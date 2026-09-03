@@ -26,9 +26,12 @@ This file adds only the rules an agent must hold itself to.
 The roadmap is human-owned. Until it is published in this repository (it will live under
 `docs/`), the roadmap is exactly the set of `target` issues opened by humans. Add a new definition,
 theorem, instance, or file only when it advances a target listed there, or supplies a
-prerequisite a listed target needs. If something you want to build is not on the roadmap, open
-an issue labelled `roadmap` describing the gap and leave it to a human; never edit the
-roadmap yourself and never build off-roadmap material "in passing".
+prerequisite a listed target needs. If a mathematical gap blocks the roadmap item you're
+working on, open an issue labelled `roadmap` describing it and leave it to a human; never edit
+the roadmap yourself and never build off-roadmap material "in passing". Gaps outside the
+mathematics — missing CI, infrastructure, or anything under a human-owned path (see
+[`docs/workflow.md`](docs/workflow.md)) — are not issues to open; mention them in a PR comment
+or leave them for a human to notice.
 
 Improving existing code needs no roadmap entry: refactoring, simplifying proofs, modest
 generalization of an existing lemma, relocation, documentation. Open a `target` issue for it

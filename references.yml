@@ -1,0 +1,125 @@
+# Bibliography for AlphaCentauri, in Hayagriva YAML format.
+# https://github.com/typst/hayagriva/blob/main/docs/file-format.md
+#
+# The keys are the citation keys used in docstrings, e.g. `- [HP98, Theorem I.2.4]`;
+# see docs/conventions.md. Entries are sorted by key.
+
+AB05:
+  type: Chapter
+  title: Provability Logic
+  author: ["Artemov, Sergei N.", "Beklemishev, Lev D."]
+  page-range: 189-360
+  date: 2005
+  serial-number:
+    doi: "10.1007/1-4020-3521-7_3"
+  parent:
+    type: Anthology
+    title: Handbook of Philosophical Logic
+    editor: ["Gabbay, Dov M.", "Guenthner, Franz"]
+    volume: 13
+    edition: 2
+    date: 2005
+    publisher:
+      name: Springer
+      location: Dordrecht
+
+BW87:
+  type: Chapter
+  title: Provably computable functions and the fast growing hierarchy
+  author: ["Buchholz, Wilfried", "Wainer, Stanley S."]
+  page-range: 179-198
+  date: 1987
+  serial-number:
+    doi: "10.1090/conm/065/891248"
+  url: https://epub.ub.uni-muenchen.de/3843/1/3843.pdf
+  parent:
+    type: Anthology
+    title: Logic and Combinatorics
+    date: 1987
+    publisher:
+      name: American Mathematical Society
+      location: "Providence, RI"
+    parent:
+      type: Anthology
+      title: Contemporary Mathematics
+      volume: 65
+
+Buc03:
+  type: Misc
+  title: Beweistheorie
+  author: Buchholz, Wilfried
+  genre: Lecture notes
+  organization: "Mathematisches Institut der Ludwig-Maximilians-Universität München"
+  language: de
+  date: 2003
+  url: https://www.mathematik.uni-muenchen.de/~buchholz/articles/beweisth.pdf
+  note: "Skriptum einer 4-stündigen Vorlesung, Wintersemester 2002/03"
+
+EW12:
+  type: Article
+  title: "A simplified characterisation of provably computable functions of the system {ID₁} of inductive definitions"
+  author: ["Eguchi, Naohi", "Weiermann, Andreas"]
+  date: 2012
+  serial-number:
+    arxiv: "1205.2879"
+  url: https://arxiv.org/abs/1205.2879
+  parent:
+    type: Repository
+    title: arXiv
+
+HP98:
+  type: Book
+  title: Metamathematics of First-Order Arithmetic
+  author: ["Hájek, Petr", "Pudlák, Pavel"]
+  date: 1998
+  publisher:
+    name: Springer
+    location: Berlin
+  note: >-
+    Reprinted in 2016 by the Association for Symbolic Logic and Cambridge
+    University Press in the Perspectives in Logic series,
+    ISBN 978-1-107-16841-1, doi:10.1017/9781316717271; the numbering of results
+    is unchanged.
+  parent:
+    type: Anthology
+    title: Perspectives in Mathematical Logic
+
+Lin97:
+  type: Book
+  title: Aspects of Incompleteness
+  author: "Lindström, Per"
+  date: 1997
+  publisher:
+    name: Springer
+    location: Berlin
+  serial-number:
+    isbn: "3-540-63213-1"
+  parent:
+    type: Anthology
+    title: Lecture Notes in Logic
+    volume: 10
+
+Poh09:
+  type: Book
+  title: "Proof Theory: The First Step into Impredicativity"
+  author: Pohlers, Wolfram
+  date: 2009
+  publisher:
+    name: Springer
+    location: Berlin
+  serial-number:
+    isbn: "978-3-540-69318-5"
+    doi: "10.1007/978-3-540-69319-2"
+  parent:
+    type: Anthology
+    title: Universitext
+
+Tow20:
+  type: Misc
+  title: "{Goodstein}'s theorem, ε₀, and unprovability"
+  author: Towsner, Henry
+  genre: Expository notes
+  organization: University of Pennsylvania
+  date: 2020
+  url: https://www.sas.upenn.edu/~htowsner/GoodsteinsTheorem.pdf
+  note: Undated; the PDF is dated 2020

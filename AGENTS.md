@@ -26,9 +26,12 @@ This file adds only the rules an agent must hold itself to.
 The roadmap is human-owned. Until it is published in this repository (it will live under
 `docs/`), the roadmap is exactly the set of `target` issues opened by humans. Add a new definition,
 theorem, instance, or file only when it advances a target listed there, or supplies a
-prerequisite a listed target needs. If something you want to build is not on the roadmap, open
-an issue labelled `roadmap` describing the gap and leave it to a human; never edit the
-roadmap yourself and never build off-roadmap material "in passing".
+prerequisite a listed target needs. If a mathematical gap blocks the roadmap item you're
+working on, open an issue labelled `roadmap` describing it and leave it to a human; never edit
+the roadmap yourself and never build off-roadmap material "in passing". Gaps outside the
+mathematics — missing CI, infrastructure, or anything under a human-owned path (see
+[`docs/workflow.md`](docs/workflow.md)) — are not issues to open; mention them in a PR comment
+or leave them for a human to notice.
 
 Improving existing code needs no roadmap entry: refactoring, simplifying proofs, modest
 generalization of an existing lemma, relocation, documentation. Open a `target` issue for it
@@ -36,9 +39,10 @@ all the same, so the work is visible.
 
 ## The rules of the code
 
-- `main` is always green. CI builds `AlphaCentauri` with warnings as errors and runs the axiom
-  audit: no `sorry`, no `native_decide`, no axioms beyond `propext`, `Classical.choice`,
-  `Quot.sound`. Do not try to disable these; if a proof needs `maxHeartbeats`, restructure it.
+- `main` is always green. CI builds `AlphaCentauri` and runs the axiom audit: no `sorry`, no `native_decide`, no axioms beyond `propext`, `Classical.choice`,
+  `Quot.sound`, except what `audit_sorry.yml` forgives declaration by declaration (see
+  `Audit/Main.lean` for the format). Do not try to disable these; if a proof needs
+  `maxHeartbeats`, restructure it.
 - **Follow Foundation's contribution guidelines**, copied verbatim into this repository as
   [`docs/index.md`](docs/index.md), [`docs/style.md`](docs/style.md), and
   [`docs/refactoring.md`](docs/refactoring.md). [`docs/conventions.md`](docs/conventions.md)
@@ -57,8 +61,8 @@ all the same, so the work is visible.
 - **No development artifacts** in the code: plan steps, issue numbers, "TODO after review",
   skeleton-era comments.
 - `AlphaCentauri/` and `AlphaCentauri.lean` are the only places code goes. `docs/`,
-  `.github/`, `lakefile.toml`, `Justfile`, `README.md`, `AGENTS.md`, and `CLAUDE.md` are
-  human-owned; a PR that touches them always needs a human review. The two pins
+  `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `README.md`, `AGENTS.md`, and
+  `CLAUDE.md` are human-owned; a PR that touches them always needs a human review. The two pins
   (`lake-manifest.json`, `lean-toolchain`) may be bumped **forward only**, in their own PR.
 
 ## Pull requests

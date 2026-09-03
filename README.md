@@ -58,7 +58,8 @@ agents is [`AGENTS.md`](AGENTS.md); the code follows Foundation's contribution g
 | `AlphaCentauri/`, `AlphaCentauri.lean` | AI | The Lean library. |
 | `docs/` | Humans | The GitHub-based process (`workflow.md`, normative); Foundation's contribution guidelines (`index.md`, `style.md`, `refactoring.md`, vendored) and what this repository adds (`conventions.md`); the roadmap once published. |
 | `AGENTS.md`, `CLAUDE.md` | Humans | The contract for AI agents. |
-| `.github/`, `lakefile.toml`, `Justfile` | Humans | Infrastructure (CI). |
+| `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml` | Humans | Infrastructure (CI and the local pre-push hooks). |
+| `references.yml` | Shared | The bibliography for docstring citations, in Hayagriva YAML. |
 | `lake-manifest.json`, `lean-toolchain` | Shared | Pins; forward-only bumps are welcome as their own PR. |
 
 ## Building
@@ -73,6 +74,20 @@ just axiom-audit     # sorry-freeness and the axiom allowlist
 ```
 
 The Lean toolchain is pinned in [`lean-toolchain`](lean-toolchain) and must match Foundation's.
+
+### Pre-push checks
+
+[`lefthook.yml`](lefthook.yml) runs the same checks CI does — `mk_all`, `lake build`, the axiom
+audit, and `actionlint` if it is installed — before every `git push`, so a red CI run is caught
+locally. Install [lefthook](https://lefthook.dev) (`go install github.com/evilmartians/lefthook@latest`,
+or your package manager), then register the hooks once per clone:
+
+```bash
+just hooks           # = lefthook install
+```
+
+`LEFTHOOK=0 git push` skips them for a push that does not need them (a docs-only branch, say);
+CI runs them regardless.
 
 ## Related projects
 

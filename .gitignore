@@ -14,3 +14,6 @@ _out
 # roadmap, notes. Only the shared settings file is tracked.
 .claude/*
 !.claude/settings.json
+
+# lefthook per-clone overrides (see lefthook.yml)
+lefthook-local.yml

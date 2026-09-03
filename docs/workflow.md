@@ -9,7 +9,7 @@ GitHub, it has not happened.
 
 | Who | Owns | Does |
 | --- | --- | --- |
-| Humans | `docs/`, `.github/`, `lakefile.toml`, `Justfile`, `AGENTS.md`, `CLAUDE.md`, `README.md` | Write and review the roadmap; maintain the infrastructure and the review rubrics; merge. |
+| Humans | `docs/`, `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `AGENTS.md`, `CLAUDE.md`, `README.md` | Write and review the roadmap; maintain the infrastructure and the review rubrics; merge. |
 | AI agents | `AlphaCentauri/`, `AlphaCentauri.lean` | Open target issues from the roadmap; claim them; write the Lean code; open PRs; review PRs; address reviews. |
 
 Ownership is a rule of this document for now; enforcing it mechanically (`CODEOWNERS`, branch
@@ -25,8 +25,10 @@ The roadmap is the specification. It surveys the source texts ([HP98], [Lin97]) 
 chapter against what Foundation already has, and marks what is wanted here. It is drafted by
 humans outside the repository and published under `docs/` when ready; from then on it changes
 only through pull requests that a human reviews. Until it is published, the roadmap is the set
-of `target` issues that humans have opened. Agents that find a gap or a mistake in it open an
-issue with the `roadmap` label; they do not edit it.
+of `target` issues that humans have opened. Agents that find a mathematical gap or a mistake in
+it open an issue with the `roadmap` label; they do not edit it. Gaps outside the mathematics —
+CI, infrastructure, or anything under a human-owned path (see Roles above) — are not issues to
+open; note them in a PR comment or leave them for a human to notice.
 
 ### Target: an issue with the `target` label
 
@@ -72,10 +74,20 @@ work is the branch rule below.
 
 `.github/workflows/ci.yml` runs on every pull request and every push to `main`:
 
-1. `lake build` of `AlphaCentauri` against the pinned Foundation, with warnings as errors;
-2. `lake exe axiom-audit --root AlphaCentauri`: no `sorry`, no `native_decide`, no axiom outside
-   `propext`, `Classical.choice`, `Quot.sound`;
+1. `lake build` of `AlphaCentauri` against the pinned Foundation;
+2. `lake exe audit` (`just axiom-audit`, the script in `Audit/Main.lean`): no `sorry`, no
+   `native_decide`, no axiom outside `propext`, `Classical.choice`, `Quot.sound`, except what
+   `audit_sorry.yml` forgives, one declaration at a time (a statement formalized with `sorry`
+   is listed there with `forgive: [sorryAx]`, and every declaration built on it names it);
 3. `AlphaCentauri.lean` imports every module (`just mk-all` leaves no diff).
+
+The audit also writes its report to `.lake/audit.json` and `.lake/audit.md`; on a pull request
+CI posts the Markdown as one comment, overwritten on every run, unless the PR is labelled
+`infrastructure`.
+
+`.github/workflows/actionlint.yml` is separate and runs only when a workflow file itself changes:
+[actionlint](https://github.com/rhysd/actionlint) checks `.github/workflows/` for schema,
+expression, action-input, and shell errors.
 
 A red check is never worked around; it is fixed in the PR. The code itself follows Foundation's
 contribution guidelines, see [`conventions.md`](conventions.md).
@@ -109,6 +121,7 @@ PRs that touch only AI-owned paths is the intended end state.
 | `target` | A formalization target; the unit of work. |
 | `roadmap` | A problem with, or a proposed addition to, the roadmap. Human decision. |
 | `meta` | The process or the infrastructure. |
+| `infrastructure` | A PR touching CI, tooling, or another human-owned path and no mathematics; CI skips the axiom-audit comment on it. |
 | `blocked` | Waits on another issue or on a change in Foundation; the blocker is linked. |
 | `foundation` | Needs a change upstream in Foundation; a human takes it there. |
 | `keep` | Opt out of automatic stale-claim release and automatic closing. |

@@ -1,0 +1,74 @@
+# Local mirror of the checks `.github/workflows/ci.yml` runs on a pull request, executed before
+# `git push` so a red CI run is caught here instead of on GitHub.
+#
+#   just hooks           install the hooks into this clone (once per clone)
+#   LEFTHOOK=0 git push  push without running them
+#
+# Anything host-specific (extra checks, local skips) belongs in `lefthook-local.yml`, which is
+# git-ignored.
+#
+# Every command starts with the same preamble:
+#
+#   set -e                          a multi-line `run` reports only its last command's status
+#   unset GIT_DIR …                 git exports these to its hooks, and they leak into the `git`
+#                                   calls `lake` makes for its dependencies: with GIT_DIR set,
+#                                   `git -C .lake/packages/Foundation remote get-url origin`
+#                                   answers for THIS repository instead, so lake concludes the
+#                                   dependency's URL changed and deletes the package to re-clone
+#                                   it — destroying a built Foundation. Clearing them makes every
+#                                   nested `git` discover its repository from the working
+#                                   directory again, as it does outside a hook.
+
+min_version: 1.11.0
+
+pre-push:
+  # Sequential and fail-fast: the audit reads the oleans the build produces, so there is nothing
+  # to audit once the build is red, and `mk_all` rewrites the root module the build then reads.
+  piped: true
+  # Nothing to check while a merge or rebase is only half-finished.
+  skip:
+    - merge
+    - rebase
+  commands:
+    # `commands` run in name order, hence the numeric prefixes.
+
+    # CI's `mk-all-check` job. `mk_all` is deterministic, so regenerating the root module and
+    # finding it different from `HEAD` means the commit being pushed is missing an import.
+    1_mk-all:
+      run: |
+        set -e
+        unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE GIT_PREFIX
+        lake exe mk_all --lib AlphaCentauri --module
+        if ! git diff HEAD --quiet -- AlphaCentauri.lean; then
+          echo "AlphaCentauri.lean was out of date; it has been regenerated. Commit it and push again."
+          exit 1
+        fi
+
+    # CI's `build` job. Warnings are errors nowhere in the build config, so read the output:
+    # a warning here is a review finding there.
+    2_build:
+      run: |
+        set -e
+        unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE GIT_PREFIX
+        lake build AlphaCentauri
+
+    # CI's `Audit axioms` step: no `sorry`, no `native_decide`, no axiom outside the allowlist,
+    # except what `audit_sorry.yml` forgives. Writes `.lake/audit.md` with the same report CI
+    # posts on the pull request.
+    3_axiom-audit:
+      run: |
+        set -e
+        unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE GIT_PREFIX
+        lake exe audit
+
+    # CI's `actionlint` job, which only ever fires on `.github/workflows/**`. Optional: the
+    # workflow files are human-owned and most pushes do not touch them, so a missing binary is
+    # not a reason to block a push — CI still runs it.
+    4_actionlint:
+      run: |
+        set -e
+        if ! command -v actionlint >/dev/null 2>&1; then
+          echo "actionlint not installed; skipping (CI still lints the workflows)"
+          exit 0
+        fi
+        actionlint -color

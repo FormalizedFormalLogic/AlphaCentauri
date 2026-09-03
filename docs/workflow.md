@@ -45,6 +45,38 @@ Humans open targets when they add roadmap items; agents open targets when they d
 roadmap item into PR-sized pieces. A target that turns out to be wrong, too large, or already
 in Foundation is closed with a comment saying why.
 
+### Classification: `definition only` or a theorem
+
+Every target is a theorem unless it carries the `definition only` label:
+
+- **`definition only`**: a definition (or an API for a definition Foundation already has) together
+  with the minor lemmas that come with it, such as `simp` lemmas, closure properties, and agreement
+  with an external notion. One pull request, one review.
+- **theorem** (the default, no label of its own): a theorem or a substantial lemma. It passes
+  through the two stages below.
+
+### Two stages for a theorem
+
+A theorem is formalized in two stages, each landing as its own pull request:
+
+1. **Statement-formalized.** The statement is written in Foundation's vocabulary and compiles,
+   with `sorry` for the proof, forgiven by name in `audit_sorry.yml` (`forgive: [sorryAx]`, see
+   the gate below). It is reviewed **for faithfulness to the source** before any proof is
+   attempted, because a proof of the wrong statement is worthless. This stage is tracked by a
+   sub-issue of the target issue, labelled `statement-formalized`, and its pull request carries
+   the same label. Once CI is green and review approves, it merges into `main` like any other
+   pull request — the `sorry` is expected to land, forgiven under its own name.
+2. **Proof-formalized.** A follow-up pull request, branched from `main` after the statement has
+   landed, discharges the `sorry`s and removes the corresponding `audit_sorry.yml` entries. The
+   target issue itself carries `proof-formalized` and closes when this pull request merges.
+
+### Sub-issues
+
+Large targets are decomposed with GitHub sub-issues rather than with prose: the umbrella issue
+lists its work items, each pull-request-sized item is a sub-issue, and each target issue that
+isn't `definition only` has a `statement-formalized` sub-issue. An umbrella closes when all of
+its sub-issues are closed and its headline statement is proof-formalized.
+
 ### Claim: an assignment
 
 To claim a target, assign yourself to the issue:
@@ -125,6 +157,10 @@ PRs that touch only AI-owned paths is the intended end state.
 | `blocked` | Waits on another issue or on a change in Foundation; the blocker is linked. |
 | `foundation` | Needs a change upstream in Foundation; a human takes it there. |
 | `keep` | Opt out of automatic stale-claim release and automatic closing. |
+| `definition only` | The target delivers a definition and the minor lemmas that come with it. |
+| `theorem` | The target delivers a theorem or a substantial lemma; it passes through both formalization stages. |
+| `statement-formalized` | Stage: formalize the statement only (`sorry` allowed, forgiven in `audit_sorry.yml`), reviewed for faithfulness, merges once approved. |
+| `proof-formalized` | Stage: discharge the `sorry`s in a follow-up pull request; the issue closes when the proof is complete and CI is green. |
 
 They are created on the GitHub repository by hand when it is set up; issue templates and a
 label script may follow later.

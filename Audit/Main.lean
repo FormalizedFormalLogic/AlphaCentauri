@@ -13,10 +13,12 @@ lake env lean --run Audit/Main.lean
 Builds the `AlphaCentauri` environment from its compiled `.olean`s and reports, for every
 declaration defined under `AlphaCentauri`, the axioms it transitively depends on. The run fails if
 any declaration depends on an axiom outside `propext`, `Classical.choice`, `Quot.sound`, unless the
-allowlist `audit_sorry.yml` forgives it (see `Forgiveness`). Because it works on the kernel
+allowlist `axiom_debt.yml` forgives it (see `Forgiveness`). Because it works on the kernel
 environment rather than source text, it catches what a `grep` cannot: `sorry`/`admit` (`sorryAx`),
 `native_decide` (which adds an auxiliary axiom `…native_decide.ax_…` per use), and any home-rolled
-`axiom`, including ones reaching in through imports.
+`axiom`, including ones reaching in through imports. `sorryAx` is forgiven nowhere, so a `sorry`
+in the library fails the run; an unproved statement is written as an `axiom` instead, and is
+reported under its own name.
 
 Exits `0` when clean, `1` on a violation or a problem with the allowlist, and `2` when the
 environment could not be loaded. Besides the text on stdout/stderr, every run writes the report
@@ -40,7 +42,7 @@ def root : Name := `AlphaCentauri
 def allowedAxioms : List Name := [``propext, ``Classical.choice, ``Quot.sound]
 
 /-- The allowlist, relative to the repository root. -/
-def forgiveFile : System.FilePath := "audit_sorry.yml"
+def forgiveFile : System.FilePath := "axiom_debt.yml"
 
 /-- Where the reports go, relative to the repository root. -/
 def jsonFile : System.FilePath := ".lake" / "audit.json"
@@ -188,24 +190,28 @@ def parse (s : String) : Except String Value := do
 
 end Yaml
 
-/-! ## The allowlist `audit_sorry.yml`
+/-! ## The allowlist `axiom_debt.yml`
 
 ```yaml
 version: v0
 
-LO.some-sorry-lemma:
+LO.some_unproved_lemma:
   forgive:
-    - sorryAx
-    - some-other-lemma
+    - LO.some_unproved_lemma
+LO.uses_some_unproved_lemma:
+  forgive:
+    - LO.some_unproved_lemma
 ```
 
 Each top-level key other than `version` names a declaration defined under the audited root. Its
 `forgive` list names what that declaration is allowed to depend on:
 
-- an **axiom** (`sorryAx`, a home-rolled `axiom`), which is then ignored wherever the declaration
-  reaches it;
+- an **axiom**, which is then ignored wherever the declaration reaches it. AlphaCentauri writes a
+  statement it has not proved yet as an `axiom` under the statement's own name rather than as a
+  `sorry`, so an axiom forgiving itself is the normal entry: the debt is named, and the audit can
+  say which unproved result a proof leans on;
 - a **declaration**, in which case nothing reached *through* it is looked at, so a lemma may
-  build on another declaration's forgiven `sorry` without being forgiven the same axiom outright.
+  build on another declaration's forgiven debt without being forgiven the same axiom outright.
 
 Everything else the declaration depends on must still be within the allowlist. Every entry and
 every item of a `forgive` list must be needed: an entry for a clean declaration, or an item that
@@ -386,6 +392,9 @@ structure Report where
   audited : Nat
   /-- Distinct axioms used anywhere under the root, sorted. -/
   axiomsUsed : Array String
+  /-- `(axiom, how many other audited declarations reach it)` for each axiom outside the allowed
+  three: the library's own unproved statements, most depended-on first. -/
+  debt : Array (String × Nat)
   /-- `(declaration, the disallowed axioms it uses)` for each offending declaration. For a
   declaration with an allowlist entry, the axioms are those the entry does not forgive. -/
   violations : Array (String × Array String)
@@ -403,6 +412,8 @@ def Report.ok (r : Report) : Bool := r.violations.isEmpty && r.forgiveErrors.isE
 shared memo of the main pass. -/
 private structure Analysis where
   usedAll : NameSet := {}
+  /-- How many audited declarations, other than the axiom itself, reach each disallowed axiom. -/
+  debt : NameMap Nat := {}
   violations : Array (Name × Array Name) := #[]
   forgiven : Array (Name × Array Name) := #[]
   errors : Array String := #[]
@@ -430,6 +441,12 @@ private def analyze (allowed : NameSet) (candidates : Array Name) (fg : Forgiven
     let axs ← axiomsOf d
     r := { r with usedAll := axs.foldl (·.insert ·) r.usedAll }
     let bad := axs.filter (!allowed.contains ·)
+    -- An audited declaration that is itself a disallowed axiom is one of the library's own
+    -- unproved statements: it belongs in the table even when nothing depends on it yet.
+    if isAxiom env d && !allowed.contains d then
+      r := { r with debt := r.debt.insert d ((r.debt.find? d).getD 0) }
+    for a in bad do
+      if a != d then r := { r with debt := r.debt.insert a ((r.debt.find? a).getD 0 + 1) }
     match fg.find? d with
     | none =>
       if !bad.isEmpty then r := { r with violations := r.violations.push (d, bad) }
@@ -467,6 +484,8 @@ def audit (allowed : List Name) (fg : Forgiveness) : CoreM Report := do
   return {
     audited := candidates.size
     axiomsUsed := (a.usedAll.toArray.qsort Name.lt).map freshStr
+    debt := (a.debt.toList.toArray.qsort fun x y =>
+      x.2 > y.2 || (x.2 == y.2 && Name.lt x.1 y.1)).map fun (n, c) => (freshStr n, c)
     violations := a.violations.map render
     forgiven := a.forgiven.map render
     forgiveErrors := a.errors.map fun s => s.foldl (fun acc c => acc.push c) ""
@@ -486,6 +505,8 @@ def Report.toJson (r : Report) : Json :=
     ("audited", Lean.toJson r.audited),
     ("ok", Json.bool r.ok),
     ("axiomsUsed", Lean.toJson r.axiomsUsed),
+    ("debt", Lean.toJson (r.debt.map fun (d, c) =>
+      Json.mkObj [("axiom", Json.str d), ("dependents", Lean.toJson c)])),
     ("violations", Lean.toJson (r.violations.map pair)),
     ("forgiven", Lean.toJson (r.forgiven.map pair)),
     ("forgiveErrors", Lean.toJson r.forgiveErrors)
@@ -515,16 +536,30 @@ def Report.toMarkdown (r : Report) : String := Id.run do
   let mut md := s!"## Axiom audit\n\n| | |\n|---|---|\n"
   md := md ++ s!"| **Status** | {status} |\n"
   md := md ++ s!"| **Audited** | {r.audited} declaration(s) under {code (toString root)} |\n"
-  md := md ++ s!"| **Axioms used** | {codes r.axiomsUsed} |\n"
-  md := md ++ s!"| **Allowed** | {codes (allowedAxioms.map toString).toArray} |\n"
+  md := md ++ s!"| **Allowed axioms** | {codes (allowedAxioms.map toString).toArray} |\n"
+  md := md ++ s!"| **Unproved statements** | {r.debt.size} |\n"
   if !r.violations.isEmpty then
     md := md ++ s!"\n### Violations ({r.violations.size})\n\n" ++ declTable r.violations
   if !r.forgiveErrors.isEmpty then
     md := md ++ s!"\n### Problems in {code forgiveFile.toString} ({r.forgiveErrors.size})\n\n"
       ++ "".intercalate (r.forgiveErrors.map (s!"- {·}\n")).toList
+  if !r.debt.isEmpty then
+    md := md ++ s!"\n### Unproved statements ({r.debt.size})\n\n"
+      ++ "The axioms this library declares in place of a proof, most depended-on first. "
+      ++ "The count is how many other audited declarations reach the axiom, so it ranks the "
+      ++ "statements by how much of the library rests on them.\n\n"
+      ++ "| Statement | Dependent declarations |\n|---|---|\n"
+      ++ "".intercalate (r.debt.map fun (d, c) => s!"| {code d} | {c} |\n").toList
   if !r.forgiven.isEmpty then
-    md := md ++ s!"\n### Forgiven by {code forgiveFile.toString} ({r.forgiven.size})\n\n"
-      ++ declTable r.forgiven
+    -- Capped: the report is posted as one pull-request comment, and GitHub rejects a comment
+    -- over 65536 characters. The uncapped list is the allowlist file itself.
+    let shown := r.forgiven.take 150
+    md := md ++ s!"\n<details><summary>Forgiven by {code forgiveFile.toString}"
+    md := md ++ s!" ({r.forgiven.size} declaration(s))</summary>\n\n" ++ declTable shown
+    if shown.size < r.forgiven.size then
+      md := md ++ s!"\n… and {r.forgiven.size - shown.size} more;"
+      md := md ++ s!" the full list is {code forgiveFile.toString}.\n"
+    md := md ++ "\n</details>\n"
   return md
 
 def errorMarkdown (msg : String) : String :=

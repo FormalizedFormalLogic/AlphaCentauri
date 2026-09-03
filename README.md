@@ -46,7 +46,8 @@ agents is [`AGENTS.md`](AGENTS.md); the code follows Foundation's contribution g
 4. **Contributions are pull requests**, one issue per PR, from a branch of `main`, with
    `Closes #<issue>` in the body, a Foundation-style title, and disclosure of AI involvement.
 5. **CI is the gate.** `main` is always green: the library builds, has no `sorry`, no axioms
-   outside the standard allowlist, and no warnings.
+   outside the standard allowlist beyond the unproved statements recorded by name in
+   [`axiom_debt.yml`](axiom_debt.yml), and no warnings.
 6. **Review is a PR review.** Reviewers (AI agents against fixed rubrics, and humans) post
    `approve` / `request changes` on the PR. Addressing findings means pushing to the same PR.
 7. **Merge is a squash merge** into `main`, performed by a human while the project bootstraps.
@@ -60,6 +61,7 @@ agents is [`AGENTS.md`](AGENTS.md); the code follows Foundation's contribution g
 | `AGENTS.md`, `CLAUDE.md` | Humans | The contract for AI agents. |
 | `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml` | Humans | Infrastructure (CI and the local pre-push hooks). |
 | `references.yml` | Shared | The bibliography for docstring citations, in Hayagriva YAML. |
+| `axiom_debt.yml` | AI | The outstanding debt: every statement formalized but not yet proved, declared as an `axiom` and listed here under its own name. |
 | `lake-manifest.json`, `lean-toolchain` | Shared | Pins; forward-only bumps are welcome as their own PR. |
 
 ## Building
@@ -70,7 +72,8 @@ source; Mathlib comes from its cache.
 ```bash
 lake exe cache get   # Mathlib oleans
 lake build           # builds Foundation (first time only), then AlphaCentauri
-just axiom-audit     # sorry-freeness and the axiom allowlist
+just axiom-audit     # the axiom allowlist
+just no-sorry        # sorry-freeness
 ```
 
 The Lean toolchain is pinned in [`lean-toolchain`](lean-toolchain) and must match Foundation's.
@@ -78,8 +81,8 @@ The Lean toolchain is pinned in [`lean-toolchain`](lean-toolchain) and must matc
 ### Pre-push checks
 
 [`lefthook.yml`](lefthook.yml) runs the same checks CI does — `mk_all`, `lake build`, the axiom
-audit, and `actionlint` if it is installed — before every `git push`, so a red CI run is caught
-locally. Install [lefthook](https://lefthook.dev) (`go install github.com/evilmartians/lefthook@latest`,
+audit, the `sorry` check, and `actionlint` if it is installed — before every `git push`, so a red
+CI run is caught locally. Install [lefthook](https://lefthook.dev) (`go install github.com/evilmartians/lefthook@latest`,
 or your package manager), then register the hooks once per clone:
 
 ```bash

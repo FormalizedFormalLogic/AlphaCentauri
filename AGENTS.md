@@ -40,9 +40,15 @@ all the same, so the work is visible.
 ## The rules of the code
 
 - `main` is always green. CI builds `AlphaCentauri` and runs the axiom audit: no `sorry`, no `native_decide`, no axioms beyond `propext`, `Classical.choice`,
-  `Quot.sound`, except what `audit_sorry.yml` forgives declaration by declaration (see
+  `Quot.sound`, except what `axiom_debt.yml` forgives declaration by declaration (see
   `Audit/Main.lean` for the format). Do not try to disable these; if a proof needs
   `maxHeartbeats`, restructure it.
+- **Never write `sorry`.** A statement you have not proved is declared as an `axiom` under the
+  name the theorem will keep, and listed in `axiom_debt.yml` forgiving that name; proving it
+  later turns the `axiom` into a `theorem` and deletes the entry. That way the audit names the
+  unproved results a declaration leans on instead of collapsing them all into `sorryAx`. A
+  `sorry` inside a proof is extracted into its own named axiom for the fact it stands for. CI
+  rejects `sorry` in the sources and `sorryAx` in `axiom_debt.yml` (`just no-sorry`).
 - **Follow Foundation's contribution guidelines**, copied verbatim into this repository as
   [`docs/index.md`](docs/index.md), [`docs/style.md`](docs/style.md), and
   [`docs/refactoring.md`](docs/refactoring.md). [`docs/conventions.md`](docs/conventions.md)

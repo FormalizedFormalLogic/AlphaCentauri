@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.FirstOrder.Incompleteness.PartialTruth.SatSigma
+public import AlphaCentauri.Bootstrapping.PartialTruth.SatSigma
 
 /-!
 # Partial truth definitions agree with truth
@@ -20,16 +20,16 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 /-- For a strict prenex `Σₙ` formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
-theorem satSigma_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
+axiom satSigma_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 n φ) (v : Fin k → V) :
-    SatSigma n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := sorry
+    SatSigma n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ
 
 /-- For a strict prenex `Πₙ` formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
-theorem satPi_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
+axiom satPi_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
-    SatPi n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := sorry
+    SatPi n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ
 
 /-- The sentence asserting agreement of `φ` with its level-`Σₙ₊₁` partial truth definition.
 - [HP98, Corollary I.1.76] -/
@@ -39,9 +39,9 @@ noncomputable def snowing (n : ℕ) {k : ℕ}
 
 /-- Semantic interpretation of the sentence `snowing n φ`.
 - [HP98, Corollary I.1.76] -/
-lemma models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
+axiom models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
     V↓[ℒₒᵣ] ⊧ snowing n φ ↔
-      ∀ v : Fin k → V, V ⊧/v φ ↔ SatSigma (n + 1) ⌜φ⌝ (matrixToVec v) := sorry
+      ∀ v : Fin k → V, V ⊧/v φ ↔ SatSigma (n + 1) ⌜φ⌝ (matrixToVec v)
 
 /-! ## Tarski conditions as sentences -/
 
@@ -300,17 +300,17 @@ lemma tarski_finite (n : ℕ) : (tarski n).Finite := by
 - [HP98, Theorem I.1.70]
 - [HP98, Theorem I.1.75(2)]
 - [HP98, Remark I.1.77] -/
-theorem ISigma1.provable_tarski (n : ℕ) : 𝗜𝚺₁ ⊢* tarski n := sorry
+axiom ISigma1.provable_tarski (n : ℕ) : 𝗜𝚺₁ ⊢* tarski n
 
 /-- The theory form of the snowing lemma follows from `𝗣𝗔⁻` and the finite Tarski theory.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
-theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ := sorry
+axiom provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ
 
 /-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `Σₙ₊₁` formula.
 - [HP98, Corollary I.1.76] -/
-theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ snowing n φ := sorry
+axiom ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ snowing n φ
 
 end LO.FirstOrder.Arithmetic

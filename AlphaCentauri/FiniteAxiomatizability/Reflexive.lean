@@ -34,8 +34,8 @@ def ArithmeticTheory.EssentiallyReflexive (T : ArithmeticTheory) : Prop :=
 /-- A reflexive extension of `𝗜𝚺₁` is not finitely axiomatizable.
 - [Lin97, Corollary 2.1]
 - [HP98, Corollary III.2.24] -/
-theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T]
-    (h : T.Reflexive) : ¬FiniteAxiomatizable T := sorry
+axiom not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T]
+    (h : T.Reflexive) : ¬FiniteAxiomatizable T
 
 /-- `𝗜𝚺₂` proves the consistency of `𝗜𝚺₁`.
 
@@ -45,26 +45,26 @@ currently only supplies `(𝗜𝚺 k).Δ₁` for `k = 1` (`ISigma1_delta1Definab
 `Foundation.FirstOrder.Incompleteness.Delta1`; there is no such instance for a general `𝗜𝚺 k`),
 so the statement here is restricted to the case that instance supports.
 - [HP98, Corollary I.4.34(1)] -/
-theorem ISigma.provable_con_ISigma1 : 𝗜𝚺 2 ⊢ (𝗜𝚺₁ : ArithmeticTheory).consistent.val := sorry
+axiom ISigma.provable_con_ISigma1 : 𝗜𝚺 2 ⊢ (𝗜𝚺₁ : ArithmeticTheory).consistent.val
 
 /-- `𝗣𝗔` is reflexive.
 - [Lin97, Corollary 1.8]
 - [HP98, Theorem III.2.35] -/
-theorem Peano.reflexive : (𝗣𝗔 : ArithmeticTheory).Reflexive := sorry
+axiom Peano.reflexive : (𝗣𝗔 : ArithmeticTheory).Reflexive
 
 /-- `𝗣𝗔` is essentially reflexive.
 - [Lin97, Corollary 1.8]
 - [HP98, Theorem III.2.35] -/
-theorem Peano.essentiallyReflexive : (𝗣𝗔 : ArithmeticTheory).EssentiallyReflexive := sorry
+axiom Peano.essentiallyReflexive : (𝗣𝗔 : ArithmeticTheory).EssentiallyReflexive
 
 /-- `𝗣𝗔` is not finitely axiomatizable.
 - [Lin97, Corollary 2.1]
 - [HP98, Corollary III.2.24] -/
-theorem Peano.not_finiteAxiomatizable : ¬FiniteAxiomatizable (𝗣𝗔 : ArithmeticTheory) := sorry
+axiom Peano.not_finiteAxiomatizable : ¬FiniteAxiomatizable (𝗣𝗔 : ArithmeticTheory)
 
 /-- Every consistent extension of `𝗣𝗔` is not finitely axiomatizable.
 - [Lin97, Corollary 2.1] -/
-theorem not_finiteAxiomatizable_of_Peano_le [(𝗣𝗔 : ArithmeticTheory) ⪯ T] [Consistent T] :
-    ¬FiniteAxiomatizable T := sorry
+axiom not_finiteAxiomatizable_of_Peano_le [(𝗣𝗔 : ArithmeticTheory) ⪯ T] [Consistent T] :
+    ¬FiniteAxiomatizable T
 
 end LO.FirstOrder

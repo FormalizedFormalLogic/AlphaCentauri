@@ -268,20 +268,33 @@ membership may grow during the proof stage; downstream arguments use only finite
 `𝗜𝚺₁`-provability.
 
 - [HP98, Remark I.1.77] -/
-noncomputable def tarski : ℕ → ArithmeticTheory
-  | 0 => Tarski.satZeroAxioms
-  | n + 1 => tarski n ∪ Tarski.satSigmaAxioms n
+inductive tarski : ℕ → ArithmeticTheory
+  | zero : ∀ φ ∈ Tarski.satZeroAxioms, tarski 0 φ
+  | prev : ∀ n φ, tarski n φ → tarski (n + 1) φ
+  | new  : ∀ n, ∀ φ ∈ Tarski.satSigmaAxioms n, tarski (n + 1) φ
 
 /-- The explicit Tarski theory at each level is finite.
 - [HP98, Remark I.1.77] -/
 lemma tarski_finite (n : ℕ) : (tarski n).Finite := by
   induction n with
   | zero =>
-    simp only [tarski, Tarski.satZeroAxioms]
-    exact Set.toFinite _
+    have e : tarski 0 = Tarski.satZeroAxioms := by
+      ext φ; constructor
+      · rintro ⟨⟩; assumption
+      · exact tarski.zero φ
+    rw [e]; simp only [Tarski.satZeroAxioms]; exact Set.toFinite _
   | succ n ih =>
-    simp only [tarski, Tarski.satSigmaAxioms]
-    exact ih.union (Set.toFinite _)
+    have e : tarski (n + 1) = tarski n ∪ Tarski.satSigmaAxioms n := by
+      ext φ; constructor
+      · rintro (⟨⟩ | ⟨⟩)
+        · exact Or.inl ‹tarski n φ›
+        · exact Or.inr ‹φ ∈ Tarski.satSigmaAxioms n›
+      · rintro (h | h)
+        · exact tarski.prev n φ h
+        · exact tarski.new n φ h
+    rw [e]
+    refine ih.union ?_
+    simp only [Tarski.satSigmaAxioms]; exact Set.toFinite _
 
 /-- `𝗜𝚺₁` proves every sentence in the finite Tarski theory.
 - [HP98, Theorem I.1.70]

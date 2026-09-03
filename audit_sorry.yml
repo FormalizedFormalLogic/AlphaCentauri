@@ -350,15 +350,29 @@ LO.FirstOrder.Arithmetic.snowing:
   forgive: [sorryAx]
 LO.FirstOrder.Arithmetic.tarski:
   forgive: [sorryAx]
-LO.FirstOrder.Arithmetic.tarski._f:
+LO.FirstOrder.Arithmetic.tarski.below:
   forgive: [sorryAx]
-LO.FirstOrder.Arithmetic.tarski._sunfold:
+LO.FirstOrder.Arithmetic.tarski.below.casesOn:
   forgive: [sorryAx]
-LO.FirstOrder.Arithmetic.tarski.eq_1:
+LO.FirstOrder.Arithmetic.tarski.below.new:
   forgive: [sorryAx]
-LO.FirstOrder.Arithmetic.tarski.eq_2:
+LO.FirstOrder.Arithmetic.tarski.below.prev:
   forgive: [sorryAx]
-LO.FirstOrder.Arithmetic.tarski.eq_def:
+LO.FirstOrder.Arithmetic.tarski.below.rec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.below.zero:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.brecOn:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.casesOn:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.new:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.rec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.recOn:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.zero:
   forgive: [sorryAx]
 LO.FirstOrder.Arithmetic.tarski_finite:
   forgive: [sorryAx]

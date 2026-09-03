@@ -158,7 +158,6 @@ PRs that touch only AI-owned paths is the intended end state.
 | `foundation` | Needs a change upstream in Foundation; a human takes it there. |
 | `keep` | Opt out of automatic stale-claim release and automatic closing. |
 | `definition only` | The target delivers a definition and the minor lemmas that come with it. |
-| `theorem` | The target delivers a theorem or a substantial lemma; it passes through both formalization stages. |
 | `statement-formalized` | Stage: formalize the statement only (`sorry` allowed, forgiven in `audit_sorry.yml`), reviewed for faithfulness, merges once approved. |
 | `proof-formalized` | Stage: discharge the `sorry`s in a follow-up pull request; the issue closes when the proof is complete and CI is green. |
 

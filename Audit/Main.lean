@@ -19,7 +19,9 @@ environment rather than source text, it catches what a `grep` cannot: `sorry`/`a
 `axiom`, including ones reaching in through imports.
 
 Exits `0` when clean, `1` on a violation or a problem with the allowlist, and `2` when the
-environment could not be loaded.
+environment could not be loaded. Besides the text on stdout/stderr, every run writes the report
+as JSON to `.lake/audit.json` and as Markdown to `.lake/audit.md`; CI posts the latter on the
+pull request.
 
 Ported from [leanprover-community/axiom-audit](https://github.com/leanprover-community/axiom-audit)
 (Apache-2.0, commit `1a9c3c2`), which generalizes the audit Kim Morrison wrote for TauCeti and
@@ -39,6 +41,10 @@ def allowedAxioms : List Name := [``propext, ``Classical.choice, ``Quot.sound]
 
 /-- The allowlist, relative to the repository root. -/
 def forgiveFile : System.FilePath := "audit_sorry.yml"
+
+/-- Where the reports go, relative to the repository root. -/
+def jsonFile : System.FilePath := ".lake" / "audit.json"
+def markdownFile : System.FilePath := ".lake" / "audit.md"
 
 /-! ## A YAML subset reader
 
@@ -439,7 +445,7 @@ private def analyze (allowed : NameSet) (candidates : Array Name) (fg : Forgiven
       r := { r with forgiven := r.forgiven.push (d, bad) }
       for x in e.forgive do
         if env.contains x && (← remaining allowed (cut.erase x) d).isEmpty then
-          r := err r s!"`{freshStr d}`: forgiving `{freshStr x}` changes nothing; remove it"
+          r := err r s!"`{freshStr d}`: `{freshStr x}` is redundant: the other forgiven names already cover it"
   return r
 
 /-- Audit every declaration defined under `root`, against `allowed` and the allowlist `fg`. -/
@@ -466,6 +472,70 @@ def audit (allowed : List Name) (fg : Forgiveness) : CoreM Report := do
     forgiveErrors := a.errors.map fun s => s.foldl (fun acc c => acc.push c) ""
   }
 
+/-! ## Rendering -/
+
+private def pair (p : String × Array String) : Json :=
+  Json.mkObj [("decl", Json.str p.1), ("axioms", Lean.toJson p.2)]
+
+/-- The machine-readable report. -/
+def Report.toJson (r : Report) : Json :=
+  Json.mkObj [
+    ("root", Json.str (toString root)),
+    ("allowed", Lean.toJson (allowedAxioms.map toString)),
+    ("forgiveFile", Json.str forgiveFile.toString),
+    ("audited", Lean.toJson r.audited),
+    ("ok", Json.bool r.ok),
+    ("axiomsUsed", Lean.toJson r.axiomsUsed),
+    ("violations", Lean.toJson (r.violations.map pair)),
+    ("forgiven", Lean.toJson (r.forgiven.map pair)),
+    ("forgiveErrors", Lean.toJson r.forgiveErrors)
+  ]
+
+/-- A report that never got as far as the environment: the allowlist did not parse, or the
+environment did not load. -/
+def errorJson (msg : String) : Json :=
+  Json.mkObj [("root", Json.str (toString root)), ("ok", Json.bool false), ("error", Json.str msg)]
+
+private def code (s : String) : String := s!"`{s}`"
+
+private def codes (xs : Array String) : String :=
+  if xs.isEmpty then "none" else ", ".intercalate (xs.map code).toList
+
+private def declTable (rows : Array (String × Array String)) : String :=
+  "| Declaration | Disallowed axioms |\n|---|---|\n"
+    ++ "".intercalate (rows.map fun (d, axs) => s!"| {code d} | {codes axs} |\n").toList
+
+/-- The report as Markdown, for the pull-request comment. -/
+def Report.toMarkdown (r : Report) : String := Id.run do
+  let status :=
+    if r.ok then "✅ clean"
+    else ", ".intercalate <| List.filter (!·.isEmpty) [
+      if r.violations.isEmpty then "" else s!"❌ {r.violations.size} violation(s)",
+      if r.forgiveErrors.isEmpty then "" else s!"❌ {r.forgiveErrors.size} problem(s) in {code forgiveFile.toString}"]
+  let mut md := s!"## Axiom audit\n\n| | |\n|---|---|\n"
+  md := md ++ s!"| **Status** | {status} |\n"
+  md := md ++ s!"| **Audited** | {r.audited} declaration(s) under {code (toString root)} |\n"
+  md := md ++ s!"| **Axioms used** | {codes r.axiomsUsed} |\n"
+  md := md ++ s!"| **Allowed** | {codes (allowedAxioms.map toString).toArray} |\n"
+  if !r.violations.isEmpty then
+    md := md ++ s!"\n### Violations ({r.violations.size})\n\n" ++ declTable r.violations
+  if !r.forgiveErrors.isEmpty then
+    md := md ++ s!"\n### Problems in {code forgiveFile.toString} ({r.forgiveErrors.size})\n\n"
+      ++ "".intercalate (r.forgiveErrors.map (s!"- {·}\n")).toList
+  if !r.forgiven.isEmpty then
+    md := md ++ s!"\n### Forgiven by {code forgiveFile.toString} ({r.forgiven.size})\n\n"
+      ++ declTable r.forgiven
+  return md
+
+def errorMarkdown (msg : String) : String :=
+  s!"## Axiom audit\n\n| | |\n|---|---|\n| **Status** | ❌ did not run |\n\n```\n{msg}\n```\n"
+
+/-- Write both reports. -/
+def writeReports (json : Json) (md : String) : IO Unit := do
+  if let some dir := jsonFile.parent then IO.FS.createDirAll dir
+  IO.FS.writeFile jsonFile (json.pretty ++ "\n")
+  IO.FS.writeFile markdownFile md
+
 end Audit
 
 open Audit
@@ -476,7 +546,9 @@ def main : IO UInt32 := do
     match Forgiveness.parse (← IO.FS.readFile forgiveFile) with
     | .ok fg => pure fg
     | .error e =>
-      IO.eprintln s!"audit: {forgiveFile}: {e}"
+      let msg := s!"{forgiveFile}: {e}"
+      writeReports (errorJson msg) (errorMarkdown msg)
+      IO.eprintln s!"audit: {msg}"
       return 1
   let result ← try
       pure (Except.ok (← withImportedEnv #[root] (audit allowedAxioms fg)))
@@ -484,8 +556,11 @@ def main : IO UInt32 := do
   let r ← match result with
     | .ok r => pure r
     | .error msg =>
-      IO.eprintln s!"audit: failed to load the environment: {msg}"
+      let msg := s!"failed to load the environment: {msg}"
+      writeReports (errorJson msg) (errorMarkdown msg)
+      IO.eprintln s!"audit: {msg}"
       return 2
+  writeReports r.toJson r.toMarkdown
   IO.println s!"audit: audited {r.audited} declaration(s) under `{root}`; \
     axioms used: {r.axiomsUsed.toList}"
   (← IO.getStdout).flush
@@ -503,6 +578,7 @@ def main : IO UInt32 := do
     for (d, axs) in r.violations do
       IO.eprintln s!"  {d} → {axs.toList}"
     IO.eprintln s!"allowed: {allowedAxioms}"
+  IO.println s!"audit: reports written to {jsonFile} and {markdownFile}"
   if r.ok then
     IO.println "audit: ok"
     return 0

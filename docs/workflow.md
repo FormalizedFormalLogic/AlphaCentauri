@@ -79,6 +79,10 @@ work is the branch rule below.
    is listed there with `forgive: [sorryAx]`, and every declaration built on it names it);
 3. `AlphaCentauri.lean` imports every module (`just mk-all` leaves no diff).
 
+The audit also writes its report to `.lake/audit.json` and `.lake/audit.md`; on a pull request
+CI posts the Markdown as one comment, overwritten on every run, unless the PR is labelled
+`infrastructure`.
+
 A red check is never worked around; it is fixed in the PR. The code itself follows Foundation's
 contribution guidelines, see [`conventions.md`](conventions.md).
 
@@ -111,6 +115,7 @@ PRs that touch only AI-owned paths is the intended end state.
 | `target` | A formalization target; the unit of work. |
 | `roadmap` | A problem with, or a proposed addition to, the roadmap. Human decision. |
 | `meta` | The process or the infrastructure. |
+| `infrastructure` | A PR touching CI, tooling, or another human-owned path and no mathematics; CI skips the axiom-audit comment on it. |
 | `blocked` | Waits on another issue or on a change in Foundation; the blocker is linked. |
 | `foundation` | Needs a change upstream in Foundation; a human takes it there. |
 | `keep` | Opt out of automatic stale-claim release and automatic closing. |

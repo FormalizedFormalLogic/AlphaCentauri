@@ -64,6 +64,33 @@ lemma rew {Γ s n₁ n₂} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁}
   | exs h => by simpa using (rew ω.q h).exs
   | all h => by simpa using (rew ω.q h).all
 
+/-- Prefixing `s` alternating quantifiers, the outermost one of the kind `Γ`, raises a strict
+class by `s` levels.
+
+- [HP98, 0.30] -/
+lemma toPrenex {Γ j s n} {φ : Semiformula L ξ (n + s)} (h : StrictHierarchy (Γ.altItr s) j φ) :
+    StrictHierarchy Γ (j + s) (φ.toPrenex Γ s) := by
+  induction s generalizing n j with
+  | zero => simpa using h
+  | succ s ih =>
+    rw [Polarity.altItr_succ] at h
+    show StrictHierarchy Γ (j + (s + 1)) (Polarity.quantItr Γ (s + 1) φ)
+    rw [Polarity.quantItr_succ', show j + (s + 1) = j + 1 + s by omega]
+    rcases hΓ : Γ.altItr s with _ | _
+    · apply ih
+      rw [hΓ] at h ⊢
+      exact (ofAlt h).exs
+    · apply ih
+      rw [hΓ] at h ⊢
+      exact (ofAlt h).all
+
+/-- A `Δ₀` matrix under `s` alternating quantifiers, the outermost one of the kind `Γ`, is a
+strict `Γ`-formula of level `s`.
+
+- [HP98, 0.30] -/
+lemma toPrenex_of_deltaZero {Γ s n} {φ : Semiformula L ξ (n + s)} (h : Hierarchy 𝚺 0 φ) :
+    StrictHierarchy Γ s (φ.toPrenex Γ s) := by simpa using toPrenex (Γ := Γ) (zero h)
+
 /-- Strict hierarchy classes are monotone in their level.
 
 - [HP98, 0.30] -/

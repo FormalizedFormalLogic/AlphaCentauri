@@ -22,6 +22,22 @@ LO.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ:
 LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
   forgive: [sorryAx]
 
+LO.FirstOrder.ISigma.provable_con_ISigma1:
+  forgive:
+    - sorryAx
+LO.FirstOrder.Peano.reflexive:
+  forgive:
+    - sorryAx
+LO.FirstOrder.Peano.essentiallyReflexive:
+  forgive:
+    - sorryAx
+LO.FirstOrder.Peano.not_finiteAxiomatizable:
+  forgive:
+    - sorryAx
+LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
+  forgive:
+    - sorryAx
+
 LO.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection:
   forgive: [sorryAx]
 LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:

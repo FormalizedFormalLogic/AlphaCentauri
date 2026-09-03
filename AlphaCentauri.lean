@@ -11,4 +11,5 @@ public import AlphaCentauri.FirstOrder.Bootstrapping.TermVal
 public import AlphaCentauri.FirstOrder.Incompleteness.PartialTruth.SatSigma
 public import AlphaCentauri.FirstOrder.Incompleteness.PartialTruth.SatZero
 public import AlphaCentauri.FirstOrder.Incompleteness.PartialTruth.Snowing
+public import AlphaCentauri.Incompleteness.Reflexive
 public import AlphaCentauri.ProvablyTotal.Basic

@@ -10,6 +10,10 @@
 #       - AlphaCentauri.someLemma      # only the debt reached through `someLemma`
 
 version: v0
+
+LO.FirstOrder.not_finiteAxiomatizable_of_reflexive:
+  forgive: [sorryAx]
+
 LO.FirstOrder.Arithmetic.Bootstrapping.IsDelta0:
   forgive: [sorryAx]
 LO.FirstOrder.Arithmetic.Bootstrapping.IsDelta0.case_iff:

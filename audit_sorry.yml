@@ -10,3 +10,7 @@
 #       - AlphaCentauri.someLemma      # only the debt reached through `someLemma`
 
 version: v0
+
+LO.FirstOrder.not_finiteAxiomatizable_of_reflexive:
+  forgive:
+    - sorryAx

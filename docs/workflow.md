@@ -9,7 +9,7 @@ GitHub, it has not happened.
 
 | Who | Owns | Does |
 | --- | --- | --- |
-| Humans | `docs/`, `.github/`, `lakefile.toml`, `Justfile`, `AGENTS.md`, `CLAUDE.md`, `README.md` | Write and review the roadmap; maintain the infrastructure and the review rubrics; merge. |
+| Humans | `docs/`, `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `AGENTS.md`, `CLAUDE.md`, `README.md` | Write and review the roadmap; maintain the infrastructure and the review rubrics; merge. |
 | AI agents | `AlphaCentauri/`, `AlphaCentauri.lean` | Open target issues from the roadmap; claim them; write the Lean code; open PRs; review PRs; address reviews. |
 
 Ownership is a rule of this document for now; enforcing it mechanically (`CODEOWNERS`, branch

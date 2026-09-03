@@ -61,8 +61,8 @@ all the same, so the work is visible.
 - **No development artifacts** in the code: plan steps, issue numbers, "TODO after review",
   skeleton-era comments.
 - `AlphaCentauri/` and `AlphaCentauri.lean` are the only places code goes. `docs/`,
-  `.github/`, `lakefile.toml`, `Justfile`, `README.md`, `AGENTS.md`, and `CLAUDE.md` are
-  human-owned; a PR that touches them always needs a human review. The two pins
+  `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `README.md`, `AGENTS.md`, and
+  `CLAUDE.md` are human-owned; a PR that touches them always needs a human review. The two pins
   (`lake-manifest.json`, `lean-toolchain`) may be bumped **forward only**, in their own PR.
 
 ## Pull requests

@@ -15,3 +15,7 @@ axiom-audit:
 # Regenerate AlphaCentauri.lean to import all modules (run after adding/removing files)
 mk-all:
     lake exe mk_all --lib AlphaCentauri --module
+
+# Install the git hooks that run the CI checks before a push (needs lefthook: https://lefthook.dev)
+hooks:
+    lefthook install

@@ -72,4 +72,15 @@ for `∼σ`. The hypotheses are the abstract derivability conditions `HBL2` and
 theorem localReflection_of_con [𝔅.HBL2] [𝔅.FormalizedCompleteOn (∼σ)] :
     T₀ ⊢ 𝔅.con 🡒 (𝔅 σ 🡒 σ) := sorry
 
+variable {π : Sentence L}
+
+/-- A single reflection instance for `∼π`, already provable from `T ∪ {π}`, makes `T ∪ {π}`
+inconsistent. This is the finite case of the unboundedness of the local reflection schema: no
+consistent extension of `T` by finitely many sentences proves even one reflection instance for
+its own negation.
+- [AB05, Theorem 23, finite case]
+- [Lin97, Theorem 4.1] -/
+theorem inconsistent_of_localReflection_provable
+    (h : insert π T ⊢ 𝔅 (∼π) 🡒 ∼π) : Entailment.Inconsistent (insert π T) := sorry
+
 end LO.FirstOrder.ProvabilityAbstraction.Provability

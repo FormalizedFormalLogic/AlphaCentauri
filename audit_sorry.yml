@@ -10,3 +10,11 @@
 #       - AlphaCentauri.someLemma      # only the debt reached through `someLemma`
 
 version: v0
+
+LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
+  forgive:
+    - sorryAx
+
+LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
+  forgive:
+    - sorryAx

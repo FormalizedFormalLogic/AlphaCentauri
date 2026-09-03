@@ -30,7 +30,8 @@ variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provab
 `Rfn_Γ(𝔅) = { 𝔅 σ 🡒 σ | Γ σ }`.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
-def localReflectionOn (Γ : Sentence L → Prop) : Theory L := { ψ | ∃ σ, Γ σ ∧ ψ = 𝔅 σ 🡒 σ }
+def localReflectionOn (Γ : Sentence L → Prop) : Theory L :=
+  (fun σ ↦ 𝔅 σ 🡒 σ) '' {σ | Γ σ}
 
 /-- The full local reflection schema of `𝔅`: `Rfn(𝔅) = { 𝔅 σ 🡒 σ | σ }`.
 - [Lin97, §4.1, p. 52]
@@ -44,15 +45,15 @@ variable {Γ Γ' : Sentence L → Prop}
 Routine unfolding of the definition; no separate counterpart in the literature. -/
 @[simp]
 lemma mem_localReflectionOn_iff {ψ : Sentence L} :
-    ψ ∈ 𝔅.localReflectionOn Γ ↔ ∃ σ, Γ σ ∧ ψ = 𝔅 σ 🡒 σ := Iff.rfl
+    ψ ∈ 𝔅.localReflectionOn Γ ↔ ∃ σ, Γ σ ∧ ψ = 𝔅 σ 🡒 σ := by
+  simp [localReflectionOn, eq_comm]
 
 /-- Local reflection is monotone in the sentence class.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
 lemma localReflectionOn_mono (h : ∀ σ, Γ σ → Γ' σ) :
-    𝔅.localReflectionOn Γ ⊆ 𝔅.localReflectionOn Γ' := by
-  rintro ψ ⟨σ, hσ, rfl⟩
-  exact ⟨σ, h σ hσ, rfl⟩
+    𝔅.localReflectionOn Γ ⊆ 𝔅.localReflectionOn Γ' :=
+  Set.image_mono fun σ hσ ↦ h σ hσ
 
 variable [L.DecidableEq]
 

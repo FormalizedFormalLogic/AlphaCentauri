@@ -13,12 +13,387 @@ version: v0
 
 LO.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection:
   forgive: [sorryAx]
-
 LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
   forgive: [sorryAx]
-
 LO.FirstOrder.Arithmetic.instStrictlyWeakerThanSentenceORingArithmeticTheoryUnionLocalReflectionOfConsistent:
   forgive: [sorryAx]
-
 LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
   forgive: [sorryAx]
+
+LO.FirstOrder.not_finiteAxiomatizable_of_reflexive:
+  forgive: [sorryAx]
+
+LO.FirstOrder.Arithmetic.Bootstrapping.IsDelta0:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsDelta0.case_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsDelta0.definable:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsDelta0.defined:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsDelta0.isSigma1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsDelta0.neg:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi._f:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi._sunfold:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi._unsafe_rec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.all:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.congr_simp:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.definable:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.defined:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.mono:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.neg:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.of_all:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.of_sigma:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma._f:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma._sunfold:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma._unsafe_rec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.definable:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.defined:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.exs:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.mono:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.neg:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.of_exs:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.of_pi:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.definable:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.defined:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.uniq:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi._unsafe_rec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.congr_simp:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.definable:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.defined:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.dom:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.eq_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.eq_2:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.eq_def:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.mono:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.neg_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.zero:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma._mutual:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma._mutual.eq_def:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma._unsafe_rec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.congr_simp:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.definable:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.defined:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.dom:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.eq_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.eq_2:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.eq_def:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.mono:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.neg_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.subst:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.zero:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.and_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.and_iff._simp_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.ball_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.bex_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.congr_simp:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.definable:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.defined:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.dom:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.eq_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.falsum:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.falsum._simp_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.lt_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.neg_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.neq_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.nlt_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.or_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.or_iff._simp_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.subst:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum._simp_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.index_le_qqExss:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.index_le_qqExss._simp_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.isDelta0:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.isDelta0_quote_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi_quote_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma_quote_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.isUFormula_qqExss:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.isUFormula_qqExss._simp_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.le_qqExss:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.le_qqExss._simp_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.len_termValVec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.len_vecAppend:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.neg_qqAlls:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.neg_qqBall:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.neg_qqBex:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.neg_qqExss:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.nth_termValVec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.nth_vecAppend_of_le:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.nth_vecAppend_of_lt:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.pSatZero:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.satPi:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.satSigma:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec._proof_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec.defined:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.satZero:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal.definable:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal.defined:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termValGraph:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termValVec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termValVec.defined:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termValVecGraph:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal_add:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal_bvar:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal_fvar:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal_mul:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal_not_uterm:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal_one:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal_quote:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal_termBShift:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal_termShift:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal_termSubst:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Bootstrapping.termVal_zero:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.ISigma1.provable_snowing:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.ISigma1.provable_tarski:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.StrictHierarchy.mono:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satPiAll:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satPiDom:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satPiNeg:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satPiOfSigma:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satSigmaAxioms:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satSigmaAxioms.eq_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satSigmaDom:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satSigmaExs:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satSigmaNeg:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satSigmaOfPi:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroAnd:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroAxioms:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroAxioms.eq_1:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroBall:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroBex:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroDom:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroEq:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroFalsum:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroLt:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroNeg:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroNeq:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroNlt:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroOr:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.satZeroVerum:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.termValAdd:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.termValBvar:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.termValMul:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.termValOne:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.Tarski.termValZero:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.models_snowing_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.provable_snowing_of_tarski:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.satPi_quote_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.satSigma_quote_iff:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.snowing:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.below:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.below.casesOn:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.below.new:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.below.prev:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.below.rec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.below.zero:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.brecOn:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.casesOn:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.new:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.rec:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.recOn:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski.zero:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.tarski_finite:
+  forgive: [sorryAx]
+
+LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
+  forgive:
+    - sorryAx
+
+LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
+  forgive:
+    - sorryAx

@@ -17,3 +17,10 @@ leanOptions = { warningAsError = true }
 name = "Foundation"
 git = "https://github.com/FormalizedFormalLogic/Foundation"
 rev = "master"
+
+# `lake exe audit`: the axiom audit of `AlphaCentauri` against `audit_sorry.yml` (Audit/Main.lean).
+# Run after `lake build`; the script imports only `Lean`, so building it costs nothing.
+[[lean_exe]]
+name = "audit"
+root = "Audit.Main"
+supportInterpreter = true

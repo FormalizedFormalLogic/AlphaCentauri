@@ -58,6 +58,6 @@ rewrite, so it is written as if it were already there.
 
 ```bash
 lake build            # no errors, no warnings
-just axiom-audit      # no sorry, no axiom outside the allowlist
+just axiom-audit      # no sorry, no axiom outside the allowlist, except what audit_sorry.yml forgives
 just mk-all           # AlphaCentauri.lean up to date
 ```

@@ -73,8 +73,10 @@ work is the branch rule below.
 `.github/workflows/ci.yml` runs on every pull request and every push to `main`:
 
 1. `lake build` of `AlphaCentauri` against the pinned Foundation, with warnings as errors;
-2. `lake exe axiom-audit --root AlphaCentauri`: no `sorry`, no `native_decide`, no axiom outside
-   `propext`, `Classical.choice`, `Quot.sound`;
+2. `lake exe audit` (`just axiom-audit`, the script in `Audit/Main.lean`): no `sorry`, no
+   `native_decide`, no axiom outside `propext`, `Classical.choice`, `Quot.sound`, except what
+   `audit_sorry.yml` forgives, one declaration at a time (a statement formalized with `sorry`
+   is listed there with `forgive: [sorryAx]`, and every declaration built on it names it);
 3. `AlphaCentauri.lean` imports every module (`just mk-all` leaves no diff).
 
 A red check is never worked around; it is fixed in the PR. The code itself follows Foundation's

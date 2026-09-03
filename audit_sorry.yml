@@ -1,0 +1,12 @@
+# Declarations allowed to depend on an axiom outside `propext`, `Classical.choice`, `Quot.sound`.
+# Read by `lake env lean --run Audit/Main.lean` (`just axiom-audit`); the format is documented in
+# `Audit/Main.lean`. Every entry and every forgiven name must be needed, or the audit fails.
+#
+#   AlphaCentauri.someLemma:
+#     forgive:
+#       - sorryAx                      # the lemma's own `sorry`
+#   AlphaCentauri.usesSomeLemma:
+#     forgive:
+#       - AlphaCentauri.someLemma      # only the debt reached through `someLemma`
+
+version: v0

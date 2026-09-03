@@ -145,6 +145,11 @@ jobs:
       - name: Build AlphaCentauri
         run: lake build AlphaCentauri
 
+      # `just axiom-audit`: no `sorry`, no `native_decide`, no axiom outside the allowlist, except
+      # what `audit_sorry.yml` forgives declaration by declaration. Reads the oleans just built.
+      - name: Audit axioms
+        run: lake exe audit
+
       # Re-pack the freshly built oleans and save under the exact primary key. Skipped for PRs from
       # forks (no write access to the base repo's cache); pushes and same-repo PRs refresh the entry.
       - name: Pack project cache

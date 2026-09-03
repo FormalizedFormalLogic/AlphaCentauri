@@ -16,3 +16,4 @@ public import AlphaCentauri.Incompleteness.ProvabilityAbstraction.Reflection
 public import AlphaCentauri.Incompleteness.Reflexive
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parsons
+public import AlphaCentauri.ProvablyTotal.Primrec

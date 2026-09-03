@@ -11,6 +11,12 @@
 
 version: v0
 
+LO.FirstOrder.Arithmetic.provablyTotal_of_primrec':
+  forgive: [sorryAx]
+
+LO.FirstOrder.Arithmetic.provablyTotal_of_primrec:
+  forgive: [sorryAx]
+
 LO.FirstOrder.provablyTotal_of_primrec':
   forgive:
     - sorryAx

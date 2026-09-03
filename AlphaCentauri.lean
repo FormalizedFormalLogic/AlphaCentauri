@@ -8,6 +8,7 @@ public import AlphaCentauri.Bootstrapping.Prenex
 public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.FiniteAxiomatizability.ISigma
 public import AlphaCentauri.FiniteAxiomatizability.Reflexive
+public import AlphaCentauri.Hierarchy.DeltaZero
 public import AlphaCentauri.Hierarchy.NormalForm
 public import AlphaCentauri.Hierarchy.Prenex
 public import AlphaCentauri.OmegaLogic.Basic

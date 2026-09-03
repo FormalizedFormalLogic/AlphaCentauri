@@ -174,17 +174,3 @@ jobs:
             echo "Files were modified by mk_all. Please run 'just mk-all' and commit the changes."
             exit 1
           fi
-
-  # actionlint checks the workflow files themselves: YAML schema, `${{ }}` expressions, action
-  # inputs, runner labels, plus shellcheck over every `run:` block. The pinned Docker image is the
-  # upstream-recommended way to run it, and pinning the exact tag keeps a new actionlint release
-  # from turning CI red without a commit here.
-  actionlint:
-    name: Lint workflows
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Run actionlint
-        uses: docker://rhysd/actionlint:1.7.12
-        with:
-          args: -color

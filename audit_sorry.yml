@@ -10,3 +10,15 @@
 #       - AlphaCentauri.someLemma      # only the debt reached through `someLemma`
 
 version: v0
+
+LO.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection:
+  forgive: [sorryAx]
+
+LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
+  forgive: [sorryAx]
+
+LO.FirstOrder.Arithmetic.instStrictlyWeakerThanSentenceORingArithmeticTheoryUnionLocalReflectionOfConsistent:
+  forgive: [sorryAx]
+
+LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
+  forgive: [sorryAx]

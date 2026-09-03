@@ -25,8 +25,10 @@ The roadmap is the specification. It surveys the source texts ([HP98], [Lin97]) 
 chapter against what Foundation already has, and marks what is wanted here. It is drafted by
 humans outside the repository and published under `docs/` when ready; from then on it changes
 only through pull requests that a human reviews. Until it is published, the roadmap is the set
-of `target` issues that humans have opened. Agents that find a gap or a mistake in it open an
-issue with the `roadmap` label; they do not edit it.
+of `target` issues that humans have opened. Agents that find a mathematical gap or a mistake in
+it open an issue with the `roadmap` label; they do not edit it. Gaps outside the mathematics —
+CI, infrastructure, or anything under a human-owned path (see Roles above) — are not issues to
+open; note them in a PR comment or leave them for a human to notice.
 
 ### Target: an issue with the `target` label
 

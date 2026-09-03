@@ -29,8 +29,7 @@ jobs:
   #   • Foundation is a git dependency with NO public olean cache, so it compiles from source and
   #     emits lint/deprecation warnings that are upstream's, not ours. We build it once here, then
   #     CLEAR its cached build logs so they don't `Replayed`-spam the build job with warnings we
-  #     can't fix and don't want to read. That matters doubly here: `AlphaCentauri` builds with
-  #     `warningAsError = true`.
+  #     can't fix and don't want to read.
   # The built+cleansed Foundation is handed to the build job via a manifest-keyed cache. We
   # deliberately do NOT cache mathlib's oleans, since `cache get` re-hydrates those fast.
   # Bonus: keyed on toolchain+manifest, so Foundation only recompiles when its pinned rev bumps.
@@ -88,6 +87,9 @@ jobs:
     name: Build project
     needs: deps
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # the audit comment below
     steps:
       - uses: actions/checkout@v7
       - uses: leanprover/lean-action@v1
@@ -145,6 +147,32 @@ jobs:
       - name: Build AlphaCentauri
         run: lake build AlphaCentauri
 
+      # `just axiom-audit`: no `sorry`, no `native_decide`, no axiom outside the allowlist, except
+      # what `audit_sorry.yml` forgives declaration by declaration. Reads the oleans just built and
+      # writes `.lake/audit.json` and `.lake/audit.md`. A failure is deferred to the last step so
+      # the report still reaches the pull request and the cache below is still saved.
+      - name: Audit axioms
+        id: audit
+        continue-on-error: true
+        run: lake exe audit
+      # One comment per pull request, identified by `header` and overwritten on every run rather
+      # than posted anew. Skipped for PRs from forks (their token cannot write comments) and for
+      # PRs labelled `infrastructure`, which touch no mathematics and need no audit comment.
+      - name: Prepare the audit comment
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && !contains(github.event.pull_request.labels.*.name, 'infrastructure')
+        run: |
+          {
+            cat .lake/audit.md
+            echo
+            echo "Commit: ${{ github.event.pull_request.head.sha }} · [run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } > .lake/audit-comment.md
+      - name: Comment the audit on the pull request
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && !contains(github.event.pull_request.labels.*.name, 'infrastructure')
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: axiom-audit
+          path: .lake/audit-comment.md
+
       # Re-pack the freshly built oleans and save under the exact primary key. Skipped for PRs from
       # forks (no write access to the base repo's cache); pushes and same-repo PRs refresh the entry.
       - name: Pack project cache
@@ -155,6 +183,12 @@ jobs:
         with:
           path: .lake/AlphaCentauri-x86_64-unknown-linux-gnu.tar.gz
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+
+      - name: Fail if the audit failed
+        if: steps.audit.outcome != 'success'
+        run: |
+          echo "the axiom audit failed; see the 'Audit axioms' step"
+          exit 1
 
   # mk_all only scans the source tree (no build), so it runs as its own lightweight job.
   mk-all-check:

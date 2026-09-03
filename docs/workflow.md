@@ -74,10 +74,16 @@ work is the branch rule below.
 
 `.github/workflows/ci.yml` runs on every pull request and every push to `main`:
 
-1. `lake build` of `AlphaCentauri` against the pinned Foundation, with warnings as errors;
-2. `lake exe axiom-audit --root AlphaCentauri`: no `sorry`, no `native_decide`, no axiom outside
-   `propext`, `Classical.choice`, `Quot.sound`;
+1. `lake build` of `AlphaCentauri` against the pinned Foundation;
+2. `lake exe audit` (`just axiom-audit`, the script in `Audit/Main.lean`): no `sorry`, no
+   `native_decide`, no axiom outside `propext`, `Classical.choice`, `Quot.sound`, except what
+   `audit_sorry.yml` forgives, one declaration at a time (a statement formalized with `sorry`
+   is listed there with `forgive: [sorryAx]`, and every declaration built on it names it);
 3. `AlphaCentauri.lean` imports every module (`just mk-all` leaves no diff).
+
+The audit also writes its report to `.lake/audit.json` and `.lake/audit.md`; on a pull request
+CI posts the Markdown as one comment, overwritten on every run, unless the PR is labelled
+`infrastructure`.
 
 `.github/workflows/actionlint.yml` is separate and runs only when a workflow file itself changes:
 [actionlint](https://github.com/rhysd/actionlint) checks `.github/workflows/` for schema,
@@ -115,6 +121,7 @@ PRs that touch only AI-owned paths is the intended end state.
 | `target` | A formalization target; the unit of work. |
 | `roadmap` | A problem with, or a proposed addition to, the roadmap. Human decision. |
 | `meta` | The process or the infrastructure. |
+| `infrastructure` | A PR touching CI, tooling, or another human-owned path and no mathematics; CI skips the axiom-audit comment on it. |
 | `blocked` | Waits on another issue or on a change in Foundation; the blocker is linked. |
 | `foundation` | Needs a change upstream in Foundation; a human takes it there. |
 | `keep` | Opt out of automatic stale-claim release and automatic closing. |

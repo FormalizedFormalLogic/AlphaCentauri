@@ -39,9 +39,10 @@ all the same, so the work is visible.
 
 ## The rules of the code
 
-- `main` is always green. CI builds `AlphaCentauri` with warnings as errors and runs the axiom
-  audit: no `sorry`, no `native_decide`, no axioms beyond `propext`, `Classical.choice`,
-  `Quot.sound`. Do not try to disable these; if a proof needs `maxHeartbeats`, restructure it.
+- `main` is always green. CI builds `AlphaCentauri` and runs the axiom audit: no `sorry`, no `native_decide`, no axioms beyond `propext`, `Classical.choice`,
+  `Quot.sound`, except what `audit_sorry.yml` forgives declaration by declaration (see
+  `Audit/Main.lean` for the format). Do not try to disable these; if a proof needs
+  `maxHeartbeats`, restructure it.
 - **Follow Foundation's contribution guidelines**, copied verbatim into this repository as
   [`docs/index.md`](docs/index.md), [`docs/style.md`](docs/style.md), and
   [`docs/refactoring.md`](docs/refactoring.md). [`docs/conventions.md`](docs/conventions.md)

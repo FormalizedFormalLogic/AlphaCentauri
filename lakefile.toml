@@ -1,0 +1,19 @@
+name = "AlphaCentauri"
+version = "0.1.0"
+defaultTargets = ["AlphaCentauri"]
+
+[leanOptions]
+pp.unicode.fun = true
+weak.linter.flexible = true
+weak.linter.refine = true
+weak.linter.oldObtain = true
+weak.linter.style.multiGoal = true
+
+[[lean_lib]]
+name = "AlphaCentauri"
+leanOptions = { warningAsError = true }
+
+[[require]]
+name = "Foundation"
+git = "https://github.com/FormalizedFormalLogic/Foundation"
+rev = "master"

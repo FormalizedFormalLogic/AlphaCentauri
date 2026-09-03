@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
+public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Completeness
 
 /-!
@@ -8,6 +9,11 @@ public import Foundation.FirstOrder.Completeness
 
 `T.ProvablyTotalVia f φ` says that the `𝚺₁` formula `φ` defines the graph of `f : (Fin k → ℕ) → ℕ`
 over `ℕ`, and that `T` proves the totality sentence `∀ x⃗, ∃ y, φ(y, x⃗)`.
+
+Both faces of totality are available: the `T ⊢ _` form and the model-theoretic form, translated by
+`ProvablyTotalVia.models` and `ProvablyTotalVia.of_models`. The provably total functions are closed
+under composition, depend only on the `𝚷₂` consequences of the theory, and over a theory containing
+`𝗜𝚺₁` the `∃` form of totality upgrades to the `∃!` form by passing to the least witness.
 -/
 
 @[expose] public section
@@ -37,6 +43,10 @@ def totalitySentence (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSentence :=
     Hierarchy 𝚷 2 (totalitySentence φ) :=
   Hierarchy.allClosure (Hierarchy.accum φ.sigma_prop.exs 𝚷)
 
+lemma models_totalitySentence_iff {V : Type*} [ORingStructure V] {φ : 𝚺₁.Semisentence (k + 1)} :
+    V↓[ℒₒᵣ] ⊧ totalitySentence φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) := by
+  simp [totalitySentence, models_iff]
+
 variable {l : ℕ}
 
 /-- The graph formula of the composite `fun x⃗ ↦ f (fun i ↦ g i x⃗)`, assembled from a graph
@@ -58,9 +68,43 @@ def compGraph (ψ : 𝚺₁.Semisentence (l + 1)) (χ : Fin l → 𝚺₁.Semise
   simp [compGraph, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
     Matrix.comp_vecCons', Empty.eq_elim]
 
-lemma models_totalitySentence_iff {V : Type*} [ORingStructure V] {φ : 𝚺₁.Semisentence (k + 1)} :
-    V↓[ℒₒᵣ] ⊧ totalitySentence φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) := by
-  simp [totalitySentence, models_iff]
+/-- Substituting parameters into a `𝚺₁` graph formula gives a `𝚺₁`-definable predicate.
+
+This is a routine bridge to Foundation's parameterized definability API and has no counterpart in
+the literature. -/
+lemma definablePred_evalb {V : Type*} [ORingStructure V] (φ : 𝚺₁.Semisentence (k + 1))
+    (v : Fin k → V) : 𝚺₁-Predicate fun y ↦ φ.val.Evalb (y :> v) :=
+  HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 1)
+    (Rew.bind (#0 :> fun i ↦ &(v i)) Empty.elim ▹ φ.val)
+    (Hierarchy.rew _ (by simp)) fun w ↦ by
+      simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
+
+/-- `φ` refined so that the value is the least witness: `φ(y, x⃗) ∧ ∀ y' < y, ¬φ(y', x⃗)`.
+- [HP98, Lemma IV.3.4] -/
+def leastGraph (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSemisentence (k + 1) :=
+  φ.val ⋏ (∀¹[“#0 < #1”] ∼(Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val))
+
+@[simp] lemma eval_leastGraph {V : Type*} [ORingStructure V] (φ : 𝚺₁.Semisentence (k + 1))
+    (w : Fin (k + 1) → V) :
+    (leastGraph φ).Evalb w ↔ φ.val.Evalb w ∧ ∀ y < w 0, ¬φ.val.Evalb (y :> (w ·.succ)) := by
+  simp [leastGraph, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
+
+/-- The unique-existence form of totality, `∀ x⃗, ∃! y, φ*(y, x⃗)`, where `φ*` is the least-witness
+refinement `leastGraph φ`.
+- [HP98, Definition I.1.51]
+- [HP98, Lemma IV.3.4] -/
+def uniqueTotalitySentence (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSentence :=
+  ∀¹* ((∃¹ leastGraph φ) ⋏ (∀¹ ∀¹
+    (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ) ⋏
+      (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ)) 🡒 “#1 = #0”)))
+
+lemma models_uniqueTotalitySentence_iff {V : Type*} [ORingStructure V]
+    {φ : 𝚺₁.Semisentence (k + 1)} :
+    V↓[ℒₒᵣ] ⊧ uniqueTotalitySentence φ ↔ ∀ v : Fin k → V,
+      (∃ y, (leastGraph φ).Evalb (y :> v)) ∧
+        ∀ y y', (leastGraph φ).Evalb (y :> v) → (leastGraph φ).Evalb (y' :> v) → y = y' := by
+  simp [uniqueTotalitySentence, models_iff, Semiformula.eval_rew, Function.comp_def,
+    Matrix.comp_vecCons', Empty.eq_elim]
 
 end Arithmetic
 
@@ -95,7 +139,9 @@ lemma to_provablyTotal (h : T.ProvablyTotalVia f φ) : T.ProvablyTotal f := ⟨�
 lemma graph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
     φ.val.Evalb v ↔ v 0 = f (v ·.succ) := h.defined.iff
 
-/-- Provable totality passes to any stronger theory. -/
+/-- Provable totality passes to any stronger theory.
+
+This is immediate from the definition and has no separate counterpart in the literature. -/
 lemma mono (h : T.ProvablyTotalVia f φ) (hT : T ⪯ U) : U.ProvablyTotalVia f φ :=
   ⟨h.defined, hT.pbl h.total⟩
 
@@ -105,16 +151,53 @@ lemma of_pi2 (h : T.ProvablyTotalVia f φ)
     (H : ∀ σ : ArithmeticSentence, Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) : U.ProvablyTotalVia f φ :=
   ⟨h.defined, H _ (by simp) h.total⟩
 
-/-- The model-theoretic face of `total`: in every model of `T`, `φ` defines a total function. -/
+/-- The model-theoretic face of `total`: in every model of `T`, `φ` defines a total function.
+
+This is soundness applied to `total`, and has no separate counterpart in the literature. -/
 lemma models (h : T.ProvablyTotalVia f φ)
     (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (v : Fin k → V) : ∃ y, φ.val.Evalb (y :> v) :=
   models_totalitySentence_iff.mp (consequence_iff'.mp (Theory.Proof.sound h.total) V) v
 
-/-- `total` follows from its model-theoretic face, by completeness. -/
+/-- `total` follows from its model-theoretic face, by completeness.
+
+This is the converse of `models`, and has no separate counterpart in the literature. -/
 lemma of_models [𝗘𝗤 ℒₒᵣ ⪯ T] (hf : HierarchySymbol.DefinedFunction (V := ℕ) f φ)
     (H : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T], ∀ v : Fin k → V,
       ∃ y, φ.val.Evalb (y :> v)) : T.ProvablyTotalVia f φ :=
   ⟨hf, Arithmetic.complete T _ fun V _ _ ↦ models_totalitySentence_iff.mpr (H V)⟩
+
+/-- Over `ℕ` the least-witness refinement of `φ` still defines the graph of `f`, since the graph is
+single valued there.
+- [HP98, Lemma IV.3.4] -/
+lemma leastGraph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
+    (leastGraph φ).Evalb v ↔ v 0 = f (v ·.succ) := by
+  simp only [eval_leastGraph]
+  constructor
+  · exact fun hv ↦ h.graph_iff.mp hv.1
+  · intro e
+    refine ⟨h.graph_iff.mpr e, fun y hy hy' ↦ ?_⟩
+    have : y = f (v ·.succ) := by simpa using h.graph_iff.mp hy'
+    omega
+
+open PeanoMinus in
+/-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality upgrades to the `∃!` form: the least
+witness of `φ` exists and is unique in every model of `T`.
+- [HP98, Lemma IV.3.4] -/
+lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ uniqueTotalitySentence φ := by
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
+  refine Arithmetic.complete T _ fun (V : Type) _ _ ↦
+    models_uniqueTotalitySentence_iff.mpr fun v ↦ ?_
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
+  constructor
+  · obtain ⟨y, hy⟩ := h.models V v
+    obtain ⟨y₀, h₀, hmin⟩ := InductionOnHierarchy.least_number 𝚺 1 (definablePred_evalb φ v) hy
+    exact ⟨y₀, by simpa using ⟨h₀, hmin⟩⟩
+  · intro y y' hy hy'
+    simp only [eval_leastGraph, Matrix.cons_val_zero, Matrix.cons_val_succ] at hy hy'
+    rcases lt_trichotomy y y' with (hlt | rfl | hlt)
+    · exact absurd hy.1 (hy'.2 y hlt)
+    · rfl
+    · exact absurd hy'.1 (hy.2 y' hlt)
 
 section comp
 
@@ -163,6 +246,12 @@ lemma comp [𝗘𝗤 ℒₒᵣ ⪯ T] {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h
   have ⟨_, hg⟩ := hg
   have ⟨_, hh⟩ := Classical.skolem.mp hh
   ⟨_, hg.comp hh⟩
+
+/-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality upgrades to the `∃!` form.
+- [HP98, Lemma IV.3.4] -/
+lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotal f) :
+    ∃ φ, T.ProvablyTotalVia f φ ∧ T ⊢ uniqueTotalitySentence φ :=
+  have ⟨_, h⟩ := h; ⟨_, h, h.exists_unique⟩
 
 end ArithmeticTheory.ProvablyTotal
 

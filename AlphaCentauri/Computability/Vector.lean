@@ -78,45 +78,46 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {ξ : Type*} (ε : ξ → ℕ)
 
-/-- The truth of a `Δ₀` formula is primitive recursive. This is the `Δ₀` counterpart of
-Foundation's `sigma1_re`.
+/-- The truth of a `Δ₀` formula is primitive recursive, in the `List.Vector` form of Mathlib's
+primitive recursion API. This is the `Δ₀` counterpart of Foundation's `sigma1_re`.
 - [HP98, Theorem 0.35] -/
-lemma deltaZero_primrec :
+lemma deltaZero_primrec_vec :
     (k : ℕ) → (φ : ArithmeticSemiformula ξ k) → Hierarchy 𝚺 0 φ →
       PrimrecPred fun v : List.Vector ℕ k ↦ φ.Eval v.get ε
-  |              _, _, Hierarchy.verum _ _ _ => by simpa using PrimrecPred.const True
-  |             _, _, Hierarchy.falsum _ _ _ => by simpa using PrimrecPred.const False
-  |  _, _, Hierarchy.rel _ _ Language.Eq.eq v => by
+  | _, _, Hierarchy.verum _ _ _ => by simpa using PrimrecPred.const True
+  | _, _, Hierarchy.falsum _ _ _ => by simpa using PrimrecPred.const False
+  | _, _, Hierarchy.rel _ _ Language.Eq.eq v => by
     simpa [← Matrix.fun_eq_vec_two]
       using Primrec.eq.comp (term_primrec (v 0)) (term_primrec (v 1))
   | _, _, Hierarchy.nrel _ _ Language.Eq.eq v => by
     simpa [← Matrix.fun_eq_vec_two]
       using (Primrec.eq.comp (term_primrec (v 0)) (term_primrec (v 1))).not
-  |  _, _, Hierarchy.rel _ _ Language.LT.lt v => by
+  | _, _, Hierarchy.rel _ _ Language.LT.lt v => by
     simpa [← Matrix.fun_eq_vec_two]
       using Primrec.nat_lt.comp (term_primrec (v 0)) (term_primrec (v 1))
   | _, _, Hierarchy.nrel _ _ Language.LT.lt v => by
     simpa [← Matrix.fun_eq_vec_two]
       using (Primrec.nat_lt.comp (term_primrec (v 0)) (term_primrec (v 1))).not
-  |                  _, _, Hierarchy.and hφ hψ => by
-    simpa using (deltaZero_primrec _ _ hφ).and (deltaZero_primrec _ _ hψ)
-  |                   _, _, Hierarchy.or hφ hψ => by
-    simpa using (deltaZero_primrec _ _ hφ).or (deltaZero_primrec _ _ hψ)
-  |       n, _, Hierarchy.ball (φ := φ) pt hφ => by
+  | _, _, Hierarchy.and hφ hψ => by
+    simpa using (deltaZero_primrec_vec _ _ hφ).and (deltaZero_primrec_vec _ _ hψ)
+  | _, _, Hierarchy.or hφ hψ => by
+    simpa using (deltaZero_primrec_vec _ _ hφ).or (deltaZero_primrec_vec _ _ hψ)
+  | n, _, Hierarchy.ball (φ := φ) pt hφ => by
     rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
     have h : PrimrecRel fun (x : ℕ) (v : List.Vector ℕ n) ↦ φ.Eval (x ::ᵥ v).get ε :=
-      (deltaZero_primrec _ _ hφ).comp Primrec.vector_cons
+      (deltaZero_primrec_vec _ _ hφ).comp Primrec.vector_cons
     simpa [List.Vector.cons_get] using (PrimrecRel.forall_lt' h).comp (term_primrec t) .id
-  |       n, _, Hierarchy.bexs (φ := φ) pt hφ => by
+  | n, _, Hierarchy.bexs (φ := φ) pt hφ => by
     rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
     have h : PrimrecRel fun (x : ℕ) (v : List.Vector ℕ n) ↦ φ.Eval (x ::ᵥ v).get ε :=
-      (deltaZero_primrec _ _ hφ).comp Primrec.vector_cons
+      (deltaZero_primrec_vec _ _ hφ).comp Primrec.vector_cons
     simpa [List.Vector.cons_get] using (PrimrecRel.exists_lt' h).comp (term_primrec t) .id
 
-/-- The truth of a `Δ₀` formula, in the `Fin k → ℕ` form of Foundation's definability API.
+/-- The truth of a `Δ₀` formula is primitive recursive, in the `Fin k → ℕ` form of Foundation's
+definability API.
 - [HP98, Theorem 0.35] -/
-lemma deltaZero_primrec' {k} {φ : ArithmeticSemiformula ξ k} (hφ : Hierarchy 𝚺 0 φ) :
+lemma deltaZero_primrec {k} {φ : ArithmeticSemiformula ξ k} (hφ : Hierarchy 𝚺 0 φ) :
     PrimrecPred fun v : Fin k → ℕ ↦ φ.Eval v ε :=
-  PrimrecPred.comp_get_iff.mp (deltaZero_primrec ε k φ hφ)
+  PrimrecPred.comp_get_iff.mp (deltaZero_primrec_vec ε k φ hφ)
 
 end LO.FirstOrder.Arithmetic

@@ -77,7 +77,9 @@ work is the branch rule below.
 1. `lake build` of `AlphaCentauri` against the pinned Foundation, with warnings as errors;
 2. `lake exe axiom-audit --root AlphaCentauri`: no `sorry`, no `native_decide`, no axiom outside
    `propext`, `Classical.choice`, `Quot.sound`;
-3. `AlphaCentauri.lean` imports every module (`just mk-all` leaves no diff).
+3. `AlphaCentauri.lean` imports every module (`just mk-all` leaves no diff);
+4. [actionlint](https://github.com/rhysd/actionlint) over `.github/workflows/`: the workflow
+   files themselves must be free of schema, expression, and shell errors.
 
 A red check is never worked around; it is fixed in the PR. The code itself follows Foundation's
 contribution guidelines, see [`conventions.md`](conventions.md).

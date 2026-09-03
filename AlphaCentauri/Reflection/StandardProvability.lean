@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.Second
-public import AlphaCentauri.Incompleteness.ProvabilityAbstraction.Reflection
+public import AlphaCentauri.Reflection.ProvabilityAbstraction
 
 @[expose] public section
 /-!

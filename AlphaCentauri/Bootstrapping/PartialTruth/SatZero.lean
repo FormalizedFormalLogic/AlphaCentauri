@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.FirstOrder.Bootstrapping.Delta0
-public import AlphaCentauri.FirstOrder.Bootstrapping.TermVal
+public import AlphaCentauri.Bootstrapping.Delta0
+public import AlphaCentauri.Bootstrapping.TermVal
 
 /-!
 # Satisfaction for `Δ₀` formulas

@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.FirstOrder.Arithmetic.Basic.Prenex
-public import AlphaCentauri.FirstOrder.Bootstrapping.Delta0
+public import AlphaCentauri.Hierarchy.Prenex
+public import AlphaCentauri.Bootstrapping.Delta0
 
 /-!
 # Internal prenex classes

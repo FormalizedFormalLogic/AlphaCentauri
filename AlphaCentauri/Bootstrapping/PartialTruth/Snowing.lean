@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.FirstOrder.Incompleteness.PartialTruth.SatSigma
+public import AlphaCentauri.Bootstrapping.PartialTruth.SatSigma
 
 /-!
 # Partial truth definitions agree with truth

@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.ProvablyTotal.Basic
-public import AlphaCentauri.Computability.Vector
+public import AlphaCentauri.Vorspiel.Primrec
 
 /-!
 # Parsons' theorem

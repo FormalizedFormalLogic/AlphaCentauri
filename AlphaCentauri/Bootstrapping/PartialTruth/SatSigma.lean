@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.FirstOrder.Bootstrapping.Prenex
-public import AlphaCentauri.FirstOrder.Incompleteness.PartialTruth.SatZero
+public import AlphaCentauri.Bootstrapping.Prenex
+public import AlphaCentauri.Bootstrapping.PartialTruth.SatZero
 
 /-!
 # Satisfaction for prenex `Σₙ` and `Πₙ` formulas

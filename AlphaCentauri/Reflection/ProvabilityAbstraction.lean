@@ -16,7 +16,7 @@ This mirrors Foundation's split between the abstract `ProvabilityAbstraction.Bas
 (`Löb.lean`, `Second.lean`) and its arithmetic instantiation: the definitions and lemmas here
 depend only on the derivability conditions `D1`–`D3`, so they are stated for an arbitrary
 `Provability` instance and are specialized to the standard provability predicate in
-`AlphaCentauri.Arithmetic.Metamathematics.Reflection`.
+`AlphaCentauri.Reflection.StandardProvability`.
 
 - [Lin97, §4.1, p. 52]
 - [AB05, §4]

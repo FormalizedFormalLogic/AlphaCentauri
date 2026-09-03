@@ -10,3 +10,9 @@
 #       - AlphaCentauri.someLemma      # only the debt reached through `someLemma`
 
 version: v0
+
+LO.FirstOrder.Arithmetic.provablyTotal_of_primrec':
+  forgive: [sorryAx]
+
+LO.FirstOrder.Arithmetic.provablyTotal_of_primrec:
+  forgive: [sorryAx]

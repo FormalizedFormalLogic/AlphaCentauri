@@ -11,6 +11,22 @@
 
 version: v0
 
+LO.FirstOrder.provablyTotal_of_primrec':
+  forgive:
+    - sorryAx
+
+LO.FirstOrder.primrec'_of_provablyTotal:
+  forgive:
+    - sorryAx
+
+LO.FirstOrder.parsons:
+  forgive:
+    - sorryAx
+
+LO.FirstOrder.parsons_primrec:
+  forgive:
+    - sorryAx
+
 LO.FirstOrder.ProvabilityAbstraction.Provability.inconsistent_of_localReflection_provable:
   forgive: [sorryAx]
 LO.FirstOrder.Arithmetic.instConsistentSentenceORingArithmeticTheoryUnionLocalReflectionOfModelsSetStrucStrNat:

@@ -15,3 +15,4 @@ public import AlphaCentauri.FirstOrder.Incompleteness.PartialTruth.Snowing
 public import AlphaCentauri.Incompleteness.ProvabilityAbstraction.Reflection
 public import AlphaCentauri.Incompleteness.Reflexive
 public import AlphaCentauri.ProvablyTotal.Basic
+public import AlphaCentauri.ProvablyTotal.Parsons

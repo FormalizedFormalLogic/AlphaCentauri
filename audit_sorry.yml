@@ -11,6 +11,17 @@
 
 version: v0
 
+LO.FirstOrder.ProvabilityAbstraction.Provability.inconsistent_of_localReflection_provable:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.instConsistentSentenceORingArithmeticTheoryUnionLocalReflectionOfModelsSetStrucStrNat:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.instConsistentSentenceORingArithmeticTheoryUnionLocalReflectionOfSoundOnHierarchySigmaPolarityOfNatNat:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ:
+  forgive: [sorryAx]
+LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
+  forgive: [sorryAx]
+
 LO.FirstOrder.ISigma.provable_con_ISigma1:
   forgive:
     - sorryAx

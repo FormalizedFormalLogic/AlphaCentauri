@@ -72,7 +72,7 @@ work is the branch rule below.
 
 `.github/workflows/ci.yml` runs on every pull request and every push to `main`:
 
-1. `lake build` of `AlphaCentauri` against the pinned Foundation, with warnings as errors;
+1. `lake build` of `AlphaCentauri` against the pinned Foundation;
 2. `lake exe audit` (`just axiom-audit`, the script in `Audit/Main.lean`): no `sorry`, no
    `native_decide`, no axiom outside `propext`, `Classical.choice`, `Quot.sound`, except what
    `audit_sorry.yml` forgives, one declaration at a time (a statement formalized with `sorry`

@@ -29,8 +29,7 @@ jobs:
   #   • Foundation is a git dependency with NO public olean cache, so it compiles from source and
   #     emits lint/deprecation warnings that are upstream's, not ours. We build it once here, then
   #     CLEAR its cached build logs so they don't `Replayed`-spam the build job with warnings we
-  #     can't fix and don't want to read. That matters doubly here: `AlphaCentauri` builds with
-  #     `warningAsError = true`.
+  #     can't fix and don't want to read.
   # The built+cleansed Foundation is handed to the build job via a manifest-keyed cache. We
   # deliberately do NOT cache mathlib's oleans, since `cache get` re-hydrates those fast.
   # Bonus: keyed on toolchain+manifest, so Foundation only recompiles when its pinned rev bumps.

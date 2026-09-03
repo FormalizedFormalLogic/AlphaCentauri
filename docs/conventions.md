@@ -36,8 +36,9 @@ rewrite, so it is written as if it were already there.
   `@[expose] public section`.
 - **Root module.** `AlphaCentauri.lean` imports every module and is regenerated with
   `just mk-all` (`lake exe mk_all --lib AlphaCentauri --module`); CI checks it.
-- **Warnings are errors.** The library builds with `warningAsError = true` and Foundation's
-  linter set (`lakefile.toml`). A warning is fixed, not suppressed.
+- **Linters.** The library builds with Foundation's linter set (`lakefile.toml`). Warnings are not
+  errors, since a statement formalized with `sorry` must build; a warning is still fixed, not
+  suppressed, and review treats one as a finding.
 - **Citations.** The citation keys are `HP98` and `Lin97` (see `README.md`), cited at the end
   of the docstring in Foundation's form, one line per key:
   ```
@@ -57,7 +58,7 @@ rewrite, so it is written as if it were already there.
 ## Checks before opening a pull request
 
 ```bash
-lake build            # no errors, no warnings
+lake build            # no errors; fix the warnings
 just axiom-audit      # no sorry, no axiom outside the allowlist, except what audit_sorry.yml forgives
 just mk-all           # AlphaCentauri.lean up to date
 ```

@@ -36,8 +36,7 @@ all the same, so the work is visible.
 
 ## The rules of the code
 
-- `main` is always green. CI builds `AlphaCentauri` with warnings as errors and runs the axiom
-  audit: no `sorry`, no `native_decide`, no axioms beyond `propext`, `Classical.choice`,
+- `main` is always green. CI builds `AlphaCentauri` and runs the axiom audit: no `sorry`, no `native_decide`, no axioms beyond `propext`, `Classical.choice`,
   `Quot.sound`, except what `audit_sorry.yml` forgives declaration by declaration (see
   `Audit/Main.lean` for the format). Do not try to disable these; if a proof needs
   `maxHeartbeats`, restructure it.

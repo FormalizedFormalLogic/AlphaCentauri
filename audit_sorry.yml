@@ -10,3 +10,19 @@
 #       - AlphaCentauri.someLemma      # only the debt reached through `someLemma`
 
 version: v0
+
+LO.FirstOrder.provablyTotal_of_primrec':
+  forgive:
+    - sorryAx
+
+LO.FirstOrder.primrec'_of_provablyTotal:
+  forgive:
+    - sorryAx
+
+LO.FirstOrder.parsons:
+  forgive:
+    - sorryAx
+
+LO.FirstOrder.parsons_primrec:
+  forgive:
+    - sorryAx

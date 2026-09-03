@@ -376,3 +376,11 @@ LO.FirstOrder.Arithmetic.tarski.zero:
   forgive: [sorryAx]
 LO.FirstOrder.Arithmetic.tarski_finite:
   forgive: [sorryAx]
+
+LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
+  forgive:
+    - sorryAx
+
+LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
+  forgive:
+    - sorryAx

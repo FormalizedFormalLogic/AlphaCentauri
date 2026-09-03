@@ -59,6 +59,7 @@ agents is [`AGENTS.md`](AGENTS.md); the code follows Foundation's contribution g
 | `docs/` | Humans | The GitHub-based process (`workflow.md`, normative); Foundation's contribution guidelines (`index.md`, `style.md`, `refactoring.md`, vendored) and what this repository adds (`conventions.md`); the roadmap once published. |
 | `AGENTS.md`, `CLAUDE.md` | Humans | The contract for AI agents. |
 | `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml` | Humans | Infrastructure (CI and the local pre-push hooks). |
+| `references.yml` | Shared | The bibliography for docstring citations, in Hayagriva YAML. |
 | `lake-manifest.json`, `lean-toolchain` | Shared | Pins; forward-only bumps are welcome as their own PR. |
 
 ## Building

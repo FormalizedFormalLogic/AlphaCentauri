@@ -39,14 +39,17 @@ rewrite, so it is written as if it were already there.
 - **Linters.** The library builds with Foundation's linter set (`lakefile.toml`). Warnings are not
   errors, since a statement formalized with `sorry` must build; a warning is still fixed, not
   suppressed, and review treats one as a finding.
-- **Citations.** The citation keys are `HP98` and `Lin97` (see `README.md`), cited at the end
-  of the docstring in Foundation's form, one line per key:
+- **Citations.** The bibliography is [`references.yml`](../references.yml) at the repository
+  root, written in [Hayagriva](https://github.com/typst/hayagriva) YAML rather than
+  Foundation's BibTeX `references.bib`; there is no `bibtool` step, the file is edited by
+  hand and kept sorted by key. Its keys are the citation keys (`HP98`, `Lin97`, `AB05`, see
+  `README.md`), cited at the end of the docstring in Foundation's form, one line per key:
   ```
   - [HP98, Theorem I.2.4]
   - [Lin97, Lemma 5.2]
   ```
-  There is no `references.bib` here yet; when one is added it follows Foundation's
-  `bibtool` formatting.
+  A key used in a docstring must have an entry in `references.yml`; add the entry in the same
+  pull request.
 - **Reuse before restating.** Foundation's theories, notations, definability classes, and the
   hierarchy are the vocabulary. A definition that duplicates a Foundation definition under a
   new name is rejected in review. If Foundation's API is missing or awkward, open a

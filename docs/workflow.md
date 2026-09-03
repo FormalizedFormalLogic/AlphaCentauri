@@ -79,6 +79,10 @@ work is the branch rule below.
    `propext`, `Classical.choice`, `Quot.sound`;
 3. `AlphaCentauri.lean` imports every module (`just mk-all` leaves no diff).
 
+`.github/workflows/actionlint.yml` is separate and runs only when a workflow file itself changes:
+[actionlint](https://github.com/rhysd/actionlint) checks `.github/workflows/` for schema,
+expression, action-input, and shell errors.
+
 A red check is never worked around; it is fixed in the PR. The code itself follows Foundation's
 contribution guidelines, see [`conventions.md`](conventions.md).
 

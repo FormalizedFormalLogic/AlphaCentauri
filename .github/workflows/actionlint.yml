@@ -1,0 +1,41 @@
+name: Actionlint
+
+# Only workflow files are linted, so only changes to them need a run. `merge_group` is deliberately
+# absent: GitHub does not support `paths` filters on that event, and a lint that cannot be scoped
+# would run on every queue entry — this check gates the pull request, not the merge queue.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  # actionlint checks the workflow files themselves: YAML schema, `${{ }}` expressions, action
+  # inputs, runner labels, plus shellcheck over every `run:` block. No Lean toolchain and no
+  # dependency layer, so it stays a checkout plus one container and finishes in seconds.
+  actionlint:
+    name: Lint workflows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # actionlint publishes no GitHub Action of its own; upstream documents either a `curl | bash`
+      # download script or this official image. The image is the reproducible option, and pinning
+      # the exact tag keeps a new actionlint release from turning CI red without a commit here.
+      - name: Run actionlint
+        uses: docker://rhysd/actionlint:1.7.12
+        with:
+          args: -color

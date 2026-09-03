@@ -19,11 +19,11 @@ namespace LO.FirstOrder
 variable {T : ArithmeticTheory}
 
 /-- `T` is reflexive if, for every finite `l ⊆ T`, `T` proves the consistency of `l` (presented
-via `Theory.Δ₁.ofList`).
+via `Theory.Δ₁.ofList l.toList`).
 - [Lin97, Ch. 1 p. 18] -/
 def ArithmeticTheory.Reflexive (T : ArithmeticTheory) : Prop :=
-  ∀ l : List ArithmeticSentence, (∀ σ ∈ l, σ ∈ T) →
-    letI := Theory.Δ₁.ofList l
+  ∀ l : Finset ArithmeticSentence, (∀ σ ∈ l, σ ∈ T) →
+    letI : Theory.Δ₁ {σ | σ ∈ l} := (Theory.Δ₁.ofList l.toList).ofEq (by ext; simp)
     T ⊢ (Theory.consistent {σ | σ ∈ l}).val
 
 /-- `T` is essentially reflexive if every theory extending `T` is reflexive.

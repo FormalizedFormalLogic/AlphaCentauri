@@ -182,6 +182,28 @@ instance : construction.StrongFinite V where
 
 end IsDelta0F
 
+/-- Free-variable shift commutes with the bounded universal coding operation.
+- This is a routine coding fact; no separate source theorem. -/
+lemma shift_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
+    shift ℒₒᵣ (qqBall u q) = qqBall (termShift ℒₒᵣ u) (shift ℒₒᵣ q) := by
+  have hlt : IsUFormula ℒₒᵣ (Arithmetic.qqNLT (qqBvar 0) u) := by simp [Arithmetic.qqNLT, hu]
+  rw [show qqBall u q = ^∀ ((Arithmetic.qqNLT (qqBvar 0) u) ^⋎ q) from rfl,
+    show qqBall (termShift ℒₒᵣ u) (shift ℒₒᵣ q)
+      = ^∀ ((Arithmetic.qqNLT (qqBvar 0) (termShift ℒₒᵣ u)) ^⋎ shift ℒₒᵣ q) from rfl,
+    shift_all (by simp [hlt, hq]), shift_or hlt hq]
+  simp [Arithmetic.qqNLT, hu]
+
+/-- Free-variable shift commutes with the bounded existential coding operation.
+- This is a routine coding fact; no separate source theorem. -/
+lemma shift_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
+    shift ℒₒᵣ (qqBex u q) = qqBex (termShift ℒₒᵣ u) (shift ℒₒᵣ q) := by
+  have hlt : IsUFormula ℒₒᵣ (Arithmetic.qqLT (qqBvar 0) u) := by simp [Arithmetic.qqLT, hu]
+  rw [show qqBex u q = ^∃ ((Arithmetic.qqLT (qqBvar 0) u) ^⋏ q) from rfl,
+    show qqBex (termShift ℒₒᵣ u) (shift ℒₒᵣ q)
+      = ^∃ ((Arithmetic.qqLT (qqBvar 0) (termShift ℒₒᵣ u)) ^⋏ shift ℒₒᵣ q) from rfl,
+    shift_exs (by simp [hlt, hq]), shift_and hlt hq]
+  simp [Arithmetic.qqLT, hu]
+
 /-- `IsDelta0 p`: `p` codes a `Δ₀` formula (assuming `IsUFormula ℒₒᵣ p`): built from atoms by
 `^⋏`, `^⋎`, `qqBall`, `qqBex`. Mirrors `IsSigma1`, with its unbounded `^∃` clause replaced by
 the bounded `qqBex` clause.
@@ -347,6 +369,40 @@ lemma IsDelta0.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
         simpa [qqBex, Arithmetic.qqLT] using h
       rw [neg_qqBex ht.termBShift hq]
       exact IsDelta0.ball ht (ih hq)
+  exact H p h hp
+
+/-- `Δ₀` shape is preserved by the free-variable shift.
+- [HP98, Lemma I.1.68(2)] -/
+lemma IsDelta0.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
+    IsDelta0 (Bootstrapping.shift ℒₒᵣ p) := by
+  have H : ∀ p : V, IsDelta0 p → IsUFormula ℒₒᵣ p → IsDelta0 (Bootstrapping.shift ℒₒᵣ p) := by
+    apply IsDelta0.induction 𝚺
+      (P := fun p ↦ IsUFormula ℒₒᵣ p → IsDelta0 (Bootstrapping.shift ℒₒᵣ p))
+    · definability
+    · simp
+    · simp
+    · intro k r v h
+      obtain ⟨hr, hv⟩ := IsUFormula.rel.mp h
+      simp [hr, hv]
+    · intro k r v h
+      obtain ⟨hr, hv⟩ := IsUFormula.nrel.mp h
+      simp [hr, hv]
+    · intro p q _ _ ihp ihq h
+      obtain ⟨hp, hq⟩ := IsUFormula.and.mp h
+      simp [hp, hq, ihp hp, ihq hq]
+    · intro p q _ _ ihp ihq h
+      obtain ⟨hp, hq⟩ := IsUFormula.or.mp h
+      simp [hp, hq, ihp hp, ihq hq]
+    · intro t q ht _ ih h
+      obtain ⟨-, hq⟩ : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) ∧ IsUFormula ℒₒᵣ q := by
+        simpa [qqBall, Arithmetic.qqNLT] using h
+      rw [shift_qqBall ht.termBShift hq, ← termBShift_termShift ht.isSemiterm]
+      exact IsDelta0.ball ht.termShift (ih hq)
+    · intro t q ht _ ih h
+      obtain ⟨-, hq⟩ : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) ∧ IsUFormula ℒₒᵣ q := by
+        simpa [qqBex, Arithmetic.qqLT] using h
+      rw [shift_qqBex ht.termBShift hq, ← termBShift_termShift ht.isSemiterm]
+      exact IsDelta0.bex ht.termShift (ih hq)
   exact H p h hp
 
 /-- Every internally `Δ₀` formula is internally `Σ₁`.

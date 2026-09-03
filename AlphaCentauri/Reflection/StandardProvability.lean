@@ -60,22 +60,24 @@ variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 /-- `T` is strictly weaker than `T ∪ Rfn(T)` for consistent `T`: `Rfn(T)` proves `Con(T)`, which
 `T` itself cannot prove by Gödel's second incompleteness theorem.
 - [Lin97, §4.1, p. 52] -/
-instance [Consistent T] : T ⪱ T ∪ 𝗥𝗳𝗻 T := sorry
+@[instance] axiom strictlyWeakerThan_localReflection [Consistent T] : T ⪱ T ∪ 𝗥𝗳𝗻 T
 
 /-- `Rfn_{Π₁}(T)` and `Con(T)` are equivalent over `T`.
 - [Lin97, Exercise 4.1(b)(ii)]
 - [AB05, Lemma 22(i)] -/
-theorem localReflection_pi_one_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ T.Con := sorry
+axiom localReflection_pi_one_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ T.Con
 
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is sound in the standard model.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
-instance [ℕ↓[ℒₒᵣ] ⊧* T] : Entailment.Consistent (T ∪ 𝗥𝗳𝗻 T) := sorry
+@[instance] axiom consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
+    Entailment.Consistent (T ∪ 𝗥𝗳𝗻 T)
 
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is `Σ₁`-sound.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
-instance [T.SoundOnHierarchy 𝚺 1] : Entailment.Consistent (T ∪ 𝗥𝗳𝗻 T) := sorry
+@[instance] axiom consistent_localReflection_of_sigma_one_sound [T.SoundOnHierarchy 𝚺 1] :
+    Entailment.Consistent (T ∪ 𝗥𝗳𝗻 T)
 
 /-- The uniform reflection schema `RFN_Γ(T)` of an arithmetic theory `T`: for every
 one-free-variable formula `φ` satisfying `Γ`, the sentence `∀x (Pr_T(φ(ẋ)) → φ(x))`, where
@@ -102,8 +104,8 @@ abbrev _root_.LO.FirstOrder.Theory.uniformReflectionOnHierarchy
 
 /-- `RFN_{Σₙ}(T)` and `RFN_{Πₙ₊₁}(T)` are equivalent over `T`, for `n ≥ 1`.
 - [AB05, Lemma 22(ii)] -/
-theorem uniformReflectionOnHierarchy_sigma_equiv_pi_succ {n : ℕ} (hn : 1 ≤ n) :
-    T ∪ 𝗥𝗙𝗡[𝚺 n] T ≊ T ∪ 𝗥𝗙𝗡[𝚷 (n + 1)] T := sorry
+axiom uniformReflectionOnHierarchy_sigma_equiv_pi_succ {n : ℕ} (hn : 1 ≤ n) :
+    T ∪ 𝗥𝗙𝗡[𝚺 n] T ≊ T ∪ 𝗥𝗙𝗡[𝚷 (n + 1)] T
 
 /-- `T` bundled with a witness of its own `Δ₁`-definability, after `n` rounds of adjoining its own
 formalized consistency statement: the pair for `T₀ = T`, `Tₙ₊₁ = Tₙ ∪ Tₙ.Con`. Bundled with the
@@ -131,7 +133,7 @@ consistency statement of the `n`-times iterated-consistency extension of `T` is 
 `T`'s own provability predicate not proving `⊥` after `n + 1` applications.
 - [Lin97, Lemma 4.2]
 - [AB05, Lemma 21] -/
-theorem provable_iterCon_iff_not_iterate_standardProvability_bot (n : ℕ) :
-    𝗜𝚺₁ ⊢ (T.iterCon n).consistent.val 🡘 ∼(T.standardProvability^[n + 1] ⊥) := sorry
+axiom provable_iterCon_iff_not_iterate_standardProvability_bot (n : ℕ) :
+    𝗜𝚺₁ ⊢ (T.iterCon n).consistent.val 🡘 ∼(T.standardProvability^[n + 1] ⊥)
 
 end LO.FirstOrder.Arithmetic

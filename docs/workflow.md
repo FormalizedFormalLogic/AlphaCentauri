@@ -60,15 +60,21 @@ Every target is a theorem unless it carries the `definition only` label:
 A theorem is formalized in two stages, each landing as its own pull request:
 
 1. **Statement-formalized.** The statement is written in Foundation's vocabulary and compiles,
-   with `sorry` for the proof, forgiven by name in `audit_sorry.yml` (`forgive: [sorryAx]`, see
-   the gate below). It is reviewed **for faithfulness to the source** before any proof is
+   declared as an `axiom` rather than proved, and listed under its own name in `axiom_debt.yml`
+   (see the gate below). It is reviewed **for faithfulness to the source** before any proof is
    attempted, because a proof of the wrong statement is worthless. This stage is tracked by a
    sub-issue of the target issue, labelled `statement-formalized`, and its pull request carries
    the same label. Once CI is green and review approves, it merges into `main` like any other
-   pull request — the `sorry` is expected to land, forgiven under its own name.
+   pull request — the axiom is expected to land, forgiven under its own name.
 2. **Proof-formalized.** A follow-up pull request, branched from `main` after the statement has
-   landed, discharges the `sorry`s and removes the corresponding `audit_sorry.yml` entries. The
-   target issue itself carries `proof-formalized` and closes when this pull request merges.
+   landed, turns each `axiom` into a `theorem` with a proof and removes the corresponding
+   `axiom_debt.yml` entries. The target issue itself carries `proof-formalized` and closes when
+   this pull request merges.
+
+`sorry` is never used. A statement declared as an `axiom` carries its own name into the audit, so
+the report says exactly which unproved results a declaration leans on; every `sorry` in the
+library would instead collapse into one anonymous `sorryAx`. The rule is mechanical: `sorryAx` is
+forgiven nowhere, and CI checks that it appears neither in the sources nor in `axiom_debt.yml`.
 
 ### Sub-issues
 
@@ -109,9 +115,10 @@ work is the branch rule below.
 1. `lake build` of `AlphaCentauri` against the pinned Foundation;
 2. `lake exe audit` (`just axiom-audit`, the script in `Audit/Main.lean`): no `sorry`, no
    `native_decide`, no axiom outside `propext`, `Classical.choice`, `Quot.sound`, except what
-   `audit_sorry.yml` forgives, one declaration at a time (a statement formalized with `sorry`
-   is listed there with `forgive: [sorryAx]`, and every declaration built on it names it);
-3. `AlphaCentauri.lean` imports every module (`just mk-all` leaves no diff).
+   `axiom_debt.yml` forgives, one declaration at a time (a statement formalized as an `axiom` is
+   listed there forgiving its own name, and every declaration built on it names it);
+3. `just no-sorry`: no `sorry` in the sources and no `sorryAx` in `axiom_debt.yml`;
+4. `AlphaCentauri.lean` imports every module (`just mk-all` leaves no diff).
 
 The audit also writes its report to `.lake/audit.json` and `.lake/audit.md`; on a pull request
 CI posts the Markdown as one comment, overwritten on every run, unless the PR is labelled
@@ -158,8 +165,8 @@ PRs that touch only AI-owned paths is the intended end state.
 | `foundation` | Needs a change upstream in Foundation; a human takes it there. |
 | `keep` | Opt out of automatic stale-claim release and automatic closing. |
 | `definition only` | The target delivers a definition and the minor lemmas that come with it. |
-| `statement-formalized` | Stage: formalize the statement only (`sorry` allowed, forgiven in `audit_sorry.yml`), reviewed for faithfulness, merges once approved. |
-| `proof-formalized` | Stage: discharge the `sorry`s in a follow-up pull request; the issue closes when the proof is complete and CI is green. |
+| `statement-formalized` | Stage: formalize the statement only (declared as an `axiom`, forgiven by name in `axiom_debt.yml`), reviewed for faithfulness, merges once approved. |
+| `proof-formalized` | Stage: turn the `axiom`s into proved theorems in a follow-up pull request; the issue closes when the proof is complete and CI is green. |
 
 They are created on the GitHub repository by hand when it is set up; issue templates and a
 label script may follow later.

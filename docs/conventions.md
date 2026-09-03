@@ -50,6 +50,15 @@ rewrite, so it is written as if it were already there.
   ```
   A key used in a docstring must have an entry in `references.yml`; add the entry in the same
   pull request.
+- **No `sorry`; unproved statements are axioms.** Foundation's guidelines forbid `sorry` in
+  finished work. AlphaCentauri forbids it outright, including in the statement-only stage of
+  [`workflow.md`](workflow.md): a statement that is not proved yet is declared as an `axiom`
+  under the name its theorem will keep, and recorded in [`axiom_debt.yml`](../axiom_debt.yml)
+  forgiving that name. The reason is legibility of the audit — an `axiom` is reported under its
+  own name, so the report says which unproved results a declaration leans on, where every
+  `sorry` collapses into one anonymous `sorryAx`. Proving the statement turns the `axiom` into a
+  `theorem` and deletes its entry; a `sorry` that would sit inside a proof becomes its own named
+  axiom for the fact it stands for.
 - **Reuse before restating.** Foundation's theories, notations, definability classes, and the
   hierarchy are the vocabulary. A definition that duplicates a Foundation definition under a
   new name is rejected in review. If Foundation's API is missing or awkward, open a
@@ -62,6 +71,7 @@ rewrite, so it is written as if it were already there.
 
 ```bash
 lake build            # no errors; fix the warnings
-just axiom-audit      # no sorry, no axiom outside the allowlist, except what audit_sorry.yml forgives
+just axiom-audit      # no axiom outside the allowlist, except what axiom_debt.yml forgives
+just no-sorry         # no `sorry` in the sources, no `sorryAx` in axiom_debt.yml
 just mk-all           # AlphaCentauri.lean up to date
 ```

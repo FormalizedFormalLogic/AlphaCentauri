@@ -45,25 +45,25 @@ instance qqBex_definable (Γ m) : Γ-[m + 1]-Function₂ (qqBex : V → V → V)
 
 /-- Negation translates a bounded universal code to a bounded existential code.
 - This is a routine translation of bounded quantifier duality; no separate source theorem. -/
-lemma neg_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
-    neg ℒₒᵣ (qqBall u q) = qqBex u (neg ℒₒᵣ q) := sorry
+axiom neg_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
+    neg ℒₒᵣ (qqBall u q) = qqBex u (neg ℒₒᵣ q)
 /-- Negation translates a bounded existential code to a bounded universal code.
 - This is the converse routine translation; no separate source theorem. -/
-lemma neg_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
-    neg ℒₒᵣ (qqBex u q) = qqBall u (neg ℒₒᵣ q) := sorry
+axiom neg_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
+    neg ℒₒᵣ (qqBex u q) = qqBall u (neg ℒₒᵣ q)
 
 /-- `IsDelta0 p`: `p` codes a `Δ₀` formula (assuming `IsUFormula ℒₒᵣ p`): built from atoms by
 `^⋏`, `^⋎`, `qqBall`, `qqBex`. Mirrors `IsSigma1` without the `^∃` clause.
 - [HP98, Lemma I.1.68] -/
-def IsDelta0 (p : V) : Prop := sorry
+axiom IsDelta0 (p : V) : Prop
 
 /-- `𝚫₁` recognizer for `IsDelta0`.
 - [HP98, Lemma I.1.68(1)] -/
-noncomputable def isDelta0 : 𝚫₁.Semisentence 1 := sorry
+axiom isDelta0 : 𝚫₁.Semisentence 1
 
 /-- The recognizer defines the internal `Δ₀` shape predicate.
 - [HP98, Lemma I.1.68(1)] -/
-instance IsDelta0.defined : 𝚫₁-Predicate (IsDelta0 : V → Prop) via isDelta0 := sorry
+@[instance] axiom IsDelta0.defined : 𝚫₁-Predicate (IsDelta0 : V → Prop) via isDelta0
 
 /-- The internal `Δ₀` shape predicate is `𝚫₁`-definable.
 - [HP98, Lemma I.1.68(1)] -/
@@ -71,26 +71,26 @@ instance IsDelta0.definable : 𝚫₁-Predicate (IsDelta0 : V → Prop) := IsDel
 
 /-- Characterization of internal `Δ₀` formulas by their outermost coding constructor.
 - [HP98, Lemma I.1.68(2)] -/
-lemma IsDelta0.case_iff {p : V} :
+axiom IsDelta0.case_iff {p : V} :
     IsDelta0 p ↔
     (p = ^⊤) ∨ (p = ^⊥) ∨
     (∃ k r v, p = ^rel k r v) ∨ (∃ k r v, p = ^nrel k r v) ∨
     (∃ p₁ p₂, IsDelta0 p₁ ∧ IsDelta0 p₂ ∧ p = p₁ ^⋏ p₂) ∨
     (∃ p₁ p₂, IsDelta0 p₁ ∧ IsDelta0 p₂ ∧ p = p₁ ^⋎ p₂) ∨
     (∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsDelta0 q ∧ p = qqBall u q) ∨
-    (∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsDelta0 q ∧ p = qqBex u q) := sorry
+    (∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsDelta0 q ∧ p = qqBex u q)
 
 /--
 `Δ₀` shape is preserved by syntactic negation.
 - [HP98, Lemma I.1.68(2)(ii)] -/
-lemma IsDelta0.neg {p : V} (hp : IsUFormula ℒₒᵣ p) : IsDelta0 p → IsDelta0 (neg ℒₒᵣ p) := sorry
+axiom IsDelta0.neg {p : V} (hp : IsUFormula ℒₒᵣ p) : IsDelta0 p → IsDelta0 (neg ℒₒᵣ p)
 /-- Every internally `Δ₀` formula is internally `Σ₁`.
 - This is a routine bridge from `Δ₀` to `Σ₁`; no separate source theorem. -/
-lemma IsDelta0.isSigma1 {p : V} : IsDelta0 p → IsSigma1 p := sorry
+axiom IsDelta0.isSigma1 {p : V} : IsDelta0 p → IsSigma1 p
 
 /-- Agreement with the external class on quoted formulas.
 - [HP98, Lemma I.1.68] -/
-lemma isDelta0_quote_iff {k : ℕ} (ψ : ArithmeticSemisentence k) :
-    IsDelta0 (⌜ψ⌝ : V) ↔ Hierarchy 𝚺 0 ψ := sorry
+axiom isDelta0_quote_iff {k : ℕ} (ψ : ArithmeticSemisentence k) :
+    IsDelta0 (⌜ψ⌝ : V) ↔ Hierarchy 𝚺 0 ψ
 
 end LO.FirstOrder.Arithmetic.Bootstrapping

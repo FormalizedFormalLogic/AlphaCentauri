@@ -70,27 +70,26 @@ instance qqExss_definable' (Γ) : Γ-[m + 1]-Function₂ (qqExss : V → V → V
 
 /-- A formula code does not exceed the result of prefixing existential quantifiers.
 - [HP98, Lemma I.1.69] -/
-@[simp] lemma le_qqExss (p k : V) : p ≤ qqExss p k := sorry
+@[simp] axiom le_qqExss (p k : V) : p ≤ qqExss p k
 
 /-- The block length does not exceed the code of the prefixed formula.
 - [HP98, Lemma I.1.69] -/
-@[simp] lemma index_le_qqExss (p k : V) : k ≤ qqExss p k := sorry
+@[simp] axiom index_le_qqExss (p k : V) : k ≤ qqExss p k
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] in
 /-- Prefixing existential quantifiers preserves being a coded untyped formula.
 - [HP98, Lemma I.1.69] -/
-@[simp] lemma isUFormula_qqExss {p k : V} : IsUFormula L (qqExss p k) ↔ IsUFormula L p :=
-  sorry
+@[simp] axiom isUFormula_qqExss {p k : V} : IsUFormula L (qqExss p k) ↔ IsUFormula L p
 
 /-- Negation turns a coded existential block into a universal block.
 - [HP98, Lemma I.1.69] -/
-lemma neg_qqExss {p k : V} (hp : IsUFormula ℒₒᵣ p) :
-    neg ℒₒᵣ (qqExss p k) = qqAlls (neg ℒₒᵣ p) k := sorry
+axiom neg_qqExss {p k : V} (hp : IsUFormula ℒₒᵣ p) :
+    neg ℒₒᵣ (qqExss p k) = qqAlls (neg ℒₒᵣ p) k
 
 /-- Negation turns a coded universal block into an existential block.
 - [HP98, Lemma I.1.69] -/
-lemma neg_qqAlls {p k : V} (hp : IsUFormula ℒₒᵣ p) :
-    neg ℒₒᵣ (qqAlls p k) = qqExss (neg ℒₒᵣ p) k := sorry
+axiom neg_qqAlls {p k : V} (hp : IsUFormula ℒₒᵣ p) :
+    neg ℒₒᵣ (qqAlls p k) = qqExss (neg ℒₒᵣ p) k
 
 end qqExss
 
@@ -152,17 +151,16 @@ instance vecAppend_definable' (Γ m) : Γ-[m + 1]-Function₂ (vecAppend : V →
 
 /-- The length of an appended vector is the sum of the component lengths.
 - No source; this is a routine coding fact. -/
-@[simp] lemma len_vecAppend (v w : V) : len (vecAppend v w) = len v + len w := sorry
+@[simp] axiom len_vecAppend (v w : V) : len (vecAppend v w) = len v + len w
 
 /-- An index below the first length reads from the first appended vector.
 - No source; this is a routine coding fact. -/
-lemma nth_vecAppend_of_lt {v w i : V} (hi : i < len v) : (vecAppend v w).[i] = v.[i] :=
-  sorry
+axiom nth_vecAppend_of_lt {v w i : V} (hi : i < len v) : (vecAppend v w).[i] = v.[i]
 
 /-- An index beyond the first length reads from the second appended vector.
 - No source; this is a routine coding fact. -/
-lemma nth_vecAppend_of_le {v w i : V} (hi : len v ≤ i) :
-    (vecAppend v w).[i] = w.[i - len v] := sorry
+axiom nth_vecAppend_of_le {v w i : V} (hi : len v ≤ i) :
+    (vecAppend v w).[i] = w.[i - len v]
 
 end vecAppend
 
@@ -184,21 +182,21 @@ end
 
 /-- A `𝚫₁` recognizer for internally coded strict prenex `Σₙ` formulas.
 - [HP98, Lemma I.1.69(1)] -/
-noncomputable def isStrictSigma (n : ℕ) : 𝚫₁.Semisentence 1 := sorry
+axiom isStrictSigma (n : ℕ) : 𝚫₁.Semisentence 1
 
 /-- A `𝚫₁` recognizer for internally coded strict prenex `Πₙ` formulas.
 - [HP98, Lemma I.1.69(1)] -/
-noncomputable def isStrictPi (n : ℕ) : 𝚫₁.Semisentence 1 := sorry
+axiom isStrictPi (n : ℕ) : 𝚫₁.Semisentence 1
 
 /-- The strict prenex `Σₙ` recognizer defines `IsStrictSigma n`.
 - [HP98, Lemma I.1.69(1)] -/
-instance IsStrictSigma.defined (n : ℕ) :
-    𝚫₁-Predicate (IsStrictSigma n : V → Prop) via isStrictSigma n := sorry
+@[instance] axiom IsStrictSigma.defined (n : ℕ) :
+    𝚫₁-Predicate (IsStrictSigma n : V → Prop) via isStrictSigma n
 
 /-- The strict prenex `Πₙ` recognizer defines `IsStrictPi n`.
 - [HP98, Lemma I.1.69(1)] -/
-instance IsStrictPi.defined (n : ℕ) :
-    𝚫₁-Predicate (IsStrictPi n : V → Prop) via isStrictPi n := sorry
+@[instance] axiom IsStrictPi.defined (n : ℕ) :
+    𝚫₁-Predicate (IsStrictPi n : V → Prop) via isStrictPi n
 
 /-- Internal strict prenex `Σₙ` membership is `𝚫₁`-definable.
 - [HP98, Lemma I.1.69(1)] -/
@@ -222,52 +220,52 @@ lemma IsStrictPi.of_sigma {n : ℕ} {p : V} (h : IsStrictSigma n p) : IsStrictPi
 
 /-- A strict `Σₙ₊₁` class is closed under existential quantification.
 - [HP98, Lemma I.1.69] -/
-lemma IsStrictSigma.exs {n : ℕ} {p : V} (h : IsStrictSigma (n + 1) p) :
-    IsStrictSigma (n + 1) (^∃ p) := sorry
+axiom IsStrictSigma.exs {n : ℕ} {p : V} (h : IsStrictSigma (n + 1) p) :
+    IsStrictSigma (n + 1) (^∃ p)
 
 /-- A strict `Πₙ₊₁` class is closed under universal quantification.
 - [HP98, Lemma I.1.69] -/
-lemma IsStrictPi.all {n : ℕ} {p : V} (h : IsStrictPi (n + 1) p) :
-    IsStrictPi (n + 1) (^∀ p) := sorry
+axiom IsStrictPi.all {n : ℕ} {p : V} (h : IsStrictPi (n + 1) p) :
+    IsStrictPi (n + 1) (^∀ p)
 
 /-- Removing a leading existential preserves a strict positive-level `Σ` class.
 - [HP98, Lemma I.1.69] -/
-lemma IsStrictSigma.of_exs {n : ℕ} {p : V} (h : IsStrictSigma (n + 1) (^∃ p)) :
-    IsStrictSigma (n + 1) p := sorry
+axiom IsStrictSigma.of_exs {n : ℕ} {p : V} (h : IsStrictSigma (n + 1) (^∃ p)) :
+    IsStrictSigma (n + 1) p
 
 /-- Removing a leading universal preserves a strict positive-level `Π` class.
 - [HP98, Lemma I.1.69] -/
-lemma IsStrictPi.of_all {n : ℕ} {p : V} (h : IsStrictPi (n + 1) (^∀ p)) :
-    IsStrictPi (n + 1) p := sorry
+axiom IsStrictPi.of_all {n : ℕ} {p : V} (h : IsStrictPi (n + 1) (^∀ p)) :
+    IsStrictPi (n + 1) p
 
 /-- Internal strict `Σ` classes are monotone in the hierarchy level.
 - [HP98, Lemma I.1.69] -/
-lemma IsStrictSigma.mono {m n : ℕ} (h : m ≤ n) {p : V} :
-    IsStrictSigma m p → IsStrictSigma n p := sorry
+axiom IsStrictSigma.mono {m n : ℕ} (h : m ≤ n) {p : V} :
+    IsStrictSigma m p → IsStrictSigma n p
 
 /-- Internal strict `Π` classes are monotone in the hierarchy level.
 - [HP98, Lemma I.1.69] -/
-lemma IsStrictPi.mono {m n : ℕ} (h : m ≤ n) {p : V} :
-    IsStrictPi m p → IsStrictPi n p := sorry
+axiom IsStrictPi.mono {m n : ℕ} (h : m ≤ n) {p : V} :
+    IsStrictPi m p → IsStrictPi n p
 
 /-- Negation sends internally coded strict `Σₙ` formulas to strict `Πₙ` formulas.
 - [HP98, Lemma I.1.69] -/
-lemma IsStrictSigma.neg {n : ℕ} {p : V} (hp : IsUFormula ℒₒᵣ p) :
-    IsStrictSigma n p → IsStrictPi n (neg ℒₒᵣ p) := sorry
+axiom IsStrictSigma.neg {n : ℕ} {p : V} (hp : IsUFormula ℒₒᵣ p) :
+    IsStrictSigma n p → IsStrictPi n (neg ℒₒᵣ p)
 
 /-- Negation sends internally coded strict `Πₙ` formulas to strict `Σₙ` formulas.
 - [HP98, Lemma I.1.69] -/
-lemma IsStrictPi.neg {n : ℕ} {p : V} (hp : IsUFormula ℒₒᵣ p) :
-    IsStrictPi n p → IsStrictSigma n (neg ℒₒᵣ p) := sorry
+axiom IsStrictPi.neg {n : ℕ} {p : V} (hp : IsUFormula ℒₒᵣ p) :
+    IsStrictPi n p → IsStrictSigma n (neg ℒₒᵣ p)
 
 /-- Internal strict `Σₙ` recognition agrees with the external class on quoted formulas.
 - [HP98, Lemma I.1.69] -/
-lemma isStrictSigma_quote_iff {n k : ℕ} (ψ : ArithmeticSemisentence k) :
-    IsStrictSigma n (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚺 n ψ := sorry
+axiom isStrictSigma_quote_iff {n k : ℕ} (ψ : ArithmeticSemisentence k) :
+    IsStrictSigma n (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚺 n ψ
 
 /-- Internal strict `Πₙ` recognition agrees with the external class on quoted formulas.
 - [HP98, Lemma I.1.69] -/
-lemma isStrictPi_quote_iff {n k : ℕ} (ψ : ArithmeticSemisentence k) :
-    IsStrictPi n (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚷 n ψ := sorry
+axiom isStrictPi_quote_iff {n k : ℕ} (ψ : ArithmeticSemisentence k) :
+    IsStrictPi n (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚷 n ψ
 
 end LO.FirstOrder.Arithmetic.Bootstrapping

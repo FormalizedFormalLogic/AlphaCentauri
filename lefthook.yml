@@ -53,7 +53,7 @@ pre-push:
         lake build AlphaCentauri
 
     # CI's `Audit axioms` step: no `sorry`, no `native_decide`, no axiom outside the allowlist,
-    # except what `audit_sorry.yml` forgives. Writes `.lake/audit.md` with the same report CI
+    # except what `axiom_debt.yml` forgives. Writes `.lake/audit.md` with the same report CI
     # posts on the pull request.
     3_axiom-audit:
       run: |
@@ -61,10 +61,17 @@ pre-push:
         unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE GIT_PREFIX
         lake exe audit
 
+    # CI's `no-sorry` job: no `sorry` in the sources, and no `sorryAx` forgiven in
+    # `axiom_debt.yml`. An unproved statement is an `axiom` under its own name instead.
+    4_no-sorry:
+      run: |
+        set -e
+        just no-sorry
+
     # CI's `actionlint` job, which only ever fires on `.github/workflows/**`. Optional: the
     # workflow files are human-owned and most pushes do not touch them, so a missing binary is
     # not a reason to block a push — CI still runs it.
-    4_actionlint:
+    5_actionlint:
       run: |
         set -e
         if ! command -v actionlint >/dev/null 2>&1; then

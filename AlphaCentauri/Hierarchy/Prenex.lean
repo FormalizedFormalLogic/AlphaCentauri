@@ -67,8 +67,8 @@ lemma rew {Γ s n₁ n₂} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁}
 /-- Strict hierarchy classes are monotone in their level.
 
 - [HP98, 0.30] -/
-lemma mono {Γ s s' n} {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (hs : s ≤ s') :
-    StrictHierarchy Γ s' φ := sorry
+axiom mono {Γ s s' n} {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (hs : s ≤ s') :
+    StrictHierarchy Γ s' φ
 
 end StrictHierarchy
 

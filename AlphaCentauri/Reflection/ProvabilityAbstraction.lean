@@ -60,7 +60,7 @@ variable [L.DecidableEq]
 /-- `T ∪ Rfn_Γ(𝔅) ⊢ Con(𝔅)` whenever `⊥` is among the reflected sentences.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
-theorem con_of_localReflection (h : Γ ⊥) : T ∪ 𝔅.localReflectionOn Γ ⊢ 𝔅.con := sorry
+axiom con_of_localReflection (h : Γ ⊥) : T ∪ 𝔅.localReflectionOn Γ ⊢ 𝔅.con
 
 variable {σ : Sentence L}
 
@@ -69,8 +69,8 @@ for `∼σ`. The hypotheses are the abstract derivability conditions `HBL2` and
 `FormalizedCompleteOn`, so the statement is not tied to the standard provability predicate.
 - [Lin97, Exercise 4.1(b)(ii)]
 - [AB05, Lemma 22(i)] -/
-theorem localReflection_of_con [𝔅.HBL2] [𝔅.FormalizedCompleteOn (∼σ)] :
-    T₀ ⊢ 𝔅.con 🡒 (𝔅 σ 🡒 σ) := sorry
+axiom localReflection_of_con [𝔅.HBL2] [𝔅.FormalizedCompleteOn (∼σ)] :
+    T₀ ⊢ 𝔅.con 🡒 (𝔅 σ 🡒 σ)
 
 variable {π : Sentence L}
 
@@ -80,7 +80,7 @@ consistent extension of `T` by finitely many sentences proves even one reflectio
 its own negation.
 - [AB05, Theorem 23, finite case]
 - [Lin97, Theorem 4.1] -/
-theorem inconsistent_of_localReflection_provable
-    (h : insert π T ⊢ 𝔅 (∼π) 🡒 ∼π) : Entailment.Inconsistent (insert π T) := sorry
+axiom inconsistent_of_localReflection_provable
+    (h : insert π T ⊢ 𝔅 (∼π) 🡒 ∼π) : Entailment.Inconsistent (insert π T)
 
 end LO.FirstOrder.ProvabilityAbstraction.Provability

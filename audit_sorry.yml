@@ -386,6 +386,5 @@ LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
     - sorryAx
 
 LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
->>>>>>> origin/main
   forgive:
     - sorryAx

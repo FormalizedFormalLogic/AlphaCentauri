@@ -45,14 +45,6 @@ lemma IsDelta0.of_qqBex {u p : V} (h : IsDelta0 (qqBex u p)) : IsDelta0 p := by
   obtain ⟨-, rfl⟩ := (qqAnd_inj _ _ _ _).mp heq
   exact hq'
 
-/-- A `Δ₀` code beginning with the bounded universal constructor has a `Δ₀` body.
-- [HP98, Lemma I.1.68(2)] -/
-lemma IsDelta0.of_qqBall {u p : V} (h : IsDelta0 (qqBall u p)) : IsDelta0 p := by
-  obtain ⟨u', q', -, hq', heq⟩ :=
-    IsDelta0.of_all (p := (Arithmetic.qqNLT (qqBvar 0) u) ^⋎ p) h
-  obtain ⟨-, rfl⟩ := (qqOr_inj _ _ _ _).mp heq
-  exact hq'
-
 /-- The code of `ℒₒᵣ`'s equality symbol is the numeral `0`.
 - No source; a quoted restatement of `coe_eqIndex_eq`. -/
 lemma coe_quote_eq : (⌜(Language.Eq.eq : (ℒₒᵣ).Rel 2)⌝ : V) = 0 := coe_eqIndex_eq
@@ -82,6 +74,147 @@ lemma nrel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^nrel k r v)) :
     obtain ⟨a, b, ha, hb, rfl⟩ := IsUTermVec.two_iff.mp hv
   · exact Or.inl ⟨a, b, ha, hb, by rw [Arithmetic.qqNEQ, coe_quote_eq, coe_eqIndex_eq]⟩
   · exact Or.inr ⟨a, b, ha, hb, by rw [Arithmetic.qqNLT, coe_quote_lt, coe_ltIndex_eq]⟩
+
+/-! ## Substitution and the coded quantifiers -/
+
+/-- A code whose bound shift is a semiterm one level up is itself a semiterm: the converse of
+`IsSemiterm.termBShift`.
+- No source; a routine coding fact. -/
+lemma isSemiterm_of_termBShift {n t : V} (ht : IsUTerm ℒₒᵣ t)
+    (h : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t)) : IsSemiterm ℒₒᵣ n t :=
+  (IsSemiterm.def (L := ℒₒᵣ)).mpr
+    ⟨ht, (termBV_termBShift_le (L := ℒₒᵣ) ht n).mp ((IsSemiterm.def (L := ℒₒᵣ)).mp h).2⟩
+
+/-- Inversion of the semiformula condition at a bounded universal code.
+- No source; a routine coding fact. -/
+lemma isSemiformula_qqBall {n t p : V} (ht : IsUTerm ℒₒᵣ t)
+    (h : IsSemiformula ℒₒᵣ n (qqBall (termBShift ℒₒᵣ t) p)) :
+    IsSemiterm ℒₒᵣ n t ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
+  have h' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
+    simpa [qqBall, Arithmetic.qqNLT] using h
+  exact ⟨isSemiterm_of_termBShift ht h'.1, h'.2⟩
+
+/-- Inversion of the semiformula condition at a bounded existential code.
+- No source; a routine coding fact. -/
+lemma isSemiformula_qqBex {n t p : V} (ht : IsUTerm ℒₒᵣ t)
+    (h : IsSemiformula ℒₒᵣ n (qqBex (termBShift ℒₒᵣ t) p)) :
+    IsSemiterm ℒₒᵣ n t ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
+  have h' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
+    simpa [qqBex, Arithmetic.qqLT] using h
+  exact ⟨isSemiterm_of_termBShift ht h'.1, h'.2⟩
+
+/-- Substitution distributes over the coded equality atom.
+- [HP98, 1.64(4)] -/
+lemma substs_qqEQ {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
+    Bootstrapping.subst ℒₒᵣ w (t ^= u)
+      = (termSubst ℒₒᵣ w t) ^= (termSubst ℒₒᵣ w u) := by
+  simp [Arithmetic.qqEQ, ht, hu]
+
+/-- Substitution distributes over the coded inequality atom.
+- [HP98, 1.64(4)] -/
+lemma substs_qqNEQ {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
+    Bootstrapping.subst ℒₒᵣ w (t ^≠ u)
+      = (termSubst ℒₒᵣ w t) ^≠ (termSubst ℒₒᵣ w u) := by
+  simp [Arithmetic.qqNEQ, ht, hu]
+
+/-- Substitution distributes over the coded less-than atom.
+- [HP98, 1.64(4)] -/
+lemma substs_qqLT {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
+    Bootstrapping.subst ℒₒᵣ w (t ^< u)
+      = (termSubst ℒₒᵣ w t) ^< (termSubst ℒₒᵣ w u) := by
+  simp [Arithmetic.qqLT, ht, hu]
+
+/-- Substitution distributes over the coded not-less-than atom.
+- [HP98, 1.64(4)] -/
+lemma substs_qqNLT {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
+    Bootstrapping.subst ℒₒᵣ w (t ^≮ u)
+      = (termSubst ℒₒᵣ w t) ^≮ (termSubst ℒₒᵣ w u) := by
+  simp [Arithmetic.qqNLT, ht, hu]
+
+/-- Substitution commutes with the bounded universal coding operation: the untyped form of
+Foundation's `substs_ball`.
+- [HP98, 1.64(4)] -/
+lemma substs_qqBall {n m w t p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t)
+    (hp : IsUFormula ℒₒᵣ p) :
+    Bootstrapping.subst ℒₒᵣ w (qqBall (termBShift ℒₒᵣ t) p)
+      = qqBall (termBShift ℒₒᵣ (termSubst ℒₒᵣ w t)) (Bootstrapping.subst ℒₒᵣ (qVec ℒₒᵣ w) p) := by
+  have hbt : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) := ht.isUTerm.termBShift
+  have hlt : IsUFormula ℒₒᵣ ((qqBvar 0 : V) ^≮ termBShift ℒₒᵣ t) := by
+    simp [Arithmetic.qqNLT, hbt]
+  rw [show qqBall (termBShift ℒₒᵣ t) p = ^∀ (((qqBvar 0 : V) ^≮ termBShift ℒₒᵣ t) ^⋎ p) from rfl,
+    substs_all (by simp [hlt, hp]), substs_or hlt hp, substs_qqNLT (by simp) hbt,
+    substs_qVec_bShift ht hw]
+  simp [qVec, qqBall]
+
+/-- Substitution commutes with the bounded existential coding operation.
+- [HP98, 1.64(4)] -/
+lemma substs_qqBex {n m w t p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t)
+    (hp : IsUFormula ℒₒᵣ p) :
+    Bootstrapping.subst ℒₒᵣ w (qqBex (termBShift ℒₒᵣ t) p)
+      = qqBex (termBShift ℒₒᵣ (termSubst ℒₒᵣ w t)) (Bootstrapping.subst ℒₒᵣ (qVec ℒₒᵣ w) p) := by
+  have hbt : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) := ht.isUTerm.termBShift
+  have hlt : IsUFormula ℒₒᵣ ((qqBvar 0 : V) ^< termBShift ℒₒᵣ t) := by
+    simp [Arithmetic.qqLT, hbt]
+  rw [show qqBex (termBShift ℒₒᵣ t) p = ^∃ (((qqBvar 0 : V) ^< termBShift ℒₒᵣ t) ^⋏ p) from rfl,
+    substs_ex (by simp [hlt, hp]), substs_and hlt hp, substs_qqLT (by simp) hbt,
+    substs_qVec_bShift ht hw]
+  simp [qVec, qqBex]
+
+/-- Evaluating the vector that enters a quantifier extends the evaluated substitution.
+- [HP98, 1.64(5)] -/
+lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
+    termValVec (x ∷ e) (n + 1) (qVec ℒₒᵣ w) = x ∷ termValVec e n w := by
+  have hq : IsUTermVec ℒₒᵣ (n + 1) (qVec ℒₒᵣ w) := hw.qVec.isUTerm
+  apply nth_ext' (n + 1) (by simp [hq]) (by simp [len_termValVec hw.isUTerm])
+  intro i hi
+  rw [nth_termValVec hq hi]
+  rcases zero_or_succ i with rfl | ⟨j, rfl⟩
+  · simp [qVec]
+  · have hj : j < n := by simpa using hi
+    have hnth : (qVec ℒₒᵣ w).[j + 1] = termBShift ℒₒᵣ w.[j] := by
+      rw [qVec, hw.lh]
+      simp [nth_termBShiftVec hw.isUTerm hj]
+    rw [hnth, termVal_termBShift (hw.isUTerm.nth hj) x e]
+    simp [nth_termValVec hw.isUTerm hj]
+
+/-- `Δ₀` shape is preserved by substitution.
+- [HP98, Lemma I.1.68(2)] -/
+lemma IsDelta0.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+    (hp : IsSemiformula ℒₒᵣ n p) (h : IsDelta0 p) :
+    IsDelta0 (Bootstrapping.subst ℒₒᵣ w p) := by
+  have H : ∀ p : V, IsDelta0 p → ∀ n m w, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
+      IsDelta0 (Bootstrapping.subst ℒₒᵣ w p) := by
+    apply IsDelta0.induction 𝚷
+      (P := fun p ↦ ∀ n m w, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
+        IsDelta0 (Bootstrapping.subst ℒₒᵣ w p))
+    · definability
+    · intro n m w _ _; simp
+    · intro n m w _ _; simp
+    · intro k r v n m w _ hp
+      obtain ⟨hr, hv⟩ := IsUFormula.rel.mp hp.isUFormula
+      simp [hr, hv]
+    · intro k r v n m w _ hp
+      obtain ⟨hr, hv⟩ := IsUFormula.nrel.mp hp.isUFormula
+      simp [hr, hv]
+    · intro p q _ _ ihp ihq n m w hw hpq
+      obtain ⟨hp, hq⟩ := IsSemiformula.and.mp hpq
+      rw [substs_and hp.isUFormula hq.isUFormula]
+      exact IsDelta0.and_iff.mpr ⟨ihp n m w hw hp, ihq n m w hw hq⟩
+    · intro p q _ _ ihp ihq n m w hw hpq
+      obtain ⟨hp, hq⟩ := IsSemiformula.or.mp hpq
+      rw [substs_or hp.isUFormula hq.isUFormula]
+      exact IsDelta0.or_iff.mpr ⟨ihp n m w hw hp, ihq n m w hw hq⟩
+    · intro t q ht _ ih n m w hw hpq
+      obtain ⟨ht', hq⟩ := isSemiformula_qqBall ht hpq
+      rw [substs_qqBall hw ht' hq.isUFormula]
+      exact IsDelta0.ball (hw.termSubst ht').isUTerm
+        (ih (n + 1) (m + 1) (qVec ℒₒᵣ w) hw.qVec hq)
+    · intro t q ht _ ih n m w hw hpq
+      obtain ⟨ht', hq⟩ := isSemiformula_qqBex ht hpq
+      rw [substs_qqBex hw ht' hq.isUFormula]
+      exact IsDelta0.bex (hw.termSubst ht').isUTerm
+        (ih (n + 1) (m + 1) (qVec ℒₒᵣ w) hw.qVec hq)
+  exact H p h n m w hw hp
 
 /-- `SatZero z e` says that the internally coded `Δ₀` formula `z` is satisfied by `e`. The
 well-formedness of `z` is part of the definition, as in the source, where satisfaction is
@@ -254,7 +387,9 @@ lemma nlt_iff {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) 
     exact (iff_val hd hf hr).mpr ((hr.val_and hr.mem_dom_root).mpr
       ⟨(iff_mem hr hn₁ hdp hfp).mp h₁, (iff_mem hr hn₂ hdq hfq).mp h₂⟩)
 
-/-- Satisfaction commutes with coded disjunction.
+/-- Satisfaction commutes with coded disjunction. Unlike conjunction, the disjuncts have to be
+assumed well-formed: one satisfied disjunct says nothing about the shape of the other, while
+satisfaction of the disjunction carries the well-formedness of both.
 - [HP98, Theorem I.1.70(ii)] -/
 @[simp] lemma or_iff {p q e : V} (hdp : IsDelta0 p) (hfp : IsUFormula ℒₒᵣ p)
     (hdq : IsDelta0 q) (hfq : IsUFormula ℒₒᵣ q) :
@@ -360,6 +495,75 @@ lemma neg_iff {p e : V} (hp : IsDelta0 p) (hp' : IsUFormula ℒₒᵣ p) :
       · intro hn x hx
         exact (ih hfq (x ∷ e)).mpr fun hc ↦ hn ⟨x, hx, hc⟩
   exact H p hp hp' e
+
+/-- Satisfaction commutes with substitution of a coded vector of terms.
+- [HP98, 1.64(4)]
+- [HP98, Theorem I.1.70] -/
+lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+    (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsDelta0 p) :
+    SatZero (Bootstrapping.subst ℒₒᵣ w p) e ↔ SatZero p (termValVec e n w) := by
+  have H : ∀ p : V, IsDelta0 p → ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
+      (SatZero (Bootstrapping.subst ℒₒᵣ w p) e ↔ SatZero p (termValVec e n w)) := by
+    apply IsDelta0.induction 𝚷
+      (P := fun p ↦ ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
+        (SatZero (Bootstrapping.subst ℒₒᵣ w p) e ↔ SatZero p (termValVec e n w)))
+    · definability
+    · intro n m w e _ _; simp
+    · intro n m w e _ _; simp
+    · intro k r v n m w e hw hp
+      rcases rel_cases hp.isUFormula with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩
+      · rw [heq] at hp ⊢
+        obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+          simpa [Arithmetic.qqEQ] using hp
+        rw [substs_qqEQ ht hu,
+          eq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, eq_iff ht hu,
+          termVal_termSubst hw hts, termVal_termSubst hw hus]
+      · rw [heq] at hp ⊢
+        obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+          simpa [Arithmetic.qqLT] using hp
+        rw [substs_qqLT ht hu,
+          lt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, lt_iff ht hu,
+          termVal_termSubst hw hts, termVal_termSubst hw hus]
+    · intro k r v n m w e hw hp
+      rcases nrel_cases hp.isUFormula with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩
+      · rw [heq] at hp ⊢
+        obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+          simpa [Arithmetic.qqNEQ] using hp
+        rw [substs_qqNEQ ht hu,
+          neq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, neq_iff ht hu,
+          termVal_termSubst hw hts, termVal_termSubst hw hus]
+      · rw [heq] at hp ⊢
+        obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+          simpa [Arithmetic.qqNLT] using hp
+        rw [substs_qqNLT ht hu,
+          nlt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, nlt_iff ht hu,
+          termVal_termSubst hw hts, termVal_termSubst hw hus]
+    · intro p q _ _ ihp ihq n m w e hw hpq
+      obtain ⟨hp, hq⟩ := IsSemiformula.and.mp hpq
+      rw [substs_and hp.isUFormula hq.isUFormula, and_iff, and_iff,
+        ihp n m w e hw hp, ihq n m w e hw hq]
+    · intro p q hdp hdq ihp ihq n m w e hw hpq
+      obtain ⟨hp, hq⟩ := IsSemiformula.or.mp hpq
+      rw [substs_or hp.isUFormula hq.isUFormula,
+        or_iff (IsDelta0.subst hw hp hdp) (hp.subst hw).isUFormula
+          (IsDelta0.subst hw hq hdq) (hq.subst hw).isUFormula,
+        or_iff hdp hp.isUFormula hdq hq.isUFormula,
+        ihp n m w e hw hp, ihq n m w e hw hq]
+    · intro t q ht hdq ih n m w e hw hpq
+      obtain ⟨hts, hq⟩ := isSemiformula_qqBall ht hpq
+      rw [substs_qqBall hw hts hq.isUFormula,
+        ball_iff (hw.termSubst hts).isUTerm (IsDelta0.subst hw.qVec hq hdq)
+          (hq.subst hw.qVec).isUFormula,
+        ball_iff ht hdq hq.isUFormula, termVal_termSubst hw hts]
+      refine forall_congr' fun x ↦ imp_congr_right fun _ ↦ ?_
+      rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
+    · intro t q ht hdq ih n m w e hw hpq
+      obtain ⟨hts, hq⟩ := isSemiformula_qqBex ht hpq
+      rw [substs_qqBex hw hts hq.isUFormula, bex_iff (hw.termSubst hts).isUTerm,
+        bex_iff ht, termVal_termSubst hw hts]
+      refine exists_congr fun x ↦ and_congr_right fun _ ↦ ?_
+      rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
+  exact H p hp' n m w e hw hp
 
 end SatZero
 

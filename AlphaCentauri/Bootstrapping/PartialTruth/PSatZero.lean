@@ -527,7 +527,8 @@ lemma agree (h₁ : PSatZero q₁ z₁ e₁) (h₂ : PSatZero q₂ z₂ e₂) :
     · rw [hB, hB₂]
       exact forall_congr' fun x ↦ imp_congr_right fun hx ↦ (key x hx).2
 
-/-- Two tables for the same root have the same domain.
+/-- Every node of a table is a node of any other table with the same root: the domain of a table
+is determined by its root.
 - [HP98, Lemma I.1.72(2)] -/
 lemma dom_subset (h₁ : PSatZero q₁ z e) (h₂ : PSatZero q₂ z e) :
     ∀ n ∈ domain q₁, n ∈ domain q₂ := by

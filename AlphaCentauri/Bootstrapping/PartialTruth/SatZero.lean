@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Delta0
 public import AlphaCentauri.Bootstrapping.TermVal
+public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZero
 
 /-!
 # Satisfaction for `Δ₀` formulas
@@ -15,13 +16,6 @@ It exposes the resulting `Δ₀` satisfaction predicate and its Tarski condition
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
-/-- `PSatZero q z e` says that `q` is a partial satisfaction table for the `Δ₀` formula
-`z` under assignment `e`. Its domain is the downward closure of `⟪z, e⟫` under immediate
-subformulas, extending the assignment when entering bounded quantifiers.
-
-- [HP98, Definition I.1.71(1)] -/
-axiom PSatZero (q z e : V) : Prop
 
 /-- The `𝚫₁` formula defining partial satisfaction tables.
 - [HP98, Lemma I.1.72(1)] -/

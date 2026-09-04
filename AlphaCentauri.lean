@@ -13,7 +13,9 @@ public import AlphaCentauri.Hierarchy.DeltaZero
 public import AlphaCentauri.Hierarchy.NormalForm
 public import AlphaCentauri.Hierarchy.Prenex
 public import AlphaCentauri.OmegaLogic.Basic
+public import AlphaCentauri.OmegaLogic.Consistency
 public import AlphaCentauri.OmegaLogic.Elimination
+public import AlphaCentauri.OmegaLogic.Embedding
 public import AlphaCentauri.OmegaLogic.Inversion
 public import AlphaCentauri.OmegaLogic.Reduction
 public import AlphaCentauri.ProvablyTotal.Basic
@@ -23,4 +25,5 @@ public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Vorspiel.Ordinal
 public import AlphaCentauri.Vorspiel.Primrec
+public import AlphaCentauri.Vorspiel.Rew
 public import AlphaCentauri.Vorspiel.Semiformula

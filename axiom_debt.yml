@@ -19,7 +19,7 @@
 
 version: v0
 
-# The unproved statements themselves (108).
+# The unproved statements themselves (109).
 LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.all:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.all
@@ -59,6 +59,9 @@ LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.defined:
 LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.restriction:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.restriction
 LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.uniq:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.uniq
@@ -345,7 +348,7 @@ LO.FirstOrder.provablyTotal_of_primrec':
   forgive:
     - LO.FirstOrder.provablyTotal_of_primrec'
 
-# Declarations that inherit the debt of an unproved statement (77).
+# Declarations that inherit the debt of an unproved statement (100).
 LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.definable:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.defined
@@ -354,11 +357,84 @@ LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.definable:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.defined
     - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.casesOn:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
 LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.definable:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero
     - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.defined
     - LO.FirstOrder.Arithmetic.Bootstrapping.pSatZero
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.isMapping:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.mem_dom_and:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.mem_dom_ball:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal_termBShift
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.mem_dom_bex:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal_termBShift
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.mem_dom_or:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.mem_dom_root:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.minimal:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.mk:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.mk._flat_ctor:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.rec:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.recOn:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.spec:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.val_and:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.val_ball:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal_termBShift
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.val_bex:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal_termBShift
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.val_eq:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.val_falsum:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.val_lt:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.val_neq:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.val_nlt:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.val_or:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
+LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.val_verum:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal
 LO.FirstOrder.Arithmetic.Bootstrapping.SatPi:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero

@@ -17,19 +17,6 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-- The `𝚫₁` formula defining partial satisfaction tables.
-- [HP98, Lemma I.1.72(1)] -/
-axiom pSatZero : 𝚫₁.Semisentence 3
-
-/-- The formula `pSatZero` defines partial satisfaction tables.
-- [HP98, Lemma I.1.72(1)] -/
-@[instance] axiom PSatZero.defined : 𝚫₁-Relation₃ (PSatZero : V → V → V → Prop) via pSatZero
-
-/-- Partial satisfaction tables form a `𝚫₁`-definable relation.
-- [HP98, Lemma I.1.72(1)] -/
-instance PSatZero.definable : 𝚫₁-Relation₃ (PSatZero : V → V → V → Prop) :=
-  PSatZero.defined.to_definable
-
 /-- Every well-formed internally `Δ₀` formula has a partial satisfaction table.
 - [HP98, Lemma I.1.72(3)] -/
 axiom PSatZero.exists {z e : V} (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) :

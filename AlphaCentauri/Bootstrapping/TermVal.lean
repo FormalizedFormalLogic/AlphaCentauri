@@ -43,6 +43,38 @@ lemma isFunc_LOR_iff {k f : V} :
     show (⌜(Language.Add.add : (ℒₒᵣ).Func 2)⌝ : V) = 0 from quote_addIndex_eq,
     show (⌜(Language.Mul.mul : (ℒₒᵣ).Func 2)⌝ : V) = 1 from quote_mulIndex_eq]
 
+/-- The pairing function dominates the sum of its two arguments.
+- No source; an elementary property of Foundation's `pair`. -/
+lemma add_le_pair (a b : V) : a + b ≤ ⟪a, b⟫ := by
+  have sq : ∀ c : V, c ≤ c * c := fun c ↦ by
+    rcases eq_zero_or_pos c with rfl | hc
+    · simp
+    · exact le_mul_of_one_le_left (by simp) (pos_iff_one_le.mp hc)
+  rcases lt_or_ge a b with h | h
+  · calc a + b
+        ≤ a + b * b := add_le_add le_rfl (sq b)
+      _ = ⟪a, b⟫ := by simp [pair, h, add_comm]
+  · calc a + b
+        ≤ a * a + a + b := add_le_add (le_trans (sq a) le_self_add) le_rfl
+      _ = ⟪a, b⟫ := by simp [pair, not_lt.mpr h]
+
+/-- A coded application of a binary function symbol dominates the sum of its two arguments.
+- No source; an elementary property of Foundation's term coding. -/
+lemma add_lt_qqFunc (k f a b : V) : a + b < ^func k f ?[a, b] :=
+  calc a + b
+      < a + (b ∷ (0 : V)) := add_lt_add_of_le_of_lt le_rfl (lt_adjoin b 0)
+    _ ≤ ⟪a, b ∷ (0 : V)⟫ := add_le_pair _ _
+    _ < ?[a, b] := by simp [adjoin_def]
+    _ < ^func k f ?[a, b] := terms_lt_qqFunc _ _ _
+
+/-- Every entry of a coded vector is bounded by the maximum of the vector, out-of-range indices
+included (they read as `0`).
+- No source; the total form of Foundation's `nth_le_listMax`. -/
+lemma nth_le_listMax_total (v i : V) : v.[i] ≤ listMax v := by
+  rcases lt_or_ge i (len v) with h | h
+  · exact nth_le_listMax h
+  · simp [nth_lt_len h]
+
 namespace TermVal
 
 def blueprint : Language.TermRec.Blueprint 1 where
@@ -303,17 +335,84 @@ lemma termVal_quote {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) (v : Fin k → V)
       simp [Semiterm.valb]
       rfl
 
-/-- A bound on term evaluation, exponential in the term code and in the largest entry of the
-assignment. Foundation provides only base-`2` exponentiation (`Exp.exp`, `V`-valued exponent) and
-no general `V`-base, `V`-exponent power, so the literal `(listMax e + 2) ^ (t + 1)` bound suggested
-by the issue is restated here with a base-`2` exponential of comparable growth; it is `𝚫₁` (`Exp.exp`
-is `𝚺₀`-definable, `listMax`, `+`, `*` are `𝚫₁`), which is what bounding the domain of the
-satisfaction table (issue #49) actually needs. Left unproved after a serious attempt at the
-induction on `t`: it requires establishing exponential-arithmetic lemmas
-(`Exp.exp (a + b) = Exp.exp a * Exp.exp b`, monotonicity in both bounds) beyond what a term-evaluation
-file should also have to develop from scratch.
+/-- Term evaluation is bounded by a base-`2` exponential of the term code and of the largest
+entry of the assignment. The bound is `𝚫₁` in `e` and `t` (`Exp.exp` is `𝚺₀`-definable and
+`listMax`, `+`, `*` are `𝚫₁`) and monotone in both arguments, which is what bounding the domain
+of a satisfaction table needs. Foundation provides base-`2` exponentiation with a `V`-valued
+exponent but no general `V`-base power, so the source's `(listMax e + 2) ^ (t + 1)` is stated
+here as the base-`2` exponential `Exp.exp ((listMax e + 2) * (t + 1))`, which dominates it. No
+well-formedness hypothesis is needed: codes that are not terms evaluate to `0`.
 - [HP98, remark after 2.58] -/
-axiom termVal_le_poly (e t : V) : termVal e t ≤ Exp.exp ((listMax e + 2) * (t + 1))
+theorem termVal_le_poly (e t : V) : termVal e t ≤ Exp.exp ((listMax e + 2) * (t + 1)) := by
+  by_cases ht : IsUTerm ℒₒᵣ t
+  case neg => simp [termVal_not_uterm ht]
+  revert t
+  apply IsUTerm.induction (L := ℒₒᵣ) 𝚷
+    (P := fun t ↦ termVal e t ≤ Exp.exp ((listMax e + 2) * (t + 1))) ?_ ?_ ?_ ?_
+  · definability
+  · intro z
+    calc termVal e ^#z
+        = e.[z] := by simp
+      _ ≤ listMax e := nth_le_listMax_total e z
+      _ ≤ (listMax e + 2) * (^#z + 1) :=
+          le_trans (by simp) (le_mul_of_one_le_right (by simp) (by simp))
+      _ ≤ Exp.exp ((listMax e + 2) * (^#z + 1)) := le_of_lt (lt_exp _)
+  · intro x; simp
+  · intro k f v hkf hv ih
+    rcases isFunc_LOR_iff.mp hkf with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+    · have hv0 : v = 0 := len_zero_iff_eq_nil.mp hv.lh.symm
+      have hzero : (^func (0 : V) (0 : V) (0 : V)) = (𝟎 : V) := by
+        rw [Arithmetic.coe_zero_eq,
+          show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq]
+      rw [hv0, hzero]
+      simp
+    · have hv0 : v = 0 := len_zero_iff_eq_nil.mp hv.lh.symm
+      have hone : (^func (0 : V) (1 : V) (0 : V)) = (𝟏 : V) := by
+        rw [Arithmetic.coe_one_eq,
+          show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq]
+      rw [hv0, hone]
+      simp
+    · rcases IsUTermVec.two_iff.mp hv with ⟨a, b, ha, hb, rfl⟩
+      have heq : (a ^+ b : V) = ^func (2 : V) (0 : V) ?[a, b] := by
+        rw [Arithmetic.qqAdd, Arithmetic.coe_addIndex_eq]
+      have hab : a + b + 1 ≤ a ^+ b := succ_le_iff_lt.mpr (heq ▸ add_lt_qqFunc 2 0 a b)
+      have iha : termVal e a ≤ Exp.exp ((listMax e + 2) * (a + 1)) := by
+        simpa using ih 0 (by simp)
+      have ihb : termVal e b ≤ Exp.exp ((listMax e + 2) * (b + 1)) := by
+        simpa using ih 1 (by simp)
+      have hM : (1 : V) ≤ listMax e + 2 := le_trans (by simp) le_add_self
+      rw [← heq, termVal_add ha hb]
+      calc termVal e a + termVal e b
+          ≤ Exp.exp ((listMax e + 2) * (a + 1)) + Exp.exp ((listMax e + 2) * (b + 1)) :=
+            add_le_add iha ihb
+        _ ≤ Exp.exp ((listMax e + 2) * (a ^+ b)) + Exp.exp ((listMax e + 2) * (a ^+ b)) :=
+            add_le_add
+              (exp_monotone_le.mpr <|
+                mul_le_mul le_rfl (le_trans (by simp) hab) (by simp) (by simp))
+              (exp_monotone_le.mpr <|
+                mul_le_mul le_rfl (le_trans (by simp) hab) (by simp) (by simp))
+        _ = Exp.exp ((listMax e + 2) * (a ^+ b) + 1) := by rw [exp_succ, two_mul]
+        _ ≤ Exp.exp ((listMax e + 2) * (a ^+ b + 1)) := by
+            rw [exp_monotone_le, mul_add, mul_one]
+            exact add_le_add le_rfl hM
+    · rcases IsUTermVec.two_iff.mp hv with ⟨a, b, ha, hb, rfl⟩
+      have heq : (a ^* b : V) = ^func (2 : V) (1 : V) ?[a, b] := by
+        rw [Arithmetic.qqMul, Arithmetic.coe_mulIndex_eq]
+      have hab : a + b + 1 ≤ a ^* b := succ_le_iff_lt.mpr (heq ▸ add_lt_qqFunc 2 1 a b)
+      have iha : termVal e a ≤ Exp.exp ((listMax e + 2) * (a + 1)) := by
+        simpa using ih 0 (by simp)
+      have ihb : termVal e b ≤ Exp.exp ((listMax e + 2) * (b + 1)) := by
+        simpa using ih 1 (by simp)
+      have hab' : (a + 1) + (b + 1) ≤ a ^* b + 1 :=
+        le_trans (le_of_eq (by simp [add_assoc, add_comm, add_left_comm])) (add_le_add hab le_rfl)
+      rw [← heq, termVal_mul ha hb]
+      calc termVal e a * termVal e b
+          ≤ Exp.exp ((listMax e + 2) * (a + 1)) * Exp.exp ((listMax e + 2) * (b + 1)) :=
+            mul_le_mul iha ihb (by simp) (by simp)
+        _ = Exp.exp ((listMax e + 2) * (a + 1) + (listMax e + 2) * (b + 1)) := (exp_add _ _).symm
+        _ ≤ Exp.exp ((listMax e + 2) * (a ^* b + 1)) := by
+            rw [exp_monotone_le, ← mul_add]
+            exact mul_le_mul le_rfl hab' (by simp) (by simp)
 
 end termVal
 

@@ -19,7 +19,7 @@
 
 version: v0
 
-# The unproved statements themselves (89).
+# The unproved statements themselves (88).
 LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.all:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.all
@@ -194,9 +194,6 @@ LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec.defined:
 LO.FirstOrder.Arithmetic.Bootstrapping.satZero:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Bootstrapping.termVal_le_poly:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.termVal_le_poly
 LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence

@@ -53,7 +53,7 @@ pre-push:
         lake build AlphaCentauri
 
     # CI's `Audit axioms` step: no `sorry`, no `native_decide`, no axiom outside the allowlist,
-    # except what `axiom_debt.yml` forgives. Writes `.lake/audit.md` with the same report CI
+    # except what `forgive.yml` forgives. Writes `.lake/audit.md` with the same report CI
     # posts on the pull request.
     3_axiom-audit:
       run: |
@@ -62,7 +62,7 @@ pre-push:
         lake exe audit
 
     # CI's `no-sorry` job: no `sorry` in the sources, and no `sorryAx` forgiven in
-    # `axiom_debt.yml`. An unproved statement is an `axiom` under its own name instead.
+    # `forgive.yml`. An unproved statement is an `axiom` under its own name instead.
     4_no-sorry:
       run: |
         set -e

@@ -13,7 +13,7 @@ lake env lean --run Audit/Main.lean
 Builds the `AlphaCentauri` environment from its compiled `.olean`s and reports, for every
 declaration defined under `AlphaCentauri`, the axioms it transitively depends on. The run fails if
 any declaration depends on an axiom outside `propext`, `Classical.choice`, `Quot.sound`, unless the
-allowlist `axiom_debt.yml` forgives it (see `Forgiveness`). Because it works on the kernel
+allowlist `forgive.yml` forgives it (see `Forgiveness`). Because it works on the kernel
 environment rather than source text, it catches what a `grep` cannot: `sorry`/`admit` (`sorryAx`),
 `native_decide` (which adds an auxiliary axiom `…native_decide.ax_…` per use), and any home-rolled
 `axiom`, including ones reaching in through imports. `sorryAx` is forgiven nowhere, so a `sorry`
@@ -42,7 +42,7 @@ def root : Name := `AlphaCentauri
 def allowedAxioms : List Name := [``propext, ``Classical.choice, ``Quot.sound]
 
 /-- The allowlist, relative to the repository root. -/
-def forgiveFile : System.FilePath := "axiom_debt.yml"
+def forgiveFile : System.FilePath := "forgive.yml"
 
 /-- Where the reports go, relative to the repository root. -/
 def jsonFile : System.FilePath := ".lake" / "audit.json"
@@ -190,7 +190,7 @@ def parse (s : String) : Except String Value := do
 
 end Yaml
 
-/-! ## The allowlist `axiom_debt.yml`
+/-! ## The allowlist `forgive.yml`
 
 ```yaml
 version: v0

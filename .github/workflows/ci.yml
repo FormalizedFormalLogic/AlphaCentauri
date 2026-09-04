@@ -148,7 +148,7 @@ jobs:
         run: lake build AlphaCentauri
 
       # `just axiom-audit`: no `sorry`, no `native_decide`, no axiom outside the allowlist, except
-      # what `axiom_debt.yml` forgives declaration by declaration — an unproved statement forgives
+      # what `forgive.yml` forgives declaration by declaration — an unproved statement forgives
       # its own axiom name, so `sorryAx` is forgiven nowhere and a `sorry` fails here outright,
       # ahead of the `no-sorry` job. Reads the oleans just built and
       # writes `.lake/audit.json` and `.lake/audit.md`. A failure is deferred to the last step so
@@ -195,7 +195,7 @@ jobs:
   # `sorry` is banned outright: an unproved statement is an `axiom` under its own name, so the
   # audit reports the debt by name instead of collapsing it into one anonymous `sorryAx`. This
   # job is the mechanical guard — no `sorry` in the sources, and no `sorryAx` forgiven in
-  # `axiom_debt.yml` (checked with yq, which reads the values rather than the file's text, so a
+  # `forgive.yml` (checked with yq, which reads the values rather than the file's text, so a
   # comment naming `sorryAx` is not a false positive). It needs neither Lean nor a build.
   no-sorry:
     name: Check no sorry

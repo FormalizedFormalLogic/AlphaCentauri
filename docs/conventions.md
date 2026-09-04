@@ -53,7 +53,7 @@ rewrite, so it is written as if it were already there.
 - **No `sorry`; unproved statements are axioms.** Foundation's guidelines forbid `sorry` in
   finished work. AlphaCentauri forbids it outright, including in the statement-only stage of
   [`workflow.md`](workflow.md): a statement that is not proved yet is declared as an `axiom`
-  under the name its theorem will keep, and recorded in [`axiom_debt.yml`](../axiom_debt.yml)
+  under the name its theorem will keep, and recorded in [`forgive.yml`](../forgive.yml)
   forgiving that name. The reason is legibility of the audit — an `axiom` is reported under its
   own name, so the report says which unproved results a declaration leans on, where every
   `sorry` collapses into one anonymous `sorryAx`. Proving the statement turns the `axiom` into a
@@ -71,7 +71,7 @@ rewrite, so it is written as if it were already there.
 
 ```bash
 lake build            # no errors; fix the warnings
-just axiom-audit      # no axiom outside the allowlist, except what axiom_debt.yml forgives
-just no-sorry         # no `sorry` in the sources, no `sorryAx` in axiom_debt.yml
+just axiom-audit      # no axiom outside the allowlist, except what forgive.yml forgives
+just no-sorry         # no `sorry` in the sources, no `sorryAx` in forgive.yml
 just mk-all           # AlphaCentauri.lean up to date
 ```

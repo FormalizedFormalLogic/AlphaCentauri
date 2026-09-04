@@ -47,7 +47,7 @@ agents is [`AGENTS.md`](AGENTS.md); the code follows Foundation's contribution g
    `Closes #<issue>` in the body, a Foundation-style title, and disclosure of AI involvement.
 5. **CI is the gate.** `main` is always green: the library builds, has no `sorry`, no axioms
    outside the standard allowlist beyond the unproved statements recorded by name in
-   [`axiom_debt.yml`](axiom_debt.yml), and no warnings.
+   [`forgive.yml`](forgive.yml), and no warnings.
 6. **Review is a PR review.** Reviewers (AI agents against fixed rubrics, and humans) post
    `approve` / `request changes` on the PR. Addressing findings means pushing to the same PR.
 7. **Merge is a squash merge** into `main`, performed by a human while the project bootstraps.
@@ -61,7 +61,7 @@ agents is [`AGENTS.md`](AGENTS.md); the code follows Foundation's contribution g
 | `AGENTS.md`, `CLAUDE.md` | Humans | The contract for AI agents. |
 | `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml` | Humans | Infrastructure (CI and the local pre-push hooks). |
 | `references.yml` | Shared | The bibliography for docstring citations, in Hayagriva YAML. |
-| `axiom_debt.yml` | AI | The outstanding debt: every statement formalized but not yet proved, declared as an `axiom` and listed here under its own name. |
+| `forgive.yml` | AI | The outstanding debt: every statement formalized but not yet proved, declared as an `axiom` and listed here under its own name. |
 | `lake-manifest.json`, `lean-toolchain` | Shared | Pins; forward-only bumps are welcome as their own PR. |
 
 ## Building

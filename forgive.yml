@@ -19,7 +19,7 @@
 
 version: v0
 
-# The unproved statements themselves (61).
+# The unproved statements themselves.
 LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
@@ -204,7 +204,7 @@ LO.FirstOrder.provablyTotal_of_primrec':
   forgive:
     - LO.FirstOrder.provablyTotal_of_primrec'
 
-# Declarations that inherit the debt of an unproved statement (48).
+# Declarations that inherit the debt of an unproved statement.
 LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.definable:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.defined

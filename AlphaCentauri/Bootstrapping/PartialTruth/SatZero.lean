@@ -30,11 +30,6 @@ axiom pSatZero : 𝚫₁.Semisentence 3
 instance PSatZero.definable : 𝚫₁-Relation₃ (PSatZero : V → V → V → Prop) :=
   PSatZero.defined.to_definable
 
-/-- A partial satisfaction table for a fixed formula and assignment is unique.
-- [HP98, Lemma I.1.72(2)] -/
-axiom PSatZero.uniq {q₁ q₂ z e : V} (h₁ : PSatZero q₁ z e) (h₂ : PSatZero q₂ z e) :
-    q₁ = q₂
-
 /-- Every well-formed internally `Δ₀` formula has a partial satisfaction table.
 - [HP98, Lemma I.1.72(3)] -/
 axiom PSatZero.exists {z e : V} (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) :

@@ -143,9 +143,6 @@ LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
 LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
   forgive:
     - LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le
-LO.FirstOrder.not_finiteAxiomatizable_of_reflexive:
-  forgive:
-    - LO.FirstOrder.not_finiteAxiomatizable_of_reflexive
 LO.FirstOrder.parsons:
   forgive:
     - LO.FirstOrder.parsons

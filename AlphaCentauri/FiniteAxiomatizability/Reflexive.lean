@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.Delta1
+public import AlphaCentauri.FirstOrder.FiniteAxiomatizability
 
 /-!
 # Reflexive theories
@@ -23,7 +24,7 @@ via `Theory.Δ₁.ofList l.toList`).
 - [Lin97, Ch. 1 p. 18] -/
 def ArithmeticTheory.Reflexive (T : ArithmeticTheory) : Prop :=
   ∀ l : Finset ArithmeticSentence, (∀ σ ∈ l, σ ∈ T) →
-    letI : Theory.Δ₁ {σ | σ ∈ l} := (Theory.Δ₁.ofList l.toList).ofEq (by ext; simp)
+    let _ : Theory.Δ₁ {σ | σ ∈ l} := (Theory.Δ₁.ofList l.toList).ofEq (by ext; simp)
     T ⊢ (Theory.consistent {σ | σ ∈ l}).val
 
 /-- `T` is essentially reflexive if every theory extending `T` is reflexive.
@@ -32,10 +33,29 @@ def ArithmeticTheory.EssentiallyReflexive (T : ArithmeticTheory) : Prop :=
   ∀ U : ArithmeticTheory, T ⊆ U → U.Reflexive
 
 /-- A reflexive extension of `𝗜𝚺₁` is not finitely axiomatizable.
+
+If a finite `F ⊆ T` axiomatized `T`, reflexivity would give `T ⊢ Con(F)`, hence `F ⊢ Con(F)`,
+contradicting the second incompleteness theorem for `F`, which is `Δ₁`, contains `𝗜𝚺₁` and is
+consistent. The finite subtheory is taken as a subset of `T` through
+`finiteAxiomatizable_iff_exists_finite_subset`, and `F` is presented by the same `Finset` and the
+same `Theory.Δ₁` instance that `ArithmeticTheory.Reflexive` fixes, so that the consistency
+statement `T` proves is the one `consistent_unprovable` speaks about.
 - [Lin97, Corollary 2.1]
 - [HP98, Corollary III.2.24] -/
-axiom not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T]
-    (h : T.Reflexive) : ¬FiniteAxiomatizable T
+theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T]
+    (h : T.Reflexive) : ¬FiniteAxiomatizable T := by
+  intro hfa
+  obtain ⟨F, hFT, hfin, hequiv⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp hfa
+  have key : ∀ l : Finset ArithmeticSentence, (∀ σ ∈ l, σ ∈ T) →
+      ({σ | σ ∈ l} : ArithmeticTheory) ≊ T → False := by
+    intro l hlT hle
+    let _ : Theory.Δ₁ {σ | σ ∈ l} := (Theory.Δ₁.ofList l.toList).ofEq (by ext; simp)
+    have hcon : T ⊢ (Theory.consistent {σ | σ ∈ l}).val := h l hlT
+    have : 𝗜𝚺₁ ⪯ ({σ | σ ∈ l} : ArithmeticTheory) := WeakerThan.trans inferInstance hle.symm.le
+    have : Consistent ({σ | σ ∈ l} : ArithmeticTheory) := Consistent.of_le inferInstance hle.le
+    exact Arithmetic.consistent_unprovable ({σ | σ ∈ l} : ArithmeticTheory) (hle.symm.le.wk hcon)
+  have hFl : ({σ | σ ∈ hfin.toFinset} : ArithmeticTheory) = F := by ext; simp
+  exact key hfin.toFinset (fun σ hσ ↦ hFT (by simpa using hσ)) (by rwa [hFl])
 
 /-- `𝗜𝚺₂` proves the consistency of `𝗜𝚺₁`.
 

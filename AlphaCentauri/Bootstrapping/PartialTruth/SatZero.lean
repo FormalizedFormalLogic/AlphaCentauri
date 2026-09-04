@@ -3,6 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Delta0
 public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZero
+public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZeroExists
 
 /-!
 # Satisfaction for `Δ₀` formulas
@@ -21,11 +22,6 @@ conditions for it.
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
-/-- Every well-formed internally `Δ₀` formula has a partial satisfaction table.
-- [HP98, Lemma I.1.72(3)] -/
-axiom PSatZero.exists {z e : V} (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) :
-    ∃ q, PSatZero q z e
 
 /-- Equality is the binary relation of `ℒₒᵣ` with index `0`, in plain numerals.
 - No source; a numeral restatement of `Arithmetic.LOR_rel_eqIndex`. -/

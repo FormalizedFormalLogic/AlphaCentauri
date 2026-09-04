@@ -62,48 +62,6 @@ LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi:
 LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.subst:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.subst
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.and_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.and_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.ball_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.ball_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.bex_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.bex_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.defined:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.defined
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.dom:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.dom
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.eq_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.eq_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.falsum:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.falsum
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.lt_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.lt_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.neg_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.neg_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.neq_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.neq_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.nlt_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.nlt_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.or_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.or_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.subst:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.subst
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum
 LO.FirstOrder.Arithmetic.Bootstrapping.satPi:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
@@ -113,9 +71,6 @@ LO.FirstOrder.Arithmetic.Bootstrapping.satSigma:
 LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec.defined:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec.defined
-LO.FirstOrder.Arithmetic.Bootstrapping.satZero:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence
@@ -213,22 +168,66 @@ LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.definable:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.defined
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.and_iff._simp_2:
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.and_iff:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.and_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.and_iff._simp_1:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.ball_iff:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.bex_iff:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
 LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.definable:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.defined
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.falsum._simp_2:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.defined:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.falsum
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.or_iff._simp_2:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.eq_iff:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.or_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum._simp_2:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.exists_iff_forall:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.iff_forall:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.iff_mem:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.iff_val:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.lt_iff:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.neg_iff:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.neq_iff:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.nlt_iff:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.or_iff:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.or_iff._simp_1:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.subst:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum._simp_1:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
 LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
@@ -249,17 +248,14 @@ LO.FirstOrder.Arithmetic.Tarski.satPiOfSigma:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.Tarski.satSigmaAxioms:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.Tarski.satSigmaAxioms.eq_1:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.Tarski.satSigmaDom:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
@@ -274,49 +270,6 @@ LO.FirstOrder.Arithmetic.Tarski.satSigmaOfPi:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroAnd:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroAxioms:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroAxioms.eq_1:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroBall:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroBex:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroDom:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroEq:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroFalsum:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroLt:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroNeg:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroNeq:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroNlt:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroOr:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.Tarski.satZeroVerum:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.snowing:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
@@ -324,69 +277,51 @@ LO.FirstOrder.Arithmetic.tarski:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below.casesOn:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below.new:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below.prev:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below.rec:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below.zero:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.brecOn:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.casesOn:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.new:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.rec:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.recOn:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
-LO.FirstOrder.Arithmetic.tarski.zero:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski_finite:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satZero

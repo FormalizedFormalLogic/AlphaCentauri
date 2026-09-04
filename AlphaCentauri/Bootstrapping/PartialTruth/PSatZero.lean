@@ -395,7 +395,8 @@ variable {q q₁ q₂ z z₁ z₂ e e₁ e₂ p : V}
 
 /-! ## Uniqueness -/
 
-/-- A table takes at most one value at each node, so `0` and `1` cannot both occur. -/
+/-- A table takes at most one value at each node, so `0` and `1` cannot both occur.
+- [HP98, Definition I.1.71(1)] -/
 lemma val_one_ne_zero (h : PSatZero q z e) {n : V} (h1 : ⟪n, 1⟫ ∈ q) (h0 : ⟪n, 0⟫ ∈ q) : False := by
   simpa using h.isMapping.uniq h1 h0
 

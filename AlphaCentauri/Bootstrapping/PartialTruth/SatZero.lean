@@ -53,6 +53,36 @@ lemma IsDelta0.of_qqBall {u p : V} (h : IsDelta0 (qqBall u p)) : IsDelta0 p := b
   obtain ⟨-, rfl⟩ := (qqOr_inj _ _ _ _).mp heq
   exact hq'
 
+/-- The code of `ℒₒᵣ`'s equality symbol is the numeral `0`.
+- No source; a quoted restatement of `coe_eqIndex_eq`. -/
+lemma coe_quote_eq : (⌜(Language.Eq.eq : (ℒₒᵣ).Rel 2)⌝ : V) = 0 := coe_eqIndex_eq
+
+/-- The code of `ℒₒᵣ`'s less-than symbol is the numeral `1`.
+- No source; a quoted restatement of `coe_ltIndex_eq`. -/
+lemma coe_quote_lt : (⌜(Language.LT.lt : (ℒₒᵣ).Rel 2)⌝ : V) = 1 := coe_ltIndex_eq
+
+/-- A well-formed positive atom of `ℒₒᵣ` is a coded equality or a coded less-than.
+- [HP98, 1.64] -/
+lemma rel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^rel k r v)) :
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r v = t ^= u) ∨
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r v = t ^< u) := by
+  obtain ⟨hr, hv⟩ := IsUFormula.rel.mp h
+  rcases Arithmetic.isRel_iff_LOR.mp hr with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ <;>
+    obtain ⟨a, b, ha, hb, rfl⟩ := IsUTermVec.two_iff.mp hv
+  · exact Or.inl ⟨a, b, ha, hb, by rw [Arithmetic.qqEQ, coe_quote_eq, coe_eqIndex_eq]⟩
+  · exact Or.inr ⟨a, b, ha, hb, by rw [Arithmetic.qqLT, coe_quote_lt, coe_ltIndex_eq]⟩
+
+/-- A well-formed negative atom of `ℒₒᵣ` is a coded inequality or a coded not-less-than.
+- [HP98, 1.64] -/
+lemma nrel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^nrel k r v)) :
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^nrel k r v = t ^≠ u) ∨
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^nrel k r v = t ^≮ u) := by
+  obtain ⟨hr, hv⟩ := IsUFormula.nrel.mp h
+  rcases Arithmetic.isRel_iff_LOR.mp hr with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ <;>
+    obtain ⟨a, b, ha, hb, rfl⟩ := IsUTermVec.two_iff.mp hv
+  · exact Or.inl ⟨a, b, ha, hb, by rw [Arithmetic.qqNEQ, coe_quote_eq, coe_eqIndex_eq]⟩
+  · exact Or.inr ⟨a, b, ha, hb, by rw [Arithmetic.qqNLT, coe_quote_lt, coe_ltIndex_eq]⟩
+
 /-- `SatZero z e` says that the internally coded `Δ₀` formula `z` is satisfied by `e`. The
 well-formedness of `z` is part of the definition, as in the source, where satisfaction is
 introduced only for `Δ₀` formulas* and their evaluations*: a table alone does not witness it,
@@ -277,6 +307,59 @@ lemma bex_iff {t q e : V} (ht : IsUTerm ℒₒᵣ t) :
     obtain ⟨r, hr⟩ := PSatZero.exists hd hf
     refine (iff_val hd hf hr).mpr ((hr.val_bex ht hr.mem_dom_root).mpr ⟨x, hx, ?_⟩)
     exact (iff_mem hr (hr.mem_dom_bex ht hr.mem_dom_root hx) hq hq').mp hsat
+
+/-- Satisfaction commutes with coded negation on `Δ₀` formulas.
+- [HP98, Theorem I.1.70(iii)] -/
+lemma neg_iff {p e : V} (hp : IsDelta0 p) (hp' : IsUFormula ℒₒᵣ p) :
+    SatZero (neg ℒₒᵣ p) e ↔ ¬SatZero p e := by
+  have H : ∀ p : V, IsDelta0 p → IsUFormula ℒₒᵣ p →
+      ∀ e, (SatZero (neg ℒₒᵣ p) e ↔ ¬SatZero p e) := by
+    apply IsDelta0.induction 𝚷
+      (P := fun p ↦ IsUFormula ℒₒᵣ p → ∀ e, (SatZero (neg ℒₒᵣ p) e ↔ ¬SatZero p e))
+    · definability
+    · intro _ e; simp
+    · intro _ e; simp
+    · intro k r v h e
+      rcases rel_cases h with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩
+      · rw [heq, Arithmetic.neg_eq ht hu, neq_iff ht hu, eq_iff ht hu]
+      · rw [heq, Arithmetic.neg_lt ht hu, nlt_iff ht hu, lt_iff ht hu]
+    · intro k r v h e
+      rcases nrel_cases h with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩
+      · rw [heq, Arithmetic.neg_neq ht hu, eq_iff ht hu, neq_iff ht hu]; simp
+      · rw [heq, Arithmetic.neg_nlt ht hu, lt_iff ht hu, nlt_iff ht hu]; simp
+    · intro p q hdp hdq ihp ihq h e
+      obtain ⟨hfp, hfq⟩ := IsUFormula.and.mp h
+      rw [neg_and hfp hfq,
+        or_iff (IsDelta0.neg hfp hdp) hfp.neg (IsDelta0.neg hfq hdq) hfq.neg,
+        ihp hfp e, ihq hfq e, and_iff]
+      tauto
+    · intro p q hdp hdq ihp ihq h e
+      obtain ⟨hfp, hfq⟩ := IsUFormula.or.mp h
+      rw [neg_or hfp hfq, and_iff, ihp hfp e, ihq hfq e, or_iff hdp hfp hdq hfq]
+      tauto
+    · intro t q ht hdq ih h e
+      obtain ⟨-, hfq⟩ : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) ∧ IsUFormula ℒₒᵣ q := by
+        simpa [qqBall, Arithmetic.qqNLT] using h
+      rw [neg_qqBall ht.termBShift hfq, bex_iff ht, ball_iff ht hdq hfq]
+      constructor
+      · rintro ⟨x, hx, hnx⟩ hall
+        exact (ih hfq (x ∷ e)).mp hnx (hall x hx)
+      · intro hn
+        by_contra hc
+        exact hn fun x hx ↦ by
+          by_contra hnx
+          exact hc ⟨x, hx, (ih hfq (x ∷ e)).mpr hnx⟩
+    · intro t q ht hdq ih h e
+      obtain ⟨-, hfq⟩ : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) ∧ IsUFormula ℒₒᵣ q := by
+        simpa [qqBex, Arithmetic.qqLT] using h
+      rw [neg_qqBex ht.termBShift hfq,
+        ball_iff ht (IsDelta0.neg hfq hdq) hfq.neg, bex_iff ht]
+      constructor
+      · rintro hall ⟨x, hx, hx'⟩
+        exact (ih hfq (x ∷ e)).mp (hall x hx) hx'
+      · intro hn x hx
+        exact (ih hfq (x ∷ e)).mpr fun hc ↦ hn ⟨x, hx, hc⟩
+  exact H p hp hp' e
 
 end SatZero
 

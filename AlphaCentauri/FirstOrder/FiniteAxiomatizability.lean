@@ -1,0 +1,152 @@
+module
+
+public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+
+/-!
+# Finite axiomatizability
+
+Foundation defines `Entailment.FiniteAxiomatizable 𝓢` as the existence of a finite `𝓕` with
+`𝓕 ≊ 𝓢`, but supplies no lemmas about it. This file grows the API for first-order theories
+`T : Theory L`:
+
+* the finite **subset** form `finiteAxiomatizable_iff_exists_finite_subset`, obtained from the
+  syntactic compactness of `Theory L` (`Entailment.Compact`) rather than from completeness;
+* the list form `finiteAxiomatizable_iff_exists_list` and the single-sentence form
+  `finiteAxiomatizable_iff_exists_sentence`, the latter by taking the conjunction `⋀l`;
+* the characterization `not_finiteAxiomatizable_iff` of the negation;
+* invariance under provability equivalence, `Entailment.FiniteAxiomatizable.of_equiv`;
+* `𝗣𝗔⁻` as an example.
+
+Nothing here is specific to arithmetic: everything lives at the level of `Entailment` and
+`Theory L`, so the file sits under `AlphaCentauri/FirstOrder/` next to Foundation's
+`Logic/Entailment.lean` rather than under the arithmetic hierarchy.
+-/
+
+@[expose] public section
+
+namespace AdjunctiveSet
+
+open LO.FirstOrder
+
+variable {L : Language}
+
+/-- For a first-order theory, `AdjunctiveSet.Finite` is `Set.Finite`; the two are definitionally
+equal, since `Theory L` is `Set (Sentence L)` and `AdjunctiveSet.set T` is `{σ | σ ∈ T}`.
+
+This is a routine technical bridge between two spellings of the same predicate, with no
+counterpart in the literature; it is stated only to put the unfolding into the `simp` set. -/
+@[simp] lemma finite_iff_set_finite {T : Theory L} : Finite T ↔ T.Finite := Iff.rfl
+
+end AdjunctiveSet
+
+namespace LO.Entailment
+
+open FirstOrder
+
+variable {L : Language} {T U : Theory L}
+
+/-- A finite theory is finitely axiomatizable: it axiomatizes itself.
+- [Lin97, Ch. 4 §1] -/
+lemma FiniteAxiomatizable.of_finite (h : T.Finite) : FiniteAxiomatizable T :=
+  ⟨T, by simpa using h, Equiv.refl T⟩
+
+/-- Finite axiomatizability is invariant under provability equivalence.
+- [Lin97, Ch. 4 §1] -/
+lemma FiniteAxiomatizable.of_equiv (h : T ≊ U) :
+    FiniteAxiomatizable T → FiniteAxiomatizable U := by
+  rintro ⟨F, hF, hFT⟩
+  exact ⟨F, hF, hFT.trans h⟩
+
+/-- A finitely axiomatizable theory is axiomatized by a finite **subset** of itself.
+
+The axiomatizing `𝓕` given by `Entailment.FiniteAxiomatizable` need not consist of axioms of `T`.
+Syntactic compactness of `Theory L` (`Entailment.Compact`, via `Theory.Proof.axioms`) replaces each
+`φ ∈ 𝓕` by a finite set of axioms of `T` proving it; the union over the finitely many `φ ∈ 𝓕` is
+the required finite subtheory. In particular no appeal to the completeness theorem is needed.
+- [Lin97, Ch. 4 §1]
+- [HP98, Theorem I.2.52] -/
+lemma finiteAxiomatizable_iff_exists_finite_subset :
+    FiniteAxiomatizable T ↔ ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ F ≊ T := by
+  constructor
+  · rintro ⟨𝓕, h𝓕fin, h𝓕⟩
+    replace h𝓕fin : (𝓕 : Set (Sentence L)).Finite := by simpa using h𝓕fin
+    have H : ∀ σ : Sentence L, ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ (σ ∈ 𝓕 → F ⊢ σ) := by
+      intro σ
+      by_cases hσ : σ ∈ 𝓕
+      · obtain ⟨F, hsub, hfin, hprf⟩ :=
+          Compact.finite_provable (h𝓕.le.wk (Axiomatized.by_axm hσ))
+        exact ⟨F, hsub, by simpa using hfin, fun _ ↦ hprf⟩
+      · exact ⟨∅, by simp, by simp, fun h ↦ absurd h hσ⟩
+    choose f hsub hfin hprf using H
+    have hsub' : (⋃ σ ∈ 𝓕, f σ) ⊆ T := Set.iUnion₂_subset fun σ _ ↦ hsub σ
+    refine ⟨⋃ σ ∈ 𝓕, f σ, hsub', h𝓕fin.biUnion fun σ _ ↦ hfin σ, Equiv.antisymm_iff.mpr
+      ⟨Theory.Proof.weakerThan_of_le hsub', h𝓕.symm.le.trans (WeakerThan.ofAxm! ?_)⟩⟩
+    intro σ hσ
+    replace hσ : σ ∈ 𝓕 := by simpa using hσ
+    exact Axiomatized.weakening! (Set.subset_biUnion_of_mem hσ) (hprf σ hσ)
+  · rintro ⟨F, _, hfin, heq⟩
+    exact ⟨F, by simpa using hfin, heq⟩
+
+/-- A theory is finitely axiomatizable iff a list of its axioms axiomatizes it.
+- [Lin97, Ch. 4 §1]
+- [HP98, Theorem I.2.52] -/
+lemma finiteAxiomatizable_iff_exists_list :
+    FiniteAxiomatizable T ↔
+      ∃ l : List (Sentence L), (∀ σ ∈ l, σ ∈ T) ∧ ({σ | σ ∈ l} : Theory L) ≊ T := by
+  constructor
+  · intro h
+    obtain ⟨F, hsub, hfin, heq⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp h
+    have hl : ({σ | σ ∈ hfin.toFinset.toList} : Theory L) = F := by ext σ; simp
+    exact ⟨hfin.toFinset.toList, fun σ hσ ↦ hsub (by simpa using hσ), by rw [hl]; exact heq⟩
+  · rintro ⟨l, _, heq⟩
+    exact ⟨{σ | σ ∈ l}, by simp, heq⟩
+
+/-- A theory is finitely axiomatizable iff a single sentence axiomatizes it, namely the
+conjunction of a finite list of its axioms.
+- [Lin97, Ch. 4 §1]
+- [HP98, Theorem I.2.52] -/
+lemma finiteAxiomatizable_iff_exists_sentence :
+    FiniteAxiomatizable T ↔ ∃ σ : Sentence L, ({σ} : Theory L) ≊ T := by
+  classical
+  constructor
+  · intro h
+    obtain ⟨l, _, heq⟩ := finiteAxiomatizable_iff_exists_list.mp h
+    refine ⟨⋀l, Equiv.trans
+      (Equiv.antisymm_iff.mpr ⟨WeakerThan.ofAxm! ?_, WeakerThan.ofAxm! ?_⟩) heq⟩
+    · rintro σ (rfl : σ = ⋀l)
+      exact Conj₂_iff_forall_provable.mpr fun φ hφ ↦ Axiomatized.by_axm hφ
+    · intro σ hσ
+      exact mdp (left_Conj₂_intro (show σ ∈ l by simpa using hσ)) (Axiomatized.by_axm rfl)
+  · rintro ⟨σ, heq⟩
+    exact ⟨{σ}, by simp, heq⟩
+
+/-- A theory fails to be finitely axiomatizable exactly when every finite subtheory of it is
+strictly weaker.
+- [Lin97, Ch. 4 §1]
+- [HP98, Theorem I.2.52] -/
+lemma not_finiteAxiomatizable_iff :
+    ¬FiniteAxiomatizable T ↔ ∀ F : Theory L, F ⊆ T → F.Finite → F ⪱ T := by
+  rw [finiteAxiomatizable_iff_exists_finite_subset]
+  constructor
+  · intro h F hsub hfin
+    have hle : F ⪯ T := Theory.Proof.weakerThan_of_le hsub
+    refine ⟨hle, fun hle' ↦ h ⟨F, hsub, hfin, Equiv.antisymm_iff.mpr ⟨hle, hle'⟩⟩⟩
+  · rintro h ⟨F, hsub, hfin, heq⟩
+    exact (h F hsub hfin).notWT (Equiv.antisymm_iff.mp heq).2
+
+end LO.Entailment
+
+namespace LO.FirstOrder.Arithmetic
+
+/-- `𝗣𝗔⁻` is finitely axiomatizable: it is already a finite theory.
+
+Immediate from `PeanoMinus.finite`, so it has no separate source of its own; the cited section is
+where the notion of a finitely axiomatized theory is set up.
+
+`Entailment.FiniteAxiomatizable` is a `def`, not a class, so this cannot be an `instance`.
+- [Lin97, Ch. 4 §1] -/
+lemma PeanoMinus.finiteAxiomatizable :
+    Entailment.FiniteAxiomatizable (𝗣𝗔⁻ : ArithmeticTheory) :=
+  Entailment.FiniteAxiomatizable.of_finite PeanoMinus.finite
+
+end LO.FirstOrder.Arithmetic

@@ -1,0 +1,55 @@
+module
+
+public import Foundation.FirstOrder.Basic.Semantics.Semantics
+
+/-!
+# Substitution against a rewriting
+
+Foundation composes rewritings (`Rew.comp`, `Rew.q_comp`, `Rew.subst_comp_subst`) but states none
+of the resulting commutations in the applied form a syntactic induction over a sequent calculus
+needs, where a substitution `φ/[t]` has to be pushed through an ambient rewriting or extended by
+one more slot. This file supplies those three, and the evaluation congruence that goes with them.
+They belong in Foundation next to `Rew.subst_comp_subst`.
+-/
+
+@[expose] public section
+
+namespace LO.FirstOrder.Rew
+
+variable {L : Language} {ξ : Type*} {n : ℕ}
+
+/-- Pushing a rewriting through a substitution: `ω ▹ (φ/[t]) = (ω.q ▹ φ)/[ω t]`. -/
+lemma app_substs (ω : Rew L ξ 0 ξ 0) (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) :
+    ω ▹ (φ/[t]) = (ω.q ▹ φ)/[ω t] := by
+  show ω ▹ (Rew.subst ![t] ▹ φ) = Rew.subst ![ω t] ▹ (ω.q ▹ φ)
+  have h : ω.comp (Rew.subst ![t]) = (Rew.subst ![ω t]).comp ω.q := by
+    ext x
+    · cases x using Fin.cases with
+      | zero => simp [Rew.comp_app]
+      | succ i => exact i.elim0
+    · simp [Rew.comp_app]
+  rw [← TransitiveRewriting.comp_app, ← TransitiveRewriting.comp_app, h]
+
+/-- Substituting the slot that `Rew.q` freed is the same as extending the substitution vector. -/
+lemma subst_comp_subst_q (w : Fin n → Semiterm L ξ 0) (s : Semiterm L ξ 0) :
+    (Rew.subst ![s]).comp (Rew.subst w).q = Rew.subst (s :> w) := by
+  ext x
+  · cases x using Fin.cases with
+    | zero => simp [Rew.comp_app]
+    | succ i => simp [Rew.comp_app]
+  · simp [Rew.comp_app]
+
+/-- The applied form of `Rew.subst_comp_subst_q`. -/
+lemma subst_q_app (w : Fin n → Semiterm L ξ 0) (s : Semiterm L ξ 0)
+    (φ : Semiformula L ξ (n + 1)) : ((Rew.subst w).q ▹ φ)/[s] = Rew.subst (s :> w) ▹ φ := by
+  show Rew.subst ![s] ▹ ((Rew.subst w).q ▹ φ) = Rew.subst (s :> w) ▹ φ
+  rw [← TransitiveRewriting.comp_app, subst_comp_subst_q]
+
+/-- The value of a substituted term depends on the substituted terms only through their values. -/
+lemma val_subst_congr {M : Type*} [Structure L M] {ε : ξ → M} {w w' : Fin n → Semiterm L ξ 0}
+    (h : ∀ i, Semiterm.val ![] ε (w i) = Semiterm.val ![] ε (w' i)) (t : Semiterm L ξ n) :
+    Semiterm.val ![] ε (Rew.subst w t) = Semiterm.val ![] ε (Rew.subst w' t) := by
+  simp only [Semiterm.val_substs]
+  exact congrArg (Semiterm.val · ε t) (funext fun i => h i)
+
+end LO.FirstOrder.Rew

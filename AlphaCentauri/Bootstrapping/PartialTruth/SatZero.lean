@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Delta0
 public import AlphaCentauri.Bootstrapping.TermVal
+public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZero
 
 /-!
 # Satisfaction for `Δ₀` formulas
@@ -15,31 +16,6 @@ It exposes the resulting `Δ₀` satisfaction predicate and its Tarski condition
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
-/-- `PSatZero q z e` says that `q` is a partial satisfaction table for the `Δ₀` formula
-`z` under assignment `e`. Its domain is the downward closure of `⟪z, e⟫` under immediate
-subformulas, extending the assignment when entering bounded quantifiers.
-
-- [HP98, Definition I.1.71(1)] -/
-axiom PSatZero (q z e : V) : Prop
-
-/-- The `𝚫₁` formula defining partial satisfaction tables.
-- [HP98, Lemma I.1.72(1)] -/
-axiom pSatZero : 𝚫₁.Semisentence 3
-
-/-- The formula `pSatZero` defines partial satisfaction tables.
-- [HP98, Lemma I.1.72(1)] -/
-@[instance] axiom PSatZero.defined : 𝚫₁-Relation₃ (PSatZero : V → V → V → Prop) via pSatZero
-
-/-- Partial satisfaction tables form a `𝚫₁`-definable relation.
-- [HP98, Lemma I.1.72(1)] -/
-instance PSatZero.definable : 𝚫₁-Relation₃ (PSatZero : V → V → V → Prop) :=
-  PSatZero.defined.to_definable
-
-/-- A partial satisfaction table for a fixed formula and assignment is unique.
-- [HP98, Lemma I.1.72(2)] -/
-axiom PSatZero.uniq {q₁ q₂ z e : V} (h₁ : PSatZero q₁ z e) (h₂ : PSatZero q₂ z e) :
-    q₁ = q₂
 
 /-- Every well-formed internally `Δ₀` formula has a partial satisfaction table.
 - [HP98, Lemma I.1.72(3)] -/

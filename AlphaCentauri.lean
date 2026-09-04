@@ -1,6 +1,7 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
 public import AlphaCentauri.Bootstrapping.Delta0
+public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZero
 public import AlphaCentauri.Bootstrapping.PartialTruth.SatSigma
 public import AlphaCentauri.Bootstrapping.PartialTruth.SatZero
 public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing

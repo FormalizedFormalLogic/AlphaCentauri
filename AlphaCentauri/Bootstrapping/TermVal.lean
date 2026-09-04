@@ -153,6 +153,11 @@ instance termValVec.defined : 𝚺₁-Function₃ (termValVec : V → V → V �
   simpa [termValVecGraph, termValVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
     using (construction.resultVec_defined (L := ℒₒᵣ)).defined ![v 0, v 2, v 3, v 1]
 
+/-- The `𝚫₁` definability instance for evaluation of term vectors, using uniqueness of its graph.
+- [HP98, 1.63] -/
+instance termValVec.definable : 𝚫₁-Function₃ (termValVec : V → V → V → V) :=
+  termValVec.defined.graph_delta.to_definable
+
 end
 
 /-- Evaluation of a coded term vector preserves its coded length.

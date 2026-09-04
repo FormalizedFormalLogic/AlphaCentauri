@@ -20,9 +20,6 @@
 version: v0
 
 # The unproved statements themselves.
-LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
 LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff

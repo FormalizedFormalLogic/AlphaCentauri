@@ -3,6 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Delta0
 public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZero
+public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZeroExists
 
 /-!
 # Satisfaction for `Δ₀` formulas
@@ -16,11 +17,6 @@ It exposes the resulting `Δ₀` satisfaction predicate and its Tarski condition
 namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
-/-- Every well-formed internally `Δ₀` formula has a partial satisfaction table.
-- [HP98, Lemma I.1.72(3)] -/
-axiom PSatZero.exists {z e : V} (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) :
-    ∃ q, PSatZero q z e
 
 /-- `SatZero z e` says that the internally coded `Δ₀` formula `z` is satisfied by `e`.
 - [HP98, Definition I.1.71(2)] -/

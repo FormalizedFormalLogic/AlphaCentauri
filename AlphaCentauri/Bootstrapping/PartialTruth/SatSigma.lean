@@ -35,25 +35,118 @@ mutual
         IsStrictPi (n + 1) z ∧ IsUFormula ℒₒᵣ z ∧ ¬SatSigma (n + 1) (neg ℒₒᵣ z) e
 end
 
-/-- The `𝚺ₙ₊₁` formula defining `SatSigma (n + 1)`, with arguments `(z, e)`.
+/-- Builds the `𝚷ₘ₊₁` formula for `SatPi (m + 1)` from the `𝚺ₘ₊₁` formula for `SatSigma (m + 1)`:
+`Πₘ₊₁` satisfaction is membership in the domain together with failure of `Σₘ₊₁` satisfaction of
+the negation.
+- [HP98, Definition I.1.74] -/
+noncomputable def piOfSigma (m : ℕ) (σ : 𝚺-[m + 1].Semisentence 2) :
+    𝚷-[m + 1].Semisentence 2 := .mkPi
+  “z e. !(isStrictPi (m + 1)).pi z ∧ !(isUFormula ℒₒᵣ).pi z ∧
+    ∀ nz, !(negGraph ℒₒᵣ).val nz z → ¬!σ.val nz e”
+  (by
+    have h1 : Hierarchy 𝚷 (m + 1) (isStrictPi (m + 1)).pi.val :=
+      (isStrictPi (m + 1)).pi.pi_prop.mono (Nat.le_add_left 1 m)
+    have h2 : Hierarchy 𝚷 (m + 1) (isUFormula ℒₒᵣ).pi.val :=
+      (isUFormula ℒₒᵣ).pi.pi_prop.mono (Nat.le_add_left 1 m)
+    have h3 : Hierarchy 𝚺 (m + 1) (negGraph ℒₒᵣ).val :=
+      (negGraph ℒₒᵣ).sigma_prop.mono (Nat.le_add_left 1 m)
+    have h4 : Hierarchy 𝚺 (m + 1) σ.val := σ.sigma_prop
+    simp [h1, h2, h3, h4])
+
+/-- Builds the `𝚺ₘ₊₂` formula for `SatSigma (m + 2)` from the `𝚷ₘ₊₁` formula for `SatPi (m + 1)`,
+by peeling one block of existential quantifiers off a strict `Πₘ₊₁` matrix.
+- [HP98, Definition I.1.74] -/
+noncomputable def sigmaOfPi (m : ℕ) (π : 𝚷-[m + 1].Semisentence 2) :
+    𝚺-[m + 2].Semisentence 2 := .mkSigma
+  “z e. ∃ k q w e', !qqExssDef z q k ∧ !(isStrictPi (m + 1)).val q ∧ !lenDef k w ∧
+    !vecAppendDef e' w e ∧ !π.val q e'”
+  (by
+    have h1 : Hierarchy 𝚺 (m + 2) qqExssDef.val :=
+      qqExssDef.sigma_prop.mono (show 1 ≤ m + 2 by omega)
+    have h2 : Hierarchy 𝚺 (m + 2) (isStrictPi (m + 1)).val :=
+      (isStrictPi (m + 1)).sigma.sigma_prop.mono (show 1 ≤ m + 2 by omega)
+    have h3 : Hierarchy 𝚺 (m + 2) lenDef.val :=
+      lenDef.sigma_prop.mono (show 1 ≤ m + 2 by omega)
+    have h4 : Hierarchy 𝚺 (m + 2) vecAppendDef.val :=
+      vecAppendDef.sigma_prop.mono (show 1 ≤ m + 2 by omega)
+    have h5 : Hierarchy 𝚺 (m + 2) π.val := π.pi_prop.accum 𝚺
+    simp [h1, h2, h3, h4, h5])
+
+/-- The `𝚺₁` formula for `satSigma 0`, i.e. for `SatSigma 1`: an existential block over a strict
+`Π₀ = Δ₀` matrix, tested against `satZero` (since `SatPi 0` is definitionally `SatZero`).
+- [HP98, Definition I.1.74] -/
+noncomputable def sigmaZero : 𝚺-[1].Semisentence 2 := .mkSigma
+  “z e. ∃ k q w e', !qqExssDef z q k ∧ !(isStrictPi 0).val q ∧ !lenDef k w ∧
+    !vecAppendDef e' w e ∧ !satZero.val q e'”
+  (by
+    have h1 : Hierarchy 𝚺 1 qqExssDef.val := qqExssDef.sigma_prop
+    have h2 : Hierarchy 𝚺 1 (isStrictPi 0).val := (isStrictPi 0).sigma.sigma_prop
+    have h3 : Hierarchy 𝚺 1 lenDef.val := lenDef.sigma_prop
+    have h4 : Hierarchy 𝚺 1 vecAppendDef.val := vecAppendDef.sigma_prop
+    have h5 : Hierarchy 𝚺 1 satZero.val :=
+      HierarchySymbol.Semiformula.val_sigma satZero ▸ satZero.sigma.sigma_prop
+    simp [h1, h2, h3, h4, h5])
+
+/-- The `𝚺ₙ₊₁` formula defining `SatSigma (n + 1)`, with arguments `(z, e)`, by recursion on `n`.
 - [HP98, Definition I.1.74]
 - [HP98, Theorem I.1.75(1)] -/
-axiom satSigma (n : ℕ) : 𝚺-[n + 1].Semisentence 2
+noncomputable def satSigma : (n : ℕ) → 𝚺-[n + 1].Semisentence 2
+  | 0 => sigmaZero
+  | n + 1 => sigmaOfPi n (piOfSigma n (satSigma n))
 
 /-- The `𝚷ₙ₊₁` formula defining `SatPi (n + 1)`, with arguments `(z, e)`.
 - [HP98, Definition I.1.74]
 - [HP98, Theorem I.1.75(1)] -/
-axiom satPi (n : ℕ) : 𝚷-[n + 1].Semisentence 2
+noncomputable def satPi (n : ℕ) : 𝚷-[n + 1].Semisentence 2 := piOfSigma n (satSigma n)
+
+/-- `satPi` unfolds to `piOfSigma` applied to `satSigma` at the same level; recorded so `satSigma`'s
+successor equation reads directly in terms of `satPi`.
+- [HP98, Definition I.1.74] -/
+private lemma satSigma_succ (n : ℕ) : satSigma (n + 1) = sigmaOfPi n (satPi n) := rfl
+
+/-- Derives definedness of `piOfSigma m σ` for `SatPi (m + 1)` from definedness of `σ` for
+`SatSigma (m + 1)`.
+- [HP98, Theorem I.1.75(1)] -/
+private lemma piDefined_of_sigmaDefined {m : ℕ} {σ : 𝚺-[m + 1].Semisentence 2}
+    (hσ : 𝚺-[m + 1]-Relation (SatSigma (m + 1) : V → V → Prop) via σ) :
+    𝚷-[m + 1]-Relation (SatPi (m + 1) : V → V → Prop) via piOfSigma m σ := .mk fun v ↦ by
+  have := hσ
+  simp [piOfSigma, SatPi]
+
+/-- Derives definedness of `sigmaOfPi m π` for `SatSigma (m + 2)` from definedness of `π` for
+`SatPi (m + 1)`.
+- [HP98, Theorem I.1.75(1)] -/
+private lemma sigmaDefined_of_piDefined {m : ℕ} {π : 𝚷-[m + 1].Semisentence 2}
+    (hπ : 𝚷-[m + 1]-Relation (SatPi (m + 1) : V → V → Prop) via π) :
+    𝚺-[m + 2]-Relation (SatSigma (m + 2) : V → V → Prop) via sigmaOfPi m π := .mk fun v ↦ by
+  have := hπ
+  simp [sigmaOfPi, SatSigma]
+
+/-- Definedness of `sigmaZero` for `SatSigma 1`.
+- [HP98, Theorem I.1.75(1)] -/
+private lemma sigmaZero_defined :
+    𝚺-[1]-Relation (SatSigma 1 : V → V → Prop) via sigmaZero := .mk fun v ↦ by
+  simp [sigmaZero, SatSigma, SatPi]
+
+/-- Definedness of `satSigma n` for `SatSigma (n + 1)`, by recursion on `n`, deriving definedness
+of `satPi n` for `SatPi (n + 1)` along the way.
+- [HP98, Theorem I.1.75(1)] -/
+private lemma sigmaDefined : ∀ n : ℕ, 𝚺-[n + 1]-Relation (SatSigma (n + 1) : V → V → Prop) via satSigma n
+  | 0 => sigmaZero_defined
+  | n + 1 => by
+    rw [satSigma_succ]
+    exact sigmaDefined_of_piDefined (piDefined_of_sigmaDefined (sigmaDefined n))
 
 /-- The formula `satSigma n` defines satisfaction for strict prenex `Σₙ₊₁` formulas.
 - [HP98, Theorem I.1.75(1)] -/
-@[instance] axiom SatSigma.defined (n : ℕ) :
-    𝚺-[n + 1]-Relation (SatSigma (n + 1) : V → V → Prop) via satSigma n
+instance SatSigma.defined (n : ℕ) :
+    𝚺-[n + 1]-Relation (SatSigma (n + 1) : V → V → Prop) via satSigma n := sigmaDefined n
 
 /-- The formula `satPi n` defines satisfaction for strict prenex `Πₙ₊₁` formulas.
 - [HP98, Theorem I.1.75(1)] -/
-@[instance] axiom SatPi.defined (n : ℕ) :
-    𝚷-[n + 1]-Relation (SatPi (n + 1) : V → V → Prop) via satPi n
+instance SatPi.defined (n : ℕ) :
+    𝚷-[n + 1]-Relation (SatPi (n + 1) : V → V → Prop) via satPi n :=
+  piDefined_of_sigmaDefined (sigmaDefined n)
 
 /-- Satisfaction for strict prenex `Σₙ₊₁` formulas is definable at level `Σₙ₊₁`.
 - [HP98, Theorem I.1.75(1)] -/
@@ -150,9 +243,26 @@ noncomputable def satSigmaVec (n k : ℕ) : 𝚺-[n + 1].Semisentence (k + 1) :=
 /-- The formula `satSigmaVec n k` defines strict `Σₙ₊₁` satisfaction under its variables.
 - [HP98, Remark I.1.77]
 - [HP98, Definition I.1.78(2)] -/
-axiom satSigmaVec.defined (n k : ℕ) :
+theorem satSigmaVec.defined (n k : ℕ) :
     𝚺-[n + 1].Defined
       (fun v : Fin (k + 1) → V ↦ SatSigma (n + 1) (v 0) (matrixToVec (v ·.succ)))
-      (satSigmaVec n k)
+      (satSigmaVec n k) := .mk fun v ↦ by
+  simp only [satSigmaVec, Nat.succ_eq_add_one, Nat.reduceAdd, HierarchySymbol.Semiformula.val_mkSigma,
+    Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
+    Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, numeral_eq_natCast_app, Semiterm.val_bvar,
+    Matrix.cons_val_zero, HierarchySymbol.Defined.iff, Fin.isValue, Fin.Fin1.eq_one, Fin.succ_zero_eq_one,
+    Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃, Fin.succ_one_eq_two,
+    Matrix.cons_app_two, Semiformula.eval_operator, Matrix.cons_val_succ, Structure.eq_iff_eq,
+    LogicalConnective.Prop.and_eq, exists_eq_left]
+  constructor
+  · rintro ⟨x, hlen, hnth, hsat⟩
+    have hx : x = matrixToVec (v ·.succ) := by
+      apply nth_ext' (k : V) hlen.symm (by simp)
+      intro i hi
+      obtain ⟨j, rfl⟩ := lt_numeral_iff.mp (by simpa [← numeral_eq_natCast_app] using hi)
+      simp [numeral_eq_natCast_app, hnth j]
+    rwa [hx] at hsat
+  · intro hsat
+    exact ⟨matrixToVec (v ·.succ), by simp, fun i ↦ matrixToVec_nth _ i, hsat⟩
 
 end LO.FirstOrder.Arithmetic.Bootstrapping

@@ -94,8 +94,25 @@ lemma toPrenex_of_deltaZero {Γ s n} {φ : Semiformula L ξ (n + s)} (h : Hierar
 /-- Strict hierarchy classes are monotone in their level.
 
 - [HP98, 0.30] -/
-axiom mono {Γ s s' n} {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (hs : s ≤ s') :
-    StrictHierarchy Γ s' φ
+lemma mono {Γ s s' n} {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (hs : s ≤ s') :
+    StrictHierarchy Γ s' φ := by
+  induction h generalizing s' with
+  | @zero Γ₀ n₀ φ₀ h =>
+    have key : ∀ t Γ', StrictHierarchy Γ' t φ₀ := by
+      intro t
+      induction t with
+      | zero => intro Γ'; exact zero h
+      | succ t ih => intro Γ'; exact ofAlt (ih Γ'.alt)
+    exact key s' Γ₀
+  | @ofAlt Γ₀ s₀ n₀ φ₀ h ih =>
+    obtain ⟨t, rfl⟩ : ∃ t, s' = t + 1 := ⟨s' - 1, by omega⟩
+    exact ofAlt (ih (s' := t) (by omega))
+  | @exs s₀ n₀ φ₀ h ih =>
+    obtain ⟨t, rfl⟩ : ∃ t, s' = t + 1 := ⟨s' - 1, by omega⟩
+    exact exs (ih (s' := t + 1) (by omega))
+  | @all s₀ n₀ φ₀ h ih =>
+    obtain ⟨t, rfl⟩ : ∃ t, s' = t + 1 := ⟨s' - 1, by omega⟩
+    exact all (ih (s' := t + 1) (by omega))
 
 end StrictHierarchy
 

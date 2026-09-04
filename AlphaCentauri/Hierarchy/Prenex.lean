@@ -64,6 +64,30 @@ lemma rew {Γ s n₁ n₂} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁}
   | exs h => by simpa using (rew ω.q h).exs
   | all h => by simpa using (rew ω.q h).all
 
+/-- Syntactic rewriting also reflects strict hierarchy classes: a class of `ω ▹ φ` is already a
+class of `φ`, because every constructor of the class determines the shape of the formula.
+
+- [HP98, 0.30] -/
+lemma of_rew {Γ s n₂} {ξ₂ : Type*} {ψ : Semiformula L ξ₂ n₂} :
+    StrictHierarchy Γ s ψ →
+      ∀ {ξ₁ : Type*} {n₁ : ℕ} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁},
+        ω ▹ φ = ψ → StrictHierarchy Γ s φ
+  | zero h => fun e ↦ zero (by rw [← e] at h; simpa using h)
+  | ofAlt h => fun e ↦ ofAlt (of_rew h e)
+  | exs h => fun e ↦ by
+      rcases (Semiformula.eq_exs_iff _).mp e with ⟨φ', hφ', rfl⟩
+      exact exs (of_rew h hφ')
+  | all h => fun e ↦ by
+      rcases (Semiformula.eq_all_iff _).mp e with ⟨φ', hφ', rfl⟩
+      exact all (of_rew h hφ')
+
+/-- Strict hierarchy classes are invariant under syntactic rewriting.
+
+- [HP98, 0.30] -/
+@[simp] lemma rew_iff {Γ s n₁ n₂} {ξ₁ ξ₂ : Type*} {ω : Rew L ξ₁ n₁ ξ₂ n₂}
+    {φ : Semiformula L ξ₁ n₁} : StrictHierarchy Γ s (ω ▹ φ) ↔ StrictHierarchy Γ s φ :=
+  ⟨fun h ↦ of_rew h rfl, rew ω⟩
+
 /-- Prefixing `s` alternating quantifiers, the outermost one of the kind `Γ`, raises a strict
 class by `s` levels.
 

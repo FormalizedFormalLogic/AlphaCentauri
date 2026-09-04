@@ -19,7 +19,7 @@
 
 version: v0
 
-# The unproved statements themselves (87).
+# The unproved statements themselves (85).
 LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero
@@ -113,12 +113,6 @@ LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.subst:
 LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum
-LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi_quote_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi_quote_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma_quote_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma_quote_iff
 LO.FirstOrder.Arithmetic.Bootstrapping.len_termValVec:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.len_termValVec

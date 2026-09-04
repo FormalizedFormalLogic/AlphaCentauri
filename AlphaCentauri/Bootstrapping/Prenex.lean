@@ -495,14 +495,164 @@ lemma IsStrictSigma.neg {n : ℕ} {p : V} (hp : IsUFormula ℒₒᵣ p) :
 lemma IsStrictPi.neg {n : ℕ} {p : V} (hp : IsUFormula ℒₒᵣ p) :
     IsStrictPi n p → IsStrictSigma n (neg ℒₒᵣ p) := (isStrictNeg n).2 p hp
 
-/-- Internal strict `Σₙ` recognition agrees with the external class on quoted formulas.
-- [HP98, Lemma I.1.69] -/
-axiom isStrictSigma_quote_iff {n k : ℕ} (ψ : ArithmeticSemisentence k) :
-    IsStrictSigma n (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚺 n ψ
+/-! ## Agreement with the external strict hierarchy on quoted formulas -/
 
-/-- Internal strict `Πₙ` recognition agrees with the external class on quoted formulas.
+/-- The internal strict class selected by a polarity. It lets one induction on a
+`StrictHierarchy` derivation, whose polarity the `zero` and `ofAlt` constructors leave open,
+produce the `Σ` and the `Π` statement at once.
 - [HP98, Lemma I.1.69] -/
-axiom isStrictPi_quote_iff {n k : ℕ} (ψ : ArithmeticSemisentence k) :
-    IsStrictPi n (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚷 n ψ
+private def IsStrictClass : Polarity → ℕ → V → Prop
+  | .sigma, s, p => IsStrictSigma s p
+  | .pi, s, p => IsStrictPi s p
+
+/-- A formula in an external strict class has a code in the matching internal strict class, by
+induction on the derivation.
+- [HP98, Lemma I.1.69] -/
+private lemma isStrictClass_quote {Γ : Polarity} {s n : ℕ} {ψ : ArithmeticSemiproposition n}
+    (h : StrictHierarchy Γ s ψ) : IsStrictClass Γ s (⌜ψ⌝ : V) := by
+  induction h with
+  | @zero Γ₀ n₀ φ₀ hφ₀ =>
+    rcases Γ₀ with _ | _
+    · exact (isDelta0_quote_iff_s φ₀).mpr hφ₀
+    · exact (isDelta0_quote_iff_s φ₀).mpr hφ₀
+  | @ofAlt Γ₀ s₀ n₀ φ₀ _ ih =>
+    rcases Γ₀ with _ | _
+    · exact IsStrictSigma.of_pi ih
+    · exact IsStrictPi.of_sigma ih
+  | exs _ ih =>
+    show IsStrictSigma _ _
+    rw [Semiformula.quote_ex]
+    exact IsStrictSigma.exs ih
+  | all _ ih =>
+    show IsStrictPi _ _
+    rw [Semiformula.quote_all]
+    exact IsStrictPi.all ih
+
+/-- Peeling one existential quantifier off a quoted formula: a formula whose code is a coded
+existential quantification is itself an existential quantification, and its body quotes to the
+body of the code.
+- [HP98, Lemma I.1.69] -/
+private lemma exists_ex_of_quote_eq_qqExs {n : ℕ} (ψ : ArithmeticSemiproposition n) {p : ℕ}
+    (h : (⌜ψ⌝ : ℕ) = ^∃ p) :
+    ∃ ψ' : ArithmeticSemiproposition (n + 1), ψ = ∃¹ ψ' ∧ (⌜ψ'⌝ : ℕ) = p := by
+  induction ψ using Semiformula.rec' with
+  | hverum => simp [qqVerum, qqExs] at h
+  | hfalsum => simp [qqFalsum, qqExs] at h
+  | hrel _ _ => simp [qqRel, qqExs] at h
+  | hnrel _ _ => simp [qqNRel, qqExs] at h
+  | hand _ _ _ _ => simp [qqAnd, qqExs] at h
+  | hor _ _ _ _ => simp [qqOr, qqExs] at h
+  | hall _ _ => simp [qqAll, qqExs] at h
+  | hexs φ _ => exact ⟨φ, rfl, by simpa using h⟩
+
+/-- Peeling one universal quantifier off a quoted formula, dual to `exists_ex_of_quote_eq_qqExs`.
+- [HP98, Lemma I.1.69] -/
+private lemma exists_all_of_quote_eq_qqAll {n : ℕ} (ψ : ArithmeticSemiproposition n) {p : ℕ}
+    (h : (⌜ψ⌝ : ℕ) = ^∀ p) :
+    ∃ ψ' : ArithmeticSemiproposition (n + 1), ψ = ∀¹ ψ' ∧ (⌜ψ'⌝ : ℕ) = p := by
+  induction ψ using Semiformula.rec' with
+  | hverum => simp [qqVerum, qqAll] at h
+  | hfalsum => simp [qqFalsum, qqAll] at h
+  | hrel _ _ => simp [qqRel, qqAll] at h
+  | hnrel _ _ => simp [qqNRel, qqAll] at h
+  | hand _ _ _ _ => simp [qqAnd, qqAll] at h
+  | hor _ _ _ _ => simp [qqOr, qqAll] at h
+  | hexs _ _ => simp [qqExs, qqAll] at h
+  | hall φ _ => exact ⟨φ, rfl, by simpa using h⟩
+
+/-- Joint converse of `isStrictClass_quote` over the standard model, by recursion on the level and,
+at a successor level, by induction on the length of the witnessing quantifier block.
+- [HP98, Lemma I.1.69] -/
+private theorem strictHierarchy_of_isStrict_nat :
+    ∀ s : ℕ,
+      (∀ {n : ℕ} (ψ : ArithmeticSemiproposition n),
+        IsStrictSigma s (⌜ψ⌝ : ℕ) → StrictHierarchy 𝚺 s ψ) ∧
+      (∀ {n : ℕ} (ψ : ArithmeticSemiproposition n),
+        IsStrictPi s (⌜ψ⌝ : ℕ) → StrictHierarchy 𝚷 s ψ)
+  | 0 => ⟨fun ψ h ↦ .zero ((isDelta0_quote_iff_s ψ).mp h),
+      fun ψ h ↦ .zero ((isDelta0_quote_iff_s ψ).mp h)⟩
+  | s + 1 => by
+    obtain ⟨ihS, ihP⟩ := strictHierarchy_of_isStrict_nat s
+    have keyS : ∀ k : ℕ, ∀ {n : ℕ} (ψ : ArithmeticSemiproposition n) (q : ℕ),
+        (⌜ψ⌝ : ℕ) = qqExss q k → IsStrictPi s q → StrictHierarchy 𝚺 (s + 1) ψ := by
+      intro k
+      induction k with
+      | zero =>
+        intro n ψ q heq hq
+        rw [qqExss_zero] at heq
+        subst heq
+        exact .ofAlt (ihP ψ hq)
+      | succ k ih =>
+        intro n ψ q heq hq
+        rw [qqExss_succ] at heq
+        obtain ⟨ψ', rfl, heq'⟩ := exists_ex_of_quote_eq_qqExs ψ heq
+        exact .exs (ih ψ' q heq' hq)
+    have keyP : ∀ k : ℕ, ∀ {n : ℕ} (ψ : ArithmeticSemiproposition n) (q : ℕ),
+        (⌜ψ⌝ : ℕ) = qqAlls q k → IsStrictSigma s q → StrictHierarchy 𝚷 (s + 1) ψ := by
+      intro k
+      induction k with
+      | zero =>
+        intro n ψ q heq hq
+        rw [qqAlls_zero] at heq
+        subst heq
+        exact .ofAlt (ihS ψ hq)
+      | succ k ih =>
+        intro n ψ q heq hq
+        rw [qqAlls_succ] at heq
+        obtain ⟨ψ', rfl, heq'⟩ := exists_all_of_quote_eq_qqAll ψ heq
+        exact .all (ih ψ' q heq' hq)
+    exact ⟨fun ψ h ↦ by obtain ⟨k, q, heq, hq⟩ := h; exact keyS k ψ q heq hq,
+      fun ψ h ↦ by obtain ⟨k, q, heq, hq⟩ := h; exact keyP k ψ q heq hq⟩
+
+/-- Internal strict `Σₛ` recognition over the standard model agrees with the external class.
+- [HP98, Lemma I.1.69] -/
+private lemma isStrictSigma_quote_iff_nat {s n : ℕ} (ψ : ArithmeticSemiproposition n) :
+    IsStrictSigma s (⌜ψ⌝ : ℕ) ↔ StrictHierarchy 𝚺 s ψ :=
+  ⟨(strictHierarchy_of_isStrict_nat s).1 ψ, fun h ↦ isStrictClass_quote h⟩
+
+/-- Internal strict `Πₛ` recognition over the standard model agrees with the external class.
+- [HP98, Lemma I.1.69] -/
+private lemma isStrictPi_quote_iff_nat {s n : ℕ} (ψ : ArithmeticSemiproposition n) :
+    IsStrictPi s (⌜ψ⌝ : ℕ) ↔ StrictHierarchy 𝚷 s ψ :=
+  ⟨(strictHierarchy_of_isStrict_nat s).2 ψ, fun h ↦ isStrictClass_quote h⟩
+
+/-- Internal strict `Σₛ` recognition agrees with the external class on quoted formulas, in any
+model of `𝗜𝚺₁`: the recognizer is `𝚫₁`, hence absolute between `ℕ` and `V` on the standard code
+of `ψ`.
+- [HP98, Lemma I.1.69] -/
+lemma isStrictSigma_quote_iff_s {s n : ℕ} (ψ : ArithmeticSemiproposition n) :
+    IsStrictSigma s (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚺 s ψ :=
+  have h : V ⊧/![(⌜ψ⌝ : V)] (isStrictSigma s).val ↔ ℕ ⊧/![(⌜ψ⌝ : ℕ)] (isStrictSigma s).val := by
+    simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
+      using models_iff_of_Delta1 (V := V) (σ := isStrictSigma s)
+        (IsStrictSigma.defined (V := ℕ) s).proper (IsStrictSigma.defined (V := V) s).proper
+        (e := ![⌜ψ⌝])
+  by simpa [(IsStrictSigma.defined (V := V) s).df, (IsStrictSigma.defined (V := ℕ) s).df,
+    isStrictSigma_quote_iff_nat] using h
+
+/-- Internal strict `Πₛ` recognition agrees with the external class on quoted formulas, in any
+model of `𝗜𝚺₁`.
+- [HP98, Lemma I.1.69] -/
+lemma isStrictPi_quote_iff_s {s n : ℕ} (ψ : ArithmeticSemiproposition n) :
+    IsStrictPi s (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚷 s ψ :=
+  have h : V ⊧/![(⌜ψ⌝ : V)] (isStrictPi s).val ↔ ℕ ⊧/![(⌜ψ⌝ : ℕ)] (isStrictPi s).val := by
+    simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
+      using models_iff_of_Delta1 (V := V) (σ := isStrictPi s)
+        (IsStrictPi.defined (V := ℕ) s).proper (IsStrictPi.defined (V := V) s).proper
+        (e := ![⌜ψ⌝])
+  by simpa [(IsStrictPi.defined (V := V) s).df, (IsStrictPi.defined (V := ℕ) s).df,
+    isStrictPi_quote_iff_nat] using h
+
+/-- Internal strict `Σₛ` recognition agrees with the external class on quoted semisentences.
+- [HP98, Lemma I.1.69] -/
+lemma isStrictSigma_quote_iff {n k : ℕ} (ψ : ArithmeticSemisentence k) :
+    IsStrictSigma n (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚺 n ψ := by
+  simp [Sentence.quote_def, isStrictSigma_quote_iff_s]
+
+/-- Internal strict `Πₛ` recognition agrees with the external class on quoted semisentences.
+- [HP98, Lemma I.1.69] -/
+lemma isStrictPi_quote_iff {n k : ℕ} (ψ : ArithmeticSemisentence k) :
+    IsStrictPi n (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚷 n ψ := by
+  simp [Sentence.quote_def, isStrictPi_quote_iff_s]
 
 end LO.FirstOrder.Arithmetic.Bootstrapping

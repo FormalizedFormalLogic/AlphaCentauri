@@ -19,37 +19,7 @@
 
 version: v0
 
-# The unproved statements themselves (84).
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.all:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.all
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.defined:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.defined
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.mono:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.mono
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.neg:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.neg
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.of_all:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.of_all
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.defined:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.defined
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.exs:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.exs
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.mono:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.mono
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.neg:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.neg
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.of_exs:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.of_exs
+# The unproved statements themselves (61).
 LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
@@ -134,42 +104,6 @@ LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.subst:
 LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum
-LO.FirstOrder.Arithmetic.Bootstrapping.index_le_qqExss:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.index_le_qqExss
-LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi_quote_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi_quote_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
-LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma_quote_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma_quote_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.isUFormula_qqExss:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isUFormula_qqExss
-LO.FirstOrder.Arithmetic.Bootstrapping.le_qqExss:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.le_qqExss
-LO.FirstOrder.Arithmetic.Bootstrapping.len_vecAppend:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.len_vecAppend
-LO.FirstOrder.Arithmetic.Bootstrapping.neg_qqAlls:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.neg_qqAlls
-LO.FirstOrder.Arithmetic.Bootstrapping.neg_qqExss:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.neg_qqExss
-LO.FirstOrder.Arithmetic.Bootstrapping.nth_vecAppend_of_le:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.nth_vecAppend_of_le
-LO.FirstOrder.Arithmetic.Bootstrapping.nth_vecAppend_of_lt:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.nth_vecAppend_of_lt
 LO.FirstOrder.Arithmetic.Bootstrapping.satPi:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
@@ -194,9 +128,6 @@ LO.FirstOrder.Arithmetic.ISigma1.provable_snowing:
 LO.FirstOrder.Arithmetic.ISigma1.provable_tarski:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma1.provable_tarski
-LO.FirstOrder.Arithmetic.StrictHierarchy.mono:
-  forgive:
-    - LO.FirstOrder.Arithmetic.StrictHierarchy.mono
 LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
   forgive:
     - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound
@@ -273,15 +204,7 @@ LO.FirstOrder.provablyTotal_of_primrec':
   forgive:
     - LO.FirstOrder.provablyTotal_of_primrec'
 
-# Declarations that inherit the debt of an unproved statement (53).
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.definable:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictPi.defined
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.definable:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.IsStrictSigma.defined
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
+# Declarations that inherit the debt of an unproved statement (48).
 LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.definable:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.defined
@@ -306,15 +229,6 @@ LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.or_iff._simp_2:
 LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum._simp_2:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum
-LO.FirstOrder.Arithmetic.Bootstrapping.index_le_qqExss._simp_2:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.index_le_qqExss
-LO.FirstOrder.Arithmetic.Bootstrapping.isUFormula_qqExss._simp_2:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isUFormula_qqExss
-LO.FirstOrder.Arithmetic.Bootstrapping.le_qqExss._simp_2:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.le_qqExss
 LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
@@ -326,48 +240,38 @@ LO.FirstOrder.Arithmetic.Tarski.satPiAll:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
 LO.FirstOrder.Arithmetic.Tarski.satPiDom:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
 LO.FirstOrder.Arithmetic.Tarski.satPiNeg:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
 LO.FirstOrder.Arithmetic.Tarski.satPiOfSigma:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.Tarski.satSigmaAxioms:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.Tarski.satSigmaAxioms.eq_1:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.Tarski.satSigmaDom:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
 LO.FirstOrder.Arithmetic.Tarski.satSigmaExs:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
 LO.FirstOrder.Arithmetic.Tarski.satSigmaNeg:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
 LO.FirstOrder.Arithmetic.Tarski.satSigmaOfPi:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
@@ -418,99 +322,71 @@ LO.FirstOrder.Arithmetic.snowing:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
 LO.FirstOrder.Arithmetic.tarski:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below.casesOn:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below.new:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below.prev:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below.rec:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.below.zero:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.brecOn:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.casesOn:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.new:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.rec:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.recOn:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski.zero:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero
 LO.FirstOrder.Arithmetic.tarski_finite:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictPi
-    - LO.FirstOrder.Arithmetic.Bootstrapping.isStrictSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satPi
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigma
     - LO.FirstOrder.Arithmetic.Bootstrapping.satZero

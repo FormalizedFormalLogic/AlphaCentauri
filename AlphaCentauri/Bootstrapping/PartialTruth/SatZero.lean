@@ -23,13 +23,9 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-- Equality is the binary relation of `ℒₒᵣ` with index `0`, in plain numerals.
-- No source; a numeral restatement of `Arithmetic.LOR_rel_eqIndex`. -/
 @[simp] lemma isRel_two_zero : (ℒₒᵣ).IsRel (2 : V) 0 := by
   simpa using Arithmetic.LOR_rel_eqIndex (V := V)
 
-/-- Less-than is the binary relation of `ℒₒᵣ` with index `1`, in plain numerals.
-- No source; a numeral restatement of `Arithmetic.LOR_rel_ltIndex`. -/
 @[simp] lemma isRel_two_one : (ℒₒᵣ).IsRel (2 : V) 1 := by
   simpa using Arithmetic.LOR_rel_ltIndex (V := V)
 
@@ -41,12 +37,8 @@ lemma IsDelta0.of_qqBex {u p : V} (h : IsDelta0 (qqBex u p)) : IsDelta0 p := by
   obtain ⟨-, rfl⟩ := (qqAnd_inj _ _ _ _).mp heq
   exact hq'
 
-/-- The code of `ℒₒᵣ`'s equality symbol is the numeral `0`.
-- No source; a quoted restatement of `coe_eqIndex_eq`. -/
 lemma coe_quote_eq : (⌜(Language.Eq.eq : (ℒₒᵣ).Rel 2)⌝ : V) = 0 := coe_eqIndex_eq
 
-/-- The code of `ℒₒᵣ`'s less-than symbol is the numeral `1`.
-- No source; a quoted restatement of `coe_ltIndex_eq`. -/
 lemma coe_quote_lt : (⌜(Language.LT.lt : (ℒₒᵣ).Rel 2)⌝ : V) = 1 := coe_ltIndex_eq
 
 /-- A well-formed positive atom of `ℒₒᵣ` is a coded equality or a coded less-than.
@@ -73,16 +65,11 @@ lemma nrel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^nrel k r v)) :
 
 /-! ## Substitution and the coded quantifiers -/
 
-/-- A code whose bound shift is a semiterm one level up is itself a semiterm: the converse of
-`IsSemiterm.termBShift`.
-- No source; a routine coding fact. -/
 lemma isSemiterm_of_termBShift {n t : V} (ht : IsUTerm ℒₒᵣ t)
     (h : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t)) : IsSemiterm ℒₒᵣ n t :=
   (IsSemiterm.def (L := ℒₒᵣ)).mpr
     ⟨ht, (termBV_termBShift_le (L := ℒₒᵣ) ht n).mp ((IsSemiterm.def (L := ℒₒᵣ)).mp h).2⟩
 
-/-- Inversion of the semiformula condition at a bounded universal code.
-- No source; a routine coding fact. -/
 lemma isSemiformula_qqBall {n t p : V} (ht : IsUTerm ℒₒᵣ t)
     (h : IsSemiformula ℒₒᵣ n (qqBall (termBShift ℒₒᵣ t) p)) :
     IsSemiterm ℒₒᵣ n t ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
@@ -90,8 +77,6 @@ lemma isSemiformula_qqBall {n t p : V} (ht : IsUTerm ℒₒᵣ t)
     simpa [qqBall, Arithmetic.qqNLT] using h
   exact ⟨isSemiterm_of_termBShift ht h'.1, h'.2⟩
 
-/-- Inversion of the semiformula condition at a bounded existential code.
-- No source; a routine coding fact. -/
 lemma isSemiformula_qqBex {n t p : V} (ht : IsUTerm ℒₒᵣ t)
     (h : IsSemiformula ℒₒᵣ n (qqBex (termBShift ℒₒᵣ t) p)) :
     IsSemiterm ℒₒᵣ n t ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
@@ -127,8 +112,7 @@ lemma substs_qqNLT {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒ�
       = (termSubst ℒₒᵣ w t) ^≮ (termSubst ℒₒᵣ w u) := by
   simp [Arithmetic.qqNLT, ht, hu]
 
-/-- Substitution commutes with the bounded universal coding operation: the untyped form of
-Foundation's `substs_ball`.
+/-- Substitution commutes with the bounded universal coding operation.
 - [HP98, 1.64(4)] -/
 lemma substs_qqBall {n m w t p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t)
     (hp : IsUFormula ℒₒᵣ p) :
@@ -212,11 +196,7 @@ lemma IsDelta0.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
         (ih (n + 1) (m + 1) (qVec ℒₒᵣ w) hw.qVec hq)
   exact H p h n m w hw hp
 
-/-- `SatZero z e` says that the internally coded `Δ₀` formula `z` is satisfied by `e`. The
-well-formedness of `z` is part of the definition, as in the source, where satisfaction is
-introduced only for `Δ₀` formulas* and their evaluations*: a table alone does not witness it,
-since a code whose bounded quantifier has an empty range carries a table no matter what its
-body is.
+/-- `SatZero z e` says that `z` is an internally coded `Δ₀` formula satisfied by `e`.
 - [HP98, Definition I.1.71(2)] -/
 def SatZero (z e : V) : Prop :=
   (IsDelta0 z ∧ IsUFormula ℒₒᵣ z) ∧ ∃ q, PSatZero q z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ q
@@ -227,8 +207,7 @@ variable {z e p q t u : V}
 
 /-! ## Reading satisfaction off a table -/
 
-/-- Satisfaction at a node of a table is the value the table takes there: the two tables agree
-at the node, since it belongs to both domains.
+/-- Satisfaction at a node of a table is the value the table takes there.
 - [HP98, Lemma I.1.72(2)] -/
 lemma iff_mem {r z e p e' : V} (hr : PSatZero r z e) (hn : ⟪p, e'⟫ ∈ domain r)
     (hp : IsDelta0 p) (hp' : IsUFormula ℒₒᵣ p) :
@@ -245,8 +224,7 @@ lemma iff_mem {r z e p e' : V} (hr : PSatZero r z e) (hn : ⟪p, e'⟫ ∈ domai
 lemma iff_val {r : V} (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) (hr : PSatZero r z e) :
     SatZero z e ↔ ⟪⟪z, e⟫, 1⟫ ∈ r := iff_mem hr hr.mem_dom_root hz hz'
 
-/-- On the `Δ₀` domain, the `𝚺₁` and the `𝚷₁` readings of satisfaction agree: a table exists,
-and all tables give the root the same value.
+/-- Existential and universal table characterizations of `Δ₀` satisfaction agree.
 - [HP98, Lemma I.1.73(1)] -/
 lemma exists_iff_forall (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) :
     (∃ r, PSatZero r z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ r) ↔ ∀ r, PSatZero r z e → ⟪⟪z, e⟫, 1⟫ ∈ r := by
@@ -383,9 +361,7 @@ lemma nlt_iff {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) 
     exact (iff_val hd hf hr).mpr ((hr.val_and hr.mem_dom_root).mpr
       ⟨(iff_mem hr hn₁ hdp hfp).mp h₁, (iff_mem hr hn₂ hdq hfq).mp h₂⟩)
 
-/-- Satisfaction commutes with coded disjunction. Unlike conjunction, the disjuncts have to be
-assumed well-formed: one satisfied disjunct says nothing about the shape of the other, while
-satisfaction of the disjunction carries the well-formedness of both.
+/-- Satisfaction commutes with coded disjunction of well-formed formulas.
 - [HP98, Theorem I.1.70(ii)] -/
 @[simp] lemma or_iff {p q e : V} (hdp : IsDelta0 p) (hfp : IsUFormula ℒₒᵣ p)
     (hdq : IsDelta0 q) (hfq : IsUFormula ℒₒᵣ q) :

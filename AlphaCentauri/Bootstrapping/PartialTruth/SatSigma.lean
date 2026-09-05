@@ -4,7 +4,7 @@ public import AlphaCentauri.Bootstrapping.Prenex
 public import AlphaCentauri.Bootstrapping.PartialTruth.SatZero
 
 /-!
-# Satisfaction for prenex `Σₙ` and `Πₙ` formulas
+# Satisfaction for prenex `𝚺-[n]` and `𝚷-[n]` formulas
 
 This module defines satisfaction predicates for the internally coded strict prenex hierarchy and
 proves their definability, Tarski conditions, duality, monotonicity, and substitution laws.
@@ -17,8 +17,7 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 mutual
-  /-- `SatSigma n z e` says that the strict prenex `Σₙ` formula `z` is satisfied by `e`.
-  A positive level peels a block of existential quantifiers and prepends its witnesses to `e`.
+  /-- `SatSigma n z e` says that the strict prenex `𝚺-[n]` formula `z` is satisfied by `e`.
   - [HP98, Definition I.1.74] -/
   def SatSigma : ℕ → V → V → Prop
     | 0 => SatZero
@@ -26,8 +25,7 @@ mutual
         ∃ k q, z = qqExss q k ∧ IsStrictPi n q ∧
           ∃ w, len w = k ∧ SatPi n q (vecAppend w e)
 
-  /-- `SatPi n z e` says that the strict prenex `Πₙ` formula `z` is satisfied by `e`.
-  At a positive level it is defined by duality through coded negation.
+  /-- `SatPi n z e` says that the strict prenex `𝚷-[n]` formula `z` is satisfied by `e`.
   - [HP98, Definition I.1.74] -/
   def SatPi : ℕ → V → V → Prop
     | 0 => SatZero
@@ -35,9 +33,7 @@ mutual
         IsStrictPi (n + 1) z ∧ IsUFormula ℒₒᵣ z ∧ ¬SatSigma (n + 1) (neg ℒₒᵣ z) e
 end
 
-/-- Builds the `𝚷ₘ₊₁` formula for `SatPi (m + 1)` from the `𝚺ₘ₊₁` formula for `SatSigma (m + 1)`:
-`Πₘ₊₁` satisfaction is membership in the domain together with failure of `Σₘ₊₁` satisfaction of
-the negation.
+/-- The `𝚷-[m + 1]` formula for `SatPi (m + 1)` associated with a formula for `SatSigma (m + 1)`.
 - [HP98, Definition I.1.74] -/
 noncomputable def piOfSigma (m : ℕ) (σ : 𝚺-[m + 1].Semisentence 2) :
     𝚷-[m + 1].Semisentence 2 := .mkPi
@@ -53,8 +49,7 @@ noncomputable def piOfSigma (m : ℕ) (σ : 𝚺-[m + 1].Semisentence 2) :
     have h4 : Hierarchy 𝚺 (m + 1) σ.val := σ.sigma_prop
     simp [h1, h2, h3, h4])
 
-/-- Builds the `𝚺ₘ₊₂` formula for `SatSigma (m + 2)` from the `𝚷ₘ₊₁` formula for `SatPi (m + 1)`,
-by peeling one block of existential quantifiers off a strict `Πₘ₊₁` matrix.
+/-- The `𝚺-[m + 2]` formula for `SatSigma (m + 2)` associated with a formula for `SatPi (m + 1)`.
 - [HP98, Definition I.1.74] -/
 noncomputable def sigmaOfPi (m : ℕ) (π : 𝚷-[m + 1].Semisentence 2) :
     𝚺-[m + 2].Semisentence 2 := .mkSigma
@@ -72,8 +67,7 @@ noncomputable def sigmaOfPi (m : ℕ) (π : 𝚷-[m + 1].Semisentence 2) :
     have h5 : Hierarchy 𝚺 (m + 2) π.val := π.pi_prop.accum 𝚺
     simp [h1, h2, h3, h4, h5])
 
-/-- The `𝚺₁` formula for `satSigma 0`, i.e. for `SatSigma 1`: an existential block over a strict
-`Π₀ = Δ₀` matrix, tested against `satZero` (since `SatPi 0` is definitionally `SatZero`).
+/-- The `𝚺₁` formula for `SatSigma 1`.
 - [HP98, Definition I.1.74] -/
 noncomputable def sigmaZero : 𝚺-[1].Semisentence 2 := .mkSigma
   “z e. ∃ k q w e', !qqExssDef z q k ∧ !(isStrictPi 0).val q ∧ !lenDef k w ∧
@@ -87,25 +81,23 @@ noncomputable def sigmaZero : 𝚺-[1].Semisentence 2 := .mkSigma
       HierarchySymbol.Semiformula.val_sigma satZero ▸ satZero.sigma.sigma_prop
     simp [h1, h2, h3, h4, h5])
 
-/-- The `𝚺ₙ₊₁` formula defining `SatSigma (n + 1)`, with arguments `(z, e)`, by recursion on `n`.
+/-- The `𝚺-[n + 1]` formula defining `SatSigma (n + 1)`, with arguments `(z, e)`.
 - [HP98, Definition I.1.74]
 - [HP98, Theorem I.1.75(1)] -/
 noncomputable def satSigma : (n : ℕ) → 𝚺-[n + 1].Semisentence 2
   | 0 => sigmaZero
   | n + 1 => sigmaOfPi n (piOfSigma n (satSigma n))
 
-/-- The `𝚷ₙ₊₁` formula defining `SatPi (n + 1)`, with arguments `(z, e)`.
+/-- The `𝚷-[n + 1]` formula defining `SatPi (n + 1)`, with arguments `(z, e)`.
 - [HP98, Definition I.1.74]
 - [HP98, Theorem I.1.75(1)] -/
 noncomputable def satPi (n : ℕ) : 𝚷-[n + 1].Semisentence 2 := piOfSigma n (satSigma n)
 
-/-- `satPi` unfolds to `piOfSigma` applied to `satSigma` at the same level; recorded so `satSigma`'s
-successor equation reads directly in terms of `satPi`.
+/-- `satPi` unfolds to `piOfSigma` applied to `satSigma` at the same level.
 - [HP98, Definition I.1.74] -/
 private lemma satSigma_succ (n : ℕ) : satSigma (n + 1) = sigmaOfPi n (satPi n) := rfl
 
-/-- Derives definedness of `piOfSigma m σ` for `SatPi (m + 1)` from definedness of `σ` for
-`SatSigma (m + 1)`.
+/-- `piOfSigma m σ` defines `SatPi (m + 1)` when `σ` defines `SatSigma (m + 1)`.
 - [HP98, Theorem I.1.75(1)] -/
 private lemma piDefined_of_sigmaDefined {m : ℕ} {σ : 𝚺-[m + 1].Semisentence 2}
     (hσ : 𝚺-[m + 1]-Relation (SatSigma (m + 1) : V → V → Prop) via σ) :
@@ -113,8 +105,7 @@ private lemma piDefined_of_sigmaDefined {m : ℕ} {σ : 𝚺-[m + 1].Semisentenc
   have := hσ
   simp [piOfSigma, SatPi]
 
-/-- Derives definedness of `sigmaOfPi m π` for `SatSigma (m + 2)` from definedness of `π` for
-`SatPi (m + 1)`.
+/-- `sigmaOfPi m π` defines `SatSigma (m + 2)` when `π` defines `SatPi (m + 1)`.
 - [HP98, Theorem I.1.75(1)] -/
 private lemma sigmaDefined_of_piDefined {m : ℕ} {π : 𝚷-[m + 1].Semisentence 2}
     (hπ : 𝚷-[m + 1]-Relation (SatPi (m + 1) : V → V → Prop) via π) :
@@ -128,8 +119,7 @@ private lemma sigmaZero_defined :
     𝚺-[1]-Relation (SatSigma 1 : V → V → Prop) via sigmaZero := .mk fun v ↦ by
   simp [sigmaZero, SatSigma, SatPi]
 
-/-- Definedness of `satSigma n` for `SatSigma (n + 1)`, by recursion on `n`, deriving definedness
-of `satPi n` for `SatPi (n + 1)` along the way.
+/-- Definedness of `satSigma n` for `SatSigma (n + 1)`.
 - [HP98, Theorem I.1.75(1)] -/
 private lemma sigmaDefined : ∀ n : ℕ, 𝚺-[n + 1]-Relation (SatSigma (n + 1) : V → V → Prop) via satSigma n
   | 0 => sigmaZero_defined
@@ -137,24 +127,24 @@ private lemma sigmaDefined : ∀ n : ℕ, 𝚺-[n + 1]-Relation (SatSigma (n + 1
     rw [satSigma_succ]
     exact sigmaDefined_of_piDefined (piDefined_of_sigmaDefined (sigmaDefined n))
 
-/-- The formula `satSigma n` defines satisfaction for strict prenex `Σₙ₊₁` formulas.
+/-- The formula `satSigma n` defines satisfaction for strict prenex `𝚺-[n + 1]` formulas.
 - [HP98, Theorem I.1.75(1)] -/
 instance SatSigma.defined (n : ℕ) :
     𝚺-[n + 1]-Relation (SatSigma (n + 1) : V → V → Prop) via satSigma n := sigmaDefined n
 
-/-- The formula `satPi n` defines satisfaction for strict prenex `Πₙ₊₁` formulas.
+/-- The formula `satPi n` defines satisfaction for strict prenex `𝚷-[n + 1]` formulas.
 - [HP98, Theorem I.1.75(1)] -/
 instance SatPi.defined (n : ℕ) :
     𝚷-[n + 1]-Relation (SatPi (n + 1) : V → V → Prop) via satPi n :=
   piDefined_of_sigmaDefined (sigmaDefined n)
 
-/-- Satisfaction for strict prenex `Σₙ₊₁` formulas is definable at level `Σₙ₊₁`.
+/-- Satisfaction for strict prenex `𝚺-[n + 1]` formulas is definable at level `𝚺-[n + 1]`.
 - [HP98, Theorem I.1.75(1)] -/
 instance SatSigma.definable (n : ℕ) :
     𝚺-[n + 1]-Relation (SatSigma (n + 1) : V → V → Prop) :=
   (SatSigma.defined n).to_definable
 
-/-- Satisfaction for strict prenex `Πₙ₊₁` formulas is definable at level `Πₙ₊₁`.
+/-- Satisfaction for strict prenex `𝚷-[n + 1]` formulas is definable at level `𝚷-[n + 1]`.
 - [HP98, Theorem I.1.75(1)] -/
 instance SatPi.definable (n : ℕ) :
     𝚷-[n + 1]-Relation (SatPi (n + 1) : V → V → Prop) :=
@@ -182,7 +172,7 @@ private lemma satPi_succ_iff {n : ℕ} {z e : V} :
     SatPi (n + 1) z e ↔ IsStrictPi (n + 1) z ∧ IsUFormula ℒₒᵣ z ∧
       ¬SatSigma (n + 1) (neg ℒₒᵣ z) e := by rw [SatPi]
 
-/-- Strict `Πₙ` satisfaction implies membership in its syntactic domain.
+/-- Strict `𝚷-[n]` satisfaction implies membership in its syntactic domain.
 - [HP98, Theorem I.1.75(2)] -/
 theorem SatPi.dom {n : ℕ} {z e : V} (h : SatPi n z e) :
     IsStrictPi n z ∧ IsUFormula ℒₒᵣ z := by
@@ -190,7 +180,7 @@ theorem SatPi.dom {n : ℕ} {z e : V} (h : SatPi n z e) :
   | 0 => exact SatZero.dom (by simpa using h)
   | _ + 1 => exact ⟨(satPi_succ_iff.mp h).1, (satPi_succ_iff.mp h).2.1⟩
 
-/-- Strict `Σₙ` satisfaction implies membership in its syntactic domain.
+/-- Strict `𝚺-[n]` satisfaction implies membership in its syntactic domain.
 - [HP98, Theorem I.1.75(2)] -/
 theorem SatSigma.dom {n : ℕ} {z e : V} (h : SatSigma n z e) :
     IsStrictSigma n z ∧ IsUFormula ℒₒᵣ z := by
@@ -200,7 +190,7 @@ theorem SatSigma.dom {n : ℕ} {z e : V} (h : SatSigma n z e) :
     obtain ⟨k, q, rfl, hq, w, -, hsat⟩ := satSigma_succ_iff.mp h
     exact ⟨⟨k, q, rfl, hq⟩, isUFormula_qqExss.mpr (SatPi.dom hsat).2⟩
 
-/-- `Πₙ` satisfaction of a negated strict `Σₙ` formula is failure of `Σₙ` satisfaction.
+/-- `𝚷-[n]` satisfaction of a negated strict `𝚺-[n]` formula is failure of `𝚺-[n]` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
 theorem SatPi.neg_iff {n : ℕ} {z e : V} (hz : IsStrictSigma n z)
     (hz' : IsUFormula ℒₒᵣ z) : SatPi n (neg ℒₒᵣ z) e ↔ ¬SatSigma n z e := by
@@ -210,7 +200,7 @@ theorem SatPi.neg_iff {n : ℕ} {z e : V} (hz : IsStrictSigma n z)
     rw [satPi_succ_iff, IsUFormula.neg_neg hz']
     simp [IsStrictSigma.neg hz' hz, hz']
 
-/-- `Σₙ` satisfaction of a negated strict `Πₙ` formula is failure of `Πₙ` satisfaction.
+/-- `𝚺-[n]` satisfaction of a negated strict `𝚷-[n]` formula is failure of `𝚷-[n]` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
 theorem SatSigma.neg_iff {n : ℕ} {z e : V} (hz : IsStrictPi n z)
     (hz' : IsUFormula ℒₒᵣ z) : SatSigma n (neg ℒₒᵣ z) e ↔ ¬SatPi n z e := by
@@ -270,8 +260,8 @@ private lemma ex_block_dominates {z M K q k : V} (hMK : z = qqExss M K)
     · exact ⟨0, by simp, by simpa using hMq.symm⟩
     · exact absurd hMq (by rw [qqExss_succ]; exact hM _)
 
-/-- A strict `Πₙ₊₁` code beginning with an existential quantifier has an empty universal block,
-hence is already strict `Σₙ`.
+/-- A strict `𝚷-[n + 1]` code beginning with an existential quantifier has an empty universal block,
+hence is already strict `𝚺-[n]`.
 - [HP98, Lemma I.1.69] -/
 private lemma isStrictSigma_of_isStrictPi_ex {n : ℕ} {p : V} (h : IsStrictPi (n + 1) (^∃ p)) :
     IsStrictSigma n (^∃ p) := by
@@ -299,7 +289,7 @@ private lemma isDelta0_ex_block {z M K : V} (hz : IsDelta0 z) (hMK : z = qqExss 
     · rw [qqExss_succ] at heq
       simp [qqExs, qqAnd, pair_ext_iff] at heq
 
-/-- The matrix of the maximal existential block of a strict `Σₙ₊₁` code is strict `Πₙ`.
+/-- The matrix of the maximal existential block of a strict `𝚺-[n + 1]` code is strict `𝚷-[n]`.
 - [HP98, Lemma I.1.69] -/
 private lemma isStrictPi_ex_block : ∀ (n : ℕ) (z M K : V), IsStrictSigma (n + 1) z →
     z = qqExss M K → (∀ p : V, M ≠ ^∃ p) → IsStrictPi n M
@@ -323,8 +313,6 @@ private lemma isStrictPi_ex_block : ∀ (n : ℕ) (z M K : V), IsStrictSigma (n 
 
 /-! ### Vector blocks -/
 
-/-- Appending coded vectors is associative.
-- No source; this is a routine coding fact. -/
 private lemma vecAppend_assoc (u v e : V) :
     vecAppend (vecAppend u v) e = vecAppend u (vecAppend v e) := by
   induction u using adjoin_ISigma1.sigma1_succ_induction
@@ -332,8 +320,6 @@ private lemma vecAppend_assoc (u v e : V) :
   case nil => simp
   case adjoin x u ih => simp [ih]
 
-/-- A nonempty coded vector splits into its initial segment and its last entry.
-- No source; this is a routine coding fact. -/
 private lemma exists_vecAppend_singleton {k w : V} (h : len w = k + 1) :
     ∃ u x, len u = k ∧ w = vecAppend u ?[x] := by
   have H : ∀ w : V, w ≠ 0 → ∃ u ≤ w, ∃ x ≤ w, len u + 1 = len w ∧ w = vecAppend u ?[x] := by
@@ -375,18 +361,18 @@ private lemma satZero_ex_iff {p e : V} (h : IsDelta0 (^∃ p)) :
 /-! ### The block characterization
 
 Satisfaction is defined through *some* decomposition of the code into an existential block over
-a strict `Πₙ` matrix. `BlockSat` says that the *maximal* block computes it, which makes the
+a strict `𝚷-[n]` matrix. `BlockSat` says that the *maximal* block computes it, which makes the
 definition independent of the decomposition; the Tarski conditions all follow from it, and it is
 itself proved by recursion on the level, since a matrix that still begins with an existential
 quantifier belongs to a lower level. -/
 
-/-- Strict `Σₙ₊₁` satisfaction of `z` is witnessed over the maximal existential block of `z`.
+/-- Strict `𝚺-[n + 1]` satisfaction of `z` is witnessed over the maximal existential block of `z`.
 - [HP98, Theorem I.1.75(2)] -/
 private def BlockSat (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (n : ℕ) : Prop :=
   ∀ z M K e : V, IsStrictSigma (n + 1) z → IsUFormula ℒₒᵣ z → z = qqExss M K →
     (∀ p : V, M ≠ ^∃ p) → (SatSigma (n + 1) z e ↔ ∃ w, len w = K ∧ SatPi n M (vecAppend w e))
 
-/-- An empty existential block at level zero: a `Δ₀` code is `Σ₁`-satisfied exactly when it is
+/-- An empty existential block at level zero: a `Δ₀` code is `𝚺-[1]`-satisfied exactly when it is
 `Δ₀`-satisfied.
 - [HP98, Theorem I.1.75(2)(v)] -/
 private lemma of_pi_zero (hB : BlockSat V 0) {z e : V} (hz : IsDelta0 z)
@@ -564,13 +550,13 @@ private lemma blockSat : ∀ n : ℕ, BlockSat V n := fun n ↦ by
             (vecAppend u (vecAppend w e)) (IsStrictPi.mono (by omega) hMpi') hMu
           exact h2.mp (h1.mp husat)
 
-/-- An empty existential block reads a strict `Πₙ` formula as a `Σₙ₊₁` formula.
+/-- An empty existential block reads a strict `𝚷-[n]` formula as a `𝚺-[n + 1]` formula.
 - [HP98, Theorem I.1.75(2)(v)] -/
 theorem SatSigma.of_pi {n : ℕ} {z e : V} (hz : IsStrictPi n z)
     (hz' : IsUFormula ℒₒᵣ z) : SatSigma (n + 1) z e ↔ SatPi n z e :=
   (of_pi_step n fun m _ ↦ blockSat m).1 z e hz hz'
 
-/-- An empty universal block reads a strict `Σₙ` formula as a `Πₙ₊₁` formula.
+/-- An empty universal block reads a strict `𝚺-[n]` formula as a `𝚷-[n + 1]` formula.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 theorem SatPi.of_sigma {n : ℕ} {z e : V} (hz : IsStrictSigma n z)
     (hz' : IsUFormula ℒₒᵣ z) : SatPi (n + 1) z e ↔ SatSigma n z e :=
@@ -628,7 +614,7 @@ theorem SatPi.all_iff {n : ℕ} {p e : V} :
     rintro ⟨x, hx⟩
     exact (satPi_succ_iff.mp (h x)).2.2 hx
 
-/-- Satisfaction of a strict `Σₘ` formula is stable when viewed at a higher `Σ` level.
+/-- Satisfaction of a strict `𝚺-[m]` formula is stable when viewed at a higher `Σ` level.
 - [HP98, Theorem I.1.75(2)(v)] -/
 theorem SatSigma.mono {m n : ℕ} (h : m ≤ n) {z e : V} (hz : IsStrictSigma m z)
     (hz' : IsUFormula ℒₒᵣ z) : SatSigma m z e ↔ SatSigma n z e := by
@@ -637,7 +623,7 @@ theorem SatSigma.mono {m n : ℕ} (h : m ≤ n) {z e : V} (hz : IsStrictSigma m 
   | succ n hn ih =>
     exact ih.trans ((mono_step n fun i _ ↦ blockSat i).1 z e (IsStrictSigma.mono hn hz) hz')
 
-/-- Satisfaction of a strict `Πₘ` formula is stable when viewed at a higher `Π` level.
+/-- Satisfaction of a strict `𝚷-[m]` formula is stable when viewed at a higher `Π` level.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 theorem SatPi.mono {m n : ℕ} (h : m ≤ n) {z e : V} (hz : IsStrictPi m z)
     (hz' : IsUFormula ℒₒᵣ z) : SatPi m z e ↔ SatPi n z e := by
@@ -813,7 +799,7 @@ private lemma not_ex_subst {M : V} (hM : IsUFormula ℒₒᵣ M) (h : ∀ p : V,
   · rw [substs_all hp]; simp [qqAll, qqExs, pair_ext_iff]
   · exact absurd rfl (h p)
 
-/-- Strict `Σₙ` satisfaction commutes with substitution of a coded vector of terms.
+/-- Strict `𝚺-[n]` satisfaction commutes with substitution of a coded vector of terms.
 - [HP98, Theorem I.1.75(2)] -/
 theorem SatSigma.subst {n : ℕ} {m l w p e : V} (hw : IsSemitermVec ℒₒᵣ m l w)
     (hp : IsSemiformula ℒₒᵣ m p) (hp' : IsStrictSigma n p) :
@@ -849,8 +835,7 @@ theorem SatSigma.subst {n : ℕ} {m l w p e : V} (hw : IsSemitermVec ℒₒᵣ m
 
 /-! ## Satisfaction under an externally supplied vector -/
 
-/-- `satSigmaVec n k` defines `SatSigma (n + 1)` under the vector formed by its `k`
-free variables. This is the formula used by the corresponding induction scheme.
+/-- `satSigmaVec n k` defines `SatSigma (n + 1)` under its `k` free variables.
 
 - [HP98, Remark I.1.77]
 - [HP98, Definition I.1.78(2)] -/
@@ -861,7 +846,7 @@ noncomputable def satSigmaVec (n k : ℕ) : 𝚺-[n + 1].Semisentence (k + 1) :=
   (by simp [lenDef.sigma_prop.mono (Nat.le_add_left 1 n),
     nthDef.sigma_prop.mono (Nat.le_add_left 1 n)])
 
-/-- The formula `satSigmaVec n k` defines strict `Σₙ₊₁` satisfaction under its variables.
+/-- The formula `satSigmaVec n k` defines strict `𝚺-[n + 1]` satisfaction under its variables.
 - [HP98, Remark I.1.77]
 - [HP98, Definition I.1.78(2)] -/
 theorem satSigmaVec.defined (n k : ℕ) :

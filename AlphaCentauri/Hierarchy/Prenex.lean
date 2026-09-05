@@ -4,9 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 
 /-! # Prenex arithmetical classes
 
-The strict hierarchy records the prenex alternation pattern separately from the cumulative
-arithmetical hierarchy. Its levels alternate the polarity of the leading unbounded quantifier
-block, while bounded quantifiers remain available at every level.
+Prenex formulas classified by quantifier alternation and leading polarity.
 -/
 
 @[expose] public section
@@ -15,10 +13,8 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT] {ξ : Type*}
 
-/-- `StrictHierarchy Γ s φ`: `φ` is a prenex `Γ`-formula of level `s`: a block of
-quantifiers of the kind `Γ`, followed by a prenex formula of the dual kind one level down,
-with a `Δ₀` matrix at the bottom. Unlike `Hierarchy`, the classes are prenex: level `s + 1`
-is `Q*(level s of the dual kind)`, nothing else.
+/-- `StrictHierarchy Γ s φ` says that `φ` is a prenex `Γ`-formula of level `s`, with a `Δ₀`
+matrix beneath alternating quantifier blocks.
 
 - [HP98, 0.30]
 - [HP98, Lemma I.1.69] -/
@@ -64,8 +60,7 @@ lemma rew {Γ s n₁ n₂} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁}
   | exs h => by simpa using (rew ω.q h).exs
   | all h => by simpa using (rew ω.q h).all
 
-/-- Syntactic rewriting also reflects strict hierarchy classes: a class of `ω ▹ φ` is already a
-class of `φ`, because every constructor of the class determines the shape of the formula.
+/-- If a rewriting of a formula belongs to a strict hierarchy class, so does the formula.
 
 - [HP98, 0.30] -/
 lemma of_rew {Γ s n₂} {ξ₂ : Type*} {ψ : Semiformula L ξ₂ n₂} :

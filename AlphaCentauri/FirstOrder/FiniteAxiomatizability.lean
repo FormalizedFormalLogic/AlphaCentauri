@@ -5,21 +5,14 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 /-!
 # Finite axiomatizability
 
-Foundation defines `Entailment.FiniteAxiomatizable 𝓢` as the existence of a finite `𝓕` with
-`𝓕 ≊ 𝓢`, but supplies no lemmas about it. This file grows the API for first-order theories
-`T : Theory L`:
+Finite axiomatizability for first-order theories:
 
-* the finite **subset** form `finiteAxiomatizable_iff_exists_finite_subset`, obtained from the
-  syntactic compactness of `Theory L` (`Entailment.Compact`) rather than from completeness;
+* the finite **subset** form `finiteAxiomatizable_iff_exists_finite_subset`;
 * the list form `finiteAxiomatizable_iff_exists_list` and the single-sentence form
-  `finiteAxiomatizable_iff_exists_sentence`, the latter by taking the conjunction `⋀l`;
+  `finiteAxiomatizable_iff_exists_sentence`;
 * the characterization `not_finiteAxiomatizable_iff` of the negation;
 * invariance under provability equivalence, `Entailment.FiniteAxiomatizable.of_equiv`;
-* `𝗣𝗔⁻` as an example.
-
-Nothing here is specific to arithmetic: everything lives at the level of `Entailment` and
-`Theory L`, so the file sits under `AlphaCentauri/FirstOrder/` next to Foundation's
-`Logic/Entailment.lean` rather than under the arithmetic hierarchy.
+* finite axiomatizability of `𝗣𝗔⁻`.
 -/
 
 @[expose] public section
@@ -30,11 +23,6 @@ open LO.FirstOrder
 
 variable {L : Language}
 
-/-- For a first-order theory, `AdjunctiveSet.Finite` is `Set.Finite`; the two are definitionally
-equal, since `Theory L` is `Set (Sentence L)` and `AdjunctiveSet.set T` is `{σ | σ ∈ T}`.
-
-This is a routine technical bridge between two spellings of the same predicate, with no
-counterpart in the literature; it is stated only to put the unfolding into the `simp` set. -/
 @[simp] lemma finite_iff_set_finite {T : Theory L} : Finite T ↔ T.Finite := Iff.rfl
 
 end AdjunctiveSet
@@ -45,7 +33,7 @@ open FirstOrder
 
 variable {L : Language} {T U : Theory L}
 
-/-- A finite theory is finitely axiomatizable: it axiomatizes itself.
+/-- Every finite theory is finitely axiomatizable.
 - [Lin97, Ch. 4 §1] -/
 lemma FiniteAxiomatizable.of_finite (h : T.Finite) : FiniteAxiomatizable T :=
   ⟨T, by simpa using h, Equiv.refl T⟩
@@ -57,17 +45,13 @@ lemma FiniteAxiomatizable.of_equiv (h : T ≊ U) :
   rintro ⟨F, hF, hFT⟩
   exact ⟨F, hF, hFT.trans h⟩
 
-/-- A finitely axiomatizable theory is axiomatized by a finite **subset** of itself.
-
-The axiomatizing `𝓕` given by `Entailment.FiniteAxiomatizable` need not consist of axioms of `T`.
-Syntactic compactness of `Theory L` (`Entailment.Compact`, via `Theory.Proof.axioms`) replaces each
-`φ ∈ 𝓕` by a finite set of axioms of `T` proving it; the union over the finitely many `φ ∈ 𝓕` is
-the required finite subtheory. In particular no appeal to the completeness theorem is needed.
+/-- A theory is finitely axiomatizable iff a finite subtheory axiomatizes it.
 - [Lin97, Ch. 4 §1]
 - [HP98, Theorem I.2.52] -/
 lemma finiteAxiomatizable_iff_exists_finite_subset :
     FiniteAxiomatizable T ↔ ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ F ≊ T := by
   constructor
+  -- Syntactic compactness (`Entailment.Compact`), not the completeness theorem, supplies F.
   · rintro ⟨𝓕, h𝓕fin, h𝓕⟩
     replace h𝓕fin : (𝓕 : Set (Sentence L)).Finite := by simpa using h𝓕fin
     have H : ∀ σ : Sentence L, ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ (σ ∈ 𝓕 → F ⊢ σ) := by
@@ -101,8 +85,7 @@ lemma finiteAxiomatizable_iff_exists_list :
   · rintro ⟨l, _, heq⟩
     exact ⟨{σ | σ ∈ l}, by simp, heq⟩
 
-/-- A theory is finitely axiomatizable iff a single sentence axiomatizes it, namely the
-conjunction of a finite list of its axioms.
+/-- A theory is finitely axiomatizable iff a single sentence axiomatizes it.
 - [Lin97, Ch. 4 §1]
 - [HP98, Theorem I.2.52] -/
 lemma finiteAxiomatizable_iff_exists_sentence :
@@ -138,12 +121,7 @@ end LO.Entailment
 
 namespace LO.FirstOrder.Arithmetic
 
-/-- `𝗣𝗔⁻` is finitely axiomatizable: it is already a finite theory.
-
-Immediate from `PeanoMinus.finite`, so it has no separate source of its own; the cited section is
-where the notion of a finitely axiomatized theory is set up.
-
-`Entailment.FiniteAxiomatizable` is a `def`, not a class, so this cannot be an `instance`.
+/-- `𝗣𝗔⁻` is finitely axiomatizable.
 - [Lin97, Ch. 4 §1] -/
 lemma PeanoMinus.finiteAxiomatizable :
     Entailment.FiniteAxiomatizable (𝗣𝗔⁻ : ArithmeticTheory) :=

@@ -135,14 +135,10 @@ section vecAppend
 
 namespace VecAppend
 
-/-- Vector-recursion blueprint for appending two coded vectors.
-- No source; this is a routine coding construction. -/
 def blueprint : VecRec.Blueprint 1 where
   nil := .mkSigma “y w. y = w”
   adjoin := .mkSigma “y x xs ih w. !adjoinDef y x ih”
 
-/-- Vector-recursive construction for appending two coded vectors.
-- No source; this is a routine coding construction. -/
 noncomputable def construction : VecRec.Construction V blueprint where
   nil param := param 0
   adjoin (_ x _ ih) := x ∷ ih
@@ -155,46 +151,30 @@ end VecAppend
 - No source; this is a routine coding construction. -/
 noncomputable def vecAppend (v w : V) : V := VecAppend.construction.result ![w] v
 
-/-- Appending to the empty coded vector returns the second vector.
-- No source; this is a routine coding fact. -/
 @[simp] lemma vecAppend_nil (w : V) : vecAppend 0 w = w := by
   simp [vecAppend, VecAppend.construction]
 
-/-- Appending preserves the head of a nonempty coded vector.
-- No source; this is a routine coding fact. -/
 @[simp] lemma vecAppend_adjoin (x v w : V) : vecAppend (x ∷ v) w = x ∷ vecAppend v w := by
   simp [vecAppend, VecAppend.construction]
 
-/-- Defining formula for appending coded vectors.
-- No source; this is a routine coding construction. -/
 def _root_.LO.FirstOrder.Arithmetic.vecAppendDef : 𝚺₁.Semisentence 3 :=
   VecAppend.blueprint.resultDef
 
-/-- Appending coded vectors is `𝚺₁`-definable.
-- No source; this is a routine coding construction. -/
 instance vecAppend_defined : 𝚺₁-Function₂ (vecAppend : V → V → V) via vecAppendDef :=
   VecAppend.construction.result_defined
 
-/-- The `𝚺₁` definability instance for appending coded vectors.
-- No source; this is a routine coding construction. -/
 instance vecAppend_definable : 𝚺₁-Function₂ (vecAppend : V → V → V) :=
   vecAppend_defined.to_definable
 
-/-- Appending coded vectors is definable at every positive hierarchy level.
-- No source; this is a routine coding construction. -/
 instance vecAppend_definable' (Γ m) : Γ-[m + 1]-Function₂ (vecAppend : V → V → V) :=
   vecAppend_definable.of_sigmaOne
 
-/-- The length of an appended vector is the sum of the component lengths.
-- No source; this is a routine coding fact. -/
 @[simp] lemma len_vecAppend (v w : V) : len (vecAppend v w) = len v + len w := by
   induction v using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
   case adjoin x v ih => simp [vecAppend_adjoin, ih, add_right_comm]
 
-/-- An index below the first length reads from the first appended vector.
-- No source; this is a routine coding fact. -/
 lemma nth_vecAppend_of_lt {v w i : V} (hi : i < len v) : (vecAppend v w).[i] = v.[i] := by
   induction v using adjoin_ISigma1.pi1_succ_induction generalizing i
   · definability
@@ -205,8 +185,6 @@ lemma nth_vecAppend_of_lt {v w i : V} (hi : i < len v) : (vecAppend v w).[i] = v
     · simp only [vecAppend_adjoin, nth_adjoin_succ]
       exact ih (by simpa using hi)
 
-/-- An index beyond the first length reads from the second appended vector.
-- No source; this is a routine coding fact. -/
 lemma nth_vecAppend_of_le {v w i : V} (hi : len v ≤ i) :
     (vecAppend v w).[i] = w.[i - len v] := by
   induction v using adjoin_ISigma1.pi1_succ_induction generalizing i
@@ -223,13 +201,13 @@ end vecAppend
 /-! ## Internal prenex classes -/
 
 mutual
-  /-- `IsStrictSigma n p` says that `p` codes a strict prenex `Σₙ` formula.
+  /-- `IsStrictSigma n p` says that `p` codes a strict prenex `𝚺-[n]` formula.
   - [HP98, Lemma I.1.69] -/
   def IsStrictSigma : ℕ → V → Prop
     | 0 => IsDelta0
     | n + 1 => fun p ↦ ∃ k q, p = qqExss q k ∧ IsStrictPi n q
 
-  /-- `IsStrictPi n p` says that `p` codes a strict prenex `Πₙ` formula.
+  /-- `IsStrictPi n p` says that `p` codes a strict prenex `𝚷-[n]` formula.
   - [HP98, Lemma I.1.69] -/
   def IsStrictPi : ℕ → V → Prop
     | 0 => IsDelta0
@@ -237,7 +215,7 @@ mutual
 end
 
 mutual
-  /-- A `𝚫₁` recognizer for internally coded strict prenex `Σₙ` formulas.
+  /-- A `𝚫₁` recognizer for internally coded strict prenex `𝚺-[n]` formulas.
   - [HP98, Lemma I.1.69(1)] -/
   noncomputable def isStrictSigma : ℕ → 𝚫₁.Semisentence 1
     | 0 => isDelta0
@@ -245,7 +223,7 @@ mutual
         (.mkSigma “p. ∃ k < p + 1, ∃ q < p + 1, !qqExssDef p q k ∧ !(isStrictPi n).sigma q”)
         (.mkPi “p. ∃ k < p + 1, ∃ q < p + 1, (∀ y, !qqExssDef y q k → y = p) ∧ !(isStrictPi n).pi q”)
 
-  /-- A `𝚫₁` recognizer for internally coded strict prenex `Πₙ` formulas.
+  /-- A `𝚫₁` recognizer for internally coded strict prenex `𝚷-[n]` formulas.
   - [HP98, Lemma I.1.69(1)] -/
   noncomputable def isStrictPi : ℕ → 𝚫₁.Semisentence 1
     | 0 => isDelta0
@@ -264,7 +242,7 @@ private lemma exists_block_iff {f : V → V → V} (hmatrix : ∀ q k : V, q ≤
     fun ⟨k, q, heq, hq⟩ ↦ ⟨k, heq ▸ hlength q k, q, heq ▸ hmatrix q k, heq, hq⟩⟩
 
 mutual
-  /-- The strict prenex `Σₙ` recognizer defines `IsStrictSigma n`.
+  /-- The strict prenex `𝚺-[n]` recognizer defines `IsStrictSigma n`.
   - [HP98, Lemma I.1.69(1)] -/
   instance IsStrictSigma.defined :
       ∀ n : ℕ, 𝚫₁-Predicate (IsStrictSigma n : V → Prop) via isStrictSigma n
@@ -276,7 +254,7 @@ mutual
           simpa [isStrictSigma, IsStrictSigma, lt_succ_iff_le] using
             exists_block_iff le_qqExss index_le_qqExss (IsStrictPi n) (v 0)⟩
 
-  /-- The strict prenex `Πₙ` recognizer defines `IsStrictPi n`.
+  /-- The strict prenex `𝚷-[n]` recognizer defines `IsStrictPi n`.
   - [HP98, Lemma I.1.69(1)] -/
   instance IsStrictPi.defined :
       ∀ n : ℕ, 𝚫₁-Predicate (IsStrictPi n : V → Prop) via isStrictPi n
@@ -290,34 +268,34 @@ mutual
             exists_block_iff le_qqAlls index_le_qqAlls (IsStrictSigma n) (v 0)⟩
 end
 
-/-- Internal strict prenex `Σₙ` membership is `𝚫₁`-definable.
+/-- Internal strict prenex `𝚺-[n]` membership is `𝚫₁`-definable.
 - [HP98, Lemma I.1.69(1)] -/
 instance IsStrictSigma.definable (n : ℕ) : 𝚫₁-Predicate (IsStrictSigma n : V → Prop) :=
   (IsStrictSigma.defined n).to_definable
 
-/-- Internal strict prenex `Πₙ` membership is `𝚫₁`-definable.
+/-- Internal strict prenex `𝚷-[n]` membership is `𝚫₁`-definable.
 - [HP98, Lemma I.1.69(1)] -/
 instance IsStrictPi.definable (n : ℕ) : 𝚫₁-Predicate (IsStrictPi n : V → Prop) :=
   (IsStrictPi.defined n).to_definable
 
-/-- A strict `Πₙ` formula belongs to the next strict `Σ` level via an empty block.
+/-- A strict `𝚷-[n]` formula belongs to the next strict `Σ` level.
 - [HP98, Lemma I.1.69] -/
 lemma IsStrictSigma.of_pi {n : ℕ} {p : V} (h : IsStrictPi n p) : IsStrictSigma (n + 1) p :=
   ⟨0, p, (qqExss_zero p).symm, h⟩
 
-/-- A strict `Σₙ` formula belongs to the next strict `Π` level via an empty block.
+/-- A strict `𝚺-[n]` formula belongs to the next strict `Π` level.
 - [HP98, Lemma I.1.69] -/
 lemma IsStrictPi.of_sigma {n : ℕ} {p : V} (h : IsStrictSigma n p) : IsStrictPi (n + 1) p :=
   ⟨0, p, (qqAlls_zero p).symm, h⟩
 
-/-- A strict `Σₙ₊₁` class is closed under existential quantification.
+/-- A strict `𝚺-[n + 1]` class is closed under existential quantification.
 - [HP98, Lemma I.1.69] -/
 lemma IsStrictSigma.exs {n : ℕ} {p : V} (h : IsStrictSigma (n + 1) p) :
     IsStrictSigma (n + 1) (^∃ p) := by
   obtain ⟨k, q, rfl, hq⟩ := h
   exact ⟨k + 1, q, (qqExss_succ q k).symm, hq⟩
 
-/-- A strict `Πₙ₊₁` class is closed under universal quantification.
+/-- A strict `𝚷-[n + 1]` class is closed under universal quantification.
 - [HP98, Lemma I.1.69] -/
 lemma IsStrictPi.all {n : ℕ} {p : V} (h : IsStrictPi (n + 1) p) :
     IsStrictPi (n + 1) (^∀ p) := by
@@ -325,13 +303,13 @@ lemma IsStrictPi.all {n : ℕ} {p : V} (h : IsStrictPi (n + 1) p) :
   exact ⟨k + 1, q, (qqAlls_succ q k).symm, hq⟩
 
 mutual
-  /-- An internally `Δ₀` formula is strict `Σₙ` at every level.
+  /-- An internally `Δ₀` formula is strict `𝚺-[n]` at every level.
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictSigma.of_delta0 : ∀ {n : ℕ} {p : V}, IsDelta0 p → IsStrictSigma n p
     | 0,     _, h => h
     | _ + 1, _, h => IsStrictSigma.of_pi (IsStrictPi.of_delta0 h)
 
-  /-- An internally `Δ₀` formula is strict `Πₙ` at every level.
+  /-- An internally `Δ₀` formula is strict `𝚷-[n]` at every level.
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictPi.of_delta0 : ∀ {n : ℕ} {p : V}, IsDelta0 p → IsStrictPi n p
     | 0,     _, h => h
@@ -358,7 +336,7 @@ mutual
       exact ⟨k, q, rfl, IsStrictSigma.mono (by omega) hq⟩
 end
 
-/-- The body of a `Δ₀` code of an existential quantification is strict `Σ₁`.
+/-- The body of a `Δ₀` code of an existential quantification is strict `𝚺-[1]`.
 - [HP98, Lemma I.1.69] -/
 private lemma isStrictSigma_one_of_isDelta0_exs {p : V} (h : IsDelta0 (^∃ p)) :
     IsStrictSigma 1 p := by
@@ -367,7 +345,7 @@ private lemma isStrictSigma_one_of_isDelta0_exs {p : V} (h : IsDelta0 (^∃ p)) 
     rw [Arithmetic.qqLT]; exact IsDelta0.rel
   exact IsStrictSigma.of_pi (IsDelta0.and_iff.mpr ⟨h₁, hq⟩)
 
-/-- The body of a `Δ₀` code of a universal quantification is strict `Π₁`.
+/-- The body of a `Δ₀` code of a universal quantification is strict `𝚷-[1]`.
 - [HP98, Lemma I.1.69] -/
 private lemma isStrictPi_one_of_isDelta0_alls {p : V} (h : IsDelta0 (^∀ p)) :
     IsStrictPi 1 p := by
@@ -377,7 +355,7 @@ private lemma isStrictPi_one_of_isDelta0_alls {p : V} (h : IsDelta0 (^∀ p)) :
   exact IsStrictPi.of_sigma (IsDelta0.or_iff.mpr ⟨h₁, hq⟩)
 
 mutual
-  /-- Removing a leading existential from a strict `Πₙ` code lands in strict `Σₙ₊₁`.
+  /-- Removing a leading existential from a strict `𝚷-[n]` code lands in strict `𝚺-[n + 1]`.
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictPi.of_exs_aux :
       ∀ {n : ℕ} {p : V}, IsStrictPi n (^∃ p) → IsStrictSigma (n + 1) p
@@ -389,7 +367,7 @@ mutual
         exact IsStrictSigma.mono (by omega) (IsStrictSigma.of_exs_aux hq)
       · rw [qqAlls_succ] at heq; simp [qqExs, qqAll, pair_ext_iff] at heq
 
-  /-- Removing a leading existential from a strict `Σₙ` code lands in strict `Σₙ₊₁`.
+  /-- Removing a leading existential from a strict `𝚺-[n]` code lands in strict `𝚺-[n + 1]`.
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictSigma.of_exs_aux :
       ∀ {n : ℕ} {p : V}, IsStrictSigma n (^∃ p) → IsStrictSigma (n + 1) p
@@ -405,7 +383,7 @@ mutual
 end
 
 mutual
-  /-- Removing a leading universal from a strict `Σₙ` code lands in strict `Πₙ₊₁`.
+  /-- Removing a leading universal from a strict `𝚺-[n]` code lands in strict `𝚷-[n + 1]`.
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictSigma.of_all_aux :
       ∀ {n : ℕ} {p : V}, IsStrictSigma n (^∀ p) → IsStrictPi (n + 1) p
@@ -417,7 +395,7 @@ mutual
         exact IsStrictPi.mono (by omega) (IsStrictPi.of_all_aux hq)
       · rw [qqExss_succ] at heq; simp [qqExs, qqAll, pair_ext_iff] at heq
 
-  /-- Removing a leading universal from a strict `Πₙ` code lands in strict `Πₙ₊₁`.
+  /-- Removing a leading universal from a strict `𝚷-[n]` code lands in strict `𝚷-[n + 1]`.
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictPi.of_all_aux :
       ∀ {n : ℕ} {p : V}, IsStrictPi n (^∀ p) → IsStrictPi (n + 1) p
@@ -457,7 +435,7 @@ lemma IsStrictPi.of_all {n : ℕ} {p : V} (h : IsStrictPi (n + 1) (^∀ p)) :
     exact ⟨k, q, heq, hq⟩
 
 mutual
-  /-- Negation sends internally coded strict `Σₙ` formulas to strict `Πₙ` formulas.
+  /-- Negation sends internally coded strict `𝚺-[n]` formulas to strict `𝚷-[n]` formulas.
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictSigma.neg :
       ∀ {n : ℕ} {p : V}, IsUFormula ℒₒᵣ p → IsStrictSigma n p → IsStrictPi n (neg ℒₒᵣ p)
@@ -467,7 +445,7 @@ mutual
       have hq' : IsUFormula ℒₒᵣ q := isUFormula_qqExss.mp hp
       exact ⟨k, neg ℒₒᵣ q, neg_qqExss hq', IsStrictPi.neg hq' hq⟩
 
-  /-- Negation sends internally coded strict `Πₙ` formulas to strict `Σₙ` formulas.
+  /-- Negation sends internally coded strict `𝚷-[n]` formulas to strict `𝚺-[n]` formulas.
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictPi.neg :
       ∀ {n : ℕ} {p : V}, IsUFormula ℒₒᵣ p → IsStrictPi n p → IsStrictSigma n (neg ℒₒᵣ p)
@@ -480,16 +458,15 @@ end
 
 /-! ## Agreement with the external strict hierarchy on quoted formulas -/
 
-/-- The internal strict class selected by a polarity. It lets one induction on a
-`StrictHierarchy` derivation, whose polarity the `zero` and `ofAlt` constructors leave open,
-produce the `Σ` and the `Π` statement at once.
+/-- The internal strict class selected by a polarity.
 - [HP98, Lemma I.1.69] -/
+-- Indexed by polarity so a single induction on a `StrictHierarchy` derivation proves the `Σ`
+-- and `Π` cases at once.
 private def IsStrictClass : Polarity → ℕ → V → Prop
   | .sigma, s, p => IsStrictSigma s p
   | .pi, s, p => IsStrictPi s p
 
-/-- A formula in an external strict class has a code in the matching internal strict class, by
-induction on the derivation.
+/-- A formula in an external strict class has a code in the matching internal strict class.
 - [HP98, Lemma I.1.69] -/
 private lemma isStrictClass_quote {Γ : Polarity} {s n : ℕ} {ψ : ArithmeticSemiproposition n}
     (h : StrictHierarchy Γ s ψ) : IsStrictClass Γ s (⌜ψ⌝ : V) := by
@@ -511,9 +488,7 @@ private lemma isStrictClass_quote {Γ : Polarity} {s n : ℕ} {ψ : ArithmeticSe
     rw [Semiformula.quote_all]
     exact IsStrictPi.all ih
 
-/-- Peeling one existential quantifier off a quoted formula: a formula whose code is a coded
-existential quantification is itself an existential quantification, and its body quotes to the
-body of the code.
+/-- A formula whose code is existentially quantified is itself existentially quantified.
 - [HP98, Lemma I.1.69] -/
 private lemma exists_ex_of_quote_eq_qqExs {n : ℕ} (ψ : ArithmeticSemiproposition n) {p : ℕ}
     (h : (⌜ψ⌝ : ℕ) = ^∃ p) :
@@ -522,7 +497,7 @@ private lemma exists_ex_of_quote_eq_qqExs {n : ℕ} (ψ : ArithmeticSemiproposit
   | hexs φ _ => exact ⟨φ, rfl, by simpa using h⟩
   | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs] at h
 
-/-- Peeling one universal quantifier off a quoted formula, dual to `exists_ex_of_quote_eq_qqExs`.
+/-- A formula whose code is universally quantified is itself universally quantified.
 - [HP98, Lemma I.1.69] -/
 private lemma exists_all_of_quote_eq_qqAll {n : ℕ} (ψ : ArithmeticSemiproposition n) {p : ℕ}
     (h : (⌜ψ⌝ : ℕ) = ^∀ p) :
@@ -532,7 +507,7 @@ private lemma exists_all_of_quote_eq_qqAll {n : ℕ} (ψ : ArithmeticSemiproposi
   | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqExs, qqAll] at h
 
 /-- A quoted formula whose code is a block of `k` existentials over a strict `Πₛ` code is strict
-`Σₛ₊₁`, by induction on `k`.
+`Σₛ₊₁`.
 - [HP98, Lemma I.1.69] -/
 private lemma strictHierarchy_sigma_of_quote_eq_qqExss {s : ℕ}
     (ih : ∀ {n : ℕ} (ψ : ArithmeticSemiproposition n),
@@ -548,7 +523,7 @@ private lemma strictHierarchy_sigma_of_quote_eq_qqExss {s : ℕ}
     exact .exs (strictHierarchy_sigma_of_quote_eq_qqExss ih k ψ' q heq' hq)
 
 /-- A quoted formula whose code is a block of `k` universals over a strict `Σₛ` code is strict
-`Πₛ₊₁`, by induction on `k`.
+`Πₛ₊₁`.
 - [HP98, Lemma I.1.69] -/
 private lemma strictHierarchy_pi_of_quote_eq_qqAlls {s : ℕ}
     (ih : ∀ {n : ℕ} (ψ : ArithmeticSemiproposition n),
@@ -564,7 +539,7 @@ private lemma strictHierarchy_pi_of_quote_eq_qqAlls {s : ℕ}
     exact .all (strictHierarchy_pi_of_quote_eq_qqAlls ih k ψ' q heq' hq)
 
 mutual
-  /-- Converse of `isStrictClass_quote` for `Σ` over the standard model.
+  /-- Internal strict `Σₛ` recognition implies external strict `Σₛ` membership.
   - [HP98, Lemma I.1.69] -/
   private lemma strictHierarchy_sigma_of_isStrictSigma_nat :
       ∀ (s : ℕ) {n : ℕ} (ψ : ArithmeticSemiproposition n),
@@ -575,7 +550,7 @@ mutual
       exact strictHierarchy_sigma_of_quote_eq_qqExss
         (strictHierarchy_pi_of_isStrictPi_nat s) k ψ q heq hq
 
-  /-- Converse of `isStrictClass_quote` for `Π` over the standard model.
+  /-- Internal strict `Πₛ` recognition implies external strict `Πₛ` membership.
   - [HP98, Lemma I.1.69] -/
   private lemma strictHierarchy_pi_of_isStrictPi_nat :
       ∀ (s : ℕ) {n : ℕ} (ψ : ArithmeticSemiproposition n),
@@ -599,9 +574,7 @@ private lemma isStrictPi_quote_iff_nat {s n : ℕ} (ψ : ArithmeticSemipropositi
     IsStrictPi s (⌜ψ⌝ : ℕ) ↔ StrictHierarchy 𝚷 s ψ :=
   ⟨strictHierarchy_pi_of_isStrictPi_nat s ψ, fun h ↦ isStrictClass_quote h⟩
 
-/-- Internal strict `Σₛ` recognition agrees with the external class on quoted formulas, in any
-model of `𝗜𝚺₁`: the recognizer is `𝚫₁`, hence absolute between `ℕ` and `V` on the standard code
-of `ψ`.
+/-- Internal strict `Σₛ` recognition agrees with the external class on quoted formulas.
 - [HP98, Lemma I.1.69] -/
 lemma isStrictSigma_quote_iff_s {s n : ℕ} (ψ : ArithmeticSemiproposition n) :
     IsStrictSigma s (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚺 s ψ :=
@@ -613,8 +586,7 @@ lemma isStrictSigma_quote_iff_s {s n : ℕ} (ψ : ArithmeticSemiproposition n) :
   by simpa [(IsStrictSigma.defined (V := V) s).df, (IsStrictSigma.defined (V := ℕ) s).df,
     isStrictSigma_quote_iff_nat] using h
 
-/-- Internal strict `Πₛ` recognition agrees with the external class on quoted formulas, in any
-model of `𝗜𝚺₁`.
+/-- Internal strict `Πₛ` recognition agrees with the external class on quoted formulas.
 - [HP98, Lemma I.1.69] -/
 lemma isStrictPi_quote_iff_s {s n : ℕ} (ψ : ArithmeticSemiproposition n) :
     IsStrictPi s (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚷 s ψ :=

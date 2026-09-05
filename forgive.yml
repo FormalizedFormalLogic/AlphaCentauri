@@ -62,9 +62,6 @@ LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
 LO.FirstOrder.Arithmetic.ISigma1.provable_snowing:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma1.provable_snowing
-LO.FirstOrder.Arithmetic.ISigma1.provable_tarski:
-  forgive:
-    - LO.FirstOrder.Arithmetic.ISigma1.provable_tarski
 LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
   forgive:
     - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound
@@ -139,6 +136,60 @@ LO.FirstOrder.provablyTotal_of_primrec':
     - LO.FirstOrder.provablyTotal_of_primrec'
 
 # Declarations that inherit the debt of an unproved statement.
+LO.FirstOrder.Arithmetic.ISigma1.provable_tarski:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.dom
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.neg_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.dom
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.neg_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi
+LO.FirstOrder.Arithmetic.Tarski.models_satPiAll:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff
+LO.FirstOrder.Arithmetic.Tarski.models_satPiDom:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.dom
+LO.FirstOrder.Arithmetic.Tarski.models_satPiNeg:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.neg_iff
+LO.FirstOrder.Arithmetic.Tarski.models_satPiOfSigma:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma
+LO.FirstOrder.Arithmetic.Tarski.models_satSigmaAxioms:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.dom
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.neg_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.dom
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.neg_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi
+LO.FirstOrder.Arithmetic.Tarski.models_satSigmaDom:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.dom
+LO.FirstOrder.Arithmetic.Tarski.models_satSigmaExs:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff
+LO.FirstOrder.Arithmetic.Tarski.models_satSigmaNeg:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.neg_iff
+LO.FirstOrder.Arithmetic.Tarski.models_satSigmaOfPi:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi
+LO.FirstOrder.Arithmetic.models_tarski:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.dom
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.neg_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.dom
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.neg_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi
 LO.FirstOrder.Arithmetic.satClass_quote_iff:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff

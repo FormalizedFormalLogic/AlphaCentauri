@@ -6,6 +6,7 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZeroExists
 public import AlphaCentauri.Bootstrapping.PartialTruth.SatSigma
 public import AlphaCentauri.Bootstrapping.PartialTruth.SatZero
 public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
+public import AlphaCentauri.Bootstrapping.PartialTruth.Tarski
 public import AlphaCentauri.Bootstrapping.Prenex
 public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.FiniteAxiomatizability.ISigma

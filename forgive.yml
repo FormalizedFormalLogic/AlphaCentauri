@@ -20,48 +20,12 @@
 version: v0
 
 # The unproved statements themselves.
-LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.dom:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.dom
-LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.mono:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.mono
-LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.neg_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.neg_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.dom:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.dom
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.mono:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.mono
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.neg_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.neg_iff
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.subst:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.subst
 LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence
 LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable
-LO.FirstOrder.Arithmetic.ISigma1.provable_snowing:
-  forgive:
-    - LO.FirstOrder.Arithmetic.ISigma1.provable_snowing
 LO.FirstOrder.Arithmetic.ISigma1.provable_tarski:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma1.provable_tarski
@@ -86,12 +50,6 @@ LO.FirstOrder.Arithmetic.provablyTotal_of_primrec:
 LO.FirstOrder.Arithmetic.provablyTotal_of_primrec':
   forgive:
     - LO.FirstOrder.Arithmetic.provablyTotal_of_primrec'
-LO.FirstOrder.Arithmetic.satPi_quote_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.satPi_quote_iff
-LO.FirstOrder.Arithmetic.satSigma_quote_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.satSigma_quote_iff
 LO.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection:
   forgive:
     - LO.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection
@@ -136,9 +94,3 @@ LO.FirstOrder.provablyTotal_of_primrec':
     - LO.FirstOrder.provablyTotal_of_primrec'
 
 # Declarations that inherit the debt of an unproved statement.
-LO.FirstOrder.Arithmetic.satClass_quote_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi

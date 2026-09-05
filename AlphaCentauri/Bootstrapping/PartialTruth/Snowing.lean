@@ -20,8 +20,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 /-! ## Codes of quoted semisentences
 
 Foundation's `quote_*` lemmas compute the code of a `Semiproposition`. A `Semisentence` is
-quoted through its embedding (`Sentence.quote_def`), so each of them has a counterpart here,
-proved by unfolding that embedding. -/
+quoted through its embedding (`Sentence.quote_def`), so each of them has a counterpart here. -/
 
 /-- A coded closed term is a well-formed internal term.
 - [HP98, 1.66] -/
@@ -111,9 +110,7 @@ private lemma quote_bex_sentence {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k)
 
 /-! ## Agreement of satisfaction with truth -/
 
-/-- For a bounded formula, internal `Δ₀` satisfaction of its code agrees with truth. This is the
-base case of the snowing lemma, by recursion on the bounded formula: each clause is the matching
-Tarski condition of `SatZero`, and the atoms are `termVal_quote`.
+/-- For a bounded formula, internal `Δ₀` satisfaction of its code agrees with truth.
 - [HP98, Theorem I.1.70]
 - [HP98, Corollary I.1.76] -/
 theorem satZero_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
@@ -162,16 +159,13 @@ theorem satZero_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)]
     simp [Function.comp_def]
 
-/-- The satisfaction predicate selected by a polarity. It lets one induction on a
-`StrictHierarchy` derivation, whose polarity the `zero` and `ofAlt` constructors leave open,
-produce the `Σ` and the `Π` statement at once.
+/-- The satisfaction predicate selected by a polarity: `SatSigma` for `Σ`, `SatPi` for `Π`.
 - [HP98, Definition I.1.74] -/
 def SatClass : Polarity → ℕ → V → V → Prop
   | .sigma, n, z, e => SatSigma n z e
   | .pi, n, z, e => SatPi n z e
 
-/-- Internal satisfaction of the code of a strict prenex formula agrees with truth, by induction
-on the derivation of its strict class.
+/-- Internal satisfaction of the code of a strict prenex formula agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
 lemma satClass_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
@@ -211,28 +205,27 @@ lemma satClass_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentenc
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp]
     exact ih (x :> v)
 
-/-- For a strict prenex `Σₙ` formula, internal satisfaction of its code agrees with truth.
+/-- For a strict prenex `𝚺-[n]` formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
 theorem satSigma_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 n φ) (v : Fin k → V) :
     SatSigma n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := satClass_quote_iff hφ v
 
-/-- For a strict prenex `Πₙ` formula, internal satisfaction of its code agrees with truth.
+/-- For a strict prenex `𝚷-[n]` formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
 theorem satPi_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
     SatPi n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := satClass_quote_iff hφ v
 
-/-- The sentence asserting agreement of `φ` with its level-`Σₙ₊₁` partial truth definition.
+/-- The sentence asserting agreement of `φ` with its level-`𝚺-[n + 1]` partial truth definition.
 - [HP98, Corollary I.1.76] -/
 noncomputable def snowing (n : ℕ) {k : ℕ}
     (φ : ArithmeticSemisentence k) : ArithmeticSentence :=
   ∀¹* (φ 🡘 (satSigmaVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
 
-/-- Semantic interpretation of the sentence `snowing n φ`: the substituted right-hand side is
-the defining formula of `satSigmaVec`, read under the assignment given by the free variables.
+/-- Semantic characterization of the sentence `snowing n φ`.
 - [HP98, Corollary I.1.76] -/
 theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
     V↓[ℒₒᵣ] ⊧ snowing n φ ↔
@@ -351,36 +344,36 @@ noncomputable def termValMul : ArithmeticSentence :=
     (!termValGraph.val v e s ↔ v = vt * vu)”
 
 /-- Coded vector adjunction is total.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def adjoinTotal : ArithmeticSentence :=
   “∀ x v, ∃ e, !adjoinDef.val e x v”
 
 /-- Coded vector adjunction is functional.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def adjoinUnique : ArithmeticSentence :=
   “∀ x v e e', !adjoinDef.val e x v → !adjoinDef.val e' x v → e = e'”
 
 /-- The head of an adjoined coded vector is its new entry.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def nthAdjoinZero : ArithmeticSentence :=
   “∀ x v e y, !adjoinDef.val e x v → (!nthDef.val y e 0 ↔ y = x)”
 
 /-- Successor indices into an adjoined coded vector read from its tail.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def nthAdjoinSucc : ArithmeticSentence :=
   “∀ x v e i y, !adjoinDef.val e x v →
     (!nthDef.val y e (i + 1) ↔ !nthDef.val y v i)”
 
 /-- The empty coded vector has length zero.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def lenNil : ArithmeticSentence := “∀ l, !lenDef.val l 0 ↔ l = 0”
 
 /-- Adjunction increases the length of a coded vector by one.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def lenAdjoin : ArithmeticSentence :=
   “∀ x v e l, !adjoinDef.val e x v → (!lenDef.val (l + 1) e ↔ !lenDef.val l v)”
 
-/-- The empty-block Tarski condition for reading `Πₙ` satisfaction as `Σₙ₊₁` satisfaction.
+/-- The empty-block Tarski condition for reading `𝚷-[n]` satisfaction as `𝚺-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)(v)] -/
 noncomputable def satSigmaOfPi : ℕ → ArithmeticSentence
   | 0 =>
@@ -390,7 +383,7 @@ noncomputable def satSigmaOfPi : ℕ → ArithmeticSentence
       “∀ z e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
         (!(satSigma (n + 1)).val z e ↔ !(satPi n).val z e)”
 
-/-- The empty-block Tarski condition for reading `Σₙ` satisfaction as `Πₙ₊₁` satisfaction.
+/-- The empty-block Tarski condition for reading `𝚺-[n]` satisfaction as `𝚷-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 noncomputable def satPiOfSigma : ℕ → ArithmeticSentence
   | 0 =>
@@ -400,40 +393,40 @@ noncomputable def satPiOfSigma : ℕ → ArithmeticSentence
       “∀ z e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
         (!(satPi (n + 1)).val z e ↔ !(satSigma n).val z e)”
 
-/-- The domain Tarski condition for `Σₙ₊₁` satisfaction.
+/-- The domain Tarski condition for `𝚺-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satSigmaDom (n : ℕ) : ArithmeticSentence :=
   “∀ z e, !(satSigma n).val z e →
     !(isStrictSigma (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
-/-- The domain Tarski condition for `Πₙ₊₁` satisfaction.
+/-- The domain Tarski condition for `𝚷-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satPiDom (n : ℕ) : ArithmeticSentence :=
   “∀ z e, !(satPi n).val z e →
     !(isStrictPi (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
-/-- The Tarski condition for existential quantification at level `Σₙ₊₁`.
+/-- The Tarski condition for existential quantification at level `𝚺-[n + 1]`.
 - [HP98, Theorem I.1.75(2)(v)] -/
 noncomputable def satSigmaExs (n : ℕ) : ArithmeticSentence :=
   “∀ p z e, !qqExsDef.val z p →
     (!(satSigma n).val z e ↔
       ∃ x e', !adjoinDef.val e' x e ∧ !(satSigma n).val p e')”
 
-/-- The Tarski condition for universal quantification at level `Πₙ₊₁`.
+/-- The Tarski condition for universal quantification at level `𝚷-[n + 1]`.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 noncomputable def satPiAll (n : ℕ) : ArithmeticSentence :=
   “∀ p z e, !qqAllDef.val z p →
     (!(satPi n).val z e ↔
       ∀ x e', !adjoinDef.val e' x e → !(satPi n).val p e')”
 
-/-- The negation-duality Tarski condition from `Σₙ₊₁` to `Πₙ₊₁`.
+/-- The negation-duality Tarski condition from `𝚺-[n + 1]` to `𝚷-[n + 1]`.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satPiNeg (n : ℕ) : ArithmeticSentence :=
   “∀ z nz e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
     !(negGraph ℒₒᵣ).val nz z →
     (!(satPi n).val nz e ↔ ¬!(satSigma n).val z e)”
 
-/-- The negation-duality Tarski condition from `Πₙ₊₁` to `Σₙ₊₁`.
+/-- The negation-duality Tarski condition from `𝚷-[n + 1]` to `𝚺-[n + 1]`.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satSigmaNeg (n : ℕ) : ArithmeticSentence :=
   “∀ z nz e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
@@ -458,11 +451,7 @@ noncomputable def satSigmaAxioms (n : ℕ) : ArithmeticTheory :=
 
 end Tarski
 
-/-- `tarski n` contains the finitely many Tarski conditions through level `n + 1`, together
-with the vector and term-evaluation facts used in the proof of the snowing lemma. Its exact
-membership may grow during the proof stage; downstream arguments use only finiteness and
-`𝗜𝚺₁`-provability.
-
+/-- `tarski n` contains the Tarski, vector, and term-evaluation conditions through level `n + 1`.
 - [HP98, Remark I.1.77] -/
 inductive tarski : ℕ → ArithmeticTheory
   | zero : ∀ φ ∈ Tarski.satZeroAxioms, tarski 0 φ
@@ -498,14 +487,13 @@ lemma tarski_finite (n : ℕ) : (tarski n).Finite := by
 - [HP98, Remark I.1.77] -/
 axiom ISigma1.provable_tarski (n : ℕ) : 𝗜𝚺₁ ⊢* tarski n
 
-/-- The theory form of the snowing lemma follows from `𝗣𝗔⁻` and the finite Tarski theory.
+/-- `𝗣𝗔⁻` together with the finite Tarski theory proves the snowing lemma.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
 axiom provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ
 
-/-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `Σₙ₊₁` formula: the two sides
-agree in every model of `𝗜𝚺₁` by `satSigma_quote_iff`, so completeness delivers a proof.
+/-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `𝚺-[n + 1]` formula.
 - [HP98, Corollary I.1.76] -/
 theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ snowing n φ := by

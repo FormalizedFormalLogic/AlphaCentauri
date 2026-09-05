@@ -19,8 +19,7 @@ namespace LO.FirstOrder
 
 variable {T : ArithmeticTheory}
 
-/-- `T` is reflexive if it proves the consistency of each of its finite subtheories `U`, presented
-by `Theory.Δ₁.ofFinite`.
+/-- `T` is reflexive if it proves the consistency of every finite subtheory.
 - [Lin97, Ch. 1 p. 18]
 - [HP98, Definition III.2.32] -/
 def ArithmeticTheory.Reflexive (T : ArithmeticTheory) : Prop :=
@@ -34,13 +33,6 @@ def ArithmeticTheory.EssentiallyReflexive (T : ArithmeticTheory) : Prop :=
   ∀ U : ArithmeticTheory, T ⊆ U → U.Reflexive
 
 /-- A reflexive extension of `𝗜𝚺₁` is not finitely axiomatizable.
-
-If a finite `F ⊆ T` axiomatized `T`, reflexivity would give `T ⊢ Con(F)`, hence `F ⊢ Con(F)`,
-contradicting the second incompleteness theorem for `F`, which is `Δ₁`, contains `𝗜𝚺₁` and is
-consistent. The finite subtheory is taken as a subset of `T` through
-`finiteAxiomatizable_iff_exists_finite_subset`, and its `Theory.Δ₁` presentation is the one
-`ArithmeticTheory.Reflexive` fixes, so that the consistency statement `T` proves is the one
-`consistent_unprovable` speaks about.
 - [Lin97, Corollary 2.1]
 - [HP98, Corollary III.2.24] -/
 theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T]
@@ -54,12 +46,6 @@ theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T]
   exact Arithmetic.consistent_unprovable F (hequiv.symm.le.wk hcon)
 
 /-- `𝗜𝚺₂` proves the consistency of `𝗜𝚺₁`.
-
-This is the `k = 1` case of the general fact that `𝗜𝚺 (k + 1)` proves the consistency of `𝗜𝚺 k`
-for every `k`. The general statement needs a `(𝗜𝚺 k).Δ₁` instance for every `k`, but Foundation
-currently only supplies `(𝗜𝚺 k).Δ₁` for `k = 1` (`ISigma1_delta1Definable` in
-`Foundation.FirstOrder.Incompleteness.Delta1`; there is no such instance for a general `𝗜𝚺 k`),
-so the statement here is restricted to the case that instance supports.
 - [HP98, Corollary I.4.34(1)] -/
 axiom ISigma.provable_con_ISigma1 : 𝗜𝚺 2 ⊢ (𝗜𝚺₁ : ArithmeticTheory).consistent.val
 

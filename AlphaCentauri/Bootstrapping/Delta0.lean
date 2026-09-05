@@ -22,7 +22,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 - [HP98, 0.30] -/
 noncomputable def qqBex (u q : V) : V := ^∃ ((^#0 ^< u) ^⋏ q)
 
-/-- This bound is a routine coding fact corresponding to the construction in HP98.
+/-- The coded body is a proper subcode of the bounded existential formula.
 - [HP98, 0.30] -/
 @[simp] lemma lt_q_qqBex (u q : V) : q < qqBex u q :=
   lt_trans (lt_K!_right _ _) (lt_exists _)
@@ -45,8 +45,6 @@ instance qqBex_defined : 𝚺₁-Function₂ (qqBex : V → V → V) via qqBexDe
 instance qqBex_definable (Γ m) : Γ-[m + 1]-Function₂ (qqBex : V → V → V) :=
   .of_sigmaOne qqBex_defined.to_definable
 
-/-- Negation translates a bounded universal code to a bounded existential code.
-- This is a routine translation of bounded quantifier duality; no separate source theorem. -/
 lemma neg_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
     neg ℒₒᵣ (qqBall u q) = qqBex u (neg ℒₒᵣ q) := by
   have hlt : IsUFormula ℒₒᵣ (Arithmetic.qqNLT (qqBvar 0) u) := by simp [Arithmetic.qqNLT, hu]
@@ -55,8 +53,6 @@ lemma neg_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ
     neg_all (by simp [hlt, hq]), neg_or hlt hq]
   simp [Arithmetic.qqNLT, Arithmetic.qqLT, hu]
 
-/-- Negation translates a bounded existential code to a bounded universal code.
-- This is the converse routine translation; no separate source theorem. -/
 lemma neg_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
     neg ℒₒᵣ (qqBex u q) = qqBall u (neg ℒₒᵣ q) := by
   have hlt : IsUFormula ℒₒᵣ (Arithmetic.qqLT (qqBvar 0) u) := by simp [Arithmetic.qqLT, hu]
@@ -67,8 +63,7 @@ lemma neg_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ 
 
 namespace IsDelta0F
 
-/-- Single-step operator: `p` is `Δ₀` given that its immediate subformulas are. Mirrors
-`IsSigma1F.Phi`, with the unbounded `^∃` clause replaced by a bounded `qqBex` clause.
+/-- `Phi C p` recognizes one `Δ₀` constructor step over the class `C`.
 - [HP98, Lemma I.1.68] -/
 def Phi (C : Set V) (p : V) : Prop :=
   (p = ^⊤) ∨
@@ -182,8 +177,6 @@ instance : construction.StrongFinite V where
 
 end IsDelta0F
 
-/-- Free-variable shift commutes with the bounded universal coding operation.
-- This is a routine coding fact; no separate source theorem. -/
 lemma shift_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
     shift ℒₒᵣ (qqBall u q) = qqBall (termShift ℒₒᵣ u) (shift ℒₒᵣ q) := by
   have hlt : IsUFormula ℒₒᵣ (Arithmetic.qqNLT (qqBvar 0) u) := by simp [Arithmetic.qqNLT, hu]
@@ -193,8 +186,6 @@ lemma shift_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒ�
     shift_all (by simp [hlt, hq]), shift_or hlt hq]
   simp [Arithmetic.qqNLT, hu]
 
-/-- Free-variable shift commutes with the bounded existential coding operation.
-- This is a routine coding fact; no separate source theorem. -/
 lemma shift_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
     shift ℒₒᵣ (qqBex u q) = qqBex (termShift ℒₒᵣ u) (shift ℒₒᵣ q) := by
   have hlt : IsUFormula ℒₒᵣ (Arithmetic.qqLT (qqBvar 0) u) := by simp [Arithmetic.qqLT, hu]
@@ -204,9 +195,7 @@ lemma shift_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒ�
     shift_exs (by simp [hlt, hq]), shift_and hlt hq]
   simp [Arithmetic.qqLT, hu]
 
-/-- `IsDelta0 p`: `p` codes a `Δ₀` formula (assuming `IsUFormula ℒₒᵣ p`): built from atoms by
-`^⋏`, `^⋎`, `qqBall`, `qqBex`. Mirrors `IsSigma1`, with its unbounded `^∃` clause replaced by
-the bounded `qqBex` clause.
+/-- `IsDelta0 p` says that `p` has the internal shape of a `Δ₀` formula.
 - [HP98, Lemma I.1.68] -/
 def IsDelta0 (p : V) : Prop := IsDelta0F.construction.Fixpoint ![] p
 
@@ -405,8 +394,6 @@ lemma IsDelta0.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
       exact IsDelta0.bex ht.termShift (ih hq)
   exact H p h hp
 
-/-- Every internally `Δ₀` formula is internally `Σ₁`.
-- This is a routine bridge from `Δ₀` to `Σ₁`; no separate source theorem. -/
 lemma IsDelta0.isSigma1 {p : V} (h : IsDelta0 p) : IsSigma1 p := by
   have : 𝚫₁-Predicate (IsSigma1 : V → Prop) := IsSigma1.defined.to_definable
   have H : ∀ p : V, IsDelta0 p → IsSigma1 p := by
@@ -432,8 +419,7 @@ namespace LO.FirstOrder.Arithmetic
 /-! ## Correctness of `IsDelta0`: `IsDelta0 ⌜ψ⌝ ↔ Hierarchy 𝚺 0 ψ` -/
 
 open Bootstrapping in
-/-- The code of a bounded existential quantification is the bounded existential code; the dual
-of Foundation's `quote_ball`.
+/-- The code of a bounded existential quantification is `qqBex` of its bound and body codes.
 - [HP98, 0.30] -/
 lemma quote_bex {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSemiproposition (n + 1)) :
     (⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemiproposition n)⌝ : ℕ)
@@ -547,8 +533,7 @@ lemma isDelta0_iff_hierarchy {n : ℕ} (ψ : ArithmeticSemiproposition n) :
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Bootstrapping in
-/-- Agreement with the external class on quoted formulas, in any model of `𝗜𝚺₁`: the recognizer
-is `𝚫₁`, hence absolute between `ℕ` and `V` on the standard code of `ψ`.
+/-- Internal `Δ₀` recognition of a quoted formula agrees with its external hierarchy class.
 - [HP98, Lemma I.1.68] -/
 lemma isDelta0_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     IsDelta0 (⌜ψ⌝ : V) ↔ Hierarchy 𝚺 0 ψ :=

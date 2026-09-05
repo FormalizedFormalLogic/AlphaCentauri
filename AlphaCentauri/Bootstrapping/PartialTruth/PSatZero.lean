@@ -26,19 +26,13 @@ open Arithmetic (qqEQ qqNEQ qqLT qqNLT)
 
 /-! ## Bounds on the nodes of a finite mapping -/
 
-/-- Every element of the domain of a finite mapping is smaller than the mapping.
-- This is a routine coding fact; no separate source theorem. -/
 lemma lt_of_mem_domain {n q : V} (h : n ∈ domain q) : n < q := by
   obtain ⟨y, hy⟩ := mem_domain_iff.mp h
   exact lt_of_mem_dom hy
 
-/-- The first component of a node of a finite mapping is smaller than the mapping.
-- This is a routine coding fact; no separate source theorem. -/
 lemma fst_lt_of_mem_domain {p e q : V} (h : ⟪p, e⟫ ∈ domain q) : p < q :=
   lt_of_le_of_lt (le_pair_left p e) (lt_of_mem_domain h)
 
-/-- The second component of a node of a finite mapping is smaller than the mapping.
-- This is a routine coding fact; no separate source theorem. -/
 lemma snd_lt_of_mem_domain {p e q : V} (h : ⟪p, e⟫ ∈ domain q) : e < q :=
   lt_of_le_of_lt (le_pair_right p e) (lt_of_mem_domain h)
 
@@ -53,55 +47,33 @@ attribute [local simp] qqAnd qqOr qqVerum qqFalsum qqRel qqNRel qqBall qqAll qqB
 
 /-! ## Coding injectivity facts for the bounded quantifiers -/
 
-/-- The bounded universal coding operation is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqBall_inj {u₁ q₁ u₂ q₂ : V} : qqBall u₁ q₁ = qqBall u₂ q₂ ↔ u₁ = u₂ ∧ q₁ = q₂ := by
   simp [qqBall, Arithmetic.qqNLT, qqNRel, adjoin_inj]
 
-/-- The bounded existential coding operation is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqBex_inj {u₁ q₁ u₂ q₂ : V} : qqBex u₁ q₁ = qqBex u₂ q₂ ↔ u₁ = u₂ ∧ q₁ = q₂ := by
   simp [qqBex, Arithmetic.qqLT, qqRel, adjoin_inj]
 
-/-- The coded equality atom is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqEQ_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^= u₁ = t₂ ^= u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
   simp [Arithmetic.qqEQ, qqRel, adjoin_inj]
 
-/-- The coded inequality atom is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqNEQ_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^≠ u₁ = t₂ ^≠ u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
   simp [Arithmetic.qqNEQ, qqNRel, adjoin_inj]
 
-/-- The coded less-than atom is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqLT_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^< u₁ = t₂ ^< u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
   simp [Arithmetic.qqLT, qqRel, adjoin_inj]
 
-/-- The coded not-less-than atom is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqNLT_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^≮ u₁ = t₂ ^≮ u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
   simp [Arithmetic.qqNLT, qqNRel, adjoin_inj]
 
-/-- The relation index of coded equality, read off in `V`.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma coe_eqIndex_eq : (Arithmetic.eqIndex : V) = 0 := rfl
 
-/-- The relation index of coded less-than, read off in `V`.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma coe_ltIndex_eq : (Arithmetic.ltIndex : V) = 1 := by simp [Arithmetic.ltIndex]; rfl
 
-/-- The two relation indices of `ℒₒᵣ` are distinct.
-- This is a routine coding fact; no separate source theorem. -/
 lemma eqIndex_ne_ltIndex : (Arithmetic.eqIndex : V) ≠ (Arithmetic.ltIndex : V) := by simp
 
 /-! ## The partial satisfaction table -/
 
-/-- `PSatZero q z e` says that `q` is a partial satisfaction table for the `Δ₀` formula `z`
-under assignment `e`: `q` is a finite mapping whose domain is the downward closure of the root
-`⟪z, e⟫` under immediate subformulas (extending the assignment by `x ∷ e'` when entering a
-bounded quantifier), and which carries `0`/`1` values obeying Tarski's clauses at every node of
-its domain.
+/-- `PSatZero q z e` says that `q` is a finite Tarski satisfaction table rooted at `⟪z, e⟫`.
 
 - [HP98, Definition I.1.71(1)] -/
 structure PSatZero (q z e : V) : Prop where
@@ -109,9 +81,7 @@ structure PSatZero (q z e : V) : Prop where
   isMapping : IsMapping q
   /-- The root belongs to the domain. -/
   mem_dom_root : ⟪z, e⟫ ∈ domain q
-  /-- At every node of the domain, `q` obeys the Tarski clause for that node's outermost
-  constructor, and (for the compound constructors) the node's immediate children also belong
-  to the domain. -/
+  /-- Each domain node obeys its Tarski clause and has its immediate children in the domain. -/
   spec : ∀ z' e', ⟪z', e'⟫ ∈ domain q →
     (z' = ^⊤ ∧ ⟪⟪z', e'⟫, 1⟫ ∈ q) ∨
     (z' = ^⊥ ∧ ⟪⟪z', e'⟫, 0⟫ ∈ q) ∨
@@ -141,8 +111,7 @@ structure PSatZero (q z e : V) : Prop where
       (∀ x < termVal (0 ∷ e') u, ⟪p, x ∷ e'⟫ ∈ domain q) ∧
       (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
       (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q))
-  /-- Every node of the domain other than the root has an immediate parent in the domain: the
-  domain is exactly the downward closure of the root, not merely a superset of it. -/
+  /-- Every nonroot domain node has an immediate parent in the domain. -/
   minimal : ∀ n ∈ domain q, n = ⟪z, e⟫ ∨
     (∃ p₁ p₂ e', ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q ∧ (n = ⟪p₁, e'⟫ ∨ n = ⟪p₂, e'⟫)) ∨
     (∃ p₁ p₂ e', ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q ∧ (n = ⟪p₁, e'⟫ ∨ n = ⟪p₂, e'⟫)) ∨
@@ -157,11 +126,10 @@ variable {q q₁ q₂ z z₁ z₂ e e₁ e₂ z' e' t u p p₁ p₂ : V}
 /-! ## Reading `spec` off at a node of known shape
 
 `spec` is a ten-way disjunction over the outermost coding constructor of the node. Each lemma
-below selects the disjunct matching a node of known shape and returns all of its content: that
-the immediate children belong to the domain, and how the values `1` and `0` at the node are
-determined. -/
+below specializes it to a node of known shape: membership of the immediate children in the
+domain, and how the values `1` and `0` at the node are determined. -/
 
-/-- Case analysis of `spec` at a node known to be the coded truth constant.
+/-- The Tarski clause for the truth constant, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
 lemma val_verum (h : PSatZero q z e) (hn : ⟪(^⊤ : V), e'⟫ ∈ domain q) :
     ⟪⟪(^⊤ : V), e'⟫, 1⟫ ∈ q := by
@@ -174,7 +142,7 @@ lemma val_verum (h : PSatZero q z e) (hn : ⟪(^⊤ : V), e'⟫ ∈ domain q) :
   on_goal 1 => exact hv
   all_goals simp at he
 
-/-- Case analysis of `spec` at a node known to be the coded falsehood constant.
+/-- The Tarski clause for the falsehood constant, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
 lemma val_falsum (h : PSatZero q z e) (hn : ⟪(^⊥ : V), e'⟫ ∈ domain q) :
     ⟪⟪(^⊥ : V), e'⟫, 0⟫ ∈ q := by
@@ -243,8 +211,7 @@ lemma spec_nlt (h : PSatZero q z e) (hn : ⟪t ^≮ u, e'⟫ ∈ domain q) :
   on_goal 6 => obtain ⟨rfl, rfl⟩ := qqNLT_inj.mp he; exact ⟨hA, hB⟩
   all_goals simp at he
 
-/-- The Tarski clauses for a coded conjunction, at a node of the domain, together with
-membership of its immediate subformulas in the domain.
+/-- The Tarski and child-domain clauses for a coded conjunction.
 - [HP98, Definition I.1.71(1)] -/
 lemma spec_and (h : PSatZero q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q ∧
@@ -259,8 +226,7 @@ lemma spec_and (h : PSatZero q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q)
   on_goal 7 => obtain ⟨rfl, rfl⟩ := (qqAnd_inj _ _ _ _).mp he; exact ⟨hd, hd', hA, hB⟩
   all_goals simp at he
 
-/-- The Tarski clauses for a coded disjunction, at a node of the domain, together with
-membership of its immediate subformulas in the domain.
+/-- The Tarski and child-domain clauses for a coded disjunction.
 - [HP98, Definition I.1.71(1)] -/
 lemma spec_or (h : PSatZero q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q ∧
@@ -275,8 +241,7 @@ lemma spec_or (h : PSatZero q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) 
   on_goal 8 => obtain ⟨rfl, rfl⟩ := (qqOr_inj _ _ _ _).mp he; exact ⟨hd, hd', hA, hB⟩
   all_goals simp at he
 
-/-- The Tarski clauses for a coded bounded universal, at a node of the domain, together with
-membership of its body in the domain under every extended assignment.
+/-- The Tarski and child-domain clauses for a coded bounded universal.
 - [HP98, Definition I.1.71(1)] -/
 lemma spec_ball (h : PSatZero q z e) (hn : ⟪qqBall u p, e'⟫ ∈ domain q) :
     (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧
@@ -292,8 +257,7 @@ lemma spec_ball (h : PSatZero q z e) (hn : ⟪qqBall u p, e'⟫ ∈ domain q) :
   on_goal 9 => obtain ⟨rfl, rfl⟩ := qqBall_inj.mp he; exact ⟨ht, hd, hA, hB⟩
   all_goals simp at he
 
-/-- The Tarski clauses for a coded bounded existential, at a node of the domain, together with
-membership of its body in the domain under every extended assignment.
+/-- The Tarski and child-domain clauses for a coded bounded existential.
 - [HP98, Definition I.1.71(1)] -/
 lemma spec_bex (h : PSatZero q z e) (hn : ⟪qqBex u p, e'⟫ ∈ domain q) :
     (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧
@@ -457,8 +421,7 @@ lemma val_zero_or_one (h : PSatZero q z e) :
       · exact Or.inl (hA.mpr ⟨x, hx, h'⟩)
       · exact absurd h' hx0
 
-/-- Two tables agree at every node that belongs to both domains: this is the agreement half of
-uniqueness, and it does not require the two tables to have the same root.
+/-- Two tables agree at every node common to their domains.
 - [HP98, Lemma I.1.72(2)] -/
 lemma agree (h₁ : PSatZero q₁ z₁ e₁) (h₂ : PSatZero q₂ z₂ e₂) :
     ∀ p e', ⟪p, e'⟫ ∈ domain q₁ → ⟪p, e'⟫ ∈ domain q₂ →

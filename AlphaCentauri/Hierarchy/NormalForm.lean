@@ -6,10 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Prenex
 /-!
 # Prenex normal form for the strict hierarchy
 
-Foundation's prenex normal form theorem sends a `Hierarchy Γ s` formula to a provably
-equivalent `Δ₀` matrix under `s` alternating quantifiers. Read through `StrictHierarchy`, it
-says that over a theory extending `𝗜𝚺 s` every `Hierarchy Γ s` formula is provably equivalent
-to a prenex `Γ`-formula of level `s`.
+Prenex normal forms for formulas in the arithmetical hierarchy.
 -/
 
 @[expose] public section

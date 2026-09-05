@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.PartialTruth.Tarski
+public import AlphaCentauri.Vorspiel.Absoluteness
 
 /-!
 # Partial truth definitions agree with truth
@@ -279,15 +280,7 @@ theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
   exact (models_snowing_iff φ).mpr fun v ↦ (satSigma_quote_iff hφ v).symm
 
 
-/-! ## The snowing lemma over `𝗣𝗔⁻`
-
-The agreement above uses `𝗜𝚺₁` throughout: `SatZero` and `SatSigma` are functions of the model,
-and the induction that drives `satZero_quote_iff` is the `𝚫₁` induction of `𝗜𝚺₁`. The consumer of
-the snowing lemma needs a single finite theory that works for every `φ`, so the argument is
-redone here over `𝗣𝗔⁻` together with the sentences of `tarski n`, where the satisfaction
-predicates are visible only through those sentences. Both inductions become external inductions
-on the formula `φ`.
--/
+/-! ## The snowing lemma over `𝗣𝗔⁻` -/
 
 section peanoMinus
 
@@ -296,10 +289,46 @@ open Tarski Reading PeanoMinus
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ}
   (hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ)
 
-/-! ### Coding facts about standard codes
+/-! ### Codes of finite sequences -/
 
-Everything the argument needs to know about the code of a fixed formula or term is a true `𝚺₁`
-statement about standard numbers, hence holds in `M` by `𝚺₁`-completeness of `𝗣𝗔⁻`. -/
+namespace Reading
+
+/-- `Codes v ev` says that `ev` is a code for the finite sequence `v`: it has length `m` and its
+`i`-th entry is `v i`. -/
+def Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop :=
+  Len (m : M) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : M)
+
+end Reading
+
+include hM in
+lemma codes_nil (v : Fin 0 → M) : Codes v 0 :=
+  ⟨by simpa using (read_lenNil hM 0).mpr rfl, fun i ↦ i.elim0⟩
+
+include hM in
+lemma codes_cons {m : ℕ} {v : Fin m → M} {ev ev' x : M} (h : Codes v ev)
+    (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' := by
+  refine ⟨?_, fun i ↦ ?_⟩
+  · have := (read_lenAdjoin hM x ev ev' (m : M) hadj).mpr h.1
+    simpa using this
+  · refine Fin.cases ?_ (fun j ↦ ?_) i
+    · simpa using (read_nthAdjoinZero hM x ev ev' x hadj).mpr rfl
+    · have := (read_nthAdjoinSucc hM x ev ev' (j.val : M) (v j) hadj).mpr (h.2 j)
+      simpa using this
+
+include hM in
+lemma exists_codes : ∀ {m : ℕ} (v : Fin m → M), ∃ ev, Codes v ev := by
+  intro m
+  induction m with
+  | zero => exact fun v ↦ ⟨0, codes_nil hM v⟩
+  | succ m ih =>
+    intro v
+    obtain ⟨ev, hev⟩ := ih (fun i ↦ v i.succ)
+    obtain ⟨ev', hadj⟩ := read_adjoinTotal hM (v 0) ev
+    have hcons : (v 0 :> fun i ↦ v i.succ) = v := by
+      funext i; refine Fin.cases ?_ (fun j ↦ ?_) i <;> simp
+    exact ⟨ev', hcons ▸ codes_cons hM hev hadj⟩
+
+/-! ### Coding facts about standard codes -/
 
 /-- The code of a closed semiterm is a well-formed internal term.
 - [HP98, 1.66] -/
@@ -392,8 +421,7 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
 
 include hM in
 /-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `satZero` at the code of a bounded
-formula agrees with truth. This is `satZero_quote_iff` again, with the `𝚫₁` induction of `𝗜𝚺₁`
-replaced by the external induction on the bounded formula.
+formula agrees with truth.
 - [HP98, Theorem I.1.70]
 - [HP98, Corollary I.1.76] -/
 private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
@@ -496,8 +524,7 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
 
 include hM in
 /-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of the level-`s` satisfaction formula
-at the code of a strict prenex formula agrees with truth. This is `satClass_quote_iff` again,
-carried out with the finitely many Tarski sentences in place of the satisfaction predicates.
+at the code of a strict prenex formula agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
 private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
@@ -517,7 +544,7 @@ private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : Arithmeti
     intro hs v ev hev
     have hq : M ⊧/![((⌜(∃¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
         qqExsDef.val := cast_sigmaZero₂ qqExsDef (by simpa using quote_ex_sentence (V := ℕ) φ₀)
-    show Reading.SatSig s₀ _ _ ↔ _
+    show Reading.SatSigma s₀ _ _ ↔ _
     rw [read_satSigmaExs hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
     simp only [Semiformula.eval_ex]
     constructor
@@ -530,7 +557,7 @@ private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : Arithmeti
     intro hs v ev hev
     have hq : M ⊧/![((⌜(∀¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
         qqAllDef.val := cast_sigmaZero₂ qqAllDef (by simpa using quote_all_sentence (V := ℕ) φ₀)
-    show Reading.SatPii s₀ _ _ ↔ _
+    show Reading.SatPi s₀ _ _ ↔ _
     rw [read_satPiAll hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
     simp only [Semiformula.eval_all]
     constructor
@@ -542,19 +569,16 @@ private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : Arithmeti
 
 /-! ### Assembling the snowing lemma over `𝗣𝗔⁻` -/
 
-/-- Evaluation of `satSigmaVec n k` in `M` at an externally supplied vector, computed purely from
-its definition as a substitution formula. -/
 private lemma eval_satSigmaVec (p : M) (w : Fin k → M) :
-    M ⊧/(p :> w) (satSigmaVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SatSig n p ev := by
+    M ⊧/(p :> w) (satSigmaVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SatSigma n p ev := by
   simp only [satSigmaVec, Nat.succ_eq_add_one, Nat.reduceAdd, HierarchySymbol.Semiformula.val_mkSigma,
     Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
     Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, numeral_eq_natCast_app,
     Semiterm.val_bvar, Matrix.cons_val_zero, Fin.isValue, Fin.Fin1.eq_one, Matrix.cons_val_one,
     Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃, Semiformula.eval_operator,
     Matrix.cons_val_succ, Structure.eq_iff_eq, LogicalConnective.Prop.and_eq, exists_eq_right,
-    Reading.Codes, Reading.Len, Reading.Nth, Reading.SatSig, and_assoc]
+    Reading.Codes, Reading.Len, Reading.Nth, Reading.SatSigma, and_assoc]
 
-/-- Evaluation of the substituted right-hand side of `snowing n φ`. -/
 private lemma eval_snowing_rhs {k : ℕ} (φ : ArithmeticSemisentence k) (e : Fin k → M) :
     M ⊧/e ((satSigmaVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
       ↔ M ⊧/(((⌜φ⌝ : ℕ) : M) :> e) (satSigmaVec n k).val := by

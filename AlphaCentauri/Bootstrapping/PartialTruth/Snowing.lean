@@ -109,6 +109,44 @@ private lemma quote_bex_sentence {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k)
     Arithmetic.qqLT, Semiterm.empty_quote_eq, Matrix.vecHead, Matrix.vecTail,
     ← Rew.emb_bShift_term, ← Semiterm.empty_typed_quote_def] using coe_quote_lt (V := V)
 
+/-- The code of a coded bound variable.
+- [HP98, 1.66] -/
+private lemma quote_bvar_sentence {k : ℕ} (i : Fin k) :
+    (⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : V) = qqBvar (i.val : V) := by
+  simp [Semiterm.empty_quote_eq]
+
+/-- The code of the zero term.
+- [HP98, 1.66] -/
+private lemma quote_zeroTerm_sentence {k : ℕ} (w : Fin 0 → ClosedSemiterm ℒₒᵣ k) :
+    (⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : V) = (𝟎 : V) := by
+  rw [Arithmetic.coe_zero_eq,
+    show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq]
+  simp [Semiterm.empty_quote_eq, quote_zeroIndex_eq]
+
+/-- The code of the one term.
+- [HP98, 1.66] -/
+private lemma quote_oneTerm_sentence {k : ℕ} (w : Fin 0 → ClosedSemiterm ℒₒᵣ k) :
+    (⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : V) = (𝟏 : V) := by
+  rw [Arithmetic.coe_one_eq,
+    show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq]
+  simp [Semiterm.empty_quote_eq, quote_oneIndex_eq]
+
+/-- The code of a sum of closed terms.
+- [HP98, 1.66] -/
+private lemma quote_addTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒₒᵣ k) :
+    (⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : V)
+      = (⌜w 0⌝ : V) ^+ ⌜w 1⌝ := by
+  simp [Semiterm.empty_quote_eq, Arithmetic.qqAdd, quote_addIndex_eq,
+    Arithmetic.coe_addIndex_eq, Matrix.vecHead, Matrix.vecTail]
+
+/-- The code of a product of closed terms.
+- [HP98, 1.66] -/
+private lemma quote_mulTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒₒᵣ k) :
+    (⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : V)
+      = (⌜w 0⌝ : V) ^* ⌜w 1⌝ := by
+  simp [Semiterm.empty_quote_eq, Arithmetic.qqMul, quote_mulIndex_eq,
+    Arithmetic.coe_mulIndex_eq, Matrix.vecHead, Matrix.vecTail]
+
 /-! ## Agreement of satisfaction with truth -/
 
 /-- For a bounded formula, internal `Δ₀` satisfaction of its code agrees with truth. This is the
@@ -253,5 +291,116 @@ theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
   apply Arithmetic.complete.{0}
   intro M _ _
   exact (models_snowing_iff φ).mpr fun v ↦ (satSigma_quote_iff hφ v).symm
+
+
+/-! ## The snowing lemma over `𝗣𝗔⁻`
+
+The agreement above uses `𝗜𝚺₁` throughout: `SatZero` and `SatSigma` are functions of the model,
+and the induction that drives `satZero_quote_iff` is the `𝚫₁` induction of `𝗜𝚺₁`. The consumer of
+the snowing lemma needs a single finite theory that works for every `φ`, so the argument is
+redone here over `𝗣𝗔⁻` together with the sentences of `tarski n`, where the satisfaction
+predicates are visible only through those sentences. Both inductions become external inductions
+on the formula `φ`.
+-/
+
+section peanoMinus
+
+open Tarski Reading PeanoMinus
+
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ}
+  (hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ)
+
+/-! ### Coding facts about standard codes
+
+Everything the argument needs to know about the code of a fixed formula or term is a true `𝚺₁`
+statement about standard numbers, hence holds in `M` by `𝚺₁`-completeness of `𝗣𝗔⁻`. -/
+
+/-- The code of a closed semiterm is a well-formed internal term.
+- [HP98, 1.66] -/
+private lemma uTerm_quote_cast {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) :
+    UTerm ((⌜t⌝ : ℕ) : M) :=
+  cast_delta₁ (isUTerm ℒₒᵣ) (by simpa using isUTerm_quote (V := ℕ) t)
+
+/-- The code of a semisentence is a well-formed internal formula.
+- [HP98, 1.66] -/
+private lemma uFormula_quote_cast {k : ℕ} (φ : ArithmeticSemisentence k) :
+    UFormula ((⌜φ⌝ : ℕ) : M) :=
+  cast_delta₁ (isUFormula ℒₒᵣ) (by simpa using isUFormula_quote (V := ℕ) φ)
+
+/-- The code of a bounded semisentence is internally `Δ₀`.
+- [HP98, Lemma I.1.68] -/
+private lemma delta0_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k} (h : Hierarchy 𝚺 0 φ) :
+    Delta0 ((⌜φ⌝ : ℕ) : M) :=
+  cast_delta₁ isDelta0 (by simpa using (isDelta0_quote_iff (V := ℕ) φ).mpr h)
+
+/-- The code of a strict prenex semisentence is in the matching internal strict class.
+- [HP98, Lemma I.1.69] -/
+private lemma strict_quote_cast {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
+    (h : StrictHierarchy Γ s φ) : Strict Γ s ((⌜φ⌝ : ℕ) : M) := by
+  rcases Γ with _ | _
+  · exact cast_delta₁ (isStrictSigma s) (by simpa using (isStrictSigma_quote_iff (V := ℕ) φ).mpr h)
+  · exact cast_delta₁ (isStrictPi s) (by simpa using (isStrictPi_quote_iff (V := ℕ) φ).mpr h)
+
+/-! ### Evaluation of coded closed terms -/
+
+include hM in
+/-- The value of the code of a closed semiterm, read through the term-evaluation sentences of
+`tarski n`, is its value in the model.
+- [HP98, 1.66] -/
+private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Codes v ev) :
+    ∀ t : ClosedSemiterm ℒₒᵣ k, TermVal (t.valb v) ev ((⌜t⌝ : ℕ) : M) := by
+  intro t
+  induction t with
+  | bvar i =>
+    have hb : M ⊧/![((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M), ((i.val : ℕ) : M)] qqBvarDef.val :=
+      cast_sigmaZero₂ qqBvarDef (by simpa using quote_bvar_sentence (V := ℕ) i)
+    have := (read_termValBvar hM ev ((i.val : ℕ) : M) ((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
+      (v i) hb).mpr (hev.2 i)
+    simpa using this
+  | fvar x => exact x.elim
+  | @func k' f w ih =>
+    match k', f, w, ih with
+    | 0, .zero, w, _ =>
+      have hval : (Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k).valb v
+          = 0 := rfl
+      have hq : ((⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
+          = ((𝟎 : ℕ) : M) := by
+        rw [show (⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟎 by
+          simpa using quote_zeroTerm_sentence (V := ℕ) w]
+      rw [hval, hq]
+      exact (read_termValZero hM ev 0).mpr rfl
+    | 0, .one, w, _ =>
+      have hval : (Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k).valb v
+          = 1 := rfl
+      have hq : ((⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
+          = ((𝟏 : ℕ) : M) := by
+        rw [show (⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟏 by
+          simpa using quote_oneTerm_sentence (V := ℕ) w]
+      rw [hval, hq]
+      exact (read_termValOne hM ev 1).mpr rfl
+    | 2, .add, w, ih =>
+      have hval : (Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k).valb v
+          = (w 0).valb v + (w 1).valb v := rfl
+      have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
+          ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqAddGraph.val :=
+        cast_sigma₃ Arithmetic.qqAddGraph (by simpa using quote_addTerm_sentence (V := ℕ) w)
+      rw [hval]
+      exact (read_termValAdd hM ev ((⌜w 0⌝ : ℕ) : M) ((⌜w 1⌝ : ℕ) : M)
+        ((⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
+        ((w 0).valb v) ((w 1).valb v) ((w 0).valb v + (w 1).valb v)
+        (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq (ih 0) (ih 1)).mpr rfl
+    | 2, .mul, w, ih =>
+      have hval : (Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k).valb v
+          = (w 0).valb v * (w 1).valb v := rfl
+      have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
+          ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqMulGraph.val :=
+        cast_sigma₃ Arithmetic.qqMulGraph (by simpa using quote_mulTerm_sentence (V := ℕ) w)
+      rw [hval]
+      exact (read_termValMul hM ev ((⌜w 0⌝ : ℕ) : M) ((⌜w 1⌝ : ℕ) : M)
+        ((⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
+        ((w 0).valb v) ((w 1).valb v) ((w 0).valb v * (w 1).valb v)
+        (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq (ih 0) (ih 1)).mpr rfl
+
+end peanoMinus
 
 end LO.FirstOrder.Arithmetic

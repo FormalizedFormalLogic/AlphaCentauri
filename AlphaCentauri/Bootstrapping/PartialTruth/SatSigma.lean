@@ -18,7 +18,6 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 mutual
   /-- `SatSigma n z e` says that the strict prenex `Σₙ` formula `z` is satisfied by `e`.
-  A positive level peels a block of existential quantifiers and prepends its witnesses to `e`.
   - [HP98, Definition I.1.74] -/
   def SatSigma : ℕ → V → V → Prop
     | 0 => SatZero
@@ -27,7 +26,6 @@ mutual
           ∃ w, len w = k ∧ SatPi n q (vecAppend w e)
 
   /-- `SatPi n z e` says that the strict prenex `Πₙ` formula `z` is satisfied by `e`.
-  At a positive level it is defined by duality through coded negation.
   - [HP98, Definition I.1.74] -/
   def SatPi : ℕ → V → V → Prop
     | 0 => SatZero
@@ -35,9 +33,7 @@ mutual
         IsStrictPi (n + 1) z ∧ IsUFormula ℒₒᵣ z ∧ ¬SatSigma (n + 1) (neg ℒₒᵣ z) e
 end
 
-/-- Builds the `𝚷ₘ₊₁` formula for `SatPi (m + 1)` from the `𝚺ₘ₊₁` formula for `SatSigma (m + 1)`:
-`Πₘ₊₁` satisfaction is membership in the domain together with failure of `Σₘ₊₁` satisfaction of
-the negation.
+/-- The `𝚷ₘ₊₁` formula for `SatPi (m + 1)` associated with a formula for `SatSigma (m + 1)`.
 - [HP98, Definition I.1.74] -/
 noncomputable def piOfSigma (m : ℕ) (σ : 𝚺-[m + 1].Semisentence 2) :
     𝚷-[m + 1].Semisentence 2 := .mkPi
@@ -53,8 +49,7 @@ noncomputable def piOfSigma (m : ℕ) (σ : 𝚺-[m + 1].Semisentence 2) :
     have h4 : Hierarchy 𝚺 (m + 1) σ.val := σ.sigma_prop
     simp [h1, h2, h3, h4])
 
-/-- Builds the `𝚺ₘ₊₂` formula for `SatSigma (m + 2)` from the `𝚷ₘ₊₁` formula for `SatPi (m + 1)`,
-by peeling one block of existential quantifiers off a strict `Πₘ₊₁` matrix.
+/-- The `𝚺ₘ₊₂` formula for `SatSigma (m + 2)` associated with a formula for `SatPi (m + 1)`.
 - [HP98, Definition I.1.74] -/
 noncomputable def sigmaOfPi (m : ℕ) (π : 𝚷-[m + 1].Semisentence 2) :
     𝚺-[m + 2].Semisentence 2 := .mkSigma
@@ -72,8 +67,7 @@ noncomputable def sigmaOfPi (m : ℕ) (π : 𝚷-[m + 1].Semisentence 2) :
     have h5 : Hierarchy 𝚺 (m + 2) π.val := π.pi_prop.accum 𝚺
     simp [h1, h2, h3, h4, h5])
 
-/-- The `𝚺₁` formula for `satSigma 0`, i.e. for `SatSigma 1`: an existential block over a strict
-`Π₀ = Δ₀` matrix, tested against `satZero` (since `SatPi 0` is definitionally `SatZero`).
+/-- The `𝚺₁` formula for `SatSigma 1`.
 - [HP98, Definition I.1.74] -/
 noncomputable def sigmaZero : 𝚺-[1].Semisentence 2 := .mkSigma
   “z e. ∃ k q w e', !qqExssDef z q k ∧ !(isStrictPi 0).val q ∧ !lenDef k w ∧
@@ -87,7 +81,7 @@ noncomputable def sigmaZero : 𝚺-[1].Semisentence 2 := .mkSigma
       HierarchySymbol.Semiformula.val_sigma satZero ▸ satZero.sigma.sigma_prop
     simp [h1, h2, h3, h4, h5])
 
-/-- The `𝚺ₙ₊₁` formula defining `SatSigma (n + 1)`, with arguments `(z, e)`, by recursion on `n`.
+/-- The `𝚺ₙ₊₁` formula defining `SatSigma (n + 1)`, with arguments `(z, e)`.
 - [HP98, Definition I.1.74]
 - [HP98, Theorem I.1.75(1)] -/
 noncomputable def satSigma : (n : ℕ) → 𝚺-[n + 1].Semisentence 2
@@ -103,8 +97,7 @@ noncomputable def satPi (n : ℕ) : 𝚷-[n + 1].Semisentence 2 := piOfSigma n (
 - [HP98, Definition I.1.74] -/
 private lemma satSigma_succ (n : ℕ) : satSigma (n + 1) = sigmaOfPi n (satPi n) := rfl
 
-/-- Derives definedness of `piOfSigma m σ` for `SatPi (m + 1)` from definedness of `σ` for
-`SatSigma (m + 1)`.
+/-- `piOfSigma m σ` defines `SatPi (m + 1)` when `σ` defines `SatSigma (m + 1)`.
 - [HP98, Theorem I.1.75(1)] -/
 private lemma piDefined_of_sigmaDefined {m : ℕ} {σ : 𝚺-[m + 1].Semisentence 2}
     (hσ : 𝚺-[m + 1]-Relation (SatSigma (m + 1) : V → V → Prop) via σ) :
@@ -112,8 +105,7 @@ private lemma piDefined_of_sigmaDefined {m : ℕ} {σ : 𝚺-[m + 1].Semisentenc
   have := hσ
   simp [piOfSigma, SatPi]
 
-/-- Derives definedness of `sigmaOfPi m π` for `SatSigma (m + 2)` from definedness of `π` for
-`SatPi (m + 1)`.
+/-- `sigmaOfPi m π` defines `SatSigma (m + 2)` when `π` defines `SatPi (m + 1)`.
 - [HP98, Theorem I.1.75(1)] -/
 private lemma sigmaDefined_of_piDefined {m : ℕ} {π : 𝚷-[m + 1].Semisentence 2}
     (hπ : 𝚷-[m + 1]-Relation (SatPi (m + 1) : V → V → Prop) via π) :
@@ -847,8 +839,7 @@ theorem SatSigma.subst {n : ℕ} {m l w p e : V} (hw : IsSemitermVec ℒₒᵣ m
 
 /-! ## Satisfaction under an externally supplied vector -/
 
-/-- `satSigmaVec n k` defines `SatSigma (n + 1)` under the vector formed by its `k`
-free variables. This is the formula used by the corresponding induction scheme.
+/-- `satSigmaVec n k` defines `SatSigma (n + 1)` under its `k` free variables.
 
 - [HP98, Remark I.1.77]
 - [HP98, Definition I.1.78(2)] -/

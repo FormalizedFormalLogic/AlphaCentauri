@@ -6,11 +6,7 @@ public import AlphaCentauri.Vorspiel.Ordinal
 /-!
 # Cut reduction for `Z_∞`
 
-The syntactic content of cut elimination: what it takes to trade one cut for derivations that
-stay below a fixed additively principal ordinal `ω ^ θ`.
-
-`CutReducible θ c φ` says exactly that, and the file establishes it for every shape a cut formula
-can have.
+This file defines cut reducibility below `ω ^ θ` and proves it for each form of cut formula.
 
 Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20].
 -/
@@ -28,8 +24,7 @@ section Frame
 
 /-! ### Moving an `insert` across an `erase`
 
-Helper subset lemmas for the commuting cases of the inductions below. The last two carry an
-ambient `∪ Δ`, needed by the reductions that fix one premise and induct on the other. -/
+Subset relations for moving insertion across erasure and union. -/
 
 private lemma eraseIn (a e : ArithmeticFormula ℕ) (s : Sequent) :
     (insert a s).erase e ⊆ insert a (s.erase e) := by
@@ -57,13 +52,8 @@ private lemma frameOut {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s t : Sequen
 
 end Frame
 
-/-- **A cut formula is reducible below `ω ^ θ` at rank `c`** when any cut on it, between premises
-of height below `ω ^ θ` and cut rank at most `c`, can be traded for a derivation of the conclusion
-that is still below `ω ^ θ` and still of cut rank at most `c`.
-
-Phrasing the reduction this way rather than as an explicit ordinal bound is what makes it compose:
-`ω ^ θ` is additively principal, so the `+ 1` a rule costs and the finitely many nested cuts that
-a propositional cut formula unfolds into are all absorbed.
+/-- A cut formula is reducible below `ω ^ θ` at rank `c` when cutting two bounded derivations on it
+produces another derivation with the same bounds.
 
 - [Tow20, Section 19.5] -/
 def CutReducible (θ : Ordinal.{0}) (c : ℕ) (φ : ArithmeticFormula ℕ) : Prop :=
@@ -80,8 +70,7 @@ end CutReducible
 
 namespace Provable
 
-/-- A formula whose quantifier rank the bound `c` still admits needs no reduction: the cut stays
-where it is.
+/-- A formula of quantifier rank below `c` is cut-reducible at rank `c`.
 
 - [Tow20, Section 19.5] -/
 lemma cutReducible_of_qr_lt (hθ : 0 < θ) (h : φ.qr < c) : CutReducible θ c φ :=
@@ -90,8 +79,7 @@ lemma cutReducible_of_qr_lt (hθ : 0 < θ) (h : φ.qr < c) : CutReducible θ c �
 
 section Falsum
 
-/-- `⊥` is never introduced by a rule and is never the witness of a leaf, so it can be struck out
-of a cut-free derivation at no cost in height.
+/-- Erases `⊥` from a cut-free derivation without increasing its height.
 
 - [Tow20, Section 19.2] -/
 private lemma remove_falsumAux (D : Derivation Γ) (hcr : D.cutRank ≤ (0 : ℕ∞)) (hmem : ⊥ ∈ Γ) :
@@ -131,7 +119,7 @@ private lemma remove_falsumAux (D : Derivation Γ) (hcr : D.cutRank ≤ (0 : ℕ
     exact (exI n h).weakening (eraseOut (by grind) Γ₁)
   | @cut Γ₁ ξ D₁ D₂ ih₁ ih₂ => exact absurd ((le_max_left _ _).trans hcr) (by simp)
 
-/-- **Removing `⊥`** from a cut-free sequent, at no cost in height.
+/-- Removes `⊥` from a cut-free sequent without increasing its height.
 
 - [Tow20, Section 19.2] -/
 lemma remove_falsum (h : Z∞ ⊢[α, 0] insert ⊥ Γ) : Z∞ ⊢[α, 0] Γ := by
@@ -141,11 +129,11 @@ lemma remove_falsum (h : Z∞ ⊢[α, 0] insert ⊥ Γ) : Z∞ ⊢[α, 0] Γ := 
   simp only [Finset.mem_erase, Finset.mem_insert] at hx
   exact hx.2.resolve_left hx.1
 
-/-- `⊤` reduces at rank `0`: the cut is against `⊥`, which is simply struck out. -/
+/-- `⊤` is cut-reducible at rank `0`. -/
 lemma cutReducible_verum : CutReducible θ 0 (⊤ : ArithmeticFormula ℕ) :=
   fun _ hδ _ h₂ => ⟨_, hδ, remove_falsum (by simpa using h₂)⟩
 
-/-- `⊥` reduces at rank `0`, dually to `cutReducible_verum`. -/
+/-- `⊥` is cut-reducible at rank `0`. -/
 lemma cutReducible_falsum : CutReducible θ 0 (⊥ : ArithmeticFormula ℕ) :=
   fun hγ _ h₁ _ => ⟨_, hγ, remove_falsum h₁⟩
 
@@ -155,8 +143,7 @@ section Atom
 
 variable {k₀ : ℕ} {b₀ : Bool} {r₀ : (ℒₒᵣ).Rel k₀} {v₀ : Fin k₀ → ArithmeticTerm ℕ}
 
-/-- **Removing a false literal** from a cut-free derivation. Unlike `⊥`, a literal can be the
-witness of a leaf, and this is where the truth of the standard model enters.
+/-- Erases a false literal from a cut-free derivation without increasing its height.
 
 - [Tow20, Section 19.2] -/
 private lemma remove_false_litAux (hL : ¬LitTrue (signedLit b₀ r₀ v₀)) (D : Derivation Γ)
@@ -216,7 +203,7 @@ private lemma remove_false_litAux (hL : ¬LitTrue (signedLit b₀ r₀ v₀)) (D
     exact (exI n h).weakening (eraseOut (hne _ (by simp)) Γ₁)
   | @cut Γ₁ ξ D₁ D₂ ih₁ ih₂ => exact absurd ((le_max_left _ _).trans hcr) (by simp)
 
-/-- **Removing a false literal** from a cut-free sequent.
+/-- Removes a false literal from a cut-free sequent without increasing its height.
 
 - [Tow20, Section 19.2] -/
 lemma remove_false_lit (hL : ¬LitTrue (signedLit b₀ r₀ v₀))
@@ -228,7 +215,7 @@ lemma remove_false_lit (hL : ¬LitTrue (signedLit b₀ r₀ v₀))
   simp only [Finset.mem_erase, Finset.mem_insert] at hx
   exact hx.2.resolve_left hx.1
 
-/-- The induction underlying `atom_cut`.
+/-- Eliminates an atomic cut against a cut-free derivation with an explicit height bound.
 
 - [Tow20, Section 19.2] -/
 private lemma atom_cutAux (r : (ℒₒᵣ).Rel k) (v) (hNC : Z∞ ⊢[β, 0] insert (Semiformula.nrel r v) Γ)
@@ -293,8 +280,7 @@ private lemma atom_cutAux (r : (ℒₒᵣ).Rel k) (v) (hNC : Z∞ ⊢[β, 0] ins
       (Ordinal.add_add_one_add_one_le β D'.ordinalBound)
   | @cut Γ₁ ξ D₁ D₂ ih₁ ih₂ => exact absurd ((le_max_left _ _).trans hcr) (by simp)
 
-/-- **Atomic cut elimination.** An atomic cut formula is never principal in a logical rule, so it
-only enters through `axL` or a leaf.
+/-- Eliminates a cut on an atomic formula between cut-free derivations.
 
 - [Tow20, Section 19.2] -/
 lemma atom_cut (r : (ℒₒᵣ).Rel k) (v) (hC : Z∞ ⊢[α, 0] insert (Semiformula.rel r v) Γ)
@@ -322,9 +308,7 @@ lemma cutReducible_nrel (hθ : 0 < θ) (r : (ℒₒᵣ).Rel k) (v) :
   ⟨_, Ordinal.add_one_lt_omega0_opow hθ (Ordinal.add_lt_omega0_opow hγ hδ),
     atom_cut r v (by simpa using h₂) h₁⟩
 
-/-- **The leaves of the reduction.** A formula without connectives is reducible at every rank:
-either the rank still admits it as a cut formula, or the rank is `0` and one of the four
-rank-`0` reductions applies. -/
+/-- Every formula of complexity zero is cut-reducible at every rank. -/
 lemma cutReducible_of_complexity_zero (hθ : 0 < θ) (hc : φ.complexity = 0) :
     CutReducible θ c φ := by
   rcases Nat.eq_zero_or_pos c with rfl | hpos
@@ -342,8 +326,7 @@ end Atom
 
 section Binary
 
-/-- **Reduction of a `∧`-cut.** Inverting the conjunction on one side and the disjunction on the
-other leaves two cuts, on the conjuncts.
+/-- Reducibility of both conjuncts implies reducibility of their conjunction.
 
 - [Tow20, Theorem 19.5] -/
 lemma cut_reduce_and (hφ : CutReducible θ c φ) (hψ : CutReducible θ c ψ) :
@@ -363,7 +346,7 @@ lemma cut_reduce_and (hφ : CutReducible θ c φ) (hψ : CutReducible θ c ψ) :
     intro x hx; simp only [Finset.mem_insert] at hx ⊢; tauto)) hNab
   exact hψ hγ hε hB h
 
-/-- **Reduction of a `∨`-cut**, dual to `cut_reduce_and`.
+/-- Reducibility of both disjuncts implies reducibility of their disjunction.
 
 - [Tow20, Theorem 19.5] -/
 lemma cut_reduce_or (hφ : CutReducible θ c φ) (hψ : CutReducible θ c ψ) :
@@ -375,7 +358,7 @@ end Binary
 
 section Quantifier
 
-/-- The induction underlying `cut_reduce_all`.
+/-- Eliminates a universal cut against a bounded derivation with an explicit height bound.
 
 - [Tow20, Theorem 19.6] -/
 private lemma cut_reduce_allAux (hqr : φₓ.qr < c)
@@ -465,8 +448,7 @@ private lemma cut_reduce_allAux (hqr : φₓ.qr < c)
     exact (cut ξ hcξ h₁ h₂).mono_ordinalBound
       (Ordinal.max_add_add_one_add_one_le α D₁.ordinalBound D₂.ordinalBound)
 
-/-- **Reduction of a `∀`-cut.** Unlike `cut_reduce_and`, the existential side is not invertible,
-so there is no double-inversion shortcut.
+/-- A universal formula of quantifier rank below `c` is cut-reducible at rank `c`.
 
 - [Tow20, Theorem 19.6] -/
 lemma cut_reduce_all (hθ : 0 < θ) (hqr : φₓ.qr < c) : CutReducible θ c (∀¹ φₓ) := by

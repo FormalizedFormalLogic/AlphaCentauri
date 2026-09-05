@@ -6,17 +6,7 @@ public import AlphaCentauri.Vorspiel.Primrec
 /-!
 # Parsons' theorem
 
-Parsons' theorem: the `𝗜𝚺₁`-provably total functions are exactly the primitive recursive
-functions.
-
-All four statements are recorded here as axioms. Neither [HP98] nor [Lin97] nor [AB05]
-contains a proof: the easy direction (`provablyTotal_of_primrec'`, primitive recursive functions
-are `𝗜𝚺₁`-provably total) is [HP98, Theorem I.1.54], but the converse direction
-(`primrec'_of_provablyTotal`) is only *stated*, at [HP98, Corollary IV.3.7], with a proof sketch
-referencing [HP98, Lemma IV.3.4], [HP98, Theorem IV.3.5] and [HP98, Corollary IV.3.34]; an
-alternative route (Parsons 1970, Mints 1971, Takeuti *Proof Theory*, Buss *Bounded Arithmetic*
-(1986) §2.4) is only mentioned in passing at [HP98, p. 245] and is developed in none of the
-three sources.
+The `𝗜𝚺₁`-provably total functions are exactly the primitive recursive functions.
 -/
 
 @[expose] public section
@@ -27,38 +17,24 @@ open LO.FirstOrder.Arithmetic
 
 /-- Every primitive recursive function is `𝗜𝚺₁`-provably total.
 - [HP98, Theorem I.1.54]
-- [HP98, Lemma I.1.55]
-
-Neither [HP98] nor [Lin97] nor [AB05] is cited for a proof here: this is the easy direction of
-Parsons' theorem. -/
+- [HP98, Lemma I.1.55] -/
 axiom provablyTotal_of_primrec' {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Nat.Primrec' f) :
     𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))
 
 /-- Every `𝗜𝚺₁`-provably total function is primitive recursive.
-
-This is the hard direction of Parsons' theorem. [HP98, Corollary IV.3.7] states it but its proof
-is not reproduced here (nor is it in [Lin97] or [AB05]); an alternative route (Parsons 1970,
-Mints 1971, Takeuti, Buss) is only mentioned in passing at [HP98, p. 245]. -/
+- [HP98, Corollary IV.3.7] -/
 axiom primrec'_of_provablyTotal {k : ℕ} {f : List.Vector ℕ k → ℕ}
     (hf : 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))) : Nat.Primrec' f
 
 /-- **Parsons' theorem**: the `𝗜𝚺₁`-provably total functions are exactly the primitive recursive
 functions.
-- [HP98, Corollary IV.3.7]
-
-The statement is [HP98, Corollary IV.3.7], but neither its proof nor the alternative route
-(Parsons 1970, Mints 1971, Takeuti, Buss, mentioned only in passing at [HP98, p. 245]) is
-developed in [HP98], [Lin97] or [AB05]; the two directions are recorded separately as
-`provablyTotal_of_primrec'` and `primrec'_of_provablyTotal`, and this statement is an axiom
-independently of them pending that proof. -/
+- [HP98, Corollary IV.3.7] -/
 axiom parsons {k : ℕ} (f : List.Vector ℕ k → ℕ) :
     Nat.Primrec' f ↔ 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))
 
-/-- The `Primrec` corollary of Parsons' theorem, via Mathlib's `Nat.Primrec'.prim_iff`
-(`Nat.Primrec' f ↔ Primrec f` for `f : List.Vector ℕ k → ℕ`).
-- [HP98, Corollary IV.3.7]
-
-Same provenance and caveats as `parsons`. -/
+/-- In Mathlib's `Primrec` form, the `𝗜𝚺₁`-provably total functions are exactly the primitive
+recursive functions.
+- [HP98, Corollary IV.3.7] -/
 axiom parsons_primrec {k : ℕ} (f : List.Vector ℕ k → ℕ) :
     Primrec f ↔ 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))
 

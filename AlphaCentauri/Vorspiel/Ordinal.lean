@@ -6,13 +6,7 @@ public import Mathlib.SetTheory.Ordinal.Veblen
 /-!
 # Ordinal arithmetic for cut elimination
 
-The `ω`-tower `Ordinal.omegaTower c α`, which iterates `ω ^ ·` on `α` exactly `c` times, together
-with the bookkeeping lemmas the ordinal bounds of `Z_∞` cut elimination need. Everything here is
-about `Ordinal` alone and belongs upstream in Mathlib rather than in this repository.
-
-The recurring pattern is that `ω ^ θ` is *additively principal*
-(`Ordinal.isPrincipal_add_omega0_opow`): a finite sum of ordinals below `ω ^ θ` stays below
-`ω ^ θ`. This is the fact cut elimination needs to absorb the `+ 1` that every rule adds.
+The `ω`-tower `Ordinal.omegaTower c α` and ordinal bounds used in cut elimination.
 -/
 
 @[expose] public section
@@ -56,16 +50,16 @@ lemma lt_opow_succ_max_of_le_max {a b x : Ordinal} (hx : x ≤ max (ω ^ a) (ω 
     ((opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_left a b).trans_lt (lt_add_one _)))
     ((opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_right a b).trans_lt (lt_add_one _)))
 
-/-- The bound of a binary rule reassembled from premises `ω ^ a` and `ω ^ b`. -/
+/-- `max (ω ^ a) (ω ^ b) + 1 ≤ ω ^ (max a b + 1)`. -/
 lemma max_opow_add_one_le : max (ω ^ a) (ω ^ b) + 1 ≤ ω ^ (max a b + 1) :=
   (add_one_lt_omega0_opow (zero_lt_add_one _) (lt_opow_succ_max_of_le_max le_rfl)).le
 
-/-- The bound of a unary rule reassembled from a premise `ω ^ a`. -/
+/-- `ω ^ a + 1 ≤ ω ^ (a + 1)`. -/
 lemma opow_add_one_le_opow_succ : ω ^ a + 1 ≤ ω ^ (a + 1) :=
   (add_one_lt_omega0_opow (zero_lt_add_one _)
     ((opow_lt_opow_iff_right one_lt_omega0).mpr (lt_add_one a))).le
 
-/-- The bound of the ω-rule reassembled from premises `ω ^ f n`. -/
+/-- `(⨆ n, ω ^ f n) + 1 ≤ ω ^ ((⨆ n, f n) + 1)`. -/
 lemma iSup_opow_add_one_le : (⨆ n, ω ^ f n) + 1 ≤ ω ^ ((⨆ n, f n) + 1) := by
   have hsup : (⨆ n, ω ^ f n) ≤ ω ^ ⨆ n, f n :=
     Ordinal.iSup_le fun n => opow_le_opow_right omega0_pos (Ordinal.le_iSup f n)
@@ -74,18 +68,17 @@ lemma iSup_opow_add_one_le : (⨆ n, ω ^ f n) + 1 ≤ ω ^ ((⨆ n, f n) + 1) :
 
 variable {a b f}
 
-/-- Bookkeeping for a binary commuting case of a reduction lemma: premises reassembled at
-`max (a + b + 1) (a + c + 1) + 1` fit the target `a + (max b c + 1) + 1`. -/
+/-- `max (a + b + 1) (a + c + 1) + 1 ≤ a + (max b c + 1) + 1`. -/
 lemma max_add_add_one_add_one_le (a b c : Ordinal) :
     max (a + b + 1) (a + c + 1) + 1 ≤ a + (max b c + 1) + 1 := by
   gcongr
   refine max_le ?_ ?_ <;> rw [add_assoc] <;> gcongr <;> simp
 
-/-- Bookkeeping for a unary commuting case of a reduction lemma. -/
+/-- `a + b + 1 + 1 ≤ a + (b + 1) + 1`. -/
 lemma add_add_one_add_one_le (a b : Ordinal) : a + b + 1 + 1 ≤ a + (b + 1) + 1 :=
   le_of_eq (by rw [add_assoc a b 1])
 
-/-- Bookkeeping for the ω-rule commuting case of a reduction lemma. -/
+/-- `(⨆ n, a + f n + 1) + 1 ≤ a + ((⨆ n, f n) + 1) + 1`. -/
 lemma iSup_add_add_one_add_one_le (a : Ordinal) (f : ℕ → Ordinal) :
     (⨆ n, a + f n + 1) + 1 ≤ a + ((⨆ n, f n) + 1) + 1 := by
   gcongr
@@ -98,8 +91,7 @@ end Bounds
 
 section OmegaTower
 
-/-- The **`ω`-tower** `ω_c^α`: `ω ^ ·` iterated `c` times over `α`, the ordinal cost of removing
-`c` levels of cut rank from a `Z_∞` derivation.
+/-- The **`ω`-tower** `ω_c^α`: `ω ^ ·` iterated `c` times over `α`.
 
 - [Tow20, Definition 19.8] -/
 noncomputable def omegaTower : ℕ → Ordinal → Ordinal
@@ -114,14 +106,14 @@ variable {a : Ordinal}
 
 @[grind =] lemma omegaTower_succ (c : ℕ) : omegaTower (c + 1) a = omegaTower c (ω ^ a) := rfl
 
-/-- `ε₀` is closed under `ω ^ ·`, being a fixed point of it. -/
+/-- `ε₀` is closed under `ω ^ ·`. -/
 lemma omega0_opow_lt_epsilon0 (h : a < ε₀) : ω ^ a < ε₀ := by
   obtain ⟨n, hn⟩ := lt_epsilon_zero.mp h
   refine lt_trans ?_ (iterate_omega0_opow_lt_epsilon_zero (n + 1))
   rw [Function.iterate_succ_apply']
   exact (opow_lt_opow_iff_right one_lt_omega0).mpr hn
 
-/-- Cut elimination never leaves `ε₀`: the tower over an ordinal below `ε₀` stays below `ε₀`. -/
+/-- The `ω`-tower over an ordinal below `ε₀` stays below `ε₀`. -/
 lemma omegaTower_lt_epsilon0 (c : ℕ) (h : a < ε₀) : omegaTower c a < ε₀ := by
   induction c generalizing a with
   | zero => simpa using h

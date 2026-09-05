@@ -8,17 +8,8 @@ public import Foundation.FirstOrder.Basic.Calculus2
 /-!
 # Embedding `𝗣𝗔` into `Z_∞`
 
-Every Foundation `Derivation2` from `𝗣𝗔` becomes a `Z_∞` derivation, once its free variables are
-closed by a numeral assignment `asg e`.
-
-Three of the rules need something the finitary calculus does not have: a way to admit an axiom of
-`𝗣𝗔` without it being an axiom of `Z_∞`, an ω-rule for the universal quantifier, and admission of
-an existential witness that need not be a numeral.
-
-Absorbing the axioms by their truth in `ℕ` is what makes the ordinal height existential here: the
-result is `∃ α`, not a bound computed from the `𝗣𝗔` derivation. That is enough for soundness and
-so for `AlphaCentauri/OmegaLogic/Consistency.lean`, and it is deliberately *not* the
-ordinal-bounded embedding an ordinal analysis needs.
+This file embeds Foundation `Derivation2` derivations from `𝗣𝗔` into `Z_∞` under numeral
+assignments, first with bounded cut rank and then cut-free.
 
 Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20] and [Buc03].
 -/
@@ -29,9 +20,7 @@ namespace LO.FirstOrder.Arithmetic.OmegaLogic
 
 variable {n : ℕ} {Γ : Sequent}
 
-/-- **The closing assignment.** `asg e` sends the free variable `&x` to the numeral of `e x`, and
-so sends every `ArithmeticFormula ℕ` to a formula without free variables — the form the leaves and
-the ω-rule of `Z_∞` need.
+/-- The assignment sending each free variable `&x` to the numeral of `e x`.
 
 - [Tow20, Section 16] -/
 noncomputable def asg (e : ℕ → ℕ) : Rew ℒₒᵣ ℕ 0 ℕ 0 :=
@@ -47,7 +36,7 @@ lemma asg_comp_shift (e : ℕ → ℕ) : (asg e).comp Rew.shift = asg (e ∘ Nat
   · exact x.elim0
   · simp [asg, Rew.comp_app]
 
-/-- The `Finset.image` form of `asg_comp_shift`, matching the sequent of `Derivation2.shift`. -/
+/-- Closing a shifted sequent reindexes its assignment by `Nat.succ`. -/
 lemma asg_image_shift (e : ℕ → ℕ) (Γ : Sequent) :
     (Γ.image Rewriting.shift).image (fun ψ => asg e ▹ ψ)
       = Γ.image (fun ψ => asg (e ∘ Nat.succ) ▹ ψ) := by
@@ -56,8 +45,7 @@ lemma asg_image_shift (e : ℕ → ℕ) (Γ : Sequent) :
   show asg e ▹ (Rew.shift ▹ ψ) = asg (e ∘ Nat.succ) ▹ ψ
   rw [← TransitiveRewriting.comp_app, asg_comp_shift]
 
-/-- Freeing the eigenvariable and closing it to the numeral `m` is the same as closing the rest and
-substituting that numeral: the step that turns `Derivation2.all` into the ω-rule.
+/-- Closing a freed variable with `m :>ₙ e` equals closing with `e` and substituting `m`.
 
 - [Tow20, Section 16] -/
 lemma asg_cons_free (m : ℕ) (e : ℕ → ℕ) (φ : ArithmeticSemiformula ℕ 1) :
@@ -75,9 +63,7 @@ section ExcludedMiddle
 
 /-! ### Value-congruent excluded middle
 
-`Provable.lem` closes a sequent containing a formula and its negation. `em_cong` closes one
-containing `ψ/[s]` and `∼(ψ/[s'])` for closed terms `s`, `s'` of the same standard value — the
-form `exI_closed` needs, since `Derivation2.exs` may pick a witness term that is not a numeral. -/
+Cut-free excluded middle for substitutions by closed terms of the same standard value. -/
 
 variable {b : Bool} {k : ℕ} {w w' : Fin n → ArithmeticTerm ℕ}
 
@@ -96,8 +82,7 @@ private lemma litTrue_subst_congr
 
 namespace Provable
 
-/-- The `∧`/`∨` step of `em_congAux`: two premises for the conjuncts, over a sequent already
-carrying both disjuncts, collapse in two rules. -/
+/-- Combines two derivable conjunct premises with conjunction and disjunction formulas in `Γ`. -/
 private lemma em_binary {A B C D : ArithmeticFormula ℕ} (hab : A ⋏ B ∈ Γ) (hcd : C ⋎ D ∈ Γ)
     (h₁ : ∃ α, Z∞ ⊢[α, 0] insert A (insert C (insert D Γ)))
     (h₂ : ∃ α, Z∞ ⊢[α, 0] insert B (insert C (insert D Γ))) : ∃ α, Z∞ ⊢[α, 0] Γ := by
@@ -107,8 +92,7 @@ private lemma em_binary {A B C D : ArithmeticFormula ℕ} (hab : A ⋏ B ∈ Γ)
     (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hab))
   exact ⟨_, h.orI.insert_absorb hcd⟩
 
-/-- The `∀`/`∃` step of `em_congAux`: an ω-family of premises, each carrying the matching
-existential instance, collapses in two rules. -/
+/-- Combines numeral-instance premises with universal and existential formulas in `Γ`. -/
 private lemma em_quant {φₓ ψₓ : ArithmeticSemiformula ℕ 1} (hall : (∀¹ φₓ) ∈ Γ)
     (hexs : (∃¹ ψₓ) ∈ Γ)
     (fam : ∀ m : ℕ, ∃ α, Z∞ ⊢[α, 0] insert (ψₓ/[(↑m : ArithmeticTerm ℕ)])
@@ -118,8 +102,7 @@ private lemma em_quant {φₓ ψₓ : ArithmeticSemiformula ℕ 1} (hall : (∀�
     (exI m (hβ m)).insert_absorb (Finset.mem_insert_of_mem hexs)
   exact ⟨_, (allω h).insert_absorb hall⟩
 
-/-- The leaf of `em_congAux`: a literal and its opposite polarity, substituted by value-equal
-vectors, are settled by whichever of the two is true in `ℕ`. -/
+/-- Value-equal substitutions into opposite atomic literals yield a cut-free derivation. -/
 private lemma em_atomic
     (h : ∀ i, Semiterm.val (M := ℕ) ![] id (w i) = Semiterm.val (M := ℕ) ![] id (w' i))
     (b : Bool) (r : (ℒₒᵣ).Rel k) (v : Fin k → Semiterm ℒₒᵣ ℕ n)
@@ -130,7 +113,7 @@ private lemma em_atomic
   · rw [neg_signedLit] at ht
     exact ⟨0, axTrue (!b) r _ ((litTrue_subst_congr h (!b) r v).mp ht) hn⟩
 
-/-- The induction underlying `em_cong`, on the complexity of the formula. -/
+/-- Value-equal substitutions into a formula and its negation yield a cut-free derivation. -/
 private lemma em_congAux : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → ArithmeticTerm ℕ)
     (ψ : ArithmeticSemiformula ℕ n), ψ.complexity ≤ k →
     (∀ i, Semiterm.val (M := ℕ) ![] id (w i) = Semiterm.val (M := ℕ) ![] id (w' i)) →
@@ -206,8 +189,7 @@ where
     | zero => rfl
     | succ j => simpa using h j
 
-/-- **Value-congruent excluded middle.** For closed terms `s`, `s'` of the same standard value, a
-sequent containing `ψ/[s]` and `∼(ψ/[s'])` is derivable cut-free.
+/-- Equal-valued closed substitutions into a formula and its negation are derivable cut-free.
 
 - [Tow20, Section 16] -/
 lemma em_cong (s s' : ArithmeticTerm ℕ)
@@ -230,9 +212,7 @@ section ClosedWitness
 
 variable {α : Ordinal.{0}} {c : ℕ}
 
-/-- **Existential introduction with an arbitrary closed witness.** `Z_∞`'s `exI` admits only
-numerals, but a `Derivation2.exs` may have picked any term. Cutting the numeral of the term's
-value against `em_cong` closes the gap, at the price of raising the cut rank to admit `ψ`.
+/-- An arbitrary closed witness introduces an existential with cut rank at most `max c (ψ.qr + 1)`.
 
 - [Tow20, Section 16] -/
 lemma exI_closed (ψ : ArithmeticSemiformula ℕ 1) (s : ArithmeticTerm ℕ)
@@ -254,11 +234,7 @@ end ClosedWitness
 
 section Embedding
 
-/-- **The embedding.** Every `𝗣𝗔`-derivation embeds into `Z_∞`, at every numeral assignment of its
-free variables, with a cut rank read off the derivation and an unbounded ordinal height.
-
-The height cannot be bounded here, since it is read off axioms of `𝗣𝗔` known only to be true in
-`ℕ`.
+/-- Every `𝗣𝗔` derivation embeds into `Z_∞` under every numeral assignment of its free variables.
 
 - [Tow20, Section 16]
 - [Buc03, Section 5.5] -/
@@ -333,7 +309,7 @@ theorem of_derivation2 (d : 𝗣𝗔 ⟹₂ Γ) :
     exact ⟨_, cut (asg e ▹ φ) (by simp only [Semiformula.qr_rew]; omega)
       (h₁.mono_cutRank (by omega)) (h₂.mono_cutRank (by omega))⟩
 
-/-- **The cut-free embedding**: `of_derivation2` followed by `cut_elimination`.
+/-- Every `𝗣𝗔` derivation embeds cut-free into `Z_∞` under a numeral assignment.
 
 - [Tow20, Section 16] -/
 theorem of_derivation2_cutFree (d : 𝗣𝗔 ⟹₂ Γ) (e : ℕ → ℕ) :

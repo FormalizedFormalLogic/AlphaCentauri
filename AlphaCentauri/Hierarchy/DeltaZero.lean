@@ -4,10 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 
 /-! # Recursion on the bounded formulas
 
-Foundation's `Hierarchy` comes with `sigma₁_induction`, a recursor for `Hierarchy 𝚺 1`, but
-none for the bounded class `Hierarchy 𝚺 0`. This module supplies the missing one: at level `0`
-the quantifier clauses of `Hierarchy` collapse to the two bounded ones, so a bounded formula is
-built from atoms by `⋏`, `⋎`, `∀¹[· < t]` and `∃¹[· < t]`.
+A recursor for bounded arithmetical formulas.
 -/
 
 @[expose] public section
@@ -16,8 +13,8 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {ξ : Type*}
 
-/-- Recursion on a bounded arithmetical formula: the level-`0` counterpart of Foundation's
-`sigma₁_induction`, with the unbounded quantifier clauses replaced by the two bounded ones.
+/-- Recursion on bounded arithmetical formulas with clauses for atoms, Boolean operations, and
+bounded quantifiers.
 - This is the level-`0` instance of the shape of Foundation's `sigma₁_induction`; no separate
   source theorem. -/
 lemma delta₀_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}

@@ -300,12 +300,12 @@ instance IsStrictSigma.definable (n : ℕ) : 𝚫₁-Predicate (IsStrictSigma n 
 instance IsStrictPi.definable (n : ℕ) : 𝚫₁-Predicate (IsStrictPi n : V → Prop) :=
   (IsStrictPi.defined n).to_definable
 
-/-- A strict `Πₙ` formula belongs to the next strict `Σ` level via an empty block.
+/-- A strict `Πₙ` formula belongs to the next strict `Σ` level.
 - [HP98, Lemma I.1.69] -/
 lemma IsStrictSigma.of_pi {n : ℕ} {p : V} (h : IsStrictPi n p) : IsStrictSigma (n + 1) p :=
   ⟨0, p, (qqExss_zero p).symm, h⟩
 
-/-- A strict `Σₙ` formula belongs to the next strict `Π` level via an empty block.
+/-- A strict `Σₙ` formula belongs to the next strict `Π` level.
 - [HP98, Lemma I.1.69] -/
 lemma IsStrictPi.of_sigma {n : ℕ} {p : V} (h : IsStrictSigma n p) : IsStrictPi (n + 1) p :=
   ⟨0, p, (qqAlls_zero p).symm, h⟩
@@ -510,9 +510,7 @@ private lemma isStrictClass_quote {Γ : Polarity} {s n : ℕ} {ψ : ArithmeticSe
     rw [Semiformula.quote_all]
     exact IsStrictPi.all ih
 
-/-- Peeling one existential quantifier off a quoted formula: a formula whose code is a coded
-existential quantification is itself an existential quantification, and its body quotes to the
-body of the code.
+/-- A formula whose code is existentially quantified is itself existentially quantified.
 - [HP98, Lemma I.1.69] -/
 private lemma exists_ex_of_quote_eq_qqExs {n : ℕ} (ψ : ArithmeticSemiproposition n) {p : ℕ}
     (h : (⌜ψ⌝ : ℕ) = ^∃ p) :
@@ -521,7 +519,7 @@ private lemma exists_ex_of_quote_eq_qqExs {n : ℕ} (ψ : ArithmeticSemiproposit
   | hexs φ _ => exact ⟨φ, rfl, by simpa using h⟩
   | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs] at h
 
-/-- Peeling one universal quantifier off a quoted formula, dual to `exists_ex_of_quote_eq_qqExs`.
+/-- A formula whose code is universally quantified is itself universally quantified.
 - [HP98, Lemma I.1.69] -/
 private lemma exists_all_of_quote_eq_qqAll {n : ℕ} (ψ : ArithmeticSemiproposition n) {p : ℕ}
     (h : (⌜ψ⌝ : ℕ) = ^∀ p) :
@@ -563,7 +561,7 @@ private lemma strictHierarchy_pi_of_quote_eq_qqAlls {s : ℕ}
     exact .all (strictHierarchy_pi_of_quote_eq_qqAlls ih k ψ' q heq' hq)
 
 mutual
-  /-- Converse of `isStrictClass_quote` for `Σ` over the standard model.
+  /-- Internal strict `Σₛ` recognition implies external strict `Σₛ` membership.
   - [HP98, Lemma I.1.69] -/
   private lemma strictHierarchy_sigma_of_isStrictSigma_nat :
       ∀ (s : ℕ) {n : ℕ} (ψ : ArithmeticSemiproposition n),
@@ -574,7 +572,7 @@ mutual
       exact strictHierarchy_sigma_of_quote_eq_qqExss
         (strictHierarchy_pi_of_isStrictPi_nat s) k ψ q heq hq
 
-  /-- Converse of `isStrictClass_quote` for `Π` over the standard model.
+  /-- Internal strict `Πₛ` recognition implies external strict `Πₛ` membership.
   - [HP98, Lemma I.1.69] -/
   private lemma strictHierarchy_pi_of_isStrictPi_nat :
       ∀ (s : ℕ) {n : ℕ} (ψ : ArithmeticSemiproposition n),
@@ -598,9 +596,7 @@ private lemma isStrictPi_quote_iff_nat {s n : ℕ} (ψ : ArithmeticSemipropositi
     IsStrictPi s (⌜ψ⌝ : ℕ) ↔ StrictHierarchy 𝚷 s ψ :=
   ⟨strictHierarchy_pi_of_isStrictPi_nat s ψ, fun h ↦ isStrictClass_quote h⟩
 
-/-- Internal strict `Σₛ` recognition agrees with the external class on quoted formulas, in any
-model of `𝗜𝚺₁`: the recognizer is `𝚫₁`, hence absolute between `ℕ` and `V` on the standard code
-of `ψ`.
+/-- Internal strict `Σₛ` recognition agrees with the external class on quoted formulas.
 - [HP98, Lemma I.1.69] -/
 lemma isStrictSigma_quote_iff_s {s n : ℕ} (ψ : ArithmeticSemiproposition n) :
     IsStrictSigma s (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚺 s ψ :=
@@ -612,8 +608,7 @@ lemma isStrictSigma_quote_iff_s {s n : ℕ} (ψ : ArithmeticSemiproposition n) :
   by simpa [(IsStrictSigma.defined (V := V) s).df, (IsStrictSigma.defined (V := ℕ) s).df,
     isStrictSigma_quote_iff_nat] using h
 
-/-- Internal strict `Πₛ` recognition agrees with the external class on quoted formulas, in any
-model of `𝗜𝚺₁`.
+/-- Internal strict `Πₛ` recognition agrees with the external class on quoted formulas.
 - [HP98, Lemma I.1.69] -/
 lemma isStrictPi_quote_iff_s {s n : ℕ} (ψ : ArithmeticSemiproposition n) :
     IsStrictPi s (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚷 s ψ :=

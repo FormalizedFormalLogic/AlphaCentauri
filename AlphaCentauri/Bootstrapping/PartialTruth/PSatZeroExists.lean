@@ -486,7 +486,7 @@ lemma of_atom (h : Spec ({⟪⟪z, e⟫, v⟫} : V) z e) : PSatZero ({⟪⟪z, e
   · intro n hn
     exact Or.inl (by simpa using hn)
 
-/-- The table for a conjunction, assembled from tables for its two conjuncts.
+/-- Existence of a table for a conjunction from bounded tables for its conjuncts.
 - [HP98, Lemma I.1.72(3)] -/
 lemma of_and {N : V} (h₁ : PSatZero q₁ p₁ e) (h₂ : PSatZero q₂ p₂ e)
     (hn₁ : ∀ w ∈ q₁, w < N) (hn₂ : ∀ w ∈ q₂, w < N)
@@ -566,7 +566,7 @@ lemma of_and {N : V} (h₁ : PSatZero q₁ p₁ e) (h₂ : PSatZero q₂ p₂ e)
     · exact hn₁ _ h
     · exact hn₂ _ h
 
-/-- The table for a disjunction, assembled from tables for its two disjuncts.
+/-- Existence of a table for a disjunction from bounded tables for its disjuncts.
 - [HP98, Lemma I.1.72(3)] -/
 lemma of_or {N : V} (h₁ : PSatZero q₁ p₁ e) (h₂ : PSatZero q₂ p₂ e)
     (hn₁ : ∀ w ∈ q₁, w < N) (hn₂ : ∀ w ∈ q₂, w < N)
@@ -644,8 +644,7 @@ lemma of_or {N : V} (h₁ : PSatZero q₁ p₁ e) (h₂ : PSatZero q₂ p₂ e)
     · exact hn₁ _ h
     · exact hn₂ _ h
 
-/-- The tables for the instances of the body of a bounded quantifier, collected into a single
-mapping by `𝚺₁`-collection.
+/-- A single mapping contains bounded partial satisfaction tables for every body instance.
 - [HP98, Lemma I.1.72(3)] -/
 lemma exists_family_union {p e X N : V}
     (H : ∀ x < X, ∃ q, PSatZero q p (x ∷ e) ∧ ∀ w ∈ q, w < N) :
@@ -692,7 +691,7 @@ lemma exists_family_union {p e X N : V}
     obtain ⟨r, hr⟩ := mem_domain_iff.mp (show x ∈ domain f by rw [hfd]; simpa using hx)
     exact ⟨r, (hfr x r hr).1, hsub x r hr⟩
 
-/-- The table for a bounded universal quantification, assembled from tables for its body.
+/-- Existence of a table for a bounded universal from bounded tables for its body instances.
 - [HP98, Lemma I.1.72(3)] -/
 lemma of_ball {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) (hp : p < qqBall u p)
     (hr1 : ⟪⟪qqBall u p, e⟫, 1⟫ < N) (hr0 : ⟪⟪qqBall u p, e⟫, 0⟫ < N)
@@ -768,7 +767,7 @@ lemma of_ball {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ
       · exact hr1
     · exact hWN _ h
 
-/-- The table for a bounded existential quantification, assembled from tables for its body.
+/-- Existence of a table for a bounded existential from bounded tables for its body instances.
 - [HP98, Lemma I.1.72(3)] -/
 lemma of_bex {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) (hp : p < qqBex u p)
     (hr1 : ⟪⟪qqBex u p, e⟫, 1⟫ < N) (hr0 : ⟪⟪qqBex u p, e⟫, 0⟫ < N)
@@ -858,7 +857,7 @@ lemma singleton_le_tableBound {z e v : V} (hv : v ≤ 1) :
         rw [tableBound, show 8 * z + 24 = 3 + (8 * z + 21) from by ring, iterExp_add]
         exact le_iterExp _ _
 
-/-- The root node lies below the working bound of an induction step.
+/-- A root node lies below the designated iterated-exponential bound.
 - [HP98, Lemma I.1.72(3)] -/
 lemma node_lt_step {z e v : V} (hv : v ≤ 1) :
     ⟪⟪z, e⟫, v⟫ < iterExp (tableExp z e) (8 * z + 21) := by

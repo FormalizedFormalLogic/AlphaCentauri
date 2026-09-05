@@ -5,14 +5,8 @@ public import AlphaCentauri.OmegaLogic.Reduction
 /-!
 # Cut elimination for `Z_∞`
 
-Every cut is removable, at the price of an `ω`-tower over the height: a derivation of ordinal
-height `α` and cut rank `c` becomes a cut-free one of height `Ordinal.omegaTower c α`.
-
-The **quantifier** cut rank of `Derivation.cutRank` costs something here. Towsner ranks a cut
-formula by `Semiformula.complexity`, and then a `∧`- or `∨`-cut reduces to cuts of *strictly*
-smaller rank, which a rank induction absorbs. Counting quantifiers instead, `(φ ⋏ ψ).qr = max φ.qr
-ψ.qr`, so the reduction of a `∧`-cut produces cuts of the *same* rank, and a rank induction on
-quantifier rank alone would give nothing.
+A derivation of height `α` and cut rank `c` yields a cut-free derivation of height
+`Ordinal.omegaTower c α`.
 
 Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20].
 -/

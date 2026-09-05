@@ -5,11 +5,7 @@ public import Foundation.FirstOrder.Basic.Semantics.Semantics
 /-!
 # Substitution against a rewriting
 
-Foundation composes rewritings (`Rew.comp`, `Rew.q_comp`, `Rew.subst_comp_subst`) but states none
-of the resulting commutations in the applied form a syntactic induction over a sequent calculus
-needs, where a substitution `φ/[t]` has to be pushed through an ambient rewriting or extended by
-one more slot. This file supplies those three, and the evaluation congruence that goes with them.
-They belong in Foundation next to `Rew.subst_comp_subst`.
+Commutation and congruence lemmas for substitutions and rewritings.
 -/
 
 @[expose] public section
@@ -39,7 +35,7 @@ lemma subst_comp_subst_q (w : Fin n → Semiterm L ξ 0) (s : Semiterm L ξ 0) :
     | succ i => simp [Rew.comp_app]
   · simp [Rew.comp_app]
 
-/-- The applied form of `Rew.subst_comp_subst_q`. -/
+/-- Substitution after a lifted substitution equals substitution by the extended vector. -/
 lemma subst_q_app (w : Fin n → Semiterm L ξ 0) (s : Semiterm L ξ 0)
     (φ : Semiformula L ξ (n + 1)) : ((Rew.subst w).q ▹ φ)/[s] = Rew.subst (s :> w) ▹ φ := by
   show Rew.subst ![s] ▹ ((Rew.subst w).q ▹ φ) = Rew.subst (s :> w) ▹ φ

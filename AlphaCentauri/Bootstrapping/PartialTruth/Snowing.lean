@@ -225,8 +225,7 @@ noncomputable def snowing (n : ℕ) {k : ℕ}
     (φ : ArithmeticSemisentence k) : ArithmeticSentence :=
   ∀¹* (φ 🡘 (satSigmaVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
 
-/-- Semantic interpretation of the sentence `snowing n φ`: the substituted right-hand side is
-the defining formula of `satSigmaVec`, read under the assignment given by the free variables.
+/-- Semantic characterization of the sentence `snowing n φ`.
 - [HP98, Corollary I.1.76] -/
 theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
     V↓[ℒₒᵣ] ⊧ snowing n φ ↔
@@ -345,32 +344,32 @@ noncomputable def termValMul : ArithmeticSentence :=
     (!termValGraph.val v e s ↔ v = vt * vu)”
 
 /-- Coded vector adjunction is total.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def adjoinTotal : ArithmeticSentence :=
   “∀ x v, ∃ e, !adjoinDef.val e x v”
 
 /-- Coded vector adjunction is functional.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def adjoinUnique : ArithmeticSentence :=
   “∀ x v e e', !adjoinDef.val e x v → !adjoinDef.val e' x v → e = e'”
 
 /-- The head of an adjoined coded vector is its new entry.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def nthAdjoinZero : ArithmeticSentence :=
   “∀ x v e y, !adjoinDef.val e x v → (!nthDef.val y e 0 ↔ y = x)”
 
 /-- Successor indices into an adjoined coded vector read from its tail.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def nthAdjoinSucc : ArithmeticSentence :=
   “∀ x v e i y, !adjoinDef.val e x v →
     (!nthDef.val y e (i + 1) ↔ !nthDef.val y v i)”
 
 /-- The empty coded vector has length zero.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def lenNil : ArithmeticSentence := “∀ l, !lenDef.val l 0 ↔ l = 0”
 
 /-- Adjunction increases the length of a coded vector by one.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def lenAdjoin : ArithmeticSentence :=
   “∀ x v e l, !adjoinDef.val e x v → (!lenDef.val (l + 1) e ↔ !lenDef.val l v)”
 
@@ -452,8 +451,7 @@ noncomputable def satSigmaAxioms (n : ℕ) : ArithmeticTheory :=
 
 end Tarski
 
-/-- `tarski n` contains the finitely many Tarski conditions through level `n + 1`, together
-with the vector and term-evaluation facts used in the snowing lemma.
+/-- `tarski n` contains the Tarski, vector, and term-evaluation conditions through level `n + 1`.
 - [HP98, Remark I.1.77] -/
 inductive tarski : ℕ → ArithmeticTheory
   | zero : ∀ φ ∈ Tarski.satZeroAxioms, tarski 0 φ
@@ -489,7 +487,7 @@ lemma tarski_finite (n : ℕ) : (tarski n).Finite := by
 - [HP98, Remark I.1.77] -/
 axiom ISigma1.provable_tarski (n : ℕ) : 𝗜𝚺₁ ⊢* tarski n
 
-/-- The theory form of the snowing lemma follows from `𝗣𝗔⁻` and the finite Tarski theory.
+/-- `𝗣𝗔⁻` together with the finite Tarski theory proves the snowing lemma.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
 axiom provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}

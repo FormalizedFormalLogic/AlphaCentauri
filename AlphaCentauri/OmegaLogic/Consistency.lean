@@ -5,13 +5,7 @@ public import AlphaCentauri.OmegaLogic.Embedding
 /-!
 # The consistency of `𝗣𝗔`, read off `Z_∞`
 
-The consistency of `𝗣𝗔` follows as a corollary of the `Z_∞` development in this directory.
-
-**This is not new mathematics.** Foundation already has `instance : Entailment.Consistent 𝗣𝗔` in
-`FirstOrder/Arithmetic/Schemata.lean`, proved directly from the soundness of first-order logic
-over `ℕ`; the theorem below is that instance's statement with a longer proof. Its purpose is to be
-an integration check on the `Z_∞` chain — every link is exercised, and the audit confirms the chain
-leans on nothing but the three standard axioms.
+This file states the consistency of `𝗣𝗔` as a consequence of the `Z_∞` development.
 
 Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20].
 -/
@@ -20,8 +14,7 @@ Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20]
 
 namespace LO.FirstOrder.Arithmetic.OmegaLogic
 
-/-- **The consistency of `𝗣𝗔`, via `Z_∞`.** Foundation's `Entailment.Consistent 𝗣𝗔` says the same
-thing by way of soundness over `ℕ`.
+/-- Peano arithmetic does not prove falsity.
 
 - [Tow20, Section 16] -/
 theorem consistent_PA : 𝗣𝗔 ⊬ ⊥ := by

@@ -7,13 +7,7 @@ public import Foundation.FirstOrder.Completeness
 /-!
 # Provably total functions
 
-`T.ProvablyTotalVia f φ` says that the `𝚺₁` formula `φ` defines the graph of `f : (Fin k → ℕ) → ℕ`
-over `ℕ`, and that `T` proves the totality sentence `∀ x⃗, ∃ y, φ(y, x⃗)`.
-
-Both faces of totality are available: the `T ⊢ _` form and the model-theoretic form, translated by
-`ProvablyTotalVia.models` and `ProvablyTotalVia.of_models`. The provably total functions are closed
-under composition, depend only on the `𝚷₂` consequences of the theory, and over a theory containing
-`𝗜𝚺₁` the `∃` form of totality upgrades to the `∃!` form by passing to the least witness.
+Provably total functions, their graph formulas, and closure under composition.
 -/
 
 @[expose] public section
@@ -24,10 +18,7 @@ namespace Arithmetic
 
 variable {L : Language} [L.LT] {ξ : Type*} {s : ℕ}
 
-/-- Universal closure preserves the `𝚷-[s + 1]` classes.
-
-The `∃¹*` counterpart is Foundation's `Hierarchy.exsClosure`; this is its dual and has no separate
-counterpart in the literature. -/
+/-- Universal closure preserves the `𝚷-[s + 1]` classes. -/
 lemma Hierarchy.allClosure :
     {n : ℕ} → {φ : Semiformula L ξ n} → Hierarchy 𝚷 (s + 1) φ → Hierarchy 𝚷 (s + 1) (∀¹* φ)
   |     0, _, hφ => hφ
@@ -49,10 +40,7 @@ lemma models_totalitySentence_iff {V : Type*} [ORingStructure V] {φ : 𝚺₁.S
 
 variable {l : ℕ}
 
-/-- The graph formula of the composite `fun x⃗ ↦ f (fun i ↦ g i x⃗)`, assembled from a graph
-formula `ψ` of `f` and graph formulas `χ` of the `g i`: the free variable `0` carries the value and
-the free variables `i + 1` the arguments, while the `l` bound variables carry the intermediate
-values.
+/-- A graph formula for the composite `fun x⃗ ↦ f (fun i ↦ g i x⃗)`.
 - [HP98, Lemma I.1.53] -/
 def compGraph (ψ : 𝚺₁.Semisentence (l + 1)) (χ : Fin l → 𝚺₁.Semisentence (k + 1)) :
     𝚺₁.Semisentence (k + 1) :=
@@ -68,10 +56,7 @@ def compGraph (ψ : 𝚺₁.Semisentence (l + 1)) (χ : Fin l → 𝚺₁.Semise
   simp [compGraph, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
     Matrix.comp_vecCons', Empty.eq_elim]
 
-/-- Substituting parameters into a `𝚺₁` graph formula gives a `𝚺₁`-definable predicate.
-
-This is a routine bridge to Foundation's parameterized definability API and has no counterpart in
-the literature. -/
+/-- Substituting parameters into a `𝚺₁` graph formula gives a `𝚺₁`-definable predicate. -/
 lemma definablePred_evalb {V : Type*} [ORingStructure V] (φ : 𝚺₁.Semisentence (k + 1))
     (v : Fin k → V) : 𝚺₁-Predicate fun y ↦ φ.val.Evalb (y :> v) :=
   HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 1)
@@ -112,12 +97,8 @@ open Arithmetic
 
 variable {T U : ArithmeticTheory} {k : ℕ} {f : (Fin k → ℕ) → ℕ} {φ : 𝚺₁.Semisentence (k + 1)}
 
-/-- `f` is `T`-provably total via `φ`: the `𝚺₁` formula `φ` defines the graph of `f` over `ℕ`, and
-`T` proves that `φ` defines a total function.
-
-Since `defined` is a `HierarchySymbol.DefinedFunction`, uniqueness of the value holds in `ℕ`; the
-difference between the `∃!` form of [HP98] and the `∃` form of [AB05, §10.2] therefore shows up
-only in `total`.
+/-- `f` is `T`-provably total via `φ` iff `φ` defines the graph of `f` over `ℕ` and `T` proves its
+totality sentence.
 - [HP98, Definition I.1.51]
 - [HP98, Definition IV.3.1] -/
 structure ArithmeticTheory.ProvablyTotalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ)
@@ -139,9 +120,7 @@ lemma to_provablyTotal (h : T.ProvablyTotalVia f φ) : T.ProvablyTotal f := ⟨�
 lemma graph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
     φ.val.Evalb v ↔ v 0 = f (v ·.succ) := h.defined.iff
 
-/-- Provable totality passes to any stronger theory.
-
-This is immediate from the definition and has no separate counterpart in the literature. -/
+/-- Provable totality passes to any stronger theory. -/
 lemma mono (h : T.ProvablyTotalVia f φ) (hT : T ⪯ U) : U.ProvablyTotalVia f φ :=
   ⟨h.defined, hT.pbl h.total⟩
 
@@ -151,23 +130,18 @@ lemma of_pi2 (h : T.ProvablyTotalVia f φ)
     (H : ∀ σ : ArithmeticSentence, Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) : U.ProvablyTotalVia f φ :=
   ⟨h.defined, H _ (by simp) h.total⟩
 
-/-- The model-theoretic face of `total`: in every model of `T`, `φ` defines a total function.
-
-This is soundness applied to `total`, and has no separate counterpart in the literature. -/
+/-- In every model of `T`, a provably total graph formula has a value for every input. -/
 lemma models (h : T.ProvablyTotalVia f φ)
     (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (v : Fin k → V) : ∃ y, φ.val.Evalb (y :> v) :=
   models_totalitySentence_iff.mp (consequence_iff'.mp (Theory.Proof.sound h.total) V) v
 
-/-- `total` follows from its model-theoretic face, by completeness.
-
-This is the converse of `models`, and has no separate counterpart in the literature. -/
+/-- A graph formula that has a value for every input in every model of `T` is provably total. -/
 lemma of_models [𝗘𝗤 ℒₒᵣ ⪯ T] (hf : HierarchySymbol.DefinedFunction (V := ℕ) f φ)
     (H : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T], ∀ v : Fin k → V,
       ∃ y, φ.val.Evalb (y :> v)) : T.ProvablyTotalVia f φ :=
   ⟨hf, Arithmetic.complete T _ fun V _ _ ↦ models_totalitySentence_iff.mpr (H V)⟩
 
-/-- Over `ℕ` the least-witness refinement of `φ` still defines the graph of `f`, since the graph is
-single valued there.
+/-- Over `ℕ`, the least-witness refinement of `φ` defines the same graph of `f`.
 - [HP98, Lemma IV.3.4] -/
 lemma leastGraph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
     (leastGraph φ).Evalb v ↔ v 0 = f (v ·.succ) := by

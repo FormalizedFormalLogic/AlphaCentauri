@@ -3,39 +3,15 @@ import Lean
 /-!
 # The axiom audit
 
-Run from the repository root after `lake build`, compiled (`just axiom-audit`) or as a script:
-
-```
-lake exe audit
-lake env lean --run Audit/Main.lean
-```
-
-Builds the `AlphaCentauri` environment from its compiled `.olean`s and reports, for every
-declaration defined under `AlphaCentauri`, the axioms it transitively depends on. The run fails if
-any declaration depends on an axiom outside `propext`, `Classical.choice`, `Quot.sound`, unless the
-allowlist `forgive.yml` forgives it (see `Forgiveness`). Because it works on the kernel
-environment rather than source text, it catches what a `grep` cannot: `sorry`/`admit` (`sorryAx`),
-`native_decide` (which adds an auxiliary axiom `…native_decide.ax_…` per use), and any home-rolled
-`axiom`, including ones reaching in through imports. `sorryAx` is forgiven nowhere, so a `sorry`
-in the library fails the run; an unproved statement is written as an `axiom` instead, and is
-reported under its own name.
-
-Exits `0` when clean, `1` on a violation or a problem with the allowlist, and `2` when the
-environment could not be loaded. Besides the text on stdout/stderr, every run writes the report
-as JSON to `.lake/audit.json` and as Markdown to `.lake/audit.md`; CI posts the latter on the
-pull request.
-
-Ported from [leanprover-community/axiom-audit](https://github.com/leanprover-community/axiom-audit)
-(Apache-2.0, commit `1a9c3c2`), which generalizes the audit Kim Morrison wrote for TauCeti and
-adapts Robin Arnez's shared-cache traversal. The command-line surface is dropped, and the
-allowlist is added.
+Reports the axioms transitively used by declarations under `AlphaCentauri`, subject to the
+allowlist in `forgive.yml`.
 -/
 
 open Lean
 
 namespace Audit
 
-/-- The library whose declarations are audited; also the module imported to build the environment. -/
+/-- The root module of the audited library. -/
 def root : Name := `AlphaCentauri
 
 /-- The axioms every declaration may use. -/
@@ -50,13 +26,7 @@ def markdownFile : System.FilePath := ".lake" / "audit.md"
 
 /-! ## A YAML subset reader
 
-Lean core has no YAML library, and the allowlist needs only a sliver of the language. This reader
-accepts exactly the subset the file uses: `#` comments (at the start of a line or after
-whitespace) and blank lines; block mappings `key: value` with plain or quoted scalar values, or
-with the value on the following lines indented further than the key; block sequences `- item` of
-scalars and flow sequences `[a, b]` of scalars; indentation by spaces only. Anything else
-(anchors, multi-line scalars, mappings inside sequences, tabs) is rejected with the line number,
-so a mistake in the allowlist fails the audit loudly rather than forgiving nothing. -/
+A reader for the YAML subset used by the allowlist. -/
 
 namespace Yaml
 
@@ -68,7 +38,7 @@ inductive Value where
   | map (entries : Array (String × Value))
   deriving Repr, Inhabited
 
-/-- A source line with its comment stripped: its 1-based number, indentation, and trimmed text. -/
+/-- A source line represented by its 1-based number, indentation, and trimmed uncommented text. -/
 structure Line where
   no : Nat
   indent : Nat
@@ -203,19 +173,8 @@ LO.uses_some_unproved_lemma:
     - LO.some_unproved_lemma
 ```
 
-Each top-level key other than `version` names a declaration defined under the audited root. Its
-`forgive` list names what that declaration is allowed to depend on:
-
-- an **axiom**, which is then ignored wherever the declaration reaches it. AlphaCentauri writes a
-  statement it has not proved yet as an `axiom` under the statement's own name rather than as a
-  `sorry`, so an axiom forgiving itself is the normal entry: the debt is named, and the audit can
-  say which unproved result a proof leans on;
-- a **declaration**, in which case nothing reached *through* it is looked at, so a lemma may
-  build on another declaration's forgiven debt without being forgiven the same axiom outright.
-
-Everything else the declaration depends on must still be within the allowlist. Every entry and
-every item of a `forgive` list must be needed: an entry for a clean declaration, or an item that
-forgives nothing, fails the audit, so the file stays an exact record of the outstanding debt. -/
+Each top-level declaration key lists the axioms or declarations through which its dependencies
+may be forgiven. Every entry and forgiven name must be necessary. -/
 
 /-- One entry of the allowlist: a declaration and the names it is allowed to depend on. -/
 structure ForgiveEntry where
@@ -297,22 +256,10 @@ def isAxiom (env : Environment) (c : Name) : Bool :=
   | some (.axiomInfo _) => true
   | _ => false
 
-/--
-Reader/State monad for the shared axiom-collection pass: the `Environment` is read-only and the
-`NameMap (Array Name)` memoizes, for every constant visited, the (sorted) set of axioms it
-transitively depends on. The map is threaded across *all* declarations so the shared dependency
-closure (e.g. all of Mathlib) is walked once in total, not re-walked per declaration.
--/
+/-- A computation over an environment with a memo of each constant's transitive axioms. -/
 abbrev AxiomM := ReaderT Environment (StateM (NameMap (Array Name)))
 
-/--
-The axioms transitively used by `c`, memoized in the shared `NameMap`. Mirrors
-`Lean.collectAxioms`, but shares one cache across every call instead of rebuilding it per call,
-since a whole-library audit calls this once per candidate declaration.
-
-Never hides an axiom or misses a violation project-wide; in a cyclic declaration cluster the
-per-declaration list can under-count (a re-run flags the rest).
--/
+/-- The axioms transitively used by `c`. -/
 partial def axiomsOf (c : Name) : AxiomM (Array Name) := do
   if let some s := (← get).find? c then return s
   -- Record `c` empty before recursing, so a cycle's back-edge into it contributes nothing.
@@ -325,18 +272,11 @@ partial def axiomsOf (c : Name) : AxiomM (Array Name) := do
   modify (·.insert c arr)
   return arr
 
-/-- The memo of one cut traversal (`axiomsOfCut`), distinct from the shared one by type so the
-two `StateT` layers cannot be confused. -/
+/-- The memo of an `axiomsOfCut` traversal. -/
 structure CutMemo where
   map : NameMap (Array Name) := {}
 
-/--
-The axioms `c` reaches without passing through any name in `cut`: a name in `cut` is not
-descended into, and if it is an axiom it is not counted. This is what the allowlist forgives.
-
-Only descends into constants the shared pass (`axiomsOf`) has not already shown lie entirely
-within `allowed`, so a cut traversal costs almost nothing beyond the shared pass.
--/
+/-- The axioms `c` reaches without passing through any name in `cut`. -/
 partial def axiomsOfCut (allowed cut : NameSet) (c : Name) :
     StateT CutMemo AxiomM (Array Name) := do
   if cut.contains c then return #[]
@@ -356,11 +296,7 @@ partial def axiomsOfCut (allowed cut : NameSet) (c : Name) :
 
 /-! ## The audit -/
 
-/-- Build the environment from the given imported modules and run `act` in `CoreM`.
-`trustLevel := 1024` means imported constants are taken as type-correct rather than re-checked:
-this audit checks *which axioms* a declaration depends on, not whether the proofs are valid, so it
-relies on a prior `lake build` having kernel-checked the library. It is not a defense against
-stale or hand-forged `.olean`s. -/
+/-- Run `act` in the environment built from the given imported modules. -/
 def withImportedEnv {α} (modules : Array Name) (act : CoreM α) : IO α := do
   initSearchPath (← findSysroot)
   unsafe Lean.withImportModules (modules.map (fun m => { module := m })) {} (trustLevel := 1024)
@@ -370,14 +306,10 @@ def withImportedEnv {α} (modules : Array Name) (act : CoreM α) : IO α := do
 /-- Is `mod` the audited root or one of its submodules? -/
 def inAuditedLib (root : Name) (mod : Name) : Bool := mod == root || root.isPrefixOf mod
 
-/-- A heap-owned copy of a name's string. Names loaded from `.olean`s carry string data in a
-memory-mapped region that is unmapped once `withImportModules` returns; `toString` can hand back a
-string still backed by that region, so we rebuild it character by character to make it self-owned
-and safe to keep in the returned `Report`. -/
+/-- A heap-owned string representation of a name. -/
 def freshStr (n : Name) : String := (toString n).foldl (fun acc c => acc.push c) ""
 
-/-- The result of an audit, rendered to `String`s inside the environment callback (declaration and
-axiom `Name`s live in a memory-mapped region unmapped once `withImportModules` returns). -/
+/-- The result of an axiom audit. -/
 structure Report where
   audited : Nat
   /-- Distinct axioms used anywhere under the root, sorted. -/
@@ -394,12 +326,10 @@ structure Report where
   nothing. -/
   forgiveErrors : Array String
 
-/-- The audit succeeded only if there were no violations and the allowlist is exact. An empty
-audit is fine: the root module is fixed and importing it succeeded, so nothing was miswired. -/
+/-- Whether the audit has no violations or allowlist errors. -/
 def Report.ok (r : Report) : Bool := r.violations.isEmpty && r.forgiveErrors.isEmpty
 
-/-- Everything the report needs, computed in one `AxiomM` run so the cut traversals reuse the
-shared memo of the main pass. -/
+/-- Intermediate data used to construct an audit report. -/
 private structure Analysis where
   usedAll : NameSet := {}
   /-- How many audited declarations, other than the axiom itself, reach each disallowed axiom. -/

@@ -6,13 +6,8 @@ public import AlphaCentauri.ProvablyTotal.Basic
 /-!
 # Primitive recursive functions are `𝗜𝚺₁`-provably total
 
-The easy direction of Parsons' theorem: every primitive recursive function is `𝗜𝚺₁`-provably
-total, in both of Mathlib's forms — `Nat.Primrec'` on `List.Vector ℕ k → ℕ` and the curried
-`Primrec` — translated to `(Fin k → ℕ) → ℕ` through `List.Vector.ofFn`, the same translation
-`AlphaCentauri.Vorspiel.Primrec` uses for the `Nat.Primrec'`/`Primrec` bridge lemmas.
-
-Both statements are recorded here as axioms; see [HP98, Theorem I.1.54] and
-[HP98, Lemma I.1.55].
+Every primitive recursive function is `𝗜𝚺₁`-provably total, in Mathlib's `Nat.Primrec'` and
+`Primrec` forms.
 -/
 
 @[expose] public section

@@ -22,7 +22,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 - [HP98, 0.30] -/
 noncomputable def qqBex (u q : V) : V := ^∃ ((^#0 ^< u) ^⋏ q)
 
-/-- This bound is a routine coding fact corresponding to the construction in HP98.
+/-- The coded body is a proper subcode of the bounded existential formula.
 - [HP98, 0.30] -/
 @[simp] lemma lt_q_qqBex (u q : V) : q < qqBex u q :=
   lt_trans (lt_K!_right _ _) (lt_exists _)
@@ -67,8 +67,7 @@ lemma neg_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ 
 
 namespace IsDelta0F
 
-/-- Single-step operator: `p` is `Δ₀` given that its immediate subformulas are. Mirrors
-`IsSigma1F.Phi`, with the unbounded `^∃` clause replaced by a bounded `qqBex` clause.
+/-- `Phi C p` recognizes one `Δ₀` constructor step over the class `C`.
 - [HP98, Lemma I.1.68] -/
 def Phi (C : Set V) (p : V) : Prop :=
   (p = ^⊤) ∨
@@ -204,9 +203,7 @@ lemma shift_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒ�
     shift_exs (by simp [hlt, hq]), shift_and hlt hq]
   simp [Arithmetic.qqLT, hu]
 
-/-- `IsDelta0 p`: `p` codes a `Δ₀` formula (assuming `IsUFormula ℒₒᵣ p`): built from atoms by
-`^⋏`, `^⋎`, `qqBall`, `qqBex`. Mirrors `IsSigma1`, with its unbounded `^∃` clause replaced by
-the bounded `qqBex` clause.
+/-- `IsDelta0 p` says that `p` has the internal shape of a `Δ₀` formula.
 - [HP98, Lemma I.1.68] -/
 def IsDelta0 (p : V) : Prop := IsDelta0F.construction.Fixpoint ![] p
 
@@ -432,8 +429,7 @@ namespace LO.FirstOrder.Arithmetic
 /-! ## Correctness of `IsDelta0`: `IsDelta0 ⌜ψ⌝ ↔ Hierarchy 𝚺 0 ψ` -/
 
 open Bootstrapping in
-/-- The code of a bounded existential quantification is the bounded existential code; the dual
-of Foundation's `quote_ball`.
+/-- The code of a bounded existential quantification is `qqBex` of its bound and body codes.
 - [HP98, 0.30] -/
 lemma quote_bex {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSemiproposition (n + 1)) :
     (⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemiproposition n)⌝ : ℕ)
@@ -547,8 +543,7 @@ lemma isDelta0_iff_hierarchy {n : ℕ} (ψ : ArithmeticSemiproposition n) :
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Bootstrapping in
-/-- Agreement with the external class on quoted formulas, in any model of `𝗜𝚺₁`: the recognizer
-is `𝚫₁`, hence absolute between `ℕ` and `V` on the standard code of `ψ`.
+/-- Internal `Δ₀` recognition of a quoted formula agrees with its external hierarchy class.
 - [HP98, Lemma I.1.68] -/
 lemma isDelta0_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     IsDelta0 (⌜ψ⌝ : V) ↔ Hierarchy 𝚺 0 ψ :=

@@ -15,8 +15,7 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-- The quote of `ℒₒᵣ`'s `zero` function symbol, as a plain numeral (the concrete `ORing.Func`
-constructor, matching what pattern matching on `ℒₒᵣ.Func k` produces).
+/-- The quote of `ℒₒᵣ`'s `zero` function symbol is `0`.
 - No source; a quoted restatement of `Arithmetic.coe_zeroIndex_eq`. -/
 lemma quote_zeroIndex_eq : (⌜(Language.ORing.Func.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 := Arithmetic.coe_zeroIndex_eq
 
@@ -32,8 +31,7 @@ lemma quote_addIndex_eq : (⌜(Language.ORing.Func.add : (ℒₒᵣ).Func 2)⌝ 
 - No source; a quoted restatement of `Arithmetic.coe_mulIndex_eq`. -/
 lemma quote_mulIndex_eq : (⌜(Language.ORing.Func.mul : (ℒₒᵣ).Func 2)⌝ : V) = 1 := Arithmetic.coe_mulIndex_eq
 
-/-- The case split of `ℒₒᵣ.IsFunc` on the concrete function-symbol indices, in plain numerals
-(`zeroIndex = addIndex = 0`, `oneIndex = mulIndex = 1`, distinguished by arity).
+/-- Characterization of the function-symbol indices and arities of `ℒₒᵣ`.
 - No source; a numeral restatement of `Arithmetic.isFunc_iff_LOR`. -/
 lemma isFunc_LOR_iff {k f : V} :
     (ℒₒᵣ).IsFunc k f ↔ (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1) := by
@@ -143,7 +141,7 @@ instance termVal.defined : 𝚺₁-Function₂ (termVal : V → V → V) via ter
   simpa [termValGraph, termVal, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
     using construction.result_defined.defined ![v 0, v 2, v 1]
 
-/-- The `𝚫₁` definability instance for `termVal`, using uniqueness of its graph.
+/-- Term evaluation is `𝚫₁`-definable.
 - [HP98, 1.63] -/
 instance termVal.definable : 𝚫₁-Function₂ (termVal : V → V → V) := termVal.defined.graph_delta.to_definable
 
@@ -153,7 +151,7 @@ instance termValVec.defined : 𝚺₁-Function₃ (termValVec : V → V → V �
   simpa [termValVecGraph, termValVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
     using (construction.resultVec_defined (L := ℒₒᵣ)).defined ![v 0, v 2, v 3, v 1]
 
-/-- The `𝚫₁` definability instance for evaluation of term vectors, using uniqueness of its graph.
+/-- Evaluation of term vectors is `𝚫₁`-definable.
 - [HP98, 1.63] -/
 instance termValVec.definable : 𝚫₁-Function₃ (termValVec : V → V → V → V) :=
   termValVec.defined.graph_delta.to_definable
@@ -251,7 +249,7 @@ lemma termVal_termSubst {e n m w t : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht
     simp [construction]
 
 /-- Evaluation is invariant under a bound shift when entering a quantifier.
-- No source; routine bridge between coded syntax and evaluation. -/
+- No source; an elementary coding lemma. -/
 lemma termVal_termBShift {t : V} (ht : IsUTerm ℒₒᵣ t) (x e : V) :
     termVal (x ∷ e) (termBShift ℒₒᵣ t) = termVal e t := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
@@ -275,7 +273,7 @@ lemma termVal_termBShift {t : V} (ht : IsUTerm ℒₒᵣ t) (x e : V) :
     simp [construction]
 
 /-- Evaluation is invariant under the external-variable shift on closed terms.
-- No source; routine bridge between coded syntax and evaluation. -/
+- No source; an elementary coding lemma. -/
 lemma termVal_termShift {t : V} (ht : IsUTerm ℒₒᵣ t) (e : V) :
     termVal e (termShift ℒₒᵣ t) = termVal e t := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
@@ -340,13 +338,7 @@ lemma termVal_quote {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) (v : Fin k → V)
       simp [Semiterm.valb]
       rfl
 
-/-- Term evaluation is bounded by a base-`2` exponential of the term code and of the largest
-entry of the assignment. The bound is `𝚫₁` in `e` and `t` (`Exp.exp` is `𝚺₀`-definable and
-`listMax`, `+`, `*` are `𝚫₁`) and monotone in both arguments, which is what bounding the domain
-of a satisfaction table needs. Foundation provides base-`2` exponentiation with a `V`-valued
-exponent but no general `V`-base power, so the source's `(listMax e + 2) ^ (t + 1)` is stated
-here as the base-`2` exponential `Exp.exp ((listMax e + 2) * (t + 1))`, which dominates it. No
-well-formedness hypothesis is needed: codes that are not terms evaluate to `0`.
+/-- Term evaluation is bounded by `Exp.exp ((listMax e + 2) * (t + 1))`.
 - [HP98, remark after 2.58] -/
 theorem termVal_le_poly (e t : V) : termVal e t ≤ Exp.exp ((listMax e + 2) * (t + 1)) := by
   by_cases ht : IsUTerm ℒₒᵣ t

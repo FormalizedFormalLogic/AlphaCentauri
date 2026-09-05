@@ -6,17 +6,8 @@ public import AlphaCentauri.Vorspiel.Semiformula
 /-!
 # Inversion for `Z_∞`
 
-The three inversion lemmas of the calculus: from a derivable sequent containing a compound
-formula, a derivation of the sequent with the immediate subformulas put in its place, at the
-*same* ordinal height and the same cut rank.
-
-`∨`- and `∧`-inversion are the usual ones of a Tait calculus. `∀`-inversion is the infinitary
-one: inverting `∀¹ φ` returns, for each numeral `n`, the instance `φ/[n]`, the ω-rule supplying
-exactly that premise when it is principal.
-
-All three are proved by structural induction on the derivation, which is tractable here because
-sequents are finite *sets*: there is no contraction rule to commute past, and the principal case
-absorbs the duplicate occurrence by `Finset.insert_eq_self`.
+This file proves bound-preserving inversion for disjunctions, conjunctions, and universal formulas
+in `Z_∞`.
 
 Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20].
 -/
@@ -32,14 +23,12 @@ section Frame
 
 variable (b : ArithmeticFormula ℕ)
 
-/-- Inverting under an `insert a` lands inside `insert a` of the inversion. -/
 private lemma inv_push (a e : ArithmeticFormula ℕ) (s : Sequent) :
     insert b ((insert a s).erase e) ⊆ insert a (insert b (s.erase e)) := by
   intro x hx
   simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
   tauto
 
-/-- The converse of `inv_push`, available when the head `a` is not the formula being erased. -/
 private lemma inv_pull {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s : Sequent) :
     insert a (insert b (s.erase e)) ⊆ insert b ((insert a s).erase e) := by
   intro x hx
@@ -48,13 +37,11 @@ private lemma inv_pull {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s : Sequent)
 
 variable {b}
 
-/-- `inv_push` for the two-formula inversion of `∨`. -/
 private lemma inv_push₂ (a : ArithmeticFormula ℕ) (s : Sequent) :
     insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ)))
       ⊆ insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ)))) :=
   (Finset.insert_subset_insert φ (inv_push ψ a (φ ⋎ ψ) s)).trans (Finset.insert_comm φ a _).subset
 
-/-- `inv_pull` for the two-formula inversion of `∨`. -/
 private lemma inv_pull₂ {a : ArithmeticFormula ℕ} (h : a ≠ (φ ⋎ ψ)) (s : Sequent) :
     insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ))))
       ⊆ insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ))) :=
@@ -62,9 +49,6 @@ private lemma inv_pull₂ {a : ArithmeticFormula ℕ} (h : a ≠ (φ ⋎ ψ)) (s
 
 end Frame
 
-/-- The bridge between the two ways the cut rank is measured: `Derivation.cutRank` takes values
-in `ℕ∞`, where a `cut` on `χ` contributes `χ.qr + 1`, while `Provable` and `Provable.cut` bound it
-by a natural number. -/
 lemma qr_lt_of_succ_le {χ : ArithmeticFormula ℕ} (h : ((χ.qr : ℕ∞) + 1) ≤ (c : ℕ∞)) :
     χ.qr < c := by exact_mod_cast h
 
@@ -72,8 +56,7 @@ namespace Provable
 
 section InversionOr
 
-/-- **`∨`-inversion**, at the height of the given derivation. Replacing `φ ⋎ ψ` by its two
-disjuncts costs nothing, in either bound.
+/-- Replaces a disjunction in a derivation by its two disjuncts while preserving both bounds.
 
 - [Tow20, Section 19.2] -/
 private lemma orInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (hmem : (φ ⋎ ψ) ∈ Γ) :
@@ -121,7 +104,7 @@ private lemma orInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (h
     · exact (ih₂ ((le_max_right D₁.cutRank D₂.cutRank).trans ((le_max_right _ _).trans hcr))
         (by grind)).weakening (inv_push₂ (∼χ) Γ₀)
 
-/-- **`∨`-inversion.**
+/-- Replaces a disjunction by its two disjuncts while preserving both bounds.
 
 - [Tow20, Section 19.2] -/
 @[grind →]
@@ -134,8 +117,7 @@ end InversionOr
 
 section InversionAll
 
-/-- **`∀`-inversion**, at the height of the given derivation: the infinitary inversion, returning
-the numeral instance `φ/[n]` for each `n`.
+/-- Replaces a universal formula by a numeral instance while preserving both derivation bounds.
 
 - [Tow20, Section 19.4] -/
 private lemma allInvAux (n : ℕ) (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞))
@@ -187,7 +169,7 @@ private lemma allInvAux (n : ℕ) (D : Derivation Γ) (hcr : D.cutRank ≤ (c : 
     · exact (ih₂ ((le_max_right D₁.cutRank D₂.cutRank).trans ((le_max_right _ _).trans hcr))
         (by grind)).weakening (inv_push _ (∼χ) _ Γ₀)
 
-/-- **`∀`-inversion.**
+/-- Replaces a universal formula by a numeral instance while preserving both bounds.
 
 - [Tow20, Section 19.4] -/
 lemma all_inv (hmem : (∀¹ φₓ) ∈ Γ) (n : ℕ) (h : Z∞ ⊢[α, c] Γ) :
@@ -199,8 +181,7 @@ end InversionAll
 
 section InversionAnd
 
-/-- **`∧`-inversion**, at the height of the given derivation. Both conjuncts come out of one
-induction, so they are proved together.
+/-- Replaces a conjunction by either conjunct while preserving both derivation bounds.
 
 - [Tow20, Section 19.3] -/
 private lemma andInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (hmem : (φ ⋏ ψ) ∈ Γ) :
@@ -294,7 +275,7 @@ private lemma andInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (
     · exact cut χ hc ((ih₁ hcr₁ (by grind)).2.weakening (inv_push _ χ _ Γ₀))
         ((ih₂ hcr₂ (by grind)).2.weakening (inv_push _ (∼χ) _ Γ₀))
 
-/-- **`∧`-inversion**, left conjunct.
+/-- Replaces a conjunction by its left conjunct while preserving both bounds.
 
 - [Tow20, Section 19.3] -/
 @[grind →]
@@ -303,7 +284,7 @@ lemma and_inv_left (hmem : (φ ⋏ ψ) ∈ Γ) (h : Z∞ ⊢[α, c] Γ) :
   obtain ⟨D, ho, hcr⟩ := h
   exact (andInvAux D hcr hmem).1.mono_ordinalBound ho
 
-/-- **`∧`-inversion**, right conjunct.
+/-- Replaces a conjunction by its right conjunct while preserving both bounds.
 
 - [Tow20, Section 19.3] -/
 @[grind →]

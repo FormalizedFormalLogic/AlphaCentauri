@@ -5,21 +5,8 @@ public import AlphaCentauri.OmegaLogic.Reduction
 /-!
 # Cut elimination for `Z_∞`
 
-Every cut is removable, at the price of an `ω`-tower over the height: a derivation of ordinal
-height `α` and cut rank `c` becomes a cut-free one of height `Ordinal.omegaTower c α`.
-
-The argument is the usual one, in two layers. `cut_elim_principal` shows every formula the rank
-`c` still allows is reducible in the sense of `CutReducible`, and `cut_elimination_step` then
-lowers the rank by one, raising the height to `ω ^ α`; iterating gives `cut_elimination`.
-
-The first layer is where the **quantifier** cut rank of `Derivation.cutRank` costs something.
-Towsner ranks a cut formula by `Semiformula.complexity`, and then a `∧`- or `∨`-cut reduces to
-cuts of *strictly* smaller rank, which the rank induction absorbs. Counting quantifiers instead,
-`(φ ⋏ ψ).qr = max φ.qr ψ.qr`, so the reduction of a `∧`-cut produces cuts of the *same* rank and
-the rank induction gives nothing. `cut_elim_principal` is therefore an induction on the
-complexity of the cut formula at fixed rank, and the ordinal cost of its nested cuts is carried
-by `CutReducible`, whose ambient bound `ω ^ θ` is additively principal and absorbs all of them.
-The height `ω ^ α` per rank level is unchanged.
+A derivation of height `α` and cut rank `c` yields a cut-free derivation of height
+`Ordinal.omegaTower c α`.
 
 Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20].
 -/
@@ -34,7 +21,6 @@ variable {θ α : Ordinal.{0}} {c : ℕ} {ξ : ArithmeticFormula ℕ} {Γ : Sequ
 
 namespace Provable
 
-/-- The induction underlying `cut_elim_principal`, on the complexity of the cut formula. -/
 private lemma cutReducibleAux (hθ : 0 < θ) (m : ℕ) :
     ∀ ξ : ArithmeticFormula ℕ, ξ.complexity ≤ m → ξ.qr ≤ c → CutReducible θ c ξ := by
   induction m with
@@ -68,8 +54,8 @@ quantifier rank at most `c` can be traded for a derivation that stays below `ω 
 lemma cut_elim_principal (hθ : 0 < θ) (hqr : ξ.qr ≤ c) : CutReducible θ c ξ :=
   cutReducibleAux hθ ξ.complexity ξ le_rfl hqr
 
-/-- The induction underlying `cut_elimination_step`: a derivation of cut rank at most `c + 1`
-becomes one of cut rank at most `c`, at height `ω ^ D.ordinalBound`.
+/-- A derivation of cut rank at most `c + 1` becomes one of cut rank at most `c`, at height
+`ω ^ D.ordinalBound`.
 
 - [Tow20, Theorem 19.7] -/
 private lemma cut_elimination_stepAux (D : Derivation Γ) (hcr : D.cutRank ≤ ((c : ℕ∞) + 1)) :

@@ -15,26 +15,14 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-- The quote of `ℒₒᵣ`'s `zero` function symbol, as a plain numeral (the concrete `ORing.Func`
-constructor, matching what pattern matching on `ℒₒᵣ.Func k` produces).
-- No source; a quoted restatement of `Arithmetic.coe_zeroIndex_eq`. -/
 lemma quote_zeroIndex_eq : (⌜(Language.ORing.Func.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 := Arithmetic.coe_zeroIndex_eq
 
-/-- The quote of `ℒₒᵣ`'s `one` function symbol, as a plain numeral.
-- No source; a quoted restatement of `Arithmetic.coe_oneIndex_eq`. -/
 lemma quote_oneIndex_eq : (⌜(Language.ORing.Func.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 := Arithmetic.coe_oneIndex_eq
 
-/-- The quote of `ℒₒᵣ`'s `add` function symbol, as a plain numeral.
-- No source; a quoted restatement of `Arithmetic.coe_addIndex_eq`. -/
 lemma quote_addIndex_eq : (⌜(Language.ORing.Func.add : (ℒₒᵣ).Func 2)⌝ : V) = 0 := Arithmetic.coe_addIndex_eq
 
-/-- The quote of `ℒₒᵣ`'s `mul` function symbol, as a plain numeral.
-- No source; a quoted restatement of `Arithmetic.coe_mulIndex_eq`. -/
 lemma quote_mulIndex_eq : (⌜(Language.ORing.Func.mul : (ℒₒᵣ).Func 2)⌝ : V) = 1 := Arithmetic.coe_mulIndex_eq
 
-/-- The case split of `ℒₒᵣ.IsFunc` on the concrete function-symbol indices, in plain numerals
-(`zeroIndex = addIndex = 0`, `oneIndex = mulIndex = 1`, distinguished by arity).
-- No source; a numeral restatement of `Arithmetic.isFunc_iff_LOR`. -/
 lemma isFunc_LOR_iff {k f : V} :
     (ℒₒᵣ).IsFunc k f ↔ (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1) := by
   rw [Arithmetic.isFunc_iff_LOR,
@@ -43,8 +31,6 @@ lemma isFunc_LOR_iff {k f : V} :
     show (⌜(Language.Add.add : (ℒₒᵣ).Func 2)⌝ : V) = 0 from quote_addIndex_eq,
     show (⌜(Language.Mul.mul : (ℒₒᵣ).Func 2)⌝ : V) = 1 from quote_mulIndex_eq]
 
-/-- The pairing function dominates the sum of its two arguments.
-- No source; an elementary property of Foundation's `pair`. -/
 lemma add_le_pair (a b : V) : a + b ≤ ⟪a, b⟫ := by
   have sq : ∀ c : V, c ≤ c * c := fun c ↦ by
     rcases eq_zero_or_pos c with rfl | hc
@@ -58,8 +44,6 @@ lemma add_le_pair (a b : V) : a + b ≤ ⟪a, b⟫ := by
         ≤ a * a + a + b := add_le_add (le_trans (sq a) le_self_add) le_rfl
       _ = ⟪a, b⟫ := by simp [pair, not_lt.mpr h]
 
-/-- A coded application of a binary function symbol dominates the sum of its two arguments.
-- No source; an elementary property of Foundation's term coding. -/
 lemma add_lt_qqFunc (k f a b : V) : a + b < ^func k f ?[a, b] :=
   calc a + b
       < a + (b ∷ (0 : V)) := add_lt_add_of_le_of_lt le_rfl (lt_adjoin b 0)
@@ -67,9 +51,6 @@ lemma add_lt_qqFunc (k f a b : V) : a + b < ^func k f ?[a, b] :=
     _ < ?[a, b] := by simp [adjoin_def]
     _ < ^func k f ?[a, b] := terms_lt_qqFunc _ _ _
 
-/-- Every entry of a coded vector is bounded by the maximum of the vector, out-of-range indices
-included (they read as `0`).
-- No source; the total form of Foundation's `nth_le_listMax`. -/
 lemma nth_le_listMax_total (v i : V) : v.[i] ≤ listMax v := by
   rcases lt_or_ge i (len v) with h | h
   · exact nth_le_listMax h
@@ -131,8 +112,6 @@ noncomputable def termValVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultV
 - [HP98, 1.64(5)] -/
 @[simp] lemma termVal_bvar (e z : V) : termVal e ^#z = e.[z] := by simp [termVal, construction]
 
-/-- Evaluation of a coded free variable is zero under the total-assignment convention.
-- No source; this is the convention for free variables in internal evaluation. -/
 @[simp] lemma termVal_fvar (e x : V) : termVal e ^&x = 0 := by simp [termVal, construction]
 
 section
@@ -143,7 +122,7 @@ instance termVal.defined : 𝚺₁-Function₂ (termVal : V → V → V) via ter
   simpa [termValGraph, termVal, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
     using construction.result_defined.defined ![v 0, v 2, v 1]
 
-/-- The `𝚫₁` definability instance for `termVal`, using uniqueness of its graph.
+/-- Term evaluation is `𝚫₁`-definable.
 - [HP98, 1.63] -/
 instance termVal.definable : 𝚫₁-Function₂ (termVal : V → V → V) := termVal.defined.graph_delta.to_definable
 
@@ -153,7 +132,7 @@ instance termValVec.defined : 𝚺₁-Function₃ (termValVec : V → V → V �
   simpa [termValVecGraph, termValVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
     using (construction.resultVec_defined (L := ℒₒᵣ)).defined ![v 0, v 2, v 3, v 1]
 
-/-- The `𝚫₁` definability instance for evaluation of term vectors, using uniqueness of its graph.
+/-- Evaluation of term vectors is `𝚫₁`-definable.
 - [HP98, 1.63] -/
 instance termValVec.definable : 𝚫₁-Function₃ (termValVec : V → V → V → V) :=
   termValVec.defined.graph_delta.to_definable
@@ -220,8 +199,6 @@ end
   rw [heq, step]
   simp [construction, nth_termValVec hv (show (0 : V) < 2 by simp), nth_termValVec hv (show (1 : V) < 2 by simp)]
 
-/-- Non-term codes evaluate to zero under the total internal evaluation.
-- No source; this is the convention for malformed term codes. -/
 lemma termVal_not_uterm {e t : V} (h : ¬IsUTerm ℒₒᵣ t) : termVal e t = 0 := by
   show construction.result ℒₒᵣ ![e] t = 0
   exact construction.result_prop_not ℒₒᵣ ![e] h
@@ -250,8 +227,6 @@ lemma termVal_termSubst {e n m w t : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht
     rw [step1, step2, key]
     simp [construction]
 
-/-- Evaluation is invariant under a bound shift when entering a quantifier.
-- No source; routine bridge between coded syntax and evaluation. -/
 lemma termVal_termBShift {t : V} (ht : IsUTerm ℒₒᵣ t) (x e : V) :
     termVal (x ∷ e) (termBShift ℒₒᵣ t) = termVal e t := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
@@ -274,8 +249,6 @@ lemma termVal_termBShift {t : V} (ht : IsUTerm ℒₒᵣ t) (x e : V) :
     rw [step1, step2, key]
     simp [construction]
 
-/-- Evaluation is invariant under the external-variable shift on closed terms.
-- No source; routine bridge between coded syntax and evaluation. -/
 lemma termVal_termShift {t : V} (ht : IsUTerm ℒₒᵣ t) (e : V) :
     termVal e (termShift ℒₒᵣ t) = termVal e t := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
@@ -340,13 +313,7 @@ lemma termVal_quote {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) (v : Fin k → V)
       simp [Semiterm.valb]
       rfl
 
-/-- Term evaluation is bounded by a base-`2` exponential of the term code and of the largest
-entry of the assignment. The bound is `𝚫₁` in `e` and `t` (`Exp.exp` is `𝚺₀`-definable and
-`listMax`, `+`, `*` are `𝚫₁`) and monotone in both arguments, which is what bounding the domain
-of a satisfaction table needs. Foundation provides base-`2` exponentiation with a `V`-valued
-exponent but no general `V`-base power, so the source's `(listMax e + 2) ^ (t + 1)` is stated
-here as the base-`2` exponential `Exp.exp ((listMax e + 2) * (t + 1))`, which dominates it. No
-well-formedness hypothesis is needed: codes that are not terms evaluate to `0`.
+/-- Term evaluation is bounded by `Exp.exp ((listMax e + 2) * (t + 1))`.
 - [HP98, remark after 2.58] -/
 theorem termVal_le_poly (e t : V) : termVal e t ≤ Exp.exp ((listMax e + 2) * (t + 1)) := by
   by_cases ht : IsUTerm ℒₒᵣ t

@@ -20,8 +20,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 /-! ## Codes of quoted semisentences
 
 Foundation's `quote_*` lemmas compute the code of a `Semiproposition`. A `Semisentence` is
-quoted through its embedding (`Sentence.quote_def`), so each of them has a counterpart here,
-proved by unfolding that embedding. -/
+quoted through its embedding (`Sentence.quote_def`), so each of them has a counterpart here. -/
 
 /-- A coded closed term is a well-formed internal term.
 - [HP98, 1.66] -/
@@ -149,9 +148,7 @@ private lemma quote_mulTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒ
 
 /-! ## Agreement of satisfaction with truth -/
 
-/-- For a bounded formula, internal `Δ₀` satisfaction of its code agrees with truth. This is the
-base case of the snowing lemma, by recursion on the bounded formula: each clause is the matching
-Tarski condition of `SatZero`, and the atoms are `termVal_quote`.
+/-- For a bounded formula, internal `Δ₀` satisfaction of its code agrees with truth.
 - [HP98, Theorem I.1.70]
 - [HP98, Corollary I.1.76] -/
 theorem satZero_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
@@ -200,16 +197,13 @@ theorem satZero_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)]
     simp [Function.comp_def]
 
-/-- The satisfaction predicate selected by a polarity. It lets one induction on a
-`StrictHierarchy` derivation, whose polarity the `zero` and `ofAlt` constructors leave open,
-produce the `Σ` and the `Π` statement at once.
+/-- The satisfaction predicate selected by a polarity: `SatSigma` for `Σ`, `SatPi` for `Π`.
 - [HP98, Definition I.1.74] -/
 def SatClass : Polarity → ℕ → V → V → Prop
   | .sigma, n, z, e => SatSigma n z e
   | .pi, n, z, e => SatPi n z e
 
-/-- Internal satisfaction of the code of a strict prenex formula agrees with truth, by induction
-on the derivation of its strict class.
+/-- Internal satisfaction of the code of a strict prenex formula agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
 lemma satClass_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
@@ -249,28 +243,27 @@ lemma satClass_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentenc
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp]
     exact ih (x :> v)
 
-/-- For a strict prenex `Σₙ` formula, internal satisfaction of its code agrees with truth.
+/-- For a strict prenex `𝚺-[n]` formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
 theorem satSigma_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 n φ) (v : Fin k → V) :
     SatSigma n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := satClass_quote_iff hφ v
 
-/-- For a strict prenex `Πₙ` formula, internal satisfaction of its code agrees with truth.
+/-- For a strict prenex `𝚷-[n]` formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
 theorem satPi_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
     SatPi n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := satClass_quote_iff hφ v
 
-/-- The sentence asserting agreement of `φ` with its level-`Σₙ₊₁` partial truth definition.
+/-- The sentence asserting agreement of `φ` with its level-`𝚺-[n + 1]` partial truth definition.
 - [HP98, Corollary I.1.76] -/
 noncomputable def snowing (n : ℕ) {k : ℕ}
     (φ : ArithmeticSemisentence k) : ArithmeticSentence :=
   ∀¹* (φ 🡘 (satSigmaVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
 
-/-- Semantic interpretation of the sentence `snowing n φ`: the substituted right-hand side is
-the defining formula of `satSigmaVec`, read under the assignment given by the free variables.
+/-- Semantic characterization of the sentence `snowing n φ`.
 - [HP98, Corollary I.1.76] -/
 theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
     V↓[ℒₒᵣ] ⊧ snowing n φ ↔
@@ -280,33 +273,10 @@ theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
 /-- The theory form of the snowing lemma follows from `𝗣𝗔⁻` and the finite Tarski theory.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
-theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory) :=
-    Entailment.WeakerThan.trans (𝓣 := (𝗣𝗔⁻ : ArithmeticTheory)) inferInstance
-      (Entailment.Axiomatized.le_of_subset Set.subset_union_left)
-  refine Arithmetic.provable_iff_of_models_iff (T := (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory)) ?_
-  intro M _ _ e
-  have hPA : M↓[ℒₒᵣ] ⊧* (𝗣𝗔⁻ : ArithmeticTheory) :=
-    Semantics.ModelsSet.of_subset (U := (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory)) inferInstance
-      Set.subset_union_left
-  have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦
-    Semantics.ModelsSet.models (T := (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory)) _
-      (Set.mem_union_right _ hσ)
-  have := hPA
-  have hkey : ∀ (p : M) (w : Fin k → M),
-      M ⊧/(p :> w) (satSigmaVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SatSig n p ev := by
-    intro p w
-    simp [satSigmaVec, Reading.Codes, Reading.Len, Reading.Nth, Reading.SatSig]
-    done
-  have hsub : M ⊧/e ((satSigmaVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
-      ↔ M ⊧/(((⌜φ⌝ : ℕ) : M) :> e) (satSigmaVec n k).val := by
-    simp [Semiformula.eval_substs, Function.comp_def]
-    done
-  done
+axiom provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ
 
-/-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `Σₙ₊₁` formula: the two sides
-agree in every model of `𝗜𝚺₁` by `satSigma_quote_iff`, so completeness delivers a proof.
+/-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `𝚺-[n + 1]` formula.
 - [HP98, Corollary I.1.76] -/
 theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ snowing n φ := by

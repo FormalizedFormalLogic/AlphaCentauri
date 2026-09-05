@@ -507,7 +507,7 @@ carried out with the finitely many Tarski sentences in place of the satisfaction
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
 private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
-    (h : StrictHierarchy Γ s φ) (hs : s ≤ n) :
+    (h : StrictHierarchy Γ s φ) (hs : s ≤ n + 1) :
     ∀ (v : Fin k → M) (ev : M), Codes v ev → (Sat Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   revert hs
   induction h with
@@ -545,6 +545,20 @@ private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : Arithmeti
       exact (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mp (hsat x e' hadj)
     · intro hsat x e' hadj
       exact (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mpr (hsat x)
+
+/-! ### Assembling the snowing lemma over `𝗣𝗔⁻` -/
+
+/-- Evaluation of `satSigmaVec n k` in `M` at an externally supplied vector, computed purely from
+its definition as a substitution formula. -/
+private lemma eval_satSigmaVec (p : M) (w : Fin k → M) :
+    M ⊧/(p :> w) (satSigmaVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SatSig n p ev := by
+  simp only [satSigmaVec, Nat.succ_eq_add_one, Nat.reduceAdd, HierarchySymbol.Semiformula.val_mkSigma,
+    Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
+    Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, numeral_eq_natCast_app,
+    Semiterm.val_bvar, Matrix.cons_val_zero, Fin.isValue, Fin.Fin1.eq_one, Matrix.cons_val_one,
+    Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃, Semiformula.eval_operator,
+    Matrix.cons_val_succ, Structure.eq_iff_eq, LogicalConnective.Prop.and_eq, exists_eq_right,
+    Reading.Codes, Reading.Len, Reading.Nth, Reading.SatSig, and_assoc]
 
 end peanoMinus
 

@@ -280,8 +280,30 @@ theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
 /-- The theory form of the snowing lemma follows from `𝗣𝗔⁻` and the finite Tarski theory.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
-axiom provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ
+theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ := by
+  have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory) :=
+    Entailment.WeakerThan.trans (𝓣 := (𝗣𝗔⁻ : ArithmeticTheory)) inferInstance
+      (Entailment.Axiomatized.le_of_subset Set.subset_union_left)
+  refine Arithmetic.provable_iff_of_models_iff (T := (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory)) ?_
+  intro M _ _ e
+  have hPA : M↓[ℒₒᵣ] ⊧* (𝗣𝗔⁻ : ArithmeticTheory) :=
+    Semantics.ModelsSet.of_subset (U := (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory)) inferInstance
+      Set.subset_union_left
+  have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦
+    Semantics.ModelsSet.models (T := (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory)) _
+      (Set.mem_union_right _ hσ)
+  have := hPA
+  have hkey : ∀ (p : M) (w : Fin k → M),
+      M ⊧/(p :> w) (satSigmaVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SatSig n p ev := by
+    intro p w
+    simp [satSigmaVec, Reading.Codes, Reading.Len, Reading.Nth, Reading.SatSig]
+    done
+  have hsub : M ⊧/e ((satSigmaVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
+      ↔ M ⊧/(((⌜φ⌝ : ℕ) : M) :> e) (satSigmaVec n k).val := by
+    simp [Semiformula.eval_substs, Function.comp_def]
+    done
+  done
 
 /-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `Σₙ₊₁` formula: the two sides
 agree in every model of `𝗜𝚺₁` by `satSigma_quote_iff`, so completeness delivers a proof.
@@ -401,6 +423,160 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
         ((w 0).valb v) ((w 1).valb v) ((w 0).valb v * (w 1).valb v)
         (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq (ih 0) (ih 1)).mpr rfl
 
+
+/-! ### The `Δ₀` base case -/
+
+include hM in
+/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `satZero` at the code of a bounded
+formula agrees with truth. This is `satZero_quote_iff` again, with the `𝚫₁` induction of `𝗜𝚺₁`
+replaced by the external induction on the bounded formula.
+- [HP98, Theorem I.1.70]
+- [HP98, Corollary I.1.76] -/
+private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : Hierarchy 𝚺 0 φ) :
+    ∀ (v : Fin k → M) (ev : M), Codes v ev → (Sat0 ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+  refine delta₀_induction (ξ := Empty)
+    (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev →
+      (Sat0 ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ))
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ k φ hφ
+  · intro m v ev _
+    have hq : M ⊧/![((⌜(⊤ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqVerumDef.val :=
+      cast_sigmaZero₁ qqVerumDef (by simp [Sentence.quote_def])
+    simpa using read_satZeroVerum hM _ ev hq
+  · intro m v ev _
+    have hq : M ⊧/![((⌜(⊥ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqFalsumDef.val :=
+      cast_sigmaZero₁ qqFalsumDef (by simp [Sentence.quote_def])
+    simpa using read_satZeroFalsum hM _ ev hq
+  · intro m t u v ev hev
+    have hq : M ⊧/![((⌜(.rel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqEQDef.val :=
+      cast_sigma₃ qqEQDef (by simpa using quote_eq_sentence (V := ℕ) t u)
+    rw [read_satZeroEq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
+      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
+    simp [Semiformula.eval_rel]
+  · intro m t u v ev hev
+    have hq : M ⊧/![((⌜(.nrel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNEQDef.val :=
+      cast_sigma₃ qqNEQDef (by simpa using quote_neq_sentence (V := ℕ) t u)
+    rw [read_satZeroNeq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
+      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
+    simp [Semiformula.eval_nrel]
+  · intro m t u v ev hev
+    have hq : M ⊧/![((⌜(.rel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqLTDef.val :=
+      cast_sigma₃ qqLTDef (by simpa using quote_lt_sentence (V := ℕ) t u)
+    rw [read_satZeroLt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
+      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
+    simp [Semiformula.eval_rel]
+  · intro m t u v ev hev
+    have hq : M ⊧/![((⌜(.nrel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNLTDef.val :=
+      cast_sigma₃ qqNLTDef (by simpa using quote_nlt_sentence (V := ℕ) t u)
+    rw [read_satZeroNlt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
+      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
+    simp [Semiformula.eval_nrel]
+  · intro m φ ψ _ _ ihφ ihψ v ev hev
+    have hq : M ⊧/![((⌜φ ⋏ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqAndDef.val :=
+      cast_sigmaZero₃ qqAndDef (by simpa using quote_and_sentence (V := ℕ) φ ψ)
+    rw [read_satZeroAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev, ihψ v ev hev]
+    simp
+  · intro m φ ψ hφ hψ ihφ ihψ v ev hev
+    have hq : M ⊧/![((⌜φ ⋎ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqOrDef.val :=
+      cast_sigmaZero₃ qqOrDef (by simpa using quote_or_sentence (V := ℕ) φ ψ)
+    rw [read_satZeroOr hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev
+      (delta0_quote_cast hφ) (uFormula_quote_cast φ) (delta0_quote_cast hψ)
+      (uFormula_quote_cast ψ) hq, ihφ v ev hev, ihψ v ev hev]
+    simp
+  · intro m t φ hφ ihφ v ev hev
+    have hu : M ⊧/![((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜t⌝ : ℕ) : M)]
+        (termBShiftGraph ℒₒᵣ).val := cast_sigma₂ (termBShiftGraph ℒₒᵣ) (by simp)
+    have hq : M ⊧/![((⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜φ⌝ : ℕ) : M)] qqBallDef.val :=
+      cast_sigma₃ qqBallDef (by simpa using quote_ball_sentence (V := ℕ) t φ)
+    rw [read_satZeroBall hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
+      ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) (delta0_quote_cast hφ)
+      (uFormula_quote_cast φ) hu hq (termVal_quote_cast hM hev t)]
+    simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel]
+    constructor
+    · intro h x hx
+      obtain ⟨e', hadj⟩ := read_adjoinTotal hM x ev
+      exact (ihφ (x :> v) e' (codes_cons hM hev hadj)).mp
+        (h x (by simpa [Function.comp_def] using hx) e' hadj)
+    · intro h x hx e' hadj
+      exact (ihφ (x :> v) e' (codes_cons hM hev hadj)).mpr
+        (by simpa [Function.comp_def] using h x (by simpa [Function.comp_def] using hx))
+  · intro m t φ hφ ihφ v ev hev
+    have hu : M ⊧/![((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜t⌝ : ℕ) : M)]
+        (termBShiftGraph ℒₒᵣ).val := cast_sigma₂ (termBShiftGraph ℒₒᵣ) (by simp)
+    have hq : M ⊧/![((⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜φ⌝ : ℕ) : M)] qqBexDef.val :=
+      cast_sigma₃ qqBexDef (by simpa using quote_bex_sentence (V := ℕ) t φ)
+    rw [read_satZeroBex hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
+      ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) hu hq
+      (termVal_quote_cast hM hev t)]
+    simp only [Semiformula.eval_bexs, Semiformula.Operator.lt_def, Semiformula.eval_rel]
+    constructor
+    · rintro ⟨x, hx, e', hadj, hsat⟩
+      exact ⟨x, by simpa [Function.comp_def] using hx,
+        (ihφ (x :> v) e' (codes_cons hM hev hadj)).mp hsat⟩
+    · rintro ⟨x, hx, hsat⟩
+      obtain ⟨e', hadj⟩ := read_adjoinTotal hM x ev
+      exact ⟨x, by simpa [Function.comp_def] using hx, e', hadj,
+        (ihφ (x :> v) e' (codes_cons hM hev hadj)).mpr (by simpa [Function.comp_def] using hsat)⟩
+
+/-! ### The strict prenex induction -/
+
+include hM in
+/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of the level-`s` satisfaction formula
+at the code of a strict prenex formula agrees with truth. This is `satClass_quote_iff` again,
+carried out with the finitely many Tarski sentences in place of the satisfaction predicates.
+- [HP98, Corollary I.1.76]
+- [HP98, Remark I.1.77] -/
+private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
+    (h : StrictHierarchy Γ s φ) (hs : s ≤ n) :
+    ∀ (v : Fin k → M) (ev : M), Codes v ev → (Sat Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+  revert hs
+  induction h with
+  | @zero Γ₀ m₀ φ₀ hφ₀ =>
+    intro _ v ev hev
+    exact satZero_quote_reading hM hφ₀ v ev hev
+  | @ofAlt Γ₀ s₀ m₀ φ₀ hφ₀ ih =>
+    intro hs v ev hev
+    rw [read_ofAlt hM (show s₀ ≤ n by omega) Γ₀ ((⌜φ₀⌝ : ℕ) : M) ev
+      (strict_quote_cast hφ₀) (uFormula_quote_cast φ₀)]
+    exact ih (by omega) v ev hev
+  | @exs s₀ m₀ φ₀ _ ih =>
+    intro hs v ev hev
+    have hq : M ⊧/![((⌜(∃¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
+        qqExsDef.val := cast_sigmaZero₂ qqExsDef (by simpa using quote_ex_sentence (V := ℕ) φ₀)
+    show Reading.SatSig s₀ _ _ ↔ _
+    rw [read_satSigmaExs hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
+    simp only [Semiformula.eval_ex]
+    constructor
+    · rintro ⟨x, e', hadj, hsat⟩
+      exact ⟨x, (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mp hsat⟩
+    · rintro ⟨x, hsat⟩
+      obtain ⟨e', hadj⟩ := read_adjoinTotal hM x ev
+      exact ⟨x, e', hadj, (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mpr hsat⟩
+  | @all s₀ m₀ φ₀ _ ih =>
+    intro hs v ev hev
+    have hq : M ⊧/![((⌜(∀¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
+        qqAllDef.val := cast_sigmaZero₂ qqAllDef (by simpa using quote_all_sentence (V := ℕ) φ₀)
+    show Reading.SatPii s₀ _ _ ↔ _
+    rw [read_satPiAll hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
+    simp only [Semiformula.eval_all]
+    constructor
+    · intro hsat x
+      obtain ⟨e', hadj⟩ := read_adjoinTotal hM x ev
+      exact (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mp (hsat x e' hadj)
+    · intro hsat x e' hadj
+      exact (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mpr (hsat x)
+
 end peanoMinus
+
 
 end LO.FirstOrder.Arithmetic

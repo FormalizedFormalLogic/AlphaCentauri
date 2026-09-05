@@ -29,9 +29,6 @@ LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.defined:
 LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.defined:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.defined
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.subst:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.subst
 LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec.defined:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec.defined
@@ -152,6 +149,9 @@ LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.neg_iff:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
 LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.subst:
   forgive:
     - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
 LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.and_iff:

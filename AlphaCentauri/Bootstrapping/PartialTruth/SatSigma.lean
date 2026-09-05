@@ -6,8 +6,8 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.SatZero
 /-!
 # Satisfaction for prenex `Σₙ` and `Πₙ` formulas
 
-This module defines satisfaction predicates for the internally coded strict prenex hierarchy.
-It states their definability, Tarski conditions, duality, monotonicity, and substitution laws.
+This module defines satisfaction predicates for the internally coded strict prenex hierarchy and
+proves their definability, Tarski conditions, duality, monotonicity, and substitution laws.
 -/
 
 @[expose] public section
@@ -646,11 +646,206 @@ theorem SatPi.mono {m n : ℕ} (h : m ≤ n) {z e : V} (hz : IsStrictPi m z)
   | succ n hn ih =>
     exact ih.trans ((mono_step n fun i _ ↦ blockSat i).2 z e (IsStrictPi.mono hn hz) hz')
 
+/-! ### Substitution under a quantifier block -/
+
+namespace QVecIter
+
+/-- Primitive-recursive blueprint for iterating the quantifier lift of a substitution vector.
+- [HP98, 1.64(5)] -/
+noncomputable def blueprint : PR.Blueprint 1 where
+  zero := .mkSigma “y x. y = x”
+  succ := .mkSigma “y ih n x. !(qVecGraph ℒₒᵣ) y ih”
+
+/-- Primitive-recursive construction iterating the quantifier lift of a substitution vector.
+- [HP98, 1.64(5)] -/
+noncomputable def construction : PR.Construction V blueprint where
+  zero := fun x ↦ x 0
+  succ := fun _ _ ih ↦ qVec ℒₒᵣ ih
+  zero_defined := .mk fun v ↦ by simp [blueprint]
+  succ_defined := .mk fun v ↦ by simp [blueprint, (qVec.defined (L := ℒₒᵣ) (V := V)).df]
+
+end QVecIter
+
+/-- `qVecIter w k` is the substitution vector `w` lifted past `k` quantifiers.
+- [HP98, 1.64(5)] -/
+noncomputable def qVecIter (w k : V) : V := QVecIter.construction.result ![w] k
+
+/-- Lifting past no quantifier leaves the vector unchanged.
+- [HP98, 1.64(5)] -/
+@[simp] lemma qVecIter_zero (w : V) : qVecIter w 0 = w := by
+  simp [qVecIter, QVecIter.construction]
+
+/-- One more quantifier applies one more lift.
+- [HP98, 1.64(5)] -/
+@[simp] lemma qVecIter_succ (w k : V) : qVecIter w (k + 1) = qVec ℒₒᵣ (qVecIter w k) := by
+  simp [qVecIter, QVecIter.construction]
+
+/-- Defining formula for the iterated quantifier lift.
+- [HP98, 1.64(5)] -/
+noncomputable def _root_.LO.FirstOrder.Arithmetic.qVecIterDef : 𝚺₁.Semisentence 3 :=
+  QVecIter.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
+
+/-- The iterated quantifier lift is `𝚺₁`-definable.
+- [HP98, 1.64(5)] -/
+instance qVecIter_defined : 𝚺₁-Function₂ (qVecIter : V → V → V) via qVecIterDef := .mk
+  fun v ↦ by simp [QVecIter.construction.result_defined_iff, qVecIterDef]; rfl
+
+/-- The `𝚺₁` definability instance for the iterated quantifier lift.
+- [HP98, 1.64(5)] -/
+instance qVecIter_definable : 𝚺₁-Function₂ (qVecIter : V → V → V) := qVecIter_defined.to_definable
+
+/-- The iterated quantifier lift is definable at every positive hierarchy level.
+- [HP98, 1.64(5)] -/
+instance qVecIter_definable' (Γ m) : Γ-[m + 1]-Function₂ (qVecIter : V → V → V) :=
+  qVecIter_definable.of_sigmaOne
+
+/-- The iterated lift of a semiterm vector is a semiterm vector for the extended arities.
+- [HP98, 1.64(5)] -/
+private lemma isSemitermVec_qVecIter {m l w : V} (hw : IsSemitermVec ℒₒᵣ m l w) (k : V) :
+    IsSemitermVec ℒₒᵣ (m + k) (l + k) (qVecIter w k) := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simpa using hw
+  case succ k ih =>
+    rw [qVecIter_succ, ← add_assoc, ← add_assoc]
+    exact ih.qVec
+
+/-- Lifting past a quantifier commutes with iterating the lift.
+- [HP98, 1.64(5)] -/
+private lemma qVecIter_qVec (w k : V) :
+    qVecIter (qVec ℒₒᵣ w) k = qVec ℒₒᵣ (qVecIter w k) := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih => rw [qVecIter_succ, ih, qVecIter_succ]
+
+/-- Substituting into an existential block substitutes the iterated lift into its matrix.
+- [HP98, 1.64(5)] -/
+private lemma substs_qqExss {p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
+    ∀ w : V, subst ℒₒᵣ w (qqExss p k) = qqExss (subst ℒₒᵣ (qVecIter w k) p) k := by
+  induction k using ISigma1.pi1_succ_induction
+  · definability
+  case zero => intro w; simp
+  case succ k ih =>
+    intro w
+    rw [qqExss_succ, substs_ex (isUFormula_qqExss.mpr hp), ih (qVec ℒₒᵣ w), qVecIter_qVec,
+      qVecIter_succ, qqExss_succ]
+
+/-- Substituting into a universal block substitutes the iterated lift into its matrix.
+- [HP98, 1.64(5)] -/
+private lemma substs_qqAlls {p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
+    ∀ w : V, subst ℒₒᵣ w (qqAlls p k) = qqAlls (subst ℒₒᵣ (qVecIter w k) p) k := by
+  induction k using ISigma1.pi1_succ_induction
+  · definability
+  case zero => intro w; simp
+  case succ k ih =>
+    intro w
+    rw [qqAlls_succ, substs_all (isUFormula_qqAlls.mpr hp), ih (qVec ℒₒᵣ w), qVecIter_qVec,
+      qVecIter_succ, qqAlls_succ]
+
+/-- Being a semiformula under an existential block is being one for the extended arity.
+- [HP98, 1.64(5)] -/
+private lemma isSemiformula_qqExss {p : V} (k : V) :
+    ∀ n : V, (IsSemiformula ℒₒᵣ n (qqExss p k) ↔ IsSemiformula ℒₒᵣ (n + k) p) := by
+  induction k using ISigma1.pi1_succ_induction
+  · definability
+  case zero => intro n; simp
+  case succ k ih => intro n; rw [qqExss_succ, IsSemiformula.exs, ih, add_assoc, add_comm 1 k]
+
+/-- Being a semiformula under a universal block is being one for the extended arity.
+- [HP98, 1.64(5)] -/
+private lemma isSemiformula_qqAlls {p : V} (k : V) :
+    ∀ n : V, (IsSemiformula ℒₒᵣ n (qqAlls p k) ↔ IsSemiformula ℒₒᵣ (n + k) p) := by
+  induction k using ISigma1.pi1_succ_induction
+  · definability
+  case zero => intro n; simp
+  case succ k ih => intro n; rw [qqAlls_succ, IsSemiformula.all, ih, add_assoc, add_comm 1 k]
+
+/-- Evaluating the vector lifted past a block extends the evaluated substitution by the
+witnesses of the block.
+- [HP98, 1.64(5)] -/
+private lemma termValVec_qVecIter {m l w e : V} (hw : IsSemitermVec ℒₒᵣ m l w) (k : V) :
+    ∀ v : V, len v = k →
+      termValVec (vecAppend v e) (m + k) (qVecIter w k) = vecAppend v (termValVec e m w) := by
+  induction k using ISigma1.pi1_succ_induction
+  · definability
+  case zero => intro v hv; rw [len_zero_iff_eq_nil.mp hv]; simp
+  case succ k ih =>
+    intro v hv
+    rcases nil_or_adjoin v with rfl | ⟨x, v, rfl⟩
+    · simp at hv
+    · rw [vecAppend_adjoin, qVecIter_succ, ← add_assoc,
+        termValVec_qVec (isSemitermVec_qVecIter hw k), ih v (by simpa using hv),
+        vecAppend_adjoin]
+
+/-- The strict prenex classes are closed under substitution.
+- [HP98, Lemma I.1.69] -/
+private lemma isStrict_subst : ∀ (n : ℕ) (m l w p : V), IsSemitermVec ℒₒᵣ m l w →
+    IsSemiformula ℒₒᵣ m p →
+    (IsStrictSigma n p → IsStrictSigma n (subst ℒₒᵣ w p)) ∧
+    (IsStrictPi n p → IsStrictPi n (subst ℒₒᵣ w p))
+  | 0, _, _, _, _, hw, hp => ⟨fun h ↦ IsDelta0.subst hw hp h, fun h ↦ IsDelta0.subst hw hp h⟩
+  | n + 1, m, l, w, p, hw, hp => by
+    constructor
+    · rintro ⟨k, q, rfl, hq⟩
+      have hqp : IsSemiformula ℒₒᵣ (m + k) q := (isSemiformula_qqExss k m).mp hp
+      refine ⟨k, subst ℒₒᵣ (qVecIter w k) q, substs_qqExss hqp.isUFormula k w, ?_⟩
+      exact (isStrict_subst n (m + k) (l + k) (qVecIter w k) q
+        (isSemitermVec_qVecIter hw k) hqp).2 hq
+    · rintro ⟨k, q, rfl, hq⟩
+      have hqp : IsSemiformula ℒₒᵣ (m + k) q := (isSemiformula_qqAlls k m).mp hp
+      refine ⟨k, subst ℒₒᵣ (qVecIter w k) q, substs_qqAlls hqp.isUFormula k w, ?_⟩
+      exact (isStrict_subst n (m + k) (l + k) (qVecIter w k) q
+        (isSemitermVec_qVecIter hw k) hqp).1 hq
+
+/-- Substitution does not create a leading existential quantifier.
+- [HP98, 1.64(4)] -/
+private lemma not_ex_subst {M : V} (hM : IsUFormula ℒₒᵣ M) (h : ∀ p : V, M ≠ ^∃ p) (w r : V) :
+    subst ℒₒᵣ w M ≠ ^∃ r := by
+  rcases hM.case with ⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
+    ⟨p, q, hp, hq, rfl⟩ | ⟨p, q, hp, hq, rfl⟩ | ⟨p, hp, rfl⟩ | ⟨p, -, rfl⟩
+  · rw [substs_rel hR hv]; simp [qqRel, qqExs, pair_ext_iff]
+  · rw [substs_nrel hR hv]; simp [qqNRel, qqExs, pair_ext_iff]
+  · rw [substs_verum]; simp [qqVerum, qqExs, pair_ext_iff]
+  · rw [substs_falsum]; simp [qqFalsum, qqExs, pair_ext_iff]
+  · rw [substs_and hp hq]; simp [qqAnd, qqExs, pair_ext_iff]
+  · rw [substs_or hp hq]; simp [qqOr, qqExs, pair_ext_iff]
+  · rw [substs_all hp]; simp [qqAll, qqExs, pair_ext_iff]
+  · exact absurd rfl (h p)
+
 /-- Strict `Σₙ` satisfaction commutes with substitution of a coded vector of terms.
 - [HP98, Theorem I.1.75(2)] -/
-axiom SatSigma.subst {n : ℕ} {m l w p e : V} (hw : IsSemitermVec ℒₒᵣ m l w)
+theorem SatSigma.subst {n : ℕ} {m l w p e : V} (hw : IsSemitermVec ℒₒᵣ m l w)
     (hp : IsSemiformula ℒₒᵣ m p) (hp' : IsStrictSigma n p) :
-    SatSigma n (subst ℒₒᵣ w p) e ↔ SatSigma n p (termValVec e m w)
+    SatSigma n (Bootstrapping.subst ℒₒᵣ w p) e ↔ SatSigma n p (termValVec e m w) := by
+  induction n generalizing m l w p e with
+  | zero => simpa using SatZero.subst hw hp hp'
+  | succ n ih =>
+    have hpi : ∀ {m l w q e' : V}, IsSemitermVec ℒₒᵣ m l w → IsSemiformula ℒₒᵣ m q →
+        IsStrictPi n q →
+        (SatPi n (Bootstrapping.subst ℒₒᵣ w q) e' ↔ SatPi n q (termValVec e' m w)) := by
+      intro m l w q e' hw hq hq'
+      have hsq : IsStrictPi n (Bootstrapping.subst ℒₒᵣ w q) :=
+        (isStrict_subst n m l w q hw hq).2 hq'
+      rw [show (SatPi n (Bootstrapping.subst ℒₒᵣ w q) e' ↔
+            ¬SatSigma n (neg ℒₒᵣ (Bootstrapping.subst ℒₒᵣ w q)) e') by
+          rw [SatSigma.neg_iff hsq (hq.subst hw).isUFormula]; simp,
+        ← substs_neg hq hw,
+        ih hw (by simp [hq]) (IsStrictPi.neg hq.isUFormula hq'),
+        SatSigma.neg_iff hq' hq.isUFormula]
+      simp
+    obtain ⟨K, M, hMK, hM⟩ := exists_ex_block p
+    have hMs : IsSemiformula ℒₒᵣ (m + K) M := (isSemiformula_qqExss K m).mp (hMK ▸ hp)
+    have hMpi : IsStrictPi n M := isStrictPi_ex_block n p M K hp' hMK hM
+    have hsubst : Bootstrapping.subst ℒₒᵣ w p
+        = qqExss (Bootstrapping.subst ℒₒᵣ (qVecIter w K) M) K := by
+      rw [hMK, substs_qqExss hMs.isUFormula K w]
+    rw [blockSat n (Bootstrapping.subst ℒₒᵣ w p) _ K e
+        ((isStrict_subst (n + 1) m l w p hw hp).1 hp') (hp.subst hw).isUFormula hsubst
+        (not_ex_subst hMs.isUFormula hM _),
+      blockSat n p M K (termValVec e m w) hp' hp.isUFormula hMK hM]
+    refine exists_congr fun v ↦ and_congr_right fun hv ↦ ?_
+    rw [hpi (isSemitermVec_qVecIter hw K) hMs hMpi, termValVec_qVecIter hw K v hv]
 
 /-! ## Satisfaction under an externally supplied vector -/
 

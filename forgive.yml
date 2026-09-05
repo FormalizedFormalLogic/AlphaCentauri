@@ -23,9 +23,9 @@ version: v0
 LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence
-LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
+LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction:
   forgive:
-    - LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable
+    - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
 LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
   forgive:
     - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound
@@ -88,3 +88,9 @@ LO.FirstOrder.provablyTotal_of_primrec':
     - LO.FirstOrder.provablyTotal_of_primrec'
 
 # Declarations that inherit the debt of an unproved statement.
+LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
+  forgive:
+    - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
+LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatization_equiv:
+  forgive:
+    - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction

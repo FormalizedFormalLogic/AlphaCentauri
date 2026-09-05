@@ -567,6 +567,16 @@ private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : Arithmeti
     · intro hsat x e' hadj
       exact (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mpr (hsat x)
 
+include hM in
+/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `satSigma n` at the code of a
+strict prenex `𝚺-[n + 1]` formula agrees with truth.
+- [HP98, Corollary I.1.76]
+- [HP98, Remark I.1.77] -/
+theorem satSigma_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : StrictHierarchy 𝚺 (n + 1) φ) {v : Fin k → M} {ev : M} (hev : Codes v ev) :
+    Reading.SatSigma n ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ :=
+  satClass_quote_reading hM hφ le_rfl v ev hev
+
 /-! ### Assembling the snowing lemma over `𝗣𝗔⁻` -/
 
 private lemma eval_satSigmaVec (p : M) (w : Fin k → M) :

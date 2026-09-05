@@ -24,25 +24,37 @@ namespace InternalMeasures
 No source; a formalization device for reading off the constructor used to build `d`. -/
 noncomputable def tag (d : V) : V := π₁ (sndIdx d)
 
-/-- The first stored argument of a proof-rule constructor code, after its rule tag.
+/-- The tail of a proof-rule constructor code after its rule tag, with the outermost pairing layer
+stripped off: the sole stored child of a unary rule (`wkRule`, `shiftRule`).
+
+No source; a formalization device for reading off a constructor argument of `d`. -/
+noncomputable def last₁ (d : V) : V := π₂ (sndIdx d)
+
+/-- As `last₁`, with a further pairing layer stripped off: the stored child of `allIntro`.
 
 No source; a formalization device. -/
-noncomputable def arg₁ (d : V) : V := π₁ (π₂ (sndIdx d))
+noncomputable def last₂ (d : V) : V := π₂ (π₂ (sndIdx d))
 
-/-- The second stored argument of a proof-rule constructor code, after its rule tag.
-
-No source; a formalization device. -/
-noncomputable def arg₂ (d : V) : V := π₁ (π₂ (π₂ (sndIdx d)))
-
-/-- The third stored argument of a proof-rule constructor code, after its rule tag.
+/-- As `last₂`, with a further pairing layer stripped off: the stored child of `orIntro` and
+`exsIntro`, and the second child `d₂` of `cutRule`.
 
 No source; a formalization device. -/
-noncomputable def arg₃ (d : V) : V := π₁ (π₂ (π₂ (π₂ (sndIdx d))))
+noncomputable def last₃ (d : V) : V := π₂ (π₂ (π₂ (sndIdx d)))
 
-/-- The fourth stored argument of a proof-rule constructor code, after its rule tag.
+/-- As `last₃`, with a further pairing layer stripped off: the second child `dq` of `andIntro`.
 
 No source; a formalization device. -/
-noncomputable def arg₄ (d : V) : V := π₁ (π₂ (π₂ (π₂ (π₂ (sndIdx d)))))
+noncomputable def last₄ (d : V) : V := π₂ (π₂ (π₂ (π₂ (sndIdx d))))
+
+/-- The first component of the last pair stored by `cutRule`, i.e. its first child `d₁`.
+
+No source; a formalization device. -/
+noncomputable def pre₃ (d : V) : V := π₁ (π₂ (π₂ (sndIdx d)))
+
+/-- The first component of the last pair stored by `andIntro`, i.e. its first child `dp`.
+
+No source; a formalization device. -/
+noncomputable def pre₄ (d : V) : V := π₁ (π₂ (π₂ (π₂ (sndIdx d))))
 
 /-- The `𝚺₁` graph of `tag`.
 
@@ -50,33 +62,45 @@ No source; a formalization device. -/
 def tagGraph : 𝚺₁.Semisentence 2 := .mkSigma
   “t d. ∃ r, !sndIdxDef r d ∧ !pi₁Def t r”
 
-/-- The `𝚺₁` graph of `arg₁`.
+/-- The `𝚺₁` graph of `last₁`.
 
 No source; a formalization device. -/
-def arg₁Graph : 𝚺₁.Semisentence 2 := .mkSigma
-  “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧ !pi₁Def a q”
+def last₁Graph : 𝚺₁.Semisentence 2 := .mkSigma
+  “a d. ∃ r, !sndIdxDef r d ∧ !pi₂Def a r”
 
-/-- The `𝚺₁` graph of `arg₂`.
+/-- The `𝚺₁` graph of `last₂`.
 
 No source; a formalization device. -/
-def arg₂Graph : 𝚺₁.Semisentence 2 := .mkSigma
+def last₂Graph : 𝚺₁.Semisentence 2 := .mkSigma
+  “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧ !pi₂Def a q”
+
+/-- The `𝚺₁` graph of `last₃`.
+
+No source; a formalization device. -/
+def last₃Graph : 𝚺₁.Semisentence 2 := .mkSigma
+  “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧
+    ∃ q', !pi₂Def q' q ∧ !pi₂Def a q'”
+
+/-- The `𝚺₁` graph of `last₄`.
+
+No source; a formalization device. -/
+def last₄Graph : 𝚺₁.Semisentence 2 := .mkSigma
+  “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧
+    ∃ q', !pi₂Def q' q ∧ ∃ q'', !pi₂Def q'' q' ∧ !pi₂Def a q''”
+
+/-- The `𝚺₁` graph of `pre₃`.
+
+No source; a formalization device. -/
+def pre₃Graph : 𝚺₁.Semisentence 2 := .mkSigma
   “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧
     ∃ q', !pi₂Def q' q ∧ !pi₁Def a q'”
 
-/-- The `𝚺₁` graph of `arg₃`.
+/-- The `𝚺₁` graph of `pre₄`.
 
 No source; a formalization device. -/
-def arg₃Graph : 𝚺₁.Semisentence 2 := .mkSigma
+def pre₄Graph : 𝚺₁.Semisentence 2 := .mkSigma
   “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧
     ∃ q', !pi₂Def q' q ∧ ∃ q'', !pi₂Def q'' q' ∧ !pi₁Def a q''”
-
-/-- The `𝚺₁` graph of `arg₄`.
-
-No source; a formalization device. -/
-def arg₄Graph : 𝚺₁.Semisentence 2 := .mkSigma
-  “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧
-    ∃ q', !pi₂Def q' q ∧ ∃ q'', !pi₂Def q'' q' ∧
-    ∃ q''', !pi₂Def q''' q'' ∧ !pi₁Def a q'''”
 
 /-- `tag` is `𝚺₁`-definable.
 
@@ -84,58 +108,201 @@ No source; a formalization device. -/
 instance tag_def : 𝚺₁-Function₁[V] tag via tagGraph := .mk fun v ↦ by
   simp [tagGraph, tag]
 
-/-- `arg₁` is `𝚺₁`-definable.
+/-- `last₁` is `𝚺₁`-definable.
 
 No source; a formalization device. -/
-instance arg₁_def : 𝚺₁-Function₁[V] arg₁ via arg₁Graph := .mk fun v ↦ by
-  simp [arg₁Graph, arg₁]
+instance last₁_def : 𝚺₁-Function₁[V] last₁ via last₁Graph := .mk fun v ↦ by
+  simp [last₁Graph, last₁]
 
-/-- `arg₂` is `𝚺₁`-definable.
-
-No source; a formalization device. -/
-instance arg₂_def : 𝚺₁-Function₁[V] arg₂ via arg₂Graph := .mk fun v ↦ by
-  simp [arg₂Graph, arg₂]
-
-/-- `arg₃` is `𝚺₁`-definable.
+/-- `last₂` is `𝚺₁`-definable.
 
 No source; a formalization device. -/
-instance arg₃_def : 𝚺₁-Function₁[V] arg₃ via arg₃Graph := .mk fun v ↦ by
-  simp [arg₃Graph, arg₃]
+instance last₂_def : 𝚺₁-Function₁[V] last₂ via last₂Graph := .mk fun v ↦ by
+  simp [last₂Graph, last₂]
 
-/-- `arg₄` is `𝚺₁`-definable.
+/-- `last₃` is `𝚺₁`-definable.
 
 No source; a formalization device. -/
-instance arg₄_def : 𝚺₁-Function₁[V] arg₄ via arg₄Graph := .mk fun v ↦ by
-  simp [arg₄Graph, arg₄]
+instance last₃_def : 𝚺₁-Function₁[V] last₃ via last₃Graph := .mk fun v ↦ by
+  simp [last₃Graph, last₃]
+
+/-- `last₄` is `𝚺₁`-definable.
+
+No source; a formalization device. -/
+instance last₄_def : 𝚺₁-Function₁[V] last₄ via last₄Graph := .mk fun v ↦ by
+  simp [last₄Graph, last₄]
+
+/-- `pre₃` is `𝚺₁`-definable.
+
+No source; a formalization device. -/
+instance pre₃_def : 𝚺₁-Function₁[V] pre₃ via pre₃Graph := .mk fun v ↦ by
+  simp [pre₃Graph, pre₃]
+
+/-- `pre₄` is `𝚺₁`-definable.
+
+No source; a formalization device. -/
+instance pre₄_def : 𝚺₁-Function₁[V] pre₄ via pre₄Graph := .mk fun v ↦ by
+  simp [pre₄Graph, pre₄]
+
+/-- The rule tag of `axL s p` is `0`, the constructor's own tag.
+
+No source; direct computation from the definition of `tag`. -/
+@[simp] lemma tag_axL (s p : V) : tag (axL s p) = 0 := by
+  rw [show axL s p = ⟪s, 0, p⟫ + 1 from rfl]
+  simp [tag, sndIdx]
+
+/-- The rule tag of `verumIntro s` is `1`, the constructor's own tag.
+
+No source; direct computation from the definition of `tag`. -/
+@[simp] lemma tag_verumIntro (s : V) : tag (verumIntro s) = 1 := by
+  rw [show verumIntro s = ⟪s, 1, 0⟫ + 1 from rfl]
+  simp [tag, sndIdx]
+
+/-- The rule tag of `andIntro s p q dp dq` is `2`, the constructor's own tag.
+
+No source; direct computation from the definition of `tag`. -/
+@[simp] lemma tag_andIntro (s p q dp dq : V) : tag (andIntro s p q dp dq) = 2 := by
+  rw [show andIntro s p q dp dq = ⟪s, 2, p, q, dp, dq⟫ + 1 from rfl]
+  simp [tag, sndIdx]
+
+/-- `pre₄` recovers the first child `dp` stored by `andIntro s p q dp dq`.
+
+No source; direct computation from the definition of `pre₄`. -/
+@[simp] lemma pre₄_andIntro (s p q dp dq : V) : pre₄ (andIntro s p q dp dq) = dp := by
+  rw [show andIntro s p q dp dq = ⟪s, 2, p, q, dp, dq⟫ + 1 from rfl]
+  simp [pre₄, sndIdx]
+
+/-- `last₄` recovers the second child `dq` stored by `andIntro s p q dp dq`.
+
+No source; direct computation from the definition of `last₄`. -/
+@[simp] lemma last₄_andIntro (s p q dp dq : V) : last₄ (andIntro s p q dp dq) = dq := by
+  rw [show andIntro s p q dp dq = ⟪s, 2, p, q, dp, dq⟫ + 1 from rfl]
+  simp [last₄, sndIdx]
+
+/-- The rule tag of `orIntro s p q d` is `3`, the constructor's own tag.
+
+No source; direct computation from the definition of `tag`. -/
+@[simp] lemma tag_orIntro (s p q d : V) : tag (orIntro s p q d) = 3 := by
+  rw [show orIntro s p q d = ⟪s, 3, p, q, d⟫ + 1 from rfl]
+  simp [tag, sndIdx]
+
+/-- `last₃` recovers the child `d` stored by `orIntro s p q d`.
+
+No source; direct computation from the definition of `last₃`. -/
+@[simp] lemma last₃_orIntro (s p q d : V) : last₃ (orIntro s p q d) = d := by
+  rw [show orIntro s p q d = ⟪s, 3, p, q, d⟫ + 1 from rfl]
+  simp [last₃, sndIdx]
+
+/-- The rule tag of `allIntro s p d` is `4`, the constructor's own tag.
+
+No source; direct computation from the definition of `tag`. -/
+@[simp] lemma tag_allIntro (s p d : V) : tag (allIntro s p d) = 4 := by
+  rw [show allIntro s p d = ⟪s, 4, p, d⟫ + 1 from rfl]
+  simp [tag, sndIdx]
+
+/-- `last₂` recovers the child `d` stored by `allIntro s p d`.
+
+No source; direct computation from the definition of `last₂`. -/
+@[simp] lemma last₂_allIntro (s p d : V) : last₂ (allIntro s p d) = d := by
+  rw [show allIntro s p d = ⟪s, 4, p, d⟫ + 1 from rfl]
+  simp [last₂, sndIdx]
+
+/-- The rule tag of `exsIntro s p t d` is `5`, the constructor's own tag.
+
+No source; direct computation from the definition of `tag`. -/
+@[simp] lemma tag_exsIntro (s p t d : V) : tag (exsIntro s p t d) = 5 := by
+  rw [show exsIntro s p t d = ⟪s, 5, p, t, d⟫ + 1 from rfl]
+  simp [tag, sndIdx]
+
+/-- `last₃` recovers the child `d` stored by `exsIntro s p t d`.
+
+No source; direct computation from the definition of `last₃`. -/
+@[simp] lemma last₃_exsIntro (s p t d : V) : last₃ (exsIntro s p t d) = d := by
+  rw [show exsIntro s p t d = ⟪s, 5, p, t, d⟫ + 1 from rfl]
+  simp [last₃, sndIdx]
+
+/-- The rule tag of `wkRule s d` is `6`, the constructor's own tag.
+
+No source; direct computation from the definition of `tag`. -/
+@[simp] lemma tag_wkRule (s d : V) : tag (wkRule s d) = 6 := by
+  rw [show wkRule s d = ⟪s, 6, d⟫ + 1 from rfl]
+  simp [tag, sndIdx]
+
+/-- `last₁` recovers the child `d` stored by `wkRule s d`.
+
+No source; direct computation from the definition of `last₁`. -/
+@[simp] lemma last₁_wkRule (s d : V) : last₁ (wkRule s d) = d := by
+  rw [show wkRule s d = ⟪s, 6, d⟫ + 1 from rfl]
+  simp [last₁, sndIdx]
+
+/-- The rule tag of `shiftRule s d` is `7`, the constructor's own tag.
+
+No source; direct computation from the definition of `tag`. -/
+@[simp] lemma tag_shiftRule (s d : V) : tag (shiftRule s d) = 7 := by
+  rw [show shiftRule s d = ⟪s, 7, d⟫ + 1 from rfl]
+  simp [tag, sndIdx]
+
+/-- `last₁` recovers the child `d` stored by `shiftRule s d`.
+
+No source; direct computation from the definition of `last₁`. -/
+@[simp] lemma last₁_shiftRule (s d : V) : last₁ (shiftRule s d) = d := by
+  rw [show shiftRule s d = ⟪s, 7, d⟫ + 1 from rfl]
+  simp [last₁, sndIdx]
+
+/-- The rule tag of `cutRule s p d₁ d₂` is `8`, the constructor's own tag.
+
+No source; direct computation from the definition of `tag`. -/
+@[simp] lemma tag_cutRule (s p d₁ d₂ : V) : tag (cutRule s p d₁ d₂) = 8 := by
+  rw [show cutRule s p d₁ d₂ = ⟪s, 8, p, d₁, d₂⟫ + 1 from rfl]
+  simp [tag, sndIdx]
+
+/-- `pre₃` recovers the first child `d₁` stored by `cutRule s p d₁ d₂`.
+
+No source; direct computation from the definition of `pre₃`. -/
+@[simp] lemma pre₃_cutRule (s p d₁ d₂ : V) : pre₃ (cutRule s p d₁ d₂) = d₁ := by
+  rw [show cutRule s p d₁ d₂ = ⟪s, 8, p, d₁, d₂⟫ + 1 from rfl]
+  simp [pre₃, sndIdx]
+
+/-- `last₃` recovers the second child `d₂` stored by `cutRule s p d₁ d₂`.
+
+No source; direct computation from the definition of `last₃`. -/
+@[simp] lemma last₃_cutRule (s p d₁ d₂ : V) : last₃ (cutRule s p d₁ d₂) = d₂ := by
+  rw [show cutRule s p d₁ d₂ = ⟪s, 8, p, d₁, d₂⟫ + 1 from rfl]
+  simp [last₃, sndIdx]
+
+/-- The rule tag of `axm s p` is `9`, the constructor's own tag.
+
+No source; direct computation from the definition of `tag`. -/
+@[simp] lemma tag_axm (s p : V) : tag (axm s p) = 9 := by
+  rw [show axm s p = ⟪s, 9, p⟫ + 1 from rfl]
+  simp [tag, sndIdx]
 
 /-- The next height in the primitive-recursive history of an internal proof code, computed from
 the history `ih` of the heights of all smaller codes.
 
-This is the standard structural height of a one-sided sequent-calculus derivation; no citation is
-given because the reference this repository would cite (Buss, *An Introduction to Proof Theory*,
-key `Bus98`) is not yet registered in `references.yml`. -/
+- [Bus98, Ch. I §2.4] -/
 noncomputable def nodeHeight (d ih : V) : V :=
-  if tag d = 2 then max (znth ih (arg₃ d)) (znth ih (arg₄ d)) + 1
-  else if tag d = 3 then znth ih (arg₃ d) + 1
-  else if tag d = 4 then znth ih (arg₂ d) + 1
-  else if tag d = 5 then znth ih (arg₃ d) + 1
-  else if tag d = 6 then znth ih (arg₂ d) + 1
-  else if tag d = 7 then znth ih (arg₂ d) + 1
-  else if tag d = 8 then max (znth ih (arg₃ d)) (znth ih (arg₄ d)) + 1
+  if tag d = 2 then max (znth ih (pre₄ d)) (znth ih (last₄ d)) + 1
+  else if tag d = 3 then znth ih (last₃ d) + 1
+  else if tag d = 4 then znth ih (last₂ d) + 1
+  else if tag d = 5 then znth ih (last₃ d) + 1
+  else if tag d = 6 then znth ih (last₁ d) + 1
+  else if tag d = 7 then znth ih (last₁ d) + 1
+  else if tag d = 8 then max (znth ih (pre₃ d)) (znth ih (last₃ d)) + 1
   else 0
 
 /-- The `𝚺₁` graph of `nodeHeight`.
 
 No source; a formalization device. -/
 def nodeHeightGraph : 𝚺₁.Semisentence 3 := .mkSigma
-  “h d ih. (∃ t, !tagGraph t d ∧ t = 2 ∧ ∃ p, !arg₃Graph p d ∧ ∃ q, !arg₄Graph q d ∧
+  “h d ih. (∃ t, !tagGraph t d ∧ t = 2 ∧ ∃ p, !pre₄Graph p d ∧ ∃ q, !last₄Graph q d ∧
       ∃ hp, !znthDef hp ih p ∧ ∃ hq, !znthDef hq ih q ∧ ∃ m, !max.dfn m hp hq ∧ h = m + 1) ∨
-    (∃ t, !tagGraph t d ∧ t = 3 ∧ ∃ p, !arg₃Graph p d ∧ ∃ hp, !znthDef hp ih p ∧ h = hp + 1) ∨
-    (∃ t, !tagGraph t d ∧ t = 4 ∧ ∃ p, !arg₂Graph p d ∧ ∃ hp, !znthDef hp ih p ∧ h = hp + 1) ∨
-    (∃ t, !tagGraph t d ∧ t = 5 ∧ ∃ p, !arg₃Graph p d ∧ ∃ hp, !znthDef hp ih p ∧ h = hp + 1) ∨
-    (∃ t, !tagGraph t d ∧ t = 6 ∧ ∃ p, !arg₂Graph p d ∧ ∃ hp, !znthDef hp ih p ∧ h = hp + 1) ∨
-    (∃ t, !tagGraph t d ∧ t = 7 ∧ ∃ p, !arg₂Graph p d ∧ ∃ hp, !znthDef hp ih p ∧ h = hp + 1) ∨
-    (∃ t, !tagGraph t d ∧ t = 8 ∧ ∃ p, !arg₃Graph p d ∧ ∃ q, !arg₄Graph q d ∧
+    (∃ t, !tagGraph t d ∧ t = 3 ∧ ∃ p, !last₃Graph p d ∧ ∃ hp, !znthDef hp ih p ∧ h = hp + 1) ∨
+    (∃ t, !tagGraph t d ∧ t = 4 ∧ ∃ p, !last₂Graph p d ∧ ∃ hp, !znthDef hp ih p ∧ h = hp + 1) ∨
+    (∃ t, !tagGraph t d ∧ t = 5 ∧ ∃ p, !last₃Graph p d ∧ ∃ hp, !znthDef hp ih p ∧ h = hp + 1) ∨
+    (∃ t, !tagGraph t d ∧ t = 6 ∧ ∃ p, !last₁Graph p d ∧ ∃ hp, !znthDef hp ih p ∧ h = hp + 1) ∨
+    (∃ t, !tagGraph t d ∧ t = 7 ∧ ∃ p, !last₁Graph p d ∧ ∃ hp, !znthDef hp ih p ∧ h = hp + 1) ∨
+    (∃ t, !tagGraph t d ∧ t = 8 ∧ ∃ p, !pre₃Graph p d ∧ ∃ q, !last₃Graph q d ∧
       ∃ hp, !znthDef hp ih p ∧ ∃ hq, !znthDef hq ih q ∧ ∃ m, !max.dfn m hp hq ∧ h = m + 1) ∨
     (∃ t, !tagGraph t d ∧ t ≠ 2 ∧ t ≠ 3 ∧ t ≠ 4 ∧ t ≠ 5 ∧ t ≠ 6 ∧ t ≠ 7 ∧ t ≠ 8 ∧ h = 0)”
 
@@ -224,9 +391,7 @@ instance heightSeq_definable : 𝚺₁-Function₁[V] heightSeq := heightSeq_def
 /-- The primitive-recursive height assigned to an internal proof code: the length of the longest
 branch of the derivation `d` denotes, or `0` if `d` is not a proof-rule constructor.
 
-This is the standard structural height of a one-sided sequent-calculus derivation; no citation is
-given because the reference this repository would cite (Buss, *An Introduction to Proof Theory*,
-key `Bus98`) is not yet registered in `references.yml`. -/
+- [Bus98, Ch. I §2.4] -/
 noncomputable def height (d : V) : V := znth (heightSeq d) d
 
 /-- The `𝚺₁` graph of `height`.
@@ -363,6 +528,80 @@ No source; direct computation from the definition of `height`. -/
 @[simp] lemma height_axm (s p : V) : height (axm s p) = 0 := by
   rw [show axm s p = ⟪s, 9, p⟫ + 1 from rfl, height_succ]
   simp [nodeHeight, tag, sndIdx]
+
+/-- An `∧`-introduction node's height is one more than the greater of its two children's heights.
+
+No source; direct computation from the definition of `height`. -/
+@[simp] lemma height_andIntro (s p q dp dq : V) :
+    height (andIntro s p q dp dq) = max (height dp) (height dq) + 1 := by
+  have hp : dp ≤ ⟪s, 2, p, q, dp, dq⟫ := lt_succ_iff_le.mp (dp_lt_andIntro s p q dp dq)
+  have hq : dq ≤ ⟪s, 2, p, q, dp, dq⟫ := lt_succ_iff_le.mp (dq_lt_andIntro s p q dp dq)
+  have h := height_succ (⟪s, 2, p, q, dp, dq⟫ : V)
+  rw [show (⟪s, 2, p, q, dp, dq⟫ : V) + 1 = andIntro s p q dp dq from rfl] at h
+  rw [h]
+  simp [nodeHeight, znth_heightSeq_of_le hp, znth_heightSeq_of_le hq]
+
+/-- An `∨`-introduction node's height is one more than its child's height.
+
+No source; direct computation from the definition of `height`. -/
+@[simp] lemma height_orIntro (s p q d : V) : height (orIntro s p q d) = height d + 1 := by
+  have hd : d ≤ ⟪s, 3, p, q, d⟫ := lt_succ_iff_le.mp (d_lt_orIntro s p q d)
+  have h := height_succ (⟪s, 3, p, q, d⟫ : V)
+  rw [show (⟪s, 3, p, q, d⟫ : V) + 1 = orIntro s p q d from rfl] at h
+  rw [h]
+  simp [nodeHeight, znth_heightSeq_of_le hd]
+
+/-- A `∀`-introduction node's height is one more than its child's height.
+
+No source; direct computation from the definition of `height`. -/
+@[simp] lemma height_allIntro (s p d : V) : height (allIntro s p d) = height d + 1 := by
+  have hd : d ≤ ⟪s, 4, p, d⟫ := lt_succ_iff_le.mp (s_lt_allIntro s p d)
+  have h := height_succ (⟪s, 4, p, d⟫ : V)
+  rw [show (⟪s, 4, p, d⟫ : V) + 1 = allIntro s p d from rfl] at h
+  rw [h]
+  simp [nodeHeight, znth_heightSeq_of_le hd]
+
+/-- An `∃`-introduction node's height is one more than its child's height.
+
+No source; direct computation from the definition of `height`. -/
+@[simp] lemma height_exsIntro (s p t d : V) : height (exsIntro s p t d) = height d + 1 := by
+  have hd : d ≤ ⟪s, 5, p, t, d⟫ := lt_succ_iff_le.mp (d_lt_exsIntro s p t d)
+  have h := height_succ (⟪s, 5, p, t, d⟫ : V)
+  rw [show (⟪s, 5, p, t, d⟫ : V) + 1 = exsIntro s p t d from rfl] at h
+  rw [h]
+  simp [nodeHeight, znth_heightSeq_of_le hd]
+
+/-- A weakening node's height is one more than its child's height.
+
+No source; direct computation from the definition of `height`. -/
+@[simp] lemma height_wkRule (s d : V) : height (wkRule s d) = height d + 1 := by
+  have hd : d ≤ ⟪s, 6, d⟫ := lt_succ_iff_le.mp (d_lt_wkRule s d)
+  have h := height_succ (⟪s, 6, d⟫ : V)
+  rw [show (⟪s, 6, d⟫ : V) + 1 = wkRule s d from rfl] at h
+  rw [h]
+  simp [nodeHeight, znth_heightSeq_of_le hd]
+
+/-- A shift node's height is one more than its child's height.
+
+No source; direct computation from the definition of `height`. -/
+@[simp] lemma height_shiftRule (s d : V) : height (shiftRule s d) = height d + 1 := by
+  have hd : d ≤ ⟪s, 7, d⟫ := lt_succ_iff_le.mp (d_lt_shiftRule s d)
+  have h := height_succ (⟪s, 7, d⟫ : V)
+  rw [show (⟪s, 7, d⟫ : V) + 1 = shiftRule s d from rfl] at h
+  rw [h]
+  simp [nodeHeight, znth_heightSeq_of_le hd]
+
+/-- A cut node's height is one more than the greater of its two children's heights.
+
+No source; direct computation from the definition of `height`. -/
+@[simp] lemma height_cutRule (s p d₁ d₂ : V) :
+    height (cutRule s p d₁ d₂) = max (height d₁) (height d₂) + 1 := by
+  have h₁ : d₁ ≤ ⟪s, 8, p, d₁, d₂⟫ := lt_succ_iff_le.mp (d₁_lt_cutRule s p d₁ d₂)
+  have h₂ : d₂ ≤ ⟪s, 8, p, d₁, d₂⟫ := lt_succ_iff_le.mp (d₂_lt_cutRule s p d₁ d₂)
+  have h := height_succ (⟪s, 8, p, d₁, d₂⟫ : V)
+  rw [show (⟪s, 8, p, d₁, d₂⟫ : V) + 1 = cutRule s p d₁ d₂ from rfl] at h
+  rw [h]
+  simp [nodeHeight, znth_heightSeq_of_le h₁, znth_heightSeq_of_le h₂]
 
 end InternalMeasures
 

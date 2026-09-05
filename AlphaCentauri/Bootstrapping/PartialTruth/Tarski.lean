@@ -601,4 +601,409 @@ lemma models_tarski {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜�
 theorem ISigma1.provable_tarski (n : ℕ) : 𝗜𝚺₁ ⊢* tarski n := fun {_} hφ ↦
   Arithmetic.complete.{0} _ _ fun _ _ _ ↦ models_tarski hφ
 
+
+/-! ## Reading the sentences in a model of `𝗣𝗔⁻`
+
+A model of `𝗣𝗔⁻` carries none of the coding machinery as functions and predicates: `SatZero`,
+`IsDelta0`, `termVal` and the coded vector operations are all defined only under `𝗜𝚺₁`. What such
+a model does carry is the formulas themselves, so the sentences of `tarski n` are read here as
+statements about their evaluation. Each definition below names one such reading. -/
+
+namespace Reading
+
+variable {V : Type*} [ORingStructure V]
+
+/-- The reading of `satZero`. -/
+def Sat0 (z e : V) : Prop := V ⊧/![z, e] satZero.val
+
+/-- The reading of `satSigma m`, which speaks about level `Σₘ₊₁`. -/
+def SatSig (m : ℕ) (z e : V) : Prop := V ⊧/![z, e] (satSigma m).val
+
+/-- The reading of `satPi m`, which speaks about level `Πₘ₊₁`. -/
+def SatPii (m : ℕ) (z e : V) : Prop := V ⊧/![z, e] (satPi m).val
+
+/-- The reading of the satisfaction formula of level `s` selected by a polarity; the counterpart
+of `SatClass` over a model that need not satisfy `𝗜𝚺₁`. -/
+def Sat : Polarity → ℕ → V → V → Prop
+  | _,       0     => Sat0
+  | .sigma, m + 1 => SatSig m
+  | .pi,    m + 1 => SatPii m
+
+/-- The reading of `isDelta0`. -/
+def Delta0 (z : V) : Prop := V ⊧/![z] isDelta0.val
+
+/-- The reading of `isUFormula`. -/
+def UFormula (z : V) : Prop := V ⊧/![z] (isUFormula ℒₒᵣ).val
+
+/-- The reading of `isUTerm`. -/
+def UTerm (t : V) : Prop := V ⊧/![t] (isUTerm ℒₒᵣ).val
+
+/-- The reading of `isStrictSigma m`. -/
+def StrictSig (m : ℕ) (z : V) : Prop := V ⊧/![z] (isStrictSigma m).val
+
+/-- The reading of `isStrictPi m`. -/
+def StrictPii (m : ℕ) (z : V) : Prop := V ⊧/![z] (isStrictPi m).val
+
+/-- The reading of the strict-class recognizer of level `s` selected by a polarity. -/
+def Strict : Polarity → ℕ → V → Prop
+  | .sigma => StrictSig
+  | .pi => StrictPii
+
+/-- The reading of `adjoinDef`: `e'` codes the vector `e` with `x` put in front. -/
+def Adjoin (e' x e : V) : Prop := V ⊧/![e', x, e] adjoinDef.val
+
+/-- The reading of `nthDef`. -/
+def Nth (y e i : V) : Prop := V ⊧/![y, e, i] nthDef.val
+
+/-- The reading of `lenDef`. -/
+def Len (l e : V) : Prop := V ⊧/![l, e] lenDef.val
+
+/-- The reading of `termValGraph`. -/
+def TermVal (y e t : V) : Prop := V ⊧/![y, e, t] termValGraph.val
+
+end Reading
+
+namespace Reading
+
+open PeanoMinus
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+
+/-- `Codes v ev` says that `ev` is a code for the finite sequence `v`: it has length `m` and its
+`i`-th entry is `v i`. Over `𝗜𝚺₁` this pins `ev` down to `matrixToVec v`, but no uniqueness is
+needed below: every step of the snowing argument only ever moves between a code of `v` and a code
+of `x :> v`. -/
+def Codes {m : ℕ} (v : Fin m → V) (ev : V) : Prop :=
+  Len (m : V) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : V)
+
+end Reading
+
+section reading
+
+open Reading
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+
+open PeanoMinus
+
+/-- A `𝚺₁` fact about standard numbers is inherited by every model of `𝗣𝗔⁻`, by `𝚺₁`-completeness.
+This is how every purely syntactic coding fact about the code of a fixed formula is imported into
+a model that satisfies no induction.
+- [HP98, Theorem I.1.6] -/
+lemma sigma_one_cast {m : ℕ} (σ : 𝚺₁.Semisentence m) {u : Fin m → ℕ}
+    (h : ℕ ⊧/u σ.val) : V ⊧/(fun i ↦ (u i : V)) σ.val := by
+  simpa [Function.comp_def] using sigmaOne_upward_absolute V σ u h
+
+/-- The `𝚫₁` form of `sigma_one_cast`, reading the `𝚺₁` half of the definition.
+- [HP98, Theorem I.1.6] -/
+lemma delta_one_cast {m : ℕ} (σ : 𝚫₁.Semisentence m) {u : Fin m → ℕ}
+    (h : ℕ ⊧/u σ.val) : V ⊧/(fun i ↦ (u i : V)) σ.val := by
+  have h' : ℕ ⊧/u σ.sigma.val := by rwa [HierarchySymbol.Semiformula.val_sigma]
+  have := sigma_one_cast (V := V) σ.sigma h'
+  rwa [HierarchySymbol.Semiformula.val_sigma] at this
+
+/-- `sigma_one_cast` at one argument.
+- [HP98, Theorem I.1.6] -/
+lemma cast_sigma₁ (σ : 𝚺₁.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a] σ.val) :
+    V ⊧/![(a : V)] σ.val := by
+  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using sigma_one_cast (V := V) σ h
+
+/-- `sigma_one_cast` at two arguments.
+- [HP98, Theorem I.1.6] -/
+lemma cast_sigma₂ (σ : 𝚺₁.Semisentence 2) {a b : ℕ} (h : ℕ ⊧/![a, b] σ.val) :
+    V ⊧/![(a : V), (b : V)] σ.val := by
+  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using sigma_one_cast (V := V) σ h
+
+/-- `sigma_one_cast` at three arguments.
+- [HP98, Theorem I.1.6] -/
+lemma cast_sigma₃ (σ : 𝚺₁.Semisentence 3) {a b c : ℕ} (h : ℕ ⊧/![a, b, c] σ.val) :
+    V ⊧/![(a : V), (b : V), (c : V)] σ.val := by
+  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using sigma_one_cast (V := V) σ h
+
+/-- `delta_one_cast` at one argument.
+- [HP98, Theorem I.1.6] -/
+lemma cast_delta₁ (σ : 𝚫₁.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a] σ.val) :
+    V ⊧/![(a : V)] σ.val := by
+  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using delta_one_cast (V := V) σ h
+
+end reading
+
+
+/-! ## The theory is monotone in its level -/
+
+/-- A sentence of a lower level of the Tarski theory belongs to every higher level.
+- [HP98, Remark I.1.77] -/
+lemma tarski_mono {m n : ℕ} (hmn : m ≤ n) {σ : ArithmeticSentence} (h : tarski m σ) :
+    tarski n σ := by
+  induction n with
+  | zero => rwa [Nat.le_zero.mp hmn] at h
+  | succ n ih =>
+    rcases Nat.eq_or_lt_of_le hmn with rfl | hlt
+    · exact h
+    · exact tarski.prev n σ (ih (by omega))
+
+/-! ## Reading the sentences in a model of `𝗣𝗔⁻`
+
+Every reading lemma below takes the hypothesis that the sentences of `tarski n` hold in `V`, and
+nothing else beyond `𝗣𝗔⁻`; together they are the whole of what the snowing argument may use. -/
+
+section reading
+
+open Reading PeanoMinus
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ}
+  (hV : ∀ σ : ArithmeticSentence, tarski n σ → V↓[ℒₒᵣ] ⊧ σ)
+
+include hV
+
+section satZero
+
+/-- The reading of the Tarski sentence for truth.
+- [HP98, Theorem I.1.70(ii)] -/
+lemma read_satZeroVerum : ∀ z e : V, V ⊧/![z] qqVerumDef.val → Sat0 z e := by
+  simpa [models_iff, Tarski.satZeroVerum, Reading.Sat0]
+    using hV _ (tarski.zero n Tarski.satZeroVerum (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the Tarski sentence for falsehood.
+- [HP98, Theorem I.1.70(ii)] -/
+lemma read_satZeroFalsum : ∀ z e : V, V ⊧/![z] qqFalsumDef.val → ¬Sat0 z e := by
+  simpa [models_iff, Tarski.satZeroFalsum, Reading.Sat0]
+    using hV _ (tarski.zero n Tarski.satZeroFalsum (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the Tarski sentence for equality.
+- [HP98, Theorem I.1.70(ii)] -/
+lemma read_satZeroEq : ∀ t u z e vt vu : V, UTerm t → UTerm u →
+    V ⊧/![z, t, u] qqEQDef.val → TermVal vt e t → TermVal vu e u → (Sat0 z e ↔ vt = vu) := by
+  simpa [models_iff, Tarski.satZeroEq, Reading.Sat0, Reading.UTerm, Reading.TermVal]
+    using hV _ (tarski.zero n Tarski.satZeroEq (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the Tarski sentence for inequality.
+- [HP98, Theorem I.1.70(ii)] -/
+lemma read_satZeroNeq : ∀ t u z e vt vu : V, UTerm t → UTerm u →
+    V ⊧/![z, t, u] qqNEQDef.val → TermVal vt e t → TermVal vu e u → (Sat0 z e ↔ vt ≠ vu) := by
+  simpa [models_iff, Tarski.satZeroNeq, Reading.Sat0, Reading.UTerm, Reading.TermVal]
+    using hV _ (tarski.zero n Tarski.satZeroNeq (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the Tarski sentence for less-than.
+- [HP98, Theorem I.1.70(ii)] -/
+lemma read_satZeroLt : ∀ t u z e vt vu : V, UTerm t → UTerm u →
+    V ⊧/![z, t, u] qqLTDef.val → TermVal vt e t → TermVal vu e u → (Sat0 z e ↔ vt < vu) := by
+  simpa [models_iff, Tarski.satZeroLt, Reading.Sat0, Reading.UTerm, Reading.TermVal]
+    using hV _ (tarski.zero n Tarski.satZeroLt (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the Tarski sentence for negated less-than.
+- [HP98, Theorem I.1.70(ii)] -/
+lemma read_satZeroNlt : ∀ t u z e vt vu : V, UTerm t → UTerm u →
+    V ⊧/![z, t, u] qqNLTDef.val → TermVal vt e t → TermVal vu e u →
+    (Sat0 z e ↔ ¬(vt < vu)) := by
+  simpa [models_iff, Tarski.satZeroNlt, Reading.Sat0, Reading.UTerm, Reading.TermVal]
+    using hV _ (tarski.zero n Tarski.satZeroNlt (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the Tarski sentence for conjunction.
+- [HP98, Theorem I.1.70(ii)] -/
+lemma read_satZeroAnd : ∀ p q z e : V, V ⊧/![z, p, q] qqAndDef.val →
+    (Sat0 z e ↔ Sat0 p e ∧ Sat0 q e) := by
+  simpa [models_iff, Tarski.satZeroAnd, Reading.Sat0]
+    using hV _ (tarski.zero n Tarski.satZeroAnd (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the Tarski sentence for disjunction.
+- [HP98, Theorem I.1.70(ii)] -/
+lemma read_satZeroOr : ∀ p q z e : V, Delta0 p → UFormula p → Delta0 q → UFormula q →
+    V ⊧/![z, p, q] qqOrDef.val → (Sat0 z e ↔ Sat0 p e ∨ Sat0 q e) := by
+  simpa [models_iff, Tarski.satZeroOr, Reading.Sat0, Reading.Delta0, Reading.UFormula]
+    using hV _ (tarski.zero n Tarski.satZeroOr (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the Tarski sentence for bounded universal quantification.
+- [HP98, Theorem I.1.70(iv)] -/
+lemma read_satZeroBall : ∀ t u q z e v : V, UTerm t → Delta0 q → UFormula q →
+    V ⊧/![u, t] (termBShiftGraph ℒₒᵣ).val → V ⊧/![z, u, q] qqBallDef.val → TermVal v e t →
+    (Sat0 z e ↔ ∀ x < v, ∀ e', Adjoin e' x e → Sat0 q e') := by
+  simpa [models_iff, Tarski.satZeroBall, Reading.Sat0, Reading.UTerm, Reading.Delta0, Reading.UFormula, Reading.TermVal, Reading.Adjoin]
+    using hV _ (tarski.zero n Tarski.satZeroBall (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the Tarski sentence for bounded existential quantification.
+- [HP98, Theorem I.1.70(iv)] -/
+lemma read_satZeroBex : ∀ t u q z e v : V, UTerm t →
+    V ⊧/![u, t] (termBShiftGraph ℒₒᵣ).val → V ⊧/![z, u, q] qqBexDef.val → TermVal v e t →
+    (Sat0 z e ↔ ∃ x < v, ∃ e', Adjoin e' x e ∧ Sat0 q e') := by
+  simpa [models_iff, Tarski.satZeroBex, Reading.Sat0, Reading.UTerm, Reading.TermVal, Reading.Adjoin]
+    using hV _ (tarski.zero n Tarski.satZeroBex (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the defining sentence for coded bound variables.
+- [HP98, 1.64(5)] -/
+lemma read_termValBvar : ∀ e z t v : V, V ⊧/![t, z] qqBvarDef.val →
+    (TermVal v e t ↔ Nth v e z) := by
+  simpa [models_iff, Tarski.termValBvar, Reading.TermVal, Reading.Nth]
+    using hV _ (tarski.zero n Tarski.termValBvar (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the defining sentence for the coded zero term.
+- [HP98, 1.64(5)] -/
+lemma read_termValZero : ∀ e v : V, TermVal v e ((𝟎 : ℕ) : V) ↔ v = 0 := by
+  simpa [models_iff, Tarski.termValZero, Reading.TermVal, numeral_eq_natCast]
+    using hV _ (tarski.zero n Tarski.termValZero (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the defining sentence for the coded one term.
+- [HP98, 1.64(5)] -/
+lemma read_termValOne : ∀ e v : V, TermVal v e ((𝟏 : ℕ) : V) ↔ v = 1 := by
+  simpa [models_iff, Tarski.termValOne, Reading.TermVal, numeral_eq_natCast]
+    using hV _ (tarski.zero n Tarski.termValOne (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the defining sentence for coded addition.
+- [HP98, 1.64(5)] -/
+lemma read_termValAdd : ∀ e t u s vt vu v : V, UTerm t → UTerm u →
+    V ⊧/![s, t, u] Arithmetic.qqAddGraph.val → TermVal vt e t → TermVal vu e u →
+    (TermVal v e s ↔ v = vt + vu) := by
+  simpa [models_iff, Tarski.termValAdd, Reading.TermVal, Reading.UTerm]
+    using hV _ (tarski.zero n Tarski.termValAdd (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the defining sentence for coded multiplication.
+- [HP98, 1.64(5)] -/
+lemma read_termValMul : ∀ e t u s vt vu v : V, UTerm t → UTerm u →
+    V ⊧/![s, t, u] Arithmetic.qqMulGraph.val → TermVal vt e t → TermVal vu e u →
+    (TermVal v e s ↔ v = vt * vu) := by
+  simpa [models_iff, Tarski.termValMul, Reading.TermVal, Reading.UTerm]
+    using hV _ (tarski.zero n Tarski.termValMul (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of totality of coded adjunction.
+- No source; this is a routine vector-coding fact used in the snowing argument. -/
+lemma read_adjoinTotal : ∀ x v : V, ∃ e, Adjoin e x v := by
+  simpa [models_iff, Tarski.adjoinTotal, Reading.Adjoin]
+    using hV _ (tarski.zero n Tarski.adjoinTotal (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the head equation of coded adjunction.
+- No source; this is a routine vector-coding fact used in the snowing argument. -/
+lemma read_nthAdjoinZero : ∀ x v e y : V, Adjoin e x v → (Nth y e 0 ↔ y = x) := by
+  simpa [models_iff, Tarski.nthAdjoinZero, Reading.Adjoin, Reading.Nth]
+    using hV _ (tarski.zero n Tarski.nthAdjoinZero (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the tail equation of coded adjunction.
+- No source; this is a routine vector-coding fact used in the snowing argument. -/
+lemma read_nthAdjoinSucc : ∀ x v e i y : V, Adjoin e x v → (Nth y e (i + 1) ↔ Nth y v i) := by
+  simpa [models_iff, Tarski.nthAdjoinSucc, Reading.Adjoin, Reading.Nth]
+    using hV _ (tarski.zero n Tarski.nthAdjoinSucc (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the length of the empty coded vector.
+- No source; this is a routine vector-coding fact used in the snowing argument. -/
+lemma read_lenNil : ∀ l : V, Len l 0 ↔ l = 0 := by
+  simpa [models_iff, Tarski.lenNil, Reading.Len]
+    using hV _ (tarski.zero n Tarski.lenNil (by simp [Tarski.satZeroAxioms]))
+
+/-- The reading of the length equation of coded adjunction.
+- No source; this is a routine vector-coding fact used in the snowing argument. -/
+lemma read_lenAdjoin : ∀ x v e l : V, Adjoin e x v → (Len (l + 1) e ↔ Len l v) := by
+  simpa [models_iff, Tarski.lenAdjoin, Reading.Adjoin, Reading.Len]
+    using hV _ (tarski.zero n Tarski.lenAdjoin (by simp [Tarski.satZeroAxioms]))
+
+end satZero
+
+section satSigma
+
+variable {m : ℕ} (hm : m ≤ n)
+
+include hm
+
+/-- The reading of the empty-block condition from `Π` to `Σ`.
+- [HP98, Theorem I.1.75(2)(v)] -/
+lemma read_satSigmaOfPi : ∀ z e : V, Strict 𝚷 m z → Reading.UFormula z →
+    (Reading.SatSig m z e ↔ Sat 𝚷 m z e) := by
+  have h := hV _ (tarski_mono hm (tarski.new m (Tarski.satSigmaOfPi m)
+    (by simp [Tarski.satSigmaAxioms])))
+  cases m with
+  | zero =>
+    simpa [models_iff, Tarski.satSigmaOfPi, Reading.Sat, Reading.Strict, Reading.SatSig,
+      Reading.StrictPii, Reading.Sat0, Reading.UFormula, isStrictPi] using h
+  | succ m =>
+    simpa [models_iff, Tarski.satSigmaOfPi, Reading.Sat, Reading.Strict, Reading.SatSig,
+      Reading.StrictPii, Reading.SatPii, Reading.UFormula] using h
+
+/-- The reading of the empty-block condition from `Σ` to `Π`.
+- [HP98, Theorem I.1.75(2)(v′)] -/
+lemma read_satPiOfSigma : ∀ z e : V, Strict 𝚺 m z → Reading.UFormula z →
+    (Reading.SatPii m z e ↔ Sat 𝚺 m z e) := by
+  have h := hV _ (tarski_mono hm (tarski.new m (Tarski.satPiOfSigma m)
+    (by simp [Tarski.satSigmaAxioms])))
+  cases m with
+  | zero =>
+    simpa [models_iff, Tarski.satPiOfSigma, Reading.Sat, Reading.Strict, Reading.SatPii,
+      Reading.StrictSig, Reading.Sat0, Reading.UFormula, isStrictSigma] using h
+  | succ m =>
+    simpa [models_iff, Tarski.satPiOfSigma, Reading.Sat, Reading.Strict, Reading.SatPii,
+      Reading.StrictSig, Reading.SatSig, Reading.UFormula] using h
+
+/-- The reading of the empty-block condition, in the polarity-indexed form used by the induction
+on a strict prenex derivation.
+- [HP98, Theorem I.1.75(2)(v)]
+- [HP98, Theorem I.1.75(2)(v′)] -/
+lemma read_ofAlt (Γ : Polarity) : ∀ z e : V, Strict Γ.alt m z → Reading.UFormula z →
+    (Sat Γ (m + 1) z e ↔ Sat Γ.alt m z e) := by
+  rcases Γ with _ | _
+  · exact read_satSigmaOfPi hV hm
+  · exact read_satPiOfSigma hV hm
+
+/-- The reading of the Tarski condition for existential quantification.
+- [HP98, Theorem I.1.75(2)(v)] -/
+lemma read_satSigmaExs : ∀ p z e : V, V ⊧/![z, p] qqExsDef.val →
+    (SatSig m z e ↔ ∃ x e', Adjoin e' x e ∧ SatSig m p e') := by
+  simpa [models_iff, Tarski.satSigmaExs, Reading.SatSig, Reading.Adjoin]
+    using hV _ (tarski_mono hm (tarski.new m (Tarski.satSigmaExs m) (by simp [Tarski.satSigmaAxioms])))
+
+/-- The reading of the Tarski condition for universal quantification.
+- [HP98, Theorem I.1.75(2)(v′)] -/
+lemma read_satPiAll : ∀ p z e : V, V ⊧/![z, p] qqAllDef.val →
+    (SatPii m z e ↔ ∀ x e', Adjoin e' x e → SatPii m p e') := by
+  simpa [models_iff, Tarski.satPiAll, Reading.SatPii, Reading.Adjoin]
+    using hV _ (tarski_mono hm (tarski.new m (Tarski.satPiAll m) (by simp [Tarski.satSigmaAxioms])))
+
+end satSigma
+
+end reading
+
+
+/-! ## Codes of finite sequences
+
+The vector sentences of `tarski n` say just enough about `adjoinDef`, `lenDef` and `nthDef` to
+build a code for any finite sequence of the model and to extend one by a new first entry. -/
+
+section codes
+
+open Reading PeanoMinus
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ}
+  (hV : ∀ σ : ArithmeticSentence, tarski n σ → V↓[ℒₒᵣ] ⊧ σ)
+
+include hV
+
+/-- The empty sequence is coded by `0`.
+- No source; this is a routine vector-coding fact used in the snowing argument. -/
+lemma codes_nil (v : Fin 0 → V) : Codes v 0 :=
+  ⟨by simpa using (read_lenNil hV 0).mpr rfl, fun i ↦ i.elim0⟩
+
+/-- Adjoining a new first entry to a code of `v` gives a code of `x :> v`.
+- No source; this is a routine vector-coding fact used in the snowing argument. -/
+lemma codes_cons {m : ℕ} {v : Fin m → V} {ev ev' x : V} (h : Codes v ev)
+    (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' := by
+  refine ⟨?_, fun i ↦ ?_⟩
+  · have := (read_lenAdjoin hV x ev ev' (m : V) hadj).mpr h.1
+    simpa using this
+  · refine Fin.cases ?_ (fun j ↦ ?_) i
+    · simpa using (read_nthAdjoinZero hV x ev ev' x hadj).mpr rfl
+    · have := (read_nthAdjoinSucc hV x ev ev' (j.val : V) (v j) hadj).mpr (h.2 j)
+      simpa using this
+
+/-- Every finite sequence of the model has a code.
+- No source; this is a routine vector-coding fact used in the snowing argument. -/
+lemma exists_codes : ∀ {m : ℕ} (v : Fin m → V), ∃ ev, Codes v ev := by
+  intro m
+  induction m with
+  | zero => exact fun v ↦ ⟨0, codes_nil hV v⟩
+  | succ m ih =>
+    intro v
+    obtain ⟨ev, hev⟩ := ih (fun i ↦ v i.succ)
+    obtain ⟨ev', hadj⟩ := read_adjoinTotal hV (v 0) ev
+    have hcons : (v 0 :> fun i ↦ v i.succ) = v := by
+      funext i; refine Fin.cases ?_ (fun j ↦ ?_) i <;> simp
+    exact ⟨ev', hcons ▸ codes_cons hV hev hadj⟩
+
+end codes
+
 end LO.FirstOrder.Arithmetic

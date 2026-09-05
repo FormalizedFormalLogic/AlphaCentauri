@@ -560,6 +560,16 @@ private lemma eval_satSigmaVec (p : M) (w : Fin k → M) :
     Matrix.cons_val_succ, Structure.eq_iff_eq, LogicalConnective.Prop.and_eq, exists_eq_right,
     Reading.Codes, Reading.Len, Reading.Nth, Reading.SatSig, and_assoc]
 
+/-- Evaluation of the substituted right-hand side of `snowing n φ`. -/
+private lemma eval_snowing_rhs {k : ℕ} (φ : ArithmeticSemisentence k) (e : Fin k → M) :
+    M ⊧/e ((satSigmaVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
+      ↔ M ⊧/(((⌜φ⌝ : ℕ) : M) :> e) (satSigmaVec n k).val := by
+  simp only [Semiformula.eval_substs, Matrix.comp_vecCons'', Arithmetic.gödelNumber'_def,
+    Semiterm.Operator.encode, Semiterm.Operator.const, Semiterm.val_operator,
+    Structure.numeral_eq_numeral, numeral_eq_natCast_app, Sentence.quote_eq_encode_nat,
+    Matrix.empty_eq]
+  simp only [Function.comp_def, Semiterm.val_bvar]
+
 end peanoMinus
 
 

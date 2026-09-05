@@ -270,12 +270,6 @@ theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
       ∀ v : Fin k → V, V ⊧/v φ ↔ SatSigma (n + 1) ⌜φ⌝ (matrixToVec v) := by
   simp [snowing, models_iff, (satSigmaVec.defined n k).df, Function.comp_def]
 
-/-- `𝗣𝗔⁻` together with the finite Tarski theory proves the snowing lemma.
-- [HP98, Corollary I.1.76]
-- [HP98, Remark I.1.77] -/
-axiom provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ
-
 /-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `𝚺-[n + 1]` formula.
 - [HP98, Corollary I.1.76] -/
 theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
@@ -572,5 +566,28 @@ private lemma eval_snowing_rhs {k : ℕ} (φ : ArithmeticSemisentence k) (e : Fi
 
 end peanoMinus
 
+/-- `𝗣𝗔⁻` together with the finite Tarski theory proves the snowing lemma.
+- [HP98, Corollary I.1.76]
+- [HP98, Remark I.1.77] -/
+theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ := by
+  have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory) :=
+    Entailment.WeakerThan.trans (𝓣 := (𝗣𝗔⁻ : ArithmeticTheory)) inferInstance
+      (Entailment.Axiomatized.le_of_subset Set.subset_union_left)
+  unfold snowing
+  refine Arithmetic.provable_iff_of_models_iff (T := (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory)) ?_
+  intro M _ hMT e
+  have hPA : M↓[ℒₒᵣ] ⊧* (𝗣𝗔⁻ : ArithmeticTheory) :=
+    Semantics.ModelsSet.of_subset hMT Set.subset_union_left
+  have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦
+    Semantics.ModelsSet.models _ (Set.mem_union_right (𝗣𝗔⁻ : ArithmeticTheory) hσ)
+  have := hPA
+  rw [eval_snowing_rhs, eval_satSigmaVec]
+  constructor
+  · intro h
+    obtain ⟨ev, hev⟩ := exists_codes hM e
+    exact ⟨ev, hev, (satClass_quote_reading hM hφ le_rfl e ev hev).mpr h⟩
+  · rintro ⟨ev, hev, hsat⟩
+    exact (satClass_quote_reading hM hφ le_rfl e ev hev).mp hsat
 
 end LO.FirstOrder.Arithmetic

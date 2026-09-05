@@ -38,9 +38,6 @@ LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
 LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
   forgive:
     - LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
-LO.FirstOrder.Arithmetic.provable_snowing_of_tarski:
-  forgive:
-    - LO.FirstOrder.Arithmetic.provable_snowing_of_tarski
 LO.FirstOrder.Arithmetic.provablyTotal_of_primrec:
   forgive:
     - LO.FirstOrder.Arithmetic.provablyTotal_of_primrec

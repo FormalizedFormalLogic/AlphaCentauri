@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.Delta1
+public import AlphaCentauri.FirstOrder.FiniteAxiomatizability
 
 /-!
 # Reflexive theories
@@ -18,13 +19,14 @@ namespace LO.FirstOrder
 
 variable {T : ArithmeticTheory}
 
-/-- `T` is reflexive if, for every finite `l ⊆ T`, `T` proves the consistency of `l` (presented
-via `Theory.Δ₁.ofList l.toList`).
-- [Lin97, Ch. 1 p. 18] -/
+/-- `T` is reflexive if it proves the consistency of each of its finite subtheories `U`, presented
+by `Theory.Δ₁.ofFinite`.
+- [Lin97, Ch. 1 p. 18]
+- [HP98, Definition III.2.32] -/
 def ArithmeticTheory.Reflexive (T : ArithmeticTheory) : Prop :=
-  ∀ l : Finset ArithmeticSentence, (∀ σ ∈ l, σ ∈ T) →
-    letI : Theory.Δ₁ {σ | σ ∈ l} := (Theory.Δ₁.ofList l.toList).ofEq (by ext; simp)
-    T ⊢ (Theory.consistent {σ | σ ∈ l}).val
+  ∀ U, U ⊆ T → (U_fin : U.Finite) →
+    let _ : U.Δ₁ := Theory.Δ₁.ofFinite _ U_fin
+    T ⊢ U.consistent.val
 
 /-- `T` is essentially reflexive if every theory extending `T` is reflexive.
 - [Lin97, Ch. 1 p. 18] -/
@@ -32,10 +34,24 @@ def ArithmeticTheory.EssentiallyReflexive (T : ArithmeticTheory) : Prop :=
   ∀ U : ArithmeticTheory, T ⊆ U → U.Reflexive
 
 /-- A reflexive extension of `𝗜𝚺₁` is not finitely axiomatizable.
+
+If a finite `F ⊆ T` axiomatized `T`, reflexivity would give `T ⊢ Con(F)`, hence `F ⊢ Con(F)`,
+contradicting the second incompleteness theorem for `F`, which is `Δ₁`, contains `𝗜𝚺₁` and is
+consistent. The finite subtheory is taken as a subset of `T` through
+`finiteAxiomatizable_iff_exists_finite_subset`, and its `Theory.Δ₁` presentation is the one
+`ArithmeticTheory.Reflexive` fixes, so that the consistency statement `T` proves is the one
+`consistent_unprovable` speaks about.
 - [Lin97, Corollary 2.1]
 - [HP98, Corollary III.2.24] -/
-axiom not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T]
-    (h : T.Reflexive) : ¬FiniteAxiomatizable T
+theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T]
+    (h : T.Reflexive) : ¬FiniteAxiomatizable T := by
+  intro hfa
+  obtain ⟨F, hFT, hfin, hequiv⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp hfa
+  let _ : F.Δ₁ := Theory.Δ₁.ofFinite F hfin
+  have hcon : T ⊢ F.consistent.val := h F hFT hfin
+  have : 𝗜𝚺₁ ⪯ F := WeakerThan.trans inferInstance hequiv.symm.le
+  have : Consistent F := Consistent.of_le inferInstance hequiv.le
+  exact Arithmetic.consistent_unprovable F (hequiv.symm.le.wk hcon)
 
 /-- `𝗜𝚺₂` proves the consistency of `𝗜𝚺₁`.
 

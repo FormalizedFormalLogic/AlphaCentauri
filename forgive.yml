@@ -20,18 +20,39 @@
 version: v0
 
 # The unproved statements themselves.
-LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists:
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.defined:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.dom:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.defined
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.defined:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.dom
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.mono:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.defined
-LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec.defined:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.mono
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.neg_iff:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.satSigmaVec.defined
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.neg_iff
+LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.dom:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.dom
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.mono:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.mono
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.neg_iff:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.neg_iff
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi
+LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.subst:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.subst
 LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence
@@ -53,9 +74,6 @@ LO.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
 LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
   forgive:
     - LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con
-LO.FirstOrder.Arithmetic.models_snowing_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.models_snowing_iff
 LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
   forgive:
     - LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
@@ -104,9 +122,6 @@ LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
 LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
   forgive:
     - LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le
-LO.FirstOrder.not_finiteAxiomatizable_of_reflexive:
-  forgive:
-    - LO.FirstOrder.not_finiteAxiomatizable_of_reflexive
 LO.FirstOrder.parsons:
   forgive:
     - LO.FirstOrder.parsons
@@ -121,123 +136,9 @@ LO.FirstOrder.provablyTotal_of_primrec':
     - LO.FirstOrder.provablyTotal_of_primrec'
 
 # Declarations that inherit the debt of an unproved statement.
-LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff:
+LO.FirstOrder.Arithmetic.satClass_quote_iff:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.definable:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.defined
-LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.mono:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.neg_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.definable:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.defined
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.mono:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.neg_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.subst:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.and_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.and_iff._simp_1:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.ball_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.bex_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.definable:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.defined:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.eq_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.exists_iff_forall:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.iff_forall:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.iff_mem:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.iff_val:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.lt_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.neg_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.neq_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.nlt_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.or_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.or_iff._simp_1:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.subst:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-LO.FirstOrder.Arithmetic.Bootstrapping.SatZero.verum._simp_1:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-_private.AlphaCentauri.Bootstrapping.PartialTruth.SatSigma.0.LO.FirstOrder.Arithmetic.Bootstrapping.blockSat:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-_private.AlphaCentauri.Bootstrapping.PartialTruth.SatSigma.0.LO.FirstOrder.Arithmetic.Bootstrapping.exs_iff_aux:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-_private.AlphaCentauri.Bootstrapping.PartialTruth.SatSigma.0.LO.FirstOrder.Arithmetic.Bootstrapping.mono_step:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-_private.AlphaCentauri.Bootstrapping.PartialTruth.SatSigma.0.LO.FirstOrder.Arithmetic.Bootstrapping.of_pi_step:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-_private.AlphaCentauri.Bootstrapping.PartialTruth.SatSigma.0.LO.FirstOrder.Arithmetic.Bootstrapping.of_pi_zero:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-_private.AlphaCentauri.Bootstrapping.PartialTruth.SatSigma.0.LO.FirstOrder.Arithmetic.Bootstrapping.satZero_ex_iff:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-_private.AlphaCentauri.Bootstrapping.PartialTruth.SatSigma.0.LO.FirstOrder.Arithmetic.Bootstrapping.sigmaDefined:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-_private.AlphaCentauri.Bootstrapping.PartialTruth.SatSigma.0.LO.FirstOrder.Arithmetic.Bootstrapping.sigmaZero_defined:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
-_private.AlphaCentauri.Bootstrapping.PartialTruth.SatSigma.0.LO.FirstOrder.Arithmetic.Bootstrapping.sigmaDefined._f:
-  forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.PSatZero.exists
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.all_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatPi.of_sigma
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.exs_iff
+    - LO.FirstOrder.Arithmetic.Bootstrapping.SatSigma.of_pi

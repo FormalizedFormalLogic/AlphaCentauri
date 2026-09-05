@@ -26,9 +26,6 @@ LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
 LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable
-LO.FirstOrder.Arithmetic.ISigma1.provable_tarski:
-  forgive:
-    - LO.FirstOrder.Arithmetic.ISigma1.provable_tarski
 LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
   forgive:
     - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound

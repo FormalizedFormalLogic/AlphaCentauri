@@ -270,7 +270,7 @@ theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
       ∀ v : Fin k → V, V ⊧/v φ ↔ SatSigma (n + 1) ⌜φ⌝ (matrixToVec v) := by
   simp [snowing, models_iff, (satSigmaVec.defined n k).df, Function.comp_def]
 
-/-- The theory form of the snowing lemma follows from `𝗣𝗔⁻` and the finite Tarski theory.
+/-- `𝗣𝗔⁻` together with the finite Tarski theory proves the snowing lemma.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
 axiom provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}

@@ -135,36 +135,36 @@ noncomputable def termValMul : ArithmeticSentence :=
     (!termValGraph.val v e s ↔ v = vt * vu)”
 
 /-- Coded vector adjunction is total.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def adjoinTotal : ArithmeticSentence :=
   “∀ x v, ∃ e, !adjoinDef.val e x v”
 
 /-- Coded vector adjunction is functional.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def adjoinUnique : ArithmeticSentence :=
   “∀ x v e e', !adjoinDef.val e x v → !adjoinDef.val e' x v → e = e'”
 
 /-- The head of an adjoined coded vector is its new entry.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def nthAdjoinZero : ArithmeticSentence :=
   “∀ x v e y, !adjoinDef.val e x v → (!nthDef.val y e 0 ↔ y = x)”
 
 /-- Successor indices into an adjoined coded vector read from its tail.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def nthAdjoinSucc : ArithmeticSentence :=
   “∀ x v e i y, !adjoinDef.val e x v →
     (!nthDef.val y e (i + 1) ↔ !nthDef.val y v i)”
 
 /-- The empty coded vector has length zero.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def lenNil : ArithmeticSentence := “∀ l, !lenDef.val l 0 ↔ l = 0”
 
 /-- Adjunction increases the length of a coded vector by one.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 noncomputable def lenAdjoin : ArithmeticSentence :=
   “∀ x v e l, !adjoinDef.val e x v → (!lenDef.val (l + 1) e ↔ !lenDef.val l v)”
 
-/-- The empty-block Tarski condition for reading `Πₙ` satisfaction as `Σₙ₊₁` satisfaction.
+/-- The empty-block Tarski condition for reading `𝚷-[n]` satisfaction as `𝚺-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)(v)] -/
 noncomputable def satSigmaOfPi : ℕ → ArithmeticSentence
   | 0 =>
@@ -174,7 +174,7 @@ noncomputable def satSigmaOfPi : ℕ → ArithmeticSentence
       “∀ z e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
         (!(satSigma (n + 1)).val z e ↔ !(satPi n).val z e)”
 
-/-- The empty-block Tarski condition for reading `Σₙ` satisfaction as `Πₙ₊₁` satisfaction.
+/-- The empty-block Tarski condition for reading `𝚺-[n]` satisfaction as `𝚷-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 noncomputable def satPiOfSigma : ℕ → ArithmeticSentence
   | 0 =>
@@ -184,40 +184,40 @@ noncomputable def satPiOfSigma : ℕ → ArithmeticSentence
       “∀ z e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
         (!(satPi (n + 1)).val z e ↔ !(satSigma n).val z e)”
 
-/-- The domain Tarski condition for `Σₙ₊₁` satisfaction.
+/-- The domain Tarski condition for `𝚺-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satSigmaDom (n : ℕ) : ArithmeticSentence :=
   “∀ z e, !(satSigma n).val z e →
     !(isStrictSigma (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
-/-- The domain Tarski condition for `Πₙ₊₁` satisfaction.
+/-- The domain Tarski condition for `𝚷-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satPiDom (n : ℕ) : ArithmeticSentence :=
   “∀ z e, !(satPi n).val z e →
     !(isStrictPi (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
-/-- The Tarski condition for existential quantification at level `Σₙ₊₁`.
+/-- The Tarski condition for existential quantification at level `𝚺-[n + 1]`.
 - [HP98, Theorem I.1.75(2)(v)] -/
 noncomputable def satSigmaExs (n : ℕ) : ArithmeticSentence :=
   “∀ p z e, !qqExsDef.val z p →
     (!(satSigma n).val z e ↔
       ∃ x e', !adjoinDef.val e' x e ∧ !(satSigma n).val p e')”
 
-/-- The Tarski condition for universal quantification at level `Πₙ₊₁`.
+/-- The Tarski condition for universal quantification at level `𝚷-[n + 1]`.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 noncomputable def satPiAll (n : ℕ) : ArithmeticSentence :=
   “∀ p z e, !qqAllDef.val z p →
     (!(satPi n).val z e ↔
       ∀ x e', !adjoinDef.val e' x e → !(satPi n).val p e')”
 
-/-- The negation-duality Tarski condition from `Σₙ₊₁` to `Πₙ₊₁`.
+/-- The negation-duality Tarski condition from `𝚺-[n + 1]` to `𝚷-[n + 1]`.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satPiNeg (n : ℕ) : ArithmeticSentence :=
   “∀ z nz e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
     !(negGraph ℒₒᵣ).val nz z →
     (!(satPi n).val nz e ↔ ¬!(satSigma n).val z e)”
 
-/-- The negation-duality Tarski condition from `Πₙ₊₁` to `Σₙ₊₁`.
+/-- The negation-duality Tarski condition from `𝚷-[n + 1]` to `𝚺-[n + 1]`.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satSigmaNeg (n : ℕ) : ArithmeticSentence :=
   “∀ z nz e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
@@ -242,11 +242,7 @@ noncomputable def satSigmaAxioms (n : ℕ) : ArithmeticTheory :=
 
 end Tarski
 
-/-- `tarski n` contains the finitely many Tarski conditions through level `n + 1`, together
-with the vector and term-evaluation facts used in the proof of the snowing lemma. Its exact
-membership may grow during the proof stage; downstream arguments use only finiteness and
-`𝗜𝚺₁`-provability.
-
+/-- `tarski n` contains the Tarski, vector, and term-evaluation conditions through level `n + 1`.
 - [HP98, Remark I.1.77] -/
 inductive tarski : ℕ → ArithmeticTheory
   | zero : ∀ n, ∀ φ ∈ Tarski.satZeroAxioms, tarski n φ
@@ -441,17 +437,17 @@ lemma models_termValMul : V↓[ℒₒᵣ] ⊧ termValMul := by
   simp [termVal_mul ht hu]
 
 /-- Totality of coded adjunction holds in every model of `𝗜𝚺₁`.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma models_adjoinTotal : V↓[ℒₒᵣ] ⊧ adjoinTotal := by
   simp [models_iff, adjoinTotal]
 
 /-- Functionality of coded adjunction holds in every model of `𝗜𝚺₁`.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma models_adjoinUnique : V↓[ℒₒᵣ] ⊧ adjoinUnique := by
   simp [models_iff, adjoinUnique]
 
 /-- The head equation of coded adjunction holds in every model of `𝗜𝚺₁`.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma models_nthAdjoinZero : V↓[ℒₒᵣ] ⊧ nthAdjoinZero := by
   suffices ∀ x v e y : V, e = x ∷ v → (y = e.[0] ↔ y = x) by
     simpa [models_iff, nthAdjoinZero] using this
@@ -459,7 +455,7 @@ lemma models_nthAdjoinZero : V↓[ℒₒᵣ] ⊧ nthAdjoinZero := by
   simp
 
 /-- The tail equation of coded adjunction holds in every model of `𝗜𝚺₁`.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma models_nthAdjoinSucc : V↓[ℒₒᵣ] ⊧ nthAdjoinSucc := by
   suffices ∀ x v e i y : V, e = x ∷ v → (y = e.[i + 1] ↔ y = v.[i]) by
     simpa [models_iff, nthAdjoinSucc] using this
@@ -467,12 +463,12 @@ lemma models_nthAdjoinSucc : V↓[ℒₒᵣ] ⊧ nthAdjoinSucc := by
   simp
 
 /-- The length of the empty coded vector holds in every model of `𝗜𝚺₁`.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma models_lenNil : V↓[ℒₒᵣ] ⊧ lenNil := by
   simp [models_iff, lenNil]
 
 /-- The length equation of coded adjunction holds in every model of `𝗜𝚺₁`.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma models_lenAdjoin : V↓[ℒₒᵣ] ⊧ lenAdjoin := by
   suffices ∀ x v e l : V, e = x ∷ v → (l + 1 = len e ↔ l = len v) by
     simpa [models_iff, lenAdjoin] using this
@@ -886,31 +882,31 @@ lemma read_termValMul : ∀ e t u s vt vu v : V, UTerm t → UTerm u →
     using hV _ (tarski.zero n Tarski.termValMul (by simp [Tarski.satZeroAxioms]))
 
 /-- The reading of totality of coded adjunction.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma read_adjoinTotal : ∀ x v : V, ∃ e, Adjoin e x v := by
   simpa [models_iff, Tarski.adjoinTotal, Reading.Adjoin]
     using hV _ (tarski.zero n Tarski.adjoinTotal (by simp [Tarski.satZeroAxioms]))
 
 /-- The reading of the head equation of coded adjunction.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma read_nthAdjoinZero : ∀ x v e y : V, Adjoin e x v → (Nth y e 0 ↔ y = x) := by
   simpa [models_iff, Tarski.nthAdjoinZero, Reading.Adjoin, Reading.Nth]
     using hV _ (tarski.zero n Tarski.nthAdjoinZero (by simp [Tarski.satZeroAxioms]))
 
 /-- The reading of the tail equation of coded adjunction.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma read_nthAdjoinSucc : ∀ x v e i y : V, Adjoin e x v → (Nth y e (i + 1) ↔ Nth y v i) := by
   simpa [models_iff, Tarski.nthAdjoinSucc, Reading.Adjoin, Reading.Nth]
     using hV _ (tarski.zero n Tarski.nthAdjoinSucc (by simp [Tarski.satZeroAxioms]))
 
 /-- The reading of the length of the empty coded vector.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma read_lenNil : ∀ l : V, Len l 0 ↔ l = 0 := by
   simpa [models_iff, Tarski.lenNil, Reading.Len]
     using hV _ (tarski.zero n Tarski.lenNil (by simp [Tarski.satZeroAxioms]))
 
 /-- The reading of the length equation of coded adjunction.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma read_lenAdjoin : ∀ x v e l : V, Adjoin e x v → (Len (l + 1) e ↔ Len l v) := by
   simpa [models_iff, Tarski.lenAdjoin, Reading.Adjoin, Reading.Len]
     using hV _ (tarski.zero n Tarski.lenAdjoin (by simp [Tarski.satZeroAxioms]))
@@ -995,12 +991,12 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : 
 include hV
 
 /-- The empty sequence is coded by `0`.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma codes_nil (v : Fin 0 → V) : Codes v 0 :=
   ⟨by simpa using (read_lenNil hV 0).mpr rfl, fun i ↦ i.elim0⟩
 
 /-- Adjoining a new first entry to a code of `v` gives a code of `x :> v`.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma codes_cons {m : ℕ} {v : Fin m → V} {ev ev' x : V} (h : Codes v ev)
     (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' := by
   refine ⟨?_, fun i ↦ ?_⟩
@@ -1012,7 +1008,7 @@ lemma codes_cons {m : ℕ} {v : Fin m → V} {ev ev' x : V} (h : Codes v ev)
       simpa using this
 
 /-- Every finite sequence of the model has a code.
-- No source; this is a routine vector-coding fact used in the snowing argument. -/
+- No source; an elementary vector-coding lemma. -/
 lemma exists_codes : ∀ {m : ℕ} (v : Fin m → V), ∃ ev, Codes v ev := by
   intro m
   induction m with

@@ -170,55 +170,481 @@ instance SatPi.definable (n : ℕ) :
 
 /-! ## Tarski conditions -/
 
-/-- Strict `Σₙ` satisfaction implies membership in its syntactic domain.
-- [HP98, Theorem I.1.75(2)] -/
-axiom SatSigma.dom {n : ℕ} {z e : V} :
-    SatSigma n z e → IsStrictSigma n z ∧ IsUFormula ℒₒᵣ z
+/-- Unfolding of strict `Σ` satisfaction at a positive level.
+- [HP98, Definition I.1.74] -/
+private lemma satSigma_succ_iff {n : ℕ} {z e : V} :
+    SatSigma (n + 1) z e ↔ ∃ k q, z = qqExss q k ∧ IsStrictPi n q ∧
+      ∃ w, len w = k ∧ SatPi n q (vecAppend w e) := by rw [SatSigma]
+
+/-- Unfolding of strict `Π` satisfaction at a positive level.
+- [HP98, Definition I.1.74] -/
+private lemma satPi_succ_iff {n : ℕ} {z e : V} :
+    SatPi (n + 1) z e ↔ IsStrictPi (n + 1) z ∧ IsUFormula ℒₒᵣ z ∧
+      ¬SatSigma (n + 1) (neg ℒₒᵣ z) e := by rw [SatPi]
 
 /-- Strict `Πₙ` satisfaction implies membership in its syntactic domain.
 - [HP98, Theorem I.1.75(2)] -/
-axiom SatPi.dom {n : ℕ} {z e : V} :
-    SatPi n z e → IsStrictPi n z ∧ IsUFormula ℒₒᵣ z
+theorem SatPi.dom {n : ℕ} {z e : V} (h : SatPi n z e) :
+    IsStrictPi n z ∧ IsUFormula ℒₒᵣ z := by
+  match n with
+  | 0 => exact SatZero.dom (by simpa using h)
+  | _ + 1 => exact ⟨(satPi_succ_iff.mp h).1, (satPi_succ_iff.mp h).2.1⟩
 
-/-- An empty existential block reads a strict `Πₙ` formula as a `Σₙ₊₁` formula.
-- [HP98, Theorem I.1.75(2)(v)] -/
-axiom SatSigma.of_pi {n : ℕ} {z e : V} (hz : IsStrictPi n z)
-    (hz' : IsUFormula ℒₒᵣ z) : SatSigma (n + 1) z e ↔ SatPi n z e
-
-/-- An empty universal block reads a strict `Σₙ` formula as a `Πₙ₊₁` formula.
-- [HP98, Theorem I.1.75(2)(v′)] -/
-axiom SatPi.of_sigma {n : ℕ} {z e : V} (hz : IsStrictSigma n z)
-    (hz' : IsUFormula ℒₒᵣ z) : SatPi (n + 1) z e ↔ SatSigma n z e
-
-/-- Satisfaction of an existential formula is existential satisfaction of its body.
-- [HP98, Theorem I.1.75(2)(v)] -/
-axiom SatSigma.exs_iff {n : ℕ} {p e : V} :
-    SatSigma (n + 1) (^∃ p) e ↔ ∃ x, SatSigma (n + 1) p (x ∷ e)
-
-/-- Satisfaction of a universal formula is universal satisfaction of its body.
-- [HP98, Theorem I.1.75(2)(v′)] -/
-axiom SatPi.all_iff {n : ℕ} {p e : V} :
-    SatPi (n + 1) (^∀ p) e ↔ ∀ x, SatPi (n + 1) p (x ∷ e)
-
-/-- Satisfaction of a strict `Σₘ` formula is stable when viewed at a higher `Σ` level.
-- [HP98, Theorem I.1.75(2)(v)] -/
-axiom SatSigma.mono {m n : ℕ} (h : m ≤ n) {z e : V} (hz : IsStrictSigma m z)
-    (hz' : IsUFormula ℒₒᵣ z) : SatSigma m z e ↔ SatSigma n z e
-
-/-- Satisfaction of a strict `Πₘ` formula is stable when viewed at a higher `Π` level.
-- [HP98, Theorem I.1.75(2)(v′)] -/
-axiom SatPi.mono {m n : ℕ} (h : m ≤ n) {z e : V} (hz : IsStrictPi m z)
-    (hz' : IsUFormula ℒₒᵣ z) : SatPi m z e ↔ SatPi n z e
+/-- Strict `Σₙ` satisfaction implies membership in its syntactic domain.
+- [HP98, Theorem I.1.75(2)] -/
+theorem SatSigma.dom {n : ℕ} {z e : V} (h : SatSigma n z e) :
+    IsStrictSigma n z ∧ IsUFormula ℒₒᵣ z := by
+  match n with
+  | 0 => exact SatZero.dom (by simpa using h)
+  | _ + 1 =>
+    obtain ⟨k, q, rfl, hq, w, -, hsat⟩ := satSigma_succ_iff.mp h
+    exact ⟨⟨k, q, rfl, hq⟩, isUFormula_qqExss.mpr (SatPi.dom hsat).2⟩
 
 /-- `Πₙ` satisfaction of a negated strict `Σₙ` formula is failure of `Σₙ` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
-axiom SatPi.neg_iff {n : ℕ} {z e : V} (hz : IsStrictSigma n z)
-    (hz' : IsUFormula ℒₒᵣ z) : SatPi n (neg ℒₒᵣ z) e ↔ ¬SatSigma n z e
+theorem SatPi.neg_iff {n : ℕ} {z e : V} (hz : IsStrictSigma n z)
+    (hz' : IsUFormula ℒₒᵣ z) : SatPi n (neg ℒₒᵣ z) e ↔ ¬SatSigma n z e := by
+  match n with
+  | 0 => simpa using SatZero.neg_iff hz hz'
+  | _ + 1 =>
+    rw [satPi_succ_iff, IsUFormula.neg_neg hz']
+    simp [IsStrictSigma.neg hz' hz, hz']
 
 /-- `Σₙ` satisfaction of a negated strict `Πₙ` formula is failure of `Πₙ` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
-axiom SatSigma.neg_iff {n : ℕ} {z e : V} (hz : IsStrictPi n z)
-    (hz' : IsUFormula ℒₒᵣ z) : SatSigma n (neg ℒₒᵣ z) e ↔ ¬SatPi n z e
+theorem SatSigma.neg_iff {n : ℕ} {z e : V} (hz : IsStrictPi n z)
+    (hz' : IsUFormula ℒₒᵣ z) : SatSigma n (neg ℒₒᵣ z) e ↔ ¬SatPi n z e := by
+  match n with
+  | 0 => simpa using SatZero.neg_iff hz hz'
+  | _ + 1 =>
+    rw [satPi_succ_iff (z := z)]
+    simp [hz, hz']
+
+/-! ### Maximal existential blocks
+
+The prenex classes do not determine the decomposition `z = qqExss q k` a code admits, so the
+definition of `SatSigma (n + 1)` has to be shown independent of it. The tool is the *maximal*
+existential block of a code, the decomposition whose matrix does not itself begin with an
+existential quantifier: every other decomposition is an initial segment of it. -/
+
+/-- Cancelling an outer existential block common to two decompositions.
+- [HP98, Lemma I.1.69] -/
+private lemma qqExss_cancel (k : V) :
+    ∀ p p' j : V, qqExss p k = qqExss p' (k + j) → p = qqExss p' j := by
+  induction k using ISigma1.pi1_succ_induction
+  · definability
+  case zero => intro p p' j h; simpa using h
+  case succ k ih =>
+    intro p p' j h
+    rw [qqExss_succ, add_right_comm k 1 j, qqExss_succ, qqExs_inj] at h
+    exact ih p p' j h
+
+/-- Every code is an existential block over a code that does not itself begin with an
+existential quantifier.
+- [HP98, Lemma I.1.69] -/
+private lemma exists_ex_block (z : V) : ∃ K M, z = qqExss M K ∧ ∀ p : V, M ≠ ^∃ p := by
+  have H : ∀ z : V, ∃ K ≤ z, ∃ M ≤ z, z = qqExss M K ∧ ∀ p < M, M ≠ ^∃ p := by
+    intro z
+    induction z using ISigma1.sigma1_order_induction
+    · definability
+    case ind z ih =>
+      by_cases hz : ∃ p < z, z = ^∃ p
+      · obtain ⟨p, hp, rfl⟩ := hz
+        obtain ⟨K, hK, M, hM, rfl, hM'⟩ := ih p hp
+        exact ⟨K + 1, le_trans (add_le_add hK (le_refl 1)) (succ_le_qqExs _),
+          M, le_trans hM (le_of_lt hp), by rw [qqExss_succ], hM'⟩
+      · exact ⟨0, by simp, z, by simp, by simp, fun p hp h ↦ hz ⟨p, hp, h⟩⟩
+  obtain ⟨K, -, M, -, h, hM⟩ := H z
+  exact ⟨K, M, h, fun p hp ↦ hM p (hp ▸ lt_exists p) hp⟩
+
+/-- The maximal existential block dominates every other decomposition.
+- [HP98, Lemma I.1.69] -/
+private lemma ex_block_dominates {z M K q k : V} (hMK : z = qqExss M K)
+    (hM : ∀ p : V, M ≠ ^∃ p) (hqk : z = qqExss q k) : ∃ j, K = k + j ∧ q = qqExss M j := by
+  rcases le_total k K with h | h
+  · obtain ⟨j, rfl⟩ := exists_add_of_le h
+    exact ⟨j, rfl, qqExss_cancel k q M j (by rw [← hqk, hMK])⟩
+  · obtain ⟨j, rfl⟩ := exists_add_of_le h
+    have hMq : M = qqExss q j := qqExss_cancel K M q j (by rw [← hMK, hqk])
+    rcases zero_or_succ j with rfl | ⟨j, rfl⟩
+    · exact ⟨0, by simp, by simpa using hMq.symm⟩
+    · exact absurd hMq (by rw [qqExss_succ]; exact hM _)
+
+/-- A strict `Πₙ₊₁` code beginning with an existential quantifier has an empty universal block,
+hence is already strict `Σₙ`.
+- [HP98, Lemma I.1.69] -/
+private lemma isStrictSigma_of_isStrictPi_ex {n : ℕ} {p : V} (h : IsStrictPi (n + 1) (^∃ p)) :
+    IsStrictSigma n (^∃ p) := by
+  obtain ⟨k, q, heq, hq⟩ := h
+  rcases zero_or_succ k with rfl | ⟨k, rfl⟩
+  · rw [qqAlls_zero] at heq; exact heq ▸ hq
+  · rw [qqAlls_succ] at heq; simp [qqExs, qqAll, pair_ext_iff] at heq
+
+/-- The maximal existential block of a `Δ₀` code has length at most one, and its matrix is
+`Δ₀`: a `Δ₀` code begins with at most one existential quantifier, the one of a bounded
+existential quantification.
+- [HP98, Lemma I.1.68(2)] -/
+private lemma isDelta0_ex_block {z M K : V} (hz : IsDelta0 z) (hMK : z = qqExss M K)
+    (hM : ∀ p : V, M ≠ ^∃ p) : IsDelta0 M ∧ K ≤ 1 := by
+  rcases zero_or_succ K with rfl | ⟨K, rfl⟩
+  · rw [qqExss_zero] at hMK; exact ⟨hMK ▸ hz, by simp⟩
+  · rw [qqExss_succ] at hMK
+    subst hMK
+    obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, heq⟩ := IsDelta0.of_ex hz
+    rcases zero_or_succ K with rfl | ⟨K, rfl⟩
+    · rw [qqExss_zero] at heq
+      subst heq
+      refine ⟨IsDelta0.and_iff.mpr ⟨?_, hq⟩, by simp⟩
+      rw [Arithmetic.qqLT]; exact IsDelta0.rel
+    · rw [qqExss_succ] at heq
+      simp [qqExs, qqAnd, pair_ext_iff] at heq
+
+/-- The matrix of the maximal existential block of a strict `Σₙ₊₁` code is strict `Πₙ`.
+- [HP98, Lemma I.1.69] -/
+private lemma isStrictPi_ex_block : ∀ (n : ℕ) (z M K : V), IsStrictSigma (n + 1) z →
+    z = qqExss M K → (∀ p : V, M ≠ ^∃ p) → IsStrictPi n M
+  | 0, _, M, _, hz, hMK, hM => by
+    obtain ⟨k, q, hqk, hq⟩ := hz
+    obtain ⟨j, -, rfl⟩ := ex_block_dominates hMK hM hqk
+    exact (isDelta0_ex_block hq rfl hM).1
+  | n + 1, _, M, _, hz, hMK, hM => by
+    obtain ⟨k, q, hqk, hq⟩ := hz
+    obtain ⟨j, -, rfl⟩ := ex_block_dominates hMK hM hqk
+    rcases zero_or_succ j with rfl | ⟨j, rfl⟩
+    · simpa using hq
+    · have hs : IsStrictSigma n (qqExss M (j + 1)) := by
+        rw [qqExss_succ] at hq ⊢
+        exact isStrictSigma_of_isStrictPi_ex hq
+      match n with
+      | 0 => exact IsStrictPi.of_delta0 (isDelta0_ex_block hs rfl hM).1
+      | n + 1 =>
+        exact IsStrictPi.mono (by omega)
+          (isStrictPi_ex_block n (qqExss M (j + 1)) M (j + 1) hs rfl hM)
+
+/-! ### Vector blocks -/
+
+/-- Appending coded vectors is associative.
+- No source; this is a routine coding fact. -/
+private lemma vecAppend_assoc (u v e : V) :
+    vecAppend (vecAppend u v) e = vecAppend u (vecAppend v e) := by
+  induction u using adjoin_ISigma1.sigma1_succ_induction
+  · definability
+  case nil => simp
+  case adjoin x u ih => simp [ih]
+
+/-- A nonempty coded vector splits into its initial segment and its last entry.
+- No source; this is a routine coding fact. -/
+private lemma exists_vecAppend_singleton {k w : V} (h : len w = k + 1) :
+    ∃ u x, len u = k ∧ w = vecAppend u ?[x] := by
+  have H : ∀ w : V, w ≠ 0 → ∃ u ≤ w, ∃ x ≤ w, len u + 1 = len w ∧ w = vecAppend u ?[x] := by
+    intro w
+    induction w using adjoin_ISigma1.sigma1_succ_induction
+    · definability
+    case nil => simp
+    case adjoin y w ih =>
+      intro _
+      rcases eq_or_ne w 0 with rfl | hw
+      · exact ⟨0, by simp, y, le_of_lt (lt_adjoin y 0), by simp⟩
+      · obtain ⟨u, hu, x, hx, hlen, heq⟩ := ih hw
+        exact ⟨y ∷ u, adjoin_le_adjoin (le_refl y) hu, x,
+          le_trans hx (le_of_lt (lt_adjoin' y w)), by simp [hlen], by simp [← heq]⟩
+  obtain ⟨u, -, x, -, hlen, heq⟩ := H w (by rintro rfl; simp at h)
+  exact ⟨u, x, add_right_cancel (hlen.trans h), heq⟩
+
+/-! ### The `Δ₀` existential condition -/
+
+/-- Satisfaction of a `Δ₀` code that begins with an existential quantifier is existential
+satisfaction of its body: the guard of the bounded quantifier is part of that body.
+- [HP98, Theorem I.1.70(iv)] -/
+private lemma satZero_ex_iff {p e : V} (h : IsDelta0 (^∃ p)) :
+    SatZero (^∃ p) e ↔ ∃ x, SatZero p (x ∷ e) := by
+  obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsDelta0.of_ex h
+  have hlt : ∀ x : V, SatZero (Arithmetic.qqLT (qqBvar 0) (termBShift ℒₒᵣ t)) (x ∷ e) ↔
+      x < termVal e t := fun x ↦ by
+    rw [SatZero.lt_iff (by simp) ht.termBShift]
+    simp [termVal_termBShift ht x e]
+  rw [show (^∃ ((Arithmetic.qqLT (qqBvar 0) (termBShift ℒₒᵣ t)) ^⋏ q) : V)
+      = qqBex (termBShift ℒₒᵣ t) q from rfl, SatZero.bex_iff ht]
+  constructor
+  · rintro ⟨x, hx, hsat⟩
+    exact ⟨x, SatZero.and_iff.mpr ⟨(hlt x).mpr hx, hsat⟩⟩
+  · rintro ⟨x, hsat⟩
+    obtain ⟨h₁, h₂⟩ := SatZero.and_iff.mp hsat
+    exact ⟨x, (hlt x).mp h₁, h₂⟩
+
+/-! ### The block characterization
+
+Satisfaction is defined through *some* decomposition of the code into an existential block over
+a strict `Πₙ` matrix. `BlockSat` says that the *maximal* block computes it, which makes the
+definition independent of the decomposition; the Tarski conditions all follow from it, and it is
+itself proved by recursion on the level, since a matrix that still begins with an existential
+quantifier belongs to a lower level. -/
+
+/-- Strict `Σₙ₊₁` satisfaction of `z` is witnessed over the maximal existential block of `z`.
+- [HP98, Theorem I.1.75(2)] -/
+private def BlockSat (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (n : ℕ) : Prop :=
+  ∀ z M K e : V, IsStrictSigma (n + 1) z → IsUFormula ℒₒᵣ z → z = qqExss M K →
+    (∀ p : V, M ≠ ^∃ p) → (SatSigma (n + 1) z e ↔ ∃ w, len w = K ∧ SatPi n M (vecAppend w e))
+
+/-- An empty existential block at level zero: a `Δ₀` code is `Σ₁`-satisfied exactly when it is
+`Δ₀`-satisfied.
+- [HP98, Theorem I.1.75(2)(v)] -/
+private lemma of_pi_zero (hB : BlockSat V 0) {z e : V} (hz : IsDelta0 z)
+    (hz' : IsUFormula ℒₒᵣ z) : SatSigma 1 z e ↔ SatPi 0 z e := by
+  constructor
+  · intro h
+    obtain ⟨K, M, hMK, hM⟩ := exists_ex_block z
+    obtain ⟨w, hw, hsat⟩ := (hB z M K e (IsStrictSigma.of_pi hz) hz' hMK hM).mp h
+    obtain ⟨hMd, hK1⟩ := isDelta0_ex_block hz hMK hM
+    rcases zero_or_succ K with rfl | ⟨K, rfl⟩
+    · rw [qqExss_zero] at hMK
+      rw [len_zero_iff_eq_nil.mp hw] at hsat
+      simpa [hMK] using hsat
+    · have hK : K = 0 := by simpa using hK1
+      subst hK
+      rw [qqExss_succ, qqExss_zero] at hMK
+      obtain ⟨x, rfl⟩ := eq_singleton_iff_len_eq_one.mp (by simpa using hw)
+      have h0 : SatZero M (x ∷ e) := by simpa using hsat
+      simpa [hMK] using (satZero_ex_iff (hMK ▸ hz)).mpr ⟨x, h0⟩
+  · intro h
+    exact satSigma_succ_iff.mpr ⟨0, z, by simp, hz, 0, by simp, by simpa using h⟩
+
+/-- Level monotonicity by one step, `Σ` and `Π` at once, from the block characterization at
+levels up to `n`.
+- [HP98, Theorem I.1.75(2)] -/
+private lemma mono_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSat V m) →
+    (∀ z e : V, IsStrictSigma n z → IsUFormula ℒₒᵣ z →
+      (SatSigma n z e ↔ SatSigma (n + 1) z e)) ∧
+    (∀ z e : V, IsStrictPi n z → IsUFormula ℒₒᵣ z → (SatPi n z e ↔ SatPi (n + 1) z e)) := by
+  intro n
+  induction n with
+  | zero =>
+    intro hB
+    have hsig : ∀ z e : V, IsStrictSigma 0 z → IsUFormula ℒₒᵣ z →
+        (SatSigma 0 z e ↔ SatSigma 1 z e) := fun z e hz hz' ↦ by
+      simpa using (of_pi_zero (hB 0 le_rfl) hz hz').symm
+    exact ⟨hsig, fun z e hz hz' ↦ by
+      rw [show (SatPi 0 z e ↔ ¬SatSigma 0 (neg ℒₒᵣ z) e) by
+          rw [SatSigma.neg_iff hz hz']; simp,
+        show (SatPi 1 z e ↔ ¬SatSigma 1 (neg ℒₒᵣ z) e) by
+          rw [SatSigma.neg_iff (IsStrictPi.mono (Nat.le_succ 0) hz) hz']; simp,
+        hsig (neg ℒₒᵣ z) e (IsStrictPi.neg hz' hz) hz'.neg]⟩
+  | succ n ih =>
+    intro hB
+    have hpin := (ih fun i hi ↦ hB i (by omega)).2
+    have hsig : ∀ z e : V, IsStrictSigma (n + 1) z → IsUFormula ℒₒᵣ z →
+        (SatSigma (n + 1) z e ↔ SatSigma (n + 2) z e) := fun z e hz hz' ↦ by
+      obtain ⟨K, M, hMK, hM⟩ := exists_ex_block z
+      have hMu : IsUFormula ℒₒᵣ M := isUFormula_qqExss.mp (hMK ▸ hz')
+      have hMpi : IsStrictPi n M := isStrictPi_ex_block n z M K hz hMK hM
+      rw [hB n (by omega) z M K e hz hz' hMK hM,
+        hB (n + 1) le_rfl z M K e (IsStrictSigma.mono (by omega) hz) hz' hMK hM]
+      exact exists_congr fun w ↦ and_congr_right fun _ ↦ hpin M _ hMpi hMu
+    exact ⟨hsig, fun z e hz hz' ↦ by
+      rw [show (SatPi (n + 1) z e ↔ ¬SatSigma (n + 1) (neg ℒₒᵣ z) e) by
+          rw [SatSigma.neg_iff hz hz']; simp,
+        show (SatPi (n + 2) z e ↔ ¬SatSigma (n + 2) (neg ℒₒᵣ z) e) by
+          rw [SatSigma.neg_iff (IsStrictPi.mono (Nat.le_succ _) hz) hz']; simp,
+        hsig (neg ℒₒᵣ z) e (IsStrictPi.neg hz' hz) hz'.neg]⟩
+
+/-- The empty-block conditions, `Σ` and `Π` at once, from the block characterization at levels
+up to `n`.
+- [HP98, Theorem I.1.75(2)(v)]
+- [HP98, Theorem I.1.75(2)(v′)] -/
+private lemma of_pi_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSat V m) →
+    (∀ z e : V, IsStrictPi n z → IsUFormula ℒₒᵣ z → (SatSigma (n + 1) z e ↔ SatPi n z e)) ∧
+    (∀ z e : V, IsStrictSigma n z → IsUFormula ℒₒᵣ z →
+      (SatPi (n + 1) z e ↔ SatSigma n z e)) := by
+  intro n
+  induction n with
+  | zero =>
+    intro hB
+    exact ⟨fun z e hz hz' ↦ of_pi_zero (hB 0 le_rfl) hz hz',
+      fun z e hz hz' ↦ by
+        rw [show (SatPi 1 z e ↔ ¬SatSigma 1 (neg ℒₒᵣ z) e) by
+            rw [SatSigma.neg_iff (IsStrictPi.of_sigma hz) hz']; simp,
+          of_pi_zero (hB 0 le_rfl) (IsStrictSigma.neg hz' hz) hz'.neg,
+          SatPi.neg_iff hz hz']
+        simp⟩
+  | succ n ih =>
+    intro hB
+    have hsig : ∀ z e : V, IsStrictPi (n + 1) z → IsUFormula ℒₒᵣ z →
+        (SatSigma (n + 2) z e ↔ SatPi (n + 1) z e) := by
+      intro z e hz hz'
+      constructor
+      · intro h
+        obtain ⟨K, M, hMK, hM⟩ := exists_ex_block z
+        have hMu : IsUFormula ℒₒᵣ M := isUFormula_qqExss.mp (hMK ▸ hz')
+        obtain ⟨w, hw, hsat⟩ :=
+          (hB (n + 1) le_rfl z M K e (IsStrictSigma.of_pi hz) hz' hMK hM).mp h
+        rcases zero_or_succ K with rfl | ⟨K, rfl⟩
+        · rw [qqExss_zero] at hMK
+          rw [len_zero_iff_eq_nil.mp hw] at hsat
+          simpa [hMK] using hsat
+        · have hzex : z = ^∃ (qqExss M K) := by rw [hMK, qqExss_succ]
+          have hzs : IsStrictSigma n z := by
+            rw [hzex] at hz ⊢
+            exact isStrictSigma_of_isStrictPi_ex hz
+          refine ((ih fun i hi ↦ hB i (by omega)).2 z e hzs hz').mpr ?_
+          match n with
+          | 0 =>
+            obtain ⟨hMd, hK1⟩ := isDelta0_ex_block hzs hMK hM
+            have hK : K = 0 := by simpa using hK1
+            subst hK
+            rw [qqExss_zero] at hzex
+            obtain ⟨x, rfl⟩ := eq_singleton_iff_len_eq_one.mp (by simpa using hw)
+            have h0 : SatZero M (x ∷ e) := by
+              simpa using ((ih fun i hi ↦ hB i (by omega)).2 M (x ∷ e) hMd hMu).mp
+                (by simpa using hsat)
+            simpa [hzex] using (satZero_ex_iff (hzex ▸ hzs)).mpr ⟨x, h0⟩
+          | n + 1 =>
+            have hMpi : IsStrictPi n M := isStrictPi_ex_block n z M (K + 1) hzs hMK hM
+            have h1 := (mono_step n fun i hi ↦ hB i (by omega)).2
+            have h2 := (mono_step (n + 1) fun i hi ↦ hB i (by omega)).2
+            refine (hB n (by omega) z M (K + 1) e hzs hz' hMK hM).mpr ⟨w, hw, ?_⟩
+            rw [h1 M _ hMpi hMu, h2 M _ (IsStrictPi.mono (by omega) hMpi) hMu]
+            exact hsat
+      · intro h
+        exact satSigma_succ_iff.mpr ⟨0, z, by simp, hz, 0, by simp, by simpa using h⟩
+    exact ⟨hsig, fun z e hz hz' ↦ by
+      rw [show (SatPi (n + 2) z e ↔ ¬SatSigma (n + 2) (neg ℒₒᵣ z) e) by
+          rw [SatSigma.neg_iff (IsStrictPi.of_sigma hz) hz']; simp,
+        hsig (neg ℒₒᵣ z) e (IsStrictSigma.neg hz' hz) hz'.neg, SatPi.neg_iff hz hz']
+      simp⟩
+
+/-- The block characterization, by recursion on the level.
+- [HP98, Theorem I.1.75(2)] -/
+private lemma blockSat : ∀ n : ℕ, BlockSat V n := fun n ↦ by
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+    intro z M K e hz hz' hMK hM
+    have hMu : IsUFormula ℒₒᵣ M := isUFormula_qqExss.mp (hMK ▸ hz')
+    have hMpi : IsStrictPi n M := isStrictPi_ex_block n z M K hz hMK hM
+    refine ⟨fun h ↦ ?_, fun ⟨w, hw, hsat⟩ ↦ satSigma_succ_iff.mpr ⟨K, M, hMK, hMpi, w, hw, hsat⟩⟩
+    obtain ⟨k, q, hqk, hq, w, hw, hsat⟩ := satSigma_succ_iff.mp h
+    obtain ⟨j, rfl, rfl⟩ := ex_block_dominates hMK hM hqk
+    rcases zero_or_succ j with rfl | ⟨j, rfl⟩
+    · exact ⟨w, by simpa using hw, by simpa using hsat⟩
+    · have hqex : (^∃ (qqExss M j) : V) = qqExss M (j + 1) := (qqExss_succ M j).symm
+      rw [qqExss_succ] at hq hsat
+      match n with
+      | 0 =>
+        obtain ⟨-, hj⟩ := isDelta0_ex_block hq hqex hM
+        have hj0 : j = 0 := by simpa using hj
+        subst hj0
+        rw [qqExss_zero] at hq hsat
+        obtain ⟨x, hx⟩ := (satZero_ex_iff hq).mp (by simpa using hsat)
+        exact ⟨x ∷ w, by simp [hw], by simpa using hx⟩
+      | m + 1 =>
+        have hqU : IsUFormula ℒₒᵣ (^∃ (qqExss M j) : V) := by
+          rw [hqex]; exact isUFormula_qqExss.mpr hMu
+        have hqs : IsStrictSigma m (^∃ (qqExss M j) : V) := isStrictSigma_of_isStrictPi_ex hq
+        have hsat' : SatSigma m (^∃ (qqExss M j) : V) (vecAppend w e) :=
+          ((of_pi_step m fun i hi ↦ ih i (by omega)).2 _ _ hqs hqU).mp hsat
+        match m with
+        | 0 =>
+          obtain ⟨hMd, hj'⟩ := isDelta0_ex_block hqs hqex hM
+          have hj0 : j = 0 := by simpa using hj'
+          subst hj0
+          rw [qqExss_zero] at hqs hsat'
+          obtain ⟨x, hx⟩ := (satZero_ex_iff hqs).mp (by simpa using hsat')
+          refine ⟨x ∷ w, by simp [hw], ?_⟩
+          refine ((of_pi_step 0 fun i hi ↦ ih i (by omega)).2 M _ hMd hMu).mpr ?_
+          simpa using hx
+        | m + 1 =>
+          have hMpi' : IsStrictPi m M :=
+            isStrictPi_ex_block m _ M (j + 1) hqs hqex hM
+          obtain ⟨u, hu, husat⟩ :=
+            (ih m (by omega) _ M (j + 1) (vecAppend w e) hqs hqU hqex hM).mp hsat'
+          refine ⟨vecAppend u w, by rw [len_vecAppend, hu, hw, add_comm], ?_⟩
+          rw [vecAppend_assoc]
+          have h1 := (mono_step m fun i hi ↦ ih i (by omega)).2 M
+            (vecAppend u (vecAppend w e)) hMpi' hMu
+          have h2 := (mono_step (m + 1) fun i hi ↦ ih i (by omega)).2 M
+            (vecAppend u (vecAppend w e)) (IsStrictPi.mono (by omega) hMpi') hMu
+          exact h2.mp (h1.mp husat)
+
+/-- An empty existential block reads a strict `Πₙ` formula as a `Σₙ₊₁` formula.
+- [HP98, Theorem I.1.75(2)(v)] -/
+theorem SatSigma.of_pi {n : ℕ} {z e : V} (hz : IsStrictPi n z)
+    (hz' : IsUFormula ℒₒᵣ z) : SatSigma (n + 1) z e ↔ SatPi n z e :=
+  (of_pi_step n fun m _ ↦ blockSat m).1 z e hz hz'
+
+/-- An empty universal block reads a strict `Σₙ` formula as a `Πₙ₊₁` formula.
+- [HP98, Theorem I.1.75(2)(v′)] -/
+theorem SatPi.of_sigma {n : ℕ} {z e : V} (hz : IsStrictSigma n z)
+    (hz' : IsUFormula ℒₒᵣ z) : SatPi (n + 1) z e ↔ SatSigma n z e :=
+  (of_pi_step n fun m _ ↦ blockSat m).2 z e hz hz'
+
+/-- Satisfaction of an existential formula is existential satisfaction of its body, for a body
+that lies in the domain: peeling the quantifier shortens the maximal block by one.
+- [HP98, Theorem I.1.75(2)(v)] -/
+private lemma exs_iff_aux {n : ℕ} {p e : V} (hp : IsStrictSigma (n + 1) p)
+    (hp' : IsUFormula ℒₒᵣ p) : SatSigma (n + 1) (^∃ p) e ↔ ∃ x, SatSigma (n + 1) p (x ∷ e) := by
+  obtain ⟨K, M, hMK, hM⟩ := exists_ex_block p
+  have h1 : SatSigma (n + 1) (^∃ p) e ↔ ∃ w, len w = K + 1 ∧ SatPi n M (vecAppend w e) :=
+    blockSat n (^∃ p) M (K + 1) e (IsStrictSigma.exs hp) (by simp [hp'])
+      (by rw [qqExss_succ, ← hMK]) hM
+  have h2 : ∀ x : V, SatSigma (n + 1) p (x ∷ e) ↔
+      ∃ u, len u = K ∧ SatPi n M (vecAppend u (x ∷ e)) :=
+    fun x ↦ blockSat n p M K (x ∷ e) hp hp' hMK hM
+  rw [h1]
+  constructor
+  · rintro ⟨w, hw, hsat⟩
+    obtain ⟨u, x, hu, rfl⟩ := exists_vecAppend_singleton hw
+    refine ⟨x, (h2 x).mpr ⟨u, hu, ?_⟩⟩
+    rw [vecAppend_assoc] at hsat
+    simpa using hsat
+  · rintro ⟨x, hx⟩
+    obtain ⟨u, hu, hsat⟩ := (h2 x).mp hx
+    refine ⟨vecAppend u ?[x], by simp [hu], ?_⟩
+    rw [vecAppend_assoc]
+    simpa using hsat
+
+/-- Satisfaction of an existential formula is existential satisfaction of its body.
+- [HP98, Theorem I.1.75(2)(v)] -/
+theorem SatSigma.exs_iff {n : ℕ} {p e : V} :
+    SatSigma (n + 1) (^∃ p) e ↔ ∃ x, SatSigma (n + 1) p (x ∷ e) := by
+  by_cases hp : IsStrictSigma (n + 1) p ∧ IsUFormula ℒₒᵣ p
+  · exact exs_iff_aux hp.1 hp.2
+  · refine ⟨fun h ↦ ?_, fun ⟨_, hx⟩ ↦ absurd hx.dom hp⟩
+    obtain ⟨hs, hu⟩ := h.dom
+    exact absurd ⟨IsStrictSigma.of_exs hs, by simpa using hu⟩ hp
+
+/-- Satisfaction of a universal formula is universal satisfaction of its body.
+- [HP98, Theorem I.1.75(2)(v′)] -/
+theorem SatPi.all_iff {n : ℕ} {p e : V} :
+    SatPi (n + 1) (^∀ p) e ↔ ∀ x, SatPi (n + 1) p (x ∷ e) := by
+  constructor
+  · intro h
+    obtain ⟨hs, hu, hns⟩ := satPi_succ_iff.mp h
+    have hup : IsUFormula ℒₒᵣ p := by simpa using hu
+    rw [neg_all hup, SatSigma.exs_iff] at hns
+    exact fun x ↦ satPi_succ_iff.mpr ⟨IsStrictPi.of_all hs, hup, fun hc ↦ hns ⟨x, hc⟩⟩
+  · intro h
+    obtain ⟨hsp, hup, -⟩ := satPi_succ_iff.mp (h 0)
+    refine satPi_succ_iff.mpr ⟨IsStrictPi.all hsp, by simp [hup], ?_⟩
+    rw [neg_all hup, SatSigma.exs_iff]
+    rintro ⟨x, hx⟩
+    exact (satPi_succ_iff.mp (h x)).2.2 hx
+
+/-- Satisfaction of a strict `Σₘ` formula is stable when viewed at a higher `Σ` level.
+- [HP98, Theorem I.1.75(2)(v)] -/
+theorem SatSigma.mono {m n : ℕ} (h : m ≤ n) {z e : V} (hz : IsStrictSigma m z)
+    (hz' : IsUFormula ℒₒᵣ z) : SatSigma m z e ↔ SatSigma n z e := by
+  induction n, h using Nat.le_induction with
+  | base => rfl
+  | succ n hn ih =>
+    exact ih.trans ((mono_step n fun i _ ↦ blockSat i).1 z e (IsStrictSigma.mono hn hz) hz')
+
+/-- Satisfaction of a strict `Πₘ` formula is stable when viewed at a higher `Π` level.
+- [HP98, Theorem I.1.75(2)(v′)] -/
+theorem SatPi.mono {m n : ℕ} (h : m ≤ n) {z e : V} (hz : IsStrictPi m z)
+    (hz' : IsUFormula ℒₒᵣ z) : SatPi m z e ↔ SatPi n z e := by
+  induction n, h using Nat.le_induction with
+  | base => rfl
+  | succ n hn ih =>
+    exact ih.trans ((mono_step n fun i _ ↦ blockSat i).2 z e (IsStrictPi.mono hn hz) hz')
 
 /-- Strict `Σₙ` satisfaction commutes with substitution of a coded vector of terms.
 - [HP98, Theorem I.1.75(2)] -/

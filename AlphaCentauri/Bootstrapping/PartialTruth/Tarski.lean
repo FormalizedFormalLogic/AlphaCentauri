@@ -134,33 +134,21 @@ noncomputable def termValMul : ArithmeticSentence :=
     !termValGraph.val vu e u →
     (!termValGraph.val v e s ↔ v = vt * vu)”
 
-/-- Coded vector adjunction is total.
-- No source; an elementary vector-coding lemma. -/
 noncomputable def adjoinTotal : ArithmeticSentence :=
   “∀ x v, ∃ e, !adjoinDef.val e x v”
 
-/-- Coded vector adjunction is functional.
-- No source; an elementary vector-coding lemma. -/
 noncomputable def adjoinUnique : ArithmeticSentence :=
   “∀ x v e e', !adjoinDef.val e x v → !adjoinDef.val e' x v → e = e'”
 
-/-- The head of an adjoined coded vector is its new entry.
-- No source; an elementary vector-coding lemma. -/
 noncomputable def nthAdjoinZero : ArithmeticSentence :=
   “∀ x v e y, !adjoinDef.val e x v → (!nthDef.val y e 0 ↔ y = x)”
 
-/-- Successor indices into an adjoined coded vector read from its tail.
-- No source; an elementary vector-coding lemma. -/
 noncomputable def nthAdjoinSucc : ArithmeticSentence :=
   “∀ x v e i y, !adjoinDef.val e x v →
     (!nthDef.val y e (i + 1) ↔ !nthDef.val y v i)”
 
-/-- The empty coded vector has length zero.
-- No source; an elementary vector-coding lemma. -/
 noncomputable def lenNil : ArithmeticSentence := “∀ l, !lenDef.val l 0 ↔ l = 0”
 
-/-- Adjunction increases the length of a coded vector by one.
-- No source; an elementary vector-coding lemma. -/
 noncomputable def lenAdjoin : ArithmeticSentence :=
   “∀ x v e l, !adjoinDef.val e x v → (!lenDef.val (l + 1) e ↔ !lenDef.val l v)”
 
@@ -286,13 +274,7 @@ lemma tarski_finite (n : ℕ) : (tarski n).Finite := by
     exact Set.Finite.union (by simp only [Tarski.satZeroAxioms]; exact Set.toFinite _) (hSigmaAx 0)
   | succ n ih => rw [tarski_succ]; exact ih.union (hSigmaAx (n + 1))
 
-
-
-/-! ## `𝗜𝚺₁` proves the Tarski conditions
-
-Each sentence is read through the `via` instances of the formulas it mentions, which turns it
-into the matching Tarski condition of `SatZero`, `SatSigma` and `SatPi`, or into a term-evaluation
-or vector-coding fact. -/
+/-! ## `𝗜𝚺₁` proves the Tarski conditions -/
 
 namespace Tarski
 
@@ -436,39 +418,27 @@ lemma models_termValMul : V↓[ℒₒᵣ] ⊧ termValMul := by
   rintro e t u _ _ _ v ht hu rfl rfl rfl
   simp [termVal_mul ht hu]
 
-/-- Totality of coded adjunction holds in every model of `𝗜𝚺₁`.
-- No source; an elementary vector-coding lemma. -/
 lemma models_adjoinTotal : V↓[ℒₒᵣ] ⊧ adjoinTotal := by
   simp [models_iff, adjoinTotal]
 
-/-- Functionality of coded adjunction holds in every model of `𝗜𝚺₁`.
-- No source; an elementary vector-coding lemma. -/
 lemma models_adjoinUnique : V↓[ℒₒᵣ] ⊧ adjoinUnique := by
   simp [models_iff, adjoinUnique]
 
-/-- The head equation of coded adjunction holds in every model of `𝗜𝚺₁`.
-- No source; an elementary vector-coding lemma. -/
 lemma models_nthAdjoinZero : V↓[ℒₒᵣ] ⊧ nthAdjoinZero := by
   suffices ∀ x v e y : V, e = x ∷ v → (y = e.[0] ↔ y = x) by
     simpa [models_iff, nthAdjoinZero] using this
   rintro x v _ y rfl
   simp
 
-/-- The tail equation of coded adjunction holds in every model of `𝗜𝚺₁`.
-- No source; an elementary vector-coding lemma. -/
 lemma models_nthAdjoinSucc : V↓[ℒₒᵣ] ⊧ nthAdjoinSucc := by
   suffices ∀ x v e i y : V, e = x ∷ v → (y = e.[i + 1] ↔ y = v.[i]) by
     simpa [models_iff, nthAdjoinSucc] using this
   rintro x v _ i y rfl
   simp
 
-/-- The length of the empty coded vector holds in every model of `𝗜𝚺₁`.
-- No source; an elementary vector-coding lemma. -/
 lemma models_lenNil : V↓[ℒₒᵣ] ⊧ lenNil := by
   simp [models_iff, lenNil]
 
-/-- The length equation of coded adjunction holds in every model of `𝗜𝚺₁`.
-- No source; an elementary vector-coding lemma. -/
 lemma models_lenAdjoin : V↓[ℒₒᵣ] ⊧ lenAdjoin := by
   suffices ∀ x v e l : V, e = x ∷ v → (l + 1 = len e ↔ l = len v) by
     simpa [models_iff, lenAdjoin] using this
@@ -597,13 +567,7 @@ lemma models_tarski {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜�
 theorem ISigma1.provable_tarski (n : ℕ) : 𝗜𝚺₁ ⊢* tarski n := fun {_} hφ ↦
   Arithmetic.complete.{0} _ _ fun _ _ _ ↦ models_tarski hφ
 
-
-/-! ## Reading the sentences in a model of `𝗣𝗔⁻`
-
-A model of `𝗣𝗔⁻` carries none of the coding machinery as functions and predicates: `SatZero`,
-`IsDelta0`, `termVal` and the coded vector operations are all defined only under `𝗜𝚺₁`. What such
-a model does carry is the formulas themselves, so the sentences of `tarski n` are read here as
-statements about their evaluation. Each definition below names one such reading. -/
+/-! ## Reading the sentences in a model of `𝗣𝗔⁻` -/
 
 namespace Reading
 
@@ -612,18 +576,17 @@ variable {V : Type*} [ORingStructure V]
 /-- The reading of `satZero`. -/
 def Sat0 (z e : V) : Prop := V ⊧/![z, e] satZero.val
 
-/-- The reading of `satSigma m`, which speaks about level `Σₘ₊₁`. -/
-def SatSig (m : ℕ) (z e : V) : Prop := V ⊧/![z, e] (satSigma m).val
+/-- The reading of `satSigma m`, which speaks about level `𝚺-[m + 1]`. -/
+def SatSigma (m : ℕ) (z e : V) : Prop := V ⊧/![z, e] (satSigma m).val
 
-/-- The reading of `satPi m`, which speaks about level `Πₘ₊₁`. -/
-def SatPii (m : ℕ) (z e : V) : Prop := V ⊧/![z, e] (satPi m).val
+/-- The reading of `satPi m`, which speaks about level `𝚷-[m + 1]`. -/
+def SatPi (m : ℕ) (z e : V) : Prop := V ⊧/![z, e] (satPi m).val
 
-/-- The reading of the satisfaction formula of level `s` selected by a polarity; the counterpart
-of `SatClass` over a model that need not satisfy `𝗜𝚺₁`. -/
+/-- The reading of the satisfaction formula of level `s` selected by a polarity. -/
 def Sat : Polarity → ℕ → V → V → Prop
   | _,       0     => Sat0
-  | .sigma, m + 1 => SatSig m
-  | .pi,    m + 1 => SatPii m
+  | .sigma, m + 1 => Reading.SatSigma m
+  | .pi,    m + 1 => Reading.SatPi m
 
 /-- The reading of `isDelta0`. -/
 def Delta0 (z : V) : Prop := V ⊧/![z] isDelta0.val
@@ -659,93 +622,6 @@ def TermVal (y e t : V) : Prop := V ⊧/![y, e, t] termValGraph.val
 
 end Reading
 
-namespace Reading
-
-open PeanoMinus
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
-
-/-- `Codes v ev` says that `ev` is a code for the finite sequence `v`: it has length `m` and its
-`i`-th entry is `v i`. Over `𝗜𝚺₁` this pins `ev` down to `matrixToVec v`, but no uniqueness is
-needed below: every step of the snowing argument only ever moves between a code of `v` and a code
-of `x :> v`. -/
-def Codes {m : ℕ} (v : Fin m → V) (ev : V) : Prop :=
-  Len (m : V) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : V)
-
-end Reading
-
-section reading
-
-open Reading
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
-
-open PeanoMinus
-
-/-- A `𝚺₁` fact about standard numbers is inherited by every model of `𝗣𝗔⁻`, by `𝚺₁`-completeness.
-This is how every purely syntactic coding fact about the code of a fixed formula is imported into
-a model that satisfies no induction.
-- [HP98, Theorem I.1.6] -/
-lemma sigma_one_cast {m : ℕ} (σ : 𝚺₁.Semisentence m) {u : Fin m → ℕ}
-    (h : ℕ ⊧/u σ.val) : V ⊧/(fun i ↦ (u i : V)) σ.val := by
-  simpa [Function.comp_def] using sigmaOne_upward_absolute V σ u h
-
-/-- The `𝚫₁` form of `sigma_one_cast`, reading the `𝚺₁` half of the definition.
-- [HP98, Theorem I.1.6] -/
-lemma delta_one_cast {m : ℕ} (σ : 𝚫₁.Semisentence m) {u : Fin m → ℕ}
-    (h : ℕ ⊧/u σ.val) : V ⊧/(fun i ↦ (u i : V)) σ.val := by
-  have h' : ℕ ⊧/u σ.sigma.val := by rwa [HierarchySymbol.Semiformula.val_sigma]
-  have := sigma_one_cast (V := V) σ.sigma h'
-  rwa [HierarchySymbol.Semiformula.val_sigma] at this
-
-/-- `sigma_one_cast` at one argument.
-- [HP98, Theorem I.1.6] -/
-lemma cast_sigma₁ (σ : 𝚺₁.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a] σ.val) :
-    V ⊧/![(a : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using sigma_one_cast (V := V) σ h
-
-/-- `sigma_one_cast` at two arguments.
-- [HP98, Theorem I.1.6] -/
-lemma cast_sigma₂ (σ : 𝚺₁.Semisentence 2) {a b : ℕ} (h : ℕ ⊧/![a, b] σ.val) :
-    V ⊧/![(a : V), (b : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using sigma_one_cast (V := V) σ h
-
-/-- `sigma_one_cast` at three arguments.
-- [HP98, Theorem I.1.6] -/
-lemma cast_sigma₃ (σ : 𝚺₁.Semisentence 3) {a b c : ℕ} (h : ℕ ⊧/![a, b, c] σ.val) :
-    V ⊧/![(a : V), (b : V), (c : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using sigma_one_cast (V := V) σ h
-
-/-- `𝚺₀` cast at one argument.
-- [HP98, Theorem I.1.6] -/
-lemma cast_sigmaZero₁ (σ : 𝚺₀.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a] σ.val) :
-    V ⊧/![(a : V)] σ.val := by
-  simpa [Function.comp_def, Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
-    using (shigmaZero_absolute V σ ![a]).mp h
-
-/-- `𝚺₀` cast at two arguments.
-- [HP98, Theorem I.1.6] -/
-lemma cast_sigmaZero₂ (σ : 𝚺₀.Semisentence 2) {a b : ℕ} (h : ℕ ⊧/![a, b] σ.val) :
-    V ⊧/![(a : V), (b : V)] σ.val := by
-  simpa [Function.comp_def, Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
-    using (shigmaZero_absolute V σ ![a, b]).mp h
-
-/-- `𝚺₀` cast at three arguments.
-- [HP98, Theorem I.1.6] -/
-lemma cast_sigmaZero₃ (σ : 𝚺₀.Semisentence 3) {a b c : ℕ} (h : ℕ ⊧/![a, b, c] σ.val) :
-    V ⊧/![(a : V), (b : V), (c : V)] σ.val := by
-  simpa [Function.comp_def, Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
-    using (shigmaZero_absolute V σ ![a, b, c]).mp h
-
-/-- `delta_one_cast` at one argument.
-- [HP98, Theorem I.1.6] -/
-lemma cast_delta₁ (σ : 𝚫₁.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a] σ.val) :
-    V ⊧/![(a : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using delta_one_cast (V := V) σ h
-
-end reading
-
-
 /-! ## The theory is monotone in its level -/
 
 /-- A sentence of a lower level of the Tarski theory belongs to every higher level.
@@ -759,10 +635,7 @@ lemma tarski_mono {m n : ℕ} (hmn : m ≤ n) {σ : ArithmeticSentence} (h : tar
     · exact h
     · exact tarski.prev n σ (ih (by omega))
 
-/-! ## Reading the sentences in a model of `𝗣𝗔⁻`
-
-Every reading lemma below takes the hypothesis that the sentences of `tarski n` hold in `V`, and
-nothing else beyond `𝗣𝗔⁻`; together they are the whole of what the snowing argument may use. -/
+/-! ## Reading the sentences in a model of `𝗣𝗔⁻` -/
 
 section reading
 
@@ -881,32 +754,22 @@ lemma read_termValMul : ∀ e t u s vt vu v : V, UTerm t → UTerm u →
   simpa [models_iff, Tarski.termValMul, Reading.TermVal, Reading.UTerm]
     using hV _ (tarski.zero n Tarski.termValMul (by simp [Tarski.satZeroAxioms]))
 
-/-- The reading of totality of coded adjunction.
-- No source; an elementary vector-coding lemma. -/
 lemma read_adjoinTotal : ∀ x v : V, ∃ e, Adjoin e x v := by
   simpa [models_iff, Tarski.adjoinTotal, Reading.Adjoin]
     using hV _ (tarski.zero n Tarski.adjoinTotal (by simp [Tarski.satZeroAxioms]))
 
-/-- The reading of the head equation of coded adjunction.
-- No source; an elementary vector-coding lemma. -/
 lemma read_nthAdjoinZero : ∀ x v e y : V, Adjoin e x v → (Nth y e 0 ↔ y = x) := by
   simpa [models_iff, Tarski.nthAdjoinZero, Reading.Adjoin, Reading.Nth]
     using hV _ (tarski.zero n Tarski.nthAdjoinZero (by simp [Tarski.satZeroAxioms]))
 
-/-- The reading of the tail equation of coded adjunction.
-- No source; an elementary vector-coding lemma. -/
 lemma read_nthAdjoinSucc : ∀ x v e i y : V, Adjoin e x v → (Nth y e (i + 1) ↔ Nth y v i) := by
   simpa [models_iff, Tarski.nthAdjoinSucc, Reading.Adjoin, Reading.Nth]
     using hV _ (tarski.zero n Tarski.nthAdjoinSucc (by simp [Tarski.satZeroAxioms]))
 
-/-- The reading of the length of the empty coded vector.
-- No source; an elementary vector-coding lemma. -/
 lemma read_lenNil : ∀ l : V, Len l 0 ↔ l = 0 := by
   simpa [models_iff, Tarski.lenNil, Reading.Len]
     using hV _ (tarski.zero n Tarski.lenNil (by simp [Tarski.satZeroAxioms]))
 
-/-- The reading of the length equation of coded adjunction.
-- No source; an elementary vector-coding lemma. -/
 lemma read_lenAdjoin : ∀ x v e l : V, Adjoin e x v → (Len (l + 1) e ↔ Len l v) := by
   simpa [models_iff, Tarski.lenAdjoin, Reading.Adjoin, Reading.Len]
     using hV _ (tarski.zero n Tarski.lenAdjoin (by simp [Tarski.satZeroAxioms]))
@@ -922,33 +785,32 @@ include hm
 /-- The reading of the empty-block condition from `Π` to `Σ`.
 - [HP98, Theorem I.1.75(2)(v)] -/
 lemma read_satSigmaOfPi : ∀ z e : V, Strict 𝚷 m z → Reading.UFormula z →
-    (Reading.SatSig m z e ↔ Sat 𝚷 m z e) := by
+    (Reading.SatSigma m z e ↔ Sat 𝚷 m z e) := by
   have h := hV _ (tarski_mono hm (tarski.new m (Tarski.satSigmaOfPi m)
     (by simp [Tarski.satSigmaAxioms])))
   cases m with
   | zero =>
-    simpa [models_iff, Tarski.satSigmaOfPi, Reading.Sat, Reading.Strict, Reading.SatSig,
+    simpa [models_iff, Tarski.satSigmaOfPi, Reading.Sat, Reading.Strict, Reading.SatSigma,
       Reading.StrictPii, Reading.Sat0, Reading.UFormula, isStrictPi] using h
   | succ m =>
-    simpa [models_iff, Tarski.satSigmaOfPi, Reading.Sat, Reading.Strict, Reading.SatSig,
-      Reading.StrictPii, Reading.SatPii, Reading.UFormula] using h
+    simpa [models_iff, Tarski.satSigmaOfPi, Reading.Sat, Reading.Strict, Reading.SatSigma,
+      Reading.StrictPii, Reading.SatPi, Reading.UFormula] using h
 
 /-- The reading of the empty-block condition from `Σ` to `Π`.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 lemma read_satPiOfSigma : ∀ z e : V, Strict 𝚺 m z → Reading.UFormula z →
-    (Reading.SatPii m z e ↔ Sat 𝚺 m z e) := by
+    (Reading.SatPi m z e ↔ Sat 𝚺 m z e) := by
   have h := hV _ (tarski_mono hm (tarski.new m (Tarski.satPiOfSigma m)
     (by simp [Tarski.satSigmaAxioms])))
   cases m with
   | zero =>
-    simpa [models_iff, Tarski.satPiOfSigma, Reading.Sat, Reading.Strict, Reading.SatPii,
+    simpa [models_iff, Tarski.satPiOfSigma, Reading.Sat, Reading.Strict, Reading.SatPi,
       Reading.StrictSig, Reading.Sat0, Reading.UFormula, isStrictSigma] using h
   | succ m =>
-    simpa [models_iff, Tarski.satPiOfSigma, Reading.Sat, Reading.Strict, Reading.SatPii,
-      Reading.StrictSig, Reading.SatSig, Reading.UFormula] using h
+    simpa [models_iff, Tarski.satPiOfSigma, Reading.Sat, Reading.Strict, Reading.SatPi,
+      Reading.StrictSig, Reading.SatSigma, Reading.UFormula] using h
 
-/-- The reading of the empty-block condition, in the polarity-indexed form used by the induction
-on a strict prenex derivation.
+/-- The reading of the empty-block condition, in the polarity-indexed form.
 - [HP98, Theorem I.1.75(2)(v)]
 - [HP98, Theorem I.1.75(2)(v′)] -/
 lemma read_ofAlt (Γ : Polarity) : ∀ z e : V, Strict Γ.alt m z → Reading.UFormula z →
@@ -960,67 +822,19 @@ lemma read_ofAlt (Γ : Polarity) : ∀ z e : V, Strict Γ.alt m z → Reading.UF
 /-- The reading of the Tarski condition for existential quantification.
 - [HP98, Theorem I.1.75(2)(v)] -/
 lemma read_satSigmaExs : ∀ p z e : V, V ⊧/![z, p] qqExsDef.val →
-    (SatSig m z e ↔ ∃ x e', Adjoin e' x e ∧ SatSig m p e') := by
-  simpa [models_iff, Tarski.satSigmaExs, Reading.SatSig, Reading.Adjoin]
+    (Reading.SatSigma m z e ↔ ∃ x e', Adjoin e' x e ∧ Reading.SatSigma m p e') := by
+  simpa [models_iff, Tarski.satSigmaExs, Reading.SatSigma, Reading.Adjoin]
     using hV _ (tarski_mono hm (tarski.new m (Tarski.satSigmaExs m) (by simp [Tarski.satSigmaAxioms])))
 
 /-- The reading of the Tarski condition for universal quantification.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 lemma read_satPiAll : ∀ p z e : V, V ⊧/![z, p] qqAllDef.val →
-    (SatPii m z e ↔ ∀ x e', Adjoin e' x e → SatPii m p e') := by
-  simpa [models_iff, Tarski.satPiAll, Reading.SatPii, Reading.Adjoin]
+    (Reading.SatPi m z e ↔ ∀ x e', Adjoin e' x e → Reading.SatPi m p e') := by
+  simpa [models_iff, Tarski.satPiAll, Reading.SatPi, Reading.Adjoin]
     using hV _ (tarski_mono hm (tarski.new m (Tarski.satPiAll m) (by simp [Tarski.satSigmaAxioms])))
 
 end satSigma
 
 end reading
-
-
-/-! ## Codes of finite sequences
-
-The vector sentences of `tarski n` say just enough about `adjoinDef`, `lenDef` and `nthDef` to
-build a code for any finite sequence of the model and to extend one by a new first entry. -/
-
-section codes
-
-open Reading PeanoMinus
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ}
-  (hV : ∀ σ : ArithmeticSentence, tarski n σ → V↓[ℒₒᵣ] ⊧ σ)
-
-include hV
-
-/-- The empty sequence is coded by `0`.
-- No source; an elementary vector-coding lemma. -/
-lemma codes_nil (v : Fin 0 → V) : Codes v 0 :=
-  ⟨by simpa using (read_lenNil hV 0).mpr rfl, fun i ↦ i.elim0⟩
-
-/-- Adjoining a new first entry to a code of `v` gives a code of `x :> v`.
-- No source; an elementary vector-coding lemma. -/
-lemma codes_cons {m : ℕ} {v : Fin m → V} {ev ev' x : V} (h : Codes v ev)
-    (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' := by
-  refine ⟨?_, fun i ↦ ?_⟩
-  · have := (read_lenAdjoin hV x ev ev' (m : V) hadj).mpr h.1
-    simpa using this
-  · refine Fin.cases ?_ (fun j ↦ ?_) i
-    · simpa using (read_nthAdjoinZero hV x ev ev' x hadj).mpr rfl
-    · have := (read_nthAdjoinSucc hV x ev ev' (j.val : V) (v j) hadj).mpr (h.2 j)
-      simpa using this
-
-/-- Every finite sequence of the model has a code.
-- No source; an elementary vector-coding lemma. -/
-lemma exists_codes : ∀ {m : ℕ} (v : Fin m → V), ∃ ev, Codes v ev := by
-  intro m
-  induction m with
-  | zero => exact fun v ↦ ⟨0, codes_nil hV v⟩
-  | succ m ih =>
-    intro v
-    obtain ⟨ev, hev⟩ := ih (fun i ↦ v i.succ)
-    obtain ⟨ev', hadj⟩ := read_adjoinTotal hV (v 0) ev
-    have hcons : (v 0 :> fun i ↦ v i.succ) = v := by
-      funext i; refine Fin.cases ?_ (fun j ↦ ?_) i <;> simp
-    exact ⟨ev', hcons ▸ codes_cons hV hev hadj⟩
-
-end codes
 
 end LO.FirstOrder.Arithmetic

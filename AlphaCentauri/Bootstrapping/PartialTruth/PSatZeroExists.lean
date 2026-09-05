@@ -20,14 +20,7 @@ polynomial because the domain here is the downward closure of the root rather th
 rectangle `(< p) × (< r)`: entering a bounded quantifier pushes a value `x < termVal e t` onto
 the assignment, and `termVal_le_poly` bounds that value only exponentially. Since the number of
 nested quantifiers is bounded by the code `z`, the height `8 * z + 24` suffices; `iterExp` is
-`𝚺₁` and total in `𝗜𝚺₁`, so the bound is available. With the bound in place,
-
-  `∀ e b, b = tableBound z e → ∃ q ≤ b, PSatZero q z e`
-
-is `Π₁`, and `IsDelta0.induction 𝚷` applies. The induction step glues the tables of the
-immediate subformulas: `𝚺₁`-collection (`sigmaOne_skolem`) collects the tables of the instances
-of the body of a bounded quantifier into one coded family, bounded comprehension
-(`finite_comprehension₁!`) takes their union, and `PSatZero.agree` makes the union a mapping.
+`𝚺₁` and total in `𝗜𝚺₁`, so the bound is available.
 
 - [HP98, Lemma I.1.72(3)]
 -/

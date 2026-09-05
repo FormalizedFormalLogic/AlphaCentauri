@@ -12,16 +12,6 @@ stay below a fixed additively principal ordinal `ω ^ θ`.
 `CutReducible θ c φ` says exactly that, and the file establishes it for every shape a cut formula
 can have.
 
-* `cutReducible_of_qr_lt` — a formula the rank `c` still admits as a cut formula needs no work.
-* `cutReducible_of_complexity_zero` — a formula without connectives. At rank `0`, where nothing
-  is admitted, `⊤` and `⊥` are removed outright (`remove_falsum`) and an atomic cut is traded
-  against the truth of its literal (`atom_cut`, resting on `remove_false_lit`).
-* `cut_reduce_and`, `cut_reduce_or` — `∧`/`∨` reduce to their immediate subformulas, by inverting
-  both premises.
-* `cut_reduce_all` — `∀`/`∃` reduce to the numeral instances. The existential is not invertible,
-  so this one is an induction on the `∃`-side derivation, the ω-side being inverted once and
-  carried along.
-
 Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20].
 -/
 
@@ -38,11 +28,8 @@ section Frame
 
 /-! ### Moving an `insert` across an `erase`
 
-Every commuting case of every induction below has the same shape: the induction hypothesis
-delivers the premise of a rule over `(insert a Γ).erase e`, the rule is applied over
-`insert a (Γ.erase e)`, and its conclusion is pushed back. These four subset lemmas are that
-bookkeeping; the last two carry an ambient `∪ Δ`, which the reductions that fix one premise and
-induct on the other need. -/
+Helper subset lemmas for the commuting cases of the inductions below. The last two carry an
+ambient `∪ Δ`, needed by the reductions that fix one premise and induct on the other. -/
 
 private lemma eraseIn (a e : ArithmeticFormula ℕ) (s : Sequent) :
     (insert a s).erase e ⊆ insert a (s.erase e) := by
@@ -169,8 +156,7 @@ section Atom
 variable {k₀ : ℕ} {b₀ : Bool} {r₀ : (ℒₒᵣ).Rel k₀} {v₀ : Fin k₀ → ArithmeticTerm ℕ}
 
 /-- **Removing a false literal** from a cut-free derivation. Unlike `⊥`, a literal can be the
-witness of a leaf, and this is where the truth of the standard model enters: an `axL` clash on a
-false literal exposes its opposite polarity, which is true and closes the sequent by `axTrue`.
+witness of a leaf, and this is where the truth of the standard model enters.
 
 - [Tow20, Section 19.2] -/
 private lemma remove_false_litAux (hL : ¬LitTrue (signedLit b₀ r₀ v₀)) (D : Derivation Γ)
@@ -242,8 +228,7 @@ lemma remove_false_lit (hL : ¬LitTrue (signedLit b₀ r₀ v₀))
   simp only [Finset.mem_erase, Finset.mem_insert] at hx
   exact hx.2.resolve_left hx.1
 
-/-- The induction core of the atomic cut: the `rel`-side derivation is taken apart, the fixed
-`nrel`-side derivation `hNC` settling the clash when it arises.
+/-- The induction underlying `atom_cut`.
 
 - [Tow20, Section 19.2] -/
 private lemma atom_cutAux (r : (ℒₒᵣ).Rel k) (v) (hNC : Z∞ ⊢[β, 0] insert (Semiformula.nrel r v) Γ)
@@ -309,8 +294,7 @@ private lemma atom_cutAux (r : (ℒₒᵣ).Rel k) (v) (hNC : Z∞ ⊢[β, 0] ins
   | @cut Γ₁ ξ D₁ D₂ ih₁ ih₂ => exact absurd ((le_max_left _ _).trans hcr) (by simp)
 
 /-- **Atomic cut elimination.** An atomic cut formula is never principal in a logical rule, so it
-only enters through `axL` or a leaf; either the clash is settled by set idempotence, or the truth
-of the atom in `ℕ` settles it through `remove_false_lit`.
+only enters through `axL` or a leaf.
 
 - [Tow20, Section 19.2] -/
 lemma atom_cut (r : (ℒₒᵣ).Rel k) (v) (hC : Z∞ ⊢[α, 0] insert (Semiformula.rel r v) Γ)
@@ -391,9 +375,7 @@ end Binary
 
 section Quantifier
 
-/-- The induction core of the `∀`/`∃` reduction: the `∀`-side is inverted once into the family
-`fam`, and the `∃`-side derivation is taken apart, `fam` supplying the matching instance at the
-witness numeral when `∃¹ ∼φ` is principal.
+/-- The induction underlying `cut_reduce_all`.
 
 - [Tow20, Theorem 19.6] -/
 private lemma cut_reduce_allAux (hqr : φₓ.qr < c)
@@ -483,9 +465,8 @@ private lemma cut_reduce_allAux (hqr : φₓ.qr < c)
     exact (cut ξ hcξ h₁ h₂).mono_ordinalBound
       (Ordinal.max_add_add_one_add_one_le α D₁.ordinalBound D₂.ordinalBound)
 
-/-- **Reduction of a `∀`-cut.** The existential side is not invertible, so there is no
-double-inversion shortcut: the `∀`-side is inverted once into its family of numeral instances and
-the `∃`-side derivation is inducted on.
+/-- **Reduction of a `∀`-cut.** Unlike `cut_reduce_and`, the existential side is not invertible,
+so there is no double-inversion shortcut.
 
 - [Tow20, Theorem 19.6] -/
 lemma cut_reduce_all (hθ : 0 < θ) (hqr : φₓ.qr < c) : CutReducible θ c (∀¹ φₓ) := by

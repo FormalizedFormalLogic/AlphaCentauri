@@ -14,9 +14,7 @@ formula, a derivation of the sequent with the immediate subformulas put in its p
 one: inverting `∀¹ φ` returns, for each numeral `n`, the instance `φ/[n]`, the ω-rule supplying
 exactly that premise when it is principal.
 
-All three are proved by structural induction on the derivation, which is tractable here because
-sequents are finite *sets*: there is no contraction rule to commute past, and the principal case
-absorbs the duplicate occurrence by `Finset.insert_eq_self`.
+Sequents are finite *sets*, not multisets, so inversion needs no contraction rule to commute past.
 
 Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20].
 -/
@@ -199,8 +197,7 @@ end InversionAll
 
 section InversionAnd
 
-/-- **`∧`-inversion**, at the height of the given derivation. Both conjuncts come out of one
-induction, so they are proved together.
+/-- **`∧`-inversion**, at the height of the given derivation.
 
 - [Tow20, Section 19.3] -/
 private lemma andInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (hmem : (φ ⋏ ψ) ∈ Γ) :

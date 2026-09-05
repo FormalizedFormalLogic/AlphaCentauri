@@ -480,16 +480,15 @@ end
 
 /-! ## Agreement with the external strict hierarchy on quoted formulas -/
 
-/-- The internal strict class selected by a polarity. It lets one induction on a
-`StrictHierarchy` derivation, whose polarity the `zero` and `ofAlt` constructors leave open,
-produce the `Σ` and the `Π` statement at once.
+/-- The internal strict class selected by a polarity.
 - [HP98, Lemma I.1.69] -/
+-- Indexed by polarity so a single induction on a `StrictHierarchy` derivation proves the `Σ`
+-- and `Π` cases at once.
 private def IsStrictClass : Polarity → ℕ → V → Prop
   | .sigma, s, p => IsStrictSigma s p
   | .pi, s, p => IsStrictPi s p
 
-/-- A formula in an external strict class has a code in the matching internal strict class, by
-induction on the derivation.
+/-- A formula in an external strict class has a code in the matching internal strict class.
 - [HP98, Lemma I.1.69] -/
 private lemma isStrictClass_quote {Γ : Polarity} {s n : ℕ} {ψ : ArithmeticSemiproposition n}
     (h : StrictHierarchy Γ s ψ) : IsStrictClass Γ s (⌜ψ⌝ : V) := by
@@ -532,7 +531,7 @@ private lemma exists_all_of_quote_eq_qqAll {n : ℕ} (ψ : ArithmeticSemiproposi
   | _ => simp [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqExs, qqAll] at h
 
 /-- A quoted formula whose code is a block of `k` existentials over a strict `Πₛ` code is strict
-`Σₛ₊₁`, by induction on `k`.
+`Σₛ₊₁`.
 - [HP98, Lemma I.1.69] -/
 private lemma strictHierarchy_sigma_of_quote_eq_qqExss {s : ℕ}
     (ih : ∀ {n : ℕ} (ψ : ArithmeticSemiproposition n),
@@ -548,7 +547,7 @@ private lemma strictHierarchy_sigma_of_quote_eq_qqExss {s : ℕ}
     exact .exs (strictHierarchy_sigma_of_quote_eq_qqExss ih k ψ' q heq' hq)
 
 /-- A quoted formula whose code is a block of `k` universals over a strict `Σₛ` code is strict
-`Πₛ₊₁`, by induction on `k`.
+`Πₛ₊₁`.
 - [HP98, Lemma I.1.69] -/
 private lemma strictHierarchy_pi_of_quote_eq_qqAlls {s : ℕ}
     (ih : ∀ {n : ℕ} (ψ : ArithmeticSemiproposition n),

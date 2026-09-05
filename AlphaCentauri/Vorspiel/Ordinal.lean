@@ -12,7 +12,7 @@ about `Ordinal` alone and belongs upstream in Mathlib rather than in this reposi
 
 The recurring pattern is that `ω ^ θ` is *additively principal*
 (`Ordinal.isPrincipal_add_omega0_opow`): a finite sum of ordinals below `ω ^ θ` stays below
-`ω ^ θ`, which is what lets a cut-elimination step absorb the `+ 1` that every rule adds.
+`ω ^ θ`. This is the fact cut elimination needs to absorb the `+ 1` that every rule adds.
 -/
 
 @[expose] public section

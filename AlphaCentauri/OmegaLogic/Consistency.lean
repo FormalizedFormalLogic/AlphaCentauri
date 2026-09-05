@@ -5,11 +5,7 @@ public import AlphaCentauri.OmegaLogic.Embedding
 /-!
 # The consistency of `𝗣𝗔`, read off `Z_∞`
 
-Chaining the whole ω-logic development end to end: a `𝗣𝗔`-proof of `⊥` embeds into `Z_∞`
-(`Provable.of_derivation2`), cut elimination makes it cut-free
-(`Provable.cut_elimination`), `⊥` is struck out of a cut-free derivation
-(`Provable.remove_falsum`), and soundness (`Provable.sound`) then asks the empty sequent for a
-formula true in `ℕ`.
+The consistency of `𝗣𝗔` follows as a corollary of the `Z_∞` development in this directory.
 
 **This is not new mathematics.** Foundation already has `instance : Entailment.Consistent 𝗣𝗔` in
 `FirstOrder/Arithmetic/Schemata.lean`, proved directly from the soundness of first-order logic
@@ -25,8 +21,7 @@ Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20]
 namespace LO.FirstOrder.Arithmetic.OmegaLogic
 
 /-- **The consistency of `𝗣𝗔`, via `Z_∞`.** Foundation's `Entailment.Consistent 𝗣𝗔` says the same
-thing by way of soundness over `ℕ`; this proof instead runs a `𝗣𝗔`-proof of `⊥` through the
-embedding, cut elimination and the soundness of `Z_∞`.
+thing by way of soundness over `ℕ`.
 
 - [Tow20, Section 16] -/
 theorem consistent_PA : 𝗣𝗔 ⊬ ⊥ := by

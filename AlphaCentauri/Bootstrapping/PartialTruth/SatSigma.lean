@@ -99,8 +99,7 @@ noncomputable def satSigma : (n : ℕ) → 𝚺-[n + 1].Semisentence 2
 - [HP98, Theorem I.1.75(1)] -/
 noncomputable def satPi (n : ℕ) : 𝚷-[n + 1].Semisentence 2 := piOfSigma n (satSigma n)
 
-/-- `satPi` unfolds to `piOfSigma` applied to `satSigma` at the same level; recorded so `satSigma`'s
-successor equation reads directly in terms of `satPi`.
+/-- `satPi` unfolds to `piOfSigma` applied to `satSigma` at the same level.
 - [HP98, Definition I.1.74] -/
 private lemma satSigma_succ (n : ℕ) : satSigma (n + 1) = sigmaOfPi n (satPi n) := rfl
 
@@ -128,8 +127,7 @@ private lemma sigmaZero_defined :
     𝚺-[1]-Relation (SatSigma 1 : V → V → Prop) via sigmaZero := .mk fun v ↦ by
   simp [sigmaZero, SatSigma, SatPi]
 
-/-- Definedness of `satSigma n` for `SatSigma (n + 1)`, by recursion on `n`, deriving definedness
-of `satPi n` for `SatPi (n + 1)` along the way.
+/-- Definedness of `satSigma n` for `SatSigma (n + 1)`.
 - [HP98, Theorem I.1.75(1)] -/
 private lemma sigmaDefined : ∀ n : ℕ, 𝚺-[n + 1]-Relation (SatSigma (n + 1) : V → V → Prop) via satSigma n
   | 0 => sigmaZero_defined

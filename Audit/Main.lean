@@ -306,23 +306,16 @@ closure (e.g. all of Mathlib) is walked once in total, not re-walked per declara
 abbrev AxiomM := ReaderT Environment (StateM (NameMap (Array Name)))
 
 /--
-The axioms transitively used by `c`, memoized in the shared `NameMap`. Mirrors `Lean.collectAxioms`'
-traversal of each declaration's type and value, but shares one cache across every call: the stock
-`collectAxioms` rebuilds its state and redoes per-call setup on each invocation, which dominates a
-whole-library audit. A constant is recorded with the empty set before recursing so cycles
-terminate; axioms are leaves, so a back edge into an in-progress constant contributes nothing to it
-directly.
+The axioms transitively used by `c`, memoized in the shared `NameMap`. Mirrors
+`Lean.collectAxioms`, but shares one cache across every call instead of rebuilding it per call,
+since a whole-library audit calls this once per candidate declaration.
 
-Soundness for an allowlist audit: the declaration that *directly* mentions a disallowed axiom
-always gets that axiom in its own set (the edge to the leaf axiom is in its own frame, not a back
-edge), and since the imported libraries are axiom-clean that declaration is itself an audited
-candidate, so any violation is reported and fails the run, and the project-wide union of axioms is
-complete. The empty sentinel can, in a cyclic declaration cluster, leave *other* members of the
-cluster with an incomplete set, so a per-declaration list may under-count there (a re-run flags the
-rest); it never hides an axiom project-wide and never lets a violation pass.
+Never hides an axiom or misses a violation project-wide; in a cyclic declaration cluster the
+per-declaration list can under-count (a re-run flags the rest).
 -/
 partial def axiomsOf (c : Name) : AxiomM (Array Name) := do
   if let some s := (← get).find? c then return s
+  -- Record `c` empty before recursing, so a cycle's back-edge into it contributes nothing.
   modify (·.insert c #[])
   let env ← read
   let mut used : NameSet := if isAxiom env c then ({} : NameSet).insert c else {}
@@ -341,11 +334,8 @@ structure CutMemo where
 The axioms `c` reaches without passing through any name in `cut`: a name in `cut` is not
 descended into, and if it is an axiom it is not counted. This is what the allowlist forgives.
 
-The traversal only walks the tainted part of the dependency graph. Whenever the shared pass
-(`axiomsOf`) already knows that a constant's full axiom set lies within `allowed`, the cut set,
-which is a subset of it, does too, so the constant is not descended into. The tainted part is the
-handful of declarations that reach a disallowed axiom, so a cut traversal costs almost nothing on
-top of the shared pass.
+Only descends into constants the shared pass (`axiomsOf`) has not already shown lie entirely
+within `allowed`, so a cut traversal costs almost nothing beyond the shared pass.
 -/
 partial def axiomsOfCut (allowed cut : NameSet) (c : Name) :
     StateT CutMemo AxiomM (Array Name) := do

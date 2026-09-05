@@ -40,9 +40,7 @@ abbrev localReflection : Theory L := 𝔅.localReflectionOn fun _ ↦ True
 
 variable {Γ Γ' : Sentence L → Prop}
 
-/-- Membership form of `localReflectionOn`.
-
-Routine unfolding of the definition; no separate counterpart in the literature. -/
+/-- Membership form of `localReflectionOn`; no separate counterpart in the literature. -/
 @[simp]
 lemma mem_localReflectionOn_iff {ψ : Sentence L} :
     ψ ∈ 𝔅.localReflectionOn Γ ↔ ∃ σ, Γ σ ∧ ψ = 𝔅 σ 🡒 σ := by

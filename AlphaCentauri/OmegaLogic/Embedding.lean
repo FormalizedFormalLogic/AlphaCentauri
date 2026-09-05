@@ -11,12 +11,9 @@ public import Foundation.FirstOrder.Basic.Calculus2
 Every Foundation `Derivation2` from `𝗣𝗔` becomes a `Z_∞` derivation, once its free variables are
 closed by a numeral assignment `asg e`.
 
-Three of the rules need something the finitary calculus does not have. `Derivation2.axm` is
-discharged by `Provable.of_true`: an axiom of `𝗣𝗔` is true in `ℕ`, so ω-completeness derives it at
-finite height without any use of the axiom as an axiom. `Derivation2.all` becomes the ω-rule, the
-eigenvariable being freed to the numeral `n` in the `n`-th premise. `Derivation2.exs` carries an
-arbitrary witness *term*, while `Z_∞`'s `exI` admits only numerals; `exI_closed` bridges the gap by
-cutting against `em_cong`, a value-congruent form of `Provable.lem`.
+Three of the rules need something the finitary calculus does not have: a way to admit an axiom of
+`𝗣𝗔` without it being an axiom of `Z_∞`, an ω-rule for the universal quantifier, and admission of
+an existential witness that need not be a numeral.
 
 Absorbing the axioms by their truth in `ℕ` is what makes the ordinal height existential here: the
 result is `∃ α`, not a bound computed from the `𝗣𝗔` derivation. That is enough for soundness and
@@ -260,8 +257,8 @@ section Embedding
 /-- **The embedding.** Every `𝗣𝗔`-derivation embeds into `Z_∞`, at every numeral assignment of its
 free variables, with a cut rank read off the derivation and an unbounded ordinal height.
 
-The height cannot be bounded here: the `𝗣𝗔` axioms are discharged by `Provable.of_true`, which
-knows only that they are true in `ℕ`.
+The height cannot be bounded here, since it is read off axioms of `𝗣𝗔` known only to be true in
+`ℕ`.
 
 - [Tow20, Section 16]
 - [Buc03, Section 5.5] -/

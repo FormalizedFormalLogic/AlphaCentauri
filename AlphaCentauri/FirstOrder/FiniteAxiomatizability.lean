@@ -60,14 +60,12 @@ lemma FiniteAxiomatizable.of_equiv (h : T ≊ U) :
 /-- A finitely axiomatizable theory is axiomatized by a finite **subset** of itself.
 
 The axiomatizing `𝓕` given by `Entailment.FiniteAxiomatizable` need not consist of axioms of `T`.
-Syntactic compactness of `Theory L` (`Entailment.Compact`, via `Theory.Proof.axioms`) replaces each
-`φ ∈ 𝓕` by a finite set of axioms of `T` proving it; the union over the finitely many `φ ∈ 𝓕` is
-the required finite subtheory. In particular no appeal to the completeness theorem is needed.
 - [Lin97, Ch. 4 §1]
 - [HP98, Theorem I.2.52] -/
 lemma finiteAxiomatizable_iff_exists_finite_subset :
     FiniteAxiomatizable T ↔ ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ F ≊ T := by
   constructor
+  -- Syntactic compactness (`Entailment.Compact`), not the completeness theorem, supplies F.
   · rintro ⟨𝓕, h𝓕fin, h𝓕⟩
     replace h𝓕fin : (𝓕 : Set (Sentence L)).Finite := by simpa using h𝓕fin
     have H : ∀ σ : Sentence L, ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ (σ ∈ 𝓕 → F ⊢ σ) := by

@@ -354,16 +354,12 @@ section ExcludedMiddle
 
 variable {α : Ordinal.{0}} {k : ℕ} {φ : ArithmeticFormula ℕ} {Γ : Sequent}
 
-/-- The `∧`/`∨` step of `lemAux`: two premises for the conjuncts, over a sequent already carrying
-both disjuncts, collapse in two rules. -/
 private lemma em_binaryStep {A B C D : ArithmeticFormula ℕ} (hab : A ⋏ B ∈ Γ) (hcd : C ⋎ D ∈ Γ)
     (h₁ : Z∞ ⊢[α, 0] insert A (insert C (insert D Γ)))
     (h₂ : Z∞ ⊢[α, 0] insert B (insert C (insert D Γ))) : Z∞ ⊢[α + 1 + 1, 0] Γ := by
   have h := (andI h₁ h₂).insert_absorb (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hab))
   simpa using h.orI.insert_absorb hcd
 
-/-- The `∀`/`∃` step of `lemAux`: an ω-family of premises, each carrying the matching existential
-instance, collapses in two rules. -/
 private lemma em_quantStep {φₓ ψₓ : ArithmeticSemiformula ℕ 1} (hall : (∀¹ φₓ) ∈ Γ)
     (hexs : (∃¹ ψₓ) ∈ Γ)
     (fam : ∀ n : ℕ, Z∞ ⊢[α, 0]

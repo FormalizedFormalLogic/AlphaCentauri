@@ -20,8 +20,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 /-! ## Codes of quoted semisentences
 
 Foundation's `quote_*` lemmas compute the code of a `Semiproposition`. A `Semisentence` is
-quoted through its embedding (`Sentence.quote_def`), so each of them has a counterpart here,
-proved by unfolding that embedding. -/
+quoted through its embedding (`Sentence.quote_def`), so each of them has a counterpart here. -/
 
 /-- A coded closed term is a well-formed internal term.
 - [HP98, 1.66] -/
@@ -111,9 +110,7 @@ private lemma quote_bex_sentence {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k)
 
 /-! ## Agreement of satisfaction with truth -/
 
-/-- For a bounded formula, internal `Δ₀` satisfaction of its code agrees with truth. This is the
-base case of the snowing lemma, by recursion on the bounded formula: each clause is the matching
-Tarski condition of `SatZero`, and the atoms are `termVal_quote`.
+/-- For a bounded formula, internal `Δ₀` satisfaction of its code agrees with truth.
 - [HP98, Theorem I.1.70]
 - [HP98, Corollary I.1.76] -/
 theorem satZero_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
@@ -162,16 +159,13 @@ theorem satZero_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)]
     simp [Function.comp_def]
 
-/-- The satisfaction predicate selected by a polarity. It lets one induction on a
-`StrictHierarchy` derivation, whose polarity the `zero` and `ofAlt` constructors leave open,
-produce the `Σ` and the `Π` statement at once.
+/-- The satisfaction predicate selected by a polarity: `SatSigma` for `Σ`, `SatPi` for `Π`.
 - [HP98, Definition I.1.74] -/
 def SatClass : Polarity → ℕ → V → V → Prop
   | .sigma, n, z, e => SatSigma n z e
   | .pi, n, z, e => SatPi n z e
 
-/-- Internal satisfaction of the code of a strict prenex formula agrees with truth, by induction
-on the derivation of its strict class.
+/-- Internal satisfaction of the code of a strict prenex formula agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
 lemma satClass_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
@@ -459,10 +453,7 @@ noncomputable def satSigmaAxioms (n : ℕ) : ArithmeticTheory :=
 end Tarski
 
 /-- `tarski n` contains the finitely many Tarski conditions through level `n + 1`, together
-with the vector and term-evaluation facts used in the proof of the snowing lemma. Its exact
-membership may grow during the proof stage; downstream arguments use only finiteness and
-`𝗜𝚺₁`-provability.
-
+with the vector and term-evaluation facts used in the snowing lemma.
 - [HP98, Remark I.1.77] -/
 inductive tarski : ℕ → ArithmeticTheory
   | zero : ∀ φ ∈ Tarski.satZeroAxioms, tarski 0 φ
@@ -504,8 +495,7 @@ axiom ISigma1.provable_tarski (n : ℕ) : 𝗜𝚺₁ ⊢* tarski n
 axiom provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ
 
-/-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `Σₙ₊₁` formula: the two sides
-agree in every model of `𝗜𝚺₁` by `satSigma_quote_iff`, so completeness delivers a proof.
+/-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `Σₙ₊₁` formula.
 - [HP98, Corollary I.1.76] -/
 theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ snowing n φ := by

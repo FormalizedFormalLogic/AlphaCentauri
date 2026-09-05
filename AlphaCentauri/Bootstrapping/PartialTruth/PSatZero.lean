@@ -157,11 +157,10 @@ variable {q q₁ q₂ z z₁ z₂ e e₁ e₂ z' e' t u p p₁ p₂ : V}
 /-! ## Reading `spec` off at a node of known shape
 
 `spec` is a ten-way disjunction over the outermost coding constructor of the node. Each lemma
-below selects the disjunct matching a node of known shape and returns all of its content: that
-the immediate children belong to the domain, and how the values `1` and `0` at the node are
-determined. -/
+below specializes it to a node of known shape: membership of the immediate children in the
+domain, and how the values `1` and `0` at the node are determined. -/
 
-/-- Case analysis of `spec` at a node known to be the coded truth constant.
+/-- The Tarski clause for the truth constant, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
 lemma val_verum (h : PSatZero q z e) (hn : ⟪(^⊤ : V), e'⟫ ∈ domain q) :
     ⟪⟪(^⊤ : V), e'⟫, 1⟫ ∈ q := by
@@ -174,7 +173,7 @@ lemma val_verum (h : PSatZero q z e) (hn : ⟪(^⊤ : V), e'⟫ ∈ domain q) :
   on_goal 1 => exact hv
   all_goals simp at he
 
-/-- Case analysis of `spec` at a node known to be the coded falsehood constant.
+/-- The Tarski clause for the falsehood constant, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
 lemma val_falsum (h : PSatZero q z e) (hn : ⟪(^⊥ : V), e'⟫ ∈ domain q) :
     ⟪⟪(^⊥ : V), e'⟫, 0⟫ ∈ q := by

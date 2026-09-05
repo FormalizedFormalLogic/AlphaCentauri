@@ -26,19 +26,13 @@ open Arithmetic (qqEQ qqNEQ qqLT qqNLT)
 
 /-! ## Bounds on the nodes of a finite mapping -/
 
-/-- Every element of the domain of a finite mapping is smaller than the mapping.
-- This is a routine coding fact; no separate source theorem. -/
 lemma lt_of_mem_domain {n q : V} (h : n ∈ domain q) : n < q := by
   obtain ⟨y, hy⟩ := mem_domain_iff.mp h
   exact lt_of_mem_dom hy
 
-/-- The first component of a node of a finite mapping is smaller than the mapping.
-- This is a routine coding fact; no separate source theorem. -/
 lemma fst_lt_of_mem_domain {p e q : V} (h : ⟪p, e⟫ ∈ domain q) : p < q :=
   lt_of_le_of_lt (le_pair_left p e) (lt_of_mem_domain h)
 
-/-- The second component of a node of a finite mapping is smaller than the mapping.
-- This is a routine coding fact; no separate source theorem. -/
 lemma snd_lt_of_mem_domain {p e q : V} (h : ⟪p, e⟫ ∈ domain q) : e < q :=
   lt_of_le_of_lt (le_pair_right p e) (lt_of_mem_domain h)
 
@@ -53,46 +47,28 @@ attribute [local simp] qqAnd qqOr qqVerum qqFalsum qqRel qqNRel qqBall qqAll qqB
 
 /-! ## Coding injectivity facts for the bounded quantifiers -/
 
-/-- The bounded universal coding operation is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqBall_inj {u₁ q₁ u₂ q₂ : V} : qqBall u₁ q₁ = qqBall u₂ q₂ ↔ u₁ = u₂ ∧ q₁ = q₂ := by
   simp [qqBall, Arithmetic.qqNLT, qqNRel, adjoin_inj]
 
-/-- The bounded existential coding operation is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqBex_inj {u₁ q₁ u₂ q₂ : V} : qqBex u₁ q₁ = qqBex u₂ q₂ ↔ u₁ = u₂ ∧ q₁ = q₂ := by
   simp [qqBex, Arithmetic.qqLT, qqRel, adjoin_inj]
 
-/-- The coded equality atom is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqEQ_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^= u₁ = t₂ ^= u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
   simp [Arithmetic.qqEQ, qqRel, adjoin_inj]
 
-/-- The coded inequality atom is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqNEQ_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^≠ u₁ = t₂ ^≠ u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
   simp [Arithmetic.qqNEQ, qqNRel, adjoin_inj]
 
-/-- The coded less-than atom is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqLT_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^< u₁ = t₂ ^< u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
   simp [Arithmetic.qqLT, qqRel, adjoin_inj]
 
-/-- The coded not-less-than atom is injective in both arguments.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma qqNLT_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^≮ u₁ = t₂ ^≮ u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
   simp [Arithmetic.qqNLT, qqNRel, adjoin_inj]
 
-/-- The relation index of coded equality, read off in `V`.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma coe_eqIndex_eq : (Arithmetic.eqIndex : V) = 0 := rfl
 
-/-- The relation index of coded less-than, read off in `V`.
-- This is a routine coding fact; no separate source theorem. -/
 @[simp] lemma coe_ltIndex_eq : (Arithmetic.ltIndex : V) = 1 := by simp [Arithmetic.ltIndex]; rfl
 
-/-- The two relation indices of `ℒₒᵣ` are distinct.
-- This is a routine coding fact; no separate source theorem. -/
 lemma eqIndex_ne_ltIndex : (Arithmetic.eqIndex : V) ≠ (Arithmetic.ltIndex : V) := by simp
 
 /-! ## The partial satisfaction table -/

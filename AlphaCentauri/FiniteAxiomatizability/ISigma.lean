@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 /-!
 # Finite axiomatizability of `𝗜𝚺 n`
 
-For `n ≥ 1`, `𝗜𝚺 n` is finitely axiomatizable by a single `Πₙ₊₂` sentence.
+For `n ≥ 1`, `𝗜𝚺 n` is finitely axiomatizable by a single `𝚷-[n + 2]` sentence.
 -/
 
 @[expose] public section

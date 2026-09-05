@@ -62,7 +62,6 @@ def CutReducible (θ : Ordinal.{0}) (c : ℕ) (φ : ArithmeticFormula ℕ) : Pro
 
 namespace CutReducible
 
-/-- Reducibility does not distinguish a formula from its negation. -/
 lemma neg (h : CutReducible θ c φ) : CutReducible θ c (∼φ) := fun hγ hδ h₁ h₂ =>
   h hδ hγ (by simpa using h₂) h₁
 
@@ -129,11 +128,9 @@ lemma remove_falsum (h : Z∞ ⊢[α, 0] insert ⊥ Γ) : Z∞ ⊢[α, 0] Γ := 
   simp only [Finset.mem_erase, Finset.mem_insert] at hx
   exact hx.2.resolve_left hx.1
 
-/-- `⊤` is cut-reducible at rank `0`. -/
 lemma cutReducible_verum : CutReducible θ 0 (⊤ : ArithmeticFormula ℕ) :=
   fun _ hδ _ h₂ => ⟨_, hδ, remove_falsum (by simpa using h₂)⟩
 
-/-- `⊥` is cut-reducible at rank `0`. -/
 lemma cutReducible_falsum : CutReducible θ 0 (⊥ : ArithmeticFormula ℕ) :=
   fun hγ _ h₁ _ => ⟨_, hγ, remove_falsum h₁⟩
 
@@ -308,7 +305,6 @@ lemma cutReducible_nrel (hθ : 0 < θ) (r : (ℒₒᵣ).Rel k) (v) :
   ⟨_, Ordinal.add_one_lt_omega0_opow hθ (Ordinal.add_lt_omega0_opow hγ hδ),
     atom_cut r v (by simpa using h₂) h₁⟩
 
-/-- Every formula of complexity zero is cut-reducible at every rank. -/
 lemma cutReducible_of_complexity_zero (hθ : 0 < θ) (hc : φ.complexity = 0) :
     CutReducible θ c φ := by
   rcases Nat.eq_zero_or_pos c with rfl | hpos

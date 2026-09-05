@@ -23,7 +23,6 @@ open LO.FirstOrder
 
 variable {L : Language}
 
-/-- For a first-order theory, `AdjunctiveSet.Finite` is equivalent to `Set.Finite`. -/
 @[simp] lemma finite_iff_set_finite {T : Theory L} : Finite T ↔ T.Finite := Iff.rfl
 
 end AdjunctiveSet

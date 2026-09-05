@@ -43,7 +43,6 @@ def LitTrue (φ : ArithmeticFormula ℕ) : Prop := Semiformula.Evalf (M := ℕ) 
 
 @[simp, grind =] lemma litTrue_or : LitTrue (φ ⋎ ψ) ↔ LitTrue φ ∨ LitTrue ψ := by simp [LitTrue]
 
-/-- Every formula or its negation is true in the standard model. -/
 lemma litTrue_or_neg (φ : ArithmeticFormula ℕ) : LitTrue φ ∨ LitTrue (∼φ) := by simp [LitTrue, em]
 
 @[simp, grind =]
@@ -74,7 +73,6 @@ def signedLit : Bool → {k : ℕ} → (ℒₒᵣ).Rel k → (Fin k → Arithmet
 @[simp, grind =] lemma neg_signedLit : ∼(signedLit b r v) = signedLit (!b) r v := by
   cases b <;> simp [signedLit]
 
-/-- The two polarities of a literal have opposite truth values. -/
 @[grind =] lemma litTrue_signedLit_not :
     LitTrue (signedLit (!b) r v) ↔ ¬LitTrue (signedLit b r v) := by simp [← neg_signedLit]
 
@@ -120,7 +118,6 @@ noncomputable def ordinalBound : {Γ : Sequent} → Derivation Γ → Ordinal.{0
   | _, exI _ _ D => D.ordinalBound + 1
   | _, cut _ D₁ D₂ => max D₁.ordinalBound D₂.ordinalBound + 1
 
-/-- The ω-rule strictly dominates each of its premises. -/
 lemma ordinalBound_lt_allω {Γ : Sequent} {φₓ : ArithmeticSemiformula ℕ 1} {n : ℕ}
     {Dₓ : (n : ℕ) → Derivation (insert (φₓ/[(↑n : ArithmeticTerm ℕ)]) Γ)} :
     (Dₓ n).ordinalBound < (allω φₓ Dₓ).ordinalBound :=
@@ -228,7 +225,6 @@ lemma weakening (h : Γ ⊆ Δ) : Z∞ ⊢[α, c] Γ → Z∞ ⊢[α, c] Δ := b
   exact ⟨D.weak h, by simpa [Derivation.ordinalBound] using ho,
     by simpa [Derivation.cutRank] using hcr⟩
 
-/-- An inserted formula already in the sequent may be dropped. -/
 lemma insert_absorb (h : Z∞ ⊢[α, c] insert φ Γ) (hmem : φ ∈ Γ) : Z∞ ⊢[α, c] Γ := by
   rwa [Finset.insert_eq_self.mpr hmem] at h
 
@@ -315,7 +311,6 @@ lemma cut (χ : ArithmeticFormula ℕ) (hc : χ.qr < c) (h₁ : Z∞ ⊢[α, c] 
 - [Tow20, Section 14] -/
 lemma sound (h : Z∞ ⊢[α, c] Γ) : ∃ φ ∈ Γ, LitTrue φ := h.choose.sound
 
-/-- The empty sequent is not boundedly derivable. -/
 lemma not_empty : ¬(Z∞ ⊢[α, c] ∅) := fun h => by simpa using h.sound
 
 end

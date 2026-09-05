@@ -13,10 +13,7 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {ξ : Type*}
 
-/-- Recursion on bounded arithmetical formulas with clauses for atoms, Boolean operations, and
-bounded quantifiers.
-- This is the level-`0` instance of the shape of Foundation's `sigma₁_induction`; no separate
-  source theorem. -/
+/-- Recursion on bounded arithmetical formulas. -/
 lemma delta₀_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
     (hVerum : ∀ n, P n ⊤)
     (hFalsum : ∀ n, P n ⊥)

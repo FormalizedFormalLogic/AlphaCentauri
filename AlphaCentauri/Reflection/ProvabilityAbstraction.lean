@@ -30,8 +30,6 @@ abbrev localReflection : Theory L := 𝔅.localReflectionOn fun _ ↦ True
 
 variable {Γ Γ' : Sentence L → Prop}
 
-/-- A sentence belongs to `localReflectionOn Γ` iff it is a reflection instance for a sentence
-satisfying `Γ`. -/
 @[simp]
 lemma mem_localReflectionOn_iff {ψ : Sentence L} :
     ψ ∈ 𝔅.localReflectionOn Γ ↔ ∃ σ, Γ σ ∧ ψ = 𝔅 σ 🡒 σ := by

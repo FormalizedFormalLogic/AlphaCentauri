@@ -36,7 +36,6 @@ lemma asg_comp_shift (e : ℕ → ℕ) : (asg e).comp Rew.shift = asg (e ∘ Nat
   · exact x.elim0
   · simp [asg, Rew.comp_app]
 
-/-- Closing a shifted sequent reindexes its assignment by `Nat.succ`. -/
 lemma asg_image_shift (e : ℕ → ℕ) (Γ : Sequent) :
     (Γ.image Rewriting.shift).image (fun ψ => asg e ▹ ψ)
       = Γ.image (fun ψ => asg (e ∘ Nat.succ) ▹ ψ) := by
@@ -67,7 +66,6 @@ Cut-free excluded middle for substitutions by closed terms of the same standard 
 
 variable {b : Bool} {k : ℕ} {w w' : Fin n → ArithmeticTerm ℕ}
 
-/-- Truth of a literal depends on the substituted terms only through their values. -/
 private lemma litTrue_subst_congr
     (h : ∀ i, Semiterm.val (M := ℕ) ![] id (w i) = Semiterm.val (M := ℕ) ![] id (w' i))
     (b : Bool) (r : (ℒₒᵣ).Rel k) (v : Fin k → Semiterm ℒₒᵣ ℕ n) :
@@ -82,7 +80,6 @@ private lemma litTrue_subst_congr
 
 namespace Provable
 
-/-- Combines two derivable conjunct premises with conjunction and disjunction formulas in `Γ`. -/
 private lemma em_binary {A B C D : ArithmeticFormula ℕ} (hab : A ⋏ B ∈ Γ) (hcd : C ⋎ D ∈ Γ)
     (h₁ : ∃ α, Z∞ ⊢[α, 0] insert A (insert C (insert D Γ)))
     (h₂ : ∃ α, Z∞ ⊢[α, 0] insert B (insert C (insert D Γ))) : ∃ α, Z∞ ⊢[α, 0] Γ := by
@@ -92,7 +89,6 @@ private lemma em_binary {A B C D : ArithmeticFormula ℕ} (hab : A ⋏ B ∈ Γ)
     (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem hab))
   exact ⟨_, h.orI.insert_absorb hcd⟩
 
-/-- Combines numeral-instance premises with universal and existential formulas in `Γ`. -/
 private lemma em_quant {φₓ ψₓ : ArithmeticSemiformula ℕ 1} (hall : (∀¹ φₓ) ∈ Γ)
     (hexs : (∃¹ ψₓ) ∈ Γ)
     (fam : ∀ m : ℕ, ∃ α, Z∞ ⊢[α, 0] insert (ψₓ/[(↑m : ArithmeticTerm ℕ)])
@@ -102,7 +98,6 @@ private lemma em_quant {φₓ ψₓ : ArithmeticSemiformula ℕ 1} (hall : (∀�
     (exI m (hβ m)).insert_absorb (Finset.mem_insert_of_mem hexs)
   exact ⟨_, (allω h).insert_absorb hall⟩
 
-/-- Value-equal substitutions into opposite atomic literals yield a cut-free derivation. -/
 private lemma em_atomic
     (h : ∀ i, Semiterm.val (M := ℕ) ![] id (w i) = Semiterm.val (M := ℕ) ![] id (w' i))
     (b : Bool) (r : (ℒₒᵣ).Rel k) (v : Fin k → Semiterm ℒₒᵣ ℕ n)
@@ -113,7 +108,6 @@ private lemma em_atomic
   · rw [neg_signedLit] at ht
     exact ⟨0, axTrue (!b) r _ ((litTrue_subst_congr h (!b) r v).mp ht) hn⟩
 
-/-- Value-equal substitutions into a formula and its negation yield a cut-free derivation. -/
 private lemma em_congAux : ∀ (k : ℕ) {n : ℕ} (w w' : Fin n → ArithmeticTerm ℕ)
     (ψ : ArithmeticSemiformula ℕ n), ψ.complexity ≤ k →
     (∀ i, Semiterm.val (M := ℕ) ![] id (w i) = Semiterm.val (M := ℕ) ![] id (w' i)) →

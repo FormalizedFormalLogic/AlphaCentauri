@@ -23,14 +23,12 @@ section Frame
 
 variable (b : ArithmeticFormula ℕ)
 
-/-- Moving `insert b` through erasure and insertion gives the indicated subset. -/
 private lemma inv_push (a e : ArithmeticFormula ℕ) (s : Sequent) :
     insert b ((insert a s).erase e) ⊆ insert a (insert b (s.erase e)) := by
   intro x hx
   simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
   tauto
 
-/-- The reverse subset to `inv_push` when `a` differs from the erased formula. -/
 private lemma inv_pull {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s : Sequent) :
     insert a (insert b (s.erase e)) ⊆ insert b ((insert a s).erase e) := by
   intro x hx
@@ -39,13 +37,11 @@ private lemma inv_pull {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s : Sequent)
 
 variable {b}
 
-/-- The two-formula version of `inv_push` for a disjunction. -/
 private lemma inv_push₂ (a : ArithmeticFormula ℕ) (s : Sequent) :
     insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ)))
       ⊆ insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ)))) :=
   (Finset.insert_subset_insert φ (inv_push ψ a (φ ⋎ ψ) s)).trans (Finset.insert_comm φ a _).subset
 
-/-- The two-formula version of `inv_pull` for a disjunction. -/
 private lemma inv_pull₂ {a : ArithmeticFormula ℕ} (h : a ≠ (φ ⋎ ψ)) (s : Sequent) :
     insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ))))
       ⊆ insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ))) :=
@@ -53,7 +49,6 @@ private lemma inv_pull₂ {a : ArithmeticFormula ℕ} (h : a ≠ (φ ⋎ ψ)) (s
 
 end Frame
 
-/-- An `ℕ∞` bound on `χ.qr + 1` by `c` implies `χ.qr < c`. -/
 lemma qr_lt_of_succ_le {χ : ArithmeticFormula ℕ} (h : ((χ.qr : ℕ∞) + 1) ≤ (c : ℕ∞)) :
     χ.qr < c := by exact_mod_cast h
 

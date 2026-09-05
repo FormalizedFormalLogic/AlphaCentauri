@@ -45,8 +45,6 @@ instance qqBex_defined : 𝚺₁-Function₂ (qqBex : V → V → V) via qqBexDe
 instance qqBex_definable (Γ m) : Γ-[m + 1]-Function₂ (qqBex : V → V → V) :=
   .of_sigmaOne qqBex_defined.to_definable
 
-/-- Negation translates a bounded universal code to a bounded existential code.
-- This is a routine translation of bounded quantifier duality; no separate source theorem. -/
 lemma neg_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
     neg ℒₒᵣ (qqBall u q) = qqBex u (neg ℒₒᵣ q) := by
   have hlt : IsUFormula ℒₒᵣ (Arithmetic.qqNLT (qqBvar 0) u) := by simp [Arithmetic.qqNLT, hu]
@@ -55,8 +53,6 @@ lemma neg_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ
     neg_all (by simp [hlt, hq]), neg_or hlt hq]
   simp [Arithmetic.qqNLT, Arithmetic.qqLT, hu]
 
-/-- Negation translates a bounded existential code to a bounded universal code.
-- This is the converse routine translation; no separate source theorem. -/
 lemma neg_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
     neg ℒₒᵣ (qqBex u q) = qqBall u (neg ℒₒᵣ q) := by
   have hlt : IsUFormula ℒₒᵣ (Arithmetic.qqLT (qqBvar 0) u) := by simp [Arithmetic.qqLT, hu]
@@ -181,8 +177,6 @@ instance : construction.StrongFinite V where
 
 end IsDelta0F
 
-/-- Free-variable shift commutes with the bounded universal coding operation.
-- This is a routine coding fact; no separate source theorem. -/
 lemma shift_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
     shift ℒₒᵣ (qqBall u q) = qqBall (termShift ℒₒᵣ u) (shift ℒₒᵣ q) := by
   have hlt : IsUFormula ℒₒᵣ (Arithmetic.qqNLT (qqBvar 0) u) := by simp [Arithmetic.qqNLT, hu]
@@ -192,8 +186,6 @@ lemma shift_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒ�
     shift_all (by simp [hlt, hq]), shift_or hlt hq]
   simp [Arithmetic.qqNLT, hu]
 
-/-- Free-variable shift commutes with the bounded existential coding operation.
-- This is a routine coding fact; no separate source theorem. -/
 lemma shift_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
     shift ℒₒᵣ (qqBex u q) = qqBex (termShift ℒₒᵣ u) (shift ℒₒᵣ q) := by
   have hlt : IsUFormula ℒₒᵣ (Arithmetic.qqLT (qqBvar 0) u) := by simp [Arithmetic.qqLT, hu]
@@ -402,8 +394,6 @@ lemma IsDelta0.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
       exact IsDelta0.bex ht.termShift (ih hq)
   exact H p h hp
 
-/-- Every internally `Δ₀` formula is internally `Σ₁`.
-- This is a routine bridge from `Δ₀` to `Σ₁`; no separate source theorem. -/
 lemma IsDelta0.isSigma1 {p : V} (h : IsDelta0 p) : IsSigma1 p := by
   have : 𝚫₁-Predicate (IsSigma1 : V → Prop) := IsSigma1.defined.to_definable
   have H : ∀ p : V, IsDelta0 p → IsSigma1 p := by

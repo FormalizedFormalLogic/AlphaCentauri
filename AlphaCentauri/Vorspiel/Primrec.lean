@@ -16,17 +16,14 @@ section quantifier
 
 variable {β : Type*} [Primcodable β] {R : ℕ → β → Prop}
 
-/-- Bounded existential quantification over the first argument preserves primitive recursiveness. -/
 theorem PrimrecRel.exists_lt' (h : PrimrecRel R) : PrimrecRel fun n y ↦ ∃ x < n, R x y :=
   (PrimrecRel.exists_mem_list h |>.comp (Primrec.list_range.comp .fst) .snd).of_eq (by simp)
 
-/-- Bounded universal quantification over the first argument preserves primitive recursiveness. -/
 theorem PrimrecRel.forall_lt' (h : PrimrecRel R) : PrimrecRel fun n y ↦ ∀ x < n, R x y :=
   (PrimrecRel.forall_mem_list h |>.comp (Primrec.list_range.comp .fst) .snd).of_eq (by simp)
 
 end quantifier
 
-/-- A constant predicate is primitive recursive. -/
 theorem PrimrecPred.const {α : Type*} [Primcodable α] (p : Prop) : PrimrecPred fun _ : α ↦ p := by
   classical
   exact Primrec.primrecPred (Primrec.const (decide p))
@@ -35,21 +32,18 @@ section vector
 
 variable {k : ℕ}
 
-/-- A function on `Fin k → ℕ` is primitive recursive iff its `List.Vector` form is. -/
 theorem Nat.Primrec'.comp_get_iff {f : (Fin k → ℕ) → ℕ} :
     Nat.Primrec' (fun v : List.Vector ℕ k ↦ f v.get) ↔ Primrec f := by
   rw [Nat.Primrec'.prim_iff]
   exact ⟨fun h ↦ (h.comp Primrec.vector_ofFn').of_eq fun v ↦ by
       rw [funext (List.Vector.get_ofFn v)], fun h ↦ h.comp Primrec.vector_get'⟩
 
-/-- A function on `List.Vector ℕ k` is primitive recursive iff its `Fin k → ℕ` form is. -/
 theorem Nat.Primrec'.comp_ofFn_iff {f : List.Vector ℕ k → ℕ} :
     Primrec (fun v : Fin k → ℕ ↦ f (List.Vector.ofFn v)) ↔ Nat.Primrec' f := by
   rw [Nat.Primrec'.prim_iff]
   exact ⟨fun h ↦ (h.comp Primrec.vector_get').of_eq (by simp [List.Vector.ofFn_get]),
     fun h ↦ h.comp Primrec.vector_ofFn'⟩
 
-/-- A predicate on `Fin k → ℕ` is primitive recursive iff its `List.Vector` form is. -/
 theorem PrimrecPred.comp_get_iff {p : (Fin k → ℕ) → Prop} :
     PrimrecPred (fun v : List.Vector ℕ k ↦ p v.get) ↔ PrimrecPred p :=
   ⟨fun h ↦ (h.comp Primrec.vector_ofFn').of_eq fun v ↦ by

@@ -23,13 +23,9 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-- Equality is the binary relation of `ℒₒᵣ` with index `0`, in plain numerals.
-- No source; a numeral restatement of `Arithmetic.LOR_rel_eqIndex`. -/
 @[simp] lemma isRel_two_zero : (ℒₒᵣ).IsRel (2 : V) 0 := by
   simpa using Arithmetic.LOR_rel_eqIndex (V := V)
 
-/-- Less-than is the binary relation of `ℒₒᵣ` with index `1`, in plain numerals.
-- No source; a numeral restatement of `Arithmetic.LOR_rel_ltIndex`. -/
 @[simp] lemma isRel_two_one : (ℒₒᵣ).IsRel (2 : V) 1 := by
   simpa using Arithmetic.LOR_rel_ltIndex (V := V)
 
@@ -41,12 +37,8 @@ lemma IsDelta0.of_qqBex {u p : V} (h : IsDelta0 (qqBex u p)) : IsDelta0 p := by
   obtain ⟨-, rfl⟩ := (qqAnd_inj _ _ _ _).mp heq
   exact hq'
 
-/-- The code of `ℒₒᵣ`'s equality symbol is the numeral `0`.
-- No source; a quoted restatement of `coe_eqIndex_eq`. -/
 lemma coe_quote_eq : (⌜(Language.Eq.eq : (ℒₒᵣ).Rel 2)⌝ : V) = 0 := coe_eqIndex_eq
 
-/-- The code of `ℒₒᵣ`'s less-than symbol is the numeral `1`.
-- No source; a quoted restatement of `coe_ltIndex_eq`. -/
 lemma coe_quote_lt : (⌜(Language.LT.lt : (ℒₒᵣ).Rel 2)⌝ : V) = 1 := coe_ltIndex_eq
 
 /-- A well-formed positive atom of `ℒₒᵣ` is a coded equality or a coded less-than.
@@ -73,15 +65,11 @@ lemma nrel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^nrel k r v)) :
 
 /-! ## Substitution and the coded quantifiers -/
 
-/-- A code whose bound shift is a semiterm one level up is itself a semiterm.
-- No source; a routine coding fact. -/
 lemma isSemiterm_of_termBShift {n t : V} (ht : IsUTerm ℒₒᵣ t)
     (h : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t)) : IsSemiterm ℒₒᵣ n t :=
   (IsSemiterm.def (L := ℒₒᵣ)).mpr
     ⟨ht, (termBV_termBShift_le (L := ℒₒᵣ) ht n).mp ((IsSemiterm.def (L := ℒₒᵣ)).mp h).2⟩
 
-/-- Inversion of the semiformula condition at a bounded universal code.
-- No source; a routine coding fact. -/
 lemma isSemiformula_qqBall {n t p : V} (ht : IsUTerm ℒₒᵣ t)
     (h : IsSemiformula ℒₒᵣ n (qqBall (termBShift ℒₒᵣ t) p)) :
     IsSemiterm ℒₒᵣ n t ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
@@ -89,8 +77,6 @@ lemma isSemiformula_qqBall {n t p : V} (ht : IsUTerm ℒₒᵣ t)
     simpa [qqBall, Arithmetic.qqNLT] using h
   exact ⟨isSemiterm_of_termBShift ht h'.1, h'.2⟩
 
-/-- Inversion of the semiformula condition at a bounded existential code.
-- No source; a routine coding fact. -/
 lemma isSemiformula_qqBex {n t p : V} (ht : IsUTerm ℒₒᵣ t)
     (h : IsSemiformula ℒₒᵣ n (qqBex (termBShift ℒₒᵣ t) p)) :
     IsSemiterm ℒₒᵣ n t ∧ IsSemiformula ℒₒᵣ (n + 1) p := by

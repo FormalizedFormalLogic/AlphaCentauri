@@ -33,13 +33,6 @@ def ArithmeticTheory.EssentiallyReflexive (T : ArithmeticTheory) : Prop :=
   ∀ U : ArithmeticTheory, T ⊆ U → U.Reflexive
 
 /-- A reflexive extension of `𝗜𝚺₁` is not finitely axiomatizable.
-
-If a finite `F ⊆ T` axiomatized `T`, reflexivity would give `T ⊢ Con(F)`, hence `F ⊢ Con(F)`,
-contradicting the second incompleteness theorem for `F`, which is `Δ₁`, contains `𝗜𝚺₁` and is
-consistent. The finite subtheory is taken as a subset of `T` through
-`finiteAxiomatizable_iff_exists_finite_subset`, and its `Theory.Δ₁` presentation is the one
-`ArithmeticTheory.Reflexive` fixes, so that the consistency statement `T` proves is the one
-`consistent_unprovable` speaks about.
 - [Lin97, Corollary 2.1]
 - [HP98, Corollary III.2.24] -/
 theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T]

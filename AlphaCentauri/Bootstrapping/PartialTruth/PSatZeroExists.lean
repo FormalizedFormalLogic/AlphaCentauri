@@ -35,15 +35,11 @@ open Arithmetic (qqEQ qqNEQ qqLT qqNLT)
 
 /-! ## Elementary exponential bounds -/
 
-/-- A product is dominated by the exponential of the sum.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma mul_le_exp_add (a b : V) : a * b ≤ Exp.exp (a + b) :=
   calc a * b ≤ Exp.exp a * Exp.exp b :=
         mul_le_mul (le_of_lt (lt_exp a)) (le_of_lt (lt_exp b)) (by simp) (by simp)
     _ = Exp.exp (a + b) := (exp_add a b).symm
 
-/-- Adding a summand to an exponential costs one step of the exponent.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma exp_add_le (a c : V) : Exp.exp a + c ≤ Exp.exp (a + c + 1) := by
   have h1 : c + 2 ≤ Exp.exp (c + 1) := by
     have : c + 1 + 1 ≤ Exp.exp (c + 1) := succ_le_iff_lt.mpr (lt_exp (c + 1))
@@ -59,16 +55,12 @@ lemma exp_add_le (a c : V) : Exp.exp a + c ≤ Exp.exp (a + c + 1) := by
     _ ≤ Exp.exp a * Exp.exp (c + 1) := mul_le_mul le_rfl h1 (by simp) (by simp)
     _ = Exp.exp (a + c + 1) := by rw [← exp_add]; simp [add_assoc]
 
-/-- The pairing function is dominated by an exponential of its arguments.
-- This is a routine coding fact; no separate source theorem. -/
 lemma pair_le_exp (a b : V) : ⟪a, b⟫ ≤ Exp.exp (2 * a + 2 * b + 2) :=
   calc ⟪a, b⟫ ≤ (a + b + 1) ^ 2 := pair_polybound a b
     _ = (a + b + 1) * (a + b + 1) := by ring
     _ ≤ Exp.exp ((a + b + 1) + (a + b + 1)) := mul_le_exp_add _ _
     _ = Exp.exp (2 * a + 2 * b + 2) := by ring_nf
 
-/-- Pushing a value onto an assignment is dominated by an exponential.
-- This is a routine coding fact; no separate source theorem. -/
 lemma adjoin_le_exp (a v : V) : a ∷ v ≤ Exp.exp (2 * a + 2 * v + 3) := by
   have h1 : (1 : V) ≤ Exp.exp (2 * a + 2 * v + 2) := by simp
   calc a ∷ v = ⟪a, v⟫ + 1 := adjoin_def a v
@@ -77,8 +69,6 @@ lemma adjoin_le_exp (a v : V) : a ∷ v ≤ Exp.exp (2 * a + 2 * v + 3) := by
     _ = Exp.exp (2 * a + 2 * v + 3) := by
         rw [show 2 * a + 2 * v + 3 = (2 * a + 2 * v + 2) + 1 from by ring, exp_succ]
 
-/-- Every entry of a coded assignment is dominated by its code.
-- This is a routine coding fact; no separate source theorem. -/
 lemma listMax_le_self (v : V) : listMax v ≤ v := by
   refine adjoin_induction 𝚷 (P := fun v ↦ listMax v ≤ v) (by definability) (by simp) ?_ v
   intro x v ih
@@ -87,8 +77,6 @@ lemma listMax_le_self (v : V) : listMax v ≤ v := by
 
 /-! ## The iterated exponential -/
 
-/-- The iterated exponential dominates its base.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma le_iterExp (x n : V) : x ≤ iterExp x n := by
   refine ISigma1.sigma1_succ_induction (P := fun n ↦ x ≤ iterExp x n) (by definability)
     (by simp) ?_ n
@@ -97,41 +85,29 @@ lemma le_iterExp (x n : V) : x ≤ iterExp x n := by
     _ ≤ Exp.exp (iterExp x n) := le_of_lt (lt_exp _)
     _ = iterExp x (n + 1) := (iterExp_succ x n).symm
 
-/-- The iterated exponential is monotone in its base.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma iterExp_le_iterExp_left {x y : V} (h : x ≤ y) (n : V) : iterExp x n ≤ iterExp y n := by
   refine ISigma1.sigma1_succ_induction (P := fun n ↦ iterExp x n ≤ iterExp y n) (by definability)
     (by simpa using h) ?_ n
   intro n ih
   simpa using exp_monotone_le.mpr ih
 
-/-- Iterating the exponential is additive in the number of steps.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma iterExp_add (x m n : V) : iterExp x (m + n) = iterExp (iterExp x m) n := by
   refine ISigma1.sigma1_succ_induction (P := fun n ↦ iterExp x (m + n) = iterExp (iterExp x m) n)
     (by definability) (by simp) ?_ n
   intro n ih
   rw [show m + (n + 1) = (m + n) + 1 from by ring, iterExp_succ, ih, iterExp_succ]
 
-/-- The iterated exponential is monotone in the number of steps.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma iterExp_le_iterExp_right (x : V) {m n : V} (h : m ≤ n) : iterExp x m ≤ iterExp x n := by
   obtain ⟨k, rfl⟩ := le_iff_exists_add.mp h
   rw [iterExp_add]
   exact le_iterExp _ k
 
-/-- One step of the iterated exponential is a strict increase.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma iterExp_lt_iterExp_succ (x n : V) : iterExp x n < iterExp x (n + 1) := by
   simp
 
-/-- A strictly larger number of steps gives a strictly larger iterated exponential.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma iterExp_lt_of_lt (x : V) {m n : V} (h : m < n) : iterExp x m < iterExp x n :=
   lt_of_lt_of_le (iterExp_lt_iterExp_succ x m) (iterExp_le_iterExp_right x (lt_iff_succ_le.mp h))
 
-/-- Doubling is dominated by the exponential from `2` on.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma two_mul_le_exp {a : V} (h : 2 ≤ a) : 2 * a ≤ Exp.exp a := by
   obtain ⟨c, rfl⟩ := le_iff_exists_add.mp h
   have h4 : Exp.exp (2 + c : V) = 4 * Exp.exp c := by
@@ -143,23 +119,15 @@ lemma two_mul_le_exp {a : V} (h : 2 ≤ a) : 2 * a ≤ Exp.exp a := by
     _ ≤ 4 * Exp.exp c := mul_le_mul le_rfl hc (by simp) (by simp)
     _ = Exp.exp (2 + c) := h4.symm
 
-/-- The first step of the iterated exponential.
-- This is a routine arithmetic fact; no separate source theorem. -/
 @[simp] lemma iterExp_one (x : V) : iterExp x 1 = Exp.exp x := by
   rw [show (1 : V) = 0 + 1 from by ring, iterExp_succ, iterExp_zero]
 
-/-- The second step of the iterated exponential.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma iterExp_two (x : V) : iterExp x 2 = Exp.exp (Exp.exp x) := by
   rw [show (2 : V) = 1 + 1 from by ring, iterExp_succ, iterExp_one]
 
-/-- The third step of the iterated exponential.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma iterExp_three (x : V) : iterExp x 3 = Exp.exp (Exp.exp (Exp.exp x)) := by
   rw [show (3 : V) = 2 + 1 from by ring, iterExp_succ, iterExp_two]
 
-/-- The fourth step of the iterated exponential.
-- This is a routine arithmetic fact; no separate source theorem. -/
 lemma iterExp_four (x : V) : iterExp x 4 = Exp.exp (Exp.exp (Exp.exp (Exp.exp x))) := by
   rw [show (4 : V) = 3 + 1 from by ring, iterExp_succ, iterExp_three]
 
@@ -267,8 +235,6 @@ lemma tableExp_step {z p u x e : V} (hp : p < z) (hu : u < z) (hx : x < termVal 
 
 /-! ## Atomic codes over `ℒₒᵣ` -/
 
-/-- A well-formed atomic code over `ℒₒᵣ` is an equality or a less-than atom.
-- This is a routine coding fact; no separate source theorem. -/
 lemma uformula_rel_cases {k r w : V} (h : IsUFormula ℒₒᵣ (^rel k r w)) :
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r w = t ^= u) ∨
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r w = t ^< u) := by
@@ -279,8 +245,6 @@ lemma uformula_rel_cases {k r w : V} (h : IsUFormula ℒₒᵣ (^rel k r w)) :
   · obtain ⟨t, u, ht, hu, rfl⟩ := IsUTermVec.two_iff.mp hw
     exact Or.inr ⟨t, u, ht, hu, rfl⟩
 
-/-- A well-formed negated atomic code over `ℒₒᵣ` is an inequality or a not-less-than atom.
-- This is a routine coding fact; no separate source theorem. -/
 lemma uformula_nrel_cases {k r w : V} (h : IsUFormula ℒₒᵣ (^nrel k r w)) :
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^nrel k r w = t ^≠ u) ∨
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^nrel k r w = t ^≮ u) := by
@@ -356,8 +320,6 @@ lemma MinChild.mono (hsub : ∀ m ∈ domain q, m ∈ domain Q) (h : MinChild q 
   · exact Or.inr (Or.inr (Or.inl ⟨a, b, e'', hsub _ hd, hx⟩))
   · exact Or.inr (Or.inr (Or.inr ⟨a, b, e'', hsub _ hd, hx⟩))
 
-/-- A larger mapping takes the same values as a sub-mapping at the nodes of the latter.
-- This is a routine coding fact; no separate source theorem. -/
 lemma val_iff_of_subset (hQ : IsMapping Q) (hsub : q ⊆ Q) (hn : n ∈ domain q) :
     ⟪n, v⟫ ∈ Q ↔ ⟪n, v⟫ ∈ q := by
   obtain ⟨w, hw⟩ := mem_domain_iff.mp hn

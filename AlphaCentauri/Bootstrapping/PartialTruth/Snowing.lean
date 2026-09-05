@@ -205,21 +205,21 @@ lemma satClass_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentenc
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp]
     exact ih (x :> v)
 
-/-- For a strict prenex `Σₙ` formula, internal satisfaction of its code agrees with truth.
+/-- For a strict prenex `𝚺-[n]` formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
 theorem satSigma_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 n φ) (v : Fin k → V) :
     SatSigma n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := satClass_quote_iff hφ v
 
-/-- For a strict prenex `Πₙ` formula, internal satisfaction of its code agrees with truth.
+/-- For a strict prenex `𝚷-[n]` formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
 theorem satPi_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
     SatPi n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := satClass_quote_iff hφ v
 
-/-- The sentence asserting agreement of `φ` with its level-`Σₙ₊₁` partial truth definition.
+/-- The sentence asserting agreement of `φ` with its level-`𝚺-[n + 1]` partial truth definition.
 - [HP98, Corollary I.1.76] -/
 noncomputable def snowing (n : ℕ) {k : ℕ}
     (φ : ArithmeticSemisentence k) : ArithmeticSentence :=
@@ -373,7 +373,7 @@ noncomputable def lenNil : ArithmeticSentence := “∀ l, !lenDef.val l 0 ↔ l
 noncomputable def lenAdjoin : ArithmeticSentence :=
   “∀ x v e l, !adjoinDef.val e x v → (!lenDef.val (l + 1) e ↔ !lenDef.val l v)”
 
-/-- The empty-block Tarski condition for reading `Πₙ` satisfaction as `Σₙ₊₁` satisfaction.
+/-- The empty-block Tarski condition for reading `𝚷-[n]` satisfaction as `𝚺-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)(v)] -/
 noncomputable def satSigmaOfPi : ℕ → ArithmeticSentence
   | 0 =>
@@ -383,7 +383,7 @@ noncomputable def satSigmaOfPi : ℕ → ArithmeticSentence
       “∀ z e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
         (!(satSigma (n + 1)).val z e ↔ !(satPi n).val z e)”
 
-/-- The empty-block Tarski condition for reading `Σₙ` satisfaction as `Πₙ₊₁` satisfaction.
+/-- The empty-block Tarski condition for reading `𝚺-[n]` satisfaction as `𝚷-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 noncomputable def satPiOfSigma : ℕ → ArithmeticSentence
   | 0 =>
@@ -393,40 +393,40 @@ noncomputable def satPiOfSigma : ℕ → ArithmeticSentence
       “∀ z e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
         (!(satPi (n + 1)).val z e ↔ !(satSigma n).val z e)”
 
-/-- The domain Tarski condition for `Σₙ₊₁` satisfaction.
+/-- The domain Tarski condition for `𝚺-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satSigmaDom (n : ℕ) : ArithmeticSentence :=
   “∀ z e, !(satSigma n).val z e →
     !(isStrictSigma (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
-/-- The domain Tarski condition for `Πₙ₊₁` satisfaction.
+/-- The domain Tarski condition for `𝚷-[n + 1]` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satPiDom (n : ℕ) : ArithmeticSentence :=
   “∀ z e, !(satPi n).val z e →
     !(isStrictPi (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
-/-- The Tarski condition for existential quantification at level `Σₙ₊₁`.
+/-- The Tarski condition for existential quantification at level `𝚺-[n + 1]`.
 - [HP98, Theorem I.1.75(2)(v)] -/
 noncomputable def satSigmaExs (n : ℕ) : ArithmeticSentence :=
   “∀ p z e, !qqExsDef.val z p →
     (!(satSigma n).val z e ↔
       ∃ x e', !adjoinDef.val e' x e ∧ !(satSigma n).val p e')”
 
-/-- The Tarski condition for universal quantification at level `Πₙ₊₁`.
+/-- The Tarski condition for universal quantification at level `𝚷-[n + 1]`.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 noncomputable def satPiAll (n : ℕ) : ArithmeticSentence :=
   “∀ p z e, !qqAllDef.val z p →
     (!(satPi n).val z e ↔
       ∀ x e', !adjoinDef.val e' x e → !(satPi n).val p e')”
 
-/-- The negation-duality Tarski condition from `Σₙ₊₁` to `Πₙ₊₁`.
+/-- The negation-duality Tarski condition from `𝚺-[n + 1]` to `𝚷-[n + 1]`.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satPiNeg (n : ℕ) : ArithmeticSentence :=
   “∀ z nz e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
     !(negGraph ℒₒᵣ).val nz z →
     (!(satPi n).val nz e ↔ ¬!(satSigma n).val z e)”
 
-/-- The negation-duality Tarski condition from `Πₙ₊₁` to `Σₙ₊₁`.
+/-- The negation-duality Tarski condition from `𝚷-[n + 1]` to `𝚺-[n + 1]`.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satSigmaNeg (n : ℕ) : ArithmeticSentence :=
   “∀ z nz e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
@@ -493,7 +493,7 @@ axiom ISigma1.provable_tarski (n : ℕ) : 𝗜𝚺₁ ⊢* tarski n
 axiom provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ
 
-/-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `Σₙ₊₁` formula.
+/-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `𝚺-[n + 1]` formula.
 - [HP98, Corollary I.1.76] -/
 theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ snowing n φ := by

@@ -43,7 +43,7 @@ variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 - [Lin97, §4.1, p. 52] -/
 @[instance] axiom strictlyWeakerThan_localReflection [Consistent T] : T ⪱ T ∪ 𝗥𝗳𝗻 T
 
-/-- `Rfn_{Π₁}(T)` and `Con(T)` are equivalent over `T`.
+/-- `Rfn_{𝚷-[1]}(T)` and `Con(T)` are equivalent over `T`.
 - [Lin97, Exercise 4.1(b)(ii)]
 - [AB05, Lemma 22(i)] -/
 axiom localReflection_pi_one_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ T.Con
@@ -54,7 +54,7 @@ axiom localReflection_pi_one_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ 
 @[instance] axiom consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
     Entailment.Consistent (T ∪ 𝗥𝗳𝗻 T)
 
-/-- `T ∪ Rfn(T)` is consistent whenever `T` is `Σ₁`-sound.
+/-- `T ∪ Rfn(T)` is consistent whenever `T` is `𝚺-[1]`-sound.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
 @[instance] axiom consistent_localReflection_of_sigma_one_sound [T.SoundOnHierarchy 𝚺 1] :
@@ -80,7 +80,7 @@ abbrev _root_.LO.FirstOrder.Theory.uniformReflectionOnHierarchy
 
 @[inherit_doc] notation "𝗥𝗙𝗡[" Γ:max n:max "] " T:max => Theory.uniformReflectionOnHierarchy T Γ n
 
-/-- `RFN_{Σₙ}(T)` and `RFN_{Πₙ₊₁}(T)` are equivalent over `T`, for `n ≥ 1`.
+/-- `RFN_{𝚺-[n]}(T)` and `RFN_{𝚷-[n + 1]}(T)` are equivalent over `T`, for `n ≥ 1`.
 - [AB05, Lemma 22(ii)] -/
 axiom uniformReflectionOnHierarchy_sigma_equiv_pi_succ {n : ℕ} (hn : 1 ≤ n) :
     T ∪ 𝗥𝗙𝗡[𝚺 n] T ≊ T ∪ 𝗥𝗙𝗡[𝚷 (n + 1)] T

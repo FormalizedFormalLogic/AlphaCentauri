@@ -18,7 +18,6 @@ namespace Arithmetic
 
 variable {L : Language} [L.LT] {ξ : Type*} {s : ℕ}
 
-/-- Universal closure preserves the `𝚷-[s + 1]` classes. -/
 lemma Hierarchy.allClosure :
     {n : ℕ} → {φ : Semiformula L ξ n} → Hierarchy 𝚷 (s + 1) φ → Hierarchy 𝚷 (s + 1) (∀¹* φ)
   |     0, _, hφ => hφ
@@ -56,7 +55,6 @@ def compGraph (ψ : 𝚺₁.Semisentence (l + 1)) (χ : Fin l → 𝚺₁.Semise
   simp [compGraph, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
     Matrix.comp_vecCons', Empty.eq_elim]
 
-/-- Substituting parameters into a `𝚺₁` graph formula gives a `𝚺₁`-definable predicate. -/
 lemma definablePred_evalb {V : Type*} [ORingStructure V] (φ : 𝚺₁.Semisentence (k + 1))
     (v : Fin k → V) : 𝚺₁-Predicate fun y ↦ φ.val.Evalb (y :> v) :=
   HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 1)
@@ -120,22 +118,19 @@ lemma to_provablyTotal (h : T.ProvablyTotalVia f φ) : T.ProvablyTotal f := ⟨�
 lemma graph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
     φ.val.Evalb v ↔ v 0 = f (v ·.succ) := h.defined.iff
 
-/-- Provable totality passes to any stronger theory. -/
 lemma mono (h : T.ProvablyTotalVia f φ) (hT : T ⪯ U) : U.ProvablyTotalVia f φ :=
   ⟨h.defined, hT.pbl h.total⟩
 
-/-- Provable totality depends only on the `𝚷₂` consequences of the theory.
+/-- Provable totality depends only on the `𝚷-[2]` consequences of the theory.
 - [AB05, §10.2] -/
 lemma of_pi2 (h : T.ProvablyTotalVia f φ)
     (H : ∀ σ : ArithmeticSentence, Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) : U.ProvablyTotalVia f φ :=
   ⟨h.defined, H _ (by simp) h.total⟩
 
-/-- In every model of `T`, a provably total graph formula has a value for every input. -/
 lemma models (h : T.ProvablyTotalVia f φ)
     (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] (v : Fin k → V) : ∃ y, φ.val.Evalb (y :> v) :=
   models_totalitySentence_iff.mp (consequence_iff'.mp (Theory.Proof.sound h.total) V) v
 
-/-- A graph formula that has a value for every input in every model of `T` is provably total. -/
 lemma of_models [𝗘𝗤 ℒₒᵣ ⪯ T] (hf : HierarchySymbol.DefinedFunction (V := ℕ) f φ)
     (H : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T], ∀ v : Fin k → V,
       ∃ y, φ.val.Evalb (y :> v)) : T.ProvablyTotalVia f φ :=
@@ -206,7 +201,7 @@ namespace ArithmeticTheory.ProvablyTotal
 lemma mono (h : T.ProvablyTotal f) (hT : T ⪯ U) : U.ProvablyTotal f :=
   have ⟨_, h⟩ := h; ⟨_, h.mono hT⟩
 
-/-- Provable totality depends only on the `𝚷₂` consequences of the theory.
+/-- Provable totality depends only on the `𝚷-[2]` consequences of the theory.
 - [AB05, §10.2] -/
 lemma of_pi2 (h : T.ProvablyTotal f)
     (H : ∀ σ : ArithmeticSentence, Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) : U.ProvablyTotal f :=

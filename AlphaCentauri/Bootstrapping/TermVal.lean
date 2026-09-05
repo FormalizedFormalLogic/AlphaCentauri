@@ -421,4 +421,232 @@ theorem termVal_le_poly (e t : V) : termVal e t ≤ Exp.exp ((listMax e + 2) * (
 
 end termVal
 
+namespace TermValFree
+
+/-- Blueprint for evaluating coded arithmetic terms with separate finite assignments for free
+and bound variables. Free variables outside the coded assignment vector read as `0`.
+- [HP98, 1.64(5)] -/
+def blueprint : Language.TermRec.Blueprint 2 where
+  bvar := .mkSigma “y z f e. !nthDef y e z”
+  fvar := .mkSigma “y x f e. !nthDef y f x”
+  func := .mkSigma
+    “y k g v v' f e.
+      (k = 0 ∧ g = 0 → y = 0) ∧
+      (k = 0 ∧ g = 1 → y = 1) ∧
+      (k = 2 ∧ g = 0 → ∃ a, !nthDef a v' 0 ∧ ∃ b, !nthDef b v' 1 ∧ y = a + b) ∧
+      (k = 2 ∧ g = 1 → ∃ a, !nthDef a v' 0 ∧ ∃ b, !nthDef b v' 1 ∧ y = a * b) ∧
+      (¬(k = 0 ∧ g = 0) → ¬(k = 0 ∧ g = 1) → ¬(k = 2 ∧ g = 0) →
+        ¬(k = 2 ∧ g = 1) → y = 0)”
+
+/-- The recursion realizing `TermValFree.blueprint`.
+- [HP98, 1.64(5)] -/
+noncomputable def construction : Language.TermRec.Construction V blueprint where
+  bvar (param z)        := (param 1).[z]
+  fvar (param x)        := (param 0).[x]
+  func (_     k g _ v') :=
+    if k = 0 ∧ g = 0 then 0
+    else if k = 0 ∧ g = 1 then 1
+    else if k = 2 ∧ g = 0 then v'.[0] + v'.[1]
+    else if k = 2 ∧ g = 1 then v'.[0] * v'.[1]
+    else 0
+  bvar_defined := .mk fun v ↦ by simp [blueprint]
+  fvar_defined := .mk fun v ↦ by simp [blueprint]
+  func_defined := .mk fun v ↦ by
+    simp only [blueprint]
+    split_ifs with h1 h2 h3 h4 <;> simp_all
+    tauto
+
+end TermValFree
+
+section termValFree
+
+open TermValFree
+
+/-- `termVal' f e t` evaluates the coded `ℒₒᵣ`-term `t`, using `f` for free variables and `e`
+for bound variables. Both assignments are coded vectors, with out-of-range entries equal to `0`.
+- [HP98, 1.64(5)] -/
+noncomputable def termVal' (f e t : V) : V := construction.result ℒₒᵣ ![f, e] t
+
+/-- `termValVec' f e k v` evaluates every entry of the coded `k`-vector `v` with assignments
+`f` and `e`.
+- [HP98, 1.64(5)] -/
+noncomputable def termValVec' (f e k v : V) : V :=
+  construction.resultVec ℒₒᵣ (fun i ↦ ![f, e] i) k v
+
+/-- The `𝚺₁` graph of `termVal'`; argument order `(y, f, e, t)`.
+- [HP98, 1.63] -/
+noncomputable def termVal'Graph : 𝚺₁.Semisentence 4 :=
+  (blueprint.result ℒₒᵣ).rew <| Rew.subst ![#0, #3, #1, #2]
+
+/-- The `𝚺₁` graph of `termValVec'`; argument order `(y, f, e, k, v)`.
+- [HP98, 1.63] -/
+noncomputable def termValVec'Graph : 𝚺₁.Semisentence 5 :=
+  (blueprint.resultVec ℒₒᵣ).rew <| Rew.subst ![#0, #3, #4, #1, #2]
+
+@[simp] lemma termVal'_bvar (f e z : V) : termVal' f e ^#z = e.[z] := by
+  simp [termVal', construction]
+
+@[simp] lemma termVal'_fvar (f e x : V) : termVal' f e ^&x = f.[x] := by
+  simp [termVal', construction]
+
+section
+
+/-- The `𝚺₁` definability witness for `termVal'`.
+- [HP98, 1.63] -/
+instance termVal'.defined : 𝚺₁-Function₃ (termVal' : V → V → V → V) via termVal'Graph := .mk fun v ↦ by
+  simpa [termVal'Graph, termVal', Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+    using construction.result_defined.defined ![v 0, v 3, v 1, v 2]
+
+/-- The `𝚫₁` definability instance for `termVal'`, using uniqueness of its graph.
+- [HP98, 1.63] -/
+instance termVal'.definable : 𝚫₁-Function₃ (termVal' : V → V → V → V) :=
+  termVal'.defined.graph_delta.to_definable
+
+/-- The `𝚺₁` definability witness for `termValVec'`.
+- [HP98, 1.63] -/
+instance termValVec'.defined : 𝚺₁-Function₄ (termValVec' : V → V → V → V → V) via termValVec'Graph :=
+  .mk fun v ↦ by
+    simpa [termValVec'Graph, termValVec', Matrix.constant_eq_singleton, Matrix.comp_vecCons',
+      Function.comp_def]
+      using! (construction.resultVec_defined (L := ℒₒᵣ)).defined ![v 0, v 3, v 4, v 1, v 2]
+
+/-- The `𝚫₁` definability instance for `termValVec'`, using uniqueness of its graph.
+- [HP98, 1.63] -/
+instance termValVec'.definable : 𝚫₁-Function₄ (termValVec' : V → V → V → V → V) :=
+  termValVec'.defined.graph_delta.to_definable
+
+end
+
+/-- Evaluation of a coded term vector with free-variable assignments preserves its length.
+- [HP98, 1.64(5)] -/
+@[simp] lemma len_termValVec' {f e k v : V} (hv : IsUTermVec ℒₒᵣ k v) :
+    len (termValVec' f e k v) = k := construction.resultVec_lh ℒₒᵣ _ hv
+
+/-- The entries of an evaluated coded term vector are evaluated entrywise.
+- [HP98, 1.64(5)] -/
+@[simp] lemma nth_termValVec' {f e k v i : V} (hv : IsUTermVec ℒₒᵣ k v) (hi : i < k) :
+    (termValVec' f e k v).[i] = termVal' f e v.[i] :=
+  construction.nth_resultVec ℒₒᵣ _ hv hi
+
+/-- Evaluation with free-variable assignments commutes with coded addition.
+- [HP98, 1.64(5)] -/
+@[simp] lemma termVal'_add {f e t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
+    termVal' f e (t ^+ u) = termVal' f e t + termVal' f e u := by
+  have hkf : (ℒₒᵣ).IsFunc (2 : V) (0 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inl ⟨rfl, rfl⟩)
+  have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
+  have heq : (t ^+ u : V) = ^func (2 : V) (0 : V) (?[t, u] : V) := by
+    rw [Arithmetic.qqAdd, Arithmetic.coe_addIndex_eq]
+  have step : termVal' f e (^func (2 : V) (0 : V) (?[t, u] : V)) =
+      construction.func ![f, e] 2 0 (?[t, u] : V) (termValVec' f e 2 (?[t, u] : V)) :=
+    construction.result_func' hkf hv
+  rw [heq, step]
+  simp [construction, nth_termValVec' hv (show (0 : V) < 2 by simp),
+    nth_termValVec' hv (show (1 : V) < 2 by simp)]
+
+/-- Evaluation with free-variable assignments commutes with coded multiplication.
+- [HP98, 1.64(5)] -/
+@[simp] lemma termVal'_mul {f e t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
+    termVal' f e (t ^* u) = termVal' f e t * termVal' f e u := by
+  have hkf : (ℒₒᵣ).IsFunc (2 : V) (1 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inr ⟨rfl, rfl⟩)
+  have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
+  have heq : (t ^* u : V) = ^func (2 : V) (1 : V) (?[t, u] : V) := by
+    rw [Arithmetic.qqMul, Arithmetic.coe_mulIndex_eq]
+  have step : termVal' f e (^func (2 : V) (1 : V) (?[t, u] : V)) =
+      construction.func ![f, e] 2 1 (?[t, u] : V) (termValVec' f e 2 (?[t, u] : V)) :=
+    construction.result_func' hkf hv
+  rw [heq, step]
+  simp [construction, nth_termValVec' hv (show (0 : V) < 2 by simp),
+    nth_termValVec' hv (show (1 : V) < 2 by simp)]
+
+/-- Non-term codes evaluate to zero with arbitrary free-variable assignments. -/
+lemma termVal'_not_uterm {f e t : V} (h : ¬IsUTerm ℒₒᵣ t) : termVal' f e t = 0 := by
+  exact construction.result_prop_not ℒₒᵣ ![f, e] h
+
+/-- The free-variable-aware evaluator agrees with `termVal` when the free assignment is empty.
+Since coded-vector lookup is total, this also covers every free variable outside the assignment.
+- [HP98, 1.64(5)] -/
+lemma termVal'_empty (e t : V) : termVal' 0 e t = termVal e t := by
+  by_cases ht : IsUTerm ℒₒᵣ t
+  · revert t
+    apply IsUTerm.induction (L := ℒₒᵣ) 𝚺 (P := fun t ↦ termVal' 0 e t = termVal e t) ?_ ?_ ?_ ?_
+    · definability
+    · intro z; simp
+    · intro x; simp
+    · intro k g v hkg hv ih
+      have key : termValVec' 0 e k v = termValVec e k v := by
+        apply nth_ext' k (by simp [hv]) (by simp [hv])
+        intro i hi
+        rw [nth_termValVec' hv hi, nth_termValVec hv hi, ih i hi]
+      have step1 : termVal' 0 e (^func k g v) =
+          construction.func ![0, e] k g v (termValVec' 0 e k v) :=
+        construction.result_func' hkg hv
+      have step2 : termVal e (^func k g v) =
+          TermVal.construction.func ![e] k g v (termValVec e k v) :=
+        TermVal.construction.result_func' hkg hv
+      rw [step1, step2, key]
+      simp [construction, TermVal.construction]
+  · simp [termVal'_not_uterm ht, termVal_not_uterm ht]
+
+/-- Evaluation after coded term substitution agrees with evaluation under substituted values,
+with the free-variable assignment unchanged.
+- [HP98, 1.64(3), 1.67] -/
+lemma termVal'_termSubst {f e n m w t : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+    (ht : IsSemiterm ℒₒᵣ n t) :
+    termVal' f e (termSubst ℒₒᵣ w t) = termVal' f (termValVec' f e n w) t := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz
+    rw [termSubst_bvar, termVal'_bvar, nth_termValVec' hw.isUTerm hz]
+  · intro x; simp
+  · intro k g v hkg hv ih
+    rw [termSubst_func hkg hv.isUTerm]
+    have hv' : IsUTermVec ℒₒᵣ k (termSubstVec ℒₒᵣ k w v) :=
+      (hw.termSubstVec hv).isUTerm
+    have key : termValVec' f e k (termSubstVec ℒₒᵣ k w v) =
+        termValVec' f (termValVec' f e n w) k v := by
+      apply nth_ext' k (by simp [hv']) (by simp [hv.isUTerm])
+      intro i hi
+      rw [nth_termValVec' hv' hi, nth_termSubstVec hv.isUTerm hi, ih i hi,
+        nth_termValVec' hv.isUTerm hi]
+    have step1 : termVal' f e (^func k g (termSubstVec ℒₒᵣ k w v)) =
+        construction.func ![f, e] k g (termSubstVec ℒₒᵣ k w v)
+          (termValVec' f e k (termSubstVec ℒₒᵣ k w v)) :=
+      construction.result_func' hkg hv'
+    have step2 : termVal' f (termValVec' f e n w) (^func k g v) =
+        construction.func ![f, termValVec' f e n w] k g v
+          (termValVec' f (termValVec' f e n w) k v) :=
+      construction.result_func' hkg hv.isUTerm
+    rw [step1, step2, key]
+    simp [construction]
+
+/-- Evaluation after the external-variable shift is evaluation under the tail of the free
+assignment, so that the value of variable `x` is read from the old slot `x + 1`. -/
+lemma termVal'_termShift {f e t : V} (ht : IsUTerm ℒₒᵣ t) :
+    termVal' f e (termShift ℒₒᵣ t) = termVal' (sndIdx f) e t := by
+  apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z; simp
+  · intro x
+    simp [termShift_fvar, nth_succ]
+  · intro k g v hkg hv ih
+    rw [termShift_func hkg hv]
+    have hv' : IsUTermVec ℒₒᵣ k (termShiftVec ℒₒᵣ k v) := hv.termShiftVec
+    have key : termValVec' f e k (termShiftVec ℒₒᵣ k v) =
+        termValVec' (sndIdx f) e k v := by
+      apply nth_ext' k (by simp [hv']) (by simp [hv])
+      intro i hi
+      rw [nth_termValVec' hv' hi, nth_termShiftVec hv hi, ih i hi,
+        nth_termValVec' hv hi]
+    have step1 : termVal' f e (^func k g (termShiftVec ℒₒᵣ k v)) =
+        construction.func ![f, e] k g (termShiftVec ℒₒᵣ k v)
+          (termValVec' f e k (termShiftVec ℒₒᵣ k v)) :=
+      construction.result_func' hkg hv'
+    have step2 : termVal' (sndIdx f) e (^func k g v) =
+        construction.func ![sndIdx f, e] k g v (termValVec' (sndIdx f) e k v) :=
+      construction.result_func' hkg hv
+    rw [step1, step2, key]
+    simp [construction]
+
+end termValFree
+
 end LO.FirstOrder.Arithmetic.Bootstrapping

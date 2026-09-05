@@ -1,12 +1,13 @@
 module
 
-public import AlphaCentauri.Bootstrapping.PartialTruth.SatSigma
+public import AlphaCentauri.Bootstrapping.PartialTruth.Tarski
+public import AlphaCentauri.Vorspiel.Absoluteness
 
 /-!
 # Partial truth definitions agree with truth
 
-This module states the “it's snowing” agreement between partial satisfaction and semantics.
-It also packages the required Tarski conditions as an explicit finite arithmetic theory.
+This module proves the “it's snowing” agreement between partial satisfaction and semantics,
+both in every model of `𝗜𝚺₁` and, uniformly, over `𝗣𝗔⁻` together with the finite Tarski theory.
 -/
 
 @[expose] public section
@@ -107,6 +108,44 @@ private lemma quote_bex_sentence {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k)
   simpa [Sentence.quote_def, Semiformula.Operator.lt_def, qqBex, Semiformula.quote_rel,
     Arithmetic.qqLT, Semiterm.empty_quote_eq, Matrix.vecHead, Matrix.vecTail,
     ← Rew.emb_bShift_term, ← Semiterm.empty_typed_quote_def] using coe_quote_lt (V := V)
+
+/-- The code of a coded bound variable.
+- [HP98, 1.66] -/
+private lemma quote_bvar_sentence {k : ℕ} (i : Fin k) :
+    (⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : V) = qqBvar (i.val : V) := by
+  simp [Semiterm.empty_quote_eq]
+
+/-- The code of the zero term.
+- [HP98, 1.66] -/
+private lemma quote_zeroTerm_sentence {k : ℕ} (w : Fin 0 → ClosedSemiterm ℒₒᵣ k) :
+    (⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : V) = (𝟎 : V) := by
+  rw [Arithmetic.coe_zero_eq,
+    show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq]
+  simp [Semiterm.empty_quote_eq, quote_zeroIndex_eq]
+
+/-- The code of the one term.
+- [HP98, 1.66] -/
+private lemma quote_oneTerm_sentence {k : ℕ} (w : Fin 0 → ClosedSemiterm ℒₒᵣ k) :
+    (⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : V) = (𝟏 : V) := by
+  rw [Arithmetic.coe_one_eq,
+    show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq]
+  simp [Semiterm.empty_quote_eq, quote_oneIndex_eq]
+
+/-- The code of a sum of closed terms.
+- [HP98, 1.66] -/
+private lemma quote_addTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒₒᵣ k) :
+    (⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : V)
+      = (⌜w 0⌝ : V) ^+ ⌜w 1⌝ := by
+  simp [Semiterm.empty_quote_eq, Arithmetic.qqAdd, quote_addIndex_eq,
+    Arithmetic.coe_addIndex_eq, Matrix.vecHead, Matrix.vecTail]
+
+/-- The code of a product of closed terms.
+- [HP98, 1.66] -/
+private lemma quote_mulTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒₒᵣ k) :
+    (⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : V)
+      = (⌜w 0⌝ : V) ^* ⌜w 1⌝ := by
+  simp [Semiterm.empty_quote_eq, Arithmetic.qqMul, quote_mulIndex_eq,
+    Arithmetic.coe_mulIndex_eq, Matrix.vecHead, Matrix.vecTail]
 
 /-! ## Agreement of satisfaction with truth -/
 
@@ -232,267 +271,6 @@ theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
       ∀ v : Fin k → V, V ⊧/v φ ↔ SatSigma (n + 1) ⌜φ⌝ (matrixToVec v) := by
   simp [snowing, models_iff, (satSigmaVec.defined n k).df, Function.comp_def]
 
-/-! ## Tarski conditions as sentences -/
-
-namespace Tarski
-
-/-- Satisfaction is restricted to internally coded `Δ₀` formulas.
-- [HP98, Theorem I.1.70(i)] -/
-noncomputable def satZeroDom : ArithmeticSentence :=
-  “∀ z e, !satZero.val z e → !isDelta0.val z ∧ !(isUFormula ℒₒᵣ).val z”
-
-/-- The Tarski sentence for truth.
-- [HP98, Theorem I.1.70(ii)] -/
-noncomputable def satZeroVerum : ArithmeticSentence :=
-  “∀ z e, !qqVerumDef.val z → !satZero.val z e”
-
-/-- The Tarski sentence for falsehood.
-- [HP98, Theorem I.1.70(ii)] -/
-noncomputable def satZeroFalsum : ArithmeticSentence :=
-  “∀ z e, !qqFalsumDef.val z → ¬!satZero.val z e”
-
-/-- The Tarski sentence for equality.
-- [HP98, Theorem I.1.70(ii)] -/
-noncomputable def satZeroEq : ArithmeticSentence :=
-  “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
-    !qqEQDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
-    (!satZero.val z e ↔ vt = vu)”
-
-/-- The Tarski sentence for inequality.
-- [HP98, Theorem I.1.70(ii)] -/
-noncomputable def satZeroNeq : ArithmeticSentence :=
-  “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
-    !qqNEQDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
-    (!satZero.val z e ↔ vt ≠ vu)”
-
-/-- The Tarski sentence for less-than.
-- [HP98, Theorem I.1.70(ii)] -/
-noncomputable def satZeroLt : ArithmeticSentence :=
-  “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
-    !qqLTDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
-    (!satZero.val z e ↔ vt < vu)”
-
-/-- The Tarski sentence for negated less-than.
-- [HP98, Theorem I.1.70(ii)] -/
-noncomputable def satZeroNlt : ArithmeticSentence :=
-  “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
-    !qqNLTDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
-    (!satZero.val z e ↔ ¬(vt < vu))”
-
-/-- The Tarski sentence for conjunction.
-- [HP98, Theorem I.1.70(ii)] -/
-noncomputable def satZeroAnd : ArithmeticSentence :=
-  “∀ p q z e, !qqAndDef.val z p q →
-    (!satZero.val z e ↔ !satZero.val p e ∧ !satZero.val q e)”
-
-/-- The Tarski sentence for disjunction.
-- [HP98, Theorem I.1.70(ii)] -/
-noncomputable def satZeroOr : ArithmeticSentence :=
-  “∀ p q z e, !qqOrDef.val z p q →
-    (!satZero.val z e ↔ !satZero.val p e ∨ !satZero.val q e)”
-
-/-- The Tarski sentence for negation.
-- [HP98, Theorem I.1.70(iii)] -/
-noncomputable def satZeroNeg : ArithmeticSentence :=
-  “∀ p np e, !isDelta0.val p → !(isUFormula ℒₒᵣ).val p →
-    !(negGraph ℒₒᵣ).val np p → (!satZero.val np e ↔ ¬!satZero.val p e)”
-
-/-- The Tarski sentence for bounded universal quantification.
-- [HP98, Theorem I.1.70(iv)] -/
-noncomputable def satZeroBall : ArithmeticSentence :=
-  “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !isDelta0.val q →
-    !(isUFormula ℒₒᵣ).val q → !(termBShiftGraph ℒₒᵣ).val u t →
-    !qqBallDef.val z u q → !termValGraph.val v e t →
-    (!satZero.val z e ↔ ∀ x < v, ∀ e', !adjoinDef.val e' x e → !satZero.val q e')”
-
-/-- The Tarski sentence for bounded existential quantification.
-- [HP98, Theorem I.1.70(iv)] -/
-noncomputable def satZeroBex : ArithmeticSentence :=
-  “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !(termBShiftGraph ℒₒᵣ).val u t →
-    !qqBexDef.val z u q → !termValGraph.val v e t →
-    (!satZero.val z e ↔ ∃ x < v, ∃ e', !adjoinDef.val e' x e ∧ !satZero.val q e')”
-
-/-- The defining sentence for evaluation of coded bound variables.
-- [HP98, 1.64(5)] -/
-noncomputable def termValBvar : ArithmeticSentence :=
-  “∀ e z t v, !qqBvarDef.val t z → (!termValGraph.val v e t ↔ !nthDef.val v e z)”
-
-/-- The defining sentence for evaluation of zero.
-- [HP98, 1.64(5)] -/
-noncomputable def termValZero : ArithmeticSentence :=
-  “∀ e v, !termValGraph.val v e ↑Bootstrapping.Arithmetic.zero ↔ v = 0”
-
-/-- The defining sentence for evaluation of one.
-- [HP98, 1.64(5)] -/
-noncomputable def termValOne : ArithmeticSentence :=
-  “∀ e v, !termValGraph.val v e ↑Bootstrapping.Arithmetic.one ↔ v = 1”
-
-/-- The defining sentence for evaluation of addition.
-- [HP98, 1.64(5)] -/
-noncomputable def termValAdd : ArithmeticSentence :=
-  “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
-    !Bootstrapping.Arithmetic.qqAddGraph.val s t u → !termValGraph.val vt e t →
-    !termValGraph.val vu e u →
-    (!termValGraph.val v e s ↔ v = vt + vu)”
-
-/-- The defining sentence for evaluation of multiplication.
-- [HP98, 1.64(5)] -/
-noncomputable def termValMul : ArithmeticSentence :=
-  “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
-    !Bootstrapping.Arithmetic.qqMulGraph.val s t u → !termValGraph.val vt e t →
-    !termValGraph.val vu e u →
-    (!termValGraph.val v e s ↔ v = vt * vu)”
-
-/-- Coded vector adjunction is total.
-- No source; an elementary vector-coding lemma. -/
-noncomputable def adjoinTotal : ArithmeticSentence :=
-  “∀ x v, ∃ e, !adjoinDef.val e x v”
-
-/-- Coded vector adjunction is functional.
-- No source; an elementary vector-coding lemma. -/
-noncomputable def adjoinUnique : ArithmeticSentence :=
-  “∀ x v e e', !adjoinDef.val e x v → !adjoinDef.val e' x v → e = e'”
-
-/-- The head of an adjoined coded vector is its new entry.
-- No source; an elementary vector-coding lemma. -/
-noncomputable def nthAdjoinZero : ArithmeticSentence :=
-  “∀ x v e y, !adjoinDef.val e x v → (!nthDef.val y e 0 ↔ y = x)”
-
-/-- Successor indices into an adjoined coded vector read from its tail.
-- No source; an elementary vector-coding lemma. -/
-noncomputable def nthAdjoinSucc : ArithmeticSentence :=
-  “∀ x v e i y, !adjoinDef.val e x v →
-    (!nthDef.val y e (i + 1) ↔ !nthDef.val y v i)”
-
-/-- The empty coded vector has length zero.
-- No source; an elementary vector-coding lemma. -/
-noncomputable def lenNil : ArithmeticSentence := “∀ l, !lenDef.val l 0 ↔ l = 0”
-
-/-- Adjunction increases the length of a coded vector by one.
-- No source; an elementary vector-coding lemma. -/
-noncomputable def lenAdjoin : ArithmeticSentence :=
-  “∀ x v e l, !adjoinDef.val e x v → (!lenDef.val (l + 1) e ↔ !lenDef.val l v)”
-
-/-- The empty-block Tarski condition for reading `𝚷-[n]` satisfaction as `𝚺-[n + 1]` satisfaction.
-- [HP98, Theorem I.1.75(2)(v)] -/
-noncomputable def satSigmaOfPi : ℕ → ArithmeticSentence
-  | 0 =>
-      “∀ z e, !isDelta0.val z → !(isUFormula ℒₒᵣ).val z →
-        (!(satSigma 0).val z e ↔ !satZero.val z e)”
-  | n + 1 =>
-      “∀ z e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
-        (!(satSigma (n + 1)).val z e ↔ !(satPi n).val z e)”
-
-/-- The empty-block Tarski condition for reading `𝚺-[n]` satisfaction as `𝚷-[n + 1]` satisfaction.
-- [HP98, Theorem I.1.75(2)(v′)] -/
-noncomputable def satPiOfSigma : ℕ → ArithmeticSentence
-  | 0 =>
-      “∀ z e, !isDelta0.val z → !(isUFormula ℒₒᵣ).val z →
-        (!(satPi 0).val z e ↔ !satZero.val z e)”
-  | n + 1 =>
-      “∀ z e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
-        (!(satPi (n + 1)).val z e ↔ !(satSigma n).val z e)”
-
-/-- The domain Tarski condition for `𝚺-[n + 1]` satisfaction.
-- [HP98, Theorem I.1.75(2)] -/
-noncomputable def satSigmaDom (n : ℕ) : ArithmeticSentence :=
-  “∀ z e, !(satSigma n).val z e →
-    !(isStrictSigma (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
-
-/-- The domain Tarski condition for `𝚷-[n + 1]` satisfaction.
-- [HP98, Theorem I.1.75(2)] -/
-noncomputable def satPiDom (n : ℕ) : ArithmeticSentence :=
-  “∀ z e, !(satPi n).val z e →
-    !(isStrictPi (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
-
-/-- The Tarski condition for existential quantification at level `𝚺-[n + 1]`.
-- [HP98, Theorem I.1.75(2)(v)] -/
-noncomputable def satSigmaExs (n : ℕ) : ArithmeticSentence :=
-  “∀ p z e, !qqExsDef.val z p →
-    (!(satSigma n).val z e ↔
-      ∃ x e', !adjoinDef.val e' x e ∧ !(satSigma n).val p e')”
-
-/-- The Tarski condition for universal quantification at level `𝚷-[n + 1]`.
-- [HP98, Theorem I.1.75(2)(v′)] -/
-noncomputable def satPiAll (n : ℕ) : ArithmeticSentence :=
-  “∀ p z e, !qqAllDef.val z p →
-    (!(satPi n).val z e ↔
-      ∀ x e', !adjoinDef.val e' x e → !(satPi n).val p e')”
-
-/-- The negation-duality Tarski condition from `𝚺-[n + 1]` to `𝚷-[n + 1]`.
-- [HP98, Theorem I.1.75(2)] -/
-noncomputable def satPiNeg (n : ℕ) : ArithmeticSentence :=
-  “∀ z nz e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
-    !(negGraph ℒₒᵣ).val nz z →
-    (!(satPi n).val nz e ↔ ¬!(satSigma n).val z e)”
-
-/-- The negation-duality Tarski condition from `𝚷-[n + 1]` to `𝚺-[n + 1]`.
-- [HP98, Theorem I.1.75(2)] -/
-noncomputable def satSigmaNeg (n : ℕ) : ArithmeticSentence :=
-  “∀ z nz e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
-    !(negGraph ℒₒᵣ).val nz z →
-    (!(satSigma n).val nz e ↔ ¬!(satPi n).val z e)”
-
-/-- The finite collection of `Δ₀` Tarski and term-evaluation sentences.
-- [HP98, Theorem I.1.70]
-- [HP98, Remark I.1.77] -/
-noncomputable def satZeroAxioms : ArithmeticTheory :=
-  {satZeroDom, satZeroVerum, satZeroFalsum, satZeroEq, satZeroNeq, satZeroLt,
-    satZeroNlt, satZeroAnd, satZeroOr, satZeroNeg, satZeroBall, satZeroBex,
-    termValBvar, termValZero, termValOne, termValAdd, termValMul, adjoinTotal,
-    adjoinUnique, nthAdjoinZero, nthAdjoinSucc, lenNil, lenAdjoin}
-
-/-- The finite collection of level-`n + 1` Tarski sentences.
-- [HP98, Theorem I.1.75(2)]
-- [HP98, Remark I.1.77] -/
-noncomputable def satSigmaAxioms (n : ℕ) : ArithmeticTheory :=
-  {satSigmaOfPi n, satPiOfSigma n, satSigmaDom n, satPiDom n, satSigmaExs n,
-    satPiAll n, satPiNeg n, satSigmaNeg n}
-
-end Tarski
-
-/-- `tarski n` contains the Tarski, vector, and term-evaluation conditions through level `n + 1`.
-- [HP98, Remark I.1.77] -/
-inductive tarski : ℕ → ArithmeticTheory
-  | zero : ∀ φ ∈ Tarski.satZeroAxioms, tarski 0 φ
-  | prev : ∀ n φ, tarski n φ → tarski (n + 1) φ
-  | new  : ∀ n, ∀ φ ∈ Tarski.satSigmaAxioms n, tarski (n + 1) φ
-
-/-- The explicit Tarski theory at each level is finite.
-- [HP98, Remark I.1.77] -/
-lemma tarski_finite (n : ℕ) : (tarski n).Finite := by
-  induction n with
-  | zero =>
-    have e : tarski 0 = Tarski.satZeroAxioms := by
-      ext φ; constructor
-      · rintro ⟨⟩; assumption
-      · exact tarski.zero φ
-    rw [e]; simp only [Tarski.satZeroAxioms]; exact Set.toFinite _
-  | succ n ih =>
-    have e : tarski (n + 1) = tarski n ∪ Tarski.satSigmaAxioms n := by
-      ext φ; constructor
-      · rintro (⟨⟩ | ⟨⟩)
-        · exact Or.inl ‹tarski n φ›
-        · exact Or.inr ‹φ ∈ Tarski.satSigmaAxioms n›
-      · rintro (h | h)
-        · exact tarski.prev n φ h
-        · exact tarski.new n φ h
-    rw [e]
-    refine ih.union ?_
-    simp only [Tarski.satSigmaAxioms]; exact Set.toFinite _
-
-/-- `𝗜𝚺₁` proves every sentence in the finite Tarski theory.
-- [HP98, Theorem I.1.70]
-- [HP98, Theorem I.1.75(2)]
-- [HP98, Remark I.1.77] -/
-axiom ISigma1.provable_tarski (n : ℕ) : 𝗜𝚺₁ ⊢* tarski n
-
-/-- `𝗣𝗔⁻` together with the finite Tarski theory proves the snowing lemma.
-- [HP98, Corollary I.1.76]
-- [HP98, Remark I.1.77] -/
-axiom provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ
-
 /-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `𝚺-[n + 1]` formula.
 - [HP98, Corollary I.1.76] -/
 theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
@@ -500,5 +278,340 @@ theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
   apply Arithmetic.complete.{0}
   intro M _ _
   exact (models_snowing_iff φ).mpr fun v ↦ (satSigma_quote_iff hφ v).symm
+
+
+/-! ## The snowing lemma over `𝗣𝗔⁻` -/
+
+section peanoMinus
+
+open Tarski Reading PeanoMinus
+
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ}
+  (hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ)
+
+/-! ### Codes of finite sequences -/
+
+namespace Reading
+
+/-- `Codes v ev` says that `ev` is a code for the finite sequence `v`: it has length `m` and its
+`i`-th entry is `v i`. -/
+def Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop :=
+  Len (m : M) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : M)
+
+end Reading
+
+include hM in
+lemma codes_nil (v : Fin 0 → M) : Codes v 0 :=
+  ⟨by simpa using (read_lenNil hM 0).mpr rfl, fun i ↦ i.elim0⟩
+
+include hM in
+lemma codes_cons {m : ℕ} {v : Fin m → M} {ev ev' x : M} (h : Codes v ev)
+    (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' := by
+  refine ⟨?_, fun i ↦ ?_⟩
+  · have := (read_lenAdjoin hM x ev ev' (m : M) hadj).mpr h.1
+    simpa using this
+  · refine Fin.cases ?_ (fun j ↦ ?_) i
+    · simpa using (read_nthAdjoinZero hM x ev ev' x hadj).mpr rfl
+    · have := (read_nthAdjoinSucc hM x ev ev' (j.val : M) (v j) hadj).mpr (h.2 j)
+      simpa using this
+
+include hM in
+lemma exists_codes : ∀ {m : ℕ} (v : Fin m → M), ∃ ev, Codes v ev := by
+  intro m
+  induction m with
+  | zero => exact fun v ↦ ⟨0, codes_nil hM v⟩
+  | succ m ih =>
+    intro v
+    obtain ⟨ev, hev⟩ := ih (fun i ↦ v i.succ)
+    obtain ⟨ev', hadj⟩ := read_adjoinTotal hM (v 0) ev
+    have hcons : (v 0 :> fun i ↦ v i.succ) = v := by
+      funext i; refine Fin.cases ?_ (fun j ↦ ?_) i <;> simp
+    exact ⟨ev', hcons ▸ codes_cons hM hev hadj⟩
+
+/-! ### Coding facts about standard codes -/
+
+/-- The code of a closed semiterm is a well-formed internal term.
+- [HP98, 1.66] -/
+private lemma uTerm_quote_cast {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) :
+    UTerm ((⌜t⌝ : ℕ) : M) :=
+  cast_delta₁ (isUTerm ℒₒᵣ) (by simpa using isUTerm_quote (V := ℕ) t)
+
+/-- The code of a semisentence is a well-formed internal formula.
+- [HP98, 1.66] -/
+private lemma uFormula_quote_cast {k : ℕ} (φ : ArithmeticSemisentence k) :
+    UFormula ((⌜φ⌝ : ℕ) : M) :=
+  cast_delta₁ (isUFormula ℒₒᵣ) (by simpa using isUFormula_quote (V := ℕ) φ)
+
+/-- The code of a bounded semisentence is internally `Δ₀`.
+- [HP98, Lemma I.1.68] -/
+private lemma delta0_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k} (h : Hierarchy 𝚺 0 φ) :
+    Delta0 ((⌜φ⌝ : ℕ) : M) :=
+  cast_delta₁ isDelta0 (by simpa using (isDelta0_quote_iff (V := ℕ) φ).mpr h)
+
+/-- The code of a strict prenex semisentence is in the matching internal strict class.
+- [HP98, Lemma I.1.69] -/
+private lemma strict_quote_cast {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
+    (h : StrictHierarchy Γ s φ) : Strict Γ s ((⌜φ⌝ : ℕ) : M) := by
+  rcases Γ with _ | _
+  · exact cast_delta₁ (isStrictSigma s) (by simpa using (isStrictSigma_quote_iff (V := ℕ) φ).mpr h)
+  · exact cast_delta₁ (isStrictPi s) (by simpa using (isStrictPi_quote_iff (V := ℕ) φ).mpr h)
+
+/-! ### Evaluation of coded closed terms -/
+
+include hM in
+/-- The value of the code of a closed semiterm, read through the term-evaluation sentences of
+`tarski n`, is its value in the model.
+- [HP98, 1.66] -/
+private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Codes v ev) :
+    ∀ t : ClosedSemiterm ℒₒᵣ k, TermVal (t.valb v) ev ((⌜t⌝ : ℕ) : M) := by
+  intro t
+  induction t with
+  | bvar i =>
+    have hb : M ⊧/![((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M), ((i.val : ℕ) : M)] qqBvarDef.val :=
+      cast_sigmaZero₂ qqBvarDef (by simpa using quote_bvar_sentence (V := ℕ) i)
+    have := (read_termValBvar hM ev ((i.val : ℕ) : M) ((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
+      (v i) hb).mpr (hev.2 i)
+    simpa using this
+  | fvar x => exact x.elim
+  | @func k' f w ih =>
+    match k', f, w, ih with
+    | 0, .zero, w, _ =>
+      have hval : (Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k).valb v
+          = 0 := rfl
+      have hq : ((⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
+          = ((𝟎 : ℕ) : M) := by
+        rw [show (⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟎 by
+          simpa using quote_zeroTerm_sentence (V := ℕ) w]
+      rw [hval, hq]
+      exact (read_termValZero hM ev 0).mpr rfl
+    | 0, .one, w, _ =>
+      have hval : (Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k).valb v
+          = 1 := rfl
+      have hq : ((⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
+          = ((𝟏 : ℕ) : M) := by
+        rw [show (⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) = 𝟏 by
+          simpa using quote_oneTerm_sentence (V := ℕ) w]
+      rw [hval, hq]
+      exact (read_termValOne hM ev 1).mpr rfl
+    | 2, .add, w, ih =>
+      have hval : (Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k).valb v
+          = (w 0).valb v + (w 1).valb v := rfl
+      have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
+          ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqAddGraph.val :=
+        cast_sigma₃ Arithmetic.qqAddGraph (by simpa using quote_addTerm_sentence (V := ℕ) w)
+      rw [hval]
+      exact (read_termValAdd hM ev ((⌜w 0⌝ : ℕ) : M) ((⌜w 1⌝ : ℕ) : M)
+        ((⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
+        ((w 0).valb v) ((w 1).valb v) ((w 0).valb v + (w 1).valb v)
+        (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq (ih 0) (ih 1)).mpr rfl
+    | 2, .mul, w, ih =>
+      have hval : (Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k).valb v
+          = (w 0).valb v * (w 1).valb v := rfl
+      have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
+          ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqMulGraph.val :=
+        cast_sigma₃ Arithmetic.qqMulGraph (by simpa using quote_mulTerm_sentence (V := ℕ) w)
+      rw [hval]
+      exact (read_termValMul hM ev ((⌜w 0⌝ : ℕ) : M) ((⌜w 1⌝ : ℕ) : M)
+        ((⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
+        ((w 0).valb v) ((w 1).valb v) ((w 0).valb v * (w 1).valb v)
+        (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq (ih 0) (ih 1)).mpr rfl
+
+
+/-! ### The `Δ₀` base case -/
+
+include hM in
+/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `satZero` at the code of a bounded
+formula agrees with truth.
+- [HP98, Theorem I.1.70]
+- [HP98, Corollary I.1.76] -/
+private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : Hierarchy 𝚺 0 φ) :
+    ∀ (v : Fin k → M) (ev : M), Codes v ev → (Sat0 ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+  refine delta₀_induction (ξ := Empty)
+    (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev →
+      (Sat0 ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ))
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ k φ hφ
+  · intro m v ev _
+    have hq : M ⊧/![((⌜(⊤ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqVerumDef.val :=
+      cast_sigmaZero₁ qqVerumDef (by simp [Sentence.quote_def])
+    simpa using read_satZeroVerum hM _ ev hq
+  · intro m v ev _
+    have hq : M ⊧/![((⌜(⊥ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqFalsumDef.val :=
+      cast_sigmaZero₁ qqFalsumDef (by simp [Sentence.quote_def])
+    simpa using read_satZeroFalsum hM _ ev hq
+  · intro m t u v ev hev
+    have hq : M ⊧/![((⌜(.rel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqEQDef.val :=
+      cast_sigma₃ qqEQDef (by simpa using quote_eq_sentence (V := ℕ) t u)
+    rw [read_satZeroEq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
+      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
+    simp [Semiformula.eval_rel]
+  · intro m t u v ev hev
+    have hq : M ⊧/![((⌜(.nrel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNEQDef.val :=
+      cast_sigma₃ qqNEQDef (by simpa using quote_neq_sentence (V := ℕ) t u)
+    rw [read_satZeroNeq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
+      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
+    simp [Semiformula.eval_nrel]
+  · intro m t u v ev hev
+    have hq : M ⊧/![((⌜(.rel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqLTDef.val :=
+      cast_sigma₃ qqLTDef (by simpa using quote_lt_sentence (V := ℕ) t u)
+    rw [read_satZeroLt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
+      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
+    simp [Semiformula.eval_rel]
+  · intro m t u v ev hev
+    have hq : M ⊧/![((⌜(.nrel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNLTDef.val :=
+      cast_sigma₃ qqNLTDef (by simpa using quote_nlt_sentence (V := ℕ) t u)
+    rw [read_satZeroNlt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+      (uTerm_quote_cast t) (uTerm_quote_cast u) hq
+      (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
+    simp [Semiformula.eval_nrel]
+  · intro m φ ψ _ _ ihφ ihψ v ev hev
+    have hq : M ⊧/![((⌜φ ⋏ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqAndDef.val :=
+      cast_sigmaZero₃ qqAndDef (by simpa using quote_and_sentence (V := ℕ) φ ψ)
+    rw [read_satZeroAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev, ihψ v ev hev]
+    simp
+  · intro m φ ψ hφ hψ ihφ ihψ v ev hev
+    have hq : M ⊧/![((⌜φ ⋎ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqOrDef.val :=
+      cast_sigmaZero₃ qqOrDef (by simpa using quote_or_sentence (V := ℕ) φ ψ)
+    rw [read_satZeroOr hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev
+      (delta0_quote_cast hφ) (uFormula_quote_cast φ) (delta0_quote_cast hψ)
+      (uFormula_quote_cast ψ) hq, ihφ v ev hev, ihψ v ev hev]
+    simp
+  · intro m t φ hφ ihφ v ev hev
+    have hu : M ⊧/![((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜t⌝ : ℕ) : M)]
+        (termBShiftGraph ℒₒᵣ).val := cast_sigma₂ (termBShiftGraph ℒₒᵣ) (by simp)
+    have hq : M ⊧/![((⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜φ⌝ : ℕ) : M)] qqBallDef.val :=
+      cast_sigma₃ qqBallDef (by simpa using quote_ball_sentence (V := ℕ) t φ)
+    rw [read_satZeroBall hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
+      ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) (delta0_quote_cast hφ)
+      (uFormula_quote_cast φ) hu hq (termVal_quote_cast hM hev t)]
+    simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel]
+    constructor
+    · intro h x hx
+      obtain ⟨e', hadj⟩ := read_adjoinTotal hM x ev
+      exact (ihφ (x :> v) e' (codes_cons hM hev hadj)).mp
+        (h x (by simpa [Function.comp_def] using hx) e' hadj)
+    · intro h x hx e' hadj
+      exact (ihφ (x :> v) e' (codes_cons hM hev hadj)).mpr
+        (by simpa [Function.comp_def] using h x (by simpa [Function.comp_def] using hx))
+  · intro m t φ hφ ihφ v ev hev
+    have hu : M ⊧/![((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜t⌝ : ℕ) : M)]
+        (termBShiftGraph ℒₒᵣ).val := cast_sigma₂ (termBShiftGraph ℒₒᵣ) (by simp)
+    have hq : M ⊧/![((⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence m)⌝ : ℕ) : M),
+        ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜φ⌝ : ℕ) : M)] qqBexDef.val :=
+      cast_sigma₃ qqBexDef (by simpa using quote_bex_sentence (V := ℕ) t φ)
+    rw [read_satZeroBex hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
+      ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) hu hq
+      (termVal_quote_cast hM hev t)]
+    simp only [Semiformula.eval_bexs, Semiformula.Operator.lt_def, Semiformula.eval_rel]
+    constructor
+    · rintro ⟨x, hx, e', hadj, hsat⟩
+      exact ⟨x, by simpa [Function.comp_def] using hx,
+        (ihφ (x :> v) e' (codes_cons hM hev hadj)).mp hsat⟩
+    · rintro ⟨x, hx, hsat⟩
+      obtain ⟨e', hadj⟩ := read_adjoinTotal hM x ev
+      exact ⟨x, by simpa [Function.comp_def] using hx, e', hadj,
+        (ihφ (x :> v) e' (codes_cons hM hev hadj)).mpr (by simpa [Function.comp_def] using hsat)⟩
+
+/-! ### The strict prenex induction -/
+
+include hM in
+/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of the level-`s` satisfaction formula
+at the code of a strict prenex formula agrees with truth.
+- [HP98, Corollary I.1.76]
+- [HP98, Remark I.1.77] -/
+private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
+    (h : StrictHierarchy Γ s φ) (hs : s ≤ n + 1) :
+    ∀ (v : Fin k → M) (ev : M), Codes v ev → (Sat Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+  revert hs
+  induction h with
+  | @zero Γ₀ m₀ φ₀ hφ₀ =>
+    intro _ v ev hev
+    exact satZero_quote_reading hM hφ₀ v ev hev
+  | @ofAlt Γ₀ s₀ m₀ φ₀ hφ₀ ih =>
+    intro hs v ev hev
+    rw [read_ofAlt hM (show s₀ ≤ n by omega) Γ₀ ((⌜φ₀⌝ : ℕ) : M) ev
+      (strict_quote_cast hφ₀) (uFormula_quote_cast φ₀)]
+    exact ih (by omega) v ev hev
+  | @exs s₀ m₀ φ₀ _ ih =>
+    intro hs v ev hev
+    have hq : M ⊧/![((⌜(∃¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
+        qqExsDef.val := cast_sigmaZero₂ qqExsDef (by simpa using quote_ex_sentence (V := ℕ) φ₀)
+    show Reading.SatSigma s₀ _ _ ↔ _
+    rw [read_satSigmaExs hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
+    simp only [Semiformula.eval_ex]
+    constructor
+    · rintro ⟨x, e', hadj, hsat⟩
+      exact ⟨x, (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mp hsat⟩
+    · rintro ⟨x, hsat⟩
+      obtain ⟨e', hadj⟩ := read_adjoinTotal hM x ev
+      exact ⟨x, e', hadj, (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mpr hsat⟩
+  | @all s₀ m₀ φ₀ _ ih =>
+    intro hs v ev hev
+    have hq : M ⊧/![((⌜(∀¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
+        qqAllDef.val := cast_sigmaZero₂ qqAllDef (by simpa using quote_all_sentence (V := ℕ) φ₀)
+    show Reading.SatPi s₀ _ _ ↔ _
+    rw [read_satPiAll hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
+    simp only [Semiformula.eval_all]
+    constructor
+    · intro hsat x
+      obtain ⟨e', hadj⟩ := read_adjoinTotal hM x ev
+      exact (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mp (hsat x e' hadj)
+    · intro hsat x e' hadj
+      exact (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mpr (hsat x)
+
+/-! ### Assembling the snowing lemma over `𝗣𝗔⁻` -/
+
+private lemma eval_satSigmaVec (p : M) (w : Fin k → M) :
+    M ⊧/(p :> w) (satSigmaVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SatSigma n p ev := by
+  simp only [satSigmaVec, Nat.succ_eq_add_one, Nat.reduceAdd, HierarchySymbol.Semiformula.val_mkSigma,
+    Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
+    Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, numeral_eq_natCast_app,
+    Semiterm.val_bvar, Matrix.cons_val_zero, Fin.isValue, Fin.Fin1.eq_one, Matrix.cons_val_one,
+    Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃, Semiformula.eval_operator,
+    Matrix.cons_val_succ, Structure.eq_iff_eq, LogicalConnective.Prop.and_eq, exists_eq_right,
+    Reading.Codes, Reading.Len, Reading.Nth, Reading.SatSigma, and_assoc]
+
+private lemma eval_snowing_rhs {k : ℕ} (φ : ArithmeticSemisentence k) (e : Fin k → M) :
+    M ⊧/e ((satSigmaVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
+      ↔ M ⊧/(((⌜φ⌝ : ℕ) : M) :> e) (satSigmaVec n k).val := by
+  simp only [Semiformula.eval_substs, Matrix.comp_vecCons'', Arithmetic.gödelNumber'_def,
+    Semiterm.Operator.encode, Semiterm.Operator.const, Semiterm.val_operator,
+    Structure.numeral_eq_numeral, numeral_eq_natCast_app, Sentence.quote_eq_encode_nat,
+    Matrix.empty_eq]
+  simp only [Function.comp_def, Semiterm.val_bvar]
+
+end peanoMinus
+
+/-- `𝗣𝗔⁻` together with the finite Tarski theory proves the snowing lemma.
+- [HP98, Corollary I.1.76]
+- [HP98, Remark I.1.77] -/
+theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ := by
+  have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory) :=
+    Entailment.WeakerThan.trans (𝓣 := (𝗣𝗔⁻ : ArithmeticTheory)) inferInstance
+      (Entailment.Axiomatized.le_of_subset Set.subset_union_left)
+  unfold snowing
+  refine Arithmetic.provable_iff_of_models_iff (T := (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory)) ?_
+  intro M _ hMT e
+  have hPA : M↓[ℒₒᵣ] ⊧* (𝗣𝗔⁻ : ArithmeticTheory) :=
+    Semantics.ModelsSet.of_subset hMT Set.subset_union_left
+  have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦
+    Semantics.ModelsSet.models _ (Set.mem_union_right (𝗣𝗔⁻ : ArithmeticTheory) hσ)
+  have := hPA
+  rw [eval_snowing_rhs, eval_satSigmaVec]
+  constructor
+  · intro h
+    obtain ⟨ev, hev⟩ := exists_codes hM e
+    exact ⟨ev, hev, (satClass_quote_reading hM hφ le_rfl e ev hev).mpr h⟩
+  · rintro ⟨ev, hev, hsat⟩
+    exact (satClass_quote_reading hM hφ le_rfl e ev hev).mp hsat
 
 end LO.FirstOrder.Arithmetic

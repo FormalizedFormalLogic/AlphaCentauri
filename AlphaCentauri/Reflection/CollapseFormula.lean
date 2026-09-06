@@ -14,11 +14,7 @@ elsewhere; this module supplies only the sentence and its syntactic properties.
 
 The sentence is the one-step unfolding of the fixed point of `collapseFormula T U n Γ`, a formula
 built from `U`'s `Δ₁` presentation, a syntactic guard against junk codes, and the partial truth
-predicates of `AlphaCentauri.Bootstrapping.PartialTruth.Snowing`, in place of the formula HP98
-diagonalizes directly: the latter mentions the proof predicate of `T` extended by the very
-sentence being constructed, a circularity avoided here by replacing "`T + collapseSentence ...` is
-inconsistent" with the equivalent, non-circular "`T` proves the negation of
-`collapseSentence ...`".
+predicates of `AlphaCentauri.Bootstrapping.PartialTruth.Snowing`.
 
 - [Lin97, Theorem 4.3]
 - [AB05, Theorem 23]
@@ -33,9 +29,8 @@ variable (T U : ArithmeticTheory) [T.Δ₁] [U.Δ₁] (n : ℕ)
 /-- The formula, in one free variable `v` for the code of a sentence, whose fixed point collapses
 a `Δ₁`-presented set `U` of `Γ_{n + 1}` sentences relative to `T`: at polarity `𝚷`, "every early
 enough `T`-consistent member of `U` (checked against a code `v` of `∼collapseSentence T U n 𝚷`
-through `negGraph`, so as to avoid mentioning the theory `T + collapseSentence T U n 𝚷` itself) is
-true"; at polarity `𝚺`, its dual, "some standard proof of `∼v` from `T` exists at a stage by which
-every member of `U` still true is caught".
+through `negGraph`) is true"; at polarity `𝚺`, its dual, "some standard proof of `∼v` from `T`
+exists at a stage by which every member of `U` still true is caught".
 
 - [Lin97, Theorem 4.3]
 - [AB05, Theorem 23]
@@ -88,9 +83,7 @@ theorem hierarchy_collapseFormula (Γ : Polarity) :
     simp [collapseFormula, hneg, hproof, hξ, hU, hSS, hTr]
 
 /-- The one-step unfolding of the fixed point of `collapseFormula`, at the code of that very fixed
-point: the sentence collapsing `U` relative to `T`. Diagonalizing `collapseFormula` directly would
-work equally well semantically, but only this unfolding stays in `Γ_{n + 1}` at polarity `𝚺`,
-since `fixedpoint` produces a `∀`-sentence.
+point: the sentence collapsing `U` relative to `T`.
 
 - [Lin97, Theorem 4.3]
 - [AB05, Theorem 23]

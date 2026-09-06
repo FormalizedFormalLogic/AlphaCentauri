@@ -29,6 +29,12 @@ LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
 LO.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
   forgive:
     - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sound
+LO.FirstOrder.Arithmetic.exists_sentence_weakerThan_of_consistent:
+  forgive:
+    - LO.FirstOrder.Arithmetic.exists_sentence_weakerThan_of_consistent
+LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union:
+  forgive:
+    - LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union
 LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
   forgive:
     - LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con
@@ -85,6 +91,9 @@ LO.FirstOrder.Arithmetic.ISigma.exists_pi_axiomatization:
 LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatization_equiv:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
+LO.FirstOrder.Arithmetic.not_localReflectionOnHierarchy_weakerThan_union:
+  forgive:
+    - LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union
 LO.FirstOrder.Peano.not_finiteAxiomatizable:
   forgive:
     - LO.FirstOrder.Peano.reflexive

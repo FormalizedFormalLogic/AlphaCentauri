@@ -62,7 +62,11 @@ variable {π : Sentence L}
 /-- If `T ∪ {π}` proves the reflection instance for `∼π`, then `T ∪ {π}` is inconsistent.
 - [AB05, Theorem 23, finite case]
 - [Lin97, Theorem 4.1] -/
-axiom inconsistent_of_localReflection_provable
-    (h : insert π T ⊢ 𝔅 (∼π) 🡒 ∼π) : Entailment.Inconsistent (insert π T)
+theorem inconsistent_of_localReflection_provable [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL]
+    (h : insert π T ⊢ 𝔅 (∼π) 🡒 ∼π) : Entailment.Inconsistent (insert π T) := by
+  have h₁ : T ⊢ π 🡒 (𝔅 (∼π) 🡒 ∼π) := Entailment.deduction_iff.mp h
+  have h₂ : T ⊢ ∼π := löb_theorem (by cl_prover [h₁])
+  exact Entailment.inconsistent_of_provable <| by
+    cl_prover [Entailment.Axiomatized.adjoin! π T, Entailment.Axiomatized.to_adjoin (φ := π) h₂]
 
 end LO.FirstOrder.ProvabilityAbstraction.Provability

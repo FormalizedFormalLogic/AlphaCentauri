@@ -410,7 +410,8 @@ lemma strictCollection_of_models_collectionAxiom [V↓[ℒₒᵣ] ⊧* 𝗣𝗔�
 /-- Over a theory extending `𝗣𝗔⁻` that proves the collection axiom of every strict `𝚺-[s]`
 formula, every `Hierarchy Γ s` semisentence is provably equivalent to the value of a `Prenex Γ s`
 code.
-- [HP98, Theorem I.2.25] -/
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9] -/
 theorem exists_prenex_of_collection (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
     (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 s ψ →
       T ⊢ (.univCl (collectionAxiom ψ) : ArithmeticSentence))
@@ -427,7 +428,8 @@ theorem exists_prenex_of_collection (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
 
 /-- In a model of `𝗣𝗔⁻` with collection for strict `𝚺-[s]` formulas, every `Hierarchy Γ s` formula
 agrees, at a fixed assignment of its free variables, with a strict `Γ-[s]` formula.
-- [HP98, Theorem I.2.25] -/
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9] -/
 lemma exists_strictHierarchy_eval_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCollection V s)
     {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ s φ) (f : ℕ → V) :
     ∃ ψ : ArithmeticSemiformula ℕ 1, StrictHierarchy Γ s ψ ∧
@@ -449,7 +451,8 @@ lemma exists_strictHierarchy_eval_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : S
 /-- Over a theory extending `𝗣𝗔⁻` that proves the collection axiom of every strict `𝚺-[s]`
 formula, every `Hierarchy Γ s` semisentence is provably equivalent to a strict `Γ-[s]` one.
 - [HP98, 0.30]
-- [HP98, Theorem I.2.25] -/
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9] -/
 theorem exists_strictHierarchy_of_collection (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
     (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 s ψ →
       T ⊢ (.univCl (collectionAxiom ψ) : ArithmeticSentence))

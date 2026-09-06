@@ -31,7 +31,8 @@ end
 prenex `Γ`-formula of level `s`.
 
 - [HP98, 0.30]
-- [HP98, Theorem I.2.25] -/
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9] -/
 theorem exists_strictHierarchy_of_hierarchy (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T]
     {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by

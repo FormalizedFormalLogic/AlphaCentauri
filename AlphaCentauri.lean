@@ -11,6 +11,7 @@ public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
 public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
+public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.FiniteAxiomatizability.ISigma
 public import AlphaCentauri.FiniteAxiomatizability.Reflexive

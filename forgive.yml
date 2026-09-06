@@ -20,6 +20,9 @@
 version: v0
 
 # The unproved statements themselves.
+LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
 LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence
@@ -94,3 +97,15 @@ LO.FirstOrder.provablyTotal_of_primrec':
     - LO.FirstOrder.provablyTotal_of_primrec'
 
 # Declarations that inherit the debt of an unproved statement.
+LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_fresh:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_free:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite

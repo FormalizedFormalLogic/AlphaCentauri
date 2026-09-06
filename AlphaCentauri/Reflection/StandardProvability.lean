@@ -52,13 +52,59 @@ axiom localReflection_pi_one_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ 
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
 @[instance] axiom consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
-    Entailment.Consistent (T ∪ 𝗥𝗳𝗻 T)
+    Consistent (T ∪ 𝗥𝗳𝗻 T)
 
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is `𝚺-[1]`-sound.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
 @[instance] axiom consistent_localReflection_of_sigma_one_sound [T.SoundOnHierarchy 𝚺 1] :
-    Entailment.Consistent (T ∪ 𝗥𝗳𝗻 T)
+    Consistent (T ∪ 𝗥𝗳𝗻 T)
+
+variable {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
+
+/-- Unboundedness, for an extension by a single sentence: if `T ∪ {π}` for a `Γ n` sentence `π`
+proves the local reflection schema of `T` on the dual class, then `T ∪ {π}` is inconsistent.
+- [AB05, Theorem 23]
+- [AB05, Remark 24]
+- [Lin97, Theorem 4.1] -/
+theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_insert
+    (hπ : Hierarchy Γ n π) (h : 𝗥𝗳𝗻[Γ.alt n] T ⪯ insert π T) : Inconsistent (insert π T) :=
+  T.standardProvability.inconsistent_of_localReflectionOn_weakerThan_insert
+    (fun _ hσ ↦ by simpa using hσ) hπ h
+
+/-- Unboundedness, for an extension by a single sentence: a consistent `T ∪ {π}` with `π` a
+`Γ n` sentence does not contain the local reflection schema of `T` on the dual class.
+- [AB05, Theorem 23]
+- [AB05, Remark 24]
+- [Lin97, Theorem 4.1] -/
+theorem not_localReflectionOnHierarchy_weakerThan_insert
+    (hπ : Hierarchy Γ n π) [Consistent (insert π T)] : ¬𝗥𝗳𝗻[Γ.alt n] T ⪯ insert π T :=
+  fun h ↦ (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hπ h).not_con
+    inferInstance
+
+/-- Unboundedness, for an extension by finitely many sentences: if `T ∪ U` for a finite set `U`
+of `Γ n` sentences proves the local reflection schema of `T` on the dual class, then `T ∪ U` is
+inconsistent.
+- [AB05, Theorem 23]
+- [AB05, Remark 24]
+- [Lin97, Theorem 4.1] -/
+theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
+    {U : ArithmeticTheory} (hU : U.Finite) (hΓ : ∀ σ ∈ U, Hierarchy Γ n σ)
+    (h : 𝗥𝗳𝗻[Γ.alt n] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
+  classical
+  have hmem : ∀ σ, σ ∈ hU.toFinset.toList ↔ σ ∈ U := by simp
+  have hconj : Hierarchy Γ n (⋀hU.toFinset.toList) :=
+    Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ σ ((hmem σ).mp hσ)
+  have hle : T ∪ U ⪯ insert (⋀hU.toFinset.toList) T := WeakerThan.ofAxm! <| by
+    rintro φ (hφ | hφ)
+    · exact Axiomatized.by_axm (Set.mem_insert_of_mem _ hφ)
+    · exact mdp (left_Conj₂_intro ((hmem φ).mpr hφ)) (Axiomatized.by_axm (Set.mem_insert _ _))
+  have hge : insert (⋀hU.toFinset.toList) T ⪯ T ∪ U := WeakerThan.ofAxm! <| by
+    rintro φ (rfl | hφ)
+    · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦ Axiomatized.by_axm (Or.inr ((hmem ψ).mp hψ))
+    · exact Axiomatized.by_axm (Or.inl hφ)
+  exact (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hconj
+    (h.trans hle)).of_ge hge
 
 /-- The uniform reflection schema `RFN_Γ(T)` consists of
 `∀x (Pr_T(φ(ẋ)) → φ(x))` for one-free-variable formulas `φ` satisfying `Γ`.

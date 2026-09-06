@@ -6,6 +6,7 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZeroExists
 public import AlphaCentauri.Bootstrapping.PartialTruth.SatSigma
 public import AlphaCentauri.Bootstrapping.PartialTruth.SatZero
 public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
+public import AlphaCentauri.Bootstrapping.PartialTruth.Tarski
 public import AlphaCentauri.Bootstrapping.Prenex
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
@@ -29,6 +30,10 @@ public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.ProvablyTotal.Primrec
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.StandardProvability
+public import AlphaCentauri.Schemata.Collection
+public import AlphaCentauri.Vorspiel.Absoluteness
+public import AlphaCentauri.Vorspiel.Fvar
+public import AlphaCentauri.Vorspiel.Hierarchy
 public import AlphaCentauri.Vorspiel.Ordinal
 public import AlphaCentauri.Vorspiel.Primrec
 public import AlphaCentauri.Vorspiel.Rew

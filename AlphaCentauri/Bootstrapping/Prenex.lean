@@ -147,8 +147,7 @@ noncomputable def construction : VecRec.Construction V blueprint where
 
 end VecAppend
 
-/-- `vecAppend v w` is the coded vector obtained by placing `v` before `w`.
-- No source; this is a routine coding construction. -/
+/-- `vecAppend v w` is the coded vector obtained by placing `v` before `w`. -/
 noncomputable def vecAppend (v w : V) : V := VecAppend.construction.result ![w] v
 
 @[simp] lemma vecAppend_nil (w : V) : vecAppend 0 w = w := by

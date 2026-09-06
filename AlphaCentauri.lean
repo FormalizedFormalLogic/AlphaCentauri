@@ -26,6 +26,7 @@ public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.ProvablyTotal.Primrec
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.StandardProvability
+public import AlphaCentauri.Schemata.Collection
 public import AlphaCentauri.Vorspiel.Absoluteness
 public import AlphaCentauri.Vorspiel.Ordinal
 public import AlphaCentauri.Vorspiel.Primrec

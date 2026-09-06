@@ -15,11 +15,9 @@ namespace Ordinal
 
 open scoped Ordinal
 
-variable (a b : Ordinal) (f : ℕ → Ordinal)
-
 section Principal
 
-variable {a} {θ γ δ : Ordinal}
+variable {θ γ δ : Ordinal}
 
 lemma one_lt_omega0_opow (h : 0 < θ) : 1 < ω ^ θ := by
   simpa using (opow_lt_opow_iff_right one_lt_omega0 (b := 0) (c := θ)).mpr h
@@ -33,6 +31,8 @@ lemma add_one_lt_omega0_opow (hθ : 0 < θ) (hγ : γ < ω ^ θ) : γ + 1 < ω ^
 end Principal
 
 section Bounds
+
+variable (a b : Ordinal) (f : ℕ → Ordinal)
 
 lemma zero_lt_add_one : 0 < a + 1 := one_pos.trans_le le_add_self
 
@@ -56,8 +56,6 @@ lemma iSup_opow_add_one_le : (⨆ n, ω ^ f n) + 1 ≤ ω ^ ((⨆ n, f n) + 1) :
     Ordinal.iSup_le fun n => opow_le_opow_right omega0_pos (Ordinal.le_iSup f n)
   refine (add_one_lt_omega0_opow (zero_lt_add_one _) (hsup.trans_lt ?_)).le
   exact (opow_lt_opow_iff_right one_lt_omega0).mpr (lt_add_one _)
-
-variable {a b f}
 
 lemma max_add_add_one_add_one_le (a b c : Ordinal) :
     max (a + b + 1) (a + c + 1) + 1 ≤ a + (max b c + 1) + 1 := by

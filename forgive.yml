@@ -20,9 +20,6 @@
 version: v0
 
 # The unproved statements themselves.
-LO.FirstOrder.Arithmetic.ISigma.exists_pi_axiomatization:
-  forgive:
-    - LO.FirstOrder.Arithmetic.ISigma.exists_pi_axiomatization
 LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
@@ -80,6 +77,9 @@ LO.FirstOrder.provablyTotal_of_primrec':
 
 # Declarations that inherit the debt of an unproved statement.
 LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
+  forgive:
+    - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
+LO.FirstOrder.Arithmetic.ISigma.exists_pi_axiomatization:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
 LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatization_equiv:

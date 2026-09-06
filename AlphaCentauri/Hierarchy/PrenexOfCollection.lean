@@ -302,8 +302,7 @@ lemma models_all_of_collection [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCo
 
 /-- Every `Hierarchy Γ s` semisentence is equivalent, in every model of `𝗣𝗔⁻` with collection for
 strict `𝚺-[s]` formulas, to the value of a `Prenex Γ s` code. -/
-theorem models_exists_prenex_of_collection {Γ : Polarity} {s n : ℕ}
-    {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
+theorem models_exists_prenex_of_collection {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ φ' : Prenex Γ s Empty n,
       ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻], StrictCollection V s →
         ∀ e : Fin n → V, V ⊧/e φ ↔ V ⊧/e φ'.val := by

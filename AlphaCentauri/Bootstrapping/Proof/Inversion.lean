@@ -22,8 +22,7 @@ open PeanoMinus ISigma0 ISigma1 InternalMeasures
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-/-- The external-variable shift is injective on term codes.
-- No source; a routine technical fact about the coded syntax. -/
+/-- The external-variable shift is injective on term codes. -/
 lemma termShift_inj {t u : V} (ht : IsUTerm L t) (hu : IsUTerm L u)
     (h : termShift L t = termShift L u) : t = u := by
   have H : ∀ t : V, IsUTerm L t → ∀ u, IsUTerm L u → termShift L t = termShift L u → t = u := by
@@ -61,8 +60,7 @@ lemma termShift_inj {t u : V} (ht : IsUTerm L t) (hu : IsUTerm L u)
         rw [this]
   exact H t ht u hu h
 
-/-- The shape of a formula code, together with the value the external-variable shift takes on it.
-- No source; a routine technical fact about the coded syntax. -/
+/-- The shape of a formula code, together with the value the external-variable shift takes on it. -/
 private lemma shift_case {q : V} (hq : IsUFormula L q) :
     (∃ k R v, L.IsRel k R ∧ IsUTermVec L k v ∧ q = ^rel k R v ∧
       shift L q = ^rel k R (termShiftVec L k v)) ∨
@@ -91,8 +89,7 @@ private lemma shift_case {q : V} (hq : IsUFormula L q) :
   · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr
       ⟨q₁, hq₁, rfl, shift_exs hq₁⟩
 
-/-- The external-variable shift is injective on formula codes.
-- No source; a routine technical fact about the coded syntax. -/
+/-- The external-variable shift is injective on formula codes. -/
 lemma shift_inj {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q)
     (h : shift L p = shift L q) : p = q := by
   have H : ∀ p : V, IsUFormula L p → ∀ q, IsUFormula L q → shift L p = shift L q → p = q := by
@@ -236,8 +233,7 @@ lemma shift_inj {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q)
       · rw [ih₁ q₁ hq₁ (by simpa using h)]
   exact H p hp q hq h
 
-/-- Removing a formula from a coded set commutes with the external-variable shift.
-- No source; a routine technical fact about the coded syntax. -/
+/-- Removing a formula from a coded set commutes with the external-variable shift. -/
 lemma setShift_bitRemove {p s : V} (hs : IsFormulaSet L s) (hp : IsUFormula L p) :
     setShift L (bitRemove p s) = bitRemove (shift L p) (setShift L s) := by
   apply mem_ext
@@ -254,8 +250,7 @@ lemma setShift_bitRemove {p s : V} (hs : IsFormulaSet L s) (hp : IsUFormula L p)
     exact mem_setShift_iff.mpr ⟨x, mem_bitRemove_iff.mpr ⟨fun e ↦ hy'.1 (by rw [e]), hx⟩, rfl⟩
 
 /-- A formula code whose external-variable shift is a conjunction is itself a conjunction, and its
-conjuncts shift to the given ones.
-- No source; a routine technical fact about the coded syntax. -/
+conjuncts shift to the given ones. -/
 lemma exists_and_of_shift_eq_and {r p q : V} (hr : IsUFormula L r) (h : shift L r = p ^⋏ q) :
     ∃ r₁ r₂, IsUFormula L r₁ ∧ IsUFormula L r₂ ∧ r = r₁ ^⋏ r₂ ∧
       shift L r₁ = p ∧ shift L r₂ = q := by
@@ -274,8 +269,7 @@ lemma exists_and_of_shift_eq_and {r p q : V} (hr : IsUFormula L r) (h : shift L 
   · simp [qqAnd, qqExs] at h
 
 /-- A formula code whose external-variable shift is a disjunction is itself a disjunction, and its
-disjuncts shift to the given ones.
-- No source; a routine technical fact about the coded syntax. -/
+disjuncts shift to the given ones. -/
 lemma exists_or_of_shift_eq_or {r p q : V} (hr : IsUFormula L r) (h : shift L r = p ^⋎ q) :
     ∃ r₁ r₂, IsUFormula L r₁ ∧ IsUFormula L r₂ ∧ r = r₁ ^⋎ r₂ ∧
       shift L r₁ = p ∧ shift L r₂ = q := by
@@ -297,23 +291,20 @@ section
 
 variable {T : Theory L} [T.Δ₁]
 
-/-- Adding the same code twice to a coded set is adding it once.
-- No source; a routine fact about coded sets. -/
+/-- Adding the same code twice to a coded set is adding it once. -/
 private lemma insert_insert_self (x s : V) : insert x (insert x s) = insert x s := mem_ext <| by
   intro z
   simp only [mem_bitInsert_iff]
   tauto
 
-/-- Adding two codes to a coded set does not depend on their order.
-- No source; a routine fact about coded sets. -/
+/-- Adding two codes to a coded set does not depend on their order. -/
 private lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) :=
   mem_ext <| by
     intro z
     simp only [mem_bitInsert_iff]
     tauto
 
-/-- Removing a code just added to a coded set that did not contain it recovers the set.
-- No source; a routine fact about coded sets. -/
+/-- Removing a code just added to a coded set that did not contain it recovers the set. -/
 private lemma bitRemove_insert_of_not_mem {x s : V} (h : x ∉ s) : bitRemove x (insert x s) = s :=
   mem_ext <| by
     intro z
@@ -325,14 +316,12 @@ private lemma bitRemove_insert_of_not_mem {x s : V} (h : x ∉ s) : bitRemove x 
     · intro hz
       exact ⟨by rintro rfl; exact h hz, Or.inr hz⟩
 
-/-- The end-sequent of a proof code is bounded by the code itself.
-- No source; a routine fact about the coding of proofs. -/
+/-- The end-sequent of a proof code is bounded by the code itself. -/
 lemma fstIdx_le (d : V) : fstIdx d ≤ d :=
   le_trans (pi₁_le_self (d - 1)) (by simp)
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-/-- No code is an axiom of the empty theory.
-- No source; a routine fact about the internal presentation of a theory. -/
+/-- No code is an axiom of the empty theory. -/
 lemma not_mem_empty_Δ₁Class (p : V) : p ∉ (∅ : Theory L).Δ₁Class := by
   intro h
   have : V ⊧/![p] (⊥ : 𝚫₁.Semisentence 1).val := h
@@ -357,8 +346,7 @@ lemma cutRank_eq_zero {d : V} (h : CutFreeDerivation T d) : cutRank L d = 0 := b
 
 end CutFreeDerivation
 
-/-- Adding a code already present to a coded set changes nothing.
-- No source; a routine fact about coded sets. -/
+/-- Adding a code already present to a coded set changes nothing. -/
 private lemma insert_eq_self {x s : V} (h : x ∈ s) : insert x s = s := mem_ext <| by
   intro z
   simp only [mem_bitInsert_iff]
@@ -368,18 +356,15 @@ private lemma insert_eq_self {x s : V} (h : x ∈ s) : insert x s = s := mem_ext
     · exact hz
   · exact Or.inr
 
-/-- A code in the end-sequent of a proof code is bounded by the proof code.
-- No source; a routine fact about the coding of proofs. -/
+/-- A code in the end-sequent of a proof code is bounded by the proof code. -/
 private lemma le_of_mem_fstIdx {x d : V} (h : x ∈ fstIdx d) : x ≤ d :=
   le_trans (le_of_lt (lt_of_mem h)) (fstIdx_le d)
 
-/-- A subset of the end-sequent of a proof code is bounded by the proof code.
-- No source; a routine fact about the coding of proofs. -/
+/-- A subset of the end-sequent of a proof code is bounded by the proof code. -/
 private lemma le_of_subset_fstIdx {u d : V} (h : u ⊆ fstIdx d) : u ≤ d :=
   le_trans (le_of_subset h) (fstIdx_le d)
 
-/-- The data of a conjunction inversion is bounded by the derivation it is read off.
-- No source; a bookkeeping device keeping the induction hypothesis `𝚺₁`. -/
+/-- The formulas and the context of a conjunction inversion are bounded by the derivation. -/
 private lemma and_bounds {p q c s d : V} (hc : c = p ∨ c = q)
     (h : fstIdx d = insert (p ^⋏ q) s) : p ≤ d ∧ q ≤ d ∧ c ≤ d ∧ s ≤ d := by
   have hb : p ^⋏ q ≤ d := le_of_mem_fstIdx (by rw [h]; simp)
@@ -390,24 +375,21 @@ private lemma and_bounds {p q c s d : V} (hc : c = p ∨ c = q)
   · exact hp
   · exact hq
 
-/-- Adding two codes to a coded set already containing them changes nothing.
-- No source; a routine fact about coded sets. -/
+/-- Adding two codes to a coded set already containing them changes nothing. -/
 private lemma insert_pair_absorb (x y s : V) :
     insert x (insert y (insert x (insert y s))) = insert x (insert y s) := mem_ext <| by
   intro z
   simp only [mem_bitInsert_iff]
   tauto
 
-/-- Adding two codes and then a third is adding the third and then the two.
-- No source; a routine fact about coded sets. -/
+/-- Adding two codes and then a third is adding the third and then the two. -/
 private lemma insert_pair_comm (x y a s : V) :
     insert x (insert y (insert a s)) = insert a (insert x (insert y s)) := mem_ext <| by
   intro z
   simp only [mem_bitInsert_iff]
   tauto
 
-/-- Adding two codes and then two more is adding the last two and then the first two.
-- No source; a routine fact about coded sets. -/
+/-- Adding two codes and then two more is adding the last two and then the first two. -/
 private lemma insert_pair_comm₂ (x y a b s : V) :
     insert x (insert y (insert a (insert b s))) = insert a (insert b (insert x (insert y s))) :=
   mem_ext <| by
@@ -415,20 +397,17 @@ private lemma insert_pair_comm₂ (x y a b s : V) :
     simp only [mem_bitInsert_iff]
     tauto
 
-/-- The data of a disjunction inversion is bounded by the derivation it is read off.
-- No source; a bookkeeping device keeping the induction hypothesis `𝚺₁`. -/
+/-- The formulas and the context of a disjunction inversion are bounded by the derivation. -/
 private lemma or_bounds {p q s d : V} (h : fstIdx d = insert (p ^⋎ q) s) :
     p ≤ d ∧ q ≤ d ∧ s ≤ d := by
   have hb : p ^⋎ q ≤ d := le_of_mem_fstIdx (by rw [h]; simp)
   exact ⟨le_trans (le_of_lt (by simp)) hb, le_trans (le_of_lt (by simp)) hb,
     le_of_subset_fstIdx (by rw [h]; intro x hx; simp [hx])⟩
 
-/-- Every element is below its successor.
-- No source; a routine arithmetical fact. -/
+/-- Every element is below its successor. -/
 private lemma le_add_one (x : V) : x ≤ x + 1 := le_of_lt (lt_succ_iff_le.mpr le_rfl)
 
-/-- Taking successors is monotone.
-- No source; a routine arithmetical fact. -/
+/-- Taking successors is monotone. -/
 private lemma succ_le_succ {x y : V} (h : x ≤ y) : x + 1 ≤ y + 1 := by simpa using h
 
 namespace CutFreeDerivation

@@ -9,7 +9,9 @@ Finite axiomatizability for first-order theories:
 
 * the finite **subset** form `finiteAxiomatizable_iff_exists_finite_subset`;
 * the finset form `finiteAxiomatizable_iff_exists_finset` and the single-sentence form
-  `finiteAxiomatizable_iff_exists_sentence`, through `equiv_singleton_Fconj`;
+  `finiteAxiomatizable_iff_exists_sentence`, through `equiv_singleton_Fconj`
+  (with private list-based counterparts `finiteAxiomatizable_iff_exists_list` and
+  `equiv_singleton_Conj₂`);
 * the characterization `not_finiteAxiomatizable_iff` of the negation;
 * invariance under provability equivalence, `Entailment.FiniteAxiomatizable.of_equiv`;
 * finite axiomatizability of `𝗣𝗔⁻`.
@@ -82,6 +84,20 @@ lemma finiteAxiomatizable_iff_exists_finset :
   · rintro ⟨F, _, heq⟩
     exact ⟨↑F, F.finite_toSet, heq⟩
 
+/-- A theory is finitely axiomatizable iff a list of its axioms axiomatizes it.
+- [Lin97, Ch. 4 §1]
+- [HP98, Theorem I.2.52] -/
+private lemma finiteAxiomatizable_iff_exists_list :
+    FiniteAxiomatizable T ↔
+      ∃ l : List (Sentence L), (∀ σ ∈ l, σ ∈ T) ∧ ({σ | σ ∈ l} : Theory L) ≊ T := by
+  constructor
+  · intro h
+    obtain ⟨F, hsub, hfin, heq⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp h
+    have hl : ({σ | σ ∈ hfin.toFinset.toList} : Theory L) = F := by ext σ; simp
+    exact ⟨hfin.toFinset.toList, fun σ hσ ↦ hsub (by simpa using hσ), by rw [hl]; exact heq⟩
+  · rintro ⟨l, _, heq⟩
+    exact ⟨{σ | σ ∈ l}, by simp, heq⟩
+
 /-- The conjunction of a finset of sentences axiomatizes the theory of its members.
 - [Lin97, Ch. 4 §1] -/
 lemma equiv_singleton_Fconj (F : Finset (Sentence L)) :
@@ -92,6 +108,17 @@ lemma equiv_singleton_Fconj (F : Finset (Sentence L)) :
     exact FConj_iff_forall_provable.mpr fun φ hφ ↦ Axiomatized.by_axm hφ
   · intro σ hσ
     exact mdp (left_Fconj_intro (show σ ∈ F by simpa using hσ)) (Axiomatized.by_axm rfl)
+
+/-- The conjunction of a list of sentences axiomatizes the theory of its members.
+- [Lin97, Ch. 4 §1] -/
+private lemma equiv_singleton_Conj₂ (l : List (Sentence L)) :
+    ({⋀l} : Theory L) ≊ ({σ | σ ∈ l} : Theory L) := by
+  classical
+  refine Equiv.antisymm_iff.mpr ⟨WeakerThan.ofAxm! ?_, WeakerThan.ofAxm! ?_⟩
+  · rintro σ (rfl : σ = ⋀l)
+    exact Conj₂_iff_forall_provable.mpr fun φ hφ ↦ Axiomatized.by_axm hφ
+  · intro σ hσ
+    exact mdp (left_Conj₂_intro (show σ ∈ l by simpa using hσ)) (Axiomatized.by_axm rfl)
 
 /-- A theory is finitely axiomatizable iff a single sentence axiomatizes it.
 - [Lin97, Ch. 4 §1]

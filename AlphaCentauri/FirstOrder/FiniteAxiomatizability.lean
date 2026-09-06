@@ -9,7 +9,7 @@ Finite axiomatizability for first-order theories:
 
 * the finite **subset** form `finiteAxiomatizable_iff_exists_finite_subset`;
 * the list form `finiteAxiomatizable_iff_exists_list` and the single-sentence form
-  `finiteAxiomatizable_iff_exists_sentence`;
+  `finiteAxiomatizable_iff_exists_sentence`, through `equiv_singleton_Conj₂`;
 * the characterization `not_finiteAxiomatizable_iff` of the negation;
 * invariance under provability equivalence, `Entailment.FiniteAxiomatizable.of_equiv`;
 * finite axiomatizability of `𝗣𝗔⁻`.
@@ -85,21 +85,26 @@ lemma finiteAxiomatizable_iff_exists_list :
   · rintro ⟨l, _, heq⟩
     exact ⟨{σ | σ ∈ l}, by simp, heq⟩
 
+/-- The conjunction of a list of sentences axiomatizes the theory of its members.
+- [Lin97, Ch. 4 §1] -/
+lemma equiv_singleton_Conj₂ (l : List (Sentence L)) :
+    ({⋀l} : Theory L) ≊ ({σ | σ ∈ l} : Theory L) := by
+  classical
+  refine Equiv.antisymm_iff.mpr ⟨WeakerThan.ofAxm! ?_, WeakerThan.ofAxm! ?_⟩
+  · rintro σ (rfl : σ = ⋀l)
+    exact Conj₂_iff_forall_provable.mpr fun φ hφ ↦ Axiomatized.by_axm hφ
+  · intro σ hσ
+    exact mdp (left_Conj₂_intro (show σ ∈ l by simpa using hσ)) (Axiomatized.by_axm rfl)
+
 /-- A theory is finitely axiomatizable iff a single sentence axiomatizes it.
 - [Lin97, Ch. 4 §1]
 - [HP98, Theorem I.2.52] -/
 lemma finiteAxiomatizable_iff_exists_sentence :
     FiniteAxiomatizable T ↔ ∃ σ : Sentence L, ({σ} : Theory L) ≊ T := by
-  classical
   constructor
   · intro h
     obtain ⟨l, _, heq⟩ := finiteAxiomatizable_iff_exists_list.mp h
-    refine ⟨⋀l, Equiv.trans
-      (Equiv.antisymm_iff.mpr ⟨WeakerThan.ofAxm! ?_, WeakerThan.ofAxm! ?_⟩) heq⟩
-    · rintro σ (rfl : σ = ⋀l)
-      exact Conj₂_iff_forall_provable.mpr fun φ hφ ↦ Axiomatized.by_axm hφ
-    · intro σ hσ
-      exact mdp (left_Conj₂_intro (show σ ∈ l by simpa using hσ)) (Axiomatized.by_axm rfl)
+    exact ⟨⋀l, (equiv_singleton_Conj₂ l).trans heq⟩
   · rintro ⟨σ, heq⟩
     exact ⟨{σ}, by simp, heq⟩
 

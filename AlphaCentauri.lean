@@ -8,6 +8,10 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.SatZero
 public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
 public import AlphaCentauri.Bootstrapping.PartialTruth.Tarski
 public import AlphaCentauri.Bootstrapping.Prenex
+public import AlphaCentauri.Bootstrapping.Proof.CutFree
+public import AlphaCentauri.Bootstrapping.Proof.FvSubst
+public import AlphaCentauri.Bootstrapping.Proof.Measures
+public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.FiniteAxiomatizability.ISigma
 public import AlphaCentauri.FiniteAxiomatizability.Reflexive
@@ -15,6 +19,7 @@ public import AlphaCentauri.FirstOrder.FiniteAxiomatizability
 public import AlphaCentauri.Hierarchy.DeltaZero
 public import AlphaCentauri.Hierarchy.NormalForm
 public import AlphaCentauri.Hierarchy.Prenex
+public import AlphaCentauri.Hierarchy.PrenexOfCollection
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.OmegaLogic.Basic
 public import AlphaCentauri.OmegaLogic.Consistency
@@ -25,11 +30,13 @@ public import AlphaCentauri.OmegaLogic.Reduction
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.ProvablyTotal.Primrec
+public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Schemata.Collection
 public import AlphaCentauri.Vorspiel.Absoluteness
 public import AlphaCentauri.Vorspiel.Fvar
+public import AlphaCentauri.Vorspiel.Hierarchy
 public import AlphaCentauri.Vorspiel.Ordinal
 public import AlphaCentauri.Vorspiel.Primrec
 public import AlphaCentauri.Vorspiel.Rew

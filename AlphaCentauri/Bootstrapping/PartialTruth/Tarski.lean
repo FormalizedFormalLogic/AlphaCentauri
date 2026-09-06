@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.PartialTruth.SatSigma
+public import AlphaCentauri.Vorspiel.Hierarchy
 
 /-!
 # The Tarski conditions as an explicit finite theory
@@ -273,6 +274,110 @@ lemma tarski_finite (n : ℕ) : (tarski n).Finite := by
     rw [tarski_zero]
     exact Set.Finite.union (by simp only [Tarski.satZeroAxioms]; exact Set.toFinite _) (hSigmaAx 0)
   | succ n ih => rw [tarski_succ]; exact ih.union (hSigmaAx (n + 1))
+
+/-! ## The level of the Tarski conditions in the arithmetical hierarchy -/
+
+namespace Tarski
+
+section Hierarchy
+
+variable {s m : ℕ}
+
+/-! Each Tarski sentence is a universal closure of a Boolean combination of formulas of level at
+most `𝚺-[m + 1]`, so `Hierarchy.iff_iff` splits the biconditionals and `Hierarchy.dummy_sigma`,
+`Hierarchy.dummy_pi` absorb the quantifier blocks that raise the level by one. -/
+attribute [local simp] Hierarchy.iff_iff Hierarchy.dummy_sigma Hierarchy.dummy_pi
+
+@[simp] lemma hierarchy_satZeroDom : Hierarchy 𝚷 (s + 3) satZeroDom := by simp [satZeroDom]
+
+@[simp] lemma hierarchy_satZeroVerum : Hierarchy 𝚷 (s + 3) satZeroVerum := by simp [satZeroVerum]
+
+@[simp] lemma hierarchy_satZeroFalsum : Hierarchy 𝚷 (s + 3) satZeroFalsum := by
+  simp [satZeroFalsum]
+
+@[simp] lemma hierarchy_satZeroEq : Hierarchy 𝚷 (s + 3) satZeroEq := by simp [satZeroEq]
+
+@[simp] lemma hierarchy_satZeroNeq : Hierarchy 𝚷 (s + 3) satZeroNeq := by simp [satZeroNeq]
+
+@[simp] lemma hierarchy_satZeroLt : Hierarchy 𝚷 (s + 3) satZeroLt := by simp [satZeroLt]
+
+@[simp] lemma hierarchy_satZeroNlt : Hierarchy 𝚷 (s + 3) satZeroNlt := by simp [satZeroNlt]
+
+@[simp] lemma hierarchy_satZeroAnd : Hierarchy 𝚷 (s + 3) satZeroAnd := by simp [satZeroAnd]
+
+@[simp] lemma hierarchy_satZeroOr : Hierarchy 𝚷 (s + 3) satZeroOr := by simp [satZeroOr]
+
+@[simp] lemma hierarchy_satZeroNeg : Hierarchy 𝚷 (s + 3) satZeroNeg := by simp [satZeroNeg]
+
+@[simp] lemma hierarchy_satZeroBall : Hierarchy 𝚷 (s + 3) satZeroBall := by simp [satZeroBall]
+
+@[simp] lemma hierarchy_satZeroBex : Hierarchy 𝚷 (s + 3) satZeroBex := by simp [satZeroBex]
+
+@[simp] lemma hierarchy_termValBvar : Hierarchy 𝚷 (s + 3) termValBvar := by simp [termValBvar]
+
+@[simp] lemma hierarchy_termValZero : Hierarchy 𝚷 (s + 3) termValZero := by simp [termValZero]
+
+@[simp] lemma hierarchy_termValOne : Hierarchy 𝚷 (s + 3) termValOne := by simp [termValOne]
+
+@[simp] lemma hierarchy_termValAdd : Hierarchy 𝚷 (s + 3) termValAdd := by simp [termValAdd]
+
+@[simp] lemma hierarchy_termValMul : Hierarchy 𝚷 (s + 3) termValMul := by simp [termValMul]
+
+@[simp] lemma hierarchy_adjoinTotal : Hierarchy 𝚷 (s + 3) adjoinTotal := by simp [adjoinTotal]
+
+@[simp] lemma hierarchy_adjoinUnique : Hierarchy 𝚷 (s + 3) adjoinUnique := by simp [adjoinUnique]
+
+@[simp] lemma hierarchy_nthAdjoinZero : Hierarchy 𝚷 (s + 3) nthAdjoinZero := by
+  simp [nthAdjoinZero]
+
+@[simp] lemma hierarchy_nthAdjoinSucc : Hierarchy 𝚷 (s + 3) nthAdjoinSucc := by
+  simp [nthAdjoinSucc]
+
+@[simp] lemma hierarchy_lenNil : Hierarchy 𝚷 (s + 3) lenNil := by simp [lenNil]
+
+@[simp] lemma hierarchy_lenAdjoin : Hierarchy 𝚷 (s + 3) lenAdjoin := by simp [lenAdjoin]
+
+@[simp] lemma hierarchy_satSigmaOfPi : Hierarchy 𝚷 (m + 2) (satSigmaOfPi m) := by
+  cases m <;> simp [satSigmaOfPi]
+
+@[simp] lemma hierarchy_satPiOfSigma : Hierarchy 𝚷 (m + 2) (satPiOfSigma m) := by
+  cases m <;> simp [satPiOfSigma]
+
+@[simp] lemma hierarchy_satSigmaDom : Hierarchy 𝚷 (m + 2) (satSigmaDom m) := by simp [satSigmaDom]
+
+@[simp] lemma hierarchy_satPiDom : Hierarchy 𝚷 (m + 2) (satPiDom m) := by simp [satPiDom]
+
+@[simp] lemma hierarchy_satSigmaExs : Hierarchy 𝚷 (m + 2) (satSigmaExs m) := by simp [satSigmaExs]
+
+@[simp] lemma hierarchy_satPiAll : Hierarchy 𝚷 (m + 2) (satPiAll m) := by simp [satPiAll]
+
+@[simp] lemma hierarchy_satPiNeg : Hierarchy 𝚷 (m + 2) (satPiNeg m) := by simp [satPiNeg]
+
+@[simp] lemma hierarchy_satSigmaNeg : Hierarchy 𝚷 (m + 2) (satSigmaNeg m) := by simp [satSigmaNeg]
+
+lemma hierarchy_of_mem_satZeroAxioms {σ : ArithmeticSentence} (hσ : σ ∈ satZeroAxioms) :
+    Hierarchy 𝚷 (s + 3) σ := by
+  simp only [satZeroAxioms, Set.mem_insert_iff, Set.mem_singleton_iff] at hσ
+  rcases hσ with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
+    rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> simp
+
+lemma hierarchy_of_mem_satSigmaAxioms {σ : ArithmeticSentence} (hσ : σ ∈ satSigmaAxioms m) :
+    Hierarchy 𝚷 (m + 2) σ := by
+  simp only [satSigmaAxioms, Set.mem_insert_iff, Set.mem_singleton_iff] at hσ
+  rcases hσ with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> simp
+
+end Hierarchy
+
+end Tarski
+
+/-- Every sentence of the finite Tarski theory at level `n` is `𝚷-[n + 3]`.
+- [HP98, Remark I.1.77] -/
+lemma hierarchy_of_tarski {n : ℕ} {σ : ArithmeticSentence} (hσ : tarski n σ) :
+    Hierarchy 𝚷 (n + 3) σ := by
+  induction hσ with
+  | zero n φ hφ => exact Tarski.hierarchy_of_mem_satZeroAxioms hφ
+  | prev n φ _ ih => exact ih.mono (by omega)
+  | new n φ hφ => exact (Tarski.hierarchy_of_mem_satSigmaAxioms hφ).mono (by omega)
 
 /-! ## `𝗜𝚺₁` proves the Tarski conditions -/
 

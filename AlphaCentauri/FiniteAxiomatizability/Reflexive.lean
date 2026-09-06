@@ -36,10 +36,10 @@ def ArithmeticTheory.EssentiallyReflexive (T : ArithmeticTheory) : Prop :=
 - [Lin97, Corollary 2.1]
 - [HP98, Corollary III.2.24] -/
 theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T] (h : T.Reflexive) : ¬FiniteAxiomatizable T := by
-  by_contra! hfa;
-  obtain ⟨F, hFT, hfin, hequiv⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp hfa;
-  let : F.Δ₁ := Theory.Δ₁.ofFinite F hfin;
-  have hcon : T ⊢ F.consistent.val := h F hFT hfin;
+  by_contra! hfa
+  obtain ⟨F, hFT, hfin, hequiv⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp hfa
+  let : F.Δ₁ := Theory.Δ₁.ofFinite F hfin
+  have hcon : T ⊢ F.consistent.val := h F hFT hfin
   have : 𝗜𝚺₁ ⪯ F := WeakerThan.trans inferInstance hequiv.symm.le
   have : Consistent F := Consistent.of_le inferInstance hequiv.le
   exact Arithmetic.consistent_unprovable F (hequiv.symm.le.wk hcon)
@@ -68,14 +68,14 @@ theorem Peano.not_finiteAxiomatizable : ¬FiniteAxiomatizable 𝗣𝗔 :=
 - [Lin97, Corollary 2.1] -/
 theorem not_finiteAxiomatizable_of_Peano_le [𝗣𝗔 ⪯ T] [Consistent T] : ¬FiniteAxiomatizable T := by
   have hR : (𝗣𝗔 ∪ T).Reflexive := Peano.essentiallyReflexive _ Set.subset_union_left
-  have hUT : 𝗣𝗔 ∪ T ⪯ T := WeakerThan.ofAxm! $ by
-    intro σ hσ;
+  have hUT : 𝗣𝗔 ∪ T ⪯ T := WeakerThan.ofAxm! <| by
+    intro σ hσ
     rcases hσ with hσ | hσ
-    · exact ‹𝗣𝗔 ⪯ T›.wk $ Axiomatized.by_axm hσ;
-    · exact Axiomatized.by_axm hσ;
+    · exact ‹𝗣𝗔 ⪯ T›.wk <| Axiomatized.by_axm hσ
+    · exact Axiomatized.by_axm hσ
   have hequiv : T ≊ 𝗣𝗔 ∪ T := Equiv.antisymm_iff.mpr ⟨inferInstance, hUT⟩
   have : 𝗜𝚺₁ ⪯ 𝗣𝗔 ∪ T := WeakerThan.trans (inferInstance : 𝗜𝚺₁ ⪯ 𝗣𝗔) inferInstance
   have : Consistent (𝗣𝗔 ∪ T) := Consistent.of_le ‹Consistent T› hUT
-  exact mt (FiniteAxiomatizable.of_equiv hequiv) $ not_finiteAxiomatizable_of_reflexive hR
+  exact mt (FiniteAxiomatizable.of_equiv hequiv) <| not_finiteAxiomatizable_of_reflexive hR
 
 end LO.FirstOrder

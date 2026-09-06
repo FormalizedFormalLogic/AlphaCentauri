@@ -33,7 +33,7 @@ namespace LO.Entailment
 
 open FirstOrder
 
-variable {L : Language} {T U : Theory L}
+variable {L : Language} {T : Theory L}
 
 /-- Every finite theory is finitely axiomatizable.
 - [Lin97, Ch. 4 §1] -/
@@ -42,7 +42,8 @@ lemma FiniteAxiomatizable.of_finite (h : T.Finite) : FiniteAxiomatizable T :=
 
 /-- Finite axiomatizability is invariant under provability equivalence.
 - [Lin97, Ch. 4 §1] -/
-lemma FiniteAxiomatizable.of_equiv (h : T ≊ U) : FiniteAxiomatizable T → FiniteAxiomatizable U := by
+lemma FiniteAxiomatizable.of_equiv {U : Theory L} (h : T ≊ U) :
+    FiniteAxiomatizable T → FiniteAxiomatizable U := by
   rintro ⟨F, hF, hFT⟩
   exact ⟨F, hF, hFT.trans h⟩
 
@@ -50,7 +51,7 @@ lemma FiniteAxiomatizable.of_equiv (h : T ≊ U) : FiniteAxiomatizable T → Fin
 - [Lin97, Ch. 4 §1]
 - [HP98, Theorem I.2.52] -/
 lemma finiteAxiomatizable_iff_exists_finite_subset :
-  FiniteAxiomatizable T ↔ ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ F ≊ T := by
+    FiniteAxiomatizable T ↔ ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ F ≊ T := by
   constructor
   -- Syntactic compactness (`Entailment.Compact`), not the completeness theorem, supplies F.
   · rintro ⟨𝓕, h𝓕fin, h𝓕⟩
@@ -138,9 +139,9 @@ strictly weaker.
 - [HP98, Theorem I.2.52] -/
 lemma not_finiteAxiomatizable_iff :
     ¬FiniteAxiomatizable T ↔ ∀ F : Theory L, F ⊆ T → F.Finite → F ⪱ T := by
-  rw [finiteAxiomatizable_iff_exists_finite_subset];
+  rw [finiteAxiomatizable_iff_exists_finite_subset]
   constructor
-  · intro h F hsub hfin;
+  · intro h F hsub hfin
     have hle : F ⪯ T := Theory.Proof.weakerThan_of_le hsub
     refine ⟨hle, fun hle' ↦ h ⟨F, hsub, hfin, Equiv.antisymm_iff.mpr ⟨hle, hle'⟩⟩⟩
   · rintro h ⟨F, hsub, hfin, heq⟩
@@ -150,9 +151,10 @@ end LO.Entailment
 
 namespace LO.FirstOrder.Arithmetic
 
+open _root_.LO.Entailment in
 /-- `𝗣𝗔⁻` is finitely axiomatizable.
 - [Lin97, Ch. 4 §1] -/
-lemma PeanoMinus.finiteAxiomatizable : Entailment.FiniteAxiomatizable 𝗣𝗔⁻ :=
-  Entailment.FiniteAxiomatizable.of_finite PeanoMinus.finite
+lemma PeanoMinus.finiteAxiomatizable : FiniteAxiomatizable 𝗣𝗔⁻ :=
+  FiniteAxiomatizable.of_finite PeanoMinus.finite
 
 end LO.FirstOrder.Arithmetic

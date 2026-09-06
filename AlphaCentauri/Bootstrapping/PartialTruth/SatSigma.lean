@@ -160,21 +160,24 @@ instance SatPi.definable (n : ℕ) :
 
 /-! ## Tarski conditions -/
 
+section
+variable {n : ℕ} {z e : V}
+
 /-- Unfolding of strict `Σ` satisfaction at a positive level.
 - [HP98, Definition I.1.74] -/
-private lemma satSigma_succ_iff {n : ℕ} {z e : V} :
+private lemma satSigma_succ_iff :
     SatSigma (n + 1) z e ↔ ∃ k q, z = qqExss q k ∧ IsStrictPi n q ∧
       ∃ w, len w = k ∧ SatPi n q (vecAppend w e) := by rw [SatSigma]
 
 /-- Unfolding of strict `Π` satisfaction at a positive level.
 - [HP98, Definition I.1.74] -/
-private lemma satPi_succ_iff {n : ℕ} {z e : V} :
+private lemma satPi_succ_iff :
     SatPi (n + 1) z e ↔ IsStrictPi (n + 1) z ∧ IsUFormula ℒₒᵣ z ∧
       ¬SatSigma (n + 1) (neg ℒₒᵣ z) e := by rw [SatPi]
 
 /-- Strict `𝚷-[n]` satisfaction implies membership in its syntactic domain.
 - [HP98, Theorem I.1.75(2)] -/
-theorem SatPi.dom {n : ℕ} {z e : V} (h : SatPi n z e) :
+theorem SatPi.dom (h : SatPi n z e) :
     IsStrictPi n z ∧ IsUFormula ℒₒᵣ z := by
   match n with
   | 0 => exact SatZero.dom (by simpa using h)
@@ -182,7 +185,7 @@ theorem SatPi.dom {n : ℕ} {z e : V} (h : SatPi n z e) :
 
 /-- Strict `𝚺-[n]` satisfaction implies membership in its syntactic domain.
 - [HP98, Theorem I.1.75(2)] -/
-theorem SatSigma.dom {n : ℕ} {z e : V} (h : SatSigma n z e) :
+theorem SatSigma.dom (h : SatSigma n z e) :
     IsStrictSigma n z ∧ IsUFormula ℒₒᵣ z := by
   match n with
   | 0 => exact SatZero.dom (by simpa using h)
@@ -192,7 +195,7 @@ theorem SatSigma.dom {n : ℕ} {z e : V} (h : SatSigma n z e) :
 
 /-- `𝚷-[n]` satisfaction of a negated strict `𝚺-[n]` formula is failure of `𝚺-[n]` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
-theorem SatPi.neg_iff {n : ℕ} {z e : V} (hz : IsStrictSigma n z)
+theorem SatPi.neg_iff (hz : IsStrictSigma n z)
     (hz' : IsUFormula ℒₒᵣ z) : SatPi n (neg ℒₒᵣ z) e ↔ ¬SatSigma n z e := by
   match n with
   | 0 => simpa using SatZero.neg_iff hz hz'
@@ -202,13 +205,15 @@ theorem SatPi.neg_iff {n : ℕ} {z e : V} (hz : IsStrictSigma n z)
 
 /-- `𝚺-[n]` satisfaction of a negated strict `𝚷-[n]` formula is failure of `𝚷-[n]` satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
-theorem SatSigma.neg_iff {n : ℕ} {z e : V} (hz : IsStrictPi n z)
+theorem SatSigma.neg_iff (hz : IsStrictPi n z)
     (hz' : IsUFormula ℒₒᵣ z) : SatSigma n (neg ℒₒᵣ z) e ↔ ¬SatPi n z e := by
   match n with
   | 0 => simpa using SatZero.neg_iff hz hz'
   | _ + 1 =>
     rw [satPi_succ_iff (z := z)]
     simp [hz, hz']
+
+end
 
 /-! ### Maximal existential blocks
 
@@ -550,17 +555,22 @@ private lemma blockSat : ∀ n : ℕ, BlockSat V n := fun n ↦ by
             (vecAppend u (vecAppend w e)) (IsStrictPi.mono (by omega) hMpi') hMu
           exact h2.mp (h1.mp husat)
 
+section
+variable {n : ℕ} {z e : V}
+
 /-- An empty existential block reads a strict `𝚷-[n]` formula as a `𝚺-[n + 1]` formula.
 - [HP98, Theorem I.1.75(2)(v)] -/
-theorem SatSigma.of_pi {n : ℕ} {z e : V} (hz : IsStrictPi n z)
-    (hz' : IsUFormula ℒₒᵣ z) : SatSigma (n + 1) z e ↔ SatPi n z e :=
+theorem SatSigma.of_pi (hz : IsStrictPi n z) (hz' : IsUFormula ℒₒᵣ z) :
+    SatSigma (n + 1) z e ↔ SatPi n z e :=
   (of_pi_step n fun m _ ↦ blockSat m).1 z e hz hz'
 
 /-- An empty universal block reads a strict `𝚺-[n]` formula as a `𝚷-[n + 1]` formula.
 - [HP98, Theorem I.1.75(2)(v′)] -/
-theorem SatPi.of_sigma {n : ℕ} {z e : V} (hz : IsStrictSigma n z)
-    (hz' : IsUFormula ℒₒᵣ z) : SatPi (n + 1) z e ↔ SatSigma n z e :=
+theorem SatPi.of_sigma (hz : IsStrictSigma n z) (hz' : IsUFormula ℒₒᵣ z) :
+    SatPi (n + 1) z e ↔ SatSigma n z e :=
   (of_pi_step n fun m _ ↦ blockSat m).2 z e hz hz'
+
+end
 
 /-- Satisfaction of an existential formula is existential satisfaction of its body, for a body
 that lies in the domain: peeling the quantifier shortens the maximal block by one.
@@ -587,10 +597,12 @@ private lemma exs_iff_aux {n : ℕ} {p e : V} (hp : IsStrictSigma (n + 1) p)
     rw [vecAppend_assoc]
     simpa using hsat
 
+section
+variable {n : ℕ} {p e : V}
+
 /-- Satisfaction of an existential formula is existential satisfaction of its body.
 - [HP98, Theorem I.1.75(2)(v)] -/
-theorem SatSigma.exs_iff {n : ℕ} {p e : V} :
-    SatSigma (n + 1) (^∃ p) e ↔ ∃ x, SatSigma (n + 1) p (x ∷ e) := by
+theorem SatSigma.exs_iff : SatSigma (n + 1) (^∃ p) e ↔ ∃ x, SatSigma (n + 1) p (x ∷ e) := by
   by_cases hp : IsStrictSigma (n + 1) p ∧ IsUFormula ℒₒᵣ p
   · exact exs_iff_aux hp.1 hp.2
   · refine ⟨fun h ↦ ?_, fun ⟨_, hx⟩ ↦ absurd hx.dom hp⟩
@@ -599,8 +611,7 @@ theorem SatSigma.exs_iff {n : ℕ} {p e : V} :
 
 /-- Satisfaction of a universal formula is universal satisfaction of its body.
 - [HP98, Theorem I.1.75(2)(v′)] -/
-theorem SatPi.all_iff {n : ℕ} {p e : V} :
-    SatPi (n + 1) (^∀ p) e ↔ ∀ x, SatPi (n + 1) p (x ∷ e) := by
+theorem SatPi.all_iff : SatPi (n + 1) (^∀ p) e ↔ ∀ x, SatPi (n + 1) p (x ∷ e) := by
   constructor
   · intro h
     obtain ⟨hs, hu, hns⟩ := satPi_succ_iff.mp h
@@ -614,10 +625,16 @@ theorem SatPi.all_iff {n : ℕ} {p e : V} :
     rintro ⟨x, hx⟩
     exact (satPi_succ_iff.mp (h x)).2.2 hx
 
+end
+
+section
+variable {m n : ℕ} (h : m ≤ n) {z e : V}
+include h
+
 /-- Satisfaction of a strict `𝚺-[m]` formula is stable when viewed at a higher `Σ` level.
 - [HP98, Theorem I.1.75(2)(v)] -/
-theorem SatSigma.mono {m n : ℕ} (h : m ≤ n) {z e : V} (hz : IsStrictSigma m z)
-    (hz' : IsUFormula ℒₒᵣ z) : SatSigma m z e ↔ SatSigma n z e := by
+theorem SatSigma.mono (hz : IsStrictSigma m z) (hz' : IsUFormula ℒₒᵣ z) :
+    SatSigma m z e ↔ SatSigma n z e := by
   induction n, h using Nat.le_induction with
   | base => rfl
   | succ n hn ih =>
@@ -625,12 +642,14 @@ theorem SatSigma.mono {m n : ℕ} (h : m ≤ n) {z e : V} (hz : IsStrictSigma m 
 
 /-- Satisfaction of a strict `𝚷-[m]` formula is stable when viewed at a higher `Π` level.
 - [HP98, Theorem I.1.75(2)(v′)] -/
-theorem SatPi.mono {m n : ℕ} (h : m ≤ n) {z e : V} (hz : IsStrictPi m z)
-    (hz' : IsUFormula ℒₒᵣ z) : SatPi m z e ↔ SatPi n z e := by
+theorem SatPi.mono (hz : IsStrictPi m z) (hz' : IsUFormula ℒₒᵣ z) :
+    SatPi m z e ↔ SatPi n z e := by
   induction n, h using Nat.le_induction with
   | base => rfl
   | succ n hn ih =>
     exact ih.trans ((mono_step n fun i _ ↦ blockSat i).2 z e (IsStrictPi.mono hn hz) hz')
+
+end
 
 /-! ### Substitution under a quantifier block -/
 

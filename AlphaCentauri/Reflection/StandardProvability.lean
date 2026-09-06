@@ -38,7 +38,7 @@ abbrev _root_.LO.FirstOrder.Theory.localReflectionOnHierarchy
 
 @[inherit_doc] notation "𝗥𝗳𝗻[" Γ:max n:max "] " T:max => Theory.localReflectionOnHierarchy T Γ n
 
-variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+variable {T : ArithmeticTheory} [T.Δ₁]
 
 /-- A consistent `T` is strictly weaker than `T ∪ Rfn(T)`.
 - [Lin97, §4.1, p. 52] -/
@@ -61,7 +61,8 @@ axiom localReflection_pi_one_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ 
 @[instance] axiom consistent_localReflection_of_sigma_one_sound [T.SoundOnHierarchy 𝚺 1] :
     Consistent (T ∪ 𝗥𝗳𝗻 T)
 
-variable {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
+section
+variable [𝗜𝚺₁ ⪯ T] {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
 
 /-- Unboundedness, for an extension by a single sentence: if `T ∪ {π}` for a `Γ n` sentence `π`
 proves the local reflection schema of `T` on the dual class, then `T ∪ {π}` is inconsistent.
@@ -98,14 +99,16 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
     Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ σ ((hmem σ).mp hσ)
   have hle : T ∪ U ⪯ insert (⋀hU.toFinset.toList) T := WeakerThan.ofAxm! <| by
     rintro φ (hφ | hφ)
-    · exact Axiomatized.by_axm (Set.mem_insert_of_mem _ hφ)
-    · exact mdp (left_Conj₂_intro ((hmem φ).mpr hφ)) (Axiomatized.by_axm (Set.mem_insert _ _))
+    · exact by_axm (Set.mem_insert_of_mem _ hφ)
+    · exact mdp (left_Conj₂_intro ((hmem φ).mpr hφ)) (by_axm (Set.mem_insert _ _))
   have hge : insert (⋀hU.toFinset.toList) T ⪯ T ∪ U := WeakerThan.ofAxm! <| by
     rintro φ (rfl | hφ)
-    · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦ Axiomatized.by_axm (Or.inr ((hmem ψ).mp hψ))
-    · exact Axiomatized.by_axm (Or.inl hφ)
+    · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦ by_axm (Or.inr ((hmem ψ).mp hψ))
+    · exact by_axm (Or.inl hφ)
   exact (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hconj
     (h.trans hle)).of_ge hge
+
+end
 
 /-- The uniform reflection schema `RFN_Γ(T)` consists of
 `∀x (Pr_T(φ(ẋ)) → φ(x))` for one-free-variable formulas `φ` satisfying `Γ`.

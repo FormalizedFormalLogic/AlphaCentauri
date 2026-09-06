@@ -41,9 +41,6 @@ LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_u
 LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
   forgive:
     - LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con
-LO.FirstOrder.Arithmetic.not_localReflectionOnHierarchy_weakerThan_union:
-  forgive:
-    - LO.FirstOrder.Arithmetic.not_localReflectionOnHierarchy_weakerThan_union
 LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
   forgive:
     - LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
@@ -94,6 +91,9 @@ LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
 LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatization_equiv:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
+LO.FirstOrder.Arithmetic.not_localReflectionOnHierarchy_weakerThan_union:
+  forgive:
+    - LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union
 LO.FirstOrder.Peano.not_finiteAxiomatizable:
   forgive:
     - LO.FirstOrder.Peano.reflexive

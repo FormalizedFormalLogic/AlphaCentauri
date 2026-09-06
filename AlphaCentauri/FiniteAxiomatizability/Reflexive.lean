@@ -62,11 +62,24 @@ axiom Peano.essentiallyReflexive : (𝗣𝗔 : ArithmeticTheory).EssentiallyRefl
 /-- `𝗣𝗔` is not finitely axiomatizable.
 - [Lin97, Corollary 2.1]
 - [HP98, Corollary III.2.24] -/
-axiom Peano.not_finiteAxiomatizable : ¬FiniteAxiomatizable (𝗣𝗔 : ArithmeticTheory)
+theorem Peano.not_finiteAxiomatizable : ¬FiniteAxiomatizable (𝗣𝗔 : ArithmeticTheory) :=
+  not_finiteAxiomatizable_of_reflexive Peano.reflexive
 
 /-- Every consistent extension of `𝗣𝗔` is not finitely axiomatizable.
 - [Lin97, Corollary 2.1] -/
-axiom not_finiteAxiomatizable_of_Peano_le [(𝗣𝗔 : ArithmeticTheory) ⪯ T] [Consistent T] :
-    ¬FiniteAxiomatizable T
+theorem not_finiteAxiomatizable_of_Peano_le [(𝗣𝗔 : ArithmeticTheory) ⪯ T] [Consistent T] :
+    ¬FiniteAxiomatizable T := by
+  have hR : ((𝗣𝗔 : ArithmeticTheory) ∪ T).Reflexive :=
+    Peano.essentiallyReflexive _ Set.subset_union_left
+  have hUT : (𝗣𝗔 : ArithmeticTheory) ∪ T ⪯ T :=
+    WeakerThan.ofAxm! fun {σ} hσ ↦ by
+      rcases hσ with hσ | hσ
+      · exact ‹(𝗣𝗔 : ArithmeticTheory) ⪯ T›.wk (Axiomatized.by_axm hσ)
+      · exact Axiomatized.by_axm hσ
+  have hequiv : T ≊ (𝗣𝗔 : ArithmeticTheory) ∪ T := Equiv.antisymm_iff.mpr ⟨inferInstance, hUT⟩
+  have : 𝗜𝚺₁ ⪯ (𝗣𝗔 : ArithmeticTheory) ∪ T :=
+    WeakerThan.trans (inferInstance : 𝗜𝚺₁ ⪯ (𝗣𝗔 : ArithmeticTheory)) inferInstance
+  have : Consistent ((𝗣𝗔 : ArithmeticTheory) ∪ T) := Consistent.of_le ‹Consistent T› hUT
+  exact mt (FiniteAxiomatizable.of_equiv hequiv) (not_finiteAxiomatizable_of_reflexive hR)
 
 end LO.FirstOrder

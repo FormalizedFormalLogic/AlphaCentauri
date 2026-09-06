@@ -20,30 +20,27 @@
 version: v0
 
 # The unproved statements themselves.
-LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
+LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction:
   forgive:
-    - LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence
-LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
-  forgive:
-    - LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable
-LO.FirstOrder.Arithmetic.ISigma1.provable_tarski:
-  forgive:
-    - LO.FirstOrder.Arithmetic.ISigma1.provable_tarski
+    - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
 LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
   forgive:
     - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound
 LO.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
   forgive:
     - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sound
+LO.FirstOrder.Arithmetic.exists_sentence_weakerThan_of_consistent:
+  forgive:
+    - LO.FirstOrder.Arithmetic.exists_sentence_weakerThan_of_consistent
+LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union:
+  forgive:
+    - LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union
 LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
   forgive:
     - LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con
 LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
   forgive:
     - LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
-LO.FirstOrder.Arithmetic.provable_snowing_of_tarski:
-  forgive:
-    - LO.FirstOrder.Arithmetic.provable_snowing_of_tarski
 LO.FirstOrder.Arithmetic.provablyTotal_of_primrec:
   forgive:
     - LO.FirstOrder.Arithmetic.provablyTotal_of_primrec
@@ -62,24 +59,15 @@ LO.FirstOrder.ISigma.provable_con_ISigma1:
 LO.FirstOrder.Peano.essentiallyReflexive:
   forgive:
     - LO.FirstOrder.Peano.essentiallyReflexive
-LO.FirstOrder.Peano.not_finiteAxiomatizable:
-  forgive:
-    - LO.FirstOrder.Peano.not_finiteAxiomatizable
 LO.FirstOrder.Peano.reflexive:
   forgive:
     - LO.FirstOrder.Peano.reflexive
 LO.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection:
   forgive:
     - LO.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection
-LO.FirstOrder.ProvabilityAbstraction.Provability.inconsistent_of_localReflection_provable:
-  forgive:
-    - LO.FirstOrder.ProvabilityAbstraction.Provability.inconsistent_of_localReflection_provable
 LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
   forgive:
     - LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con
-LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
-  forgive:
-    - LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le
 LO.FirstOrder.parsons:
   forgive:
     - LO.FirstOrder.parsons
@@ -94,3 +82,21 @@ LO.FirstOrder.provablyTotal_of_primrec':
     - LO.FirstOrder.provablyTotal_of_primrec'
 
 # Declarations that inherit the debt of an unproved statement.
+LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
+  forgive:
+    - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
+LO.FirstOrder.Arithmetic.ISigma.exists_pi_axiomatization:
+  forgive:
+    - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
+LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatization_equiv:
+  forgive:
+    - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
+LO.FirstOrder.Arithmetic.not_localReflectionOnHierarchy_weakerThan_union:
+  forgive:
+    - LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union
+LO.FirstOrder.Peano.not_finiteAxiomatizable:
+  forgive:
+    - LO.FirstOrder.Peano.reflexive
+LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
+  forgive:
+    - LO.FirstOrder.Peano.essentiallyReflexive

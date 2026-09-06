@@ -20,9 +20,9 @@
 version: v0
 
 # The unproved statements themselves.
-LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence:
+LO.FirstOrder.Arithmetic.ISigma.exists_pi_axiomatization:
   forgive:
-    - LO.FirstOrder.Arithmetic.ISigma.exists_pi_sentence
+    - LO.FirstOrder.Arithmetic.ISigma.exists_pi_axiomatization
 LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction

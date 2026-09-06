@@ -305,8 +305,8 @@ include ht hu
 /-- Satisfaction of coded equality agrees with equality of term values.
 - [HP98, Theorem I.1.70(ii)] -/
 lemma eq_iff : SatZero (t ^= u) e ↔ termVal e t = termVal e u := by
-  have hd : IsDelta0 (t ^= u : V) := by simp [Arithmetic.qqEQ]
-  have hf : IsUFormula ℒₒᵣ (t ^= u : V) := by simp [Arithmetic.qqEQ, ht, hu]
+  have hd : IsDelta0 (t ^= u) := by simp [Arithmetic.qqEQ]
+  have hf : IsUFormula ℒₒᵣ (t ^= u) := by simp [Arithmetic.qqEQ, ht, hu]
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_eq hr.mem_dom_root
@@ -314,8 +314,8 @@ lemma eq_iff : SatZero (t ^= u) e ↔ termVal e t = termVal e u := by
 /-- Satisfaction of coded inequality agrees with inequality of term values.
 - [HP98, Theorem I.1.70(ii)] -/
 lemma neq_iff : SatZero (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
-  have hd : IsDelta0 (t ^≠ u : V) := by simp [Arithmetic.qqNEQ]
-  have hf : IsUFormula ℒₒᵣ (t ^≠ u : V) := by simp [Arithmetic.qqNEQ, ht, hu]
+  have hd : IsDelta0 (t ^≠ u) := by simp [Arithmetic.qqNEQ]
+  have hf : IsUFormula ℒₒᵣ (t ^≠ u) := by simp [Arithmetic.qqNEQ, ht, hu]
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_neq hr.mem_dom_root
@@ -323,8 +323,8 @@ lemma neq_iff : SatZero (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
 /-- Satisfaction of coded less-than agrees with comparison of term values.
 - [HP98, Theorem I.1.70(ii)] -/
 lemma lt_iff : SatZero (t ^< u) e ↔ termVal e t < termVal e u := by
-  have hd : IsDelta0 (t ^< u : V) := by simp [Arithmetic.qqLT]
-  have hf : IsUFormula ℒₒᵣ (t ^< u : V) := by simp [Arithmetic.qqLT, ht, hu]
+  have hd : IsDelta0 (t ^< u) := by simp [Arithmetic.qqLT]
+  have hf : IsUFormula ℒₒᵣ (t ^< u) := by simp [Arithmetic.qqLT, ht, hu]
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_lt hr.mem_dom_root

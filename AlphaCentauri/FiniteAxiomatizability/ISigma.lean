@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
 public import AlphaCentauri.FirstOrder.FiniteAxiomatizability
+public import AlphaCentauri.Vorspiel.Fvar
 
 /-!
 # Finite axiomatizability of `𝗜𝚺 n`
@@ -84,31 +85,6 @@ theorem provable_finiteAxiomatization (n : ℕ) : 𝗜𝚺 (n + 1) ⊢* finiteAx
 
 open Reading
 
-/-- The substitution sending the bound variable of a formula to `#0` and its free variables below
-`φ.fvSup` to the remaining bound variables. -/
-private noncomputable def paramSubst (φ : ArithmeticSemiformula ℕ 1) :
-    Rew ℒₒᵣ ℕ 1 Empty (φ.fvSup + 1) :=
-  Rew.bind ![#0] fun x ↦ if h : x < φ.fvSup then #⟨x + 1, by omega⟩ else #0
-
-/-- A formula with one bound variable, viewed as a semisentence whose extra bound variables are
-its free variables. -/
-private noncomputable def toSemisentence (φ : ArithmeticSemiformula ℕ 1) :
-    ArithmeticSemisentence (φ.fvSup + 1) := paramSubst φ ▹ φ
-
-private lemma eval_toSemisentence {M : Type*} [ORingStructure M]
-    (φ : ArithmeticSemiformula ℕ 1) (x : M) (f : ℕ → M) :
-    M ⊧/(x :> fun i : Fin φ.fvSup ↦ f i) (toSemisentence φ) ↔ φ.Eval ![x] f := by
-  rw [toSemisentence, Semiformula.eval_rew]
-  have hb : (Semiterm.val (x :> fun i : Fin φ.fvSup ↦ f i) (Empty.elim) ∘
-      paramSubst φ ∘ Semiterm.bvar) = ![x] := by
-    funext i
-    rw [show i = 0 from Fin.fin_one_eq_zero i]
-    simp [paramSubst]
-  rw [hb]
-  refine Semiformula.eval_iff_of_funEqOn φ fun y hy ↦ ?_
-  have : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy
-  simp [paramSubst, this]
-
 /-- The finite theory proves the induction axiom of every strict prenex `𝚺-[n + 1]` formula.
 - [HP98, Theorem I.2.52] -/
 theorem provable_succInd_of_strictHierarchy {n : ℕ} {φ : ArithmeticSemiformula ℕ 1}
@@ -134,22 +110,22 @@ theorem provable_succInd_of_strictHierarchy {n : ℕ} {φ : ArithmeticSemiformul
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
       Matrix.constant_eq_singleton] using this
   intro f hzero hsucc
-  have hψ : StrictHierarchy 𝚺 (n + 1) (toSemisentence φ) := hφ.rew _
+  have hψ : StrictHierarchy 𝚺 (n + 1) (φ.toSemisentence ![#0]) := hφ.rew _
   obtain ⟨e₀, he₀⟩ := exists_codes hM (fun i : Fin φ.fvSup ↦ f i)
-  set g : ℕ → M := fun i ↦ if i = 0 then ((⌜toSemisentence φ⌝ : ℕ) : M) else e₀ with hg
-  have hg₀ : g 0 = ((⌜toSemisentence φ⌝ : ℕ) : M) := by simp [hg]
+  set g : ℕ → M := fun i ↦ if i = 0 then ((⌜φ.toSemisentence ![#0]⌝ : ℕ) : M) else e₀ with hg
+  have hg₀ : g 0 = ((⌜φ.toSemisentence ![#0]⌝ : ℕ) : M) := by simp [hg]
   have hg₁ : g 1 = e₀ := by simp [hg]
   have hP : ∀ x : M, (indFormula n).Eval ![x] g ↔ φ.Eval ![x] f := by
     intro x
     rw [eval_indFormula, hg₀, hg₁]
     constructor
     · rintro ⟨ev, hadj, hsat⟩
-      exact (eval_toSemisentence φ x f).mp
+      exact (φ.eval_toSemisentence_one x f).mp
         ((satSigma_quote_reading hM hψ (codes_cons hM he₀ hadj)).mp hsat)
     · intro h
       obtain ⟨ev, hadj⟩ := read_adjoinTotal hM x e₀
       exact ⟨ev, hadj, (satSigma_quote_reading hM hψ (codes_cons hM he₀ hadj)).mpr
-        ((eval_toSemisentence φ x f).mpr h)⟩
+        ((φ.eval_toSemisentence_one x f).mpr h)⟩
   intro x
   refine (hP x).mp (hind g ((hP 0).mpr hzero) (fun y hy ↦ (hP (y + 1)).mpr ?_) x)
   exact hsucc y ((hP y).mp hy)

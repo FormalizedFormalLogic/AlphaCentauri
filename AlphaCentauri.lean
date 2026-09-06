@@ -28,6 +28,7 @@ public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Schemata.Collection
 public import AlphaCentauri.Vorspiel.Absoluteness
+public import AlphaCentauri.Vorspiel.Fvar
 public import AlphaCentauri.Vorspiel.Ordinal
 public import AlphaCentauri.Vorspiel.Primrec
 public import AlphaCentauri.Vorspiel.Rew

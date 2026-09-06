@@ -10,10 +10,13 @@ _out
 # direnv
 .envrc
 
-# Claude-side working material stays out of git: reference PDFs (copyrighted), the draft
-# roadmap, notes. Only the shared settings file is tracked.
+# Claude-side working material stays out of git: reference PDFs (copyrighted), plans, notes.
+# Only the shared settings file is tracked.
 .claude/*
 !.claude/settings.json
+
+# Local, per-user operating notes for Claude Code; not shared with other contributors.
+CLAUDE.local.md
 
 # lefthook per-clone overrides (see lefthook.yml)
 lefthook-local.yml

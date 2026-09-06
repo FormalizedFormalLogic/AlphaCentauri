@@ -6,8 +6,8 @@ first-order arithmetic**, built on top of
 mathematical logic of the [Formalized Formal Logic](https://github.com/FormalizedFormalLogic)
 organization.
 
-Humans write the roadmap: what to formalize, from which source, in what order. AI agents write,
-review, and maintain the Lean code. **Every step of that work is carried out on GitHub**: a unit
+Humans decide what to formalize, from which source, in what order, one GitHub issue at a time.
+AI agents write, review, and maintain the Lean code. **Every step of that work is carried out on GitHub**: a unit
 of work is an issue, a contribution is a pull request, the gate is GitHub Actions, and the
 verdict is a pull-request review. Nothing counts until it is visible there. The model is
 [Tau Ceti](https://github.com/TauCetiProject/TauCeti), scaled down to a single repository and a
@@ -27,8 +27,7 @@ $\mathsf{TA}$, …), definability and the arithmetical hierarchy, exponentiation
 finite sets, and the incompleteness theorems. AlphaCentauri formalizes what those books prove
 *about* such theories and Foundation does not yet have, developed against Foundation's API and
 in Foundation's house style, so that whatever proves reusable can be moved into Foundation by
-its maintainers. The roadmap is human-owned and is not yet published in this repository; until it
-is, humans open the target issues directly.
+its maintainers. What to formalize is decided by humans, who open the issues.
 
 ## How work happens: GitHub is the workbench
 
@@ -36,29 +35,28 @@ The complete process is specified in [`docs/workflow.md`](docs/workflow.md); the
 agents is [`AGENTS.md`](AGENTS.md); the code follows Foundation's contribution guidelines, see
 [`docs/conventions.md`](docs/conventions.md). In one screen:
 
-1. **Roadmap** (human-owned): a survey of [HP98] and [Lin97] against what Foundation has, and
-   the list of what is wanted. It is drafted outside the repository and will be published here,
-   under `docs/`, once it is ready; from then on it changes only by human-reviewed pull requests.
-2. **Targets are issues.** Each formalization target is a GitHub issue with the `target` label,
-   citing the roadmap item and the theorem it comes from. The issue is the unit of work.
-3. **Claims are assignments.** An agent claims a target by assigning itself to the issue, and
+1. **Issues are the plan** (human-owned). Each formalization task is a GitHub issue opened by a
+   human, citing the theorem and the source it comes from. The issue is the unit of work; a
+   theorem passes through two stages, `statement-formalized` then `proof-formalized`.
+2. **Claims are assignments.** An agent claims an issue by assigning itself to it, and
    releases it by unassigning. Nobody works on an issue assigned to someone else.
-4. **Contributions are pull requests**, one issue per PR, from a branch of `main`, with
+3. **Contributions are pull requests**, one issue per PR, from a branch of `main`, with
    `Closes #<issue>` in the body, a Foundation-style title, and disclosure of AI involvement.
-5. **CI is the gate.** `main` is always green: the library builds, has no `sorry`, no axioms
+4. **CI is the gate.** `main` is always green: the library builds, has no `sorry`, no axioms
    outside the standard allowlist beyond the unproved statements recorded by name in
    [`forgive.yml`](forgive.yml), and no warnings.
-6. **Review is a PR review.** Reviewers (AI agents against fixed rubrics, and humans) post
+5. **Review is a PR review.** Reviewers (AI agents against fixed rubrics, and humans) post
    `approve` / `request changes` on the PR. Addressing findings means pushing to the same PR.
-7. **Merge is a squash merge** into `main`, performed by a human while the project bootstraps.
+6. **Merge is a squash merge** into `main`, performed by a human, or by an agent once
+   explicitly told to for that PR.
 
 ## Repository layout
 
 | Path | Owner | Contents |
 | --- | --- | --- |
 | `AlphaCentauri/`, `AlphaCentauri.lean` | AI | The Lean library. |
-| `docs/` | Humans | The GitHub-based process (`workflow.md`, normative); Foundation's contribution guidelines (`index.md`, `style.md`, `refactoring.md`, vendored) and what this repository adds (`conventions.md`); the roadmap once published. |
-| `AGENTS.md`, `CLAUDE.md` | Humans | The contract for AI agents. |
+| `docs/` | Humans | The GitHub-based process (`workflow.md`, normative); Foundation's contribution guidelines (`index.md`, `style.md`, `refactoring.md`, vendored) and what this repository adds (`conventions.md`). |
+| `AGENTS.md`, `CLAUDE.md` | Humans | The contract for AI agents; `CLAUDE.md` is a symlink to `AGENTS.md`. |
 | `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml` | Humans | Infrastructure (CI and the local pre-push hooks). |
 | `references.yml` | Shared | The bibliography for docstring citations, in Hayagriva YAML. |
 | `forgive.yml` | AI | The outstanding debt: every statement formalized but not yet proved, declared as an `axiom` and listed here under its own name. |

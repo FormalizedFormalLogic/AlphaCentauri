@@ -33,9 +33,12 @@ private lemma isUTerm_quote {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) : IsUTerm
 private lemma isUFormula_quote {k : ℕ} (φ : ArithmeticSemisentence k) :
     IsUFormula ℒₒᵣ (⌜φ⌝ : V) := (Sentence.quote_isSemiformula φ).isUFormula
 
+section
+variable {k : ℕ} (t u : ClosedSemiterm ℒₒᵣ k)
+
 /-- The code of an equation between closed terms.
 - [HP98, 1.66] -/
-private lemma quote_eq_sentence {k : ℕ} (t u : ClosedSemiterm ℒₒᵣ k) :
+private lemma quote_eq_sentence :
     (⌜(.rel Language.Eq.eq ![t, u] : ArithmeticSemisentence k)⌝ : V)
       = Arithmetic.qqEQ (⌜t⌝ : V) (⌜u⌝ : V) := by
   simpa [Sentence.quote_def, Semiformula.quote_rel, Arithmetic.qqEQ, Semiterm.empty_quote_eq,
@@ -43,7 +46,7 @@ private lemma quote_eq_sentence {k : ℕ} (t u : ClosedSemiterm ℒₒᵣ k) :
 
 /-- The code of a negated equation between closed terms.
 - [HP98, 1.66] -/
-private lemma quote_neq_sentence {k : ℕ} (t u : ClosedSemiterm ℒₒᵣ k) :
+private lemma quote_neq_sentence :
     (⌜(.nrel Language.Eq.eq ![t, u] : ArithmeticSemisentence k)⌝ : V)
       = Arithmetic.qqNEQ (⌜t⌝ : V) (⌜u⌝ : V) := by
   simpa [Sentence.quote_def, Semiformula.quote_nrel, Arithmetic.qqNEQ, Semiterm.empty_quote_eq,
@@ -51,7 +54,7 @@ private lemma quote_neq_sentence {k : ℕ} (t u : ClosedSemiterm ℒₒᵣ k) :
 
 /-- The code of a comparison between closed terms.
 - [HP98, 1.66] -/
-private lemma quote_lt_sentence {k : ℕ} (t u : ClosedSemiterm ℒₒᵣ k) :
+private lemma quote_lt_sentence :
     (⌜(.rel Language.LT.lt ![t, u] : ArithmeticSemisentence k)⌝ : V)
       = Arithmetic.qqLT (⌜t⌝ : V) (⌜u⌝ : V) := by
   simpa [Sentence.quote_def, Semiformula.quote_rel, Arithmetic.qqLT, Semiterm.empty_quote_eq,
@@ -59,11 +62,13 @@ private lemma quote_lt_sentence {k : ℕ} (t u : ClosedSemiterm ℒₒᵣ k) :
 
 /-- The code of a negated comparison between closed terms.
 - [HP98, 1.66] -/
-private lemma quote_nlt_sentence {k : ℕ} (t u : ClosedSemiterm ℒₒᵣ k) :
+private lemma quote_nlt_sentence :
     (⌜(.nrel Language.LT.lt ![t, u] : ArithmeticSemisentence k)⌝ : V)
       = Arithmetic.qqNLT (⌜t⌝ : V) (⌜u⌝ : V) := by
   simpa [Sentence.quote_def, Semiformula.quote_nrel, Arithmetic.qqNLT, Semiterm.empty_quote_eq,
     Semiterm.empty_typed_quote_def, Matrix.vecHead, Matrix.vecTail] using coe_quote_lt (V := V)
+
+end
 
 /-- The code of a conjunction of semisentences.
 - [HP98, 1.66] -/
@@ -85,11 +90,13 @@ private lemma quote_all_sentence {k : ℕ} (φ : ArithmeticSemisentence (k + 1))
 private lemma quote_ex_sentence {k : ℕ} (φ : ArithmeticSemisentence (k + 1)) :
     (⌜(∃¹ φ : ArithmeticSemisentence k)⌝ : V) = ^∃ (⌜φ⌝ : V) := by simp [Sentence.quote_def]
 
+section
+variable {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) (φ : ArithmeticSemisentence (k + 1))
+
 /-- The code of a bounded universal quantification; the semisentence form of Foundation's
 `quote_ball`.
 - [HP98, 0.30] -/
-private lemma quote_ball_sentence {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k)
-    (φ : ArithmeticSemisentence (k + 1)) :
+private lemma quote_ball_sentence :
     (⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence k)⌝ : V)
       = qqBall (termBShift ℒₒᵣ (⌜t⌝ : V)) (⌜φ⌝ : V) := by
   rw [Semiformula.ball_eq, Semiformula.imp_eq]
@@ -100,14 +107,15 @@ private lemma quote_ball_sentence {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k)
 
 /-- The code of a bounded existential quantification; the semisentence form of `quote_bex`.
 - [HP98, 0.30] -/
-private lemma quote_bex_sentence {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k)
-    (φ : ArithmeticSemisentence (k + 1)) :
+private lemma quote_bex_sentence :
     (⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence k)⌝ : V)
       = qqBex (termBShift ℒₒᵣ (⌜t⌝ : V)) (⌜φ⌝ : V) := by
   rw [Semiformula.bexs_eq]
   simpa [Sentence.quote_def, Semiformula.Operator.lt_def, qqBex, Semiformula.quote_rel,
     Arithmetic.qqLT, Semiterm.empty_quote_eq, Matrix.vecHead, Matrix.vecTail,
     ← Rew.emb_bShift_term, ← Semiterm.empty_typed_quote_def] using coe_quote_lt (V := V)
+
+end
 
 /-- The code of a coded bound variable.
 - [HP98, 1.66] -/
@@ -244,19 +252,22 @@ lemma satClass_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentenc
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp]
     exact ih (x :> v)
 
+section
+variable {n k : ℕ} {φ : ArithmeticSemisentence k}
+
 /-- For a strict prenex `𝚺-[n]` formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
-theorem satSigma_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : StrictHierarchy 𝚺 n φ) (v : Fin k → V) :
+theorem satSigma_quote_iff (hφ : StrictHierarchy 𝚺 n φ) (v : Fin k → V) :
     SatSigma n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := satClass_quote_iff hφ v
 
 /-- For a strict prenex `𝚷-[n]` formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
-theorem satPi_quote_iff {n k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
+theorem satPi_quote_iff (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
     SatPi n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := satClass_quote_iff hφ v
+
+end
 
 /-- The sentence asserting agreement of `φ` with its level-`𝚺-[n + 1]` partial truth definition.
 - [HP98, Corollary I.1.76] -/

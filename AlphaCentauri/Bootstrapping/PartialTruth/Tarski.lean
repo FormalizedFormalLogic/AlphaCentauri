@@ -112,18 +112,18 @@ noncomputable def termValBvar : ArithmeticSentence :=
 /-- The defining sentence for evaluation of zero.
 - [HP98, 1.64(5)] -/
 noncomputable def termValZero : ArithmeticSentence :=
-  “∀ e v, !termValGraph.val v e ↑Bootstrapping.Arithmetic.zero ↔ v = 0”
+  “∀ e v, !termValGraph.val v e ↑Arithmetic.zero ↔ v = 0”
 
 /-- The defining sentence for evaluation of one.
 - [HP98, 1.64(5)] -/
 noncomputable def termValOne : ArithmeticSentence :=
-  “∀ e v, !termValGraph.val v e ↑Bootstrapping.Arithmetic.one ↔ v = 1”
+  “∀ e v, !termValGraph.val v e ↑Arithmetic.one ↔ v = 1”
 
 /-- The defining sentence for evaluation of addition.
 - [HP98, 1.64(5)] -/
 noncomputable def termValAdd : ArithmeticSentence :=
   “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
-    !Bootstrapping.Arithmetic.qqAddGraph.val s t u → !termValGraph.val vt e t →
+    !Arithmetic.qqAddGraph.val s t u → !termValGraph.val vt e t →
     !termValGraph.val vu e u →
     (!termValGraph.val v e s ↔ v = vt + vu)”
 
@@ -131,7 +131,7 @@ noncomputable def termValAdd : ArithmeticSentence :=
 - [HP98, 1.64(5)] -/
 noncomputable def termValMul : ArithmeticSentence :=
   “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
-    !Bootstrapping.Arithmetic.qqMulGraph.val s t u → !termValGraph.val vt e t →
+    !Arithmetic.qqMulGraph.val s t u → !termValGraph.val vt e t →
     !termValGraph.val vu e u →
     (!termValGraph.val v e s ↔ v = vt * vu)”
 

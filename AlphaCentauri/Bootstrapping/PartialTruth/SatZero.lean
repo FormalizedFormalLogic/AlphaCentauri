@@ -203,7 +203,7 @@ def SatZero (z e : V) : Prop :=
 
 namespace SatZero
 
-variable {z e p q t u : V}
+variable {z e : V}
 
 /-! ## Reading satisfaction off a table -/
 
@@ -282,8 +282,6 @@ instance SatZero.definable : 𝚫₁-Relation (SatZero : V → V → Prop) :=
 
 namespace SatZero
 
-variable {z e p q t u : V}
-
 /-- Satisfaction implies that its formula code belongs to the `Δ₀` domain.
 - [HP98, Theorem I.1.70(i)] -/
 lemma dom {z e : V} : SatZero z e → IsDelta0 z ∧ IsUFormula ℒₒᵣ z := And.left
@@ -300,45 +298,47 @@ lemma dom {z e : V} : SatZero z e → IsDelta0 z ∧ IsUFormula ℒₒᵣ z := A
   rintro ⟨-, r, hr, h1⟩
   exact hr.val_one_ne_zero h1 (hr.val_falsum hr.mem_dom_root)
 
+section
+variable {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u)
+include ht hu
+
 /-- Satisfaction of coded equality agrees with equality of term values.
 - [HP98, Theorem I.1.70(ii)] -/
-lemma eq_iff {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
-    SatZero (t ^= u) e ↔ termVal e t = termVal e u := by
-  have hd : IsDelta0 (t ^= u : V) := by simp [Arithmetic.qqEQ]
-  have hf : IsUFormula ℒₒᵣ (t ^= u : V) := by simp [Arithmetic.qqEQ, ht, hu]
+lemma eq_iff : SatZero (t ^= u) e ↔ termVal e t = termVal e u := by
+  have hd : IsDelta0 (t ^= u) := by simp [Arithmetic.qqEQ]
+  have hf : IsUFormula ℒₒᵣ (t ^= u) := by simp [Arithmetic.qqEQ, ht, hu]
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_eq hr.mem_dom_root
 
 /-- Satisfaction of coded inequality agrees with inequality of term values.
 - [HP98, Theorem I.1.70(ii)] -/
-lemma neq_iff {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
-    SatZero (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
-  have hd : IsDelta0 (t ^≠ u : V) := by simp [Arithmetic.qqNEQ]
-  have hf : IsUFormula ℒₒᵣ (t ^≠ u : V) := by simp [Arithmetic.qqNEQ, ht, hu]
+lemma neq_iff : SatZero (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
+  have hd : IsDelta0 (t ^≠ u) := by simp [Arithmetic.qqNEQ]
+  have hf : IsUFormula ℒₒᵣ (t ^≠ u) := by simp [Arithmetic.qqNEQ, ht, hu]
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_neq hr.mem_dom_root
 
 /-- Satisfaction of coded less-than agrees with comparison of term values.
 - [HP98, Theorem I.1.70(ii)] -/
-lemma lt_iff {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
-    SatZero (t ^< u) e ↔ termVal e t < termVal e u := by
-  have hd : IsDelta0 (t ^< u : V) := by simp [Arithmetic.qqLT]
-  have hf : IsUFormula ℒₒᵣ (t ^< u : V) := by simp [Arithmetic.qqLT, ht, hu]
+lemma lt_iff : SatZero (t ^< u) e ↔ termVal e t < termVal e u := by
+  have hd : IsDelta0 (t ^< u) := by simp [Arithmetic.qqLT]
+  have hf : IsUFormula ℒₒᵣ (t ^< u) := by simp [Arithmetic.qqLT, ht, hu]
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_lt hr.mem_dom_root
 
 /-- Satisfaction of coded negated less-than agrees with failure of comparison.
 - [HP98, Theorem I.1.70(ii)] -/
-lemma nlt_iff {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
-    SatZero (t ^≮ u) e ↔ ¬(termVal e t < termVal e u) := by
+lemma nlt_iff : SatZero (t ^≮ u) e ↔ ¬(termVal e t < termVal e u) := by
   have hd : IsDelta0 (t ^≮ u : V) := by simp [Arithmetic.qqNLT]
   have hf : IsUFormula ℒₒᵣ (t ^≮ u : V) := by simp [Arithmetic.qqNLT, ht, hu]
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_nlt hr.mem_dom_root
+
+end
 
 /-- Satisfaction commutes with coded conjunction.
 - [HP98, Theorem I.1.70(ii)] -/
@@ -382,10 +382,13 @@ lemma nlt_iff {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) 
     · exact Or.inl ((iff_mem hr hn₁ hdp hfp).mp h)
     · exact Or.inr ((iff_mem hr hn₂ hdq hfq).mp h)
 
+section
+variable {t q e : V} (ht : IsUTerm ℒₒᵣ t)
+include ht
+
 /-- Satisfaction of a bounded universal is bounded universal satisfaction of its body.
 - [HP98, Theorem I.1.70(iv)] -/
-lemma ball_iff {t q e : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsDelta0 q)
-    (hq' : IsUFormula ℒₒᵣ q) :
+lemma ball_iff (hq : IsDelta0 q) (hq' : IsUFormula ℒₒᵣ q) :
     SatZero (qqBall (termBShift ℒₒᵣ t) q) e ↔ ∀ x < termVal e t, SatZero q (x ∷ e) := by
   have hd : IsDelta0 (qqBall (termBShift ℒₒᵣ t) q) := IsDelta0.ball ht hq
   have hf : IsUFormula ℒₒᵣ (qqBall (termBShift ℒₒᵣ t) q) := by
@@ -397,8 +400,7 @@ lemma ball_iff {t q e : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsDelta0 q)
 
 /-- Satisfaction of a bounded existential is bounded existential satisfaction of its body.
 - [HP98, Theorem I.1.70(iv)] -/
-lemma bex_iff {t q e : V} (ht : IsUTerm ℒₒᵣ t) :
-    SatZero (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃ x < termVal e t, SatZero q (x ∷ e) := by
+lemma bex_iff : SatZero (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃ x < termVal e t, SatZero q (x ∷ e) := by
   constructor
   · rintro ⟨⟨hd, hf⟩, r, hr, h1⟩
     have hq : IsDelta0 q := hd.of_qqBex
@@ -414,6 +416,8 @@ lemma bex_iff {t q e : V} (ht : IsUTerm ℒₒᵣ t) :
     obtain ⟨r, hr⟩ := PSatZero.exists hd hf
     refine (iff_val hd hf hr).mpr ((hr.val_bex ht hr.mem_dom_root).mpr ⟨x, hx, ?_⟩)
     exact (iff_mem hr (hr.mem_dom_bex ht hr.mem_dom_root hx) hq hq').mp hsat
+
+end
 
 /-- Satisfaction commutes with coded negation on `Δ₀` formulas.
 - [HP98, Theorem I.1.70(iii)] -/

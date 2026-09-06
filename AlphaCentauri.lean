@@ -29,6 +29,7 @@ public import AlphaCentauri.OmegaLogic.Reduction
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.ProvablyTotal.Primrec
+public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Schemata.Collection

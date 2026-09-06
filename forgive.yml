@@ -56,9 +56,6 @@ LO.FirstOrder.ISigma.provable_con_ISigma1:
 LO.FirstOrder.Peano.essentiallyReflexive:
   forgive:
     - LO.FirstOrder.Peano.essentiallyReflexive
-LO.FirstOrder.Peano.not_finiteAxiomatizable:
-  forgive:
-    - LO.FirstOrder.Peano.not_finiteAxiomatizable
 LO.FirstOrder.Peano.reflexive:
   forgive:
     - LO.FirstOrder.Peano.reflexive
@@ -71,9 +68,6 @@ LO.FirstOrder.ProvabilityAbstraction.Provability.inconsistent_of_localReflection
 LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
   forgive:
     - LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con
-LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
-  forgive:
-    - LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le
 LO.FirstOrder.parsons:
   forgive:
     - LO.FirstOrder.parsons
@@ -94,3 +88,9 @@ LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatizable:
 LO.FirstOrder.Arithmetic.ISigma.finiteAxiomatization_equiv:
   forgive:
     - LO.FirstOrder.Arithmetic.ISigma.hierarchyInduction_of_strictInduction
+LO.FirstOrder.Peano.not_finiteAxiomatizable:
+  forgive:
+    - LO.FirstOrder.Peano.reflexive
+LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
+  forgive:
+    - LO.FirstOrder.Peano.essentiallyReflexive

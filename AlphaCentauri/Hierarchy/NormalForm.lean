@@ -30,7 +30,7 @@ prenex `Γ`-formula of level `s`.
 theorem exists_strictHierarchy_of_hierarchy (T : ArithmeticTheory) [𝗜𝚺 s ⪯ T]
     {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ ψ : ArithmeticSemisentence n, StrictHierarchy Γ s ψ ∧ T ⊢ ∀¹* (φ 🡘 ψ) := by
-  obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h
+  obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h;
   exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩
 
 end LO.FirstOrder.Arithmetic

@@ -418,10 +418,10 @@ theorem exists_prenex_of_collection (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
     {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ φ' : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 φ'.val) := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T :=
-    Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ : ArithmeticTheory)) inferInstance
+    Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
   obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex_of_collection h
   refine ⟨φ', provable_iff_of_models_iff fun V _ _ e ↦ ?_⟩
-  have : V↓[ℒₒᵣ] ⊧* (𝗣𝗔⁻ : ArithmeticTheory) :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance
   exact hφ' V (strictCollection_of_models_collectionAxiom fun ψ hψ ↦
     consequence_iff.mp (Theory.Proof.sound (hcol ψ hψ)) V inferInstance) e

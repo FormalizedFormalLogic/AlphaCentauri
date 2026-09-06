@@ -605,16 +605,16 @@ end peanoMinus
 - [HP98, Remark I.1.77] -/
 theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory) :=
-    Entailment.WeakerThan.trans (𝓣 := (𝗣𝗔⁻ : ArithmeticTheory)) inferInstance
+  have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n) :=
+    Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance
       (Entailment.Axiomatized.le_of_subset Set.subset_union_left)
   unfold snowing
-  refine Arithmetic.provable_iff_of_models_iff (T := (𝗣𝗔⁻ ∪ tarski n : ArithmeticTheory)) ?_
+  refine Arithmetic.provable_iff_of_models_iff (T := 𝗣𝗔⁻ ∪ tarski n) ?_
   intro M _ hMT e
-  have hPA : M↓[ℒₒᵣ] ⊧* (𝗣𝗔⁻ : ArithmeticTheory) :=
+  have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     Semantics.ModelsSet.of_subset hMT Set.subset_union_left
   have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦
-    Semantics.ModelsSet.models _ (Set.mem_union_right (𝗣𝗔⁻ : ArithmeticTheory) hσ)
+    Semantics.ModelsSet.models _ (Set.mem_union_right 𝗣𝗔⁻ hσ)
   have := hPA
   rw [eval_snowing_rhs, eval_satSigmaVec]
   constructor

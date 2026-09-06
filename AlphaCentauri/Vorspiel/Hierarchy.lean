@@ -42,7 +42,7 @@ lemma of_mem_eqAxiom {σ : ArithmeticSentence} (hσ : σ ∈ 𝗘𝗤 ℒₒᵣ)
   | _ => simp
 
 /-- Every axiom of `𝗣𝗔⁻` is `𝚷-[2]`. -/
-lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ (𝗣𝗔⁻ : ArithmeticTheory)) :
+lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) :
     Hierarchy 𝚷 2 σ := by
   cases hσ with
   | equal φ hφ => exact of_mem_eqAxiom hφ

@@ -82,7 +82,7 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticS
     (hφ : Hierarchy 𝚺 (n + 1) φ) : 𝗜𝚺 (n + 1) ⊢ .univCl (collectionAxiom φ) := by
   refine Arithmetic.complete.{0} _ _ ?_
   intro M _ hMT
-  have hPA : M↓[ℒₒᵣ] ⊧* (𝗣𝗔⁻ : ArithmeticTheory) := mod_paMinus_of_ISigma (n := n + 1)
+  have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := n + 1)
   rw [models_collectionAxiom_iff]
   intro f a h
   have hθ : Hierarchy 𝚺 (n + 1) (φ.toSemisentence ![#1, #0]) := hφ.rew _

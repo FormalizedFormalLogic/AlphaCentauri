@@ -62,9 +62,6 @@ LO.FirstOrder.Peano.reflexive:
 LO.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection:
   forgive:
     - LO.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection
-LO.FirstOrder.ProvabilityAbstraction.Provability.inconsistent_of_localReflection_provable:
-  forgive:
-    - LO.FirstOrder.ProvabilityAbstraction.Provability.inconsistent_of_localReflection_provable
 LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
   forgive:
     - LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con

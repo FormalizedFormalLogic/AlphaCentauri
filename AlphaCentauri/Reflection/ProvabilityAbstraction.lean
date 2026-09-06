@@ -14,6 +14,8 @@ Local reflection schemas for an abstract provability predicate and their relatio
 
 namespace LO.FirstOrder.ProvabilityAbstraction.Provability
 
+open LO.Entailment Axiomatized
+
 variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T)
 
 /-- The local reflection schema of `𝔅`, restricted to sentences satisfying `Γ`:
@@ -62,7 +64,10 @@ variable {π : Sentence L}
 /-- If `T ∪ {π}` proves the reflection instance for `∼π`, then `T ∪ {π}` is inconsistent.
 - [AB05, Theorem 23, finite case]
 - [Lin97, Theorem 4.1] -/
-axiom inconsistent_of_localReflection_provable
-    (h : insert π T ⊢ 𝔅 (∼π) 🡒 ∼π) : Entailment.Inconsistent (insert π T)
+theorem inconsistent_of_localReflection_provable [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL]
+    (h : insert π T ⊢ 𝔅 (∼π) 🡒 ∼π) : Inconsistent (insert π T) := by
+  have h₁ : T ⊢ π 🡒 (𝔅 (∼π) 🡒 ∼π) := deduction_iff.mp h
+  have h₂ : T ⊢ ∼π := löb_theorem (by cl_prover [h₁])
+  exact inconsistent_of_provable <| by cl_prover [adjoin! π T, to_adjoin (φ := π) h₂]
 
 end LO.FirstOrder.ProvabilityAbstraction.Provability

@@ -36,12 +36,12 @@ exists at a stage by which every member of `U` still true is caught".
 - [AB05, Theorem 23]
 - [AB05, Remark 24] -/
 noncomputable def collapseFormula : Polarity → ArithmeticSemisentence 1
-  | 𝚷 => “v. ∀ y, ((!U.Δ₁ch.sigma.val y ∧ !(isUFormula ℒₒᵣ).sigma.val y ∧
+  | 𝚷 => “v. ∀ y, ((!U.Δ₁ch.sigma.val y ∧ !(isSemiformula ℒₒᵣ).sigma.val 0 y ∧
         !(isStrictPi (n + 1)).sigma.val y ∧
         ∀ u < y, ∃ w, !(negGraph ℒₒᵣ).val w v ∧ ¬!(proof T).pi.val u w)
       → !(satPi n).val y 0)”
   | 𝚺 => “v. ∃ y, ((∃ u < y, ∃ w, !(negGraph ℒₒᵣ).val w v ∧ !(proof T).sigma.val u w) ∧
-      ∀ z < y, ((!U.Δ₁ch.pi.val z ∧ !(isUFormula ℒₒᵣ).pi.val z ∧
+      ∀ z < y, ((!U.Δ₁ch.pi.val z ∧ !(isSemiformula ℒₒᵣ).pi.val 0 z ∧
           !(isStrictSigma (n + 1)).pi.val z)
         → !(satSigma n).val z 0))”
 
@@ -57,8 +57,8 @@ theorem hierarchy_collapseFormula (Γ : Polarity) :
     show Hierarchy 𝚷 (n + 1) (collapseFormula T U n 𝚷)
     have hξ : Hierarchy 𝚺 (n + 1) U.Δ₁ch.sigma.val :=
       U.Δ₁ch.sigma.sigma_prop.mono (Nat.le_add_left 1 n)
-    have hU : Hierarchy 𝚺 (n + 1) (isUFormula ℒₒᵣ).sigma.val :=
-      (isUFormula ℒₒᵣ).sigma.sigma_prop.mono (Nat.le_add_left 1 n)
+    have hU : Hierarchy 𝚺 (n + 1) (isSemiformula ℒₒᵣ).sigma.val :=
+      (isSemiformula ℒₒᵣ).sigma.sigma_prop.mono (Nat.le_add_left 1 n)
     have hSP : Hierarchy 𝚺 (n + 1) (isStrictPi (n + 1)).sigma.val :=
       (isStrictPi (n + 1)).sigma.sigma_prop.mono (Nat.le_add_left 1 n)
     have hneg : Hierarchy 𝚺 (n + 1) (negGraph ℒₒᵣ).val :=
@@ -75,8 +75,8 @@ theorem hierarchy_collapseFormula (Γ : Polarity) :
       (proof T).sigma.sigma_prop.mono (Nat.le_add_left 1 n)
     have hξ : Hierarchy 𝚷 (n + 1) U.Δ₁ch.pi.val :=
       U.Δ₁ch.pi.pi_prop.mono (Nat.le_add_left 1 n)
-    have hU : Hierarchy 𝚷 (n + 1) (isUFormula ℒₒᵣ).pi.val :=
-      (isUFormula ℒₒᵣ).pi.pi_prop.mono (Nat.le_add_left 1 n)
+    have hU : Hierarchy 𝚷 (n + 1) (isSemiformula ℒₒᵣ).pi.val :=
+      (isSemiformula ℒₒᵣ).pi.pi_prop.mono (Nat.le_add_left 1 n)
     have hSS : Hierarchy 𝚷 (n + 1) (isStrictSigma (n + 1)).pi.val :=
       (isStrictSigma (n + 1)).pi.pi_prop.mono (Nat.le_add_left 1 n)
     have hTr : Hierarchy 𝚺 (n + 1) (satSigma n).val := (satSigma n).sigma_prop

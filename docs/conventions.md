@@ -18,9 +18,12 @@ the commit pinned in `lake-manifest.json` when they were copied:
 
 Those documents are the authority; AlphaCentauri follows them as written. This file does not
 restate them; it records only where AlphaCentauri differs or adds. Where the two conflict,
-Foundation's guidelines win, and the conflict is reported as a `meta` issue. When the Foundation
-pin is bumped, re-copy the three files above in the same PR if they changed upstream, and update
-the commit noted above.
+Foundation's guidelines win, and the conflict is reported in an issue — with one standing
+exception: [`style.md`](style.md)'s citation rule requires a docstring to say so and explain why
+when a definition or theorem has no source; AGENTS.md's "Cite the source" rule instead has such
+a declaration omit the docstring outright, unless a genuinely useful statement-level explanation
+remains. AGENTS.md's rule wins here. When the Foundation pin is bumped, re-copy the three files
+above in the same PR if they changed upstream, and update the commit noted above.
 
 Where they say "Foundation", read "Foundation, and AlphaCentauri"; where they name
 Foundation-specific files (`Foundation.lean`, `references.bib`, `just` recipes), the
@@ -59,10 +62,17 @@ rewrite, so it is written as if it were already there.
   `sorry` collapses into one anonymous `sorryAx`. Proving the statement turns the `axiom` into a
   `theorem` and deletes its entry; a `sorry` that would sit inside a proof becomes its own named
   axiom for the fact it stands for.
+- **An `axiom` can silently drop a hypothesis.** Lean pulls a `variable`-bound instance argument
+  into a declaration only when the declaration's own type mentions it; an `axiom` has no body to
+  mention it indirectly, so a hypothesis like `[U.Δ₁]` or `[𝗜𝚺₁ ⪯ T]` can vanish from the type
+  without any error — the resulting statement is *stronger* than intended, and neither
+  `lake build`, `lake exe audit`, nor `just mk-all` catches it. This happened in PR #107 and was
+  fixed in PR #112. A `statement-formalized` PR must run `#check @Name` on every `axiom` it adds
+  and confirm the printed type keeps every intended hypothesis.
 - **Reuse before restating.** Foundation's theories, notations, definability classes, and the
   hierarchy are the vocabulary. A definition that duplicates a Foundation definition under a
-  new name is rejected in review. If Foundation's API is missing or awkward, open a
-  `foundation` issue rather than working around it.
+  new name is rejected in review. If Foundation's API is missing or awkward, say so in the
+  issue you are working on rather than working around it; a human takes it upstream.
 - **AI disclosure.** As in Foundation: every commit carries a `Co-Authored-By` trailer for the
   model, and the PR body says an AI agent wrote it. Here that is the normal case, not the
   exception, so every PR body says so explicitly.
@@ -75,3 +85,6 @@ just axiom-audit      # no axiom outside the allowlist, except what forgive.yml 
 just no-sorry         # no `sorry` in the sources, no `sorryAx` in forgive.yml
 just mk-all           # AlphaCentauri.lean up to date
 ```
+
+A `statement-formalized` PR additionally runs `#check @Name` on every `axiom` it adds — see
+"An `axiom` can silently drop a hypothesis" above.

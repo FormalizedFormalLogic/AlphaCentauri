@@ -204,7 +204,8 @@ namespace Provable
 
 section
 
-variable {α β : Ordinal.{0}} {c c' : ℕ} {φ : ArithmeticFormula ℕ} {Γ : Sequent}
+variable {α β : Ordinal.{0}} {c c' k : ℕ} {φ ψ : ArithmeticFormula ℕ}
+  {φₓ : ArithmeticSemiformula ℕ 1} {Γ : Sequent}
 
 /-- Both bounds may be relaxed.
 
@@ -236,9 +237,6 @@ lemma insert_absorb (h : Z∞ ⊢[α, c] insert φ Γ) (hmem : φ ∈ Γ) : Z∞
 lemma contr (h : Z∞ ⊢[α, c] insert φ (insert φ Γ)) : Z∞ ⊢[α, c] insert φ Γ := by
   simpa using h
 
-section
-variable {k : ℕ}
-
 /-- The identity axiom.
 
 - [Tow20, Section 13] -/
@@ -253,16 +251,11 @@ lemma axTrue (b : Bool) (r : (ℒₒᵣ).Rel k) (v) (ht : LitTrue (signedLit b r
     (hmem : signedLit b r v ∈ Γ) : Z∞ ⊢[0, 0] Γ :=
   ⟨Derivation.axTrue b r v ht hmem, by simp [Derivation.ordinalBound], by simp [Derivation.cutRank]⟩
 
-end
-
 /-- `⊤` closes a sequent.
 
 - [Tow20, Section 13] -/
 lemma verumR (h : ⊤ ∈ Γ) : Z∞ ⊢[0, 0] Γ :=
   ⟨Derivation.verumR h, by simp [Derivation.ordinalBound], by simp [Derivation.cutRank]⟩
-
-section
-variable {ψ : ArithmeticFormula ℕ}
 
 /-- The `∧`-rule.
 
@@ -285,11 +278,6 @@ lemma orI (h : Z∞ ⊢[α, c] insert φ (insert ψ Γ)) :
   · simpa [Derivation.ordinalBound] using add_le_add_left ho 1
   · simpa [Derivation.cutRank] using hcr
 
-end
-
-section
-variable {φₓ : ArithmeticSemiformula ℕ 1}
-
 /-- The bounded `∃`-rule with a numeral witness.
 
 - [Tow20, Section 13] -/
@@ -311,8 +299,6 @@ lemma allω {βₓ : ℕ → Ordinal.{0}}
   have : (⨆ n, (Dₓ n).ordinalBound) ≤ ⨆ n, βₓ n :=
     Ordinal.iSup_le fun n => (ho n).trans (Ordinal.le_iSup βₓ n)
   simpa [Derivation.ordinalBound] using add_le_add_left this 1
-
-end
 
 /-- The bounded cut rule for formulas of quantifier rank below `c`.
 
@@ -337,10 +323,8 @@ end
 
 section ExcludedMiddle
 
-variable {Γ : Sequent}
-
 section
-variable {α : Ordinal.{0}}
+variable {α : Ordinal.{0}} {Γ : Sequent}
 
 private lemma em_binaryStep {A B C D : ArithmeticFormula ℕ} (hab : A ⋏ B ∈ Γ) (hcd : C ⋎ D ∈ Γ)
     (h₁ : Z∞ ⊢[α, 0] insert A (insert C (insert D Γ)))
@@ -360,7 +344,7 @@ private lemma em_quantStep {φₓ ψₓ : ArithmeticSemiformula ℕ 1} (hall : (
 
 end
 
-variable {k : ℕ} {φ : ArithmeticFormula ℕ}
+variable {k : ℕ} {φ : ArithmeticFormula ℕ} {Γ : Sequent}
 
 private lemma lemAux (hk : φ.complexity ≤ k) (hp : φ ∈ Γ) (hn : ∼φ ∈ Γ) :
     Z∞ ⊢[((2 * k : ℕ) : Ordinal.{0}), 0] Γ := by

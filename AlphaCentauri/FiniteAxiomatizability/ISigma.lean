@@ -306,10 +306,57 @@ theorem finiteAxiomatizable (n : ℕ) (hn : 1 ≤ n) : Entailment.FiniteAxiomati
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   exact ⟨finiteAxiomatization m, by simp, finiteAxiomatization_equiv m⟩
 
+/-! ## The level of the finite theory in the arithmetical hierarchy -/
+
+section Hierarchy
+
+variable {n : ℕ}
+
+/-! The induction and the collection axiom are universal closures of Boolean combinations of
+formulas of level at most `𝚺-[n + 1]`, so `Hierarchy.iff_iff` splits the biconditionals and
+`Hierarchy.dummy_sigma`, `Hierarchy.dummy_pi` absorb the quantifier blocks that raise the level
+by one. -/
+attribute [local simp] Hierarchy.iff_iff Hierarchy.dummy_sigma Hierarchy.dummy_pi
+
+@[simp]
+lemma hierarchy_indSentence : Hierarchy 𝚷 (n + 3) (indSentence n) := by
+  have h₂ : ∀ Γ : Polarity, Hierarchy Γ (n + 2) (indFormula n) := fun _ ↦
+    hierarchy_indFormula.strict_mono _ (by omega)
+  have h₃ : ∀ Γ : Polarity, Hierarchy Γ (n + 3) (indFormula n) := fun _ ↦
+    hierarchy_indFormula.strict_mono _ (by omega)
+  simp [indSentence, succInd, h₂, h₃]
+
+@[simp]
+lemma hierarchy_collSentence : Hierarchy 𝚷 (n + 3) (collSentence n) := by
+  have h₂ : ∀ Γ : Polarity, Hierarchy Γ (n + 2) (collFormula n) := fun _ ↦
+    hierarchy_collFormula.strict_mono _ (by omega)
+  have h₃ : ∀ Γ : Polarity, Hierarchy Γ (n + 3) (collFormula n) := fun _ ↦
+    hierarchy_collFormula.strict_mono _ (by omega)
+  simp [collSentence, collectionAxiom, h₂, h₃]
+
+/-- Every axiom of the finite theory is `𝚷-[n + 3]`.
+- [HP98, Corollary I.4.34(1)] -/
+lemma hierarchy_of_mem_finiteAxiomatization {σ : ArithmeticSentence}
+    (hσ : σ ∈ finiteAxiomatization n) : Hierarchy 𝚷 (n + 3) σ := by
+  rcases hσ with (hσ | hσ) | rfl | rfl
+  · exact (Hierarchy.of_mem_peanoMinus hσ).mono (by omega)
+  · exact hierarchy_of_tarski hσ
+  · exact hierarchy_indSentence
+  · exact hierarchy_collSentence
+
+end Hierarchy
+
 /-- For `n ≥ 1`, `𝗜𝚺 n` is axiomatized by a single `𝚷-[n + 2]` sentence.
+- [HP98, Corollary I.4.34(1)]
 - [HP98, Remark I.4.35(1)] -/
-axiom exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :
-    ∃ σ : 𝚷-[n + 2].Sentence, ({σ.val} : ArithmeticTheory) ≊ 𝗜𝚺 n
+theorem exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :
+    ∃ σ : 𝚷-[n + 2].Sentence, ({σ.val} : ArithmeticTheory) ≊ 𝗜𝚺 n := by
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+  obtain ⟨l, hl, heq⟩ := Entailment.finiteAxiomatizable_iff_exists_list.mp
+    (Entailment.FiniteAxiomatizable.of_finite (finiteAxiomatization_finite (n := m)))
+  refine ⟨.mkPi (⋀l)
+    (by simpa using fun σ hσ ↦ hierarchy_of_mem_finiteAxiomatization (hl σ hσ)), ?_⟩
+  exact ((Entailment.equiv_singleton_Conj₂ l).trans heq).trans (finiteAxiomatization_equiv m)
 
 end ISigma
 

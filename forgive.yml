@@ -20,9 +20,6 @@
 version: v0
 
 # The unproved statements themselves.
-LO.FirstOrder.Arithmetic.ISigma.exists_pi_axiomatization:
-  forgive:
-    - LO.FirstOrder.Arithmetic.ISigma.exists_pi_axiomatization
 LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
   forgive:
     - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound

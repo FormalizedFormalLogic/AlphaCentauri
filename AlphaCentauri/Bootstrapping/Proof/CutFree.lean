@@ -567,7 +567,7 @@ theorem deductionAux {a d : V} (ha : IsFormulaSet L a) (hsa : setShift L a = a)
     intro z
     simp only [mem_cup_iff, mem_bitInsert_iff]
     tauto
-  apply Derivation.induction1 SigmaSymbol.sigma (P := fun d ↦
+  apply Derivation.induction1 𝚺 (P := fun d ↦
       ∃ d', Derivation (∅ : Theory L) d' ∧ fstIdx d' = fstIdx d ∪ a) (by definability) hd
   · intro s hs p hp hnp
     exact ⟨Bootstrapping.axL (s ∪ a) p,

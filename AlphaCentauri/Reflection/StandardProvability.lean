@@ -52,13 +52,41 @@ axiom localReflection_pi_one_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ 
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
 @[instance] axiom consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
-    Entailment.Consistent (T ∪ 𝗥𝗳𝗻 T)
+    Consistent (T ∪ 𝗥𝗳𝗻 T)
 
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is `𝚺-[1]`-sound.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
 @[instance] axiom consistent_localReflection_of_sigma_one_sound [T.SoundOnHierarchy 𝚺 1] :
-    Entailment.Consistent (T ∪ 𝗥𝗳𝗻 T)
+    Consistent (T ∪ 𝗥𝗳𝗻 T)
+
+variable {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
+
+/-- Unboundedness, for an extension by a single sentence: if `T ∪ {π}` for a `Γ n` sentence `π`
+proves the local reflection schema of `T` on the dual class, then `T ∪ {π}` is inconsistent.
+- [AB05, Theorem 23]
+- [AB05, Remark 24]
+- [Lin97, Theorem 4.1] -/
+axiom inconsistent_of_localReflectionOnHierarchy_weakerThan_insert
+    (hπ : Hierarchy Γ n π) (h : 𝗥𝗳𝗻[Γ.alt n] T ⪯ insert π T) : Inconsistent (insert π T)
+
+/-- Unboundedness, for an extension by a single sentence: a consistent `T ∪ {π}` with `π` a
+`Γ n` sentence does not contain the local reflection schema of `T` on the dual class.
+- [AB05, Theorem 23]
+- [AB05, Remark 24]
+- [Lin97, Theorem 4.1] -/
+axiom not_localReflectionOnHierarchy_weakerThan_insert
+    (hπ : Hierarchy Γ n π) [Consistent (insert π T)] : ¬𝗥𝗳𝗻[Γ.alt n] T ⪯ insert π T
+
+/-- Unboundedness, for an extension by finitely many sentences: if `T ∪ U` for a finite set `U`
+of `Γ n` sentences proves the local reflection schema of `T` on the dual class, then `T ∪ U` is
+inconsistent.
+- [AB05, Theorem 23]
+- [AB05, Remark 24]
+- [Lin97, Theorem 4.1] -/
+axiom inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite {U : ArithmeticTheory}
+    (hU : U.Finite) (hΓ : ∀ σ ∈ U, Hierarchy Γ n σ) (h : 𝗥𝗳𝗻[Γ.alt n] T ⪯ T ∪ U) :
+    Inconsistent (T ∪ U)
 
 /-- The uniform reflection schema `RFN_Γ(T)` consists of
 `∀x (Pr_T(φ(ẋ)) → φ(x))` for one-free-variable formulas `φ` satisfying `Γ`.

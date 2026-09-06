@@ -70,4 +70,14 @@ theorem inconsistent_of_localReflection_provable [Diagonalization T₀] [T₀ �
   have h₂ : T ⊢ ∼π := löb_theorem (by cl_prover [h₁])
   exact inconsistent_of_provable <| by cl_prover [adjoin! π T, to_adjoin (φ := π) h₂]
 
+/-- If `T ∪ {π}` for a sentence `π` in a class `Γ` proves the local reflection schema of `𝔅`
+restricted to a class `Γ'` dual to it, then `T ∪ {π}` is inconsistent.
+- [AB05, Theorem 23, finite case]
+- [AB05, Remark 24]
+- [Lin97, Theorem 4.1] -/
+axiom inconsistent_of_localReflectionOn_weakerThan_insert
+    [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL] {Γ Γ' : Sentence L → Prop}
+    (hd : ∀ σ, Γ σ → Γ' (∼σ)) (hπ : Γ π) (h : 𝔅.localReflectionOn Γ' ⪯ insert π T) :
+    Inconsistent (insert π T)
+
 end LO.FirstOrder.ProvabilityAbstraction.Provability

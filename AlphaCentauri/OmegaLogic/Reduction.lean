@@ -18,7 +18,7 @@ namespace LO.FirstOrder.Arithmetic.OmegaLogic
 open scoped Ordinal
 
 variable {θ α β : Ordinal.{0}} {c k : ℕ} {φ ψ : ArithmeticFormula ℕ}
-  {φₓ : ArithmeticSemiformula ℕ 1} {Γ Δ : Sequent}
+  {φₓ : ArithmeticSemiformula ℕ 1} {Γ : Sequent}
 
 section Frame
 
@@ -211,6 +211,8 @@ lemma remove_false_lit (hL : ¬LitTrue (signedLit b₀ r₀ v₀))
   intro x hx
   simp only [Finset.mem_erase, Finset.mem_insert] at hx
   exact hx.2.resolve_left hx.1
+
+variable {Δ : Sequent}
 
 /-- Eliminates an atomic cut against a cut-free derivation with an explicit height bound.
 

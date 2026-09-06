@@ -16,12 +16,15 @@ namespace LO.FirstOrder
 
 namespace Arithmetic
 
+section
 variable {L : Language} [L.LT] {ξ : Type*} {s : ℕ}
 
 lemma Hierarchy.allClosure :
     {n : ℕ} → {φ : Semiformula L ξ n} → Hierarchy 𝚷 (s + 1) φ → Hierarchy 𝚷 (s + 1) (∀¹* φ)
   |     0, _, hφ => hφ
   | _ + 1, φ, hφ => allClosure (φ := ∀¹ φ) hφ.all
+
+end
 
 variable {k : ℕ}
 
@@ -37,6 +40,7 @@ lemma models_totalitySentence_iff {V : Type*} [ORingStructure V] {φ : 𝚺₁.S
     V↓[ℒₒᵣ] ⊧ totalitySentence φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) := by
   simp [totalitySentence, models_iff]
 
+section
 variable {l : ℕ}
 
 /-- A graph formula for the composite `fun x⃗ ↦ f (fun i ↦ g i x⃗)`.
@@ -54,6 +58,8 @@ def compGraph (ψ : 𝚺₁.Semisentence (l + 1)) (χ : Fin l → 𝚺₁.Semise
       ∃ z : Fin l → V, ψ.val.Evalb (w 0 :> z) ∧ ∀ i, (χ i).val.Evalb (z i :> (w ·.succ)) := by
   simp [compGraph, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
     Matrix.comp_vecCons', Empty.eq_elim]
+
+end
 
 lemma definablePred_evalb {V : Type*} [ORingStructure V] (φ : 𝚺₁.Semisentence (k + 1))
     (v : Fin k → V) : 𝚺₁-Predicate fun y ↦ φ.val.Evalb (y :> v) :=

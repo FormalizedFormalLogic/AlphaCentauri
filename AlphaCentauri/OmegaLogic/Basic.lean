@@ -25,8 +25,7 @@ abbrev Sequent := Finset (ArithmeticFormula ℕ)
 
 section Truth
 
-variable {k : ℕ} {b : Bool} {r : (ℒₒᵣ).Rel k} {v : Fin k → ArithmeticTerm ℕ}
-  {φ ψ : ArithmeticFormula ℕ} {φₓ : ArithmeticSemiformula ℕ 1}
+variable {φ ψ : ArithmeticFormula ℕ} {φₓ : ArithmeticSemiformula ℕ 1}
 
 /-- Truth of an arithmetic formula in the standard model `ℕ`.
 
@@ -69,6 +68,8 @@ lemma litTrue_exs : LitTrue (∃¹ φₓ) ↔ ∃ n : ℕ, LitTrue (φₓ/[(↑n
 def signedLit : Bool → {k : ℕ} → (ℒₒᵣ).Rel k → (Fin k → ArithmeticTerm ℕ) → ArithmeticFormula ℕ
   |  true, _, r, v => Semiformula.rel r v
   | false, _, r, v => Semiformula.nrel r v
+
+variable {k : ℕ} {b : Bool} {r : (ℒₒᵣ).Rel k} {v : Fin k → ArithmeticTerm ℕ}
 
 @[simp, grind =] lemma neg_signedLit : ∼(signedLit b r v) = signedLit (!b) r v := by
   cases b <;> simp [signedLit]
@@ -204,7 +205,7 @@ namespace Provable
 section
 
 variable {α β : Ordinal.{0}} {c c' k : ℕ} {φ ψ : ArithmeticFormula ℕ}
-  {φₓ : ArithmeticSemiformula ℕ 1} {Γ Δ : Sequent}
+  {φₓ : ArithmeticSemiformula ℕ 1} {Γ : Sequent}
 
 /-- Both bounds may be relaxed.
 
@@ -217,6 +218,9 @@ lemma mono_ordinalBound (h : α ≤ β) : Z∞ ⊢[α, c] Γ → Z∞ ⊢[β, c]
 
 lemma mono_cutRank (h : c ≤ c') : Z∞ ⊢[α, c] Γ → Z∞ ⊢[α, c'] Γ := mono le_rfl h
 
+section
+variable {Δ : Sequent}
+
 /-- Weakening preserves both derivation bounds.
 
 - [Tow20, Section 14] -/
@@ -224,6 +228,8 @@ lemma weakening (h : Γ ⊆ Δ) : Z∞ ⊢[α, c] Γ → Z∞ ⊢[α, c] Δ := b
   rintro ⟨D, ho, hcr⟩
   exact ⟨D.weak h, by simpa [Derivation.ordinalBound] using ho,
     by simpa [Derivation.cutRank] using hcr⟩
+
+end
 
 lemma insert_absorb (h : Z∞ ⊢[α, c] insert φ Γ) (hmem : φ ∈ Γ) : Z∞ ⊢[α, c] Γ := by
   rwa [Finset.insert_eq_self.mpr hmem] at h
@@ -317,7 +323,8 @@ end
 
 section ExcludedMiddle
 
-variable {α : Ordinal.{0}} {k : ℕ} {φ : ArithmeticFormula ℕ} {Γ : Sequent}
+section
+variable {α : Ordinal.{0}} {Γ : Sequent}
 
 private lemma em_binaryStep {A B C D : ArithmeticFormula ℕ} (hab : A ⋏ B ∈ Γ) (hcd : C ⋎ D ∈ Γ)
     (h₁ : Z∞ ⊢[α, 0] insert A (insert C (insert D Γ)))
@@ -334,6 +341,10 @@ private lemma em_quantStep {φₓ ψₓ : ArithmeticSemiformula ℕ 1} (hall : (
     fun n => (exI n (fam n)).insert_absorb (Finset.mem_insert_of_mem hexs)
   refine ((allω h).insert_absorb hall).mono_ordinalBound ?_
   exact add_le_add_left (Ordinal.iSup_le fun _ => le_rfl) 1
+
+end
+
+variable {k : ℕ} {φ : ArithmeticFormula ℕ} {Γ : Sequent}
 
 private lemma lemAux (hk : φ.complexity ≤ k) (hp : φ ∈ Γ) (hn : ∼φ ∈ Γ) :
     Z∞ ⊢[((2 * k : ℕ) : Ordinal.{0}), 0] Γ := by

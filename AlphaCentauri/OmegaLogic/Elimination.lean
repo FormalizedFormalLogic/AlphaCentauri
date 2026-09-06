@@ -17,9 +17,12 @@ namespace LO.FirstOrder.Arithmetic.OmegaLogic
 
 open scoped Ordinal
 
-variable {θ α : Ordinal.{0}} {c : ℕ} {ξ : ArithmeticFormula ℕ} {Γ : Sequent}
+variable {θ α : Ordinal.{0}} {c : ℕ}
 
 namespace Provable
+
+section
+variable {ξ : ArithmeticFormula ℕ}
 
 private lemma cutReducibleAux (hθ : 0 < θ) (m : ℕ) :
     ∀ ξ : ArithmeticFormula ℕ, ξ.complexity ≤ m → ξ.qr ≤ c → CutReducible θ c ξ := by
@@ -53,6 +56,10 @@ quantifier rank at most `c` can be traded for a derivation that stays below `ω 
 - [Tow20, Theorem 19.7] -/
 lemma cut_elim_principal (hθ : 0 < θ) (hqr : ξ.qr ≤ c) : CutReducible θ c ξ :=
   cutReducibleAux hθ ξ.complexity ξ le_rfl hqr
+
+end
+
+variable {Γ : Sequent}
 
 /-- A derivation of cut rank at most `c + 1` becomes one of cut rank at most `c`, at height
 `ω ^ D.ordinalBound`.

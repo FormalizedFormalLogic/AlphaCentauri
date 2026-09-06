@@ -13,6 +13,8 @@ public import AlphaCentauri.Vorspiel.Fvar
 
 namespace LO.FirstOrder.Arithmetic
 
+open _root_.LO.Entailment
+
 section axioms
 
 variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
@@ -49,13 +51,13 @@ lemma BSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕𝚺 s₁ ⊆ �
   Set.union_subset_union_right _ (CollectionScheme_subset (fun H ↦ H.mono h))
 
 lemma BSigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕𝚺 s₁ ⪯ 𝗕𝚺 s₂ :=
-  Entailment.WeakerThan.ofSubset (BSigma_subset_mono h)
+  WeakerThan.ofSubset (BSigma_subset_mono h)
 
-instance (n : ℕ) : 𝗣𝗔⁻ ⪯ 𝗕𝚺 n := Entailment.WeakerThan.ofSubset Set.subset_union_left
+instance (n : ℕ) : 𝗣𝗔⁻ ⪯ 𝗕𝚺 n := WeakerThan.ofSubset Set.subset_union_left
 
 instance (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕𝚺 n :=
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
-  Entailment.WeakerThan.trans this inferInstance
+  WeakerThan.trans this inferInstance
 
 end axioms
 
@@ -82,7 +84,7 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticS
     (hφ : Hierarchy 𝚺 (n + 1) φ) : 𝗜𝚺 (n + 1) ⊢ .univCl (collectionAxiom φ) := by
   refine Arithmetic.complete.{0} _ _ ?_
   intro M _ hMT
-  have hPA : M↓[ℒₒᵣ] ⊧* (𝗣𝗔⁻ : ArithmeticTheory) := mod_paMinus_of_ISigma (n := n + 1)
+  have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := n + 1)
   rw [models_collectionAxiom_iff]
   intro f a h
   have hθ : Hierarchy 𝚺 (n + 1) (φ.toSemisentence ![#1, #0]) := hφ.rew _
@@ -99,9 +101,9 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticS
 /-- `𝗕𝚺 (n + 1)` is at most as strong as `𝗜𝚺 (n + 1)`.
 - [HP98, Theorem I.2.15] -/
 theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) :=
-  Entailment.WeakerThan.ofAxm! (fun {σ} hσ ↦ by
+  WeakerThan.ofAxm! (fun {σ} hσ ↦ by
     rcases hσ with hσ | ⟨φ, hφ, rfl⟩
-    · exact Entailment.WeakerThan.pbl (h := inferInstance) (Entailment.by_axm hσ)
+    · exact WeakerThan.pbl (h := inferInstance) (by_axm hσ)
     · exact ISigma.provable_collectionAxiom_of_hierarchy n hφ)
 
 end BSigma_ISigma

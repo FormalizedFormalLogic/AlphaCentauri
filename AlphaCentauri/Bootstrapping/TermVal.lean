@@ -56,6 +56,18 @@ lemma nth_le_listMax_total (v i : V) : v.[i] ≤ listMax v := by
   · exact nth_le_listMax h
   · simp [nth_lt_len h]
 
+lemma qqAdd_eq_qqFunc (a b : V) : (a ^+ b : V) = ^func (2 : V) (0 : V) (?[a, b] : V) := by
+  rw [Arithmetic.qqAdd, Arithmetic.coe_addIndex_eq]
+
+lemma qqMul_eq_qqFunc (a b : V) : (a ^* b : V) = ^func (2 : V) (1 : V) (?[a, b] : V) := by
+  rw [Arithmetic.qqMul, Arithmetic.coe_mulIndex_eq]
+
+lemma qqZero_eq_qqFunc : (𝟎 : V) = ^func (0 : V) (0 : V) (0 : V) := by
+  rw [Arithmetic.coe_zero_eq, show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq]
+
+lemma qqOne_eq_qqFunc : (𝟏 : V) = ^func (0 : V) (1 : V) (0 : V) := by
+  rw [Arithmetic.coe_one_eq, show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq]
+
 namespace TermVal
 
 def blueprint : Language.TermRec.Blueprint 1 where
@@ -154,8 +166,7 @@ end
 @[simp] lemma termVal_zero (e : V) : termVal e (𝟎 : V) = 0 := by
   have hkf : (ℒₒᵣ).IsFunc (0 : V) (0 : V) := isFunc_LOR_iff.mpr (Or.inl ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ (0 : V) (0 : V) := by simp
-  have heq : (𝟎 : V) = ^func (0 : V) (0 : V) (0 : V) := by
-    rw [Arithmetic.coe_zero_eq, show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq]
+  have heq : (𝟎 : V) = ^func (0 : V) (0 : V) (0 : V) := qqZero_eq_qqFunc
   show construction.result ℒₒᵣ ![e] (𝟎 : V) = 0
   rw [heq, construction.result_func' hkf hv]
   simp [construction]
@@ -165,8 +176,7 @@ end
 @[simp] lemma termVal_one (e : V) : termVal e (𝟏 : V) = 1 := by
   have hkf : (ℒₒᵣ).IsFunc (0 : V) (1 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inl ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ (0 : V) (0 : V) := by simp
-  have heq : (𝟏 : V) = ^func (0 : V) (1 : V) (0 : V) := by
-    rw [Arithmetic.coe_one_eq, show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq]
+  have heq : (𝟏 : V) = ^func (0 : V) (1 : V) (0 : V) := qqOne_eq_qqFunc
   show construction.result ℒₒᵣ ![e] (𝟏 : V) = 1
   rw [heq, construction.result_func' hkf hv]
   simp [construction]
@@ -177,8 +187,7 @@ end
     termVal e (t ^+ u) = termVal e t + termVal e u := by
   have hkf : (ℒₒᵣ).IsFunc (2 : V) (0 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inl ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
-  have heq : (t ^+ u : V) = ^func (2 : V) (0 : V) (?[t, u] : V) := by
-    rw [Arithmetic.qqAdd, Arithmetic.coe_addIndex_eq]
+  have heq : (t ^+ u : V) = ^func (2 : V) (0 : V) (?[t, u] : V) := qqAdd_eq_qqFunc t u
   have step : termVal e (^func (2 : V) (0 : V) (?[t, u] : V)) =
       construction.func ![e] 2 0 (?[t, u] : V) (termValVec e 2 (?[t, u] : V)) :=
     construction.result_func' hkf hv
@@ -191,8 +200,7 @@ end
     termVal e (t ^* u) = termVal e t * termVal e u := by
   have hkf : (ℒₒᵣ).IsFunc (2 : V) (1 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inr ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
-  have heq : (t ^* u : V) = ^func (2 : V) (1 : V) (?[t, u] : V) := by
-    rw [Arithmetic.qqMul, Arithmetic.coe_mulIndex_eq]
+  have heq : (t ^* u : V) = ^func (2 : V) (1 : V) (?[t, u] : V) := qqMul_eq_qqFunc t u
   have step : termVal e (^func (2 : V) (1 : V) (?[t, u] : V)) =
       construction.func ![e] 2 1 (?[t, u] : V) (termValVec e 2 (?[t, u] : V)) :=
     construction.result_func' hkf hv
@@ -282,15 +290,13 @@ lemma termVal_quote {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) (v : Fin k → V)
     match k', f, w, ih with
     | 0, .zero, w, _ =>
       have hz : termVal (matrixToVec v) (^func (0 : V) (0 : V) (0 : V)) = 0 := by
-        rw [show (^func (0 : V) (0 : V) (0 : V) : V) = (𝟎 : V) by
-          rw [Arithmetic.coe_zero_eq, show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq]]
+        rw [← qqZero_eq_qqFunc (V := V)]
         exact termVal_zero _
       simp [Semiterm.empty_quote_eq, Semiterm.valb, quote_zeroIndex_eq, hz]
       rfl
     | 0, .one, w, _ =>
       have ho : termVal (matrixToVec v) (^func (0 : V) (1 : V) (0 : V)) = 1 := by
-        rw [show (^func (0 : V) (1 : V) (0 : V) : V) = (𝟏 : V) by
-          rw [Arithmetic.coe_one_eq, show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq]]
+        rw [← qqOne_eq_qqFunc (V := V)]
         exact termVal_one _
       simp [Semiterm.empty_quote_eq, Semiterm.valb, quote_oneIndex_eq, ho]
       rfl
@@ -333,20 +339,15 @@ theorem termVal_le_poly (e t : V) : termVal e t ≤ Exp.exp ((listMax e + 2) * (
   · intro k f v hkf hv ih
     rcases isFunc_LOR_iff.mp hkf with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
     · have hv0 : v = 0 := len_zero_iff_eq_nil.mp hv.lh.symm
-      have hzero : (^func (0 : V) (0 : V) (0 : V)) = (𝟎 : V) := by
-        rw [Arithmetic.coe_zero_eq,
-          show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq]
+      have hzero : (^func (0 : V) (0 : V) (0 : V)) = (𝟎 : V) := qqZero_eq_qqFunc.symm
       rw [hv0, hzero]
       simp
     · have hv0 : v = 0 := len_zero_iff_eq_nil.mp hv.lh.symm
-      have hone : (^func (0 : V) (1 : V) (0 : V)) = (𝟏 : V) := by
-        rw [Arithmetic.coe_one_eq,
-          show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq]
+      have hone : (^func (0 : V) (1 : V) (0 : V)) = (𝟏 : V) := qqOne_eq_qqFunc.symm
       rw [hv0, hone]
       simp
     · rcases IsUTermVec.two_iff.mp hv with ⟨a, b, ha, hb, rfl⟩
-      have heq : (a ^+ b : V) = ^func (2 : V) (0 : V) ?[a, b] := by
-        rw [Arithmetic.qqAdd, Arithmetic.coe_addIndex_eq]
+      have heq : (a ^+ b : V) = ^func (2 : V) (0 : V) ?[a, b] := qqAdd_eq_qqFunc a b
       have hab : a + b + 1 ≤ a ^+ b := succ_le_iff_lt.mpr (heq ▸ add_lt_qqFunc 2 0 a b)
       have iha : termVal e a ≤ Exp.exp ((listMax e + 2) * (a + 1)) := by
         simpa using ih 0 (by simp)
@@ -368,8 +369,7 @@ theorem termVal_le_poly (e t : V) : termVal e t ≤ Exp.exp ((listMax e + 2) * (
             rw [exp_monotone_le, mul_add, mul_one]
             exact add_le_add le_rfl hM
     · rcases IsUTermVec.two_iff.mp hv with ⟨a, b, ha, hb, rfl⟩
-      have heq : (a ^* b : V) = ^func (2 : V) (1 : V) ?[a, b] := by
-        rw [Arithmetic.qqMul, Arithmetic.coe_mulIndex_eq]
+      have heq : (a ^* b : V) = ^func (2 : V) (1 : V) ?[a, b] := qqMul_eq_qqFunc a b
       have hab : a + b + 1 ≤ a ^* b := succ_le_iff_lt.mpr (heq ▸ add_lt_qqFunc 2 1 a b)
       have iha : termVal e a ≤ Exp.exp ((listMax e + 2) * (a + 1)) := by
         simpa using ih 0 (by simp)
@@ -501,8 +501,7 @@ end
     termVal' f e (t ^+ u) = termVal' f e t + termVal' f e u := by
   have hkf : (ℒₒᵣ).IsFunc (2 : V) (0 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inl ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
-  have heq : (t ^+ u : V) = ^func (2 : V) (0 : V) (?[t, u] : V) := by
-    rw [Arithmetic.qqAdd, Arithmetic.coe_addIndex_eq]
+  have heq : (t ^+ u : V) = ^func (2 : V) (0 : V) (?[t, u] : V) := qqAdd_eq_qqFunc t u
   have step : termVal' f e (^func (2 : V) (0 : V) (?[t, u] : V)) =
       construction.func ![f, e] 2 0 (?[t, u] : V) (termValVec' f e 2 (?[t, u] : V)) :=
     construction.result_func' hkf hv
@@ -516,8 +515,7 @@ end
     termVal' f e (t ^* u) = termVal' f e t * termVal' f e u := by
   have hkf : (ℒₒᵣ).IsFunc (2 : V) (1 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inr ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
-  have heq : (t ^* u : V) = ^func (2 : V) (1 : V) (?[t, u] : V) := by
-    rw [Arithmetic.qqMul, Arithmetic.coe_mulIndex_eq]
+  have heq : (t ^* u : V) = ^func (2 : V) (1 : V) (?[t, u] : V) := qqMul_eq_qqFunc t u
   have step : termVal' f e (^func (2 : V) (1 : V) (?[t, u] : V)) =
       construction.func ![f, e] 2 1 (?[t, u] : V) (termValVec' f e 2 (?[t, u] : V)) :=
     construction.result_func' hkf hv

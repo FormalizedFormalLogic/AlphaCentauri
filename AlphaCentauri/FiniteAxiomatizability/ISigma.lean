@@ -20,6 +20,7 @@ finitely axiomatizable for `n ≥ 1`.
 namespace LO.FirstOrder.Arithmetic
 
 open Bootstrapping
+open _root_.LO.Entailment
 
 namespace ISigma
 
@@ -89,8 +90,7 @@ lemma finiteAxiomatization_finite {n : ℕ} : (finiteAxiomatization n).Finite :=
   (PeanoMinus.finite.union (tarski_finite n)).union ((Set.finite_singleton _).insert _)
 
 @[simp]
-lemma peanoMinus_subset_finiteAxiomatization {n : ℕ} :
-    (𝗣𝗔⁻ : ArithmeticTheory) ⊆ finiteAxiomatization n :=
+lemma peanoMinus_subset_finiteAxiomatization {n : ℕ} : 𝗣𝗔⁻ ⊆ finiteAxiomatization n :=
   Set.subset_union_left.trans Set.subset_union_left
 
 @[grind →]
@@ -107,39 +107,44 @@ lemma collSentence_mem_finiteAxiomatization {n : ℕ} :
   Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
 
 instance (n : ℕ) : 𝗣𝗔⁻ ⪯ finiteAxiomatization n :=
-  Entailment.Axiomatized.le_of_subset peanoMinus_subset_finiteAxiomatization
+  Axiomatized.le_of_subset peanoMinus_subset_finiteAxiomatization
 
 instance (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ finiteAxiomatization n :=
-  Entailment.WeakerThan.trans (𝓣 := (𝗣𝗔⁻ : ArithmeticTheory)) inferInstance inferInstance
+  WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
+
+section
+variable {M : Type*} [ORingStructure M]
 
 @[simp]
-lemma eval_indFormula {M : Type*} [ORingStructure M] {n : ℕ} (x : M) (g : ℕ → M) :
+lemma eval_indFormula {n : ℕ} (x : M) (g : ℕ → M) :
     (indFormula n).Eval ![x] g ↔
       ∃ ev, Reading.Adjoin ev x (g 1) ∧ Reading.SatSigma n (g 0) ev := by
   simp [indFormula, Reading.Adjoin, Reading.SatSigma]
 
 @[simp]
-lemma eval_collFormula {M : Type*} [ORingStructure M] {n : ℕ} (x y : M) (g : ℕ → M) :
+lemma eval_collFormula {n : ℕ} (x y : M) (g : ℕ → M) :
     (collFormula n).Eval ![x, y] g ↔
       ∃ ev₀, Reading.Adjoin ev₀ x (g 1) ∧
         ∃ ev, Reading.Adjoin ev y ev₀ ∧ Reading.SatSigma n (g 0) ev := by
   simp [collFormula, Reading.Adjoin, Reading.SatSigma]
 
+end
+
 /-- `𝗜𝚺 (n + 1)` proves the finite theory.
 - [HP98, Theorem I.2.52] -/
 theorem provable_finiteAxiomatization (n : ℕ) : 𝗜𝚺 (n + 1) ⊢* finiteAxiomatization n := by
   rintro σ ((hσ | hσ) | rfl | rfl)
-  · exact Entailment.by_axm (Set.mem_union_left _ hσ)
-  · exact Entailment.WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega))
+  · exact by_axm (Set.mem_union_left _ hσ)
+  · exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega))
       (ISigma1.provable_tarski n hσ)
-  · exact Entailment.by_axm (Set.mem_union_right _ indSentence_mem_inductionScheme)
-  · exact Entailment.WeakerThan.pbl (h := BSigma_weakerThan_ISigma n)
-      (Entailment.by_axm (Set.mem_union_right _ collSentence_mem_collectionScheme))
+  · exact by_axm (Set.mem_union_right _ indSentence_mem_inductionScheme)
+  · exact WeakerThan.pbl (h := BSigma_weakerThan_ISigma n)
+      (by_axm (Set.mem_union_right _ collSentence_mem_collectionScheme))
 
 /-- `𝗣𝗔⁻` holds in a model of the finite theory; the proofs below use it as a local instance.
 - [HP98, Theorem I.2.52] -/
 lemma models_peanoMinus (n : ℕ) {M : Type*} [ORingStructure M]
-    [M↓[ℒₒᵣ] ⊧* finiteAxiomatization n] : M↓[ℒₒᵣ] ⊧* (𝗣𝗔⁻ : ArithmeticTheory) :=
+    [M↓[ℒₒᵣ] ⊧* finiteAxiomatization n] : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
   Semantics.ModelsSet.of_subset' (peanoMinus_subset_finiteAxiomatization (n := n))
 
 /-- Every axiom of the finite Tarski theory holds in a model of the finite theory.
@@ -258,51 +263,53 @@ strict prenex `𝚺-[n + 1]` formula is at least as strong as `𝗜𝚺 (n + 1)`
 - [HP98, Theorem I.2.15]
 - [HP98, Theorem I.2.25] -/
 theorem hierarchyInduction_of_strictInduction (n : ℕ) (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
-    (hind : ∀ φ : ArithmeticSemiformula ℕ 1, StrictHierarchy 𝚺 (n + 1) φ →
-      T ⊢ .univCl (succInd φ))
-    (hcol : ∀ φ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 (n + 1) φ →
-      T ⊢ .univCl (collectionAxiom φ)) :
+    (hind : ∀ φ : ArithmeticSemiformula ℕ 1,
+      StrictHierarchy 𝚺 (n + 1) φ → T ⊢ .univCl (succInd φ))
+    (hcol : ∀ φ : ArithmeticSemiformula ℕ 2,
+      StrictHierarchy 𝚺 (n + 1) φ → T ⊢ .univCl (collectionAxiom φ)) :
     𝗜𝚺 (n + 1) ⪯ T := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T :=
-    Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ : ArithmeticTheory)) inferInstance
-  refine Entailment.WeakerThan.ofAxm! fun {σ} hσ ↦ ?_
+    WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
+  apply WeakerThan.ofAxm!
+  intro σ hσ
   rcases hσ with hσ | ⟨φ, hφ, rfl⟩
-  · exact Entailment.WeakerThan.pbl (h := inferInstance) (Entailment.by_axm hσ)
-  refine Arithmetic.complete.{0} _ _ ?_
-  intro M _ _
-  have : M↓[ℒₒᵣ] ⊧* (𝗣𝗔⁻ : ArithmeticTheory) :=
-    models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance
-  have hC : StrictCollection M (n + 1) :=
-    strictCollection_of_models_collectionAxiom fun ψ hψ ↦
-      consequence_iff.mp (Theory.Proof.sound (hcol ψ hψ)) M inferInstance
-  suffices ∀ f : ℕ → M, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →
-      ∀ x, φ.Eval ![x] f by
-    simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
-      Matrix.constant_eq_singleton] using this
-  intro f hzero hsucc
-  obtain ⟨ψ, hψ, heval⟩ := exists_strictHierarchy_eval_iff hC hφ f
-  have hInd : M↓[ℒₒᵣ] ⊧ (.univCl (succInd ψ) : ArithmeticSentence) :=
-    consequence_iff.mp (Theory.Proof.sound (hind ψ hψ)) M inferInstance
-  have hind' : ∀ g : ℕ → M, ψ.Eval ![0] g → (∀ x, ψ.Eval ![x] g → ψ.Eval ![x + 1] g) →
-      ∀ x, ψ.Eval ![x] g := by
-    simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
-      Matrix.constant_eq_singleton] using hInd
-  intro x
-  refine (heval x).mp (hind' f ((heval 0).mpr hzero) (fun y hy ↦ (heval (y + 1)).mpr ?_) x)
-  exact hsucc y ((heval y).mp hy)
+  · exact WeakerThan.pbl (h := inferInstance) (by_axm hσ)
+  · apply Arithmetic.complete.{0}
+    intro M _ _
+    have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+      models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance
+    have hC : StrictCollection M (n + 1) :=
+      strictCollection_of_models_collectionAxiom fun ψ hψ ↦
+        consequence_iff.mp (Theory.Proof.sound (hcol ψ hψ)) M inferInstance
+    suffices ∀ f : ℕ → M, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →
+        ∀ x, φ.Eval ![x] f by
+      simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
+        Matrix.constant_eq_singleton] using this
+    intro f hzero hsucc
+    obtain ⟨ψ, hψ, heval⟩ := exists_strictHierarchy_eval_iff hC hφ f
+    have hInd : M↓[ℒₒᵣ] ⊧ (.univCl (succInd ψ) : ArithmeticSentence) :=
+      consequence_iff.mp (Theory.Proof.sound (hind ψ hψ)) M inferInstance
+    have hind' : ∀ g : ℕ → M, ψ.Eval ![0] g → (∀ x, ψ.Eval ![x] g → ψ.Eval ![x + 1] g) →
+        ∀ x, ψ.Eval ![x] g := by
+      simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
+        Matrix.constant_eq_singleton] using hInd
+    intro x
+    refine (heval x).mp (hind' f ((heval 0).mpr hzero) (fun y hy ↦ (heval (y + 1)).mpr ?_) x)
+    exact hsucc y ((heval y).mp hy)
 
 /-- The finite theory is equivalent to `𝗜𝚺 (n + 1)`.
 - [HP98, Theorem I.2.52] -/
-theorem finiteAxiomatization_equiv (n : ℕ) : finiteAxiomatization n ≊ 𝗜𝚺 (n + 1) :=
-  Entailment.Equiv.antisymm_iff.mpr
-    ⟨Entailment.WeakerThan.ofAxm! (provable_finiteAxiomatization n),
-      hierarchyInduction_of_strictInduction n _
-        (fun _ hφ ↦ provable_succInd_of_strictHierarchy hφ)
-        (fun _ hφ ↦ provable_collectionAxiom_of_strictHierarchy hφ)⟩
+theorem finiteAxiomatization_equiv (n : ℕ) : finiteAxiomatization n ≊ 𝗜𝚺 (n + 1) := by
+  apply Equiv.antisymm_iff.mpr
+  constructor
+  · exact WeakerThan.ofAxm! (provable_finiteAxiomatization n)
+  · exact hierarchyInduction_of_strictInduction n _
+      (fun _ hφ ↦ provable_succInd_of_strictHierarchy hφ)
+      (fun _ hφ ↦ provable_collectionAxiom_of_strictHierarchy hφ)
 
 /-- For `n ≥ 1`, `𝗜𝚺 n` is finitely axiomatizable.
 - [HP98, Theorem I.2.52] -/
-theorem finiteAxiomatizable (n : ℕ) (hn : 1 ≤ n) : Entailment.FiniteAxiomatizable (𝗜𝚺 n) := by
+theorem finiteAxiomatizable (n : ℕ) (hn : 1 ≤ n) : FiniteAxiomatizable (𝗜𝚺 n) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   exact ⟨finiteAxiomatization m, by simp, finiteAxiomatization_equiv m⟩
 
@@ -346,17 +353,25 @@ lemma hierarchy_of_mem_finiteAxiomatization {σ : ArithmeticSentence}
 
 end Hierarchy
 
+/-- Every member of a finset of arithmetic sentences bounds the hierarchy level of its
+conjunction. -/
+private lemma hierarchy_finsetConj_iff {Γ : Polarity} {s : ℕ} {F : Finset ArithmeticSentence} :
+    Hierarchy Γ s F.conj ↔ ∀ σ ∈ F, Hierarchy Γ s σ := by
+  simp [Finset.conj]
+
 /-- For `n ≥ 1`, `𝗜𝚺 n` is axiomatized by a single `𝚷-[n + 2]` sentence.
 - [HP98, Corollary I.4.34(1)]
 - [HP98, Remark I.4.35(1)] -/
 theorem exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :
     ∃ σ : 𝚷-[n + 2].Sentence, ({σ.val} : ArithmeticTheory) ≊ 𝗜𝚺 n := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  obtain ⟨l, hl, heq⟩ := Entailment.finiteAxiomatizable_iff_exists_list.mp
-    (Entailment.FiniteAxiomatizable.of_finite (finiteAxiomatization_finite (n := m)))
-  refine ⟨.mkPi (⋀l)
-    (by simpa using fun σ hσ ↦ hierarchy_of_mem_finiteAxiomatization (hl σ hσ)), ?_⟩
-  exact ((Entailment.equiv_singleton_Conj₂ l).trans heq).trans (finiteAxiomatization_equiv m)
+  obtain ⟨F, hsub, heq⟩ := finiteAxiomatizable_iff_exists_finset.mp
+    (FiniteAxiomatizable.of_finite (finiteAxiomatization_finite (n := m)))
+  have hσ : Hierarchy 𝚷 (m + 1 + 2) F.conj := by
+    rw [show m + 1 + 2 = m + 3 by omega]
+    exact hierarchy_finsetConj_iff.mpr fun σ hσ ↦ hierarchy_of_mem_finiteAxiomatization (hsub hσ)
+  exact ⟨.mkPi F.conj hσ,
+    ((equiv_singleton_Fconj F).trans heq).trans (finiteAxiomatization_equiv m)⟩
 
 end ISigma
 

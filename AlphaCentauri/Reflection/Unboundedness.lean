@@ -21,8 +21,10 @@ namespace LO.FirstOrder.Arithmetic
 
 open LO.Entailment Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {T U : ArithmeticTheory} [T.Δ₁] [U.Δ₁] {n : ℕ} {Γ : Polarity}
+
+section
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Reading standard codes inside a model -/
 
@@ -106,6 +108,8 @@ lemma models_collapseSentence_sigma_iff :
     simp [collapseSentence, models_iff]
   rw [h, eval_collapseFormula_sigma]
   simp [Sentence.quote_eq]
+
+end
 
 /-! ## The collapse -/
 
@@ -224,7 +228,7 @@ private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚷 (n + 
   have hT : T ⪯ insert (collapseSentence T U n 𝚷) T := WeakerThan.ofSubset (Set.subset_insert _ _)
   have key' : insert (collapseSentence T U n 𝚷) T ⊢ collapseSentence T U n 𝚷 🡒 σ :=
     hT.pbl (WeakerThan.pbl (𝓢 := 𝗜𝚺₁) key)
-  exact key' ⨀ Axiomatized.by_axm (Set.mem_insert _ _)
+  exact key' ⨀ by_axm (Set.mem_insert _ _)
 
 /-- The polarity `𝚺` case of `provable_of_mem`. -/
 private lemma provable_of_mem_sigma (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚺 (n + 1) σ)
@@ -251,7 +255,7 @@ private lemma provable_of_mem_sigma (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚺 (n
   have hT : T ⪯ insert (collapseSentence T U n 𝚺) T := WeakerThan.ofSubset (Set.subset_insert _ _)
   have key' : insert (collapseSentence T U n 𝚺) T ⊢ collapseSentence T U n 𝚺 🡒 σ :=
     hT.pbl (WeakerThan.pbl (𝓢 := 𝗜𝚺₁) key)
-  exact key' ⨀ Axiomatized.by_axm (Set.mem_insert _ _)
+  exact key' ⨀ by_axm (Set.mem_insert _ _)
 
 /-- A consistent extension of `T` by `collapseSentence` proves every member of `U`.
 - [Lin97, Theorem 4.3] -/
@@ -286,7 +290,7 @@ theorem exists_sentence_weakerThan_of_consistent
   refine ⟨collapseSentence T U n Γ, hierarchy_collapseSentence T U n Γ, ?_, hcon⟩
   apply WeakerThan.ofAxm!
   rintro φ (hφ | hφ)
-  · exact Axiomatized.by_axm (Set.mem_insert_of_mem _ hφ)
+  · exact by_axm (Set.mem_insert_of_mem _ hφ)
   · exact provable_of_mem hΓ hcon hφ
 
 /-- Unboundedness, for an extension by a `Δ₁`-presented set: if `T ∪ U`, for a `Δ₁`-presented

@@ -16,7 +16,7 @@ Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20]
 
 namespace LO.FirstOrder.Arithmetic.OmegaLogic
 
-variable {α : Ordinal.{0}} {c k : ℕ} {φ ψ : ArithmeticFormula ℕ}
+variable {α : Ordinal.{0}} {c : ℕ} {φ ψ : ArithmeticFormula ℕ}
   {φₓ : ArithmeticSemiformula ℕ 1} {Γ : Sequent}
 
 section Frame
@@ -34,8 +34,6 @@ private lemma inv_pull {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s : Sequent)
   intro x hx
   simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
   rcases hx with rfl | hx <;> tauto
-
-variable {b}
 
 private lemma inv_push₂ (a : ArithmeticFormula ℕ) (s : Sequent) :
     insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ)))

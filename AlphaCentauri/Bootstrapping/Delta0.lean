@@ -325,7 +325,6 @@ lemma IsDelta0.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     · exact hball t q ht (hC q hq).1 (hC q hq).2
     · exact hbex t q ht (hC q hq).1 (hC q hq).2)
 
-
 /-- `Δ₀` shape is preserved by syntactic negation.
 - [HP98, Lemma I.1.68(2)(ii)] -/
 lemma IsDelta0.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
@@ -478,10 +477,10 @@ lemma hierarchy_of_isDelta0 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
       rw [hφeq, Arithmetic.qqNLT] at hsf
       simp only [IsSemiformula.or, IsSemiformula.nrel] at hsf
       obtain ⟨⟨_, hvec⟩, hqsf⟩ := hsf
-      obtain ⟨φ₂, hφ₂⟩ := Bootstrapping.IsSemiformula.sound hqsf
+      obtain ⟨φ₂, hφ₂⟩ := IsSemiformula.sound hqsf
       have htmsf := hvec.nth (i := 1) (show (1 : ℕ) < 2 by simp)
       simp only [nth_adjoin_one, nth_adjoin_zero] at htmsf
-      obtain ⟨s, hs⟩ := Bootstrapping.IsSemiterm.sound
+      obtain ⟨s, hs⟩ := IsSemiterm.sound
         ((IsSemiterm.def (L := ℒₒᵣ)).mpr ⟨ht,
           (termBV_termBShift_le (L := ℒₒᵣ) ht _).mp ((IsSemiterm.def (L := ℒₒᵣ)).mp htmsf).2⟩)
       have heq : (∀¹ φ) = ∀¹[“#0 < !!(Rew.bShift s)”] φ₂ := by
@@ -505,10 +504,10 @@ lemma hierarchy_of_isDelta0 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
       rw [hφeq, Arithmetic.qqLT] at hsf
       simp only [IsSemiformula.and, IsSemiformula.rel] at hsf
       obtain ⟨⟨_, hvec⟩, hqsf⟩ := hsf
-      obtain ⟨φ₂, hφ₂⟩ := Bootstrapping.IsSemiformula.sound hqsf
+      obtain ⟨φ₂, hφ₂⟩ := IsSemiformula.sound hqsf
       have htmsf := hvec.nth (i := 1) (show (1 : ℕ) < 2 by simp)
       simp only [nth_adjoin_one, nth_adjoin_zero] at htmsf
-      obtain ⟨s, hs⟩ := Bootstrapping.IsSemiterm.sound
+      obtain ⟨s, hs⟩ := IsSemiterm.sound
         ((IsSemiterm.def (L := ℒₒᵣ)).mpr ⟨ht,
           (termBV_termBShift_le (L := ℒₒᵣ) ht _).mp ((IsSemiterm.def (L := ℒₒᵣ)).mp htmsf).2⟩)
       have heq : (∃¹ φ) = ∃¹[“#0 < !!(Rew.bShift s)”] φ₂ := by

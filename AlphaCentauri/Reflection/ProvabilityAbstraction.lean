@@ -75,9 +75,11 @@ restricted to a class `Γ'` dual to it, then `T ∪ {π}` is inconsistent.
 - [AB05, Theorem 23, finite case]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
-axiom inconsistent_of_localReflectionOn_weakerThan_insert
+theorem inconsistent_of_localReflectionOn_weakerThan_insert
     [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL] {Γ Γ' : Sentence L → Prop}
     (hd : ∀ σ, Γ σ → Γ' (∼σ)) (hπ : Γ π) (h : 𝔅.localReflectionOn Γ' ⪯ insert π T) :
-    Inconsistent (insert π T)
+    Inconsistent (insert π T) :=
+  inconsistent_of_localReflection_provable 𝔅
+    (h.subset (Axiomatized.by_axm ((mem_localReflectionOn_iff 𝔅).mpr ⟨∼π, hd π hπ, rfl⟩)))
 
 end LO.FirstOrder.ProvabilityAbstraction.Provability

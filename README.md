@@ -90,6 +90,20 @@ just hooks           # = lefthook install
 `LEFTHOOK=0 git push` skips them for a push that does not need them (a docs-only branch, say);
 CI runs them regardless.
 
+## Zoo
+
+The zoo illustrates the interrelationships among the arithmetical theories, verified in Lean 4. It
+is generated from the environment by [`Zoo/`](./Zoo) on every build; run `just zoo` to regenerate it
+locally.
+
+- A solid arrow $\mathsf{A} \leftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
+- A dashed arrow $\mathsf{A} \dashleftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
+- A double line $\mathsf{A} \xlongequal{} \mathsf{B}$ indicates that $\mathsf{A}$ and $\mathsf{B}$ are equivalent in terms of provability strength.
+
+### Arithmetic Theory Zoo
+
+<a href="https://formalizedformallogic.github.io/AlphaCentauri/zoo/arithmetic.png"><img alt="Arithmetic Theory Zoo" src="https://formalizedformallogic.github.io/AlphaCentauri/zoo/arithmetic.png" height="600"></a>
+
 ## Related projects
 
 - [Foundation](https://github.com/FormalizedFormalLogic/Foundation): the library this project

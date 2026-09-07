@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Schemata
+public import AlphaCentauri.Vorspiel.Definable
 
 /-!
 # The least number schemes `𝗟𝚺` and `𝗟𝚷`
@@ -120,13 +121,6 @@ lemma succ_induction {P : V → Prop} (hP : Γ.alt-[m].DefinablePred P)
   exact hy (succ z (not_not.mp (hmin z (lt_succ_iff_le.mpr le_rfl))))
 
 end LeastNumberOnHierarchy
-
-/-- The evaluation of a `Γ-[n]` formula against a fixed valuation is a `Γ-[n]`-definable
-predicate. -/
-private lemma definablePred_of_hierarchy {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemiformula ℕ 1}
-    (hφ : Hierarchy Γ n φ) (v : ℕ → V) : Γ-[n].DefinablePred (fun y ↦ φ.Eval ![y] v) :=
-  .mkPolarity (Rew.rewriteMap v ▹ φ) (hφ.rew _)
-    (by intro x; simp [← Matrix.fun_eq_vec_one, Semiformula.eval_rewriteMap])
 
 variable (n : ℕ)
 

@@ -43,9 +43,8 @@ lemma FiniteAxiomatizable.of_finite (h : T.Finite) : FiniteAxiomatizable T :=
 /-- Finite axiomatizability is invariant under provability equivalence.
 - [Lin97, Ch. 4 §1] -/
 lemma FiniteAxiomatizable.of_equiv {U : Theory L} (h : T ≊ U) :
-    FiniteAxiomatizable T → FiniteAxiomatizable U := by
-  rintro ⟨F, hF, hFT⟩
-  exact ⟨F, hF, hFT.trans h⟩
+    FiniteAxiomatizable T → FiniteAxiomatizable U :=
+  fun ⟨F, hF, hFT⟩ ↦ ⟨F, hF, hFT.trans h⟩
 
 /-- A theory is finitely axiomatizable iff a finite subtheory axiomatizes it.
 - [Lin97, Ch. 4 §1]
@@ -95,7 +94,7 @@ private lemma finiteAxiomatizable_iff_exists_list :
   · intro h
     obtain ⟨F, hsub, hfin, heq⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp h
     have hl : ({σ | σ ∈ hfin.toFinset.toList} : Theory L) = F := by ext σ; simp
-    exact ⟨hfin.toFinset.toList, fun σ hσ ↦ hsub (by simpa using hσ), by rw [hl]; exact heq⟩
+    exact ⟨hfin.toFinset.toList, fun σ hσ ↦ hsub (by simpa using hσ), hl.symm ▸ heq⟩
   · rintro ⟨l, _, heq⟩
     exact ⟨{σ | σ ∈ l}, by simp, heq⟩
 
@@ -143,7 +142,7 @@ lemma not_finiteAxiomatizable_iff :
   constructor
   · intro h F hsub hfin
     have hle : F ⪯ T := Theory.Proof.weakerThan_of_le hsub
-    refine ⟨hle, fun hle' ↦ h ⟨F, hsub, hfin, Equiv.antisymm_iff.mpr ⟨hle, hle'⟩⟩⟩
+    exact ⟨hle, fun hle' ↦ h ⟨F, hsub, hfin, Equiv.antisymm_iff.mpr ⟨hle, hle'⟩⟩⟩
   · rintro h ⟨F, hsub, hfin, heq⟩
     exact (h F hsub hfin).notWT (Equiv.antisymm_iff.mp heq).2
 

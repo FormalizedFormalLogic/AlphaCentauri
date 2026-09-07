@@ -84,7 +84,7 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticS
     (hφ : Hierarchy 𝚺 (n + 1) φ) : 𝗜𝚺 (n + 1) ⊢ .univCl (collectionAxiom φ) := by
   refine Arithmetic.complete.{0} _ _ ?_
   intro M _ hMT
-  have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := n + 1)
+  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := n + 1)
   rw [models_collectionAxiom_iff]
   intro f a h
   have hθ : Hierarchy 𝚺 (n + 1) (φ.toSemisentence ![#1, #0]) := hφ.rew _
@@ -94,7 +94,8 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticS
     obtain ⟨y, hy⟩ := h x hx
     exact ⟨y, (φ.eval_toSemisentence_two x y f).mpr hy⟩
   obtain ⟨w, hw⟩ := sigma_exists_bound_witness hθ (fun i : Fin φ.fvSup ↦ f i) a h'
-  refine ⟨w + 1, fun x hx ↦ ?_⟩
+  refine ⟨w + 1, ?_⟩
+  intro x hx
   obtain ⟨u, hu, hux⟩ := hw x hx
   exact ⟨u, Arithmetic.lt_succ_iff_le.mpr hu, (φ.eval_toSemisentence_two x u f).mp hux⟩
 

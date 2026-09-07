@@ -235,7 +235,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v7
+      # No checkout: the artifact is the whole of what gets published.
       - name: Download the zoo
         uses: actions/download-artifact@v8
         with:

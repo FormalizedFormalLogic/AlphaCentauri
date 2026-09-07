@@ -10,7 +10,7 @@ Companion of Foundation's `Semiformula.eval_insert1` and `Semiformula.eval_inser
 
 @[expose] public section
 
-namespace LO.FirstOrder.Semiformula
+namespace FFL.FirstOrder.Semiformula
 
 variable {L : Language} {ξ : Type*} {M : Type*} [Structure L M] {f : ξ → M}
 
@@ -21,4 +21,4 @@ lemma eval_swap01 {n} (φ : Semiformula L ξ (n + 2)) (u w : M) (e : Fin n → M
   exact Iff.of_eq (congrArg (fun c ↦ Eval c f φ)
     (Fin.funext_two (by simp) (by simp) fun i ↦ by simp))
 
-end LO.FirstOrder.Semiformula
+end FFL.FirstOrder.Semiformula

@@ -11,7 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 namespace Hierarchy
 
@@ -70,4 +70,4 @@ lemma hierarchy_of_lt {C : HierarchySymbol} {Γ : Polarity} (φ : C.Semiformula 
 
 end HierarchySymbol.Semiformula
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

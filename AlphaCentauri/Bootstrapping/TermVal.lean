@@ -11,7 +11,7 @@ It also records their definability interfaces and the basic computation and subs
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -614,4 +614,4 @@ lemma termVal'_termShift {f e t : V} (ht : IsUTerm ℒₒᵣ t) :
 
 end termValFree
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

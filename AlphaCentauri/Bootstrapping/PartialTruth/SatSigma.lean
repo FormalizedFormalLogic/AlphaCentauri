@@ -12,7 +12,7 @@ proves their definability, Tarski conditions, duality, monotonicity, and substit
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -667,7 +667,11 @@ noncomputable def construction : PR.Construction V blueprint where
   zero := fun x ↦ x 0
   succ := fun _ _ ih ↦ qVec ℒₒᵣ ih
   zero_defined := .mk fun v ↦ by simp [blueprint]
-  succ_defined := .mk fun v ↦ by simp [blueprint, (qVec.defined (L := ℒₒᵣ) (V := V)).df]
+  -- Letting `simp` apply `Semiformula.eval_substs` here overflows memory on Lean v4.33.1.
+  succ_defined := .mk fun v ↦ by
+    simp only [blueprint, HierarchySymbol.Semiformula.val_mkSigma]
+    rw [Semiformula.eval_substs]
+    simp [(qVec.defined (L := ℒₒᵣ) (V := V)).df]
 
 end QVecIter
 
@@ -687,7 +691,7 @@ noncomputable def qVecIter (w k : V) : V := QVecIter.construction.result ![w] k
 
 /-- Defining formula for the iterated quantifier lift.
 - [HP98, 1.64(5)] -/
-noncomputable def _root_.LO.FirstOrder.Arithmetic.qVecIterDef : 𝚺₁.Semisentence 3 :=
+noncomputable def _root_.FFL.FirstOrder.Arithmetic.qVecIterDef : 𝚺₁.Semisentence 3 :=
   QVecIter.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
 /-- The iterated quantifier lift is `𝚺₁`-definable.
@@ -890,4 +894,4 @@ theorem satSigmaVec.defined (n k : ℕ) :
   · intro hsat
     exact ⟨matrixToVec (v ·.succ), by simp, fun i ↦ matrixToVec_nth _ i, hsat⟩
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

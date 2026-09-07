@@ -27,7 +27,7 @@ nested quantifiers is bounded by the code `z`, the height `8 * z + 24` suffices;
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -1006,4 +1006,4 @@ theorem PSatZero.exists {z e : V} (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ 
               (8 * qqBex (termBShift ℒₒᵣ t) p + 21)) := le_of_lt (lt_exp_iff.mpr hQN)
       _ ≤ tableBound (qqBex (termBShift ℒₒᵣ t) p) e := PSatZero.exp_step_le_tableBound _ _
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Hierarchy.DeltaZero
-public import Foundation.FirstOrder.Incompleteness.Delta1
+public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!
 # Internal `Δ₀` formulas
@@ -14,7 +14,7 @@ formulas.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -33,7 +33,7 @@ noncomputable def qqBex (u q : V) : V := ^∃ ((^#0 ^< u) ^⋏ q)
 
 /-- Defining formula for the bounded existential coding operation.
 - [HP98, 0.30] -/
-def _root_.LO.FirstOrder.Arithmetic.qqBexDef : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.qqBexDef : 𝚺₁.Semisentence 3 := .mkSigma
   “p u q. ∃ bv, !qqBvarDef bv 0 ∧ ∃ lt, !qqLTDef lt bv u ∧ ∃ g, !qqAndDef g lt q ∧ !qqExsDef p g”
 
 /-- The bounded existential coding operation is `𝚺₁`-definable.
@@ -411,9 +411,9 @@ lemma IsDelta0.isSigma1 {p : V} (h : IsDelta0 p) : IsSigma1 p := by
       simp [qqBex, Arithmetic.qqLT, ih]
   exact H p h
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 /-! ## Correctness of `IsDelta0`: `IsDelta0 ⌜ψ⌝ ↔ Hierarchy 𝚺 0 ψ` -/
 
@@ -550,4 +550,4 @@ lemma isDelta0_quote_iff {n : ℕ} (σ : ArithmeticSemisentence n) :
     IsDelta0 (⌜σ⌝ : V) ↔ Hierarchy 𝚺 0 σ := by
   simp [Sentence.quote_def, isDelta0_quote_iff_s]
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

@@ -18,7 +18,7 @@ condition off the table of a subformula, so no separate restriction operation is
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -1200,4 +1200,4 @@ instance PSatZero.defined : 𝚫₁-Relation₃ (PSatZero : V → V → V → Pr
 instance PSatZero.definable : 𝚫₁-Relation₃ (PSatZero : V → V → V → Prop) :=
   PSatZero.defined.to_definable
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

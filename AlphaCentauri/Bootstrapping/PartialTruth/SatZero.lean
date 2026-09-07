@@ -19,7 +19,7 @@ conditions for it.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -543,4 +543,4 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
 
 end SatZero
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -17,7 +17,7 @@ proves every one of them.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
 
@@ -942,4 +942,4 @@ end satSigma
 
 end reading
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

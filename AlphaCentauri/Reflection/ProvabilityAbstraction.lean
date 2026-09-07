@@ -12,9 +12,9 @@ Local reflection schemas for an abstract provability predicate and their relatio
 - [AB05, §4]
 -/
 
-namespace LO.FirstOrder.ProvabilityAbstraction.Provability
+namespace FFL.FirstOrder.ProvabilityAbstraction.Provability
 
-open LO.Entailment Axiomatized
+open FFL.Entailment Axiomatized
 
 variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T)
 
@@ -82,4 +82,4 @@ theorem inconsistent_of_localReflectionOn_weakerThan_insert
   inconsistent_of_localReflection_provable 𝔅
     (h.subset (Axiomatized.by_axm ((mem_localReflectionOn_iff 𝔅).mpr ⟨∼π, hd π hπ, rfl⟩)))
 
-end LO.FirstOrder.ProvabilityAbstraction.Provability
+end FFL.FirstOrder.ProvabilityAbstraction.Provability

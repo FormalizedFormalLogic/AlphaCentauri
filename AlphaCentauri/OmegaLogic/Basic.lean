@@ -16,7 +16,7 @@ file is cited from them. The presentation followed is [Tow20].
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic.OmegaLogic
 
 /-- A `Z_∞` sequent: a finite set of arithmetic formulas, read disjunctively.
 
@@ -461,4 +461,4 @@ end OmegaCompleteness
 
 end Provable
 
-end LO.FirstOrder.Arithmetic.OmegaLogic
+end FFL.FirstOrder.Arithmetic.OmegaLogic

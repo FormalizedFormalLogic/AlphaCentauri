@@ -6,8 +6,8 @@ verbatim from the `contribute/` directory of
 [Foundation](https://github.com/FormalizedFormalLogic/Foundation/tree/master/contribute), at
 the commit pinned in `lake-manifest.json` when they were copied:
 
-- source: https://github.com/FormalizedFormalLogic/Foundation/tree/a77e4e903062c05ce502e331f7215a5a07cb780a/contribute
-- commit: `a77e4e903062c05ce502e331f7215a5a07cb780a`
+- source: https://github.com/FormalizedFormalLogic/Foundation/tree/3fc342d6ae381ca1dd9151569cb062d0927573b9/contribute
+- commit: `3fc342d6ae381ca1dd9151569cb062d0927573b9`
 - license: Apache-2.0 (Foundation's)
 
 - [`index.md`](index.md): the flow to the main branch, PR titles and the commit convention,

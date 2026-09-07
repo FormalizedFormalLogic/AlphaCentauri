@@ -21,9 +21,9 @@ replaced by Foundation's own declarations once the weakening is taken upstream.
 
 @[expose] public section
 
-open LO
+open FFL
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s n : ℕ}
 
@@ -442,4 +442,4 @@ theorem exists_strictHierarchy_of_collection (T : ArithmeticTheory) [𝗣𝗔⁻
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_collection T hcol h
   exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

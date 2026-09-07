@@ -20,77 +20,77 @@
 version: v0
 
 # The unproved statements themselves.
-LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
+FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
+    - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
   forgive:
-    - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound
-LO.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
+    - FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound
+FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
   forgive:
-    - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sound
-LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
+    - FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound
+FFL.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
   forgive:
-    - LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con
-LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
+    - FFL.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con
+FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
   forgive:
-    - LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
-LO.FirstOrder.Arithmetic.provablyTotal_of_primrec:
+    - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
+FFL.FirstOrder.Arithmetic.provablyTotal_of_primrec:
   forgive:
-    - LO.FirstOrder.Arithmetic.provablyTotal_of_primrec
-LO.FirstOrder.Arithmetic.provablyTotal_of_primrec':
+    - FFL.FirstOrder.Arithmetic.provablyTotal_of_primrec
+FFL.FirstOrder.Arithmetic.provablyTotal_of_primrec':
   forgive:
-    - LO.FirstOrder.Arithmetic.provablyTotal_of_primrec'
-LO.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection:
+    - FFL.FirstOrder.Arithmetic.provablyTotal_of_primrec'
+FFL.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection:
   forgive:
-    - LO.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection
-LO.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ:
+    - FFL.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection
+FFL.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ:
   forgive:
-    - LO.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ
-LO.FirstOrder.ISigma.provable_con_ISigma1:
+    - FFL.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ
+FFL.FirstOrder.ISigma.provable_con_ISigma1:
   forgive:
-    - LO.FirstOrder.ISigma.provable_con_ISigma1
-LO.FirstOrder.Peano.essentiallyReflexive:
+    - FFL.FirstOrder.ISigma.provable_con_ISigma1
+FFL.FirstOrder.Peano.essentiallyReflexive:
   forgive:
-    - LO.FirstOrder.Peano.essentiallyReflexive
-LO.FirstOrder.Peano.reflexive:
+    - FFL.FirstOrder.Peano.essentiallyReflexive
+FFL.FirstOrder.Peano.reflexive:
   forgive:
-    - LO.FirstOrder.Peano.reflexive
-LO.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection:
+    - FFL.FirstOrder.Peano.reflexive
+FFL.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection:
   forgive:
-    - LO.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection
-LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
+    - FFL.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection
+FFL.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
   forgive:
-    - LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con
-LO.FirstOrder.parsons:
+    - FFL.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con
+FFL.FirstOrder.parsons:
   forgive:
-    - LO.FirstOrder.parsons
-LO.FirstOrder.parsons_primrec:
+    - FFL.FirstOrder.parsons
+FFL.FirstOrder.parsons_primrec:
   forgive:
-    - LO.FirstOrder.parsons_primrec
-LO.FirstOrder.primrec'_of_provablyTotal:
+    - FFL.FirstOrder.parsons_primrec
+FFL.FirstOrder.primrec'_of_provablyTotal:
   forgive:
-    - LO.FirstOrder.primrec'_of_provablyTotal
-LO.FirstOrder.provablyTotal_of_primrec':
+    - FFL.FirstOrder.primrec'_of_provablyTotal
+FFL.FirstOrder.provablyTotal_of_primrec':
   forgive:
-    - LO.FirstOrder.provablyTotal_of_primrec'
+    - FFL.FirstOrder.provablyTotal_of_primrec'
 
 # Declarations that inherit the debt of an unproved statement.
-LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:
+FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_fresh:
+    - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_fresh:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_free:
+    - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_free:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
+    - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
   forgive:
-    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-LO.FirstOrder.Peano.not_finiteAxiomatizable:
+    - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+FFL.FirstOrder.Peano.not_finiteAxiomatizable:
   forgive:
-    - LO.FirstOrder.Peano.reflexive
-LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
+    - FFL.FirstOrder.Peano.reflexive
+FFL.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
   forgive:
-    - LO.FirstOrder.Peano.essentiallyReflexive
+    - FFL.FirstOrder.Peano.essentiallyReflexive

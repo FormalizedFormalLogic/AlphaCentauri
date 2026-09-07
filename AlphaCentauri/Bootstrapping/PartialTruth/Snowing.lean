@@ -12,7 +12,7 @@ both in every model of `𝗜𝚺₁` and, uniformly, over `𝗣𝗔⁻` together
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
 
@@ -635,4 +635,4 @@ theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
   · rintro ⟨ev, hev, hsat⟩
     exact (satClass_quote_reading hM hφ le_rfl e ev hev).mp hsat
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

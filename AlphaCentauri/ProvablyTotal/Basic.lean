@@ -12,7 +12,7 @@ Provably total functions, their graph formulas, and closure under composition.
 
 @[expose] public section
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 namespace Arithmetic
 
@@ -230,4 +230,4 @@ lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotal f) :
 
 end ArithmeticTheory.ProvablyTotal
 
-end LO.FirstOrder
+end FFL.FirstOrder

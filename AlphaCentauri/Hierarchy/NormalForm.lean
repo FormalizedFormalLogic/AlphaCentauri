@@ -11,7 +11,7 @@ Prenex normal forms for formulas in the arithmetical hierarchy.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {Γ : Polarity} {s n : ℕ}
 
@@ -39,4 +39,4 @@ theorem exists_strictHierarchy_of_hierarchy (T : ArithmeticTheory) [𝗜𝚺 s �
   obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy T h
   exact ⟨φ'.val, Prenex.val_strictHierarchy, hφ'⟩
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

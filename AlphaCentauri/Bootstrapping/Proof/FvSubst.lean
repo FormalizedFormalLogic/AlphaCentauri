@@ -13,7 +13,7 @@ free variables are left unchanged.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* ISigma 1]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
@@ -351,7 +351,7 @@ semiformula.
     (hp : IsSemiformula L n p) : IsSemiformula L n (fvSubst L w p) := by
   apply IsSemiformula.pi1_structural_induction
     (P := fun n p ↦ ∀ w, IsSemitermVec L (len w) n w →
-      IsSemiformula L n (LO.FirstOrder.Arithmetic.Bootstrapping.fvSubst L w p))
+      IsSemiformula L n (FFL.FirstOrder.Arithmetic.Bootstrapping.fvSubst L w p))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp w hw
   · definability
   · intro n k R v hR hv w hw
@@ -759,4 +759,4 @@ lemma fvSubst_substs1 {n w t p : V}
       ht.isUTerm (by simp))
   rw [hvec]
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

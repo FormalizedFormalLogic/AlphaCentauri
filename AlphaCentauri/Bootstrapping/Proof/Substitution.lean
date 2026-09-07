@@ -15,7 +15,7 @@ variable.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1
 
@@ -232,4 +232,4 @@ lemma Derivable.neg_exs_of_fresh {u p s : V} (hsu : s ≤ u) (hpu : p ≤ u)
       (IsFormulaSet.insert_iff.mp h.isFormulaSet).2 hsu)
     (fvSubst_eq_shift (by simp) (fun _ hx ↦ nth_freshVec_of_lt hx) hp hpu) hp h
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

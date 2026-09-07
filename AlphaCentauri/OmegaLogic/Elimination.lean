@@ -13,7 +13,7 @@ Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20]
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic.OmegaLogic
 
 open scoped Ordinal
 
@@ -119,4 +119,4 @@ theorem cut_elimination (h : Z∞ ⊢[α, c] Γ) : Z∞ ⊢[Ordinal.omegaTower c
 
 end Provable
 
-end LO.FirstOrder.Arithmetic.OmegaLogic
+end FFL.FirstOrder.Arithmetic.OmegaLogic

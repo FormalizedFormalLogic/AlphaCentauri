@@ -10,7 +10,7 @@ Quantifier-rank invariance, distinctness lemmas, and constructor equations for `
 
 @[expose] public section
 
-namespace LO.FirstOrder.Semiformula
+namespace FFL.FirstOrder.Semiformula
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
 
@@ -56,4 +56,4 @@ Equations identifying logical notation with `Semiformula` constructors. -/
 
 end GrindConstructors
 
-end LO.FirstOrder.Semiformula
+end FFL.FirstOrder.Semiformula

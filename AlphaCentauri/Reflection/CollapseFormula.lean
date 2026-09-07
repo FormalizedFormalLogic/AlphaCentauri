@@ -20,7 +20,7 @@ predicates of `AlphaCentauri.Bootstrapping.PartialTruth.Snowing`.
 - [AB05, Theorem 23]
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
 
@@ -108,4 +108,4 @@ theorem provable_fixedpoint_collapseFormula_iff (Γ : Polarity) :
     𝗜𝚺₁ ⊢ fixedpoint (collapseFormula T U n Γ) 🡘 collapseSentence T U n Γ :=
   diagonal (collapseFormula T U n Γ)
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

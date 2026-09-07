@@ -15,15 +15,15 @@ iteration results.
 - [AB05, §4]
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-open LO.Entailment
+open FFL.Entailment
 
 /-- The local reflection schema `Rfn(T)` of an arithmetic theory `T`, via its standard
 provability predicate.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
-abbrev _root_.LO.FirstOrder.Theory.localReflection (T : ArithmeticTheory) [T.Δ₁] : ArithmeticTheory :=
+abbrev _root_.FFL.FirstOrder.Theory.localReflection (T : ArithmeticTheory) [T.Δ₁] : ArithmeticTheory :=
   T.standardProvability.localReflection
 
 @[inherit_doc] notation "𝗥𝗳𝗻 " T:max => Theory.localReflection T
@@ -32,7 +32,7 @@ abbrev _root_.LO.FirstOrder.Theory.localReflection (T : ArithmeticTheory) [T.Δ�
 hierarchy, `Rfn_{Γ n}(T)`.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
-abbrev _root_.LO.FirstOrder.Theory.localReflectionOnHierarchy
+abbrev _root_.FFL.FirstOrder.Theory.localReflectionOnHierarchy
     (T : ArithmeticTheory) [T.Δ₁] (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
   T.standardProvability.localReflectionOn (Hierarchy Γ n)
 
@@ -114,7 +114,7 @@ end
 `∀x (Pr_T(φ(ẋ)) → φ(x))` for one-free-variable formulas `φ` satisfying `Γ`.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
-def _root_.LO.FirstOrder.Theory.uniformReflectionOn
+def _root_.FFL.FirstOrder.Theory.uniformReflectionOn
     (T : ArithmeticTheory) [T.Δ₁] (Γ : ArithmeticSemisentence 1 → Prop) : ArithmeticTheory :=
   { ψ | ∃ φ : ArithmeticSemisentence 1, Γ φ ∧
       ψ = (“∀ x, ∀ y, !Bootstrapping.Arithmetic.ssnum y ↑(Encodable.encode φ) x →
@@ -124,7 +124,7 @@ def _root_.LO.FirstOrder.Theory.uniformReflectionOn
 hierarchy, `RFN_{Γ n}(T)`.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
-abbrev _root_.LO.FirstOrder.Theory.uniformReflectionOnHierarchy
+abbrev _root_.FFL.FirstOrder.Theory.uniformReflectionOnHierarchy
     (T : ArithmeticTheory) [T.Δ₁] (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
   T.uniformReflectionOn (Hierarchy Γ n)
 
@@ -139,7 +139,7 @@ axiom uniformReflectionOnHierarchy_sigma_equiv_pi_succ {n : ℕ} (hn : 1 ≤ n) 
 `Δ₁`-definability witness.
 - [Lin97, §4, p. 55, the `Con(n, S)` tower]
 - [AB05, §4.1, the `Tₙ` tower] -/
-noncomputable def _root_.LO.FirstOrder.Theory.iterConSigma
+noncomputable def _root_.FFL.FirstOrder.Theory.iterConSigma
     (T : ArithmeticTheory) [T.Δ₁] : ℕ → Σ' S : ArithmeticTheory, S.Δ₁
   | 0 => ⟨T, ‹_›⟩
   | n + 1 =>
@@ -149,7 +149,7 @@ noncomputable def _root_.LO.FirstOrder.Theory.iterConSigma
 /-- The `n`-times iterated-consistency extension of `T`: `T₀ = T`, `Tₙ₊₁ = Tₙ ∪ Tₙ.Con`.
 - [Lin97, §4, p. 55]
 - [AB05, §4.1] -/
-noncomputable def _root_.LO.FirstOrder.Theory.iterCon (T : ArithmeticTheory) [T.Δ₁] (n : ℕ) :
+noncomputable def _root_.FFL.FirstOrder.Theory.iterCon (T : ArithmeticTheory) [T.Δ₁] (n : ℕ) :
     ArithmeticTheory := (T.iterConSigma n).1
 
 noncomputable instance (T : ArithmeticTheory) [T.Δ₁] (n : ℕ) : (T.iterCon n).Δ₁ :=
@@ -163,4 +163,4 @@ consistency statement of the `n`-times iterated-consistency extension of `T` is 
 axiom provable_iterCon_iff_not_iterate_standardProvability_bot (n : ℕ) :
     𝗜𝚺₁ ⊢ (T.iterCon n).consistent.val 🡘 ∼(T.standardProvability^[n + 1] ⊥)
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

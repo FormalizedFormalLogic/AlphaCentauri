@@ -12,7 +12,7 @@ It also defines internal predicates for the strict prenex hierarchy.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -50,7 +50,7 @@ noncomputable def qqExss (p k : V) : V := qqExss.construction.result ![p] k
 
 /-- Defining formula for iterated existential quantification.
 - [HP98, Lemma I.1.69] -/
-def _root_.LO.FirstOrder.Arithmetic.qqExssDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqExssDef : 𝚺₁.Semisentence 3 :=
   qqExss.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
 /-- Iterated existential quantification is `𝚺₁`-definable.
@@ -156,7 +156,7 @@ noncomputable def vecAppend (v w : V) : V := VecAppend.construction.result ![w] 
 @[simp] lemma vecAppend_adjoin (x v w : V) : vecAppend (x ∷ v) w = x ∷ vecAppend v w := by
   simp [vecAppend, VecAppend.construction]
 
-def _root_.LO.FirstOrder.Arithmetic.vecAppendDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.vecAppendDef : 𝚺₁.Semisentence 3 :=
   VecAppend.blueprint.resultDef
 
 instance vecAppend_defined : 𝚺₁-Function₂ (vecAppend : V → V → V) via vecAppendDef :=
@@ -609,4 +609,4 @@ lemma isStrictPi_quote_iff {n k : ℕ} (ψ : ArithmeticSemisentence k) :
     IsStrictPi n (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚷 n ψ := by
   simp [Sentence.quote_def, isStrictPi_quote_iff_s]
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

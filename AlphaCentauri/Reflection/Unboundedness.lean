@@ -17,9 +17,9 @@ to the case of an extension by one sentence.
 - [Lin97, Corollary 4.2]
 -/
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-open LO.Entailment Bootstrapping
+open FFL.Entailment Bootstrapping
 
 variable {T U : ArithmeticTheory} [T.Δ₁] [U.Δ₁] {n : ℕ} {Γ : Polarity}
 
@@ -326,4 +326,4 @@ theorem not_localReflectionOnHierarchy_weakerThan_union
   fun h ↦ (inconsistent_of_localReflectionOnHierarchy_weakerThan_union hΓ h).not_con
     inferInstance
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

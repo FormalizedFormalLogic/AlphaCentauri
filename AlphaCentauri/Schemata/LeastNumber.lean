@@ -10,9 +10,9 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-open _root_.LO.Entailment
+open _root_.FFL.Entailment
 
 section axioms
 
@@ -215,4 +215,4 @@ theorem LPi_equiv_ISigma (n : ℕ) : 𝗟𝚷 n ≊ 𝗜𝚺 n :=
 
 end theorems
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

@@ -10,7 +10,7 @@ Commutation and congruence lemmas for substitutions and rewritings.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Rew
+namespace FFL.FirstOrder.Rew
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
 
@@ -44,4 +44,4 @@ lemma val_subst_congr {M : Type*} [Structure L M] {ε : ξ → M} {w w' : Fin n 
   simp only [Semiterm.val_substs]
   exact congrArg (Semiterm.val · ε t) (funext fun i => h i)
 
-end LO.FirstOrder.Rew
+end FFL.FirstOrder.Rew

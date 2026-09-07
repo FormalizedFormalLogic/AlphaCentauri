@@ -11,9 +11,9 @@ The `𝗜𝚺₁`-provably total functions are exactly the primitive recursive f
 
 @[expose] public section
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
-open LO.FirstOrder.Arithmetic
+open FFL.FirstOrder.Arithmetic
 
 /-- Every primitive recursive function is `𝗜𝚺₁`-provably total.
 - [HP98, Theorem I.1.54]
@@ -38,4 +38,4 @@ recursive functions.
 axiom parsons_primrec {k : ℕ} (f : List.Vector ℕ k → ℕ) :
     Primrec f ↔ 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))
 
-end LO.FirstOrder
+end FFL.FirstOrder

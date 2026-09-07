@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
@@ -71,4 +71,4 @@ lemma cast_delta₁ (σ : 𝚫₁.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a] σ
     V ⊧/![(a : V)] σ.val := by
   simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using delta_one_cast (V := V) σ h
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

@@ -12,7 +12,7 @@ Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20]
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic.OmegaLogic
 
 /-- Peano arithmetic does not prove falsity.
 
@@ -23,4 +23,4 @@ theorem consistent_PA : 𝗣𝗔 ⊬ ⊥ := by
   obtain ⟨α, hα⟩ := Provable.of_derivation2_cutFree d fun _ => 0
   exact Provable.not_empty (Provable.remove_falsum (by simpa using hα))
 
-end LO.FirstOrder.Arithmetic.OmegaLogic
+end FFL.FirstOrder.Arithmetic.OmegaLogic

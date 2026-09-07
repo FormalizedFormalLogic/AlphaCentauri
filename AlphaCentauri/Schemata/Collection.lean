@@ -30,9 +30,9 @@ def collectionAxiom {ξ} (φ : Semiformula L ξ 2) : Formula L ξ :=
 def CollectionScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : ArithmeticTheory :=
   { ψ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ ψ = .univCl (collectionAxiom φ) }
 
-/-- `𝗕𝚺 n` is `𝗣𝗔⁻` together with the collection scheme for `Hierarchy 𝚺 n`.
+/-- `𝗕𝚺 n` is `𝗜𝚺₀` together with the collection scheme for `Hierarchy 𝚺 n`.
 - [HP98, §I.2(a)] -/
-abbrev BSigma (n : ℕ) : ArithmeticTheory := 𝗣𝗔⁻ ∪ CollectionScheme (Arithmetic.Hierarchy 𝚺 n)
+abbrev BSigma (n : ℕ) : ArithmeticTheory := 𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.Hierarchy 𝚺 n)
 
 prefix:max "𝗕𝚺 " => BSigma
 
@@ -53,7 +53,7 @@ lemma BSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕𝚺 s₁ ⊆ �
 lemma BSigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕𝚺 s₁ ⪯ 𝗕𝚺 s₂ :=
   WeakerThan.ofSubset (BSigma_subset_mono h)
 
-instance (n : ℕ) : 𝗣𝗔⁻ ⪯ 𝗕𝚺 n := WeakerThan.ofSubset Set.subset_union_left
+instance (n : ℕ) : 𝗜𝚺₀ ⪯ 𝗕𝚺 n := WeakerThan.ofSubset Set.subset_union_left
 
 instance (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕𝚺 n :=
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
@@ -79,32 +79,30 @@ end models
 section BSigma_ISigma
 
 /-- Every collection axiom of `Hierarchy 𝚺 (n + 1)` is provable in `𝗜𝚺 (n + 1)`.
-- [HP98, Theorem I.2.15] -/
+- [HP98, Lemma I.2.11] -/
 theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticSemiformula ℕ 2}
     (hφ : Hierarchy 𝚺 (n + 1) φ) : 𝗜𝚺 (n + 1) ⊢ .univCl (collectionAxiom φ) := by
   refine Arithmetic.complete.{0} _ _ ?_
   intro M _ hMT
-  have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := n + 1)
+  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := n + 1)
   rw [models_collectionAxiom_iff]
   intro f a h
-  have hθ : Hierarchy 𝚺 (n + 1) (φ.toSemisentence ![#1, #0]) := hφ.rew _
-  have h' : ∀ x < a, ∃ u,
-      M ⊧/(u :> x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#1, #0]) := by
+  obtain ⟨w, hw⟩ := sigma_exists_bound_witness (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a <| by
     intro x hx
     obtain ⟨y, hy⟩ := h x hx
     exact ⟨y, (φ.eval_toSemisentence_two x y f).mpr hy⟩
-  obtain ⟨w, hw⟩ := sigma_exists_bound_witness hθ (fun i : Fin φ.fvSup ↦ f i) a h'
-  refine ⟨w + 1, fun x hx ↦ ?_⟩
+  refine ⟨w + 1, ?_⟩
+  intro x hx
   obtain ⟨u, hu, hux⟩ := hw x hx
   exact ⟨u, Arithmetic.lt_succ_iff_le.mpr hu, (φ.eval_toSemisentence_two x u f).mp hux⟩
 
 /-- `𝗕𝚺 (n + 1)` is at most as strong as `𝗜𝚺 (n + 1)`.
-- [HP98, Theorem I.2.15] -/
+- [HP98, Lemma I.2.11] -/
 theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) :=
-  WeakerThan.ofAxm! (fun {σ} hσ ↦ by
-    rcases hσ with hσ | ⟨φ, hφ, rfl⟩
-    · exact WeakerThan.pbl (h := inferInstance) (by_axm hσ)
-    · exact ISigma.provable_collectionAxiom_of_hierarchy n hφ)
+  WeakerThan.ofAxm! <| by
+    rintro σ (hσ | ⟨φ, hφ, rfl⟩)
+    · exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (Nat.zero_le _)) (by_axm hσ)
+    · exact ISigma.provable_collectionAxiom_of_hierarchy n hφ
 
 end BSigma_ISigma
 

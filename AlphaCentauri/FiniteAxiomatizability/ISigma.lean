@@ -260,8 +260,9 @@ theorem provable_collectionAxiom_of_strictHierarchy {n : ℕ} {φ : ArithmeticSe
 
 /-- A theory extending `𝗣𝗔⁻` that proves the induction axiom and the collection axiom of every
 strict prenex `𝚺-[n + 1]` formula is at least as strong as `𝗜𝚺 (n + 1)`.
-- [HP98, Theorem I.2.15]
-- [HP98, Theorem I.2.25] -/
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9]
+- [HP98, Theorem I.2.52] -/
 theorem hierarchyInduction_of_strictInduction (n : ℕ) (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
     (hind : ∀ φ : ArithmeticSemiformula ℕ 1,
       StrictHierarchy 𝚺 (n + 1) φ → T ⊢ .univCl (succInd φ))

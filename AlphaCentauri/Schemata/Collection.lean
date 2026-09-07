@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.BoundedCollection
 public import AlphaCentauri.Vorspiel.Fvar
 
 /-!
-# The collection scheme `𝗕𝚺`
+# The collection schemata `𝗕𝚺` and `𝗕𝚷`
 
 - [HP98, §I.2(a)]
 -/
@@ -30,13 +30,26 @@ def collectionAxiom {ξ} (φ : Semiformula L ξ 2) : Formula L ξ :=
 def CollectionScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : ArithmeticTheory :=
   { ψ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ ψ = .univCl (collectionAxiom φ) }
 
-/-- `𝗕𝚺 n` is `𝗜𝚺₀` together with the collection scheme for `Hierarchy 𝚺 n`.
-- [HP98, §I.2(a)] -/
-abbrev BSigma (n : ℕ) : ArithmeticTheory := 𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.Hierarchy 𝚺 n)
+/-- `𝗕 Γ n` is `𝗜𝚺₀` together with the collection scheme for `Hierarchy Γ n`.
+- [HP98, I.2.3] -/
+abbrev CollectionOnHierarchy (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
+  𝗜𝚺₀ ∪ CollectionScheme (Arithmetic.Hierarchy Γ n)
+
+prefix:max "𝗕 " => CollectionOnHierarchy
+
+/-- The collection scheme for `𝚺-[n]` formulas.
+- [HP98, I.2.3] -/
+abbrev BSigma (n : ℕ) : ArithmeticTheory := 𝗕 𝚺 n
 
 prefix:max "𝗕𝚺 " => BSigma
 
 notation "𝗕𝚺₁" => BSigma 1
+
+/-- The collection scheme for `𝚷-[n]` formulas.
+- [HP98, I.2.3] -/
+abbrev BPi (n : ℕ) : ArithmeticTheory := 𝗕 𝚷 n
+
+prefix:max "𝗕𝚷 " => BPi
 
 variable {C C' : ArithmeticSemiformula ℕ 2 → Prop}
 
@@ -47,15 +60,23 @@ lemma CollectionScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 2}, C φ 
 lemma mem_CollectionScheme_of_mem {φ : ArithmeticSemiformula ℕ 2} (hφ : C φ) :
     .univCl (collectionAxiom φ) ∈ CollectionScheme C := ⟨φ, hφ, rfl⟩
 
-lemma BSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕𝚺 s₁ ⊆ 𝗕𝚺 s₂ :=
+variable {Γ : Polarity}
+
+lemma CollectionOnHierarchy_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕 Γ s₁ ⊆ 𝗕 Γ s₂ :=
   Set.union_subset_union_right _ (CollectionScheme_subset (fun H ↦ H.mono h))
 
-lemma BSigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕𝚺 s₁ ⪯ 𝗕𝚺 s₂ :=
-  WeakerThan.ofSubset (BSigma_subset_mono h)
+lemma CollectionOnHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗕 Γ s₁ ⪯ 𝗕 Γ s₂ :=
+  WeakerThan.ofSubset (CollectionOnHierarchy_subset_mono h)
 
-instance (n : ℕ) : 𝗜𝚺₀ ⪯ 𝗕𝚺 n := WeakerThan.ofSubset Set.subset_union_left
+lemma CollectionOnHierarchy_subset_BSigma_succ (Γ : Polarity) (n : ℕ) : 𝗕 Γ n ⊆ 𝗕𝚺 (n + 1) :=
+  Set.union_subset_union_right _ (CollectionScheme_subset (·.accum 𝚺))
 
-instance (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕𝚺 n :=
+lemma CollectionOnHierarchy_weakerThan_BSigma_succ (Γ : Polarity) (n : ℕ) : 𝗕 Γ n ⪯ 𝗕𝚺 (n + 1) :=
+  WeakerThan.ofSubset (CollectionOnHierarchy_subset_BSigma_succ Γ n)
+
+instance (Γ : Polarity) (n : ℕ) : 𝗜𝚺₀ ⪯ 𝗕 Γ n := WeakerThan.ofSubset Set.subset_union_left
+
+instance (Γ : Polarity) (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕 Γ n :=
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
   WeakerThan.trans this inferInstance
 
@@ -75,6 +96,22 @@ lemma models_collectionAxiom_iff (φ : ArithmeticSemiformula ℕ 2) :
     Semiformula.eval_bexsLT, Semiformula.eval_substs]
 
 end models
+
+section standardModel
+
+instance models_CollectionOnHierarchy (Γ : Polarity) (n : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗕 Γ n := by
+  refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
+  rintro _ ⟨φ, -, rfl⟩
+  rw [models_collectionAxiom_iff]
+  intro f a h
+  choose! g hg using h
+  refine ⟨(Finset.range a).sup g + 1, ?_⟩
+  intro x hx
+  exact ⟨g x, Nat.lt_succ_of_le (Finset.le_sup (Finset.mem_range.mpr hx)), hg x hx⟩
+
+instance (Γ : Polarity) (n : ℕ) : Consistent (𝗕 Γ n) := (𝗕 Γ n).consistent_of_sound (Eq ⊥) rfl
+
+end standardModel
 
 section BSigma_ISigma
 

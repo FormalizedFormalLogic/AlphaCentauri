@@ -13,6 +13,7 @@ public import AlphaCentauri.Bootstrapping.Proof.FvSubst
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
+public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.FiniteAxiomatizability.ISigma
 public import AlphaCentauri.FiniteAxiomatizability.Reflexive
@@ -30,10 +31,18 @@ public import AlphaCentauri.OmegaLogic.Reduction
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.ProvablyTotal.Primrec
+public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.StandardProvability
+public import AlphaCentauri.Reflection.Unboundedness
 public import AlphaCentauri.Schemata.Collection
+public import AlphaCentauri.Schemata.CollectionEquivalence
+public import AlphaCentauri.Schemata.CollectionInduction
+public import AlphaCentauri.Schemata.Example
+public import AlphaCentauri.Schemata.LeastNumber
 public import AlphaCentauri.Vorspiel.Absoluteness
+public import AlphaCentauri.Vorspiel.Definable
+public import AlphaCentauri.Vorspiel.Eval
 public import AlphaCentauri.Vorspiel.Fvar
 public import AlphaCentauri.Vorspiel.Hierarchy
 public import AlphaCentauri.Vorspiel.Ordinal

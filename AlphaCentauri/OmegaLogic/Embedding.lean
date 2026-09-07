@@ -64,7 +64,7 @@ section ExcludedMiddle
 
 Cut-free excluded middle for substitutions by closed terms of the same standard value. -/
 
-variable {b : Bool} {k : ℕ} {w w' : Fin n → ArithmeticTerm ℕ}
+variable {k : ℕ} {w w' : Fin n → ArithmeticTerm ℕ}
 
 private lemma litTrue_subst_congr
     (h : ∀ i, Semiterm.val (M := ℕ) ![] id (w i) = Semiterm.val (M := ℕ) ![] id (w' i))

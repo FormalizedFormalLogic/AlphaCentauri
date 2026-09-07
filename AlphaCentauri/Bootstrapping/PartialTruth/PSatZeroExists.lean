@@ -31,8 +31,6 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-open Arithmetic (qqEQ qqNEQ qqLT qqNLT)
-
 /-! ## Elementary exponential bounds -/
 
 lemma mul_le_exp_add (a b : V) : a * b ≤ Exp.exp (a + b) :=
@@ -259,7 +257,7 @@ lemma uformula_nrel_cases {k r w : V} (h : IsUFormula ℒₒᵣ (^nrel k r w)) :
 
 namespace PSatZero
 
-variable {q q₁ q₂ Q z z₁ z₂ e e₁ e₂ z' e' n p p₁ p₂ u t v : V}
+variable {q q₁ q₂ Q z e z' e' n p p₁ p₂ u t v : V}
 
 /-- The clause that `PSatZero.spec` imposes at the node `⟪z', e'⟫` of the domain of `q`.
 - [HP98, Definition I.1.71(1)] -/
@@ -373,6 +371,8 @@ lemma Spec.mono (hQ : IsMapping Q) (hsub : q ⊆ Q) (hd : ⟪z', e'⟫ ∈ domai
         (val_iff_of_subset hQ hsub (hc x hx)).symm
 
 /-! ## Gluing tables together -/
+
+variable {z₁ z₂ e₁ e₂ : V}
 
 /-- Two tables assign the same value to any node common to both.
 - [HP98, Lemma I.1.72(2)] -/

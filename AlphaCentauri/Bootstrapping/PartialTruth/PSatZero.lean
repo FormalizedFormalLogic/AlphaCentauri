@@ -22,7 +22,7 @@ namespace LO.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-open Arithmetic (qqEQ qqNEQ qqLT qqNLT)
+open Arithmetic (qqEQ qqNEQ qqLT qqNLT qqEQ_defined qqNEQ_defined qqLT_defined qqNLT_defined)
 
 /-! ## Bounds on the nodes of a finite mapping -/
 
@@ -43,27 +43,27 @@ section coding
 -- coded formulas apart when reading `spec` off at a node. Scoped to this section, since
 -- unconditionally unfolding these constructors defeats the ordinary simp set on coded formulas.
 attribute [local simp] qqAnd qqOr qqVerum qqFalsum qqRel qqNRel qqBall qqAll qqBex qqExs
-  Arithmetic.qqEQ Arithmetic.qqNEQ Arithmetic.qqLT Arithmetic.qqNLT
+  qqEQ qqNEQ qqLT qqNLT
 
 /-! ## Coding injectivity facts for the bounded quantifiers -/
 
 @[simp] lemma qqBall_inj {u₁ q₁ u₂ q₂ : V} : qqBall u₁ q₁ = qqBall u₂ q₂ ↔ u₁ = u₂ ∧ q₁ = q₂ := by
-  simp [qqBall, Arithmetic.qqNLT, qqNRel, adjoin_inj]
+  simp [qqBall, qqNLT, qqNRel, adjoin_inj]
 
 @[simp] lemma qqBex_inj {u₁ q₁ u₂ q₂ : V} : qqBex u₁ q₁ = qqBex u₂ q₂ ↔ u₁ = u₂ ∧ q₁ = q₂ := by
-  simp [qqBex, Arithmetic.qqLT, qqRel, adjoin_inj]
+  simp [qqBex, qqLT, qqRel, adjoin_inj]
 
 @[simp] lemma qqEQ_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^= u₁ = t₂ ^= u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
-  simp [Arithmetic.qqEQ, qqRel, adjoin_inj]
+  simp [qqEQ, qqRel, adjoin_inj]
 
 @[simp] lemma qqNEQ_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^≠ u₁ = t₂ ^≠ u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
-  simp [Arithmetic.qqNEQ, qqNRel, adjoin_inj]
+  simp [qqNEQ, qqNRel, adjoin_inj]
 
 @[simp] lemma qqLT_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^< u₁ = t₂ ^< u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
-  simp [Arithmetic.qqLT, qqRel, adjoin_inj]
+  simp [qqLT, qqRel, adjoin_inj]
 
 @[simp] lemma qqNLT_inj {t₁ u₁ t₂ u₂ : V} : t₁ ^≮ u₁ = t₂ ^≮ u₂ ↔ t₁ = t₂ ∧ u₁ = u₂ := by
-  simp [Arithmetic.qqNLT, qqNRel, adjoin_inj]
+  simp [qqNLT, qqNRel, adjoin_inj]
 
 @[simp] lemma coe_eqIndex_eq : (Arithmetic.eqIndex : V) = 0 := rfl
 
@@ -121,7 +121,7 @@ structure PSatZero (q z e : V) : Prop where
 
 namespace PSatZero
 
-variable {q q₁ q₂ z z₁ z₂ e e₁ e₂ z' e' t u p p₁ p₂ : V}
+variable {q z e z' e' t u p p₁ p₂ : V}
 
 /-! ## Reading `spec` off at a node of known shape
 
@@ -690,10 +690,10 @@ instance specEq_defined : 𝚫₁-Relation₃ (SpecEq : V → V → V → Prop) 
   constructor
   · intro v
     simp [specEqDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
-      (Arithmetic.qqEQ_defined (V := V)).df, eqMatrix_defined.df]
+      (qqEQ_defined (V := V)).df, eqMatrix_defined.df]
   · intro v
     simp [specEqDef, HierarchySymbol.Semiformula.val_sigma, SpecEq, (termVal.defined (V := V)).df,
-      (Arithmetic.qqEQ_defined (V := V)).df, eqMatrix_defined.df]
+      (qqEQ_defined (V := V)).df, eqMatrix_defined.df]
 
 /-- The clause of `PSatZero.spec` at a node whose code is an inequality atom.
 - [HP98, Lemma I.1.72(1)] -/
@@ -730,10 +730,10 @@ instance specNeq_defined : 𝚫₁-Relation₃ (SpecNeq : V → V → V → Prop
   constructor
   · intro v
     simp [specNeqDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
-      (Arithmetic.qqNEQ_defined (V := V)).df, neqMatrix_defined.df]
+      (qqNEQ_defined (V := V)).df, neqMatrix_defined.df]
   · intro v
     simp [specNeqDef, HierarchySymbol.Semiformula.val_sigma, SpecNeq, (termVal.defined (V := V)).df,
-      (Arithmetic.qqNEQ_defined (V := V)).df, neqMatrix_defined.df]
+      (qqNEQ_defined (V := V)).df, neqMatrix_defined.df]
 
 /-- The clause of `PSatZero.spec` at a node whose code is a less-than atom.
 - [HP98, Lemma I.1.72(1)] -/
@@ -770,10 +770,10 @@ instance specLt_defined : 𝚫₁-Relation₃ (SpecLt : V → V → V → Prop) 
   constructor
   · intro v
     simp [specLtDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
-      (Arithmetic.qqLT_defined (V := V)).df, ltMatrix_defined.df]
+      (qqLT_defined (V := V)).df, ltMatrix_defined.df]
   · intro v
     simp [specLtDef, HierarchySymbol.Semiformula.val_sigma, SpecLt, (termVal.defined (V := V)).df,
-      (Arithmetic.qqLT_defined (V := V)).df, ltMatrix_defined.df]
+      (qqLT_defined (V := V)).df, ltMatrix_defined.df]
 
 /-- The clause of `PSatZero.spec` at a node whose code is a not-less-than atom.
 - [HP98, Lemma I.1.72(1)] -/
@@ -810,10 +810,10 @@ instance specNlt_defined : 𝚫₁-Relation₃ (SpecNlt : V → V → V → Prop
   constructor
   · intro v
     simp [specNltDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
-      (Arithmetic.qqNLT_defined (V := V)).df, nltMatrix_defined.df]
+      (qqNLT_defined (V := V)).df, nltMatrix_defined.df]
   · intro v
     simp [specNltDef, HierarchySymbol.Semiformula.val_sigma, SpecNlt, (termVal.defined (V := V)).df,
-      (Arithmetic.qqNLT_defined (V := V)).df, nltMatrix_defined.df]
+      (qqNLT_defined (V := V)).df, nltMatrix_defined.df]
 
 /-- The clause of `PSatZero.spec` at a node whose code is a conjunction.
 - [HP98, Lemma I.1.72(1)] -/

@@ -88,7 +88,7 @@ noncomputable def subformulas (p : V) : V := (Subformula.construction L).result 
 
 No source; a formalization device.
 -/
-noncomputable def subformulasGraph : HierarchySymbol.sigmaOne.Semisentence 2 :=
+noncomputable def subformulasGraph : 𝚺₁.Semisentence 2 :=
   ((Subformula.blueprint L).result L).rew (Rew.subst ![#0, ‘0’, #1])
 
 variable {L}

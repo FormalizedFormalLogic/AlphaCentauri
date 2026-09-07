@@ -38,7 +38,7 @@ abbrev _root_.LO.FirstOrder.Theory.localReflectionOnHierarchy
 
 @[inherit_doc] notation "𝗥𝗳𝗻[" Γ:max n:max "] " T:max => Theory.localReflectionOnHierarchy T Γ n
 
-variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+variable {T : ArithmeticTheory} [T.Δ₁]
 
 /-- A consistent `T` is strictly weaker than `T ∪ Rfn(T)`.
 - [Lin97, §4.1, p. 52] -/
@@ -61,7 +61,8 @@ axiom localReflection_pi_one_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ 
 @[instance] axiom consistent_localReflection_of_sigma_one_sound [T.SoundOnHierarchy 𝚺 1] :
     Consistent (T ∪ 𝗥𝗳𝗻 T)
 
-variable {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
+section
+variable [𝗜𝚺₁ ⪯ T] {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
 
 /-- Unboundedness, for an extension by a single sentence: if `T ∪ {π}` for a `Γ n` sentence `π`
 proves the local reflection schema of `T` on the dual class, then `T ∪ {π}` is inconsistent.
@@ -98,58 +99,16 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
     Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ σ ((hmem σ).mp hσ)
   have hle : T ∪ U ⪯ insert (⋀hU.toFinset.toList) T := WeakerThan.ofAxm! <| by
     rintro φ (hφ | hφ)
-    · exact Axiomatized.by_axm (Set.mem_insert_of_mem _ hφ)
-    · exact mdp (left_Conj₂_intro ((hmem φ).mpr hφ)) (Axiomatized.by_axm (Set.mem_insert _ _))
+    · exact by_axm (Set.mem_insert_of_mem _ hφ)
+    · exact mdp (left_Conj₂_intro ((hmem φ).mpr hφ)) (by_axm (Set.mem_insert _ _))
   have hge : insert (⋀hU.toFinset.toList) T ⪯ T ∪ U := WeakerThan.ofAxm! <| by
     rintro φ (rfl | hφ)
-    · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦ Axiomatized.by_axm (Or.inr ((hmem ψ).mp hψ))
-    · exact Axiomatized.by_axm (Or.inl hφ)
+    · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦ by_axm (Or.inr ((hmem ψ).mp hψ))
+    · exact by_axm (Or.inl hφ)
   exact (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hconj
     (h.trans hle)).of_ge hge
 
-variable {U : ArithmeticTheory} [U.Δ₁]
-
-/-- If `T ∪ U` is consistent, for a `Δ₁`-presented theory `U` all of whose members are
-`StrictHierarchy Γ (n + 1)`, then there is a `Γ (n + 1)` sentence `θ` such that `T ∪ U ⪯ insert θ T`
-and `insert θ T` is consistent.
-
-`U`'s presentation is read as `Δ₁` rather than r.e.: this is a deliberate narrowing of [AB05]'s
-"consistent r.e. extension", which reduces to an elementary presentation via Craig's trick, a
-result absent from both Foundation and this repository. Restricting `U`'s members to
-`StrictHierarchy Γ (n + 1)` rather than `Hierarchy Γ (n + 1)` is likewise deliberate: the partial
-truth predicate used to build `θ` agrees with truth only on the strict prenex classes.
-- [Lin97, Theorem 4.3] -/
-axiom exists_sentence_weakerThan_of_consistent
-    (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) [Consistent (T ∪ U)] :
-    ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
-      T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T)
-
-/-- Unboundedness, for an extension by a `Δ₁`-presented set: if `T ∪ U`, for a `Δ₁`-presented
-theory `U` all of whose members are `StrictHierarchy Γ (n + 1)`, proves the local reflection
-schema of `T` on the dual class, then `T ∪ U` is inconsistent.
-
-As in `exists_sentence_weakerThan_of_consistent`, `U`'s presentation is read as `Δ₁` rather than
-r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather than `Hierarchy Γ (n + 1)`.
-- [AB05, Theorem 23]
-- [Lin97, Corollary 4.2] -/
-axiom inconsistent_of_localReflectionOnHierarchy_weakerThan_union
-    (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ)
-    (h : 𝗥𝗳𝗻[Γ.alt (n + 1)] T ⪯ T ∪ U) : Inconsistent (T ∪ U)
-
-omit [𝗜𝚺₁ ⪯ T] [Theory.Δ₁ U] in
-/-- Unboundedness, for an extension by a `Δ₁`-presented set: a consistent `T ∪ U`, for a
-`Δ₁`-presented theory `U` all of whose members are `StrictHierarchy Γ (n + 1)`, does not contain
-the local reflection schema of `T` on the dual class.
-
-As in `exists_sentence_weakerThan_of_consistent`, `U`'s presentation is read as `Δ₁` rather than
-r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather than `Hierarchy Γ (n + 1)`.
-- [AB05, Theorem 23]
-- [Lin97, Corollary 4.2] -/
-theorem not_localReflectionOnHierarchy_weakerThan_union
-    (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) [Consistent (T ∪ U)] :
-    ¬𝗥𝗳𝗻[Γ.alt (n + 1)] T ⪯ T ∪ U :=
-  fun h ↦ (inconsistent_of_localReflectionOnHierarchy_weakerThan_union hΓ h).not_con
-    inferInstance
+end
 
 /-- The uniform reflection schema `RFN_Γ(T)` consists of
 `∀x (Pr_T(φ(ẋ)) → φ(x))` for one-free-variable formulas `φ` satisfying `Γ`.

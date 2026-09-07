@@ -29,7 +29,9 @@ noncomputable def toSemisentence [NeZero k] (φ : Semiformula L ℕ k)
     (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Semisentence L (φ.fvSup + k) :=
   paramSubst φ b ▹ φ
 
-lemma eval_toSemisentence {M : Type*} [Structure L M] [NeZero k] {φ : Semiformula L ℕ k}
+variable {M : Type*} [Structure L M]
+
+lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
     (b : Fin k → Semiterm L Empty (φ.fvSup + k)) {v : Fin (φ.fvSup + k) → M} {w : Fin k → M}
     {f : ℕ → M} (hb : ∀ i, Semiterm.val v Empty.elim (b i) = w i)
     (hv : ∀ y : Fin φ.fvSup, v ⟨y + k, by omega⟩ = f y) :
@@ -42,7 +44,7 @@ lemma eval_toSemisentence {M : Type*} [Structure L M] [NeZero k] {φ : Semiformu
   simp [paramSubst, hlt, hv ⟨y, hlt⟩]
 
 /-- `eval_toSemisentence` at `k = 1`, with `b` placing the bound variable at `#0`. -/
-lemma eval_toSemisentence_one {M : Type*} [Structure L M] (φ : Semiformula L ℕ 1) (x : M)
+lemma eval_toSemisentence_one (φ : Semiformula L ℕ 1) (x : M)
     (f : ℕ → M) :
     M ⊧/(x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#0]) ↔ φ.Eval ![x] f :=
   eval_toSemisentence ![#0]
@@ -51,7 +53,7 @@ lemma eval_toSemisentence_one {M : Type*} [Structure L M] (φ : Semiformula L �
 
 /-- `eval_toSemisentence` at `k = 2`, with `b` placing the two bound variables at `#1`, `#0` (the
 witness-then-bound order). -/
-lemma eval_toSemisentence_two {M : Type*} [Structure L M] (φ : Semiformula L ℕ 2) (x y : M)
+lemma eval_toSemisentence_two (φ : Semiformula L ℕ 2) (x y : M)
     (f : ℕ → M) :
     M ⊧/(y :> x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#1, #0]) ↔ φ.Eval ![x, y] f :=
   eval_toSemisentence ![#1, #0]

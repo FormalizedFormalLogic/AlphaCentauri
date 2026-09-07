@@ -302,8 +302,7 @@ lemma models_all_of_collection [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCo
 
 /-- Every `Hierarchy Γ s` semisentence is equivalent, in every model of `𝗣𝗔⁻` with collection for
 strict `𝚺-[s]` formulas, to the value of a `Prenex Γ s` code. -/
-theorem models_exists_prenex_of_collection {Γ : Polarity} {s n : ℕ}
-    {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
+theorem models_exists_prenex_of_collection {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ φ' : Prenex Γ s Empty n,
       ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻], StrictCollection V s →
         ∀ e : Fin n → V, V ⊧/e φ ↔ V ⊧/e φ'.val := by
@@ -386,49 +385,32 @@ collection axiom of every strict `𝚺-[s]` formula. -/
 lemma strictCollection_of_models_collectionAxiom [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
     (h : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 s ψ →
       V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom ψ) : ArithmeticSentence)) :
-    StrictCollection V s := by
-  intro n θ hθ e a hex
-  set ψ : ArithmeticSemiformula ℕ 2 :=
-    Rew.embSubsts (#1 :> #0 :> fun i : Fin n ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹ θ with hψdef
-  have hψ : StrictHierarchy 𝚺 s ψ := hθ.rew _
-  set f : ℕ → V := fun i ↦ if hi : i < n then e ⟨i, hi⟩ else a with hf
-  have heval : ∀ x y : V, ψ.Eval ![x, y] f ↔ V ⊧/(y :> x :> e) θ := by
-    intro x y
-    rw [hψdef]
-    simp only [Semiformula.eval_embSubsts]
-    refine Iff.of_eq (congrArg (fun b ↦ Semiformula.Evalb (M := V) b θ) ?_)
-    funext i
-    cases i using Fin.cases with
-    | zero => simp
-    | succ i =>
-      cases i using Fin.cases with
-      | zero => simp
-      | succ i => simp [hf, i.isLt]
-  obtain ⟨b, hb⟩ := (models_collectionAxiom_iff ψ).mp (h ψ hψ) f a
-    fun x hx ↦ (hex x hx).imp fun u hu ↦ (heval x u).mpr hu
-  exact ⟨b, fun x hx ↦ (hb x hx).imp fun u hu ↦ ⟨le_of_lt hu.1, (heval x u).mp hu.2⟩⟩
+    StrictCollection V s := fun hθ e a hex ↦
+  exists_bound_of_models_collectionAxiom (h _ (hθ.rew _)) e a hex
 
 /-- Over a theory extending `𝗣𝗔⁻` that proves the collection axiom of every strict `𝚺-[s]`
 formula, every `Hierarchy Γ s` semisentence is provably equivalent to the value of a `Prenex Γ s`
 code.
-- [HP98, Theorem I.2.25] -/
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9] -/
 theorem exists_prenex_of_collection (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
     (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 s ψ →
       T ⊢ (.univCl (collectionAxiom ψ) : ArithmeticSentence))
     {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ φ' : Prenex Γ s Empty n, T ⊢ ∀¹* (φ 🡘 φ'.val) := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T :=
-    Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ : ArithmeticTheory)) inferInstance
+    Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
   obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex_of_collection h
   refine ⟨φ', provable_iff_of_models_iff fun V _ _ e ↦ ?_⟩
-  have : V↓[ℒₒᵣ] ⊧* (𝗣𝗔⁻ : ArithmeticTheory) :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance
   exact hφ' V (strictCollection_of_models_collectionAxiom fun ψ hψ ↦
     consequence_iff.mp (Theory.Proof.sound (hcol ψ hψ)) V inferInstance) e
 
 /-- In a model of `𝗣𝗔⁻` with collection for strict `𝚺-[s]` formulas, every `Hierarchy Γ s` formula
 agrees, at a fixed assignment of its free variables, with a strict `Γ-[s]` formula.
-- [HP98, Theorem I.2.25] -/
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9] -/
 lemma exists_strictHierarchy_eval_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCollection V s)
     {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ s φ) (f : ℕ → V) :
     ∃ ψ : ArithmeticSemiformula ℕ 1, StrictHierarchy Γ s ψ ∧
@@ -450,7 +432,8 @@ lemma exists_strictHierarchy_eval_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : S
 /-- Over a theory extending `𝗣𝗔⁻` that proves the collection axiom of every strict `𝚺-[s]`
 formula, every `Hierarchy Γ s` semisentence is provably equivalent to a strict `Γ-[s]` one.
 - [HP98, 0.30]
-- [HP98, Theorem I.2.25] -/
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9] -/
 theorem exists_strictHierarchy_of_collection (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
     (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 s ψ →
       T ⊢ (.univCl (collectionAxiom ψ) : ArithmeticSentence))

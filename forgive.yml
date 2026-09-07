@@ -20,18 +20,15 @@
 version: v0
 
 # The unproved statements themselves.
+LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
 LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
   forgive:
     - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound
 LO.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
   forgive:
     - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sound
-LO.FirstOrder.Arithmetic.exists_sentence_weakerThan_of_consistent:
-  forgive:
-    - LO.FirstOrder.Arithmetic.exists_sentence_weakerThan_of_consistent
-LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union:
-  forgive:
-    - LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union
 LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
   forgive:
     - LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con
@@ -79,9 +76,18 @@ LO.FirstOrder.provablyTotal_of_primrec':
     - LO.FirstOrder.provablyTotal_of_primrec'
 
 # Declarations that inherit the debt of an unproved statement.
-LO.FirstOrder.Arithmetic.not_localReflectionOnHierarchy_weakerThan_union:
+LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:
   forgive:
-    - LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union
+    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_fresh:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_free:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
+  forgive:
+    - LO.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
 LO.FirstOrder.Peano.not_finiteAxiomatizable:
   forgive:
     - LO.FirstOrder.Peano.reflexive

@@ -73,6 +73,24 @@ Bus98:
       title: Studies in Logic and the Foundations of Mathematics
       volume: 137
 
+Bus98A:
+  type: Chapter
+  title: First-order proof theory of arithmetic
+  author: Buss, Samuel R.
+  page-range: 79-147
+  date: 1998
+  parent:
+    type: Anthology
+    title: Handbook of Proof Theory
+    editor: ["Buss, Samuel R."]
+    date: 1998
+    publisher:
+      name: Elsevier
+    parent:
+      type: Anthology
+      title: Studies in Logic and the Foundations of Mathematics
+      volume: 137
+
 EW12:
   type: Article
   title: "A simplified characterisation of provably computable functions of the system {ID₁} of inductive definitions"

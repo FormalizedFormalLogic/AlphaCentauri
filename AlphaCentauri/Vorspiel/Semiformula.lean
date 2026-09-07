@@ -12,10 +12,15 @@ Quantifier-rank invariance, distinctness lemmas, and constructor equations for `
 
 namespace LO.FirstOrder.Semiformula
 
-variable {L : Language} {ξ ξ₁ ξ₂ : Type*} {n n₁ n₂ : ℕ}
+variable {L : Language} {ξ : Type*} {n : ℕ}
+
+section
+variable {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ}
 
 @[simp] lemma qr_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : (ω ▹ φ).qr = φ.qr := by
   induction φ using Semiformula.rec' generalizing n₂ <;> simp [*]
+
+end
 
 @[simp] lemma qr_substs (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) : (φ/[t]).qr = φ.qr :=
   qr_rew _ φ

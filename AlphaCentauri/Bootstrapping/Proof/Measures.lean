@@ -311,24 +311,6 @@ def nodeHeightGraph : 𝚺₁.Semisentence 3 := .mkSigma
 No source; a formalization device. -/
 instance nodeHeight_def : 𝚺₁-Function₂[V] nodeHeight via nodeHeightGraph := .mk fun v ↦ by
   simp [nodeHeightGraph, nodeHeight]
-  have h₂₅ : (2 : V) ≠ ORingStructure.numeral 5 := by simp [numeral_eq_natCast]
-  have h₂₆ : (2 : V) ≠ ORingStructure.numeral 6 := by simp [numeral_eq_natCast]
-  have h₂₇ : (2 : V) ≠ ORingStructure.numeral 7 := by simp [numeral_eq_natCast]
-  have h₂₈ : (2 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
-  have h₃₅ : (3 : V) ≠ ORingStructure.numeral 5 := by simp [numeral_eq_natCast]
-  have h₃₆ : (3 : V) ≠ ORingStructure.numeral 6 := by simp [numeral_eq_natCast]
-  have h₃₇ : (3 : V) ≠ ORingStructure.numeral 7 := by simp [numeral_eq_natCast]
-  have h₃₈ : (3 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
-  have h₄₅ : (4 : V) ≠ ORingStructure.numeral 5 := by simp [numeral_eq_natCast]
-  have h₄₆ : (4 : V) ≠ ORingStructure.numeral 6 := by simp [numeral_eq_natCast]
-  have h₄₇ : (4 : V) ≠ ORingStructure.numeral 7 := by simp [numeral_eq_natCast]
-  have h₄₈ : (4 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
-  have h₅₆ : (5 : V) ≠ ORingStructure.numeral 6 := by simp [numeral_eq_natCast]
-  have h₅₇ : (5 : V) ≠ ORingStructure.numeral 7 := by simp [numeral_eq_natCast]
-  have h₅₈ : (5 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
-  have h₆₇ : (6 : V) ≠ ORingStructure.numeral 7 := by simp [numeral_eq_natCast]
-  have h₆₈ : (6 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
-  have h₇₈ : (7 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
   split_ifs <;> simp_all [numeral_eq_natCast]
 
 /-- The primitive-recursion blueprint for `heightSeq`: it grows a sequence of heights, one entry
@@ -508,6 +490,14 @@ lemma height_succ (c : V) : height (c + 1) = nodeHeight (c + 1) (heightSeq c) :=
     exact lh_mem_seqCons (heightSeq c) _
   simpa [height] using (heightSeq_seq (c + 1)).znth_eq_of_mem hmem
 
+/-- As `height_succ`, stated for a code `d` known to be some `c + 1`, so that `rw` can unfold
+`height d` while keeping `d` itself in constructor form for the rule-specific `tag`/`lastᵢ` simp
+lemmas to fire.
+
+No source; a formalization device. -/
+private lemma height_eq_of_succ {c d : V} (h : c + 1 = d) : height d = nodeHeight d (heightSeq c) :=
+  h ▸ height_succ c
+
 /-- An axiom leaf has height `0`.
 
 No source; direct computation from the definition of `height`. -/
@@ -536,9 +526,7 @@ No source; direct computation from the definition of `height`. -/
     height (andIntro s p q dp dq) = max (height dp) (height dq) + 1 := by
   have hp : dp ≤ ⟪s, 2, p, q, dp, dq⟫ := lt_succ_iff_le.mp (dp_lt_andIntro s p q dp dq)
   have hq : dq ≤ ⟪s, 2, p, q, dp, dq⟫ := lt_succ_iff_le.mp (dq_lt_andIntro s p q dp dq)
-  have h := height_succ (⟪s, 2, p, q, dp, dq⟫ : V)
-  rw [show (⟪s, 2, p, q, dp, dq⟫ : V) + 1 = andIntro s p q dp dq from rfl] at h
-  rw [h]
+  rw [height_eq_of_succ (c := ⟪s, 2, p, q, dp, dq⟫) (d := andIntro s p q dp dq) rfl]
   simp [nodeHeight, znth_heightSeq_of_le hp, znth_heightSeq_of_le hq]
 
 /-- An `∨`-introduction node's height is one more than its child's height.
@@ -546,9 +534,7 @@ No source; direct computation from the definition of `height`. -/
 No source; direct computation from the definition of `height`. -/
 @[simp] lemma height_orIntro (s p q d : V) : height (orIntro s p q d) = height d + 1 := by
   have hd : d ≤ ⟪s, 3, p, q, d⟫ := lt_succ_iff_le.mp (d_lt_orIntro s p q d)
-  have h := height_succ (⟪s, 3, p, q, d⟫ : V)
-  rw [show (⟪s, 3, p, q, d⟫ : V) + 1 = orIntro s p q d from rfl] at h
-  rw [h]
+  rw [height_eq_of_succ (c := ⟪s, 3, p, q, d⟫) (d := orIntro s p q d) rfl]
   simp [nodeHeight, znth_heightSeq_of_le hd]
 
 /-- A `∀`-introduction node's height is one more than its child's height.
@@ -556,9 +542,7 @@ No source; direct computation from the definition of `height`. -/
 No source; direct computation from the definition of `height`. -/
 @[simp] lemma height_allIntro (s p d : V) : height (allIntro s p d) = height d + 1 := by
   have hd : d ≤ ⟪s, 4, p, d⟫ := lt_succ_iff_le.mp (s_lt_allIntro s p d)
-  have h := height_succ (⟪s, 4, p, d⟫ : V)
-  rw [show (⟪s, 4, p, d⟫ : V) + 1 = allIntro s p d from rfl] at h
-  rw [h]
+  rw [height_eq_of_succ (c := ⟪s, 4, p, d⟫) (d := allIntro s p d) rfl]
   simp [nodeHeight, znth_heightSeq_of_le hd]
 
 /-- An `∃`-introduction node's height is one more than its child's height.
@@ -566,9 +550,7 @@ No source; direct computation from the definition of `height`. -/
 No source; direct computation from the definition of `height`. -/
 @[simp] lemma height_exsIntro (s p t d : V) : height (exsIntro s p t d) = height d + 1 := by
   have hd : d ≤ ⟪s, 5, p, t, d⟫ := lt_succ_iff_le.mp (d_lt_exsIntro s p t d)
-  have h := height_succ (⟪s, 5, p, t, d⟫ : V)
-  rw [show (⟪s, 5, p, t, d⟫ : V) + 1 = exsIntro s p t d from rfl] at h
-  rw [h]
+  rw [height_eq_of_succ (c := ⟪s, 5, p, t, d⟫) (d := exsIntro s p t d) rfl]
   simp [nodeHeight, znth_heightSeq_of_le hd]
 
 /-- A weakening node's height is one more than its child's height.
@@ -576,9 +558,7 @@ No source; direct computation from the definition of `height`. -/
 No source; direct computation from the definition of `height`. -/
 @[simp] lemma height_wkRule (s d : V) : height (wkRule s d) = height d + 1 := by
   have hd : d ≤ ⟪s, 6, d⟫ := lt_succ_iff_le.mp (d_lt_wkRule s d)
-  have h := height_succ (⟪s, 6, d⟫ : V)
-  rw [show (⟪s, 6, d⟫ : V) + 1 = wkRule s d from rfl] at h
-  rw [h]
+  rw [height_eq_of_succ (c := ⟪s, 6, d⟫) (d := wkRule s d) rfl]
   simp [nodeHeight, znth_heightSeq_of_le hd]
 
 /-- A shift node's height is one more than its child's height.
@@ -586,9 +566,7 @@ No source; direct computation from the definition of `height`. -/
 No source; direct computation from the definition of `height`. -/
 @[simp] lemma height_shiftRule (s d : V) : height (shiftRule s d) = height d + 1 := by
   have hd : d ≤ ⟪s, 7, d⟫ := lt_succ_iff_le.mp (d_lt_shiftRule s d)
-  have h := height_succ (⟪s, 7, d⟫ : V)
-  rw [show (⟪s, 7, d⟫ : V) + 1 = shiftRule s d from rfl] at h
-  rw [h]
+  rw [height_eq_of_succ (c := ⟪s, 7, d⟫) (d := shiftRule s d) rfl]
   simp [nodeHeight, znth_heightSeq_of_le hd]
 
 /-- A cut node's height is one more than the greater of its two children's heights.
@@ -598,9 +576,7 @@ No source; direct computation from the definition of `height`. -/
     height (cutRule s p d₁ d₂) = max (height d₁) (height d₂) + 1 := by
   have h₁ : d₁ ≤ ⟪s, 8, p, d₁, d₂⟫ := lt_succ_iff_le.mp (d₁_lt_cutRule s p d₁ d₂)
   have h₂ : d₂ ≤ ⟪s, 8, p, d₁, d₂⟫ := lt_succ_iff_le.mp (d₂_lt_cutRule s p d₁ d₂)
-  have h := height_succ (⟪s, 8, p, d₁, d₂⟫ : V)
-  rw [show (⟪s, 8, p, d₁, d₂⟫ : V) + 1 = cutRule s p d₁ d₂ from rfl] at h
-  rw [h]
+  rw [height_eq_of_succ (c := ⟪s, 8, p, d₁, d₂⟫) (d := cutRule s p d₁ d₂) rfl]
   simp [nodeHeight, znth_heightSeq_of_le h₁, znth_heightSeq_of_le h₂]
 
 /-- The first component of the middle pair stored by `cutRule`, i.e. its cut formula `p`. -/

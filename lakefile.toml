@@ -26,10 +26,10 @@ supportInterpreter = true
 
 # Generator of the theory zoo. Kept out of `defaultTargets`: it is built by `just zoo`.
 [[lean_lib]]
-name = "Zoo"
-globs = ["Zoo.+"]
+name = "AlphaCentauriZoo"
+globs = ["AlphaCentauriZoo.+"]
 
 [[lean_exe]]
 name = "zoo_arithmetic"
-root = "Zoo.Arithmetic"
+root = "AlphaCentauriZoo.Arithmetic"
 supportInterpreter = true

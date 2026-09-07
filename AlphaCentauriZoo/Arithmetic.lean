@@ -1,6 +1,6 @@
 module
 
-public import Zoo.Basic
+public import AlphaCentauriZoo.Basic
 public import Lean
 
 /-!
@@ -21,9 +21,9 @@ namespace Zoo
 
 /-- Classes stating a relation between two theories, and the relation each of them states. -/
 def relationClasses : Array (Name × EdgeType) :=
-  #[(`LO.Entailment.WeakerThan, .sub),
-    (`LO.Entailment.StrictlyWeakerThan, .ssub),
-    (`LO.Entailment.Equiv, .eq)]
+  #[(`FFL.Entailment.WeakerThan, .sub),
+    (`FFL.Entailment.StrictlyWeakerThan, .ssub),
+    (`FFL.Entailment.Equiv, .eq)]
 
 /--
 The modules whose constants are scanned, and the type whose inhabitants are the vertices.
@@ -32,7 +32,7 @@ The modules whose constants are scanned, and the type whose inhabitants are the 
 def rootModules : Array Name := #[`Foundation, `AlphaCentauri]
 
 /-- Type of the theories the zoo is about. -/
-def vertexType : Name := `LO.FirstOrder.ArithmeticTheory
+def vertexType : Name := `FFL.FirstOrder.ArithmeticTheory
 
 /--
 The relation stated by `type`, if it relates two theories of type `vertexType`.

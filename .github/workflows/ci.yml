@@ -42,17 +42,6 @@ jobs:
         with:
           build: false
           use-github-cache: false
-      # Mathlib's cache leaves the runner's disk 97% full, and the cold Foundation build then fills
-      # it and the runner is killed (exit 143) partway through `Foundation.FirstOrder.Arithmetic`.
-      # Dropping the preinstalled toolchains we never use buys the tens of gigabytes it needs.
-      - name: Free disk space
-        if: steps.foundation-cache.outputs.cache-hit != 'true'
-        run: |
-          df -h /
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
-            /usr/local/share/boost /usr/local/share/powershell \
-            /usr/local/lib/node_modules "$AGENT_TOOLSDIRECTORY"
-          df -h /
       - name: Build Foundation from source (cache miss only)
         if: steps.foundation-cache.outputs.cache-hit != 'true'
         run: lake build Foundation

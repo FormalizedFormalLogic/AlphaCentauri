@@ -3,12 +3,8 @@
 AlphaCentauri follows **Foundation's contribution guidelines**: [`index.md`](index.md),
 [`style.md`](style.md), and [`refactoring.md`](refactoring.md) in this directory are copied
 verbatim from the `contribute/` directory of
-[Foundation](https://github.com/FormalizedFormalLogic/Foundation/tree/master/contribute), at
-the commit pinned in `lake-manifest.json` when they were copied:
-
-- source: https://github.com/FormalizedFormalLogic/Foundation/tree/3fc342d6ae381ca1dd9151569cb062d0927573b9/contribute
-- commit: `3fc342d6ae381ca1dd9151569cb062d0927573b9`
-- license: Apache-2.0 (Foundation's)
+[Foundation](https://github.com/FormalizedFormalLogic/Foundation/tree/master/contribute),
+under its Apache-2.0 license:
 
 - [`index.md`](index.md): the flow to the main branch, PR titles and the commit convention,
   pre-submission checks, disclosure of AI involvement.
@@ -23,7 +19,7 @@ exception: [`style.md`](style.md)'s citation rule requires a docstring to say so
 when a definition or theorem has no source; AGENTS.md's "Cite the source" rule instead has such
 a declaration omit the docstring outright, unless a genuinely useful statement-level explanation
 remains. AGENTS.md's rule wins here. When the Foundation pin is bumped, re-copy the three files
-above in the same PR if they changed upstream, and update the commit noted above.
+above in the same PR if they changed upstream.
 
 Where they say "Foundation", read "Foundation, and AlphaCentauri"; where they name
 Foundation-specific files (`Foundation.lean`, `references.bib`, `just` recipes), the

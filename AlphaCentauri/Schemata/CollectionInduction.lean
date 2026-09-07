@@ -10,9 +10,9 @@ public import AlphaCentauri.Schemata.CollectionEquivalence
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-open _root_.LO.Entailment
+open _root_.FFL.Entailment
 
 variable {V : Type*} [ORingStructure V] {n : ℕ}
 
@@ -127,4 +127,4 @@ theorem ISigma_weakerThan_BSigma_succ (n : ℕ) : 𝗜𝚺 n ⪯ 𝗕𝚺 (n + 1
 
 end theorems
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

@@ -385,27 +385,8 @@ collection axiom of every strict `𝚺-[s]` formula. -/
 lemma strictCollection_of_models_collectionAxiom [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
     (h : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 s ψ →
       V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom ψ) : ArithmeticSentence)) :
-    StrictCollection V s := by
-  intro n θ hθ e a hex
-  set ψ : ArithmeticSemiformula ℕ 2 :=
-    Rew.embSubsts (#1 :> #0 :> fun i : Fin n ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹ θ with hψdef
-  have hψ : StrictHierarchy 𝚺 s ψ := hθ.rew _
-  set f : ℕ → V := fun i ↦ if hi : i < n then e ⟨i, hi⟩ else a with hf
-  have heval : ∀ x y : V, ψ.Eval ![x, y] f ↔ V ⊧/(y :> x :> e) θ := by
-    intro x y
-    rw [hψdef]
-    simp only [Semiformula.eval_embSubsts]
-    refine Iff.of_eq (congrArg (fun b ↦ Semiformula.Evalb (M := V) b θ) ?_)
-    funext i
-    cases i using Fin.cases with
-    | zero => simp
-    | succ i =>
-      cases i using Fin.cases with
-      | zero => simp
-      | succ i => simp [hf, i.isLt]
-  obtain ⟨b, hb⟩ := (models_collectionAxiom_iff ψ).mp (h ψ hψ) f a
-    fun x hx ↦ (hex x hx).imp fun u hu ↦ (heval x u).mpr hu
-  exact ⟨b, fun x hx ↦ (hb x hx).imp fun u hu ↦ ⟨le_of_lt hu.1, (heval x u).mp hu.2⟩⟩
+    StrictCollection V s := fun hθ e a hex ↦
+  exists_bound_of_models_collectionAxiom (h _ (hθ.rew _)) e a hex
 
 /-- Over a theory extending `𝗣𝗔⁻` that proves the collection axiom of every strict `𝚺-[s]`
 formula, every `Hierarchy Γ s` semisentence is provably equivalent to the value of a `Prenex Γ s`

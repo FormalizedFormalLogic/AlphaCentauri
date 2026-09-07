@@ -252,10 +252,13 @@ jobs:
           fi
 
   # Publishing happens from `main` only: a pull request builds the zoo but does not deploy it.
+  # The repository is private and this organization is on the Team plan, where a Pages site is
+  # public whichever repository it is built from. So the deployment stays dormant until someone
+  # decides to publish: enable Pages, then set the repository variable `DEPLOY_PAGES` to `true`.
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && vars.DEPLOY_PAGES == 'true'
     needs:
       - build
       - no-sorry

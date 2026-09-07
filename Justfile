@@ -37,6 +37,14 @@ no-sorry:
 check-pr-title title:
     PR_TITLE={{ quote(title) }} python3 .github/scripts/check-pr-title.py
 
+# Generate the theory zoo as pages/zoo/arithmetic.{png,pdf} (needs typst and graphviz)
+zoo:
+    lake build Foundation zoo_arithmetic
+    lake exe zoo_arithmetic Zoo/arithmetic.json
+    mkdir -p pages/zoo
+    typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.png
+    typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.pdf
+
 # Regenerate AlphaCentauri.lean to import all modules (run after adding/removing files)
 mk-all:
     lake exe mk_all --lib AlphaCentauri --module

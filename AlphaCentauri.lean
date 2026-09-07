@@ -37,6 +37,7 @@ public import AlphaCentauri.Reflection.Unboundedness
 public import AlphaCentauri.Schemata.Collection
 public import AlphaCentauri.Schemata.CollectionEquivalence
 public import AlphaCentauri.Schemata.CollectionInduction
+public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Schemata.LeastNumber
 public import AlphaCentauri.Vorspiel.Absoluteness
 public import AlphaCentauri.Vorspiel.Definable

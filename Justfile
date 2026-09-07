@@ -39,7 +39,7 @@ check-pr-title title:
 
 # Generate the theory zoo as pages/zoo/arithmetic.{png,pdf} (needs typst and graphviz)
 zoo:
-    lake build Foundation zoo_arithmetic
+    lake build AlphaCentauri Foundation zoo_arithmetic
     lake exe zoo_arithmetic Zoo/arithmetic.json
     mkdir -p pages/zoo
     typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.png

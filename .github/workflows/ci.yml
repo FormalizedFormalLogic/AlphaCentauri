@@ -192,6 +192,18 @@ jobs:
           echo "the axiom audit failed; see the 'Audit axioms' step"
           exit 1
 
+      # The zoo scans `Foundation` too, which this job has already built.
+      - uses: extractions/setup-just@v3
+      - uses: typst-community/setup-typst@v4
+      - uses: ts-graphviz/setup-graphviz@v2
+      - name: Generate the zoo
+        run: just zoo
+      - name: Upload the zoo
+        uses: actions/upload-artifact@v7
+        with:
+          name: zoo
+          path: pages/zoo
+
   # `sorry` is banned outright: an unproved statement is an `axiom` under its own name, so the
   # audit reports the debt by name instead of collapsing it into one anonymous `sorryAx`. This
   # job is the mechanical guard — no `sorry` in the sources, and no `sorryAx` forgiven in
@@ -238,3 +250,31 @@ jobs:
             echo "Files were modified by mk_all. Please run 'just mk-all' and commit the changes."
             exit 1
           fi
+
+  # Publishing happens from `main` only: a pull request builds the zoo but does not deploy it.
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - build
+      - no-sorry
+      - mk-all-check
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Download the zoo
+        uses: actions/download-artifact@v8
+        with:
+          name: zoo
+          path: pages/zoo
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: pages
+      - uses: actions/deploy-pages@v5
+        id: deployment

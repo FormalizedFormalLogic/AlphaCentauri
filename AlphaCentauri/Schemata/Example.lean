@@ -4,7 +4,7 @@ public import AlphaCentauri.Schemata.CollectionEquivalence
 public import AlphaCentauri.Schemata.LeastNumber
 
 /-!
-# The fragment hierarchy at small indices
+# Instances of the fragment hierarchy
 
 The relations between the fragments are stated for every index, which leaves the theory zoo — whose
 vertices are closed theories — with nothing to draw. These are their instances at the first few

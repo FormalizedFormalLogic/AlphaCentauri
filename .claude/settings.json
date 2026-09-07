@@ -26,6 +26,9 @@
       "mcp__lean-lsp__lean_verify"
     ]
   },
+  "enabledMcpjsonServers": [
+    "lean-lsp"
+  ],
   "extraKnownMarketplaces": {
     "lean4-skills": {
       "source": {

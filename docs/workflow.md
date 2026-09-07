@@ -106,6 +106,7 @@ agent when the user has explicitly told it to for that PR.
 | `statement-formalized` | Stage: the statement as an `axiom`, forgiven in `forgive.yml`, reviewed for faithfulness. |
 | `proof-formalized` | Stage: the `axiom` proved in a follow-up PR; closes the issue. |
 | `infrastructure` | A PR with no mathematics; CI skips the audit comment. |
+| `refactor` | Reorganizes existing code without adding results; no mathematics. |
 
 Nothing else is a label. Blocked, belongs upstream in Foundation, process questions — say it
 in the issue thread.

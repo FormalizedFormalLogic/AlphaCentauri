@@ -21,6 +21,7 @@ public import AlphaCentauri.Hierarchy.DeltaZero
 public import AlphaCentauri.Hierarchy.NormalForm
 public import AlphaCentauri.Hierarchy.Prenex
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
+public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.OmegaLogic.Basic
 public import AlphaCentauri.OmegaLogic.Consistency
 public import AlphaCentauri.OmegaLogic.Elimination

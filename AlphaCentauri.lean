@@ -36,8 +36,10 @@ public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Reflection.Unboundedness
 public import AlphaCentauri.Schemata.Collection
 public import AlphaCentauri.Schemata.CollectionEquivalence
+public import AlphaCentauri.Schemata.CollectionInduction
 public import AlphaCentauri.Schemata.LeastNumber
 public import AlphaCentauri.Vorspiel.Absoluteness
+public import AlphaCentauri.Vorspiel.Definable
 public import AlphaCentauri.Vorspiel.Eval
 public import AlphaCentauri.Vorspiel.Fvar
 public import AlphaCentauri.Vorspiel.Hierarchy

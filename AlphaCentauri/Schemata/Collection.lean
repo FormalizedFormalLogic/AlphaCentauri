@@ -95,6 +95,34 @@ lemma models_collectionAxiom_iff (φ : ArithmeticSemiformula ℕ 2) :
   simp [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
     Semiformula.eval_bexsLT, Semiformula.eval_substs]
 
+/-- The reading of the collection axiom at a semisentence whose extra bound variables carry the
+parameters.
+- [HP98, §I.2(a)] -/
+lemma exists_bound_of_models_collectionAxiom {m : ℕ} {θ : ArithmeticSemisentence (m + 2)}
+    (h : V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom
+      (Rew.embSubsts (#1 :> #0 :> fun i : Fin m ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹ θ)) :
+        ArithmeticSentence))
+    (e : Fin m → V) (a : V) (hex : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
+    ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ := by
+  set ψ : ArithmeticSemiformula ℕ 2 :=
+    Rew.embSubsts (#1 :> #0 :> fun i : Fin m ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹ θ with hψdef
+  set f : ℕ → V := fun i ↦ if hi : i < m then e ⟨i, hi⟩ else a with hf
+  have heval : ∀ x y : V, ψ.Eval ![x, y] f ↔ V ⊧/(y :> x :> e) θ := by
+    intro x y
+    rw [hψdef]
+    simp only [Semiformula.eval_embSubsts]
+    refine Iff.of_eq (congrArg (fun b ↦ Semiformula.Evalb (M := V) b θ) ?_)
+    funext i
+    cases i using Fin.cases with
+    | zero => simp
+    | succ i =>
+      cases i using Fin.cases with
+      | zero => simp
+      | succ i => simp [hf, i.isLt]
+  obtain ⟨b, hb⟩ := (models_collectionAxiom_iff ψ).mp h f a
+    fun x hx ↦ (hex x hx).imp fun u hu ↦ (heval x u).mpr hu
+  exact ⟨b, fun x hx ↦ (hb x hx).imp fun u hu ↦ ⟨le_of_lt hu.1, (heval x u).mp hu.2⟩⟩
+
 end models
 
 section standardModel

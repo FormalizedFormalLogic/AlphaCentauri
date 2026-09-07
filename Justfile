@@ -33,6 +33,10 @@ no-sorry:
     fi
     echo "no-sorry: ok"
 
+# Check a pull request title against the conventions in docs/workflow.md
+check-pr-title title:
+    PR_TITLE={{ quote(title) }} python3 .github/scripts/check-pr-title.py
+
 # Regenerate AlphaCentauri.lean to import all modules (run after adding/removing files)
 mk-all:
     lake exe mk_all --lib AlphaCentauri --module

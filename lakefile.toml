@@ -23,3 +23,13 @@ rev = "master"
 name = "audit"
 root = "Audit.Main"
 supportInterpreter = true
+
+# Generator of the theory zoo. Kept out of `defaultTargets`: it is built by `just zoo`.
+[[lean_lib]]
+name = "Zoo"
+globs = ["Zoo.+"]
+
+[[lean_exe]]
+name = "zoo_arithmetic"
+root = "Zoo.Arithmetic"
+supportInterpreter = true

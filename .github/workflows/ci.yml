@@ -55,23 +55,20 @@ jobs:
         with:
           build: false
           use-github-cache: false
-      # The cold build has been killed (exit 143) partway through `Foundation.FirstOrder.Arithmetic`;
-      # these report whether the runner ran out of memory or of disk.
-      - name: Report the runner's resources
+      # Mathlib's cache leaves the runner's disk 97% full, and the cold Foundation build then fills
+      # it and the runner is killed (exit 143) partway through `Foundation.FirstOrder.Arithmetic`.
+      # Dropping the preinstalled toolchains we never use buys the tens of gigabytes it needs.
+      - name: Free disk space
         if: steps.foundation-cache.outputs.cache-hit != 'true'
         run: |
-          nproc
-          free -h
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /usr/local/share/boost /usr/local/share/powershell \
+            /usr/local/lib/node_modules "$AGENT_TOOLSDIRECTORY"
           df -h /
       - name: Build Foundation from source (cache miss only)
         if: steps.foundation-cache.outputs.cache-hit != 'true'
-        run: /usr/bin/time -v lake build Foundation
-      - name: Report the runner's resources after the build
-        if: always() && steps.foundation-cache.outputs.cache-hit != 'true'
-        run: |
-          free -h
-          df -h /
-          dmesg 2>/dev/null | grep -iE 'killed process|out of memory' | tail -5 || true
+        run: lake build Foundation
       # ── Clear Foundation's cached warnings ───────────────────────────────────────────────────────
       # Modern Lake stores each module's build diagnostics in its `.trace` file's `"log"` array and
       # RE-EMITS them (`⚠ Replayed`) on every downstream build. Emptying `"log"` drops the replay

@@ -55,9 +55,12 @@ jobs:
         with:
           build: false
           use-github-cache: false
+      # `-j 2` caps the peak memory: at the runner's default parallelism the cold build is killed
+      # (exit 143) partway through `Foundation.FirstOrder.Arithmetic`. Only a pin bump misses the
+      # cache, so the slower build is paid once per bump.
       - name: Build Foundation from source (cache miss only)
         if: steps.foundation-cache.outputs.cache-hit != 'true'
-        run: lake build Foundation
+        run: lake build Foundation -j 2
       # ── Clear Foundation's cached warnings ───────────────────────────────────────────────────────
       # Modern Lake stores each module's build diagnostics in its `.trace` file's `"log"` array and
       # RE-EMITS them (`⚠ Replayed`) on every downstream build. Emptying `"log"` drops the replay

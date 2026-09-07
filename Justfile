@@ -37,9 +37,9 @@ no-sorry:
 check-pr-title title:
     PR_TITLE={{ quote(title) }} python3 .github/scripts/check-pr-title.py
 
-# Generate the theory zoo as pages/zoo/arithmetic.{png,pdf} (needs typst and graphviz)
+# Render the theory zoo as pages/zoo/arithmetic.{png,pdf} (needs typst and graphviz).
+# Reads the environment, so `lake build AlphaCentauri Foundation` has to have run first.
 zoo:
-    lake build Foundation zoo_arithmetic
     lake exe zoo_arithmetic Zoo/arithmetic.json
     mkdir -p pages/zoo
     typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.png

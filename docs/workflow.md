@@ -83,6 +83,10 @@ lints the workflow files.
 
 A red check is fixed in the PR, never worked around.
 
+[`lefthook.yml`](../lefthook.yml) runs the same checks before every `git push`, so a red run is
+caught locally. Install [lefthook](https://lefthook.dev), then `just hooks` once per clone;
+`LEFTHOOK=0 git push` skips them for a branch that does not need them, and CI runs them regardless.
+
 ### Review and merge
 
 Reviews are GitHub PR reviews with a verdict and line-anchored findings, by AI agents (each

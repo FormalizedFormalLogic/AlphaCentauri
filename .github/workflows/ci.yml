@@ -197,6 +197,20 @@ jobs:
   # job is the mechanical guard — no `sorry` in the sources, and no `sorryAx` forgiven in
   # `forgive.yml` (checked with yq, which reads the values rather than the file's text, so a
   # comment naming `sorryAx` is not a false positive). It needs neither Lean nor a build.
+  # The PR title becomes the commit subject on `main` (squash merge), so it is checked here.
+  # Runs only for pull requests; `merge_group` and `push` have no title to check.
+  pr-title:
+    name: Check PR title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check the pull request title
+        env:
+          # Passed through the environment, never interpolated into the shell.
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: python3 .github/scripts/check-pr-title.py
+
   no-sorry:
     name: Check no sorry
     runs-on: ubuntu-latest

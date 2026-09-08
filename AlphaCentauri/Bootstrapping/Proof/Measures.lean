@@ -5,8 +5,8 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
 /-!
 # Internal proof measures
 
-This module defines a primitive-recursive height function on internal proof codes.  It is total
-on all codes; on codes that are not proof-rule constructors its value is zero.
+This module defines primitive-recursive height and cut-rank functions on internal proof codes.
+Both are total on all codes; on codes that are not proof-rule constructors their value is zero.
 -/
 
 @[expose] public section
@@ -578,6 +578,272 @@ No source; direct computation from the definition of `height`. -/
   have h₂ : d₂ ≤ ⟪s, 8, p, d₁, d₂⟫ := lt_succ_iff_le.mp (d₂_lt_cutRule s p d₁ d₂)
   rw [height_eq_of_succ (c := ⟪s, 8, p, d₁, d₂⟫) (d := cutRule s p d₁ d₂) rfl]
   simp [nodeHeight, znth_heightSeq_of_le h₁, znth_heightSeq_of_le h₂]
+
+/-- The first component of the middle pair stored by `cutRule`, i.e. its cut formula `p`. -/
+noncomputable def pre₂ (d : V) : V := π₁ (π₂ (sndIdx d))
+
+/-- The `𝚺₁` graph of `pre₂`. -/
+def pre₂Graph : 𝚺₁.Semisentence 2 := .mkSigma
+  “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧ !pi₁Def a q”
+
+/-- `pre₂` is `𝚺₁`-definable. -/
+instance pre₂_def : 𝚺₁-Function₁[V] pre₂ via pre₂Graph := .mk fun v ↦ by
+  simp [pre₂Graph, pre₂]
+
+/-- `pre₂` recovers the cut formula `p` stored by `cutRule s p d₁ d₂`. -/
+@[simp] lemma pre₂_cutRule (s p d₁ d₂ : V) : pre₂ (cutRule s p d₁ d₂) = p := by
+  rw [show cutRule s p d₁ d₂ = ⟪s, 8, p, d₁, d₂⟫ + 1 from rfl]
+  simp [pre₂, sndIdx]
+
+variable (L : Language) [L.Encodable] [L.LORDefinable]
+
+/-- The next cut rank in the primitive-recursive history of an internal proof code, computed from
+the history `ih` of the cut ranks of all smaller codes: a cut node contributes one more than the
+complexity of its cut formula, every other node only passes on the ranks of its children.
+
+- [Bus98, Ch. I §2.4] -/
+noncomputable def nodeCutRank (d ih : V) : V :=
+  if tag d = 2 then max (znth ih (pre₄ d)) (znth ih (last₄ d))
+  else if tag d = 3 then znth ih (last₃ d)
+  else if tag d = 4 then znth ih (last₂ d)
+  else if tag d = 5 then znth ih (last₃ d)
+  else if tag d = 6 then znth ih (last₁ d)
+  else if tag d = 7 then znth ih (last₁ d)
+  else if tag d = 8 then
+    max (max (znth ih (pre₃ d)) (znth ih (last₃ d))) (formulaComplexity L (pre₂ d) + 1)
+  else 0
+
+/-- The `𝚺₁` graph of `nodeCutRank`. -/
+noncomputable def nodeCutRankGraph : 𝚺₁.Semisentence 3 := .mkSigma
+  “r d ih. (∃ t, !tagGraph t d ∧ t = 2 ∧ ∃ p, !pre₄Graph p d ∧ ∃ q, !last₄Graph q d ∧
+      ∃ rp, !znthDef rp ih p ∧ ∃ rq, !znthDef rq ih q ∧ !max.dfn r rp rq) ∨
+    (∃ t, !tagGraph t d ∧ t = 3 ∧ ∃ p, !last₃Graph p d ∧ !znthDef r ih p) ∨
+    (∃ t, !tagGraph t d ∧ t = 4 ∧ ∃ p, !last₂Graph p d ∧ !znthDef r ih p) ∨
+    (∃ t, !tagGraph t d ∧ t = 5 ∧ ∃ p, !last₃Graph p d ∧ !znthDef r ih p) ∨
+    (∃ t, !tagGraph t d ∧ t = 6 ∧ ∃ p, !last₁Graph p d ∧ !znthDef r ih p) ∨
+    (∃ t, !tagGraph t d ∧ t = 7 ∧ ∃ p, !last₁Graph p d ∧ !znthDef r ih p) ∨
+    (∃ t, !tagGraph t d ∧ t = 8 ∧ ∃ p, !pre₃Graph p d ∧ ∃ q, !last₃Graph q d ∧
+      ∃ rp, !znthDef rp ih p ∧ ∃ rq, !znthDef rq ih q ∧ ∃ m, !max.dfn m rp rq ∧
+      ∃ c, !pre₂Graph c d ∧ ∃ k, !(formulaComplexityGraph L) k c ∧ !max.dfn r m (k + 1)) ∨
+    (∃ t, !tagGraph t d ∧ t ≠ 2 ∧ t ≠ 3 ∧ t ≠ 4 ∧ t ≠ 5 ∧ t ≠ 6 ∧ t ≠ 7 ∧ t ≠ 8 ∧ r = 0)”
+
+/-- `nodeCutRank` is `𝚺₁`-definable. -/
+instance nodeCutRank_def :
+    𝚺₁-Function₂[V] nodeCutRank L via nodeCutRankGraph L := .mk fun v ↦ by
+  simp [nodeCutRankGraph, nodeCutRank, (formulaComplexity.defined (L := L) (V := V)).iff]
+  have h₂₅ : (2 : V) ≠ ORingStructure.numeral 5 := by simp [numeral_eq_natCast]
+  have h₂₆ : (2 : V) ≠ ORingStructure.numeral 6 := by simp [numeral_eq_natCast]
+  have h₂₇ : (2 : V) ≠ ORingStructure.numeral 7 := by simp [numeral_eq_natCast]
+  have h₂₈ : (2 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
+  have h₃₅ : (3 : V) ≠ ORingStructure.numeral 5 := by simp [numeral_eq_natCast]
+  have h₃₆ : (3 : V) ≠ ORingStructure.numeral 6 := by simp [numeral_eq_natCast]
+  have h₃₇ : (3 : V) ≠ ORingStructure.numeral 7 := by simp [numeral_eq_natCast]
+  have h₃₈ : (3 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
+  have h₄₅ : (4 : V) ≠ ORingStructure.numeral 5 := by simp [numeral_eq_natCast]
+  have h₄₆ : (4 : V) ≠ ORingStructure.numeral 6 := by simp [numeral_eq_natCast]
+  have h₄₇ : (4 : V) ≠ ORingStructure.numeral 7 := by simp [numeral_eq_natCast]
+  have h₄₈ : (4 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
+  have h₅₆ : (5 : V) ≠ ORingStructure.numeral 6 := by simp [numeral_eq_natCast]
+  have h₅₇ : (5 : V) ≠ ORingStructure.numeral 7 := by simp [numeral_eq_natCast]
+  have h₅₈ : (5 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
+  have h₆₇ : (6 : V) ≠ ORingStructure.numeral 7 := by simp [numeral_eq_natCast]
+  have h₆₈ : (6 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
+  have h₇₈ : (7 : V) ≠ ORingStructure.numeral 8 := by simp [numeral_eq_natCast]
+  split_ifs <;> simp_all [numeral_eq_natCast]
+
+/-- The primitive-recursion blueprint for `cutRankSeq`: it grows a sequence of cut ranks, one entry
+per code, by appending `nodeCutRank` computed from the entries seen so far. -/
+noncomputable def cutRankBlueprint : PR.Blueprint 0 where
+  zero := .mkSigma “s. !seqConsDef s 0 0”
+  succ := .mkSigma “y ih k. ∃ r, !(nodeCutRankGraph L) r (k + 1) ih ∧ !seqConsDef y ih r”
+
+/-- The primitive-recursive construction underlying `cutRankSeq`. -/
+noncomputable def cutRankConstruction : PR.Construction V (cutRankBlueprint L) where
+  zero _ := 0 ⁀' 0
+  succ _ k ih := ih ⁀' nodeCutRank L (k + 1) ih
+  zero_defined := .mk fun v ↦ by simp [cutRankBlueprint]
+  succ_defined := .mk fun v ↦ by simp [cutRankBlueprint, (nodeCutRank_def (L := L) (V := V)).iff]
+
+/-- The primitive-recursive history of cut ranks through the internal code `d`. -/
+noncomputable def cutRankSeq (d : V) : V := (cutRankConstruction L).result ![] d
+
+variable {L}
+
+/-- `cutRankSeq` at `0` is the length-one sequence holding a single cut rank entry `0`. -/
+@[simp] lemma cutRankSeq_zero : cutRankSeq L (0 : V) = 0 ⁀' 0 := by
+  simp [cutRankSeq, cutRankConstruction]
+
+/-- `cutRankSeq` grows by appending the next node's cut rank to the history seen so far. -/
+@[simp] lemma cutRankSeq_succ (d : V) :
+    cutRankSeq L (d + 1) = cutRankSeq L d ⁀' nodeCutRank L (d + 1) (cutRankSeq L d) := by
+  rw [cutRankSeq, (cutRankConstruction L).result_succ]
+  rfl
+
+variable (L)
+
+/-- The `𝚺₁` graph of `cutRankSeq`. -/
+noncomputable def cutRankSeqGraph : 𝚺₁.Semisentence 2 := (cutRankBlueprint L).resultDef
+
+variable {L}
+
+/-- `cutRankSeq` is `𝚺₁`-definable. -/
+instance cutRankSeq_def : 𝚺₁-Function₁[V] cutRankSeq L via cutRankSeqGraph L := .mk fun v ↦ by
+  have h := (cutRankConstruction L).result_defined_iff (V := V) v
+  have hv : (fun x : Fin 0 ↦ v x.succ.succ) = (![] : Fin 0 → V) := by
+    ext x
+    exact Fin.elim0 x
+  have hv' : (fun _ : Fin 0 ↦ v 1) = (![] : Fin 0 → V) := by
+    ext x
+    exact Fin.elim0 x
+  simpa [cutRankSeqGraph, cutRankSeq, cutRankBlueprint, hv, hv'] using h
+
+/-- `cutRankSeq` is `𝚺₁`-definable. -/
+instance cutRankSeq_definable : 𝚺₁-Function₁[V] cutRankSeq L := cutRankSeq_def.to_definable
+
+variable (L)
+
+/-- The primitive-recursive cut rank assigned to an internal proof code: one more than the greatest
+complexity of a formula cut on in `d`, and `0` when `d` cuts on nothing.
+
+- [Bus98, Ch. I §2.4] -/
+noncomputable def cutRank (d : V) : V := znth (cutRankSeq L d) d
+
+/-- The `𝚺₁` graph of `cutRank`. -/
+noncomputable def cutRankGraph : 𝚺₁.Semisentence 2 := .mkSigma
+  “r d. ∃ s, !(cutRankBlueprint L).resultDef s d ∧ !znthDef r s d”
+
+variable {L}
+
+/-- `cutRank` is `𝚺₁`-definable. -/
+instance cutRank_def : 𝚺₁-Function₁[V] cutRank L via cutRankGraph L := .mk fun v ↦ by
+  have h (s d : V) : (cutRankBlueprint L).resultDef.val.Evalb ![s, d] ↔ s = cutRankSeq L d := by
+    have hparam : (fun _ : Fin 0 ↦ d) = (![] : Fin 0 → V) := by
+      ext x
+      exact Fin.elim0 x
+    simpa [cutRankSeq, cutRankBlueprint, hparam] using
+      ((cutRankConstruction L).result_defined_iff (![s, d] : Fin 2 → V) :
+        (cutRankBlueprint L).resultDef.val.Evalb ![s, d] ↔
+          s = (cutRankConstruction L).result (fun _ : Fin 0 ↦ d) d)
+  simp [cutRankGraph, cutRank, h]
+
+/-- `cutRank` is `𝚺₁`-definable. -/
+instance cutRank_definable : 𝚺₁-Function₁[V] cutRank L := cutRank_def.to_definable
+
+/-- `cutRankSeq d` is always a sequence. -/
+private lemma cutRankSeq_seq (d : V) : Seq (cutRankSeq L d) := by
+  induction d using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simpa using seq_zero.seqCons 0
+  case succ d ih => simpa using ih.seqCons _
+
+/-- `cutRankSeq d` has length `d + 1`: it records one cut rank entry per code up to and including
+`d`. -/
+private lemma lh_cutRankSeq (d : V) : lh (cutRankSeq L d) = d + 1 := by
+  induction d using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => rw [cutRankSeq_zero, seq_zero.lh_seqCons 0, lh_zero]
+  case succ d ih => rw [cutRankSeq_succ, (cutRankSeq_seq (L := L) d).lh_seqCons _, ih]
+
+/-- Every entry of `cutRankSeq d` at an index `x ≤ d` agrees with `cutRank x`: extending the
+history further never changes the cut rank already recorded for a smaller code. -/
+lemma znth_cutRankSeq_of_le {x d : V} (h : x ≤ d) : znth (cutRankSeq L d) x = cutRank L x := by
+  induction d using ISigma1.sigma1_succ_induction generalizing x
+  · definability
+  case zero =>
+    rcases nonpos_iff_eq_zero.mp h with rfl
+    rfl
+  case succ d ih =>
+    rcases le_iff_lt_or_eq.mp h with hlt | rfl
+    · have hxd : x ≤ d := lt_succ_iff_le.mp hlt
+      rw [cutRankSeq_succ, znth_seqCons_of_lt (cutRankSeq_seq (L := L) d)
+        (by rw [lh_cutRankSeq]; exact lt_succ_iff_le.mpr hxd)]
+      exact ih hxd
+    · rfl
+
+/-- The cut rank of a code built as the successor of `c` unfolds one primitive-recursion step: it
+is `nodeCutRank` applied to the history of cut ranks up to `c`. -/
+lemma cutRank_succ (c : V) : cutRank L (c + 1) = nodeCutRank L (c + 1) (cutRankSeq L c) := by
+  have hmem : ⟪c + 1, nodeCutRank L (c + 1) (cutRankSeq L c)⟫ ∈ cutRankSeq L (c + 1) := by
+    rw [cutRankSeq_succ, ← lh_cutRankSeq (L := L) c]
+    exact lh_mem_seqCons (cutRankSeq L c) _
+  simpa [cutRank] using (cutRankSeq_seq (L := L) (c + 1)).znth_eq_of_mem hmem
+
+/-- An axiom leaf cuts on nothing, so its cut rank is `0`. -/
+@[simp] lemma cutRank_axL (s p : V) : cutRank L (axL s p) = 0 := by
+  rw [show axL s p = ⟪s, 0, p⟫ + 1 from rfl, cutRank_succ]
+  simp [nodeCutRank, tag, sndIdx]
+
+/-- A `⊤`-introduction leaf cuts on nothing, so its cut rank is `0`. -/
+@[simp] lemma cutRank_verumIntro (s : V) : cutRank L (verumIntro s) = 0 := by
+  rw [show verumIntro s = ⟪s, 1, 0⟫ + 1 from rfl, cutRank_succ]
+  simp [nodeCutRank, tag, sndIdx]
+
+/-- A theory-axiom leaf cuts on nothing, so its cut rank is `0`. -/
+@[simp] lemma cutRank_axm (s p : V) : cutRank L (axm s p) = 0 := by
+  rw [show axm s p = ⟪s, 9, p⟫ + 1 from rfl, cutRank_succ]
+  simp [nodeCutRank, tag, sndIdx]
+
+/-- An `∧`-introduction node's cut rank is the greater of its two children's cut ranks. -/
+@[simp] lemma cutRank_andIntro (s p q dp dq : V) :
+    cutRank L (andIntro s p q dp dq) = max (cutRank L dp) (cutRank L dq) := by
+  have hp : dp ≤ ⟪s, 2, p, q, dp, dq⟫ := lt_succ_iff_le.mp (dp_lt_andIntro s p q dp dq)
+  have hq : dq ≤ ⟪s, 2, p, q, dp, dq⟫ := lt_succ_iff_le.mp (dq_lt_andIntro s p q dp dq)
+  have h := cutRank_succ (L := L) (⟪s, 2, p, q, dp, dq⟫ : V)
+  rw [show (⟪s, 2, p, q, dp, dq⟫ : V) + 1 = andIntro s p q dp dq from rfl] at h
+  rw [h]
+  simp [nodeCutRank, znth_cutRankSeq_of_le hp, znth_cutRankSeq_of_le hq]
+
+/-- An `∨`-introduction node's cut rank is its child's cut rank. -/
+@[simp] lemma cutRank_orIntro (s p q d : V) : cutRank L (orIntro s p q d) = cutRank L d := by
+  have hd : d ≤ ⟪s, 3, p, q, d⟫ := lt_succ_iff_le.mp (d_lt_orIntro s p q d)
+  have h := cutRank_succ (L := L) (⟪s, 3, p, q, d⟫ : V)
+  rw [show (⟪s, 3, p, q, d⟫ : V) + 1 = orIntro s p q d from rfl] at h
+  rw [h]
+  simp [nodeCutRank, znth_cutRankSeq_of_le hd]
+
+/-- A `∀`-introduction node's cut rank is its child's cut rank. -/
+@[simp] lemma cutRank_allIntro (s p d : V) : cutRank L (allIntro s p d) = cutRank L d := by
+  have hd : d ≤ ⟪s, 4, p, d⟫ := lt_succ_iff_le.mp (s_lt_allIntro s p d)
+  have h := cutRank_succ (L := L) (⟪s, 4, p, d⟫ : V)
+  rw [show (⟪s, 4, p, d⟫ : V) + 1 = allIntro s p d from rfl] at h
+  rw [h]
+  simp [nodeCutRank, znth_cutRankSeq_of_le hd]
+
+/-- An `∃`-introduction node's cut rank is its child's cut rank. -/
+@[simp] lemma cutRank_exsIntro (s p t d : V) : cutRank L (exsIntro s p t d) = cutRank L d := by
+  have hd : d ≤ ⟪s, 5, p, t, d⟫ := lt_succ_iff_le.mp (d_lt_exsIntro s p t d)
+  have h := cutRank_succ (L := L) (⟪s, 5, p, t, d⟫ : V)
+  rw [show (⟪s, 5, p, t, d⟫ : V) + 1 = exsIntro s p t d from rfl] at h
+  rw [h]
+  simp [nodeCutRank, znth_cutRankSeq_of_le hd]
+
+/-- A weakening node's cut rank is its child's cut rank. -/
+@[simp] lemma cutRank_wkRule (s d : V) : cutRank L (wkRule s d) = cutRank L d := by
+  have hd : d ≤ ⟪s, 6, d⟫ := lt_succ_iff_le.mp (d_lt_wkRule s d)
+  have h := cutRank_succ (L := L) (⟪s, 6, d⟫ : V)
+  rw [show (⟪s, 6, d⟫ : V) + 1 = wkRule s d from rfl] at h
+  rw [h]
+  simp [nodeCutRank, znth_cutRankSeq_of_le hd]
+
+/-- A shift node's cut rank is its child's cut rank. -/
+@[simp] lemma cutRank_shiftRule (s d : V) : cutRank L (shiftRule s d) = cutRank L d := by
+  have hd : d ≤ ⟪s, 7, d⟫ := lt_succ_iff_le.mp (d_lt_shiftRule s d)
+  have h := cutRank_succ (L := L) (⟪s, 7, d⟫ : V)
+  rw [show (⟪s, 7, d⟫ : V) + 1 = shiftRule s d from rfl] at h
+  rw [h]
+  simp [nodeCutRank, znth_cutRankSeq_of_le hd]
+
+/-- A cut node's cut rank is the greater of its two children's cut ranks and one more than the
+complexity of its cut formula. -/
+@[simp] lemma cutRank_cutRule (s p d₁ d₂ : V) :
+    cutRank L (cutRule s p d₁ d₂) =
+      max (max (cutRank L d₁) (cutRank L d₂)) (formulaComplexity L p + 1) := by
+  have h₁ : d₁ ≤ ⟪s, 8, p, d₁, d₂⟫ := lt_succ_iff_le.mp (d₁_lt_cutRule s p d₁ d₂)
+  have h₂ : d₂ ≤ ⟪s, 8, p, d₁, d₂⟫ := lt_succ_iff_le.mp (d₂_lt_cutRule s p d₁ d₂)
+  have h := cutRank_succ (L := L) (⟪s, 8, p, d₁, d₂⟫ : V)
+  rw [show (⟪s, 8, p, d₁, d₂⟫ : V) + 1 = cutRule s p d₁ d₂ from rfl] at h
+  rw [h]
+  simp [nodeCutRank, znth_cutRankSeq_of_le h₁, znth_cutRankSeq_of_le h₂]
 
 end InternalMeasures
 

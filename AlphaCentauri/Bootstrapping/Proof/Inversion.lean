@@ -15,7 +15,7 @@ records the injectivity of the external-variable shift on codes, which the shift
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1 InternalMeasures
 
@@ -945,4 +945,4 @@ end CutFreeDerivation
 
 end
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

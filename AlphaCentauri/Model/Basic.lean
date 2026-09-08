@@ -154,62 +154,55 @@ lemma absolute_of_open (T : ArithmeticTheory) {n} {φ : ArithmeticSemiformula ξ
 -- The universe of the models is a parameter of `Absolute`, so the closure lemmas below pin it
 -- explicitly: without the annotation each occurrence is generalized on its own.
 
-lemma Absolute.and {T : ArithmeticTheory} {n} {φ ψ : ArithmeticSemiformula ξ n}
-    (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) : Absolute.{_, u} T (φ ⋏ ψ) := by
-  intro M _ _ N _ e f
+variable {T : ArithmeticTheory} {n : ℕ}
+  {φ ψ : ArithmeticSemiformula ξ n}
+  {θ : ArithmeticSemiformula ξ (n + 1)} {t : ArithmeticSemiterm ξ n}
+
+lemma and_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) : Absolute.{_, u} T (φ ⋏ ψ) := by
+  intro M _ _ N _ e f;
   simp [hφ M N e f, hψ M N e f]
 
-lemma Absolute.or {T : ArithmeticTheory} {n} {φ ψ : ArithmeticSemiformula ξ n}
-    (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) : Absolute.{_, u} T (φ ⋎ ψ) := by
-  intro M _ _ N _ e f
+lemma or_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) : Absolute.{_, u} T (φ ⋎ ψ) := by
+  intro M _ _ N _ e f;
   simp [hφ M N e f, hψ M N e f]
 
-lemma Absolute.ballLT {T : ArithmeticTheory} {n} {t : ArithmeticSemiterm ξ n}
-    {φ : ArithmeticSemiformula ξ (n + 1)} (hφ : Absolute.{_, u} T φ) :
-    Absolute.{_, u} T (φ.ballLT t) := by
+lemma ballLT_absolute (hθ : Absolute.{_, u} T θ) : Absolute.{_, u} T (θ.ballLT t) := by
   intro M _ _ N _ e f
   simp only [eval_ballLT, ← HomClass.val_term N.emb e f t]
   constructor
   · intro h y hy
     obtain ⟨x, rfl⟩ := N.mem_range_of_lt hy
     rw [← Matrix.comp_vecCons'']
-    exact (hφ M N (x :> e) f).mp (h x (by simpa using hy))
+    exact (hθ M N (x :> e) f).mp (h x (by simpa using hy))
   · intro h x hx
     have h₁ := h (N x) (by simpa using hx)
     rw [← Matrix.comp_vecCons''] at h₁
-    exact (hφ M N (x :> e) f).mpr h₁
+    exact (hθ M N (x :> e) f).mpr h₁
 
-lemma Absolute.bexsLT {T : ArithmeticTheory} {n} {t : ArithmeticSemiterm ξ n}
-    {φ : ArithmeticSemiformula ξ (n + 1)} (hφ : Absolute.{_, u} T φ) :
-    Absolute.{_, u} T (φ.bexsLT t) := by
+lemma bexsLT_absolute (hθ : Absolute.{_, u} T θ) : Absolute.{_, u} T (θ.bexsLT t) := by
   intro M _ _ N _ e f
   simp only [eval_bexsLT, ← HomClass.val_term N.emb e f t]
   constructor
   · rintro ⟨x, hx, h⟩
     refine ⟨N x, by simpa using hx, ?_⟩
     rw [← Matrix.comp_vecCons'']
-    exact (hφ M N (x :> e) f).mp h
+    exact (hθ M N (x :> e) f).mp h
   · rintro ⟨y, hy, h⟩
     obtain ⟨x, rfl⟩ := N.mem_range_of_lt hy
     rw [← Matrix.comp_vecCons''] at h
-    exact ⟨x, by simpa using hy, (hφ M N (x :> e) f).mpr h⟩
+    exact ⟨x, by simpa using hy, (hθ M N (x :> e) f).mpr h⟩
 
 /-- Bounded formulas take the same truth value along an end extension.
 - [HP98, Fact IV.1.3(4), Remark IV.1.18]
 - [vO99, Exercise 37] -/
-theorem absolute_of_deltaZero (T : ArithmeticTheory) {n} {φ : ArithmeticSemiformula ξ n}
-    (hφ : Hierarchy 𝚺 0 φ) : Absolute T φ :=
-  delta₀_induction (P := fun _ φ ↦ Absolute T φ)
-    (fun _ ↦ absolute_of_open T (by simp))
-    (fun _ ↦ absolute_of_open T (by simp))
-    (fun _ _ _ ↦ absolute_of_open T (by simp))
-    (fun _ _ _ ↦ absolute_of_open T (by simp))
-    (fun _ _ _ ↦ absolute_of_open T (by simp))
-    (fun _ _ _ ↦ absolute_of_open T (by simp))
-    (fun _ _ _ _ _ ihφ ihψ ↦ ihφ.and ihψ)
-    (fun _ _ _ _ _ ihφ ihψ ↦ ihφ.or ihψ)
-    (fun _ _ _ _ ih ↦ ih.ballLT)
-    (fun _ _ _ _ ih ↦ ih.bexsLT)
+@[simp, grind .]
+theorem absolute_of_deltaZero (hφ : Hierarchy 𝚺 0 φ) : Absolute T φ :=
+  delta₀_induction_open (P := fun _ φ ↦ Absolute T φ)
+    (fun _ _ hφ ↦ absolute_of_open T hφ)
+    (fun _ _ _ _ _ ihφ ihψ ↦ and_absolute ihφ ihψ)
+    (fun _ _ _ _ _ ihφ ihψ ↦ or_absolute ihφ ihψ)
+    (fun _ _ _ _ ih ↦ ballLT_absolute ih)
+    (fun _ _ _ _ ih ↦ bexsLT_absolute ih)
     n φ hφ
 
 end Absolute

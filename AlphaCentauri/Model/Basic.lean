@@ -23,7 +23,7 @@ variable {ξ : Type*} {M : Type u} [ORingStructure M]
 - [vO99, §3.1] -/
 structure EndExtensionOf (M : Type u) [ORingStructure M] where
   carrier : Type u
-  [oRingStructure : ORingStructure carrier]
+  [oring : ORingStructure carrier]
   emb : M ↪ₛ[ℒₒᵣ] carrier
   mem_range_of_lt {a : M} {b : carrier} : b < emb a → b ∈ Set.range emb
 
@@ -31,69 +31,30 @@ namespace EndExtensionOf
 
 instance : CoeSort (EndExtensionOf M) (Type u) := ⟨EndExtensionOf.carrier⟩
 
-instance (N : EndExtensionOf M) : ORingStructure N := N.oRingStructure
+instance : CoeFun (EndExtensionOf M) (λ N => M → N.carrier) := ⟨λ N => N.emb⟩
+
+instance (N : EndExtensionOf M) : ORingStructure N := N.oring
 
 variable (N : EndExtensionOf M)
 
 lemma emb_injective : Function.Injective N.emb := EmbeddingClass.map_inj N.emb
 
-@[simp] lemma emb_zero : N.emb 0 = 0 := by
+@[simp] lemma emb_zero : N 0 = 0 := by
   simpa [Function.comp_def] using HomClass.func N.emb Language.Zero.zero ![]
 
-@[simp] lemma emb_one : N.emb 1 = 1 := by
+@[simp] lemma emb_one : N 1 = 1 := by
   simpa [Function.comp_def] using HomClass.func N.emb Language.One.one ![]
 
-@[simp] lemma emb_add (x y : M) : N.emb (x + y) = N.emb x + N.emb y := by
+@[simp] lemma emb_add (x y : M) : N (x + y) = N x + N y := by
   simpa [Function.comp_def] using HomClass.func N.emb Language.Add.add ![x, y]
 
-@[simp] lemma emb_mul (x y : M) : N.emb (x * y) = N.emb x * N.emb y := by
+@[simp] lemma emb_mul (x y : M) : N (x * y) = N x * N y := by
   simpa [Function.comp_def] using HomClass.func N.emb Language.Mul.mul ![x, y]
 
-@[simp] lemma emb_lt_emb {x y : M} : N.emb x < N.emb y ↔ x < y := by
+@[simp] lemma emb_lt_emb {x y : M} : N x < N y ↔ x < y := by
   simpa [Function.comp_def] using EmbeddingClass.rel N.emb Language.LT.lt ![x, y]
 
-lemma emb_eq_emb {x y : M} : N.emb x = N.emb y ↔ x = y := N.emb_injective.eq_iff
-
-/-- Bounded formulas take the same truth value along an end extension.
-- [HP98, Fact IV.1.3(4), Remark IV.1.18]
-- [vO99, Exercise 37] -/
-theorem eval_iff_of_deltaZero {n} {φ : ArithmeticSemiformula ξ n} (hφ : Hierarchy 𝚺 0 φ)
-    (e : Fin n → M) (f : ξ → M) : φ.Eval e f ↔ φ.Eval (N.emb ∘ e) (N.emb ∘ f) := by
-  revert e
-  apply delta₀_induction (P := fun n φ ↦ ∀ e : Fin n → M, φ.Eval e f ↔ φ.Eval (N.emb ∘ e) (N.emb ∘ f));
-  · intro n e; exact eval_hom_iff_of_open N.emb (by simp)
-  · intro n e; exact eval_hom_iff_of_open N.emb (by simp)
-  · intro n t u e; exact eval_hom_iff_of_open N.emb (by simp)
-  · intro n t u e; exact eval_hom_iff_of_open N.emb (by simp)
-  · intro n t u e; exact eval_hom_iff_of_open N.emb (by simp)
-  · intro n t u e; exact eval_hom_iff_of_open N.emb (by simp)
-  · intro n φ ψ _ _ ihφ ihψ e; simp [ihφ, ihψ]
-  · intro n φ ψ _ _ ihφ ihψ e; simp [ihφ, ihψ]
-  · intro n t φ _ ih e
-    show (φ.ballLT t).Eval e f ↔ (φ.ballLT t).Eval (⇑N.emb ∘ e) (⇑N.emb ∘ f)
-    simp only [eval_ballLT, ← HomClass.val_term N.emb e f t]
-    constructor
-    · intro h y hy
-      obtain ⟨x, rfl⟩ := N.mem_range_of_lt hy
-      rw [← Matrix.comp_vecCons'']
-      exact (ih (x :> e)).mp (h x (by simpa using hy))
-    · intro h x hx
-      have h₁ := h (N.emb x) (by simpa using hx)
-      rw [← Matrix.comp_vecCons''] at h₁
-      exact (ih (x :> e)).mpr h₁
-  · intro n t φ _ ih e
-    show (φ.bexsLT t).Eval e f ↔ (φ.bexsLT t).Eval (⇑N.emb ∘ e) (⇑N.emb ∘ f)
-    simp only [eval_bexsLT, ← HomClass.val_term N.emb e f t]
-    constructor
-    · rintro ⟨x, hx, h⟩
-      refine ⟨N.emb x, by simpa using hx, ?_⟩
-      rw [← Matrix.comp_vecCons'']
-      exact (ih (x :> e)).mp h
-    · rintro ⟨y, hy, h⟩
-      obtain ⟨x, rfl⟩ := N.mem_range_of_lt hy
-      rw [← Matrix.comp_vecCons''] at h
-      exact ⟨x, by simpa using hy, (ih (x :> e)).mpr h⟩
-  . assumption;
+lemma emb_eq_emb {x y : M} : N x = N y ↔ x = y := N.emb_injective.eq_iff
 
 /-- A structure with an end extension modelling `𝗣𝗔⁻` is itself a model of `𝗣𝗔⁻`.
 - [vO99, Exercise 40] -/
@@ -176,5 +137,81 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
       (Or.imp N.emb_eq_emb.mp N.emb_lt_emb.mp)
 
 end EndExtensionOf
+
+section Absolute
+
+/-- `φ` is absolute for `T` when it takes the same truth value in every model of `T` as in every
+end extension of that model which again models `T`. -/
+def Absolute (T : ArithmeticTheory) {n : ℕ} (φ : ArithmeticSemiformula ξ n) : Prop :=
+  ∀ (M : Type u) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T] (N : EndExtensionOf M) [N↓[ℒₒᵣ] ⊧* T]
+    (e : Fin n → M) (f : ξ → M), φ.Eval e f ↔ φ.Eval (N ∘ e) (N ∘ f)
+
+lemma absolute_of_open (T : ArithmeticTheory) {n} {φ : ArithmeticSemiformula ξ n} (hφ : φ.Open) :
+    Absolute T φ := by
+  intro M _ _ N _ e f
+  exact eval_hom_iff_of_open N.emb hφ
+
+-- The universe of the models is a parameter of `Absolute`, so the closure lemmas below pin it
+-- explicitly: without the annotation each occurrence is generalized on its own.
+
+lemma Absolute.and {T : ArithmeticTheory} {n} {φ ψ : ArithmeticSemiformula ξ n}
+    (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) : Absolute.{_, u} T (φ ⋏ ψ) := by
+  intro M _ _ N _ e f
+  simp [hφ M N e f, hψ M N e f]
+
+lemma Absolute.or {T : ArithmeticTheory} {n} {φ ψ : ArithmeticSemiformula ξ n}
+    (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) : Absolute.{_, u} T (φ ⋎ ψ) := by
+  intro M _ _ N _ e f
+  simp [hφ M N e f, hψ M N e f]
+
+lemma Absolute.ballLT {T : ArithmeticTheory} {n} {t : ArithmeticSemiterm ξ n}
+    {φ : ArithmeticSemiformula ξ (n + 1)} (hφ : Absolute.{_, u} T φ) :
+    Absolute.{_, u} T (φ.ballLT t) := by
+  intro M _ _ N _ e f
+  simp only [eval_ballLT, ← HomClass.val_term N.emb e f t]
+  constructor
+  · intro h y hy
+    obtain ⟨x, rfl⟩ := N.mem_range_of_lt hy
+    rw [← Matrix.comp_vecCons'']
+    exact (hφ M N (x :> e) f).mp (h x (by simpa using hy))
+  · intro h x hx
+    have h₁ := h (N x) (by simpa using hx)
+    rw [← Matrix.comp_vecCons''] at h₁
+    exact (hφ M N (x :> e) f).mpr h₁
+
+lemma Absolute.bexsLT {T : ArithmeticTheory} {n} {t : ArithmeticSemiterm ξ n}
+    {φ : ArithmeticSemiformula ξ (n + 1)} (hφ : Absolute.{_, u} T φ) :
+    Absolute.{_, u} T (φ.bexsLT t) := by
+  intro M _ _ N _ e f
+  simp only [eval_bexsLT, ← HomClass.val_term N.emb e f t]
+  constructor
+  · rintro ⟨x, hx, h⟩
+    refine ⟨N x, by simpa using hx, ?_⟩
+    rw [← Matrix.comp_vecCons'']
+    exact (hφ M N (x :> e) f).mp h
+  · rintro ⟨y, hy, h⟩
+    obtain ⟨x, rfl⟩ := N.mem_range_of_lt hy
+    rw [← Matrix.comp_vecCons''] at h
+    exact ⟨x, by simpa using hy, (hφ M N (x :> e) f).mpr h⟩
+
+/-- Bounded formulas take the same truth value along an end extension.
+- [HP98, Fact IV.1.3(4), Remark IV.1.18]
+- [vO99, Exercise 37] -/
+theorem absolute_of_deltaZero (T : ArithmeticTheory) {n} {φ : ArithmeticSemiformula ξ n}
+    (hφ : Hierarchy 𝚺 0 φ) : Absolute T φ :=
+  delta₀_induction (P := fun _ φ ↦ Absolute T φ)
+    (fun _ ↦ absolute_of_open T (by simp))
+    (fun _ ↦ absolute_of_open T (by simp))
+    (fun _ _ _ ↦ absolute_of_open T (by simp))
+    (fun _ _ _ ↦ absolute_of_open T (by simp))
+    (fun _ _ _ ↦ absolute_of_open T (by simp))
+    (fun _ _ _ ↦ absolute_of_open T (by simp))
+    (fun _ _ _ _ _ ihφ ihψ ↦ ihφ.and ihψ)
+    (fun _ _ _ _ _ ihφ ihψ ↦ ihφ.or ihψ)
+    (fun _ _ _ _ ih ↦ ih.ballLT)
+    (fun _ _ _ _ ih ↦ ih.bexsLT)
+    n φ hφ
+
+end Absolute
 
 end FFL.FirstOrder.Arithmetic

@@ -56,6 +56,14 @@ lemma emb_injective : Function.Injective N.emb := EmbeddingClass.map_inj N.emb
 
 lemma emb_eq_emb {x y : M} : N x = N y ↔ x = y := N.emb_injective.eq_iff
 
+/-- `N` is a proper end extension of `M`: not every element of `N` comes from `M`.
+- [HP98, Definition IV.1.14]
+- [vO99, §3.2] -/
+def IsProper : Prop := ¬Function.Surjective N.emb
+
+lemma isProper_iff : N.IsProper ↔ ∃ c : N, c ∉ Set.range N.emb := by
+  simp [IsProper, Function.Surjective, Set.range, not_forall]
+
 /-- A structure with an end extension modelling `𝗣𝗔⁻` is itself a model of `𝗣𝗔⁻`.
 - [vO99, Exercise 40] -/
 theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_theory_iff.mpr <| by

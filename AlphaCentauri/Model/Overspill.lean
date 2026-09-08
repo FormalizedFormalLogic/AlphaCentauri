@@ -22,7 +22,7 @@ below some element outside it.
 - [HP98, Corollary IV.1.16]
 - [vO99, Lemma 3.2, Corollary 3.3] -/
 theorem overspill (Γ : Polarity) (m : ℕ) (N : EndExtensionOf M) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
-    (hproper : ¬Function.Surjective N.emb)
+    (hproper : N.IsProper)
     {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ m φ) (e : ℕ → N)
     (h : ∀ a : M, φ.Eval ![N a] e) :
     ∃ c : N, c ∉ Set.range N.emb ∧ ∀ x < c, φ.Eval ![x] e := by

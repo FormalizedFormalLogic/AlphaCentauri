@@ -49,4 +49,22 @@ lemma delta₀_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
     exact hBex _ t _ hp
       (delta₀_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
 
+/-- Recursion on bounded arithmetical formulas, with the literals collected into a single case for
+open formulas. -/
+lemma delta₀_induction_open {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
+    (hOpen : ∀ n φ, Semiformula.Open φ → P n φ)
+    (hAnd : ∀ n φ ψ, Hierarchy 𝚺 0 φ → Hierarchy 𝚺 0 ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hOr : ∀ n φ ψ, Hierarchy 𝚺 0 φ → Hierarchy 𝚺 0 ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
+    (hBall : ∀ n t φ, Hierarchy 𝚺 0 φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hBex : ∀ n t φ, Hierarchy 𝚺 0 φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
+    (n φ) : Hierarchy 𝚺 0 φ → P n φ :=
+  delta₀_induction
+    (fun _ ↦ hOpen _ _ (by simp))
+    (fun _ ↦ hOpen _ _ (by simp))
+    (fun _ _ _ ↦ hOpen _ _ (by simp))
+    (fun _ _ _ ↦ hOpen _ _ (by simp))
+    (fun _ _ _ ↦ hOpen _ _ (by simp))
+    (fun _ _ _ ↦ hOpen _ _ (by simp))
+    hAnd hOr hBall hBex n φ
+
 end FFL.FirstOrder.Arithmetic

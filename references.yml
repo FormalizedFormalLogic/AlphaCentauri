@@ -159,3 +159,14 @@ Tow20:
   date: 2020
   url: https://www.sas.upenn.edu/~htowsner/GoodsteinsTheorem.pdf
   note: Undated; the PDF is dated 2020
+
+vO99:
+  type: Misc
+  title: "Introduction to {Peano} Arithmetic: Gödel Incompleteness and Nonstandard Models"
+  author: "van Oosten, Jaap"
+  genre: Lecture notes
+  organization: "Department of Mathematics, Utrecht University"
+  date: 1999
+  note: >-
+    Notes of a course in the 1998-1999 Master Class Program in Mathematical
+    Logic of the Mathematical Research Institute, Utrecht

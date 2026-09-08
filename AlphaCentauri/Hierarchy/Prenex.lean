@@ -9,7 +9,7 @@ Prenex formulas classified by quantifier alternation and leading polarity.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT] {ξ : Type*}
 
@@ -135,4 +135,4 @@ lemma mono {Γ s s' n} {φ : Semiformula L ξ n} (h : StrictHierarchy Γ s φ) (
 
 end StrictHierarchy
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

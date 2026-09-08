@@ -40,10 +40,10 @@ check-pr-title title:
 # Render the theory zoo as pages/zoo/arithmetic.{png,pdf} (needs typst and graphviz).
 # Reads the environment, so `lake build AlphaCentauri Foundation` has to have run first.
 zoo:
-    lake exe zoo_arithmetic Zoo/arithmetic.json
+    lake exe zoo_arithmetic AlphaCentauriZoo/arithmetic.json
     mkdir -p pages/zoo
-    typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.png
-    typst compile Zoo/arithmetic.typ pages/zoo/arithmetic.pdf
+    typst compile AlphaCentauriZoo/arithmetic.typ pages/zoo/arithmetic.png
+    typst compile AlphaCentauriZoo/arithmetic.typ pages/zoo/arithmetic.pdf
 
 # Regenerate AlphaCentauri.lean to import all modules (run after adding/removing files)
 mk-all:

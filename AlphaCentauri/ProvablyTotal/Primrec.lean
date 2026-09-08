@@ -12,7 +12,7 @@ Every primitive recursive function is `𝗜𝚺₁`-provably total, in Mathlib's
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 /-- Every primitive recursive function, in Mathlib's `List.Vector` form `Nat.Primrec'`, is
 `𝗜𝚺₁`-provably total.
@@ -28,4 +28,4 @@ total.
 axiom provablyTotal_of_primrec {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Primrec f) :
     𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

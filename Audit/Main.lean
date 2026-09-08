@@ -165,12 +165,12 @@ end Yaml
 ```yaml
 version: v0
 
-LO.some_unproved_lemma:
+FFL.some_unproved_lemma:
   forgive:
-    - LO.some_unproved_lemma
-LO.uses_some_unproved_lemma:
+    - FFL.some_unproved_lemma
+FFL.uses_some_unproved_lemma:
   forgive:
-    - LO.some_unproved_lemma
+    - FFL.some_unproved_lemma
 ```
 
 Each top-level declaration key lists the axioms or declarations through which its dependencies

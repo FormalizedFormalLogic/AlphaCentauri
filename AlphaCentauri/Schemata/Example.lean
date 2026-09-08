@@ -14,7 +14,7 @@ indices.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 theorem BSigma_one_weakerThan_ISigma_one : 𝗕𝚺 1 ⪯ 𝗜𝚺 1 := BSigma_weakerThan_ISigma 0
 
@@ -40,4 +40,4 @@ theorem ISigma_one_weakerThan_BSigma_two : 𝗜𝚺 1 ⪯ 𝗕𝚺 2 := ISigma_w
 
 theorem ISigma_two_weakerThan_PA : 𝗜𝚺 2 ⪯ 𝗣𝗔 := inferInstance
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

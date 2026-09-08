@@ -9,7 +9,7 @@ A recursor for bounded arithmetical formulas.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {ξ : Type*}
 
@@ -49,4 +49,4 @@ lemma delta₀_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
     exact hBex _ t _ hp
       (delta₀_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

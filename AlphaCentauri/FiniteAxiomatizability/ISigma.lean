@@ -17,10 +17,10 @@ finitely axiomatizable for `n ≥ 1`.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
-open _root_.LO.Entailment
+open _root_.FFL.Entailment
 
 namespace ISigma
 
@@ -376,4 +376,4 @@ theorem exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :
 
 end ISigma
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

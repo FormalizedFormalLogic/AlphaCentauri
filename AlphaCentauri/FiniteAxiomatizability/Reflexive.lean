@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.Second
-public import Foundation.FirstOrder.Incompleteness.Delta1
+public import Foundation.FirstOrder.Incompleteness.Definability
 public import AlphaCentauri.FirstOrder.FiniteAxiomatizability
 
 /-!
@@ -13,9 +13,9 @@ reflexive extension of `𝗜𝚺₁` fails to be finitely axiomatizable.
 
 @[expose] public section
 
-open LO.Entailment
+open FFL.Entailment
 
-namespace LO.FirstOrder
+namespace FFL.FirstOrder
 
 variable {T : ArithmeticTheory}
 
@@ -78,4 +78,4 @@ theorem not_finiteAxiomatizable_of_Peano_le [𝗣𝗔 ⪯ T] [Consistent T] : ¬
   have : Consistent (𝗣𝗔 ∪ T) := Consistent.of_le ‹Consistent T› hUT
   exact mt (FiniteAxiomatizable.of_equiv hequiv) <| not_finiteAxiomatizable_of_reflexive hR
 
-end LO.FirstOrder
+end FFL.FirstOrder

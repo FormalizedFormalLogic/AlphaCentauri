@@ -12,9 +12,9 @@ public import AlphaCentauri.Vorspiel.Eval
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-open _root_.LO.Entailment
+open _root_.FFL.Entailment
 
 variable {V : Type*} [ORingStructure V] {Γ : Polarity} {n s : ℕ}
 
@@ -235,4 +235,4 @@ theorem BSigma_succ_equiv_BPi (n : ℕ) : 𝗕𝚺 (n + 1) ≊ 𝗕𝚷 n :=
   Equiv.antisymm_iff.mpr
     ⟨BSigma_succ_weakerThan_BPi n, CollectionOnHierarchy_weakerThan_BSigma_succ 𝚷 n⟩
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

@@ -13,7 +13,7 @@ hierarchy class.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 namespace HierarchySymbol.Definable
 
@@ -62,4 +62,4 @@ lemma exists_hierarchy_eval_iff {P : (Fin k → V) → Prop} (hP : Γ-[s].Defina
   exact ⟨φ.val.enumerateFVar, Rew.rewriteMap φ.val.idxOfFVar ▹ φ.val, by simp,
     fun _ ↦ by simp [Semiformula.eval_rewriteMap, hφ.df.iff]⟩
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

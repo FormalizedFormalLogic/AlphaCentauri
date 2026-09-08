@@ -12,9 +12,9 @@ public import AlphaCentauri.Vorspiel.Fvar
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-open _root_.LO.Entailment
+open _root_.FFL.Entailment
 
 section axioms
 
@@ -185,4 +185,4 @@ theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 
 
 end BSigma_ISigma
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

@@ -11,7 +11,7 @@ separate least fixpoint so that cut-freeness remains a `Δ₁` property in every
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1
 
@@ -324,7 +324,7 @@ lemma case_iff {d : V} :
       (∃ s p, d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) ) :=
   (construction T).case
 
-alias ⟨case, _root_.LO.FirstOrder.Arithmetic.Bootstrapping.CutFreeDerivation.mk⟩ := case_iff
+alias ⟨case, _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.CutFreeDerivation.mk⟩ := case_iff
 
 /-- Structural induction on cut-free derivations: to prove `P` for every `CutFreeDerivation T d`,
 it suffices to prove it for each rule of the cut-free calculus (axiom leaf, `⊤`-introduction,
@@ -373,7 +373,7 @@ lemma isFormulaSet {d : V} (h : CutFreeDerivation T d) : IsFormulaSet L (fstIdx 
 
 /-- The sequent of a `CutFreeDerivationOf` witness is a coded formula set.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
-lemma _root_.LO.FirstOrder.Arithmetic.Bootstrapping.CutFreeDerivationOf.isFormulaSet {d s : V}
+lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.CutFreeDerivationOf.isFormulaSet {d s : V}
     (h : CutFreeDerivationOf T d s) : IsFormulaSet L s := by
   simpa [h.1] using h.2.case.1
 
@@ -722,4 +722,4 @@ end Deduction
 
 end Derivation
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

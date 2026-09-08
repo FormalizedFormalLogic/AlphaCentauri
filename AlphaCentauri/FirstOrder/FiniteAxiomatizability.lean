@@ -21,7 +21,7 @@ Finite axiomatizability for first-order theories:
 
 namespace AdjunctiveSet
 
-open LO.FirstOrder
+open FFL.FirstOrder
 
 variable {L : Language}
 
@@ -29,7 +29,7 @@ variable {L : Language}
 
 end AdjunctiveSet
 
-namespace LO.Entailment
+namespace FFL.Entailment
 
 open FirstOrder
 
@@ -146,14 +146,14 @@ lemma not_finiteAxiomatizable_iff :
   · rintro h ⟨F, hsub, hfin, heq⟩
     exact (h F hsub hfin).notWT (Equiv.antisymm_iff.mp heq).2
 
-end LO.Entailment
+end FFL.Entailment
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
-open _root_.LO.Entailment in
+open _root_.FFL.Entailment in
 /-- `𝗣𝗔⁻` is finitely axiomatizable.
 - [Lin97, Ch. 4 §1] -/
 lemma PeanoMinus.finiteAxiomatizable : FiniteAxiomatizable 𝗣𝗔⁻ :=
   FiniteAxiomatizable.of_finite PeanoMinus.finite
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

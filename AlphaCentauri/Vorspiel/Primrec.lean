@@ -10,7 +10,7 @@ Primitive recursion for bounded quantification, vector encodings, and truth of `
 
 @[expose] public section
 
-open LO.FirstOrder LO.FirstOrder.Arithmetic
+open FFL.FirstOrder FFL.FirstOrder.Arithmetic
 
 section quantifier
 
@@ -51,7 +51,7 @@ theorem PrimrecPred.comp_get_iff {p : (Fin k → ℕ) → Prop} :
 
 end vector
 
-namespace LO.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 variable {ξ : Type*} (ε : ξ → ℕ)
 
@@ -95,4 +95,4 @@ lemma deltaZero_primrec {k} {φ : ArithmeticSemiformula ξ k} (hφ : Hierarchy �
     PrimrecPred fun v : Fin k → ℕ ↦ φ.Eval v ε :=
   PrimrecPred.comp_get_iff.mp (deltaZero_primrec_vec ε k φ hφ)
 
-end LO.FirstOrder.Arithmetic
+end FFL.FirstOrder.Arithmetic

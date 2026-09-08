@@ -31,7 +31,7 @@ just hooks           # run the CI checks before every push (needs lefthook)
 ## Zoo
 
 The zoo illustrates the interrelationships among the arithmetical theories, verified in Lean 4. It
-is generated from the environment by [`Zoo/`](./Zoo) on every build; run `just zoo` to regenerate it
+is generated from the environment by [`AlphaCentauriZoo/`](./AlphaCentauriZoo) on every build; run `just zoo` to regenerate it
 locally.
 
 - A solid arrow $\mathsf{A} \leftarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.

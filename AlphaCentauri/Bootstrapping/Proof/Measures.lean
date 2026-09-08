@@ -11,7 +11,7 @@ Both are total on all codes; on codes that are not proof-rule constructors their
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1
 
@@ -847,4 +847,4 @@ complexity of its cut formula. -/
 
 end InternalMeasures
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

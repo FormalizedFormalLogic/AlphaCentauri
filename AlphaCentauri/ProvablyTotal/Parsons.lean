@@ -15,12 +15,6 @@ namespace FFL.FirstOrder
 
 open FFL.FirstOrder.Arithmetic
 
-/-- Every primitive recursive function is `𝗜𝚺₁`-provably total.
-- [HP98, Theorem I.1.54]
-- [HP98, Lemma I.1.55] -/
-axiom provablyTotal_of_primrec' {k : ℕ} {f : List.Vector ℕ k → ℕ} (hf : Nat.Primrec' f) :
-    𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))
-
 /-- Every `𝗜𝚺₁`-provably total function is primitive recursive.
 - [HP98, Corollary IV.3.7] -/
 axiom primrec'_of_provablyTotal {k : ℕ} {f : List.Vector ℕ k → ℕ}

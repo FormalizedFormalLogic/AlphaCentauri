@@ -71,9 +71,6 @@ FFL.FirstOrder.parsons_primrec:
 FFL.FirstOrder.primrec'_of_provablyTotal:
   forgive:
     - FFL.FirstOrder.primrec'_of_provablyTotal
-FFL.FirstOrder.provablyTotal_of_primrec':
-  forgive:
-    - FFL.FirstOrder.provablyTotal_of_primrec'
 
 # Declarations that inherit the debt of an unproved statement.
 FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:

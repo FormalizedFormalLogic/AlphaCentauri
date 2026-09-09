@@ -29,9 +29,15 @@ FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
 FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
   forgive:
     - FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound
+FFL.FirstOrder.Arithmetic.exists_term_bound_of_provablyTotal:
+  forgive:
+    - FFL.FirstOrder.Arithmetic.exists_term_bound_of_provablyTotal
 FFL.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
   forgive:
     - FFL.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con
+FFL.FirstOrder.Arithmetic.parikh:
+  forgive:
+    - FFL.FirstOrder.Arithmetic.parikh
 FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
   forgive:
     - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot

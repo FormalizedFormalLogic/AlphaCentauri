@@ -8,7 +8,7 @@
    "rev": "653e94fe1cb16eae9eb66b4202398c04844fd9e0",
    "name": "Foundation",
    "manifestFile": "lake-manifest.json",
-   "inputRev": "master",
+   "inputRev": "653e94fe1cb16eae9eb66b4202398c04844fd9e0",
    "inherited": false,
    "configFile": "lakefile.toml"},
   {"url": "https://github.com/SnO2WMaN/axiom-audit",

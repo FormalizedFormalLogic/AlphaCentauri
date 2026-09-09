@@ -141,7 +141,8 @@ a revision to pin instead of the tip of Foundation's `master`). It keeps one bra
 committed on top of it — never a force-push, since the repairs made for the previous bump live
 on that branch; otherwise the branch restarts from `main` and the pull request is opened. The
 workflow moves the pins and nothing else: it does not build, and the bump is red until someone
-makes it green.
+makes it green. It pushes as the organization's GitHub App (the variable `BOT_APP_ID` and the
+secret `BOT_APP_PRIVATE_KEY`), because a push made with `github.token` starts no checks.
 
 That is a session's work, not an issue's:
 

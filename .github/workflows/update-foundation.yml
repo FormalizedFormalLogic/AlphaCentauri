@@ -5,10 +5,11 @@ name: Update Foundation
 # Only the pins move: whatever the bump breaks is fixed by an agent inside that same pull
 # request (see docs/workflow.md).
 #
-# The pull request is opened by `github.token` unless `UPDATE_FOUNDATION_TOKEN` — a personal
-# access token with `contents: write` and `pull-requests: write` — is configured. Pushes made
-# with `github.token` do not start `ci.yml`, so without that secret the pull request has no
-# checks until someone pushes to it.
+# Pushes made with `github.token` do not start `ci.yml`, and `main` requires its checks, so the
+# branch and the pull request belong to a GitHub App instead: the organization variable
+# `BOT_APP_ID` and the secret `BOT_APP_PRIVATE_KEY` (contents and pull requests: write; issues:
+# write, for the label). Without them the workflow still runs under `github.token`, and the bump
+# then has no checks until someone pushes to its branch.
 on:
   schedule:
     - cron: '17 */6 * * *'
@@ -41,17 +42,27 @@ jobs:
     if: github.repository == 'FormalizedFormalLogic/AlphaCentauri'
     runs-on: ubuntu-latest
     steps:
+      # An installation token, revoked when the job ends. Skipped, and `github.token` used, where
+      # the app is not installed — a fork, or before the app exists.
+      - name: Mint the app token
+        id: app-token
+        if: vars.BOT_APP_ID != ''
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+
       # Full history: the existing branch is fetched below, and its tip is what the push leases.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.UPDATE_FOUNDATION_TOKEN || github.token }}
+          token: ${{ steps.app-token.outputs.token || github.token }}
 
       # One pull request carries the bump at a time; a second one would race this branch.
       - name: Find the open pull request
         id: pr
         env:
-          GH_TOKEN: ${{ secrets.UPDATE_FOUNDATION_TOKEN || github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
           pr=$(gh pr list --state open --label "$LABEL" --limit 1 --json number,headRefName)
@@ -133,13 +144,19 @@ jobs:
         id: push
         if: steps.rev.outputs.changed == 'true'
         env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           HEAD_REF: ${{ steps.pr.outputs.head }}
           SHORT: ${{ steps.rev.outputs.short }}
         run: |
           set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # The commit is attributed to the identity that pushes it, whose noreply address is
+          # built from the bot account's user id.
+          author=${APP_SLUG:+$APP_SLUG[bot]}
+          author=${author:-github-actions[bot]}
+          git config user.name "$author"
+          git config user.email "$(gh api "/users/${author//\[bot\]/%5Bbot%5D}" --jq .id)+$author@users.noreply.github.com"
           if git diff --quiet -- lakefile.toml lake-manifest.json lean-toolchain; then
             echo "the pins did not move; nothing to push"
             echo "pushed=false" >> "$GITHUB_OUTPUT"
@@ -160,7 +177,7 @@ jobs:
       - name: Open or refresh the pull request
         if: steps.push.outputs.pushed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.UPDATE_FOUNDATION_TOKEN || github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           NEW: ${{ steps.rev.outputs.new }}
           OLD: ${{ steps.rev.outputs.old }}

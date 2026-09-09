@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Hierarchy.Prenex
+public import AlphaCentauri.Hierarchy.StrictHierarchy
 public import AlphaCentauri.Bootstrapping.Delta0
 
 /-!

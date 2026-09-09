@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Hierarchy.NormalForm
-public import AlphaCentauri.Schemata.Collection
+public import AlphaCentauri.Schemata.Collection.Basic
 
 /-!
 # Prenex normal form from collection

@@ -2,7 +2,7 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.Definability
-public import AlphaCentauri.FirstOrder.FiniteAxiomatizability
+public import AlphaCentauri.FiniteAxiomatizability.Basic
 
 /-!
 # Reflexive theories

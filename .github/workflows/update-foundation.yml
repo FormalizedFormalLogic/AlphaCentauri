@@ -153,7 +153,7 @@ jobs:
           set -euo pipefail
           # The commit is attributed to the identity that pushes it, whose noreply address is
           # built from the bot account's user id.
-          author=${APP_SLUG:+$APP_SLUG[bot]}
+          author=${APP_SLUG:+${APP_SLUG}[bot]}
           author=${author:-github-actions[bot]}
           git config user.name "$author"
           git config user.email "$(gh api "/users/${author//\[bot\]/%5Bbot%5D}" --jq .id)+$author@users.noreply.github.com"

@@ -59,6 +59,21 @@ def compGraph (ψ : 𝚺₁.Semisentence (l + 1)) (χ : Fin l → 𝚺₁.Semise
   simp [compGraph, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
     Matrix.comp_vecCons', Empty.eq_elim]
 
+/-- `compGraph ψ χ` defines the composite of the functions defined by `ψ` and `χ`.
+- [HP98, Lemma I.1.53] -/
+lemma definedFunction_compGraph {V : Type*} [ORingStructure V] {ψ : 𝚺₁.Semisentence (l + 1)}
+    {χ : Fin l → 𝚺₁.Semisentence (k + 1)} {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V}
+    (hf : 𝚺₁.DefinedFunction f ψ) (hg : ∀ i, 𝚺₁.DefinedFunction (g i) (χ i)) :
+    𝚺₁.DefinedFunction (fun v ↦ f fun i ↦ g i v) (compGraph ψ χ) :=
+  .mk fun w ↦ by
+    simp only [eval_compGraph, hf.iff, (hg _).iff, Matrix.cons_val_zero, Matrix.cons_val_succ]
+    constructor
+    · rintro ⟨z, hz, hχ⟩
+      have : z = fun i ↦ g i (w ·.succ) := funext hχ
+      simpa [this] using hz
+    · intro e
+      exact ⟨fun i ↦ g i (w ·.succ), by simpa using e, fun i ↦ rfl⟩
+
 end
 
 lemma definablePred_evalb {V : Type*} [ORingStructure V] (φ : 𝚺₁.Semisentence (k + 1))
@@ -183,20 +198,11 @@ variable {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) 
 - [HP98, Lemma I.1.53] -/
 lemma comp [𝗘𝗤 ℒₒᵣ ⪯ T] (hg : T.ProvablyTotalVia g ψ) (hh : ∀ i, T.ProvablyTotalVia (h i) (χ i)) :
     T.ProvablyTotalVia (fun v ↦ g fun i ↦ h i v) (compGraph ψ χ) := by
-  refine of_models ⟨fun w ↦ ?_⟩ ?_
-  · simp only [eval_compGraph]
-    constructor
-    · rintro ⟨z, hz, hχ⟩
-      have e : z = fun i ↦ h i (w ·.succ) := funext fun i ↦ by
-        simpa using (hh i).graph_iff.mp (hχ i)
-      simpa [e] using hg.graph_iff.mp hz
-    · intro e
-      exact ⟨fun i ↦ h i (w ·.succ), hg.graph_iff.mpr (by simpa using e),
-        fun i ↦ (hh i).graph_iff.mpr (by simp)⟩
-  · intro V _ _ v
-    choose z hz using fun i ↦ (hh i).models V v
-    obtain ⟨y, hy⟩ := hg.models V z
-    exact ⟨y, by simpa using ⟨z, by simpa using hy, by simpa using hz⟩⟩
+  refine of_models (definedFunction_compGraph hg.defined fun i ↦ (hh i).defined) ?_
+  intro V _ _ v
+  choose z hz using fun i ↦ (hh i).models V v
+  obtain ⟨y, hy⟩ := hg.models V z
+  exact ⟨y, by simpa using ⟨z, by simpa using hy, by simpa using hz⟩⟩
 
 end comp
 

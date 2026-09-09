@@ -51,3 +51,4 @@ public import AlphaCentauri.Vorspiel.Ordinal
 public import AlphaCentauri.Vorspiel.Primrec
 public import AlphaCentauri.Vorspiel.Rew
 public import AlphaCentauri.Vorspiel.Semiformula
+public import AlphaCentauri.Vorspiel.Vector

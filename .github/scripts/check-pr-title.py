@@ -8,7 +8,10 @@ import os
 import re
 import sys
 
-TYPES = ("add", "fix", "refactor", "doc", "ci", "chore")
+TYPES = ("add", "fix", "refactor", "doc", "ci", "chore", "deps")
+# The one titled scope: the automated Foundation pin bump, whose title names the revision it
+# lands (`.github/workflows/update-foundation.yml`). Every other title carries none.
+SCOPES = {"deps": ("Foundation",)}
 MAX_LENGTH = 100
 
 # Greek, mathematical Greek (bold/sans/italic planes) and Unicode subscripts.
@@ -40,12 +43,12 @@ def check(title: str) -> list[str]:
         errors.append(f"the title is {len(title)} characters, over the {MAX_LENGTH} allowed")
 
     scope = re.match(r"^([A-Za-z]+)\(([^)]*)\):", title)
-    if scope:
+    if scope and scope.group(2) not in SCOPES.get(scope.group(1), ()):
         errors.append(
             f"the title carries a '({scope.group(2)})' scope; write "
             f"'{scope.group(1)}: <subject>' instead"
         )
-    elif not re.match(rf"^({'|'.join(TYPES)}): \S", title):
+    elif not re.match(rf"^({'|'.join(TYPES)})(\([^)]*\))?: \S", title):
         head = title.split(":", 1)[0] if ":" in title else title
         errors.append(
             f"the title must start with '<type>: ' where <type> is one of "

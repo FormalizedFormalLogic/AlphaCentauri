@@ -12,10 +12,12 @@ weak.linter.style.multiGoal = true
 [[lean_lib]]
 name = "AlphaCentauri"
 
+# Pinned to an exact revision, never a branch: what CI builds is what a checkout builds. The pin
+# is moved forward by `.github/workflows/update-foundation.yml` (see docs/workflow.md).
 [[require]]
 name = "Foundation"
 git = "https://github.com/FormalizedFormalLogic/Foundation"
-rev = "master"
+rev = "653e94fe1cb16eae9eb66b4202398c04844fd9e0"
 
 # `lake exe audit`: the axiom audit of `AlphaCentauri` against `forgive.yml` (Audit/Main.lean).
 # Run after `lake build`; the script imports only `Lean`, so building it costs nothing.

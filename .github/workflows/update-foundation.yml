@@ -1,0 +1,181 @@
+name: Update Foundation
+
+# Every six hours (and on demand) the Foundation pins are moved to the tip of Foundation's
+# `master`, on a single long-lived branch behind one pull request labelled `update-foundation`.
+# Only the pins move: whatever the bump breaks is fixed by an agent inside that same pull
+# request (see docs/workflow.md).
+#
+# The pull request is opened by `github.token` unless `UPDATE_FOUNDATION_TOKEN` — a personal
+# access token with `contents: write` and `pull-requests: write` — is configured. Pushes made
+# with `github.token` do not start `ci.yml`, so without that secret the pull request has no
+# checks until someone pushes to it.
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      rev:
+        description: 'Foundation revision to pin (default: the tip of master)'
+        required: false
+        type: string
+
+# A run pushes to a shared branch, so runs never overlap; a scheduled run behind a manual one
+# waits rather than dies, because it may carry a newer revision.
+concurrency:
+  group: update-foundation
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  BRANCH: update-foundation
+  LABEL: update-foundation
+  FOUNDATION: FormalizedFormalLogic/Foundation
+
+jobs:
+  update:
+    name: Bump the Foundation pins
+    # Nothing to do in a fork, whose pull requests go to its own default branch.
+    if: github.repository == 'FormalizedFormalLogic/AlphaCentauri'
+    runs-on: ubuntu-latest
+    steps:
+      # Full history: the existing branch is fetched below, and its tip is what the push leases.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.UPDATE_FOUNDATION_TOKEN || github.token }}
+
+      # One pull request carries the bump at a time; a second one would race this branch.
+      - name: Find the open pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.UPDATE_FOUNDATION_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+          pr=$(gh pr list --state open --label "$LABEL" --limit 1 --json number,headRefName)
+          number=$(echo "$pr" | jq -r '.[0].number // ""')
+          head=$(echo "$pr" | jq -r '.[0].headRefName // ""')
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "head=${head:-$BRANCH}" >> "$GITHUB_OUTPUT"
+          echo "found the pull request: ${number:-none} (branch ${head:-$BRANCH})"
+
+      # An open pull request's branch is built on top of, never rewritten: an agent's fixes for
+      # the previous bump live there. Without one, the branch restarts from `main`.
+      - name: Prepare the branch
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          HEAD_REF: ${{ steps.pr.outputs.head }}
+        run: |
+          set -euo pipefail
+          if [ -n "$PR_NUMBER" ]; then
+            git fetch origin "+refs/heads/$HEAD_REF:refs/remotes/origin/$HEAD_REF"
+            git switch --force-create "$HEAD_REF" "origin/$HEAD_REF"
+          else
+            git switch --force-create "$BRANCH" origin/main
+          fi
+
+      - name: Resolve the revision to pin
+        id: rev
+        env:
+          REQUESTED: ${{ inputs.rev }}
+        run: |
+          set -euo pipefail
+          new=${REQUESTED:-$(git ls-remote "https://github.com/$FOUNDATION" master | cut -f1)}
+          old=$(jq -r '.packages[] | select(.name == "Foundation") | .rev' lake-manifest.json)
+          if [ -z "$new" ]; then
+            echo "could not resolve a Foundation revision" >&2
+            exit 1
+          fi
+          {
+            echo "new=$new"
+            echo "old=$old"
+            echo "short=${new:0:7}"
+            [ "$new" = "$old" ] && echo "changed=false" || echo "changed=true"
+          } >> "$GITHUB_OUTPUT"
+          echo "the branch pins $old; upstream is at $new"
+
+      # `lakefile.toml` names the revision and `lake update` writes it into the manifest, so both
+      # move here. `lean-toolchain` has to equal Foundation's, and is taken from the new revision
+      # before lake runs, so that lake runs under the toolchain it is resolving for.
+      - name: Move the pins
+        if: steps.rev.outputs.changed == 'true'
+        env:
+          NEW: ${{ steps.rev.outputs.new }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, pathlib, re
+          new = os.environ['NEW']
+          path = pathlib.Path('lakefile.toml')
+          text = path.read_text()
+          bumped, count = re.subn(r'(?m)^rev = "[^"]*"$', f'rev = "{new}"', text)
+          if count != 1:
+              raise SystemExit(f'lakefile.toml has {count} pinned revisions, expected exactly 1')
+          path.write_text(bumped)
+          PY
+          curl -fsSL "https://raw.githubusercontent.com/$FOUNDATION/$NEW/lean-toolchain" -o lean-toolchain
+          echo "pinned $NEW on the toolchain $(cat lean-toolchain)"
+
+      - name: Install elan
+        if: steps.rev.outputs.changed == 'true'
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+          use-github-cache: false
+
+      - name: Update the manifest
+        if: steps.rev.outputs.changed == 'true'
+        run: lake update Foundation
+
+      - name: Commit and push
+        id: push
+        if: steps.rev.outputs.changed == 'true'
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          HEAD_REF: ${{ steps.pr.outputs.head }}
+          SHORT: ${{ steps.rev.outputs.short }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet -- lakefile.toml lake-manifest.json lean-toolchain; then
+            echo "the pins did not move; nothing to push"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "deps(Foundation): Update to \`$SHORT\`" -- lakefile.toml lake-manifest.json lean-toolchain
+          if [ -n "$PR_NUMBER" ]; then
+            # Never a rewrite: the branch carries the fixes pushed for the previous bump.
+            git push origin "HEAD:refs/heads/$HEAD_REF"
+          else
+            # No pull request points at the branch, so a leftover one is replaced, against the
+            # tip fetched at checkout.
+            git push --force-with-lease origin "HEAD:$BRANCH"
+          fi
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # The title becomes the commit subject on `main`, so it names the revision that landed.
+      - name: Open or refresh the pull request
+        if: steps.push.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.UPDATE_FOUNDATION_TOKEN || github.token }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          NEW: ${{ steps.rev.outputs.new }}
+          OLD: ${{ steps.rev.outputs.old }}
+          SHORT: ${{ steps.rev.outputs.short }}
+        run: |
+          set -euo pipefail
+          title="deps(Foundation): Update to \`$SHORT\`"
+          body=$(cat <<EOF
+          Pins Foundation at \`$NEW\` ([compare](https://github.com/$FOUNDATION/compare/$OLD...$NEW)).
+
+          Opened by \`.github/workflows/update-foundation.yml\`, which moves the pins only. This body is rewritten on every run; leave notes in a comment.
+          EOF
+          )
+          if [ -n "$PR_NUMBER" ]; then
+            gh pr edit "$PR_NUMBER" --title "$title" --body "$body"
+          else
+            gh pr create --base main --head "$BRANCH" --label "$LABEL" --title "$title" --body "$body"
+          fi

@@ -60,7 +60,9 @@ activity for 14 days may be released by anyone, with a comment.
   wait for the prerequisite PR to land first.
 - Never force-push a branch you did not create except with `--force-with-lease`.
 - Title: a short noun phrase — no subtitle, no full theorem name, no `(scope)` parenthetical —
-  in the form `<type>: <subject>` with `<type>` in `add | fix | refactor | doc | ci | chore`.
+  in the form `<type>: <subject>` with `<type>` in `add | fix | refactor | doc | ci | chore |
+  deps`. The one exception is the automated Foundation bump, titled
+  ``deps(Foundation): Update to `<short sha>` ``.
   PRs are squash-merged, so the title becomes the commit on `main`: do not phone it in. Backtick
   every Lean identifier or notation (`` `DirectInterpretation` ``, `` `𝚺-[s]` ``); write
   mathematics in TeX (`` $\Delta_1$ ``, `` $\Sigma_n$ ``, `` $\mathsf{I}\Sigma_1$ ``,
@@ -79,7 +81,7 @@ activity for 14 days may be released by anyone, with a comment.
 axiom outside `propext`, `Classical.choice`, `Quot.sound` except what `forgive.yml` forgives by
 name); `just no-sorry`; `just mk-all` leaves no diff. The audit report is posted as one PR
 comment, overwritten on each run, unless the PR is labelled `infrastructure`. `actionlint.yml`
-lints the workflow files.
+lints the workflow files, and `update-foundation.yml` bumps the dependency pins (below).
 
 A red check is fixed in the PR, never worked around.
 
@@ -107,11 +109,15 @@ agent when the user has explicitly told it to for that PR.
 | `proof-formalized` | Stage: the `axiom` proved in a follow-up PR; closes the issue. |
 | `infrastructure` | A PR with no mathematics; CI skips the audit comment. |
 | `refactor` | Reorganizes existing code without adding results; no mathematics. |
+| `update-foundation` | The automated Foundation pin bump; at most one open PR carries it. |
 
 Nothing else is a label. Blocked, belongs upstream in Foundation, process questions — say it
 in the issue thread.
 
 ## The worker loop
+
+An open pull request labelled `update-foundation` comes before all of this; see
+[Dependency pins and Foundation](#dependency-pins-and-foundation).
 
 1. List open, unassigned issues whose thread does not say they are waiting; pick one.
 2. Claim it. If that fails, go to 1.
@@ -123,10 +129,36 @@ in the issue thread.
 
 ## Dependency pins and Foundation
 
-`lake-manifest.json` pins Foundation and `lean-toolchain` must equal Foundation's. Bumps are
-forward only, in their own PR titled `chore: bump Foundation to <short sha>`, with any
-resulting fixes included; `lakefile.toml` is not edited.
+`lakefile.toml` pins Foundation at an exact revision, `lake-manifest.json` records what that
+revision resolves to, and `lean-toolchain` equals Foundation's. The three move together, forward
+only, and nobody bumps them by hand.
 
-Material is written in Foundation's style so it can move upstream. Deciding what moves is a
+[`.github/workflows/update-foundation.yml`](../.github/workflows/update-foundation.yml) moves
+them every six hours, and on demand from the Actions tab (`workflow_dispatch`, optionally given
+a revision to pin instead of the tip of Foundation's `master`). It keeps one branch,
+`update-foundation`, behind one open pull request labelled `update-foundation` and titled
+``deps(Foundation): Update to `<short sha>` ``. While that pull request is open the new pins are
+committed on top of it — never a force-push, since the repairs made for the previous bump live
+on that branch; otherwise the branch restarts from `main` and the pull request is opened. The
+workflow moves the pins and nothing else: it does not build, and the bump is red until someone
+makes it green.
+
+That is a session's work, not an issue's:
+
+1. An open pull request labelled `update-foundation` takes precedence over picking up an issue
+   — a `/loop` iteration is the usual way to notice one. Work on its branch, in that pull
+   request.
+2. Build, read the compiler's complaints against Foundation's own diff over the range the pull
+   request body links, and repair this repository: renames, changed signatures, lemmas that
+   moved.
+3. Where Foundation has absorbed material ported from here, Foundation's version wins: delete
+   the local copy, use Foundation's, and adapt every call site. Never keep both, and leave no
+   wrapper behind (see [`AGENTS.md`](../AGENTS.md), "No compatibility layer").
+4. Push to the same branch, and leave the merge to a human as for every other pull request.
+
+A bump blocked on mathematics this repository does not have is reported in a comment on that
+pull request and left to a human.
+
+Material here is written in Foundation's style so it can move upstream. Deciding what moves is a
 human's job; an agent that thinks a result belongs upstream, or that Foundation's API needs a
 change, says so in the issue thread.

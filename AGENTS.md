@@ -86,8 +86,12 @@ same, so the work is visible.
 - `AlphaCentauri/` and `AlphaCentauri.lean` are the only places code goes. `docs/`,
   `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `README.md`, `AGENTS.md`, and
   `CLAUDE.md` (a symlink to `AGENTS.md`) are human-owned; a PR that touches them always needs a
-  human review. The two pins (`lake-manifest.json`, `lean-toolchain`) may be bumped
-  **forward only**, in their own PR.
+  human review. The pins (Foundation's `rev` in `lakefile.toml`, `lake-manifest.json`,
+  `lean-toolchain`) move **forward only**, and a workflow moves them: never bump them yourself,
+  work in the open pull request labelled `update-foundation`, whose branch also carries the
+  repairs the bump needs — including replacing anything Foundation has absorbed from here with
+  Foundation's own version (see
+  [`docs/workflow.md`](docs/workflow.md#dependency-pins-and-foundation)).
 
 ## Pull requests
 

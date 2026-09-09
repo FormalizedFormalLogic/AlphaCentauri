@@ -17,7 +17,7 @@ name = "AlphaCentauri"
 [[require]]
 name = "Foundation"
 git = "https://github.com/FormalizedFormalLogic/Foundation"
-rev = "653e94fe1cb16eae9eb66b4202398c04844fd9e0"
+rev = "58c76ac8b26cfda45d0d5430511750489d39b25a"
 
 # `lake exe audit`: the axiom audit of `AlphaCentauri` against `forgive.yml` (Audit/Main.lean).
 # Run after `lake build`; the script imports only `Lean`, so building it costs nothing.

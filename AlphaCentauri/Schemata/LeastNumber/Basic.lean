@@ -58,9 +58,7 @@ lemma LeastNumberOnHierarchy_weakerThan_of_le {n₁ n₂} (h : n₁ ≤ n₂) : 
 
 instance (Γ : Polarity) (n : ℕ) : 𝗣𝗔⁻ ⪯ 𝗟 Γ n := WeakerThan.ofSubset Set.subset_union_left
 
-instance (Γ : Polarity) (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗟 Γ n :=
-  have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
-  WeakerThan.trans this inferInstance
+instance (Γ : Polarity) (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗟 Γ n := WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
 
 end axioms
 
@@ -92,33 +90,42 @@ namespace LeastNumberOnHierarchy
 
 variable (Γ : Polarity) (m : ℕ) [V↓[ℒₒᵣ] ⊧* 𝗟 Γ m]
 
-instance : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (Hierarchy Γ m) :=
-  have : V↓[ℒₒᵣ] ⊧* 𝗟 Γ m := inferInstance
-  models_of_subtheory this
+instance : V↓[ℒₒᵣ] ⊧* LeastNumberScheme (Hierarchy Γ m) := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗟 Γ m›
 
-lemma least_number {P : V → Prop} (hP : Γ-[m].DefinablePred P) {x} (h : P x) :
-    ∃ y, P y ∧ ∀ z < y, ¬P z :=
+lemma least_number {P : V → Prop} (hP : Γ-[m].DefinablePred P) {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
   LeastNumberScheme.least_number (P := P) (C := Hierarchy Γ m) (by
     classical
-    rcases hP with ⟨φ, hp⟩
-    have : Inhabited V := Classical.inhabited_of_nonempty'
-    exact ⟨φ.val.enumerateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val, by simp,
-      by intro x; simp [Semiformula.eval_rewriteMap, hp.df.iff]⟩) h
+    rcases hP with ⟨φ, hp⟩;
+    have : Inhabited V := Classical.inhabited_of_nonempty';
+    use φ.val.enumerateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val;
+    and_intros;
+    . simp;
+    . intro x;
+      simp [Semiformula.eval_rewriteMap, hp.df.iff]
+  ) h
 
 /-- The least number scheme for `Γ` proves successor induction for `Γ.alt`-definable
 predicates. -/
 lemma succ_induction {P : V → Prop} (hP : Γ.alt-[m].DefinablePred P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
+  (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory ‹V↓[ℒₒᵣ] ⊧* 𝗟 Γ m›
   have : V↓[ℒₒᵣ] ⊧* 𝗤 := models_of_subtheory this
-  have hP' : (SigmaPiDelta.alt (Γ : SigmaPiDelta))-[m].DefinablePred P := by
-    rw [SigmaPiDelta.alt_coe]; exact hP
-  by_contra hcon
-  obtain ⟨a, ha⟩ : ∃ x, ¬P x := by simpa using hcon
-  obtain ⟨y, hy, hmin⟩ := least_number Γ m (P := fun x ↦ ¬P x) hP'.not ha
-  have hy0 : y ≠ 0 := by rintro rfl; exact hy zero
-  obtain ⟨z, rfl⟩ := Arithmetic.exists_succ_of_ne_zero hy0
-  exact hy (succ z (not_not.mp (hmin z (lt_succ_iff_le.mpr le_rfl))))
+  by_contra! hcon
+  obtain ⟨a, ha⟩ := hcon;
+  obtain ⟨y, hy, hmin⟩ := least_number Γ m (P := fun x ↦ ¬P x) (by
+    apply Arithmetic.HierarchySymbol.Definable.not;
+    simpa [SigmaPiDelta.alt_coe];
+  ) ha;
+  push Not at hmin;
+  obtain ⟨z, rfl⟩ := Arithmetic.exists_succ_of_ne_zero $
+    show y ≠ 0 by
+    rintro rfl;
+    contradiction;
+  apply hy;
+  apply succ;
+  apply hmin;
+  apply lt_succ_iff_le.mpr;
+  apply le_rfl;
 
 end LeastNumberOnHierarchy
 
@@ -184,28 +191,28 @@ section theorems
 
 /-- The induction schemes for `𝚺-[n]` and `𝚷-[n]` formulas give the same theory.
 - [HP98, Theorem I.2.4] -/
-theorem ISigma_equiv_IPi (n : ℕ) : 𝗜𝚺 n ≊ 𝗜𝚷 n :=
-  Equiv.antisymm_iff.mpr
-    ⟨weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance,
-     weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance⟩
+theorem ISigma_equiv_IPi (n : ℕ) : 𝗜𝚺 n ≊ 𝗜𝚷 n := Equiv.antisymm_iff.mpr ⟨
+  weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance,
+  weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
+⟩
 
 /-- The least number scheme for `𝚺-[n]` formulas gives the same theory as the induction
 scheme for `𝚺-[n]` formulas.
 - [HP98, Lemma I.2.8]
 - [HP98, Lemma I.2.12] -/
-theorem LSigma_equiv_ISigma (n : ℕ) : 𝗟𝚺 n ≊ 𝗜𝚺 n :=
-  Equiv.antisymm_iff.mpr
-    ⟨weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance,
-     weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance⟩
+theorem LSigma_equiv_ISigma (n : ℕ) : 𝗟𝚺 n ≊ 𝗜𝚺 n := Equiv.antisymm_iff.mpr ⟨
+  weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance,
+  weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
+⟩
 
 /-- The least number scheme for `𝚷-[n]` formulas gives the same theory as the induction
 scheme for `𝚺-[n]` formulas.
 - [HP98, Lemma I.2.8]
 - [HP98, Lemma I.2.12] -/
-theorem LPi_equiv_ISigma (n : ℕ) : 𝗟𝚷 n ≊ 𝗜𝚺 n :=
-  Equiv.antisymm_iff.mpr
-    ⟨weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance,
-     weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance⟩
+theorem LPi_equiv_ISigma (n : ℕ) : 𝗟𝚷 n ≊ 𝗜𝚺 n := Equiv.antisymm_iff.mpr ⟨
+  weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance,
+  weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
+⟩
 
 end theorems
 

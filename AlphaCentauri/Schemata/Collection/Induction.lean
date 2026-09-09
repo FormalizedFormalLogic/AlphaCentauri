@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Schemata.CollectionEquivalence
+public import AlphaCentauri.Schemata.Collection.Equivalence
 
 /-!
 # The induction scheme `𝗜𝚺 n` from the collection scheme `𝗕𝚺 (n + 1)`

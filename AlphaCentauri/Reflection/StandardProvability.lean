@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.Second
-public import AlphaCentauri.Hierarchy.Prenex
+public import AlphaCentauri.Hierarchy.StrictHierarchy
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 
 @[expose] public section

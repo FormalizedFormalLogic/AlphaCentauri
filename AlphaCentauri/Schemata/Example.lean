@@ -1,8 +1,8 @@
 module
 
-public import AlphaCentauri.Schemata.CollectionEquivalence
-public import AlphaCentauri.Schemata.CollectionInduction
-public import AlphaCentauri.Schemata.LeastNumber
+public import AlphaCentauri.Schemata.Collection.Equivalence
+public import AlphaCentauri.Schemata.Collection.Induction
+public import AlphaCentauri.Schemata.LeastNumber.Basic
 
 /-!
 # Instances of the fragment hierarchy

@@ -1,9 +1,9 @@
 module
 
 public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
-public import AlphaCentauri.FirstOrder.FiniteAxiomatizability
+public import AlphaCentauri.FiniteAxiomatizability.Basic
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
-public import AlphaCentauri.Schemata.Collection
+public import AlphaCentauri.Schemata.Collection.Basic
 public import AlphaCentauri.Vorspiel.Fvar
 
 /-!

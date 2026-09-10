@@ -7,7 +7,8 @@ public import Foundation.FirstOrder.Completeness
 /-!
 # Provably total functions
 
-Provably total functions, their graph formulas, and closure under composition.
+Provably total and provably functional functions, their graph formulas, and closure under
+composition.
 -/
 
 @[expose] public section
@@ -39,6 +40,19 @@ def totalitySentence (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSentence :=
 lemma models_totalitySentence_iff {V : Type*} [ORingStructure V] {φ : 𝚺₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ totalitySentence φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) := by
   simp [totalitySentence, models_iff]
+
+/-- The functionality sentence `∀ x⃗, ∀ y y', φ(y, x⃗) ∧ φ(y', x⃗) → y = y'` of a graph formula `φ`.
+- [HP98, Definition I.1.51(2)] -/
+def functionalitySentence (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSentence :=
+  ∀¹* ∀¹ ∀¹ (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val) ⋏
+    (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val)) 🡒 “#1 = #0”)
+
+lemma models_functionalitySentence_iff {V : Type*} [ORingStructure V]
+    {φ : 𝚺₁.Semisentence (k + 1)} :
+    V↓[ℒₒᵣ] ⊧ functionalitySentence φ ↔ ∀ (v : Fin k → V) (y y'),
+      φ.val.Evalb (y :> v) → φ.val.Evalb (y' :> v) → y = y' := by
+  simp [functionalitySentence, models_iff, Semiformula.eval_rew, Function.comp_def,
+    Matrix.comp_vecCons', Empty.eq_elim]
 
 section
 variable {l : ℕ}
@@ -125,6 +139,13 @@ structure ArithmeticTheory.ProvablyTotalVia (T : ArithmeticTheory) (f : (Fin k �
   defined : HierarchySymbol.DefinedFunction (V := ℕ) f φ
   total : T ⊢ totalitySentence φ
 
+/-- `f` is `T`-provably functional via `φ` iff `f` is `T`-provably total via `φ` and `T` proves
+that `φ` is single-valued.
+- [HP98, Definition I.1.51(2)] -/
+structure ArithmeticTheory.ProvablyFunctionalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ)
+    (φ : 𝚺₁.Semisentence (k + 1)) : Prop extends T.ProvablyTotalVia f φ where
+  functional : T ⊢ functionalitySentence φ
+
 /-- `f` is `T`-provably total: some `𝚺₁` formula witnesses `T.ProvablyTotalVia f`.
 - [HP98, Definition I.1.51]
 - [HP98, Definition IV.3.1]
@@ -132,9 +153,14 @@ structure ArithmeticTheory.ProvablyTotalVia (T : ArithmeticTheory) (f : (Fin k �
 def ArithmeticTheory.ProvablyTotal (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Prop :=
   ∃ φ, T.ProvablyTotalVia f φ
 
+/-- `f` is `T`-provably functional: some `𝚺₁` formula witnesses `T.ProvablyFunctionalVia f`.
+- [HP98, Definition I.1.51(2)] -/
+def ArithmeticTheory.ProvablyFunctional (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Prop :=
+  ∃ φ, T.ProvablyFunctionalVia f φ
+
 namespace ArithmeticTheory.ProvablyTotalVia
 
-lemma to_provablyTotal (h : T.ProvablyTotalVia f φ) : T.ProvablyTotal f := ⟨φ, h⟩
+lemma toProvablyTotal (h : T.ProvablyTotalVia f φ) : T.ProvablyTotal f := ⟨φ, h⟩
 
 lemma graph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
     φ.val.Evalb v ↔ v 0 = f (v ·.succ) := h.defined.iff
@@ -208,6 +234,29 @@ end comp
 
 end ArithmeticTheory.ProvablyTotalVia
 
+namespace ArithmeticTheory.ProvablyFunctionalVia
+
+lemma toProvablyFunctional (h : T.ProvablyFunctionalVia f φ) : T.ProvablyFunctional f := ⟨φ, h⟩
+
+lemma models (h : T.ProvablyFunctionalVia f φ) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] :
+    ∃ F : (Fin k → V) → V, 𝚺₁.DefinedFunction F φ := by
+  have h₁ := models_functionalitySentence_iff.mp
+    (consequence_iff'.mp (Theory.Proof.sound h.functional) V)
+  choose F hF using h.toProvablyTotalVia.models V
+  exact ⟨F, .mk fun v ↦ ⟨fun hv ↦ by simpa using h₁ _ _ _ (by simpa using hv) (hF _),
+    fun e ↦ by simpa [← e] using hF (v ·.succ)⟩⟩
+
+lemma of_models [𝗘𝗤 ℒₒᵣ ⪯ T] (hf : HierarchySymbol.DefinedFunction (V := ℕ) f φ)
+    (H : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T],
+      ∃ F : (Fin k → V) → V, 𝚺₁.DefinedFunction F φ) : T.ProvablyFunctionalVia f φ where
+  toProvablyTotalVia := .of_models hf fun V _ _ v ↦ have ⟨F, hF⟩ := H V; ⟨F v, by simp [hF.iff]⟩
+  functional := Arithmetic.complete T _ fun V _ _ ↦
+    models_functionalitySentence_iff.mpr fun v y y' hy hy' ↦ by
+      obtain ⟨F, hF⟩ := H V
+      simp_all [hF.iff]
+
+end ArithmeticTheory.ProvablyFunctionalVia
+
 namespace ArithmeticTheory.ProvablyTotal
 
 lemma mono (h : T.ProvablyTotal f) (hT : T ⪯ U) : U.ProvablyTotal f :=
@@ -235,5 +284,12 @@ lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotal f) :
   have ⟨_, h⟩ := h; ⟨_, h, h.exists_unique⟩
 
 end ArithmeticTheory.ProvablyTotal
+
+namespace ArithmeticTheory.ProvablyFunctional
+
+lemma toProvablyTotal (h : T.ProvablyFunctional f) : T.ProvablyTotal f :=
+  have ⟨_, h⟩ := h; h.toProvablyTotalVia.toProvablyTotal
+
+end ArithmeticTheory.ProvablyFunctional
 
 end FFL.FirstOrder

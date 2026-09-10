@@ -175,13 +175,17 @@ theorem eval_of_Sigma1 {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hierar
 /-- A theory axiomatized by $\Pi_1$ sentences holds in `M` as soon as it holds in an end
 extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
-theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 1 σ)
-    [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T := models_theory_iff.mpr fun σ hσ ↦ by
-  by_contra h
-  have h₁ : (∼σ).Eval ![] Empty.elim :=
-    Eval.of_eq (N.eval_of_Sigma1 (hT σ hσ).neg ![] Empty.elim (by simpa [models_iff] using h))
-      (funext (·.elim0)) (funext (·.elim))
-  exact notModels_iff.mpr (by simpa using h₁) (models_theory_iff.mp inferInstance σ hσ)
+theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 1 σ) [N↓[ℒₒᵣ] ⊧* T] :
+    M↓[ℒₒᵣ] ⊧* T :=
+  models_theory_iff.mpr <| by
+    intro σ hσ
+    by_contra! h
+    apply notModels_iff.mpr ?_ <| models_theory_iff.mp (inferInstance : N.carrier↓[ℒₒᵣ] ⊧* T) σ hσ
+    · suffices (∼σ).Eval ![] Empty.elim by simpa
+      exact Eval.of_eq
+        (N.eval_of_Sigma1 (hT σ hσ).neg ![] Empty.elim (by simpa [models_iff] using h))
+        (funext (·.elim0))
+        (funext (·.elim))
 
 end EndExtensionOf
 

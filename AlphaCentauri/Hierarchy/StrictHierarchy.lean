@@ -101,11 +101,11 @@ lemma toPrenex {Γ j s n} {φ : Semiformula L ξ (n + s)} (h : StrictHierarchy (
       rw [hΓ] at h ⊢
       exact (ofAlt h).all
 
-/-- A `Δ₀` matrix under `s` alternating quantifiers, the outermost one of the kind `Γ`, is a
+/-- A $\Delta_0$ matrix under `s` alternating quantifiers, the outermost one of the kind `Γ`, is a
 strict `Γ`-formula of level `s`.
 
 - [HP98, 0.30] -/
-lemma toPrenex_of_deltaZero {Γ s n} {φ : Semiformula L ξ (n + s)} (h : Hierarchy 𝚺 0 φ) :
+lemma toPrenex_of_Delta0 {Γ s n} {φ : Semiformula L ξ (n + s)} (h : Hierarchy 𝚺 0 φ) :
     StrictHierarchy Γ s (φ.toPrenex Γ s) := by simpa using toPrenex (Γ := Γ) (zero h)
 
 /-- Strict hierarchy classes are monotone in their level.

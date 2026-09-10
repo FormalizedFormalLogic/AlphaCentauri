@@ -204,8 +204,8 @@ lemma bexsLT_absolute (hθ : Absolute.{_, u} T θ) : Absolute.{_, u} T (θ.bexsL
 - [HP98, Fact IV.1.3(4), Remark IV.1.18]
 - [vO99, Exercise 37] -/
 @[simp, grind .]
-theorem absolute_of_deltaZero (hφ : Hierarchy 𝚺 0 φ) : Absolute T φ :=
-  delta₀_induction_open (P := fun _ φ ↦ Absolute T φ)
+theorem absolute_of_Delta0 (hφ : Hierarchy 𝚺 0 φ) : Absolute T φ :=
+  Delta0_induction_open (P := fun _ φ ↦ Absolute T φ)
     (fun _ _ hφ ↦ absolute_of_open T hφ)
     (fun _ _ _ _ _ ihφ ihψ ↦ and_absolute ihφ ihψ)
     (fun _ _ _ _ _ ihφ ihψ ↦ or_absolute ihφ ihψ)

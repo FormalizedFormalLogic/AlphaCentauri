@@ -78,7 +78,6 @@ variable (φ : ArithmeticSemisentence (k + 1)) {M : Type*} [ORingStructure M] [M
 private lemma exists_witness_in_segment (I : InitialSegment M) (hφ : Hierarchy 𝚺 0 φ)
     (h : 𝗜𝚺₀ ⊢ ∀¹* ∃¹ φ) (e : Fin k → ↥I.carrier) :
     ∃ b ∈ I.carrier, φ.Evalb (b :> fun i ↦ (e i : M)) := by
-  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀)
   have hN : I.endExtension↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀)
   have : I.endExtension↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hN
   have hK : (↥I.carrier)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := I.endExtension.models_ISigma0
@@ -110,8 +109,7 @@ existential bounded by a term.
 theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
     (h : 𝗜𝚺₀ ⊢ ∀¹* ∃¹ φ) :
     ∃ t : ClosedSemiterm ℒₒᵣ k, 𝗜𝚺₀ ⊢ ∀¹* ∃¹[“#0 < !!(Rew.bShift t)”] φ := by
-  by_contra hcon
-  push Not at hcon
+  by_contra! hcon
   have sat : Satisfiable (⋃ n, unboundedTheory φ n) :=
     (Compact.compact_cumulative (unboundedTheory_cumulative φ)).mpr
       (satisfiable_unboundedTheory φ hcon)
@@ -121,7 +119,8 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
   have : (ModelOfSatEq sat)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
     models_of_lMap_image_subset sat <| Set.subset_iUnion_of_subset 0 <|
       Set.subset_union_of_subset_left Set.subset_union_right _
-  refine false_of_unbounded φ hφ h (cstVal sat) fun t ↦ ?_
+  refine false_of_unbounded φ hφ h (cstVal sat) ?_
+  intro t
   have h₁ : (ModelOfSatEq sat)↓[Language.oRingConst k] ⊧ lift ((∼φ).ballLT t) :=
     Semantics.modelsSet_iff.mp (ModelOfSatEq.models sat)
       (Set.mem_iUnion_of_mem (Encodable.encode t + 1)
@@ -136,10 +135,10 @@ theorem exists_term_bound_of_provablyTotal {f : (Fin k → ℕ) → ℕ} {φ : �
     (hφ : Hierarchy 𝚺 0 φ.val) (h : 𝗜𝚺₀.ProvablyTotalVia f φ) :
     ∃ t : ClosedSemiterm ℒₒᵣ k, ∀ v, f v ≤ Semiterm.valb v t := by
   obtain ⟨t, ht⟩ := parikh φ.val hφ h.total
-  refine ⟨t, fun v ↦ ?_⟩
   have h₁ : ∀ w : Fin k → ℕ, ∃ y < Semiterm.valb w t, φ.val.Evalb (y :> w) := by
-    simpa [models_iff, eval_allClosure, eval_bexsLT] using
-      consequence_iff'.mp (Theory.Proof.sound ht) ℕ
+    simpa [models_iff, eval_allClosure] using consequence_iff'.mp (Theory.Proof.sound ht) ℕ
+  refine ⟨t, ?_⟩
+  intro v
   obtain ⟨y, hy, hy'⟩ := h₁ v
   exact le_of_lt (h.graph_iff.mp hy' ▸ hy)
 

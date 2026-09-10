@@ -85,9 +85,8 @@ theorem models_ISigma0 [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧*
   simp only [Semantics.ModelsSet.union_iff, InductionScheme]
   refine ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
   rintro _ ⟨φ, hφ, rfl⟩
-  simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_rew_q,
-    Semiformula.eval_substs, Function.comp, Matrix.constant_eq_singleton]
-    using fun v h0 hs a ↦ N.eval_of_endExtension hφ v h0 hs a
+  simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
+    using N.eval_of_endExtension hφ
 
 end EndExtensionOf
 

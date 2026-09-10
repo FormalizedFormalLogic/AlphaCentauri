@@ -127,9 +127,8 @@ lemma models_lift_iff (φ : ArithmeticSemisentence k) :
 lemma models_of_lMap_image_subset {U : ArithmeticTheory}
     (h : Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) '' U ⊆ T) :
     (ModelOfSatEq sat)↓[ℒₒᵣ] ⊧* U := ⟨fun _ hσ ↦
-  have h₁ := Semiformula.models_lMap.mp
-    ((ModelOfSatEq.models sat).models _ (h (Set.mem_image_of_mem _ hσ)))
-  reduct_eq sat ▸ h₁⟩
+  reduct_eq sat ▸ Semiformula.models_lMap.mp
+    ((ModelOfSatEq.models sat).models _ (h (Set.mem_image_of_mem _ hσ)))⟩
 
 end
 

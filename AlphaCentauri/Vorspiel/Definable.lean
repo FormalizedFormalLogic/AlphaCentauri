@@ -31,19 +31,6 @@ end HierarchySymbol.Definable
 
 variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s k : ℕ}
 
-/-- The evaluation of a `Hierarchy Γ s` formula at a fixed valuation is `Γ-[s]`-definable. -/
-lemma definable_of_hierarchy {φ : ArithmeticSemiformula ℕ k} (hφ : Hierarchy Γ s φ) (e : ℕ → V) :
-    Γ-[s].Definable fun v ↦ φ.Eval v e :=
-  .mkPolarity (Rew.rewriteMap e ▹ φ) (hφ.rew _) fun _ ↦ by simp [Semiformula.eval_rewriteMap]
-
-/-- The evaluation of a `Hierarchy Γ s` formula in one variable at a fixed valuation is a
-`Γ-[s]`-definable predicate. -/
-lemma definablePred_of_hierarchy {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ s φ)
-    (e : ℕ → V) : Γ-[s].DefinablePred fun x ↦ φ.Eval ![x] e :=
-  (definable_of_hierarchy hφ e).of_iff fun v ↦ by
-    have h : ![v 0] = v := (Matrix.fun_eq_vec_one v).symm
-    simp [h]
-
 /-- The evaluation of a `Hierarchy Γ s` formula in two variables at a fixed valuation is a
 `Γ-[s]`-definable relation. -/
 lemma definableRel_of_hierarchy {φ : ArithmeticSemiformula ℕ 2} (hφ : Hierarchy Γ s φ)

@@ -7,8 +7,8 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 An end extension of an `ℒₒᵣ`-structure `M` is a structure into which `M` embeds with nothing new
 below the image of `M`. Bounded formulas take the same truth value in `M` and in an end extension
-of it, `𝚺-[1]` formulas satisfied in `M` stay satisfied in an end extension of it, and both `𝗣𝗔⁻`
-and any theory axiomatized by `𝚷-[1]` sentences hold in `M` as soon as they hold in an end
+of it, $\Sigma_1$ formulas satisfied in `M` stay satisfied in an end extension of it, and both
+`𝗣𝗔⁻` and any theory axiomatized by $\Pi_1$ sentences hold in `M` as soon as they hold in an end
 extension of `M`.
 -/
 
@@ -146,9 +146,9 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     exact (lt_tri (N.emb x) (N.emb y)).imp N.emb_lt_emb.mp
       (Or.imp N.emb_eq_emb.mp N.emb_lt_emb.mp)
 
-/-- Satisfaction of a `𝚺-[1]` formula carries over from `M` to an end extension of `M`.
+/-- Satisfaction of a $\Sigma_1$ formula carries over from `M` to an end extension of `M`.
 - [HP98, Fact IV.1.3(4)] -/
-theorem eval_of_sigmaOne {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hierarchy 𝚺 1 φ)
+theorem eval_of_Sigma1 {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hierarchy 𝚺 1 φ)
     (e : Fin n → M) (f : ξ → M) : φ.Eval e f → φ.Eval (N ∘ e) (N ∘ f) :=
   sigma₁_induction' (P := fun n φ ↦ ∀ (e : Fin n → M) (f : ξ → M),
       φ.Eval e f → φ.Eval (N ∘ e) (N ∘ f)) hφ
@@ -172,14 +172,14 @@ theorem eval_of_sigmaOne {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hier
       exact ⟨N x, by rw [← Matrix.comp_vecCons'']; exact ih (x :> e) f hx⟩)
     e f
 
-/-- A theory axiomatized by `𝚷-[1]` sentences holds in `M` as soon as it holds in an end extension
-of `M`.
+/-- A theory axiomatized by $\Pi_1$ sentences holds in `M` as soon as it holds in an end
+extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
-theorem models_of_piOne {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 1 σ)
+theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 1 σ)
     [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T := models_theory_iff.mpr fun σ hσ ↦ by
   by_contra h
   have h₁ : (∼σ).Eval ![] Empty.elim :=
-    Eval.of_eq (N.eval_of_sigmaOne (hT σ hσ).neg ![] Empty.elim (by simpa [models_iff] using h))
+    Eval.of_eq (N.eval_of_Sigma1 (hT σ hσ).neg ![] Empty.elim (by simpa [models_iff] using h))
       (funext (·.elim0)) (funext (·.elim))
   exact notModels_iff.mpr (by simpa using h₁) (models_theory_iff.mp inferInstance σ hσ)
 

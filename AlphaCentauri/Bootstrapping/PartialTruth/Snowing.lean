@@ -164,7 +164,7 @@ theorem satZero_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : Hierarchy 𝚺 0 φ) (v : Fin k → V) :
     SatZero (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
   revert v
-  refine delta₀_induction (ξ := Empty)
+  refine Delta0_induction (ξ := Empty)
     (P := fun k φ ↦ ∀ v : Fin k → V, SatZero (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ)
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ k φ hφ
   · intro n v; simp [Sentence.quote_def]
@@ -345,27 +345,27 @@ lemma exists_codes : ∀ {m : ℕ} (v : Fin m → M), ∃ ev, Codes v ev := by
 - [HP98, 1.66] -/
 private lemma uTerm_quote_cast {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) :
     UTerm ((⌜t⌝ : ℕ) : M) :=
-  cast_delta₁ (isUTerm ℒₒᵣ) (by simpa using isUTerm_quote (V := ℕ) t)
+  Delta1_cast₁ (isUTerm ℒₒᵣ) (by simpa using isUTerm_quote (V := ℕ) t)
 
 /-- The code of a semisentence is a well-formed internal formula.
 - [HP98, 1.66] -/
 private lemma uFormula_quote_cast {k : ℕ} (φ : ArithmeticSemisentence k) :
     UFormula ((⌜φ⌝ : ℕ) : M) :=
-  cast_delta₁ (isUFormula ℒₒᵣ) (by simpa using isUFormula_quote (V := ℕ) φ)
+  Delta1_cast₁ (isUFormula ℒₒᵣ) (by simpa using isUFormula_quote (V := ℕ) φ)
 
-/-- The code of a bounded semisentence is internally `Δ₀`.
+/-- The code of a bounded semisentence is internally $\Delta_0$.
 - [HP98, Lemma I.1.68] -/
-private lemma delta0_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k} (h : Hierarchy 𝚺 0 φ) :
+private lemma Delta0_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k} (h : Hierarchy 𝚺 0 φ) :
     Delta0 ((⌜φ⌝ : ℕ) : M) :=
-  cast_delta₁ isDelta0 (by simpa using (isDelta0_quote_iff (V := ℕ) φ).mpr h)
+  Delta1_cast₁ isDelta0 (by simpa using (isDelta0_quote_iff (V := ℕ) φ).mpr h)
 
 /-- The code of a strict prenex semisentence is in the matching internal strict class.
 - [HP98, Lemma I.1.69] -/
 private lemma strict_quote_cast {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) : Strict Γ s ((⌜φ⌝ : ℕ) : M) := by
   rcases Γ with _ | _
-  · exact cast_delta₁ (isStrictSigma s) (by simpa using (isStrictSigma_quote_iff (V := ℕ) φ).mpr h)
-  · exact cast_delta₁ (isStrictPi s) (by simpa using (isStrictPi_quote_iff (V := ℕ) φ).mpr h)
+  · exact Delta1_cast₁ (isStrictSigma s) (by simpa using (isStrictSigma_quote_iff (V := ℕ) φ).mpr h)
+  · exact Delta1_cast₁ (isStrictPi s) (by simpa using (isStrictPi_quote_iff (V := ℕ) φ).mpr h)
 
 /-! ### Evaluation of coded closed terms -/
 
@@ -379,7 +379,7 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
   induction t with
   | bvar i =>
     have hb : M ⊧/![((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M), ((i.val : ℕ) : M)] qqBvarDef.val :=
-      cast_sigmaZero₂ qqBvarDef (by simpa using quote_bvar_sentence (V := ℕ) i)
+      Sigma0_cast₂ qqBvarDef (by simpa using quote_bvar_sentence (V := ℕ) i)
     have := (read_termValBvar hM ev ((i.val : ℕ) : M) ((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
       (v i) hb).mpr (hev.2 i)
     simpa using this
@@ -409,7 +409,7 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
           = (w 0).valb v + (w 1).valb v := rfl
       have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
           ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqAddGraph.val :=
-        cast_sigma₃ Arithmetic.qqAddGraph (by simpa using quote_addTerm_sentence (V := ℕ) w)
+        Sigma1_cast₃ Arithmetic.qqAddGraph (by simpa using quote_addTerm_sentence (V := ℕ) w)
       rw [hval]
       exact (read_termValAdd hM ev ((⌜w 0⌝ : ℕ) : M) ((⌜w 1⌝ : ℕ) : M)
         ((⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
@@ -420,7 +420,7 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
           = (w 0).valb v * (w 1).valb v := rfl
       have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
           ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqMulGraph.val :=
-        cast_sigma₃ Arithmetic.qqMulGraph (by simpa using quote_mulTerm_sentence (V := ℕ) w)
+        Sigma1_cast₃ Arithmetic.qqMulGraph (by simpa using quote_mulTerm_sentence (V := ℕ) w)
       rw [hval]
       exact (read_termValMul hM ev ((⌜w 0⌝ : ℕ) : M) ((⌜w 1⌝ : ℕ) : M)
         ((⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M)
@@ -438,22 +438,22 @@ formula agrees with truth.
 private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : Hierarchy 𝚺 0 φ) :
     ∀ (v : Fin k → M) (ev : M), Codes v ev → (Sat0 ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
-  refine delta₀_induction (ξ := Empty)
+  refine Delta0_induction (ξ := Empty)
     (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev →
       (Sat0 ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ k φ hφ
   · intro m v ev _
     have hq : M ⊧/![((⌜(⊤ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqVerumDef.val :=
-      cast_sigmaZero₁ qqVerumDef (by simp [Sentence.quote_def])
+      Sigma0_cast₁ qqVerumDef (by simp [Sentence.quote_def])
     simpa using read_satZeroVerum hM _ ev hq
   · intro m v ev _
     have hq : M ⊧/![((⌜(⊥ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqFalsumDef.val :=
-      cast_sigmaZero₁ qqFalsumDef (by simp [Sentence.quote_def])
+      Sigma0_cast₁ qqFalsumDef (by simp [Sentence.quote_def])
     simpa using read_satZeroFalsum hM _ ev hq
   · intro m t u v ev hev
     have hq : M ⊧/![((⌜(.rel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqEQDef.val :=
-      cast_sigma₃ qqEQDef (by simpa using quote_eq_sentence (V := ℕ) t u)
+      Sigma1_cast₃ qqEQDef (by simpa using quote_eq_sentence (V := ℕ) t u)
     rw [read_satZeroEq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
@@ -461,7 +461,7 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
   · intro m t u v ev hev
     have hq : M ⊧/![((⌜(.nrel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNEQDef.val :=
-      cast_sigma₃ qqNEQDef (by simpa using quote_neq_sentence (V := ℕ) t u)
+      Sigma1_cast₃ qqNEQDef (by simpa using quote_neq_sentence (V := ℕ) t u)
     rw [read_satZeroNeq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
@@ -469,7 +469,7 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
   · intro m t u v ev hev
     have hq : M ⊧/![((⌜(.rel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqLTDef.val :=
-      cast_sigma₃ qqLTDef (by simpa using quote_lt_sentence (V := ℕ) t u)
+      Sigma1_cast₃ qqLTDef (by simpa using quote_lt_sentence (V := ℕ) t u)
     rw [read_satZeroLt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
@@ -477,31 +477,31 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
   · intro m t u v ev hev
     have hq : M ⊧/![((⌜(.nrel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNLTDef.val :=
-      cast_sigma₃ qqNLTDef (by simpa using quote_nlt_sentence (V := ℕ) t u)
+      Sigma1_cast₃ qqNLTDef (by simpa using quote_nlt_sentence (V := ℕ) t u)
     rw [read_satZeroNlt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
     simp [Semiformula.eval_nrel]
   · intro m φ ψ _ _ ihφ ihψ v ev hev
     have hq : M ⊧/![((⌜φ ⋏ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqAndDef.val :=
-      cast_sigmaZero₃ qqAndDef (by simpa using quote_and_sentence (V := ℕ) φ ψ)
+      Sigma0_cast₃ qqAndDef (by simpa using quote_and_sentence (V := ℕ) φ ψ)
     rw [read_satZeroAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev, ihψ v ev hev]
     simp
   · intro m φ ψ hφ hψ ihφ ihψ v ev hev
     have hq : M ⊧/![((⌜φ ⋎ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqOrDef.val :=
-      cast_sigmaZero₃ qqOrDef (by simpa using quote_or_sentence (V := ℕ) φ ψ)
+      Sigma0_cast₃ qqOrDef (by simpa using quote_or_sentence (V := ℕ) φ ψ)
     rw [read_satZeroOr hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev
-      (delta0_quote_cast hφ) (uFormula_quote_cast φ) (delta0_quote_cast hψ)
+      (Delta0_quote_cast hφ) (uFormula_quote_cast φ) (Delta0_quote_cast hψ)
       (uFormula_quote_cast ψ) hq, ihφ v ev hev, ihψ v ev hev]
     simp
   · intro m t φ hφ ihφ v ev hev
     have hu : M ⊧/![((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜t⌝ : ℕ) : M)]
-        (termBShiftGraph ℒₒᵣ).val := cast_sigma₂ (termBShiftGraph ℒₒᵣ) (by simp)
+        (termBShiftGraph ℒₒᵣ).val := Sigma1_cast₂ (termBShiftGraph ℒₒᵣ) (by simp)
     have hq : M ⊧/![((⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜φ⌝ : ℕ) : M)] qqBallDef.val :=
-      cast_sigma₃ qqBallDef (by simpa using quote_ball_sentence (V := ℕ) t φ)
+      Sigma1_cast₃ qqBallDef (by simpa using quote_ball_sentence (V := ℕ) t φ)
     rw [read_satZeroBall hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
-      ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) (delta0_quote_cast hφ)
+      ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) (Delta0_quote_cast hφ)
       (uFormula_quote_cast φ) hu hq (termVal_quote_cast hM hev t)]
     simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel]
     constructor
@@ -514,10 +514,10 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
         (by simpa [Function.comp_def] using h x (by simpa [Function.comp_def] using hx))
   · intro m t φ hφ ihφ v ev hev
     have hu : M ⊧/![((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜t⌝ : ℕ) : M)]
-        (termBShiftGraph ℒₒᵣ).val := cast_sigma₂ (termBShiftGraph ℒₒᵣ) (by simp)
+        (termBShiftGraph ℒₒᵣ).val := Sigma1_cast₂ (termBShiftGraph ℒₒᵣ) (by simp)
     have hq : M ⊧/![((⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜φ⌝ : ℕ) : M)] qqBexDef.val :=
-      cast_sigma₃ qqBexDef (by simpa using quote_bex_sentence (V := ℕ) t φ)
+      Sigma1_cast₃ qqBexDef (by simpa using quote_bex_sentence (V := ℕ) t φ)
     rw [read_satZeroBex hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
       ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) hu hq
       (termVal_quote_cast hM hev t)]
@@ -554,7 +554,7 @@ private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : Arithmeti
   | @exs s₀ m₀ φ₀ _ ih =>
     intro hs v ev hev
     have hq : M ⊧/![((⌜(∃¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
-        qqExsDef.val := cast_sigmaZero₂ qqExsDef (by simpa using quote_ex_sentence (V := ℕ) φ₀)
+        qqExsDef.val := Sigma0_cast₂ qqExsDef (by simpa using quote_ex_sentence (V := ℕ) φ₀)
     show Reading.SatSigma s₀ _ _ ↔ _
     rw [read_satSigmaExs hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
     simp only [Semiformula.eval_ex]
@@ -567,7 +567,7 @@ private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : Arithmeti
   | @all s₀ m₀ φ₀ _ ih =>
     intro hs v ev hev
     have hq : M ⊧/![((⌜(∀¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
-        qqAllDef.val := cast_sigmaZero₂ qqAllDef (by simpa using quote_all_sentence (V := ℕ) φ₀)
+        qqAllDef.val := Sigma0_cast₂ qqAllDef (by simpa using quote_all_sentence (V := ℕ) φ₀)
     show Reading.SatPi s₀ _ _ ↔ _
     rw [read_satPiAll hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
     simp only [Semiformula.eval_all]

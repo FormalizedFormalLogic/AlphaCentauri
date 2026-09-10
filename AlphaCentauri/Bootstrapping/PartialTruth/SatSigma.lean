@@ -377,10 +377,10 @@ private def BlockSat (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜�
   ∀ z M K e : V, IsStrictSigma (n + 1) z → IsUFormula ℒₒᵣ z → z = qqExss M K →
     (∀ p : V, M ≠ ^∃ p) → (SatSigma (n + 1) z e ↔ ∃ w, len w = K ∧ SatPi n M (vecAppend w e))
 
-/-- An empty existential block at level zero: a `Δ₀` code is `𝚺-[1]`-satisfied exactly when it is
-`Δ₀`-satisfied.
+/-- An empty existential block at level zero: a $\Delta_0$ code is $\Sigma_1$-satisfied exactly when
+it is $\Delta_0$-satisfied.
 - [HP98, Theorem I.1.75(2)(v)] -/
-private lemma of_pi_zero (hB : BlockSat V 0) {z e : V} (hz : IsDelta0 z)
+private lemma of_Pi0 (hB : BlockSat V 0) {z e : V} (hz : IsDelta0 z)
     (hz' : IsUFormula ℒₒᵣ z) : SatSigma 1 z e ↔ SatPi 0 z e := by
   constructor
   · intro h
@@ -413,7 +413,7 @@ private lemma mono_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSat V m) →
     intro hB
     have hsig : ∀ z e : V, IsStrictSigma 0 z → IsUFormula ℒₒᵣ z →
         (SatSigma 0 z e ↔ SatSigma 1 z e) := fun z e hz hz' ↦ by
-      simpa using (of_pi_zero (hB 0 le_rfl) hz hz').symm
+      simpa using (of_Pi0 (hB 0 le_rfl) hz hz').symm
     exact ⟨hsig, fun z e hz hz' ↦ by
       rw [show (SatPi 0 z e ↔ ¬SatSigma 0 (neg ℒₒᵣ z) e) by
           rw [SatSigma.neg_iff hz hz']; simp,
@@ -450,11 +450,11 @@ private lemma of_pi_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSat V m) →
   induction n with
   | zero =>
     intro hB
-    exact ⟨fun z e hz hz' ↦ of_pi_zero (hB 0 le_rfl) hz hz',
+    exact ⟨fun z e hz hz' ↦ of_Pi0 (hB 0 le_rfl) hz hz',
       fun z e hz hz' ↦ by
         rw [show (SatPi 1 z e ↔ ¬SatSigma 1 (neg ℒₒᵣ z) e) by
             rw [SatSigma.neg_iff (IsStrictPi.of_sigma hz) hz']; simp,
-          of_pi_zero (hB 0 le_rfl) (IsStrictSigma.neg hz' hz) hz'.neg,
+          of_Pi0 (hB 0 le_rfl) (IsStrictSigma.neg hz' hz) hz'.neg,
           SatPi.neg_iff hz hz']
         simp⟩
   | succ n ih =>

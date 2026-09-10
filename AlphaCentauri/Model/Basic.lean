@@ -7,7 +7,9 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 An end extension of an `ℒₒᵣ`-structure `M` is a structure into which `M` embeds with nothing new
 below the image of `M`. Bounded formulas take the same truth value in `M` and in an end extension
-of it, and `𝗣𝗔⁻` holds in `M` as soon as it holds in an end extension of `M`.
+of it, `𝚺-[1]` formulas satisfied in `M` stay satisfied in an end extension of it, and both `𝗣𝗔⁻`
+and any theory axiomatized by `𝚷-[1]` sentences hold in `M` as soon as they hold in an end
+extension of `M`.
 -/
 
 @[expose] public section
@@ -144,6 +146,43 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     exact (lt_tri (N.emb x) (N.emb y)).imp N.emb_lt_emb.mp
       (Or.imp N.emb_eq_emb.mp N.emb_lt_emb.mp)
 
+/-- Satisfaction of a `𝚺-[1]` formula carries over from `M` to an end extension of `M`.
+- [HP98, Fact IV.1.3(4)] -/
+theorem eval_of_sigmaOne {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hierarchy 𝚺 1 φ)
+    (e : Fin n → M) (f : ξ → M) : φ.Eval e f → φ.Eval (N ∘ e) (N ∘ f) :=
+  sigma₁_induction' (P := fun n φ ↦ ∀ (e : Fin n → M) (f : ξ → M),
+      φ.Eval e f → φ.Eval (N ∘ e) (N ∘ f)) hφ
+    (fun _ _ _ _ ↦ by simp)
+    (fun _ _ _ h ↦ by simp at h)
+    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open N.emb (by simp)).mp h)
+    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open N.emb (by simp)).mp h)
+    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open N.emb (by simp)).mp h)
+    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open N.emb (by simp)).mp h)
+    (fun _ _ _ _ _ ih₁ ih₂ e f h ↦ ⟨ih₁ e f h.1, ih₂ e f h.2⟩)
+    (fun _ _ _ _ _ ih₁ ih₂ e f h ↦ h.imp (ih₁ e f) (ih₂ e f))
+    (fun _ t θ _ ih e f h ↦ by
+      show (θ.ballLT t).Eval (N ∘ e) (N ∘ f)
+      simp only [eval_ballLT, ← HomClass.val_term N.emb e f t]
+      intro y hy
+      obtain ⟨x, rfl⟩ := N.mem_range_of_lt hy
+      rw [← Matrix.comp_vecCons'']
+      exact ih (x :> e) f (eval_ballLT.mp h x (by simpa using hy)))
+    (fun _ _ _ ih e f ↦ by
+      rintro ⟨x, hx⟩
+      exact ⟨N x, by rw [← Matrix.comp_vecCons'']; exact ih (x :> e) f hx⟩)
+    e f
+
+/-- A theory axiomatized by `𝚷-[1]` sentences holds in `M` as soon as it holds in an end extension
+of `M`.
+- [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
+theorem models_of_piOne {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 1 σ)
+    [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T := models_theory_iff.mpr fun σ hσ ↦ by
+  by_contra h
+  have h₁ : (∼σ).Eval ![] Empty.elim :=
+    Eval.of_eq (N.eval_of_sigmaOne (hT σ hσ).neg ![] Empty.elim (by simpa [models_iff] using h))
+      (funext (·.elim0)) (funext (·.elim))
+  exact notModels_iff.mpr (by simpa using h₁) (models_theory_iff.mp inferInstance σ hσ)
+
 end EndExtensionOf
 
 section Absolute
@@ -166,11 +205,13 @@ variable {T : ArithmeticTheory} {n : ℕ}
   {φ ψ : ArithmeticSemiformula ξ n}
   {θ : ArithmeticSemiformula ξ (n + 1)} {t : ArithmeticSemiterm ξ n}
 
-lemma and_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) : Absolute.{_, u} T (φ ⋏ ψ) := by
+lemma and_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) :
+    Absolute.{_, u} T (φ ⋏ ψ) := by
   intro M _ _ N _ e f;
   simp [hφ M N e f, hψ M N e f]
 
-lemma or_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) : Absolute.{_, u} T (φ ⋎ ψ) := by
+lemma or_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) :
+    Absolute.{_, u} T (φ ⋎ ψ) := by
   intro M _ _ N _ e f;
   simp [hφ M N e f, hψ M N e f]
 

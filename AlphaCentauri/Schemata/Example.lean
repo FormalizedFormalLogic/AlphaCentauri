@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Schemata.Collection.Equivalence
 public import AlphaCentauri.Schemata.Collection.Induction
-public import AlphaCentauri.Schemata.LeastNumber.Basic
+public import Foundation.FirstOrder.Arithmetic.LeastNumber.Basic
 
 /-!
 # Instances of the fragment hierarchy

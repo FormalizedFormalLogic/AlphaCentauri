@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Completeness
+public import AlphaCentauri.Vorspiel.Hierarchy
 
 /-!
 # Provably total functions
@@ -18,16 +19,6 @@ namespace FFL.FirstOrder
 namespace Arithmetic
 
 section
-variable {L : Language} [L.LT] {ξ : Type*} {s : ℕ}
-
-lemma Hierarchy.allClosure :
-    {n : ℕ} → {φ : Semiformula L ξ n} → Hierarchy 𝚷 (s + 1) φ → Hierarchy 𝚷 (s + 1) (∀¹* φ)
-  |     0, _, hφ => hφ
-  | _ + 1, φ, hφ => allClosure (φ := ∀¹ φ) hφ.all
-
-end
-
-section
 variable {k l : ℕ} {V : Type*} [ORingStructure V]
 
 /-- The totality sentence `∀ x⃗, ∃ y, φ(y, x⃗)` of a graph formula `φ`.
@@ -36,7 +27,7 @@ def totalitySentence (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSentence :=
 
 @[simp] lemma hierarchy_totalitySentence (φ : 𝚺₁.Semisentence (k + 1)) :
     Hierarchy 𝚷 2 (totalitySentence φ) :=
-  Hierarchy.allClosure (Hierarchy.accum φ.sigma_prop.exs 𝚷)
+  Hierarchy.allClosure_iff.mpr (Hierarchy.accum φ.sigma_prop.exs 𝚷)
 
 lemma models_totalitySentence_iff {φ : 𝚺₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ totalitySentence φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) := by

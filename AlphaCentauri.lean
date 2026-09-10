@@ -23,6 +23,7 @@ public import AlphaCentauri.Hierarchy.NormalForm
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
 public import AlphaCentauri.Hierarchy.StrictHierarchy
 public import AlphaCentauri.Model.Basic
+public import AlphaCentauri.Model.InitialSegment
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.OmegaLogic.Basic
 public import AlphaCentauri.OmegaLogic.Consistency
@@ -44,6 +45,8 @@ public import AlphaCentauri.Schemata.Collection.Induction
 public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Schemata.LeastNumber.Basic
 public import AlphaCentauri.Vorspiel.Absoluteness
+public import AlphaCentauri.Vorspiel.Completeness
+public import AlphaCentauri.Vorspiel.ConstantExtension
 public import AlphaCentauri.Vorspiel.Definable
 public import AlphaCentauri.Vorspiel.Eval
 public import AlphaCentauri.Vorspiel.Fvar

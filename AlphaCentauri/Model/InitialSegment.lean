@@ -1,0 +1,94 @@
+module
+
+public import AlphaCentauri.Model.Basic
+public import Foundation.FirstOrder.Arithmetic.Schemata
+
+/-! # Initial segments
+
+An initial segment of an `ℒₒᵣ`-structure `M` is a downward closed subset closed under the
+operations of the language; `M` is an end extension of it.
+-/
+
+@[expose] public section
+
+namespace FFL.FirstOrder.Arithmetic
+
+open Semiformula Structure
+
+variable {M : Type u} [ORingStructure M]
+
+/-- An initial segment of `M`: a subset closed under the operations of `ℒₒᵣ` and downward closed
+under `<`.
+- [HP98, Definition IV.1.3(2)] -/
+structure InitialSegment (M : Type u) [ORingStructure M] where
+  carrier : Set M
+  zero_mem : (0 : M) ∈ carrier
+  one_mem : (1 : M) ∈ carrier
+  add_mem {a b : M} : a ∈ carrier → b ∈ carrier → a + b ∈ carrier
+  mul_mem {a b : M} : a ∈ carrier → b ∈ carrier → a * b ∈ carrier
+  mem_of_lt {a b : M} : a < b → b ∈ carrier → a ∈ carrier
+
+namespace InitialSegment
+
+variable (I : InitialSegment M)
+
+instance oringStructure : ORingStructure I.carrier where
+  zero := ⟨0, I.zero_mem⟩
+  one := ⟨1, I.one_mem⟩
+  add a b := ⟨a.1 + b.1, I.add_mem a.2 b.2⟩
+  mul a b := ⟨a.1 * b.1, I.mul_mem a.2 b.2⟩
+  lt a b := a.1 < b.1
+
+/-- `M` is an end extension of each of its initial segments. -/
+def endExtension : EndExtensionOf I.carrier where
+  carrier := M
+  emb :=
+    { toFun := Subtype.val
+      func' := fun f v ↦ by cases f <;> rfl
+      rel' := fun r _ ↦ by cases r; exacts [congrArg Subtype.val, id]
+      toFun_inj := Subtype.val_injective
+      rel_inv' := fun r _ ↦ by cases r; exacts [Subtype.ext, id] }
+  mem_range_of_lt := fun {a b} h ↦ ⟨⟨b, I.mem_of_lt h a.2⟩, rfl⟩
+
+@[simp] lemma endExtension_emb (x : I.carrier) : I.endExtension x = x.1 := rfl
+
+end InitialSegment
+
+namespace EndExtensionOf
+
+variable (N : EndExtensionOf M)
+
+private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : ArithmeticSemiformula ℕ 1}
+    (hφ : Hierarchy 𝚺 0 φ)
+    (v : ℕ → M) (h0 : φ.Eval ![0] v) (hs : ∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) (a : M) :
+    φ.Eval ![a] v := by
+  have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀)
+  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := N.models_peanoMinus
+  have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![N x] (N ∘ v) := fun x ↦ by
+    simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using
+      absolute_of_deltaZero (T := 𝗣𝗔⁻) hφ M N ![x] v
+  have h₂ : ∀ y : N, y < N a + 1 → φ.Eval ![y] (N ∘ v) := by
+    refine InductionScheme.succ_induction (C := Hierarchy 𝚺 0)
+      ⟨(N a + 1) :>ₙ fun j ↦ N (v j), “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ), by simp [hφ],
+        fun x ↦ by simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩
+      (fun _ ↦ by simpa using (h₁ 0).mp h0) ?_
+    intro y ih hy
+    have h₃ : y < N a := lt_of_lt_of_le (lt_add_one y) (lt_succ_iff_le.mp hy)
+    obtain ⟨x, rfl⟩ := N.mem_range_of_lt h₃
+    simpa using (h₁ (x + 1)).mp (hs x ((h₁ x).mpr (ih (lt_trans h₃ (lt_add_one _)))))
+  exact (h₁ a).mpr (h₂ (N a) (by simp))
+
+/-- A structure with an end extension modelling `𝗜𝚺₀` is itself a model of `𝗜𝚺₀`.
+- [HP98, Remark IV.1.21(2)] -/
+theorem models_ISigma0 [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := by
+  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := N.models_peanoMinus
+  simp only [Semantics.ModelsSet.union_iff, InductionScheme]
+  refine ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
+  rintro _ ⟨φ, hφ, rfl⟩
+  simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_rew_q,
+    Semiformula.eval_substs, Function.comp, Matrix.constant_eq_singleton]
+    using fun v h0 hs a ↦ N.eval_of_endExtension hφ v h0 hs a
+
+end EndExtensionOf
+
+end FFL.FirstOrder.Arithmetic

@@ -152,9 +152,9 @@ lemma graph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
 lemma mono (h : T.ProvablyTotalVia f φ) (hT : T ⪯ U) : U.ProvablyTotalVia f φ :=
   ⟨h.defined, hT.pbl h.total⟩
 
-/-- Provable totality depends only on the `𝚷-[2]` consequences of the theory.
+/-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
-lemma of_pi2 (h : T.ProvablyTotalVia f φ)
+lemma of_Pi2 (h : T.ProvablyTotalVia f φ)
     (H : ∀ σ : ArithmeticSentence, Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) : U.ProvablyTotalVia f φ :=
   ⟨h.defined, H _ (by simp) h.total⟩
 
@@ -237,11 +237,11 @@ namespace ProvablyTotal
 lemma mono (h : T.ProvablyTotal f) (hT : T ⪯ U) : U.ProvablyTotal f :=
   have ⟨_, h⟩ := h; ⟨_, h.mono hT⟩
 
-/-- Provable totality depends only on the `𝚷-[2]` consequences of the theory.
+/-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
-lemma of_pi2 (h : T.ProvablyTotal f)
+lemma of_Pi2 (h : T.ProvablyTotal f)
     (H : ∀ σ : ArithmeticSentence, Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) : U.ProvablyTotal f :=
-  have ⟨_, h⟩ := h; ⟨_, h.of_pi2 H⟩
+  have ⟨_, h⟩ := h; ⟨_, h.of_Pi2 H⟩
 
 section
 variable [𝗘𝗤 ℒₒᵣ ⪯ T] {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}

@@ -435,7 +435,7 @@ open Bootstrapping in
 - [HP98, Lemma I.1.68] -/
 lemma isDelta0_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : Hierarchy 𝚺 0 ψ) :
     IsDelta0 (⌜ψ⌝ : ℕ) := by
-  refine delta₀_induction (P := fun n φ ↦ IsDelta0 (⌜φ⌝ : ℕ))
+  refine Delta0_induction (P := fun n φ ↦ IsDelta0 (⌜φ⌝ : ℕ))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ n ψ h
   · intro n; simp
   · intro n; simp

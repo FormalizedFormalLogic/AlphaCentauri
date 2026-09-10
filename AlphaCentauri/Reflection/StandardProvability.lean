@@ -44,10 +44,10 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 - [Lin97, §4.1, p. 52] -/
 @[instance] axiom strictlyWeakerThan_localReflection [Consistent T] : T ⪱ T ∪ 𝗥𝗳𝗻 T
 
-/-- `Rfn_{𝚷-[1]}(T)` and `Con(T)` are equivalent over `T`.
+/-- The $\Pi_1$ local reflection principle and `Con(T)` are equivalent over `T`.
 - [Lin97, Exercise 4.1(b)(ii)]
 - [AB05, Lemma 22(i)] -/
-axiom localReflection_pi_one_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ T.Con
+axiom localReflection_Pi1_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ T.Con
 
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is sound in the standard model.
 - [Lin97, §4.1, p. 52]
@@ -55,10 +55,10 @@ axiom localReflection_pi_one_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ 
 @[instance] axiom consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
     Consistent (T ∪ 𝗥𝗳𝗻 T)
 
-/-- `T ∪ Rfn(T)` is consistent whenever `T` is `𝚺-[1]`-sound.
+/-- `T ∪ Rfn(T)` is consistent whenever `T` is $\Sigma_1$-sound.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
-@[instance] axiom consistent_localReflection_of_sigma_one_sound [T.SoundOnHierarchy 𝚺 1] :
+@[instance] axiom consistent_localReflection_of_Sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
     Consistent (T ∪ 𝗥𝗳𝗻 T)
 
 section

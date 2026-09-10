@@ -88,7 +88,7 @@ private lemma exists_witness_in_segment (I : InitialSegment M) (hφ : Hierarchy 
       consequence_iff'.mp (Theory.Proof.sound h) (↥I.carrier)
   obtain ⟨b, hb⟩ := h₁ e
   refine ⟨b, b.2, ?_⟩
-  have h₂ := (absolute_of_deltaZero (T := 𝗣𝗔⁻) hφ (↥I.carrier) I.endExtension
+  have h₂ := (absolute_of_Delta0 (T := 𝗣𝗔⁻) hφ (↥I.carrier) I.endExtension
     (b :> e) Empty.elim).mp hb
   have h₃ : ⇑I.endExtension.emb ∘ e = fun i ↦ ((e i : M)) := rfl
   simp only [Matrix.comp_vecCons'', Empty.eq_elim, h₃] at h₂

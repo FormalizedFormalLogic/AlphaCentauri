@@ -55,9 +55,9 @@ namespace FFL.FirstOrder.Arithmetic
 
 variable {ξ : Type*} (ε : ξ → ℕ)
 
-/-- The truth of a `Δ₀` formula is primitive recursive in `List.Vector` form.
+/-- The truth of a $\Delta_0$ formula is primitive recursive in `List.Vector` form.
 - [HP98, Theorem 0.35] -/
-lemma deltaZero_primrec_vec :
+lemma Delta0_primrec_vec :
     (k : ℕ) → (φ : ArithmeticSemiformula ξ k) → Hierarchy 𝚺 0 φ →
       PrimrecPred fun v : List.Vector ℕ k ↦ φ.Eval v.get ε
   | _, _, Hierarchy.verum _ _ _ => by simpa using PrimrecPred.const True
@@ -75,24 +75,24 @@ lemma deltaZero_primrec_vec :
     simpa [← Matrix.fun_eq_vec_two]
       using (Primrec.nat_lt.comp (term_primrec (v 0)) (term_primrec (v 1))).not
   | _, _, Hierarchy.and hφ hψ => by
-    simpa using (deltaZero_primrec_vec _ _ hφ).and (deltaZero_primrec_vec _ _ hψ)
+    simpa using (Delta0_primrec_vec _ _ hφ).and (Delta0_primrec_vec _ _ hψ)
   | _, _, Hierarchy.or hφ hψ => by
-    simpa using (deltaZero_primrec_vec _ _ hφ).or (deltaZero_primrec_vec _ _ hψ)
+    simpa using (Delta0_primrec_vec _ _ hφ).or (Delta0_primrec_vec _ _ hψ)
   | n, _, Hierarchy.ball (φ := φ) pt hφ => by
     rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
     have h : PrimrecRel fun (x : ℕ) (v : List.Vector ℕ n) ↦ φ.Eval (x ::ᵥ v).get ε :=
-      (deltaZero_primrec_vec _ _ hφ).comp Primrec.vector_cons
+      (Delta0_primrec_vec _ _ hφ).comp Primrec.vector_cons
     simpa [List.Vector.cons_get] using (PrimrecRel.forall_lt' h).comp (term_primrec t) .id
   | n, _, Hierarchy.bexs (φ := φ) pt hφ => by
     rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
     have h : PrimrecRel fun (x : ℕ) (v : List.Vector ℕ n) ↦ φ.Eval (x ::ᵥ v).get ε :=
-      (deltaZero_primrec_vec _ _ hφ).comp Primrec.vector_cons
+      (Delta0_primrec_vec _ _ hφ).comp Primrec.vector_cons
     simpa [List.Vector.cons_get] using (PrimrecRel.exists_lt' h).comp (term_primrec t) .id
 
-/-- The truth of a `Δ₀` formula is primitive recursive in `Fin k → ℕ` form.
+/-- The truth of a $\Delta_0$ formula is primitive recursive in `Fin k → ℕ` form.
 - [HP98, Theorem 0.35] -/
-lemma deltaZero_primrec {k} {φ : ArithmeticSemiformula ξ k} (hφ : Hierarchy 𝚺 0 φ) :
+lemma Delta0_primrec {k} {φ : ArithmeticSemiformula ξ k} (hφ : Hierarchy 𝚺 0 φ) :
     PrimrecPred fun v : Fin k → ℕ ↦ φ.Eval v ε :=
-  PrimrecPred.comp_get_iff.mp (deltaZero_primrec_vec ε k φ hφ)
+  PrimrecPred.comp_get_iff.mp (Delta0_primrec_vec ε k φ hφ)
 
 end FFL.FirstOrder.Arithmetic

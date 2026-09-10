@@ -66,7 +66,7 @@ private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : Arit
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := N.models_peanoMinus
   have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![N x] (N ∘ v) := fun x ↦ by
     simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using
-      absolute_of_deltaZero (T := 𝗣𝗔⁻) hφ M N ![x] v
+      absolute_of_Delta0 (T := 𝗣𝗔⁻) hφ M N ![x] v
   have h₂ : ∀ y : N, y < N a + 1 → φ.Eval ![y] (N ∘ v) := by
     refine InductionScheme.succ_induction (C := Hierarchy 𝚺 0)
       ⟨(N a + 1) :>ₙ fun j ↦ N (v j), “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ), by simp [hφ],

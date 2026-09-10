@@ -335,18 +335,18 @@ mutual
       exact ⟨k, q, rfl, IsStrictSigma.mono (by omega) hq⟩
 end
 
-/-- The body of a `Δ₀` code of an existential quantification is strict `𝚺-[1]`.
+/-- The body of a $\Delta_0$ code of an existential quantification is strict $\Sigma_1$.
 - [HP98, Lemma I.1.69] -/
-private lemma isStrictSigma_one_of_isDelta0_exs {p : V} (h : IsDelta0 (^∃ p)) :
+private lemma isStrictSigma1_of_isDelta0_exs {p : V} (h : IsDelta0 (^∃ p)) :
     IsStrictSigma 1 p := by
   obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsDelta0.of_ex h
   have h₁ : IsDelta0 (Arithmetic.qqLT (qqBvar 0) (termBShift ℒₒᵣ t)) := by
     rw [Arithmetic.qqLT]; exact IsDelta0.rel
   exact IsStrictSigma.of_pi (IsDelta0.and_iff.mpr ⟨h₁, hq⟩)
 
-/-- The body of a `Δ₀` code of a universal quantification is strict `𝚷-[1]`.
+/-- The body of a $\Delta_0$ code of a universal quantification is strict $\Pi_1$.
 - [HP98, Lemma I.1.69] -/
-private lemma isStrictPi_one_of_isDelta0_alls {p : V} (h : IsDelta0 (^∀ p)) :
+private lemma isStrictPi1_of_isDelta0_alls {p : V} (h : IsDelta0 (^∀ p)) :
     IsStrictPi 1 p := by
   obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsDelta0.of_all h
   have h₁ : IsDelta0 (Arithmetic.qqNLT (qqBvar 0) (termBShift ℒₒᵣ t)) := by
@@ -358,7 +358,7 @@ mutual
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictPi.of_exs_aux :
       ∀ {n : ℕ} {p : V}, IsStrictPi n (^∃ p) → IsStrictSigma (n + 1) p
-    | 0,     _, h => isStrictSigma_one_of_isDelta0_exs h
+    | 0,     _, h => isStrictSigma1_of_isDelta0_exs h
     | _ + 1, _, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       rcases zero_or_succ k with (rfl | ⟨k, rfl⟩)
@@ -370,7 +370,7 @@ mutual
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictSigma.of_exs_aux :
       ∀ {n : ℕ} {p : V}, IsStrictSigma n (^∃ p) → IsStrictSigma (n + 1) p
-    | 0,     _, h => isStrictSigma_one_of_isDelta0_exs h
+    | 0,     _, h => isStrictSigma1_of_isDelta0_exs h
     | _ + 1, _, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       rcases zero_or_succ k with (rfl | ⟨k, rfl⟩)
@@ -386,7 +386,7 @@ mutual
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictSigma.of_all_aux :
       ∀ {n : ℕ} {p : V}, IsStrictSigma n (^∀ p) → IsStrictPi (n + 1) p
-    | 0,     _, h => isStrictPi_one_of_isDelta0_alls h
+    | 0,     _, h => isStrictPi1_of_isDelta0_alls h
     | _ + 1, _, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       rcases zero_or_succ k with (rfl | ⟨k, rfl⟩)
@@ -398,7 +398,7 @@ mutual
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictPi.of_all_aux :
       ∀ {n : ℕ} {p : V}, IsStrictPi n (^∀ p) → IsStrictPi (n + 1) p
-    | 0,     _, h => isStrictPi_one_of_isDelta0_alls h
+    | 0,     _, h => isStrictPi1_of_isDelta0_alls h
     | _ + 1, _, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       rcases zero_or_succ k with (rfl | ⟨k, rfl⟩)

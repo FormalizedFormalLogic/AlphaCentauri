@@ -23,7 +23,7 @@ variable {ξ : Type*}
 - [HP98, 0.30] -/
 @[simp, grind .]
 lemma Prenex.val_strictHierarchy {φ : Prenex Γ s ξ n} : StrictHierarchy Γ s φ.val :=
-  StrictHierarchy.toPrenex_of_deltaZero φ.matrix.sigma_prop
+  StrictHierarchy.toPrenex_of_Delta0 φ.matrix.sigma_prop
 
 end
 

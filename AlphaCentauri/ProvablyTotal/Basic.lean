@@ -27,7 +27,8 @@ lemma Hierarchy.allClosure :
 
 end
 
-variable {k : ℕ}
+section
+variable {k l : ℕ} {V : Type*} [ORingStructure V]
 
 /-- The totality sentence `∀ x⃗, ∃ y, φ(y, x⃗)` of a graph formula `φ`.
 - [HP98, Definition I.1.51] -/
@@ -37,7 +38,7 @@ def totalitySentence (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSentence :=
     Hierarchy 𝚷 2 (totalitySentence φ) :=
   Hierarchy.allClosure (Hierarchy.accum φ.sigma_prop.exs 𝚷)
 
-lemma models_totalitySentence_iff {V : Type*} [ORingStructure V] {φ : 𝚺₁.Semisentence (k + 1)} :
+lemma models_totalitySentence_iff {φ : 𝚺₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ totalitySentence φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) := by
   simp [totalitySentence, models_iff]
 
@@ -47,15 +48,11 @@ def functionalitySentence (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSenten
   ∀¹* ∀¹ ∀¹ (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val) ⋏
     (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val)) 🡒 “#1 = #0”)
 
-lemma models_functionalitySentence_iff {V : Type*} [ORingStructure V]
-    {φ : 𝚺₁.Semisentence (k + 1)} :
+lemma models_functionalitySentence_iff {φ : 𝚺₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ functionalitySentence φ ↔ ∀ (v : Fin k → V) (y y'),
       φ.val.Evalb (y :> v) → φ.val.Evalb (y' :> v) → y = y' := by
   simp [functionalitySentence, models_iff, Semiformula.eval_rew, Function.comp_def,
     Matrix.comp_vecCons', Empty.eq_elim]
-
-section
-variable {l : ℕ}
 
 /-- A graph formula for the composite `fun x⃗ ↦ f (fun i ↦ g i x⃗)`.
 - [HP98, Lemma I.1.53] -/
@@ -66,7 +63,7 @@ def compGraph (ψ : 𝚺₁.Semisentence (l + 1)) (χ : Fin l → 𝚺₁.Semise
       Matrix.conj fun i ↦ Rew.bind (#i :> (&·.succ)) Empty.elim ▹ (χ i).val)))
     (Hierarchy.rew _ (Hierarchy.exsClosure (by simp)))
 
-@[simp] lemma eval_compGraph {V : Type*} [ORingStructure V] (ψ : 𝚺₁.Semisentence (l + 1))
+@[simp] lemma eval_compGraph (ψ : 𝚺₁.Semisentence (l + 1))
     (χ : Fin l → 𝚺₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
     (compGraph ψ χ).val.Evalb w ↔
       ∃ z : Fin l → V, ψ.val.Evalb (w 0 :> z) ∧ ∀ i, (χ i).val.Evalb (z i :> (w ·.succ)) := by
@@ -75,23 +72,17 @@ def compGraph (ψ : 𝚺₁.Semisentence (l + 1)) (χ : Fin l → 𝚺₁.Semise
 
 /-- `compGraph ψ χ` defines the composite of the functions defined by `ψ` and `χ`.
 - [HP98, Lemma I.1.53] -/
-lemma definedFunction_compGraph {V : Type*} [ORingStructure V] {ψ : 𝚺₁.Semisentence (l + 1)}
+lemma definedFunction_compGraph {ψ : 𝚺₁.Semisentence (l + 1)}
     {χ : Fin l → 𝚺₁.Semisentence (k + 1)} {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V}
     (hf : 𝚺₁.DefinedFunction f ψ) (hg : ∀ i, 𝚺₁.DefinedFunction (g i) (χ i)) :
     𝚺₁.DefinedFunction (fun v ↦ f fun i ↦ g i v) (compGraph ψ χ) :=
   .mk fun w ↦ by
     simp only [eval_compGraph, hf.iff, (hg _).iff, Matrix.cons_val_zero, Matrix.cons_val_succ]
-    constructor
-    · rintro ⟨z, hz, hχ⟩
-      have : z = fun i ↦ g i (w ·.succ) := funext hχ
-      simpa [this] using hz
-    · intro e
-      exact ⟨fun i ↦ g i (w ·.succ), by simpa using e, fun i ↦ rfl⟩
+    exact ⟨fun ⟨z, hz, hχ⟩ ↦ by simpa [funext hχ] using hz,
+      fun e ↦ ⟨_, by simpa using e, fun _ ↦ rfl⟩⟩
 
-end
-
-lemma definablePred_evalb {V : Type*} [ORingStructure V] (φ : 𝚺₁.Semisentence (k + 1))
-    (v : Fin k → V) : 𝚺₁-Predicate fun y ↦ φ.val.Evalb (y :> v) :=
+lemma definablePred_evalb (φ : 𝚺₁.Semisentence (k + 1)) (v : Fin k → V) :
+    𝚺₁-Predicate fun y ↦ φ.val.Evalb (y :> v) :=
   HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 1)
     (Rew.bind (#0 :> fun i ↦ &(v i)) Empty.elim ▹ φ.val)
     (Hierarchy.rew _ (by simp)) fun w ↦ by
@@ -102,8 +93,7 @@ lemma definablePred_evalb {V : Type*} [ORingStructure V] (φ : 𝚺₁.Semisente
 def leastGraph (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSemisentence (k + 1) :=
   φ.val ⋏ (∀¹[“#0 < #1”] ∼(Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val))
 
-@[simp] lemma eval_leastGraph {V : Type*} [ORingStructure V] (φ : 𝚺₁.Semisentence (k + 1))
-    (w : Fin (k + 1) → V) :
+@[simp] lemma eval_leastGraph (φ : 𝚺₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
     (leastGraph φ).Evalb w ↔ φ.val.Evalb w ∧ ∀ y < w 0, ¬φ.val.Evalb (y :> (w ·.succ)) := by
   simp [leastGraph, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
 
@@ -116,17 +106,20 @@ def uniqueTotalitySentence (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSente
     (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ) ⋏
       (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ)) 🡒 “#1 = #0”)))
 
-lemma models_uniqueTotalitySentence_iff {V : Type*} [ORingStructure V]
-    {φ : 𝚺₁.Semisentence (k + 1)} :
+lemma models_uniqueTotalitySentence_iff {φ : 𝚺₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ uniqueTotalitySentence φ ↔ ∀ v : Fin k → V,
       (∃ y, (leastGraph φ).Evalb (y :> v)) ∧
         ∀ y y', (leastGraph φ).Evalb (y :> v) → (leastGraph φ).Evalb (y' :> v) → y = y' := by
   simp [uniqueTotalitySentence, models_iff, Semiformula.eval_rew, Function.comp_def,
     Matrix.comp_vecCons', Empty.eq_elim]
 
+end
+
 end Arithmetic
 
 open Arithmetic
+
+namespace ArithmeticTheory
 
 variable {T U : ArithmeticTheory} {k : ℕ} {f : (Fin k → ℕ) → ℕ} {φ : 𝚺₁.Semisentence (k + 1)}
 
@@ -134,7 +127,7 @@ variable {T U : ArithmeticTheory} {k : ℕ} {f : (Fin k → ℕ) → ℕ} {φ : 
 totality sentence.
 - [HP98, Definition I.1.51]
 - [HP98, Definition IV.3.1] -/
-structure ArithmeticTheory.ProvablyTotalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ)
+structure ProvablyTotalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ)
     (φ : 𝚺₁.Semisentence (k + 1)) : Prop where
   defined : HierarchySymbol.DefinedFunction (V := ℕ) f φ
   total : T ⊢ totalitySentence φ
@@ -142,7 +135,7 @@ structure ArithmeticTheory.ProvablyTotalVia (T : ArithmeticTheory) (f : (Fin k �
 /-- `f` is `T`-provably functional via `φ` iff `f` is `T`-provably total via `φ` and `T` proves
 that `φ` is single-valued.
 - [HP98, Definition I.1.51(2)] -/
-structure ArithmeticTheory.ProvablyFunctionalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ)
+structure ProvablyFunctionalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ)
     (φ : 𝚺₁.Semisentence (k + 1)) : Prop extends T.ProvablyTotalVia f φ where
   functional : T ⊢ functionalitySentence φ
 
@@ -150,15 +143,15 @@ structure ArithmeticTheory.ProvablyFunctionalVia (T : ArithmeticTheory) (f : (Fi
 - [HP98, Definition I.1.51]
 - [HP98, Definition IV.3.1]
 - [AB05, §10.2] -/
-def ArithmeticTheory.ProvablyTotal (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Prop :=
+def ProvablyTotal (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Prop :=
   ∃ φ, T.ProvablyTotalVia f φ
 
 /-- `f` is `T`-provably functional: some `𝚺₁` formula witnesses `T.ProvablyFunctionalVia f`.
 - [HP98, Definition I.1.51(2)] -/
-def ArithmeticTheory.ProvablyFunctional (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Prop :=
+def ProvablyFunctional (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Prop :=
   ∃ φ, T.ProvablyFunctionalVia f φ
 
-namespace ArithmeticTheory.ProvablyTotalVia
+namespace ProvablyTotalVia
 
 lemma toProvablyTotal (h : T.ProvablyTotalVia f φ) : T.ProvablyTotal f := ⟨φ, h⟩
 
@@ -187,13 +180,8 @@ lemma of_models [𝗘𝗤 ℒₒᵣ ⪯ T] (hf : HierarchySymbol.DefinedFunction
 - [HP98, Lemma IV.3.4] -/
 lemma leastGraph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
     (leastGraph φ).Evalb v ↔ v 0 = f (v ·.succ) := by
-  simp only [eval_leastGraph]
-  constructor
-  · exact fun hv ↦ h.graph_iff.mp hv.1
-  · intro e
-    refine ⟨h.graph_iff.mpr e, fun y hy hy' ↦ ?_⟩
-    have : y = f (v ·.succ) := by simpa using h.graph_iff.mp hy'
-    omega
+  simp [h.graph_iff]
+  omega
 
 open PeanoMinus in
 /-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality upgrades to the `∃!` form: the least
@@ -210,13 +198,9 @@ lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ un
     exact ⟨y₀, by simpa using ⟨h₀, hmin⟩⟩
   · intro y y' hy hy'
     simp only [eval_leastGraph, Matrix.cons_val_zero, Matrix.cons_val_succ] at hy hy'
-    rcases lt_trichotomy y y' with (hlt | rfl | hlt)
-    · exact absurd hy.1 (hy'.2 y hlt)
-    · rfl
-    · exact absurd hy'.1 (hy.2 y' hlt)
+    grind
 
-section comp
-
+section
 variable {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
   {ψ : 𝚺₁.Semisentence (l + 1)} {χ : Fin l → 𝚺₁.Semisentence (k + 1)}
 
@@ -228,13 +212,13 @@ lemma comp [𝗘𝗤 ℒₒᵣ ⪯ T] (hg : T.ProvablyTotalVia g ψ) (hh : ∀ i
   intro V _ _ v
   choose z hz using fun i ↦ (hh i).models V v
   obtain ⟨y, hy⟩ := hg.models V z
-  exact ⟨y, by simpa using ⟨z, by simpa using hy, by simpa using hz⟩⟩
+  exact ⟨y, by simpa using ⟨z, hy, hz⟩⟩
 
-end comp
+end
 
-end ArithmeticTheory.ProvablyTotalVia
+end ProvablyTotalVia
 
-namespace ArithmeticTheory.ProvablyFunctionalVia
+namespace ProvablyFunctionalVia
 
 lemma toProvablyFunctional (h : T.ProvablyFunctionalVia f φ) : T.ProvablyFunctional f := ⟨φ, h⟩
 
@@ -255,9 +239,9 @@ lemma of_models [𝗘𝗤 ℒₒᵣ ⪯ T] (hf : HierarchySymbol.DefinedFunction
       obtain ⟨F, hF⟩ := H V
       simp_all [hF.iff]
 
-end ArithmeticTheory.ProvablyFunctionalVia
+end ProvablyFunctionalVia
 
-namespace ArithmeticTheory.ProvablyTotal
+namespace ProvablyTotal
 
 lemma mono (h : T.ProvablyTotal f) (hT : T ⪯ U) : U.ProvablyTotal f :=
   have ⟨_, h⟩ := h; ⟨_, h.mono hT⟩
@@ -268,14 +252,18 @@ lemma of_pi2 (h : T.ProvablyTotal f)
     (H : ∀ σ : ArithmeticSentence, Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) : U.ProvablyTotal f :=
   have ⟨_, h⟩ := h; ⟨_, h.of_pi2 H⟩
 
+section
+variable [𝗘𝗤 ℒₒᵣ ⪯ T] {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
+
 /-- The `T`-provably total functions are closed under composition.
 - [HP98, Lemma I.1.53] -/
-lemma comp [𝗘𝗤 ℒₒᵣ ⪯ T] {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
-    (hg : T.ProvablyTotal g) (hh : ∀ i, T.ProvablyTotal (h i)) :
+lemma comp (hg : T.ProvablyTotal g) (hh : ∀ i, T.ProvablyTotal (h i)) :
     T.ProvablyTotal fun v ↦ g fun i ↦ h i v :=
   have ⟨_, hg⟩ := hg
   have ⟨_, hh⟩ := Classical.skolem.mp hh
   ⟨_, hg.comp hh⟩
+
+end
 
 /-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality upgrades to the `∃!` form.
 - [HP98, Lemma IV.3.4] -/
@@ -283,13 +271,15 @@ lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotal f) :
     ∃ φ, T.ProvablyTotalVia f φ ∧ T ⊢ uniqueTotalitySentence φ :=
   have ⟨_, h⟩ := h; ⟨_, h, h.exists_unique⟩
 
-end ArithmeticTheory.ProvablyTotal
+end ProvablyTotal
 
-namespace ArithmeticTheory.ProvablyFunctional
+namespace ProvablyFunctional
 
 lemma toProvablyTotal (h : T.ProvablyFunctional f) : T.ProvablyTotal f :=
   have ⟨_, h⟩ := h; h.toProvablyTotalVia.toProvablyTotal
 
-end ArithmeticTheory.ProvablyFunctional
+end ProvablyFunctional
+
+end ArithmeticTheory
 
 end FFL.FirstOrder

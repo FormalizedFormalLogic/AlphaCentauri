@@ -41,12 +41,6 @@ FFL.FirstOrder.Arithmetic.parikh:
 FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
   forgive:
     - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
-FFL.FirstOrder.Arithmetic.provablyTotal_of_primrec:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.provablyTotal_of_primrec
-FFL.FirstOrder.Arithmetic.provablyTotal_of_primrec':
-  forgive:
-    - FFL.FirstOrder.Arithmetic.provablyTotal_of_primrec'
 FFL.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection:
   forgive:
     - FFL.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection

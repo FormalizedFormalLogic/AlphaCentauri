@@ -40,6 +40,7 @@ instance oringStructure : ORingStructure I.carrier where
 
 /-- `M` is an end extension of each of its cuts.
 - [HP98, Definition IV.1.3(2)] -/
+@[instance_reducible]
 def endExtension : EndExtensionOf I.carrier M where
   emb := {
     toFun := Subtype.val,
@@ -81,7 +82,7 @@ private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : Arit
 
 /-- A structure with an end extension modelling `𝗜𝚺₀` is itself a model of `𝗜𝚺₀`.
 - [HP98, Remark IV.1.21(2)] -/
-theorem models_ISigma0 [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := by
+theorem models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := by
   simp only [Semantics.ModelsSet.union_iff, InductionScheme];
   and_intros;
   . exact hMN.models_peanoMinus

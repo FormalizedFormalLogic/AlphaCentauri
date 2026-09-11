@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Coding
 # Internal cut-free derivations
 
 This module defines the cut-free fragment of Foundation's internal one-sided calculus.  It is a
-separate least fixpoint so that cut-freeness remains a `Δ₁` property in every model of `𝗜𝚺₁`.
+separate least fixpoint so that cut-freeness remains a $\Delta_1$ property in every model of `𝗜𝚺₁`.
 -/
 
 @[expose] public section
@@ -104,8 +104,8 @@ private lemma phi_iff (C d : V) :
     · right; right; right; right; right; right; right; left; exact ⟨s, d', rfl, h⟩
     · right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
 
-/-- The `Δ₁` fixpoint blueprint encoding `Phi` as a bounded arithmetical formula, needed to run
-the least-fixpoint construction inside the model.
+/-- The $\Delta_1$ fixpoint blueprint encoding `Phi` as a bounded arithmetical formula, needed to
+run the least-fixpoint construction inside the model.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “d C.
@@ -158,7 +158,7 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
           s = ss ∧ d' ∈ C) ∨
       (∃ s < d, ∃ p < d, !axmGraph d s p ∧ p ∈ s ∧ !T.Δ₁ch.pi p) )”)⟩
 
-/-- `Phi` is `Δ₁`-defined by `blueprint`.
+/-- `Phi` is $\Delta_1$-defined by `blueprint`.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 lemma Phi_definable :
     𝚫₁.Defined (fun v : Fin 2 → V ↦ Phi T {x | x ∈ v 1} (v 0)) (blueprint T).core := .mk <| by
@@ -231,69 +231,69 @@ def CutFreeDerivationOf (T : Theory L) [T.Δ₁] (d s : V) : Prop :=
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 def CutFreeDerivable (T : Theory L) [T.Δ₁] (s : V) : Prop := ∃ d, CutFreeDerivationOf T d s
 
-/-- The `Δ₁` semisentence defining `CutFreeDerivation`.
+/-- The $\Delta_1$ semisentence defining `CutFreeDerivation`.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 noncomputable def cutFreeDerivation (T : Theory L) [T.Δ₁] : 𝚫₁.Semisentence 1 :=
   (CutFreeDerivation.blueprint T).fixpointDefΔ₁
 
-/-- The `Δ₁` semisentence defining `CutFreeDerivationOf`.
+/-- The $\Delta_1$ semisentence defining `CutFreeDerivationOf`.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 noncomputable def cutFreeDerivationOf (T : Theory L) [T.Δ₁] : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “d s. !fstIdxDef s d ∧ !(cutFreeDerivation T).sigma d”)
   (.mkPi “d s. !fstIdxDef s d ∧ !(cutFreeDerivation T).pi d”)
 
-/-- The `𝚺₁` semisentence defining `CutFreeDerivable`.
+/-- The $\Sigma_1$ semisentence defining `CutFreeDerivable`.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 noncomputable def cutFreeDerivable (T : Theory L) [T.Δ₁] : 𝚺₁.Semisentence 1 := .mkSigma
   “Γ. ∃ d, !(cutFreeDerivationOf T).sigma d Γ”
 
 section
 
-/-- The `Δ₁` definability witness for `CutFreeDerivation`, via `cutFreeDerivation`.
+/-- The $\Delta_1$ definability witness for `CutFreeDerivation`, via `cutFreeDerivation`.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivation.defined :
     𝚫₁-Predicate[V] CutFreeDerivation T via cutFreeDerivation T :=
   (CutFreeDerivation.construction T).fixpoint_definedΔ₁
 
-/-- The `𝚫₁` definability instance for `CutFreeDerivation`, forgetting the specific witness.
+/-- The $\Delta_1$ definability instance for `CutFreeDerivation`, forgetting the specific witness.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivation.definable : 𝚫₁-Predicate[V] CutFreeDerivation T :=
   CutFreeDerivation.defined.to_definable
 
-/-- `CutFreeDerivation` is `Γ`-definable at every level `m + 1` above `𝚫₁`.
+/-- `CutFreeDerivation` is `Γ`-definable at every level `m + 1` above $\Delta_1$.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivation.definable' : Γ-[m + 1]-Predicate[V] CutFreeDerivation T :=
   CutFreeDerivation.definable.of_deltaOne
 
-/-- The `Δ₁` definability witness for `CutFreeDerivationOf`, via `cutFreeDerivationOf`.
+/-- The $\Delta_1$ definability witness for `CutFreeDerivationOf`, via `cutFreeDerivationOf`.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivationOf.defined :
     𝚫₁-Relation[V] CutFreeDerivationOf T via cutFreeDerivationOf T := .mk
   ⟨by intro v; simp [cutFreeDerivationOf],
    by intro v; simp [cutFreeDerivationOf, eq_comm (b := fstIdx (v 0))]; rfl⟩
 
-/-- The `𝚫₁` definability instance for `CutFreeDerivationOf`, forgetting the specific witness.
+/-- The $\Delta_1$ definability instance for `CutFreeDerivationOf`, forgetting the specific witness.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivationOf.definable : 𝚫₁-Relation[V] CutFreeDerivationOf T :=
   CutFreeDerivationOf.defined.to_definable
 
-/-- `CutFreeDerivationOf` is `Γ`-definable at every level `m + 1` above `𝚫₁`.
+/-- `CutFreeDerivationOf` is `Γ`-definable at every level `m + 1` above $\Delta_1$.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivationOf.definable' : Γ-[m + 1]-Relation[V] CutFreeDerivationOf T :=
   CutFreeDerivationOf.definable.of_deltaOne
 
-/-- The `𝚺₁` definability witness for `CutFreeDerivable`, via `cutFreeDerivable`.
+/-- The $\Sigma_1$ definability witness for `CutFreeDerivable`, via `cutFreeDerivable`.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivable.defined :
     𝚺₁-Predicate[V] CutFreeDerivable T via cutFreeDerivable T := .mk fun v ↦ by
   simp [cutFreeDerivable, CutFreeDerivable]
 
-/-- The `𝚺₁` definability instance for `CutFreeDerivable`, forgetting the specific witness.
+/-- The $\Sigma_1$ definability instance for `CutFreeDerivable`, forgetting the specific witness.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivable.definable : 𝚺₁-Predicate[V] CutFreeDerivable T :=
   CutFreeDerivable.defined.to_definable
 
-/-- `CutFreeDerivable` is `𝚺-[0 + 1]`-definable.
+/-- `CutFreeDerivable` is $\Sigma_{0 + 1}$-definable.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivable.definable' : 𝚺-[0 + 1]-Predicate[V] CutFreeDerivable T :=
   CutFreeDerivable.definable
@@ -465,8 +465,8 @@ lemma axm {s p : V} (hs : IsFormulaSet L s) (hp : p ∈ s) (hT : p ∈ T.Δ₁Cl
 
 variable {U : Theory L} [U.Δ₁]
 
-/-- Cut-free derivability is monotone in the theory: enlarging the set of `Δ₁`-axioms preserves
-cut-free derivations.
+/-- Cut-free derivability is monotone in the theory: enlarging the set of $\Delta_1$-axioms
+preserves cut-free derivations.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {d : V} :
     CutFreeDerivation T d → CutFreeDerivation U d := by
@@ -530,8 +530,8 @@ end CutFreeDerivable
 
 namespace Derivation
 
-/-- A formula code belongs to the `Δ₁`-class of a finite list of sentences, presented as a theory,
-iff it is the quote of one of the listed sentences.
+/-- A formula code belongs to the $\Delta_1$-class of a finite list of sentences, presented as a
+theory, iff it is the quote of one of the listed sentences.
 - No source; a routine technical bridge. -/
 lemma mem_deltaClass_ofList_iff (l : List (Sentence L)) (p : V) :
     p ∈ @Theory.Δ₁Class V _ L _ _ {p | p ∈ l} (Theory.Δ₁.ofList l) ↔

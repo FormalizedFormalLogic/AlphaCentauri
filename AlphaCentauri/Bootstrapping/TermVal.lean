@@ -112,7 +112,7 @@ noncomputable def termVal (e t : V) : V := construction.result ℒₒᵣ ![e] t
 - [HP98, 1.64(5)] -/
 noncomputable def termValVec (e k v : V) : V := construction.resultVec ℒₒᵣ ![e] k v
 
-/-- The `𝚺₁` graph of `termVal`; argument order `(y, e, t)`, `y = termVal e t`.
+/-- The $\Sigma_1$ graph of `termVal`; argument order `(y, e, t)`, `y = termVal e t`.
 - [HP98, 1.63] -/
 noncomputable def termValGraph : 𝚺₁.Semisentence 3 := (blueprint.result ℒₒᵣ).rew <| Rew.subst ![#0, #2, #1]
 
@@ -128,23 +128,23 @@ noncomputable def termValVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultV
 
 section
 
-/-- The `𝚺₁` definability witness for `termVal`.
+/-- The $\Sigma_1$ definability witness for `termVal`.
 - [HP98, 1.63] -/
 instance termVal.defined : 𝚺₁-Function₂ (termVal : V → V → V) via termValGraph := .mk fun v ↦ by
   simpa [termValGraph, termVal, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
     using construction.result_defined.defined ![v 0, v 2, v 1]
 
-/-- Term evaluation is `𝚫₁`-definable.
+/-- Term evaluation is $\Delta_1$-definable.
 - [HP98, 1.63] -/
 instance termVal.definable : 𝚫₁-Function₂ (termVal : V → V → V) := termVal.defined.graph_delta.to_definable
 
-/-- The `𝚺₁` definability witness for evaluation of term vectors.
+/-- The $\Sigma_1$ definability witness for evaluation of term vectors.
 - [HP98, 1.63] -/
 instance termValVec.defined : 𝚺₁-Function₃ (termValVec : V → V → V → V) via termValVecGraph := .mk fun v ↦ by
   simpa [termValVecGraph, termValVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
     using (construction.resultVec_defined (L := ℒₒᵣ)).defined ![v 0, v 2, v 3, v 1]
 
-/-- Evaluation of term vectors is `𝚫₁`-definable.
+/-- Evaluation of term vectors is $\Delta_1$-definable.
 - [HP98, 1.63] -/
 instance termValVec.definable : 𝚫₁-Function₃ (termValVec : V → V → V → V) :=
   termValVec.defined.graph_delta.to_definable
@@ -440,12 +440,12 @@ noncomputable def termVal' (f e t : V) : V := construction.result ℒₒᵣ ![f,
 noncomputable def termValVec' (f e k v : V) : V :=
   construction.resultVec ℒₒᵣ (fun i ↦ ![f, e] i) k v
 
-/-- The `𝚺₁` graph of `termVal'`; argument order `(y, f, e, t)`.
+/-- The $\Sigma_1$ graph of `termVal'`; argument order `(y, f, e, t)`.
 - [HP98, 1.63] -/
 noncomputable def termVal'Graph : 𝚺₁.Semisentence 4 :=
   (blueprint.result ℒₒᵣ).rew <| Rew.subst ![#0, #3, #1, #2]
 
-/-- The `𝚺₁` graph of `termValVec'`; argument order `(y, f, e, k, v)`.
+/-- The $\Sigma_1$ graph of `termValVec'`; argument order `(y, f, e, k, v)`.
 - [HP98, 1.63] -/
 noncomputable def termValVec'Graph : 𝚺₁.Semisentence 5 :=
   (blueprint.resultVec ℒₒᵣ).rew <| Rew.subst ![#0, #3, #4, #1, #2]
@@ -458,18 +458,18 @@ noncomputable def termValVec'Graph : 𝚺₁.Semisentence 5 :=
 
 section
 
-/-- The `𝚺₁` definability witness for `termVal'`.
+/-- The $\Sigma_1$ definability witness for `termVal'`.
 - [HP98, 1.63] -/
 instance termVal'.defined : 𝚺₁-Function₃ (termVal' : V → V → V → V) via termVal'Graph := .mk fun v ↦ by
   simpa [termVal'Graph, termVal', Matrix.constant_eq_singleton, Matrix.comp_vecCons']
     using construction.result_defined.defined ![v 0, v 3, v 1, v 2]
 
-/-- The `𝚫₁` definability instance for `termVal'`, using uniqueness of its graph.
+/-- The $\Delta_1$ definability instance for `termVal'`, using uniqueness of its graph.
 - [HP98, 1.63] -/
 instance termVal'.definable : 𝚫₁-Function₃ (termVal' : V → V → V → V) :=
   termVal'.defined.graph_delta.to_definable
 
-/-- The `𝚺₁` definability witness for `termValVec'`.
+/-- The $\Sigma_1$ definability witness for `termValVec'`.
 - [HP98, 1.63] -/
 instance termValVec'.defined : 𝚺₁-Function₄ (termValVec' : V → V → V → V → V) via termValVec'Graph :=
   .mk fun v ↦ by
@@ -477,7 +477,7 @@ instance termValVec'.defined : 𝚺₁-Function₄ (termValVec' : V → V → V 
       Function.comp_def]
       using! (construction.resultVec_defined (L := ℒₒᵣ)).defined ![v 0, v 3, v 4, v 1, v 2]
 
-/-- The `𝚫₁` definability instance for `termValVec'`, using uniqueness of its graph.
+/-- The $\Delta_1$ definability instance for `termValVec'`, using uniqueness of its graph.
 - [HP98, 1.63] -/
 instance termValVec'.definable : 𝚫₁-Function₄ (termValVec' : V → V → V → V → V) :=
   termValVec'.defined.graph_delta.to_definable

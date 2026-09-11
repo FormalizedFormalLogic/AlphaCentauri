@@ -5,16 +5,16 @@ public import AlphaCentauri.Reflection.StandardProvability
 
 @[expose] public section
 /-!
-# The collapse formula for a `Δ₁` set of `Γ_{n + 1}` sentences
+# The collapse formula for a $\Delta_1$ set of `Γ_{n + 1}` sentences
 
-Given an arithmetic theory `T` and a `Δ₁`-presented set `U` of `Γ_{n + 1}` sentences, this module
-constructs a single `Γ_{n + 1}` sentence `collapseSentence T U n Γ` whose extension of `T` proves
-every member of `U` while staying consistent whenever `T ∪ U` is. Those two claims are proved
+Given an arithmetic theory `T` and a $\Delta_1$-presented set `U` of `Γ_{n + 1}` sentences, this
+module constructs a single `Γ_{n + 1}` sentence `collapseSentence T U n Γ` whose extension of `T`
+proves every member of `U` while staying consistent whenever `T ∪ U` is. Those two claims are proved
 elsewhere; this module supplies only the sentence and its syntactic properties.
 
 The sentence is the one-step unfolding of the fixed point of `collapseFormula T U n Γ`, a formula
-built from `U`'s `Δ₁` presentation, a syntactic guard against junk codes, and the partial truth
-predicates of `AlphaCentauri.Bootstrapping.PartialTruth.Snowing`.
+built from `U`'s $\Delta_1$ presentation, a syntactic guard against junk codes, and the partial
+truth predicates of `AlphaCentauri.Bootstrapping.PartialTruth.Snowing`.
 
 - [Lin97, Theorem 4.3]
 - [AB05, Theorem 23]
@@ -27,8 +27,8 @@ open Bootstrapping
 variable (T U : ArithmeticTheory) [T.Δ₁] [U.Δ₁] (n : ℕ)
 
 /-- The formula, in one free variable `v` for the code of a sentence, whose fixed point collapses
-a `Δ₁`-presented set `U` of `Γ_{n + 1}` sentences relative to `T`: at polarity `𝚷`, "every early
-enough `T`-consistent member of `U` (checked against a code `v` of `∼collapseSentence T U n 𝚷`
+a $\Delta_1$-presented set `U` of `Γ_{n + 1}` sentences relative to `T`: at polarity `𝚷`, "every
+early enough `T`-consistent member of `U` (checked against a code `v` of `∼collapseSentence T U n 𝚷`
 through `negGraph`) is true"; at polarity `𝚺`, its dual, "some standard proof of `∼v` from `T`
 exists at a stage by which every member of `U` still true is caught".
 

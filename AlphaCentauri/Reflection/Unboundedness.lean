@@ -4,12 +4,12 @@ public import AlphaCentauri.Reflection.CollapseFormula
 
 @[expose] public section
 /-!
-# The unboundedness theorem for a `Δ₁` set of `Γ_{n + 1}` sentences
+# The unboundedness theorem for a $\Delta_1$ set of `Γ_{n + 1}` sentences
 
 The local reflection schema of `T` on a class is not contained in any consistent extension of `T`
-by a `Δ₁`-presented set of sentences of the dual class. The extension is collapsed to the single
-sentence `collapseSentence` of `AlphaCentauri.Reflection.CollapseFormula`, which reduces the claim
-to the case of an extension by one sentence.
+by a $\Delta_1$-presented set of sentences of the dual class. The extension is collapsed to the
+single sentence `collapseSentence` of `AlphaCentauri.Reflection.CollapseFormula`, which reduces the
+claim to the case of an extension by one sentence.
 
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
@@ -28,7 +28,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Reading standard codes inside a model -/
 
-/-- Membership in the `Δ₁` class of a theory is absolute between `ℕ` and a model of `𝗜𝚺₁` at
+/-- Membership in the $\Delta_1$ class of a theory is absolute between `ℕ` and a model of `𝗜𝚺₁` at
 standard codes. -/
 lemma mem_Δ₁Class_natCast_iff {m : ℕ} : m ∈ U.Δ₁Class ↔ (m : V) ∈ U.Δ₁Class := by
   simpa using Defined.shigmaOne_absolute V (φ := U.Δ₁ch)
@@ -42,7 +42,7 @@ lemma isSemiformula_natCast_iff {m : ℕ} :
     (R := fun v ↦ IsSemiformula ℒₒᵣ (v 0) (v 1)) (R' := fun v ↦ IsSemiformula ℒₒᵣ (v 0) (v 1))
     IsSemiformula.defined IsSemiformula.defined ![0, m]
 
-/-- A standard code of a formula that lies in the `Δ₁` class of `U` is the code of a member of
+/-- A standard code of a formula that lies in the $\Delta_1$ class of `U` is the code of a member of
 `U`. -/
 lemma exists_mem_eq_quote {m : ℕ} (hmem : (m : V) ∈ U.Δ₁Class)
     (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V)) : ∃ σ ∈ U, (m : V) = (⌜σ⌝ : V) := by
@@ -269,13 +269,13 @@ private lemma provable_of_mem (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ
 
 /-! ## The unboundedness theorem -/
 
-/-- If `T ∪ U` is consistent, for a `Δ₁`-presented theory `U` all of whose members are
+/-- If `T ∪ U` is consistent, for a $\Delta_1$-presented theory `U` all of whose members are
 `StrictHierarchy Γ (n + 1)`, then there is a `Γ (n + 1)` sentence `θ` such that `T ∪ U ⪯ insert θ T`
 and `insert θ T` is consistent.
 
-`U`'s presentation is read as `Δ₁` rather than r.e.: this is a deliberate narrowing of [AB05]'s
-"consistent r.e. extension", which reduces to an elementary presentation via Craig's trick, a
-result absent from both Foundation and this repository. Restricting `U`'s members to
+`U`'s presentation is read as $\Delta_1$ rather than r.e.: this is a deliberate narrowing of
+[AB05]'s "consistent r.e. extension", which reduces to an elementary presentation via Craig's trick,
+a result absent from both Foundation and this repository. Restricting `U`'s members to
 `StrictHierarchy Γ (n + 1)` rather than `Hierarchy Γ (n + 1)` is likewise deliberate: the partial
 truth predicate used to build `θ` agrees with truth only on the strict prenex classes.
 - [Lin97, Theorem 4.3] -/
@@ -293,12 +293,12 @@ theorem exists_sentence_weakerThan_of_consistent
   · exact by_axm (Set.mem_insert_of_mem _ hφ)
   · exact provable_of_mem hΓ hcon hφ
 
-/-- Unboundedness, for an extension by a `Δ₁`-presented set: if `T ∪ U`, for a `Δ₁`-presented
-theory `U` all of whose members are `StrictHierarchy Γ (n + 1)`, proves the local reflection
-schema of `T` on the dual class, then `T ∪ U` is inconsistent.
+/-- Unboundedness, for an extension by a $\Delta_1$-presented set: if `T ∪ U`, for a
+$\Delta_1$-presented theory `U` all of whose members are `StrictHierarchy Γ (n + 1)`, proves the
+local reflection schema of `T` on the dual class, then `T ∪ U` is inconsistent.
 
-As in `exists_sentence_weakerThan_of_consistent`, `U`'s presentation is read as `Δ₁` rather than
-r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather than
+As in `exists_sentence_weakerThan_of_consistent`, `U`'s presentation is read as $\Delta_1$ rather
+than r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather than
 `Hierarchy Γ (n + 1)`.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
@@ -311,12 +311,12 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union
   exact hcon.not_inc
     (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hθ (h.trans hle))
 
-/-- Unboundedness, for an extension by a `Δ₁`-presented set: a consistent `T ∪ U`, for a
-`Δ₁`-presented theory `U` all of whose members are `StrictHierarchy Γ (n + 1)`, does not contain
-the local reflection schema of `T` on the dual class.
+/-- Unboundedness, for an extension by a $\Delta_1$-presented set: a consistent `T ∪ U`, for a
+$\Delta_1$-presented theory `U` all of whose members are `StrictHierarchy Γ (n + 1)`, does not
+contain the local reflection schema of `T` on the dual class.
 
-As in `exists_sentence_weakerThan_of_consistent`, `U`'s presentation is read as `Δ₁` rather than
-r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather than
+As in `exists_sentence_weakerThan_of_consistent`, `U`'s presentation is read as $\Delta_1$ rather
+than r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather than
 `Hierarchy Γ (n + 1)`.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/

@@ -7,8 +7,8 @@ import Mathlib.Tactic.Ring
 /-!
 # Existence of partial satisfaction tables
 
-Every well-formed internally `Δ₀` formula has a partial satisfaction table under every
-assignment. The statement `∀ e, ∃ q, PSatZero q z e` is `Π₂`, so `𝗜𝚺₁` cannot induct on it
+Every well-formed internally $\Delta_0$ formula has a partial satisfaction table under every
+assignment. The statement `∀ e, ∃ q, PSatZero q z e` is $\Pi_2$, so `𝗜𝚺₁` cannot induct on it
 directly; following [HP98, Lemma I.1.72(3)], the induction is carried out on a bounded form of
 the statement instead. Where the source bounds the table uniformly by a polynomial in the code
 and in an assignment bound, this development bounds it by
@@ -20,7 +20,7 @@ polynomial because the domain here is the downward closure of the root rather th
 rectangle `(< p) × (< r)`: entering a bounded quantifier pushes a value `x < termVal e t` onto
 the assignment, and `termVal_le_poly` bounds that value only exponentially. Since the number of
 nested quantifiers is bounded by the code `z`, the height `8 * z + 24` suffices; `iterExp` is
-`𝚺₁` and total in `𝗜𝚺₁`, so the bound is available.
+$\Sigma_1$ and total in `𝗜𝚺₁`, so the bound is available.
 
 - [HP98, Lemma I.1.72(3)]
 -/
@@ -915,7 +915,7 @@ end PSatZero
 
 /-! ## Existence -/
 
-/-- Every well-formed internally `Δ₀` formula has a partial satisfaction table under every
+/-- Every well-formed internally $\Delta_0$ formula has a partial satisfaction table under every
 assignment.
 - [HP98, Lemma I.1.72(3)] -/
 theorem PSatZero.exists {z e : V} (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) :

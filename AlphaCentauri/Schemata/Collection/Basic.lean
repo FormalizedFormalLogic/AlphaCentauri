@@ -38,7 +38,7 @@ abbrev CollectionOnHierarchy (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
 
 prefix:max "𝗕 " => CollectionOnHierarchy
 
-/-- The collection scheme for `𝚺-[n]` formulas.
+/-- The collection scheme for $\Sigma_n$ formulas.
 - [HP98, I.2.3] -/
 abbrev BSigma (n : ℕ) : ArithmeticTheory := 𝗕 𝚺 n
 
@@ -46,7 +46,7 @@ prefix:max "𝗕𝚺 " => BSigma
 
 notation "𝗕𝚺₁" => BSigma 1
 
-/-- The collection scheme for `𝚷-[n]` formulas.
+/-- The collection scheme for $\Pi_n$ formulas.
 - [HP98, I.2.3] -/
 abbrev BPi (n : ℕ) : ArithmeticTheory := 𝗕 𝚷 n
 

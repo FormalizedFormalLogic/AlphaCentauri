@@ -6,8 +6,8 @@ public import AlphaCentauri.Bootstrapping.TermVal
 /-!
 # Partial satisfaction tables
 
-This module defines `PSatZero`, the partial satisfaction table for an internally coded `Δ₀`
-formula under an assignment, proves it is `𝚫₁`, and proves that a table for a fixed root is
+This module defines `PSatZero`, the partial satisfaction table for an internally coded $\Delta_0$
+formula under an assignment, proves it is $\Delta_1$, and proves that a table for a fixed root is
 unique. `PSatZero.agree` is the form uniqueness takes for tables with different roots: two
 tables give the same value at every node common to their domains. This is what reads a Tarski
 condition off the table of a subformula, so no separate restriction operation is needed.
@@ -546,17 +546,17 @@ theorem uniq (h₁ : PSatZero q₁ z e) (h₂ : PSatZero q₂ z e) : q₁ = q₂
 
 end PSatZero
 
-/-! ## `𝚫₁`-definability
+/-! ## $\Delta_1$-definability
 
 The predicate is spelled out clause by clause: each clause of `PSatZero.spec` and of
 `PSatZero.minimal` gets a `Prop` with every quantifier bounded and a defining formula, and
-`pSatZero` is their assembly. Where a clause mentions `termVal`, whose graph is `𝚺₁` but not
-`𝚺₀`, the value is hoisted out of the clause by an existential on the `𝚺₁` side and by a
-universal on the `𝚷₁` side, which leaves the clause itself `𝚺₀`. -/
+`pSatZero` is their assembly. Where a clause mentions `termVal`, whose graph is $\Sigma_1$ but not
+$\Sigma_0$, the value is hoisted out of the clause by an existential on the $\Sigma_1$ side and by a
+universal on the $\Pi_1$ side, which leaves the clause itself $\Sigma_0$. -/
 
 namespace PSatZeroF
 
-/-! ### Nodes and values as `𝚺₀` relations -/
+/-! ### Nodes and values as $\Sigma_0$ relations -/
 
 /-- Defining formula for `n ∈ domain q`.
 - [HP98, Lemma I.1.72(1)] -/
@@ -1174,7 +1174,7 @@ lemma psatZero_iff {q z e : V} : PSatZero q z e ↔
 
 end PSatZeroF
 
-/-- The `𝚫₁` formula defining partial satisfaction tables.
+/-- The $\Delta_1$ formula defining partial satisfaction tables.
 - [HP98, Lemma I.1.72(1)] -/
 noncomputable def pSatZero : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. !isMappingDef q ∧ !PSatZeroF.nodeDomDef q z e ∧
@@ -1195,7 +1195,7 @@ instance PSatZero.defined : 𝚫₁-Relation₃ (PSatZero : V → V → V → Pr
     simp [pSatZero, HierarchySymbol.Semiformula.val_sigma, PSatZeroF.psatZero_iff,
       PSatZeroF.nodeDom_defined.df, PSatZeroF.inDom_defined.df]
 
-/-- Partial satisfaction tables form a `𝚫₁`-definable relation.
+/-- Partial satisfaction tables form a $\Delta_1$-definable relation.
 - [HP98, Lemma I.1.72(1)] -/
 instance PSatZero.definable : 𝚫₁-Relation₃ (PSatZero : V → V → V → Prop) :=
   PSatZero.defined.to_definable

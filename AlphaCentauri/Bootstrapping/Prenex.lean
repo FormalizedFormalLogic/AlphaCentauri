@@ -53,12 +53,12 @@ noncomputable def qqExss (p k : V) : V := qqExss.construction.result ![p] k
 def _root_.FFL.FirstOrder.Arithmetic.qqExssDef : 𝚺₁.Semisentence 3 :=
   qqExss.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
-/-- Iterated existential quantification is `𝚺₁`-definable.
+/-- Iterated existential quantification is $\Sigma_1$-definable.
 - [HP98, Lemma I.1.69] -/
 instance qqExss_defined : 𝚺₁-Function₂ (qqExss : V → V → V) via qqExssDef := .mk
   fun v ↦ by simp [qqExss.construction.result_defined_iff, qqExssDef]; rfl
 
-/-- The `𝚺₁` definability instance for iterated existential quantification.
+/-- The $\Sigma_1$ definability instance for iterated existential quantification.
 - [HP98, Lemma I.1.69] -/
 instance qqExss_definable : 𝚺₁-Function₂ (qqExss : V → V → V) :=
   qqExss_defined.to_definable
@@ -200,13 +200,13 @@ end vecAppend
 /-! ## Internal prenex classes -/
 
 mutual
-  /-- `IsStrictSigma n p` says that `p` codes a strict prenex `𝚺-[n]` formula.
+  /-- `IsStrictSigma n p` says that `p` codes a strict prenex $\Sigma_n$ formula.
   - [HP98, Lemma I.1.69] -/
   def IsStrictSigma : ℕ → V → Prop
     | 0 => IsDelta0
     | n + 1 => fun p ↦ ∃ k q, p = qqExss q k ∧ IsStrictPi n q
 
-  /-- `IsStrictPi n p` says that `p` codes a strict prenex `𝚷-[n]` formula.
+  /-- `IsStrictPi n p` says that `p` codes a strict prenex $\Pi_n$ formula.
   - [HP98, Lemma I.1.69] -/
   def IsStrictPi : ℕ → V → Prop
     | 0 => IsDelta0
@@ -214,7 +214,7 @@ mutual
 end
 
 mutual
-  /-- A `𝚫₁` recognizer for internally coded strict prenex `𝚺-[n]` formulas.
+  /-- A $\Delta_1$ recognizer for internally coded strict prenex $\Sigma_n$ formulas.
   - [HP98, Lemma I.1.69(1)] -/
   noncomputable def isStrictSigma : ℕ → 𝚫₁.Semisentence 1
     | 0 => isDelta0
@@ -222,7 +222,7 @@ mutual
         (.mkSigma “p. ∃ k < p + 1, ∃ q < p + 1, !qqExssDef p q k ∧ !(isStrictPi n).sigma q”)
         (.mkPi “p. ∃ k < p + 1, ∃ q < p + 1, (∀ y, !qqExssDef y q k → y = p) ∧ !(isStrictPi n).pi q”)
 
-  /-- A `𝚫₁` recognizer for internally coded strict prenex `𝚷-[n]` formulas.
+  /-- A $\Delta_1$ recognizer for internally coded strict prenex $\Pi_n$ formulas.
   - [HP98, Lemma I.1.69(1)] -/
   noncomputable def isStrictPi : ℕ → 𝚫₁.Semisentence 1
     | 0 => isDelta0
@@ -241,7 +241,7 @@ private lemma exists_block_iff {f : V → V → V} (hmatrix : ∀ q k : V, q ≤
     fun ⟨k, q, heq, hq⟩ ↦ ⟨k, heq ▸ hlength q k, q, heq ▸ hmatrix q k, heq, hq⟩⟩
 
 mutual
-  /-- The strict prenex `𝚺-[n]` recognizer defines `IsStrictSigma n`.
+  /-- The strict prenex $\Sigma_n$ recognizer defines `IsStrictSigma n`.
   - [HP98, Lemma I.1.69(1)] -/
   instance IsStrictSigma.defined :
       ∀ n : ℕ, 𝚫₁-Predicate (IsStrictSigma n : V → Prop) via isStrictSigma n
@@ -253,7 +253,7 @@ mutual
           simpa [isStrictSigma, IsStrictSigma, lt_succ_iff_le] using
             exists_block_iff le_qqExss index_le_qqExss (IsStrictPi n) (v 0)⟩
 
-  /-- The strict prenex `𝚷-[n]` recognizer defines `IsStrictPi n`.
+  /-- The strict prenex $\Pi_n$ recognizer defines `IsStrictPi n`.
   - [HP98, Lemma I.1.69(1)] -/
   instance IsStrictPi.defined :
       ∀ n : ℕ, 𝚫₁-Predicate (IsStrictPi n : V → Prop) via isStrictPi n
@@ -267,34 +267,34 @@ mutual
             exists_block_iff le_qqAlls index_le_qqAlls (IsStrictSigma n) (v 0)⟩
 end
 
-/-- Internal strict prenex `𝚺-[n]` membership is `𝚫₁`-definable.
+/-- Internal strict prenex $\Sigma_n$ membership is $\Delta_1$-definable.
 - [HP98, Lemma I.1.69(1)] -/
 instance IsStrictSigma.definable (n : ℕ) : 𝚫₁-Predicate (IsStrictSigma n : V → Prop) :=
   (IsStrictSigma.defined n).to_definable
 
-/-- Internal strict prenex `𝚷-[n]` membership is `𝚫₁`-definable.
+/-- Internal strict prenex $\Pi_n$ membership is $\Delta_1$-definable.
 - [HP98, Lemma I.1.69(1)] -/
 instance IsStrictPi.definable (n : ℕ) : 𝚫₁-Predicate (IsStrictPi n : V → Prop) :=
   (IsStrictPi.defined n).to_definable
 
-/-- A strict `𝚷-[n]` formula belongs to the next strict `Σ` level.
+/-- A strict $\Pi_n$ formula belongs to the next strict `Σ` level.
 - [HP98, Lemma I.1.69] -/
 lemma IsStrictSigma.of_pi {n : ℕ} {p : V} (h : IsStrictPi n p) : IsStrictSigma (n + 1) p :=
   ⟨0, p, (qqExss_zero p).symm, h⟩
 
-/-- A strict `𝚺-[n]` formula belongs to the next strict `Π` level.
+/-- A strict $\Sigma_n$ formula belongs to the next strict `Π` level.
 - [HP98, Lemma I.1.69] -/
 lemma IsStrictPi.of_sigma {n : ℕ} {p : V} (h : IsStrictSigma n p) : IsStrictPi (n + 1) p :=
   ⟨0, p, (qqAlls_zero p).symm, h⟩
 
-/-- A strict `𝚺-[n + 1]` class is closed under existential quantification.
+/-- A strict $\Sigma_{n + 1}$ class is closed under existential quantification.
 - [HP98, Lemma I.1.69] -/
 lemma IsStrictSigma.exs {n : ℕ} {p : V} (h : IsStrictSigma (n + 1) p) :
     IsStrictSigma (n + 1) (^∃ p) := by
   obtain ⟨k, q, rfl, hq⟩ := h
   exact ⟨k + 1, q, (qqExss_succ q k).symm, hq⟩
 
-/-- A strict `𝚷-[n + 1]` class is closed under universal quantification.
+/-- A strict $\Pi_{n + 1}$ class is closed under universal quantification.
 - [HP98, Lemma I.1.69] -/
 lemma IsStrictPi.all {n : ℕ} {p : V} (h : IsStrictPi (n + 1) p) :
     IsStrictPi (n + 1) (^∀ p) := by
@@ -302,13 +302,13 @@ lemma IsStrictPi.all {n : ℕ} {p : V} (h : IsStrictPi (n + 1) p) :
   exact ⟨k + 1, q, (qqAlls_succ q k).symm, hq⟩
 
 mutual
-  /-- An internally `Δ₀` formula is strict `𝚺-[n]` at every level.
+  /-- An internally $\Delta_0$ formula is strict $\Sigma_n$ at every level.
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictSigma.of_delta0 : ∀ {n : ℕ} {p : V}, IsDelta0 p → IsStrictSigma n p
     | 0,     _, h => h
     | _ + 1, _, h => IsStrictSigma.of_pi (IsStrictPi.of_delta0 h)
 
-  /-- An internally `Δ₀` formula is strict `𝚷-[n]` at every level.
+  /-- An internally $\Delta_0$ formula is strict $\Pi_n$ at every level.
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictPi.of_delta0 : ∀ {n : ℕ} {p : V}, IsDelta0 p → IsStrictPi n p
     | 0,     _, h => h
@@ -354,7 +354,7 @@ private lemma isStrictPi1_of_isDelta0_alls {p : V} (h : IsDelta0 (^∀ p)) :
   exact IsStrictPi.of_sigma (IsDelta0.or_iff.mpr ⟨h₁, hq⟩)
 
 mutual
-  /-- Removing a leading existential from a strict `𝚷-[n]` code lands in strict `𝚺-[n + 1]`.
+  /-- Removing a leading existential from a strict $\Pi_n$ code lands in strict $\Sigma_{n + 1}$.
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictPi.of_exs_aux :
       ∀ {n : ℕ} {p : V}, IsStrictPi n (^∃ p) → IsStrictSigma (n + 1) p
@@ -366,7 +366,7 @@ mutual
         exact IsStrictSigma.mono (by omega) (IsStrictSigma.of_exs_aux hq)
       · rw [qqAlls_succ] at heq; simp [qqExs, qqAll, pair_ext_iff] at heq
 
-  /-- Removing a leading existential from a strict `𝚺-[n]` code lands in strict `𝚺-[n + 1]`.
+  /-- Removing a leading existential from a strict $\Sigma_n$ code lands in strict $\Sigma_{n + 1}$.
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictSigma.of_exs_aux :
       ∀ {n : ℕ} {p : V}, IsStrictSigma n (^∃ p) → IsStrictSigma (n + 1) p
@@ -382,7 +382,7 @@ mutual
 end
 
 mutual
-  /-- Removing a leading universal from a strict `𝚺-[n]` code lands in strict `𝚷-[n + 1]`.
+  /-- Removing a leading universal from a strict $\Sigma_n$ code lands in strict $\Pi_{n + 1}$.
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictSigma.of_all_aux :
       ∀ {n : ℕ} {p : V}, IsStrictSigma n (^∀ p) → IsStrictPi (n + 1) p
@@ -394,7 +394,7 @@ mutual
         exact IsStrictPi.mono (by omega) (IsStrictPi.of_all_aux hq)
       · rw [qqExss_succ] at heq; simp [qqExs, qqAll, pair_ext_iff] at heq
 
-  /-- Removing a leading universal from a strict `𝚷-[n]` code lands in strict `𝚷-[n + 1]`.
+  /-- Removing a leading universal from a strict $\Pi_n$ code lands in strict $\Pi_{n + 1}$.
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictPi.of_all_aux :
       ∀ {n : ℕ} {p : V}, IsStrictPi n (^∀ p) → IsStrictPi (n + 1) p
@@ -434,7 +434,7 @@ lemma IsStrictPi.of_all {n : ℕ} {p : V} (h : IsStrictPi (n + 1) (^∀ p)) :
     exact ⟨k, q, heq, hq⟩
 
 mutual
-  /-- Negation sends internally coded strict `𝚺-[n]` formulas to strict `𝚷-[n]` formulas.
+  /-- Negation sends internally coded strict $\Sigma_n$ formulas to strict $\Pi_n$ formulas.
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictSigma.neg :
       ∀ {n : ℕ} {p : V}, IsUFormula ℒₒᵣ p → IsStrictSigma n p → IsStrictPi n (neg ℒₒᵣ p)
@@ -444,7 +444,7 @@ mutual
       have hq' : IsUFormula ℒₒᵣ q := isUFormula_qqExss.mp hp
       exact ⟨k, neg ℒₒᵣ q, neg_qqExss hq', IsStrictPi.neg hq' hq⟩
 
-  /-- Negation sends internally coded strict `𝚷-[n]` formulas to strict `𝚺-[n]` formulas.
+  /-- Negation sends internally coded strict $\Pi_n$ formulas to strict $\Sigma_n$ formulas.
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictPi.neg :
       ∀ {n : ℕ} {p : V}, IsUFormula ℒₒᵣ p → IsStrictPi n p → IsStrictSigma n (neg ℒₒᵣ p)

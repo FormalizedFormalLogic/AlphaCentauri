@@ -34,7 +34,7 @@ lemma hierarchyCollection_of_models_collectionAxiom [V↓[ℒₒᵣ] ⊧* 𝗣�
     HierarchyCollection V Γ s := fun hθ e a hex ↦
   exists_bound_of_models_collectionAxiom (h _ (hθ.rew _)) e a hex
 
-/-- Collection for `𝚷-[n]` formulas holds in every model of `𝗕𝚷 n`. -/
+/-- Collection for $\Pi_n$ formulas holds in every model of `𝗕𝚷 n`. -/
 lemma hierarchyCollection_of_models_BPi (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n] :
     HierarchyCollection V 𝚷 n :=
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := 𝗕𝚷 n) inferInstance
@@ -53,7 +53,7 @@ section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
-/-- A `𝚷-[n]` semisentence has its witnesses bounded by a `𝚷-[n]` semisentence. -/
+/-- A $\Pi_n$ semisentence has its witnesses bounded by a $\Pi_n$ semisentence. -/
 private lemma exists_boundsWitness_of_hierarchy {m : ℕ} {θ : ArithmeticSemisentence (m + 1)}
     (h : Hierarchy 𝚷 n θ) :
     ∃ χ : ArithmeticSemisentence (m + 1), Hierarchy 𝚷 n χ ∧ BoundsWitness V χ θ := by
@@ -69,7 +69,7 @@ private lemma exists_boundsWitness_of_hierarchy {m : ℕ} {θ : ArithmeticSemise
   obtain ⟨u, hu, hθ⟩ := (heval e v).mp hχ
   exact (heval e v').mpr ⟨u, lt_of_lt_of_le hu hv, hθ⟩
 
-/-- The witnesses of `∃¹ θ` are bounded by a `𝚷-[n]` semisentence as soon as those of `θ` are.
+/-- The witnesses of `∃¹ θ` are bounded by a $\Pi_n$ semisentence as soon as those of `θ` are.
 - [Bus98A, Theorem 1.2.9(a)] -/
 private lemma exists_boundsWitness_exs {m : ℕ} {θ χ : ArithmeticSemisentence (m + 2)}
     (hχ : Hierarchy 𝚷 n χ) (hB : BoundsWitness V χ θ) :
@@ -96,7 +96,7 @@ private lemma exists_boundsWitness_exs {m : ℕ} {θ χ : ArithmeticSemisentence
       ⟨u, lt_of_lt_of_le (lt_add_one u) (le_max_left _ _),
         hmono (u :> e) v (max (u + 1) v) (le_max_right _ _) hv⟩⟩
 
-/-- A strict `𝚺-[n + 1]` semisentence has its witnesses bounded by a `𝚷-[n]` semisentence.
+/-- A strict $\Sigma_{n + 1}$ semisentence has its witnesses bounded by a $\Pi_n$ semisentence.
 - [Bus98A, Theorem 1.2.9(a)] -/
 private lemma exists_boundsWitness_of_strictHierarchy :
     ∀ {m : ℕ} {θ : ArithmeticSemisentence (m + 1)}, StrictHierarchy 𝚺 (n + 1) θ →
@@ -121,9 +121,9 @@ private lemma exists_boundsWitness_of_strictHierarchy :
   intro m θ hθ
   exact key θ.complexity le_rfl hθ
 
-/-- In a model of `𝗣𝗔⁻` with collection for strict `𝚺-[n + 1]` formulas, every `𝚺-[n + 1]`
+/-- In a model of `𝗣𝗔⁻` with collection for strict $\Sigma_{n + 1}$ formulas, every $\Sigma_{n + 1}$
 formula agrees, at a fixed assignment of its free variables, with an existential quantification
-of a `𝚷-[n]` formula.
+of a $\Pi_n$ formula.
 - [HP98, 0.30]
 - [Bus98A, Theorem 1.2.9(a)] -/
 lemma exists_pi_eval_iff (hC : StrictCollection V (n + 1)) {φ : ArithmeticSemiformula ℕ 1}
@@ -163,7 +163,7 @@ lemma exists_pi_eval_iff (hC : StrictCollection V (n + 1)) {φ : ArithmeticSemif
     obtain ⟨u, -, hu⟩ := hbound (x :> fun i : Fin ψ.fvSup ↦ f i) w ((hval w).mp hw)
     exact (hshift u x).mp hu
 
-/-- Collection for `𝚷-[n]` formulas gives collection for strict `𝚺-[n + 1]` formulas.
+/-- Collection for $\Pi_n$ formulas gives collection for strict $\Sigma_{n + 1}$ formulas.
 - [HP98, Lemma I.2.10]
 - [Bus98A, Theorem 1.2.9(a)] -/
 lemma strictCollection_succ_of_hierarchyCollection (hC : HierarchyCollection V 𝚷 n) :
@@ -177,7 +177,7 @@ lemma strictCollection_succ_of_hierarchyCollection (hC : HierarchyCollection V �
   obtain ⟨u, huv, hu⟩ := hbound (x :> e) v hv
   exact ⟨u, le_of_lt (lt_of_lt_of_le huv hvw), hu⟩
 
-/-- Collection for `𝚷-[n]` formulas gives collection for `𝚺-[n + 1]` formulas.
+/-- Collection for $\Pi_n$ formulas gives collection for $\Sigma_{n + 1}$ formulas.
 - [HP98, Lemma I.2.10]
 - [Bus98A, Theorem 1.2.9(a)] -/
 lemma hierarchyCollection_sigma_succ_of_pi (hC : HierarchyCollection V 𝚷 n) :
@@ -190,8 +190,8 @@ lemma hierarchyCollection_sigma_succ_of_pi (hC : HierarchyCollection V 𝚷 n) :
     fun x hx ↦ (hex x hx).imp fun u hu ↦ (hiff _).mp hu
   exact ⟨w, fun x hx ↦ (hw x hx).imp fun u hu ↦ ⟨hu.1, (hiff _).mpr hu.2⟩⟩
 
-/-- The collection axiom of a `𝚺-[n + 1]` formula holds in a model of `𝗣𝗔⁻` with collection for
-`𝚷-[n]` formulas.
+/-- The collection axiom of a $\Sigma_{n + 1}$ formula holds in a model of `𝗣𝗔⁻` with collection for
+$\Pi_n$ formulas.
 - [HP98, Lemma I.2.10]
 - [Bus98A, Theorem 1.2.9(a)] -/
 lemma models_collectionAxiom_of_hierarchyCollection (hC : HierarchyCollection V 𝚷 n)

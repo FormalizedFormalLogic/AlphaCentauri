@@ -25,7 +25,7 @@ open Bootstrapping
 
 namespace Tarski
 
-/-- Satisfaction is restricted to internally coded `Δ₀` formulas.
+/-- Satisfaction is restricted to internally coded $\Delta_0$ formulas.
 - [HP98, Theorem I.1.70(i)] -/
 noncomputable def satZeroDom : ArithmeticSentence :=
   “∀ z e, !satZero.val z e → !isDelta0.val z ∧ !(isUFormula ℒₒᵣ).val z”
@@ -153,7 +153,8 @@ noncomputable def lenNil : ArithmeticSentence := “∀ l, !lenDef.val l 0 ↔ l
 noncomputable def lenAdjoin : ArithmeticSentence :=
   “∀ x v e l, !adjoinDef.val e x v → (!lenDef.val (l + 1) e ↔ !lenDef.val l v)”
 
-/-- The empty-block Tarski condition for reading `𝚷-[n]` satisfaction as `𝚺-[n + 1]` satisfaction.
+/-- The empty-block Tarski condition for reading $\Pi_n$ satisfaction as $\Sigma_{n + 1}$
+satisfaction.
 - [HP98, Theorem I.1.75(2)(v)] -/
 noncomputable def satSigmaOfPi : ℕ → ArithmeticSentence
   | 0 =>
@@ -163,7 +164,8 @@ noncomputable def satSigmaOfPi : ℕ → ArithmeticSentence
       “∀ z e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
         (!(satSigma (n + 1)).val z e ↔ !(satPi n).val z e)”
 
-/-- The empty-block Tarski condition for reading `𝚺-[n]` satisfaction as `𝚷-[n + 1]` satisfaction.
+/-- The empty-block Tarski condition for reading $\Sigma_n$ satisfaction as $\Pi_{n + 1}$
+satisfaction.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 noncomputable def satPiOfSigma : ℕ → ArithmeticSentence
   | 0 =>
@@ -173,47 +175,47 @@ noncomputable def satPiOfSigma : ℕ → ArithmeticSentence
       “∀ z e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
         (!(satPi (n + 1)).val z e ↔ !(satSigma n).val z e)”
 
-/-- The domain Tarski condition for `𝚺-[n + 1]` satisfaction.
+/-- The domain Tarski condition for $\Sigma_{n + 1}$ satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satSigmaDom (n : ℕ) : ArithmeticSentence :=
   “∀ z e, !(satSigma n).val z e →
     !(isStrictSigma (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
-/-- The domain Tarski condition for `𝚷-[n + 1]` satisfaction.
+/-- The domain Tarski condition for $\Pi_{n + 1}$ satisfaction.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satPiDom (n : ℕ) : ArithmeticSentence :=
   “∀ z e, !(satPi n).val z e →
     !(isStrictPi (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
-/-- The Tarski condition for existential quantification at level `𝚺-[n + 1]`.
+/-- The Tarski condition for existential quantification at level $\Sigma_{n + 1}$.
 - [HP98, Theorem I.1.75(2)(v)] -/
 noncomputable def satSigmaExs (n : ℕ) : ArithmeticSentence :=
   “∀ p z e, !qqExsDef.val z p →
     (!(satSigma n).val z e ↔
       ∃ x e', !adjoinDef.val e' x e ∧ !(satSigma n).val p e')”
 
-/-- The Tarski condition for universal quantification at level `𝚷-[n + 1]`.
+/-- The Tarski condition for universal quantification at level $\Pi_{n + 1}$.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 noncomputable def satPiAll (n : ℕ) : ArithmeticSentence :=
   “∀ p z e, !qqAllDef.val z p →
     (!(satPi n).val z e ↔
       ∀ x e', !adjoinDef.val e' x e → !(satPi n).val p e')”
 
-/-- The negation-duality Tarski condition from `𝚺-[n + 1]` to `𝚷-[n + 1]`.
+/-- The negation-duality Tarski condition from $\Sigma_{n + 1}$ to $\Pi_{n + 1}$.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satPiNeg (n : ℕ) : ArithmeticSentence :=
   “∀ z nz e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
     !(negGraph ℒₒᵣ).val nz z →
     (!(satPi n).val nz e ↔ ¬!(satSigma n).val z e)”
 
-/-- The negation-duality Tarski condition from `𝚷-[n + 1]` to `𝚺-[n + 1]`.
+/-- The negation-duality Tarski condition from $\Pi_{n + 1}$ to $\Sigma_{n + 1}$.
 - [HP98, Theorem I.1.75(2)] -/
 noncomputable def satSigmaNeg (n : ℕ) : ArithmeticSentence :=
   “∀ z nz e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
     !(negGraph ℒₒᵣ).val nz z →
     (!(satSigma n).val nz e ↔ ¬!(satPi n).val z e)”
 
-/-- The finite collection of `Δ₀` Tarski and term-evaluation sentences.
+/-- The finite collection of $\Delta_0$ Tarski and term-evaluation sentences.
 - [HP98, Theorem I.1.70]
 - [HP98, Remark I.1.77] -/
 noncomputable def satZeroAxioms : ArithmeticTheory :=
@@ -238,7 +240,7 @@ inductive tarski : ℕ → ArithmeticTheory
   | prev : ∀ n φ, tarski n φ → tarski (n + 1) φ
   | new  : ∀ n, ∀ φ ∈ Tarski.satSigmaAxioms n, tarski n φ
 
-/-- At the bottom level the theory is the `Δ₀` block together with the level-`Σ₁` block.
+/-- At the bottom level the theory is the $\Delta_0$ block together with the level-$\Sigma_1$ block.
 - [HP98, Remark I.1.77] -/
 lemma tarski_zero : tarski 0 = Tarski.satZeroAxioms ∪ Tarski.satSigmaAxioms 0 := by
   ext φ
@@ -284,7 +286,7 @@ section Hierarchy
 variable {s m : ℕ}
 
 /-! Each Tarski sentence is a universal closure of a Boolean combination of formulas of level at
-most `𝚺-[m + 1]`, so `Hierarchy.iff_iff` splits the biconditionals and `Hierarchy.dummy_sigma`,
+most $\Sigma_{m + 1}$, so `Hierarchy.iff_iff` splits the biconditionals and `Hierarchy.dummy_sigma`,
 `Hierarchy.dummy_pi` absorb the quantifier blocks that raise the level by one. -/
 attribute [local simp] Hierarchy.iff_iff Hierarchy.dummy_sigma Hierarchy.dummy_pi
 
@@ -370,7 +372,7 @@ end Hierarchy
 
 end Tarski
 
-/-- Every sentence of the finite Tarski theory at level `n` is `𝚷-[n + 3]`.
+/-- Every sentence of the finite Tarski theory at level `n` is $\Pi_{n + 3}$.
 - [HP98, Remark I.1.77] -/
 lemma hierarchy_of_tarski {n : ℕ} {σ : ArithmeticSentence} (hσ : tarski n σ) :
     Hierarchy 𝚷 (n + 3) σ := by
@@ -630,7 +632,7 @@ lemma models_satSigmaNeg (n : ℕ) : V↓[ℒₒᵣ] ⊧ satSigmaNeg n := by
   rintro z _ e hs hf rfl
   exact SatSigma.neg_iff hs hf
 
-/-- Every sentence of the `Δ₀` block holds in every model of `𝗜𝚺₁`.
+/-- Every sentence of the $\Delta_0$ block holds in every model of `𝗜𝚺₁`.
 - [HP98, Theorem I.1.70] -/
 lemma models_satZeroAxioms {φ : ArithmeticSentence} (h : φ ∈ satZeroAxioms) :
     V↓[ℒₒᵣ] ⊧ φ := by
@@ -681,10 +683,10 @@ variable {V : Type*} [ORingStructure V]
 /-- The reading of `satZero`. -/
 def Sat0 (z e : V) : Prop := V ⊧/![z, e] satZero.val
 
-/-- The reading of `satSigma m`, which speaks about level `𝚺-[m + 1]`. -/
+/-- The reading of `satSigma m`, which speaks about level $\Sigma_{m + 1}$. -/
 def SatSigma (m : ℕ) (z e : V) : Prop := V ⊧/![z, e] (satSigma m).val
 
-/-- The reading of `satPi m`, which speaks about level `𝚷-[m + 1]`. -/
+/-- The reading of `satPi m`, which speaks about level $\Pi_{m + 1}$. -/
 def SatPi (m : ℕ) (z e : V) : Prop := V ⊧/![z, e] (satPi m).val
 
 /-- The reading of the satisfaction formula of level `s` selected by a polarity. -/

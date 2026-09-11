@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 
 /-!
-# Casting true `𝚺₁`/`𝚺₀`/`𝚫₁` facts about standard numbers into a model of `𝗣𝗔⁻`
+# Casting true $\Sigma_1$/$\Sigma_0$/$\Delta_1$ facts about standard numbers into a model of `𝗣𝗔⁻`
 -/
 
 @[expose] public section

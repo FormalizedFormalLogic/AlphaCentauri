@@ -412,8 +412,8 @@ private lemma succ_le_succ {x y : V} (h : x ≤ y) : x + 1 ≤ y + 1 := by simpa
 
 namespace CutFreeDerivation
 
-/-- The `𝚺₁` form of the conjunction inversion that the course-of-values induction proves: every
-piece of data is bounded by the derivation it is read off.
+/-- The $\Sigma_1$ form of the conjunction inversion that the course-of-values induction proves:
+every piece of data is bounded by the derivation it is read off.
 - [Bus98, Ch. I §2.4] -/
 private lemma inversion_and_aux :
     ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
@@ -681,8 +681,8 @@ theorem inversion_and {p q c s d : V} (hc : c = p ∨ c = q)
   obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc hd.1
   exact inversion_and_aux d _ b₁ _ b₂ _ b₃ _ b₄ hc hd
 
-/-- The `𝚺₁` form of the disjunction inversion that the course-of-values induction proves: every
-piece of data is bounded by the derivation it is read off.
+/-- The $\Sigma_1$ form of the disjunction inversion that the course-of-values induction proves:
+every piece of data is bounded by the derivation it is read off.
 - [Bus98, Ch. I §2.4] -/
 private lemma inversion_or_aux :
     ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,

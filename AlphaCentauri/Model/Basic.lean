@@ -20,23 +20,33 @@ open Semiformula Structure
 
 variable {ξ : Type*} {M N : Type u} [ORingStructure M]
 
-/-- An end extension of `M`: a model into which `M` embeds so that nothing new lies below `M`.
+/-- `N` is an end extension of `M`: a model into which `M` embeds so that nothing new lies below
+the image of `M`.
 - [HP98, Definition IV.1.3(2)]
 - [vO99, §3.1] -/
-class EndExtensionOf (M : outParam (Type u)) (N : Type u) [ORingStructure M] where
+class EndExtension (M : outParam (Type u)) (N : Type u) [ORingStructure M] where
   [oring : ORingStructure N]
   emb : M ↪ₛ[ℒₒᵣ] N
   mem_range_of_lt {a : M} {b : N} : b < emb a → b ∈ Set.range emb
 
-namespace EndExtensionOf
+@[inherit_doc] infix:50 " ⊆ₑ " => EndExtension
 
-instance [hMN : EndExtensionOf M N] : Coe M N := ⟨λ x => hMN.emb x⟩
+/-- `N` is a proper end extension of `M`: not every element of `N` comes from `M`.
+- [HP98, Definition IV.1.14]
+- [vO99, §3.2] -/
+class ProperEndExtension (M : outParam (Type u)) (N : Type u) [ORingStructure M]
+    extends EndExtension M N where
+  not_surjective : ¬Function.Surjective emb
 
-instance [hMN : EndExtensionOf M N] : Coe M (Set N) := ⟨λ x => {hMN.emb y | y < x}⟩
+@[inherit_doc] infix:50 " ⊂ₑ " => ProperEndExtension
 
-instance [hMN : EndExtensionOf M N] : ORingStructure N := hMN.oring
+namespace EndExtension
 
-variable [hMN : EndExtensionOf M N]
+instance [hMN : M ⊆ₑ N] : Coe M N := ⟨fun x ↦ hMN.emb x⟩
+
+instance [hMN : M ⊆ₑ N] : ORingStructure N := hMN.oring
+
+variable [hMN : M ⊆ₑ N]
 
 lemma emb_injective : Function.Injective hMN.emb := EmbeddingClass.map_inj hMN.emb
 
@@ -57,14 +67,6 @@ lemma emb_injective : Function.Injective hMN.emb := EmbeddingClass.map_inj hMN.e
 
 lemma emb_eq_emb {x y : M} : hMN.emb x = hMN.emb y ↔ x = y := hMN.emb_injective.eq_iff
 
-/-- `N` is a proper end extension of `M`: not every element of `N` comes from `M`.
-- [HP98, Definition IV.1.14]
-- [vO99, §3.2] -/
-def IsProper : Prop := ¬Function.Surjective hMN.emb
-
-lemma isProper_iff : hMN.IsProper ↔ ∃ c : N, c ∉ Set.range hMN.emb := by
-  simp [IsProper, Function.Surjective, Set.range, not_forall]
-
 /-- A structure with an end extension modelling `𝗣𝗔⁻` is itself a model of `𝗣𝗔⁻`.
 - [vO99, Exercise 40] -/
 theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_theory_iff.mpr <| by
@@ -76,13 +78,16 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     exact models_theory_iff.mp h₁ _ hσ
   case addZero =>
     suffices ∀ x : M, x + 0 = x by simpa [models_iff] using this
-    exact fun x ↦ inj (by simp)
+    intro x
+    exact inj (by simp)
   case addAssoc =>
     suffices ∀ x y z : M, x + y + z = x + (y + z) by simpa [models_iff] using this
-    exact fun x y z ↦ inj (by simp [add_assoc])
+    intro x y z
+    exact inj (by simp [add_assoc])
   case addComm =>
     suffices ∀ x y : M, x + y = y + x by simpa [models_iff] using this
-    exact fun x y ↦ inj (by simp [add_comm])
+    intro x y
+    exact inj (by simp [add_comm])
   case addEqOfLt =>
     suffices ∀ x y : M, x < y → ∃ z, x + z = y by simpa [models_iff] using this
     intro x y h
@@ -114,16 +119,20 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     exact hMN.emb_lt_emb.mp (by simpa using add_lt_add _ _ (hMN.emb z) (hMN.emb_lt_emb.mpr h))
   case mulZero =>
     suffices ∀ x : M, x * 0 = 0 by simpa [models_iff] using this
-    exact fun x ↦ inj (by simp)
+    intro x
+    exact inj (by simp)
   case mulOne =>
     suffices ∀ x : M, x * 1 = x by simpa [models_iff] using this
-    exact fun x ↦ inj (by simp)
+    intro x
+    exact inj (by simp)
   case mulAssoc =>
     suffices ∀ x y z : M, x * y * z = x * (y * z) by simpa [models_iff] using this
-    exact fun x y z ↦ inj (by simp [mul_assoc])
+    intro x y z
+    exact inj (by simp [mul_assoc])
   case mulComm =>
     suffices ∀ x y : M, x * y = y * x by simpa [models_iff] using this
-    exact fun x y ↦ inj (by simp [mul_comm])
+    intro x y
+    exact inj (by simp [mul_comm])
   case mulLtMul =>
     suffices ∀ x y z : M, x < y → 0 < z → x * z < y * z by simpa [models_iff] using this
     intro x y z h hz
@@ -131,14 +140,17 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     exact hMN.emb_lt_emb.mp (by simpa using mul_lt_mul _ _ (hMN.emb z) (hMN.emb_lt_emb.mpr h) h₁)
   case distr =>
     suffices ∀ x y z : M, x * (y + z) = x * y + x * z by simpa [models_iff] using this
-    exact fun x y z ↦ inj (by simp [mul_add])
+    intro x y z
+    exact inj (by simp [mul_add])
   case ltIrrefl =>
     suffices ∀ x : M, ¬x < x by simpa [models_iff] using this
-    exact fun x h ↦ lt_irrefl (hMN.emb x) (hMN.emb_lt_emb.mpr h)
+    intro x h
+    exact lt_irrefl (hMN.emb x) (hMN.emb_lt_emb.mpr h)
   case ltTrans =>
     suffices ∀ x y z : M, x < y → y < z → x < z by simpa [models_iff] using this
     intro x y z hxy hyz
-    exact hMN.emb_lt_emb.mp (Arithmetic.lt_trans _ _ _ (hMN.emb_lt_emb.mpr hxy) (hMN.emb_lt_emb.mpr hyz))
+    exact hMN.emb_lt_emb.mp
+      (Arithmetic.lt_trans _ _ _ (hMN.emb_lt_emb.mpr hxy) (hMN.emb_lt_emb.mpr hyz))
   case ltTri =>
     suffices ∀ x y : M, x < y ∨ x = y ∨ y < x by simpa [models_iff] using this
     intro x y
@@ -186,14 +198,23 @@ theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 
         (funext (·.elim0))
         (funext (·.elim))
 
-end EndExtensionOf
+end EndExtension
+
+namespace ProperEndExtension
+
+variable [hMN : M ⊂ₑ N]
+
+lemma exists_not_mem_range : ∃ c : N, c ∉ Set.range hMN.emb := by
+  simpa [Function.Surjective, Set.range, not_forall] using hMN.not_surjective
+
+end ProperEndExtension
 
 section Absolute
 
 /-- `φ` is absolute for `T` when it takes the same truth value in every model of `T` as in every
 end extension of that model which again models `T`. -/
 def Absolute (T : ArithmeticTheory) {n : ℕ} (φ : ArithmeticSemiformula ξ n) : Prop :=
-  ∀ (M N : Type u) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T] [hMN : EndExtensionOf M N] [N↓[ℒₒᵣ] ⊧* T]
+  ∀ (M N : Type u) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T] [hMN : M ⊆ₑ N] [N↓[ℒₒᵣ] ⊧* T]
     (e : Fin n → M) (f : ξ → M), φ.Eval e f ↔ φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f)
 
 lemma absolute_of_open (T : ArithmeticTheory) {n} {φ : ArithmeticSemiformula ξ n} (hφ : φ.Open) :
@@ -208,11 +229,13 @@ variable {T : ArithmeticTheory} {n : ℕ}
   {φ ψ : ArithmeticSemiformula ξ n}
   {θ : ArithmeticSemiformula ξ (n + 1)} {t : ArithmeticSemiterm ξ n}
 
-lemma and_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) : Absolute.{_, u} T (φ ⋏ ψ) := by
+lemma and_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) :
+    Absolute.{_, u} T (φ ⋏ ψ) := by
   intro M N _ _ hMN _ e f;
   simp [hφ M N e f, hψ M N e f]
 
-lemma or_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) : Absolute.{_, u} T (φ ⋎ ψ) := by
+lemma or_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) :
+    Absolute.{_, u} T (φ ⋎ ψ) := by
   intro M N _ _ hMN _ e f;
   simp [hφ M N e f, hψ M N e f]
 

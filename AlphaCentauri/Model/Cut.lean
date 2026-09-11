@@ -41,7 +41,7 @@ instance oringStructure : ORingStructure I.carrier where
 /-- `M` is an end extension of each of its cuts.
 - [HP98, Definition IV.1.3(2)] -/
 @[instance_reducible]
-def endExtension : EndExtensionOf I.carrier M where
+def endExtension : I.carrier ⊆ₑ M where
   emb := {
     toFun := Subtype.val,
     func' f v := by cases f <;> rfl
@@ -56,9 +56,9 @@ lemma endExtension_emb (x : I.carrier) : I.endExtension.emb x = x.val := rfl
 
 end Cut
 
-namespace EndExtensionOf
+namespace EndExtension
 
-variable {N : Type u} [hMN : EndExtensionOf M N]
+variable {N : Type u} [hMN : M ⊆ₑ N]
 
 private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : ArithmeticSemiformula ℕ 1}
     (hφ : Hierarchy 𝚺 0 φ)
@@ -71,7 +71,8 @@ private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : Arit
       absolute_of_Delta0 (T := 𝗣𝗔⁻) hφ M N ![x] v
   have h₂ : ∀ y : N, y < hMN.emb a + 1 → φ.Eval ![y] (hMN.emb ∘ v) := by
     refine InductionScheme.succ_induction (C := Hierarchy 𝚺 0)
-      ⟨(hMN.emb a + 1) :>ₙ fun j ↦ hMN.emb (v j), “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ), by simp [hφ],
+      ⟨(hMN.emb a + 1) :>ₙ fun j ↦ hMN.emb (v j),
+        “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ), by simp [hφ],
         by intro x; simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩
       (by intro _; simpa using (h₁ 0).mp h0) ?_
     intro y ih hy
@@ -91,6 +92,6 @@ theorem models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ]
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
       using hMN.eval_of_endExtension hφ
 
-end EndExtensionOf
+end EndExtension
 
 end FFL.FirstOrder.Arithmetic

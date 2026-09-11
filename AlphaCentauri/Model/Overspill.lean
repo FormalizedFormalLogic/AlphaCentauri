@@ -15,14 +15,13 @@ namespace FFL.FirstOrder.Arithmetic
 
 open Semiformula
 
-variable {M N : Type u} [ORingStructure M] [hMN : EndExtensionOf M N]
+variable {M N : Type u} [ORingStructure M] [hMN : M ⊂ₑ N]
 
 /-- Overspill: a formula of the induction class holding at every element of the base model holds
 below some element outside it.
 - [HP98, Corollary IV.1.16]
 - [vO99, Lemma 3.2, Corollary 3.3] -/
 theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
-    (hproper : hMN.IsProper)
     {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ m φ) (e : ℕ → N)
     (h : ∀ a : M, φ.Eval ![hMN.emb a] e) :
     ∃ c : N, c ∉ Set.range hMN.emb ∧ ∀ x < c, φ.Eval ![x] e := by
@@ -39,6 +38,6 @@ theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 �
     InductionScheme.succ_induction (C := Hierarchy Γ m)
       ⟨e, (φ/[#0]).ballLT #0, by simp [hφ], fun x ↦ by simp [eval_ballLT]⟩
       (by simp) h₂
-  exact hproper fun x ↦ h₁ x (h₃ x)
+  exact hMN.not_surjective fun x ↦ h₁ x (h₃ x)
 
 end FFL.FirstOrder.Arithmetic

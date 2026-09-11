@@ -45,8 +45,8 @@ private lemma definable_bounded {Q : V → V → Prop} (hQ : 𝚷-[n].DefinableR
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n]
 
-/-- Successor induction holds for the existential quantification of a `𝚷-[n]`-definable relation,
-in a model of `𝗜𝚺 n` satisfying the collection axiom of every `𝚷-[n + 1]` formula.
+/-- Successor induction holds for the existential quantification of a $\Pi_n$-definable relation,
+in a model of `𝗜𝚺 n` satisfying the collection axiom of every $\Pi_{n + 1}$ formula.
 - [HP98, Lemma I.2.15] -/
 lemma succ_induction_of_exists_pi
     (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy 𝚷 (n + 1) ψ →

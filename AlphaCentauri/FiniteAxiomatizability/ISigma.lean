@@ -9,8 +9,8 @@ public import AlphaCentauri.Vorspiel.Fvar
 /-!
 # Finite axiomatizability of `𝗜𝚺 n`
 
-`𝗣𝗔⁻` together with the finite Tarski theory, a single instance of the `𝚺-[n + 1]` induction
-scheme and a single instance of the `𝚺-[n + 1]` collection scheme, both stated with the partial
+`𝗣𝗔⁻` together with the finite Tarski theory, a single instance of the $\Sigma_{n + 1}$ induction
+scheme and a single instance of the $\Sigma_{n + 1}$ collection scheme, both stated with the partial
 truth definition `satSigma n`, is a finite theory equivalent to `𝗜𝚺 (n + 1)`; hence `𝗜𝚺 n` is
 finitely axiomatizable for `n ≥ 1`.
 -/
@@ -24,19 +24,19 @@ open _root_.FFL.Entailment
 
 namespace ISigma
 
-/-- The formula saying that the code `z` is `𝚺-[n + 1]`-satisfied by the assignment obtained by
+/-- The formula saying that the code `z` is $\Sigma_{n + 1}$-satisfied by the assignment obtained by
 putting `x` in front of the assignment coded by `e`, with `x` as its bound variable and `z`, `e`
 as its free variables.
 - [HP98, Theorem I.2.52] -/
 noncomputable def indFormula (n : ℕ) : ArithmeticSemiformula ℕ 1 :=
   “x. ∃ ev, !adjoinDef.val ev x &1 ∧ !(satSigma n).val &0 ev”
 
-/-- The graph of `adjoin` is `𝚺-[n + 1]`. -/
+/-- The graph of `adjoin` is $\Sigma_{n + 1}$. -/
 @[simp]
 private lemma hierarchy_adjoinDef {n : ℕ} : Hierarchy 𝚺 (n + 1) adjoinDef.val :=
   adjoinDef.sigma_prop.mono (by omega)
 
-/-- The induction formula is `𝚺-[n + 1]`.
+/-- The induction formula is $\Sigma_{n + 1}$.
 - [HP98, Theorem I.2.52] -/
 @[simp]
 lemma hierarchy_indFormula {n : ℕ} : Hierarchy 𝚺 (n + 1) (indFormula n) := by
@@ -46,21 +46,21 @@ lemma hierarchy_indFormula {n : ℕ} : Hierarchy 𝚺 (n + 1) (indFormula n) := 
 - [HP98, Theorem I.2.52] -/
 noncomputable def indSentence (n : ℕ) : ArithmeticSentence := .univCl (succInd (indFormula n))
 
-/-- The induction axiom is an instance of the `𝚺-[n + 1]` induction scheme.
+/-- The induction axiom is an instance of the $\Sigma_{n + 1}$ induction scheme.
 - [HP98, Theorem I.2.52] -/
 @[simp]
 lemma indSentence_mem_inductionScheme {n : ℕ} :
     indSentence n ∈ InductionScheme ℒₒᵣ (Hierarchy 𝚺 (n + 1)) :=
   mem_InductionScheme_of_mem hierarchy_indFormula
 
-/-- The formula saying that the code `z` is `𝚺-[n + 1]`-satisfied by the assignment obtained by
+/-- The formula saying that the code `z` is $\Sigma_{n + 1}$-satisfied by the assignment obtained by
 putting `y` and then `x` in front of the assignment coded by `e`, with `x` and `y` as its bound
 variables and `z`, `e` as its free variables.
 - [HP98, Theorem I.2.52] -/
 noncomputable def collFormula (n : ℕ) : ArithmeticSemiformula ℕ 2 :=
   “x y. ∃ ev₀, !adjoinDef.val ev₀ x &1 ∧ ∃ ev, !adjoinDef.val ev y ev₀ ∧ !(satSigma n).val &0 ev”
 
-/-- The collection formula is `𝚺-[n + 1]`.
+/-- The collection formula is $\Sigma_{n + 1}$.
 - [HP98, Theorem I.2.52] -/
 @[simp]
 lemma hierarchy_collFormula {n : ℕ} : Hierarchy 𝚺 (n + 1) (collFormula n) := by
@@ -71,7 +71,7 @@ lemma hierarchy_collFormula {n : ℕ} : Hierarchy 𝚺 (n + 1) (collFormula n) :
 noncomputable def collSentence (n : ℕ) : ArithmeticSentence :=
   .univCl (collectionAxiom (collFormula n))
 
-/-- The collection axiom is an instance of the `𝚺-[n + 1]` collection scheme.
+/-- The collection axiom is an instance of the $\Sigma_{n + 1}$ collection scheme.
 - [HP98, Theorem I.2.52] -/
 @[simp]
 lemma collSentence_mem_collectionScheme {n : ℕ} :
@@ -158,7 +158,7 @@ lemma models_tarski {n : ℕ} {M : Type*} [ORingStructure M]
 open Reading
 
 /-- In a model of the finite theory, the induction formula at the code of a strict prenex
-`𝚺-[n + 1]` formula `φ` evaluates exactly like `φ`, under the assignment that carries the code
+$\Sigma_{n + 1}$ formula `φ` evaluates exactly like `φ`, under the assignment that carries the code
 of `φ` and a code of `φ`'s parameters.
 - [HP98, Theorem I.2.52] -/
 private lemma exists_assignment_eval_indFormula {M : Type*} [ORingStructure M] {n : ℕ}
@@ -183,7 +183,7 @@ private lemma exists_assignment_eval_indFormula {M : Type*} [ORingStructure M] {
     exact ⟨ev, hadj, (satSigma_quote_reading hM hψ (codes_cons hM he₀ hadj)).mpr
       ((φ.eval_toSemisentence_one x f).mpr h)⟩
 
-/-- The finite theory proves the induction axiom of every strict prenex `𝚺-[n + 1]` formula.
+/-- The finite theory proves the induction axiom of every strict prenex $\Sigma_{n + 1}$ formula.
 - [HP98, Theorem I.2.52] -/
 theorem provable_succInd_of_strictHierarchy {n : ℕ} {φ : ArithmeticSemiformula ℕ 1}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) :
@@ -210,7 +210,7 @@ theorem provable_succInd_of_strictHierarchy {n : ℕ} {φ : ArithmeticSemiformul
 /-! ## The finite theory proves collection for strict prenex formulas -/
 
 /-- In a model of the finite theory, the collection formula at the code of a strict prenex
-`𝚺-[n + 1]` formula `φ` evaluates exactly like `φ`, under the assignment that carries the code
+$\Sigma_{n + 1}$ formula `φ` evaluates exactly like `φ`, under the assignment that carries the code
 of `φ` and a code of `φ`'s parameters.
 - [HP98, Theorem I.2.52] -/
 private lemma exists_assignment_eval_collFormula {M : Type*} [ORingStructure M] {n : ℕ}
@@ -237,7 +237,7 @@ private lemma exists_assignment_eval_collFormula {M : Type*} [ORingStructure M] 
       (satSigma_quote_reading hM hψ (codes_cons hM (codes_cons hM he₀ hadj₀) hadj)).mpr
         ((φ.eval_toSemisentence_two x y f).mpr hxy)⟩
 
-/-- The finite theory proves the collection axiom of every strict prenex `𝚺-[n + 1]` formula.
+/-- The finite theory proves the collection axiom of every strict prenex $\Sigma_{n + 1}$ formula.
 - [HP98, Theorem I.2.52] -/
 theorem provable_collectionAxiom_of_strictHierarchy {n : ℕ} {φ : ArithmeticSemiformula ℕ 2}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) :
@@ -259,7 +259,7 @@ theorem provable_collectionAxiom_of_strictHierarchy {n : ℕ} {φ : ArithmeticSe
 /-! ## The equivalence with `𝗜𝚺 (n + 1)` -/
 
 /-- A theory extending `𝗣𝗔⁻` that proves the induction axiom and the collection axiom of every
-strict prenex `𝚺-[n + 1]` formula is at least as strong as `𝗜𝚺 (n + 1)`.
+strict prenex $\Sigma_{n + 1}$ formula is at least as strong as `𝗜𝚺 (n + 1)`.
 - [HP98, Theorem I.2.5(3)]
 - [HP98, Lemma I.2.9]
 - [HP98, Theorem I.2.52] -/
@@ -321,7 +321,7 @@ section Hierarchy
 variable {n : ℕ}
 
 /-! The induction and the collection axiom are universal closures of Boolean combinations of
-formulas of level at most `𝚺-[n + 1]`, so `Hierarchy.iff_iff` splits the biconditionals and
+formulas of level at most $\Sigma_{n + 1}$, so `Hierarchy.iff_iff` splits the biconditionals and
 `Hierarchy.dummy_sigma`, `Hierarchy.dummy_pi` absorb the quantifier blocks that raise the level
 by one. -/
 attribute [local simp] Hierarchy.iff_iff Hierarchy.dummy_sigma Hierarchy.dummy_pi
@@ -342,7 +342,7 @@ lemma hierarchy_collSentence : Hierarchy 𝚷 (n + 3) (collSentence n) := by
     hierarchy_collFormula.strict_mono _ (by omega)
   simp [collSentence, collectionAxiom, h₂, h₃]
 
-/-- Every axiom of the finite theory is `𝚷-[n + 3]`.
+/-- Every axiom of the finite theory is $\Pi_{n + 3}$.
 - [HP98, Corollary I.4.34(1)] -/
 lemma hierarchy_of_mem_finiteAxiomatization {σ : ArithmeticSentence}
     (hσ : σ ∈ finiteAxiomatization n) : Hierarchy 𝚷 (n + 3) σ := by
@@ -360,7 +360,7 @@ private lemma hierarchy_finsetConj_iff {Γ : Polarity} {s : ℕ} {F : Finset Ari
     Hierarchy Γ s F.conj ↔ ∀ σ ∈ F, Hierarchy Γ s σ := by
   simp [Finset.conj]
 
-/-- For `n ≥ 1`, `𝗜𝚺 n` is axiomatized by a single `𝚷-[n + 2]` sentence.
+/-- For `n ≥ 1`, `𝗜𝚺 n` is axiomatized by a single $\Pi_{n + 2}$ sentence.
 - [HP98, Corollary I.4.34(1)]
 - [HP98, Remark I.4.35(1)] -/
 theorem exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :

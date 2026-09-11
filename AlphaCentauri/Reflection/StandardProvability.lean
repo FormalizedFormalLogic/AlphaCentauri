@@ -136,7 +136,7 @@ axiom uniformReflectionOnHierarchy_sigma_equiv_pi_succ {n : ℕ} (hn : 1 ≤ n) 
     T ∪ 𝗥𝗙𝗡[𝚺 n] T ≊ T ∪ 𝗥𝗙𝗡[𝚷 (n + 1)] T
 
 /-- The pair of the iterated-consistency theory `T₀ = T`, `Tₙ₊₁ = Tₙ ∪ Tₙ.Con` and its
-`Δ₁`-definability witness.
+$\Delta_1$-definability witness.
 - [Lin97, §4, p. 55, the `Con(n, S)` tower]
 - [AB05, §4.1, the `Tₙ` tower] -/
 noncomputable def _root_.FFL.FirstOrder.Theory.iterConSigma

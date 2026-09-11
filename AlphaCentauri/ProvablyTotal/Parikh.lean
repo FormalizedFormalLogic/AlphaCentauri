@@ -95,7 +95,8 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
   have : K.endExtension↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := hM
   have hK : (↥K.carrier)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := K.endExtension.models_ISigma0
 
-  -- Soundness in the cut gives a witness `b ≤ t(c)`, and `φ` being `𝚫₀` it holds in the model too.
+  -- Soundness in the cut gives a witness `b ≤ t(c)`, and `φ` being $\Delta_0$ it holds in the
+  -- model too.
   have hwit : ∀ w : Fin k → ↥K.carrier, ∃ b, φ.Evalb (b :> w) := by
     simpa [models_iff, eval_allClosure] using models_of_provable hK h
   obtain ⟨b, hb⟩ := hwit fun i ↦ ⟨cstVal sat i, Semiterm.bvar i, by simp⟩

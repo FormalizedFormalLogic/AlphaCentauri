@@ -6,10 +6,10 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZero
 public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZeroExists
 
 /-!
-# Satisfaction for `Δ₀` formulas
+# Satisfaction for $\Delta_0$ formulas
 
-This module defines the satisfaction predicate for internally coded `Δ₀` formulas from the
-partial satisfaction tables of `PSatZero`, proves it is `𝚫₁`, and proves Tarski's satisfaction
+This module defines the satisfaction predicate for internally coded $\Delta_0$ formulas from the
+partial satisfaction tables of `PSatZero`, proves it is $\Delta_1$, and proves Tarski's satisfaction
 conditions for it.
 
 - [HP98, Theorem I.1.70]
@@ -29,7 +29,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 @[simp] lemma isRel_two_one : (ℒₒᵣ).IsRel (2 : V) 1 := by
   simpa using Arithmetic.LOR_rel_ltIndex (V := V)
 
-/-- A `Δ₀` code beginning with the bounded existential constructor has a `Δ₀` body.
+/-- A $\Delta_0$ code beginning with the bounded existential constructor has a $\Delta_0$ body.
 - [HP98, Lemma I.1.68(2)] -/
 lemma IsDelta0.of_qqBex {u p : V} (h : IsDelta0 (qqBex u p)) : IsDelta0 p := by
   obtain ⟨u', q', -, hq', heq⟩ :=
@@ -157,7 +157,7 @@ lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
     rw [hnth, termVal_termBShift (hw.isUTerm.nth hj) x e]
     simp [nth_termValVec hw.isUTerm hj]
 
-/-- `Δ₀` shape is preserved by substitution.
+/-- $\Delta_0$ shape is preserved by substitution.
 - [HP98, Lemma I.1.68(2)] -/
 lemma IsDelta0.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (h : IsDelta0 p) :
@@ -196,7 +196,7 @@ lemma IsDelta0.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
         (ih (n + 1) (m + 1) (qVec ℒₒᵣ w) hw.qVec hq)
   exact H p h n m w hw hp
 
-/-- `SatZero z e` says that `z` is an internally coded `Δ₀` formula satisfied by `e`.
+/-- `SatZero z e` says that `z` is an internally coded $\Delta_0$ formula satisfied by `e`.
 - [HP98, Definition I.1.71(2)] -/
 def SatZero (z e : V) : Prop :=
   (IsDelta0 z ∧ IsUFormula ℒₒᵣ z) ∧ ∃ q, PSatZero q z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ q
@@ -224,7 +224,7 @@ lemma iff_mem {r z e p e' : V} (hr : PSatZero r z e) (hn : ⟪p, e'⟫ ∈ domai
 lemma iff_val {r : V} (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) (hr : PSatZero r z e) :
     SatZero z e ↔ ⟪⟪z, e⟫, 1⟫ ∈ r := iff_mem hr hr.mem_dom_root hz hz'
 
-/-- Existential and universal table characterizations of `Δ₀` satisfaction agree.
+/-- Existential and universal table characterizations of $\Delta_0$ satisfaction agree.
 - [HP98, Lemma I.1.73(1)] -/
 lemma exists_iff_forall (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) :
     (∃ r, PSatZero r z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ r) ↔ ∀ r, PSatZero r z e → ⟪⟪z, e⟫, 1⟫ ∈ r := by
@@ -235,7 +235,7 @@ lemma exists_iff_forall (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) :
     obtain ⟨r, hr⟩ := PSatZero.exists hz hz'
     exact ⟨r, hr, h r hr⟩
 
-/-- The `𝚷₁` form of satisfaction.
+/-- The $\Pi_1$ form of satisfaction.
 - [HP98, Lemma I.1.73(1)] -/
 lemma iff_forall {z e : V} :
     SatZero z e ↔
@@ -244,7 +244,7 @@ lemma iff_forall {z e : V} :
 
 end SatZero
 
-/-- The `𝚫₁` formula defining satisfaction for internally coded `Δ₀` formulas.
+/-- The $\Delta_1$ formula defining satisfaction for internally coded $\Delta_0$ formulas.
 - [HP98, Theorem I.1.70]
 - [HP98, Lemma I.1.73(1)] -/
 noncomputable def satZero : 𝚫₁.Semisentence 2 := .mkDelta
@@ -271,7 +271,7 @@ instance SatZero.defined : 𝚫₁-Relation (SatZero : V → V → Prop) via sat
       (IsDelta0.defined (V := V)).df, (IsUFormula.defined (V := V) (L := ℒₒᵣ)).df,
       (PSatZero.defined (V := V)).df, PSatZeroF.nodeVal_defined.df]
 
-/-- Satisfaction for internally coded `Δ₀` formulas is `𝚫₁`-definable.
+/-- Satisfaction for internally coded $\Delta_0$ formulas is $\Delta_1$-definable.
 - [HP98, Theorem I.1.70]
 - [HP98, Lemma I.1.73(1)] -/
 instance SatZero.definable : 𝚫₁-Relation (SatZero : V → V → Prop) :=
@@ -282,7 +282,7 @@ instance SatZero.definable : 𝚫₁-Relation (SatZero : V → V → Prop) :=
 
 namespace SatZero
 
-/-- Satisfaction implies that its formula code belongs to the `Δ₀` domain.
+/-- Satisfaction implies that its formula code belongs to the $\Delta_0$ domain.
 - [HP98, Theorem I.1.70(i)] -/
 lemma dom {z e : V} : SatZero z e → IsDelta0 z ∧ IsUFormula ℒₒᵣ z := And.left
 
@@ -419,7 +419,7 @@ lemma bex_iff : SatZero (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃ x < termVal
 
 end
 
-/-- Satisfaction commutes with coded negation on `Δ₀` formulas.
+/-- Satisfaction commutes with coded negation on $\Delta_0$ formulas.
 - [HP98, Theorem I.1.70(iii)] -/
 lemma neg_iff {p e : V} (hp : IsDelta0 p) (hp' : IsUFormula ℒₒᵣ p) :
     SatZero (neg ℒₒᵣ p) e ↔ ¬SatZero p e := by

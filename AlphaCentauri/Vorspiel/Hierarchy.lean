@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 /-!
 # The arithmetical hierarchy of a universal closure
 
-`Hierarchy 𝚷 (s + 1)` passes through `Semiformula.univCl`, and every axiom of `𝗣𝗔⁻` is `𝚷-[2]`.
+`Hierarchy 𝚷 (s + 1)` passes through `Semiformula.univCl`, and every axiom of `𝗣𝗔⁻` is $\Pi_2$.
 -/
 
 @[expose] public section
@@ -34,14 +34,14 @@ variable {L : Language} [L.LT] {ξ : Type*} {Γ : Polarity} {s n : ℕ}
     Hierarchy 𝚷 (s + 1) (Semiformula.univCl φ) ↔ Hierarchy 𝚷 (s + 1) φ := by
   simp [Semiformula.univCl, Semiformula.univCl']
 
-/-- Every axiom of `𝗘𝗤 ℒₒᵣ` is `𝚷-[2]`. -/
+/-- Every axiom of `𝗘𝗤 ℒₒᵣ` is $\Pi_2$. -/
 lemma of_mem_eqAxiom {σ : ArithmeticSentence} (hσ : σ ∈ 𝗘𝗤 ℒₒᵣ) : Hierarchy 𝚷 2 σ := by
   cases hσ with
   | funcExt f => simp [Theory.Eq.funcExt]
   | relExt r => simp [Theory.Eq.relExt]
   | _ => simp
 
-/-- Every axiom of `𝗣𝗔⁻` is `𝚷-[2]`. -/
+/-- Every axiom of `𝗣𝗔⁻` is $\Pi_2$. -/
 lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) :
     Hierarchy 𝚷 2 σ := by
   cases hσ with

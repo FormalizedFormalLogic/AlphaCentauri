@@ -113,7 +113,8 @@ lemma reduct_eq :
   have : Structure.One ℒₒᵣ (ModelOfSatEq sat) := ⟨rfl⟩
   have : Structure.Add ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ rfl⟩
   have : Structure.Mul ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ rfl⟩
-  have : Structure.Eq ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ by
+  have : Structure.Eq ℒₒᵣ (ModelOfSatEq sat) := ⟨by
+    intro _ _;
     simp [Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq, Matrix.fun_eq_vec_two]⟩
   have : Structure.LT ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ iff_of_eq rfl⟩
   standardModel_unique _ _

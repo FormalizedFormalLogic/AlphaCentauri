@@ -44,12 +44,12 @@ def endExtension : EndExtensionOf I.carrier where
   carrier := M
   emb := {
     toFun := Subtype.val,
-    func' := fun f v ↦ by cases f <;> rfl
-    rel' := fun r _ ↦ by cases r; exacts [congrArg Subtype.val, id]
+    func' f v := by cases f <;> rfl
+    rel' r _ := by cases r; exacts [congrArg Subtype.val, id]
     toFun_inj := Subtype.val_injective
-    rel_inv' := fun r _ ↦ by cases r; exacts [Subtype.ext, id]
+    rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
   }
-  mem_range_of_lt := fun {a b} h ↦ ⟨⟨b, I.mem_of_lt h a.2⟩, rfl⟩
+  mem_range_of_lt {a b} h := ⟨⟨b, I.mem_of_lt h a.2⟩, rfl⟩
 
 @[simp]
 lemma endExtension_emb (x : I.carrier) : I.endExtension x = x.1 := rfl
@@ -64,16 +64,16 @@ private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : Arit
     (hφ : Hierarchy 𝚺 0 φ)
     (v : ℕ → M) (h0 : φ.Eval ![0] v) (hs : ∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) (a : M) :
     φ.Eval ![a] v := by
-  have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀)
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := N.models_peanoMinus
-  have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![N x] (N ∘ v) := fun x ↦ by
+  have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![N x] (N ∘ v) := by
+    intro x;
     simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using
       absolute_of_Delta0 (T := 𝗣𝗔⁻) hφ M N ![x] v
   have h₂ : ∀ y : N, y < N a + 1 → φ.Eval ![y] (N ∘ v) := by
     refine InductionScheme.succ_induction (C := Hierarchy 𝚺 0)
       ⟨(N a + 1) :>ₙ fun j ↦ N (v j), “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ), by simp [hφ],
-        fun x ↦ by simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩
-      (fun _ ↦ by simpa using (h₁ 0).mp h0) ?_
+        by intro x; simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩
+      (by intro _; simpa using (h₁ 0).mp h0) ?_
     intro y ih hy
     have h₃ : y < N a := lt_of_lt_of_le (lt_add_one y) (lt_succ_iff_le.mp hy)
     obtain ⟨x, rfl⟩ := N.mem_range_of_lt h₃
@@ -83,10 +83,9 @@ private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : Arit
 /-- A structure with an end extension modelling `𝗜𝚺₀` is itself a model of `𝗜𝚺₀`.
 - [HP98, Remark IV.1.21(2)] -/
 theorem models_ISigma0 [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := by
-  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := N.models_peanoMinus
   simp only [Semantics.ModelsSet.union_iff, InductionScheme];
   and_intros;
-  . assumption;
+  . exact N.models_peanoMinus
   . apply Semantics.ModelsSet.setOf_iff.mpr;
     rintro _ ⟨φ, hφ, rfl⟩
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]

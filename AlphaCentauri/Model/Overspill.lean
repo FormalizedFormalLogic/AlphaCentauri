@@ -15,20 +15,20 @@ namespace FFL.FirstOrder.Arithmetic
 
 open Semiformula
 
-variable {M : Type u} [ORingStructure M]
+variable {M N : Type u} [ORingStructure M] [hMN : EndExtensionOf M N]
 
 /-- Overspill: a formula of the induction class holding at every element of the base model holds
 below some element outside it.
 - [HP98, Corollary IV.1.16]
 - [vO99, Lemma 3.2, Corollary 3.3] -/
-theorem overspill (Γ : Polarity) (m : ℕ) (N : EndExtensionOf M) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
-    (hproper : N.IsProper)
+theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
+    (hproper : hMN.IsProper)
     {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ m φ) (e : ℕ → N)
-    (h : ∀ a : M, φ.Eval ![N a] e) :
-    ∃ c : N, c ∉ Set.range N.emb ∧ ∀ x < c, φ.Eval ![x] e := by
+    (h : ∀ a : M, φ.Eval ![hMN.emb a] e) :
+    ∃ c : N, c ∉ Set.range hMN.emb ∧ ∀ x < c, φ.Eval ![x] e := by
   have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m)
   by_contra! hc
-  have h₁ : ∀ x : N, (∀ y < x, φ.Eval ![y] e) → x ∈ Set.range N.emb := by grind;
+  have h₁ : ∀ x : N, (∀ y < x, φ.Eval ![y] e) → x ∈ Set.range hMN.emb := by grind;
   have h₂ : ∀ x : N, (∀ y < x, φ.Eval ![y] e) → ∀ y < x + 1, φ.Eval ![y] e := by
     intro x ih y hy;
     obtain ⟨a, rfl⟩ := h₁ x ih;

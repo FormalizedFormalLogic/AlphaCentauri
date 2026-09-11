@@ -36,7 +36,7 @@ instance [hMN : EndExtensionOf M N] : Coe M (Set N) := ⟨λ x => {hMN.emb y | y
 
 instance [hMN : EndExtensionOf M N] : ORingStructure N := hMN.oring
 
-variable (N : Type u) [hMN : EndExtensionOf M N]
+variable [hMN : EndExtensionOf M N]
 
 lemma emb_injective : Function.Injective hMN.emb := EmbeddingClass.map_inj hMN.emb
 
@@ -148,27 +148,27 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
 /-- Satisfaction of a $\Sigma_1$ formula carries over from `M` to an end extension of `M`.
 - [HP98, Fact IV.1.3(4)] -/
 theorem eval_of_Sigma1 {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hierarchy 𝚺 1 φ)
-    (e : Fin n → M) (f : ξ → M) : φ.Eval e f → φ.Eval (N ∘ e) (N ∘ f) :=
+    (e : Fin n → M) (f : ξ → M) : φ.Eval e f → φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f) :=
   sigma₁_induction' (P := fun n φ ↦ ∀ (e : Fin n → M) (f : ξ → M),
-      φ.Eval e f → φ.Eval (N ∘ e) (N ∘ f)) hφ
+      φ.Eval e f → φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f)) hφ
     (fun _ _ _ _ ↦ by simp)
     (fun _ _ _ h ↦ by simp at h)
-    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open N.emb (by simp)).mp h)
-    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open N.emb (by simp)).mp h)
-    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open N.emb (by simp)).mp h)
-    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open N.emb (by simp)).mp h)
+    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open hMN.emb (by simp)).mp h)
+    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open hMN.emb (by simp)).mp h)
+    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open hMN.emb (by simp)).mp h)
+    (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open hMN.emb (by simp)).mp h)
     (fun _ _ _ _ _ ih₁ ih₂ e f h ↦ ⟨ih₁ e f h.1, ih₂ e f h.2⟩)
     (fun _ _ _ _ _ ih₁ ih₂ e f h ↦ h.imp (ih₁ e f) (ih₂ e f))
     (fun _ t θ _ ih e f h ↦ by
-      show (θ.ballLT t).Eval (N ∘ e) (N ∘ f)
-      simp only [eval_ballLT, ← HomClass.val_term N.emb e f t]
+      show (θ.ballLT t).Eval (hMN.emb ∘ e) (hMN.emb ∘ f)
+      simp only [eval_ballLT, ← HomClass.val_term hMN.emb e f t]
       intro y hy
-      obtain ⟨x, rfl⟩ := N.mem_range_of_lt hy
+      obtain ⟨x, rfl⟩ := hMN.mem_range_of_lt hy
       rw [← Matrix.comp_vecCons'']
       exact ih (x :> e) f (eval_ballLT.mp h x (by simpa using hy)))
     (fun _ _ _ ih e f ↦ by
       rintro ⟨x, hx⟩
-      exact ⟨N x, by rw [← Matrix.comp_vecCons'']; exact ih (x :> e) f hx⟩)
+      exact ⟨hMN.emb x, by rw [← Matrix.comp_vecCons'']; exact ih (x :> e) f hx⟩)
     e f
 
 /-- A theory axiomatized by $\Pi_1$ sentences holds in `M` as soon as it holds in an end
@@ -179,10 +179,10 @@ theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 
   models_theory_iff.mpr <| by
     intro σ hσ
     by_contra! h
-    apply notModels_iff.mpr ?_ <| models_theory_iff.mp (inferInstance : N.carrier↓[ℒₒᵣ] ⊧* T) σ hσ
+    apply notModels_iff.mpr ?_ <| models_theory_iff.mp (inferInstance : N↓[ℒₒᵣ] ⊧* T) σ hσ
     · suffices (∼σ).Eval ![] Empty.elim by simpa
       exact Eval.of_eq
-        (N.eval_of_Sigma1 (hT σ hσ).neg ![] Empty.elim (by simpa [models_iff] using h))
+        (hMN.eval_of_Sigma1 (hT σ hσ).neg ![] Empty.elim (by simpa [models_iff] using h))
         (funext (·.elim0))
         (funext (·.elim))
 

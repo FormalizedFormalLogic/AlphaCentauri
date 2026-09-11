@@ -95,14 +95,14 @@ variable {L}
 
 section
 
-/-- `subformulas` is `𝚺₁`-definable through `subformulasGraph`.
+/-- `subformulas` is $\Sigma_1$-definable through `subformulasGraph`.
 - No source; a formalization device mirroring the external subformula relation. -/
 instance subformulas.defined : 𝚺₁-Function₁ subformulas (V := V) L via subformulasGraph L :=
   .mk fun v ↦ by
     simpa [subformulasGraph, subformulas, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using!
       (Subformula.construction L).result_defined.defined ![v 0, 0, v 1]
 
-/-- `subformulas` is a `𝚺₁`-definable function.
+/-- `subformulas` is a $\Sigma_1$-definable function.
 - No source; a formalization device mirroring the external subformula relation. -/
 instance subformulas.definable : 𝚺₁-Function₁ subformulas (V := V) L :=
   subformulas.defined.to_definable

@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 /-!
 # Primitive recursion across the Mathlib–Foundation boundary
 
-Primitive recursion for bounded quantification, vector encodings, and truth of `Δ₀` formulas.
+Primitive recursion for bounded quantification, vector encodings, and truth of $\Delta_0$ formulas.
 -/
 
 @[expose] public section

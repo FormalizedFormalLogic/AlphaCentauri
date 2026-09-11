@@ -157,7 +157,7 @@ private lemma quote_mulTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒ
 
 /-! ## Agreement of satisfaction with truth -/
 
-/-- For a bounded formula, internal `Δ₀` satisfaction of its code agrees with truth.
+/-- For a bounded formula, internal $\Delta_0$ satisfaction of its code agrees with truth.
 - [HP98, Theorem I.1.70]
 - [HP98, Corollary I.1.76] -/
 theorem satZero_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
@@ -255,13 +255,13 @@ lemma satClass_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentenc
 section
 variable {n k : ℕ} {φ : ArithmeticSemisentence k}
 
-/-- For a strict prenex `𝚺-[n]` formula, internal satisfaction of its code agrees with truth.
+/-- For a strict prenex $\Sigma_n$ formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
 theorem satSigma_quote_iff (hφ : StrictHierarchy 𝚺 n φ) (v : Fin k → V) :
     SatSigma n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := satClass_quote_iff hφ v
 
-/-- For a strict prenex `𝚷-[n]` formula, internal satisfaction of its code agrees with truth.
+/-- For a strict prenex $\Pi_n$ formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
 theorem satPi_quote_iff (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
@@ -269,7 +269,8 @@ theorem satPi_quote_iff (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
 
 end
 
-/-- The sentence asserting agreement of `φ` with its level-`𝚺-[n + 1]` partial truth definition.
+/-- The sentence asserting agreement of `φ` with its level-$\Sigma_{n + 1}$ partial truth
+definition.
 - [HP98, Corollary I.1.76] -/
 noncomputable def snowing (n : ℕ) {k : ℕ}
     (φ : ArithmeticSemisentence k) : ArithmeticSentence :=
@@ -282,7 +283,7 @@ theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
       ∀ v : Fin k → V, V ⊧/v φ ↔ SatSigma (n + 1) ⌜φ⌝ (matrixToVec v) := by
   simp [snowing, models_iff, (satSigmaVec.defined n k).df, Function.comp_def]
 
-/-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex `𝚺-[n + 1]` formula.
+/-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex $\Sigma_{n + 1}$ formula.
 - [HP98, Corollary I.1.76] -/
 theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ snowing n φ := by
@@ -428,7 +429,7 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
         (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq (ih 0) (ih 1)).mpr rfl
 
 
-/-! ### The `Δ₀` base case -/
+/-! ### The $\Delta_0$ base case -/
 
 include hM in
 /-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `satZero` at the code of a bounded
@@ -580,7 +581,7 @@ private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : Arithmeti
 
 include hM in
 /-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `satSigma n` at the code of a
-strict prenex `𝚺-[n + 1]` formula agrees with truth.
+strict prenex $\Sigma_{n + 1}$ formula agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
 theorem satSigma_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}

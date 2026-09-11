@@ -13,7 +13,7 @@ namespace FFL.FirstOrder.Arithmetic
 
 variable {L : Language} [L.LT] {ξ : Type*}
 
-/-- `StrictHierarchy Γ s φ` says that `φ` is a prenex `Γ`-formula of level `s`, with a `Δ₀`
+/-- `StrictHierarchy Γ s φ` says that `φ` is a prenex `Γ`-formula of level `s`, with a $\Delta_0$
 matrix beneath alternating quantifier blocks.
 
 - [HP98, 0.30]

@@ -7,7 +7,7 @@ public import AlphaCentauri.Schemata.Collection.Basic
 # Prenex normal form from collection
 
 The prenex normal form of `Foundation.FirstOrder.Arithmetic.Prenex`, with the hypothesis
-`V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s` weakened to `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻` together with collection for strict `𝚺-[s]`
+`V↓[ℒₒᵣ] ⊧* 𝗜𝚺 s` weakened to `V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻` together with collection for strict $\Sigma_s$
 formulas.
 
 The `Prenex` codes and every lemma about them that does not mention `𝗜𝚺` are reused from
@@ -27,15 +27,15 @@ namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s n : ℕ}
 
-/-- Collection for strict `𝚺-[s]` formulas holds in `V`: witnesses for a strict `𝚺-[s]` formula
-at every argument below `a` admit a common bound.
+/-- Collection for strict $\Sigma_s$ formulas holds in `V`: witnesses for a strict $\Sigma_s$
+formula at every argument below `a` admit a common bound.
 - [HP98, §I.2(a)] -/
 def StrictCollection (V : Type*) [ORingStructure V] (s : ℕ) : Prop :=
   ∀ {n : ℕ} {θ : ArithmeticSemisentence (n + 2)}, StrictHierarchy 𝚺 s θ →
     ∀ (e : Fin n → V) (a : V), (∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) →
       ∃ w, ∀ x < a, ∃ u ≤ w, V ⊧/(u :> x :> e) θ
 
-/-- Collection for strict `𝚺-[s]` formulas is monotone in `s`. -/
+/-- Collection for strict $\Sigma_s$ formulas is monotone in `s`. -/
 lemma StrictCollection.of_le {s' : ℕ} (h : StrictCollection V s') (hs : s ≤ s') :
     StrictCollection V s := fun hθ ↦ h (hθ.mono hs)
 
@@ -79,7 +79,7 @@ private lemma models_bexs_witness [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 mutual
 
 /-- A bounded universal quantifier commutes with the prenex normal form, over a model of `𝗣𝗔⁻`
-with collection for strict `𝚺-[s]` formulas. -/
+with collection for strict $\Sigma_s$ formulas. -/
 theorem models_ball_of_collection :
     {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → StrictCollection V s →
       (u : ArithmeticSemiterm Empty n) →
@@ -118,7 +118,7 @@ theorem models_ball_of_collection :
 termination_by Γ s n _inst _hC _u _φ _e => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 /-- A bounded existential quantifier commutes with the prenex normal form, over a model of `𝗣𝗔⁻`
-with collection for strict `𝚺-[s]` formulas. -/
+with collection for strict $\Sigma_s$ formulas. -/
 theorem models_bexs_of_collection :
     {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → StrictCollection V s →
       (u : ArithmeticSemiterm Empty n) →
@@ -173,7 +173,7 @@ end
 mutual
 
 /-- Conjunction commutes with the prenex normal form, over a model of `𝗣𝗔⁻` with collection for
-strict `𝚺-[s]` formulas. -/
+strict $\Sigma_s$ formulas. -/
 theorem models_and_of_collection :
     {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → StrictCollection V s →
       (φ ψ : Prenex Γ s Empty n) → (e : Fin n → V) →
@@ -221,7 +221,7 @@ theorem models_and_of_collection :
 termination_by Γ s n _inst _hC _φ _ψ _e => (s, match Γ with | 𝚺 => 0 | 𝚷 => 1)
 
 /-- Disjunction commutes with the prenex normal form, over a model of `𝗣𝗔⁻` with collection for
-strict `𝚺-[s]` formulas. -/
+strict $\Sigma_s$ formulas. -/
 theorem models_or_of_collection :
     {Γ : Polarity} → {s n : ℕ} → [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] → StrictCollection V s →
       (φ ψ : Prenex Γ s Empty n) → (e : Fin n → V) →
@@ -255,7 +255,7 @@ local prefix:64 "∃' " => Prenex.exs
 local prefix:64 "∀' " => Prenex.all
 
 /-- An unbounded existential quantifier commutes with the prenex normal form, over a model of
-`𝗣𝗔⁻` with collection for strict `𝚺-[s]` formulas. -/
+`𝗣𝗔⁻` with collection for strict $\Sigma_s$ formulas. -/
 lemma models_exs_of_collection [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCollection V s)
     (φ : Prenex 𝚺 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∃' φ).val ↔ ∃ x, V ⊧/(x :> e) φ.val := by
@@ -288,7 +288,7 @@ lemma models_exs_of_collection [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCo
     exact ⟨max x y, y, le_max_right x y, x, le_max_left x y, hx⟩
 
 /-- An unbounded universal quantifier commutes with the prenex normal form, over a model of `𝗣𝗔⁻`
-with collection for strict `𝚺-[s]` formulas. -/
+with collection for strict $\Sigma_s$ formulas. -/
 lemma models_all_of_collection [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCollection V s)
     (φ : Prenex 𝚷 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∀' φ).val ↔ ∀ x, V ⊧/(x :> e) φ.val := by
@@ -301,7 +301,7 @@ lemma models_all_of_collection [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCo
   grind
 
 /-- Every `Hierarchy Γ s` semisentence is equivalent, in every model of `𝗣𝗔⁻` with collection for
-strict `𝚺-[s]` formulas, to the value of a `Prenex Γ s` code. -/
+strict $\Sigma_s$ formulas, to the value of a `Prenex Γ s` code. -/
 theorem models_exists_prenex_of_collection {φ : ArithmeticSemisentence n} (h : Hierarchy Γ s φ) :
     ∃ φ' : Prenex Γ s Empty n,
       ∀ (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻], StrictCollection V s →
@@ -380,15 +380,15 @@ theorem models_exists_prenex_of_collection {φ : ArithmeticSemisentence n} (h : 
 
 end Prenex
 
-/-- Collection for strict `𝚺-[s]` formulas holds in a model of `𝗣𝗔⁻` that satisfies the
-collection axiom of every strict `𝚺-[s]` formula. -/
+/-- Collection for strict $\Sigma_s$ formulas holds in a model of `𝗣𝗔⁻` that satisfies the
+collection axiom of every strict $\Sigma_s$ formula. -/
 lemma strictCollection_of_models_collectionAxiom [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
     (h : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 s ψ →
       V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom ψ) : ArithmeticSentence)) :
     StrictCollection V s := fun hθ e a hex ↦
   exists_bound_of_models_collectionAxiom (h _ (hθ.rew _)) e a hex
 
-/-- Over a theory extending `𝗣𝗔⁻` that proves the collection axiom of every strict `𝚺-[s]`
+/-- Over a theory extending `𝗣𝗔⁻` that proves the collection axiom of every strict $\Sigma_s$
 formula, every `Hierarchy Γ s` semisentence is provably equivalent to the value of a `Prenex Γ s`
 code.
 - [HP98, Theorem I.2.5(3)]
@@ -407,8 +407,8 @@ theorem exists_prenex_of_collection (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
   exact hφ' V (strictCollection_of_models_collectionAxiom fun ψ hψ ↦
     consequence_iff.mp (Theory.Proof.sound (hcol ψ hψ)) V inferInstance) e
 
-/-- In a model of `𝗣𝗔⁻` with collection for strict `𝚺-[s]` formulas, every `Hierarchy Γ s` formula
-agrees, at a fixed assignment of its free variables, with a strict `Γ-[s]` formula.
+/-- In a model of `𝗣𝗔⁻` with collection for strict $\Sigma_s$ formulas, every `Hierarchy Γ s`
+formula agrees, at a fixed assignment of its free variables, with a strict `Γ-[s]` formula.
 - [HP98, Theorem I.2.5(3)]
 - [HP98, Lemma I.2.9] -/
 lemma exists_strictHierarchy_eval_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCollection V s)
@@ -429,7 +429,7 @@ lemma exists_strictHierarchy_eval_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : S
   simp only [Semiformula.eval_embSubsts, hvec]
   exact (hθ V hC (x :> fun i : Fin φ.fvSup ↦ f i)).symm.trans (φ.eval_toSemisentence_one x f)
 
-/-- Over a theory extending `𝗣𝗔⁻` that proves the collection axiom of every strict `𝚺-[s]`
+/-- Over a theory extending `𝗣𝗔⁻` that proves the collection axiom of every strict $\Sigma_s$
 formula, every `Hierarchy Γ s` semisentence is provably equivalent to a strict `Γ-[s]` one.
 - [HP98, 0.30]
 - [HP98, Theorem I.2.5(3)]

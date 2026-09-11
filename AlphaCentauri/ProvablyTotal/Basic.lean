@@ -130,14 +130,14 @@ structure ProvablyFunctionalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → 
     (φ : 𝚺₁.Semisentence (k + 1)) : Prop extends T.ProvablyTotalVia f φ where
   functional : T ⊢ functionalitySentence φ
 
-/-- `f` is `T`-provably total: some `𝚺₁` formula witnesses `T.ProvablyTotalVia f`.
+/-- `f` is `T`-provably total: some $\Sigma_1$ formula witnesses `T.ProvablyTotalVia f`.
 - [HP98, Definition I.1.51]
 - [HP98, Definition IV.3.1]
 - [AB05, §10.2] -/
 def ProvablyTotal (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Prop :=
   ∃ φ, T.ProvablyTotalVia f φ
 
-/-- `f` is `T`-provably functional: some `𝚺₁` formula witnesses `T.ProvablyFunctionalVia f`.
+/-- `f` is `T`-provably functional: some $\Sigma_1$ formula witnesses `T.ProvablyFunctionalVia f`.
 - [HP98, Definition I.1.51(2)] -/
 def ProvablyFunctional (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Prop :=
   ∃ φ, T.ProvablyFunctionalVia f φ

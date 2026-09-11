@@ -4,11 +4,11 @@ public import AlphaCentauri.Hierarchy.DeltaZero
 public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!
-# Internal `Δ₀` formulas
+# Internal $\Delta_0$ formulas
 
 This module introduces the bounded-existential coding operation and the internal shape
-predicate `IsDelta0` for `Δ₀` formulas, built as a least fixpoint in the manner of Foundation's
-`IsSigma1`, and proves that it agrees with the external class `Hierarchy 𝚺 0` on quoted
+predicate `IsDelta0` for $\Delta_0$ formulas, built as a least fixpoint in the manner of
+Foundation's `IsSigma1`, and proves that it agrees with the external class `Hierarchy 𝚺 0` on quoted
 formulas.
 -/
 
@@ -36,7 +36,7 @@ noncomputable def qqBex (u q : V) : V := ^∃ ((^#0 ^< u) ^⋏ q)
 def _root_.FFL.FirstOrder.Arithmetic.qqBexDef : 𝚺₁.Semisentence 3 := .mkSigma
   “p u q. ∃ bv, !qqBvarDef bv 0 ∧ ∃ lt, !qqLTDef lt bv u ∧ ∃ g, !qqAndDef g lt q ∧ !qqExsDef p g”
 
-/-- The bounded existential coding operation is `𝚺₁`-definable.
+/-- The bounded existential coding operation is $\Sigma_1$-definable.
 - [HP98, 0.30] -/
 instance qqBex_defined : 𝚺₁-Function₂ (qqBex : V → V → V) via qqBexDef := .mk fun v ↦ by
   simp [qqBexDef, qqBex, (Arithmetic.qqLT_defined (V := V)).df]
@@ -63,7 +63,7 @@ lemma neg_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ 
 
 namespace IsDelta0F
 
-/-- `Phi C p` recognizes one `Δ₀` constructor step over the class `C`.
+/-- `Phi C p` recognizes one $\Delta_0$ constructor step over the class `C`.
 - [HP98, Lemma I.1.68] -/
 def Phi (C : Set V) (p : V) : Prop :=
   (p = ^⊤) ∨
@@ -108,7 +108,7 @@ private lemma phi_iff (C p : V) :
       | ⟨p₁, _, p₂, _, hp, hq, rfl⟩ | ⟨p₁, _, p₂, _, hp, hq, rfl⟩
       | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩ | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩) <;> grind
 
-/-- Fixpoint blueprint whose least fixpoint is the internal `Δ₀` shape predicate.
+/-- Fixpoint blueprint whose least fixpoint is the internal $\Delta_0$ shape predicate.
 - [HP98, Lemma I.1.68(1)] -/
 noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “p C.
@@ -195,24 +195,24 @@ lemma shift_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒ�
     shift_exs (by simp [hlt, hq]), shift_and hlt hq]
   simp [Arithmetic.qqLT, hu]
 
-/-- `IsDelta0 p` says that `p` has the internal shape of a `Δ₀` formula.
+/-- `IsDelta0 p` says that `p` has the internal shape of a $\Delta_0$ formula.
 - [HP98, Lemma I.1.68] -/
 def IsDelta0 (p : V) : Prop := IsDelta0F.construction.Fixpoint ![] p
 
-/-- `𝚫₁` recognizer for `IsDelta0`.
+/-- $\Delta_1$ recognizer for `IsDelta0`.
 - [HP98, Lemma I.1.68(1)] -/
 noncomputable def isDelta0 : 𝚫₁.Semisentence 1 := IsDelta0F.blueprint.fixpointDefΔ₁
 
-/-- The recognizer defines the internal `Δ₀` shape predicate.
+/-- The recognizer defines the internal $\Delta_0$ shape predicate.
 - [HP98, Lemma I.1.68(1)] -/
 instance IsDelta0.defined : 𝚫₁-Predicate (IsDelta0 (V := V)) via isDelta0 :=
   IsDelta0F.construction.fixpoint_definedΔ₁
 
-/-- The internal `Δ₀` shape predicate is `𝚫₁`-definable.
+/-- The internal $\Delta_0$ shape predicate is $\Delta_1$-definable.
 - [HP98, Lemma I.1.68(1)] -/
 instance IsDelta0.definable : 𝚫₁-Predicate (IsDelta0 : V → Prop) := IsDelta0.defined.to_definable
 
-/-- Characterization of internal `Δ₀` formulas by their outermost coding constructor.
+/-- Characterization of internal $\Delta_0$ formulas by their outermost coding constructor.
 - [HP98, Lemma I.1.68(2)] -/
 lemma IsDelta0.case_iff {p : V} :
     IsDelta0 p ↔
@@ -233,7 +233,7 @@ alias ⟨IsDelta0.case, IsDelta0.mk⟩ := IsDelta0.case_iff
 @[simp] lemma IsDelta0.nrel {k r v : V} : IsDelta0 (^nrel k r v) :=
   IsDelta0.mk (Or.inr (Or.inr (Or.inr (Or.inl ⟨k, r, v, rfl⟩))))
 
-/-- `Δ₀` shape is exactly inherited through internal conjunction.
+/-- $\Delta_0$ shape is exactly inherited through internal conjunction.
 - [HP98, Lemma I.1.68(2)] -/
 @[simp] lemma IsDelta0.and_iff {p q : V} : IsDelta0 (p ^⋏ q) ↔ IsDelta0 p ∧ IsDelta0 q := by
   constructor
@@ -247,7 +247,7 @@ alias ⟨IsDelta0.case, IsDelta0.mk⟩ := IsDelta0.case_iff
   · rintro ⟨hp, hq⟩
     exact IsDelta0.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩)))))
 
-/-- `Δ₀` shape is exactly inherited through internal disjunction.
+/-- $\Delta_0$ shape is exactly inherited through internal disjunction.
 - [HP98, Lemma I.1.68(2)] -/
 @[simp] lemma IsDelta0.or_iff {p q : V} : IsDelta0 (p ^⋎ q) ↔ IsDelta0 p ∧ IsDelta0 q := by
   constructor
@@ -261,21 +261,21 @@ alias ⟨IsDelta0.case, IsDelta0.mk⟩ := IsDelta0.case_iff
   · rintro ⟨hp, hq⟩
     exact IsDelta0.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩))))))
 
-/-- A bounded universal quantification of a `Δ₀` code is `Δ₀`.
+/-- A bounded universal quantification of a $\Delta_0$ code is $\Delta_0$.
 - [HP98, Lemma I.1.68(2)] -/
 lemma IsDelta0.ball {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsDelta0 q) :
     IsDelta0 (qqBall (termBShift ℒₒᵣ t) q) :=
   IsDelta0.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
     ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩)))))))
 
-/-- A bounded existential quantification of a `Δ₀` code is `Δ₀`.
+/-- A bounded existential quantification of a $\Delta_0$ code is $\Delta_0$.
 - [HP98, Lemma I.1.68(2)] -/
 lemma IsDelta0.bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsDelta0 q) :
     IsDelta0 (qqBex (termBShift ℒₒᵣ t) q) :=
   IsDelta0.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
     ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩)))))))
 
-/-- Inversion for the universal quantifier: a `Δ₀` code beginning with `^∀` is a bounded
+/-- Inversion for the universal quantifier: a $\Delta_0$ code beginning with `^∀` is a bounded
 universal quantification.
 - [HP98, Lemma I.1.68(2)] -/
 lemma IsDelta0.of_all {p : V} (h : IsDelta0 (^∀ p)) :
@@ -289,7 +289,7 @@ lemma IsDelta0.of_all {p : V} (h : IsDelta0 (^∀ p)) :
       | (rw [show qqBall u q = ^∀ (qqOr (Arithmetic.qqNLT (qqBvar 0) u) q) from rfl, qqAll_inj] at h
          exact ⟨u, q, hguard, hq, h⟩)
 
-/-- Inversion for the existential quantifier: a `Δ₀` code beginning with `^∃` is a bounded
+/-- Inversion for the existential quantifier: a $\Delta_0$ code beginning with `^∃` is a bounded
 existential quantification.
 - [HP98, Lemma I.1.68(2)] -/
 lemma IsDelta0.of_ex {p : V} (h : IsDelta0 (^∃ p)) :
@@ -303,7 +303,7 @@ lemma IsDelta0.of_ex {p : V} (h : IsDelta0 (^∃ p)) :
       | (rw [show qqBex u q = ^∃ ((Arithmetic.qqLT (qqBvar 0) u) ^⋏ q) from rfl, qqExs_inj] at h
          exact ⟨u, q, hguard, hq, h⟩)
 
-/-- Recursion on the internal `Δ₀` shape.
+/-- Recursion on the internal $\Delta_0$ shape.
 - [HP98, Lemma I.1.68(2)] -/
 lemma IsDelta0.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hverum : P ^⊤) (hfalsum : P ^⊥)
@@ -325,7 +325,7 @@ lemma IsDelta0.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     · exact hball t q ht (hC q hq).1 (hC q hq).2
     · exact hbex t q ht (hC q hq).1 (hC q hq).2)
 
-/-- `Δ₀` shape is preserved by syntactic negation.
+/-- $\Delta_0$ shape is preserved by syntactic negation.
 - [HP98, Lemma I.1.68(2)(ii)] -/
 lemma IsDelta0.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
     IsDelta0 (Bootstrapping.neg ℒₒᵣ p) := by
@@ -359,7 +359,7 @@ lemma IsDelta0.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
       exact IsDelta0.ball ht (ih hq)
   exact H p h hp
 
-/-- `Δ₀` shape is preserved by the free-variable shift.
+/-- $\Delta_0$ shape is preserved by the free-variable shift.
 - [HP98, Lemma I.1.68(2)] -/
 lemma IsDelta0.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
     IsDelta0 (Bootstrapping.shift ℒₒᵣ p) := by
@@ -431,7 +431,7 @@ lemma quote_bex {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSe
   rfl
 
 open Bootstrapping in
-/-- A bounded formula has a `Δ₀` code.
+/-- A bounded formula has a $\Delta_0$ code.
 - [HP98, Lemma I.1.68] -/
 lemma isDelta0_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : Hierarchy 𝚺 0 ψ) :
     IsDelta0 (⌜ψ⌝ : ℕ) := by
@@ -453,7 +453,7 @@ lemma isDelta0_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : Hi
     exact IsDelta0.bex (by simp [Semiterm.quote_def]) ihφ
 
 open Bootstrapping in
-/-- A formula with a `Δ₀` code is bounded.
+/-- A formula with a $\Delta_0$ code is bounded.
 - [HP98, Lemma I.1.68] -/
 lemma hierarchy_of_isDelta0 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     IsDelta0 (⌜ψ⌝ : ℕ) → Hierarchy 𝚺 0 ψ := by
@@ -523,7 +523,7 @@ lemma hierarchy_of_isDelta0 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
       rw [heq]
       exact Hierarchy.bexs (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
 
-/-- Correctness of the `Δ₀`-code recognizer over the standard model.
+/-- Correctness of the $\Delta_0$-code recognizer over the standard model.
 - [HP98, Lemma I.1.68] -/
 lemma isDelta0_iff_hierarchy {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     Bootstrapping.IsDelta0 (⌜ψ⌝ : ℕ) ↔ Hierarchy 𝚺 0 ψ :=
@@ -532,7 +532,7 @@ lemma isDelta0_iff_hierarchy {n : ℕ} (ψ : ArithmeticSemiproposition n) :
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Bootstrapping in
-/-- Internal `Δ₀` recognition of a quoted formula agrees with its external hierarchy class.
+/-- Internal $\Delta_0$ recognition of a quoted formula agrees with its external hierarchy class.
 - [HP98, Lemma I.1.68] -/
 lemma isDelta0_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     IsDelta0 (⌜ψ⌝ : V) ↔ Hierarchy 𝚺 0 ψ :=

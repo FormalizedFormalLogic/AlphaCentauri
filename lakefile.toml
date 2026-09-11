@@ -19,12 +19,12 @@ name = "Foundation"
 git = "https://github.com/FormalizedFormalLogic/Foundation"
 rev = "81810b9f22c49fbb32bd89c1e9737059d83a37e6"
 
-# `lake exe audit`: the axiom audit of `AlphaCentauri` against `forgive.yml` (Audit/Main.lean).
-# Run after `lake build`; the script imports only `Lean`, so building it costs nothing.
-[[lean_exe]]
-name = "audit"
-root = "Audit.Main"
-supportInterpreter = true
+# `lake exe forgive AlphaCentauri` (`just axiom-audit`): the axiom audit against `forgive.yml`.
+# Run after `lake build`; it reads the oleans. The package imports only `Lean` and `Cli`.
+[[require]]
+name = "Forgive"
+git = "https://github.com/FormalizedFormalLogic/forgive"
+rev = "32667a1902df73e5f27cdfcef57855e6b8b24d55"
 
 # Generator of the theory zoo. Kept out of `defaultTargets`: it is built by `just zoo`.
 [[lean_lib]]

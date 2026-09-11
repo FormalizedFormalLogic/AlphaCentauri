@@ -3,15 +3,16 @@
 # AlphaCentauri does not use `sorry`: a statement that is formalized but not yet proved is
 # declared as an `axiom`, so the audit reports it under its own name and every declaration that
 # leans on it says which unproved result it leans on. This file is that ledger, read by
-# `lake env lean --run Audit/Main.lean` (`just axiom-audit`); the format is documented in
-# `Audit/Main.lean`.
+# `lake exe forgive AlphaCentauri` (`just axiom-audit`); the format is documented in
+# https://github.com/FormalizedFormalLogic/forgive.
 #
-#   AlphaCentauri.someLemma:
-#     forgive:
-#       - AlphaCentauri.someLemma      # the axiom standing in for its own proof
-#   AlphaCentauri.usesSomeLemma:
-#     forgive:
-#       - AlphaCentauri.someLemma      # only the debt reached through `someLemma`
+#   declaration:
+#     AlphaCentauri.someLemma:
+#       forgive:
+#         - AlphaCentauri.someLemma    # the axiom standing in for its own proof
+#     AlphaCentauri.usesSomeLemma:
+#       forgive:
+#         - AlphaCentauri.someLemma    # only the debt reached through `someLemma`
 #
 # Every entry and every forgiven name must be needed, so the file stays exact: proving a
 # statement means deleting its `axiom` and every entry that named it. `sorryAx` must never
@@ -19,69 +20,76 @@
 
 version: v0
 
-# The unproved statements themselves.
-FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-FFL.FirstOrder.Arithmetic.consistent_localReflection_of_Sigma1_sound:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.consistent_localReflection_of_Sigma1_sound
-FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound
-FFL.FirstOrder.Arithmetic.localReflection_Pi1_equiv_con:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.localReflection_Pi1_equiv_con
-FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
-FFL.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection
-FFL.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ
-FFL.FirstOrder.ISigma.provable_con_ISigma1:
-  forgive:
-    - FFL.FirstOrder.ISigma.provable_con_ISigma1
-FFL.FirstOrder.Peano.essentiallyReflexive:
-  forgive:
-    - FFL.FirstOrder.Peano.essentiallyReflexive
-FFL.FirstOrder.Peano.reflexive:
-  forgive:
-    - FFL.FirstOrder.Peano.reflexive
-FFL.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection:
-  forgive:
-    - FFL.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection
-FFL.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
-  forgive:
-    - FFL.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con
-FFL.FirstOrder.parsons:
-  forgive:
-    - FFL.FirstOrder.parsons
-FFL.FirstOrder.parsons_primrec:
-  forgive:
-    - FFL.FirstOrder.parsons_primrec
-FFL.FirstOrder.primrec'_of_provablyTotal:
-  forgive:
-    - FFL.FirstOrder.primrec'_of_provablyTotal
+# The axioms every declaration may use.
+accept:
+  - propext
+  - Classical.choice
+  - Quot.sound
 
-# Declarations that inherit the debt of an unproved statement.
-FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_fresh:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_free:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
-  forgive:
-    - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-FFL.FirstOrder.Peano.not_finiteAxiomatizable:
-  forgive:
-    - FFL.FirstOrder.Peano.reflexive
-FFL.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
-  forgive:
-    - FFL.FirstOrder.Peano.essentiallyReflexive
+declaration:
+  # The unproved statements themselves.
+  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.consistent_localReflection_of_Sigma1_sound:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.consistent_localReflection_of_Sigma1_sound
+  FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound
+  FFL.FirstOrder.Arithmetic.localReflection_Pi1_equiv_con:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.localReflection_Pi1_equiv_con
+  FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
+  FFL.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection
+  FFL.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ
+  FFL.FirstOrder.ISigma.provable_con_ISigma1:
+    forgive:
+      - FFL.FirstOrder.ISigma.provable_con_ISigma1
+  FFL.FirstOrder.Peano.essentiallyReflexive:
+    forgive:
+      - FFL.FirstOrder.Peano.essentiallyReflexive
+  FFL.FirstOrder.Peano.reflexive:
+    forgive:
+      - FFL.FirstOrder.Peano.reflexive
+  FFL.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection:
+    forgive:
+      - FFL.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection
+  FFL.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
+    forgive:
+      - FFL.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con
+  FFL.FirstOrder.parsons:
+    forgive:
+      - FFL.FirstOrder.parsons
+  FFL.FirstOrder.parsons_primrec:
+    forgive:
+      - FFL.FirstOrder.parsons_primrec
+  FFL.FirstOrder.primrec'_of_provablyTotal:
+    forgive:
+      - FFL.FirstOrder.primrec'_of_provablyTotal
+
+  # Declarations that inherit the debt of an unproved statement.
+  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_fresh:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_free:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Peano.not_finiteAxiomatizable:
+    forgive:
+      - FFL.FirstOrder.Peano.reflexive
+  FFL.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
+    forgive:
+      - FFL.FirstOrder.Peano.essentiallyReflexive

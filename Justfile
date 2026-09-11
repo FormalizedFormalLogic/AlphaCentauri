@@ -8,9 +8,9 @@ build:
     lake build
 
 # Audit AlphaCentauri for sorry/native_decide/unauthorized axioms, honouring the allowlist
-# forgive.yml (requires `lake build` first; see Audit/Main.lean)
+# forgive.yml (requires `lake build` first; see https://github.com/FormalizedFormalLogic/forgive)
 axiom-audit:
-    lake exe audit
+    lake exe forgive AlphaCentauri --json .lake/audit.json
 
 # Forbid `sorry`: none in the Lean sources, and `sorryAx` forgiven nowhere in forgive.yml.
 # An unproved statement is an `axiom` under its own name instead (see docs/conventions.md).

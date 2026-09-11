@@ -10,8 +10,8 @@ public import Foundation.FirstOrder.Ultraproduct
 /-!
 # Parikh's theorem
 
-A $\Delta_0$ totality proved by `𝗜𝚺₀` is already provable in bounded form, so an `𝗜𝚺₀`-provably
-total function with a $\Delta_0$ graph is bounded by a term.
+An `𝗜𝚺₀`-provably total function with a $\Delta_0$ graph is bounded by a term, hence grows at
+most polynomially.
 -/
 
 @[expose] public section
@@ -36,16 +36,17 @@ private def termCut {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣�
   ⟩
   mem_of_lt := fun hab ⟨t, ht⟩ ↦ ⟨t, le_trans hab.le ht⟩
 
-/-- **Parikh's theorem**: a totality `𝗜𝚺₀` proves for a $\Delta_0$ formula is provable with the
-existential bounded by a term.
+/-- **Parikh's theorem**: a $\Pi^0_2$ sentence provable by `𝗜𝚺₀` is provable with the
+existential quantifier bounded by a term. This is proven for `∀...∀∃` formulas, which
+have any number of unbounded universal quantifiers, then one unbounded existential.
 - [HP98, Theorem V.1.4]
 - [Bus98A, Theorem 1.2.7.1] -/
 theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
   (h : 𝗜𝚺₀ ⊢ ∀¹* ∃¹ φ) :
   ∃ t : ClosedSemiterm ℒₒᵣ k, 𝗜𝚺₀ ⊢ ∀¹* ∃¹[“#0 < !!(Rew.bShift t)”] φ := by
   by_contra! hcon
-  -- Realize, in the language with `k` new constants, a model in which no witness for `φ` at the
-  -- constants is bounded by the value of a closed term.
+  -- In the language with `k` new constants, define for each natural number `n` the theory
+  -- stating that WIP.
   set Tn : ℕ → Theory (Language.oringConst k) := λ n =>
     𝗘𝗤 _
     ∪ Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ _) '' 𝗜𝚺₀

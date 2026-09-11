@@ -62,7 +62,7 @@ rewrite, so it is written as if it were already there.
   into a declaration only when the declaration's own type mentions it; an `axiom` has no body to
   mention it indirectly, so a hypothesis like `[U.Δ₁]` or `[𝗜𝚺₁ ⪯ T]` can vanish from the type
   without any error — the resulting statement is *stronger* than intended, and neither
-  `lake build`, `lake exe audit`, nor `just mk-all` catches it. This happened in PR #107 and was
+  `lake build`, `just axiom-audit`, nor `just mk-all` catches it. This happened in PR #107 and was
   fixed in PR #112. A `statement-formalized` PR must run `#check @Name` on every `axiom` it adds
   and confirm the printed type keeps every intended hypothesis.
 - **Reuse before restating.** Foundation's theories, notations, definability classes, and the

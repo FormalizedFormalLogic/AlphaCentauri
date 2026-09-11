@@ -76,6 +76,7 @@ jobs:
       pull-requests: write # the audit comment below
     steps:
       - uses: actions/checkout@v7
+      - uses: extractions/setup-just@v3
       - uses: leanprover/lean-action@v1
         with:
           build: false
@@ -130,14 +131,15 @@ jobs:
       - name: Audit axioms
         id: audit
         continue-on-error: true
-        run: lake exe audit
-      # One comment per pull request, overwritten on every run. Skipped for forks, whose token
-      # cannot write comments, and for `infrastructure`, which touches no mathematics.
+        run: just axiom-audit
+      # One comment per pull request, overwritten on every run, rendered from the JSON report by
+      # `.github/scripts/audit-comment.py`. Skipped for forks, whose token cannot write comments,
+      # and for `infrastructure`, which touches no mathematics.
       - name: Prepare the audit comment
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && !contains(github.event.pull_request.labels.*.name, 'infrastructure')
         run: |
           {
-            cat .lake/audit.md
+            python3 .github/scripts/audit-comment.py .lake/audit.json
             echo
             echo "Commit: ${{ github.event.pull_request.head.sha }} · [run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           } > .lake/audit-comment.md
@@ -165,7 +167,6 @@ jobs:
           exit 1
 
       # The zoo scans `Foundation` too, which this job has already built.
-      - uses: extractions/setup-just@v3
       - uses: typst-community/setup-typst@v4
       - uses: ts-graphviz/setup-graphviz@v2
       - name: Generate the zoo

@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Basic.Eq
 
 /-! # The language of ordered rings with finitely many extra constants
 
-`Language.oRingConst k` is `ℒₒᵣ` together with `k` new constant symbols. An `ℒₒᵣ`-formula in `k`
+`Language.oringConst k` is `ℒₒᵣ` together with `k` new constant symbols. An `ℒₒᵣ`-formula in `k`
 free variables becomes a sentence of that language by filling its variables with the constants,
 and a model of `ℒₒᵣ` becomes a model of it by choosing a `k`-tuple.
 -/
@@ -17,7 +17,7 @@ namespace FFL.FirstOrder
 namespace Language
 
 /-- `ℒₒᵣ` extended by `k` new constant symbols. -/
-abbrev oRingConst (k : ℕ) : Language := Language.add ℒₒᵣ (Language.constant (Fin k))
+abbrev oringConst (k : ℕ) : Language := Language.add ℒₒᵣ (Language.constant (Fin k))
 
 end Language
 
@@ -28,21 +28,21 @@ open Semiformula
 variable {k : ℕ}
 
 /-- The `i`-th of the `k` constants adjoined to `ℒₒᵣ`. -/
-def cst {ξ n} (i : Fin k) : Semiterm (Language.oRingConst k) ξ n :=
+def cst {ξ n} (i : Fin k) : Semiterm (Language.oringConst k) ξ n :=
   Semiterm.func (arity := 0) (Sum.inr (Language.Constant.Func.const i)) ![]
 
-/-- An `ℒₒᵣ`-formula in `k` free variables, read as a sentence of `Language.oRingConst k` with the
+/-- An `ℒₒᵣ`-formula in `k` free variables, read as a sentence of `Language.oringConst k` with the
 variables filled by the adjoined constants. -/
-def lift (φ : ArithmeticSemisentence k) : Sentence (Language.oRingConst k) :=
+def lift (φ : ArithmeticSemisentence k) : Sentence (Language.oringConst k) :=
   Rew.subst (fun i ↦ cst i) ▹ Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) φ
 
 section
 
 variable (M : Type u) [ORingStructure M] (a : Fin k → M)
 
-/-- `M` as a structure for `Language.oRingConst k`, reading the `i`-th adjoined constant as
+/-- `M` as a structure for `Language.oringConst k`, reading the `i`-th adjoined constant as
 `a i`. -/
-def strucOfTuple : Struc (Language.oRingConst k) where
+def strucOfTuple : Struc (Language.oringConst k) where
   Dom := M
   nonempty := ⟨0⟩
   struc :=
@@ -57,11 +57,11 @@ def strucOfTuple : Struc (Language.oRingConst k) where
     Structure.eval_lMap_add₁]
   exact Iff.rfl
 
-lemma strucOfTuple_models_eq : strucOfTuple M a ⊧* 𝗘𝗤 (Language.oRingConst k) := by
-  let s : Structure (Language.oRingConst k) M := (strucOfTuple M a).struc
+lemma strucOfTuple_models_eq : strucOfTuple M a ⊧* 𝗘𝗤 (Language.oringConst k) := by
+  let s : Structure (Language.oringConst k) M := (strucOfTuple M a).struc
   have : Nonempty M := ⟨0⟩
-  have : Structure.Eq (Language.oRingConst k) M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
-  show M↓[Language.oRingConst k] ⊧* 𝗘𝗤 (Language.oRingConst k)
+  have : Structure.Eq (Language.oringConst k) M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
+  show M↓[Language.oringConst k] ⊧* 𝗘𝗤 (Language.oringConst k)
   infer_instance
 
 lemma strucOfTuple_models_lMap_image {U : ArithmeticTheory} (h : M↓[ℒₒᵣ] ⊧* U) :
@@ -83,8 +83,8 @@ def dominatingTerm (k : ℕ) : ℕ → ClosedSemiterm ℒₒᵣ k
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 lemma valb_le_valb_dominatingTerm {n : ℕ} {t : ClosedSemiterm ℒₒᵣ k}
-    (ht : Encodable.encode t < n) (e : Fin k → M) :
-    t.valb e ≤ (dominatingTerm k n).valb e := by
+  (ht : Encodable.encode t < n) (e : Fin k → M)
+  : t.valb e ≤ (dominatingTerm k n).valb e := by
   induction n with
   | zero => simp at ht
   | succ n ih =>
@@ -98,8 +98,8 @@ end
 
 section
 
-variable {T : Theory (Language.oRingConst k)} [𝗘𝗤 (Language.oRingConst k) ⪯ T]
-  (sat : Semantics.Satisfiable (Struc (Language.oRingConst k)) T)
+variable {T : Theory (Language.oringConst k)} [𝗘𝗤 (Language.oringConst k) ⪯ T]
+  (sat : Semantics.Satisfiable (Struc (Language.oringConst k)) T)
 
 /-- The tuple of elements of `ModelOfSatEq sat` named by the adjoined constants. -/
 noncomputable def cstVal (i : Fin k) : ModelOfSatEq sat := Semiterm.valb ![] (cst i)
@@ -119,7 +119,7 @@ lemma reduct_eq :
   standardModel_unique _ _
 
 lemma models_lift_iff (φ : ArithmeticSemisentence k) :
-    (ModelOfSatEq sat)↓[Language.oRingConst k] ⊧ lift φ ↔ φ.Evalb (cstVal sat) := by
+    (ModelOfSatEq sat)↓[Language.oringConst k] ⊧ lift φ ↔ φ.Evalb (cstVal sat) := by
   simp only [lift, models_iff, Semiformula.Realize, eval_substs, Semiformula.eval_lMap]
   rw [reduct_eq]
   exact Iff.rfl

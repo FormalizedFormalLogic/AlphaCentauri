@@ -3,10 +3,10 @@ module
 public import AlphaCentauri.Model.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata
 
-/-! # Initial segments
+/-! # Cuts
 
-An initial segment of an `ℒₒᵣ`-structure `M` is a downward closed subset closed under the
-operations of the language; `M` is an end extension of it.
+A cut of an `ℒₒᵣ`-structure `M` is a downward closed subset closed under the operations of the
+language; `M` is an end extension of it.
 -/
 
 @[expose] public section
@@ -17,10 +17,9 @@ open Semiformula Structure
 
 variable {M : Type u} [ORingStructure M]
 
-/-- An initial segment of `M`: a subset closed under the operations of `ℒₒᵣ` and downward closed
-under `<`.
-- [HP98, Definition IV.1.3(2)] -/
-structure InitialSegment (M : Type u) [ORingStructure M] where
+/-- A cut of `M`: a subset closed under the operations of `ℒₒᵣ` and downward closed under `<`.
+- [HP98, Definition IV.1.14] -/
+structure Cut (M : Type u) [ORingStructure M] where
   carrier : Set M
   zero_mem : (0 : M) ∈ carrier
   one_mem : (1 : M) ∈ carrier
@@ -28,9 +27,9 @@ structure InitialSegment (M : Type u) [ORingStructure M] where
   mul_mem {a b : M} : a ∈ carrier → b ∈ carrier → a * b ∈ carrier
   mem_of_lt {a b : M} : a < b → b ∈ carrier → a ∈ carrier
 
-namespace InitialSegment
+namespace Cut
 
-variable (I : InitialSegment M)
+variable (I : Cut M)
 
 instance oringStructure : ORingStructure I.carrier where
   zero := ⟨0, I.zero_mem⟩
@@ -39,20 +38,23 @@ instance oringStructure : ORingStructure I.carrier where
   mul a b := ⟨a.1 * b.1, I.mul_mem a.2 b.2⟩
   lt a b := a.1 < b.1
 
-/-- `M` is an end extension of each of its initial segments. -/
+/-- `M` is an end extension of each of its cuts.
+- [HP98, Definition IV.1.3(2)] -/
 def endExtension : EndExtensionOf I.carrier where
   carrier := M
-  emb :=
-    { toFun := Subtype.val
-      func' := fun f v ↦ by cases f <;> rfl
-      rel' := fun r _ ↦ by cases r; exacts [congrArg Subtype.val, id]
-      toFun_inj := Subtype.val_injective
-      rel_inv' := fun r _ ↦ by cases r; exacts [Subtype.ext, id] }
+  emb := {
+    toFun := Subtype.val,
+    func' := fun f v ↦ by cases f <;> rfl
+    rel' := fun r _ ↦ by cases r; exacts [congrArg Subtype.val, id]
+    toFun_inj := Subtype.val_injective
+    rel_inv' := fun r _ ↦ by cases r; exacts [Subtype.ext, id]
+  }
   mem_range_of_lt := fun {a b} h ↦ ⟨⟨b, I.mem_of_lt h a.2⟩, rfl⟩
 
-@[simp] lemma endExtension_emb (x : I.carrier) : I.endExtension x = x.1 := rfl
+@[simp]
+lemma endExtension_emb (x : I.carrier) : I.endExtension x = x.1 := rfl
 
-end InitialSegment
+end Cut
 
 namespace EndExtensionOf
 
@@ -82,11 +84,13 @@ private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : Arit
 - [HP98, Remark IV.1.21(2)] -/
 theorem models_ISigma0 [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := by
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := N.models_peanoMinus
-  simp only [Semantics.ModelsSet.union_iff, InductionScheme]
-  refine ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
-  rintro _ ⟨φ, hφ, rfl⟩
-  simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
-    using N.eval_of_endExtension hφ
+  simp only [Semantics.ModelsSet.union_iff, InductionScheme];
+  and_intros;
+  . assumption;
+  . apply Semantics.ModelsSet.setOf_iff.mpr;
+    rintro _ ⟨φ, hφ, rfl⟩
+    simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
+      using N.eval_of_endExtension hφ
 
 end EndExtensionOf
 

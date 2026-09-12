@@ -16,12 +16,14 @@ and the `lean-lsp` MCP server (defined in `.mcp.json`; requires `uv` and `ripgre
 
 ## GitHub is the only workbench
 
-- **A unit of work is an issue.** Work only on an open issue. Humans open the issues for new
-  mathematics; never start from a private to-do list.
+- **A unit of new mathematics is an issue.** Work only on an open issue. Humans open the issues
+  for new mathematics; never start from a private to-do list. Improvements to existing code are
+  the exception: see below.
 - **Claim by assigning yourself** (`gh issue edit <n> --add-assignee @me`) before you write
   code, and never work on an issue assigned to someone else. Unassign yourself if you stop.
-- **One issue, one branch, one pull request.** Branch from `main` as `<n>-<slug>`. The
-  PR body contains `Closes #<n>`. Ship a prerequisite refactor as its own PR.
+- **One branch, one pull request.** Branch from `main` as `<n>-<slug>` for an issue, whose PR
+  body contains `Closes #<n>`, or as `<slug>` for issue-less work. Ship a prerequisite refactor
+  as its own PR.
 - **Never push to `main`.** Never force-push over someone else's commits: pushing to a branch
   you did not create uses `--force-with-lease` against the tip you observed.
 - **Don't merge without being told to.** Landing a PR is the review pipeline's job (a human's,
@@ -41,9 +43,9 @@ material "in passing". Gaps outside the mathematics — missing CI, infrastructu
 under a human-owned path (see [`docs/workflow.md`](docs/workflow.md)) — are not issues to
 open; mention them in a PR comment or leave them for a human to notice.
 
-Improving existing code needs no human-opened issue: refactoring, simplifying proofs, modest
-generalization of an existing lemma, relocation, documentation. Open an issue for it all the
-same, so the work is visible.
+Improving existing code needs no issue at all: refactoring, simplifying proofs, modest
+generalization of an existing lemma, relocation, documentation. Branch from `main` with a
+descriptive slug and open the pull request directly; the PR is the record.
 
 ## The rules of the code
 
@@ -71,7 +73,10 @@ same, so the work is visible.
 - **Keep docstrings informative, not redundant.** A docstring may state only what its declaration
   says, never how or why its proof works; omit it when it merely repeats or paraphrases the
   declaration, unless a citation or a genuinely useful statement-level explanation remains. In
-  docstrings, write hierarchy classes in Lean notation, e.g. `𝚷-[m + 1]`, not `𝚷ₘ₊₁`.
+  prose — docstrings, pull request bodies, issues — write hierarchy classes in TeX, e.g.
+  `$\Pi_{m + 1}$`, not the Lean notation `𝚷-[m + 1]` and not `𝚷ₘ₊₁`; Lean identifiers stay in
+  backticks as code. In a declaration's *name* a hierarchy class is spelled out capitalised with
+  an arabic index, e.g. `Sigma1`, `Pi1`, `Delta0` — never `sigmaOne`, `piOne` or `delta₀`.
 - **Use Foundation's vocabulary.** Search Foundation (and Mathlib) before defining anything; see
   [`docs/conventions.md`](docs/conventions.md) ("Reuse before restating") for the rule. Never
   patch Foundation's sources under `.lake/`.

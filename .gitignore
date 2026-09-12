@@ -14,6 +14,8 @@ _out
 # Only the shared settings file is tracked.
 .claude/*
 !.claude/settings.json
+!.claude/commands/
+!.claude/commands/**
 
 # Local, per-user operating notes for Claude Code; not shared with other contributors.
 CLAUDE.local.md

@@ -24,8 +24,8 @@ checklists are working notes, not the issue's content; keep those in your own lo
 Title conventions are the same as for pull requests, below.
 
 Agents do not open issues for new mathematics: a gap or a mistake is reported in the thread of
-the issue being worked on, and a human decides. An agent may open an issue for improving
-existing code (refactor, simplification, relocation, documentation) so the work is visible.
+the issue being worked on, and a human decides. Improving existing code (refactor,
+simplification, relocation, documentation) needs no issue: the pull request is the record.
 Gaps in CI or infrastructure are not issues; note them in a PR comment.
 
 Large issues are decomposed with GitHub sub-issues, one per pull request. An umbrella closes
@@ -54,10 +54,10 @@ activity for 14 days may be released by anyone, with a comment.
 
 ## Pull requests
 
-- Branch from `main`, named `<n>-<slug>`. One issue per PR. Never branch from another PR's
-  branch before it merges into `main`: a squash merge rewrites that history, so the stacked
-  branch conflicts (often in `forgive.yml`) on every later push and needs manual resolution —
-  wait for the prerequisite PR to land first.
+- Branch from `main`, named `<n>-<slug>` for an issue and `<slug>` without one. One issue per
+  PR. Never branch from another PR's branch before it merges into `main`: a squash merge
+  rewrites that history, so the stacked branch conflicts (often in `forgive.yml`) on every
+  later push and needs manual resolution — wait for the prerequisite PR to land first.
 - Never force-push a branch you did not create except with `--force-with-lease`.
 - Title: a short noun phrase — no subtitle, no full theorem name, no `(scope)` parenthetical —
   in the form `<type>: <subject>` with `<type>` in `add | fix | refactor | doc | ci | chore |

@@ -37,7 +37,7 @@ private def termCut {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣�
   mem_of_lt := fun hab ⟨t, ht⟩ ↦ ⟨t, le_trans hab.le ht⟩
 
 /-- **Parikh's theorem**: a $\Pi^0_2$ sentence provable by `𝗜𝚺₀` is provable with the
-existential quantifier bounded by a term. This is proven for `∀...∀∃` formulas, which
+existential quantifier bounded by a term. This is proven for $\forall\ldots\forall\exists` formulas, which
 have any number of unbounded universal quantifiers, then one unbounded existential.
 - [HP98, Theorem V.1.4]
 - [Bus98A, Theorem 1.2.7.1] -/
@@ -46,7 +46,7 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
   ∃ t : ClosedSemiterm ℒₒᵣ k, 𝗜𝚺₀ ⊢ ∀¹* ∃¹[“#0 < !!(Rew.bShift t)”] φ := by
   by_contra! hcon
   -- In the language with `k` new constants, define for each natural number `n` the theory
-  -- stating that WIP.
+  -- consisting of `𝗜𝚺₀` plus, for each of the first `n` terms `t` of `ℒₒᵣ`, the sentence `∀(#0 < t), ∼φ`.
   set Tn : ℕ → Theory (Language.oringConst k) := λ n =>
     𝗘𝗤 _
     ∪ Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ _) '' 𝗜𝚺₀
@@ -59,8 +59,8 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
     exact Nat.lt_succ_of_lt ht;
 
   set T := ⋃ n, Tn n;
-  -- Each `unboundedTheory φ n` is satisfiable: a term dominating the closed terms numbered below
-  -- `n` turns the assumption into a counter-model.
+  -- Each `Tn n` is satisfiable: a term dominating the closed terms numbered below
+  -- `n` turns the assumption into a counter-model. Thus the union is satisfiable by compactness.
   have sat : Satisfiable T := Compact.satisfiable_iUnion ‹_› $ by
     intro n;
     obtain ⟨M, _, _, hM⟩ := exists_countermodel_of_unprovable $ hcon $ dominatingTerm k n;
@@ -76,7 +76,7 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
       intro y hy;
       exact ha y (lt_of_lt_of_le hy (valb_le_valb_dominatingTerm ht a))
 
-  -- The union is satisfiable by compactness; its model `ModelOfSatEq sat` reduces to a model of
+  -- A model `ModelOfSatEq sat` of `T` is also a model of
   -- `𝗜𝚺₀` in which no witness lies below the value of any closed term.
   have : 𝗘𝗤 (Language.oringConst k) ⪯ T := WeakerThan.ofSubset
     <| Set.subset_iUnion_of_subset 0
@@ -109,7 +109,8 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
     simp only [Matrix.comp_vecCons'', Empty.eq_elim] at h₂
     exact h₂
 
-  -- But `b` is below the value of `t + 1`, which the theory forbids.
+  -- But `b` is below the value of `t + 1`, which contradicts that no witness lies
+  -- below the closed term `t + 1`.
   exact hunbounded ‘!!t + 1’ b (by simpa using lt_succ_iff_le.mpr ht) hbM
 
 /-- An `𝗜𝚺₀`-provably total function with a $\Delta_0$ graph is bounded by a term, hence grows at

@@ -70,11 +70,22 @@ theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[�
     · exact by_axm (Set.mem_union_left _ hφ)
     · exact Provability.con_of_localReflection _ (by simp)
 
+/-- The standard model satisfies every local reflection instance of a theory it satisfies.
+- [Lin97, §4.1, p. 52] -/
+instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒₒᵣ] ⊧* T] :
+    ℕ↓[ℒₒᵣ] ⊧* (T ∪ T.standardProvability.localReflectionOn Γ) := by
+  apply Semantics.modelsSet_iff.mpr
+  rintro φ (hφ | ⟨σ, _, rfl⟩)
+  · exact Semantics.modelsSet_iff.mp inferInstance hφ
+  · have : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ → ℕ↓[ℒₒᵣ] ⊧ σ := fun h ↦
+      models_of_provable inferInstance (T.standardProvability.sound_on h)
+    simpa using this
+
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is sound in the standard model.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
-@[instance] axiom consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
-    Consistent (T ∪ 𝗥𝗳𝗻 T)
+@[instance] theorem consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
+    Consistent (T ∪ 𝗥𝗳𝗻 T) := Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], inferInstance⟩
 
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is $\Sigma_1$-sound.
 - [Lin97, §4.1, p. 52]

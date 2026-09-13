@@ -37,15 +37,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
     forgive:
       - FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound
-  FFL.FirstOrder.Arithmetic.localReflection_Pi1_equiv_con:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.localReflection_Pi1_equiv_con
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
-  FFL.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection
   FFL.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ:
     forgive:
       - FFL.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ
@@ -58,12 +52,6 @@ declaration:
   FFL.FirstOrder.Peano.reflexive:
     forgive:
       - FFL.FirstOrder.Peano.reflexive
-  FFL.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection:
-    forgive:
-      - FFL.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection
-  FFL.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
-    forgive:
-      - FFL.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con
   FFL.FirstOrder.parsons:
     forgive:
       - FFL.FirstOrder.parsons

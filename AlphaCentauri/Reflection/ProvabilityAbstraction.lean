@@ -49,15 +49,25 @@ variable [L.DecidableEq]
 /-- `T ∪ Rfn_Γ(𝔅) ⊢ Con(𝔅)` whenever `⊥` is among the reflected sentences.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
-axiom con_of_localReflection (h : Γ ⊥) : T ∪ 𝔅.localReflectionOn Γ ⊢ 𝔅.con
+theorem con_of_localReflection (h : Γ ⊥) : T ∪ 𝔅.localReflectionOn Γ ⊢ 𝔅.con := by
+  have h₁ : T ∪ 𝔅.localReflectionOn Γ ⊢ 𝔅 ⊥ 🡒 ⊥ :=
+    Axiomatized.by_axm (Set.mem_union_right _ ((mem_localReflectionOn_iff 𝔅).mpr ⟨⊥, h, rfl⟩))
+  show T ∪ 𝔅.localReflectionOn Γ ⊢ ∼𝔅 ⊥
+  cl_prover [h₁]
 
 variable {σ : Sentence L}
 
 /-- `Con(𝔅)` implies `𝔅 σ 🡒 σ` when `𝔅` is formally complete for `∼σ`.
 - [Lin97, Exercise 4.1(b)(ii)]
 - [AB05, Lemma 22(i)] -/
-axiom localReflection_of_con [𝔅.HBL2] [𝔅.FormalizedCompleteOn (∼σ)] :
-    T₀ ⊢ 𝔅.con 🡒 (𝔅 σ 🡒 σ)
+theorem localReflection_of_con [𝔅.HBL2] [𝔅.FormalizedCompleteOn (∼σ)] :
+    T₀ ⊢ 𝔅.con 🡒 (𝔅 σ 🡒 σ) := by
+  have h₁ : T₀ ⊢ ∼σ 🡒 𝔅 (∼σ) := formalized_complete_on
+  have h₂ : T₀ ⊢ 𝔅 (σ 🡒 ∼σ 🡒 ⊥) := D1 (by cl_prover)
+  have h₃ : T₀ ⊢ 𝔅 (σ 🡒 ∼σ 🡒 ⊥) 🡒 𝔅 σ 🡒 𝔅 (∼σ 🡒 ⊥) := D2
+  have h₄ : T₀ ⊢ 𝔅 (∼σ 🡒 ⊥) 🡒 𝔅 (∼σ) 🡒 𝔅 ⊥ := D2
+  show T₀ ⊢ ∼𝔅 ⊥ 🡒 (𝔅 σ 🡒 σ)
+  cl_prover [h₁, h₂, h₃, h₄]
 
 variable {π : Sentence L}
 

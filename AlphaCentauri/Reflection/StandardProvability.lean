@@ -17,7 +17,7 @@ iteration results.
 
 namespace FFL.FirstOrder.Arithmetic
 
-open FFL.Entailment
+open FFL.Entailment ProvabilityAbstraction
 
 /-- The local reflection schema `Rfn(T)` of an arithmetic theory `T`, via its standard
 provability predicate.
@@ -42,12 +42,33 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 
 /-- A consistent `T` is strictly weaker than `T ∪ Rfn(T)`.
 - [Lin97, §4.1, p. 52] -/
-@[instance] axiom strictlyWeakerThan_localReflection [Consistent T] : T ⪱ T ∪ 𝗥𝗳𝗻 T
+@[instance] theorem strictlyWeakerThan_localReflection [𝗜𝚺₁ ⪯ T] [Consistent T] :
+    T ⪱ T ∪ 𝗥𝗳𝗻 T :=
+  StrictlyWeakerThan.of_unprovable_provable (φ := T.consistent)
+    (consistent_unprovable T)
+    (Provability.con_of_localReflection _ trivial)
 
 /-- The $\Pi_1$ local reflection principle and `Con(T)` are equivalent over `T`.
 - [Lin97, Exercise 4.1(b)(ii)]
 - [AB05, Lemma 22(i)] -/
-axiom localReflection_Pi1_equiv_con : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ T.Con
+theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ T.Con := by
+  have : 𝗜𝚺₁ ⪯ T ∪ T.Con :=
+    (inferInstance : 𝗜𝚺₁ ⪯ T).trans (WeakerThan.ofSubset Set.subset_union_left)
+  refine Equiv.antisymm ⟨?_, ?_⟩
+  · apply WeakerThan.ofAxm!
+    rintro φ (hφ | ⟨σ, hσ, rfl⟩)
+    · exact by_axm (Set.mem_union_left _ hφ)
+    · have : T.standardProvability.FormalizedCompleteOn (∼σ) :=
+        ⟨provable_sigma_one_complete (by simpa using hσ.neg)⟩
+      have h₁ : T ∪ T.Con ⊢ T.standardProvability.con 🡒 (T.standardProvability σ 🡒 σ) :=
+        WeakerThan.pbl (Provability.localReflection_of_con T.standardProvability)
+      have h₂ : T ∪ T.Con ⊢ T.standardProvability.con :=
+        by_axm (Set.mem_union_right _ rfl)
+      cl_prover [h₁, h₂]
+  · apply WeakerThan.ofAxm!
+    rintro φ (hφ | rfl)
+    · exact by_axm (Set.mem_union_left _ hφ)
+    · exact Provability.con_of_localReflection _ (by simp)
 
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is sound in the standard model.
 - [Lin97, §4.1, p. 52]

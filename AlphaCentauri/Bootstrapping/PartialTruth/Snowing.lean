@@ -21,47 +21,38 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 /-! ## Codes of quoted semisentences
 
 Foundation's `quote_*` lemmas compute the code of a `Semiproposition`. A `Semisentence` is
-quoted through its embedding (`Sentence.quote_def`), so each of them has a counterpart here. -/
+quoted through its embedding (`Sentence.quote_def`), so each of them has a counterpart here.
 
-/-- A coded closed term is a well-formed internal term.
-- [HP98, 1.66] -/
+- [HP98, 1.66]
+- [HP98, 0.30] -/
+
 private lemma isUTerm_quote {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) : IsUTerm ℒₒᵣ (⌜t⌝ : V) := by
   simp [Semiterm.empty_quote_eq]
 
-/-- A coded semisentence is a well-formed internal formula.
-- [HP98, 1.66] -/
 private lemma isUFormula_quote {k : ℕ} (φ : ArithmeticSemisentence k) :
     IsUFormula ℒₒᵣ (⌜φ⌝ : V) := (Sentence.quote_isSemiformula φ).isUFormula
 
 section
 variable {k : ℕ} (t u : ClosedSemiterm ℒₒᵣ k)
 
-/-- The code of an equation between closed terms.
-- [HP98, 1.66] -/
 private lemma quote_eq_sentence :
     (⌜(.rel Language.Eq.eq ![t, u] : ArithmeticSemisentence k)⌝ : V)
       = Arithmetic.qqEQ (⌜t⌝ : V) (⌜u⌝ : V) := by
   simpa [Sentence.quote_def, Semiformula.quote_rel, Arithmetic.qqEQ, Semiterm.empty_quote_eq,
     Semiterm.empty_typed_quote_def, Matrix.vecHead, Matrix.vecTail] using coe_quote_eq (V := V)
 
-/-- The code of a negated equation between closed terms.
-- [HP98, 1.66] -/
 private lemma quote_neq_sentence :
     (⌜(.nrel Language.Eq.eq ![t, u] : ArithmeticSemisentence k)⌝ : V)
       = Arithmetic.qqNEQ (⌜t⌝ : V) (⌜u⌝ : V) := by
   simpa [Sentence.quote_def, Semiformula.quote_nrel, Arithmetic.qqNEQ, Semiterm.empty_quote_eq,
     Semiterm.empty_typed_quote_def, Matrix.vecHead, Matrix.vecTail] using coe_quote_eq (V := V)
 
-/-- The code of a comparison between closed terms.
-- [HP98, 1.66] -/
 private lemma quote_lt_sentence :
     (⌜(.rel Language.LT.lt ![t, u] : ArithmeticSemisentence k)⌝ : V)
       = Arithmetic.qqLT (⌜t⌝ : V) (⌜u⌝ : V) := by
   simpa [Sentence.quote_def, Semiformula.quote_rel, Arithmetic.qqLT, Semiterm.empty_quote_eq,
     Semiterm.empty_typed_quote_def, Matrix.vecHead, Matrix.vecTail] using coe_quote_lt (V := V)
 
-/-- The code of a negated comparison between closed terms.
-- [HP98, 1.66] -/
 private lemma quote_nlt_sentence :
     (⌜(.nrel Language.LT.lt ![t, u] : ArithmeticSemisentence k)⌝ : V)
       = Arithmetic.qqNLT (⌜t⌝ : V) (⌜u⌝ : V) := by
@@ -70,32 +61,21 @@ private lemma quote_nlt_sentence :
 
 end
 
-/-- The code of a conjunction of semisentences.
-- [HP98, 1.66] -/
 private lemma quote_and_sentence {k : ℕ} (φ ψ : ArithmeticSemisentence k) :
     (⌜φ ⋏ ψ⌝ : V) = (⌜φ⌝ : V) ^⋏ (⌜ψ⌝ : V) := by simp [Sentence.quote_def]
 
-/-- The code of a disjunction of semisentences.
-- [HP98, 1.66] -/
 private lemma quote_or_sentence {k : ℕ} (φ ψ : ArithmeticSemisentence k) :
     (⌜φ ⋎ ψ⌝ : V) = (⌜φ⌝ : V) ^⋎ (⌜ψ⌝ : V) := by simp [Sentence.quote_def]
 
-/-- The code of a universally quantified semisentence.
-- [HP98, 1.66] -/
 private lemma quote_all_sentence {k : ℕ} (φ : ArithmeticSemisentence (k + 1)) :
     (⌜(∀¹ φ : ArithmeticSemisentence k)⌝ : V) = ^∀ (⌜φ⌝ : V) := by simp [Sentence.quote_def]
 
-/-- The code of an existentially quantified semisentence.
-- [HP98, 1.66] -/
 private lemma quote_ex_sentence {k : ℕ} (φ : ArithmeticSemisentence (k + 1)) :
     (⌜(∃¹ φ : ArithmeticSemisentence k)⌝ : V) = ^∃ (⌜φ⌝ : V) := by simp [Sentence.quote_def]
 
 section
 variable {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) (φ : ArithmeticSemisentence (k + 1))
 
-/-- The code of a bounded universal quantification; the semisentence form of Foundation's
-`quote_ball`.
-- [HP98, 0.30] -/
 private lemma quote_ball_sentence :
     (⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence k)⌝ : V)
       = qqBall (termBShift ℒₒᵣ (⌜t⌝ : V)) (⌜φ⌝ : V) := by
@@ -105,8 +85,6 @@ private lemma quote_ball_sentence :
     Matrix.vecTail, ← Rew.emb_bShift_term,
     ← Semiterm.empty_typed_quote_def] using coe_quote_lt (V := V)
 
-/-- The code of a bounded existential quantification; the semisentence form of `quote_bex`.
-- [HP98, 0.30] -/
 private lemma quote_bex_sentence :
     (⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence k)⌝ : V)
       = qqBex (termBShift ℒₒᵣ (⌜t⌝ : V)) (⌜φ⌝ : V) := by
@@ -117,49 +95,41 @@ private lemma quote_bex_sentence :
 
 end
 
-/-- The code of a coded bound variable.
-- [HP98, 1.66] -/
 private lemma quote_bvar_sentence {k : ℕ} (i : Fin k) :
     (⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : V) = qqBvar (i.val : V) := by
   simp [Semiterm.empty_quote_eq]
 
-/-- The code of the zero term.
-- [HP98, 1.66] -/
 private lemma quote_zeroTerm_sentence {k : ℕ} (w : Fin 0 → ClosedSemiterm ℒₒᵣ k) :
     (⌜(Semiterm.func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ k)⌝ : V) = (𝟎 : V) := by
   rw [Arithmetic.coe_zero_eq,
     show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq]
   simp [Semiterm.empty_quote_eq, quote_zeroIndex_eq]
 
-/-- The code of the one term.
-- [HP98, 1.66] -/
 private lemma quote_oneTerm_sentence {k : ℕ} (w : Fin 0 → ClosedSemiterm ℒₒᵣ k) :
     (⌜(Semiterm.func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ k)⌝ : V) = (𝟏 : V) := by
   rw [Arithmetic.coe_one_eq,
     show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq]
   simp [Semiterm.empty_quote_eq, quote_oneIndex_eq]
 
-/-- The code of a sum of closed terms.
-- [HP98, 1.66] -/
 private lemma quote_addTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒₒᵣ k) :
     (⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : V)
       = (⌜w 0⌝ : V) ^+ ⌜w 1⌝ := by
   simp [Semiterm.empty_quote_eq, Arithmetic.qqAdd, quote_addIndex_eq,
     Arithmetic.coe_addIndex_eq, Matrix.vecHead, Matrix.vecTail]
 
-/-- The code of a product of closed terms.
-- [HP98, 1.66] -/
 private lemma quote_mulTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒₒᵣ k) :
     (⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : V)
       = (⌜w 0⌝ : V) ^* ⌜w 1⌝ := by
   simp [Semiterm.empty_quote_eq, Arithmetic.qqMul, quote_mulIndex_eq,
     Arithmetic.coe_mulIndex_eq, Matrix.vecHead, Matrix.vecTail]
 
-/-! ## Agreement of satisfaction with truth -/
+/-! ## Agreement of satisfaction with truth
 
-/-- For a bounded formula, internal $\Delta_0$ satisfaction of its code agrees with truth.
 - [HP98, Theorem I.1.70]
-- [HP98, Corollary I.1.76] -/
+- [HP98, Corollary I.1.76]
+- [HP98, Definition I.1.74]
+- [HP98, Remark I.1.80] -/
+
 theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : φ.Bounded) (v : Fin k → V) :
     BoundedSatisfaction (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
@@ -208,15 +178,11 @@ theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     simp [Function.comp_def]
 
 /-- The satisfaction predicate selected by a polarity: `SigmaSatisfaction` for `Σ`, `PiSatisfaction`
-for `Π`.
-- [HP98, Definition I.1.74] -/
+for `Π`. -/
 def HierarchySatisfaction : Polarity → ℕ → V → V → Prop
   | .sigma, n, z, e => SigmaSatisfaction n z e
   | .pi, n, z, e => PiSatisfaction n z e
 
-/-- Internal satisfaction of the code of a strict prenex formula agrees with truth.
-- [HP98, Corollary I.1.76]
-- [HP98, Remark I.1.80] -/
 lemma hierarchySatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) :
     ∀ v : Fin k → V, HierarchySatisfaction Γ s (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
@@ -257,42 +223,30 @@ lemma hierarchySatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : Arithmet
 section
 variable {n k : ℕ} {φ : ArithmeticSemisentence k}
 
-/-- For a strict prenex $\Sigma_n$ formula, internal satisfaction of its code agrees with truth.
-- [HP98, Corollary I.1.76]
-- [HP98, Remark I.1.80] -/
 theorem sigmaSatisfaction_quote_iff (hφ : StrictHierarchy 𝚺 n φ) (v : Fin k → V) :
     SigmaSatisfaction n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := hierarchySatisfaction_quote_iff hφ v
 
-/-- For a strict prenex $\Pi_n$ formula, internal satisfaction of its code agrees with truth.
-- [HP98, Corollary I.1.76]
-- [HP98, Remark I.1.80] -/
 theorem piSatisfaction_quote_iff (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
     PiSatisfaction n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := hierarchySatisfaction_quote_iff hφ v
 
 end
 
 /-- The sentence asserting agreement of `φ` with its level-$\Sigma_{n + 1}$ partial truth
-definition.
-- [HP98, Corollary I.1.76] -/
+definition. -/
 noncomputable def snowing (n : ℕ) {k : ℕ}
     (φ : ArithmeticSemisentence k) : ArithmeticSentence :=
   ∀¹* (φ 🡘 (sigmaSatisfactionVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
 
-/-- Semantic characterization of the sentence `snowing n φ`.
-- [HP98, Corollary I.1.76] -/
 theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
     V↓[ℒₒᵣ] ⊧ snowing n φ ↔
       ∀ v : Fin k → V, V ⊧/v φ ↔ SigmaSatisfaction (n + 1) ⌜φ⌝ (matrixToVec v) := by
   simp [snowing, models_iff, (sigmaSatisfactionVec.defined n k).df, Function.comp_def]
 
-/-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex $\Sigma_{n + 1}$ formula.
-- [HP98, Corollary I.1.76] -/
 theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ snowing n φ := by
   apply Arithmetic.complete.{0}
   intro M _ _
   exact (models_snowing_iff φ).mpr fun v ↦ (sigmaSatisfaction_quote_iff hφ v).symm
-
 
 /-! ## The snowing lemma over `𝗣𝗔⁻` -/
 
@@ -342,40 +296,35 @@ lemma exists_codes : ∀ {m : ℕ} (v : Fin m → M), ∃ ev, Codes v ev := by
       funext i; refine Fin.cases ?_ (fun j ↦ ?_) i <;> simp
     exact ⟨ev', hcons ▸ codes_cons hM hev hadj⟩
 
-/-! ### Coding facts about standard codes -/
+/-! ### Coding facts about standard codes
 
-/-- The code of a closed semiterm is a well-formed internal term.
-- [HP98, 1.66] -/
+- [HP98, 1.66]
+- [HP98, Lemma I.1.68]
+- [HP98, Lemma I.1.69] -/
+
 private lemma uTerm_quote_cast {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) :
     UTerm ((⌜t⌝ : ℕ) : M) :=
   Delta1_cast₁ (isUTerm ℒₒᵣ) (by simpa using isUTerm_quote (V := ℕ) t)
 
-/-- The code of a semisentence is a well-formed internal formula.
-- [HP98, 1.66] -/
 private lemma uFormula_quote_cast {k : ℕ} (φ : ArithmeticSemisentence k) :
     UFormula ((⌜φ⌝ : ℕ) : M) :=
   Delta1_cast₁ (isUFormula ℒₒᵣ) (by simpa using isUFormula_quote (V := ℕ) φ)
 
-/-- The code of a bounded semisentence is internally $\Delta_0$.
-- [HP98, Lemma I.1.68] -/
 private lemma bounded_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k} (h : φ.Bounded) :
     Reading.Bounded ((⌜φ⌝ : ℕ) : M) :=
   Delta1_cast₁ isBounded (by simpa using (isBounded_quote_iff (V := ℕ) φ).mpr h)
 
-/-- The code of a strict prenex semisentence is in the matching internal strict class.
-- [HP98, Lemma I.1.69] -/
 private lemma strict_quote_cast {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) : Strict Γ s ((⌜φ⌝ : ℕ) : M) := by
   rcases Γ with _ | _
   · exact Delta1_cast₁ (isStrictSigma s) (by simpa using (isStrictSigma_quote_iff (V := ℕ) φ).mpr h)
   · exact Delta1_cast₁ (isStrictPi s) (by simpa using (isStrictPi_quote_iff (V := ℕ) φ).mpr h)
 
-/-! ### Evaluation of coded closed terms -/
+/-! ### Evaluation of coded closed terms
+
+- [HP98, 1.66] -/
 
 include hM in
-/-- The value of the code of a closed semiterm, read through the term-evaluation sentences of
-`tarski n`, is its value in the model.
-- [HP98, 1.66] -/
 private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Codes v ev) :
     ∀ t : ClosedSemiterm ℒₒᵣ k, TermVal (t.valb v) ev ((⌜t⌝ : ℕ) : M) := by
   intro t
@@ -432,15 +381,15 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
         ((w 0).valb v) ((w 1).valb v) ((w 0).valb v * (w 1).valb v)
         (uTerm_quote_cast (w 0)) (uTerm_quote_cast (w 1)) hq (ih 0) (ih 1)).mpr rfl
 
+/-! ### The $\Delta_0$ base case
 
-/-! ### The $\Delta_0$ base case -/
+- [HP98, Theorem I.1.70]
+- [HP98, Corollary I.1.76] -/
 
 include hM in
 /-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `boundedSatisfaction` at the code of
 a bounded
-formula agrees with truth.
-- [HP98, Theorem I.1.70]
-- [HP98, Corollary I.1.76] -/
+formula agrees with truth. -/
 private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : φ.Bounded) :
     ∀ (v : Fin k → M) (ev : M), Codes v ev → (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔
@@ -539,13 +488,12 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
       exact ⟨x, by simpa [Function.comp_def] using hx, e', hadj,
         (ihφ (x :> v) e' (codes_cons hM hev hadj)).mpr (by simpa [Function.comp_def] using hsat)⟩
 
-/-! ### The strict prenex induction -/
+/-! ### The strict prenex induction
 
-include hM in
-/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of the level-`s` satisfaction formula
-at the code of a strict prenex formula agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
+
+include hM in
 private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
     {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) (hs : s ≤ n + 1) :
@@ -591,15 +539,16 @@ private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
 include hM in
 /-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `sigmaSatisfaction n` at the code of
 a
-strict prenex $\Sigma_{n + 1}$ formula agrees with truth.
-- [HP98, Corollary I.1.76]
-- [HP98, Remark I.1.77] -/
+strict prenex $\Sigma_{n + 1}$ formula agrees with truth. -/
 theorem sigmaSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) {v : Fin k → M} {ev : M} (hev : Codes v ev) :
     Reading.SigmaSatisfaction n ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ :=
   hierarchySatisfaction_quote_reading hM hφ le_rfl v ev hev
 
-/-! ### Assembling the snowing lemma over `𝗣𝗔⁻` -/
+/-! ### Assembling the snowing lemma over `𝗣𝗔⁻`
+
+- [HP98, Corollary I.1.76]
+- [HP98, Remark I.1.77] -/
 
 private lemma eval_sigmaSatisfactionVec (p : M) (w : Fin k → M) :
     M ⊧/(p :> w) (sigmaSatisfactionVec n k).val ↔ ∃ ev, Codes w ev ∧
@@ -624,9 +573,6 @@ private lemma eval_snowing_rhs {k : ℕ} (φ : ArithmeticSemisentence k) (e : Fi
 
 end peanoMinus
 
-/-- `𝗣𝗔⁻` together with the finite Tarski theory proves the snowing lemma.
-- [HP98, Corollary I.1.76]
-- [HP98, Remark I.1.77] -/
 theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n) :=

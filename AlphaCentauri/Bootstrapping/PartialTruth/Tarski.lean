@@ -21,76 +21,76 @@ namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
 
-/-! ## The sentences -/
+/-! ## The sentences
+
+- [HP98, Theorem I.1.70(i)]
+- [HP98, Theorem I.1.70(ii)]
+- [HP98, Theorem I.1.70(iii)]
+- [HP98, Theorem I.1.70(iv)]
+- [HP98, 1.64(5)]
+- [HP98, Theorem I.1.75(2)(v)]
+- [HP98, Theorem I.1.75(2)(v′)]
+- [HP98, Theorem I.1.75(2)]
+- [HP98, Theorem I.1.70]
+- [HP98, Remark I.1.77] -/
 
 namespace Tarski
 
-/-- Satisfaction is restricted to internally coded $\Delta_0$ formulas.
-- [HP98, Theorem I.1.70(i)] -/
+/-- Satisfaction is restricted to internally coded $\Delta_0$ formulas. -/
 noncomputable def boundedSatisfactionDom : ArithmeticSentence :=
   “∀ z e, !boundedSatisfaction.val z e → !isBounded.val z ∧ !(isUFormula ℒₒᵣ).val z”
 
-/-- The Tarski sentence for truth.
-- [HP98, Theorem I.1.70(ii)] -/
+/-- The Tarski sentence for truth. -/
 noncomputable def boundedSatisfactionVerum : ArithmeticSentence :=
   “∀ z e, !qqVerumDef.val z → !boundedSatisfaction.val z e”
 
-/-- The Tarski sentence for falsehood.
-- [HP98, Theorem I.1.70(ii)] -/
+/-- The Tarski sentence for falsehood. -/
 noncomputable def boundedSatisfactionFalsum : ArithmeticSentence :=
   “∀ z e, !qqFalsumDef.val z → ¬!boundedSatisfaction.val z e”
 
-/-- The Tarski sentence for equality.
-- [HP98, Theorem I.1.70(ii)] -/
+/-- The Tarski sentence for equality. -/
 noncomputable def boundedSatisfactionEq : ArithmeticSentence :=
   “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
     !qqEQDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
     (!boundedSatisfaction.val z e ↔ vt = vu)”
 
-/-- The Tarski sentence for inequality.
-- [HP98, Theorem I.1.70(ii)] -/
+/-- The Tarski sentence for inequality. -/
 noncomputable def boundedSatisfactionNeq : ArithmeticSentence :=
   “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
     !qqNEQDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
     (!boundedSatisfaction.val z e ↔ vt ≠ vu)”
 
-/-- The Tarski sentence for less-than.
-- [HP98, Theorem I.1.70(ii)] -/
+/-- The Tarski sentence for less-than. -/
 noncomputable def boundedSatisfactionLt : ArithmeticSentence :=
   “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
     !qqLTDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
     (!boundedSatisfaction.val z e ↔ vt < vu)”
 
-/-- The Tarski sentence for negated less-than.
-- [HP98, Theorem I.1.70(ii)] -/
+/-- The Tarski sentence for negated less-than. -/
 noncomputable def boundedSatisfactionNlt : ArithmeticSentence :=
   “∀ t u z e vt vu, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
     !qqNLTDef.val z t u → !termValGraph.val vt e t → !termValGraph.val vu e u →
     (!boundedSatisfaction.val z e ↔ ¬(vt < vu))”
 
-/-- The Tarski sentence for conjunction.
-- [HP98, Theorem I.1.70(ii)] -/
+/-- The Tarski sentence for conjunction. -/
 noncomputable def boundedSatisfactionAnd : ArithmeticSentence :=
   “∀ p q z e, !qqAndDef.val z p q →
     (!boundedSatisfaction.val z e ↔ !boundedSatisfaction.val p e ∧ !boundedSatisfaction.val q e)”
 
 /-- The Tarski sentence for disjunction. Unlike conjunction, both disjuncts have to be assumed
 well-formed: one satisfied disjunct says nothing about the shape of the other, while satisfaction
-of the disjunction carries the well-formedness of both.
-- [HP98, Theorem I.1.70(ii)] -/
+of the disjunction carries the well-formedness of both. -/
 noncomputable def boundedSatisfactionOr : ArithmeticSentence :=
   “∀ p q z e, !isBounded.val p → !(isUFormula ℒₒᵣ).val p → !isBounded.val q →
     !(isUFormula ℒₒᵣ).val q → !qqOrDef.val z p q →
     (!boundedSatisfaction.val z e ↔ !boundedSatisfaction.val p e ∨ !boundedSatisfaction.val q e)”
 
-/-- The Tarski sentence for negation.
-- [HP98, Theorem I.1.70(iii)] -/
+/-- The Tarski sentence for negation. -/
 noncomputable def boundedSatisfactionNeg : ArithmeticSentence :=
   “∀ p np e, !isBounded.val p → !(isUFormula ℒₒᵣ).val p →
     !(negGraph ℒₒᵣ).val np p → (!boundedSatisfaction.val np e ↔ ¬!boundedSatisfaction.val p e)”
 
-/-- The Tarski sentence for bounded universal quantification.
-- [HP98, Theorem I.1.70(iv)] -/
+/-- The Tarski sentence for bounded universal quantification. -/
 noncomputable def boundedSatisfactionBall : ArithmeticSentence :=
   “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !isBounded.val q →
     !(isUFormula ℒₒᵣ).val q → !(termBShiftGraph ℒₒᵣ).val u t →
@@ -98,39 +98,33 @@ noncomputable def boundedSatisfactionBall : ArithmeticSentence :=
     (!boundedSatisfaction.val z e ↔ ∀ x < v, ∀ e', !adjoinDef.val e' x e →
       !boundedSatisfaction.val q e')”
 
-/-- The Tarski sentence for bounded existential quantification.
-- [HP98, Theorem I.1.70(iv)] -/
+/-- The Tarski sentence for bounded existential quantification. -/
 noncomputable def boundedSatisfactionBex : ArithmeticSentence :=
   “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !(termBShiftGraph ℒₒᵣ).val u t →
     !qqBexDef.val z u q → !termValGraph.val v e t →
     (!boundedSatisfaction.val z e ↔ ∃ x < v, ∃ e', !adjoinDef.val e' x e ∧
       !boundedSatisfaction.val q e')”
 
-/-- The defining sentence for evaluation of coded bound variables.
-- [HP98, 1.64(5)] -/
+/-- The defining sentence for evaluation of coded bound variables. -/
 noncomputable def termValBvar : ArithmeticSentence :=
   “∀ e z t v, !qqBvarDef.val t z → (!termValGraph.val v e t ↔ !nthDef.val v e z)”
 
-/-- The defining sentence for evaluation of zero.
-- [HP98, 1.64(5)] -/
+/-- The defining sentence for evaluation of zero. -/
 noncomputable def termValZero : ArithmeticSentence :=
   “∀ e v, !termValGraph.val v e ↑Arithmetic.zero ↔ v = 0”
 
-/-- The defining sentence for evaluation of one.
-- [HP98, 1.64(5)] -/
+/-- The defining sentence for evaluation of one. -/
 noncomputable def termValOne : ArithmeticSentence :=
   “∀ e v, !termValGraph.val v e ↑Arithmetic.one ↔ v = 1”
 
-/-- The defining sentence for evaluation of addition.
-- [HP98, 1.64(5)] -/
+/-- The defining sentence for evaluation of addition. -/
 noncomputable def termValAdd : ArithmeticSentence :=
   “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
     !Arithmetic.qqAddGraph.val s t u → !termValGraph.val vt e t →
     !termValGraph.val vu e u →
     (!termValGraph.val v e s ↔ v = vt + vu)”
 
-/-- The defining sentence for evaluation of multiplication.
-- [HP98, 1.64(5)] -/
+/-- The defining sentence for evaluation of multiplication. -/
 noncomputable def termValMul : ArithmeticSentence :=
   “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
     !Arithmetic.qqMulGraph.val s t u → !termValGraph.val vt e t →
@@ -156,8 +150,7 @@ noncomputable def lenAdjoin : ArithmeticSentence :=
   “∀ x v e l, !adjoinDef.val e x v → (!lenDef.val (l + 1) e ↔ !lenDef.val l v)”
 
 /-- The empty-block Tarski condition for reading $\Pi_n$ satisfaction as $\Sigma_{n + 1}$
-satisfaction.
-- [HP98, Theorem I.1.75(2)(v)] -/
+satisfaction. -/
 noncomputable def sigmaSatisfactionOfPi : ℕ → ArithmeticSentence
   | 0 =>
       “∀ z e, !isBounded.val z → !(isUFormula ℒₒᵣ).val z →
@@ -167,8 +160,7 @@ noncomputable def sigmaSatisfactionOfPi : ℕ → ArithmeticSentence
         (!(sigmaSatisfaction (n + 1)).val z e ↔ !(piSatisfaction n).val z e)”
 
 /-- The empty-block Tarski condition for reading $\Sigma_n$ satisfaction as $\Pi_{n + 1}$
-satisfaction.
-- [HP98, Theorem I.1.75(2)(v′)] -/
+satisfaction. -/
 noncomputable def piSatisfactionOfSigma : ℕ → ArithmeticSentence
   | 0 =>
       “∀ z e, !isBounded.val z → !(isUFormula ℒₒᵣ).val z →
@@ -177,49 +169,41 @@ noncomputable def piSatisfactionOfSigma : ℕ → ArithmeticSentence
       “∀ z e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
         (!(piSatisfaction (n + 1)).val z e ↔ !(sigmaSatisfaction n).val z e)”
 
-/-- The domain Tarski condition for $\Sigma_{n + 1}$ satisfaction.
-- [HP98, Theorem I.1.75(2)] -/
+/-- The domain Tarski condition for $\Sigma_{n + 1}$ satisfaction. -/
 noncomputable def sigmaSatisfactionDom (n : ℕ) : ArithmeticSentence :=
   “∀ z e, !(sigmaSatisfaction n).val z e →
     !(isStrictSigma (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
-/-- The domain Tarski condition for $\Pi_{n + 1}$ satisfaction.
-- [HP98, Theorem I.1.75(2)] -/
+/-- The domain Tarski condition for $\Pi_{n + 1}$ satisfaction. -/
 noncomputable def piSatisfactionDom (n : ℕ) : ArithmeticSentence :=
   “∀ z e, !(piSatisfaction n).val z e →
     !(isStrictPi (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
-/-- The Tarski condition for existential quantification at level $\Sigma_{n + 1}$.
-- [HP98, Theorem I.1.75(2)(v)] -/
+/-- The Tarski condition for existential quantification at level $\Sigma_{n + 1}$. -/
 noncomputable def sigmaSatisfactionExs (n : ℕ) : ArithmeticSentence :=
   “∀ p z e, !qqExsDef.val z p →
     (!(sigmaSatisfaction n).val z e ↔
       ∃ x e', !adjoinDef.val e' x e ∧ !(sigmaSatisfaction n).val p e')”
 
-/-- The Tarski condition for universal quantification at level $\Pi_{n + 1}$.
-- [HP98, Theorem I.1.75(2)(v′)] -/
+/-- The Tarski condition for universal quantification at level $\Pi_{n + 1}$. -/
 noncomputable def piSatisfactionAll (n : ℕ) : ArithmeticSentence :=
   “∀ p z e, !qqAllDef.val z p →
     (!(piSatisfaction n).val z e ↔
       ∀ x e', !adjoinDef.val e' x e → !(piSatisfaction n).val p e')”
 
-/-- The negation-duality Tarski condition from $\Sigma_{n + 1}$ to $\Pi_{n + 1}$.
-- [HP98, Theorem I.1.75(2)] -/
+/-- The negation-duality Tarski condition from $\Sigma_{n + 1}$ to $\Pi_{n + 1}$. -/
 noncomputable def piSatisfactionNeg (n : ℕ) : ArithmeticSentence :=
   “∀ z nz e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
     !(negGraph ℒₒᵣ).val nz z →
     (!(piSatisfaction n).val nz e ↔ ¬!(sigmaSatisfaction n).val z e)”
 
-/-- The negation-duality Tarski condition from $\Pi_{n + 1}$ to $\Sigma_{n + 1}$.
-- [HP98, Theorem I.1.75(2)] -/
+/-- The negation-duality Tarski condition from $\Pi_{n + 1}$ to $\Sigma_{n + 1}$. -/
 noncomputable def sigmaSatisfactionNeg (n : ℕ) : ArithmeticSentence :=
   “∀ z nz e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
     !(negGraph ℒₒᵣ).val nz z →
     (!(sigmaSatisfaction n).val nz e ↔ ¬!(piSatisfaction n).val z e)”
 
-/-- The finite collection of $\Delta_0$ Tarski and term-evaluation sentences.
-- [HP98, Theorem I.1.70]
-- [HP98, Remark I.1.77] -/
+/-- The finite collection of $\Delta_0$ Tarski and term-evaluation sentences. -/
 noncomputable def boundedSatisfactionAxioms : ArithmeticTheory :=
   {boundedSatisfactionDom, boundedSatisfactionVerum, boundedSatisfactionFalsum,
     boundedSatisfactionEq, boundedSatisfactionNeq, boundedSatisfactionLt,
@@ -228,9 +212,7 @@ noncomputable def boundedSatisfactionAxioms : ArithmeticTheory :=
     termValBvar, termValZero, termValOne, termValAdd, termValMul, adjoinTotal,
     adjoinUnique, nthAdjoinZero, nthAdjoinSucc, lenNil, lenAdjoin}
 
-/-- The finite collection of level-`n + 1` Tarski sentences.
-- [HP98, Theorem I.1.75(2)]
-- [HP98, Remark I.1.77] -/
+/-- The finite collection of level-`n + 1` Tarski sentences. -/
 noncomputable def sigmaSatisfactionAxioms (n : ℕ) : ArithmeticTheory :=
   {sigmaSatisfactionOfPi n, piSatisfactionOfSigma n, sigmaSatisfactionDom n, piSatisfactionDom n,
     sigmaSatisfactionExs n,
@@ -238,15 +220,12 @@ noncomputable def sigmaSatisfactionAxioms (n : ℕ) : ArithmeticTheory :=
 
 end Tarski
 
-/-- `tarski n` contains the Tarski, vector, and term-evaluation conditions through level `n + 1`.
-- [HP98, Remark I.1.77] -/
+/-- `tarski n` contains the Tarski, vector, and term-evaluation conditions through level `n + 1`. -/
 inductive tarski : ℕ → ArithmeticTheory
   | zero : ∀ n, ∀ φ ∈ Tarski.boundedSatisfactionAxioms, tarski n φ
   | prev : ∀ n φ, tarski n φ → tarski (n + 1) φ
   | new  : ∀ n, ∀ φ ∈ Tarski.sigmaSatisfactionAxioms n, tarski n φ
 
-/-- At the bottom level the theory is the $\Delta_0$ block together with the level-$\Sigma_1$ block.
-- [HP98, Remark I.1.77] -/
 lemma tarski_zero :
     tarski 0 = Tarski.boundedSatisfactionAxioms ∪ Tarski.sigmaSatisfactionAxioms 0 := by
   ext φ
@@ -258,8 +237,6 @@ lemma tarski_zero :
     · exact tarski.zero 0 φ h
     · exact tarski.new 0 φ h
 
-/-- Each level adds the Tarski conditions of the next satisfaction predicate.
-- [HP98, Remark I.1.77] -/
 lemma tarski_succ (n : ℕ) :
     tarski (n + 1) = tarski n ∪ Tarski.sigmaSatisfactionAxioms (n + 1) := by
   ext φ
@@ -272,8 +249,6 @@ lemma tarski_succ (n : ℕ) :
     · exact tarski.prev n φ h
     · exact tarski.new (n + 1) φ h
 
-/-- The explicit Tarski theory at each level is finite.
-- [HP98, Remark I.1.77] -/
 lemma tarski_finite (n : ℕ) : (tarski n).Finite := by
   have hSigmaAx : ∀ m : ℕ, (Tarski.sigmaSatisfactionAxioms m).Finite := by
     intro m; simp only [Tarski.sigmaSatisfactionAxioms]; exact Set.toFinite _
@@ -294,7 +269,9 @@ variable {s m : ℕ}
 
 /-! Each Tarski sentence is a universal closure of a Boolean combination of formulas of level at
 most $\Sigma_{m + 1}$, so `Hierarchy.iff_iff` splits the biconditionals and `Hierarchy.dummy_sigma`,
-`Hierarchy.dummy_pi` absorb the quantifier blocks that raise the level by one. -/
+`Hierarchy.dummy_pi` absorb the quantifier blocks that raise the level by one.
+
+- [HP98, Remark I.1.77] -/
 attribute [local simp] Hierarchy.iff_iff Hierarchy.dummy_sigma Hierarchy.dummy_pi
 
 @[simp] lemma hierarchy_boundedSatisfactionDom : Hierarchy 𝚷 (s + 3) boundedSatisfactionDom := by
@@ -400,8 +377,6 @@ end Hierarchy
 
 end Tarski
 
-/-- Every sentence of the finite Tarski theory at level `n` is $\Pi_{n + 3}$.
-- [HP98, Remark I.1.77] -/
 lemma hierarchy_of_tarski {n : ℕ} {σ : ArithmeticSentence} (hσ : tarski n σ) :
     Hierarchy 𝚷 (n + 3) σ := by
   induction hσ with
@@ -409,37 +384,40 @@ lemma hierarchy_of_tarski {n : ℕ} {σ : ArithmeticSentence} (hσ : tarski n σ
   | prev n φ _ ih => exact ih.mono (by omega)
   | new n φ hφ => exact (Tarski.hierarchy_of_mem_sigmaSatisfactionAxioms hφ).mono (by omega)
 
-/-! ## `𝗜𝚺₁` proves the Tarski conditions -/
+/-! ## `𝗜𝚺₁` proves the Tarski conditions
+
+- [HP98, Theorem I.1.70(i)]
+- [HP98, Theorem I.1.70(ii)]
+- [HP98, Theorem I.1.70(iii)]
+- [HP98, Theorem I.1.70(iv)]
+- [HP98, 1.64(5)]
+- [HP98, Theorem I.1.75(2)(v)]
+- [HP98, Theorem I.1.75(2)(v′)]
+- [HP98, Theorem I.1.75(2)]
+- [HP98, Theorem I.1.70]
+- [HP98, Remark I.1.77] -/
 
 namespace Tarski
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-- The domain condition holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(i)] -/
 lemma models_boundedSatisfactionDom : V↓[ℒₒᵣ] ⊧ boundedSatisfactionDom := by
   suffices ∀ z e : V, BoundedSatisfaction z e → IsBounded z ∧ IsUFormula ℒₒᵣ z by
     simpa [models_iff, boundedSatisfactionDom] using this
   exact fun _ _ h ↦ BoundedSatisfaction.dom h
 
-/-- The Tarski condition for truth holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma models_boundedSatisfactionVerum : V↓[ℒₒᵣ] ⊧ boundedSatisfactionVerum := by
   suffices ∀ z e : V, z = ^⊤ → BoundedSatisfaction z e by simpa [models_iff,
     boundedSatisfactionVerum] using this
   rintro _ e rfl
   exact BoundedSatisfaction.verum e
 
-/-- The Tarski condition for falsehood holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma models_boundedSatisfactionFalsum : V↓[ℒₒᵣ] ⊧ boundedSatisfactionFalsum := by
   suffices ∀ z e : V, z = ^⊥ → ¬BoundedSatisfaction z e by simpa [models_iff,
     boundedSatisfactionFalsum] using this
   rintro _ e rfl
   exact BoundedSatisfaction.falsum e
 
-/-- The Tarski condition for equality holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma models_boundedSatisfactionEq : V↓[ℒₒᵣ] ⊧ boundedSatisfactionEq := by
   suffices ∀ t u z e vt vu : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → z = t ^= u →
       vt = termVal e t → vu = termVal e u → (BoundedSatisfaction z e ↔ vt = vu) by
@@ -447,8 +425,6 @@ lemma models_boundedSatisfactionEq : V↓[ℒₒᵣ] ⊧ boundedSatisfactionEq :
   rintro t u _ e _ _ ht hu rfl rfl rfl
   exact BoundedSatisfaction.eq_iff ht hu
 
-/-- The Tarski condition for inequality holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma models_boundedSatisfactionNeq : V↓[ℒₒᵣ] ⊧ boundedSatisfactionNeq := by
   suffices ∀ t u z e vt vu : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → z = t ^≠ u →
       vt = termVal e t → vu = termVal e u → (BoundedSatisfaction z e ↔ vt ≠ vu) by
@@ -456,8 +432,6 @@ lemma models_boundedSatisfactionNeq : V↓[ℒₒᵣ] ⊧ boundedSatisfactionNeq
   rintro t u _ e _ _ ht hu rfl rfl rfl
   exact BoundedSatisfaction.neq_iff ht hu
 
-/-- The Tarski condition for less-than holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma models_boundedSatisfactionLt : V↓[ℒₒᵣ] ⊧ boundedSatisfactionLt := by
   suffices ∀ t u z e vt vu : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → z = t ^< u →
       vt = termVal e t → vu = termVal e u → (BoundedSatisfaction z e ↔ vt < vu) by
@@ -465,8 +439,6 @@ lemma models_boundedSatisfactionLt : V↓[ℒₒᵣ] ⊧ boundedSatisfactionLt :
   rintro t u _ e _ _ ht hu rfl rfl rfl
   exact BoundedSatisfaction.lt_iff ht hu
 
-/-- The Tarski condition for negated less-than holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma models_boundedSatisfactionNlt : V↓[ℒₒᵣ] ⊧ boundedSatisfactionNlt := by
   suffices ∀ t u z e vt vu : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → z = t ^≮ u →
       vt = termVal e t → vu = termVal e u → (BoundedSatisfaction z e ↔ ¬(vt < vu)) by
@@ -474,8 +446,6 @@ lemma models_boundedSatisfactionNlt : V↓[ℒₒᵣ] ⊧ boundedSatisfactionNlt
   rintro t u _ e _ _ ht hu rfl rfl rfl
   exact BoundedSatisfaction.nlt_iff ht hu
 
-/-- The Tarski condition for conjunction holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma models_boundedSatisfactionAnd : V↓[ℒₒᵣ] ⊧ boundedSatisfactionAnd := by
   suffices ∀ p q z e : V, z = p ^⋏ q → (BoundedSatisfaction z e ↔ BoundedSatisfaction p e ∧
     BoundedSatisfaction q e) by
@@ -483,8 +453,6 @@ lemma models_boundedSatisfactionAnd : V↓[ℒₒᵣ] ⊧ boundedSatisfactionAnd
   rintro p q _ e rfl
   exact BoundedSatisfaction.and_iff
 
-/-- The Tarski condition for disjunction holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma models_boundedSatisfactionOr : V↓[ℒₒᵣ] ⊧ boundedSatisfactionOr := by
   suffices ∀ p q z e : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded q → IsUFormula ℒₒᵣ q →
       z = p ^⋎ q → (BoundedSatisfaction z e ↔ BoundedSatisfaction p e ∨ BoundedSatisfaction q e) by
@@ -492,8 +460,6 @@ lemma models_boundedSatisfactionOr : V↓[ℒₒᵣ] ⊧ boundedSatisfactionOr :
   rintro p q _ e hdp hfp hdq hfq rfl
   exact BoundedSatisfaction.or_iff hdp hfp hdq hfq
 
-/-- The Tarski condition for negation holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(iii)] -/
 lemma models_boundedSatisfactionNeg : V↓[ℒₒᵣ] ⊧ boundedSatisfactionNeg := by
   suffices ∀ p np e : V, IsBounded p → IsUFormula ℒₒᵣ p → np = neg ℒₒᵣ p →
       (BoundedSatisfaction np e ↔ ¬BoundedSatisfaction p e) by
@@ -501,8 +467,6 @@ lemma models_boundedSatisfactionNeg : V↓[ℒₒᵣ] ⊧ boundedSatisfactionNeg
   rintro p _ e hd hf rfl
   exact BoundedSatisfaction.neg_iff hd hf
 
-/-- The Tarski condition for bounded universal quantification holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(iv)] -/
 lemma models_boundedSatisfactionBall : V↓[ℒₒᵣ] ⊧ boundedSatisfactionBall := by
   suffices ∀ t u q z e v : V, IsUTerm ℒₒᵣ t → IsBounded q → IsUFormula ℒₒᵣ q →
       u = termBShift ℒₒᵣ t → z = qqBall u q → v = termVal e t →
@@ -511,8 +475,6 @@ lemma models_boundedSatisfactionBall : V↓[ℒₒᵣ] ⊧ boundedSatisfactionBa
   rintro t _ q _ e _ ht hdq hfq rfl rfl rfl
   exact BoundedSatisfaction.ball_iff ht hdq hfq
 
-/-- The Tarski condition for bounded existential quantification holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70(iv)] -/
 lemma models_boundedSatisfactionBex : V↓[ℒₒᵣ] ⊧ boundedSatisfactionBex := by
   suffices ∀ t u q z e v : V, IsUTerm ℒₒᵣ t → u = termBShift ℒₒᵣ t → z = qqBex u q →
       v = termVal e t → (BoundedSatisfaction z e ↔ ∃ x < v, BoundedSatisfaction q (x ∷ e)) by
@@ -520,26 +482,18 @@ lemma models_boundedSatisfactionBex : V↓[ℒₒᵣ] ⊧ boundedSatisfactionBex
   rintro t _ q _ e _ ht rfl rfl rfl
   exact BoundedSatisfaction.bex_iff ht
 
-/-- Evaluation of a coded bound variable holds in every model of `𝗜𝚺₁`.
-- [HP98, 1.64(5)] -/
 lemma models_termValBvar : V↓[ℒₒᵣ] ⊧ termValBvar := by
   suffices ∀ e z t v : V, t = ^#z → (v = termVal e t ↔ v = e.[z]) by
     simpa [models_iff, termValBvar] using this
   rintro e z _ v rfl
   simp
 
-/-- Evaluation of the coded zero term holds in every model of `𝗜𝚺₁`.
-- [HP98, 1.64(5)] -/
 lemma models_termValZero : V↓[ℒₒᵣ] ⊧ termValZero := by
   simp [models_iff, termValZero, numeral_eq_natCast]
 
-/-- Evaluation of the coded one term holds in every model of `𝗜𝚺₁`.
-- [HP98, 1.64(5)] -/
 lemma models_termValOne : V↓[ℒₒᵣ] ⊧ termValOne := by
   simp [models_iff, termValOne, numeral_eq_natCast]
 
-/-- Evaluation of a coded sum holds in every model of `𝗜𝚺₁`.
-- [HP98, 1.64(5)] -/
 lemma models_termValAdd : V↓[ℒₒᵣ] ⊧ termValAdd := by
   suffices ∀ e t u s vt vu v : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → s = t ^+ u →
       vt = termVal e t → vu = termVal e u → (v = termVal e s ↔ v = vt + vu) by
@@ -547,8 +501,6 @@ lemma models_termValAdd : V↓[ℒₒᵣ] ⊧ termValAdd := by
   rintro e t u _ _ _ v ht hu rfl rfl rfl
   simp [termVal_add ht hu]
 
-/-- Evaluation of a coded product holds in every model of `𝗜𝚺₁`.
-- [HP98, 1.64(5)] -/
 lemma models_termValMul : V↓[ℒₒᵣ] ⊧ termValMul := by
   suffices ∀ e t u s vt vu v : V, IsUTerm ℒₒᵣ t → IsUTerm ℒₒᵣ u → s = t ^* u →
       vt = termVal e t → vu = termVal e u → (v = termVal e s ↔ v = vt * vu) by
@@ -583,8 +535,6 @@ lemma models_lenAdjoin : V↓[ℒₒᵣ] ⊧ lenAdjoin := by
   rintro x v _ l rfl
   simp
 
-/-- The empty-block condition from `Π` to `Σ` holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.75(2)(v)] -/
 lemma models_sigmaSatisfactionOfPi (n : ℕ) : V↓[ℒₒᵣ] ⊧ sigmaSatisfactionOfPi n := by
   cases n with
   | zero =>
@@ -600,8 +550,6 @@ lemma models_sigmaSatisfactionOfPi (n : ℕ) : V↓[ℒₒᵣ] ⊧ sigmaSatisfac
     intro z e hs hf
     exact SigmaSatisfaction.of_pi hs hf
 
-/-- The empty-block condition from `Σ` to `Π` holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.75(2)(v′)] -/
 lemma models_piSatisfactionOfSigma (n : ℕ) : V↓[ℒₒᵣ] ⊧ piSatisfactionOfSigma n := by
   cases n with
   | zero =>
@@ -617,22 +565,16 @@ lemma models_piSatisfactionOfSigma (n : ℕ) : V↓[ℒₒᵣ] ⊧ piSatisfactio
     intro z e hs hf
     exact PiSatisfaction.of_sigma hs hf
 
-/-- The `Σ` domain condition holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.75(2)] -/
 lemma models_sigmaSatisfactionDom (n : ℕ) : V↓[ℒₒᵣ] ⊧ sigmaSatisfactionDom n := by
   suffices ∀ z e : V, SigmaSatisfaction (n + 1) z e → IsStrictSigma (n + 1) z ∧ IsUFormula ℒₒᵣ z by
     simpa [models_iff, sigmaSatisfactionDom] using this
   exact fun _ _ h ↦ SigmaSatisfaction.dom h
 
-/-- The `Π` domain condition holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.75(2)] -/
 lemma models_piSatisfactionDom (n : ℕ) : V↓[ℒₒᵣ] ⊧ piSatisfactionDom n := by
   suffices ∀ z e : V, PiSatisfaction (n + 1) z e → IsStrictPi (n + 1) z ∧ IsUFormula ℒₒᵣ z by
     simpa [models_iff, piSatisfactionDom] using this
   exact fun _ _ h ↦ PiSatisfaction.dom h
 
-/-- The Tarski condition for existential quantification holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.75(2)(v)] -/
 lemma models_sigmaSatisfactionExs (n : ℕ) : V↓[ℒₒᵣ] ⊧ sigmaSatisfactionExs n := by
   suffices ∀ p z e : V, z = ^∃ p → (SigmaSatisfaction (n + 1) z e ↔ ∃ x,
     SigmaSatisfaction (n + 1) p (x ∷ e)) by
@@ -640,8 +582,6 @@ lemma models_sigmaSatisfactionExs (n : ℕ) : V↓[ℒₒᵣ] ⊧ sigmaSatisfact
   rintro p _ e rfl
   exact SigmaSatisfaction.exs_iff
 
-/-- The Tarski condition for universal quantification holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.75(2)(v′)] -/
 lemma models_piSatisfactionAll (n : ℕ) : V↓[ℒₒᵣ] ⊧ piSatisfactionAll n := by
   suffices ∀ p z e : V, z = ^∀ p → (PiSatisfaction (n + 1) z e ↔ ∀ x,
     PiSatisfaction (n + 1) p (x ∷ e)) by
@@ -649,8 +589,6 @@ lemma models_piSatisfactionAll (n : ℕ) : V↓[ℒₒᵣ] ⊧ piSatisfactionAll
   rintro p _ e rfl
   exact PiSatisfaction.all_iff
 
-/-- The negation-duality condition from `Σ` to `Π` holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.75(2)] -/
 lemma models_piSatisfactionNeg (n : ℕ) : V↓[ℒₒᵣ] ⊧ piSatisfactionNeg n := by
   suffices ∀ z nz e : V, IsStrictSigma (n + 1) z → IsUFormula ℒₒᵣ z → nz = neg ℒₒᵣ z →
       (PiSatisfaction (n + 1) nz e ↔ ¬SigmaSatisfaction (n + 1) z e) by
@@ -658,8 +596,6 @@ lemma models_piSatisfactionNeg (n : ℕ) : V↓[ℒₒᵣ] ⊧ piSatisfactionNeg
   rintro z _ e hs hf rfl
   exact PiSatisfaction.neg_iff hs hf
 
-/-- The negation-duality condition from `Π` to `Σ` holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.75(2)] -/
 lemma models_sigmaSatisfactionNeg (n : ℕ) : V↓[ℒₒᵣ] ⊧ sigmaSatisfactionNeg n := by
   suffices ∀ z nz e : V, IsStrictPi (n + 1) z → IsUFormula ℒₒᵣ z → nz = neg ℒₒᵣ z →
       (SigmaSatisfaction (n + 1) nz e ↔ ¬PiSatisfaction (n + 1) z e) by
@@ -667,8 +603,6 @@ lemma models_sigmaSatisfactionNeg (n : ℕ) : V↓[ℒₒᵣ] ⊧ sigmaSatisfact
   rintro z _ e hs hf rfl
   exact SigmaSatisfaction.neg_iff hs hf
 
-/-- Every sentence of the $\Delta_0$ block holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70] -/
 lemma models_boundedSatisfactionAxioms {φ : ArithmeticSentence}
   (h : φ ∈ boundedSatisfactionAxioms) :
     V↓[ℒₒᵣ] ⊧ φ := by
@@ -685,8 +619,6 @@ lemma models_boundedSatisfactionAxioms {φ : ArithmeticSentence}
     models_adjoinTotal, models_adjoinUnique, models_nthAdjoinZero, models_nthAdjoinSucc,
     models_lenNil, models_lenAdjoin]
 
-/-- Every sentence of the level-`n + 1` block holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.75(2)] -/
 lemma models_sigmaSatisfactionAxioms {n : ℕ} {φ : ArithmeticSentence}
   (h : φ ∈ sigmaSatisfactionAxioms n) :
     V↓[ℒₒᵣ] ⊧ φ := by
@@ -699,9 +631,6 @@ lemma models_sigmaSatisfactionAxioms {n : ℕ} {φ : ArithmeticSentence}
 
 end Tarski
 
-/-- Every sentence of the finite Tarski theory holds in every model of `𝗜𝚺₁`.
-- [HP98, Theorem I.1.70]
-- [HP98, Theorem I.1.75(2)] -/
 lemma models_tarski {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {n : ℕ}
     {φ : ArithmeticSentence} (h : tarski n φ) : V↓[ℒₒᵣ] ⊧ φ := by
   induction h with
@@ -709,10 +638,6 @@ lemma models_tarski {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜�
   | prev _ _ _ ih => exact ih
   | new _ _ h => exact Tarski.models_sigmaSatisfactionAxioms h
 
-/-- `𝗜𝚺₁` proves every sentence in the finite Tarski theory.
-- [HP98, Theorem I.1.70]
-- [HP98, Theorem I.1.75(2)]
-- [HP98, Remark I.1.77] -/
 theorem ISigma1.provable_tarski (n : ℕ) : 𝗜𝚺₁ ⊢* tarski n := fun {_} hφ ↦
   Arithmetic.complete.{0} _ _ fun _ _ _ ↦ models_tarski hφ
 
@@ -771,10 +696,10 @@ def TermVal (y e t : V) : Prop := V ⊧/![y, e, t] termValGraph.val
 
 end Reading
 
-/-! ## The theory is monotone in its level -/
+/-! ## The theory is monotone in its level
 
-/-- A sentence of a lower level of the Tarski theory belongs to every higher level.
 - [HP98, Remark I.1.77] -/
+
 lemma tarski_mono {m n : ℕ} (hmn : m ≤ n) {σ : ArithmeticSentence} (h : tarski m σ) :
     tarski n σ := by
   induction n with
@@ -784,7 +709,13 @@ lemma tarski_mono {m n : ℕ} (hmn : m ≤ n) {σ : ArithmeticSentence} (h : tar
     · exact h
     · exact tarski.prev n σ (ih (by omega))
 
-/-! ## Reading the sentences in a model of `𝗣𝗔⁻` -/
+/-! ## Reading the sentences in a model of `𝗣𝗔⁻`
+
+- [HP98, Theorem I.1.70(ii)]
+- [HP98, Theorem I.1.70(iv)]
+- [HP98, 1.64(5)]
+- [HP98, Theorem I.1.75(2)(v)]
+- [HP98, Theorem I.1.75(2)(v′)] -/
 
 section reading
 
@@ -797,24 +728,18 @@ include hV
 
 section boundedSatisfaction
 
-/-- The reading of the Tarski sentence for truth.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma read_boundedSatisfactionVerum : ∀ z e : V, V ⊧/![z] qqVerumDef.val →
   BoundedSatisfaction z e := by
   simpa [models_iff, Tarski.boundedSatisfactionVerum, Reading.BoundedSatisfaction]
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionVerum (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the Tarski sentence for falsehood.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma read_boundedSatisfactionFalsum : ∀ z e : V, V ⊧/![z] qqFalsumDef.val →
   ¬BoundedSatisfaction z e := by
   simpa [models_iff, Tarski.boundedSatisfactionFalsum, Reading.BoundedSatisfaction]
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionFalsum (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the Tarski sentence for equality.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma read_boundedSatisfactionEq : ∀ t u z e vt vu : V, UTerm t → UTerm u →
     V ⊧/![z, t, u] qqEQDef.val → TermVal vt e t → TermVal vu e u → (BoundedSatisfaction z e ↔
       vt = vu) := by
@@ -823,8 +748,6 @@ lemma read_boundedSatisfactionEq : ∀ t u z e vt vu : V, UTerm t → UTerm u �
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionEq (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the Tarski sentence for inequality.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma read_boundedSatisfactionNeq : ∀ t u z e vt vu : V, UTerm t → UTerm u →
     V ⊧/![z, t, u] qqNEQDef.val → TermVal vt e t → TermVal vu e u → (BoundedSatisfaction z e ↔
       vt ≠ vu) := by
@@ -833,8 +756,6 @@ lemma read_boundedSatisfactionNeq : ∀ t u z e vt vu : V, UTerm t → UTerm u �
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionNeq (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the Tarski sentence for less-than.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma read_boundedSatisfactionLt : ∀ t u z e vt vu : V, UTerm t → UTerm u →
     V ⊧/![z, t, u] qqLTDef.val → TermVal vt e t → TermVal vu e u → (BoundedSatisfaction z e ↔
       vt < vu) := by
@@ -843,8 +764,6 @@ lemma read_boundedSatisfactionLt : ∀ t u z e vt vu : V, UTerm t → UTerm u �
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionLt (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the Tarski sentence for negated less-than.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma read_boundedSatisfactionNlt : ∀ t u z e vt vu : V, UTerm t → UTerm u →
     V ⊧/![z, t, u] qqNLTDef.val → TermVal vt e t → TermVal vu e u →
     (BoundedSatisfaction z e ↔ ¬(vt < vu)) := by
@@ -853,16 +772,12 @@ lemma read_boundedSatisfactionNlt : ∀ t u z e vt vu : V, UTerm t → UTerm u �
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionNlt (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the Tarski sentence for conjunction.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma read_boundedSatisfactionAnd : ∀ p q z e : V, V ⊧/![z, p, q] qqAndDef.val →
     (BoundedSatisfaction z e ↔ BoundedSatisfaction p e ∧ BoundedSatisfaction q e) := by
   simpa [models_iff, Tarski.boundedSatisfactionAnd, Reading.BoundedSatisfaction]
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionAnd (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the Tarski sentence for disjunction.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma read_boundedSatisfactionOr : ∀ p q z e : V, Reading.Bounded p → UFormula p →
   Reading.Bounded q →
     UFormula q →
@@ -873,8 +788,6 @@ lemma read_boundedSatisfactionOr : ∀ p q z e : V, Reading.Bounded p → UFormu
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionOr (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the Tarski sentence for bounded universal quantification.
-- [HP98, Theorem I.1.70(iv)] -/
 lemma read_boundedSatisfactionBall : ∀ t u q z e v : V, UTerm t → Reading.Bounded q → UFormula q →
     V ⊧/![u, t] (termBShiftGraph ℒₒᵣ).val → V ⊧/![z, u, q] qqBallDef.val → TermVal v e t →
     (BoundedSatisfaction z e ↔ ∀ x < v, ∀ e', Adjoin e' x e → BoundedSatisfaction q e') := by
@@ -883,8 +796,6 @@ lemma read_boundedSatisfactionBall : ∀ t u q z e v : V, UTerm t → Reading.Bo
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionBall (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the Tarski sentence for bounded existential quantification.
-- [HP98, Theorem I.1.70(iv)] -/
 lemma read_boundedSatisfactionBex : ∀ t u q z e v : V, UTerm t →
     V ⊧/![u, t] (termBShiftGraph ℒₒᵣ).val → V ⊧/![z, u, q] qqBexDef.val → TermVal v e t →
     (BoundedSatisfaction z e ↔ ∃ x < v, ∃ e', Adjoin e' x e ∧ BoundedSatisfaction q e') := by
@@ -893,35 +804,25 @@ lemma read_boundedSatisfactionBex : ∀ t u q z e v : V, UTerm t →
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionBex (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the defining sentence for coded bound variables.
-- [HP98, 1.64(5)] -/
 lemma read_termValBvar : ∀ e z t v : V, V ⊧/![t, z] qqBvarDef.val →
     (TermVal v e t ↔ Nth v e z) := by
   simpa [models_iff, Tarski.termValBvar, Reading.TermVal, Reading.Nth]
     using hV _ (tarski.zero n Tarski.termValBvar (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the defining sentence for the coded zero term.
-- [HP98, 1.64(5)] -/
 lemma read_termValZero : ∀ e v : V, TermVal v e ((𝟎 : ℕ) : V) ↔ v = 0 := by
   simpa [models_iff, Tarski.termValZero, Reading.TermVal, numeral_eq_natCast]
     using hV _ (tarski.zero n Tarski.termValZero (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the defining sentence for the coded one term.
-- [HP98, 1.64(5)] -/
 lemma read_termValOne : ∀ e v : V, TermVal v e ((𝟏 : ℕ) : V) ↔ v = 1 := by
   simpa [models_iff, Tarski.termValOne, Reading.TermVal, numeral_eq_natCast]
     using hV _ (tarski.zero n Tarski.termValOne (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the defining sentence for coded addition.
-- [HP98, 1.64(5)] -/
 lemma read_termValAdd : ∀ e t u s vt vu v : V, UTerm t → UTerm u →
     V ⊧/![s, t, u] Arithmetic.qqAddGraph.val → TermVal vt e t → TermVal vu e u →
     (TermVal v e s ↔ v = vt + vu) := by
   simpa [models_iff, Tarski.termValAdd, Reading.TermVal, Reading.UTerm]
     using hV _ (tarski.zero n Tarski.termValAdd (by simp [Tarski.boundedSatisfactionAxioms]))
 
-/-- The reading of the defining sentence for coded multiplication.
-- [HP98, 1.64(5)] -/
 lemma read_termValMul : ∀ e t u s vt vu v : V, UTerm t → UTerm u →
     V ⊧/![s, t, u] Arithmetic.qqMulGraph.val → TermVal vt e t → TermVal vu e u →
     (TermVal v e s ↔ v = vt * vu) := by
@@ -956,8 +857,6 @@ variable {m : ℕ} (hm : m ≤ n)
 
 include hm
 
-/-- The reading of the empty-block condition from `Π` to `Σ`.
-- [HP98, Theorem I.1.75(2)(v)] -/
 lemma read_sigmaSatisfactionOfPi : ∀ z e : V, Strict 𝚷 m z → Reading.UFormula z →
     (Reading.SigmaSatisfaction m z e ↔ HierarchySatisfaction 𝚷 m z e) := by
   have h := hV _ (tarski_mono hm (tarski.new m (Tarski.sigmaSatisfactionOfPi m)
@@ -972,8 +871,6 @@ lemma read_sigmaSatisfactionOfPi : ∀ z e : V, Strict 𝚷 m z → Reading.UFor
       Reading.SigmaSatisfaction,
       Reading.StrictPii, Reading.PiSatisfaction, Reading.UFormula] using h
 
-/-- The reading of the empty-block condition from `Σ` to `Π`.
-- [HP98, Theorem I.1.75(2)(v′)] -/
 lemma read_piSatisfactionOfSigma : ∀ z e : V, Strict 𝚺 m z → Reading.UFormula z →
     (Reading.PiSatisfaction m z e ↔ HierarchySatisfaction 𝚺 m z e) := by
   have h := hV _ (tarski_mono hm (tarski.new m (Tarski.piSatisfactionOfSigma m)
@@ -988,17 +885,12 @@ lemma read_piSatisfactionOfSigma : ∀ z e : V, Strict 𝚺 m z → Reading.UFor
       Reading.PiSatisfaction,
       Reading.StrictSig, Reading.SigmaSatisfaction, Reading.UFormula] using h
 
-/-- The reading of the empty-block condition, in the polarity-indexed form.
-- [HP98, Theorem I.1.75(2)(v)]
-- [HP98, Theorem I.1.75(2)(v′)] -/
 lemma read_ofAlt (Γ : Polarity) : ∀ z e : V, Strict Γ.alt m z → Reading.UFormula z →
     (HierarchySatisfaction Γ (m + 1) z e ↔ HierarchySatisfaction Γ.alt m z e) := by
   rcases Γ with _ | _
   · exact read_sigmaSatisfactionOfPi hV hm
   · exact read_piSatisfactionOfSigma hV hm
 
-/-- The reading of the Tarski condition for existential quantification.
-- [HP98, Theorem I.1.75(2)(v)] -/
 lemma read_sigmaSatisfactionExs : ∀ p z e : V, V ⊧/![z, p] qqExsDef.val →
     (Reading.SigmaSatisfaction m z e ↔ ∃ x e', Adjoin e' x e ∧
       Reading.SigmaSatisfaction m p e') := by
@@ -1007,8 +899,6 @@ lemma read_sigmaSatisfactionExs : ∀ p z e : V, V ⊧/![z, p] qqExsDef.val →
       (tarski_mono hm (tarski.new m (Tarski.sigmaSatisfactionExs m)
         (by simp [Tarski.sigmaSatisfactionAxioms])))
 
-/-- The reading of the Tarski condition for universal quantification.
-- [HP98, Theorem I.1.75(2)(v′)] -/
 lemma read_piSatisfactionAll : ∀ p z e : V, V ⊧/![z, p] qqAllDef.val →
     (Reading.PiSatisfaction m z e ↔ ∀ x e', Adjoin e' x e → Reading.PiSatisfaction m p e') := by
   simpa [models_iff, Tarski.piSatisfactionAll, Reading.PiSatisfaction, Reading.Adjoin]

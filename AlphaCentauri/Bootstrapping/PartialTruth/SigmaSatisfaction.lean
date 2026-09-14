@@ -8,7 +8,9 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.BoundedSatisfaction
 
 This module defines satisfaction predicates for the internally coded strict prenex hierarchy and
 proves their definability, Tarski conditions, duality, monotonicity, and substitution laws.
--/
+
+- [HP98, Definition I.1.74]
+- [HP98, Theorem I.1.75(1)] -/
 
 @[expose] public section
 
@@ -18,16 +20,14 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 mutual
   /-- `SigmaSatisfaction n z e` says that the strict prenex $\Sigma_n$ formula `z` is satisfied by
-  `e`.
-  - [HP98, Definition I.1.74] -/
+  `e`. -/
   def SigmaSatisfaction : ℕ → V → V → Prop
     | 0 => BoundedSatisfaction
     | n + 1 => fun z e ↦
         ∃ k q, z = qqExss q k ∧ IsStrictPi n q ∧
           ∃ w, len w = k ∧ PiSatisfaction n q (vecAppend w e)
 
-  /-- `PiSatisfaction n z e` says that the strict prenex $\Pi_n$ formula `z` is satisfied by `e`.
-  - [HP98, Definition I.1.74] -/
+  /-- `PiSatisfaction n z e` says that the strict prenex $\Pi_n$ formula `z` is satisfied by `e`. -/
   def PiSatisfaction : ℕ → V → V → Prop
     | 0 => BoundedSatisfaction
     | n + 1 => fun z e ↦
@@ -35,8 +35,7 @@ mutual
 end
 
 /-- The $\Pi_{m + 1}$ formula for `PiSatisfaction (m + 1)` associated with a formula for
-`SigmaSatisfaction (m + 1)`.
-- [HP98, Definition I.1.74] -/
+`SigmaSatisfaction (m + 1)`. -/
 noncomputable def piOfSigma (m : ℕ) (σ : 𝚺-[m + 1].Semisentence 2) :
     𝚷-[m + 1].Semisentence 2 := .mkPi
   “z e. !(isStrictPi (m + 1)).pi z ∧ !(isUFormula ℒₒᵣ).pi z ∧
@@ -53,8 +52,7 @@ noncomputable def piOfSigma (m : ℕ) (σ : 𝚺-[m + 1].Semisentence 2) :
 
 /-- The $\Sigma_{m + 2}$ formula for `SigmaSatisfaction (m + 2)` associated with a formula for
 `PiSatisfaction (m +
-1)`.
-- [HP98, Definition I.1.74] -/
+1)`. -/
 noncomputable def sigmaOfPi (m : ℕ) (π : 𝚷-[m + 1].Semisentence 2) :
     𝚺-[m + 2].Semisentence 2 := .mkSigma
   “z e. ∃ k q w e', !qqExssDef z q k ∧ !(isStrictPi (m + 1)).val q ∧ !lenDef k w ∧
@@ -71,8 +69,7 @@ noncomputable def sigmaOfPi (m : ℕ) (π : 𝚷-[m + 1].Semisentence 2) :
     have h5 : Hierarchy 𝚺 (m + 2) π.val := π.pi_prop.accum 𝚺
     simp [h1, h2, h3, h4, h5])
 
-/-- The $\Sigma_1$ formula for `SigmaSatisfaction 1`.
-- [HP98, Definition I.1.74] -/
+/-- The $\Sigma_1$ formula for `SigmaSatisfaction 1`. -/
 noncomputable def sigmaZero : 𝚺-[1].Semisentence 2 := .mkSigma
   “z e. ∃ k q w e', !qqExssDef z q k ∧ !(isStrictPi 0).val q ∧ !lenDef k w ∧
     !vecAppendDef e' w e ∧ !boundedSatisfaction.val q e'”
@@ -86,34 +83,24 @@ noncomputable def sigmaZero : 𝚺-[1].Semisentence 2 := .mkSigma
         boundedSatisfaction.sigma.sigma_prop
     simp [h1, h2, h3, h4, h5])
 
-/-- The $\Sigma_{n + 1}$ formula defining `SigmaSatisfaction (n + 1)`, with arguments `(z, e)`.
-- [HP98, Definition I.1.74]
-- [HP98, Theorem I.1.75(1)] -/
+/-- The $\Sigma_{n + 1}$ formula defining `SigmaSatisfaction (n + 1)`, with arguments `(z, e)`. -/
 noncomputable def sigmaSatisfaction : (n : ℕ) → 𝚺-[n + 1].Semisentence 2
   | 0 => sigmaZero
   | n + 1 => sigmaOfPi n (piOfSigma n (sigmaSatisfaction n))
 
-/-- The $\Pi_{n + 1}$ formula defining `PiSatisfaction (n + 1)`, with arguments `(z, e)`.
-- [HP98, Definition I.1.74]
-- [HP98, Theorem I.1.75(1)] -/
+/-- The $\Pi_{n + 1}$ formula defining `PiSatisfaction (n + 1)`, with arguments `(z, e)`. -/
 noncomputable def piSatisfaction (n : ℕ) :
     𝚷-[n + 1].Semisentence 2 := piOfSigma n (sigmaSatisfaction n)
 
-/-- `piSatisfaction` unfolds to `piOfSigma` applied to `sigmaSatisfaction` at the same level.
-- [HP98, Definition I.1.74] -/
 private lemma sigmaSatisfaction_succ (n : ℕ) :
     sigmaSatisfaction (n + 1) = sigmaOfPi n (piSatisfaction n) := rfl
 
-/-- `piOfSigma m σ` defines `PiSatisfaction (m + 1)` when `σ` defines `SigmaSatisfaction (m + 1)`.
-- [HP98, Theorem I.1.75(1)] -/
 private lemma piDefined_of_sigmaDefined {m : ℕ} {σ : 𝚺-[m + 1].Semisentence 2}
     (hσ : 𝚺-[m + 1]-Relation (SigmaSatisfaction (m + 1) : V → V → Prop) via σ) :
     𝚷-[m + 1]-Relation (PiSatisfaction (m + 1) : V → V → Prop) via piOfSigma m σ := .mk fun v ↦ by
   have := hσ
   simp [piOfSigma, PiSatisfaction]
 
-/-- `sigmaOfPi m π` defines `SigmaSatisfaction (m + 2)` when `π` defines `PiSatisfaction (m + 1)`.
-- [HP98, Theorem I.1.75(1)] -/
 private lemma sigmaDefined_of_piDefined {m : ℕ} {π : 𝚷-[m + 1].Semisentence 2}
     (hπ : 𝚷-[m + 1]-Relation (PiSatisfaction (m + 1) : V → V → Prop) via π) :
     𝚺-[m + 2]-Relation (SigmaSatisfaction (m + 2) : V → V →
@@ -121,14 +108,10 @@ private lemma sigmaDefined_of_piDefined {m : ℕ} {π : 𝚷-[m + 1].Semisentenc
   have := hπ
   simp [sigmaOfPi, SigmaSatisfaction]
 
-/-- Definedness of `sigmaZero` for `SigmaSatisfaction 1`.
-- [HP98, Theorem I.1.75(1)] -/
 private lemma sigmaZero_defined :
     𝚺-[1]-Relation (SigmaSatisfaction 1 : V → V → Prop) via sigmaZero := .mk fun v ↦ by
   simp [sigmaZero, SigmaSatisfaction, PiSatisfaction]
 
-/-- Definedness of `sigmaSatisfaction n` for `SigmaSatisfaction (n + 1)`.
-- [HP98, Theorem I.1.75(1)] -/
 private lemma sigmaDefined : ∀ n : ℕ, 𝚺-[n + 1]-Relation (SigmaSatisfaction (n + 1) : V → V →
   Prop) via sigmaSatisfaction n
   | 0 => sigmaZero_defined
@@ -137,67 +120,54 @@ private lemma sigmaDefined : ∀ n : ℕ, 𝚺-[n + 1]-Relation (SigmaSatisfacti
     exact sigmaDefined_of_piDefined (piDefined_of_sigmaDefined (sigmaDefined n))
 
 /-- The formula `sigmaSatisfaction n` defines satisfaction for strict prenex $\Sigma_{n + 1}$
-formulas.
-- [HP98, Theorem I.1.75(1)] -/
+formulas. -/
 instance SigmaSatisfaction.defined (n : ℕ) :
     𝚺-[n + 1]-Relation (SigmaSatisfaction (n + 1) : V → V →
       Prop) via sigmaSatisfaction n := sigmaDefined n
 
-/-- The formula `piSatisfaction n` defines satisfaction for strict prenex $\Pi_{n + 1}$ formulas.
-- [HP98, Theorem I.1.75(1)] -/
+/-- The formula `piSatisfaction n` defines satisfaction for strict prenex $\Pi_{n + 1}$ formulas. -/
 instance PiSatisfaction.defined (n : ℕ) :
     𝚷-[n + 1]-Relation (PiSatisfaction (n + 1) : V → V → Prop) via piSatisfaction n :=
   piDefined_of_sigmaDefined (sigmaDefined n)
 
-/-- Satisfaction for strict prenex $\Sigma_{n + 1}$ formulas is definable at level $\Sigma_{n + 1}$.
-- [HP98, Theorem I.1.75(1)] -/
+/-- Satisfaction for strict prenex $\Sigma_{n + 1}$ formulas is definable at level $\Sigma_{n + 1}$. -/
 instance SigmaSatisfaction.definable (n : ℕ) :
     𝚺-[n + 1]-Relation (SigmaSatisfaction (n + 1) : V → V → Prop) :=
   (SigmaSatisfaction.defined n).to_definable
 
-/-- Satisfaction for strict prenex $\Pi_{n + 1}$ formulas is definable at level $\Pi_{n + 1}$.
-- [HP98, Theorem I.1.75(1)] -/
+/-- Satisfaction for strict prenex $\Pi_{n + 1}$ formulas is definable at level $\Pi_{n + 1}$. -/
 instance PiSatisfaction.definable (n : ℕ) :
     𝚷-[n + 1]-Relation (PiSatisfaction (n + 1) : V → V → Prop) :=
   (PiSatisfaction.defined n).to_definable
 
-/-- At level zero, strict `Σ` satisfaction is $\Delta_0$ satisfaction.
-- [HP98, Definition I.1.74] -/
 @[simp] lemma SigmaSatisfaction.zero : SigmaSatisfaction 0 = (BoundedSatisfaction : V → V →
   Prop) := by simp [SigmaSatisfaction]
 
-/-- At level zero, strict `Π` satisfaction is $\Delta_0$ satisfaction.
-- [HP98, Definition I.1.74] -/
 @[simp] lemma PiSatisfaction.zero : PiSatisfaction 0 = (BoundedSatisfaction : V → V →
   Prop) := by simp [PiSatisfaction]
 
-/-! ## Tarski conditions -/
+/-! ## Tarski conditions
+
+- [HP98, Definition I.1.74]
+- [HP98, Theorem I.1.75(2)] -/
 
 section
 variable {n : ℕ} {z e : V}
 
-/-- Unfolding of strict `Σ` satisfaction at a positive level.
-- [HP98, Definition I.1.74] -/
 private lemma sigmaSatisfaction_succ_iff :
     SigmaSatisfaction (n + 1) z e ↔ ∃ k q, z = qqExss q k ∧ IsStrictPi n q ∧
       ∃ w, len w = k ∧ PiSatisfaction n q (vecAppend w e) := by rw [SigmaSatisfaction]
 
-/-- Unfolding of strict `Π` satisfaction at a positive level.
-- [HP98, Definition I.1.74] -/
 private lemma piSatisfaction_succ_iff :
     PiSatisfaction (n + 1) z e ↔ IsStrictPi (n + 1) z ∧ IsUFormula ℒₒᵣ z ∧
       ¬SigmaSatisfaction (n + 1) (neg ℒₒᵣ z) e := by rw [PiSatisfaction]
 
-/-- Strict $\Pi_n$ satisfaction implies membership in its syntactic domain.
-- [HP98, Theorem I.1.75(2)] -/
 theorem PiSatisfaction.dom (h : PiSatisfaction n z e) :
     IsStrictPi n z ∧ IsUFormula ℒₒᵣ z := by
   match n with
   | 0 => exact BoundedSatisfaction.dom (by simpa using h)
   | _ + 1 => exact ⟨(piSatisfaction_succ_iff.mp h).1, (piSatisfaction_succ_iff.mp h).2.1⟩
 
-/-- Strict $\Sigma_n$ satisfaction implies membership in its syntactic domain.
-- [HP98, Theorem I.1.75(2)] -/
 theorem SigmaSatisfaction.dom (h : SigmaSatisfaction n z e) :
     IsStrictSigma n z ∧ IsUFormula ℒₒᵣ z := by
   match n with
@@ -206,9 +176,6 @@ theorem SigmaSatisfaction.dom (h : SigmaSatisfaction n z e) :
     obtain ⟨k, q, rfl, hq, w, -, hsat⟩ := sigmaSatisfaction_succ_iff.mp h
     exact ⟨⟨k, q, rfl, hq⟩, isUFormula_qqExss.mpr (PiSatisfaction.dom hsat).2⟩
 
-/-- $\Pi_n$ satisfaction of a negated strict $\Sigma_n$ formula is failure of $\Sigma_n$
-satisfaction.
-- [HP98, Theorem I.1.75(2)] -/
 theorem PiSatisfaction.neg_iff (hz : IsStrictSigma n z)
     (hz' : IsUFormula ℒₒᵣ z) : PiSatisfaction n (neg ℒₒᵣ z) e ↔ ¬SigmaSatisfaction n z e := by
   match n with
@@ -217,8 +184,6 @@ theorem PiSatisfaction.neg_iff (hz : IsStrictSigma n z)
     rw [piSatisfaction_succ_iff, IsUFormula.neg_neg hz']
     simp [IsStrictSigma.neg hz' hz, hz']
 
-/-- $\Sigma_n$ satisfaction of a negated strict $\Pi_n$ formula is failure of $\Pi_n$ satisfaction.
-- [HP98, Theorem I.1.75(2)] -/
 theorem SigmaSatisfaction.neg_iff (hz : IsStrictPi n z)
     (hz' : IsUFormula ℒₒᵣ z) : SigmaSatisfaction n (neg ℒₒᵣ z) e ↔ ¬PiSatisfaction n z e := by
   match n with
@@ -235,10 +200,11 @@ The prenex classes do not determine the decomposition `z = qqExss q k` a code ad
 definition of `SigmaSatisfaction (n + 1)` has to be shown independent of it. The tool is the
 *maximal*
 existential block of a code, the decomposition whose matrix does not itself begin with an
-existential quantifier: every other decomposition is an initial segment of it. -/
+existential quantifier: every other decomposition is an initial segment of it.
 
-/-- Cancelling an outer existential block common to two decompositions.
-- [HP98, Lemma I.1.69] -/
+- [HP98, Lemma I.1.69]
+- [HP98, Lemma I.1.68(2)] -/
+
 private lemma qqExss_cancel (k : V) :
     ∀ p p' j : V, qqExss p k = qqExss p' (k + j) → p = qqExss p' j := by
   induction k using ISigma1.pi1_succ_induction
@@ -249,9 +215,6 @@ private lemma qqExss_cancel (k : V) :
     rw [qqExss_succ, add_right_comm k 1 j, qqExss_succ, qqExs_inj] at h
     exact ih p p' j h
 
-/-- Every code is an existential block over a code that does not itself begin with an
-existential quantifier.
-- [HP98, Lemma I.1.69] -/
 private lemma exists_ex_block (z : V) : ∃ K M, z = qqExss M K ∧ ∀ p : V, M ≠ ^∃ p := by
   have H : ∀ z : V, ∃ K ≤ z, ∃ M ≤ z, z = qqExss M K ∧ ∀ p < M, M ≠ ^∃ p := by
     intro z
@@ -267,8 +230,6 @@ private lemma exists_ex_block (z : V) : ∃ K M, z = qqExss M K ∧ ∀ p : V, M
   obtain ⟨K, -, M, -, h, hM⟩ := H z
   exact ⟨K, M, h, fun p hp ↦ hM p (hp ▸ lt_exists p) hp⟩
 
-/-- The maximal existential block dominates every other decomposition.
-- [HP98, Lemma I.1.69] -/
 private lemma ex_block_dominates {z M K q k : V} (hMK : z = qqExss M K)
     (hM : ∀ p : V, M ≠ ^∃ p) (hqk : z = qqExss q k) : ∃ j, K = k + j ∧ q = qqExss M j := by
   rcases le_total k K with h | h
@@ -280,9 +241,6 @@ private lemma ex_block_dominates {z M K q k : V} (hMK : z = qqExss M K)
     · exact ⟨0, by simp, by simpa using hMq.symm⟩
     · exact absurd hMq (by rw [qqExss_succ]; exact hM _)
 
-/-- A strict $\Pi_{n + 1}$ code beginning with an existential quantifier has an empty universal
-block, hence is already strict $\Sigma_n$.
-- [HP98, Lemma I.1.69] -/
 private lemma isStrictSigma_of_isStrictPi_ex {n : ℕ} {p : V} (h : IsStrictPi (n + 1) (^∃ p)) :
     IsStrictSigma n (^∃ p) := by
   obtain ⟨k, q, heq, hq⟩ := h
@@ -292,8 +250,7 @@ private lemma isStrictSigma_of_isStrictPi_ex {n : ℕ} {p : V} (h : IsStrictPi (
 
 /-- The maximal existential block of a $\Delta_0$ code has length at most one, and its matrix is
 $\Delta_0$: a $\Delta_0$ code begins with at most one existential quantifier, the one of a bounded
-existential quantification.
-- [HP98, Lemma I.1.68(2)] -/
+existential quantification. -/
 private lemma isBounded_ex_block {z M K : V} (hz : IsBounded z) (hMK : z = qqExss M K)
     (hM : ∀ p : V, M ≠ ^∃ p) : IsBounded M ∧ K ≤ 1 := by
   rcases zero_or_succ K with rfl | ⟨K, rfl⟩
@@ -309,8 +266,6 @@ private lemma isBounded_ex_block {z M K : V} (hz : IsBounded z) (hMK : z = qqExs
     · rw [qqExss_succ] at heq
       simp [qqExs, qqAnd, pair_ext_iff] at heq
 
-/-- The matrix of the maximal existential block of a strict $\Sigma_{n + 1}$ code is strict $\Pi_n$.
-- [HP98, Lemma I.1.69] -/
 private lemma isStrictPi_ex_block : ∀ (n : ℕ) (z M K : V), IsStrictSigma (n + 1) z →
     z = qqExss M K → (∀ p : V, M ≠ ^∃ p) → IsStrictPi n M
   | 0, _, M, _, hz, hMK, hM => by
@@ -357,11 +312,10 @@ private lemma exists_vecAppend_singleton {k w : V} (h : len w = k + 1) :
   obtain ⟨u, -, x, -, hlen, heq⟩ := H w (by rintro rfl; simp at h)
   exact ⟨u, x, add_right_cancel (hlen.trans h), heq⟩
 
-/-! ### The $\Delta_0$ existential condition -/
+/-! ### The $\Delta_0$ existential condition
 
-/-- Satisfaction of a $\Delta_0$ code that begins with an existential quantifier is existential
-satisfaction of its body: the guard of the bounded quantifier is part of that body.
 - [HP98, Theorem I.1.70(iv)] -/
+
 private lemma boundedSatisfaction_ex_iff {p e : V} (h : IsBounded (^∃ p)) :
     BoundedSatisfaction (^∃ p) e ↔ ∃ x, BoundedSatisfaction p (x ∷ e) := by
   obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsBounded.of_ex h
@@ -385,19 +339,19 @@ a strict $\Pi_n$ matrix. `BlockSatisfaction` says that the *maximal* block compu
 the
 definition independent of the decomposition; the Tarski conditions all follow from it, and it is
 itself proved by recursion on the level, since a matrix that still begins with an existential
-quantifier belongs to a lower level. -/
+quantifier belongs to a lower level.
+
+- [HP98, Theorem I.1.75(2)]
+- [HP98, Theorem I.1.75(2)(v)]
+- [HP98, Theorem I.1.75(2)(v′)] -/
 
 /-- Strict $\Sigma_{n + 1}$ satisfaction of `z` is witnessed over the maximal existential block of
-`z`.
-- [HP98, Theorem I.1.75(2)] -/
+`z`. -/
 private def BlockSatisfaction (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (n : ℕ) : Prop :=
   ∀ z M K e : V, IsStrictSigma (n + 1) z → IsUFormula ℒₒᵣ z → z = qqExss M K →
     (∀ p : V, M ≠ ^∃ p) → (SigmaSatisfaction (n + 1) z e ↔ ∃ w, len w = K ∧
       PiSatisfaction n M (vecAppend w e))
 
-/-- An empty existential block at level zero: a $\Delta_0$ code is $\Sigma_1$-satisfied exactly when
-it is $\Delta_0$-satisfied.
-- [HP98, Theorem I.1.75(2)(v)] -/
 private lemma of_Pi0 (hB : BlockSatisfaction V 0) {z e : V} (hz : IsBounded z)
     (hz' : IsUFormula ℒₒᵣ z) : SigmaSatisfaction 1 z e ↔ PiSatisfaction 0 z e := by
   constructor
@@ -418,9 +372,6 @@ private lemma of_Pi0 (hB : BlockSatisfaction V 0) {z e : V} (hz : IsBounded z)
   · intro h
     exact sigmaSatisfaction_succ_iff.mpr ⟨0, z, by simp, hz, 0, by simp, by simpa using h⟩
 
-/-- Level monotonicity by one step, `Σ` and `Π` at once, from the block characterization at
-levels up to `n`.
-- [HP98, Theorem I.1.75(2)] -/
 private lemma mono_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSatisfaction V m) →
     (∀ z e : V, IsStrictSigma n z → IsUFormula ℒₒᵣ z →
       (SigmaSatisfaction n z e ↔ SigmaSatisfaction (n + 1) z e)) ∧
@@ -457,10 +408,6 @@ private lemma mono_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSatisfaction V m) �
           rw [SigmaSatisfaction.neg_iff (IsStrictPi.mono (Nat.le_succ _) hz) hz']; simp,
         hsig (neg ℒₒᵣ z) e (IsStrictPi.neg hz' hz) hz'.neg]⟩
 
-/-- The empty-block conditions, `Σ` and `Π` at once, from the block characterization at levels
-up to `n`.
-- [HP98, Theorem I.1.75(2)(v)]
-- [HP98, Theorem I.1.75(2)(v′)] -/
 private lemma of_pi_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSatisfaction V m) →
     (∀ z e : V, IsStrictPi n z → IsUFormula ℒₒᵣ z → (SigmaSatisfaction (n + 1) z e ↔
       PiSatisfaction n z e)) ∧
@@ -523,8 +470,6 @@ private lemma of_pi_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSatisfaction V m) �
         hsig (neg ℒₒᵣ z) e (IsStrictSigma.neg hz' hz) hz'.neg, PiSatisfaction.neg_iff hz hz']
       simp⟩
 
-/-- The block characterization, by recursion on the level.
-- [HP98, Theorem I.1.75(2)] -/
 private lemma blockSatisfaction : ∀ n : ℕ, BlockSatisfaction V n := fun n ↦ by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
@@ -579,23 +524,16 @@ private lemma blockSatisfaction : ∀ n : ℕ, BlockSatisfaction V n := fun n �
 section
 variable {n : ℕ} {z e : V}
 
-/-- An empty existential block reads a strict $\Pi_n$ formula as a $\Sigma_{n + 1}$ formula.
-- [HP98, Theorem I.1.75(2)(v)] -/
 theorem SigmaSatisfaction.of_pi (hz : IsStrictPi n z) (hz' : IsUFormula ℒₒᵣ z) :
     SigmaSatisfaction (n + 1) z e ↔ PiSatisfaction n z e :=
   (of_pi_step n fun m _ ↦ blockSatisfaction m).1 z e hz hz'
 
-/-- An empty universal block reads a strict $\Sigma_n$ formula as a $\Pi_{n + 1}$ formula.
-- [HP98, Theorem I.1.75(2)(v′)] -/
 theorem PiSatisfaction.of_sigma (hz : IsStrictSigma n z) (hz' : IsUFormula ℒₒᵣ z) :
     PiSatisfaction (n + 1) z e ↔ SigmaSatisfaction n z e :=
   (of_pi_step n fun m _ ↦ blockSatisfaction m).2 z e hz hz'
 
 end
 
-/-- Satisfaction of an existential formula is existential satisfaction of its body, for a body
-that lies in the domain: peeling the quantifier shortens the maximal block by one.
-- [HP98, Theorem I.1.75(2)(v)] -/
 private lemma exs_iff_aux {n : ℕ} {p e : V} (hp : IsStrictSigma (n + 1) p)
     (hp' : IsUFormula ℒₒᵣ p) : SigmaSatisfaction (n + 1) (^∃ p) e ↔ ∃ x,
       SigmaSatisfaction (n + 1) p (x ∷ e) := by
@@ -623,8 +561,6 @@ private lemma exs_iff_aux {n : ℕ} {p e : V} (hp : IsStrictSigma (n + 1) p)
 section
 variable {n : ℕ} {p e : V}
 
-/-- Satisfaction of an existential formula is existential satisfaction of its body.
-- [HP98, Theorem I.1.75(2)(v)] -/
 theorem SigmaSatisfaction.exs_iff : SigmaSatisfaction (n + 1) (^∃ p) e ↔ ∃ x,
   SigmaSatisfaction (n + 1) p (x ∷ e) := by
   by_cases hp : IsStrictSigma (n + 1) p ∧ IsUFormula ℒₒᵣ p
@@ -633,8 +569,6 @@ theorem SigmaSatisfaction.exs_iff : SigmaSatisfaction (n + 1) (^∃ p) e ↔ ∃
     obtain ⟨hs, hu⟩ := h.dom
     exact absurd ⟨IsStrictSigma.of_exs hs, by simpa using hu⟩ hp
 
-/-- Satisfaction of a universal formula is universal satisfaction of its body.
-- [HP98, Theorem I.1.75(2)(v′)] -/
 theorem PiSatisfaction.all_iff : PiSatisfaction (n + 1) (^∀ p) e ↔ ∀ x,
   PiSatisfaction (n + 1) p (x ∷ e) := by
   constructor
@@ -656,8 +590,6 @@ section
 variable {m n : ℕ} (h : m ≤ n) {z e : V}
 include h
 
-/-- Satisfaction of a strict $\Sigma_m$ formula is stable when viewed at a higher `Σ` level.
-- [HP98, Theorem I.1.75(2)(v)] -/
 theorem SigmaSatisfaction.mono (hz : IsStrictSigma m z) (hz' : IsUFormula ℒₒᵣ z) :
     SigmaSatisfaction m z e ↔ SigmaSatisfaction n z e := by
   induction n, h using Nat.le_induction with
@@ -666,8 +598,6 @@ theorem SigmaSatisfaction.mono (hz : IsStrictSigma m z) (hz' : IsUFormula ℒₒ
     exact ih.trans
       ((mono_step n fun i _ ↦ blockSatisfaction i).1 z e (IsStrictSigma.mono hn hz) hz')
 
-/-- Satisfaction of a strict $\Pi_m$ formula is stable when viewed at a higher `Π` level.
-- [HP98, Theorem I.1.75(2)(v′)] -/
 theorem PiSatisfaction.mono (hz : IsStrictPi m z) (hz' : IsUFormula ℒₒᵣ z) :
     PiSatisfaction m z e ↔ PiSatisfaction n z e := by
   induction n, h using Nat.le_induction with
@@ -677,18 +607,21 @@ theorem PiSatisfaction.mono (hz : IsStrictPi m z) (hz' : IsUFormula ℒₒᵣ z)
 
 end
 
-/-! ### Substitution under a quantifier block -/
+/-! ### Substitution under a quantifier block
+
+- [HP98, 1.64(5)]
+- [HP98, Lemma I.1.69]
+- [HP98, 1.64(4)]
+- [HP98, Theorem I.1.75(2)] -/
 
 namespace QVecIter
 
-/-- Primitive-recursive blueprint for iterating the quantifier lift of a substitution vector.
-- [HP98, 1.64(5)] -/
+/-- Primitive-recursive blueprint for iterating the quantifier lift of a substitution vector. -/
 noncomputable def blueprint : PR.Blueprint 1 where
   zero := .mkSigma “y x. y = x”
   succ := .mkSigma “y ih n x. !(qVecGraph ℒₒᵣ) y ih”
 
-/-- Primitive-recursive construction iterating the quantifier lift of a substitution vector.
-- [HP98, 1.64(5)] -/
+/-- Primitive-recursive construction iterating the quantifier lift of a substitution vector. -/
 noncomputable def construction : PR.Construction V blueprint where
   zero := fun x ↦ x 0
   succ := fun _ _ ih ↦ qVec ℒₒᵣ ih
@@ -701,41 +634,30 @@ noncomputable def construction : PR.Construction V blueprint where
 
 end QVecIter
 
-/-- `qVecIter w k` is the substitution vector `w` lifted past `k` quantifiers.
-- [HP98, 1.64(5)] -/
+/-- `qVecIter w k` is the substitution vector `w` lifted past `k` quantifiers. -/
 noncomputable def qVecIter (w k : V) : V := QVecIter.construction.result ![w] k
 
-/-- Lifting past no quantifier leaves the vector unchanged.
-- [HP98, 1.64(5)] -/
 @[simp] lemma qVecIter_zero (w : V) : qVecIter w 0 = w := by
   simp [qVecIter, QVecIter.construction]
 
-/-- One more quantifier applies one more lift.
-- [HP98, 1.64(5)] -/
 @[simp] lemma qVecIter_succ (w k : V) : qVecIter w (k + 1) = qVec ℒₒᵣ (qVecIter w k) := by
   simp [qVecIter, QVecIter.construction]
 
-/-- Defining formula for the iterated quantifier lift.
-- [HP98, 1.64(5)] -/
+/-- Defining formula for the iterated quantifier lift. -/
 noncomputable def _root_.FFL.FirstOrder.Arithmetic.qVecIterDef : 𝚺₁.Semisentence 3 :=
   QVecIter.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
-/-- The iterated quantifier lift is $\Sigma_1$-definable.
-- [HP98, 1.64(5)] -/
+/-- The iterated quantifier lift is $\Sigma_1$-definable. -/
 instance qVecIter_defined : 𝚺₁-Function₂ (qVecIter : V → V → V) via qVecIterDef := .mk
   fun v ↦ by simp [QVecIter.construction.result_defined_iff, qVecIterDef]; rfl
 
-/-- The $\Sigma_1$ definability instance for the iterated quantifier lift.
-- [HP98, 1.64(5)] -/
+/-- The $\Sigma_1$ definability instance for the iterated quantifier lift. -/
 instance qVecIter_definable : 𝚺₁-Function₂ (qVecIter : V → V → V) := qVecIter_defined.to_definable
 
-/-- The iterated quantifier lift is definable at every positive hierarchy level.
-- [HP98, 1.64(5)] -/
+/-- The iterated quantifier lift is definable at every positive hierarchy level. -/
 instance qVecIter_definable' (Γ m) : Γ-[m + 1]-Function₂ (qVecIter : V → V → V) :=
   qVecIter_definable.of_sigmaOne
 
-/-- The iterated lift of a semiterm vector is a semiterm vector for the extended arities.
-- [HP98, 1.64(5)] -/
 private lemma isSemitermVec_qVecIter {m l w : V} (hw : IsSemitermVec ℒₒᵣ m l w) (k : V) :
     IsSemitermVec ℒₒᵣ (m + k) (l + k) (qVecIter w k) := by
   induction k using ISigma1.sigma1_succ_induction
@@ -745,8 +667,6 @@ private lemma isSemitermVec_qVecIter {m l w : V} (hw : IsSemitermVec ℒₒᵣ m
     rw [qVecIter_succ, ← add_assoc, ← add_assoc]
     exact ih.qVec
 
-/-- Lifting past a quantifier commutes with iterating the lift.
-- [HP98, 1.64(5)] -/
 private lemma qVecIter_qVec (w k : V) :
     qVecIter (qVec ℒₒᵣ w) k = qVec ℒₒᵣ (qVecIter w k) := by
   induction k using ISigma1.sigma1_succ_induction
@@ -754,8 +674,6 @@ private lemma qVecIter_qVec (w k : V) :
   case zero => simp
   case succ k ih => rw [qVecIter_succ, ih, qVecIter_succ]
 
-/-- Substituting into an existential block substitutes the iterated lift into its matrix.
-- [HP98, 1.64(5)] -/
 private lemma substs_qqExss {p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
     ∀ w : V, subst ℒₒᵣ w (qqExss p k) = qqExss (subst ℒₒᵣ (qVecIter w k) p) k := by
   induction k using ISigma1.pi1_succ_induction
@@ -766,8 +684,6 @@ private lemma substs_qqExss {p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
     rw [qqExss_succ, substs_ex (isUFormula_qqExss.mpr hp), ih (qVec ℒₒᵣ w), qVecIter_qVec,
       qVecIter_succ, qqExss_succ]
 
-/-- Substituting into a universal block substitutes the iterated lift into its matrix.
-- [HP98, 1.64(5)] -/
 private lemma substs_qqAlls {p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
     ∀ w : V, subst ℒₒᵣ w (qqAlls p k) = qqAlls (subst ℒₒᵣ (qVecIter w k) p) k := by
   induction k using ISigma1.pi1_succ_induction
@@ -778,8 +694,6 @@ private lemma substs_qqAlls {p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
     rw [qqAlls_succ, substs_all (isUFormula_qqAlls.mpr hp), ih (qVec ℒₒᵣ w), qVecIter_qVec,
       qVecIter_succ, qqAlls_succ]
 
-/-- Being a semiformula under an existential block is being one for the extended arity.
-- [HP98, 1.64(5)] -/
 private lemma isSemiformula_qqExss {p : V} (k : V) :
     ∀ n : V, (IsSemiformula ℒₒᵣ n (qqExss p k) ↔ IsSemiformula ℒₒᵣ (n + k) p) := by
   induction k using ISigma1.pi1_succ_induction
@@ -787,8 +701,6 @@ private lemma isSemiformula_qqExss {p : V} (k : V) :
   case zero => intro n; simp
   case succ k ih => intro n; rw [qqExss_succ, IsSemiformula.exs, ih, add_assoc, add_comm 1 k]
 
-/-- Being a semiformula under a universal block is being one for the extended arity.
-- [HP98, 1.64(5)] -/
 private lemma isSemiformula_qqAlls {p : V} (k : V) :
     ∀ n : V, (IsSemiformula ℒₒᵣ n (qqAlls p k) ↔ IsSemiformula ℒₒᵣ (n + k) p) := by
   induction k using ISigma1.pi1_succ_induction
@@ -796,9 +708,6 @@ private lemma isSemiformula_qqAlls {p : V} (k : V) :
   case zero => intro n; simp
   case succ k ih => intro n; rw [qqAlls_succ, IsSemiformula.all, ih, add_assoc, add_comm 1 k]
 
-/-- Evaluating the vector lifted past a block extends the evaluated substitution by the
-witnesses of the block.
-- [HP98, 1.64(5)] -/
 private lemma termValVec_qVecIter {m l w e : V} (hw : IsSemitermVec ℒₒᵣ m l w) (k : V) :
     ∀ v : V, len v = k →
       termValVec (vecAppend v e) (m + k) (qVecIter w k) = vecAppend v (termValVec e m w) := by
@@ -813,8 +722,6 @@ private lemma termValVec_qVecIter {m l w e : V} (hw : IsSemitermVec ℒₒᵣ m 
         termValVec_qVec (isSemitermVec_qVecIter hw k), ih v (by simpa using hv),
         vecAppend_adjoin]
 
-/-- The strict prenex classes are closed under substitution.
-- [HP98, Lemma I.1.69] -/
 private lemma isStrict_subst : ∀ (n : ℕ) (m l w p : V), IsSemitermVec ℒₒᵣ m l w →
     IsSemiformula ℒₒᵣ m p →
     (IsStrictSigma n p → IsStrictSigma n (subst ℒₒᵣ w p)) ∧
@@ -833,8 +740,6 @@ private lemma isStrict_subst : ∀ (n : ℕ) (m l w p : V), IsSemitermVec ℒₒ
       exact (isStrict_subst n (m + k) (l + k) (qVecIter w k) q
         (isSemitermVec_qVecIter hw k) hqp).1 hq
 
-/-- Substitution does not create a leading existential quantifier.
-- [HP98, 1.64(4)] -/
 private lemma not_ex_subst {M : V} (hM : IsUFormula ℒₒᵣ M) (h : ∀ p : V, M ≠ ^∃ p) (w r : V) :
     subst ℒₒᵣ w M ≠ ^∃ r := by
   rcases hM.case with ⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
@@ -848,8 +753,6 @@ private lemma not_ex_subst {M : V} (hM : IsUFormula ℒₒᵣ M) (h : ∀ p : V,
   · rw [substs_all hp]; simp [qqAll, qqExs, pair_ext_iff]
   · exact absurd rfl (h p)
 
-/-- Strict $\Sigma_n$ satisfaction commutes with substitution of a coded vector of terms.
-- [HP98, Theorem I.1.75(2)] -/
 theorem SigmaSatisfaction.subst {n : ℕ} {m l w p e : V} (hw : IsSemitermVec ℒₒᵣ m l w)
     (hp : IsSemiformula ℒₒᵣ m p) (hp' : IsStrictSigma n p) :
     SigmaSatisfaction n (Bootstrapping.subst ℒₒᵣ w p) e ↔
@@ -884,12 +787,12 @@ theorem SigmaSatisfaction.subst {n : ℕ} {m l w p e : V} (hw : IsSemitermVec �
     refine exists_congr fun v ↦ and_congr_right fun hv ↦ ?_
     rw [hpi (isSemitermVec_qVecIter hw K) hMs hMpi, termValVec_qVecIter hw K v hv]
 
-/-! ## Satisfaction under an externally supplied vector -/
-
-/-- `sigmaSatisfactionVec n k` defines `SigmaSatisfaction (n + 1)` under its `k` free variables.
+/-! ## Satisfaction under an externally supplied vector
 
 - [HP98, Remark I.1.77]
 - [HP98, Definition I.1.78(2)] -/
+
+/-- `sigmaSatisfactionVec n k` defines `SigmaSatisfaction (n + 1)` under its `k` free variables. -/
 noncomputable def sigmaSatisfactionVec (n k : ℕ) : 𝚺-[n + 1].Semisentence (k + 1) := .mkSigma
   “p. ∃ e, !lenDef ↑k e ∧
     (⋀ i, ∃ z, !nthDef z e ↑(i : Fin k).val ∧ z = #i.succ.succ.succ) ∧
@@ -897,10 +800,6 @@ noncomputable def sigmaSatisfactionVec (n k : ℕ) : 𝚺-[n + 1].Semisentence (
   (by simp [lenDef.sigma_prop.mono (Nat.le_add_left 1 n),
     nthDef.sigma_prop.mono (Nat.le_add_left 1 n)])
 
-/-- The formula `sigmaSatisfactionVec n k` defines strict $\Sigma_{n + 1}$ satisfaction under its
-variables.
-- [HP98, Remark I.1.77]
-- [HP98, Definition I.1.78(2)] -/
 theorem sigmaSatisfactionVec.defined (n k : ℕ) :
     𝚺-[n + 1].Defined
       (fun v : Fin (k + 1) → V ↦ SigmaSatisfaction (n + 1) (v 0) (matrixToVec (v ·.succ)))

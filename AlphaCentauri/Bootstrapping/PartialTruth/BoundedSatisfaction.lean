@@ -99,12 +99,12 @@ attribute [local simp] qqAnd qqOr qqVerum qqFalsum qqRel qqNRel qqBall qqAll qqB
 
 lemma eqIndex_ne_ltIndex : (Arithmetic.eqIndex : V) ≠ (Arithmetic.ltIndex : V) := by simp
 
-/-! ## The partial satisfaction table -/
-
-/-- `BoundedSatisfactionTable q z e` says that `q` is a finite Tarski satisfaction table rooted at
-`⟪z, e⟫`.
+/-! ## The partial satisfaction table
 
 - [HP98, Definition I.1.71(1)] -/
+
+/-- `BoundedSatisfactionTable q z e` says that `q` is a finite Tarski satisfaction table rooted at
+`⟪z, e⟫`. -/
 structure BoundedSatisfactionTable (q z e : V) : Prop where
   /-- `q` is a finite mapping. -/
   isMapping : IsMapping q
@@ -147,7 +147,6 @@ structure BoundedSatisfactionTable (q z e : V) : Prop where
     (∃ u p e', ⟪qqBall u p, e'⟫ ∈ domain q ∧ ∃ x < termVal (0 ∷ e') u, n = ⟪p, x ∷ e'⟫) ∨
     (∃ u p e', ⟪qqBex u p, e'⟫ ∈ domain q ∧ ∃ x < termVal (0 ∷ e') u, n = ⟪p, x ∷ e'⟫)
 
-
 namespace BoundedSatisfactionTable
 
 variable {q z e z' e' t u p p₁ p₂ : V}
@@ -156,10 +155,10 @@ variable {q z e z' e' t u p p₁ p₂ : V}
 
 `spec` is a ten-way disjunction over the outermost coding constructor of the node. Each lemma
 below specializes it to a node of known shape: membership of the immediate children in the
-domain, and how the values `1` and `0` at the node are determined. -/
+domain, and how the values `1` and `0` at the node are determined.
 
-/-- The Tarski clause for the truth constant, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
+
 lemma val_verum (h : BoundedSatisfactionTable q z e) (hn : ⟪(^⊤ : V), e'⟫ ∈ domain q) :
     ⟪⟪(^⊤ : V), e'⟫, 1⟫ ∈ q := by
   rcases h.spec _ e' hn with
@@ -171,8 +170,6 @@ lemma val_verum (h : BoundedSatisfactionTable q z e) (hn : ⟪(^⊤ : V), e'⟫ 
   on_goal 1 => exact hv
   all_goals simp at he
 
-/-- The Tarski clause for the falsehood constant, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma val_falsum (h : BoundedSatisfactionTable q z e) (hn : ⟪(^⊥ : V), e'⟫ ∈ domain q) :
     ⟪⟪(^⊥ : V), e'⟫, 0⟫ ∈ q := by
   rcases h.spec _ e' hn with
@@ -184,8 +181,6 @@ lemma val_falsum (h : BoundedSatisfactionTable q z e) (hn : ⟪(^⊥ : V), e'⟫
   on_goal 2 => exact hv
   all_goals simp at he
 
-/-- The Tarski clauses for a coded equality atom, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma spec_eq (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^= u, e'⟫ ∈ domain q) :
     (⟪⟪t ^= u, e'⟫, 1⟫ ∈ q ↔ termVal e' t = termVal e' u) ∧
     (⟪⟪t ^= u, e'⟫, 0⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) := by
@@ -198,8 +193,6 @@ lemma spec_eq (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^= u, e'⟫ ∈ do
   on_goal 3 => obtain ⟨rfl, rfl⟩ := qqEQ_inj.mp he; exact ⟨hA, hB⟩
   all_goals simp at he
 
-/-- The Tarski clauses for a coded inequality atom, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma spec_neq (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^≠ u, e'⟫ ∈ domain q) :
     (⟪⟪t ^≠ u, e'⟫, 1⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) ∧
     (⟪⟪t ^≠ u, e'⟫, 0⟫ ∈ q ↔ termVal e' t = termVal e' u) := by
@@ -212,8 +205,6 @@ lemma spec_neq (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^≠ u, e'⟫ ∈
   on_goal 4 => obtain ⟨rfl, rfl⟩ := qqNEQ_inj.mp he; exact ⟨hA, hB⟩
   all_goals simp at he
 
-/-- The Tarski clauses for a coded less-than atom, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma spec_lt (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^< u, e'⟫ ∈ domain q) :
     (⟪⟪t ^< u, e'⟫, 1⟫ ∈ q ↔ termVal e' t < termVal e' u) ∧
     (⟪⟪t ^< u, e'⟫, 0⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) := by
@@ -226,8 +217,6 @@ lemma spec_lt (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^< u, e'⟫ ∈ do
   on_goal 5 => obtain ⟨rfl, rfl⟩ := qqLT_inj.mp he; exact ⟨hA, hB⟩
   all_goals simp at he
 
-/-- The Tarski clauses for a coded not-less-than atom, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma spec_nlt (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^≮ u, e'⟫ ∈ domain q) :
     (⟪⟪t ^≮ u, e'⟫, 1⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) ∧
     (⟪⟪t ^≮ u, e'⟫, 0⟫ ∈ q ↔ termVal e' t < termVal e' u) := by
@@ -240,8 +229,6 @@ lemma spec_nlt (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^≮ u, e'⟫ ∈
   on_goal 6 => obtain ⟨rfl, rfl⟩ := qqNLT_inj.mp he; exact ⟨hA, hB⟩
   all_goals simp at he
 
-/-- The Tarski and child-domain clauses for a coded conjunction.
-- [HP98, Definition I.1.71(1)] -/
 lemma spec_and (h : BoundedSatisfactionTable q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q ∧
     (⟪⟪p₁ ^⋏ p₂, e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∧ ⟪⟪p₂, e'⟫, 1⟫ ∈ q) ∧
@@ -255,8 +242,6 @@ lemma spec_and (h : BoundedSatisfactionTable q z e) (hn : ⟪p₁ ^⋏ p₂, e'�
   on_goal 7 => obtain ⟨rfl, rfl⟩ := (qqAnd_inj _ _ _ _).mp he; exact ⟨hd, hd', hA, hB⟩
   all_goals simp at he
 
-/-- The Tarski and child-domain clauses for a coded disjunction.
-- [HP98, Definition I.1.71(1)] -/
 lemma spec_or (h : BoundedSatisfactionTable q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q ∧
     (⟪⟪p₁ ^⋎ p₂, e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∨ ⟪⟪p₂, e'⟫, 1⟫ ∈ q) ∧
@@ -270,8 +255,6 @@ lemma spec_or (h : BoundedSatisfactionTable q z e) (hn : ⟪p₁ ^⋎ p₂, e'�
   on_goal 8 => obtain ⟨rfl, rfl⟩ := (qqOr_inj _ _ _ _).mp he; exact ⟨hd, hd', hA, hB⟩
   all_goals simp at he
 
-/-- The Tarski and child-domain clauses for a coded bounded universal.
-- [HP98, Definition I.1.71(1)] -/
 lemma spec_ball (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBall u p, e'⟫ ∈ domain q) :
     (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧
     (∀ x < termVal (0 ∷ e') u, ⟪p, x ∷ e'⟫ ∈ domain q) ∧
@@ -286,8 +269,6 @@ lemma spec_ball (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBall u p, e'⟫ 
   on_goal 9 => obtain ⟨rfl, rfl⟩ := qqBall_inj.mp he; exact ⟨ht, hd, hA, hB⟩
   all_goals simp at he
 
-/-- The Tarski and child-domain clauses for a coded bounded existential.
-- [HP98, Definition I.1.71(1)] -/
 lemma spec_bex (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBex u p, e'⟫ ∈ domain q) :
     (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧
     (∀ x < termVal (0 ∷ e') u, ⟪p, x ∷ e'⟫ ∈ domain q) ∧
@@ -302,76 +283,52 @@ lemma spec_bex (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBex u p, e'⟫ �
   on_goal 10 => obtain ⟨rfl, rfl⟩ := qqBex_inj.mp he; exact ⟨ht, hd, hA, hB⟩
   all_goals simp at he
 
-/-! ## The Tarski clauses in the form the satisfaction predicate uses -/
+/-! ## The Tarski clauses in the form the satisfaction predicate uses
 
-/-- Satisfaction of a coded equality atom, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
+
 lemma val_eq (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^= u, e'⟫ ∈ domain q) :
     ⟪⟪t ^= u, e'⟫, 1⟫ ∈ q ↔ termVal e' t = termVal e' u := (h.spec_eq hn).1
 
-/-- Satisfaction of a coded inequality atom, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma val_neq (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^≠ u, e'⟫ ∈ domain q) :
     ⟪⟪t ^≠ u, e'⟫, 1⟫ ∈ q ↔ termVal e' t ≠ termVal e' u := (h.spec_neq hn).1
 
-/-- Satisfaction of a coded less-than atom, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma val_lt (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^< u, e'⟫ ∈ domain q) :
     ⟪⟪t ^< u, e'⟫, 1⟫ ∈ q ↔ termVal e' t < termVal e' u := (h.spec_lt hn).1
 
-/-- Satisfaction of a coded not-less-than atom, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma val_nlt (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^≮ u, e'⟫ ∈ domain q) :
     ⟪⟪t ^≮ u, e'⟫, 1⟫ ∈ q ↔ ¬termVal e' t < termVal e' u := (h.spec_nlt hn).1
 
-/-- Immediate subformulas of a coded conjunction in the domain also belong to the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma mem_dom_and (h : BoundedSatisfactionTable q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q :=
   ⟨(h.spec_and hn).1, (h.spec_and hn).2.1⟩
 
-/-- The Tarski clause for conjunction, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma val_and (h : BoundedSatisfactionTable q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
     ⟪⟪p₁ ^⋏ p₂, e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∧ ⟪⟪p₂, e'⟫, 1⟫ ∈ q := (h.spec_and hn).2.2.1
 
-/-- Immediate subformulas of a coded disjunction in the domain also belong to the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma mem_dom_or (h : BoundedSatisfactionTable q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q :=
   ⟨(h.spec_or hn).1, (h.spec_or hn).2.1⟩
 
-/-- The Tarski clause for disjunction, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma val_or (h : BoundedSatisfactionTable q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) :
     ⟪⟪p₁ ^⋎ p₂, e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∨ ⟪⟪p₂, e'⟫, 1⟫ ∈ q := (h.spec_or hn).2.2.1
 
-/-- Immediate subformulas of a coded bounded universal in the domain also belong to the domain,
-under the extended assignment.
-- [HP98, Definition I.1.71(1)] -/
 lemma mem_dom_ball (h : BoundedSatisfactionTable q z e) (ht : IsUTerm ℒₒᵣ t)
     (hn : ⟪qqBall (termBShift ℒₒᵣ t) p, e'⟫ ∈ domain q) {x : V} (hx : x < termVal e' t) :
     ⟪p, x ∷ e'⟫ ∈ domain q :=
   (h.spec_ball hn).2.1 x (by rwa [termVal_termBShift ht])
 
-/-- The Tarski clause for the bounded universal, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma val_ball (h : BoundedSatisfactionTable q z e) (ht : IsUTerm ℒₒᵣ t)
     (hn : ⟪qqBall (termBShift ℒₒᵣ t) p, e'⟫ ∈ domain q) :
     ⟪⟪qqBall (termBShift ℒₒᵣ t) p, e'⟫, 1⟫ ∈ q ↔ ∀ x < termVal e' t, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q := by
   have := (h.spec_ball hn).2.2.1
   rwa [termVal_termBShift ht] at this
 
-/-- Immediate subformulas of a coded bounded existential in the domain also belong to the
-domain, under the extended assignment.
-- [HP98, Definition I.1.71(1)] -/
 lemma mem_dom_bex (h : BoundedSatisfactionTable q z e) (ht : IsUTerm ℒₒᵣ t)
     (hn : ⟪qqBex (termBShift ℒₒᵣ t) p, e'⟫ ∈ domain q) {x : V} (hx : x < termVal e' t) :
     ⟪p, x ∷ e'⟫ ∈ domain q :=
   (h.spec_bex hn).2.1 x (by rwa [termVal_termBShift ht])
 
-/-- The Tarski clause for the bounded existential, at a node of the domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma val_bex (h : BoundedSatisfactionTable q z e) (ht : IsUTerm ℒₒᵣ t)
     (hn : ⟪qqBex (termBShift ℒₒᵣ t) p, e'⟫ ∈ domain q) :
     ⟪⟪qqBex (termBShift ℒₒᵣ t) p, e'⟫, 1⟫ ∈ q ↔ ∃ x < termVal e' t, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q := by
@@ -386,16 +343,15 @@ namespace BoundedSatisfactionTable
 
 variable {q q₁ q₂ z z₁ z₂ e e₁ e₂ p : V}
 
-/-! ## Uniqueness -/
+/-! ## Uniqueness
 
-/-- A table takes at most one value at each node, so `0` and `1` cannot both occur.
-- [HP98, Definition I.1.71(1)] -/
+- [HP98, Definition I.1.71(1)]
+- [HP98, Lemma I.1.72(2)] -/
+
 lemma val_one_ne_zero (h : BoundedSatisfactionTable q z e) {n : V} (h1 : ⟪n, 1⟫ ∈ q) (h0 : ⟪n,
   0⟫ ∈ q) : False := by
   simpa using h.isMapping.uniq h1 h0
 
-/-- Every node of the domain carries the value `1` or the value `0`.
-- [HP98, Definition I.1.71(1)] -/
 lemma val_zero_or_one (h : BoundedSatisfactionTable q z e) :
     ∀ p e', ⟪p, e'⟫ ∈ domain q → ⟪⟪p, e'⟫, 1⟫ ∈ q ∨ ⟪⟪p, e'⟫, 0⟫ ∈ q := by
   refine ISigma1.pi1_order_induction
@@ -451,8 +407,6 @@ lemma val_zero_or_one (h : BoundedSatisfactionTable q z e) :
       · exact Or.inl (hA.mpr ⟨x, hx, h'⟩)
       · exact absurd h' hx0
 
-/-- Two tables agree at every node common to their domains.
-- [HP98, Lemma I.1.72(2)] -/
 lemma agree (h₁ : BoundedSatisfactionTable q₁ z₁ e₁) (h₂ : BoundedSatisfactionTable q₂ z₂ e₂) :
     ∀ p e', ⟪p, e'⟫ ∈ domain q₁ → ⟪p, e'⟫ ∈ domain q₂ →
       (⟪⟪p, e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪p, e'⟫, 1⟫ ∈ q₂) ∧
@@ -521,9 +475,6 @@ lemma agree (h₁ : BoundedSatisfactionTable q₁ z₁ e₁) (h₂ : BoundedSati
     · rw [hB, hB₂]
       exact forall_congr' fun x ↦ imp_congr_right fun hx ↦ (key x hx).2
 
-/-- Every node of a table is a node of any other table with the same root: the domain of a table
-is determined by its root.
-- [HP98, Lemma I.1.72(2)] -/
 lemma dom_subset (h₁ : BoundedSatisfactionTable q₁ z e) (h₂ : BoundedSatisfactionTable q₂ z e) :
     ∀ n ∈ domain q₁, n ∈ domain q₂ := by
   have key : ∀ k n, n ∈ domain q₁ → q₁ ≤ π₁ n + k → n ∈ domain q₂ := by
@@ -553,8 +504,6 @@ lemma dom_subset (h₁ : BoundedSatisfactionTable q₁ z e) (h₂ : BoundedSatis
       · exact (h₂.spec_bex (up _ hm (by simp))).2.1 x hx
   exact fun n hn ↦ key q₁ n hn le_add_self
 
-/-- A partial satisfaction table for a fixed formula and assignment is unique.
-- [HP98, Lemma I.1.72(2)] -/
 theorem uniq (h₁ : BoundedSatisfactionTable q₁ z e) (h₂ : BoundedSatisfactionTable q₂ z e) :
     q₁ = q₂ := by
   have sub : ∀ {r₁ r₂ : V}, BoundedSatisfactionTable r₁ z e → BoundedSatisfactionTable r₂ z e →
@@ -590,37 +539,33 @@ universal on the $\Pi_1$ side, which leaves the clause itself $\Sigma_0$. -/
 
 namespace BoundedSatisfactionTableF
 
-/-! ### Nodes and values as $\Sigma_0$ relations -/
+/-! ### Nodes and values as $\Sigma_0$ relations
 
-/-- Defining formula for `n ∈ domain q`.
 - [HP98, Lemma I.1.72(1)] -/
+
+/-- Defining formula for `n ∈ domain q`. -/
 def inDomDef : 𝚺₀.Semisentence 2 := .mkSigma “q n. ∃ v < q, :⟪n, v⟫:∈ q”
 
-/-- `inDomDef` defines membership in the domain of a finite mapping.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `inDomDef` defines membership in the domain of a finite mapping. -/
 instance inDom_defined : 𝚺₀-Relation (fun q n : V ↦ n ∈ domain q) via inDomDef := .mk fun v ↦ by
   suffices (∃ y < v 0, ⟪v 1, y⟫ ∈ v 0) ↔ v 1 ∈ domain (v 0) by simpa [inDomDef]
   rw [mem_domain_iff]
   exact ⟨fun ⟨y, _, h⟩ ↦ ⟨y, h⟩, fun ⟨y, h⟩ ↦ ⟨y, lt_of_mem_rng h, h⟩⟩
 
 /-- Defining formula for `⟪⟪p, e⟫, v⟫ ∈ q`: the table `q` gives the node `⟪p, e⟫` the value
-`v`.
-- [HP98, Lemma I.1.72(1)] -/
+`v`. -/
 def nodeValDef : 𝚺₀.Semisentence 4 := .mkSigma
   “q p e v. ∃ n <⁺ (p + e + 1)², !pairDef n p e ∧ :⟪n, v⟫:∈ q”
 
-/-- `nodeValDef` defines the value of a table at a node.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `nodeValDef` defines the value of a table at a node. -/
 instance nodeVal_defined :
     𝚺₀-Relation₄ (fun q p e v : V ↦ ⟪⟪p, e⟫, v⟫ ∈ q) via nodeValDef := .mk fun v ↦ by
   simp [nodeValDef]
 
-/-- Defining formula for `⟪p, e⟫ ∈ domain q`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `⟪p, e⟫ ∈ domain q`. -/
 def nodeDomDef : 𝚺₀.Semisentence 3 := .mkSigma “q p e. ∃ v < q, !nodeValDef q p e v”
 
-/-- `nodeDomDef` defines membership of a node in a table.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `nodeDomDef` defines membership of a node in a table. -/
 instance nodeDom_defined :
     𝚺₀-Relation₃ (fun q p e : V ↦ ⟪p, e⟫ ∈ domain q) via nodeDomDef := .mk fun v ↦ by
   suffices (∃ y < v 0, ⟪⟪v 1, v 2⟫, y⟫ ∈ v 0) ↔ ⟪v 1, v 2⟫ ∈ domain (v 0) by
@@ -628,88 +573,74 @@ instance nodeDom_defined :
   rw [mem_domain_iff]
   exact ⟨fun ⟨y, _, h⟩ ↦ ⟨y, h⟩, fun ⟨y, h⟩ ↦ ⟨y, lt_of_mem_rng h, h⟩⟩
 
-/-- Defining formula for `⟪⟪p, x ∷ e⟫, v⟫ ∈ q`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `⟪⟪p, x ∷ e⟫, v⟫ ∈ q`. -/
 def childValDef : 𝚺₀.Semisentence 5 := .mkSigma
   “q p x e v. ∃ xe <⁺ (x + e + 1)² + 1, !adjoinDef xe x e ∧ !nodeValDef q p xe v”
 
-/-- `childValDef` defines the value of a table at a node under an extended assignment.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `childValDef` defines the value of a table at a node under an extended assignment. -/
 instance childVal_defined :
     HierarchySymbol.Defined (fun v : Fin 5 → V ↦ ⟪⟪v 1, v 2 ∷ v 3⟫, v 4⟫ ∈ v 0) childValDef :=
   .mk fun v ↦ by simp [childValDef, nodeVal_defined.df, adjoin_def]
 
-/-- Defining formula for `⟪p, x ∷ e⟫ ∈ domain q`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `⟪p, x ∷ e⟫ ∈ domain q`. -/
 def childDomDef : 𝚺₀.Semisentence 4 := .mkSigma
   “q p x e. ∃ xe <⁺ (x + e + 1)² + 1, !adjoinDef xe x e ∧ !nodeDomDef q p xe”
 
-/-- `childDomDef` defines membership of a node under an extended assignment.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `childDomDef` defines membership of a node under an extended assignment. -/
 instance childDom_defined :
     𝚺₀-Relation₄ (fun q p x e : V ↦ ⟪p, x ∷ e⟫ ∈ domain q) via childDomDef := .mk fun v ↦ by
   simp [childDomDef, nodeDom_defined.df, adjoin_def]
 
-/-- Defining formula for `n = ⟪p, x ∷ e⟫`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `n = ⟪p, x ∷ e⟫`. -/
 def childPairDef : 𝚺₀.Semisentence 4 := .mkSigma
   “n p x e. ∃ xe <⁺ (x + e + 1)² + 1, !adjoinDef xe x e ∧ !pairDef n p xe”
 
-/-- `childPairDef` defines the code of a node under an extended assignment.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `childPairDef` defines the code of a node under an extended assignment. -/
 instance childPair_defined :
     𝚺₀-Relation₄ (fun n p x e : V ↦ n = ⟪p, x ∷ e⟫) via childPairDef := .mk fun v ↦ by
   simp [childPairDef, adjoin_def]
 
-/-! ### The ten Tarski clauses -/
+/-! ### The ten Tarski clauses
 
-/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is the truth constant.
 - [HP98, Lemma I.1.72(1)] -/
+
+/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is the truth constant. -/
 def SpecVerum (q z e : V) : Prop := z = ^⊤ ∧ ⟪⟪z, e⟫, 1⟫ ∈ q
 
-/-- Defining formula for `SpecVerum`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `SpecVerum`. -/
 def specVerumDef : 𝚺₀.Semisentence 3 := .mkSigma “q z e. !qqVerumDef z ∧ !nodeValDef q z e 1”
 
-/-- `specVerumDef` defines `SpecVerum`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `specVerumDef` defines `SpecVerum`. -/
 instance specVerum_defined : 𝚺₀-Relation₃ (SpecVerum : V → V → V → Prop) via specVerumDef :=
   .mk fun v ↦ by simp [specVerumDef, SpecVerum, nodeVal_defined.df]
 
-/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is the falsehood constant.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is the falsehood constant. -/
 def SpecFalsum (q z e : V) : Prop := z = ^⊥ ∧ ⟪⟪z, e⟫, 0⟫ ∈ q
 
-/-- Defining formula for `SpecFalsum`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `SpecFalsum`. -/
 def specFalsumDef : 𝚺₀.Semisentence 3 := .mkSigma “q z e. !qqFalsumDef z ∧ !nodeValDef q z e 0”
 
-/-- `specFalsumDef` defines `SpecFalsum`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `specFalsumDef` defines `SpecFalsum`. -/
 instance specFalsum_defined : 𝚺₀-Relation₃ (SpecFalsum : V → V → V → Prop) via specFalsumDef :=
   .mk fun v ↦ by simp [specFalsumDef, SpecFalsum, nodeVal_defined.df]
 
-/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is an equality atom.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is an equality atom. -/
 def SpecEq (q z e : V) : Prop :=
   ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^= u ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ termVal e t = termVal e u) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ termVal e t ≠ termVal e u)
 
-/-- Defining formula for the values of `SpecEq` once the two term values are known.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for the values of `SpecEq` once the two term values are known. -/
 def eqMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
   “q z e a b. (!nodeValDef q z e 1 ↔ a = b) ∧ (!nodeValDef q z e 0 ↔ a ≠ b)”
 
-/-- `eqMatrixDef` defines the values of `SpecEq` at given term values.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `eqMatrixDef` defines the values of `SpecEq` at given term values. -/
 instance eqMatrix_defined :
     HierarchySymbol.Defined (fun v : Fin 5 → V ↦
       (⟪⟪v 1, v 2⟫, 1⟫ ∈ v 0 ↔ v 3 = v 4) ∧ (⟪⟪v 1, v 2⟫, 0⟫ ∈ v 0 ↔ v 3 ≠ v 4)) eqMatrixDef :=
   .mk fun v ↦ by simp [eqMatrixDef, nodeVal_defined.df]
 
-/-- Defining formula for `SpecEq`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `SpecEq`. -/
 noncomputable def specEqDef : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ t < z, ∃ u < z,
     !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqEQDef z t u ∧
@@ -718,8 +649,7 @@ noncomputable def specEqDef : 𝚫₁.Semisentence 3 := .mkDelta
     !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqEQDef z' t u → z = z') ∧
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !eqMatrixDef q z e a b”)
 
-/-- `specEqDef` defines `SpecEq`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `specEqDef` defines `SpecEq`. -/
 instance specEq_defined : 𝚫₁-Relation₃ (SpecEq : V → V → V → Prop) via specEqDef := .mk <| by
   constructor
   · intro v
@@ -729,27 +659,23 @@ instance specEq_defined : 𝚫₁-Relation₃ (SpecEq : V → V → V → Prop) 
     simp [specEqDef, HierarchySymbol.Semiformula.val_sigma, SpecEq, (termVal.defined (V := V)).df,
       (qqEQ_defined (V := V)).df, eqMatrix_defined.df]
 
-/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is an inequality atom.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is an inequality atom. -/
 def SpecNeq (q z e : V) : Prop :=
   ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^≠ u ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ termVal e t ≠ termVal e u) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ termVal e t = termVal e u)
 
-/-- Defining formula for the values of `SpecNeq` once the two term values are known.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for the values of `SpecNeq` once the two term values are known. -/
 def neqMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
   “q z e a b. (!nodeValDef q z e 1 ↔ a ≠ b) ∧ (!nodeValDef q z e 0 ↔ a = b)”
 
-/-- `neqMatrixDef` defines the values of `SpecNeq` at given term values.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `neqMatrixDef` defines the values of `SpecNeq` at given term values. -/
 instance neqMatrix_defined :
     HierarchySymbol.Defined (fun v : Fin 5 → V ↦
       (⟪⟪v 1, v 2⟫, 1⟫ ∈ v 0 ↔ v 3 ≠ v 4) ∧ (⟪⟪v 1, v 2⟫, 0⟫ ∈ v 0 ↔ v 3 = v 4)) neqMatrixDef :=
   .mk fun v ↦ by simp [neqMatrixDef, nodeVal_defined.df]
 
-/-- Defining formula for `SpecNeq`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `SpecNeq`. -/
 noncomputable def specNeqDef : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ t < z, ∃ u < z,
     !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqNEQDef z t u ∧
@@ -758,8 +684,7 @@ noncomputable def specNeqDef : 𝚫₁.Semisentence 3 := .mkDelta
     !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqNEQDef z' t u → z = z') ∧
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !neqMatrixDef q z e a b”)
 
-/-- `specNeqDef` defines `SpecNeq`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `specNeqDef` defines `SpecNeq`. -/
 instance specNeq_defined : 𝚫₁-Relation₃ (SpecNeq : V → V → V → Prop) via specNeqDef := .mk <| by
   constructor
   · intro v
@@ -769,27 +694,23 @@ instance specNeq_defined : 𝚫₁-Relation₃ (SpecNeq : V → V → V → Prop
     simp [specNeqDef, HierarchySymbol.Semiformula.val_sigma, SpecNeq, (termVal.defined (V := V)).df,
       (qqNEQ_defined (V := V)).df, neqMatrix_defined.df]
 
-/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a less-than atom.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a less-than atom. -/
 def SpecLt (q z e : V) : Prop :=
   ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^< u ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ termVal e t < termVal e u) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ¬termVal e t < termVal e u)
 
-/-- Defining formula for the values of `SpecLt` once the two term values are known.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for the values of `SpecLt` once the two term values are known. -/
 def ltMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
   “q z e a b. (!nodeValDef q z e 1 ↔ a < b) ∧ (!nodeValDef q z e 0 ↔ ¬a < b)”
 
-/-- `ltMatrixDef` defines the values of `SpecLt` at given term values.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `ltMatrixDef` defines the values of `SpecLt` at given term values. -/
 instance ltMatrix_defined :
     HierarchySymbol.Defined (fun v : Fin 5 → V ↦
       (⟪⟪v 1, v 2⟫, 1⟫ ∈ v 0 ↔ v 3 < v 4) ∧ (⟪⟪v 1, v 2⟫, 0⟫ ∈ v 0 ↔ ¬v 3 < v 4)) ltMatrixDef :=
   .mk fun v ↦ by simp [ltMatrixDef, nodeVal_defined.df]
 
-/-- Defining formula for `SpecLt`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `SpecLt`. -/
 noncomputable def specLtDef : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ t < z, ∃ u < z,
     !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqLTDef z t u ∧
@@ -798,8 +719,7 @@ noncomputable def specLtDef : 𝚫₁.Semisentence 3 := .mkDelta
     !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqLTDef z' t u → z = z') ∧
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !ltMatrixDef q z e a b”)
 
-/-- `specLtDef` defines `SpecLt`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `specLtDef` defines `SpecLt`. -/
 instance specLt_defined : 𝚫₁-Relation₃ (SpecLt : V → V → V → Prop) via specLtDef := .mk <| by
   constructor
   · intro v
@@ -809,27 +729,23 @@ instance specLt_defined : 𝚫₁-Relation₃ (SpecLt : V → V → V → Prop) 
     simp [specLtDef, HierarchySymbol.Semiformula.val_sigma, SpecLt, (termVal.defined (V := V)).df,
       (qqLT_defined (V := V)).df, ltMatrix_defined.df]
 
-/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a not-less-than atom.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a not-less-than atom. -/
 def SpecNlt (q z e : V) : Prop :=
   ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^≮ u ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ¬termVal e t < termVal e u) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ termVal e t < termVal e u)
 
-/-- Defining formula for the values of `SpecNlt` once the two term values are known.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for the values of `SpecNlt` once the two term values are known. -/
 def nltMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
   “q z e a b. (!nodeValDef q z e 1 ↔ ¬a < b) ∧ (!nodeValDef q z e 0 ↔ a < b)”
 
-/-- `nltMatrixDef` defines the values of `SpecNlt` at given term values.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `nltMatrixDef` defines the values of `SpecNlt` at given term values. -/
 instance nltMatrix_defined :
     HierarchySymbol.Defined (fun v : Fin 5 → V ↦
       (⟪⟪v 1, v 2⟫, 1⟫ ∈ v 0 ↔ ¬v 3 < v 4) ∧ (⟪⟪v 1, v 2⟫, 0⟫ ∈ v 0 ↔ v 3 < v 4)) nltMatrixDef :=
   .mk fun v ↦ by simp [nltMatrixDef, nodeVal_defined.df]
 
-/-- Defining formula for `SpecNlt`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `SpecNlt`. -/
 noncomputable def specNltDef : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ t < z, ∃ u < z,
     !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqNLTDef z t u ∧
@@ -838,8 +754,7 @@ noncomputable def specNltDef : 𝚫₁.Semisentence 3 := .mkDelta
     !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqNLTDef z' t u → z = z') ∧
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !nltMatrixDef q z e a b”)
 
-/-- `specNltDef` defines `SpecNlt`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `specNltDef` defines `SpecNlt`. -/
 instance specNlt_defined : 𝚫₁-Relation₃ (SpecNlt : V → V → V → Prop) via specNltDef := .mk <| by
   constructor
   · intro v
@@ -849,61 +764,52 @@ instance specNlt_defined : 𝚫₁-Relation₃ (SpecNlt : V → V → V → Prop
     simp [specNltDef, HierarchySymbol.Semiformula.val_sigma, SpecNlt, (termVal.defined (V := V)).df,
       (qqNLT_defined (V := V)).df, nltMatrix_defined.df]
 
-/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a conjunction.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a conjunction. -/
 def SpecAnd (q z e : V) : Prop :=
   ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋏ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈ domain q ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 1⟫ ∈ q ∧ ⟪⟪p₂, e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 0⟫ ∈ q ∨ ⟪⟪p₂, e⟫, 0⟫ ∈ q)
 
-/-- Defining formula for `SpecAnd`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `SpecAnd`. -/
 def specAndDef : 𝚺₀.Semisentence 3 := .mkSigma
   “q z e. ∃ p₁ < z, ∃ p₂ < z, !qqAndDef z p₁ p₂ ∧ !nodeDomDef q p₁ e ∧ !nodeDomDef q p₂ e ∧
     (!nodeValDef q z e 1 ↔ !nodeValDef q p₁ e 1 ∧ !nodeValDef q p₂ e 1) ∧
     (!nodeValDef q z e 0 ↔ !nodeValDef q p₁ e 0 ∨ !nodeValDef q p₂ e 0)”
 
-/-- `specAndDef` defines `SpecAnd`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `specAndDef` defines `SpecAnd`. -/
 instance specAnd_defined : 𝚺₀-Relation₃ (SpecAnd : V → V → V → Prop) via specAndDef :=
   .mk fun v ↦ by simp [specAndDef, SpecAnd, nodeVal_defined.df, nodeDom_defined.df]
 
-/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a disjunction.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a disjunction. -/
 def SpecOr (q z e : V) : Prop :=
   ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋎ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈ domain q ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 1⟫ ∈ q ∨ ⟪⟪p₂, e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 0⟫ ∈ q ∧ ⟪⟪p₂, e⟫, 0⟫ ∈ q)
 
-/-- Defining formula for `SpecOr`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `SpecOr`. -/
 def specOrDef : 𝚺₀.Semisentence 3 := .mkSigma
   “q z e. ∃ p₁ < z, ∃ p₂ < z, !qqOrDef z p₁ p₂ ∧ !nodeDomDef q p₁ e ∧ !nodeDomDef q p₂ e ∧
     (!nodeValDef q z e 1 ↔ !nodeValDef q p₁ e 1 ∨ !nodeValDef q p₂ e 1) ∧
     (!nodeValDef q z e 0 ↔ !nodeValDef q p₁ e 0 ∧ !nodeValDef q p₂ e 0)”
 
-/-- `specOrDef` defines `SpecOr`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `specOrDef` defines `SpecOr`. -/
 instance specOr_defined : 𝚺₀-Relation₃ (SpecOr : V → V → V → Prop) via specOrDef :=
   .mk fun v ↦ by simp [specOrDef, SpecOr, nodeVal_defined.df, nodeDom_defined.df]
 
-/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a bounded universal.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a bounded universal. -/
 def SpecBall (q z e : V) : Prop :=
   ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ z = qqBall u p ∧
     (∀ x < termVal (0 ∷ e) u, ⟪p, x ∷ e⟫ ∈ domain q) ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 0⟫ ∈ q)
 
-/-- Defining formula for the values of `SpecBall` once the bound is known.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for the values of `SpecBall` once the bound is known. -/
 def ballMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
   “q z e p b. (∀ x < b, !childDomDef q p x e) ∧
     (!nodeValDef q z e 1 ↔ ∀ x < b, !childValDef q p x e 1) ∧
     (!nodeValDef q z e 0 ↔ ∃ x < b, !childValDef q p x e 0)”
 
-/-- `ballMatrixDef` defines the values of `SpecBall` at a given bound.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `ballMatrixDef` defines the values of `SpecBall` at a given bound. -/
 instance ballMatrix_defined :
     HierarchySymbol.Defined (fun v : Fin 5 → V ↦
       (∀ x < v 4, ⟪v 3, x ∷ v 2⟫ ∈ domain (v 0)) ∧
@@ -912,8 +818,7 @@ instance ballMatrix_defined :
   .mk fun v ↦ by
     simp [ballMatrixDef, nodeVal_defined.df, childVal_defined.df, childDom_defined.df]
 
-/-- Defining formula for `SpecBall`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `SpecBall`. -/
 noncomputable def specBallDef : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ u < z, ∃ p < z,
     (∃ t <⁺ u, !(isUTerm ℒₒᵣ).sigma t ∧ !(termBShiftGraph ℒₒᵣ) u t) ∧ !qqBallDef z u p ∧
@@ -923,8 +828,7 @@ noncomputable def specBallDef : 𝚫₁.Semisentence 3 := .mkDelta
     (∀ z', !qqBallDef z' u p → z = z') ∧
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !ballMatrixDef q z e p b”)
 
-/-- `specBallDef` defines `SpecBall`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `specBallDef` defines `SpecBall`. -/
 instance specBall_defined : 𝚫₁-Relation₃ (SpecBall : V → V → V → Prop) via specBallDef :=
   .mk <| by
   constructor
@@ -937,23 +841,20 @@ instance specBall_defined : 𝚫₁-Relation₃ (SpecBall : V → V → V → Pr
       (termVal.defined (V := V)).df, (termBShift.defined (L := ℒₒᵣ) (V := V)).df,
       (qqBall_defined (V := V)).df, ballMatrix_defined.df, adjoin_def]
 
-/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a bounded existential.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a bounded existential. -/
 def SpecBex (q z e : V) : Prop :=
   ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ z = qqBex u p ∧
     (∀ x < termVal (0 ∷ e) u, ⟪p, x ∷ e⟫ ∈ domain q) ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 0⟫ ∈ q)
 
-/-- Defining formula for the values of `SpecBex` once the bound is known.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for the values of `SpecBex` once the bound is known. -/
 def bexMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
   “q z e p b. (∀ x < b, !childDomDef q p x e) ∧
     (!nodeValDef q z e 1 ↔ ∃ x < b, !childValDef q p x e 1) ∧
     (!nodeValDef q z e 0 ↔ ∀ x < b, !childValDef q p x e 0)”
 
-/-- `bexMatrixDef` defines the values of `SpecBex` at a given bound.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `bexMatrixDef` defines the values of `SpecBex` at a given bound. -/
 instance bexMatrix_defined :
     HierarchySymbol.Defined (fun v : Fin 5 → V ↦
       (∀ x < v 4, ⟪v 3, x ∷ v 2⟫ ∈ domain (v 0)) ∧
@@ -962,8 +863,7 @@ instance bexMatrix_defined :
   .mk fun v ↦ by
     simp [bexMatrixDef, nodeVal_defined.df, childVal_defined.df, childDom_defined.df]
 
-/-- Defining formula for `SpecBex`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `SpecBex`. -/
 noncomputable def specBexDef : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ u < z, ∃ p < z,
     (∃ t <⁺ u, !(isUTerm ℒₒᵣ).sigma t ∧ !(termBShiftGraph ℒₒᵣ) u t) ∧ !qqBexDef z u p ∧
@@ -973,8 +873,7 @@ noncomputable def specBexDef : 𝚫₁.Semisentence 3 := .mkDelta
     (∀ z', !qqBexDef z' u p → z = z') ∧
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !bexMatrixDef q z e p b”)
 
-/-- `specBexDef` defines `SpecBex`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `specBexDef` defines `SpecBex`. -/
 instance specBex_defined : 𝚫₁-Relation₃ (SpecBex : V → V → V → Prop) via specBexDef :=
   .mk <| by
   constructor
@@ -987,17 +886,16 @@ instance specBex_defined : 𝚫₁-Relation₃ (SpecBex : V → V → V → Prop
       (termVal.defined (V := V)).df, (termBShift.defined (L := ℒₒᵣ) (V := V)).df,
       (qqBex_defined (V := V)).df, bexMatrix_defined.df, adjoin_def]
 
+/-! ### The clause of `BoundedSatisfactionTable.spec`, assembled
 
-/-! ### The clause of `BoundedSatisfactionTable.spec`, assembled -/
-
-/-- The clause `BoundedSatisfactionTable.spec` imposes at the node `⟪z, e⟫` of the domain of `q`.
 - [HP98, Lemma I.1.72(1)] -/
+
+/-- The clause `BoundedSatisfactionTable.spec` imposes at the node `⟪z, e⟫` of the domain of `q`. -/
 def SpecAt (q z e : V) : Prop :=
   SpecVerum q z e ∨ SpecFalsum q z e ∨ SpecEq q z e ∨ SpecNeq q z e ∨ SpecLt q z e ∨
     SpecNlt q z e ∨ SpecAnd q z e ∨ SpecOr q z e ∨ SpecBall q z e ∨ SpecBex q z e
 
-/-- Defining formula for `SpecAt`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `SpecAt`. -/
 noncomputable def specDef : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. !specVerumDef q z e ∨ !specFalsumDef q z e ∨ !specEqDef.sigma q z e ∨
     !specNeqDef.sigma q z e ∨ !specLtDef.sigma q z e ∨ !specNltDef.sigma q z e ∨
@@ -1006,67 +904,58 @@ noncomputable def specDef : 𝚫₁.Semisentence 3 := .mkDelta
     !specNeqDef.pi q z e ∨ !specLtDef.pi q z e ∨ !specNltDef.pi q z e ∨
     !specAndDef q z e ∨ !specOrDef q z e ∨ !specBallDef.pi q z e ∨ !specBexDef.pi q z e”)
 
-/-- `specDef` defines `SpecAt`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `specDef` defines `SpecAt`. -/
 instance specAt_defined : 𝚫₁-Relation₃ (SpecAt : V → V → V → Prop) via specDef := .mk <| by
   constructor
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma]
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma, SpecAt]
 
-/-! ### The clause of `BoundedSatisfactionTable.minimal` -/
+/-! ### The clause of `BoundedSatisfactionTable.minimal`
 
-/-- A node of the domain that is an immediate subformula of a coded conjunction in it.
 - [HP98, Lemma I.1.72(1)] -/
+
+/-- A node of the domain that is an immediate subformula of a coded conjunction in it. -/
 def MinAnd (q n : V) : Prop :=
   ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, c = p₁ ^⋏ p₂ ∧ ⟪c, e⟫ ∈ domain q ∧
     (n = ⟪p₁, e⟫ ∨ n = ⟪p₂, e⟫)
 
-/-- Defining formula for `MinAnd`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `MinAnd`. -/
 def minAndDef : 𝚺₀.Semisentence 2 := .mkSigma
   “q n. ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, !qqAndDef c p₁ p₂ ∧ !nodeDomDef q c e ∧
     (!pairDef n p₁ e ∨ !pairDef n p₂ e)”
 
-/-- `minAndDef` defines `MinAnd`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `minAndDef` defines `MinAnd`. -/
 instance minAnd_defined : 𝚺₀-Relation (MinAnd : V → V → Prop) via minAndDef := .mk fun v ↦ by
   simp [minAndDef, MinAnd, nodeDom_defined.df]
 
-/-- A node of the domain that is an immediate subformula of a coded disjunction in it.
-- [HP98, Lemma I.1.72(1)] -/
+/-- A node of the domain that is an immediate subformula of a coded disjunction in it. -/
 def MinOr (q n : V) : Prop :=
   ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, c = p₁ ^⋎ p₂ ∧ ⟪c, e⟫ ∈ domain q ∧
     (n = ⟪p₁, e⟫ ∨ n = ⟪p₂, e⟫)
 
-/-- Defining formula for `MinOr`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `MinOr`. -/
 def minOrDef : 𝚺₀.Semisentence 2 := .mkSigma
   “q n. ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, !qqOrDef c p₁ p₂ ∧ !nodeDomDef q c e ∧
     (!pairDef n p₁ e ∨ !pairDef n p₂ e)”
 
-/-- `minOrDef` defines `MinOr`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `minOrDef` defines `MinOr`. -/
 instance minOr_defined : 𝚺₀-Relation (MinOr : V → V → Prop) via minOrDef := .mk fun v ↦ by
   simp [minOrDef, MinOr, nodeDom_defined.df]
 
-/-- `∃ x < b, n = ⟪p, x ∷ e⟫`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `∃ x < b, n = ⟪p, x ∷ e⟫`. -/
 def minChildDef : 𝚺₀.Semisentence 4 := .mkSigma “n p e b. ∃ x < b, !childPairDef n p x e”
 
-/-- `minChildDef` defines the codes of the nodes below a bounded quantifier.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `minChildDef` defines the codes of the nodes below a bounded quantifier. -/
 instance minChild_defined :
     𝚺₀-Relation₄ (fun n p e b : V ↦ ∃ x < b, n = ⟪p, x ∷ e⟫) via minChildDef := .mk fun v ↦ by
   simp [minChildDef, childPair_defined.df]
 
-/-- A node of the domain reached by entering a coded bounded universal in it.
-- [HP98, Lemma I.1.72(1)] -/
+/-- A node of the domain reached by entering a coded bounded universal in it. -/
 def MinBall (q n : V) : Prop :=
   ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, c = qqBall u p ∧ ⟪c, e⟫ ∈ domain q ∧
     ∃ x < termVal (0 ∷ e) u, n = ⟪p, x ∷ e⟫
 
-/-- Defining formula for `MinBall`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `MinBall`. -/
 noncomputable def minBallDef : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, !qqBallDef c u p ∧ !nodeDomDef q c e ∧
     ∃ e0, !adjoinDef e0 0 e ∧ ∃ b, !termValGraph b e0 u ∧ !minChildDef n p e b”)
@@ -1074,8 +963,7 @@ noncomputable def minBallDef : 𝚫₁.Semisentence 2 := .mkDelta
     !nodeDomDef q c e ∧
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !minChildDef n p e b”)
 
-/-- `minBallDef` defines `MinBall`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `minBallDef` defines `MinBall`. -/
 instance minBall_defined : 𝚫₁-Relation (MinBall : V → V → Prop) via minBallDef := .mk <| by
   constructor
   · intro v
@@ -1086,14 +974,12 @@ instance minBall_defined : 𝚫₁-Relation (MinBall : V → V → Prop) via min
       (termVal.defined (V := V)).df, (qqBall_defined (V := V)).df, nodeDom_defined.df,
       minChild_defined.df, adjoin_def]
 
-/-- A node of the domain reached by entering a coded bounded existential in it.
-- [HP98, Lemma I.1.72(1)] -/
+/-- A node of the domain reached by entering a coded bounded existential in it. -/
 def MinBex (q n : V) : Prop :=
   ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, c = qqBex u p ∧ ⟪c, e⟫ ∈ domain q ∧
     ∃ x < termVal (0 ∷ e) u, n = ⟪p, x ∷ e⟫
 
-/-- Defining formula for `MinBex`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `MinBex`. -/
 noncomputable def minBexDef : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, !qqBexDef c u p ∧ !nodeDomDef q c e ∧
     ∃ e0, !adjoinDef e0 0 e ∧ ∃ b, !termValGraph b e0 u ∧ !minChildDef n p e b”)
@@ -1101,8 +987,7 @@ noncomputable def minBexDef : 𝚫₁.Semisentence 2 := .mkDelta
     !nodeDomDef q c e ∧
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !minChildDef n p e b”)
 
-/-- `minBexDef` defines `MinBex`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `minBexDef` defines `MinBex`. -/
 instance minBex_defined : 𝚫₁-Relation (MinBex : V → V → Prop) via minBexDef := .mk <| by
   constructor
   · intro v
@@ -1113,31 +998,28 @@ instance minBex_defined : 𝚫₁-Relation (MinBex : V → V → Prop) via minBe
       (termVal.defined (V := V)).df, (qqBex_defined (V := V)).df, nodeDom_defined.df,
       minChild_defined.df, adjoin_def]
 
-/-- The clause `BoundedSatisfactionTable.minimal` imposes at the node `n` of the domain of `q`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The clause `BoundedSatisfactionTable.minimal` imposes at the node `n` of the domain of `q`. -/
 def MinimalAt (q z e n : V) : Prop :=
   n = ⟪z, e⟫ ∨ MinAnd q n ∨ MinOr q n ∨ MinBall q n ∨ MinBex q n
 
-/-- Defining formula for `MinimalAt`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Defining formula for `MinimalAt`. -/
 noncomputable def minimalDef : 𝚫₁.Semisentence 4 := .mkDelta
   (.mkSigma “q z e n. !pairDef n z e ∨ !minAndDef q n ∨ !minOrDef q n ∨ !minBallDef.sigma q n ∨
     !minBexDef.sigma q n”)
   (.mkPi “q z e n. !pairDef n z e ∨ !minAndDef q n ∨ !minOrDef q n ∨ !minBallDef.pi q n ∨
     !minBexDef.pi q n”)
 
-/-- `minimalDef` defines `MinimalAt`.
-- [HP98, Lemma I.1.72(1)] -/
+/-- `minimalDef` defines `MinimalAt`. -/
 instance minimalAt_defined :
     𝚫₁-Relation₄ (MinimalAt : V → V → V → V → Prop) via minimalDef := .mk <| by
   constructor
   · intro v; simp [minimalDef, HierarchySymbol.Semiformula.val_sigma]
   · intro v; simp [minimalDef, HierarchySymbol.Semiformula.val_sigma, MinimalAt]
 
-/-! ### Assembling the definition -/
+/-! ### Assembling the definition
 
-/-- The definition of `BoundedSatisfactionTable`, with every quantifier bounded by the table.
 - [HP98, Lemma I.1.72(1)] -/
+
 lemma boundedSatisfactionTable_iff {q z e : V} : BoundedSatisfactionTable q z e ↔
     IsMapping q ∧ ⟪z, e⟫ ∈ domain q ∧
     (∀ z' < q, ∀ e' < q, ⟪z', e'⟫ ∈ domain q → SpecAt q z' e') ∧
@@ -1212,8 +1094,7 @@ section defining
 
 open BoundedSatisfactionTableF
 
-/-- The $\Delta_1$ formula defining satisfaction tables.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The $\Delta_1$ formula defining satisfaction tables. -/
 noncomputable def boundedSatisfactionTable : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. !isMappingDef q ∧ !nodeDomDef q z e ∧
     (∀ z' < q, ∀ e' < q, !nodeDomDef q z' e' → !specDef.sigma q z' e') ∧
@@ -1222,8 +1103,7 @@ noncomputable def boundedSatisfactionTable : 𝚫₁.Semisentence 3 := .mkDelta
     (∀ z' < q, ∀ e' < q, !nodeDomDef q z' e' → !specDef.pi q z' e') ∧
     (∀ n < q, !inDomDef q n → !minimalDef.pi q z e n)”)
 
-/-- The formula `boundedSatisfactionTable` defines satisfaction tables.
-- [HP98, Lemma I.1.72(1)] -/
+/-- The formula `boundedSatisfactionTable` defines satisfaction tables. -/
 instance BoundedSatisfactionTable.defined :
     𝚫₁-Relation₃ (BoundedSatisfactionTable : V → V → V → Prop) via boundedSatisfactionTable :=
   .mk <| by
@@ -1235,8 +1115,7 @@ instance BoundedSatisfactionTable.defined :
       simp [boundedSatisfactionTable, HierarchySymbol.Semiformula.val_sigma,
         boundedSatisfactionTable_iff, nodeDom_defined.df, inDom_defined.df]
 
-/-- Satisfaction tables form a $\Delta_1$-definable relation.
-- [HP98, Lemma I.1.72(1)] -/
+/-- Satisfaction tables form a $\Delta_1$-definable relation. -/
 instance BoundedSatisfactionTable.definable :
     𝚫₁-Relation₃ (BoundedSatisfactionTable : V → V → V → Prop) :=
   BoundedSatisfactionTable.defined.to_definable
@@ -1343,23 +1222,19 @@ lemma iterExp_three (x : V) : iterExp x 3 = Exp.exp (Exp.exp (Exp.exp x)) := by
 lemma iterExp_four (x : V) : iterExp x 4 = Exp.exp (Exp.exp (Exp.exp (Exp.exp x))) := by
   rw [show (4 : V) = 3 + 1 from by ring, iterExp_succ, iterExp_three]
 
-/-! ## The bound on a partial satisfaction table -/
+/-! ## The bound on a partial satisfaction table
 
-/-- The exponent from which the bound on a table for `z` under `e` is built.
 - [HP98, Lemma I.1.72(3)] -/
+
+/-- The exponent from which the bound on a table for `z` under `e` is built. -/
 def tableExp (z e : V) : V := 4 * z + 3 * e + 31
 
-/-- `tableBound z e` bounds every partial satisfaction table for `z` under `e`.
-- [HP98, Lemma I.1.72(3)] -/
+/-- `tableBound z e` bounds every partial satisfaction table for `z` under `e`. -/
 noncomputable def tableBound (z e : V) : V := iterExp (tableExp z e) (8 * z + 24)
 
-/-- The exponent is monotone in the formula code.
-- [HP98, Lemma I.1.72(3)] -/
 lemma tableExp_mono {p z e : V} (h : p ≤ z) : tableExp p e ≤ tableExp z e :=
   add_le_add (add_le_add (mul_le_mul le_rfl h (by simp) (by simp)) le_rfl) le_rfl
 
-/-- Every node of the table for `z` under `e` is bounded by two exponential steps.
-- [HP98, Lemma I.1.72(3)] -/
 lemma node_le_iterExp {z e v : V} (hv : v ≤ 1) : ⟪⟪z, e⟫, v⟫ ≤ iterExp (tableExp z e) 2 := by
   have h1 : (2 : V) * ⟪z, e⟫ + 2 * v + 2 ≤ Exp.exp (2 * z + 2 * e + 3) + 4 := by
     calc (2 : V) * ⟪z, e⟫ + 2 * v + 2
@@ -1381,8 +1256,6 @@ lemma node_le_iterExp {z e v : V} (hv : v ≤ 1) : ⟪⟪z, e⟫, v⟫ ≤ iterE
     _ ≤ Exp.exp (Exp.exp (tableExp z e)) := exp_monotone_le.mpr (exp_monotone_le.mpr h3)
     _ = iterExp (tableExp z e) 2 := (iterExp_two _).symm
 
-/-- Entering a bounded quantifier costs four exponential steps in the exponent.
-- [HP98, Lemma I.1.72(3)] -/
 lemma tableExp_step {z p u x e : V} (hp : p < z) (hu : u < z) (hx : x < termVal (0 ∷ e) u) :
     tableExp p (x ∷ e) ≤ iterExp (tableExp z e) 4 := by
   have hxE : x ≤ Exp.exp ((e + 2) * (z + 1)) := by
@@ -1467,15 +1340,16 @@ lemma uformula_nrel_cases {k r w : V} (h : IsUFormula ℒₒᵣ (^nrel k r w)) :
   · obtain ⟨t, u, ht, hu, rfl⟩ := IsUTermVec.two_iff.mp hw
     exact Or.inr ⟨t, u, ht, hu, rfl⟩
 
-/-! ## The clauses of a table as standalone predicates -/
+/-! ## The clauses of a table as standalone predicates
+
+- [HP98, Definition I.1.71(1)] -/
 
 namespace BoundedSatisfactionTable
 
 variable {q q₁ q₂ Q z e z' e' n p p₁ p₂ u t v : V}
 
 /-- The clause that `BoundedSatisfactionTable.spec` imposes at the node `⟪z', e'⟫` of the domain of
-`q`.
-- [HP98, Definition I.1.71(1)] -/
+`q`. -/
 def Spec (q z' e' : V) : Prop :=
   (z' = ^⊤ ∧ ⟪⟪z', e'⟫, 1⟫ ∈ q) ∨
   (z' = ^⊥ ∧ ⟪⟪z', e'⟫, 0⟫ ∈ q) ∨
@@ -1507,27 +1381,20 @@ def Spec (q z' e' : V) : Prop :=
     (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q))
 
 /-- The clause that `BoundedSatisfactionTable.minimal` imposes at a node of the domain other than
-the root.
-- [HP98, Definition I.1.71(1)] -/
+the root. -/
 def MinChild (q n : V) : Prop :=
   (∃ p₁ p₂ e', ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q ∧ (n = ⟪p₁, e'⟫ ∨ n = ⟪p₂, e'⟫)) ∨
   (∃ p₁ p₂ e', ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q ∧ (n = ⟪p₁, e'⟫ ∨ n = ⟪p₂, e'⟫)) ∨
   (∃ u p e', ⟪qqBall u p, e'⟫ ∈ domain q ∧ ∃ x < termVal (0 ∷ e') u, n = ⟪p, x ∷ e'⟫) ∨
   (∃ u p e', ⟪qqBex u p, e'⟫ ∈ domain q ∧ ∃ x < termVal (0 ∷ e') u, n = ⟪p, x ∷ e'⟫)
 
-/-- Reading the `spec` field of a table as the standalone clause `Spec`.
-- [HP98, Definition I.1.71(1)] -/
 lemma spec' (h : BoundedSatisfactionTable q z e) (hn : ⟪z',
   e'⟫ ∈ domain q) : Spec q z' e' := h.spec z' e' hn
 
-/-- Reading the `minimal` field of a table as the standalone clause `MinChild`.
-- [HP98, Definition I.1.71(1)] -/
 lemma minimal' (h : BoundedSatisfactionTable q z e) (hn : n ∈ domain q) : n = ⟪z, e⟫ ∨
   MinChild q n :=
   h.minimal n hn
 
-/-- The domain clause is inherited by any larger domain.
-- [HP98, Definition I.1.71(1)] -/
 lemma MinChild.mono (hsub : ∀ m ∈ domain q, m ∈ domain Q) (h : MinChild q n) : MinChild Q n := by
   rcases h with ⟨a, b, e'', hd, hc⟩ | ⟨a, b, e'', hd, hc⟩ | ⟨a, b, e'', hd, hx⟩ |
     ⟨a, b, e'', hd, hx⟩
@@ -1541,8 +1408,6 @@ lemma val_iff_of_subset (hQ : IsMapping Q) (hsub : q ⊆ Q) (hn : n ∈ domain q
   obtain ⟨w, hw⟩ := mem_domain_iff.mp hn
   exact ⟨fun h ↦ by rw [hQ.uniq h (hsub hw)]; exact hw, fun h ↦ hsub h⟩
 
-/-- The Tarski clause at a node survives passing to a larger mapping.
-- [HP98, Definition I.1.71(1)] -/
 lemma Spec.mono (hQ : IsMapping Q) (hsub : q ⊆ Q) (hd : ⟪z', e'⟫ ∈ domain q) (h : Spec q z' e') :
     Spec Q z' e' := by
   have dom : ∀ m ∈ domain q, m ∈ domain Q := fun m hm ↦ domain_subset_domain_of_subset hsub hm
@@ -1588,12 +1453,14 @@ lemma Spec.mono (hQ : IsMapping Q) (hsub : q ⊆ Q) (hd : ⟪z', e'⟫ ∈ domai
       exact forall_congr' fun x ↦ imp_congr_right fun hx ↦
         (val_iff_of_subset hQ hsub (hc x hx)).symm
 
-/-! ## Gluing tables together -/
+/-! ## Gluing tables together
+
+- [HP98, Lemma I.1.72(2)]
+- [HP98, Lemma I.1.72(3)]
+- [HP98, Definition I.1.71(1)] -/
 
 variable {z₁ z₂ e₁ e₂ : V}
 
-/-- Two tables assign the same value to any node common to both.
-- [HP98, Lemma I.1.72(2)] -/
 lemma val_agree (h₁ : BoundedSatisfactionTable q₁ z₁ e₁)
   (h₂ : BoundedSatisfactionTable q₂ z₂ e₂) {y₁ y₂ : V}
     (hn₁ : ⟪n, y₁⟫ ∈ q₁) (hn₂ : ⟪n, y₂⟫ ∈ q₂) : y₁ = y₂ := by
@@ -1605,8 +1472,6 @@ lemma val_agree (h₁ : BoundedSatisfactionTable q₁ z₁ e₁)
   · rw [h₁.isMapping.uniq hn₁ h', h₂.isMapping.uniq hn₂ (i1.mp h')]
   · rw [h₁.isMapping.uniq hn₁ h', h₂.isMapping.uniq hn₂ (i0.mp h')]
 
-/-- The union of two tables is again a mapping: they agree wherever both are defined.
-- [HP98, Lemma I.1.72(3)] -/
 lemma isMapping_union (h₁ : BoundedSatisfactionTable q₁ z₁ e₁)
   (h₂ : BoundedSatisfactionTable q₂ z₂ e₂) :
     IsMapping (q₁ ∪ q₂) := by
@@ -1619,8 +1484,6 @@ lemma isMapping_union (h₁ : BoundedSatisfactionTable q₁ z₁ e₁)
   · exact h₂.val_agree h₁ h h' |>.symm
   · exact h₂.isMapping.uniq h' h
 
-/-- Every node of a table has a formula code bounded by the root's.
-- [HP98, Definition I.1.71(1)] -/
 lemma fst_le_of_mem_domain (h : BoundedSatisfactionTable q z e) : ∀ n ∈ domain q, π₁ n ≤ z := by
   have key : ∀ k n, n ∈ domain q → q ≤ π₁ n + k → π₁ n ≤ z := by
     refine ISigma1.pi1_succ_induction
@@ -1648,8 +1511,6 @@ lemma fst_le_of_mem_domain (h : BoundedSatisfactionTable q z e) : ∀ n ∈ doma
       · exact le_trans (le_of_lt (by simp)) (up _ hm (by simp))
   exact fun n hn ↦ key q n hn le_add_self
 
-/-- A table for a proper subformula does not contain the root node.
-- [HP98, Definition I.1.71(1)] -/
 lemma root_not_mem_domain (h : BoundedSatisfactionTable q p e₁) (hlt : p < z) : ⟪z,
   e⟫ ∉ domain q := by
   intro hc
@@ -1657,10 +1518,10 @@ lemma root_not_mem_domain (h : BoundedSatisfactionTable q p e₁) (hlt : p < z) 
   simp only [pi₁_pair] at this
   exact absurd (lt_of_le_of_lt this hlt) (lt_irrefl z)
 
-/-! ## Building tables -/
+/-! ## Building tables
 
-/-- The one-node table for a node whose Tarski clause mentions no children.
 - [HP98, Lemma I.1.72(3)] -/
+
 lemma of_atom (h : Spec ({⟪⟪z, e⟫, v⟫} : V) z e) : BoundedSatisfactionTable ({⟪⟪z, e⟫,
   v⟫} : V) z e := by
   refine ⟨IsMapping.singleton _ _, by simp, ?_, ?_⟩
@@ -1670,8 +1531,6 @@ lemma of_atom (h : Spec ({⟪⟪z, e⟫, v⟫} : V) z e) : BoundedSatisfactionTa
   · intro n hn
     exact Or.inl (by simpa using hn)
 
-/-- Existence of a table for a conjunction from bounded tables for its conjuncts.
-- [HP98, Lemma I.1.72(3)] -/
 lemma of_and {N : V} (h₁ : BoundedSatisfactionTable q₁ p₁ e) (h₂ : BoundedSatisfactionTable q₂ p₂ e)
     (hn₁ : ∀ w ∈ q₁, w < N) (hn₂ : ∀ w ∈ q₂, w < N)
     (hr1 : ⟪⟪p₁ ^⋏ p₂, e⟫, 1⟫ < N) (hr0 : ⟪⟪p₁ ^⋏ p₂, e⟫, 0⟫ < N) :
@@ -1750,8 +1609,6 @@ lemma of_and {N : V} (h₁ : BoundedSatisfactionTable q₁ p₁ e) (h₂ : Bound
     · exact hn₁ _ h
     · exact hn₂ _ h
 
-/-- Existence of a table for a disjunction from bounded tables for its disjuncts.
-- [HP98, Lemma I.1.72(3)] -/
 lemma of_or {N : V} (h₁ : BoundedSatisfactionTable q₁ p₁ e) (h₂ : BoundedSatisfactionTable q₂ p₂ e)
     (hn₁ : ∀ w ∈ q₁, w < N) (hn₂ : ∀ w ∈ q₂, w < N)
     (hr1 : ⟪⟪p₁ ^⋎ p₂, e⟫, 1⟫ < N) (hr0 : ⟪⟪p₁ ^⋎ p₂, e⟫, 0⟫ < N) :
@@ -1828,8 +1685,6 @@ lemma of_or {N : V} (h₁ : BoundedSatisfactionTable q₁ p₁ e) (h₂ : Bounde
     · exact hn₁ _ h
     · exact hn₂ _ h
 
-/-- A single mapping contains bounded partial satisfaction tables for every body instance.
-- [HP98, Lemma I.1.72(3)] -/
 lemma exists_family_union {p e X N : V}
     (H : ∀ x < X, ∃ q, BoundedSatisfactionTable q p (x ∷ e) ∧ ∀ w ∈ q, w < N) :
     ∃ W : V, IsMapping W ∧ (∀ w ∈ W, w < N) ∧
@@ -1875,8 +1730,6 @@ lemma exists_family_union {p e X N : V}
     obtain ⟨r, hr⟩ := mem_domain_iff.mp (show x ∈ domain f by rw [hfd]; simpa using hx)
     exact ⟨r, (hfr x r hr).1, hsub x r hr⟩
 
-/-- Existence of a table for a bounded universal from bounded tables for its body instances.
-- [HP98, Lemma I.1.72(3)] -/
 lemma of_ball {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) (hp : p < qqBall u p)
     (hr1 : ⟪⟪qqBall u p, e⟫, 1⟫ < N) (hr0 : ⟪⟪qqBall u p, e⟫, 0⟫ < N)
     (H : ∀ x < termVal (0 ∷ e) u, ∃ q, BoundedSatisfactionTable q p (x ∷ e) ∧ ∀ w ∈ q, w < N) :
@@ -1951,8 +1804,6 @@ lemma of_ball {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ
       · exact hr1
     · exact hWN _ h
 
-/-- Existence of a table for a bounded existential from bounded tables for its body instances.
-- [HP98, Lemma I.1.72(3)] -/
 lemma of_bex {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) (hp : p < qqBex u p)
     (hr1 : ⟪⟪qqBex u p, e⟫, 1⟫ < N) (hr0 : ⟪⟪qqBex u p, e⟫, 0⟫ < N)
     (H : ∀ x < termVal (0 ∷ e) u, ∃ q, BoundedSatisfactionTable q p (x ∷ e) ∧ ∀ w ∈ q, w < N) :
@@ -2027,10 +1878,10 @@ lemma of_bex {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ�
       · exact hr1
     · exact hWN _ h
 
-/-! ## Bound bookkeeping -/
+/-! ## Bound bookkeeping
 
-/-- A one-node table is within the bound.
 - [HP98, Lemma I.1.72(3)] -/
+
 lemma singleton_le_tableBound {z e v : V} (hv : v ≤ 1) :
     ({⟪⟪z, e⟫, v⟫} : V) ≤ tableBound z e := by
   rw [singleton_def]
@@ -2041,8 +1892,6 @@ lemma singleton_le_tableBound {z e v : V} (hv : v ≤ 1) :
         rw [tableBound, show 8 * z + 24 = 3 + (8 * z + 21) from by ring, iterExp_add]
         exact le_iterExp _ _
 
-/-- A root node lies below the designated iterated-exponential bound.
-- [HP98, Lemma I.1.72(3)] -/
 lemma node_lt_step {z e v : V} (hv : v ≤ 1) :
     ⟪⟪z, e⟫, v⟫ < iterExp (tableExp z e) (8 * z + 21) := by
   calc ⟪⟪z, e⟫, v⟫ ≤ iterExp (tableExp z e) 2 := node_le_iterExp hv
@@ -2052,8 +1901,6 @@ lemma node_lt_step {z e v : V} (hv : v ≤ 1) :
         rw [show 8 * z + 21 = 3 + (8 * z + 18) from by ring, iterExp_add]
         exact le_iterExp _ _
 
-/-- One exponential above the working bound is still within the bound.
-- [HP98, Lemma I.1.72(3)] -/
 lemma exp_step_le_tableBound (z e : V) :
     Exp.exp (iterExp (tableExp z e) (8 * z + 21)) ≤ tableBound z e :=
   calc Exp.exp (iterExp (tableExp z e) (8 * z + 21))
@@ -2064,8 +1911,6 @@ lemma exp_step_le_tableBound (z e : V) :
           _ = 8 * z + 24 := by ring)
     _ = tableBound z e := rfl
 
-/-- The bound for an immediate subformula lies below the working bound.
-- [HP98, Lemma I.1.72(3)] -/
 lemma tableBound_le_step {p z e : V} (h : p < z) :
     tableBound p e ≤ iterExp (tableExp z e) (8 * z + 21) := by
   have h1 : p + 1 ≤ z := lt_iff_succ_le.mp h
@@ -2079,8 +1924,6 @@ lemma tableBound_le_step {p z e : V} (h : p < z) :
           _ ≤ 8 * z + 16 + 5 := le_self_add
           _ = 8 * z + 21 := by ring
 
-/-- The bound for the body of a bounded quantifier lies below the working bound.
-- [HP98, Lemma I.1.72(3)] -/
 lemma tableBound_le_step_quant {p z u x e : V} (hp : p < z) (hu : u < z)
     (hx : x < termVal (0 ∷ e) u) :
     tableBound p (x ∷ e) ≤ iterExp (tableExp z e) (8 * z + 21) := by
@@ -2096,10 +1939,10 @@ lemma tableBound_le_step_quant {p z u x e : V} (hp : p < z) (hu : u < z)
           _ ≤ 8 * z + 20 + 1 := le_self_add
           _ = 8 * z + 21 := by ring
 
-/-! ## The atomic cases -/
+/-! ## The atomic cases
 
-/-- The one-node table for a well-formed atomic code.
 - [HP98, Lemma I.1.72(3)] -/
+
 lemma exists_atom_table {z e : V} (hz' : IsUFormula ℒₒᵣ z)
     (h : z = ^⊤ ∨ z = ^⊥ ∨ (∃ k r w, z = ^rel k r w) ∨ (∃ k r w, z = ^nrel k r w)) :
     ∃ v : V, v ≤ 1 ∧ BoundedSatisfactionTable ({⟪⟪z, e⟫, v⟫} : V) z e := by
@@ -2135,11 +1978,12 @@ lemma exists_atom_table {z e : V} (hz' : IsUFormula ℒₒᵣ z)
 
 end BoundedSatisfactionTable
 
-/-! ## Existence -/
+/-! ## Existence
 
-/-- Every well-formed internally $\Delta_0$ formula has a partial satisfaction table under every
-assignment.
-- [HP98, Lemma I.1.72(3)] -/
+- [HP98, Lemma I.1.72(3)]
+- [HP98, Lemma I.1.68(2)]
+- [HP98, 1.64] -/
+
 theorem BoundedSatisfactionTable.exists {z e : V} (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z) :
     ∃ q, BoundedSatisfactionTable q z e := by
   suffices H : ∀ z, IsBounded z →
@@ -2246,8 +2090,6 @@ theorem BoundedSatisfactionTable.exists {z e : V} (hz : IsBounded z) (hz' : IsUF
 @[simp] lemma isRel_two_one : (ℒₒᵣ).IsRel (2 : V) 1 := by
   simpa using Arithmetic.LOR_rel_ltIndex (V := V)
 
-/-- A $\Delta_0$ code beginning with the bounded existential constructor has a $\Delta_0$ body.
-- [HP98, Lemma I.1.68(2)] -/
 lemma IsBounded.of_qqBex {u p : V} (h : IsBounded (qqBex u p)) : IsBounded p := by
   obtain ⟨u', q', -, hq', heq⟩ :=
     IsBounded.of_ex (p := (Arithmetic.qqLT (qqBvar 0) u) ^⋏ p) h
@@ -2258,8 +2100,6 @@ lemma coe_quote_eq : (⌜(Language.Eq.eq : (ℒₒᵣ).Rel 2)⌝ : V) = 0 := coe
 
 lemma coe_quote_lt : (⌜(Language.LT.lt : (ℒₒᵣ).Rel 2)⌝ : V) = 1 := coe_ltIndex_eq
 
-/-- A well-formed positive atom of `ℒₒᵣ` is a coded equality or a coded less-than.
-- [HP98, 1.64] -/
 lemma rel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^rel k r v)) :
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r v = t ^= u) ∨
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r v = t ^< u) := by
@@ -2269,8 +2109,6 @@ lemma rel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^rel k r v)) :
   · exact Or.inl ⟨a, b, ha, hb, by rw [Arithmetic.qqEQ, coe_quote_eq, coe_eqIndex_eq]⟩
   · exact Or.inr ⟨a, b, ha, hb, by rw [Arithmetic.qqLT, coe_quote_lt, coe_ltIndex_eq]⟩
 
-/-- A well-formed negative atom of `ℒₒᵣ` is a coded inequality or a coded not-less-than.
-- [HP98, 1.64] -/
 lemma nrel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^nrel k r v)) :
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^nrel k r v = t ^≠ u) ∨
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^nrel k r v = t ^≮ u) := by
@@ -2280,7 +2118,12 @@ lemma nrel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^nrel k r v)) :
   · exact Or.inl ⟨a, b, ha, hb, by rw [Arithmetic.qqNEQ, coe_quote_eq, coe_eqIndex_eq]⟩
   · exact Or.inr ⟨a, b, ha, hb, by rw [Arithmetic.qqNLT, coe_quote_lt, coe_ltIndex_eq]⟩
 
-/-! ## Substitution and the coded quantifiers -/
+/-! ## Substitution and the coded quantifiers
+
+- [HP98, 1.64(4)]
+- [HP98, 1.64(5)]
+- [HP98, Lemma I.1.68(2)]
+- [HP98, Definition I.1.71(2)] -/
 
 lemma isSemiterm_of_termBShift {n t : V} (ht : IsUTerm ℒₒᵣ t)
     (h : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t)) : IsSemiterm ℒₒᵣ n t :=
@@ -2301,36 +2144,26 @@ lemma isSemiformula_qqBex {n t p : V} (ht : IsUTerm ℒₒᵣ t)
     simpa [qqBex, Arithmetic.qqLT] using h
   exact ⟨isSemiterm_of_termBShift ht h'.1, h'.2⟩
 
-/-- Substitution distributes over the coded equality atom.
-- [HP98, 1.64(4)] -/
 lemma substs_qqEQ {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     Bootstrapping.subst ℒₒᵣ w (t ^= u)
       = (termSubst ℒₒᵣ w t) ^= (termSubst ℒₒᵣ w u) := by
   simp [Arithmetic.qqEQ, ht, hu]
 
-/-- Substitution distributes over the coded inequality atom.
-- [HP98, 1.64(4)] -/
 lemma substs_qqNEQ {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     Bootstrapping.subst ℒₒᵣ w (t ^≠ u)
       = (termSubst ℒₒᵣ w t) ^≠ (termSubst ℒₒᵣ w u) := by
   simp [Arithmetic.qqNEQ, ht, hu]
 
-/-- Substitution distributes over the coded less-than atom.
-- [HP98, 1.64(4)] -/
 lemma substs_qqLT {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     Bootstrapping.subst ℒₒᵣ w (t ^< u)
       = (termSubst ℒₒᵣ w t) ^< (termSubst ℒₒᵣ w u) := by
   simp [Arithmetic.qqLT, ht, hu]
 
-/-- Substitution distributes over the coded not-less-than atom.
-- [HP98, 1.64(4)] -/
 lemma substs_qqNLT {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     Bootstrapping.subst ℒₒᵣ w (t ^≮ u)
       = (termSubst ℒₒᵣ w t) ^≮ (termSubst ℒₒᵣ w u) := by
   simp [Arithmetic.qqNLT, ht, hu]
 
-/-- Substitution commutes with the bounded universal coding operation.
-- [HP98, 1.64(4)] -/
 lemma substs_qqBall {n m w t p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t)
     (hp : IsUFormula ℒₒᵣ p) :
     Bootstrapping.subst ℒₒᵣ w (qqBall (termBShift ℒₒᵣ t) p)
@@ -2343,8 +2176,6 @@ lemma substs_qqBall {n m w t p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht : I
     substs_qVec_bShift ht hw]
   simp [qVec, qqBall]
 
-/-- Substitution commutes with the bounded existential coding operation.
-- [HP98, 1.64(4)] -/
 lemma substs_qqBex {n m w t p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t)
     (hp : IsUFormula ℒₒᵣ p) :
     Bootstrapping.subst ℒₒᵣ w (qqBex (termBShift ℒₒᵣ t) p)
@@ -2357,8 +2188,6 @@ lemma substs_qqBex {n m w t p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht : Is
     substs_qVec_bShift ht hw]
   simp [qVec, qqBex]
 
-/-- Evaluating the vector that enters a quantifier extends the evaluated substitution.
-- [HP98, 1.64(5)] -/
 lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
     termValVec (x ∷ e) (n + 1) (qVec ℒₒᵣ w) = x ∷ termValVec e n w := by
   have hq : IsUTermVec ℒₒᵣ (n + 1) (qVec ℒₒᵣ w) := hw.qVec.isUTerm
@@ -2374,8 +2203,6 @@ lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
     rw [hnth, termVal_termBShift (hw.isUTerm.nth hj) x e]
     simp [nth_termValVec hw.isUTerm hj]
 
-/-- $\Delta_0$ shape is preserved by substitution.
-- [HP98, Lemma I.1.68(2)] -/
 lemma IsBounded.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (h : IsBounded p) :
     IsBounded (Bootstrapping.subst ℒₒᵣ w p) := by
@@ -2414,8 +2241,7 @@ lemma IsBounded.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
   exact H p h n m w hw hp
 
 /-- `BoundedSatisfaction z e` says that `z` is an internally coded $\Delta_0$ formula satisfied by
-`e`.
-- [HP98, Definition I.1.71(2)] -/
+`e`. -/
 structure BoundedSatisfaction (z e : V) : Prop where
   /-- The satisfied code is that of a bounded formula. -/
   isBounded : IsBounded z
@@ -2428,10 +2254,12 @@ namespace BoundedSatisfaction
 
 variable {z e : V}
 
-/-! ## Reading satisfaction off a table -/
+/-! ## Reading satisfaction off a table
 
-/-- Satisfaction at a node of a table is the value the table takes there.
-- [HP98, Lemma I.1.72(2)] -/
+- [HP98, Lemma I.1.72(2)]
+- [HP98, Lemma I.1.73(1)]
+- [HP98, Theorem I.1.70] -/
+
 lemma iff_mem {r z e p e' : V} (hr : BoundedSatisfactionTable r z e) (hn : ⟪p, e'⟫ ∈ domain r)
     (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
     BoundedSatisfaction p e' ↔ ⟪⟪p, e'⟫, 1⟫ ∈ r := by
@@ -2442,14 +2270,10 @@ lemma iff_mem {r z e p e' : V} (hr : BoundedSatisfactionTable r z e) (hn : ⟪p,
     obtain ⟨s, hs⟩ := BoundedSatisfactionTable.exists hp hp'
     exact ⟨hp, hp', s, hs, (hr.agree hs p e' hn hs.mem_dom_root).1.mp h1⟩
 
-/-- Satisfaction of the root of a table is the value the table takes at the root.
-- [HP98, Lemma I.1.72(2)] -/
 lemma iff_val {r : V} (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z)
   (hr : BoundedSatisfactionTable r z e) :
     BoundedSatisfaction z e ↔ ⟪⟪z, e⟫, 1⟫ ∈ r := iff_mem hr hr.mem_dom_root hz hz'
 
-/-- Existential and universal table characterizations of $\Delta_0$ satisfaction agree.
-- [HP98, Lemma I.1.73(1)] -/
 lemma exists_iff_forall (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z) :
     (∃ r, BoundedSatisfactionTable r z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ r) ↔ ∀ r, BoundedSatisfactionTable r z e →
       ⟪⟪z, e⟫, 1⟫ ∈ r := by
@@ -2460,8 +2284,6 @@ lemma exists_iff_forall (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z) :
     obtain ⟨r, hr⟩ := BoundedSatisfactionTable.exists hz hz'
     exact ⟨r, hr, h r hr⟩
 
-/-- The $\Pi_1$ form of satisfaction.
-- [HP98, Lemma I.1.73(1)] -/
 lemma iff_forall {z e : V} :
     BoundedSatisfaction z e ↔
       (IsBounded z ∧ IsUFormula ℒₒᵣ z) ∧ ∀ r, BoundedSatisfactionTable r z e → ⟪⟪z, e⟫, 1⟫ ∈ r := by
@@ -2471,7 +2293,6 @@ lemma iff_forall {z e : V} :
   · rintro ⟨⟨hz, hz'⟩, h⟩
     exact ⟨hz, hz', (exists_iff_forall hz hz').mpr h⟩
 
-/-- The existential table characterization of $\Delta_0$ satisfaction. -/
 lemma iff_exists {z e : V} :
     BoundedSatisfaction z e ↔
       (IsBounded z ∧ IsUFormula ℒₒᵣ z) ∧ ∃ r, BoundedSatisfactionTable r z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ r :=
@@ -2479,18 +2300,14 @@ lemma iff_exists {z e : V} :
 
 end BoundedSatisfaction
 
-/-- The $\Delta_1$ formula defining satisfaction for internally coded $\Delta_0$ formulas.
-- [HP98, Theorem I.1.70]
-- [HP98, Lemma I.1.73(1)] -/
+/-- The $\Delta_1$ formula defining satisfaction for internally coded $\Delta_0$ formulas. -/
 noncomputable def boundedSatisfaction : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “z e. (!isBounded.sigma z ∧ !(isUFormula ℒₒᵣ).sigma z) ∧
     ∃ q, !boundedSatisfactionTable.sigma q z e ∧ !BoundedSatisfactionTableF.nodeValDef q z e 1”)
   (.mkPi “z e. (!isBounded.pi z ∧ !(isUFormula ℒₒᵣ).pi z) ∧
     ∀ q, !boundedSatisfactionTable.sigma q z e → !BoundedSatisfactionTableF.nodeValDef q z e 1”)
 
-/-- The formula `boundedSatisfaction` defines `BoundedSatisfaction`.
-- [HP98, Theorem I.1.70]
-- [HP98, Lemma I.1.73(1)] -/
+/-- The formula `boundedSatisfaction` defines `BoundedSatisfaction`. -/
 instance BoundedSatisfaction.defined : 𝚫₁-Relation (BoundedSatisfaction : V → V →
   Prop) via boundedSatisfaction := .mk <| by
   constructor
@@ -2509,30 +2326,28 @@ instance BoundedSatisfaction.defined : 𝚫₁-Relation (BoundedSatisfaction : V
       (IsBounded.defined (V := V)).df, (IsUFormula.defined (V := V) (L := ℒₒᵣ)).df,
       (BoundedSatisfactionTable.defined (V := V)).df, BoundedSatisfactionTableF.nodeVal_defined.df]
 
-/-- Satisfaction for internally coded $\Delta_0$ formulas is $\Delta_1$-definable.
-- [HP98, Theorem I.1.70]
-- [HP98, Lemma I.1.73(1)] -/
+/-- Satisfaction for internally coded $\Delta_0$ formulas is $\Delta_1$-definable. -/
 instance BoundedSatisfaction.definable : 𝚫₁-Relation (BoundedSatisfaction : V → V → Prop) :=
   BoundedSatisfaction.defined.to_definable
 
+/-! ## Tarski conditions
 
-/-! ## Tarski conditions -/
+- [HP98, Theorem I.1.70(i)]
+- [HP98, Theorem I.1.70(ii)]
+- [HP98, Theorem I.1.70(iv)]
+- [HP98, Theorem I.1.70(iii)]
+- [HP98, 1.64(4)]
+- [HP98, Theorem I.1.70] -/
 
 namespace BoundedSatisfaction
 
-/-- Satisfaction implies that its formula code belongs to the $\Delta_0$ domain.
-- [HP98, Theorem I.1.70(i)] -/
 lemma dom {z e : V} (h : BoundedSatisfaction z e) : IsBounded z ∧ IsUFormula ℒₒᵣ z :=
   ⟨h.isBounded, h.isUFormula⟩
 
-/-- The coded truth constant is satisfied.
-- [HP98, Theorem I.1.70(ii)] -/
 @[simp] lemma verum (e : V) : BoundedSatisfaction (^⊤ : V) e := by
   obtain ⟨r, hr⟩ := BoundedSatisfactionTable.exists (z := (^⊤ : V)) (e := e) (by simp) (by simp)
   exact ⟨by simp, by simp, r, hr, hr.val_verum hr.mem_dom_root⟩
 
-/-- The coded falsehood constant is not satisfied.
-- [HP98, Theorem I.1.70(ii)] -/
 @[simp] lemma falsum (e : V) : ¬BoundedSatisfaction (^⊥ : V) e := by
   rintro ⟨-, -, r, hr, h1⟩
   exact hr.val_one_ne_zero h1 (hr.val_falsum hr.mem_dom_root)
@@ -2541,8 +2356,6 @@ section
 variable {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u)
 include ht hu
 
-/-- Satisfaction of coded equality agrees with equality of term values.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma eq_iff : BoundedSatisfaction (t ^= u) e ↔ termVal e t = termVal e u := by
   have hd : IsBounded (t ^= u) := by simp [Arithmetic.qqEQ]
   have hf : IsUFormula ℒₒᵣ (t ^= u) := by simp [Arithmetic.qqEQ, ht, hu]
@@ -2550,8 +2363,6 @@ lemma eq_iff : BoundedSatisfaction (t ^= u) e ↔ termVal e t = termVal e u := b
   rw [iff_val hd hf hr]
   exact hr.val_eq hr.mem_dom_root
 
-/-- Satisfaction of coded inequality agrees with inequality of term values.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma neq_iff : BoundedSatisfaction (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
   have hd : IsBounded (t ^≠ u) := by simp [Arithmetic.qqNEQ]
   have hf : IsUFormula ℒₒᵣ (t ^≠ u) := by simp [Arithmetic.qqNEQ, ht, hu]
@@ -2559,8 +2370,6 @@ lemma neq_iff : BoundedSatisfaction (t ^≠ u) e ↔ termVal e t ≠ termVal e u
   rw [iff_val hd hf hr]
   exact hr.val_neq hr.mem_dom_root
 
-/-- Satisfaction of coded less-than agrees with comparison of term values.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma lt_iff : BoundedSatisfaction (t ^< u) e ↔ termVal e t < termVal e u := by
   have hd : IsBounded (t ^< u) := by simp [Arithmetic.qqLT]
   have hf : IsUFormula ℒₒᵣ (t ^< u) := by simp [Arithmetic.qqLT, ht, hu]
@@ -2568,8 +2377,6 @@ lemma lt_iff : BoundedSatisfaction (t ^< u) e ↔ termVal e t < termVal e u := b
   rw [iff_val hd hf hr]
   exact hr.val_lt hr.mem_dom_root
 
-/-- Satisfaction of coded negated less-than agrees with failure of comparison.
-- [HP98, Theorem I.1.70(ii)] -/
 lemma nlt_iff : BoundedSatisfaction (t ^≮ u) e ↔ ¬(termVal e t < termVal e u) := by
   have hd : IsBounded (t ^≮ u : V) := by simp [Arithmetic.qqNLT]
   have hf : IsUFormula ℒₒᵣ (t ^≮ u : V) := by simp [Arithmetic.qqNLT, ht, hu]
@@ -2579,8 +2386,6 @@ lemma nlt_iff : BoundedSatisfaction (t ^≮ u) e ↔ ¬(termVal e t < termVal e 
 
 end
 
-/-- Satisfaction commutes with coded conjunction.
-- [HP98, Theorem I.1.70(ii)] -/
 @[simp] lemma and_iff {p q e : V} :
     BoundedSatisfaction (p ^⋏ q) e ↔ BoundedSatisfaction p e ∧ BoundedSatisfaction q e := by
   constructor
@@ -2600,8 +2405,6 @@ end
     exact (iff_val hd hf hr).mpr ((hr.val_and hr.mem_dom_root).mpr
       ⟨(iff_mem hr hn₁ hdp hfp).mp h₁, (iff_mem hr hn₂ hdq hfq).mp h₂⟩)
 
-/-- Satisfaction commutes with coded disjunction of well-formed formulas.
-- [HP98, Theorem I.1.70(ii)] -/
 @[simp] lemma or_iff {p q e : V} (hdp : IsBounded p) (hfp : IsUFormula ℒₒᵣ p)
     (hdq : IsBounded q) (hfq : IsUFormula ℒₒᵣ q) :
     BoundedSatisfaction (p ^⋎ q) e ↔ BoundedSatisfaction p e ∨ BoundedSatisfaction q e := by
@@ -2625,8 +2428,6 @@ section
 variable {t q e : V} (ht : IsUTerm ℒₒᵣ t)
 include ht
 
-/-- Satisfaction of a bounded universal is bounded universal satisfaction of its body.
-- [HP98, Theorem I.1.70(iv)] -/
 lemma ball_iff (hq : IsBounded q) (hq' : IsUFormula ℒₒᵣ q) :
     BoundedSatisfaction (qqBall (termBShift ℒₒᵣ t) q) e ↔ ∀ x < termVal e t,
       BoundedSatisfaction q (x ∷ e) := by
@@ -2638,8 +2439,6 @@ lemma ball_iff (hq : IsBounded q) (hq' : IsUFormula ℒₒᵣ q) :
   exact forall_congr' fun x ↦ imp_congr_right fun hx ↦
     (iff_mem hr (hr.mem_dom_ball ht hr.mem_dom_root hx) hq hq').symm
 
-/-- Satisfaction of a bounded existential is bounded existential satisfaction of its body.
-- [HP98, Theorem I.1.70(iv)] -/
 lemma bex_iff : BoundedSatisfaction (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃ x < termVal e t,
   BoundedSatisfaction q (x ∷ e) := by
   constructor
@@ -2660,8 +2459,6 @@ lemma bex_iff : BoundedSatisfaction (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃
 
 end
 
-/-- Satisfaction commutes with coded negation on $\Delta_0$ formulas.
-- [HP98, Theorem I.1.70(iii)] -/
 lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
     BoundedSatisfaction (neg ℒₒᵣ p) e ↔ ¬BoundedSatisfaction p e := by
   have H : ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p →
@@ -2714,9 +2511,6 @@ lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
         exact (ih hfq (x ∷ e)).mpr fun hc ↦ hn ⟨x, hx, hc⟩
   exact H p hp hp' e
 
-/-- Satisfaction commutes with substitution of a coded vector of terms.
-- [HP98, 1.64(4)]
-- [HP98, Theorem I.1.70] -/
 lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsBounded p) :
     BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔

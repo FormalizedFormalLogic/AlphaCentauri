@@ -10,7 +10,12 @@ This module introduces the bounded-existential coding operation and the internal
 predicate `IsBounded` for $\Delta_0$ formulas, built as a least fixpoint in the manner of
 Foundation's `IsSigma1`, and proves that it agrees with the external class `Bounded` on quoted
 formulas.
--/
+
+- [HP98, 0.30]
+- [HP98, Lemma I.1.68]
+- [HP98, Lemma I.1.68(1)]
+- [HP98, Lemma I.1.68(2)]
+- [HP98, Lemma I.1.68(2)(ii)] -/
 
 @[expose] public section
 
@@ -18,30 +23,22 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-/-- `qqBex u q = ^∃ ((^#0 ^< u) ^⋏ q)`, the code of `∃¹[“#0 < u”] q`; dual of `qqBall`.
-- [HP98, 0.30] -/
+/-- `qqBex u q = ^∃ ((^#0 ^< u) ^⋏ q)`, the code of `∃¹[“#0 < u”] q`; dual of `qqBall`. -/
 noncomputable def qqBex (u q : V) : V := ^∃ ((^#0 ^< u) ^⋏ q)
 
-/-- The coded body is a proper subcode of the bounded existential formula.
-- [HP98, 0.30] -/
 @[simp] lemma lt_q_qqBex (u q : V) : q < qqBex u q :=
   lt_trans (lt_K!_right _ _) (lt_exists _)
-/-- The coded bound is a proper subcode of the bounded existential formula.
-- [HP98, 0.30] -/
 @[simp] lemma lt_u_qqBex (u q : V) : u < qqBex u q :=
   lt_trans (Arithmetic.lt_qqLT_right _ _) (lt_trans (lt_K!_left _ _) (lt_exists _))
 
-/-- Defining formula for the bounded existential coding operation.
-- [HP98, 0.30] -/
+/-- Defining formula for the bounded existential coding operation. -/
 def _root_.FFL.FirstOrder.Arithmetic.qqBexDef : 𝚺₁.Semisentence 3 := .mkSigma
   “p u q. ∃ bv, !qqBvarDef bv 0 ∧ ∃ lt, !qqLTDef lt bv u ∧ ∃ g, !qqAndDef g lt q ∧ !qqExsDef p g”
 
-/-- The bounded existential coding operation is $\Sigma_1$-definable.
-- [HP98, 0.30] -/
+/-- The bounded existential coding operation is $\Sigma_1$-definable. -/
 instance qqBex_defined : 𝚺₁-Function₂ (qqBex : V → V → V) via qqBexDef := .mk fun v ↦ by
   simp [qqBexDef, qqBex, (Arithmetic.qqLT_defined (V := V)).df]
-/-- The bounded existential coding operation is definable at every hierarchy level.
-- [HP98, 0.30] -/
+/-- The bounded existential coding operation is definable at every hierarchy level. -/
 instance qqBex_definable (Γ m) : Γ-[m + 1]-Function₂ (qqBex : V → V → V) :=
   .of_sigmaOne qqBex_defined.to_definable
 
@@ -63,8 +60,7 @@ lemma neg_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ 
 
 namespace IsBoundedF
 
-/-- `Phi C p` recognizes one $\Delta_0$ constructor step over the class `C`.
-- [HP98, Lemma I.1.68] -/
+/-- `Phi C p` recognizes one $\Delta_0$ constructor step over the class `C`. -/
 def Phi (C : Set V) (p : V) : Prop :=
   (p = ^⊤) ∨
   (p = ^⊥) ∨
@@ -108,8 +104,7 @@ private lemma phi_iff (C p : V) :
       | ⟨p₁, _, p₂, _, hp, hq, rfl⟩ | ⟨p₁, _, p₂, _, hp, hq, rfl⟩
       | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩ | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩) <;> grind
 
-/-- Fixpoint blueprint whose least fixpoint is the internal $\Delta_0$ shape predicate.
-- [HP98, Lemma I.1.68(1)] -/
+/-- Fixpoint blueprint whose least fixpoint is the internal $\Delta_0$ shape predicate. -/
 noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “p C.
     !qqVerumDef p ∨ !qqFalsumDef p ∨
@@ -136,8 +131,7 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
        (∃ t < p, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u = u') ∧ q ∈ C
        ∧ ∀ p', !qqBexDef p' u q → p = p')”)⟩
 
-/-- The fixpoint construction for `blueprint`.
-- [HP98, Lemma I.1.68(1)] -/
+/-- The fixpoint construction for `blueprint`. -/
 def construction : Fixpoint.Construction V blueprint where
   Φ := fun _ ↦ Phi
   defined := .mk <| by
@@ -195,25 +189,19 @@ lemma shift_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒ�
     shift_exs (by simp [hlt, hq]), shift_and hlt hq]
   simp [Arithmetic.qqLT, hu]
 
-/-- `IsBounded p` says that `p` has the internal shape of a $\Delta_0$ formula.
-- [HP98, Lemma I.1.68] -/
+/-- `IsBounded p` says that `p` has the internal shape of a $\Delta_0$ formula. -/
 def IsBounded (p : V) : Prop := IsBoundedF.construction.Fixpoint ![] p
 
-/-- $\Delta_1$ recognizer for `IsBounded`.
-- [HP98, Lemma I.1.68(1)] -/
+/-- $\Delta_1$ recognizer for `IsBounded`. -/
 noncomputable def isBounded : 𝚫₁.Semisentence 1 := IsBoundedF.blueprint.fixpointDefΔ₁
 
-/-- The recognizer defines the internal $\Delta_0$ shape predicate.
-- [HP98, Lemma I.1.68(1)] -/
+/-- The recognizer defines the internal $\Delta_0$ shape predicate. -/
 instance IsBounded.defined : 𝚫₁-Predicate (IsBounded (V := V)) via isBounded :=
   IsBoundedF.construction.fixpoint_definedΔ₁
 
-/-- The internal $\Delta_0$ shape predicate is $\Delta_1$-definable.
-- [HP98, Lemma I.1.68(1)] -/
+/-- The internal $\Delta_0$ shape predicate is $\Delta_1$-definable. -/
 instance IsBounded.definable : 𝚫₁-Predicate (IsBounded : V → Prop) := IsBounded.defined.to_definable
 
-/-- Characterization of internal $\Delta_0$ formulas by their outermost coding constructor.
-- [HP98, Lemma I.1.68(2)] -/
 lemma IsBounded.case_iff {p : V} :
     IsBounded p ↔
     (p = ^⊤) ∨ (p = ^⊥) ∨
@@ -233,8 +221,6 @@ alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
 @[simp] lemma IsBounded.nrel {k r v : V} : IsBounded (^nrel k r v) :=
   IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inl ⟨k, r, v, rfl⟩))))
 
-/-- $\Delta_0$ shape is exactly inherited through internal conjunction.
-- [HP98, Lemma I.1.68(2)] -/
 @[simp] lemma IsBounded.and_iff {p q : V} : IsBounded (p ^⋏ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
   · intro h
@@ -247,8 +233,6 @@ alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
   · rintro ⟨hp, hq⟩
     exact IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩)))))
 
-/-- $\Delta_0$ shape is exactly inherited through internal disjunction.
-- [HP98, Lemma I.1.68(2)] -/
 @[simp] lemma IsBounded.or_iff {p q : V} : IsBounded (p ^⋎ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
   · intro h
@@ -261,23 +245,16 @@ alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
   · rintro ⟨hp, hq⟩
     exact IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩))))))
 
-/-- A bounded universal quantification of a $\Delta_0$ code is $\Delta_0$.
-- [HP98, Lemma I.1.68(2)] -/
 lemma IsBounded.ball {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
     IsBounded (qqBall (termBShift ℒₒᵣ t) q) :=
   IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
     ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩)))))))
 
-/-- A bounded existential quantification of a $\Delta_0$ code is $\Delta_0$.
-- [HP98, Lemma I.1.68(2)] -/
 lemma IsBounded.bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
     IsBounded (qqBex (termBShift ℒₒᵣ t) q) :=
   IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
     ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩)))))))
 
-/-- Inversion for the universal quantifier: a $\Delta_0$ code beginning with `^∀` is a bounded
-universal quantification.
-- [HP98, Lemma I.1.68(2)] -/
 lemma IsBounded.of_all {p : V} (h : IsBounded (^∀ p)) :
     ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsBounded q
       ∧ p = qqOr (Arithmetic.qqNLT (qqBvar 0) u) q := by
@@ -289,9 +266,6 @@ lemma IsBounded.of_all {p : V} (h : IsBounded (^∀ p)) :
       | (rw [show qqBall u q = ^∀ (qqOr (Arithmetic.qqNLT (qqBvar 0) u) q) from rfl, qqAll_inj] at h
          exact ⟨u, q, hguard, hq, h⟩)
 
-/-- Inversion for the existential quantifier: a $\Delta_0$ code beginning with `^∃` is a bounded
-existential quantification.
-- [HP98, Lemma I.1.68(2)] -/
 lemma IsBounded.of_ex {p : V} (h : IsBounded (^∃ p)) :
     ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsBounded q
       ∧ p = (Arithmetic.qqLT (qqBvar 0) u) ^⋏ q := by
@@ -303,8 +277,6 @@ lemma IsBounded.of_ex {p : V} (h : IsBounded (^∃ p)) :
       | (rw [show qqBex u q = ^∃ ((Arithmetic.qqLT (qqBvar 0) u) ^⋏ q) from rfl, qqExs_inj] at h
          exact ⟨u, q, hguard, hq, h⟩)
 
-/-- Recursion on the internal $\Delta_0$ shape.
-- [HP98, Lemma I.1.68(2)] -/
 lemma IsBounded.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hverum : P ^⊤) (hfalsum : P ^⊥)
     (hrel : ∀ k r v, P (^rel k r v)) (hnrel : ∀ k r v, P (^nrel k r v))
@@ -325,8 +297,6 @@ lemma IsBounded.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     · exact hball t q ht (hC q hq).1 (hC q hq).2
     · exact hbex t q ht (hC q hq).1 (hC q hq).2)
 
-/-- $\Delta_0$ shape is preserved by syntactic negation.
-- [HP98, Lemma I.1.68(2)(ii)] -/
 lemma IsBounded.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     IsBounded (Bootstrapping.neg ℒₒᵣ p) := by
   have H : ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.neg ℒₒᵣ p) := by
@@ -359,8 +329,6 @@ lemma IsBounded.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
       exact IsBounded.ball ht (ih hq)
   exact H p h hp
 
-/-- $\Delta_0$ shape is preserved by the free-variable shift.
-- [HP98, Lemma I.1.68(2)] -/
 lemma IsBounded.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     IsBounded (Bootstrapping.shift ℒₒᵣ p) := by
   have H : ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.shift ℒₒᵣ p) := by
@@ -415,11 +383,12 @@ end FFL.FirstOrder.Arithmetic.Bootstrapping
 
 namespace FFL.FirstOrder.Arithmetic
 
-/-! ## Correctness of `IsBounded`: `IsBounded ⌜ψ⌝ ↔ ψ.Bounded` -/
+/-! ## Correctness of `IsBounded`: `IsBounded ⌜ψ⌝ ↔ ψ.Bounded`
+
+- [HP98, 0.30]
+- [HP98, Lemma I.1.68] -/
 
 open Bootstrapping in
-/-- The code of a bounded existential quantification is `qqBex` of its bound and body codes.
-- [HP98, 0.30] -/
 lemma quote_bex {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSemiproposition (n + 1)) :
     (⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemiproposition n)⌝ : ℕ)
       = qqBex (termBShift ℒₒᵣ (⌜t⌝ : ℕ)) (⌜φ⌝ : ℕ) := by
@@ -431,8 +400,6 @@ lemma quote_bex {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSe
   rfl
 
 open Bootstrapping in
-/-- A bounded formula has a $\Delta_0$ code.
-- [HP98, Lemma I.1.68] -/
 lemma isBounded_of_bounded {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : ψ.Bounded) :
     IsBounded (⌜ψ⌝ : ℕ) := by
   refine bounded_induction (P := fun n φ ↦ IsBounded (⌜φ⌝ : ℕ))
@@ -453,8 +420,6 @@ lemma isBounded_of_bounded {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : ψ.
     exact IsBounded.bex (by simp [Semiterm.quote_def]) ihφ
 
 open Bootstrapping in
-/-- A formula with a $\Delta_0$ code is bounded.
-- [HP98, Lemma I.1.68] -/
 lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     IsBounded (⌜ψ⌝ : ℕ) → ψ.Bounded := by
   induction ψ using Semiformula.rec' with
@@ -523,8 +488,6 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
       rw [heq]
       exact Hierarchy.bexs (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
 
-/-- Correctness of the $\Delta_0$-code recognizer over the standard model.
-- [HP98, Lemma I.1.68] -/
 lemma isBounded_iff_bounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     Bootstrapping.IsBounded (⌜ψ⌝ : ℕ) ↔ ψ.Bounded :=
   ⟨bounded_of_isBounded ψ, isBounded_of_bounded⟩
@@ -532,8 +495,6 @@ lemma isBounded_iff_bounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Bootstrapping in
-/-- Internal $\Delta_0$ recognition of a quoted formula agrees with its external hierarchy class.
-- [HP98, Lemma I.1.68] -/
 lemma isBounded_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     IsBounded (⌜ψ⌝ : V) ↔ ψ.Bounded :=
   have h : V ⊧/![(⌜ψ⌝ : V)] isBounded.val ↔ ℕ ⊧/![(⌜ψ⌝ : ℕ)] isBounded.val := by
@@ -544,8 +505,6 @@ lemma isBounded_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     isBounded_iff_bounded] using h
 
 open Bootstrapping in
-/-- Agreement with the external class on quoted semisentences.
-- [HP98, Lemma I.1.68] -/
 lemma isBounded_quote_iff {n : ℕ} (σ : ArithmeticSemisentence n) :
     IsBounded (⌜σ⌝ : V) ↔ σ.Bounded := by
   simp [Sentence.quote_def, isBounded_quote_iff_s]

@@ -64,7 +64,7 @@ end Cut
 
 namespace EndExtension
 
-variable {N : Type u} [hMN : M ⊆ₑ N]
+variable {N : Type v} [hMN : M ⊆ₑ N]
 
 private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : ArithmeticSemiformula ℕ 1}
     (hφ : Hierarchy 𝚺 0 φ)

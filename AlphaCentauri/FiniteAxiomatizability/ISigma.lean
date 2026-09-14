@@ -162,8 +162,8 @@ private lemma exists_assignment_eval_indFormula {M : Type*} [ORingStructure M] {
   have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun _ ↦ models_tarski
   have hψ : StrictHierarchy 𝚺 (n + 1) (φ.toSemisentence ![#0]) := hφ.rew _
   obtain ⟨e₀, he₀⟩ := exists_codes hM (fun i : Fin φ.fvSup ↦ f i)
-  set g : ℕ → M := fun i ↦ if i = 0 then ((⌜φ.toSemisentence ![#0]⌝ : ℕ) : M) else e₀ with hg
-  have hg₀ : g 0 = ((⌜φ.toSemisentence ![#0]⌝ : ℕ) : M) := by simp [hg]
+  set g : ℕ → M := fun i ↦ if i = 0 then (⌜φ.toSemisentence ![#0]⌝ : ℕ) else e₀ with hg
+  have hg₀ : g 0 = (⌜φ.toSemisentence ![#0]⌝ : ℕ) := by simp [hg]
   have hg₁ : g 1 = e₀ := by simp [hg]
   refine ⟨g, ?_⟩
   intro x
@@ -213,8 +213,8 @@ private lemma exists_assignment_eval_collFormula {M : Type*} [ORingStructure M] 
   have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun _ ↦ models_tarski
   have hψ : StrictHierarchy 𝚺 (n + 1) (φ.toSemisentence ![#1, #0]) := hφ.rew _
   obtain ⟨e₀, he₀⟩ := exists_codes hM (fun i : Fin φ.fvSup ↦ f i)
-  set g : ℕ → M := fun i ↦ if i = 0 then ((⌜φ.toSemisentence ![#1, #0]⌝ : ℕ) : M) else e₀ with hg
-  have hg₀ : g 0 = ((⌜φ.toSemisentence ![#1, #0]⌝ : ℕ) : M) := by simp [hg]
+  set g : ℕ → M := fun i ↦ if i = 0 then (⌜φ.toSemisentence ![#1, #0]⌝ : ℕ) else e₀ with hg
+  have hg₀ : g 0 = (⌜φ.toSemisentence ![#1, #0]⌝ : ℕ) := by simp [hg]
   have hg₁ : g 1 = e₀ := by simp [hg]
   refine ⟨g, ?_⟩
   intro x y

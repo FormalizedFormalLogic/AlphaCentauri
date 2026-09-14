@@ -1,0 +1,35 @@
+name: PR title
+
+# The title becomes the commit subject on `main`, so it is checked on every event that can change
+# it. `edited` fires on a title or body edit, which is why this check lives in its own workflow:
+# adding that event to `ci.yml` would rebuild the whole library every time a body is reworded.
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  pr-title:
+    name: Check PR title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check the pull request title
+        env:
+          # Passed through the environment, never interpolated into the shell.
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: python3 .github/scripts/check-pr-title.py

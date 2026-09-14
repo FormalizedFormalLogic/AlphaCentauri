@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Hierarchy.DeltaZero
+public import AlphaCentauri.Vorspiel.Axiomatizable
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 /-! # End extensions
@@ -183,8 +184,8 @@ theorem eval_of_Sigma1 {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hierar
       exact ⟨hMN.emb x, by rw [← Matrix.comp_vecCons'']; exact ih (x :> e) f hx⟩)
     e f
 
-/-- A theory axiomatized by $\Pi_1$ sentences holds in `M` as soon as it holds in an end
-extension of `M`.
+/-- A theory all of whose members are $\Pi_1$ sentences holds in `M` as soon as it holds in an
+end extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
 theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 1 σ) [N↓[ℒₒᵣ] ⊧* T] :
     M↓[ℒₒᵣ] ⊧* T :=
@@ -197,6 +198,16 @@ theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 
         (hMN.eval_of_Sigma1 (hT σ hσ).neg ![] Empty.elim (by simpa [models_iff] using h))
         (funext (·.elim0))
         (funext (·.elim))
+
+/-- A $\Pi_1$-axiomatizable theory holds in `M` as soon as it holds in an end extension of `M`.
+- [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
+theorem models_of_Pi1Axiomatizable {T : ArithmeticTheory}
+    (hT : Axiomatizable (Hierarchy 𝚷 1) T) [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T := by
+  obtain ⟨U, hU, hTU⟩ := hT
+  have : U ⪯ T := hTU.symm.le
+  have : T ⪯ U := hTU.le
+  have : N↓[ℒₒᵣ] ⊧* U := models_of_subtheory ‹N↓[ℒₒᵣ] ⊧* T›
+  exact models_of_subtheory (hMN.models_of_Pi1 hU)
 
 end EndExtension
 

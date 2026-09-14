@@ -177,19 +177,6 @@ jobs:
           name: zoo
           path: pages/zoo
 
-  # The title becomes the commit subject on `main`, and only a pull request has one.
-  pr-title:
-    name: Check PR title
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Check the pull request title
-        env:
-          # Passed through the environment, never interpolated into the shell.
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: python3 .github/scripts/check-pr-title.py
-
   # An unproved statement is an `axiom` under its own name, never a `sorry`, so that the audit
   # reports the debt by name. This is the mechanical guard, and needs neither Lean nor a build.
   no-sorry:

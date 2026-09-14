@@ -29,13 +29,13 @@ namespace Cut
 
 /-- A cut closed under the operations of `ℒₒᵣ`, hence a substructure of `M`.
 - [HP98, Definition IV.2.8(2)] -/
-class IsClosed (I : Cut M) : Prop where
+class Closed (I : Cut M) : Prop where
   zero_mem : (0 : M) ∈ I.carrier
   one_mem : (1 : M) ∈ I.carrier
   add_mem {a b : M} : a ∈ I.carrier → b ∈ I.carrier → a + b ∈ I.carrier
   mul_mem {a b : M} : a ∈ I.carrier → b ∈ I.carrier → a * b ∈ I.carrier
 
-variable (I : Cut M) [hI : I.IsClosed]
+variable (I : Cut M) [hI : I.Closed]
 
 instance oringStructure : ORingStructure I.carrier where
   zero := ⟨0, hI.zero_mem⟩

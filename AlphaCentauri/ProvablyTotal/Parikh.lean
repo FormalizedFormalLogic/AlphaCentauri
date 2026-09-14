@@ -33,7 +33,7 @@ private def termCut (c : Fin k → M) : Cut M where
   succ_mem := fun ⟨t, ht⟩ ↦ ⟨‘!!t + 1’, by simpa using add_le_add_right ht 1⟩
   mem_of_lt := fun hab ⟨t, ht⟩ ↦ ⟨t, le_trans hab.le ht⟩
 
-private instance termCut_isClosed (c : Fin k → M) : (termCut c).IsClosed where
+private instance termCut_closed (c : Fin k → M) : (termCut c).Closed where
   zero_mem := ⟨‘0’, by simp⟩
   one_mem := ⟨‘1’, by simp⟩
   add_mem := fun ⟨s, hs⟩ ⟨t, ht⟩ ↦ ⟨‘!!s + !!t’, by
@@ -102,7 +102,7 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
 
   -- The elements bounded by the value of a closed term form a cut, which models `𝗜𝚺₀`.
   set K : Cut (ModelOfSatEq sat) := termCut (cstVal sat);
-  let _ : K.IsClosed := termCut_isClosed _
+  let _ : K.Closed := termCut_closed _
   let _ : ↥K.carrier ⊆ₑ ModelOfSatEq sat := K.endExtension
   have hK : (↥K.carrier)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
     EndExtension.models_ISigma0 (M := ↥K.carrier) (N := ModelOfSatEq sat)

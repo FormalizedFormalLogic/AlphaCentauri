@@ -19,13 +19,13 @@ namespace FFL.FirstOrder.Arithmetic
 
 open Semiformula Structure
 
-variable {ξ : Type*} {M N : Type u} [ORingStructure M]
+variable {ξ : Type*} {M : Type u} {N : Type v} [ORingStructure M]
 
 /-- `N` is an end extension of `M`: a model into which `M` embeds so that nothing new lies below
 the image of `M`.
 - [HP98, Definition IV.1.3(2)]
 - [vO99, §3.1] -/
-class EndExtension (M : outParam (Type u)) (N : Type u) [ORingStructure M] where
+class EndExtension (M : outParam (Type u)) (N : Type v) [ORingStructure M] where
   [oring : ORingStructure N]
   emb : M ↪ₛ[ℒₒᵣ] N
   mem_range_of_lt {a : M} {b : N} : b < emb a → b ∈ Set.range emb
@@ -35,7 +35,7 @@ class EndExtension (M : outParam (Type u)) (N : Type u) [ORingStructure M] where
 /-- `N` is a proper end extension of `M`: not every element of `N` comes from `M`.
 - [HP98, Definition IV.1.14]
 - [vO99, §3.2] -/
-class ProperEndExtension (M : outParam (Type u)) (N : Type u) [ORingStructure M]
+class ProperEndExtension (M : outParam (Type u)) (N : Type v) [ORingStructure M]
     extends EndExtension M N where
   not_surjective : ¬Function.Surjective emb
 
@@ -225,7 +225,7 @@ section Absolute
 /-- `φ` is absolute for `T` when it takes the same truth value in every model of `T` as in every
 end extension of that model which again models `T`. -/
 def Absolute (T : ArithmeticTheory) {n : ℕ} (φ : ArithmeticSemiformula ξ n) : Prop :=
-  ∀ (M N : Type u) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T] [hMN : M ⊆ₑ N] [N↓[ℒₒᵣ] ⊧* T]
+  ∀ (M : Type u) (N : Type v) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* T] [hMN : M ⊆ₑ N] [N↓[ℒₒᵣ] ⊧* T]
     (e : Fin n → M) (f : ξ → M), φ.Eval e f ↔ φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f)
 
 lemma absolute_of_open (T : ArithmeticTheory) {n} {φ : ArithmeticSemiformula ξ n} (hφ : φ.Open) :
@@ -233,24 +233,24 @@ lemma absolute_of_open (T : ArithmeticTheory) {n} {φ : ArithmeticSemiformula ξ
   intro M N _ _ hMN _ e f
   exact eval_hom_iff_of_open hMN.emb hφ
 
--- The universe of the models is a parameter of `Absolute`, so the closure lemmas below pin it
--- explicitly: without the annotation each occurrence is generalized on its own.
+-- The universes of the models are parameters of `Absolute`, so the closure lemmas below pin
+-- them explicitly: without the annotation each occurrence is generalized on its own.
 
 variable {T : ArithmeticTheory} {n : ℕ}
   {φ ψ : ArithmeticSemiformula ξ n}
   {θ : ArithmeticSemiformula ξ (n + 1)} {t : ArithmeticSemiterm ξ n}
 
-lemma and_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) :
-    Absolute.{_, u} T (φ ⋏ ψ) := by
+lemma and_absolute (hφ : Absolute.{_, u, v} T φ) (hψ : Absolute.{_, u, v} T ψ) :
+    Absolute.{_, u, v} T (φ ⋏ ψ) := by
   intro M N _ _ hMN _ e f;
   simp [hφ M N e f, hψ M N e f]
 
-lemma or_absolute (hφ : Absolute.{_, u} T φ) (hψ : Absolute.{_, u} T ψ) :
-    Absolute.{_, u} T (φ ⋎ ψ) := by
+lemma or_absolute (hφ : Absolute.{_, u, v} T φ) (hψ : Absolute.{_, u, v} T ψ) :
+    Absolute.{_, u, v} T (φ ⋎ ψ) := by
   intro M N _ _ hMN _ e f;
   simp [hφ M N e f, hψ M N e f]
 
-lemma ballLT_absolute (hθ : Absolute.{_, u} T θ) : Absolute.{_, u} T (θ.ballLT t) := by
+lemma ballLT_absolute (hθ : Absolute.{_, u, v} T θ) : Absolute.{_, u, v} T (θ.ballLT t) := by
   intro M N _ _ hMN _ e f
   simp only [eval_ballLT, ← HomClass.val_term hMN.emb e f t]
   constructor
@@ -263,7 +263,7 @@ lemma ballLT_absolute (hθ : Absolute.{_, u} T θ) : Absolute.{_, u} T (θ.ballL
     rw [← Matrix.comp_vecCons''] at h₁
     exact (hθ M N (x :> e) f).mpr h₁
 
-lemma bexsLT_absolute (hθ : Absolute.{_, u} T θ) : Absolute.{_, u} T (θ.bexsLT t) := by
+lemma bexsLT_absolute (hθ : Absolute.{_, u, v} T θ) : Absolute.{_, u, v} T (θ.bexsLT t) := by
   intro M N _ _ hMN _ e f
   simp only [eval_bexsLT, ← HomClass.val_term hMN.emb e f t]
   constructor

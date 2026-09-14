@@ -2,14 +2,14 @@ module
 
 public import AlphaCentauri.Bootstrapping.Bounded
 public import AlphaCentauri.Bootstrapping.TermVal
-public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZero
-public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZeroExists
+public import AlphaCentauri.Bootstrapping.PartialTruth.PartialBoundedSatisfaction
+public import AlphaCentauri.Bootstrapping.PartialTruth.PartialBoundedSatisfactionExists
 
 /-!
 # Satisfaction for $\Delta_0$ formulas
 
 This module defines the satisfaction predicate for internally coded $\Delta_0$ formulas from the
-partial satisfaction tables of `PSatZero`, proves it is $\Delta_1$, and proves Tarski's satisfaction
+partial satisfaction tables of `PartialBoundedSatisfaction`, proves it is $\Delta_1$, and proves Tarski's satisfaction
 conditions for it.
 
 - [HP98, Theorem I.1.70]
@@ -196,12 +196,12 @@ lemma IsBounded.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
         (ih (n + 1) (m + 1) (qVec ℒₒᵣ w) hw.qVec hq)
   exact H p h n m w hw hp
 
-/-- `SatZero z e` says that `z` is an internally coded $\Delta_0$ formula satisfied by `e`.
+/-- `BoundedSatisfaction z e` says that `z` is an internally coded $\Delta_0$ formula satisfied by `e`.
 - [HP98, Definition I.1.71(2)] -/
-def SatZero (z e : V) : Prop :=
-  (IsBounded z ∧ IsUFormula ℒₒᵣ z) ∧ ∃ q, PSatZero q z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ q
+def BoundedSatisfaction (z e : V) : Prop :=
+  (IsBounded z ∧ IsUFormula ℒₒᵣ z) ∧ ∃ q, PartialBoundedSatisfaction q z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ q
 
-namespace SatZero
+namespace BoundedSatisfaction
 
 variable {z e : V}
 
@@ -209,92 +209,92 @@ variable {z e : V}
 
 /-- Satisfaction at a node of a table is the value the table takes there.
 - [HP98, Lemma I.1.72(2)] -/
-lemma iff_mem {r z e p e' : V} (hr : PSatZero r z e) (hn : ⟪p, e'⟫ ∈ domain r)
+lemma iff_mem {r z e p e' : V} (hr : PartialBoundedSatisfaction r z e) (hn : ⟪p, e'⟫ ∈ domain r)
     (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
-    SatZero p e' ↔ ⟪⟪p, e'⟫, 1⟫ ∈ r := by
+    BoundedSatisfaction p e' ↔ ⟪⟪p, e'⟫, 1⟫ ∈ r := by
   constructor
   · rintro ⟨-, s, hs, h1⟩
     exact (hs.agree hr p e' hs.mem_dom_root hn).1.mp h1
   · intro h1
-    obtain ⟨s, hs⟩ := PSatZero.exists hp hp'
+    obtain ⟨s, hs⟩ := PartialBoundedSatisfaction.exists hp hp'
     exact ⟨⟨hp, hp'⟩, s, hs, (hr.agree hs p e' hn hs.mem_dom_root).1.mp h1⟩
 
 /-- Satisfaction of the root of a table is the value the table takes at the root.
 - [HP98, Lemma I.1.72(2)] -/
-lemma iff_val {r : V} (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z) (hr : PSatZero r z e) :
-    SatZero z e ↔ ⟪⟪z, e⟫, 1⟫ ∈ r := iff_mem hr hr.mem_dom_root hz hz'
+lemma iff_val {r : V} (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z) (hr : PartialBoundedSatisfaction r z e) :
+    BoundedSatisfaction z e ↔ ⟪⟪z, e⟫, 1⟫ ∈ r := iff_mem hr hr.mem_dom_root hz hz'
 
 /-- Existential and universal table characterizations of $\Delta_0$ satisfaction agree.
 - [HP98, Lemma I.1.73(1)] -/
 lemma exists_iff_forall (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z) :
-    (∃ r, PSatZero r z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ r) ↔ ∀ r, PSatZero r z e → ⟪⟪z, e⟫, 1⟫ ∈ r := by
+    (∃ r, PartialBoundedSatisfaction r z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ r) ↔ ∀ r, PartialBoundedSatisfaction r z e → ⟪⟪z, e⟫, 1⟫ ∈ r := by
   constructor
   · rintro ⟨s, hs, h1⟩ r hr
     exact (hs.agree hr z e hs.mem_dom_root hr.mem_dom_root).1.mp h1
   · intro h
-    obtain ⟨r, hr⟩ := PSatZero.exists hz hz'
+    obtain ⟨r, hr⟩ := PartialBoundedSatisfaction.exists hz hz'
     exact ⟨r, hr, h r hr⟩
 
 /-- The $\Pi_1$ form of satisfaction.
 - [HP98, Lemma I.1.73(1)] -/
 lemma iff_forall {z e : V} :
-    SatZero z e ↔
-      (IsBounded z ∧ IsUFormula ℒₒᵣ z) ∧ ∀ r, PSatZero r z e → ⟪⟪z, e⟫, 1⟫ ∈ r :=
+    BoundedSatisfaction z e ↔
+      (IsBounded z ∧ IsUFormula ℒₒᵣ z) ∧ ∀ r, PartialBoundedSatisfaction r z e → ⟪⟪z, e⟫, 1⟫ ∈ r :=
   and_congr_right fun ⟨hz, hz'⟩ ↦ exists_iff_forall hz hz'
 
-end SatZero
+end BoundedSatisfaction
 
 /-- The $\Delta_1$ formula defining satisfaction for internally coded $\Delta_0$ formulas.
 - [HP98, Theorem I.1.70]
 - [HP98, Lemma I.1.73(1)] -/
-noncomputable def satZero : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def boundedSatisfaction : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “z e. (!isBounded.sigma z ∧ !(isUFormula ℒₒᵣ).sigma z) ∧
-    ∃ q, !pSatZero.sigma q z e ∧ !PSatZeroF.nodeValDef q z e 1”)
+    ∃ q, !pBoundedSatisfaction.sigma q z e ∧ !PartialBoundedSatisfactionF.nodeValDef q z e 1”)
   (.mkPi “z e. (!isBounded.pi z ∧ !(isUFormula ℒₒᵣ).pi z) ∧
-    ∀ q, !pSatZero.sigma q z e → !PSatZeroF.nodeValDef q z e 1”)
+    ∀ q, !pBoundedSatisfaction.sigma q z e → !PartialBoundedSatisfactionF.nodeValDef q z e 1”)
 
-/-- The formula `satZero` defines `SatZero`.
+/-- The formula `boundedSatisfaction` defines `BoundedSatisfaction`.
 - [HP98, Theorem I.1.70]
 - [HP98, Lemma I.1.73(1)] -/
-instance SatZero.defined : 𝚫₁-Relation (SatZero : V → V → Prop) via satZero := .mk <| by
+instance BoundedSatisfaction.defined : 𝚫₁-Relation (BoundedSatisfaction : V → V → Prop) via boundedSatisfaction := .mk <| by
   constructor
   · intro v
     suffices IsBounded (v 0) → IsUFormula ℒₒᵣ (v 0) →
-        ((∃ r, PSatZero r (v 0) (v 1) ∧ ⟪⟪v 0, v 1⟫, 1⟫ ∈ r) ↔
-          ∀ r, PSatZero r (v 0) (v 1) → ⟪⟪v 0, v 1⟫, 1⟫ ∈ r) by
-      simpa [satZero, HierarchySymbol.Semiformula.val_sigma,
+        ((∃ r, PartialBoundedSatisfaction r (v 0) (v 1) ∧ ⟪⟪v 0, v 1⟫, 1⟫ ∈ r) ↔
+          ∀ r, PartialBoundedSatisfaction r (v 0) (v 1) → ⟪⟪v 0, v 1⟫, 1⟫ ∈ r) by
+      simpa [boundedSatisfaction, HierarchySymbol.Semiformula.val_sigma,
         (IsBounded.defined (V := V)).df, (IsUFormula.defined (V := V) (L := ℒₒᵣ)).df,
-        (PSatZero.defined (V := V)).df, PSatZeroF.nodeVal_defined.df] using this
-    exact fun hz hz' ↦ SatZero.exists_iff_forall hz hz'
+        (PartialBoundedSatisfaction.defined (V := V)).df, PartialBoundedSatisfactionF.nodeVal_defined.df] using this
+    exact fun hz hz' ↦ BoundedSatisfaction.exists_iff_forall hz hz'
   · intro v
-    simp [satZero, HierarchySymbol.Semiformula.val_sigma, SatZero,
+    simp [boundedSatisfaction, HierarchySymbol.Semiformula.val_sigma, BoundedSatisfaction,
       (IsBounded.defined (V := V)).df, (IsUFormula.defined (V := V) (L := ℒₒᵣ)).df,
-      (PSatZero.defined (V := V)).df, PSatZeroF.nodeVal_defined.df]
+      (PartialBoundedSatisfaction.defined (V := V)).df, PartialBoundedSatisfactionF.nodeVal_defined.df]
 
 /-- Satisfaction for internally coded $\Delta_0$ formulas is $\Delta_1$-definable.
 - [HP98, Theorem I.1.70]
 - [HP98, Lemma I.1.73(1)] -/
-instance SatZero.definable : 𝚫₁-Relation (SatZero : V → V → Prop) :=
-  SatZero.defined.to_definable
+instance BoundedSatisfaction.definable : 𝚫₁-Relation (BoundedSatisfaction : V → V → Prop) :=
+  BoundedSatisfaction.defined.to_definable
 
 
 /-! ## Tarski conditions -/
 
-namespace SatZero
+namespace BoundedSatisfaction
 
 /-- Satisfaction implies that its formula code belongs to the $\Delta_0$ domain.
 - [HP98, Theorem I.1.70(i)] -/
-lemma dom {z e : V} : SatZero z e → IsBounded z ∧ IsUFormula ℒₒᵣ z := And.left
+lemma dom {z e : V} : BoundedSatisfaction z e → IsBounded z ∧ IsUFormula ℒₒᵣ z := And.left
 
 /-- The coded truth constant is satisfied.
 - [HP98, Theorem I.1.70(ii)] -/
-@[simp] lemma verum (e : V) : SatZero (^⊤ : V) e := by
-  obtain ⟨r, hr⟩ := PSatZero.exists (z := (^⊤ : V)) (e := e) (by simp) (by simp)
+@[simp] lemma verum (e : V) : BoundedSatisfaction (^⊤ : V) e := by
+  obtain ⟨r, hr⟩ := PartialBoundedSatisfaction.exists (z := (^⊤ : V)) (e := e) (by simp) (by simp)
   exact ⟨⟨by simp, by simp⟩, r, hr, hr.val_verum hr.mem_dom_root⟩
 
 /-- The coded falsehood constant is not satisfied.
 - [HP98, Theorem I.1.70(ii)] -/
-@[simp] lemma falsum (e : V) : ¬SatZero (^⊥ : V) e := by
+@[simp] lemma falsum (e : V) : ¬BoundedSatisfaction (^⊥ : V) e := by
   rintro ⟨-, r, hr, h1⟩
   exact hr.val_one_ne_zero h1 (hr.val_falsum hr.mem_dom_root)
 
@@ -304,37 +304,37 @@ include ht hu
 
 /-- Satisfaction of coded equality agrees with equality of term values.
 - [HP98, Theorem I.1.70(ii)] -/
-lemma eq_iff : SatZero (t ^= u) e ↔ termVal e t = termVal e u := by
+lemma eq_iff : BoundedSatisfaction (t ^= u) e ↔ termVal e t = termVal e u := by
   have hd : IsBounded (t ^= u) := by simp [Arithmetic.qqEQ]
   have hf : IsUFormula ℒₒᵣ (t ^= u) := by simp [Arithmetic.qqEQ, ht, hu]
-  obtain ⟨r, hr⟩ := PSatZero.exists hd hf
+  obtain ⟨r, hr⟩ := PartialBoundedSatisfaction.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_eq hr.mem_dom_root
 
 /-- Satisfaction of coded inequality agrees with inequality of term values.
 - [HP98, Theorem I.1.70(ii)] -/
-lemma neq_iff : SatZero (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
+lemma neq_iff : BoundedSatisfaction (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
   have hd : IsBounded (t ^≠ u) := by simp [Arithmetic.qqNEQ]
   have hf : IsUFormula ℒₒᵣ (t ^≠ u) := by simp [Arithmetic.qqNEQ, ht, hu]
-  obtain ⟨r, hr⟩ := PSatZero.exists hd hf
+  obtain ⟨r, hr⟩ := PartialBoundedSatisfaction.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_neq hr.mem_dom_root
 
 /-- Satisfaction of coded less-than agrees with comparison of term values.
 - [HP98, Theorem I.1.70(ii)] -/
-lemma lt_iff : SatZero (t ^< u) e ↔ termVal e t < termVal e u := by
+lemma lt_iff : BoundedSatisfaction (t ^< u) e ↔ termVal e t < termVal e u := by
   have hd : IsBounded (t ^< u) := by simp [Arithmetic.qqLT]
   have hf : IsUFormula ℒₒᵣ (t ^< u) := by simp [Arithmetic.qqLT, ht, hu]
-  obtain ⟨r, hr⟩ := PSatZero.exists hd hf
+  obtain ⟨r, hr⟩ := PartialBoundedSatisfaction.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_lt hr.mem_dom_root
 
 /-- Satisfaction of coded negated less-than agrees with failure of comparison.
 - [HP98, Theorem I.1.70(ii)] -/
-lemma nlt_iff : SatZero (t ^≮ u) e ↔ ¬(termVal e t < termVal e u) := by
+lemma nlt_iff : BoundedSatisfaction (t ^≮ u) e ↔ ¬(termVal e t < termVal e u) := by
   have hd : IsBounded (t ^≮ u : V) := by simp [Arithmetic.qqNLT]
   have hf : IsUFormula ℒₒᵣ (t ^≮ u : V) := by simp [Arithmetic.qqNLT, ht, hu]
-  obtain ⟨r, hr⟩ := PSatZero.exists hd hf
+  obtain ⟨r, hr⟩ := PartialBoundedSatisfaction.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_nlt hr.mem_dom_root
 
@@ -343,7 +343,7 @@ end
 /-- Satisfaction commutes with coded conjunction.
 - [HP98, Theorem I.1.70(ii)] -/
 @[simp] lemma and_iff {p q e : V} :
-    SatZero (p ^⋏ q) e ↔ SatZero p e ∧ SatZero q e := by
+    BoundedSatisfaction (p ^⋏ q) e ↔ BoundedSatisfaction p e ∧ BoundedSatisfaction q e := by
   constructor
   · rintro ⟨⟨hd, hf⟩, r, hr, h1⟩
     obtain ⟨hdp, hdq⟩ := IsBounded.and_iff.mp hd
@@ -356,7 +356,7 @@ end
     obtain ⟨hdq, hfq⟩ := h₂.dom
     have hd : IsBounded (p ^⋏ q) := IsBounded.and_iff.mpr ⟨hdp, hdq⟩
     have hf : IsUFormula ℒₒᵣ (p ^⋏ q) := by simp [hfp, hfq]
-    obtain ⟨r, hr⟩ := PSatZero.exists hd hf
+    obtain ⟨r, hr⟩ := PartialBoundedSatisfaction.exists hd hf
     obtain ⟨hn₁, hn₂⟩ := hr.mem_dom_and hr.mem_dom_root
     exact (iff_val hd hf hr).mpr ((hr.val_and hr.mem_dom_root).mpr
       ⟨(iff_mem hr hn₁ hdp hfp).mp h₁, (iff_mem hr hn₂ hdq hfq).mp h₂⟩)
@@ -365,7 +365,7 @@ end
 - [HP98, Theorem I.1.70(ii)] -/
 @[simp] lemma or_iff {p q e : V} (hdp : IsBounded p) (hfp : IsUFormula ℒₒᵣ p)
     (hdq : IsBounded q) (hfq : IsUFormula ℒₒᵣ q) :
-    SatZero (p ^⋎ q) e ↔ SatZero p e ∨ SatZero q e := by
+    BoundedSatisfaction (p ^⋎ q) e ↔ BoundedSatisfaction p e ∨ BoundedSatisfaction q e := by
   constructor
   · rintro ⟨-, r, hr, h1⟩
     obtain ⟨hn₁, hn₂⟩ := hr.mem_dom_or hr.mem_dom_root
@@ -375,7 +375,7 @@ end
   · intro h
     have hd : IsBounded (p ^⋎ q) := IsBounded.or_iff.mpr ⟨hdp, hdq⟩
     have hf : IsUFormula ℒₒᵣ (p ^⋎ q) := by simp [hfp, hfq]
-    obtain ⟨r, hr⟩ := PSatZero.exists hd hf
+    obtain ⟨r, hr⟩ := PartialBoundedSatisfaction.exists hd hf
     obtain ⟨hn₁, hn₂⟩ := hr.mem_dom_or hr.mem_dom_root
     refine (iff_val hd hf hr).mpr ((hr.val_or hr.mem_dom_root).mpr ?_)
     rcases h with h | h
@@ -389,18 +389,18 @@ include ht
 /-- Satisfaction of a bounded universal is bounded universal satisfaction of its body.
 - [HP98, Theorem I.1.70(iv)] -/
 lemma ball_iff (hq : IsBounded q) (hq' : IsUFormula ℒₒᵣ q) :
-    SatZero (qqBall (termBShift ℒₒᵣ t) q) e ↔ ∀ x < termVal e t, SatZero q (x ∷ e) := by
+    BoundedSatisfaction (qqBall (termBShift ℒₒᵣ t) q) e ↔ ∀ x < termVal e t, BoundedSatisfaction q (x ∷ e) := by
   have hd : IsBounded (qqBall (termBShift ℒₒᵣ t) q) := IsBounded.ball ht hq
   have hf : IsUFormula ℒₒᵣ (qqBall (termBShift ℒₒᵣ t) q) := by
     simp [qqBall, Arithmetic.qqNLT, ht.termBShift, hq']
-  obtain ⟨r, hr⟩ := PSatZero.exists hd hf
+  obtain ⟨r, hr⟩ := PartialBoundedSatisfaction.exists hd hf
   rw [iff_val hd hf hr, hr.val_ball ht hr.mem_dom_root]
   exact forall_congr' fun x ↦ imp_congr_right fun hx ↦
     (iff_mem hr (hr.mem_dom_ball ht hr.mem_dom_root hx) hq hq').symm
 
 /-- Satisfaction of a bounded existential is bounded existential satisfaction of its body.
 - [HP98, Theorem I.1.70(iv)] -/
-lemma bex_iff : SatZero (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃ x < termVal e t, SatZero q (x ∷ e) := by
+lemma bex_iff : BoundedSatisfaction (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃ x < termVal e t, BoundedSatisfaction q (x ∷ e) := by
   constructor
   · rintro ⟨⟨hd, hf⟩, r, hr, h1⟩
     have hq : IsBounded q := hd.of_qqBex
@@ -413,7 +413,7 @@ lemma bex_iff : SatZero (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃ x < termVal
     have hd : IsBounded (qqBex (termBShift ℒₒᵣ t) q) := IsBounded.bex ht hq
     have hf : IsUFormula ℒₒᵣ (qqBex (termBShift ℒₒᵣ t) q) := by
       simp [qqBex, Arithmetic.qqLT, ht.termBShift, hq']
-    obtain ⟨r, hr⟩ := PSatZero.exists hd hf
+    obtain ⟨r, hr⟩ := PartialBoundedSatisfaction.exists hd hf
     refine (iff_val hd hf hr).mpr ((hr.val_bex ht hr.mem_dom_root).mpr ⟨x, hx, ?_⟩)
     exact (iff_mem hr (hr.mem_dom_bex ht hr.mem_dom_root hx) hq hq').mp hsat
 
@@ -422,11 +422,11 @@ end
 /-- Satisfaction commutes with coded negation on $\Delta_0$ formulas.
 - [HP98, Theorem I.1.70(iii)] -/
 lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
-    SatZero (neg ℒₒᵣ p) e ↔ ¬SatZero p e := by
+    BoundedSatisfaction (neg ℒₒᵣ p) e ↔ ¬BoundedSatisfaction p e := by
   have H : ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p →
-      ∀ e, (SatZero (neg ℒₒᵣ p) e ↔ ¬SatZero p e) := by
+      ∀ e, (BoundedSatisfaction (neg ℒₒᵣ p) e ↔ ¬BoundedSatisfaction p e) := by
     apply Isbounded_induction 𝚷
-      (P := fun p ↦ IsUFormula ℒₒᵣ p → ∀ e, (SatZero (neg ℒₒᵣ p) e ↔ ¬SatZero p e))
+      (P := fun p ↦ IsUFormula ℒₒᵣ p → ∀ e, (BoundedSatisfaction (neg ℒₒᵣ p) e ↔ ¬BoundedSatisfaction p e))
     · definability
     · intro _ e; simp
     · intro _ e; simp
@@ -477,12 +477,12 @@ lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
 - [HP98, Theorem I.1.70] -/
 lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsBounded p) :
-    SatZero (Bootstrapping.subst ℒₒᵣ w p) e ↔ SatZero p (termValVec e n w) := by
+    BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔ BoundedSatisfaction p (termValVec e n w) := by
   have H : ∀ p : V, IsBounded p → ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
-      (SatZero (Bootstrapping.subst ℒₒᵣ w p) e ↔ SatZero p (termValVec e n w)) := by
+      (BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔ BoundedSatisfaction p (termValVec e n w)) := by
     apply Isbounded_induction 𝚷
       (P := fun p ↦ ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
-        (SatZero (Bootstrapping.subst ℒₒᵣ w p) e ↔ SatZero p (termValVec e n w)))
+        (BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔ BoundedSatisfaction p (termValVec e n w)))
     · definability
     · intro n m w e _ _; simp
     · intro n m w e _ _; simp
@@ -541,6 +541,6 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
       rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
   exact H p hp' n m w e hw hp
 
-end SatZero
+end BoundedSatisfaction
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

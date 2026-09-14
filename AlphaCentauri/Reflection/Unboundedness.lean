@@ -58,7 +58,7 @@ lemma exists_mem_eq_quote {m : ℕ} (hmem : (m : V) ∈ U.Δ₁Class)
 lemma eval_collapseFormula_pi (c : V) :
     V ⊧/![c] (collapseFormula T U n 𝚷) ↔
       ∀ y ∈ U.Δ₁Class, IsSemiformula ℒₒᵣ (0 : V) y → IsStrictPi (n + 1) y →
-        (∀ u < y, ¬Proof T u (neg ℒₒᵣ c)) → SatPi (n + 1) y 0 := by
+        (∀ u < y, ¬Proof T u (neg ℒₒᵣ c)) → PiSatisfaction (n + 1) y 0 := by
   simp [collapseFormula, HierarchySymbol.Semiformula.val_sigma,
     (Δ₁Class.defined (T := U) (V := V)).df,
     (IsSemiformula.defined (L := ℒₒᵣ) (V := V)).df,
@@ -66,14 +66,14 @@ lemma eval_collapseFormula_pi (c : V) :
     (neg.defined (L := ℒₒᵣ) (V := V)).df,
     (Proof.defined (T := T) (V := V)).proper.iff',
     (Proof.defined (T := T) (V := V)).df,
-    (SatPi.defined (V := V) n).df]
+    (PiSatisfaction.defined (V := V) n).df]
 
 /-- Truth of `collapseFormula` at polarity `𝚺` in a model of `𝗜𝚺₁`. -/
 lemma eval_collapseFormula_sigma (c : V) :
     V ⊧/![c] (collapseFormula T U n 𝚺) ↔
       ∃ y : V, (∃ u < y, Proof T u (neg ℒₒᵣ c)) ∧
         ∀ z < y, z ∈ U.Δ₁Class → IsSemiformula ℒₒᵣ (0 : V) z → IsStrictSigma (n + 1) z →
-          SatSigma (n + 1) z 0 := by
+          SigmaSatisfaction (n + 1) z 0 := by
   simp [collapseFormula, HierarchySymbol.Semiformula.val_sigma,
     (Δ₁Class.defined (T := U) (V := V)).proper.iff',
     (Δ₁Class.defined (T := U) (V := V)).df,
@@ -83,14 +83,14 @@ lemma eval_collapseFormula_sigma (c : V) :
     (IsStrictSigma.defined (V := V) (n + 1)).df,
     (neg.defined (L := ℒₒᵣ) (V := V)).df,
     (Proof.defined (T := T) (V := V)).df,
-    (SatSigma.defined (V := V) n).df]
+    (SigmaSatisfaction.defined (V := V) n).df]
 
 /-- Truth of `collapseSentence` at polarity `𝚷` in a model of `𝗜𝚺₁`. -/
 lemma models_collapseSentence_pi_iff :
     V↓[ℒₒᵣ] ⊧ collapseSentence T U n 𝚷 ↔
       ∀ y ∈ U.Δ₁Class, IsSemiformula ℒₒᵣ (0 : V) y → IsStrictPi (n + 1) y →
         (∀ u < y, ¬Proof T u (⌜∼fixedpoint (collapseFormula T U n 𝚷)⌝ : V)) →
-          SatPi (n + 1) y 0 := by
+          PiSatisfaction (n + 1) y 0 := by
   have h : V↓[ℒₒᵣ] ⊧ collapseSentence T U n 𝚷 ↔
       V ⊧/![(⌜fixedpoint (collapseFormula T U n 𝚷)⌝ : V)] (collapseFormula T U n 𝚷) := by
     simp [collapseSentence, models_iff]
@@ -102,7 +102,7 @@ lemma models_collapseSentence_sigma_iff :
     V↓[ℒₒᵣ] ⊧ collapseSentence T U n 𝚺 ↔
       ∃ y : V, (∃ u < y, Proof T u (⌜∼fixedpoint (collapseFormula T U n 𝚺)⌝ : V)) ∧
         ∀ z < y, z ∈ U.Δ₁Class → IsSemiformula ℒₒᵣ (0 : V) z → IsStrictSigma (n + 1) z →
-          SatSigma (n + 1) z 0 := by
+          SigmaSatisfaction (n + 1) z 0 := by
   have h : V↓[ℒₒᵣ] ⊧ collapseSentence T U n 𝚺 ↔
       V ⊧/![(⌜fixedpoint (collapseFormula T U n 𝚺)⌝ : V)] (collapseFormula T U n 𝚺) := by
     simp [collapseSentence, models_iff]
@@ -166,7 +166,7 @@ private lemma inconsistent_union_of_inconsistent_insert_pi
     obtain ⟨m, rfl⟩ := eq_nat_of_le_nat hle
     obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi
     rw [hmσ]
-    refine (satPi_quote_iff (hΓ σ hσ) ![]).mpr ?_
+    refine (piSatisfaction_quote_iff (hΓ σ hσ) ![]).mpr ?_
     have hσM : M↓[ℒₒᵣ] ⊧ σ := models_of_mem (Set.mem_union_right T hσ)
     simpa [models_iff] using hσM
   exact inconsistent_of_provable_of_unprovable hprov (WeakerThan.pbl hneg)
@@ -192,7 +192,7 @@ private lemma inconsistent_union_of_inconsistent_insert_sigma
     obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat hz
     obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi
     rw [hmσ]
-    refine (satSigma_quote_iff (hΓ σ hσ) ![]).mpr ?_
+    refine (sigmaSatisfaction_quote_iff (hΓ σ hσ) ![]).mpr ?_
     have hσM : M↓[ℒₒᵣ] ⊧ σ := models_of_mem (Set.mem_union_right T hσ)
     simpa [models_iff] using hσM
   exact inconsistent_of_provable_of_unprovable hprov (WeakerThan.pbl hneg)
@@ -220,7 +220,7 @@ private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚷 (n + 
     intro hθ
     have hsat := models_collapseSentence_pi_iff.mp hθ (⌜σ⌝ : M) (by simp [hσ])
       (by simp) ((isStrictPi_quote_iff σ).mpr (hΓ σ hσ)) ?_
-    · exact (satPi_quote_iff (hΓ σ hσ) ![]).mp (by simpa using hsat)
+    · exact (piSatisfaction_quote_iff (hΓ σ hσ) ![]).mp (by simpa using hsat)
     · intro u hu hpu
       rw [← Sentence.coe_quote_eq_quote] at hu
       obtain ⟨j, rfl⟩ := eq_nat_of_lt_nat hu
@@ -251,7 +251,7 @@ private lemma provable_of_mem_sigma (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚺 (n
     have hlt : (⌜σ⌝ : M) < y := lt_trans (not_le.mp hnu) huy
     have hsat := hall (⌜σ⌝ : M) hlt (by simp [hσ]) (by simp)
       ((isStrictSigma_quote_iff σ).mpr (hΓ σ hσ))
-    exact (satSigma_quote_iff (hΓ σ hσ) ![]).mp (by simpa using hsat)
+    exact (sigmaSatisfaction_quote_iff (hΓ σ hσ) ![]).mp (by simpa using hsat)
   have hT : T ⪯ insert (collapseSentence T U n 𝚺) T := WeakerThan.ofSubset (Set.subset_insert _ _)
   have key' : insert (collapseSentence T U n 𝚺) T ⊢ collapseSentence T U n 𝚺 🡒 σ :=
     hT.pbl (WeakerThan.pbl (𝓢 := 𝗜𝚺₁) key)

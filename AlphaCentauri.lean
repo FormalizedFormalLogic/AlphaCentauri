@@ -1,10 +1,10 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
 public import AlphaCentauri.Bootstrapping.Bounded
-public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZero
-public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZeroExists
-public import AlphaCentauri.Bootstrapping.PartialTruth.SatSigma
-public import AlphaCentauri.Bootstrapping.PartialTruth.SatZero
+public import AlphaCentauri.Bootstrapping.PartialTruth.BoundedSatisfaction
+public import AlphaCentauri.Bootstrapping.PartialTruth.PartialBoundedSatisfaction
+public import AlphaCentauri.Bootstrapping.PartialTruth.PartialBoundedSatisfactionExists
+public import AlphaCentauri.Bootstrapping.PartialTruth.SigmaSatisfaction
 public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
 public import AlphaCentauri.Bootstrapping.PartialTruth.Tarski
 public import AlphaCentauri.Bootstrapping.Prenex

@@ -160,93 +160,93 @@ private lemma quote_mulTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒ
 /-- For a bounded formula, internal $\Delta_0$ satisfaction of its code agrees with truth.
 - [HP98, Theorem I.1.70]
 - [HP98, Corollary I.1.76] -/
-theorem satZero_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
+theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : φ.Bounded) (v : Fin k → V) :
-    SatZero (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
+    BoundedSatisfaction (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
   revert v
   refine bounded_induction (ξ := Empty)
-    (P := fun k φ ↦ ∀ v : Fin k → V, SatZero (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ)
+    (P := fun k φ ↦ ∀ v : Fin k → V, BoundedSatisfaction (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ)
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ k φ hφ
   · intro n v; simp [Sentence.quote_def]
   · intro n v; simp [Sentence.quote_def]
   · intro n t u v
-    rw [quote_eq_sentence, SatZero.eq_iff (isUTerm_quote t) (isUTerm_quote u),
+    rw [quote_eq_sentence, BoundedSatisfaction.eq_iff (isUTerm_quote t) (isUTerm_quote u),
       termVal_quote, termVal_quote]
     simp [Semiformula.eval_rel]
   · intro n t u v
-    rw [quote_neq_sentence, SatZero.neq_iff (isUTerm_quote t) (isUTerm_quote u),
+    rw [quote_neq_sentence, BoundedSatisfaction.neq_iff (isUTerm_quote t) (isUTerm_quote u),
       termVal_quote, termVal_quote]
     simp [Semiformula.eval_nrel]
   · intro n t u v
-    rw [quote_lt_sentence, SatZero.lt_iff (isUTerm_quote t) (isUTerm_quote u),
+    rw [quote_lt_sentence, BoundedSatisfaction.lt_iff (isUTerm_quote t) (isUTerm_quote u),
       termVal_quote, termVal_quote]
     simp [Semiformula.eval_rel]
   · intro n t u v
-    rw [quote_nlt_sentence, SatZero.nlt_iff (isUTerm_quote t) (isUTerm_quote u),
+    rw [quote_nlt_sentence, BoundedSatisfaction.nlt_iff (isUTerm_quote t) (isUTerm_quote u),
       termVal_quote, termVal_quote]
     simp [Semiformula.eval_nrel]
   · intro n φ ψ hφ hψ ihφ ihψ v
-    rw [quote_and_sentence, SatZero.and_iff, ihφ v, ihψ v]
+    rw [quote_and_sentence, BoundedSatisfaction.and_iff, ihφ v, ihψ v]
     simp
   · intro n φ ψ hφ hψ ihφ ihψ v
-    rw [quote_or_sentence, SatZero.or_iff ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ)
+    rw [quote_or_sentence, BoundedSatisfaction.or_iff ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ)
       ((isBounded_quote_iff ψ).mpr hψ) (isUFormula_quote ψ), ihφ v, ihψ v]
     simp
   · intro n t φ hφ ihφ v
-    rw [quote_ball_sentence, SatZero.ball_iff (isUTerm_quote t)
+    rw [quote_ball_sentence, BoundedSatisfaction.ball_iff (isUTerm_quote t)
       ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ), termVal_quote]
     simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel]
     refine forall_congr' fun x ↦ ?_
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)]
     simp [Function.comp_def]
   · intro n t φ hφ ihφ v
-    rw [quote_bex_sentence, SatZero.bex_iff (isUTerm_quote t), termVal_quote]
+    rw [quote_bex_sentence, BoundedSatisfaction.bex_iff (isUTerm_quote t), termVal_quote]
     simp only [Semiformula.eval_bexs, Semiformula.Operator.lt_def, Semiformula.eval_rel]
     refine exists_congr fun x ↦ ?_
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)]
     simp [Function.comp_def]
 
-/-- The satisfaction predicate selected by a polarity: `SatSigma` for `Σ`, `SatPi` for `Π`.
+/-- The satisfaction predicate selected by a polarity: `SigmaSatisfaction` for `Σ`, `PiSatisfaction` for `Π`.
 - [HP98, Definition I.1.74] -/
-def SatClass : Polarity → ℕ → V → V → Prop
-  | .sigma, n, z, e => SatSigma n z e
-  | .pi, n, z, e => SatPi n z e
+def HierarchySatisfaction : Polarity → ℕ → V → V → Prop
+  | .sigma, n, z, e => SigmaSatisfaction n z e
+  | .pi, n, z, e => PiSatisfaction n z e
 
 /-- Internal satisfaction of the code of a strict prenex formula agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
-lemma satClass_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
+lemma hierarchySatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) :
-    ∀ v : Fin k → V, SatClass Γ s (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
+    ∀ v : Fin k → V, HierarchySatisfaction Γ s (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
   induction h with
   | @zero Γ₀ n₀ φ₀ hφ₀ =>
     intro v
     rcases Γ₀ with _ | _
-    · show SatSigma 0 _ _ ↔ _
-      rw [SatSigma.zero]; exact satZero_quote_iff hφ₀ v
-    · show SatPi 0 _ _ ↔ _
-      rw [SatPi.zero]; exact satZero_quote_iff hφ₀ v
+    · show SigmaSatisfaction 0 _ _ ↔ _
+      rw [SigmaSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀ v
+    · show PiSatisfaction 0 _ _ ↔ _
+      rw [PiSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀ v
   | @ofAlt Γ₀ s₀ n₀ φ₀ hφ₀ ih =>
     intro v
     rcases Γ₀ with _ | _
-    · show SatSigma (s₀ + 1) _ _ ↔ _
-      rw [SatSigma.of_pi ((isStrictPi_quote_iff φ₀).mpr hφ₀) (isUFormula_quote φ₀)]
+    · show SigmaSatisfaction (s₀ + 1) _ _ ↔ _
+      rw [SigmaSatisfaction.of_pi ((isStrictPi_quote_iff φ₀).mpr hφ₀) (isUFormula_quote φ₀)]
       exact ih v
-    · show SatPi (s₀ + 1) _ _ ↔ _
-      rw [SatPi.of_sigma ((isStrictSigma_quote_iff φ₀).mpr hφ₀) (isUFormula_quote φ₀)]
+    · show PiSatisfaction (s₀ + 1) _ _ ↔ _
+      rw [PiSatisfaction.of_sigma ((isStrictSigma_quote_iff φ₀).mpr hφ₀) (isUFormula_quote φ₀)]
       exact ih v
   | @exs s₀ n₀ φ₀ hφ₀ ih =>
     intro v
-    show SatSigma (s₀ + 1) _ _ ↔ _
-    rw [quote_ex_sentence, SatSigma.exs_iff]
+    show SigmaSatisfaction (s₀ + 1) _ _ ↔ _
+    rw [quote_ex_sentence, SigmaSatisfaction.exs_iff]
     simp only [Semiformula.eval_ex]
     refine exists_congr fun x ↦ ?_
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp]
     exact ih (x :> v)
   | @all s₀ n₀ φ₀ hφ₀ ih =>
     intro v
-    show SatPi (s₀ + 1) _ _ ↔ _
-    rw [quote_all_sentence, SatPi.all_iff]
+    show PiSatisfaction (s₀ + 1) _ _ ↔ _
+    rw [quote_all_sentence, PiSatisfaction.all_iff]
     simp only [Semiformula.eval_all]
     refine forall_congr' fun x ↦ ?_
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp]
@@ -258,14 +258,14 @@ variable {n k : ℕ} {φ : ArithmeticSemisentence k}
 /-- For a strict prenex $\Sigma_n$ formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
-theorem satSigma_quote_iff (hφ : StrictHierarchy 𝚺 n φ) (v : Fin k → V) :
-    SatSigma n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := satClass_quote_iff hφ v
+theorem sigmaSatisfaction_quote_iff (hφ : StrictHierarchy 𝚺 n φ) (v : Fin k → V) :
+    SigmaSatisfaction n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := hierarchySatisfaction_quote_iff hφ v
 
 /-- For a strict prenex $\Pi_n$ formula, internal satisfaction of its code agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.80] -/
-theorem satPi_quote_iff (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
-    SatPi n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := satClass_quote_iff hφ v
+theorem piSatisfaction_quote_iff (hφ : StrictHierarchy 𝚷 n φ) (v : Fin k → V) :
+    PiSatisfaction n ⌜φ⌝ (matrixToVec v) ↔ V ⊧/v φ := hierarchySatisfaction_quote_iff hφ v
 
 end
 
@@ -274,14 +274,14 @@ definition.
 - [HP98, Corollary I.1.76] -/
 noncomputable def snowing (n : ℕ) {k : ℕ}
     (φ : ArithmeticSemisentence k) : ArithmeticSentence :=
-  ∀¹* (φ 🡘 (satSigmaVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
+  ∀¹* (φ 🡘 (sigmaSatisfactionVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
 
 /-- Semantic characterization of the sentence `snowing n φ`.
 - [HP98, Corollary I.1.76] -/
 theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
     V↓[ℒₒᵣ] ⊧ snowing n φ ↔
-      ∀ v : Fin k → V, V ⊧/v φ ↔ SatSigma (n + 1) ⌜φ⌝ (matrixToVec v) := by
-  simp [snowing, models_iff, (satSigmaVec.defined n k).df, Function.comp_def]
+      ∀ v : Fin k → V, V ⊧/v φ ↔ SigmaSatisfaction (n + 1) ⌜φ⌝ (matrixToVec v) := by
+  simp [snowing, models_iff, (sigmaSatisfactionVec.defined n k).df, Function.comp_def]
 
 /-- `𝗜𝚺₁` proves the snowing sentence for every strict prenex $\Sigma_{n + 1}$ formula.
 - [HP98, Corollary I.1.76] -/
@@ -289,7 +289,7 @@ theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗜𝚺₁ ⊢ snowing n φ := by
   apply Arithmetic.complete.{0}
   intro M _ _
-  exact (models_snowing_iff φ).mpr fun v ↦ (satSigma_quote_iff hφ v).symm
+  exact (models_snowing_iff φ).mpr fun v ↦ (sigmaSatisfaction_quote_iff hφ v).symm
 
 
 /-! ## The snowing lemma over `𝗣𝗔⁻` -/
@@ -432,30 +432,30 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
 /-! ### The $\Delta_0$ base case -/
 
 include hM in
-/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `satZero` at the code of a bounded
+/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `boundedSatisfaction` at the code of a bounded
 formula agrees with truth.
 - [HP98, Theorem I.1.70]
 - [HP98, Corollary I.1.76] -/
-private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
+private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : φ.Bounded) :
-    ∀ (v : Fin k → M) (ev : M), Codes v ev → (Sat0 ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+    ∀ (v : Fin k → M) (ev : M), Codes v ev → (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   refine bounded_induction (ξ := Empty)
     (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev →
-      (Sat0 ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ))
+      (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ k φ hφ
   · intro m v ev _
     have hq : M ⊧/![((⌜(⊤ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqVerumDef.val :=
       Sigma0_cast₁ qqVerumDef (by simp [Sentence.quote_def])
-    simpa using read_satZeroVerum hM _ ev hq
+    simpa using read_boundedSatisfactionVerum hM _ ev hq
   · intro m v ev _
     have hq : M ⊧/![((⌜(⊥ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqFalsumDef.val :=
       Sigma0_cast₁ qqFalsumDef (by simp [Sentence.quote_def])
-    simpa using read_satZeroFalsum hM _ ev hq
+    simpa using read_boundedSatisfactionFalsum hM _ ev hq
   · intro m t u v ev hev
     have hq : M ⊧/![((⌜(.rel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqEQDef.val :=
       Sigma1_cast₃ qqEQDef (by simpa using quote_eq_sentence (V := ℕ) t u)
-    rw [read_satZeroEq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+    rw [read_boundedSatisfactionEq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
     simp [Semiformula.eval_rel]
@@ -463,7 +463,7 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     have hq : M ⊧/![((⌜(.nrel Language.Eq.eq ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNEQDef.val :=
       Sigma1_cast₃ qqNEQDef (by simpa using quote_neq_sentence (V := ℕ) t u)
-    rw [read_satZeroNeq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+    rw [read_boundedSatisfactionNeq hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
     simp [Semiformula.eval_nrel]
@@ -471,7 +471,7 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     have hq : M ⊧/![((⌜(.rel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqLTDef.val :=
       Sigma1_cast₃ qqLTDef (by simpa using quote_lt_sentence (V := ℕ) t u)
-    rw [read_satZeroLt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+    rw [read_boundedSatisfactionLt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
     simp [Semiformula.eval_rel]
@@ -479,19 +479,19 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     have hq : M ⊧/![((⌜(.nrel Language.LT.lt ![t, u] : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((⌜t⌝ : ℕ) : M), ((⌜u⌝ : ℕ) : M)] qqNLTDef.val :=
       Sigma1_cast₃ qqNLTDef (by simpa using quote_nlt_sentence (V := ℕ) t u)
-    rw [read_satZeroNlt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
+    rw [read_boundedSatisfactionNlt hM ((⌜t⌝ : ℕ) : M) ((⌜u⌝ : ℕ) : M) _ ev (t.valb v) (u.valb v)
       (uTerm_quote_cast t) (uTerm_quote_cast u) hq
       (termVal_quote_cast hM hev t) (termVal_quote_cast hM hev u)]
     simp [Semiformula.eval_nrel]
   · intro m φ ψ _ _ ihφ ihψ v ev hev
     have hq : M ⊧/![((⌜φ ⋏ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqAndDef.val :=
       Sigma0_cast₃ qqAndDef (by simpa using quote_and_sentence (V := ℕ) φ ψ)
-    rw [read_satZeroAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev, ihψ v ev hev]
+    rw [read_boundedSatisfactionAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev, ihψ v ev hev]
     simp
   · intro m φ ψ hφ hψ ihφ ihψ v ev hev
     have hq : M ⊧/![((⌜φ ⋎ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqOrDef.val :=
       Sigma0_cast₃ qqOrDef (by simpa using quote_or_sentence (V := ℕ) φ ψ)
-    rw [read_satZeroOr hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev
+    rw [read_boundedSatisfactionOr hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev
       (bounded_quote_cast hφ) (uFormula_quote_cast φ) (bounded_quote_cast hψ)
       (uFormula_quote_cast ψ) hq, ihφ v ev hev, ihψ v ev hev]
     simp
@@ -501,7 +501,7 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     have hq : M ⊧/![((⌜(∀¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜φ⌝ : ℕ) : M)] qqBallDef.val :=
       Sigma1_cast₃ qqBallDef (by simpa using quote_ball_sentence (V := ℕ) t φ)
-    rw [read_satZeroBall hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
+    rw [read_boundedSatisfactionBall hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
       ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) (bounded_quote_cast hφ)
       (uFormula_quote_cast φ) hu hq (termVal_quote_cast hM hev t)]
     simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel]
@@ -519,7 +519,7 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     have hq : M ⊧/![((⌜(∃¹[“#0 < !!(Rew.bShift t)”] φ : ArithmeticSemisentence m)⌝ : ℕ) : M),
         ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜φ⌝ : ℕ) : M)] qqBexDef.val :=
       Sigma1_cast₃ qqBexDef (by simpa using quote_bex_sentence (V := ℕ) t φ)
-    rw [read_satZeroBex hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
+    rw [read_boundedSatisfactionBex hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
       ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) hu hq
       (termVal_quote_cast hM hev t)]
     simp only [Semiformula.eval_bexs, Semiformula.Operator.lt_def, Semiformula.eval_rel]
@@ -539,14 +539,14 @@ include hM in
 at the code of a strict prenex formula agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
-private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
+private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) (hs : s ≤ n + 1) :
-    ∀ (v : Fin k → M) (ev : M), Codes v ev → (Sat Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+    ∀ (v : Fin k → M) (ev : M), Codes v ev → (Reading.HierarchySatisfaction Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   revert hs
   induction h with
   | @zero Γ₀ m₀ φ₀ hφ₀ =>
     intro _ v ev hev
-    exact satZero_quote_reading hM hφ₀ v ev hev
+    exact boundedSatisfaction_quote_reading hM hφ₀ v ev hev
   | @ofAlt Γ₀ s₀ m₀ φ₀ hφ₀ ih =>
     intro hs v ev hev
     rw [read_ofAlt hM (show s₀ ≤ n by omega) Γ₀ ((⌜φ₀⌝ : ℕ) : M) ev
@@ -556,8 +556,8 @@ private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : Arithmeti
     intro hs v ev hev
     have hq : M ⊧/![((⌜(∃¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
         qqExsDef.val := Sigma0_cast₂ qqExsDef (by simpa using quote_ex_sentence (V := ℕ) φ₀)
-    show Reading.SatSigma s₀ _ _ ↔ _
-    rw [read_satSigmaExs hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
+    show Reading.SigmaSatisfaction s₀ _ _ ↔ _
+    rw [read_sigmaSatisfactionExs hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
     simp only [Semiformula.eval_ex]
     constructor
     · rintro ⟨x, e', hadj, hsat⟩
@@ -569,8 +569,8 @@ private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : Arithmeti
     intro hs v ev hev
     have hq : M ⊧/![((⌜(∀¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
         qqAllDef.val := Sigma0_cast₂ qqAllDef (by simpa using quote_all_sentence (V := ℕ) φ₀)
-    show Reading.SatPi s₀ _ _ ↔ _
-    rw [read_satPiAll hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
+    show Reading.PiSatisfaction s₀ _ _ ↔ _
+    rw [read_piSatisfactionAll hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
     simp only [Semiformula.eval_all]
     constructor
     · intro hsat x
@@ -580,30 +580,30 @@ private lemma satClass_quote_reading {Γ : Polarity} {s k : ℕ} {φ : Arithmeti
       exact (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mpr (hsat x)
 
 include hM in
-/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `satSigma n` at the code of a
+/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `sigmaSatisfaction n` at the code of a
 strict prenex $\Sigma_{n + 1}$ formula agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
-theorem satSigma_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
+theorem sigmaSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) {v : Fin k → M} {ev : M} (hev : Codes v ev) :
-    Reading.SatSigma n ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ :=
-  satClass_quote_reading hM hφ le_rfl v ev hev
+    Reading.SigmaSatisfaction n ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ :=
+  hierarchySatisfaction_quote_reading hM hφ le_rfl v ev hev
 
 /-! ### Assembling the snowing lemma over `𝗣𝗔⁻` -/
 
-private lemma eval_satSigmaVec (p : M) (w : Fin k → M) :
-    M ⊧/(p :> w) (satSigmaVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SatSigma n p ev := by
-  simp only [satSigmaVec, Nat.succ_eq_add_one, Nat.reduceAdd, HierarchySymbol.Semiformula.val_mkSigma,
+private lemma eval_sigmaSatisfactionVec (p : M) (w : Fin k → M) :
+    M ⊧/(p :> w) (sigmaSatisfactionVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SigmaSatisfaction n p ev := by
+  simp only [sigmaSatisfactionVec, Nat.succ_eq_add_one, Nat.reduceAdd, HierarchySymbol.Semiformula.val_mkSigma,
     Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
     Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, numeral_eq_natCast_app,
     Semiterm.val_bvar, Matrix.cons_val_zero, Fin.isValue, Fin.Fin1.eq_one, Matrix.cons_val_one,
     Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃, Semiformula.eval_operator,
     Matrix.cons_val_succ, Structure.eq_iff_eq, LogicalConnective.Prop.and_eq, exists_eq_right,
-    Reading.Codes, Reading.Len, Reading.Nth, Reading.SatSigma, and_assoc]
+    Reading.Codes, Reading.Len, Reading.Nth, Reading.SigmaSatisfaction, and_assoc]
 
 private lemma eval_snowing_rhs {k : ℕ} (φ : ArithmeticSemisentence k) (e : Fin k → M) :
-    M ⊧/e ((satSigmaVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
-      ↔ M ⊧/(((⌜φ⌝ : ℕ) : M) :> e) (satSigmaVec n k).val := by
+    M ⊧/e ((sigmaSatisfactionVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
+      ↔ M ⊧/(((⌜φ⌝ : ℕ) : M) :> e) (sigmaSatisfactionVec n k).val := by
   simp only [Semiformula.eval_substs, Matrix.comp_vecCons'', Arithmetic.gödelNumber'_def,
     Semiterm.Operator.encode, Semiterm.Operator.const, Semiterm.val_operator,
     Structure.numeral_eq_numeral, numeral_eq_natCast_app, Sentence.quote_eq_encode_nat,
@@ -628,12 +628,12 @@ theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
   have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦
     Semantics.ModelsSet.models _ (Set.mem_union_right 𝗣𝗔⁻ hσ)
   have := hPA
-  rw [eval_snowing_rhs, eval_satSigmaVec]
+  rw [eval_snowing_rhs, eval_sigmaSatisfactionVec]
   constructor
   · intro h
     obtain ⟨ev, hev⟩ := exists_codes hM e
-    exact ⟨ev, hev, (satClass_quote_reading hM hφ le_rfl e ev hev).mpr h⟩
+    exact ⟨ev, hev, (hierarchySatisfaction_quote_reading hM hφ le_rfl e ev hev).mpr h⟩
   · rintro ⟨ev, hev, hsat⟩
-    exact (satClass_quote_reading hM hφ le_rfl e ev hev).mp hsat
+    exact (hierarchySatisfaction_quote_reading hM hφ le_rfl e ev hev).mp hsat
 
 end FFL.FirstOrder.Arithmetic

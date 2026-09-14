@@ -11,7 +11,7 @@ public import AlphaCentauri.Vorspiel.Fvar
 
 `𝗣𝗔⁻` together with the finite Tarski theory, a single instance of the $\Sigma_{n + 1}$ induction
 scheme and a single instance of the $\Sigma_{n + 1}$ collection scheme, both stated with the partial
-truth definition `satSigma n`, is a finite theory equivalent to `𝗜𝚺 (n + 1)`; hence `𝗜𝚺 n` is
+truth definition `sigmaSatisfaction n`, is a finite theory equivalent to `𝗜𝚺 (n + 1)`; hence `𝗜𝚺 n` is
 finitely axiomatizable for `n ≥ 1`.
 -/
 
@@ -29,7 +29,7 @@ putting `x` in front of the assignment coded by `e`, with `x` as its bound varia
 as its free variables.
 - [HP98, Theorem I.2.52] -/
 noncomputable def indFormula (n : ℕ) : ArithmeticSemiformula ℕ 1 :=
-  “x. ∃ ev, !adjoinDef.val ev x &1 ∧ !(satSigma n).val &0 ev”
+  “x. ∃ ev, !adjoinDef.val ev x &1 ∧ !(sigmaSatisfaction n).val &0 ev”
 
 /-- The graph of `adjoin` is $\Sigma_{n + 1}$. -/
 @[simp]
@@ -58,7 +58,7 @@ putting `y` and then `x` in front of the assignment coded by `e`, with `x` and `
 variables and `z`, `e` as its free variables.
 - [HP98, Theorem I.2.52] -/
 noncomputable def collFormula (n : ℕ) : ArithmeticSemiformula ℕ 2 :=
-  “x y. ∃ ev₀, !adjoinDef.val ev₀ x &1 ∧ ∃ ev, !adjoinDef.val ev y ev₀ ∧ !(satSigma n).val &0 ev”
+  “x y. ∃ ev₀, !adjoinDef.val ev₀ x &1 ∧ ∃ ev, !adjoinDef.val ev y ev₀ ∧ !(sigmaSatisfaction n).val &0 ev”
 
 /-- The collection formula is $\Sigma_{n + 1}$.
 - [HP98, Theorem I.2.52] -/
@@ -118,15 +118,15 @@ variable {M : Type*} [ORingStructure M]
 @[simp]
 lemma eval_indFormula {n : ℕ} (x : M) (g : ℕ → M) :
     (indFormula n).Eval ![x] g ↔
-      ∃ ev, Reading.Adjoin ev x (g 1) ∧ Reading.SatSigma n (g 0) ev := by
-  simp [indFormula, Reading.Adjoin, Reading.SatSigma]
+      ∃ ev, Reading.Adjoin ev x (g 1) ∧ Reading.SigmaSatisfaction n (g 0) ev := by
+  simp [indFormula, Reading.Adjoin, Reading.SigmaSatisfaction]
 
 @[simp]
 lemma eval_collFormula {n : ℕ} (x y : M) (g : ℕ → M) :
     (collFormula n).Eval ![x, y] g ↔
       ∃ ev₀, Reading.Adjoin ev₀ x (g 1) ∧
-        ∃ ev, Reading.Adjoin ev y ev₀ ∧ Reading.SatSigma n (g 0) ev := by
-  simp [collFormula, Reading.Adjoin, Reading.SatSigma]
+        ∃ ev, Reading.Adjoin ev y ev₀ ∧ Reading.SigmaSatisfaction n (g 0) ev := by
+  simp [collFormula, Reading.Adjoin, Reading.SigmaSatisfaction]
 
 end
 
@@ -177,10 +177,10 @@ private lemma exists_assignment_eval_indFormula {M : Type*} [ORingStructure M] {
   constructor
   · rintro ⟨ev, hadj, hsat⟩
     exact (φ.eval_toSemisentence_one x f).mp
-      ((satSigma_quote_reading hM hψ (codes_cons hM he₀ hadj)).mp hsat)
+      ((sigmaSatisfaction_quote_reading hM hψ (codes_cons hM he₀ hadj)).mp hsat)
   · intro h
     obtain ⟨ev, hadj⟩ := read_adjoinTotal hM x e₀
-    exact ⟨ev, hadj, (satSigma_quote_reading hM hψ (codes_cons hM he₀ hadj)).mpr
+    exact ⟨ev, hadj, (sigmaSatisfaction_quote_reading hM hψ (codes_cons hM he₀ hadj)).mpr
       ((φ.eval_toSemisentence_one x f).mpr h)⟩
 
 /-- The finite theory proves the induction axiom of every strict prenex $\Sigma_{n + 1}$ formula.
@@ -229,12 +229,12 @@ private lemma exists_assignment_eval_collFormula {M : Type*} [ORingStructure M] 
   constructor
   · rintro ⟨ev₀, hadj₀, ev, hadj, hsat⟩
     exact (φ.eval_toSemisentence_two x y f).mp
-      ((satSigma_quote_reading hM hψ (codes_cons hM (codes_cons hM he₀ hadj₀) hadj)).mp hsat)
+      ((sigmaSatisfaction_quote_reading hM hψ (codes_cons hM (codes_cons hM he₀ hadj₀) hadj)).mp hsat)
   · intro hxy
     obtain ⟨ev₀, hadj₀⟩ := read_adjoinTotal hM x e₀
     obtain ⟨ev, hadj⟩ := read_adjoinTotal hM y ev₀
     exact ⟨ev₀, hadj₀, ev, hadj,
-      (satSigma_quote_reading hM hψ (codes_cons hM (codes_cons hM he₀ hadj₀) hadj)).mpr
+      (sigmaSatisfaction_quote_reading hM hψ (codes_cons hM (codes_cons hM he₀ hadj₀) hadj)).mpr
         ((φ.eval_toSemisentence_two x y f).mpr hxy)⟩
 
 /-- The finite theory proves the collection axiom of every strict prenex $\Sigma_{n + 1}$ formula.

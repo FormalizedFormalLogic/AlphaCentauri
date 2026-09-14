@@ -6,9 +6,9 @@ public import AlphaCentauri.Bootstrapping.TermVal
 /-!
 # Partial satisfaction tables
 
-This module defines `PSatZero`, the partial satisfaction table for an internally coded $\Delta_0$
+This module defines `PartialBoundedSatisfaction`, the partial satisfaction table for an internally coded $\Delta_0$
 formula under an assignment, proves it is $\Delta_1$, and proves that a table for a fixed root is
-unique. `PSatZero.agree` is the form uniqueness takes for tables with different roots: two
+unique. `PartialBoundedSatisfaction.agree` is the form uniqueness takes for tables with different roots: two
 tables give the same value at every node common to their domains. This is what reads a Tarski
 condition off the table of a subformula, so no separate restriction operation is needed.
 
@@ -73,10 +73,10 @@ lemma eqIndex_ne_ltIndex : (Arithmetic.eqIndex : V) ≠ (Arithmetic.ltIndex : V)
 
 /-! ## The partial satisfaction table -/
 
-/-- `PSatZero q z e` says that `q` is a finite Tarski satisfaction table rooted at `⟪z, e⟫`.
+/-- `PartialBoundedSatisfaction q z e` says that `q` is a finite Tarski satisfaction table rooted at `⟪z, e⟫`.
 
 - [HP98, Definition I.1.71(1)] -/
-structure PSatZero (q z e : V) : Prop where
+structure PartialBoundedSatisfaction (q z e : V) : Prop where
   /-- `q` is a finite mapping. -/
   isMapping : IsMapping q
   /-- The root belongs to the domain. -/
@@ -119,7 +119,7 @@ structure PSatZero (q z e : V) : Prop where
     (∃ u p e', ⟪qqBex u p, e'⟫ ∈ domain q ∧ ∃ x < termVal (0 ∷ e') u, n = ⟪p, x ∷ e'⟫)
 
 
-namespace PSatZero
+namespace PartialBoundedSatisfaction
 
 variable {q z e z' e' t u p p₁ p₂ : V}
 
@@ -131,7 +131,7 @@ domain, and how the values `1` and `0` at the node are determined. -/
 
 /-- The Tarski clause for the truth constant, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_verum (h : PSatZero q z e) (hn : ⟪(^⊤ : V), e'⟫ ∈ domain q) :
+lemma val_verum (h : PartialBoundedSatisfaction q z e) (hn : ⟪(^⊤ : V), e'⟫ ∈ domain q) :
     ⟪⟪(^⊤ : V), e'⟫, 1⟫ ∈ q := by
   rcases h.spec _ e' hn with
     ⟨he, hv⟩ | ⟨he, hv⟩ |
@@ -144,7 +144,7 @@ lemma val_verum (h : PSatZero q z e) (hn : ⟪(^⊤ : V), e'⟫ ∈ domain q) :
 
 /-- The Tarski clause for the falsehood constant, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_falsum (h : PSatZero q z e) (hn : ⟪(^⊥ : V), e'⟫ ∈ domain q) :
+lemma val_falsum (h : PartialBoundedSatisfaction q z e) (hn : ⟪(^⊥ : V), e'⟫ ∈ domain q) :
     ⟪⟪(^⊥ : V), e'⟫, 0⟫ ∈ q := by
   rcases h.spec _ e' hn with
     ⟨he, hv⟩ | ⟨he, hv⟩ |
@@ -157,7 +157,7 @@ lemma val_falsum (h : PSatZero q z e) (hn : ⟪(^⊥ : V), e'⟫ ∈ domain q) :
 
 /-- The Tarski clauses for a coded equality atom, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma spec_eq (h : PSatZero q z e) (hn : ⟪t ^= u, e'⟫ ∈ domain q) :
+lemma spec_eq (h : PartialBoundedSatisfaction q z e) (hn : ⟪t ^= u, e'⟫ ∈ domain q) :
     (⟪⟪t ^= u, e'⟫, 1⟫ ∈ q ↔ termVal e' t = termVal e' u) ∧
     (⟪⟪t ^= u, e'⟫, 0⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) := by
   rcases h.spec _ e' hn with
@@ -171,7 +171,7 @@ lemma spec_eq (h : PSatZero q z e) (hn : ⟪t ^= u, e'⟫ ∈ domain q) :
 
 /-- The Tarski clauses for a coded inequality atom, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma spec_neq (h : PSatZero q z e) (hn : ⟪t ^≠ u, e'⟫ ∈ domain q) :
+lemma spec_neq (h : PartialBoundedSatisfaction q z e) (hn : ⟪t ^≠ u, e'⟫ ∈ domain q) :
     (⟪⟪t ^≠ u, e'⟫, 1⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) ∧
     (⟪⟪t ^≠ u, e'⟫, 0⟫ ∈ q ↔ termVal e' t = termVal e' u) := by
   rcases h.spec _ e' hn with
@@ -185,7 +185,7 @@ lemma spec_neq (h : PSatZero q z e) (hn : ⟪t ^≠ u, e'⟫ ∈ domain q) :
 
 /-- The Tarski clauses for a coded less-than atom, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma spec_lt (h : PSatZero q z e) (hn : ⟪t ^< u, e'⟫ ∈ domain q) :
+lemma spec_lt (h : PartialBoundedSatisfaction q z e) (hn : ⟪t ^< u, e'⟫ ∈ domain q) :
     (⟪⟪t ^< u, e'⟫, 1⟫ ∈ q ↔ termVal e' t < termVal e' u) ∧
     (⟪⟪t ^< u, e'⟫, 0⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) := by
   rcases h.spec _ e' hn with
@@ -199,7 +199,7 @@ lemma spec_lt (h : PSatZero q z e) (hn : ⟪t ^< u, e'⟫ ∈ domain q) :
 
 /-- The Tarski clauses for a coded not-less-than atom, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma spec_nlt (h : PSatZero q z e) (hn : ⟪t ^≮ u, e'⟫ ∈ domain q) :
+lemma spec_nlt (h : PartialBoundedSatisfaction q z e) (hn : ⟪t ^≮ u, e'⟫ ∈ domain q) :
     (⟪⟪t ^≮ u, e'⟫, 1⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) ∧
     (⟪⟪t ^≮ u, e'⟫, 0⟫ ∈ q ↔ termVal e' t < termVal e' u) := by
   rcases h.spec _ e' hn with
@@ -213,7 +213,7 @@ lemma spec_nlt (h : PSatZero q z e) (hn : ⟪t ^≮ u, e'⟫ ∈ domain q) :
 
 /-- The Tarski and child-domain clauses for a coded conjunction.
 - [HP98, Definition I.1.71(1)] -/
-lemma spec_and (h : PSatZero q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
+lemma spec_and (h : PartialBoundedSatisfaction q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q ∧
     (⟪⟪p₁ ^⋏ p₂, e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∧ ⟪⟪p₂, e'⟫, 1⟫ ∈ q) ∧
     (⟪⟪p₁ ^⋏ p₂, e'⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 0⟫ ∈ q ∨ ⟪⟪p₂, e'⟫, 0⟫ ∈ q) := by
@@ -228,7 +228,7 @@ lemma spec_and (h : PSatZero q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q)
 
 /-- The Tarski and child-domain clauses for a coded disjunction.
 - [HP98, Definition I.1.71(1)] -/
-lemma spec_or (h : PSatZero q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) :
+lemma spec_or (h : PartialBoundedSatisfaction q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q ∧
     (⟪⟪p₁ ^⋎ p₂, e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∨ ⟪⟪p₂, e'⟫, 1⟫ ∈ q) ∧
     (⟪⟪p₁ ^⋎ p₂, e'⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 0⟫ ∈ q ∧ ⟪⟪p₂, e'⟫, 0⟫ ∈ q) := by
@@ -243,7 +243,7 @@ lemma spec_or (h : PSatZero q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) 
 
 /-- The Tarski and child-domain clauses for a coded bounded universal.
 - [HP98, Definition I.1.71(1)] -/
-lemma spec_ball (h : PSatZero q z e) (hn : ⟪qqBall u p, e'⟫ ∈ domain q) :
+lemma spec_ball (h : PartialBoundedSatisfaction q z e) (hn : ⟪qqBall u p, e'⟫ ∈ domain q) :
     (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧
     (∀ x < termVal (0 ∷ e') u, ⟪p, x ∷ e'⟫ ∈ domain q) ∧
     (⟪⟪qqBall u p, e'⟫, 1⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
@@ -259,7 +259,7 @@ lemma spec_ball (h : PSatZero q z e) (hn : ⟪qqBall u p, e'⟫ ∈ domain q) :
 
 /-- The Tarski and child-domain clauses for a coded bounded existential.
 - [HP98, Definition I.1.71(1)] -/
-lemma spec_bex (h : PSatZero q z e) (hn : ⟪qqBex u p, e'⟫ ∈ domain q) :
+lemma spec_bex (h : PartialBoundedSatisfaction q z e) (hn : ⟪qqBex u p, e'⟫ ∈ domain q) :
     (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧
     (∀ x < termVal (0 ∷ e') u, ⟪p, x ∷ e'⟫ ∈ domain q) ∧
     (⟪⟪qqBex u p, e'⟫, 1⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
@@ -277,57 +277,57 @@ lemma spec_bex (h : PSatZero q z e) (hn : ⟪qqBex u p, e'⟫ ∈ domain q) :
 
 /-- Satisfaction of a coded equality atom, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_eq (h : PSatZero q z e) (hn : ⟪t ^= u, e'⟫ ∈ domain q) :
+lemma val_eq (h : PartialBoundedSatisfaction q z e) (hn : ⟪t ^= u, e'⟫ ∈ domain q) :
     ⟪⟪t ^= u, e'⟫, 1⟫ ∈ q ↔ termVal e' t = termVal e' u := (h.spec_eq hn).1
 
 /-- Satisfaction of a coded inequality atom, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_neq (h : PSatZero q z e) (hn : ⟪t ^≠ u, e'⟫ ∈ domain q) :
+lemma val_neq (h : PartialBoundedSatisfaction q z e) (hn : ⟪t ^≠ u, e'⟫ ∈ domain q) :
     ⟪⟪t ^≠ u, e'⟫, 1⟫ ∈ q ↔ termVal e' t ≠ termVal e' u := (h.spec_neq hn).1
 
 /-- Satisfaction of a coded less-than atom, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_lt (h : PSatZero q z e) (hn : ⟪t ^< u, e'⟫ ∈ domain q) :
+lemma val_lt (h : PartialBoundedSatisfaction q z e) (hn : ⟪t ^< u, e'⟫ ∈ domain q) :
     ⟪⟪t ^< u, e'⟫, 1⟫ ∈ q ↔ termVal e' t < termVal e' u := (h.spec_lt hn).1
 
 /-- Satisfaction of a coded not-less-than atom, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_nlt (h : PSatZero q z e) (hn : ⟪t ^≮ u, e'⟫ ∈ domain q) :
+lemma val_nlt (h : PartialBoundedSatisfaction q z e) (hn : ⟪t ^≮ u, e'⟫ ∈ domain q) :
     ⟪⟪t ^≮ u, e'⟫, 1⟫ ∈ q ↔ ¬termVal e' t < termVal e' u := (h.spec_nlt hn).1
 
 /-- Immediate subformulas of a coded conjunction in the domain also belong to the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma mem_dom_and (h : PSatZero q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
+lemma mem_dom_and (h : PartialBoundedSatisfaction q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q :=
   ⟨(h.spec_and hn).1, (h.spec_and hn).2.1⟩
 
 /-- The Tarski clause for conjunction, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_and (h : PSatZero q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
+lemma val_and (h : PartialBoundedSatisfaction q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
     ⟪⟪p₁ ^⋏ p₂, e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∧ ⟪⟪p₂, e'⟫, 1⟫ ∈ q := (h.spec_and hn).2.2.1
 
 /-- Immediate subformulas of a coded disjunction in the domain also belong to the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma mem_dom_or (h : PSatZero q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) :
+lemma mem_dom_or (h : PartialBoundedSatisfaction q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q :=
   ⟨(h.spec_or hn).1, (h.spec_or hn).2.1⟩
 
 /-- The Tarski clause for disjunction, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_or (h : PSatZero q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) :
+lemma val_or (h : PartialBoundedSatisfaction q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) :
     ⟪⟪p₁ ^⋎ p₂, e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∨ ⟪⟪p₂, e'⟫, 1⟫ ∈ q := (h.spec_or hn).2.2.1
 
 /-- Immediate subformulas of a coded bounded universal in the domain also belong to the domain,
 under the extended assignment.
 - [HP98, Definition I.1.71(1)] -/
-lemma mem_dom_ball (h : PSatZero q z e) (ht : IsUTerm ℒₒᵣ t)
+lemma mem_dom_ball (h : PartialBoundedSatisfaction q z e) (ht : IsUTerm ℒₒᵣ t)
     (hn : ⟪qqBall (termBShift ℒₒᵣ t) p, e'⟫ ∈ domain q) {x : V} (hx : x < termVal e' t) :
     ⟪p, x ∷ e'⟫ ∈ domain q :=
   (h.spec_ball hn).2.1 x (by rwa [termVal_termBShift ht])
 
 /-- The Tarski clause for the bounded universal, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_ball (h : PSatZero q z e) (ht : IsUTerm ℒₒᵣ t)
+lemma val_ball (h : PartialBoundedSatisfaction q z e) (ht : IsUTerm ℒₒᵣ t)
     (hn : ⟪qqBall (termBShift ℒₒᵣ t) p, e'⟫ ∈ domain q) :
     ⟪⟪qqBall (termBShift ℒₒᵣ t) p, e'⟫, 1⟫ ∈ q ↔ ∀ x < termVal e' t, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q := by
   have := (h.spec_ball hn).2.2.1
@@ -336,24 +336,24 @@ lemma val_ball (h : PSatZero q z e) (ht : IsUTerm ℒₒᵣ t)
 /-- Immediate subformulas of a coded bounded existential in the domain also belong to the
 domain, under the extended assignment.
 - [HP98, Definition I.1.71(1)] -/
-lemma mem_dom_bex (h : PSatZero q z e) (ht : IsUTerm ℒₒᵣ t)
+lemma mem_dom_bex (h : PartialBoundedSatisfaction q z e) (ht : IsUTerm ℒₒᵣ t)
     (hn : ⟪qqBex (termBShift ℒₒᵣ t) p, e'⟫ ∈ domain q) {x : V} (hx : x < termVal e' t) :
     ⟪p, x ∷ e'⟫ ∈ domain q :=
   (h.spec_bex hn).2.1 x (by rwa [termVal_termBShift ht])
 
 /-- The Tarski clause for the bounded existential, at a node of the domain.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_bex (h : PSatZero q z e) (ht : IsUTerm ℒₒᵣ t)
+lemma val_bex (h : PartialBoundedSatisfaction q z e) (ht : IsUTerm ℒₒᵣ t)
     (hn : ⟪qqBex (termBShift ℒₒᵣ t) p, e'⟫ ∈ domain q) :
     ⟪⟪qqBex (termBShift ℒₒᵣ t) p, e'⟫, 1⟫ ∈ q ↔ ∃ x < termVal e' t, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q := by
   have := (h.spec_bex hn).2.2.1
   rwa [termVal_termBShift ht] at this
 
-end PSatZero
+end PartialBoundedSatisfaction
 
 end coding
 
-namespace PSatZero
+namespace PartialBoundedSatisfaction
 
 variable {q q₁ q₂ z z₁ z₂ e e₁ e₂ p : V}
 
@@ -361,12 +361,12 @@ variable {q q₁ q₂ z z₁ z₂ e e₁ e₂ p : V}
 
 /-- A table takes at most one value at each node, so `0` and `1` cannot both occur.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_one_ne_zero (h : PSatZero q z e) {n : V} (h1 : ⟪n, 1⟫ ∈ q) (h0 : ⟪n, 0⟫ ∈ q) : False := by
+lemma val_one_ne_zero (h : PartialBoundedSatisfaction q z e) {n : V} (h1 : ⟪n, 1⟫ ∈ q) (h0 : ⟪n, 0⟫ ∈ q) : False := by
   simpa using h.isMapping.uniq h1 h0
 
 /-- Every node of the domain carries the value `1` or the value `0`.
 - [HP98, Definition I.1.71(1)] -/
-lemma val_zero_or_one (h : PSatZero q z e) :
+lemma val_zero_or_one (h : PartialBoundedSatisfaction q z e) :
     ∀ p e', ⟪p, e'⟫ ∈ domain q → ⟪⟪p, e'⟫, 1⟫ ∈ q ∨ ⟪⟪p, e'⟫, 0⟫ ∈ q := by
   refine ISigma1.pi1_order_induction
     (P := fun p ↦ ∀ e', ⟪p, e'⟫ ∈ domain q → ⟪⟪p, e'⟫, 1⟫ ∈ q ∨ ⟪⟪p, e'⟫, 0⟫ ∈ q)
@@ -423,7 +423,7 @@ lemma val_zero_or_one (h : PSatZero q z e) :
 
 /-- Two tables agree at every node common to their domains.
 - [HP98, Lemma I.1.72(2)] -/
-lemma agree (h₁ : PSatZero q₁ z₁ e₁) (h₂ : PSatZero q₂ z₂ e₂) :
+lemma agree (h₁ : PartialBoundedSatisfaction q₁ z₁ e₁) (h₂ : PartialBoundedSatisfaction q₂ z₂ e₂) :
     ∀ p e', ⟪p, e'⟫ ∈ domain q₁ → ⟪p, e'⟫ ∈ domain q₂ →
       (⟪⟪p, e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪p, e'⟫, 1⟫ ∈ q₂) ∧
       (⟪⟪p, e'⟫, 0⟫ ∈ q₁ ↔ ⟪⟪p, e'⟫, 0⟫ ∈ q₂) := by
@@ -494,7 +494,7 @@ lemma agree (h₁ : PSatZero q₁ z₁ e₁) (h₂ : PSatZero q₂ z₂ e₂) :
 /-- Every node of a table is a node of any other table with the same root: the domain of a table
 is determined by its root.
 - [HP98, Lemma I.1.72(2)] -/
-lemma dom_subset (h₁ : PSatZero q₁ z e) (h₂ : PSatZero q₂ z e) :
+lemma dom_subset (h₁ : PartialBoundedSatisfaction q₁ z e) (h₂ : PartialBoundedSatisfaction q₂ z e) :
     ∀ n ∈ domain q₁, n ∈ domain q₂ := by
   have key : ∀ k n, n ∈ domain q₁ → q₁ ≤ π₁ n + k → n ∈ domain q₂ := by
     refine ISigma1.pi1_succ_induction
@@ -525,8 +525,8 @@ lemma dom_subset (h₁ : PSatZero q₁ z e) (h₂ : PSatZero q₂ z e) :
 
 /-- A partial satisfaction table for a fixed formula and assignment is unique.
 - [HP98, Lemma I.1.72(2)] -/
-theorem uniq (h₁ : PSatZero q₁ z e) (h₂ : PSatZero q₂ z e) : q₁ = q₂ := by
-  have sub : ∀ {r₁ r₂ : V}, PSatZero r₁ z e → PSatZero r₂ z e → ∀ x, x ∈ r₁ → x ∈ r₂ := by
+theorem uniq (h₁ : PartialBoundedSatisfaction q₁ z e) (h₂ : PartialBoundedSatisfaction q₂ z e) : q₁ = q₂ := by
+  have sub : ∀ {r₁ r₂ : V}, PartialBoundedSatisfaction r₁ z e → PartialBoundedSatisfaction r₂ z e → ∀ x, x ∈ r₁ → x ∈ r₂ := by
     intro r₁ r₂ k₁ k₂ x hx
     have hx' : ⟪π₁ x, π₂ x⟫ ∈ r₁ := by rwa [pair_unpair]
     have hn₁ : ⟪π₁ (π₁ x), π₂ (π₁ x)⟫ ∈ domain r₁ := by
@@ -544,17 +544,17 @@ theorem uniq (h₁ : PSatZero q₁ z e) (h₂ : PSatZero q₂ z e) : q₁ = q₂
       rw [hxe]; exact i0.mp h'
   exact mem_ext fun i ↦ ⟨sub h₁ h₂ i, sub h₂ h₁ i⟩
 
-end PSatZero
+end PartialBoundedSatisfaction
 
 /-! ## $\Delta_1$-definability
 
-The predicate is spelled out clause by clause: each clause of `PSatZero.spec` and of
-`PSatZero.minimal` gets a `Prop` with every quantifier bounded and a defining formula, and
-`pSatZero` is their assembly. Where a clause mentions `termVal`, whose graph is $\Sigma_1$ but not
+The predicate is spelled out clause by clause: each clause of `PartialBoundedSatisfaction.spec` and of
+`PartialBoundedSatisfaction.minimal` gets a `Prop` with every quantifier bounded and a defining formula, and
+`pBoundedSatisfaction` is their assembly. Where a clause mentions `termVal`, whose graph is $\Sigma_1$ but not
 $\Sigma_0$, the value is hoisted out of the clause by an existential on the $\Sigma_1$ side and by a
 universal on the $\Pi_1$ side, which leaves the clause itself $\Sigma_0$. -/
 
-namespace PSatZeroF
+namespace PartialBoundedSatisfactionF
 
 /-! ### Nodes and values as $\Sigma_0$ relations -/
 
@@ -629,7 +629,7 @@ instance childPair_defined :
 
 /-! ### The ten Tarski clauses -/
 
-/-- The clause of `PSatZero.spec` at a node whose code is the truth constant.
+/-- The clause of `PartialBoundedSatisfaction.spec` at a node whose code is the truth constant.
 - [HP98, Lemma I.1.72(1)] -/
 def SpecVerum (q z e : V) : Prop := z = ^⊤ ∧ ⟪⟪z, e⟫, 1⟫ ∈ q
 
@@ -642,7 +642,7 @@ def specVerumDef : 𝚺₀.Semisentence 3 := .mkSigma “q z e. !qqVerumDef z �
 instance specVerum_defined : 𝚺₀-Relation₃ (SpecVerum : V → V → V → Prop) via specVerumDef :=
   .mk fun v ↦ by simp [specVerumDef, SpecVerum, nodeVal_defined.df]
 
-/-- The clause of `PSatZero.spec` at a node whose code is the falsehood constant.
+/-- The clause of `PartialBoundedSatisfaction.spec` at a node whose code is the falsehood constant.
 - [HP98, Lemma I.1.72(1)] -/
 def SpecFalsum (q z e : V) : Prop := z = ^⊥ ∧ ⟪⟪z, e⟫, 0⟫ ∈ q
 
@@ -655,7 +655,7 @@ def specFalsumDef : 𝚺₀.Semisentence 3 := .mkSigma “q z e. !qqFalsumDef z 
 instance specFalsum_defined : 𝚺₀-Relation₃ (SpecFalsum : V → V → V → Prop) via specFalsumDef :=
   .mk fun v ↦ by simp [specFalsumDef, SpecFalsum, nodeVal_defined.df]
 
-/-- The clause of `PSatZero.spec` at a node whose code is an equality atom.
+/-- The clause of `PartialBoundedSatisfaction.spec` at a node whose code is an equality atom.
 - [HP98, Lemma I.1.72(1)] -/
 def SpecEq (q z e : V) : Prop :=
   ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^= u ∧
@@ -695,7 +695,7 @@ instance specEq_defined : 𝚫₁-Relation₃ (SpecEq : V → V → V → Prop) 
     simp [specEqDef, HierarchySymbol.Semiformula.val_sigma, SpecEq, (termVal.defined (V := V)).df,
       (qqEQ_defined (V := V)).df, eqMatrix_defined.df]
 
-/-- The clause of `PSatZero.spec` at a node whose code is an inequality atom.
+/-- The clause of `PartialBoundedSatisfaction.spec` at a node whose code is an inequality atom.
 - [HP98, Lemma I.1.72(1)] -/
 def SpecNeq (q z e : V) : Prop :=
   ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^≠ u ∧
@@ -735,7 +735,7 @@ instance specNeq_defined : 𝚫₁-Relation₃ (SpecNeq : V → V → V → Prop
     simp [specNeqDef, HierarchySymbol.Semiformula.val_sigma, SpecNeq, (termVal.defined (V := V)).df,
       (qqNEQ_defined (V := V)).df, neqMatrix_defined.df]
 
-/-- The clause of `PSatZero.spec` at a node whose code is a less-than atom.
+/-- The clause of `PartialBoundedSatisfaction.spec` at a node whose code is a less-than atom.
 - [HP98, Lemma I.1.72(1)] -/
 def SpecLt (q z e : V) : Prop :=
   ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^< u ∧
@@ -775,7 +775,7 @@ instance specLt_defined : 𝚫₁-Relation₃ (SpecLt : V → V → V → Prop) 
     simp [specLtDef, HierarchySymbol.Semiformula.val_sigma, SpecLt, (termVal.defined (V := V)).df,
       (qqLT_defined (V := V)).df, ltMatrix_defined.df]
 
-/-- The clause of `PSatZero.spec` at a node whose code is a not-less-than atom.
+/-- The clause of `PartialBoundedSatisfaction.spec` at a node whose code is a not-less-than atom.
 - [HP98, Lemma I.1.72(1)] -/
 def SpecNlt (q z e : V) : Prop :=
   ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^≮ u ∧
@@ -815,7 +815,7 @@ instance specNlt_defined : 𝚫₁-Relation₃ (SpecNlt : V → V → V → Prop
     simp [specNltDef, HierarchySymbol.Semiformula.val_sigma, SpecNlt, (termVal.defined (V := V)).df,
       (qqNLT_defined (V := V)).df, nltMatrix_defined.df]
 
-/-- The clause of `PSatZero.spec` at a node whose code is a conjunction.
+/-- The clause of `PartialBoundedSatisfaction.spec` at a node whose code is a conjunction.
 - [HP98, Lemma I.1.72(1)] -/
 def SpecAnd (q z e : V) : Prop :=
   ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋏ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈ domain q ∧
@@ -834,7 +834,7 @@ def specAndDef : 𝚺₀.Semisentence 3 := .mkSigma
 instance specAnd_defined : 𝚺₀-Relation₃ (SpecAnd : V → V → V → Prop) via specAndDef :=
   .mk fun v ↦ by simp [specAndDef, SpecAnd, nodeVal_defined.df, nodeDom_defined.df]
 
-/-- The clause of `PSatZero.spec` at a node whose code is a disjunction.
+/-- The clause of `PartialBoundedSatisfaction.spec` at a node whose code is a disjunction.
 - [HP98, Lemma I.1.72(1)] -/
 def SpecOr (q z e : V) : Prop :=
   ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋎ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈ domain q ∧
@@ -853,7 +853,7 @@ def specOrDef : 𝚺₀.Semisentence 3 := .mkSigma
 instance specOr_defined : 𝚺₀-Relation₃ (SpecOr : V → V → V → Prop) via specOrDef :=
   .mk fun v ↦ by simp [specOrDef, SpecOr, nodeVal_defined.df, nodeDom_defined.df]
 
-/-- The clause of `PSatZero.spec` at a node whose code is a bounded universal.
+/-- The clause of `PartialBoundedSatisfaction.spec` at a node whose code is a bounded universal.
 - [HP98, Lemma I.1.72(1)] -/
 def SpecBall (q z e : V) : Prop :=
   ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ z = qqBall u p ∧
@@ -903,7 +903,7 @@ instance specBall_defined : 𝚫₁-Relation₃ (SpecBall : V → V → V → Pr
       (termVal.defined (V := V)).df, (termBShift.defined (L := ℒₒᵣ) (V := V)).df,
       (qqBall_defined (V := V)).df, ballMatrix_defined.df, adjoin_def]
 
-/-- The clause of `PSatZero.spec` at a node whose code is a bounded existential.
+/-- The clause of `PartialBoundedSatisfaction.spec` at a node whose code is a bounded existential.
 - [HP98, Lemma I.1.72(1)] -/
 def SpecBex (q z e : V) : Prop :=
   ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ z = qqBex u p ∧
@@ -954,9 +954,9 @@ instance specBex_defined : 𝚫₁-Relation₃ (SpecBex : V → V → V → Prop
       (qqBex_defined (V := V)).df, bexMatrix_defined.df, adjoin_def]
 
 
-/-! ### The clause of `PSatZero.spec`, assembled -/
+/-! ### The clause of `PartialBoundedSatisfaction.spec`, assembled -/
 
-/-- The clause `PSatZero.spec` imposes at the node `⟪z, e⟫` of the domain of `q`.
+/-- The clause `PartialBoundedSatisfaction.spec` imposes at the node `⟪z, e⟫` of the domain of `q`.
 - [HP98, Lemma I.1.72(1)] -/
 def SpecAt (q z e : V) : Prop :=
   SpecVerum q z e ∨ SpecFalsum q z e ∨ SpecEq q z e ∨ SpecNeq q z e ∨ SpecLt q z e ∨
@@ -979,7 +979,7 @@ instance specAt_defined : 𝚫₁-Relation₃ (SpecAt : V → V → V → Prop) 
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma]
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma, SpecAt]
 
-/-! ### The clause of `PSatZero.minimal` -/
+/-! ### The clause of `PartialBoundedSatisfaction.minimal` -/
 
 /-- A node of the domain that is an immediate subformula of a coded conjunction in it.
 - [HP98, Lemma I.1.72(1)] -/
@@ -1079,7 +1079,7 @@ instance minBex_defined : 𝚫₁-Relation (MinBex : V → V → Prop) via minBe
       (termVal.defined (V := V)).df, (qqBex_defined (V := V)).df, nodeDom_defined.df,
       minChild_defined.df, adjoin_def]
 
-/-- The clause `PSatZero.minimal` imposes at the node `n` of the domain of `q`.
+/-- The clause `PartialBoundedSatisfaction.minimal` imposes at the node `n` of the domain of `q`.
 - [HP98, Lemma I.1.72(1)] -/
 def MinimalAt (q z e n : V) : Prop :=
   n = ⟪z, e⟫ ∨ MinAnd q n ∨ MinOr q n ∨ MinBall q n ∨ MinBex q n
@@ -1102,9 +1102,9 @@ instance minimalAt_defined :
 
 /-! ### Assembling the definition -/
 
-/-- The definition of `PSatZero`, with every quantifier bounded by the table.
+/-- The definition of `PartialBoundedSatisfaction`, with every quantifier bounded by the table.
 - [HP98, Lemma I.1.72(1)] -/
-lemma psatZero_iff {q z e : V} : PSatZero q z e ↔
+lemma pboundedSatisfaction_iff {q z e : V} : PartialBoundedSatisfaction q z e ↔
     IsMapping q ∧ ⟪z, e⟫ ∈ domain q ∧
     (∀ z' < q, ∀ e' < q, ⟪z', e'⟫ ∈ domain q → SpecAt q z' e') ∧
     (∀ n < q, n ∈ domain q → MinimalAt q z e n) := by
@@ -1172,32 +1172,32 @@ lemma psatZero_iff {q z e : V} : PSatZero q z e ↔
       · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨u, p, e', hd, hx⟩)))
       · exact Or.inr (Or.inr (Or.inr (Or.inr ⟨u, p, e', hd, hx⟩)))
 
-end PSatZeroF
+end PartialBoundedSatisfactionF
 
 /-- The $\Delta_1$ formula defining partial satisfaction tables.
 - [HP98, Lemma I.1.72(1)] -/
-noncomputable def pSatZero : 𝚫₁.Semisentence 3 := .mkDelta
-  (.mkSigma “q z e. !isMappingDef q ∧ !PSatZeroF.nodeDomDef q z e ∧
-    (∀ z' < q, ∀ e' < q, !PSatZeroF.nodeDomDef q z' e' → !PSatZeroF.specDef.sigma q z' e') ∧
-    (∀ n < q, !PSatZeroF.inDomDef q n → !PSatZeroF.minimalDef.sigma q z e n)”)
-  (.mkPi “q z e. !isMappingDef q ∧ !PSatZeroF.nodeDomDef q z e ∧
-    (∀ z' < q, ∀ e' < q, !PSatZeroF.nodeDomDef q z' e' → !PSatZeroF.specDef.pi q z' e') ∧
-    (∀ n < q, !PSatZeroF.inDomDef q n → !PSatZeroF.minimalDef.pi q z e n)”)
+noncomputable def pBoundedSatisfaction : 𝚫₁.Semisentence 3 := .mkDelta
+  (.mkSigma “q z e. !isMappingDef q ∧ !PartialBoundedSatisfactionF.nodeDomDef q z e ∧
+    (∀ z' < q, ∀ e' < q, !PartialBoundedSatisfactionF.nodeDomDef q z' e' → !PartialBoundedSatisfactionF.specDef.sigma q z' e') ∧
+    (∀ n < q, !PartialBoundedSatisfactionF.inDomDef q n → !PartialBoundedSatisfactionF.minimalDef.sigma q z e n)”)
+  (.mkPi “q z e. !isMappingDef q ∧ !PartialBoundedSatisfactionF.nodeDomDef q z e ∧
+    (∀ z' < q, ∀ e' < q, !PartialBoundedSatisfactionF.nodeDomDef q z' e' → !PartialBoundedSatisfactionF.specDef.pi q z' e') ∧
+    (∀ n < q, !PartialBoundedSatisfactionF.inDomDef q n → !PartialBoundedSatisfactionF.minimalDef.pi q z e n)”)
 
-/-- The formula `pSatZero` defines partial satisfaction tables.
+/-- The formula `pBoundedSatisfaction` defines partial satisfaction tables.
 - [HP98, Lemma I.1.72(1)] -/
-instance PSatZero.defined : 𝚫₁-Relation₃ (PSatZero : V → V → V → Prop) via pSatZero := .mk <| by
+instance PartialBoundedSatisfaction.defined : 𝚫₁-Relation₃ (PartialBoundedSatisfaction : V → V → V → Prop) via pBoundedSatisfaction := .mk <| by
   constructor
   · intro v
-    simp [pSatZero, HierarchySymbol.Semiformula.val_sigma, PSatZeroF.nodeDom_defined.df,
-      PSatZeroF.inDom_defined.df]
+    simp [pBoundedSatisfaction, HierarchySymbol.Semiformula.val_sigma, PartialBoundedSatisfactionF.nodeDom_defined.df,
+      PartialBoundedSatisfactionF.inDom_defined.df]
   · intro v
-    simp [pSatZero, HierarchySymbol.Semiformula.val_sigma, PSatZeroF.psatZero_iff,
-      PSatZeroF.nodeDom_defined.df, PSatZeroF.inDom_defined.df]
+    simp [pBoundedSatisfaction, HierarchySymbol.Semiformula.val_sigma, PartialBoundedSatisfactionF.pboundedSatisfaction_iff,
+      PartialBoundedSatisfactionF.nodeDom_defined.df, PartialBoundedSatisfactionF.inDom_defined.df]
 
 /-- Partial satisfaction tables form a $\Delta_1$-definable relation.
 - [HP98, Lemma I.1.72(1)] -/
-instance PSatZero.definable : 𝚫₁-Relation₃ (PSatZero : V → V → V → Prop) :=
-  PSatZero.defined.to_definable
+instance PartialBoundedSatisfaction.definable : 𝚫₁-Relation₃ (PartialBoundedSatisfaction : V → V → V → Prop) :=
+  PartialBoundedSatisfaction.defined.to_definable
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

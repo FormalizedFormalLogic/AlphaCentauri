@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZero
+public import AlphaCentauri.Bootstrapping.PartialTruth.PartialBoundedSatisfaction
 public import Foundation.FirstOrder.Arithmetic.HFS.Superexp
 import Mathlib.Tactic.Ring
 
@@ -8,7 +8,7 @@ import Mathlib.Tactic.Ring
 # Existence of partial satisfaction tables
 
 Every well-formed internally $\Delta_0$ formula has a partial satisfaction table under every
-assignment. The statement `∀ e, ∃ q, PSatZero q z e` is $\Pi_2$, so `𝗜𝚺₁` cannot induct on it
+assignment. The statement `∀ e, ∃ q, PartialBoundedSatisfaction q z e` is $\Pi_2$, so `𝗜𝚺₁` cannot induct on it
 directly; following [HP98, Lemma I.1.72(3)], the induction is carried out on a bounded form of
 the statement instead. Where the source bounds the table uniformly by a polynomial in the code
 and in an assignment bound, this development bounds it by
@@ -255,11 +255,11 @@ lemma uformula_nrel_cases {k r w : V} (h : IsUFormula ℒₒᵣ (^nrel k r w)) :
 
 /-! ## The clauses of a table as standalone predicates -/
 
-namespace PSatZero
+namespace PartialBoundedSatisfaction
 
 variable {q q₁ q₂ Q z e z' e' n p p₁ p₂ u t v : V}
 
-/-- The clause that `PSatZero.spec` imposes at the node `⟪z', e'⟫` of the domain of `q`.
+/-- The clause that `PartialBoundedSatisfaction.spec` imposes at the node `⟪z', e'⟫` of the domain of `q`.
 - [HP98, Definition I.1.71(1)] -/
 def Spec (q z' e' : V) : Prop :=
   (z' = ^⊤ ∧ ⟪⟪z', e'⟫, 1⟫ ∈ q) ∨
@@ -291,7 +291,7 @@ def Spec (q z' e' : V) : Prop :=
     (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
     (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q))
 
-/-- The clause that `PSatZero.minimal` imposes at a node of the domain other than the root.
+/-- The clause that `PartialBoundedSatisfaction.minimal` imposes at a node of the domain other than the root.
 - [HP98, Definition I.1.71(1)] -/
 def MinChild (q n : V) : Prop :=
   (∃ p₁ p₂ e', ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q ∧ (n = ⟪p₁, e'⟫ ∨ n = ⟪p₂, e'⟫)) ∨
@@ -301,11 +301,11 @@ def MinChild (q n : V) : Prop :=
 
 /-- Reading the `spec` field of a table as the standalone clause `Spec`.
 - [HP98, Definition I.1.71(1)] -/
-lemma spec' (h : PSatZero q z e) (hn : ⟪z', e'⟫ ∈ domain q) : Spec q z' e' := h.spec z' e' hn
+lemma spec' (h : PartialBoundedSatisfaction q z e) (hn : ⟪z', e'⟫ ∈ domain q) : Spec q z' e' := h.spec z' e' hn
 
 /-- Reading the `minimal` field of a table as the standalone clause `MinChild`.
 - [HP98, Definition I.1.71(1)] -/
-lemma minimal' (h : PSatZero q z e) (hn : n ∈ domain q) : n = ⟪z, e⟫ ∨ MinChild q n :=
+lemma minimal' (h : PartialBoundedSatisfaction q z e) (hn : n ∈ domain q) : n = ⟪z, e⟫ ∨ MinChild q n :=
   h.minimal n hn
 
 /-- The domain clause is inherited by any larger domain.
@@ -376,7 +376,7 @@ variable {z₁ z₂ e₁ e₂ : V}
 
 /-- Two tables assign the same value to any node common to both.
 - [HP98, Lemma I.1.72(2)] -/
-lemma val_agree (h₁ : PSatZero q₁ z₁ e₁) (h₂ : PSatZero q₂ z₂ e₂) {y₁ y₂ : V}
+lemma val_agree (h₁ : PartialBoundedSatisfaction q₁ z₁ e₁) (h₂ : PartialBoundedSatisfaction q₂ z₂ e₂) {y₁ y₂ : V}
     (hn₁ : ⟪n, y₁⟫ ∈ q₁) (hn₂ : ⟪n, y₂⟫ ∈ q₂) : y₁ = y₂ := by
   have hd₁ : ⟪π₁ n, π₂ n⟫ ∈ domain q₁ := by rw [pair_unpair]; exact mem_domain_of_pair_mem hn₁
   have hd₂ : ⟪π₁ n, π₂ n⟫ ∈ domain q₂ := by rw [pair_unpair]; exact mem_domain_of_pair_mem hn₂
@@ -388,7 +388,7 @@ lemma val_agree (h₁ : PSatZero q₁ z₁ e₁) (h₂ : PSatZero q₂ z₂ e₂
 
 /-- The union of two tables is again a mapping: they agree wherever both are defined.
 - [HP98, Lemma I.1.72(3)] -/
-lemma isMapping_union (h₁ : PSatZero q₁ z₁ e₁) (h₂ : PSatZero q₂ z₂ e₂) :
+lemma isMapping_union (h₁ : PartialBoundedSatisfaction q₁ z₁ e₁) (h₂ : PartialBoundedSatisfaction q₂ z₂ e₂) :
     IsMapping (q₁ ∪ q₂) := by
   intro x hx
   obtain ⟨y, hy⟩ := mem_domain_iff.mp hx
@@ -401,7 +401,7 @@ lemma isMapping_union (h₁ : PSatZero q₁ z₁ e₁) (h₂ : PSatZero q₂ z�
 
 /-- Every node of a table has a formula code bounded by the root's.
 - [HP98, Definition I.1.71(1)] -/
-lemma fst_le_of_mem_domain (h : PSatZero q z e) : ∀ n ∈ domain q, π₁ n ≤ z := by
+lemma fst_le_of_mem_domain (h : PartialBoundedSatisfaction q z e) : ∀ n ∈ domain q, π₁ n ≤ z := by
   have key : ∀ k n, n ∈ domain q → q ≤ π₁ n + k → π₁ n ≤ z := by
     refine ISigma1.pi1_succ_induction
       (P := fun k ↦ ∀ n, n ∈ domain q → q ≤ π₁ n + k → π₁ n ≤ z) (by definability) ?_ ?_
@@ -430,7 +430,7 @@ lemma fst_le_of_mem_domain (h : PSatZero q z e) : ∀ n ∈ domain q, π₁ n �
 
 /-- A table for a proper subformula does not contain the root node.
 - [HP98, Definition I.1.71(1)] -/
-lemma root_not_mem_domain (h : PSatZero q p e₁) (hlt : p < z) : ⟪z, e⟫ ∉ domain q := by
+lemma root_not_mem_domain (h : PartialBoundedSatisfaction q p e₁) (hlt : p < z) : ⟪z, e⟫ ∉ domain q := by
   intro hc
   have : π₁ (⟪z, e⟫ : V) ≤ p := h.fst_le_of_mem_domain _ hc
   simp only [pi₁_pair] at this
@@ -440,7 +440,7 @@ lemma root_not_mem_domain (h : PSatZero q p e₁) (hlt : p < z) : ⟪z, e⟫ ∉
 
 /-- The one-node table for a node whose Tarski clause mentions no children.
 - [HP98, Lemma I.1.72(3)] -/
-lemma of_atom (h : Spec ({⟪⟪z, e⟫, v⟫} : V) z e) : PSatZero ({⟪⟪z, e⟫, v⟫} : V) z e := by
+lemma of_atom (h : Spec ({⟪⟪z, e⟫, v⟫} : V) z e) : PartialBoundedSatisfaction ({⟪⟪z, e⟫, v⟫} : V) z e := by
   refine ⟨IsMapping.singleton _ _, by simp, ?_, ?_⟩
   · intro z' e' hn
     obtain ⟨rfl, rfl⟩ : z' = z ∧ e' = e := by simpa using hn
@@ -450,10 +450,10 @@ lemma of_atom (h : Spec ({⟪⟪z, e⟫, v⟫} : V) z e) : PSatZero ({⟪⟪z, e
 
 /-- Existence of a table for a conjunction from bounded tables for its conjuncts.
 - [HP98, Lemma I.1.72(3)] -/
-lemma of_and {N : V} (h₁ : PSatZero q₁ p₁ e) (h₂ : PSatZero q₂ p₂ e)
+lemma of_and {N : V} (h₁ : PartialBoundedSatisfaction q₁ p₁ e) (h₂ : PartialBoundedSatisfaction q₂ p₂ e)
     (hn₁ : ∀ w ∈ q₁, w < N) (hn₂ : ∀ w ∈ q₂, w < N)
     (hr1 : ⟪⟪p₁ ^⋏ p₂, e⟫, 1⟫ < N) (hr0 : ⟪⟪p₁ ^⋏ p₂, e⟫, 0⟫ < N) :
-    ∃ Q, PSatZero Q (p₁ ^⋏ p₂) e ∧ ∀ w ∈ Q, w < N := by
+    ∃ Q, PartialBoundedSatisfaction Q (p₁ ^⋏ p₂) e ∧ ∀ w ∈ Q, w < N := by
   obtain ⟨v, hv, hv1, hv0⟩ :
       ∃ v : V, (v = 0 ∨ v = 1) ∧ (v = 1 ↔ ⟪⟪p₁, e⟫, 1⟫ ∈ q₁ ∧ ⟪⟪p₂, e⟫, 1⟫ ∈ q₂) ∧
         (v = 0 ↔ ⟪⟪p₁, e⟫, 0⟫ ∈ q₁ ∨ ⟪⟪p₂, e⟫, 0⟫ ∈ q₂) := by
@@ -530,10 +530,10 @@ lemma of_and {N : V} (h₁ : PSatZero q₁ p₁ e) (h₂ : PSatZero q₂ p₂ e)
 
 /-- Existence of a table for a disjunction from bounded tables for its disjuncts.
 - [HP98, Lemma I.1.72(3)] -/
-lemma of_or {N : V} (h₁ : PSatZero q₁ p₁ e) (h₂ : PSatZero q₂ p₂ e)
+lemma of_or {N : V} (h₁ : PartialBoundedSatisfaction q₁ p₁ e) (h₂ : PartialBoundedSatisfaction q₂ p₂ e)
     (hn₁ : ∀ w ∈ q₁, w < N) (hn₂ : ∀ w ∈ q₂, w < N)
     (hr1 : ⟪⟪p₁ ^⋎ p₂, e⟫, 1⟫ < N) (hr0 : ⟪⟪p₁ ^⋎ p₂, e⟫, 0⟫ < N) :
-    ∃ Q, PSatZero Q (p₁ ^⋎ p₂) e ∧ ∀ w ∈ Q, w < N := by
+    ∃ Q, PartialBoundedSatisfaction Q (p₁ ^⋎ p₂) e ∧ ∀ w ∈ Q, w < N := by
   obtain ⟨v, hv, hv1, hv0⟩ :
       ∃ v : V, (v = 0 ∨ v = 1) ∧ (v = 1 ↔ ⟪⟪p₁, e⟫, 1⟫ ∈ q₁ ∨ ⟪⟪p₂, e⟫, 1⟫ ∈ q₂) ∧
         (v = 0 ↔ ⟪⟪p₁, e⟫, 0⟫ ∈ q₁ ∧ ⟪⟪p₂, e⟫, 0⟫ ∈ q₂) := by
@@ -609,14 +609,14 @@ lemma of_or {N : V} (h₁ : PSatZero q₁ p₁ e) (h₂ : PSatZero q₂ p₂ e)
 /-- A single mapping contains bounded partial satisfaction tables for every body instance.
 - [HP98, Lemma I.1.72(3)] -/
 lemma exists_family_union {p e X N : V}
-    (H : ∀ x < X, ∃ q, PSatZero q p (x ∷ e) ∧ ∀ w ∈ q, w < N) :
+    (H : ∀ x < X, ∃ q, PartialBoundedSatisfaction q p (x ∷ e) ∧ ∀ w ∈ q, w < N) :
     ∃ W : V, IsMapping W ∧ (∀ w ∈ W, w < N) ∧
-      (∀ n ∈ domain W, ∃ x < X, ∃ r, PSatZero r p (x ∷ e) ∧ r ⊆ W ∧ n ∈ domain r) ∧
-      (∀ x < X, ∃ r, PSatZero r p (x ∷ e) ∧ r ⊆ W) := by
+      (∀ n ∈ domain W, ∃ x < X, ∃ r, PartialBoundedSatisfaction r p (x ∷ e) ∧ r ⊆ W ∧ n ∈ domain r) ∧
+      (∀ x < X, ∃ r, PartialBoundedSatisfaction r p (x ∷ e) ∧ r ⊆ W) := by
   obtain ⟨f, hfm, hfd, hfr⟩ :
       ∃ f, IsMapping f ∧ domain f = under X ∧
-        ∀ x r : V, ⟪x, r⟫ ∈ f → PSatZero r p (x ∷ e) ∧ ∀ w ∈ r, w < N :=
-    sigmaOne_skolem (R := fun x r : V ↦ PSatZero r p (x ∷ e) ∧ ∀ w ∈ r, w < N)
+        ∀ x r : V, ⟪x, r⟫ ∈ f → PartialBoundedSatisfaction r p (x ∷ e) ∧ ∀ w ∈ r, w < N :=
+    sigmaOne_skolem (R := fun x r : V ↦ PartialBoundedSatisfaction r p (x ∷ e) ∧ ∀ w ∈ r, w < N)
       (by definability) (fun x hx ↦ H x (by simpa using hx))
   obtain ⟨W, hW⟩ : ∃ W : V, ∀ w : V, w ∈ W ↔ ∃ x < f, ∃ r < f, ⟪x, r⟫ ∈ f ∧ w ∈ r :=
     (finite_comprehension₁! (Γ := 𝚺) (by definability)
@@ -657,8 +657,8 @@ lemma exists_family_union {p e X N : V}
 - [HP98, Lemma I.1.72(3)] -/
 lemma of_ball {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) (hp : p < qqBall u p)
     (hr1 : ⟪⟪qqBall u p, e⟫, 1⟫ < N) (hr0 : ⟪⟪qqBall u p, e⟫, 0⟫ < N)
-    (H : ∀ x < termVal (0 ∷ e) u, ∃ q, PSatZero q p (x ∷ e) ∧ ∀ w ∈ q, w < N) :
-    ∃ Q, PSatZero Q (qqBall u p) e ∧ ∀ w ∈ Q, w < N := by
+    (H : ∀ x < termVal (0 ∷ e) u, ∃ q, PartialBoundedSatisfaction q p (x ∷ e) ∧ ∀ w ∈ q, w < N) :
+    ∃ Q, PartialBoundedSatisfaction Q (qqBall u p) e ∧ ∀ w ∈ Q, w < N := by
   obtain ⟨W, hmW, hWN, hWdom, hWfam⟩ := exists_family_union H
   have hchild : ∀ x < termVal (0 ∷ e) u, ⟪p, x ∷ e⟫ ∈ domain W := by
     intro x hx
@@ -733,8 +733,8 @@ lemma of_ball {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ
 - [HP98, Lemma I.1.72(3)] -/
 lemma of_bex {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) (hp : p < qqBex u p)
     (hr1 : ⟪⟪qqBex u p, e⟫, 1⟫ < N) (hr0 : ⟪⟪qqBex u p, e⟫, 0⟫ < N)
-    (H : ∀ x < termVal (0 ∷ e) u, ∃ q, PSatZero q p (x ∷ e) ∧ ∀ w ∈ q, w < N) :
-    ∃ Q, PSatZero Q (qqBex u p) e ∧ ∀ w ∈ Q, w < N := by
+    (H : ∀ x < termVal (0 ∷ e) u, ∃ q, PartialBoundedSatisfaction q p (x ∷ e) ∧ ∀ w ∈ q, w < N) :
+    ∃ Q, PartialBoundedSatisfaction Q (qqBex u p) e ∧ ∀ w ∈ Q, w < N := by
   obtain ⟨W, hmW, hWN, hWdom, hWfam⟩ := exists_family_union H
   have hchild : ∀ x < termVal (0 ∷ e) u, ⟪p, x ∷ e⟫ ∈ domain W := by
     intro x hx
@@ -880,7 +880,7 @@ lemma tableBound_le_step_quant {p z u x e : V} (hp : p < z) (hu : u < z)
 - [HP98, Lemma I.1.72(3)] -/
 lemma exists_atom_table {z e : V} (hz' : IsUFormula ℒₒᵣ z)
     (h : z = ^⊤ ∨ z = ^⊥ ∨ (∃ k r w, z = ^rel k r w) ∨ (∃ k r w, z = ^nrel k r w)) :
-    ∃ v : V, v ≤ 1 ∧ PSatZero ({⟪⟪z, e⟫, v⟫} : V) z e := by
+    ∃ v : V, v ≤ 1 ∧ PartialBoundedSatisfaction ({⟪⟪z, e⟫, v⟫} : V) z e := by
   rcases h with rfl | rfl | ⟨k, r, w, rfl⟩ | ⟨k, r, w, rfl⟩
   · exact ⟨1, le_rfl, of_atom (Or.inl ⟨rfl, by simp⟩)⟩
   · exact ⟨0, by simp, of_atom (Or.inr <| Or.inl ⟨rfl, by simp⟩)⟩
@@ -911,40 +911,40 @@ lemma exists_atom_table {z e : V} (hz' : IsUFormula ℒₒᵣ z)
       · exact ⟨1, le_rfl, of_atom (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
           ⟨t, u, ht, hu, rfl, by simp [hc], by simp [hc]⟩)⟩
 
-end PSatZero
+end PartialBoundedSatisfaction
 
 /-! ## Existence -/
 
 /-- Every well-formed internally $\Delta_0$ formula has a partial satisfaction table under every
 assignment.
 - [HP98, Lemma I.1.72(3)] -/
-theorem PSatZero.exists {z e : V} (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z) :
-    ∃ q, PSatZero q z e := by
+theorem PartialBoundedSatisfaction.exists {z e : V} (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z) :
+    ∃ q, PartialBoundedSatisfaction q z e := by
   suffices H : ∀ z, IsBounded z →
-      ∀ e b, b = tableBound z e → IsUFormula ℒₒᵣ z → ∃ q ≤ b, PSatZero q z e by
+      ∀ e b, b = tableBound z e → IsUFormula ℒₒᵣ z → ∃ q ≤ b, PartialBoundedSatisfaction q z e by
     obtain ⟨q, -, hq⟩ := H z hz e (tableBound z e) rfl hz'
     exact ⟨q, hq⟩
   refine Isbounded_induction 𝚷
-    (P := fun z ↦ ∀ e b, b = tableBound z e → IsUFormula ℒₒᵣ z → ∃ q ≤ b, PSatZero q z e)
+    (P := fun z ↦ ∀ e b, b = tableBound z e → IsUFormula ℒₒᵣ z → ∃ q ≤ b, PartialBoundedSatisfaction q z e)
     (by simp only [tableBound, tableExp]; definability) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
   · intro e b hb hu
     subst hb
-    obtain ⟨v, hv, hq⟩ := PSatZero.exists_atom_table (e := e) hu (Or.inl rfl)
-    exact ⟨_, PSatZero.singleton_le_tableBound hv, hq⟩
+    obtain ⟨v, hv, hq⟩ := PartialBoundedSatisfaction.exists_atom_table (e := e) hu (Or.inl rfl)
+    exact ⟨_, PartialBoundedSatisfaction.singleton_le_tableBound hv, hq⟩
   · intro e b hb hu
     subst hb
-    obtain ⟨v, hv, hq⟩ := PSatZero.exists_atom_table (e := e) hu (Or.inr <| Or.inl rfl)
-    exact ⟨_, PSatZero.singleton_le_tableBound hv, hq⟩
+    obtain ⟨v, hv, hq⟩ := PartialBoundedSatisfaction.exists_atom_table (e := e) hu (Or.inr <| Or.inl rfl)
+    exact ⟨_, PartialBoundedSatisfaction.singleton_le_tableBound hv, hq⟩
   · intro k r w e b hb hu
     subst hb
     obtain ⟨v, hv, hq⟩ :=
-      PSatZero.exists_atom_table (e := e) hu (Or.inr <| Or.inr <| Or.inl ⟨k, r, w, rfl⟩)
-    exact ⟨_, PSatZero.singleton_le_tableBound hv, hq⟩
+      PartialBoundedSatisfaction.exists_atom_table (e := e) hu (Or.inr <| Or.inr <| Or.inl ⟨k, r, w, rfl⟩)
+    exact ⟨_, PartialBoundedSatisfaction.singleton_le_tableBound hv, hq⟩
   · intro k r w e b hb hu
     subst hb
     obtain ⟨v, hv, hq⟩ :=
-      PSatZero.exists_atom_table (e := e) hu (Or.inr <| Or.inr <| Or.inr ⟨k, r, w, rfl⟩)
-    exact ⟨_, PSatZero.singleton_le_tableBound hv, hq⟩
+      PartialBoundedSatisfaction.exists_atom_table (e := e) hu (Or.inr <| Or.inr <| Or.inr ⟨k, r, w, rfl⟩)
+    exact ⟨_, PartialBoundedSatisfaction.singleton_le_tableBound hv, hq⟩
   · intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ e b hb hu
     subst hb
     obtain ⟨hu₁, hu₂⟩ : IsUFormula ℒₒᵣ p₁ ∧ IsUFormula ℒₒᵣ p₂ := by simpa using hu
@@ -952,14 +952,14 @@ theorem PSatZero.exists {z e : V} (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ
     obtain ⟨q₂, hb₂, hq₂⟩ := ih₂ e _ rfl hu₂
     obtain ⟨Q, hQ, hQN⟩ := hq₁.of_and hq₂
       (fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-        (le_trans hb₁ (PSatZero.tableBound_le_step (by simp))))
+        (le_trans hb₁ (PartialBoundedSatisfaction.tableBound_le_step (by simp))))
       (fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-        (le_trans hb₂ (PSatZero.tableBound_le_step (by simp))))
-      (PSatZero.node_lt_step le_rfl) (PSatZero.node_lt_step (by simp))
+        (le_trans hb₂ (PartialBoundedSatisfaction.tableBound_le_step (by simp))))
+      (PartialBoundedSatisfaction.node_lt_step le_rfl) (PartialBoundedSatisfaction.node_lt_step (by simp))
     refine ⟨Q, ?_, hQ⟩
     calc Q ≤ Exp.exp (iterExp (tableExp (p₁ ^⋏ p₂) e) (8 * (p₁ ^⋏ p₂) + 21)) :=
           le_of_lt (lt_exp_iff.mpr hQN)
-      _ ≤ tableBound (p₁ ^⋏ p₂) e := PSatZero.exp_step_le_tableBound _ _
+      _ ≤ tableBound (p₁ ^⋏ p₂) e := PartialBoundedSatisfaction.exp_step_le_tableBound _ _
   · intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ e b hb hu
     subst hb
     obtain ⟨hu₁, hu₂⟩ : IsUFormula ℒₒᵣ p₁ ∧ IsUFormula ℒₒᵣ p₂ := by simpa using hu
@@ -967,43 +967,43 @@ theorem PSatZero.exists {z e : V} (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ
     obtain ⟨q₂, hb₂, hq₂⟩ := ih₂ e _ rfl hu₂
     obtain ⟨Q, hQ, hQN⟩ := hq₁.of_or hq₂
       (fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-        (le_trans hb₁ (PSatZero.tableBound_le_step (by simp))))
+        (le_trans hb₁ (PartialBoundedSatisfaction.tableBound_le_step (by simp))))
       (fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-        (le_trans hb₂ (PSatZero.tableBound_le_step (by simp))))
-      (PSatZero.node_lt_step le_rfl) (PSatZero.node_lt_step (by simp))
+        (le_trans hb₂ (PartialBoundedSatisfaction.tableBound_le_step (by simp))))
+      (PartialBoundedSatisfaction.node_lt_step le_rfl) (PartialBoundedSatisfaction.node_lt_step (by simp))
     refine ⟨Q, ?_, hQ⟩
     calc Q ≤ Exp.exp (iterExp (tableExp (p₁ ^⋎ p₂) e) (8 * (p₁ ^⋎ p₂) + 21)) :=
           le_of_lt (lt_exp_iff.mpr hQN)
-      _ ≤ tableBound (p₁ ^⋎ p₂) e := PSatZero.exp_step_le_tableBound _ _
+      _ ≤ tableBound (p₁ ^⋎ p₂) e := PartialBoundedSatisfaction.exp_step_le_tableBound _ _
   · intro t p ht hp ih e b hb hu
     subst hb
     have hup : IsUFormula ℒₒᵣ p := by
       have h := hu
       simp only [qqBall, IsUFormula.all, IsUFormula.or] at h
       exact h.2
-    obtain ⟨Q, hQ, hQN⟩ := PSatZero.of_ball (e := e) ⟨t, ht, rfl⟩ (by simp)
-      (PSatZero.node_lt_step le_rfl) (PSatZero.node_lt_step (by simp)) (fun x hx ↦ by
+    obtain ⟨Q, hQ, hQN⟩ := PartialBoundedSatisfaction.of_ball (e := e) ⟨t, ht, rfl⟩ (by simp)
+      (PartialBoundedSatisfaction.node_lt_step le_rfl) (PartialBoundedSatisfaction.node_lt_step (by simp)) (fun x hx ↦ by
         obtain ⟨q, hqb, hq⟩ := ih (x ∷ e) _ rfl hup
         exact ⟨q, hq, fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-          (le_trans hqb (PSatZero.tableBound_le_step_quant (by simp) (by simp) hx))⟩)
+          (le_trans hqb (PartialBoundedSatisfaction.tableBound_le_step_quant (by simp) (by simp) hx))⟩)
     refine ⟨Q, ?_, hQ⟩
     calc Q ≤ Exp.exp (iterExp (tableExp (qqBall (termBShift ℒₒᵣ t) p) e)
               (8 * qqBall (termBShift ℒₒᵣ t) p + 21)) := le_of_lt (lt_exp_iff.mpr hQN)
-      _ ≤ tableBound (qqBall (termBShift ℒₒᵣ t) p) e := PSatZero.exp_step_le_tableBound _ _
+      _ ≤ tableBound (qqBall (termBShift ℒₒᵣ t) p) e := PartialBoundedSatisfaction.exp_step_le_tableBound _ _
   · intro t p ht hp ih e b hb hu
     subst hb
     have hup : IsUFormula ℒₒᵣ p := by
       have h := hu
       simp only [qqBex, IsUFormula.ex, IsUFormula.and] at h
       exact h.2
-    obtain ⟨Q, hQ, hQN⟩ := PSatZero.of_bex (e := e) ⟨t, ht, rfl⟩ (by simp)
-      (PSatZero.node_lt_step le_rfl) (PSatZero.node_lt_step (by simp)) (fun x hx ↦ by
+    obtain ⟨Q, hQ, hQN⟩ := PartialBoundedSatisfaction.of_bex (e := e) ⟨t, ht, rfl⟩ (by simp)
+      (PartialBoundedSatisfaction.node_lt_step le_rfl) (PartialBoundedSatisfaction.node_lt_step (by simp)) (fun x hx ↦ by
         obtain ⟨q, hqb, hq⟩ := ih (x ∷ e) _ rfl hup
         exact ⟨q, hq, fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
-          (le_trans hqb (PSatZero.tableBound_le_step_quant (by simp) (by simp) hx))⟩)
+          (le_trans hqb (PartialBoundedSatisfaction.tableBound_le_step_quant (by simp) (by simp) hx))⟩)
     refine ⟨Q, ?_, hQ⟩
     calc Q ≤ Exp.exp (iterExp (tableExp (qqBex (termBShift ℒₒᵣ t) p) e)
               (8 * qqBex (termBShift ℒₒᵣ t) p + 21)) := le_of_lt (lt_exp_iff.mpr hQN)
-      _ ≤ tableBound (qqBex (termBShift ℒₒᵣ t) p) e := PSatZero.exp_step_le_tableBound _ _
+      _ ≤ tableBound (qqBex (termBShift ℒₒᵣ t) p) e := PartialBoundedSatisfaction.exp_step_le_tableBound _ _
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

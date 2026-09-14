@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Hierarchy.DeltaZero
-public import AlphaCentauri.Hierarchy.Axiomatizable
+public import AlphaCentauri.Vorspiel.Axiomatizable
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 /-! # End extensions
@@ -17,7 +17,7 @@ extension of `M`.
 
 namespace FFL.FirstOrder.Arithmetic
 
-open Semiformula Structure
+open Semiformula Structure _root_.FFL.Entailment
 
 variable {ξ : Type*} {M N : Type u} [ORingStructure M]
 
@@ -202,8 +202,8 @@ theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 
 /-- A $\Pi_1$-axiomatizable theory holds in `M` as soon as it holds in an end extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
 theorem models_of_Pi1Axiomatizable {T : ArithmeticTheory}
-    (hT : Axiomatizable 𝚷 1 T) [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T := by
-  obtain ⟨U, hU, hUT⟩ := hT
+    (hT : Axiomatizable (Hierarchy 𝚷 1) T) [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T := by
+  obtain ⟨U, ⟨hU, hUT⟩⟩ := hT
   have : U ⪯ T := hUT.le
   have : T ⪯ U := hUT.symm.le
   have : N↓[ℒₒᵣ] ⊧* U := models_of_subtheory ‹N↓[ℒₒᵣ] ⊧* T›

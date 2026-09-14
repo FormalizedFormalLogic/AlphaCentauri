@@ -18,7 +18,6 @@ public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.FiniteAxiomatizability.Basic
 public import AlphaCentauri.FiniteAxiomatizability.ISigma
 public import AlphaCentauri.FiniteAxiomatizability.Reflexive
-public import AlphaCentauri.Hierarchy.Axiomatizable
 public import AlphaCentauri.Hierarchy.DeltaZero
 public import AlphaCentauri.Hierarchy.NormalForm
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
@@ -45,6 +44,7 @@ public import AlphaCentauri.Schemata.Collection.Equivalence
 public import AlphaCentauri.Schemata.Collection.Induction
 public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Vorspiel.Absoluteness
+public import AlphaCentauri.Vorspiel.Axiomatizable
 public import AlphaCentauri.Vorspiel.Compact
 public import AlphaCentauri.Vorspiel.Completeness
 public import AlphaCentauri.Vorspiel.ConstantExtension

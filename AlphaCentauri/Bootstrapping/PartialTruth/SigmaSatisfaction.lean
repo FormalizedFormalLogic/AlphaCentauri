@@ -247,8 +247,7 @@ private lemma isBounded_ex_block {z M K : V} (hz : IsBounded z) (hMK : z = qqExs
     rcases zero_or_succ K with rfl | ⟨K, rfl⟩
     · rw [qqExss_zero] at heq
       subst heq
-      refine ⟨IsBounded.and_iff.mpr ⟨?_, hq⟩, by simp⟩
-      rw [Arithmetic.qqLT]; exact IsBounded.rel
+      exact ⟨IsBounded.and_iff.mpr ⟨by rw [Arithmetic.qqLT]; exact IsBounded.rel, hq⟩, by simp⟩
     · rw [qqExss_succ] at heq
       simp [qqExs, qqAnd, pair_ext_iff] at heq
 
@@ -438,9 +437,8 @@ private lemma of_pi_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSatisfaction V m) �
             have hMpi : IsStrictPi n M := isStrictPi_ex_block n z M (K + 1) hzs hMK hM
             have h1 := (mono_step n fun i hi ↦ hB i (by omega)).2
             have h2 := (mono_step (n + 1) fun i hi ↦ hB i (by omega)).2
-            refine (hB n (by omega) z M (K + 1) e hzs hz' hMK hM).mpr ⟨w, hw, ?_⟩
-            rw [h1 M _ hMpi hMu, h2 M _ (IsStrictPi.mono (by omega) hMpi) hMu]
-            exact hsat
+            exact (hB n (by omega) z M (K + 1) e hzs hz' hMK hM).mpr
+              ⟨w, hw, by rw [h1 M _ hMpi hMu, h2 M _ (IsStrictPi.mono (by omega) hMpi) hMu]; exact hsat⟩
       · intro h
         exact sigmaSatisfaction_succ_iff.mpr ⟨0, z, by simp, hz, 0, by simp, by simpa using h⟩
     exact ⟨hsig, fun z e hz hz' ↦ by
@@ -455,7 +453,8 @@ private lemma blockSatisfaction : ∀ n : ℕ, BlockSatisfaction V n := fun n �
     intro z M K e hz hz' hMK hM
     have hMu : IsUFormula ℒₒᵣ M := isUFormula_qqExss.mp (hMK ▸ hz')
     have hMpi : IsStrictPi n M := isStrictPi_ex_block n z M K hz hMK hM
-    refine ⟨fun h ↦ ?_, fun ⟨w, hw, hsat⟩ ↦ sigmaSatisfaction_succ_iff.mpr ⟨K, M, hMK, hMpi, w, hw, hsat⟩⟩
+    refine ⟨?_, fun ⟨w, hw, hsat⟩ ↦ sigmaSatisfaction_succ_iff.mpr ⟨K, M, hMK, hMpi, w, hw, hsat⟩⟩
+    intro h
     obtain ⟨k, q, hqk, hq, w, hw, hsat⟩ := sigmaSatisfaction_succ_iff.mp h
     obtain ⟨j, rfl, rfl⟩ := ex_block_dominates hMK hM hqk
     rcases zero_or_succ j with rfl | ⟨j, rfl⟩
@@ -483,9 +482,7 @@ private lemma blockSatisfaction : ∀ n : ℕ, BlockSatisfaction V n := fun n �
           subst hj0
           rw [qqExss_zero] at hqs hsat'
           obtain ⟨x, hx⟩ := (boundedSatisfaction_ex_iff hqs).mp (by simpa using hsat')
-          refine ⟨x ∷ w, by simp [hw], ?_⟩
-          apply ((of_pi_step 0 fun i hi ↦ ih i (by omega)).2 M _ hMd hMu).mpr
-          simpa using hx
+          exact ⟨x ∷ w, by simp [hw], ((of_pi_step 0 fun i hi ↦ ih i (by omega)).2 M _ hMd hMu).mpr (by simpa using hx)⟩
         | m + 1 =>
           have hMpi' : IsStrictPi m M := isStrictPi_ex_block m _ M (j + 1) hqs hqex hM
           obtain ⟨u, hu, husat⟩ := (ih m (by omega) _ M (j + 1) (vecAppend w e) hqs hqU hqex hM).mp hsat'
@@ -522,14 +519,10 @@ private lemma exs_iff_aux {n : ℕ} {p e : V} (hp : IsStrictSigma (n + 1) p)
   constructor
   · rintro ⟨w, hw, hsat⟩
     obtain ⟨u, x, hu, rfl⟩ := exists_vecAppend_singleton hw
-    refine ⟨x, (h2 x).mpr ⟨u, hu, ?_⟩⟩
-    rw [vecAppend_assoc] at hsat
-    simpa using hsat
+    exact ⟨x, (h2 x).mpr ⟨u, hu, by rw [vecAppend_assoc] at hsat; simpa using hsat⟩⟩
   · rintro ⟨x, hx⟩
     obtain ⟨u, hu, hsat⟩ := (h2 x).mp hx
-    refine ⟨vecAppend u ?[x], by simp [hu], ?_⟩
-    rw [vecAppend_assoc]
-    simpa using hsat
+    exact ⟨vecAppend u ?[x], by simp [hu], by rw [vecAppend_assoc]; simpa using hsat⟩
 
 section
 variable {n : ℕ} {p e : V}
@@ -537,7 +530,8 @@ variable {n : ℕ} {p e : V}
 theorem SigmaSatisfaction.exs_iff : SigmaSatisfaction (n + 1) (^∃ p) e ↔ ∃ x, SigmaSatisfaction (n + 1) p (x ∷ e) := by
   by_cases hp : IsStrictSigma (n + 1) p ∧ IsUFormula ℒₒᵣ p
   · exact exs_iff_aux hp.1 hp.2
-  · refine ⟨fun h ↦ ?_, fun ⟨_, hx⟩ ↦ absurd hx.dom hp⟩
+  · refine ⟨?_, fun ⟨_, hx⟩ ↦ absurd hx.dom hp⟩
+    intro h
     obtain ⟨hs, hu⟩ := h.dom
     exact absurd ⟨IsStrictSigma.of_exs hs, by simpa using hu⟩ hp
 
@@ -697,14 +691,12 @@ private lemma isStrict_subst : ∀ (n : ℕ) (m l w p : V), IsSemitermVec ℒₒ
     constructor
     · rintro ⟨k, q, rfl, hq⟩
       have hqp : IsSemiformula ℒₒᵣ (m + k) q := (isSemiformula_qqExss k m).mp hp
-      refine ⟨k, subst ℒₒᵣ (qVecIter w k) q, substs_qqExss hqp.isUFormula k w, ?_⟩
-      exact (isStrict_subst n (m + k) (l + k) (qVecIter w k) q
-        (isSemitermVec_qVecIter hw k) hqp).2 hq
+      exact ⟨k, subst ℒₒᵣ (qVecIter w k) q, substs_qqExss hqp.isUFormula k w,
+        (isStrict_subst n (m + k) (l + k) (qVecIter w k) q (isSemitermVec_qVecIter hw k) hqp).2 hq⟩
     · rintro ⟨k, q, rfl, hq⟩
       have hqp : IsSemiformula ℒₒᵣ (m + k) q := (isSemiformula_qqAlls k m).mp hp
-      refine ⟨k, subst ℒₒᵣ (qVecIter w k) q, substs_qqAlls hqp.isUFormula k w, ?_⟩
-      exact (isStrict_subst n (m + k) (l + k) (qVecIter w k) q
-        (isSemitermVec_qVecIter hw k) hqp).1 hq
+      exact ⟨k, subst ℒₒᵣ (qVecIter w k) q, substs_qqAlls hqp.isUFormula k w,
+        (isStrict_subst n (m + k) (l + k) (qVecIter w k) q (isSemitermVec_qVecIter hw k) hqp).1 hq⟩
 
 private lemma not_ex_subst {M : V} (hM : IsUFormula ℒₒᵣ M) (h : ∀ p : V, M ≠ ^∃ p) (w r : V) :
     subst ℒₒᵣ w M ≠ ^∃ r := by

@@ -263,14 +263,10 @@ lemma codes_nil (v : Fin 0 → M) : Codes v 0 := ⟨by simpa using (read_lenNil 
 
 include hM in
 lemma codes_cons {m : ℕ} {v : Fin m → M} {ev ev' x : M} (h : Codes v ev)
-    (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' := by
-  refine ⟨?_, fun i ↦ ?_⟩
-  · have := (read_lenAdjoin hM x ev ev' (m : M) hadj).mpr h.1
-    simpa using this
-  · refine Fin.cases ?_ (fun j ↦ ?_) i
-    · simpa using (read_nthAdjoinZero hM x ev ev' x hadj).mpr rfl
-    · have := (read_nthAdjoinSucc hM x ev ev' (j.val : M) (v j) hadj).mpr (h.2 j)
-      simpa using this
+    (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' :=
+  ⟨by simpa using (read_lenAdjoin hM x ev ev' (m : M) hadj).mpr h.1,
+    fun i ↦ Fin.cases (by simpa using (read_nthAdjoinZero hM x ev ev' x hadj).mpr rfl)
+      (fun j ↦ by simpa using (read_nthAdjoinSucc hM x ev ev' (j.val : M) (v j) hadj).mpr (h.2 j)) i⟩
 
 include hM in
 lemma exists_codes : ∀ {m : ℕ} (v : Fin m → M), ∃ ev, Codes v ev := by
@@ -282,7 +278,7 @@ lemma exists_codes : ∀ {m : ℕ} (v : Fin m → M), ∃ ev, Codes v ev := by
     obtain ⟨ev, hev⟩ := ih (fun i ↦ v i.succ)
     obtain ⟨ev', hadj⟩ := read_adjoinTotal hM (v 0) ev
     have hcons : (v 0 :> fun i ↦ v i.succ) = v := by
-      funext i; refine Fin.cases ?_ (fun j ↦ ?_) i <;> simp
+      funext i; cases i using Fin.cases <;> simp
     exact ⟨ev', hcons ▸ codes_cons hM hev hadj⟩
 
 /-! ### Coding facts about standard codes

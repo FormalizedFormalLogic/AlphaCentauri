@@ -392,7 +392,7 @@ lemma agree (h₁ : BoundedSatisfactionTable q₁ z₁ e₁) (h₂ : BoundedSati
     have key : ∀ x < termVal (0 ∷ e') a, (⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₂) ∧
         (⟪⟪b, x ∷ e'⟫, 0⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 0⟫ ∈ q₂) :=
       fun x hx ↦ ih b (by simp) (x ∷ e') (hd x hx) (hd₂ x hx)
-    and_intros;
+    and_intros
     · rw [hA, hA₂]
       exact forall_congr' fun x ↦ imp_congr_right fun hx ↦ (key x hx).1
     · rw [hB, hB₂]
@@ -402,7 +402,7 @@ lemma agree (h₁ : BoundedSatisfactionTable q₁ z₁ e₁) (h₂ : BoundedSati
     have key : ∀ x < termVal (0 ∷ e') a, (⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₂) ∧
         (⟪⟪b, x ∷ e'⟫, 0⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 0⟫ ∈ q₂) :=
       fun x hx ↦ ih b (by simp) (x ∷ e') (hd x hx) (hd₂ x hx)
-    refine ⟨?_, ?_⟩
+    and_intros
     · rw [hA, hA₂]
       exact exists_congr fun x ↦ and_congr_right fun hx ↦ (key x hx).1
     · rw [hB, hB₂]
@@ -930,7 +930,7 @@ lemma boundedSatisfactionTable_iff {q z e : V} : BoundedSatisfactionTable q z e 
         ⟨u, p, ⟨t, ht, rfl⟩, rfl, h⟩ | ⟨u, p, ⟨t, ht, rfl⟩, rfl, h⟩
       · exact Or.inl h
       · exact Or.inr $ Or.inl h
-      · exact Or.inr $ Or.inr $ Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩;
+      · exact Or.inr $ Or.inr $ Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩
       · exact Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩
       · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩
       · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩
@@ -1008,7 +1008,7 @@ instance BoundedSatisfactionTable.defined :
     𝚫₁-Relation₃ (BoundedSatisfactionTable : V → V → V → Prop) via boundedSatisfactionTable :=
   .mk $ by
     constructor
-    · intro v;
+    · intro v
       simp [boundedSatisfactionTable, HierarchySymbol.Semiformula.val_sigma, nodeDom_defined.df, inDom_defined.df]
     · intro v
       simp [boundedSatisfactionTable, HierarchySymbol.Semiformula.val_sigma,
@@ -1936,18 +1936,15 @@ theorem BoundedSatisfactionTable.exists {z e : V} (hz : IsBounded z) (hz' : IsUF
     obtain ⟨Q, hQ, hQN⟩ := BoundedSatisfactionTable.of_bex (e := e) ⟨t, ht, rfl⟩ (by simp)
       (BoundedSatisfactionTable.node_lt_step le_rfl)
         (BoundedSatisfactionTable.node_lt_step (by simp)) $ by
-        intro x hx;
+        intro x hx
         obtain ⟨q, hqb, hq⟩ := ih (x ∷ e) _ rfl hup
         exact ⟨q, hq, fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
           (le_trans hqb
             (BoundedSatisfactionTable.tableBound_le_step_quant (by simp) (by simp) hx))⟩
-    use Q;
-    and_intros;
-    . calc
-        Q ≤ Exp.exp (iterExp (tableExp (qqBex (termBShift ℒₒᵣ t) p) e) (8 * qqBex (termBShift ℒₒᵣ t) p + 21))
+    refine ⟨Q, ?_, hQ⟩
+    calc Q ≤ Exp.exp (iterExp (tableExp (qqBex (termBShift ℒₒᵣ t) p) e) (8 * qqBex (termBShift ℒₒᵣ t) p + 21))
           := le_of_lt (lt_exp_iff.mpr hQN)
-        _ ≤ tableBound (qqBex (termBShift ℒₒᵣ t) p) e := BoundedSatisfactionTable.exp_step_le_tableBound _ _
-    . assumption;
+      _ ≤ tableBound (qqBex (termBShift ℒₒᵣ t) p) e := BoundedSatisfactionTable.exp_step_le_tableBound _ _
 
 @[simp] lemma isRel_two_zero : (ℒₒᵣ).IsRel (2 : V) 0 := by
   simpa using Arithmetic.LOR_rel_eqIndex (V := V)
@@ -2318,8 +2315,8 @@ include ht
     have hf : IsUFormula ℒₒᵣ (qqBex (termBShift ℒₒᵣ t) q) := by
       simp [qqBex, Arithmetic.qqLT, ht.termBShift, hq']
     obtain ⟨r, hr⟩ := BoundedSatisfactionTable.exists hd hf
-    refine (iff_val hd hf hr).mpr ((hr.val_bex ht hr.mem_dom_root).mpr ⟨x, hx, ?_⟩)
-    exact (iff_mem hr (hr.mem_dom_bex ht hr.mem_dom_root hx) hq hq').mp hsat
+    exact (iff_val hd hf hr).mpr
+      ((hr.val_bex ht hr.mem_dom_root).mpr ⟨x, hx, (iff_mem hr (hr.mem_dom_bex ht hr.mem_dom_root hx) hq hq').mp hsat⟩)
 
 end
 

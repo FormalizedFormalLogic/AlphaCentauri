@@ -30,11 +30,11 @@ variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 /-- The elements of `M` bounded by the value at `c` of some closed term. -/
 private def termCut (c : Fin k → M) : Cut M where
   carrier := {x | ∃ t : ClosedSemiterm ℒₒᵣ k, x ≤ t.valb c}
-  zero_mem := ⟨‘0’, by simp⟩
   succ_mem := fun ⟨t, ht⟩ ↦ ⟨‘!!t + 1’, by simpa using add_le_add_right ht 1⟩
   mem_of_lt := fun hab ⟨t, ht⟩ ↦ ⟨t, le_trans hab.le ht⟩
 
 private instance termCut_isClosed (c : Fin k → M) : (termCut c).IsClosed where
+  zero_mem := ⟨‘0’, by simp⟩
   one_mem := ⟨‘1’, by simp⟩
   add_mem := fun ⟨s, hs⟩ ⟨t, ht⟩ ↦ ⟨‘!!s + !!t’, by
     simpa using add_le_add hs ht

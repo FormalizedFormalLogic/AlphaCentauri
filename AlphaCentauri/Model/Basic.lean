@@ -94,15 +94,14 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     intro x y h
     obtain ⟨z, hz⟩ := Arithmetic.add_eq_of_lt (hMN.emb x) (hMN.emb y) (by simpa using h)
     have h₁ : z ≤ hMN.emb y := hz ▸ le_add_self
-    obtain ⟨w, rfl⟩ : z ∈ Set.range hMN.emb :=
-      h₁.lt_or_eq.elim hMN.mem_range_of_lt fun h₂ ↦ ⟨y, h₂.symm⟩
+    obtain ⟨w, rfl⟩ : z ∈ Set.range hMN.emb := h₁.lt_or_eq.elim hMN.mem_range_of_lt fun h₂ ↦ ⟨y, h₂.symm⟩
     exact ⟨w, inj (by simpa using hz)⟩
   case zeroLe =>
     suffices ∀ x : M, 0 ≤ x by simpa [models_iff, le_iff_of_eq_of_lt, le_def] using this
     intro x
     rcases le_def.mp (Arithmetic.zero_le (hMN.emb x)) with h | h
-    · exact le_def.mpr (Or.inl (inj (by simpa using h)))
-    · exact le_def.mpr (Or.inr (hMN.emb_lt_emb.mp (by simpa using h)))
+    · exact le_def.mpr $ Or.inl $ inj (by simpa using h)
+    · exact le_def.mpr $ Or.inr $ hMN.emb_lt_emb.mp (by simpa using h)
   case zeroLtOne =>
     suffices (0 : M) < 1 by simpa [models_iff] using this
     exact hMN.emb_lt_emb.mp (by simp)
@@ -112,8 +111,8 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     intro x h
     have h₁ : (0 : N) < hMN.emb x := by simpa using hMN.emb_lt_emb.mpr h
     rcases le_def.mp (one_le_of_zero_lt _ h₁) with h₂ | h₂
-    · exact le_def.mpr (Or.inl (inj (by simpa using h₂)))
-    · exact le_def.mpr (Or.inr (hMN.emb_lt_emb.mp (by simpa using h₂)))
+    · exact le_def.mpr $ Or.inl $ inj (by simpa using h₂)
+    · exact le_def.mpr $ Or.inr $ hMN.emb_lt_emb.mp (by simpa using h₂)
   case addLtAdd =>
     suffices ∀ x y z : M, x < y → x + z < y + z by simpa [models_iff] using this
     intro x y z h
@@ -162,8 +161,7 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
 - [HP98, Fact IV.1.3(4)] -/
 theorem eval_of_Sigma1 {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hierarchy 𝚺 1 φ)
     (e : Fin n → M) (f : ξ → M) : φ.Eval e f → φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f) :=
-  sigma₁_induction' (P := fun n φ ↦ ∀ (e : Fin n → M) (f : ξ → M),
-      φ.Eval e f → φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f)) hφ
+  sigma₁_induction' (P := fun n φ ↦ ∀ (e : Fin n → M) (f : ξ → M), φ.Eval e f → φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f)) hφ
     (fun _ _ _ _ ↦ by simp)
     (fun _ _ _ h ↦ by simp at h)
     (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open hMN.emb (by simp)).mp h)
@@ -280,8 +278,7 @@ lemma bexsLT_absolute (hθ : Absolute.{_, u, v} T θ) : Absolute.{_, u, v} T (θ
 - [HP98, Fact IV.1.3(4), Remark IV.1.18]
 - [vO99, Exercise 37] -/
 @[simp, grind .]
-theorem absolute_of_bounded (hφ : φ.Bounded) : Absolute T φ :=
-  bounded_induction_open (P := fun _ φ ↦ Absolute T φ)
+theorem absolute_of_bounded (hφ : φ.Bounded) : Absolute T φ := bounded_induction_open (P := fun _ φ ↦ Absolute T φ)
     (fun _ _ hφ ↦ absolute_of_open T hφ)
     (fun _ _ _ _ _ ihφ ihψ ↦ and_absolute ihφ ihψ)
     (fun _ _ _ _ _ ihφ ihψ ↦ or_absolute ihφ ihψ)

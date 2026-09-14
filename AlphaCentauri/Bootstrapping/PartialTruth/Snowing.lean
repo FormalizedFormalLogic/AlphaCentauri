@@ -155,13 +155,15 @@ theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     rw [quote_ball_sentence, BoundedSatisfaction.ball_iff (isUTerm_quote t)
       ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ), termVal_quote]
     simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel]
-    refine forall_congr' fun x ↦ ?_
+    refine forall_congr' ?_
+    intro x
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)]
     simp [Function.comp_def]
   · intro n t φ hφ ihφ v
     rw [quote_bex_sentence, BoundedSatisfaction.bex_iff (isUTerm_quote t), termVal_quote]
     simp only [Semiformula.eval_bexs, Semiformula.Operator.lt_def, Semiformula.eval_rel]
-    refine exists_congr fun x ↦ ?_
+    refine exists_congr ?_
+    intro x
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)]
     simp [Function.comp_def]
 
@@ -196,7 +198,8 @@ lemma hierarchySatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : Arithmet
     show SigmaSatisfaction (s₀ + 1) _ _ ↔ _
     rw [quote_ex_sentence, SigmaSatisfaction.exs_iff]
     simp only [Semiformula.eval_ex]
-    refine exists_congr fun x ↦ ?_
+    refine exists_congr ?_
+    intro x
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp]
     exact ih (x :> v)
   | @all s₀ n₀ φ₀ hφ₀ ih =>
@@ -204,7 +207,8 @@ lemma hierarchySatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : Arithmet
     show PiSatisfaction (s₀ + 1) _ _ ↔ _
     rw [quote_all_sentence, PiSatisfaction.all_iff]
     simp only [Semiformula.eval_all]
-    refine forall_congr' fun x ↦ ?_
+    refine forall_congr' ?_
+    intro x
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp]
     exact ih (x :> v)
 
@@ -226,8 +230,7 @@ noncomputable def snowing (n : ℕ) {k : ℕ}
   ∀¹* (φ 🡘 (sigmaSatisfactionVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
 
 theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
-    V↓[ℒₒᵣ] ⊧ snowing n φ ↔
-      ∀ v : Fin k → V, V ⊧/v φ ↔ SigmaSatisfaction (n + 1) ⌜φ⌝ (matrixToVec v) := by
+    V↓[ℒₒᵣ] ⊧ snowing n φ ↔ ∀ v : Fin k → V, V ⊧/v φ ↔ SigmaSatisfaction (n + 1) ⌜φ⌝ (matrixToVec v) := by
   simp [snowing, models_iff, (sigmaSatisfactionVec.defined n k).df, Function.comp_def]
 
 theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
@@ -251,14 +254,12 @@ namespace Reading
 
 /-- `Codes v ev` says that `ev` is a code for the finite sequence `v`: it has length `m` and its
 `i`-th entry is `v i`. -/
-def Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop :=
-  Len (m : M) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : M)
+def Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop := Len (m : M) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : M)
 
 end Reading
 
 include hM in
-lemma codes_nil (v : Fin 0 → M) : Codes v 0 :=
-  ⟨by simpa using (read_lenNil hM 0).mpr rfl, fun i ↦ i.elim0⟩
+lemma codes_nil (v : Fin 0 → M) : Codes v 0 := ⟨by simpa using (read_lenNil hM 0).mpr rfl, fun i ↦ i.elim0⟩
 
 include hM in
 lemma codes_cons {m : ℕ} {v : Fin m → M} {ev ev' x : M} (h : Codes v ev)
@@ -380,11 +381,9 @@ a bounded
 formula agrees with truth. -/
 private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : φ.Bounded) :
-    ∀ (v : Fin k → M) (ev : M), Codes v ev → (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔
-      M ⊧/v φ) := by
+    ∀ (v : Fin k → M) (ev : M), Codes v ev → (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   refine bounded_induction (ξ := Empty)
-    (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev →
-      (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ))
+    (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev → (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ k φ hφ
   · intro m v ev _
     have hq : M ⊧/![((⌜(⊤ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqVerumDef.val :=
@@ -429,8 +428,7 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
   · intro m φ ψ _ _ ihφ ihψ v ev hev
     have hq : M ⊧/![((⌜φ ⋏ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqAndDef.val :=
       Sigma0_cast₃ qqAndDef (by simpa using quote_and_sentence (V := ℕ) φ ψ)
-    rw [read_boundedSatisfactionAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev,
-      ihψ v ev hev]
+    rw [read_boundedSatisfactionAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev, ihψ v ev hev]
     simp
   · intro m φ ψ hφ hψ ihφ ihψ v ev hev
     have hq : M ⊧/![((⌜φ ⋎ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqOrDef.val :=
@@ -469,8 +467,7 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
     simp only [Semiformula.eval_bexs, Semiformula.Operator.lt_def, Semiformula.eval_rel]
     constructor
     · rintro ⟨x, hx, e', hadj, hsat⟩
-      exact ⟨x, by simpa [Function.comp_def] using hx,
-        (ihφ (x :> v) e' (codes_cons hM hev hadj)).mp hsat⟩
+      exact ⟨x, by simpa [Function.comp_def] using hx, (ihφ (x :> v) e' (codes_cons hM hev hadj)).mp hsat⟩
     · rintro ⟨x, hx, hsat⟩
       obtain ⟨e', hadj⟩ := read_adjoinTotal hM x ev
       exact ⟨x, by simpa [Function.comp_def] using hx, e', hadj,
@@ -485,8 +482,7 @@ include hM in
 private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
     {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) (hs : s ≤ n + 1) :
-    ∀ (v : Fin k → M) (ev : M), Codes v ev →
-      (Reading.HierarchySatisfaction Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+    ∀ (v : Fin k → M) (ev : M), Codes v ev → (Reading.HierarchySatisfaction Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   revert hs
   induction h with
   | @zero Γ₀ m₀ φ₀ hφ₀ =>
@@ -539,10 +535,8 @@ theorem sigmaSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k
 - [HP98, Remark I.1.77] -/
 
 private lemma eval_sigmaSatisfactionVec (p : M) (w : Fin k → M) :
-    M ⊧/(p :> w) (sigmaSatisfactionVec n k).val ↔ ∃ ev, Codes w ev ∧
-      Reading.SigmaSatisfaction n p ev := by
-  simp only [sigmaSatisfactionVec, Nat.succ_eq_add_one, Nat.reduceAdd,
-    HierarchySymbol.Semiformula.val_mkSigma,
+    M ⊧/(p :> w) (sigmaSatisfactionVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SigmaSatisfaction n p ev := by
+  simp only [sigmaSatisfactionVec, Nat.succ_eq_add_one, Nat.reduceAdd, HierarchySymbol.Semiformula.val_mkSigma,
     Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
     Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, numeral_eq_natCast_app,
     Semiterm.val_bvar, Matrix.cons_val_zero, Fin.isValue, Fin.Fin1.eq_one, Matrix.cons_val_one,
@@ -563,14 +557,12 @@ end peanoMinus
 
 theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) : 𝗣𝗔⁻ ∪ tarski n ⊢ snowing n φ := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n) :=
-    Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance
+  have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n) := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance
       (Entailment.Axiomatized.le_of_subset Set.subset_union_left)
   unfold snowing
   refine Arithmetic.provable_iff_of_models_iff (T := 𝗣𝗔⁻ ∪ tarski n) ?_
   intro M _ hMT e
-  have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
-    Semantics.ModelsSet.of_subset hMT Set.subset_union_left
+  have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := Semantics.ModelsSet.of_subset hMT Set.subset_union_left
   have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦
     Semantics.ModelsSet.models _ (Set.mem_union_right 𝗣𝗔⁻ hσ)
   have := hPA

@@ -113,20 +113,14 @@ structure BoundedSatisfactionTable (q z e : V) : Prop where
   /-- The root belongs to the domain. -/
   mem_dom_root : ⟪z, e⟫ ∈ domain q
   /-- Each domain node obeys its Tarski clause and has its immediate children in the domain. -/
-  spec : ∀ z' e', ⟪z', e'⟫ ∈ domain q →
-    (z' = ^⊤ ∧ ⟪⟪z', e'⟫, 1⟫ ∈ q) ∨
-    (z' = ^⊥ ∧ ⟪⟪z', e'⟫, 0⟫ ∈ q) ∨
-    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^= u ∧
-      (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t = termVal e' u) ∧
+  spec : ∀ z' e', ⟪z', e'⟫ ∈ domain q → (z' = ^⊤ ∧ ⟪⟪z', e'⟫, 1⟫ ∈ q) ∨ (z' = ^⊥ ∧ ⟪⟪z', e'⟫, 0⟫ ∈ q) ∨
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^= u ∧ (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t = termVal e' u) ∧
       (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ termVal e' t ≠ termVal e' u)) ∨
-    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^≠ u ∧
-      (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) ∧
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^≠ u ∧ (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) ∧
       (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ termVal e' t = termVal e' u)) ∨
-    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^< u ∧
-      (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t < termVal e' u) ∧
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^< u ∧ (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t < termVal e' u) ∧
       (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ ¬termVal e' t < termVal e' u)) ∨
-    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^≮ u ∧
-      (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) ∧
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^≮ u ∧ (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) ∧
       (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ termVal e' t < termVal e' u)) ∨
     (∃ p₁ p₂, z' = p₁ ^⋏ p₂ ∧ ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q ∧
       (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∧ ⟪⟪p₂, e'⟫, 1⟫ ∈ q) ∧
@@ -143,8 +137,7 @@ structure BoundedSatisfactionTable (q z e : V) : Prop where
       (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
       (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q))
   /-- Every nonroot domain node has an immediate parent in the domain. -/
-  minimal : ∀ n ∈ domain q, n = ⟪z, e⟫ ∨
-    (∃ p₁ p₂ e', ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q ∧ (n = ⟪p₁, e'⟫ ∨ n = ⟪p₂, e'⟫)) ∨
+  minimal : ∀ n ∈ domain q, n = ⟪z, e⟫ ∨ (∃ p₁ p₂ e', ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q ∧ (n = ⟪p₁, e'⟫ ∨ n = ⟪p₂, e'⟫)) ∨
     (∃ p₁ p₂ e', ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q ∧ (n = ⟪p₁, e'⟫ ∨ n = ⟪p₂, e'⟫)) ∨
     (∃ u p e', ⟪qqBall u p, e'⟫ ∈ domain q ∧ ∃ x < termVal (0 ∷ e') u, n = ⟪p, x ∷ e'⟫) ∨
     (∃ u p e', ⟪qqBex u p, e'⟫ ∈ domain q ∧ ∃ x < termVal (0 ∷ e') u, n = ⟪p, x ∷ e'⟫)
@@ -211,12 +204,9 @@ lemma spec_ball (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBall u p, e'⟫ 
     (⟪⟪qqBall u p, e'⟫, 1⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
     (⟪⟪qqBall u p, e'⟫, 0⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
   obtain ⟨t, ht, rfl, hd, hA, hB⟩ :
-      ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t ∧
-        (∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪p, x ∷ e'⟫ ∈ domain q) ∧
-        (⟪⟪qqBall u p, e'⟫, 1⟫ ∈ q ↔
-          ∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
-        (⟪⟪qqBall u p, e'⟫, 0⟫ ∈ q ↔
-          ∃ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
+      ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t ∧ (∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪p, x ∷ e'⟫ ∈ domain q) ∧
+        (⟪⟪qqBall u p, e'⟫, 1⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
+        (⟪⟪qqBall u p, e'⟫, 0⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
     simpa using h.spec _ e' hn
   exact ⟨⟨t, ht, rfl⟩, hd, hA, hB⟩
 
@@ -226,12 +216,9 @@ lemma spec_bex (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBex u p, e'⟫ �
     (⟪⟪qqBex u p, e'⟫, 1⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
     (⟪⟪qqBex u p, e'⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
   obtain ⟨t, ht, rfl, hd, hA, hB⟩ :
-      ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t ∧
-        (∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪p, x ∷ e'⟫ ∈ domain q) ∧
-        (⟪⟪qqBex u p, e'⟫, 1⟫ ∈ q ↔
-          ∃ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
-        (⟪⟪qqBex u p, e'⟫, 0⟫ ∈ q ↔
-          ∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
+      ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t ∧ (∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪p, x ∷ e'⟫ ∈ domain q) ∧
+        (⟪⟪qqBex u p, e'⟫, 1⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
+        (⟪⟪qqBex u p, e'⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
     simpa using h.spec _ e' hn
   exact ⟨⟨t, ht, rfl⟩, hd, hA, hB⟩
 
@@ -300,8 +287,7 @@ variable {q q₁ q₂ z z₁ z₂ e e₁ e₂ p : V}
 - [HP98, Definition I.1.71(1)]
 - [HP98, Lemma I.1.72(2)] -/
 
-lemma val_one_ne_zero (h : BoundedSatisfactionTable q z e) {n : V} (h1 : ⟪n, 1⟫ ∈ q) (h0 : ⟪n,
-  0⟫ ∈ q) : False := by
+lemma val_one_ne_zero (h : BoundedSatisfactionTable q z e) {n : V} (h1 : ⟪n, 1⟫ ∈ q) (h0 : ⟪n, 0⟫ ∈ q) : False := by
   simpa using h.isMapping.uniq h1 h0
 
 lemma val_zero_or_one (h : BoundedSatisfactionTable q z e) :
@@ -319,53 +305,51 @@ lemma val_zero_or_one (h : BoundedSatisfactionTable q z e) :
   · exact Or.inl hv
   · exact Or.inr hv
   · by_cases h' : termVal e' a = termVal e' b
-    · exact Or.inl (hA.mpr h')
-    · exact Or.inr (hB.mpr h')
+    · exact Or.inl $ hA.mpr h'
+    · exact Or.inr $ hB.mpr h'
   · by_cases h' : termVal e' a = termVal e' b
-    · exact Or.inr (hB.mpr h')
-    · exact Or.inl (hA.mpr h')
+    · exact Or.inr $ hB.mpr h'
+    · exact Or.inl $ hA.mpr h'
   · by_cases h' : termVal e' a < termVal e' b
-    · exact Or.inl (hA.mpr h')
-    · exact Or.inr (hB.mpr h')
+    · exact Or.inl $ hA.mpr h'
+    · exact Or.inr $ hB.mpr h'
   · by_cases h' : termVal e' a < termVal e' b
-    · exact Or.inr (hB.mpr h')
-    · exact Or.inl (hA.mpr h')
+    · exact Or.inr $ hB.mpr h'
+    · exact Or.inl $ hA.mpr h'
   · subst he
     rcases ih a (by simp) e' hd with h1 | h1
     · rcases ih b (by simp) e' hd' with h2 | h2
-      · exact Or.inl (hA.mpr ⟨h1, h2⟩)
-      · exact Or.inr (hB.mpr (Or.inr h2))
-    · exact Or.inr (hB.mpr (Or.inl h1))
+      · exact Or.inl $ hA.mpr ⟨h1, h2⟩
+      · exact Or.inr $ hB.mpr $ Or.inr h2
+    · exact Or.inr $ hB.mpr $ Or.inl h1
   · subst he
     rcases ih a (by simp) e' hd with h1 | h1
-    · exact Or.inl (hA.mpr (Or.inl h1))
+    · exact Or.inl $ hA.mpr $ Or.inl h1
     · rcases ih b (by simp) e' hd' with h2 | h2
-      · exact Or.inl (hA.mpr (Or.inr h2))
-      · exact Or.inr (hB.mpr ⟨h1, h2⟩)
+      · exact Or.inl $ hA.mpr $ Or.inr h2
+      · exact Or.inr $ hB.mpr ⟨h1, h2⟩
   · subst he
     by_cases hall : ∀ x < termVal (0 ∷ e') a, ⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q
-    · exact Or.inl (hA.mpr hall)
+    · exact Or.inl $ hA.mpr hall
     · push Not at hall
       obtain ⟨x, hx, hx1⟩ := hall
       rcases ih b (by simp) (x ∷ e') (hd x hx) with h' | h'
       · exact absurd h' hx1
-      · exact Or.inr (hB.mpr ⟨x, hx, h'⟩)
+      · exact Or.inr $ hB.mpr ⟨x, hx, h'⟩
   · subst he
     by_cases hall : ∀ x < termVal (0 ∷ e') a, ⟪⟪b, x ∷ e'⟫, 0⟫ ∈ q
-    · exact Or.inr (hB.mpr hall)
+    · exact Or.inr $ hB.mpr hall
     · push Not at hall
       obtain ⟨x, hx, hx0⟩ := hall
       rcases ih b (by simp) (x ∷ e') (hd x hx) with h' | h'
-      · exact Or.inl (hA.mpr ⟨x, hx, h'⟩)
+      · exact Or.inl $ hA.mpr ⟨x, hx, h'⟩
       · exact absurd h' hx0
 
 lemma agree (h₁ : BoundedSatisfactionTable q₁ z₁ e₁) (h₂ : BoundedSatisfactionTable q₂ z₂ e₂) :
-    ∀ p e', ⟪p, e'⟫ ∈ domain q₁ → ⟪p, e'⟫ ∈ domain q₂ →
-      (⟪⟪p, e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪p, e'⟫, 1⟫ ∈ q₂) ∧
+    ∀ p e', ⟪p, e'⟫ ∈ domain q₁ → ⟪p, e'⟫ ∈ domain q₂ → (⟪⟪p, e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪p, e'⟫, 1⟫ ∈ q₂) ∧
       (⟪⟪p, e'⟫, 0⟫ ∈ q₁ ↔ ⟪⟪p, e'⟫, 0⟫ ∈ q₂) := by
   refine ISigma1.pi1_order_induction
-    (P := fun p ↦ ∀ e', ⟪p, e'⟫ ∈ domain q₁ → ⟪p, e'⟫ ∈ domain q₂ →
-      (⟪⟪p, e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪p, e'⟫, 1⟫ ∈ q₂) ∧
+    (P := fun p ↦ ∀ e', ⟪p, e'⟫ ∈ domain q₁ → ⟪p, e'⟫ ∈ domain q₂ → (⟪⟪p, e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪p, e'⟫, 1⟫ ∈ q₂) ∧
       (⟪⟪p, e'⟫, 0⟫ ∈ q₁ ↔ ⟪⟪p, e'⟫, 0⟫ ∈ q₂))
     (by definability) ?_
   intro p ih e' hn₁ hn₂
@@ -380,8 +364,7 @@ lemma agree (h₁ : BoundedSatisfactionTable q₁ z₁ e₁) (h₂ : BoundedSati
     exact ⟨iff_of_true hv hv₂, iff_of_false (h₁.val_one_ne_zero hv) (h₂.val_one_ne_zero hv₂)⟩
   · subst he
     have hv₂ := h₂.val_falsum hn₂
-    exact ⟨iff_of_false (fun hc ↦ h₁.val_one_ne_zero hc hv) (fun hc ↦ h₂.val_one_ne_zero hc hv₂),
-      iff_of_true hv hv₂⟩
+    exact ⟨iff_of_false (fun hc ↦ h₁.val_one_ne_zero hc hv) (fun hc ↦ h₂.val_one_ne_zero hc hv₂), iff_of_true hv hv₂⟩
   · subst he
     obtain ⟨hA₂, hB₂⟩ := h₂.spec_eq hn₂
     exact ⟨hA.trans hA₂.symm, hB.trans hB₂.symm⟩
@@ -406,8 +389,7 @@ lemma agree (h₁ : BoundedSatisfactionTable q₁ z₁ e₁) (h₂ : BoundedSati
     exact ⟨by rw [hA, hA₂, i1, j1], by rw [hB, hB₂, i0, j0]⟩
   · subst he
     obtain ⟨ht₂, hd₂, hA₂, hB₂⟩ := h₂.spec_ball hn₂
-    have key : ∀ x < termVal (0 ∷ e') a,
-        (⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₂) ∧
+    have key : ∀ x < termVal (0 ∷ e') a, (⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₂) ∧
         (⟪⟪b, x ∷ e'⟫, 0⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 0⟫ ∈ q₂) :=
       fun x hx ↦ ih b (by simp) (x ∷ e') (hd x hx) (hd₂ x hx)
     refine ⟨?_, ?_⟩
@@ -417,8 +399,7 @@ lemma agree (h₁ : BoundedSatisfactionTable q₁ z₁ e₁) (h₂ : BoundedSati
       exact exists_congr fun x ↦ and_congr_right fun hx ↦ (key x hx).2
   · subst he
     obtain ⟨ht₂, hd₂, hA₂, hB₂⟩ := h₂.spec_bex hn₂
-    have key : ∀ x < termVal (0 ∷ e') a,
-        (⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₂) ∧
+    have key : ∀ x < termVal (0 ∷ e') a, (⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₂) ∧
         (⟪⟪b, x ∷ e'⟫, 0⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 0⟫ ∈ q₂) :=
       fun x hx ↦ ih b (by simp) (x ∷ e') (hd x hx) (hd₂ x hx)
     refine ⟨?_, ?_⟩
@@ -577,8 +558,7 @@ instance specFalsum_defined : 𝚺₀-Relation₃ (SpecFalsum : V → V → V �
   .mk fun v ↦ by simp [specFalsumDef, SpecFalsum, nodeVal_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is an equality atom. -/
-def SpecEq (q z e : V) : Prop :=
-  ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^= u ∧
+def SpecEq (q z e : V) : Prop := ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^= u ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ termVal e t = termVal e u) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ termVal e t ≠ termVal e u)
 
@@ -594,11 +574,9 @@ instance eqMatrix_defined :
 
 /-- Defining formula for `SpecEq`. -/
 noncomputable def specEqDef : 𝚫₁.Semisentence 3 := .mkDelta
-  (.mkSigma “q z e. ∃ t < z, ∃ u < z,
-    !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqEQDef z t u ∧
+  (.mkSigma “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqEQDef z t u ∧
     ∃ a, !termValGraph a e t ∧ ∃ b, !termValGraph b e u ∧ !eqMatrixDef q z e a b”)
-  (.mkPi “q z e. ∃ t < z, ∃ u < z,
-    !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqEQDef z' t u → z = z') ∧
+  (.mkPi “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqEQDef z' t u → z = z') ∧
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !eqMatrixDef q z e a b”)
 
 /-- `specEqDef` defines `SpecEq`. -/
@@ -612,8 +590,7 @@ instance specEq_defined : 𝚫₁-Relation₃ (SpecEq : V → V → V → Prop) 
       (qqEQ_defined (V := V)).df, eqMatrix_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is an inequality atom. -/
-def SpecNeq (q z e : V) : Prop :=
-  ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^≠ u ∧
+def SpecNeq (q z e : V) : Prop := ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^≠ u ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ termVal e t ≠ termVal e u) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ termVal e t = termVal e u)
 
@@ -629,11 +606,9 @@ instance neqMatrix_defined :
 
 /-- Defining formula for `SpecNeq`. -/
 noncomputable def specNeqDef : 𝚫₁.Semisentence 3 := .mkDelta
-  (.mkSigma “q z e. ∃ t < z, ∃ u < z,
-    !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqNEQDef z t u ∧
+  (.mkSigma “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqNEQDef z t u ∧
     ∃ a, !termValGraph a e t ∧ ∃ b, !termValGraph b e u ∧ !neqMatrixDef q z e a b”)
-  (.mkPi “q z e. ∃ t < z, ∃ u < z,
-    !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqNEQDef z' t u → z = z') ∧
+  (.mkPi “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqNEQDef z' t u → z = z') ∧
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !neqMatrixDef q z e a b”)
 
 /-- `specNeqDef` defines `SpecNeq`. -/
@@ -647,8 +622,7 @@ instance specNeq_defined : 𝚫₁-Relation₃ (SpecNeq : V → V → V → Prop
       (qqNEQ_defined (V := V)).df, neqMatrix_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a less-than atom. -/
-def SpecLt (q z e : V) : Prop :=
-  ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^< u ∧
+def SpecLt (q z e : V) : Prop := ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^< u ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ termVal e t < termVal e u) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ¬termVal e t < termVal e u)
 
@@ -664,11 +638,9 @@ instance ltMatrix_defined :
 
 /-- Defining formula for `SpecLt`. -/
 noncomputable def specLtDef : 𝚫₁.Semisentence 3 := .mkDelta
-  (.mkSigma “q z e. ∃ t < z, ∃ u < z,
-    !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqLTDef z t u ∧
+  (.mkSigma “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqLTDef z t u ∧
     ∃ a, !termValGraph a e t ∧ ∃ b, !termValGraph b e u ∧ !ltMatrixDef q z e a b”)
-  (.mkPi “q z e. ∃ t < z, ∃ u < z,
-    !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqLTDef z' t u → z = z') ∧
+  (.mkPi “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqLTDef z' t u → z = z') ∧
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !ltMatrixDef q z e a b”)
 
 /-- `specLtDef` defines `SpecLt`. -/
@@ -682,8 +654,7 @@ instance specLt_defined : 𝚫₁-Relation₃ (SpecLt : V → V → V → Prop) 
       (qqLT_defined (V := V)).df, ltMatrix_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a not-less-than atom. -/
-def SpecNlt (q z e : V) : Prop :=
-  ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^≮ u ∧
+def SpecNlt (q z e : V) : Prop := ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z = t ^≮ u ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ¬termVal e t < termVal e u) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ termVal e t < termVal e u)
 
@@ -699,11 +670,9 @@ instance nltMatrix_defined :
 
 /-- Defining formula for `SpecNlt`. -/
 noncomputable def specNltDef : 𝚫₁.Semisentence 3 := .mkDelta
-  (.mkSigma “q z e. ∃ t < z, ∃ u < z,
-    !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqNLTDef z t u ∧
+  (.mkSigma “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧ !qqNLTDef z t u ∧
     ∃ a, !termValGraph a e t ∧ ∃ b, !termValGraph b e u ∧ !nltMatrixDef q z e a b”)
-  (.mkPi “q z e. ∃ t < z, ∃ u < z,
-    !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqNLTDef z' t u → z = z') ∧
+  (.mkPi “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).pi t ∧ !(isUTerm ℒₒᵣ).pi u ∧ (∀ z', !qqNLTDef z' t u → z = z') ∧
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !nltMatrixDef q z e a b”)
 
 /-- `specNltDef` defines `SpecNlt`. -/
@@ -717,8 +686,7 @@ instance specNlt_defined : 𝚫₁-Relation₃ (SpecNlt : V → V → V → Prop
       (qqNLT_defined (V := V)).df, nltMatrix_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a conjunction. -/
-def SpecAnd (q z e : V) : Prop :=
-  ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋏ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈ domain q ∧
+def SpecAnd (q z e : V) : Prop := ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋏ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈ domain q ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 1⟫ ∈ q ∧ ⟪⟪p₂, e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 0⟫ ∈ q ∨ ⟪⟪p₂, e⟫, 0⟫ ∈ q)
 
@@ -733,8 +701,7 @@ instance specAnd_defined : 𝚺₀-Relation₃ (SpecAnd : V → V → V → Prop
   .mk fun v ↦ by simp [specAndDef, SpecAnd, nodeVal_defined.df, nodeDom_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a disjunction. -/
-def SpecOr (q z e : V) : Prop :=
-  ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋎ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈ domain q ∧
+def SpecOr (q z e : V) : Prop := ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋎ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈ domain q ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 1⟫ ∈ q ∨ ⟪⟪p₂, e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 0⟫ ∈ q ∧ ⟪⟪p₂, e⟫, 0⟫ ∈ q)
 
@@ -749,22 +716,19 @@ instance specOr_defined : 𝚺₀-Relation₃ (SpecOr : V → V → V → Prop) 
   .mk fun v ↦ by simp [specOrDef, SpecOr, nodeVal_defined.df, nodeDom_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a bounded universal. -/
-def SpecBall (q z e : V) : Prop :=
-  ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ z = qqBall u p ∧
+def SpecBall (q z e : V) : Prop := ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ z = qqBall u p ∧
     (∀ x < termVal (0 ∷ e) u, ⟪p, x ∷ e⟫ ∈ domain q) ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 0⟫ ∈ q)
 
 /-- Defining formula for the values of `SpecBall` once the bound is known. -/
 def ballMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
-  “q z e p b. (∀ x < b, !childDomDef q p x e) ∧
-    (!nodeValDef q z e 1 ↔ ∀ x < b, !childValDef q p x e 1) ∧
+  “q z e p b. (∀ x < b, !childDomDef q p x e) ∧ (!nodeValDef q z e 1 ↔ ∀ x < b, !childValDef q p x e 1) ∧
     (!nodeValDef q z e 0 ↔ ∃ x < b, !childValDef q p x e 0)”
 
 /-- `ballMatrixDef` defines the values of `SpecBall` at a given bound. -/
 instance ballMatrix_defined :
-    HierarchySymbol.Defined (fun v : Fin 5 → V ↦
-      (∀ x < v 4, ⟪v 3, x ∷ v 2⟫ ∈ domain (v 0)) ∧
+    HierarchySymbol.Defined (fun v : Fin 5 → V ↦ (∀ x < v 4, ⟪v 3, x ∷ v 2⟫ ∈ domain (v 0)) ∧
       (⟪⟪v 1, v 2⟫, 1⟫ ∈ v 0 ↔ ∀ x < v 4, ⟪⟪v 3, x ∷ v 2⟫, 1⟫ ∈ v 0) ∧
       (⟪⟪v 1, v 2⟫, 0⟫ ∈ v 0 ↔ ∃ x < v 4, ⟪⟪v 3, x ∷ v 2⟫, 0⟫ ∈ v 0)) ballMatrixDef :=
   .mk fun v ↦ by
@@ -775,14 +739,12 @@ noncomputable def specBallDef : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ u < z, ∃ p < z,
     (∃ t <⁺ u, !(isUTerm ℒₒᵣ).sigma t ∧ !(termBShiftGraph ℒₒᵣ) u t) ∧ !qqBallDef z u p ∧
     ∃ e0, !adjoinDef e0 0 e ∧ ∃ b, !termValGraph b e0 u ∧ !ballMatrixDef q z e p b”)
-  (.mkPi “q z e. ∃ u < z, ∃ p < z,
-    (∃ t <⁺ u, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u = u') ∧
+  (.mkPi “q z e. ∃ u < z, ∃ p < z, (∃ t <⁺ u, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u = u') ∧
     (∀ z', !qqBallDef z' u p → z = z') ∧
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !ballMatrixDef q z e p b”)
 
 /-- `specBallDef` defines `SpecBall`. -/
-instance specBall_defined : 𝚫₁-Relation₃ (SpecBall : V → V → V → Prop) via specBallDef :=
-  .mk <| by
+instance specBall_defined : 𝚫₁-Relation₃ (SpecBall : V → V → V → Prop) via specBallDef := .mk <| by
   constructor
   · intro v
     simp [specBallDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -794,22 +756,19 @@ instance specBall_defined : 𝚫₁-Relation₃ (SpecBall : V → V → V → Pr
       (qqBall_defined (V := V)).df, ballMatrix_defined.df, adjoin_def]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a bounded existential. -/
-def SpecBex (q z e : V) : Prop :=
-  ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ z = qqBex u p ∧
+def SpecBex (q z e : V) : Prop := ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ z = qqBex u p ∧
     (∀ x < termVal (0 ∷ e) u, ⟪p, x ∷ e⟫ ∈ domain q) ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 0⟫ ∈ q)
 
 /-- Defining formula for the values of `SpecBex` once the bound is known. -/
 def bexMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
-  “q z e p b. (∀ x < b, !childDomDef q p x e) ∧
-    (!nodeValDef q z e 1 ↔ ∃ x < b, !childValDef q p x e 1) ∧
+  “q z e p b. (∀ x < b, !childDomDef q p x e) ∧ (!nodeValDef q z e 1 ↔ ∃ x < b, !childValDef q p x e 1) ∧
     (!nodeValDef q z e 0 ↔ ∀ x < b, !childValDef q p x e 0)”
 
 /-- `bexMatrixDef` defines the values of `SpecBex` at a given bound. -/
 instance bexMatrix_defined :
-    HierarchySymbol.Defined (fun v : Fin 5 → V ↦
-      (∀ x < v 4, ⟪v 3, x ∷ v 2⟫ ∈ domain (v 0)) ∧
+    HierarchySymbol.Defined (fun v : Fin 5 → V ↦ (∀ x < v 4, ⟪v 3, x ∷ v 2⟫ ∈ domain (v 0)) ∧
       (⟪⟪v 1, v 2⟫, 1⟫ ∈ v 0 ↔ ∃ x < v 4, ⟪⟪v 3, x ∷ v 2⟫, 1⟫ ∈ v 0) ∧
       (⟪⟪v 1, v 2⟫, 0⟫ ∈ v 0 ↔ ∀ x < v 4, ⟪⟪v 3, x ∷ v 2⟫, 0⟫ ∈ v 0)) bexMatrixDef :=
   .mk fun v ↦ by
@@ -820,14 +779,12 @@ noncomputable def specBexDef : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ u < z, ∃ p < z,
     (∃ t <⁺ u, !(isUTerm ℒₒᵣ).sigma t ∧ !(termBShiftGraph ℒₒᵣ) u t) ∧ !qqBexDef z u p ∧
     ∃ e0, !adjoinDef e0 0 e ∧ ∃ b, !termValGraph b e0 u ∧ !bexMatrixDef q z e p b”)
-  (.mkPi “q z e. ∃ u < z, ∃ p < z,
-    (∃ t <⁺ u, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u = u') ∧
+  (.mkPi “q z e. ∃ u < z, ∃ p < z, (∃ t <⁺ u, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u = u') ∧
     (∀ z', !qqBexDef z' u p → z = z') ∧
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !bexMatrixDef q z e p b”)
 
 /-- `specBexDef` defines `SpecBex`. -/
-instance specBex_defined : 𝚫₁-Relation₃ (SpecBex : V → V → V → Prop) via specBexDef :=
-  .mk <| by
+instance specBex_defined : 𝚫₁-Relation₃ (SpecBex : V → V → V → Prop) via specBexDef := .mk <| by
   constructor
   · intro v
     simp [specBexDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -843,8 +800,7 @@ instance specBex_defined : 𝚫₁-Relation₃ (SpecBex : V → V → V → Prop
 - [HP98, Lemma I.1.72(1)] -/
 
 /-- The clause `BoundedSatisfactionTable.spec` imposes at the node `⟪z, e⟫` of the domain of `q`. -/
-def SpecAt (q z e : V) : Prop :=
-  SpecVerum q z e ∨ SpecFalsum q z e ∨ SpecEq q z e ∨ SpecNeq q z e ∨ SpecLt q z e ∨
+def SpecAt (q z e : V) : Prop := SpecVerum q z e ∨ SpecFalsum q z e ∨ SpecEq q z e ∨ SpecNeq q z e ∨ SpecLt q z e ∨
     SpecNlt q z e ∨ SpecAnd q z e ∨ SpecOr q z e ∨ SpecBall q z e ∨ SpecBex q z e
 
 /-- Defining formula for `SpecAt`. -/
@@ -867,8 +823,7 @@ instance specAt_defined : 𝚫₁-Relation₃ (SpecAt : V → V → V → Prop) 
 - [HP98, Lemma I.1.72(1)] -/
 
 /-- A node of the domain that is an immediate subformula of a coded conjunction in it. -/
-def MinAnd (q n : V) : Prop :=
-  ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, c = p₁ ^⋏ p₂ ∧ ⟪c, e⟫ ∈ domain q ∧
+def MinAnd (q n : V) : Prop := ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, c = p₁ ^⋏ p₂ ∧ ⟪c, e⟫ ∈ domain q ∧
     (n = ⟪p₁, e⟫ ∨ n = ⟪p₂, e⟫)
 
 /-- Defining formula for `MinAnd`. -/
@@ -881,8 +836,7 @@ instance minAnd_defined : 𝚺₀-Relation (MinAnd : V → V → Prop) via minAn
   simp [minAndDef, MinAnd, nodeDom_defined.df]
 
 /-- A node of the domain that is an immediate subformula of a coded disjunction in it. -/
-def MinOr (q n : V) : Prop :=
-  ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, c = p₁ ^⋎ p₂ ∧ ⟪c, e⟫ ∈ domain q ∧
+def MinOr (q n : V) : Prop := ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, c = p₁ ^⋎ p₂ ∧ ⟪c, e⟫ ∈ domain q ∧
     (n = ⟪p₁, e⟫ ∨ n = ⟪p₂, e⟫)
 
 /-- Defining formula for `MinOr`. -/
@@ -903,16 +857,14 @@ instance minChild_defined :
   simp [minChildDef, childPair_defined.df]
 
 /-- A node of the domain reached by entering a coded bounded universal in it. -/
-def MinBall (q n : V) : Prop :=
-  ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, c = qqBall u p ∧ ⟪c, e⟫ ∈ domain q ∧
+def MinBall (q n : V) : Prop := ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, c = qqBall u p ∧ ⟪c, e⟫ ∈ domain q ∧
     ∃ x < termVal (0 ∷ e) u, n = ⟪p, x ∷ e⟫
 
 /-- Defining formula for `MinBall`. -/
 noncomputable def minBallDef : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, !qqBallDef c u p ∧ !nodeDomDef q c e ∧
     ∃ e0, !adjoinDef e0 0 e ∧ ∃ b, !termValGraph b e0 u ∧ !minChildDef n p e b”)
-  (.mkPi “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, (∀ c', !qqBallDef c' u p → c = c') ∧
-    !nodeDomDef q c e ∧
+  (.mkPi “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, (∀ c', !qqBallDef c' u p → c = c') ∧ !nodeDomDef q c e ∧
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !minChildDef n p e b”)
 
 /-- `minBallDef` defines `MinBall`. -/
@@ -922,21 +874,18 @@ instance minBall_defined : 𝚫₁-Relation (MinBall : V → V → Prop) via min
     simp [minBallDef, (termVal.defined (V := V)).df,
       (qqBall_defined (V := V)).df, nodeDom_defined.df, minChild_defined.df, adjoin_def]
   · intro v
-    simp [minBallDef, MinBall,
-      (termVal.defined (V := V)).df, (qqBall_defined (V := V)).df, nodeDom_defined.df,
+    simp [minBallDef, MinBall, (termVal.defined (V := V)).df, (qqBall_defined (V := V)).df, nodeDom_defined.df,
       minChild_defined.df, adjoin_def]
 
 /-- A node of the domain reached by entering a coded bounded existential in it. -/
-def MinBex (q n : V) : Prop :=
-  ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, c = qqBex u p ∧ ⟪c, e⟫ ∈ domain q ∧
+def MinBex (q n : V) : Prop := ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, c = qqBex u p ∧ ⟪c, e⟫ ∈ domain q ∧
     ∃ x < termVal (0 ∷ e) u, n = ⟪p, x ∷ e⟫
 
 /-- Defining formula for `MinBex`. -/
 noncomputable def minBexDef : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, !qqBexDef c u p ∧ !nodeDomDef q c e ∧
     ∃ e0, !adjoinDef e0 0 e ∧ ∃ b, !termValGraph b e0 u ∧ !minChildDef n p e b”)
-  (.mkPi “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, (∀ c', !qqBexDef c' u p → c = c') ∧
-    !nodeDomDef q c e ∧
+  (.mkPi “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, (∀ c', !qqBexDef c' u p → c = c') ∧ !nodeDomDef q c e ∧
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !minChildDef n p e b”)
 
 /-- `minBexDef` defines `MinBex`. -/
@@ -946,20 +895,16 @@ instance minBex_defined : 𝚫₁-Relation (MinBex : V → V → Prop) via minBe
     simp [minBexDef, (termVal.defined (V := V)).df,
       (qqBex_defined (V := V)).df, nodeDom_defined.df, minChild_defined.df, adjoin_def]
   · intro v
-    simp [minBexDef, MinBex,
-      (termVal.defined (V := V)).df, (qqBex_defined (V := V)).df, nodeDom_defined.df,
+    simp [minBexDef, MinBex, (termVal.defined (V := V)).df, (qqBex_defined (V := V)).df, nodeDom_defined.df,
       minChild_defined.df, adjoin_def]
 
 /-- The clause `BoundedSatisfactionTable.minimal` imposes at the node `n` of the domain of `q`. -/
-def MinimalAt (q z e n : V) : Prop :=
-  n = ⟪z, e⟫ ∨ MinAnd q n ∨ MinOr q n ∨ MinBall q n ∨ MinBex q n
+def MinimalAt (q z e n : V) : Prop := n = ⟪z, e⟫ ∨ MinAnd q n ∨ MinOr q n ∨ MinBall q n ∨ MinBex q n
 
 /-- Defining formula for `MinimalAt`. -/
 noncomputable def minimalDef : 𝚫₁.Semisentence 4 := .mkDelta
-  (.mkSigma “q z e n. !pairDef n z e ∨ !minAndDef q n ∨ !minOrDef q n ∨ !minBallDef.sigma q n ∨
-    !minBexDef.sigma q n”)
-  (.mkPi “q z e n. !pairDef n z e ∨ !minAndDef q n ∨ !minOrDef q n ∨ !minBallDef.pi q n ∨
-    !minBexDef.pi q n”)
+  (.mkSigma “q z e n. !pairDef n z e ∨ !minAndDef q n ∨ !minOrDef q n ∨ !minBallDef.sigma q n ∨ !minBexDef.sigma q n”)
+  (.mkPi “q z e n. !pairDef n z e ∨ !minAndDef q n ∨ !minOrDef q n ∨ !minBallDef.pi q n ∨ !minBexDef.pi q n”)
 
 /-- `minimalDef` defines `MinimalAt`. -/
 instance minimalAt_defined :
@@ -972,8 +917,7 @@ instance minimalAt_defined :
 
 - [HP98, Lemma I.1.72(1)] -/
 
-lemma boundedSatisfactionTable_iff {q z e : V} : BoundedSatisfactionTable q z e ↔
-    IsMapping q ∧ ⟪z, e⟫ ∈ domain q ∧
+lemma boundedSatisfactionTable_iff {q z e : V} : BoundedSatisfactionTable q z e ↔ IsMapping q ∧ ⟪z, e⟫ ∈ domain q ∧
     (∀ z' < q, ∀ e' < q, ⟪z', e'⟫ ∈ domain q → SpecAt q z' e') ∧
     (∀ n < q, n ∈ domain q → MinimalAt q z e n) := by
   constructor
@@ -985,60 +929,65 @@ lemma boundedSatisfactionTable_iff {q z e : V} : BoundedSatisfactionTable q z e 
         ⟨t, u, ht, hu, rfl, h⟩ | ⟨p₁, p₂, rfl, h⟩ | ⟨p₁, p₂, rfl, h⟩ |
         ⟨u, p, ⟨t, ht, rfl⟩, rfl, h⟩ | ⟨u, p, ⟨t, ht, rfl⟩, rfl, h⟩
       · exact Or.inl h
-      · exact Or.inr (Or.inl h)
-      · exact Or.inr (Or.inr (Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩))
-      · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩)))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩))))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-          ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩)))))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-          ⟨p₁, by simp, p₂, by simp, rfl, h⟩))))))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-          ⟨p₁, by simp, p₂, by simp, rfl, h⟩)))))))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-          ⟨termBShift ℒₒᵣ t, by simp, p, by simp, ⟨t, le_termBShift ht, ht, rfl⟩, rfl, h⟩))))))))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-          ⟨termBShift ℒₒᵣ t, by simp, p, by simp, ⟨t, le_termBShift ht, ht, rfl⟩, rfl, h⟩))))))))
+      · exact Or.inr $ Or.inl h
+      · exact Or.inr $ Or.inr $ Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩;
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨t, by simp, u, by simp, ht, hu, rfl, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨p₁, by simp, p₂, by simp, rfl, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨p₁, by simp, p₂, by simp, rfl, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $
+        Or.inl ⟨termBShift ℒₒᵣ t, by simp, p, by simp, ⟨t, le_termBShift ht, ht, rfl⟩, rfl, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $
+        Or.inr ⟨termBShift ℒₒᵣ t, by simp, p, by simp, ⟨t, le_termBShift ht, ht, rfl⟩, rfl, h⟩
     · intro n _ hn
       rcases hmin n hn with h | ⟨p₁, p₂, e', hd, hc⟩ | ⟨p₁, p₂, e', hd, hc⟩ |
         ⟨u, p, e', hd, hx⟩ | ⟨u, p, e', hd, hx⟩
       · exact Or.inl h
-      · exact Or.inr (Or.inl ⟨p₁ ^⋏ p₂, fst_lt_of_mem_domain hd, p₁, by simp, p₂, by simp,
-          e', snd_lt_of_mem_domain hd, rfl, hd, hc⟩)
-      · exact Or.inr (Or.inr (Or.inl ⟨p₁ ^⋎ p₂, fst_lt_of_mem_domain hd, p₁, by simp, p₂, by simp,
-          e', snd_lt_of_mem_domain hd, rfl, hd, hc⟩))
-      · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨qqBall u p, fst_lt_of_mem_domain hd, u, by simp,
-          p, by simp, e', snd_lt_of_mem_domain hd, rfl, hd, hx⟩)))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr ⟨qqBex u p, fst_lt_of_mem_domain hd, u, by simp,
-          p, by simp, e', snd_lt_of_mem_domain hd, rfl, hd, hx⟩)))
+      · exact Or.inr $
+        Or.inl ⟨p₁ ^⋏ p₂, fst_lt_of_mem_domain hd, p₁, by simp, p₂, by simp, e', snd_lt_of_mem_domain hd, rfl, hd, hc⟩
+      · exact Or.inr $ Or.inr $
+        Or.inl ⟨p₁ ^⋎ p₂, fst_lt_of_mem_domain hd, p₁, by simp, p₂, by simp, e', snd_lt_of_mem_domain hd, rfl, hd, hc⟩
+      · exact Or.inr $ Or.inr $ Or.inr $
+        Or.inl ⟨qqBall u p, fst_lt_of_mem_domain hd, u, by simp, p, by simp, e', snd_lt_of_mem_domain hd, rfl, hd, hx⟩
+      · exact Or.inr $ Or.inr $ Or.inr $
+        Or.inr ⟨qqBex u p, fst_lt_of_mem_domain hd, u, by simp, p, by simp, e', snd_lt_of_mem_domain hd, rfl, hd, hx⟩
   · rintro ⟨hm, hr, hs, hmin⟩
     refine ⟨hm, hr, ?_, ?_⟩
     · intro z' e' hd
       rcases hs z' (fst_lt_of_mem_domain hd) e' (snd_lt_of_mem_domain hd) hd with
-        h | h | ⟨t, -, u, -, h⟩ | ⟨t, -, u, -, h⟩ | ⟨t, -, u, -, h⟩ | ⟨t, -, u, -, h⟩ |
-        ⟨p₁, -, p₂, -, h⟩ | ⟨p₁, -, p₂, -, h⟩ | ⟨u, -, p, -, ⟨t, -, ht⟩, h⟩ |
-        ⟨u, -, p, -, ⟨t, -, ht⟩, h⟩
+          h
+        | h
+        | ⟨t, -, u, -, h⟩
+        | ⟨t, -, u, -, h⟩
+        | ⟨t, -, u, -, h⟩
+        | ⟨t, -, u, -, h⟩
+        | ⟨p₁, -, p₂, -, h⟩
+        | ⟨p₁, -, p₂, -, h⟩
+        | ⟨u, -, p, -, ⟨t, -, ht⟩, h⟩
+        | ⟨u, -, p, -, ⟨t, -, ht⟩, h⟩
       · exact Or.inl h
-      · exact Or.inr (Or.inl h)
-      · exact Or.inr (Or.inr (Or.inl ⟨t, u, h⟩))
-      · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨t, u, h⟩)))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨t, u, h⟩))))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨t, u, h⟩)))))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, p₂, h⟩))))))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, p₂, h⟩)))))))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-          ⟨u, p, ⟨t, ht⟩, h⟩))))))))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-          ⟨u, p, ⟨t, ht⟩, h⟩))))))))
+      · exact Or.inr $ Or.inl h
+      · exact Or.inr $ Or.inr $ Or.inl ⟨t, u, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨t, u, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨t, u, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨t, u, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨p₁, p₂, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨p₁, p₂, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨u, p, ⟨t, ht⟩, h⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr ⟨u, p, ⟨t, ht⟩, h⟩
     · intro n hn
-      rcases hmin n (lt_of_mem_domain hn) hn with h | ⟨c, -, p₁, -, p₂, -, e', -, rfl, hd, hc⟩ |
-        ⟨c, -, p₁, -, p₂, -, e', -, rfl, hd, hc⟩ | ⟨c, -, u, -, p, -, e', -, rfl, hd, hx⟩ |
-        ⟨c, -, u, -, p, -, e', -, rfl, hd, hx⟩
+      rcases hmin n (lt_of_mem_domain hn) hn with
+        h
+        | ⟨c, -, p₁, -, p₂, -, e', -, rfl, hd, hc⟩
+        | ⟨c, -, p₁, -, p₂, -, e', -, rfl, hd, hc⟩
+        | ⟨c, -, u, -, p, -, e', -, rfl, hd, hx⟩
+        | ⟨c, -, u, -, p, -, e', -, rfl, hd, hx⟩
       · exact Or.inl h
-      · exact Or.inr (Or.inl ⟨p₁, p₂, e', hd, hc⟩)
-      · exact Or.inr (Or.inr (Or.inl ⟨p₁, p₂, e', hd, hc⟩))
-      · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨u, p, e', hd, hx⟩)))
-      · exact Or.inr (Or.inr (Or.inr (Or.inr ⟨u, p, e', hd, hx⟩)))
+      · exact Or.inr $ Or.inl ⟨p₁, p₂, e', hd, hc⟩
+      · exact Or.inr $ Or.inr $ Or.inl ⟨p₁, p₂, e', hd, hc⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨u, p, e', hd, hx⟩
+      · exact Or.inr $ Or.inr $ Or.inr $ Or.inr ⟨u, p, e', hd, hx⟩
 
 end BoundedSatisfactionTableF
 
@@ -1051,8 +1000,7 @@ noncomputable def boundedSatisfactionTable : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. !isMappingDef q ∧ !nodeDomDef q z e ∧
     (∀ z' < q, ∀ e' < q, !nodeDomDef q z' e' → !specDef.sigma q z' e') ∧
     (∀ n < q, !inDomDef q n → !minimalDef.sigma q z e n)”)
-  (.mkPi “q z e. !isMappingDef q ∧ !nodeDomDef q z e ∧
-    (∀ z' < q, ∀ e' < q, !nodeDomDef q z' e' → !specDef.pi q z' e') ∧
+  (.mkPi “q z e. !isMappingDef q ∧ !nodeDomDef q z e ∧ (∀ z' < q, ∀ e' < q, !nodeDomDef q z' e' → !specDef.pi q z' e') ∧
     (∀ n < q, !inDomDef q n → !minimalDef.pi q z e n)”)
 
 /-- The formula `boundedSatisfactionTable` defines satisfaction tables. -/
@@ -1060,9 +1008,8 @@ instance BoundedSatisfactionTable.defined :
     𝚫₁-Relation₃ (BoundedSatisfactionTable : V → V → V → Prop) via boundedSatisfactionTable :=
   .mk <| by
     constructor
-    · intro v
-      simp [boundedSatisfactionTable, HierarchySymbol.Semiformula.val_sigma,
-        nodeDom_defined.df, inDom_defined.df]
+    · intro v;
+      simp [boundedSatisfactionTable, HierarchySymbol.Semiformula.val_sigma, nodeDom_defined.df, inDom_defined.df]
     · intro v
       simp [boundedSatisfactionTable, HierarchySymbol.Semiformula.val_sigma,
         boundedSatisfactionTable_iff, nodeDom_defined.df, inDom_defined.df]
@@ -1083,8 +1030,7 @@ section existence
 /-! ### Elementary exponential bounds -/
 
 lemma mul_le_exp_add (a b : V) : a * b ≤ Exp.exp (a + b) :=
-  calc a * b ≤ Exp.exp a * Exp.exp b :=
-        mul_le_mul (le_of_lt (lt_exp a)) (le_of_lt (lt_exp b)) (by simp) (by simp)
+  calc a * b ≤ Exp.exp a * Exp.exp b := mul_le_mul (le_of_lt (lt_exp a)) (le_of_lt (lt_exp b)) (by simp) (by simp)
     _ = Exp.exp (a + b) := (exp_add a b).symm
 
 lemma exp_add_le (a c : V) : Exp.exp a + c ≤ Exp.exp (a + c + 1) := by
@@ -1221,8 +1167,7 @@ lemma tableExp_step {z p u x e : V} (hp : p < z) (hu : u < z) (hx : x < termVal 
     exact le_of_lt (lt_of_lt_of_le hx
       (le_trans (termVal_le_poly _ _) (exp_monotone_le.mpr h3)))
   have hb : 3 * (x ∷ e) ≤ Exp.exp (2 * x + 2 * e + 5) := by
-    calc 3 * (x ∷ e) ≤ 3 * Exp.exp (2 * x + 2 * e + 3) :=
-          mul_le_mul le_rfl (adjoin_le_exp x e) (by simp) (by simp)
+    calc 3 * (x ∷ e) ≤ 3 * Exp.exp (2 * x + 2 * e + 3) := mul_le_mul le_rfl (adjoin_le_exp x e) (by simp) (by simp)
       _ ≤ 3 * Exp.exp (2 * x + 2 * e + 3) + Exp.exp (2 * x + 2 * e + 3) := le_self_add
       _ = 4 * Exp.exp (2 * x + 2 * e + 3) := by ring
       _ = Exp.exp (2 * x + 2 * e + 5) := by
@@ -1253,8 +1198,7 @@ lemma tableExp_step {z p u x e : V} (hp : p < z) (hu : u < z) (hx : x < termVal 
       calc (e + 2) * (z + 1) ≤ Exp.exp ((e + 2) + (z + 1)) := mul_le_exp_add _ _
         _ = Exp.exp (z + e + 3) := by rw [show (e + 2) + (z + 1) = z + e + 3 from by ring]
     calc (e + 2) * (z + 1) + 2 * e + 4 * z + 39
-        ≤ Exp.exp (z + e + 3) + 2 * e + 4 * z + 39 :=
-          add_le_add (add_le_add (add_le_add hEE le_rfl) le_rfl) le_rfl
+        ≤ Exp.exp (z + e + 3) + 2 * e + 4 * z + 39 := add_le_add (add_le_add (add_le_add hEE le_rfl) le_rfl) le_rfl
       _ = Exp.exp (z + e + 3) + (2 * e + 4 * z + 39) := by ring
       _ ≤ Exp.exp (z + e + 3 + (2 * e + 4 * z + 39) + 1) := exp_add_le _ _
       _ = Exp.exp (5 * z + 3 * e + 43) := by
@@ -1268,8 +1212,7 @@ lemma tableExp_step {z p u x e : V} (hp : p < z) (hu : u < z) (hx : x < termVal 
       _ ≤ Exp.exp (tableExp z e) := two_mul_le_exp h2
   calc tableExp p (x ∷ e) ≤ Exp.exp (2 * x + 2 * e + 4 * z + 37) := step1
     _ ≤ Exp.exp (Exp.exp ((e + 2) * (z + 1) + 2 * e + 4 * z + 39)) := exp_monotone_le.mpr step2
-    _ ≤ Exp.exp (Exp.exp (Exp.exp (5 * z + 3 * e + 43))) :=
-        exp_monotone_le.mpr (exp_monotone_le.mpr step3)
+    _ ≤ Exp.exp (Exp.exp (Exp.exp (5 * z + 3 * e + 43))) := exp_monotone_le.mpr (exp_monotone_le.mpr step3)
     _ ≤ Exp.exp (Exp.exp (Exp.exp (Exp.exp (tableExp z e)))) :=
         exp_monotone_le.mpr (exp_monotone_le.mpr (exp_monotone_le.mpr step4))
     _ = iterExp (tableExp z e) 4 := (iterExp_four _).symm
@@ -1306,20 +1249,14 @@ variable {q q₁ q₂ Q z e z' e' n p p₁ p₂ u t v : V}
 
 /-- The clause that `BoundedSatisfactionTable.spec` imposes at the node `⟪z', e'⟫` of the domain of
 `q`. -/
-def Spec (q z' e' : V) : Prop :=
-  (z' = ^⊤ ∧ ⟪⟪z', e'⟫, 1⟫ ∈ q) ∨
-  (z' = ^⊥ ∧ ⟪⟪z', e'⟫, 0⟫ ∈ q) ∨
-  (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^= u ∧
-    (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t = termVal e' u) ∧
+def Spec (q z' e' : V) : Prop := (z' = ^⊤ ∧ ⟪⟪z', e'⟫, 1⟫ ∈ q) ∨ (z' = ^⊥ ∧ ⟪⟪z', e'⟫, 0⟫ ∈ q) ∨
+  (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^= u ∧ (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t = termVal e' u) ∧
     (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ termVal e' t ≠ termVal e' u)) ∨
-  (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^≠ u ∧
-    (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) ∧
+  (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^≠ u ∧ (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) ∧
     (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ termVal e' t = termVal e' u)) ∨
-  (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^< u ∧
-    (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t < termVal e' u) ∧
+  (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^< u ∧ (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ termVal e' t < termVal e' u) ∧
     (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ ¬termVal e' t < termVal e' u)) ∨
-  (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^≮ u ∧
-    (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) ∧
+  (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ z' = t ^≮ u ∧ (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) ∧
     (⟪⟪z', e'⟫, 0⟫ ∈ q ↔ termVal e' t < termVal e' u)) ∨
   (∃ p₁ p₂, z' = p₁ ^⋏ p₂ ∧ ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q ∧
     (⟪⟪z', e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∧ ⟪⟪p₂, e'⟫, 1⟫ ∈ q) ∧
@@ -1338,26 +1275,22 @@ def Spec (q z' e' : V) : Prop :=
 
 /-- The clause that `BoundedSatisfactionTable.minimal` imposes at a node of the domain other than
 the root. -/
-def MinChild (q n : V) : Prop :=
-  (∃ p₁ p₂ e', ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q ∧ (n = ⟪p₁, e'⟫ ∨ n = ⟪p₂, e'⟫)) ∨
+def MinChild (q n : V) : Prop := (∃ p₁ p₂ e', ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q ∧ (n = ⟪p₁, e'⟫ ∨ n = ⟪p₂, e'⟫)) ∨
   (∃ p₁ p₂ e', ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q ∧ (n = ⟪p₁, e'⟫ ∨ n = ⟪p₂, e'⟫)) ∨
   (∃ u p e', ⟪qqBall u p, e'⟫ ∈ domain q ∧ ∃ x < termVal (0 ∷ e') u, n = ⟪p, x ∷ e'⟫) ∨
   (∃ u p e', ⟪qqBex u p, e'⟫ ∈ domain q ∧ ∃ x < termVal (0 ∷ e') u, n = ⟪p, x ∷ e'⟫)
 
-lemma spec' (h : BoundedSatisfactionTable q z e) (hn : ⟪z',
-  e'⟫ ∈ domain q) : Spec q z' e' := h.spec z' e' hn
+lemma spec' (h : BoundedSatisfactionTable q z e) (hn : ⟪z', e'⟫ ∈ domain q) : Spec q z' e' := h.spec z' e' hn
 
-lemma minimal' (h : BoundedSatisfactionTable q z e) (hn : n ∈ domain q) : n = ⟪z, e⟫ ∨
-  MinChild q n :=
-  h.minimal n hn
+lemma minimal' (h : BoundedSatisfactionTable q z e) (hn : n ∈ domain q) : n = ⟪z, e⟫ ∨ MinChild q n := h.minimal n hn
 
 lemma MinChild.mono (hsub : ∀ m ∈ domain q, m ∈ domain Q) (h : MinChild q n) : MinChild Q n := by
   rcases h with ⟨a, b, e'', hd, hc⟩ | ⟨a, b, e'', hd, hc⟩ | ⟨a, b, e'', hd, hx⟩ |
     ⟨a, b, e'', hd, hx⟩
   · exact Or.inl ⟨a, b, e'', hsub _ hd, hc⟩
-  · exact Or.inr (Or.inl ⟨a, b, e'', hsub _ hd, hc⟩)
-  · exact Or.inr (Or.inr (Or.inl ⟨a, b, e'', hsub _ hd, hx⟩))
-  · exact Or.inr (Or.inr (Or.inr ⟨a, b, e'', hsub _ hd, hx⟩))
+  · exact Or.inr $ Or.inl ⟨a, b, e'', hsub _ hd, hc⟩
+  · exact Or.inr $ Or.inr $ Or.inl ⟨a, b, e'', hsub _ hd, hx⟩
+  · exact Or.inr $ Or.inr $ Or.inr ⟨a, b, e'', hsub _ hd, hx⟩
 
 lemma val_iff_of_subset (hQ : IsMapping Q) (hsub : q ⊆ Q) (hn : n ∈ domain q) :
     ⟪n, v⟫ ∈ Q ↔ ⟪n, v⟫ ∈ q := by
@@ -1367,47 +1300,42 @@ lemma val_iff_of_subset (hQ : IsMapping Q) (hsub : q ⊆ Q) (hn : n ∈ domain q
 lemma Spec.mono (hQ : IsMapping Q) (hsub : q ⊆ Q) (hd : ⟪z', e'⟫ ∈ domain q) (h : Spec q z' e') :
     Spec Q z' e' := by
   have dom : ∀ m ∈ domain q, m ∈ domain Q := fun m hm ↦ domain_subset_domain_of_subset hsub hm
-  have root : ∀ w : V, ⟪⟪z', e'⟫, w⟫ ∈ Q ↔ ⟪⟪z', e'⟫, w⟫ ∈ q :=
-    fun w ↦ val_iff_of_subset hQ hsub hd
+  have root : ∀ w : V, ⟪⟪z', e'⟫, w⟫ ∈ Q ↔ ⟪⟪z', e'⟫, w⟫ ∈ q := fun w ↦ val_iff_of_subset hQ hsub hd
   rcases h with ⟨he, hv⟩ | ⟨he, hv⟩ |
     ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
     ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
     ⟨a, b, he, hc, hc', hA, hB⟩ | ⟨a, b, he, hc, hc', hA, hB⟩ |
     ⟨a, b, ht, he, hc, hA, hB⟩ | ⟨a, b, ht, he, hc, hA, hB⟩
   · exact Or.inl ⟨he, hsub hv⟩
-  · exact Or.inr <| Or.inl ⟨he, hsub hv⟩
-  · exact Or.inr <| Or.inr <| Or.inl
+  · exact Or.inr $ Or.inl ⟨he, hsub hv⟩
+  · exact Or.inr $ Or.inr $ Or.inl
       ⟨a, b, ha, hb, he, (root 1).trans hA, (root 0).trans hB⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inl
+  · exact Or.inr $ Or.inr $ Or.inr $ Or.inl
       ⟨a, b, ha, hb, he, (root 1).trans hA, (root 0).trans hB⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+  · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
       ⟨a, b, ha, hb, he, (root 1).trans hA, (root 0).trans hB⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+  · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
       ⟨a, b, ha, hb, he, (root 1).trans hA, (root 0).trans hB⟩
-  · refine Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+  · refine Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
       ⟨a, b, he, dom _ hc, dom _ hc', ?_, ?_⟩
     · rw [root 1, hA, val_iff_of_subset hQ hsub hc, val_iff_of_subset hQ hsub hc']
     · rw [root 0, hB, val_iff_of_subset hQ hsub hc, val_iff_of_subset hQ hsub hc']
-  · refine Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+  · refine Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
       ⟨a, b, he, dom _ hc, dom _ hc', ?_, ?_⟩
     · rw [root 1, hA, val_iff_of_subset hQ hsub hc, val_iff_of_subset hQ hsub hc']
     · rw [root 0, hB, val_iff_of_subset hQ hsub hc, val_iff_of_subset hQ hsub hc']
-  · refine Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+  · refine Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
       ⟨a, b, ht, he, fun x hx ↦ dom _ (hc x hx), ?_, ?_⟩
     · rw [root 1, hA]
-      exact forall_congr' fun x ↦ imp_congr_right fun hx ↦
-        (val_iff_of_subset hQ hsub (hc x hx)).symm
+      exact forall_congr' fun x ↦ imp_congr_right fun hx ↦ (val_iff_of_subset hQ hsub (hc x hx)).symm
     · rw [root 0, hB]
-      exact exists_congr fun x ↦ and_congr_right fun hx ↦
-        (val_iff_of_subset hQ hsub (hc x hx)).symm
-  · refine Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr
+      exact exists_congr fun x ↦ and_congr_right fun hx ↦ (val_iff_of_subset hQ hsub (hc x hx)).symm
+  · refine Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr
       ⟨a, b, ht, he, fun x hx ↦ dom _ (hc x hx), ?_, ?_⟩
     · rw [root 1, hA]
-      exact exists_congr fun x ↦ and_congr_right fun hx ↦
-        (val_iff_of_subset hQ hsub (hc x hx)).symm
+      exact exists_congr fun x ↦ and_congr_right fun hx ↦ (val_iff_of_subset hQ hsub (hc x hx)).symm
     · rw [root 0, hB]
-      exact forall_congr' fun x ↦ imp_congr_right fun hx ↦
-        (val_iff_of_subset hQ hsub (hc x hx)).symm
+      exact forall_congr' fun x ↦ imp_congr_right fun hx ↦ (val_iff_of_subset hQ hsub (hc x hx)).symm
 
 /-! ### Gluing tables together
 
@@ -1467,8 +1395,7 @@ lemma fst_le_of_mem_domain (h : BoundedSatisfactionTable q z e) : ∀ n ∈ doma
       · exact le_trans (le_of_lt (by simp)) (up _ hm (by simp))
   exact fun n hn ↦ key q n hn le_add_self
 
-lemma root_not_mem_domain (h : BoundedSatisfactionTable q p e₁) (hlt : p < z) : ⟪z,
-  e⟫ ∉ domain q := by
+lemma root_not_mem_domain (h : BoundedSatisfactionTable q p e₁) (hlt : p < z) : ⟪z, e⟫ ∉ domain q := by
   intro hc
   have : π₁ (⟪z, e⟫ : V) ≤ p := h.fst_le_of_mem_domain _ hc
   simp only [pi₁_pair] at this
@@ -1478,14 +1405,13 @@ lemma root_not_mem_domain (h : BoundedSatisfactionTable q p e₁) (hlt : p < z) 
 
 - [HP98, Lemma I.1.72(3)] -/
 
-lemma of_atom (h : Spec ({⟪⟪z, e⟫, v⟫} : V) z e) : BoundedSatisfactionTable ({⟪⟪z, e⟫,
-  v⟫} : V) z e := by
+lemma of_atom (h : Spec ({⟪⟪z, e⟫, v⟫} : V) z e) : BoundedSatisfactionTable ({⟪⟪z, e⟫, v⟫} : V) z e := by
   refine ⟨IsMapping.singleton _ _, by simp, ?_, ?_⟩
   · intro z' e' hn
     obtain ⟨rfl, rfl⟩ : z' = z ∧ e' = e := by simpa using hn
     exact h
   · intro n hn
-    exact Or.inl (by simpa using hn)
+    exact Or.inl $ by simpa using hn
 
 lemma of_and {N : V} (h₁ : BoundedSatisfactionTable q₁ p₁ e) (h₂ : BoundedSatisfactionTable q₂ p₂ e)
     (hn₁ : ∀ w ∈ q₁, w < N) (hn₂ : ∀ w ∈ q₂, w < N)
@@ -1526,8 +1452,7 @@ lemma of_and {N : V} (h₁ : BoundedSatisfactionTable q₁ p₁ e) (h₂ : Bound
       intro w
       constructor
       · intro h
-        rcases (by simpa using h : ⟪⟪p₁ ^⋏ p₂, e⟫, w⟫ = ⟪⟪p₁ ^⋏ p₂, e⟫, v⟫ ∨
-            ⟪⟪p₁ ^⋏ p₂, e⟫, w⟫ ∈ q₁ ∪ q₂) with h | h
+        rcases (by simpa using h : ⟪⟪p₁ ^⋏ p₂, e⟫, w⟫ = ⟪⟪p₁ ^⋏ p₂, e⟫, v⟫ ∨ ⟪⟪p₁ ^⋏ p₂, e⟫, w⟫ ∈ q₁ ∪ q₂) with h | h
         · exact (pair_ext_iff.mp h).2
         · exact absurd (mem_domain_of_pair_mem h) hnr
       · rintro rfl; simp
@@ -1536,27 +1461,24 @@ lemma of_and {N : V} (h₁ : BoundedSatisfactionTable q₁ p₁ e) (h₂ : Bound
       rcases (by simpa [domain_union] using hn : ⟪z', e'⟫ = ⟪p₁ ^⋏ p₂, e⟫ ∨
           ⟪z', e'⟫ ∈ domain q₁ ∨ ⟪z', e'⟫ ∈ domain q₂) with h | h | h
       · obtain ⟨rfl, rfl⟩ := pair_ext_iff.mp h
-        refine Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+        refine Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
           ⟨p₁, p₂, rfl, domain_subset_domain_of_subset hs₁ h₁.mem_dom_root,
             domain_subset_domain_of_subset hs₂ h₂.mem_dom_root, ?_, ?_⟩
-        · rw [hroot 1, val_iff_of_subset hmQ hs₁ h₁.mem_dom_root,
-            val_iff_of_subset hmQ hs₂ h₂.mem_dom_root]
+        · rw [hroot 1, val_iff_of_subset hmQ hs₁ h₁.mem_dom_root, val_iff_of_subset hmQ hs₂ h₂.mem_dom_root]
           exact eq_comm.trans hv1
-        · rw [hroot 0, val_iff_of_subset hmQ hs₁ h₁.mem_dom_root,
-            val_iff_of_subset hmQ hs₂ h₂.mem_dom_root]
+        · rw [hroot 0, val_iff_of_subset hmQ hs₁ h₁.mem_dom_root, val_iff_of_subset hmQ hs₂ h₂.mem_dom_root]
           exact eq_comm.trans hv0
       · exact (h₁.spec' h).mono hmQ hs₁ h
       · exact (h₂.spec' h).mono hmQ hs₂ h
     · intro n hn
-      rcases (by simpa [domain_union] using hn : n = ⟪p₁ ^⋏ p₂, e⟫ ∨
-          n ∈ domain q₁ ∨ n ∈ domain q₂) with h | h | h
+      rcases (by simpa [domain_union] using hn : n = ⟪p₁ ^⋏ p₂, e⟫ ∨ n ∈ domain q₁ ∨ n ∈ domain q₂) with h | h | h
       · exact Or.inl h
       · rcases h₁.minimal' h with rfl | hm
-        · exact Or.inr <| Or.inl ⟨p₁, p₂, e, by simp, Or.inl rfl⟩
-        · exact Or.inr (hm.mono (fun m hm ↦ domain_subset_domain_of_subset hs₁ hm))
+        · exact Or.inr $ Or.inl ⟨p₁, p₂, e, by simp, Or.inl rfl⟩
+        · exact Or.inr $ hm.mono (fun m hm ↦ domain_subset_domain_of_subset hs₁ hm)
       · rcases h₂.minimal' h with rfl | hm
-        · exact Or.inr <| Or.inl ⟨p₁, p₂, e, by simp, Or.inr rfl⟩
-        · exact Or.inr (hm.mono (fun m hm ↦ domain_subset_domain_of_subset hs₂ hm))
+        · exact Or.inr $ Or.inl ⟨p₁, p₂, e, by simp, Or.inr rfl⟩
+        · exact Or.inr $ hm.mono (fun m hm ↦ domain_subset_domain_of_subset hs₂ hm)
   · intro w hw
     rcases (by simpa using hw : w = ⟪⟪p₁ ^⋏ p₂, e⟫, v⟫ ∨ w ∈ q₁ ∨ w ∈ q₂) with rfl | h | h
     · rcases hv with rfl | rfl
@@ -1602,8 +1524,7 @@ lemma of_or {N : V} (h₁ : BoundedSatisfactionTable q₁ p₁ e) (h₂ : Bounde
       intro w
       constructor
       · intro h
-        rcases (by simpa using h : ⟪⟪p₁ ^⋎ p₂, e⟫, w⟫ = ⟪⟪p₁ ^⋎ p₂, e⟫, v⟫ ∨
-            ⟪⟪p₁ ^⋎ p₂, e⟫, w⟫ ∈ q₁ ∪ q₂) with h | h
+        rcases (by simpa using h : ⟪⟪p₁ ^⋎ p₂, e⟫, w⟫ = ⟪⟪p₁ ^⋎ p₂, e⟫, v⟫ ∨ ⟪⟪p₁ ^⋎ p₂, e⟫, w⟫ ∈ q₁ ∪ q₂) with h | h
         · exact (pair_ext_iff.mp h).2
         · exact absurd (mem_domain_of_pair_mem h) hnr
       · rintro rfl; simp
@@ -1612,27 +1533,24 @@ lemma of_or {N : V} (h₁ : BoundedSatisfactionTable q₁ p₁ e) (h₂ : Bounde
       rcases (by simpa [domain_union] using hn : ⟪z', e'⟫ = ⟪p₁ ^⋎ p₂, e⟫ ∨
           ⟪z', e'⟫ ∈ domain q₁ ∨ ⟪z', e'⟫ ∈ domain q₂) with h | h | h
       · obtain ⟨rfl, rfl⟩ := pair_ext_iff.mp h
-        refine Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+        refine Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
           ⟨p₁, p₂, rfl, domain_subset_domain_of_subset hs₁ h₁.mem_dom_root,
             domain_subset_domain_of_subset hs₂ h₂.mem_dom_root, ?_, ?_⟩
-        · rw [hroot 1, val_iff_of_subset hmQ hs₁ h₁.mem_dom_root,
-            val_iff_of_subset hmQ hs₂ h₂.mem_dom_root]
+        · rw [hroot 1, val_iff_of_subset hmQ hs₁ h₁.mem_dom_root, val_iff_of_subset hmQ hs₂ h₂.mem_dom_root]
           exact eq_comm.trans hv1
-        · rw [hroot 0, val_iff_of_subset hmQ hs₁ h₁.mem_dom_root,
-            val_iff_of_subset hmQ hs₂ h₂.mem_dom_root]
+        · rw [hroot 0, val_iff_of_subset hmQ hs₁ h₁.mem_dom_root, val_iff_of_subset hmQ hs₂ h₂.mem_dom_root]
           exact eq_comm.trans hv0
       · exact (h₁.spec' h).mono hmQ hs₁ h
       · exact (h₂.spec' h).mono hmQ hs₂ h
     · intro n hn
-      rcases (by simpa [domain_union] using hn : n = ⟪p₁ ^⋎ p₂, e⟫ ∨
-          n ∈ domain q₁ ∨ n ∈ domain q₂) with h | h | h
+      rcases (by simpa [domain_union] using hn : n = ⟪p₁ ^⋎ p₂, e⟫ ∨ n ∈ domain q₁ ∨ n ∈ domain q₂) with h | h | h
       · exact Or.inl h
       · rcases h₁.minimal' h with rfl | hm
-        · exact Or.inr <| Or.inr <| Or.inl ⟨p₁, p₂, e, by simp, Or.inl rfl⟩
-        · exact Or.inr (hm.mono (fun m hm ↦ domain_subset_domain_of_subset hs₁ hm))
+        · exact Or.inr $ Or.inr $ Or.inl ⟨p₁, p₂, e, by simp, Or.inl rfl⟩
+        · exact Or.inr $ hm.mono (fun m hm ↦ domain_subset_domain_of_subset hs₁ hm)
       · rcases h₂.minimal' h with rfl | hm
-        · exact Or.inr <| Or.inr <| Or.inl ⟨p₁, p₂, e, by simp, Or.inr rfl⟩
-        · exact Or.inr (hm.mono (fun m hm ↦ domain_subset_domain_of_subset hs₂ hm))
+        · exact Or.inr $ Or.inr $ Or.inl ⟨p₁, p₂, e, by simp, Or.inr rfl⟩
+        · exact Or.inr $ hm.mono (fun m hm ↦ domain_subset_domain_of_subset hs₂ hm)
   · intro w hw
     rcases (by simpa using hw : w = ⟪⟪p₁ ^⋎ p₂, e⟫, v⟫ ∨ w ∈ q₁ ∨ w ∈ q₂) with rfl | h | h
     · rcases hv with rfl | rfl
@@ -1657,8 +1575,7 @@ lemma exists_family_union {p e X N : V}
   have hsub : ∀ x r : V, ⟪x, r⟫ ∈ f → r ⊆ W := by
     intro x r hxr w hw
     have hlt : ⟪x, r⟫ < f := lt_of_mem hxr
-    exact (hW w).mpr ⟨x, lt_of_le_of_lt (le_pair_left x r) hlt, r,
-      lt_of_le_of_lt (le_pair_right x r) hlt, hxr, hw⟩
+    exact (hW w).mpr ⟨x, lt_of_le_of_lt (le_pair_left x r) hlt, r, lt_of_le_of_lt (le_pair_right x r) hlt, hxr, hw⟩
   have hmem : ∀ w ∈ W, ∃ x r : V, ⟪x, r⟫ ∈ f ∧ w ∈ r := by
     intro w hw
     obtain ⟨x, -, r, -, hxr, hwr⟩ := (hW w).mp hw
@@ -1699,14 +1616,13 @@ lemma of_ball {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ
     intro x hx
     obtain ⟨r, hr, hrsub⟩ := hWfam x hx
     rcases hr.val_zero_or_one p (x ∷ e) hr.mem_dom_root with h | h
-    · exact Or.inl (hrsub h)
-    · exact Or.inr (hrsub h)
+    · exact Or.inl $ hrsub h
+    · exact Or.inr $ hrsub h
   have hnotin : ⟪qqBall u p, e⟫ ∉ domain W := by
     intro hc
     obtain ⟨x, -, r, hr, -, hn⟩ := hWdom _ hc
     exact hr.root_not_mem_domain hp hn
-  obtain ⟨v, hv, hv1, hv0⟩ : ∃ v : V, (v = 0 ∨ v = 1) ∧
-      (v = 1 ↔ ∀ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ W) ∧
+  obtain ⟨v, hv, hv1, hv0⟩ : ∃ v : V, (v = 0 ∨ v = 1) ∧ (v = 1 ↔ ∀ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ W) ∧
       (v = 0 ↔ ∃ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 0⟫ ∈ W) := by
     by_cases h : ∀ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ W
     · refine ⟨1, Or.inr rfl, iff_of_true rfl h, iff_of_false (by simp) ?_⟩
@@ -1725,8 +1641,7 @@ lemma of_ball {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ
       intro w
       constructor
       · intro h
-        rcases (by simpa using h : ⟪⟪qqBall u p, e⟫, w⟫ = ⟪⟪qqBall u p, e⟫, v⟫ ∨
-            ⟪⟪qqBall u p, e⟫, w⟫ ∈ W) with h | h
+        rcases (by simpa using h : ⟪⟪qqBall u p, e⟫, w⟫ = ⟪⟪qqBall u p, e⟫, v⟫ ∨ ⟪⟪qqBall u p, e⟫, w⟫ ∈ W) with h | h
         · exact (pair_ext_iff.mp h).2
         · exact absurd (mem_domain_of_pair_mem h) hnotin
       · rintro rfl; simp
@@ -1734,9 +1649,8 @@ lemma of_ball {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ
     · intro z' e' hn
       rcases (by simpa using hn : ⟪z', e'⟫ = ⟪qqBall u p, e⟫ ∨ ⟪z', e'⟫ ∈ domain W) with h | h
       · obtain ⟨rfl, rfl⟩ := pair_ext_iff.mp h
-        refine Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-          Or.inl ⟨u, p, hu, rfl,
-            fun x hx ↦ domain_subset_domain_of_subset hsW (hchild x hx), ?_, ?_⟩
+        refine Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $
+          Or.inl ⟨u, p, hu, rfl, fun x hx ↦ domain_subset_domain_of_subset hsW (hchild x hx), ?_, ?_⟩
         · rw [hroot 1]
           refine (eq_comm.trans hv1).trans (forall_congr' fun x ↦ imp_congr_right fun hx ↦ ?_)
           exact (val_iff_of_subset hmQ hsW (hchild x hx)).symm
@@ -1750,9 +1664,8 @@ lemma of_ball {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ
       · exact Or.inl h
       · obtain ⟨x, hx, r, hr, hrsub, hnd⟩ := hWdom _ h
         rcases hr.minimal' hnd with rfl | hm
-        · exact Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨u, p, e, by simp, x, hx, rfl⟩
-        · exact Or.inr (hm.mono
-            (fun m hm ↦ domain_subset_domain_of_subset (subset_trans hrsub hsW) hm))
+        · exact Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨u, p, e, by simp, x, hx, rfl⟩
+        · exact Or.inr $ hm.mono (fun m hm ↦ domain_subset_domain_of_subset (subset_trans hrsub hsW) hm)
   · intro w hw
     rcases (by simpa using hw : w = ⟪⟪qqBall u p, e⟫, v⟫ ∨ w ∈ W) with rfl | h
     · rcases hv with rfl | rfl
@@ -1773,14 +1686,13 @@ lemma of_bex {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ�
     intro x hx
     obtain ⟨r, hr, hrsub⟩ := hWfam x hx
     rcases hr.val_zero_or_one p (x ∷ e) hr.mem_dom_root with h | h
-    · exact Or.inl (hrsub h)
-    · exact Or.inr (hrsub h)
+    · exact Or.inl $ hrsub h
+    · exact Or.inr $ hrsub h
   have hnotin : ⟪qqBex u p, e⟫ ∉ domain W := by
     intro hc
     obtain ⟨x, -, r, hr, -, hn⟩ := hWdom _ hc
     exact hr.root_not_mem_domain hp hn
-  obtain ⟨v, hv, hv1, hv0⟩ : ∃ v : V, (v = 0 ∨ v = 1) ∧
-      (v = 1 ↔ ∃ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ W) ∧
+  obtain ⟨v, hv, hv1, hv0⟩ : ∃ v : V, (v = 0 ∨ v = 1) ∧ (v = 1 ↔ ∃ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ W) ∧
       (v = 0 ↔ ∀ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 0⟫ ∈ W) := by
     by_cases h : ∃ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ W
     · refine ⟨1, Or.inr rfl, iff_of_true rfl h, iff_of_false (by simp) ?_⟩
@@ -1799,8 +1711,7 @@ lemma of_bex {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ�
       intro w
       constructor
       · intro h
-        rcases (by simpa using h : ⟪⟪qqBex u p, e⟫, w⟫ = ⟪⟪qqBex u p, e⟫, v⟫ ∨
-            ⟪⟪qqBex u p, e⟫, w⟫ ∈ W) with h | h
+        rcases (by simpa using h : ⟪⟪qqBex u p, e⟫, w⟫ = ⟪⟪qqBex u p, e⟫, v⟫ ∨ ⟪⟪qqBex u p, e⟫, w⟫ ∈ W) with h | h
         · exact (pair_ext_iff.mp h).2
         · exact absurd (mem_domain_of_pair_mem h) hnotin
       · rintro rfl; simp
@@ -1808,9 +1719,8 @@ lemma of_bex {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ�
     · intro z' e' hn
       rcases (by simpa using hn : ⟪z', e'⟫ = ⟪qqBex u p, e⟫ ∨ ⟪z', e'⟫ ∈ domain W) with h | h
       · obtain ⟨rfl, rfl⟩ := pair_ext_iff.mp h
-        refine Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-          Or.inr ⟨u, p, hu, rfl,
-            fun x hx ↦ domain_subset_domain_of_subset hsW (hchild x hx), ?_, ?_⟩
+        refine Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $
+          Or.inr ⟨u, p, hu, rfl, fun x hx ↦ domain_subset_domain_of_subset hsW (hchild x hx), ?_, ?_⟩
         · rw [hroot 1]
           refine (eq_comm.trans hv1).trans (exists_congr fun x ↦ and_congr_right fun hx ↦ ?_)
           exact (val_iff_of_subset hmQ hsW (hchild x hx)).symm
@@ -1824,9 +1734,8 @@ lemma of_bex {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ�
       · exact Or.inl h
       · obtain ⟨x, hx, r, hr, hrsub, hnd⟩ := hWdom _ h
         rcases hr.minimal' hnd with rfl | hm
-        · exact Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨u, p, e, by simp, x, hx, rfl⟩
-        · exact Or.inr (hm.mono
-            (fun m hm ↦ domain_subset_domain_of_subset (subset_trans hrsub hsW) hm))
+        · exact Or.inr $ Or.inr $ Or.inr $ Or.inr ⟨u, p, e, by simp, x, hx, rfl⟩
+        · exact Or.inr $ hm.mono (fun m hm ↦ domain_subset_domain_of_subset (subset_trans hrsub hsW) hm)
   · intro w hw
     rcases (by simpa using hw : w = ⟪⟪qqBex u p, e⟫, v⟫ ∨ w ∈ W) with rfl | h
     · rcases hv with rfl | rfl
@@ -1841,8 +1750,7 @@ lemma of_bex {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ�
 lemma singleton_le_tableBound {z e v : V} (hv : v ≤ 1) :
     ({⟪⟪z, e⟫, v⟫} : V) ≤ tableBound z e := by
   rw [singleton_def]
-  calc Exp.exp ⟪⟪z, e⟫, v⟫ ≤ Exp.exp (iterExp (tableExp z e) 2) :=
-        exp_monotone_le.mpr (node_le_iterExp hv)
+  calc Exp.exp ⟪⟪z, e⟫, v⟫ ≤ Exp.exp (iterExp (tableExp z e) 2) := exp_monotone_le.mpr (node_le_iterExp hv)
     _ = iterExp (tableExp z e) 3 := by rw [show (3 : V) = 2 + 1 from by ring, iterExp_succ]
     _ ≤ tableBound z e := by
         rw [tableBound, show 8 * z + 24 = 3 + (8 * z + 21) from by ring, iterExp_add]
@@ -1871,8 +1779,7 @@ lemma tableBound_le_step {p z e : V} (h : p < z) :
     tableBound p e ≤ iterExp (tableExp z e) (8 * z + 21) := by
   have h1 : p + 1 ≤ z := lt_iff_succ_le.mp h
   calc tableBound p e = iterExp (tableExp p e) (8 * p + 24) := rfl
-    _ ≤ iterExp (tableExp z e) (8 * p + 24) :=
-        iterExp_le_iterExp_left (tableExp_mono (le_of_lt h)) _
+    _ ≤ iterExp (tableExp z e) (8 * p + 24) := iterExp_le_iterExp_left (tableExp_mono (le_of_lt h)) _
     _ ≤ iterExp (tableExp z e) (8 * z + 21) := by
         refine iterExp_le_iterExp_right _ ?_
         calc 8 * p + 24 = 8 * (p + 1) + 16 := by ring
@@ -1885,8 +1792,7 @@ lemma tableBound_le_step_quant {p z u x e : V} (hp : p < z) (hu : u < z)
     tableBound p (x ∷ e) ≤ iterExp (tableExp z e) (8 * z + 21) := by
   have h1 : p + 1 ≤ z := lt_iff_succ_le.mp hp
   calc tableBound p (x ∷ e) = iterExp (tableExp p (x ∷ e)) (8 * p + 24) := rfl
-    _ ≤ iterExp (iterExp (tableExp z e) 4) (8 * p + 24) :=
-        iterExp_le_iterExp_left (tableExp_step hp hu hx) _
+    _ ≤ iterExp (iterExp (tableExp z e) 4) (8 * p + 24) := iterExp_le_iterExp_left (tableExp_step hp hu hx) _
     _ = iterExp (tableExp z e) (4 + (8 * p + 24)) := (iterExp_add _ _ _).symm
     _ ≤ iterExp (tableExp z e) (8 * z + 21) := by
         refine iterExp_le_iterExp_right _ ?_
@@ -1904,32 +1810,32 @@ lemma exists_atom_table {z e : V} (hz' : IsUFormula ℒₒᵣ z)
     ∃ v : V, v ≤ 1 ∧ BoundedSatisfactionTable ({⟪⟪z, e⟫, v⟫} : V) z e := by
   rcases h with rfl | rfl | ⟨k, r, w, rfl⟩ | ⟨k, r, w, rfl⟩
   · exact ⟨1, le_rfl, of_atom (Or.inl ⟨rfl, by simp⟩)⟩
-  · exact ⟨0, by simp, of_atom (Or.inr <| Or.inl ⟨rfl, by simp⟩)⟩
+  · exact ⟨0, by simp, of_atom (Or.inr $ Or.inl ⟨rfl, by simp⟩)⟩
   · rcases uformula_rel_cases hz' with ⟨t, u, ht, hu, hzz⟩ | ⟨t, u, ht, hu, hzz⟩
     · rw [hzz]
       by_cases hc : termVal e t = termVal e u
-      · exact ⟨1, le_rfl, of_atom (Or.inr <| Or.inr <| Or.inl
+      · exact ⟨1, le_rfl, of_atom (Or.inr $ Or.inr $ Or.inl
           ⟨t, u, ht, hu, rfl, by simp [hc], by simp [hc]⟩)⟩
-      · exact ⟨0, by simp, of_atom (Or.inr <| Or.inr <| Or.inl
+      · exact ⟨0, by simp, of_atom (Or.inr $ Or.inr $ Or.inl
           ⟨t, u, ht, hu, rfl, by simp [hc], by simp [hc]⟩)⟩
     · rw [hzz]
       by_cases hc : termVal e t < termVal e u
-      · exact ⟨1, le_rfl, of_atom (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+      · exact ⟨1, le_rfl, of_atom (Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
           ⟨t, u, ht, hu, rfl, by simp [hc], by simp [hc]⟩)⟩
-      · exact ⟨0, by simp, of_atom (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+      · exact ⟨0, by simp, of_atom (Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
           ⟨t, u, ht, hu, rfl, by simp [hc], by simp [hc]⟩)⟩
   · rcases uformula_nrel_cases hz' with ⟨t, u, ht, hu, hzz⟩ | ⟨t, u, ht, hu, hzz⟩
     · rw [hzz]
       by_cases hc : termVal e t = termVal e u
-      · exact ⟨0, by simp, of_atom (Or.inr <| Or.inr <| Or.inr <| Or.inl
+      · exact ⟨0, by simp, of_atom (Or.inr $ Or.inr $ Or.inr $ Or.inl
           ⟨t, u, ht, hu, rfl, by simp [hc], by simp [hc]⟩)⟩
-      · exact ⟨1, le_rfl, of_atom (Or.inr <| Or.inr <| Or.inr <| Or.inl
+      · exact ⟨1, le_rfl, of_atom (Or.inr $ Or.inr $ Or.inr $ Or.inl
           ⟨t, u, ht, hu, rfl, by simp [hc], by simp [hc]⟩)⟩
     · rw [hzz]
       by_cases hc : termVal e t < termVal e u
-      · exact ⟨0, by simp, of_atom (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+      · exact ⟨0, by simp, of_atom (Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
           ⟨t, u, ht, hu, rfl, by simp [hc], by simp [hc]⟩)⟩
-      · exact ⟨1, le_rfl, of_atom (Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+      · exact ⟨1, le_rfl, of_atom (Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
           ⟨t, u, ht, hu, rfl, by simp [hc], by simp [hc]⟩)⟩
 
 end BoundedSatisfactionTable
@@ -1946,30 +1852,26 @@ theorem BoundedSatisfactionTable.exists {z e : V} (hz : IsBounded z) (hz' : IsUF
       ∀ e b, b = tableBound z e → IsUFormula ℒₒᵣ z → ∃ q ≤ b, BoundedSatisfactionTable q z e by
     obtain ⟨q, -, hq⟩ := H z hz e (tableBound z e) rfl hz'
     exact ⟨q, hq⟩
-  refine IsBounded.induction 𝚷
-    (P := fun z ↦ ∀ e b, b = tableBound z e → IsUFormula ℒₒᵣ z → ∃ q ≤ b,
-      BoundedSatisfactionTable q z e)
-    (by simp only [tableBound, tableExp]; definability) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+  apply IsBounded.induction 𝚷
+    (P := fun z ↦ ∀ e b, b = tableBound z e → IsUFormula ℒₒᵣ z → ∃ q ≤ b, BoundedSatisfactionTable q z e)
+    (by simp only [tableBound, tableExp]; definability)
   · intro e b hb hu
     subst hb
-    obtain ⟨v, hv, hq⟩ := BoundedSatisfactionTable.exists_atom_table (e := e) hu (Or.inl rfl)
+    obtain ⟨v, hv, hq⟩ := BoundedSatisfactionTable.exists_atom_table (e := e) hu $ Or.inl rfl
     exact ⟨_, BoundedSatisfactionTable.singleton_le_tableBound hv, hq⟩
   · intro e b hb hu
     subst hb
-    obtain ⟨v, hv,
-      hq⟩ := BoundedSatisfactionTable.exists_atom_table (e := e) hu (Or.inr <| Or.inl rfl)
+    obtain ⟨v, hv, hq⟩ := BoundedSatisfactionTable.exists_atom_table (e := e) hu $ Or.inr $ Or.inl rfl
     exact ⟨_, BoundedSatisfactionTable.singleton_le_tableBound hv, hq⟩
   · intro k r w e b hb hu
     subst hb
-    obtain ⟨v, hv, hq⟩ :=
-      BoundedSatisfactionTable.exists_atom_table (e := e) hu (Or.inr <| Or.inr <| Or.inl ⟨k, r, w,
-        rfl⟩)
+    obtain ⟨v, hv, hq⟩ := BoundedSatisfactionTable.exists_atom_table (e := e) hu $ Or.inr $ Or.inr $
+      Or.inl ⟨k, r, w, rfl⟩
     exact ⟨_, BoundedSatisfactionTable.singleton_le_tableBound hv, hq⟩
   · intro k r w e b hb hu
     subst hb
-    obtain ⟨v, hv, hq⟩ :=
-      BoundedSatisfactionTable.exists_atom_table (e := e) hu (Or.inr <| Or.inr <| Or.inr ⟨k, r, w,
-        rfl⟩)
+    obtain ⟨v, hv, hq⟩ := BoundedSatisfactionTable.exists_atom_table (e := e) hu $ Or.inr $ Or.inr $
+      Or.inr ⟨k, r, w, rfl⟩
     exact ⟨_, BoundedSatisfactionTable.singleton_le_tableBound hv, hq⟩
   · intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ e b hb hu
     subst hb
@@ -1984,8 +1886,7 @@ theorem BoundedSatisfactionTable.exists {z e : V} (hz : IsBounded z) (hz' : IsUF
       (BoundedSatisfactionTable.node_lt_step le_rfl)
         (BoundedSatisfactionTable.node_lt_step (by simp))
     refine ⟨Q, ?_, hQ⟩
-    calc Q ≤ Exp.exp (iterExp (tableExp (p₁ ^⋏ p₂) e) (8 * (p₁ ^⋏ p₂) + 21)) :=
-          le_of_lt (lt_exp_iff.mpr hQN)
+    calc Q ≤ Exp.exp (iterExp (tableExp (p₁ ^⋏ p₂) e) (8 * (p₁ ^⋏ p₂) + 21)) := le_of_lt (lt_exp_iff.mpr hQN)
       _ ≤ tableBound (p₁ ^⋏ p₂) e := BoundedSatisfactionTable.exp_step_le_tableBound _ _
   · intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ e b hb hu
     subst hb
@@ -2000,8 +1901,7 @@ theorem BoundedSatisfactionTable.exists {z e : V} (hz : IsBounded z) (hz' : IsUF
       (BoundedSatisfactionTable.node_lt_step le_rfl)
         (BoundedSatisfactionTable.node_lt_step (by simp))
     refine ⟨Q, ?_, hQ⟩
-    calc Q ≤ Exp.exp (iterExp (tableExp (p₁ ^⋎ p₂) e) (8 * (p₁ ^⋎ p₂) + 21)) :=
-          le_of_lt (lt_exp_iff.mpr hQN)
+    calc Q ≤ Exp.exp (iterExp (tableExp (p₁ ^⋎ p₂) e) (8 * (p₁ ^⋎ p₂) + 21)) := le_of_lt (lt_exp_iff.mpr hQN)
       _ ≤ tableBound (p₁ ^⋎ p₂) e := BoundedSatisfactionTable.exp_step_le_tableBound _ _
   · intro t p ht hp ih e b hb hu
     subst hb
@@ -2029,16 +1929,19 @@ theorem BoundedSatisfactionTable.exists {z e : V} (hz : IsBounded z) (hz' : IsUF
       exact h.2
     obtain ⟨Q, hQ, hQN⟩ := BoundedSatisfactionTable.of_bex (e := e) ⟨t, ht, rfl⟩ (by simp)
       (BoundedSatisfactionTable.node_lt_step le_rfl)
-        (BoundedSatisfactionTable.node_lt_step (by simp)) (fun x hx ↦ by
+        (BoundedSatisfactionTable.node_lt_step (by simp)) $ by
+        intro x hx;
         obtain ⟨q, hqb, hq⟩ := ih (x ∷ e) _ rfl hup
         exact ⟨q, hq, fun w hw ↦ lt_of_lt_of_le (lt_of_mem hw)
           (le_trans hqb
-            (BoundedSatisfactionTable.tableBound_le_step_quant (by simp) (by simp) hx))⟩)
-    refine ⟨Q, ?_, hQ⟩
-    calc Q ≤ Exp.exp (iterExp (tableExp (qqBex (termBShift ℒₒᵣ t) p) e)
-              (8 * qqBex (termBShift ℒₒᵣ t) p + 21)) := le_of_lt (lt_exp_iff.mpr hQN)
-      _ ≤ tableBound
-        (qqBex (termBShift ℒₒᵣ t) p) e := BoundedSatisfactionTable.exp_step_le_tableBound _ _
+            (BoundedSatisfactionTable.tableBound_le_step_quant (by simp) (by simp) hx))⟩
+    use Q;
+    and_intros;
+    . calc
+        Q ≤ Exp.exp (iterExp (tableExp (qqBex (termBShift ℒₒᵣ t) p) e) (8 * qqBex (termBShift ℒₒᵣ t) p + 21))
+          := le_of_lt (lt_exp_iff.mpr hQN)
+        _ ≤ tableBound (qqBex (termBShift ℒₒᵣ t) p) e := BoundedSatisfactionTable.exp_step_le_tableBound _ _
+    . assumption;
 
 @[simp] lemma isRel_two_zero : (ℒₒᵣ).IsRel (2 : V) 0 := by
   simpa using Arithmetic.LOR_rel_eqIndex (V := V)
@@ -2047,8 +1950,7 @@ theorem BoundedSatisfactionTable.exists {z e : V} (hz : IsBounded z) (hz' : IsUF
   simpa using Arithmetic.LOR_rel_ltIndex (V := V)
 
 lemma IsBounded.of_qqBex {u p : V} (h : IsBounded (qqBex u p)) : IsBounded p := by
-  obtain ⟨u', q', -, hq', heq⟩ :=
-    IsBounded.of_ex (p := (Arithmetic.qqLT (qqBvar 0) u) ^⋏ p) h
+  obtain ⟨u', q', -, hq', heq⟩ := IsBounded.of_ex (p := (Arithmetic.qqLT (qqBvar 0) u) ^⋏ p) h
   obtain ⟨-, rfl⟩ := (qqAnd_inj _ _ _ _).mp heq
   exact hq'
 
@@ -2171,8 +2073,7 @@ lemma IsBounded.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
   have H : ∀ p : V, IsBounded p → ∀ n m w, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
       IsBounded (Bootstrapping.subst ℒₒᵣ w p) := by
     apply IsBounded.induction 𝚷
-      (P := fun p ↦ ∀ n m w, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
-        IsBounded (Bootstrapping.subst ℒₒᵣ w p))
+      (P := fun p ↦ ∀ n m w, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p → IsBounded (Bootstrapping.subst ℒₒᵣ w p))
     · definability
     · intro n m w _ _; simp
     · intro n m w _ _; simp
@@ -2279,12 +2180,10 @@ instance BoundedSatisfaction.defined : 𝚫₁-Relation (BoundedSatisfaction : V
           ∀ r, BoundedSatisfactionTable r (v 0) (v 1) → ⟪⟪v 0, v 1⟫, 1⟫ ∈ r) by
       simpa [boundedSatisfaction, HierarchySymbol.Semiformula.val_sigma,
         (IsBounded.defined (V := V)).df, (IsUFormula.defined (V := V) (L := ℒₒᵣ)).df,
-        (BoundedSatisfactionTable.defined (V := V)).df,
-          BoundedSatisfactionTableF.nodeVal_defined.df] using this
+        (BoundedSatisfactionTable.defined (V := V)).df, BoundedSatisfactionTableF.nodeVal_defined.df] using this
     exact fun hz hz' ↦ BoundedSatisfaction.exists_iff_forall hz hz'
   · intro v
-    simp [boundedSatisfaction, HierarchySymbol.Semiformula.val_sigma,
-      BoundedSatisfaction.iff_exists,
+    simp [boundedSatisfaction, HierarchySymbol.Semiformula.val_sigma, BoundedSatisfaction.iff_exists,
       (IsBounded.defined (V := V)).df, (IsUFormula.defined (V := V) (L := ℒₒᵣ)).df,
       (BoundedSatisfactionTable.defined (V := V)).df, BoundedSatisfactionTableF.nodeVal_defined.df]
 
@@ -2303,8 +2202,7 @@ instance BoundedSatisfaction.definable : 𝚫₁-Relation (BoundedSatisfaction :
 
 namespace BoundedSatisfaction
 
-lemma dom {z e : V} (h : BoundedSatisfaction z e) : IsBounded z ∧ IsUFormula ℒₒᵣ z :=
-  ⟨h.isBounded, h.isUFormula⟩
+lemma dom {z e : V} (h : BoundedSatisfaction z e) : IsBounded z ∧ IsUFormula ℒₒᵣ z := ⟨h.isBounded, h.isUFormula⟩
 
 @[simp] lemma verum (e : V) : BoundedSatisfaction (^⊤ : V) e := by
   obtain ⟨r, hr⟩ := BoundedSatisfactionTable.exists (z := (^⊤ : V)) (e := e) (by simp) (by simp)
@@ -2374,8 +2272,8 @@ end
   · rintro ⟨-, -, r, hr, h1⟩
     obtain ⟨hn₁, hn₂⟩ := hr.mem_dom_or hr.mem_dom_root
     rcases (hr.val_or hr.mem_dom_root).mp h1 with v | v
-    · exact Or.inl ((iff_mem hr hn₁ hdp hfp).mpr v)
-    · exact Or.inr ((iff_mem hr hn₂ hdq hfq).mpr v)
+    · exact Or.inl $ (iff_mem hr hn₁ hdp hfp).mpr v
+    · exact Or.inr $ (iff_mem hr hn₂ hdq hfq).mpr v
   · intro h
     have hd : IsBounded (p ^⋎ q) := IsBounded.or_iff.mpr ⟨hdp, hdq⟩
     have hf : IsUFormula ℒₒᵣ (p ^⋎ q) := by simp [hfp, hfq]
@@ -2383,23 +2281,21 @@ end
     obtain ⟨hn₁, hn₂⟩ := hr.mem_dom_or hr.mem_dom_root
     refine (iff_val hd hf hr).mpr ((hr.val_or hr.mem_dom_root).mpr ?_)
     rcases h with h | h
-    · exact Or.inl ((iff_mem hr hn₁ hdp hfp).mp h)
-    · exact Or.inr ((iff_mem hr hn₂ hdq hfq).mp h)
+    · exact Or.inl $ (iff_mem hr hn₁ hdp hfp).mp h
+    · exact Or.inr $ (iff_mem hr hn₂ hdq hfq).mp h
 
 section
 variable {t q e : V} (ht : IsUTerm ℒₒᵣ t)
 include ht
 
 @[simp] lemma ball_iff (hq : IsBounded q) (hq' : IsUFormula ℒₒᵣ q) :
-    BoundedSatisfaction (qqBall (termBShift ℒₒᵣ t) q) e ↔ ∀ x < termVal e t,
-      BoundedSatisfaction q (x ∷ e) := by
+    BoundedSatisfaction (qqBall (termBShift ℒₒᵣ t) q) e ↔ ∀ x < termVal e t, BoundedSatisfaction q (x ∷ e) := by
   have hd : IsBounded (qqBall (termBShift ℒₒᵣ t) q) := IsBounded.ball ht hq
   have hf : IsUFormula ℒₒᵣ (qqBall (termBShift ℒₒᵣ t) q) := by
     simp [qqBall, Arithmetic.qqNLT, ht.termBShift, hq']
   obtain ⟨r, hr⟩ := BoundedSatisfactionTable.exists hd hf
   rw [iff_val hd hf hr, hr.val_ball ht hr.mem_dom_root]
-  exact forall_congr' fun x ↦ imp_congr_right fun hx ↦
-    (iff_mem hr (hr.mem_dom_ball ht hr.mem_dom_root hx) hq hq').symm
+  exact forall_congr' fun x ↦ imp_congr_right fun hx ↦ (iff_mem hr (hr.mem_dom_ball ht hr.mem_dom_root hx) hq hq').symm
 
 @[simp] lemma bex_iff : BoundedSatisfaction (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃ x < termVal e t,
   BoundedSatisfaction q (x ∷ e) := by
@@ -2426,8 +2322,7 @@ lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
   have H : ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p →
       ∀ e, (BoundedSatisfaction (neg ℒₒᵣ p) e ↔ ¬BoundedSatisfaction p e) := by
     apply IsBounded.induction 𝚷
-      (P := fun p ↦ IsUFormula ℒₒᵣ p → ∀ e, (BoundedSatisfaction (neg ℒₒᵣ p) e ↔
-        ¬BoundedSatisfaction p e))
+      (P := fun p ↦ IsUFormula ℒₒᵣ p → ∀ e, (BoundedSatisfaction (neg ℒₒᵣ p) e ↔ ¬BoundedSatisfaction p e))
     · definability
     · intro _ e; simp
     · intro _ e; simp
@@ -2441,8 +2336,7 @@ lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
       · rw [heq, Arithmetic.neg_nlt ht hu, lt_iff ht hu, nlt_iff ht hu]; simp
     · intro p q hdp hdq ihp ihq h e
       obtain ⟨hfp, hfq⟩ := IsUFormula.and.mp h
-      rw [neg_and hfp hfq,
-        or_iff (IsBounded.neg hfp hdp) hfp.neg (IsBounded.neg hfq hdq) hfq.neg,
+      rw [neg_and hfp hfq, or_iff (IsBounded.neg hfp hdp) hfp.neg (IsBounded.neg hfq hdq) hfq.neg,
         ihp hfp e, ihq hfq e, and_iff]
       tauto
     · intro p q hdp hdq ihp ihq h e
@@ -2464,8 +2358,7 @@ lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
     · intro t q ht hdq ih h e
       obtain ⟨-, hfq⟩ : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) ∧ IsUFormula ℒₒᵣ q := by
         simpa [qqBex, Arithmetic.qqLT] using h
-      rw [neg_qqBex ht.termBShift hfq,
-        ball_iff ht (IsBounded.neg hfq hdq) hfq.neg, bex_iff ht]
+      rw [neg_qqBex ht.termBShift hfq, ball_iff ht (IsBounded.neg hfq hdq) hfq.neg, bex_iff ht]
       constructor
       · rintro hall ⟨x, hx, hx'⟩
         exact (ih hfq (x ∷ e)).mp (hall x hx) hx'
@@ -2475,15 +2368,12 @@ lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
 
 lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsBounded p) :
-    BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔
-      BoundedSatisfaction p (termValVec e n w) := by
+    BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔ BoundedSatisfaction p (termValVec e n w) := by
   have H : ∀ p : V, IsBounded p → ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
-      (BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔
-        BoundedSatisfaction p (termValVec e n w)) := by
+      (BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔ BoundedSatisfaction p (termValVec e n w)) := by
     apply IsBounded.induction 𝚷
       (P := fun p ↦ ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
-        (BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔
-          BoundedSatisfaction p (termValVec e n w)))
+        (BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔ BoundedSatisfaction p (termValVec e n w)))
     · definability
     · intro n m w e _ _; simp
     · intro n m w e _ _; simp
@@ -2492,52 +2382,44 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
       · rw [heq] at hp ⊢
         obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
           simpa [Arithmetic.qqEQ] using hp
-        rw [substs_qqEQ ht hu,
-          eq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, eq_iff ht hu,
+        rw [substs_qqEQ ht hu, eq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, eq_iff ht hu,
           termVal_termSubst hw hts, termVal_termSubst hw hus]
       · rw [heq] at hp ⊢
         obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
           simpa [Arithmetic.qqLT] using hp
-        rw [substs_qqLT ht hu,
-          lt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, lt_iff ht hu,
+        rw [substs_qqLT ht hu, lt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, lt_iff ht hu,
           termVal_termSubst hw hts, termVal_termSubst hw hus]
     · intro k r v n m w e hw hp
       rcases nrel_cases hp.isUFormula with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩
       · rw [heq] at hp ⊢
         obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
           simpa [Arithmetic.qqNEQ] using hp
-        rw [substs_qqNEQ ht hu,
-          neq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, neq_iff ht hu,
+        rw [substs_qqNEQ ht hu, neq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, neq_iff ht hu,
           termVal_termSubst hw hts, termVal_termSubst hw hus]
       · rw [heq] at hp ⊢
         obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
           simpa [Arithmetic.qqNLT] using hp
-        rw [substs_qqNLT ht hu,
-          nlt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, nlt_iff ht hu,
+        rw [substs_qqNLT ht hu, nlt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm, nlt_iff ht hu,
           termVal_termSubst hw hts, termVal_termSubst hw hus]
     · intro p q _ _ ihp ihq n m w e hw hpq
       obtain ⟨hp, hq⟩ := IsSemiformula.and.mp hpq
-      rw [substs_and hp.isUFormula hq.isUFormula, and_iff, and_iff,
-        ihp n m w e hw hp, ihq n m w e hw hq]
+      rw [substs_and hp.isUFormula hq.isUFormula, and_iff, and_iff, ihp n m w e hw hp, ihq n m w e hw hq]
     · intro p q hdp hdq ihp ihq n m w e hw hpq
       obtain ⟨hp, hq⟩ := IsSemiformula.or.mp hpq
-      rw [substs_or hp.isUFormula hq.isUFormula,
-        or_iff (IsBounded.subst hw hp hdp) (hp.subst hw).isUFormula
+      rw [substs_or hp.isUFormula hq.isUFormula, or_iff (IsBounded.subst hw hp hdp) (hp.subst hw).isUFormula
           (IsBounded.subst hw hq hdq) (hq.subst hw).isUFormula,
         or_iff hdp hp.isUFormula hdq hq.isUFormula,
         ihp n m w e hw hp, ihq n m w e hw hq]
     · intro t q ht hdq ih n m w e hw hpq
       obtain ⟨hts, hq⟩ := isSemiformula_qqBall ht hpq
-      rw [substs_qqBall hw hts hq.isUFormula,
-        ball_iff (hw.termSubst hts).isUTerm (IsBounded.subst hw.qVec hq hdq)
+      rw [substs_qqBall hw hts hq.isUFormula, ball_iff (hw.termSubst hts).isUTerm (IsBounded.subst hw.qVec hq hdq)
           (hq.subst hw.qVec).isUFormula,
         ball_iff ht hdq hq.isUFormula, termVal_termSubst hw hts]
       refine forall_congr' fun x ↦ imp_congr_right fun _ ↦ ?_
       rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
     · intro t q ht hdq ih n m w e hw hpq
       obtain ⟨hts, hq⟩ := isSemiformula_qqBex ht hpq
-      rw [substs_qqBex hw hts hq.isUFormula, bex_iff (hw.termSubst hts).isUTerm,
-        bex_iff ht, termVal_termSubst hw hts]
+      rw [substs_qqBex hw hts hq.isUFormula, bex_iff (hw.termSubst hts).isUTerm, bex_iff ht, termVal_termSubst hw hts]
       refine exists_congr fun x ↦ and_congr_right fun _ ↦ ?_
       rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
   exact H p hp' n m w e hw hp

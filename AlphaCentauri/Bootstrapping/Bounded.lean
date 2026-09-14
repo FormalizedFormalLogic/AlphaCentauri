@@ -26,8 +26,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 /-- `qqBex u q = ^∃ ((^#0 ^< u) ^⋏ q)`, the code of `∃¹[“#0 < u”] q`; dual of `qqBall`. -/
 noncomputable def qqBex (u q : V) : V := ^∃ ((^#0 ^< u) ^⋏ q)
 
-@[simp] lemma lt_q_qqBex (u q : V) : q < qqBex u q :=
-  lt_trans (lt_K!_right _ _) (lt_exists _)
+@[simp] lemma lt_q_qqBex (u q : V) : q < qqBex u q := lt_trans (lt_K!_right _ _) (lt_exists _)
 @[simp] lemma lt_u_qqBex (u q : V) : u < qqBex u q :=
   lt_trans (Arithmetic.lt_qqLT_right _ _) (lt_trans (lt_K!_left _ _) (lt_exists _))
 
@@ -39,8 +38,7 @@ def _root_.FFL.FirstOrder.Arithmetic.qqBexDef : 𝚺₁.Semisentence 3 := .mkSig
 instance qqBex_defined : 𝚺₁-Function₂ (qqBex : V → V → V) via qqBexDef := .mk fun v ↦ by
   simp [qqBexDef, qqBex, (Arithmetic.qqLT_defined (V := V)).df]
 /-- The bounded existential coding operation is definable at every hierarchy level. -/
-instance qqBex_definable (Γ m) : Γ-[m + 1]-Function₂ (qqBex : V → V → V) :=
-  .of_sigmaOne qqBex_defined.to_definable
+instance qqBex_definable (Γ m) : Γ-[m + 1]-Function₂ (qqBex : V → V → V) := .of_sigmaOne qqBex_defined.to_definable
 
 lemma neg_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
     neg ℒₒᵣ (qqBall u q) = qqBex u (neg ℒₒᵣ q) := by
@@ -61,10 +59,7 @@ lemma neg_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ 
 namespace IsBoundedF
 
 /-- `Phi C p` recognizes one $\Delta_0$ constructor step over the class `C`. -/
-def Phi (C : Set V) (p : V) : Prop :=
-  (p = ^⊤) ∨
-  (p = ^⊥) ∨
-  (∃ k r v, p = ^rel k r v) ∨
+def Phi (C : Set V) (p : V) : Prop := (p = ^⊤) ∨ (p = ^⊥) ∨ (∃ k r v, p = ^rel k r v) ∨
   (∃ k r v, p = ^nrel k r v) ∨
   (∃ p₁ p₂, p₁ ∈ C ∧ p₂ ∈ C ∧ p = p₁ ^⋏ p₂) ∨
   (∃ p₁ p₂, p₁ ∈ C ∧ p₂ ∈ C ∧ p = p₁ ^⋎ p₂) ∨
@@ -88,16 +83,16 @@ private lemma phi_iff (C p : V) :
       | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩)
     · tauto
     · tauto
-    · exact Or.inr (Or.inr (Or.inl ⟨k, by simp, r, by simp, v, by simp, rfl⟩))
-    · exact Or.inr (Or.inr (Or.inr (Or.inl ⟨k, by simp, r, by simp, v, by simp, rfl⟩)))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩)))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-        ⟨termBShift ℒₒᵣ t, lt_u_qqBall _ _, q, lt_q_qqBall _ _,
-          ⟨t, lt_of_le_of_lt (le_termBShift ht) (lt_u_qqBall _ _), ht, rfl⟩, hq, rfl⟩))))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        ⟨termBShift ℒₒᵣ t, lt_u_qqBex _ _, q, lt_q_qqBex _ _,
-          ⟨t, lt_of_le_of_lt (le_termBShift ht) (lt_u_qqBex _ _), ht, rfl⟩, hq, rfl⟩))))))
+    · exact Or.inr $ Or.inr $ Or.inl ⟨k, by simp, r, by simp, v, by simp, rfl⟩
+    · exact Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨k, by simp, r, by simp, v, by simp, rfl⟩
+    · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩
+    · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩
+    · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $
+      Or.inl ⟨termBShift ℒₒᵣ t, lt_u_qqBall _ _, q, lt_q_qqBall _ _,
+        ⟨t, lt_of_le_of_lt (le_termBShift ht) (lt_u_qqBall _ _), ht, rfl⟩, hq, rfl⟩
+    · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $
+      Or.inr ⟨termBShift ℒₒᵣ t, lt_u_qqBex _ _, q, lt_q_qqBex _ _,
+        ⟨t, lt_of_le_of_lt (le_termBShift ht) (lt_u_qqBex _ _), ht, rfl⟩, hq, rfl⟩
   mpr := by
     unfold Phi
     rintro (rfl | rfl | ⟨k, _, r, _, v, _, rfl⟩ | ⟨k, _, r, _, v, _, rfl⟩
@@ -112,11 +107,9 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
     (∃ k < p, ∃ r < p, ∃ v < p, !qqNRelDef p k r v) ∨
     (∃ p₁ < p, ∃ p₂ < p, p₁ ∈ C ∧ p₂ ∈ C ∧ !qqAndDef p p₁ p₂) ∨
     (∃ p₁ < p, ∃ p₂ < p, p₁ ∈ C ∧ p₂ ∈ C ∧ !qqOrDef p p₁ p₂) ∨
-    (∃ u < p, ∃ q < p,
-       (∃ t < p, !(isUTerm ℒₒᵣ).sigma t ∧ !(termBShiftGraph ℒₒᵣ) u t) ∧ q ∈ C
+    (∃ u < p, ∃ q < p, (∃ t < p, !(isUTerm ℒₒᵣ).sigma t ∧ !(termBShiftGraph ℒₒᵣ) u t) ∧ q ∈ C
        ∧ !qqBallDef p u q) ∨
-    (∃ u < p, ∃ q < p,
-       (∃ t < p, !(isUTerm ℒₒᵣ).sigma t ∧ !(termBShiftGraph ℒₒᵣ) u t) ∧ q ∈ C
+    (∃ u < p, ∃ q < p, (∃ t < p, !(isUTerm ℒₒᵣ).sigma t ∧ !(termBShiftGraph ℒₒᵣ) u t) ∧ q ∈ C
        ∧ !qqBexDef p u q)”)
   (.mkPi “p C.
     !qqVerumDef p ∨ !qqFalsumDef p ∨
@@ -124,11 +117,9 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
     (∃ k < p, ∃ r < p, ∃ v < p, !qqNRelDef p k r v) ∨
     (∃ p₁ < p, ∃ p₂ < p, p₁ ∈ C ∧ p₂ ∈ C ∧ !qqAndDef p p₁ p₂) ∨
     (∃ p₁ < p, ∃ p₂ < p, p₁ ∈ C ∧ p₂ ∈ C ∧ !qqOrDef p p₁ p₂) ∨
-    (∃ u < p, ∃ q < p,
-       (∃ t < p, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u = u') ∧ q ∈ C
+    (∃ u < p, ∃ q < p, (∃ t < p, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u = u') ∧ q ∈ C
        ∧ ∀ p', !qqBallDef p' u q → p = p') ∨
-    (∃ u < p, ∃ q < p,
-       (∃ t < p, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u = u') ∧ q ∈ C
+    (∃ u < p, ∃ q < p, (∃ t < p, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u = u') ∧ q ∈ C
        ∧ ∀ p', !qqBexDef p' u q → p = p')”)⟩
 
 /-- The fixpoint construction for `blueprint`. -/
@@ -157,17 +148,13 @@ instance : construction.StrongFinite V where
     rintro C _ x (h | h | h | h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
       | ⟨u, q, ht, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩)
     · exact Or.inl h
-    · exact Or.inr (Or.inl h)
-    · exact Or.inr (Or.inr (Or.inl h))
-    · exact Or.inr (Or.inr (Or.inr (Or.inl h)))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-        ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-        ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩)))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-        ⟨u, q, ht, ⟨hq, lt_q_qqBall _ _⟩, rfl⟩))))))
-    · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        ⟨u, q, ht, ⟨hq, lt_q_qqBex _ _⟩, rfl⟩))))))
+    · exact Or.inr $ Or.inl h
+    · exact Or.inr $ Or.inr $ Or.inl h
+    · exact Or.inr $ Or.inr $ Or.inr $ Or.inl h
+    · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩
+    · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩
+    · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨u, q, ht, ⟨hq, lt_q_qqBall _ _⟩, rfl⟩
+    · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr ⟨u, q, ht, ⟨hq, lt_q_qqBex _ _⟩, rfl⟩
 
 end IsBoundedF
 
@@ -214,12 +201,12 @@ lemma IsBounded.case_iff {p : V} :
 
 alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
 
-@[simp] lemma IsBounded.verum : IsBounded (V := V) (^⊤) := IsBounded.mk (Or.inl rfl)
-@[simp] lemma IsBounded.falsum : IsBounded (V := V) (^⊥) := IsBounded.mk (Or.inr (Or.inl rfl))
+@[simp] lemma IsBounded.verum : IsBounded (V := V) (^⊤) := IsBounded.mk $ Or.inl rfl
+@[simp] lemma IsBounded.falsum : IsBounded (V := V) (^⊥) := IsBounded.mk $ Or.inr $ Or.inl rfl
 @[simp] lemma IsBounded.rel {k r v : V} : IsBounded (^rel k r v) :=
-  IsBounded.mk (Or.inr (Or.inr (Or.inl ⟨k, r, v, rfl⟩)))
+  IsBounded.mk $ Or.inr $ Or.inr $ Or.inl ⟨k, r, v, rfl⟩
 @[simp] lemma IsBounded.nrel {k r v : V} : IsBounded (^nrel k r v) :=
-  IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inl ⟨k, r, v, rfl⟩))))
+  IsBounded.mk $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨k, r, v, rfl⟩
 
 @[simp] lemma IsBounded.and_iff {p q : V} : IsBounded (p ^⋏ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
@@ -231,7 +218,7 @@ alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
         OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
-    exact IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩)))))
+    exact IsBounded.mk $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨p, q, hp, hq, rfl⟩
 
 @[simp] lemma IsBounded.or_iff {p q : V} : IsBounded (p ^⋎ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
@@ -243,17 +230,17 @@ alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
         OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
-    exact IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩))))))
+    exact IsBounded.mk $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨p, q, hp, hq, rfl⟩
 
 lemma IsBounded.ball {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
     IsBounded (qqBall (termBShift ℒₒᵣ t) q) :=
-  IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
-    ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩)))))))
+  IsBounded.mk $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $
+    Or.inl ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩
 
 lemma IsBounded.bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
     IsBounded (qqBex (termBShift ℒₒᵣ t) q) :=
-  IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-    ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩)))))))
+  IsBounded.mk $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $
+    Or.inr ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩
 
 lemma IsBounded.of_all {p : V} (h : IsBounded (^∀ p)) :
     ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsBounded q
@@ -373,8 +360,8 @@ lemma IsBounded.isSigma1 {p : V} (h : IsBounded p) : IsSigma1 p := by
     · intro p q _ _ ihp ihq; simp [ihp, ihq]
     · intro p q _ _ ihp ihq; simp [ihp, ihq]
     · intro t q ht _ ih
-      exact IsSigma1.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
-        ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, ih, rfl⟩)))))))
+      exact IsSigma1.mk $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $
+        Or.inr ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, ih, rfl⟩
     · intro t q _ _ ih
       simp [qqBex, Arithmetic.qqLT, ih]
   exact H p h
@@ -501,8 +488,7 @@ lemma isBounded_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
       using models_iff_of_Delta1 (V := V) (σ := isBounded)
         (IsBounded.defined (V := ℕ)).proper (IsBounded.defined (V := V)).proper (e := ![⌜ψ⌝])
-  by simpa [(IsBounded.defined (V := V)).df, (IsBounded.defined (V := ℕ)).df,
-    isBounded_iff_bounded] using h
+  by simpa [(IsBounded.defined (V := V)).df, (IsBounded.defined (V := ℕ)).df, isBounded_iff_bounded] using h
 
 open Bootstrapping in
 lemma isBounded_quote_iff {n : ℕ} (σ : ArithmeticSemisentence n) :

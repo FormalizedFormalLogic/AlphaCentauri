@@ -183,8 +183,8 @@ theorem eval_of_Sigma1 {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hierar
       exact ⟨hMN.emb x, by rw [← Matrix.comp_vecCons'']; exact ih (x :> e) f hx⟩)
     e f
 
-/-- A theory axiomatized by $\Pi_1$ sentences holds in `M` as soon as it holds in an end
-extension of `M`.
+/-- A theory all of whose members are $\Pi_1$ sentences holds in `M` as soon as it holds in an
+end extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
 theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 1 σ) [N↓[ℒₒᵣ] ⊧* T] :
     M↓[ℒₒᵣ] ⊧* T :=
@@ -197,6 +197,16 @@ theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 
         (hMN.eval_of_Sigma1 (hT σ hσ).neg ![] Empty.elim (by simpa [models_iff] using h))
         (funext (·.elim0))
         (funext (·.elim))
+
+/-- A theory axiomatized by $\Pi_1$ sentences — one deductively equivalent to a theory `U` all of
+whose members are $\Pi_1$ — holds in `M` as soon as it holds in an end extension of `M`.
+- [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
+theorem models_of_Pi1Axiomatizable {T U : ArithmeticTheory} (hU : ∀ σ ∈ U, Hierarchy 𝚷 1 σ)
+    (hTU : T ≊ U) [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T :=
+  haveI : U ⪯ T := hTU.symm.le
+  haveI : N↓[ℒₒᵣ] ⊧* U := models_of_subtheory ‹N↓[ℒₒᵣ] ⊧* T›
+  haveI : T ⪯ U := hTU.le
+  models_of_subtheory (hMN.models_of_Pi1 hU)
 
 end EndExtension
 

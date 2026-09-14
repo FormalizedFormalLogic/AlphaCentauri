@@ -48,11 +48,13 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
+/-! ## The satisfaction table -/
+
 section table
 
 open Arithmetic (qqEQ qqNEQ qqLT qqNLT qqEQ_defined qqNEQ_defined qqLT_defined qqNLT_defined)
 
-/-! ## Bounds on the nodes of a finite mapping -/
+/-! ### Bounds on the nodes of a finite mapping -/
 
 lemma lt_of_mem_domain {n q : V} (h : n ∈ domain q) : n < q := by
   obtain ⟨y, hy⟩ := mem_domain_iff.mp h
@@ -73,7 +75,7 @@ section coding
 attribute [local simp] qqAnd qqOr qqVerum qqFalsum qqRel qqNRel qqBall qqAll qqBex qqExs
   qqEQ qqNEQ qqLT qqNLT
 
-/-! ## Coding injectivity facts for the bounded quantifiers -/
+/-! ### Coding injectivity facts for the bounded quantifiers -/
 
 @[simp] lemma qqBall_inj {u₁ q₁ u₂ q₂ : V} : qqBall u₁ q₁ = qqBall u₂ q₂ ↔ u₁ = u₂ ∧ q₁ = q₂ := by
   simp [qqBall, qqNLT, qqNRel, adjoin_inj]
@@ -99,7 +101,7 @@ attribute [local simp] qqAnd qqOr qqVerum qqFalsum qqRel qqNRel qqBall qqAll qqB
 
 lemma eqIndex_ne_ltIndex : (Arithmetic.eqIndex : V) ≠ (Arithmetic.ltIndex : V) := by simp
 
-/-! ## The partial satisfaction table
+/-! ### The partial satisfaction table
 
 - [HP98, Definition I.1.71(1)] -/
 
@@ -151,7 +153,7 @@ namespace BoundedSatisfactionTable
 
 variable {q z e z' e' t u p p₁ p₂ : V}
 
-/-! ## Reading `spec` off at a node of known shape
+/-! ### Reading `spec` off at a node of known shape
 
 `spec` is a ten-way disjunction over the outermost coding constructor of the node. Each lemma
 below specializes it to a node of known shape: membership of the immediate children in the
@@ -227,7 +229,7 @@ lemma spec_bex (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBex u p, e'⟫ �
   obtain ⟨t, ht, rfl, hd, hA, hB⟩ := h₁
   exact ⟨⟨t, ht, rfl⟩, hd, hA, hB⟩
 
-/-! ## The Tarski clauses in the form the satisfaction predicate uses
+/-! ### The Tarski clauses in the form the satisfaction predicate uses
 
 - [HP98, Definition I.1.71(1)] -/
 
@@ -287,7 +289,7 @@ namespace BoundedSatisfactionTable
 
 variable {q q₁ q₂ z z₁ z₂ e e₁ e₂ p : V}
 
-/-! ## Uniqueness
+/-! ### Uniqueness
 
 - [HP98, Definition I.1.71(1)]
 - [HP98, Lemma I.1.72(2)] -/
@@ -471,7 +473,7 @@ theorem uniq (h₁ : BoundedSatisfactionTable q₁ z e) (h₂ : BoundedSatisfact
 
 end BoundedSatisfactionTable
 
-/-! ## $\Delta_1$-definability
+/-! ### $\Delta_1$-definability
 
 The predicate is spelled out clause by clause: each clause of `BoundedSatisfactionTable.spec` and of
 `BoundedSatisfactionTable.minimal` gets a `Prop` with every quantifier bounded and a defining
@@ -483,7 +485,7 @@ universal on the $\Pi_1$ side, which leaves the clause itself $\Sigma_0$. -/
 
 namespace BoundedSatisfactionTableF
 
-/-! ### Nodes and values as $\Sigma_0$ relations
+/-! #### Nodes and values as $\Sigma_0$ relations
 
 - [HP98, Lemma I.1.72(1)] -/
 
@@ -544,7 +546,7 @@ instance childPair_defined :
     𝚺₀-Relation₄ (fun n p x e : V ↦ n = ⟪p, x ∷ e⟫) via childPairDef := .mk fun v ↦ by
   simp [childPairDef, adjoin_def]
 
-/-! ### The ten Tarski clauses
+/-! #### The ten Tarski clauses
 
 - [HP98, Lemma I.1.72(1)] -/
 
@@ -830,7 +832,7 @@ instance specBex_defined : 𝚫₁-Relation₃ (SpecBex : V → V → V → Prop
       (termVal.defined (V := V)).df, (termBShift.defined (L := ℒₒᵣ) (V := V)).df,
       (qqBex_defined (V := V)).df, bexMatrix_defined.df, adjoin_def]
 
-/-! ### The clause of `BoundedSatisfactionTable.spec`, assembled
+/-! #### The clause of `BoundedSatisfactionTable.spec`, assembled
 
 - [HP98, Lemma I.1.72(1)] -/
 
@@ -854,7 +856,7 @@ instance specAt_defined : 𝚫₁-Relation₃ (SpecAt : V → V → V → Prop) 
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma]
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma, SpecAt]
 
-/-! ### The clause of `BoundedSatisfactionTable.minimal`
+/-! #### The clause of `BoundedSatisfactionTable.minimal`
 
 - [HP98, Lemma I.1.72(1)] -/
 
@@ -960,7 +962,7 @@ instance minimalAt_defined :
   · intro v; simp [minimalDef, HierarchySymbol.Semiformula.val_sigma]
   · intro v; simp [minimalDef, HierarchySymbol.Semiformula.val_sigma, MinimalAt]
 
-/-! ### Assembling the definition
+/-! #### Assembling the definition
 
 - [HP98, Lemma I.1.72(1)] -/
 
@@ -1068,7 +1070,11 @@ end defining
 
 end table
 
-/-! ## Elementary exponential bounds -/
+/-! ## Existence of satisfaction tables -/
+
+section existence
+
+/-! ### Elementary exponential bounds -/
 
 lemma mul_le_exp_add (a b : V) : a * b ≤ Exp.exp (a + b) :=
   calc a * b ≤ Exp.exp a * Exp.exp b :=
@@ -1110,7 +1116,7 @@ lemma listMax_le_self (v : V) : listMax v ≤ v := by
   simp only [listMax_adjoin, max_le_iff]
   exact ⟨le_of_lt (lt_adjoin x v), le_trans ih (le_of_lt (lt_adjoin' x v))⟩
 
-/-! ## The iterated exponential -/
+/-! ### The iterated exponential -/
 
 lemma le_iterExp (x n : V) : x ≤ iterExp x n := by
   refine ISigma1.sigma1_succ_induction (P := fun n ↦ x ≤ iterExp x n) (by definability)
@@ -1166,7 +1172,7 @@ lemma iterExp_three (x : V) : iterExp x 3 = Exp.exp (Exp.exp (Exp.exp x)) := by
 lemma iterExp_four (x : V) : iterExp x 4 = Exp.exp (Exp.exp (Exp.exp (Exp.exp x))) := by
   rw [show (4 : V) = 3 + 1 from by ring, iterExp_succ, iterExp_three]
 
-/-! ## The bound on a partial satisfaction table
+/-! ### The bound on a partial satisfaction table
 
 - [HP98, Lemma I.1.72(3)] -/
 
@@ -1262,7 +1268,7 @@ lemma tableExp_step {z p u x e : V} (hp : p < z) (hu : u < z) (hx : x < termVal 
         exp_monotone_le.mpr (exp_monotone_le.mpr (exp_monotone_le.mpr step4))
     _ = iterExp (tableExp z e) 4 := (iterExp_four _).symm
 
-/-! ## Atomic codes over `ℒₒᵣ` -/
+/-! ### Atomic codes over `ℒₒᵣ` -/
 
 lemma uformula_rel_cases {k r w : V} (h : IsUFormula ℒₒᵣ (^rel k r w)) :
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r w = t ^= u) ∨
@@ -1284,7 +1290,7 @@ lemma uformula_nrel_cases {k r w : V} (h : IsUFormula ℒₒᵣ (^nrel k r w)) :
   · obtain ⟨t, u, ht, hu, rfl⟩ := IsUTermVec.two_iff.mp hw
     exact Or.inr ⟨t, u, ht, hu, rfl⟩
 
-/-! ## The clauses of a table as standalone predicates
+/-! ### The clauses of a table as standalone predicates
 
 - [HP98, Definition I.1.71(1)] -/
 
@@ -1397,7 +1403,7 @@ lemma Spec.mono (hQ : IsMapping Q) (hsub : q ⊆ Q) (hd : ⟪z', e'⟫ ∈ domai
       exact forall_congr' fun x ↦ imp_congr_right fun hx ↦
         (val_iff_of_subset hQ hsub (hc x hx)).symm
 
-/-! ## Gluing tables together
+/-! ### Gluing tables together
 
 - [HP98, Lemma I.1.72(2)]
 - [HP98, Lemma I.1.72(3)]
@@ -1462,7 +1468,7 @@ lemma root_not_mem_domain (h : BoundedSatisfactionTable q p e₁) (hlt : p < z) 
   simp only [pi₁_pair] at this
   exact absurd (lt_of_le_of_lt this hlt) (lt_irrefl z)
 
-/-! ## Building tables
+/-! ### Building tables
 
 - [HP98, Lemma I.1.72(3)] -/
 
@@ -1822,7 +1828,7 @@ lemma of_bex {N : V} (hu : ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒ�
       · exact hr1
     · exact hWN _ h
 
-/-! ## Bound bookkeeping
+/-! ### Bound bookkeeping
 
 - [HP98, Lemma I.1.72(3)] -/
 
@@ -1883,7 +1889,7 @@ lemma tableBound_le_step_quant {p z u x e : V} (hp : p < z) (hu : u < z)
           _ ≤ 8 * z + 20 + 1 := le_self_add
           _ = 8 * z + 21 := by ring
 
-/-! ## The atomic cases
+/-! ### The atomic cases
 
 - [HP98, Lemma I.1.72(3)] -/
 
@@ -1922,7 +1928,7 @@ lemma exists_atom_table {z e : V} (hz' : IsUFormula ℒₒᵣ z)
 
 end BoundedSatisfactionTable
 
-/-! ## Existence
+/-! ### Existence
 
 - [HP98, Lemma I.1.72(3)]
 - [HP98, Lemma I.1.68(2)]
@@ -2062,7 +2068,13 @@ lemma nrel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^nrel k r v)) :
   · exact Or.inl ⟨a, b, ha, hb, by rw [Arithmetic.qqNEQ, coe_quote_eq, coe_eqIndex_eq]⟩
   · exact Or.inr ⟨a, b, ha, hb, by rw [Arithmetic.qqNLT, coe_quote_lt, coe_ltIndex_eq]⟩
 
-/-! ## Substitution and the coded quantifiers
+end existence
+
+/-! ## Satisfaction -/
+
+section satisfaction
+
+/-! ### Substitution and the coded quantifiers
 
 - [HP98, 1.64(4)]
 - [HP98, 1.64(5)]
@@ -2198,7 +2210,7 @@ namespace BoundedSatisfaction
 
 variable {z e : V}
 
-/-! ## Reading satisfaction off a table
+/-! ### Reading satisfaction off a table
 
 - [HP98, Lemma I.1.72(2)]
 - [HP98, Lemma I.1.73(1)]
@@ -2274,7 +2286,7 @@ instance BoundedSatisfaction.defined : 𝚫₁-Relation (BoundedSatisfaction : V
 instance BoundedSatisfaction.definable : 𝚫₁-Relation (BoundedSatisfaction : V → V → Prop) :=
   BoundedSatisfaction.defined.to_definable
 
-/-! ## Tarski conditions
+/-! ### Tarski conditions
 
 - [HP98, Theorem I.1.70(i)]
 - [HP98, Theorem I.1.70(ii)]
@@ -2300,28 +2312,28 @@ section
 variable {t u e : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u)
 include ht hu
 
-lemma eq_iff : BoundedSatisfaction (t ^= u) e ↔ termVal e t = termVal e u := by
+@[simp] lemma eq_iff : BoundedSatisfaction (t ^= u) e ↔ termVal e t = termVal e u := by
   have hd : IsBounded (t ^= u) := by simp [Arithmetic.qqEQ]
   have hf : IsUFormula ℒₒᵣ (t ^= u) := by simp [Arithmetic.qqEQ, ht, hu]
   obtain ⟨r, hr⟩ := BoundedSatisfactionTable.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_eq hr.mem_dom_root
 
-lemma neq_iff : BoundedSatisfaction (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
+@[simp] lemma neq_iff : BoundedSatisfaction (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
   have hd : IsBounded (t ^≠ u) := by simp [Arithmetic.qqNEQ]
   have hf : IsUFormula ℒₒᵣ (t ^≠ u) := by simp [Arithmetic.qqNEQ, ht, hu]
   obtain ⟨r, hr⟩ := BoundedSatisfactionTable.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_neq hr.mem_dom_root
 
-lemma lt_iff : BoundedSatisfaction (t ^< u) e ↔ termVal e t < termVal e u := by
+@[simp] lemma lt_iff : BoundedSatisfaction (t ^< u) e ↔ termVal e t < termVal e u := by
   have hd : IsBounded (t ^< u) := by simp [Arithmetic.qqLT]
   have hf : IsUFormula ℒₒᵣ (t ^< u) := by simp [Arithmetic.qqLT, ht, hu]
   obtain ⟨r, hr⟩ := BoundedSatisfactionTable.exists hd hf
   rw [iff_val hd hf hr]
   exact hr.val_lt hr.mem_dom_root
 
-lemma nlt_iff : BoundedSatisfaction (t ^≮ u) e ↔ ¬(termVal e t < termVal e u) := by
+@[simp] lemma nlt_iff : BoundedSatisfaction (t ^≮ u) e ↔ ¬(termVal e t < termVal e u) := by
   have hd : IsBounded (t ^≮ u : V) := by simp [Arithmetic.qqNLT]
   have hf : IsUFormula ℒₒᵣ (t ^≮ u : V) := by simp [Arithmetic.qqNLT, ht, hu]
   obtain ⟨r, hr⟩ := BoundedSatisfactionTable.exists hd hf
@@ -2372,7 +2384,7 @@ section
 variable {t q e : V} (ht : IsUTerm ℒₒᵣ t)
 include ht
 
-lemma ball_iff (hq : IsBounded q) (hq' : IsUFormula ℒₒᵣ q) :
+@[simp] lemma ball_iff (hq : IsBounded q) (hq' : IsUFormula ℒₒᵣ q) :
     BoundedSatisfaction (qqBall (termBShift ℒₒᵣ t) q) e ↔ ∀ x < termVal e t,
       BoundedSatisfaction q (x ∷ e) := by
   have hd : IsBounded (qqBall (termBShift ℒₒᵣ t) q) := IsBounded.ball ht hq
@@ -2383,7 +2395,7 @@ lemma ball_iff (hq : IsBounded q) (hq' : IsUFormula ℒₒᵣ q) :
   exact forall_congr' fun x ↦ imp_congr_right fun hx ↦
     (iff_mem hr (hr.mem_dom_ball ht hr.mem_dom_root hx) hq hq').symm
 
-lemma bex_iff : BoundedSatisfaction (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃ x < termVal e t,
+@[simp] lemma bex_iff : BoundedSatisfaction (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃ x < termVal e t,
   BoundedSatisfaction q (x ∷ e) := by
   constructor
   · rintro ⟨hd, hf, r, hr, h1⟩
@@ -2525,5 +2537,7 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
   exact H p hp' n m w e hw hp
 
 end BoundedSatisfaction
+
+end satisfaction
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

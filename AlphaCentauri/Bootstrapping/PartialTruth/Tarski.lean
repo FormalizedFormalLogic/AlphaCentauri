@@ -641,7 +641,7 @@ lemma models_tarski {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜�
 theorem ISigma1.provable_tarski (n : ℕ) : 𝗜𝚺₁ ⊢* tarski n := fun {_} hφ ↦
   Arithmetic.complete.{0} _ _ fun _ _ _ ↦ models_tarski hφ
 
-/-! ## Reading the sentences in a model of `𝗣𝗔⁻` -/
+/-! ## The readings of the defining formulas -/
 
 namespace Reading
 

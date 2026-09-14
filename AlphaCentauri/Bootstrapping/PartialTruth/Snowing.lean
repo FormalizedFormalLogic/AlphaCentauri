@@ -140,29 +140,17 @@ theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
   · intro n v; simp [Sentence.quote_def]
   · intro n v; simp [Sentence.quote_def]
   · intro n t u v
-    rw [quote_eq_sentence, BoundedSatisfaction.eq_iff (isUTerm_quote t) (isUTerm_quote u),
-      termVal_quote, termVal_quote]
-    simp [Semiformula.eval_rel]
+    simp [quote_eq_sentence, isUTerm_quote, termVal_quote, Semiformula.eval_rel]
   · intro n t u v
-    rw [quote_neq_sentence, BoundedSatisfaction.neq_iff (isUTerm_quote t) (isUTerm_quote u),
-      termVal_quote, termVal_quote]
-    simp [Semiformula.eval_nrel]
+    simp [quote_neq_sentence, isUTerm_quote, termVal_quote, Semiformula.eval_nrel]
   · intro n t u v
-    rw [quote_lt_sentence, BoundedSatisfaction.lt_iff (isUTerm_quote t) (isUTerm_quote u),
-      termVal_quote, termVal_quote]
-    simp [Semiformula.eval_rel]
+    simp [quote_lt_sentence, isUTerm_quote, termVal_quote, Semiformula.eval_rel]
   · intro n t u v
-    rw [quote_nlt_sentence, BoundedSatisfaction.nlt_iff (isUTerm_quote t) (isUTerm_quote u),
-      termVal_quote, termVal_quote]
-    simp [Semiformula.eval_nrel]
+    simp [quote_nlt_sentence, isUTerm_quote, termVal_quote, Semiformula.eval_nrel]
   · intro n φ ψ hφ hψ ihφ ihψ v
-    rw [quote_and_sentence, BoundedSatisfaction.and_iff, ihφ v, ihψ v]
-    simp
+    simp [quote_and_sentence, ihφ v, ihψ v]
   · intro n φ ψ hφ hψ ihφ ihψ v
-    rw [quote_or_sentence,
-      BoundedSatisfaction.or_iff ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ)
-      ((isBounded_quote_iff ψ).mpr hψ) (isUFormula_quote ψ), ihφ v, ihψ v]
-    simp
+    simp [quote_or_sentence, isBounded_quote_iff, isUFormula_quote, hφ, hψ, ihφ v, ihψ v]
   · intro n t φ hφ ihφ v
     rw [quote_ball_sentence, BoundedSatisfaction.ball_iff (isUTerm_quote t)
       ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ), termVal_quote]

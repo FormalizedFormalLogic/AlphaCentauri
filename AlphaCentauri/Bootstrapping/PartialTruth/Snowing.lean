@@ -189,7 +189,8 @@ theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     rw [quote_and_sentence, BoundedSatisfaction.and_iff, ihφ v, ihψ v]
     simp
   · intro n φ ψ hφ hψ ihφ ihψ v
-    rw [quote_or_sentence, BoundedSatisfaction.or_iff ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ)
+    rw [quote_or_sentence,
+      BoundedSatisfaction.or_iff ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ)
       ((isBounded_quote_iff ψ).mpr hψ) (isUFormula_quote ψ), ihφ v, ihψ v]
     simp
   · intro n t φ hφ ihφ v
@@ -206,7 +207,8 @@ theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)]
     simp [Function.comp_def]
 
-/-- The satisfaction predicate selected by a polarity: `SigmaSatisfaction` for `Σ`, `PiSatisfaction` for `Π`.
+/-- The satisfaction predicate selected by a polarity: `SigmaSatisfaction` for `Σ`, `PiSatisfaction`
+for `Π`.
 - [HP98, Definition I.1.74] -/
 def HierarchySatisfaction : Polarity → ℕ → V → V → Prop
   | .sigma, n, z, e => SigmaSatisfaction n z e
@@ -408,7 +410,8 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
     | 2, .add, w, ih =>
       have hval : (Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k).valb v
           = (w 0).valb v + (w 1).valb v := rfl
-      have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
+      have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.add w :
+          ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
           ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqAddGraph.val :=
         Sigma1_cast₃ Arithmetic.qqAddGraph (by simpa using quote_addTerm_sentence (V := ℕ) w)
       rw [hval]
@@ -419,7 +422,8 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
     | 2, .mul, w, ih =>
       have hval : (Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k).valb v
           = (w 0).valb v * (w 1).valb v := rfl
-      have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
+      have hq : M ⊧/![((⌜(Semiterm.func Language.ORing.Func.mul w :
+          ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M),
           ((⌜w 0⌝ : ℕ) : M), ((⌜w 1⌝ : ℕ) : M)] Arithmetic.qqMulGraph.val :=
         Sigma1_cast₃ Arithmetic.qqMulGraph (by simpa using quote_mulTerm_sentence (V := ℕ) w)
       rw [hval]
@@ -432,13 +436,15 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
 /-! ### The $\Delta_0$ base case -/
 
 include hM in
-/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `boundedSatisfaction` at the code of a bounded
+/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `boundedSatisfaction` at the code of
+a bounded
 formula agrees with truth.
 - [HP98, Theorem I.1.70]
 - [HP98, Corollary I.1.76] -/
 private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : φ.Bounded) :
-    ∀ (v : Fin k → M) (ev : M), Codes v ev → (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+    ∀ (v : Fin k → M) (ev : M), Codes v ev → (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔
+      M ⊧/v φ) := by
   refine bounded_induction (ξ := Empty)
     (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev →
       (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ))
@@ -486,7 +492,8 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
   · intro m φ ψ _ _ ihφ ihψ v ev hev
     have hq : M ⊧/![((⌜φ ⋏ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqAndDef.val :=
       Sigma0_cast₃ qqAndDef (by simpa using quote_and_sentence (V := ℕ) φ ψ)
-    rw [read_boundedSatisfactionAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev, ihψ v ev hev]
+    rw [read_boundedSatisfactionAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev,
+      ihψ v ev hev]
     simp
   · intro m φ ψ hφ hψ ihφ ihψ v ev hev
     have hq : M ⊧/![((⌜φ ⋎ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqOrDef.val :=
@@ -539,9 +546,11 @@ include hM in
 at the code of a strict prenex formula agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
-private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ} {φ : ArithmeticSemisentence k}
+private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
+    {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) (hs : s ≤ n + 1) :
-    ∀ (v : Fin k → M) (ev : M), Codes v ev → (Reading.HierarchySatisfaction Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+    ∀ (v : Fin k → M) (ev : M), Codes v ev →
+      (Reading.HierarchySatisfaction Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   revert hs
   induction h with
   | @zero Γ₀ m₀ φ₀ hφ₀ =>
@@ -580,7 +589,8 @@ private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ} {�
       exact (ih (by omega) (x :> v) e' (codes_cons hM hev hadj)).mpr (hsat x)
 
 include hM in
-/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `sigmaSatisfaction n` at the code of a
+/-- Over `𝗣𝗔⁻` and the sentences of `tarski n`, the reading of `sigmaSatisfaction n` at the code of
+a
 strict prenex $\Sigma_{n + 1}$ formula agrees with truth.
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
@@ -592,8 +602,10 @@ theorem sigmaSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k
 /-! ### Assembling the snowing lemma over `𝗣𝗔⁻` -/
 
 private lemma eval_sigmaSatisfactionVec (p : M) (w : Fin k → M) :
-    M ⊧/(p :> w) (sigmaSatisfactionVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SigmaSatisfaction n p ev := by
-  simp only [sigmaSatisfactionVec, Nat.succ_eq_add_one, Nat.reduceAdd, HierarchySymbol.Semiformula.val_mkSigma,
+    M ⊧/(p :> w) (sigmaSatisfactionVec n k).val ↔ ∃ ev, Codes w ev ∧
+      Reading.SigmaSatisfaction n p ev := by
+  simp only [sigmaSatisfactionVec, Nat.succ_eq_add_one, Nat.reduceAdd,
+    HierarchySymbol.Semiformula.val_mkSigma,
     Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
     Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, numeral_eq_natCast_app,
     Semiterm.val_bvar, Matrix.cons_val_zero, Fin.isValue, Fin.Fin1.eq_one, Matrix.cons_val_one,

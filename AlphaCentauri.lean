@@ -2,8 +2,6 @@ module  -- shake: keep-all --deprecated_module: ignore
 
 public import AlphaCentauri.Bootstrapping.Bounded
 public import AlphaCentauri.Bootstrapping.PartialTruth.BoundedSatisfaction
-public import AlphaCentauri.Bootstrapping.PartialTruth.PartialBoundedSatisfaction
-public import AlphaCentauri.Bootstrapping.PartialTruth.PartialBoundedSatisfactionExists
 public import AlphaCentauri.Bootstrapping.PartialTruth.SigmaSatisfaction
 public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
 public import AlphaCentauri.Bootstrapping.PartialTruth.Tarski

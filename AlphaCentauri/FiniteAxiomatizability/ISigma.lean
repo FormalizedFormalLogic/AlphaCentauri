@@ -11,8 +11,8 @@ public import AlphaCentauri.Vorspiel.Fvar
 
 `𝗣𝗔⁻` together with the finite Tarski theory, a single instance of the $\Sigma_{n + 1}$ induction
 scheme and a single instance of the $\Sigma_{n + 1}$ collection scheme, both stated with the partial
-truth definition `sigmaSatisfaction n`, is a finite theory equivalent to `𝗜𝚺 (n + 1)`; hence `𝗜𝚺 n` is
-finitely axiomatizable for `n ≥ 1`.
+truth definition `sigmaSatisfaction n`, is a finite theory equivalent to `𝗜𝚺 (n + 1)`; hence
+`𝗜𝚺 n` is finitely axiomatizable for `n ≥ 1`.
 -/
 
 @[expose] public section
@@ -58,7 +58,8 @@ putting `y` and then `x` in front of the assignment coded by `e`, with `x` and `
 variables and `z`, `e` as its free variables.
 - [HP98, Theorem I.2.52] -/
 noncomputable def collFormula (n : ℕ) : ArithmeticSemiformula ℕ 2 :=
-  “x y. ∃ ev₀, !adjoinDef.val ev₀ x &1 ∧ ∃ ev, !adjoinDef.val ev y ev₀ ∧ !(sigmaSatisfaction n).val &0 ev”
+  “x y. ∃ ev₀, !adjoinDef.val ev₀ x &1 ∧
+    ∃ ev, !adjoinDef.val ev y ev₀ ∧ !(sigmaSatisfaction n).val &0 ev”
 
 /-- The collection formula is $\Sigma_{n + 1}$.
 - [HP98, Theorem I.2.52] -/
@@ -229,7 +230,8 @@ private lemma exists_assignment_eval_collFormula {M : Type*} [ORingStructure M] 
   constructor
   · rintro ⟨ev₀, hadj₀, ev, hadj, hsat⟩
     exact (φ.eval_toSemisentence_two x y f).mp
-      ((sigmaSatisfaction_quote_reading hM hψ (codes_cons hM (codes_cons hM he₀ hadj₀) hadj)).mp hsat)
+      ((sigmaSatisfaction_quote_reading hM hψ
+        (codes_cons hM (codes_cons hM he₀ hadj₀) hadj)).mp hsat)
   · intro hxy
     obtain ⟨ev₀, hadj₀⟩ := read_adjoinTotal hM x e₀
     obtain ⟨ev, hadj⟩ := read_adjoinTotal hM y ev₀

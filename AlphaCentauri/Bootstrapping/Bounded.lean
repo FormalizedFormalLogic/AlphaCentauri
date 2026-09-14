@@ -305,7 +305,7 @@ lemma IsBounded.of_ex {p : V} (h : IsBounded (^∃ p)) :
 
 /-- Recursion on the internal $\Delta_0$ shape.
 - [HP98, Lemma I.1.68(2)] -/
-lemma Isbounded_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma IsBounded.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hverum : P ^⊤) (hfalsum : P ^⊥)
     (hrel : ∀ k r v, P (^rel k r v)) (hnrel : ∀ k r v, P (^nrel k r v))
     (hand : ∀ p q, IsBounded p → IsBounded q → P p → P q → P (p ^⋏ q))
@@ -330,7 +330,7 @@ lemma Isbounded_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
 lemma IsBounded.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     IsBounded (Bootstrapping.neg ℒₒᵣ p) := by
   have H : ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.neg ℒₒᵣ p) := by
-    apply Isbounded_induction 𝚺
+    apply IsBounded.induction 𝚺
       (P := fun p ↦ IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.neg ℒₒᵣ p))
     · definability
     · simp
@@ -364,7 +364,7 @@ lemma IsBounded.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
 lemma IsBounded.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     IsBounded (Bootstrapping.shift ℒₒᵣ p) := by
   have H : ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.shift ℒₒᵣ p) := by
-    apply Isbounded_induction 𝚺
+    apply IsBounded.induction 𝚺
       (P := fun p ↦ IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.shift ℒₒᵣ p))
     · definability
     · simp
@@ -396,7 +396,7 @@ lemma IsBounded.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
 lemma IsBounded.isSigma1 {p : V} (h : IsBounded p) : IsSigma1 p := by
   have : 𝚫₁-Predicate (IsSigma1 : V → Prop) := IsSigma1.defined.to_definable
   have H : ∀ p : V, IsBounded p → IsSigma1 p := by
-    apply Isbounded_induction 𝚺 (P := fun p ↦ IsSigma1 p)
+    apply IsBounded.induction 𝚺 (P := fun p ↦ IsSigma1 p)
     · definability
     · simp
     · simp

@@ -203,9 +203,9 @@ theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
 theorem models_of_Pi1Axiomatizable {T : ArithmeticTheory}
     (hT : Axiomatizable (Hierarchy 𝚷 1) T) [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T := by
-  obtain ⟨U, ⟨hU, hUT⟩⟩ := hT
-  have : U ⪯ T := hUT.le
-  have : T ⪯ U := hUT.symm.le
+  obtain ⟨U, ⟨hU, hTU⟩⟩ := hT
+  have : U ⪯ T := hTU.symm.le
+  have : T ⪯ U := hTU.le
   have : N↓[ℒₒᵣ] ⊧* U := models_of_subtheory ‹N↓[ℒₒᵣ] ⊧* T›
   exact models_of_subtheory (hMN.models_of_Pi1 hU)
 

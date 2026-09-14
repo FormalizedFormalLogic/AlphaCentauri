@@ -161,127 +161,71 @@ domain, and how the values `1` and `0` at the node are determined.
 
 lemma val_verum (h : BoundedSatisfactionTable q z e) (hn : ⟪(^⊤ : V), e'⟫ ∈ domain q) :
     ⟪⟪(^⊤ : V), e'⟫, 1⟫ ∈ q := by
-  rcases h.spec _ e' hn with
-    ⟨he, hv⟩ | ⟨he, hv⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, he, hd, hd', hA, hB⟩ | ⟨a, b, he, hd, hd', hA, hB⟩ |
-    ⟨a, b, ht, he, hd, hA, hB⟩ | ⟨a, b, ht, he, hd, hA, hB⟩
-  on_goal 1 => exact hv
-  all_goals simp at he
+  simpa using h.spec _ e' hn
 
 lemma val_falsum (h : BoundedSatisfactionTable q z e) (hn : ⟪(^⊥ : V), e'⟫ ∈ domain q) :
     ⟪⟪(^⊥ : V), e'⟫, 0⟫ ∈ q := by
-  rcases h.spec _ e' hn with
-    ⟨he, hv⟩ | ⟨he, hv⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, he, hd, hd', hA, hB⟩ | ⟨a, b, he, hd, hd', hA, hB⟩ |
-    ⟨a, b, ht, he, hd, hA, hB⟩ | ⟨a, b, ht, he, hd, hA, hB⟩
-  on_goal 2 => exact hv
-  all_goals simp at he
+  simpa using h.spec _ e' hn
 
 lemma spec_eq (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^= u, e'⟫ ∈ domain q) :
     (⟪⟪t ^= u, e'⟫, 1⟫ ∈ q ↔ termVal e' t = termVal e' u) ∧
     (⟪⟪t ^= u, e'⟫, 0⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) := by
-  rcases h.spec _ e' hn with
-    ⟨he, hv⟩ | ⟨he, hv⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, he, hd, hd', hA, hB⟩ | ⟨a, b, he, hd, hd', hA, hB⟩ |
-    ⟨a, b, ht, he, hd, hA, hB⟩ | ⟨a, b, ht, he, hd, hA, hB⟩
-  on_goal 3 => obtain ⟨rfl, rfl⟩ := qqEQ_inj.mp he; exact ⟨hA, hB⟩
-  all_goals simp at he
+  have h₁ := h.spec _ e' hn
+  simp at h₁
+  exact h₁.2.2
 
 lemma spec_neq (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^≠ u, e'⟫ ∈ domain q) :
     (⟪⟪t ^≠ u, e'⟫, 1⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) ∧
     (⟪⟪t ^≠ u, e'⟫, 0⟫ ∈ q ↔ termVal e' t = termVal e' u) := by
-  rcases h.spec _ e' hn with
-    ⟨he, hv⟩ | ⟨he, hv⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, he, hd, hd', hA, hB⟩ | ⟨a, b, he, hd, hd', hA, hB⟩ |
-    ⟨a, b, ht, he, hd, hA, hB⟩ | ⟨a, b, ht, he, hd, hA, hB⟩
-  on_goal 4 => obtain ⟨rfl, rfl⟩ := qqNEQ_inj.mp he; exact ⟨hA, hB⟩
-  all_goals simp at he
+  have h₁ := h.spec _ e' hn
+  simp at h₁
+  exact h₁.2.2
 
 lemma spec_lt (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^< u, e'⟫ ∈ domain q) :
     (⟪⟪t ^< u, e'⟫, 1⟫ ∈ q ↔ termVal e' t < termVal e' u) ∧
     (⟪⟪t ^< u, e'⟫, 0⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) := by
-  rcases h.spec _ e' hn with
-    ⟨he, hv⟩ | ⟨he, hv⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, he, hd, hd', hA, hB⟩ | ⟨a, b, he, hd, hd', hA, hB⟩ |
-    ⟨a, b, ht, he, hd, hA, hB⟩ | ⟨a, b, ht, he, hd, hA, hB⟩
-  on_goal 5 => obtain ⟨rfl, rfl⟩ := qqLT_inj.mp he; exact ⟨hA, hB⟩
-  all_goals simp at he
+  have h₁ := h.spec _ e' hn
+  simp at h₁ ⊢
+  exact h₁.2.2
 
 lemma spec_nlt (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^≮ u, e'⟫ ∈ domain q) :
     (⟪⟪t ^≮ u, e'⟫, 1⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) ∧
     (⟪⟪t ^≮ u, e'⟫, 0⟫ ∈ q ↔ termVal e' t < termVal e' u) := by
-  rcases h.spec _ e' hn with
-    ⟨he, hv⟩ | ⟨he, hv⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, he, hd, hd', hA, hB⟩ | ⟨a, b, he, hd, hd', hA, hB⟩ |
-    ⟨a, b, ht, he, hd, hA, hB⟩ | ⟨a, b, ht, he, hd, hA, hB⟩
-  on_goal 6 => obtain ⟨rfl, rfl⟩ := qqNLT_inj.mp he; exact ⟨hA, hB⟩
-  all_goals simp at he
+  have h₁ := h.spec _ e' hn
+  simp at h₁ ⊢
+  exact h₁.2.2
 
 lemma spec_and (h : BoundedSatisfactionTable q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q ∧
     (⟪⟪p₁ ^⋏ p₂, e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∧ ⟪⟪p₂, e'⟫, 1⟫ ∈ q) ∧
     (⟪⟪p₁ ^⋏ p₂, e'⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 0⟫ ∈ q ∨ ⟪⟪p₂, e'⟫, 0⟫ ∈ q) := by
-  rcases h.spec _ e' hn with
-    ⟨he, hv⟩ | ⟨he, hv⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, he, hd, hd', hA, hB⟩ | ⟨a, b, he, hd, hd', hA, hB⟩ |
-    ⟨a, b, ht, he, hd, hA, hB⟩ | ⟨a, b, ht, he, hd, hA, hB⟩
-  on_goal 7 => obtain ⟨rfl, rfl⟩ := (qqAnd_inj _ _ _ _).mp he; exact ⟨hd, hd', hA, hB⟩
-  all_goals simp at he
+  simpa using h.spec _ e' hn
 
 lemma spec_or (h : BoundedSatisfactionTable q z e) (hn : ⟪p₁ ^⋎ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q ∧
     (⟪⟪p₁ ^⋎ p₂, e'⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 1⟫ ∈ q ∨ ⟪⟪p₂, e'⟫, 1⟫ ∈ q) ∧
     (⟪⟪p₁ ^⋎ p₂, e'⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e'⟫, 0⟫ ∈ q ∧ ⟪⟪p₂, e'⟫, 0⟫ ∈ q) := by
-  rcases h.spec _ e' hn with
-    ⟨he, hv⟩ | ⟨he, hv⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, he, hd, hd', hA, hB⟩ | ⟨a, b, he, hd, hd', hA, hB⟩ |
-    ⟨a, b, ht, he, hd, hA, hB⟩ | ⟨a, b, ht, he, hd, hA, hB⟩
-  on_goal 8 => obtain ⟨rfl, rfl⟩ := (qqOr_inj _ _ _ _).mp he; exact ⟨hd, hd', hA, hB⟩
-  all_goals simp at he
+  simpa using h.spec _ e' hn
 
 lemma spec_ball (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBall u p, e'⟫ ∈ domain q) :
     (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧
     (∀ x < termVal (0 ∷ e') u, ⟪p, x ∷ e'⟫ ∈ domain q) ∧
     (⟪⟪qqBall u p, e'⟫, 1⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
     (⟪⟪qqBall u p, e'⟫, 0⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
-  rcases h.spec _ e' hn with
-    ⟨he, hv⟩ | ⟨he, hv⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, he, hd, hd', hA, hB⟩ | ⟨a, b, he, hd, hd', hA, hB⟩ |
-    ⟨a, b, ht, he, hd, hA, hB⟩ | ⟨a, b, ht, he, hd, hA, hB⟩
-  on_goal 9 => obtain ⟨rfl, rfl⟩ := qqBall_inj.mp he; exact ⟨ht, hd, hA, hB⟩
-  all_goals simp at he
+  have h₁ := h.spec _ e' hn
+  simp at h₁ ⊢
+  obtain ⟨t, ht, rfl, hd, hA, hB⟩ := h₁
+  exact ⟨⟨t, ht, rfl⟩, hd, hA, hB⟩
 
 lemma spec_bex (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBex u p, e'⟫ ∈ domain q) :
     (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧
     (∀ x < termVal (0 ∷ e') u, ⟪p, x ∷ e'⟫ ∈ domain q) ∧
     (⟪⟪qqBex u p, e'⟫, 1⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
     (⟪⟪qqBex u p, e'⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
-  rcases h.spec _ e' hn with
-    ⟨he, hv⟩ | ⟨he, hv⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, ha, hb, he, hA, hB⟩ | ⟨a, b, ha, hb, he, hA, hB⟩ |
-    ⟨a, b, he, hd, hd', hA, hB⟩ | ⟨a, b, he, hd, hd', hA, hB⟩ |
-    ⟨a, b, ht, he, hd, hA, hB⟩ | ⟨a, b, ht, he, hd, hA, hB⟩
-  on_goal 10 => obtain ⟨rfl, rfl⟩ := qqBex_inj.mp he; exact ⟨ht, hd, hA, hB⟩
-  all_goals simp at he
+  have h₁ := h.spec _ e' hn
+  simp at h₁ ⊢
+  obtain ⟨t, ht, rfl, hd, hA, hB⟩ := h₁
+  exact ⟨⟨t, ht, rfl⟩, hd, hA, hB⟩
 
 /-! ## The Tarski clauses in the form the satisfaction predicate uses
 

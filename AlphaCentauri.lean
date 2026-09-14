@@ -44,6 +44,7 @@ public import AlphaCentauri.Schemata.Collection.Equivalence
 public import AlphaCentauri.Schemata.Collection.Induction
 public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Vorspiel.Absoluteness
+public import AlphaCentauri.Vorspiel.Axiomatizable
 public import AlphaCentauri.Vorspiel.Compact
 public import AlphaCentauri.Vorspiel.Completeness
 public import AlphaCentauri.Vorspiel.ConstantExtension

@@ -918,13 +918,13 @@ end PSatZero
 /-- Every well-formed internally $\Delta_0$ formula has a partial satisfaction table under every
 assignment.
 - [HP98, Lemma I.1.72(3)] -/
-theorem PSatZero.exists {z e : V} (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) :
+theorem PSatZero.exists {z e : V} (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z) :
     ∃ q, PSatZero q z e := by
-  suffices H : ∀ z, IsDelta0 z →
+  suffices H : ∀ z, IsBounded z →
       ∀ e b, b = tableBound z e → IsUFormula ℒₒᵣ z → ∃ q ≤ b, PSatZero q z e by
     obtain ⟨q, -, hq⟩ := H z hz e (tableBound z e) rfl hz'
     exact ⟨q, hq⟩
-  refine IsDelta0.induction 𝚷
+  refine Isbounded_induction 𝚷
     (P := fun z ↦ ∀ e b, b = tableBound z e → IsUFormula ℒₒᵣ z → ∃ q ≤ b, PSatZero q z e)
     (by simp only [tableBound, tableExp]; definability) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
   · intro e b hb hu

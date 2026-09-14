@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Delta0
+public import AlphaCentauri.Bootstrapping.Bounded
 public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZero
 public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZeroExists
@@ -31,9 +31,9 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-- A $\Delta_0$ code beginning with the bounded existential constructor has a $\Delta_0$ body.
 - [HP98, Lemma I.1.68(2)] -/
-lemma IsDelta0.of_qqBex {u p : V} (h : IsDelta0 (qqBex u p)) : IsDelta0 p := by
+lemma IsBounded.of_qqBex {u p : V} (h : IsBounded (qqBex u p)) : IsBounded p := by
   obtain ⟨u', q', -, hq', heq⟩ :=
-    IsDelta0.of_ex (p := (Arithmetic.qqLT (qqBvar 0) u) ^⋏ p) h
+    IsBounded.of_ex (p := (Arithmetic.qqLT (qqBvar 0) u) ^⋏ p) h
   obtain ⟨-, rfl⟩ := (qqAnd_inj _ _ _ _).mp heq
   exact hq'
 
@@ -159,14 +159,14 @@ lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
 
 /-- $\Delta_0$ shape is preserved by substitution.
 - [HP98, Lemma I.1.68(2)] -/
-lemma IsDelta0.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
-    (hp : IsSemiformula ℒₒᵣ n p) (h : IsDelta0 p) :
-    IsDelta0 (Bootstrapping.subst ℒₒᵣ w p) := by
-  have H : ∀ p : V, IsDelta0 p → ∀ n m w, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
-      IsDelta0 (Bootstrapping.subst ℒₒᵣ w p) := by
-    apply IsDelta0.induction 𝚷
+lemma IsBounded.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+    (hp : IsSemiformula ℒₒᵣ n p) (h : IsBounded p) :
+    IsBounded (Bootstrapping.subst ℒₒᵣ w p) := by
+  have H : ∀ p : V, IsBounded p → ∀ n m w, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
+      IsBounded (Bootstrapping.subst ℒₒᵣ w p) := by
+    apply Isbounded_induction 𝚷
       (P := fun p ↦ ∀ n m w, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
-        IsDelta0 (Bootstrapping.subst ℒₒᵣ w p))
+        IsBounded (Bootstrapping.subst ℒₒᵣ w p))
     · definability
     · intro n m w _ _; simp
     · intro n m w _ _; simp
@@ -179,27 +179,27 @@ lemma IsDelta0.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     · intro p q _ _ ihp ihq n m w hw hpq
       obtain ⟨hp, hq⟩ := IsSemiformula.and.mp hpq
       rw [substs_and hp.isUFormula hq.isUFormula]
-      exact IsDelta0.and_iff.mpr ⟨ihp n m w hw hp, ihq n m w hw hq⟩
+      exact IsBounded.and_iff.mpr ⟨ihp n m w hw hp, ihq n m w hw hq⟩
     · intro p q _ _ ihp ihq n m w hw hpq
       obtain ⟨hp, hq⟩ := IsSemiformula.or.mp hpq
       rw [substs_or hp.isUFormula hq.isUFormula]
-      exact IsDelta0.or_iff.mpr ⟨ihp n m w hw hp, ihq n m w hw hq⟩
+      exact IsBounded.or_iff.mpr ⟨ihp n m w hw hp, ihq n m w hw hq⟩
     · intro t q ht _ ih n m w hw hpq
       obtain ⟨ht', hq⟩ := isSemiformula_qqBall ht hpq
       rw [substs_qqBall hw ht' hq.isUFormula]
-      exact IsDelta0.ball (hw.termSubst ht').isUTerm
+      exact IsBounded.ball (hw.termSubst ht').isUTerm
         (ih (n + 1) (m + 1) (qVec ℒₒᵣ w) hw.qVec hq)
     · intro t q ht _ ih n m w hw hpq
       obtain ⟨ht', hq⟩ := isSemiformula_qqBex ht hpq
       rw [substs_qqBex hw ht' hq.isUFormula]
-      exact IsDelta0.bex (hw.termSubst ht').isUTerm
+      exact IsBounded.bex (hw.termSubst ht').isUTerm
         (ih (n + 1) (m + 1) (qVec ℒₒᵣ w) hw.qVec hq)
   exact H p h n m w hw hp
 
 /-- `SatZero z e` says that `z` is an internally coded $\Delta_0$ formula satisfied by `e`.
 - [HP98, Definition I.1.71(2)] -/
 def SatZero (z e : V) : Prop :=
-  (IsDelta0 z ∧ IsUFormula ℒₒᵣ z) ∧ ∃ q, PSatZero q z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ q
+  (IsBounded z ∧ IsUFormula ℒₒᵣ z) ∧ ∃ q, PSatZero q z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ q
 
 namespace SatZero
 
@@ -210,7 +210,7 @@ variable {z e : V}
 /-- Satisfaction at a node of a table is the value the table takes there.
 - [HP98, Lemma I.1.72(2)] -/
 lemma iff_mem {r z e p e' : V} (hr : PSatZero r z e) (hn : ⟪p, e'⟫ ∈ domain r)
-    (hp : IsDelta0 p) (hp' : IsUFormula ℒₒᵣ p) :
+    (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
     SatZero p e' ↔ ⟪⟪p, e'⟫, 1⟫ ∈ r := by
   constructor
   · rintro ⟨-, s, hs, h1⟩
@@ -221,12 +221,12 @@ lemma iff_mem {r z e p e' : V} (hr : PSatZero r z e) (hn : ⟪p, e'⟫ ∈ domai
 
 /-- Satisfaction of the root of a table is the value the table takes at the root.
 - [HP98, Lemma I.1.72(2)] -/
-lemma iff_val {r : V} (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) (hr : PSatZero r z e) :
+lemma iff_val {r : V} (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z) (hr : PSatZero r z e) :
     SatZero z e ↔ ⟪⟪z, e⟫, 1⟫ ∈ r := iff_mem hr hr.mem_dom_root hz hz'
 
 /-- Existential and universal table characterizations of $\Delta_0$ satisfaction agree.
 - [HP98, Lemma I.1.73(1)] -/
-lemma exists_iff_forall (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) :
+lemma exists_iff_forall (hz : IsBounded z) (hz' : IsUFormula ℒₒᵣ z) :
     (∃ r, PSatZero r z e ∧ ⟪⟪z, e⟫, 1⟫ ∈ r) ↔ ∀ r, PSatZero r z e → ⟪⟪z, e⟫, 1⟫ ∈ r := by
   constructor
   · rintro ⟨s, hs, h1⟩ r hr
@@ -239,7 +239,7 @@ lemma exists_iff_forall (hz : IsDelta0 z) (hz' : IsUFormula ℒₒᵣ z) :
 - [HP98, Lemma I.1.73(1)] -/
 lemma iff_forall {z e : V} :
     SatZero z e ↔
-      (IsDelta0 z ∧ IsUFormula ℒₒᵣ z) ∧ ∀ r, PSatZero r z e → ⟪⟪z, e⟫, 1⟫ ∈ r :=
+      (IsBounded z ∧ IsUFormula ℒₒᵣ z) ∧ ∀ r, PSatZero r z e → ⟪⟪z, e⟫, 1⟫ ∈ r :=
   and_congr_right fun ⟨hz, hz'⟩ ↦ exists_iff_forall hz hz'
 
 end SatZero
@@ -248,9 +248,9 @@ end SatZero
 - [HP98, Theorem I.1.70]
 - [HP98, Lemma I.1.73(1)] -/
 noncomputable def satZero : 𝚫₁.Semisentence 2 := .mkDelta
-  (.mkSigma “z e. (!isDelta0.sigma z ∧ !(isUFormula ℒₒᵣ).sigma z) ∧
+  (.mkSigma “z e. (!isBounded.sigma z ∧ !(isUFormula ℒₒᵣ).sigma z) ∧
     ∃ q, !pSatZero.sigma q z e ∧ !PSatZeroF.nodeValDef q z e 1”)
-  (.mkPi “z e. (!isDelta0.pi z ∧ !(isUFormula ℒₒᵣ).pi z) ∧
+  (.mkPi “z e. (!isBounded.pi z ∧ !(isUFormula ℒₒᵣ).pi z) ∧
     ∀ q, !pSatZero.sigma q z e → !PSatZeroF.nodeValDef q z e 1”)
 
 /-- The formula `satZero` defines `SatZero`.
@@ -259,16 +259,16 @@ noncomputable def satZero : 𝚫₁.Semisentence 2 := .mkDelta
 instance SatZero.defined : 𝚫₁-Relation (SatZero : V → V → Prop) via satZero := .mk <| by
   constructor
   · intro v
-    suffices IsDelta0 (v 0) → IsUFormula ℒₒᵣ (v 0) →
+    suffices IsBounded (v 0) → IsUFormula ℒₒᵣ (v 0) →
         ((∃ r, PSatZero r (v 0) (v 1) ∧ ⟪⟪v 0, v 1⟫, 1⟫ ∈ r) ↔
           ∀ r, PSatZero r (v 0) (v 1) → ⟪⟪v 0, v 1⟫, 1⟫ ∈ r) by
       simpa [satZero, HierarchySymbol.Semiformula.val_sigma,
-        (IsDelta0.defined (V := V)).df, (IsUFormula.defined (V := V) (L := ℒₒᵣ)).df,
+        (IsBounded.defined (V := V)).df, (IsUFormula.defined (V := V) (L := ℒₒᵣ)).df,
         (PSatZero.defined (V := V)).df, PSatZeroF.nodeVal_defined.df] using this
     exact fun hz hz' ↦ SatZero.exists_iff_forall hz hz'
   · intro v
     simp [satZero, HierarchySymbol.Semiformula.val_sigma, SatZero,
-      (IsDelta0.defined (V := V)).df, (IsUFormula.defined (V := V) (L := ℒₒᵣ)).df,
+      (IsBounded.defined (V := V)).df, (IsUFormula.defined (V := V) (L := ℒₒᵣ)).df,
       (PSatZero.defined (V := V)).df, PSatZeroF.nodeVal_defined.df]
 
 /-- Satisfaction for internally coded $\Delta_0$ formulas is $\Delta_1$-definable.
@@ -284,7 +284,7 @@ namespace SatZero
 
 /-- Satisfaction implies that its formula code belongs to the $\Delta_0$ domain.
 - [HP98, Theorem I.1.70(i)] -/
-lemma dom {z e : V} : SatZero z e → IsDelta0 z ∧ IsUFormula ℒₒᵣ z := And.left
+lemma dom {z e : V} : SatZero z e → IsBounded z ∧ IsUFormula ℒₒᵣ z := And.left
 
 /-- The coded truth constant is satisfied.
 - [HP98, Theorem I.1.70(ii)] -/
@@ -305,7 +305,7 @@ include ht hu
 /-- Satisfaction of coded equality agrees with equality of term values.
 - [HP98, Theorem I.1.70(ii)] -/
 lemma eq_iff : SatZero (t ^= u) e ↔ termVal e t = termVal e u := by
-  have hd : IsDelta0 (t ^= u) := by simp [Arithmetic.qqEQ]
+  have hd : IsBounded (t ^= u) := by simp [Arithmetic.qqEQ]
   have hf : IsUFormula ℒₒᵣ (t ^= u) := by simp [Arithmetic.qqEQ, ht, hu]
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
   rw [iff_val hd hf hr]
@@ -314,7 +314,7 @@ lemma eq_iff : SatZero (t ^= u) e ↔ termVal e t = termVal e u := by
 /-- Satisfaction of coded inequality agrees with inequality of term values.
 - [HP98, Theorem I.1.70(ii)] -/
 lemma neq_iff : SatZero (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
-  have hd : IsDelta0 (t ^≠ u) := by simp [Arithmetic.qqNEQ]
+  have hd : IsBounded (t ^≠ u) := by simp [Arithmetic.qqNEQ]
   have hf : IsUFormula ℒₒᵣ (t ^≠ u) := by simp [Arithmetic.qqNEQ, ht, hu]
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
   rw [iff_val hd hf hr]
@@ -323,7 +323,7 @@ lemma neq_iff : SatZero (t ^≠ u) e ↔ termVal e t ≠ termVal e u := by
 /-- Satisfaction of coded less-than agrees with comparison of term values.
 - [HP98, Theorem I.1.70(ii)] -/
 lemma lt_iff : SatZero (t ^< u) e ↔ termVal e t < termVal e u := by
-  have hd : IsDelta0 (t ^< u) := by simp [Arithmetic.qqLT]
+  have hd : IsBounded (t ^< u) := by simp [Arithmetic.qqLT]
   have hf : IsUFormula ℒₒᵣ (t ^< u) := by simp [Arithmetic.qqLT, ht, hu]
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
   rw [iff_val hd hf hr]
@@ -332,7 +332,7 @@ lemma lt_iff : SatZero (t ^< u) e ↔ termVal e t < termVal e u := by
 /-- Satisfaction of coded negated less-than agrees with failure of comparison.
 - [HP98, Theorem I.1.70(ii)] -/
 lemma nlt_iff : SatZero (t ^≮ u) e ↔ ¬(termVal e t < termVal e u) := by
-  have hd : IsDelta0 (t ^≮ u : V) := by simp [Arithmetic.qqNLT]
+  have hd : IsBounded (t ^≮ u : V) := by simp [Arithmetic.qqNLT]
   have hf : IsUFormula ℒₒᵣ (t ^≮ u : V) := by simp [Arithmetic.qqNLT, ht, hu]
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
   rw [iff_val hd hf hr]
@@ -346,7 +346,7 @@ end
     SatZero (p ^⋏ q) e ↔ SatZero p e ∧ SatZero q e := by
   constructor
   · rintro ⟨⟨hd, hf⟩, r, hr, h1⟩
-    obtain ⟨hdp, hdq⟩ := IsDelta0.and_iff.mp hd
+    obtain ⟨hdp, hdq⟩ := IsBounded.and_iff.mp hd
     obtain ⟨hfp, hfq⟩ := IsUFormula.and.mp hf
     obtain ⟨hn₁, hn₂⟩ := hr.mem_dom_and hr.mem_dom_root
     obtain ⟨v₁, v₂⟩ := (hr.val_and hr.mem_dom_root).mp h1
@@ -354,7 +354,7 @@ end
   · rintro ⟨h₁, h₂⟩
     obtain ⟨hdp, hfp⟩ := h₁.dom
     obtain ⟨hdq, hfq⟩ := h₂.dom
-    have hd : IsDelta0 (p ^⋏ q) := IsDelta0.and_iff.mpr ⟨hdp, hdq⟩
+    have hd : IsBounded (p ^⋏ q) := IsBounded.and_iff.mpr ⟨hdp, hdq⟩
     have hf : IsUFormula ℒₒᵣ (p ^⋏ q) := by simp [hfp, hfq]
     obtain ⟨r, hr⟩ := PSatZero.exists hd hf
     obtain ⟨hn₁, hn₂⟩ := hr.mem_dom_and hr.mem_dom_root
@@ -363,8 +363,8 @@ end
 
 /-- Satisfaction commutes with coded disjunction of well-formed formulas.
 - [HP98, Theorem I.1.70(ii)] -/
-@[simp] lemma or_iff {p q e : V} (hdp : IsDelta0 p) (hfp : IsUFormula ℒₒᵣ p)
-    (hdq : IsDelta0 q) (hfq : IsUFormula ℒₒᵣ q) :
+@[simp] lemma or_iff {p q e : V} (hdp : IsBounded p) (hfp : IsUFormula ℒₒᵣ p)
+    (hdq : IsBounded q) (hfq : IsUFormula ℒₒᵣ q) :
     SatZero (p ^⋎ q) e ↔ SatZero p e ∨ SatZero q e := by
   constructor
   · rintro ⟨-, r, hr, h1⟩
@@ -373,7 +373,7 @@ end
     · exact Or.inl ((iff_mem hr hn₁ hdp hfp).mpr v)
     · exact Or.inr ((iff_mem hr hn₂ hdq hfq).mpr v)
   · intro h
-    have hd : IsDelta0 (p ^⋎ q) := IsDelta0.or_iff.mpr ⟨hdp, hdq⟩
+    have hd : IsBounded (p ^⋎ q) := IsBounded.or_iff.mpr ⟨hdp, hdq⟩
     have hf : IsUFormula ℒₒᵣ (p ^⋎ q) := by simp [hfp, hfq]
     obtain ⟨r, hr⟩ := PSatZero.exists hd hf
     obtain ⟨hn₁, hn₂⟩ := hr.mem_dom_or hr.mem_dom_root
@@ -388,9 +388,9 @@ include ht
 
 /-- Satisfaction of a bounded universal is bounded universal satisfaction of its body.
 - [HP98, Theorem I.1.70(iv)] -/
-lemma ball_iff (hq : IsDelta0 q) (hq' : IsUFormula ℒₒᵣ q) :
+lemma ball_iff (hq : IsBounded q) (hq' : IsUFormula ℒₒᵣ q) :
     SatZero (qqBall (termBShift ℒₒᵣ t) q) e ↔ ∀ x < termVal e t, SatZero q (x ∷ e) := by
-  have hd : IsDelta0 (qqBall (termBShift ℒₒᵣ t) q) := IsDelta0.ball ht hq
+  have hd : IsBounded (qqBall (termBShift ℒₒᵣ t) q) := IsBounded.ball ht hq
   have hf : IsUFormula ℒₒᵣ (qqBall (termBShift ℒₒᵣ t) q) := by
     simp [qqBall, Arithmetic.qqNLT, ht.termBShift, hq']
   obtain ⟨r, hr⟩ := PSatZero.exists hd hf
@@ -403,14 +403,14 @@ lemma ball_iff (hq : IsDelta0 q) (hq' : IsUFormula ℒₒᵣ q) :
 lemma bex_iff : SatZero (qqBex (termBShift ℒₒᵣ t) q) e ↔ ∃ x < termVal e t, SatZero q (x ∷ e) := by
   constructor
   · rintro ⟨⟨hd, hf⟩, r, hr, h1⟩
-    have hq : IsDelta0 q := hd.of_qqBex
+    have hq : IsBounded q := hd.of_qqBex
     have hq' : IsUFormula ℒₒᵣ q := by
       simpa [qqBex, Arithmetic.qqLT, ht.termBShift] using hf
     obtain ⟨x, hx, v⟩ := (hr.val_bex ht hr.mem_dom_root).mp h1
     exact ⟨x, hx, (iff_mem hr (hr.mem_dom_bex ht hr.mem_dom_root hx) hq hq').mpr v⟩
   · rintro ⟨x, hx, hsat⟩
     obtain ⟨hq, hq'⟩ := hsat.dom
-    have hd : IsDelta0 (qqBex (termBShift ℒₒᵣ t) q) := IsDelta0.bex ht hq
+    have hd : IsBounded (qqBex (termBShift ℒₒᵣ t) q) := IsBounded.bex ht hq
     have hf : IsUFormula ℒₒᵣ (qqBex (termBShift ℒₒᵣ t) q) := by
       simp [qqBex, Arithmetic.qqLT, ht.termBShift, hq']
     obtain ⟨r, hr⟩ := PSatZero.exists hd hf
@@ -421,11 +421,11 @@ end
 
 /-- Satisfaction commutes with coded negation on $\Delta_0$ formulas.
 - [HP98, Theorem I.1.70(iii)] -/
-lemma neg_iff {p e : V} (hp : IsDelta0 p) (hp' : IsUFormula ℒₒᵣ p) :
+lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
     SatZero (neg ℒₒᵣ p) e ↔ ¬SatZero p e := by
-  have H : ∀ p : V, IsDelta0 p → IsUFormula ℒₒᵣ p →
+  have H : ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p →
       ∀ e, (SatZero (neg ℒₒᵣ p) e ↔ ¬SatZero p e) := by
-    apply IsDelta0.induction 𝚷
+    apply Isbounded_induction 𝚷
       (P := fun p ↦ IsUFormula ℒₒᵣ p → ∀ e, (SatZero (neg ℒₒᵣ p) e ↔ ¬SatZero p e))
     · definability
     · intro _ e; simp
@@ -441,7 +441,7 @@ lemma neg_iff {p e : V} (hp : IsDelta0 p) (hp' : IsUFormula ℒₒᵣ p) :
     · intro p q hdp hdq ihp ihq h e
       obtain ⟨hfp, hfq⟩ := IsUFormula.and.mp h
       rw [neg_and hfp hfq,
-        or_iff (IsDelta0.neg hfp hdp) hfp.neg (IsDelta0.neg hfq hdq) hfq.neg,
+        or_iff (IsBounded.neg hfp hdp) hfp.neg (IsBounded.neg hfq hdq) hfq.neg,
         ihp hfp e, ihq hfq e, and_iff]
       tauto
     · intro p q hdp hdq ihp ihq h e
@@ -464,7 +464,7 @@ lemma neg_iff {p e : V} (hp : IsDelta0 p) (hp' : IsUFormula ℒₒᵣ p) :
       obtain ⟨-, hfq⟩ : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) ∧ IsUFormula ℒₒᵣ q := by
         simpa [qqBex, Arithmetic.qqLT] using h
       rw [neg_qqBex ht.termBShift hfq,
-        ball_iff ht (IsDelta0.neg hfq hdq) hfq.neg, bex_iff ht]
+        ball_iff ht (IsBounded.neg hfq hdq) hfq.neg, bex_iff ht]
       constructor
       · rintro hall ⟨x, hx, hx'⟩
         exact (ih hfq (x ∷ e)).mp (hall x hx) hx'
@@ -476,11 +476,11 @@ lemma neg_iff {p e : V} (hp : IsDelta0 p) (hp' : IsUFormula ℒₒᵣ p) :
 - [HP98, 1.64(4)]
 - [HP98, Theorem I.1.70] -/
 lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
-    (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsDelta0 p) :
+    (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsBounded p) :
     SatZero (Bootstrapping.subst ℒₒᵣ w p) e ↔ SatZero p (termValVec e n w) := by
-  have H : ∀ p : V, IsDelta0 p → ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
+  have H : ∀ p : V, IsBounded p → ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
       (SatZero (Bootstrapping.subst ℒₒᵣ w p) e ↔ SatZero p (termValVec e n w)) := by
-    apply IsDelta0.induction 𝚷
+    apply Isbounded_induction 𝚷
       (P := fun p ↦ ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
         (SatZero (Bootstrapping.subst ℒₒᵣ w p) e ↔ SatZero p (termValVec e n w)))
     · definability
@@ -521,14 +521,14 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     · intro p q hdp hdq ihp ihq n m w e hw hpq
       obtain ⟨hp, hq⟩ := IsSemiformula.or.mp hpq
       rw [substs_or hp.isUFormula hq.isUFormula,
-        or_iff (IsDelta0.subst hw hp hdp) (hp.subst hw).isUFormula
-          (IsDelta0.subst hw hq hdq) (hq.subst hw).isUFormula,
+        or_iff (IsBounded.subst hw hp hdp) (hp.subst hw).isUFormula
+          (IsBounded.subst hw hq hdq) (hq.subst hw).isUFormula,
         or_iff hdp hp.isUFormula hdq hq.isUFormula,
         ihp n m w e hw hp, ihq n m w e hw hq]
     · intro t q ht hdq ih n m w e hw hpq
       obtain ⟨hts, hq⟩ := isSemiformula_qqBall ht hpq
       rw [substs_qqBall hw hts hq.isUFormula,
-        ball_iff (hw.termSubst hts).isUTerm (IsDelta0.subst hw.qVec hq hdq)
+        ball_iff (hw.termSubst hts).isUTerm (IsBounded.subst hw.qVec hq hdq)
           (hq.subst hw.qVec).isUFormula,
         ball_iff ht hdq hq.isUFormula, termVal_termSubst hw hts]
       refine forall_congr' fun x ↦ imp_congr_right fun _ ↦ ?_

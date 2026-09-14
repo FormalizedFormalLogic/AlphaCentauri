@@ -28,7 +28,7 @@ namespace Tarski
 /-- Satisfaction is restricted to internally coded $\Delta_0$ formulas.
 - [HP98, Theorem I.1.70(i)] -/
 noncomputable def satZeroDom : ArithmeticSentence :=
-  “∀ z e, !satZero.val z e → !isDelta0.val z ∧ !(isUFormula ℒₒᵣ).val z”
+  “∀ z e, !satZero.val z e → !isBounded.val z ∧ !(isUFormula ℒₒᵣ).val z”
 
 /-- The Tarski sentence for truth.
 - [HP98, Theorem I.1.70(ii)] -/
@@ -79,20 +79,20 @@ well-formed: one satisfied disjunct says nothing about the shape of the other, w
 of the disjunction carries the well-formedness of both.
 - [HP98, Theorem I.1.70(ii)] -/
 noncomputable def satZeroOr : ArithmeticSentence :=
-  “∀ p q z e, !isDelta0.val p → !(isUFormula ℒₒᵣ).val p → !isDelta0.val q →
+  “∀ p q z e, !isBounded.val p → !(isUFormula ℒₒᵣ).val p → !isBounded.val q →
     !(isUFormula ℒₒᵣ).val q → !qqOrDef.val z p q →
     (!satZero.val z e ↔ !satZero.val p e ∨ !satZero.val q e)”
 
 /-- The Tarski sentence for negation.
 - [HP98, Theorem I.1.70(iii)] -/
 noncomputable def satZeroNeg : ArithmeticSentence :=
-  “∀ p np e, !isDelta0.val p → !(isUFormula ℒₒᵣ).val p →
+  “∀ p np e, !isBounded.val p → !(isUFormula ℒₒᵣ).val p →
     !(negGraph ℒₒᵣ).val np p → (!satZero.val np e ↔ ¬!satZero.val p e)”
 
 /-- The Tarski sentence for bounded universal quantification.
 - [HP98, Theorem I.1.70(iv)] -/
 noncomputable def satZeroBall : ArithmeticSentence :=
-  “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !isDelta0.val q →
+  “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !isBounded.val q →
     !(isUFormula ℒₒᵣ).val q → !(termBShiftGraph ℒₒᵣ).val u t →
     !qqBallDef.val z u q → !termValGraph.val v e t →
     (!satZero.val z e ↔ ∀ x < v, ∀ e', !adjoinDef.val e' x e → !satZero.val q e')”
@@ -158,7 +158,7 @@ satisfaction.
 - [HP98, Theorem I.1.75(2)(v)] -/
 noncomputable def satSigmaOfPi : ℕ → ArithmeticSentence
   | 0 =>
-      “∀ z e, !isDelta0.val z → !(isUFormula ℒₒᵣ).val z →
+      “∀ z e, !isBounded.val z → !(isUFormula ℒₒᵣ).val z →
         (!(satSigma 0).val z e ↔ !satZero.val z e)”
   | n + 1 =>
       “∀ z e, !(isStrictPi (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
@@ -169,7 +169,7 @@ satisfaction.
 - [HP98, Theorem I.1.75(2)(v′)] -/
 noncomputable def satPiOfSigma : ℕ → ArithmeticSentence
   | 0 =>
-      “∀ z e, !isDelta0.val z → !(isUFormula ℒₒᵣ).val z →
+      “∀ z e, !isBounded.val z → !(isUFormula ℒₒᵣ).val z →
         (!(satPi 0).val z e ↔ !satZero.val z e)”
   | n + 1 =>
       “∀ z e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
@@ -390,7 +390,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 /-- The domain condition holds in every model of `𝗜𝚺₁`.
 - [HP98, Theorem I.1.70(i)] -/
 lemma models_satZeroDom : V↓[ℒₒᵣ] ⊧ satZeroDom := by
-  suffices ∀ z e : V, SatZero z e → IsDelta0 z ∧ IsUFormula ℒₒᵣ z by
+  suffices ∀ z e : V, SatZero z e → IsBounded z ∧ IsUFormula ℒₒᵣ z by
     simpa [models_iff, satZeroDom] using this
   exact fun _ _ h ↦ SatZero.dom h
 
@@ -455,7 +455,7 @@ lemma models_satZeroAnd : V↓[ℒₒᵣ] ⊧ satZeroAnd := by
 /-- The Tarski condition for disjunction holds in every model of `𝗜𝚺₁`.
 - [HP98, Theorem I.1.70(ii)] -/
 lemma models_satZeroOr : V↓[ℒₒᵣ] ⊧ satZeroOr := by
-  suffices ∀ p q z e : V, IsDelta0 p → IsUFormula ℒₒᵣ p → IsDelta0 q → IsUFormula ℒₒᵣ q →
+  suffices ∀ p q z e : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded q → IsUFormula ℒₒᵣ q →
       z = p ^⋎ q → (SatZero z e ↔ SatZero p e ∨ SatZero q e) by
     simpa [models_iff, satZeroOr] using this
   rintro p q _ e hdp hfp hdq hfq rfl
@@ -464,7 +464,7 @@ lemma models_satZeroOr : V↓[ℒₒᵣ] ⊧ satZeroOr := by
 /-- The Tarski condition for negation holds in every model of `𝗜𝚺₁`.
 - [HP98, Theorem I.1.70(iii)] -/
 lemma models_satZeroNeg : V↓[ℒₒᵣ] ⊧ satZeroNeg := by
-  suffices ∀ p np e : V, IsDelta0 p → IsUFormula ℒₒᵣ p → np = neg ℒₒᵣ p →
+  suffices ∀ p np e : V, IsBounded p → IsUFormula ℒₒᵣ p → np = neg ℒₒᵣ p →
       (SatZero np e ↔ ¬SatZero p e) by
     simpa [models_iff, satZeroNeg] using this
   rintro p _ e hd hf rfl
@@ -473,7 +473,7 @@ lemma models_satZeroNeg : V↓[ℒₒᵣ] ⊧ satZeroNeg := by
 /-- The Tarski condition for bounded universal quantification holds in every model of `𝗜𝚺₁`.
 - [HP98, Theorem I.1.70(iv)] -/
 lemma models_satZeroBall : V↓[ℒₒᵣ] ⊧ satZeroBall := by
-  suffices ∀ t u q z e v : V, IsUTerm ℒₒᵣ t → IsDelta0 q → IsUFormula ℒₒᵣ q →
+  suffices ∀ t u q z e v : V, IsUTerm ℒₒᵣ t → IsBounded q → IsUFormula ℒₒᵣ q →
       u = termBShift ℒₒᵣ t → z = qqBall u q → v = termVal e t →
       (SatZero z e ↔ ∀ x < v, SatZero q (x ∷ e)) by
     simpa [models_iff, satZeroBall] using this
@@ -557,10 +557,10 @@ lemma models_lenAdjoin : V↓[ℒₒᵣ] ⊧ lenAdjoin := by
 lemma models_satSigmaOfPi (n : ℕ) : V↓[ℒₒᵣ] ⊧ satSigmaOfPi n := by
   cases n with
   | zero =>
-    suffices ∀ z e : V, IsDelta0 z → IsUFormula ℒₒᵣ z → (SatSigma 1 z e ↔ SatZero z e) by
+    suffices ∀ z e : V, IsBounded z → IsUFormula ℒₒᵣ z → (SatSigma 1 z e ↔ SatZero z e) by
       simpa [models_iff, satSigmaOfPi] using this
     intro z e hd hf
-    rw [SatSigma.of_pi (IsStrictPi.of_delta0 hd) hf, SatPi.zero]
+    rw [SatSigma.of_pi (IsStrictPi.of_bounded hd) hf, SatPi.zero]
   | succ n =>
     suffices ∀ z e : V, IsStrictPi (n + 1) z → IsUFormula ℒₒᵣ z →
         (SatSigma (n + 2) z e ↔ SatPi (n + 1) z e) by
@@ -573,10 +573,10 @@ lemma models_satSigmaOfPi (n : ℕ) : V↓[ℒₒᵣ] ⊧ satSigmaOfPi n := by
 lemma models_satPiOfSigma (n : ℕ) : V↓[ℒₒᵣ] ⊧ satPiOfSigma n := by
   cases n with
   | zero =>
-    suffices ∀ z e : V, IsDelta0 z → IsUFormula ℒₒᵣ z → (SatPi 1 z e ↔ SatZero z e) by
+    suffices ∀ z e : V, IsBounded z → IsUFormula ℒₒᵣ z → (SatPi 1 z e ↔ SatZero z e) by
       simpa [models_iff, satPiOfSigma] using this
     intro z e hd hf
-    rw [SatPi.of_sigma (IsStrictSigma.of_delta0 hd) hf, SatSigma.zero]
+    rw [SatPi.of_sigma (IsStrictSigma.of_bounded hd) hf, SatSigma.zero]
   | succ n =>
     suffices ∀ z e : V, IsStrictSigma (n + 1) z → IsUFormula ℒₒᵣ z →
         (SatPi (n + 2) z e ↔ SatSigma (n + 1) z e) by
@@ -695,8 +695,8 @@ def Sat : Polarity → ℕ → V → V → Prop
   | .sigma, m + 1 => Reading.SatSigma m
   | .pi,    m + 1 => Reading.SatPi m
 
-/-- The reading of `isDelta0`. -/
-def Delta0 (z : V) : Prop := V ⊧/![z] isDelta0.val
+/-- The reading of `isBounded`. -/
+def Bounded (z : V) : Prop := V ⊧/![z] isBounded.val
 
 /-- The reading of `isUFormula`. -/
 def UFormula (z : V) : Prop := V ⊧/![z] (isUFormula ℒₒᵣ).val
@@ -805,17 +805,18 @@ lemma read_satZeroAnd : ∀ p q z e : V, V ⊧/![z, p, q] qqAndDef.val →
 
 /-- The reading of the Tarski sentence for disjunction.
 - [HP98, Theorem I.1.70(ii)] -/
-lemma read_satZeroOr : ∀ p q z e : V, Delta0 p → UFormula p → Delta0 q → UFormula q →
+lemma read_satZeroOr : ∀ p q z e : V, Reading.Bounded p → UFormula p → Reading.Bounded q →
+    UFormula q →
     V ⊧/![z, p, q] qqOrDef.val → (Sat0 z e ↔ Sat0 p e ∨ Sat0 q e) := by
-  simpa [models_iff, Tarski.satZeroOr, Reading.Sat0, Reading.Delta0, Reading.UFormula]
+  simpa [models_iff, Tarski.satZeroOr, Reading.Sat0, Reading.Bounded, Reading.UFormula]
     using hV _ (tarski.zero n Tarski.satZeroOr (by simp [Tarski.satZeroAxioms]))
 
 /-- The reading of the Tarski sentence for bounded universal quantification.
 - [HP98, Theorem I.1.70(iv)] -/
-lemma read_satZeroBall : ∀ t u q z e v : V, UTerm t → Delta0 q → UFormula q →
+lemma read_satZeroBall : ∀ t u q z e v : V, UTerm t → Reading.Bounded q → UFormula q →
     V ⊧/![u, t] (termBShiftGraph ℒₒᵣ).val → V ⊧/![z, u, q] qqBallDef.val → TermVal v e t →
     (Sat0 z e ↔ ∀ x < v, ∀ e', Adjoin e' x e → Sat0 q e') := by
-  simpa [models_iff, Tarski.satZeroBall, Reading.Sat0, Reading.UTerm, Reading.Delta0, Reading.UFormula, Reading.TermVal, Reading.Adjoin]
+  simpa [models_iff, Tarski.satZeroBall, Reading.Sat0, Reading.UTerm, Reading.Bounded, Reading.UFormula, Reading.TermVal, Reading.Adjoin]
     using hV _ (tarski.zero n Tarski.satZeroBall (by simp [Tarski.satZeroAxioms]))
 
 /-- The reading of the Tarski sentence for bounded existential quantification.

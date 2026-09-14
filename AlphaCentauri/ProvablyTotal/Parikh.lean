@@ -50,7 +50,7 @@ existential quantifier bounded by a term. This is proven for $\forall\ldots\fora
 have any number of unbounded universal quantifiers, then one unbounded existential.
 - [HP98, Theorem V.1.4]
 - [Bus98A, Theorem 1.2.7.1] -/
-theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
+theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : φ.Bounded)
   (h : 𝗜𝚺₀ ⊢ ∀¹* ∃¹ φ) :
   ∃ t : ClosedSemiterm ℒₒᵣ k, 𝗜𝚺₀ ⊢ ∀¹* ∃¹[“#0 < !!(Rew.bShift t)”] φ := by
   by_contra! hcon
@@ -115,7 +115,7 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
   obtain ⟨t, ht⟩ : ∃ t : ClosedSemiterm ℒₒᵣ k, (b : ModelOfSatEq sat) ≤ t.valb (cstVal sat) := b.2
   have hbM : φ.Evalb ((b : ModelOfSatEq sat) :> cstVal sat) := by
     have h₂ :=
-      (absolute_of_Delta0 (T := 𝗣𝗔⁻) hφ (↥K.carrier) (ModelOfSatEq sat) _ Empty.elim).mp hb
+      (absolute_of_bounded (T := 𝗣𝗔⁻) hφ (↥K.carrier) (ModelOfSatEq sat) _ Empty.elim).mp hb
     simp only [Matrix.comp_vecCons'', Empty.eq_elim] at h₂
     exact h₂
 
@@ -128,7 +128,7 @@ most polynomially.
 - [HP98, Theorem V.1.4]
 - [Bus98A, Theorem 1.2.7.1] -/
 theorem exists_term_bound_of_provablyTotal {f φ}
-  (hφ : Hierarchy 𝚺 0 φ.val) (h : 𝗜𝚺₀.ProvablyTotalVia f φ) :
+  (hφ : φ.val.Bounded) (h : 𝗜𝚺₀.ProvablyTotalVia f φ) :
   ∃ t : ClosedSemiterm ℒₒᵣ k, ∀ v, f v ≤ Semiterm.valb v t := by
   obtain ⟨t, ht⟩ := parikh φ.val hφ h.total;
   have h₁ : ∀ v : Fin k → ℕ, ∃ y < Semiterm.valb v t, φ.val.Evalb (y :> v) := by

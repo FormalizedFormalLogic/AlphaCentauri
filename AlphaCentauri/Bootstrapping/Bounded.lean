@@ -1,14 +1,14 @@
 module
 
-public import AlphaCentauri.Hierarchy.DeltaZero
+public import AlphaCentauri.Hierarchy.Bounded
 public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!
 # Internal $\Delta_0$ formulas
 
 This module introduces the bounded-existential coding operation and the internal shape
-predicate `IsDelta0` for $\Delta_0$ formulas, built as a least fixpoint in the manner of
-Foundation's `IsSigma1`, and proves that it agrees with the external class `Hierarchy 𝚺 0` on quoted
+predicate `IsBounded` for $\Delta_0$ formulas, built as a least fixpoint in the manner of
+Foundation's `IsSigma1`, and proves that it agrees with the external class `Bounded` on quoted
 formulas.
 -/
 
@@ -61,7 +61,7 @@ lemma neg_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ 
     neg_ex (by simp [hlt, hq]), neg_and hlt hq]
   simp [Arithmetic.qqNLT, Arithmetic.qqLT, hu]
 
-namespace IsDelta0F
+namespace IsBoundedF
 
 /-- `Phi C p` recognizes one $\Delta_0$ constructor step over the class `C`.
 - [HP98, Lemma I.1.68] -/
@@ -175,7 +175,7 @@ instance : construction.StrongFinite V where
     · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
         ⟨u, q, ht, ⟨hq, lt_q_qqBex _ _⟩, rfl⟩))))))
 
-end IsDelta0F
+end IsBoundedF
 
 lemma shift_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
     shift ℒₒᵣ (qqBall u q) = qqBall (termShift ℒₒᵣ u) (shift ℒₒᵣ q) := by
@@ -195,47 +195,47 @@ lemma shift_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒ�
     shift_exs (by simp [hlt, hq]), shift_and hlt hq]
   simp [Arithmetic.qqLT, hu]
 
-/-- `IsDelta0 p` says that `p` has the internal shape of a $\Delta_0$ formula.
+/-- `IsBounded p` says that `p` has the internal shape of a $\Delta_0$ formula.
 - [HP98, Lemma I.1.68] -/
-def IsDelta0 (p : V) : Prop := IsDelta0F.construction.Fixpoint ![] p
+def IsBounded (p : V) : Prop := IsBoundedF.construction.Fixpoint ![] p
 
-/-- $\Delta_1$ recognizer for `IsDelta0`.
+/-- $\Delta_1$ recognizer for `IsBounded`.
 - [HP98, Lemma I.1.68(1)] -/
-noncomputable def isDelta0 : 𝚫₁.Semisentence 1 := IsDelta0F.blueprint.fixpointDefΔ₁
+noncomputable def isBounded : 𝚫₁.Semisentence 1 := IsBoundedF.blueprint.fixpointDefΔ₁
 
 /-- The recognizer defines the internal $\Delta_0$ shape predicate.
 - [HP98, Lemma I.1.68(1)] -/
-instance IsDelta0.defined : 𝚫₁-Predicate (IsDelta0 (V := V)) via isDelta0 :=
-  IsDelta0F.construction.fixpoint_definedΔ₁
+instance IsBounded.defined : 𝚫₁-Predicate (IsBounded (V := V)) via isBounded :=
+  IsBoundedF.construction.fixpoint_definedΔ₁
 
 /-- The internal $\Delta_0$ shape predicate is $\Delta_1$-definable.
 - [HP98, Lemma I.1.68(1)] -/
-instance IsDelta0.definable : 𝚫₁-Predicate (IsDelta0 : V → Prop) := IsDelta0.defined.to_definable
+instance IsBounded.definable : 𝚫₁-Predicate (IsBounded : V → Prop) := IsBounded.defined.to_definable
 
 /-- Characterization of internal $\Delta_0$ formulas by their outermost coding constructor.
 - [HP98, Lemma I.1.68(2)] -/
-lemma IsDelta0.case_iff {p : V} :
-    IsDelta0 p ↔
+lemma IsBounded.case_iff {p : V} :
+    IsBounded p ↔
     (p = ^⊤) ∨ (p = ^⊥) ∨
     (∃ k r v, p = ^rel k r v) ∨ (∃ k r v, p = ^nrel k r v) ∨
-    (∃ p₁ p₂, IsDelta0 p₁ ∧ IsDelta0 p₂ ∧ p = p₁ ^⋏ p₂) ∨
-    (∃ p₁ p₂, IsDelta0 p₁ ∧ IsDelta0 p₂ ∧ p = p₁ ^⋎ p₂) ∨
-    (∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsDelta0 q ∧ p = qqBall u q) ∨
-    (∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsDelta0 q ∧ p = qqBex u q) :=
-  IsDelta0F.construction.case
+    (∃ p₁ p₂, IsBounded p₁ ∧ IsBounded p₂ ∧ p = p₁ ^⋏ p₂) ∨
+    (∃ p₁ p₂, IsBounded p₁ ∧ IsBounded p₂ ∧ p = p₁ ^⋎ p₂) ∨
+    (∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsBounded q ∧ p = qqBall u q) ∨
+    (∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsBounded q ∧ p = qqBex u q) :=
+  IsBoundedF.construction.case
 
-alias ⟨IsDelta0.case, IsDelta0.mk⟩ := IsDelta0.case_iff
+alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
 
-@[simp] lemma IsDelta0.verum : IsDelta0 (V := V) (^⊤) := IsDelta0.mk (Or.inl rfl)
-@[simp] lemma IsDelta0.falsum : IsDelta0 (V := V) (^⊥) := IsDelta0.mk (Or.inr (Or.inl rfl))
-@[simp] lemma IsDelta0.rel {k r v : V} : IsDelta0 (^rel k r v) :=
-  IsDelta0.mk (Or.inr (Or.inr (Or.inl ⟨k, r, v, rfl⟩)))
-@[simp] lemma IsDelta0.nrel {k r v : V} : IsDelta0 (^nrel k r v) :=
-  IsDelta0.mk (Or.inr (Or.inr (Or.inr (Or.inl ⟨k, r, v, rfl⟩))))
+@[simp] lemma IsBounded.verum : IsBounded (V := V) (^⊤) := IsBounded.mk (Or.inl rfl)
+@[simp] lemma IsBounded.falsum : IsBounded (V := V) (^⊥) := IsBounded.mk (Or.inr (Or.inl rfl))
+@[simp] lemma IsBounded.rel {k r v : V} : IsBounded (^rel k r v) :=
+  IsBounded.mk (Or.inr (Or.inr (Or.inl ⟨k, r, v, rfl⟩)))
+@[simp] lemma IsBounded.nrel {k r v : V} : IsBounded (^nrel k r v) :=
+  IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inl ⟨k, r, v, rfl⟩))))
 
 /-- $\Delta_0$ shape is exactly inherited through internal conjunction.
 - [HP98, Lemma I.1.68(2)] -/
-@[simp] lemma IsDelta0.and_iff {p q : V} : IsDelta0 (p ^⋏ q) ↔ IsDelta0 p ∧ IsDelta0 q := by
+@[simp] lemma IsBounded.and_iff {p q : V} : IsBounded (p ^⋏ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
   · intro h
     rcases h.case with
@@ -245,11 +245,11 @@ alias ⟨IsDelta0.case, IsDelta0.mk⟩ := IsDelta0.case_iff
         OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
-    exact IsDelta0.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩)))))
+    exact IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩)))))
 
 /-- $\Delta_0$ shape is exactly inherited through internal disjunction.
 - [HP98, Lemma I.1.68(2)] -/
-@[simp] lemma IsDelta0.or_iff {p q : V} : IsDelta0 (p ^⋎ q) ↔ IsDelta0 p ∧ IsDelta0 q := by
+@[simp] lemma IsBounded.or_iff {p q : V} : IsBounded (p ^⋎ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
   · intro h
     rcases h.case with
@@ -259,27 +259,27 @@ alias ⟨IsDelta0.case, IsDelta0.mk⟩ := IsDelta0.case_iff
         OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
-    exact IsDelta0.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩))))))
+    exact IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl ⟨p, q, hp, hq, rfl⟩))))))
 
 /-- A bounded universal quantification of a $\Delta_0$ code is $\Delta_0$.
 - [HP98, Lemma I.1.68(2)] -/
-lemma IsDelta0.ball {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsDelta0 q) :
-    IsDelta0 (qqBall (termBShift ℒₒᵣ t) q) :=
-  IsDelta0.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
+lemma IsBounded.ball {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
+    IsBounded (qqBall (termBShift ℒₒᵣ t) q) :=
+  IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl
     ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩)))))))
 
 /-- A bounded existential quantification of a $\Delta_0$ code is $\Delta_0$.
 - [HP98, Lemma I.1.68(2)] -/
-lemma IsDelta0.bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsDelta0 q) :
-    IsDelta0 (qqBex (termBShift ℒₒᵣ t) q) :=
-  IsDelta0.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
+lemma IsBounded.bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
+    IsBounded (qqBex (termBShift ℒₒᵣ t) q) :=
+  IsBounded.mk (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr
     ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩)))))))
 
 /-- Inversion for the universal quantifier: a $\Delta_0$ code beginning with `^∀` is a bounded
 universal quantification.
 - [HP98, Lemma I.1.68(2)] -/
-lemma IsDelta0.of_all {p : V} (h : IsDelta0 (^∀ p)) :
-    ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsDelta0 q
+lemma IsBounded.of_all {p : V} (h : IsBounded (^∀ p)) :
+    ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsBounded q
       ∧ p = qqOr (Arithmetic.qqNLT (qqBvar 0) u) q := by
   rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,_,_,h⟩
     | ⟨u, q, hguard, hq, h⟩ | ⟨_,_,_,_,h⟩) <;>
@@ -292,8 +292,8 @@ lemma IsDelta0.of_all {p : V} (h : IsDelta0 (^∀ p)) :
 /-- Inversion for the existential quantifier: a $\Delta_0$ code beginning with `^∃` is a bounded
 existential quantification.
 - [HP98, Lemma I.1.68(2)] -/
-lemma IsDelta0.of_ex {p : V} (h : IsDelta0 (^∃ p)) :
-    ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsDelta0 q
+lemma IsBounded.of_ex {p : V} (h : IsBounded (^∃ p)) :
+    ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsBounded q
       ∧ p = (Arithmetic.qqLT (qqBvar 0) u) ^⋏ q := by
   rcases h.case with (h | h | ⟨_,_,_,h⟩ | ⟨_,_,_,h⟩ | ⟨_,_,_,_,h⟩ | ⟨_,_,_,_,h⟩
     | ⟨_,_,_,_,h⟩ | ⟨u, q, hguard, hq, h⟩) <;>
@@ -305,15 +305,15 @@ lemma IsDelta0.of_ex {p : V} (h : IsDelta0 (^∃ p)) :
 
 /-- Recursion on the internal $\Delta_0$ shape.
 - [HP98, Lemma I.1.68(2)] -/
-lemma IsDelta0.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma Isbounded_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hverum : P ^⊤) (hfalsum : P ^⊥)
     (hrel : ∀ k r v, P (^rel k r v)) (hnrel : ∀ k r v, P (^nrel k r v))
-    (hand : ∀ p q, IsDelta0 p → IsDelta0 q → P p → P q → P (p ^⋏ q))
-    (hor : ∀ p q, IsDelta0 p → IsDelta0 q → P p → P q → P (p ^⋎ q))
-    (hball : ∀ t q, IsUTerm ℒₒᵣ t → IsDelta0 q → P q → P (qqBall (termBShift ℒₒᵣ t) q))
-    (hbex : ∀ t q, IsUTerm ℒₒᵣ t → IsDelta0 q → P q → P (qqBex (termBShift ℒₒᵣ t) q)) :
-    ∀ p, IsDelta0 p → P p :=
-  IsDelta0F.construction.induction (v := ![]) hP (by
+    (hand : ∀ p q, IsBounded p → IsBounded q → P p → P q → P (p ^⋏ q))
+    (hor : ∀ p q, IsBounded p → IsBounded q → P p → P q → P (p ^⋎ q))
+    (hball : ∀ t q, IsUTerm ℒₒᵣ t → IsBounded q → P q → P (qqBall (termBShift ℒₒᵣ t) q))
+    (hbex : ∀ t q, IsUTerm ℒₒᵣ t → IsBounded q → P q → P (qqBex (termBShift ℒₒᵣ t) q)) :
+    ∀ p, IsBounded p → P p :=
+  IsBoundedF.construction.induction (v := ![]) hP (by
     rintro C hC x (rfl | rfl | ⟨k, r, v, rfl⟩ | ⟨k, r, v, rfl⟩ | ⟨p, q, hp, hq, rfl⟩
       | ⟨p, q, hp, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩)
     · exact hverum
@@ -327,11 +327,11 @@ lemma IsDelta0.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
 
 /-- $\Delta_0$ shape is preserved by syntactic negation.
 - [HP98, Lemma I.1.68(2)(ii)] -/
-lemma IsDelta0.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
-    IsDelta0 (Bootstrapping.neg ℒₒᵣ p) := by
-  have H : ∀ p : V, IsDelta0 p → IsUFormula ℒₒᵣ p → IsDelta0 (Bootstrapping.neg ℒₒᵣ p) := by
-    apply IsDelta0.induction 𝚺
-      (P := fun p ↦ IsUFormula ℒₒᵣ p → IsDelta0 (Bootstrapping.neg ℒₒᵣ p))
+lemma IsBounded.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
+    IsBounded (Bootstrapping.neg ℒₒᵣ p) := by
+  have H : ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.neg ℒₒᵣ p) := by
+    apply Isbounded_induction 𝚺
+      (P := fun p ↦ IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.neg ℒₒᵣ p))
     · definability
     · simp
     · simp
@@ -351,21 +351,21 @@ lemma IsDelta0.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
       obtain ⟨-, hq⟩ : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) ∧ IsUFormula ℒₒᵣ q := by
         simpa [qqBall, Arithmetic.qqNLT] using h
       rw [neg_qqBall ht.termBShift hq]
-      exact IsDelta0.bex ht (ih hq)
+      exact IsBounded.bex ht (ih hq)
     · intro t q ht _ ih h
       obtain ⟨-, hq⟩ : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) ∧ IsUFormula ℒₒᵣ q := by
         simpa [qqBex, Arithmetic.qqLT] using h
       rw [neg_qqBex ht.termBShift hq]
-      exact IsDelta0.ball ht (ih hq)
+      exact IsBounded.ball ht (ih hq)
   exact H p h hp
 
 /-- $\Delta_0$ shape is preserved by the free-variable shift.
 - [HP98, Lemma I.1.68(2)] -/
-lemma IsDelta0.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
-    IsDelta0 (Bootstrapping.shift ℒₒᵣ p) := by
-  have H : ∀ p : V, IsDelta0 p → IsUFormula ℒₒᵣ p → IsDelta0 (Bootstrapping.shift ℒₒᵣ p) := by
-    apply IsDelta0.induction 𝚺
-      (P := fun p ↦ IsUFormula ℒₒᵣ p → IsDelta0 (Bootstrapping.shift ℒₒᵣ p))
+lemma IsBounded.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
+    IsBounded (Bootstrapping.shift ℒₒᵣ p) := by
+  have H : ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.shift ℒₒᵣ p) := by
+    apply Isbounded_induction 𝚺
+      (P := fun p ↦ IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.shift ℒₒᵣ p))
     · definability
     · simp
     · simp
@@ -385,18 +385,18 @@ lemma IsDelta0.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsDelta0 p) :
       obtain ⟨-, hq⟩ : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) ∧ IsUFormula ℒₒᵣ q := by
         simpa [qqBall, Arithmetic.qqNLT] using h
       rw [shift_qqBall ht.termBShift hq, ← termBShift_termShift ht.isSemiterm]
-      exact IsDelta0.ball ht.termShift (ih hq)
+      exact IsBounded.ball ht.termShift (ih hq)
     · intro t q ht _ ih h
       obtain ⟨-, hq⟩ : IsUTerm ℒₒᵣ (termBShift ℒₒᵣ t) ∧ IsUFormula ℒₒᵣ q := by
         simpa [qqBex, Arithmetic.qqLT] using h
       rw [shift_qqBex ht.termBShift hq, ← termBShift_termShift ht.isSemiterm]
-      exact IsDelta0.bex ht.termShift (ih hq)
+      exact IsBounded.bex ht.termShift (ih hq)
   exact H p h hp
 
-lemma IsDelta0.isSigma1 {p : V} (h : IsDelta0 p) : IsSigma1 p := by
+lemma IsBounded.isSigma1 {p : V} (h : IsBounded p) : IsSigma1 p := by
   have : 𝚫₁-Predicate (IsSigma1 : V → Prop) := IsSigma1.defined.to_definable
-  have H : ∀ p : V, IsDelta0 p → IsSigma1 p := by
-    apply IsDelta0.induction 𝚺 (P := fun p ↦ IsSigma1 p)
+  have H : ∀ p : V, IsBounded p → IsSigma1 p := by
+    apply Isbounded_induction 𝚺 (P := fun p ↦ IsSigma1 p)
     · definability
     · simp
     · simp
@@ -415,7 +415,7 @@ end FFL.FirstOrder.Arithmetic.Bootstrapping
 
 namespace FFL.FirstOrder.Arithmetic
 
-/-! ## Correctness of `IsDelta0`: `IsDelta0 ⌜ψ⌝ ↔ Hierarchy 𝚺 0 ψ` -/
+/-! ## Correctness of `IsBounded`: `IsBounded ⌜ψ⌝ ↔ ψ.Bounded` -/
 
 open Bootstrapping in
 /-- The code of a bounded existential quantification is `qqBex` of its bound and body codes.
@@ -433,9 +433,9 @@ lemma quote_bex {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSe
 open Bootstrapping in
 /-- A bounded formula has a $\Delta_0$ code.
 - [HP98, Lemma I.1.68] -/
-lemma isDelta0_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : Hierarchy 𝚺 0 ψ) :
-    IsDelta0 (⌜ψ⌝ : ℕ) := by
-  refine Delta0_induction (P := fun n φ ↦ IsDelta0 (⌜φ⌝ : ℕ))
+lemma isBounded_of_bounded {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : ψ.Bounded) :
+    IsBounded (⌜ψ⌝ : ℕ) := by
+  refine bounded_induction (P := fun n φ ↦ IsBounded (⌜φ⌝ : ℕ))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ n ψ h
   · intro n; simp
   · intro n; simp
@@ -447,31 +447,31 @@ lemma isDelta0_of_hierarchy {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : Hi
   · intro n φ ψ hφ hψ ihφ ihψ; simpa [Semiformula.quote_or] using ⟨ihφ, ihψ⟩
   · intro n t φ hφ ihφ
     rw [quote_ball]
-    exact IsDelta0.ball (by simp [Semiterm.quote_def]) ihφ
+    exact IsBounded.ball (by simp [Semiterm.quote_def]) ihφ
   · intro n t φ hφ ihφ
     rw [quote_bex]
-    exact IsDelta0.bex (by simp [Semiterm.quote_def]) ihφ
+    exact IsBounded.bex (by simp [Semiterm.quote_def]) ihφ
 
 open Bootstrapping in
 /-- A formula with a $\Delta_0$ code is bounded.
 - [HP98, Lemma I.1.68] -/
-lemma hierarchy_of_isDelta0 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-    IsDelta0 (⌜ψ⌝ : ℕ) → Hierarchy 𝚺 0 ψ := by
+lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
+    IsBounded (⌜ψ⌝ : ℕ) → ψ.Bounded := by
   induction ψ using Semiformula.rec' with
   | hverum => intro _; simp
   | hfalsum => intro _; simp
   | hrel R v => intro _; exact Hierarchy.rel _ _ _ _
   | hnrel R v => intro _; exact Hierarchy.nrel _ _ _ _
   | hand φ ψ ihφ ihψ =>
-      intro h; rw [Semiformula.quote_and (V := ℕ) φ ψ, IsDelta0.and_iff] at h
+      intro h; rw [Semiformula.quote_and (V := ℕ) φ ψ, IsBounded.and_iff] at h
       exact Hierarchy.and (ihφ h.1) (ihψ h.2)
   | hor φ ψ ihφ ihψ =>
-      intro h; rw [Semiformula.quote_or (V := ℕ) φ ψ, IsDelta0.or_iff] at h
+      intro h; rw [Semiformula.quote_or (V := ℕ) φ ψ, IsBounded.or_iff] at h
       exact Hierarchy.or (ihφ h.1) (ihψ h.2)
   | hall φ ihφ =>
       intro h
       rw [Semiformula.quote_all (V := ℕ) φ] at h
-      obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, hφeq⟩ := IsDelta0.of_all h
+      obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, hφeq⟩ := IsBounded.of_all h
       have hsf := Semiformula.quote_isSemiformula (V := ℕ) φ
       simp only [natCast_nat] at hsf
       rw [hφeq, Arithmetic.qqNLT] at hsf
@@ -487,18 +487,18 @@ lemma hierarchy_of_isDelta0 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
         apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
         rw [Semiformula.quote_all (V := ℕ) φ, hφeq, quote_ball, hs, hφ₂]
         rfl
-      have hφ : Hierarchy 𝚺 0 φ := ihφ (by rw [hφeq]; simp [IsDelta0.or_iff, hq, Arithmetic.qqNLT])
-      have hφ2 : Hierarchy 𝚺 0 φ₂ := by
+      have hφ : φ.Bounded := ihφ (by rw [hφeq]; simp [IsBounded.or_iff, hq, Arithmetic.qqNLT])
+      have hφ2 : φ₂.Bounded := by
         have hform : φ = (“#0 < !!(Rew.bShift s)” 🡒 φ₂) :=
           (Semiformula.all_inj _ _).mp (by rw [← Semiformula.ball_eq]; exact heq)
-        rw [hform, Semiformula.imp_eq, Hierarchy.or_iff] at hφ
-        exact hφ.2
+        rw [hform, Semiformula.imp_eq] at hφ
+        exact (Hierarchy.or_iff.mp hφ).2
       rw [heq]
       exact Hierarchy.ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
   | hexs φ ihφ =>
       intro h
       rw [Semiformula.quote_ex (V := ℕ) φ] at h
-      obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, hφeq⟩ := IsDelta0.of_ex h
+      obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, hφeq⟩ := IsBounded.of_ex h
       have hsf := Semiformula.quote_isSemiformula (V := ℕ) φ
       simp only [natCast_nat] at hsf
       rw [hφeq, Arithmetic.qqLT] at hsf
@@ -514,40 +514,40 @@ lemma hierarchy_of_isDelta0 {n : ℕ} (ψ : ArithmeticSemiproposition n) :
         apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
         rw [Semiformula.quote_ex (V := ℕ) φ, hφeq, quote_bex, hs, hφ₂]
         rfl
-      have hφ : Hierarchy 𝚺 0 φ := ihφ (by rw [hφeq]; simp [IsDelta0.and_iff, hq, Arithmetic.qqLT])
-      have hφ2 : Hierarchy 𝚺 0 φ₂ := by
+      have hφ : φ.Bounded := ihφ (by rw [hφeq]; simp [IsBounded.and_iff, hq, Arithmetic.qqLT])
+      have hφ2 : φ₂.Bounded := by
         have hform : φ = (“#0 < !!(Rew.bShift s)” ⋏ φ₂) :=
           (Semiformula.exs_inj _ _).mp (by rw [← Semiformula.bexs_eq]; exact heq)
-        rw [hform, Hierarchy.and_iff] at hφ
-        exact hφ.2
+        rw [hform] at hφ
+        exact (Hierarchy.and_iff.mp hφ).2
       rw [heq]
       exact Hierarchy.bexs (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
 
 /-- Correctness of the $\Delta_0$-code recognizer over the standard model.
 - [HP98, Lemma I.1.68] -/
-lemma isDelta0_iff_hierarchy {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-    Bootstrapping.IsDelta0 (⌜ψ⌝ : ℕ) ↔ Hierarchy 𝚺 0 ψ :=
-  ⟨hierarchy_of_isDelta0 ψ, isDelta0_of_hierarchy⟩
+lemma isBounded_iff_bounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
+    Bootstrapping.IsBounded (⌜ψ⌝ : ℕ) ↔ ψ.Bounded :=
+  ⟨bounded_of_isBounded ψ, isBounded_of_bounded⟩
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Bootstrapping in
 /-- Internal $\Delta_0$ recognition of a quoted formula agrees with its external hierarchy class.
 - [HP98, Lemma I.1.68] -/
-lemma isDelta0_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-    IsDelta0 (⌜ψ⌝ : V) ↔ Hierarchy 𝚺 0 ψ :=
-  have h : V ⊧/![(⌜ψ⌝ : V)] isDelta0.val ↔ ℕ ⊧/![(⌜ψ⌝ : ℕ)] isDelta0.val := by
+lemma isBounded_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
+    IsBounded (⌜ψ⌝ : V) ↔ ψ.Bounded :=
+  have h : V ⊧/![(⌜ψ⌝ : V)] isBounded.val ↔ ℕ ⊧/![(⌜ψ⌝ : ℕ)] isBounded.val := by
     simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
-      using models_iff_of_Delta1 (V := V) (σ := isDelta0)
-        (IsDelta0.defined (V := ℕ)).proper (IsDelta0.defined (V := V)).proper (e := ![⌜ψ⌝])
-  by simpa [(IsDelta0.defined (V := V)).df, (IsDelta0.defined (V := ℕ)).df,
-    isDelta0_iff_hierarchy] using h
+      using models_iff_of_Delta1 (V := V) (σ := isBounded)
+        (IsBounded.defined (V := ℕ)).proper (IsBounded.defined (V := V)).proper (e := ![⌜ψ⌝])
+  by simpa [(IsBounded.defined (V := V)).df, (IsBounded.defined (V := ℕ)).df,
+    isBounded_iff_bounded] using h
 
 open Bootstrapping in
 /-- Agreement with the external class on quoted semisentences.
 - [HP98, Lemma I.1.68] -/
-lemma isDelta0_quote_iff {n : ℕ} (σ : ArithmeticSemisentence n) :
-    IsDelta0 (⌜σ⌝ : V) ↔ Hierarchy 𝚺 0 σ := by
-  simp [Sentence.quote_def, isDelta0_quote_iff_s]
+lemma isBounded_quote_iff {n : ℕ} (σ : ArithmeticSemisentence n) :
+    IsBounded (⌜σ⌝ : V) ↔ σ.Bounded := by
+  simp [Sentence.quote_def, isBounded_quote_iff_s]
 
 end FFL.FirstOrder.Arithmetic

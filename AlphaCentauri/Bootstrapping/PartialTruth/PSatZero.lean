@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Delta0
+public import AlphaCentauri.Bootstrapping.Bounded
 public import AlphaCentauri.Bootstrapping.TermVal
 
 /-!

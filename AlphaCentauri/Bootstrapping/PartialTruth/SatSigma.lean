@@ -281,18 +281,18 @@ private lemma isStrictSigma_of_isStrictPi_ex {n : ℕ} {p : V} (h : IsStrictPi (
 $\Delta_0$: a $\Delta_0$ code begins with at most one existential quantifier, the one of a bounded
 existential quantification.
 - [HP98, Lemma I.1.68(2)] -/
-private lemma isDelta0_ex_block {z M K : V} (hz : IsDelta0 z) (hMK : z = qqExss M K)
-    (hM : ∀ p : V, M ≠ ^∃ p) : IsDelta0 M ∧ K ≤ 1 := by
+private lemma isBounded_ex_block {z M K : V} (hz : IsBounded z) (hMK : z = qqExss M K)
+    (hM : ∀ p : V, M ≠ ^∃ p) : IsBounded M ∧ K ≤ 1 := by
   rcases zero_or_succ K with rfl | ⟨K, rfl⟩
   · rw [qqExss_zero] at hMK; exact ⟨hMK ▸ hz, by simp⟩
   · rw [qqExss_succ] at hMK
     subst hMK
-    obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, heq⟩ := IsDelta0.of_ex hz
+    obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, heq⟩ := IsBounded.of_ex hz
     rcases zero_or_succ K with rfl | ⟨K, rfl⟩
     · rw [qqExss_zero] at heq
       subst heq
-      refine ⟨IsDelta0.and_iff.mpr ⟨?_, hq⟩, by simp⟩
-      rw [Arithmetic.qqLT]; exact IsDelta0.rel
+      refine ⟨IsBounded.and_iff.mpr ⟨?_, hq⟩, by simp⟩
+      rw [Arithmetic.qqLT]; exact IsBounded.rel
     · rw [qqExss_succ] at heq
       simp [qqExs, qqAnd, pair_ext_iff] at heq
 
@@ -303,7 +303,7 @@ private lemma isStrictPi_ex_block : ∀ (n : ℕ) (z M K : V), IsStrictSigma (n 
   | 0, _, M, _, hz, hMK, hM => by
     obtain ⟨k, q, hqk, hq⟩ := hz
     obtain ⟨j, -, rfl⟩ := ex_block_dominates hMK hM hqk
-    exact (isDelta0_ex_block hq rfl hM).1
+    exact (isBounded_ex_block hq rfl hM).1
   | n + 1, _, M, _, hz, hMK, hM => by
     obtain ⟨k, q, hqk, hq⟩ := hz
     obtain ⟨j, -, rfl⟩ := ex_block_dominates hMK hM hqk
@@ -313,7 +313,7 @@ private lemma isStrictPi_ex_block : ∀ (n : ℕ) (z M K : V), IsStrictSigma (n 
         rw [qqExss_succ] at hq ⊢
         exact isStrictSigma_of_isStrictPi_ex hq
       match n with
-      | 0 => exact IsStrictPi.of_delta0 (isDelta0_ex_block hs rfl hM).1
+      | 0 => exact IsStrictPi.of_bounded (isBounded_ex_block hs rfl hM).1
       | n + 1 =>
         exact IsStrictPi.mono (by omega)
           (isStrictPi_ex_block n (qqExss M (j + 1)) M (j + 1) hs rfl hM)
@@ -349,9 +349,9 @@ private lemma exists_vecAppend_singleton {k w : V} (h : len w = k + 1) :
 /-- Satisfaction of a $\Delta_0$ code that begins with an existential quantifier is existential
 satisfaction of its body: the guard of the bounded quantifier is part of that body.
 - [HP98, Theorem I.1.70(iv)] -/
-private lemma satZero_ex_iff {p e : V} (h : IsDelta0 (^∃ p)) :
+private lemma satZero_ex_iff {p e : V} (h : IsBounded (^∃ p)) :
     SatZero (^∃ p) e ↔ ∃ x, SatZero p (x ∷ e) := by
-  obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsDelta0.of_ex h
+  obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsBounded.of_ex h
   have hlt : ∀ x : V, SatZero (Arithmetic.qqLT (qqBvar 0) (termBShift ℒₒᵣ t)) (x ∷ e) ↔
       x < termVal e t := fun x ↦ by
     rw [SatZero.lt_iff (by simp) ht.termBShift]
@@ -383,13 +383,13 @@ private def BlockSat (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜�
 /-- An empty existential block at level zero: a $\Delta_0$ code is $\Sigma_1$-satisfied exactly when
 it is $\Delta_0$-satisfied.
 - [HP98, Theorem I.1.75(2)(v)] -/
-private lemma of_Pi0 (hB : BlockSat V 0) {z e : V} (hz : IsDelta0 z)
+private lemma of_Pi0 (hB : BlockSat V 0) {z e : V} (hz : IsBounded z)
     (hz' : IsUFormula ℒₒᵣ z) : SatSigma 1 z e ↔ SatPi 0 z e := by
   constructor
   · intro h
     obtain ⟨K, M, hMK, hM⟩ := exists_ex_block z
     obtain ⟨w, hw, hsat⟩ := (hB z M K e (IsStrictSigma.of_pi hz) hz' hMK hM).mp h
-    obtain ⟨hMd, hK1⟩ := isDelta0_ex_block hz hMK hM
+    obtain ⟨hMd, hK1⟩ := isBounded_ex_block hz hMK hM
     rcases zero_or_succ K with rfl | ⟨K, rfl⟩
     · rw [qqExss_zero] at hMK
       rw [len_zero_iff_eq_nil.mp hw] at hsat
@@ -482,7 +482,7 @@ private lemma of_pi_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSat V m) →
           refine ((ih fun i hi ↦ hB i (by omega)).2 z e hzs hz').mpr ?_
           match n with
           | 0 =>
-            obtain ⟨hMd, hK1⟩ := isDelta0_ex_block hzs hMK hM
+            obtain ⟨hMd, hK1⟩ := isBounded_ex_block hzs hMK hM
             have hK : K = 0 := by simpa using hK1
             subst hK
             rw [qqExss_zero] at hzex
@@ -523,7 +523,7 @@ private lemma blockSat : ∀ n : ℕ, BlockSat V n := fun n ↦ by
       rw [qqExss_succ] at hq hsat
       match n with
       | 0 =>
-        obtain ⟨-, hj⟩ := isDelta0_ex_block hq hqex hM
+        obtain ⟨-, hj⟩ := isBounded_ex_block hq hqex hM
         have hj0 : j = 0 := by simpa using hj
         subst hj0
         rw [qqExss_zero] at hq hsat
@@ -537,7 +537,7 @@ private lemma blockSat : ∀ n : ℕ, BlockSat V n := fun n ↦ by
           ((of_pi_step m fun i hi ↦ ih i (by omega)).2 _ _ hqs hqU).mp hsat
         match m with
         | 0 =>
-          obtain ⟨hMd, hj'⟩ := isDelta0_ex_block hqs hqex hM
+          obtain ⟨hMd, hj'⟩ := isBounded_ex_block hqs hqex hM
           have hj0 : j = 0 := by simpa using hj'
           subst hj0
           rw [qqExss_zero] at hqs hsat'
@@ -796,7 +796,7 @@ private lemma isStrict_subst : ∀ (n : ℕ) (m l w p : V), IsSemitermVec ℒₒ
     IsSemiformula ℒₒᵣ m p →
     (IsStrictSigma n p → IsStrictSigma n (subst ℒₒᵣ w p)) ∧
     (IsStrictPi n p → IsStrictPi n (subst ℒₒᵣ w p))
-  | 0, _, _, _, _, hw, hp => ⟨fun h ↦ IsDelta0.subst hw hp h, fun h ↦ IsDelta0.subst hw hp h⟩
+  | 0, _, _, _, _, hw, hp => ⟨fun h ↦ IsBounded.subst hw hp h, fun h ↦ IsBounded.subst hw hp h⟩
   | n + 1, m, l, w, p, hw, hp => by
     constructor
     · rintro ⟨k, q, rfl, hq⟩

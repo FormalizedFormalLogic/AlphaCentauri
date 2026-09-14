@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Hierarchy.Bounded
 public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 
 /-! # Prenex arithmetical classes
@@ -19,7 +20,7 @@ matrix beneath alternating quantifier blocks.
 - [HP98, 0.30]
 - [HP98, Lemma I.1.69] -/
 inductive StrictHierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
-  | zero {Γ n} {φ : Semiformula L ξ n}      : Hierarchy 𝚺 0 φ → StrictHierarchy Γ 0 φ
+  | zero {Γ n} {φ : Semiformula L ξ n}      : φ.Bounded → StrictHierarchy Γ 0 φ
   | ofAlt {Γ s n} {φ : Semiformula L ξ n}   : StrictHierarchy Γ.alt s φ → StrictHierarchy Γ (s + 1) φ
   | exs {s n} {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚺 (s + 1) φ → StrictHierarchy 𝚺 (s + 1) (∃¹ φ)
   | all {s n} {φ : Semiformula L ξ (n + 1)} : StrictHierarchy 𝚷 (s + 1) φ → StrictHierarchy 𝚷 (s + 1) (∀¹ φ)
@@ -105,7 +106,7 @@ lemma toPrenex {Γ j s n} {φ : Semiformula L ξ (n + s)} (h : StrictHierarchy (
 strict `Γ`-formula of level `s`.
 
 - [HP98, 0.30] -/
-lemma toPrenex_of_Delta0 {Γ s n} {φ : Semiformula L ξ (n + s)} (h : Hierarchy 𝚺 0 φ) :
+lemma toPrenex_of_bounded {Γ s n} {φ : Semiformula L ξ (n + s)} (h : φ.Bounded) :
     StrictHierarchy Γ s (φ.toPrenex Γ s) := by simpa using toPrenex (Γ := Γ) (zero h)
 
 /-- Strict hierarchy classes are monotone in their level.

@@ -161,10 +161,10 @@ private lemma quote_mulTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒ
 - [HP98, Theorem I.1.70]
 - [HP98, Corollary I.1.76] -/
 theorem satZero_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : Hierarchy 𝚺 0 φ) (v : Fin k → V) :
+    (hφ : φ.Bounded) (v : Fin k → V) :
     SatZero (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
   revert v
-  refine Delta0_induction (ξ := Empty)
+  refine bounded_induction (ξ := Empty)
     (P := fun k φ ↦ ∀ v : Fin k → V, SatZero (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ)
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ k φ hφ
   · intro n v; simp [Sentence.quote_def]
@@ -189,12 +189,12 @@ theorem satZero_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     rw [quote_and_sentence, SatZero.and_iff, ihφ v, ihψ v]
     simp
   · intro n φ ψ hφ hψ ihφ ihψ v
-    rw [quote_or_sentence, SatZero.or_iff ((isDelta0_quote_iff φ).mpr hφ) (isUFormula_quote φ)
-      ((isDelta0_quote_iff ψ).mpr hψ) (isUFormula_quote ψ), ihφ v, ihψ v]
+    rw [quote_or_sentence, SatZero.or_iff ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ)
+      ((isBounded_quote_iff ψ).mpr hψ) (isUFormula_quote ψ), ihφ v, ihψ v]
     simp
   · intro n t φ hφ ihφ v
     rw [quote_ball_sentence, SatZero.ball_iff (isUTerm_quote t)
-      ((isDelta0_quote_iff φ).mpr hφ) (isUFormula_quote φ), termVal_quote]
+      ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ), termVal_quote]
     simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel]
     refine forall_congr' fun x ↦ ?_
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)]
@@ -356,9 +356,9 @@ private lemma uFormula_quote_cast {k : ℕ} (φ : ArithmeticSemisentence k) :
 
 /-- The code of a bounded semisentence is internally $\Delta_0$.
 - [HP98, Lemma I.1.68] -/
-private lemma Delta0_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k} (h : Hierarchy 𝚺 0 φ) :
-    Delta0 ((⌜φ⌝ : ℕ) : M) :=
-  Delta1_cast₁ isDelta0 (by simpa using (isDelta0_quote_iff (V := ℕ) φ).mpr h)
+private lemma bounded_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k} (h : φ.Bounded) :
+    Reading.Bounded ((⌜φ⌝ : ℕ) : M) :=
+  Delta1_cast₁ isBounded (by simpa using (isBounded_quote_iff (V := ℕ) φ).mpr h)
 
 /-- The code of a strict prenex semisentence is in the matching internal strict class.
 - [HP98, Lemma I.1.69] -/
@@ -437,9 +437,9 @@ formula agrees with truth.
 - [HP98, Theorem I.1.70]
 - [HP98, Corollary I.1.76] -/
 private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : Hierarchy 𝚺 0 φ) :
+    (hφ : φ.Bounded) :
     ∀ (v : Fin k → M) (ev : M), Codes v ev → (Sat0 ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
-  refine Delta0_induction (ξ := Empty)
+  refine bounded_induction (ξ := Empty)
     (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev →
       (Sat0 ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ k φ hφ
@@ -492,7 +492,7 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     have hq : M ⊧/![((⌜φ ⋎ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqOrDef.val :=
       Sigma0_cast₃ qqOrDef (by simpa using quote_or_sentence (V := ℕ) φ ψ)
     rw [read_satZeroOr hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev
-      (Delta0_quote_cast hφ) (uFormula_quote_cast φ) (Delta0_quote_cast hψ)
+      (bounded_quote_cast hφ) (uFormula_quote_cast φ) (bounded_quote_cast hψ)
       (uFormula_quote_cast ψ) hq, ihφ v ev hev, ihψ v ev hev]
     simp
   · intro m t φ hφ ihφ v ev hev
@@ -502,7 +502,7 @@ private lemma satZero_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
         ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M), ((⌜φ⌝ : ℕ) : M)] qqBallDef.val :=
       Sigma1_cast₃ qqBallDef (by simpa using quote_ball_sentence (V := ℕ) t φ)
     rw [read_satZeroBall hM ((⌜t⌝ : ℕ) : M) ((termBShift ℒₒᵣ (⌜t⌝ : ℕ) : ℕ) : M)
-      ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) (Delta0_quote_cast hφ)
+      ((⌜φ⌝ : ℕ) : M) _ ev (t.valb v) (uTerm_quote_cast t) (bounded_quote_cast hφ)
       (uFormula_quote_cast φ) hu hq (termVal_quote_cast hM hev t)]
     simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel]
     constructor

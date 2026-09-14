@@ -23,10 +23,18 @@ open Semantics (modelsSet_iff)
 
 variable {k : ℕ}
 
+section termCut
+
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+
 /-- The elements of `M` bounded by the value at `c` of some closed term. -/
-private def termCut {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (c : Fin k → M) : Cut M where
+private def termCut (c : Fin k → M) : Cut M where
   carrier := {x | ∃ t : ClosedSemiterm ℒₒᵣ k, x ≤ t.valb c}
   zero_mem := ⟨‘0’, by simp⟩
+  succ_mem := fun ⟨t, ht⟩ ↦ ⟨‘!!t + 1’, by simpa using add_le_add_right ht 1⟩
+  mem_of_lt := fun hab ⟨t, ht⟩ ↦ ⟨t, le_trans hab.le ht⟩
+
+private instance termCut_isClosed (c : Fin k → M) : (termCut c).IsClosed where
   one_mem := ⟨‘1’, by simp⟩
   add_mem := fun ⟨s, hs⟩ ⟨t, ht⟩ ↦ ⟨‘!!s + !!t’, by
     simpa using add_le_add hs ht
@@ -34,7 +42,8 @@ private def termCut {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣�
   mul_mem := fun ⟨s, hs⟩ ⟨t, ht⟩ ↦ ⟨‘!!s * !!t’, by
     simpa using mul_le_mul hs ht (by simp) (by simp)
   ⟩
-  mem_of_lt := fun hab ⟨t, ht⟩ ↦ ⟨t, le_trans hab.le ht⟩
+
+end termCut
 
 /-- **Parikh's theorem**: a $\Pi^0_2$ sentence provable by `𝗜𝚺₀` is provable with the
 existential quantifier bounded by a term. This is proven for $\forall\ldots\forall\exists` formulas, which
@@ -93,6 +102,7 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : Hierarchy 𝚺 0 φ)
 
   -- The elements bounded by the value of a closed term form a cut, which models `𝗜𝚺₀`.
   set K : Cut (ModelOfSatEq sat) := termCut (cstVal sat);
+  let _ : K.IsClosed := termCut_isClosed _
   let _ : ↥K.carrier ⊆ₑ ModelOfSatEq sat := K.endExtension
   have hK : (↥K.carrier)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
     EndExtension.models_ISigma0 (M := ↥K.carrier) (N := ModelOfSatEq sat)

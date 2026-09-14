@@ -84,7 +84,7 @@ lemma succ_le_qqExs (p : V) : p + 1 ≤ ^∃ p := by
   · definability
   case zero => simp
   case succ k ih =>
-    refine le_trans ih ?_
+    apply le_trans ih
     rw [qqExss_succ]
     exact le_qqExs _
 

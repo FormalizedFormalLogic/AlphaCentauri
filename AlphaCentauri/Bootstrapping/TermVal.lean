@@ -114,11 +114,11 @@ noncomputable def termValVec (e k v : V) : V := construction.resultVec ℒₒᵣ
 
 /-- The $\Sigma_1$ graph of `termVal`; argument order `(y, e, t)`, `y = termVal e t`.
 - [HP98, 1.63] -/
-noncomputable def termValGraph : 𝚺₁.Semisentence 3 := (blueprint.result ℒₒᵣ).rew <| Rew.subst ![#0, #2, #1]
+noncomputable def termValGraph : 𝚺₁.Semisentence 3 := (blueprint.result ℒₒᵣ).rew $ Rew.subst ![#0, #2, #1]
 
 /-- Graph of `termValVec`; argument order `(y, e, k, v)`.
 - [HP98, 1.63] -/
-noncomputable def termValVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultVec ℒₒᵣ).rew <| Rew.subst ![#0, #2, #3, #1]
+noncomputable def termValVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultVec ℒₒᵣ).rew $ Rew.subst ![#0, #2, #3, #1]
 
 /-- Evaluation of a coded bound variable reads the corresponding assignment entry.
 - [HP98, 1.64(5)] -/
@@ -174,7 +174,7 @@ end
 /-- Evaluation of the coded one term is one.
 - [HP98, 1.64(5)] -/
 @[simp] lemma termVal_one (e : V) : termVal e (𝟏 : V) = 1 := by
-  have hkf : (ℒₒᵣ).IsFunc (0 : V) (1 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inl ⟨rfl, rfl⟩)
+  have hkf : (ℒₒᵣ).IsFunc (0 : V) (1 : V) := isFunc_LOR_iff.mpr (Or.inr $ Or.inl ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ (0 : V) (0 : V) := by simp
   have heq : (𝟏 : V) = ^func (0 : V) (1 : V) (0 : V) := qqOne_eq_qqFunc
   show construction.result ℒₒᵣ ![e] (𝟏 : V) = 1
@@ -185,7 +185,7 @@ end
 - [HP98, 1.64(5)] -/
 @[simp] lemma termVal_add {e t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     termVal e (t ^+ u) = termVal e t + termVal e u := by
-  have hkf : (ℒₒᵣ).IsFunc (2 : V) (0 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inl ⟨rfl, rfl⟩)
+  have hkf : (ℒₒᵣ).IsFunc (2 : V) (0 : V) := isFunc_LOR_iff.mpr (Or.inr $ Or.inr $ Or.inl ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
   have heq : (t ^+ u : V) = ^func (2 : V) (0 : V) (?[t, u] : V) := qqAdd_eq_qqFunc t u
   have step : termVal e (^func (2 : V) (0 : V) (?[t, u] : V)) =
@@ -198,7 +198,7 @@ end
 - [HP98, 1.64(5)] -/
 @[simp] lemma termVal_mul {e t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     termVal e (t ^* u) = termVal e t * termVal e u := by
-  have hkf : (ℒₒᵣ).IsFunc (2 : V) (1 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inr ⟨rfl, rfl⟩)
+  have hkf : (ℒₒᵣ).IsFunc (2 : V) (1 : V) := isFunc_LOR_iff.mpr (Or.inr $ Or.inr $ Or.inr ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
   have heq : (t ^* u : V) = ^func (2 : V) (1 : V) (?[t, u] : V) := qqMul_eq_qqFunc t u
   have step : termVal e (^func (2 : V) (1 : V) (?[t, u] : V)) =
@@ -360,9 +360,9 @@ theorem termVal_le_poly (e t : V) : termVal e t ≤ Exp.exp ((listMax e + 2) * (
             add_le_add iha ihb
         _ ≤ Exp.exp ((listMax e + 2) * (a ^+ b)) + Exp.exp ((listMax e + 2) * (a ^+ b)) :=
             add_le_add
-              (exp_monotone_le.mpr <|
+              (exp_monotone_le.mpr $
                 mul_le_mul le_rfl (le_trans (by simp) hab) (by simp) (by simp))
-              (exp_monotone_le.mpr <|
+              (exp_monotone_le.mpr $
                 mul_le_mul le_rfl (le_trans (by simp) hab) (by simp) (by simp))
         _ = Exp.exp ((listMax e + 2) * (a ^+ b) + 1) := by rw [exp_succ, two_mul]
         _ ≤ Exp.exp ((listMax e + 2) * (a ^+ b + 1)) := by
@@ -443,12 +443,12 @@ noncomputable def termValVec' (f e k v : V) : V :=
 /-- The $\Sigma_1$ graph of `termVal'`; argument order `(y, f, e, t)`.
 - [HP98, 1.63] -/
 noncomputable def termVal'Graph : 𝚺₁.Semisentence 4 :=
-  (blueprint.result ℒₒᵣ).rew <| Rew.subst ![#0, #3, #1, #2]
+  (blueprint.result ℒₒᵣ).rew $ Rew.subst ![#0, #3, #1, #2]
 
 /-- The $\Sigma_1$ graph of `termValVec'`; argument order `(y, f, e, k, v)`.
 - [HP98, 1.63] -/
 noncomputable def termValVec'Graph : 𝚺₁.Semisentence 5 :=
-  (blueprint.resultVec ℒₒᵣ).rew <| Rew.subst ![#0, #3, #4, #1, #2]
+  (blueprint.resultVec ℒₒᵣ).rew $ Rew.subst ![#0, #3, #4, #1, #2]
 
 @[simp] lemma termVal'_bvar (f e z : V) : termVal' f e ^#z = e.[z] := by
   simp [termVal', construction]
@@ -499,7 +499,7 @@ end
 - [HP98, 1.64(5)] -/
 @[simp] lemma termVal'_add {f e t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     termVal' f e (t ^+ u) = termVal' f e t + termVal' f e u := by
-  have hkf : (ℒₒᵣ).IsFunc (2 : V) (0 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inl ⟨rfl, rfl⟩)
+  have hkf : (ℒₒᵣ).IsFunc (2 : V) (0 : V) := isFunc_LOR_iff.mpr (Or.inr $ Or.inr $ Or.inl ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
   have heq : (t ^+ u : V) = ^func (2 : V) (0 : V) (?[t, u] : V) := qqAdd_eq_qqFunc t u
   have step : termVal' f e (^func (2 : V) (0 : V) (?[t, u] : V)) =
@@ -513,7 +513,7 @@ end
 - [HP98, 1.64(5)] -/
 @[simp] lemma termVal'_mul {f e t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     termVal' f e (t ^* u) = termVal' f e t * termVal' f e u := by
-  have hkf : (ℒₒᵣ).IsFunc (2 : V) (1 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inr ⟨rfl, rfl⟩)
+  have hkf : (ℒₒᵣ).IsFunc (2 : V) (1 : V) := isFunc_LOR_iff.mpr (Or.inr $ Or.inr $ Or.inr ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
   have heq : (t ^* u : V) = ^func (2 : V) (1 : V) (?[t, u] : V) := qqMul_eq_qqFunc t u
   have step : termVal' f e (^func (2 : V) (1 : V) (?[t, u] : V)) =

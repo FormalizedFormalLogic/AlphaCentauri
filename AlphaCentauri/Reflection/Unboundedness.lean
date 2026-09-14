@@ -156,7 +156,7 @@ private lemma inconsistent_union_of_inconsistent_insert_pi
     apply Arithmetic.complete.{0}
     intro M _ _
     have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory M 𝗜𝚺₁ (T ∪ U) inferInstance
-    refine models_collapseSentence_pi_iff.mpr ?_
+    apply models_collapseSentence_pi_iff.mpr
     intro y hmem hsemi _ hlt
     have hp : Proof T ((⌜hnegζ.get⌝ : ℕ) : M) ⌜∼fixedpoint (collapseFormula T U n 𝚷)⌝ := by
       simp [coe_quote_proof_eq]
@@ -166,7 +166,7 @@ private lemma inconsistent_union_of_inconsistent_insert_pi
     obtain ⟨m, rfl⟩ := eq_nat_of_le_nat hle
     obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi
     rw [hmσ]
-    refine (piSatisfaction_quote_iff (hΓ σ hσ) ![]).mpr ?_
+    apply (piSatisfaction_quote_iff (hΓ σ hσ) ![]).mpr
     have hσM : M↓[ℒₒᵣ] ⊧ σ := models_of_mem (Set.mem_union_right T hσ)
     simpa [models_iff] using hσM
   exact inconsistent_of_provable_of_unprovable hprov (WeakerThan.pbl hneg)
@@ -192,7 +192,7 @@ private lemma inconsistent_union_of_inconsistent_insert_sigma
     obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat hz
     obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi
     rw [hmσ]
-    refine (sigmaSatisfaction_quote_iff (hΓ σ hσ) ![]).mpr ?_
+    apply (sigmaSatisfaction_quote_iff (hΓ σ hσ) ![]).mpr
     have hσM : M↓[ℒₒᵣ] ⊧ σ := models_of_mem (Set.mem_union_right T hσ)
     simpa [models_iff] using hσM
   exact inconsistent_of_provable_of_unprovable hprov (WeakerThan.pbl hneg)

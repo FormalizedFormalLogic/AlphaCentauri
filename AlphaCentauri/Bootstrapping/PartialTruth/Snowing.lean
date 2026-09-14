@@ -155,14 +155,14 @@ theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
     rw [quote_ball_sentence, BoundedSatisfaction.ball_iff (isUTerm_quote t)
       ((isBounded_quote_iff φ).mpr hφ) (isUFormula_quote φ), termVal_quote]
     simp only [Semiformula.eval_ball, Semiformula.Operator.lt_def, Semiformula.eval_rel]
-    refine forall_congr' ?_
+    apply forall_congr'
     intro x
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)]
     simp [Function.comp_def]
   · intro n t φ hφ ihφ v
     rw [quote_bex_sentence, BoundedSatisfaction.bex_iff (isUTerm_quote t), termVal_quote]
     simp only [Semiformula.eval_bexs, Semiformula.Operator.lt_def, Semiformula.eval_rel]
-    refine exists_congr ?_
+    apply exists_congr
     intro x
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp, ihφ (x :> v)]
     simp [Function.comp_def]
@@ -198,7 +198,7 @@ lemma hierarchySatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : Arithmet
     show SigmaSatisfaction (s₀ + 1) _ _ ↔ _
     rw [quote_ex_sentence, SigmaSatisfaction.exs_iff]
     simp only [Semiformula.eval_ex]
-    refine exists_congr ?_
+    apply exists_congr
     intro x
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp]
     exact ih (x :> v)
@@ -207,7 +207,7 @@ lemma hierarchySatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : Arithmet
     show PiSatisfaction (s₀ + 1) _ _ ↔ _
     rw [quote_all_sentence, PiSatisfaction.all_iff]
     simp only [Semiformula.eval_all]
-    refine forall_congr' ?_
+    apply forall_congr'
     intro x
     rw [show (x ∷ matrixToVec v : V) = matrixToVec (x :> v) by simp]
     exact ih (x :> v)
@@ -560,7 +560,7 @@ theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
   have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n) := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance
       (Entailment.Axiomatized.le_of_subset Set.subset_union_left)
   unfold snowing
-  refine Arithmetic.provable_iff_of_models_iff (T := 𝗣𝗔⁻ ∪ tarski n) ?_
+  apply Arithmetic.provable_iff_of_models_iff (T := 𝗣𝗔⁻ ∪ tarski n)
   intro M _ hMT e
   have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := Semantics.ModelsSet.of_subset hMT Set.subset_union_left
   have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦

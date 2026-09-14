@@ -161,7 +161,7 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
 /-- `Phi` is $\Delta_1$-defined by `blueprint`.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 lemma Phi_definable :
-    𝚫₁.Defined (fun v : Fin 2 → V ↦ Phi T {x | x ∈ v 1} (v 0)) (blueprint T).core := .mk <| by
+    𝚫₁.Defined (fun v : Fin 2 → V ↦ Phi T {x | x ∈ v 1} (v 0)) (blueprint T).core := .mk $ by
   constructor
   · intro v; simp [blueprint]
   · intro v; simp [phi_iff, blueprint]
@@ -389,7 +389,7 @@ lemma axL {s p : V} (hs : IsFormulaSet L s) (h : p ∈ s) (hn : neg L p ∈ s) :
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 lemma verumIntro {s : V} (hs : IsFormulaSet L s) (h : ^⊤ ∈ s) :
     CutFreeDerivation T (verumIntro s) :=
-  CutFreeDerivation.mk ⟨by simpa using hs, Or.inr <| Or.inl ⟨s, rfl, h⟩⟩
+  CutFreeDerivation.mk ⟨by simpa using hs, Or.inr $ Or.inl ⟨s, rfl, h⟩⟩
 
 /-- An and-introduction `andIntro s p q dp dq` is a cut-free derivation of `s` whenever `s`
 contains `p ^⋏ q` and `dp`, `dq` cut-free derive `s` extended by `p`, respectively `q`.
@@ -399,7 +399,7 @@ lemma andIntro {s p q dp dq : V} (h : p ^⋏ q ∈ s)
     CutFreeDerivation T (andIntro s p q dp dq) :=
   CutFreeDerivation.mk
     ⟨by simp only [fstIdx_andIntro]; intro r hr; exact hdp.isFormulaSet r (by simp [hr]),
-      Or.inr <| Or.inr <| Or.inl ⟨s, p, q, dp, dq, rfl, h, hdp, hdq⟩⟩
+      Or.inr $ Or.inr $ Or.inl ⟨s, p, q, dp, dq, rfl, h, hdp, hdq⟩⟩
 
 /-- An or-introduction `orIntro s p q dpq` is a cut-free derivation of `s` whenever `s` contains
 `p ^⋎ q` and `dpq` cut-free derives `s` extended by both `p` and `q`.
@@ -409,7 +409,7 @@ lemma orIntro {s p q dpq : V} (h : p ^⋎ q ∈ s)
     CutFreeDerivation T (orIntro s p q dpq) :=
   CutFreeDerivation.mk
     ⟨by simp only [fstIdx_orIntro]; intro r hr; exact hdpq.isFormulaSet r (by simp [hr]),
-      Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, q, dpq, rfl, h, hdpq⟩⟩
+      Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨s, p, q, dpq, rfl, h, hdpq⟩⟩
 
 /-- An all-introduction `allIntro s p dp` is a cut-free derivation of `s` whenever `s` contains
 `^∀ p` and `dp` cut-free derives the shifted sequent extended by the free instance of `p`.
@@ -420,7 +420,7 @@ lemma allIntro {s p dp : V} (h : ^∀ p ∈ s)
   CutFreeDerivation.mk
     ⟨by simp only [fstIdx_allIntro]; intro q hq
         simpa using hdp.isFormulaSet (shift L q) (by simp [shift_mem_setShift hq]),
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, dp, rfl, h, hdp⟩⟩
+      Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨s, p, dp, rfl, h, hdp⟩⟩
 
 /-- An exists-introduction `exsIntro s p t dp` is a cut-free derivation of `s` whenever `s`
 contains `^∃ p`, `t` is a term, and `dp` cut-free derives `s` extended by the instance of `p` at
@@ -431,7 +431,7 @@ lemma exsIntro {s p t dp : V} (h : ^∃ p ∈ s) (ht : IsTerm L t)
     CutFreeDerivation T (exsIntro s p t dp) :=
   CutFreeDerivation.mk
     ⟨by simp only [fstIdx_exsIntro]; intro q hq; exact hdp.isFormulaSet q (by simp [hq]),
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, t, dp, rfl, h, ht, hdp⟩⟩
+      Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨s, p, t, dp, rfl, h, ht, hdp⟩⟩
 
 /-- A weakening `wkRule s d` is a cut-free derivation of `s` whenever `d` cut-free derives some
 subset `s'` of `s`.
@@ -440,7 +440,7 @@ lemma wkRule {s s' d : V} (hs : IsFormulaSet L s) (h : s' ⊆ s)
     (hd : CutFreeDerivationOf T d s') : CutFreeDerivation T (wkRule s d) :=
   CutFreeDerivation.mk
     ⟨by simpa using hs,
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+      Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
         ⟨s, d, rfl, by simp [hd.1, h], hd.2⟩⟩
 
 /-- A shift `shiftRule (setShift L s) d` is a cut-free derivation of the shifted sequent whenever
@@ -450,7 +450,7 @@ lemma shiftRule {s d : V} (hd : CutFreeDerivationOf T d s) :
     CutFreeDerivation T (shiftRule (setShift L s) d) :=
   CutFreeDerivation.mk
     ⟨by simp [hd.isFormulaSet],
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+      Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
         ⟨setShift L s, d, rfl, by simp [hd.1], hd.2⟩⟩
 
 /-- An axiom-set leaf `axm s p` is a cut-free derivation of `s` whenever `s` contains `p` and `p`
@@ -460,7 +460,7 @@ lemma axm {s p : V} (hs : IsFormulaSet L s) (hp : p ∈ s) (hT : p ∈ T.Δ₁Cl
     CutFreeDerivation T (axm s p) :=
   CutFreeDerivation.mk
     ⟨by simpa using hs,
-      Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr
+      Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr
         ⟨s, p, rfl, hp, hT⟩⟩
 
 variable {U : Theory L} [U.Δ₁]

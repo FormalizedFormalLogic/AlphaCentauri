@@ -125,7 +125,7 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
 /-- The fixpoint construction for `blueprint`. -/
 def construction : Fixpoint.Construction V blueprint where
   Φ := fun _ ↦ Phi
-  defined := .mk <| by
+  defined := .mk $ by
     constructor
     · intro v
       simp [blueprint, HierarchySymbol.Semiformula.val_sigma, eq_comm,

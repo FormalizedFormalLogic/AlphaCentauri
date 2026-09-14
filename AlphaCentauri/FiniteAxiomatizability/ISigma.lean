@@ -181,7 +181,7 @@ private lemma exists_assignment_eval_indFormula {M : Type*} [ORingStructure M] {
 theorem provable_succInd_of_strictHierarchy {n : ℕ} {φ : ArithmeticSemiformula ℕ 1}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) :
     finiteAxiomatization n ⊢ .univCl (succInd φ) := by
-  refine Arithmetic.complete.{0} _ _ ?_
+  apply Arithmetic.complete.{0} _ _
   intro M _ _
   have hInd : M↓[ℒₒᵣ] ⊧ indSentence n := Semantics.ModelsSet.models _ indSentence_mem_finiteAxiomatization
   have hind : ∀ g : ℕ → M, (indFormula n).Eval ![0] g →
@@ -234,7 +234,7 @@ private lemma exists_assignment_eval_collFormula {M : Type*} [ORingStructure M] 
 theorem provable_collectionAxiom_of_strictHierarchy {n : ℕ} {φ : ArithmeticSemiformula ℕ 2}
     (hφ : StrictHierarchy 𝚺 (n + 1) φ) :
     finiteAxiomatization n ⊢ .univCl (collectionAxiom φ) := by
-  refine Arithmetic.complete.{0} _ _ ?_
+  apply Arithmetic.complete.{0} _ _
   intro M _ _
   have := models_peanoMinus n (M := M)
   have hColl : M↓[ℒₒᵣ] ⊧ collSentence n := Semantics.ModelsSet.models _ collSentence_mem_finiteAxiomatization

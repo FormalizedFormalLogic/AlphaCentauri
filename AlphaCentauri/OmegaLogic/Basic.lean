@@ -339,7 +339,7 @@ private lemma em_quantStep {φₓ ψₓ : ArithmeticSemiformula ℕ 1} (hall : (
     Z∞ ⊢[α + 1 + 1, 0] Γ := by
   have h : ∀ n : ℕ, Z∞ ⊢[α + 1, 0] insert (φₓ/[(↑n : ArithmeticTerm ℕ)]) Γ :=
     fun n => (exI n (fam n)).insert_absorb (Finset.mem_insert_of_mem hexs)
-  refine ((allω h).insert_absorb hall).mono_ordinalBound ?_
+  apply ((allω h).insert_absorb hall).mono_ordinalBound
   exact add_le_add_left (Ordinal.iSup_le fun _ => le_rfl) 1
 
 end
@@ -441,7 +441,7 @@ private lemma of_trueAux (hk : φ.complexity ≤ k) (ht : LitTrue φ) (hmem : φ
       have h : ∀ n : ℕ, Z∞ ⊢[(k : Ordinal.{0}), 0]
           insert (ψ/[(↑n : ArithmeticTerm ℕ)]) Γ := fun n =>
         ih (by simpa using hk) (litTrue_all.mp ht n) (by simp)
-      refine ((allω h).insert_absorb hmem).mono_ordinalBound ?_
+      apply ((allω h).insert_absorb hmem).mono_ordinalBound
       rw [hcast]
       exact add_le_add_left (Ordinal.iSup_le fun _ => le_rfl) 1
     | hexs ψ =>

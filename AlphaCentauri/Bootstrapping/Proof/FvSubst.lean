@@ -65,12 +65,12 @@ noncomputable def termFvSubstVec (k w v : V) : V := construction.resultVec L ![w
 /-- The $\Sigma_1$ graph of `termFvSubst`; argument order `(y, w, t)`, `y = termFvSubst L w t`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 noncomputable def termFvSubstGraph : 𝚺₁.Semisentence 3 :=
-  (blueprint.result L).rew <| Rew.subst ![#0, #2, #1]
+  (blueprint.result L).rew $ Rew.subst ![#0, #2, #1]
 
 /-- The $\Sigma_1$ graph of `termFvSubstVec`; argument order `(y, w, k, v)`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 noncomputable def termFvSubstVecGraph : 𝚺₁.Semisentence 4 :=
-  (blueprint.resultVec L).rew <| Rew.subst ![#0, #1, #3, #2]
+  (blueprint.resultVec L).rew $ Rew.subst ![#0, #1, #3, #2]
 
 variable {L}
 

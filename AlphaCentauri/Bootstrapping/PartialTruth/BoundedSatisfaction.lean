@@ -420,7 +420,7 @@ lemma dom_subset (h₁ : BoundedSatisfactionTable q₁ z e) (h₂ : BoundedSatis
     · intro k IH n hn hle
       have up : ∀ m, m ∈ domain q₁ → π₁ n < π₁ m → m ∈ domain q₂ := by
         intro m hm hlt
-        refine IH m hm ?_
+        apply IH m hm
         calc q₁ ≤ π₁ n + (k + 1) := hle
           _ = π₁ n + 1 + k := by simp [add_assoc, add_comm]
           _ ≤ π₁ m + k := add_le_add (lt_iff_succ_le.mp hlt) le_rfl
@@ -580,7 +580,7 @@ noncomputable def specEqDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !eqMatrixDef q z e a b”)
 
 /-- `specEqDef` defines `SpecEq`. -/
-instance specEq_defined : 𝚫₁-Relation₃ (SpecEq : V → V → V → Prop) via specEqDef := .mk <| by
+instance specEq_defined : 𝚫₁-Relation₃ (SpecEq : V → V → V → Prop) via specEqDef := .mk $ by
   constructor
   · intro v
     simp [specEqDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -612,7 +612,7 @@ noncomputable def specNeqDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !neqMatrixDef q z e a b”)
 
 /-- `specNeqDef` defines `SpecNeq`. -/
-instance specNeq_defined : 𝚫₁-Relation₃ (SpecNeq : V → V → V → Prop) via specNeqDef := .mk <| by
+instance specNeq_defined : 𝚫₁-Relation₃ (SpecNeq : V → V → V → Prop) via specNeqDef := .mk $ by
   constructor
   · intro v
     simp [specNeqDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -644,7 +644,7 @@ noncomputable def specLtDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !ltMatrixDef q z e a b”)
 
 /-- `specLtDef` defines `SpecLt`. -/
-instance specLt_defined : 𝚫₁-Relation₃ (SpecLt : V → V → V → Prop) via specLtDef := .mk <| by
+instance specLt_defined : 𝚫₁-Relation₃ (SpecLt : V → V → V → Prop) via specLtDef := .mk $ by
   constructor
   · intro v
     simp [specLtDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -676,7 +676,7 @@ noncomputable def specNltDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !nltMatrixDef q z e a b”)
 
 /-- `specNltDef` defines `SpecNlt`. -/
-instance specNlt_defined : 𝚫₁-Relation₃ (SpecNlt : V → V → V → Prop) via specNltDef := .mk <| by
+instance specNlt_defined : 𝚫₁-Relation₃ (SpecNlt : V → V → V → Prop) via specNltDef := .mk $ by
   constructor
   · intro v
     simp [specNltDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -744,7 +744,7 @@ noncomputable def specBallDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !ballMatrixDef q z e p b”)
 
 /-- `specBallDef` defines `SpecBall`. -/
-instance specBall_defined : 𝚫₁-Relation₃ (SpecBall : V → V → V → Prop) via specBallDef := .mk <| by
+instance specBall_defined : 𝚫₁-Relation₃ (SpecBall : V → V → V → Prop) via specBallDef := .mk $ by
   constructor
   · intro v
     simp [specBallDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -784,7 +784,7 @@ noncomputable def specBexDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !bexMatrixDef q z e p b”)
 
 /-- `specBexDef` defines `SpecBex`. -/
-instance specBex_defined : 𝚫₁-Relation₃ (SpecBex : V → V → V → Prop) via specBexDef := .mk <| by
+instance specBex_defined : 𝚫₁-Relation₃ (SpecBex : V → V → V → Prop) via specBexDef := .mk $ by
   constructor
   · intro v
     simp [specBexDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -813,7 +813,7 @@ noncomputable def specDef : 𝚫₁.Semisentence 3 := .mkDelta
     !specAndDef q z e ∨ !specOrDef q z e ∨ !specBallDef.pi q z e ∨ !specBexDef.pi q z e”)
 
 /-- `specDef` defines `SpecAt`. -/
-instance specAt_defined : 𝚫₁-Relation₃ (SpecAt : V → V → V → Prop) via specDef := .mk <| by
+instance specAt_defined : 𝚫₁-Relation₃ (SpecAt : V → V → V → Prop) via specDef := .mk $ by
   constructor
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma]
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma, SpecAt]
@@ -868,7 +868,7 @@ noncomputable def minBallDef : 𝚫₁.Semisentence 2 := .mkDelta
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !minChildDef n p e b”)
 
 /-- `minBallDef` defines `MinBall`. -/
-instance minBall_defined : 𝚫₁-Relation (MinBall : V → V → Prop) via minBallDef := .mk <| by
+instance minBall_defined : 𝚫₁-Relation (MinBall : V → V → Prop) via minBallDef := .mk $ by
   constructor
   · intro v
     simp [minBallDef, (termVal.defined (V := V)).df,
@@ -889,7 +889,7 @@ noncomputable def minBexDef : 𝚫₁.Semisentence 2 := .mkDelta
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !minChildDef n p e b”)
 
 /-- `minBexDef` defines `MinBex`. -/
-instance minBex_defined : 𝚫₁-Relation (MinBex : V → V → Prop) via minBexDef := .mk <| by
+instance minBex_defined : 𝚫₁-Relation (MinBex : V → V → Prop) via minBexDef := .mk $ by
   constructor
   · intro v
     simp [minBexDef, (termVal.defined (V := V)).df,
@@ -908,7 +908,7 @@ noncomputable def minimalDef : 𝚫₁.Semisentence 4 := .mkDelta
 
 /-- `minimalDef` defines `MinimalAt`. -/
 instance minimalAt_defined :
-    𝚫₁-Relation₄ (MinimalAt : V → V → V → V → Prop) via minimalDef := .mk <| by
+    𝚫₁-Relation₄ (MinimalAt : V → V → V → V → Prop) via minimalDef := .mk $ by
   constructor
   · intro v; simp [minimalDef, HierarchySymbol.Semiformula.val_sigma]
   · intro v; simp [minimalDef, HierarchySymbol.Semiformula.val_sigma, MinimalAt]
@@ -1006,7 +1006,7 @@ noncomputable def boundedSatisfactionTable : 𝚫₁.Semisentence 3 := .mkDelta
 /-- The formula `boundedSatisfactionTable` defines satisfaction tables. -/
 instance BoundedSatisfactionTable.defined :
     𝚫₁-Relation₃ (BoundedSatisfactionTable : V → V → V → Prop) via boundedSatisfactionTable :=
-  .mk <| by
+  .mk $ by
     constructor
     · intro v;
       simp [boundedSatisfactionTable, HierarchySymbol.Semiformula.val_sigma, nodeDom_defined.df, inDom_defined.df]
@@ -1361,12 +1361,15 @@ lemma isMapping_union (h₁ : BoundedSatisfactionTable q₁ z₁ e₁)
     IsMapping (q₁ ∪ q₂) := by
   intro x hx
   obtain ⟨y, hy⟩ := mem_domain_iff.mp hx
-  refine ⟨y, hy, fun y' hy' ↦ ?_⟩
-  rcases mem_cup_iff.mp hy with h | h <;> rcases mem_cup_iff.mp hy' with h' | h'
-  · exact h₁.isMapping.uniq h' h
-  · exact h₁.val_agree h₂ h h' |>.symm
-  · exact h₂.val_agree h₁ h h' |>.symm
-  · exact h₂.isMapping.uniq h' h
+  use y
+  and_intros
+  · exact hy
+  · intro y' hy'
+    rcases mem_cup_iff.mp hy with h | h <;> rcases mem_cup_iff.mp hy' with h' | h'
+    · exact h₁.isMapping.uniq h' h
+    · exact h₁.val_agree h₂ h h' |>.symm
+    · exact h₂.val_agree h₁ h h' |>.symm
+    · exact h₂.isMapping.uniq h' h
 
 lemma fst_le_of_mem_domain (h : BoundedSatisfactionTable q z e) : ∀ n ∈ domain q, π₁ n ≤ z := by
   have key : ∀ k n, n ∈ domain q → q ≤ π₁ n + k → π₁ n ≤ z := by
@@ -1378,7 +1381,7 @@ lemma fst_le_of_mem_domain (h : BoundedSatisfactionTable q z e) : ∀ n ∈ doma
     · intro k IH n hn hle
       have up : ∀ m, m ∈ domain q → π₁ n < π₁ m → π₁ m ≤ z := by
         intro m hm hlt
-        refine IH m hm ?_
+        apply IH m hm
         calc q ≤ π₁ n + (k + 1) := hle
           _ = π₁ n + 1 + k := by ring
           _ ≤ π₁ m + k := add_le_add (lt_iff_succ_le.mp hlt) le_rfl
@@ -1422,7 +1425,7 @@ lemma of_and {N : V} (h₁ : BoundedSatisfactionTable q₁ p₁ e) (h₂ : Bound
         (v = 0 ↔ ⟪⟪p₁, e⟫, 0⟫ ∈ q₁ ∨ ⟪⟪p₂, e⟫, 0⟫ ∈ q₂) := by
     by_cases h : ⟪⟪p₁, e⟫, 1⟫ ∈ q₁ ∧ ⟪⟪p₂, e⟫, 1⟫ ∈ q₂
     · refine ⟨1, Or.inr rfl, iff_of_true rfl h, ?_⟩
-      refine iff_of_false (by simp) ?_
+      apply iff_of_false (by simp)
       rintro (h0 | h0)
       · exact h₁.val_one_ne_zero h.1 h0
       · exact h₂.val_one_ne_zero h.2 h0
@@ -1588,10 +1591,13 @@ lemma exists_family_union {p e X N : V}
   refine ⟨W, ?_, ?_, ?_, ?_⟩
   · intro n hn
     obtain ⟨y, hy⟩ := mem_domain_iff.mp hn
-    refine ⟨y, hy, fun y' hy' ↦ ?_⟩
-    obtain ⟨x, r, hxr, hyr⟩ := hmem _ hy
-    obtain ⟨x', r', hxr', hyr'⟩ := hmem _ hy'
-    exact (hfr x' r' hxr').1.val_agree (hfr x r hxr).1 hyr' hyr
+    use y
+    and_intros
+    · exact hy
+    · intro y' hy'
+      obtain ⟨x, r, hxr, hyr⟩ := hmem _ hy
+      obtain ⟨x', r', hxr', hyr'⟩ := hmem _ hy'
+      exact (hfr x' r' hxr').1.val_agree (hfr x r hxr).1 hyr' hyr
   · intro w hw
     obtain ⟨x, r, hxr, hwr⟩ := hmem w hw
     exact (hfr x r hxr).2 w hwr
@@ -1781,7 +1787,7 @@ lemma tableBound_le_step {p z e : V} (h : p < z) :
   calc tableBound p e = iterExp (tableExp p e) (8 * p + 24) := rfl
     _ ≤ iterExp (tableExp z e) (8 * p + 24) := iterExp_le_iterExp_left (tableExp_mono (le_of_lt h)) _
     _ ≤ iterExp (tableExp z e) (8 * z + 21) := by
-        refine iterExp_le_iterExp_right _ ?_
+        apply iterExp_le_iterExp_right _
         calc 8 * p + 24 = 8 * (p + 1) + 16 := by ring
           _ ≤ 8 * z + 16 := add_le_add (mul_le_mul le_rfl h1 (by simp) (by simp)) le_rfl
           _ ≤ 8 * z + 16 + 5 := le_self_add
@@ -1795,7 +1801,7 @@ lemma tableBound_le_step_quant {p z u x e : V} (hp : p < z) (hu : u < z)
     _ ≤ iterExp (iterExp (tableExp z e) 4) (8 * p + 24) := iterExp_le_iterExp_left (tableExp_step hp hu hx) _
     _ = iterExp (tableExp z e) (4 + (8 * p + 24)) := (iterExp_add _ _ _).symm
     _ ≤ iterExp (tableExp z e) (8 * z + 21) := by
-        refine iterExp_le_iterExp_right _ ?_
+        apply iterExp_le_iterExp_right _
         calc 4 + (8 * p + 24) = 8 * (p + 1) + 20 := by ring
           _ ≤ 8 * z + 20 := add_le_add (mul_le_mul le_rfl h1 (by simp) (by simp)) le_rfl
           _ ≤ 8 * z + 20 + 1 := le_self_add
@@ -2172,7 +2178,7 @@ noncomputable def boundedSatisfaction : 𝚫₁.Semisentence 2 := .mkDelta
 
 /-- The formula `boundedSatisfaction` defines `BoundedSatisfaction`. -/
 instance BoundedSatisfaction.defined : 𝚫₁-Relation (BoundedSatisfaction : V → V →
-  Prop) via boundedSatisfaction := .mk <| by
+  Prop) via boundedSatisfaction := .mk $ by
   constructor
   · intro v
     suffices IsBounded (v 0) → IsUFormula ℒₒᵣ (v 0) →

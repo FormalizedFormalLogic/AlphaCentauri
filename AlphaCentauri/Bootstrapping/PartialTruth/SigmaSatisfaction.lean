@@ -422,7 +422,7 @@ private lemma of_pi_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSatisfaction V m) �
           have hzs : IsStrictSigma n z := by
             rw [hzex] at hz ⊢
             exact isStrictSigma_of_isStrictPi_ex hz
-          refine ((ih fun i hi ↦ hB i (by omega)).2 z e hzs hz').mpr ?_
+          apply ((ih fun i hi ↦ hB i (by omega)).2 z e hzs hz').mpr
           match n with
           | 0 =>
             obtain ⟨hMd, hK1⟩ := isBounded_ex_block hzs hMK hM
@@ -484,7 +484,7 @@ private lemma blockSatisfaction : ∀ n : ℕ, BlockSatisfaction V n := fun n �
           rw [qqExss_zero] at hqs hsat'
           obtain ⟨x, hx⟩ := (boundedSatisfaction_ex_iff hqs).mp (by simpa using hsat')
           refine ⟨x ∷ w, by simp [hw], ?_⟩
-          refine ((of_pi_step 0 fun i hi ↦ ih i (by omega)).2 M _ hMd hMu).mpr ?_
+          apply ((of_pi_step 0 fun i hi ↦ ih i (by omega)).2 M _ hMd hMu).mpr
           simpa using hx
         | m + 1 =>
           have hMpi' : IsStrictPi m M := isStrictPi_ex_block m _ M (j + 1) hqs hqex hM

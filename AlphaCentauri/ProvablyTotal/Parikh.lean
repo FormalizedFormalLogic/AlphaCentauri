@@ -88,17 +88,17 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : φ.Bounded)
   -- A model `ModelOfSatEq sat` of `T` is also a model of
   -- `𝗜𝚺₀` in which no witness lies below the value of any closed term.
   have : 𝗘𝗤 (Language.oringConst k) ⪯ T := WeakerThan.ofSubset
-    <| Set.subset_iUnion_of_subset 0
-    <| Set.subset_union_of_subset_left Set.subset_union_left _
+    $ Set.subset_iUnion_of_subset 0
+    $ Set.subset_union_of_subset_left Set.subset_union_left _
   have hM : (ModelOfSatEq sat)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_lMap_image_subset sat
-    <| Set.subset_iUnion_of_subset 0
-    <| Set.subset_union_of_subset_left Set.subset_union_right _
+    $ Set.subset_iUnion_of_subset 0
+    $ Set.subset_union_of_subset_left Set.subset_union_right _
   have hunbounded : ∀ (t : ClosedSemiterm ℒₒᵣ k) (y), y < t.valb (cstVal sat) →
       ¬φ.Evalb (y :> cstVal sat) := by
     intro t;
     simpa [models_lift_iff, eval_ballLT] using modelsSet_iff.mp (ModelOfSatEq.models sat)
-      <| Set.mem_iUnion_of_mem (Encodable.encode t + 1)
-      <| Set.mem_union_right _ ⟨t, Nat.lt_succ_self _, rfl⟩
+      $ Set.mem_iUnion_of_mem (Encodable.encode t + 1)
+      $ Set.mem_union_right _ ⟨t, Nat.lt_succ_self _, rfl⟩
 
   -- The elements bounded by the value of a closed term form a cut, which models `𝗜𝚺₀`.
   set K : Cut (ModelOfSatEq sat) := termCut (cstVal sat);

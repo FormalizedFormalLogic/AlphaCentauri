@@ -70,7 +70,7 @@ lemma emb_eq_emb {x y : M} : hMN.emb x = hMN.emb y ↔ x = y := hMN.emb_injectiv
 
 /-- A structure with an end extension modelling `𝗣𝗔⁻` is itself a model of `𝗣𝗔⁻`.
 - [vO99, Exercise 40] -/
-theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_theory_iff.mpr <| by
+theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_theory_iff.mpr $ by
   have inj : Function.Injective hMN.emb := hMN.emb_injective
   intro σ hσ
   rcases hσ
@@ -187,10 +187,10 @@ end extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
 theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 1 σ) [N↓[ℒₒᵣ] ⊧* T] :
     M↓[ℒₒᵣ] ⊧* T :=
-  models_theory_iff.mpr <| by
+  models_theory_iff.mpr $ by
     intro σ hσ
     by_contra! h
-    apply notModels_iff.mpr ?_ <| models_theory_iff.mp (inferInstance : N↓[ℒₒᵣ] ⊧* T) σ hσ
+    apply notModels_iff.mpr ?_ $ models_theory_iff.mp (inferInstance : N↓[ℒₒᵣ] ⊧* T) σ hσ
     · suffices (∼σ).Eval ![] Empty.elim by simpa
       exact Eval.of_eq
         (hMN.eval_of_Sigma1 (hT σ hσ).neg ![] Empty.elim (by simpa [models_iff] using h))

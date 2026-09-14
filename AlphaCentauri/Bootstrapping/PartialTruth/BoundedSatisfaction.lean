@@ -173,29 +173,25 @@ lemma spec_eq (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^= u, e'⟫ ∈ do
     (⟪⟪t ^= u, e'⟫, 1⟫ ∈ q ↔ termVal e' t = termVal e' u) ∧
     (⟪⟪t ^= u, e'⟫, 0⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) := by
   have h₁ := h.spec _ e' hn
-  simp at h₁
-  exact h₁.2.2
+  simp_all
 
 lemma spec_neq (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^≠ u, e'⟫ ∈ domain q) :
     (⟪⟪t ^≠ u, e'⟫, 1⟫ ∈ q ↔ termVal e' t ≠ termVal e' u) ∧
     (⟪⟪t ^≠ u, e'⟫, 0⟫ ∈ q ↔ termVal e' t = termVal e' u) := by
   have h₁ := h.spec _ e' hn
-  simp at h₁
-  exact h₁.2.2
+  simp_all
 
 lemma spec_lt (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^< u, e'⟫ ∈ domain q) :
     (⟪⟪t ^< u, e'⟫, 1⟫ ∈ q ↔ termVal e' t < termVal e' u) ∧
     (⟪⟪t ^< u, e'⟫, 0⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) := by
   have h₁ := h.spec _ e' hn
-  simp at h₁ ⊢
-  exact h₁.2.2
+  simp_all
 
 lemma spec_nlt (h : BoundedSatisfactionTable q z e) (hn : ⟪t ^≮ u, e'⟫ ∈ domain q) :
     (⟪⟪t ^≮ u, e'⟫, 1⟫ ∈ q ↔ ¬termVal e' t < termVal e' u) ∧
     (⟪⟪t ^≮ u, e'⟫, 0⟫ ∈ q ↔ termVal e' t < termVal e' u) := by
   have h₁ := h.spec _ e' hn
-  simp at h₁ ⊢
-  exact h₁.2.2
+  simp_all
 
 lemma spec_and (h : BoundedSatisfactionTable q z e) (hn : ⟪p₁ ^⋏ p₂, e'⟫ ∈ domain q) :
     ⟪p₁, e'⟫ ∈ domain q ∧ ⟪p₂, e'⟫ ∈ domain q ∧
@@ -214,9 +210,14 @@ lemma spec_ball (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBall u p, e'⟫ 
     (∀ x < termVal (0 ∷ e') u, ⟪p, x ∷ e'⟫ ∈ domain q) ∧
     (⟪⟪qqBall u p, e'⟫, 1⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
     (⟪⟪qqBall u p, e'⟫, 0⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
-  have h₁ := h.spec _ e' hn
-  simp at h₁ ⊢
-  obtain ⟨t, ht, rfl, hd, hA, hB⟩ := h₁
+  obtain ⟨t, ht, rfl, hd, hA, hB⟩ :
+      ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t ∧
+        (∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪p, x ∷ e'⟫ ∈ domain q) ∧
+        (⟪⟪qqBall u p, e'⟫, 1⟫ ∈ q ↔
+          ∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
+        (⟪⟪qqBall u p, e'⟫, 0⟫ ∈ q ↔
+          ∃ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
+    simpa using h.spec _ e' hn
   exact ⟨⟨t, ht, rfl⟩, hd, hA, hB⟩
 
 lemma spec_bex (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBex u p, e'⟫ ∈ domain q) :
@@ -224,9 +225,14 @@ lemma spec_bex (h : BoundedSatisfactionTable q z e) (hn : ⟪qqBex u p, e'⟫ �
     (∀ x < termVal (0 ∷ e') u, ⟪p, x ∷ e'⟫ ∈ domain q) ∧
     (⟪⟪qqBex u p, e'⟫, 1⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
     (⟪⟪qqBex u p, e'⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e') u, ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
-  have h₁ := h.spec _ e' hn
-  simp at h₁ ⊢
-  obtain ⟨t, ht, rfl, hd, hA, hB⟩ := h₁
+  obtain ⟨t, ht, rfl, hd, hA, hB⟩ :
+      ∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t ∧
+        (∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪p, x ∷ e'⟫ ∈ domain q) ∧
+        (⟪⟪qqBex u p, e'⟫, 1⟫ ∈ q ↔
+          ∃ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 1⟫ ∈ q) ∧
+        (⟪⟪qqBex u p, e'⟫, 0⟫ ∈ q ↔
+          ∀ x < termVal (0 ∷ e') (termBShift ℒₒᵣ t), ⟪⟪p, x ∷ e'⟫, 0⟫ ∈ q) := by
+    simpa using h.spec _ e' hn
   exact ⟨⟨t, ht, rfl⟩, hd, hA, hB⟩
 
 /-! ### The Tarski clauses in the form the satisfaction predicate uses

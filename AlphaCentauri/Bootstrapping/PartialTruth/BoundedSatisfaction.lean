@@ -392,7 +392,7 @@ lemma agree (h₁ : BoundedSatisfactionTable q₁ z₁ e₁) (h₂ : BoundedSati
     have key : ∀ x < termVal (0 ∷ e') a, (⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 1⟫ ∈ q₂) ∧
         (⟪⟪b, x ∷ e'⟫, 0⟫ ∈ q₁ ↔ ⟪⟪b, x ∷ e'⟫, 0⟫ ∈ q₂) :=
       fun x hx ↦ ih b (by simp) (x ∷ e') (hd x hx) (hd₂ x hx)
-    refine ⟨?_, ?_⟩
+    and_intros;
     · rw [hA, hA₂]
       exact forall_congr' fun x ↦ imp_congr_right fun hx ↦ (key x hx).1
     · rw [hB, hB₂]

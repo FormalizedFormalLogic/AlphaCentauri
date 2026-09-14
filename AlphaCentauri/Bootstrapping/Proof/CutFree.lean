@@ -610,15 +610,14 @@ theorem deductionAux {a d : V} (ha : IsFormulaSet L a) (hsa : setShift L a = a)
       by simp⟩
   · rintro _ _ d rfl _ ih
     obtain ⟨d', hd', ed⟩ := ih
-    refine ⟨Bootstrapping.shiftRule (setShift L (fstIdx d ∪ a)) d', ?_, ?_⟩
-    · exact Derivation.shiftRule ⟨ed, hd'⟩
-    · simp [mem_setShift_union, hsa]
+    exact ⟨Bootstrapping.shiftRule (setShift L (fstIdx d ∪ a)) d', Derivation.shiftRule ⟨ed, hd'⟩,
+      by simp [mem_setShift_union, hsa]⟩
   · intro s _ p d₁ d₂ hd₁ hd₂ ih₁ ih₂
     obtain ⟨d₁', hd₁', ed₁⟩ := ih₁
     obtain ⟨d₂', hd₂', ed₂⟩ := ih₂
-    refine ⟨Bootstrapping.cutRule (s ∪ a) p d₁' d₂', Derivation.cutRule ?_ ?_, by simp⟩
-    · exact ⟨by rw [ed₁, hd₁.1, insert_union], hd₁'⟩
-    · exact ⟨by rw [ed₂, hd₂.1, insert_union], hd₂'⟩
+    exact ⟨Bootstrapping.cutRule (s ∪ a) p d₁' d₂',
+      Derivation.cutRule ⟨by rw [ed₁, hd₁.1, insert_union], hd₁'⟩
+        ⟨by rw [ed₂, hd₂.1, insert_union], hd₂'⟩, by simp⟩
   · intro s hs p hp hT
     exact ⟨Bootstrapping.axL (s ∪ a) p,
       Derivation.axL (by simp [hs, ha]) (by simp [hp])

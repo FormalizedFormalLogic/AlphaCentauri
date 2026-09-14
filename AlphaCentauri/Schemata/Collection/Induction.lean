@@ -21,8 +21,7 @@ section models
 private lemma definable_step {Q : V → V → Prop} (hQ : 𝚷-[n].DefinableRel Q) :
     𝚷-[n + 1].DefinableRel fun x w ↦ (¬∃ z, Q x z) ∨ Q (x + 1) w := by
   have hex : 𝚺-[n + 1].DefinablePred fun x ↦ ∃ z, Q x z := by
-    apply HierarchySymbol.Definable.exs
-    exact HierarchySymbol.Definable.of_iff
+    exact HierarchySymbol.Definable.exs $ HierarchySymbol.Definable.of_iff
       ((hQ.of_lt (s := n + 1) (Γ := 𝚺) (by simp)).retraction ![1, 0]) (by intro w; simp)
   refine HierarchySymbol.Definable.or ?_ ?_
   · exact HierarchySymbol.Definable.of_iff (hex.notSigma.retraction ![0]) (by intro v; simp)

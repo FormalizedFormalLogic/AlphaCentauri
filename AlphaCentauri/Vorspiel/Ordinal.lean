@@ -68,7 +68,8 @@ lemma add_add_one_add_one_le (a b : Ordinal) : a + b + 1 + 1 ≤ a + (b + 1) + 1
 lemma iSup_add_add_one_add_one_le (a : Ordinal) (f : ℕ → Ordinal) :
     (⨆ n, a + f n + 1) + 1 ≤ a + ((⨆ n, f n) + 1) + 1 := by
   gcongr
-  refine Ordinal.iSup_le fun n => ?_
+  apply Ordinal.iSup_le
+  intro n
   rw [add_assoc]
   gcongr
   exact Ordinal.le_iSup f n

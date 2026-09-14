@@ -169,7 +169,8 @@ theorem sound {Γ : Sequent} (D : Derivation Γ) : ∃ φ ∈ Γ, LitTrue φ := 
     by_cases h : ∃ χ ∈ Γ', LitTrue χ
     · obtain ⟨χ, hχ, ht⟩ := h
       exact ⟨χ, Finset.mem_insert_of_mem hχ, ht⟩
-    · refine ⟨_, Finset.mem_insert_self _ _, litTrue_all.mpr fun n => ?_⟩
+    · refine ⟨_, Finset.mem_insert_self _ _, litTrue_all.mpr ?_⟩
+      intro n
       obtain ⟨χ, hχ, ht⟩ := ih n
       rcases Finset.mem_insert.mp hχ with rfl | hχ
       · exact ht
@@ -274,9 +275,8 @@ lemma andI (hφ : Z∞ ⊢[α, c] insert φ Γ) (hψ : Z∞ ⊢[β, c] insert ψ
 lemma orI (h : Z∞ ⊢[α, c] insert φ (insert ψ Γ)) :
     Z∞ ⊢[α + 1, c] insert (φ ⋎ ψ) Γ := by
   obtain ⟨D, ho, hcr⟩ := h
-  refine ⟨Derivation.orI φ ψ D, ?_, ?_⟩
-  · simpa [Derivation.ordinalBound] using add_le_add_left ho 1
-  · simpa [Derivation.cutRank] using hcr
+  exact ⟨Derivation.orI φ ψ D, by simpa [Derivation.ordinalBound] using add_le_add_left ho 1,
+    by simpa [Derivation.cutRank] using hcr⟩
 
 /-- The bounded `∃`-rule with a numeral witness.
 
@@ -284,9 +284,8 @@ lemma orI (h : Z∞ ⊢[α, c] insert φ (insert ψ Γ)) :
 lemma exI (n : ℕ) (h : Z∞ ⊢[α, c] insert (φₓ/[(↑n : ArithmeticTerm ℕ)]) Γ) :
     Z∞ ⊢[α + 1, c] insert (∃¹ φₓ) Γ := by
   obtain ⟨D, ho, hcr⟩ := h
-  refine ⟨Derivation.exI φₓ n D, ?_, ?_⟩
-  · simpa [Derivation.ordinalBound] using add_le_add_left ho 1
-  · simpa [Derivation.cutRank] using hcr
+  exact ⟨Derivation.exI φₓ n D, by simpa [Derivation.ordinalBound] using add_le_add_left ho 1,
+    by simpa [Derivation.cutRank] using hcr⟩
 
 /-- The bounded ω-rule for universal formulas.
 
@@ -339,8 +338,8 @@ private lemma em_quantStep {φₓ ψₓ : ArithmeticSemiformula ℕ 1} (hall : (
     Z∞ ⊢[α + 1 + 1, 0] Γ := by
   have h : ∀ n : ℕ, Z∞ ⊢[α + 1, 0] insert (φₓ/[(↑n : ArithmeticTerm ℕ)]) Γ :=
     fun n => (exI n (fam n)).insert_absorb (Finset.mem_insert_of_mem hexs)
-  apply ((allω h).insert_absorb hall).mono_ordinalBound
-  exact add_le_add_left (Ordinal.iSup_le fun _ => le_rfl) 1
+  exact ((allω h).insert_absorb hall).mono_ordinalBound
+    (add_le_add_left (Ordinal.iSup_le fun _ => le_rfl) 1)
 
 end
 
@@ -381,13 +380,15 @@ private lemma lemAux (hk : φ.complexity ≤ k) (hp : φ ∈ Γ) (hn : ∼φ ∈
         (by simp)
       exact em_binaryStep (show (∼φ ⋏ ∼ψ) ∈ Γ by simpa using hn) hp h₁ h₂
     | hall ψ =>
-      refine em_quantStep hp (show (∃¹ ∼ψ) ∈ Γ by simpa using hn) fun n => ?_
+      apply em_quantStep hp (show (∃¹ ∼ψ) ∈ Γ by simpa using hn)
+      intro n
       have h := ih (φ := ψ/[(↑n : ArithmeticTerm ℕ)])
         (Γ := insert (∼(ψ/[(↑n : ArithmeticTerm ℕ)])) (insert (ψ/[(↑n : ArithmeticTerm ℕ)]) Γ))
         (by simpa using hk) (by simp) (by simp)
       simpa using h
     | hexs ψ =>
-      refine em_quantStep (show (∀¹ ∼ψ) ∈ Γ by simpa using hn) hp fun n => ?_
+      apply em_quantStep (show (∀¹ ∼ψ) ∈ Γ by simpa using hn) hp
+      intro n
       have h := ih (φ := ψ/[(↑n : ArithmeticTerm ℕ)])
         (Γ := insert (ψ/[(↑n : ArithmeticTerm ℕ)]) (insert (∼(ψ/[(↑n : ArithmeticTerm ℕ)])) Γ))
         (by simpa using hk) (by simp) (by simp)

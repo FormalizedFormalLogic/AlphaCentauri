@@ -44,7 +44,7 @@ lemma hierarchy {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s φ →
 
 - [HP98, 0.30] -/
 lemma neg {Γ s n} {φ : Semiformula L ξ n} : StrictHierarchy Γ s φ → StrictHierarchy Γ.alt s (∼φ)
-  | zero h => zero (by exact (Hierarchy.neg h).of_zero)
+  | zero h => zero (Hierarchy.neg h).of_zero
   | ofAlt h => ofAlt (by simpa using neg h)
   | exs h => by simpa using (neg h).all
   | all h => by simpa using (neg h).exs

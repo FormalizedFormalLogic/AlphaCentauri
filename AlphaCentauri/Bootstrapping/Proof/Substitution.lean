@@ -153,7 +153,8 @@ lemma freshVec_existsUnique (u : V) :
   obtain ⟨w, hlen, hlt, hlast⟩ := freshVec_exists_aux u u 0 (by simp) (by simp)
   refine ⟨w, ⟨hlen, by simpa using hlt, hlast⟩, ?_⟩
   rintro v ⟨hlen', hlt', hlast'⟩
-  refine nth_ext' (u + 1) hlen' hlen fun i hi ↦ ?_
+  apply nth_ext' (u + 1) hlen' hlen
+  intro i hi
   rcases lt_or_eq_of_le (lt_succ_iff_le.mp hi) with (h | rfl)
   · rw [hlt' i h]
     simpa using (hlt i h).symm

@@ -165,7 +165,8 @@ private lemma exists_assignment_eval_indFormula {M : Type*} [ORingStructure M] {
   set g : ℕ → M := fun i ↦ if i = 0 then ((⌜φ.toSemisentence ![#0]⌝ : ℕ) : M) else e₀ with hg
   have hg₀ : g 0 = ((⌜φ.toSemisentence ![#0]⌝ : ℕ) : M) := by simp [hg]
   have hg₁ : g 1 = e₀ := by simp [hg]
-  refine ⟨g, fun x ↦ ?_⟩
+  refine ⟨g, ?_⟩
+  intro x
   rw [eval_indFormula, hg₀, hg₁]
   constructor
   · rintro ⟨ev, hadj, hsat⟩
@@ -215,7 +216,8 @@ private lemma exists_assignment_eval_collFormula {M : Type*} [ORingStructure M] 
   set g : ℕ → M := fun i ↦ if i = 0 then ((⌜φ.toSemisentence ![#1, #0]⌝ : ℕ) : M) else e₀ with hg
   have hg₀ : g 0 = ((⌜φ.toSemisentence ![#1, #0]⌝ : ℕ) : M) := by simp [hg]
   have hg₁ : g 1 = e₀ := by simp [hg]
-  refine ⟨g, fun x y ↦ ?_⟩
+  refine ⟨g, ?_⟩
+  intro x y
   rw [eval_collFormula, hg₀, hg₁]
   constructor
   · rintro ⟨ev₀, hadj₀, ev, hadj, hsat⟩
@@ -243,7 +245,8 @@ theorem provable_collectionAxiom_of_strictHierarchy {n : ℕ} {φ : ArithmeticSe
   intro f a h
   obtain ⟨g, hP⟩ := exists_assignment_eval_collFormula hφ f
   obtain ⟨b, hb⟩ := hcoll g a fun x hx ↦ (h x hx).imp fun y hy ↦ (hP x y).mpr hy
-  refine ⟨b, fun x hx ↦ ?_⟩
+  refine ⟨b, ?_⟩
+  intro x hx
   obtain ⟨y, hyb, hy⟩ := hb x hx
   exact ⟨y, hyb, (hP x y).mp hy⟩
 

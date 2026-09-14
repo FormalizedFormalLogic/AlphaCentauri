@@ -40,7 +40,8 @@ lemma asg_image_shift (e : ℕ → ℕ) (Γ : Sequent) :
     (Γ.image Rewriting.shift).image (fun ψ => asg e ▹ ψ)
       = Γ.image (fun ψ => asg (e ∘ Nat.succ) ▹ ψ) := by
   rw [Finset.image_image]
-  refine Finset.image_congr fun ψ _ => ?_
+  apply Finset.image_congr
+  intro ψ _
   show asg e ▹ (Rew.shift ▹ ψ) = asg (e ∘ Nat.succ) ▹ ψ
   rw [← TransitiveRewriting.comp_app, asg_comp_shift]
 
@@ -250,7 +251,8 @@ theorem of_derivation2 (d : 𝗣𝗔 ⟹₂ Γ) :
   | @and Γ φ ψ hmem _ _ ih₁ ih₂ =>
     obtain ⟨c₁, ih₁⟩ := ih₁
     obtain ⟨c₂, ih₂⟩ := ih₂
-    refine ⟨max c₁ c₂, fun e => ?_⟩
+    refine ⟨max c₁ c₂, ?_⟩
+    intro e
     obtain ⟨α₁, h₁⟩ := ih₁ e
     obtain ⟨α₂, h₂⟩ := ih₂ e
     rw [Finset.image_insert] at h₁ h₂
@@ -259,13 +261,15 @@ theorem of_derivation2 (d : 𝗣𝗔 ⟹₂ Γ) :
       (by simpa using Finset.mem_image_of_mem (fun φ => asg e ▹ φ) hmem)⟩
   | @or Γ φ ψ hmem _ ih =>
     obtain ⟨c, ih⟩ := ih
-    refine ⟨c, fun e => ?_⟩
+    refine ⟨c, ?_⟩
+    intro e
     obtain ⟨α, h⟩ := ih e
     rw [Finset.image_insert, Finset.image_insert] at h
     exact ⟨_, h.orI.insert_absorb (by simpa using Finset.mem_image_of_mem (fun φ => asg e ▹ φ) hmem)⟩
   | @all Γ φ hmem _ ih =>
     obtain ⟨c, ih⟩ := ih
-    refine ⟨c, fun e => ?_⟩
+    refine ⟨c, ?_⟩
+    intro e
     have hfam : ∀ n : ℕ, ∃ α, Z∞ ⊢[α, c]
         insert (((asg e).q ▹ φ)/[(↑n : ArithmeticTerm ℕ)]) (Γ.image fun ψ => asg e ▹ ψ) := by
       intro n
@@ -278,7 +282,8 @@ theorem of_derivation2 (d : 𝗣𝗔 ⟹₂ Γ) :
       (by simpa using Finset.mem_image_of_mem (fun ψ => asg e ▹ ψ) hmem)⟩
   | @exs Γ φ hmem t _ ih =>
     obtain ⟨c, ih⟩ := ih
-    refine ⟨max c (φ.qr + 1), fun e => ?_⟩
+    refine ⟨max c (φ.qr + 1), ?_⟩
+    intro e
     obtain ⟨α, h⟩ := ih e
     rw [Finset.image_insert, Rew.app_substs (asg e) φ t] at h
     obtain ⟨β, hβ⟩ := exI_closed ((asg e).q ▹ φ) (asg e t) h
@@ -289,13 +294,15 @@ theorem of_derivation2 (d : 𝗣𝗔 ⟹₂ Γ) :
     exact ⟨c, fun e => (ih e).imp fun _ h => h.weakening (Finset.image_subset_image hsub)⟩
   | @shift Γ _ ih =>
     obtain ⟨c, ih⟩ := ih
-    refine ⟨c, fun e => ?_⟩
+    refine ⟨c, ?_⟩
+    intro e
     rw [asg_image_shift]
     exact ih (e ∘ Nat.succ)
   | @cut Γ φ _ _ ih₁ ih₂ =>
     obtain ⟨c₁, ih₁⟩ := ih₁
     obtain ⟨c₂, ih₂⟩ := ih₂
-    refine ⟨max (φ.qr + 1) (max c₁ c₂), fun e => ?_⟩
+    refine ⟨max (φ.qr + 1) (max c₁ c₂), ?_⟩
+    intro e
     obtain ⟨α₁, h₁⟩ := ih₁ e
     obtain ⟨α₂, h₂⟩ := ih₂ e
     rw [Finset.image_insert] at h₁ h₂

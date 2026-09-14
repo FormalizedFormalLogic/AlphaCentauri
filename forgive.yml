@@ -34,9 +34,6 @@ declaration:
   FFL.FirstOrder.Arithmetic.consistent_localReflection_of_Sigma1_sound:
     forgive:
       - FFL.FirstOrder.Arithmetic.consistent_localReflection_of_Sigma1_sound
-  FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.consistent_localReflection_of_sound
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot

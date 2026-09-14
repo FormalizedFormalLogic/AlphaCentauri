@@ -27,7 +27,7 @@ structure AxiomatizableBy (C : Sentence L → Prop) (T U : Theory L) : Prop wher
 exactly the theorems of `T`. The axioms of `T` itself need not satisfy `C`.
 - [HP98, Discussion III.2.28] -/
 def Axiomatizable (C : Sentence L → Prop) (T : Theory L) : Prop :=
-  ∃ U : Theory L, Nonempty (AxiomatizableBy C T U)
+  ∃ U : Theory L, AxiomatizableBy C T U
 
 namespace AxiomatizableBy
 
@@ -39,7 +39,7 @@ lemma of_equiv (h : AxiomatizableBy C T U) (e : T ≊ V) : AxiomatizableBy C V U
 lemma mono (h : AxiomatizableBy C T U) (hCD : ∀ σ, C σ → D σ) : AxiomatizableBy D T U :=
   ⟨fun σ hσ ↦ hCD σ (h.forall_mem σ hσ), h.equiv⟩
 
-lemma axiomatizable (h : AxiomatizableBy C T U) : Axiomatizable C T := ⟨U, ⟨h⟩⟩
+lemma axiomatizable (h : AxiomatizableBy C T U) : Axiomatizable C T := ⟨U, h⟩
 
 end AxiomatizableBy
 
@@ -48,11 +48,11 @@ namespace Axiomatizable
 lemma of_forall_mem (h : ∀ σ ∈ T, C σ) : Axiomatizable C T := (AxiomatizableBy.refl h).axiomatizable
 
 lemma of_equiv (h : Axiomatizable C T) (e : T ≊ U) : Axiomatizable C U := by
-  obtain ⟨V, ⟨hV⟩⟩ := h
+  obtain ⟨V, hV⟩ := h
   exact (hV.of_equiv e).axiomatizable
 
 lemma mono (h : Axiomatizable C T) (hCD : ∀ σ, C σ → D σ) : Axiomatizable D T := by
-  obtain ⟨U, ⟨hU⟩⟩ := h
+  obtain ⟨U, hU⟩ := h
   exact (hU.mono hCD).axiomatizable
 
 end Axiomatizable

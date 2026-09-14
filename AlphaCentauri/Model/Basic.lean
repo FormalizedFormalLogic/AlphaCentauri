@@ -17,7 +17,7 @@ extension of `M`.
 
 namespace FFL.FirstOrder.Arithmetic
 
-open Semiformula Structure _root_.FFL.Entailment
+open Semiformula Structure
 
 variable {ξ : Type*} {M N : Type u} [ORingStructure M]
 

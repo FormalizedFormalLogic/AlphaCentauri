@@ -5,16 +5,14 @@ public import Foundation.FirstOrder.Basic
 /-!
 # Axiomatizability by a class of sentences
 
-`FFL.Entailment.AxiomatizableBy C T U` says that `T` is axiomatized by `U` through sentences
-satisfying `C`, and `FFL.Entailment.Axiomatizable C T` that some theory axiomatizes `T` that way,
+`FFL.FirstOrder.AxiomatizableBy C T U` says that `T` is axiomatized by `U` through sentences
+satisfying `C`, and `FFL.FirstOrder.Axiomatizable C T` that some theory axiomatizes `T` that way,
 the analogue for a class of sentences of Foundation's `Entailment.FiniteAxiomatizable`.
 -/
 
 @[expose] public section
 
-namespace FFL.Entailment
-
-open FirstOrder
+namespace FFL.FirstOrder
 
 variable {L : Language} {C D : Sentence L → Prop} {T U V : Theory L}
 
@@ -33,7 +31,7 @@ def Axiomatizable (C : Sentence L → Prop) (T : Theory L) : Prop :=
 
 namespace AxiomatizableBy
 
-lemma refl (h : ∀ σ ∈ T, C σ) : AxiomatizableBy C T T := ⟨h, Equiv.refl T⟩
+lemma refl (h : ∀ σ ∈ T, C σ) : AxiomatizableBy C T T := ⟨h, .refl T⟩
 
 lemma of_equiv (h : AxiomatizableBy C T U) (e : T ≊ V) : AxiomatizableBy C V U :=
   ⟨h.forall_mem, e.symm.trans h.equiv⟩
@@ -59,4 +57,4 @@ lemma mono (h : Axiomatizable C T) (hCD : ∀ σ, C σ → D σ) : Axiomatizable
 
 end Axiomatizable
 
-end FFL.Entailment
+end FFL.FirstOrder

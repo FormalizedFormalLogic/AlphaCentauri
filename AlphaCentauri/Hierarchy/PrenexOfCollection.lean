@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Hierarchy.NormalForm
+public import Foundation.FirstOrder.Arithmetic.Prenex
 public import AlphaCentauri.Schemata.Collection.Basic
 
 /-!

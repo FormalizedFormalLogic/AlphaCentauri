@@ -38,6 +38,7 @@ public import AlphaCentauri.Reflection.Unboundedness
 public import AlphaCentauri.Schemata.Collection.Basic
 public import AlphaCentauri.Schemata.Collection.Equivalence
 public import AlphaCentauri.Schemata.Collection.Induction
+public import AlphaCentauri.Schemata.EA
 public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Vorspiel.Absoluteness
 public import AlphaCentauri.Vorspiel.Compact

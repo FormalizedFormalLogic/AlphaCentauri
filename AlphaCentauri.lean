@@ -17,9 +17,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.Hierarchy.Bounded
-public import AlphaCentauri.Hierarchy.NormalForm
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
-public import AlphaCentauri.Hierarchy.StrictHierarchy
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.Overspill

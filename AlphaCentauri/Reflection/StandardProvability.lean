@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
+public import AlphaCentauri.Vorspiel.Adjoin
 
 @[expose] public section
 /-!
@@ -87,11 +88,88 @@ instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒ
 @[instance] theorem consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
     Consistent (T ∪ 𝗥𝗳𝗻 T) := Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], inferInstance⟩
 
+section Sigma1Sound
+
+variable [T.SoundOnHierarchy 𝚺 1]
+
+private lemma models_map_disj {g : ArithmeticSentence → ArithmeticSentence} :
+    ∀ {l : List ArithmeticSentence},
+      ℕ↓[ℒₒᵣ] ⊧ (l.map g).disj ↔ ∃ σ ∈ l, ℕ↓[ℒₒᵣ] ⊧ g σ
+  | [] => by simp
+  | _ :: l => by simp [models_map_disj (g := g) (l := l)]
+
+private lemma hierarchy_map_disj {g : ArithmeticSentence → ArithmeticSentence}
+    (hg : ∀ σ, Hierarchy 𝚺 1 (g σ)) :
+    ∀ {l : List ArithmeticSentence}, Hierarchy 𝚺 1 (l.map g).disj
+  | [] => by simp
+  | _ :: l => by simp [hg, hierarchy_map_disj hg (l := l)]
+
+/-- `T` proves no disjunction of provability statements for sentences it does not prove: the
+disjunction is $\Sigma_1$ and false in the standard model. -/
+private lemma unprovable_map_disj {l : List ArithmeticSentence} (hl : ∀ σ ∈ l, T ⊬ σ) :
+    T ⊬ (l.map T.standardProvability).disj := by
+  intro h
+  obtain ⟨σ, hσ, hmod⟩ :=
+    models_map_disj.mp
+      (T.soundOnHierarchy 𝚺 1 h (hierarchy_map_disj (by intro _; simp [standardProvability_def])))
+  exact hl σ hσ (T.standardProvability.sound_on hmod)
+
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is $\Sigma_1$-sound.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
-@[instance] axiom consistent_localReflection_of_Sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
-    Consistent (T ∪ 𝗥𝗳𝗻 T)
+@[instance] theorem consistent_localReflection_of_Sigma1_sound :
+    Consistent (T ∪ 𝗥𝗳𝗻 T) := by
+  -- Adjoining `∼Pr(σ)` for every `σ` that `T` does not prove already proves `Rfn(T)`.
+  set X : ArithmeticTheory := {ψ | ∃ σ, T ⊬ σ ∧ ψ = ∼(T.standardProvability σ)}
+  have hTX : T ⪯ T ∪ X := WeakerThan.ofSubset Set.subset_union_left
+  have hle : T ∪ 𝗥𝗳𝗻 T ⪯ T ∪ X := by
+    apply WeakerThan.ofAxm!
+    rintro φ (hφ | ⟨σ, -, rfl⟩)
+    · exact by_axm (Set.mem_union_left _ hφ)
+    · by_cases hσ : T ⊢ σ
+      · have h₁ : T ∪ X ⊢ σ := WeakerThan.pbl hσ
+        cl_prover [h₁]
+      · have h₁ : T ∪ X ⊢ ∼(T.standardProvability σ) :=
+          by_axm (Set.mem_union_right _ ⟨σ, hσ, rfl⟩)
+        cl_prover [h₁]
+  -- `T ∪ X` is consistent: each of its finite parts sits inside `T` with finitely many `∼Pr(σ)`
+  -- adjoined, which `unprovable_map_disj` keeps consistent.
+  have hcon : Consistent (T ∪ X) := by
+    apply Entailment.consistent_compact.mpr
+    intro F hsub hfin
+    have hFfin : (F : Set ArithmeticSentence).Finite := by simpa using hfin
+    classical
+    have hmemX : ∀ ψ ∈ F \ T, ψ ∈ X := by
+      intro ψ hψ
+      rcases AdjunctiveSet.subset_iff.mp hsub ψ hψ.1 with h | h
+      · exact absurd h hψ.2
+      · exact h
+    have hchoice : ∀ ψ : ArithmeticSentence,
+        ∃ σ, ψ ∈ X → T ⊬ σ ∧ ψ = ∼(T.standardProvability σ) := by
+      intro ψ
+      by_cases h : ψ ∈ X
+      · obtain ⟨σ, hσ⟩ := h
+        exact ⟨σ, fun _ ↦ hσ⟩
+      · exact ⟨⊥, fun h' ↦ absurd h' h⟩
+    choose pick hpick using hchoice
+    have hFT : (F \ T : Set ArithmeticSentence).Finite := hFfin.subset Set.sdiff_subset
+    let l : List ArithmeticSentence := (hFT.toFinset.image pick).toList
+    have hl : ∀ σ ∈ l, T ⊬ σ := by
+      intro σ hσ
+      simp only [l, Finset.mem_toList, Finset.mem_image, Set.Finite.mem_toFinset] at hσ
+      obtain ⟨ψ, hψ, rfl⟩ := hσ
+      exact (hpick ψ (hmemX ψ hψ)).1
+    refine Entailment.Consistent.of_subset (consistent_adjoinNegs (unprovable_map_disj hl)) ?_
+    intro ψ hψ
+    by_cases h : ψ ∈ T
+    · simp [h]
+    · obtain ⟨-, he⟩ := hpick ψ (hmemX ψ ⟨hψ, h⟩)
+      refine mem_adjoinNegs.mpr (Or.inl ⟨T.standardProvability (pick ψ), ?_, he⟩)
+      simp only [l, List.mem_map, Finset.mem_toList, Finset.mem_image, Set.Finite.mem_toFinset]
+      exact ⟨pick ψ, ⟨ψ, ⟨hψ, h⟩, rfl⟩, rfl⟩
+  exact hcon.of_le hle
+
+end Sigma1Sound
 
 section
 variable [𝗜𝚺₁ ⪯ T] {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}

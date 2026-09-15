@@ -12,8 +12,8 @@ Foundation states finite axiomatizability over an arbitrary entailment structure
 witness stays implicit.
 
 This module also collects the equivalent forms of finite axiomatizability — a finite **subset**,
-a finset, a single sentence — the characterization of its negation, and the finite
-axiomatizability of `𝗣𝗔⁻`.
+a finset, a single sentence — `singleAxiom`, the conjunction of that finite theory, the
+characterization of the negation, and the finite axiomatizability of `𝗣𝗔⁻`.
 
 - [Lin97, Ch. 4 §1]
 - [HP98, Theorem I.2.52]
@@ -135,20 +135,6 @@ lemma finiteAxiomatizable_iff_exists_finset :
   · rintro ⟨F, _, heq⟩
     exact ⟨↑F, F.finite_toSet, heq⟩
 
-/-- A theory is finitely axiomatizable iff a list of its axioms axiomatizes it.
-- [Lin97, Ch. 4 §1]
-- [HP98, Theorem I.2.52] -/
-private lemma finiteAxiomatizable_iff_exists_list :
-    FiniteAxiomatizable T ↔
-      ∃ l : List (Sentence L), (∀ σ ∈ l, σ ∈ T) ∧ T ≊ ({σ | σ ∈ l} : Theory L) := by
-  constructor
-  · intro h
-    obtain ⟨F, hsub, hfin, heq⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp h
-    have hl : ({σ | σ ∈ hfin.toFinset.toList} : Theory L) = F := by ext σ; simp
-    exact ⟨hfin.toFinset.toList, fun σ hσ ↦ hsub (by simpa using hσ), hl.symm ▸ heq⟩
-  · rintro ⟨l, _, heq⟩
-    exact ⟨{σ | σ ∈ l}, by simp, heq⟩
-
 /-- The conjunction of a finset of sentences axiomatizes the theory of its members.
 - [Lin97, Ch. 4 §1] -/
 lemma equiv_singleton_Fconj (F : Finset (Sentence L)) :
@@ -159,17 +145,6 @@ lemma equiv_singleton_Fconj (F : Finset (Sentence L)) :
     exact FConj_iff_forall_provable.mpr fun φ hφ ↦ Axiomatized.by_axm hφ
   · intro σ hσ
     exact mdp (left_Fconj_intro (show σ ∈ F by simpa using hσ)) (Axiomatized.by_axm rfl)
-
-/-- The conjunction of a list of sentences axiomatizes the theory of its members.
-- [Lin97, Ch. 4 §1] -/
-private lemma equiv_singleton_Conj₂ (l : List (Sentence L)) :
-    ({⋀l} : Theory L) ≊ ({σ | σ ∈ l} : Theory L) := by
-  classical
-  refine Equiv.antisymm_iff.mpr ⟨WeakerThan.ofAxm! ?_, WeakerThan.ofAxm! ?_⟩
-  · rintro σ (rfl : σ = ⋀l)
-    exact Conj₂_iff_forall_provable.mpr fun φ hφ ↦ Axiomatized.by_axm hφ
-  · intro σ hσ
-    exact mdp (left_Conj₂_intro (show σ ∈ l by simpa using hσ)) (Axiomatized.by_axm rfl)
 
 /-- A theory is finitely axiomatizable iff a single sentence axiomatizes it.
 - [Lin97, Ch. 4 §1]
@@ -182,6 +157,31 @@ lemma finiteAxiomatizable_iff_exists_sentence :
     exact ⟨F.conj, heq.trans (equiv_singleton_Fconj F).symm⟩
   · rintro ⟨σ, heq⟩
     exact ⟨{σ}, by simp, heq⟩
+
+/-- The single sentence that axiomatizes `T`: the conjunction of the finite theory `U`.
+- [Lin97, Ch. 4 §1] -/
+noncomputable def FiniteAxiomatizableBy.singleAxiom (h : FiniteAxiomatizableBy T U) : Sentence L :=
+  h.finite.toFinset.conj
+
+lemma FiniteAxiomatizableBy.equiv_singleton (h : FiniteAxiomatizableBy T U) :
+    T ≊ ({h.singleAxiom} : Theory L) :=
+  h.equiv.trans $ by
+    have e : (↑h.finite.toFinset : Theory L) = U := by simp
+    exact (e ▸ equiv_singleton_Fconj h.finite.toFinset).symm
+
+/-- The single sentence that axiomatizes a finitely axiomatizable theory.
+- [Lin97, Ch. 4 §1] -/
+noncomputable def FiniteAxiomatizable.singleAxiom (h : FiniteAxiomatizable T) : Sentence L :=
+  h.choose_spec.singleAxiom
+
+lemma FiniteAxiomatizable.equiv_singleton (h : FiniteAxiomatizable T) :
+    T ≊ ({h.singleAxiom} : Theory L) := h.choose_spec.equiv_singleton
+
+lemma FiniteAxiomatizable.provable_singleAxiom (h : FiniteAxiomatizable T) : T ⊢ h.singleAxiom :=
+  h.equiv_singleton.symm.le.wk (Axiomatized.by_axm rfl)
+
+lemma FiniteAxiomatizable.provable_singleton_iff (h : FiniteAxiomatizable T) {σ : Sentence L} :
+    ({h.singleAxiom} : Theory L) ⊢ σ ↔ T ⊢ σ := (Equiv.iff.mp h.equiv_singleton σ).symm
 
 /-- A theory fails to be finitely axiomatizable exactly when every finite subtheory of it is
 strictly weaker.

@@ -14,6 +14,10 @@ collapsed to the single sentence `collapseSentence` of
 `AlphaCentauri.Reflection.CollapseFormula`, which reduces the claim to the case of an extension by
 one sentence.
 
+Two narrowings of [AB05], which asks only for an r.e. extension: the axiomatization is
+$\Delta_1$-presented, since Craig's trick is in neither Foundation nor this repository, and its
+sentences are strict prenex, since the partial truth predicates agree with truth only there.
+
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.3]
@@ -274,8 +278,7 @@ private lemma provable_of_mem (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) �
 
 /-! ## The unboundedness theorem -/
 
-/-- The case of an extension by `U'` itself, all of whose members are
-`StrictHierarchy Γ (n + 1)`.
+/-- The case `U = U'` of `exists_sentence_weakerThan_of_consistent`.
 - [Lin97, Theorem 4.3] -/
 private lemma exists_sentence_weakerThan_of_forall_mem
     (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) [Consistent (T ∪ U')] :
@@ -291,15 +294,8 @@ private lemma exists_sentence_weakerThan_of_forall_mem
   · exact by_axm (Set.mem_insert_of_mem _ hφ)
   · exact provable_of_mem hΓ hcon hφ
 
-/-- If `T ∪ U` is consistent, for a theory `U` axiomatized by a $\Delta_1$-presented set `U'` of
-`StrictHierarchy Γ (n + 1)` sentences, then there is a `Γ (n + 1)` sentence `θ` such that
-`T ∪ U ⪯ insert θ T` and `insert θ T` is consistent.
-
-The axiomatization `U'` is read as $\Delta_1$-presented rather than r.e.: this is a deliberate
-narrowing of [AB05]'s "consistent r.e. extension", which reduces to an elementary presentation via
-Craig's trick, a result absent from both Foundation and this repository. Restricting `U'`'s members
-to `StrictHierarchy Γ (n + 1)` rather than `Hierarchy Γ (n + 1)` is likewise deliberate: the partial
-truth predicate used to build `θ` agrees with truth only on the strict prenex classes.
+/-- A consistent extension of `T` by a $\Gamma_{n + 1}$-axiomatizable theory is contained in a
+consistent extension of `T` by a single `Γ (n + 1)` sentence.
 - [Lin97, Theorem 4.3] -/
 theorem exists_sentence_weakerThan_of_consistent
     (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U') [Consistent (T ∪ U)] :
@@ -310,13 +306,8 @@ theorem exists_sentence_weakerThan_of_consistent
   obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_forall_mem (T := T) hΓ.forall_mem
   exact ⟨θ, hθ, e.le.trans hle, hcon⟩
 
-/-- Unboundedness, for a $\Gamma_{n + 1}$-axiomatizable extension: if `T ∪ U`, for a theory `U`
-axiomatized by a $\Delta_1$-presented set `U'` of `StrictHierarchy Γ (n + 1)` sentences, proves the
-local reflection schema of `T` on the dual class, then `T ∪ U` is inconsistent.
-
-As in `exists_sentence_weakerThan_of_consistent`, `U'` is read as $\Delta_1$-presented rather than
-r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather than
-`Hierarchy Γ (n + 1)`.
+/-- Unboundedness: a $\Gamma_{n + 1}$-axiomatizable extension of `T` proving the local reflection
+schema of `T` on the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
 theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union
@@ -328,13 +319,8 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union
   exact hcon.not_inc
     (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hθ (h.trans hle))
 
-/-- Unboundedness, for a $\Gamma_{n + 1}$-axiomatizable extension: a consistent `T ∪ U`, for a
-theory `U` axiomatized by a $\Delta_1$-presented set `U'` of `StrictHierarchy Γ (n + 1)` sentences,
-does not contain the local reflection schema of `T` on the dual class.
-
-As in `exists_sentence_weakerThan_of_consistent`, `U'` is read as $\Delta_1$-presented rather than
-r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather than
-`Hierarchy Γ (n + 1)`.
+/-- Unboundedness: a consistent $\Gamma_{n + 1}$-axiomatizable extension of `T` does not contain
+the local reflection schema of `T` on the dual class.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
 theorem not_localReflectionOnHierarchy_weakerThan_union

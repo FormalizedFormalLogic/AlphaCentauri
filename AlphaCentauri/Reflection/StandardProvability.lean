@@ -98,8 +98,8 @@ instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒ
 section
 variable [𝗜𝚺₁ ⪯ T] {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
 
-/-- Unboundedness, for an extension by a single sentence: if `T ∪ {π}` for a `Γ n` sentence `π`
-proves the local reflection schema of `T` on the dual class, then `T ∪ {π}` is inconsistent.
+/-- Unboundedness: an extension of `T` by a single `Γ n` sentence proving the local reflection
+schema of `T` on the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
@@ -108,8 +108,8 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_insert
   T.standardProvability.inconsistent_of_localReflectionOn_weakerThan_insert
     (fun _ hσ ↦ by simpa using hσ) hπ h
 
-/-- Unboundedness, for an extension by a single sentence: a consistent `T ∪ {π}` with `π` a
-`Γ n` sentence does not contain the local reflection schema of `T` on the dual class.
+/-- Unboundedness: a consistent extension of `T` by a single `Γ n` sentence does not contain the
+local reflection schema of `T` on the dual class.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
@@ -118,9 +118,8 @@ theorem not_localReflectionOnHierarchy_weakerThan_insert
   fun h ↦ (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hπ h).not_con
     inferInstance
 
-/-- Unboundedness, for a finitely axiomatizable extension: if `T ∪ U`, for a theory `U` axiomatized
-by a finite set `U'` of `Γ n` sentences, proves the local reflection schema of `T` on the dual
-class, then `T ∪ U` is inconsistent.
+/-- Unboundedness: an extension of `T` axiomatized by finitely many `Γ n` sentences and proving
+the local reflection schema of `T` on the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/

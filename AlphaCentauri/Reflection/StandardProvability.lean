@@ -2,7 +2,9 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
+public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
+public import AlphaCentauri.Vorspiel.Theory
 
 @[expose] public section
 /-!
@@ -96,8 +98,8 @@ instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒ
 section
 variable [𝗜𝚺₁ ⪯ T] {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
 
-/-- Unboundedness, for an extension by a single sentence: if `T ∪ {π}` for a `Γ n` sentence `π`
-proves the local reflection schema of `T` on the dual class, then `T ∪ {π}` is inconsistent.
+/-- Unboundedness: an extension of `T` by a single `Γ n` sentence proving the local reflection
+schema of `T` on the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
@@ -106,8 +108,8 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_insert
   T.standardProvability.inconsistent_of_localReflectionOn_weakerThan_insert
     (fun _ hσ ↦ by simpa using hσ) hπ h
 
-/-- Unboundedness, for an extension by a single sentence: a consistent `T ∪ {π}` with `π` a
-`Γ n` sentence does not contain the local reflection schema of `T` on the dual class.
+/-- Unboundedness: a consistent extension of `T` by a single `Γ n` sentence does not contain the
+local reflection schema of `T` on the dual class.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
@@ -116,29 +118,29 @@ theorem not_localReflectionOnHierarchy_weakerThan_insert
   fun h ↦ (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hπ h).not_con
     inferInstance
 
-/-- Unboundedness, for an extension by finitely many sentences: if `T ∪ U` for a finite set `U`
-of `Γ n` sentences proves the local reflection schema of `T` on the dual class, then `T ∪ U` is
-inconsistent.
+/-- Unboundedness: an extension of `T` axiomatized by finitely many `Γ n` sentences and proving
+the local reflection schema of `T` on the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
 theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
-    {U : ArithmeticTheory} (hU : U.Finite) (hΓ : ∀ σ ∈ U, Hierarchy Γ n σ)
+    {U U' : ArithmeticTheory} (hΓ : AxiomatizableBy (Hierarchy Γ n) U U') (hU' : U'.Finite)
     (h : 𝗥𝗳𝗻[Γ.alt n] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
   classical
-  have hmem : ∀ σ, σ ∈ hU.toFinset.toList ↔ σ ∈ U := by simp
-  have hconj : Hierarchy Γ n (⋀hU.toFinset.toList) :=
-    Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ σ ((hmem σ).mp hσ)
-  have hle : T ∪ U ⪯ insert (⋀hU.toFinset.toList) T := WeakerThan.ofAxm! $ by
+  have e : T ∪ U ≊ T ∪ U' := hΓ.equiv.union_right T
+  have hmem : ∀ σ, σ ∈ hU'.toFinset.toList ↔ σ ∈ U' := by simp
+  have hconj : Hierarchy Γ n (⋀hU'.toFinset.toList) :=
+    Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ.forall_mem σ ((hmem σ).mp hσ)
+  have hle : T ∪ U' ⪯ insert (⋀hU'.toFinset.toList) T := WeakerThan.ofAxm! $ by
     rintro φ (hφ | hφ)
     · exact by_axm (Set.mem_insert_of_mem _ hφ)
     · exact mdp (left_Conj₂_intro ((hmem φ).mpr hφ)) (by_axm (Set.mem_insert _ _))
-  have hge : insert (⋀hU.toFinset.toList) T ⪯ T ∪ U := WeakerThan.ofAxm! $ by
+  have hge : insert (⋀hU'.toFinset.toList) T ⪯ T ∪ U' := WeakerThan.ofAxm! $ by
     rintro φ (rfl | hφ)
     · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦ by_axm (Or.inr ((hmem ψ).mp hψ))
     · exact by_axm (Or.inl hφ)
   exact (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hconj
-    (h.trans hle)).of_ge hge
+    ((h.trans e.le).trans hle)).of_ge (hge.trans e.symm.le)
 
 end
 

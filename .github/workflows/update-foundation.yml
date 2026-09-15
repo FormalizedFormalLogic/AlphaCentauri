@@ -14,11 +14,6 @@ on:
   schedule:
     - cron: '17 */6 * * *'
   workflow_dispatch:
-    inputs:
-      rev:
-        description: 'Foundation revision to pin (default: the tip of master)'
-        required: false
-        type: string
 
 # A run pushes to a shared branch, so runs never overlap; a scheduled run behind a manual one
 # waits rather than dies, because it may carry a newer revision.
@@ -87,64 +82,39 @@ jobs:
             git switch --force-create "$BRANCH" origin/main
           fi
 
-      - name: Resolve the revision to pin
-        id: rev
-        env:
-          REQUESTED: ${{ inputs.rev }}
+      # `lean-toolchain` has to equal Foundation's, and is taken before lake runs, so that lake
+      # runs under the toolchain it is resolving for.
+      - name: Take Foundation's toolchain
         run: |
           set -euo pipefail
-          new=${REQUESTED:-$(git ls-remote "https://github.com/$FOUNDATION" master | cut -f1)}
-          old=$(jq -r '.packages[] | select(.name == "Foundation") | .rev' lake-manifest.json)
-          if [ -z "$new" ]; then
-            echo "could not resolve a Foundation revision" >&2
-            exit 1
-          fi
-          {
-            echo "new=$new"
-            echo "old=$old"
-            echo "short=${new:0:7}"
-            [ "$new" = "$old" ] && echo "changed=false" || echo "changed=true"
-          } >> "$GITHUB_OUTPUT"
-          echo "the branch pins $old; upstream is at $new"
-
-      # `lakefile.toml` names the revision and `lake update` writes it into the manifest, so both
-      # move here. `lean-toolchain` has to equal Foundation's, and is taken from the new revision
-      # before lake runs, so that lake runs under the toolchain it is resolving for.
-      - name: Move the pins
-        if: steps.rev.outputs.changed == 'true'
-        env:
-          NEW: ${{ steps.rev.outputs.new }}
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import os, pathlib, re
-          new = os.environ['NEW']
-          path = pathlib.Path('lakefile.toml')
-          text = path.read_text()
-          # Other requires (Forgive) carry pins of their own, so only Foundation's block moves.
-          block = re.compile(r'(?ms)^(\[\[require\]\]\nname = "Foundation"\n.*?^rev = )"[^"]*"$')
-          bumped, count = block.subn(lambda m: f'{m.group(1)}"{new}"', text)
-          if count != 1:
-              raise SystemExit(f'lakefile.toml pins Foundation {count} times, expected exactly 1')
-          path.write_text(bumped)
-          PY
-          curl -fsSL "https://raw.githubusercontent.com/$FOUNDATION/$NEW/lean-toolchain" -o lean-toolchain
-          echo "pinned $NEW on the toolchain $(cat lean-toolchain)"
+          curl -fsSL "https://raw.githubusercontent.com/$FOUNDATION/master/lean-toolchain" -o lean-toolchain
+          echo "the toolchain is $(cat lean-toolchain)"
 
       - name: Install elan
-        if: steps.rev.outputs.changed == 'true'
         uses: leanprover/lean-action@v1
         with:
           build: false
           use-github-cache: false
 
+      # `lakefile.toml` follows Foundation's `master`, so `lake update` is the whole bump: it
+      # resolves that branch and writes the revision it lands on into the manifest.
       - name: Update the manifest
-        if: steps.rev.outputs.changed == 'true'
-        run: lake update Foundation
+        id: rev
+        run: |
+          set -euo pipefail
+          pin() { jq -r '.packages[] | select(.name == "Foundation") | .rev' lake-manifest.json; }
+          old=$(pin)
+          lake update Foundation
+          new=$(pin)
+          {
+            echo "old=$old"
+            echo "new=$new"
+            echo "short=${new:0:7}"
+          } >> "$GITHUB_OUTPUT"
+          echo "the branch pinned $old; it now pins $new"
 
       - name: Commit and push
         id: push
-        if: steps.rev.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}

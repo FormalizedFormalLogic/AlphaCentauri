@@ -121,9 +121,11 @@ jobs:
           new = os.environ['NEW']
           path = pathlib.Path('lakefile.toml')
           text = path.read_text()
-          bumped, count = re.subn(r'(?m)^rev = "[^"]*"$', f'rev = "{new}"', text)
+          # Other requires (Forgive) carry pins of their own, so only Foundation's block moves.
+          block = re.compile(r'(?ms)^(\[\[require\]\]\nname = "Foundation"\n.*?^rev = )"[^"]*"$')
+          bumped, count = block.subn(lambda m: f'{m.group(1)}"{new}"', text)
           if count != 1:
-              raise SystemExit(f'lakefile.toml has {count} pinned revisions, expected exactly 1')
+              raise SystemExit(f'lakefile.toml pins Foundation {count} times, expected exactly 1')
           path.write_text(bumped)
           PY
           curl -fsSL "https://raw.githubusercontent.com/$FOUNDATION/$NEW/lean-toolchain" -o lean-toolchain

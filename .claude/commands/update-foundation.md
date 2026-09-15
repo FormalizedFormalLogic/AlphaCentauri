@@ -13,7 +13,7 @@ Stop immediately, reporting nothing but the reason, when there is no open pull r
 When its checks are all green, **merge it** — the maintainer has given standing authorization for
 this one pull request, overriding `AGENTS.md`'s "Don't merge without being told to". Squash merge,
 as for everything else. Before merging, confirm there is nothing surprising in it: the diff should
-touch only the pins (`lakefile.toml`, `lake-manifest.json`, `lean-toolchain`) and whatever repairs
+touch only the pins (`lake-manifest.json`, `lean-toolchain`) and whatever repairs
 were made on the branch for this bump. If it touches anything else, or a check is failing that
 GitHub does not require, leave it alone and say why.
 

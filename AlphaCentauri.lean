@@ -19,9 +19,7 @@ public import AlphaCentauri.FiniteAxiomatizability.Basic
 public import AlphaCentauri.FiniteAxiomatizability.ISigma
 public import AlphaCentauri.FiniteAxiomatizability.Reflexive
 public import AlphaCentauri.Hierarchy.DeltaZero
-public import AlphaCentauri.Hierarchy.NormalForm
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
-public import AlphaCentauri.Hierarchy.StrictHierarchy
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.Overspill

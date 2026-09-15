@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Hierarchy.StrictHierarchy
+public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import AlphaCentauri.Bootstrapping.Delta0
 
 /-!

@@ -2,7 +2,7 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.Definability
-public import AlphaCentauri.FiniteAxiomatizability.Basic
+public import AlphaCentauri.Axiomatizability.Basic
 
 /-!
 # Reflexive theories
@@ -40,9 +40,9 @@ theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T] 
   obtain ⟨F, hFT, hfin, hequiv⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp hfa
   let : F.Δ₁ := Theory.Δ₁.ofFinite F hfin
   have hcon : T ⊢ F.consistent.val := h F hFT hfin
-  have : 𝗜𝚺₁ ⪯ F := WeakerThan.trans inferInstance hequiv.symm.le
-  have : Consistent F := Consistent.of_le inferInstance hequiv.le
-  exact Arithmetic.consistent_unprovable F (hequiv.symm.le.wk hcon)
+  have : 𝗜𝚺₁ ⪯ F := WeakerThan.trans inferInstance hequiv.le
+  have : Consistent F := Consistent.of_le inferInstance hequiv.symm.le
+  exact Arithmetic.consistent_unprovable F (hequiv.le.wk hcon)
 
 /-- `𝗜𝚺₂` proves the consistency of `𝗜𝚺₁`.
 - [HP98, Corollary I.4.34(1)] -/

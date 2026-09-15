@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Hierarchy.Bounded
-public import AlphaCentauri.Vorspiel.Axiomatizable
+public import AlphaCentauri.Axiomatizability.Basic
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 /-! # End extensions

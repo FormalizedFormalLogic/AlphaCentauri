@@ -3,18 +3,20 @@ module
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 /-!
-# Finite axiomatizability
+# Axiomatizability
 
-Finite axiomatizability for first-order theories:
+`AxiomatizableBy C T U` says that `U` axiomatizes `T` through sentences satisfying `C`, and
+`FiniteAxiomatizableBy T U` that a finite `U` axiomatizes `T`; `Axiomatizable` and
+`FiniteAxiomatizable` are the statements that such a `U` exists. Both are AlphaCentauri's own:
+Foundation states finite axiomatizability over an arbitrary entailment structure, where the
+witness stays implicit.
 
-* the finite **subset** form `finiteAxiomatizable_iff_exists_finite_subset`;
-* the finset form `finiteAxiomatizable_iff_exists_finset` and the single-sentence form
-  `finiteAxiomatizable_iff_exists_sentence`, through `equiv_singleton_Fconj`
-  (with private list-based counterparts `finiteAxiomatizable_iff_exists_list` and
-  `equiv_singleton_Conj₂`);
-* the characterization `not_finiteAxiomatizable_iff` of the negation;
-* invariance under provability equivalence, `Entailment.FiniteAxiomatizable.of_equiv`;
-* finite axiomatizability of `𝗣𝗔⁻`.
+This module also collects the equivalent forms of finite axiomatizability — a finite **subset**,
+a finset, a single sentence — the characterization of its negation, and the finite
+axiomatizability of `𝗣𝗔⁻`.
+
+- [Lin97, Ch. 4 §1]
+- [HP98, Theorem I.2.52]
 -/
 
 @[expose] public section
@@ -29,54 +31,103 @@ variable {L : Language}
 
 end AdjunctiveSet
 
-namespace FFL.Entailment
+namespace FFL.FirstOrder
 
-open FirstOrder
+open _root_.FFL.Entailment
 
-variable {L : Language} {T : Theory L}
+variable {L : Language} {C D : Sentence L → Prop} {T U V : Theory L}
+
+/-- `T` is axiomatized by `U` through sentences satisfying `C`: every member of `U` satisfies `C`,
+and `T` proves exactly the theorems of `U`.
+- [HP98, Discussion III.2.28] -/
+structure AxiomatizableBy (C : Sentence L → Prop) (T U : Theory L) : Prop where
+  forall_mem : ∀ σ ∈ U, C σ
+  equiv : T ≊ U
+
+/-- `T` is axiomatized by the sentences satisfying `C`: some theory of such sentences proves
+exactly the theorems of `T`. The axioms of `T` itself need not satisfy `C`.
+- [HP98, Discussion III.2.28] -/
+def Axiomatizable (C : Sentence L → Prop) (T : Theory L) : Prop :=
+  ∃ U : Theory L, AxiomatizableBy C T U
+
+/-- `T` is finitely axiomatized by `U`: `U` is finite and proves exactly the theorems of `T`.
+- [Lin97, Ch. 4 §1] -/
+structure FiniteAxiomatizableBy (T U : Theory L) : Prop where
+  finite : U.Finite
+  equiv : T ≊ U
+
+/-- `T` is finitely axiomatizable: some finite theory proves exactly the theorems of `T`.
+- [Lin97, Ch. 4 §1] -/
+def FiniteAxiomatizable (T : Theory L) : Prop := ∃ U : Theory L, FiniteAxiomatizableBy T U
+
+namespace AxiomatizableBy
+
+lemma refl (h : ∀ σ ∈ T, C σ) : AxiomatizableBy C T T := ⟨h, .refl T⟩
+
+lemma of_equiv (h : AxiomatizableBy C T U) (e : T ≊ V) : AxiomatizableBy C V U :=
+  ⟨h.forall_mem, e.symm.trans h.equiv⟩
+
+lemma mono (h : AxiomatizableBy C T U) (hCD : ∀ σ, C σ → D σ) : AxiomatizableBy D T U :=
+  ⟨fun σ hσ ↦ hCD σ (h.forall_mem σ hσ), h.equiv⟩
+
+lemma axiomatizable (h : AxiomatizableBy C T U) : Axiomatizable C T := ⟨U, h⟩
+
+end AxiomatizableBy
+
+namespace Axiomatizable
+
+lemma of_forall_mem (h : ∀ σ ∈ T, C σ) : Axiomatizable C T := (AxiomatizableBy.refl h).axiomatizable
+
+lemma of_equiv (h : Axiomatizable C T) (e : T ≊ U) : Axiomatizable C U := by
+  obtain ⟨V, hV⟩ := h
+  exact (hV.of_equiv e).axiomatizable
+
+lemma mono (h : Axiomatizable C T) (hCD : ∀ σ, C σ → D σ) : Axiomatizable D T := by
+  obtain ⟨U, hU⟩ := h
+  exact (hU.mono hCD).axiomatizable
+
+end Axiomatizable
 
 /-- Every finite theory is finitely axiomatizable.
 - [Lin97, Ch. 4 §1] -/
-lemma FiniteAxiomatizable.of_finite (h : T.Finite) : FiniteAxiomatizable T :=
-  ⟨T, by simpa using h, Equiv.refl T⟩
+lemma FiniteAxiomatizable.of_finite (h : T.Finite) : FiniteAxiomatizable T := ⟨T, h, .refl T⟩
 
 /-- Finite axiomatizability is invariant under provability equivalence.
 - [Lin97, Ch. 4 §1] -/
-lemma FiniteAxiomatizable.of_equiv {U : Theory L} (h : T ≊ U) :
+lemma FiniteAxiomatizable.of_equiv (h : T ≊ U) :
     FiniteAxiomatizable T → FiniteAxiomatizable U :=
-  fun ⟨F, hF, hFT⟩ ↦ ⟨F, hF, hFT.trans h⟩
+  fun ⟨F, hF, hTF⟩ ↦ ⟨F, hF, h.symm.trans hTF⟩
 
 /-- A theory is finitely axiomatizable iff a finite subtheory axiomatizes it.
 - [Lin97, Ch. 4 §1]
 - [HP98, Theorem I.2.52] -/
 lemma finiteAxiomatizable_iff_exists_finite_subset :
-    FiniteAxiomatizable T ↔ ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ F ≊ T := by
+    FiniteAxiomatizable T ↔ ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ T ≊ F := by
   constructor
   -- Syntactic compactness (`Entailment.Compact`), not the completeness theorem, supplies F.
   · rintro ⟨𝓕, h𝓕fin, h𝓕⟩
-    replace h𝓕fin : (𝓕 : Set (Sentence L)).Finite := by simpa using h𝓕fin
     have H : ∀ σ : Sentence L, ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ (σ ∈ 𝓕 → F ⊢ σ) := by
       intro σ
       by_cases hσ : σ ∈ 𝓕
       · obtain ⟨F, hsub, hfin, hprf⟩ :=
-          Compact.finite_provable (h𝓕.le.wk (Axiomatized.by_axm hσ))
+          Compact.finite_provable (h𝓕.symm.le.wk (Axiomatized.by_axm hσ))
         exact ⟨F, hsub, by simpa using hfin, fun _ ↦ hprf⟩
       · exact ⟨∅, by simp, by simp, fun h ↦ absurd h hσ⟩
     choose f hsub hfin hprf using H
     have hsub' : (⋃ σ ∈ 𝓕, f σ) ⊆ T := Set.iUnion₂_subset fun σ _ ↦ hsub σ
     refine ⟨⋃ σ ∈ 𝓕, f σ, hsub', h𝓕fin.biUnion fun σ _ ↦ hfin σ, Equiv.antisymm_iff.mpr
-      ⟨Theory.Proof.weakerThan_of_le hsub', h𝓕.symm.le.trans (WeakerThan.ofAxm! ?_)⟩⟩
+      ⟨h𝓕.le.trans (WeakerThan.ofAxm! ?_), Theory.Proof.weakerThan_of_le hsub'⟩⟩
     intro σ hσ
     replace hσ : σ ∈ 𝓕 := by simpa using hσ
     exact Axiomatized.weakening! (Set.subset_biUnion_of_mem hσ) (hprf σ hσ)
   · rintro ⟨F, _, hfin, heq⟩
-    exact ⟨F, by simpa using hfin, heq⟩
+    exact ⟨F, hfin, heq⟩
 
 /-- A theory is finitely axiomatizable iff a finset of its axioms axiomatizes it.
 - [Lin97, Ch. 4 §1]
 - [HP98, Theorem I.2.52] -/
 lemma finiteAxiomatizable_iff_exists_finset :
-    FiniteAxiomatizable T ↔ ∃ F : Finset (Sentence L), ↑F ⊆ T ∧ (↑F : Theory L) ≊ T := by
+    FiniteAxiomatizable T ↔ ∃ F : Finset (Sentence L), ↑F ⊆ T ∧ T ≊ (↑F : Theory L) := by
   constructor
   · intro h
     obtain ⟨F, hsub, hfin, heq⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp h
@@ -89,7 +140,7 @@ lemma finiteAxiomatizable_iff_exists_finset :
 - [HP98, Theorem I.2.52] -/
 private lemma finiteAxiomatizable_iff_exists_list :
     FiniteAxiomatizable T ↔
-      ∃ l : List (Sentence L), (∀ σ ∈ l, σ ∈ T) ∧ ({σ | σ ∈ l} : Theory L) ≊ T := by
+      ∃ l : List (Sentence L), (∀ σ ∈ l, σ ∈ T) ∧ T ≊ ({σ | σ ∈ l} : Theory L) := by
   constructor
   · intro h
     obtain ⟨F, hsub, hfin, heq⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp h
@@ -124,11 +175,11 @@ private lemma equiv_singleton_Conj₂ (l : List (Sentence L)) :
 - [Lin97, Ch. 4 §1]
 - [HP98, Theorem I.2.52] -/
 lemma finiteAxiomatizable_iff_exists_sentence :
-    FiniteAxiomatizable T ↔ ∃ σ : Sentence L, ({σ} : Theory L) ≊ T := by
+    FiniteAxiomatizable T ↔ ∃ σ : Sentence L, T ≊ ({σ} : Theory L) := by
   constructor
   · intro h
     obtain ⟨F, _, heq⟩ := finiteAxiomatizable_iff_exists_finset.mp h
-    exact ⟨F.conj, (equiv_singleton_Fconj F).trans heq⟩
+    exact ⟨F.conj, heq.trans (equiv_singleton_Fconj F).symm⟩
   · rintro ⟨σ, heq⟩
     exact ⟨{σ}, by simp, heq⟩
 
@@ -142,15 +193,14 @@ lemma not_finiteAxiomatizable_iff :
   constructor
   · intro h F hsub hfin
     have hle : F ⪯ T := Theory.Proof.weakerThan_of_le hsub
-    exact ⟨hle, fun hle' ↦ h ⟨F, hsub, hfin, Equiv.antisymm_iff.mpr ⟨hle, hle'⟩⟩⟩
+    exact ⟨hle, fun hle' ↦ h ⟨F, hsub, hfin, Equiv.antisymm_iff.mpr ⟨hle', hle⟩⟩⟩
   · rintro h ⟨F, hsub, hfin, heq⟩
-    exact (h F hsub hfin).notWT (Equiv.antisymm_iff.mp heq).2
+    exact (h F hsub hfin).notWT (Equiv.antisymm_iff.mp heq).1
 
-end FFL.Entailment
+end FFL.FirstOrder
 
 namespace FFL.FirstOrder.Arithmetic
 
-open _root_.FFL.Entailment in
 /-- `𝗣𝗔⁻` is finitely axiomatizable.
 - [Lin97, Ch. 4 §1] -/
 lemma PeanoMinus.finiteAxiomatizable : FiniteAxiomatizable 𝗣𝗔⁻ :=

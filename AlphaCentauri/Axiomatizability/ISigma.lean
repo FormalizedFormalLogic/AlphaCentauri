@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
-public import AlphaCentauri.FiniteAxiomatizability.Basic
+public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
 public import AlphaCentauri.Schemata.Collection.Basic
 public import AlphaCentauri.Vorspiel.Fvar
@@ -299,7 +299,7 @@ theorem finiteAxiomatization_equiv (n : ℕ) : finiteAxiomatization n ≊ 𝗜�
 - [HP98, Theorem I.2.52] -/
 theorem finiteAxiomatizable (n : ℕ) (hn : 1 ≤ n) : FiniteAxiomatizable (𝗜𝚺 n) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  exact ⟨finiteAxiomatization m, by simp, finiteAxiomatization_equiv m⟩
+  exact ⟨finiteAxiomatization m, by simp, (finiteAxiomatization_equiv m).symm⟩
 
 /-! ## The level of the finite theory in the arithmetical hierarchy -/
 
@@ -356,7 +356,8 @@ theorem exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :
   have hσ : Hierarchy 𝚷 (m + 1 + 2) F.conj := by
     rw [show m + 1 + 2 = m + 3 by omega]
     exact hierarchy_finsetConj_iff.mpr fun σ hσ ↦ hierarchy_of_mem_finiteAxiomatization (hsub hσ)
-  exact ⟨.mkPi F.conj hσ, ((equiv_singleton_Fconj F).trans heq).trans (finiteAxiomatization_equiv m)⟩
+  exact ⟨.mkPi F.conj hσ,
+    ((equiv_singleton_Fconj F).trans heq.symm).trans (finiteAxiomatization_equiv m)⟩
 
 end ISigma
 

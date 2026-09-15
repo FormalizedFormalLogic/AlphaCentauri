@@ -158,6 +158,9 @@ lemma finiteAxiomatizable_iff_exists_sentence :
   · rintro ⟨σ, heq⟩
     exact ⟨{σ}, by simp, heq⟩
 
+lemma FiniteAxiomatizableBy.finiteAxiomatizable (h : FiniteAxiomatizableBy T U) :
+    FiniteAxiomatizable T := ⟨U, h⟩
+
 /-- The single sentence that axiomatizes `T`: the conjunction of the finite theory `U`.
 - [Lin97, Ch. 4 §1] -/
 noncomputable def FiniteAxiomatizableBy.conj (h : FiniteAxiomatizableBy T U) : Sentence L :=

@@ -21,8 +21,7 @@ section models
 private lemma definable_step {Q : V → V → Prop} (hQ : 𝚷-[n].DefinableRel Q) :
     𝚷-[n + 1].DefinableRel fun x w ↦ (¬∃ z, Q x z) ∨ Q (x + 1) w := by
   have hex : 𝚺-[n + 1].DefinablePred fun x ↦ ∃ z, Q x z := by
-    apply HierarchySymbol.Definable.exs
-    exact HierarchySymbol.Definable.of_iff
+    exact HierarchySymbol.Definable.exs $ HierarchySymbol.Definable.of_iff
       ((hQ.of_lt (s := n + 1) (Γ := 𝚺) (by simp)).retraction ![1, 0]) (by intro w; simp)
   refine HierarchySymbol.Definable.or ?_ ?_
   · exact HierarchySymbol.Definable.of_iff (hex.notSigma.retraction ![0]) (by intro v; simp)
@@ -54,7 +53,7 @@ lemma succ_induction_of_exists_pi
     {P : V → Prop} {Q : V → V → Prop} (hQ : 𝚷-[n].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   intro a
-  obtain ⟨v, hv⟩ := exists_bound_of_definable hcol (definable_step hQ) a <| by
+  obtain ⟨v, hv⟩ := exists_bound_of_definable hcol (definable_step hQ) a $ by
     intro x _
     by_cases hx : ∃ z, Q x z
     · exact ((hPQ (x + 1)).mp (succ x ((hPQ x).mpr hx))).imp fun w hw ↦ Or.inr hw
@@ -96,7 +95,7 @@ private lemma models_ISigma_succ [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (n + 2)] [V↓[�
   suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Hierarchy 𝚺 (n + 1)) by
     simpa [ISigma, InductionOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩
   simp only [InductionScheme]
-  refine Semantics.ModelsSet.setOf_iff.mpr ?_
+  apply Semantics.ModelsSet.setOf_iff.mpr
   rintro _ ⟨φ, hφ, rfl⟩
   suffices ∀ f : ℕ → V, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →
       ∀ x, φ.Eval ![x] f by

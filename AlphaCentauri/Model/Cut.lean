@@ -67,16 +67,16 @@ namespace EndExtension
 variable {N : Type v} [hMN : M ⊆ₑ N]
 
 private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : ArithmeticSemiformula ℕ 1}
-    (hφ : Hierarchy 𝚺 0 φ)
+    (hφ : φ.Bounded)
     (v : ℕ → M) (h0 : φ.Eval ![0] v) (hs : ∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) (a : M) :
     φ.Eval ![a] v := by
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := hMN.models_peanoMinus
   have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![hMN.emb x] (hMN.emb ∘ v) := by
     intro x;
     simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using
-      absolute_of_Delta0 (T := 𝗣𝗔⁻) hφ M N ![x] v
+      absolute_of_bounded (T := 𝗣𝗔⁻) hφ M N ![x] v
   have h₂ : ∀ y : N, y < hMN.emb a + 1 → φ.Eval ![y] (hMN.emb ∘ v) := by
-    refine InductionScheme.succ_induction (C := Hierarchy 𝚺 0)
+    refine InductionScheme.succ_induction (C := Semiformula.Bounded)
       ⟨(hMN.emb a + 1) :>ₙ fun j ↦ hMN.emb (v j),
         “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ), by simp [hφ],
         by intro x; simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩

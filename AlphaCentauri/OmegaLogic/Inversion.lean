@@ -85,7 +85,7 @@ private lemma orInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (h
           ⟨D', le_rfl, hcr⟩).weakening ?_).mono_ordinalBound (lt_add_one _).le
         intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
     · refine (orI ?_).weakening (inv_pull₂ hhd Γ₀)
-      refine (ih hcr (by grind)).weakening ?_
+      apply (ih hcr (by grind)).weakening
       intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
   | @allω Γ₀ χ Dₓ ih =>
     refine (allω ?_).weakening (inv_pull₂ (by grind) Γ₀)
@@ -139,7 +139,7 @@ private lemma allInvAux (n : ℕ) (D : Derivation Γ) (hcr : D.cutRank ≤ (c : 
     · exact (ih₂ ((le_max_right _ _).trans hcr) (by grind)).weakening (inv_push _ ψ' _ Γ₀)
   | @orI Γ₀ φ' ψ' D' ih =>
     refine (orI ?_).weakening (inv_pull _ (by grind) Γ₀)
-    refine (ih hcr (by grind)).weakening ?_
+    apply (ih hcr (by grind)).weakening
     intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
   | @allω Γ₀ χ Dₓ ih =>
     by_cases hhd : (∀¹ χ) = (∀¹ φₓ)
@@ -240,10 +240,10 @@ private lemma andInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (
   | @orI Γ₀ φ' ψ' D' ih =>
     constructor
     · refine (orI ?_).weakening (inv_pull _ (by grind) Γ₀)
-      refine (ih hcr (by grind)).1.weakening ?_
+      apply (ih hcr (by grind)).1.weakening
       intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
     · refine (orI ?_).weakening (inv_pull _ (by grind) Γ₀)
-      refine (ih hcr (by grind)).2.weakening ?_
+      apply (ih hcr (by grind)).2.weakening
       intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
   | @allω Γ₀ χ Dₓ ih =>
     constructor

@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.Second
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
+public import AlphaCentauri.Hierarchy.StrictHierarchy
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 
 @[expose] public section
@@ -129,11 +129,11 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
   have hmem : ∀ σ, σ ∈ hU.toFinset.toList ↔ σ ∈ U := by simp
   have hconj : Hierarchy Γ n (⋀hU.toFinset.toList) :=
     Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ σ ((hmem σ).mp hσ)
-  have hle : T ∪ U ⪯ insert (⋀hU.toFinset.toList) T := WeakerThan.ofAxm! <| by
+  have hle : T ∪ U ⪯ insert (⋀hU.toFinset.toList) T := WeakerThan.ofAxm! $ by
     rintro φ (hφ | hφ)
     · exact by_axm (Set.mem_insert_of_mem _ hφ)
     · exact mdp (left_Conj₂_intro ((hmem φ).mpr hφ)) (by_axm (Set.mem_insert _ _))
-  have hge : insert (⋀hU.toFinset.toList) T ⪯ T ∪ U := WeakerThan.ofAxm! <| by
+  have hge : insert (⋀hU.toFinset.toList) T ⪯ T ∪ U := WeakerThan.ofAxm! $ by
     rintro φ (rfl | hφ)
     · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦ by_axm (Or.inr ((hmem ψ).mp hψ))
     · exact by_axm (Or.inl hφ)

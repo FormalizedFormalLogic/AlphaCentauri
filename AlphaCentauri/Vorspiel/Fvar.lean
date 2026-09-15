@@ -39,7 +39,8 @@ lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
   rw [toSemisentence, Semiformula.eval_rew]
   have hbv : (Semiterm.val v Empty.elim ∘ φ.paramSubst b ∘ Semiterm.bvar) = w := funext hb
   rw [hbv]
-  refine Semiformula.eval_iff_of_funEqOn φ fun y hy ↦ ?_
+  apply Semiformula.eval_iff_of_funEqOn φ
+  intro y hy
   have hlt : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy
   simp [paramSubst, hlt, hv ⟨y, hlt⟩]
 

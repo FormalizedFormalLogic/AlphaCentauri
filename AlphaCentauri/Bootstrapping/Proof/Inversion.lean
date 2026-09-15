@@ -55,7 +55,7 @@ lemma termShift_inj {t u : V} (ht : IsUTerm L t) (hu : IsUTerm L u)
         have : v = v' := by
           apply nth_ext' k hv.lh.symm hv'.lh.symm
           intro i hi
-          refine ih i hi _ (hv'.nth hi) ?_
+          apply ih i hi _ (hv'.nth hi)
           rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, hvv]
         rw [this]
   exact H t ht u hu h
@@ -77,16 +77,16 @@ private lemma shift_case {q : V} (hq : IsUFormula L q) :
   rcases hq.case with (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
     ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, hq₁, rfl⟩ | ⟨q₁, hq₁, rfl⟩)
   · exact Or.inl ⟨k, R, v, hR, hv, rfl, shift_rel hR hv⟩
-  · exact Or.inr <| Or.inl ⟨k, R, v, hR, hv, rfl, shift_nrel hR hv⟩
-  · exact Or.inr <| Or.inr <| Or.inl ⟨rfl, by simp⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨rfl, by simp⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+  · exact Or.inr $ Or.inl ⟨k, R, v, hR, hv, rfl, shift_nrel hR hv⟩
+  · exact Or.inr $ Or.inr $ Or.inl ⟨rfl, by simp⟩
+  · exact Or.inr $ Or.inr $ Or.inr $ Or.inl ⟨rfl, by simp⟩
+  · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
       ⟨q₁, q₂, hq₁, hq₂, rfl, shift_and hq₁ hq₂⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+  · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
       ⟨q₁, q₂, hq₁, hq₂, rfl, shift_or hq₁ hq₂⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+  · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inl
       ⟨q₁, hq₁, rfl, shift_all hq₁⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr
+  · exact Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr $ Or.inr
       ⟨q₁, hq₁, rfl, shift_exs hq₁⟩
 
 /-- The external-variable shift is injective on formula codes. -/
@@ -107,7 +107,7 @@ lemma shift_inj {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q)
         have : v = v' := by
           apply nth_ext' k hv.lh.symm hv'.lh.symm
           intro i hi
-          refine termShift_inj (hv.nth hi) (hv'.nth hi) ?_
+          apply termShift_inj (hv.nth hi) (hv'.nth hi)
           rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, hvv]
         rw [this]
       · simp [qqRel, qqNRel] at h
@@ -130,7 +130,7 @@ lemma shift_inj {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q)
         have : v = v' := by
           apply nth_ext' k hv.lh.symm hv'.lh.symm
           intro i hi
-          refine termShift_inj (hv.nth hi) (hv'.nth hi) ?_
+          apply termShift_inj (hv.nth hi) (hv'.nth hi)
           rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, hvv]
         rw [this]
       · simp [qqNRel, qqVerum] at h
@@ -292,21 +292,21 @@ section
 variable {T : Theory L} [T.Δ₁]
 
 /-- Adding the same code twice to a coded set is adding it once. -/
-private lemma insert_insert_self (x s : V) : insert x (insert x s) = insert x s := mem_ext <| by
+private lemma insert_insert_self (x s : V) : insert x (insert x s) = insert x s := mem_ext $ by
   intro z
   simp only [mem_bitInsert_iff]
   tauto
 
 /-- Adding two codes to a coded set does not depend on their order. -/
 private lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) :=
-  mem_ext <| by
+  mem_ext $ by
     intro z
     simp only [mem_bitInsert_iff]
     tauto
 
 /-- Removing a code just added to a coded set that did not contain it recovers the set. -/
 private lemma bitRemove_insert_of_not_mem {x s : V} (h : x ∉ s) : bitRemove x (insert x s) = s :=
-  mem_ext <| by
+  mem_ext $ by
     intro z
     simp only [mem_bitRemove_iff, mem_bitInsert_iff]
     constructor
@@ -347,7 +347,7 @@ lemma cutRank_eq_zero {d : V} (h : CutFreeDerivation T d) : cutRank L d = 0 := b
 end CutFreeDerivation
 
 /-- Adding a code already present to a coded set changes nothing. -/
-private lemma insert_eq_self {x s : V} (h : x ∈ s) : insert x s = s := mem_ext <| by
+private lemma insert_eq_self {x s : V} (h : x ∈ s) : insert x s = s := mem_ext $ by
   intro z
   simp only [mem_bitInsert_iff]
   constructor
@@ -377,14 +377,14 @@ private lemma and_bounds {p q c s d : V} (hc : c = p ∨ c = q)
 
 /-- Adding two codes to a coded set already containing them changes nothing. -/
 private lemma insert_pair_absorb (x y s : V) :
-    insert x (insert y (insert x (insert y s))) = insert x (insert y s) := mem_ext <| by
+    insert x (insert y (insert x (insert y s))) = insert x (insert y s) := mem_ext $ by
   intro z
   simp only [mem_bitInsert_iff]
   tauto
 
 /-- Adding two codes and then a third is adding the third and then the two. -/
 private lemma insert_pair_comm (x y a s : V) :
-    insert x (insert y (insert a s)) = insert a (insert x (insert y s)) := mem_ext <| by
+    insert x (insert y (insert a s)) = insert a (insert x (insert y s)) := mem_ext $ by
   intro z
   simp only [mem_bitInsert_iff]
   tauto
@@ -392,7 +392,7 @@ private lemma insert_pair_comm (x y a s : V) :
 /-- Adding two codes and then two more is adding the last two and then the first two. -/
 private lemma insert_pair_comm₂ (x y a b s : V) :
     insert x (insert y (insert a (insert b s))) = insert a (insert b (insert x (insert y s))) :=
-  mem_ext <| by
+  mem_ext $ by
     intro z
     simp only [mem_bitInsert_iff]
     tauto
@@ -513,7 +513,7 @@ private lemma inversion_and_aux :
         obtain ⟨d', hd', hh⟩ :=
           ih dp (dp_lt_andIntro _ _ _ _ _) _ b₁ _ b₂ _ b₃ _ b₄ (Or.inl rfl) ⟨heq, hdp.2⟩
         refine ⟨d', by rwa [insert_insert_self] at hd', ?_⟩
-        refine le_trans hh ?_
+        apply le_trans hh
         simp only [height_andIntro]
         exact le_trans (succ_le_succ (le_max_left (height dp) (height dq))) (le_add_one _)
       · rw [hcq]
@@ -523,7 +523,7 @@ private lemma inversion_and_aux :
         obtain ⟨d', hd', hh⟩ :=
           ih dq (dq_lt_andIntro _ _ _ _ _) _ b₁ _ b₂ _ b₃ _ b₄ (Or.inr rfl) ⟨heq, hdq.2⟩
         refine ⟨d', by rwa [insert_insert_self] at hd', ?_⟩
-        refine le_trans hh ?_
+        apply le_trans hh
         simp only [height_andIntro]
         exact le_trans (succ_le_succ (le_max_right (height dp) (height dq))) (le_add_one _)
     · have habs : a ^⋏ b ∈ s := by
@@ -811,7 +811,7 @@ private lemma inversion_or_aux :
       obtain ⟨d', hd', hh⟩ :=
         ih d₀ (d_lt_orIntro _ _ _ _) _ b₁ _ b₂ _ b₃ ⟨heq, hd₀.2⟩
       refine ⟨d', by rwa [insert_pair_absorb] at hd', ?_⟩
-      refine le_trans hh ?_
+      apply le_trans hh
       simp only [height_orIntro]
       exact le_add_one _
     · have habs : a ^⋎ b ∈ s := by

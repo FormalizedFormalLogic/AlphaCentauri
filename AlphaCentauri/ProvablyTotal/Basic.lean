@@ -199,7 +199,7 @@ variable {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) 
 - [HP98, Lemma I.1.53] -/
 lemma comp [𝗘𝗤 ℒₒᵣ ⪯ T] (hg : T.ProvablyTotalVia g ψ) (hh : ∀ i, T.ProvablyTotalVia (h i) (χ i)) :
     T.ProvablyTotalVia (fun v ↦ g fun i ↦ h i v) (compGraph ψ χ) := by
-  refine of_models (definedFunction_compGraph hg.defined fun i ↦ (hh i).defined) ?_
+  apply of_models (definedFunction_compGraph hg.defined fun i ↦ (hh i).defined)
   intro V _ _ v
   choose z hz using fun i ↦ (hh i).models V v
   obtain ⟨y, hy⟩ := hg.models V z

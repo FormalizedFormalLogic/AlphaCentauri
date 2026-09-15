@@ -1,10 +1,11 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
-public import AlphaCentauri.Bootstrapping.Delta0
-public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZero
-public import AlphaCentauri.Bootstrapping.PartialTruth.PSatZeroExists
-public import AlphaCentauri.Bootstrapping.PartialTruth.SatSigma
-public import AlphaCentauri.Bootstrapping.PartialTruth.SatZero
+public import AlphaCentauri.Axiomatizability.Basic
+public import AlphaCentauri.Axiomatizability.ISigma
+public import AlphaCentauri.Axiomatizability.Reflexive
+public import AlphaCentauri.Bootstrapping.Bounded
+public import AlphaCentauri.Bootstrapping.PartialTruth.BoundedSatisfaction
+public import AlphaCentauri.Bootstrapping.PartialTruth.SigmaSatisfaction
 public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
 public import AlphaCentauri.Bootstrapping.PartialTruth.Tarski
 public import AlphaCentauri.Bootstrapping.Prenex
@@ -15,11 +16,10 @@ public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.Bootstrapping.TermVal
-public import AlphaCentauri.FiniteAxiomatizability.Basic
-public import AlphaCentauri.FiniteAxiomatizability.ISigma
-public import AlphaCentauri.FiniteAxiomatizability.Reflexive
-public import AlphaCentauri.Hierarchy.DeltaZero
+public import AlphaCentauri.Hierarchy.Bounded
+public import AlphaCentauri.Hierarchy.NormalForm
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
+public import AlphaCentauri.Hierarchy.StrictHierarchy
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.Overspill
@@ -42,7 +42,6 @@ public import AlphaCentauri.Schemata.Collection.Equivalence
 public import AlphaCentauri.Schemata.Collection.Induction
 public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Vorspiel.Absoluteness
-public import AlphaCentauri.Vorspiel.Axiomatizable
 public import AlphaCentauri.Vorspiel.Compact
 public import AlphaCentauri.Vorspiel.Completeness
 public import AlphaCentauri.Vorspiel.ConstantExtension

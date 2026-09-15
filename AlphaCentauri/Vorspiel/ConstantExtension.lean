@@ -67,7 +67,7 @@ lemma strucOfTuple_models_eq : strucOfTuple M a ⊧* 𝗘𝗤 (Language.oringCon
 lemma strucOfTuple_models_lMap_image {U : ArithmeticTheory} (h : M↓[ℒₒᵣ] ⊧* U) :
     strucOfTuple M a ⊧*
       Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) '' U := by
-  refine Semantics.modelsSet_iff.mpr ?_
+  apply Semantics.modelsSet_iff.mpr
   rintro _ ⟨σ, hσ, rfl⟩
   simpa [strucOfTuple, models_iff, Semiformula.Realize] using Semantics.modelsSet_iff.mp h hσ
 

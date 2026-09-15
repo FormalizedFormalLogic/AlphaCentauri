@@ -69,6 +69,17 @@ rewrite, so it is written as if it were already there.
   hierarchy are the vocabulary. A definition that duplicates a Foundation definition under a
   new name is rejected in review. If Foundation's API is missing or awkward, say so in the
   issue you are working on rather than working around it; a human takes it upstream.
+- **`$` for low-precedence application.** Write `f $ x`, not `f <| x`, and prefer it to
+  parentheses whenever the argument runs to the end of the term: `exact Or.inr $ Or.inl h`, not
+  `exact Or.inr (Or.inl h)`. Foundation's guidelines do not choose between the two spellings —
+  [`style.md`](style.md) happens to use `<|` in one example — and AlphaCentauri uses `$`
+  throughout, so that a chain of constructor applications reads as a chain.
+- **Avoid `?_`.** Prefer `apply f` to `refine f ?_`, and a direct term to a `refine` with holes;
+  [`style.md`](style.md)'s preference for direct term construction is the same rule seen from the
+  other side. `use` takes data only — a witness of a `Type`, never a proof of a hypothesis: split
+  what remains with `and_intros` rather than passing the proof to `use`.
+- **Line length.** Up to about 120 columns is acceptable, rather than the 100 that
+  [`style.md`](style.md) inherits from the Mathlib guide. Do not break a line that fits in 120.
 - **AI disclosure.** As in Foundation: every commit carries a `Co-Authored-By` trailer for the
   model, and the PR body says an AI agent wrote it. Here that is the normal case, not the
   exception, so every PR body says so explicitly.

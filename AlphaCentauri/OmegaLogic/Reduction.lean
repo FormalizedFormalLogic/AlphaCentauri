@@ -86,7 +86,7 @@ private lemma remove_falsumAux (D : Derivation Γ) (hcr : D.cutRank ≤ (0 : ℕ
   induction D with
   | @axL Γ k r v hp hn => exact axL r v (by grind) (by grind)
   | @axTrue Γ k b r v ht hm =>
-    refine axTrue b r v ht ?_
+    apply axTrue b r v ht
     cases b <;> · simp only [signedLit] at hm ⊢; grind
   | @verumR Γ h => exact verumR (by grind)
   | @weak Δ Γ D' hsub ih =>
@@ -412,14 +412,14 @@ private lemma cut_reduce_allAux (hqr : φₓ.qr < c)
       by_cases hd : (∃¹ ∼φₓ) ∈ Γ₁
       · have hP : Z∞ ⊢[α + D'.ordinalBound + 1, c]
             insert (∼(φₓ/[(↑n : ArithmeticTerm ℕ)])) (Γ₁.erase (∃¹ ∼φₓ) ∪ Γ) := by
-          refine (ih hcr (Finset.mem_insert_of_mem hd)).weakening ?_
+          apply (ih hcr (Finset.mem_insert_of_mem hd)).weakening
           intro x hx
           simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢
           rcases hx with ⟨hne, rfl | hx⟩ | hx
           · left; simp
           · exact Or.inr (Or.inl ⟨hne, hx⟩)
           · exact Or.inr (Or.inr hx)
-        refine (cut _ hcut hfam hP).mono_ordinalBound ?_
+        apply (cut _ hcut hfam hP).mono_ordinalBound
         gcongr
         exact max_le le_self_add (le_of_eq (add_assoc α D'.ordinalBound 1))
       · have hP : Z∞ ⊢[D'.ordinalBound, c]
@@ -431,7 +431,7 @@ private lemma cut_reduce_allAux (hqr : φₓ.qr < c)
           rcases hx with rfl | hx
           · left; simp
           · exact Or.inr (Or.inl ⟨fun e => hd (e ▸ hx), hx⟩)
-        refine (cut _ hcut hfam hP).mono_ordinalBound ?_
+        apply (cut _ hcut hfam hP).mono_ordinalBound
         gcongr
         exact max_le le_self_add ((lt_add_one _).le.trans le_add_self)
     · have h := (ih hcr (by grind)).weakening (frameIn _ _ Γ₁ Γ)

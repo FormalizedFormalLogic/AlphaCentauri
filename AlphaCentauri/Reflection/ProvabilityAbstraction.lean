@@ -78,7 +78,7 @@ theorem inconsistent_of_localReflection_provable [Diagonalization T₀] [T₀ �
     (h : insert π T ⊢ 𝔅 (∼π) 🡒 ∼π) : Inconsistent (insert π T) := by
   have h₁ : T ⊢ π 🡒 (𝔅 (∼π) 🡒 ∼π) := deduction_iff.mp h
   have h₂ : T ⊢ ∼π := löb_theorem (by cl_prover [h₁])
-  exact inconsistent_of_provable <| by cl_prover [adjoin! π T, to_adjoin (φ := π) h₂]
+  exact inconsistent_of_provable $ by cl_prover [adjoin! π T, to_adjoin (φ := π) h₂]
 
 /-- If `T ∪ {π}` for a sentence `π` in a class `Γ` proves the local reflection schema of `𝔅`
 restricted to a class `Γ'` dual to it, then `T ∪ {π}` is inconsistent.

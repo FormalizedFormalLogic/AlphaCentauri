@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Hierarchy.StrictHierarchy
-public import AlphaCentauri.Bootstrapping.Delta0
+public import AlphaCentauri.Bootstrapping.Bounded
 
 /-!
 # Internal prenex classes
@@ -84,7 +84,7 @@ lemma succ_le_qqExs (p : V) : p + 1 ≤ ^∃ p := by
   · definability
   case zero => simp
   case succ k ih =>
-    refine le_trans ih ?_
+    apply le_trans ih
     rw [qqExss_succ]
     exact le_qqExs _
 
@@ -203,13 +203,13 @@ mutual
   /-- `IsStrictSigma n p` says that `p` codes a strict prenex $\Sigma_n$ formula.
   - [HP98, Lemma I.1.69] -/
   def IsStrictSigma : ℕ → V → Prop
-    | 0 => IsDelta0
+    | 0 => IsBounded
     | n + 1 => fun p ↦ ∃ k q, p = qqExss q k ∧ IsStrictPi n q
 
   /-- `IsStrictPi n p` says that `p` codes a strict prenex $\Pi_n$ formula.
   - [HP98, Lemma I.1.69] -/
   def IsStrictPi : ℕ → V → Prop
-    | 0 => IsDelta0
+    | 0 => IsBounded
     | n + 1 => fun p ↦ ∃ k q, p = qqAlls q k ∧ IsStrictSigma n q
 end
 
@@ -217,7 +217,7 @@ mutual
   /-- A $\Delta_1$ recognizer for internally coded strict prenex $\Sigma_n$ formulas.
   - [HP98, Lemma I.1.69(1)] -/
   noncomputable def isStrictSigma : ℕ → 𝚫₁.Semisentence 1
-    | 0 => isDelta0
+    | 0 => isBounded
     | n + 1 => .mkDelta
         (.mkSigma “p. ∃ k < p + 1, ∃ q < p + 1, !qqExssDef p q k ∧ !(isStrictPi n).sigma q”)
         (.mkPi “p. ∃ k < p + 1, ∃ q < p + 1, (∀ y, !qqExssDef y q k → y = p) ∧ !(isStrictPi n).pi q”)
@@ -225,7 +225,7 @@ mutual
   /-- A $\Delta_1$ recognizer for internally coded strict prenex $\Pi_n$ formulas.
   - [HP98, Lemma I.1.69(1)] -/
   noncomputable def isStrictPi : ℕ → 𝚫₁.Semisentence 1
-    | 0 => isDelta0
+    | 0 => isBounded
     | n + 1 => .mkDelta
         (.mkSigma “p. ∃ k < p + 1, ∃ q < p + 1, !qqAllsDef p q k ∧ !(isStrictSigma n).sigma q”)
         (.mkPi “p. ∃ k < p + 1, ∃ q < p + 1, (∀ y, !qqAllsDef y q k → y = p) ∧ !(isStrictSigma n).pi q”)
@@ -245,7 +245,7 @@ mutual
   - [HP98, Lemma I.1.69(1)] -/
   instance IsStrictSigma.defined :
       ∀ n : ℕ, 𝚫₁-Predicate (IsStrictSigma n : V → Prop) via isStrictSigma n
-    | 0 => IsDelta0.defined
+    | 0 => IsBounded.defined
     | n + 1 =>
       have : 𝚫₁-Predicate (IsStrictPi n : V → Prop) via isStrictPi n := IsStrictPi.defined n
       .mk ⟨fun v ↦ by simp [isStrictSigma, HierarchySymbol.Semiformula.val_sigma, eq_comm],
@@ -257,7 +257,7 @@ mutual
   - [HP98, Lemma I.1.69(1)] -/
   instance IsStrictPi.defined :
       ∀ n : ℕ, 𝚫₁-Predicate (IsStrictPi n : V → Prop) via isStrictPi n
-    | 0 => IsDelta0.defined
+    | 0 => IsBounded.defined
     | n + 1 =>
       have : 𝚫₁-Predicate (IsStrictSigma n : V → Prop) via isStrictSigma n :=
         IsStrictSigma.defined n
@@ -304,22 +304,22 @@ lemma IsStrictPi.all {n : ℕ} {p : V} (h : IsStrictPi (n + 1) p) :
 mutual
   /-- An internally $\Delta_0$ formula is strict $\Sigma_n$ at every level.
   - [HP98, Lemma I.1.69] -/
-  lemma IsStrictSigma.of_delta0 : ∀ {n : ℕ} {p : V}, IsDelta0 p → IsStrictSigma n p
+  lemma IsStrictSigma.of_bounded : ∀ {n : ℕ} {p : V}, IsBounded p → IsStrictSigma n p
     | 0,     _, h => h
-    | _ + 1, _, h => IsStrictSigma.of_pi (IsStrictPi.of_delta0 h)
+    | _ + 1, _, h => IsStrictSigma.of_pi (IsStrictPi.of_bounded h)
 
   /-- An internally $\Delta_0$ formula is strict $\Pi_n$ at every level.
   - [HP98, Lemma I.1.69] -/
-  lemma IsStrictPi.of_delta0 : ∀ {n : ℕ} {p : V}, IsDelta0 p → IsStrictPi n p
+  lemma IsStrictPi.of_bounded : ∀ {n : ℕ} {p : V}, IsBounded p → IsStrictPi n p
     | 0,     _, h => h
-    | _ + 1, _, h => IsStrictPi.of_sigma (IsStrictSigma.of_delta0 h)
+    | _ + 1, _, h => IsStrictPi.of_sigma (IsStrictSigma.of_bounded h)
 end
 
 mutual
   /-- Internal strict `Σ` classes are monotone in the hierarchy level.
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictSigma.mono : ∀ {m n : ℕ}, m ≤ n → ∀ {p : V}, IsStrictSigma m p → IsStrictSigma n p
-    | 0,     _,     _,  _, h => IsStrictSigma.of_delta0 h
+    | 0,     _,     _,  _, h => IsStrictSigma.of_bounded h
     | _ + 1, 0,     hn, _, _ => absurd hn (by omega)
     | _ + 1, _ + 1, hn, _, h => by
       obtain ⟨k, q, rfl, hq⟩ := h
@@ -328,7 +328,7 @@ mutual
   /-- Internal strict `Π` classes are monotone in the hierarchy level.
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictPi.mono : ∀ {m n : ℕ}, m ≤ n → ∀ {p : V}, IsStrictPi m p → IsStrictPi n p
-    | 0,     _,     _,  _, h => IsStrictPi.of_delta0 h
+    | 0,     _,     _,  _, h => IsStrictPi.of_bounded h
     | _ + 1, 0,     hn, _, _ => absurd hn (by omega)
     | _ + 1, _ + 1, hn, _, h => by
       obtain ⟨k, q, rfl, hq⟩ := h
@@ -337,28 +337,28 @@ end
 
 /-- The body of a $\Delta_0$ code of an existential quantification is strict $\Sigma_1$.
 - [HP98, Lemma I.1.69] -/
-private lemma isStrictSigma1_of_isDelta0_exs {p : V} (h : IsDelta0 (^∃ p)) :
+private lemma isStrictSigma1_of_isBounded_exs {p : V} (h : IsBounded (^∃ p)) :
     IsStrictSigma 1 p := by
-  obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsDelta0.of_ex h
-  have h₁ : IsDelta0 (Arithmetic.qqLT (qqBvar 0) (termBShift ℒₒᵣ t)) := by
-    rw [Arithmetic.qqLT]; exact IsDelta0.rel
-  exact IsStrictSigma.of_pi (IsDelta0.and_iff.mpr ⟨h₁, hq⟩)
+  obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsBounded.of_ex h
+  have h₁ : IsBounded (Arithmetic.qqLT (qqBvar 0) (termBShift ℒₒᵣ t)) := by
+    rw [Arithmetic.qqLT]; exact IsBounded.rel
+  exact IsStrictSigma.of_pi (IsBounded.and_iff.mpr ⟨h₁, hq⟩)
 
 /-- The body of a $\Delta_0$ code of a universal quantification is strict $\Pi_1$.
 - [HP98, Lemma I.1.69] -/
-private lemma isStrictPi1_of_isDelta0_alls {p : V} (h : IsDelta0 (^∀ p)) :
+private lemma isStrictPi1_of_isBounded_alls {p : V} (h : IsBounded (^∀ p)) :
     IsStrictPi 1 p := by
-  obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsDelta0.of_all h
-  have h₁ : IsDelta0 (Arithmetic.qqNLT (qqBvar 0) (termBShift ℒₒᵣ t)) := by
-    rw [Arithmetic.qqNLT]; exact IsDelta0.nrel
-  exact IsStrictPi.of_sigma (IsDelta0.or_iff.mpr ⟨h₁, hq⟩)
+  obtain ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsBounded.of_all h
+  have h₁ : IsBounded (Arithmetic.qqNLT (qqBvar 0) (termBShift ℒₒᵣ t)) := by
+    rw [Arithmetic.qqNLT]; exact IsBounded.nrel
+  exact IsStrictPi.of_sigma (IsBounded.or_iff.mpr ⟨h₁, hq⟩)
 
 mutual
   /-- Removing a leading existential from a strict $\Pi_n$ code lands in strict $\Sigma_{n + 1}$.
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictPi.of_exs_aux :
       ∀ {n : ℕ} {p : V}, IsStrictPi n (^∃ p) → IsStrictSigma (n + 1) p
-    | 0,     _, h => isStrictSigma1_of_isDelta0_exs h
+    | 0,     _, h => isStrictSigma1_of_isBounded_exs h
     | _ + 1, _, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       rcases zero_or_succ k with (rfl | ⟨k, rfl⟩)
@@ -370,7 +370,7 @@ mutual
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictSigma.of_exs_aux :
       ∀ {n : ℕ} {p : V}, IsStrictSigma n (^∃ p) → IsStrictSigma (n + 1) p
-    | 0,     _, h => isStrictSigma1_of_isDelta0_exs h
+    | 0,     _, h => isStrictSigma1_of_isBounded_exs h
     | _ + 1, _, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       rcases zero_or_succ k with (rfl | ⟨k, rfl⟩)
@@ -386,7 +386,7 @@ mutual
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictSigma.of_all_aux :
       ∀ {n : ℕ} {p : V}, IsStrictSigma n (^∀ p) → IsStrictPi (n + 1) p
-    | 0,     _, h => isStrictPi1_of_isDelta0_alls h
+    | 0,     _, h => isStrictPi1_of_isBounded_alls h
     | _ + 1, _, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       rcases zero_or_succ k with (rfl | ⟨k, rfl⟩)
@@ -398,7 +398,7 @@ mutual
   - [HP98, Lemma I.1.69] -/
   private lemma IsStrictPi.of_all_aux :
       ∀ {n : ℕ} {p : V}, IsStrictPi n (^∀ p) → IsStrictPi (n + 1) p
-    | 0,     _, h => isStrictPi1_of_isDelta0_alls h
+    | 0,     _, h => isStrictPi1_of_isBounded_alls h
     | _ + 1, _, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       rcases zero_or_succ k with (rfl | ⟨k, rfl⟩)
@@ -438,7 +438,7 @@ mutual
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictSigma.neg :
       ∀ {n : ℕ} {p : V}, IsUFormula ℒₒᵣ p → IsStrictSigma n p → IsStrictPi n (neg ℒₒᵣ p)
-    | 0,     _, hp, h => IsDelta0.neg hp h
+    | 0,     _, hp, h => IsBounded.neg hp h
     | _ + 1, _, hp, h => by
       obtain ⟨k, q, rfl, hq⟩ := h
       have hq' : IsUFormula ℒₒᵣ q := isUFormula_qqExss.mp hp
@@ -448,7 +448,7 @@ mutual
   - [HP98, Lemma I.1.69] -/
   lemma IsStrictPi.neg :
       ∀ {n : ℕ} {p : V}, IsUFormula ℒₒᵣ p → IsStrictPi n p → IsStrictSigma n (neg ℒₒᵣ p)
-    | 0,     _, hp, h => IsDelta0.neg hp h
+    | 0,     _, hp, h => IsBounded.neg hp h
     | _ + 1, _, hp, h => by
       obtain ⟨k, q, rfl, hq⟩ := h
       have hq' : IsUFormula ℒₒᵣ q := isUFormula_qqAlls.mp hp
@@ -472,8 +472,8 @@ private lemma isStrictClass_quote {Γ : Polarity} {s n : ℕ} {ψ : ArithmeticSe
   induction h with
   | @zero Γ₀ n₀ φ₀ hφ₀ =>
     rcases Γ₀ with _ | _
-    · exact (isDelta0_quote_iff_s φ₀).mpr hφ₀
-    · exact (isDelta0_quote_iff_s φ₀).mpr hφ₀
+    · exact (isBounded_quote_iff_s φ₀).mpr hφ₀
+    · exact (isBounded_quote_iff_s φ₀).mpr hφ₀
   | @ofAlt Γ₀ s₀ n₀ φ₀ _ ih =>
     rcases Γ₀ with _ | _
     · exact IsStrictSigma.of_pi ih
@@ -543,7 +543,7 @@ mutual
   private lemma strictHierarchy_sigma_of_isStrictSigma_nat :
       ∀ (s : ℕ) {n : ℕ} (ψ : ArithmeticSemiproposition n),
         IsStrictSigma s (⌜ψ⌝ : ℕ) → StrictHierarchy 𝚺 s ψ
-    | 0,     _, ψ, h => .zero ((isDelta0_quote_iff_s ψ).mp h)
+    | 0,     _, ψ, h => .zero ((isBounded_quote_iff_s ψ).mp h)
     | s + 1, _, ψ, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       exact strictHierarchy_sigma_of_quote_eq_qqExss
@@ -554,7 +554,7 @@ mutual
   private lemma strictHierarchy_pi_of_isStrictPi_nat :
       ∀ (s : ℕ) {n : ℕ} (ψ : ArithmeticSemiproposition n),
         IsStrictPi s (⌜ψ⌝ : ℕ) → StrictHierarchy 𝚷 s ψ
-    | 0,     _, ψ, h => .zero ((isDelta0_quote_iff_s ψ).mp h)
+    | 0,     _, ψ, h => .zero ((isBounded_quote_iff_s ψ).mp h)
     | s + 1, _, ψ, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       exact strictHierarchy_pi_of_quote_eq_qqAlls

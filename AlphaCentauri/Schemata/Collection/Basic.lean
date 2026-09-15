@@ -168,7 +168,7 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticS
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := n + 1);
   apply models_collectionAxiom_iff _ |>.mpr;
   intro f a h
-  obtain ⟨w, hw⟩ := sigma_exists_bound_witness (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a <| by
+  obtain ⟨w, hw⟩ := sigma_exists_bound_witness (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a $ by
     intro x hx;
     obtain ⟨y, hy⟩ := h x hx;
     exact ⟨y, (φ.eval_toSemisentence_two x y f).mpr hy⟩
@@ -182,7 +182,7 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticS
 
 /-- `𝗕𝚺 (n + 1)` is at most as strong as `𝗜𝚺 (n + 1)`.
 - [HP98, Lemma I.2.11] -/
-theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := WeakerThan.ofAxm! <| by
+theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := WeakerThan.ofAxm! $ by
   rintro σ (hσ | ⟨φ, hφ, rfl⟩);
   · exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega)) (by_axm hσ)
   · exact ISigma.provable_collectionAxiom_of_hierarchy n hφ

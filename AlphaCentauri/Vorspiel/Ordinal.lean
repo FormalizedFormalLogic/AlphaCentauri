@@ -40,7 +40,7 @@ lemma one_lt_opow_succ : 1 < ω ^ (a + 1) := one_lt_omega0_opow (zero_lt_add_one
 
 lemma lt_opow_succ_max_of_le_max {a b x : Ordinal} (hx : x ≤ max (ω ^ a) (ω ^ b)) :
     x < ω ^ (max a b + 1) :=
-  hx.trans_lt <| max_lt
+  hx.trans_lt $ max_lt
     ((opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_left a b).trans_lt (lt_add_one _)))
     ((opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_right a b).trans_lt (lt_add_one _)))
 
@@ -68,7 +68,8 @@ lemma add_add_one_add_one_le (a b : Ordinal) : a + b + 1 + 1 ≤ a + (b + 1) + 1
 lemma iSup_add_add_one_add_one_le (a : Ordinal) (f : ℕ → Ordinal) :
     (⨆ n, a + f n + 1) + 1 ≤ a + ((⨆ n, f n) + 1) + 1 := by
   gcongr
-  refine Ordinal.iSup_le fun n => ?_
+  apply Ordinal.iSup_le
+  intro n
   rw [add_assoc]
   gcongr
   exact Ordinal.le_iSup f n

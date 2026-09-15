@@ -183,19 +183,51 @@ noncomputable def sigmaSatisfactionNeg (n : ℕ) : ArithmeticSentence :=
     (!(sigmaSatisfaction n).val nz e ↔ ¬!(piSatisfaction n).val z e)”
 
 /-- The finite collection of $\Delta_0$ Tarski and term-evaluation sentences. -/
-noncomputable def boundedSatisfactionAxioms : ArithmeticTheory :=
-  {boundedSatisfactionDom, boundedSatisfactionVerum, boundedSatisfactionFalsum,
-    boundedSatisfactionEq, boundedSatisfactionNeq, boundedSatisfactionLt,
-    boundedSatisfactionNlt, boundedSatisfactionAnd, boundedSatisfactionOr, boundedSatisfactionNeg,
-      boundedSatisfactionBall, boundedSatisfactionBex,
-    termValBvar, termValZero, termValOne, termValAdd, termValMul, adjoinTotal,
-    adjoinUnique, nthAdjoinZero, nthAdjoinSucc, lenNil, lenAdjoin}
+noncomputable def boundedSatisfactionAxioms : ArithmeticTheory := {
+  boundedSatisfactionDom,
+  boundedSatisfactionVerum,
+  boundedSatisfactionFalsum,
+  boundedSatisfactionEq,
+  boundedSatisfactionNeq,
+  boundedSatisfactionLt,
+  boundedSatisfactionNlt,
+  boundedSatisfactionAnd,
+  boundedSatisfactionOr,
+  boundedSatisfactionNeg,
+  boundedSatisfactionBall,
+  boundedSatisfactionBex,
+  termValBvar,
+  termValZero,
+  termValOne,
+  termValAdd,
+  termValMul,
+  adjoinTotal,
+  adjoinUnique,
+  nthAdjoinZero,
+  nthAdjoinSucc,
+  lenNil,
+  lenAdjoin
+}
 
 /-- The finite collection of level-`n + 1` Tarski sentences. -/
-noncomputable def sigmaSatisfactionAxioms (n : ℕ) : ArithmeticTheory :=
-  {sigmaSatisfactionOfPi n, piSatisfactionOfSigma n, sigmaSatisfactionDom n, piSatisfactionDom n,
-    sigmaSatisfactionExs n,
-    piSatisfactionAll n, piSatisfactionNeg n, sigmaSatisfactionNeg n}
+noncomputable def sigmaSatisfactionAxioms (n : ℕ) : ArithmeticTheory := {
+  sigmaSatisfactionOfPi n,
+  piSatisfactionOfSigma n,
+  sigmaSatisfactionDom n,
+  piSatisfactionDom n,
+  sigmaSatisfactionExs n,
+  piSatisfactionAll n,
+  piSatisfactionNeg n,
+  sigmaSatisfactionNeg n
+}
+
+lemma boundedSatisfactionAxioms_finite : boundedSatisfactionAxioms.Finite := by
+  unfold boundedSatisfactionAxioms
+  exact Set.toFinite _
+
+lemma sigmaSatisfactionAxioms_finite (n : ℕ) : (sigmaSatisfactionAxioms n).Finite := by
+  unfold sigmaSatisfactionAxioms
+  exact Set.toFinite _
 
 end Tarski
 
@@ -205,8 +237,7 @@ inductive tarski : ℕ → ArithmeticTheory
   | prev : ∀ n φ, tarski n φ → tarski (n + 1) φ
   | new  : ∀ n, ∀ φ ∈ Tarski.sigmaSatisfactionAxioms n, tarski n φ
 
-lemma tarski_zero :
-    tarski 0 = Tarski.boundedSatisfactionAxioms ∪ Tarski.sigmaSatisfactionAxioms 0 := by
+lemma tarski_zero : tarski 0 = Tarski.boundedSatisfactionAxioms ∪ Tarski.sigmaSatisfactionAxioms 0 := by
   ext φ
   constructor
   · rintro (⟨⟩ | ⟨⟩)
@@ -216,8 +247,7 @@ lemma tarski_zero :
     · exact tarski.zero 0 φ h
     · exact tarski.new 0 φ h
 
-lemma tarski_succ (n : ℕ) :
-    tarski (n + 1) = tarski n ∪ Tarski.sigmaSatisfactionAxioms (n + 1) := by
+lemma tarski_succ (n : ℕ) : tarski (n + 1) = tarski n ∪ Tarski.sigmaSatisfactionAxioms (n + 1) := by
   ext φ
   constructor
   · rintro (⟨⟩ | ⟨⟩ | ⟨⟩)
@@ -229,14 +259,13 @@ lemma tarski_succ (n : ℕ) :
     · exact tarski.new (n + 1) φ h
 
 lemma tarski_finite (n : ℕ) : (tarski n).Finite := by
-  have hSigmaAx : ∀ m : ℕ, (Tarski.sigmaSatisfactionAxioms m).Finite := by
-    intro m; simp only [Tarski.sigmaSatisfactionAxioms]; exact Set.toFinite _
   induction n with
   | zero =>
     rw [tarski_zero]
-    exact Set.Finite.union (by simp only [Tarski.boundedSatisfactionAxioms]; exact Set.toFinite _)
-      (hSigmaAx 0)
-  | succ n ih => rw [tarski_succ]; exact ih.union (hSigmaAx (n + 1))
+    exact Tarski.boundedSatisfactionAxioms_finite.union (Tarski.sigmaSatisfactionAxioms_finite 0)
+  | succ n ih =>
+    rw [tarski_succ]
+    exact ih.union (Tarski.sigmaSatisfactionAxioms_finite (n + 1))
 
 /-! ## The level of the Tarski conditions in the arithmetical hierarchy -/
 

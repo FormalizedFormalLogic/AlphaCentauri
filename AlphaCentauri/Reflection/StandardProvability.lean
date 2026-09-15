@@ -119,24 +119,24 @@ theorem not_localReflectionOnHierarchy_weakerThan_insert
     inferInstance
 
 /-- Unboundedness, for a finitely axiomatizable extension: if `T ∪ U`, for a theory `U` axiomatized
-by a finite set `S` of `Γ n` sentences, proves the local reflection schema of `T` on the dual class,
-then `T ∪ U` is inconsistent.
+by a finite set `U'` of `Γ n` sentences, proves the local reflection schema of `T` on the dual
+class, then `T ∪ U` is inconsistent.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
 theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
-    {U S : ArithmeticTheory} (hΓ : AxiomatizableBy (Hierarchy Γ n) U S) (hS : S.Finite)
+    {U U' : ArithmeticTheory} (hΓ : AxiomatizableBy (Hierarchy Γ n) U U') (hU' : U'.Finite)
     (h : 𝗥𝗳𝗻[Γ.alt n] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
   classical
-  have e : T ∪ U ≊ T ∪ S := hΓ.equiv.union_right T
-  have hmem : ∀ σ, σ ∈ hS.toFinset.toList ↔ σ ∈ S := by simp
-  have hconj : Hierarchy Γ n (⋀hS.toFinset.toList) :=
+  have e : T ∪ U ≊ T ∪ U' := hΓ.equiv.union_right T
+  have hmem : ∀ σ, σ ∈ hU'.toFinset.toList ↔ σ ∈ U' := by simp
+  have hconj : Hierarchy Γ n (⋀hU'.toFinset.toList) :=
     Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ.forall_mem σ ((hmem σ).mp hσ)
-  have hle : T ∪ S ⪯ insert (⋀hS.toFinset.toList) T := WeakerThan.ofAxm! $ by
+  have hle : T ∪ U' ⪯ insert (⋀hU'.toFinset.toList) T := WeakerThan.ofAxm! $ by
     rintro φ (hφ | hφ)
     · exact by_axm (Set.mem_insert_of_mem _ hφ)
     · exact mdp (left_Conj₂_intro ((hmem φ).mpr hφ)) (by_axm (Set.mem_insert _ _))
-  have hge : insert (⋀hS.toFinset.toList) T ⪯ T ∪ S := WeakerThan.ofAxm! $ by
+  have hge : insert (⋀hU'.toFinset.toList) T ⪯ T ∪ U' := WeakerThan.ofAxm! $ by
     rintro φ (rfl | hφ)
     · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦ by_axm (Or.inr ((hmem ψ).mp hψ))
     · exact by_axm (Or.inl hφ)

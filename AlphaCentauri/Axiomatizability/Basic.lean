@@ -12,7 +12,7 @@ Foundation states finite axiomatizability over an arbitrary entailment structure
 witness stays implicit.
 
 This module also collects the equivalent forms of finite axiomatizability — a finite **subset**,
-a finset, a single sentence — `singleAxiom`, the conjunction of that finite theory, the
+a finset, a single sentence — `conj`, the conjunction of that finite theory — the
 characterization of the negation, and the finite axiomatizability of `𝗣𝗔⁻`.
 
 - [Lin97, Ch. 4 §1]
@@ -160,28 +160,28 @@ lemma finiteAxiomatizable_iff_exists_sentence :
 
 /-- The single sentence that axiomatizes `T`: the conjunction of the finite theory `U`.
 - [Lin97, Ch. 4 §1] -/
-noncomputable def FiniteAxiomatizableBy.singleAxiom (h : FiniteAxiomatizableBy T U) : Sentence L :=
+noncomputable def FiniteAxiomatizableBy.conj (h : FiniteAxiomatizableBy T U) : Sentence L :=
   h.finite.toFinset.conj
 
 lemma FiniteAxiomatizableBy.equiv_singleton (h : FiniteAxiomatizableBy T U) :
-    T ≊ ({h.singleAxiom} : Theory L) :=
+    T ≊ ({h.conj} : Theory L) :=
   h.equiv.trans $ by
     have e : (↑h.finite.toFinset : Theory L) = U := by simp
     exact (e ▸ equiv_singleton_Fconj h.finite.toFinset).symm
 
 /-- The single sentence that axiomatizes a finitely axiomatizable theory.
 - [Lin97, Ch. 4 §1] -/
-noncomputable def FiniteAxiomatizable.singleAxiom (h : FiniteAxiomatizable T) : Sentence L :=
-  h.choose_spec.singleAxiom
+noncomputable def FiniteAxiomatizable.conj (h : FiniteAxiomatizable T) : Sentence L :=
+  h.choose_spec.conj
 
 lemma FiniteAxiomatizable.equiv_singleton (h : FiniteAxiomatizable T) :
-    T ≊ ({h.singleAxiom} : Theory L) := h.choose_spec.equiv_singleton
+    T ≊ ({h.conj} : Theory L) := h.choose_spec.equiv_singleton
 
-lemma FiniteAxiomatizable.provable_singleAxiom (h : FiniteAxiomatizable T) : T ⊢ h.singleAxiom :=
+lemma FiniteAxiomatizable.provable_conj (h : FiniteAxiomatizable T) : T ⊢ h.conj :=
   h.equiv_singleton.symm.le.wk (Axiomatized.by_axm rfl)
 
 lemma FiniteAxiomatizable.provable_singleton_iff (h : FiniteAxiomatizable T) {σ : Sentence L} :
-    ({h.singleAxiom} : Theory L) ⊢ σ ↔ T ⊢ σ := (Equiv.iff.mp h.equiv_singleton σ).symm
+    ({h.conj} : Theory L) ⊢ σ ↔ T ⊢ σ := (Equiv.iff.mp h.equiv_singleton σ).symm
 
 /-- A theory fails to be finitely axiomatizable exactly when every finite subtheory of it is
 strictly weaker.

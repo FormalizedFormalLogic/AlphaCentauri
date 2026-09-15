@@ -295,11 +295,17 @@ theorem finiteAxiomatization_equiv (n : ℕ) : finiteAxiomatization n ≊ 𝗜�
       (fun _ hφ ↦ provable_succInd_of_strictHierarchy hφ)
       (fun _ hφ ↦ provable_collectionAxiom_of_strictHierarchy hφ)
 
+/-- `𝗜𝚺 (n + 1)` is finitely axiomatized by `finiteAxiomatization n`.
+- [HP98, Theorem I.2.52] -/
+theorem finiteAxiomatizableBy (n : ℕ) :
+    FiniteAxiomatizableBy (𝗜𝚺 (n + 1)) (finiteAxiomatization n) :=
+  ⟨finiteAxiomatization_finite, (finiteAxiomatization_equiv n).symm⟩
+
 /-- For `n ≥ 1`, `𝗜𝚺 n` is finitely axiomatizable.
 - [HP98, Theorem I.2.52] -/
 theorem finiteAxiomatizable (n : ℕ) (hn : 1 ≤ n) : FiniteAxiomatizable (𝗜𝚺 n) := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  exact ⟨finiteAxiomatization m, by simp, (finiteAxiomatization_equiv m).symm⟩
+  exact (finiteAxiomatizableBy m).finiteAxiomatizable
 
 /-! ## The level of the finite theory in the arithmetical hierarchy -/
 
@@ -351,13 +357,12 @@ private lemma hierarchy_finsetConj_iff {Γ : Polarity} {s : ℕ} {F : Finset Ari
 theorem exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :
     ∃ σ : 𝚷-[n + 2].Sentence, ({σ.val} : ArithmeticTheory) ≊ 𝗜𝚺 n := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
-  obtain ⟨F, hsub, heq⟩ := finiteAxiomatizable_iff_exists_finset.mp
-    (FiniteAxiomatizable.of_finite (finiteAxiomatization_finite (n := m)))
-  have hσ : Hierarchy 𝚷 (m + 1 + 2) F.conj := by
+  have h := finiteAxiomatizableBy m
+  have hσ : Hierarchy 𝚷 (m + 1 + 2) h.conj := by
     rw [show m + 1 + 2 = m + 3 by omega]
-    exact hierarchy_finsetConj_iff.mpr fun σ hσ ↦ hierarchy_of_mem_finiteAxiomatization (hsub hσ)
-  exact ⟨.mkPi F.conj hσ,
-    ((equiv_singleton_Fconj F).trans heq.symm).trans (finiteAxiomatization_equiv m)⟩
+    exact hierarchy_finsetConj_iff.mpr fun σ hσ ↦
+      hierarchy_of_mem_finiteAxiomatization (by simpa using hσ)
+  exact ⟨.mkPi h.conj hσ, h.equiv_singleton.symm⟩
 
 end ISigma
 

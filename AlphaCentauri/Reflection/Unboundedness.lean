@@ -27,21 +27,21 @@ open FFL.Entailment Bootstrapping
 /-! ## Refuting a sentence and adjoining it -/
 
 /-- Negation transfers along a provable equivalence. -/
-private lemma neg_of_iff {S : ArithmeticTheory} {φ ψ : ArithmeticSentence}
-    (e : S ⊢ φ 🡘 ψ) (h : S ⊢ ∼ψ) : S ⊢ ∼φ := by cl_prover [e, h]
+private lemma neg_of_iff {U : ArithmeticTheory} {φ ψ : ArithmeticSentence}
+    (e : U ⊢ φ 🡘 ψ) (h : U ⊢ ∼ψ) : U ⊢ ∼φ := by cl_prover [e, h]
 
 /-- Negation transfers along a provable equivalence, in the other direction. -/
-private lemma neg_of_iff' {S : ArithmeticTheory} {φ ψ : ArithmeticSentence}
-    (e : S ⊢ φ 🡘 ψ) (h : S ⊢ ∼φ) : S ⊢ ∼ψ := by cl_prover [e, h]
+private lemma neg_of_iff' {U : ArithmeticTheory} {φ ψ : ArithmeticSentence}
+    (e : U ⊢ φ 🡘 ψ) (h : U ⊢ ∼φ) : U ⊢ ∼ψ := by cl_prover [e, h]
 
-/-- If adjoining `φ` makes `S` inconsistent then `S` refutes `φ`. -/
-private lemma neg_of_inconsistent_insert {S : ArithmeticTheory} {φ : ArithmeticSentence}
-    (h : Inconsistent (insert φ S)) : S ⊢ ∼φ := by
+/-- If adjoining `φ` makes `U` inconsistent then `U` refutes `φ`. -/
+private lemma neg_of_inconsistent_insert {U : ArithmeticTheory} {φ : ArithmeticSentence}
+    (h : Inconsistent (insert φ U)) : U ⊢ ∼φ := by
   have h' := deduction_iff.mp (h ⊥); cl_prover [h']
 
-/-- If `S` refutes `φ` then adjoining `φ` makes `S` inconsistent. -/
-private lemma inconsistent_insert_of_provable_neg {S : ArithmeticTheory} {φ : ArithmeticSentence}
-    (h : S ⊢ ∼φ) : Inconsistent (insert φ S) :=
+/-- If `U` refutes `φ` then adjoining `φ` makes `U` inconsistent. -/
+private lemma inconsistent_insert_of_provable_neg {U : ArithmeticTheory} {φ : ArithmeticSentence}
+    (h : U ⊢ ∼φ) : Inconsistent (insert φ U) :=
   inconsistent_of_provable (deduction_iff.mpr (by cl_prover [h]))
 
 variable {T U S : ArithmeticTheory} [T.Δ₁] [S.Δ₁] {n : ℕ} {Γ : Polarity}

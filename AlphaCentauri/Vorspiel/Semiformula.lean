@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Basic.Syntax.Rew
+public import Foundation.FirstOrder.Syntax.Classical.Rew
 
 /-!
 # Two gaps in Foundation's `Semiformula` API

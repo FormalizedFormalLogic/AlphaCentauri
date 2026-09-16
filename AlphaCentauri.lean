@@ -52,6 +52,7 @@ public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Semiformula
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds
+public import AlphaCentauri.ToMathlib.Ordinal.Epsilon0
 public import AlphaCentauri.ToMathlib.Ordinal.OmegaTower
 public import AlphaCentauri.ToMathlib.Ordinal.Rank
 public import AlphaCentauri.ToMathlib.Primrec

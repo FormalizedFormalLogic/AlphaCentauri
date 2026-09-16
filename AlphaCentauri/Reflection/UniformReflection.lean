@@ -40,7 +40,7 @@ lemma models_globalReflectionSchema_iff (T : ArithmeticTheory) [T.Δ₁] {k : �
 - [AB05, §4.2] -/
 noncomputable def _root_.FFL.FirstOrder.Theory.uniformReflectionOn
     (T : ArithmeticTheory) [T.Δ₁] (Γ : ∀ {k : ℕ}, ArithmeticSemisentence k → Prop) :
-    ArithmeticTheory :=
+    Set ArithmeticSentence :=
   { σ | ∃ (k : ℕ) (φ : ArithmeticSemisentence k), Γ φ ∧ σ = T.globalReflectionSchema φ }
 
 @[inherit_doc] notation "𝗥𝗙𝗡[" Γ "] " T:max => Theory.uniformReflectionOn T Γ

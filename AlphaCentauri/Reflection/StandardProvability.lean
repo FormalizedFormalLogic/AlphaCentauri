@@ -90,11 +90,49 @@ instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒ
 @[instance] theorem consistent_localReflection_of_sound [ℕ↓[ℒₒᵣ] ⊧* T] :
     Consistent (T ∪ 𝗥𝗳𝗻 T) := Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], inferInstance⟩
 
+section Sigma1Sound
+
+variable [T.SoundOnHierarchy 𝚺 1]
+
+private lemma unprovable_disj {s : Finset ArithmeticSentence} (hs : ∀ σ ∈ s, T ⊬ σ) :
+    T ⊬ (⩖ σ ∈ s, T.standardProvability σ) := by
+  intro h
+  obtain ⟨σ, hσ, hmod⟩ : ∃ σ ∈ s, ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ := by
+    simpa using T.soundOnHierarchy 𝚺 1 h (by simp [standardProvability_def])
+  exact hs σ hσ (T.standardProvability.sound_on hmod)
+
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is $\Sigma_1$-sound.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4.2] -/
-@[instance] axiom consistent_localReflection_of_Sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
-    Consistent (T ∪ 𝗥𝗳𝗻 T)
+@[instance] theorem consistent_localReflection_of_Sigma1_sound :
+    Consistent (T ∪ 𝗥𝗳𝗻 T) := by
+  classical
+  apply Entailment.consistent_compact.mpr
+  intro F hF hFfin
+  -- The instances of `Rfn(T)` in the finite part `F` come from a finite set `t` of sentences.
+  obtain ⟨t, -, htfin, ht⟩ :=
+    Set.Finite.exists_subset_finite_image_eq (s := Set.univ) (u := F \ T)
+      (f := T.standardProvability.localReflectionSchema) ((by simpa using hFfin : F.Finite).sdiff)
+      fun ψ hψ ↦ (AdjunctiveSet.subset_iff.mp hF ψ hψ.1).resolve_left hψ.2
+  -- Adjoining `∼Pr(σ)` for those `σ ∈ t` that `T` does not prove proves every instance in `F`.
+  set s : Finset ArithmeticSentence := htfin.toFinset.filter fun σ ↦ T ⊬ σ
+  set D : ArithmeticSentence := ⩖ σ ∈ s, T.standardProvability σ
+  have hcon : Consistent (adjoin (∼D) T) :=
+    unprovable_iff_consistent_adjoin.mp (unprovable_disj fun σ hσ ↦ (Finset.mem_filter.mp hσ).2)
+  refine hcon.of_le (WeakerThan.ofAxm! ?_)
+  intro ψ hψ
+  by_cases hψT : ψ ∈ T
+  · exact by_axm (by simp [hψT])
+  obtain ⟨σ, hσt, rfl⟩ : ψ ∈ T.standardProvability.localReflectionSchema '' t := ht ▸ ⟨hψ, hψT⟩
+  by_cases hσ : T ⊢ σ
+  · have h₁ : adjoin (∼D) T ⊢ σ := Axiomatized.to_adjoin hσ
+    cl_prover [h₁]
+  · have h₁ : adjoin (∼D) T ⊢ T.standardProvability σ 🡒 D :=
+      right_Fdisj'_intro _ _ (Finset.mem_filter.mpr ⟨htfin.mem_toFinset.mpr hσt, hσ⟩)
+    have h₂ : adjoin (∼D) T ⊢ ∼D := Axiomatized.adjoin! _ _
+    cl_prover [h₁, h₂]
+
+end Sigma1Sound
 
 section
 variable [𝗜𝚺₁ ⪯ T] {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}

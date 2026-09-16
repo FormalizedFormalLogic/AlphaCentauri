@@ -17,8 +17,6 @@ open FFL.Entailment
 
 namespace FFL.FirstOrder
 
-variable {T : ArithmeticTheory}
-
 /-- `T` is reflexive if it proves the consistency of every finite subtheory.
 - [Lin97, Ch. 1 p. 18]
 - [HP98, Definition III.2.32] -/

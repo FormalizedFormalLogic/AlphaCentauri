@@ -31,12 +31,6 @@ declaration:
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-  FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
-  FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ
   FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1
@@ -55,6 +49,12 @@ declaration:
   FFL.FirstOrder.Arithmetic.primrec'_of_provablyTotal:
     forgive:
       - FFL.FirstOrder.Arithmetic.primrec'_of_provablyTotal
+  FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
+  FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:

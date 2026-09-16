@@ -1,12 +1,11 @@
 module
 
 public import Mathlib.SetTheory.Ordinal.Principal
-public import Mathlib.SetTheory.Ordinal.Veblen
 
 /-!
-# Ordinal arithmetic for cut elimination
+# Ordinal bounds
 
-The `ω`-tower `Ordinal.omegaTower c α` and ordinal bounds used in cut elimination.
+Bounds on `ω`-exponentiation, `+`, `max` and `⨆` over the ordinals.
 -/
 
 @[expose] public section
@@ -38,14 +37,26 @@ lemma zero_lt_add_one : 0 < a + 1 := one_pos.trans_le le_add_self
 
 lemma one_lt_opow_succ : 1 < ω ^ (a + 1) := one_lt_omega0_opow (zero_lt_add_one a)
 
+private lemma lt_opow_succ_max_left (a b : Ordinal) : ω ^ a < ω ^ (max a b + 1) :=
+  (opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_left a b).trans_lt (lt_add_one _))
+
+private lemma lt_opow_succ_max_right (a b : Ordinal) : ω ^ b < ω ^ (max a b + 1) :=
+  (opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_right a b).trans_lt (lt_add_one _))
+
 lemma lt_opow_succ_max_of_le_max {a b x : Ordinal} (hx : x ≤ max (ω ^ a) (ω ^ b)) :
     x < ω ^ (max a b + 1) :=
-  hx.trans_lt <| max_lt
-    ((opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_left a b).trans_lt (lt_add_one _)))
-    ((opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_right a b).trans_lt (lt_add_one _)))
+  hx.trans_lt <| max_lt (lt_opow_succ_max_left a b) (lt_opow_succ_max_right a b)
 
 lemma max_opow_add_one_le : max (ω ^ a) (ω ^ b) + 1 ≤ ω ^ (max a b + 1) :=
   (add_one_lt_omega0_opow (zero_lt_add_one _) (lt_opow_succ_max_of_le_max le_rfl)).le
+
+lemma max_opow_add_two_le : max (ω ^ a) (ω ^ b) + 1 + 1 ≤ ω ^ (max a b + 1) :=
+  (add_one_lt_omega0_opow (zero_lt_add_one _)
+    (add_one_lt_omega0_opow (zero_lt_add_one _) (lt_opow_succ_max_of_le_max le_rfl))).le
+
+lemma opow_add_opow_add_one_le : ω ^ a + ω ^ b + 1 ≤ ω ^ (max a b + 1) :=
+  (add_one_lt_omega0_opow (zero_lt_add_one _)
+    (add_lt_omega0_opow (lt_opow_succ_max_left a b) (lt_opow_succ_max_right a b))).le
 
 lemma opow_add_one_le_opow_succ : ω ^ a + 1 ≤ ω ^ (a + 1) :=
   (add_one_lt_omega0_opow (zero_lt_add_one _)
@@ -75,35 +86,5 @@ lemma iSup_add_add_one_add_one_le (a : Ordinal) (f : ℕ → Ordinal) :
   exact Ordinal.le_iSup f n
 
 end Bounds
-
-section OmegaTower
-
-/-- The **`ω`-tower** `ω_c^α`: `ω ^ ·` iterated `c` times over `α`.
-
-- [Tow20, Definition 19.8] -/
-noncomputable def omegaTower : ℕ → Ordinal → Ordinal
-  | 0, a => a
-  | c + 1, a => omegaTower c (ω ^ a)
-
-variable {a : Ordinal}
-
-@[simp, grind =] lemma omegaTower_zero : omegaTower 0 a = a := rfl
-
-@[simp, grind =] lemma omegaTower_one : omegaTower 1 a = ω ^ a := rfl
-
-@[grind =] lemma omegaTower_succ (c : ℕ) : omegaTower (c + 1) a = omegaTower c (ω ^ a) := rfl
-
-lemma omega0_opow_lt_epsilon0 (h : a < ε₀) : ω ^ a < ε₀ := by
-  obtain ⟨n, hn⟩ := lt_epsilon_zero.mp h
-  refine lt_trans ?_ (iterate_omega0_opow_lt_epsilon_zero (n + 1))
-  rw [Function.iterate_succ_apply']
-  exact (opow_lt_opow_iff_right one_lt_omega0).mpr hn
-
-lemma omegaTower_lt_epsilon0 (c : ℕ) (h : a < ε₀) : omegaTower c a < ε₀ := by
-  induction c generalizing a with
-  | zero => simpa using h
-  | succ c ih => simpa [omegaTower_succ] using ih (omega0_opow_lt_epsilon0 h)
-
-end OmegaTower
 
 end Ordinal

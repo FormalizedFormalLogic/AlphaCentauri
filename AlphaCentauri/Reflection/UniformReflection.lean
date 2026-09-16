@@ -65,6 +65,6 @@ lemma uniformReflectionOn_mono {Γ Γ' : ∀ {k : ℕ}, ArithmeticSemisentence k
 /-- `RFN` for $\Sigma_n$ and `RFN` for $\Pi_{n + 1}$ are equivalent over `T`, for `n ≥ 1`.
 - [AB05, Lemma 22(ii)] -/
 axiom uniformReflectionOn_Sigma_equiv_Pi_succ {n : ℕ} (hn : 1 ≤ n) :
-    T ∪ 𝗥𝗙𝗡[Hierarchy 𝚺 n] T ≊ T ∪ 𝗥𝗙𝗡[Hierarchy 𝚷 (n + 1)] T
+    T ∪ 𝗥𝗙𝗡[StrictHierarchy 𝚺 n] T ≊ T ∪ 𝗥𝗙𝗡[StrictHierarchy 𝚷 (n + 1)] T
 
 end FFL.FirstOrder.Arithmetic

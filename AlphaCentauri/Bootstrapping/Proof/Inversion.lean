@@ -55,7 +55,7 @@ lemma termShift_inj {t u : V} (ht : IsUTerm L t) (hu : IsUTerm L u)
         have : v = v' := by
           apply nth_ext' k hv.lh.symm hv'.lh.symm
           intro i hi
-          refine ih i hi _ (hv'.nth hi) ?_
+          apply ih i hi _ (hv'.nth hi)
           rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, hvv]
         rw [this]
   exact H t ht u hu h
@@ -107,7 +107,7 @@ lemma shift_inj {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q)
         have : v = v' := by
           apply nth_ext' k hv.lh.symm hv'.lh.symm
           intro i hi
-          refine termShift_inj (hv.nth hi) (hv'.nth hi) ?_
+          apply termShift_inj (hv.nth hi) (hv'.nth hi)
           rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, hvv]
         rw [this]
       · simp [qqRel, qqNRel] at h
@@ -130,7 +130,7 @@ lemma shift_inj {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q)
         have : v = v' := by
           apply nth_ext' k hv.lh.symm hv'.lh.symm
           intro i hi
-          refine termShift_inj (hv.nth hi) (hv'.nth hi) ?_
+          apply termShift_inj (hv.nth hi) (hv'.nth hi)
           rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, hvv]
         rw [this]
       · simp [qqNRel, qqVerum] at h
@@ -513,7 +513,7 @@ private lemma inversion_and_aux :
         obtain ⟨d', hd', hh⟩ :=
           ih dp (dp_lt_andIntro _ _ _ _ _) _ b₁ _ b₂ _ b₃ _ b₄ (Or.inl rfl) ⟨heq, hdp.2⟩
         refine ⟨d', by rwa [insert_insert_self] at hd', ?_⟩
-        refine le_trans hh ?_
+        apply le_trans hh
         simp only [height_andIntro]
         exact le_trans (succ_le_succ (le_max_left (height dp) (height dq))) (le_add_one _)
       · rw [hcq]
@@ -523,7 +523,7 @@ private lemma inversion_and_aux :
         obtain ⟨d', hd', hh⟩ :=
           ih dq (dq_lt_andIntro _ _ _ _ _) _ b₁ _ b₂ _ b₃ _ b₄ (Or.inr rfl) ⟨heq, hdq.2⟩
         refine ⟨d', by rwa [insert_insert_self] at hd', ?_⟩
-        refine le_trans hh ?_
+        apply le_trans hh
         simp only [height_andIntro]
         exact le_trans (succ_le_succ (le_max_right (height dp) (height dq))) (le_add_one _)
     · have habs : a ^⋏ b ∈ s := by
@@ -811,7 +811,7 @@ private lemma inversion_or_aux :
       obtain ⟨d', hd', hh⟩ :=
         ih d₀ (d_lt_orIntro _ _ _ _) _ b₁ _ b₂ _ b₃ ⟨heq, hd₀.2⟩
       refine ⟨d', by rwa [insert_pair_absorb] at hd', ?_⟩
-      refine le_trans hh ?_
+      apply le_trans hh
       simp only [height_orIntro]
       exact le_add_one _
     · have habs : a ^⋎ b ∈ s := by

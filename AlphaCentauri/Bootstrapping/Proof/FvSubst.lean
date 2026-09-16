@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Syntax
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
 # Internal substitution for free variables
@@ -96,6 +96,8 @@ function symbol and recursing into the argument vector.
   rfl
 
 section
+
+variable {Γ : SigmaPiDelta} {m : ℕ}
 
 /-- The $\Sigma_1$ definability witness for `termFvSubst`, via `termFvSubstGraph`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
@@ -216,7 +218,8 @@ namespace FvSubst
 pass through unchanged, and the substitution vector `w` is left untouched when crossing a
 quantifier.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] : UformulaRec1.Blueprint where
+noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] :
+    UformulaRec1.Blueprint where
   rel := .mkSigma
     “y w k R v. ∃ v', !(termFvSubstVecGraph L) v' k w v ∧ !qqRelDef y k R v'”
   nrel := .mkSigma
@@ -275,6 +278,8 @@ noncomputable def fvSubstGraph : 𝚺₁.Semisentence 3 := (blueprint L).result 
 variable {L}
 
 section
+
+variable {Γ : SigmaPiDelta} {m : ℕ}
 
 /-- The $\Sigma_1$ definability witness for `fvSubst`, via `fvSubstGraph`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/

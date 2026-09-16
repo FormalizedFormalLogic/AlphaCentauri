@@ -24,7 +24,8 @@ its subformula codes.
 No source; a formalization device mirroring `UformulaRec1.Blueprint` for a codomain of finite
 sets rather than of formula/term codes.
 -/
-noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] : UformulaRec1.Blueprint where
+noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] :
+    UformulaRec1.Blueprint where
   rel := .mkSigma
     “y param k R v. ∃ z, !qqRelDef z k R v ∧ !insertDef y z 0”
   nrel := .mkSigma
@@ -94,6 +95,8 @@ noncomputable def subformulasGraph : 𝚺₁.Semisentence 2 :=
 variable {L}
 
 section
+
+variable {Γ : SigmaPiDelta} {m : ℕ}
 
 /-- `subformulas` is $\Sigma_1$-definable through `subformulasGraph`.
 - No source; a formalization device mirroring the external subformula relation. -/
@@ -173,7 +176,8 @@ lemma subformulas_not_uformula {p : V} (hp : ¬IsUFormula L p) : subformulas L p
 -/
 lemma mem_subformulas_self {p : V} (hp : IsUFormula L p) : p ∈ subformulas L p := by
   have H : ∀ p : V, IsUFormula L p → p ∈ subformulas L p := by
-    apply IsUFormula.ISigma1.sigma1_succ_induction (P := fun p ↦ p ∈ subformulas L p) (by definability)
+    apply IsUFormula.ISigma1.sigma1_succ_induction (P := fun p ↦ p ∈ subformulas L p)
+      (by definability)
     case hrel => intro k R v hR hv; simp [hR, hv]
     case hnrel => intro k R v hR hv; simp [hR, hv]
     case hverum => simp
@@ -321,18 +325,22 @@ lemma subformulas_subset_of_mem {p q : V} (hp : IsUFormula L p) (hq : q ∈ subf
       rcases hq with rfl | hq | hq
       · simp [hp₁, hp₂]
       · exact subset_trans (ih₁ q hq) (by
-          rw [subformulas_and hp₁ hp₂]; exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
+          rw [subformulas_and hp₁ hp₂];
+          exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
       · exact subset_trans (ih₂ q hq) (by
-          rw [subformulas_and hp₁ hp₂]; exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
+          rw [subformulas_and hp₁ hp₂];
+          exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
     case hor =>
       intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ q hq
       simp only [subformulas_or hp₁ hp₂, mem_bitInsert_iff, mem_cup_iff] at hq
       rcases hq with rfl | hq | hq
       · simp [hp₁, hp₂]
       · exact subset_trans (ih₁ q hq) (by
-          rw [subformulas_or hp₁ hp₂]; exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
+          rw [subformulas_or hp₁ hp₂];
+          exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
       · exact subset_trans (ih₂ q hq) (by
-          rw [subformulas_or hp₁ hp₂]; exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
+          rw [subformulas_or hp₁ hp₂];
+          exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
     case hall =>
       intro p₁ hp₁ ih₁ q hq
       simp only [subformulas_all hp₁, mem_bitInsert_iff] at hq

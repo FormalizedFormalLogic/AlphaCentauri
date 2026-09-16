@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Coding
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Coding
 
 /-!
 # Internal cut-free derivations
@@ -248,6 +248,8 @@ noncomputable def cutFreeDerivable (T : Theory L) [T.Δ₁] : 𝚺₁.Semisenten
   “Γ. ∃ d, !(cutFreeDerivationOf T).sigma d Γ”
 
 section
+
+variable {Γ : SigmaPiDelta} {m : ℕ}
 
 /-- The $\Delta_1$ definability witness for `CutFreeDerivation`, via `cutFreeDerivation`.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
@@ -610,15 +612,14 @@ theorem deductionAux {a d : V} (ha : IsFormulaSet L a) (hsa : setShift L a = a)
       by simp⟩
   · rintro _ _ d rfl _ ih
     obtain ⟨d', hd', ed⟩ := ih
-    refine ⟨Bootstrapping.shiftRule (setShift L (fstIdx d ∪ a)) d', ?_, ?_⟩
-    · exact Derivation.shiftRule ⟨ed, hd'⟩
-    · simp [mem_setShift_union, hsa]
+    exact ⟨Bootstrapping.shiftRule (setShift L (fstIdx d ∪ a)) d', Derivation.shiftRule ⟨ed, hd'⟩,
+      by simp [mem_setShift_union, hsa]⟩
   · intro s _ p d₁ d₂ hd₁ hd₂ ih₁ ih₂
     obtain ⟨d₁', hd₁', ed₁⟩ := ih₁
     obtain ⟨d₂', hd₂', ed₂⟩ := ih₂
-    refine ⟨Bootstrapping.cutRule (s ∪ a) p d₁' d₂', Derivation.cutRule ?_ ?_, by simp⟩
-    · exact ⟨by rw [ed₁, hd₁.1, insert_union], hd₁'⟩
-    · exact ⟨by rw [ed₂, hd₂.1, insert_union], hd₂'⟩
+    exact ⟨Bootstrapping.cutRule (s ∪ a) p d₁' d₂',
+      Derivation.cutRule ⟨by rw [ed₁, hd₁.1, insert_union], hd₁'⟩
+        ⟨by rw [ed₂, hd₂.1, insert_union], hd₂'⟩, by simp⟩
   · intro s hs p hp hT
     exact ⟨Bootstrapping.axL (s ∪ a) p,
       Derivation.axL (by simp [hs, ha]) (by simp [hp])
@@ -650,8 +651,8 @@ theorem deduction (l : List (Sentence L)) {d : V} :
   dsimp only
   intro hd
   apply deductionAux (T := {p | p ∈ l}) (a := (⌜negatedAxioms l⌝ : V))
-  · exact Derivation2.formulaSet_quote_finset _
-  · rw [Derivation2.setShift_quote]
+  · exact LK2.Derivation.formulaSet_quote_finset _
+  · rw [LK2.Derivation.setShift_quote]
     congr 1
     ext p
     have hshift (σ : Sentence L) :
@@ -664,7 +665,7 @@ theorem deduction (l : List (Sentence L)) {d : V} :
       exact congrArg (fun q : Bootstrapping.Formula V L ↦ q.val)
         (Semiformula.typedQuote_neg (V := V) (↑σ : Proposition L)).symm
     rw [hneg]
-    exact (Derivation2.Sequent.mem_quote_iff (V := V)).mpr
+    exact (LK2.Derivation.Sequent.mem_quote_iff (V := V)).mpr
       (show ∼(↑σ : Proposition L) ∈ negatedAxioms l by simp [negatedAxioms, hσ])
   · exact hd
 

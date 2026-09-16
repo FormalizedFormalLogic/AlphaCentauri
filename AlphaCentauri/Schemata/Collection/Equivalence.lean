@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
-public import AlphaCentauri.Vorspiel.Eval
+public import AlphaCentauri.ToFoundation.Eval
 
 /-!
 # The collection schemata `𝗕𝚺 (n + 1)` and `𝗕𝚷 n`
@@ -214,7 +214,7 @@ end
 - [Bus98A, Theorem 1.2.9(a)] -/
 theorem BPi.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticSemiformula ℕ 2}
     (hφ : Hierarchy 𝚺 (n + 1) φ) : 𝗕𝚷 n ⊢ .univCl (collectionAxiom φ) := by
-  refine Arithmetic.complete.{0} _ _ ?_
+  apply Arithmetic.complete.{0} _ _
   intro M _ _
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := 𝗕𝚷 n) inferInstance
   exact models_collectionAxiom_of_hierarchyCollection (hierarchyCollection_of_models_BPi M) hφ

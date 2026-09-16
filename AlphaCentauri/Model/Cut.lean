@@ -5,40 +5,48 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-! # Cuts
 
-A cut of an `ℒₒᵣ`-structure `M` is a downward closed subset closed under the operations of the
-language; `M` is an end extension of it.
+A cut of an `ℒₒᵣ`-structure `M` is a subset closed under successor and downward closed under `<`.
+A cut closed under the operations of the language is a substructure of `M`, and `M` is an end
+extension of it.
 -/
 
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
 
-open Semiformula Structure
+open Semiformula Tarski.Structure
+
+universe u v
 
 variable {M : Type u} [ORingStructure M]
 
-/-- A cut of `M`: a subset closed under the operations of `ℒₒᵣ` and downward closed under `<`.
+/-- A cut of `M`: a subset closed under successor and downward closed under `<`.
 - [HP98, Definition IV.1.14] -/
 structure Cut (M : Type u) [ORingStructure M] where
   carrier : Set M
-  zero_mem : (0 : M) ∈ carrier
-  one_mem : (1 : M) ∈ carrier
-  add_mem {a b : M} : a ∈ carrier → b ∈ carrier → a + b ∈ carrier
-  mul_mem {a b : M} : a ∈ carrier → b ∈ carrier → a * b ∈ carrier
+  succ_mem {a : M} : a ∈ carrier → a + 1 ∈ carrier
   mem_of_lt {a b : M} : a < b → b ∈ carrier → a ∈ carrier
 
 namespace Cut
 
-variable (I : Cut M)
+/-- A cut closed under the operations of `ℒₒᵣ`, hence a substructure of `M`.
+- [HP98, Definition IV.2.8(2)] -/
+class Closed (I : Cut M) : Prop where
+  zero_mem : (0 : M) ∈ I.carrier
+  one_mem : (1 : M) ∈ I.carrier
+  add_mem {a b : M} : a ∈ I.carrier → b ∈ I.carrier → a + b ∈ I.carrier
+  mul_mem {a b : M} : a ∈ I.carrier → b ∈ I.carrier → a * b ∈ I.carrier
+
+variable (I : Cut M) [hI : I.Closed]
 
 instance oringStructure : ORingStructure I.carrier where
-  zero := ⟨0, I.zero_mem⟩
-  one := ⟨1, I.one_mem⟩
-  add a b := ⟨a.1 + b.1, I.add_mem a.2 b.2⟩
-  mul a b := ⟨a.1 * b.1, I.mul_mem a.2 b.2⟩
+  zero := ⟨0, hI.zero_mem⟩
+  one := ⟨1, hI.one_mem⟩
+  add a b := ⟨a.1 + b.1, hI.add_mem a.2 b.2⟩
+  mul a b := ⟨a.1 * b.1, hI.mul_mem a.2 b.2⟩
   lt a b := a.1 < b.1
 
-/-- `M` is an end extension of each of its cuts.
+/-- `M` is an end extension of each of its cuts closed under the operations.
 - [HP98, Definition IV.1.3(2)] -/
 @[instance_reducible]
 def endExtension : I.carrier ⊆ₑ M where
@@ -58,19 +66,19 @@ end Cut
 
 namespace EndExtension
 
-variable {N : Type u} [hMN : M ⊆ₑ N]
+variable {N : Type v} [hMN : M ⊆ₑ N]
 
 private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : ArithmeticSemiformula ℕ 1}
-    (hφ : Hierarchy 𝚺 0 φ)
+    (hφ : φ.Bounded)
     (v : ℕ → M) (h0 : φ.Eval ![0] v) (hs : ∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) (a : M) :
     φ.Eval ![a] v := by
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := hMN.models_peanoMinus
   have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![hMN.emb x] (hMN.emb ∘ v) := by
     intro x;
     simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using
-      absolute_of_Delta0 (T := 𝗣𝗔⁻) hφ M N ![x] v
+      absolute_of_bounded (T := 𝗣𝗔⁻) hφ M N ![x] v
   have h₂ : ∀ y : N, y < hMN.emb a + 1 → φ.Eval ![y] (hMN.emb ∘ v) := by
-    refine InductionScheme.succ_induction (C := Hierarchy 𝚺 0)
+    refine InductionScheme.succ_induction (C := Semiformula.Bounded)
       ⟨(hMN.emb a + 1) :>ₙ fun j ↦ hMN.emb (v j),
         “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ), by simp [hφ],
         by intro x; simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩
@@ -86,8 +94,8 @@ private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : Arit
 theorem models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := by
   simp only [Semantics.ModelsSet.union_iff, InductionScheme];
   and_intros;
-  . exact hMN.models_peanoMinus
-  . apply Semantics.ModelsSet.setOf_iff.mpr;
+  · exact hMN.models_peanoMinus
+  · apply Semantics.ModelsSet.setOf_iff.mpr;
     rintro _ ⟨φ, hφ, rfl⟩
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
       using hMN.eval_of_endExtension hφ

@@ -39,11 +39,11 @@ noncomputable def collapseFormula : Polarity → ArithmeticSemisentence 1
   | 𝚷 => “v. ∀ y, ((!U.Δ₁ch.sigma.val y ∧ !(isSemiformula ℒₒᵣ).sigma.val 0 y ∧
         !(isStrictPi (n + 1)).sigma.val y ∧
         ∀ u < y, ∃ w, !(negGraph ℒₒᵣ).val w v ∧ ¬!(proof T).pi.val u w)
-      → !(satPi n).val y 0)”
+      → !(piSatisfaction n).val y 0)”
   | 𝚺 => “v. ∃ y, ((∃ u < y, ∃ w, !(negGraph ℒₒᵣ).val w v ∧ !(proof T).sigma.val u w) ∧
       ∀ z < y, ((!U.Δ₁ch.pi.val z ∧ !(isSemiformula ℒₒᵣ).pi.val 0 z ∧
           !(isStrictSigma (n + 1)).pi.val z)
-        → !(satSigma n).val z 0))”
+        → !(sigmaSatisfaction n).val z 0))”
 
 /-- `collapseFormula` lies in `Γ_{n + 1}` of the arithmetical hierarchy, for either polarity `Γ`.
 
@@ -54,7 +54,7 @@ theorem hierarchy_collapseFormula (Γ : Polarity) :
     Hierarchy Γ (n + 1) (collapseFormula T U n Γ) := by
   cases Γ with
   | pi =>
-    show Hierarchy 𝚷 (n + 1) (collapseFormula T U n 𝚷)
+    change Hierarchy 𝚷 (n + 1) (collapseFormula T U n 𝚷)
     have hξ : Hierarchy 𝚺 (n + 1) U.Δ₁ch.sigma.val :=
       U.Δ₁ch.sigma.sigma_prop.mono (Nat.le_add_left 1 n)
     have hU : Hierarchy 𝚺 (n + 1) (isSemiformula ℒₒᵣ).sigma.val :=
@@ -65,10 +65,10 @@ theorem hierarchy_collapseFormula (Γ : Polarity) :
       (negGraph ℒₒᵣ).sigma_prop.mono (Nat.le_add_left 1 n)
     have hproof : Hierarchy 𝚷 (n + 1) (proof T).pi.val :=
       (proof T).pi.pi_prop.mono (Nat.le_add_left 1 n)
-    have hTr : Hierarchy 𝚷 (n + 1) (satPi n).val := (satPi n).pi_prop
+    have hTr : Hierarchy 𝚷 (n + 1) (piSatisfaction n).val := (piSatisfaction n).pi_prop
     simp [collapseFormula, hξ, hU, hSP, hneg, hproof, hTr]
   | sigma =>
-    show Hierarchy 𝚺 (n + 1) (collapseFormula T U n 𝚺)
+    change Hierarchy 𝚺 (n + 1) (collapseFormula T U n 𝚺)
     have hneg : Hierarchy 𝚺 (n + 1) (negGraph ℒₒᵣ).val :=
       (negGraph ℒₒᵣ).sigma_prop.mono (Nat.le_add_left 1 n)
     have hproof : Hierarchy 𝚺 (n + 1) (proof T).sigma.val :=
@@ -79,7 +79,7 @@ theorem hierarchy_collapseFormula (Γ : Polarity) :
       (isSemiformula ℒₒᵣ).pi.pi_prop.mono (Nat.le_add_left 1 n)
     have hSS : Hierarchy 𝚷 (n + 1) (isStrictSigma (n + 1)).pi.val :=
       (isStrictSigma (n + 1)).pi.pi_prop.mono (Nat.le_add_left 1 n)
-    have hTr : Hierarchy 𝚺 (n + 1) (satSigma n).val := (satSigma n).sigma_prop
+    have hTr : Hierarchy 𝚺 (n + 1) (sigmaSatisfaction n).val := (sigmaSatisfaction n).sigma_prop
     simp [collapseFormula, hneg, hproof, hξ, hU, hSS, hTr]
 
 /-- The one-step unfolding of the fixed point of `collapseFormula`, at the code of that very fixed

@@ -2,8 +2,8 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Schemata
-public import Foundation.FirstOrder.Completeness
-public import AlphaCentauri.Vorspiel.Hierarchy
+public import Foundation.FirstOrder.LK.Completeness
+public import AlphaCentauri.ToFoundation.Hierarchy
 
 /-!
 # Provably total functions
@@ -175,8 +175,8 @@ lemma leastGraph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
   omega
 
 open PeanoMinus in
-/-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality upgrades to the `∃!` form: the least
-witness of `φ` exists and is unique in every model of `T`.
+/-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality implies the stronger `∃!` form
+stating that the least witness of `φ` exists and is unique in every model of `T`.
 - [HP98, Lemma IV.3.4] -/
 lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ uniqueTotalitySentence φ := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
@@ -199,7 +199,7 @@ variable {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) 
 - [HP98, Lemma I.1.53] -/
 lemma comp [𝗘𝗤 ℒₒᵣ ⪯ T] (hg : T.ProvablyTotalVia g ψ) (hh : ∀ i, T.ProvablyTotalVia (h i) (χ i)) :
     T.ProvablyTotalVia (fun v ↦ g fun i ↦ h i v) (compGraph ψ χ) := by
-  refine of_models (definedFunction_compGraph hg.defined fun i ↦ (hh i).defined) ?_
+  apply of_models (definedFunction_compGraph hg.defined fun i ↦ (hh i).defined)
   intro V _ _ v
   choose z hz using fun i ↦ (hh i).models V v
   obtain ⟨y, hy⟩ := hg.models V z
@@ -256,7 +256,7 @@ lemma comp (hg : T.ProvablyTotal g) (hh : ∀ i, T.ProvablyTotal (h i)) :
 
 end
 
-/-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality upgrades to the `∃!` form.
+/-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality implies the stronger `∃!` form.
 - [HP98, Lemma IV.3.4] -/
 lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotal f) :
     ∃ φ, T.ProvablyTotalVia f φ ∧ T ⊢ uniqueTotalitySentence φ :=

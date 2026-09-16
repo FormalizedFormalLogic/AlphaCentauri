@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Basic.Semantics.Semantics
+public import Foundation.FirstOrder.Tarski.Basic
 
 /-!
 # Evaluation after exchanging the two leading bound variables
@@ -12,7 +12,7 @@ Companion of Foundation's `Semiformula.eval_insert1` and `Semiformula.eval_inser
 
 namespace FFL.FirstOrder.Semiformula
 
-variable {L : Language} {ξ : Type*} {M : Type*} [Structure L M] {f : ξ → M}
+variable {L : Language} {ξ : Type*} {M : Type*} [Tarski.Structure L M] {f : ξ → M}
 
 /-- Evaluating a formula whose two leading bound variables have been exchanged. -/
 lemma eval_swap01 {n} (φ : Semiformula L ξ (n + 2)) (u w : M) (e : Fin n → M) :

@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
-public import Foundation.FirstOrder.Basic.Eq
+public import Foundation.FirstOrder.Tarski.Eq
 
 /-! # The language of ordered rings with finitely many extra constants
 
@@ -25,6 +25,8 @@ namespace Arithmetic
 
 open Semiformula
 
+universe u
+
 variable {k : ℕ}
 
 /-- The `i`-th of the `k` constants adjoined to `ℒₒᵣ`. -/
@@ -42,32 +44,32 @@ variable (M : Type u) [ORingStructure M] (a : Fin k → M)
 
 /-- `M` as a structure for `Language.oringConst k`, reading the `i`-th adjoined constant as
 `a i`. -/
-def strucOfTuple : Struc (Language.oringConst k) where
+def strucOfTuple : Tarski.Struc (Language.oringConst k) where
   Dom := M
   nonempty := ⟨0⟩
   struc :=
-    letI : Structure (Language.constant (Fin k)) M :=
+    letI : Tarski.Structure (Language.constant (Fin k)) M :=
       { func := fun _ c _ ↦ match c with | .const i => a i
         rel := fun _ r _ ↦ r.elim }
-    Structure.add ℒₒᵣ (Language.constant (Fin k)) M
+    Tarski.Structure.add ℒₒᵣ (Language.constant (Fin k)) M
 
 @[simp] lemma strucOfTuple_models_lift_iff (φ : ArithmeticSemisentence k) :
     strucOfTuple M a ⊧ lift φ ↔ φ.Evalb a := by
   simp only [lift, strucOfTuple, models_iff, Semiformula.Realize, eval_substs,
-    Structure.eval_lMap_add₁]
+    Tarski.Structure.eval_lMap_add₁]
   exact Iff.rfl
 
 lemma strucOfTuple_models_eq : strucOfTuple M a ⊧* 𝗘𝗤 (Language.oringConst k) := by
-  let s : Structure (Language.oringConst k) M := (strucOfTuple M a).struc
+  let s : Tarski.Structure (Language.oringConst k) M := (strucOfTuple M a).struc
   have : Nonempty M := ⟨0⟩
-  have : Structure.Eq (Language.oringConst k) M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
-  show M↓[Language.oringConst k] ⊧* 𝗘𝗤 (Language.oringConst k)
+  have : Tarski.Structure.Eq (Language.oringConst k) M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
+  change M↓[Language.oringConst k] ⊧* 𝗘𝗤 (Language.oringConst k)
   infer_instance
 
 lemma strucOfTuple_models_lMap_image {U : ArithmeticTheory} (h : M↓[ℒₒᵣ] ⊧* U) :
     strucOfTuple M a ⊧*
       Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) '' U := by
-  refine Semantics.modelsSet_iff.mpr ?_
+  apply Semantics.modelsSet_iff.mpr
   rintro _ ⟨σ, hσ, rfl⟩
   simpa [strucOfTuple, models_iff, Semiformula.Realize] using Semantics.modelsSet_iff.mp h hσ
 
@@ -99,7 +101,7 @@ end
 section
 
 variable {T : Theory (Language.oringConst k)} [𝗘𝗤 (Language.oringConst k) ⪯ T]
-  (sat : Semantics.Satisfiable (Struc (Language.oringConst k)) T)
+  (sat : Semantics.Satisfiable (Tarski.Struc (Language.oringConst k)) T)
 
 /-- The tuple of elements of `ModelOfSatEq sat` named by the adjoined constants. -/
 noncomputable def cstVal (i : Fin k) : ModelOfSatEq sat := Semiterm.valb ![] (cst i)
@@ -107,16 +109,16 @@ noncomputable def cstVal (i : Fin k) : ModelOfSatEq sat := Semiterm.valb ![] (cs
 lemma reduct_eq :
     (ModelOfSatEq.struc sat).lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) =
       standardModel (ModelOfSatEq sat) :=
-  letI s : Structure ℒₒᵣ (ModelOfSatEq sat) :=
+  letI s : Tarski.Structure ℒₒᵣ (ModelOfSatEq sat) :=
     (ModelOfSatEq.struc sat).lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k)))
-  have : Structure.Zero ℒₒᵣ (ModelOfSatEq sat) := ⟨rfl⟩
-  have : Structure.One ℒₒᵣ (ModelOfSatEq sat) := ⟨rfl⟩
-  have : Structure.Add ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ rfl⟩
-  have : Structure.Mul ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ rfl⟩
-  have : Structure.Eq ℒₒᵣ (ModelOfSatEq sat) := ⟨by
+  have : Tarski.Structure.Zero ℒₒᵣ (ModelOfSatEq sat) := ⟨rfl⟩
+  have : Tarski.Structure.One ℒₒᵣ (ModelOfSatEq sat) := ⟨rfl⟩
+  have : Tarski.Structure.Add ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ rfl⟩
+  have : Tarski.Structure.Mul ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ rfl⟩
+  have : Tarski.Structure.Eq ℒₒᵣ (ModelOfSatEq sat) := ⟨by
     intro _ _;
     simp [Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq, Matrix.fun_eq_vec_two]⟩
-  have : Structure.LT ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ iff_of_eq rfl⟩
+  have : Tarski.Structure.LT ℒₒᵣ (ModelOfSatEq sat) := ⟨fun _ _ ↦ iff_of_eq rfl⟩
   standardModel_unique _ _
 
 lemma models_lift_iff (φ : ArithmeticSemisentence k) :

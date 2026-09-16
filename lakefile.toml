@@ -2,22 +2,28 @@ name = "AlphaCentauri"
 version = "0.1.0"
 defaultTargets = ["AlphaCentauri"]
 
+# Mathlib's own options: `autoImplicit` off, and the standard linter set that downstream
+# projects are meant to opt into wholesale (see `register_linter_set linter.mathlibStandardSet`
+# in `Mathlib/Init.lean`), which subsumes the individual linters this file used to list. Only
+# the header linter is dropped: it enforces Mathlib's copyright header, which this repository
+# does not carry. `lake build --wfail`, which CI and the pre-push hook use, turns every warning
+# the set emits into an error.
 [leanOptions]
 pp.unicode.fun = true
-weak.linter.flexible = true
-weak.linter.refine = true
-weak.linter.oldObtain = true
-weak.linter.style.multiGoal = true
+autoImplicit = false
+weak.linter.mathlibStandardSet = true
+weak.linter.style.header = false
 
 [[lean_lib]]
 name = "AlphaCentauri"
 
-# Pinned to an exact revision, never a branch: what CI builds is what a checkout builds. The pin
-# is moved forward by `.github/workflows/update-foundation.yml` (see docs/workflow.md).
+# Foundation follows `master`, and `lake-manifest.json` records the exact revision that resolves
+# to; the manifest is committed, so what CI builds is what a checkout builds. `lake update` is run
+# only by `.github/workflows/update-foundation.yml` (see docs/workflow.md).
 [[require]]
 name = "Foundation"
 git = "https://github.com/FormalizedFormalLogic/Foundation"
-rev = "21318c7ee3b608c10366da82c4208b0d38a07402"
+rev = "master"
 
 # `lake exe forgive AlphaCentauri` (`just axiom-audit`): the axiom audit against `forgive.yml`.
 # Run after `lake build`; it reads the oleans. The package imports only `Lean` and `Cli`.

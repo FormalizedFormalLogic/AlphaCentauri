@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Basic.Semantics.Semantics
+public import Foundation.FirstOrder.Tarski.Basic
 
 /-!
 # Free variables of a formula as bound variables of a semisentence
@@ -29,7 +29,7 @@ noncomputable def toSemisentence [NeZero k] (φ : Semiformula L ℕ k)
     (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Semisentence L (φ.fvSup + k) :=
   paramSubst φ b ▹ φ
 
-variable {M : Type*} [Structure L M]
+variable {M : Type*} [Tarski.Structure L M]
 
 lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
     (b : Fin k → Semiterm L Empty (φ.fvSup + k)) {v : Fin (φ.fvSup + k) → M} {w : Fin k → M}
@@ -39,7 +39,8 @@ lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
   rw [toSemisentence, Semiformula.eval_rew]
   have hbv : (Semiterm.val v Empty.elim ∘ φ.paramSubst b ∘ Semiterm.bvar) = w := funext hb
   rw [hbv]
-  refine Semiformula.eval_iff_of_funEqOn φ fun y hy ↦ ?_
+  apply Semiformula.eval_iff_of_funEqOn φ
+  intro y hy
   have hlt : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy
   simp [paramSubst, hlt, hv ⟨y, hlt⟩]
 

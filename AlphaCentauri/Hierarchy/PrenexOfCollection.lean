@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Hierarchy.NormalForm
+public import Foundation.FirstOrder.Arithmetic.Prenex
 public import AlphaCentauri.Schemata.Collection.Basic
 
 /-!
@@ -151,7 +151,7 @@ theorem models_bexs_of_collection :
         funext i; exact i.elim
       rw [hA, hB]
     rw [bexs_succ_sigma (u := u) (φ := φ), val_sigma]
-    show (∃ b, V ⊧/(b :> e) (∃'[Rew.bShift u] φ₂').val) ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val
+    change (∃ b, V ⊧/(b :> e) (∃'[Rew.bShift u] φ₂').val) ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val
     simp only [ih (Rew.bShift u) φ₂', Semiterm.val_bShift, hswap, models_sigmaInv φ]
     grind
   | 𝚷, s + 1, _, _, hC, u, φ, e => by
@@ -259,7 +259,7 @@ local prefix:64 "∀' " => Prenex.all
 lemma models_exs_of_collection [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCollection V s)
     (φ : Prenex 𝚺 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∃' φ).val ↔ ∃ x, V ⊧/(x :> e) φ.val := by
-  show V ⊧/e
+  change V ⊧/e
       (∃'[‘#0 + 1’] (∃'[‘#1 + 1’]
         (φ.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma.val ↔
     ∃ x, V ⊧/(x :> e) φ.val
@@ -318,61 +318,71 @@ theorem models_exists_prenex_of_collection {φ : ArithmeticSemisentence n} (h : 
   | and _ _ ihφ ihψ =>
     obtain ⟨φ', hφ'⟩ := ihφ
     obtain ⟨ψ', hψ'⟩ := ihψ
-    refine ⟨φ' ⋏ ψ', fun V _ _ hC e => ?_⟩
+    refine ⟨φ' ⋏ ψ', ?_⟩
+    intro V _ _ hC e
     rw [models_and_of_collection hC φ' ψ' e]
     simp only [LogicalConnective.HomClass.map_and, LogicalConnective.Prop.and_eq]
     exact and_congr (hφ' V hC e) (hψ' V hC e)
   | or _ _ ihφ ihψ =>
     obtain ⟨φ', hφ'⟩ := ihφ
     obtain ⟨ψ', hψ'⟩ := ihψ
-    refine ⟨φ' ⋎ ψ', fun V _ _ hC e => ?_⟩
+    refine ⟨φ' ⋎ ψ', ?_⟩
+    intro V _ _ hC e
     rw [models_or_of_collection hC φ' ψ' e]
     simp only [LogicalConnective.HomClass.map_or, LogicalConnective.Prop.or_eq]
     exact or_congr (hφ' V hC e) (hψ' V hC e)
   | ball pos _ ih =>
     obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos
     obtain ⟨φ', hφ'⟩ := ih
-    refine ⟨∀'[u] φ', fun V _ _ hC e => ?_⟩
+    refine ⟨∀'[u] φ', ?_⟩
+    intro V _ _ hC e
     rw [models_ball_of_collection hC u φ' e]
     simp only [Semiformula.eval_ball]
     exact forall_congr' fun x => (imp_congr Iff.rfl (hφ' V hC (x :> e))).trans (by simp)
   | bexs pos _ ih =>
     obtain ⟨u, rfl⟩ := Rew.positive_iff.mp pos
     obtain ⟨φ', hφ'⟩ := ih
-    refine ⟨∃'[u] φ', fun V _ _ hC e => ?_⟩
+    refine ⟨∃'[u] φ', ?_⟩
+    intro V _ _ hC e
     rw [models_bexs_of_collection hC u φ' e]
     simp only [Semiformula.eval_bexs]
     exact exists_congr fun x => (and_congr Iff.rfl (hφ' V hC (x :> e))).trans (by simp)
   | @exs s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih
-    refine ⟨∃' φ', fun V _ _ hC e => ?_⟩
+    refine ⟨∃' φ', ?_⟩
+    intro V _ _ hC e
     rw [models_exs_of_collection (hC.of_le (by omega)) φ' e, Semiformula.eval_ex]
     exact exists_congr fun x => hφ' V (hC.of_le (by omega)) (x :> e)
   | @all s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih
-    refine ⟨∀' φ', fun V _ _ hC e => ?_⟩
+    refine ⟨∀' φ', ?_⟩
+    intro V _ _ hC e
     rw [models_all_of_collection (hC.of_le (by omega)) φ' e, Semiformula.eval_all]
     exact forall_congr' fun x => hφ' V (hC.of_le (by omega)) (x :> e)
   | @sigma s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih
-    refine ⟨φ'.sigma, fun V _ _ hC e => ?_⟩
+    refine ⟨φ'.sigma, ?_⟩
+    intro V _ _ hC e
     rw [models_sigma φ' e, Semiformula.eval_ex]
     exact exists_congr fun x => hφ' V (hC.of_le (by omega)) (x :> e)
   | @pi s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih
-    refine ⟨φ'.pi, fun V _ _ hC e => ?_⟩
+    refine ⟨φ'.pi, ?_⟩
+    intro V _ _ hC e
     rw [models_pi φ' e, Semiformula.eval_all]
     exact forall_congr' fun x => hφ' V (hC.of_le (by omega)) (x :> e)
   | @dummy_sigma s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih
-    refine ⟨(∀' φ').altUp, fun V _ _ hC e => ?_⟩
+    refine ⟨(∀' φ').altUp, ?_⟩
+    intro V _ _ hC e
     exact Semiformula.eval_all.trans
       ((forall_congr' fun x => hφ' V (hC.of_le (by omega)) (x :> e)).trans
         ((models_all_of_collection (hC.of_le (by omega)) φ' e).symm.trans
           (models_altUp (∀' φ') e).symm))
   | @dummy_pi s n φ _ ih =>
     obtain ⟨φ', hφ'⟩ := ih
-    refine ⟨(∃' φ').altUp, fun V _ _ hC e => ?_⟩
+    refine ⟨(∃' φ').altUp, ?_⟩
+    intro V _ _ hC e
     exact Semiformula.eval_ex.trans
       ((exists_congr fun x => hφ' V (hC.of_le (by omega)) (x :> e)).trans
         ((models_exs_of_collection (hC.of_le (by omega)) φ' e).symm.trans
@@ -401,7 +411,8 @@ theorem exists_prenex_of_collection (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
   have : 𝗘𝗤 ℒₒᵣ ⪯ T :=
     Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
   obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex_of_collection h
-  refine ⟨φ', provable_iff_of_models_iff fun V _ _ e ↦ ?_⟩
+  refine ⟨φ', provable_iff_of_models_iff ?_⟩
+  intro V _ _ e
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance
   exact hφ' V (strictCollection_of_models_collectionAxiom fun ψ hψ ↦

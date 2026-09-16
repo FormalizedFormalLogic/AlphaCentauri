@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Basic
+public import Foundation.FirstOrder.LK.Basic
 public import Foundation.Meta.ClProver
 
 /-!

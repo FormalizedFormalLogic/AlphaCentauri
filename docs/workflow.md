@@ -130,13 +130,13 @@ An open pull request labelled `update-foundation` comes before all of this; see
 
 ## Dependency pins and Foundation
 
-`lakefile.toml` pins Foundation at an exact revision, `lake-manifest.json` records what that
-revision resolves to, and `lean-toolchain` equals Foundation's. The three move together, forward
-only, and nobody bumps them by hand.
+`lakefile.toml` follows Foundation's `master`, `lake-manifest.json` records the exact revision
+that resolves to, and `lean-toolchain` equals Foundation's. The manifest and the toolchain move
+together, forward only, and nobody bumps them by hand: `lake update` is the workflow's to run.
 
 [`.github/workflows/update-foundation.yml`](../.github/workflows/update-foundation.yml) moves
-them every six hours, and on demand from the Actions tab (`workflow_dispatch`, optionally given
-a revision to pin instead of the tip of Foundation's `master`). It keeps one branch,
+them every six hours, and on demand from the Actions tab (`workflow_dispatch`). It keeps one
+branch,
 `update-foundation`, behind one open pull request labelled `update-foundation` and titled
 ``deps(Foundation): Update to `<short sha>` ``. While that pull request is open the new pins are
 committed on top of it — never a force-push, since the repairs made for the previous bump live

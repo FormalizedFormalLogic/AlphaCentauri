@@ -35,6 +35,7 @@ public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Reflection.Unboundedness
+public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.Collection.Basic
 public import AlphaCentauri.Schemata.Collection.Equivalence
 public import AlphaCentauri.Schemata.Collection.Induction
@@ -51,6 +52,8 @@ public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Semiformula
+public import AlphaCentauri.ToFoundation.Theory
+public import AlphaCentauri.ToMathlib.FastGrowing.Basic
 public import AlphaCentauri.ToMathlib.ONote.Computability
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds
 public import AlphaCentauri.ToMathlib.Ordinal.Epsilon0

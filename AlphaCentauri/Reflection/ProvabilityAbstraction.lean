@@ -18,24 +18,29 @@ open FFL.Entailment Axiomatized
 
 variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T)
 
+/-- The local reflection instance of `𝔅` for a sentence `σ`: `𝔅 σ 🡒 σ`.
+- [Lin97, §4.1, p. 52]
+- [AB05, §4] -/
+abbrev localReflectionSchema (σ : Sentence L) : Sentence L := 𝔅 σ 🡒 σ
+
 /-- The local reflection schema of `𝔅`, restricted to sentences satisfying `Γ`:
 `Rfn_Γ(𝔅) = { 𝔅 σ 🡒 σ | Γ σ }`.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
-def localReflectionOn (Γ : Sentence L → Prop) : Theory L :=
-  (fun σ ↦ 𝔅 σ 🡒 σ) '' {σ | Γ σ}
+def localReflectionOn (Γ : Sentence L → Prop) : Set (Sentence L) :=
+  𝔅.localReflectionSchema '' {σ | Γ σ}
 
 /-- The full local reflection schema of `𝔅`: `Rfn(𝔅) = { 𝔅 σ 🡒 σ | σ }`.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
-abbrev localReflection : Theory L := 𝔅.localReflectionOn fun _ ↦ True
+abbrev localReflection : Set (Sentence L) := 𝔅.localReflectionOn fun _ ↦ True
 
 variable {Γ Γ' : Sentence L → Prop}
 
 @[simp]
 lemma mem_localReflectionOn_iff {ψ : Sentence L} :
     ψ ∈ 𝔅.localReflectionOn Γ ↔ ∃ σ, Γ σ ∧ ψ = 𝔅 σ 🡒 σ := by
-  simp [localReflectionOn, eq_comm]
+  simp [localReflectionOn, localReflectionSchema, eq_comm]
 
 /-- Local reflection is monotone in the sentence class.
 - [Lin97, §4.1, p. 52]
@@ -85,11 +90,11 @@ restricted to a class `Γ'` dual to it, then `T ∪ {π}` is inconsistent.
 - [AB05, Theorem 23, finite case]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
-theorem inconsistent_of_localReflectionOn_weakerThan_insert
+theorem inconsistent_of_provable_localReflectionOn_insert
     [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL] {Γ Γ' : Sentence L → Prop}
-    (hd : ∀ σ, Γ σ → Γ' (∼σ)) (hπ : Γ π) (h : 𝔅.localReflectionOn Γ' ⪯ insert π T) :
+    (hd : ∀ σ, Γ σ → Γ' (∼σ)) (hπ : Γ π) (h : insert π T ⊢* 𝔅.localReflectionOn Γ') :
     Inconsistent (insert π T) :=
   inconsistent_of_localReflection_provable 𝔅
-    (h.subset (Axiomatized.by_axm ((mem_localReflectionOn_iff 𝔅).mpr ⟨∼π, hd π hπ, rfl⟩)))
+    (h ((mem_localReflectionOn_iff 𝔅).mpr ⟨∼π, hd π hπ, rfl⟩))
 
 end FFL.FirstOrder.ProvabilityAbstraction.Provability

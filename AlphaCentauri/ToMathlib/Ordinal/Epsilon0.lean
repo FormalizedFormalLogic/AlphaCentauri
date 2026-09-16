@@ -21,7 +21,6 @@ namespace ONote
 open Ordinal ONote IsWellFounded
 open scoped Ordinal
 
-/-- Every ordinal `< ε₀` is `repr` of some normal-form `ONote`. -/
 theorem exists_NF_repr_eq (o : Ordinal) (hε : o < ε₀) : ∃ x : ONote, x.NF ∧ x.repr = o := by
   induction o using WellFoundedLT.induction with
   | _ o IH =>
@@ -51,12 +50,10 @@ theorem exists_NF_repr_eq (o : Ordinal) (hε : o < ε₀) : ∃ x : ONote, x.NF 
         rw [hval, heRepr, hrRepr, hr, ← hm]
         exact div_add_mod o (ω ^ e)
 
-/-- `ε₀` is a limit ordinal. -/
 private lemma isSuccLimit_epsilon0 : Order.IsSuccLimit ε₀ := by
   have h := isSuccLimit_opow_left isSuccLimit_omega0 (epsilon_pos 0).ne'
   rwa [omega0_opow_epsilon] at h
 
-/-- Every normal-form `ONote` represents an ordinal `< ε₀`. -/
 theorem NF.repr_lt_epsilon0 {x : ONote} (h : x.NF) : x.repr < ε₀ := by
   induction x with
   | zero => exact epsilon_pos 0
@@ -78,7 +75,6 @@ theorem NF.repr_lt_epsilon0 {x : ONote} (h : x.NF) : x.repr < ε₀ := by
     exact key.trans (((opow_lt_opow_iff_right one_lt_omega0).2 hsucc).trans_eq
       (omega0_opow_epsilon 0))
 
-/-- The range of `NONote.repr` is exactly the ordinals `< ε₀`. -/
 theorem range_NONote_repr : Set.range NONote.repr = Set.Iio ε₀ := by
   ext o
   constructor
@@ -100,7 +96,6 @@ def ltPull (a b : ℕ) : Prop := e a < e b
 instance ltPull_wf : IsWellFounded ℕ (ltPull e) :=
   ⟨InvImage.wf e NONote.lt_wf⟩
 
-/-- The `≺`-rank of `n` in the pullback order is the ordinal `NONote.repr (e n)`. -/
 lemma rank_ltPull_eq_repr (n : ℕ) : rank (ltPull e) n = NONote.repr (e n) := by
   refine IsWellFounded.induction (ltPull e) n
     (motive := fun k => rank (ltPull e) k = NONote.repr (e k)) ?_
@@ -119,7 +114,6 @@ lemma rank_ltPull_eq_repr (n : ℕ) : rank (ltPull e) n = NONote.repr (e n) := b
   rw [IH m₀ hrel, he] at this
   exact lt_irrefl _ this
 
-/-- For any coding `e : ℕ ≃ NONote`, the pullback order on `ℕ` has order type at least `ε₀`. -/
 theorem epsilon0_le_orderType_ltPull : ε₀ ≤ orderType (ltPull e) := by
   by_contra! hlt
   obtain ⟨x, hxNF, hxo⟩ := exists_NF_repr_eq (orderType (ltPull e)) hlt
@@ -141,7 +135,7 @@ def encodeONote : ONote → ℕ
   | ONote.oadd e n a =>
       Nat.pair (encodeONote e) (Nat.pair ((n : ℕ) - 1) (encodeONote a)) + 1
 
-/-- Structural decoding `ℕ → ONote`, a left inverse of `encodeONote`. -/
+/-- Structural decoding `ℕ → ONote`. -/
 def decodeONote : ℕ → ONote
   | 0 => ONote.zero
   | (m + 1) =>
@@ -176,10 +170,9 @@ instance : Encodable NONote :=
 instance : Denumerable NONote :=
   Denumerable.ofEncodableOfInfinite NONote
 
-/-- A computable coding of `ℕ` by CNF notations, built from the structural `Encodable ONote`. -/
+/-- A computable coding of `ℕ` by normal-form notations. -/
 def natCode : ℕ ≃ NONote := (Denumerable.eqv NONote).symm
 
-/-- The pullback order on `ℕ` along `natCode` has order type at least `ε₀`. -/
 theorem epsilon0_le_orderType_natCode : ε₀ ≤ orderType (ltPull natCode) :=
   epsilon0_le_orderType_ltPull natCode
 

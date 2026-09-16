@@ -61,6 +61,7 @@ public import AlphaCentauri.ToMathlib.Goodstein.Termination
 public import AlphaCentauri.ToMathlib.Hardy.Basic
 public import AlphaCentauri.ToMathlib.Hardy.Comparison
 public import AlphaCentauri.ToMathlib.Hardy.Structure
+public import AlphaCentauri.ToMathlib.ONote.Computability
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds
 public import AlphaCentauri.ToMathlib.Ordinal.Epsilon0
 public import AlphaCentauri.ToMathlib.Ordinal.OmegaTower

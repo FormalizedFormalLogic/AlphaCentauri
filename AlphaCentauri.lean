@@ -51,6 +51,7 @@ public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Semiformula
+public import AlphaCentauri.ToMathlib.FastGrowing.Basic
 public import AlphaCentauri.ToMathlib.Ordinal
 public import AlphaCentauri.ToMathlib.Primrec
 public import AlphaCentauri.ToMathlib.Vector

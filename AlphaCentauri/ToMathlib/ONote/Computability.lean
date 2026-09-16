@@ -1,19 +1,18 @@
-/-
-# Computability of `ONote` comparison
-
-Mathlib's `Mathlib/SetTheory/Ordinal/Notation.lean` proves `ONote.cmp` computes the order on
-CNF (`NONote.cmp_compares`) but supplies no `Primcodable`/`Computable` packaging. This file
-supplies a structural `Primcodable ONote` instance and shows that the order pulled back to `ℕ`
-via the structural coding `natCode` is recursively enumerable:
-
-  `rePred_ltPull_natCode : REPred fun v : List.Vector ℕ 2 ↦ natCode (v.get 0) < natCode (v.get 1)`.
--/
 module
 
 public import Mathlib.Computability.RE
 public import Mathlib.Tactic.Cases
 public import Mathlib.Tactic.Linarith
-public import AlphaCentauri.ToMathlib.Ordinal.Epsilon0
+public import AlphaCentauri.ToMathlib.ONote.Epsilon0
+
+/-!
+# Computability of `ONote` comparison
+
+Mathlib proves that `ONote.cmp` computes the order on Cantor normal forms
+(`NONote.cmp_compares`) but packages it neither as `Primcodable` nor as `Computable`. This module
+supplies a structural `Primcodable ONote` instance, and shows the order pulled back to `ℕ` along
+the structural coding `natCode` to be recursively enumerable.
+-/
 
 @[expose] public section
 
@@ -24,9 +23,9 @@ namespace ONote
 private lemma encodeONote_decodeONote (n : ℕ) : encodeONote (decodeONote n) = n := by
   induction n using Nat.strongRecOn with
   | ind n ih =>
-  rcases n with (_ | m);
-  · simp [decodeONote, encodeONote];
-  · unfold decodeONote;
+  rcases n with (_ | m)
+  · simp [decodeONote, encodeONote]
+  · unfold decodeONote
     simp +arith +decide [encodeONote, ih _ (Nat.lt_succ_of_le (Nat.unpair_left_le _)),
       ih _ (Nat.lt_succ_of_le (Nat.unpair_right_le _ |> le_trans <| Nat.unpair_right_le _))]
 
@@ -181,7 +180,7 @@ private lemma computable_cmpStep : Computable cmpStep := by
     (Primrec.ite c2 (Primrec.const (some 2)) helse)
 
 private lemma cmpStep_spec (m : ℕ) : cmpStep ((List.range m).map Cnat) = some (Cnat m) := by
-  unfold cmpStep;
+  unfold cmpStep
   simp +decide only [cmpIdxE, cmpIdxA, cmpNV, List.length_map, List.length_range]
   rcases n : Nat.unpair m with ⟨x, y⟩; rcases x with (_ | x) <;> rcases y with (_ | y) <;>
     simp +decide only [↓reduceIte, Option.some.injEq, Nat.add_eq_zero_iff, and_false,
@@ -190,9 +189,9 @@ private lemma cmpStep_spec (m : ℕ) : cmpStep ((List.range m).map Cnat) = some 
     simp [Cnat, decodeONote, ONote.cmp, ordCode]
   · simp [Cnat, n, decodeONote, ONote.cmp, ordCode]
   · simp [Cnat, n, decodeONote, ONote.cmp, ordCode]
-  · rw [List.getElem?_range, List.getElem?_range] <;> norm_num [n];
-    · unfold Cnat;
-      rw [n];
+  · rw [List.getElem?_range, List.getElem?_range] <;> norm_num [n]
+    · unfold Cnat
+      rw [n]
       rw [decodeONote, decodeONote]
       simp +decide only [Nat.unpair_pair, ONote.cmp, ordCode_then, ordCode_cmp, PNat.mk_coe]
     · rw [← Nat.pair_unpair m, n]
@@ -304,15 +303,15 @@ private lemma NF_oadd_iff {e : ONote} {n : ℕ+} {a : ONote} :
   · exact ⟨fun h' => absurd h'.fst h, fun h' => absurd h'.1 h⟩
 
 private lemma nfStep_spec (n : ℕ) : nfStep ((List.range n).map Nfb) = some (Nfb n) := by
-  unfold nfStep Nfb;
-  by_cases hn : n = 0;
-  · rw [hn]; simp +decide [decodeONote];
+  unfold nfStep Nfb
+  by_cases hn : n = 0
+  · rw [hn]; simp +decide [decodeONote]
   · rw [show decodeONote n = ONote.oadd (decodeONote (Nat.unpair (n - 1) |>.1))
       ⟨(Nat.unpair (Nat.unpair (n - 1) |>.2) |>.1) + 1, Nat.succ_pos _⟩
-      (decodeONote (Nat.unpair (Nat.unpair (n - 1) |>.2) |>.2)) from ?_];
+      (decodeONote (Nat.unpair (Nat.unpair (n - 1) |>.2) |>.2)) from ?_]
     · have h_nfTB : nfTB n =
           decide (ONote.TopBelow (decodeONote (nfIdxE n)) (decodeONote (nfIdxA n))) := by
-        unfold nfTB ONote.TopBelow;
+        unfold nfTB ONote.TopBelow
         rcases k : nfIdxA n with (_ | k)
         · simp_all +decide only [↓reduceIte, Bool.true_eq]
           unfold decodeONote; simp +decide
@@ -322,7 +321,7 @@ private lemma nfStep_spec (n : ℕ) : nfStep ((List.range n).map Nfb) = some (Nf
       simp_all +decide only [List.length_map, List.length_range, List.getElem?_map,
         Option.map_map, ↓reduceIte]
       rw [List.getElem?_range, List.getElem?_range]
-      · simp +decide [nfIdxE, nfIdxA];
+      · simp +decide [nfIdxE, nfIdxA]
         grind [NF_oadd_iff]
       · exact lt_of_le_of_lt (Nat.unpair_right_le _)
           (lt_of_le_of_lt (Nat.unpair_right_le _) (Nat.pred_lt hn))
@@ -348,10 +347,10 @@ private lemma nf_decode_enc : (decodeONote (enc a)).NF := by
   rw [decodeONote_enc]; exact (natCode a).2
 
 private lemma enc_injective : Function.Injective enc := by
-  intro a b hab;
-  apply_fun decodeONote at hab;
+  intro a b hab
+  apply_fun decodeONote at hab
   have h_eq : (natCode a).1 = (natCode b).1 := by
-    grind +suggestions;
+    grind +suggestions
   exact natCode.injective (Subtype.ext h_eq)
 
 private lemma enc_surjOn {n : ℕ} (h : (decodeONote n).NF) : ∃ a, enc a = n := by
@@ -442,15 +441,16 @@ private lemma countNF_enc : countNF (enc a) = a := by
     countNF (n + 1) = countNF n + (if Nfb n then 1 else 0) := by
   have h_filter : List.filter (fun k => Nfb k) (List.range (n + 1)) =
       List.filter (fun k => Nfb k) (List.range n) ++ if Nfb n then [n] else [] := by
-    simp +decide [List.range_succ];
-    grind;
-  unfold countNF; aesop;
+    simp +decide [List.range_succ]
+    grind
+  unfold countNF
+  aesop
 
 private lemma countNF_mono : Monotone countNF :=
   monotone_nat_of_le_succ (by simp +decide [countNF_succ])
 
 private lemma lt_countNF_succ_enc : a < countNF (enc a + 1) := by
-  rw [countNF_succ];
+  rw [countNF_succ]
   rw [countNF_enc, if_pos (Nfb_enc a)]; linarith
 
 private lemma exists_count : ∃ n, a < countNF (n + 1) := ⟨enc a, lt_countNF_succ_enc a⟩

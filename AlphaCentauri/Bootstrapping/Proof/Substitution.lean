@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 
 /-!
 # Free-variable substitution on internal derivations
@@ -71,7 +71,7 @@ lemma termFvSubst_eq_termShift (hu : u < len w) (hw : ∀ x < u, w.[x] = ^&(x + 
     refine congrArg _ (nth_ext' k (by simp [hv.isUTerm]) (by simp [hv.isUTerm]) fun i hi ↦ ?_)
     rw [nth_termFvSubstVec hv.isUTerm hi, nth_termShiftVec hv.isUTerm hi]
     exact ih i hi
-      (le_of_lt $ lt_of_lt_of_le (nth_lt_qqFunc_of_lt (by rw [hv.lh]; exact hi)) hle)
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqFunc_of_lt (by rw [hv.lh]; exact hi)) hle)
 
 /-- A substitution vector reaching past `u` and sending `^&x` to `^&(x + 1)` below `u` acts on
 the formulas coded by a number at most `u` as the shift of free variables. -/
@@ -86,29 +86,29 @@ lemma fvSubst_eq_shift (hu : u < len w) (hw : ∀ x < u, w.[x] = ^&(x + 1))
     refine congrArg _ (nth_ext' k (by simp [hv.isUTerm]) (by simp [hv.isUTerm]) fun i hi ↦ ?_)
     rw [nth_termFvSubstVec hv.isUTerm hi, nth_termShiftVec hv.isUTerm hi]
     exact termFvSubst_eq_termShift hu hw (hv.nth hi)
-      (le_of_lt $ lt_of_lt_of_le (nth_lt_qqRel_of_lt (by rw [hv.lh]; exact hi)) hle)
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqRel_of_lt (by rw [hv.lh]; exact hi)) hle)
   · intro n k R v hR hv hle
     rw [fvSubst_nrel hR hv.isUTerm, shift_nrel hR hv.isUTerm]
     refine congrArg _ (nth_ext' k (by simp [hv.isUTerm]) (by simp [hv.isUTerm]) fun i hi ↦ ?_)
     rw [nth_termFvSubstVec hv.isUTerm hi, nth_termShiftVec hv.isUTerm hi]
     exact termFvSubst_eq_termShift hu hw (hv.nth hi)
-      (le_of_lt $ lt_of_lt_of_le (nth_lt_qqNRel_of_lt (by rw [hv.lh]; exact hi)) hle)
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqNRel_of_lt (by rw [hv.lh]; exact hi)) hle)
   · intro n _; simp
   · intro n _; simp
   · intro n p q hp hq ihp ihq hle
     rw [fvSubst_and hp.isUFormula hq.isUFormula, shift_and hp.isUFormula hq.isUFormula,
-      ihp (le_of_lt $ lt_of_lt_of_le (by simp) hle),
-      ihq (le_of_lt $ lt_of_lt_of_le (by simp) hle)]
+      ihp (le_of_lt <| lt_of_lt_of_le (by simp) hle),
+      ihq (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
   · intro n p q hp hq ihp ihq hle
     rw [fvSubst_or hp.isUFormula hq.isUFormula, shift_or hp.isUFormula hq.isUFormula,
-      ihp (le_of_lt $ lt_of_lt_of_le (by simp) hle),
-      ihq (le_of_lt $ lt_of_lt_of_le (by simp) hle)]
+      ihp (le_of_lt <| lt_of_lt_of_le (by simp) hle),
+      ihq (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
   · intro n p hp ih hle
     rw [fvSubst_all hp.isUFormula, shift_all hp.isUFormula,
-      ih (le_of_lt $ lt_of_lt_of_le (by simp) hle)]
+      ih (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
   · intro n p hp ih hle
     rw [fvSubst_exs hp.isUFormula, shift_exs hp.isUFormula,
-      ih (le_of_lt $ lt_of_lt_of_le (by simp) hle)]
+      ih (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
 
 /-- A substitution vector reaching past `u` and sending `^&x` to `^&(x + 1)` below `u` acts on
 a coded formula set bounded by `u` as `setShift`. -/
@@ -119,10 +119,10 @@ lemma fvSubstImage_eq_setShift (hu : u < len w) (hw : ∀ x < u, w.[x] = ^&(x + 
     simp only [mem_fvSubstImage_iff, mem_setShift_iff]
     constructor
     · rintro ⟨q, hq, rfl⟩
-      exact ⟨q, hq, fvSubst_eq_shift hu hw (hs q hq) (le_of_lt $ lt_of_lt_of_le (lt_of_mem hq) h)⟩
+      exact ⟨q, hq, fvSubst_eq_shift hu hw (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)⟩
     · rintro ⟨q, hq, rfl⟩
       exact ⟨q, hq,
-        (fvSubst_eq_shift hu hw (hs q hq) (le_of_lt $ lt_of_lt_of_le (lt_of_mem hq) h)).symm⟩
+        (fvSubst_eq_shift hu hw (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)).symm⟩
 
 end eqShift
 

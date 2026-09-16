@@ -80,9 +80,13 @@ descriptive slug and open the pull request directly; the PR is the record.
 - **Use Foundation's vocabulary.** Search Foundation (and Mathlib) before defining anything; see
   [`docs/conventions.md`](docs/conventions.md) ("Reuse before restating") for the rule. Never
   patch Foundation's sources under `.lake/`.
-- **Generic material goes to `AlphaCentauri/Vorspiel/`.** A lemma that mentions none of the
-  notions the module is about — a Mathlib or Foundation gap, a transfer principle, a coding
-  identity — belongs in its own `Vorspiel` module, not next to the theorem that first needed it.
+- **Generic material goes to its own module, sorted by where it is headed.** A lemma that
+  mentions none of the notions the module is about — a Mathlib or Foundation gap, a transfer
+  principle, a coding identity — does not belong next to the theorem that first needed it.
+  `AlphaCentauri/ToFoundation/` takes what is destined for Foundation: anything stated in an
+  `FFL.*` namespace, or about Foundation's syntax, semantics, theories or hierarchy.
+  `AlphaCentauri/ToMathlib/` takes what mentions none of that and would be at home in Mathlib.
+  A module that straddles the two is split.
 - **No compatibility layer.** When you rename, move, or delete a declaration, update every use
   in the same PR and remove the old name. No aliases, wrappers, forwarding modules, or
   deprecation shims.

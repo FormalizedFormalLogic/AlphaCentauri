@@ -23,7 +23,8 @@ open FFL.Entailment ProvabilityAbstraction
 provability predicate.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
-abbrev _root_.FFL.FirstOrder.Theory.localReflection (T : ArithmeticTheory) [T.Δ₁] : ArithmeticTheory :=
+abbrev _root_.FFL.FirstOrder.Theory.localReflection (T : ArithmeticTheory) [T.Δ₁] :
+    ArithmeticTheory :=
   T.standardProvability.localReflection
 
 @[inherit_doc] notation "𝗥𝗳𝗻 " T:max => Theory.localReflection T
@@ -129,11 +130,11 @@ theorem inconsistent_of_localReflectionOn_weakerThan_union_of_finite
   have hmem : ∀ σ, σ ∈ hU.toFinset.toList ↔ σ ∈ U := by simp
   have hconj : Hierarchy Γ n (⋀hU.toFinset.toList) :=
     Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ σ ((hmem σ).mp hσ)
-  have hle : T ∪ U ⪯ insert (⋀hU.toFinset.toList) T := WeakerThan.ofAxm! $ by
+  have hle : T ∪ U ⪯ insert (⋀hU.toFinset.toList) T := WeakerThan.ofAxm! <| by
     rintro φ (hφ | hφ)
     · exact by_axm (Set.mem_insert_of_mem _ hφ)
     · exact mdp (left_Conj₂_intro ((hmem φ).mpr hφ)) (by_axm (Set.mem_insert _ _))
-  have hge : insert (⋀hU.toFinset.toList) T ⪯ T ∪ U := WeakerThan.ofAxm! $ by
+  have hge : insert (⋀hU.toFinset.toList) T ⪯ T ∪ U := WeakerThan.ofAxm! <| by
     rintro φ (rfl | hφ)
     · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦ by_axm (Or.inr ((hmem ψ).mp hψ))
     · exact by_axm (Or.inl hφ)

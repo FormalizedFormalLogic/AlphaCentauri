@@ -36,7 +36,7 @@ lemma models_expAxiom_iff [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] :
 
 instance [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : V↓[ℒₒᵣ] ⊧* 𝗘𝗔 :=
   Semantics.ModelsSet.union_iff.mpr
-    ⟨inferInstance, Semantics.ModelsSet.singleton_iff.mpr $
+    ⟨inferInstance, Semantics.ModelsSet.singleton_iff.mpr <|
       models_expAxiom_iff.mpr Exponential.range_exists⟩
 
 namespace ElementaryArithmetic

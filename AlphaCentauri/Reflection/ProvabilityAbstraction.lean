@@ -57,7 +57,7 @@ variable [L.DecidableEq]
 theorem con_of_localReflection (h : Γ ⊥) : T ∪ 𝔅.localReflectionOn Γ ⊢ 𝔅.con := by
   have h₁ : T ∪ 𝔅.localReflectionOn Γ ⊢ 𝔅 ⊥ 🡒 ⊥ :=
     Axiomatized.by_axm (Set.mem_union_right _ ((mem_localReflectionOn_iff 𝔅).mpr ⟨⊥, h, rfl⟩))
-  show T ∪ 𝔅.localReflectionOn Γ ⊢ ∼𝔅 ⊥
+  change T ∪ 𝔅.localReflectionOn Γ ⊢ ∼𝔅 ⊥
   cl_prover [h₁]
 
 variable {σ : Sentence L}
@@ -71,7 +71,7 @@ theorem localReflection_of_con [𝔅.HBL2] [𝔅.FormalizedCompleteOn (∼σ)] :
   have h₂ : T₀ ⊢ 𝔅 (σ 🡒 ∼σ 🡒 ⊥) := D1 (by cl_prover)
   have h₃ : T₀ ⊢ 𝔅 (σ 🡒 ∼σ 🡒 ⊥) 🡒 𝔅 σ 🡒 𝔅 (∼σ 🡒 ⊥) := D2
   have h₄ : T₀ ⊢ 𝔅 (∼σ 🡒 ⊥) 🡒 𝔅 (∼σ) 🡒 𝔅 ⊥ := D2
-  show T₀ ⊢ ∼𝔅 ⊥ 🡒 (𝔅 σ 🡒 σ)
+  change T₀ ⊢ ∼𝔅 ⊥ 🡒 (𝔅 σ 🡒 σ)
   cl_prover [h₁, h₂, h₃, h₄]
 
 variable {π : Sentence L}
@@ -83,7 +83,7 @@ theorem inconsistent_of_localReflection_provable [Diagonalization T₀] [T₀ �
     (h : insert π T ⊢ 𝔅 (∼π) 🡒 ∼π) : Inconsistent (insert π T) := by
   have h₁ : T ⊢ π 🡒 (𝔅 (∼π) 🡒 ∼π) := deduction_iff.mp h
   have h₂ : T ⊢ ∼π := löb_theorem (by cl_prover [h₁])
-  exact inconsistent_of_provable $ by cl_prover [adjoin! π T, to_adjoin (φ := π) h₂]
+  exact inconsistent_of_provable <| by cl_prover [adjoin! π T, to_adjoin (φ := π) h₂]
 
 /-- If `T ∪ {π}` for a sentence `π` in a class `Γ` proves the local reflection schema of `𝔅`
 restricted to a class `Γ'` dual to it, then `T ∪ {π}` is inconsistent.

@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.OmegaLogic.Basic
-public import AlphaCentauri.Vorspiel.Semiformula
+public import AlphaCentauri.ToFoundation.Semiformula
 
 /-!
 # Inversion for `Z_∞`

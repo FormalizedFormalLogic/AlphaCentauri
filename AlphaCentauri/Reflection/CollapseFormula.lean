@@ -54,7 +54,7 @@ theorem hierarchy_collapseFormula (Γ : Polarity) :
     Hierarchy Γ (n + 1) (collapseFormula T U n Γ) := by
   cases Γ with
   | pi =>
-    show Hierarchy 𝚷 (n + 1) (collapseFormula T U n 𝚷)
+    change Hierarchy 𝚷 (n + 1) (collapseFormula T U n 𝚷)
     have hξ : Hierarchy 𝚺 (n + 1) U.Δ₁ch.sigma.val :=
       U.Δ₁ch.sigma.sigma_prop.mono (Nat.le_add_left 1 n)
     have hU : Hierarchy 𝚺 (n + 1) (isSemiformula ℒₒᵣ).sigma.val :=
@@ -68,7 +68,7 @@ theorem hierarchy_collapseFormula (Γ : Polarity) :
     have hTr : Hierarchy 𝚷 (n + 1) (piSatisfaction n).val := (piSatisfaction n).pi_prop
     simp [collapseFormula, hξ, hU, hSP, hneg, hproof, hTr]
   | sigma =>
-    show Hierarchy 𝚺 (n + 1) (collapseFormula T U n 𝚺)
+    change Hierarchy 𝚺 (n + 1) (collapseFormula T U n 𝚺)
     have hneg : Hierarchy 𝚺 (n + 1) (negGraph ℒₒᵣ).val :=
       (negGraph ℒₒᵣ).sigma_prop.mono (Nat.le_add_left 1 n)
     have hproof : Hierarchy 𝚺 (n + 1) (proof T).sigma.val :=

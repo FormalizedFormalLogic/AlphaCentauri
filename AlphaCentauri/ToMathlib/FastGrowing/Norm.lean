@@ -217,8 +217,6 @@ private theorem lt_fundamentalSequence_of_norm_le (o : ONote) (ho : o.NF) (g : �
             rw [norm_oadd] at hnorm; exact (le_max_of_le_right (le_max_right _ _)).trans hnorm
           exact oadd_lt_oadd_3 (ihb ho.snd hbf hb ba hd.snd hbalt hnorm_ba)
 
-/-- For normal-form `d < o` with budget `x` at least `d`'s CNF norm, the standard
-fundamental-sequence descent of `o` reaches `d`. -/
 theorem reaches_of_lt (o : ONote) (ho : o.NF) (d : ONote) (hd : d.NF) (hdo : d < o)
     (hnorm : norm d ≤ x) : Reaches x o d := by
   rcases e : fundamentalSequence o with (_ | c) | g
@@ -243,8 +241,6 @@ theorem reaches_of_lt (o : ONote) (ho : o.NF) (d : ONote) (hd : d.NF) (hdo : d <
 termination_by o
 decreasing_by all_goals assumption
 
-/-- `f_d(x) ≤ f_o(x)` for normal-form `d < o`, provided `1 ≤ x` and `d`'s CNF norm is at
-most `x`. -/
 theorem fastGrowing_le_of_lt (hx : 1 ≤ x) (hd : d.NF) (ho : o.NF) (hdo : d < o)
     (hnorm : norm d ≤ x) : fastGrowing d x ≤ fastGrowing o x :=
   fastGrowing_le_of_reaches hx (reaches_of_lt o ho d hd hdo hnorm)
@@ -320,7 +316,6 @@ lemma norm_osucc_le {o : ONote} : norm (osucc o) ≤ norm o + 1 :=
       have ih : norm (osucc b) ≤ norm b + 1 := norm_osucc_le
       simp only [osucc, norm_oadd]; omega
 
-/-- At a notation-successor `o` with predecessor `a`, `f_a(n) < f_o(n)` for `n ≥ 2`. -/
 lemma fastGrowing_lt_succ_index (h : fundamentalSequence o = Sum.inl (some a)) {n : ℕ}
     (hn : 2 ≤ n) : fastGrowing a n < fastGrowing o n := by
   rw [fastGrowing_succ o h]
@@ -346,7 +341,6 @@ def tower (i : ℕ) : ONote := (fun a => oadd a 1 0)^[i] 0
 
 @[simp] theorem tower_zero : tower 0 = 0 := rfl
 
-/-- `tower (i + 1)` is `oadd (tower i) 1 0`, which represents `ω ^ tower i`. -/
 lemma tower_succ (i : ℕ) : tower (i + 1) = oadd (tower i) 1 0 := by
   rw [tower, tower, Function.iterate_succ_apply']
 
@@ -369,7 +363,6 @@ lemma repr_tower_succ (i : ℕ) : (tower (i + 1)).repr = ω ^ (tower i).repr := 
   rw [tower_succ]
   simp only [ONote.repr, PNat.one_coe, Nat.cast_one, mul_one, add_zero]
 
-/-- **Cofinality of `tower` in `ε₀`**: every normal-form notation lies below some tower level. -/
 theorem tower_cofinal (o : ONote) (h : o.NF) : ∃ k, o < tower k :=
   match o, h with
   | 0, _ => ⟨1, by rw [lt_def]; simp [tower_succ]⟩

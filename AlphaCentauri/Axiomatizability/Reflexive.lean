@@ -32,6 +32,12 @@ def ArithmeticTheory.Reflexive (T : ArithmeticTheory) : Prop :=
 def ArithmeticTheory.EssentiallyReflexive (T : ArithmeticTheory) : Prop :=
   ∀ U : ArithmeticTheory, T ⊆ U → U.Reflexive
 
+end FFL.FirstOrder
+
+namespace FFL.FirstOrder.Arithmetic
+
+variable {T : ArithmeticTheory}
+
 /-- A reflexive extension of `𝗜𝚺₁` is not finitely axiomatizable.
 - [Lin97, Corollary 2.1]
 - [HP98, Corollary III.2.24] -/
@@ -43,7 +49,7 @@ theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T] 
   have hcon : T ⊢ F.consistent.val := h F hFT hfin
   have : 𝗜𝚺₁ ⪯ F := WeakerThan.trans inferInstance hequiv.le
   have : Consistent F := Consistent.of_le inferInstance hequiv.symm.le
-  exact Arithmetic.consistent_unprovable F (hequiv.le.wk hcon)
+  exact consistent_unprovable F (hequiv.le.wk hcon)
 
 /-- `𝗜𝚺₂` proves the consistency of `𝗜𝚺₁`.
 - [HP98, Corollary I.4.34(1)] -/
@@ -79,4 +85,4 @@ theorem not_finiteAxiomatizable_of_Peano_le [𝗣𝗔 ⪯ T] [Consistent T] : ¬
   have : Consistent (𝗣𝗔 ∪ T) := Consistent.of_le ‹Consistent T› hUT
   exact mt (FiniteAxiomatizable.of_equiv hequiv) <| not_finiteAxiomatizable_of_reflexive hR
 
-end FFL.FirstOrder
+end FFL.FirstOrder.Arithmetic

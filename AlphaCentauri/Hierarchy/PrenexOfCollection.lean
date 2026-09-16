@@ -151,7 +151,7 @@ theorem models_bexs_of_collection :
         funext i; exact i.elim
       rw [hA, hB]
     rw [bexs_succ_sigma (u := u) (φ := φ), val_sigma]
-    show (∃ b, V ⊧/(b :> e) (∃'[Rew.bShift u] φ₂').val) ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val
+    change (∃ b, V ⊧/(b :> e) (∃'[Rew.bShift u] φ₂').val) ↔ ∃ x < u.valb e, V ⊧/(x :> e) φ.val
     simp only [ih (Rew.bShift u) φ₂', Semiterm.val_bShift, hswap, models_sigmaInv φ]
     grind
   | 𝚷, s + 1, _, _, hC, u, φ, e => by
@@ -259,7 +259,7 @@ local prefix:64 "∀' " => Prenex.all
 lemma models_exs_of_collection [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCollection V s)
     (φ : Prenex 𝚺 (s + 1) Empty (n + 1)) (e : Fin n → V) :
     V ⊧/e (∃' φ).val ↔ ∃ x, V ⊧/(x :> e) φ.val := by
-  show V ⊧/e
+  change V ⊧/e
       (∃'[‘#0 + 1’] (∃'[‘#1 + 1’]
         (φ.sigmaInv.rew (Rew.subst (#0 :> #1 :> (#·.succ.succ.succ)))))).sigma.val ↔
     ∃ x, V ⊧/(x :> e) φ.val

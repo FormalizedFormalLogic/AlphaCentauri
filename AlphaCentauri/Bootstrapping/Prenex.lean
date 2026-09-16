@@ -65,7 +65,7 @@ instance qqExss_definable : 𝚺₁-Function₂ (qqExss : V → V → V) :=
 
 /-- Iterated existential quantification is definable at every positive hierarchy level.
 - [HP98, Lemma I.1.69] -/
-instance qqExss_definable' (Γ) : Γ-[m + 1]-Function₂ (qqExss : V → V → V) :=
+instance qqExss_definable' {m : ℕ} (Γ) : Γ-[m + 1]-Function₂ (qqExss : V → V → V) :=
   qqExss_definable.of_sigmaOne
 
 /-- One existential quantifier does not exceed the formula it quantifies.
@@ -220,7 +220,8 @@ mutual
     | 0 => isBounded
     | n + 1 => .mkDelta
         (.mkSigma “p. ∃ k < p + 1, ∃ q < p + 1, !qqExssDef p q k ∧ !(isStrictPi n).sigma q”)
-        (.mkPi “p. ∃ k < p + 1, ∃ q < p + 1, (∀ y, !qqExssDef y q k → y = p) ∧ !(isStrictPi n).pi q”)
+        (.mkPi “p. ∃ k < p + 1, ∃ q < p + 1, (∀ y, !qqExssDef y q k → y = p) ∧
+          !(isStrictPi n).pi q”)
 
   /-- A $\Delta_1$ recognizer for internally coded strict prenex $\Pi_n$ formulas.
   - [HP98, Lemma I.1.69(1)] -/
@@ -228,7 +229,8 @@ mutual
     | 0 => isBounded
     | n + 1 => .mkDelta
         (.mkSigma “p. ∃ k < p + 1, ∃ q < p + 1, !qqAllsDef p q k ∧ !(isStrictSigma n).sigma q”)
-        (.mkPi “p. ∃ k < p + 1, ∃ q < p + 1, (∀ y, !qqAllsDef y q k → y = p) ∧ !(isStrictSigma n).pi q”)
+        (.mkPi “p. ∃ k < p + 1, ∃ q < p + 1, (∀ y, !qqAllsDef y q k → y = p) ∧
+          !(isStrictSigma n).pi q”)
 end
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
@@ -479,11 +481,11 @@ private lemma isStrictClass_quote {Γ : Polarity} {s n : ℕ} {ψ : ArithmeticSe
     · exact IsStrictSigma.of_pi ih
     · exact IsStrictPi.of_sigma ih
   | exs _ ih =>
-    show IsStrictSigma _ _
+    change IsStrictSigma _ _
     rw [Semiformula.quote_ex]
     exact IsStrictSigma.exs ih
   | all _ ih =>
-    show IsStrictPi _ _
+    change IsStrictPi _ _
     rw [Semiformula.quote_all]
     exact IsStrictPi.all ih
 

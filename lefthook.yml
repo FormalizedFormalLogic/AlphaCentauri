@@ -44,13 +44,13 @@ pre-push:
           exit 1
         fi
 
-    # CI's `build` job. Warnings are errors nowhere in the build config, so read the output:
-    # a warning here is a review finding there.
+    # CI's `build` job. `just build-strict` fails the build on any warning from a path under
+    # `AlphaCentauri/`, matching CI.
     2_build:
       run: |
         set -e
         unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE GIT_PREFIX
-        lake build AlphaCentauri
+        just build-strict
 
     # CI's `Audit axioms` step: no `sorry`, no `native_decide`, no axiom outside the allowlist,
     # except what `forgive.yml` forgives. Writes `.lake/audit.json`, the report CI renders into

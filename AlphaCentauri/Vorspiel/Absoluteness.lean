@@ -30,19 +30,22 @@ lemma Delta1_cast {m : ℕ} (σ : 𝚫₁.Semisentence m) {u : Fin m → ℕ}
 - [HP98, Theorem I.1.6] -/
 lemma Sigma1_cast₁ (σ : 𝚺₁.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a] σ.val) :
     V ⊧/![(a : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using Sigma1_cast (V := V) σ h
+  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using Sigma1_cast
+    (V := V) σ h
 
 /-- `Sigma1_cast` at two arguments.
 - [HP98, Theorem I.1.6] -/
 lemma Sigma1_cast₂ (σ : 𝚺₁.Semisentence 2) {a b : ℕ} (h : ℕ ⊧/![a, b] σ.val) :
     V ⊧/![(a : V), (b : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using Sigma1_cast (V := V) σ h
+  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using Sigma1_cast
+    (V := V) σ h
 
 /-- `Sigma1_cast` at three arguments.
 - [HP98, Theorem I.1.6] -/
 lemma Sigma1_cast₃ (σ : 𝚺₁.Semisentence 3) {a b c : ℕ} (h : ℕ ⊧/![a, b, c] σ.val) :
     V ⊧/![(a : V), (b : V), (c : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using Sigma1_cast (V := V) σ h
+  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using Sigma1_cast
+    (V := V) σ h
 
 /-- $\Sigma_0$ cast at one argument.
 - [HP98, Theorem I.1.6] -/
@@ -69,6 +72,7 @@ lemma Sigma0_cast₃ (σ : 𝚺₀.Semisentence 3) {a b c : ℕ} (h : ℕ ⊧/![
 - [HP98, Theorem I.1.6] -/
 lemma Delta1_cast₁ (σ : 𝚫₁.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a] σ.val) :
     V ⊧/![(a : V)] σ.val := by
-  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using Delta1_cast (V := V) σ h
+  simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton] using Delta1_cast
+    (V := V) σ h
 
 end FFL.FirstOrder.Arithmetic

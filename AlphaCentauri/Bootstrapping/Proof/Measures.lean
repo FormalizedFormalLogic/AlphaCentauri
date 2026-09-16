@@ -476,7 +476,8 @@ lemma znth_heightSeq_of_le {x d : V} (h : x ≤ d) : znth (heightSeq d) x = heig
   case succ d ih =>
     rcases le_iff_lt_or_eq.mp h with hlt | rfl
     · have hxd : x ≤ d := lt_succ_iff_le.mp hlt
-      rw [heightSeq_succ, znth_seqCons_of_lt (heightSeq_seq d) (by rw [lh_heightSeq]; exact lt_succ_iff_le.mpr hxd)]
+      rw [heightSeq_succ, znth_seqCons_of_lt (heightSeq_seq d)
+        (by rw [lh_heightSeq]; exact lt_succ_iff_le.mpr hxd)]
       exact ih hxd
     · rfl
 

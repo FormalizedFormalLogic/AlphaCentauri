@@ -42,7 +42,7 @@ lemma asg_image_shift (e : ℕ → ℕ) (Γ : Sequent) :
   rw [Finset.image_image]
   apply Finset.image_congr
   intro ψ _
-  show asg e ▹ (Rew.shift ▹ ψ) = asg (e ∘ Nat.succ) ▹ ψ
+  change asg e ▹ (Rew.shift ▹ ψ) = asg (e ∘ Nat.succ) ▹ ψ
   rw [← TransitiveRewriting.comp_app, asg_comp_shift]
 
 /-- Closing a freed variable with `m :>ₙ e` equals closing with `e` and substituting `m`.
@@ -56,7 +56,7 @@ lemma asg_cons_free (m : ℕ) (e : ℕ → ℕ) (φ : ArithmeticSemiformula ℕ 
     · refine Fin.cases ?_ (fun i => i.elim0) x
       simp [asg, Rew.comp_app]
     · simp [asg, Rew.comp_app]
-  show asg (m :>ₙ e) ▹ (Rew.free ▹ φ) = Rew.subst ![(↑m : ArithmeticTerm ℕ)] ▹ ((asg e).q ▹ φ)
+  change asg (m :>ₙ e) ▹ (Rew.free ▹ φ) = Rew.subst ![(↑m : ArithmeticTerm ℕ)] ▹ ((asg e).q ▹ φ)
   rw [← TransitiveRewriting.comp_app, ← TransitiveRewriting.comp_app, h]
 
 section ExcludedMiddle
@@ -233,7 +233,7 @@ section Embedding
 
 - [Tow20, Section 16]
 - [Buc03, Section 5.5] -/
-theorem of_derivation2 (d : 𝗣𝗔 ⟹₂ Γ) :
+theorem of_derivation2 (d : 𝗣𝗔 ⟹₂Γ) :
     ∃ c, ∀ e : ℕ → ℕ, ∃ α, Z∞ ⊢[α, c] (Γ.image fun φ => asg e ▹ φ) := by
   induction d with
   | closed Γ φ hp hn =>
@@ -265,7 +265,8 @@ theorem of_derivation2 (d : 𝗣𝗔 ⟹₂ Γ) :
     intro e
     obtain ⟨α, h⟩ := ih e
     rw [Finset.image_insert, Finset.image_insert] at h
-    exact ⟨_, h.orI.insert_absorb (by simpa using Finset.mem_image_of_mem (fun φ => asg e ▹ φ) hmem)⟩
+    exact ⟨_, h.orI.insert_absorb
+      (by simpa using Finset.mem_image_of_mem (fun φ => asg e ▹ φ) hmem)⟩
   | @all Γ φ hmem _ ih =>
     obtain ⟨c, ih⟩ := ih
     refine ⟨c, ?_⟩
@@ -313,7 +314,7 @@ theorem of_derivation2 (d : 𝗣𝗔 ⟹₂ Γ) :
 /-- Every `𝗣𝗔` derivation embeds cut-free into `Z_∞` under a numeral assignment.
 
 - [Tow20, Section 16] -/
-theorem of_derivation2_cutFree (d : 𝗣𝗔 ⟹₂ Γ) (e : ℕ → ℕ) :
+theorem of_derivation2_cutFree (d : 𝗣𝗔 ⟹₂Γ) (e : ℕ → ℕ) :
     ∃ α, Z∞ ⊢[α, 0] (Γ.image fun φ => asg e ▹ φ) := by
   obtain ⟨c, h⟩ := of_derivation2 d
   obtain ⟨α, hα⟩ := h e

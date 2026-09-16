@@ -7,6 +7,21 @@ build:
     lake exe cache get
     lake build
 
+# Build and reject warnings. The linter set in lakefile.toml only warns, and conventions.md
+# treats a warning as a finding, so CI and the pre-push hook fail on one. Only paths under
+# AlphaCentauri/ are ours; a dependency's warnings are not this repository's to fix.
+build-strict:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    log=$(mktemp)
+    trap 'rm -f "$log"' EXIT
+    lake build AlphaCentauri 2>&1 | tee "$log"
+    if grep -E '^warning: AlphaCentauri/' "$log"; then
+        echo >&2 "build-strict: the build emitted the warnings above; fix them, do not suppress them"
+        exit 1
+    fi
+    echo "build-strict: no warnings"
+
 # Audit AlphaCentauri for sorry/native_decide/unauthorized axioms, honouring the allowlist
 # forgive.yml (requires `lake build` first; see https://github.com/FormalizedFormalLogic/forgive)
 axiom-audit:

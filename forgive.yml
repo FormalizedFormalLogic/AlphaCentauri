@@ -78,3 +78,6 @@ declaration:
   FFL.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
     forgive:
       - FFL.FirstOrder.Peano.essentiallyReflexive
+  FFL.FirstOrder.not_provablyTotal_ack:
+    forgive:
+      - FFL.FirstOrder.parsons

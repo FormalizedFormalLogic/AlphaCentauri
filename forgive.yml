@@ -37,9 +37,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
-  FFL.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ:
+  FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ:
     forgive:
-      - FFL.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ
+      - FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ
   FFL.FirstOrder.ISigma.provable_con_ISigma1:
     forgive:
       - FFL.FirstOrder.ISigma.provable_con_ISigma1

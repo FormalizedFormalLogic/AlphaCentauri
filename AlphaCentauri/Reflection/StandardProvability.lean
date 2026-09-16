@@ -100,7 +100,7 @@ proves the local reflection schema of `T` on the dual class, then `T ∪ {π}` i
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
-theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_insert
+theorem inconsistent_of_localReflectionOn_weakerThan_insert
     (hπ : Hierarchy Γ n π) (h : 𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ insert π T) :
     Inconsistent (insert π T) :=
   T.standardProvability.inconsistent_of_localReflectionOn_weakerThan_insert
@@ -111,9 +111,9 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_insert
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
-theorem not_localReflectionOnHierarchy_weakerThan_insert
+theorem not_localReflectionOn_weakerThan_insert
     (hπ : Hierarchy Γ n π) [Consistent (insert π T)] : ¬𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ insert π T :=
-  fun h ↦ (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hπ h).not_con
+  fun h ↦ (inconsistent_of_localReflectionOn_weakerThan_insert hπ h).not_con
     inferInstance
 
 /-- Unboundedness, for an extension by finitely many sentences: if `T ∪ U` for a finite set `U`
@@ -122,7 +122,7 @@ inconsistent.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
-theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
+theorem inconsistent_of_localReflectionOn_weakerThan_union_of_finite
     {U : ArithmeticTheory} (hU : U.Finite) (hΓ : ∀ σ ∈ U, Hierarchy Γ n σ)
     (h : 𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
   classical
@@ -137,7 +137,7 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
     rintro φ (rfl | hφ)
     · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦ by_axm (Or.inr ((hmem ψ).mp hψ))
     · exact by_axm (Or.inl hφ)
-  exact (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hconj
+  exact (inconsistent_of_localReflectionOn_weakerThan_insert hconj
     (h.trans hle)).of_ge hge
 
 end

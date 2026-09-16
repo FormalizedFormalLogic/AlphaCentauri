@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Coding
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Coding
 
 /-!
 # Internal cut-free derivations
@@ -649,8 +649,8 @@ theorem deduction (l : List (Sentence L)) {d : V} :
   dsimp only
   intro hd
   apply deductionAux (T := {p | p ∈ l}) (a := (⌜negatedAxioms l⌝ : V))
-  · exact Derivation2.formulaSet_quote_finset _
-  · rw [Derivation2.setShift_quote]
+  · exact LK2.Derivation.formulaSet_quote_finset _
+  · rw [LK2.Derivation.setShift_quote]
     congr 1
     ext p
     have hshift (σ : Sentence L) :
@@ -663,7 +663,7 @@ theorem deduction (l : List (Sentence L)) {d : V} :
       exact congrArg (fun q : Bootstrapping.Formula V L ↦ q.val)
         (Semiformula.typedQuote_neg (V := V) (↑σ : Proposition L)).symm
     rw [hneg]
-    exact (Derivation2.Sequent.mem_quote_iff (V := V)).mpr
+    exact (LK2.Derivation.Sequent.mem_quote_iff (V := V)).mpr
       (show ∼(↑σ : Proposition L) ∈ negatedAxioms l by simp [negatedAxioms, hσ])
   · exact hd
 

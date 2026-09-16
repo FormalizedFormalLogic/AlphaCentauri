@@ -17,7 +17,7 @@ extension of `M`.
 
 namespace FFL.FirstOrder.Arithmetic
 
-open Semiformula Structure
+open Semiformula Tarski.Structure
 
 variable {ξ : Type*} {M : Type u} {N : Type v} [ORingStructure M]
 

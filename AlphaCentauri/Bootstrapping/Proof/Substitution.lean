@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
-public import Foundation.FirstOrder.Bootstrapping.Syntax.Proof.Basic
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 
 /-!
 # Free-variable substitution on internal derivations

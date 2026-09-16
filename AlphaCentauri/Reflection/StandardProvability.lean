@@ -6,10 +6,10 @@ public import AlphaCentauri.Reflection.ProvabilityAbstraction
 
 @[expose] public section
 /-!
-# Local and uniform reflection principles for arithmetic theories
+# Local reflection principles for arithmetic theories
 
-Local and uniform reflection schemas for arithmetic theories, together with consistency and
-iteration results.
+Local reflection schemas for arithmetic theories, together with consistency and iteration
+results.
 
 - [Lin97, §4.1, p. 52]
 - [AB05, §4]
@@ -79,7 +79,7 @@ instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒ
   · exact Semantics.modelsSet_iff.mp inferInstance hφ
   · have : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ → ℕ↓[ℒₒᵣ] ⊧ σ := fun h ↦
       models_of_provable inferInstance (T.standardProvability.sound_on h)
-    simpa using this
+    simpa [Provability.localReflectionSchema] using this
 
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is sound in the standard model.
 - [Lin97, §4.1, p. 52]
@@ -141,31 +141,6 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
     (h.trans hle)).of_ge hge
 
 end
-
-/-- The uniform reflection schema `RFN_Γ(T)` consists of
-`∀x (Pr_T(φ(ẋ)) → φ(x))` for one-free-variable formulas `φ` satisfying `Γ`.
-- [Lin97, §4.1, p. 52]
-- [AB05, §4.2] -/
-def _root_.FFL.FirstOrder.Theory.uniformReflectionOn
-    (T : ArithmeticTheory) [T.Δ₁] (Γ : ArithmeticSemisentence 1 → Prop) : ArithmeticTheory :=
-  { ψ | ∃ φ : ArithmeticSemisentence 1, Γ φ ∧
-      ψ = (“∀ x, ∀ y, !Bootstrapping.Arithmetic.ssnum y ↑(Encodable.encode φ) x →
-        (!(T.standardProvability.prov) y → !φ x)” : ArithmeticSentence) }
-
-/-- The uniform reflection schema of `T` restricted to the `Γ n` formulas of the arithmetical
-hierarchy, `RFN_{Γ n}(T)`.
-- [Lin97, §4.1, p. 52]
-- [AB05, §4.2] -/
-abbrev _root_.FFL.FirstOrder.Theory.uniformReflectionOnHierarchy
-    (T : ArithmeticTheory) [T.Δ₁] (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
-  T.uniformReflectionOn (Hierarchy Γ n)
-
-@[inherit_doc] notation "𝗥𝗙𝗡[" Γ:max n:max "] " T:max => Theory.uniformReflectionOnHierarchy T Γ n
-
-/-- `RFN_{𝚺-[n]}(T)` and `RFN_{𝚷-[n + 1]}(T)` are equivalent over `T`, for `n ≥ 1`.
-- [AB05, Lemma 22(ii)] -/
-axiom uniformReflectionOnHierarchy_sigma_equiv_pi_succ {n : ℕ} (hn : 1 ≤ n) :
-    T ∪ 𝗥𝗙𝗡[𝚺 n] T ≊ T ∪ 𝗥𝗙𝗡[𝚷 (n + 1)] T
 
 /-- The pair of the iterated-consistency theory `T₀ = T`, `Tₙ₊₁ = Tₙ ∪ Tₙ.Con` and its
 $\Delta_1$-definability witness.

@@ -1,19 +1,18 @@
-/-
-# Computability of `ONote` comparison
-
-Mathlib's `Mathlib/SetTheory/Ordinal/Notation.lean` proves `ONote.cmp` computes the order on
-CNF (`NONote.cmp_compares`) but supplies no `Primcodable`/`Computable` packaging. This file
-supplies a structural `Primcodable ONote` instance and shows that the order pulled back to `ℕ`
-via the structural coding `natCode` is recursively enumerable:
-
-  `rePred_ltPull_natCode : REPred fun v : List.Vector ℕ 2 ↦ natCode (v.get 0) < natCode (v.get 1)`.
--/
 module
 
 public import Mathlib.Computability.RE
 public import Mathlib.Tactic.Cases
 public import Mathlib.Tactic.Linarith
 public import AlphaCentauri.ToMathlib.ONote.Epsilon0
+
+/-!
+# Computability of `ONote` comparison
+
+Mathlib proves that `ONote.cmp` computes the order on Cantor normal forms
+(`NONote.cmp_compares`) but packages it neither as `Primcodable` nor as `Computable`. This module
+supplies a structural `Primcodable ONote` instance, and shows the order pulled back to `ℕ` along
+the structural coding `natCode` to be recursively enumerable.
+-/
 
 @[expose] public section
 

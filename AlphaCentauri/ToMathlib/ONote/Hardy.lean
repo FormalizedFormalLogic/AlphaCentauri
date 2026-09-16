@@ -19,7 +19,7 @@ namespace ONote
 
 open ONote Ordinal
 
-/-! ### Definition and growth theory -/
+/-! ### Definition and values -/
 
 section Basic
 
@@ -72,7 +72,7 @@ lemma hardy_zero : hardy 0 = id :=
 lemma hardy_one : hardy 1 = fun n => n + 1 := by
   rw [@hardy_succ 1 0 rfl]; funext n; rw [hardy_zero]; rfl
 
-/-! ### Growth theory of the Hardy hierarchy -/
+/-! ### Growth -/
 
 theorem le_hardy (o : ONote) (n : ℕ) : n ≤ hardy o n := by
   rcases e : fundamentalSequence o with (_ | a) | f
@@ -149,11 +149,9 @@ lemma hardy_omega (n : ℕ) : hardy (oadd 1 1 0) n = 2 * n + 1 := by
 
 end Basic
 
-/-! ### Structural laws -/
+/-! ### The Hardy step -/
 
 section Structure
-
-/-! ### The Hardy step -/
 
 /-- The fundamental sequence of a limit notation is everywhere nonzero. -/
 lemma fundamentalSequence_ne_zero_of_limit {o : ONote} {f : ℕ → ONote}
@@ -400,10 +398,10 @@ theorem hardy_le_fastGrowing (o : ONote) (n : ℕ) (hn : 2 ≤ n) : hardy o n �
 termination_by o
 decreasing_by all_goals exact hlt
 
-/-! ### Hardy vs. fast-growing at an arbitrary exponent
+/-! ### An arbitrary exponent
 
-At arbitrary `a : ONote`, `H_{ω^a}(n) + 1 ≤ f_a(n+1)` unconditionally, tightening to a
-two-sided bracket once the coefficient composition law is in place.
+At arbitrary `a : ONote`, `H_{ω^a}(n) + 1 ≤ f_a(n+1)` unconditionally, tightening to a two-sided
+bracket once the coefficient composition law is in place.
 -/
 
 private lemma hardy_omega_pow_coeff_comp (b : ONote) (k n : ℕ) :

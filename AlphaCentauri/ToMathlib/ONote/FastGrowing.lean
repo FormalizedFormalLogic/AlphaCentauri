@@ -5,12 +5,11 @@ public import Mathlib.SetTheory.Ordinal.Notation
 /-!
 # Fast-growing hierarchy over `ONote`
 
-`ONote.fastGrowing`, the fast-growing hierarchy indexed by ordinal notations: monotonicity,
-expansiveness, and the structural `Reaches` descent relation on fundamental sequences with the
-index monotonicity it gives along that descent; `norm`, the CNF norm bounding the budget a
-descent needs; `osucc`, the notation successor; `tower`, the diagonal tower `0, 1, ω, ω^ω, …`
-cofinal in `ε₀`; and the domination of every fixed level `fastGrowing o` by the diagonal
-`fastGrowingε₀`.
+`ONote.fastGrowing` is monotone and expansive, and `Reaches` — descent along fundamental
+sequences with a fixed budget — carries index monotonicity along it. The CNF norm `norm` bounds
+the budget a descent needs, `osucc` is the notation successor, and `tower` is the diagonal
+`0, 1, ω, ω^ω, …`, cofinal in `ε₀`. Along it `fastGrowingε₀` eventually dominates every fixed
+level.
 -/
 
 @[expose] public section

@@ -54,6 +54,8 @@ public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Semiformula
 public import AlphaCentauri.ToFoundation.Theory
 public import AlphaCentauri.ToMathlib.FastGrowing.Basic
+public import AlphaCentauri.ToMathlib.FastGrowing.Epsilon0
+public import AlphaCentauri.ToMathlib.FastGrowing.Norm
 public import AlphaCentauri.ToMathlib.Goodstein.Defs
 public import AlphaCentauri.ToMathlib.Goodstein.Termination
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds

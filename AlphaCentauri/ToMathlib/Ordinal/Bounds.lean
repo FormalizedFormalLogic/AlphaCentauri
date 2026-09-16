@@ -38,7 +38,7 @@ variable (a b : Ordinal) (f : ℕ → Ordinal)
 
 lemma zero_lt_add_one : 0 < a + 1 := one_pos.trans_le le_add_self
 
-lemma one_lt_opow_succ : 1 < ω ^ (a + 1) := one_lt_omega0_opow (zero_lt_add_one a)
+private lemma one_lt_opow_succ : 1 < ω ^ (a + 1) := one_lt_omega0_opow (zero_lt_add_one a)
 
 private lemma lt_opow_succ_max_left (a b : Ordinal) : ω ^ a < ω ^ (max a b + 1) :=
   (opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_left a b).trans_lt (lt_add_one _))
@@ -46,7 +46,7 @@ private lemma lt_opow_succ_max_left (a b : Ordinal) : ω ^ a < ω ^ (max a b + 1
 private lemma lt_opow_succ_max_right (a b : Ordinal) : ω ^ b < ω ^ (max a b + 1) :=
   (opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_right a b).trans_lt (lt_add_one _))
 
-lemma lt_opow_succ_max_of_le_max {a b x : Ordinal} (hx : x ≤ max (ω ^ a) (ω ^ b)) :
+private lemma lt_opow_succ_max_of_le_max {a b x : Ordinal} (hx : x ≤ max (ω ^ a) (ω ^ b)) :
     x < ω ^ (max a b + 1) :=
   hx.trans_lt <| max_lt (lt_opow_succ_max_left a b) (lt_opow_succ_max_right a b)
 

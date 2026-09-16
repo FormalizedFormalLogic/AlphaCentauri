@@ -51,7 +51,7 @@ theorem le_fastGrowing (o : ONote) (n : ℕ) : n ≤ fastGrowing o n := by
 termination_by o
 decreasing_by all_goals exact hlt
 
-lemma id_le_fastGrowing (o : ONote) : (id : ℕ → ℕ) ≤ fastGrowing o :=
+private lemma id_le_fastGrowing (o : ONote) : (id : ℕ → ℕ) ≤ fastGrowing o :=
   fun m => le_fastGrowing o m
 
 theorem lt_fastGrowing (o : ONote) (hn : 1 ≤ n) : n < fastGrowing o n := by
@@ -71,7 +71,8 @@ theorem lt_fastGrowing (o : ONote) (hn : 1 ≤ n) : n < fastGrowing o n := by
 termination_by o
 decreasing_by all_goals exact hlt
 
-lemma fastGrowing_le_succ_index (h : fundamentalSequence o = Sum.inl (some a)) (hn : 1 ≤ n) :
+private lemma fastGrowing_le_succ_index
+    (h : fundamentalSequence o = Sum.inl (some a)) (hn : 1 ≤ n) :
     fastGrowing a n ≤ fastGrowing o n := by
   rw [fastGrowing_succ o h]
   simpa using (Function.monotone_iterate_of_id_le (id_le_fastGrowing a) hn) n
@@ -132,7 +133,7 @@ lemma Reaches.oadd_tail {m : ℕ+} {d' d : ONote} (h : Reaches x d' d) :
   | succ hb _ ih => exact Reaches.succ (fundamentalSequence_oadd_succ hb) ih
   | limit hb _ ih => exact Reaches.limit (fundamentalSequence_oadd_limit hb) ih
 
-lemma reaches_zero (o : ONote) (x : ℕ) : Reaches x o 0 := by
+private lemma reaches_zero (o : ONote) (x : ℕ) : Reaches x o 0 := by
   rcases e : fundamentalSequence o with (_ | a) | g
   · have ho : o = 0 := by have hp := fundamentalSequence_has_prop o; rw [e] at hp; exact hp
     rw [ho]; exact Reaches.refl 0
@@ -144,7 +145,7 @@ termination_by o
 decreasing_by all_goals exact hlt
 
 /-- `ω^e·(j+2)` descends to `ω^e·(j+1)` with any budget. -/
-lemma reaches_coeff_step (e : ONote) (j x : ℕ) :
+private lemma reaches_coeff_step (e : ONote) (j x : ℕ) :
     Reaches x (oadd e (j + 1).succPNat 0) (oadd e j.succPNat 0) := by
   rcases he : fundamentalSequence e with (_ | e') | p
   · have h0 : e = 0 := by have hp := fundamentalSequence_has_prop e; rw [he] at hp; exact hp
@@ -164,7 +165,7 @@ lemma reaches_coeff_step (e : ONote) (j x : ℕ) :
     exact Reaches.limit hlim (Reaches.oadd_tail (reaches_zero (oadd (p x) 1 0) x))
 
 /-- `ω^e·(j+1)` descends to `ω^e·1`. -/
-lemma reaches_coeff_chain (e : ONote) (j x : ℕ) :
+private lemma reaches_coeff_chain (e : ONote) (j x : ℕ) :
     Reaches x (oadd e j.succPNat 0) (oadd e (0 : ℕ).succPNat 0) := by
   induction j with
   | zero => exact Reaches.refl _
@@ -186,7 +187,7 @@ lemma fundamentalSequence_omega_pow_limit {q : ℕ → ONote}
   rw [he]; rfl
 
 /-- A structural reach on exponents lifts through `ω^·`. -/
-lemma reaches_omega_pow_lift {p r : ONote} (h : Reaches x p r) :
+private lemma reaches_omega_pow_lift {p r : ONote} (h : Reaches x p r) :
     Reaches x (oadd p 1 0) (oadd r 1 0) := by
   induction h with
   | refl c => exact Reaches.refl _
@@ -203,7 +204,7 @@ lemma fundamentalSequence_ofNat_succ (k : ℕ) :
   | zero => rfl
   | succ k' => rfl
 
-lemma fastGrowing_succ_chain_mono
+private lemma fastGrowing_succ_chain_mono
     (hchain : ∀ k, fundamentalSequence (g (k + 1)) = Sum.inl (some (g k)))
     (hmn : m ≤ n) (hx : 1 ≤ x) :
     fastGrowing (g m) x ≤ fastGrowing (g n) x := by
@@ -212,7 +213,7 @@ lemma fastGrowing_succ_chain_mono
   | succ n _ ih => exact le_trans ih (fastGrowing_le_succ_index (hchain n) hx)
 
 /-- The `ofNat` instance of `fastGrowing_succ_chain_mono`. -/
-lemma fastGrowing_ofNat_mono (hmn : m ≤ n) (hx : 1 ≤ x) :
+private lemma fastGrowing_ofNat_mono (hmn : m ≤ n) (hx : 1 ≤ x) :
     fastGrowing (ofNat m) x ≤ fastGrowing (ofNat n) x :=
   fastGrowing_succ_chain_mono fundamentalSequence_ofNat_succ hmn hx
 
@@ -255,12 +256,13 @@ theorem fastGrowing_bachmann_reach {o : ONote} {f : ℕ → ONote}
         rw [fundamentalSequence_oadd_limit hb] at h; exact (Sum.inr.inj h).symm
       rw [hf]; exact Reaches.oadd_tail (fastGrowing_bachmann_reach hb n)
 
-lemma fastGrowing_fundSeq_step
+private lemma fastGrowing_fundSeq_step
     (h : fundamentalSequence o = Sum.inr f) (n : ℕ) :
     fastGrowing (f n) (n + 1) ≤ fastGrowing (f (n + 1)) (n + 1) :=
   fastGrowing_le_of_reaches (Nat.succ_le_succ (Nat.zero_le n)) (fastGrowing_bachmann_reach h n)
 
-lemma fastGrowing_le_succ (o : ONote) (n : ℕ) : fastGrowing o n ≤ fastGrowing o (n + 1) := by
+private lemma fastGrowing_le_succ (o : ONote) (n : ℕ) :
+    fastGrowing o n ≤ fastGrowing o (n + 1) := by
   rcases e : fundamentalSequence o with (_ | a) | g
   · rw [fastGrowing_zero' o e]
     exact Nat.le_succ _
@@ -591,7 +593,7 @@ lemma norm_osucc_le {o : ONote} : norm (osucc o) ≤ norm o + 1 :=
       have ih : norm (osucc b) ≤ norm b + 1 := norm_osucc_le
       simp only [osucc, norm_oadd]; omega
 
-lemma fastGrowing_lt_succ_index (h : fundamentalSequence o = Sum.inl (some a)) {n : ℕ}
+private lemma fastGrowing_lt_succ_index (h : fundamentalSequence o = Sum.inl (some a)) {n : ℕ}
     (hn : 2 ≤ n) : fastGrowing a n < fastGrowing o n := by
   rw [fastGrowing_succ o h]
   have hexp : (id : ℕ → ℕ) ≤ fastGrowing a := fun m => le_fastGrowing a m

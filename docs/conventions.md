@@ -37,9 +37,8 @@ rewrite, so it is written as if it were already there.
   `just mk-all` (`lake exe mk_all --lib AlphaCentauri --module`); CI checks it.
 - **Linters.** The library builds with Mathlib's standard linter set, which `lakefile.toml`
   opts into wholesale (`weak.linter.mathlibStandardSet`), minus the header linter; `autoImplicit`
-  is off, as in Mathlib. A warning is an error: `just build-strict`, which CI and the pre-push hook
-  run in place of `lake build`, fails on any warning from a path under `AlphaCentauri/`. Fix it,
-  never suppress it.
+  is off, as in Mathlib. A warning is an error: CI and the pre-push hook build with
+  `lake build AlphaCentauri --wfail`. Fix a warning, never suppress it.
 - **Citations.** The bibliography is [`references.yml`](../references.yml) at the repository
   root, written in [Hayagriva](https://github.com/typst/hayagriva) YAML rather than
   Foundation's BibTeX `references.bib`; there is no `bibtool` step, the file is edited by
@@ -86,10 +85,10 @@ rewrite, so it is written as if it were already there.
 ## Checks before opening a pull request
 
 ```bash
-just build-strict     # no errors and no warnings
-just axiom-audit      # no axiom outside the allowlist, except what forgive.yml forgives
-just no-sorry         # no `sorry` in the sources, no `sorryAx` in forgive.yml
-just mk-all           # AlphaCentauri.lean up to date
+lake build AlphaCentauri --wfail   # no errors and no warnings
+just axiom-audit                   # no axiom outside the allowlist, except what forgive.yml forgives
+just no-sorry                      # no `sorry` in the sources, no `sorryAx` in forgive.yml
+just mk-all                        # AlphaCentauri.lean up to date
 ```
 
 A `statement-formalized` PR additionally runs `#check @Name` on every `axiom` it adds — see

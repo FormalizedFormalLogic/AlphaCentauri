@@ -6,7 +6,8 @@ defaultTargets = ["AlphaCentauri"]
 # projects are meant to opt into wholesale (see `register_linter_set linter.mathlibStandardSet`
 # in `Mathlib/Init.lean`), which subsumes the individual linters this file used to list. Only
 # the header linter is dropped: it enforces Mathlib's copyright header, which this repository
-# does not carry. `just build-strict` turns every warning the set emits into an error.
+# does not carry. `lake build --wfail`, which CI and the pre-push hook use, turns every warning
+# the set emits into an error.
 [leanOptions]
 pp.unicode.fun = true
 autoImplicit = false

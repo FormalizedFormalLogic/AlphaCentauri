@@ -44,13 +44,13 @@ pre-push:
           exit 1
         fi
 
-    # CI's `build` job. `just build-strict` fails the build on any warning from a path under
-    # `AlphaCentauri/`, matching CI.
+    # CI's `build` job. `--wfail` fails the build on any warning, so a linter warning is caught
+    # here rather than becoming a review finding.
     2_build:
       run: |
         set -e
         unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE GIT_PREFIX
-        just build-strict
+        lake build AlphaCentauri --wfail
 
     # CI's `Audit axioms` step: no `sorry`, no `native_decide`, no axiom outside the allowlist,
     # except what `forgive.yml` forgives. Writes `.lake/audit.json`, the report CI renders into

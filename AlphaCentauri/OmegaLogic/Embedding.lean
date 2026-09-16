@@ -3,12 +3,12 @@ module
 public import AlphaCentauri.OmegaLogic.Elimination
 public import AlphaCentauri.Vorspiel.Rew
 public import Foundation.FirstOrder.Arithmetic.Schemata
-public import Foundation.FirstOrder.Basic.Calculus2
+public import Foundation.FirstOrder.LK.Simplified
 
 /-!
 # Embedding `𝗣𝗔` into `Z_∞`
 
-This file embeds Foundation `Derivation2` derivations from `𝗣𝗔` into `Z_∞` under numeral
+This file embeds Foundation `LK2.Derivation` derivations from `𝗣𝗔` into `Z_∞` under numeral
 assignments, first with bounded cut rank and then cut-free.
 
 Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20] and [Buc03].

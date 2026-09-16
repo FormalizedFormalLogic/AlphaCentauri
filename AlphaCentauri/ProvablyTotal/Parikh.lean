@@ -5,7 +5,7 @@ public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Vorspiel.Compact
 public import AlphaCentauri.Vorspiel.Completeness
 public import AlphaCentauri.Vorspiel.ConstantExtension
-public import Foundation.FirstOrder.Ultraproduct
+public import Foundation.FirstOrder.Tarski.Ultraproduct
 
 /-!
 # Parikh's theorem

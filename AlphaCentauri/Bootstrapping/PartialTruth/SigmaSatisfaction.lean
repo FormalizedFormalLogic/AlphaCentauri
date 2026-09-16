@@ -794,16 +794,14 @@ theorem sigmaSatisfactionVec.defined (n k : ℕ) :
       (fun v : Fin (k + 1) → V ↦ SigmaSatisfaction (n + 1) (v 0) (matrixToVec (v ·.succ)))
       (sigmaSatisfactionVec n k) := .mk fun v ↦ by
   simp only [sigmaSatisfactionVec, Nat.succ_eq_add_one, Nat.reduceAdd,
-    HierarchySymbol.Semiformula.val_mkSigma,
-    Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
-    Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, numeral_eq_natCast_app,
-      Semiterm.val_bvar,
-    Matrix.cons_val_zero, HierarchySymbol.Defined.iff, Fin.isValue, Fin.Fin1.eq_one,
-      Fin.succ_zero_eq_one,
-    Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃,
-      Fin.succ_one_eq_two,
-    Matrix.cons_app_two, Semiformula.eval_operator, Matrix.cons_val_succ, Structure.eq_iff_eq,
-    LogicalConnective.Prop.and_eq, exists_eq_left]
+    HierarchySymbol.Semiformula.val_mkSigma, Semiformula.eval_ex,
+    LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
+    Semiterm.val_operator, Matrix.comp₀, Tarski.Structure.numeral_eq_numeral,
+    numeral_eq_natCast_app, Semiterm.val_bvar, Matrix.cons_val_zero, HierarchySymbol.Defined.iff,
+    Fin.isValue, Fin.Fin1.eq_one, Fin.succ_zero_eq_one, Matrix.cons_val_one,
+    Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃, Fin.succ_one_eq_two,
+    Matrix.cons_app_two, Semiformula.eval_operator, Matrix.cons_val_succ,
+    Tarski.Structure.eq_iff_eq, LogicalConnective.Prop.and_eq, exists_eq_left]
   constructor
   · rintro ⟨x, hlen, hnth, hsat⟩
     have hx : x = matrixToVec (v ·.succ) := by

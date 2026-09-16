@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.Completeness
+public import Foundation.FirstOrder.LK.Completeness
 
 /-! # Counter-models for unprovable arithmetic sentences
 

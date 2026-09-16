@@ -244,7 +244,7 @@ theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
 
 section peanoMinus
 
-open Tarski Reading PeanoMinus
+open _root_.FFL.FirstOrder.Tarski Reading PeanoMinus
 
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ}
   (hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ)
@@ -543,20 +543,21 @@ private lemma eval_sigmaSatisfactionVec {k : ℕ} (p : M) (w : Fin k → M) :
     M ⊧/(p :> w) (sigmaSatisfactionVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SigmaSatisfaction n p
       ev := by
   simp only [sigmaSatisfactionVec, Nat.succ_eq_add_one, Nat.reduceAdd,
-    HierarchySymbol.Semiformula.val_mkSigma,
-    Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
-    Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, numeral_eq_natCast_app,
-    Semiterm.val_bvar, Matrix.cons_val_zero, Fin.isValue, Fin.Fin1.eq_one, Matrix.cons_val_one,
-    Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃, Semiformula.eval_operator,
-    Matrix.cons_val_succ, Structure.eq_iff_eq, LogicalConnective.Prop.and_eq, exists_eq_right,
-    Reading.Codes, Reading.Len, Reading.Nth, Reading.SigmaSatisfaction, and_assoc]
+    HierarchySymbol.Semiformula.val_mkSigma, Semiformula.eval_ex,
+    LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
+    Semiterm.val_operator, Matrix.comp₀, Tarski.Structure.numeral_eq_numeral,
+    numeral_eq_natCast_app, Semiterm.val_bvar, Matrix.cons_val_zero, Fin.isValue, Fin.Fin1.eq_one,
+    Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃,
+    Semiformula.eval_operator, Matrix.cons_val_succ, Tarski.Structure.eq_iff_eq,
+    LogicalConnective.Prop.and_eq, exists_eq_right, Reading.Codes, Reading.Len, Reading.Nth,
+    Reading.SigmaSatisfaction, and_assoc]
 
 private lemma eval_snowing_rhs {k : ℕ} (φ : ArithmeticSemisentence k) (e : Fin k → M) :
     M ⊧/e ((sigmaSatisfactionVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
       ↔ M ⊧/(((⌜φ⌝ : ℕ) : M) :> e) (sigmaSatisfactionVec n k).val := by
   simp only [Semiformula.eval_substs, Matrix.comp_vecCons'', Arithmetic.gödelNumber'_def,
     Semiterm.Operator.encode, Semiterm.Operator.const, Semiterm.val_operator,
-    Structure.numeral_eq_numeral, numeral_eq_natCast_app, Sentence.quote_eq_encode_nat,
+    Tarski.Structure.numeral_eq_numeral, numeral_eq_natCast_app, Sentence.quote_eq_encode_nat,
     Matrix.empty_eq]
   simp only [Function.comp_def, Semiterm.val_bvar]
 

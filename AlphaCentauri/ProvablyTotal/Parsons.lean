@@ -36,7 +36,7 @@ axiom parsons_primrec {k : ℕ} (f : List.Vector ℕ k → ℕ) :
 
 /-- The Ackermann function is not `𝗜𝚺₁`-provably total.
 - [HP98, Corollary IV.3.7] -/
-theorem not_provablyTotal_ack :
+theorem not_provablyTotal_ackermann :
     ¬𝗜𝚺₁.ProvablyTotal (fun v : Fin 2 → ℕ ↦ _root_.ack (v 0) (v 1)) := by
   intro h
   have hp : Primrec fun w : List.Vector ℕ 2 ↦ _root_.ack (w.get 0) (w.get 1) :=

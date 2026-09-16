@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds
+public import Mathlib.SetTheory.Ordinal.Veblen
 
 /-!
 # The `ω`-tower
@@ -30,6 +31,8 @@ variable {a : Ordinal}
 
 @[grind =] lemma omegaTower_succ (c : ℕ) : omegaTower (c + 1) a = omegaTower c (ω ^ a) := rfl
 
+/-- `ε₀` is closed under `ω ^ ·`. -/
+@[grind →]
 lemma omega0_opow_lt_epsilon0 (h : a < ε₀) : ω ^ a < ε₀ := by
   obtain ⟨n, hn⟩ := lt_epsilon_zero.mp h
   refine lt_trans ?_ (iterate_omega0_opow_lt_epsilon_zero (n + 1))

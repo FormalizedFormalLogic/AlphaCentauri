@@ -1,8 +1,8 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.BoundedCollection
-public import AlphaCentauri.Vorspiel.Definable
-public import AlphaCentauri.Vorspiel.Fvar
+public import AlphaCentauri.ToFoundation.Definable
+public import AlphaCentauri.ToFoundation.Fvar
 
 /-!
 # The collection schemata `𝗕𝚺` and `𝗕𝚷`

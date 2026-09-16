@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
-public import AlphaCentauri.Vorspiel.Eval
+public import AlphaCentauri.ToFoundation.Eval
 
 /-!
 # The collection schemata `𝗕𝚺 (n + 1)` and `𝗕𝚷 n`

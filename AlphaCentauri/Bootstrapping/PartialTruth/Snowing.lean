@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.PartialTruth.Tarski
-public import AlphaCentauri.Vorspiel.Absoluteness
+public import AlphaCentauri.ToFoundation.Absoluteness
 
 /-!
 # Partial truth definitions agree with truth

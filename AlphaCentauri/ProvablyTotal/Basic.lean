@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.LK.Completeness
-public import AlphaCentauri.Vorspiel.Hierarchy
+public import AlphaCentauri.ToFoundation.Hierarchy
 
 /-!
 # Provably total functions

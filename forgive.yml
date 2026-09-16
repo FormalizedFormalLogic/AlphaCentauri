@@ -78,3 +78,6 @@ declaration:
   FFL.FirstOrder.Arithmetic.not_provablyTotal_ackermann:
     forgive:
       - FFL.FirstOrder.Arithmetic.parsons
+  FFL.FirstOrder.Arithmetic.provablyTotalFunctions_ISigma1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.parsons

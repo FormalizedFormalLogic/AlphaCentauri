@@ -65,7 +65,7 @@ private lemma hardy_omega_pow_coeff_le {b : ONote}
     hardy (oadd b (Nat.succPNat m) 0) n + 1 ≤ (fastGrowing b)^[m + 1] (n + 1) := by
   induction m generalizing n with
   | zero =>
-      show hardy (oadd b 1 0) n + 1 ≤ fastGrowing b (n + 1)
+      change hardy (oadd b 1 0) n + 1 ≤ fastGrowing b (n + 1)
       exact hbase n
   | succ m ih =>
       rw [hardy_omega_pow_coeff_comp b m n]
@@ -129,10 +129,11 @@ theorem fastGrowing_le_hardy_omega_pow : fastGrowing a n ≤ hardy (oadd a 1 0) 
       have homega : fundamentalSequence (oadd a 1 0) = Sum.inr (fun i => oadd b i.succPNat 0) :=
         fundamentalSequence_omega_pow_succ ha
       rw [fastGrowing_succ a ha, hardy_limit (oadd a 1 0) homega]
-      show (fastGrowing b)^[n] n ≤ hardy (oadd b n.succPNat 0) n
+      change (fastGrowing b)^[n] n ≤ hardy (oadd b n.succPNat 0) n
       rcases eq_or_ne b 0 with hb0 | hb0
       · subst hb0
-        rw [fastGrowing_zero, show oadd (0 : ONote) n.succPNat 0 = ofNat (n + 1) from (ofNat_succ n).symm,
+        rw [fastGrowing_zero,
+          show oadd (0 : ONote) n.succPNat 0 = ofNat (n + 1) from (ofNat_succ n).symm,
           hardy_ofNat, Nat.succ_iterate]
         omega
       · rw [hardy_oadd_coeff b hb0 n n]
@@ -190,7 +191,8 @@ theorem fastGrowingε₀_le_hardy_tower_succ (i : ℕ) : fastGrowingε₀ i ≤ 
   rw [← tower_succ] at h
   exact h
 
-theorem hardy_tower_succ_lt_fastGrowing (i : ℕ) : hardy (tower (i + 1)) i < fastGrowing (tower i) (i + 1) := by
+theorem hardy_tower_succ_lt_fastGrowing (i : ℕ) :
+    hardy (tower (i + 1)) i < fastGrowing (tower i) (i + 1) := by
   have h := (hardy_omega_pow_bracket (tower i) i).2
   rw [← tower_succ] at h
   exact h

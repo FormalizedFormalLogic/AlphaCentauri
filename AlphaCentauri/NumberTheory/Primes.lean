@@ -1,16 +1,18 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
+public import AlphaCentauri.Schemata.EA
 
 /-!
 # The infinitude of primes
 
-Euclid's argument needs $\mathrm{lcm}(1, \dots, x)$, so it runs in $\mathsf{I}\Sigma_1$ but not in
-$\mathsf{I}\Delta_0$, where no term bounds the next prime. Over $\mathsf{I}\Delta_0 + \Omega_1$ the
-sentence is a theorem of Paris, Wilkie and Woods, obtained from a weak $\Delta_0$ pigeonhole
-principle; over $\mathsf{I}\Delta_0$ it is an open problem. Both are declared as axioms here.
+Euclid's argument needs $\mathrm{lcm}(1, \dots, x)$, so it runs in
+$\mathsf{I}\Delta_0 + \mathrm{Exp}$ but not in $\mathsf{I}\Delta_0$, where no term bounds the
+next prime. Over $\mathsf{I}\Delta_0 + \Omega_1$ the sentence is a theorem of Paris, Wilkie and
+Woods, obtained from a weak $\Delta_0$ pigeonhole principle; over $\mathsf{I}\Delta_0$ it is an
+open problem. Each of the three is its own axiom here, so that none of them carries the debt of
+another; the $\mathsf{I}\Sigma_1$ case is a weakening of the first.
 
-- [HP98, Theorem I.1.58(2)]
+- [HP98, Theorem I.1.58(2), Remark I.1.59(3)]
 - [PWW88, Problem 1, Corollary 8]
 -/
 
@@ -30,6 +32,13 @@ variable {V : Type*} [ORingStructure V]
   simp [models_iff, infinitudeOfPrimes]
 
 end
+
+/-- - [HP98, Remark I.1.59(3)] -/
+axiom provable_infinitudeOfPrimes_ElementaryArithmetic : 𝗘𝗔 ⊢ infinitudeOfPrimes
+
+/-- - [HP98, Theorem I.1.58(2)] -/
+theorem provable_infinitudeOfPrimes_ISigma1 : 𝗜𝚺₁ ⊢ infinitudeOfPrimes :=
+  Entailment.WeakerThan.pbl provable_infinitudeOfPrimes_ElementaryArithmetic
 
 /-- - [PWW88, Corollary 8] -/
 axiom provable_infinitudeOfPrimes_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮₁ ⊢ infinitudeOfPrimes

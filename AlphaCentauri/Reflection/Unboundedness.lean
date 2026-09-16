@@ -292,23 +292,23 @@ theorem exists_sentence_weakerThan_of_consistent
 schema of `T` on the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
-theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union
+theorem inconsistent_of_localReflectionOn_weakerThan_union
     (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U')
-    (h : 𝗥𝗳𝗻[Γ.alt (n + 1)] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
+    (h : 𝗥𝗳𝗻[Hierarchy Γ.alt (n + 1)] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
   by_contra hc
   have : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
   obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent (T := T) hΓ
   exact hcon.not_inc
-    (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hθ (h.trans hle))
+    (inconsistent_of_localReflectionOn_weakerThan_insert hθ (h.trans hle))
 
 /-- Unboundedness: a consistent $\Gamma_{n + 1}$-axiomatizable extension of `T` does not contain
 the local reflection schema of `T` on the dual class.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
-theorem not_localReflectionOnHierarchy_weakerThan_union
+theorem not_localReflectionOn_weakerThan_union
     (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U') [Consistent (T ∪ U)] :
-    ¬𝗥𝗳𝗻[Γ.alt (n + 1)] T ⪯ T ∪ U :=
-  fun h ↦ (inconsistent_of_localReflectionOnHierarchy_weakerThan_union hΓ h).not_con
+    ¬𝗥𝗳𝗻[Hierarchy Γ.alt (n + 1)] T ⪯ T ∪ U :=
+  fun h ↦ (inconsistent_of_localReflectionOn_weakerThan_union hΓ h).not_con
     inferInstance
 
 end FFL.FirstOrder.Arithmetic

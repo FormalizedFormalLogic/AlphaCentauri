@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
+public import Foundation.FirstOrder.Arithmetic.Prenex
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.ToFoundation.Theory
@@ -98,35 +99,56 @@ instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒ
 section
 variable [𝗜𝚺₁ ⪯ T] {Γ : Polarity} {n : ℕ} {π : ArithmeticSentence}
 
-/-- Unboundedness: an extension of `T` by a single `Γ n` sentence proving the local reflection
-schema of `T` on the dual class is inconsistent.
+/-- Over a base proving `𝗜𝚺n`, reflection on the strict $\Gamma_n$ sentences already yields
+reflection on all $\Gamma_n$ sentences. -/
+lemma localReflectionOn_hierarchy_weakerThan_of_strictHierarchy [𝗜𝚺n ⪯ T]
+    {S : ArithmeticTheory} (hTS : T ⪯ S) (h : 𝗥𝗳𝗻[StrictHierarchy Γ n] T ⪯ S) :
+    𝗥𝗳𝗻[Hierarchy Γ n] T ⪯ S := by
+  have : 𝗜𝚺₁ ⪯ S := (inferInstance : 𝗜𝚺₁ ⪯ T).trans hTS
+  apply WeakerThan.ofAxm!
+  rintro φ ⟨σ, hσ, rfl⟩
+  obtain ⟨σ', hσ', e⟩ := exists_strictHierarchy_of_hierarchy (Γ := Γ) T hσ
+  have he : T ⊢ σ 🡘 σ' := by simpa using e
+  have hinst : S ⊢ T.standardProvability σ' 🡒 σ' :=
+    h.pbl (by_axm ((Provability.mem_localReflectionOn_iff _).mpr ⟨σ', hσ', rfl⟩))
+  have hext : S ⊢ T.standardProvability σ 🡘 T.standardProvability σ' :=
+    WeakerThan.pbl (Provability.ext (𝔅 := T.standardProvability) he)
+  have he' : S ⊢ σ 🡘 σ' := hTS.pbl he
+  cl_prover [hinst, hext, he']
+
+/-- Unboundedness: an extension of `T` by a single $\Gamma_n$ sentence proving the local
+reflection schema of `T` on the strict sentences of the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
-theorem inconsistent_of_localReflectionOn_weakerThan_insert
-    (hπ : Hierarchy Γ n π) (h : 𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ insert π T) :
+theorem inconsistent_of_localReflectionOn_weakerThan_insert [𝗜𝚺n ⪯ T]
+    (hπ : Hierarchy Γ n π) (h : 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T ⪯ insert π T) :
     Inconsistent (insert π T) :=
   T.standardProvability.inconsistent_of_localReflectionOn_weakerThan_insert
-    (fun _ hσ ↦ by simpa using hσ) hπ h
+    (fun _ hσ ↦ by simpa using hσ) hπ
+    (localReflectionOn_hierarchy_weakerThan_of_strictHierarchy
+      (WeakerThan.ofSubset (Set.subset_insert _ _)) h)
 
-/-- Unboundedness: a consistent extension of `T` by a single `Γ n` sentence does not contain the
-local reflection schema of `T` on the dual class.
+/-- Unboundedness: a consistent extension of `T` by a single $\Gamma_n$ sentence does not contain
+the local reflection schema of `T` on the strict sentences of the dual class.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
-theorem not_localReflectionOn_weakerThan_insert
-    (hπ : Hierarchy Γ n π) [Consistent (insert π T)] : ¬𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ insert π T :=
+theorem not_localReflectionOn_weakerThan_insert [𝗜𝚺n ⪯ T]
+    (hπ : Hierarchy Γ n π) [Consistent (insert π T)] :
+    ¬𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T ⪯ insert π T :=
   fun h ↦ (inconsistent_of_localReflectionOn_weakerThan_insert hπ h).not_con
     inferInstance
 
-/-- Unboundedness: an extension of `T` axiomatized by finitely many `Γ n` sentences and proving
-the local reflection schema of `T` on the dual class is inconsistent.
+/-- Unboundedness: an extension of `T` axiomatized by finitely many $\Gamma_n$ sentences and
+proving the local reflection schema of `T` on the strict sentences of the dual class is
+inconsistent.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
-theorem inconsistent_of_localReflectionOn_weakerThan_union_of_finite
+theorem inconsistent_of_localReflectionOn_weakerThan_union_of_finite [𝗜𝚺n ⪯ T]
     {U U' : ArithmeticTheory} (hΓ : AxiomatizableBy (Hierarchy Γ n) U U') (hU' : U'.Finite)
-    (h : 𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
+    (h : 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
   classical
   have e : T ∪ U ≊ T ∪ U' := hΓ.equiv.union_right T
   have hmem : ∀ σ, σ ∈ hU'.toFinset.toList ↔ σ ∈ U' := by simp

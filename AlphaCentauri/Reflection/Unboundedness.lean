@@ -304,7 +304,7 @@ than r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather
 - [Lin97, Corollary 4.2] -/
 theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union
     (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ)
-    (h : 𝗥𝗳𝗻[Γ.alt (n + 1)] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
+    (h : 𝗥𝗳𝗻[Hierarchy Γ.alt (n + 1)] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
   by_contra hc
   have : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
   obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent (T := T) hΓ
@@ -322,7 +322,7 @@ than r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather
 - [Lin97, Corollary 4.2] -/
 theorem not_localReflectionOnHierarchy_weakerThan_union
     (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) [Consistent (T ∪ U)] :
-    ¬𝗥𝗳𝗻[Γ.alt (n + 1)] T ⪯ T ∪ U :=
+    ¬𝗥𝗳𝗻[Hierarchy Γ.alt (n + 1)] T ⪯ T ∪ U :=
   fun h ↦ (inconsistent_of_localReflectionOnHierarchy_weakerThan_union hΓ h).not_con
     inferInstance
 

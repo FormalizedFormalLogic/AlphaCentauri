@@ -43,6 +43,8 @@ noncomputable def _root_.FFL.FirstOrder.Theory.uniformReflectionOn
     ArithmeticTheory :=
   { σ | ∃ (k : ℕ) (φ : ArithmeticSemisentence k), Γ φ ∧ σ = T.globalReflectionSchema φ }
 
+@[inherit_doc] notation "𝗥𝗙𝗡[" Γ "] " T:max => Theory.uniformReflectionOn T Γ
+
 variable {T : ArithmeticTheory} [T.Δ₁]
 
 @[simp]
@@ -60,19 +62,9 @@ lemma uniformReflectionOn_mono {Γ Γ' : ∀ {k : ℕ}, ArithmeticSemisentence k
   rintro σ ⟨k, φ, hφ, rfl⟩
   exact ⟨k, φ, h φ hφ, rfl⟩
 
-/-- The uniform reflection schema of `T` restricted to the `Γ n` formulas of the arithmetical
-hierarchy, `RFN_{Γ n}(T)`.
-- [Lin97, §4.1, p. 52]
-- [AB05, §4.2] -/
-noncomputable abbrev _root_.FFL.FirstOrder.Theory.uniformReflectionOnHierarchy
-    (T : ArithmeticTheory) [T.Δ₁] (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
-  T.uniformReflectionOn (Hierarchy Γ n)
-
-@[inherit_doc] notation "𝗥𝗙𝗡[" Γ:max n:max "] " T:max => Theory.uniformReflectionOnHierarchy T Γ n
-
 /-- `RFN` for $\Sigma_n$ and `RFN` for $\Pi_{n + 1}$ are equivalent over `T`, for `n ≥ 1`.
 - [AB05, Lemma 22(ii)] -/
 axiom uniformReflectionOnHierarchy_sigma_equiv_pi_succ {n : ℕ} (hn : 1 ≤ n) :
-    T ∪ 𝗥𝗙𝗡[𝚺 n] T ≊ T ∪ 𝗥𝗙𝗡[𝚷 (n + 1)] T
+    T ∪ 𝗥𝗙𝗡[Hierarchy 𝚺 n] T ≊ T ∪ 𝗥𝗙𝗡[Hierarchy 𝚷 (n + 1)] T
 
 end FFL.FirstOrder.Arithmetic

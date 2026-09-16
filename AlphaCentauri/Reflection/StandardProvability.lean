@@ -28,15 +28,14 @@ abbrev _root_.FFL.FirstOrder.Theory.localReflection (T : ArithmeticTheory) [T.Δ
 
 @[inherit_doc] notation "𝗥𝗳𝗻 " T:max => Theory.localReflection T
 
-/-- The local reflection schema of `T` restricted to the `Γ n` sentences of the arithmetical
-hierarchy, `Rfn_{Γ n}(T)`.
+/-- The local reflection schema of `T` restricted to the sentences satisfying `Γ`, `Rfn_Γ(T)`.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
-abbrev _root_.FFL.FirstOrder.Theory.localReflectionOnHierarchy
-    (T : ArithmeticTheory) [T.Δ₁] (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
-  T.standardProvability.localReflectionOn (Hierarchy Γ n)
+abbrev _root_.FFL.FirstOrder.Theory.localReflectionOn
+    (T : ArithmeticTheory) [T.Δ₁] (Γ : ArithmeticSentence → Prop) : ArithmeticTheory :=
+  T.standardProvability.localReflectionOn Γ
 
-@[inherit_doc] notation "𝗥𝗳𝗻[" Γ:max n:max "] " T:max => Theory.localReflectionOnHierarchy T Γ n
+@[inherit_doc] notation "𝗥𝗳𝗻[" Γ "] " T:max => Theory.localReflectionOn T Γ
 
 variable {T : ArithmeticTheory} [T.Δ₁]
 
@@ -51,7 +50,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 /-- The $\Pi_1$ local reflection principle and `Con(T)` are equivalent over `T`.
 - [Lin97, Exercise 4.1(b)(ii)]
 - [AB05, Lemma 22(i)] -/
-theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ T.Con := by
+theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[Hierarchy 𝚷 1] T ≊ T ∪ T.Con := by
   have : 𝗜𝚺₁ ⪯ T ∪ T.Con :=
     (inferInstance : 𝗜𝚺₁ ⪯ T).trans (WeakerThan.ofSubset Set.subset_union_left)
   refine Equiv.antisymm ⟨?_, ?_⟩
@@ -73,7 +72,7 @@ theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[�
 /-- The standard model satisfies every local reflection instance of a theory it satisfies.
 - [Lin97, §4.1, p. 52] -/
 instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒₒᵣ] ⊧* T] :
-    ℕ↓[ℒₒᵣ] ⊧* (T ∪ T.standardProvability.localReflectionOn Γ) := by
+    ℕ↓[ℒₒᵣ] ⊧* (T ∪ 𝗥𝗳𝗻[Γ] T) := by
   apply Semantics.modelsSet_iff.mpr
   rintro φ (hφ | ⟨σ, _, rfl⟩)
   · exact Semantics.modelsSet_iff.mp inferInstance hφ
@@ -102,7 +101,8 @@ proves the local reflection schema of `T` on the dual class, then `T ∪ {π}` i
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
 theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_insert
-    (hπ : Hierarchy Γ n π) (h : 𝗥𝗳𝗻[Γ.alt n] T ⪯ insert π T) : Inconsistent (insert π T) :=
+    (hπ : Hierarchy Γ n π) (h : 𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ insert π T) :
+    Inconsistent (insert π T) :=
   T.standardProvability.inconsistent_of_localReflectionOn_weakerThan_insert
     (fun _ hσ ↦ by simpa using hσ) hπ h
 
@@ -112,7 +112,7 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_insert
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
 theorem not_localReflectionOnHierarchy_weakerThan_insert
-    (hπ : Hierarchy Γ n π) [Consistent (insert π T)] : ¬𝗥𝗳𝗻[Γ.alt n] T ⪯ insert π T :=
+    (hπ : Hierarchy Γ n π) [Consistent (insert π T)] : ¬𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ insert π T :=
   fun h ↦ (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hπ h).not_con
     inferInstance
 
@@ -124,7 +124,7 @@ inconsistent.
 - [Lin97, Theorem 4.1] -/
 theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
     {U : ArithmeticTheory} (hU : U.Finite) (hΓ : ∀ σ ∈ U, Hierarchy Γ n σ)
-    (h : 𝗥𝗳𝗻[Γ.alt n] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
+    (h : 𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
   classical
   have hmem : ∀ σ, σ ∈ hU.toFinset.toList ↔ σ ∈ U := by simp
   have hconj : Hierarchy Γ n (⋀hU.toFinset.toList) :=

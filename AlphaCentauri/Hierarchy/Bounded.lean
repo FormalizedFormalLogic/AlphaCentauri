@@ -37,11 +37,11 @@ lemma bounded_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
   |               Hierarchy.verum _ _ _ => hVerum _
   |              Hierarchy.falsum _ _ _ => hFalsum _
   |  Hierarchy.rel _ _ Language.Eq.eq v => by simpa [←Matrix.fun_eq_vec_two] using hEQ _ (v 0) (v 1)
-  | Hierarchy.nrel _ _ Language.Eq.eq v => by simpa [←Matrix.fun_eq_vec_two] using hNEQ _
-                                                (v 0) (v 1)
+  | Hierarchy.nrel _ _ Language.Eq.eq v => by
+      simpa [←Matrix.fun_eq_vec_two] using hNEQ _ (v 0) (v 1)
   |  Hierarchy.rel _ _ Language.LT.lt v => by simpa [←Matrix.fun_eq_vec_two] using hLT _ (v 0) (v 1)
-  | Hierarchy.nrel _ _ Language.LT.lt v => by simpa [←Matrix.fun_eq_vec_two] using hNLT _
-                                                (v 0) (v 1)
+  | Hierarchy.nrel _ _ Language.LT.lt v => by
+      simpa [←Matrix.fun_eq_vec_two] using hNLT _ (v 0) (v 1)
   |                 Hierarchy.and hp hq =>
     hAnd _ _ _ hp hq
       (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)

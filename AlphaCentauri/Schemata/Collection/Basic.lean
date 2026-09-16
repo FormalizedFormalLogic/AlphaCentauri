@@ -127,8 +127,8 @@ lemma exists_bound_of_models_collectionAxiom {m : ℕ} {θ : ArithmeticSemisente
 /-- The reading of the collection axiom at a `Γ-[s]`-definable relation.
 - [HP98, §I.2(a)] -/
 lemma exists_bound_of_definable {Γ : Polarity} {s : ℕ}
-    (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy Γ s ψ → V↓[ℒₒᵣ] ⊧
-      .univCl (collectionAxiom ψ))
+    (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy Γ s ψ →
+      V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom ψ))
     {R : V → V → Prop} (hR : Γ-[s].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
   obtain ⟨e, ψ, hψ, hiff⟩ := exists_hierarchy_eval_iff hR

@@ -119,12 +119,12 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
     (∃ k < p, ∃ r < p, ∃ v < p, !qqNRelDef p k r v) ∨
     (∃ p₁ < p, ∃ p₂ < p, p₁ ∈ C ∧ p₂ ∈ C ∧ !qqAndDef p p₁ p₂) ∨
     (∃ p₁ < p, ∃ p₂ < p, p₁ ∈ C ∧ p₂ ∈ C ∧ !qqOrDef p p₁ p₂) ∨
-    (∃ u < p, ∃ q < p, (∃ t < p, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u =
-      u') ∧ q ∈ C
-       ∧ ∀ p', !qqBallDef p' u q → p = p') ∨
-    (∃ u < p, ∃ q < p, (∃ t < p, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u =
-      u') ∧ q ∈ C
-       ∧ ∀ p', !qqBexDef p' u q → p = p')”)⟩
+    (∃ u < p, ∃ q < p,
+      (∃ t < p, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u = u') ∧
+      q ∈ C ∧ ∀ p', !qqBallDef p' u q → p = p') ∨
+    (∃ u < p, ∃ q < p,
+      (∃ t < p, !(isUTerm ℒₒᵣ).pi t ∧ ∀ u', !(termBShiftGraph ℒₒᵣ) u' t → u = u') ∧
+      q ∈ C ∧ ∀ p', !qqBexDef p' u q → p = p')”)⟩
 
 /-- The fixpoint construction for `blueprint`. -/
 def construction : Fixpoint.Construction V blueprint where

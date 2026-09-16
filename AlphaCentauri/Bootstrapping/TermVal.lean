@@ -67,12 +67,12 @@ lemma qqMul_eq_qqFunc (a b : V) : (a ^* b : V) = ^func (2 : V) (1 : V) (?[a, b] 
   rw [Arithmetic.qqMul, Arithmetic.coe_mulIndex_eq]
 
 lemma qqZero_eq_qqFunc : (𝟎 : V) = ^func (0 : V) (0 : V) (0 : V) := by
-  rw [Arithmetic.coe_zero_eq, show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from
-    quote_zeroIndex_eq]
+  rw [Arithmetic.coe_zero_eq,
+    show (⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ : V) = 0 from quote_zeroIndex_eq]
 
 lemma qqOne_eq_qqFunc : (𝟏 : V) = ^func (0 : V) (1 : V) (0 : V) := by
-  rw [Arithmetic.coe_one_eq, show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from
-    quote_oneIndex_eq]
+  rw [Arithmetic.coe_one_eq,
+    show (⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ : V) = 1 from quote_oneIndex_eq]
 
 namespace TermVal
 
@@ -203,8 +203,8 @@ end
       construction.func ![e] 2 0 (?[t, u] : V) (termValVec e 2 (?[t, u] : V)) :=
     construction.result_func' hkf hv
   rw [heq, step]
-  simp [construction, nth_termValVec hv (show (0 : V) < 2 by simp), nth_termValVec hv
-    (show (1 : V) < 2 by simp)]
+  simp [construction, nth_termValVec hv (show (0 : V) < 2 by simp),
+    nth_termValVec hv (show (1 : V) < 2 by simp)]
 
 /-- Evaluation commutes with coded multiplication on coded terms.
 - [HP98, 1.64(5)] -/
@@ -218,8 +218,8 @@ end
       construction.func ![e] 2 1 (?[t, u] : V) (termValVec e 2 (?[t, u] : V)) :=
     construction.result_func' hkf hv
   rw [heq, step]
-  simp [construction, nth_termValVec hv (show (0 : V) < 2 by simp), nth_termValVec hv
-    (show (1 : V) < 2 by simp)]
+  simp [construction, nth_termValVec hv (show (0 : V) < 2 by simp),
+    nth_termValVec hv (show (1 : V) < 2 by simp)]
 
 lemma termVal_not_uterm {e t : V} (h : ¬IsUTerm ℒₒᵣ t) : termVal e t = 0 := by
   change construction.result ℒₒᵣ ![e] t = 0
@@ -239,8 +239,8 @@ lemma termVal_termSubst {e n m w t : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht
     have key : termValVec e k (termSubstVec ℒₒᵣ k w v) = termValVec (termValVec e n w) k v := by
       apply nth_ext' k (by simp [hv']) (by simp [hv.isUTerm])
       intro i hi
-      rw [nth_termValVec hv' hi, nth_termSubstVec hv.isUTerm hi, ih i hi, nth_termValVec
-        hv.isUTerm hi]
+      rw [nth_termValVec hv' hi, nth_termSubstVec hv.isUTerm hi, ih i hi,
+        nth_termValVec hv.isUTerm hi]
     have step1 : termVal e (^func k f (termSubstVec ℒₒᵣ k w v)) =
         construction.func ![e] k f (termSubstVec ℒₒᵣ k w v)
           (termValVec e k (termSubstVec ℒₒᵣ k w v)) :=

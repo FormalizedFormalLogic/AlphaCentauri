@@ -265,8 +265,8 @@ theorem of_derivation2 (d : 𝗣𝗔 ⟹₂Γ) :
     intro e
     obtain ⟨α, h⟩ := ih e
     rw [Finset.image_insert, Finset.image_insert] at h
-    exact ⟨_, h.orI.insert_absorb
-      (by simpa using Finset.mem_image_of_mem (fun φ => asg e ▹ φ) hmem)⟩
+    exact ⟨_,
+      h.orI.insert_absorb (by simpa using Finset.mem_image_of_mem (fun φ => asg e ▹ φ) hmem)⟩
   | @all Γ φ hmem _ ih =>
     obtain ⟨c, ih⟩ := ih
     refine ⟨c, ?_⟩

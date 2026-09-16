@@ -118,8 +118,8 @@ variable {M : Type*} [ORingStructure M]
 
 @[simp]
 lemma eval_indFormula {n : ℕ} (x : M) (g : ℕ → M) :
-    (indFormula n).Eval ![x] g ↔ ∃ ev, Reading.Adjoin ev x (g 1) ∧ Reading.SigmaSatisfaction n (g 0)
-      ev := by
+    (indFormula n).Eval ![x] g ↔
+      ∃ ev, Reading.Adjoin ev x (g 1) ∧ Reading.SigmaSatisfaction n (g 0) ev := by
   simp [indFormula, Reading.Adjoin, Reading.SigmaSatisfaction]
 
 @[simp]
@@ -269,8 +269,8 @@ strict prenex $\Sigma_{n + 1}$ formula is at least as strong as `𝗜𝚺 (n + 1
 - [HP98, Theorem I.2.52] -/
 theorem hierarchyInduction_of_strictInduction (n : ℕ) (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
     (hind : ∀ φ : ArithmeticSemiformula ℕ 1, StrictHierarchy 𝚺 (n + 1) φ → T ⊢ .univCl (succInd φ))
-    (hcol : ∀ φ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 (n + 1) φ → T ⊢
-      .univCl (collectionAxiom φ)) :
+    (hcol : ∀ φ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 (n + 1) φ →
+      T ⊢ .univCl (collectionAxiom φ)) :
     𝗜𝚺 (n + 1) ⪯ T := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
   apply WeakerThan.ofAxm!

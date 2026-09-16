@@ -230,8 +230,8 @@ noncomputable def snowing (n : ℕ) {k : ℕ}
   ∀¹* (φ 🡘 (sigmaSatisfactionVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
 
 theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
-    V↓[ℒₒᵣ] ⊧ snowing n φ ↔ ∀ v : Fin k → V, V ⊧/v φ ↔ SigmaSatisfaction (n + 1) ⌜φ⌝
-      (matrixToVec v) := by
+    V↓[ℒₒᵣ] ⊧ snowing n φ ↔
+      ∀ v : Fin k → V, V ⊧/v φ ↔ SigmaSatisfaction (n + 1) ⌜φ⌝ (matrixToVec v) := by
   simp [snowing, models_iff, (sigmaSatisfactionVec.defined n k).df, Function.comp_def]
 
 theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
@@ -269,8 +269,8 @@ lemma codes_cons {m : ℕ} {v : Fin m → M} {ev ev' x : M} (h : Codes v ev)
     (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' :=
   ⟨by simpa using (read_lenAdjoin hM x ev ev' (m : M) hadj).mpr h.1,
     fun i ↦ Fin.cases (by simpa using (read_nthAdjoinZero hM x ev ev' x hadj).mpr rfl)
-      (fun j ↦ by simpa using (read_nthAdjoinSucc hM x ev ev' (j.val : M) (v j) hadj).mpr
-                    (h.2 j)) i⟩
+      (fun j ↦ by
+        simpa using (read_nthAdjoinSucc hM x ev ev' (j.val : M) (v j) hadj).mpr (h.2 j)) i⟩
 
 include hM in
 lemma exists_codes : ∀ {m : ℕ} (v : Fin m → M), ∃ ev, Codes v ev := by

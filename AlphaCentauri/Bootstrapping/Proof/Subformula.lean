@@ -325,22 +325,22 @@ lemma subformulas_subset_of_mem {p q : V} (hp : IsUFormula L p) (hq : q ∈ subf
       rcases hq with rfl | hq | hq
       · simp [hp₁, hp₂]
       · exact subset_trans (ih₁ q hq) (by
-          rw [subformulas_and hp₁ hp₂]; exact subset_trans (union_succ_union_left _ _)
-            (susbset_insert _ _))
+          rw [subformulas_and hp₁ hp₂];
+          exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
       · exact subset_trans (ih₂ q hq) (by
-          rw [subformulas_and hp₁ hp₂]; exact subset_trans (union_succ_union_right _ _)
-            (susbset_insert _ _))
+          rw [subformulas_and hp₁ hp₂];
+          exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
     case hor =>
       intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ q hq
       simp only [subformulas_or hp₁ hp₂, mem_bitInsert_iff, mem_cup_iff] at hq
       rcases hq with rfl | hq | hq
       · simp [hp₁, hp₂]
       · exact subset_trans (ih₁ q hq) (by
-          rw [subformulas_or hp₁ hp₂]; exact subset_trans (union_succ_union_left _ _)
-            (susbset_insert _ _))
+          rw [subformulas_or hp₁ hp₂];
+          exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
       · exact subset_trans (ih₂ q hq) (by
-          rw [subformulas_or hp₁ hp₂]; exact subset_trans (union_succ_union_right _ _)
-            (susbset_insert _ _))
+          rw [subformulas_or hp₁ hp₂];
+          exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
     case hall =>
       intro p₁ hp₁ ih₁ q hq
       simp only [subformulas_all hp₁, mem_bitInsert_iff] at hq

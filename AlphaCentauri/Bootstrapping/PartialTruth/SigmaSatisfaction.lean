@@ -23,14 +23,14 @@ mutual
   `e`. -/
   def SigmaSatisfaction : ℕ → V → V → Prop
     | 0 => BoundedSatisfaction
-    | n + 1 => fun z e ↦ ∃ k q, z = qqExss q k ∧ IsStrictPi n q ∧ ∃ w, len w = k ∧
-        PiSatisfaction n q (vecAppend w e)
+    | n + 1 => fun z e ↦
+        ∃ k q, z = qqExss q k ∧ IsStrictPi n q ∧ ∃ w, len w = k ∧ PiSatisfaction n q (vecAppend w e)
 
   /-- `PiSatisfaction n z e` says that the strict prenex $\Pi_n$ formula `z` is satisfied by `e`. -/
   def PiSatisfaction : ℕ → V → V → Prop
     | 0 => BoundedSatisfaction
-    | n + 1 => fun z e ↦ IsStrictPi (n + 1) z ∧ IsUFormula ℒₒᵣ z ∧ ¬SigmaSatisfaction (n + 1)
-        (neg ℒₒᵣ z) e
+    | n + 1 => fun z e ↦
+        IsStrictPi (n + 1) z ∧ IsUFormula ℒₒᵣ z ∧ ¬SigmaSatisfaction (n + 1) (neg ℒₒᵣ z) e
 end
 
 /-- The $\Pi_{m + 1}$ formula for `PiSatisfaction (m + 1)` associated with a formula for
@@ -128,8 +128,8 @@ instance PiSatisfaction.defined (n : ℕ) :
     𝚷-[n + 1]-Relation (PiSatisfaction (n + 1) : V → V → Prop) via piSatisfaction n :=
   piDefined_of_sigmaDefined (sigmaDefined n)
 
-/-- Satisfaction for strict prenex $\Sigma_{n + 1}$ formulas is definable at level
-$\Sigma_{n + 1}$. -/
+/-- Satisfaction for strict prenex $\Sigma_{n + 1}$ formulas
+is definable at level $\Sigma_{n + 1}$. -/
 instance SigmaSatisfaction.definable (n : ℕ) :
     𝚺-[n + 1]-Relation (SigmaSatisfaction (n + 1) : V → V → Prop) :=
   (SigmaSatisfaction.defined n).to_definable
@@ -347,8 +347,8 @@ quantifier belongs to a lower level.
 `z`. -/
 private def BlockSatisfaction (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (n : ℕ) : Prop :=
   ∀ z M K e : V, IsStrictSigma (n + 1) z → IsUFormula ℒₒᵣ z → z = qqExss M K →
-    (∀ p : V, M ≠ ^∃ p) → (SigmaSatisfaction (n + 1) z e ↔ ∃ w, len w = K ∧
-      PiSatisfaction n M (vecAppend w e))
+    (∀ p : V, M ≠ ^∃ p) →
+      (SigmaSatisfaction (n + 1) z e ↔ ∃ w, len w = K ∧ PiSatisfaction n M (vecAppend w e))
 
 private lemma of_Pi0 (hB : BlockSatisfaction V 0) {z e : V} (hz : IsBounded z)
     (hz' : IsUFormula ℒₒᵣ z) : SigmaSatisfaction 1 z e ↔ PiSatisfaction 0 z e := by
@@ -456,8 +456,9 @@ private lemma of_pi_step : ∀ (n : ℕ), (∀ m ≤ n, BlockSatisfaction V m) �
             have h1 := (mono_step n fun i hi ↦ hB i (by omega)).2
             have h2 := (mono_step (n + 1) fun i hi ↦ hB i (by omega)).2
             exact (hB n (by omega) z M (K + 1) e hzs hz' hMK hM).mpr
-              ⟨w, hw, by rw [h1 M _ hMpi hMu, h2 M _ (IsStrictPi.mono (by omega) hMpi) hMu];
-                           exact hsat⟩
+              ⟨w, hw, by
+                rw [h1 M _ hMpi hMu, h2 M _ (IsStrictPi.mono (by omega) hMpi) hMu];
+                exact hsat⟩
       · intro h
         exact sigmaSatisfaction_succ_iff.mpr ⟨0, z, by simp, hz, 0, by simp, by simpa using h⟩
     exact ⟨hsig, fun z e hz hz' ↦ by
@@ -501,8 +502,8 @@ private lemma blockSatisfaction : ∀ n : ℕ, BlockSatisfaction V n := fun n �
           subst hj0
           rw [qqExss_zero] at hqs hsat'
           obtain ⟨x, hx⟩ := (boundedSatisfaction_ex_iff hqs).mp (by simpa using hsat')
-          exact ⟨x ∷ w, by simp [hw], ((of_pi_step 0 fun i hi ↦ ih i (by omega)).2 M _ hMd hMu).mpr
-            (by simpa using hx)⟩
+          exact ⟨x ∷ w, by simp [hw],
+            ((of_pi_step 0 fun i hi ↦ ih i (by omega)).2 M _ hMd hMu).mpr (by simpa using hx)⟩
         | m + 1 =>
           have hMpi' : IsStrictPi m M := isStrictPi_ex_block m _ M (j + 1) hqs hqex hM
           obtain ⟨u, hu, husat⟩ :=
@@ -529,15 +530,15 @@ theorem PiSatisfaction.of_sigma (hz : IsStrictSigma n z) (hz' : IsUFormula ℒ�
 end
 
 private lemma exs_iff_aux {n : ℕ} {p e : V} (hp : IsStrictSigma (n + 1) p)
-    (hp' : IsUFormula ℒₒᵣ p) : SigmaSatisfaction (n + 1) (^∃ p) e ↔ ∃ x, SigmaSatisfaction (n + 1) p
-      (x ∷ e) := by
+    (hp' : IsUFormula ℒₒᵣ p) : SigmaSatisfaction (n + 1) (^∃ p) e ↔
+      ∃ x, SigmaSatisfaction (n + 1) p (x ∷ e) := by
   obtain ⟨K, M, hMK, hM⟩ := exists_ex_block p
-  have h1 : SigmaSatisfaction (n + 1) (^∃ p) e ↔ ∃ w, len w = K + 1 ∧
-    PiSatisfaction n M (vecAppend w e) :=
+  have h1 : SigmaSatisfaction (n + 1) (^∃ p) e ↔
+    ∃ w, len w = K + 1 ∧ PiSatisfaction n M (vecAppend w e) :=
     blockSatisfaction n (^∃ p) M (K + 1) e (IsStrictSigma.exs hp) (by simp [hp'])
       (by rw [qqExss_succ, ← hMK]) hM
-  have h2 : ∀ x : V, SigmaSatisfaction (n + 1) p (x ∷ e) ↔ ∃ u, len u = K ∧
-    PiSatisfaction n M (vecAppend u (x ∷ e)) :=
+  have h2 : ∀ x : V, SigmaSatisfaction (n + 1) p (x ∷ e) ↔
+    ∃ u, len u = K ∧ PiSatisfaction n M (vecAppend u (x ∷ e)) :=
     fun x ↦ blockSatisfaction n p M K (x ∷ e) hp hp' hMK hM
   rw [h1]
   constructor
@@ -560,8 +561,8 @@ theorem SigmaSatisfaction.exs_iff : SigmaSatisfaction (n + 1) (^∃ p) e ↔
     obtain ⟨hs, hu⟩ := h.dom
     exact absurd ⟨IsStrictSigma.of_exs hs, by simpa using hu⟩ hp
 
-theorem PiSatisfaction.all_iff : PiSatisfaction (n + 1) (^∀ p) e ↔ ∀ x, PiSatisfaction (n + 1) p
-    (x ∷ e) := by
+theorem PiSatisfaction.all_iff : PiSatisfaction (n + 1) (^∀ p) e ↔
+    ∀ x, PiSatisfaction (n + 1) p (x ∷ e) := by
   constructor
   · intro h
     obtain ⟨hs, hu, hns⟩ := piSatisfaction_succ_iff.mp h
@@ -785,8 +786,8 @@ theorem SigmaSatisfaction.subst {n : ℕ} {m l w p e : V} (hw : IsSemitermVec �
 noncomputable def sigmaSatisfactionVec (n k : ℕ) : 𝚺-[n + 1].Semisentence (k + 1) := .mkSigma
   “p. ∃ e, !lenDef ↑k e ∧ (⋀ i, ∃ z, !nthDef z e ↑(i : Fin k).val ∧ z = #i.succ.succ.succ) ∧
     !(sigmaSatisfaction n).val p e”
-  (by simp [lenDef.sigma_prop.mono (Nat.le_add_left 1 n), nthDef.sigma_prop.mono
-        (Nat.le_add_left 1 n)])
+  (by simp [lenDef.sigma_prop.mono (Nat.le_add_left 1 n),
+        nthDef.sigma_prop.mono (Nat.le_add_left 1 n)])
 
 theorem sigmaSatisfactionVec.defined (n k : ℕ) :
     𝚺-[n + 1].Defined

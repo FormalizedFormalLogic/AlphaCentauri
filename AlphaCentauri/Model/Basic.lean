@@ -164,8 +164,9 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
 - [HP98, Fact IV.1.3(4)] -/
 theorem eval_of_Sigma1 {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hierarchy 𝚺 1 φ)
     (e : Fin n → M) (f : ξ → M) : φ.Eval e f → φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f) :=
-  sigma₁_induction' (P := fun n φ ↦ ∀ (e : Fin n → M) (f : ξ → M), φ.Eval e f →
-    φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f)) hφ
+  sigma₁_induction'
+    (P := fun n φ ↦ ∀ (e : Fin n → M) (f : ξ → M), φ.Eval e f → φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f))
+    hφ
     (fun _ _ _ _ ↦ by simp)
     (fun _ _ _ h ↦ by simp at h)
     (fun _ _ _ _ _ h ↦ (eval_hom_iff_of_open hMN.emb (by simp)).mp h)

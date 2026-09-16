@@ -913,8 +913,8 @@ lemma read_ofAlt (Γ : Polarity) : ∀ z e : V, Strict Γ.alt m z → Reading.UF
   · exact read_piSatisfactionOfSigma hV hm
 
 lemma read_sigmaSatisfactionExs : ∀ p z e : V, V ⊧/![z, p] qqExsDef.val →
-    (Reading.SigmaSatisfaction m z e ↔ ∃ x e', Adjoin e' x e ∧ Reading.SigmaSatisfaction m p
-      e') := by
+    (Reading.SigmaSatisfaction m z e ↔ ∃ x e', Adjoin e' x e ∧
+      Reading.SigmaSatisfaction m p e') := by
   simpa [models_iff, Tarski.sigmaSatisfactionExs, Reading.SigmaSatisfaction, Reading.Adjoin]
     using hV _
       (tarski_mono hm (tarski.new m (Tarski.sigmaSatisfactionExs m)

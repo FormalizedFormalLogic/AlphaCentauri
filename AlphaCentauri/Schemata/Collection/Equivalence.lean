@@ -200,7 +200,7 @@ lemma models_collectionAxiom_of_hierarchyCollection (hC : HierarchyCollection V 
   rw [models_collectionAxiom_iff]
   intro f a h
   obtain ⟨w, hw⟩ := hierarchyCollection_sigma_succ_of_pi hC (θ := φ.toSemisentence ![#1, #0])
-    (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a $ by
+    (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a <| by
       intro x hx
       obtain ⟨y, hy⟩ := h x hx
       exact ⟨y, (φ.eval_toSemisentence_two x y f).mpr hy⟩
@@ -223,7 +223,7 @@ theorem BPi.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticSemi
 - [HP98, Lemma I.2.10]
 - [Bus98A, Theorem 1.2.9(a)] -/
 theorem BSigma_succ_weakerThan_BPi (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗕𝚷 n :=
-  WeakerThan.ofAxm! $ by
+  WeakerThan.ofAxm! <| by
     rintro σ (hσ | ⟨φ, hφ, rfl⟩)
     · exact WeakerThan.pbl (h := (inferInstance : 𝗜𝚺₀ ⪯ 𝗕𝚷 n)) (by_axm hσ)
     · exact BPi.provable_collectionAxiom_of_hierarchy n hφ

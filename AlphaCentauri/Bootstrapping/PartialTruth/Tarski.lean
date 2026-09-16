@@ -85,39 +85,47 @@ noncomputable def boundedSatisfactionOr : ArithmeticSentence :=
     (!boundedSatisfaction.val z e ↔ !boundedSatisfaction.val p e ∨ !boundedSatisfaction.val q e)”
 
 /-- The Tarski sentence for negation. -/
-noncomputable def boundedSatisfactionNeg : ArithmeticSentence := “∀ p np e, !isBounded.val p → !(isUFormula ℒₒᵣ).val p →
+noncomputable def boundedSatisfactionNeg : ArithmeticSentence :=
+  “∀ p np e, !isBounded.val p → !(isUFormula ℒₒᵣ).val p →
     !(negGraph ℒₒᵣ).val np p → (!boundedSatisfaction.val np e ↔ ¬!boundedSatisfaction.val p e)”
 
 /-- The Tarski sentence for bounded universal quantification. -/
 noncomputable def boundedSatisfactionBall : ArithmeticSentence :=
-  “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !isBounded.val q → !(isUFormula ℒₒᵣ).val q → !(termBShiftGraph ℒₒᵣ).val u t →
+  “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !isBounded.val q → !(isUFormula ℒₒᵣ).val q →
+    !(termBShiftGraph ℒₒᵣ).val u t →
     !qqBallDef.val z u q → !termValGraph.val v e t →
-    (!boundedSatisfaction.val z e ↔ ∀ x < v, ∀ e', !adjoinDef.val e' x e → !boundedSatisfaction.val q e')”
+    (!boundedSatisfaction.val z e ↔ ∀ x < v, ∀ e', !adjoinDef.val e' x e →
+      !boundedSatisfaction.val q e')”
 
 /-- The Tarski sentence for bounded existential quantification. -/
 noncomputable def boundedSatisfactionBex : ArithmeticSentence :=
   “∀ t u q z e v, !(isUTerm ℒₒᵣ).val t → !(termBShiftGraph ℒₒᵣ).val u t →
     !qqBexDef.val z u q → !termValGraph.val v e t →
-    (!boundedSatisfaction.val z e ↔ ∃ x < v, ∃ e', !adjoinDef.val e' x e ∧ !boundedSatisfaction.val q e')”
+    (!boundedSatisfaction.val z e ↔ ∃ x < v, ∃ e', !adjoinDef.val e' x e ∧
+      !boundedSatisfaction.val q e')”
 
 /-- The defining sentence for evaluation of coded bound variables. -/
 noncomputable def termValBvar : ArithmeticSentence :=
   “∀ e z t v, !qqBvarDef.val t z → (!termValGraph.val v e t ↔ !nthDef.val v e z)”
 
 /-- The defining sentence for evaluation of zero. -/
-noncomputable def termValZero : ArithmeticSentence := “∀ e v, !termValGraph.val v e ↑Arithmetic.zero ↔ v = 0”
+noncomputable def termValZero : ArithmeticSentence :=
+  “∀ e v, !termValGraph.val v e ↑Arithmetic.zero ↔ v = 0”
 
 /-- The defining sentence for evaluation of one. -/
-noncomputable def termValOne : ArithmeticSentence := “∀ e v, !termValGraph.val v e ↑Arithmetic.one ↔ v = 1”
+noncomputable def termValOne : ArithmeticSentence :=
+  “∀ e v, !termValGraph.val v e ↑Arithmetic.one ↔ v = 1”
 
 /-- The defining sentence for evaluation of addition. -/
-noncomputable def termValAdd : ArithmeticSentence := “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
+noncomputable def termValAdd : ArithmeticSentence :=
+  “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
     !Arithmetic.qqAddGraph.val s t u → !termValGraph.val vt e t →
     !termValGraph.val vu e u →
     (!termValGraph.val v e s ↔ v = vt + vu)”
 
 /-- The defining sentence for evaluation of multiplication. -/
-noncomputable def termValMul : ArithmeticSentence := “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
+noncomputable def termValMul : ArithmeticSentence :=
+  “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
     !Arithmetic.qqMulGraph.val s t u → !termValGraph.val vt e t →
     !termValGraph.val vu e u →
     (!termValGraph.val v e s ↔ v = vt * vu)”
@@ -127,7 +135,8 @@ noncomputable def adjoinTotal : ArithmeticSentence := “∀ x v, ∃ e, !adjoin
 noncomputable def adjoinUnique : ArithmeticSentence :=
   “∀ x v e e', !adjoinDef.val e x v → !adjoinDef.val e' x v → e = e'”
 
-noncomputable def nthAdjoinZero : ArithmeticSentence := “∀ x v e y, !adjoinDef.val e x v → (!nthDef.val y e 0 ↔ y = x)”
+noncomputable def nthAdjoinZero : ArithmeticSentence :=
+  “∀ x v e y, !adjoinDef.val e x v → (!nthDef.val y e 0 ↔ y = x)”
 
 noncomputable def nthAdjoinSucc : ArithmeticSentence := “∀ x v e i y, !adjoinDef.val e x v →
     (!nthDef.val y e (i + 1) ↔ !nthDef.val y v i)”
@@ -151,22 +160,26 @@ noncomputable def sigmaSatisfactionOfPi : ℕ → ArithmeticSentence
 satisfaction. -/
 noncomputable def piSatisfactionOfSigma : ℕ → ArithmeticSentence
   | 0 =>
-      “∀ z e, !isBounded.val z → !(isUFormula ℒₒᵣ).val z → (!(piSatisfaction 0).val z e ↔ !boundedSatisfaction.val z e)”
+      “∀ z e, !isBounded.val z → !(isUFormula ℒₒᵣ).val z →
+        (!(piSatisfaction 0).val z e ↔ !boundedSatisfaction.val z e)”
   | n + 1 =>
       “∀ z e, !(isStrictSigma (n + 1)).val z → !(isUFormula ℒₒᵣ).val z →
         (!(piSatisfaction (n + 1)).val z e ↔ !(sigmaSatisfaction n).val z e)”
 
 /-- The domain Tarski condition for $\Sigma_{n + 1}$ satisfaction. -/
-noncomputable def sigmaSatisfactionDom (n : ℕ) : ArithmeticSentence := “∀ z e, !(sigmaSatisfaction n).val z e →
+noncomputable def sigmaSatisfactionDom (n : ℕ) : ArithmeticSentence :=
+  “∀ z e, !(sigmaSatisfaction n).val z e →
     !(isStrictSigma (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
 /-- The domain Tarski condition for $\Pi_{n + 1}$ satisfaction. -/
-noncomputable def piSatisfactionDom (n : ℕ) : ArithmeticSentence := “∀ z e, !(piSatisfaction n).val z e →
+noncomputable def piSatisfactionDom (n : ℕ) : ArithmeticSentence :=
+  “∀ z e, !(piSatisfaction n).val z e →
     !(isStrictPi (n + 1)).val z ∧ !(isUFormula ℒₒᵣ).val z”
 
 /-- The Tarski condition for existential quantification at level $\Sigma_{n + 1}$. -/
 noncomputable def sigmaSatisfactionExs (n : ℕ) : ArithmeticSentence := “∀ p z e, !qqExsDef.val z p →
-    (!(sigmaSatisfaction n).val z e ↔ ∃ x e', !adjoinDef.val e' x e ∧ !(sigmaSatisfaction n).val p e')”
+    (!(sigmaSatisfaction n).val z e ↔ ∃ x e', !adjoinDef.val e' x e ∧
+      !(sigmaSatisfaction n).val p e')”
 
 /-- The Tarski condition for universal quantification at level $\Pi_{n + 1}$. -/
 noncomputable def piSatisfactionAll (n : ℕ) : ArithmeticSentence := “∀ p z e, !qqAllDef.val z p →
@@ -237,7 +250,8 @@ inductive tarski : ℕ → ArithmeticTheory
   | prev : ∀ n φ, tarski n φ → tarski (n + 1) φ
   | new  : ∀ n, ∀ φ ∈ Tarski.sigmaSatisfactionAxioms n, tarski n φ
 
-lemma tarski_zero : tarski 0 = Tarski.boundedSatisfactionAxioms ∪ Tarski.sigmaSatisfactionAxioms 0 := by
+lemma tarski_zero : tarski 0 = Tarski.boundedSatisfactionAxioms ∪
+    Tarski.sigmaSatisfactionAxioms 0 := by
   ext φ
   constructor
   · rintro (⟨⟩ | ⟨⟩)
@@ -251,7 +265,7 @@ lemma tarski_succ (n : ℕ) : tarski (n + 1) = tarski n ∪ Tarski.sigmaSatisfac
   ext φ
   constructor
   · rintro (⟨⟩ | ⟨⟩ | ⟨⟩)
-    · exact Or.inl $ tarski.zero n φ ‹φ ∈ Tarski.boundedSatisfactionAxioms›
+    · exact Or.inl <| tarski.zero n φ ‹φ ∈ Tarski.boundedSatisfactionAxioms›
     · exact Or.inl ‹tarski n φ›
     · exact Or.inr ‹φ ∈ Tarski.sigmaSatisfactionAxioms (n + 1)›
   · rintro (h | h)
@@ -415,12 +429,14 @@ lemma models_boundedSatisfactionDom : V↓[ℒₒᵣ] ⊧ boundedSatisfactionDom
   exact fun _ _ h ↦ BoundedSatisfaction.dom h
 
 lemma models_boundedSatisfactionVerum : V↓[ℒₒᵣ] ⊧ boundedSatisfactionVerum := by
-  suffices ∀ z e : V, z = ^⊤ → BoundedSatisfaction z e by simpa [models_iff, boundedSatisfactionVerum] using this
+  suffices ∀ z e : V, z = ^⊤ → BoundedSatisfaction z e by
+    simpa [models_iff, boundedSatisfactionVerum] using this
   rintro _ e rfl
   exact BoundedSatisfaction.verum e
 
 lemma models_boundedSatisfactionFalsum : V↓[ℒₒᵣ] ⊧ boundedSatisfactionFalsum := by
-  suffices ∀ z e : V, z = ^⊥ → ¬BoundedSatisfaction z e by simpa [models_iff, boundedSatisfactionFalsum] using this
+  suffices ∀ z e : V, z = ^⊥ → ¬BoundedSatisfaction z e by
+    simpa [models_iff, boundedSatisfactionFalsum] using this
   rintro _ e rfl
   exact BoundedSatisfaction.falsum e
 
@@ -453,7 +469,8 @@ lemma models_boundedSatisfactionNlt : V↓[ℒₒᵣ] ⊧ boundedSatisfactionNlt
   exact BoundedSatisfaction.nlt_iff ht hu
 
 lemma models_boundedSatisfactionAnd : V↓[ℒₒᵣ] ⊧ boundedSatisfactionAnd := by
-  suffices ∀ p q z e : V, z = p ^⋏ q → (BoundedSatisfaction z e ↔ BoundedSatisfaction p e ∧ BoundedSatisfaction q e) by
+  suffices ∀ p q z e : V, z = p ^⋏ q →
+    (BoundedSatisfaction z e ↔ BoundedSatisfaction p e ∧ BoundedSatisfaction q e) by
     simpa [models_iff, boundedSatisfactionAnd] using this
   rintro p q _ e rfl
   exact BoundedSatisfaction.and_iff
@@ -543,7 +560,8 @@ lemma models_lenAdjoin : V↓[ℒₒᵣ] ⊧ lenAdjoin := by
 lemma models_sigmaSatisfactionOfPi (n : ℕ) : V↓[ℒₒᵣ] ⊧ sigmaSatisfactionOfPi n := by
   cases n with
   | zero =>
-    suffices ∀ z e : V, IsBounded z → IsUFormula ℒₒᵣ z → (SigmaSatisfaction 1 z e ↔ BoundedSatisfaction z e) by
+    suffices ∀ z e : V, IsBounded z → IsUFormula ℒₒᵣ z →
+      (SigmaSatisfaction 1 z e ↔ BoundedSatisfaction z e) by
       simpa [models_iff, sigmaSatisfactionOfPi] using this
     intro z e hd hf
     rw [SigmaSatisfaction.of_pi (IsStrictPi.of_bounded hd) hf, PiSatisfaction.zero]
@@ -557,7 +575,8 @@ lemma models_sigmaSatisfactionOfPi (n : ℕ) : V↓[ℒₒᵣ] ⊧ sigmaSatisfac
 lemma models_piSatisfactionOfSigma (n : ℕ) : V↓[ℒₒᵣ] ⊧ piSatisfactionOfSigma n := by
   cases n with
   | zero =>
-    suffices ∀ z e : V, IsBounded z → IsUFormula ℒₒᵣ z → (PiSatisfaction 1 z e ↔ BoundedSatisfaction z e) by
+    suffices ∀ z e : V, IsBounded z → IsUFormula ℒₒᵣ z →
+      (PiSatisfaction 1 z e ↔ BoundedSatisfaction z e) by
       simpa [models_iff, piSatisfactionOfSigma] using this
     intro z e hd hf
     rw [PiSatisfaction.of_sigma (IsStrictSigma.of_bounded hd) hf, SigmaSatisfaction.zero]
@@ -579,13 +598,15 @@ lemma models_piSatisfactionDom (n : ℕ) : V↓[ℒₒᵣ] ⊧ piSatisfactionDom
   exact fun _ _ h ↦ PiSatisfaction.dom h
 
 lemma models_sigmaSatisfactionExs (n : ℕ) : V↓[ℒₒᵣ] ⊧ sigmaSatisfactionExs n := by
-  suffices ∀ p z e : V, z = ^∃ p → (SigmaSatisfaction (n + 1) z e ↔ ∃ x, SigmaSatisfaction (n + 1) p (x ∷ e)) by
+  suffices ∀ p z e : V, z = ^∃ p →
+    (SigmaSatisfaction (n + 1) z e ↔ ∃ x, SigmaSatisfaction (n + 1) p (x ∷ e)) by
     simpa [models_iff, sigmaSatisfactionExs] using this
   rintro p _ e rfl
   exact SigmaSatisfaction.exs_iff
 
 lemma models_piSatisfactionAll (n : ℕ) : V↓[ℒₒᵣ] ⊧ piSatisfactionAll n := by
-  suffices ∀ p z e : V, z = ^∀ p → (PiSatisfaction (n + 1) z e ↔ ∀ x, PiSatisfaction (n + 1) p (x ∷ e)) by
+  suffices ∀ p z e : V, z = ^∀ p →
+    (PiSatisfaction (n + 1) z e ↔ ∀ x, PiSatisfaction (n + 1) p (x ∷ e)) by
     simpa [models_iff, piSatisfactionAll] using this
   rintro p _ e rfl
   exact PiSatisfaction.all_iff
@@ -614,7 +635,8 @@ lemma models_boundedSatisfactionAxioms {φ : ArithmeticSentence}
     models_boundedSatisfactionFalsum, models_boundedSatisfactionEq,
     models_boundedSatisfactionNeq, models_boundedSatisfactionLt, models_boundedSatisfactionNlt,
       models_boundedSatisfactionAnd, models_boundedSatisfactionOr,
-    models_boundedSatisfactionNeg, models_boundedSatisfactionBall, models_boundedSatisfactionBex, models_termValBvar,
+    models_boundedSatisfactionNeg, models_boundedSatisfactionBall, models_boundedSatisfactionBex,
+      models_termValBvar,
     models_termValZero, models_termValOne, models_termValAdd, models_termValMul,
     models_adjoinTotal, models_adjoinUnique, models_nthAdjoinZero, models_nthAdjoinSucc,
     models_lenNil, models_lenAdjoin]
@@ -728,38 +750,47 @@ include hV
 
 section boundedSatisfaction
 
-lemma read_boundedSatisfactionVerum : ∀ z e : V, V ⊧/![z] qqVerumDef.val → BoundedSatisfaction z e := by
+lemma read_boundedSatisfactionVerum : ∀ z e : V, V ⊧/![z] qqVerumDef.val →
+    BoundedSatisfaction z e := by
   simpa [models_iff, Tarski.boundedSatisfactionVerum, Reading.BoundedSatisfaction]
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionVerum (by simp [Tarski.boundedSatisfactionAxioms]))
 
-lemma read_boundedSatisfactionFalsum : ∀ z e : V, V ⊧/![z] qqFalsumDef.val → ¬BoundedSatisfaction z e := by
+lemma read_boundedSatisfactionFalsum : ∀ z e : V, V ⊧/![z] qqFalsumDef.val →
+    ¬BoundedSatisfaction z e := by
   simpa [models_iff, Tarski.boundedSatisfactionFalsum, Reading.BoundedSatisfaction]
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionFalsum (by simp [Tarski.boundedSatisfactionAxioms]))
 
 lemma read_boundedSatisfactionEq : ∀ t u z e vt vu : V, UTerm t → UTerm u →
-    V ⊧/![z, t, u] qqEQDef.val → TermVal vt e t → TermVal vu e u → (BoundedSatisfaction z e ↔ vt = vu) := by
-  simpa [models_iff, Tarski.boundedSatisfactionEq, Reading.BoundedSatisfaction, Reading.UTerm, Reading.TermVal]
+    V ⊧/![z, t, u] qqEQDef.val → TermVal vt e t → TermVal vu e u →
+      (BoundedSatisfaction z e ↔ vt = vu) := by
+  simpa [models_iff, Tarski.boundedSatisfactionEq, Reading.BoundedSatisfaction, Reading.UTerm,
+    Reading.TermVal]
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionEq (by simp [Tarski.boundedSatisfactionAxioms]))
 
 lemma read_boundedSatisfactionNeq : ∀ t u z e vt vu : V, UTerm t → UTerm u →
-    V ⊧/![z, t, u] qqNEQDef.val → TermVal vt e t → TermVal vu e u → (BoundedSatisfaction z e ↔ vt ≠ vu) := by
-  simpa [models_iff, Tarski.boundedSatisfactionNeq, Reading.BoundedSatisfaction, Reading.UTerm, Reading.TermVal]
+    V ⊧/![z, t, u] qqNEQDef.val → TermVal vt e t → TermVal vu e u →
+      (BoundedSatisfaction z e ↔ vt ≠ vu) := by
+  simpa [models_iff, Tarski.boundedSatisfactionNeq, Reading.BoundedSatisfaction, Reading.UTerm,
+    Reading.TermVal]
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionNeq (by simp [Tarski.boundedSatisfactionAxioms]))
 
 lemma read_boundedSatisfactionLt : ∀ t u z e vt vu : V, UTerm t → UTerm u →
-    V ⊧/![z, t, u] qqLTDef.val → TermVal vt e t → TermVal vu e u → (BoundedSatisfaction z e ↔ vt < vu) := by
-  simpa [models_iff, Tarski.boundedSatisfactionLt, Reading.BoundedSatisfaction, Reading.UTerm, Reading.TermVal]
+    V ⊧/![z, t, u] qqLTDef.val → TermVal vt e t → TermVal vu e u →
+      (BoundedSatisfaction z e ↔ vt < vu) := by
+  simpa [models_iff, Tarski.boundedSatisfactionLt, Reading.BoundedSatisfaction, Reading.UTerm,
+    Reading.TermVal]
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionLt (by simp [Tarski.boundedSatisfactionAxioms]))
 
 lemma read_boundedSatisfactionNlt : ∀ t u z e vt vu : V, UTerm t → UTerm u →
     V ⊧/![z, t, u] qqNLTDef.val → TermVal vt e t → TermVal vu e u →
     (BoundedSatisfaction z e ↔ ¬(vt < vu)) := by
-  simpa [models_iff, Tarski.boundedSatisfactionNlt, Reading.BoundedSatisfaction, Reading.UTerm, Reading.TermVal]
+  simpa [models_iff, Tarski.boundedSatisfactionNlt, Reading.BoundedSatisfaction, Reading.UTerm,
+    Reading.TermVal]
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionNlt (by simp [Tarski.boundedSatisfactionAxioms]))
 
@@ -769,9 +800,12 @@ lemma read_boundedSatisfactionAnd : ∀ p q z e : V, V ⊧/![z, p, q] qqAndDef.v
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionAnd (by simp [Tarski.boundedSatisfactionAxioms]))
 
-lemma read_boundedSatisfactionOr : ∀ p q z e : V, Reading.Bounded p → UFormula p → Reading.Bounded q → UFormula q →
-    V ⊧/![z, p, q] qqOrDef.val → (BoundedSatisfaction z e ↔ BoundedSatisfaction p e ∨ BoundedSatisfaction q e) := by
-  simpa [models_iff, Tarski.boundedSatisfactionOr, Reading.BoundedSatisfaction, Reading.Bounded, Reading.UFormula]
+lemma read_boundedSatisfactionOr : ∀ p q z e : V, Reading.Bounded p → UFormula p →
+    Reading.Bounded q → UFormula q →
+    V ⊧/![z, p, q] qqOrDef.val →
+      (BoundedSatisfaction z e ↔ BoundedSatisfaction p e ∨ BoundedSatisfaction q e) := by
+  simpa [models_iff, Tarski.boundedSatisfactionOr, Reading.BoundedSatisfaction, Reading.Bounded,
+    Reading.UFormula]
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionOr (by simp [Tarski.boundedSatisfactionAxioms]))
 
@@ -791,7 +825,8 @@ lemma read_boundedSatisfactionBex : ∀ t u q z e v : V, UTerm t →
     using hV _
       (tarski.zero n Tarski.boundedSatisfactionBex (by simp [Tarski.boundedSatisfactionAxioms]))
 
-lemma read_termValBvar : ∀ e z t v : V, V ⊧/![t, z] qqBvarDef.val → (TermVal v e t ↔ Nth v e z) := by
+lemma read_termValBvar : ∀ e z t v : V, V ⊧/![t, z] qqBvarDef.val →
+    (TermVal v e t ↔ Nth v e z) := by
   simpa [models_iff, Tarski.termValBvar, Reading.TermVal, Reading.Nth]
     using hV _ (tarski.zero n Tarski.termValBvar (by simp [Tarski.boundedSatisfactionAxioms]))
 
@@ -878,7 +913,8 @@ lemma read_ofAlt (Γ : Polarity) : ∀ z e : V, Strict Γ.alt m z → Reading.UF
   · exact read_piSatisfactionOfSigma hV hm
 
 lemma read_sigmaSatisfactionExs : ∀ p z e : V, V ⊧/![z, p] qqExsDef.val →
-    (Reading.SigmaSatisfaction m z e ↔ ∃ x e', Adjoin e' x e ∧ Reading.SigmaSatisfaction m p e') := by
+    (Reading.SigmaSatisfaction m z e ↔ ∃ x e', Adjoin e' x e ∧
+      Reading.SigmaSatisfaction m p e') := by
   simpa [models_iff, Tarski.sigmaSatisfactionExs, Reading.SigmaSatisfaction, Reading.Adjoin]
     using hV _
       (tarski_mono hm (tarski.new m (Tarski.sigmaSatisfactionExs m)

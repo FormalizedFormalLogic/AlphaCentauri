@@ -123,8 +123,8 @@ jobs:
                       f.unlink()
           PY
 
-      - name: Build AlphaCentauri
-        run: lake build AlphaCentauri
+      - name: Build AlphaCentauri (warnings are errors)
+        run: lake build AlphaCentauri --wfail
 
       # A failure is deferred to the last step of the job, so that the report still reaches the
       # pull request and the cache below is still saved.

@@ -25,6 +25,8 @@ namespace Arithmetic
 
 open Semiformula
 
+universe u
+
 variable {k : ℕ}
 
 /-- The `i`-th of the `k` constants adjoined to `ℒₒᵣ`. -/
@@ -61,7 +63,7 @@ lemma strucOfTuple_models_eq : strucOfTuple M a ⊧* 𝗘𝗤 (Language.oringCon
   let s : Tarski.Structure (Language.oringConst k) M := (strucOfTuple M a).struc
   have : Nonempty M := ⟨0⟩
   have : Tarski.Structure.Eq (Language.oringConst k) M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
-  show M↓[Language.oringConst k] ⊧* 𝗘𝗤 (Language.oringConst k)
+  change M↓[Language.oringConst k] ⊧* 𝗘𝗤 (Language.oringConst k)
   infer_instance
 
 lemma strucOfTuple_models_lMap_image {U : ArithmeticTheory} (h : M↓[ℒₒᵣ] ⊧* U) :

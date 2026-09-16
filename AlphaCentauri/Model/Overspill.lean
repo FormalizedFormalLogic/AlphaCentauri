@@ -15,6 +15,8 @@ namespace FFL.FirstOrder.Arithmetic
 
 open Semiformula
 
+universe u v
+
 variable {M : Type u} {N : Type v} [ORingStructure M] [hMN : M ⊂ₑ N]
 
 /-- Overspill: a formula of the induction class holding at every element of the base model holds

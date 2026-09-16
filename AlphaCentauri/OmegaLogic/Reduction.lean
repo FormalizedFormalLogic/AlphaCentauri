@@ -152,12 +152,12 @@ private lemma remove_false_litAux (hL : ¬LitTrue (signedLit b₀ r₀ v₀)) (D
   | @axL Γ k r v hp hn =>
     by_cases h₁ : signedLit b₀ r₀ v₀ = Semiformula.rel r v
     · refine axTrue false r v ?_ (Finset.mem_erase.mpr ⟨by rw [h₁]; simp [signedLit], hn⟩)
-      show LitTrue (Semiformula.nrel r v)
+      change LitTrue (Semiformula.nrel r v)
       rw [← Semiformula.neg_rel, litTrue_neg]
       exact h₁ ▸ hL
     · by_cases h₂ : signedLit b₀ r₀ v₀ = Semiformula.nrel r v
       · refine axTrue true r v ?_ (Finset.mem_erase.mpr ⟨by rw [h₂]; simp [signedLit], hp⟩)
-        show LitTrue (Semiformula.rel r v)
+        change LitTrue (Semiformula.rel r v)
         by_contra hc
         exact (h₂ ▸ hL) (by rw [← Semiformula.neg_rel, litTrue_neg]; exact hc)
       · exact axL r v (Finset.mem_erase.mpr ⟨fun e => h₁ e.symm, hp⟩)
@@ -355,6 +355,8 @@ lemma cut_reduce_or (hφ : CutReducible θ c φ) (hψ : CutReducible θ c ψ) :
 end Binary
 
 section Quantifier
+
+variable {Δ : Sequent}
 
 /-- Eliminates a universal cut against a bounded derivation with an explicit height bound.
 

@@ -168,7 +168,7 @@ noncomputable def FiniteAxiomatizableBy.conj (h : FiniteAxiomatizableBy T U) : S
 
 lemma FiniteAxiomatizableBy.equiv_singleton (h : FiniteAxiomatizableBy T U) :
     T ≊ ({h.conj} : Theory L) :=
-  h.equiv.trans $ by
+  h.equiv.trans <| by
     have e : (↑h.finite.toFinset : Theory L) = U := by simp
     exact (e ▸ equiv_singleton_Fconj h.finite.toFinset).symm
 

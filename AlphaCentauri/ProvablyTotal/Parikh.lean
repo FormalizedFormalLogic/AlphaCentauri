@@ -2,9 +2,9 @@ module
 
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.Model.Cut
-public import AlphaCentauri.Vorspiel.Compact
-public import AlphaCentauri.Vorspiel.Completeness
-public import AlphaCentauri.Vorspiel.ConstantExtension
+public import AlphaCentauri.ToFoundation.Compact
+public import AlphaCentauri.ToFoundation.Completeness
+public import AlphaCentauri.ToFoundation.ConstantExtension
 public import Foundation.FirstOrder.Tarski.Ultraproduct
 
 /-!

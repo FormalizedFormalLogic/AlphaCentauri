@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.PartialTruth.SigmaSatisfaction
-public import AlphaCentauri.Vorspiel.Hierarchy
+public import AlphaCentauri.ToFoundation.Hierarchy
 
 /-!
 # The Tarski conditions as an explicit finite theory

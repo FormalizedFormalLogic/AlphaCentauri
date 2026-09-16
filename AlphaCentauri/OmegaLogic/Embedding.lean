@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.OmegaLogic.Elimination
-public import AlphaCentauri.Vorspiel.Rew
+public import AlphaCentauri.ToFoundation.Rew
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.LK.Simplified
 

@@ -4,7 +4,7 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
 public import AlphaCentauri.Schemata.Collection.Basic
-public import AlphaCentauri.Vorspiel.Fvar
+public import AlphaCentauri.ToFoundation.Fvar
 
 /-!
 # Finite axiomatizability of `𝗜𝚺 n`

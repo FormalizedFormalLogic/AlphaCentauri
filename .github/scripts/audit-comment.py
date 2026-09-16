@@ -24,9 +24,18 @@ def codes(xs: list[str]) -> str:
     return ", ".join(code(x) for x in xs) if xs else "none"
 
 
-def decl_table(rows: list[dict]) -> str:
+def decl_table(rows: list[dict], drop_self: bool = False) -> str:
+    """The declarations and the disallowed axioms each one reaches.
+
+    An `axiom` reaches itself, and with `drop_self` that row is left blank rather than repeating
+    the declaration's own name: the column then says what else the declaration leans on.
+    """
     head = "| Declaration | Disallowed axioms |\n|---|---|\n"
-    return head + "".join(f"| {code(r['declaration'])} | {codes(r['axioms'])} |\n" for r in rows)
+    body = ""
+    for r in rows:
+        axioms = [a for a in r["axioms"] if not (drop_self and a == r["declaration"])]
+        body += f"| {code(r['declaration'])} | {', '.join(code(a) for a in axioms)} |\n"
+    return head + body
 
 
 def did_not_run(msg: str) -> str:
@@ -72,7 +81,12 @@ def render(r: dict) -> str:
         md += "".join(f"| {code(d['axiom'])} | {d['dependents']} |\n" for d in debt)
     if forgiven:
         shown = forgiven[:FORGIVEN_SHOWN]
-        md += f"\n### Forgiven by {code(forgive_file)} ({len(forgiven)})\n\n" + decl_table(shown)
+        md += f"\n### Forgiven by {code(forgive_file)} ({len(forgiven)})\n\n"
+        md += (
+            "What each declaration leans on besides itself; a declaration that is itself an "
+            "unproved axiom has a blank row.\n\n"
+        )
+        md += decl_table(shown, drop_self=True)
         if len(shown) < len(forgiven):
             md += f"\n… and {len(forgiven) - len(shown)} more;"
             md += f" the full list is {code(forgive_file)}.\n"

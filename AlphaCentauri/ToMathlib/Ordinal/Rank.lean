@@ -15,7 +15,6 @@ namespace IsWellFounded
 
 variable {α : Type*} (r : α → α → Prop) [IsWellFounded α r]
 
-/-- `rank r a ≤ o` whenever every `r`-predecessor of `a` has rank `< o`. -/
 lemma rank_le_of_forall {a : α} {o : Ordinal} (h : ∀ b, r b a → rank r b < o) : rank r a ≤ o := by
   rw [rank_eq]
   exact Ordinal.iSup_le fun b => Order.succ_le_of_lt (h b b.2)

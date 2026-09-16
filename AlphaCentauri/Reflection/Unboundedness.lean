@@ -1,15 +1,22 @@
 module
 
+public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Reflection.CollapseFormula
+public import AlphaCentauri.ToFoundation.Theory
 
 @[expose] public section
 /-!
-# The unboundedness theorem for a $\Delta_1$ set of `Γ_{n + 1}` sentences
+# The unboundedness theorem for a $\Gamma_{n + 1}$-axiomatizable extension
 
-The local reflection schema of `T` on a class is not contained in any consistent extension of `T`
-by a $\Delta_1$-presented set of sentences of the dual class. The extension is collapsed to the
-single sentence `collapseSentence` of `AlphaCentauri.Reflection.CollapseFormula`, which reduces the
-claim to the case of an extension by one sentence.
+The local reflection schema of `T` on a class is not provable in any consistent extension of `T`
+axiomatized by a $\Delta_1$-presented set of sentences of the dual class. The axiomatization is
+collapsed to the single sentence `collapseSentence` of
+`AlphaCentauri.Reflection.CollapseFormula`, which reduces the claim to the case of an extension by
+one sentence.
+
+Two narrowings of [AB05], which asks only for an r.e. extension: the axiomatization is
+$\Delta_1$-presented, since Craig's trick is in neither Foundation nor this repository, and its
+sentences are strict prenex, since the partial truth predicates agree with truth only there.
 
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
@@ -21,7 +28,10 @@ namespace FFL.FirstOrder.Arithmetic
 
 open FFL.Entailment Bootstrapping
 
-variable {T U : ArithmeticTheory} [T.Δ₁] [U.Δ₁] {n : ℕ} {Γ : Polarity}
+variable {T : ArithmeticTheory} [T.Δ₁] {n : ℕ} {Γ : Polarity}
+
+section
+variable {U : ArithmeticTheory} [U.Δ₁]
 
 section
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -42,8 +52,8 @@ lemma isSemiformula_natCast_iff {m : ℕ} :
     (R := fun v ↦ IsSemiformula ℒₒᵣ (v 0) (v 1)) (R' := fun v ↦ IsSemiformula ℒₒᵣ (v 0) (v 1))
     IsSemiformula.defined IsSemiformula.defined ![0, m]
 
-/-- A standard code of a formula that lies in the $\Delta_1$ class of `U` is the code of a member of
-`U`. -/
+/-- A standard code of a formula that lies in the $\Delta_1$ class of `U` is the code of a member
+of `U`. -/
 lemma exists_mem_eq_quote {m : ℕ} (hmem : (m : V) ∈ U.Δ₁Class)
     (hsemi : IsSemiformula ℒₒᵣ (0 : V) (m : V)) : ∃ σ ∈ U, (m : V) = (⌜σ⌝ : V) := by
   obtain ⟨F, hF⟩ := IsSemiformula.sound (L := ℒₒᵣ) (isSemiformula_natCast_iff (V := V) |>.mpr hsemi)
@@ -113,35 +123,12 @@ end
 
 /-! ## The collapse -/
 
-/-- Negation transfers along a provable equivalence. -/
-private lemma neg_of_iff {S : ArithmeticTheory} {φ ψ : ArithmeticSentence}
-    (e : S ⊢ φ 🡘 ψ) (h : S ⊢ ∼ψ) : S ⊢ ∼φ := by cl_prover [e, h]
-
-/-- Negation transfers along a provable equivalence, in the other direction. -/
-private lemma neg_of_iff' {S : ArithmeticTheory} {φ ψ : ArithmeticSentence}
-    (e : S ⊢ φ 🡘 ψ) (h : S ⊢ ∼φ) : S ⊢ ∼ψ := by cl_prover [e, h]
-
-/-- If adjoining `φ` makes `S` inconsistent then `S` refutes `φ`. -/
-private lemma neg_of_inconsistent_insert {S : ArithmeticTheory} {φ : ArithmeticSentence}
-    (h : Inconsistent (insert φ S)) : S ⊢ ∼φ := by
-  have h' := deduction_iff.mp (h ⊥); cl_prover [h']
-
-/-- If `S` refutes `φ` then adjoining `φ` makes `S` inconsistent. -/
-private lemma inconsistent_insert_of_provable_neg {S : ArithmeticTheory} {φ : ArithmeticSentence}
-    (h : S ⊢ ∼φ) : Inconsistent (insert φ S) :=
-  inconsistent_of_provable (deduction_iff.mpr (by cl_prover [h]))
-
 variable [𝗜𝚺₁ ⪯ T]
 
-/-- `T` refutes the fixed point of `collapseFormula` if it refutes `collapseSentence`. -/
-private lemma neg_fixedpoint_of_neg_collapseSentence
-    (h : T ⊢ ∼collapseSentence T U n Γ) : T ⊢ ∼fixedpoint (collapseFormula T U n Γ) :=
-  neg_of_iff (WeakerThan.pbl (provable_fixedpoint_collapseFormula_iff T U n Γ)) h
-
-/-- `T` refutes `collapseSentence` if it refutes the fixed point of `collapseFormula`. -/
-private lemma neg_collapseSentence_of_neg_fixedpoint
-    (h : T ⊢ ∼fixedpoint (collapseFormula T U n Γ)) : T ⊢ ∼collapseSentence T U n Γ :=
-  neg_of_iff' (WeakerThan.pbl (provable_fixedpoint_collapseFormula_iff T U n Γ)) h
+/-- `T` refutes `collapseSentence` exactly when it refutes the fixed point of `collapseFormula`. -/
+private lemma neg_collapseSentence_iff :
+    T ⊢ ∼collapseSentence T U n Γ ↔ T ⊢ ∼fixedpoint (collapseFormula T U n Γ) :=
+  (provable_neg_iff (WeakerThan.pbl (provable_fixedpoint_collapseFormula_iff T U n Γ))).symm
 
 /-- The polarity `𝚷` case of `inconsistent_union_of_inconsistent_insert`. -/
 private lemma inconsistent_union_of_inconsistent_insert_pi
@@ -149,9 +136,9 @@ private lemma inconsistent_union_of_inconsistent_insert_pi
     (h : Inconsistent (insert (collapseSentence T U n 𝚷) T)) : Inconsistent (T ∪ U) := by
   have : 𝗜𝚺₁ ⪯ T ∪ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   have : 𝗘𝗤 ℒₒᵣ ⪯ T ∪ U := WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
-  have hneg : T ⊢ ∼collapseSentence T U n 𝚷 := neg_of_inconsistent_insert h
+  have hneg : T ⊢ ∼collapseSentence T U n 𝚷 := provable_neg_of_inconsistent_insert h
   have hnegζ : T ⊢ ∼fixedpoint (collapseFormula T U n 𝚷) :=
-    neg_fixedpoint_of_neg_collapseSentence hneg
+    neg_collapseSentence_iff.mp hneg
   have hprov : T ∪ U ⊢ collapseSentence T U n 𝚷 := by
     apply Arithmetic.complete.{0}
     intro M _ _
@@ -177,9 +164,9 @@ private lemma inconsistent_union_of_inconsistent_insert_sigma
     (h : Inconsistent (insert (collapseSentence T U n 𝚺) T)) : Inconsistent (T ∪ U) := by
   have : 𝗜𝚺₁ ⪯ T ∪ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   have : 𝗘𝗤 ℒₒᵣ ⪯ T ∪ U := WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
-  have hneg : T ⊢ ∼collapseSentence T U n 𝚺 := neg_of_inconsistent_insert h
+  have hneg : T ⊢ ∼collapseSentence T U n 𝚺 := provable_neg_of_inconsistent_insert h
   have hnegζ : T ⊢ ∼fixedpoint (collapseFormula T U n 𝚺) :=
-    neg_fixedpoint_of_neg_collapseSentence hneg
+    neg_collapseSentence_iff.mp hneg
   have hprov : T ∪ U ⊢ collapseSentence T U n 𝚺 := by
     apply Arithmetic.complete.{0}
     intro M _ _
@@ -212,7 +199,7 @@ private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚷 (n + 
     {σ : ArithmeticSentence} (hσ : σ ∈ U) :
     insert (collapseSentence T U n 𝚷) T ⊢ σ := by
   have hnζ : ¬T ⊢ ∼fixedpoint (collapseFormula T U n 𝚷) := fun h ↦
-    hcon.not_inc (inconsistent_insert_of_provable_neg (neg_collapseSentence_of_neg_fixedpoint h))
+    hcon.not_inc (inconsistent_insert_of_provable_neg (neg_collapseSentence_iff.mpr h))
   have key : 𝗜𝚺₁ ⊢ collapseSentence T U n 𝚷 🡒 σ := by
     apply Arithmetic.complete.{0}
     intro M _ _
@@ -236,7 +223,7 @@ private lemma provable_of_mem_sigma (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚺 (n
     {σ : ArithmeticSentence} (hσ : σ ∈ U) :
     insert (collapseSentence T U n 𝚺) T ⊢ σ := by
   have hnζ : ¬T ⊢ ∼fixedpoint (collapseFormula T U n 𝚺) := fun h ↦
-    hcon.not_inc (inconsistent_insert_of_provable_neg (neg_collapseSentence_of_neg_fixedpoint h))
+    hcon.not_inc (inconsistent_insert_of_provable_neg (neg_collapseSentence_iff.mpr h))
   have key : 𝗜𝚺₁ ⊢ collapseSentence T U n 𝚺 🡒 σ := by
     apply Arithmetic.complete.{0}
     intro M _ _
@@ -267,19 +254,9 @@ private lemma provable_of_mem (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ
   | sigma => exact provable_of_mem_sigma hΓ hcon hσ
   | pi => exact provable_of_mem_pi hΓ hcon hσ
 
-/-! ## The unboundedness theorem -/
-
-/-- If `T ∪ U` is consistent, for a $\Delta_1$-presented theory `U` all of whose members are
-`StrictHierarchy Γ (n + 1)`, then there is a `Γ (n + 1)` sentence `θ` such that `T ∪ U ⪯ insert θ T`
-and `insert θ T` is consistent.
-
-`U`'s presentation is read as $\Delta_1$ rather than r.e.: this is a deliberate narrowing of
-[AB05]'s "consistent r.e. extension", which reduces to an elementary presentation via Craig's trick,
-a result absent from both Foundation and this repository. Restricting `U`'s members to
-`StrictHierarchy Γ (n + 1)` rather than `Hierarchy Γ (n + 1)` is likewise deliberate: the partial
-truth predicate used to build `θ` agrees with truth only on the strict prenex classes.
+/-- The case of `exists_sentence_weakerThan_of_consistent` where `U` axiomatizes itself.
 - [Lin97, Theorem 4.3] -/
-theorem exists_sentence_weakerThan_of_consistent
+private lemma exists_sentence_weakerThan_of_forall_mem
     (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) [Consistent (T ∪ U)] :
     ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
@@ -293,37 +270,45 @@ theorem exists_sentence_weakerThan_of_consistent
   · exact by_axm (Set.mem_insert_of_mem _ hφ)
   · exact provable_of_mem hΓ hcon hφ
 
-/-- Unboundedness, for an extension by a $\Delta_1$-presented set: if `T ∪ U`, for a
-$\Delta_1$-presented theory `U` all of whose members are `StrictHierarchy Γ (n + 1)`, proves the
-local reflection schema of `T` on the dual class, then `T ∪ U` is inconsistent.
+end
 
-As in `exists_sentence_weakerThan_of_consistent`, `U`'s presentation is read as $\Delta_1$ rather
-than r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather than
-`Hierarchy Γ (n + 1)`.
+/-! ## The unboundedness theorem -/
+
+variable {U U' : ArithmeticTheory} [U'.Δ₁] [𝗜𝚺₁ ⪯ T]
+
+/-- A consistent extension of `T` by a $\Gamma_{n + 1}$-axiomatizable theory is contained in a
+consistent extension of `T` by a single `Γ (n + 1)` sentence.
+- [Lin97, Theorem 4.3] -/
+theorem exists_sentence_weakerThan_of_consistent
+    (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U') [Consistent (T ∪ U)] :
+    ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
+      T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
+  have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right hΓ.equiv T
+  have : Consistent (T ∪ U') := Consistent.of_le ‹Consistent (T ∪ U)› e.symm.le
+  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_forall_mem (T := T) hΓ.forall_mem
+  exact ⟨θ, hθ, e.le.trans hle, hcon⟩
+
+/-- Unboundedness: a $\Gamma_{n + 1}$-axiomatizable extension of `T` proving the local reflection
+schema of `T` on the strict sentences of the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
-theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union
-    (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ)
-    (h : 𝗥𝗳𝗻[Γ.alt(n + 1)] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
+theorem inconsistent_of_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
+    (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U')
+    (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
   by_contra hc
   have : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
   obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent (T := T) hΓ
   exact hcon.not_inc
-    (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hθ (h.trans hle))
+    (inconsistent_of_provable_localReflectionOn_insert hθ fun hσ ↦ hle.pbl (h hσ))
 
-/-- Unboundedness, for an extension by a $\Delta_1$-presented set: a consistent `T ∪ U`, for a
-$\Delta_1$-presented theory `U` all of whose members are `StrictHierarchy Γ (n + 1)`, does not
-contain the local reflection schema of `T` on the dual class.
-
-As in `exists_sentence_weakerThan_of_consistent`, `U`'s presentation is read as $\Delta_1$ rather
-than r.e., and its members are restricted to `StrictHierarchy Γ (n + 1)` rather than
-`Hierarchy Γ (n + 1)`.
+/-- Unboundedness: a consistent $\Gamma_{n + 1}$-axiomatizable extension of `T` does not prove
+the local reflection schema of `T` on the strict sentences of the dual class.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
-theorem not_localReflectionOnHierarchy_weakerThan_union
-    (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) [Consistent (T ∪ U)] :
-    ¬𝗥𝗳𝗻[Γ.alt (n + 1)] T ⪯ T ∪ U :=
-  fun h ↦ (inconsistent_of_localReflectionOnHierarchy_weakerThan_union hΓ h).not_con
+theorem not_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
+    (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U') [Consistent (T ∪ U)] :
+    ¬T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T :=
+  fun h ↦ (inconsistent_of_provable_localReflectionOn_union hΓ h).not_con
     inferInstance
 
 end FFL.FirstOrder.Arithmetic

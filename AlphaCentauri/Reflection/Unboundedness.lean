@@ -8,7 +8,7 @@ public import AlphaCentauri.ToFoundation.Theory
 /-!
 # The unboundedness theorem for a $\Gamma_{n + 1}$-axiomatizable extension
 
-The local reflection schema of `T` on a class is not contained in any consistent extension of `T`
+The local reflection schema of `T` on a class is not provable in any consistent extension of `T`
 axiomatized by a $\Delta_1$-presented set of sentences of the dual class. The axiomatization is
 collapsed to the single sentence `collapseSentence` of
 `AlphaCentauri.Reflection.CollapseFormula`, which reduces the claim to the case of an extension by
@@ -292,23 +292,23 @@ theorem exists_sentence_weakerThan_of_consistent
 schema of `T` on the strict sentences of the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
-theorem inconsistent_of_localReflectionOn_weakerThan_union [𝗜𝚺(n + 1) ⪯ T]
+theorem inconsistent_of_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
     (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U')
-    (h : 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
+    (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
   by_contra hc
   have : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
   obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent (T := T) hΓ
   exact hcon.not_inc
-    (inconsistent_of_localReflectionOn_weakerThan_insert hθ (h.trans hle))
+    (inconsistent_of_provable_localReflectionOn_insert hθ fun hσ ↦ hle.pbl (h hσ))
 
-/-- Unboundedness: a consistent $\Gamma_{n + 1}$-axiomatizable extension of `T` does not contain
+/-- Unboundedness: a consistent $\Gamma_{n + 1}$-axiomatizable extension of `T` does not prove
 the local reflection schema of `T` on the strict sentences of the dual class.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
-theorem not_localReflectionOn_weakerThan_union [𝗜𝚺(n + 1) ⪯ T]
+theorem not_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
     (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U') [Consistent (T ∪ U)] :
-    ¬𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T ⪯ T ∪ U :=
-  fun h ↦ (inconsistent_of_localReflectionOn_weakerThan_union hΓ h).not_con
+    ¬T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T :=
+  fun h ↦ (inconsistent_of_provable_localReflectionOn_union hΓ h).not_con
     inferInstance
 
 end FFL.FirstOrder.Arithmetic

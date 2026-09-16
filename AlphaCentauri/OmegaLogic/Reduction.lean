@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.OmegaLogic.Inversion
-public import AlphaCentauri.ToMathlib.Ordinal
+public import AlphaCentauri.ToMathlib.Ordinal.OmegaTower
 
 /-!
 # Cut reduction for `Z_∞`

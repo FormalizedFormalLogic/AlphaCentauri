@@ -49,6 +49,13 @@ declaration:
   FFL.FirstOrder.Arithmetic.primrec'_of_provablyTotal:
     forgive:
       - FFL.FirstOrder.Arithmetic.primrec'_of_provablyTotal
+  FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [PWW88, Problem 1].
+      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0
+  FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
@@ -72,6 +79,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive
+  FFL.FirstOrder.Arithmetic.exists_prime_gt:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.not_finiteAxiomatizable_of_Peano_le:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive

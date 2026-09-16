@@ -18,12 +18,17 @@ open FFL.Entailment Axiomatized
 
 variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T)
 
+/-- The local reflection instance of `𝔅` for a sentence `σ`: `𝔅 σ 🡒 σ`.
+- [Lin97, §4.1, p. 52]
+- [AB05, §4] -/
+abbrev localReflectionSchema (σ : Sentence L) : Sentence L := 𝔅 σ 🡒 σ
+
 /-- The local reflection schema of `𝔅`, restricted to sentences satisfying `Γ`:
 `Rfn_Γ(𝔅) = { 𝔅 σ 🡒 σ | Γ σ }`.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
 def localReflectionOn (Γ : Sentence L → Prop) : Theory L :=
-  (fun σ ↦ 𝔅 σ 🡒 σ) '' {σ | Γ σ}
+  𝔅.localReflectionSchema '' {σ | Γ σ}
 
 /-- The full local reflection schema of `𝔅`: `Rfn(𝔅) = { 𝔅 σ 🡒 σ | σ }`.
 - [Lin97, §4.1, p. 52]
@@ -35,7 +40,7 @@ variable {Γ Γ' : Sentence L → Prop}
 @[simp]
 lemma mem_localReflectionOn_iff {ψ : Sentence L} :
     ψ ∈ 𝔅.localReflectionOn Γ ↔ ∃ σ, Γ σ ∧ ψ = 𝔅 σ 🡒 σ := by
-  simp [localReflectionOn, eq_comm]
+  simp [localReflectionOn, localReflectionSchema, eq_comm]
 
 /-- Local reflection is monotone in the sentence class.
 - [Lin97, §4.1, p. 52]

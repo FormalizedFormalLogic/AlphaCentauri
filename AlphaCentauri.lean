@@ -35,6 +35,7 @@ public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Reflection.Unboundedness
+public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.Collection.Basic
 public import AlphaCentauri.Schemata.Collection.Equivalence
 public import AlphaCentauri.Schemata.Collection.Induction

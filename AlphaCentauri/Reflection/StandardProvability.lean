@@ -6,10 +6,10 @@ public import AlphaCentauri.Reflection.ProvabilityAbstraction
 
 @[expose] public section
 /-!
-# Local and uniform reflection principles for arithmetic theories
+# Local reflection principles for arithmetic theories
 
-Local and uniform reflection schemas for arithmetic theories, together with consistency and
-iteration results.
+Local reflection schemas for arithmetic theories, together with consistency and iteration
+results.
 
 - [Lin97, §4.1, p. 52]
 - [AB05, §4]
@@ -29,15 +29,14 @@ abbrev _root_.FFL.FirstOrder.Theory.localReflection (T : ArithmeticTheory) [T.Δ
 
 @[inherit_doc] notation "𝗥𝗳𝗻 " T:max => Theory.localReflection T
 
-/-- The local reflection schema of `T` restricted to the `Γ n` sentences of the arithmetical
-hierarchy, `Rfn_{Γ n}(T)`.
+/-- The local reflection schema of `T` restricted to the sentences satisfying `Γ`, `Rfn_Γ(T)`.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
-abbrev _root_.FFL.FirstOrder.Theory.localReflectionOnHierarchy
-    (T : ArithmeticTheory) [T.Δ₁] (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
-  T.standardProvability.localReflectionOn (Hierarchy Γ n)
+abbrev _root_.FFL.FirstOrder.Theory.localReflectionOn
+    (T : ArithmeticTheory) [T.Δ₁] (Γ : ArithmeticSentence → Prop) : ArithmeticTheory :=
+  T.standardProvability.localReflectionOn Γ
 
-@[inherit_doc] notation "𝗥𝗳𝗻[" Γ:max n:max "] " T:max => Theory.localReflectionOnHierarchy T Γ n
+@[inherit_doc] notation "𝗥𝗳𝗻[" Γ "] " T:max => Theory.localReflectionOn T Γ
 
 variable {T : ArithmeticTheory} [T.Δ₁]
 
@@ -52,7 +51,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 /-- The $\Pi_1$ local reflection principle and `Con(T)` are equivalent over `T`.
 - [Lin97, Exercise 4.1(b)(ii)]
 - [AB05, Lemma 22(i)] -/
-theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[𝚷 1] T ≊ T ∪ T.Con := by
+theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[Hierarchy 𝚷 1] T ≊ T ∪ T.Con := by
   have : 𝗜𝚺₁ ⪯ T ∪ T.Con :=
     (inferInstance : 𝗜𝚺₁ ⪯ T).trans (WeakerThan.ofSubset Set.subset_union_left)
   refine Equiv.antisymm ⟨?_, ?_⟩
@@ -74,7 +73,7 @@ theorem localReflection_Pi1_equiv_con [𝗜𝚺₁ ⪯ T] : T ∪ 𝗥𝗳𝗻[�
 /-- The standard model satisfies every local reflection instance of a theory it satisfies.
 - [Lin97, §4.1, p. 52] -/
 instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒₒᵣ] ⊧* T] :
-    ℕ↓[ℒₒᵣ] ⊧* (T ∪ T.standardProvability.localReflectionOn Γ) := by
+    ℕ↓[ℒₒᵣ] ⊧* (T ∪ 𝗥𝗳𝗻[Γ] T) := by
   apply Semantics.modelsSet_iff.mpr
   rintro φ (hφ | ⟨σ, _, rfl⟩)
   · exact Semantics.modelsSet_iff.mp inferInstance hφ
@@ -102,8 +101,9 @@ proves the local reflection schema of `T` on the dual class, then `T ∪ {π}` i
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
-theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_insert
-    (hπ : Hierarchy Γ n π) (h : 𝗥𝗳𝗻[Γ.alt n] T ⪯ insert π T) : Inconsistent (insert π T) :=
+theorem inconsistent_of_localReflectionOn_weakerThan_insert
+    (hπ : Hierarchy Γ n π) (h : 𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ insert π T) :
+    Inconsistent (insert π T) :=
   T.standardProvability.inconsistent_of_localReflectionOn_weakerThan_insert
     (fun _ hσ ↦ by simpa using hσ) hπ h
 
@@ -112,9 +112,9 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_insert
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
-theorem not_localReflectionOnHierarchy_weakerThan_insert
-    (hπ : Hierarchy Γ n π) [Consistent (insert π T)] : ¬𝗥𝗳𝗻[Γ.alt n] T ⪯ insert π T :=
-  fun h ↦ (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hπ h).not_con
+theorem not_localReflectionOn_weakerThan_insert
+    (hπ : Hierarchy Γ n π) [Consistent (insert π T)] : ¬𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ insert π T :=
+  fun h ↦ (inconsistent_of_localReflectionOn_weakerThan_insert hπ h).not_con
     inferInstance
 
 /-- Unboundedness, for an extension by finitely many sentences: if `T ∪ U` for a finite set `U`
@@ -123,9 +123,9 @@ inconsistent.
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
 - [Lin97, Theorem 4.1] -/
-theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
+theorem inconsistent_of_localReflectionOn_weakerThan_union_of_finite
     {U : ArithmeticTheory} (hU : U.Finite) (hΓ : ∀ σ ∈ U, Hierarchy Γ n σ)
-    (h : 𝗥𝗳𝗻[Γ.alt n] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
+    (h : 𝗥𝗳𝗻[Hierarchy Γ.alt n] T ⪯ T ∪ U) : Inconsistent (T ∪ U) := by
   classical
   have hmem : ∀ σ, σ ∈ hU.toFinset.toList ↔ σ ∈ U := by simp
   have hconj : Hierarchy Γ n (⋀hU.toFinset.toList) :=
@@ -138,35 +138,10 @@ theorem inconsistent_of_localReflectionOnHierarchy_weakerThan_union_of_finite
     rintro φ (rfl | hφ)
     · exact Conj₂_iff_forall_provable.mpr fun ψ hψ ↦ by_axm (Or.inr ((hmem ψ).mp hψ))
     · exact by_axm (Or.inl hφ)
-  exact (inconsistent_of_localReflectionOnHierarchy_weakerThan_insert hconj
+  exact (inconsistent_of_localReflectionOn_weakerThan_insert hconj
     (h.trans hle)).of_ge hge
 
 end
-
-/-- The uniform reflection schema `RFN_Γ(T)` consists of
-`∀x (Pr_T(φ(ẋ)) → φ(x))` for one-free-variable formulas `φ` satisfying `Γ`.
-- [Lin97, §4.1, p. 52]
-- [AB05, §4.2] -/
-def _root_.FFL.FirstOrder.Theory.uniformReflectionOn
-    (T : ArithmeticTheory) [T.Δ₁] (Γ : ArithmeticSemisentence 1 → Prop) : ArithmeticTheory :=
-  { ψ | ∃ φ : ArithmeticSemisentence 1, Γ φ ∧
-      ψ = (“∀ x, ∀ y, !Bootstrapping.Arithmetic.ssnum y ↑(Encodable.encode φ) x →
-        (!(T.standardProvability.prov) y → !φ x)” : ArithmeticSentence) }
-
-/-- The uniform reflection schema of `T` restricted to the `Γ n` formulas of the arithmetical
-hierarchy, `RFN_{Γ n}(T)`.
-- [Lin97, §4.1, p. 52]
-- [AB05, §4.2] -/
-abbrev _root_.FFL.FirstOrder.Theory.uniformReflectionOnHierarchy
-    (T : ArithmeticTheory) [T.Δ₁] (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
-  T.uniformReflectionOn (Hierarchy Γ n)
-
-@[inherit_doc] notation "𝗥𝗙𝗡[" Γ:max n:max "] " T:max => Theory.uniformReflectionOnHierarchy T Γ n
-
-/-- `RFN_{𝚺-[n]}(T)` and `RFN_{𝚷-[n + 1]}(T)` are equivalent over `T`, for `n ≥ 1`.
-- [AB05, Lemma 22(ii)] -/
-axiom uniformReflectionOnHierarchy_sigma_equiv_pi_succ {n : ℕ} (hn : 1 ≤ n) :
-    T ∪ 𝗥𝗙𝗡[𝚺 n] T ≊ T ∪ 𝗥𝗙𝗡[𝚷 (n + 1)] T
 
 /-- The pair of the iterated-consistency theory `T₀ = T`, `Tₙ₊₁ = Tₙ ∪ Tₙ.Con` and its
 $\Delta_1$-definability witness.

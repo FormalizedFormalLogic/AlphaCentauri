@@ -187,7 +187,7 @@ theorem inconsistent_of_provable_localReflectionOn_union_of_finite [𝗜𝚺n �
     {U U' : ArithmeticTheory} (hΓ : AxiomatizableBy (Hierarchy Γ n) U U') (hU' : U'.Finite)
     (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt n] T) : Inconsistent (T ∪ U) := by
   classical
-  have e : T ∪ U ≊ T ∪ U' := hΓ.equiv.union_right T
+  have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right hΓ.equiv T
   have hmem : ∀ σ, σ ∈ hU'.toFinset.toList ↔ σ ∈ U' := by simp
   have hconj : Hierarchy Γ n (⋀hU'.toFinset.toList) :=
     Hierarchy.list_conj₂_iff.mpr fun σ hσ ↦ hΓ.forall_mem σ ((hmem σ).mp hσ)

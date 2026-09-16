@@ -31,30 +31,30 @@ declaration:
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1
+  FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
+  FFL.FirstOrder.Arithmetic.Peano.reflexive:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Peano.reflexive
+  FFL.FirstOrder.Arithmetic.parsons:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.parsons
+  FFL.FirstOrder.Arithmetic.parsons_primrec:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.parsons_primrec
+  FFL.FirstOrder.Arithmetic.primrec'_of_provablyTotal:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.primrec'_of_provablyTotal
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
   FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ:
     forgive:
       - FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ
-  FFL.FirstOrder.ISigma.provable_con_ISigma1:
-    forgive:
-      - FFL.FirstOrder.ISigma.provable_con_ISigma1
-  FFL.FirstOrder.Peano.essentiallyReflexive:
-    forgive:
-      - FFL.FirstOrder.Peano.essentiallyReflexive
-  FFL.FirstOrder.Peano.reflexive:
-    forgive:
-      - FFL.FirstOrder.Peano.reflexive
-  FFL.FirstOrder.parsons:
-    forgive:
-      - FFL.FirstOrder.parsons
-  FFL.FirstOrder.parsons_primrec:
-    forgive:
-      - FFL.FirstOrder.parsons_primrec
-  FFL.FirstOrder.primrec'_of_provablyTotal:
-    forgive:
-      - FFL.FirstOrder.primrec'_of_provablyTotal
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:
@@ -69,12 +69,15 @@ declaration:
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-  FFL.FirstOrder.Peano.not_finiteAxiomatizable:
+  FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
     forgive:
-      - FFL.FirstOrder.Peano.reflexive
-  FFL.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
+      - FFL.FirstOrder.Arithmetic.Peano.reflexive
+  FFL.FirstOrder.Arithmetic.not_finiteAxiomatizable_of_Peano_le:
     forgive:
-      - FFL.FirstOrder.Peano.essentiallyReflexive
-  FFL.FirstOrder.not_provablyTotal_ackermann:
+      - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
+  FFL.FirstOrder.Arithmetic.not_provablyTotal_ackermann:
     forgive:
-      - FFL.FirstOrder.parsons
+      - FFL.FirstOrder.Arithmetic.parsons
+  FFL.FirstOrder.Arithmetic.provablyTotalFunctions_ISigma1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.parsons

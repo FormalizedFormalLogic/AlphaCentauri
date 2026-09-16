@@ -57,6 +57,8 @@ public import AlphaCentauri.ToMathlib.FastGrowing.Basic
 public import AlphaCentauri.ToMathlib.Goodstein.Defs
 public import AlphaCentauri.ToMathlib.Goodstein.Termination
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds
+public import AlphaCentauri.ToMathlib.Ordinal.Epsilon0
 public import AlphaCentauri.ToMathlib.Ordinal.OmegaTower
+public import AlphaCentauri.ToMathlib.Ordinal.Rank
 public import AlphaCentauri.ToMathlib.Primrec
 public import AlphaCentauri.ToMathlib.Vector

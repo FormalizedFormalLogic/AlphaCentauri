@@ -56,6 +56,7 @@ public import AlphaCentauri.ToFoundation.Theory
 public import AlphaCentauri.ToMathlib.FastGrowing.Basic
 public import AlphaCentauri.ToMathlib.FastGrowing.Epsilon0
 public import AlphaCentauri.ToMathlib.FastGrowing.Norm
+public import AlphaCentauri.ToMathlib.Hardy.Basic
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds
 public import AlphaCentauri.ToMathlib.Ordinal.Epsilon0
 public import AlphaCentauri.ToMathlib.Ordinal.OmegaTower

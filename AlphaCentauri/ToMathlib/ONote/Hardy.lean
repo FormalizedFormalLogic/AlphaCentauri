@@ -38,7 +38,8 @@ def hardy : ONote → ℕ → ℕ
       hardy (f n) n
   termination_by o => o
 
-lemma eq_zero_of_fundamentalSequence_none {o : ONote} (e : fundamentalSequence o = Sum.inl none) :
+private lemma eq_zero_of_fundamentalSequence_none
+    {o : ONote} (e : fundamentalSequence o = Sum.inl none) :
     o = 0 := by
   have hp := fundamentalSequence_has_prop o; rw [e] at hp; exact hp
 
@@ -154,7 +155,7 @@ end Basic
 section Structure
 
 /-- The fundamental sequence of a limit notation is everywhere nonzero. -/
-lemma fundamentalSequence_ne_zero_of_limit {o : ONote} {f : ℕ → ONote}
+private lemma fundamentalSequence_ne_zero_of_limit {o : ONote} {f : ℕ → ONote}
     (h : fundamentalSequence o = Sum.inr f) (i : ℕ) : f i ≠ 0 := by
   induction o with
   | zero => simp [fundamentalSequence] at h

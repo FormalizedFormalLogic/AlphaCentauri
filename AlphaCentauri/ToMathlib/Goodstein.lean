@@ -64,14 +64,13 @@ def goodsteinSeq (m : ℕ) : ℕ → ℕ
   | 0 => m
   | k + 1 => bump (base k) (goodsteinSeq m k) - 1
 
-
 end Defs
 
 /-! ### Termination -/
 
 section Termination
 
-variable (b : ℕ)
+variable (b m k : ℕ)
 
 /-- Reads `n` in hereditary base `b` as an ordinal, replacing `b` by `ω`. Peeling the top power,
 with `e = Nat.log b n`, `c = n / b ^ e`, `r = n % b ^ e`: `toOrdinal b n = ω ^ toOrdinal b e * c +
@@ -352,8 +351,6 @@ theorem toOrdinal_bump (hb : 2 ≤ b) (n : ℕ) : toOrdinal (b + 1) (bump b n) =
       rw [key, ih e he_lt_n, ih (n % b ^ e) hr_lt_n]
       exact (toOrdinal_pos b hn0).symm
 
-variable (m k : ℕ)
-
 /-- The ordinal value of the `k`-th Goodstein term, read in its base `k + 2`. -/
 noncomputable def seqOrd : Ordinal.{0} := toOrdinal (k + 2) (goodsteinSeq m k)
 
@@ -395,7 +392,6 @@ lemma goodsteinLength_le {m N : ℕ} (h : goodsteinSeq m N = 0) : goodsteinLengt
 
 lemma goodsteinSeq_ne_zero_of_lt {m N : ℕ} (h : N < goodsteinLength m) : goodsteinSeq m N ≠ 0 :=
   Nat.find_min (goodstein_terminates m) h
-
 
 end Termination
 

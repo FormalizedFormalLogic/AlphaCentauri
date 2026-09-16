@@ -21,7 +21,7 @@ variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provab
 /-- The local reflection instance of `𝔅` for a sentence `σ`: `𝔅 σ 🡒 σ`.
 - [Lin97, §4.1, p. 52]
 - [AB05, §4] -/
-def localReflectionSchema (σ : Sentence L) : Sentence L := 𝔅 σ 🡒 σ
+abbrev localReflectionSchema (σ : Sentence L) : Sentence L := 𝔅 σ 🡒 σ
 
 /-- The local reflection schema of `𝔅`, restricted to sentences satisfying `Γ`:
 `Rfn_Γ(𝔅) = { 𝔅 σ 🡒 σ | Γ σ }`.

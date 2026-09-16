@@ -79,7 +79,7 @@ instance models_localReflectionOn {Γ : ArithmeticSentence → Prop} [ℕ↓[ℒ
   · exact Semantics.modelsSet_iff.mp inferInstance hφ
   · have : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ → ℕ↓[ℒₒᵣ] ⊧ σ := fun h ↦
       models_of_provable inferInstance (T.standardProvability.sound_on h)
-    simpa [Provability.localReflectionSchema] using this
+    simpa using this
 
 /-- `T ∪ Rfn(T)` is consistent whenever `T` is sound in the standard model.
 - [Lin97, §4.1, p. 52]

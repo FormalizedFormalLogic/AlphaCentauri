@@ -29,18 +29,18 @@ variable (b : ℕ)
 with `e = Nat.log b n`, `c = n / b ^ e`, `r = n % b ^ e`: `toOrdinal b n = ω ^ toOrdinal b e * c +
 toOrdinal b r`. -/
 noncomputable def toOrdinal (b n : ℕ) : Ordinal.{0} :=
-  if h : n = 0 then 0
+  if _h : n = 0 then 0
   else
     ω ^ toOrdinal b (Nat.log b n) * (n / b ^ Nat.log b n : ℕ)
       + toOrdinal b (n % b ^ Nat.log b n)
 termination_by n
 decreasing_by
-  · exact Nat.log_lt_self b h
+  · exact Nat.log_lt_self b _h
   · have hb : 0 < b ^ Nat.log b n := by
       rcases eq_or_ne b 0 with rfl | hbpos
       · simp [Nat.log_zero_left]
       · exact Nat.pow_pos (Nat.pos_of_ne_zero hbpos)
-    exact lt_of_lt_of_le (Nat.mod_lt _ hb) (Nat.pow_log_le_self b h)
+    exact lt_of_lt_of_le (Nat.mod_lt _ hb) (Nat.pow_log_le_self b _h)
 
 @[simp] lemma toOrdinal_zero : toOrdinal b 0 = 0 := by rw [toOrdinal]; simp
 

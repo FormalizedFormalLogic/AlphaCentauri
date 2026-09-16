@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Reflection.CollapseFormula
-public import AlphaCentauri.Vorspiel.Theory
+public import AlphaCentauri.ToFoundation.Theory
 
 @[expose] public section
 /-!

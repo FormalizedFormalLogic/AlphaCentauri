@@ -1,8 +1,8 @@
 module
 
 public import AlphaCentauri.ProvablyTotal.Basic
-public import AlphaCentauri.Vorspiel.Primrec
-public import AlphaCentauri.Vorspiel.Vector
+public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ToMathlib.Vector
 public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 
 /-!

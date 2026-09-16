@@ -35,9 +35,10 @@ rewrite, so it is written as if it were already there.
   `@[expose] public section`.
 - **Root module.** `AlphaCentauri.lean` imports every module and is regenerated with
   `just mk-all` (`lake exe mk_all --lib AlphaCentauri --module`); CI checks it.
-- **Linters.** The library builds with Foundation's linter set (`lakefile.toml`). Warnings are not
-  errors, since a statement formalized with `sorry` must build; a warning is still fixed, not
-  suppressed, and review treats one as a finding.
+- **Linters.** The library builds with Mathlib's standard linter set, which `lakefile.toml`
+  opts into wholesale (`weak.linter.mathlibStandardSet`), minus the header linter; `autoImplicit`
+  is off, as in Mathlib. A warning is an error: CI and the pre-push hook build with
+  `lake build AlphaCentauri --wfail`. Fix a warning, never suppress it.
 - **Citations.** The bibliography is [`references.yml`](../references.yml) at the repository
   root, written in [Hayagriva](https://github.com/typst/hayagriva) YAML rather than
   Foundation's BibTeX `references.bib`; there is no `bibtool` step, the file is edited by
@@ -69,17 +70,14 @@ rewrite, so it is written as if it were already there.
   hierarchy are the vocabulary. A definition that duplicates a Foundation definition under a
   new name is rejected in review. If Foundation's API is missing or awkward, say so in the
   issue you are working on rather than working around it; a human takes it upstream.
-- **`$` for low-precedence application.** Write `f $ x`, not `f <| x`, and prefer it to
-  parentheses whenever the argument runs to the end of the term: `exact Or.inr $ Or.inl h`, not
-  `exact Or.inr (Or.inl h)`. Foundation's guidelines do not choose between the two spellings —
-  [`style.md`](style.md) happens to use `<|` in one example — and AlphaCentauri uses `$`
-  throughout, so that a chain of constructor applications reads as a chain.
+- **`<|` for low-precedence application.** Write `f <| x`, not `f $ x`, and prefer it to
+  parentheses whenever the argument runs to the end of the term: `exact Or.inr <| Or.inl h`, not
+  `exact Or.inr (Or.inl h)`. Foundation's guidelines do not choose between the two spellings;
+  Mathlib's `style.dollarSyntax` linter does, and this repository follows it.
 - **Avoid `?_`.** Prefer `apply f` to `refine f ?_`, and a direct term to a `refine` with holes;
   [`style.md`](style.md)'s preference for direct term construction is the same rule seen from the
   other side. `use` takes data only — a witness of a `Type`, never a proof of a hypothesis: split
   what remains with `and_intros` rather than passing the proof to `use`.
-- **Line length.** Up to about 120 columns is acceptable, rather than the 100 that
-  [`style.md`](style.md) inherits from the Mathlib guide. Do not break a line that fits in 120.
 - **AI disclosure.** As in Foundation: every commit carries a `Co-Authored-By` trailer for the
   model, and the PR body says an AI agent wrote it. Here that is the normal case, not the
   exception, so every PR body says so explicitly.
@@ -87,10 +85,10 @@ rewrite, so it is written as if it were already there.
 ## Checks before opening a pull request
 
 ```bash
-lake build            # no errors; fix the warnings
-just axiom-audit      # no axiom outside the allowlist, except what forgive.yml forgives
-just no-sorry         # no `sorry` in the sources, no `sorryAx` in forgive.yml
-just mk-all           # AlphaCentauri.lean up to date
+lake build AlphaCentauri --wfail   # no errors and no warnings
+just axiom-audit                   # no axiom outside the allowlist, except what forgive.yml forgives
+just no-sorry                      # no `sorry` in the sources, no `sorryAx` in forgive.yml
+just mk-all                        # AlphaCentauri.lean up to date
 ```
 
 A `statement-formalized` PR additionally runs `#check @Name` on every `axiom` it adds — see

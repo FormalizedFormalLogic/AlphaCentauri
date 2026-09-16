@@ -1,8 +1,8 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.BoundedCollection
-public import AlphaCentauri.Vorspiel.Definable
-public import AlphaCentauri.Vorspiel.Fvar
+public import AlphaCentauri.ToFoundation.Definable
+public import AlphaCentauri.ToFoundation.Fvar
 
 /-!
 # The collection schemata `𝗕𝚺` and `𝗕𝚷`
@@ -127,7 +127,8 @@ lemma exists_bound_of_models_collectionAxiom {m : ℕ} {θ : ArithmeticSemisente
 /-- The reading of the collection axiom at a `Γ-[s]`-definable relation.
 - [HP98, §I.2(a)] -/
 lemma exists_bound_of_definable {Γ : Polarity} {s : ℕ}
-    (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy Γ s ψ → V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom ψ))
+    (hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy Γ s ψ →
+      V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom ψ))
     {R : V → V → Prop} (hR : Γ-[s].DefinableRel R) (a : V) (h : ∀ x < a, ∃ y, R x y) :
     ∃ b, ∀ x < a, ∃ y < b, R x y := by
   obtain ⟨e, ψ, hψ, hiff⟩ := exists_hierarchy_eval_iff hR
@@ -150,8 +151,8 @@ instance models_CollectionOnHierarchy (Γ : Polarity) (n : ℕ) : ℕ↓[ℒₒ�
   intro x hx;
   use g x;
   and_intros;
-  . exact Nat.lt_succ_of_le (Finset.le_sup (Finset.mem_range.mpr hx));
-  . exact hg x hx;
+  · exact Nat.lt_succ_of_le (Finset.le_sup (Finset.mem_range.mpr hx));
+  · exact hg x hx;
 
 instance (Γ : Polarity) (n : ℕ) : Consistent (𝗕 Γ n) := (𝗕 Γ n).consistent_of_sound (Eq ⊥) rfl
 
@@ -168,7 +169,7 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticS
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := n + 1);
   apply models_collectionAxiom_iff _ |>.mpr;
   intro f a h
-  obtain ⟨w, hw⟩ := sigma_exists_bound_witness (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a $ by
+  obtain ⟨w, hw⟩ := sigma_exists_bound_witness (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a <| by
     intro x hx;
     obtain ⟨y, hy⟩ := h x hx;
     exact ⟨y, (φ.eval_toSemisentence_two x y f).mpr hy⟩
@@ -177,12 +178,12 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticS
   obtain ⟨u, hu, hux⟩ := hw x hx;
   use u;
   and_intros;
-  . exact Arithmetic.lt_succ_iff_le.mpr hu;
-  . exact (φ.eval_toSemisentence_two x u f).mp hux;
+  · exact Arithmetic.lt_succ_iff_le.mpr hu;
+  · exact (φ.eval_toSemisentence_two x u f).mp hux;
 
 /-- `𝗕𝚺 (n + 1)` is at most as strong as `𝗜𝚺 (n + 1)`.
 - [HP98, Lemma I.2.11] -/
-theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := WeakerThan.ofAxm! $ by
+theorem BSigma_weakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := WeakerThan.ofAxm! <| by
   rintro σ (hσ | ⟨φ, hφ, rfl⟩);
   · exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega)) (by_axm hσ)
   · exact ISigma.provable_collectionAxiom_of_hierarchy n hφ

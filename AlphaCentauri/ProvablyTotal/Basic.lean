@@ -2,8 +2,8 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Schemata
-public import Foundation.FirstOrder.Completeness
-public import AlphaCentauri.Vorspiel.Hierarchy
+public import Foundation.FirstOrder.LK.Completeness
+public import AlphaCentauri.ToFoundation.Hierarchy
 
 /-!
 # Provably total functions
@@ -175,8 +175,8 @@ lemma leastGraph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
   omega
 
 open PeanoMinus in
-/-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality implies the stronger `∃!` form stating that
-the least witness of `φ` exists and is unique in every model of `T`.
+/-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality implies the stronger `∃!` form
+stating that the least witness of `φ` exists and is unique in every model of `T`.
 - [HP98, Lemma IV.3.4] -/
 lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ uniqueTotalitySentence φ := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance

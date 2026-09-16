@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.PartialTruth.Tarski
-public import AlphaCentauri.Vorspiel.Absoluteness
+public import AlphaCentauri.ToFoundation.Absoluteness
 
 /-!
 # Partial truth definitions agree with truth
@@ -180,22 +180,22 @@ lemma hierarchySatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : Arithmet
   | @zero Γ₀ n₀ φ₀ hφ₀ =>
     intro v
     rcases Γ₀ with _ | _
-    · show SigmaSatisfaction 0 _ _ ↔ _
+    · change SigmaSatisfaction 0 _ _ ↔ _
       rw [SigmaSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀ v
-    · show PiSatisfaction 0 _ _ ↔ _
+    · change PiSatisfaction 0 _ _ ↔ _
       rw [PiSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀ v
   | @ofAlt Γ₀ s₀ n₀ φ₀ hφ₀ ih =>
     intro v
     rcases Γ₀ with _ | _
-    · show SigmaSatisfaction (s₀ + 1) _ _ ↔ _
+    · change SigmaSatisfaction (s₀ + 1) _ _ ↔ _
       rw [SigmaSatisfaction.of_pi ((isStrictPi_quote_iff φ₀).mpr hφ₀) (isUFormula_quote φ₀)]
       exact ih v
-    · show PiSatisfaction (s₀ + 1) _ _ ↔ _
+    · change PiSatisfaction (s₀ + 1) _ _ ↔ _
       rw [PiSatisfaction.of_sigma ((isStrictSigma_quote_iff φ₀).mpr hφ₀) (isUFormula_quote φ₀)]
       exact ih v
   | @exs s₀ n₀ φ₀ hφ₀ ih =>
     intro v
-    show SigmaSatisfaction (s₀ + 1) _ _ ↔ _
+    change SigmaSatisfaction (s₀ + 1) _ _ ↔ _
     rw [quote_ex_sentence, SigmaSatisfaction.exs_iff]
     simp only [Semiformula.eval_ex]
     apply exists_congr
@@ -204,7 +204,7 @@ lemma hierarchySatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : Arithmet
     exact ih (x :> v)
   | @all s₀ n₀ φ₀ hφ₀ ih =>
     intro v
-    show PiSatisfaction (s₀ + 1) _ _ ↔ _
+    change PiSatisfaction (s₀ + 1) _ _ ↔ _
     rw [quote_all_sentence, PiSatisfaction.all_iff]
     simp only [Semiformula.eval_all]
     apply forall_congr'
@@ -230,7 +230,8 @@ noncomputable def snowing (n : ℕ) {k : ℕ}
   ∀¹* (φ 🡘 (sigmaSatisfactionVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
 
 theorem models_snowing_iff {n k : ℕ} (φ : ArithmeticSemisentence k) :
-    V↓[ℒₒᵣ] ⊧ snowing n φ ↔ ∀ v : Fin k → V, V ⊧/v φ ↔ SigmaSatisfaction (n + 1) ⌜φ⌝ (matrixToVec v) := by
+    V↓[ℒₒᵣ] ⊧ snowing n φ ↔
+      ∀ v : Fin k → V, V ⊧/v φ ↔ SigmaSatisfaction (n + 1) ⌜φ⌝ (matrixToVec v) := by
   simp [snowing, models_iff, (sigmaSatisfactionVec.defined n k).df, Function.comp_def]
 
 theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
@@ -243,7 +244,7 @@ theorem ISigma1.provable_snowing {n k : ℕ} {φ : ArithmeticSemisentence k}
 
 section peanoMinus
 
-open Tarski Reading PeanoMinus
+open _root_.FFL.FirstOrder.Tarski Reading PeanoMinus
 
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ}
   (hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ)
@@ -254,19 +255,22 @@ namespace Reading
 
 /-- `Codes v ev` says that `ev` is a code for the finite sequence `v`: it has length `m` and its
 `i`-th entry is `v i`. -/
-def Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop := Len (m : M) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : M)
+def Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop :=
+  Len (m : M) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : M)
 
 end Reading
 
 include hM in
-lemma codes_nil (v : Fin 0 → M) : Codes v 0 := ⟨by simpa using (read_lenNil hM 0).mpr rfl, fun i ↦ i.elim0⟩
+lemma codes_nil (v : Fin 0 → M) : Codes v 0 :=
+  ⟨by simpa using (read_lenNil hM 0).mpr rfl, fun i ↦ i.elim0⟩
 
 include hM in
 lemma codes_cons {m : ℕ} {v : Fin m → M} {ev ev' x : M} (h : Codes v ev)
     (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' :=
   ⟨by simpa using (read_lenAdjoin hM x ev ev' (m : M) hadj).mpr h.1,
     fun i ↦ Fin.cases (by simpa using (read_nthAdjoinZero hM x ev ev' x hadj).mpr rfl)
-      (fun j ↦ by simpa using (read_nthAdjoinSucc hM x ev ev' (j.val : M) (v j) hadj).mpr (h.2 j)) i⟩
+      (fun j ↦ by
+        simpa using (read_nthAdjoinSucc hM x ev ev' (j.val : M) (v j) hadj).mpr (h.2 j)) i⟩
 
 include hM in
 lemma exists_codes : ∀ {m : ℕ} (v : Fin m → M), ∃ ev, Codes v ev := by
@@ -377,9 +381,11 @@ a bounded
 formula agrees with truth. -/
 private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
     (hφ : φ.Bounded) :
-    ∀ (v : Fin k → M) (ev : M), Codes v ev → (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+    ∀ (v : Fin k → M) (ev : M), Codes v ev →
+      (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   refine bounded_induction (ξ := Empty)
-    (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev → (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ))
+    (P := fun k φ ↦ ∀ (v : Fin k → M) (ev : M), Codes v ev →
+      (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ k φ hφ
   · intro m v ev _
     have hq : M ⊧/![((⌜(⊤ : ArithmeticSemisentence m)⌝ : ℕ) : M)] qqVerumDef.val :=
@@ -424,7 +430,8 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
   · intro m φ ψ _ _ ihφ ihψ v ev hev
     have hq : M ⊧/![((⌜φ ⋏ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqAndDef.val :=
       Sigma0_cast₃ qqAndDef (by simpa using quote_and_sentence (V := ℕ) φ ψ)
-    rw [read_boundedSatisfactionAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev, ihψ v ev hev]
+    rw [read_boundedSatisfactionAnd hM ((⌜φ⌝ : ℕ) : M) ((⌜ψ⌝ : ℕ) : M) _ ev hq, ihφ v ev hev,
+      ihψ v ev hev]
     simp
   · intro m φ ψ hφ hψ ihφ ihψ v ev hev
     have hq : M ⊧/![((⌜φ ⋎ ψ⌝ : ℕ) : M), ((⌜φ⌝ : ℕ) : M), ((⌜ψ⌝ : ℕ) : M)] qqOrDef.val :=
@@ -463,7 +470,8 @@ private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemise
     simp only [Semiformula.eval_bexs, Semiformula.Operator.lt_def, Semiformula.eval_rel]
     constructor
     · rintro ⟨x, hx, e', hadj, hsat⟩
-      exact ⟨x, by simpa [Function.comp_def] using hx, (ihφ (x :> v) e' (codes_cons hM hev hadj)).mp hsat⟩
+      exact ⟨x, by simpa [Function.comp_def] using hx,
+        (ihφ (x :> v) e' (codes_cons hM hev hadj)).mp hsat⟩
     · rintro ⟨x, hx, hsat⟩
       obtain ⟨e', hadj⟩ := read_adjoinTotal hM x ev
       exact ⟨x, by simpa [Function.comp_def] using hx, e', hadj,
@@ -478,7 +486,8 @@ include hM in
 private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
     {φ : ArithmeticSemisentence k}
     (h : StrictHierarchy Γ s φ) (hs : s ≤ n + 1) :
-    ∀ (v : Fin k → M) (ev : M), Codes v ev → (Reading.HierarchySatisfaction Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
+    ∀ (v : Fin k → M) (ev : M), Codes v ev →
+      (Reading.HierarchySatisfaction Γ s ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   revert hs
   induction h with
   | @zero Γ₀ m₀ φ₀ hφ₀ =>
@@ -493,7 +502,7 @@ private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
     intro hs v ev hev
     have hq : M ⊧/![((⌜(∃¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
         qqExsDef.val := Sigma0_cast₂ qqExsDef (by simpa using quote_ex_sentence (V := ℕ) φ₀)
-    show Reading.SigmaSatisfaction s₀ _ _ ↔ _
+    change Reading.SigmaSatisfaction s₀ _ _ ↔ _
     rw [read_sigmaSatisfactionExs hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
     simp only [Semiformula.eval_ex]
     constructor
@@ -506,7 +515,7 @@ private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
     intro hs v ev hev
     have hq : M ⊧/![((⌜(∀¹ φ₀ : ArithmeticSemisentence m₀)⌝ : ℕ) : M), ((⌜φ₀⌝ : ℕ) : M)]
         qqAllDef.val := Sigma0_cast₂ qqAllDef (by simpa using quote_all_sentence (V := ℕ) φ₀)
-    show Reading.PiSatisfaction s₀ _ _ ↔ _
+    change Reading.PiSatisfaction s₀ _ _ ↔ _
     rw [read_piSatisfactionAll hM (show s₀ ≤ n by omega) ((⌜φ₀⌝ : ℕ) : M) _ ev hq]
     simp only [Semiformula.eval_all]
     constructor
@@ -530,22 +539,25 @@ theorem sigmaSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k
 - [HP98, Corollary I.1.76]
 - [HP98, Remark I.1.77] -/
 
-private lemma eval_sigmaSatisfactionVec (p : M) (w : Fin k → M) :
-    M ⊧/(p :> w) (sigmaSatisfactionVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SigmaSatisfaction n p ev := by
-  simp only [sigmaSatisfactionVec, Nat.succ_eq_add_one, Nat.reduceAdd, HierarchySymbol.Semiformula.val_mkSigma,
-    Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
-    Semiterm.val_operator, Matrix.comp₀, Structure.numeral_eq_numeral, numeral_eq_natCast_app,
-    Semiterm.val_bvar, Matrix.cons_val_zero, Fin.isValue, Fin.Fin1.eq_one, Matrix.cons_val_one,
-    Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃, Semiformula.eval_operator,
-    Matrix.cons_val_succ, Structure.eq_iff_eq, LogicalConnective.Prop.and_eq, exists_eq_right,
-    Reading.Codes, Reading.Len, Reading.Nth, Reading.SigmaSatisfaction, and_assoc]
+private lemma eval_sigmaSatisfactionVec {k : ℕ} (p : M) (w : Fin k → M) :
+    M ⊧/(p :> w) (sigmaSatisfactionVec n k).val ↔ ∃ ev, Codes w ev ∧ Reading.SigmaSatisfaction n p
+      ev := by
+  simp only [sigmaSatisfactionVec, Nat.succ_eq_add_one, Nat.reduceAdd,
+    HierarchySymbol.Semiformula.val_mkSigma, Semiformula.eval_ex,
+    LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp₂,
+    Semiterm.val_operator, Matrix.comp₀, Tarski.Structure.numeral_eq_numeral,
+    numeral_eq_natCast_app, Semiterm.val_bvar, Matrix.cons_val_zero, Fin.isValue, Fin.Fin1.eq_one,
+    Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.conj_hom_prop, Matrix.comp₃,
+    Semiformula.eval_operator, Matrix.cons_val_succ, Tarski.Structure.eq_iff_eq,
+    LogicalConnective.Prop.and_eq, exists_eq_right, Reading.Codes, Reading.Len, Reading.Nth,
+    Reading.SigmaSatisfaction, and_assoc]
 
 private lemma eval_snowing_rhs {k : ℕ} (φ : ArithmeticSemisentence k) (e : Fin k → M) :
     M ⊧/e ((sigmaSatisfactionVec n k).val ⇜ ((⌜φ⌝ : ArithmeticSemiterm Empty k) :> fun i ↦ #i))
       ↔ M ⊧/(((⌜φ⌝ : ℕ) : M) :> e) (sigmaSatisfactionVec n k).val := by
   simp only [Semiformula.eval_substs, Matrix.comp_vecCons'', Arithmetic.gödelNumber'_def,
     Semiterm.Operator.encode, Semiterm.Operator.const, Semiterm.val_operator,
-    Structure.numeral_eq_numeral, numeral_eq_natCast_app, Sentence.quote_eq_encode_nat,
+    Tarski.Structure.numeral_eq_numeral, numeral_eq_natCast_app, Sentence.quote_eq_encode_nat,
     Matrix.empty_eq]
   simp only [Function.comp_def, Semiterm.val_bvar]
 

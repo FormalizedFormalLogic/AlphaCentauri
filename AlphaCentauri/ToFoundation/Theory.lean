@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Basic.Calculus
+public import Foundation.FirstOrder.LK.Basic
 public import Foundation.Meta.ClProver
 
 /-!
@@ -20,7 +20,7 @@ open FFL.FirstOrder
 variable {L : Language} {U S : Theory L}
 
 lemma WeakerThan.union_right (h : U ⪯ S) (T : Theory L) : T ∪ U ⪯ T ∪ S :=
-  WeakerThan.ofAxm! $ by
+  WeakerThan.ofAxm! <| by
     rintro φ (hφ | hφ)
     · exact by_axm (Set.mem_union_left _ hφ)
     · exact WeakerThan.pbl (h.pbl (by_axm hφ))
@@ -40,7 +40,7 @@ lemma provable_neg_iff (e : T ⊢ φ 🡘 ψ) : T ⊢ ∼φ ↔ T ⊢ ∼ψ :=
   ⟨fun h ↦ by cl_prover [e, h], fun h ↦ by cl_prover [e, h]⟩
 
 private lemma inconsistent_insert_iff : Inconsistent (insert φ T) ↔ T ⊢ ∼φ := by
-  show Inconsistent (adjoin φ T) ↔ T ⊢ ∼φ
+  change Inconsistent (adjoin φ T) ↔ T ⊢ ∼φ
   simpa using (provable_iff_inconsistent_adjoin (𝓢 := T) (φ := ∼φ)).symm
 
 lemma provable_neg_of_inconsistent_insert (h : Inconsistent (insert φ T)) : T ⊢ ∼φ :=

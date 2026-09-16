@@ -14,7 +14,9 @@ extension of it.
 
 namespace FFL.FirstOrder.Arithmetic
 
-open Semiformula Structure
+open Semiformula Tarski.Structure
+
+universe u v
 
 variable {M : Type u} [ORingStructure M]
 
@@ -92,8 +94,8 @@ private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : Arit
 theorem models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := by
   simp only [Semantics.ModelsSet.union_iff, InductionScheme];
   and_intros;
-  . exact hMN.models_peanoMinus
-  . apply Semantics.ModelsSet.setOf_iff.mpr;
+  · exact hMN.models_peanoMinus
+  · apply Semantics.ModelsSet.setOf_iff.mpr;
     rintro _ ⟨φ, hφ, rfl⟩
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
       using hMN.eval_of_endExtension hφ

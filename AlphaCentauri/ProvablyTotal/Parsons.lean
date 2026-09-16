@@ -13,9 +13,7 @@ Ackermann function is therefore not `𝗜𝚺₁`-provably total.
 
 @[expose] public section
 
-namespace FFL.FirstOrder
-
-open FFL.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
 
 /-- Every `𝗜𝚺₁`-provably total function is primitive recursive.
 - [HP98, Corollary IV.3.7] -/
@@ -45,4 +43,4 @@ theorem not_provablyTotal_ackermann :
     Primrec.vector_cons.comp Primrec.fst (Primrec.vector_cons.comp Primrec.snd (Primrec.const _))
   exact not_primrec₂_ack ((hp.comp hc).of_eq (by intro p; rfl))
 
-end FFL.FirstOrder
+end FFL.FirstOrder.Arithmetic

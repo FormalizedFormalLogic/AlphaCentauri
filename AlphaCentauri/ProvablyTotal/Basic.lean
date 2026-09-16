@@ -142,6 +142,15 @@ def ProvablyTotal (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Prop :=
 def ProvablyFunctional (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Prop :=
   ∃ φ, T.ProvablyFunctionalVia f φ
 
+/-- The class of `T`-provably total functions of arity `k`.
+- [AB05, §10.2]
+- [Bek99, §1] -/
+def provablyTotalFunctions (T : ArithmeticTheory) (k : ℕ) : Set ((Fin k → ℕ) → ℕ) :=
+  {f | T.ProvablyTotal f}
+
+@[simp] lemma mem_provablyTotalFunctions :
+    f ∈ T.provablyTotalFunctions k ↔ T.ProvablyTotal f := .rfl
+
 namespace ProvablyTotalVia
 
 lemma toProvablyTotal (h : T.ProvablyTotalVia f φ) : T.ProvablyTotal f := ⟨φ, h⟩
@@ -263,6 +272,15 @@ lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotal f) :
   have ⟨_, h⟩ := h; ⟨_, h, h.exists_unique⟩
 
 end ProvablyTotal
+
+lemma provablyTotalFunctions_subset (h : T ⪯ U) :
+    T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.mono h
+
+/-- The class of provably total functions depends only on the $\Pi_2$ consequences of the theory.
+- [AB05, §10.2] -/
+lemma provablyTotalFunctions_subset_of_Pi2
+    (H : ∀ σ : ArithmeticSentence, Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) :
+    T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.of_Pi2 H
 
 namespace ProvablyFunctional
 

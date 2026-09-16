@@ -96,8 +96,8 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     intro x y h
     obtain ⟨z, hz⟩ := Arithmetic.add_eq_of_lt (hMN.emb x) (hMN.emb y) (by simpa using h)
     have h₁ : z ≤ hMN.emb y := hz ▸ le_add_self
-    obtain ⟨w, rfl⟩ : z ∈ Set.range hMN.emb := h₁.lt_or_eq.elim hMN.mem_range_of_lt fun h₂ ↦
-      ⟨y, h₂.symm⟩
+    obtain ⟨w, rfl⟩ : z ∈ Set.range hMN.emb :=
+      h₁.lt_or_eq.elim hMN.mem_range_of_lt fun h₂ ↦ ⟨y, h₂.symm⟩
     exact ⟨w, inj (by simpa using hz)⟩
   case zeroLe =>
     suffices ∀ x : M, 0 ≤ x by simpa [models_iff, le_iff_of_eq_of_lt, le_def] using this

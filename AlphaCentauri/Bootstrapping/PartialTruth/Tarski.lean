@@ -85,8 +85,8 @@ noncomputable def boundedSatisfactionOr : ArithmeticSentence :=
     (!boundedSatisfaction.val z e ↔ !boundedSatisfaction.val p e ∨ !boundedSatisfaction.val q e)”
 
 /-- The Tarski sentence for negation. -/
-noncomputable def boundedSatisfactionNeg : ArithmeticSentence := “∀ p np e, !isBounded.val p →
-  !(isUFormula ℒₒᵣ).val p →
+noncomputable def boundedSatisfactionNeg : ArithmeticSentence :=
+  “∀ p np e, !isBounded.val p → !(isUFormula ℒₒᵣ).val p →
     !(negGraph ℒₒᵣ).val np p → (!boundedSatisfaction.val np e ↔ ¬!boundedSatisfaction.val p e)”
 
 /-- The Tarski sentence for bounded universal quantification. -/
@@ -109,23 +109,23 @@ noncomputable def termValBvar : ArithmeticSentence :=
   “∀ e z t v, !qqBvarDef.val t z → (!termValGraph.val v e t ↔ !nthDef.val v e z)”
 
 /-- The defining sentence for evaluation of zero. -/
-noncomputable def termValZero : ArithmeticSentence := “∀ e v, !termValGraph.val v e ↑Arithmetic.zero
-  ↔ v = 0”
+noncomputable def termValZero : ArithmeticSentence :=
+  “∀ e v, !termValGraph.val v e ↑Arithmetic.zero ↔ v = 0”
 
 /-- The defining sentence for evaluation of one. -/
-noncomputable def termValOne : ArithmeticSentence := “∀ e v, !termValGraph.val v e ↑Arithmetic.one
-  ↔ v = 1”
+noncomputable def termValOne : ArithmeticSentence :=
+  “∀ e v, !termValGraph.val v e ↑Arithmetic.one ↔ v = 1”
 
 /-- The defining sentence for evaluation of addition. -/
-noncomputable def termValAdd : ArithmeticSentence := “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t →
-  !(isUTerm ℒₒᵣ).val u →
+noncomputable def termValAdd : ArithmeticSentence :=
+  “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
     !Arithmetic.qqAddGraph.val s t u → !termValGraph.val vt e t →
     !termValGraph.val vu e u →
     (!termValGraph.val v e s ↔ v = vt + vu)”
 
 /-- The defining sentence for evaluation of multiplication. -/
-noncomputable def termValMul : ArithmeticSentence := “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t →
-  !(isUTerm ℒₒᵣ).val u →
+noncomputable def termValMul : ArithmeticSentence :=
+  “∀ e t u s vt vu v, !(isUTerm ℒₒᵣ).val t → !(isUTerm ℒₒᵣ).val u →
     !Arithmetic.qqMulGraph.val s t u → !termValGraph.val vt e t →
     !termValGraph.val vu e u →
     (!termValGraph.val v e s ↔ v = vt * vu)”
@@ -135,8 +135,8 @@ noncomputable def adjoinTotal : ArithmeticSentence := “∀ x v, ∃ e, !adjoin
 noncomputable def adjoinUnique : ArithmeticSentence :=
   “∀ x v e e', !adjoinDef.val e x v → !adjoinDef.val e' x v → e = e'”
 
-noncomputable def nthAdjoinZero : ArithmeticSentence := “∀ x v e y, !adjoinDef.val e x v →
-  (!nthDef.val y e 0 ↔ y = x)”
+noncomputable def nthAdjoinZero : ArithmeticSentence :=
+  “∀ x v e y, !adjoinDef.val e x v → (!nthDef.val y e 0 ↔ y = x)”
 
 noncomputable def nthAdjoinSucc : ArithmeticSentence := “∀ x v e i y, !adjoinDef.val e x v →
     (!nthDef.val y e (i + 1) ↔ !nthDef.val y v i)”

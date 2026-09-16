@@ -57,8 +57,8 @@ lemma indSentence_mem_inductionScheme {n : ℕ} :
 putting `y` and then `x` in front of the assignment coded by `e`, with `x` and `y` as its bound
 variables and `z`, `e` as its free variables.
 - [HP98, Theorem I.2.52] -/
-noncomputable def collFormula (n : ℕ) : ArithmeticSemiformula ℕ 2 := “x y. ∃ ev₀, !adjoinDef.val
-  ev₀ x &1 ∧
+noncomputable def collFormula (n : ℕ) : ArithmeticSemiformula ℕ 2 :=
+  “x y. ∃ ev₀, !adjoinDef.val ev₀ x &1 ∧
     ∃ ev, !adjoinDef.val ev y ev₀ ∧ !(sigmaSatisfaction n).val &0 ev”
 
 /-- The collection formula is $\Sigma_{n + 1}$.
@@ -81,8 +81,8 @@ lemma collSentence_mem_collectionScheme {n : ℕ} :
 
 /-- The finite theory equivalent to `𝗜𝚺 (n + 1)`.
 - [HP98, Theorem I.2.52] -/
-noncomputable def finiteAxiomatization (n : ℕ) : ArithmeticTheory := 𝗣𝗔⁻ ∪ tarski n ∪
-  {indSentence n, collSentence n}
+noncomputable def finiteAxiomatization (n : ℕ) : ArithmeticTheory :=
+  𝗣𝗔⁻ ∪ tarski n ∪ {indSentence n, collSentence n}
 
 /-- The theory `finiteAxiomatization n` is finite.
 - [HP98, Theorem I.2.52] -/
@@ -107,11 +107,11 @@ lemma collSentence_mem_finiteAxiomatization {n : ℕ} :
     collSentence n ∈ finiteAxiomatization n :=
   Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
 
-instance (n : ℕ) : 𝗣𝗔⁻ ⪯ finiteAxiomatization n := Axiomatized.le_of_subset
-  peanoMinus_subset_finiteAxiomatization
+instance (n : ℕ) : 𝗣𝗔⁻ ⪯ finiteAxiomatization n :=
+  Axiomatized.le_of_subset peanoMinus_subset_finiteAxiomatization
 
-instance (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ finiteAxiomatization n := WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance
-  inferInstance
+instance (n : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ finiteAxiomatization n :=
+  WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
 
 section
 variable {M : Type*} [ORingStructure M]
@@ -191,8 +191,8 @@ theorem provable_succInd_of_strictHierarchy {n : ℕ} {φ : ArithmeticSemiformul
     finiteAxiomatization n ⊢ .univCl (succInd φ) := by
   apply Arithmetic.complete.{0} _ _
   intro M _ _
-  have hInd : M↓[ℒₒᵣ] ⊧ indSentence n := Semantics.ModelsSet.models _
-    indSentence_mem_finiteAxiomatization
+  have hInd : M↓[ℒₒᵣ] ⊧ indSentence n :=
+    Semantics.ModelsSet.models _ indSentence_mem_finiteAxiomatization
   have hind : ∀ g : ℕ → M, (indFormula n).Eval ![0] g →
       (∀ x, (indFormula n).Eval ![x] g → (indFormula n).Eval ![x + 1] g) →
       ∀ x, (indFormula n).Eval ![x] g := by
@@ -248,8 +248,8 @@ theorem provable_collectionAxiom_of_strictHierarchy {n : ℕ} {φ : ArithmeticSe
   apply Arithmetic.complete.{0} _ _
   intro M _ _
   have := models_peanoMinus n (M := M)
-  have hColl : M↓[ℒₒᵣ] ⊧ collSentence n := Semantics.ModelsSet.models _
-    collSentence_mem_finiteAxiomatization
+  have hColl : M↓[ℒₒᵣ] ⊧ collSentence n :=
+    Semantics.ModelsSet.models _ collSentence_mem_finiteAxiomatization
   have hcoll := (models_collectionAxiom_iff (collFormula n)).mp hColl
   rw [models_collectionAxiom_iff]
   intro f a h

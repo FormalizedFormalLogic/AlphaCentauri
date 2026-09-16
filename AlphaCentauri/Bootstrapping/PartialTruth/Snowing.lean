@@ -255,8 +255,8 @@ namespace Reading
 
 /-- `Codes v ev` says that `ev` is a code for the finite sequence `v`: it has length `m` and its
 `i`-th entry is `v i`. -/
-def Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop := Len (m : M) ev ∧ ∀ i : Fin m, Nth (v i) ev
-  (i.val : M)
+def Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop :=
+  Len (m : M) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : M)
 
 end Reading
 

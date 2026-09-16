@@ -120,13 +120,13 @@ noncomputable def termValVec (e k v : V) : V := construction.resultVec ℒₒᵣ
 
 /-- The $\Sigma_1$ graph of `termVal`; argument order `(y, e, t)`, `y = termVal e t`.
 - [HP98, 1.63] -/
-noncomputable def termValGraph : 𝚺₁.Semisentence 3 := (blueprint.result ℒₒᵣ).rew <|
-  Rew.subst ![#0, #2, #1]
+noncomputable def termValGraph : 𝚺₁.Semisentence 3 :=
+  (blueprint.result ℒₒᵣ).rew <| Rew.subst ![#0, #2, #1]
 
 /-- Graph of `termValVec`; argument order `(y, e, k, v)`.
 - [HP98, 1.63] -/
-noncomputable def termValVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultVec ℒₒᵣ).rew <|
-  Rew.subst ![#0, #2, #3, #1]
+noncomputable def termValVecGraph : 𝚺₁.Semisentence 4 :=
+  (blueprint.resultVec ℒₒᵣ).rew <| Rew.subst ![#0, #2, #3, #1]
 
 /-- Evaluation of a coded bound variable reads the corresponding assignment entry.
 - [HP98, 1.64(5)] -/

@@ -709,8 +709,8 @@ instance specNlt_defined : 𝚫₁-Relation₃ (SpecNlt : V → V → V → Prop
       (qqNLT_defined (V := V)).df, nltMatrix_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a conjunction. -/
-def SpecAnd (q z e : V) : Prop := ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋏ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈
-  domain q ∧
+def SpecAnd (q z e : V) : Prop :=
+  ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋏ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈ domain q ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 1⟫ ∈ q ∧ ⟪⟪p₂, e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 0⟫ ∈ q ∨ ⟪⟪p₂, e⟫, 0⟫ ∈ q)
 
@@ -725,8 +725,8 @@ instance specAnd_defined : 𝚺₀-Relation₃ (SpecAnd : V → V → V → Prop
   .mk fun v ↦ by simp [specAndDef, SpecAnd, nodeVal_defined.df, nodeDom_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a disjunction. -/
-def SpecOr (q z e : V) : Prop := ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋎ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈
-  domain q ∧
+def SpecOr (q z e : V) : Prop :=
+  ∃ p₁ < z, ∃ p₂ < z, z = p₁ ^⋎ p₂ ∧ ⟪p₁, e⟫ ∈ domain q ∧ ⟪p₂, e⟫ ∈ domain q ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 1⟫ ∈ q ∨ ⟪⟪p₂, e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 0⟫ ∈ q ∧ ⟪⟪p₂, e⟫, 0⟫ ∈ q)
 
@@ -741,8 +741,8 @@ instance specOr_defined : 𝚺₀-Relation₃ (SpecOr : V → V → V → Prop) 
   .mk fun v ↦ by simp [specOrDef, SpecOr, nodeVal_defined.df, nodeDom_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a bounded universal. -/
-def SpecBall (q z e : V) : Prop := ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t)
-  ∧ z = qqBall u p ∧
+def SpecBall (q z e : V) : Prop :=
+  ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ z = qqBall u p ∧
     (∀ x < termVal (0 ∷ e) u, ⟪p, x ∷ e⟫ ∈ domain q) ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 0⟫ ∈ q)
@@ -784,8 +784,8 @@ instance specBall_defined : 𝚫₁-Relation₃ (SpecBall : V → V → V → Pr
       (qqBall_defined (V := V)).df, ballMatrix_defined.df, adjoin_def]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a bounded existential. -/
-def SpecBex (q z e : V) : Prop := ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t)
-  ∧ z = qqBex u p ∧
+def SpecBex (q z e : V) : Prop :=
+  ∃ u < z, ∃ p < z, (∃ t ≤ u, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ z = qqBex u p ∧
     (∀ x < termVal (0 ∷ e) u, ⟪p, x ∷ e⟫ ∈ domain q) ∧
     (⟪⟪z, e⟫, 1⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 1⟫ ∈ q) ∧
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 0⟫ ∈ q)
@@ -831,8 +831,8 @@ instance specBex_defined : 𝚫₁-Relation₃ (SpecBex : V → V → V → Prop
 - [HP98, Lemma I.1.72(1)] -/
 
 /-- The clause `BoundedSatisfactionTable.spec` imposes at the node `⟪z, e⟫` of the domain of `q`. -/
-def SpecAt (q z e : V) : Prop := SpecVerum q z e ∨ SpecFalsum q z e ∨ SpecEq q z e ∨ SpecNeq q z e ∨
-  SpecLt q z e ∨
+def SpecAt (q z e : V) : Prop :=
+  SpecVerum q z e ∨ SpecFalsum q z e ∨ SpecEq q z e ∨ SpecNeq q z e ∨ SpecLt q z e ∨
     SpecNlt q z e ∨ SpecAnd q z e ∨ SpecOr q z e ∨ SpecBall q z e ∨ SpecBex q z e
 
 /-- Defining formula for `SpecAt`. -/
@@ -855,8 +855,8 @@ instance specAt_defined : 𝚫₁-Relation₃ (SpecAt : V → V → V → Prop) 
 - [HP98, Lemma I.1.72(1)] -/
 
 /-- A node of the domain that is an immediate subformula of a coded conjunction in it. -/
-def MinAnd (q n : V) : Prop := ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, c = p₁ ^⋏ p₂ ∧ ⟪c, e⟫ ∈
-  domain q ∧
+def MinAnd (q n : V) : Prop :=
+  ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, c = p₁ ^⋏ p₂ ∧ ⟪c, e⟫ ∈ domain q ∧
     (n = ⟪p₁, e⟫ ∨ n = ⟪p₂, e⟫)
 
 /-- Defining formula for `MinAnd`. -/
@@ -869,8 +869,8 @@ instance minAnd_defined : 𝚺₀-Relation (MinAnd : V → V → Prop) via minAn
   simp [minAndDef, MinAnd, nodeDom_defined.df]
 
 /-- A node of the domain that is an immediate subformula of a coded disjunction in it. -/
-def MinOr (q n : V) : Prop := ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, c = p₁ ^⋎ p₂ ∧ ⟪c, e⟫ ∈
-  domain q ∧
+def MinOr (q n : V) : Prop :=
+  ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, c = p₁ ^⋎ p₂ ∧ ⟪c, e⟫ ∈ domain q ∧
     (n = ⟪p₁, e⟫ ∨ n = ⟪p₂, e⟫)
 
 /-- Defining formula for `MinOr`. -/
@@ -891,8 +891,8 @@ instance minChild_defined :
   simp [minChildDef, childPair_defined.df]
 
 /-- A node of the domain reached by entering a coded bounded universal in it. -/
-def MinBall (q n : V) : Prop := ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, c = qqBall u p ∧ ⟪c, e⟫ ∈
-  domain q ∧
+def MinBall (q n : V) : Prop :=
+  ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, c = qqBall u p ∧ ⟪c, e⟫ ∈ domain q ∧
     ∃ x < termVal (0 ∷ e) u, n = ⟪p, x ∷ e⟫
 
 /-- Defining formula for `MinBall`. -/
@@ -915,8 +915,8 @@ instance minBall_defined : 𝚫₁-Relation (MinBall : V → V → Prop) via min
       minChild_defined.df, adjoin_def]
 
 /-- A node of the domain reached by entering a coded bounded existential in it. -/
-def MinBex (q n : V) : Prop := ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, c = qqBex u p ∧ ⟪c, e⟫ ∈
-  domain q ∧
+def MinBex (q n : V) : Prop :=
+  ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, c = qqBex u p ∧ ⟪c, e⟫ ∈ domain q ∧
     ∃ x < termVal (0 ∷ e) u, n = ⟪p, x ∷ e⟫
 
 /-- Defining formula for `MinBex`. -/
@@ -1086,8 +1086,8 @@ section existence
 /-! ### Elementary exponential bounds -/
 
 lemma mul_le_exp_add (a b : V) : a * b ≤ Exp.exp (a + b) :=
-  calc a * b ≤ Exp.exp a * Exp.exp b := mul_le_mul (le_of_lt (lt_exp a)) (le_of_lt (lt_exp b))
-         (by simp) (by simp)
+  calc a * b ≤ Exp.exp a * Exp.exp b :=
+        mul_le_mul (le_of_lt (lt_exp a)) (le_of_lt (lt_exp b)) (by simp) (by simp)
     _ = Exp.exp (a + b) := (exp_add a b).symm
 
 lemma exp_add_le (a c : V) : Exp.exp a + c ≤ Exp.exp (a + c + 1) := by
@@ -1224,8 +1224,8 @@ lemma tableExp_step {z p u x e : V} (hp : p < z) (hu : u < z) (hx : x < termVal 
     exact le_of_lt (lt_of_lt_of_le hx
       (le_trans (termVal_le_poly _ _) (exp_monotone_le.mpr h3)))
   have hb : 3 * (x ∷ e) ≤ Exp.exp (2 * x + 2 * e + 5) := by
-    calc 3 * (x ∷ e) ≤ 3 * Exp.exp (2 * x + 2 * e + 3) := mul_le_mul le_rfl (adjoin_le_exp x e)
-           (by simp) (by simp)
+    calc 3 * (x ∷ e) ≤ 3 * Exp.exp (2 * x + 2 * e + 3) :=
+          mul_le_mul le_rfl (adjoin_le_exp x e) (by simp) (by simp)
       _ ≤ 3 * Exp.exp (2 * x + 2 * e + 3) + Exp.exp (2 * x + 2 * e + 3) := le_self_add
       _ = 4 * Exp.exp (2 * x + 2 * e + 3) := by ring
       _ = Exp.exp (2 * x + 2 * e + 5) := by
@@ -1959,19 +1959,19 @@ theorem BoundedSatisfactionTable.exists {z e : V} (hz : IsBounded z) (hz' : IsUF
     exact ⟨_, BoundedSatisfactionTable.singleton_le_tableBound hv, hq⟩
   · intro e b hb hu
     subst hb
-    obtain ⟨v, hv, hq⟩ := BoundedSatisfactionTable.exists_atom_table (e := e) hu <| Or.inr <|
-      Or.inl rfl
+    obtain ⟨v, hv, hq⟩ :=
+      BoundedSatisfactionTable.exists_atom_table (e := e) hu <| Or.inr <| Or.inl rfl
     exact ⟨_, BoundedSatisfactionTable.singleton_le_tableBound hv, hq⟩
   · intro k r w e b hb hu
     subst hb
-    obtain ⟨v, hv, hq⟩ := BoundedSatisfactionTable.exists_atom_table (e := e) hu <| Or.inr <|
-      Or.inr <|
+    obtain ⟨v, hv, hq⟩ :=
+      BoundedSatisfactionTable.exists_atom_table (e := e) hu <| Or.inr <| Or.inr <|
       Or.inl ⟨k, r, w, rfl⟩
     exact ⟨_, BoundedSatisfactionTable.singleton_le_tableBound hv, hq⟩
   · intro k r w e b hb hu
     subst hb
-    obtain ⟨v, hv, hq⟩ := BoundedSatisfactionTable.exists_atom_table (e := e) hu <| Or.inr <|
-      Or.inr <|
+    obtain ⟨v, hv, hq⟩ :=
+      BoundedSatisfactionTable.exists_atom_table (e := e) hu <| Or.inr <| Or.inr <|
       Or.inr ⟨k, r, w, rfl⟩
     exact ⟨_, BoundedSatisfactionTable.singleton_le_tableBound hv, hq⟩
   · intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ e b hb hu

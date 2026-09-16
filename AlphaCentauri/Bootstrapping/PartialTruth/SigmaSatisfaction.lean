@@ -42,10 +42,10 @@ noncomputable def piOfSigma (m : ℕ) (σ : 𝚺-[m + 1].Semisentence 2) :
   (by
     have h1 : Hierarchy 𝚷 (m + 1) (isStrictPi (m + 1)).pi.val :=
       (isStrictPi (m + 1)).pi.pi_prop.mono (Nat.le_add_left 1 m)
-    have h2 : Hierarchy 𝚷 (m + 1) (isUFormula ℒₒᵣ).pi.val := (isUFormula ℒₒᵣ).pi.pi_prop.mono
-      (Nat.le_add_left 1 m)
-    have h3 : Hierarchy 𝚺 (m + 1) (negGraph ℒₒᵣ).val := (negGraph ℒₒᵣ).sigma_prop.mono
-      (Nat.le_add_left 1 m)
+    have h2 : Hierarchy 𝚷 (m + 1) (isUFormula ℒₒᵣ).pi.val :=
+      (isUFormula ℒₒᵣ).pi.pi_prop.mono (Nat.le_add_left 1 m)
+    have h3 : Hierarchy 𝚺 (m + 1) (negGraph ℒₒᵣ).val :=
+      (negGraph ℒₒᵣ).sigma_prop.mono (Nat.le_add_left 1 m)
     have h4 : Hierarchy 𝚺 (m + 1) σ.val := σ.sigma_prop
     simp [h1, h2, h3, h4])
 
@@ -57,13 +57,13 @@ noncomputable def sigmaOfPi (m : ℕ) (π : 𝚷-[m + 1].Semisentence 2) :
   “z e. ∃ k q w e', !qqExssDef z q k ∧ !(isStrictPi (m + 1)).val q ∧ !lenDef k w ∧
     !vecAppendDef e' w e ∧ !π.val q e'”
   (by
-    have h1 : Hierarchy 𝚺 (m + 2) qqExssDef.val := qqExssDef.sigma_prop.mono
-      (show 1 ≤ m + 2 by omega)
+    have h1 : Hierarchy 𝚺 (m + 2) qqExssDef.val :=
+      qqExssDef.sigma_prop.mono (show 1 ≤ m + 2 by omega)
     have h2 : Hierarchy 𝚺 (m + 2) (isStrictPi (m + 1)).val :=
       (isStrictPi (m + 1)).sigma.sigma_prop.mono (show 1 ≤ m + 2 by omega)
     have h3 : Hierarchy 𝚺 (m + 2) lenDef.val := lenDef.sigma_prop.mono (show 1 ≤ m + 2 by omega)
-    have h4 : Hierarchy 𝚺 (m + 2) vecAppendDef.val := vecAppendDef.sigma_prop.mono
-      (show 1 ≤ m + 2 by omega)
+    have h4 : Hierarchy 𝚺 (m + 2) vecAppendDef.val :=
+      vecAppendDef.sigma_prop.mono (show 1 ≤ m + 2 by omega)
     have h5 : Hierarchy 𝚺 (m + 2) π.val := π.pi_prop.accum 𝚺
     simp [h1, h2, h3, h4, h5])
 
@@ -76,8 +76,8 @@ noncomputable def sigmaZero : 𝚺-[1].Semisentence 2 := .mkSigma
     have h2 : Hierarchy 𝚺 1 (isStrictPi 0).val := (isStrictPi 0).sigma.sigma_prop
     have h3 : Hierarchy 𝚺 1 lenDef.val := lenDef.sigma_prop
     have h4 : Hierarchy 𝚺 1 vecAppendDef.val := vecAppendDef.sigma_prop
-    have h5 : Hierarchy 𝚺 1 boundedSatisfaction.val := HierarchySymbol.Semiformula.val_sigma
-      boundedSatisfaction ▸
+    have h5 : Hierarchy 𝚺 1 boundedSatisfaction.val :=
+      HierarchySymbol.Semiformula.val_sigma boundedSatisfaction ▸
         boundedSatisfaction.sigma.sigma_prop
     simp [h1, h2, h3, h4, h5])
 

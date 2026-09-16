@@ -72,12 +72,10 @@ def render(r: dict) -> str:
         md += "".join(f"| {code(d['axiom'])} | {d['dependents']} |\n" for d in debt)
     if forgiven:
         shown = forgiven[:FORGIVEN_SHOWN]
-        md += f"\n<details><summary>Forgiven by {code(forgive_file)}"
-        md += f" ({len(forgiven)} declaration(s))</summary>\n\n" + decl_table(shown)
+        md += f"\n### Forgiven by {code(forgive_file)} ({len(forgiven)})\n\n" + decl_table(shown)
         if len(shown) < len(forgiven):
             md += f"\n… and {len(forgiven) - len(shown)} more;"
             md += f" the full list is {code(forgive_file)}.\n"
-        md += "\n</details>\n"
     return md
 
 

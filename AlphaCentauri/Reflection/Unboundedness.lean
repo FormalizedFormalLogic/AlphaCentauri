@@ -283,7 +283,7 @@ theorem exists_sentence_weakerThan_of_consistent
     (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U') [Consistent (T ∪ U)] :
     ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
-  have e : T ∪ U ≊ T ∪ U' := hΓ.equiv.union_right T
+  have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right hΓ.equiv T
   have : Consistent (T ∪ U') := Consistent.of_le ‹Consistent (T ∪ U)› e.symm.le
   obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_forall_mem (T := T) hΓ.forall_mem
   exact ⟨θ, hθ, e.le.trans hle, hcon⟩

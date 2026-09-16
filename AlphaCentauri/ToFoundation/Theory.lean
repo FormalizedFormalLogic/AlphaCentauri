@@ -13,26 +13,25 @@ adjoining a sentence is inconsistent exactly when the theory refutes it.
 
 @[expose] public section
 
-namespace FFL.Entailment
+namespace FFL.FirstOrder
 
-open FFL.FirstOrder
+open FFL.Entailment
+
+namespace Theory
 
 variable {L : Language} {U S : Theory L}
 
-lemma WeakerThan.union_right (h : U ⪯ S) (T : Theory L) : T ∪ U ⪯ T ∪ S :=
+lemma weakerThan_union_right (h : U ⪯ S) (T : Theory L) : T ∪ U ⪯ T ∪ S :=
   WeakerThan.ofAxm! <| by
     rintro φ (hφ | hφ)
     · exact by_axm (Set.mem_union_left _ hφ)
     · exact WeakerThan.pbl (h.pbl (by_axm hφ))
 
-lemma Equiv.union_right (e : U ≊ S) (T : Theory L) : T ∪ U ≊ T ∪ S :=
-  Equiv.antisymm ⟨e.le.union_right T, e.symm.le.union_right T⟩
+lemma equiv_union_right (e : U ≊ S) (T : Theory L) : T ∪ U ≊ T ∪ S :=
+  Equiv.antisymm
+    ⟨weakerThan_union_right e.le T, weakerThan_union_right e.symm.le T⟩
 
-end FFL.Entailment
-
-namespace FFL.FirstOrder
-
-open FFL.Entailment
+end Theory
 
 variable {L : Language} {T : Theory L} {φ ψ : Sentence L} [L.DecidableEq]
 

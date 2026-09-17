@@ -31,6 +31,30 @@ lemma equiv_union_right (e : U ≊ S) (T : Theory L) : T ∪ U ≊ T ∪ S :=
   Equiv.antisymm
     ⟨weakerThan_union_right e.le T, weakerThan_union_right e.symm.le T⟩
 
+/-- `T` proves every `Γ`-sentence that `U` proves.
+- [Bek99, §2] -/
+def ConservativeOver (U T : Theory L) (Γ : Sentence L → Prop) : Prop :=
+  ∀ σ, Γ σ → U ⊢ σ → T ⊢ σ
+
+namespace ConservativeOver
+
+variable {Γ Γ' : Sentence L → Prop} {U T S : Theory L}
+
+lemma refl (T : Theory L) (Γ : Sentence L → Prop) : ConservativeOver T T Γ :=
+  fun _ _ h ↦ h
+
+lemma trans (h₁ : ConservativeOver U T Γ) (h₂ : ConservativeOver T S Γ) :
+    ConservativeOver U S Γ :=
+  fun σ hσ h ↦ h₂ σ hσ (h₁ σ hσ h)
+
+lemma of_weakerThan (h : U ⪯ T) : ConservativeOver U T Γ :=
+  fun _ _ hσ ↦ h.pbl hσ
+
+lemma mono (h : ∀ σ, Γ' σ → Γ σ) (hUT : ConservativeOver U T Γ) : ConservativeOver U T Γ' :=
+  fun σ hσ ↦ hUT σ (h σ hσ)
+
+end ConservativeOver
+
 end Theory
 
 variable {L : Language} {T : Theory L} {φ ψ : Sentence L} [L.DecidableEq]

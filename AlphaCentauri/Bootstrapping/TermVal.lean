@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToMathlib.Util.Disjunct
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
@@ -174,7 +175,7 @@ end
 /-- Evaluation of the coded zero term is zero.
 - [HP98, 1.64(5)] -/
 @[simp] lemma termVal_zero (e : V) : termVal e (𝟎 : V) = 0 := by
-  have hkf : (ℒₒᵣ).IsFunc (0 : V) (0 : V) := isFunc_LOR_iff.mpr (Or.inl ⟨rfl, rfl⟩)
+  have hkf : (ℒₒᵣ).IsFunc (0 : V) (0 : V) := isFunc_LOR_iff.mpr (by disj 1; exact ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ (0 : V) (0 : V) := by simp
   have heq : (𝟎 : V) = ^func (0 : V) (0 : V) (0 : V) := qqZero_eq_qqFunc
   change construction.result ℒₒᵣ ![e] (𝟎 : V) = 0
@@ -184,7 +185,7 @@ end
 /-- Evaluation of the coded one term is one.
 - [HP98, 1.64(5)] -/
 @[simp] lemma termVal_one (e : V) : termVal e (𝟏 : V) = 1 := by
-  have hkf : (ℒₒᵣ).IsFunc (0 : V) (1 : V) := isFunc_LOR_iff.mpr (Or.inr <| Or.inl ⟨rfl, rfl⟩)
+  have hkf : (ℒₒᵣ).IsFunc (0 : V) (1 : V) := isFunc_LOR_iff.mpr (by disj 2; exact ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ (0 : V) (0 : V) := by simp
   have heq : (𝟏 : V) = ^func (0 : V) (1 : V) (0 : V) := qqOne_eq_qqFunc
   change construction.result ℒₒᵣ ![e] (𝟏 : V) = 1
@@ -196,7 +197,7 @@ end
 @[simp] lemma termVal_add {e t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     termVal e (t ^+ u) = termVal e t + termVal e u := by
   have hkf : (ℒₒᵣ).IsFunc (2 : V) (0 : V) :=
-    isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inl ⟨rfl, rfl⟩)
+    isFunc_LOR_iff.mpr (by disj 3; exact ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
   have heq : (t ^+ u : V) = ^func (2 : V) (0 : V) (?[t, u] : V) := qqAdd_eq_qqFunc t u
   have step : termVal e (^func (2 : V) (0 : V) (?[t, u] : V)) =
@@ -211,7 +212,7 @@ end
 @[simp] lemma termVal_mul {e t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     termVal e (t ^* u) = termVal e t * termVal e u := by
   have hkf : (ℒₒᵣ).IsFunc (2 : V) (1 : V) :=
-    isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inr ⟨rfl, rfl⟩)
+    isFunc_LOR_iff.mpr (by disj 4; exact ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
   have heq : (t ^* u : V) = ^func (2 : V) (1 : V) (?[t, u] : V) := qqMul_eq_qqFunc t u
   have step : termVal e (^func (2 : V) (1 : V) (?[t, u] : V)) =
@@ -523,7 +524,7 @@ end
 @[simp] lemma termVal'_add {f e t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     termVal' f e (t ^+ u) = termVal' f e t + termVal' f e u := by
   have hkf : (ℒₒᵣ).IsFunc (2 : V) (0 : V) :=
-    isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inl ⟨rfl, rfl⟩)
+    isFunc_LOR_iff.mpr (by disj 3; exact ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
   have heq : (t ^+ u : V) = ^func (2 : V) (0 : V) (?[t, u] : V) := qqAdd_eq_qqFunc t u
   have step : termVal' f e (^func (2 : V) (0 : V) (?[t, u] : V)) =
@@ -538,7 +539,7 @@ end
 @[simp] lemma termVal'_mul {f e t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     termVal' f e (t ^* u) = termVal' f e t * termVal' f e u := by
   have hkf : (ℒₒᵣ).IsFunc (2 : V) (1 : V) :=
-    isFunc_LOR_iff.mpr (Or.inr <| Or.inr <| Or.inr ⟨rfl, rfl⟩)
+    isFunc_LOR_iff.mpr (by disj 4; exact ⟨rfl, rfl⟩)
   have hv : IsUTermVec ℒₒᵣ 2 (?[t, u] : V) := IsUTermVec.mkSeq₂_iff.mpr ⟨ht, hu⟩
   have heq : (t ^* u : V) = ^func (2 : V) (1 : V) (?[t, u] : V) := qqMul_eq_qqFunc t u
   have step : termVal' f e (^func (2 : V) (1 : V) (?[t, u] : V)) =

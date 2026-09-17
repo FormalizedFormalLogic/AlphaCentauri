@@ -157,8 +157,9 @@ the diff to read. A branch that carries more than the pins is never queued.
 [`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes the rest: when
 CI fails on that branch it hands it to Claude Code, which repairs this repository in place, pushes,
 reports in a comment, and cancels the queued merge — so a repaired bump is read by a human before
-it lands. Each bump gets one attempt, paid for by the organization secret `ANTHROPIC_API_KEY`;
-without it, or after that attempt, the pull request says so and waits. `/update-deps` is the same
+it lands. Each bump gets one attempt, drawn from the maintainer's Claude subscription through the
+organization secret `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`); without it, or after that
+attempt, the pull request says so and waits. `/update-deps` is the same
 runbook from a local session.
 
 Repairing a bump is a session's work, not an issue's:

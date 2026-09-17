@@ -1,9 +1,13 @@
-name: Update Foundation
+name: Update dependencies
 
-# Every six hours (and on demand) the Foundation pins are moved to the tip of Foundation's
-# `master`, on a single long-lived branch behind one pull request labelled `update-foundation`.
-# Only the pins move here: whatever the bump breaks is repaired inside that same pull request by
-# `repair-foundation.yml`, and a bump that breaks nothing merges itself (see docs/workflow.md).
+# Every six hours (and on demand) the pins of the upstream package this repository follows —
+# Foundation — are moved to the tip of its `master`, on a single long-lived branch behind one
+# pull request labelled after it. Only the pins move here: whatever the bump breaks is repaired
+# inside that same pull request by `repair-deps.yml`, and a bump that breaks nothing merges
+# itself (see docs/workflow.md).
+#
+# Which package is followed is the `env` block below and nothing else, so a repository that
+# follows another one changes those four values.
 #
 # Pushes made with `github.token` do not start `ci.yml`, and `main` requires its checks, so the
 # branch and the pull request belong to a GitHub App instead: the organization variable
@@ -28,7 +32,9 @@ permissions:
 env:
   BRANCH: update-foundation
   LABEL: update-foundation
-  FOUNDATION: FormalizedFormalLogic/Foundation
+  # The Lake package as `lake-manifest.json` names it, and the repository it is resolved from.
+  PACKAGE: Foundation
+  UPSTREAM: FormalizedFormalLogic/Foundation
 
 jobs:
   update:
@@ -82,17 +88,18 @@ jobs:
             git switch --force-create "$BRANCH" origin/main
           fi
 
-      # `lean-toolchain` has to equal Foundation's, and is taken before lake runs, so that lake
-      # runs under the toolchain it is resolving for.
-      - name: Take Foundation's toolchain
+      # `lean-toolchain` has to equal the upstream package's, and is taken before lake runs, so
+      # that lake runs under the toolchain it is resolving for.
+      - name: Take the upstream toolchain
         run: |
           set -euo pipefail
-          curl -fsSL "https://raw.githubusercontent.com/$FOUNDATION/master/lean-toolchain" -o lean-toolchain
+          curl -fsSL "https://raw.githubusercontent.com/$UPSTREAM/master/lean-toolchain" -o lean-toolchain
           echo "the toolchain is $(cat lean-toolchain)"
 
       # elan only. `lake exe cache get` would run against a tree whose `lean-toolchain` is
-      # already Foundation's while `lake-manifest.json` still pins the old Mathlib, and the cache
-      # refuses a toolchain mismatch — so it is turned off rather than left to autodetection.
+      # already the upstream's while `lake-manifest.json` still pins the old Mathlib, and the
+      # cache refuses a toolchain mismatch — so it is turned off rather than left to
+      # autodetection.
       - name: Install elan
         uses: leanprover/lean-action@v1
         with:
@@ -100,15 +107,15 @@ jobs:
           use-github-cache: false
           use-mathlib-cache: false
 
-      # `lakefile.toml` follows Foundation's `master`, so `lake update` is the whole bump: it
+      # `lakefile.toml` follows the upstream `master`, so `lake update` is the whole bump: it
       # resolves that branch and writes the revision it lands on into the manifest.
       - name: Update the manifest
         id: rev
         run: |
           set -euo pipefail
-          pin() { jq -r '.packages[] | select(.name == "Foundation") | .rev' lake-manifest.json; }
+          pin() { jq -r --arg p "$PACKAGE" '.packages[] | select(.name == $p) | .rev' lake-manifest.json; }
           old=$(pin)
-          lake update Foundation
+          lake update "$PACKAGE"
           new=$(pin)
           {
             echo "old=$old"
@@ -138,7 +145,7 @@ jobs:
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git commit -m "deps(Foundation): Update to \`$SHORT\`" -- lakefile.toml lake-manifest.json lean-toolchain
+          git commit -m "deps($PACKAGE): Update to \`$SHORT\`" -- lakefile.toml lake-manifest.json lean-toolchain
           if [ -n "$PR_NUMBER" ]; then
             # Never a rewrite: the branch carries the fixes pushed for the previous bump.
             git push origin "HEAD:refs/heads/$HEAD_REF"
@@ -160,11 +167,11 @@ jobs:
           SHORT: ${{ steps.rev.outputs.short }}
         run: |
           set -euo pipefail
-          title="deps(Foundation): Update to \`$SHORT\`"
+          title="deps($PACKAGE): Update to \`$SHORT\`"
           body=$(cat <<EOF
-          Pins Foundation at \`$NEW\` ([compare](https://github.com/$FOUNDATION/compare/$OLD...$NEW)).
+          Pins $PACKAGE at \`$NEW\` ([compare](https://github.com/$UPSTREAM/compare/$OLD...$NEW)).
 
-          Opened by \`.github/workflows/update-foundation.yml\`, which moves the pins only. This body is rewritten on every run; leave notes in a comment.
+          Opened by \`.github/workflows/update-deps.yml\`, which moves the pins only. This body is rewritten on every run; leave notes in a comment.
           EOF
           )
           if [ -n "$PR_NUMBER" ]; then
@@ -175,7 +182,7 @@ jobs:
 
       # A bump that moves nothing but the pins has no diff for a human to read: its checks are
       # the whole review, so the merge is queued here and GitHub performs it the moment they go
-      # green. A branch that carries repairs is not queued, and `repair-foundation.yml` cancels
+      # green. A branch that carries repairs is not queued, and `repair-deps.yml` cancels
       # a queued merge as soon as it pushes one.
       - name: Queue the merge of a pins-only bump
         if: steps.push.outputs.pushed == 'true'

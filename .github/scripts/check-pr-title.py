@@ -10,7 +10,7 @@ import sys
 
 TYPES = ("add", "fix", "refactor", "doc", "ci", "chore", "deps")
 # The one titled scope: the automated Foundation pin bump, whose title names the revision it
-# lands (`.github/workflows/update-foundation.yml`). Every other title carries none.
+# lands (`.github/workflows/update-deps.yml`). Every other title carries none.
 SCOPES = {"deps": ("Foundation",)}
 MAX_LENGTH = 100
 

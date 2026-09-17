@@ -82,8 +82,8 @@ activity for 14 days may be released by anyone, with a comment.
 what `forgive.yml` forgives by name); `just no-sorry`; `just mk-all` leaves no diff. The audit
 writes `.lake/audit.json`, which `.github/scripts/audit-comment.py` renders into one PR comment,
 overwritten on each run, unless the PR is labelled `infrastructure`. `actionlint.yml`
-lints the workflow files, and `update-foundation.yml` and `repair-foundation.yml` move the
-dependency pins and repair what the move breaks (below).
+lints the workflow files, and `update-deps.yml` and `repair-deps.yml` move the dependency pins
+and repair what the move breaks (below).
 
 A red check is fixed in the PR, never worked around.
 
@@ -135,7 +135,7 @@ An open pull request labelled `update-foundation` comes before all of this; see
 that resolves to, and `lean-toolchain` equals Foundation's. The manifest and the toolchain move
 together, forward only, and nobody bumps them by hand: `lake update` is the workflow's to run.
 
-[`.github/workflows/update-foundation.yml`](../.github/workflows/update-foundation.yml) moves
+[`.github/workflows/update-deps.yml`](../.github/workflows/update-deps.yml) moves
 them every six hours, and on demand from the Actions tab (`workflow_dispatch`). It keeps one
 branch, `update-foundation`, behind one open pull request labelled `update-foundation` and titled
 ``deps(Foundation): Update to `<short sha>` ``. While that pull request is open the new pins are
@@ -150,7 +150,7 @@ files alone, the workflow queues its merge (`gh pr merge --squash --auto`) and G
 it once the checks are green; the checks are the whole review, because there is nothing else in
 the diff to read. A branch that carries more than the pins is never queued.
 
-[`.github/workflows/repair-foundation.yml`](../.github/workflows/repair-foundation.yml) takes
+[`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes
 the rest: when CI fails on that branch, it hands the branch to Claude Code, which repairs this
 repository in place, pushes to the same branch, and cancels the queued merge — so a repaired
 bump is read by a human before it lands. It attempts each bump once; a repair that leaves the

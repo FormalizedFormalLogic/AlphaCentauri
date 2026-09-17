@@ -1,9 +1,9 @@
-name: Repair Foundation bump
+name: Repair the dependency bump
 
-# `update-foundation.yml` moves the pins and nothing else, so a bump that breaks this repository
-# arrives red. This picks the red one up: when CI fails on the `update-foundation` branch, Claude
-# Code repairs the branch in place under the runbook in `.claude/commands/update-foundation.md`
-# and pushes to it. Nothing else here is ever touched by it, and it never merges.
+# `update-deps.yml` moves the pins and nothing else, so a bump that breaks this repository
+# arrives red. This picks the red one up: when CI fails on the bump's branch, Claude Code repairs
+# the branch in place under the runbook in `.claude/commands/update-foundation.md` and pushes to
+# it. Nothing else here is ever touched by it, and it never merges.
 #
 # One attempt per revision: a branch that already carries a repair is left alone, so a repair
 # that leaves CI red is not retried until the next bump lands a new pin. The attempt after that
@@ -28,6 +28,8 @@ permissions:
 env:
   BRANCH: update-foundation
   LABEL: update-foundation
+  # The Lake package being bumped, as `update-deps.yml` writes it into the commit subject.
+  PACKAGE: Foundation
 
 jobs:
   repair:
@@ -44,7 +46,7 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      # The same identity `update-foundation.yml` pushes as, so the repair commits start CI in
+      # The same identity `update-deps.yml` pushes as, so the repair commits start CI in
       # turn — a push made with `github.token` starts none.
       - name: Mint the app token
         id: app-token
@@ -84,7 +86,7 @@ jobs:
           # it is a previous repair, so this bump has had its attempt. `--first-parent` keeps a
           # branch update — a merge of `main`, which GitHub makes to satisfy the strict checks —
           # from counting as one.
-          pin=$(git log --grep='^deps(Foundation): Update to' -1 --format='%H')
+          pin=$(git log --grep="^deps($PACKAGE): Update to" -1 --format='%H')
           if [ -z "$pin" ]; then
             echo "no pin commit on the branch; leaving it alone"
             exit 0
@@ -92,7 +94,7 @@ jobs:
           if [ "$(git rev-list --first-parent --no-merges --count "$pin..HEAD")" != 0 ]; then
             echo "this bump has already been repaired once and is still red; a human decides"
             gh pr comment "$number" --body \
-              "The repair pushed for this bump did not make it green, and \`repair-foundation.yml\` attempts each bump once. It is yours now; the next bump restarts the cycle."
+              "The repair pushed for this bump did not make it green, and \`repair-deps.yml\` attempts each bump once. It is yours now; the next bump restarts the cycle."
             exit 0
           fi
           if [ -z "$KEY" ]; then
@@ -112,20 +114,21 @@ jobs:
           build: false
           use-github-cache: false
 
-      # The CI run that just failed built and cached this pin's Foundation, so this is a hit
-      # except when the failure was that build itself.
-      - name: Restore the Foundation build
+      # The CI run that just failed built and cached this pin's dependency layer, so this is a
+      # hit except when the failure was that build itself. The path and the key are `ci.yml`'s
+      # and have to stay identical to it.
+      - name: Restore the dependency build
         id: foundation-cache
         if: steps.decide.outputs.number != ''
         uses: actions/cache/restore@v6
         with:
           path: .lake/packages/Foundation/.lake/build
           key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
-      - name: Build Foundation from source (cache miss only)
+      - name: Build the dependency from source (cache miss only)
         if: steps.decide.outputs.number != '' && steps.foundation-cache.outputs.cache-hit != 'true'
         run: |
-          lake build Foundation
-          python3 .github/scripts/clear-foundation-warnings.py
+          lake build "$PACKAGE"
+          python3 .github/scripts/clear-dep-warnings.py ".lake/packages/$PACKAGE/.lake/build"
 
       # Commits the agent makes carry the bot's identity, as the pin commits above it do.
       - name: Configure the committer
@@ -151,8 +154,9 @@ jobs:
             --model claude-sonnet-5
             --allowedTools Read,Edit,Write,Glob,Grep,Bash
           prompt: |
-            The `${{ env.BRANCH }}` branch is checked out and built against Foundation's new pin,
-            and CI is red. Repair this repository so that it builds again, and push to this branch.
+            The `${{ env.BRANCH }}` branch is checked out, its dependency layer is built against
+            the new pin, and CI is red. Repair this repository so that it builds again, and push
+            to this branch.
 
             `.claude/commands/update-foundation.md` is the runbook for exactly this work; read it
             first. Its steps 1 and 2 are already done for you — the branch is here, the dependency

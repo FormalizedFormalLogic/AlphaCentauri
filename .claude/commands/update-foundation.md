@@ -2,10 +2,10 @@
 description: Pick up the Foundation pin-bump pull request and make it green
 ---
 
-Handle the automated Foundation pin bump. `.github/workflows/update-foundation.yml` keeps one
+Handle the automated Foundation pin bump. `.github/workflows/update-deps.yml` keeps one
 branch, `update-foundation`, behind one pull request labelled `update-foundation`; the workflow
 moves the pins and nothing else, so the bump is red until this repository is repaired.
-`.github/workflows/repair-foundation.yml` does that in the cloud, once per bump, and this command
+`.github/workflows/repair-deps.yml` does that in the cloud, once per bump, and this command
 is the same runbook from a local session — for the bumps it could not fix, and for the ones it
 repaired and left for a reader. `docs/workflow.md`, "Dependency pins and Foundation", is
 normative — read it before acting.

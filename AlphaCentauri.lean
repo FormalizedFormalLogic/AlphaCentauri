@@ -42,6 +42,7 @@ public import AlphaCentauri.Schemata.Collection.Equivalence
 public import AlphaCentauri.Schemata.Collection.Induction
 public import AlphaCentauri.Schemata.EA
 public import AlphaCentauri.Schemata.Example
+public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.ToFoundation.Absoluteness
 public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness

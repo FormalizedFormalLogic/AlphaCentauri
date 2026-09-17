@@ -62,4 +62,5 @@ public import AlphaCentauri.ToMathlib.ONote.Hardy
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds
 public import AlphaCentauri.ToMathlib.Ordinal.Rank
 public import AlphaCentauri.ToMathlib.Primrec
+public import AlphaCentauri.ToMathlib.Util.Disjunct
 public import AlphaCentauri.ToMathlib.Vector

@@ -5,14 +5,23 @@ Usage: check-pr-title.py [TITLE]   (falls back to $PR_TITLE)
 """
 
 import os
+import pathlib
 import re
 import sys
+import tomllib
 
 TYPES = ("add", "fix", "refactor", "doc", "ci", "chore", "deps")
-# The one titled scope: the automated Foundation pin bump, whose title names the revision it
-# lands (`.github/workflows/update-deps.yml`). Every other title carries none.
-SCOPES = {"deps": ("Foundation",)}
+LAKEFILE = pathlib.Path(__file__).resolve().parents[2] / "lakefile.toml"
 MAX_LENGTH = 100
+
+
+def scoped(kind: str, scope: str) -> bool:
+    """The one titled scope: the automated pin bump (`.github/workflows/update-deps.yml`), whose
+    scope names the packages it moved. Every other title carries none."""
+    if kind != "deps":
+        return False
+    required = {r["name"] for r in tomllib.loads(LAKEFILE.read_text()).get("require", [])}
+    return bool(scope) and set(scope.split(", ")) <= required
 
 # Greek, mathematical Greek (bold/sans/italic planes) and Unicode subscripts.
 GREEK = re.compile(r"[Ͱ-Ͽἀ-῿\U0001d6a8-\U0001d7cb]")
@@ -43,7 +52,7 @@ def check(title: str) -> list[str]:
         errors.append(f"the title is {len(title)} characters, over the {MAX_LENGTH} allowed")
 
     scope = re.match(r"^([A-Za-z]+)\(([^)]*)\):", title)
-    if scope and scope.group(2) not in SCOPES.get(scope.group(1), ()):
+    if scope and not scoped(scope.group(1), scope.group(2)):
         errors.append(
             f"the title carries a '({scope.group(2)})' scope; write "
             f"'{scope.group(1)}: <subject>' instead"

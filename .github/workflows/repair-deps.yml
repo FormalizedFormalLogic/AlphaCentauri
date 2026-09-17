@@ -20,8 +20,6 @@ permissions:
 env:
   BRANCH: update-deps
   LABEL: update-deps
-  # The Lake package being bumped, as `update-deps.yml` writes it into the commit subject.
-  PACKAGE: Foundation
 
 jobs:
   repair:
@@ -73,7 +71,7 @@ jobs:
           fi
           # A commit on top of the newest pin is a previous repair, so this bump has had its
           # attempt. `--first-parent` ignores a merge of `main` made to satisfy the strict checks.
-          pin=$(git log --grep="^deps($PACKAGE): Update to" -1 --format='%H')
+          pin=$(git log --grep='^deps(.*): Update to' -1 --format='%H')
           if [ -z "$pin" ]; then
             echo "no pin commit on the branch; leaving it alone"
             exit 0
@@ -113,8 +111,8 @@ jobs:
       - name: Build the dependency from source (cache miss only)
         if: steps.decide.outputs.number != '' && steps.foundation-cache.outputs.cache-hit != 'true'
         run: |
-          lake build "$PACKAGE"
-          python3 .github/scripts/clear-dep-warnings.py ".lake/packages/$PACKAGE/.lake/build"
+          lake build Foundation
+          python3 .github/scripts/clear-dep-warnings.py .lake/packages/Foundation/.lake/build
 
       - name: Configure the committer
         if: steps.decide.outputs.number != ''

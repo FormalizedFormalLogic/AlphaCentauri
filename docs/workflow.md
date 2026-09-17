@@ -61,7 +61,7 @@ activity for 14 days may be released by anyone, with a comment.
 - Never force-push a branch you did not create except with `--force-with-lease`.
 - Title: a short noun phrase — no subtitle, no full theorem name, no `(scope)` parenthetical —
   in the form `<type>: <subject>` with `<type>` in `add | fix | refactor | doc | ci | chore |
-  deps`. The one exception is the automated Foundation bump, titled
+  deps`. The one exception is the automated pin bump, whose scope names the packages it moved:
   ``deps(Foundation): Update to `<short sha>` ``.
   PRs are squash-merged, so the title becomes the commit on `main`: do not phone it in. Backtick
   every Lean identifier or notation (`` `DirectInterpretation` ``, `` `𝚺-[s]` ``); write
@@ -136,7 +136,9 @@ that resolves to, and `lean-toolchain` equals Foundation's. The manifest and the
 together, forward only, and nobody bumps them by hand: `lake update` is the workflow's to run.
 Forgive, the axiom audit, is pinned to the tag naming that toolchain instead, because it reads
 Lean's internals and only compiles at a revision written for it; the workflow moves that pin with
-the toolchain, and leaves it alone when Forgive has no tag for the new one.
+the toolchain, and leaves it alone when Forgive has no tag for the new one. Which packages are
+followed, and which are pinned to the toolchain's tag, are two lists in the workflow's `env`; the
+repositories behind them are read from `lakefile.toml`, never spelled out twice.
 
 [`.github/workflows/update-deps.yml`](../.github/workflows/update-deps.yml) moves
 them every six hours, and on demand from the Actions tab (`workflow_dispatch`). It keeps one

@@ -29,10 +29,9 @@ permissions:
 env:
   BRANCH: update-deps
   LABEL: update-deps
-  # The Lake package followed on `master`, and the repository it is resolved from.
-  PACKAGE: Foundation
-  UPSTREAM: FormalizedFormalLogic/Foundation
-  # Packages pinned by revision that read Lean's internals, so their pin moves with the toolchain.
+  # The packages followed on `master`, and those pinned to the tag naming our toolchain. Both are
+  # lists of `lakefile.toml` names; the repositories behind them come from `lakefile.toml` too.
+  FOLLOWED: Foundation
   TOOLCHAIN_PINNED: Forgive
 
 jobs:
@@ -89,11 +88,14 @@ jobs:
 
       # `lean-toolchain` has to equal the upstream package's, and is taken before lake runs, so
       # that lake runs under the toolchain it is resolving for.
+      # Every followed package builds under the same toolchain, so the first one's is ours. It is
+      # taken before lake runs, so that lake resolves under the toolchain it is resolving for.
       - name: Take the upstream toolchain
         run: |
           set -euo pipefail
-          curl -fsSL "https://raw.githubusercontent.com/$UPSTREAM/master/lean-toolchain" -o lean-toolchain
-          echo "the toolchain is $(cat lean-toolchain)"
+          first=$(python3 .github/scripts/deps.py slug lakefile.toml "${FOLLOWED%% *}")
+          curl -fsSL "https://raw.githubusercontent.com/$first/master/lean-toolchain" -o lean-toolchain
+          echo "the toolchain is $(cat lean-toolchain), taken from $first"
 
       # Lake builds every dependency under the root toolchain, so a package pinned by revision
       # has to move with it or it no longer compiles.
@@ -103,7 +105,7 @@ jobs:
         run: |
           set -euo pipefail
           for package in $TOOLCHAIN_PINNED; do
-            python3 .github/scripts/pin-to-toolchain.py lakefile.toml "$package" "$(cat lean-toolchain)"
+            python3 .github/scripts/deps.py pin-tag lakefile.toml "$package" "$(cat lean-toolchain)"
           done
 
       # elan only. `lake exe cache get` would run against a tree whose `lean-toolchain` is
@@ -117,23 +119,34 @@ jobs:
           use-github-cache: false
           use-mathlib-cache: false
 
-      # `lakefile.toml` follows the upstream `master`, so `lake update` is the rest of the bump:
-      # it resolves that branch, and the pins moved above, into the manifest.
+      # `lakefile.toml` holds the branches and tags to follow, so `lake update` is the rest of
+      # the bump: it resolves them, and the pins moved above, into the manifest. The title and the
+      # body are written here, where both manifests are at hand.
       - name: Update the manifest
         id: rev
         run: |
           set -euo pipefail
-          pin() { jq -r --arg p "$PACKAGE" '.packages[] | select(.name == $p) | .rev' lake-manifest.json; }
-          old=$(pin)
-          # shellcheck disable=SC2086 # a list of package names, deliberately split
-          lake update "$PACKAGE" $TOOLCHAIN_PINNED
-          new=$(pin)
+          pin() { jq -r --arg p "$2" '.packages[] | select(.name == $p) | .rev' "$1"; }
+          before="$RUNNER_TEMP/manifest-before.json"
+          cp lake-manifest.json "$before"
+          # shellcheck disable=SC2086 # lists of package names, deliberately split
+          lake update $FOLLOWED $TOOLCHAIN_PINNED
+          scope='' shorts='' body=''
+          for package in $FOLLOWED; do
+            old=$(pin "$before" "$package")
+            new=$(pin lake-manifest.json "$package")
+            repository=$(python3 .github/scripts/deps.py slug lakefile.toml "$package")
+            scope="${scope:+$scope, }$package"
+            shorts="${shorts:+$shorts, }\`${new:0:7}\`"
+            body="${body:+$body$'\n'}Pins $package at \`$new\` ([compare](https://github.com/$repository/compare/$old...$new))."
+            echo "$package: $old -> $new"
+          done
           {
-            echo "old=$old"
-            echo "new=$new"
-            echo "short=${new:0:7}"
+            echo "title=deps($scope): Update to $shorts"
+            echo "body<<BODY"
+            echo "$body"
+            echo "BODY"
           } >> "$GITHUB_OUTPUT"
-          echo "the branch pinned $old; it now pins $new"
 
       - name: Commit and push
         id: push
@@ -142,7 +155,7 @@ jobs:
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           HEAD_REF: ${{ steps.pr.outputs.head }}
-          SHORT: ${{ steps.rev.outputs.short }}
+          TITLE: ${{ steps.rev.outputs.title }}
         run: |
           set -euo pipefail
           # The commit is attributed to the identity that pushes it, whose noreply address is
@@ -156,7 +169,7 @@ jobs:
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git commit -m "deps($PACKAGE): Update to \`$SHORT\`" -- lakefile.toml lake-manifest.json lean-toolchain
+          git commit -m "$TITLE" -- lakefile.toml lake-manifest.json lean-toolchain
           if [ -n "$PR_NUMBER" ]; then
             # Never a rewrite: the branch carries the fixes pushed for the previous bump.
             git push origin "HEAD:refs/heads/$HEAD_REF"
@@ -173,22 +186,17 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
-          NEW: ${{ steps.rev.outputs.new }}
-          OLD: ${{ steps.rev.outputs.old }}
-          SHORT: ${{ steps.rev.outputs.short }}
+          TITLE: ${{ steps.rev.outputs.title }}
+          PINS: ${{ steps.rev.outputs.body }}
         run: |
           set -euo pipefail
-          title="deps($PACKAGE): Update to \`$SHORT\`"
-          body=$(cat <<EOF
-          Pins $PACKAGE at \`$NEW\` ([compare](https://github.com/$UPSTREAM/compare/$OLD...$NEW)).
+          body="$PINS
 
-          Opened by \`.github/workflows/update-deps.yml\`, which moves the pins only. This body is rewritten on every run; leave notes in a comment.
-          EOF
-          )
+          Opened by \`.github/workflows/update-deps.yml\`, which moves the pins only. This body is rewritten on every run; leave notes in a comment."
           if [ -n "$PR_NUMBER" ]; then
-            gh pr edit "$PR_NUMBER" --title "$title" --body "$body"
+            gh pr edit "$PR_NUMBER" --title "$TITLE" --body "$body"
           else
-            gh pr create --base main --head "$BRANCH" --label "$LABEL" --title "$title" --body "$body"
+            gh pr create --base main --head "$BRANCH" --label "$LABEL" --title "$TITLE" --body "$body"
           fi
 
       # A pins-only bump has no diff to read, so its checks are the whole review: the merge is

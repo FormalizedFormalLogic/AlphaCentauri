@@ -29,9 +29,11 @@ permissions:
 env:
   BRANCH: update-deps
   LABEL: update-deps
-  # The Lake package as `lake-manifest.json` names it, and the repository it is resolved from.
+  # The Lake package followed on `master`, and the repository it is resolved from.
   PACKAGE: Foundation
   UPSTREAM: FormalizedFormalLogic/Foundation
+  # Packages pinned by revision that read Lean's internals, so their pin moves with the toolchain.
+  TOOLCHAIN_PINNED: Forgive
 
 jobs:
   update:
@@ -93,6 +95,17 @@ jobs:
           curl -fsSL "https://raw.githubusercontent.com/$UPSTREAM/master/lean-toolchain" -o lean-toolchain
           echo "the toolchain is $(cat lean-toolchain)"
 
+      # Lake builds every dependency under the root toolchain, so a package pinned by revision
+      # has to move with it or it no longer compiles.
+      - name: Move the pins tied to the toolchain
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
+        run: |
+          set -euo pipefail
+          for package in $TOOLCHAIN_PINNED; do
+            python3 .github/scripts/pin-to-toolchain.py lakefile.toml "$package" "$(cat lean-toolchain)"
+          done
+
       # elan only. `lake exe cache get` would run against a tree whose `lean-toolchain` is
       # already the upstream's while `lake-manifest.json` still pins the old Mathlib, and the
       # cache refuses a toolchain mismatch — so it is turned off rather than left to
@@ -104,15 +117,16 @@ jobs:
           use-github-cache: false
           use-mathlib-cache: false
 
-      # `lakefile.toml` follows the upstream `master`, so `lake update` is the whole bump: it
-      # resolves that branch and writes the revision it lands on into the manifest.
+      # `lakefile.toml` follows the upstream `master`, so `lake update` is the rest of the bump:
+      # it resolves that branch, and the pins moved above, into the manifest.
       - name: Update the manifest
         id: rev
         run: |
           set -euo pipefail
           pin() { jq -r --arg p "$PACKAGE" '.packages[] | select(.name == $p) | .rev' lake-manifest.json; }
           old=$(pin)
-          lake update "$PACKAGE"
+          # shellcheck disable=SC2086 # a list of package names, deliberately split
+          lake update "$PACKAGE" $TOOLCHAIN_PINNED
           new=$(pin)
           {
             echo "old=$old"

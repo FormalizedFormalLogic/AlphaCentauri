@@ -26,7 +26,9 @@ git = "https://github.com/FormalizedFormalLogic/Foundation"
 rev = "master"
 
 # `lake exe forgive AlphaCentauri` (`just axiom-audit`): the axiom audit against `forgive.yml`.
-# Run after `lake build`; it reads the oleans. The package imports only `Lean` and `Cli`.
+# Run after `lake build`; it reads the oleans. The package imports only `Lean` and `Cli`, whose
+# internals move between toolchains, so it is pinned by revision and `update-deps.yml` moves that
+# pin to the newest Forgive commit carrying our `lean-toolchain`.
 [[require]]
 name = "Forgive"
 git = "https://github.com/FormalizedFormalLogic/forgive"

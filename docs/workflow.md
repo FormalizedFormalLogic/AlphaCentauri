@@ -134,6 +134,9 @@ An open pull request labelled `update-deps` comes before all of this; see
 `lakefile.toml` follows Foundation's `master`, `lake-manifest.json` records the exact revision
 that resolves to, and `lean-toolchain` equals Foundation's. The manifest and the toolchain move
 together, forward only, and nobody bumps them by hand: `lake update` is the workflow's to run.
+Forgive, the axiom audit, is pinned by revision instead, because it reads Lean's internals and
+only compiles at a revision written for our toolchain; the workflow moves that pin with the
+toolchain, to the newest commit of Forgive carrying it.
 
 [`.github/workflows/update-deps.yml`](../.github/workflows/update-deps.yml) moves
 them every six hours, and on demand from the Actions tab (`workflow_dispatch`). It keeps one

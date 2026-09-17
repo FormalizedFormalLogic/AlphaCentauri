@@ -19,7 +19,7 @@ name = "AlphaCentauri"
 
 # Foundation follows `master`, and `lake-manifest.json` records the exact revision that resolves
 # to; the manifest is committed, so what CI builds is what a checkout builds. `lake update` is run
-# only by `.github/workflows/update-foundation.yml` (see docs/workflow.md).
+# only by `.github/workflows/update-deps.yml` (see docs/workflow.md).
 [[require]]
 name = "Foundation"
 git = "https://github.com/FormalizedFormalLogic/Foundation"

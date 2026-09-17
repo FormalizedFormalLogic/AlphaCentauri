@@ -155,9 +155,10 @@ it once the checks are green; the checks are the whole review, because there is 
 the diff to read. A branch that carries more than the pins is never queued.
 
 [`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes the rest: when
-CI fails on that branch it hands it to Claude Code, which repairs this repository in place, pushes,
-reports in a comment, and cancels the queued merge — so a repaired bump is read by a human before
-it lands. Each bump gets one attempt, drawn from the maintainer's Claude subscription through the
+CI fails on that branch it hands it to Claude Code, which repairs this repository in place and
+commits. The agent cannot push: the workflow runs the checks `ci.yml` runs and pushes only if they
+pass, so the branch never advances to a commit that does not build, and cancels the queued merge
+when it does — a repaired bump is read by a human before it lands. Each bump gets one attempt, drawn from the maintainer's Claude subscription through the
 organization secret `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`); without it, or after that
 attempt, the pull request says so and waits. `/update-deps` is the same
 runbook from a local session.

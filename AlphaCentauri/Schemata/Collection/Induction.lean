@@ -164,17 +164,18 @@ lemma models_ISigma_of_models_BSigma_succ :
 theorem ISigma_weakerThan_BSigma_succ (n : ℕ) : 𝗜𝚺 n ⪯ 𝗕𝚺 (n + 1) :=
   weakerThan_of_models.{0} _ _ fun V _ _ ↦ models_ISigma_of_models_BSigma_succ n V
 
-/-- Every model of `𝗕𝚺 (n + 1)` satisfies `𝗜𝚫⁺ (n + 1)`.
+/-- Every model of `𝗕𝚺 (n + 1)` satisfies the `Δ` induction scheme for a class of formulas each of
+which agrees with an existential quantification of a $\Pi_n$ formula.
 - [Sla04, §2.1] -/
-lemma models_IDeltaOnBroadHierarchy_of_models_BSigma_succ (n : ℕ) (V : Type*) [ORingStructure V]
-    [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (n + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚫⁺ (n + 1) := by
+private lemma models_DeltaInductionScheme_of_exists_pi_eval_iff
+    {C : ArithmeticSemiformula ℕ 1 → Prop} [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (n + 1)]
+    (hC : ∀ {φ : ArithmeticSemiformula ℕ 1}, C φ → ∀ f : ℕ → V,
+      ∃ χ : ArithmeticSemiformula ℕ 2, Hierarchy 𝚷 n χ ∧
+        ∀ x : V, φ.Eval ![x] f ↔ ∃ w, χ.Eval ![x, w] f) :
+    V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ DeltaInductionScheme C := by
   have hPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := 𝗕𝚺 (n + 1)) inferInstance
   have hzero : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_subtheory (T := 𝗜𝚺₀) (U := 𝗕𝚺 (n + 1)) inferInstance
   have hind : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n := models_ISigma_of_models_BSigma_succ n V
-  have hstrict : StrictCollection V (n + 1) :=
-    strictCollection_of_models_collectionAxiom fun _ hψ ↦
-      models_of_mem (T := 𝗕𝚺 (n + 1))
-        (Set.mem_union_right _ (mem_CollectionScheme_of_mem hψ.hierarchy))
   have hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, Hierarchy 𝚷 n ψ →
       V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom ψ) : ArithmeticSentence) := fun _ hψ ↦
     models_of_mem (T := 𝗕𝚺 (n + 1))
@@ -183,23 +184,41 @@ lemma models_IDeltaOnBroadHierarchy_of_models_BSigma_succ (n : ℕ) (V : Type*) 
   rintro _ ⟨φ, ψ, hφ, hψ, rfl⟩
   apply (models_deltaInd_iff φ ψ).mpr
   intro f heq zero succ
-  obtain ⟨χ, hχ, hχiff⟩ := exists_pi_eval_iff hstrict hφ f
-  obtain ⟨χ', hχ', hχ'iff⟩ := exists_pi_eval_iff hstrict hψ f
+  obtain ⟨χ, hχ, hχiff⟩ := hC hφ f
+  obtain ⟨χ', hχ', hχ'iff⟩ := hC hψ f
   exact succ_induction_of_complementary_exists_pi hcol (definableRel_of_hierarchy hχ f)
     (definableRel_of_hierarchy hχ' f) hχiff
     (fun x ↦ by rw [← hχ'iff x, heq x, not_not]) zero succ
+
+/-- Every model of `𝗕𝚺 (n + 1)` satisfies `𝗜𝚫 (n + 1)`.
+- [Sla04, §2.1] -/
+lemma models_IDelta_of_models_BSigma_succ (n : ℕ) (V : Type*) [ORingStructure V]
+    [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (n + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚫 (n + 1) :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := 𝗕𝚺 (n + 1)) inferInstance
+  models_DeltaInductionScheme_of_exists_pi_eval_iff fun hφ f ↦
+    exists_pi_eval_iff_of_strictHierarchy hφ f
+
+/-- `𝗜𝚫 (n + 1)` is at most as strong as `𝗕𝚺 (n + 1)`.
+- [Sla04, §2.1] -/
+theorem IDelta_weakerThan_BSigma (n : ℕ) : 𝗜𝚫 (n + 1) ⪯ 𝗕𝚺 (n + 1) :=
+  weakerThan_of_models.{0} _ _ fun V _ _ ↦ models_IDelta_of_models_BSigma_succ n V
+
+/-- Every model of `𝗕𝚺 (n + 1)` satisfies `𝗜𝚫⁺ (n + 1)`.
+- [Sla04, §2.1] -/
+lemma models_IDeltaOnBroadHierarchy_of_models_BSigma_succ (n : ℕ) (V : Type*) [ORingStructure V]
+    [V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (n + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚫⁺ (n + 1) :=
+  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := 𝗕𝚺 (n + 1)) inferInstance
+  have hstrict : StrictCollection V (n + 1) :=
+    strictCollection_of_models_collectionAxiom fun _ hψ ↦
+      models_of_mem (T := 𝗕𝚺 (n + 1))
+        (Set.mem_union_right _ (mem_CollectionScheme_of_mem hψ.hierarchy))
+  models_DeltaInductionScheme_of_exists_pi_eval_iff fun hφ f ↦ exists_pi_eval_iff hstrict hφ f
 
 /-- `𝗜𝚫⁺ (n + 1)` is at most as strong as `𝗕𝚺 (n + 1)`.
 - [Sla04, §2.1] -/
 theorem IDeltaOnBroadHierarchy_weakerThan_BSigma (n : ℕ) : 𝗜𝚫⁺ (n + 1) ⪯ 𝗕𝚺 (n + 1) :=
   weakerThan_of_models.{0} _ _ fun V _ _ ↦
     models_IDeltaOnBroadHierarchy_of_models_BSigma_succ n V
-
-/-- `𝗜𝚫 (n + 1)` is at most as strong as `𝗕𝚺 (n + 1)`.
-- [Sla04, §2.1] -/
-theorem IDelta_weakerThan_BSigma (n : ℕ) : 𝗜𝚫 (n + 1) ⪯ 𝗕𝚺 (n + 1) :=
-  WeakerThan.trans (IDelta_weakerThan_IDeltaOnBroadHierarchy (n + 1))
-    (IDeltaOnBroadHierarchy_weakerThan_BSigma n)
 
 end theorems
 

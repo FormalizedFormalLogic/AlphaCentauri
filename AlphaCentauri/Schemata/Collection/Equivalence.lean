@@ -121,29 +121,26 @@ private lemma exists_boundsWitness_of_strictHierarchy :
   intro m θ hθ
   exact key θ.complexity le_rfl hθ
 
-/-- In a model of `𝗣𝗔⁻` with collection for strict $\Sigma_{n + 1}$ formulas, every $\Sigma_{n + 1}$
-formula agrees, at a fixed assignment of its free variables, with an existential quantification
-of a $\Pi_n$ formula.
-- [HP98, 0.30]
+/-- In a model of `𝗣𝗔⁻`, every strict $\Sigma_{n + 1}$ formula agrees, at a fixed assignment of its
+free variables, with an existential quantification of a $\Pi_n$ formula.
 - [Bus98A, Theorem 1.2.9(a)] -/
-lemma exists_pi_eval_iff (hC : StrictCollection V (n + 1)) {φ : ArithmeticSemiformula ℕ 1}
-    (hφ : Hierarchy 𝚺 (n + 1) φ) (f : ℕ → V) :
+lemma exists_pi_eval_iff_of_strictHierarchy {φ : ArithmeticSemiformula ℕ 1}
+    (hφ : StrictHierarchy 𝚺 (n + 1) φ) (f : ℕ → V) :
     ∃ χ : ArithmeticSemiformula ℕ 2, Hierarchy 𝚷 n χ ∧
       ∀ x : V, φ.Eval ![x] f ↔ ∃ w, χ.Eval ![x, w] f := by
-  obtain ⟨ψ, hψ, hψiff⟩ := exists_strictHierarchy_eval_iff (V := V) hC hφ f
   obtain ⟨χ, hχ, -, hbound, hwitness⟩ :=
     exists_boundsWitness_of_strictHierarchy (V := V)
-      (θ := (Rew.bShift ▹ ψ.toSemisentence ![#0] : ArithmeticSemisentence (ψ.fvSup + 2)))
-      ((hψ.rew _).rew _)
+      (θ := (Rew.bShift ▹ φ.toSemisentence ![#0] : ArithmeticSemisentence (φ.fvSup + 2)))
+      ((hφ.rew _).rew _)
   have hshift : ∀ u x : V,
-      V ⊧/(u :> x :> fun i : Fin ψ.fvSup ↦ f i) (Rew.bShift ▹ ψ.toSemisentence ![#0]) ↔
-        ψ.Eval ![x] f := fun u x ↦ by simpa using ψ.eval_toSemisentence_one x f
+      V ⊧/(u :> x :> fun i : Fin φ.fvSup ↦ f i) (Rew.bShift ▹ φ.toSemisentence ![#0]) ↔
+        φ.Eval ![x] f := fun u x ↦ by simpa using φ.eval_toSemisentence_one x f
   refine ⟨Rew.embSubsts
-      (#1 :> #0 :> fun i : Fin ψ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹ χ,
+      (#1 :> #0 :> fun i : Fin φ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹ χ,
     hχ.rew _, fun x ↦ ?_⟩
   have hval : ∀ w : V,
-      (Rew.embSubsts (#1 :> #0 :> fun i : Fin ψ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹
-        χ).Eval ![x, w] f ↔ V ⊧/(w :> x :> fun i : Fin ψ.fvSup ↦ f i) χ := by
+      (Rew.embSubsts (#1 :> #0 :> fun i : Fin φ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹
+        χ).Eval ![x, w] f ↔ V ⊧/(w :> x :> fun i : Fin φ.fvSup ↦ f i) χ := by
     intro w
     simp only [Semiformula.eval_embSubsts]
     refine Iff.of_eq (congrArg (fun b ↦ Semiformula.Evalb (M := V) b χ) ?_)
@@ -154,14 +151,26 @@ lemma exists_pi_eval_iff (hC : StrictCollection V (n + 1)) {φ : ArithmeticSemif
       cases i using Fin.cases with
       | zero => simp
       | succ i => simp
-  rw [← hψiff x]
   constructor
   · intro h
-    obtain ⟨v, hv⟩ := hwitness (x :> fun i : Fin ψ.fvSup ↦ f i) 0 ((hshift 0 x).mpr h)
+    obtain ⟨v, hv⟩ := hwitness (x :> fun i : Fin φ.fvSup ↦ f i) 0 ((hshift 0 x).mpr h)
     exact ⟨v, (hval v).mpr hv⟩
   · rintro ⟨w, hw⟩
-    obtain ⟨u, -, hu⟩ := hbound (x :> fun i : Fin ψ.fvSup ↦ f i) w ((hval w).mp hw)
+    obtain ⟨u, -, hu⟩ := hbound (x :> fun i : Fin φ.fvSup ↦ f i) w ((hval w).mp hw)
     exact (hshift u x).mp hu
+
+/-- In a model of `𝗣𝗔⁻` with collection for strict $\Sigma_{n + 1}$ formulas, every $\Sigma_{n + 1}$
+formula agrees, at a fixed assignment of its free variables, with an existential quantification
+of a $\Pi_n$ formula.
+- [HP98, 0.30]
+- [Bus98A, Theorem 1.2.9(a)] -/
+lemma exists_pi_eval_iff (hC : StrictCollection V (n + 1)) {φ : ArithmeticSemiformula ℕ 1}
+    (hφ : Hierarchy 𝚺 (n + 1) φ) (f : ℕ → V) :
+    ∃ χ : ArithmeticSemiformula ℕ 2, Hierarchy 𝚷 n χ ∧
+      ∀ x : V, φ.Eval ![x] f ↔ ∃ w, χ.Eval ![x, w] f := by
+  obtain ⟨ψ, hψ, hψiff⟩ := exists_strictHierarchy_eval_iff (V := V) hC hφ f
+  obtain ⟨χ, hχ, hχiff⟩ := exists_pi_eval_iff_of_strictHierarchy hψ f
+  exact ⟨χ, hχ, fun x ↦ (hψiff x).symm.trans (hχiff x)⟩
 
 /-- Collection for $\Pi_n$ formulas gives collection for strict $\Sigma_{n + 1}$ formulas.
 - [HP98, Lemma I.2.10]

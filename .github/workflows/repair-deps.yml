@@ -19,7 +19,6 @@ permissions:
 
 env:
   BRANCH: update-deps
-  LABEL: update-deps
   # `update-deps.yml`'s commit subject: it marks the bump's own commit.
   TITLE: 'chore: Update dependencies'
 
@@ -59,9 +58,9 @@ jobs:
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
-          number=$(gh pr list --state open --label "$LABEL" --limit 1 --json number --jq '.[0].number // ""')
+          number=$(gh pr list --state open --head "$BRANCH" --limit 1 --json number --jq '.[0].number // ""')
           if [ -z "$number" ]; then
-            echo "no open pull request labelled $LABEL; nothing to repair"
+            echo "no open pull request for $BRANCH; nothing to repair"
             exit 0
           fi
           if [ "$(git rev-parse HEAD)" != "$HEAD_SHA" ]; then

@@ -57,24 +57,20 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
         run: |
           set -euo pipefail
-          pr=$(gh pr list --state open --label "$LABEL" --limit 1 --json number,headRefName)
-          number=$(echo "$pr" | jq -r '.[0].number // ""')
-          head=$(echo "$pr" | jq -r '.[0].headRefName // ""')
+          number=$(gh pr list --state open --head "$BRANCH" --limit 1 --json number --jq '.[0].number // ""')
           echo "number=$number" >> "$GITHUB_OUTPUT"
-          echo "head=${head:-$BRANCH}" >> "$GITHUB_OUTPUT"
-          echo "found the pull request: ${number:-none} (branch ${head:-$BRANCH})"
+          echo "found the pull request: ${number:-none}"
 
       # An open pull request's branch is built on top of, never rewritten: the previous bump's
       # repairs live there.
       - name: Prepare the branch
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
-          HEAD_REF: ${{ steps.pr.outputs.head }}
         run: |
           set -euo pipefail
           if [ -n "$PR_NUMBER" ]; then
-            git fetch origin "+refs/heads/$HEAD_REF:refs/remotes/origin/$HEAD_REF"
-            git switch --force-create "$HEAD_REF" "origin/$HEAD_REF"
+            git fetch origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+            git switch --force-create "$BRANCH" "origin/$BRANCH"
           else
             git switch --force-create "$BRANCH" origin/main
           fi
@@ -138,7 +134,6 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
-          HEAD_REF: ${{ steps.pr.outputs.head }}
         run: |
           set -euo pipefail
           # The bot's noreply address is built from its user id.
@@ -153,7 +148,7 @@ jobs:
           fi
           git commit -m "$TITLE" -- lakefile.toml lake-manifest.json lean-toolchain
           if [ -n "$PR_NUMBER" ]; then
-            git push origin "HEAD:refs/heads/$HEAD_REF"
+            git push origin "HEAD:refs/heads/$BRANCH"
           else
             # A leftover branch nothing points at is replaced, against the tip fetched above.
             git push --force-with-lease origin "HEAD:$BRANCH"
@@ -162,6 +157,7 @@ jobs:
 
       # The body is rewritten on every run, so notes about the bump belong in a comment.
       - name: Open or refresh the pull request
+        id: open
         if: steps.push.outputs.pushed == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
@@ -172,28 +168,26 @@ jobs:
           if [ -n "$PR_NUMBER" ]; then
             gh pr edit "$PR_NUMBER" --title "$TITLE" --body "$BODY"
           else
-            gh pr create --base main --head "$BRANCH" --label "$LABEL" --title "$TITLE" --body "$BODY"
+            url=$(gh pr create --base main --head "$BRANCH" --label "$LABEL" --title "$TITLE" --body "$BODY")
+            PR_NUMBER=${url##*/}
           fi
+          echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
 
       # A pins-only bump has no diff to read, so its checks are the whole review.
       - name: Queue the merge of a pins-only bump
         if: steps.push.outputs.pushed == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
+          NUMBER: ${{ steps.open.outputs.number }}
         run: |
           set -euo pipefail
-          number=$(gh pr list --state open --label "$LABEL" --limit 1 --json number --jq '.[0].number // ""')
-          if [ -z "$number" ]; then
-            echo "no open pull request to queue"
-            exit 0
-          fi
           extra=$(git diff --name-only origin/main...HEAD |
             grep -vxE 'lake-manifest\.json|lakefile\.toml|lean-toolchain' || true)
           if [ -n "$extra" ]; then
             echo "the branch also changes:"
             echo "$extra"
-            echo "the merge of #$number stays a human's"
+            echo "the merge of #$NUMBER stays a human's"
             exit 0
           fi
-          gh pr merge "$number" --squash --auto
-          echo "queued the merge of #$number; GitHub performs it once the checks are green"
+          gh pr merge "$NUMBER" --squash --auto
+          echo "queued the merge of #$NUMBER; GitHub performs it once the checks are green"

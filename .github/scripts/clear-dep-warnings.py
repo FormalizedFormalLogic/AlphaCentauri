@@ -4,8 +4,6 @@
 Lake replays each module's cached log on every downstream build, so a dependency's own warnings
 would reach a `lake build ... --wfail` here as if they were ours. Emptying the `log` array of
 each `.trace` drops the replay and leaves the `.olean` untouched.
-
-Takes the dependency's build directory, e.g. `.lake/packages/Foundation/.lake/build`.
 """
 
 import json

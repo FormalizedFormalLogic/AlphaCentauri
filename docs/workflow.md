@@ -61,8 +61,7 @@ activity for 14 days may be released by anyone, with a comment.
 - Never force-push a branch you did not create except with `--force-with-lease`.
 - Title: a short noun phrase — no subtitle, no full theorem name, no `(scope)` parenthetical —
   in the form `<type>: <subject>` with `<type>` in `add | fix | refactor | doc | ci | chore |
-  deps`. The one exception is the automated Foundation bump, titled
-  ``deps(Foundation): Update to `<short sha>` ``.
+  deps`, and no scope at all.
   PRs are squash-merged, so the title becomes the commit on `main`: do not phone it in. Backtick
   every Lean identifier or notation (`` `DirectInterpretation` ``, `` `𝚺-[s]` ``); write
   mathematics in TeX (`` $\Delta_1$ ``, `` $\Sigma_n$ ``, `` $\mathsf{I}\Sigma_1$ ``,
@@ -82,7 +81,8 @@ activity for 14 days may be released by anyone, with a comment.
 what `forgive.yml` forgives by name); `just no-sorry`; `just mk-all` leaves no diff. The audit
 writes `.lake/audit.json`, which `.github/scripts/audit-comment.py` renders into one PR comment,
 overwritten on each run, unless the PR is labelled `infrastructure`. `actionlint.yml`
-lints the workflow files, and `update-foundation.yml` bumps the dependency pins (below).
+lints the workflow files, and `update-deps.yml` and `repair-deps.yml` move the dependency pins
+and repair what the move breaks (below).
 
 A red check is fixed in the PR, never worked around.
 
@@ -110,14 +110,14 @@ agent when the user has explicitly told it to for that PR.
 | `proof-formalized` | Stage: the `axiom` proved in a follow-up PR; closes the issue. |
 | `infrastructure` | A PR with no mathematics; CI skips the audit comment. |
 | `refactor` | Reorganizes existing code without adding results; no mathematics. |
-| `update-foundation` | The automated Foundation pin bump; at most one open PR carries it. |
+| `update-deps` | The automated dependency pin bump; at most one open PR carries it. |
 
 Nothing else is a label. Blocked, belongs upstream in Foundation, process questions — say it
 in the issue thread.
 
 ## The worker loop
 
-An open pull request labelled `update-foundation` comes before all of this; see
+An open pull request labelled `update-deps` comes before all of this; see
 [Dependency pins and Foundation](#dependency-pins-and-foundation).
 
 1. List open, unassigned issues whose thread does not say they are waiting; pick one.
@@ -133,21 +133,37 @@ An open pull request labelled `update-foundation` comes before all of this; see
 `lakefile.toml` follows Foundation's `master`, `lake-manifest.json` records the exact revision
 that resolves to, and `lean-toolchain` equals Foundation's. The manifest and the toolchain move
 together, forward only, and nobody bumps them by hand: `lake update` is the workflow's to run.
+Forgive, the axiom audit, is pinned to the tag naming that toolchain instead, because it reads
+Lean's internals and only compiles at a revision written for it; the workflow moves that pin with
+the toolchain, and leaves it alone when Forgive has no tag for the new one. Which packages are
+followed, and which are pinned to the toolchain's tag, are two lists in the workflow's `env`; the
+repositories behind them are read from `lakefile.toml`, never spelled out twice.
 
-[`.github/workflows/update-foundation.yml`](../.github/workflows/update-foundation.yml) moves
+[`.github/workflows/update-deps.yml`](../.github/workflows/update-deps.yml) moves
 them every six hours, and on demand from the Actions tab (`workflow_dispatch`). It keeps one
-branch,
-`update-foundation`, behind one open pull request labelled `update-foundation` and titled
-``deps(Foundation): Update to `<short sha>` ``. While that pull request is open the new pins are
+branch, `update-deps`, behind one open pull request labelled `update-deps` and titled
+`chore: Update dependencies`, whose body is the table of revisions moved and nothing else. While that pull request is open the new pins are
 committed on top of it — never a force-push, since the repairs made for the previous bump live
 on that branch; otherwise the branch restarts from `main` and the pull request is opened. The
-workflow moves the pins and nothing else: it does not build, and the bump is red until someone
+workflow moves the pins and nothing else: it does not build, and the bump is red until something
 makes it green. It pushes as the organization's GitHub App (the variable `BOT_APP_ID` and the
 secret `BOT_APP_PRIVATE_KEY`), because a push made with `github.token` starts no checks.
 
-That is a session's work, not an issue's:
+A bump that breaks nothing lands by itself. When the branch's diff against `main` is the pin
+files alone, the workflow queues its merge (`gh pr merge --squash --auto`) and GitHub performs
+it once the checks are green; the checks are the whole review, because there is nothing else in
+the diff to read. A branch that carries more than the pins is never queued.
 
-1. An open pull request labelled `update-foundation` takes precedence over picking up an issue
+[`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes the rest: when
+CI fails on that branch it hands it to Claude Code, which repairs this repository in place, pushes,
+reports in a comment, and cancels the queued merge — so a repaired bump is read by a human before
+it lands. Each bump gets one attempt, paid for by the organization secret `ANTHROPIC_API_KEY`;
+without it, or after that attempt, the pull request says so and waits. `/update-deps` is the same
+runbook from a local session.
+
+Repairing a bump is a session's work, not an issue's:
+
+1. An open pull request labelled `update-deps` takes precedence over picking up an issue
    — a `/loop` iteration is the usual way to notice one. Work on its branch, in that pull
    request.
 2. Build, read the compiler's complaints against Foundation's own diff over the range the pull
@@ -159,7 +175,8 @@ That is a session's work, not an issue's:
 4. Push to the same branch, and leave the merge to a human as for every other pull request.
 
 A bump blocked on mathematics this repository does not have is reported in a comment on that
-pull request and left to a human.
+pull request and left to a human. A red bump is never made green by pinning Foundation back:
+the pins move forward only.
 
 Material here is written in Foundation's style so it can move upstream. Deciding what moves is a
 human's job; an agent that thinks a result belongs upstream, or that Foundation's API needs a

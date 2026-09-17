@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Drop Lake's cached diagnostics for a dependency's build.
+"""Drop Lake's cached diagnostics for a dependency's build directory.
 
 Lake replays each module's cached log on every downstream build, so a dependency's own warnings
-would reach a `lake build ... --wfail` here as if they were ours. Emptying the `log` array of
-each `.trace` drops the replay and leaves the `.olean` untouched.
+would reach `lake build ... --wfail` as if they were ours. Emptying each `.trace`'s `log` array
+drops the replay and leaves the `.olean` untouched.
 """
 
 import json

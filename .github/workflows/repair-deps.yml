@@ -20,11 +20,12 @@ permissions:
 env:
   BRANCH: update-deps
   LABEL: update-deps
+  # `update-deps.yml`'s commit subject, which marks where a bump's own commit ends.
+  TITLE: 'chore: Update dependencies'
 
 jobs:
   repair:
     name: Repair the bump
-    # Nothing to do in a fork, and nothing to do for any branch but the bump's own.
     if: >-
       github.repository == 'FormalizedFormalLogic/AlphaCentauri'
       && github.event.workflow_run.conclusion == 'failure'
@@ -71,7 +72,7 @@ jobs:
           fi
           # A commit on top of the newest pin is a previous repair, so this bump has had its
           # attempt. `--first-parent` ignores a merge of `main` made to satisfy the strict checks.
-          pin=$(git log --grep='^deps(.*): Update to' -1 --format='%H')
+          pin=$(git log --grep="^$TITLE" -1 --format='%H')
           if [ -z "$pin" ]; then
             echo "no pin commit on the branch; leaving it alone"
             exit 0
@@ -146,8 +147,9 @@ jobs:
             `just axiom-audit` before committing. Never force-push, never merge, never write
             `sorry`, and touch nothing under `docs/`, `.github/`, `README.md` or `AGENTS.md`.
 
-            If you cannot get it green, push nothing and say what is broken in a comment on
-            #${{ steps.decide.outputs.number }}: this bump gets one attempt.
+            Say what you changed, or what is broken if you cannot get it green, in a comment on
+            #${{ steps.decide.outputs.number }}. Push nothing that leaves the build red: this bump
+            gets one attempt.
 
       # The branch is no longer pins-only, so the merge queued when it was opened is off.
       - name: Cancel the queued merge if the agent pushed

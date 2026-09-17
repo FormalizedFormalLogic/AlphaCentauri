@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-"""Answer questions about `lakefile.toml`'s dependencies, so no workflow repeats what it says.
+"""Answer questions about `lakefile.toml`, so no workflow repeats what it says.
 
     deps.py slug lakefile.toml Foundation
     deps.py pin-tag lakefile.toml Forgive leanprover/lean4:v4.34.0
 
-`slug` prints the `owner/name` a package is resolved from. `pin-tag` moves a package pinned by
-revision onto the tag naming our Lean toolchain: Lake builds every dependency under the root
-`lean-toolchain`, so a package that reads Lean's internals — Forgive, the axiom audit — only
-compiles at a revision written for it, and such repositories tag each toolchain they support. It
-leaves the file alone when there is no such tag; the bump then goes red and is repaired like any
-other pull request.
+`slug` prints the `owner/name` a package is resolved from. `pin-tag` moves a package onto the tag
+naming our toolchain — Lake builds every dependency under the root `lean-toolchain`, and a package
+reading Lean's internals only compiles at a revision written for it — and leaves the pin alone
+when there is no such tag.
 """
 
 import json

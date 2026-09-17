@@ -1,23 +1,19 @@
 name: Update dependencies
 
-# Every six hours (and on demand) the pins of the package this repository follows are moved to
-# the tip of its `master`, on one long-lived branch, `update-deps`, behind one pull request
-# labelled `update-deps`. Only the pins move here: `repair-deps.yml` fixes what the move breaks in
-# that same pull request, and a bump that breaks nothing merges itself (see docs/workflow.md).
-# Which package is followed is the `env` block below and nothing else.
+# Every six hours (and on demand) the followed pins are moved to the tip of their `master`, on one
+# long-lived branch, `update-deps`, behind one pull request labelled `update-deps`. Only the pins
+# move here: `repair-deps.yml` fixes what the move breaks, and a bump that breaks nothing merges
+# itself (see docs/workflow.md). What is followed is the `env` block below and `lakefile.toml`.
 #
-# Pushes made with `github.token` do not start `ci.yml`, and `main` requires its checks, so the
-# branch and the pull request belong to a GitHub App instead: the organization variable
-# `BOT_APP_ID` and the secret `BOT_APP_PRIVATE_KEY` (contents and pull requests: write; issues:
-# write, for the label). Without them the workflow still runs under `github.token`, and the bump
-# then has no checks until someone pushes to its branch.
+# The branch and the pull request belong to the organization's GitHub App (`BOT_APP_ID`,
+# `BOT_APP_PRIVATE_KEY`), because a push made with `github.token` starts no checks.
 on:
   schedule:
     - cron: '17 */6 * * *'
   workflow_dispatch:
 
-# A run pushes to a shared branch, so runs never overlap; a scheduled run behind a manual one
-# waits rather than dies, because it may carry a newer revision.
+# Runs share a branch, so they never overlap; one waiting behind another finishes rather than
+# dies, because it may carry a newer revision.
 concurrency:
   group: update-deps
   cancel-in-progress: false
@@ -29,20 +25,20 @@ permissions:
 env:
   BRANCH: update-deps
   LABEL: update-deps
-  # The packages followed on `master`, and those pinned to the tag naming our toolchain. Both are
-  # lists of `lakefile.toml` names; the repositories behind them come from `lakefile.toml` too.
+  TITLE: 'chore: Update dependencies'
+  # `lakefile.toml` names: the packages followed on `master`, and those pinned to the tag naming
+  # our toolchain. The repositories behind them are read from `lakefile.toml` too.
   FOLLOWED: Foundation
   TOOLCHAIN_PINNED: Forgive
 
 jobs:
   update:
-    name: Bump the Foundation pins
-    # Nothing to do in a fork, whose pull requests go to its own default branch.
+    name: Bump the pins
+    # A fork's pull requests go to its own default branch.
     if: github.repository == 'FormalizedFormalLogic/AlphaCentauri'
     runs-on: ubuntu-latest
     steps:
-      # An installation token, revoked when the job ends. Skipped, and `github.token` used, where
-      # the app is not installed — a fork, or before the app exists.
+      # An installation token, revoked when the job ends; `github.token` where the app is absent.
       - name: Mint the app token
         id: app-token
         if: vars.BOT_APP_ID != ''
@@ -51,13 +47,12 @@ jobs:
           app-id: ${{ vars.BOT_APP_ID }}
           private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
 
-      # Full history: the existing branch is fetched below, and its tip is what the push leases.
+      # Full history: the push below leases the tip fetched here.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token || github.token }}
 
-      # One pull request carries the bump at a time; a second one would race this branch.
       - name: Find the open pull request
         id: pr
         env:
@@ -71,8 +66,8 @@ jobs:
           echo "head=${head:-$BRANCH}" >> "$GITHUB_OUTPUT"
           echo "found the pull request: ${number:-none} (branch ${head:-$BRANCH})"
 
-      # An open pull request's branch is built on top of, never rewritten: an agent's fixes for
-      # the previous bump live there. Without one, the branch restarts from `main`.
+      # An open pull request's branch is built on top of, never rewritten: the previous bump's
+      # repairs live there. Without one, the branch restarts from `main`.
       - name: Prepare the branch
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
@@ -86,10 +81,8 @@ jobs:
             git switch --force-create "$BRANCH" origin/main
           fi
 
-      # `lean-toolchain` has to equal the upstream package's, and is taken before lake runs, so
-      # that lake runs under the toolchain it is resolving for.
-      # Every followed package builds under the same toolchain, so the first one's is ours. It is
-      # taken before lake runs, so that lake resolves under the toolchain it is resolving for.
+      # Taken before lake runs, so that lake resolves under the toolchain it resolves for. The
+      # followed packages share a toolchain, so the first one's is ours.
       - name: Take the upstream toolchain
         run: |
           set -euo pipefail
@@ -97,8 +90,7 @@ jobs:
           curl -fsSL "https://raw.githubusercontent.com/$first/master/lean-toolchain" -o lean-toolchain
           echo "the toolchain is $(cat lean-toolchain), taken from $first"
 
-      # Lake builds every dependency under the root toolchain, so a package pinned by revision
-      # has to move with it or it no longer compiles.
+      # Lake builds every dependency under the root toolchain, so a pin tied to it has to move.
       - name: Move the pins tied to the toolchain
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
@@ -108,10 +100,8 @@ jobs:
             python3 .github/scripts/deps.py pin-tag lakefile.toml "$package" "$(cat lean-toolchain)"
           done
 
-      # elan only. `lake exe cache get` would run against a tree whose `lean-toolchain` is
-      # already the upstream's while `lake-manifest.json` still pins the old Mathlib, and the
-      # cache refuses a toolchain mismatch — so it is turned off rather than left to
-      # autodetection.
+      # elan only: `lake exe cache get` refuses a tree whose toolchain is already the upstream's
+      # while the manifest still pins the old Mathlib.
       - name: Install elan
         uses: leanprover/lean-action@v1
         with:
@@ -119,9 +109,8 @@ jobs:
           use-github-cache: false
           use-mathlib-cache: false
 
-      # `lakefile.toml` holds the branches and tags to follow, so `lake update` is the rest of
-      # the bump: it resolves them, and the pins moved above, into the manifest. The title and the
-      # body are written here, where both manifests are at hand.
+      # `lakefile.toml` holds the branches and tags to follow, so `lake update` is the rest of the
+      # bump. The body is written here, where both manifests are at hand.
       - name: Update the manifest
         id: rev
         run: |
@@ -131,21 +120,19 @@ jobs:
           cp lake-manifest.json "$before"
           # shellcheck disable=SC2086 # lists of package names, deliberately split
           lake update $FOLLOWED $TOOLCHAIN_PINNED
-          scope='' shorts='' body=''
-          for package in $FOLLOWED; do
+          rows=''
+          for package in $FOLLOWED $TOOLCHAIN_PINNED; do
             old=$(pin "$before" "$package")
             new=$(pin lake-manifest.json "$package")
+            [ "$old" != "$new" ] || continue
             repository=$(python3 .github/scripts/deps.py slug lakefile.toml "$package")
-            scope="${scope:+$scope, }$package"
-            shorts="${shorts:+$shorts, }\`${new:0:7}\`"
-            body="${body:+$body$'\n'}Pins $package at \`$new\` ([compare](https://github.com/$repository/compare/$old...$new))."
+            rows="${rows:+$rows$'\n'}| \`$package\` | \`${old:0:7}\` | [\`${new:0:7}\`](https://github.com/$repository/compare/$old...$new) |"
             echo "$package: $old -> $new"
           done
           {
-            echo "title=deps($scope): Update to $shorts"
-            echo "body<<BODY"
-            echo "$body"
-            echo "BODY"
+            echo 'body<<BODY'
+            printf '%s\n' '| package | from | to |' '| --- | --- | --- |' "$rows"
+            echo BODY
           } >> "$GITHUB_OUTPUT"
 
       - name: Commit and push
@@ -155,11 +142,10 @@ jobs:
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           HEAD_REF: ${{ steps.pr.outputs.head }}
-          TITLE: ${{ steps.rev.outputs.title }}
         run: |
           set -euo pipefail
-          # The commit is attributed to the identity that pushes it, whose noreply address is
-          # built from the bot account's user id.
+          # The commit is attributed to the pushing identity, whose noreply address is built from
+          # the bot account's user id.
           author=${APP_SLUG:+${APP_SLUG}[bot]}
           author=${author:-github-actions[bot]}
           git config user.name "$author"
@@ -171,37 +157,31 @@ jobs:
           fi
           git commit -m "$TITLE" -- lakefile.toml lake-manifest.json lean-toolchain
           if [ -n "$PR_NUMBER" ]; then
-            # Never a rewrite: the branch carries the fixes pushed for the previous bump.
             git push origin "HEAD:refs/heads/$HEAD_REF"
           else
-            # No pull request points at the branch, so a leftover one is replaced, against the
-            # tip fetched at checkout.
+            # A leftover branch nothing points at is replaced, against the tip fetched above.
             git push --force-with-lease origin "HEAD:$BRANCH"
           fi
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
-      # The title becomes the commit subject on `main`, so it names the revision that landed.
+      # The body is the table and nothing else; it is rewritten on every run, so notes about the
+      # bump belong in a comment.
       - name: Open or refresh the pull request
         if: steps.push.outputs.pushed == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
-          TITLE: ${{ steps.rev.outputs.title }}
-          PINS: ${{ steps.rev.outputs.body }}
+          BODY: ${{ steps.rev.outputs.body }}
         run: |
           set -euo pipefail
-          body="$PINS
-
-          Opened by \`.github/workflows/update-deps.yml\`, which moves the pins only. This body is rewritten on every run; leave notes in a comment."
           if [ -n "$PR_NUMBER" ]; then
-            gh pr edit "$PR_NUMBER" --title "$TITLE" --body "$body"
+            gh pr edit "$PR_NUMBER" --title "$TITLE" --body "$BODY"
           else
-            gh pr create --base main --head "$BRANCH" --label "$LABEL" --title "$TITLE" --body "$body"
+            gh pr create --base main --head "$BRANCH" --label "$LABEL" --title "$TITLE" --body "$BODY"
           fi
 
-      # A pins-only bump has no diff to read, so its checks are the whole review: the merge is
-      # queued here and GitHub performs it once they are green. `repair-deps.yml` cancels it when
-      # the branch stops being pins-only.
+      # A pins-only bump has no diff to read, so its checks are the whole review. `repair-deps.yml`
+      # cancels the queued merge when the branch stops being pins-only.
       - name: Queue the merge of a pins-only bump
         if: steps.push.outputs.pushed == 'true'
         env:

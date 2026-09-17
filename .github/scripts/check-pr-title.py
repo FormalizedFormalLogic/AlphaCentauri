@@ -5,23 +5,11 @@ Usage: check-pr-title.py [TITLE]   (falls back to $PR_TITLE)
 """
 
 import os
-import pathlib
 import re
 import sys
-import tomllib
 
 TYPES = ("add", "fix", "refactor", "doc", "ci", "chore", "deps")
-LAKEFILE = pathlib.Path(__file__).resolve().parents[2] / "lakefile.toml"
 MAX_LENGTH = 100
-
-
-def scoped(kind: str, scope: str) -> bool:
-    """The one titled scope: the automated pin bump (`.github/workflows/update-deps.yml`), whose
-    scope names the packages it moved. Every other title carries none."""
-    if kind != "deps":
-        return False
-    required = {r["name"] for r in tomllib.loads(LAKEFILE.read_text()).get("require", [])}
-    return bool(scope) and set(scope.split(", ")) <= required
 
 # Greek, mathematical Greek (bold/sans/italic planes) and Unicode subscripts.
 GREEK = re.compile(r"[Ͱ-Ͽἀ-῿\U0001d6a8-\U0001d7cb]")
@@ -52,12 +40,12 @@ def check(title: str) -> list[str]:
         errors.append(f"the title is {len(title)} characters, over the {MAX_LENGTH} allowed")
 
     scope = re.match(r"^([A-Za-z]+)\(([^)]*)\):", title)
-    if scope and not scoped(scope.group(1), scope.group(2)):
+    if scope:
         errors.append(
             f"the title carries a '({scope.group(2)})' scope; write "
             f"'{scope.group(1)}: <subject>' instead"
         )
-    elif not re.match(rf"^({'|'.join(TYPES)})(\([^)]*\))?: \S", title):
+    elif not re.match(rf"^({'|'.join(TYPES)}): \S", title):
         head = title.split(":", 1)[0] if ":" in title else title
         errors.append(
             f"the title must start with '<type>: ' where <type> is one of "

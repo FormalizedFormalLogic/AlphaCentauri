@@ -61,8 +61,7 @@ activity for 14 days may be released by anyone, with a comment.
 - Never force-push a branch you did not create except with `--force-with-lease`.
 - Title: a short noun phrase — no subtitle, no full theorem name, no `(scope)` parenthetical —
   in the form `<type>: <subject>` with `<type>` in `add | fix | refactor | doc | ci | chore |
-  deps`. The one exception is the automated pin bump, whose scope names the packages it moved:
-  ``deps(Foundation): Update to `<short sha>` ``.
+  deps`, and no scope at all.
   PRs are squash-merged, so the title becomes the commit on `main`: do not phone it in. Backtick
   every Lean identifier or notation (`` `DirectInterpretation` ``, `` `𝚺-[s]` ``); write
   mathematics in TeX (`` $\Delta_1$ ``, `` $\Sigma_n$ ``, `` $\mathsf{I}\Sigma_1$ ``,
@@ -143,7 +142,7 @@ repositories behind them are read from `lakefile.toml`, never spelled out twice.
 [`.github/workflows/update-deps.yml`](../.github/workflows/update-deps.yml) moves
 them every six hours, and on demand from the Actions tab (`workflow_dispatch`). It keeps one
 branch, `update-deps`, behind one open pull request labelled `update-deps` and titled
-``deps(Foundation): Update to `<short sha>` ``. While that pull request is open the new pins are
+`chore: Update dependencies`, whose body is the table of revisions moved and nothing else. While that pull request is open the new pins are
 committed on top of it — never a force-push, since the repairs made for the previous bump live
 on that branch; otherwise the branch restarts from `main` and the pull request is opened. The
 workflow moves the pins and nothing else: it does not build, and the bump is red until something
@@ -155,14 +154,12 @@ files alone, the workflow queues its merge (`gh pr merge --squash --auto`) and G
 it once the checks are green; the checks are the whole review, because there is nothing else in
 the diff to read. A branch that carries more than the pins is never queued.
 
-[`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes
-the rest: when CI fails on the `update-deps` branch, it hands the branch to Claude Code, which repairs this
-repository in place, pushes to the same branch, and cancels the queued merge — so a repaired
-bump is read by a human before it lands. It attempts each bump once; a repair that leaves the
-branch red is not retried until the next pin arrives. It runs on the organization secret
-`ANTHROPIC_API_KEY`, and without it — or after its one attempt — it says so in a comment on the
-pull request and waits. A local session does the same work through `/update-deps`, whose runbook
-is [`.claude/commands/update-deps.md`](../.claude/commands/update-deps.md).
+[`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes the rest: when
+CI fails on that branch it hands it to Claude Code, which repairs this repository in place, pushes,
+reports in a comment, and cancels the queued merge — so a repaired bump is read by a human before
+it lands. Each bump gets one attempt, paid for by the organization secret `ANTHROPIC_API_KEY`;
+without it, or after that attempt, the pull request says so and waits. `/update-deps` is the same
+runbook from a local session.
 
 Repairing a bump is a session's work, not an issue's:
 

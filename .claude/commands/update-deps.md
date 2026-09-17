@@ -2,13 +2,12 @@
 description: Pick up the dependency pin-bump pull request and make it green
 ---
 
-Handle the automated dependency pin bump. `.github/workflows/update-deps.yml` keeps one
-branch, `update-deps`, behind one pull request labelled `update-deps`; the workflow
-moves the pins and nothing else, so the bump is red until this repository is repaired.
-`.github/workflows/repair-deps.yml` does that in the cloud, once per bump, and this command
-is the same runbook from a local session — for the bumps it could not fix, and for the ones it
-repaired and left for a reader. Foundation is the package this repository follows. `docs/workflow.md`, "Dependency pins and Foundation", is
-normative — read it before acting.
+Handle the automated dependency pin bump. `.github/workflows/update-deps.yml` keeps one branch,
+`update-deps`, behind one pull request labelled `update-deps`, whose body tabulates the revisions
+it moved; the workflow moves the pins and nothing else, so the bump is red until this repository
+is repaired. `.github/workflows/repair-deps.yml` does that in the cloud, once per bump, and this
+command is the same runbook from a local session. `docs/workflow.md`, "Dependency pins and
+Foundation", is normative — read it before acting.
 
 Stop immediately, reporting nothing but the reason, when there is no open pull request labelled
 `update-deps`, or its checks are still running.
@@ -28,8 +27,8 @@ Otherwise the bump is red and it is yours to repair:
    `.lake/packages` (`cp -a <main>/.lake/packages <main>/.lake/config .lake/`) so `lake build` works
    there. Pull the branch first — the workflow commits new pins on top of it, so your local copy may
    be behind.
-3. Build. Read the compiler's complaints against Foundation's own diff over the range the pull
-   request body links, and repair this repository: renames, changed signatures, lemmas that moved.
+3. Build. Read the compiler's complaints against the upstream's own diff over the range the body's
+   table links, and repair this repository: renames, changed signatures, lemmas that moved.
    Where Foundation has absorbed material ported from here, Foundation's version wins — delete the
    local copy, use Foundation's, and adapt every call site, leaving no wrapper behind.
 4. Verify as for any pull request: `lake build`, `just mk-all`, `just no-sorry`, `just axiom-audit`.

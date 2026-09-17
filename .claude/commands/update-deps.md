@@ -1,17 +1,17 @@
 ---
-description: Pick up the Foundation pin-bump pull request and make it green
+description: Pick up the dependency pin-bump pull request and make it green
 ---
 
-Handle the automated Foundation pin bump. `.github/workflows/update-deps.yml` keeps one
-branch, `update-foundation`, behind one pull request labelled `update-foundation`; the workflow
+Handle the automated dependency pin bump. `.github/workflows/update-deps.yml` keeps one
+branch, `update-deps`, behind one pull request labelled `update-deps`; the workflow
 moves the pins and nothing else, so the bump is red until this repository is repaired.
 `.github/workflows/repair-deps.yml` does that in the cloud, once per bump, and this command
 is the same runbook from a local session — for the bumps it could not fix, and for the ones it
-repaired and left for a reader. `docs/workflow.md`, "Dependency pins and Foundation", is
+repaired and left for a reader. Foundation is the package this repository follows. `docs/workflow.md`, "Dependency pins and Foundation", is
 normative — read it before acting.
 
 Stop immediately, reporting nothing but the reason, when there is no open pull request labelled
-`update-foundation`, or its checks are still running.
+`update-deps`, or its checks are still running.
 
 When its checks are all green, **merge it** — the maintainer has given standing authorization for
 this one pull request, overriding `AGENTS.md`'s "Don't merge without being told to". Squash merge,
@@ -23,7 +23,7 @@ a check is failing that GitHub does not require, leave it alone and say why.
 Otherwise the bump is red and it is yours to repair:
 
 1. Find the pull request:
-   `gh pr list --label update-foundation --state open --json number,headRefName,url`.
+   `gh pr list --label update-deps --state open --json number,headRefName,url`.
 2. Add a git worktree for its branch under `.claude/worktrees/`, and give it its own
    `.lake/packages` (`cp -a <main>/.lake/packages <main>/.lake/config .lake/`) so `lake build` works
    there. Pull the branch first — the workflow commits new pins on top of it, so your local copy may

@@ -111,14 +111,14 @@ agent when the user has explicitly told it to for that PR.
 | `proof-formalized` | Stage: the `axiom` proved in a follow-up PR; closes the issue. |
 | `infrastructure` | A PR with no mathematics; CI skips the audit comment. |
 | `refactor` | Reorganizes existing code without adding results; no mathematics. |
-| `update-foundation` | The automated Foundation pin bump; at most one open PR carries it. |
+| `update-deps` | The automated dependency pin bump; at most one open PR carries it. |
 
 Nothing else is a label. Blocked, belongs upstream in Foundation, process questions — say it
 in the issue thread.
 
 ## The worker loop
 
-An open pull request labelled `update-foundation` comes before all of this; see
+An open pull request labelled `update-deps` comes before all of this; see
 [Dependency pins and Foundation](#dependency-pins-and-foundation).
 
 1. List open, unassigned issues whose thread does not say they are waiting; pick one.
@@ -137,7 +137,7 @@ together, forward only, and nobody bumps them by hand: `lake update` is the work
 
 [`.github/workflows/update-deps.yml`](../.github/workflows/update-deps.yml) moves
 them every six hours, and on demand from the Actions tab (`workflow_dispatch`). It keeps one
-branch, `update-foundation`, behind one open pull request labelled `update-foundation` and titled
+branch, `update-deps`, behind one open pull request labelled `update-deps` and titled
 ``deps(Foundation): Update to `<short sha>` ``. While that pull request is open the new pins are
 committed on top of it — never a force-push, since the repairs made for the previous bump live
 on that branch; otherwise the branch restarts from `main` and the pull request is opened. The
@@ -151,17 +151,17 @@ it once the checks are green; the checks are the whole review, because there is 
 the diff to read. A branch that carries more than the pins is never queued.
 
 [`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes
-the rest: when CI fails on that branch, it hands the branch to Claude Code, which repairs this
+the rest: when CI fails on the `update-deps` branch, it hands the branch to Claude Code, which repairs this
 repository in place, pushes to the same branch, and cancels the queued merge — so a repaired
 bump is read by a human before it lands. It attempts each bump once; a repair that leaves the
 branch red is not retried until the next pin arrives. It runs on the organization secret
 `ANTHROPIC_API_KEY`, and without it — or after its one attempt — it says so in a comment on the
-pull request and waits. A local session does the same work through `/update-foundation`, whose
-runbook is [`.claude/commands/update-foundation.md`](../.claude/commands/update-foundation.md).
+pull request and waits. A local session does the same work through `/update-deps`, whose runbook
+is [`.claude/commands/update-deps.md`](../.claude/commands/update-deps.md).
 
 Repairing a bump is a session's work, not an issue's:
 
-1. An open pull request labelled `update-foundation` takes precedence over picking up an issue
+1. An open pull request labelled `update-deps` takes precedence over picking up an issue
    — a `/loop` iteration is the usual way to notice one. Work on its branch, in that pull
    request.
 2. Build, read the compiler's complaints against Foundation's own diff over the range the pull

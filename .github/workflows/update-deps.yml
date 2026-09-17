@@ -1,10 +1,10 @@
 name: Update dependencies
 
 # Every six hours (and on demand) the pins of the upstream package this repository follows —
-# Foundation — are moved to the tip of its `master`, on a single long-lived branch behind one
-# pull request labelled after it. Only the pins move here: whatever the bump breaks is repaired
-# inside that same pull request by `repair-deps.yml`, and a bump that breaks nothing merges
-# itself (see docs/workflow.md).
+# Foundation — are moved to the tip of its `master`, on a single long-lived branch, `update-deps`,
+# behind one pull request labelled `update-deps`. Only the pins move here: whatever the bump
+# breaks is repaired inside that same pull request by `repair-deps.yml`, and a bump that breaks
+# nothing merges itself (see docs/workflow.md).
 #
 # Which package is followed is the `env` block below and nothing else, so a repository that
 # follows another one changes those four values.
@@ -22,7 +22,7 @@ on:
 # A run pushes to a shared branch, so runs never overlap; a scheduled run behind a manual one
 # waits rather than dies, because it may carry a newer revision.
 concurrency:
-  group: update-foundation
+  group: update-deps
   cancel-in-progress: false
 
 permissions:
@@ -30,8 +30,8 @@ permissions:
   pull-requests: write
 
 env:
-  BRANCH: update-foundation
-  LABEL: update-foundation
+  BRANCH: update-deps
+  LABEL: update-deps
   # The Lake package as `lake-manifest.json` names it, and the repository it is resolved from.
   PACKAGE: Foundation
   UPSTREAM: FormalizedFormalLogic/Foundation

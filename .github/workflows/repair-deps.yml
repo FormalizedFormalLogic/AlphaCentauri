@@ -1,9 +1,9 @@
 name: Repair the dependency bump
 
 # `update-deps.yml` moves the pins and nothing else, so a bump that breaks this repository
-# arrives red. This picks the red one up: when CI fails on the bump's branch, Claude Code repairs
-# the branch in place under the runbook in `.claude/commands/update-foundation.md` and pushes to
-# it. Nothing else here is ever touched by it, and it never merges.
+# arrives red. This picks the red one up: when CI fails on the `update-deps` branch, Claude Code
+# repairs the branch in place under the runbook in `.claude/commands/update-deps.md` and pushes
+# to it. Nothing else here is ever touched by it, and it never merges.
 #
 # One attempt per revision: a branch that already carries a repair is left alone, so a repair
 # that leaves CI red is not retried until the next bump lands a new pin. The attempt after that
@@ -26,8 +26,8 @@ permissions:
   contents: read
 
 env:
-  BRANCH: update-foundation
-  LABEL: update-foundation
+  BRANCH: update-deps
+  LABEL: update-deps
   # The Lake package being bumped, as `update-deps.yml` writes it into the commit subject.
   PACKAGE: Foundation
 
@@ -38,7 +38,7 @@ jobs:
     if: >-
       github.repository == 'FormalizedFormalLogic/AlphaCentauri'
       && github.event.workflow_run.conclusion == 'failure'
-      && github.event.workflow_run.head_branch == 'update-foundation'
+      && github.event.workflow_run.head_branch == 'update-deps'
     runs-on: ubuntu-latest
     # The agent writes through the app token below; these are for the action's own API calls.
     permissions:
@@ -158,7 +158,7 @@ jobs:
             the new pin, and CI is red. Repair this repository so that it builds again, and push
             to this branch.
 
-            `.claude/commands/update-foundation.md` is the runbook for exactly this work; read it
+            `.claude/commands/update-deps.md` is the runbook for exactly this work; read it
             first. Its steps 1 and 2 are already done for you — the branch is here, the dependency
             layer is built — and its merge paragraph is not yours: you stop at the push.
             `AGENTS.md` and `docs/workflow.md` bind you as they bind every agent here.

@@ -29,10 +29,10 @@ def ParameterFreeInductionScheme (L : Language) [L.ORing] (Γ : Semisentence L 1
 
 /-- `𝗜ᶠ Γ s` is `𝗘𝗔` together with the parameter-free induction scheme for `StrictHierarchy Γ s`.
 - [Bek99, §1] -/
-abbrev ParameterFreeInductionOnStrictHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+abbrev IParameterFree (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
   𝗘𝗔 ∪ ParameterFreeInductionScheme ℒₒᵣ (Arithmetic.StrictHierarchy Γ s)
 
-prefix:max "𝗜ᶠ " => ParameterFreeInductionOnStrictHierarchy
+prefix:max "𝗜ᶠ " => IParameterFree
 
 variable {L : Language} [L.ORing] {C C' : Semisentence L 1 → Prop}
 
@@ -40,21 +40,21 @@ lemma ParameterFreeInductionScheme_subset (h : ∀ {φ : Semisentence L 1}, C φ
     ParameterFreeInductionScheme L C ⊆ ParameterFreeInductionScheme L C' := by
   rintro _ ⟨φ, hφ, rfl⟩; exact ⟨φ, h hφ, rfl⟩
 
-lemma ParameterFreeInductionOnStrictHierarchy_subset_mono {Γ : Polarity} {s₁ s₂ : ℕ}
+lemma IParameterFree_subset_mono {Γ : Polarity} {s₁ s₂ : ℕ}
     (h : s₁ ≤ s₂) : 𝗜ᶠ Γ s₁ ⊆ 𝗜ᶠ Γ s₂ :=
   Set.union_subset_union_right _
     (ParameterFreeInductionScheme_subset (fun H ↦ H.mono h))
 
-lemma ParameterFreeInductionOnStrictHierarchy_weakerThan_of_le {Γ : Polarity} {s₁ s₂ : ℕ}
+lemma IParameterFree_weakerThan_of_le {Γ : Polarity} {s₁ s₂ : ℕ}
     (h : s₁ ≤ s₂) : 𝗜ᶠ Γ s₁ ⪯ 𝗜ᶠ Γ s₂ :=
-  WeakerThan.ofSubset (ParameterFreeInductionOnStrictHierarchy_subset_mono h)
+  WeakerThan.ofSubset (IParameterFree_subset_mono h)
 
 lemma ParameterFreeInductionScheme_subset_InductionScheme (Γ : Polarity) (s : ℕ) :
     ParameterFreeInductionScheme ℒₒᵣ (Arithmetic.StrictHierarchy Γ s) ⊆
       InductionScheme ℒₒᵣ (Arithmetic.StrictHierarchy Γ s) := by
   rintro _ ⟨φ, hφ, rfl⟩; exact ⟨Rew.emb ▹ φ, StrictHierarchy.rew_iff.mpr hφ, rfl⟩
 
-instance ParameterFreeInductionOnStrictHierarchy_weakerThan_EA_union_InductionOnStrictHierarchy
+instance IParameterFree_weakerThan_EA_union_InductionScheme
     (Γ : Polarity) (s : ℕ) :
     𝗜ᶠ Γ s ⪯ 𝗘𝗔 ∪ InductionScheme ℒₒᵣ (Arithmetic.StrictHierarchy Γ s) :=
   WeakerThan.ofSubset
@@ -72,7 +72,7 @@ end axioms
 
 section standardModel
 
-instance models_ParameterFreeInductionOnStrictHierarchy (Γ : Polarity) (s : ℕ) :
+instance models_IParameterFree (Γ : Polarity) (s : ℕ) :
     ℕ↓[ℒₒᵣ] ⊧* 𝗜ᶠ Γ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
   rintro _ ⟨φ, -, rfl⟩

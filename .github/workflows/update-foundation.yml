@@ -2,8 +2,8 @@ name: Update Foundation
 
 # Every six hours (and on demand) the Foundation pins are moved to the tip of Foundation's
 # `master`, on a single long-lived branch behind one pull request labelled `update-foundation`.
-# Only the pins move: whatever the bump breaks is fixed by an agent inside that same pull
-# request (see docs/workflow.md).
+# Only the pins move here: whatever the bump breaks is repaired inside that same pull request by
+# `repair-foundation.yml`, and a bump that breaks nothing merges itself (see docs/workflow.md).
 #
 # Pushes made with `github.token` do not start `ci.yml`, and `main` requires its checks, so the
 # branch and the pull request belong to a GitHub App instead: the organization variable
@@ -90,11 +90,15 @@ jobs:
           curl -fsSL "https://raw.githubusercontent.com/$FOUNDATION/master/lean-toolchain" -o lean-toolchain
           echo "the toolchain is $(cat lean-toolchain)"
 
+      # elan only. `lake exe cache get` would run against a tree whose `lean-toolchain` is
+      # already Foundation's while `lake-manifest.json` still pins the old Mathlib, and the cache
+      # refuses a toolchain mismatch — so it is turned off rather than left to autodetection.
       - name: Install elan
         uses: leanprover/lean-action@v1
         with:
           build: false
           use-github-cache: false
+          use-mathlib-cache: false
 
       # `lakefile.toml` follows Foundation's `master`, so `lake update` is the whole bump: it
       # resolves that branch and writes the revision it lands on into the manifest.
@@ -168,3 +172,29 @@ jobs:
           else
             gh pr create --base main --head "$BRANCH" --label "$LABEL" --title "$title" --body "$body"
           fi
+
+      # A bump that moves nothing but the pins has no diff for a human to read: its checks are
+      # the whole review, so the merge is queued here and GitHub performs it the moment they go
+      # green. A branch that carries repairs is not queued, and `repair-foundation.yml` cancels
+      # a queued merge as soon as it pushes one.
+      - name: Queue the merge of a pins-only bump
+        if: steps.push.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
+        run: |
+          set -euo pipefail
+          number=$(gh pr list --state open --label "$LABEL" --limit 1 --json number --jq '.[0].number // ""')
+          if [ -z "$number" ]; then
+            echo "no open pull request to queue"
+            exit 0
+          fi
+          extra=$(git diff --name-only origin/main...HEAD |
+            grep -vxE 'lake-manifest\.json|lakefile\.toml|lean-toolchain' || true)
+          if [ -n "$extra" ]; then
+            echo "the branch also changes:"
+            echo "$extra"
+            echo "the merge of #$number stays a human's"
+            exit 0
+          fi
+          gh pr merge "$number" --squash --auto
+          echo "queued the merge of #$number; GitHub performs it once the checks are green"

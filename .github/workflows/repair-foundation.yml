@@ -1,0 +1,190 @@
+name: Repair Foundation bump
+
+# `update-foundation.yml` moves the pins and nothing else, so a bump that breaks this repository
+# arrives red. This picks the red one up: when CI fails on the `update-foundation` branch, Claude
+# Code repairs the branch in place under the runbook in `.claude/commands/update-foundation.md`
+# and pushes to it. Nothing else here is ever touched by it, and it never merges.
+#
+# One attempt per revision: a branch that already carries a repair is left alone, so a repair
+# that leaves CI red is not retried until the next bump lands a new pin. The attempt after that
+# is the next agent's, on a newer Foundation.
+#
+# `ANTHROPIC_API_KEY` is the organization secret that pays for it; without it the job reports
+# that it is unconfigured and stops, leaving the bump to a human.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+# One repair at a time, and never cancelled halfway: a cancelled agent leaves an uncommitted
+# working tree, and its successor would start from a stale CI verdict anyway.
+concurrency:
+  group: repair-foundation
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  BRANCH: update-foundation
+  LABEL: update-foundation
+
+jobs:
+  repair:
+    name: Repair the bump
+    # Nothing to do in a fork, and nothing to do for any branch but the bump's own.
+    if: >-
+      github.repository == 'FormalizedFormalLogic/AlphaCentauri'
+      && github.event.workflow_run.conclusion == 'failure'
+      && github.event.workflow_run.head_branch == 'update-foundation'
+    runs-on: ubuntu-latest
+    # The agent writes through the app token below; these are for the action's own API calls.
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      # The same identity `update-foundation.yml` pushes as, so the repair commits start CI in
+      # turn — a push made with `github.token` starts none.
+      - name: Mint the app token
+        id: app-token
+        if: vars.BOT_APP_ID != ''
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+
+      # The branch as CI saw it, with the history the attempt guard below reads.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token || github.token }}
+
+      - name: Decide whether this bump is ours to repair
+        id: decide
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
+          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          number=$(gh pr list --state open --label "$LABEL" --limit 1 --json number --jq '.[0].number // ""')
+          if [ -z "$number" ]; then
+            echo "no open pull request labelled $LABEL; nothing to repair"
+            exit 0
+          fi
+          # The verdict that woke this run has to be about the branch as it stands, or the repair
+          # would be answering a build that no longer exists.
+          if [ "$(git rev-parse HEAD)" != "$HEAD_SHA" ]; then
+            echo "the branch moved since that CI run; a later run will report on the new tip"
+            exit 0
+          fi
+          # The newest pin commit is the workflow's. Anything committed on the branch on top of
+          # it is a previous repair, so this bump has had its attempt. `--first-parent` keeps a
+          # branch update — a merge of `main`, which GitHub makes to satisfy the strict checks —
+          # from counting as one.
+          pin=$(git log --grep='^deps(Foundation): Update to' -1 --format='%H')
+          if [ -z "$pin" ]; then
+            echo "no pin commit on the branch; leaving it alone"
+            exit 0
+          fi
+          if [ "$(git rev-list --first-parent --no-merges --count "$pin..HEAD")" != 0 ]; then
+            echo "this bump has already been repaired once and is still red; a human decides"
+            gh pr comment "$number" --body \
+              "The repair pushed for this bump did not make it green, and \`repair-foundation.yml\` attempts each bump once. It is yours now; the next bump restarts the cycle."
+            exit 0
+          fi
+          if [ -z "$KEY" ]; then
+            echo "ANTHROPIC_API_KEY is not configured; leaving the bump to a human"
+            gh pr comment "$number" --body \
+              "This bump is red and \`ANTHROPIC_API_KEY\` is not configured, so no agent picked it up."
+            exit 0
+          fi
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "repairing #$number at $(git rev-parse --short HEAD)"
+
+      - uses: extractions/setup-just@v3
+        if: steps.decide.outputs.number != ''
+      - uses: leanprover/lean-action@v1
+        if: steps.decide.outputs.number != ''
+        with:
+          build: false
+          use-github-cache: false
+
+      # The CI run that just failed built and cached this pin's Foundation, so this is a hit
+      # except when the failure was that build itself.
+      - name: Restore the Foundation build
+        id: foundation-cache
+        if: steps.decide.outputs.number != ''
+        uses: actions/cache/restore@v6
+        with:
+          path: .lake/packages/Foundation/.lake/build
+          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
+      - name: Build Foundation from source (cache miss only)
+        if: steps.decide.outputs.number != '' && steps.foundation-cache.outputs.cache-hit != 'true'
+        run: |
+          lake build Foundation
+          python3 .github/scripts/clear-foundation-warnings.py
+
+      # Commits the agent makes carry the bot's identity, as the pin commits above it do.
+      - name: Configure the committer
+        if: steps.decide.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        run: |
+          set -euo pipefail
+          author=${APP_SLUG:+${APP_SLUG}[bot]}
+          author=${author:-github-actions[bot]}
+          git config user.name "$author"
+          git config user.email "$(gh api "/users/${author//\[bot\]/%5Bbot%5D}" --jq .id)+$author@users.noreply.github.com"
+
+      - name: Repair the branch
+        if: steps.decide.outputs.number != ''
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ steps.app-token.outputs.token || github.token }}
+          claude_args: |
+            --max-turns 120
+            --model claude-sonnet-5
+            --allowedTools Read,Edit,Write,Glob,Grep,Bash
+          prompt: |
+            The `${{ env.BRANCH }}` branch is checked out and built against Foundation's new pin,
+            and CI is red. Repair this repository so that it builds again, and push to this branch.
+
+            `.claude/commands/update-foundation.md` is the runbook for exactly this work; read it
+            first. Its steps 1 and 2 are already done for you — the branch is here, the dependency
+            layer is built — and its merge paragraph is not yours: you stop at the push.
+            `AGENTS.md` and `docs/workflow.md` bind you as they bind every agent here.
+
+            Verify with `lake build AlphaCentauri --wfail`, `just mk-all`, `just no-sorry` and
+            `just axiom-audit`, then commit and push to `${{ env.BRANCH }}`. Never force-push:
+            the bump workflow commits the next pin on top of yours.
+
+            Touch nothing under `docs/`, `.github/`, `README.md` or `AGENTS.md`: they are
+            human-owned, and a change there would need a review this pull request will not get.
+            Never write `sorry`, and never merge the pull request.
+
+            If the bump is blocked on mathematics this repository does not have, or you cannot
+            get it green, push nothing and say precisely what is broken in a comment on
+            #${{ steps.decide.outputs.number }}. A partial repair that leaves the build red is
+            worse than none: this bump gets one attempt.
+
+      # A pins-only bump had its merge queued when it was opened, and the branch no longer is
+      # one — whatever the agent pushed is a diff a human reads before it lands.
+      - name: Cancel the queued merge if the agent pushed
+        if: steps.decide.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
+          NUMBER: ${{ steps.decide.outputs.number }}
+        run: |
+          set -euo pipefail
+          git fetch origin "$BRANCH"
+          if [ "$(git rev-parse HEAD)" = "$(git rev-parse "origin/$BRANCH")" ]; then
+            echo "the agent pushed nothing; the queued merge, if any, still stands"
+            exit 0
+          fi
+          gh pr merge "$NUMBER" --disable-auto || true
+          echo "#$NUMBER carries a repair now; its merge is a human's"

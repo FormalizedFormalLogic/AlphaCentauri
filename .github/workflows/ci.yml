@@ -49,22 +49,7 @@ jobs:
       # `log` array of its `.trace` drops the replay without touching the `.olean`.
       - name: Clear Foundation's replayed-warning cache
         if: steps.foundation-cache.outputs.cache-hit != 'true'
-        run: |
-          python3 - <<'PY'
-          import json, pathlib
-          root = pathlib.Path('.lake/packages/Foundation/.lake/build')
-          cleared = 0
-          for t in root.rglob('*.trace'):
-              try:
-                  d = json.loads(t.read_text())
-              except (ValueError, OSError):
-                  continue
-              if d.get('log'):
-                  d['log'] = []
-                  t.write_text(json.dumps(d))
-                  cleared += 1
-          print(f'cleared warning cache in {cleared} Foundation trace(s)')
-          PY
+        run: python3 .github/scripts/clear-foundation-warnings.py
 
   # Build AlphaCentauri against the cleansed dependency layer from `deps`.
   build:

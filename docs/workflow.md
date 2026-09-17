@@ -82,7 +82,8 @@ activity for 14 days may be released by anyone, with a comment.
 what `forgive.yml` forgives by name); `just no-sorry`; `just mk-all` leaves no diff. The audit
 writes `.lake/audit.json`, which `.github/scripts/audit-comment.py` renders into one PR comment,
 overwritten on each run, unless the PR is labelled `infrastructure`. `actionlint.yml`
-lints the workflow files, and `update-foundation.yml` bumps the dependency pins (below).
+lints the workflow files, and `update-foundation.yml` and `repair-foundation.yml` move the
+dependency pins and repair what the move breaks (below).
 
 A red check is fixed in the PR, never worked around.
 
@@ -136,16 +137,29 @@ together, forward only, and nobody bumps them by hand: `lake update` is the work
 
 [`.github/workflows/update-foundation.yml`](../.github/workflows/update-foundation.yml) moves
 them every six hours, and on demand from the Actions tab (`workflow_dispatch`). It keeps one
-branch,
-`update-foundation`, behind one open pull request labelled `update-foundation` and titled
+branch, `update-foundation`, behind one open pull request labelled `update-foundation` and titled
 ``deps(Foundation): Update to `<short sha>` ``. While that pull request is open the new pins are
 committed on top of it — never a force-push, since the repairs made for the previous bump live
 on that branch; otherwise the branch restarts from `main` and the pull request is opened. The
-workflow moves the pins and nothing else: it does not build, and the bump is red until someone
+workflow moves the pins and nothing else: it does not build, and the bump is red until something
 makes it green. It pushes as the organization's GitHub App (the variable `BOT_APP_ID` and the
 secret `BOT_APP_PRIVATE_KEY`), because a push made with `github.token` starts no checks.
 
-That is a session's work, not an issue's:
+A bump that breaks nothing lands by itself. When the branch's diff against `main` is the pin
+files alone, the workflow queues its merge (`gh pr merge --squash --auto`) and GitHub performs
+it once the checks are green; the checks are the whole review, because there is nothing else in
+the diff to read. A branch that carries more than the pins is never queued.
+
+[`.github/workflows/repair-foundation.yml`](../.github/workflows/repair-foundation.yml) takes
+the rest: when CI fails on that branch, it hands the branch to Claude Code, which repairs this
+repository in place, pushes to the same branch, and cancels the queued merge — so a repaired
+bump is read by a human before it lands. It attempts each bump once; a repair that leaves the
+branch red is not retried until the next pin arrives. It runs on the organization secret
+`ANTHROPIC_API_KEY`, and without it — or after its one attempt — it says so in a comment on the
+pull request and waits. A local session does the same work through `/update-foundation`, whose
+runbook is [`.claude/commands/update-foundation.md`](../.claude/commands/update-foundation.md).
+
+Repairing a bump is a session's work, not an issue's:
 
 1. An open pull request labelled `update-foundation` takes precedence over picking up an issue
    — a `/loop` iteration is the usual way to notice one. Work on its branch, in that pull
@@ -159,7 +173,8 @@ That is a session's work, not an issue's:
 4. Push to the same branch, and leave the merge to a human as for every other pull request.
 
 A bump blocked on mathematics this repository does not have is reported in a comment on that
-pull request and left to a human.
+pull request and left to a human. A red bump is never made green by pinning Foundation back:
+the pins move forward only.
 
 Material here is written in Foundation's style so it can move upstream. Deciding what moves is a
 human's job; an agent that thinks a result belongs upstream, or that Foundation's API needs a

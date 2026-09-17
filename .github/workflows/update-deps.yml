@@ -34,11 +34,9 @@ env:
 jobs:
   update:
     name: Bump the pins
-    # A fork's pull requests go to its own default branch.
     if: github.repository == 'FormalizedFormalLogic/AlphaCentauri'
     runs-on: ubuntu-latest
     steps:
-      # An installation token, revoked when the job ends; `github.token` where the app is absent.
       - name: Mint the app token
         id: app-token
         if: vars.BOT_APP_ID != ''
@@ -47,7 +45,7 @@ jobs:
           app-id: ${{ vars.BOT_APP_ID }}
           private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
 
-      # Full history: the push below leases the tip fetched here.
+      # Full history: the force-push below leases the tip fetched here.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
@@ -67,7 +65,7 @@ jobs:
           echo "found the pull request: ${number:-none} (branch ${head:-$BRANCH})"
 
       # An open pull request's branch is built on top of, never rewritten: the previous bump's
-      # repairs live there. Without one, the branch restarts from `main`.
+      # repairs live there.
       - name: Prepare the branch
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
@@ -81,8 +79,8 @@ jobs:
             git switch --force-create "$BRANCH" origin/main
           fi
 
-      # Taken before lake runs, so that lake resolves under the toolchain it resolves for. The
-      # followed packages share a toolchain, so the first one's is ours.
+      # Before lake runs, so that it resolves under the toolchain it is resolving for. The
+      # followed packages share one, so the first's is ours.
       - name: Take the upstream toolchain
         run: |
           set -euo pipefail
@@ -109,8 +107,7 @@ jobs:
           use-github-cache: false
           use-mathlib-cache: false
 
-      # `lakefile.toml` holds the branches and tags to follow, so `lake update` is the rest of the
-      # bump. The body is written here, where both manifests are at hand.
+      # The body is written here, where both manifests are at hand.
       - name: Update the manifest
         id: rev
         run: |
@@ -144,8 +141,7 @@ jobs:
           HEAD_REF: ${{ steps.pr.outputs.head }}
         run: |
           set -euo pipefail
-          # The commit is attributed to the pushing identity, whose noreply address is built from
-          # the bot account's user id.
+          # The bot's noreply address is built from its user id.
           author=${APP_SLUG:+${APP_SLUG}[bot]}
           author=${author:-github-actions[bot]}
           git config user.name "$author"
@@ -164,8 +160,7 @@ jobs:
           fi
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
-      # The body is the table and nothing else; it is rewritten on every run, so notes about the
-      # bump belong in a comment.
+      # The body is rewritten on every run, so notes about the bump belong in a comment.
       - name: Open or refresh the pull request
         if: steps.push.outputs.pushed == 'true'
         env:
@@ -180,8 +175,7 @@ jobs:
             gh pr create --base main --head "$BRANCH" --label "$LABEL" --title "$TITLE" --body "$BODY"
           fi
 
-      # A pins-only bump has no diff to read, so its checks are the whole review. `repair-deps.yml`
-      # cancels the queued merge when the branch stops being pins-only.
+      # A pins-only bump has no diff to read, so its checks are the whole review.
       - name: Queue the merge of a pins-only bump
         if: steps.push.outputs.pushed == 'true'
         env:

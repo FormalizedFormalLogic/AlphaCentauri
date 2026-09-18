@@ -1,5 +1,6 @@
 module
 
+public import Mathlib.Order.OrderIsoNat
 public import Mathlib.SetTheory.Ordinal.Notation
 public import Mathlib.SetTheory.Ordinal.Veblen
 public import AlphaCentauri.ToMathlib.Ordinal.Rank
@@ -10,8 +11,8 @@ public import AlphaCentauri.ToMathlib.Ordinal.Rank
 Mathlib's `Mathlib/SetTheory/Ordinal/Notation.lean` proves that `ONote.repr` is an embedding
 `NONote ↪ ε₀` but does not prove surjectivity onto ordinals `< ε₀`. This file supplies that
 surjectivity, and transfers the result to any `ℕ`-order obtained by pulling the `NONote` order
-back along a bijection. A concrete computable bijection (`natCode`) is constructed from a
-structural `Encodable ONote` instance.
+back along a bijection. A concrete bijection (`natCode`) is constructed from a structural
+`Encodable ONote` instance, enumerating the normal forms in increasing order of their code.
 -/
 
 @[expose] public section
@@ -170,8 +171,14 @@ instance : Encodable NONote :=
 instance : Denumerable NONote :=
   Denumerable.ofEncodableOfInfinite NONote
 
-/-- A computable coding of `ℕ` by normal-form notations. -/
-def natCode : ℕ ≃ NONote := (Denumerable.eqv NONote).symm
+/-- A coding of `ℕ` by normal-form notations, in increasing order of the structural code. -/
+noncomputable def natCode : ℕ ≃ NONote :=
+  letI : DecidablePred (· ∈ Set.range (Encodable.encode : NONote → ℕ)) :=
+    Encodable.decidableRangeEncode NONote
+  letI : Infinite (Set.range (Encodable.encode : NONote → ℕ)) :=
+    Infinite.of_injective _ (Equiv.ofInjective _ Encodable.encode_injective).injective
+  (Nat.Subtype.orderIsoOfNat (Set.range (Encodable.encode : NONote → ℕ))).toEquiv.trans
+    (Encodable.equivRangeEncode NONote).symm
 
 theorem epsilon0_le_orderType_natCode : ε₀ ≤ orderType (ltPull natCode) :=
   epsilon0_le_orderType_ltPull natCode

@@ -43,7 +43,7 @@ namespace WeakerThanOn
 
 variable {Γ Γ' : Sentence L → Prop} {T U S : Theory L}
 
-@[refl] lemma refl (T : Theory L) (Γ : Sentence L → Prop) : T ⪯[Γ] T := fun _ _ h ↦ h
+@[simp, refl] lemma refl (T : Theory L) (Γ : Sentence L → Prop) : T ⪯[Γ] T := fun _ _ h ↦ h
 
 @[trans] lemma trans (h₁ : T ⪯[Γ] U) (h₂ : U ⪯[Γ] S) : T ⪯[Γ] S :=
   fun σ hσ h ↦ h₂ σ hσ (h₁ σ hσ h)

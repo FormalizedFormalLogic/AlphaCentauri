@@ -55,6 +55,7 @@ public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ToFoundation.Provable
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Semiformula
 public import AlphaCentauri.ToFoundation.Theory

@@ -34,6 +34,7 @@ public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.ProvablyTotal.Primrec
 public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
+public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Reflection.Unboundedness
 public import AlphaCentauri.Reflection.UniformReflection
@@ -45,6 +46,7 @@ public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.Schemata.ParameterFreeInduction
 public import AlphaCentauri.ToFoundation.Absoluteness
+public import AlphaCentauri.ToFoundation.BooleanCombination
 public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension

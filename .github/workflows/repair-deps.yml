@@ -3,7 +3,8 @@ name: Repair the dependency bump
 # `update-deps.yml` moves the pins only, so a bump that breaks this repository arrives red. This
 # runs after that red CI run has finished, not inside it: Claude Code repairs the branch under
 # `.claude/commands/update-deps.md`, and the push it makes starts the CI run that judges it. One
-# attempt per bump, on the organization secret `ANTHROPIC_API_KEY`.
+# attempt per bump, on the organization secret `CLAUDE_CODE_OAUTH_TOKEN` — a subscription
+# token from `claude setup-token`, so the repair draws on the maintainer's plan.
 on:
   workflow_run:
     workflows: [CI]
@@ -19,7 +20,6 @@ permissions:
 
 env:
   BRANCH: update-deps
-  LABEL: update-deps
   # `update-deps.yml`'s commit subject: it marks the bump's own commit.
   TITLE: 'chore: Update dependencies'
 
@@ -55,13 +55,13 @@ jobs:
         id: decide
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
-          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
-          number=$(gh pr list --state open --label "$LABEL" --limit 1 --json number --jq '.[0].number // ""')
+          number=$(gh pr list --state open --head "$BRANCH" --limit 1 --json number --jq '.[0].number // ""')
           if [ -z "$number" ]; then
-            echo "no open pull request labelled $LABEL; nothing to repair"
+            echo "no open pull request for $BRANCH; nothing to repair"
             exit 0
           fi
           if [ "$(git rev-parse HEAD)" != "$HEAD_SHA" ]; then
@@ -81,10 +81,10 @@ jobs:
               "The repair pushed for this bump did not make it green, and \`repair-deps.yml\` attempts each bump once. It is yours now; the next bump restarts the cycle."
             exit 0
           fi
-          if [ -z "$KEY" ]; then
-            echo "ANTHROPIC_API_KEY is not configured; leaving the bump to a human"
+          if [ -z "$TOKEN" ]; then
+            echo "CLAUDE_CODE_OAUTH_TOKEN is not configured; leaving the bump to a human"
             gh pr comment "$number" --body \
-              "This bump is red and \`ANTHROPIC_API_KEY\` is not configured, so no agent picked it up."
+              "This bump is red and \`CLAUDE_CODE_OAUTH_TOKEN\` is not configured, so no agent picked it up."
             exit 0
           fi
           echo "number=$number" >> "$GITHUB_OUTPUT"
@@ -128,8 +128,12 @@ jobs:
         if: steps.decide.outputs.number != ''
         uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ steps.app-token.outputs.token || github.token }}
+          # The CI run this answers was started by the App's push, so the action sees a bot actor
+          # and refuses unless that bot is named. Only ours: the prompt here is fixed, but `*`
+          # would let any App reach this action.
+          allowed_bots: ${{ steps.app-token.outputs.app-slug || 'github-actions' }}
           claude_args: |
             --max-turns 120
             --model claude-sonnet-5

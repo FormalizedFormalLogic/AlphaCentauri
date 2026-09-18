@@ -167,5 +167,44 @@ theorem relativizedProvability_formalizedCompleteOn_of_pi
       simpa [Theory.relativizedProvability, Provability.pr,
         (RelativizedProv.defined T m).df] using hRel
 
+/-- Provability relativized to true $\Pi_n$ sentences is monotone in `n`.
+- [Bek99, Lemma 3.1(2)] -/
+theorem relativizedProvability_mono
+    (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] (n : ℕ) {σ : ArithmeticSentence} :
+    𝗜𝚺₁ ⊢ T.relativizedProvability n σ 🡒 T.relativizedProvability (n + 1) σ := by
+  match n with
+  | 0 =>
+    exact complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+      simp only [models_iff, LogicalConnective.HomClass.map_imply]
+      intro hVσ
+      have hVσ' : Provable T (⌜σ⌝ : V) := by
+        simpa [Theory.relativizedProvability, Provability.pr] using hVσ
+      have hTop : T ⊢ σ 🡒 ((⊤ : ArithmeticSentence) 🡒 σ) := by cl_prover
+      have hProvImp : Provable T (⌜(σ 🡒 ((⊤ : ArithmeticSentence) 🡒 σ))⌝ : V) :=
+        internalize_provability hTop
+      have hProv'' : Provable T (⌜((⊤ : ArithmeticSentence) 🡒 σ)⌝ : V) :=
+        Bootstrapping.modus_ponens_sentence T hProvImp hVσ'
+      have hProv''' :
+          Provable T (Bootstrapping.imp ℒₒᵣ (⌜(⊤ : ArithmeticSentence)⌝ : V) (⌜σ⌝ : V)) := by
+        rw [← quote_imp_sentence]; exact hProv''
+      have hRel : RelativizedProv T 0 (⌜σ⌝ : V) :=
+        ⟨⌜(⊤ : ArithmeticSentence)⌝, piSatisfaction_top 0,
+          Bootstrapping.imp ℒₒᵣ (⌜(⊤ : ArithmeticSentence)⌝ : V) (⌜σ⌝ : V), rfl, hProv'''⟩
+      simpa [Theory.relativizedProvability, Provability.pr,
+        (RelativizedProv.defined T 0).df] using hRel
+  | m + 1 =>
+    exact complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+      simp only [models_iff, LogicalConnective.HomClass.map_imply]
+      intro hVσ
+      have hRel : RelativizedProv T m (⌜σ⌝ : V) := by
+        simpa [Theory.relativizedProvability, Provability.pr,
+          (RelativizedProv.defined T m).df] using hVσ
+      obtain ⟨s, hs, i, hi, hProv⟩ := hRel
+      have hTrue : PiSatisfaction (m + 2) s 0 :=
+        (PiSatisfaction.mono (by omega) hs.dom.1 hs.dom.2).mp hs
+      have hRel' : RelativizedProv T (m + 1) (⌜σ⌝ : V) := ⟨s, hTrue, i, hi, hProv⟩
+      simpa [Theory.relativizedProvability, Provability.pr,
+        (RelativizedProv.defined T (m + 1)).df] using hRel'
+
 end FFL.FirstOrder.Arithmetic
 

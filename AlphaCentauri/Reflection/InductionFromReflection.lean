@@ -54,9 +54,8 @@ private lemma step_aux {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] (φ 
   have := hrep ⨀ (h3 ⨀ hxTyped)
   simpa [substNumeral, Sentence.quote_eq] using tprovable_iff_provable.mp this
 
-/-- Each instance of parameter-free induction for `φ` follows over `T₀` from `φ`'s induction
-hypothesis together with uniform reflection for `T₀` and that induction hypothesis, provided `Γ`
-places `φ` in the reflection schema.
+/-- `∀ x, φ(x)` follows over `T₀` from `φ`'s induction hypothesis together with uniform reflection
+for `T₀` and that induction hypothesis, provided `Γ` places `φ` in the reflection schema.
 - [Bek99, Proposition 2.1] -/
 theorem provable_all_of_uniformReflection {T₀ : ArithmeticTheory} [T₀.Δ₁] [𝗜𝚺₁ ⪯ T₀]
     {Γ : ∀ {k : ℕ}, ArithmeticSemisentence k → Prop} (φ : ArithmeticSemisentence 1) (hφ : Γ φ) :

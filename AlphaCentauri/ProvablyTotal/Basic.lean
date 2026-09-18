@@ -4,6 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Prenex
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.LK.Completeness
+public import AlphaCentauri.Hierarchy.PrenexOfCollection
 public import AlphaCentauri.ToFoundation.Hierarchy
 
 /-!
@@ -89,16 +90,27 @@ def leastGraph (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSemisentence (k +
     (leastGraph φ).Evalb w ↔ φ.val.Evalb w ∧ ∀ y < w 0, ¬φ.val.Evalb (y :> (w ·.succ)) := by
   simp [leastGraph, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
 
-/-- A $\Delta_0$ matrix `θ` such that `∃ z, θ(z, y, x⃗)` is `𝗜𝚺₁`-provably equivalent to `φ(y, x⃗)`,
+/-- A $\Delta_0$ matrix `θ` such that `∃ z, θ(z, y, x⃗)` is `𝗕𝚺₁`-provably equivalent to `φ(y, x⃗)`,
 fixed once and for all so that it does not depend on the ambient theory.
 - [HP98, Theorem I.1.5] -/
 noncomputable def minimalGraphMatrix (φ : 𝚺₁.Semisentence (k + 1)) : 𝚺₀.Semisentence (k + 2) :=
-  Classical.choose (exists_matrix_provable (Γ := 𝚺) (s := 1) 𝗜𝚺₁ φ.sigma_prop)
+  (Classical.choose (Prenex.models_exists_prenex_of_collection.{0} (Γ := 𝚺) (s := 1)
+    φ.sigma_prop)).matrix
 
-lemma provable_iff_exists_minimalGraphMatrix (φ : 𝚺₁.Semisentence (k + 1)) :
-    𝗜𝚺₁ ⊢ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) := by
-  simpa [minimalGraphMatrix] using
-    Classical.choose_spec (exists_matrix_provable (Γ := 𝚺) (s := 1) 𝗜𝚺₁ φ.sigma_prop)
+lemma provable_iff_exists_minimalGraphMatrix (T : ArithmeticTheory) [𝗕𝚺₁ ⪯ T]
+    (φ : 𝚺₁.Semisentence (k + 1)) :
+    T ⊢ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) := by
+  have hPA : 𝗣𝗔⁻ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗕𝚺₁) inferInstance inferInstance
+  have hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 1 ψ →
+      T ⊢ (.univCl (collectionAxiom ψ) : ArithmeticSentence) := fun ψ hψ ↦
+    Entailment.WeakerThan.pbl (𝓢 := 𝗕𝚺₁)
+      (Entailment.by_axm (Set.mem_union_right _ (mem_CollectionScheme_of_mem hψ.hierarchy)))
+  have hEQ : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
+  refine provable_iff_of_models_iff fun V _ _ e ↦ ?_
+  have hVPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance
+  exact Classical.choose_spec (Prenex.models_exists_prenex_of_collection.{0} (Γ := 𝚺) (s := 1)
+    φ.sigma_prop) V (strictCollection_of_models_collectionAxiom fun ψ hψ ↦
+      consequence_iff.mp (Theory.Proof.sound (hcol ψ hψ)) V inferInstance) e
 
 lemma models_iff_exists_minimalGraphMatrix {φ : 𝚺₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) ↔
@@ -326,19 +338,20 @@ lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ un
     grind
 
 open PeanoMinus in
-/-- Over a theory containing `𝗜𝚺₁`, a `T`-provably total function is `T`-provably functional via
+/-- Over a theory containing `𝗕𝚺₁`, a `T`-provably total function is `T`-provably functional via
 the minimal-pair refinement `minimalGraph φ` of `φ`, which is obtained from `φ` by only
 $\Delta_0$ minimization.
 - [Bek99, §1]
 - [HP98, Lemma IV.3.4] -/
-lemma provablyFunctionalVia_minimalGraph [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) :
+lemma provablyFunctionalVia_minimalGraph [𝗕𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) :
     T.ProvablyFunctionalVia f (minimalGraph φ) := by
   have hTIS1 : T ⊢ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) :=
-    Entailment.WeakerThan.pbl (provable_iff_exists_minimalGraphMatrix φ)
+    provable_iff_exists_minimalGraphMatrix T φ
   have heqN : ∀ v : Fin (k + 1) → ℕ,
       φ.val.Evalb v ↔ ∃ z, (minimalGraphMatrix φ).val.Evalb (z :> v) :=
     models_iff_exists_minimalGraphMatrix.mp
-      (consequence_iff'.mp (Theory.Proof.sound (provable_iff_exists_minimalGraphMatrix φ)) ℕ)
+      (consequence_iff'.mp
+        (Theory.Proof.sound (provable_iff_exists_minimalGraphMatrix 𝗕𝚺₁ φ)) ℕ)
   have hforce : ∀ (y : ℕ) (x : Fin k → ℕ) (z : ℕ),
       (minimalGraphMatrix φ).val.Evalb (z :> y :> x) → y = f x := fun y x z hz ↦ by
     simpa using h.graph_iff.mp ((heqN (y :> x)).mpr ⟨z, hz⟩)
@@ -369,12 +382,14 @@ lemma provablyFunctionalVia_minimalGraph [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTota
         ∀ y y', (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y :> v) →
           (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y' :> v) → y = y' := by
     intro V _ _ v
-    have hVIS1 : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
+    have hIS0T : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗕𝚺₁) inferInstance inferInstance
+    have hVIS0 : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₀ T inferInstance
     apply models_existsUnique_minimalPairGraph
     obtain ⟨y, hy⟩ := h.models V v
     exact ⟨y, (models_iff_exists_minimalGraphMatrix.mp
       (consequence_iff'.mp (Theory.Proof.sound hTIS1) V) (y :> v)).mp hy⟩
-  have hEQ : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
+  have hPA : 𝗣𝗔⁻ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗕𝚺₁) inferInstance inferInstance
+  have hEQ : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance hPA
   have htotal : T ⊢ totalitySentence (minimalGraph φ) :=
     Arithmetic.complete T _ fun (V : Type) _ _ ↦
       models_totalitySentence_iff.mpr fun v ↦ (hmodelV V v).1
@@ -474,11 +489,11 @@ lemma toProvablyTotal (h : T.ProvablyFunctional f) : T.ProvablyTotal f :=
 
 end ProvablyFunctional
 
-/-- Over a theory containing `𝗜𝚺₁`, `T`-provable totality and `T`-provable functionality
+/-- Over a theory containing `𝗕𝚺₁`, `T`-provable totality and `T`-provable functionality
 coincide, identifying `provablyTotalFunctions` with Bek99's class of functions with a
 `∃!`-provably total graph.
 - [Bek99, §1] -/
-theorem provablyTotal_iff_provablyFunctional [𝗜𝚺₁ ⪯ T] :
+theorem provablyTotal_iff_provablyFunctional [𝗕𝚺₁ ⪯ T] :
     T.ProvablyTotal f ↔ T.ProvablyFunctional f :=
   ⟨fun h ↦ have ⟨_, h⟩ := h; ⟨_, h.provablyFunctionalVia_minimalGraph⟩,
     ProvablyFunctional.toProvablyTotal⟩

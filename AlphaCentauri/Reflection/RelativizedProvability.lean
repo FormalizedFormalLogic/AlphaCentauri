@@ -140,5 +140,32 @@ theorem models_relativizedProvability_of_true_pi {m : ℕ} {π σ : ArithmeticSe
     ⟨⌜π⌝, hTrue, Bootstrapping.imp ℒₒᵣ (⌜π⌝ : ℕ) (⌜σ⌝ : ℕ), rfl, hProv'⟩
   simpa [models_iff, (RelativizedProv.defined T m).df] using hRel
 
+/-- A true $\Pi_n$ sentence witnesses its own relativized provability: formalized $\Sigma_{n + 1}$
+completeness restricted to sentences that are themselves strict $\Pi_n$.
+- [Bek99, Lemma 3.1(1)] -/
+theorem relativizedProvability_formalizedCompleteOn_of_pi
+    (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] (n : ℕ) {σ : ArithmeticSentence}
+    (hσ : StrictHierarchy 𝚷 n σ) :
+    𝗜𝚺₁ ⊢ σ 🡒 T.relativizedProvability n σ := by
+  match n with
+  | 0 =>
+    have h1 : Hierarchy 𝚺 1 σ := hσ.hierarchy.of_zero
+    simpa [Theory.relativizedProvability, Provability.pr] using
+      provable_sigma_one_complete (T := T) h1
+  | m + 1 =>
+    exact complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+      simp only [models_iff, LogicalConnective.HomClass.map_imply]
+      intro hVσ
+      have hProv : T ⊢ σ 🡒 σ := by cl_prover
+      have hProv' : Provable T (⌜(σ 🡒 σ)⌝ : V) := internalize_provability hProv
+      have hProv'' : Provable T (Bootstrapping.imp ℒₒᵣ (⌜σ⌝ : V) (⌜σ⌝ : V)) := by
+        rw [← quote_imp_sentence]; exact hProv'
+      have hTrue : PiSatisfaction (m + 1) (⌜σ⌝ : V) 0 := by
+        simpa [matrixToVec] using (piSatisfaction_quote_iff hσ ![]).mpr (by simpa using hVσ)
+      have hRel : RelativizedProv T m (⌜σ⌝ : V) :=
+        ⟨⌜σ⌝, hTrue, Bootstrapping.imp ℒₒᵣ (⌜σ⌝ : V) (⌜σ⌝ : V), rfl, hProv''⟩
+      simpa [Theory.relativizedProvability, Provability.pr,
+        (RelativizedProv.defined T m).df] using hRel
+
 end FFL.FirstOrder.Arithmetic
 

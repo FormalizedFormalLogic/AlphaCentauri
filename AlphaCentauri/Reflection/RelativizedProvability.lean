@@ -174,13 +174,12 @@ theorem relativizedProvability_formalizedCompleteOn_of_pi (n : ℕ) {σ : Arithm
       simpa [Theory.relativizedProvability, Provability.pr,
         (RelativizedProv.defined T m).df] using hRel
 
--- Re-declared explicitly rather than inherited from the section: the proof below never uses
--- `[𝗜𝚺₁ ⪯ T]`, so the section variable would be flagged as unused.
-omit [𝗜𝚺₁ ⪯ T] in
+end
+
 /-- Raising the level of the relativization is provable: `𝗜𝚺₁` proves that what `Prov^n_T` proves,
 `Prov^(n + 1)_T` proves.
 - [Bek99, Lemma 3.1(2)] -/
-theorem provable_relativizedProvability_succ_of_relativizedProvability [𝗜𝚺₁ ⪯ T] (n : ℕ)
+theorem provable_relativizedProvability_succ_of_relativizedProvability (n : ℕ)
     {σ : ArithmeticSentence} :
     𝗜𝚺₁ ⊢ T.relativizedProvability n σ 🡒 T.relativizedProvability (n + 1) σ := by
   match n with
@@ -212,15 +211,14 @@ theorem provable_relativizedProvability_succ_of_relativizedProvability [𝗜𝚺
 
 /-- Raising the level of the relativization to any higher one is provable.
 - [Bek99, Lemma 3.1(2)] -/
-theorem provable_relativizedProvability_of_le {n m : ℕ} (hnm : n ≤ m) {σ : ArithmeticSentence} :
+theorem provable_relativizedProvability_of_le [𝗜𝚺₁ ⪯ T] {n m : ℕ} (hnm : n ≤ m)
+    {σ : ArithmeticSentence} :
     𝗜𝚺₁ ⊢ T.relativizedProvability n σ 🡒 T.relativizedProvability m σ := by
   induction m, hnm using Nat.le_induction with
   | base => cl_prover
   | succ m _ ih =>
     have h := provable_relativizedProvability_succ_of_relativizedProvability T m (σ := σ)
     cl_prover [ih, h]
-
-end
 
 end FFL.FirstOrder.Arithmetic
 

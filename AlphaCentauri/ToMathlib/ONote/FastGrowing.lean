@@ -7,9 +7,9 @@ public import Mathlib.SetTheory.Ordinal.Notation
 
 `ONote.fastGrowing` is monotone and expansive, and `Reaches` — descent along fundamental
 sequences with a fixed budget — carries index monotonicity along it. The CNF norm `norm` bounds
-the budget a descent needs, `osucc` is the notation successor, and `tower` is the diagonal
-`0, 1, ω, ω^ω, …`, cofinal in `ε₀`. Along it `fastGrowingε₀` eventually dominates every fixed
-level.
+the budget a descent needs, `osucc` is the notation successor, `omegaTower c a` iterates `ω ^ ·`
+`c` times over `a`, and `tower` is its diagonal `omegaTower · 0`, i.e. `0, 1, ω, ω^ω, …`, cofinal
+in `ε₀`. Along it `fastGrowingε₀` eventually dominates every fixed level.
 -/
 
 @[expose] public section
@@ -613,10 +613,27 @@ private lemma fastGrowing_lt_succ_index (h : fundamentalSequence o = Sum.inl (so
 
 `tower 0 = 0` and `tower (i + 1) = ω ^ tower i`, cofinal in `ε₀`. -/
 
+/-- The **`ω`-tower** `ω_c(a)`: `ω ^ ·` iterated `c` times over `a`, so `tower i = omegaTower i 0`.
+- [Bek99, §6] -/
+def omegaTower (c : ℕ) (a : ONote) : ONote := (fun x => oadd x 1 0)^[c] a
+
+@[simp] theorem omegaTower_zero (a : ONote) : omegaTower 0 a = a := rfl
+
+lemma omegaTower_succ (c : ℕ) (a : ONote) :
+    omegaTower (c + 1) a = oadd (omegaTower c a) 1 0 := by
+  rw [omegaTower, omegaTower, Function.iterate_succ_apply']
+
+lemma omegaTower_NF {a : ONote} (ha : a.NF) (c : ℕ) : (omegaTower c a).NF := by
+  induction c with
+  | zero => simpa using ha
+  | succ c ih => rw [omegaTower_succ]; exact @NF.oadd_zero _ _ ih
+
 /-- The **diagonal tower**: `0, 1, ω, ω^ω, …`. -/
 def tower (i : ℕ) : ONote := (fun a => oadd a 1 0)^[i] 0
 
 @[simp] theorem tower_zero : tower 0 = 0 := rfl
+
+lemma tower_eq_omegaTower (i : ℕ) : tower i = omegaTower i 0 := rfl
 
 lemma tower_succ (i : ℕ) : tower (i + 1) = oadd (tower i) 1 0 := by
   rw [tower, tower, Function.iterate_succ_apply']

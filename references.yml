@@ -44,6 +44,20 @@ BW87:
       title: Contemporary Mathematics
       volume: 65
 
+Bek99:
+  type: Article
+  title: Parameter free induction and provably total computable functions
+  author: Beklemishev, Lev D.
+  page-range: 13-33
+  date: 1999
+  serial-number:
+    doi: "10.1016/S0304-3975(98)00307-1"
+  parent:
+    type: Periodical
+    title: Theoretical Computer Science
+    volume: 224
+    issue: 1-2
+
 Buc03:
   type: Misc
   title: Beweistheorie

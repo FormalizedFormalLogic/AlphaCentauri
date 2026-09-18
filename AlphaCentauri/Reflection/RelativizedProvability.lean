@@ -167,9 +167,10 @@ theorem relativizedProvability_formalizedCompleteOn_of_pi
       simpa [Theory.relativizedProvability, Provability.pr,
         (RelativizedProv.defined T m).df] using hRel
 
-/-- Provability relativized to true $\Pi_n$ sentences is monotone in `n`.
+/-- Raising the level of the relativization is provable: `𝗜𝚺₁` proves that what `Prov^n_T` proves,
+`Prov^(n + 1)_T` proves.
 - [Bek99, Lemma 3.1(2)] -/
-theorem relativizedProvability_mono
+theorem provable_relativizedProvability_succ_of_relativizedProvability
     (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] (n : ℕ) {σ : ArithmeticSentence} :
     𝗜𝚺₁ ⊢ T.relativizedProvability n σ 🡒 T.relativizedProvability (n + 1) σ := by
   match n with

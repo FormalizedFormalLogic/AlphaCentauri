@@ -18,7 +18,7 @@ structural `Encodable ONote` instance.
 
 namespace ONote
 
-open Ordinal ONote IsWellFounded
+open Ordinal ONote WellFounded
 open scoped Ordinal
 
 theorem exists_NF_repr_eq (o : Ordinal) (hε : o < ε₀) : ∃ x : ONote, x.NF ∧ x.repr = o := by
@@ -62,7 +62,7 @@ theorem NF.repr_lt_epsilon0 {x : ONote} (h : x.NF) : x.repr < ε₀ := by
     have hbelow : a.repr < ω ^ e.repr := h.snd'.repr_lt
     have hsucc : Order.succ e.repr < ε₀ := isSuccLimit_epsilon0.succ_lt hee
     have key : (ONote.oadd e n a).repr < ω ^ Order.succ e.repr := by
-      rw [opow_succ]
+      rw [Order.succ_eq_add_one, opow_add_one]
       have h1 : (ONote.oadd e n a).repr = ω ^ e.repr * ((n : ℕ) : Ordinal) + a.repr := by simp
       rw [h1]
       calc ω ^ e.repr * ((n : ℕ) : Ordinal) + a.repr
@@ -93,11 +93,11 @@ variable (e : ℕ ≃ NONote)
 /-- The `NONote` order pulled back to `ℕ` along a coding `e`. -/
 def ltPull (a b : ℕ) : Prop := e a < e b
 
-instance ltPull_wf : IsWellFounded ℕ (ltPull e) :=
-  ⟨InvImage.wf e NONote.lt_wf⟩
+instance ltPull_wf : WellFounded (ltPull e) :=
+  InvImage.wf e NONote.lt_wf
 
 lemma rank_ltPull_eq_repr (n : ℕ) : rank (ltPull e) n = NONote.repr (e n) := by
-  refine IsWellFounded.induction (ltPull e) n
+  refine WellFounded.induction' (ltPull e) n
     (motive := fun k => rank (ltPull e) k = NONote.repr (e k)) ?_
   intro n IH
   refine le_antisymm (rank_le_of_forall (ltPull e) fun m hm => (IH m hm).trans_lt hm) ?_

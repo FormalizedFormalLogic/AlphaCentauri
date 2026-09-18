@@ -373,7 +373,7 @@ diagonal. Throughout, `oadd a 1 0` is the notation for `ω ^ a`. -/
 
 section Comparison
 
-instance : WellFoundedLT ONote := ⟨InvImage.wf repr Ordinal.lt_wf⟩
+instance : WellFoundedLT ONote := InvImage.wf repr Ordinal.lt_wf
 
 theorem hardy_le_fastGrowing (o : ONote) (n : ℕ) (hn : 2 ≤ n) : hardy o n ≤ fastGrowing o n := by
   rcases e : fundamentalSequence o with (_ | a) | f

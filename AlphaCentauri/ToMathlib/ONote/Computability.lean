@@ -451,7 +451,7 @@ private lemma countNF_mono : Monotone countNF :=
 
 private lemma lt_countNF_succ_enc : a < countNF (enc a + 1) := by
   rw [countNF_succ]
-  rw [countNF_enc, if_pos (Nfb_enc a)]; linarith
+  rw [countNF_enc, ite_eq_left (Nfb_enc a)]; linarith
 
 private lemma exists_count : ∃ n, a < countNF (n + 1) := ⟨enc a, lt_countNF_succ_enc a⟩
 

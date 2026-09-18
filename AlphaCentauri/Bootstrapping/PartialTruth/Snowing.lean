@@ -568,7 +568,7 @@ theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
   have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n) := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance
       (Entailment.Axiomatized.le_of_subset Set.subset_union_left)
   unfold snowing
-  apply Arithmetic.provable_iff_of_models_iff (T := 𝗣𝗔⁻ ∪ tarski n)
+  apply Arithmetic.provable_iff_of_models_iff.{0} (T := 𝗣𝗔⁻ ∪ tarski n)
   intro M _ hMT e
   have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := Semantics.ModelsSet.of_subset hMT Set.subset_union_left
   have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦

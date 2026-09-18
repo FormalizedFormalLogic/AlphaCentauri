@@ -92,7 +92,8 @@ def leastGraph (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSemisentence (k +
 
 /-- A $\Delta_0$ matrix `θ` such that `∃ z, θ(z, y, x⃗)` is `𝗕𝚺₁`-provably equivalent to `φ(y, x⃗)`,
 fixed once and for all so that it does not depend on the ambient theory.
-- [HP98, Theorem I.1.5] -/
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9] -/
 noncomputable def minimalGraphMatrix (φ : 𝚺₁.Semisentence (k + 1)) : 𝚺₀.Semisentence (k + 2) :=
   (Classical.choose (Prenex.models_exists_prenex_of_collection.{0} (Γ := 𝚺) (s := 1)
     φ.sigma_prop)).matrix

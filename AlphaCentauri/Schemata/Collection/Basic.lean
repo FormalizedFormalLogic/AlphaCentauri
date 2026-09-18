@@ -166,7 +166,7 @@ theorem ISigma.provable_collectionAxiom_of_hierarchy (n : ℕ) {φ : ArithmeticS
     (hφ : Hierarchy 𝚺 (n + 1) φ) : 𝗜𝚺 (n + 1) ⊢ .univCl (collectionAxiom φ) := by
   apply Arithmetic.complete.{0};
   intro M _ hMT;
-  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (n := n + 1);
+  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := n + 1);
   apply models_collectionAxiom_iff _ |>.mpr;
   intro f a h
   obtain ⟨w, hw⟩ := sigma_exists_bound_witness (hφ.rew _) (fun i : Fin φ.fvSup ↦ f i) a <| by

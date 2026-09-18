@@ -566,7 +566,7 @@ lemma termFvSubst_termBShift_closed {n w t : V}
     simp
   · intro x
     by_cases hx : x < len w
-    · rw [termBShift_fvar, termFvSubst_fvar, if_pos hx]
+    · rw [termBShift_fvar, termFvSubst_fvar, ite_eq_left hx]
       exact (termBShift_zero (hw.nth hx)).symm
     · simp [termFvSubst_fvar, termBShift_fvar, hx]
   · intro k f ts hf hts ih
@@ -602,7 +602,7 @@ lemma termFvSubst_termSubst {n m w v t : V}
       nth_termFvSubstVec hv.isUTerm hz]
   · intro x
     by_cases hx : x < len w
-    · rw [termFvSubst_fvar, termSubst_fvar, termFvSubst_fvar, if_pos hx]
+    · rw [termFvSubst_fvar, termSubst_fvar, termFvSubst_fvar, ite_eq_left hx]
       exact (termSubst_zero (v := termFvSubstVec L n w v) (hw.nth hx)).symm
     · simp [termFvSubst_fvar, termSubst_fvar, hx]
   · intro k f ts hf hts ih

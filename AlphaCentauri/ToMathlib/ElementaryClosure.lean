@@ -6,9 +6,9 @@ public import Foundation.Vorspiel.Matrix
 # Elementary closure
 
 `Nat.ElementaryClosure K f` holds when `f` is reachable from a family `K` of functions,
-indexed by arity, together with the basic functions `0`, successor, projections, addition, and
-truncated subtraction, by composition and bounded primitive recursion. `Nat.elementaryClosure K`
-is the resulting family of function classes, one per arity.
+indexed by arity, together with the basic functions `0`, successor, projections, addition,
+truncated subtraction, multiplication, and `2 ^ ·`, by composition and bounded primitive
+recursion. `Nat.elementaryClosure K` is the resulting family of function classes, one per arity.
 
 Closing the basic functions alone under composition and bounded recursion, with no base family,
 produces exactly the Kalmar elementary functions, so this is the elementary closure of `K` in the
@@ -20,8 +20,8 @@ sense of [Bek99, §6].
 namespace Nat
 
 /-- `ElementaryClosure K f` holds when `f` is built from `K` and the basic functions `0`,
-successor, projections, addition, and truncated subtraction, by composition and bounded
-primitive recursion.
+successor, projections, addition, truncated subtraction, multiplication, and `2 ^ ·`, by
+composition and bounded primitive recursion.
 - [Bek99, §6] -/
 inductive ElementaryClosure (K : ∀ k, Set ((Fin k → ℕ) → ℕ)) : ∀ {k}, ((Fin k → ℕ) → ℕ) → Prop
   | base {k} {f : (Fin k → ℕ) → ℕ} (hf : f ∈ K k) : ElementaryClosure K f
@@ -30,6 +30,8 @@ inductive ElementaryClosure (K : ∀ k, Set ((Fin k → ℕ) → ℕ)) : ∀ {k}
   | proj {k} (i : Fin k) : ElementaryClosure K (fun v : Fin k → ℕ ↦ v i)
   | add : ElementaryClosure K (fun v : Fin 2 → ℕ ↦ v 0 + v 1)
   | sub : ElementaryClosure K (fun v : Fin 2 → ℕ ↦ v 0 - v 1)
+  | mul : ElementaryClosure K (fun v : Fin 2 → ℕ ↦ v 0 * v 1)
+  | exp : ElementaryClosure K (fun v : Fin 1 → ℕ ↦ 2 ^ v 0)
   | comp {k l} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
       (hg : ElementaryClosure K g) (hh : ∀ i, ElementaryClosure K (h i)) :
       ElementaryClosure K (fun v : Fin k → ℕ ↦ g fun i ↦ h i v)
@@ -60,6 +62,8 @@ lemma mono {K K' : ∀ k, Set ((Fin k → ℕ) → ℕ)} (h : ∀ k, K k ⊆ K' 
   | proj i => exact .proj i
   | add => exact .add
   | sub => exact .sub
+  | mul => exact .mul
+  | exp => exact .exp
   | comp _ _ ihg ihh => exact .comp ihg ihh
   | boundedRec _ _ _ hbound ihf ihg ihb => exact .boundedRec ihf ihg ihb hbound
 

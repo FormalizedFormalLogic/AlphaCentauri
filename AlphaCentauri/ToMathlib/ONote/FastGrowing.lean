@@ -611,7 +611,8 @@ private lemma fastGrowing_lt_succ_index (h : fundamentalSequence o = Sum.inl (so
 
 /-! ### The diagonal tower
 
-`tower 0 = 0` and `tower (i + 1) = ω ^ tower i`, cofinal in `ε₀`. -/
+`omegaTower c a` iterates `ω ^ ·` `c` times over `a`, and `tower` is its diagonal
+`omegaTower · 0`: `tower 0 = 0` and `tower (i + 1) = ω ^ tower i`, cofinal in `ε₀`. -/
 
 /-- The **`ω`-tower** `ω_c(a)`: `ω ^ ·` iterated `c` times over `a`, so `tower i = omegaTower i 0`.
 - [Bek99, §6] -/
@@ -629,19 +630,13 @@ lemma omegaTower_NF {a : ONote} (ha : a.NF) (c : ℕ) : (omegaTower c a).NF := b
   | succ c ih => rw [omegaTower_succ]; exact @NF.oadd_zero _ _ ih
 
 /-- The **diagonal tower**: `0, 1, ω, ω^ω, …`. -/
-def tower (i : ℕ) : ONote := (fun a => oadd a 1 0)^[i] 0
+def tower (i : ℕ) : ONote := omegaTower i 0
 
 @[simp] theorem tower_zero : tower 0 = 0 := rfl
 
-lemma tower_eq_omegaTower (i : ℕ) : tower i = omegaTower i 0 := rfl
+lemma tower_succ (i : ℕ) : tower (i + 1) = oadd (tower i) 1 0 := omegaTower_succ i 0
 
-lemma tower_succ (i : ℕ) : tower (i + 1) = oadd (tower i) 1 0 := by
-  rw [tower, tower, Function.iterate_succ_apply']
-
-lemma tower_NF (i : ℕ) : (tower i).NF :=
-  match i with
-  | 0 => by rw [tower_zero]; exact NF.zero
-  | i + 1 => by rw [tower_succ]; have := tower_NF i; exact NF.oadd_zero _ _
+lemma tower_NF (i : ℕ) : (tower i).NF := omegaTower_NF NF.zero i
 
 private lemma tower_lt_succ (i : ℕ) : tower i < tower (i + 1) := by
   rw [tower_succ, lt_def]

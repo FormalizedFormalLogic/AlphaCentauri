@@ -10,9 +10,10 @@ indexed by arity, together with the basic functions `0`, successor, projections,
 truncated subtraction, multiplication, and `2 ^ ·`, by composition and bounded primitive
 recursion. `Nat.elementaryClosure K` is the resulting family of function classes, one per arity.
 
-Closing the basic functions alone under composition and bounded recursion, with no base family,
-produces exactly the Kalmar elementary functions, so this is the elementary closure of `K` in the
-sense of [Bek99, §6].
+[Bek99, §6] takes the elementary closure of `K` to be the closure of `K` and all elementary
+functions under composition and bounded recursion, leaving the elementary functions themselves to
+[Ros84]. The basic functions above, closed under the same two operations with no base family, are
+exactly those — Grzegorczyk's `E³` — so the two readings agree.
 -/
 
 @[expose] public section

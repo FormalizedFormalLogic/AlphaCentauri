@@ -164,6 +164,19 @@ Poh09:
     type: Anthology
     title: Universitext
 
+Ros84:
+  type: Book
+  title: "Subrecursion: Functions and Hierarchies"
+  author: "Rose, Harvey E."
+  date: 1984
+  publisher:
+    name: Clarendon Press
+    location: Oxford
+  parent:
+    type: Anthology
+    title: Oxford Logic Guides
+    volume: 9
+
 Tow20:
   type: Misc
   title: "{Goodstein}'s theorem, ε₀, and unprovability"

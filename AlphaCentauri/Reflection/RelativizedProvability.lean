@@ -207,5 +207,16 @@ theorem provable_relativizedProvability_succ_of_relativizedProvability
       simpa [Theory.relativizedProvability, Provability.pr,
         (RelativizedProv.defined T (m + 1)).df] using hRel'
 
+/-- Raising the level of the relativization to any higher one is provable.
+- [Bek99, Lemma 3.1(2)] -/
+theorem provable_relativizedProvability_of_le (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+    {n m : ℕ} (hnm : n ≤ m) {σ : ArithmeticSentence} :
+    𝗜𝚺₁ ⊢ T.relativizedProvability n σ 🡒 T.relativizedProvability m σ := by
+  induction m, hnm using Nat.le_induction with
+  | base => cl_prover
+  | succ m _ ih =>
+    have h := provable_relativizedProvability_succ_of_relativizedProvability T m (σ := σ)
+    cl_prover [ih, h]
+
 end FFL.FirstOrder.Arithmetic
 

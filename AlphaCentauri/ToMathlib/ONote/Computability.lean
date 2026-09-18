@@ -338,7 +338,7 @@ private theorem computable_Nfb : Computable Nfb :=
 variable (a : ℕ)
 
 /-- The structural NF-code of the `a`-th notation. -/
-private def enc (a : ℕ) : ℕ := encodeONote (natCode a).1
+private noncomputable def enc (a : ℕ) : ℕ := encodeONote (natCode a).1
 
 private lemma decodeONote_enc : decodeONote (enc a) = (natCode a).1 := by
   rw [enc, decodeONote_encodeONote]
@@ -370,8 +370,8 @@ private lemma enc_strictMono : StrictMono enc := by
     intro a
     have h2 : (natCode a) = (Encodable.equivRangeEncode NONote).symm
         (Nat.Subtype.ofNat (Set.range (Encodable.encode : NONote → ℕ)) a) := by
-      change Denumerable.ofNat NONote a = _
-      simp only [Denumerable.ofEquiv_ofNat, Denumerable.ofNat_nat, Equiv.coe_fn_symm_mk]
+      unfold natCode
+      simp [Nat.Subtype.orderIsoOfNat_apply]
     unfold enc
     rw [h2]
     exact congrArg Subtype.val
@@ -451,7 +451,7 @@ private lemma countNF_mono : Monotone countNF :=
 
 private lemma lt_countNF_succ_enc : a < countNF (enc a + 1) := by
   rw [countNF_succ]
-  rw [countNF_enc, if_pos (Nfb_enc a)]; linarith
+  rw [countNF_enc, ite_eq_left (Nfb_enc a)]; linarith
 
 private lemma exists_count : ∃ n, a < countNF (n + 1) := ⟨enc a, lt_countNF_succ_enc a⟩
 

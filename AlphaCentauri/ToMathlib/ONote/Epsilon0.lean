@@ -1,5 +1,6 @@
 module
 
+public import Mathlib.Order.OrderIsoNat
 public import Mathlib.SetTheory.Ordinal.Notation
 public import Mathlib.SetTheory.Ordinal.Veblen
 public import AlphaCentauri.ToMathlib.Ordinal.Rank
@@ -10,15 +11,15 @@ public import AlphaCentauri.ToMathlib.Ordinal.Rank
 Mathlib's `Mathlib/SetTheory/Ordinal/Notation.lean` proves that `ONote.repr` is an embedding
 `NONote ↪ ε₀` but does not prove surjectivity onto ordinals `< ε₀`. This file supplies that
 surjectivity, and transfers the result to any `ℕ`-order obtained by pulling the `NONote` order
-back along a bijection. A concrete computable bijection (`natCode`) is constructed from a
-structural `Encodable ONote` instance.
+back along a bijection. A concrete bijection (`natCode`) is constructed from a structural
+`Encodable ONote` instance, enumerating the normal forms in increasing order of their code.
 -/
 
 @[expose] public section
 
 namespace ONote
 
-open Ordinal ONote IsWellFounded
+open Ordinal ONote WellFounded
 open scoped Ordinal
 
 theorem exists_NF_repr_eq (o : Ordinal) (hε : o < ε₀) : ∃ x : ONote, x.NF ∧ x.repr = o := by
@@ -62,7 +63,7 @@ theorem NF.repr_lt_epsilon0 {x : ONote} (h : x.NF) : x.repr < ε₀ := by
     have hbelow : a.repr < ω ^ e.repr := h.snd'.repr_lt
     have hsucc : Order.succ e.repr < ε₀ := isSuccLimit_epsilon0.succ_lt hee
     have key : (ONote.oadd e n a).repr < ω ^ Order.succ e.repr := by
-      rw [opow_succ]
+      rw [Order.succ_eq_add_one, opow_add_one]
       have h1 : (ONote.oadd e n a).repr = ω ^ e.repr * ((n : ℕ) : Ordinal) + a.repr := by simp
       rw [h1]
       calc ω ^ e.repr * ((n : ℕ) : Ordinal) + a.repr
@@ -93,11 +94,11 @@ variable (e : ℕ ≃ NONote)
 /-- The `NONote` order pulled back to `ℕ` along a coding `e`. -/
 def ltPull (a b : ℕ) : Prop := e a < e b
 
-instance ltPull_wf : IsWellFounded ℕ (ltPull e) :=
-  ⟨InvImage.wf e NONote.lt_wf⟩
+instance ltPull_wf : WellFounded (ltPull e) :=
+  InvImage.wf e NONote.lt_wf
 
 lemma rank_ltPull_eq_repr (n : ℕ) : rank (ltPull e) n = NONote.repr (e n) := by
-  refine IsWellFounded.induction (ltPull e) n
+  refine WellFounded.induction' (ltPull e) n
     (motive := fun k => rank (ltPull e) k = NONote.repr (e k)) ?_
   intro n IH
   refine le_antisymm (rank_le_of_forall (ltPull e) fun m hm => (IH m hm).trans_lt hm) ?_
@@ -170,8 +171,14 @@ instance : Encodable NONote :=
 instance : Denumerable NONote :=
   Denumerable.ofEncodableOfInfinite NONote
 
-/-- A computable coding of `ℕ` by normal-form notations. -/
-def natCode : ℕ ≃ NONote := (Denumerable.eqv NONote).symm
+/-- A coding of `ℕ` by normal-form notations, in increasing order of the structural code. -/
+noncomputable def natCode : ℕ ≃ NONote :=
+  letI : DecidablePred (· ∈ Set.range (Encodable.encode : NONote → ℕ)) :=
+    Encodable.decidableRangeEncode NONote
+  letI : Infinite (Set.range (Encodable.encode : NONote → ℕ)) :=
+    Infinite.of_injective _ (Equiv.ofInjective _ Encodable.encode_injective).injective
+  (Nat.Subtype.orderIsoOfNat (Set.range (Encodable.encode : NONote → ℕ))).toEquiv.trans
+    (Encodable.equivRangeEncode NONote).symm
 
 theorem epsilon0_le_orderType_natCode : ε₀ ≤ orderType (ltPull natCode) :=
   epsilon0_le_orderType_ltPull natCode

@@ -196,7 +196,7 @@ private theorem toOrdinal_strictMono_and_bound (hb : 2 ≤ b) (n : ℕ) :
               rw [mul_add_one]
         _ ≤ ω ^ toOrdinal b (Nat.log b n) * ω :=
               mul_le_mul_right (by rw [← Nat.cast_add_one]; exact (natCast_lt_omega0 _).le) _
-        _ = ω ^ (toOrdinal b (Nat.log b n) + 1) := by rw [← opow_succ, Order.succ_eq_add_one]
+        _ = ω ^ (toOrdinal b (Nat.log b n) + 1) := by rw [← opow_add_one]
 
 theorem toOrdinal_strictMono (hb : 2 ≤ b) : StrictMono (toOrdinal b) :=
   fun m n hmn => (toOrdinal_strictMono_and_bound b hb n).1 m hmn

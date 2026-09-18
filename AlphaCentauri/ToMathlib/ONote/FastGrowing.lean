@@ -354,7 +354,7 @@ private lemma lt_oadd_of_lead_le (hc : c.NF) {d : ONote} (hd : d.NF)
   | oadd ed nd bd =>
     have hpow : ω ^ ed.repr ≤ (oadd ed nd bd).repr := omega0_le_oadd ed nd bd
     have h2 : (ω : Ordinal) ^ ed.repr < ω ^ c.repr * ω := lt_of_le_of_lt hpow hlead
-    rw [← opow_succ] at h2
+    rw [← opow_add_one, ← Order.succ_eq_add_one] at h2
     have hed_le : ed.repr ≤ c.repr :=
       Order.lt_succ_iff.1 ((opow_lt_opow_iff_right one_lt_omega0).1 h2)
     rcases lt_or_eq_of_le hed_le with hlt | heq
@@ -395,7 +395,7 @@ private theorem lt_fundamentalSequence_of_norm_le (o : ONote) (ho : o.NF) (g : �
           rw [hb0, hm1] at hlt
           rw [show (oadd a 1 0).repr = ω ^ a.repr from by
             simp only [ONote.repr, PNat.one_coe, Nat.cast_one, mul_one, add_zero]] at hlt
-          rw [harepr, opow_succ] at hlt
+          rw [harepr, Order.succ_eq_add_one, opow_add_one] at hlt
           exact hlt
         · -- L3 : `g = fun i => ω^a·(k+1) + ω^a'·(i+1)`, `m = k+2`
           have hg' : g = fun i => oadd a k.succPNat (oadd a' i.succPNat 0) := by
@@ -419,7 +419,7 @@ private theorem lt_fundamentalSequence_of_norm_le (o : ONote) (ho : o.NF) (g : �
                 refine oadd_lt_oadd_3 ?_
                 refine lt_oadd_of_lead_le ha'NF hd.snd ?_ ?_
                 · have hba : ba.repr < ω ^ a.repr := hd.snd'.repr_lt
-                  rw [harepr, opow_succ] at hba; exact hba
+                  rw [harepr, Order.succ_eq_add_one, opow_add_one] at hba; exact hba
                 · rw [norm_oadd] at hnorm
                   exact (le_max_of_le_right (le_max_right _ _)).trans hnorm
             · have hr := lt_def.1 hbalt; rw [repr_zero] at hr

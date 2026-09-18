@@ -31,29 +31,28 @@ lemma equiv_union_right (e : U ≊ S) (T : Theory L) : T ∪ U ≊ T ∪ S :=
   Equiv.antisymm
     ⟨weakerThan_union_right e.le T, weakerThan_union_right e.symm.le T⟩
 
-/-- `T` proves every `Γ`-sentence that `U` proves.
+/-- `T ⪯[Γ] U`: every sentence satisfying `Γ` that `T` proves is provable in `U`. The literature's
+"`U` is `Γ`-conservative over `T`" is `U ⪯[Γ] T`.
 - [Bek99, §2] -/
-def ConservativeOver (U T : Theory L) (Γ : Sentence L → Prop) : Prop :=
-  ∀ σ, Γ σ → U ⊢ σ → T ⊢ σ
+def WeakerThanOn (Γ : Sentence L → Prop) (T U : Theory L) : Prop :=
+  ∀ σ, Γ σ → T ⊢ σ → U ⊢ σ
 
-namespace ConservativeOver
+@[inherit_doc] notation:40 T:41 " ⪯[" Γ "] " U:41 => Theory.WeakerThanOn Γ T U
 
-variable {Γ Γ' : Sentence L → Prop} {U T S : Theory L}
+namespace WeakerThanOn
 
-lemma refl (T : Theory L) (Γ : Sentence L → Prop) : ConservativeOver T T Γ :=
-  fun _ _ h ↦ h
+variable {Γ Γ' : Sentence L → Prop} {T U S : Theory L}
 
-lemma trans (h₁ : ConservativeOver U T Γ) (h₂ : ConservativeOver T S Γ) :
-    ConservativeOver U S Γ :=
+@[refl] lemma refl (T : Theory L) (Γ : Sentence L → Prop) : T ⪯[Γ] T := fun _ _ h ↦ h
+
+@[trans] lemma trans (h₁ : T ⪯[Γ] U) (h₂ : U ⪯[Γ] S) : T ⪯[Γ] S :=
   fun σ hσ h ↦ h₂ σ hσ (h₁ σ hσ h)
 
-lemma of_weakerThan (h : U ⪯ T) : ConservativeOver U T Γ :=
-  fun _ _ hσ ↦ h.pbl hσ
+lemma of_weakerThan (h : T ⪯ U) : T ⪯[Γ] U := fun _ _ hσ ↦ h.pbl hσ
 
-lemma mono (h : ∀ σ, Γ' σ → Γ σ) (hUT : ConservativeOver U T Γ) : ConservativeOver U T Γ' :=
-  fun σ hσ ↦ hUT σ (h σ hσ)
+lemma mono (h : ∀ σ, Γ' σ → Γ σ) (hTU : T ⪯[Γ] U) : T ⪯[Γ'] U := fun σ hσ ↦ hTU σ (h σ hσ)
 
-end ConservativeOver
+end WeakerThanOn
 
 end Theory
 

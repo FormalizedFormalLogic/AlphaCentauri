@@ -44,4 +44,17 @@ lemma val_subst_congr {M : Type*} [Tarski.Structure L M] {ε : ξ → M} {w w' :
   simp only [Semiterm.val_substs]
   exact congrArg (Semiterm.val · ε t) (funext fun i => h i)
 
+lemma rewrite_subst_shift_eq (f : ℕ → SyntacticTerm L) (t : SyntacticTerm L)
+    (φ : Semiformula L ℕ 1) :
+    Rew.rewrite (&0 :>ₙ fun x ↦ Rew.shift (f x)) ▹ ((Rewriting.shift φ)/[t]) =
+      (Rewriting.shift (Rew.rewrite (Rew.bShift ∘ f) ▹ φ))/[
+        Rew.rewrite (&0 :>ₙ fun x ↦ Rew.shift (f x)) t] := by
+  simpa [← TransitiveRewriting.comp_app] using Rewriting.smul_ext' <| by
+    ext x
+    · simp [Rew.comp_app]
+    · have e : (Rew.shift : SyntacticRew L 1 1) (Rew.bShift (f x)) =
+          Rew.bShift (Rew.shift (f x)) := by
+        simpa using Rew.q_comp_bShift_app (ω := (Rew.shift : SyntacticRew L 0 0)) (f x)
+      simp [Rew.comp_app, e]
+
 end FFL.FirstOrder.Rew

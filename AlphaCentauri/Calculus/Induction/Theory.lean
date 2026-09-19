@@ -4,19 +4,19 @@ public import AlphaCentauri.Calculus.Induction.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-!
-# What `LI[C]` proves
+# What `LKI[C]` proves
 
 The induction rule derives the induction axiom for every formula of `C` — which is what its side
-formulas are for — and a theory whose axioms are all `LI[C]`-derivable proves only
-`LI[C]`-derivable sentences. Together these embed `𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ C` into `LI[C]` once
-the axioms of `𝗣𝗔⁻` are derived.
+formulas are for — so the whole `C`-induction scheme is derivable. A theory whose axioms are all
+`LKI[C]`-derivable proves only `LKI[C]`-derivable sentences, and the `bounded` leaf is already
+complete for the sequents of strict $\Pi_1$ formulas true in `ℕ`.
 
 - [Bus98A, Section 1.4.2]
 -/
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.LI
+namespace FFL.FirstOrder.Arithmetic.LKI
 
 open Rewriting LawfulSyntacticRewriting
 
@@ -27,23 +27,23 @@ namespace Derivable
 variable {Γ : LK.Sequent ℒₒᵣ}
 
 /-- Cutting a multiset of derivable formulas off a derivation. -/
-lemma cutAll : ∀ Δ : LK.Sequent ℒₒᵣ, (∀ δ ∈ Δ, ⊢ᴸᴵ[C] ⦃δ⦄) → ⊢ᴸᴵ[C] Γ + ∼Δ → ⊢ᴸᴵ[C] Γ := by
+lemma cutAll : ∀ Δ : LK.Sequent ℒₒᵣ, (∀ δ ∈ Δ, ⊢ᴸᴷᴵ[C] ⦃δ⦄) → ⊢ᴸᴷᴵ[C] Γ + ∼Δ → ⊢ᴸᴷᴵ[C] Γ := by
   intro Δ
   induction Δ using Multiset.induction_on with
   | empty => intro _ h; simpa using h
   | cons δ Δ ih =>
     intro hΔ h
     refine ih (fun d hd ↦ hΔ d (by simp [hd])) ?_
-    have h₁ : ⊢ᴸᴵ[C] (0 : LK.Sequent ℒₒᵣ) + ⦃δ⦄ := (hΔ δ (by simp)).cast (by simp)
-    have h₂ : ⊢ᴸᴵ[C] (Γ + ∼Δ) + ⦃∼δ⦄ :=
+    have h₁ : ⊢ᴸᴷᴵ[C] (0 : LK.Sequent ℒₒᵣ) + ⦃δ⦄ := (hΔ δ (by simp)).cast (by simp)
+    have h₂ : ⊢ᴸᴷᴵ[C] (Γ + ∼Δ) + ⦃∼δ⦄ :=
       h.cast (by simp [Multiset.tilde_def, Multiset.add_atom_eq_cons])
     exact (h₁.cut h₂).cast (by simp)
 
-lemma allOne (h : ⊢ᴸᴵ[C] ⦃free ξ⦄) : ⊢ᴸᴵ[C] ⦃∀¹ ξ⦄ :=
+lemma allOne (h : ⊢ᴸᴷᴵ[C] ⦃free ξ⦄) : ⊢ᴸᴷᴵ[C] ⦃∀¹ ξ⦄ :=
   (Derivable.all (Γ := 0) (ξ := ξ) (h.cast (by simp [Rewriting.shifts]))).cast (by simp)
 
-lemma allClosure_fixitr {φ : ArithmeticProposition} (h : ⊢ᴸᴵ[C] ⦃φ⦄) :
-    ∀ m : ℕ, ⊢ᴸᴵ[C] ⦃∀¹* (Rew.fixitr 0 m ▹ φ)⦄
+lemma allClosure_fixitr {φ : ArithmeticProposition} (h : ⊢ᴸᴷᴵ[C] ⦃φ⦄) :
+    ∀ m : ℕ, ⊢ᴸᴷᴵ[C] ⦃∀¹* (Rew.fixitr 0 m ▹ φ)⦄
   | 0 => by simpa using h
   | m + 1 => by
     simp only [LawfulSyntacticRewriting.allClosure_fixitr]
@@ -51,7 +51,7 @@ lemma allClosure_fixitr {φ : ArithmeticProposition} (h : ⊢ᴸᴵ[C] ⦃φ⦄)
     simpa using allClosure_fixitr h m
 
 /-- The universal closure of a derivable formula is derivable. -/
-lemma univCl' {φ : ArithmeticProposition} (h : ⊢ᴸᴵ[C] ⦃φ⦄) : ⊢ᴸᴵ[C] ⦃φ.univCl'⦄ :=
+lemma univCl' {φ : ArithmeticProposition} (h : ⊢ᴸᴷᴵ[C] ⦃φ⦄) : ⊢ᴸᴷᴵ[C] ⦃φ.univCl'⦄ :=
   allClosure_fixitr h _
 
 end Derivable
@@ -78,7 +78,7 @@ private lemma vecCons_head_tail (ε : ℕ → ℕ) : ε 0 :>ₙ (fun x ↦ ε (x
 fragment the `bounded` leaf and the universal rule are already complete. -/
 theorem derivable_of_valid : ∀ (n : ℕ) (Γ : LK.Sequent ℒₒᵣ),
     (Γ.map Semiformula.complexity).sum ≤ n → (∀ φ ∈ Γ, StrictHierarchy 𝚷 1 φ) →
-    (∀ ε : ℕ → ℕ, ∃ φ ∈ Γ, φ.Evalf ε) → ⊢ᴸᴵ[C] Γ := by
+    (∀ ε : ℕ → ℕ, ∃ φ ∈ Γ, φ.Evalf ε) → ⊢ᴸᴷᴵ[C] Γ := by
   intro n
   induction n with
   | zero =>
@@ -121,10 +121,10 @@ theorem derivable_of_valid : ∀ (n : ℕ) (Γ : LK.Sequent ℒₒᵣ),
           have : ∀ a : ℕ, Semiformula.Eval ![a] (fun x ↦ ε (x + 1)) ξ := by simpa using hv
           simpa using this (ε 0)
 
-/-- A theory whose axioms are all derivable in `LI[C]` proves only `LI[C]`-derivable sentences. -/
+/-- A theory whose axioms are all derivable in `LKI[C]` proves only `LKI[C]`-derivable sentences. -/
 theorem derivable_of_provable {T : ArithmeticTheory}
-    (hT : ∀ σ ∈ T, ⊢ᴸᴵ[C] ⦃(σ : ArithmeticProposition)⦄) {σ : ArithmeticSentence} (h : T ⊢ σ) :
-    ⊢ᴸᴵ[C] ⦃(σ : ArithmeticProposition)⦄ := by
+    (hT : ∀ σ ∈ T, ⊢ᴸᴷᴵ[C] ⦃(σ : ArithmeticProposition)⦄) {σ : ArithmeticSentence} (h : T ⊢ σ) :
+    ⊢ᴸᴷᴵ[C] ⦃(σ : ArithmeticProposition)⦄ := by
   obtain ⟨Δ, hΔ, hd⟩ := Theory.Proof.provable_iff.mp h
   refine Derivable.cutAll _ ?_ (Derivable.ofLK hd)
   rintro δ hδ
@@ -137,9 +137,9 @@ variable [RewriteClosed C]
 formulas, is as strong as the induction scheme for `C`.
 
 - [Bus98A, Section 1.4.2] -/
-theorem derivable_succInd (hξ : C ξ) : ⊢ᴸᴵ[C] ⦃succInd ξ⦄ := by
+theorem derivable_succInd (hξ : C ξ) : ⊢ᴸᴷᴵ[C] ⦃succInd ξ⦄ := by
   have step : ∀ η : ArithmeticSemiformula ℕ 1,
-      ⊢ᴸᴵ[C] ⦃∼(η/[(&0 : ArithmeticTerm ℕ)]), η/[‘(&0 + 1)’]⦄
+      ⊢ᴸᴷᴵ[C] ⦃∼(η/[(&0 : ArithmeticTerm ℕ)]), η/[‘(&0 + 1)’]⦄
         + ⦃(∃¹ (η ⋏ ∼(η/[‘(#0 + 1)’])) : ArithmeticProposition)⦄ := by
     intro η
     apply Derivable.exs (&0 : ArithmeticTerm ℕ)
@@ -147,31 +147,36 @@ theorem derivable_succInd (hξ : C ξ) : ⊢ᴸᴵ[C] ⦃succInd ξ⦄ := by
         = η/[(&0 : ArithmeticTerm ℕ)] ⋏ ∼(η/[‘(&0 + 1)’]) from by simp [Rew.subst_subst_eq]]
     apply Derivable.and
     · exact (Derivable.weakening (η/[‘(&0 + 1)’])
-        (Derivable.eta (η/[(&0 : ArithmeticTerm ℕ)]))).cast (by abel)
+        (Derivable.lem (η/[(&0 : ArithmeticTerm ℕ)]))).cast (by abel)
     · exact (Derivable.weakening (∼(η/[(&0 : ArithmeticTerm ℕ)]))
-        (Derivable.eta (η/[‘(&0 + 1)’]))).cast (by abel)
-  have key : ⊢ᴸᴵ[C]
+        (Derivable.lem (η/[‘(&0 + 1)’]))).cast (by abel)
+  have key : ⊢ᴸᴷᴵ[C]
       ⦃∼(ξ/[‘0’]), (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])) : ArithmeticProposition), ∀¹ ξ⦄ := by
     apply Derivable.all
-    have h := Derivable.ind (C := C) (ξ := shift ξ) (RewriteClosed.shift hξ) (&0)
+    have h := Derivable.ind' (C := C) (ξ := shift ξ) (RewriteClosed.shift hξ) (&0)
       (Γ := ⦃shift (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])) : ArithmeticProposition)⦄)
       ((step (shift (shift ξ))).cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; try abel))
     exact h.cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; try abel)
   rw [show (succInd ξ : ArithmeticProposition)
       = ∼(ξ/[‘0’]) ⋎ ((∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’]))) ⋎ (∀¹ ξ))
       from by simp [succInd, Semiformula.imp_eq]]
-  have h₁ : ⊢ᴸᴵ[C] ⦃∼(ξ/[‘0’])⦄
+  have h₁ : ⊢ᴸᴷᴵ[C] ⦃∼(ξ/[‘0’])⦄
       + ⦃(∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])) : ArithmeticProposition), ∀¹ ξ⦄ := key.cast (by abel)
-  have h₂ : ⊢ᴸᴵ[C] (0 : LK.Sequent ℒₒᵣ)
+  have h₂ : ⊢ᴸᴷᴵ[C] (0 : LK.Sequent ℒₒᵣ)
       + ⦃∼(ξ/[‘0’]), (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’]))) ⋎ (∀¹ ξ)⦄ := (Derivable.or h₁).cast (by abel)
   exact (Derivable.or h₂).cast (by simp)
 
-/-- Every axiom of the `C`-induction scheme is derivable. -/
-theorem derivable_of_mem_inductionScheme {σ : ArithmeticSentence}
-    (h : σ ∈ InductionScheme ℒₒᵣ C) : ⊢ᴸᴵ[C] ⦃(σ : ArithmeticProposition)⦄ := by
-  obtain ⟨ξ, hξ, rfl⟩ := by simpa [InductionScheme] using h
+/-- The induction axiom of the scheme, universally closed, is derivable. -/
+theorem derivable_univCl_succInd (hξ : C ξ) :
+    ⊢ᴸᴷᴵ[C] ⦃(Semiformula.univCl (succInd ξ) : ArithmeticProposition)⦄ := by
   simpa using (derivable_succInd hξ).univCl'
 
-end FFL.FirstOrder.Arithmetic.LI
+/-- Every axiom of the `C`-induction scheme is derivable. -/
+theorem derivable_of_mem_inductionScheme {σ : ArithmeticSentence}
+    (h : σ ∈ InductionScheme ℒₒᵣ C) : ⊢ᴸᴷᴵ[C] ⦃(σ : ArithmeticProposition)⦄ := by
+  obtain ⟨ξ, hξ, rfl⟩ := by simpa [InductionScheme] using h
+  exact derivable_univCl_succInd hξ
+
+end FFL.FirstOrder.Arithmetic.LKI
 
 end

@@ -121,15 +121,15 @@ theorem derivable_of_valid : ∀ (n : ℕ) (Γ : LK.Sequent ℒₒᵣ),
           have : ∀ a : ℕ, Semiformula.Eval ![a] (fun x ↦ ε (x + 1)) ξ := by simpa using hv
           simpa using this (ε 0)
 
+variable {T : ArithmeticTheory} {σ : ArithmeticSentence}
+
 /-- A theory whose axioms are all derivable in `LKI[C]` proves only `LKI[C]`-derivable sentences. -/
-theorem derivable_of_provable {T : ArithmeticTheory}
-    (hT : ∀ σ ∈ T, ⊢ᴸᴷᴵ[C] ⦃(σ : ArithmeticProposition)⦄) {σ : ArithmeticSentence} (h : T ⊢ σ) :
-    ⊢ᴸᴷᴵ[C] ⦃(σ : ArithmeticProposition)⦄ := by
+theorem derivable_of_provable (hT : ∀ σ ∈ T, ⊢ᴸᴷᴵ[C] ⦃σ⦄) (h : T ⊢ σ) : ⊢ᴸᴷᴵ[C] ⦃σ⦄ := by
   obtain ⟨Δ, hΔ, hd⟩ := Theory.Proof.provable_iff.mp h
   refine Derivable.cutAll _ ?_ (Derivable.ofLK hd)
-  rintro δ hδ
-  obtain ⟨ψ, hψ, rfl⟩ := Multiset.mem_map.mp (by simpa [LK.Sequent.embed] using hδ)
-  exact hT ψ (hΔ ψ hψ)
+  · rintro δ hδ
+    obtain ⟨ψ, hψ, rfl⟩ := Multiset.mem_map.mp (by simpa [LK.Sequent.embed] using hδ)
+    exact hT ψ (hΔ ψ hψ)
 
 variable [RewriteClosed C]
 
@@ -167,13 +167,11 @@ theorem derivable_succInd (hξ : C ξ) : ⊢ᴸᴷᴵ[C] ⦃succInd ξ⦄ := by
   exact (Derivable.or h₂).cast (by simp)
 
 /-- The induction axiom of the scheme, universally closed, is derivable. -/
-theorem derivable_univCl_succInd (hξ : C ξ) :
-    ⊢ᴸᴷᴵ[C] ⦃(Semiformula.univCl (succInd ξ) : ArithmeticProposition)⦄ := by
+theorem derivable_univCl_succInd (hξ : C ξ) : ⊢ᴸᴷᴵ[C] ⦃Semiformula.univCl (succInd ξ)⦄ := by
   simpa using (derivable_succInd hξ).univCl'
 
 /-- Every axiom of the `C`-induction scheme is derivable. -/
-theorem derivable_of_mem_inductionScheme {σ : ArithmeticSentence}
-    (h : σ ∈ InductionScheme ℒₒᵣ C) : ⊢ᴸᴷᴵ[C] ⦃(σ : ArithmeticProposition)⦄ := by
+theorem derivable_of_mem_inductionScheme (h : σ ∈ InductionScheme ℒₒᵣ C) : ⊢ᴸᴷᴵ[C] ⦃σ⦄ := by
   obtain ⟨ξ, hξ, rfl⟩ := by simpa [InductionScheme] using h
   exact derivable_univCl_succInd hξ
 

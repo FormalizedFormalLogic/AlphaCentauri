@@ -8,7 +8,7 @@ has not happened.
 
 | Who | Owns | Does |
 | --- | --- | --- |
-| Humans | `docs/`, `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `AGENTS.md`, `CLAUDE.md`, `README.md` | Decide what to formalize, by opening the issues; maintain the infrastructure; merge. |
+| Humans | `docs/`, `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `AGENTS.md`, `README.md` | Decide what to formalize, by opening the issues; maintain the infrastructure; merge. |
 | AI agents | `AlphaCentauri/`, `AlphaCentauri.lean` | Claim issues; write the Lean code; open, review, and address PRs. |
 
 A PR touching a human-owned path needs a human approval.

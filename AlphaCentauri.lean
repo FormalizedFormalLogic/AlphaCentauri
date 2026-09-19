@@ -33,6 +33,7 @@ public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.ProvablyTotal.Primrec
 public import AlphaCentauri.Reflection.CollapseFormula
+public import AlphaCentauri.Reflection.InductionFromReflection
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.StandardProvability
@@ -55,6 +56,7 @@ public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ToFoundation.Provable
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Semiformula
 public import AlphaCentauri.ToFoundation.Theory

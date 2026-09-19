@@ -57,4 +57,22 @@ lemma rewrite_subst_shift_eq (f : ℕ → SyntacticTerm L) (t : SyntacticTerm L)
         simpa using Rew.q_comp_bShift_app (ω := (Rew.shift : SyntacticRew L 0 0)) (f x)
       simp [Rew.comp_app, e]
 
+lemma subst_subst_eq {m : ℕ} (v : Fin n → Semiterm L ξ m) (φ : Semiformula L ξ 1)
+    (t : Semiterm L ξ n) : Rew.subst v ▹ (φ/[t]) = φ/[Rew.subst v t] := by
+  simpa [← TransitiveRewriting.comp_app] using Rewriting.smul_ext' <| by
+    ext x
+    · cases x using Fin.cases with
+      | zero => simp [Rew.comp_app]
+      | succ i => exact i.elim0
+    · simp [Rew.comp_app]
+
+lemma shift_subst_eq (φ : Semiformula L ℕ 1) (t : SyntacticSemiterm L n) :
+    Rew.shift ▹ (φ/[t]) = (Rew.shift ▹ φ)/[Rew.shift t] := by
+  simpa [← TransitiveRewriting.comp_app] using Rewriting.smul_ext' <| by
+    ext x
+    · cases x using Fin.cases with
+      | zero => simp [Rew.comp_app]
+      | succ i => exact i.elim0
+    · simp [Rew.comp_app]
+
 end FFL.FirstOrder.Rew

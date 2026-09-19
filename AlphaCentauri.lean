@@ -16,6 +16,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.Bootstrapping.TermVal
+public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.Hierarchy.Bounded
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
 public import AlphaCentauri.Model.Basic

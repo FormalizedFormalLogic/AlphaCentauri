@@ -40,10 +40,10 @@ namespace RewriteClosed
 
 variable {n s : ℕ} {b : Polarity} {C D : ArithmeticSemiformula ℕ n → Prop}
 
-instance strictHierarchy : RewriteClosed (StrictHierarchy (L := ℒₒᵣ) (ξ := ℕ) (n := n) b s) where
+instance strictHierarchy : RewriteClosed (n := n) (StrictHierarchy b s) where
   rewrite f := StrictHierarchy.rew (Rew.rewrite f)
 
-instance hierarchy : RewriteClosed (Hierarchy (L := ℒₒᵣ) (ξ := ℕ) (n := n) b s) where
+instance hierarchy : RewriteClosed (n := n) (Hierarchy b s) where
   rewrite f := Hierarchy.rew (Rew.rewrite f)
 
 instance or [RewriteClosed C] [RewriteClosed D] : RewriteClosed fun φ ↦ C φ ∨ D φ where
@@ -61,26 +61,18 @@ the $\Delta_0$ sequents true in `ℕ` and an induction rule for the formulas of 
 inductive Derivation (C : ArithmeticSemiformula ℕ 1 → Prop) : LK.Sequent ℒₒᵣ → Type
   | axΔ₀ (Γ : LK.Sequent ℒₒᵣ) (hΓ : ∀ φ ∈ Γ, StrictHierarchy 𝚺 0 φ)
       (h : ∀ ε : ℕ → ℕ, ∃ φ ∈ Γ, φ.Evalf ε) : Derivation C Γ
-  | ind {Γ : LK.Sequent ℒₒᵣ} (φ : ArithmeticSemiformula ℕ 1) (hφ : C φ) (t : ArithmeticTerm ℕ) :
+  | ind {Γ} (φ) (hφ : C φ) (t) :
       Derivation C (Γ⁺ + ⦃∼(free φ), (shift φ)/[‘&0 + 1’]⦄) →
       Derivation C (Γ + ⦃∼(φ/[‘0’]), φ/[t]⦄)
-  | identity {k : ℕ} (r : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticTerm ℕ) :
-      Derivation C ⦃Semiformula.rel r v, Semiformula.nrel r v⦄
-  | cut {Γ Δ : LK.Sequent ℒₒᵣ} {φ : ArithmeticProposition} :
-      Derivation C (Γ + ⦃φ⦄) → Derivation C (Δ + ⦃∼φ⦄) → Derivation C (Γ + Δ)
-  | contraction {Γ : LK.Sequent ℒₒᵣ} {φ : ArithmeticProposition} :
-      Derivation C (Γ + ⦃φ, φ⦄) → Derivation C (Γ + ⦃φ⦄)
-  | weakening {Γ : LK.Sequent ℒₒᵣ} {φ : ArithmeticProposition} :
-      Derivation C Γ → Derivation C (Γ + ⦃φ⦄)
+  | identity {k} (r : (ℒₒᵣ).Rel k) (v) : Derivation C ⦃Semiformula.rel r v, Semiformula.nrel r v⦄
+  | cut {Γ Δ φ} : Derivation C (Γ + ⦃φ⦄) → Derivation C (Δ + ⦃∼φ⦄) → Derivation C (Γ + Δ)
+  | contraction {Γ φ} : Derivation C (Γ + ⦃φ, φ⦄) → Derivation C (Γ + ⦃φ⦄)
+  | weakening {Γ φ} : Derivation C Γ → Derivation C (Γ + ⦃φ⦄)
   | verum : Derivation C ⦃⊤⦄
-  | or {Γ : LK.Sequent ℒₒᵣ} {φ ψ : ArithmeticProposition} :
-      Derivation C (Γ + ⦃φ, ψ⦄) → Derivation C (Γ + ⦃φ ⋎ ψ⦄)
-  | and {Γ : LK.Sequent ℒₒᵣ} {φ ψ : ArithmeticProposition} :
-      Derivation C (Γ + ⦃φ⦄) → Derivation C (Γ + ⦃ψ⦄) → Derivation C (Γ + ⦃φ ⋏ ψ⦄)
-  | all {Γ : LK.Sequent ℒₒᵣ} {φ : ArithmeticSemiproposition 1} :
-      Derivation C (Γ⁺ + ⦃free φ⦄) → Derivation C (Γ + ⦃∀¹ φ⦄)
-  | exs {Γ : LK.Sequent ℒₒᵣ} {φ : ArithmeticSemiproposition 1} {t : ArithmeticTerm ℕ} :
-      Derivation C (Γ + ⦃φ/[t]⦄) → Derivation C (Γ + ⦃∃¹ φ⦄)
+  | or {Γ φ ψ} : Derivation C (Γ + ⦃φ, ψ⦄) → Derivation C (Γ + ⦃φ ⋎ ψ⦄)
+  | and {Γ φ ψ} : Derivation C (Γ + ⦃φ⦄) → Derivation C (Γ + ⦃ψ⦄) → Derivation C (Γ + ⦃φ ⋏ ψ⦄)
+  | all {Γ φ} : Derivation C (Γ⁺ + ⦃free φ⦄) → Derivation C (Γ + ⦃∀¹ φ⦄)
+  | exs {Γ φ t} : Derivation C (Γ + ⦃φ/[t]⦄) → Derivation C (Γ + ⦃∃¹ φ⦄)
 
 @[inherit_doc] notation:45 "⊢ᴸᴵ[" C "]! " Γ:45 => Derivation C Γ
 
@@ -109,16 +101,14 @@ instance : Structural (Derivation C) where
 /-- The sequent of an `LI[C]` derivation contains a formula true in `ℕ` under every assignment.
 
 - [Bus98A, Section 1.4.1] -/
-theorem sound (ε : ℕ → ℕ) {Γ : LK.Sequent ℒₒᵣ} :
-    (⊢ᴸᴵ[C]! Γ) → ∃ φ ∈ Γ, φ.Evalf ε
+theorem sound (ε : ℕ → ℕ) {Γ} : (⊢ᴸᴵ[C]! Γ) → ∃ φ ∈ Γ, φ.Evalf ε
   | axΔ₀ _ _ h => h ε
   | ind (Γ := Γ) φ _ t d => by
     by_contra hc
     push Not at hc
     have hΓ : ∀ ψ ∈ Γ, ¬ψ.Evalf ε := fun ψ hψ ↦ hc ψ (by simp [hψ])
     have base : Semiformula.Eval ![0] ε φ := by simpa using hc (∼(φ/[‘0’])) (by simp)
-    have top : ¬Semiformula.Eval ![Semiterm.val ![] ε t] ε φ := by
-      simpa using hc (φ/[t]) (by simp)
+    have top : ¬Semiformula.Eval ![Semiterm.val ![] ε t] ε φ := by simpa using hc (φ/[t]) (by simp)
     have step : ∀ a : ℕ, Semiformula.Eval ![a] ε φ → Semiformula.Eval ![a + 1] ε φ := by
       intro a ha
       have h : (∃ ψ ∈ Γ, ψ.Evalf ε) ∨
@@ -140,10 +130,8 @@ theorem sound (ε : ℕ → ℕ) {Γ : LK.Sequent ℒₒᵣ} :
     · exact ⟨Semiformula.nrel r v, by simp, by simpa using h⟩
   | verum => ⟨⊤, by simp, by simp⟩
   | cut (Γ := Γ) (Δ := Δ) (φ := φ) d dn => by
-    have h : (∃ ψ ∈ Γ, ψ.Evalf ε) ∨ φ.Evalf ε := by
-      simpa using sound ε d
-    have hn : (∃ ψ ∈ Δ, ψ.Evalf ε) ∨ ¬φ.Evalf ε := by
-      simpa using sound ε dn
+    have h : (∃ ψ ∈ Γ, ψ.Evalf ε) ∨ φ.Evalf ε := by simpa using sound ε d
+    have hn : (∃ ψ ∈ Δ, ψ.Evalf ε) ∨ ¬φ.Evalf ε := by simpa using sound ε dn
     rcases h with (⟨ψ, h, hψ⟩ | h)
     · exact ⟨ψ, by simp [h], hψ⟩
     · rcases hn with (⟨ψ, hn, hψ⟩ | hn)
@@ -161,12 +149,10 @@ theorem sound (ε : ℕ → ℕ) {Γ : LK.Sequent ℒₒᵣ} :
     · exact ⟨φ ⋎ ψ, by simp, by simp [h]⟩
     · exact ⟨φ ⋎ ψ, by simp, by simp [h]⟩
   | and (Γ := Γ) (φ := φ) (ψ := ψ) dφ dψ => by
-    have hφ : (∃ χ ∈ Γ, χ.Evalf ε) ∨ φ.Evalf ε := by
-      simpa using sound ε dφ
+    have hφ : (∃ χ ∈ Γ, χ.Evalf ε) ∨ φ.Evalf ε := by simpa using sound ε dφ
     rcases hφ with (⟨χ, hχ, h⟩ | hφ)
     · exact ⟨χ, by simp [hχ], h⟩
-    · have hψ : (∃ χ ∈ Γ, χ.Evalf ε) ∨ ψ.Evalf ε := by
-        simpa using sound ε dψ
+    · have hψ : (∃ χ ∈ Γ, χ.Evalf ε) ∨ ψ.Evalf ε := by simpa using sound ε dψ
       rcases hψ with (⟨χ, hχ, h⟩ | hψ)
       · exact ⟨χ, by simp [hχ], h⟩
       · exact ⟨φ ⋏ ψ, by simp, by simp [hφ, hψ]⟩
@@ -188,8 +174,7 @@ theorem sound (ε : ℕ → ℕ) {Γ : LK.Sequent ℒₒᵣ} :
 /-- A derivation is `Anchored D` when every one of its cut formulas belongs to `D`.
 
 - [Bus98A, Section 1.4.2] -/
-def Anchored (D : ArithmeticProposition → Prop) :
-    {Γ : LK.Sequent ℒₒᵣ} → (⊢ᴸᴵ[C]! Γ) → Prop
+def Anchored (D : ArithmeticProposition → Prop) : ∀ {Γ}, (⊢ᴸᴵ[C]! Γ) → Prop
   | _, axΔ₀ _ _ _ => True
   | _, ind _ _ _ d => Anchored D d
   | _, identity _ _ => True
@@ -204,8 +189,7 @@ def Anchored (D : ArithmeticProposition → Prop) :
 
 @[simp] lemma anchored_axΔ₀ {hΓ h} : Anchored D (axΔ₀ (C := C) Γ hΓ h) := trivial
 
-@[simp] lemma anchored_ind_iff {hξ}
-    {d : ⊢ᴸᴵ[C]! Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄} :
+@[simp] lemma anchored_ind_iff {hξ} {d : ⊢ᴸᴵ[C]! Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄} :
     Anchored D (ind ξ hξ t d) ↔ Anchored D d := Iff.rfl
 
 @[simp] lemma anchored_identity {k} {r : (ℒₒᵣ).Rel k} {v} :
@@ -228,17 +212,17 @@ def Anchored (D : ArithmeticProposition → Prop) :
 @[simp] lemma anchored_and_iff {dp : ⊢ᴸᴵ[C]! Γ + ⦃φ⦄} {dq : ⊢ᴸᴵ[C]! Γ + ⦃ψ⦄} :
     Anchored D (dp.and dq) ↔ Anchored D dp ∧ Anchored D dq := Iff.rfl
 
-@[simp] lemma anchored_all_iff {ζ : ArithmeticSemiproposition 1} {d : ⊢ᴸᴵ[C]! Γ⁺ + ⦃free ζ⦄} :
+@[simp] lemma anchored_all_iff {d : ⊢ᴸᴵ[C]! Γ⁺ + ⦃free ξ⦄} :
     Anchored D d.all ↔ Anchored D d := Iff.rfl
 
-@[simp] lemma anchored_exs_iff {ζ : ArithmeticSemiproposition 1} {d : ⊢ᴸᴵ[C]! Γ + ⦃ζ/[t]⦄} :
+@[simp] lemma anchored_exs_iff {d : ⊢ᴸᴵ[C]! Γ + ⦃ξ/[t]⦄} :
     Anchored D d.exs ↔ Anchored D d := Iff.rfl
 
 @[simp] lemma anchored_cast_iff {d : ⊢ᴸᴵ[C]! Δ} {e : Δ = Γ} :
     Anchored D (cast d e) ↔ Anchored D d := by rcases e; rfl
 
-lemma Anchored.mono {D' : ArithmeticProposition → Prop} (h : ∀ φ, D φ → D' φ) :
-    ∀ {Γ : LK.Sequent ℒₒᵣ} {d : ⊢ᴸᴵ[C]! Γ}, Anchored D d → Anchored D' d
+lemma Anchored.mono {D'} (h : ∀ φ, D φ → D' φ) :
+    ∀ {Γ} {d : ⊢ᴸᴵ[C]! Γ}, Anchored D d → Anchored D' d
   | _, axΔ₀ _ _ _, _ => trivial
   | _, ind _ _ _ d, hd => Anchored.mono h (d := d) hd
   | _, identity _ _, _ => trivial
@@ -257,8 +241,7 @@ section rewrite
 
 variable [RewriteClosed C]
 
-def rewrite {Γ : LK.Sequent ℒₒᵣ} (f : ℕ → ArithmeticTerm ℕ) :
-    (⊢ᴸᴵ[C]! Γ) → ⊢ᴸᴵ[C]! Γ.map (Rew.rewrite f ▹ ·)
+def rewrite {Γ} (f : ℕ → ArithmeticTerm ℕ) : (⊢ᴸᴵ[C]! Γ) → ⊢ᴸᴵ[C]! Γ.map (Rew.rewrite f ▹ ·)
   | axΔ₀ Γ hΓ h =>
     axΔ₀ _
       (by
@@ -272,8 +255,7 @@ def rewrite {Γ : LK.Sequent ℒₒᵣ} (f : ℕ → ArithmeticTerm ℕ) :
           by simpa [Semiformula.eval_rewrite] using hv⟩)
   | ind (Γ := Γ) φ hφ t d =>
     let g : ℕ → ArithmeticTerm ℕ := &0 :>ₙ fun x ↦ Rew.shift (f x)
-    have h : ⊢ᴸᴵ[C]! (Γ⁺ + ⦃∼(free φ), (shift φ)/[‘&0 + 1’]⦄).map (Rew.rewrite g ▹ ·) :=
-      d.rewrite g
+    have h := d.rewrite g
     (ind (Γ := Γ.map (Rew.rewrite f ▹ ·)) (Rew.rewrite (Rew.bShift ∘ f) ▹ φ)
       (RewriteClosed.rewrite _ hφ) (Rew.rewrite f t)
       (cast h (by
@@ -298,13 +280,13 @@ def rewrite {Γ : LK.Sequent ℒₒᵣ} (f : ℕ → ArithmeticTerm ℕ) :
       ((d₁.rewrite f).cast (by simp)) ((d₂.rewrite f).cast (by simp))).cast (by simp)
   | all (Γ := Γ) (φ := φ) d =>
     let g : ℕ → ArithmeticTerm ℕ := &0 :>ₙ fun x ↦ Rew.shift (f x)
-    have h : ⊢ᴸᴵ[C]! (Γ⁺ + ⦃free φ⦄).map (Rew.rewrite g ▹ ·) := d.rewrite g
+    have h := d.rewrite g
     (all (Γ := Γ.map (Rew.rewrite f ▹ ·)) (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ)
       (cast h (by
         simp [g, free_rewrite_eq, Rewriting.shifts, shift_rewrite_eq,
           Function.comp_def]))).cast (by simp [Rew.q_rewrite])
   | exs (Γ := Γ) (φ := φ) (t := t) d =>
-    have h : ⊢ᴸᴵ[C]! (Γ + ⦃φ/[t]⦄).map (Rew.rewrite f ▹ ·) := d.rewrite f
+    have h := d.rewrite f
     (exs (Γ := Γ.map (Rew.rewrite f ▹ ·)) (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ)
       (t := Rew.rewrite f t) (cast h (by simp [rewrite_subst_eq]))).cast (by simp [Rew.q_rewrite])
 
@@ -315,9 +297,7 @@ protected def shift (d : ⊢ᴸᴵ[C]! Γ) : ⊢ᴸᴵ[C]! Γ⁺ := cast (Deriva
 
 variable [RewriteClosed D]
 
-lemma anchored_rewrite :
-    ∀ {Γ : LK.Sequent ℒₒᵣ} (d : ⊢ᴸᴵ[C]! Γ) (f : ℕ → ArithmeticTerm ℕ),
-      Anchored D d → Anchored D (d.rewrite f)
+lemma anchored_rewrite : ∀ {Γ} (d : ⊢ᴸᴵ[C]! Γ) (f), Anchored D d → Anchored D (d.rewrite f)
   | _, axΔ₀ _ _ _, _, _ => trivial
   | _, ind _ _ _ d, _, h => by simpa [rewrite] using anchored_rewrite d _ h
   | _, identity _ _, _, _ => trivial
@@ -333,8 +313,8 @@ lemma anchored_rewrite :
   | _, all d, _, h => by simpa [rewrite] using anchored_rewrite d _ h
   | _, exs d, f, h => by simpa [rewrite] using anchored_rewrite d f h
 
-lemma anchored_map (d : ⊢ᴸᴵ[C]! Γ) (f : ℕ → ℕ) (h : Anchored D d) :
-    Anchored D (Derivation.map d f) := anchored_rewrite d _ h
+lemma anchored_map (d : ⊢ᴸᴵ[C]! Γ) (f) (h : Anchored D d) : Anchored D (Derivation.map d f) :=
+  anchored_rewrite d _ h
 
 lemma anchored_shift (d : ⊢ᴸᴵ[C]! Γ) (h : Anchored D d) : Anchored D d.shift :=
   anchored_map d Nat.succ h

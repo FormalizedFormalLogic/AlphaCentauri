@@ -69,7 +69,7 @@ the converse needs a cut on the base case.
 - [Bus98A, Section 1.4.1]
 - [Bus98A, Section 1.4.2] -/
 inductive Derivation (C : ArithmeticSemiformula ℕ 1 → Prop) : LK.Sequent ℒₒᵣ → Type
-  | bounded (Γ : LK.Sequent ℒₒᵣ) (hΓ : ∀ φ ∈ Γ, Semiformula.Bounded φ)
+  | bounded (Γ) (hΓ : ∀ φ ∈ Γ, Semiformula.Bounded φ)
       (h : ∀ ε : ℕ → ℕ, ∃ φ ∈ Γ, φ.Evalf ε) : Derivation C Γ
   | ind {Γ} (φ) (hφ : C φ) (t) :
       Derivation C (Γ + ⦃φ/[‘0’]⦄) →

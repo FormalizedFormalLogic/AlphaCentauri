@@ -20,30 +20,29 @@ namespace FFL.FirstOrder.Arithmetic.LKI
 
 open Rewriting LawfulSyntacticRewriting
 
-variable {C : ArithmeticSemiformula ℕ 1 → Prop} {ξ : ArithmeticSemiformula ℕ 1}
+variable {C : ArithmeticSemiformula ℕ 1 → Prop}
+         {φ : ArithmeticProposition} {ξ : ArithmeticSemiformula ℕ 1}
+         {T : ArithmeticTheory} {σ : ArithmeticSentence}
+         {Γ Δ : LK.Sequent ℒₒᵣ}
 
 namespace Derivable
 
-variable {Γ : LK.Sequent ℒₒᵣ}
 
 /-- Cutting a multiset of derivable formulas off a derivation. -/
-lemma cutAll : ∀ Δ : LK.Sequent ℒₒᵣ, (∀ δ ∈ Δ, ⊢ᴸᴷᴵ[C] ⦃δ⦄) → ⊢ᴸᴷᴵ[C] Γ + ∼Δ → ⊢ᴸᴷᴵ[C] Γ := by
-  intro Δ
+lemma cutAll (hΔ : ∀ δ ∈ Δ, ⊢ᴸᴷᴵ[C] ⦃δ⦄) (h : ⊢ᴸᴷᴵ[C] Γ + ∼Δ) : ⊢ᴸᴷᴵ[C] Γ := by
   induction Δ using Multiset.induction_on with
-  | empty => intro _ h; simpa using h
+  | empty => simpa using h
   | cons δ Δ ih =>
-    intro hΔ h
-    refine ih (fun d hd ↦ hΔ d (by simp [hd])) ?_
-    have h₁ : ⊢ᴸᴷᴵ[C] (0 : LK.Sequent ℒₒᵣ) + ⦃δ⦄ := (hΔ δ (by simp)).cast (by simp)
+    apply ih (fun d hd ↦ hΔ d (by simp [hd]));
+    have h₁ : ⊢ᴸᴷᴵ[C] 0 + ⦃δ⦄ := (hΔ δ (by simp)).cast (by simp)
     have h₂ : ⊢ᴸᴷᴵ[C] (Γ + ∼Δ) + ⦃∼δ⦄ :=
       h.cast (by simp [Multiset.tilde_def, Multiset.add_atom_eq_cons])
     exact (h₁.cut h₂).cast (by simp)
 
 lemma allOne (h : ⊢ᴸᴷᴵ[C] ⦃free ξ⦄) : ⊢ᴸᴷᴵ[C] ⦃∀¹ ξ⦄ :=
-  (Derivable.all (Γ := 0) (ξ := ξ) (h.cast (by simp [Rewriting.shifts]))).cast (by simp)
+  Derivable.all (Γ := 0) (ξ := ξ) (h.cast (by simp [Rewriting.shifts])) |>.cast (by simp)
 
-lemma allClosure_fixitr {φ : ArithmeticProposition} (h : ⊢ᴸᴷᴵ[C] ⦃φ⦄) :
-    ∀ m : ℕ, ⊢ᴸᴷᴵ[C] ⦃∀¹* (Rew.fixitr 0 m ▹ φ)⦄
+lemma allClosure_fixitr (h : ⊢ᴸᴷᴵ[C] ⦃φ⦄) : ∀ m : ℕ, ⊢ᴸᴷᴵ[C] ⦃∀¹* (Rew.fixitr 0 m ▹ φ)⦄
   | 0 => by simpa using h
   | m + 1 => by
     simp only [LawfulSyntacticRewriting.allClosure_fixitr]
@@ -51,20 +50,18 @@ lemma allClosure_fixitr {φ : ArithmeticProposition} (h : ⊢ᴸᴷᴵ[C] ⦃φ�
     simpa using allClosure_fixitr h m
 
 /-- The universal closure of a derivable formula is derivable. -/
-lemma univCl' {φ : ArithmeticProposition} (h : ⊢ᴸᴷᴵ[C] ⦃φ⦄) : ⊢ᴸᴷᴵ[C] ⦃φ.univCl'⦄ :=
-  allClosure_fixitr h _
+lemma univCl' (h : ⊢ᴸᴷᴵ[C] ⦃φ⦄) : ⊢ᴸᴷᴵ[C] ⦃φ.univCl'⦄ := allClosure_fixitr h _
 
 end Derivable
 
 /-! ## Completeness for the true strict `$\Pi_1$` sequents -/
 
-private lemma bounded_of_complexity_zero {φ : ArithmeticProposition} (h : φ.complexity = 0) :
-    Semiformula.Bounded φ := by
+private lemma bounded_of_complexity_zero (h : φ.complexity = 0) : Semiformula.Bounded φ := by
   match φ with
   | .rel _ _ | .nrel _ _ | ⊤ | ⊥ => simp
   | _ ⋏ _ | _ ⋎ _ | ∀¹ _ | ∃¹ _ => simp at h
 
-private lemma exists_all_of_strictPi1 {φ : ArithmeticProposition} (h : StrictHierarchy 𝚷 1 φ)
+private lemma exists_all_of_strictPi1 (h : StrictHierarchy 𝚷 1 φ)
     (hb : ¬Semiformula.Bounded φ) : ∃ ξ, φ = ∀¹ ξ ∧ StrictHierarchy 𝚷 1 ξ := by
   rcases h with _ | h | _ | ⟨hξ⟩
   · rcases h with h | _ | _ | _
@@ -76,20 +73,19 @@ private lemma vecCons_head_tail (ε : ℕ → ℕ) : ε 0 :>ₙ (fun x ↦ ε (x
 
 /-- A sequent of strict $\Pi_1$ formulas true in `ℕ` under every assignment is derivable: on this
 fragment the `bounded` leaf and the universal rule are already complete. -/
-theorem derivable_of_valid : ∀ (n : ℕ) (Γ : LK.Sequent ℒₒᵣ),
-    (Γ.map Semiformula.complexity).sum ≤ n → (∀ φ ∈ Γ, StrictHierarchy 𝚷 1 φ) →
-    (∀ ε : ℕ → ℕ, ∃ φ ∈ Γ, φ.Evalf ε) → ⊢ᴸᴷᴵ[C] Γ := by
-  intro n
-  induction n with
+theorem derivable_of_valid (n : ℕ) (Γ : LK.Sequent ℒₒᵣ)
+  (hsum : (Γ.map Semiformula.complexity).sum ≤ n)
+  (hΓ : ∀ φ ∈ Γ, StrictHierarchy 𝚷 1 φ)
+  (hval : ∀ ε : ℕ → ℕ, ∃ φ ∈ Γ, φ.Evalf ε)
+  : ⊢ᴸᴷᴵ[C] Γ := by
+  induction n generalizing Γ with
   | zero =>
-    intro Γ hsum hΓ hval
     refine Derivable.bounded Γ (fun φ hφ ↦ bounded_of_complexity_zero (Nat.le_zero.mp ?_)) hval
     exact le_trans (Multiset.le_sum_of_mem (Multiset.mem_map_of_mem _ hφ)) hsum
   | succ n ih =>
-    intro Γ hsum hΓ hval
     by_cases hb : ∀ φ ∈ Γ, Semiformula.Bounded φ
     · exact Derivable.bounded Γ hb hval
-    · push Not at hb
+    · push Not at hb;
       obtain ⟨φ, hφΓ, hφb⟩ := hb
       obtain ⟨ξ, rfl, hξ⟩ := exists_all_of_strictPi1 (hΓ φ hφΓ) hφb
       obtain ⟨Γ', rfl⟩ : ∃ Γ', Γ = Γ' + ⦃∀¹ ξ⦄ := by
@@ -121,13 +117,11 @@ theorem derivable_of_valid : ∀ (n : ℕ) (Γ : LK.Sequent ℒₒᵣ),
           have : ∀ a : ℕ, Semiformula.Eval ![a] (fun x ↦ ε (x + 1)) ξ := by simpa using hv
           simpa using this (ε 0)
 
-variable {T : ArithmeticTheory} {σ : ArithmeticSentence}
-
 /-- A theory whose axioms are all derivable in `LKI[C]` proves only `LKI[C]`-derivable sentences. -/
 theorem derivable_of_provable (hT : ∀ σ ∈ T, ⊢ᴸᴷᴵ[C] ⦃σ⦄) (h : T ⊢ σ) : ⊢ᴸᴷᴵ[C] ⦃σ⦄ := by
   obtain ⟨Δ, hΔ, hd⟩ := Theory.Proof.provable_iff.mp h
-  refine Derivable.cutAll _ ?_ (Derivable.ofLK hd)
-  · rintro δ hδ
+  apply Derivable.cutAll ?_ (Derivable.ofLK hd)
+  · rintro δ hδ;
     obtain ⟨ψ, hψ, rfl⟩ := Multiset.mem_map.mp (by simpa [LK.Sequent.embed] using hδ)
     exact hT ψ (hΔ ψ hψ)
 
@@ -139,29 +133,24 @@ formulas, is as strong as the induction scheme for `C`.
 - [Bus98A, Section 1.4.2] -/
 theorem derivable_succInd (hξ : C ξ) : ⊢ᴸᴷᴵ[C] ⦃succInd ξ⦄ := by
   have step : ∀ η : ArithmeticSemiformula ℕ 1,
-      ⊢ᴸᴷᴵ[C] ⦃∼(η/[(&0 : ArithmeticTerm ℕ)]), η/[‘(&0 + 1)’]⦄
-        + ⦃(∃¹ (η ⋏ ∼(η/[‘(#0 + 1)’])) : ArithmeticProposition)⦄ := by
+      ⊢ᴸᴷᴵ[C] ⦃∼(η/[&0]), η/[‘(&0 + 1)’]⦄ + ⦃∃¹ (η ⋏ ∼(η/[‘(#0 + 1)’]))⦄ := by
     intro η
-    apply Derivable.exs (&0 : ArithmeticTerm ℕ)
-    rw [show (η ⋏ ∼(η/[‘(#0 + 1)’]))/[(&0 : ArithmeticTerm ℕ)]
-        = η/[(&0 : ArithmeticTerm ℕ)] ⋏ ∼(η/[‘(&0 + 1)’]) from by simp [Rew.subst_subst_eq]]
+    apply Derivable.exs &0
+    rw [show (η ⋏ ∼(η/[‘(#0 + 1)’]))/[&0] = η/[&0] ⋏ ∼(η/[‘(&0 + 1)’])
+        from by simp [Rew.subst_subst_eq]]
     apply Derivable.and
-    · exact (Derivable.weakening (η/[‘(&0 + 1)’])
-        (Derivable.lem (η/[(&0 : ArithmeticTerm ℕ)]))).cast (by abel)
-    · exact (Derivable.weakening (∼(η/[(&0 : ArithmeticTerm ℕ)]))
-        (Derivable.lem (η/[‘(&0 + 1)’]))).cast (by abel)
-  have key : ⊢ᴸᴷᴵ[C]
-      ⦃∼(ξ/[‘0’]), (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])) : ArithmeticProposition), ∀¹ ξ⦄ := by
+    · exact (Derivable.weakening (η/[‘(&0 + 1)’]) (Derivable.lem (η/[&0]))).cast (by abel)
+    · exact (Derivable.weakening (∼(η/[&0])) (Derivable.lem (η/[‘(&0 + 1)’]))).cast (by abel)
+  have key : ⊢ᴸᴷᴵ[C] ⦃∼(ξ/[‘0’]), ∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])), ∀¹ ξ⦄ := by
     apply Derivable.all
-    have h := Derivable.ind' (C := C) (ξ := shift ξ) (RewriteClosed.shift hξ) (&0)
-      (Γ := ⦃shift (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])) : ArithmeticProposition)⦄)
+    have h := Derivable.ind' (ξ := shift ξ) (RewriteClosed.shift hξ) &0
+      (Γ := ⦃shift (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])))⦄)
       ((step (shift (shift ξ))).cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; try abel))
     exact h.cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; try abel)
   rw [show (succInd ξ : ArithmeticProposition)
       = ∼(ξ/[‘0’]) ⋎ ((∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’]))) ⋎ (∀¹ ξ))
       from by simp [succInd, Semiformula.imp_eq]]
-  have h₁ : ⊢ᴸᴷᴵ[C] ⦃∼(ξ/[‘0’])⦄
-      + ⦃(∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])) : ArithmeticProposition), ∀¹ ξ⦄ := key.cast (by abel)
+  have h₁ : ⊢ᴸᴷᴵ[C] ⦃∼(ξ/[‘0’])⦄ + ⦃∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])), ∀¹ ξ⦄ := key.cast (by abel)
   have h₂ : ⊢ᴸᴷᴵ[C] (0 : LK.Sequent ℒₒᵣ)
       + ⦃∼(ξ/[‘0’]), (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’]))) ⋎ (∀¹ ξ)⦄ := (Derivable.or h₁).cast (by abel)
   exact (Derivable.or h₂).cast (by simp)

@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.ToFoundation.Fvar
+public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Primrec
 public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Tarski.Basic
@@ -39,20 +40,6 @@ def bound : {n : ℕ} → ArithmeticSemiterm ξ n → ArithmeticSemiformula ξ n
 @[simp] lemma bound_exs (u : ArithmeticSemiterm ξ n) (φ : ArithmeticSemiformula ξ (n + 1)) :
     bound u (∃¹ φ) = ∃¹[“#0 < !!(Rew.bShift u)”] bound (Rew.bShift u) φ := rfl
 
-private lemma bounded_of_bounded_exs {φ : ArithmeticSemiformula ξ (n + 1)}
-    (h : Semiformula.Bounded (∃¹ φ)) : φ.Bounded := by
-  cases h with
-  | bexs _ hφ => exact Hierarchy.and (Hierarchy.rel _ _ _ _) hφ
-
-private lemma bounded_of_strictHierarchy_zero {b : Polarity} {φ : ArithmeticSemiformula ξ n}
-    (h : StrictHierarchy b 0 φ) : φ.Bounded := by cases h with | zero h => exact h
-
-private lemma strictSigmaOne_of_exs {φ : ArithmeticSemiformula ξ (n + 1)}
-    (h : StrictHierarchy 𝚺 1 (∃¹ φ)) : StrictHierarchy 𝚺 1 φ := by
-  cases h with
-  | ofAlt h => exact .ofAlt (.zero (bounded_of_bounded_exs (bounded_of_strictHierarchy_zero h)))
-  | exs h => exact h
-
 /-- The approximation of a strict $\Sigma_1$ formula is $\Delta_0$. -/
 lemma bounded_bound : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} → StrictHierarchy 𝚺 1 φ →
     (u : ArithmeticSemiterm ξ n) → (bound u φ).Bounded
@@ -60,12 +47,12 @@ lemma bounded_bound : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} → Strict
   | _, .nrel _ _, _, _ => by simp [bound]
   | _, ⊤, _, _ => by simp [bound]
   | _, ⊥, _, _ => by simp [bound]
-  | _, _ ⋏ _, h, _ => by cases h with | ofAlt h => exact bounded_of_strictHierarchy_zero h
-  | _, _ ⋎ _, h, _ => by cases h with | ofAlt h => exact bounded_of_strictHierarchy_zero h
-  | _, ∀¹ _, h, _ => by cases h with | ofAlt h => exact bounded_of_strictHierarchy_zero h
+  | _, _ ⋏ _, h, _ => by cases h with | ofAlt h => exact StrictHierarchy.bounded_of_zero h
+  | _, _ ⋎ _, h, _ => by cases h with | ofAlt h => exact StrictHierarchy.bounded_of_zero h
+  | _, ∀¹ _, h, _ => by cases h with | ofAlt h => exact StrictHierarchy.bounded_of_zero h
   | _, ∃¹ φ, h, u => by
     refine Hierarchy.bexs (Rew.positive_iff.mpr ⟨u, rfl⟩) ?_
-    exact bounded_bound (strictSigmaOne_of_exs h) _
+    exact bounded_bound (StrictHierarchy.of_exs h) _
   termination_by _ φ => φ.complexity
 
 /-! ## The approximation, read semantically -/
@@ -80,6 +67,31 @@ def EvalBound : {n : ℕ} → (Fin n → ℕ) → (ξ → ℕ) → ℕ → Arith
 
 @[simp] lemma evalBound_exs {e : Fin n → ℕ} {ε : ξ → ℕ} {b} {φ : ArithmeticSemiformula ξ (n + 1)} :
     EvalBound e ε b (∃¹ φ) ↔ ∃ x < b, EvalBound (x :> e) ε b φ := Iff.rfl
+
+section
+
+variable {e : Fin n → ℕ} {ε : ξ → ℕ} {b : ℕ}
+
+@[simp] lemma evalBound_rel {k} {R : (ℒₒᵣ).Rel k} {v} :
+    EvalBound e ε b (.rel R v) ↔ Semiformula.Eval e ε (.rel R v) := Iff.rfl
+
+@[simp] lemma evalBound_nrel {k} {R : (ℒₒᵣ).Rel k} {v} :
+    EvalBound e ε b (.nrel R v) ↔ Semiformula.Eval e ε (.nrel R v) := Iff.rfl
+
+@[simp] lemma evalBound_verum : EvalBound e ε b (⊤ : ArithmeticSemiformula ξ n) ↔ True := Iff.rfl
+
+@[simp] lemma evalBound_falsum : EvalBound e ε b (⊥ : ArithmeticSemiformula ξ n) ↔ False := Iff.rfl
+
+@[simp] lemma evalBound_and {φ ψ : ArithmeticSemiformula ξ n} :
+    EvalBound e ε b (φ ⋏ ψ) ↔ Semiformula.Eval e ε (φ ⋏ ψ) := Iff.rfl
+
+@[simp] lemma evalBound_or {φ ψ : ArithmeticSemiformula ξ n} :
+    EvalBound e ε b (φ ⋎ ψ) ↔ Semiformula.Eval e ε (φ ⋎ ψ) := Iff.rfl
+
+@[simp] lemma evalBound_all {φ : ArithmeticSemiformula ξ (n + 1)} :
+    EvalBound e ε b (∀¹ φ) ↔ Semiformula.Eval e ε (∀¹ φ) := Iff.rfl
+
+end
 
 /-- The approximation is what the bounded formula says. -/
 lemma evalBound_iff_eval_bound : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} →
@@ -145,7 +157,7 @@ lemma exists_evalBound : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} → Str
   | _, ∀¹ _, _, _, _, h => ⟨0, h⟩
   | _, ∃¹ φ, hφ, e, ε, h => by
     obtain ⟨x, hx⟩ : ∃ x, Semiformula.Eval (x :> e) ε φ := by simpa using h
-    obtain ⟨b, hb⟩ := exists_evalBound (strictSigmaOne_of_exs hφ) hx
+    obtain ⟨b, hb⟩ := exists_evalBound (StrictHierarchy.of_exs hφ) hx
     exact ⟨max (x + 1) b, x, lt_of_lt_of_le (Nat.lt_succ_self x) (le_max_left _ _),
       evalBound_mono (le_max_right _ _) hb⟩
   termination_by _ φ => φ.complexity
@@ -177,6 +189,23 @@ lemma evalBound_rew : {n₁ n₂ : ℕ} → {ξ₁ ξ₂ : Type*} → (ω : Rew 
     exact exists_congr fun x ↦ and_congr_right fun _ ↦ key x
   termination_by _ _ _ _ _ φ => φ.complexity
 
+/-- The approximation only looks at the free variables of the formula. -/
+lemma evalBound_congr_fvar [DecidableEq ξ] : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} →
+    {b : ℕ} → {e : Fin n → ℕ} → {ε ε' : ξ → ℕ} → Function.funEqOn φ.FVar? ε ε' →
+    (EvalBound e ε b φ ↔ EvalBound e ε' b φ)
+  | _, .rel _ _, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
+  | _, .nrel _ _, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
+  | _, ⊤, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
+  | _, ⊥, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
+  | _, _ ⋏ _, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
+  | _, _ ⋎ _, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
+  | _, ∀¹ _, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
+  | _, ∃¹ _, _, _, _, _, h => by
+    simp only [evalBound_exs]
+    exact exists_congr fun x ↦ and_congr_right fun _ ↦
+      evalBound_congr_fvar (h.of_subset fun y hy ↦ by simpa using hy)
+  termination_by _ φ => φ.complexity
+
 /-! ## The approximation of a proposition -/
 
 variable {φ : ArithmeticProposition} {b b' : ℕ} {ε : ℕ → ℕ}
@@ -193,6 +222,14 @@ lemma bnd_mono (hb : b ≤ b') (h : Bnd φ b ε) : Bnd φ b' ε := evalBound_mon
 
 lemma exists_bnd (hφ : StrictHierarchy 𝚺 1 φ) (h : φ.Evalf ε) : ∃ b, Bnd φ b ε :=
   exists_evalBound hφ h
+
+/-- A true strict $\Sigma_1$ sentence has an approximation that does not depend on the
+assignment. -/
+lemma exists_bnd_of_closed (hφ : StrictHierarchy 𝚺 1 φ) (hfv : ∀ x, ¬φ.FVar? x)
+    (h : ∀ ε : ℕ → ℕ, φ.Evalf ε) : ∃ c, ∀ ε, Bnd φ c ε := by
+  obtain ⟨c, hc⟩ := exists_bnd hφ (h fun _ ↦ 0)
+  exact ⟨c, fun ε ↦ (evalBound_congr_fvar (φ := φ) (b := c) (e := ![])
+    (ε := fun _ ↦ 0) (ε' := ε) fun x hx ↦ absurd hx (hfv x)).mp hc⟩
 
 /-- The approximation of a proposition is the truth of a fixed $\Delta_0$ formula, with the bound
 supplied by its bound variable. -/

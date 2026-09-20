@@ -53,6 +53,35 @@ lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) :
 
 end Hierarchy
 
+namespace StrictHierarchy
+
+variable {L : Language} [L.LT] {ξ : Type*} {Γ : Polarity} {s n : ℕ}
+
+/-- A strict formula of level `0` is $\Delta_0$. -/
+lemma bounded_of_zero {φ : Semiformula L ξ n} (h : StrictHierarchy Γ 0 φ) : Hierarchy 𝚺 0 φ := by
+  cases h with | zero h => exact h
+
+/-- The body of a $\Delta_0$ existential is $\Delta_0$. -/
+lemma _root_.FFL.FirstOrder.Arithmetic.Hierarchy.of_bounded_exs {φ : Semiformula L ξ (n + 1)}
+    (h : Hierarchy 𝚺 0 (∃¹ φ)) : Hierarchy 𝚺 0 φ := by
+  cases h with
+  | bexs _ hφ => exact Hierarchy.and (Hierarchy.rel _ _ _ _) hφ
+
+/-- The body of a strict $\Sigma_1$ existential is strict $\Sigma_1$. -/
+lemma of_exs {φ : Semiformula L ξ (n + 1)} (h : StrictHierarchy 𝚺 1 (∃¹ φ)) :
+    StrictHierarchy 𝚺 1 φ := by
+  cases h with
+  | ofAlt h => exact .ofAlt (.zero (Hierarchy.of_bounded_exs (bounded_of_zero h)))
+  | exs h => exact h
+
+/-- A $\Delta_0$ formula is strict at every positive level. -/
+lemma of_bounded : {Γ : Polarity} → {s : ℕ} → {φ : Semiformula L ξ n} → Hierarchy 𝚺 0 φ →
+    StrictHierarchy Γ (s + 1) φ
+  | _, 0, _, h => .ofAlt (.zero h)
+  | _, _ + 1, _, h => .ofAlt (of_bounded h)
+
+end StrictHierarchy
+
 namespace HierarchySymbol.Semiformula
 
 variable {ξ : Type*} {n s : ℕ}

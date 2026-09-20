@@ -284,6 +284,33 @@ def Anchored (D : ArithmeticProposition → Prop) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) �
 @[simp] lemma anchored_cast_iff {d : ⊢ᴸᴷᴵ[C]! Δ} {e : Δ = Γ} :
     Anchored D (cast d e) ↔ Anchored D d := by rcases e; rfl
 
+@[simp] lemma anchored_structural_cast_iff {d : ⊢ᴸᴷᴵ[C]! Γ} {e : Γ = Δ} :
+    Anchored D (Structural.cast (𝔇 := Derivation C) d e) ↔ Anchored D d := by rcases e; rfl
+
+@[simp] lemma anchored_weakenMany_iff {t : Δ.Traversal} {d : ⊢ᴸᴷᴵ[C]! Γ} :
+    Anchored D (Structural.weakenMany t d) ↔ Anchored D d := by
+  induction t with
+  | zero => simp [Structural.weakenMany]
+  | succ φ t ih => simpa [Structural.weakenMany, Structural.weakening] using ih
+
+/-- The excluded middle is derived without a cut, so its derivation is anchored in every class. -/
+@[simp] lemma anchored_lem : ∀ φ : ArithmeticProposition, Anchored D (lem (C := C) φ)
+  | .rel _ _ => by unfold lem; trivial
+  | .nrel _ _ => by unfold lem; exact anchored_cast_iff.mpr trivial
+  | ⊤ => by unfold lem; simp
+  | ⊥ => by unfold lem; simp
+  | φ ⋏ ψ => by unfold lem; simp [anchored_lem φ, anchored_lem ψ]
+  | φ ⋎ ψ => by unfold lem; simp [anchored_lem φ, anchored_lem ψ]
+  | ∀¹ φ => by
+    unfold lem
+    exact anchored_cast_iff.mpr <| anchored_cast_iff.mpr <| anchored_cast_iff.mpr <|
+      anchored_lem (free φ)
+  | ∃¹ φ => by
+    unfold lem
+    exact anchored_cast_iff.mpr <| anchored_cast_iff.mpr <| anchored_cast_iff.mpr <|
+      anchored_lem (free (∼φ))
+  termination_by φ => φ.complexity
+
 
 lemma Anchored.mono (h : ∀ φ, D φ → D' φ) {Γ} : {d : ⊢ᴸᴷᴵ[C]! Γ} → Anchored D d → Anchored D' d
   | bounded _ _ _, _ => trivial

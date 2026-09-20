@@ -392,29 +392,29 @@ other cut is eliminated.
 
 - [Bus98A, Section 1.4.2]
 - [Avi01, Section 3] -/
-def hauptsatz [RewriteClosed C] [RewriteClosed D] {Γ A : LK.Sequent ℒₒᵣ}
-    (tΓ : Γ.Traversal) (tA : A.Traversal)
-    (hA : (α : ArithmeticProposition) → α ∈ A → ((0 : LK.Sequent ℒₒᵣ) ⊩[C, D] αᴺ))
-    (d : ⊢ᴸᴷ¹ Γ + ∼A) : ⊢ᴸᴷᴵ[C, D]! Γ :=
-  let tΔ : (∼(∼Γ)).Traversal := tΓ.cast (by simp)
-  let g : ContextForces C D (∼Γ) (∼(Γ + ∼A))ᴺ := fun ψ hψ ↦
+def hauptsatz [RewriteClosed C] [RewriteClosed D] {Γ Δ : LK.Sequent ℒₒᵣ}
+    (tΓ : Γ.Traversal) (tΔ : Δ.Traversal)
+    (hΔ : (φ : ArithmeticProposition) → φ ∈ Δ → (0 ⊩[C, D] φᴺ))
+    (d : ⊢ᴸᴷ¹ Γ + ∼Δ) : ⊢ᴸᴷᴵ[C, D]! Γ :=
+  let t : (∼(∼Γ)).Traversal := tΓ.cast (by simp)
+  let g : ContextForces C D (∼Γ) (∼(Γ + ∼Δ))ᴺ := fun ψ hψ ↦
     if h : ψ ∈ (∼Γ : LK.Sequent ℒₒᵣ)ᴺ then
       let φ₀ := (tΓ.map (∼·)).getPreimage (f := Semiformula.doubleNegation) h
       let hφ₀ : ∼(φ₀.val) ∈ Γ := by
         obtain ⟨a, ha, e⟩ := Multiset.mem_map.mp φ₀.property.1
         simpa [← e] using ha
       ((Forces.refl φ₀.val).monotone
-        (StrongerThan.ofSubset (.atom _) tΔ (by simpa using hφ₀))).cast φ₀.property.2
+        (StrongerThan.ofSubset (.atom _) t (by simpa using hφ₀))).cast φ₀.property.2
     else
-      let α := tA.getPreimage (f := Semiformula.doubleNegation) (by
-        have h₂ : ψ ∈ (∼Γ : LK.Sequent ℒₒᵣ)ᴺ + Aᴺ := by simpa using hψ
+      let φ₀ := tΔ.getPreimage (f := Semiformula.doubleNegation) (by
+        have h₂ : ψ ∈ (∼Γ : LK.Sequent ℒₒᵣ)ᴺ + Δᴺ := by simpa using hψ
         rcases Multiset.mem_add.mp h₂ with h₃ | h₃
         · exact absurd h₃ h
         · exact h₃)
-      ((hA α.val α.property.1).monotone
-        (StrongerThan.ofSubset (Multiset.Traversal.zero.cast (by simp)) tΔ
-          (by simp))).cast α.property.2
-  (sound d.gödelGentzen (∼Γ) tΔ g).falsumEquiv.cast (by simp)
+      ((hΔ φ₀.val φ₀.property.1).monotone
+        (StrongerThan.ofSubset (Multiset.Traversal.zero.cast (by simp)) t
+          (by simp))).cast φ₀.property.2
+  (sound d.gödelGentzen (∼Γ) t g).falsumEquiv.cast (by simp)
 
 end Canonical
 

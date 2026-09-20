@@ -411,7 +411,7 @@ theorem exists_prenex_of_collection (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
   have : 𝗘𝗤 ℒₒᵣ ⪯ T :=
     Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
   obtain ⟨φ', hφ'⟩ := Prenex.models_exists_prenex_of_collection h
-  refine ⟨φ', provable_iff_of_models_iff ?_⟩
+  refine ⟨φ', provable_iff_of_models_iff.{0} ?_⟩
   intro V _ _ e
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance

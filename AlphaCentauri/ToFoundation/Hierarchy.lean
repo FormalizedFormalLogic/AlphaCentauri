@@ -87,11 +87,16 @@ lemma _root_.FFL.FirstOrder.Semiformula.Bounded.exists_of_all
     exact ⟨t, ψ, rfl, hψ⟩
 
 /-- The body of a strict $\Sigma_1$ existential is strict $\Sigma_1$. -/
+@[grind →]
 lemma of_exs {φ : Semiformula L ξ (n + 1)} (h : StrictHierarchy 𝚺 1 (∃¹ φ)) :
     StrictHierarchy 𝚺 1 φ := by
   cases h with
   | ofAlt h => exact .ofAlt (.zero (Semiformula.Bounded.of_exs (bounded_of_zero h)).hierarchy)
   | exs h => exact h
+
+-- `witnesses_exs`/`exists_witnesses`'s `exs` case transport a `StrictHierarchy` fact across a
+-- substitution; `rew_iff` is already `@[simp]` upstream but not `@[grind]`.
+attribute [grind =] rew_iff
 
 /-- A formula that is both strict $\Sigma_1$ and strict $\Pi_1$ is $\Delta_0$. -/
 @[grind →]
@@ -128,3 +133,8 @@ lemma hierarchy_of_lt {C : HierarchySymbol} {Γ : Polarity} (φ : C.Semiformula 
 end HierarchySymbol.Semiformula
 
 end FFL.FirstOrder.Arithmetic
+
+-- The sequent bookkeeping in `Witnessing.lean` (`Γ + ⦃φ⦄` membership) relies on
+-- `Multiset.mem_atom_iff`; it is `@[simp]` upstream but not `@[grind]`. `Multiset.mem_add` is
+-- already `@[simp, grind =]` in Mathlib.
+attribute [grind =] Multiset.mem_atom_iff

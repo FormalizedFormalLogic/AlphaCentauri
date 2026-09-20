@@ -135,6 +135,20 @@ Lin97:
     title: Lecture Notes in Logic
     volume: 10
 
+PWW88:
+  type: Article
+  title: Provability of the pigeonhole principle and the existence of infinitely many primes
+  author: ["Paris, Jeff B.", "Wilkie, Alex J.", "Woods, Alan R."]
+  page-range: 1235-1244
+  date: 1988
+  serial-number:
+    doi: "10.2307/2274618"
+  parent:
+    type: Periodical
+    title: The Journal of Symbolic Logic
+    volume: 53
+    issue: 4
+
 Poh09:
   type: Book
   title: "Proof Theory: The First Step into Impredicativity"

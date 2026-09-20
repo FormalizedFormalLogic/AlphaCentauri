@@ -45,6 +45,7 @@ public import AlphaCentauri.Schemata.EA
 public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.Schemata.ParameterFreeInduction
+public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.ToFoundation.Absoluteness
 public import AlphaCentauri.ToFoundation.BooleanCombination
 public import AlphaCentauri.ToFoundation.Compact

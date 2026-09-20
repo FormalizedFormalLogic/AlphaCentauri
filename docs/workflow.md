@@ -98,8 +98,12 @@ against one rubric adapted from
 humans. Findings are addressed by pushing to the same branch; contradictory findings are
 contested in the thread, not resolved silently.
 
-Squash merge into `main` once CI is green and every review approves. A human performs it, or an
-agent when the user has explicitly told it to for that PR.
+`main` is behind a merge queue, so nothing merges into it directly: "Merge when ready" puts the
+pull request in the queue, the queue squashes it onto the tip and runs `Build project`,
+`Check mk_all executed` and `Check no sorry` there (`merge_group` in `ci.yml`), and it lands only
+if they pass. Queue it once CI is green and every review approves; a human does that, or an agent
+when the user has explicitly told it to for that PR. Nothing has to be up to date with `main`
+first — that is what the queue is for.
 
 ## Labels
 

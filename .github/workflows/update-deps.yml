@@ -5,17 +5,24 @@ name: Update dependencies
 # move here: `repair-deps.yml` fixes what the move breaks, and a bump that breaks nothing merges
 # itself (see docs/workflow.md). What is followed is the `env` block below and `lakefile.toml`.
 #
+# A push to `main` catches the branch up instead of bumping, because `main` requires its checks to
+# be current and an out-of-date branch would otherwise sit behind an armed merge for ever.
+#
 # The branch and the pull request belong to the organization's GitHub App (`BOT_APP_ID`,
 # `BOT_APP_PRIVATE_KEY`), because a push made with `github.token` starts no checks.
 on:
   schedule:
     - cron: '17 */6 * * *'
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
-# Runs share a branch, so they never overlap; one waiting behind another finishes rather than
-# dies, because it may carry a newer revision.
+# Everything that writes to the branch shares this group, `repair-deps.yml` included: a catch-up
+# landing under an agent's feet would cost that agent its push. Waiting, never cancelling — a run
+# behind another may carry a newer revision.
 concurrency:
-  group: update-deps
+  group: update-deps-branch
   cancel-in-progress: false
 
 permissions:
@@ -34,7 +41,9 @@ env:
 jobs:
   update:
     name: Bump the pins
-    if: github.repository == 'FormalizedFormalLogic/AlphaCentauri'
+    if: >-
+      github.repository == 'FormalizedFormalLogic/AlphaCentauri'
+      && github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Mint the app token
@@ -191,3 +200,40 @@ jobs:
           fi
           gh pr merge "$NUMBER" --squash --auto
           echo "queued the merge of #$NUMBER; GitHub performs it once the checks are green"
+
+  # `main` moved, so the open bump is behind it and its armed merge will not fire until the
+  # checks run against the new base. Updating the branch is what the button in the pull request
+  # does; the App's merge commit starts those checks in turn.
+  catch-up:
+    name: Catch the bump up with `main`
+    if: >-
+      github.repository == 'FormalizedFormalLogic/AlphaCentauri'
+      && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint the app token
+        id: app-token
+        if: vars.BOT_APP_ID != ''
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+
+      - name: Update the branch
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
+        run: |
+          set -euo pipefail
+          number=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$BRANCH" --limit 1 \
+            --json number --jq '.[0].number // ""')
+          if [ -z "$number" ]; then
+            echo "no open bump to catch up"
+            exit 0
+          fi
+          # 422 is "already up to date", which is the good case and not a failure.
+          if gh api --method PUT "repos/$GITHUB_REPOSITORY/pulls/$number/update-branch" >/dev/null 2>&1; then
+            echo "merged main into the bump's branch; #$number is current again"
+          else
+            echo "#$number needed no update, or the update could not be made"
+          fi
+

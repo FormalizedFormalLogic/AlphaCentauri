@@ -10,9 +10,10 @@ on:
     workflows: [CI]
     types: [completed]
 
-# Never cancelled halfway: that would leave the repair uncommitted.
+# Shared with `update-deps.yml`: nothing else writes to the branch while a repair is running.
+# Never cancelled halfway, which would leave the repair uncommitted.
 concurrency:
-  group: repair-deps
+  group: update-deps-branch
   cancel-in-progress: false
 
 permissions:

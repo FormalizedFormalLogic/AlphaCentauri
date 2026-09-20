@@ -109,13 +109,6 @@ lemma bounded_of_sigmaOne_of_piOne {φ : Semiformula L ξ n} (hσ : StrictHierar
   | ofAlt h => exact bounded_of_zero h
   | exs _ => cases hπ with | ofAlt h => exact bounded_of_zero h
 
-/-- A $\Delta_0$ formula is strict at every positive level. -/
-@[grind =>]
-lemma of_bounded : {Γ : Polarity} → {s : ℕ} → {φ : Semiformula L ξ n} → φ.Bounded →
-    StrictHierarchy Γ (s + 1) φ
-  | _, 0, _, h => .ofAlt (.zero h.hierarchy)
-  | _, _ + 1, _, h => .ofAlt (of_bounded h)
-
 end StrictHierarchy
 
 namespace HierarchySymbol.Semiformula

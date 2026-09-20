@@ -62,7 +62,7 @@ end
 
 /-- `⊤` lies at every level of the $\Pi$ hierarchy. -/
 private lemma top_strictHierarchy_pi (n : ℕ) : StrictHierarchy 𝚷 n (⊤ : ArithmeticSentence) :=
-  (StrictHierarchy.zero (show Hierarchy 𝚺 0 (⊤ : ArithmeticSentence) by simp)).mono (Nat.zero_le _)
+  (StrictHierarchy.of_bounded (φ := (⊤ : ArithmeticSentence)) (by simp)).mono (Nat.zero_le _)
 
 /-- A true strict $\Pi_{n + 1}$ sentence's code satisfies the level-$(n + 1)$ partial truth
 predicate. -/

@@ -71,7 +71,9 @@ activity for 14 days may be released by anyone, with a comment.
   "Route", "Verification", or "Design" sections — the diff and CI already say how it was built
   and verified.
 - AI disclosure: every commit carries a `Co-Authored-By` trailer for the model, and the body
-  says an AI agent wrote it.
+  says an AI agent wrote it. An agent working from a session also links that session in a comment
+  when it opens the pull request, or when it picks up one a workflow opened, so that the
+  conversation behind the change can be read from the pull request.
 
 ### CI
 
@@ -98,8 +100,12 @@ against one rubric adapted from
 humans. Findings are addressed by pushing to the same branch; contradictory findings are
 contested in the thread, not resolved silently.
 
-Squash merge into `main` once CI is green and every review approves. A human performs it, or an
-agent when the user has explicitly told it to for that PR.
+`main` is behind a merge queue, so nothing merges into it directly: "Merge when ready" puts the
+pull request in the queue, the queue squashes it onto the tip and runs `Build project`,
+`Check mk_all executed` and `Check no sorry` there (`merge_group` in `ci.yml`), and it lands only
+if they pass. Queue it once CI is green and every review approves; a human does that, or an agent
+when the user has explicitly told it to for that PR. Nothing has to be up to date with `main`
+first — that is what the queue is for.
 
 ## Labels
 
@@ -152,7 +158,8 @@ secret `BOT_APP_PRIVATE_KEY`), because a push made with `github.token` starts no
 A bump that breaks nothing lands by itself. When the branch's diff against `main` is the pin
 files alone, the workflow queues its merge (`gh pr merge --squash --auto`) and GitHub performs
 it once the checks are green; the checks are the whole review, because there is nothing else in
-the diff to read. A branch that carries more than the pins is never queued.
+the diff to read. A branch that carries more than the pins is never queued. Nothing waits on the
+branch being current, because the merge queue tests each entry against the tip of `main` itself.
 
 [`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes the rest: when
 CI fails on that branch it hands it to Claude Code, which repairs this repository in place and

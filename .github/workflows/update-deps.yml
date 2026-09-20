@@ -9,9 +9,9 @@ on:
     - cron: '17 */6 * * *'
   workflow_dispatch:
 
-# Never overlapping, never cancelled: a run behind another may carry a newer revision.
+# Shared with `repair-deps.yml`: a bump landing under an agent costs it the push it cannot force.
 concurrency:
-  group: update-deps
+  group: update-deps-branch
   cancel-in-progress: false
 
 permissions:

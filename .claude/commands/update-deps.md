@@ -9,6 +9,9 @@ is repaired. `.github/workflows/repair-deps.yml` does that in the cloud, once pe
 command is the same runbook from a local session. `docs/workflow.md`, "Dependency pins and
 Foundation", is normative — read it before acting.
 
+Comment your session's link on the pull request when you pick it up, as `docs/workflow.md` asks
+of every pull request.
+
 Stop immediately, reporting nothing but the reason, when there is no open pull request labelled
 `update-deps`, or its checks are still running.
 

@@ -8,9 +8,9 @@ on:
     workflows: [CI]
     types: [completed]
 
-# Never cancelled halfway: that would leave the repair uncommitted.
+# Shared with `update-deps.yml`; never cancelled, which would leave the repair uncommitted.
 concurrency:
-  group: repair-deps
+  group: update-deps-branch
   cancel-in-progress: false
 
 permissions:
@@ -101,7 +101,9 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: .lake/packages/Foundation/.lake/build
-          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
+          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+          restore-keys: |
+            foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-
       - name: Build the dependency from source (cache miss only)
         if: steps.decide.outputs.number != '' && steps.foundation-cache.outputs.cache-hit != 'true'
         run: |

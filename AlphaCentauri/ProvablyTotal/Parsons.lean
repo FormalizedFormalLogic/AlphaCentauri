@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.ProvablyTotal.Basic
-public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ProvablyTotal.Primrec
+public import AlphaCentauri.ProvablyTotal.Witnessing
 public import Mathlib.Computability.Ackermann
 
 /-!
@@ -15,16 +15,25 @@ Ackermann function is therefore not `𝗜𝚺₁`-provably total.
 
 namespace FFL.FirstOrder.Arithmetic
 
+/-- An `𝗜𝚺₁`-provably total function has a strict $\Sigma_1$ graph whose totality is already
+provable in the strict induction theory `𝗜 𝚺 1`. -/
+axiom exists_strictHierarchy_provablyTotalVia {k : ℕ} {f : (Fin k → ℕ) → ℕ}
+    (h : 𝗜𝚺₁.ProvablyTotal f) :
+    ∃ φ : 𝚺₁.Semisentence (k + 1), StrictHierarchy 𝚺 1 φ.val ∧ (𝗜 𝚺 1).ProvablyTotalVia f φ
+
 /-- Every `𝗜𝚺₁`-provably total function is primitive recursive.
 - [HP98, Corollary IV.3.7] -/
-axiom primrec'_of_provablyTotal {k : ℕ} {f : List.Vector ℕ k → ℕ}
-    (hf : 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))) : Nat.Primrec' f
+theorem primrec'_of_provablyTotal {k : ℕ} {f : List.Vector ℕ k → ℕ}
+    (hf : 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))) : Nat.Primrec' f :=
+  have ⟨_, hφ, h⟩ := exists_strictHierarchy_provablyTotalVia hf
+  (primrec'_of_provablyTotalVia hφ h).of_eq fun v ↦ by simp
 
 /-- **Parsons' theorem**: the `𝗜𝚺₁`-provably total functions are exactly the primitive recursive
 functions.
 - [HP98, Corollary IV.3.7] -/
-axiom parsons {k : ℕ} (f : List.Vector ℕ k → ℕ) :
-    Nat.Primrec' f ↔ 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))
+theorem parsons {k : ℕ} (f : List.Vector ℕ k → ℕ) :
+    Nat.Primrec' f ↔ 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
+  ⟨provablyTotal_of_primrec', primrec'_of_provablyTotal⟩
 
 /-- **Parsons' theorem** in class form: the class of `𝗜𝚺₁`-provably total functions of arity `k`
 is the class of primitive recursive functions of arity `k`.
@@ -39,8 +48,9 @@ theorem provablyTotalFunctions_ISigma1 (k : ℕ) :
 /-- In Mathlib's `Primrec` form, the `𝗜𝚺₁`-provably total functions are exactly the primitive
 recursive functions.
 - [HP98, Corollary IV.3.7] -/
-axiom parsons_primrec {k : ℕ} (f : List.Vector ℕ k → ℕ) :
-    Primrec f ↔ 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))
+theorem parsons_primrec {k : ℕ} (f : List.Vector ℕ k → ℕ) :
+    Primrec f ↔ 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
+  Nat.Primrec'.prim_iff.symm.trans (parsons f)
 
 /-- The Ackermann function is not `𝗜𝚺₁`-provably total.
 - [HP98, Corollary IV.3.7] -/

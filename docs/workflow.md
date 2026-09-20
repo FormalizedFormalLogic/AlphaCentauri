@@ -71,7 +71,9 @@ activity for 14 days may be released by anyone, with a comment.
   "Route", "Verification", or "Design" sections — the diff and CI already say how it was built
   and verified.
 - AI disclosure: every commit carries a `Co-Authored-By` trailer for the model, and the body
-  says an AI agent wrote it.
+  says an AI agent wrote it. An agent working from a session also links that session in a comment
+  when it opens the pull request, or when it picks up one a workflow opened, so that the
+  conversation behind the change can be read from the pull request.
 
 ### CI
 

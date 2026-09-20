@@ -277,14 +277,14 @@ end Witnesses
 
 lemma witnesses_verum : Witnesses ⦃⊤⦄ fun _ _ ↦ 0 := by
   intro l b _
-  exact ⟨⊤, by simp, StrictHierarchy.of_bounded (.verum _), by simp⟩
+  exact ⟨⊤, by simp, by grind, by simp⟩
 
 lemma witnesses_identity {k} (r : (ℒₒᵣ).Rel k) (v) :
     Witnesses ⦃.rel r v, .nrel r v⦄ fun _ _ ↦ 0 := by
   intro l b _
   by_cases hv : Semiformula.Eval ![] (l.getD · 0) (.rel r v)
-  · exact ⟨.rel r v, by simp, StrictHierarchy.of_bounded (.rel r v), by simpa using hv⟩
-  · exact ⟨.nrel r v, by simp, StrictHierarchy.of_bounded (.nrel r v), by simpa using hv⟩
+  · exact ⟨.rel r v, by simp, by grind, by simpa using hv⟩
+  · exact ⟨.nrel r v, by simp, by grind, by simpa using hv⟩
 
 lemma exists_witnesses_axm {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) :
     ∃ c, Witnesses ⦃σ⦄ fun _ _ ↦ c := by
@@ -575,9 +575,7 @@ lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} 
     induction n with
     | zero =>
       by_cases hz : StrictHierarchy 𝚺 1 (∼(ξ/[‘0’]) : ArithmeticProposition)
-      · have hπξ : StrictHierarchy 𝚷 1 ξ := by
-          have hπ : StrictHierarchy 𝚷 1 (ξ/[(‘0’ : ArithmeticTerm ℕ)]) := by simpa using hz
-          simpa [Rewriting.subst] using hπ
+      · have hπξ : StrictHierarchy 𝚷 1 ξ := by simpa [Rewriting.subst] using hz
         have hΔ : ξ.Bounded := by grind
         have hBc : B l ≤ c 0 := le_trans (le_max_right _ _) (le_indBound _ _ _ 0)
         by_cases hev : Semiformula.Eval ![0] (l.getD · 0) ξ
@@ -754,8 +752,7 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
           · grind
           · grind
         · rcases show χ = Rewriting.free ξ by simpa using hχ
-          exact Or.inl (StrictHierarchy.rew _
-            (StrictHierarchy.of_bounded (Semiformula.Bounded.of_all hd0)))
+          grind
       obtain ⟨t, ρ, rfl, hρ⟩ := Semiformula.Bounded.exists_of_all hd0
       refine ⟨_, ?_, witnesses_all_bounded hρ H⟩
       exact Primrec.to₂ (primrec_maxBelow
@@ -773,9 +770,7 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
           rcases hΓ (∀¹ ξ) (by simp) with h | h
           · exact absurd h hσ
           · cases h with
-            | ofAlt h =>
-              exact Or.inl (StrictHierarchy.rew _ (StrictHierarchy.of_bounded
-                (Semiformula.Bounded.of_all (StrictHierarchy.bounded_of_zero h))))
+            | ofAlt h => grind
             | all h => exact Or.inr (StrictHierarchy.rew _ h)
       refine ⟨_, ?_, witnesses_all_pi hσ H⟩
       exact Primrec.to₂ (primrec_maxBelow

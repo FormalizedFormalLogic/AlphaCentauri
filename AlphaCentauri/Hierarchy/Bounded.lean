@@ -40,6 +40,11 @@ inductive Semiformula.Bounded : {n : ℕ} → Semiformula L ξ n → Prop
 attribute [simp] Semiformula.Bounded.verum Semiformula.Bounded.falsum Semiformula.Bounded.rel
   Semiformula.Bounded.nrel
 
+-- `witnesses_verum`/`witnesses_identity` build a `Bounded` witness directly from its shape;
+-- these are intro rules for goals like `Semiformula.Bounded (.rel r v)`.
+attribute [grind .] Semiformula.Bounded.verum Semiformula.Bounded.falsum Semiformula.Bounded.rel
+  Semiformula.Bounded.nrel
+
 variable {n : ℕ} {φ ψ : Semiformula L ξ n}
 
 /-- A bounded formula sits at every zero level of the arithmetical hierarchy. -/

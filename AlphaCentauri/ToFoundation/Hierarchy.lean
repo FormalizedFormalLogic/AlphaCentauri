@@ -64,18 +64,21 @@ lemma bounded_of_zero {φ : Semiformula L ξ n} (h : StrictHierarchy Γ 0 φ) : 
   cases h with | zero h => exact h.bounded
 
 /-- The body of a bounded existential is bounded. -/
+@[grind →]
 lemma _root_.FFL.FirstOrder.Semiformula.Bounded.of_exs {φ : Semiformula L ξ (n + 1)}
     (h : (∃¹ φ).Bounded) : φ.Bounded := by
   cases h with
   | bexs _ hφ => exact .and (.rel _ _) hφ
 
 /-- The body of a bounded universal is bounded. -/
+@[grind →]
 lemma _root_.FFL.FirstOrder.Semiformula.Bounded.of_all {φ : Semiformula L ξ (n + 1)}
     (h : (∀¹ φ).Bounded) : φ.Bounded := by
   cases h with
   | ball _ hφ => exact Semiformula.Bounded.imp_iff.mpr ⟨.rel _ _, hφ⟩
 
 /-- A bounded universal quantifies below a term. -/
+@[grind →]
 lemma _root_.FFL.FirstOrder.Semiformula.Bounded.exists_of_all
     {φ : Semiformula L ξ (n + 1)} (h : (∀¹ φ).Bounded) :
     ∃ (t : Semiterm L ξ n) (ψ : Semiformula L ξ (n + 1)),

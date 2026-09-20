@@ -159,6 +159,140 @@ lemma witnesses_exs {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
   rw [e₁, e₂] at h₁
   exact h₁
 
+/-! ## The cut rule -/
+
+private lemma witnesses_cut_sigma {χ : ArithmeticProposition} (hσ : StrictHierarchy 𝚺 1 χ)
+    (H₁ : Witnesses (Γ + ⦃χ⦄) h) (H₂ : Witnesses (Δ + ⦃∼χ⦄) h') :
+    Witnesses (Γ + Δ) fun l b ↦ max (h l b) (h' l (max b (h l b))) := by
+  intro l b hb
+  obtain ⟨χ₁, hχ₁, hσ₁, hbnd₁⟩ := H₁ l b fun ψ hψ hnσ ↦ by
+    rcases Multiset.mem_add.mp hψ with hψ | hψ
+    · exact hb ψ (by simp [hψ]) hnσ
+    · rcases show ψ = χ by simpa using hψ
+      exact absurd hσ hnσ
+  rcases Multiset.mem_add.mp hχ₁ with hm | hm
+  · exact ⟨χ₁, by simp [hm], hσ₁, bnd_mono (le_max_left _ _) hbnd₁⟩
+  rcases show χ₁ = χ by simpa using hm
+  obtain ⟨χ₂, hχ₂, hσ₂, hbnd₂⟩ := H₂ l (max b (h l b)) fun ψ hψ hnσ ↦ by
+    rcases Multiset.mem_add.mp hψ with hψ | hψ
+    · exact bnd_mono (le_max_left _ _) (hb ψ (by simp [hψ]) hnσ)
+    · rcases show ψ = ∼χ by simpa using hψ
+      simpa using bnd_mono (le_max_right _ _) hbnd₁
+  rcases Multiset.mem_add.mp hχ₂ with hm₂ | hm₂
+  · exact ⟨χ₂, by simp [hm₂], hσ₂, bnd_mono (le_max_right _ _) hbnd₂⟩
+  rcases show χ₂ = ∼χ by simpa using hm₂
+  exact absurd (eval_of_evalBound hbnd₁) (by simpa using eval_of_evalBound hbnd₂)
+
+lemma witnesses_cut {χ : ArithmeticProposition}
+    (hχ : StrictHierarchy 𝚺 1 χ ∨ StrictHierarchy 𝚷 1 χ)
+    (H₁ : Witnesses (Γ + ⦃χ⦄) h) (H₂ : Witnesses (Δ + ⦃∼χ⦄) h') :
+    Witnesses (Γ + Δ) fun l b ↦
+      max (max (h l b) (h' l (max b (h l b)))) (max (h' l b) (h l (max b (h' l b)))) := by
+  rcases hχ with hσ | hπ
+  · exact (witnesses_cut_sigma hσ H₁ H₂).mono fun _ _ ↦ le_max_left _ _
+  · have H₁' : Witnesses (Γ + ⦃∼∼χ⦄) h := by simpa using H₁
+    exact ((witnesses_cut_sigma (StrictHierarchy.neg hπ) H₂ H₁').cast (by abel)).mono
+      fun _ _ ↦ le_max_right _ _
+
+/-! ## The universal rule -/
+
+/-- The maximum of `f` below `n`. -/
+def maxBelow (f : ℕ → ℕ) : ℕ → ℕ
+  | 0 => 0
+  | n + 1 => max (f n) (maxBelow f n)
+
+lemma le_maxBelow (f : ℕ → ℕ) {x : ℕ} : {n : ℕ} → x < n → f x ≤ maxBelow f n
+  | 0, h => absurd h (by simp)
+  | n + 1, h => by
+    rcases (Nat.lt_succ_iff.mp h).lt_or_eq with h' | rfl
+    · exact le_trans (le_maxBelow f h') (le_max_right _ _)
+    · exact le_max_left _ _
+
+private lemma bnd_shift {χ : ArithmeticProposition} {c x : ℕ} {l : List ℕ} :
+    Bnd (Rewriting.shift χ) c ((x :: l).getD · 0) ↔ Bnd χ c (l.getD · 0) := by
+  have e₁ : ((Semiterm.val ![] fun y ↦ (x :: l).getD y 0) ∘
+      ⇑(Rew.shift : SyntacticRew ℒₒᵣ 0 0) ∘ Semiterm.bvar) = ![] := by
+    funext i; exact i.elim0
+  have e₂ : ((Semiterm.val ![] fun y ↦ (x :: l).getD y 0) ∘
+      ⇑(Rew.shift : SyntacticRew ℒₒᵣ 0 0) ∘ Semiterm.fvar) = fun y ↦ l.getD y 0 := by
+    funext y; simp
+  simp only [Bnd, Rewriting.shift]
+  rw [evalBound_rew, e₁, e₂]
+
+private lemma bnd_free {χ : ArithmeticSemiformula ℕ 1} {c x : ℕ} {l : List ℕ} :
+    Bnd (Rewriting.free χ) c ((x :: l).getD · 0) ↔ EvalBound ![x] (l.getD · 0) c χ := by
+  have e₁ : ((Semiterm.val ![] fun y ↦ (x :: l).getD y 0) ∘
+      ⇑(Rew.free : SyntacticRew ℒₒᵣ 1 0) ∘ Semiterm.bvar) = ![x] := by
+    funext i
+    cases i using Fin.cases with
+    | zero => simp
+    | succ i => exact i.elim0
+  have e₂ : ((Semiterm.val ![] fun y ↦ (x :: l).getD y 0) ∘
+      ⇑(Rew.free : SyntacticRew ℒₒᵣ 1 0) ∘ Semiterm.fvar) = fun y ↦ l.getD y 0 := by
+    funext y; simp
+  simp only [Bnd, Rewriting.free]
+  rw [evalBound_rew, e₁, e₂]
+
+/-- The universal rule when the principal formula is not $\Sigma_1$: the hypothesis refutes it
+below `b`, which bounds the counterexample. -/
+lemma witnesses_all_pi {ξ : ArithmeticSemiformula ℕ 1} (hnσ : ¬StrictHierarchy 𝚺 1 (∀¹ ξ))
+    (H : Witnesses (Γ⁺ + ⦃Rewriting.free ξ⦄) h) :
+    Witnesses (Γ + ⦃∀¹ ξ⦄) fun l b ↦ maxBelow (fun x ↦ h (x :: l) b) b := by
+  intro l b hb
+  obtain ⟨x₀, hx₀, hrefute⟩ : ∃ x < b, EvalBound ![x] (l.getD · 0) b (∼ξ) := by
+    simpa using hb (∀¹ ξ) (by simp) hnσ
+  obtain ⟨χ, hχ, hσχ, hbnd⟩ := H (x₀ :: l) b fun ψ hψ hnσψ ↦ by
+    rcases Multiset.mem_add.mp hψ with hψ | hψ
+    · obtain ⟨ψ', hψ', rfl⟩ := Multiset.mem_map.mp hψ
+      have : ¬StrictHierarchy 𝚺 1 ψ' := by simpa [Rewriting.shift] using hnσψ
+      simpa using bnd_shift.mpr (hb ψ' (by simp [hψ']) this)
+    · rcases show ψ = Rewriting.free ξ by simpa using hψ
+      simpa using bnd_free.mpr hrefute
+  rcases Multiset.mem_add.mp hχ with hm | hm
+  · obtain ⟨χ', hχ', rfl⟩ := Multiset.mem_map.mp hm
+    exact ⟨χ', by simp [hχ'], by simpa [Rewriting.shift] using hσχ,
+      bnd_mono (le_maxBelow _ hx₀) (bnd_shift.mp hbnd)⟩
+  · rcases show χ = Rewriting.free ξ by simpa using hm
+    exact absurd (eval_of_evalBound (bnd_free.mp hbnd))
+      (by simpa using eval_of_evalBound hrefute)
+
+/-- The universal rule when the principal formula is a bounded universal: the term bounds the
+counterexample. -/
+lemma witnesses_all_bounded {ψ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
+    (hψ : Hierarchy 𝚺 0 ψ)
+    (H : Witnesses (Γ⁺ + ⦃Rewriting.free (“#0 < !!(Rew.bShift t)” 🡒 ψ)⦄) h) :
+    Witnesses (Γ + ⦃∀¹[“#0 < !!(Rew.bShift t)”] ψ⦄)
+      fun l b ↦ maxBelow (fun x ↦ h (x :: l) b) (Semiterm.val ![] (l.getD · 0) t) := by
+  have hd : Hierarchy 𝚺 0 (∀¹[“#0 < !!(Rew.bShift t)”] ψ) :=
+    Hierarchy.ball (Rew.positive_iff.mpr ⟨t, rfl⟩) hψ
+  have hbody : Hierarchy 𝚺 0 (“#0 < !!(Rew.bShift t)” 🡒 ψ) := by
+    simp [Semiformula.imp_eq, hψ]
+  intro l b hb
+  by_cases hex : ∃ x < Semiterm.val ![] (l.getD · 0) t,
+      ∃ γ ∈ Γ, StrictHierarchy 𝚺 1 γ ∧ Bnd γ (h (x :: l) b) (l.getD · 0)
+  · obtain ⟨x, hx, γ, hγ, hσγ, hbnd⟩ := hex
+    exact ⟨γ, by simp [hγ], hσγ, bnd_mono (le_maxBelow _ hx) hbnd⟩
+  push Not at hex
+  refine ⟨∀¹[“#0 < !!(Rew.bShift t)”] ψ, by simp, StrictHierarchy.of_bounded hd, ?_⟩
+  have hall : ∀ x < Semiterm.val ![] (l.getD · 0) t, Semiformula.Eval ![x] (l.getD · 0) ψ := by
+    intro x hx
+    obtain ⟨χ, hχ, hσχ, hbnd⟩ := H (x :: l) b fun ρ hρ hnσρ ↦ by
+      rcases Multiset.mem_add.mp hρ with hρ | hρ
+      · obtain ⟨ρ', hρ', rfl⟩ := Multiset.mem_map.mp hρ
+        have : ¬StrictHierarchy 𝚺 1 ρ' := by simpa [Rewriting.shift] using hnσρ
+        simpa using bnd_shift.mpr (hb ρ' (by simp [hρ']) this)
+      · rcases show ρ = Rewriting.free (“#0 < !!(Rew.bShift t)” 🡒 ψ) by simpa using hρ
+        exact absurd (StrictHierarchy.of_bounded (Hierarchy.rew _ hbody)) hnσρ
+    rcases Multiset.mem_add.mp hχ with hm | hm
+    · obtain ⟨χ', hχ', rfl⟩ := Multiset.mem_map.mp hm
+      exact absurd (bnd_shift.mp hbnd)
+        (hex x hx χ' (by simpa using hχ') (by simpa [Rewriting.shift] using hσχ))
+    · rcases show χ = Rewriting.free (“#0 < !!(Rew.bShift t)” 🡒 ψ) by simpa using hm
+      have h' : x < Semiterm.val ![] (l.getD · 0) t → Semiformula.Eval ![x] (l.getD · 0) ψ := by
+        simpa using eval_of_evalBound (bnd_free.mp hbnd)
+      exact h' hx
+  simpa [FFL.FirstOrder.ball] using fun x hx ↦ hall x hx
+
 end FFL.FirstOrder.Arithmetic.LKI
 
 end

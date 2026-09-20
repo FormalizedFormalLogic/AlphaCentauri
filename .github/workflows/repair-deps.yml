@@ -124,12 +124,14 @@ jobs:
           git config user.name "$author"
           git config user.email "$(gh api "/users/${author//\[bot\]/%5Bbot%5D}" --jq .id)+$author@users.noreply.github.com"
 
+      # The agent gets the workflow token, on which this job holds `contents: read`, so it can
+      # read and comment but not push. What reaches the branch is what the step below verifies.
       - name: Repair the branch
         if: steps.decide.outputs.number != ''
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ steps.app-token.outputs.token || github.token }}
+          github_token: ${{ github.token }}
           # The CI run this answers was started by the App's push, so the action sees a bot actor
           # and refuses unless that bot is named. Only ours: the prompt here is fixed, but `*`
           # would let any App reach this action.
@@ -140,19 +142,20 @@ jobs:
             --allowedTools Read,Edit,Write,Glob,Grep,Bash
           prompt: |
             The `${{ env.BRANCH }}` branch is checked out, its dependency layer is built, and CI
-            is red. Repair this repository and push to the branch.
-            `.claude/commands/update-deps.md` is the runbook; its steps 1 and 2 are done for you,
-            and you stop at the push.
+            is red. Repair this repository and commit; this workflow verifies your commit and
+            pushes it, so do not push, merge, or rewrite history yourself.
+            `.claude/commands/update-deps.md` is the runbook; its steps 1 and 2 are done for you.
 
-            Verify with `lake build AlphaCentauri --wfail`, `just mk-all`, `just no-sorry` and
-            `just axiom-audit` before committing. Never force-push, never merge, never write
-            `sorry`, and touch nothing under `docs/`, `.github/`, `README.md` or `AGENTS.md`.
+            The commit has to pass `lake build AlphaCentauri --wfail`, `just mk-all` leaving no
+            diff, `just no-sorry` and `just axiom-audit`, which run again after you stop. Never
+            write `sorry`, and touch nothing under `docs/`, `.github/`, `README.md` or `AGENTS.md`.
 
             Say what you changed, or what is broken if you cannot get it green, in a comment on
-            #${{ steps.decide.outputs.number }}. Push nothing that leaves the build red: this bump
-            gets one attempt.
+            #${{ steps.decide.outputs.number }}. Leave the tree uncommitted rather than commit a
+            repair you could not finish: this bump gets one attempt.
 
-      - name: Cancel the queued merge if the agent pushed
+      # The gate: the branch only ever advances to a commit that passes the checks `ci.yml` runs.
+      - name: Verify the repair and push it
         if: steps.decide.outputs.number != ''
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
@@ -161,8 +164,16 @@ jobs:
           set -euo pipefail
           git fetch origin "$BRANCH"
           if [ "$(git rev-parse HEAD)" = "$(git rev-parse "origin/$BRANCH")" ]; then
-            echo "the agent pushed nothing; the queued merge, if any, still stands"
+            echo "the agent committed nothing"
             exit 0
           fi
+          if ! (lake build AlphaCentauri --wfail && just mk-all &&
+                git diff --quiet -- AlphaCentauri.lean && just no-sorry && just axiom-audit); then
+            gh pr comment "$NUMBER" --body \
+              "The repair did not pass the checks, so nothing was pushed. This bump has had its attempt; the next one restarts the cycle."
+            exit 1
+          fi
+          git push origin "HEAD:refs/heads/$BRANCH"
+          # The branch is no longer pins-only.
           gh pr merge "$NUMBER" --disable-auto || true
-          echo "#$NUMBER carries a repair now; its merge is a human's"
+          echo "pushed the repair to $BRANCH; #$NUMBER is a human's to merge"

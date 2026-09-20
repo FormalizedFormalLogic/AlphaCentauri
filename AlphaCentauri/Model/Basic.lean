@@ -95,13 +95,12 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     suffices ∀ x y : M, x < y → ∃ z < y + 1, x + z = y by
       simpa [models_iff, Semiformula.eval_bexsLTSucc] using this
     intro x y h
-    obtain ⟨z, hz⟩ := Arithmetic.add_eq_of_lt (hMN.emb x) (hMN.emb y) (by simpa using h)
-    have h₁ : z ≤ hMN.emb y := hz ▸ le_add_self
+    obtain ⟨z, hz, hzeq⟩ :=
+      Arithmetic.add_eq_of_lt_bounded (hMN.emb x) (hMN.emb y) (by simpa using h)
+    have h₁ : z ≤ hMN.emb y := hzeq ▸ le_add_self
     obtain ⟨w, rfl⟩ : z ∈ Set.range hMN.emb :=
       h₁.lt_or_eq.elim hMN.mem_range_of_lt fun h₂ ↦ ⟨y, h₂.symm⟩
-    refine ⟨w, ?_, inj (by simpa using hz)⟩
-    have h₂ : hMN.emb w < hMN.emb y + 1 := Arithmetic.le_iff_lt_succ.mp h₁
-    exact emb_lt_emb.mp (by simpa using h₂)
+    exact ⟨w, hMN.emb_lt_emb.mp (by simpa using hz), inj (by simpa using hzeq)⟩
   case zeroLe =>
     suffices ∀ x : M, 0 ≤ x by simpa [models_iff, le_iff_of_eq_of_lt, le_def] using this
     intro x

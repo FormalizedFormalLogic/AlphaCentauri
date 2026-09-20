@@ -26,34 +26,22 @@ variable {ξ : Type*} {n : ℕ}
 by `u`.
 
 - [Bus98A, Section 3.1.2] -/
-def bound : {n : ℕ} → ArithmeticSemiterm ξ n → ArithmeticSemiformula ξ n →
-    ArithmeticSemiformula ξ n
-  | _, _, .rel R v => .rel R v
-  | _, _, .nrel R v => .nrel R v
-  | _, _, ⊤ => ⊤
-  | _, _, ⊥ => ⊥
-  | _, _, φ ⋏ ψ => φ ⋏ ψ
-  | _, _, φ ⋎ ψ => φ ⋎ ψ
-  | _, _, ∀¹ φ => ∀¹ φ
-  | _, u, ∃¹ φ => ∃¹[“#0 < !!(Rew.bShift u)”] bound (Rew.bShift u) φ
+def bound {n : ℕ} (u : ArithmeticSemiterm ξ n) :
+    ArithmeticSemiformula ξ n → ArithmeticSemiformula ξ n
+  | ∃¹ φ => ∃¹[“#0 < !!(Rew.bShift u)”] bound (Rew.bShift u) φ
+  | φ => φ
 
 @[simp] lemma bound_exs (u : ArithmeticSemiterm ξ n) (φ : ArithmeticSemiformula ξ (n + 1)) :
     bound u (∃¹ φ) = ∃¹[“#0 < !!(Rew.bShift u)”] bound (Rew.bShift u) φ := rfl
 
 /-- The approximation of a strict $\Sigma_1$ formula is $\Delta_0$. -/
-lemma bounded_bound : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} → StrictHierarchy 𝚺 1 φ →
-    (u : ArithmeticSemiterm ξ n) → (bound u φ).Bounded
-  | _, .rel _ _, _, _ => by simp [bound]
-  | _, .nrel _ _, _, _ => by simp [bound]
-  | _, ⊤, _, _ => by simp [bound]
-  | _, ⊥, _, _ => by simp [bound]
-  | _, _ ⋏ _, h, _ => by cases h with | ofAlt h => exact StrictHierarchy.bounded_of_zero h
-  | _, _ ⋎ _, h, _ => by cases h with | ofAlt h => exact StrictHierarchy.bounded_of_zero h
-  | _, ∀¹ _, h, _ => by cases h with | ofAlt h => exact StrictHierarchy.bounded_of_zero h
-  | _, ∃¹ φ, h, u => by
+lemma bounded_bound {n : ℕ} {φ : ArithmeticSemiformula ξ n} (h : StrictHierarchy 𝚺 1 φ)
+    (u : ArithmeticSemiterm ξ n) : (bound u φ).Bounded := by
+  induction φ using Semiformula.rec' with
+  | hexs φ ih =>
     refine Hierarchy.bexs (Rew.positive_iff.mpr ⟨u, rfl⟩) ?_
-    exact bounded_bound (StrictHierarchy.of_exs h) _
-  termination_by _ φ => φ.complexity
+    exact ih (StrictHierarchy.of_exs h) _
+  | _ => cases h with | ofAlt h => exact StrictHierarchy.bounded_of_zero h
 
 /-! ## The approximation, read semantically -/
 
@@ -61,9 +49,10 @@ lemma bounded_bound : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} → Strict
 witnessed below `b`.
 
 - [Bus98A, Section 3.1.2] -/
-def EvalBound : {n : ℕ} → (Fin n → ℕ) → (ξ → ℕ) → ℕ → ArithmeticSemiformula ξ n → Prop
-  | _, e, ε, b, ∃¹ φ => ∃ x < b, EvalBound (x :> e) ε b φ
-  | _, e, ε, _, φ => Semiformula.Eval e ε φ
+def EvalBound {n : ℕ} (e : Fin n → ℕ) (ε : ξ → ℕ) (b : ℕ) :
+    ArithmeticSemiformula ξ n → Prop
+  | ∃¹ φ => ∃ x < b, EvalBound (x :> e) ε b φ
+  | φ => Semiformula.Eval e ε φ
 
 @[simp] lemma evalBound_exs {e : Fin n → ℕ} {ε : ξ → ℕ} {b} {φ : ArithmeticSemiformula ξ (n + 1)} :
     EvalBound e ε b (∃¹ φ) ↔ ∃ x < b, EvalBound (x :> e) ε b φ := Iff.rfl
@@ -94,87 +83,56 @@ variable {e : Fin n → ℕ} {ε : ξ → ℕ} {b : ℕ}
 end
 
 /-- The approximation is what the bounded formula says. -/
-lemma evalBound_iff_eval_bound : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} →
-    {u : ArithmeticSemiterm ξ n} → {e : Fin n → ℕ} → {ε : ξ → ℕ} →
-    (EvalBound e ε (Semiterm.val e ε u) φ ↔ Semiformula.Eval e ε (bound u φ))
-  | _, .rel _ _, _, _, _ => Iff.rfl
-  | _, .nrel _ _, _, _, _ => Iff.rfl
-  | _, ⊤, _, _, _ => by simp [bound, EvalBound]
-  | _, ⊥, _, _, _ => by simp [bound, EvalBound]
-  | _, _ ⋏ _, _, _, _ => Iff.rfl
-  | _, _ ⋎ _, _, _, _ => Iff.rfl
-  | _, ∀¹ _, _, _, _ => Iff.rfl
-  | _, ∃¹ φ, u, e, ε => by
+lemma evalBound_iff_eval_bound {n : ℕ} {φ : ArithmeticSemiformula ξ n} {u : ArithmeticSemiterm ξ n}
+    {e : Fin n → ℕ} {ε : ξ → ℕ} :
+    EvalBound e ε (Semiterm.val e ε u) φ ↔ Semiformula.Eval e ε (bound u φ) := by
+  induction φ using Semiformula.rec' with
+  | hexs φ ih =>
     simp only [evalBound_exs, bound_exs, Semiformula.eval_bexs]
     constructor
     · rintro ⟨x, hx, h⟩
-      refine ⟨x, by simpa using hx, ?_⟩
-      exact evalBound_iff_eval_bound.mp (by simpa using h)
+      exact ⟨x, by simpa using hx, ih.mp (by simpa using h)⟩
     · rintro ⟨x, hx, h⟩
-      refine ⟨x, by simpa using hx, ?_⟩
-      simpa using evalBound_iff_eval_bound.mpr h
-  termination_by _ φ => φ.complexity
+      exact ⟨x, by simpa using hx, by simpa using ih.mpr h⟩
+  | _ => exact Iff.rfl
 
 /-- The approximation implies the formula. -/
-lemma eval_of_evalBound : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} → {b : ℕ} →
-    {e : Fin n → ℕ} → {ε : ξ → ℕ} → EvalBound e ε b φ → Semiformula.Eval e ε φ
-  | _, .rel _ _, _, _, _, h => h
-  | _, .nrel _ _, _, _, _, h => h
-  | _, ⊤, _, _, _, h => h
-  | _, ⊥, _, _, _, h => h
-  | _, _ ⋏ _, _, _, _, h => h
-  | _, _ ⋎ _, _, _, _, h => h
-  | _, ∀¹ _, _, _, _, h => h
-  | _, ∃¹ _, _, _, _, h => by
+lemma eval_of_evalBound {n : ℕ} {φ : ArithmeticSemiformula ξ n} {b : ℕ} {e : Fin n → ℕ}
+    {ε : ξ → ℕ} (h : EvalBound e ε b φ) : Semiformula.Eval e ε φ := by
+  induction φ using Semiformula.rec' with
+  | hexs φ ih =>
     obtain ⟨x, _, hx⟩ := h
-    exact ⟨x, eval_of_evalBound hx⟩
-  termination_by _ φ => φ.complexity
+    exact ⟨x, ih hx⟩
+  | _ => exact h
 
 /-- The approximation grows with the bound. -/
-lemma evalBound_mono : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} → {b b' : ℕ} → b ≤ b' →
-    {e : Fin n → ℕ} → {ε : ξ → ℕ} → EvalBound e ε b φ → EvalBound e ε b' φ
-  | _, .rel _ _, _, _, _, _, _, h => h
-  | _, .nrel _ _, _, _, _, _, _, h => h
-  | _, ⊤, _, _, _, _, _, h => h
-  | _, ⊥, _, _, _, _, _, h => h
-  | _, _ ⋏ _, _, _, _, _, _, h => h
-  | _, _ ⋎ _, _, _, _, _, _, h => h
-  | _, ∀¹ _, _, _, _, _, _, h => h
-  | _, ∃¹ _, _, _, hb, _, _, h => by
+lemma evalBound_mono {n : ℕ} {φ : ArithmeticSemiformula ξ n} {b b' : ℕ} (hb : b ≤ b')
+    {e : Fin n → ℕ} {ε : ξ → ℕ} (h : EvalBound e ε b φ) : EvalBound e ε b' φ := by
+  induction φ using Semiformula.rec' with
+  | hexs φ ih =>
     obtain ⟨x, hx, hxb⟩ := h
-    exact ⟨x, lt_of_lt_of_le hx hb, evalBound_mono hb hxb⟩
-  termination_by _ φ => φ.complexity
+    exact ⟨x, lt_of_lt_of_le hx hb, ih hxb⟩
+  | _ => exact h
 
 /-- A true strict $\Sigma_1$ formula has an approximation. -/
-lemma exists_evalBound : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} → StrictHierarchy 𝚺 1 φ →
-    {e : Fin n → ℕ} → {ε : ξ → ℕ} → Semiformula.Eval e ε φ → ∃ b, EvalBound e ε b φ
-  | _, .rel _ _, _, _, _, h => ⟨0, h⟩
-  | _, .nrel _ _, _, _, _, h => ⟨0, h⟩
-  | _, ⊤, _, _, _, h => ⟨0, h⟩
-  | _, ⊥, _, _, _, h => ⟨0, h⟩
-  | _, _ ⋏ _, _, _, _, h => ⟨0, h⟩
-  | _, _ ⋎ _, _, _, _, h => ⟨0, h⟩
-  | _, ∀¹ _, _, _, _, h => ⟨0, h⟩
-  | _, ∃¹ φ, hφ, e, ε, h => by
+lemma exists_evalBound {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : StrictHierarchy 𝚺 1 φ)
+    {e : Fin n → ℕ} {ε : ξ → ℕ} (h : Semiformula.Eval e ε φ) : ∃ b, EvalBound e ε b φ := by
+  induction φ using Semiformula.rec' with
+  | hexs φ ih =>
     obtain ⟨x, hx⟩ : ∃ x, Semiformula.Eval (x :> e) ε φ := by simpa using h
-    obtain ⟨b, hb⟩ := exists_evalBound (StrictHierarchy.of_exs hφ) hx
+    obtain ⟨b, hb⟩ := ih (StrictHierarchy.of_exs hφ) hx
     exact ⟨max (x + 1) b, x, lt_of_lt_of_le (Nat.lt_succ_self x) (le_max_left _ _),
       evalBound_mono (le_max_right _ _) hb⟩
-  termination_by _ φ => φ.complexity
+  | _ => exact ⟨0, h⟩
 
 /-- The approximation commutes with rewriting. -/
-lemma evalBound_rew : {n₁ n₂ : ℕ} → {ξ₁ ξ₂ : Type*} → (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) →
-    (φ : ArithmeticSemiformula ξ₁ n₁) → {e : Fin n₂ → ℕ} → {ε : ξ₂ → ℕ} → {b : ℕ} →
-    (EvalBound e ε b (ω ▹ φ) ↔
-      EvalBound (Semiterm.val e ε ∘ ω ∘ Semiterm.bvar) (Semiterm.val e ε ∘ ω ∘ Semiterm.fvar) b φ)
-  | _, _, _, _, ω, .rel _ _, _, _, _ => Semiformula.eval_rew ω _
-  | _, _, _, _, ω, .nrel _ _, _, _, _ => Semiformula.eval_rew ω _
-  | _, _, _, _, ω, ⊤, _, _, _ => Semiformula.eval_rew ω _
-  | _, _, _, _, ω, ⊥, _, _, _ => Semiformula.eval_rew ω _
-  | _, _, _, _, ω, _ ⋏ _, _, _, _ => Semiformula.eval_rew ω _
-  | _, _, _, _, ω, _ ⋎ _, _, _, _ => Semiformula.eval_rew ω _
-  | _, _, _, _, ω, ∀¹ _, _, _, _ => Semiformula.eval_rew ω _
-  | _, _, _, _, ω, ∃¹ φ, e, ε, b => by
+lemma evalBound_rew {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂)
+    (φ : ArithmeticSemiformula ξ₁ n₁) {e : Fin n₂ → ℕ} {ε : ξ₂ → ℕ} {b : ℕ} :
+    EvalBound e ε b (ω ▹ φ) ↔
+      EvalBound (Semiterm.val e ε ∘ ω ∘ Semiterm.bvar)
+        (Semiterm.val e ε ∘ ω ∘ Semiterm.fvar) b φ := by
+  induction φ using Semiformula.rec' generalizing n₂ ξ₂ e ε with
+  | hexs φ ih =>
     have key : ∀ x : ℕ, EvalBound (x :> e) ε b (ω.q ▹ φ) ↔
         EvalBound (x :> (Semiterm.val e ε ∘ ⇑ω ∘ Semiterm.bvar))
           (Semiterm.val e ε ∘ ⇑ω ∘ Semiterm.fvar) b φ := by
@@ -184,41 +142,29 @@ lemma evalBound_rew : {n₁ n₂ : ℕ} → {ξ₁ ξ₂ : Type*} → (ω : Rew 
         funext i; cases i using Fin.cases <;> simp
       have e₂ : (Semiterm.val (x :> e) ε ∘ ⇑ω.q ∘ Semiterm.fvar)
           = Semiterm.val e ε ∘ ⇑ω ∘ Semiterm.fvar := by funext y; simp
-      rw [evalBound_rew ω.q φ, e₁, e₂]
+      rw [ih ω.q, e₁, e₂]
     simp only [Rewriting.app_exs, evalBound_exs]
     exact exists_congr fun x ↦ and_congr_right fun _ ↦ key x
-  termination_by _ _ _ _ _ φ => φ.complexity
+  | _ => exact Semiformula.eval_rew ω _
 
 /-- The approximation only looks at the free variables of the formula. -/
-lemma evalBound_congr_fvar [DecidableEq ξ] : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} →
-    {b : ℕ} → {e : Fin n → ℕ} → {ε ε' : ξ → ℕ} → Function.funEqOn φ.FVar? ε ε' →
-    (EvalBound e ε b φ ↔ EvalBound e ε' b φ)
-  | _, .rel _ _, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
-  | _, .nrel _ _, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
-  | _, ⊤, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
-  | _, ⊥, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
-  | _, _ ⋏ _, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
-  | _, _ ⋎ _, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
-  | _, ∀¹ _, _, _, _, _, h => Semiformula.eval_iff_of_funEqOn _ h
-  | _, ∃¹ _, _, _, _, _, h => by
+lemma evalBound_congr_fvar [DecidableEq ξ] {n : ℕ} {φ : ArithmeticSemiformula ξ n} {b : ℕ}
+    {e : Fin n → ℕ} {ε ε' : ξ → ℕ} (h : Function.funEqOn φ.FVar? ε ε') :
+    EvalBound e ε b φ ↔ EvalBound e ε' b φ := by
+  induction φ using Semiformula.rec' with
+  | hexs φ ih =>
     simp only [evalBound_exs]
     exact exists_congr fun x ↦ and_congr_right fun _ ↦
-      evalBound_congr_fvar (h.of_subset fun y hy ↦ by simpa using hy)
-  termination_by _ φ => φ.complexity
+      ih (h.of_subset fun y hy ↦ by simpa using hy)
+  | _ => exact Semiformula.eval_iff_of_funEqOn _ h
 
 /-- A true $\Delta_0$ formula has an approximation bounded by a term of the formula: only its
 leading bounded existential has to be witnessed. -/
-lemma exists_term_evalBound_of_bounded : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} →
-    φ.Bounded → ∃ s : ArithmeticSemiterm ξ n, ∀ (e : Fin n → ℕ) (ε : ξ → ℕ),
-      Semiformula.Eval e ε φ → EvalBound e ε (Semiterm.val e ε s + 1) φ
-  | _, .rel _ _, _ => ⟨‘0’, fun _ _ h ↦ h⟩
-  | _, .nrel _ _, _ => ⟨‘0’, fun _ _ h ↦ h⟩
-  | _, ⊤, _ => ⟨‘0’, fun _ _ h ↦ h⟩
-  | _, ⊥, _ => ⟨‘0’, fun _ _ h ↦ h⟩
-  | _, _ ⋏ _, _ => ⟨‘0’, fun _ _ h ↦ h⟩
-  | _, _ ⋎ _, _ => ⟨‘0’, fun _ _ h ↦ h⟩
-  | _, ∀¹ _, _ => ⟨‘0’, fun _ _ h ↦ h⟩
-  | _, ∃¹ ψ, hφ => by
+lemma exists_term_evalBound_of_bounded {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : φ.Bounded) :
+    ∃ s : ArithmeticSemiterm ξ n, ∀ (e : Fin n → ℕ) (ε : ξ → ℕ),
+      Semiformula.Eval e ε φ → EvalBound e ε (Semiterm.val e ε s + 1) φ := by
+  cases φ using Semiformula.cases' with
+  | hexs ψ =>
     cases hφ with
     | bexs pt hρ =>
       rename_i ρ _
@@ -227,6 +173,7 @@ lemma exists_term_evalBound_of_bounded : {n : ℕ} → {φ : ArithmeticSemiformu
       obtain ⟨x, hx, hρx⟩ : ∃ x, x < Semiterm.val e ε s ∧ Semiformula.Eval (x :> e) ε ρ := by
         simpa using h
       exact ⟨x, Nat.lt_succ_of_lt hx, by simpa using ⟨hx, hρx⟩⟩
+  | _ => exact ⟨‘0’, fun _ _ h ↦ h⟩
 
 /-! ## The approximation of a proposition -/
 

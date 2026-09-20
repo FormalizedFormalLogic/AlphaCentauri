@@ -111,8 +111,7 @@ def exsEquiv {φ} : (p ⊩[C, D] ∃¹ φ) ≃ ((t : ArithmeticTerm ℕ) × Forc
 
 def cast (f : p ⊩[C, D] φ) (e : φ = ψ) : p ⊩[C, D] ψ := e ▸ f
 
-def monotone {q p : LK.Sequent ℒₒᵣ} (s : q ≼ p) :
-    {φ : Propositionᵢ ℒₒᵣ} → (p ⊩[C, D] φ) → q ⊩[C, D] φ
+def monotone (s : q ≼ p) : {φ : Propositionᵢ ℒₒᵣ} → (p ⊩[C, D] φ) → q ⊩[C, D] φ
   | ⊥, b =>
     let ⟨d, hd⟩ := b.falsumEquiv
     falsumEquiv.symm ⟨d.graft s.val, by simpa using hd⟩
@@ -129,7 +128,7 @@ def monotone {q p : LK.Sequent ℒₒᵣ} (s : q ≼ p) :
     exsEquiv.symm ⟨t, d.monotone s⟩
   termination_by φ => φ.complexity
 
-def explosion {p : LK.Sequent ℒₒᵣ} (b : p ⊩[C, D] ⊥) : (φ : Propositionᵢ ℒₒᵣ) → p ⊩[C, D] φ
+def explosion {p} (b : p ⊩[C, D] ⊥) : (φ : Propositionᵢ ℒₒᵣ) → p ⊩[C, D] φ
   | ⊥ => b
   | .rel R v =>
     let ⟨d, hd⟩ := b.falsumEquiv
@@ -249,37 +248,56 @@ def sound {Γ : LJ.Sequent ℒₒᵣ} {Ξ : LJ.Head ℒₒᵣ}
 
 /-! ## The reflexive forcing of a formula by itself -/
 
-def relRefl {k} (R : (ℒₒᵣ).Rel k) (v : Fin k → ArithmeticTerm ℕ) :
-    ⦃Semiformula.rel R v⦄ ⊩[C, D] .rel R v :=
-  relEquiv.symm ⟨Derivation.cast <| Derivation.identity _ _, by simp⟩
-
-protected def refl.or {φ ψ : ArithmeticProposition}
-    (ihφ : ⦃φ⦄ ⊩[C, D] φᴺ) (ihψ : ⦃ψ⦄ ⊩[C, D] ψᴺ) : ⦃φ ⋎ ψ⦄ ⊩[C, D] (φ ⋎ ψ)ᴺ :=
-  implyOf (.atom _) fun q tq dq ↦
-    let ⟨dφ, dψ⟩ : (q ⊩[C, D] ∼φᴺ) × (q ⊩[C, D] ∼ψᴺ) := dq.andEquiv
-    let tφ : (∼(⦃φ⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
-    let tψ : (∼(⦃ψ⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
-    let bφ : ⦃φ⦄ ⊓ q ⊩[C, D] ⊥ :=
-      dφ.implyEquiv (⦃φ⦄ ⊓ q) (.minLeRight _ _ tφ) (ihφ.monotone (.minLeLeft _ _ tq))
-    let bψ : ⦃ψ⦄ ⊓ q ⊩[C, D] ⊥ :=
-      dψ.implyEquiv (⦃ψ⦄ ⊓ q) (.minLeRight _ _ tψ) (ihψ.monotone (.minLeLeft _ _ tq))
-    let ⟨bbφ, hbbφ⟩ := bφ.falsumEquiv
-    let ⟨bbψ, hbbψ⟩ := bψ.falsumEquiv
-    let bbφ' : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼φ⦄ := Derivation.cast bbφ (by simp [inf_def]; abel)
-    let bbψ' : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼ψ⦄ := Derivation.cast bbψ (by simp [inf_def]; abel)
-    let band : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼φ ⋏ ∼ψ⦄ := Derivation.and bbφ' bbψ'
-    falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]; abel), by
-      simpa [band, bbφ', bbψ'] using And.intro hbbφ hbbψ⟩
-
 variable [RewriteClosed C] [RewriteClosed D]
 
--- Transparency is lowered so that rewriting under the recursive forcing definition remains stable.
+-- Transparency is lowered for the structural recursion through translated formulas.
 set_option backward.isDefEq.respectTransparency false in
-protected def refl.exs {φ : ArithmeticSemiformula ℕ 1}
-    (d : ∀ x, ⦃φ/[&x]⦄ ⊩[C, D] (φ/[&x])ᴺ) : ⦃∃¹ φ⦄ ⊩[C, D] (∃¹ φ)ᴺ :=
-  implyOf (.atom _) fun q tq f ↦
+/-- Every formula is forced by the condition consisting of itself.
+
+- [Avi01, Section 3] -/
+protected def refl : (φ : ArithmeticProposition) → ⦃φ⦄ ⊩[C, D] φᴺ
+  |         ⊤ => implyEquiv.symm fun _ _ dφ ↦ dφ
+  |         ⊥ => falsumEquiv.symm ⟨Derivation.verum, by simp⟩
+  |  .rel R v => implyOf (.atom _) fun q tq dq ↦
+    let tr : (∼(⦃Semiformula.rel R v⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
+    let b : ⦃Semiformula.rel R v⦄ ⊓ q ⊩[C, D] .rel R v :=
+      (relEquiv.symm ⟨Derivation.cast <| Derivation.identity R v, by simp⟩).monotone
+        (StrongerThan.minLeLeft _ _ tq)
+    dq.implyEquiv (⦃Semiformula.rel R v⦄ ⊓ q) (StrongerThan.minLeRight _ _ tr) b
+  | .nrel R v => implyOf (.atom _) fun q _ dq ↦
+    let ⟨d, hd⟩ := dq.relEquiv
+    falsumEquiv.symm ⟨Derivation.cast d (by simp [inf_def]; abel), by simpa using hd⟩
+  |     φ ⋏ ψ =>
+    let ihφ : ⦃φ⦄ ⊩[C, D] φᴺ := Forces.refl φ
+    let ihψ : ⦃ψ⦄ ⊩[C, D] ψᴺ := Forces.refl ψ
+    andEquiv.symm ⟨by simpa using ihφ.monotone (.K_left (p := 0) φ ψ),
+      by simpa using ihψ.monotone (.K_right (p := 0) φ ψ)⟩
+  |     φ ⋎ ψ =>
+    let ihφ : ⦃φ⦄ ⊩[C, D] φᴺ := Forces.refl φ
+    let ihψ : ⦃ψ⦄ ⊩[C, D] ψᴺ := Forces.refl ψ
+    implyOf (.atom _) fun q tq dq ↦
+      let ⟨dφ, dψ⟩ : (q ⊩[C, D] ∼φᴺ) × (q ⊩[C, D] ∼ψᴺ) := dq.andEquiv
+      let tφ : (∼(⦃φ⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
+      let tψ : (∼(⦃ψ⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
+      let bφ : ⦃φ⦄ ⊓ q ⊩[C, D] ⊥ :=
+        dφ.implyEquiv (⦃φ⦄ ⊓ q) (.minLeRight _ _ tφ) (ihφ.monotone (.minLeLeft _ _ tq))
+      let bψ : ⦃ψ⦄ ⊓ q ⊩[C, D] ⊥ :=
+        dψ.implyEquiv (⦃ψ⦄ ⊓ q) (.minLeRight _ _ tψ) (ihψ.monotone (.minLeLeft _ _ tq))
+      let ⟨bbφ, hbbφ⟩ := bφ.falsumEquiv
+      let ⟨bbψ, hbbψ⟩ := bψ.falsumEquiv
+      let bbφ' : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼φ⦄ := Derivation.cast bbφ (by simp [inf_def]; abel)
+      let bbψ' : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼ψ⦄ := Derivation.cast bbψ (by simp [inf_def]; abel)
+      let band : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼φ ⋏ ∼ψ⦄ := Derivation.and bbφ' bbψ'
+      falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]; abel), by
+        simpa [band, bbφ', bbψ'] using And.intro hbbφ hbbψ⟩
+  |      ∀¹ φ => allEquiv.symm fun t ↦
+    let b : ⦃φ/[t]⦄ ⊩[C, D] φᴺ/[t] := by
+      simpa [Semiformula.rew_doubleNegation] using Forces.refl (φ/[t])
+    by simpa using b.monotone (StrongerThan.all (p := 0) φ t)
+  |      ∃¹ φ => implyOf (.atom _) fun q tq f ↦
     let x := LK.Sequent.newVar (∼q + ⦃∀¹ ∼φ⦄)
-    let ih : ⦃φ/[&x]⦄ ⊩[C, D] φᴺ/[&x] := cast (d x) (by simp [Semiformula.subst_doubleNegation])
+    let ih : ⦃φ/[&x]⦄ ⊩[C, D] φᴺ/[&x] :=
+      cast (Forces.refl (φ/[&x])) (by simp [Semiformula.subst_doubleNegation])
     let b : ⦃φ/[&x]⦄ ⊓ q ⊩[C, D] ⊥ :=
       let tφ : (∼(⦃φ/[&x]⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
       (f.allEquiv &x).implyEquiv (⦃φ/[&x]⦄ ⊓ q)
@@ -293,34 +311,6 @@ protected def refl.exs {φ : ArithmeticSemiformula ℕ 1}
     let ba : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∀¹ ∼φ⦄ := Derivation.generalizeByNewVar hp hq b'
     falsumEquiv.symm ⟨Derivation.cast ba (by simp [inf_def]; abel), by
       simpa [ba, b'] using Derivation.anchored_generalizeByNewVar (by simpa [b'] using hb)⟩
-
--- Transparency is lowered for the structural recursion through translated formulas.
-set_option backward.isDefEq.respectTransparency false in
-/-- Every formula is forced by the condition consisting of itself.
-
-- [Avi01, Section 3] -/
-protected def refl : (φ : ArithmeticProposition) → ⦃φ⦄ ⊩[C, D] φᴺ
-  |         ⊤ => implyEquiv.symm fun _ _ dφ ↦ dφ
-  |         ⊥ => falsumEquiv.symm ⟨Derivation.verum, by simp⟩
-  |  .rel R v => implyOf (.atom _) fun q tq dq ↦
-    let tr : (∼(⦃Semiformula.rel R v⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
-    let b : ⦃Semiformula.rel R v⦄ ⊓ q ⊩[C, D] .rel R v :=
-      (relRefl R v).monotone (StrongerThan.minLeLeft _ _ tq)
-    dq.implyEquiv (⦃Semiformula.rel R v⦄ ⊓ q) (StrongerThan.minLeRight _ _ tr) b
-  | .nrel R v => implyOf (.atom _) fun q _ dq ↦
-    let ⟨d, hd⟩ := dq.relEquiv
-    falsumEquiv.symm ⟨Derivation.cast d (by simp [inf_def]; abel), by simpa using hd⟩
-  |     φ ⋏ ψ =>
-    let ihφ : ⦃φ⦄ ⊩[C, D] φᴺ := Forces.refl φ
-    let ihψ : ⦃ψ⦄ ⊩[C, D] ψᴺ := Forces.refl ψ
-    andEquiv.symm ⟨by simpa using ihφ.monotone (.K_left (p := 0) φ ψ),
-      by simpa using ihψ.monotone (.K_right (p := 0) φ ψ)⟩
-  |     φ ⋎ ψ => refl.or (Forces.refl φ) (Forces.refl ψ)
-  |      ∀¹ φ => allEquiv.symm fun t ↦
-    let b : ⦃φ/[t]⦄ ⊩[C, D] φᴺ/[t] := by
-      simpa [Semiformula.rew_doubleNegation] using Forces.refl (φ/[t])
-    by simpa using b.monotone (StrongerThan.all (p := 0) φ t)
-  |      ∃¹ φ => refl.exs fun x ↦ Forces.refl (φ/[&x])
   termination_by φ => φ.complexity
 
 /-! ## Forcing and anchored derivations -/
@@ -369,8 +359,8 @@ def cutForces {χ : ArithmeticProposition} (hχ : D χ) :
 
 - [Bus98A, Section 1.4.2] -/
 def forcesOfAnchored {χ : ArithmeticProposition} (hχ : D χ) (d : AnchoredDerivation C D ⦃χ⦄) :
-    (0 : LK.Sequent ℒₒᵣ) ⊩[C, D] χᴺ :=
-  cutForces (p := 0) hχ (Multiset.Traversal.zero.cast (by simp)) (d.cast (by simp))
+    0 ⊩[C, D] χᴺ :=
+  cutForces hχ (Multiset.Traversal.zero.cast (by simp)) (d.cast (by simp))
     ((Forces.refl χ).castCondition (by simp))
 
 /-- Conversely, a condition forcing the translation of `χ` yields an anchored derivation of the

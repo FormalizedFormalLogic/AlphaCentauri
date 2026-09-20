@@ -43,6 +43,7 @@ attribute [simp] Semiformula.Bounded.verum Semiformula.Bounded.falsum Semiformul
 variable {n : ℕ} {φ ψ : Semiformula L ξ n}
 
 /-- A bounded formula sits at every zero level of the arithmetical hierarchy. -/
+@[grind ←]
 theorem Semiformula.Bounded.hierarchy {Γ : Polarity} (h : φ.Bounded) : Hierarchy Γ 0 φ := by
   induction h with
   | verum _ => exact Hierarchy.verum _ _ _
@@ -56,6 +57,7 @@ theorem Semiformula.Bounded.hierarchy {Γ : Polarity} (h : φ.Bounded) : Hierarc
 
 set_option linter.flexible false in
 /-- A formula at a zero level of the arithmetical hierarchy is bounded. -/
+@[grind →]
 theorem Arithmetic.Hierarchy.bounded {Γ : Polarity} : Hierarchy Γ 0 φ → φ.Bounded := by
   generalize hs : 0 = s
   intro h

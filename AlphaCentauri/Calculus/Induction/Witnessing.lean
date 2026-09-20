@@ -29,6 +29,7 @@ namespace FFL.FirstOrder.Arithmetic
 
 /-! ## Bounded approximation of strict $\Sigma_1$ formulas -/
 
+section
 variable {ξ : Type*} {n : ℕ}
 
 /-- `bound u φ` replaces the leading existential quantifiers of `φ` by quantifiers bounded
@@ -40,16 +41,15 @@ private def bound {n : ℕ} (u : ArithmeticSemiterm ξ n) :
   | ∃¹ φ => ∃¹[“#0 < !!(Rew.bShift u)”] bound (Rew.bShift u) φ
   | φ => φ
 
-@[simp] private lemma bound_exs (u : ArithmeticSemiterm ξ n) (φ : ArithmeticSemiformula ξ (n + 1)) :
+@[simp, grind =] private lemma bound_exs (u : ArithmeticSemiterm ξ n)
+    (φ : ArithmeticSemiformula ξ (n + 1)) :
     bound u (∃¹ φ) = ∃¹[“#0 < !!(Rew.bShift u)”] bound (Rew.bShift u) φ := rfl
 
 /-- The approximation of a strict $\Sigma_1$ formula is $\Delta_0$. -/
 private lemma bounded_bound {n : ℕ} {φ : ArithmeticSemiformula ξ n} (h : StrictHierarchy 𝚺 1 φ)
     (u : ArithmeticSemiterm ξ n) : (bound u φ).Bounded := by
   induction φ using Semiformula.rec' with
-  | hexs φ ih =>
-    refine Hierarchy.bexs (Rew.positive_iff.mpr ⟨u, rfl⟩) ?_
-    exact ih (StrictHierarchy.of_exs h) _
+  | hexs φ ih => exact .bexs (Rew.positive_iff.mpr ⟨u, rfl⟩) (ih (StrictHierarchy.of_exs h) _)
   | _ => cases h with | ofAlt h => exact StrictHierarchy.bounded_of_zero h
 
 /-! ## The approximation, read semantically -/
@@ -63,30 +63,33 @@ def EvalBound {n : ℕ} (e : Fin n → ℕ) (ε : ξ → ℕ) (b : ℕ) :
   | ∃¹ φ => ∃ x < b, EvalBound (x :> e) ε b φ
   | φ => Semiformula.Eval e ε φ
 
-@[simp] lemma evalBound_exs {e : Fin n → ℕ} {ε : ξ → ℕ} {b} {φ : ArithmeticSemiformula ξ (n + 1)} :
+@[simp, grind =] lemma evalBound_exs {e : Fin n → ℕ} {ε : ξ → ℕ} {b}
+    {φ : ArithmeticSemiformula ξ (n + 1)} :
     EvalBound e ε b (∃¹ φ) ↔ ∃ x < b, EvalBound (x :> e) ε b φ := Iff.rfl
 
 section
 
 variable {e : Fin n → ℕ} {ε : ξ → ℕ} {b : ℕ}
 
-@[simp] lemma evalBound_rel {k} {R : (ℒₒᵣ).Rel k} {v} :
+@[simp, grind =] lemma evalBound_rel {k} {R : (ℒₒᵣ).Rel k} {v} :
     EvalBound e ε b (.rel R v) ↔ Semiformula.Eval e ε (.rel R v) := Iff.rfl
 
-@[simp] lemma evalBound_nrel {k} {R : (ℒₒᵣ).Rel k} {v} :
+@[simp, grind =] lemma evalBound_nrel {k} {R : (ℒₒᵣ).Rel k} {v} :
     EvalBound e ε b (.nrel R v) ↔ Semiformula.Eval e ε (.nrel R v) := Iff.rfl
 
-@[simp] lemma evalBound_verum : EvalBound e ε b (⊤ : ArithmeticSemiformula ξ n) ↔ True := Iff.rfl
+@[simp, grind =] lemma evalBound_verum :
+    EvalBound e ε b (⊤ : ArithmeticSemiformula ξ n) ↔ True := Iff.rfl
 
-@[simp] lemma evalBound_falsum : EvalBound e ε b (⊥ : ArithmeticSemiformula ξ n) ↔ False := Iff.rfl
+@[simp, grind =] lemma evalBound_falsum :
+    EvalBound e ε b (⊥ : ArithmeticSemiformula ξ n) ↔ False := Iff.rfl
 
-@[simp] lemma evalBound_and {φ ψ : ArithmeticSemiformula ξ n} :
+@[simp, grind =] lemma evalBound_and {φ ψ : ArithmeticSemiformula ξ n} :
     EvalBound e ε b (φ ⋏ ψ) ↔ Semiformula.Eval e ε (φ ⋏ ψ) := Iff.rfl
 
-@[simp] lemma evalBound_or {φ ψ : ArithmeticSemiformula ξ n} :
+@[simp, grind =] lemma evalBound_or {φ ψ : ArithmeticSemiformula ξ n} :
     EvalBound e ε b (φ ⋎ ψ) ↔ Semiformula.Eval e ε (φ ⋎ ψ) := Iff.rfl
 
-@[simp] lemma evalBound_all {φ : ArithmeticSemiformula ξ (n + 1)} :
+@[simp, grind =] lemma evalBound_all {φ : ArithmeticSemiformula ξ (n + 1)} :
     EvalBound e ε b (∀¹ φ) ↔ Semiformula.Eval e ε (∀¹ φ) := Iff.rfl
 
 end
@@ -119,9 +122,7 @@ lemma eval_of_evalBound {n : ℕ} {φ : ArithmeticSemiformula ξ n} {b : ℕ} {e
 lemma evalBound_mono {n : ℕ} {φ : ArithmeticSemiformula ξ n} {b b' : ℕ} (hb : b ≤ b')
     {e : Fin n → ℕ} {ε : ξ → ℕ} (h : EvalBound e ε b φ) : EvalBound e ε b' φ := by
   induction φ using Semiformula.rec' with
-  | hexs φ ih =>
-    obtain ⟨x, hx, hxb⟩ := h
-    exact ⟨x, lt_of_lt_of_le hx hb, ih hxb⟩
+  | hexs φ ih => grind
   | _ => exact h
 
 /-- A true strict $\Sigma_1$ formula has an approximation. -/
@@ -185,8 +186,11 @@ lemma exists_term_evalBound_of_bounded {n : ℕ} {φ : ArithmeticSemiformula ξ 
       exact ⟨x, Nat.lt_succ_of_lt hx, by simpa using ⟨hx, hρx⟩⟩
   | _ => exact ⟨‘0’, fun _ _ h ↦ h⟩
 
+end
+
 /-! ## The approximation of a proposition -/
 
+section
 variable {φ : ArithmeticProposition} {b : ℕ} {ε : ℕ → ℕ}
 
 /-- A true strict $\Sigma_1$ sentence has an approximation that does not depend on the
@@ -194,8 +198,7 @@ assignment. -/
 lemma exists_evalBound_of_closed (hφ : StrictHierarchy 𝚺 1 φ) (hfv : ∀ x, ¬φ.FVar? x)
     (h : ∀ ε : ℕ → ℕ, φ.Evalf ε) : ∃ c, ∀ ε, EvalBound ![] ε c φ := by
   obtain ⟨c, hc⟩ := exists_evalBound hφ (h fun _ ↦ 0)
-  exact ⟨c, fun ε ↦ (evalBound_congr_fvar (φ := φ) (b := c) (e := ![])
-    (ε := fun _ ↦ 0) (ε' := ε) fun x hx ↦ absurd hx (hfv x)).mp hc⟩
+  exact ⟨c, fun ε ↦ (evalBound_congr_fvar fun x hx ↦ absurd hx (hfv x)).mp hc⟩
 
 /-- The approximation of a proposition is the truth of a fixed $\Delta_0$ formula, with the bound
 supplied by its bound variable. -/
@@ -212,9 +215,9 @@ private lemma evalBound_iff_eval_bound_bShift :
 - [HP98, Theorem 0.35] -/
 lemma primrecRel_evalBound (hφ : StrictHierarchy 𝚺 1 φ) :
     PrimrecRel fun (b : ℕ) (l : List ℕ) ↦ EvalBound ![] (l.getD · 0) b φ := by
-  set ψ : ArithmeticSemiformula ℕ 1 := bound #0 (Rew.bShift ▹ φ) with hψ
+  set ψ := bound #0 (Rew.bShift ▹ φ) with hψ
   have hb : ψ.Bounded := bounded_bound (StrictHierarchy.rew _ hφ) _
-  have hσ : (ψ.toSemisentence ![#0]).Bounded := Hierarchy.rew _ hb
+  have hσ : (ψ.toSemisentence ![#0]).Bounded := Semiformula.Bounded.rew _ hb
   have key : ∀ (b : ℕ) (l : List ℕ), EvalBound ![] (l.getD · 0) b φ ↔
       ℕ ⊧/(b :> fun i : Fin ψ.fvSup ↦ l.getD i 0) (ψ.toSemisentence ![#0]) := by
     intro b l
@@ -231,6 +234,8 @@ lemma primrecRel_evalBound (hφ : StrictHierarchy 𝚺 1 φ) :
       = fun i : Fin ψ.fvSup ↦ p.2.getD (i : ℕ) 0 := funext (List.Vector.get_ofFn _)
   simp only [List.Vector.cons_get, e]
   exact (key p.1 p.2).symm
+
+end
 
 namespace LKI
 
@@ -270,22 +275,20 @@ end Witnesses
 
 /-! ## The leaves -/
 
-lemma witnesses_verum : Witnesses ⦃(⊤ : ArithmeticProposition)⦄ fun _ _ ↦ 0 := by
+lemma witnesses_verum : Witnesses ⦃⊤⦄ fun _ _ ↦ 0 := by
   intro l b _
-  exact ⟨⊤, by simp, StrictHierarchy.of_bounded (Hierarchy.verum _ _ _), by simp⟩
+  exact ⟨⊤, by simp, StrictHierarchy.of_bounded (.verum _), by simp⟩
 
 lemma witnesses_identity {k} (R : (ℒₒᵣ).Rel k) (v) :
     Witnesses ⦃Semiformula.rel R v, Semiformula.nrel R v⦄ fun _ _ ↦ 0 := by
   intro l b _
   by_cases hv : Semiformula.Eval ![] (l.getD · 0) (Semiformula.rel R v)
-  · exact ⟨Semiformula.rel R v, by simp, StrictHierarchy.of_bounded (Hierarchy.rel _ _ R v),
-      by simpa using hv⟩
-  · exact ⟨Semiformula.nrel R v, by simp, StrictHierarchy.of_bounded (Hierarchy.nrel _ _ R v),
-      by simpa using hv⟩
+  · exact ⟨Semiformula.rel R v, by simp, StrictHierarchy.of_bounded (.rel R v), by simpa using hv⟩
+  · exact ⟨Semiformula.nrel R v, by simp, StrictHierarchy.of_bounded (.nrel R v), by simpa using hv⟩
 
 lemma exists_witnesses_axm {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) :
-    ∃ c, Witnesses ⦃(Rewriting.emb σ : ArithmeticProposition)⦄ fun _ _ ↦ c := by
-  have htrue : ∀ ε : ℕ → ℕ, (Rewriting.emb σ : ArithmeticProposition).Evalf ε := by
+    ∃ c, Witnesses ⦃Rewriting.emb σ⦄ fun _ _ ↦ c := by
+  have htrue : ∀ ε : ℕ → ℕ, (Rewriting.emb σ).Evalf ε := by
     intro ε
     simpa [models_iff] using Theory.models (M := ℕ) _ hσ
   by_cases hs : StrictHierarchy 𝚺 1 (Rewriting.emb σ : ArithmeticProposition)
@@ -307,37 +310,37 @@ lemma witnesses_contraction (H : Witnesses (Γ + ⦃φ, φ⦄) f) : Witnesses (�
 
 lemma witnesses_or (hd : (φ ⋎ ψ).Bounded) (H : Witnesses (Γ + ⦃φ, ψ⦄) f) :
     Witnesses (Γ + ⦃φ ⋎ ψ⦄) f := by
-  obtain ⟨hφ, hψ⟩ := Hierarchy.or_iff.mp hd
+  obtain ⟨hφ, hψ⟩ := Semiformula.Bounded.or_iff.mp hd
   intro l b hb
   obtain ⟨χ, hχ, hσ, hbnd⟩ := H l b fun χ hχ hnσ ↦ by
     rcases Multiset.mem_add.mp hχ with hχ | hχ
     · exact hb χ (by simp [hχ]) hnσ
     · rcases show χ = φ ∨ χ = ψ by simpa using hχ with rfl | rfl
-      · exact absurd (StrictHierarchy.of_bounded hφ) hnσ
-      · exact absurd (StrictHierarchy.of_bounded hψ) hnσ
+      · grind
+      · grind
   rcases Multiset.mem_add.mp hχ with hχ | hχ
   · exact ⟨χ, by simp [hχ], hσ, hbnd⟩
-  · refine ⟨φ ⋎ ψ, by simp, StrictHierarchy.of_bounded hd, ?_⟩
+  · refine ⟨φ ⋎ ψ, by simp, by grind, ?_⟩
     rcases show χ = φ ∨ χ = ψ by simpa using hχ with rfl | rfl
     · simpa using Or.inl (eval_of_evalBound hbnd)
     · simpa using Or.inr (eval_of_evalBound hbnd)
 
 lemma witnesses_and (hd : (φ ⋏ ψ).Bounded) (H₁ : Witnesses (Γ + ⦃φ⦄) f)
     (H₂ : Witnesses (Γ + ⦃ψ⦄) g) : Witnesses (Γ + ⦃φ ⋏ ψ⦄) fun l b ↦ max (f l b) (g l b) := by
-  obtain ⟨hφ, hψ⟩ := Hierarchy.and_iff.mp hd
+  obtain ⟨hφ, hψ⟩ := Semiformula.Bounded.and_iff.mp hd
   intro l b hb
   have hb₁ : ∀ χ ∈ Γ + ⦃φ⦄, ¬StrictHierarchy 𝚺 1 χ →
       EvalBound ![] (l.getD · 0) b (∼χ) := fun χ hχ hnσ ↦ by
     rcases Multiset.mem_add.mp hχ with hχ | hχ
     · exact hb χ (by simp [hχ]) hnσ
     · rcases show χ = φ by simpa using hχ
-      exact absurd (StrictHierarchy.of_bounded hφ) hnσ
+      grind
   have hb₂ : ∀ χ ∈ Γ + ⦃ψ⦄, ¬StrictHierarchy 𝚺 1 χ →
       EvalBound ![] (l.getD · 0) b (∼χ) := fun χ hχ hnσ ↦ by
     rcases Multiset.mem_add.mp hχ with hχ | hχ
     · exact hb χ (by simp [hχ]) hnσ
     · rcases show χ = ψ by simpa using hχ
-      exact absurd (StrictHierarchy.of_bounded hψ) hnσ
+      grind
   obtain ⟨χ₁, hχ₁, hσ₁, hbnd₁⟩ := H₁ l b hb₁
   obtain ⟨χ₂, hχ₂, hσ₂, hbnd₂⟩ := H₂ l b hb₂
   rcases Multiset.mem_add.mp hχ₁ with hm₁ | hm₁
@@ -346,7 +349,7 @@ lemma witnesses_and (hd : (φ ⋏ ψ).Bounded) (H₁ : Witnesses (Γ + ⦃φ⦄)
   · exact ⟨χ₂, by simp [hm₂], hσ₂, evalBound_mono (le_max_right _ _) hbnd₂⟩
   rcases show χ₁ = φ by simpa using hm₁
   rcases show χ₂ = ψ by simpa using hm₂
-  exact ⟨φ ⋏ ψ, by simp, StrictHierarchy.of_bounded hd,
+  exact ⟨φ ⋏ ψ, by simp, by grind,
     by simpa using ⟨eval_of_evalBound hbnd₁, eval_of_evalBound hbnd₂⟩⟩
 
 /-! ## The existential rule -/
@@ -500,21 +503,21 @@ lemma witnesses_all_pi {ξ : ArithmeticSemiformula ℕ 1} (hnσ : ¬StrictHierar
 /-- The universal rule when the principal formula is a bounded universal: the term bounds the
 counterexample. -/
 lemma witnesses_all_bounded {ψ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
-    (hψ : Hierarchy 𝚺 0 ψ)
+    (hψ : ψ.Bounded)
     (H : Witnesses (Γ⁺ + ⦃Rewriting.free (“#0 < !!(Rew.bShift t)” 🡒 ψ)⦄) f) :
     Witnesses (Γ + ⦃∀¹[“#0 < !!(Rew.bShift t)”] ψ⦄)
       fun l b ↦ maxBelow (fun x ↦ f (x :: l) b) (Semiterm.val ![] (l.getD · 0) t) := by
-  have hd : Hierarchy 𝚺 0 (∀¹[“#0 < !!(Rew.bShift t)”] ψ) :=
-    Hierarchy.ball (Rew.positive_iff.mpr ⟨t, rfl⟩) hψ
-  have hbody : Hierarchy 𝚺 0 (“#0 < !!(Rew.bShift t)” 🡒 ψ) := by
-    simp [Semiformula.imp_eq, hψ]
+  have hd : (∀¹[“#0 < !!(Rew.bShift t)”] ψ).Bounded :=
+    .ball (Rew.positive_iff.mpr ⟨t, rfl⟩) hψ
+  have hbody : (“#0 < !!(Rew.bShift t)” 🡒 ψ).Bounded :=
+    Semiformula.Bounded.imp_iff.mpr ⟨.rel _ _, hψ⟩
   intro l b hb
   by_cases hex : ∃ x < Semiterm.val ![] (l.getD · 0) t,
       ∃ γ ∈ Γ, StrictHierarchy 𝚺 1 γ ∧ EvalBound ![] (l.getD · 0) (f (x :: l) b) γ
   · obtain ⟨x, hx, γ, hγ, hσγ, hbnd⟩ := hex
     exact ⟨γ, by simp [hγ], hσγ, evalBound_mono (le_maxBelow _ hx) hbnd⟩
   push Not at hex
-  refine ⟨∀¹[“#0 < !!(Rew.bShift t)”] ψ, by simp, StrictHierarchy.of_bounded hd, ?_⟩
+  refine ⟨∀¹[“#0 < !!(Rew.bShift t)”] ψ, by simp, by grind, ?_⟩
   have hall : ∀ x < Semiterm.val ![] (l.getD · 0) t, Semiformula.Eval ![x] (l.getD · 0) ψ := by
     intro x hx
     obtain ⟨χ, hχ, hσχ, hbnd⟩ := H (x :: l) b fun ρ hρ hnσρ ↦ by
@@ -523,7 +526,7 @@ lemma witnesses_all_bounded {ψ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTe
         have : ¬StrictHierarchy 𝚺 1 ρ' := by simpa [Rewriting.shift] using hnσρ
         simpa using evalBound_shift.mpr (hb ρ' (by simp [hρ']) this)
       · rcases show ρ = Rewriting.free (“#0 < !!(Rew.bShift t)” 🡒 ψ) by simpa using hρ
-        exact absurd (StrictHierarchy.of_bounded (Hierarchy.rew _ hbody)) hnσρ
+        exact absurd (StrictHierarchy.of_bounded (Semiformula.Bounded.rew _ hbody)) hnσρ
     rcases Multiset.mem_add.mp hχ with hm | hm
     · obtain ⟨χ', hχ', rfl⟩ := Multiset.mem_map.mp hm
       exact absurd (evalBound_shift.mp hbnd)
@@ -555,7 +558,7 @@ lemma le_indBound (f : List ℕ → ℕ → ℕ) (l : List ℕ) (b : ℕ) : ∀ 
 the induction formula, which is called for only when that formula is $\Delta_0$. -/
 lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} {B : List ℕ → ℕ}
     (hξ : StrictHierarchy 𝚺 1 ξ)
-    (hB : Hierarchy 𝚺 0 ξ → ∀ l : List ℕ,
+    (hB : ξ.Bounded → ∀ l : List ℕ,
       (Semiformula.Eval ![0] (l.getD · 0) ξ → EvalBound ![0] (l.getD · 0) (B l) ξ) ∧
         (Semiformula.Eval ![0] (l.getD · 0) (∼ξ) → EvalBound ![0] (l.getD · 0) (B l) (∼ξ)))
     (H : Witnesses (Γ⁺ + ⦃∼(Rewriting.free ξ), (Rewriting.shift ξ)/[‘&0 + 1’]⦄) f) :
@@ -565,29 +568,29 @@ lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} 
   set c : ℕ → ℕ := indBound f l (max b (B l)) with hcdef
   have hbc : ∀ n, b ≤ c n := fun n ↦ le_trans (le_max_left _ _) (le_indBound _ _ _ n)
   have key : ∀ n : ℕ,
-      (∃ φ ∈ Γ + ⦃∼(ξ/[(‘0’ : ArithmeticTerm ℕ)]), ξ/[t]⦄,
+      (∃ φ ∈ Γ + ⦃∼(ξ/[‘0’]), ξ/[t]⦄,
         StrictHierarchy 𝚺 1 φ ∧ EvalBound ![] (l.getD · 0) (c n) φ) ∨
       EvalBound ![n] (l.getD · 0) (c n) ξ := by
     intro n
     induction n with
     | zero =>
-      by_cases hz : StrictHierarchy 𝚺 1 (∼(ξ/[(‘0’ : ArithmeticTerm ℕ)]) : ArithmeticProposition)
+      by_cases hz : StrictHierarchy 𝚺 1 (∼(ξ/[‘0’]) : ArithmeticProposition)
       · have hπξ : StrictHierarchy 𝚷 1 ξ := by
           have hπ : StrictHierarchy 𝚷 1 (ξ/[(‘0’ : ArithmeticTerm ℕ)]) := by simpa using hz
           simpa [Rewriting.subst] using hπ
-        have hΔ : Hierarchy 𝚺 0 ξ := StrictHierarchy.bounded_of_sigmaOne_of_piOne hξ hπξ
+        have hΔ : ξ.Bounded := by grind
         have hBc : B l ≤ c 0 := le_trans (le_max_right _ _) (le_indBound _ _ _ 0)
         by_cases hev : Semiformula.Eval ![0] (l.getD · 0) ξ
         · exact Or.inr (evalBound_mono hBc ((hB hΔ l).1 hev))
-        · refine Or.inl ⟨∼(ξ/[(‘0’ : ArithmeticTerm ℕ)]), by simp, hz, ?_⟩
+        · refine Or.inl ⟨∼(ξ/[‘0’]), by simp, hz, ?_⟩
           have hn : EvalBound ![0] (l.getD · 0) (c 0) (∼ξ) :=
             evalBound_mono hBc ((hB hΔ l).2 (by simpa using hev))
-          have hs : EvalBound ![] (l.getD · 0) (c 0) ((∼ξ)/[(‘0’ : ArithmeticTerm ℕ)]) :=
+          have hs : EvalBound ![] (l.getD · 0) (c 0) ((∼ξ)/[‘0’]) :=
             evalBound_subst.mpr (by simpa using hn)
           simpa using hs
       · refine Or.inr (evalBound_mono (hbc 0) ?_)
-        have h₀ : EvalBound ![] (l.getD · 0) b (ξ/[(‘0’ : ArithmeticTerm ℕ)]) := by
-          simpa using hb (∼(ξ/[(‘0’ : ArithmeticTerm ℕ)])) (by simp) hz
+        have h₀ : EvalBound ![] (l.getD · 0) b (ξ/[‘0’]) := by
+          simpa using hb (∼(ξ/[‘0’])) (by simp) hz
         simpa using evalBound_subst.mp h₀
     | succ n ih =>
       rcases ih with ⟨φ, hφ, hσφ, hbnd⟩ | hinv
@@ -644,10 +647,10 @@ lemma primrec_indBound {f : List ℕ → ℕ → ℕ} (hf : Primrec₂ f) {b : L
 
 /-! ## The witnessing lemma -/
 
-private lemma bounded_of_strictOne {b : Polarity} {φ : ArithmeticProposition}
+private lemma bounded_of_strictOne {b : Polarity}
     (h : StrictHierarchy b 1 φ) (hne : ∀ ψ, φ ≠ ∃¹ ψ) (hna : ∀ ψ, φ ≠ ∀¹ ψ) : φ.Bounded := by
   cases h with
-  | ofAlt h => exact StrictHierarchy.bounded_of_zero h
+  | ofAlt h => grind
   | exs => exact absurd rfl (hne _)
   | all => exact absurd rfl (hna _)
 
@@ -655,7 +658,7 @@ private lemma bounded_of_strictOne {b : Polarity} {φ : ArithmeticProposition}
 formulas one reads a primitive recursive bound on the witnesses.
 
 - [Bus98A, Section 3.1.3] -/
-theorem exists_witnesses {Γ : LK.Sequent ℒₒᵣ} (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
+theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
     (hd : Derivation.Anchored (fun φ ↦ StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ) d)
     (hΓ : ∀ φ ∈ Γ, StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ) :
     ∃ f : List ℕ → ℕ → ℕ, Primrec₂ f ∧ Witnesses Γ f := by
@@ -679,30 +682,30 @@ theorem exists_witnesses {Γ : LK.Sequent ℒₒᵣ} (d : ⊢ᴸᴷᴵ[StrictHie
     have hd0 : (φ ⋎ ψ).Bounded := by
       rcases hΓ (φ ⋎ ψ) (by simp) with h | h <;>
         exact bounded_of_strictOne h (by simp) (by simp)
-    obtain ⟨hφ, hψ⟩ := Hierarchy.or_iff.mp hd0
+    obtain ⟨hφ, hψ⟩ := Semiformula.Bounded.or_iff.mp hd0
     obtain ⟨f, hf, H⟩ := ih hd fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
       · exact hΓ χ (by simp [hχ])
       · rcases show χ = φ ∨ χ = ψ by simpa using hχ with rfl | rfl
-        · exact Or.inl (StrictHierarchy.of_bounded hφ)
-        · exact Or.inl (StrictHierarchy.of_bounded hψ)
+        · grind
+        · grind
     exact ⟨f, hf, witnesses_or hd0 H⟩
   | and d₁ d₂ ih₁ ih₂ =>
     rename_i φ ψ
     have hd0 : (φ ⋏ ψ).Bounded := by
       rcases hΓ (φ ⋏ ψ) (by simp) with h | h <;>
         exact bounded_of_strictOne h (by simp) (by simp)
-    obtain ⟨hφ, hψ⟩ := Hierarchy.and_iff.mp hd0
+    obtain ⟨hφ, hψ⟩ := Semiformula.Bounded.and_iff.mp hd0
     obtain ⟨f₁, hf₁, H₁⟩ := ih₁ hd.1 fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
       · exact hΓ χ (by simp [hχ])
       · rcases show χ = φ by simpa using hχ
-        exact Or.inl (StrictHierarchy.of_bounded hφ)
+        grind
     obtain ⟨f₂, hf₂, H₂⟩ := ih₂ hd.2 fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
       · exact hΓ χ (by simp [hχ])
       · rcases show χ = ψ by simpa using hχ
-        exact Or.inl (StrictHierarchy.of_bounded hψ)
+        grind
     exact ⟨_, Primrec.nat_max.comp hf₁ hf₂ |>.to₂, witnesses_and hd0 H₁ H₂⟩
   | cut d₁ d₂ ih₁ ih₂ =>
     rename_i χ
@@ -732,7 +735,7 @@ theorem exists_witnesses {Γ : LK.Sequent ℒₒᵣ} (d : ⊢ᴸᴷᴵ[StrictHie
       rcases hΓ (∃¹ ξ) (by simp) with h | h
       · exact h
       · cases h with
-        | ofAlt h => exact StrictHierarchy.of_bounded (StrictHierarchy.bounded_of_zero h)
+        | ofAlt h => grind
     obtain ⟨f, hf, H⟩ := ih hd fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
       · exact hΓ χ (by simp [hχ])
@@ -745,7 +748,7 @@ theorem exists_witnesses {Γ : LK.Sequent ℒₒᵣ} (d : ⊢ᴸᴷᴵ[StrictHie
     rename_i ξ
     by_cases hσ : StrictHierarchy 𝚺 1 (∀¹ ξ)
     · have hd0 : (∀¹ ξ).Bounded := by
-        cases hσ with | ofAlt h => exact StrictHierarchy.bounded_of_zero h
+        cases hσ with | ofAlt h => grind
       obtain ⟨f, hf, H⟩ := ih hd fun χ hχ ↦ by
         rcases Multiset.mem_add.mp hχ with hχ | hχ
         · obtain ⟨χ', hχ', rfl⟩ := Multiset.mem_map.mp hχ
@@ -753,9 +756,9 @@ theorem exists_witnesses {Γ : LK.Sequent ℒₒᵣ} (d : ⊢ᴸᴷᴵ[StrictHie
           · exact Or.inl (by simpa [Rewriting.shift] using h)
           · exact Or.inr (by simpa [Rewriting.shift] using h)
         · rcases show χ = Rewriting.free ξ by simpa using hχ
-          exact Or.inl (StrictHierarchy.rew _ (StrictHierarchy.of_bounded
-            (Hierarchy.of_bounded_all hd0)))
-      obtain ⟨t, ρ, rfl, hρ⟩ := Hierarchy.exists_of_bounded_all hd0
+          exact Or.inl (StrictHierarchy.rew _
+            (StrictHierarchy.of_bounded (Semiformula.Bounded.of_all hd0)))
+      obtain ⟨t, ρ, rfl, hρ⟩ := Semiformula.Bounded.exists_of_all hd0
       refine ⟨_, ?_, witnesses_all_bounded hρ H⟩
       exact Primrec.to₂ (primrec_maxBelow
         (Primrec.to₂ (hf.comp
@@ -774,7 +777,7 @@ theorem exists_witnesses {Γ : LK.Sequent ℒₒᵣ} (d : ⊢ᴸᴷᴵ[StrictHie
           · cases h with
             | ofAlt h =>
               exact Or.inl (StrictHierarchy.rew _ (StrictHierarchy.of_bounded
-                (Hierarchy.of_bounded_all (StrictHierarchy.bounded_of_zero h))))
+                (Semiformula.Bounded.of_all (StrictHierarchy.bounded_of_zero h))))
             | all h => exact Or.inr (StrictHierarchy.rew _ h)
       refine ⟨_, ?_, witnesses_all_pi hσ H⟩
       exact Primrec.to₂ (primrec_maxBelow
@@ -793,19 +796,19 @@ theorem exists_witnesses {Γ : LK.Sequent ℒₒᵣ} (d : ⊢ᴸᴷᴵ[StrictHie
           simpa using hχ with rfl | rfl
         · exact Or.inr (by simpa using hξ)
         · exact Or.inl (StrictHierarchy.rew _ (StrictHierarchy.rew _ hξ))
-    by_cases hΔ : Hierarchy 𝚺 0 ξ
+    by_cases hΔ : ξ.Bounded
     · obtain ⟨s, hs⟩ := exists_term_evalBound_of_bounded hΔ
-      have hΔ' : Hierarchy 𝚺 0 (∼ξ) := by simpa using hΔ.of_zero
+      have hΔ' : (∼ξ).Bounded := Semiformula.Bounded.neg_iff.mpr hΔ
       obtain ⟨s', hs'⟩ := exists_term_evalBound_of_bounded hΔ'
-      have hB : Hierarchy 𝚺 0 ξ → ∀ l : List ℕ,
+      have hB : ξ.Bounded → ∀ l : List ℕ,
           (Semiformula.Eval ![0] (l.getD · 0) ξ →
             EvalBound ![0] (l.getD · 0)
-              (max (Semiterm.val ![] (l.getD · 0) (Rew.subst ![(‘0’ : ArithmeticTerm ℕ)] s) + 1)
-                (Semiterm.val ![] (l.getD · 0) (Rew.subst ![(‘0’ : ArithmeticTerm ℕ)] s') + 1)) ξ) ∧
+              (max (Semiterm.val ![] (l.getD · 0) (Rew.subst ![‘0’] s) + 1)
+                (Semiterm.val ![] (l.getD · 0) (Rew.subst ![‘0’] s') + 1)) ξ) ∧
           (Semiformula.Eval ![0] (l.getD · 0) (∼ξ) →
             EvalBound ![0] (l.getD · 0)
               (max (Semiterm.val ![] (l.getD · 0) (Rew.subst ![‘0’] s) + 1)
-                (Semiterm.val ![] (l.getD · 0) (Rew.subst ![(‘0’ : ArithmeticTerm ℕ)] s') + 1))
+                (Semiterm.val ![] (l.getD · 0) (Rew.subst ![‘0’] s') + 1))
               (∼ξ)) := by
         intro _ l
         refine ⟨fun hev ↦ evalBound_mono (le_max_left _ _) ?_,
@@ -818,9 +821,9 @@ theorem exists_witnesses {Γ : LK.Sequent ℒₒᵣ} (d : ⊢ᴸᴷᴵ[StrictHie
         (Primrec.nat_max.comp Primrec.snd
           (Primrec.nat_max.comp
             (Primrec.succ.comp
-              ((primrec_termVal (Rew.subst ![(‘0’ : ArithmeticTerm ℕ)] s)).comp Primrec.fst))
+              ((primrec_termVal (Rew.subst ![‘0’] s)).comp Primrec.fst))
             (Primrec.succ.comp
-              ((primrec_termVal (Rew.subst ![(‘0’ : ArithmeticTerm ℕ)] s')).comp Primrec.fst))))
+              ((primrec_termVal (Rew.subst ![‘0’] s')).comp Primrec.fst))))
         ((primrec_termVal t).comp Primrec.fst))
     · refine ⟨_, ?_, witnesses_ind (B := fun _ ↦ 0) hξ (fun hc ↦ absurd hc hΔ) H⟩
       exact Primrec.to₂ (primrec_indBound hf

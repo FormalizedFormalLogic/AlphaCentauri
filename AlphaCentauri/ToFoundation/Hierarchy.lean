@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Hierarchy.Bounded
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
@@ -58,26 +59,27 @@ namespace StrictHierarchy
 variable {L : Language} [L.LT] {ξ : Type*} {Γ : Polarity} {s n : ℕ}
 
 /-- A strict formula of level `0` is $\Delta_0$. -/
-lemma bounded_of_zero {φ : Semiformula L ξ n} (h : StrictHierarchy Γ 0 φ) : Hierarchy 𝚺 0 φ := by
-  cases h with | zero h => exact h
+@[grind →]
+lemma bounded_of_zero {φ : Semiformula L ξ n} (h : StrictHierarchy Γ 0 φ) : φ.Bounded := by
+  cases h with | zero h => exact h.bounded
 
-/-- The body of a $\Delta_0$ existential is $\Delta_0$. -/
-lemma _root_.FFL.FirstOrder.Arithmetic.Hierarchy.of_bounded_exs {φ : Semiformula L ξ (n + 1)}
-    (h : Hierarchy 𝚺 0 (∃¹ φ)) : Hierarchy 𝚺 0 φ := by
+/-- The body of a bounded existential is bounded. -/
+lemma _root_.FFL.FirstOrder.Semiformula.Bounded.of_exs {φ : Semiformula L ξ (n + 1)}
+    (h : (∃¹ φ).Bounded) : φ.Bounded := by
   cases h with
-  | bexs _ hφ => exact Hierarchy.and (Hierarchy.rel _ _ _ _) hφ
+  | bexs _ hφ => exact .and (.rel _ _) hφ
 
-/-- The body of a $\Delta_0$ universal is $\Delta_0$. -/
-lemma _root_.FFL.FirstOrder.Arithmetic.Hierarchy.of_bounded_all {φ : Semiformula L ξ (n + 1)}
-    (h : Hierarchy 𝚺 0 (∀¹ φ)) : Hierarchy 𝚺 0 φ := by
+/-- The body of a bounded universal is bounded. -/
+lemma _root_.FFL.FirstOrder.Semiformula.Bounded.of_all {φ : Semiformula L ξ (n + 1)}
+    (h : (∀¹ φ).Bounded) : φ.Bounded := by
   cases h with
-  | ball _ hφ => simp [Semiformula.imp_eq, hφ]
+  | ball _ hφ => exact Semiformula.Bounded.imp_iff.mpr ⟨.rel _ _, hφ⟩
 
-/-- A $\Delta_0$ universal is a bounded one. -/
-lemma _root_.FFL.FirstOrder.Arithmetic.Hierarchy.exists_of_bounded_all
-    {φ : Semiformula L ξ (n + 1)} (h : Hierarchy 𝚺 0 (∀¹ φ)) :
+/-- A bounded universal quantifies below a term. -/
+lemma _root_.FFL.FirstOrder.Semiformula.Bounded.exists_of_all
+    {φ : Semiformula L ξ (n + 1)} (h : (∀¹ φ).Bounded) :
     ∃ (t : Semiterm L ξ n) (ψ : Semiformula L ξ (n + 1)),
-      φ = “#0 < !!(Rew.bShift t)” 🡒 ψ ∧ Hierarchy 𝚺 0 ψ := by
+      φ = “#0 < !!(Rew.bShift t)” 🡒 ψ ∧ ψ.Bounded := by
   cases h with
   | ball pt hψ =>
     rename_i ψ _
@@ -88,20 +90,22 @@ lemma _root_.FFL.FirstOrder.Arithmetic.Hierarchy.exists_of_bounded_all
 lemma of_exs {φ : Semiformula L ξ (n + 1)} (h : StrictHierarchy 𝚺 1 (∃¹ φ)) :
     StrictHierarchy 𝚺 1 φ := by
   cases h with
-  | ofAlt h => exact .ofAlt (.zero (Hierarchy.of_bounded_exs (bounded_of_zero h)))
+  | ofAlt h => exact .ofAlt (.zero (Semiformula.Bounded.of_exs (bounded_of_zero h)).hierarchy)
   | exs h => exact h
 
 /-- A formula that is both strict $\Sigma_1$ and strict $\Pi_1$ is $\Delta_0$. -/
+@[grind →]
 lemma bounded_of_sigmaOne_of_piOne {φ : Semiformula L ξ n} (hσ : StrictHierarchy 𝚺 1 φ)
-    (hπ : StrictHierarchy 𝚷 1 φ) : Hierarchy 𝚺 0 φ := by
+    (hπ : StrictHierarchy 𝚷 1 φ) : φ.Bounded := by
   cases hσ with
   | ofAlt h => exact bounded_of_zero h
   | exs _ => cases hπ with | ofAlt h => exact bounded_of_zero h
 
 /-- A $\Delta_0$ formula is strict at every positive level. -/
-lemma of_bounded : {Γ : Polarity} → {s : ℕ} → {φ : Semiformula L ξ n} → Hierarchy 𝚺 0 φ →
+@[grind =>]
+lemma of_bounded : {Γ : Polarity} → {s : ℕ} → {φ : Semiformula L ξ n} → φ.Bounded →
     StrictHierarchy Γ (s + 1) φ
-  | _, 0, _, h => .ofAlt (.zero h)
+  | _, 0, _, h => .ofAlt (.zero h.hierarchy)
   | _, _ + 1, _, h => .ofAlt (of_bounded h)
 
 end StrictHierarchy

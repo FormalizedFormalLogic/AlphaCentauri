@@ -231,6 +231,22 @@ theorem sound (ε : ℕ → ℕ) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) → ∃ φ ∈ Γ,
     · exact ⟨ψ, by simp [hψ], h⟩
     · exact ⟨∃¹ φ, by simp, Semiterm.val ![] ε t, h⟩
 
+/-- Weakening by a whole sequent, along a traversal of it. -/
+abbrev weakeningMany (t : Δ.Traversal) (d : ⊢ᴸᴷᴵ[C]! Γ) : ⊢ᴸᴷᴵ[C]! Γ + Δ :=
+  Structural.weakenMany t d
+
+/-- The induction rule in the form that leaves the base case as a side formula of the conclusion.
+
+- [Bus98A, Section 1.4.2] -/
+def ind' (hξ : C ξ) (t) (tΓ : Γ.Traversal)
+    (d : ⊢ᴸᴷᴵ[C]! Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄) :
+    ⊢ᴸᴷᴵ[C]! Γ + ⦃∼(ξ/[‘0’]), ξ/[t]⦄ :=
+  ind (Γ := Γ + ⦃∼(ξ/[‘0’])⦄) ξ hξ t
+      (cast (weakeningMany tΓ (lem (ξ/[‘0’]))))
+      (cast (d.weakening (φ := ∼((shift ξ)/[‘0’])))
+        (by simp [Rewriting.shifts, Rew.shift_subst_eq]; abel))
+    |>.cast
+
 /-! ## Anchored derivations -/
 
 /-- A derivation is `Anchored D` when every one of its cut formulas belongs to `D`.
@@ -287,11 +303,11 @@ def Anchored (D : ArithmeticProposition → Prop) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) �
 @[simp] lemma anchored_structural_cast_iff {d : ⊢ᴸᴷᴵ[C]! Γ} {e : Γ = Δ} :
     Anchored D (Structural.cast (𝔇 := Derivation C) d e) ↔ Anchored D d := by rcases e; rfl
 
-@[simp] lemma anchored_weakenMany_iff {t : Δ.Traversal} {d : ⊢ᴸᴷᴵ[C]! Γ} :
-    Anchored D (Structural.weakenMany t d) ↔ Anchored D d := by
+@[simp] lemma anchored_weakeningMany_iff {t : Δ.Traversal} {d : ⊢ᴸᴷᴵ[C]! Γ} :
+    Anchored D (weakeningMany t d) ↔ Anchored D d := by
   induction t with
-  | zero => simp [Structural.weakenMany]
-  | succ φ t ih => simpa [Structural.weakenMany, Structural.weakening] using ih
+  | zero => simp [weakeningMany, Structural.weakenMany]
+  | succ φ t ih => simpa [weakeningMany, Structural.weakenMany, Structural.weakening] using ih
 
 /-- The excluded middle is derived without a cut, so its derivation is anchored in every class. -/
 @[simp] lemma anchored_lem : ∀ φ : ArithmeticProposition, Anchored D (lem (C := C) φ)
@@ -311,6 +327,9 @@ def Anchored (D : ArithmeticProposition → Prop) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) �
       anchored_lem (free (∼φ))
   termination_by φ => φ.complexity
 
+@[simp] lemma anchored_ind'_iff {hξ : C ξ} {tΓ : Γ.Traversal}
+    {d : ⊢ᴸᴷᴵ[C]! Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄} :
+    Anchored D (ind' hξ t tΓ d) ↔ Anchored D d := by simp [ind']
 
 lemma Anchored.mono (h : ∀ φ, D φ → D' φ) {Γ} : {d : ⊢ᴸᴷᴵ[C]! Γ} → Anchored D d → Anchored D' d
   | bounded _ _ _, _ => trivial
@@ -437,6 +456,22 @@ end rewrite
 
 end Derivation
 
+/-- The `D`-anchored derivations of `Γ` in `LKI[C]`. -/
+abbrev AnchoredDerivation (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition → Prop)
+    (Γ : LK.Sequent ℒₒᵣ) := {d : ⊢ᴸᴷᴵ[C]! Γ // Derivation.Anchored D d}
+
+@[inherit_doc] notation:45 "⊢ᴸᴷᴵ[" C ", " D "]! " Γ:45 => AnchoredDerivation C D Γ
+
+namespace AnchoredDerivation
+
+variable {C : ArithmeticSemiformula ℕ 1 → Prop} {D : ArithmeticProposition → Prop}
+  {Γ Δ : LK.Sequent ℒₒᵣ}
+
+def cast (d : ⊢ᴸᴷᴵ[C, D]! Γ) (e : Γ = Δ := by abel) : ⊢ᴸᴷᴵ[C, D]! Δ :=
+  ⟨d.val.cast e, by simpa using d.prop⟩
+
+end AnchoredDerivation
+
 namespace Derivable
 
 variable {C : ArithmeticSemiformula ℕ 1 → Prop} {Γ Δ : LK.Sequent ℒₒᵣ}
@@ -478,21 +513,13 @@ lemma cast (h : ⊢ᴸᴷᴵ[C] Δ) (e : Δ = Γ := by abel) : ⊢ᴸᴷᴵ[C] �
 
 lemma ofLK (h : Nonempty (⊢ᴸᴷ¹ Γ)) : ⊢ᴸᴷᴵ[C] Γ := Nonempty.map Derivation.ofLK h
 
-lemma weakeningMany (Δ : LK.Sequent ℒₒᵣ) (h : ⊢ᴸᴷᴵ[C] Γ) : ⊢ᴸᴷᴵ[C] Γ + Δ := by
-  induction Δ using Multiset.induction_on with
-  | empty => simpa using h
-  | cons δ Δ ih => exact (ih.weakening δ).cast (by simp [Multiset.add_atom_eq_cons])
+lemma weakeningMany (Δ) (h : ⊢ᴸᴷᴵ[C] Γ) : ⊢ᴸᴷᴵ[C] Γ + Δ :=
+  Nonempty.map (Derivation.weakeningMany default) h
 
-/-- The induction rule in the form that leaves the base case as a side formula of the conclusion.
-
-- [Bus98A, Section 1.4.2] -/
+@[inherit_doc Derivation.ind']
 lemma ind' (hξ : C ξ) (t) (h : ⊢ᴸᴷᴵ[C] Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄) :
     ⊢ᴸᴷᴵ[C] Γ + ⦃∼(ξ/[‘0’]), ξ/[t]⦄ :=
-  ind (Γ := Γ + ⦃∼(ξ/[‘0’])⦄) hξ t
-      ((weakeningMany Γ (lem (ξ/[‘0’]))).cast (by abel))
-      ((weakening (∼((shift ξ)/[‘0’])) h).cast
-        (by simp [Rewriting.shifts, Rew.shift_subst_eq]; abel))
-    |>.cast (by abel)
+  Nonempty.map (Derivation.ind' hξ t default) h
 
 /-! ### Soundness -/
 

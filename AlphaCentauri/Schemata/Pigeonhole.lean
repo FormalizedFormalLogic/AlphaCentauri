@@ -1,5 +1,6 @@
 module
 
+public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-!
@@ -47,27 +48,27 @@ def weakPigeonholeAxiom {ξ} (φ : Semiformula L ξ 2) : Formula L ξ :=
 
 /-- The pigeonhole scheme for the class `Γ` of `ArithmeticSemiformula ℕ 2`.
 - [HP98, I.2.22] -/
-def PigeonholeScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : ArithmeticTheory :=
-  { σ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ σ = .univCl (pigeonholeAxiom φ) }
+def PigeonholeScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : Set ArithmeticSentence :=
+  (fun φ ↦ .univCl (pigeonholeAxiom φ)) '' Γ
 
 /-- The weak pigeonhole scheme for the class `Γ` of `ArithmeticSemiformula ℕ 2`.
 - [PWW88, Theorem 1] -/
-def WeakPigeonholeScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : ArithmeticTheory :=
-  { σ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ σ = .univCl (weakPigeonholeAxiom φ) }
+def WeakPigeonholeScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : Set ArithmeticSentence :=
+  (fun φ ↦ .univCl (weakPigeonholeAxiom φ)) '' Γ
 
-/-- `𝗣𝗛𝗣 Γ n` is `𝗜𝚺₀` together with the pigeonhole scheme for `Hierarchy Γ n`.
+/-- `𝗣𝗛𝗣 Γ s` is `𝗜𝚺₀` together with the pigeonhole scheme for `StrictHierarchy Γ s`.
 - [HP98, I.2.22] -/
-abbrev PigeonholeOnHierarchy (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
-  𝗜𝚺₀ ∪ PigeonholeScheme (Arithmetic.Hierarchy Γ n)
+abbrev PigeonholeOnStrictHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+  𝗜𝚺₀ ∪ PigeonholeScheme (Arithmetic.StrictHierarchy Γ s)
 
-prefix:max "𝗣𝗛𝗣 " => PigeonholeOnHierarchy
+prefix:max "𝗣𝗛𝗣 " => PigeonholeOnStrictHierarchy
 
-/-- `𝗪𝗣𝗛𝗣 Γ n` is `𝗜𝚺₀` together with the weak pigeonhole scheme for `Hierarchy Γ n`.
+/-- `𝗪𝗣𝗛𝗣 Γ s` is `𝗜𝚺₀` together with the weak pigeonhole scheme for `StrictHierarchy Γ s`.
 - [PWW88, Theorem 1] -/
-abbrev WeakPigeonholeOnHierarchy (Γ : Polarity) (n : ℕ) : ArithmeticTheory :=
-  𝗜𝚺₀ ∪ WeakPigeonholeScheme (Arithmetic.Hierarchy Γ n)
+abbrev WeakPigeonholeOnStrictHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+  𝗜𝚺₀ ∪ WeakPigeonholeScheme (Arithmetic.StrictHierarchy Γ s)
 
-prefix:max "𝗪𝗣𝗛𝗣 " => WeakPigeonholeOnHierarchy
+prefix:max "𝗪𝗣𝗛𝗣 " => WeakPigeonholeOnStrictHierarchy
 
 variable {C C' : ArithmeticSemiformula ℕ 2 → Prop}
 
@@ -87,22 +88,22 @@ lemma mem_WeakPigeonholeScheme_of_mem {φ : ArithmeticSemiformula ℕ 2} (hφ : 
 
 variable {Γ : Polarity}
 
-lemma PigeonholeOnHierarchy_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗣𝗛𝗣 Γ s₁ ⊆ 𝗣𝗛𝗣 Γ s₂ :=
+lemma PigeonholeOnStrictHierarchy_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗣𝗛𝗣 Γ s₁ ⊆ 𝗣𝗛𝗣 Γ s₂ :=
   Set.union_subset_union_right _ (PigeonholeScheme_subset (fun H ↦ H.mono h))
 
-lemma PigeonholeOnHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗣𝗛𝗣 Γ s₁ ⪯ 𝗣𝗛𝗣 Γ s₂ :=
-  WeakerThan.ofSubset (PigeonholeOnHierarchy_subset_mono h)
+lemma PigeonholeOnStrictHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗣𝗛𝗣 Γ s₁ ⪯ 𝗣𝗛𝗣 Γ s₂ :=
+  WeakerThan.ofSubset (PigeonholeOnStrictHierarchy_subset_mono h)
 
-lemma WeakPigeonholeOnHierarchy_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗪𝗣𝗛𝗣 Γ s₁ ⊆ 𝗪𝗣𝗛𝗣 Γ s₂ :=
+lemma WeakPigeonholeOnStrictHierarchy_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗪𝗣𝗛𝗣 Γ s₁ ⊆ 𝗪𝗣𝗛𝗣 Γ s₂ :=
   Set.union_subset_union_right _ (WeakPigeonholeScheme_subset (fun H ↦ H.mono h))
 
-lemma WeakPigeonholeOnHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) :
+lemma WeakPigeonholeOnStrictHierarchy_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) :
     𝗪𝗣𝗛𝗣 Γ s₁ ⪯ 𝗪𝗣𝗛𝗣 Γ s₂ :=
-  WeakerThan.ofSubset (WeakPigeonholeOnHierarchy_subset_mono h)
+  WeakerThan.ofSubset (WeakPigeonholeOnStrictHierarchy_subset_mono h)
 
-instance (Γ : Polarity) (n : ℕ) : 𝗜𝚺₀ ⪯ 𝗣𝗛𝗣 Γ n := WeakerThan.ofSubset Set.subset_union_left
+instance (Γ : Polarity) (s : ℕ) : 𝗜𝚺₀ ⪯ 𝗣𝗛𝗣 Γ s := WeakerThan.ofSubset Set.subset_union_left
 
-instance (Γ : Polarity) (n : ℕ) : 𝗜𝚺₀ ⪯ 𝗪𝗣𝗛𝗣 Γ n := WeakerThan.ofSubset Set.subset_union_left
+instance (Γ : Polarity) (s : ℕ) : 𝗜𝚺₀ ⪯ 𝗪𝗣𝗛𝗣 Γ s := WeakerThan.ofSubset Set.subset_union_left
 
 end axioms
 
@@ -136,7 +137,7 @@ end models
 
 section standardModel
 
-instance models_PigeonholeOnHierarchy (Γ : Polarity) (n : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗛𝗣 Γ n := by
+instance models_PigeonholeOnStrictHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗛𝗣 Γ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
   rintro _ ⟨φ, -, rfl⟩
   apply models_pigeonholeAxiom_iff _ |>.mpr
@@ -148,7 +149,7 @@ instance models_PigeonholeOnHierarchy (Γ : Polarity) (n : ℕ) : ℕ↓[ℒₒ�
   rw [Finset.mem_range] at hx hx'
   exact ⟨x, hx, x', hx', g x, hlt x hx, hne, hφ x hx, heq ▸ hφ x' hx'⟩
 
-instance models_WeakPigeonholeOnHierarchy (Γ : Polarity) (n : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗪𝗣𝗛𝗣 Γ n := by
+instance models_WeakPigeonholeOnStrictHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗪𝗣𝗛𝗣 Γ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
   rintro _ ⟨φ, -, rfl⟩
   apply models_weakPigeonholeAxiom_iff _ |>.mpr
@@ -161,10 +162,10 @@ instance models_WeakPigeonholeOnHierarchy (Γ : Polarity) (n : ℕ) : ℕ↓[ℒ
   rw [Finset.mem_range] at hx hx'
   exact ⟨x, hx, x', hx', g x, hlt x hx, hne, hφ x hx, heq ▸ hφ x' hx'⟩
 
-instance (Γ : Polarity) (n : ℕ) : Consistent (𝗣𝗛𝗣 Γ n) := (𝗣𝗛𝗣 Γ n).consistent_of_sound (Eq ⊥) rfl
+instance (Γ : Polarity) (s : ℕ) : Consistent (𝗣𝗛𝗣 Γ s) := (𝗣𝗛𝗣 Γ s).consistent_of_sound (Eq ⊥) rfl
 
-instance (Γ : Polarity) (n : ℕ) : Consistent (𝗪𝗣𝗛𝗣 Γ n) :=
-  (𝗪𝗣𝗛𝗣 Γ n).consistent_of_sound (Eq ⊥) rfl
+instance (Γ : Polarity) (s : ℕ) : Consistent (𝗪𝗣𝗛𝗣 Γ s) :=
+  (𝗪𝗣𝗛𝗣 Γ s).consistent_of_sound (Eq ⊥) rfl
 
 end standardModel
 

@@ -437,59 +437,63 @@ private lemma bounded_of_strictOne {b : Polarity} {φ : ArithmeticProposition}
 formulas one reads a primitive recursive bound on the witnesses.
 
 - [Bus98A, Section 3.1.3] -/
-theorem exists_witnesses : {Γ : LK.Sequent ℒₒᵣ} → (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ) →
-    Derivation.Anchored (fun φ ↦ StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ) d →
-    (∀ φ ∈ Γ, StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ) →
-    ∃ h : List ℕ → ℕ → ℕ, Primrec₂ h ∧ Witnesses Γ h
-  | _, .axm hσ, _, _ => by
+theorem exists_witnesses {Γ : LK.Sequent ℒₒᵣ} (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
+    (hd : Derivation.Anchored (fun φ ↦ StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ) d)
+    (hΓ : ∀ φ ∈ Γ, StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ) :
+    ∃ h : List ℕ → ℕ → ℕ, Primrec₂ h ∧ Witnesses Γ h := by
+  induction d with
+  | axm hσ =>
     obtain ⟨c, hc⟩ := exists_witnesses_axm hσ
     exact ⟨_, Primrec₂.const c, hc⟩
-  | _, .verum, _, _ => ⟨_, Primrec₂.const 0, witnesses_verum⟩
-  | _, .identity R v, _, _ => ⟨_, Primrec₂.const 0, witnesses_identity R v⟩
-  | _, .weakening d, hd, hΓ => by
-    obtain ⟨h, hp, H⟩ := exists_witnesses d hd fun φ hφ ↦ hΓ φ (by simp [hφ])
+  | verum => exact ⟨_, Primrec₂.const 0, witnesses_verum⟩
+  | identity R v => exact ⟨_, Primrec₂.const 0, witnesses_identity R v⟩
+  | weakening d ih =>
+    obtain ⟨h, hp, H⟩ := ih hd fun φ hφ ↦ hΓ φ (by simp [hφ])
     exact ⟨h, hp, witnesses_weakening H⟩
-  | _, .contraction d, hd, hΓ => by
-    obtain ⟨h, hp, H⟩ := exists_witnesses d hd fun φ hφ ↦ by
+  | contraction d ih =>
+    obtain ⟨h, hp, H⟩ := ih hd fun φ hφ ↦ by
       rcases Multiset.mem_add.mp hφ with hφ | hφ
       · exact hΓ φ (by simp [hφ])
       · exact hΓ φ (by simp_all)
     exact ⟨h, hp, witnesses_contraction H⟩
-  | _, .or (φ := φ) (ψ := ψ) d, hd, hΓ => by
+  | or d ih =>
+    rename_i φ ψ
     have hd0 : (φ ⋎ ψ).Bounded := by
       rcases hΓ (φ ⋎ ψ) (by simp) with h | h <;>
         exact bounded_of_strictOne h (by simp) (by simp)
     obtain ⟨hφ, hψ⟩ := Hierarchy.or_iff.mp hd0
-    obtain ⟨h, hp, H⟩ := exists_witnesses d hd fun χ hχ ↦ by
+    obtain ⟨h, hp, H⟩ := ih hd fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
       · exact hΓ χ (by simp [hχ])
       · rcases show χ = φ ∨ χ = ψ by simpa using hχ with rfl | rfl
         · exact Or.inl (StrictHierarchy.of_bounded hφ)
         · exact Or.inl (StrictHierarchy.of_bounded hψ)
     exact ⟨h, hp, witnesses_or hd0 H⟩
-  | _, .and (φ := φ) (ψ := ψ) d₁ d₂, hd, hΓ => by
+  | and d₁ d₂ ih₁ ih₂ =>
+    rename_i φ ψ
     have hd0 : (φ ⋏ ψ).Bounded := by
       rcases hΓ (φ ⋏ ψ) (by simp) with h | h <;>
         exact bounded_of_strictOne h (by simp) (by simp)
     obtain ⟨hφ, hψ⟩ := Hierarchy.and_iff.mp hd0
-    obtain ⟨h₁, hp₁, H₁⟩ := exists_witnesses d₁ hd.1 fun χ hχ ↦ by
+    obtain ⟨h₁, hp₁, H₁⟩ := ih₁ hd.1 fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
       · exact hΓ χ (by simp [hχ])
       · rcases show χ = φ by simpa using hχ
         exact Or.inl (StrictHierarchy.of_bounded hφ)
-    obtain ⟨h₂, hp₂, H₂⟩ := exists_witnesses d₂ hd.2 fun χ hχ ↦ by
+    obtain ⟨h₂, hp₂, H₂⟩ := ih₂ hd.2 fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
       · exact hΓ χ (by simp [hχ])
       · rcases show χ = ψ by simpa using hχ
         exact Or.inl (StrictHierarchy.of_bounded hψ)
     exact ⟨_, Primrec.nat_max.comp hp₁ hp₂ |>.to₂, witnesses_and hd0 H₁ H₂⟩
-  | _, .cut (φ := χ) d₁ d₂, hd, hΓ => by
-    obtain ⟨h₁, hp₁, H₁⟩ := exists_witnesses d₁ hd.2.1 fun ρ hρ ↦ by
+  | cut d₁ d₂ ih₁ ih₂ =>
+    rename_i χ
+    obtain ⟨h₁, hp₁, H₁⟩ := ih₁ hd.2.1 fun ρ hρ ↦ by
       rcases Multiset.mem_add.mp hρ with hρ | hρ
       · exact hΓ ρ (by simp [hρ])
       · rcases show ρ = χ by simpa using hρ
         exact hd.1
-    obtain ⟨h₂, hp₂, H₂⟩ := exists_witnesses d₂ hd.2.2 fun ρ hρ ↦ by
+    obtain ⟨h₂, hp₂, H₂⟩ := ih₂ hd.2.2 fun ρ hρ ↦ by
       rcases Multiset.mem_add.mp hρ with hρ | hρ
       · exact hΓ ρ (by simp [hρ])
       · rcases show ρ = ∼χ by simpa using hρ
@@ -504,13 +508,14 @@ theorem exists_witnesses : {Γ : LK.Sequent ℒₒᵣ} → (d : ⊢ᴸᴷᴵ[Str
         (hp₂.comp Primrec.fst (Primrec.nat_max.comp Primrec.snd e₁)))
       (Primrec.nat_max.comp e₂
         (hp₁.comp Primrec.fst (Primrec.nat_max.comp Primrec.snd e₂))))
-  | _, .exs (φ := ξ) (t := t) d, hd, hΓ => by
+  | exs d ih =>
+    rename_i ξ t
     have hσ : StrictHierarchy 𝚺 1 (∃¹ ξ) := by
       rcases hΓ (∃¹ ξ) (by simp) with h | h
       · exact h
       · cases h with
         | ofAlt h => exact StrictHierarchy.of_bounded (StrictHierarchy.bounded_of_zero h)
-    obtain ⟨h, hp, H⟩ := exists_witnesses d hd fun χ hχ ↦ by
+    obtain ⟨h, hp, H⟩ := ih hd fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
       · exact hΓ χ (by simp [hχ])
       · rcases show χ = ξ/[t] by simpa using hχ
@@ -518,11 +523,12 @@ theorem exists_witnesses : {Γ : LK.Sequent ℒₒᵣ} → (d : ⊢ᴸᴷᴵ[Str
     refine ⟨_, ?_, witnesses_exs hσ H⟩
     exact Primrec.to₂ (Primrec.nat_max.comp hp
       (Primrec.succ.comp ((primrec_termVal t).comp Primrec.fst)))
-  | _, .all (φ := ξ) d, hd, hΓ => by
+  | all d ih =>
+    rename_i ξ
     by_cases hσ : StrictHierarchy 𝚺 1 (∀¹ ξ)
     · have hd0 : (∀¹ ξ).Bounded := by
         cases hσ with | ofAlt h => exact StrictHierarchy.bounded_of_zero h
-      obtain ⟨h, hp, H⟩ := exists_witnesses d hd fun χ hχ ↦ by
+      obtain ⟨h, hp, H⟩ := ih hd fun χ hχ ↦ by
         rcases Multiset.mem_add.mp hχ with hχ | hχ
         · obtain ⟨χ', hχ', rfl⟩ := Multiset.mem_map.mp hχ
           rcases hΓ χ' (by simp [hχ']) with h | h
@@ -538,7 +544,7 @@ theorem exists_witnesses : {Γ : LK.Sequent ℒₒᵣ} → (d : ⊢ᴸᴷᴵ[Str
           (Primrec.list_cons.comp Primrec.snd (Primrec.fst.comp (Primrec.fst (β := ℕ))))
           (Primrec.snd.comp (Primrec.fst (β := ℕ)))))
         ((primrec_termVal t).comp Primrec.fst))
-    · obtain ⟨h, hp, H⟩ := exists_witnesses d hd fun χ hχ ↦ by
+    · obtain ⟨h, hp, H⟩ := ih hd fun χ hχ ↦ by
         rcases Multiset.mem_add.mp hχ with hχ | hχ
         · obtain ⟨χ', hχ', rfl⟩ := Multiset.mem_map.mp hχ
           rcases hΓ χ' (by simp [hχ']) with h | h
@@ -558,8 +564,8 @@ theorem exists_witnesses : {Γ : LK.Sequent ℒₒᵣ} → (d : ⊢ᴸᴷᴵ[Str
           (Primrec.list_cons.comp Primrec.snd (Primrec.fst.comp (Primrec.fst (β := ℕ))))
           (Primrec.snd.comp (Primrec.fst (β := ℕ)))))
         Primrec.snd)
-  | _, .ind ξ hξ t d, hd, hΓ => by
-    obtain ⟨h, hp, H⟩ := exists_witnesses d hd fun χ hχ ↦ by
+  | ind ξ hξ t d ih =>
+    obtain ⟨h, hp, H⟩ := ih hd fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
       · obtain ⟨χ', hχ', rfl⟩ := Multiset.mem_map.mp hχ
         rcases hΓ χ' (by simp [hχ']) with h | h

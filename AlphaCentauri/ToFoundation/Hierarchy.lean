@@ -67,6 +67,23 @@ lemma _root_.FFL.FirstOrder.Arithmetic.Hierarchy.of_bounded_exs {φ : Semiformul
   cases h with
   | bexs _ hφ => exact Hierarchy.and (Hierarchy.rel _ _ _ _) hφ
 
+/-- The body of a $\Delta_0$ universal is $\Delta_0$. -/
+lemma _root_.FFL.FirstOrder.Arithmetic.Hierarchy.of_bounded_all {φ : Semiformula L ξ (n + 1)}
+    (h : Hierarchy 𝚺 0 (∀¹ φ)) : Hierarchy 𝚺 0 φ := by
+  cases h with
+  | ball _ hφ => simp [Semiformula.imp_eq, hφ]
+
+/-- A $\Delta_0$ universal is a bounded one. -/
+lemma _root_.FFL.FirstOrder.Arithmetic.Hierarchy.exists_of_bounded_all
+    {φ : Semiformula L ξ (n + 1)} (h : Hierarchy 𝚺 0 (∀¹ φ)) :
+    ∃ (t : Semiterm L ξ n) (ψ : Semiformula L ξ (n + 1)),
+      φ = “#0 < !!(Rew.bShift t)” 🡒 ψ ∧ Hierarchy 𝚺 0 ψ := by
+  cases h with
+  | ball pt hψ =>
+    rename_i ψ _
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp pt
+    exact ⟨t, ψ, rfl, hψ⟩
+
 /-- The body of a strict $\Sigma_1$ existential is strict $\Sigma_1$. -/
 lemma of_exs {φ : Semiformula L ξ (n + 1)} (h : StrictHierarchy 𝚺 1 (∃¹ φ)) :
     StrictHierarchy 𝚺 1 φ := by

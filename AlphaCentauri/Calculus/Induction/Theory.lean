@@ -25,35 +25,6 @@ variable {C : ArithmeticSemiformula ℕ 1 → Prop}
          {T : ArithmeticTheory} {σ : ArithmeticSentence}
          {Γ Δ : LK.Sequent ℒₒᵣ}
 
-namespace Derivable
-
-
-/-- Cutting a multiset of derivable formulas off a derivation. -/
-lemma cutAll (hΔ : ∀ δ ∈ Δ, ⊢ᴸᴷᴵ[C] ⦃δ⦄) (h : ⊢ᴸᴷᴵ[C] Γ + ∼Δ) : ⊢ᴸᴷᴵ[C] Γ := by
-  induction Δ using Multiset.induction_on with
-  | empty => simpa using h
-  | cons δ Δ ih =>
-    apply ih (fun d hd ↦ hΔ d (by simp [hd]));
-    have h₁ : ⊢ᴸᴷᴵ[C] 0 + ⦃δ⦄ := (hΔ δ (by simp)).cast (by simp)
-    have h₂ : ⊢ᴸᴷᴵ[C] (Γ + ∼Δ) + ⦃∼δ⦄ :=
-      h.cast (by simp [Multiset.tilde_def, Multiset.add_atom_eq_cons])
-    exact (h₁.cut h₂).cast (by simp)
-
-lemma allOne (h : ⊢ᴸᴷᴵ[C] ⦃free ξ⦄) : ⊢ᴸᴷᴵ[C] ⦃∀¹ ξ⦄ :=
-  Derivable.all (Γ := 0) (ξ := ξ) (h.cast (by simp [Rewriting.shifts])) |>.cast (by simp)
-
-lemma allClosure_fixitr (h : ⊢ᴸᴷᴵ[C] ⦃φ⦄) : ∀ m : ℕ, ⊢ᴸᴷᴵ[C] ⦃∀¹* (Rew.fixitr 0 m ▹ φ)⦄
-  | 0 => by simpa using h
-  | m + 1 => by
-    simp only [LawfulSyntacticRewriting.allClosure_fixitr]
-    apply allOne
-    simpa using allClosure_fixitr h m
-
-/-- The universal closure of a derivable formula is derivable. -/
-lemma univCl' (h : ⊢ᴸᴷᴵ[C] ⦃φ⦄) : ⊢ᴸᴷᴵ[C] ⦃φ.univCl'⦄ := allClosure_fixitr h _
-
-end Derivable
-
 /-! ## Completeness for the true strict `$\Pi_1$` sequents -/
 
 private lemma bounded_of_complexity_zero (h : φ.complexity = 0) : Semiformula.Bounded φ := by

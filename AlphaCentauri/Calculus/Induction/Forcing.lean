@@ -7,8 +7,8 @@ public import Foundation.FirstOrder.LK.Hauptsatz
 /-!
 # Forcing over anchored derivations
 
-Avigad's algebraic proof of cut elimination reads a sequent `Γ` as a forcing condition and the
-cut-free derivations of `∼Γ` as the proofs of `⊥` over it. Taking instead the `D`-anchored
+Avigad's algebraic proof of cut elimination reads a sequent `p` as a forcing condition and the
+cut-free derivations of `∼p` as the proofs of `⊥` over it. Taking instead the `D`-anchored
 derivations of `LKI[C]` as the base gives a forcing relation over which `LJ` is still sound, so
 that a classical proof from axioms that are forced yields an anchored derivation: free cuts are
 eliminated, and the cuts on the axioms remain.
@@ -53,53 +53,53 @@ end Derivation
 
 namespace Canonical
 
-variable {Γ Δ : LK.Sequent ℒₒᵣ} {φ ψ : Propositionᵢ ℒₒᵣ} {χ : ArithmeticProposition}
+variable {p q : LK.Sequent ℒₒᵣ} {φ ψ : Propositionᵢ ℒₒᵣ} {χ : ArithmeticProposition}
 
-/-- Forcing over the `D`-anchored derivations of `LKI[C]`: a condition is a sequent `Γ`, and the
-proofs of `⊥` over it are the anchored derivations of `∼Γ`.
+/-- Forcing over the `D`-anchored derivations of `LKI[C]`: a condition is a sequent `p`, and the
+proofs of `⊥` over it are the anchored derivations of `∼p`.
 
 - [Avi01, Section 3] -/
 def Forces (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition → Prop)
-    (Γ : LK.Sequent ℒₒᵣ) : Propositionᵢ ℒₒᵣ → Type
-  |        ⊥ => ⊢ᴸᴷᴵ[C, D]! ∼Γ
-  | .rel R v => ⊢ᴸᴷᴵ[C, D]! ∼Γ + ⦃Semiformula.rel R v⦄
-  |    φ ⋏ ψ => Forces C D Γ φ × Forces C D Γ ψ
-  |    φ ⋎ ψ => Forces C D Γ φ ⊕ Forces C D Γ ψ
-  |    φ 🡒 ψ => (Δ : LK.Sequent ℒₒᵣ) → Δ ≼ Γ → Forces C D Δ φ → Forces C D Δ ψ
-  |     ∀¹ φ => (t : ArithmeticTerm ℕ) → Forces C D Γ (φ/[t])
-  |     ∃¹ φ => (t : ArithmeticTerm ℕ) × Forces C D Γ (φ/[t])
+    (p : LK.Sequent ℒₒᵣ) : Propositionᵢ ℒₒᵣ → Type
+  |        ⊥ => ⊢ᴸᴷᴵ[C, D]! ∼p
+  | .rel R v => ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃Semiformula.rel R v⦄
+  |    φ ⋏ ψ => Forces C D p φ × Forces C D p ψ
+  |    φ ⋎ ψ => Forces C D p φ ⊕ Forces C D p ψ
+  |    φ 🡒 ψ => (q : LK.Sequent ℒₒᵣ) → q ≼ p → Forces C D q φ → Forces C D q ψ
+  |     ∀¹ φ => (t : ArithmeticTerm ℕ) → Forces C D p (φ/[t])
+  |     ∃¹ φ => (t : ArithmeticTerm ℕ) × Forces C D p (φ/[t])
   termination_by φ => φ.complexity
 
-@[inherit_doc] notation:45 Γ:45 " ⊩[" C ", " D "] " φ:45 => Forces C D Γ φ
+@[inherit_doc] notation:45 p:45 " ⊩[" C ", " D "] " φ:45 => Forces C D p φ
 
 namespace Forces
 
-def falsumEquiv : (Γ ⊩[C, D] ⊥) ≃ ⊢ᴸᴷᴵ[C, D]! ∼Γ := by
+def falsumEquiv : (p ⊩[C, D] ⊥) ≃ ⊢ᴸᴷᴵ[C, D]! ∼p := by
   unfold Forces; exact .refl _
 
 def relEquiv {k} {R : (ℒₒᵣ).Rel k} {v} :
-    (Γ ⊩[C, D] .rel R v) ≃ ⊢ᴸᴷᴵ[C, D]! ∼Γ + ⦃Semiformula.rel R v⦄ := by
+    (p ⊩[C, D] .rel R v) ≃ ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃Semiformula.rel R v⦄ := by
   unfold Forces; exact .refl _
 
-def andEquiv : (Γ ⊩[C, D] φ ⋏ ψ) ≃ (Γ ⊩[C, D] φ) × (Γ ⊩[C, D] ψ) := by
+def andEquiv : (p ⊩[C, D] φ ⋏ ψ) ≃ (p ⊩[C, D] φ) × (p ⊩[C, D] ψ) := by
   conv => lhs; unfold Forces; exact .refl _
 
-def orEquiv : (Γ ⊩[C, D] φ ⋎ ψ) ≃ ((Γ ⊩[C, D] φ) ⊕ (Γ ⊩[C, D] ψ)) := by
+def orEquiv : (p ⊩[C, D] φ ⋎ ψ) ≃ ((p ⊩[C, D] φ) ⊕ (p ⊩[C, D] ψ)) := by
   conv => lhs; unfold Forces; exact .refl _
 
 def implyEquiv :
-    (Γ ⊩[C, D] φ 🡒 ψ) ≃ ((Δ : LK.Sequent ℒₒᵣ) → Δ ≼ Γ → (Δ ⊩[C, D] φ) → Δ ⊩[C, D] ψ) := by
+    (p ⊩[C, D] φ 🡒 ψ) ≃ ((q : LK.Sequent ℒₒᵣ) → q ≼ p → (q ⊩[C, D] φ) → q ⊩[C, D] ψ) := by
   conv => lhs; unfold Forces; exact .refl _
 
-def allEquiv {φ} : (Γ ⊩[C, D] ∀¹ φ) ≃ ((t : ArithmeticTerm ℕ) → Forces C D Γ (φ/[t])) := by
+def allEquiv {φ} : (p ⊩[C, D] ∀¹ φ) ≃ ((t : ArithmeticTerm ℕ) → Forces C D p (φ/[t])) := by
   conv => lhs; unfold Forces; exact .refl _
 
-def exsEquiv {φ} : (Γ ⊩[C, D] ∃¹ φ) ≃ ((t : ArithmeticTerm ℕ) × Forces C D Γ (φ/[t])) := by
+def exsEquiv {φ} : (p ⊩[C, D] ∃¹ φ) ≃ ((t : ArithmeticTerm ℕ) × Forces C D p (φ/[t])) := by
   conv => lhs; unfold Forces; exact .refl _
 
-def cast (f : Γ ⊩[C, D] φ) (e : φ = ψ) : Γ ⊩[C, D] ψ := e ▸ f
+def cast (f : p ⊩[C, D] φ) (e : φ = ψ) : p ⊩[C, D] ψ := e ▸ f
 
-def monotone (s : Δ ≼ Γ) : {φ : Propositionᵢ ℒₒᵣ} → (Γ ⊩[C, D] φ) → Δ ⊩[C, D] φ
+def monotone (s : q ≼ p) : {φ : Propositionᵢ ℒₒᵣ} → (p ⊩[C, D] φ) → q ⊩[C, D] φ
   | ⊥, b =>
     let ⟨d, hd⟩ := b.falsumEquiv
     falsumEquiv.symm ⟨d.graft s.val, by simpa using hd⟩
@@ -109,63 +109,63 @@ def monotone (s : Δ ≼ Γ) : {φ : Propositionᵢ ℒₒᵣ} → (Γ ⊩[C, D]
   | _ ⋏ _, b => andEquiv.symm ⟨monotone s b.andEquiv.1, monotone s b.andEquiv.2⟩
   | _ ⋎ _, b =>
     orEquiv.symm <| b.orEquiv.rec (fun b ↦ .inl <| b.monotone s) (fun b ↦ .inr <| b.monotone s)
-  | _ 🡒 _, b => implyEquiv.symm fun Θ s' bφ ↦ b.implyEquiv Θ (s'.trans s) bφ
+  | _ 🡒 _, b => implyEquiv.symm fun r s' bφ ↦ b.implyEquiv r (s'.trans s) bφ
   | ∀¹ _, b => allEquiv.symm fun t ↦ (b.allEquiv t).monotone s
   | ∃¹ φ, b =>
-    let ⟨t, d⟩ : (t : ArithmeticTerm ℕ) × (Γ ⊩[C, D] φ/[t]) := b.exsEquiv
+    let ⟨t, d⟩ : (t : ArithmeticTerm ℕ) × (p ⊩[C, D] φ/[t]) := b.exsEquiv
     exsEquiv.symm ⟨t, d.monotone s⟩
   termination_by φ => φ.complexity
 
-def explosion {Γ} (b : Γ ⊩[C, D] ⊥) : (φ : Propositionᵢ ℒₒᵣ) → Γ ⊩[C, D] φ
+def explosion {p} (b : p ⊩[C, D] ⊥) : (φ : Propositionᵢ ℒₒᵣ) → p ⊩[C, D] φ
   | ⊥ => b
   | .rel R v =>
     let ⟨d, hd⟩ := b.falsumEquiv
     relEquiv.symm ⟨d.weakening, hd⟩
   | φ ⋏ ψ => andEquiv.symm ⟨b.explosion φ, b.explosion ψ⟩
   | φ ⋎ _ => orEquiv.symm <| .inl <| b.explosion φ
-  | _ 🡒 ψ => implyEquiv.symm fun Δ s _ ↦ (b.monotone s).explosion ψ
+  | _ 🡒 ψ => implyEquiv.symm fun q s _ ↦ (b.monotone s).explosion ψ
   | ∀¹ φ => allEquiv.symm fun t ↦ b.explosion (φ/[t])
   | ∃¹ φ => exsEquiv.symm ⟨default, b.explosion (φ/[default])⟩
   termination_by φ => φ.complexity
 
-def implyOf (tΓ : (∼Γ).Traversal)
-    (b : (Δ : LK.Sequent ℒₒᵣ) → (∼Δ).Traversal → (Δ ⊩[C, D] φ) → Γ ⊓ Δ ⊩[C, D] ψ) :
-    Γ ⊩[C, D] φ 🡒 ψ := implyEquiv.symm fun Δ s fφ ↦
-  let tΔ := s.val.traversal tΓ
-  (b Δ tΔ fφ).monotone (StrongerThan.leMinRightOfLe s tΔ)
+def implyOf (tp : (∼p).Traversal)
+    (b : (q : LK.Sequent ℒₒᵣ) → (∼q).Traversal → (q ⊩[C, D] φ) → p ⊓ q ⊩[C, D] ψ) :
+    p ⊩[C, D] φ 🡒 ψ := implyEquiv.symm fun q s fφ ↦
+  let tq := s.val.traversal tp
+  (b q tq fφ).monotone (StrongerThan.leMinRightOfLe s tq)
 
-def modusPonens (f : Γ ⊩[C, D] φ 🡒 ψ) (g : Γ ⊩[C, D] φ) : Γ ⊩[C, D] ψ :=
-  f.implyEquiv Γ (StrongerThan.refl Γ) g
+def modusPonens (f : p ⊩[C, D] φ 🡒 ψ) (g : p ⊩[C, D] φ) : p ⊩[C, D] ψ :=
+  f.implyEquiv p (StrongerThan.refl p) g
 
 end Forces
 
 /-- A condition forcing every formula of an `LJ` context. -/
 abbrev ContextForces (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition → Prop)
-    (Γ : LK.Sequent ℒₒᵣ) (Λ : LJ.Sequent ℒₒᵣ) := (φ : Propositionᵢ ℒₒᵣ) → φ ∈ Λ → Γ ⊩[C, D] φ
+    (p : LK.Sequent ℒₒᵣ) (Γ : LJ.Sequent ℒₒᵣ) := (φ : Propositionᵢ ℒₒᵣ) → φ ∈ Γ → p ⊩[C, D] φ
 
 namespace ContextForces
 
-variable {Λ Λ' : LJ.Sequent ℒₒᵣ}
+variable {Γ Δ : LJ.Sequent ℒₒᵣ}
 
-def ofSubset (b : ContextForces C D Γ Λ') (h : Λ ⊆ Λ') : ContextForces C D Γ Λ :=
+def ofSubset (b : ContextForces C D p Δ) (h : Γ ⊆ Δ) : ContextForces C D p Γ :=
   fun φ hφ ↦ b φ (h hφ)
 
-def monotone (b : ContextForces C D Γ Λ) (s : Δ ≼ Γ) : ContextForces C D Δ Λ :=
+def monotone (b : ContextForces C D p Γ) (s : q ≼ p) : ContextForces C D q Γ :=
   fun φ hφ ↦ (b φ hφ).monotone s
 
-def atom (b : Γ ⊩[C, D] φ) : ContextForces C D Γ ⦃φ⦄ :=
+def atom (b : p ⊩[C, D] φ) : ContextForces C D p ⦃φ⦄ :=
   fun _ hψ ↦ b.cast (Multiset.mem_singleton.mp hψ).symm
 
-def cons (b : ContextForces C D Γ Λ) (hφ : Γ ⊩[C, D] φ) : ContextForces C D Γ (Λ + ⦃φ⦄) :=
+def cons (b : ContextForces C D p Γ) (hφ : p ⊩[C, D] φ) : ContextForces C D p (Γ + ⦃φ⦄) :=
   fun ψ hψ ↦ if h : φ = ψ then hφ.cast h else b ψ (by simp_all [eq_comm])
 
 end ContextForces
 
 /-- A condition forcing the succedent of an `LJ` sequent. -/
 def HeadForces (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition → Prop)
-    (Γ : LK.Sequent ℒₒᵣ) : LJ.Head ℒₒᵣ → Type
-  | none => Γ ⊩[C, D] ⊥
-  | some φ => Γ ⊩[C, D] φ
+    (p : LK.Sequent ℒₒᵣ) : LJ.Head ℒₒᵣ → Type
+  | none => p ⊩[C, D] ⊥
+  | some φ => p ⊩[C, D] φ
 
 namespace Forces
 
@@ -176,59 +176,59 @@ private lemma rewrite_shift_eq (t : ArithmeticTerm ℕ) (φ : Propositionᵢ ℒ
 /-- Soundness of `LJ` for forcing over anchored derivations.
 
 - [Avi01, Section 3] -/
-def sound {Λ : LJ.Sequent ℒₒᵣ} {Ξ : LJ.Head ℒₒᵣ}
-    (d : Λ ⊢ᴸᴶ¹ Ξ) (Γ : LK.Sequent ℒₒᵣ) (tΓ : (∼Γ).Traversal)
-    (b : ContextForces C D Γ Λ) : HeadForces C D Γ Ξ :=
+def sound {Γ : LJ.Sequent ℒₒᵣ} {Ξ : LJ.Head ℒₒᵣ}
+    (d : Γ ⊢ᴸᴶ¹ Ξ) (p : LK.Sequent ℒₒᵣ) (tp : (∼p).Traversal)
+    (b : ContextForces C D p Γ) : HeadForces C D p Ξ :=
   match d with
   | .identity R v => b (.rel R v) (by simp)
   | .cut dφ d =>
-      let bΛ := b.ofSubset (by intro ψ hψ; simp_all)
-      let bΛ' := b.ofSubset (by intro ψ hψ; simp_all)
-      sound d Γ tΓ <| bΛ'.cons (sound dφ Γ tΓ bΛ)
-  | .contraction d => sound d Γ tΓ fun ψ hψ ↦ b ψ (by simp_all)
-  | .weakening d => sound d Γ tΓ (b.ofSubset Multiset.subset_add_left)
-  | .weakeningRight d => (sound d Γ tΓ b).explosion _
+      let bΓ := b.ofSubset (by intro ψ hψ; simp_all)
+      let bΔ := b.ofSubset (by intro ψ hψ; simp_all)
+      sound d p tp <| bΔ.cons (sound dφ p tp bΓ)
+  | .contraction d => sound d p tp fun ψ hψ ↦ b ψ (by simp_all)
+  | .weakening d => sound d p tp (b.ofSubset Multiset.subset_add_left)
+  | .weakeningRight d => (sound d p tp b).explosion _
   | .verum => implyEquiv.symm fun _ _ h ↦ h
   | .falsum => b ⊥ (by simp)
-  | .positiveImply d => implyEquiv.symm fun Δ s bφ ↦
-      sound d Δ (s.val.traversal tΓ) <| (b.monotone s).cons bφ
+  | .positiveImply d => implyEquiv.symm fun q s bφ ↦
+      sound d q (s.val.traversal tp) <| (b.monotone s).cons bφ
   | .negativeImply (φ := φ) (ψ := ψ) dφ d =>
-      let bΛ := b.ofSubset (by intro θ hθ; simp_all)
-      let bΛ' := b.ofSubset (by intro θ hθ; simp_all)
-      let bi : Γ ⊩[C, D] φ 🡒 ψ := b _ (by simp)
-      sound d Γ tΓ <| bΛ'.cons (bi.modusPonens <| sound dφ Γ tΓ bΛ)
-  | .positiveAnd dφ dψ => andEquiv.symm ⟨sound dφ Γ tΓ b, sound dψ Γ tΓ b⟩
-  | .negativeAnd (φ := φ) (ψ := ψ) (Γ := Λ) d =>
-      let bΛ : ContextForces C D Γ Λ := b.ofSubset Multiset.subset_add_left
+      let bΓ := b.ofSubset (by intro θ hθ; simp_all)
+      let bΔ := b.ofSubset (by intro θ hθ; simp_all)
+      let bi : p ⊩[C, D] φ 🡒 ψ := b _ (by simp)
+      sound d p tp <| bΔ.cons (bi.modusPonens <| sound dφ p tp bΓ)
+  | .positiveAnd dφ dψ => andEquiv.symm ⟨sound dφ p tp b, sound dψ p tp b⟩
+  | .negativeAnd (φ := φ) (ψ := ψ) (Γ := Γ) d =>
+      let bΓ : ContextForces C D p Γ := b.ofSubset Multiset.subset_add_left
       let ⟨bφ, bψ⟩ := (b (φ ⋏ ψ) (by simp)).andEquiv
-      sound d Γ tΓ <| ((bΛ.cons bφ).cons bψ).ofSubset
+      sound d p tp <| ((bΓ.cons bφ).cons bψ).ofSubset
         (by intro θ hθ; simpa [add_assoc] using hθ)
-  | .positiveOrLeft d => orEquiv.symm <| .inl <| sound d Γ tΓ b
-  | .positiveOrRight d => orEquiv.symm <| .inr <| sound d Γ tΓ b
+  | .positiveOrLeft d => orEquiv.symm <| .inl <| sound d p tp b
+  | .positiveOrRight d => orEquiv.symm <| .inr <| sound d p tp b
   | .negativeOr (φ := φ) (ψ := ψ) dφ dψ =>
-      let bΛ := b.ofSubset (by intro θ hθ; simp_all)
+      let bΓ := b.ofSubset (by intro θ hθ; simp_all)
       (b (φ ⋎ ψ) (by simp)).orEquiv.rec
-        (fun bφ ↦ sound dφ Γ tΓ <| bΛ.cons bφ)
-        (fun bψ ↦ sound dψ Γ tΓ <| bΛ.cons bψ)
-  | .positiveForall (Γ := Λ) (φ := φ) d => allEquiv.symm fun t ↦
+        (fun bφ ↦ sound dφ p tp <| bΓ.cons bφ)
+        (fun bψ ↦ sound dψ p tp <| bΓ.cons bψ)
+  | .positiveForall (Γ := Γ) (φ := φ) d => allEquiv.symm fun t ↦
       let f : ℕ → ArithmeticTerm ℕ := t :>ₙ fun x ↦ &x
-      let dt : Λ ⊢ᴸᴶ¹ some (φ/[t]) := (d.rewrite f).cast
+      let dt : Γ ⊢ᴸᴶ¹ some (φ/[t]) := (d.rewrite f).cast
         (by simp [f, Rewriting.shifts, Multiset.map_map, rewrite_shift_eq])
         (by simp [f, LJ.Head.rewrite, rewrite_free_eq_subst])
-      sound dt Γ tΓ b
+      sound dt p tp b
   | .negativeForall (φ := φ) d =>
-      let bΛ := b.ofSubset (by intro θ hθ; simp_all)
+      let bΓ := b.ofSubset (by intro θ hθ; simp_all)
       let bAll := (b (∀¹ φ) (by simp)).allEquiv _
-      sound d Γ tΓ <| bΛ.cons bAll
-  | .positiveExists (t := t) d => exsEquiv.symm ⟨t, sound d Γ tΓ b⟩
-  | .negativeExists (Γ := Λ) (Ξ := Ξ) (φ := φ) d =>
+      sound d p tp <| bΓ.cons bAll
+  | .positiveExists (t := t) d => exsEquiv.symm ⟨t, sound d p tp b⟩
+  | .negativeExists (Γ := Γ) (Ξ := Ξ) (φ := φ) d =>
       let ⟨t, bt⟩ := (b (∃¹ φ) (by simp)).exsEquiv
       let f : ℕ → ArithmeticTerm ℕ := t :>ₙ fun x ↦ &x
-      let dt : Λ + ⦃φ/[t]⦄ ⊢ᴸᴶ¹ Ξ := (d.rewrite f).cast
+      let dt : Γ + ⦃φ/[t]⦄ ⊢ᴸᴶ¹ Ξ := (d.rewrite f).cast
         (by simp [f, Rewriting.shifts, Multiset.map_map, rewrite_shift_eq, rewrite_free_eq_subst])
         (by cases Ξ <;> simp [f, LJ.Head.shift, LJ.Head.rewrite, rewrite_shift_eq])
-      let bΛ := b.ofSubset (by intro θ hθ; simp_all)
-      sound dt Γ tΓ <| bΛ.cons bt
+      let bΓ := b.ofSubset (by intro θ hθ; simp_all)
+      sound dt p tp <| bΓ.cons bt
   termination_by d.height
   decreasing_by
     all_goals simp [LJ.Derivation.height]
@@ -249,13 +249,13 @@ set_option backward.isDefEq.respectTransparency false in
 protected def refl : (φ : ArithmeticProposition) → ⦃φ⦄ ⊩[C, D] φᴺ
   |         ⊤ => implyEquiv.symm fun _ _ dφ ↦ dφ
   |         ⊥ => falsumEquiv.symm ⟨Derivation.verum, by simp⟩
-  |  .rel R v => implyOf (.atom _) fun Δ tΔ dΔ ↦
+  |  .rel R v => implyOf (.atom _) fun q tq dΔ ↦
     let tr : (∼(⦃Semiformula.rel R v⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
-    let b : ⦃Semiformula.rel R v⦄ ⊓ Δ ⊩[C, D] .rel R v :=
+    let b : ⦃Semiformula.rel R v⦄ ⊓ q ⊩[C, D] .rel R v :=
       (relEquiv.symm ⟨Derivation.cast <| Derivation.identity R v, by simp⟩).monotone
-        (StrongerThan.minLeLeft _ _ tΔ)
-    dΔ.implyEquiv (⦃Semiformula.rel R v⦄ ⊓ Δ) (StrongerThan.minLeRight _ _ tr) b
-  | .nrel R v => implyOf (.atom _) fun Δ _ dΔ ↦
+        (StrongerThan.minLeLeft _ _ tq)
+    dΔ.implyEquiv (⦃Semiformula.rel R v⦄ ⊓ q) (StrongerThan.minLeRight _ _ tr) b
+  | .nrel R v => implyOf (.atom _) fun q _ dΔ ↦
     let ⟨d, hd⟩ := dΔ.relEquiv
     falsumEquiv.symm ⟨Derivation.cast d (by simp [inf_def]; abel), by simpa using hd⟩
   |     φ ⋏ ψ =>
@@ -266,141 +266,141 @@ protected def refl : (φ : ArithmeticProposition) → ⦃φ⦄ ⊩[C, D] φᴺ
   |     φ ⋎ ψ =>
     let ihφ : ⦃φ⦄ ⊩[C, D] φᴺ := Forces.refl φ
     let ihψ : ⦃ψ⦄ ⊩[C, D] ψᴺ := Forces.refl ψ
-    implyOf (.atom _) fun Δ tΔ dΔ ↦
-      let ⟨dφ, dψ⟩ : (Δ ⊩[C, D] ∼φᴺ) × (Δ ⊩[C, D] ∼ψᴺ) := dΔ.andEquiv
+    implyOf (.atom _) fun q tq dΔ ↦
+      let ⟨dφ, dψ⟩ : (q ⊩[C, D] ∼φᴺ) × (q ⊩[C, D] ∼ψᴺ) := dΔ.andEquiv
       let tφ : (∼(⦃φ⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
       let tψ : (∼(⦃ψ⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
-      let bφ : ⦃φ⦄ ⊓ Δ ⊩[C, D] ⊥ :=
-        dφ.implyEquiv (⦃φ⦄ ⊓ Δ) (.minLeRight _ _ tφ) (ihφ.monotone (.minLeLeft _ _ tΔ))
-      let bψ : ⦃ψ⦄ ⊓ Δ ⊩[C, D] ⊥ :=
-        dψ.implyEquiv (⦃ψ⦄ ⊓ Δ) (.minLeRight _ _ tψ) (ihψ.monotone (.minLeLeft _ _ tΔ))
+      let bφ : ⦃φ⦄ ⊓ q ⊩[C, D] ⊥ :=
+        dφ.implyEquiv (⦃φ⦄ ⊓ q) (.minLeRight _ _ tφ) (ihφ.monotone (.minLeLeft _ _ tq))
+      let bψ : ⦃ψ⦄ ⊓ q ⊩[C, D] ⊥ :=
+        dψ.implyEquiv (⦃ψ⦄ ⊓ q) (.minLeRight _ _ tψ) (ihψ.monotone (.minLeLeft _ _ tq))
       let ⟨bbφ, hbbφ⟩ := bφ.falsumEquiv
       let ⟨bbψ, hbbψ⟩ := bψ.falsumEquiv
-      let bbφ' : ⊢ᴸᴷᴵ[C]! ∼Δ + ⦃∼φ⦄ := Derivation.cast bbφ (by simp [inf_def]; abel)
-      let bbψ' : ⊢ᴸᴷᴵ[C]! ∼Δ + ⦃∼ψ⦄ := Derivation.cast bbψ (by simp [inf_def]; abel)
-      let band : ⊢ᴸᴷᴵ[C]! ∼Δ + ⦃∼φ ⋏ ∼ψ⦄ := Derivation.and bbφ' bbψ'
+      let bbφ' : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼φ⦄ := Derivation.cast bbφ (by simp [inf_def]; abel)
+      let bbψ' : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼ψ⦄ := Derivation.cast bbψ (by simp [inf_def]; abel)
+      let band : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼φ ⋏ ∼ψ⦄ := Derivation.and bbφ' bbψ'
       falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]; abel), by
         simpa [band, bbφ', bbψ'] using And.intro hbbφ hbbψ⟩
   |      ∀¹ φ => allEquiv.symm fun t ↦
     let b : ⦃φ/[t]⦄ ⊩[C, D] φᴺ/[t] := by
       simpa [Semiformula.rew_doubleNegation] using Forces.refl (φ/[t])
     by simpa using b.monotone (StrongerThan.all (p := 0) φ t)
-  |      ∃¹ φ => implyOf (.atom _) fun Δ tΔ f ↦
-    let x := LK.Sequent.newVar (∼Δ + ⦃∀¹ ∼φ⦄)
+  |      ∃¹ φ => implyOf (.atom _) fun q tq f ↦
+    let x := LK.Sequent.newVar (∼q + ⦃∀¹ ∼φ⦄)
     let ih : ⦃φ/[&x]⦄ ⊩[C, D] φᴺ/[&x] :=
       cast (Forces.refl (φ/[&x])) (by simp [Semiformula.subst_doubleNegation])
-    let b : ⦃φ/[&x]⦄ ⊓ Δ ⊩[C, D] ⊥ :=
+    let b : ⦃φ/[&x]⦄ ⊓ q ⊩[C, D] ⊥ :=
       let tφ : (∼(⦃φ/[&x]⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
-      (f.allEquiv &x).implyEquiv (⦃φ/[&x]⦄ ⊓ Δ)
-        (StrongerThan.minLeRight _ _ tφ) (ih.monotone (StrongerThan.minLeLeft _ _ tΔ))
+      (f.allEquiv &x).implyEquiv (⦃φ/[&x]⦄ ⊓ q)
+        (StrongerThan.minLeRight _ _ tφ) (ih.monotone (StrongerThan.minLeLeft _ _ tq))
     let ⟨b, hb⟩ := b.falsumEquiv
     let hp : ¬(∼φ).FVar? x := by
       have : ¬(∀¹ ∼φ).FVar? x := LK.Sequent.not_fvar?_newVar (by simp)
       simpa using this
-    let hq : ∀ ψ ∈ ∼Δ, ¬ψ.FVar? x := fun ψ hψ ↦ LK.Sequent.not_fvar?_newVar (by simp [hψ])
-    let b' : ⊢ᴸᴷᴵ[C]! ∼Δ + ⦃(∼φ)/[&x]⦄ := Derivation.cast b (by simp [inf_def]; abel)
-    let ba : ⊢ᴸᴷᴵ[C]! ∼Δ + ⦃∀¹ ∼φ⦄ := Derivation.generalizeByNewVar hp hq b'
+    let hq : ∀ ψ ∈ ∼q, ¬ψ.FVar? x := fun ψ hψ ↦ LK.Sequent.not_fvar?_newVar (by simp [hψ])
+    let b' : ⊢ᴸᴷᴵ[C]! ∼q + ⦃(∼φ)/[&x]⦄ := Derivation.cast b (by simp [inf_def]; abel)
+    let ba : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∀¹ ∼φ⦄ := Derivation.generalizeByNewVar hp hq b'
     falsumEquiv.symm ⟨Derivation.cast ba (by simp [inf_def]; abel), by
       simpa [ba, b'] using Derivation.anchored_generalizeByNewVar (by simpa [b'] using hb)⟩
   termination_by φ => φ.complexity
 
 /-! ## Forcing and anchored derivations -/
 
-def castCondition {Γ Δ : LK.Sequent ℒₒᵣ} (f : Γ ⊩[C, D] φ) (e : Γ = Δ) : Δ ⊩[C, D] φ := e ▸ f
+def castCondition {p q : LK.Sequent ℒₒᵣ} (f : p ⊩[C, D] φ) (e : p = q) : q ⊩[C, D] φ := e ▸ f
 
 /-- The cut that `cutForces` performs: a cut against a formula of `D`, followed by the
 contraction that merges the two copies of the condition. -/
-def cutAnchored {Γ Θ : LK.Sequent ℒₒᵣ} (hχ : D χ)
-    (tΓ : (∼Γ).Traversal) (d : ⊢ᴸᴷᴵ[C, D]! ∼Γ + ⦃χ⦄)
-    (e : ⊢ᴸᴷᴵ[C, D]! ∼Γ + ⦃∼χ⦄ + Θ) : ⊢ᴸᴷᴵ[C, D]! ∼Γ + Θ :=
-  let dc : ⊢ᴸᴷᴵ[C]! Θ + (∼Γ + ∼Γ) :=
-    Derivation.cast (Derivation.cut (Γ := ∼Γ) (Δ := ∼Γ + Θ) (φ := χ) d.val (e.val.cast (by abel)))
-  let s : (∼Γ + ∼Γ : LK.Sequent ℒₒᵣ) ⟶⁺ ∼Γ :=
-    (StrongerThan.leMinRightOfLe (StrongerThan.refl Γ) tΓ).val.cast (by simp [inf_def]) rfl
-  ⟨Derivation.cast (dc.graft (s.addLeft Θ)), by simp [dc, hχ, d.prop, e.prop]⟩
+def cutAnchored {p r : LK.Sequent ℒₒᵣ} (hχ : D χ)
+    (tp : (∼p).Traversal) (d : ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃χ⦄)
+    (e : ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃∼χ⦄ + r) : ⊢ᴸᴷᴵ[C, D]! ∼p + r :=
+  let dc : ⊢ᴸᴷᴵ[C]! r + (∼p + ∼p) :=
+    Derivation.cast (Derivation.cut (Γ := ∼p) (Δ := ∼p + r) (φ := χ) d.val (e.val.cast (by abel)))
+  let s : (∼p + ∼p : LK.Sequent ℒₒᵣ) ⟶⁺ ∼p :=
+    (StrongerThan.leMinRightOfLe (StrongerThan.refl p) tp).val.cast (by simp [inf_def]) rfl
+  ⟨Derivation.cast (dc.graft (s.addLeft r)), by simp [dc, hχ, d.prop, e.prop]⟩
 
 /-- A cut against a formula of `D` is absorbed into the forcing relation.
 
 - [Bus98A, Section 1.4.2] -/
 def cutForces (hχ : D χ) :
-    {Γ : LK.Sequent ℒₒᵣ} → (∼Γ).Traversal → ⊢ᴸᴷᴵ[C, D]! ∼Γ + ⦃χ⦄ →
-      {ψ : Propositionᵢ ℒₒᵣ} → (Γ + ⦃χ⦄ ⊩[C, D] ψ) → Γ ⊩[C, D] ψ
-  | _, tΓ, d, ⊥, b =>
+    {p : LK.Sequent ℒₒᵣ} → (∼p).Traversal → ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃χ⦄ →
+      {ψ : Propositionᵢ ℒₒᵣ} → (p + ⦃χ⦄ ⊩[C, D] ψ) → p ⊩[C, D] ψ
+  | _, tp, d, ⊥, b =>
     falsumEquiv.symm <|
-      cutAnchored (Θ := 0) hχ tΓ d (b.falsumEquiv.cast (by simp)) |>.cast (by simp)
-  | _, tΓ, d, .rel R v, b =>
-    relEquiv.symm <| cutAnchored (Θ := ⦃Semiformula.rel R v⦄) hχ tΓ d (b.relEquiv.cast (by simp))
-  | _, tΓ, d, _ ⋏ _, b =>
-    andEquiv.symm ⟨cutForces hχ tΓ d b.andEquiv.1, cutForces hχ tΓ d b.andEquiv.2⟩
-  | _, tΓ, d, _ ⋎ _, b =>
+      cutAnchored (r := 0) hχ tp d (b.falsumEquiv.cast (by simp)) |>.cast (by simp)
+  | _, tp, d, .rel R v, b =>
+    relEquiv.symm <| cutAnchored (r := ⦃Semiformula.rel R v⦄) hχ tp d (b.relEquiv.cast (by simp))
+  | _, tp, d, _ ⋏ _, b =>
+    andEquiv.symm ⟨cutForces hχ tp d b.andEquiv.1, cutForces hχ tp d b.andEquiv.2⟩
+  | _, tp, d, _ ⋎ _, b =>
     orEquiv.symm <| b.orEquiv.rec
-      (fun b ↦ .inl <| cutForces hχ tΓ d b) (fun b ↦ .inr <| cutForces hχ tΓ d b)
-  | Γ, tΓ, d, _ 🡒 _, b => implyEquiv.symm fun Δ sΔ bφ ↦
-    let sχ : Δ + ⦃χ⦄ ≼ Γ + ⦃χ⦄ := ⟨(sΔ.val.cons (∼χ)).cast (by simp) (by simp)⟩
-    let s₀ : Δ + ⦃χ⦄ ≼ Δ := ⟨(LK.Derivation.Positive.weakening (φ := ∼χ) .refl).cast rfl (by simp)⟩
-    cutForces hχ (sΔ.val.traversal tΓ) ⟨d.val.graft (sΔ.val.cons χ), by simp [d.prop]⟩
-      (b.implyEquiv (Δ + ⦃χ⦄) sχ (bφ.monotone s₀))
-  | _, tΓ, d, ∀¹ _, b => allEquiv.symm fun t ↦ cutForces hχ tΓ d (b.allEquiv t)
-  | _, tΓ, d, ∃¹ _, b =>
+      (fun b ↦ .inl <| cutForces hχ tp d b) (fun b ↦ .inr <| cutForces hχ tp d b)
+  | p, tp, d, _ 🡒 _, b => implyEquiv.symm fun q sq bφ ↦
+    let sχ : q + ⦃χ⦄ ≼ p + ⦃χ⦄ := ⟨(sq.val.cons (∼χ)).cast (by simp) (by simp)⟩
+    let s₀ : q + ⦃χ⦄ ≼ q := ⟨(LK.Derivation.Positive.weakening (φ := ∼χ) .refl).cast rfl (by simp)⟩
+    cutForces hχ (sq.val.traversal tp) ⟨d.val.graft (sq.val.cons χ), by simp [d.prop]⟩
+      (b.implyEquiv (q + ⦃χ⦄) sχ (bφ.monotone s₀))
+  | _, tp, d, ∀¹ _, b => allEquiv.symm fun t ↦ cutForces hχ tp d (b.allEquiv t)
+  | _, tp, d, ∃¹ _, b =>
     let ⟨t, f⟩ := b.exsEquiv
-    exsEquiv.symm ⟨t, cutForces hχ tΓ d f⟩
+    exsEquiv.symm ⟨t, cutForces hχ tp d f⟩
   termination_by _ _ _ ψ _ => ψ.complexity
 
-/-- A formula of `D` with an anchored derivation of it over `∼Γ` is forced by `Γ`: the converse
+/-- A formula of `D` with an anchored derivation of it over `∼p` is forced by `p`: the converse
 of `derivableOfForced`.
 
 - [Bus98A, Section 1.4.2] -/
-def forcesOfAnchored (hχ : D χ) (tΓ : (∼Γ).Traversal) (d : ⊢ᴸᴷᴵ[C, D]! ∼Γ + ⦃χ⦄) :
-    Γ ⊩[C, D] χᴺ :=
-  cutForces hχ tΓ d <|
-    ((Forces.refl χ).monotone (StrongerThan.minLeRight Γ ⦃χ⦄ tΓ)).castCondition (inf_def Γ ⦃χ⦄)
+def forcesOfAnchored (hχ : D χ) (tp : (∼p).Traversal) (d : ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃χ⦄) :
+    p ⊩[C, D] χᴺ :=
+  cutForces hχ tp d <|
+    ((Forces.refl χ).monotone (StrongerThan.minLeRight p ⦃χ⦄ tp)).castCondition (inf_def p ⦃χ⦄)
 
 /-- A condition forcing the translation of `χ` yields an anchored derivation of `χ` over the
 negated condition.
 
 - [Bus98A, Section 1.4.2] -/
-def derivableOfForced (tΓ : (∼Γ).Traversal) (f : Γ ⊩[C, D] χᴺ) : ⊢ᴸᴷᴵ[C, D]! ∼Γ + ⦃χ⦄ :=
+def derivableOfForced (tp : (∼p).Traversal) (f : p ⊩[C, D] χᴺ) : ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃χ⦄ :=
   let tχ : (∼(⦃∼χ⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
-  let b : Γ ⊓ ⦃∼χ⦄ ⊩[C, D] ∼χᴺ :=
-    sound (LJ.Derivation.negDoubleNegation χ).2 (Γ ⊓ ⦃∼χ⦄) ((tΓ.add tχ).cast (by simp [inf_def]))
-      fun ψ hψ ↦ ((Forces.refl (∼χ)).monotone (StrongerThan.minLeRight Γ ⦃∼χ⦄ tΓ)).cast
+  let b : p ⊓ ⦃∼χ⦄ ⊩[C, D] ∼χᴺ :=
+    sound (LJ.Derivation.negDoubleNegation χ).2 (p ⊓ ⦃∼χ⦄) ((tp.add tχ).cast (by simp [inf_def]))
+      fun ψ hψ ↦ ((Forces.refl (∼χ)).monotone (StrongerThan.minLeRight p ⦃∼χ⦄ tp)).cast
         (Multiset.mem_singleton.mp hψ).symm
-  (b.modusPonens (f.monotone (StrongerThan.minLeLeft Γ ⦃∼χ⦄ tχ))).falsumEquiv.cast
+  (b.modusPonens (f.monotone (StrongerThan.minLeLeft p ⦃∼χ⦄ tχ))).falsumEquiv.cast
     (by simp [inf_def])
 
 /-! ## The translated connectives -/
 
 /-- Transporting a forced formula along an `LJ` derivation from it. -/
-def ofLJ (tΓ : (∼Γ).Traversal) (d : ⦃φ⦄ ⊢ᴸᴶ¹ ψ) (b : Γ ⊩[C, D] φ) : Γ ⊩[C, D] ψ :=
-  sound d Γ tΓ (.atom b)
+def ofLJ (tp : (∼p).Traversal) (d : ⦃φ⦄ ⊢ᴸᴶ¹ ψ) (b : p ⊩[C, D] φ) : p ⊩[C, D] ψ :=
+  sound d p tp (.atom b)
 
 variable {χ' : ArithmeticProposition}
 
 /-- Forcing the translation of an implication: it is enough to turn a forced antecedent into a
 forced consequent at every stronger condition. -/
-def forcesImply (tΓ : (∼Γ).Traversal)
-    (b : (Δ : LK.Sequent ℒₒᵣ) → (s : Δ ≼ Γ) → (Δ ⊩[C, D] χᴺ) → Δ ⊩[C, D] χ'ᴺ) :
-    Γ ⊩[C, D] (χ 🡒 χ')ᴺ :=
-  Forces.cast (implyEquiv.symm fun Δ s c ↦
-    let tΔ := s.val.traversal tΓ
+def forcesImply (tp : (∼p).Traversal)
+    (b : (q : LK.Sequent ℒₒᵣ) → (s : q ≼ p) → (q ⊩[C, D] χᴺ) → q ⊩[C, D] χ'ᴺ) :
+    p ⊩[C, D] (χ 🡒 χ')ᴺ :=
+  Forces.cast (implyEquiv.symm fun q s c ↦
+    let tq := s.val.traversal tp
     let ⟨c₁, c₂⟩ := c.andEquiv
-    c₂.modusPonens <| b Δ s <| ofLJ tΔ (LJ.Derivation.negDoubleNegation' χ).1 c₁)
+    c₂.modusPonens <| b q s <| ofLJ tq (LJ.Derivation.negDoubleNegation' χ).1 c₁)
     (Semiformula.doubleNegation_imply χ χ').symm
 
 /-- Using the translation of an implication. -/
-def modusPonensImply (tΓ : (∼Γ).Traversal) (f : Γ ⊩[C, D] (χ 🡒 χ')ᴺ) (b : Γ ⊩[C, D] χᴺ) :
-    Γ ⊩[C, D] χ'ᴺ :=
-  let f : Γ ⊩[C, D] ∼(∼(∼χ)ᴺ ⋏ ∼χ'ᴺ) := f.cast (Semiformula.doubleNegation_imply χ χ')
-  let g : Γ ⊩[C, D] ∼(∼χ'ᴺ) := implyEquiv.symm fun Δ s c ↦
+def modusPonensImply (tp : (∼p).Traversal) (f : p ⊩[C, D] (χ 🡒 χ')ᴺ) (b : p ⊩[C, D] χᴺ) :
+    p ⊩[C, D] χ'ᴺ :=
+  let f : p ⊩[C, D] ∼(∼(∼χ)ᴺ ⋏ ∼χ'ᴺ) := f.cast (Semiformula.doubleNegation_imply χ χ')
+  let g : p ⊩[C, D] ∼(∼χ'ᴺ) := implyEquiv.symm fun q s c ↦
     (f.monotone s).modusPonens <| andEquiv.symm
-      ⟨ofLJ (s.val.traversal tΓ) (LJ.Derivation.negDoubleNegation' χ).2 (b.monotone s), c⟩
-  ofLJ tΓ (LJ.Derivation.dneOfNegative (by simp)) g
+      ⟨ofLJ (s.val.traversal tp) (LJ.Derivation.negDoubleNegation' χ).2 (b.monotone s), c⟩
+  ofLJ tp (LJ.Derivation.dneOfNegative (by simp)) g
 
 /-! ## Universal closure -/
 
 /-- A condition forcing every substitution instance of `ψ` forces its universal closure. -/
 def forcesAllClosure : {n : ℕ} → (ψ : ArithmeticSemiformula ℕ n) →
-    ((v : Fin n → ArithmeticTerm ℕ) → Γ ⊩[C, D] (ψ⇜v)ᴺ) → Γ ⊩[C, D] (∀¹* ψ)ᴺ
+    ((v : Fin n → ArithmeticTerm ℕ) → p ⊩[C, D] (ψ⇜v)ᴺ) → p ⊩[C, D] (∀¹* ψ)ᴺ
   | 0, ψ, h => (h ![]).cast (by simp)
   | _ + 1, ψ, h => by
     refine forcesAllClosure (∀¹ ψ) fun v ↦ ?_
@@ -409,8 +409,8 @@ def forcesAllClosure : {n : ℕ} → (ψ : ArithmeticSemiformula ℕ n) →
       rw [Semiformula.subst_doubleNegation, Rew.subst_q_app])
 
 /-- A condition forcing every rewriting of `χ` forces its universal closure. -/
-def forcesUnivCl (h : (f : ℕ → ArithmeticTerm ℕ) → Γ ⊩[C, D] (Rew.rewrite f ▹ χ)ᴺ) :
-    Γ ⊩[C, D] (χ.univCl')ᴺ :=
+def forcesUnivCl (h : (f : ℕ → ArithmeticTerm ℕ) → p ⊩[C, D] (Rew.rewrite f ▹ χ)ᴺ) :
+    p ⊩[C, D] (χ.univCl')ᴺ :=
   forcesAllClosure _ fun v ↦
     (h fun x ↦ if hx : x < χ.fvSup then v ⟨x, by omega⟩ else default).cast (by
       have e : (fun x : Fin (0 + χ.fvSup) ↦
@@ -427,34 +427,34 @@ the work, so no induction on `ℕ` enters the argument.
 
 - [Bus98A, Section 1.4.2] -/
 def forcesSuccInd {ξ : ArithmeticSemiformula ℕ 1} (hξ : C ξ) (hD : ∀ t, D (ξ/[t]))
-    (tΓ : (∼Γ).Traversal) : Γ ⊩[C, D] (succInd ξ)ᴺ := by
+    (tp : (∼p).Traversal) : p ⊩[C, D] (succInd ξ)ᴺ := by
   rw [show (succInd ξ : ArithmeticProposition)
       = (ξ/[‘0’]) 🡒 ((∀¹ (ξ 🡒 ξ/[‘(#0 + 1)’])) 🡒 ∀¹ ξ) from by simp [succInd]]
-  refine forcesImply tΓ fun Δ s g₀ ↦ forcesImply (s.val.traversal tΓ) fun Θ s' gstep ↦ ?_
-  let tΘ : (∼Θ).Traversal := s'.val.traversal (s.val.traversal tΓ)
+  refine forcesImply tp fun q s g₀ ↦ forcesImply (s.val.traversal tp) fun r s' gstep ↦ ?_
+  let tr : (∼r).Traversal := s'.val.traversal (s.val.traversal tp)
   refine allEquiv.symm fun t ↦ ?_
   rw [Semiformula.subst_doubleNegation]
-  -- `Θ ⊩ (ξ/[t])ᴺ`, by the induction rule at a variable fresh for `Θ` and `ξ`
-  refine forcesOfAnchored (hD t) tΘ ?_
-  let m := LK.Sequent.newVar (∼Θ + ⦃∀¹ ξ⦄)
+  -- `r ⊩ (ξ/[t])ᴺ`, by the induction rule at a variable fresh for `r` and `ξ`
+  refine forcesOfAnchored (hD t) tr ?_
+  let m := LK.Sequent.newVar (∼r + ⦃∀¹ ξ⦄)
   have hξm : ¬ξ.FVar? m := by
     have : ¬(∀¹ ξ).FVar? m := LK.Sequent.not_fvar?_newVar (by simp)
     simpa using this
-  have hΘ : ∀ ψ ∈ ∼Θ, ¬ψ.FVar? m := fun ψ hψ ↦ LK.Sequent.not_fvar?_newVar (by simp [hψ])
+  have hr : ∀ ψ ∈ ∼r, ¬ψ.FVar? m := fun ψ hψ ↦ LK.Sequent.not_fvar?_newVar (by simp [hψ])
   -- the base case
-  let d₀ : ⊢ᴸᴷᴵ[C, D]! ∼Θ + ⦃ξ/[‘0’]⦄ := derivableOfForced tΘ (g₀.monotone s')
-  -- the step case, at the condition `Θ` extended by the induction hypothesis
-  let tΘ' : (∼(Θ + ⦃ξ/[&m]⦄)).Traversal := (tΘ.add (.atom (∼(ξ/[&m])))).cast (by simp)
-  let sΘ' : Θ + ⦃ξ/[&m]⦄ ≼ Θ :=
+  let d₀ : ⊢ᴸᴷᴵ[C, D]! ∼r + ⦃ξ/[‘0’]⦄ := derivableOfForced tr (g₀.monotone s')
+  -- the step case, at the condition `r` extended by the induction hypothesis
+  let tr' : (∼(r + ⦃ξ/[&m]⦄)).Traversal := (tr.add (.atom (∼(ξ/[&m])))).cast (by simp)
+  let sr' : r + ⦃ξ/[&m]⦄ ≼ r :=
     ⟨(LK.Derivation.Positive.weakening (φ := ∼(ξ/[&m])) .refl).cast rfl (by simp)⟩
-  let gxy : Θ ⊩[C, D] (ξ/[&m] 🡒 ξ/[‘&m + 1’])ᴺ := (gstep.allEquiv &m).cast (by
+  let gxy : r ⊩[C, D] (ξ/[&m] 🡒 ξ/[‘&m + 1’])ᴺ := (gstep.allEquiv &m).cast (by
     simp [Semiformula.subst_doubleNegation, Rew.subst_subst_eq])
-  let gY : Θ + ⦃ξ/[&m]⦄ ⊩[C, D] (ξ/[‘&m + 1’])ᴺ :=
-    modusPonensImply tΘ' (gxy.monotone sΘ')
-      ((Forces.refl (ξ/[&m])).monotone (StrongerThan.ofSubset (.atom _) tΘ' (by simp)))
-  let dstep : ⊢ᴸᴷᴵ[C, D]! ∼Θ + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄ :=
-    (derivableOfForced tΘ' gY).cast (by simp; abel)
-  exact ⟨Derivation.indByNewVar hξ t hξm hΘ d₀.val dstep.val,
+  let gY : r + ⦃ξ/[&m]⦄ ⊩[C, D] (ξ/[‘&m + 1’])ᴺ :=
+    modusPonensImply tr' (gxy.monotone sr')
+      ((Forces.refl (ξ/[&m])).monotone (StrongerThan.ofSubset (.atom _) tr' (by simp)))
+  let dstep : ⊢ᴸᴷᴵ[C, D]! ∼r + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄ :=
+    (derivableOfForced tr' gY).cast (by simp; abel)
+  exact ⟨Derivation.indByNewVar hξ t hξm hr d₀.val dstep.val,
     Derivation.anchored_indByNewVar d₀.prop dstep.prop⟩
 
 /-- Every axiom of the `C`-induction scheme is forced.
@@ -462,11 +462,11 @@ def forcesSuccInd {ξ : ArithmeticSemiformula ℕ 1} (hξ : C ξ) (hD : ∀ t, D
 - [Bus98A, Section 1.4.2] -/
 def forcesInd {ξ : ArithmeticSemiformula ℕ 1}
     (hCD : (η : ArithmeticSemiformula ℕ 1) → C η → ∀ t, D (η/[t])) (hξ : C ξ)
-    (tΓ : (∼Γ).Traversal) : Γ ⊩[C, D] ((succInd ξ).univCl')ᴺ :=
+    (tp : (∼p).Traversal) : p ⊩[C, D] ((succInd ξ).univCl')ᴺ :=
   forcesUnivCl fun f ↦
     let hq : C ((Rew.rewrite f).q ▹ ξ) := by
       simpa [Rew.q_rewrite] using RewriteClosed.rewrite (C := C) (Rew.bShift ∘ f) hξ
-    (forcesSuccInd hq (hCD _ hq) tΓ).cast (by rw [rew_succInd])
+    (forcesSuccInd hq (hCD _ hq) tp).cast (by rw [rew_succInd])
 
 end Forces
 

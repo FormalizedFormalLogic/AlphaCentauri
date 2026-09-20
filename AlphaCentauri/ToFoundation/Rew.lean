@@ -76,3 +76,32 @@ lemma shift_subst_eq (φ : Semiformula L ℕ 1) (t : SyntacticSemiterm L n) :
     · simp [Rew.comp_app]
 
 end FFL.FirstOrder.Rew
+
+namespace FFL.FirstOrder.Semiformula
+
+variable {L : Language} {m : ℕ}
+
+/-- Substituting a variable that the formula avoids, and then renaming it to the new bound
+variable, is `Rewriting.free`. -/
+lemma rewriteMap_subst_eq_free (φ : Semiformula L ℕ 1) (h : ¬φ.FVar? m) :
+    (@Rew.rewriteMap L ℕ ℕ 0 fun x ↦ if x = m then 0 else x + 1) ▹ (φ/[&m]) =
+      Rewriting.free φ := by
+  simp only [← TransitiveRewriting.comp_app]
+  exact Semiformula.rew_eq_of_funEqOn (by simp [Rew.comp_app])
+    fun x hx ↦ by simp [Rew.comp_app, ne_of_mem_of_not_mem hx h]
+
+/-- Renaming a variable that none of the formulas mentions to the new bound variable shifts the
+multiset. -/
+lemma map_rewriteMap_eq_shifts (Γ : Multiset (Semiformula L ℕ 0))
+    (h : ∀ φ ∈ Γ, ¬φ.FVar? m) :
+    Γ.map (fun φ ↦ (@Rew.rewriteMap L ℕ ℕ 0 fun x ↦ if x = m then 0 else x + 1) ▹ φ) = Γ⁺ := by
+  apply Multiset.map_congr rfl
+  intro φ hφ
+  have e : (@Rew.rewriteMap L ℕ ℕ 0 fun x ↦ if x = m then 0 else x + 1) ▹ φ =
+      (Rew.shift : SyntacticRew L 0 0) ▹ φ :=
+    Semiformula.rew_eq_of_funEqOn₀ (by
+      intro x hx
+      simp [ne_of_mem_of_not_mem hx (h φ hφ)])
+  simpa [Rewriting.shift] using e
+
+end FFL.FirstOrder.Semiformula

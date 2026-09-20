@@ -370,6 +370,12 @@ protected def map (d : ⊢ᴸᴷᴵ[C]! Γ) (f : ℕ → ℕ) : ⊢ᴸᴷᴵ[C]!
 
 protected def shift (d : ⊢ᴸᴷᴵ[C]! Γ) : ⊢ᴸᴷᴵ[C]! Γ⁺ := cast (Derivation.map d Nat.succ) (by rfl)
 
+/-- Generalization on a variable that occurs in no formula of the conclusion. -/
+def generalizeByNewVar {m} (hξ : ¬ξ.FVar? m) (hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m)
+    (d : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[&m]⦄) : ⊢ᴸᴷᴵ[C]! Γ + ⦃∀¹ ξ⦄ :=
+  all <| cast (Derivation.map d fun x ↦ if x = m then 0 else x + 1)
+    (by simp [Semiformula.rewriteMap_subst_eq_free ξ hξ, Semiformula.map_rewriteMap_eq_shifts Γ hΓ])
+
 variable [RewriteClosed D] {Γ : LK.Sequent ℒₒᵣ}
 
 lemma anchored_rewrite {Γ} : ∀ (d : ⊢ᴸᴷᴵ[C]! Γ) (f), Anchored D d → Anchored D (d.rewrite f)
@@ -394,6 +400,11 @@ lemma anchored_map (d : ⊢ᴸᴷᴵ[C]! Γ) (f) (h : Anchored D d) : Anchored D
 
 lemma anchored_shift (d : ⊢ᴸᴷᴵ[C]! Γ) (h : Anchored D d) : Anchored D d.shift :=
   anchored_map d Nat.succ h
+
+lemma anchored_generalizeByNewVar {m} {hξ : ¬ξ.FVar? m} {hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m}
+    {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[&m]⦄} (h : Anchored D d) :
+    Anchored D (generalizeByNewVar hξ hΓ d) := by
+  simpa [generalizeByNewVar] using anchored_map d _ h
 
 end rewrite
 

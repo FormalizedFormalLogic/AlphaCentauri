@@ -19,6 +19,7 @@ public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Theory
+public import AlphaCentauri.Hierarchy.Bound
 public import AlphaCentauri.Hierarchy.Bounded
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
 public import AlphaCentauri.Model.Basic

@@ -457,6 +457,24 @@ def forcesSuccInd {ξ : ArithmeticSemiformula ℕ 1} (hξ : C ξ) (hD : ∀ t, D
   exact ⟨Derivation.indByNewVar hξ t hξm hr d₀.val dstep.val,
     Derivation.anchored_indByNewVar d₀.prop dstep.prop⟩
 
+/-- Every axiom of `𝗣𝗔⁻` is forced: it is strict `Π₁` and true in `ℕ`, so the `bounded` leaf and
+the universal rule derive it without a cut.
+
+- [Bus98A, Section 1.4.2] -/
+noncomputable def forcesPeanoMinus {σ : ArithmeticSentence} (hD : D (Rewriting.emb σ))
+    (h : σ ∈ 𝗣𝗔⁻) (tp : (∼p).Traversal) :
+    p ⊩[C, D] (Rewriting.emb σ : ArithmeticProposition)ᴺ :=
+  let d : ⊢ᴸᴷᴵ[C, D]! ⦃(Rewriting.emb σ : ArithmeticProposition)⦄ :=
+    Classical.choice <| nonempty_anchored_of_valid _ _ le_rfl
+      (by
+        intro φ hφ
+        rcases Multiset.mem_singleton.mp hφ
+        exact StrictHierarchy.rew _ (PeanoMinus.strictHierarchy σ h))
+      (by
+        intro ε
+        exact ⟨Rewriting.emb σ, by simp, by simpa [models_iff] using Theory.models (M := ℕ) _ h⟩)
+  forcesOfAnchored hD tp ⟨(Derivation.weakeningMany tp d.val).cast (by abel), by simp [d.prop]⟩
+
 /-- Every axiom of the `C`-induction scheme is forced.
 
 - [Bus98A, Section 1.4.2] -/

@@ -25,69 +25,6 @@ variable {C : ArithmeticSemiformula ℕ 1 → Prop}
          {T : ArithmeticTheory} {σ : ArithmeticSentence}
          {Γ Δ : LK.Sequent ℒₒᵣ}
 
-/-! ## Completeness for the true strict `$\Pi_1$` sequents -/
-
-private lemma bounded_of_complexity_zero (h : φ.complexity = 0) : Semiformula.Bounded φ := by
-  match φ with
-  | .rel _ _ | .nrel _ _ | ⊤ | ⊥ => simp
-  | _ ⋏ _ | _ ⋎ _ | ∀¹ _ | ∃¹ _ => simp at h
-
-private lemma exists_all_of_strictPi1 (h : StrictHierarchy 𝚷 1 φ)
-    (hb : ¬Semiformula.Bounded φ) : ∃ ξ, φ = ∀¹ ξ ∧ StrictHierarchy 𝚷 1 ξ := by
-  rcases h with _ | h | _ | ⟨hξ⟩
-  · rcases h with h | _ | _ | _
-    · exact absurd h hb
-  · exact ⟨_, rfl, hξ⟩
-
-private lemma vecCons_head_tail (ε : ℕ → ℕ) : ε 0 :>ₙ (fun x ↦ ε (x + 1)) = ε := by
-  funext x; cases x <;> rfl
-
-/-- A sequent of strict $\Pi_1$ formulas true in `ℕ` under every assignment is derivable: on this
-fragment the `bounded` leaf and the universal rule are already complete. -/
-theorem derivable_of_valid (n : ℕ) (Γ : LK.Sequent ℒₒᵣ)
-  (hsum : (Γ.map Semiformula.complexity).sum ≤ n)
-  (hΓ : ∀ φ ∈ Γ, StrictHierarchy 𝚷 1 φ)
-  (hval : ∀ ε : ℕ → ℕ, ∃ φ ∈ Γ, φ.Evalf ε)
-  : ⊢ᴸᴷᴵ[C] Γ := by
-  induction n generalizing Γ with
-  | zero =>
-    refine Derivable.bounded Γ (fun φ hφ ↦ bounded_of_complexity_zero (Nat.le_zero.mp ?_)) hval
-    exact le_trans (Multiset.le_sum_of_mem (Multiset.mem_map_of_mem _ hφ)) hsum
-  | succ n ih =>
-    by_cases hb : ∀ φ ∈ Γ, Semiformula.Bounded φ
-    · exact Derivable.bounded Γ hb hval
-    · push Not at hb;
-      obtain ⟨φ, hφΓ, hφb⟩ := hb
-      obtain ⟨ξ, rfl, hξ⟩ := exists_all_of_strictPi1 (hΓ φ hφΓ) hφb
-      obtain ⟨Γ', rfl⟩ : ∃ Γ', Γ = Γ' + ⦃∀¹ ξ⦄ := by
-        obtain ⟨Γ', rfl⟩ := Multiset.exists_cons_of_mem hφΓ
-        exact ⟨Γ', by simp [Multiset.add_atom_eq_cons]⟩
-      have hshift : (Γ'⁺).map Semiformula.complexity = Γ'.map Semiformula.complexity := by
-        simp [Rewriting.shifts, Multiset.map_map]
-      apply Derivable.all
-      apply ih
-      · simp only [Multiset.map_add, Multiset.sum_add, hshift] at hsum ⊢
-        simp [Multiset.atom_eq_singleton] at hsum ⊢
-        omega
-      · intro ψ hψ
-        rcases Multiset.mem_add.mp hψ with h | h
-        · obtain ⟨χ, hχ, rfl⟩ := Multiset.mem_map.mp (by simpa [Rewriting.shifts] using h)
-          exact StrictHierarchy.rew _ (hΓ χ (by simp [hχ]))
-        · have e : ψ = free ξ := by simpa using h
-          exact e ▸ StrictHierarchy.rew _ hξ
-      · intro ε
-        obtain ⟨ψ, hψ, hv⟩ := hval fun x ↦ ε (x + 1)
-        rcases Multiset.mem_add.mp hψ with h | h
-        · refine ⟨shift ψ, by simpa [Rewriting.shifts] using Or.inl ⟨ψ, h, rfl⟩, ?_⟩
-          rw [← vecCons_head_tail ε]
-          simpa using hv
-        · have e : ψ = ∀¹ ξ := by simpa using h
-          subst e
-          refine ⟨free ξ, by simp, ?_⟩
-          rw [← vecCons_head_tail ε]
-          have : ∀ a : ℕ, Semiformula.Eval ![a] (fun x ↦ ε (x + 1)) ξ := by simpa using hv
-          simpa using this (ε 0)
-
 /-- A theory whose axioms are all derivable in `LKI[C]` proves only `LKI[C]`-derivable sentences. -/
 theorem derivable_of_provable (hT : ∀ σ ∈ T, ⊢ᴸᴷᴵ[C] ⦃σ⦄) (h : T ⊢ σ) : ⊢ᴸᴷᴵ[C] ⦃σ⦄ := by
   obtain ⟨Δ, hΔ, hd⟩ := Theory.Proof.provable_iff.mp h

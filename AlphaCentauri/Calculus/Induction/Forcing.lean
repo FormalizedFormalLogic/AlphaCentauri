@@ -24,7 +24,7 @@ open Rewriting LawfulSyntacticRewriting
 open LK.Derivation.Canonical (StrongerThan inf_def)
 open scoped FFL.FirstOrder.Derivation.Canonical
 
-variable {C : ArithmeticSemiformula ℕ 1 → Prop} {D : Set ArithmeticProposition}
+variable {C : ArithmeticSemiformula ℕ 1 → Prop} {D : ArithmeticProposition → Prop}
   {Ξ Γ : LK.Sequent ℒₒᵣ}
 
 namespace Derivation
@@ -51,14 +51,16 @@ def graft {Ξ Γ : LK.Sequent ℒₒᵣ} (b : ⊢ᴸᴷᴵ[C]! Ξ) : (Ξ ⟶⁺ 
 end Derivation
 
 /-- The `D`-anchored derivations of `Γ` in `LKI[C]`. -/
-abbrev AnchoredDerivation (C : ArithmeticSemiformula ℕ 1 → Prop) (D : Set ArithmeticProposition)
+abbrev AnchoredDerivation (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition → Prop)
     (Γ : LK.Sequent ℒₒᵣ) := {d : ⊢ᴸᴷᴵ[C]! Γ // Derivation.Anchored D d}
+
+@[inherit_doc] notation:45 "⊢ᴸᴷᴵ[" C ", " D "]! " Γ:45 => AnchoredDerivation C D Γ
 
 namespace AnchoredDerivation
 
 variable {Δ : LK.Sequent ℒₒᵣ}
 
-def cast (d : AnchoredDerivation C D Γ) (e : Γ = Δ := by abel) : AnchoredDerivation C D Δ :=
+def cast (d : ⊢ᴸᴷᴵ[C, D]! Γ) (e : Γ = Δ := by abel) : ⊢ᴸᴷᴵ[C, D]! Δ :=
   ⟨d.val.cast e, by simpa using d.prop⟩
 
 end AnchoredDerivation
@@ -71,10 +73,10 @@ variable {p q : LK.Sequent ℒₒᵣ} {φ ψ : Propositionᵢ ℒₒᵣ}
 proofs of `⊥` over it are the anchored derivations of `∼p`.
 
 - [Avi01, Section 3] -/
-def Forces (C : ArithmeticSemiformula ℕ 1 → Prop) (D : Set ArithmeticProposition)
+def Forces (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition → Prop)
     (p : LK.Sequent ℒₒᵣ) : Propositionᵢ ℒₒᵣ → Type
-  |        ⊥ => AnchoredDerivation C D (∼p)
-  | .rel R v => AnchoredDerivation C D (∼p + ⦃Semiformula.rel R v⦄)
+  |        ⊥ => ⊢ᴸᴷᴵ[C, D]! ∼p
+  | .rel R v => ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃Semiformula.rel R v⦄
   |    φ ⋏ ψ => Forces C D p φ × Forces C D p ψ
   |    φ ⋎ ψ => Forces C D p φ ⊕ Forces C D p ψ
   |    φ 🡒 ψ => (q : LK.Sequent ℒₒᵣ) → q ≼ p → Forces C D q φ → Forces C D q ψ
@@ -86,11 +88,11 @@ def Forces (C : ArithmeticSemiformula ℕ 1 → Prop) (D : Set ArithmeticProposi
 
 namespace Forces
 
-def falsumEquiv : (p ⊩[C, D] ⊥) ≃ AnchoredDerivation C D (∼p) := by
+def falsumEquiv : (p ⊩[C, D] ⊥) ≃ ⊢ᴸᴷᴵ[C, D]! ∼p := by
   unfold Forces; exact .refl _
 
 def relEquiv {k} {R : (ℒₒᵣ).Rel k} {v} :
-    (p ⊩[C, D] .rel R v) ≃ AnchoredDerivation C D (∼p + ⦃Semiformula.rel R v⦄) := by
+    (p ⊩[C, D] .rel R v) ≃ ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃Semiformula.rel R v⦄ := by
   unfold Forces; exact .refl _
 
 def andEquiv : (p ⊩[C, D] φ ⋏ ψ) ≃ (p ⊩[C, D] φ) × (p ⊩[C, D] ψ) := by
@@ -152,7 +154,7 @@ def modusPonens (f : p ⊩[C, D] φ 🡒 ψ) (g : p ⊩[C, D] φ) : p ⊩[C, D] 
 end Forces
 
 /-- A condition forcing every formula of an `LJ` context. -/
-abbrev ContextForces (C : ArithmeticSemiformula ℕ 1 → Prop) (D : Set ArithmeticProposition)
+abbrev ContextForces (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition → Prop)
     (p : LK.Sequent ℒₒᵣ) (Γ : LJ.Sequent ℒₒᵣ) := (φ : Propositionᵢ ℒₒᵣ) → φ ∈ Γ → p ⊩[C, D] φ
 
 namespace ContextForces
@@ -171,7 +173,7 @@ def cons (b : ContextForces C D p Γ) (hφ : p ⊩[C, D] φ) : ContextForces C D
 end ContextForces
 
 /-- A condition forcing the succedent of an `LJ` sequent. -/
-def HeadForces (C : ArithmeticSemiformula ℕ 1 → Prop) (D : Set ArithmeticProposition)
+def HeadForces (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition → Prop)
     (p : LK.Sequent ℒₒᵣ) : LJ.Head ℒₒᵣ → Type
   | none => p ⊩[C, D] ⊥
   | some φ => p ⊩[C, D] φ
@@ -320,8 +322,8 @@ def castCondition {p q : LK.Sequent ℒₒᵣ} (f : p ⊩[C, D] φ) (e : p = q) 
 /-- The cut that `cutForces` performs: a cut against a formula of `D`, followed by the
 contraction that merges the two copies of the condition. -/
 def cutAnchored {p Θ : LK.Sequent ℒₒᵣ} {χ : ArithmeticProposition} (hχ : D χ)
-    (tp : (∼p).Traversal) (d : AnchoredDerivation C D (∼p + ⦃χ⦄))
-    (e : AnchoredDerivation C D (∼p + ⦃∼χ⦄ + Θ)) : AnchoredDerivation C D (∼p + Θ) :=
+    (tp : (∼p).Traversal) (d : ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃χ⦄)
+    (e : ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃∼χ⦄ + Θ) : ⊢ᴸᴷᴵ[C, D]! ∼p + Θ :=
   let dc : ⊢ᴸᴷᴵ[C]! Θ + (∼p + ∼p) :=
     Derivation.cast (Derivation.cut (Γ := ∼p) (Δ := ∼p + Θ) (φ := χ) d.val (e.val.cast (by abel)))
   let s : (∼p + ∼p : LK.Sequent ℒₒᵣ) ⟶⁺ ∼p :=
@@ -332,7 +334,7 @@ def cutAnchored {p Θ : LK.Sequent ℒₒᵣ} {χ : ArithmeticProposition} (hχ 
 
 - [Bus98A, Section 1.4.2] -/
 def cutForces {χ : ArithmeticProposition} (hχ : D χ) :
-    {p : LK.Sequent ℒₒᵣ} → (∼p).Traversal → AnchoredDerivation C D (∼p + ⦃χ⦄) →
+    {p : LK.Sequent ℒₒᵣ} → (∼p).Traversal → ⊢ᴸᴷᴵ[C, D]! ∼p + ⦃χ⦄ →
       {ψ : Propositionᵢ ℒₒᵣ} → (p + ⦃χ⦄ ⊩[C, D] ψ) → p ⊩[C, D] ψ
   | _, tp, d, ⊥, b =>
     falsumEquiv.symm <|
@@ -358,7 +360,7 @@ def cutForces {χ : ArithmeticProposition} (hχ : D χ) :
 /-- A formula of `D` with an anchored derivation is forced by the empty condition.
 
 - [Bus98A, Section 1.4.2] -/
-def forcesOfAnchored {χ : ArithmeticProposition} (hχ : D χ) (d : AnchoredDerivation C D ⦃χ⦄) :
+def forcesOfAnchored {χ : ArithmeticProposition} (hχ : D χ) (d : ⊢ᴸᴷᴵ[C, D]! ⦃χ⦄) :
     0 ⊩[C, D] χᴺ :=
   cutForces hχ (Multiset.Traversal.zero.cast (by simp)) (d.cast (by simp))
     ((Forces.refl χ).castCondition (by simp))
@@ -368,7 +370,7 @@ negated condition together with `χ`.
 
 - [Bus98A, Section 1.4.2] -/
 def derivableOfForced {Δ : LK.Sequent ℒₒᵣ} {χ : ArithmeticProposition} (tΔ : (∼Δ).Traversal)
-    (f : Δ ⊩[C, D] χᴺ) : AnchoredDerivation C D (∼Δ + ⦃χ⦄) :=
+    (f : Δ ⊩[C, D] χᴺ) : ⊢ᴸᴷᴵ[C, D]! ∼Δ + ⦃χ⦄ :=
   let tχ : (∼(⦃∼χ⦄ : LK.Sequent ℒₒᵣ)).Traversal := .atom _
   let b₁ : Δ ⊓ ⦃∼χ⦄ ⊩[C, D] (∼χ)ᴺ :=
     (Forces.refl (∼χ)).monotone (StrongerThan.minLeRight _ _ tΔ)
@@ -393,7 +395,7 @@ other cut is eliminated.
 def hauptsatz [RewriteClosed C] [RewriteClosed D] {Γ A : LK.Sequent ℒₒᵣ}
     (tΓ : Γ.Traversal) (tA : A.Traversal)
     (hA : (α : ArithmeticProposition) → α ∈ A → ((0 : LK.Sequent ℒₒᵣ) ⊩[C, D] αᴺ))
-    (d : ⊢ᴸᴷ¹ Γ + ∼A) : AnchoredDerivation C D Γ :=
+    (d : ⊢ᴸᴷ¹ Γ + ∼A) : ⊢ᴸᴷᴵ[C, D]! Γ :=
   let tΔ : (∼(∼Γ)).Traversal := tΓ.cast (by simp)
   let g : ContextForces C D (∼Γ) (∼(Γ + ∼A))ᴺ := fun ψ hψ ↦
     if h : ψ ∈ (∼Γ : LK.Sequent ℒₒᵣ)ᴺ then

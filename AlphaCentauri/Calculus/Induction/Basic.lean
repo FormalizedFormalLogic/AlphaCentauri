@@ -98,7 +98,7 @@ def Derivable (C : ArithmeticSemiformula ℕ 1 → Prop) (Γ : LK.Sequent ℒₒ
 namespace Derivation
 
 variable {C : ArithmeticSemiformula ℕ 1 → Prop}
-  {D D' : Set ArithmeticProposition}
+  {D D' : ArithmeticProposition → Prop}
   {Γ Δ : LK.Sequent ℒₒᵣ} {φ ψ χ : ArithmeticProposition}
   {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
 
@@ -236,11 +236,11 @@ theorem sound (ε : ℕ → ℕ) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) → ∃ φ ∈ Γ,
 /-- A derivation is `Anchored D` when every one of its cut formulas belongs to `D`.
 
 - [Bus98A, Section 1.4.2] -/
-def Anchored (D : Set ArithmeticProposition) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) → Prop
+def Anchored (D : ArithmeticProposition → Prop) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) → Prop
   | bounded _ _ _ => True
   | ind _ _ _ d₀ d => Anchored D d₀ ∧ Anchored D d
   | identity _ _ => True
-  | cut (φ := χ) dp dn => χ ∈ D ∧ Anchored D dp ∧ Anchored D dn
+  | cut (φ := χ) dp dn => D χ ∧ Anchored D dp ∧ Anchored D dn
   | contraction d => Anchored D d
   | weakening d => Anchored D d
   | verum => True

@@ -415,14 +415,14 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
   induction ψ using Semiformula.rec' with
   | hverum => intro _; simp
   | hfalsum => intro _; simp
-  | hrel R v => intro _; exact Hierarchy.rel _ _ _ _
-  | hnrel R v => intro _; exact Hierarchy.nrel _ _ _ _
+  | hrel R v => intro _; exact .rel _ _
+  | hnrel R v => intro _; exact .nrel _ _
   | hand φ ψ ihφ ihψ =>
       intro h; rw [Semiformula.quote_and (V := ℕ) φ ψ, IsBounded.and_iff] at h
-      exact Hierarchy.and (ihφ h.1) (ihψ h.2)
+      exact .and (ihφ h.1) (ihψ h.2)
   | hor φ ψ ihφ ihψ =>
       intro h; rw [Semiformula.quote_or (V := ℕ) φ ψ, IsBounded.or_iff] at h
-      exact Hierarchy.or (ihφ h.1) (ihψ h.2)
+      exact .or (ihφ h.1) (ihψ h.2)
   | hall φ ihφ =>
       intro h
       rw [Semiformula.quote_all (V := ℕ) φ] at h
@@ -447,9 +447,9 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
         have hform : φ = (“#0 < !!(Rew.bShift s)” 🡒 φ₂) :=
           (Semiformula.all_inj _ _).mp (by rw [← Semiformula.ball_eq]; exact heq)
         rw [hform, Semiformula.imp_eq] at hφ
-        exact (Hierarchy.or_iff.mp hφ).2
+        exact (Semiformula.Bounded.or_iff.mp hφ).2
       rw [heq]
-      exact Hierarchy.ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
+      exact .ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
   | hexs φ ihφ =>
       intro h
       rw [Semiformula.quote_ex (V := ℕ) φ] at h
@@ -474,9 +474,9 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
         have hform : φ = (“#0 < !!(Rew.bShift s)” ⋏ φ₂) :=
           (Semiformula.exs_inj _ _).mp (by rw [← Semiformula.bexs_eq]; exact heq)
         rw [hform] at hφ
-        exact (Hierarchy.and_iff.mp hφ).2
+        exact (Semiformula.Bounded.and_iff.mp hφ).2
       rw [heq]
-      exact Hierarchy.bexs (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
+      exact .bexs (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
 
 lemma isBounded_iff_bounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     Bootstrapping.IsBounded (⌜ψ⌝ : ℕ) ↔ ψ.Bounded :=

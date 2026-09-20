@@ -7,13 +7,13 @@ public import AlphaCentauri.ToFoundation.Prime
 /-!
 # The infinitude of primes
 
-Euclid's argument needs a bound on the next prime: $x!$ over $\mathsf{I}\Sigma_1$ and
-$\mathrm{lcm}(1, \dots, x)$ over $\mathsf{I}\Delta_0 + \mathrm{Exp}$; over $\mathsf{I}\Delta_0$
-no term bounds it, and with $\Omega_1$ adjoined the sentence is instead a theorem of Paris,
-Wilkie and Woods, obtained from a weak $\Delta_0$ pigeonhole principle, while over
-$\mathsf{I}\Delta_0$ alone it is an open problem. Each of the three theories weaker than
-$\mathsf{I}\Sigma_1$ has the sentence as an axiom of its own, so that none of them carries the
-debt of another.
+Euclid's argument needs a bound on the next prime: $x!$ over $\mathsf{E}\mathsf{A} =
+\mathsf{I}\Delta_0 + \mathrm{Exp}$, from which $\mathsf{I}\Sigma_1$ inherits it; over
+$\mathsf{I}\Delta_0$ no term bounds it, and with $\Omega_1$ adjoined the sentence is instead a
+theorem of Paris, Wilkie and Woods, obtained from a weak $\Delta_0$ pigeonhole principle, while
+over $\mathsf{I}\Delta_0$ alone it is an open problem. $\mathsf{I}\Delta_0 + \Omega_1$ and
+$\mathsf{I}\Delta_0$ each have the sentence as an axiom of its own, so that neither carries the
+debt of the other.
 
 - [HP98, Theorem I.1.58(2), Remark I.1.59(3)]
 - [PWW88, Problem 1, Corollary 8]
@@ -41,7 +41,7 @@ noncomputable section
 variable {V : Type*} [ORingStructure V]
 
 /-- - [HP98, Theorem I.1.58(2)] -/
-lemma ISigma1.exists_prime_gt [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (x : V) : ∃ p, x < p ∧ IsPrime p := by
+lemma ElementaryArithmetic.exists_prime_gt [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] (x : V) : ∃ p, x < p ∧ IsPrime p := by
   obtain ⟨p, hp, hpn⟩ := exists_isPrime_dvd (n := factorial x + 1) (by simp)
   refine ⟨p, ?_, hp⟩
   by_contra hle
@@ -61,12 +61,13 @@ lemma ISigma1.exists_prime_gt [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (x : V) : ∃ p
 end
 
 /-- - [HP98, Remark I.1.59(3)] -/
-axiom provable_infinitudeOfPrimes_ElementaryArithmetic : 𝗘𝗔 ⊢ infinitudeOfPrimes
+theorem provable_infinitudeOfPrimes_ElementaryArithmetic : 𝗘𝗔 ⊢ infinitudeOfPrimes :=
+  complete 𝗘𝗔 infinitudeOfPrimes fun (_ : Type) _ _ ↦
+    models_infinitudeOfPrimes_iff.mpr ElementaryArithmetic.exists_prime_gt
 
 /-- - [HP98, Theorem I.1.58(2)] -/
 theorem provable_infinitudeOfPrimes_ISigma1 : 𝗜𝚺₁ ⊢ infinitudeOfPrimes :=
-  complete 𝗜𝚺₁ infinitudeOfPrimes fun (_ : Type) _ _ ↦
-    models_infinitudeOfPrimes_iff.mpr ISigma1.exists_prime_gt
+  Entailment.WeakerThan.pbl provable_infinitudeOfPrimes_ElementaryArithmetic
 
 /-- - [PWW88, Corollary 8] -/
 axiom provable_infinitudeOfPrimes_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮₁ ⊢ infinitudeOfPrimes

@@ -1,18 +1,16 @@
 name: Repair the dependency bump
 
-# `update-deps.yml` moves the pins only, so a bump that breaks this repository arrives red. This
-# runs after that red CI run has finished, not inside it: Claude Code repairs the branch under
-# `.claude/commands/update-deps.md`, and the push it makes starts the CI run that judges it. One
-# attempt per bump, on the organization secret `CLAUDE_CODE_OAUTH_TOKEN` — a subscription
-# token from `claude setup-token`, so the repair draws on the maintainer's plan.
+# Runs after a red CI run on the bump's branch has finished, not inside it: Claude Code repairs
+# the branch under `.claude/commands/update-deps.md`, and its push starts the run that judges it.
+# One attempt per bump, on `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`).
 on:
   workflow_run:
     workflows: [CI]
     types: [completed]
 
-# Never cancelled halfway: that would leave the repair uncommitted.
+# Shared with `update-deps.yml`; never cancelled, which would leave the repair uncommitted.
 concurrency:
-  group: repair-deps
+  group: update-deps-branch
   cancel-in-progress: false
 
 permissions:
@@ -20,7 +18,6 @@ permissions:
 
 env:
   BRANCH: update-deps
-  # `update-deps.yml`'s commit subject: it marks the bump's own commit.
   TITLE: 'chore: Update dependencies'
 
 jobs:
@@ -36,7 +33,7 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      # A `github.token` push starts no checks, so the repair pushes as the App too.
+      # A `github.token` push starts no checks.
       - name: Mint the app token
         id: app-token
         if: vars.BOT_APP_ID != ''
@@ -68,8 +65,7 @@ jobs:
             echo "the branch moved since that CI run; a later run will report on the new tip"
             exit 0
           fi
-          # A commit on top of the pin is a previous repair; `--first-parent` ignores the merge
-          # of `main` GitHub makes for the strict checks.
+          # A commit on top of the pin is a previous repair; `--first-parent` ignores merges.
           pin=$(git log --grep="^$TITLE" -1 --format='%H')
           if [ -z "$pin" ]; then
             echo "no pin commit on the branch; leaving it alone"
@@ -105,7 +101,9 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: .lake/packages/Foundation/.lake/build
-          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
+          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+          restore-keys: |
+            foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-
       - name: Build the dependency from source (cache miss only)
         if: steps.decide.outputs.number != '' && steps.foundation-cache.outputs.cache-hit != 'true'
         run: |
@@ -124,17 +122,14 @@ jobs:
           git config user.name "$author"
           git config user.email "$(gh api "/users/${author//\[bot\]/%5Bbot%5D}" --jq .id)+$author@users.noreply.github.com"
 
-      # The agent gets the workflow token, on which this job holds `contents: read`, so it can
-      # read and comment but not push. What reaches the branch is what the step below verifies.
+      # The workflow token, on which this job holds `contents: read`: the agent cannot push.
       - name: Repair the branch
         if: steps.decide.outputs.number != ''
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
-          # The CI run this answers was started by the App's push, so the action sees a bot actor
-          # and refuses unless that bot is named. Only ours: the prompt here is fixed, but `*`
-          # would let any App reach this action.
+          # The run this answers came from the App's push, so the actor is a bot. Never `*`.
           allowed_bots: ${{ steps.app-token.outputs.app-slug || 'github-actions' }}
           claude_args: |
             --max-turns 120
@@ -154,7 +149,7 @@ jobs:
             #${{ steps.decide.outputs.number }}. Leave the tree uncommitted rather than commit a
             repair you could not finish: this bump gets one attempt.
 
-      # The gate: the branch only ever advances to a commit that passes the checks `ci.yml` runs.
+      # The branch only advances to a commit that passes what `ci.yml` runs.
       - name: Verify the repair and push it
         if: steps.decide.outputs.number != ''
         env:
@@ -174,6 +169,5 @@ jobs:
             exit 1
           fi
           git push origin "HEAD:refs/heads/$BRANCH"
-          # The branch is no longer pins-only.
           gh pr merge "$NUMBER" --disable-auto || true
           echo "pushed the repair to $BRANCH; #$NUMBER is a human's to merge"

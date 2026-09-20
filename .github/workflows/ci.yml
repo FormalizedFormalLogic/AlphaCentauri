@@ -7,13 +7,11 @@ on:
   pull_request:
     branches:
       - main
-  # So a merge queue entry has status checks to wait on.
   merge_group:
     branches:
       - main
   workflow_dispatch:
 
-# Supersede stale runs on the same ref.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
@@ -22,36 +20,33 @@ permissions:
   contents: read
 
 jobs:
-  # Foundation has no public olean cache, so it is compiled here once, its warnings — upstream's,
-  # not ours — cleared, and handed to `build` through a cache keyed on toolchain and manifest.
   deps:
     name: Build Foundation (cached)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      # Probed first: on a hit every step below is skipped.
+      # The toolchain leads the key so `restore-keys` can fall back to the newest build under the
+      # same one; oleans from another toolchain are worth nothing.
       - name: Cache Foundation build (keyed on toolchain + manifest)
         id: foundation-cache
         uses: actions/cache@v6
         with:
           path: .lake/packages/Foundation/.lake/build
-          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
-      # elan and the mathlib cache only; the Foundation build and its cache are driven above.
+          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+          restore-keys: |
+            foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-
       - uses: leanprover/lean-action@v1
         if: steps.foundation-cache.outputs.cache-hit != 'true'
         with:
           build: false
           use-github-cache: false
-      - name: Build Foundation from source (cache miss only)
+      - name: Build Foundation (incremental when an older build was restored)
         if: steps.foundation-cache.outputs.cache-hit != 'true'
         run: lake build Foundation
-      # Lake replays each module's cached diagnostics on every downstream build. Emptying the
-      # `log` array of its `.trace` drops the replay without touching the `.olean`.
       - name: Clear Foundation's replayed-warning cache
         if: steps.foundation-cache.outputs.cache-hit != 'true'
         run: python3 .github/scripts/clear-dep-warnings.py .lake/packages/Foundation/.lake/build
 
-  # Build AlphaCentauri against the cleansed dependency layer from `deps`.
   build:
     name: Build project
     needs: deps
@@ -66,16 +61,14 @@ jobs:
         with:
           build: false
           use-github-cache: false
-      # Restore the Foundation build cleansed by `deps` (guaranteed present via `needs: deps`).
       - name: Restore Foundation build (warnings cleared)
         uses: actions/cache/restore@v6
         with:
           path: .lake/packages/Foundation/.lake/build
-          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
+          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
           fail-on-cache-miss: true
 
-      # Our own oleans only. Cache entries are immutable, so the key appends the sha and
-      # `restore-keys` falls back to the newest cache built against the same pins.
+      # Entries are immutable, hence the sha; `restore-keys` finds the newest one on these pins.
       - name: Restore project cache
         id: cache-restore
         uses: actions/cache/restore@v6
@@ -88,8 +81,7 @@ jobs:
         if: hashFiles('.lake/AlphaCentauri-x86_64-unknown-linux-gnu.tar.gz') != ''
         run: lake unpack
 
-      # A fallback cache can carry artifacts of modules that have since been renamed or deleted,
-      # and `lake build` leaves them alone because no source of theirs changed.
+      # A fallback cache carries artifacts of sources since renamed or deleted; lake keeps them.
       - name: Prune orphaned build artifacts from renamed/removed sources
         run: |
           python3 - <<'PY'
@@ -111,15 +103,11 @@ jobs:
       - name: Build AlphaCentauri (warnings are errors)
         run: lake build AlphaCentauri --wfail
 
-      # A failure is deferred to the last step of the job, so that the report still reaches the
-      # pull request and the cache below is still saved.
+      # Deferred to the last step, so the report still reaches the pull request.
       - name: Audit axioms
         id: audit
         continue-on-error: true
         run: just axiom-audit
-      # One comment per pull request, overwritten on every run, rendered from the JSON report by
-      # `.github/scripts/audit-comment.py`. Skipped for forks, whose token cannot write comments,
-      # and for `infrastructure`, which touches no mathematics.
       - name: Prepare the audit comment
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && !contains(github.event.pull_request.labels.*.name, 'infrastructure')
         run: |
@@ -135,11 +123,12 @@ jobs:
           header: axiom-audit
           path: .lake/audit-comment.md
 
-      # Skipped for forks, which cannot write the base repository's cache.
+      # Not in the merge queue, whose cache scope dies with the entry and is readable by nothing.
       - name: Pack project cache
+        if: github.event_name != 'merge_group'
         run: lake pack
       - name: Save project cache
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event_name != 'merge_group' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         uses: actions/cache/save@v6
         with:
           path: .lake/AlphaCentauri-x86_64-unknown-linux-gnu.tar.gz
@@ -151,7 +140,6 @@ jobs:
           echo "the axiom audit failed; see the 'Audit axioms' step"
           exit 1
 
-      # The zoo scans `Foundation` too, which this job has already built.
       - uses: typst-community/setup-typst@v4
       - uses: ts-graphviz/setup-graphviz@v2
       - name: Generate the zoo
@@ -162,8 +150,6 @@ jobs:
           name: zoo
           path: pages/zoo
 
-  # An unproved statement is an `axiom` under its own name, never a `sorry`, so that the audit
-  # reports the debt by name. This is the mechanical guard, and needs neither Lean nor a build.
   no-sorry:
     name: Check no sorry
     runs-on: ubuntu-latest
@@ -173,7 +159,6 @@ jobs:
       - name: Forbid sorry
         run: just no-sorry
 
-  # mk_all only scans the source tree (no build), so it runs as its own lightweight job.
   mk-all-check:
     name: Check mk_all executed
     runs-on: ubuntu-latest
@@ -192,7 +177,6 @@ jobs:
             exit 1
           fi
 
-  # A pull request builds the zoo but does not publish it.
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
@@ -208,7 +192,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      # No checkout: the artifact is the whole of what gets published.
       - name: Download the zoo
         uses: actions/download-artifact@v8
         with:

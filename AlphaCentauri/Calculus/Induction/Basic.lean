@@ -56,7 +56,7 @@ end RewriteClosed
 namespace LKI
 
 /-- Derivations of `LKI[C]`: Foundation's one-sided calculus for `ℒₒᵣ`, together with a leaf for
-the $\Delta_0$ sequents true in `ℕ` and an induction rule for the formulas of `C`.
+the axioms of `𝗣𝗔⁻` and an induction rule for the formulas of `C`.
 
 - [Bus98A, Section 1.4.1]
 - [Bus98A, Section 1.4.2] -/

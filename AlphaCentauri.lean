@@ -16,6 +16,9 @@ public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.Bootstrapping.TermVal
+public import AlphaCentauri.Calculus.Induction.Basic
+public import AlphaCentauri.Calculus.Induction.Forcing
+public import AlphaCentauri.Calculus.Induction.Theory
 public import AlphaCentauri.Hierarchy.Bounded
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
 public import AlphaCentauri.Model.Basic
@@ -59,6 +62,7 @@ public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.Rew
+public import AlphaCentauri.ToFoundation.Schemata
 public import AlphaCentauri.ToFoundation.Semiformula
 public import AlphaCentauri.ToFoundation.Theory
 public import AlphaCentauri.ToMathlib.Goodstein

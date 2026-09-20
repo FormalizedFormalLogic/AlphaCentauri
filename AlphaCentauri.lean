@@ -45,6 +45,7 @@ public import AlphaCentauri.Schemata.EA
 public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.Schemata.ParameterFreeInduction
+public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.ToFoundation.Absoluteness
 public import AlphaCentauri.ToFoundation.BooleanCombination
 public import AlphaCentauri.ToFoundation.Compact
@@ -52,8 +53,10 @@ public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.Eval
+public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
+public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Semiformula

@@ -201,6 +201,11 @@ def maxBelow (f : ℕ → ℕ) : ℕ → ℕ
   | 0 => 0
   | n + 1 => max (f n) (maxBelow f n)
 
+lemma maxBelow_eq_rec (f : ℕ → ℕ) : ∀ n : ℕ,
+    maxBelow f n = n.rec (motive := fun _ ↦ ℕ) 0 fun x ih ↦ max (f x) ih
+  | 0 => rfl
+  | n + 1 => by simp [maxBelow, maxBelow_eq_rec f n]
+
 lemma le_maxBelow (f : ℕ → ℕ) {x : ℕ} : {n : ℕ} → x < n → f x ≤ maxBelow f n
   | 0, h => absurd h (by simp)
   | n + 1, h => by
@@ -319,6 +324,11 @@ def indBound (h : List ℕ → ℕ → ℕ) (l : List ℕ) (b : ℕ) : ℕ → �
   | 0 => b
   | n + 1 => max (indBound h l b n) (h (n :: l) (indBound h l b n))
 
+lemma indBound_eq_rec (h : List ℕ → ℕ → ℕ) (l : List ℕ) (b : ℕ) : ∀ n : ℕ,
+    indBound h l b n = n.rec (motive := fun _ ↦ ℕ) b fun x ih ↦ max ih (h (x :: l) ih)
+  | 0 => rfl
+  | n + 1 => by simp [indBound, indBound_eq_rec h l b n]
+
 lemma le_indBound (h : List ℕ → ℕ → ℕ) (l : List ℕ) (b : ℕ) : ∀ n, b ≤ indBound h l b n
   | 0 => le_rfl
   | n + 1 => le_trans (le_indBound h l b n) (le_max_left _ _)
@@ -388,6 +398,31 @@ lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} 
   rcases key (Semiterm.val ![] (l.getD · 0) t) with ⟨φ, hφ, hσφ, hbnd⟩ | hinv
   · exact ⟨φ, hφ, hσφ, hbnd⟩
   · exact ⟨ξ/[t], by simp, StrictHierarchy.rew _ hξ, bnd_subst.mpr hinv⟩
+
+/-! ## Primitive recursion of the bounds -/
+
+lemma primrec_maxBelow {f : List ℕ × ℕ → ℕ → ℕ} (hf : Primrec₂ f) {B : List ℕ × ℕ → ℕ}
+    (hB : Primrec B) : Primrec fun p : List ℕ × ℕ ↦ maxBelow (f p) (B p) := by
+  have hstep : Primrec₂ fun (p : List ℕ × ℕ) (q : ℕ × ℕ) ↦ max (f p q.1) q.2 :=
+    Primrec.to₂ (Primrec.nat_max.comp (hf.comp Primrec.fst (Primrec.fst.comp Primrec.snd))
+      (Primrec.snd.comp Primrec.snd))
+  have h : Primrec fun p : List ℕ × ℕ ↦
+      (B p).rec (motive := fun _ ↦ ℕ) 0 fun x ih ↦ max (f p x) ih :=
+    Primrec.nat_rec' hB (Primrec.const 0) hstep
+  exact h.of_eq fun p ↦ (maxBelow_eq_rec _ _).symm
+
+lemma primrec_indBound {h : List ℕ → ℕ → ℕ} (hh : Primrec₂ h) {b : List ℕ × ℕ → ℕ}
+    (hb : Primrec b) {B : List ℕ × ℕ → ℕ} (hB : Primrec B) :
+    Primrec fun p : List ℕ × ℕ ↦ indBound h p.1 (b p) (B p) := by
+  have hstep : Primrec₂ fun (p : List ℕ × ℕ) (q : ℕ × ℕ) ↦ max q.2 (h (q.1 :: p.1) q.2) :=
+    Primrec.to₂ (Primrec.nat_max.comp (Primrec.snd.comp Primrec.snd)
+      (hh.comp
+        (Primrec.list_cons.comp (Primrec.fst.comp Primrec.snd) (Primrec.fst.comp Primrec.fst))
+        (Primrec.snd.comp Primrec.snd)))
+  have h' : Primrec fun p : List ℕ × ℕ ↦
+      (B p).rec (motive := fun _ ↦ ℕ) (b p) fun x ih ↦ max ih (h (x :: p.1) ih) :=
+    Primrec.nat_rec' hB hb hstep
+  exact h'.of_eq fun p ↦ (indBound_eq_rec _ _ _ _).symm
 
 end FFL.FirstOrder.Arithmetic.LKI
 

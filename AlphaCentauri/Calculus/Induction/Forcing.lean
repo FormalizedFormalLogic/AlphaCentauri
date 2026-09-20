@@ -278,7 +278,7 @@ protected def refl : (φ : ArithmeticProposition) → ⦃φ⦄ ⊩[C, D] φᴺ
       let ⟨bbψ, hbbψ⟩ := bψ.falsumEquiv
       let bbφ' : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼φ⦄ := Derivation.cast bbφ (by simp [inf_def]; abel)
       let bbψ' : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼ψ⦄ := Derivation.cast bbψ (by simp [inf_def]; abel)
-      let band : ⊢ᴸᴷᴵ[C]! ∼q + ⦃∼φ ⋏ ∼ψ⦄ := Derivation.and bbφ' bbψ'
+      let band := Derivation.and bbφ' bbψ'
       falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]; abel), by
         simpa [band, bbφ', bbψ'] using And.intro hbbφ hbbψ⟩
   |      ∀¹ φ => allEquiv.symm fun t ↦
@@ -431,7 +431,7 @@ def forcesSuccInd {ξ : ArithmeticSemiformula ℕ 1} (hξ : C ξ) (hD : ∀ t, D
   rw [show (succInd ξ : ArithmeticProposition)
       = (ξ/[‘0’]) 🡒 ((∀¹ (ξ 🡒 ξ/[‘(#0 + 1)’])) 🡒 ∀¹ ξ) from by simp [succInd]]
   refine forcesImply tp fun q s g₀ ↦ forcesImply (s.val.traversal tp) fun r s' gstep ↦ ?_
-  let tr : (∼r).Traversal := s'.val.traversal (s.val.traversal tp)
+  let tr := s'.val.traversal (s.val.traversal tp)
   refine allEquiv.symm fun t ↦ ?_
   rw [Semiformula.subst_doubleNegation]
   -- `r ⊩ (ξ/[t])ᴺ`, by the induction rule at a variable fresh for `r` and `ξ`
@@ -442,14 +442,14 @@ def forcesSuccInd {ξ : ArithmeticSemiformula ℕ 1} (hξ : C ξ) (hD : ∀ t, D
     simpa using this
   have hr : ∀ ψ ∈ ∼r, ¬ψ.FVar? m := fun ψ hψ ↦ LK.Sequent.not_fvar?_newVar (by simp [hψ])
   -- the base case
-  let d₀ : ⊢ᴸᴷᴵ[C, D]! ∼r + ⦃ξ/[‘0’]⦄ := derivableOfForced tr (g₀.monotone s')
+  let d₀ := derivableOfForced tr (g₀.monotone s')
   -- the step case, at the condition `r` extended by the induction hypothesis
   let tr' : (∼(r + ⦃ξ/[&m]⦄)).Traversal := (tr.add (.atom (∼(ξ/[&m])))).cast (by simp)
   let sr' : r + ⦃ξ/[&m]⦄ ≼ r :=
     ⟨(LK.Derivation.Positive.weakening (φ := ∼(ξ/[&m])) .refl).cast rfl (by simp)⟩
   let gxy : r ⊩[C, D] (ξ/[&m] 🡒 ξ/[‘&m + 1’])ᴺ := (gstep.allEquiv &m).cast (by
     simp [Semiformula.subst_doubleNegation, Rew.subst_subst_eq])
-  let gY : r + ⦃ξ/[&m]⦄ ⊩[C, D] (ξ/[‘&m + 1’])ᴺ :=
+  let gY :=
     modusPonensImply tr' (gxy.monotone sr')
       ((Forces.refl (ξ/[&m])).monotone (StrongerThan.ofSubset (.atom _) tr' (by simp)))
   let dstep : ⊢ᴸᴷᴵ[C, D]! ∼r + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄ :=
@@ -471,7 +471,7 @@ def forcesPeanoMinus {σ : ArithmeticSentence} (hD : D (Rewriting.emb σ)) (h : 
 
 - [Bus98A, Section 1.4.2] -/
 def forcesInd {ξ : ArithmeticSemiformula ℕ 1}
-    (hCD : (η : ArithmeticSemiformula ℕ 1) → C η → ∀ t, D (η/[t])) (hξ : C ξ)
+    (hCD : ∀ η, C η → ∀ t, D (η/[t])) (hξ : C ξ)
     (tp : (∼p).Traversal) : p ⊩[C, D] ((succInd ξ).univCl')ᴺ :=
   forcesUnivCl fun f ↦
     let hq : C ((Rew.rewrite f).q ▹ ξ) := by
@@ -522,17 +522,17 @@ of `𝗣𝗔⁻` and of the instances of the `C`-formulas.
 
 - [Bus98A, Section 1.4.2] -/
 theorem nonempty_anchored_of_derivation [RewriteClosed C] [RewriteClosed D]
-    (hCD : (η : ArithmeticSemiformula ℕ 1) → C η → ∀ t, D (η/[t]))
-    (hPA : ∀ α ∈ 𝗣𝗔⁻, D (Rewriting.emb α))
+    (hCD : ∀ η, C η → ∀ t, D (η/[t]))
+    (hPA : ∀ τ ∈ 𝗣𝗔⁻, D (Rewriting.emb τ))
     {Γ : LK.Sequent ℒₒᵣ} {Δ : Multiset ArithmeticSentence}
-    (hΔ : ∀ α ∈ Δ, α ∈ 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ C)
+    (hΔ : ∀ τ ∈ Δ, τ ∈ 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ C)
     (d : ⊢ᴸᴷ¹ Γ + ∼LK.Sequent.embed Δ) : ⊢ᴸᴷᴵ[C, D] Γ := by
   have key : ∀ φ ∈ LK.Sequent.embed Δ, Nonempty ((0 : LK.Sequent ℒₒᵣ) ⊩[C, D] φᴺ) := by
     intro φ hφ
-    obtain ⟨α, hα, rfl⟩ := Multiset.mem_map.mp hφ
-    rcases hΔ α hα with hα' | hα'
-    · exact ⟨forcesPeanoMinus (hPA α hα') hα' (Multiset.Traversal.zero.cast (by simp))⟩
-    · obtain ⟨ξ, hξ, rfl⟩ := by simpa [InductionScheme] using hα'
+    obtain ⟨τ, hτ, rfl⟩ := Multiset.mem_map.mp hφ
+    rcases hΔ τ hτ with hτ' | hτ'
+    · exact ⟨forcesPeanoMinus (hPA τ hτ') hτ' (Multiset.Traversal.zero.cast (by simp))⟩
+    · obtain ⟨ξ, hξ, rfl⟩ := by simpa [InductionScheme] using hτ'
       exact ⟨(forcesInd hCD hξ (Multiset.Traversal.zero.cast (by simp))).cast (by simp)⟩
   exact ⟨hauptsatz default default (fun φ hφ ↦ Classical.choice (key φ hφ)) d⟩
 
@@ -540,10 +540,10 @@ theorem nonempty_anchored_of_derivation [RewriteClosed C] [RewriteClosed D]
 
 - [Bus98A, Section 1.4.2] -/
 theorem nonempty_anchored_of_provable [RewriteClosed C] [RewriteClosed D]
-    (hCD : (η : ArithmeticSemiformula ℕ 1) → C η → ∀ t, D (η/[t]))
-    (hPA : ∀ α ∈ 𝗣𝗔⁻, D (Rewriting.emb α)) {σ : ArithmeticSentence}
+    (hCD : ∀ η, C η → ∀ t, D (η/[t]))
+    (hPA : ∀ τ ∈ 𝗣𝗔⁻, D (Rewriting.emb τ)) {σ : ArithmeticSentence}
     (h : 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ C ⊢ σ) :
-    ⊢ᴸᴷᴵ[C, D] ⦃(σ : ArithmeticProposition)⦄ := by
+    ⊢ᴸᴷᴵ[C, D] ⦃σ⦄ := by
   obtain ⟨Δ, hΔ, ⟨d⟩⟩ := Theory.Proof.provable_iff.mp h
   exact nonempty_anchored_of_derivation hCD hPA hΔ d
 
@@ -554,9 +554,9 @@ $\Pi_1$ propositions: the free cuts are eliminated.
 theorem nonempty_anchored_of_provable_inductionOnStrictHierarchy {σ : ArithmeticSentence}
     (h : 𝗜 𝚺 1 ⊢ σ) :
     ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1, fun φ ↦ StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ]
-      ⦃(σ : ArithmeticProposition)⦄ :=
+      ⦃σ⦄ :=
   nonempty_anchored_of_provable (fun _ hη _ ↦ .inl (StrictHierarchy.rew _ hη))
-    (fun α hα ↦ .inr (StrictHierarchy.rew _ (PeanoMinus.strictHierarchy α hα))) h
+    (fun τ hτ ↦ .inr (StrictHierarchy.rew _ (PeanoMinus.strictHierarchy τ hτ))) h
 
 end Canonical
 

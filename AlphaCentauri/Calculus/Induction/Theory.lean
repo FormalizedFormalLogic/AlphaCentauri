@@ -40,7 +40,7 @@ theorem nonempty_anchored_of_mem_peanoMinus {D : ArithmeticProposition → Prop}
 /-- Every axiom of `𝗣𝗔⁻` is derivable. -/
 theorem derivable_of_mem_peanoMinus (h : σ ∈ 𝗣𝗔⁻) : ⊢ᴸᴷᴵ[C] ⦃(σ : ArithmeticProposition)⦄ :=
   Nonempty.map Subtype.val
-    (nonempty_anchored_of_mem_peanoMinus (C := C) (D := fun _ ↦ True) h)
+    (nonempty_anchored_of_mem_peanoMinus (D := fun _ ↦ True) h)
 
 variable [RewriteClosed C]
 
@@ -86,9 +86,9 @@ theorem derivable_of_mem_inductionScheme (h : σ ∈ InductionScheme ℒₒᵣ C
 - [Bus98A, Section 1.4.2] -/
 theorem derivable_of_provable_induction (h : 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ C ⊢ σ) : ⊢ᴸᴷᴵ[C] ⦃σ⦄ := by
   refine derivable_of_provable ?_ h
-  rintro α (hα | hα)
-  · exact derivable_of_mem_peanoMinus hα
-  · exact derivable_of_mem_inductionScheme hα
+  rintro σ (hσ | hσ)
+  · exact derivable_of_mem_peanoMinus hσ
+  · exact derivable_of_mem_inductionScheme hσ
 
 /-- `LKI` over the strict $\Sigma_1$ formulas derives everything `𝗜 𝚺 1` proves: the induction
 scheme of `𝗜 𝚺 1` is the one its induction rule is as strong as.

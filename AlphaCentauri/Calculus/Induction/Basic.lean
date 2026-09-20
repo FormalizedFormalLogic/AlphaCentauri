@@ -61,7 +61,7 @@ the axioms of `𝗣𝗔⁻` and an induction rule for the formulas of `C`.
 - [Bus98A, Section 1.4.1]
 - [Bus98A, Section 1.4.2] -/
 inductive Derivation (C : ArithmeticSemiformula ℕ 1 → Prop) : LK.Sequent ℒₒᵣ → Type
-  | axm {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) : Derivation C ⦃Rewriting.emb σ⦄
+  | axm {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) : Derivation C ⦃σ⦄
   | ind {Γ} (φ) (hφ : C φ) (t) :
       Derivation C (Γ⁺ + ⦃∼(free φ), (shift φ)/[‘&0 + 1’]⦄) →
       Derivation C (Γ + ⦃∼(φ/[‘0’]), φ/[t]⦄)

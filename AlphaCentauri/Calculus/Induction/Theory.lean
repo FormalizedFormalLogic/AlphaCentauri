@@ -9,8 +9,7 @@ public import AlphaCentauri.ToFoundation.Schemata
 
 The induction rule derives the induction axiom for every formula of `C` — which is what its side
 formulas are for — so the whole `C`-induction scheme is derivable. A theory whose axioms are all
-`LKI[C]`-derivable proves only `LKI[C]`-derivable sentences, and the `bounded` leaf is already
-complete for the sequents of strict $\Pi_1$ formulas true in `ℕ`.
+`LKI[C]`-derivable proves only `LKI[C]`-derivable sentences.
 
 - [Bus98A, Section 1.4.2]
 -/
@@ -34,18 +33,9 @@ theorem derivable_of_provable (hT : ∀ σ ∈ T, ⊢ᴸᴷᴵ[C] ⦃σ⦄) (h :
     obtain ⟨ψ, hψ, rfl⟩ := Multiset.mem_map.mp (by simpa [LK.Sequent.embed] using hδ)
     exact hT ψ (hΔ ψ hψ)
 
-/-- Every axiom of `𝗣𝗔⁻` has an anchored derivation: it is strict $\Pi_1$ and true in `ℕ`, so the
-`bounded` leaf and the universal rule derive it without a cut. -/
+/-- Every axiom of `𝗣𝗔⁻` has an anchored derivation: it is a leaf of the calculus. -/
 theorem nonempty_anchored_of_mem_peanoMinus {D : ArithmeticProposition → Prop} (h : σ ∈ 𝗣𝗔⁻) :
-    Nonempty (⊢ᴸᴷᴵ[C, D]! ⦃(σ : ArithmeticProposition)⦄) :=
-  nonempty_anchored_of_valid _ _ le_rfl
-    (by
-      intro φ hφ
-      rcases Multiset.mem_singleton.mp hφ
-      exact StrictHierarchy.rew _ (PeanoMinus.strictHierarchy σ h))
-    (by
-      intro ε
-      exact ⟨Rewriting.emb σ, by simp, by simpa [models_iff] using Theory.models (M := ℕ) _ h⟩)
+    ⊢ᴸᴷᴵ[C, D] ⦃(σ : ArithmeticProposition)⦄ := ⟨⟨.axm h, by simp⟩⟩
 
 /-- Every axiom of `𝗣𝗔⁻` is derivable. -/
 theorem derivable_of_mem_peanoMinus (h : σ ∈ 𝗣𝗔⁻) : ⊢ᴸᴷᴵ[C] ⦃(σ : ArithmeticProposition)⦄ :=

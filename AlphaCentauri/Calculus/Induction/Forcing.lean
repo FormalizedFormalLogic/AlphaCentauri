@@ -457,16 +457,13 @@ def forcesSuccInd {ξ : ArithmeticSemiformula ℕ 1} (hξ : C ξ) (hD : ∀ t, D
   exact ⟨Derivation.indByNewVar hξ t hξm hr d₀.val dstep.val,
     Derivation.anchored_indByNewVar d₀.prop dstep.prop⟩
 
-/-- Every axiom of `𝗣𝗔⁻` is forced: it is strict `Π₁` and true in `ℕ`, so the `bounded` leaf and
-the universal rule derive it without a cut.
+/-- Every axiom of `𝗣𝗔⁻` is forced: it is a leaf of the calculus, so it has an anchored
+derivation.
 
 - [Bus98A, Section 1.4.2] -/
-noncomputable def forcesPeanoMinus {σ : ArithmeticSentence} (hD : D (Rewriting.emb σ))
-    (h : σ ∈ 𝗣𝗔⁻) (tp : (∼p).Traversal) :
-    p ⊩[C, D] (Rewriting.emb σ : ArithmeticProposition)ᴺ :=
-  let d : ⊢ᴸᴷᴵ[C, D]! ⦃(Rewriting.emb σ : ArithmeticProposition)⦄ :=
-    Classical.choice (nonempty_anchored_of_mem_peanoMinus h)
-  forcesOfAnchored hD tp ⟨(Derivation.weakeningMany tp d.val).cast (by abel), by simp [d.prop]⟩
+def forcesPeanoMinus {σ : ArithmeticSentence} (hD : D (Rewriting.emb σ)) (h : σ ∈ 𝗣𝗔⁻)
+    (tp : (∼p).Traversal) : p ⊩[C, D] (Rewriting.emb σ : ArithmeticProposition)ᴺ :=
+  forcesOfAnchored hD tp ⟨(Derivation.weakeningMany tp (.axm h)).cast (by abel), by simp⟩
 
 /-- Every axiom of the `C`-induction scheme is forced.
 
@@ -527,7 +524,7 @@ theorem nonempty_anchored_of_derivation [RewriteClosed C] [RewriteClosed D]
     (hPA : ∀ α ∈ 𝗣𝗔⁻, D (Rewriting.emb α))
     {Γ : LK.Sequent ℒₒᵣ} {Δ : Multiset ArithmeticSentence}
     (hΔ : ∀ α ∈ Δ, α ∈ 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ C)
-    (d : ⊢ᴸᴷ¹ Γ + ∼LK.Sequent.embed Δ) : Nonempty (⊢ᴸᴷᴵ[C, D]! Γ) := by
+    (d : ⊢ᴸᴷ¹ Γ + ∼LK.Sequent.embed Δ) : ⊢ᴸᴷᴵ[C, D] Γ := by
   have key : ∀ φ ∈ LK.Sequent.embed Δ, Nonempty ((0 : LK.Sequent ℒₒᵣ) ⊩[C, D] φᴺ) := by
     intro φ hφ
     obtain ⟨α, hα, rfl⟩ := Multiset.mem_map.mp hφ
@@ -544,22 +541,20 @@ theorem nonempty_anchored_of_provable [RewriteClosed C] [RewriteClosed D]
     (hCD : (η : ArithmeticSemiformula ℕ 1) → C η → ∀ t, D (η/[t]))
     (hPA : ∀ α ∈ 𝗣𝗔⁻, D (Rewriting.emb α)) {σ : ArithmeticSentence}
     (h : 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ C ⊢ σ) :
-    Nonempty (⊢ᴸᴷᴵ[C, D]! ⦃(σ : ArithmeticProposition)⦄) := by
+    ⊢ᴸᴷᴵ[C, D] ⦃(σ : ArithmeticProposition)⦄ := by
   obtain ⟨Δ, hΔ, ⟨d⟩⟩ := Theory.Proof.provable_iff.mp h
   exact nonempty_anchored_of_derivation hCD hPA hΔ d
 
-/-- The anchoring class for `𝗜𝚺₁`: the $\Sigma_1$ and the $\Pi_1$ propositions, which is what the
-sequents of the witnessing argument are made of. -/
-abbrev Sigma1OrPi1 (φ : ArithmeticProposition) : Prop := Hierarchy 𝚺 1 φ ∨ Hierarchy 𝚷 1 φ
-
-/-- A proof in `𝗜𝚺₁` becomes a derivation anchored in the $\Sigma_1$ and $\Pi_1$ propositions:
-the free cuts are eliminated.
+/-- A proof in `𝗜 𝚺 1` becomes a derivation anchored in the strict $\Sigma_1$ and the strict
+$\Pi_1$ propositions: the free cuts are eliminated.
 
 - [Bus98A, Section 1.4.2] -/
-theorem nonempty_anchored_of_provable_ISigma1 {σ : ArithmeticSentence} (h : 𝗜𝚺₁ ⊢ σ) :
-    Nonempty (⊢ᴸᴷᴵ[Hierarchy 𝚺 1, Sigma1OrPi1]! ⦃(σ : ArithmeticProposition)⦄) :=
-  nonempty_anchored_of_provable (fun _ hη _ ↦ .inl (Hierarchy.rew _ hη))
-    (fun α hα ↦ .inr ((PeanoMinus.strictHierarchy α hα).hierarchy.rew _)) h
+theorem nonempty_anchored_of_provable_inductionOnStrictHierarchy {σ : ArithmeticSentence}
+    (h : 𝗜 𝚺 1 ⊢ σ) :
+    ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1, fun φ ↦ StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ]
+      ⦃(σ : ArithmeticProposition)⦄ :=
+  nonempty_anchored_of_provable (fun _ hη _ ↦ .inl (StrictHierarchy.rew _ hη))
+    (fun α hα ↦ .inr (StrictHierarchy.rew _ (PeanoMinus.strictHierarchy α hα))) h
 
 end Canonical
 

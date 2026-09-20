@@ -2,24 +2,20 @@ module
 
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.Hierarchy.Bounded
-public import Foundation.FirstOrder.Arithmetic.Basic
+public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.LK.Basic
 
 /-!
 # A one-sided sequent calculus with an induction rule
 
 `LKI[C]` is Foundation's one-sided calculus `LK.Derivation` over `ℒₒᵣ` with two further rules: a
-leaf `bounded` for a sequent of $\Delta_0$ formulas true in `ℕ` under every assignment, and an
-induction rule for the formulas of a class `C`, carrying the side formulas that make it as strong
-as the induction axioms for `C`. A derivation is `Anchored D` when every cut formula belongs
-to `D`.
+leaf `axm` for the axioms of `𝗣𝗔⁻`, and an induction rule for the formulas of a class `C`,
+carrying the side formulas that make it as strong as the induction axioms for `C`. A derivation
+is `Anchored D` when every cut formula belongs to `D`.
 
 The induction class is a parameter: taking `C` to be the strict $\Sigma_1$ formulas and `D` the
 strict $\Sigma_1$ and $\Pi_1$ ones gives the calculus for $\mathsf{I}\Sigma_1$, and the same
 calculus serves the other induction schemes.
-
-The leaf is semantic rather than the axioms of `𝗣𝗔⁻`, so that the calculus does not depend on the
-axiomatization: every axiom of `𝗣𝗔⁻` is strict $\Pi_1$ and true in `ℕ`, so the leaf derives it.
 
 - [Bus98A, Section 1.4.1]
 - [Bus98A, Section 1.4.2]
@@ -69,8 +65,7 @@ the converse needs a cut on the base case.
 - [Bus98A, Section 1.4.1]
 - [Bus98A, Section 1.4.2] -/
 inductive Derivation (C : ArithmeticSemiformula ℕ 1 → Prop) : LK.Sequent ℒₒᵣ → Type
-  | bounded (Γ) (hΓ : ∀ φ ∈ Γ, Semiformula.Bounded φ)
-      (h : ∀ ε : ℕ → ℕ, ∃ φ ∈ Γ, φ.Evalf ε) : Derivation C Γ
+  | axm {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) : Derivation C ⦃Rewriting.emb σ⦄
   | ind {Γ} (φ) (hφ : C φ) (t) :
       Derivation C (Γ + ⦃φ/[‘0’]⦄) →
       Derivation C (Γ⁺ + ⦃∼(free φ), (shift φ)/[‘&0 + 1’]⦄) →
@@ -162,7 +157,8 @@ def ofLK {Γ : LK.Sequent ℒₒᵣ} : (⊢ᴸᴷ¹ Γ) → ⊢ᴸᴷᴵ[C]! Γ
 
 - [Bus98A, Section 1.4.1] -/
 theorem sound (ε : ℕ → ℕ) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) → ∃ φ ∈ Γ, φ.Evalf ε
-  | bounded _ _ h => h ε
+  | axm (σ := σ) h =>
+    ⟨Rewriting.emb σ, by simp, by simpa [models_iff] using Theory.models (M := ℕ) _ h⟩
   | ind (Γ := Γ) φ _ t d₀ d => by
     by_contra! hc;
     have hΓ : ∀ ψ ∈ Γ, ¬ψ.Evalf ε := fun ψ hψ ↦ hc ψ (by simp [hψ])
@@ -253,7 +249,7 @@ def ind' (hξ : C ξ) (t) (tΓ : Γ.Traversal)
 
 - [Bus98A, Section 1.4.2] -/
 def Anchored (D : ArithmeticProposition → Prop) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) → Prop
-  | bounded _ _ _ => True
+  | axm _ => True
   | ind _ _ _ d₀ d => Anchored D d₀ ∧ Anchored D d
   | identity _ _ => True
   | cut (φ := χ) dp dn => D χ ∧ Anchored D dp ∧ Anchored D dn
@@ -265,7 +261,8 @@ def Anchored (D : ArithmeticProposition → Prop) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) �
   | all d => Anchored D d
   | exs d => Anchored D d
 
-@[simp] lemma anchored_bounded {hΓ h} : Anchored D (bounded (C := C) Γ hΓ h) := trivial
+@[simp] lemma anchored_axm {σ : ArithmeticSentence} {h : σ ∈ 𝗣𝗔⁻} :
+    Anchored D (axm (C := C) h) := trivial
 
 @[simp] lemma anchored_ind_iff {hξ} {d₀ : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[‘0’]⦄}
     {d : ⊢ᴸᴷᴵ[C]! Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄} :
@@ -332,7 +329,7 @@ def Anchored (D : ArithmeticProposition → Prop) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) �
     Anchored D (ind' hξ t tΓ d) ↔ Anchored D d := by simp [ind']
 
 lemma Anchored.mono (h : ∀ φ, D φ → D' φ) {Γ} : {d : ⊢ᴸᴷᴵ[C]! Γ} → Anchored D d → Anchored D' d
-  | bounded _ _ _, _ => trivial
+  | axm _, _ => trivial
   | ind _ _ _ _ _, hd => ⟨.mono h hd.1, .mono h hd.2⟩
   | identity _ _, _ => trivial
   | cut _ _, hd => ⟨h _ hd.1, .mono h hd.2.1, .mono h hd.2.2⟩
@@ -351,17 +348,7 @@ section rewrite
 variable [RewriteClosed C]
 
 def rewrite {Γ} (f : ℕ → ArithmeticTerm ℕ) : (⊢ᴸᴷᴵ[C]! Γ) → ⊢ᴸᴷᴵ[C]! Γ.map (Rew.rewrite f ▹ ·)
-  | bounded Γ hΓ h =>
-    bounded _
-      (by
-        intro φ hφ
-        rcases Multiset.mem_map.mp hφ with ⟨ψ, hψ, rfl⟩
-        exact (hΓ ψ hψ).rew _)
-      (by
-        intro ε
-        obtain ⟨ψ, hψ, hv⟩ := h fun x ↦ Semiterm.val ![] ε (f x)
-        exact ⟨Rew.rewrite f ▹ ψ, Multiset.mem_map_of_mem _ hψ,
-          by simpa [Semiformula.eval_rewrite] using hv⟩)
+  | axm h => cast (axm h) (by simp)
   | ind (Γ := Γ) φ hφ t d₀ d =>
     let g : ℕ → ArithmeticTerm ℕ := &0 :>ₙ fun x ↦ Rew.shift (f x)
     have h₀ := d₀.rewrite f
@@ -434,7 +421,7 @@ def generalizeByNewVar {m} (hξ : ¬ξ.FVar? m) (hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar?
 variable [RewriteClosed D] {Γ : LK.Sequent ℒₒᵣ}
 
 lemma anchored_rewrite {Γ} : ∀ (d : ⊢ᴸᴷᴵ[C]! Γ) (f), Anchored D d → Anchored D (d.rewrite f)
-  | bounded _ _ _, _, _ => trivial
+  | axm _, _, _ => by simp [rewrite]
   | ind _ _ _ d₀ d, _, h => by
     simpa [rewrite] using ⟨anchored_rewrite d₀ _ h.1, anchored_rewrite d _ h.2⟩
   | identity _ _, _, _ => trivial
@@ -476,6 +463,9 @@ abbrev AnchoredDerivation (C : ArithmeticSemiformula ℕ 1 → Prop) (D : Arithm
 
 @[inherit_doc] notation:45 "⊢ᴸᴷᴵ[" C ", " D "]! " Γ:45 => AnchoredDerivation C D Γ
 
+/-- `⊢ᴸᴷᴵ[C, D] Γ` says that `Γ` has a `D`-anchored derivation in `LKI[C]`. -/
+notation:45 "⊢ᴸᴷᴵ[" C ", " D "] " Γ:45 => Nonempty (AnchoredDerivation C D Γ)
+
 namespace AnchoredDerivation
 
 variable {C : ArithmeticSemiformula ℕ 1 → Prop} {D : ArithmeticProposition → Prop}
@@ -486,84 +476,6 @@ def cast (d : ⊢ᴸᴷᴵ[C, D]! Γ) (e : Γ = Δ := by abel) : ⊢ᴸᴷᴵ[C,
 
 end AnchoredDerivation
 
-/-! ## Completeness for the true strict `$\Pi_1$` sequents -/
-
-section valid
-
-variable {C : ArithmeticSemiformula ℕ 1 → Prop} {D : ArithmeticProposition → Prop}
-  {φ : ArithmeticProposition}
-
-private lemma bounded_of_complexity_zero (h : φ.complexity = 0) : Semiformula.Bounded φ := by
-  match φ with
-  | .rel _ _ | .nrel _ _ | ⊤ | ⊥ => simp
-  | _ ⋏ _ | _ ⋎ _ | ∀¹ _ | ∃¹ _ => simp at h
-
-private lemma exists_all_of_strictPi1 (h : StrictHierarchy 𝚷 1 φ)
-    (hb : ¬Semiformula.Bounded φ) : ∃ ξ, φ = ∀¹ ξ ∧ StrictHierarchy 𝚷 1 ξ := by
-  rcases h with _ | h | _ | ⟨hξ⟩
-  · rcases h with h | _ | _ | _
-    · exact absurd h hb
-  · exact ⟨_, rfl, hξ⟩
-
-private lemma vecCons_head_tail (ε : ℕ → ℕ) : ε 0 :>ₙ (fun x ↦ ε (x + 1)) = ε := by
-  funext x; cases x <;> rfl
-
-/-- A sequent of strict $\Pi_1$ formulas true in `ℕ` under every assignment has an anchored
-derivation: on this fragment the `bounded` leaf and the universal rule are already complete. -/
-theorem nonempty_anchored_of_valid (n : ℕ) (Γ : LK.Sequent ℒₒᵣ)
-    (hsum : (Γ.map Semiformula.complexity).sum ≤ n)
-    (hΓ : ∀ φ ∈ Γ, StrictHierarchy 𝚷 1 φ)
-    (hval : ∀ ε : ℕ → ℕ, ∃ φ ∈ Γ, φ.Evalf ε) : Nonempty (⊢ᴸᴷᴵ[C, D]! Γ) := by
-  induction n generalizing Γ with
-  | zero =>
-    refine ⟨⟨.bounded Γ (fun φ hφ ↦ bounded_of_complexity_zero (Nat.le_zero.mp ?_)) hval, by simp⟩⟩
-    exact le_trans (Multiset.le_sum_of_mem (Multiset.mem_map_of_mem _ hφ)) hsum
-  | succ n ih =>
-    by_cases hb : ∀ φ ∈ Γ, Semiformula.Bounded φ
-    · exact ⟨⟨.bounded Γ hb hval, by simp⟩⟩
-    · push Not at hb;
-      obtain ⟨φ, hφΓ, hφb⟩ := hb
-      obtain ⟨ξ, rfl, hξ⟩ := exists_all_of_strictPi1 (hΓ φ hφΓ) hφb
-      obtain ⟨Γ', rfl⟩ : ∃ Γ', Γ = Γ' + ⦃∀¹ ξ⦄ := by
-        obtain ⟨Γ', rfl⟩ := Multiset.exists_cons_of_mem hφΓ
-        exact ⟨Γ', by simp [Multiset.add_atom_eq_cons]⟩
-      have hshift : (Γ'⁺).map Semiformula.complexity = Γ'.map Semiformula.complexity := by
-        simp [Rewriting.shifts, Multiset.map_map]
-      have h : Nonempty (⊢ᴸᴷᴵ[C, D]! Γ'⁺ + ⦃free ξ⦄) := by
-        apply ih
-        · simp only [Multiset.map_add, Multiset.sum_add, hshift] at hsum ⊢
-          simp [Multiset.atom_eq_singleton] at hsum ⊢
-          omega
-        · intro ψ hψ
-          rcases Multiset.mem_add.mp hψ with h | h
-          · obtain ⟨χ, hχ, rfl⟩ := Multiset.mem_map.mp (by simpa [Rewriting.shifts] using h)
-            exact StrictHierarchy.rew _ (hΓ χ (by simp [hχ]))
-          · have e : ψ = free ξ := by simpa using h
-            exact e ▸ StrictHierarchy.rew _ hξ
-        · intro ε
-          obtain ⟨ψ, hψ, hv⟩ := hval fun x ↦ ε (x + 1)
-          rcases Multiset.mem_add.mp hψ with h | h
-          · refine ⟨shift ψ, by simpa [Rewriting.shifts] using Or.inl ⟨ψ, h, rfl⟩, ?_⟩
-            rw [← vecCons_head_tail ε]
-            simpa using hv
-          · have e : ψ = ∀¹ ξ := by simpa using h
-            subst e
-            refine ⟨free ξ, by simp, ?_⟩
-            rw [← vecCons_head_tail ε]
-            have : ∀ a : ℕ, Semiformula.Eval ![a] (fun x ↦ ε (x + 1)) ξ := by simpa using hv
-            simpa using this (ε 0)
-      exact h.map fun d ↦ ⟨d.val.all, by simpa using d.prop⟩
-
-/-- A sequent of strict $\Pi_1$ formulas true in `ℕ` under every assignment is derivable. -/
-theorem derivable_of_valid (n : ℕ) (Γ : LK.Sequent ℒₒᵣ)
-    (hsum : (Γ.map Semiformula.complexity).sum ≤ n)
-    (hΓ : ∀ φ ∈ Γ, StrictHierarchy 𝚷 1 φ)
-    (hval : ∀ ε : ℕ → ℕ, ∃ φ ∈ Γ, φ.Evalf ε) : ⊢ᴸᴷᴵ[C] Γ :=
-  Nonempty.map Subtype.val
-    (nonempty_anchored_of_valid (C := C) (D := fun _ ↦ True) n Γ hsum hΓ hval)
-
-end valid
-
 namespace Derivable
 
 variable {C : ArithmeticSemiformula ℕ 1 → Prop} {Γ Δ : LK.Sequent ℒₒᵣ}
@@ -571,8 +483,7 @@ variable {C : ArithmeticSemiformula ℕ 1 → Prop} {Γ Δ : LK.Sequent ℒₒ�
 
 /-! ### The rules, read as closure properties of derivability -/
 
-lemma bounded (Γ) (hΓ : ∀ φ ∈ Γ, Semiformula.Bounded φ)
-    (h : ∀ ε : ℕ → ℕ, ∃ φ ∈ Γ, φ.Evalf ε) : ⊢ᴸᴷᴵ[C] Γ := ⟨.bounded Γ hΓ h⟩
+lemma axm {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) : ⊢ᴸᴷᴵ[C] ⦃Rewriting.emb σ⦄ := ⟨.axm h⟩
 
 lemma ind (hξ : C ξ) (t) (h₀ : ⊢ᴸᴷᴵ[C] Γ + ⦃ξ/[‘0’]⦄)
     (h : ⊢ᴸᴷᴵ[C] Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄) : ⊢ᴸᴷᴵ[C] Γ + ⦃ξ/[t]⦄ :=

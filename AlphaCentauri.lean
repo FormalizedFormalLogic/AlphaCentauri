@@ -18,6 +18,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.Calculus.Induction.Forcing
+public import AlphaCentauri.Calculus.Induction.Instantiation
 public import AlphaCentauri.Calculus.Induction.Theory
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.Hierarchy.Bounded

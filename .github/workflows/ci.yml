@@ -29,20 +29,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      # Probed first: on a hit every step below is skipped.
+      # Probed first: on an exact hit every step below is skipped. The toolchain leads the key so
+      # that `restore-keys` can fall back to the newest build under the same one — a pin that moved
+      # then rebuilds the modules Foundation changed instead of all of them. A build made under a
+      # different toolchain is worth nothing, and the key keeps it out of reach.
       - name: Cache Foundation build (keyed on toolchain + manifest)
         id: foundation-cache
         uses: actions/cache@v6
         with:
           path: .lake/packages/Foundation/.lake/build
-          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
+          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+          restore-keys: |
+            foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-
       # elan and the mathlib cache only; the Foundation build and its cache are driven above.
       - uses: leanprover/lean-action@v1
         if: steps.foundation-cache.outputs.cache-hit != 'true'
         with:
           build: false
           use-github-cache: false
-      - name: Build Foundation from source (cache miss only)
+      # Incremental when `restore-keys` found an older build of the same toolchain, from source
+      # when it found nothing.
+      - name: Build Foundation (cache miss only)
         if: steps.foundation-cache.outputs.cache-hit != 'true'
         run: lake build Foundation
       # Lake replays each module's cached diagnostics on every downstream build. Emptying the
@@ -135,11 +142,13 @@ jobs:
           header: axiom-audit
           path: .lake/audit-comment.md
 
-      # Skipped for forks, which cannot write the base repository's cache.
+      # Skipped for forks, which cannot write the base repository's cache, and in the merge queue,
+      # whose scope dies with the entry and is readable by nothing.
       - name: Pack project cache
+        if: github.event_name != 'merge_group'
         run: lake pack
       - name: Save project cache
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event_name != 'merge_group' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         uses: actions/cache/save@v6
         with:
           path: .lake/AlphaCentauri-x86_64-unknown-linux-gnu.tar.gz

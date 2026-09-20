@@ -514,6 +514,42 @@ def hauptsatz [RewriteClosed C] [RewriteClosed D] {Γ Δ : LK.Sequent ℒₒᵣ}
           (by simp))).cast φ₀.property.2
   (sound d.gödelGentzen (∼Γ) t g).falsumEquiv.cast (by simp)
 
+/-! ## Anchored derivations from proofs -/
+
+open Forces in
+/-- A proof from `𝗣𝗔⁻` with `C`-induction becomes a `D`-anchored derivation, provided `D` holds of
+the axioms of `𝗣𝗔⁻` and of the instances of the `C`-formulas.
+
+- [Bus98A, Section 1.4.2] -/
+theorem nonempty_anchored_of_provable [RewriteClosed C] [RewriteClosed D]
+    {σ : ArithmeticSentence} (hCD : (η : ArithmeticSemiformula ℕ 1) → C η → ∀ t, D (η/[t]))
+    (hPA : ∀ α ∈ 𝗣𝗔⁻, D (Rewriting.emb α)) (h : 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ C ⊢ σ) :
+    Nonempty (⊢ᴸᴷᴵ[C, D]! ⦃(σ : ArithmeticProposition)⦄) := by
+  obtain ⟨Δ, hΔ, ⟨d⟩⟩ := Theory.Proof.provable_iff.mp h
+  have key : ∀ φ ∈ LK.Sequent.embed Δ, Nonempty ((0 : LK.Sequent ℒₒᵣ) ⊩[C, D] φᴺ) := by
+    intro φ hφ
+    obtain ⟨α, hα, rfl⟩ := Multiset.mem_map.mp hφ
+    rcases hΔ α hα with hα' | hα'
+    · exact ⟨forcesPeanoMinus (hPA α hα') hα' (Multiset.Traversal.zero.cast (by simp))⟩
+    · obtain ⟨ξ, hξ, rfl⟩ := by simpa [InductionScheme] using hα'
+      exact ⟨(forcesInd hCD hξ (Multiset.Traversal.zero.cast (by simp))).cast (by simp)⟩
+  exact ⟨hauptsatz (.atom _) default (fun φ hφ ↦ Classical.choice (key φ hφ)) d⟩
+
+/-- The anchoring class for `𝗜 𝚺 1`: the strict $\Sigma_1$ and the strict $\Pi_1$ propositions,
+which is what the sequents of the witnessing argument are made of. -/
+abbrev StrictSigma1OrPi1 (φ : ArithmeticProposition) : Prop :=
+  StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ
+
+/-- A proof in `𝗜 𝚺 1` becomes a derivation anchored in the strict $\Sigma_1$ and $\Pi_1$
+propositions: the free cuts are eliminated.
+
+- [Bus98A, Section 1.4.2] -/
+theorem nonempty_anchored_of_provable_inductionOnStrictHierarchy {σ : ArithmeticSentence}
+    (h : 𝗜 𝚺 1 ⊢ σ) :
+    Nonempty (⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1, StrictSigma1OrPi1]! ⦃(σ : ArithmeticProposition)⦄) :=
+  nonempty_anchored_of_provable (fun _ hη _ ↦ .inl (StrictHierarchy.rew _ hη))
+    (fun α hα ↦ .inr (StrictHierarchy.rew _ (PeanoMinus.strictHierarchy α hα))) h
+
 end Canonical
 
 end FFL.FirstOrder.Arithmetic.LKI

@@ -152,10 +152,10 @@ secret `BOT_APP_PRIVATE_KEY`), because a push made with `github.token` starts no
 A bump that breaks nothing lands by itself. When the branch's diff against `main` is the pin
 files alone, the workflow queues its merge (`gh pr merge --squash --auto`) and GitHub performs
 it once the checks are green; the checks are the whole review, because there is nothing else in
-the diff to read. A branch that carries more than the pins is never queued. `main` requires its
-checks to be current, so a queued merge would otherwise wait for ever the moment anything else
-lands first: every push to `main` therefore updates the bump's branch, and the checks run again
-against the new base.
+the diff to read. A branch that carries more than the pins is never queued. Nothing waits on the
+branch being current: `main` is behind a merge queue, which squashes each entry onto the tip and
+runs the checks there (`merge_group` in `ci.yml`), so a bump opened before someone else's work
+still lands without being touched.
 
 [`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes the rest: when
 CI fails on that branch it hands it to Claude Code, which repairs this repository in place and

@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Calculus.Induction.Basic
+public import AlphaCentauri.ToFoundation.Schemata
 public import Foundation.FirstOrder.LK.Hauptsatz
 
 /-!
@@ -151,6 +152,9 @@ def ofSubset (b : ContextForces C D Γ Λ') (h : Λ ⊆ Λ') : ContextForces C D
 
 def monotone (b : ContextForces C D Γ Λ) (s : Δ ≼ Γ) : ContextForces C D Δ Λ :=
   fun φ hφ ↦ (b φ hφ).monotone s
+
+def atom (b : Γ ⊩[C, D] φ) : ContextForces C D Γ ⦃φ⦄ :=
+  fun _ hψ ↦ b.cast (Multiset.mem_singleton.mp hψ).symm
 
 def cons (b : ContextForces C D Γ Λ) (hφ : Γ ⊩[C, D] φ) : ContextForces C D Γ (Λ + ⦃φ⦄) :=
   fun ψ hψ ↦ if h : φ = ψ then hφ.cast h else b ψ (by simp_all [eq_comm])
@@ -363,6 +367,106 @@ def derivableOfForced (tΓ : (∼Γ).Traversal) (f : Γ ⊩[C, D] χᴺ) : ⊢�
         (Multiset.mem_singleton.mp hψ).symm
   (b.modusPonens (f.monotone (StrongerThan.minLeLeft Γ ⦃∼χ⦄ tχ))).falsumEquiv.cast
     (by simp [inf_def])
+
+/-! ## The translated connectives -/
+
+/-- Transporting a forced formula along an `LJ` derivation from it. -/
+def ofLJ (tΓ : (∼Γ).Traversal) (d : ⦃φ⦄ ⊢ᴸᴶ¹ ψ) (b : Γ ⊩[C, D] φ) : Γ ⊩[C, D] ψ :=
+  sound d Γ tΓ (.atom b)
+
+variable {χ' : ArithmeticProposition}
+
+/-- Forcing the translation of an implication: it is enough to turn a forced antecedent into a
+forced consequent at every stronger condition. -/
+def forcesImply (tΓ : (∼Γ).Traversal)
+    (b : (Δ : LK.Sequent ℒₒᵣ) → (s : Δ ≼ Γ) → (Δ ⊩[C, D] χᴺ) → Δ ⊩[C, D] χ'ᴺ) :
+    Γ ⊩[C, D] (χ 🡒 χ')ᴺ :=
+  Forces.cast (implyEquiv.symm fun Δ s c ↦
+    let tΔ := s.val.traversal tΓ
+    let ⟨c₁, c₂⟩ := c.andEquiv
+    c₂.modusPonens <| b Δ s <| ofLJ tΔ (LJ.Derivation.negDoubleNegation' χ).1 c₁)
+    (Semiformula.doubleNegation_imply χ χ').symm
+
+/-- Using the translation of an implication. -/
+def modusPonensImply (tΓ : (∼Γ).Traversal) (f : Γ ⊩[C, D] (χ 🡒 χ')ᴺ) (b : Γ ⊩[C, D] χᴺ) :
+    Γ ⊩[C, D] χ'ᴺ :=
+  let f : Γ ⊩[C, D] ∼(∼(∼χ)ᴺ ⋏ ∼χ'ᴺ) := f.cast (Semiformula.doubleNegation_imply χ χ')
+  let g : Γ ⊩[C, D] ∼(∼χ'ᴺ) := implyEquiv.symm fun Δ s c ↦
+    (f.monotone s).modusPonens <| andEquiv.symm
+      ⟨ofLJ (s.val.traversal tΓ) (LJ.Derivation.negDoubleNegation' χ).2 (b.monotone s), c⟩
+  ofLJ tΓ (LJ.Derivation.dneOfNegative (by simp)) g
+
+/-! ## Universal closure -/
+
+/-- A condition forcing every substitution instance of `ψ` forces its universal closure. -/
+def forcesAllClosure : {n : ℕ} → (ψ : ArithmeticSemiformula ℕ n) →
+    ((v : Fin n → ArithmeticTerm ℕ) → Γ ⊩[C, D] (ψ⇜v)ᴺ) → Γ ⊩[C, D] (∀¹* ψ)ᴺ
+  | 0, ψ, h => (h ![]).cast (by simp)
+  | _ + 1, ψ, h => by
+    refine forcesAllClosure (∀¹ ψ) fun v ↦ ?_
+    rw [show ((∀¹ ψ)⇜v : ArithmeticProposition) = ∀¹ ((Rew.subst v).q ▹ ψ) from rfl]
+    exact allEquiv.symm fun t ↦ (h (t :> v)).cast (by
+      rw [Semiformula.subst_doubleNegation, Rew.subst_q_app])
+
+/-- A condition forcing every rewriting of `χ` forces its universal closure. -/
+def forcesUnivCl (h : (f : ℕ → ArithmeticTerm ℕ) → Γ ⊩[C, D] (Rew.rewrite f ▹ χ)ᴺ) :
+    Γ ⊩[C, D] (χ.univCl')ᴺ :=
+  forcesAllClosure _ fun v ↦
+    (h fun x ↦ if hx : x < χ.fvSup then v ⟨x, by omega⟩ else default).cast (by
+      have e : (fun x : Fin (0 + χ.fvSup) ↦
+          if hx : (x : ℕ) < χ.fvSup then v ⟨x, by omega⟩ else default) = v := by
+        funext x
+        have hx : (x : ℕ) < χ.fvSup := by simpa using x.isLt
+        simp [hx]
+      rw [← Semiformula.subst_comp_fixitr_eq_map χ, e])
+
+/-! ## The induction axiom -/
+
+/-- The induction axiom for a formula of `C` is forced: the induction rule of the calculus does
+the work, so no induction on `ℕ` enters the argument.
+
+- [Bus98A, Section 1.4.2] -/
+def forcesSuccInd {ξ : ArithmeticSemiformula ℕ 1} (hξ : C ξ) (hD : ∀ t, D (ξ/[t]))
+    (tΓ : (∼Γ).Traversal) : Γ ⊩[C, D] (succInd ξ)ᴺ := by
+  rw [show (succInd ξ : ArithmeticProposition)
+      = (ξ/[‘0’]) 🡒 ((∀¹ (ξ 🡒 ξ/[‘(#0 + 1)’])) 🡒 ∀¹ ξ) from by simp [succInd]]
+  refine forcesImply tΓ fun Δ s g₀ ↦ forcesImply (s.val.traversal tΓ) fun Θ s' gstep ↦ ?_
+  let tΘ : (∼Θ).Traversal := s'.val.traversal (s.val.traversal tΓ)
+  refine allEquiv.symm fun t ↦ ?_
+  rw [Semiformula.subst_doubleNegation]
+  -- `Θ ⊩ (ξ/[t])ᴺ`, by the induction rule at a variable fresh for `Θ` and `ξ`
+  refine forcesOfAnchored (hD t) tΘ ?_
+  let m := LK.Sequent.newVar (∼Θ + ⦃∀¹ ξ⦄)
+  have hξm : ¬ξ.FVar? m := by
+    have : ¬(∀¹ ξ).FVar? m := LK.Sequent.not_fvar?_newVar (by simp)
+    simpa using this
+  have hΘ : ∀ ψ ∈ ∼Θ, ¬ψ.FVar? m := fun ψ hψ ↦ LK.Sequent.not_fvar?_newVar (by simp [hψ])
+  -- the base case
+  let d₀ : ⊢ᴸᴷᴵ[C, D]! ∼Θ + ⦃ξ/[‘0’]⦄ := derivableOfForced tΘ (g₀.monotone s')
+  -- the step case, at the condition `Θ` extended by the induction hypothesis
+  let tΘ' : (∼(Θ + ⦃ξ/[&m]⦄)).Traversal := (tΘ.add (.atom (∼(ξ/[&m])))).cast (by simp)
+  let sΘ' : Θ + ⦃ξ/[&m]⦄ ≼ Θ :=
+    ⟨(LK.Derivation.Positive.weakening (φ := ∼(ξ/[&m])) .refl).cast rfl (by simp)⟩
+  let gxy : Θ ⊩[C, D] (ξ/[&m] 🡒 ξ/[‘&m + 1’])ᴺ := (gstep.allEquiv &m).cast (by
+    simp [Semiformula.subst_doubleNegation, Rew.subst_subst_eq])
+  let gY : Θ + ⦃ξ/[&m]⦄ ⊩[C, D] (ξ/[‘&m + 1’])ᴺ :=
+    modusPonensImply tΘ' (gxy.monotone sΘ')
+      ((Forces.refl (ξ/[&m])).monotone (StrongerThan.ofSubset (.atom _) tΘ' (by simp)))
+  let dstep : ⊢ᴸᴷᴵ[C, D]! ∼Θ + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄ :=
+    (derivableOfForced tΘ' gY).cast (by simp; abel)
+  exact ⟨Derivation.indByNewVar hξ t hξm hΘ d₀.val dstep.val,
+    Derivation.anchored_indByNewVar d₀.prop dstep.prop⟩
+
+/-- Every axiom of the `C`-induction scheme is forced.
+
+- [Bus98A, Section 1.4.2] -/
+def forcesInd {ξ : ArithmeticSemiformula ℕ 1}
+    (hCD : (η : ArithmeticSemiformula ℕ 1) → C η → ∀ t, D (η/[t])) (hξ : C ξ)
+    (tΓ : (∼Γ).Traversal) : Γ ⊩[C, D] ((succInd ξ).univCl')ᴺ :=
+  forcesUnivCl fun f ↦
+    let hq : C ((Rew.rewrite f).q ▹ ξ) := by
+      simpa [Rew.q_rewrite] using RewriteClosed.rewrite (C := C) (Rew.bShift ∘ f) hξ
+    (forcesSuccInd hq (hCD _ hq) tΓ).cast (by rw [rew_succInd])
 
 end Forces
 

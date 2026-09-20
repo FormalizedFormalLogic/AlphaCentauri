@@ -416,6 +416,15 @@ protected def map (d : ⊢ᴸᴷᴵ[C]! Γ) (f : ℕ → ℕ) : ⊢ᴸᴷᴵ[C]!
 
 protected def shift (d : ⊢ᴸᴷᴵ[C]! Γ) : ⊢ᴸᴷᴵ[C]! Γ⁺ := cast (Derivation.map d Nat.succ) (by rfl)
 
+/-- The induction rule with the step case taken at a variable that occurs in no formula of the
+conclusion, in place of the shifted sequent the rule itself asks for. -/
+def indByNewVar {m} (hξ : C ξ) (t) (hξm : ¬ξ.FVar? m) (hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m)
+    (d₀ : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[‘0’]⦄) (d : ⊢ᴸᴷᴵ[C]! Γ + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄) :
+    ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[t]⦄ :=
+  ind ξ hξ t d₀ <| cast (Derivation.map d fun x ↦ if x = m then 0 else x + 1) (by
+    simp [Semiformula.map_rewriteMap_eq_shifts Γ hΓ, Semiformula.rewriteMap_subst_eq_free ξ hξm,
+      Rew.app_substs, Semiformula.rewriteMap_eq_shift ξ hξm])
+
 /-- Generalization on a variable that occurs in no formula of the conclusion. -/
 def generalizeByNewVar {m} (hξ : ¬ξ.FVar? m) (hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m)
     (d : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[&m]⦄) : ⊢ᴸᴷᴵ[C]! Γ + ⦃∀¹ ξ⦄ :=
@@ -446,6 +455,11 @@ lemma anchored_map (d : ⊢ᴸᴷᴵ[C]! Γ) (f) (h : Anchored D d) : Anchored D
 
 lemma anchored_shift (d : ⊢ᴸᴷᴵ[C]! Γ) (h : Anchored D d) : Anchored D d.shift :=
   anchored_map d Nat.succ h
+
+lemma anchored_indByNewVar {m} {hξ : C ξ} {hξm : ¬ξ.FVar? m} {hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m}
+    {d₀ : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[‘0’]⦄} {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄}
+    (h₀ : Anchored D d₀) (h : Anchored D d) : Anchored D (indByNewVar hξ t hξm hΓ d₀ d) := by
+  simpa [indByNewVar] using And.intro h₀ (anchored_map d _ h)
 
 lemma anchored_generalizeByNewVar {m} {hξ : ¬ξ.FVar? m} {hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m}
     {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[&m]⦄} (h : Anchored D d) :
@@ -543,10 +557,6 @@ end Derivable
 
 end LKI
 
-end Arithmetic
-
-end FirstOrder
-
-end FFL
+end FFL.FirstOrder.Arithmetic
 
 end

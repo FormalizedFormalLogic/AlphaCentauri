@@ -1,7 +1,8 @@
 module
 
 public import AlphaCentauri.Calculus.Induction.Basic
-public import Foundation.FirstOrder.Arithmetic.Schemata
+public import AlphaCentauri.Schemata.Induction
+public import AlphaCentauri.ToFoundation.Schemata
 
 /-!
 # What `LKI[C]` proves
@@ -32,6 +33,24 @@ theorem derivable_of_provable (hT : ∀ σ ∈ T, ⊢ᴸᴷᴵ[C] ⦃σ⦄) (h :
   · rintro δ hδ;
     obtain ⟨ψ, hψ, rfl⟩ := Multiset.mem_map.mp (by simpa [LK.Sequent.embed] using hδ)
     exact hT ψ (hΔ ψ hψ)
+
+/-- Every axiom of `𝗣𝗔⁻` has an anchored derivation: it is strict $\Pi_1$ and true in `ℕ`, so the
+`bounded` leaf and the universal rule derive it without a cut. -/
+theorem nonempty_anchored_of_mem_peanoMinus {D : ArithmeticProposition → Prop} (h : σ ∈ 𝗣𝗔⁻) :
+    Nonempty (⊢ᴸᴷᴵ[C, D]! ⦃(σ : ArithmeticProposition)⦄) :=
+  nonempty_anchored_of_valid _ _ le_rfl
+    (by
+      intro φ hφ
+      rcases Multiset.mem_singleton.mp hφ
+      exact StrictHierarchy.rew _ (PeanoMinus.strictHierarchy σ h))
+    (by
+      intro ε
+      exact ⟨Rewriting.emb σ, by simp, by simpa [models_iff] using Theory.models (M := ℕ) _ h⟩)
+
+/-- Every axiom of `𝗣𝗔⁻` is derivable. -/
+theorem derivable_of_mem_peanoMinus (h : σ ∈ 𝗣𝗔⁻) : ⊢ᴸᴷᴵ[C] ⦃(σ : ArithmeticProposition)⦄ :=
+  Nonempty.map Subtype.val
+    (nonempty_anchored_of_mem_peanoMinus (C := C) (D := fun _ ↦ True) h)
 
 variable [RewriteClosed C]
 
@@ -71,6 +90,22 @@ theorem derivable_univCl_succInd (hξ : C ξ) : ⊢ᴸᴷᴵ[C] ⦃Semiformula.u
 theorem derivable_of_mem_inductionScheme (h : σ ∈ InductionScheme ℒₒᵣ C) : ⊢ᴸᴷᴵ[C] ⦃σ⦄ := by
   obtain ⟨ξ, hξ, rfl⟩ := by simpa [InductionScheme] using h
   exact derivable_univCl_succInd hξ
+
+/-- `LKI[C]` derives everything that `𝗣𝗔⁻` with `C`-induction proves.
+
+- [Bus98A, Section 1.4.2] -/
+theorem derivable_of_provable_induction (h : 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ C ⊢ σ) : ⊢ᴸᴷᴵ[C] ⦃σ⦄ := by
+  refine derivable_of_provable ?_ h
+  rintro α (hα | hα)
+  · exact derivable_of_mem_peanoMinus hα
+  · exact derivable_of_mem_inductionScheme hα
+
+/-- `LKI` over the strict $\Sigma_1$ formulas derives everything `𝗜 𝚺 1` proves: the induction
+scheme of `𝗜 𝚺 1` is the one its induction rule is as strong as.
+
+- [Bus98A, Section 1.4.2] -/
+theorem derivable_of_provable_inductionOnStrictHierarchy {b : Polarity} {s : ℕ}
+    (h : 𝗜 b s ⊢ σ) : ⊢ᴸᴷᴵ[StrictHierarchy b s] ⦃σ⦄ := derivable_of_provable_induction h
 
 end FFL.FirstOrder.Arithmetic.LKI
 

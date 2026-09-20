@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Calculus.Induction.Basic
-public import AlphaCentauri.ToFoundation.Schemata
+public import AlphaCentauri.Calculus.Induction.Theory
 public import Foundation.FirstOrder.LK.Hauptsatz
 
 /-!
@@ -465,14 +465,7 @@ noncomputable def forcesPeanoMinus {σ : ArithmeticSentence} (hD : D (Rewriting.
     (h : σ ∈ 𝗣𝗔⁻) (tp : (∼p).Traversal) :
     p ⊩[C, D] (Rewriting.emb σ : ArithmeticProposition)ᴺ :=
   let d : ⊢ᴸᴷᴵ[C, D]! ⦃(Rewriting.emb σ : ArithmeticProposition)⦄ :=
-    Classical.choice <| nonempty_anchored_of_valid _ _ le_rfl
-      (by
-        intro φ hφ
-        rcases Multiset.mem_singleton.mp hφ
-        exact StrictHierarchy.rew _ (PeanoMinus.strictHierarchy σ h))
-      (by
-        intro ε
-        exact ⟨Rewriting.emb σ, by simp, by simpa [models_iff] using Theory.models (M := ℕ) _ h⟩)
+    Classical.choice (nonempty_anchored_of_mem_peanoMinus h)
   forcesOfAnchored hD tp ⟨(Derivation.weakeningMany tp d.val).cast (by abel), by simp [d.prop]⟩
 
 /-- Every axiom of the `C`-induction scheme is forced.

@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
+public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 
 /-! # Bounded formulas
 
@@ -8,6 +8,8 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 inductive definition in its own right, not a level of the arithmetical hierarchy;
 `Semiformula.bounded_iff_hierarchy` identifies it with `Hierarchy Γ 0`, and `bounded_induction` is
 the corresponding recursor.
+
+`StrictHierarchy.of_bounded` places a bounded formula at the bottom of the strict hierarchy.
 
 This file is a local stand-in for the upstream definition proposed in
 <https://github.com/FormalizedFormalLogic/Foundation/pull/838>. Once Foundation carries
@@ -71,6 +73,10 @@ theorem Arithmetic.Hierarchy.bounded {Γ : Polarity} : Hierarchy Γ 0 φ → φ.
 
 theorem Semiformula.bounded_iff_hierarchy {Γ : Polarity} : φ.Bounded ↔ Hierarchy Γ 0 φ :=
   ⟨Semiformula.Bounded.hierarchy, Arithmetic.Hierarchy.bounded⟩
+
+/-- A bounded formula is strictly `Γ`-[0]. -/
+theorem Arithmetic.StrictHierarchy.of_bounded {Γ : Polarity} (h : φ.Bounded) :
+    StrictHierarchy Γ 0 φ := .zero h.hierarchy
 
 namespace Semiformula.Bounded
 

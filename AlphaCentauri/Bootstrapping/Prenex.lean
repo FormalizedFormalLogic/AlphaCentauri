@@ -545,7 +545,7 @@ mutual
   private lemma strictHierarchy_sigma_of_isStrictSigma_nat :
       ∀ (s : ℕ) {n : ℕ} (ψ : ArithmeticSemiproposition n),
         IsStrictSigma s (⌜ψ⌝ : ℕ) → StrictHierarchy 𝚺 s ψ
-    | 0,     _, ψ, h => .zero ((isBounded_quote_iff_s ψ).mp h).hierarchy
+    | 0,     _, ψ, h => .of_bounded ((isBounded_quote_iff_s ψ).mp h)
     | s + 1, _, ψ, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       exact strictHierarchy_sigma_of_quote_eq_qqExss
@@ -556,7 +556,7 @@ mutual
   private lemma strictHierarchy_pi_of_isStrictPi_nat :
       ∀ (s : ℕ) {n : ℕ} (ψ : ArithmeticSemiproposition n),
         IsStrictPi s (⌜ψ⌝ : ℕ) → StrictHierarchy 𝚷 s ψ
-    | 0,     _, ψ, h => .zero ((isBounded_quote_iff_s ψ).mp h).hierarchy
+    | 0,     _, ψ, h => .of_bounded ((isBounded_quote_iff_s ψ).mp h)
     | s + 1, _, ψ, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       exact strictHierarchy_pi_of_quote_eq_qqAlls

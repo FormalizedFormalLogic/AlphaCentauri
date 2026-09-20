@@ -208,15 +208,33 @@ lemma le_maxBelow (f : ℕ → ℕ) {x : ℕ} : {n : ℕ} → x < n → f x ≤ 
     · exact le_trans (le_maxBelow f h') (le_max_right _ _)
     · exact le_max_left _ _
 
-private lemma bnd_shift {χ : ArithmeticProposition} {c x : ℕ} {l : List ℕ} :
-    Bnd (Rewriting.shift χ) c ((x :: l).getD · 0) ↔ Bnd χ c (l.getD · 0) := by
-  have e₁ : ((Semiterm.val ![] fun y ↦ (x :: l).getD y 0) ∘
-      ⇑(Rew.shift : SyntacticRew ℒₒᵣ 0 0) ∘ Semiterm.bvar) = ![] := by
-    funext i; exact i.elim0
-  have e₂ : ((Semiterm.val ![] fun y ↦ (x :: l).getD y 0) ∘
-      ⇑(Rew.shift : SyntacticRew ℒₒᵣ 0 0) ∘ Semiterm.fvar) = fun y ↦ l.getD y 0 := by
+private lemma evalBound_shift {n : ℕ} {χ : ArithmeticSemiformula ℕ n} {e : Fin n → ℕ} {c x : ℕ}
+    {l : List ℕ} :
+    EvalBound e ((x :: l).getD · 0) c (Rewriting.shift χ) ↔ EvalBound e (l.getD · 0) c χ := by
+  have e₁ : ((Semiterm.val e fun y ↦ (x :: l).getD y 0) ∘
+      ⇑(Rew.shift : SyntacticRew ℒₒᵣ n n) ∘ Semiterm.bvar) = e := by funext i; simp
+  have e₂ : ((Semiterm.val e fun y ↦ (x :: l).getD y 0) ∘
+      ⇑(Rew.shift : SyntacticRew ℒₒᵣ n n) ∘ Semiterm.fvar) = fun y ↦ l.getD y 0 := by
     funext y; simp
-  simp only [Bnd, Rewriting.shift]
+  simp only [Rewriting.shift]
+  rw [evalBound_rew, e₁, e₂]
+
+private lemma bnd_shift {χ : ArithmeticProposition} {c x : ℕ} {l : List ℕ} :
+    Bnd (Rewriting.shift χ) c ((x :: l).getD · 0) ↔ Bnd χ c (l.getD · 0) := evalBound_shift
+
+private lemma bnd_subst {ξ : ArithmeticSemiformula ℕ 1} {s : ArithmeticTerm ℕ} {c : ℕ}
+    {l : List ℕ} :
+    Bnd (ξ/[s]) c (l.getD · 0) ↔
+      EvalBound ![Semiterm.val ![] (l.getD · 0) s] (l.getD · 0) c ξ := by
+  have e₁ : ((Semiterm.val ![] fun y ↦ l.getD y 0) ∘ ⇑(Rew.subst ![s]) ∘ Semiterm.bvar)
+      = ![Semiterm.val ![] (fun y ↦ l.getD y 0) s] := by
+    funext i
+    cases i using Fin.cases with
+    | zero => simp
+    | succ i => exact i.elim0
+  have e₂ : ((Semiterm.val ![] fun y ↦ l.getD y 0) ∘ ⇑(Rew.subst ![s]) ∘ Semiterm.fvar)
+      = fun y ↦ l.getD y 0 := by funext y; simp
+  simp only [Bnd, Rewriting.subst]
   rw [evalBound_rew, e₁, e₂]
 
 private lemma bnd_free {χ : ArithmeticSemiformula ℕ 1} {c x : ℕ} {l : List ℕ} :
@@ -292,6 +310,84 @@ lemma witnesses_all_bounded {ψ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTe
         simpa using eval_of_evalBound (bnd_free.mp hbnd)
       exact h' hx
   simpa [FFL.FirstOrder.ball] using fun x hx ↦ hall x hx
+
+/-! ## The induction rule -/
+
+/-- The bounds the induction rule iterates: `b` at `0`, and at each step the larger of the
+current bound and what the premise gives. -/
+def indBound (h : List ℕ → ℕ → ℕ) (l : List ℕ) (b : ℕ) : ℕ → ℕ
+  | 0 => b
+  | n + 1 => max (indBound h l b n) (h (n :: l) (indBound h l b n))
+
+lemma le_indBound (h : List ℕ → ℕ → ℕ) (l : List ℕ) (b : ℕ) : ∀ n, b ≤ indBound h l b n
+  | 0 => le_rfl
+  | n + 1 => le_trans (le_indBound h l b n) (le_max_left _ _)
+
+/-- The induction rule: the bound is iterated along the term. `B` supplies the standard bound of
+the induction formula, which is called for only when that formula is $\Delta_0$. -/
+lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} {B : List ℕ → ℕ}
+    (hξ : StrictHierarchy 𝚺 1 ξ)
+    (hB : Hierarchy 𝚺 0 ξ → ∀ (x : ℕ) (l : List ℕ),
+      (Semiformula.Eval ![x] (l.getD · 0) ξ → EvalBound ![x] (l.getD · 0) (B l) ξ) ∧
+        (Semiformula.Eval ![x] (l.getD · 0) (∼ξ) → EvalBound ![x] (l.getD · 0) (B l) (∼ξ)))
+    (H : Witnesses (Γ⁺ + ⦃∼(Rewriting.free ξ), (Rewriting.shift ξ)/[‘&0 + 1’]⦄) h) :
+    Witnesses (Γ + ⦃∼(ξ/[‘0’]), ξ/[t]⦄)
+      fun l b ↦ indBound h l (max b (B l)) (Semiterm.val ![] (l.getD · 0) t) := by
+  intro l b hb
+  set c : ℕ → ℕ := indBound h l (max b (B l)) with hcdef
+  have hbc : ∀ n, b ≤ c n := fun n ↦ le_trans (le_max_left _ _) (le_indBound _ _ _ n)
+  have key : ∀ n : ℕ,
+      (∃ φ ∈ Γ + ⦃∼(ξ/[(‘0’ : ArithmeticTerm ℕ)]), ξ/[t]⦄,
+        StrictHierarchy 𝚺 1 φ ∧ Bnd φ (c n) (l.getD · 0)) ∨
+      EvalBound ![n] (l.getD · 0) (c n) ξ := by
+    intro n
+    induction n with
+    | zero =>
+      by_cases hz : StrictHierarchy 𝚺 1 (∼(ξ/[(‘0’ : ArithmeticTerm ℕ)]) : ArithmeticProposition)
+      · have hπξ : StrictHierarchy 𝚷 1 ξ := by
+          have hπ : StrictHierarchy 𝚷 1 (ξ/[(‘0’ : ArithmeticTerm ℕ)]) := by simpa using hz
+          simpa [Rewriting.subst] using hπ
+        have hΔ : Hierarchy 𝚺 0 ξ := StrictHierarchy.bounded_of_sigmaOne_of_piOne hξ hπξ
+        have hBc : B l ≤ c 0 := le_trans (le_max_right _ _) (le_indBound _ _ _ 0)
+        by_cases hev : Semiformula.Eval ![0] (l.getD · 0) ξ
+        · exact Or.inr (evalBound_mono hBc ((hB hΔ 0 l).1 hev))
+        · refine Or.inl ⟨∼(ξ/[(‘0’ : ArithmeticTerm ℕ)]), by simp, hz, ?_⟩
+          have hn : EvalBound ![0] (l.getD · 0) (c 0) (∼ξ) :=
+            evalBound_mono hBc ((hB hΔ 0 l).2 (by simpa using hev))
+          have hs : Bnd ((∼ξ)/[(‘0’ : ArithmeticTerm ℕ)]) (c 0) (l.getD · 0) :=
+            bnd_subst.mpr (by simpa using hn)
+          simpa using hs
+      · refine Or.inr (evalBound_mono (hbc 0) ?_)
+        have h₀ : Bnd (ξ/[(‘0’ : ArithmeticTerm ℕ)]) b (l.getD · 0) := by
+          simpa using hb (∼(ξ/[(‘0’ : ArithmeticTerm ℕ)])) (by simp) hz
+        simpa using bnd_subst.mp h₀
+    | succ n ih =>
+      rcases ih with ⟨φ, hφ, hσφ, hbnd⟩ | hinv
+      · exact Or.inl ⟨φ, hφ, hσφ, bnd_mono (le_max_left _ _) hbnd⟩
+      obtain ⟨χ, hχ, hσχ, hbndχ⟩ := H (n :: l) (c n) fun ρ hρ hnσρ ↦ by
+        rcases Multiset.mem_add.mp hρ with hρ | hρ
+        · obtain ⟨ρ', hρ', rfl⟩ := Multiset.mem_map.mp hρ
+          have hnσ' : ¬StrictHierarchy 𝚺 1 ρ' := by simpa [Rewriting.shift] using hnσρ
+          simpa using bnd_shift.mpr (bnd_mono (hbc n) (hb ρ' (by simp [hρ']) hnσ'))
+        · rcases show ρ = ∼(Rewriting.free ξ) ∨ ρ = (Rewriting.shift ξ)/[‘&0 + 1’] by
+            simpa using hρ with rfl | rfl
+          · simpa using bnd_free.mpr hinv
+          · exact absurd (StrictHierarchy.rew _ (StrictHierarchy.rew _ hξ)) hnσρ
+      rcases Multiset.mem_add.mp hχ with hm | hm
+      · obtain ⟨γ, hγ, rfl⟩ := Multiset.mem_map.mp hm
+        exact Or.inl ⟨γ, by simp [hγ], by simpa [Rewriting.shift] using hσχ,
+          bnd_mono (le_max_right _ _) (bnd_shift.mp hbndχ)⟩
+      rcases show χ = ∼(Rewriting.free ξ) ∨ χ = (Rewriting.shift ξ)/[‘&0 + 1’] by
+        simpa using hm with rfl | rfl
+      · have hneg : EvalBound ![n] (l.getD · 0) (h (n :: l) (c n)) (∼ξ) :=
+          bnd_free.mp (by simpa using hbndχ)
+        exact absurd (eval_of_evalBound hinv) (by simpa using eval_of_evalBound hneg)
+      · refine Or.inr (evalBound_mono (le_max_right _ _) ?_)
+        have h₁ := bnd_subst.mp hbndχ
+        simpa using evalBound_shift.mp (by simpa using h₁)
+  rcases key (Semiterm.val ![] (l.getD · 0) t) with ⟨φ, hφ, hσφ, hbnd⟩ | hinv
+  · exact ⟨φ, hφ, hσφ, hbnd⟩
+  · exact ⟨ξ/[t], by simp, StrictHierarchy.rew _ hξ, bnd_subst.mpr hinv⟩
 
 end FFL.FirstOrder.Arithmetic.LKI
 

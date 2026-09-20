@@ -206,6 +206,28 @@ lemma evalBound_congr_fvar [DecidableEq ξ] : {n : ℕ} → {φ : ArithmeticSemi
       evalBound_congr_fvar (h.of_subset fun y hy ↦ by simpa using hy)
   termination_by _ φ => φ.complexity
 
+/-- A true $\Delta_0$ formula has an approximation bounded by a term of the formula: only its
+leading bounded existential has to be witnessed. -/
+lemma exists_term_evalBound_of_bounded : {n : ℕ} → {φ : ArithmeticSemiformula ξ n} →
+    φ.Bounded → ∃ s : ArithmeticSemiterm ξ n, ∀ (e : Fin n → ℕ) (ε : ξ → ℕ),
+      Semiformula.Eval e ε φ → EvalBound e ε (Semiterm.val e ε s + 1) φ
+  | _, .rel _ _, _ => ⟨‘0’, fun _ _ h ↦ h⟩
+  | _, .nrel _ _, _ => ⟨‘0’, fun _ _ h ↦ h⟩
+  | _, ⊤, _ => ⟨‘0’, fun _ _ h ↦ h⟩
+  | _, ⊥, _ => ⟨‘0’, fun _ _ h ↦ h⟩
+  | _, _ ⋏ _, _ => ⟨‘0’, fun _ _ h ↦ h⟩
+  | _, _ ⋎ _, _ => ⟨‘0’, fun _ _ h ↦ h⟩
+  | _, ∀¹ _, _ => ⟨‘0’, fun _ _ h ↦ h⟩
+  | _, ∃¹ ψ, hφ => by
+    cases hφ with
+    | bexs pt hρ =>
+      rename_i ρ _
+      obtain ⟨s, rfl⟩ := Rew.positive_iff.mp pt
+      refine ⟨s, fun e ε h ↦ ?_⟩
+      obtain ⟨x, hx, hρx⟩ : ∃ x, x < Semiterm.val e ε s ∧ Semiformula.Eval (x :> e) ε ρ := by
+        simpa using h
+      exact ⟨x, Nat.lt_succ_of_lt hx, by simpa using ⟨hx, hρx⟩⟩
+
 /-! ## The approximation of a proposition -/
 
 variable {φ : ArithmeticProposition} {b b' : ℕ} {ε : ℕ → ℕ}

@@ -74,6 +74,13 @@ lemma of_exs {φ : Semiformula L ξ (n + 1)} (h : StrictHierarchy 𝚺 1 (∃¹ 
   | ofAlt h => exact .ofAlt (.zero (Hierarchy.of_bounded_exs (bounded_of_zero h)))
   | exs h => exact h
 
+/-- A formula that is both strict $\Sigma_1$ and strict $\Pi_1$ is $\Delta_0$. -/
+lemma bounded_of_sigmaOne_of_piOne {φ : Semiformula L ξ n} (hσ : StrictHierarchy 𝚺 1 φ)
+    (hπ : StrictHierarchy 𝚷 1 φ) : Hierarchy 𝚺 0 φ := by
+  cases hσ with
+  | ofAlt h => exact bounded_of_zero h
+  | exs _ => cases hπ with | ofAlt h => exact bounded_of_zero h
+
 /-- A $\Delta_0$ formula is strict at every positive level. -/
 lemma of_bounded : {Γ : Polarity} → {s : ℕ} → {φ : Semiformula L ξ n} → Hierarchy 𝚺 0 φ →
     StrictHierarchy Γ (s + 1) φ

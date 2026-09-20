@@ -437,6 +437,19 @@ lemma le_maxBelow (f : ℕ → ℕ) {x : ℕ} : {n : ℕ} → x < n → f x ≤ 
     · exact le_trans (le_maxBelow f h') (le_max_right _ _)
     · exact le_max_left _ _
 
+lemma maxBelow_le (f : ℕ → ℕ) {c : ℕ} : {n : ℕ} → (∀ x < n, f x ≤ c) → maxBelow f n ≤ c
+  | 0, _ => by simp [maxBelow]
+  | n + 1, h => by
+    simp only [maxBelow, max_le_iff]
+    exact ⟨h n (by simp), maxBelow_le f fun x hx ↦ h x (by omega)⟩
+
+/-- A bounded search: the maximum below `n` of the partial identity on `p` is the unique element
+of `p`, provided it lies below `n`. -/
+lemma maxBelow_ite_eq {p : ℕ → Prop} [DecidablePred p] {c n : ℕ} (hc : p c) (hcn : c < n)
+    (huniq : ∀ y, p y → y = c) : maxBelow (fun y ↦ if p y then y else 0) n = c :=
+  le_antisymm (maxBelow_le _ fun x _ ↦ by grind)
+    (by simpa [hc] using le_maxBelow (fun y ↦ if p y then y else 0) hcn)
+
 private lemma evalBound_shift {n : ℕ} {χ : ArithmeticSemiformula ℕ n} {e : Fin n → ℕ} {c x : ℕ}
     {l : List ℕ} :
     EvalBound e ((x :: l).getD · 0) c (Rewriting.shift χ) ↔ EvalBound e (l.getD · 0) c χ := by
@@ -620,15 +633,15 @@ lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} 
 
 /-! ## Primitive recursion of the bounds -/
 
-lemma primrec_maxBelow {f : List ℕ × ℕ → ℕ → ℕ} (hf : Primrec₂ f) {B : List ℕ × ℕ → ℕ}
-    (hB : Primrec B) : Primrec fun p : List ℕ × ℕ ↦ maxBelow (f p) (B p) := by
-  have hstep : Primrec₂ fun (p : List ℕ × ℕ) (q : ℕ × ℕ) ↦ max (f p q.1) q.2 :=
+lemma primrec_maxBelow {α : Type*} [Primcodable α] {f : α → ℕ → ℕ} (hf : Primrec₂ f)
+    {B : α → ℕ} (hB : Primrec B) : Primrec fun a ↦ maxBelow (f a) (B a) := by
+  have hstep : Primrec₂ fun (a : α) (q : ℕ × ℕ) ↦ max (f a q.1) q.2 :=
     Primrec.to₂ (Primrec.nat_max.comp (hf.comp Primrec.fst (Primrec.fst.comp Primrec.snd))
       (Primrec.snd.comp Primrec.snd))
-  have h : Primrec fun p : List ℕ × ℕ ↦
-      (B p).rec (motive := fun _ ↦ ℕ) 0 fun x ih ↦ max (f p x) ih :=
+  have h : Primrec fun a : α ↦
+      (B a).rec (motive := fun _ ↦ ℕ) 0 fun x ih ↦ max (f a x) ih :=
     Primrec.nat_rec' hB (Primrec.const 0) hstep
-  exact h.of_eq fun p ↦ (maxBelow_eq_rec _ _).symm
+  exact h.of_eq fun a ↦ (maxBelow_eq_rec _ _).symm
 
 lemma primrec_indBound {f : List ℕ → ℕ → ℕ} (hf : Primrec₂ f) {b : List ℕ × ℕ → ℕ}
     (hb : Primrec b) {B : List ℕ × ℕ → ℕ} (hB : Primrec B) :

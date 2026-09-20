@@ -58,18 +58,13 @@ namespace LKI
 /-- Derivations of `LKI[C]`: Foundation's one-sided calculus for `ℒₒᵣ`, together with a leaf for
 the $\Delta_0$ sequents true in `ℕ` and an induction rule for the formulas of `C`.
 
-The induction rule takes its base case as a premise of its own, where [Bus98A] keeps it as a side
-formula of the conclusion. Buss's form is `Derivable.ind'`, derived from this one without a cut;
-the converse needs a cut on the base case.
-
 - [Bus98A, Section 1.4.1]
 - [Bus98A, Section 1.4.2] -/
 inductive Derivation (C : ArithmeticSemiformula ℕ 1 → Prop) : LK.Sequent ℒₒᵣ → Type
   | axm {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) : Derivation C ⦃Rewriting.emb σ⦄
   | ind {Γ} (φ) (hφ : C φ) (t) :
-      Derivation C (Γ + ⦃φ/[‘0’]⦄) →
       Derivation C (Γ⁺ + ⦃∼(free φ), (shift φ)/[‘&0 + 1’]⦄) →
-      Derivation C (Γ + ⦃φ/[t]⦄)
+      Derivation C (Γ + ⦃∼(φ/[‘0’]), φ/[t]⦄)
   | identity {k} (r : (ℒₒᵣ).Rel k) (v) : Derivation C ⦃Semiformula.rel r v, Semiformula.nrel r v⦄
   | cut {Γ Δ φ} : Derivation C (Γ + ⦃φ⦄) → Derivation C (Δ + ⦃∼φ⦄) → Derivation C (Γ + Δ)
   | contraction {Γ φ} : Derivation C (Γ + ⦃φ, φ⦄) → Derivation C (Γ + ⦃φ⦄)
@@ -159,14 +154,10 @@ def ofLK {Γ : LK.Sequent ℒₒᵣ} : (⊢ᴸᴷ¹ Γ) → ⊢ᴸᴷᴵ[C]! Γ
 theorem sound (ε : ℕ → ℕ) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) → ∃ φ ∈ Γ, φ.Evalf ε
   | axm (σ := σ) h =>
     ⟨Rewriting.emb σ, by simp, by simpa [models_iff] using Theory.models (M := ℕ) _ h⟩
-  | ind (Γ := Γ) φ _ t d₀ d => by
+  | ind (Γ := Γ) φ _ t d => by
     by_contra! hc;
     have hΓ : ∀ ψ ∈ Γ, ¬ψ.Evalf ε := fun ψ hψ ↦ hc ψ (by simp [hψ])
-    have base : Semiformula.Eval ![0] ε φ := by
-      have h : (∃ ψ ∈ Γ, ψ.Evalf ε) ∨ Semiformula.Eval ![0] ε φ := by simpa using sound ε d₀
-      rcases h with (⟨ψ, hψ, h⟩ | h)
-      · exact absurd h (hΓ ψ hψ)
-      · exact h
+    have base : Semiformula.Eval ![0] ε φ := by simpa using hc (∼(φ/[‘0’])) (by simp)
     have top : ¬Semiformula.Eval ![Semiterm.val ![] ε t] ε φ := by simpa using hc (φ/[t]) (by simp)
     have step : ∀ a : ℕ, Semiformula.Eval ![a] ε φ → Semiformula.Eval ![a + 1] ε φ := by
       intro a ha
@@ -231,18 +222,6 @@ theorem sound (ε : ℕ → ℕ) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) → ∃ φ ∈ Γ,
 abbrev weakeningMany (t : Δ.Traversal) (d : ⊢ᴸᴷᴵ[C]! Γ) : ⊢ᴸᴷᴵ[C]! Γ + Δ :=
   Structural.weakenMany t d
 
-/-- The induction rule in the form that leaves the base case as a side formula of the conclusion.
-
-- [Bus98A, Section 1.4.2] -/
-def ind' (hξ : C ξ) (t) (tΓ : Γ.Traversal)
-    (d : ⊢ᴸᴷᴵ[C]! Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄) :
-    ⊢ᴸᴷᴵ[C]! Γ + ⦃∼(ξ/[‘0’]), ξ/[t]⦄ :=
-  ind (Γ := Γ + ⦃∼(ξ/[‘0’])⦄) ξ hξ t
-      (cast (weakeningMany tΓ (lem (ξ/[‘0’]))))
-      (cast (d.weakening (φ := ∼((shift ξ)/[‘0’])))
-        (by simp [Rewriting.shifts, Rew.shift_subst_eq]; abel))
-    |>.cast
-
 /-! ## Anchored derivations -/
 
 /-- A derivation is `Anchored D` when every one of its cut formulas belongs to `D`.
@@ -250,7 +229,7 @@ def ind' (hξ : C ξ) (t) (tΓ : Γ.Traversal)
 - [Bus98A, Section 1.4.2] -/
 def Anchored (D : ArithmeticProposition → Prop) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) → Prop
   | axm _ => True
-  | ind _ _ _ d₀ d => Anchored D d₀ ∧ Anchored D d
+  | ind _ _ _ d => Anchored D d
   | identity _ _ => True
   | cut (φ := χ) dp dn => D χ ∧ Anchored D dp ∧ Anchored D dn
   | contraction d => Anchored D d
@@ -264,9 +243,8 @@ def Anchored (D : ArithmeticProposition → Prop) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) �
 @[simp] lemma anchored_axm {σ : ArithmeticSentence} {h : σ ∈ 𝗣𝗔⁻} :
     Anchored D (axm (C := C) h) := trivial
 
-@[simp] lemma anchored_ind_iff {hξ} {d₀ : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[‘0’]⦄}
-    {d : ⊢ᴸᴷᴵ[C]! Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄} :
-    Anchored D (ind ξ hξ t d₀ d) ↔ Anchored D d₀ ∧ Anchored D d := Iff.rfl
+@[simp] lemma anchored_ind_iff {hξ} {d : ⊢ᴸᴷᴵ[C]! Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄} :
+    Anchored D (ind ξ hξ t d) ↔ Anchored D d := Iff.rfl
 
 @[simp] lemma anchored_identity {k} {r : (ℒₒᵣ).Rel k} {v} :
     Anchored D (identity (C := C) r v) := trivial
@@ -324,13 +302,9 @@ def Anchored (D : ArithmeticProposition → Prop) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) �
       anchored_lem (free (∼φ))
   termination_by φ => φ.complexity
 
-@[simp] lemma anchored_ind'_iff {hξ : C ξ} {tΓ : Γ.Traversal}
-    {d : ⊢ᴸᴷᴵ[C]! Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄} :
-    Anchored D (ind' hξ t tΓ d) ↔ Anchored D d := by simp [ind']
-
 lemma Anchored.mono (h : ∀ φ, D φ → D' φ) {Γ} : {d : ⊢ᴸᴷᴵ[C]! Γ} → Anchored D d → Anchored D' d
   | axm _, _ => trivial
-  | ind _ _ _ _ _, hd => ⟨.mono h hd.1, .mono h hd.2⟩
+  | ind _ _ _ d, hd => .mono h (d := d) hd
   | identity _ _, _ => trivial
   | cut _ _, hd => ⟨h _ hd.1, .mono h hd.2.1, .mono h hd.2.2⟩
   | contraction d, hd => .mono h (d := d) hd
@@ -349,13 +323,11 @@ variable [RewriteClosed C]
 
 def rewrite {Γ} (f : ℕ → ArithmeticTerm ℕ) : (⊢ᴸᴷᴵ[C]! Γ) → ⊢ᴸᴷᴵ[C]! Γ.map (Rew.rewrite f ▹ ·)
   | axm h => cast (axm h) (by simp)
-  | ind (Γ := Γ) φ hφ t d₀ d =>
+  | ind (Γ := Γ) φ hφ t d =>
     let g : ℕ → ArithmeticTerm ℕ := &0 :>ₙ fun x ↦ Rew.shift (f x)
-    have h₀ := d₀.rewrite f
     have h := d.rewrite g
     ind (Γ := Γ.map (Rew.rewrite f ▹ ·)) (Rew.rewrite (Rew.bShift ∘ f) ▹ φ)
       (RewriteClosed.rewrite _ hφ) (Rew.rewrite f t)
-      (cast h₀ (by simp [rewrite_subst_eq]))
       (cast h (by
         simp [g, free_rewrite_eq, Rewriting.shifts, shift_rewrite_eq, Function.comp_def,
           Rew.rewrite_subst_shift_eq]))
@@ -406,9 +378,9 @@ protected def shift (d : ⊢ᴸᴷᴵ[C]! Γ) : ⊢ᴸᴷᴵ[C]! Γ⁺ := cast (
 /-- The induction rule with the step case taken at a variable that occurs in no formula of the
 conclusion, in place of the shifted sequent the rule itself asks for. -/
 def indByNewVar {m} (hξ : C ξ) (t) (hξm : ¬ξ.FVar? m) (hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m)
-    (d₀ : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[‘0’]⦄) (d : ⊢ᴸᴷᴵ[C]! Γ + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄) :
-    ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[t]⦄ :=
-  ind ξ hξ t d₀ <| cast (Derivation.map d fun x ↦ if x = m then 0 else x + 1) (by
+    (d : ⊢ᴸᴷᴵ[C]! Γ + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄) :
+    ⊢ᴸᴷᴵ[C]! Γ + ⦃∼(ξ/[‘0’]), ξ/[t]⦄ :=
+  ind ξ hξ t <| cast (Derivation.map d fun x ↦ if x = m then 0 else x + 1) (by
     simp [Semiformula.map_rewriteMap_eq_shifts Γ hΓ, Semiformula.rewriteMap_subst_eq_free ξ hξm,
       Rew.app_substs, Semiformula.rewriteMap_eq_shift ξ hξm])
 
@@ -422,8 +394,7 @@ variable [RewriteClosed D] {Γ : LK.Sequent ℒₒᵣ}
 
 lemma anchored_rewrite {Γ} : ∀ (d : ⊢ᴸᴷᴵ[C]! Γ) (f), Anchored D d → Anchored D (d.rewrite f)
   | axm _, _, _ => by simp [rewrite]
-  | ind _ _ _ d₀ d, _, h => by
-    simpa [rewrite] using ⟨anchored_rewrite d₀ _ h.1, anchored_rewrite d _ h.2⟩
+  | ind _ _ _ d, _, h => by simpa [rewrite] using anchored_rewrite d _ h
   | identity _ _, _, _ => trivial
   | cut dp dn, f, h => by
     simp only [rewrite, anchored_cast_iff, anchored_cut_iff]
@@ -444,9 +415,9 @@ lemma anchored_shift (d : ⊢ᴸᴷᴵ[C]! Γ) (h : Anchored D d) : Anchored D d
   anchored_map d Nat.succ h
 
 lemma anchored_indByNewVar {m} {hξ : C ξ} {hξm : ¬ξ.FVar? m} {hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m}
-    {d₀ : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[‘0’]⦄} {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄}
-    (h₀ : Anchored D d₀) (h : Anchored D d) : Anchored D (indByNewVar hξ t hξm hΓ d₀ d) := by
-  simpa [indByNewVar] using And.intro h₀ (anchored_map d _ h)
+    {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄} (h : Anchored D d) :
+    Anchored D (indByNewVar hξ t hξm hΓ d) := by
+  simpa [indByNewVar] using anchored_map d _ h
 
 lemma anchored_generalizeByNewVar {m} {hξ : ¬ξ.FVar? m} {hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m}
     {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[&m]⦄} (h : Anchored D d) :
@@ -485,9 +456,8 @@ variable {C : ArithmeticSemiformula ℕ 1 → Prop} {Γ Δ : LK.Sequent ℒₒ�
 
 lemma axm {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) : ⊢ᴸᴷᴵ[C] ⦃Rewriting.emb σ⦄ := ⟨.axm h⟩
 
-lemma ind (hξ : C ξ) (t) (h₀ : ⊢ᴸᴷᴵ[C] Γ + ⦃ξ/[‘0’]⦄)
-    (h : ⊢ᴸᴷᴵ[C] Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄) : ⊢ᴸᴷᴵ[C] Γ + ⦃ξ/[t]⦄ :=
-  Nonempty.map2 (Derivation.ind ξ hξ t) h₀ h
+lemma ind (hξ : C ξ) (t) (h : ⊢ᴸᴷᴵ[C] Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄) :
+    ⊢ᴸᴷᴵ[C] Γ + ⦃∼(ξ/[‘0’]), ξ/[t]⦄ := Nonempty.map (Derivation.ind ξ hξ t) h
 
 lemma lem (φ : ArithmeticProposition) : ⊢ᴸᴷᴵ[C] ⦃φ, ∼φ⦄ := ⟨.lem φ⟩
 
@@ -518,11 +488,6 @@ lemma ofLK (h : Nonempty (⊢ᴸᴷ¹ Γ)) : ⊢ᴸᴷᴵ[C] Γ := Nonempty.map 
 
 lemma weakeningMany (Δ) (h : ⊢ᴸᴷᴵ[C] Γ) : ⊢ᴸᴷᴵ[C] Γ + Δ :=
   Nonempty.map (Derivation.weakeningMany default) h
-
-@[inherit_doc Derivation.ind']
-lemma ind' (hξ : C ξ) (t) (h : ⊢ᴸᴷᴵ[C] Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄) :
-    ⊢ᴸᴷᴵ[C] Γ + ⦃∼(ξ/[‘0’]), ξ/[t]⦄ :=
-  Nonempty.map (Derivation.ind' hξ t default) h
 
 /-! ### Derived closure properties -/
 

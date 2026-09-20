@@ -60,7 +60,7 @@ theorem derivable_succInd (hξ : C ξ) : ⊢ᴸᴷᴵ[C] ⦃succInd ξ⦄ := by
     · exact (Derivable.weakening (∼(η/[&0])) (Derivable.lem (η/[‘(&0 + 1)’]))).cast (by abel)
   have key : ⊢ᴸᴷᴵ[C] ⦃∼(ξ/[‘0’]), ∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])), ∀¹ ξ⦄ := by
     apply Derivable.all
-    have h := Derivable.ind' (ξ := shift ξ) (RewriteClosed.shift hξ) &0
+    have h := Derivable.ind (ξ := shift ξ) (RewriteClosed.shift hξ) &0
       (Γ := ⦃shift (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])))⦄)
       ((step (shift (shift ξ))).cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; try abel))
     exact h.cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; try abel)

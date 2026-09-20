@@ -454,8 +454,10 @@ def forcesSuccInd {ξ : ArithmeticSemiformula ℕ 1} (hξ : C ξ) (hD : ∀ t, D
       ((Forces.refl (ξ/[&m])).monotone (StrongerThan.ofSubset (.atom _) tr' (by simp)))
   let dstep : ⊢ᴸᴷᴵ[C, D]! ∼r + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄ :=
     (derivableOfForced tr' gY).cast (by simp; abel)
-  exact ⟨Derivation.indByNewVar hξ t hξm hr d₀.val dstep.val,
-    Derivation.anchored_indByNewVar d₀.prop dstep.prop⟩
+  -- the rule leaves the base case as a side formula; cut it off against `d₀`
+  refine cutAnchored (r := ⦃ξ/[t]⦄) (hD ‘0’) tr d₀ ⟨?_, ?_⟩
+  · exact (Derivation.indByNewVar hξ t hξm hr dstep.val).cast (by abel)
+  · simpa using Derivation.anchored_indByNewVar dstep.prop
 
 /-- Every axiom of `𝗣𝗔⁻` is forced: it is a leaf of the calculus, so it has an anchored
 derivation.

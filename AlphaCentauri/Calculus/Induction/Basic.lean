@@ -18,8 +18,8 @@ The induction class is a parameter: taking `C` to be the strict $\Sigma_1$ formu
 strict $\Sigma_1$ and $\Pi_1$ ones gives the calculus for $\mathsf{I}\Sigma_1$, and the same
 calculus serves the other induction schemes.
 
-The leaf is semantic rather than the axioms of `𝗣𝗔⁻`, because `addEqOfLt` is $\Pi_2$ and would
-break the invariant that every formula of a sequent is $\Sigma_1$ or $\Pi_1$.
+The leaf is semantic rather than the axioms of `𝗣𝗔⁻`, so that the calculus does not depend on the
+axiomatization: every axiom of `𝗣𝗔⁻` is strict $\Pi_1$ and true in `ℕ`, so the leaf derives it.
 
 - [Bus98A, Section 1.4.1]
 - [Bus98A, Section 1.4.2]

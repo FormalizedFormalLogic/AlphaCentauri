@@ -57,4 +57,19 @@ lemma bounded_primrec {k} {φ : ArithmeticSemiformula ξ k} (hφ : φ.Bounded) :
     PrimrecPred fun v : Fin k → ℕ ↦ φ.Eval v ε :=
   PrimrecPred.comp_get_iff.mp (bounded_primrec_vec ε k φ hφ)
 
+/-- The value of a term under an assignment read off a list is primitive recursive in the list.
+- [HP98, Theorem 0.35] -/
+lemma primrec_termVal : (t : ArithmeticTerm ℕ) →
+    Primrec fun l : List ℕ ↦ Semiterm.val ![] (l.getD · 0) t
+  | #x => x.elim0
+  | &x => by simpa using (Primrec.list_getD 0).comp Primrec.id (Primrec.const x)
+  | .func Language.Zero.zero _ => by simpa using Primrec.const 0
+  | .func Language.One.one _ => by simpa using Primrec.const 1
+  | .func Language.Add.add v => by
+    simpa [Semiterm.val_func] using
+      Primrec.nat_add.comp (primrec_termVal (v 0)) (primrec_termVal (v 1))
+  | .func Language.Mul.mul v => by
+    simpa [Semiterm.val_func] using
+      Primrec.nat_mul.comp (primrec_termVal (v 0)) (primrec_termVal (v 1))
+
 end FFL.FirstOrder.Arithmetic

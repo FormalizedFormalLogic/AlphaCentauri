@@ -42,9 +42,15 @@ inductive Semiformula.Bounded : {n : ℕ} → Semiformula L ξ n → Prop
 attribute [simp] Semiformula.Bounded.verum Semiformula.Bounded.falsum Semiformula.Bounded.rel
   Semiformula.Bounded.nrel
 
+-- `witnesses_verum`/`witnesses_identity` build a `Bounded` witness directly from its shape;
+-- these are intro rules for goals like `Semiformula.Bounded (.rel r v)`.
+attribute [grind .] Semiformula.Bounded.verum Semiformula.Bounded.falsum Semiformula.Bounded.rel
+  Semiformula.Bounded.nrel
+
 variable {n : ℕ} {φ ψ : Semiformula L ξ n}
 
 /-- A bounded formula sits at every zero level of the arithmetical hierarchy. -/
+@[grind ←]
 theorem Semiformula.Bounded.hierarchy {Γ : Polarity} (h : φ.Bounded) : Hierarchy Γ 0 φ := by
   induction h with
   | verum _ => exact Hierarchy.verum _ _ _
@@ -58,6 +64,7 @@ theorem Semiformula.Bounded.hierarchy {Γ : Polarity} (h : φ.Bounded) : Hierarc
 
 set_option linter.flexible false in
 /-- A formula at a zero level of the arithmetical hierarchy is bounded. -/
+@[grind →]
 theorem Arithmetic.Hierarchy.bounded {Γ : Polarity} : Hierarchy Γ 0 φ → φ.Bounded := by
   generalize hs : 0 = s
   intro h
@@ -74,9 +81,10 @@ theorem Arithmetic.Hierarchy.bounded {Γ : Polarity} : Hierarchy Γ 0 φ → φ.
 theorem Semiformula.bounded_iff_hierarchy {Γ : Polarity} : φ.Bounded ↔ Hierarchy Γ 0 φ :=
   ⟨Semiformula.Bounded.hierarchy, Arithmetic.Hierarchy.bounded⟩
 
-/-- A bounded formula is strictly `Γ`-[0]. -/
-theorem Arithmetic.StrictHierarchy.of_bounded {Γ : Polarity} (h : φ.Bounded) :
-    StrictHierarchy Γ 0 φ := .zero h.hierarchy
+/-- A bounded formula is strictly `Γ`-[s] at every level. -/
+@[grind =>]
+theorem Arithmetic.StrictHierarchy.of_bounded {Γ : Polarity} {s : ℕ} (h : φ.Bounded) :
+    StrictHierarchy Γ s φ := .of_deltaZero h.hierarchy
 
 namespace Semiformula.Bounded
 

@@ -18,7 +18,6 @@ public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.Calculus.Induction.Forcing
-public import AlphaCentauri.Calculus.Induction.Instantiation
 public import AlphaCentauri.Calculus.Induction.Theory
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.Hierarchy.Bounded
@@ -37,7 +36,6 @@ public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.ProvablyTotal.Primrec
-public import AlphaCentauri.ProvablyTotal.Witnessing
 public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.RelativizedProvability

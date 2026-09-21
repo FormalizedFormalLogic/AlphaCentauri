@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Hierarchy.StrictDefinable
 public import AlphaCentauri.Schemata.Collection.Induction
 public import AlphaCentauri.Schemata.Induction
 
@@ -23,12 +24,17 @@ variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s : ℕ}
 
 /-! ## Strict definitions of definable relations -/
 
-/-- Every `Γ-[s]`-definable relation on `V` is defined, at a fixed assignment of the free
-variables, by a strict `Γ-[s]` formula. -/
+/-- The evaluation of a strict `Γ-[s]` formula in two variables at a fixed assignment of the free
+variables is a `StrictDefinableRel`. -/
+private lemma strictDefinableRel_of_eval {φ : ArithmeticSemiformula ℕ 2}
+    (hφ : StrictHierarchy Γ s φ) (f : ℕ → V) :
+    StrictDefinableRel Γ s fun x y ↦ φ.Eval ![x, y] f :=
+  (StrictDefinable.of_strictHierarchy (m := 0) (θ := φ ⇜ ![#1, #0]) (hφ.rew _) ![] f).of_iff
+    fun v ↦ by simp [Semiformula.eval_substs]
+
+/-- Every `Γ-[s]`-definable relation on `V` is definable by a strict `Γ-[s]` formula. -/
 def StrictlyDefinable (V : Type*) [ORingStructure V] (s : ℕ) : Prop :=
-  ∀ {Γ : Polarity} {R : V → V → Prop}, Γ-[s].DefinableRel R →
-    ∃ (φ : ArithmeticSemiformula ℕ 2) (f : ℕ → V),
-      StrictHierarchy Γ s φ ∧ ∀ x y : V, R x y ↔ φ.Eval ![x, y] f
+  ∀ {Γ : Polarity} {R : V → V → Prop}, Γ-[s].DefinableRel R → StrictDefinableRel Γ s R
 
 /-- In a model of `𝗜𝚺 s` every `Γ-[s]`-definable relation has a strict definition.
 - [HP98, Theorem I.2.5(3)]
@@ -38,15 +44,17 @@ lemma strictlyDefinable_of_models_ISigma (V : Type*) [ORingStructure V] [V↓[�
   rcases s with _ | t
   · intro Γ R hR
     obtain ⟨f, φ, hφ, hiff⟩ := exists_hierarchy_eval_iff hR
-    exact ⟨φ, f, .zero (Hierarchy.zero_iff.mp hφ), fun x y ↦ by simpa using hiff ![x, y]⟩
+    exact (strictDefinableRel_of_eval (.zero (Hierarchy.zero_iff.mp hφ)) f).of_iff
+      fun v ↦ by simpa [← Matrix.fun_eq_vec_two v] using hiff v
   · intro Γ R hR
     obtain ⟨f, φ, hφ, hiff⟩ := exists_hierarchy_eval_iff hR
-    have heval : ∀ x y : V, R x y ↔ φ.Eval ![x, y] f := fun x y ↦ by simpa using hiff ![x, y]
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := t + 1)
     have hC : StrictCollection V (t + 1) := fun hθ e a h ↦
       sigma_exists_bound_witness hθ.hierarchy e a h
     obtain ⟨ψ, hψ, hψiff⟩ := exists_strictHierarchy_eval_iff_two hC hφ f
-    exact ⟨ψ, f, hψ, fun x y ↦ (heval x y).trans (hψiff x y).symm⟩
+    have h : ∀ x y : V, R x y ↔ φ.Eval ![x, y] f := fun x y ↦ by simpa using hiff ![x, y]
+    exact (strictDefinableRel_of_eval hψ f).of_iff fun v ↦
+      (h (v 0) (v 1)).trans (hψiff (v 0) (v 1)).symm
 
 /-! ## Successor induction over the strict hierarchy -/
 
@@ -56,12 +64,12 @@ private lemma exists_strictHierarchy_sigma_eval (hD : StrictlyDefinable V s) {P 
     {Q : V → V → Prop} (hQ : 𝚷-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∃ w, Q x w) :
     ∃ (φ : ArithmeticSemiformula ℕ 1) (f : ℕ → V),
       StrictHierarchy 𝚺 (s + 1) φ ∧ ∀ x, P x ↔ φ.Eval ![x] f := by
-  obtain ⟨χ, f, hχ, hiff⟩ := hD (Γ := 𝚷) hQ
+  obtain ⟨f, χ, hχ, hiff⟩ := (hD (Γ := 𝚷) hQ).exists_eval_iff
+  have h : ∀ x y : V, Q x y ↔ χ.Eval ![x, y] f := fun x y ↦ by simpa using hiff ![x, y]
   refine ⟨∃¹ (χ ⇜ (#1 :> #0 :> (#·.succ.succ))), f,
     (StrictHierarchy.ofAlt (Γ := 𝚺) (hχ.rew _)).exs, fun x ↦ ?_⟩
   rw [hPQ x, Semiformula.eval_ex]
-  exact exists_congr fun w ↦ (hiff x w).trans
-    (Semiformula.eval_swap01 χ w x ![]).symm
+  exact exists_congr fun w ↦ (h x w).trans (Semiformula.eval_swap01 χ w x ![]).symm
 
 /-- The universal quantification of a `𝚺-[s]`-definable relation is defined by a strict
 $\Pi_{s + 1}$ formula. -/
@@ -69,12 +77,12 @@ private lemma exists_strictHierarchy_pi_eval (hD : StrictlyDefinable V s) {P : V
     {Q : V → V → Prop} (hQ : 𝚺-[s].DefinableRel Q) (hPQ : ∀ x, P x ↔ ∀ w, Q x w) :
     ∃ (φ : ArithmeticSemiformula ℕ 1) (f : ℕ → V),
       StrictHierarchy 𝚷 (s + 1) φ ∧ ∀ x, P x ↔ φ.Eval ![x] f := by
-  obtain ⟨χ, f, hχ, hiff⟩ := hD (Γ := 𝚺) hQ
+  obtain ⟨f, χ, hχ, hiff⟩ := (hD (Γ := 𝚺) hQ).exists_eval_iff
+  have h : ∀ x y : V, Q x y ↔ χ.Eval ![x, y] f := fun x y ↦ by simpa using hiff ![x, y]
   refine ⟨∀¹ (χ ⇜ (#1 :> #0 :> (#·.succ.succ))), f,
     (StrictHierarchy.ofAlt (Γ := 𝚷) (hχ.rew _)).all, fun x ↦ ?_⟩
   rw [hPQ x, Semiformula.eval_all]
-  exact forall_congr' fun w ↦ (hiff x w).trans
-    (Semiformula.eval_swap01 χ w x ![]).symm
+  exact forall_congr' fun w ↦ (h x w).trans (Semiformula.eval_swap01 χ w x ![]).symm
 
 /-- Every model of `𝗜 Γ s` satisfies the induction scheme for `StrictHierarchy Γ s`. -/
 instance models_InductionScheme_strictHierarchy [V↓[ℒₒᵣ] ⊧* 𝗜 Γ s] :

@@ -115,10 +115,12 @@ hit, so the Lake cache download is skipped when it hits; what it structurally ca
 pull requests, evictions, a contributor's fresh clone — is what the shared cache is for.
 
 The steps come from the composite actions in
-[`FormalizedFormalLogic/.github`](https://github.com/FormalizedFormalLogic/.github/tree/main/lake-cache),
-and both are dormant unless the repository variable `LAKE_CACHE_ENABLED` is `1`; publishing also
-needs the secret `LAKE_CACHE_KEY`, an R2 token scoped to that bucket alone. Without either, every
-cache step is a no-op and the build compiles from source, which is slow but never wrong.
+[`FormalizedFormalLogic/.github`](https://github.com/FormalizedFormalLogic/.github/tree/main/lake-cache).
+Reading needs nothing configured; publishing needs the secret `LAKE_CACHE_KEY`, an R2 token scoped
+to that bucket alone, and is skipped with a notice when it is absent. Setting the repository
+variable `LAKE_CACHE_ENABLED` to `0` turns every cache step into a no-op, which is the way to take
+the cache back without editing a workflow — the build then compiles from source, slowly but never
+wrongly, as it does whenever the cache is short of something.
 
 ### Review and merge
 

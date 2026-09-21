@@ -89,6 +89,12 @@ declaration:
   FFL.FirstOrder.Arithmetic.parsons_primrec:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_strictHierarchy_provablyTotalVia
+  FFL.FirstOrder.Arithmetic.primrec'_iff_provablyTotal:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_strictHierarchy_provablyTotalVia
+  FFL.FirstOrder.Arithmetic.primrec_iff_provablyTotal:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_strictHierarchy_provablyTotalVia
   FFL.FirstOrder.Arithmetic.primrec'_of_provablyTotal:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_strictHierarchy_provablyTotalVia

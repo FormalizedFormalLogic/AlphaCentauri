@@ -2,9 +2,9 @@ module
 
 public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
 public import AlphaCentauri.Axiomatizability.Basic
-public import AlphaCentauri.Hierarchy.PrenexOfCollection
-public import AlphaCentauri.Schemata.Collection.Basic
 public import AlphaCentauri.ToFoundation.Fvar
+public import AlphaCentauri.ToFoundation.Schemata
+public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
 
 /-!
 # Finite axiomatizability of `𝗜𝚺 n`
@@ -138,7 +138,8 @@ theorem provable_finiteAxiomatization (n : ℕ) : 𝗜𝚺 (n + 1) ⊢* finiteAx
   · exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega))
       (ISigma1.provable_tarski n hσ)
   · exact by_axm (Set.mem_union_right _ indSentence_mem_inductionScheme)
-  · exact WeakerThan.pbl (h := BSigma_weakerThan_ISigma n)
+  · have h : 𝗕⁺ 𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
+    exact WeakerThan.pbl (h := h)
       (by_axm (Set.mem_union_right _ collSentence_mem_collectionScheme))
 
 /-- `𝗣𝗔⁻` holds in a model of the finite theory; the proofs below use it as a local instance.
@@ -280,23 +281,32 @@ theorem hierarchyInduction_of_strictInduction (n : ℕ) (T : ArithmeticTheory) [
   · apply Arithmetic.complete.{0}
     intro M _ _
     have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance
-    have hC : StrictCollection M (n + 1) := strictCollection_of_models_collectionAxiom fun ψ hψ ↦
-        consequence_iff.mp (Theory.Proof.sound (hcol ψ hψ)) M inferInstance
+    have hI : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := Semantics.ModelsSet.union_iff.mpr
+      ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr <| by
+        rintro _ ⟨ψ, hψ, rfl⟩
+        exact consequence_iff.mp (Theory.Proof.sound
+          (hind ψ ((StrictHierarchy.zero hψ).mono (Nat.zero_le (n + 1))))) M inferInstance⟩
+    have : M↓[ℒₒᵣ] ⊧* 𝗕𝚺 (n + 1) := Semantics.ModelsSet.union_iff.mpr
+      ⟨hI, Semantics.ModelsSet.setOf_iff.mpr <| by
+        rintro _ ⟨ψ, hψ, rfl⟩
+        exact consequence_iff.mp (Theory.Proof.sound (hcol ψ hψ)) M inferInstance⟩
     suffices ∀ f : ℕ → M, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →
       ∀ x, φ.Eval ![x] f by
       simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
         Matrix.constant_eq_singleton] using this
     intro f hzero hsucc
-    obtain ⟨ψ, hψ, heval⟩ := exists_strictHierarchy_eval_iff hC hφ f
+    obtain ⟨g, ψ, hψ, hiff⟩ :=
+      (StrictDefinable.of_definable (Γ' := 𝚺) (definablePred_of_hierarchy hφ f)).exists_eval_iff
+    have heval : ∀ x : M, φ.Eval ![x] f ↔ ψ.Eval ![x] g := fun x ↦ by simpa using hiff ![x]
     have hInd : M↓[ℒₒᵣ] ⊧ (.univCl (succInd ψ) : ArithmeticSentence) :=
       consequence_iff.mp (Theory.Proof.sound (hind ψ hψ)) M inferInstance
     have hind' : ∀ g : ℕ → M, ψ.Eval ![0] g → (∀ x, ψ.Eval ![x] g → ψ.Eval ![x + 1] g) →
       ∀ x, ψ.Eval ![x] g := by
       simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
         Matrix.constant_eq_singleton] using hInd
-    intro x
-    refine (heval x).mp (hind' f ((heval 0).mpr hzero) (fun y hy ↦ (heval (y + 1)).mpr ?_) x)
-    exact hsucc y ((heval y).mp hy)
+    have hstep : ∀ y : M, ψ.Eval ![y] g → ψ.Eval ![y + 1] g := fun y hy ↦
+      (heval (y + 1)).mp (hsucc y ((heval y).mpr hy))
+    exact fun x ↦ (heval x).mpr (hind' g ((heval 0).mp hzero) hstep x)
 
 /-- The finite theory is equivalent to `𝗜𝚺 (n + 1)`.
 - [HP98, Theorem I.2.52] -/

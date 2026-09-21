@@ -27,9 +27,10 @@ Otherwise the bump is red and it is yours to repair:
 1. Find the pull request:
    `gh pr list --label update-deps --state open --json number,headRefName,url`.
 2. Add a git worktree for its branch under `.claude/worktrees/`, and give it its own
-   `.lake/packages` (`cp -a <main>/.lake/packages <main>/.lake/config .lake/`) so `lake build` works
-   there. Pull the branch first — the workflow commits new pins on top of it, so your local copy may
-   be behind.
+   `.lake/packages` (`cp -a <main>/.lake/packages <main>/.lake/config .lake/`), then `just cache`:
+   the bump moves the pin onto a revision Foundation's CI has published, so its build is a download
+   rather than the hour it takes to elaborate. Pull the branch first — the workflow commits new pins
+   on top of it, so your local copy may be behind.
 3. Build. Read the compiler's complaints against the upstream's own diff over the range the body's
    table links, and repair this repository: renames, changed signatures, lemmas that moved.
    Where Foundation has absorbed material ported from here, Foundation's version wins — delete the

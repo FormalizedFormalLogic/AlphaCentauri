@@ -20,53 +20,22 @@ permissions:
   contents: read
 
 jobs:
-  deps:
-    name: Build Foundation (cached)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      # The toolchain leads the key so `restore-keys` can fall back to the newest build under the
-      # same one; oleans from another toolchain are worth nothing.
-      - name: Cache Foundation build (keyed on toolchain + manifest)
-        id: foundation-cache
-        uses: actions/cache@v6
-        with:
-          path: .lake/packages/Foundation/.lake/build
-          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
-          restore-keys: |
-            foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-
-      - uses: leanprover/lean-action@v1
-        if: steps.foundation-cache.outputs.cache-hit != 'true'
-        with:
-          build: false
-          use-github-cache: false
-      - name: Build Foundation (incremental when an older build was restored)
-        if: steps.foundation-cache.outputs.cache-hit != 'true'
-        run: lake build Foundation
-      - name: Clear Foundation's replayed-warning cache
-        if: steps.foundation-cache.outputs.cache-hit != 'true'
-        run: python3 .github/scripts/clear-dep-warnings.py .lake/packages/Foundation/.lake/build
-
   build:
     name: Build project
-    needs: deps
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write # the audit comment below
     steps:
       - uses: actions/checkout@v7
+        with:
+          # `lake cache get` walks back from HEAD to a published revision.
+          fetch-depth: 100
       - uses: extractions/setup-just@v3
       - uses: leanprover/lean-action@v1
         with:
           build: false
           use-github-cache: false
-      - name: Restore Foundation build (warnings cleared)
-        uses: actions/cache/restore@v6
-        with:
-          path: .lake/packages/Foundation/.lake/build
-          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
-          fail-on-cache-miss: true
 
       # Entries are immutable, hence the sha; `restore-keys` finds the newest one on these pins.
       - name: Restore project cache
@@ -80,6 +49,30 @@ jobs:
       - name: Unpack project cache
         if: hashFiles('.lake/AlphaCentauri-x86_64-unknown-linux-gnu.tar.gz') != ''
         run: lake unpack
+
+      # This library's own outputs from the shared FFL R2 cache, keyed by revision rather than by
+      # branch, so it also covers fork pull requests and fresh clones.
+      - name: Restore the Lake cache
+        uses: FormalizedFormalLogic/.github/lake-cache/restore@main
+        with:
+          # A tarball hit above already carries everything this would fetch.
+          skip-download: ${{ steps.cache-restore.outputs.cache-matched-key != '' }}
+          # No freshness assertion: Mathlib is a separate cache, and `lake exe cache get` is
+          # occasionally short a module nothing here uses. The build below compiles what is
+          # missing, as it always has.
+          assert-fresh: ''
+
+      # Foundation's oleans, published by its own CI and read at the revision the manifest pins,
+      # so that a bump of that pin costs a download rather than an hour of elaboration.
+      - name: Restore Foundation's build from the Lake cache
+        uses: FormalizedFormalLogic/.github/lake-cache/restore@main
+        with:
+          repo: FormalizedFormalLogic/Foundation
+          package: Foundation
+          assert-fresh: ''
+      # Nothing to do when the step above filled the build; a source build otherwise.
+      - name: Build Foundation
+        run: lake build Foundation
 
       # A fallback cache carries artifacts of sources since renamed or deleted; lake keeps them.
       - name: Prune orphaned build artifacts from renamed/removed sources
@@ -139,6 +132,15 @@ jobs:
         run: |
           echo "the axiom audit failed; see the 'Audit axioms' step"
           exit 1
+
+      # `main` only, after every gate above: a pull request builds a tree that will not exist
+      # after the squash-merge, and a fork pull request gets no secrets anyway.
+      - name: Publish the Lake cache
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: FormalizedFormalLogic/.github/lake-cache/publish@main
+        with:
+          cache-key: ${{ secrets.LAKE_CACHE_KEY }}
+          targets: AlphaCentauri
 
       - uses: typst-community/setup-typst@v4
       - uses: ts-graphviz/setup-graphviz@v2

@@ -143,6 +143,11 @@ lemma provable_localReflectionOn_hierarchy_of_strictHierarchy [𝗜𝚺n ⪯ T]
     {S : ArithmeticTheory} (hTS : T ⪯ S) (h : S ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ n] T) :
     S ⊢* 𝗥𝗳𝗻[Hierarchy Γ n] T := by
   have : 𝗜𝚺₁ ⪯ S := (inferInstance : 𝗜𝚺₁ ⪯ T).trans hTS
+  have : 𝗕𝚺 n ⪯ T := by
+    rcases n with _ | m
+    · exact (CollectionOnHierarchy_weakerThan_of_le (Nat.zero_le 1)).trans
+        (BSigma_weakerThan_ISigma.trans (inferInstance : 𝗜𝚺₁ ⪯ T))
+    · exact BSigma_weakerThan_ISigma.trans (inferInstance : 𝗜𝚺 (m + 1) ⪯ T)
   rintro φ ⟨σ, hσ, rfl⟩
   obtain ⟨σ', hσ', e⟩ := exists_strictHierarchy_of_hierarchy (Γ := Γ) T hσ
   have he : T ⊢ σ 🡘 σ' := by simpa using e

@@ -115,14 +115,6 @@ namespace HierarchySymbol.Semiformula
 
 variable {ξ : Type*} {n s : ℕ}
 
-/-- A formula of a hierarchy class strictly below `s` is `Γ-[s]` for either polarity `Γ`. -/
-lemma hierarchy_of_lt {C : HierarchySymbol} {Γ : Polarity} (φ : C.Semiformula ξ n)
-    (h : C.rank < s) : Hierarchy Γ s φ.val := by
-  rcases C with ⟨_ | _ | _, m⟩
-  · exact φ.sigma_prop.strict_mono _ h
-  · exact φ.pi_prop.strict_mono _ h
-  · exact (val_sigma φ ▸ φ.sigma.sigma_prop).strict_mono _ h
-
 @[simp] lemma hierarchy_succ {C : HierarchySymbol} {Γ : Polarity} (φ : C.Semiformula ξ n)
     (h : C.rank ≤ s + 1) : Hierarchy Γ (s + 2) φ.val := hierarchy_of_lt φ (by omega)
 

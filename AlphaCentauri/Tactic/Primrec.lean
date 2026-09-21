@@ -111,6 +111,8 @@ theorem vector_toList' {n : ℕ} {v : α → List.Vector β n} (hv : Primrec v) 
     Primrec fun a ↦ (v a).toList :=
   vector_toList.comp hv
 
+/-- The pointwise form of `Primrec.vector_get`. It carries a second prime because `vector_get'`
+upstream is the point-free `Primrec (List.Vector.get ·)`. -/
 theorem vector_get'' {n : ℕ} {v : α → List.Vector β n} {i : α → Fin n} (hv : Primrec v)
     (hi : Primrec i) : Primrec fun a ↦ (v a).get (i a) :=
   vector_get.comp hv hi

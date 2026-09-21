@@ -440,6 +440,34 @@ lemma exists_strictHierarchy_eval_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : S
   simp only [Semiformula.eval_embSubsts, hvec]
   exact (hθ V hC (x :> fun i : Fin φ.fvSup ↦ f i)).symm.trans (φ.eval_toSemisentence_one x f)
 
+/-- In a model of `𝗣𝗔⁻` with collection for strict $\Sigma_s$ formulas, every `Hierarchy Γ s`
+formula in two variables agrees, at a fixed assignment of its free variables, with a strict
+`Γ-[s]` formula.
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9] -/
+lemma exists_strictHierarchy_eval_iff_two [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hC : StrictCollection V s)
+    {φ : ArithmeticSemiformula ℕ 2} (hφ : Hierarchy Γ s φ) (f : ℕ → V) :
+    ∃ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy Γ s ψ ∧
+      ∀ x y : V, ψ.Eval ![x, y] f ↔ φ.Eval ![x, y] f := by
+  obtain ⟨θ, hθ⟩ :=
+    Prenex.models_exists_prenex_of_collection (φ := φ.toSemisentence ![#1, #0]) (hφ.rew _)
+  refine ⟨Rew.embSubsts
+      (#1 :> #0 :> fun i : Fin φ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2)) ▹ θ.val,
+    Prenex.val_strictHierarchy.rew _, fun x y ↦ ?_⟩
+  have hvec : (Semiterm.val (M := V) ![x, y] f) ∘
+      (#1 :> #0 :> fun i : Fin φ.fvSup ↦ (&(i : ℕ) : ArithmeticSemiterm ℕ 2))
+      = (y :> x :> fun i : Fin φ.fvSup ↦ f i) := by
+    funext i
+    cases i using Fin.cases with
+    | zero => simp
+    | succ i =>
+      cases i using Fin.cases with
+      | zero => simp
+      | succ i => simp
+  simp only [Semiformula.eval_embSubsts, hvec]
+  exact (hθ V hC (y :> x :> fun i : Fin φ.fvSup ↦ f i)).symm.trans
+    (φ.eval_toSemisentence_two x y f)
+
 /-- Over a theory extending `𝗣𝗔⁻` that proves the collection axiom of every strict $\Sigma_s$
 formula, every `Hierarchy Γ s` semisentence is provably equivalent to a strict `Γ-[s]` one.
 - [HP98, 0.30]

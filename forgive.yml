@@ -40,10 +40,6 @@ declaration:
   FFL.FirstOrder.Arithmetic.Peano.reflexive:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive
-  FFL.FirstOrder.Arithmetic.exists_strictHierarchy_provablyTotalVia:
-    forgive:
-      # The gap between the strict and the broad Sigma_1 induction theories, tracked as #238.
-      - FFL.FirstOrder.Arithmetic.exists_strictHierarchy_provablyTotalVia
   FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0:
     forgive:
       # An open problem, not a theorem awaiting formalization: [PWW88, Problem 1].
@@ -80,18 +76,3 @@ declaration:
   FFL.FirstOrder.Arithmetic.not_finiteAxiomatizable_of_Peano_le:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
-  FFL.FirstOrder.Arithmetic.not_provablyTotal_ackermann:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.exists_strictHierarchy_provablyTotalVia
-  FFL.FirstOrder.Arithmetic.parsons:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.exists_strictHierarchy_provablyTotalVia
-  FFL.FirstOrder.Arithmetic.parsons_primrec:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.exists_strictHierarchy_provablyTotalVia
-  FFL.FirstOrder.Arithmetic.primrec'_of_provablyTotal:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.exists_strictHierarchy_provablyTotalVia
-  FFL.FirstOrder.Arithmetic.provablyTotalFunctions_ISigma1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.exists_strictHierarchy_provablyTotalVia

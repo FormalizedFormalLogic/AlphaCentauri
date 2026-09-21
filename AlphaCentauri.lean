@@ -22,6 +22,7 @@ public import AlphaCentauri.Calculus.Induction.Theory
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.Hierarchy.Bounded
 public import AlphaCentauri.Hierarchy.PrenexOfCollection
+public import AlphaCentauri.Hierarchy.StrictDefinable
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.Overspill
@@ -35,7 +36,6 @@ public import AlphaCentauri.OmegaLogic.Reduction
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
-public import AlphaCentauri.ProvablyTotal.Primrec
 public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.RelativizedProvability
@@ -50,6 +50,7 @@ public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.Schemata.ParameterFreeInduction
 public import AlphaCentauri.Schemata.Pigeonhole
+public import AlphaCentauri.Schemata.StrictInduction
 public import AlphaCentauri.ToFoundation.Absoluteness
 public import AlphaCentauri.ToFoundation.BooleanCombination
 public import AlphaCentauri.ToFoundation.Compact

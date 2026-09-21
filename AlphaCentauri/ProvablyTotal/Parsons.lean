@@ -350,13 +350,9 @@ theorem exists_strictHierarchy_provablyTotalVia {k : ℕ} {f : (Fin k → ℕ) �
     (h : 𝗜𝚺₁.ProvablyTotal f) :
     ∃ φ : 𝚺₁.Semisentence (k + 1), StrictHierarchy 𝚺 1 φ.val ∧ (𝗜 𝚺 1).ProvablyTotalVia f φ := by
   obtain ⟨φ, hφ⟩ := h
-  have hBS : 𝗕𝚺₁ ⪯ 𝗜 𝚺 1 :=
-    WeakerThan.trans (𝓣 := 𝗜𝚺₁) (BSigma_weakerThan_ISigma 0) inferInstance
-  have hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 1 ψ →
-      𝗜 𝚺 1 ⊢ (.univCl (collectionAxiom ψ) : ArithmeticSentence) := fun ψ hψ ↦
-    WeakerThan.pbl (𝓢 := 𝗕𝚺₁)
-      (by_axm (Set.mem_union_right _ (mem_CollectionScheme_of_mem hψ.hierarchy)))
-  obtain ⟨ψ, hψ, hprov⟩ := exists_strictHierarchy_of_collection (𝗜 𝚺 1) hcol φ.sigma_prop
+  have : 𝗕𝚺₁ ⪯ 𝗜 𝚺 1 :=
+    WeakerThan.trans (𝓣 := 𝗜𝚺₁) BSigma_weakerThan_ISigma inferInstance
+  obtain ⟨ψ, hψ, hprov⟩ := exists_strictHierarchy_of_hierarchy (𝗜 𝚺 1) φ.sigma_prop
   have hmono : (𝗜 𝚺 1).ProvablyTotalVia f φ := hφ.mono inferInstance
   have heval : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜 𝚺 1],
       ∀ v : Fin (k + 1) → V, φ.val.Evalb v ↔ ψ.Evalb v := fun V _ _ ↦

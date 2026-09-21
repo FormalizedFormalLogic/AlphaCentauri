@@ -1,10 +1,8 @@
 module
 
+public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
-public import Foundation.FirstOrder.Arithmetic.Prenex
-public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.LK.Completeness
-public import AlphaCentauri.Hierarchy.PrenexOfCollection
 public import AlphaCentauri.ToFoundation.Hierarchy
 
 /-!
@@ -95,23 +93,17 @@ fixed once and for all so that it does not depend on the ambient theory.
 - [HP98, Theorem I.2.5(3)]
 - [HP98, Lemma I.2.9] -/
 noncomputable def minimalGraphMatrix (φ : 𝚺₁.Semisentence (k + 1)) : 𝚺₀.Semisentence (k + 2) :=
-  (Classical.choose (Prenex.models_exists_prenex_of_collection.{0} (Γ := 𝚺) (s := 1)
+  (Classical.choose (Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺) (s := 1)
     φ.sigma_prop)).matrix
 
 lemma provable_iff_exists_minimalGraphMatrix (T : ArithmeticTheory) [𝗕𝚺₁ ⪯ T]
     (φ : 𝚺₁.Semisentence (k + 1)) :
     T ⊢ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) := by
-  have hPA : 𝗣𝗔⁻ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗕𝚺₁) inferInstance inferInstance
-  have hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 1 ψ →
-      T ⊢ (.univCl (collectionAxiom ψ) : ArithmeticSentence) := fun ψ hψ ↦
-    Entailment.WeakerThan.pbl (𝓢 := 𝗕𝚺₁)
-      (Entailment.by_axm (Set.mem_union_right _ (mem_CollectionScheme_of_mem hψ.hierarchy)))
-  have hEQ : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := 1)
   refine provable_iff_of_models_iff fun V _ _ e ↦ ?_
-  have hVPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance
-  exact Classical.choose_spec (Prenex.models_exists_prenex_of_collection.{0} (Γ := 𝚺) (s := 1)
-    φ.sigma_prop) V (strictCollection_of_models_collectionAxiom fun ψ hψ ↦
-      consequence_iff.mp (Theory.Proof.sound (hcol ψ hψ)) V inferInstance) e
+  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁ := models_of_subtheory (T := 𝗕𝚺₁) (U := T) inferInstance
+  exact Classical.choose_spec (Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺) (s := 1)
+    φ.sigma_prop) V e Empty.elim
 
 lemma models_iff_exists_minimalGraphMatrix {φ : 𝚺₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) ↔

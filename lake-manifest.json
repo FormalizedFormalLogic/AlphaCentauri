@@ -15,7 +15,7 @@
    "type": "git",
    "subDir": null,
    "scope": "",
-   "rev": "b25a0368585657155227ced793191e3b2509c5e7",
+   "rev": "c805080205547ca10308b8314603c1b2b16327f1",
    "name": "Foundation",
    "manifestFile": "lake-manifest.json",
    "inputRev": "master",

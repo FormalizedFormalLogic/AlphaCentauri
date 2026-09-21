@@ -94,18 +94,19 @@ jobs:
           build: false
           use-github-cache: false
 
-      # The path and key are `ci.yml`'s and have to stay identical to it.
-      - name: Restore the dependency build
-        id: foundation-cache
+      # `ci.yml`'s steps, so the agent starts from the build its repair will be judged against.
+      # The bump moves the pin onto a revision Foundation's own CI has published, which is what
+      # makes this a download rather than the hour the agent would otherwise spend elaborating it.
+      - name: Restore Foundation's build from the Lake cache
         if: steps.decide.outputs.number != ''
-        uses: actions/cache/restore@v6
+        uses: FormalizedFormalLogic/.github/lake-cache/restore@main
         with:
-          path: .lake/packages/Foundation/.lake/build
-          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
-          restore-keys: |
-            foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-
-      - name: Build the dependency from source (cache miss only)
-        if: steps.decide.outputs.number != '' && steps.foundation-cache.outputs.cache-hit != 'true'
+          enabled: ${{ vars.LAKE_CACHE_ENABLED }}
+          repo: FormalizedFormalLogic/Foundation
+          package: Foundation
+          assert-fresh: ''
+      - name: Build the dependency
+        if: steps.decide.outputs.number != ''
         run: |
           lake build Foundation
           python3 .github/scripts/clear-dep-warnings.py .lake/packages/Foundation/.lake/build

@@ -2,9 +2,18 @@
 default:
     @just --list
 
-# Build the library (Foundation is built from source on first run; Mathlib comes from the cache)
-build:
+# Download Mathlib's, Foundation's and this library's prebuilt artifacts (a miss is not an error)
+cache:
     lake exe cache get
+    LAKE_CONFIG=lake-cache.toml lake cache get --service ffl --max-revs=100 \
+      --repo FormalizedFormalLogic/Foundation --package Foundation \
+      || echo "Foundation's cache is incomplete; the build will compile the rest from source"
+    LAKE_CONFIG=lake-cache.toml lake cache get --service ffl --max-revs=100 \
+      --repo FormalizedFormalLogic/AlphaCentauri \
+      || echo "this library's cache is incomplete; the build will compile the rest from source"
+
+# Build the library, taking from the caches what has been built elsewhere already
+build: cache
     lake build
 
 # Audit AlphaCentauri for sorry/native_decide/unauthorized axioms, honouring the allowlist

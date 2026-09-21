@@ -101,7 +101,6 @@ jobs:
         if: steps.decide.outputs.number != ''
         uses: FormalizedFormalLogic/.github/lake-cache/restore@main
         with:
-          enabled: ${{ vars.LAKE_CACHE_ENABLED }}
           repo: FormalizedFormalLogic/Foundation
           package: Foundation
           assert-fresh: ''

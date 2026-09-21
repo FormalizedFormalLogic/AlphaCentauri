@@ -111,6 +111,10 @@ theorem vector_toList' {n : ℕ} {v : α → List.Vector β n} (hv : Primrec v) 
     Primrec fun a ↦ (v a).toList :=
   vector_toList.comp hv
 
+theorem vector_get'' {n : ℕ} {v : α → List.Vector β n} {i : α → Fin n} (hv : Primrec v)
+    (hi : Primrec i) : Primrec fun a ↦ (v a).get (i a) :=
+  vector_get.comp hv hi
+
 end list
 
 /-! ## Equality -/
@@ -169,7 +173,7 @@ attribute [aesop 2 (rule_sets := [Primrec]) safe apply (transparency := reducibl
   Primrec.nat_le' Primrec.nat_lt'
   Primrec.list_cons' Primrec.list_append' Primrec.list_length' Primrec.list_getD'
   Primrec.list_getElem?' Primrec.eq' Primrec.vector_cons' Primrec.vector_toList'
-  Primrec.vector_ofFn
+  Primrec.vector_get'' Primrec.vector_ofFn
 
 attribute [aesop 3 (rule_sets := [Primrec]) safe apply (transparency := reducible)]
   PrimrecPred.not PrimrecPred.and PrimrecPred.or PrimrecPred.imp PrimrecPred.iff
@@ -258,6 +262,8 @@ example (hg : Primrec₂ g) : Primrec fun w : List.Vector ℕ k ↦ g w.toList 0
 
 example : Primrec fun p : ℕ × ℕ ↦ (p.1 ::ᵥ p.2 ::ᵥ List.Vector.nil : List.Vector ℕ 2) := by
   primrec
+
+example : Primrec fun w : List.Vector ℕ 2 ↦ w.get 0 + w.get 1 := by primrec
 
 end
 

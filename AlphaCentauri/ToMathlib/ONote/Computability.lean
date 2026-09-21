@@ -225,7 +225,7 @@ private lemma computable_nfStep : Computable nfStep := by
     have h1 : Computable (fun q : (List Bool × Bool) × Bool => q.1.2 && q.2) :=
       Computable₂.comp Primrec.and.to_comp (Computable.snd.comp Computable.fst) Computable.snd
     have h2 : Computable (fun q : (List Bool × Bool) × Bool => nfTB q.1.1.length) :=
-      computable_nfTB.comp (Primrec.list_length.comp (Primrec.fst.comp Primrec.fst)).to_comp
+      computable_nfTB.comp (Primrec.to_comp (by primrec))
     exact Computable₂.comp Primrec.and.to_comp h1 h2
   have g1 : Computable₂ (fun (L : List Bool) (be : Bool) =>
       (L[nfIdxA L.length]?).map fun ba => be && ba && nfTB L.length) :=
@@ -355,8 +355,7 @@ private lemma computable_countNF : Computable countNF := by
           convert Computable.cond computable_Nfb (Computable.const 1) (Computable.const 0) using 1
           grind
         exact h_cond.comp Computable.fst
-      have h_add : Computable (fun (p : ℕ × ℕ) => p.1 + p.2) :=
-        Primrec.to_comp (Primrec.nat_add.comp Primrec.fst Primrec.snd)
+      have h_add : Computable (fun (p : ℕ × ℕ) => p.1 + p.2) := Primrec.to_comp (by primrec)
       convert h_add.comp (Computable.snd.pair h_cond) using 1
     exact h_countNF_eq.comp Computable.snd
   · rfl
@@ -443,15 +442,15 @@ theorem rePred_ltPull_natCode :
   apply ComputablePred.to_re
   refine ⟨inferInstance, ?_⟩
   have hidx0 : Computable (fun v : List.Vector ℕ 2 => v.get (0 : Fin 2)) :=
-    (Primrec.vector_get.comp Primrec.id (Primrec.const (0 : Fin 2))).to_comp
+    Primrec.to_comp (by primrec)
   have hidx1 : Computable (fun v : List.Vector ℕ 2 => v.get (1 : Fin 2)) :=
-    (Primrec.vector_get.comp Primrec.id (Primrec.const (1 : Fin 2))).to_comp
+    Primrec.to_comp (by primrec)
   have hpair : Computable (fun v : List.Vector ℕ 2 =>
       Nat.pair (enc (v.get 0)) (enc (v.get 1))) :=
     Primrec₂.natPair.to_comp.comp (computable_enc.comp hidx0) (computable_enc.comp hidx1)
   have hmain : Computable (fun v : List.Vector ℕ 2 =>
       decide (Cnat (Nat.pair (enc (v.get 0)) (enc (v.get 1))) = 0)) :=
-    ((Primrec.eq.comp Primrec.id (Primrec.const 0)).decide.to_comp).comp
+    (PrimrecPred.decide (by primrec : PrimrecPred fun n : ℕ => n = 0) |>.to_comp).comp
       (computable_Cnat.comp hpair)
   exact hmain.of_eq (fun v => decide_eq_decide.mpr (lt_iff_Cnat (v.get 0) (v.get 1)).symm)
 

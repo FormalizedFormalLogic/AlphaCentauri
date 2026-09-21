@@ -51,6 +51,10 @@ lemma InductionOnStrictHierarchy_subset_mono {Γ : Polarity} {s₁ s₂ : ℕ} (
     𝗜 Γ s₁ ⊆ 𝗜 Γ s₂ :=
   Set.union_subset_union_right _ (InductionScheme_subset (fun H ↦ H.mono h))
 
+lemma InductionOnStrictHierarchy_subset_of_lt {Γ Γ' : Polarity} {s₁ s₂ : ℕ} (h : s₁ < s₂) :
+    𝗜 Γ s₁ ⊆ 𝗜 Γ' s₂ :=
+  Set.union_subset_union_right _ (InductionScheme_subset (fun H ↦ H.strict_mono _ h))
+
 lemma InductionOnStrictHierarchy_weakerThan_of_le {Γ : Polarity} {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) :
     𝗜 Γ s₁ ⪯ 𝗜 Γ s₂ :=
   WeakerThan.ofSubset (InductionOnStrictHierarchy_subset_mono h)
@@ -129,6 +133,9 @@ lemma models_deltaInd_iff (φ ψ : ArithmeticSemiformula ℕ 1) :
 end models
 
 section standardModel
+
+instance models_InductionOnStrictHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜 Γ s :=
+  models_of_ss inferInstance (InductionOnStrictHierarchy_subset_InductionOnHierarchy Γ s)
 
 instance models_IDeltaOnBroadHierarchy (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚫⁺ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩

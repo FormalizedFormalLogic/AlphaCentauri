@@ -73,10 +73,6 @@ jobs:
       # Nothing to do when the step above filled the build; a source build otherwise.
       - name: Build Foundation
         run: lake build Foundation
-      # Lake replays a dependency's cached warnings on every downstream build, and `--wfail` below
-      # would take them for ours.
-      - name: Clear Foundation's replayed-warning cache
-        run: python3 .github/scripts/clear-dep-warnings.py .lake/packages/Foundation/.lake/build
 
       # A fallback cache carries artifacts of sources since renamed or deleted; lake keeps them.
       - name: Prune orphaned build artifacts from renamed/removed sources

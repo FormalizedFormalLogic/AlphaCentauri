@@ -106,9 +106,7 @@ jobs:
           assert-fresh: ''
       - name: Build the dependency
         if: steps.decide.outputs.number != ''
-        run: |
-          lake build Foundation
-          python3 .github/scripts/clear-dep-warnings.py .lake/packages/Foundation/.lake/build
+        run: lake build Foundation
 
       - name: Configure the committer
         if: steps.decide.outputs.number != ''

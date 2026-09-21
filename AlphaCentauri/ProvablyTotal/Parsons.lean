@@ -4,6 +4,7 @@ public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Primrec
+public import AlphaCentauri.Schemata.StrictInduction
 public import Mathlib.Computability.Ackermann
 
 /-!
@@ -160,11 +161,46 @@ theorem primrec'_of_provablyTotalVia (hφ : StrictHierarchy 𝚺 1 φ.val)
 
 end
 
+/-! ## Normalising the graph to a strict $\Sigma_1$ formula -/
+
+section
+
+open _root_.FFL.Entailment
+
+/-- The reading of a provable equivalence of graph formulas in a model. -/
+private lemma models_allClosure_iff_evalb {k : ℕ} {φ ψ : ArithmeticSemisentence (k + 1)}
+    {V : Type*} [ORingStructure V] :
+    V↓[ℒₒᵣ] ⊧ (∀¹* (φ 🡘 ψ) : ArithmeticSentence) ↔
+      ∀ v : Fin (k + 1) → V, φ.Evalb v ↔ ψ.Evalb v := by
+  simp [models_iff]
+
 /-- An `𝗜𝚺₁`-provably total function has a strict $\Sigma_1$ graph whose totality is already
-provable in the strict induction theory `𝗜 𝚺 1`. -/
-axiom exists_strictHierarchy_provablyTotalVia {k : ℕ} {f : (Fin k → ℕ) → ℕ}
+provable in the strict induction theory `𝗜 𝚺 1`.
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9] -/
+theorem exists_strictHierarchy_provablyTotalVia {k : ℕ} {f : (Fin k → ℕ) → ℕ}
     (h : 𝗜𝚺₁.ProvablyTotal f) :
-    ∃ φ : 𝚺₁.Semisentence (k + 1), StrictHierarchy 𝚺 1 φ.val ∧ (𝗜 𝚺 1).ProvablyTotalVia f φ
+    ∃ φ : 𝚺₁.Semisentence (k + 1), StrictHierarchy 𝚺 1 φ.val ∧ (𝗜 𝚺 1).ProvablyTotalVia f φ := by
+  obtain ⟨φ, hφ⟩ := h
+  have hBS : 𝗕𝚺₁ ⪯ 𝗜 𝚺 1 :=
+    WeakerThan.trans (𝓣 := 𝗜𝚺₁) (BSigma_weakerThan_ISigma 0) inferInstance
+  have hcol : ∀ ψ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 1 ψ →
+      𝗜 𝚺 1 ⊢ (.univCl (collectionAxiom ψ) : ArithmeticSentence) := fun ψ hψ ↦
+    WeakerThan.pbl (𝓢 := 𝗕𝚺₁)
+      (by_axm (Set.mem_union_right _ (mem_CollectionScheme_of_mem hψ.hierarchy)))
+  obtain ⟨ψ, hψ, hprov⟩ := exists_strictHierarchy_of_collection (𝗜 𝚺 1) hcol φ.sigma_prop
+  have hmono : (𝗜 𝚺 1).ProvablyTotalVia f φ := hφ.mono inferInstance
+  have heval : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜 𝚺 1],
+      ∀ v : Fin (k + 1) → V, φ.val.Evalb v ↔ ψ.Evalb v := fun V _ _ ↦
+    models_allClosure_iff_evalb.mp (consequence_iff'.mp (Theory.Proof.sound hprov) V)
+  refine ⟨.mkSigma ψ hψ.hierarchy, by simpa using hψ, ?_, ?_⟩
+  · exact .mk fun v ↦ (heval ℕ v).symm.trans hmono.graph_iff
+  · exact Arithmetic.complete _ _ fun (V : Type) _ _ ↦
+      models_totalitySentence_iff.mpr fun v ↦
+        have ⟨y, hy⟩ := hmono.models V v
+        ⟨y, by simpa using (heval V (y :> v)).mp hy⟩
+
+end
 
 /-- Every `𝗜𝚺₁`-provably total function is primitive recursive.
 - [HP98, Corollary IV.3.7] -/

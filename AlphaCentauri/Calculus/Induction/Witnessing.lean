@@ -224,16 +224,21 @@ lemma primrecRel_evalBound (hφ : StrictHierarchy 𝚺 1 φ) :
     rw [evalBound_iff_eval_bound_bShift]
     exact (Semiformula.eval_toSemisentence_one ψ b _).symm
   have hvec : Primrec₂ fun (b : ℕ) (l : List ℕ) ↦
-      (b ::ᵥ List.Vector.ofFn fun i : Fin ψ.fvSup ↦ l.getD i 0) :=
-    Primrec.vector_cons.comp₂ Primrec₂.left
-      ((Primrec.vector_ofFn fun i ↦ (Primrec.list_getD 0).comp Primrec.id
-        (Primrec.const (i : ℕ))).comp₂ Primrec₂.right)
+      (b ::ᵥ List.Vector.ofFn fun i : Fin ψ.fvSup ↦ l.getD i 0) := by primrec
   have := (bounded_primrec_vec Empty.elim _ _ hσ).comp hvec
   refine this.of_eq fun p ↦ ?_
   have e : (List.Vector.ofFn fun i : Fin ψ.fvSup ↦ p.2.getD (i : ℕ) 0).get
       = fun i : Fin ψ.fvSup ↦ p.2.getD (i : ℕ) 0 := funext (List.Vector.get_ofFn _)
   simp only [List.Vector.cons_get, e]
   exact (key p.1 p.2).symm
+
+/-- `primrecRel_evalBound` in the form the `primrec` tactic reads off a goal: the bound and the
+assignment are themselves primitive recursive in a common argument. -/
+@[primrec]
+lemma primrecPred_evalBound {α : Type*} [Primcodable α] (hφ : StrictHierarchy 𝚺 1 φ)
+    {b : α → ℕ} (hb : Primrec b) {l : α → List ℕ} (hl : Primrec l) :
+    PrimrecPred fun a ↦ EvalBound ![] ((l a).getD · 0) (b a) φ :=
+  PrimrecRel.comp (primrecRel_evalBound hφ) hb hl
 
 end
 
@@ -633,28 +638,24 @@ lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} 
 
 /-! ## Primitive recursion of the bounds -/
 
+@[primrec]
 lemma primrec_maxBelow {α : Type*} [Primcodable α] {f : α → ℕ → ℕ} (hf : Primrec₂ f)
     {B : α → ℕ} (hB : Primrec B) : Primrec fun a ↦ maxBelow (f a) (B a) := by
-  have hstep : Primrec₂ fun (a : α) (q : ℕ × ℕ) ↦ max (f a q.1) q.2 :=
-    Primrec.to₂ (Primrec.nat_max.comp (hf.comp Primrec.fst (Primrec.fst.comp Primrec.snd))
-      (Primrec.snd.comp Primrec.snd))
+  have hstep : Primrec₂ fun (a : α) (q : ℕ × ℕ) ↦ max (f a q.1) q.2 := by primrec
   have h : Primrec fun a : α ↦
       (B a).rec (motive := fun _ ↦ ℕ) 0 fun x ih ↦ max (f a x) ih :=
     Primrec.nat_rec' hB (Primrec.const 0) hstep
   exact h.of_eq fun a ↦ (maxBelow_eq_rec _ _).symm
 
-lemma primrec_indBound {f : List ℕ → ℕ → ℕ} (hf : Primrec₂ f) {b : List ℕ × ℕ → ℕ}
-    (hb : Primrec b) {B : List ℕ × ℕ → ℕ} (hB : Primrec B) :
-    Primrec fun p : List ℕ × ℕ ↦ indBound f p.1 (b p) (B p) := by
-  have hstep : Primrec₂ fun (p : List ℕ × ℕ) (q : ℕ × ℕ) ↦ max q.2 (f (q.1 :: p.1) q.2) :=
-    Primrec.to₂ (Primrec.nat_max.comp (Primrec.snd.comp Primrec.snd)
-      (hf.comp
-        (Primrec.list_cons.comp (Primrec.fst.comp Primrec.snd) (Primrec.fst.comp Primrec.fst))
-        (Primrec.snd.comp Primrec.snd)))
-  have h' : Primrec fun p : List ℕ × ℕ ↦
-      (B p).rec (motive := fun _ ↦ ℕ) (b p) fun x ih ↦ max ih (f (x :: p.1) ih) :=
+@[primrec]
+lemma primrec_indBound {α : Type*} [Primcodable α] {f : List ℕ → ℕ → ℕ} (hf : Primrec₂ f)
+    {l : α → List ℕ} (hl : Primrec l) {b B : α → ℕ} (hb : Primrec b) (hB : Primrec B) :
+    Primrec fun a ↦ indBound f (l a) (b a) (B a) := by
+  have hstep : Primrec₂ fun (a : α) (q : ℕ × ℕ) ↦ max q.2 (f (q.1 :: l a) q.2) := by primrec
+  have h' : Primrec fun a ↦
+      (B a).rec (motive := fun _ ↦ ℕ) (b a) fun x ih ↦ max ih (f (x :: l a) ih) :=
     Primrec.nat_rec' hB hb hstep
-  exact h'.of_eq fun p ↦ (indBound_eq_rec _ _ _ _).symm
+  exact h'.of_eq fun a ↦ (indBound_eq_rec _ _ _ _).symm
 
 /-! ## The witnessing lemma -/
 
@@ -715,7 +716,7 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
       · exact hΓ χ (by simp [hχ])
       · rcases show χ = ψ by simpa using hχ
         grind
-    exact ⟨_, Primrec.nat_max.comp hf₁ hf₂ |>.to₂, witnesses_and hd0 H₁ H₂⟩
+    exact ⟨_, by primrec, witnesses_and hd0 H₁ H₂⟩
   | cut d₁ d₂ ih₁ ih₂ =>
     rename_i χ
     obtain ⟨f₁, hf₁, H₁⟩ := ih₁ hd.2.1 fun ρ hρ ↦ by
@@ -730,14 +731,7 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
         rcases hd.1 with h | h
         · exact Or.inr (StrictHierarchy.neg_iff.mpr h)
         · exact Or.inl (StrictHierarchy.neg_iff.mpr h)
-    refine ⟨_, ?_, witnesses_cut hd.1 H₁ H₂⟩
-    have e₁ : Primrec fun p : List ℕ × ℕ ↦ f₁ p.1 p.2 := hf₁
-    have e₂ : Primrec fun p : List ℕ × ℕ ↦ f₂ p.1 p.2 := hf₂
-    exact Primrec.to₂ (Primrec.nat_max.comp
-      (Primrec.nat_max.comp e₁
-        (hf₂.comp Primrec.fst (Primrec.nat_max.comp Primrec.snd e₁)))
-      (Primrec.nat_max.comp e₂
-        (hf₁.comp Primrec.fst (Primrec.nat_max.comp Primrec.snd e₂))))
+    exact ⟨_, by primrec, witnesses_cut hd.1 H₁ H₂⟩
   | exs d ih =>
     rename_i ξ t
     have hσ : StrictHierarchy 𝚺 1 (∃¹ ξ) := by
@@ -750,9 +744,7 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
       · exact hΓ χ (by simp [hχ])
       · rcases show χ = ξ/[t] by simpa using hχ
         grind
-    refine ⟨_, ?_, witnesses_exs hσ H⟩
-    exact Primrec.to₂ (Primrec.nat_max.comp hf
-      (Primrec.succ.comp ((primrec_termVal t).comp Primrec.fst)))
+    exact ⟨_, by primrec, witnesses_exs hσ H⟩
   | all d ih =>
     rename_i ξ
     by_cases hσ : StrictHierarchy 𝚺 1 (∀¹ ξ)
@@ -767,12 +759,7 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
         · rcases show χ = Rewriting.free ξ by simpa using hχ
           grind
       obtain ⟨t, ρ, rfl, hρ⟩ := Semiformula.Bounded.exists_of_all hd0
-      refine ⟨_, ?_, witnesses_all_bounded hρ H⟩
-      exact Primrec.to₂ (primrec_maxBelow
-        (Primrec.to₂ (hf.comp
-          (Primrec.list_cons.comp Primrec.snd (Primrec.fst.comp (Primrec.fst (β := ℕ))))
-          (Primrec.snd.comp (Primrec.fst (β := ℕ)))))
-        ((primrec_termVal t).comp Primrec.fst))
+      exact ⟨_, by primrec, witnesses_all_bounded hρ H⟩
     · obtain ⟨f, hf, H⟩ := ih hd fun χ hχ ↦ by
         rcases Multiset.mem_add.mp hχ with hχ | hχ
         · obtain ⟨χ', hχ', rfl⟩ := Multiset.mem_map.mp hχ
@@ -785,12 +772,7 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
           · cases h with
             | ofAlt h => grind
             | all h => exact Or.inr (StrictHierarchy.rew _ h)
-      refine ⟨_, ?_, witnesses_all_pi hσ H⟩
-      exact Primrec.to₂ (primrec_maxBelow
-        (Primrec.to₂ (hf.comp
-          (Primrec.list_cons.comp Primrec.snd (Primrec.fst.comp (Primrec.fst (β := ℕ))))
-          (Primrec.snd.comp (Primrec.fst (β := ℕ)))))
-        Primrec.snd)
+      exact ⟨_, by primrec, witnesses_all_pi hσ H⟩
   | ind ξ hξ t d ih =>
     obtain ⟨f, hf, H⟩ := ih hd fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
@@ -822,19 +804,8 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
         · simpa [Semiterm.val_substs, Matrix.constant_eq_singleton] using hs ![0] (l.getD · 0) hev
         · simpa [Semiterm.val_substs, Matrix.constant_eq_singleton] using
             hs' ![0] (l.getD · 0) hev
-      refine ⟨_, ?_, witnesses_ind hξ hB H⟩
-      exact Primrec.to₂ (primrec_indBound hf
-        (Primrec.nat_max.comp Primrec.snd
-          (Primrec.nat_max.comp
-            (Primrec.succ.comp
-              ((primrec_termVal (Rew.subst ![‘0’] s)).comp Primrec.fst))
-            (Primrec.succ.comp
-              ((primrec_termVal (Rew.subst ![‘0’] s')).comp Primrec.fst))))
-        ((primrec_termVal t).comp Primrec.fst))
-    · refine ⟨_, ?_, witnesses_ind (B := fun _ ↦ 0) hξ (fun hc ↦ absurd hc hΔ) H⟩
-      exact Primrec.to₂ (primrec_indBound hf
-        (Primrec.nat_max.comp Primrec.snd (Primrec.const 0))
-        ((primrec_termVal t).comp Primrec.fst))
+      exact ⟨_, by primrec, witnesses_ind hξ hB H⟩
+    · exact ⟨_, by primrec, witnesses_ind (B := fun _ ↦ 0) hξ (fun hc ↦ absurd hc hΔ) H⟩
 
 end LKI
 

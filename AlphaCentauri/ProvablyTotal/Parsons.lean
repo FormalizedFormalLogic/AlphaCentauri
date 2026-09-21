@@ -134,15 +134,12 @@ theorem primrec_of_provablyTotalVia (hφ : StrictHierarchy 𝚺 1 φ.val)
     obtain ⟨y, hy, hby⟩ := hgb v
     obtain rfl := huniq v _ y (evalBound_graph.mpr hby)
     exact maxBelow_ite_eq (evalBound_graph.mpr hby) hy (huniq v _)
-  have hB : Primrec fun w : List.Vector ℕ k ↦ g w.toList 0 :=
-    hg.comp Primrec.vector_toList (Primrec.const 0)
-  have hP : PrimrecRel fun (w : List.Vector ℕ k) (y : ℕ) ↦
-      EvalBound ![] ((y :: w.toList).getD · 0) (g w.toList 0) χ :=
-    (primrecRel_evalBound (StrictHierarchy.rew _ hφ)).comp₂ (Primrec.to₂ (hB.comp Primrec.fst))
-      (Primrec.to₂ (Primrec.list_cons.comp Primrec.snd (Primrec.vector_toList.comp Primrec.fst)))
+  have hB : Primrec fun w : List.Vector ℕ k ↦ g w.toList 0 := by primrec
   have hstep : Primrec₂ fun (w : List.Vector ℕ k) (y : ℕ) ↦
-      if EvalBound ![] ((y :: w.toList).getD · 0) (g w.toList 0) χ then y else 0 :=
-    Primrec.ite hP Primrec.snd (Primrec.const 0)
+      if EvalBound ![] ((y :: w.toList).getD · 0) (g w.toList 0) χ then y else 0 := by
+    have := StrictHierarchy.rew (Rew.embSubsts (&0 :> fun i : Fin k ↦ (&i.succ : ArithmeticTerm ℕ)))
+      hφ
+    primrec
   refine (primrec_maxBelow hstep hB).of_eq fun w ↦ ?_
   have e : List.ofFn w.get = w.toList := by
     rw [← List.Vector.toList_ofFn, List.Vector.ofFn_get]
@@ -204,8 +201,8 @@ theorem not_provablyTotal_ackermann :
   intro h
   have hp : Primrec fun w : List.Vector ℕ 2 ↦ _root_.ack (w.get 0) (w.get 1) :=
     Nat.Primrec'.prim_iff.mp ((parsons _).mpr (by simpa using h))
-  have hc : Primrec fun p : ℕ × ℕ ↦ (p.1 ::ᵥ p.2 ::ᵥ List.Vector.nil : List.Vector ℕ 2) :=
-    Primrec.vector_cons.comp Primrec.fst (Primrec.vector_cons.comp Primrec.snd (Primrec.const _))
+  have hc : Primrec fun p : ℕ × ℕ ↦ (p.1 ::ᵥ p.2 ::ᵥ List.Vector.nil : List.Vector ℕ 2) := by
+    primrec
   exact not_primrec₂_ack ((hp.comp hc).of_eq (by intro p; rfl))
 
 end FFL.FirstOrder.Arithmetic

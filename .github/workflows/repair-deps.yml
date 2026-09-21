@@ -1,0 +1,171 @@
+name: Repair the dependency bump
+
+# Runs after a red CI run on the bump's branch has finished, not inside it: Claude Code repairs
+# the branch under `.claude/commands/update-deps.md`, and its push starts the run that judges it.
+# One attempt per bump, on `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`).
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+# Shared with `update-deps.yml`; never cancelled, which would leave the repair uncommitted.
+concurrency:
+  group: update-deps-branch
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  BRANCH: update-deps
+  TITLE: 'chore: Update dependencies'
+
+jobs:
+  repair:
+    name: Repair the bump
+    if: >-
+      github.repository == 'FormalizedFormalLogic/AlphaCentauri'
+      && github.event.workflow_run.conclusion == 'failure'
+      && github.event.workflow_run.head_branch == 'update-deps'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      # A `github.token` push starts no checks.
+      - name: Mint the app token
+        id: app-token
+        if: vars.BOT_APP_ID != ''
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token || github.token }}
+
+      - name: Decide whether this bump is ours to repair
+        id: decide
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
+          TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          number=$(gh pr list --state open --head "$BRANCH" --limit 1 --json number --jq '.[0].number // ""')
+          if [ -z "$number" ]; then
+            echo "no open pull request for $BRANCH; nothing to repair"
+            exit 0
+          fi
+          if [ "$(git rev-parse HEAD)" != "$HEAD_SHA" ]; then
+            echo "the branch moved since that CI run; a later run will report on the new tip"
+            exit 0
+          fi
+          # A commit on top of the pin is a previous repair; `--first-parent` ignores merges.
+          pin=$(git log --grep="^$TITLE" -1 --format='%H')
+          if [ -z "$pin" ]; then
+            echo "no pin commit on the branch; leaving it alone"
+            exit 0
+          fi
+          if [ "$(git rev-list --first-parent --no-merges --count "$pin..HEAD")" != 0 ]; then
+            echo "this bump has already been repaired once and is still red; a human decides"
+            gh pr comment "$number" --body \
+              "The repair pushed for this bump did not make it green, and \`repair-deps.yml\` attempts each bump once. It is yours now; the next bump restarts the cycle."
+            exit 0
+          fi
+          if [ -z "$TOKEN" ]; then
+            echo "CLAUDE_CODE_OAUTH_TOKEN is not configured; leaving the bump to a human"
+            gh pr comment "$number" --body \
+              "This bump is red and \`CLAUDE_CODE_OAUTH_TOKEN\` is not configured, so no agent picked it up."
+            exit 0
+          fi
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "repairing #$number at $(git rev-parse --short HEAD)"
+
+      - uses: extractions/setup-just@v3
+        if: steps.decide.outputs.number != ''
+      - uses: leanprover/lean-action@v1
+        if: steps.decide.outputs.number != ''
+        with:
+          build: false
+          use-github-cache: false
+
+      # `ci.yml`'s steps, so the agent starts from the build its repair will be judged against.
+      # The bump moves the pin onto a revision Foundation's own CI has published, which is what
+      # makes this a download rather than the hour the agent would otherwise spend elaborating it.
+      - name: Restore Foundation's build from the Lake cache
+        if: steps.decide.outputs.number != ''
+        uses: FormalizedFormalLogic/.github/lake-cache/restore@main
+        with:
+          repo: FormalizedFormalLogic/Foundation
+          package: Foundation
+          assert-fresh: ''
+      - name: Build the dependency
+        if: steps.decide.outputs.number != ''
+        run: lake build Foundation
+
+      - name: Configure the committer
+        if: steps.decide.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        run: |
+          set -euo pipefail
+          author=${APP_SLUG:+${APP_SLUG}[bot]}
+          author=${author:-github-actions[bot]}
+          git config user.name "$author"
+          git config user.email "$(gh api "/users/${author//\[bot\]/%5Bbot%5D}" --jq .id)+$author@users.noreply.github.com"
+
+      # The workflow token, on which this job holds `contents: read`: the agent cannot push.
+      - name: Repair the branch
+        if: steps.decide.outputs.number != ''
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          # The run this answers came from the App's push, so the actor is a bot. Never `*`.
+          allowed_bots: ${{ steps.app-token.outputs.app-slug || 'github-actions' }}
+          claude_args: |
+            --max-turns 120
+            --model claude-sonnet-5
+            --allowedTools Read,Edit,Write,Glob,Grep,Bash
+          prompt: |
+            The `${{ env.BRANCH }}` branch is checked out, its dependency layer is built, and CI
+            is red. Repair this repository and commit; this workflow verifies your commit and
+            pushes it, so do not push, merge, or rewrite history yourself.
+            `.claude/commands/update-deps.md` is the runbook; its steps 1 and 2 are done for you.
+
+            The commit has to pass `lake build AlphaCentauri --wfail`, `just mk-all` leaving no
+            diff, `just no-sorry` and `just axiom-audit`, which run again after you stop. Never
+            write `sorry`, and touch nothing under `docs/`, `.github/`, `README.md` or `AGENTS.md`.
+
+            Say what you changed, or what is broken if you cannot get it green, in a comment on
+            #${{ steps.decide.outputs.number }}. Leave the tree uncommitted rather than commit a
+            repair you could not finish: this bump gets one attempt.
+
+      # The branch only advances to a commit that passes what `ci.yml` runs.
+      - name: Verify the repair and push it
+        if: steps.decide.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
+          NUMBER: ${{ steps.decide.outputs.number }}
+        run: |
+          set -euo pipefail
+          git fetch origin "$BRANCH"
+          if [ "$(git rev-parse HEAD)" = "$(git rev-parse "origin/$BRANCH")" ]; then
+            echo "the agent committed nothing"
+            exit 0
+          fi
+          if ! (lake build AlphaCentauri --wfail && just mk-all &&
+                git diff --quiet -- AlphaCentauri.lean && just no-sorry && just axiom-audit); then
+            gh pr comment "$NUMBER" --body \
+              "The repair did not pass the checks, so nothing was pushed. This bump has had its attempt; the next one restarts the cycle."
+            exit 1
+          fi
+          git push origin "HEAD:refs/heads/$BRANCH"
+          gh pr merge "$NUMBER" --disable-auto || true
+          echo "pushed the repair to $BRANCH; #$NUMBER is a human's to merge"

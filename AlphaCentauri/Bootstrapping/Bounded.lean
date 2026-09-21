@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Hierarchy.Bounded
+public import AlphaCentauri.ToMathlib.Util.Disjunct
 public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!
@@ -84,16 +85,15 @@ private lemma phi_iff (C p : V) :
       | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩ | ⟨u, q, ⟨t, ht, rfl⟩, hq, rfl⟩)
     · tauto
     · tauto
-    · exact Or.inr <| Or.inr <| Or.inl ⟨k, by simp, r, by simp, v, by simp, rfl⟩
-    · exact Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨k, by simp, r, by simp, v, by simp, rfl⟩
-    · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩
-    · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-        Or.inl ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩
-    · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-      Or.inl ⟨termBShift ℒₒᵣ t, lt_u_qqBall _ _, q, lt_q_qqBall _ _,
+    · disj 3; exact ⟨k, by simp, r, by simp, v, by simp, rfl⟩
+    · disj 4; exact ⟨k, by simp, r, by simp, v, by simp, rfl⟩
+    · disj 5; exact ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩
+    · disj 6; exact ⟨p₁, by simp, p₂, by simp, hp, hq, rfl⟩
+    · disj 7
+      exact ⟨termBShift ℒₒᵣ t, lt_u_qqBall _ _, q, lt_q_qqBall _ _,
         ⟨t, lt_of_le_of_lt (le_termBShift ht) (lt_u_qqBall _ _), ht, rfl⟩, hq, rfl⟩
-    · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-      Or.inr ⟨termBShift ℒₒᵣ t, lt_u_qqBex _ _, q, lt_q_qqBex _ _,
+    · disj 8
+      exact ⟨termBShift ℒₒᵣ t, lt_u_qqBex _ _, q, lt_q_qqBex _ _,
         ⟨t, lt_of_le_of_lt (le_termBShift ht) (lt_u_qqBex _ _), ht, rfl⟩, hq, rfl⟩
   mpr := by
     unfold Phi
@@ -151,18 +151,14 @@ instance : construction.StrongFinite V where
     unfold construction Phi
     rintro C _ x (h | h | h | h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩
       | ⟨u, q, ht, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩)
-    · exact Or.inl h
-    · exact Or.inr <| Or.inl h
-    · exact Or.inr <| Or.inr <| Or.inl h
-    · exact Or.inr <| Or.inr <| Or.inr <| Or.inl h
-    · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-        Or.inl ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩
-    · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-        Or.inl ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩
-    · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-        Or.inl ⟨u, q, ht, ⟨hq, lt_q_qqBall _ _⟩, rfl⟩
-    · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-        Or.inr ⟨u, q, ht, ⟨hq, lt_q_qqBex _ _⟩, rfl⟩
+    · disj 1; exact h
+    · disj 2; exact h
+    · disj 3; exact h
+    · disj 4; exact h
+    · disj 5; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩
+    · disj 6; exact ⟨p₁, p₂, ⟨hp, by simp⟩, ⟨hq, by simp⟩, rfl⟩
+    · disj 7; exact ⟨u, q, ht, ⟨hq, lt_q_qqBall _ _⟩, rfl⟩
+    · disj 8; exact ⟨u, q, ht, ⟨hq, lt_q_qqBex _ _⟩, rfl⟩
 
 end IsBoundedF
 
@@ -209,12 +205,12 @@ lemma IsBounded.case_iff {p : V} :
 
 alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
 
-@[simp] lemma IsBounded.verum : IsBounded (V := V) (^⊤) := IsBounded.mk <| Or.inl rfl
-@[simp] lemma IsBounded.falsum : IsBounded (V := V) (^⊥) := IsBounded.mk <| Or.inr <| Or.inl rfl
+@[simp] lemma IsBounded.verum : IsBounded (V := V) (^⊤) := IsBounded.mk <| by disj 1; exact rfl
+@[simp] lemma IsBounded.falsum : IsBounded (V := V) (^⊥) := IsBounded.mk <| by disj 2; exact rfl
 @[simp] lemma IsBounded.rel {k r v : V} : IsBounded (^rel k r v) :=
-  IsBounded.mk <| Or.inr <| Or.inr <| Or.inl ⟨k, r, v, rfl⟩
+  IsBounded.mk <| by disj 3; exact ⟨k, r, v, rfl⟩
 @[simp] lemma IsBounded.nrel {k r v : V} : IsBounded (^nrel k r v) :=
-  IsBounded.mk <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨k, r, v, rfl⟩
+  IsBounded.mk <| by disj 4; exact ⟨k, r, v, rfl⟩
 
 @[simp] lemma IsBounded.and_iff {p q : V} : IsBounded (p ^⋏ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
@@ -227,7 +223,7 @@ alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
         OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
-    exact IsBounded.mk <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p, q, hp, hq, rfl⟩
+    exact IsBounded.mk <| by disj 5; exact ⟨p, q, hp, hq, rfl⟩
 
 @[simp] lemma IsBounded.or_iff {p q : V} : IsBounded (p ^⋎ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
@@ -240,18 +236,15 @@ alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
         OfNat.ofNat_ne_one, Nat.succ_ne_self, false_and, true_and] at h
     · obtain ⟨rfl, rfl⟩ := h; exact ⟨hp, hq⟩
   · rintro ⟨hp, hq⟩
-    exact IsBounded.mk <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-      Or.inl ⟨p, q, hp, hq, rfl⟩
+    exact IsBounded.mk <| by disj 6; exact ⟨p, q, hp, hq, rfl⟩
 
 lemma IsBounded.ball {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
     IsBounded (qqBall (termBShift ℒₒᵣ t) q) :=
-  IsBounded.mk <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-    Or.inl ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩
+  IsBounded.mk <| by disj 7; exact ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩
 
 lemma IsBounded.bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
     IsBounded (qqBex (termBShift ℒₒᵣ t) q) :=
-  IsBounded.mk <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-    Or.inr ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩
+  IsBounded.mk <| by disj 8; exact ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, hq, rfl⟩
 
 lemma IsBounded.of_all {p : V} (h : IsBounded (^∀ p)) :
     ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsBounded q
@@ -371,8 +364,7 @@ lemma IsBounded.isSigma1 {p : V} (h : IsBounded p) : IsSigma1 p := by
     · intro p q _ _ ihp ihq; simp [ihp, ihq]
     · intro p q _ _ ihp ihq; simp [ihp, ihq]
     · intro t q ht _ ih
-      exact IsSigma1.mk <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <|
-        Or.inr ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, ih, rfl⟩
+      exact IsSigma1.mk <| by disj 8; exact ⟨termBShift ℒₒᵣ t, q, ⟨t, ht, rfl⟩, ih, rfl⟩
     · intro t q _ _ ih
       simp [qqBex, Arithmetic.qqLT, ih]
   exact H p h
@@ -423,14 +415,14 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
   induction ψ using Semiformula.rec' with
   | hverum => intro _; simp
   | hfalsum => intro _; simp
-  | hrel R v => intro _; exact Hierarchy.rel _ _ _ _
-  | hnrel R v => intro _; exact Hierarchy.nrel _ _ _ _
+  | hrel R v => intro _; exact .rel _ _
+  | hnrel R v => intro _; exact .nrel _ _
   | hand φ ψ ihφ ihψ =>
       intro h; rw [Semiformula.quote_and (V := ℕ) φ ψ, IsBounded.and_iff] at h
-      exact Hierarchy.and (ihφ h.1) (ihψ h.2)
+      exact .and (ihφ h.1) (ihψ h.2)
   | hor φ ψ ihφ ihψ =>
       intro h; rw [Semiformula.quote_or (V := ℕ) φ ψ, IsBounded.or_iff] at h
-      exact Hierarchy.or (ihφ h.1) (ihψ h.2)
+      exact .or (ihφ h.1) (ihψ h.2)
   | hall φ ihφ =>
       intro h
       rw [Semiformula.quote_all (V := ℕ) φ] at h
@@ -455,9 +447,9 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
         have hform : φ = (“#0 < !!(Rew.bShift s)” 🡒 φ₂) :=
           (Semiformula.all_inj _ _).mp (by rw [← Semiformula.ball_eq]; exact heq)
         rw [hform, Semiformula.imp_eq] at hφ
-        exact (Hierarchy.or_iff.mp hφ).2
+        exact (Semiformula.Bounded.or_iff.mp hφ).2
       rw [heq]
-      exact Hierarchy.ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
+      exact .ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
   | hexs φ ihφ =>
       intro h
       rw [Semiformula.quote_ex (V := ℕ) φ] at h
@@ -482,9 +474,9 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
         have hform : φ = (“#0 < !!(Rew.bShift s)” ⋏ φ₂) :=
           (Semiformula.exs_inj _ _).mp (by rw [← Semiformula.bexs_eq]; exact heq)
         rw [hform] at hφ
-        exact (Hierarchy.and_iff.mp hφ).2
+        exact (Semiformula.Bounded.and_iff.mp hφ).2
       rw [heq]
-      exact Hierarchy.bexs (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
+      exact .bexs (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
 
 lemma isBounded_iff_bounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
     Bootstrapping.IsBounded (⌜ψ⌝ : ℕ) ↔ ψ.Bounded :=

@@ -474,8 +474,8 @@ private lemma isStrictClass_quote {Γ : Polarity} {s n : ℕ} {ψ : ArithmeticSe
   induction h with
   | @zero Γ₀ n₀ φ₀ hφ₀ =>
     rcases Γ₀ with _ | _
-    · exact (isBounded_quote_iff_s φ₀).mpr hφ₀
-    · exact (isBounded_quote_iff_s φ₀).mpr hφ₀
+    · exact (isBounded_quote_iff_s φ₀).mpr hφ₀.bounded
+    · exact (isBounded_quote_iff_s φ₀).mpr hφ₀.bounded
   | @ofAlt Γ₀ s₀ n₀ φ₀ _ ih =>
     rcases Γ₀ with _ | _
     · exact IsStrictSigma.of_pi ih
@@ -545,7 +545,7 @@ mutual
   private lemma strictHierarchy_sigma_of_isStrictSigma_nat :
       ∀ (s : ℕ) {n : ℕ} (ψ : ArithmeticSemiproposition n),
         IsStrictSigma s (⌜ψ⌝ : ℕ) → StrictHierarchy 𝚺 s ψ
-    | 0,     _, ψ, h => .zero ((isBounded_quote_iff_s ψ).mp h)
+    | 0,     _, ψ, h => .of_bounded ((isBounded_quote_iff_s ψ).mp h)
     | s + 1, _, ψ, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       exact strictHierarchy_sigma_of_quote_eq_qqExss
@@ -556,7 +556,7 @@ mutual
   private lemma strictHierarchy_pi_of_isStrictPi_nat :
       ∀ (s : ℕ) {n : ℕ} (ψ : ArithmeticSemiproposition n),
         IsStrictPi s (⌜ψ⌝ : ℕ) → StrictHierarchy 𝚷 s ψ
-    | 0,     _, ψ, h => .zero ((isBounded_quote_iff_s ψ).mp h)
+    | 0,     _, ψ, h => .of_bounded ((isBounded_quote_iff_s ψ).mp h)
     | s + 1, _, ψ, h => by
       obtain ⟨k, q, heq, hq⟩ := h
       exact strictHierarchy_pi_of_quote_eq_qqAlls

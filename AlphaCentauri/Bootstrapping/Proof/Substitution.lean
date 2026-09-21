@@ -65,7 +65,7 @@ lemma termFvSubst_eq_termShift (hu : u < len w) (hw : ∀ x < u, w.[x] = ^&(x + 
   · intro z _ _; simp
   · intro x hx
     have hxu : x < u := lt_of_lt_of_le (by simp) hx
-    rw [termFvSubst_fvar, if_pos (lt_trans hxu hu), hw x hxu, termShift_fvar]
+    rw [termFvSubst_fvar, ite_eq_left (lt_trans hxu hu), hw x hxu, termShift_fvar]
   · intro k f v hf hv ih hle
     rw [termFvSubst_func hf hv.isUTerm, termShift_func hf hv.isUTerm]
     refine congrArg _ (nth_ext' k (by simp [hv.isUTerm]) (by simp [hv.isUTerm]) fun i hi ↦ ?_)
@@ -194,7 +194,7 @@ lemma Derivable.all_of_free {w u p s : V}
     Derivable.rewrite hw h
   rw [fvSubstImage_insert, hws,
     fvSubst_substs1 hw (show IsSemiterm L 0 ^&u from by simp) hp,
-    hwp, termFvSubst_fvar, if_pos hu, hwu] at h
+    hwp, termFvSubst_fvar, ite_eq_left hu, hwu] at h
   exact Derivable.all hp h
 
 /-- The internal `∃`-elimination rule with an arbitrary free variable as eigenvariable: `w`

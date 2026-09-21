@@ -1,7 +1,7 @@
 module
 
+public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
-public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.LK.Completeness
 public import AlphaCentauri.ToFoundation.Hierarchy
 
@@ -87,6 +87,136 @@ def leastGraph (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSemisentence (k +
 @[simp] lemma eval_leastGraph (φ : 𝚺₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
     (leastGraph φ).Evalb w ↔ φ.val.Evalb w ∧ ∀ y < w 0, ¬φ.val.Evalb (y :> (w ·.succ)) := by
   simp [leastGraph, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
+
+/-- A $\Delta_0$ matrix `θ` such that `∃ z, θ(z, y, x⃗)` is `𝗕𝚺₁`-provably equivalent to `φ(y, x⃗)`,
+fixed once and for all so that it does not depend on the ambient theory.
+- [HP98, Theorem I.2.5(3)]
+- [HP98, Lemma I.2.9] -/
+noncomputable def minimalGraphMatrix (φ : 𝚺₁.Semisentence (k + 1)) : 𝚺₀.Semisentence (k + 2) :=
+  (Classical.choose (Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺) (s := 1)
+    φ.sigma_prop)).matrix
+
+lemma provable_iff_exists_minimalGraphMatrix (T : ArithmeticTheory) [𝗕𝚺₁ ⪯ T]
+    (φ : 𝚺₁.Semisentence (k + 1)) :
+    T ⊢ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) := by
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := 1)
+  refine provable_iff_of_models_iff fun V _ _ e ↦ ?_
+  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁ := models_of_subtheory (T := 𝗕𝚺₁) (U := T) inferInstance
+  exact Classical.choose_spec (Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺) (s := 1)
+    φ.sigma_prop) V e Empty.elim
+
+lemma models_iff_exists_minimalGraphMatrix {φ : 𝚺₁.Semisentence (k + 1)} :
+    V↓[ℒₒᵣ] ⊧ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) ↔
+      ∀ v : Fin (k + 1) → V, φ.val.Evalb v ↔ ∃ z, (minimalGraphMatrix φ).val.Evalb (z :> v) := by
+  simp [models_iff]
+
+/-- `∃ z ≤ n, z + y = n ∧ θ(z, y, x⃗)`: there is a pair `(z, y)` with sum `n` at which `θ` holds.
+- [HP98, Lemma IV.3.4] -/
+def pairGraph (θ : 𝚺₀.Semisentence (k + 2)) : ArithmeticSemisentence (k + 2) :=
+  (“(#0 + #2) = #1” ⋏
+    (Rew.subst (#0 :> #2 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ θ.val)).bexsLTSucc
+    (#0 : ArithmeticSemiterm Empty (k + 2))
+
+@[simp] lemma eval_pairGraph [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺₀.Semisentence (k + 2)) (w : Fin (k + 2) → V) :
+    (pairGraph θ).Evalb w ↔
+      ∃ z ≤ w 0, z + w 1 = w 0 ∧ θ.val.Evalb (z :> w 1 :> (w ·.succ.succ)) := by
+  simp [pairGraph, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim,
+    Matrix.constant_eq_singleton]
+
+/-- `∃ y' ≤ n, ∃ z' ≤ n, z' + y' = n ∧ θ(z', y', x⃗)`: some pair with sum `n` witnesses `θ`. -/
+def existsAtSum (θ : 𝚺₀.Semisentence (k + 2)) : ArithmeticSemisentence (k + 1) :=
+  ((“(#0 + #1) = #2” ⋏
+    (Rew.subst (#0 :> #1 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ θ.val)).bexsLTSucc
+      (#1 : ArithmeticSemiterm Empty (k + 2))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (k + 1))
+
+@[simp] lemma eval_existsAtSum [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺₀.Semisentence (k + 2))
+    (w : Fin (k + 1) → V) :
+    (existsAtSum θ).Evalb w ↔
+      ∃ y' ≤ w 0, ∃ z' ≤ w 0, z' + y' = w 0 ∧ θ.val.Evalb (z' :> y' :> (w ·.succ)) := by
+  simp [existsAtSum, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim,
+    Matrix.constant_eq_singleton]
+
+/-- The minimal-pair refinement of `θ`: the code `n` is least among sums of pairs witnessing `θ`,
+and `y` is least among values at that sum.
+- [HP98, Lemma IV.3.4] -/
+def minimalPairGraph (θ : 𝚺₀.Semisentence (k + 2)) : ArithmeticSemisentence (k + 1) :=
+  ∃¹ (pairGraph θ ⋏
+    (∀¹[“#0 < #1”] ∼(Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ existsAtSum θ)) ⋏
+    (∀¹[“#0 < #2”] ∼(Rew.subst (#1 :> #0 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ pairGraph θ)))
+
+@[simp] lemma eval_minimalPairGraph [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺₀.Semisentence (k + 2))
+    (w : Fin (k + 1) → V) :
+    (minimalPairGraph θ).Evalb w ↔
+      ∃ n, (∃ z ≤ n, z + w 0 = n ∧ θ.val.Evalb (z :> w 0 :> (w ·.succ))) ∧
+        (∀ n' < n, ¬∃ y' ≤ n', ∃ z' ≤ n', z' + y' = n' ∧ θ.val.Evalb (z' :> y' :> (w ·.succ))) ∧
+        (∀ y' < w 0, ¬∃ z' ≤ n, z' + y' = n ∧ θ.val.Evalb (z' :> y' :> (w ·.succ))) := by
+  simp [minimalPairGraph, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons',
+    Empty.eq_elim]
+
+/-- `φ` refined so that the pair of the existential witness and the value in
+`minimalGraphMatrix φ` is least, using only $\Delta_0$ minimization.
+- [Bek99, §1]
+- [HP98, Lemma IV.3.4] -/
+noncomputable def minimalGraph (φ : 𝚺₁.Semisentence (k + 1)) : 𝚺₁.Semisentence (k + 1) :=
+  .mkSigma (minimalPairGraph (minimalGraphMatrix φ)) (by
+    unfold minimalPairGraph pairGraph existsAtSum
+    apply Hierarchy.exs
+    simp)
+
+private lemma definablePred_existsAtSum (θ : 𝚺₀.Semisentence (k + 2)) (v : Fin k → V) :
+    𝚺₀-Predicate fun n ↦ (existsAtSum θ).Evalb (n :> v) :=
+  HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 0)
+    (Rew.bind (#0 :> fun i ↦ &(v i)) Empty.elim ▹ existsAtSum θ)
+    (Hierarchy.rew _ (by simp [existsAtSum])) fun w ↦ by
+      simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
+
+private lemma definablePred_pairGraph (θ : 𝚺₀.Semisentence (k + 2)) (n₀ : V) (v : Fin k → V) :
+    𝚺₀-Predicate fun y ↦ (pairGraph θ).Evalb (n₀ :> y :> v) :=
+  HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 0)
+    (Rew.bind (&n₀ :> #0 :> fun i ↦ &(v i)) Empty.elim ▹ pairGraph θ)
+    (Hierarchy.rew _ (by simp [pairGraph])) fun w ↦ by
+      simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
+
+open PeanoMinus in
+/-- In any model of `𝗜𝚺₀`, if a pair witnesses `θ` at all, then the minimal-pair refinement of
+`θ` has an existing and unique value.
+- [HP98, Lemma IV.3.4] -/
+private lemma models_existsUnique_minimalPairGraph {θ : 𝚺₀.Semisentence (k + 2)}
+    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {v : Fin k → V} (hex : ∃ y z : V, θ.val.Evalb (z :> y :> v)) :
+    (∃ y, (minimalPairGraph θ).Evalb (y :> v)) ∧
+      ∀ y y', (minimalPairGraph θ).Evalb (y :> v) → (minimalPairGraph θ).Evalb (y' :> v) →
+        y = y' := by
+  obtain ⟨y₀, z₀, hz₀⟩ := hex
+  have hP : (existsAtSum θ).Evalb ((z₀ + y₀) :> v) :=
+    (eval_existsAtSum θ _).mpr ⟨y₀, by simp, z₀, by simp, by simp, by simpa using hz₀⟩
+  obtain ⟨n₀, hn₀, hnmin⟩ := InductionOnHierarchy.least_number 𝚺 0
+    (definablePred_existsAtSum θ v) hP
+  obtain ⟨y₁, hy₁len, z₁, hz₁len, hsum₁, hθ₁⟩ := (eval_existsAtSum θ _).mp hn₀
+  have hPy : (pairGraph θ).Evalb (n₀ :> y₁ :> v) :=
+    (eval_pairGraph θ _).mpr ⟨z₁, hz₁len, hsum₁, hθ₁⟩
+  obtain ⟨ymin, hymin, hyminmin⟩ := InductionOnHierarchy.least_number 𝚺 0
+    (definablePred_pairGraph θ n₀ v) hPy
+  have toExistsAtSum : ∀ {n y : V}, (∃ z ≤ n, z + y = n ∧ θ.val.Evalb (z :> y :> v)) →
+      ∃ y' ≤ n, ∃ z' ≤ n, z' + y' = n ∧ θ.val.Evalb (z' :> y' :> v) := by
+    rintro n y ⟨z, hzn, hsum, hθ⟩
+    exact ⟨y, by rw [← hsum]; simp, z, hzn, hsum, hθ⟩
+  refine ⟨⟨ymin, ?_⟩, ?_⟩
+  · simp only [eval_minimalPairGraph]
+    exact ⟨n₀, by simpa using hymin, by simpa using hnmin, by simpa using hyminmin⟩
+  · rintro y y' hy hy'
+    simp only [eval_minimalPairGraph] at hy hy'
+    obtain ⟨n, hyA, hyB, hyC⟩ := hy
+    obtain ⟨n', hy'A, hy'B, hy'C⟩ := hy'
+    have hnn' : n = n' := by
+      rcases lt_trichotomy n n' with hlt | rfl | hlt
+      · exact absurd (toExistsAtSum hyA) (hy'B n hlt)
+      · rfl
+      · exact absurd (toExistsAtSum hy'A) (hyB n' hlt)
+    subst hnn'
+    rcases lt_trichotomy y y' with hlt | rfl | hlt
+    · exact absurd hyA (hy'C y hlt)
+    · rfl
+    · exact absurd hy'A (hyC y' hlt)
 
 /-- The unique-existence form of totality, `∀ x⃗, ∃! y, φ*(y, x⃗)`, where `φ*` is the least-witness
 refinement `leastGraph φ`.
@@ -200,6 +330,69 @@ lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ un
     simp only [eval_leastGraph, Matrix.cons_val_zero, Matrix.cons_val_succ] at hy hy'
     grind
 
+open PeanoMinus in
+/-- Over a theory containing `𝗕𝚺₁`, a `T`-provably total function is `T`-provably functional via
+the minimal-pair refinement `minimalGraph φ` of `φ`, which is obtained from `φ` by only
+$\Delta_0$ minimization.
+- [Bek99, §1]
+- [HP98, Lemma IV.3.4] -/
+lemma provablyFunctionalVia_minimalGraph [𝗕𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) :
+    T.ProvablyFunctionalVia f (minimalGraph φ) := by
+  have hTIS1 : T ⊢ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) :=
+    provable_iff_exists_minimalGraphMatrix T φ
+  have heqN : ∀ v : Fin (k + 1) → ℕ,
+      φ.val.Evalb v ↔ ∃ z, (minimalGraphMatrix φ).val.Evalb (z :> v) :=
+    models_iff_exists_minimalGraphMatrix.mp
+      (consequence_iff'.mp
+        (Theory.Proof.sound (provable_iff_exists_minimalGraphMatrix 𝗕𝚺₁ φ)) ℕ)
+  have hforce : ∀ (y : ℕ) (x : Fin k → ℕ) (z : ℕ),
+      (minimalGraphMatrix φ).val.Evalb (z :> y :> x) → y = f x := fun y x z hz ↦ by
+    simpa using h.graph_iff.mp ((heqN (y :> x)).mpr ⟨z, hz⟩)
+  have hforce' : ∀ (y : ℕ) (x : Fin k → ℕ),
+      (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y :> x) → y = f x := fun y x hy ↦ by
+    obtain ⟨_, ⟨z, _, _, hθ⟩, _, _⟩ := (eval_minimalPairGraph _ _).mp hy
+    exact hforce y x z hθ
+  have hmodelN : ∀ x : Fin k → ℕ,
+      (∃ y, (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y :> x)) ∧
+        ∀ y y', (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y :> x) →
+          (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y' :> x) → y = y' := fun x ↦ by
+    apply models_existsUnique_minimalPairGraph
+    obtain ⟨z, hz⟩ := (heqN (f x :> x)).mp (h.graph_iff.mpr (by simp))
+    exact ⟨f x, z, hz⟩
+  have hdef : HierarchySymbol.DefinedFunction (V := ℕ) f (minimalGraph φ) := .mk fun v ↦ by
+    change (minimalPairGraph (minimalGraphMatrix φ)).Evalb v ↔ v 0 = f (fun i ↦ v i.succ)
+    constructor
+    · exact fun hv ↦ hforce' (v 0) (fun i ↦ v i.succ) (by simpa using hv)
+    · intro hv
+      obtain ⟨y₁, hy₁⟩ := (hmodelN (fun i ↦ v i.succ)).1
+      have hy₁eq : y₁ = f (fun i ↦ v i.succ) := hforce' y₁ (fun i ↦ v i.succ) hy₁
+      have hveq : v = v 0 :> fun i ↦ v i.succ := by
+        ext i; cases i using Fin.cases <;> simp
+      rw [hveq, hv]
+      simpa [hy₁eq] using hy₁
+  have hmodelV : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T], ∀ v : Fin k → V,
+      (∃ y, (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y :> v)) ∧
+        ∀ y y', (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y :> v) →
+          (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y' :> v) → y = y' := by
+    intro V _ _ v
+    have hIS0T : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗕𝚺₁) inferInstance inferInstance
+    have hVIS0 : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₀ T inferInstance
+    apply models_existsUnique_minimalPairGraph
+    obtain ⟨y, hy⟩ := h.models V v
+    exact ⟨y, (models_iff_exists_minimalGraphMatrix.mp
+      (consequence_iff'.mp (Theory.Proof.sound hTIS1) V) (y :> v)).mp hy⟩
+  have hPA : 𝗣𝗔⁻ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗕𝚺₁) inferInstance inferInstance
+  have hEQ : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance hPA
+  have htotal : T ⊢ totalitySentence (minimalGraph φ) :=
+    Arithmetic.complete T _ fun (V : Type) _ _ ↦
+      models_totalitySentence_iff.mpr fun v ↦ (hmodelV V v).1
+  have hfunctional : T ⊢ functionalitySentence (minimalGraph φ) :=
+    Arithmetic.complete T _ fun (V : Type) _ _ ↦
+      models_functionalitySentence_iff.mpr fun v y y' hy hy' ↦ by
+        simpa [minimalGraph] using (hmodelV V v).2 y y'
+          (by simpa [minimalGraph] using hy) (by simpa [minimalGraph] using hy')
+  exact ⟨⟨hdef, htotal⟩, hfunctional⟩
+
 section
 variable {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
   {ψ : 𝚺₁.Semisentence (l + 1)} {χ : Fin l → 𝚺₁.Semisentence (k + 1)}
@@ -288,6 +481,15 @@ lemma toProvablyTotal (h : T.ProvablyFunctional f) : T.ProvablyTotal f :=
   have ⟨_, h⟩ := h; h.toProvablyTotalVia.toProvablyTotal
 
 end ProvablyFunctional
+
+/-- Over a theory containing `𝗕𝚺₁`, `T`-provable totality and `T`-provable functionality
+coincide, identifying `provablyTotalFunctions` with Bek99's class of functions with a
+`∃!`-provably total graph.
+- [Bek99, §1] -/
+theorem provablyTotal_iff_provablyFunctional [𝗕𝚺₁ ⪯ T] :
+    T.ProvablyTotal f ↔ T.ProvablyFunctional f :=
+  ⟨fun h ↦ have ⟨_, h⟩ := h; ⟨_, h.provablyFunctionalVia_minimalGraph⟩,
+    ProvablyFunctional.toProvablyTotal⟩
 
 end ArithmeticTheory
 

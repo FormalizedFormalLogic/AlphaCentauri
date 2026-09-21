@@ -8,7 +8,7 @@ has not happened.
 
 | Who | Owns | Does |
 | --- | --- | --- |
-| Humans | `docs/`, `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `AGENTS.md`, `CLAUDE.md`, `README.md` | Decide what to formalize, by opening the issues; maintain the infrastructure; merge. |
+| Humans | `docs/`, `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `AGENTS.md`, `README.md` | Decide what to formalize, by opening the issues; maintain the infrastructure; merge. |
 | AI agents | `AlphaCentauri/`, `AlphaCentauri.lean` | Claim issues; write the Lean code; open, review, and address PRs. |
 
 A PR touching a human-owned path needs a human approval.
@@ -61,8 +61,7 @@ activity for 14 days may be released by anyone, with a comment.
 - Never force-push a branch you did not create except with `--force-with-lease`.
 - Title: a short noun phrase — no subtitle, no full theorem name, no `(scope)` parenthetical —
   in the form `<type>: <subject>` with `<type>` in `add | fix | refactor | doc | ci | chore |
-  deps`. The one exception is the automated Foundation bump, titled
-  ``deps(Foundation): Update to `<short sha>` ``.
+  deps`, and no scope at all.
   PRs are squash-merged, so the title becomes the commit on `main`: do not phone it in. Backtick
   every Lean identifier or notation (`` `DirectInterpretation` ``, `` `𝚺-[s]` ``); write
   mathematics in TeX (`` $\Delta_1$ ``, `` $\Sigma_n$ ``, `` $\mathsf{I}\Sigma_1$ ``,
@@ -72,7 +71,9 @@ activity for 14 days may be released by anyone, with a comment.
   "Route", "Verification", or "Design" sections — the diff and CI already say how it was built
   and verified.
 - AI disclosure: every commit carries a `Co-Authored-By` trailer for the model, and the body
-  says an AI agent wrote it.
+  says an AI agent wrote it. An agent working from a session also links that session in a comment
+  when it opens the pull request, or when it picks up one a workflow opened, so that the
+  conversation behind the change can be read from the pull request.
 
 ### CI
 
@@ -82,13 +83,44 @@ activity for 14 days may be released by anyone, with a comment.
 what `forgive.yml` forgives by name); `just no-sorry`; `just mk-all` leaves no diff. The audit
 writes `.lake/audit.json`, which `.github/scripts/audit-comment.py` renders into one PR comment,
 overwritten on each run, unless the PR is labelled `infrastructure`. `actionlint.yml`
-lints the workflow files, and `update-foundation.yml` bumps the dependency pins (below).
+lints the workflow files, and `update-deps.yml` and `repair-deps.yml` move the dependency pins
+and repair what the move breaks (below).
 
 A red check is fixed in the PR, never worked around.
 
 [`lefthook.yml`](../lefthook.yml) runs the same checks before every `git push`, so a red run is
 caught locally. Install [lefthook](https://lefthook.dev), then `just hooks` once per clone;
 `LEFTHOOK=0 git push` skips them for a branch that does not need them, and CI runs them regardless.
+
+### Build caches
+
+Nothing is elaborated twice if a cache can supply it. Mathlib comes from its own cache
+(`lake exe cache get`); Foundation and this library come from the Lake build cache the
+organization shares, an R2 bucket read anonymously through `https://ffl.sno2wman.net` and
+described by [`lake-cache.toml`](../lake-cache.toml), which is the same file in every repository
+that uses it. `just cache` fetches all three, and `just build` runs it first, so a fresh clone
+compiles nothing it did not write.
+
+The scope of an entry is the package's GitHub repository and the revision it was built at, not a
+branch. Foundation's CI publishes on every push to its `master`, so **the revision this repository
+pins is one that has been published**, and moving that pin costs a download rather than the hour
+that building Foundation from source takes — which is what makes a dependency bump cheap, here and
+in [`repair-deps.yml`](../.github/workflows/repair-deps.yml). This repository publishes its own
+outputs the same way, on pushes to `main` only: a pull request builds a tree that will not exist
+after the squash-merge.
+
+`ci.yml` keeps a second, separate cache for this library alone: a `lake pack` tarball in
+`actions/cache`, keyed on the pins and the commit. It is the faster of the two on a same-runner
+hit, so the Lake cache download is skipped when it hits; what it structurally cannot cover — fork
+pull requests, evictions, a contributor's fresh clone — is what the shared cache is for.
+
+The steps come from the composite actions in
+[`FormalizedFormalLogic/.github`](https://github.com/FormalizedFormalLogic/.github/tree/main/lake-cache).
+Reading needs nothing configured; publishing needs the secret `LAKE_CACHE_KEY`, an R2 token scoped
+to that bucket alone, and is skipped with a notice when it is absent. There is no off switch:
+writing the step is what asks for the cache, so taking it back means dropping the step. A miss
+costs only time — the build compiles from source, slowly but never wrongly, as it does whenever
+the cache is short of something.
 
 ### Review and merge
 
@@ -98,8 +130,12 @@ against one rubric adapted from
 humans. Findings are addressed by pushing to the same branch; contradictory findings are
 contested in the thread, not resolved silently.
 
-Squash merge into `main` once CI is green and every review approves. A human performs it, or an
-agent when the user has explicitly told it to for that PR.
+`main` is behind a merge queue, so nothing merges into it directly: "Merge when ready" puts the
+pull request in the queue, the queue squashes it onto the tip and runs `Build project`,
+`Check mk_all executed` and `Check no sorry` there (`merge_group` in `ci.yml`), and it lands only
+if they pass. Queue it once CI is green and every review approves; a human does that, or an agent
+when the user has explicitly told it to for that PR. Nothing has to be up to date with `main`
+first — that is what the queue is for.
 
 ## Labels
 
@@ -110,14 +146,14 @@ agent when the user has explicitly told it to for that PR.
 | `proof-formalized` | Stage: the `axiom` proved in a follow-up PR; closes the issue. |
 | `infrastructure` | A PR with no mathematics; CI skips the audit comment. |
 | `refactor` | Reorganizes existing code without adding results; no mathematics. |
-| `update-foundation` | The automated Foundation pin bump; at most one open PR carries it. |
+| `update-deps` | The automated dependency pin bump; at most one open PR carries it. |
 
 Nothing else is a label. Blocked, belongs upstream in Foundation, process questions — say it
 in the issue thread.
 
 ## The worker loop
 
-An open pull request labelled `update-foundation` comes before all of this; see
+An open pull request labelled `update-deps` comes before all of this; see
 [Dependency pins and Foundation](#dependency-pins-and-foundation).
 
 1. List open, unassigned issues whose thread does not say they are waiting; pick one.
@@ -133,21 +169,40 @@ An open pull request labelled `update-foundation` comes before all of this; see
 `lakefile.toml` follows Foundation's `master`, `lake-manifest.json` records the exact revision
 that resolves to, and `lean-toolchain` equals Foundation's. The manifest and the toolchain move
 together, forward only, and nobody bumps them by hand: `lake update` is the workflow's to run.
+Forgive, the axiom audit, is pinned to the tag naming that toolchain instead, because it reads
+Lean's internals and only compiles at a revision written for it; the workflow moves that pin with
+the toolchain, and leaves it alone when Forgive has no tag for the new one. Which packages are
+followed, and which are pinned to the toolchain's tag, are two lists in the workflow's `env`; the
+repositories behind them are read from `lakefile.toml`, never spelled out twice.
 
-[`.github/workflows/update-foundation.yml`](../.github/workflows/update-foundation.yml) moves
+[`.github/workflows/update-deps.yml`](../.github/workflows/update-deps.yml) moves
 them every six hours, and on demand from the Actions tab (`workflow_dispatch`). It keeps one
-branch,
-`update-foundation`, behind one open pull request labelled `update-foundation` and titled
-``deps(Foundation): Update to `<short sha>` ``. While that pull request is open the new pins are
+branch, `update-deps`, behind one open pull request labelled `update-deps` and titled
+`chore: Update dependencies`, whose body is the table of revisions moved and nothing else. While that pull request is open the new pins are
 committed on top of it — never a force-push, since the repairs made for the previous bump live
 on that branch; otherwise the branch restarts from `main` and the pull request is opened. The
-workflow moves the pins and nothing else: it does not build, and the bump is red until someone
+workflow moves the pins and nothing else: it does not build, and the bump is red until something
 makes it green. It pushes as the organization's GitHub App (the variable `BOT_APP_ID` and the
 secret `BOT_APP_PRIVATE_KEY`), because a push made with `github.token` starts no checks.
 
-That is a session's work, not an issue's:
+A bump that breaks nothing lands by itself. When the branch's diff against `main` is the pin
+files alone, the workflow queues its merge (`gh pr merge --squash --auto`) and GitHub performs
+it once the checks are green; the checks are the whole review, because there is nothing else in
+the diff to read. A branch that carries more than the pins is never queued. Nothing waits on the
+branch being current, because the merge queue tests each entry against the tip of `main` itself.
 
-1. An open pull request labelled `update-foundation` takes precedence over picking up an issue
+[`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes the rest: when
+CI fails on that branch it hands it to Claude Code, which repairs this repository in place and
+commits. The agent cannot push: the workflow runs the checks `ci.yml` runs and pushes only if they
+pass, so the branch never advances to a commit that does not build, and cancels the queued merge
+when it does — a repaired bump is read by a human before it lands. Each bump gets one attempt, drawn from the maintainer's Claude subscription through the
+organization secret `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`); without it, or after that
+attempt, the pull request says so and waits. `/update-deps` is the same
+runbook from a local session.
+
+Repairing a bump is a session's work, not an issue's:
+
+1. An open pull request labelled `update-deps` takes precedence over picking up an issue
    — a `/loop` iteration is the usual way to notice one. Work on its branch, in that pull
    request.
 2. Build, read the compiler's complaints against Foundation's own diff over the range the pull
@@ -159,7 +214,8 @@ That is a session's work, not an issue's:
 4. Push to the same branch, and leave the merge to a human as for every other pull request.
 
 A bump blocked on mathematics this repository does not have is reported in a comment on that
-pull request and left to a human.
+pull request and left to a human. A red bump is never made green by pinning Foundation back:
+the pins move forward only.
 
 Material here is written in Foundation's style so it can move upstream. Deciding what moves is a
 human's job; an agent that thinks a result belongs upstream, or that Foundation's API needs a

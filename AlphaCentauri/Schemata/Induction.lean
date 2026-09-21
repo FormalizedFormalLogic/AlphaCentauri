@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.Schemata.Collection.Basic
 public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
+public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-!
 # The induction schemes `𝗜` and `𝗜𝚫` over the strict hierarchy
@@ -50,6 +50,10 @@ lemma InductionOnStrictHierarchy_zero (Γ : Polarity) : 𝗜 Γ 0 = 𝗜𝚺₀ 
 lemma InductionOnStrictHierarchy_subset_mono {Γ : Polarity} {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) :
     𝗜 Γ s₁ ⊆ 𝗜 Γ s₂ :=
   Set.union_subset_union_right _ (InductionScheme_subset (fun H ↦ H.mono h))
+
+lemma InductionOnStrictHierarchy_subset_of_lt {Γ Γ' : Polarity} {s₁ s₂ : ℕ} (h : s₁ < s₂) :
+    𝗜 Γ s₁ ⊆ 𝗜 Γ' s₂ :=
+  Set.union_subset_union_right _ (InductionScheme_subset (fun H ↦ H.strict_mono _ h))
 
 lemma InductionOnStrictHierarchy_weakerThan_of_le {Γ : Polarity} {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) :
     𝗜 Γ s₁ ⪯ 𝗜 Γ s₂ :=
@@ -129,6 +133,9 @@ lemma models_deltaInd_iff (φ ψ : ArithmeticSemiformula ℕ 1) :
 end models
 
 section standardModel
+
+instance models_InductionOnStrictHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜 Γ s :=
+  models_of_ss inferInstance (InductionOnStrictHierarchy_subset_InductionOnHierarchy Γ s)
 
 instance models_IDeltaOnBroadHierarchy (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚫⁺ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩

@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.Measures
+public import AlphaCentauri.ToMathlib.Util.Disjunct
 
 /-!
 # Inversion for the internal cut-free calculus
@@ -76,18 +77,14 @@ private lemma shift_case {q : V} (hq : IsUFormula L q) :
     (∃ q₁, IsUFormula L q₁ ∧ q = ^∃ q₁ ∧ shift L q = ^∃ (shift L q₁)) := by
   rcases hq.case with (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
     ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, hq₁, rfl⟩ | ⟨q₁, hq₁, rfl⟩)
-  · exact Or.inl ⟨k, R, v, hR, hv, rfl, shift_rel hR hv⟩
-  · exact Or.inr <| Or.inl ⟨k, R, v, hR, hv, rfl, shift_nrel hR hv⟩
-  · exact Or.inr <| Or.inr <| Or.inl ⟨rfl, by simp⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨rfl, by simp⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
-      ⟨q₁, q₂, hq₁, hq₂, rfl, shift_and hq₁ hq₂⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
-      ⟨q₁, q₂, hq₁, hq₂, rfl, shift_or hq₁ hq₂⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
-      ⟨q₁, hq₁, rfl, shift_all hq₁⟩
-  · exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr
-      ⟨q₁, hq₁, rfl, shift_exs hq₁⟩
+  · disj 1; exact ⟨k, R, v, hR, hv, rfl, shift_rel hR hv⟩
+  · disj 2; exact ⟨k, R, v, hR, hv, rfl, shift_nrel hR hv⟩
+  · disj 3; exact ⟨rfl, by simp⟩
+  · disj 4; exact ⟨rfl, by simp⟩
+  · disj 5; exact ⟨q₁, q₂, hq₁, hq₂, rfl, shift_and hq₁ hq₂⟩
+  · disj 6; exact ⟨q₁, q₂, hq₁, hq₂, rfl, shift_or hq₁ hq₂⟩
+  · disj 7; exact ⟨q₁, hq₁, rfl, shift_all hq₁⟩
+  · disj 8; exact ⟨q₁, hq₁, rfl, shift_exs hq₁⟩
 
 /-- The external-variable shift is injective on formula codes. -/
 lemma shift_inj {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q)

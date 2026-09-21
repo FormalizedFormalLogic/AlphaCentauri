@@ -78,9 +78,9 @@ private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : Arit
     simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using
       absolute_of_bounded (T := 𝗣𝗔⁻) hφ M N ![x] v
   have h₂ : ∀ y : N, y < hMN.emb a + 1 → φ.Eval ![y] (hMN.emb ∘ v) := by
-    refine InductionScheme.succ_induction (C := Semiformula.Bounded)
+    refine InductionScheme.succ_induction (C := Hierarchy 𝚺 0)
       ⟨(hMN.emb a + 1) :>ₙ fun j ↦ hMN.emb (v j),
-        “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ), by simp [hφ],
+        “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ), by simp [hφ.hierarchy],
         by intro x; simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩
       (by intro _; simpa using (h₁ 0).mp h0) ?_
     intro y ih hy
@@ -98,7 +98,7 @@ theorem models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ]
   · apply Semantics.ModelsSet.setOf_iff.mpr;
     rintro _ ⟨φ, hφ, rfl⟩
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
-      using hMN.eval_of_endExtension hφ
+      using hMN.eval_of_endExtension hφ.bounded
 
 end EndExtension
 

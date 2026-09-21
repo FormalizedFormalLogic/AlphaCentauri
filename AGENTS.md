@@ -14,6 +14,13 @@ and the `lean-lsp` MCP server (defined in `.mcp.json`; requires `uv` and `ripgre
 /plugin install lean4@lean4-skills
 ```
 
+This file is the only instruction file here; no `CLAUDE.md` is checked in. Claude Code reads
+`AGENTS.md` through its built-in `agents-md` plugin, whose default mode steps in only for a project
+with no instruction file of its own — a `CLAUDE.md`, `.claude/CLAUDE.md` or `CLAUDE.local.md`
+anywhere from the filesystem root down to the working directory makes it stand down and leaves this
+file unread. Per-clone notes therefore belong in `.claude/AGENTS.md`, which is git-ignored and read
+beside this file.
+
 ## GitHub is the only workbench
 
 - **A unit of new mathematics is an issue.** Work only on an open issue. Humans open the issues
@@ -93,13 +100,12 @@ descriptive slug and open the pull request directly; the PR is the record.
 - **No development artifacts** in the code: plan steps, issue numbers, "TODO after review",
   skeleton-era comments.
 - `AlphaCentauri/` and `AlphaCentauri.lean` are the only places code goes. `docs/`,
-  `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `README.md`, `AGENTS.md`, and
-  `CLAUDE.md` (a symlink to `AGENTS.md`) are human-owned; a PR that touches them always needs a
-  human review. The pins (Foundation's revision in `lake-manifest.json` and `lean-toolchain`)
-  move **forward only**, and a workflow moves them: never bump them yourself,
-  work in the open pull request labelled `update-foundation`, whose branch also carries the
-  repairs the bump needs — including replacing anything Foundation has absorbed from here with
-  Foundation's own version (see
+  `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `README.md`, and `AGENTS.md` are
+  human-owned; a PR that touches them always needs a human review. The pins (Foundation's
+  revision in `lake-manifest.json` and `lean-toolchain`) move **forward only**, and a workflow
+  moves them: never bump them yourself, work in the open pull request labelled `update-deps`,
+  whose branch also carries the repairs the bump needs — including replacing anything Foundation
+  has absorbed from here with Foundation's own version (see
   [`docs/workflow.md`](docs/workflow.md#dependency-pins-and-foundation)).
 
 ## Pull requests

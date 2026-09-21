@@ -17,12 +17,13 @@ GitHub. The process is [`docs/workflow.md`](docs/workflow.md), the contract for 
 
 ## Building
 
-Foundation is a git dependency without a public build cache, so the first build compiles it from
-source; Mathlib comes from its cache.
+Nothing here has to be elaborated from source: Mathlib comes from its own cache, and Foundation
+and this library from the shared FormalizedFormalLogic build cache, keyed by the revision the
+manifest pins. A miss compiles what is missing and is not an error.
 
 ```bash
-lake exe cache get   # Mathlib oleans
-lake build           # builds Foundation (first time only), then AlphaCentauri
+just cache           # Mathlib's, Foundation's and this library's prebuilt artifacts
+just build           # the above, then AlphaCentauri
 just axiom-audit     # the axiom allowlist
 just no-sorry        # sorry-freeness
 just hooks           # run the CI checks before every push (needs lefthook)

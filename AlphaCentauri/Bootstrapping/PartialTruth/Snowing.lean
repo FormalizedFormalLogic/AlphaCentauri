@@ -181,9 +181,9 @@ lemma hierarchySatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : Arithmet
     intro v
     rcases Γ₀ with _ | _
     · change SigmaSatisfaction 0 _ _ ↔ _
-      rw [SigmaSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀ v
+      rw [SigmaSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀.bounded v
     · change PiSatisfaction 0 _ _ ↔ _
-      rw [PiSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀ v
+      rw [PiSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀.bounded v
   | @ofAlt Γ₀ s₀ n₀ φ₀ hφ₀ ih =>
     intro v
     rcases Γ₀ with _ | _
@@ -492,7 +492,7 @@ private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
   induction h with
   | @zero Γ₀ m₀ φ₀ hφ₀ =>
     intro _ v ev hev
-    exact boundedSatisfaction_quote_reading hM hφ₀ v ev hev
+    exact boundedSatisfaction_quote_reading hM hφ₀.bounded v ev hev
   | @ofAlt Γ₀ s₀ m₀ φ₀ hφ₀ ih =>
     intro hs v ev hev
     rw [read_ofAlt hM (show s₀ ≤ n by omega) Γ₀ ((⌜φ₀⌝ : ℕ) : M) ev
@@ -568,7 +568,7 @@ theorem provable_snowing_of_tarski {n k : ℕ} {φ : ArithmeticSemisentence k}
   have : 𝗘𝗤 ℒₒᵣ ⪯ (𝗣𝗔⁻ ∪ tarski n) := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance
       (Entailment.Axiomatized.le_of_subset Set.subset_union_left)
   unfold snowing
-  apply Arithmetic.provable_iff_of_models_iff (T := 𝗣𝗔⁻ ∪ tarski n)
+  apply Arithmetic.provable_iff_of_models_iff.{0} (T := 𝗣𝗔⁻ ∪ tarski n)
   intro M _ hMT e
   have hPA : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := Semantics.ModelsSet.of_subset hMT Set.subset_union_left
   have hM : ∀ σ : ArithmeticSentence, tarski n σ → M↓[ℒₒᵣ] ⊧ σ := fun σ hσ ↦

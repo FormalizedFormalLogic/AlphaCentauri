@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Hierarchy.Bounded
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
@@ -53,17 +54,66 @@ lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) :
 
 end Hierarchy
 
+namespace StrictHierarchy
+
+variable {L : Language} [L.LT] {ξ : Type*} {Γ : Polarity} {s n : ℕ}
+
+/-- A strict formula of level `0` is $\Delta_0$. -/
+@[grind →]
+lemma bounded_of_zero {φ : Semiformula L ξ n} (h : StrictHierarchy Γ 0 φ) : φ.Bounded := by
+  cases h with | zero h => exact h.bounded
+
+/-- The body of a bounded existential is bounded. -/
+@[grind →]
+lemma _root_.FFL.FirstOrder.Semiformula.Bounded.of_exs {φ : Semiformula L ξ (n + 1)}
+    (h : (∃¹ φ).Bounded) : φ.Bounded := by
+  cases h with
+  | bexs _ hφ => exact .and (.rel _ _) hφ
+
+/-- The body of a bounded universal is bounded. -/
+@[grind →]
+lemma _root_.FFL.FirstOrder.Semiformula.Bounded.of_all {φ : Semiformula L ξ (n + 1)}
+    (h : (∀¹ φ).Bounded) : φ.Bounded := by
+  cases h with
+  | ball _ hφ => exact Semiformula.Bounded.imp_iff.mpr ⟨.rel _ _, hφ⟩
+
+/-- A bounded universal quantifies below a term. -/
+@[grind →]
+lemma _root_.FFL.FirstOrder.Semiformula.Bounded.exists_of_all
+    {φ : Semiformula L ξ (n + 1)} (h : (∀¹ φ).Bounded) :
+    ∃ (t : Semiterm L ξ n) (ψ : Semiformula L ξ (n + 1)),
+      φ = “#0 < !!(Rew.bShift t)” 🡒 ψ ∧ ψ.Bounded := by
+  cases h with
+  | ball pt hψ =>
+    rename_i ψ _
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp pt
+    exact ⟨t, ψ, rfl, hψ⟩
+
+/-- The body of a strict $\Sigma_1$ existential is strict $\Sigma_1$. -/
+@[grind →]
+lemma of_exs {φ : Semiformula L ξ (n + 1)} (h : StrictHierarchy 𝚺 1 (∃¹ φ)) :
+    StrictHierarchy 𝚺 1 φ := by
+  cases h with
+  | ofAlt h => exact .ofAlt (.zero (Semiformula.Bounded.of_exs (bounded_of_zero h)).hierarchy)
+  | exs h => exact h
+
+-- `witnesses_exs`/`exists_witnesses`'s `exs` case transport a `StrictHierarchy` fact across a
+-- substitution; `rew_iff` is already `@[simp]` upstream but not `@[grind]`.
+attribute [grind =] rew_iff
+
+/-- A formula that is both strict $\Sigma_1$ and strict $\Pi_1$ is $\Delta_0$. -/
+@[grind →]
+lemma bounded_of_sigmaOne_of_piOne {φ : Semiformula L ξ n} (hσ : StrictHierarchy 𝚺 1 φ)
+    (hπ : StrictHierarchy 𝚷 1 φ) : φ.Bounded := by
+  cases hσ with
+  | ofAlt h => exact bounded_of_zero h
+  | exs _ => cases hπ with | ofAlt h => exact bounded_of_zero h
+
+end StrictHierarchy
+
 namespace HierarchySymbol.Semiformula
 
 variable {ξ : Type*} {n s : ℕ}
-
-/-- A formula of a hierarchy class strictly below `s` is `Γ-[s]` for either polarity `Γ`. -/
-lemma hierarchy_of_lt {C : HierarchySymbol} {Γ : Polarity} (φ : C.Semiformula ξ n)
-    (h : C.rank < s) : Hierarchy Γ s φ.val := by
-  rcases C with ⟨_ | _ | _, m⟩
-  · exact φ.sigma_prop.strict_mono _ h
-  · exact φ.pi_prop.strict_mono _ h
-  · exact (val_sigma φ ▸ φ.sigma.sigma_prop).strict_mono _ h
 
 @[simp] lemma hierarchy_succ {C : HierarchySymbol} {Γ : Polarity} (φ : C.Semiformula ξ n)
     (h : C.rank ≤ s + 1) : Hierarchy Γ (s + 2) φ.val := hierarchy_of_lt φ (by omega)
@@ -71,3 +121,8 @@ lemma hierarchy_of_lt {C : HierarchySymbol} {Γ : Polarity} (φ : C.Semiformula 
 end HierarchySymbol.Semiformula
 
 end FFL.FirstOrder.Arithmetic
+
+-- The sequent bookkeeping in `Witnessing.lean` (`Γ + ⦃φ⦄` membership) relies on
+-- `Multiset.mem_atom_iff`; it is `@[simp]` upstream but not `@[grind]`. `Multiset.mem_add` is
+-- already `@[simp, grind =]` in Mathlib.
+attribute [grind =] Multiset.mem_atom_iff

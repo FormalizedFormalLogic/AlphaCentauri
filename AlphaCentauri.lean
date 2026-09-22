@@ -32,6 +32,7 @@ public import AlphaCentauri.OmegaLogic.Embedding
 public import AlphaCentauri.OmegaLogic.Inversion
 public import AlphaCentauri.OmegaLogic.Reduction
 public import AlphaCentauri.ProvablyTotal.Basic
+public import AlphaCentauri.ProvablyTotal.FastGrowing
 public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.Reflection.CollapseFormula
@@ -64,10 +65,12 @@ public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata
 public import AlphaCentauri.ToFoundation.Semiformula
 public import AlphaCentauri.ToFoundation.Theory
+public import AlphaCentauri.ToMathlib.ElementaryClosure
 public import AlphaCentauri.ToMathlib.Goodstein
 public import AlphaCentauri.ToMathlib.ONote.Computability
 public import AlphaCentauri.ToMathlib.ONote.Epsilon0
 public import AlphaCentauri.ToMathlib.ONote.FastGrowing
+public import AlphaCentauri.ToMathlib.ONote.Grzegorczyk
 public import AlphaCentauri.ToMathlib.ONote.Hardy
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds
 public import AlphaCentauri.ToMathlib.Ordinal.Rank

@@ -50,6 +50,12 @@ declaration:
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
+  FFL.FirstOrder.Arithmetic.provablyTotalFunctions_IParameterFree_Pi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provablyTotalFunctions_IParameterFree_Pi
+  FFL.FirstOrder.Arithmetic.provablyTotalFunctions_ISigma_union_IParameterFree_Pi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provablyTotalFunctions_ISigma_union_IParameterFree_Pi
   FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ:
     forgive:
       - FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ

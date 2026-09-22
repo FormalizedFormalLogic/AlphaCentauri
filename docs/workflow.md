@@ -96,10 +96,10 @@ caught locally. Install [lefthook](https://lefthook.dev), then `just hooks` once
 
 Nothing is elaborated twice if a cache can supply it. Mathlib comes from its own cache
 (`lake exe cache get`); Foundation and this library come from the Lake build cache the
-organization shares, an R2 bucket read anonymously through `https://ffl.sno2wman.net` and
-described by [`lake-cache.toml`](../lake-cache.toml), which is the same file in every repository
-that uses it. `just cache` fetches all three, and `just build` runs it first, so a fresh clone
-compiles nothing it did not write.
+organization shares, an R2 bucket read anonymously through
+`https://cache.formalizedformallogic.org` and described by [`lake-cache.toml`](../lake-cache.toml),
+which is the same file in every repository that uses it. `just cache` fetches all three, and
+`just build` runs it first, so a fresh clone compiles nothing it did not write.
 
 The scope of an entry is the package's GitHub repository and the revision it was built at, not a
 branch. Foundation's CI publishes on every push to its `master`, so **the revision this repository
@@ -109,18 +109,10 @@ in [`repair-deps.yml`](../.github/workflows/repair-deps.yml). This repository pu
 outputs the same way, on pushes to `main` only: a pull request builds a tree that will not exist
 after the squash-merge.
 
-`ci.yml` keeps a second, separate cache for this library alone: a `lake pack` tarball in
-`actions/cache`, keyed on the pins and the commit. It is the faster of the two on a same-runner
-hit, so the Lake cache download is skipped when it hits; what it structurally cannot cover — fork
-pull requests, evictions, a contributor's fresh clone — is what the shared cache is for.
-
-The steps come from the composite actions in
-[`FormalizedFormalLogic/.github`](https://github.com/FormalizedFormalLogic/.github/tree/main/lake-cache).
-Reading needs nothing configured; publishing needs the secret `LAKE_CACHE_KEY`, an R2 token scoped
-to that bucket alone, and is skipped with a notice when it is absent. There is no off switch:
-writing the step is what asks for the cache, so taking it back means dropping the step. A miss
-costs only time — the build compiles from source, slowly but never wrongly, as it does whenever
-the cache is short of something.
+`ci.yml` and `repair-deps.yml` call `lake cache get` / `lake cache put` directly, as `just cache`
+does. Reading needs nothing configured; publishing needs the secret `LAKE_CACHE_KEY`, an R2 token
+scoped to that bucket alone. A miss costs only time — the build compiles from source, slowly but
+never wrongly, as it does whenever the cache is short of something.
 
 ### Review and merge
 

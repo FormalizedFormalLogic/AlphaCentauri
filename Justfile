@@ -1,8 +1,6 @@
-# List available recipes
 default:
     @just --list
 
-# Download Mathlib's, Foundation's and this library's prebuilt artifacts (a miss is not an error)
 cache:
     lake exe cache get
     LAKE_CONFIG=lake-cache.toml lake cache get --service ffl --max-revs=100 \
@@ -10,20 +8,14 @@ cache:
       || echo "Foundation's cache is incomplete; the build will compile the rest from source"
     LAKE_CONFIG=lake-cache.toml lake cache get --service ffl --max-revs=100 \
       --repo FormalizedFormalLogic/AlphaCentauri \
-      || echo "this library's cache is incomplete; the build will compile the rest from source"
+      || echo "AlphaCentauri's cache is incomplete; the build will compile the rest from source"
 
-# Build the library, taking from the caches what has been built elsewhere already
 build: cache
     lake build
 
-# Audit AlphaCentauri for sorry/native_decide/unauthorized axioms, honouring the allowlist
-# forgive.yml (requires `lake build` first; see https://github.com/FormalizedFormalLogic/forgive)
 axiom-audit:
     lake exe forgive AlphaCentauri --json .lake/audit.json
 
-# Forbid `sorry`: none in the Lean sources, and `sorryAx` forgiven nowhere in forgive.yml.
-# An unproved statement is an `axiom` under its own name instead (see docs/conventions.md).
-# Needs yq (https://github.com/mikefarah/yq); the jq-based kislyuk/yq understands the same query.
 no-sorry:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -42,22 +34,17 @@ no-sorry:
     fi
     echo "no-sorry: ok"
 
-# Check a pull request title against the conventions in docs/workflow.md
 check-pr-title title:
     PR_TITLE={{ quote(title) }} python3 .github/scripts/check-pr-title.py
 
-# Render the theory zoo as pages/zoo/arithmetic.{png,pdf} (needs typst and graphviz).
-# Reads the environment, so `lake build AlphaCentauri Foundation` has to have run first.
 zoo:
     lake exe zoo_arithmetic AlphaCentauriZoo/arithmetic.json
     mkdir -p pages/zoo
     typst compile AlphaCentauriZoo/arithmetic.typ pages/zoo/arithmetic.png
     typst compile AlphaCentauriZoo/arithmetic.typ pages/zoo/arithmetic.pdf
 
-# Regenerate AlphaCentauri.lean to import all modules (run after adding/removing files)
 mk-all:
     lake exe mk_all --lib AlphaCentauri --module
 
-# Install the git hooks that run the CI checks before a push (needs lefthook: https://lefthook.dev)
 hooks:
     lefthook install

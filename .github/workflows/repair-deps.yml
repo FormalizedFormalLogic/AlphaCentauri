@@ -32,6 +32,10 @@ jobs:
       contents: read
       pull-requests: write
       id-token: write
+    env:
+      LAKE_ARTIFACT_CACHE: true
+      LAKE_RESTORE_ARTIFACTS: true
+      LAKE_NO_CACHE: true
     steps:
       # A `github.token` push starts no checks.
       - name: Mint the app token
@@ -97,13 +101,17 @@ jobs:
       # `ci.yml`'s steps, so the agent starts from the build its repair will be judged against.
       # The bump moves the pin onto a revision Foundation's own CI has published, which is what
       # makes this a download rather than the hour the agent would otherwise spend elaborating it.
-      - name: Restore Foundation's build from the Lake cache
+      - name: Restore remote cache (Foundation)
         if: steps.decide.outputs.number != ''
-        uses: FormalizedFormalLogic/.github/lake-cache/restore@main
-        with:
-          repo: FormalizedFormalLogic/Foundation
-          package: Foundation
-          assert-fresh: ''
+        env:
+          LAKE_CONFIG: lake-cache.toml
+        run: |
+          lake cache get \
+            --service ffl \
+            --max-revs=100 \
+            --repo FormalizedFormalLogic/Foundation \
+            --package Foundation \
+          || echo "::warning::Foundation's cache is incomplete; the build will compile the rest from source"
       - name: Build the dependency
         if: steps.decide.outputs.number != ''
         run: lake build Foundation

@@ -19,14 +19,13 @@ variable {L : Language} [L.ReferenceableBy L] [L.DecidableEq] {T₀ T : Theory L
 
 lemma interpret_conj_left {Γ : FormulaList α} {B : Formula α} (hB : B ∈ Γ) :
     T ⊢ (FormulaList.conj Γ).interpret f 𝔅 🡒 B.interpret f 𝔅 := by
-  match Γ with
-  | [] => simp at hB
-  | [C] =>
+  induction Γ using FormulaList.conj.induct with
+  | case1 => simp at hB
+  | case2 C =>
     obtain rfl : B = C := by simpa using hB
     cl_prover
-  | C :: D :: Γ =>
-    have ih := fun hB ↦ interpret_conj_left (Γ := D :: Γ) (B := B) hB
-    simp only [FormulaList.conj, Formula.interpret] at ih ⊢
+  | case3 C D Γ ih =>
+    simp only [FormulaList.conj, Formula.interpret]
     rcases List.mem_cons.mp hB with rfl | hB
     · cl_prover
     · have := ih hB
@@ -35,13 +34,11 @@ lemma interpret_conj_left {Γ : FormulaList α} {B : Formula α} (hB : B ∈ Γ)
 lemma interpret_conj_right {Γ : FormulaList α} {φ : Sentence L}
     (h : ∀ B ∈ Γ, T ⊢ φ 🡒 B.interpret f 𝔅) :
     T ⊢ φ 🡒 (FormulaList.conj Γ).interpret f 𝔅 := by
-  match Γ with
-  | [] =>
-    simp only [FormulaList.conj, Formula.interpret]
-    cl_prover
-  | [C] => simpa using h C (by simp)
-  | C :: D :: Γ =>
-    have ih := interpret_conj_right (Γ := D :: Γ) fun B hB ↦ h B (List.mem_cons_of_mem _ hB)
+  induction Γ using FormulaList.conj.induct with
+  | case1 => simp only [FormulaList.conj, Formula.interpret]; cl_prover
+  | case2 C => simpa using h C (by simp)
+  | case3 C D Γ ih =>
+    have ih := ih fun B hB ↦ h B (List.mem_cons_of_mem _ hB)
     have hC := h C (by simp)
     simp only [FormulaList.conj, Formula.interpret] at ih ⊢
     cl_prover [ih, hC]

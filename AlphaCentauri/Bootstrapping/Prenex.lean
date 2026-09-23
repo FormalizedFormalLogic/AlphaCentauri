@@ -474,8 +474,8 @@ private lemma isStrictClass_quote {Γ : Polarity} {s n : ℕ} {ψ : ArithmeticSe
   induction h with
   | @zero Γ₀ n₀ φ₀ hφ₀ =>
     rcases Γ₀ with _ | _
-    · exact (isBounded_quote_iff_s φ₀).mpr hφ₀.bounded
-    · exact (isBounded_quote_iff_s φ₀).mpr hφ₀.bounded
+    · exact (isBounded_quote_iff_s φ₀).mpr hφ₀
+    · exact (isBounded_quote_iff_s φ₀).mpr hφ₀
   | @ofAlt Γ₀ s₀ n₀ φ₀ _ ih =>
     rcases Γ₀ with _ | _
     · exact IsStrictSigma.of_pi ih

@@ -285,7 +285,8 @@ theorem hierarchyInduction_of_strictInduction (n : ℕ) (T : ArithmeticTheory) [
       ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr <| by
         rintro _ ⟨ψ, hψ, rfl⟩
         exact consequence_iff.mp (Theory.Proof.sound
-          (hind ψ ((StrictHierarchy.zero hψ).mono (Nat.zero_le (n + 1))))) M inferInstance⟩
+          (hind ψ ((StrictHierarchy.zero (Hierarchy.zero_iff_delta_zero.mp hψ)).mono
+            (Nat.zero_le (n + 1))))) M inferInstance⟩
     have : M↓[ℒₒᵣ] ⊧* 𝗕𝚺 (n + 1) := Semantics.ModelsSet.union_iff.mpr
       ⟨hI, Semantics.ModelsSet.setOf_iff.mpr <| by
         rintro _ ⟨ψ, hψ, rfl⟩

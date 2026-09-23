@@ -46,7 +46,7 @@ lemma strictlyDefinable_of_models_ISigma (V : Type*) [ORingStructure V] [V↓[�
   rcases s with _ | t
   · intro Γ R hR
     obtain ⟨f, φ, hφ, hiff⟩ := exists_hierarchy_eval_iff hR
-    exact (strictDefinableRel_of_eval (.zero (Hierarchy.zero_iff.mp hφ)) f).of_iff
+    exact (strictDefinableRel_of_eval (.zero (Hierarchy.zero_iff_delta_zero.mp hφ)) f).of_iff
       fun v ↦ by simpa [← Matrix.fun_eq_vec_two v] using hiff v
   · have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (t + 1) := ISigma.models_BSigma_succ
     intro Γ R hR

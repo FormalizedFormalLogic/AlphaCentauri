@@ -7,9 +7,6 @@ cache:
       --repo FormalizedFormalLogic/Foundation --package Foundation \
       || echo "Foundation's cache is incomplete; the build will compile the rest from source"
     LAKE_CONFIG=lake-cache.toml lake cache get --service ffl --max-revs=100 \
-      --repo FormalizedFormalLogic/ProvabilityLogic --package ProvabilityLogic \
-      || echo "ProvabilityLogic's cache is incomplete; the build will compile the rest from source"
-    LAKE_CONFIG=lake-cache.toml lake cache get --service ffl --max-revs=100 \
       --repo FormalizedFormalLogic/AlphaCentauri \
       || echo "AlphaCentauri's cache is incomplete; the build will compile the rest from source"
 

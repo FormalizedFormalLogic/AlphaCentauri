@@ -112,20 +112,9 @@ jobs:
             --repo FormalizedFormalLogic/Foundation \
             --package Foundation \
           || echo "::warning::Foundation's cache is incomplete; the build will compile the rest from source"
-      - name: Restore remote cache (ProvabilityLogic)
+      - name: Build the dependency
         if: steps.decide.outputs.number != ''
-        env:
-          LAKE_CONFIG: lake-cache.toml
-        run: |
-          lake cache get \
-            --service ffl \
-            --max-revs=100 \
-            --repo FormalizedFormalLogic/ProvabilityLogic \
-            --package ProvabilityLogic \
-          || echo "::warning::ProvabilityLogic's cache is incomplete; the build will compile the rest from source"
-      - name: Build the dependencies
-        if: steps.decide.outputs.number != ''
-        run: lake build Foundation ProvabilityLogic
+        run: lake build Foundation
 
       - name: Configure the committer
         if: steps.decide.outputs.number != ''

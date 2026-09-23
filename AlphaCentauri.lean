@@ -62,6 +62,7 @@ public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.Interpret
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata
 public import AlphaCentauri.ToFoundation.Semiformula
@@ -76,4 +77,3 @@ public import AlphaCentauri.ToMathlib.Ordinal.Rank
 public import AlphaCentauri.ToMathlib.Primrec
 public import AlphaCentauri.ToMathlib.Util.Disjunct
 public import AlphaCentauri.ToMathlib.Vector
-public import AlphaCentauri.ToProvabilityLogic.Interpret

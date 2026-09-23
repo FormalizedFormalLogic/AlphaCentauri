@@ -23,7 +23,7 @@ env:
   LABEL: update-deps
   TITLE: 'chore: Update dependencies'
   # `lakefile.toml` names; the repositories behind them are read from `lakefile.toml` too.
-  FOLLOWED: Foundation ProvabilityLogic
+  FOLLOWED: Foundation
   TOOLCHAIN_PINNED: Forgive
 
 jobs:

@@ -29,14 +29,6 @@ name = "Foundation"
 git = "https://github.com/FormalizedFormalLogic/Foundation"
 rev = "master"
 
-# Provability logic: GL's Kripke semantics and its arithmetical soundness for any provability
-# predicate satisfying the Hilbert–Bernays–Löb conditions. It is followed like Foundation, whose
-# pin in this manifest is the one it is built against.
-[[require]]
-name = "ProvabilityLogic"
-git = "https://github.com/FormalizedFormalLogic/ProvabilityLogic"
-rev = "main"
-
 # `lake exe forgive AlphaCentauri` (`just axiom-audit`): the axiom audit against `forgive.yml`.
 # Run after `lake build`; it reads the oleans. The package imports only `Lean` and `Cli`, whose
 # internals move between toolchains, so it is pinned to the tag naming ours — a bare revision only

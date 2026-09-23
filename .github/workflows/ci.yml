@@ -51,6 +51,17 @@ jobs:
             --package Foundation \
           || echo "::warning::Foundation's cache is incomplete; the build will compile the rest from source"
 
+      - name: Restore remote cache (ProvabilityLogic)
+        env:
+          LAKE_CONFIG: lake-cache.toml
+        run: |
+          lake cache get \
+            --service ffl \
+            --max-revs=100 \
+            --repo FormalizedFormalLogic/ProvabilityLogic \
+            --package ProvabilityLogic \
+          || echo "::warning::ProvabilityLogic's cache is incomplete; the build will compile the rest from source"
+
       - name: Restore remote cache (AlphaCentauri)
         env:
           LAKE_CONFIG: lake-cache.toml
@@ -62,6 +73,7 @@ jobs:
           || echo "::warning::AlphaCentauri's cache is incomplete; the build will compile the rest from source"
 
       - run: lake build Foundation
+      - run: lake build ProvabilityLogic
       - run: lake build AlphaCentauri --wfail
 
       - name: Audit axioms

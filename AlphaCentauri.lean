@@ -35,6 +35,7 @@ public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.Reflection.CollapseFormula
+public import AlphaCentauri.Reflection.FiniteLocalReflection
 public import AlphaCentauri.Reflection.ProvabilityAbstraction
 public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.StandardProvability
@@ -75,3 +76,4 @@ public import AlphaCentauri.ToMathlib.Ordinal.Rank
 public import AlphaCentauri.ToMathlib.Primrec
 public import AlphaCentauri.ToMathlib.Util.Disjunct
 public import AlphaCentauri.ToMathlib.Vector
+public import AlphaCentauri.ToProvabilityLogic.Interpret

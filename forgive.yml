@@ -53,6 +53,10 @@ declaration:
   FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ:
     forgive:
       - FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ
+  FFL.FirstOrder.Arithmetic.uniformReflection_of_parameterFreeInduction:
+    forgive:
+      # Quoted by Bek99 from Beklemishev 1997 without proof.
+      - FFL.FirstOrder.Arithmetic.uniformReflection_of_parameterFreeInduction
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:

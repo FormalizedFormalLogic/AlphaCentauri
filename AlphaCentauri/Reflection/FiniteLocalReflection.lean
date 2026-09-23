@@ -8,8 +8,8 @@ public import ProvabilityLogic.ProvabilityLogic.GL.Basic
 /-!
 # Collapsing finitely many local reflection instances
 
-If `T` derives `A` from finitely many local reflection instances `𝔅 Aᵢ 🡒 Aᵢ`, then it derives `A`
-from the instances at the sentences `B₀ := A`, `Bᵢ₊₁ := Bᵢ ⋎ 𝔅 Bᵢ`, which depend on `A` alone.
+If `T` derives `σ` from finitely many local reflection instances `𝔅 τᵢ 🡒 τᵢ`, then it derives `σ`
+from the instances at the sentences `ρ₀ := σ`, `ρᵢ₊₁ := ρᵢ ⋎ 𝔅 ρᵢ`, which depend on `σ` alone.
 The argument is carried out in `GL` and transported by its arithmetical soundness.
 
 - [Bek99, Lemma 4.2]
@@ -22,11 +22,11 @@ open FFL.Entailment
 
 variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T)
 
-/-- `B₀ := A`, `Bᵢ₊₁ := Bᵢ ⋎ 𝔅 Bᵢ`.
+/-- `ρ₀ := σ`, `ρᵢ₊₁ := ρᵢ ⋎ 𝔅 ρᵢ`.
 - [Bek99, Lemma 4.2] -/
-def collapseSeq (A : Sentence L) : ℕ → Sentence L
-  | 0 => A
-  | i + 1 => collapseSeq A i ⋎ 𝔅 (collapseSeq A i)
+def collapseSeq (σ : Sentence L) : ℕ → Sentence L
+  | 0 => σ
+  | i + 1 => collapseSeq σ i ⋎ 𝔅 (collapseSeq σ i)
 
 end FFL.FirstOrder.ProvabilityAbstraction.Provability
 
@@ -197,32 +197,32 @@ lemma interpret_seq (B : _root_.Formula α) (i : ℕ) :
 
 end interpret
 
-/-- If `T` derives `A` from local reflection instances at `A₀, …, Aₘ`, then it derives `A` from
-those at `collapseSeq A 0, …, collapseSeq A m`.
+/-- If `T` derives `σ` from local reflection instances at `τ₀, …, τₘ`, then it derives `σ` from
+those at `collapseSeq σ 0, …, collapseSeq σ m`.
 - [Bek99, Lemma 4.2] -/
-theorem collapse_localReflection [𝔅.HBL] [Diagonalization T₀] {m : ℕ} {A : Sentence L}
-    {As : Fin (m + 1) → Sentence L} (h : T ⊢ (⩕ i, 𝔅.localReflectionSchema (As i)) 🡒 A) :
-    T ⊢ (⩕ i : Fin (m + 1), 𝔅.localReflectionSchema (𝔅.collapseSeq A i)) 🡒 A := by
+theorem collapse_localReflection [𝔅.HBL] [Diagonalization T₀] {m : ℕ} {σ : Sentence L}
+    {τ : Fin (m + 1) → Sentence L} (h : T ⊢ (⩕ i, 𝔅.localReflectionSchema (τ i)) 🡒 σ) :
+    T ⊢ (⩕ i : Fin (m + 1), 𝔅.localReflectionSchema (𝔅.collapseSeq σ i)) 🡒 σ := by
   classical
-  let f : Realization (Option (Fin (m + 1))) L := ⟨fun o ↦ o.elim A As⟩
+  let f : Realization (Option (Fin (m + 1))) L := ⟨fun o ↦ o.elim σ τ⟩
   have hH : T ⊢ (hyp m).interpret f 𝔅 := by
     have : T ⊢ (FormulaList.conj (List.ofFn fun i ↦ (p i).box 🡒 p i)).interpret f 𝔅 🡒
-        ⩕ i, 𝔅.localReflectionSchema (As i) :=
+        ⩕ i, 𝔅.localReflectionSchema (τ i) :=
       right_Uconj_intro _ _ fun i ↦ Formula.interpret_conj_left (List.mem_ofFn.mpr ⟨i, rfl⟩)
     simp only [hyp, _root_.Formula.interpret] at this ⊢
     cl_prover [this, h]
   have hbox : T ⊢ 𝔅 ((hyp m).interpret f 𝔅) := WeakerThan.pbl (𝔅.D1 hH)
   have hG : T ⊢ (hyp m 🡒 □hyp m 🡒 reflection m 🡒 q).interpret f 𝔅 :=
     LogicGL.arithmetical_soundness' (collapse_mem m)
-  have hR : T ⊢ (⩕ i : Fin (m + 1), 𝔅.localReflectionSchema (𝔅.collapseSeq A i)) 🡒
+  have hR : T ⊢ (⩕ i : Fin (m + 1), 𝔅.localReflectionSchema (𝔅.collapseSeq σ i)) 🡒
       (reflection m).interpret f 𝔅 := by
     refine Formula.interpret_conj_right fun B hB ↦ ?_
     obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hB
     have e := interpret_seq 𝔅 (f := f) q i
-    have eb : T ⊢ 𝔅 ((seq q i).interpret f 𝔅) 🡘 𝔅 (𝔅.collapseSeq A i) :=
+    have eb : T ⊢ 𝔅 ((seq q i).interpret f 𝔅) 🡘 𝔅 (𝔅.collapseSeq σ i) :=
       WeakerThan.pbl (𝔅.ext e)
     have l := left_Uconj_intro (𝓢 := T)
-      (fun i : Fin (m + 1) ↦ 𝔅.localReflectionSchema (𝔅.collapseSeq A i)) i
+      (fun i : Fin (m + 1) ↦ 𝔅.localReflectionSchema (𝔅.collapseSeq σ i)) i
     simp only [_root_.Formula.interpret] at e eb l ⊢
     cl_prover [e, eb, l]
   simp only [_root_.Formula.interpret] at hG
@@ -259,14 +259,14 @@ lemma collapseSeq_bot (i : ℕ) : T ⊢ 𝔅.collapseSeq ⊥ i 🡘 𝔅^[i] ⊥
 
 end iterate
 
-/-- If `T` refutes finitely many local reflection instances `𝔅 Aᵢ 🡒 Aᵢ` (`i ≤ m`), then it proves
+/-- If `T` refutes finitely many local reflection instances `𝔅 τᵢ 🡒 τᵢ` (`i ≤ m`), then it proves
 `𝔅^[m + 1] ⊥`.
 - [Bek99, Lemma 4.2]
 - [Bek99, Lemma 5.2] -/
 theorem iterate_bot_of_refutable_localReflection [𝔅.HBL] [Diagonalization T₀] {m : ℕ}
-    {As : Fin (m + 1) → Sentence L} (h : T ⊢ ∼⩕ i, 𝔅.localReflectionSchema (As i)) :
+    {τ : Fin (m + 1) → Sentence L} (h : T ⊢ ∼⩕ i, 𝔅.localReflectionSchema (τ i)) :
     T ⊢ 𝔅^[m + 1] ⊥ := by
-  have hc := 𝔅.collapse_localReflection (A := ⊥) (As := As) (by cl_prover [h])
+  have hc := 𝔅.collapse_localReflection (σ := ⊥) (τ := τ) (by cl_prover [h])
   have hr : T ⊢ (∼𝔅^[m + 1] ⊥ : Sentence L) 🡒
       ⩕ i : Fin (m + 1), 𝔅.localReflectionSchema (𝔅.collapseSeq ⊥ i) :=
     right_Uconj_intro _ _ fun i ↦ by

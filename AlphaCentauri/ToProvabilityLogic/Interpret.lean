@@ -5,9 +5,6 @@ public import ProvabilityLogic.ProvabilityLogic.Interpret
 @[expose] public section
 /-!
 # Realizations of finite conjunctions
-
-The interpretation of a modal conjunction `⋀Γ` under a realization proves each interpreted member,
-and is proved by anything proving every interpreted member.
 -/
 
 namespace Formula
@@ -28,8 +25,7 @@ lemma interpret_conj_left {Γ : FormulaList α} {B : Formula α} (hB : B ∈ Γ)
     simp only [FormulaList.conj, Formula.interpret]
     rcases List.mem_cons.mp hB with rfl | hB
     · cl_prover
-    · have := ih hB
-      cl_prover [this]
+    · cl_prover [ih hB]
 
 lemma interpret_conj_right {Γ : FormulaList α} {φ : Sentence L}
     (h : ∀ B ∈ Γ, T ⊢ φ 🡒 B.interpret f 𝔅) :

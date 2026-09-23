@@ -45,7 +45,7 @@ instance InductionOnStrictHierarchy_weakerThan_InductionOnHierarchy (Γ : Polari
 lemma InductionOnStrictHierarchy_zero (Γ : Polarity) : 𝗜 Γ 0 = 𝗜𝚺₀ := by
   refine congrArg _ (Set.ext fun σ ↦ ⟨?_, ?_⟩)
   · rintro ⟨φ, hφ, rfl⟩; exact ⟨φ, Arithmetic.Hierarchy.zero_iff.mp hφ.hierarchy, rfl⟩
-  · rintro ⟨φ, hφ, rfl⟩; exact ⟨φ, .zero hφ, rfl⟩
+  · rintro ⟨φ, hφ, rfl⟩; exact ⟨φ, .zero (Hierarchy.zero_iff_delta_zero.mp hφ), rfl⟩
 
 lemma InductionOnStrictHierarchy_subset_mono {Γ : Polarity} {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) :
     𝗜 Γ s₁ ⊆ 𝗜 Γ s₂ :=

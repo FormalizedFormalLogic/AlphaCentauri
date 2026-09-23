@@ -21,7 +21,7 @@ variable {ξ : Type*} (ε : ξ → ℕ)
 /-- The truth of a $\Delta_0$ formula is primitive recursive in `List.Vector` form.
 - [HP98, Theorem 0.35] -/
 lemma bounded_primrec_vec :
-    (k : ℕ) → (φ : ArithmeticSemiformula ξ k) → φ.Bounded →
+    (k : ℕ) → (φ : ArithmeticSemiformula ξ k) → DeltaZero φ →
       PrimrecPred fun v : List.Vector ℕ k ↦ φ.Eval v.get ε
   | _, _, Semiformula.Bounded.verum _ => by simpa using PrimrecPred.const True
   | _, _, Semiformula.Bounded.falsum _ => by simpa using PrimrecPred.const False
@@ -55,7 +55,7 @@ lemma bounded_primrec_vec :
 /-- The truth of a $\Delta_0$ formula is primitive recursive in `Fin k → ℕ` form.
 - [HP98, Theorem 0.35] -/
 @[primrec]
-lemma bounded_primrec {k} {φ : ArithmeticSemiformula ξ k} (hφ : φ.Bounded) :
+lemma bounded_primrec {k} {φ : ArithmeticSemiformula ξ k} (hφ : DeltaZero φ) :
     PrimrecPred fun v : Fin k → ℕ ↦ φ.Eval v ε :=
   PrimrecPred.comp_get_iff.mp (bounded_primrec_vec ε k φ hφ)
 

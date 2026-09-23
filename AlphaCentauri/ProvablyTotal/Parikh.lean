@@ -51,7 +51,7 @@ formulas, which have any number of unbounded universal quantifiers, then one unb
 existential.
 - [HP98, Theorem V.1.4]
 - [Bus98A, Theorem 1.2.7.1] -/
-theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : φ.Bounded)
+theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : DeltaZero φ)
   (h : 𝗜𝚺₀ ⊢ ∀¹* ∃¹ φ) :
   ∃ t : ClosedSemiterm ℒₒᵣ k, 𝗜𝚺₀ ⊢ ∀¹* ∃¹[“#0 < !!(Rew.bShift t)”] φ := by
   by_contra! hcon
@@ -125,7 +125,7 @@ most polynomially.
 - [HP98, Theorem V.1.4]
 - [Bus98A, Theorem 1.2.7.1] -/
 theorem exists_term_bound_of_provablyTotal {f φ}
-  (hφ : φ.val.Bounded) (h : 𝗜𝚺₀.ProvablyTotalVia f φ) :
+  (hφ : DeltaZero φ.val) (h : 𝗜𝚺₀.ProvablyTotalVia f φ) :
   ∃ t : ClosedSemiterm ℒₒᵣ k, ∀ v, f v ≤ Semiterm.valb v t := by
   obtain ⟨t, ht⟩ := parikh φ.val hφ h.total;
   have h₁ : ∀ v : Fin k → ℕ, ∃ y < Semiterm.valb v t, φ.val.Evalb (y :> v) := by

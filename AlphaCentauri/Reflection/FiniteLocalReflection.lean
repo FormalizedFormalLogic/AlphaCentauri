@@ -42,12 +42,11 @@ def seq (B : Formula α) : ℕ → Formula α
 variable {m : ℕ}
 
 def hyp (m : ℕ) : Formula (Option (Fin (m + 1))) :=
-  FormulaList.conj (List.ofFn fun i : Fin (m + 1) ↦
-    (Formula.atom (some i)).box 🡒 Formula.atom (some i)) 🡒 Formula.atom none
+  FormulaList.conj (List.ofFn fun i : Fin (m + 1) ↦ (#(some i)).box 🡒 #(some i)) 🡒 #none
 
 def reflection (m : ℕ) : Formula (Option (Fin (m + 1))) :=
   FormulaList.conj (List.ofFn fun i : Fin (m + 1) ↦
-    (seq (Formula.atom none) i).box 🡒 seq (Formula.atom none) i)
+    (seq (#none) i).box 🡒 seq (#none) i)
 
 section Kripke
 
@@ -65,15 +64,15 @@ lemma not_forces_of_not_forces_seq {x : M.World} {B : Formula _} {i : ℕ}
 
 noncomputable def refuted (x : M.World) : Finset (Fin (m + 1)) := by
   classical
-  exact Finset.univ.filter fun i ↦ ∃ z, (z = x ∨ x ≺ z) ∧ z ⊮[M] Formula.atom (some i)
+  exact Finset.univ.filter fun i ↦ ∃ z, (z = x ∨ x ≺ z) ∧ z ⊮[M] #(some i)
 
 variable [M.IsFiniteGL]
 
 lemma card_refuted {w : M.World} (hw : ∀ x, x = w ∨ w ≺ x → x ⊩[M] hyp m) :
-    ∀ k x, (x = w ∨ w ≺ x) → x ⊮[M] seq (Formula.atom none) k → k + 1 ≤ (refuted x).card := by
+    ∀ k x, (x = w ∨ w ≺ x) → x ⊮[M] seq (#none) k → k + 1 ≤ (refuted x).card := by
   classical
-  have witness : ∀ x, (x = w ∨ w ≺ x) → x ⊮[M] Formula.atom none →
-      ∃ i, x ⊩[M] □(Formula.atom (some i)) ∧ x ⊮[M] Formula.atom (some i) := by
+  have witness : ∀ x, (x = w ∨ w ≺ x) → x ⊮[M] #none →
+      ∃ i, x ⊩[M] □#(some i) ∧ x ⊮[M] #(some i) := by
     intro x hx hq
     rcases forces_imp.mp (hw x hx) with h | h
     · rw [NotForces, forces_lconj] at h
@@ -110,7 +109,7 @@ lemma card_refuted {w : M.World} (hw : ∀ x, x = w ∨ w ≺ x → x ⊩[M] hyp
 end Kripke
 
 theorem collapse_mem (m : ℕ) :
-    (hyp m 🡒 □hyp m 🡒 reflection m 🡒 Formula.atom none) ∈ LogicGL := by
+    (hyp m 🡒 □hyp m 🡒 reflection m 🡒 #none) ∈ LogicGL := by
   classical
   rw [LogicGL.iff_forces]
   intro κ _ M _ w
@@ -122,10 +121,10 @@ theorem collapse_mem (m : ℕ) :
     · exact hH
     · exact forces_box.mp hbH x hx
   have hR' : ∀ i : Fin (m + 1),
-      w ⊩[M] (seq (Formula.atom none) i).box 🡒 seq (Formula.atom none) i := by
+      w ⊩[M] (seq (#none) i).box 🡒 seq (#none) i := by
     intro i
     exact forces_lconj.mp hR _ (List.mem_ofFn.mpr ⟨i, rfl⟩)
-  have hs : ∀ k ≤ m + 1, w ⊮[M] seq (Formula.atom none) k := by
+  have hs : ∀ k ≤ m + 1, w ⊮[M] seq (#none) k := by
     intro k
     induction k with
     | zero => intro _; exact hq
@@ -176,20 +175,20 @@ theorem collapse_localReflection [𝔅.HBL] [Diagonalization T₀] {m : ℕ} {σ
   let f : Realization (Option (Fin (m + 1))) L := ⟨fun o ↦ o.elim σ τ⟩
   have hH : T ⊢ (hyp m).interpret f 𝔅 := by
     have : T ⊢ (FormulaList.conj (List.ofFn fun i ↦
-          (Formula.atom (some i)).box 🡒 Formula.atom (some i))).interpret f 𝔅 🡒
+          (#(some i)).box 🡒 #(some i))).interpret f 𝔅 🡒
         ⩕ i, 𝔅.localReflectionSchema (τ i) :=
       right_Uconj_intro _ _ fun i ↦ Formula.interpret_conj_left (List.mem_ofFn.mpr ⟨i, rfl⟩)
     simp only [hyp, _root_.Formula.interpret] at this ⊢
     cl_prover [this, h]
   have hbox : T ⊢ 𝔅 ((hyp m).interpret f 𝔅) := WeakerThan.pbl (𝔅.D1 hH)
-  have hG : T ⊢ (hyp m 🡒 □hyp m 🡒 reflection m 🡒 Formula.atom none).interpret f 𝔅 :=
+  have hG : T ⊢ (hyp m 🡒 □hyp m 🡒 reflection m 🡒 #none).interpret f 𝔅 :=
     LogicGL.arithmetical_soundness' (collapse_mem m)
   have hR : T ⊢ (⩕ i : Fin (m + 1), 𝔅.localReflectionSchema (𝔅.collapseSeq σ i)) 🡒
       (reflection m).interpret f 𝔅 := by
     refine Formula.interpret_conj_right fun B hB ↦ ?_
     obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hB
-    have e := interpret_seq 𝔅 (f := f) (Formula.atom none) i
-    have eb : T ⊢ 𝔅 ((seq (Formula.atom none) i).interpret f 𝔅) 🡘 𝔅 (𝔅.collapseSeq σ i) :=
+    have e := interpret_seq 𝔅 (f := f) (#none) i
+    have eb : T ⊢ 𝔅 ((seq (#none) i).interpret f 𝔅) 🡘 𝔅 (𝔅.collapseSeq σ i) :=
       WeakerThan.pbl (𝔅.ext e)
     have l := left_Uconj_intro (𝓢 := T)
       (fun i : Fin (m + 1) ↦ 𝔅.localReflectionSchema (𝔅.collapseSeq σ i)) i

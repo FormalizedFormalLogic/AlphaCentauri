@@ -1,8 +1,10 @@
 module
 
-public import AlphaCentauri.Hierarchy.StrictDefinable
-public import AlphaCentauri.Schemata.Collection.Induction
 public import AlphaCentauri.Schemata.Induction
+public import AlphaCentauri.ToFoundation.Definable
+public import AlphaCentauri.ToFoundation.Eval
+public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
+public import Foundation.FirstOrder.Arithmetic.Definability.StrictDefinable
 
 /-!
 # Induction over the strict and the broad hierarchy agree
@@ -46,15 +48,9 @@ lemma strictlyDefinable_of_models_ISigma (V : Type*) [ORingStructure V] [V↓[�
     obtain ⟨f, φ, hφ, hiff⟩ := exists_hierarchy_eval_iff hR
     exact (strictDefinableRel_of_eval (.zero (Hierarchy.zero_iff.mp hφ)) f).of_iff
       fun v ↦ by simpa [← Matrix.fun_eq_vec_two v] using hiff v
-  · intro Γ R hR
-    obtain ⟨f, φ, hφ, hiff⟩ := exists_hierarchy_eval_iff hR
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := t + 1)
-    have hC : StrictCollection V (t + 1) := fun hθ e a h ↦
-      sigma_exists_bound_witness hθ.hierarchy e a h
-    obtain ⟨ψ, hψ, hψiff⟩ := exists_strictHierarchy_eval_iff_two hC hφ f
-    have h : ∀ x y : V, R x y ↔ φ.Eval ![x, y] f := fun x y ↦ by simpa using hiff ![x, y]
-    exact (strictDefinableRel_of_eval hψ f).of_iff fun v ↦
-      (h (v 0) (v 1)).trans (hψiff (v 0) (v 1)).symm
+  · have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (t + 1) := ISigma.models_BSigma_succ
+    intro Γ R hR
+    exact StrictDefinable.of_definable (Γ' := 𝚺) hR
 
 /-! ## Successor induction over the strict hierarchy -/
 
@@ -216,30 +212,21 @@ lemma exists_bound_of_definable_pi (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜 Γ
   obtain ⟨w, hw⟩ := key (a + 1)
   exact ⟨w, fun x hx ↦ hw x (lt_trans hx (lt_add_one a)) hx⟩
 
-/-- The collection axiom of a `Hierarchy 𝚷 s` formula holds in a model of `𝗜 Γ (s + 1)` whose
-`𝚷-[s]`-definable relations have strict definitions.
+/-- Every model of `𝗜 Γ (s + 1)` whose `𝚷-[s]`-definable relations have strict definitions is a
+model of `𝗕𝚷 s`.
 - [HP98, Lemma I.2.11] -/
-lemma models_collectionAxiom_of_models_InductionOnStrictHierarchy (Γ : Polarity)
-    [V↓[ℒₒᵣ] ⊧* 𝗜 Γ (s + 1)] (hD : StrictlyDefinable V s) {ψ : ArithmeticSemiformula ℕ 2}
-    (hψ : Hierarchy 𝚷 s ψ) : V↓[ℒₒᵣ] ⊧ (.univCl (collectionAxiom ψ) : ArithmeticSentence) := by
+lemma models_BPi_of_strictlyDefinable (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜 Γ (s + 1)]
+    (hD : StrictlyDefinable V s) : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     models_of_ss (U := 𝗜 Γ (s + 1)) inferInstance Set.subset_union_left
-  rw [models_collectionAxiom_iff]
-  intro f a h
-  obtain ⟨w, hw⟩ := exists_bound_of_definable_pi Γ hD (definableRel_of_hierarchy hψ f) a h
-  exact ⟨w + 1, fun x hx ↦ (hw x hx).imp fun y hy ↦
-    ⟨Arithmetic.lt_succ_iff_le.mpr hy.1, hy.2⟩⟩
-
-/-- Collection for strict $\Sigma_{s + 1}$ formulas holds in every model of `𝗜 Γ (s + 1)` whose
-`𝚷-[s]`-definable relations have strict definitions.
-- [HP98, Lemma I.2.11] -/
-lemma strictCollection_of_strictlyDefinable (Γ : Polarity) [V↓[ℒₒᵣ] ⊧* 𝗜 Γ (s + 1)]
-    (hD : StrictlyDefinable V s) : StrictCollection V (s + 1) :=
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
-    models_of_ss (U := 𝗜 Γ (s + 1)) inferInstance Set.subset_union_left
-  strictCollection_succ_of_hierarchyCollection <|
-    hierarchyCollection_of_models_collectionAxiom fun _ hψ ↦
-      models_collectionAxiom_of_models_InductionOnStrictHierarchy Γ hD hψ
+  have h₀ : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_ISigma_zero_of_models_InductionOnStrictHierarchy V Γ (s + 1)
+  have h₁ : V↓[ℒₒᵣ] ⊧* CollectionScheme (Hierarchy 𝚷 s) :=
+    CollectionScheme.models_of_collection fun hR a h ↦
+      have ⟨w, hw⟩ := exists_bound_of_definable_pi Γ hD hR a h
+      ⟨w + 1, fun x hx ↦ (hw x hx).imp fun y hy ↦
+        ⟨Arithmetic.lt_succ_iff_le.mpr hy.1, hy.2⟩⟩
+  exact Semantics.ModelsSet.union_iff.mpr
+    ⟨h₀, models_of_ss h₁ (CollectionScheme_subset (·.hierarchy))⟩
 
 /-- Every model of `𝗜 Γ (s + 1)` whose `𝚷-[s]`-definable relations have strict definitions
 satisfies `𝗜𝚺 (s + 1)`.
@@ -249,7 +236,7 @@ private lemma models_ISigma_succ_of_strictlyDefinable (Γ : Polarity) [V↓[ℒ�
     (hD : StrictlyDefinable V s) : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) := by
   have hPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     models_of_ss (U := 𝗜 Γ (s + 1)) inferInstance Set.subset_union_left
-  have hC : StrictCollection V (s + 1) := strictCollection_of_strictlyDefinable Γ hD
+  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 s := models_BPi_of_strictlyDefinable Γ hD
   suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Hierarchy 𝚺 (s + 1)) by
     simpa [ISigma, InductionOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩
   simp only [InductionScheme]
@@ -260,8 +247,8 @@ private lemma models_ISigma_succ_of_strictlyDefinable (Γ : Polarity) [V↓[ℒ�
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
       Matrix.constant_eq_singleton] using this
   intro f
-  obtain ⟨χ, hχ, hiff⟩ := exists_pi_eval_iff hC hφ f
-  exact succ_induction_exists_pi Γ hD (definableRel_of_hierarchy hχ f) hiff
+  obtain ⟨Q, hQ, hiff⟩ := exists_pi_definableRel_iff (definablePred_of_hierarchy hφ f)
+  exact succ_induction_exists_pi Γ hD hQ hiff
 
 /-! ## The two induction schemes agree -/
 
@@ -311,13 +298,13 @@ theorem InductionOnStrictHierarchy_equiv_InductionOnHierarchy (Γ : Polarity) (s
 instance ISigma_weakerThan_InductionOnStrictHierarchy (s : ℕ) : 𝗜𝚺s ⪯ 𝗜 𝚺 s :=
   InductionOnHierarchy_weakerThan_InductionOnStrictHierarchy 𝚺 s
 
-/-- Collection for strict $\Sigma_{s + 1}$ formulas holds in every model of `𝗜 𝚺 (s + 1)`.
+/-- Every model of `𝗜 𝚺 (s + 1)` is a model of `𝗕𝚺 (s + 1)`.
 - [HP98, Lemma I.2.11] -/
-theorem strictCollection_of_models_InductionOnStrictHierarchy {V : Type*} [ORingStructure V]
-    {s : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜 𝚺 (s + 1)] : StrictCollection V (s + 1) :=
+theorem models_BSigma_succ_of_models_InductionOnStrictHierarchy {V : Type*} [ORingStructure V]
+    {s : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜 𝚺 (s + 1)] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (s + 1) :=
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (s + 1) :=
     models_ISigma_of_models_InductionOnStrictHierarchy 𝚺 (s + 1) V
-  fun hθ e a h ↦ sigma_exists_bound_witness hθ.hierarchy e a h
+  ISigma.models_BSigma_succ
 
 /-! ## The `Δ` induction scheme -/
 

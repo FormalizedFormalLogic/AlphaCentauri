@@ -21,8 +21,6 @@ public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Theory
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.Hierarchy.Bounded
-public import AlphaCentauri.Hierarchy.PrenexOfCollection
-public import AlphaCentauri.Hierarchy.StrictDefinable
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.Overspill
@@ -42,9 +40,7 @@ public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Reflection.Unboundedness
 public import AlphaCentauri.Reflection.UniformReflection
-public import AlphaCentauri.Schemata.Collection.Basic
-public import AlphaCentauri.Schemata.Collection.Equivalence
-public import AlphaCentauri.Schemata.Collection.Induction
+public import AlphaCentauri.Schemata.DeltaInduction
 public import AlphaCentauri.Schemata.EA
 public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Schemata.Induction

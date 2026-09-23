@@ -20,90 +20,50 @@ permissions:
   contents: read
 
 jobs:
-  deps:
-    name: Build Foundation (cached)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      # The toolchain leads the key so `restore-keys` can fall back to the newest build under the
-      # same one; oleans from another toolchain are worth nothing.
-      - name: Cache Foundation build (keyed on toolchain + manifest)
-        id: foundation-cache
-        uses: actions/cache@v6
-        with:
-          path: .lake/packages/Foundation/.lake/build
-          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
-          restore-keys: |
-            foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-
-      - uses: leanprover/lean-action@v1
-        if: steps.foundation-cache.outputs.cache-hit != 'true'
-        with:
-          build: false
-          use-github-cache: false
-      - name: Build Foundation (incremental when an older build was restored)
-        if: steps.foundation-cache.outputs.cache-hit != 'true'
-        run: lake build Foundation
-      - name: Clear Foundation's replayed-warning cache
-        if: steps.foundation-cache.outputs.cache-hit != 'true'
-        run: python3 .github/scripts/clear-dep-warnings.py .lake/packages/Foundation/.lake/build
-
   build:
     name: Build project
-    needs: deps
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write # the audit comment below
+      pull-requests: write
+    env:
+      LAKE_ARTIFACT_CACHE: true
+      LAKE_RESTORE_ARTIFACTS: true
+      LAKE_NO_CACHE: true
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
       - uses: extractions/setup-just@v3
       - uses: leanprover/lean-action@v1
         with:
           build: false
           use-github-cache: false
-      - name: Restore Foundation build (warnings cleared)
-        uses: actions/cache/restore@v6
-        with:
-          path: .lake/packages/Foundation/.lake/build
-          key: foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
-          fail-on-cache-miss: true
 
-      # Entries are immutable, hence the sha; `restore-keys` finds the newest one on these pins.
-      - name: Restore project cache
-        id: cache-restore
-        uses: actions/cache/restore@v6
-        with:
-          path: .lake/AlphaCentauri-x86_64-unknown-linux-gnu.tar.gz
-          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
-          restore-keys: |
-            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
-      - name: Unpack project cache
-        if: hashFiles('.lake/AlphaCentauri-x86_64-unknown-linux-gnu.tar.gz') != ''
-        run: lake unpack
-
-      # A fallback cache carries artifacts of sources since renamed or deleted; lake keeps them.
-      - name: Prune orphaned build artifacts from renamed/removed sources
+      - name: Restore remote cache (Foundation)
+        env:
+          LAKE_CONFIG: lake-cache.toml
         run: |
-          python3 - <<'PY'
-          import pathlib
-          src_root = pathlib.Path('AlphaCentauri')
-          for build_root in [pathlib.Path('.lake/build/lib/lean/AlphaCentauri'), pathlib.Path('.lake/build/ir/AlphaCentauri')]:
-              if not build_root.exists():
-                  continue
-              for f in sorted(build_root.rglob('*')):
-                  if not f.is_file():
-                      continue
-                  rel_dir = f.relative_to(build_root).parent
-                  base = f.name.split('.', 1)[0]
-                  if not (src_root / rel_dir / f'{base}.lean').exists():
-                      print(f'removing orphaned artifact {f}')
-                      f.unlink()
-          PY
+          lake cache get \
+            --service ffl \
+            --max-revs=100 \
+            --repo FormalizedFormalLogic/Foundation \
+            --package Foundation \
+          || echo "::warning::Foundation's cache is incomplete; the build will compile the rest from source"
 
-      - name: Build AlphaCentauri (warnings are errors)
-        run: lake build AlphaCentauri --wfail
+      - name: Restore remote cache (AlphaCentauri)
+        env:
+          LAKE_CONFIG: lake-cache.toml
+        run: |
+          lake cache get \
+            --service ffl \
+            --max-revs=100 \
+            --repo FormalizedFormalLogic/AlphaCentauri \
+          || echo "::warning::AlphaCentauri's cache is incomplete; the build will compile the rest from source"
 
-      # Deferred to the last step, so the report still reaches the pull request.
+      - run: lake build Foundation
+      - run: lake build AlphaCentauri --wfail
+
       - name: Audit axioms
         id: audit
         continue-on-error: true
@@ -122,28 +82,27 @@ jobs:
         with:
           header: axiom-audit
           path: .lake/audit-comment.md
-
-      # Not in the merge queue, whose cache scope dies with the entry and is readable by nothing.
-      - name: Pack project cache
-        if: github.event_name != 'merge_group'
-        run: lake pack
-      - name: Save project cache
-        if: github.event_name != 'merge_group' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
-        uses: actions/cache/save@v6
-        with:
-          path: .lake/AlphaCentauri-x86_64-unknown-linux-gnu.tar.gz
-          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
-
       - name: Fail if the audit failed
         if: steps.audit.outcome != 'success'
         run: |
           echo "the axiom audit failed; see the 'Audit axioms' step"
           exit 1
 
+      - name: Save remote cache
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          LAKE_CONFIG: lake-cache.toml
+          LAKE_CACHE_KEY: ${{ secrets.LAKE_CACHE_KEY }}
+        run: |
+          lake build --no-build -o .lake/outputs.jsonl AlphaCentauri
+          lake cache put \
+            .lake/outputs.jsonl \
+            --service ffl-upload \
+            --repo FormalizedFormalLogic/AlphaCentauri
+
       - uses: typst-community/setup-typst@v4
       - uses: ts-graphviz/setup-graphviz@v2
-      - name: Generate the zoo
-        run: just zoo
+      - run: just zoo
       - name: Upload the zoo
         uses: actions/upload-artifact@v7
         with:

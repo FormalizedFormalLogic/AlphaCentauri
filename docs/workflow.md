@@ -92,6 +92,28 @@ A red check is fixed in the PR, never worked around.
 caught locally. Install [lefthook](https://lefthook.dev), then `just hooks` once per clone;
 `LEFTHOOK=0 git push` skips them for a branch that does not need them, and CI runs them regardless.
 
+### Build caches
+
+Nothing is elaborated twice if a cache can supply it. Mathlib comes from its own cache
+(`lake exe cache get`); Foundation and this library come from the Lake build cache the
+organization shares, an R2 bucket read anonymously through
+`https://cache.formalizedformallogic.org` and described by [`lake-cache.toml`](../lake-cache.toml),
+which is the same file in every repository that uses it. `just cache` fetches all three, and
+`just build` runs it first, so a fresh clone compiles nothing it did not write.
+
+The scope of an entry is the package's GitHub repository and the revision it was built at, not a
+branch. Foundation's CI publishes on every push to its `master`, so **the revision this repository
+pins is one that has been published**, and moving that pin costs a download rather than the hour
+that building Foundation from source takes — which is what makes a dependency bump cheap, here and
+in [`repair-deps.yml`](../.github/workflows/repair-deps.yml). This repository publishes its own
+outputs the same way, on pushes to `main` only: a pull request builds a tree that will not exist
+after the squash-merge.
+
+`ci.yml` and `repair-deps.yml` call `lake cache get` / `lake cache put` directly, as `just cache`
+does. Reading needs nothing configured; publishing needs the secret `LAKE_CACHE_KEY`, an R2 token
+scoped to that bucket alone. A miss costs only time — the build compiles from source, slowly but
+never wrongly, as it does whenever the cache is short of something.
+
 ### Review and merge
 
 Reviews are GitHub PR reviews with a verdict and line-anchored findings, by AI agents (each

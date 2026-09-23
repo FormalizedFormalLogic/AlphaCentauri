@@ -164,6 +164,20 @@ Poh09:
     type: Anthology
     title: Universitext
 
+Sla04:
+  type: Article
+  title: "Σₙ-bounding and Δₙ-induction"
+  author: ["Slaman, Theodore A."]
+  volume: 132
+  issue: 8
+  page-range: 2449-2456
+  date: 2004
+  serial-number:
+    doi: "10.1090/S0002-9939-04-07294-6"
+  parent:
+    type: Periodical
+    title: Proceedings of the American Mathematical Society
+
 Tow20:
   type: Misc
   title: "{Goodstein}'s theorem, ε₀, and unprovability"

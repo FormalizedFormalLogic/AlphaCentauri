@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.Schemata.Collection.Basic
 public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
+public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-!
 # The induction schemes `𝗜` and `𝗜𝚫` over the strict hierarchy

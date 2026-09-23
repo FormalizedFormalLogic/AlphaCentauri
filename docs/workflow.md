@@ -95,17 +95,18 @@ caught locally. Install [lefthook](https://lefthook.dev), then `just hooks` once
 ### Build caches
 
 Nothing is elaborated twice if a cache can supply it. Mathlib comes from its own cache
-(`lake exe cache get`); Foundation and this library come from the Lake build cache the
-organization shares, an R2 bucket read anonymously through
+(`lake exe cache get`); Foundation, ProvabilityLogic and this library come from the Lake build
+cache the organization shares, an R2 bucket read anonymously through
 `https://cache.formalizedformallogic.org` and described by [`lake-cache.toml`](../lake-cache.toml),
-which is the same file in every repository that uses it. `just cache` fetches all three, and
+which is the same file in every repository that uses it. `just cache` fetches all four, and
 `just build` runs it first, so a fresh clone compiles nothing it did not write.
 
 The scope of an entry is the package's GitHub repository and the revision it was built at, not a
-branch. Foundation's CI publishes on every push to its `master`, so **the revision this repository
-pins is one that has been published**, and moving that pin costs a download rather than the hour
-that building Foundation from source takes — which is what makes a dependency bump cheap, here and
-in [`repair-deps.yml`](../.github/workflows/repair-deps.yml). This repository publishes its own
+branch. Foundation's CI publishes on every push to its `master`, and ProvabilityLogic's on every
+push to its `main`, so **the revisions this repository pins are ones that have been published**,
+and moving those pins costs a download rather than the hour that building Foundation from source
+takes — which is what makes a dependency bump cheap, here and in
+[`repair-deps.yml`](../.github/workflows/repair-deps.yml). This repository publishes its own
 outputs the same way, on pushes to `main` only: a pull request builds a tree that will not exist
 after the squash-merge.
 
@@ -158,9 +159,11 @@ An open pull request labelled `update-deps` comes before all of this; see
 
 ## Dependency pins and Foundation
 
-`lakefile.toml` follows Foundation's `master`, `lake-manifest.json` records the exact revision
-that resolves to, and `lean-toolchain` equals Foundation's. The manifest and the toolchain move
-together, forward only, and nobody bumps them by hand: `lake update` is the workflow's to run.
+`lakefile.toml` follows Foundation's `master` and ProvabilityLogic's `main`, `lake-manifest.json`
+records the exact revisions they resolve to, and `lean-toolchain` equals Foundation's. The
+manifest's Foundation pin is the one ProvabilityLogic is built against here, whatever its own
+manifest says. The manifest and the toolchain move together, forward only, and nobody bumps
+them by hand: `lake update` is the workflow's to run.
 Forgive, the axiom audit, is pinned to the tag naming that toolchain instead, because it reads
 Lean's internals and only compiles at a revision written for it; the workflow moves that pin with
 the toolchain, and leaves it alone when Forgive has no tag for the new one. Which packages are

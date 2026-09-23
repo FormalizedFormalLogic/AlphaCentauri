@@ -17,12 +17,12 @@ GitHub. The process is [`docs/workflow.md`](docs/workflow.md), the contract for 
 
 ## Building
 
-Nothing here has to be elaborated from source: Mathlib comes from its own cache, and Foundation
-and this library from the shared FormalizedFormalLogic build cache, keyed by the revision the
-manifest pins. A miss compiles what is missing and is not an error.
+Nothing here has to be elaborated from source: Mathlib comes from its own cache, and Foundation,
+ProvabilityLogic and this library from the shared FormalizedFormalLogic build cache, keyed by the
+revision the manifest pins. A miss compiles what is missing and is not an error.
 
 ```bash
-just cache           # Mathlib's, Foundation's and this library's prebuilt artifacts
+just cache           # prebuilt artifacts of Mathlib, Foundation, ProvabilityLogic and this library
 just build           # the above, then AlphaCentauri
 just axiom-audit     # the axiom allowlist
 just no-sorry        # sorry-freeness

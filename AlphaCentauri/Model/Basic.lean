@@ -285,7 +285,7 @@ lemma bexsLT_absolute (hθ : Absolute.{u, v, _} T θ) : Absolute.{u, v, _} T (θ
 - [HP98, Fact IV.1.3(4), Remark IV.1.18]
 - [vO99, Exercise 37] -/
 @[simp, grind .]
-theorem absolute_of_bounded (hφ : φ.Bounded) : Absolute T φ :=
+theorem absolute_of_bounded (hφ : DeltaZero φ) : Absolute T φ :=
   bounded_induction_open (P := fun _ φ ↦ Absolute T φ)
     (fun _ _ hφ ↦ absolute_of_open T hφ)
     (fun _ _ _ _ _ ihφ ihψ ↦ and_absolute ihφ ihψ)

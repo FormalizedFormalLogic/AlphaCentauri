@@ -131,7 +131,7 @@ private lemma quote_mulTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒ
 - [HP98, Remark I.1.80] -/
 
 theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : φ.Bounded) (v : Fin k → V) :
+    (hφ : DeltaZero φ) (v : Fin k → V) :
     BoundedSatisfaction (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
   revert v
   refine bounded_induction (ξ := Empty)
@@ -181,9 +181,9 @@ lemma hierarchySatisfaction_quote_iff {Γ : Polarity} {s k : ℕ} {φ : Arithmet
     intro v
     rcases Γ₀ with _ | _
     · change SigmaSatisfaction 0 _ _ ↔ _
-      rw [SigmaSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀.bounded v
+      rw [SigmaSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀ v
     · change PiSatisfaction 0 _ _ ↔ _
-      rw [PiSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀.bounded v
+      rw [PiSatisfaction.zero]; exact boundedSatisfaction_quote_iff hφ₀ v
   | @ofAlt Γ₀ s₀ n₀ φ₀ hφ₀ ih =>
     intro v
     rcases Γ₀ with _ | _
@@ -299,7 +299,7 @@ private lemma uFormula_quote_cast {k : ℕ} (φ : ArithmeticSemisentence k) :
     UFormula ((⌜φ⌝ : ℕ) : M) :=
   Delta1_cast₁ (isUFormula ℒₒᵣ) (by simpa using isUFormula_quote (V := ℕ) φ)
 
-private lemma bounded_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k} (h : φ.Bounded) :
+private lemma bounded_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k} (h : DeltaZero φ) :
     Reading.Bounded ((⌜φ⌝ : ℕ) : M) :=
   Delta1_cast₁ isBounded (by simpa using (isBounded_quote_iff (V := ℕ) φ).mpr h)
 
@@ -380,7 +380,7 @@ include hM in
 a bounded
 formula agrees with truth. -/
 private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : φ.Bounded) :
+    (hφ : DeltaZero φ) :
     ∀ (v : Fin k → M) (ev : M), Codes v ev →
       (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   refine bounded_induction (ξ := Empty)
@@ -492,7 +492,7 @@ private lemma hierarchySatisfaction_quote_reading {Γ : Polarity} {s k : ℕ}
   induction h with
   | @zero Γ₀ m₀ φ₀ hφ₀ =>
     intro _ v ev hev
-    exact boundedSatisfaction_quote_reading hM hφ₀.bounded v ev hev
+    exact boundedSatisfaction_quote_reading hM hφ₀ v ev hev
   | @ofAlt Γ₀ s₀ m₀ φ₀ hφ₀ ih =>
     intro hs v ev hev
     rw [read_ofAlt hM (show s₀ ≤ n by omega) Γ₀ ((⌜φ₀⌝ : ℕ) : M) ev

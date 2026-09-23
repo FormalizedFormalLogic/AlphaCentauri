@@ -390,7 +390,7 @@ lemma quote_bex {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSe
   rfl
 
 open Bootstrapping in
-lemma isBounded_of_bounded {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : ψ.Bounded) :
+lemma isBounded_of_bounded {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : DeltaZero ψ) :
     IsBounded (⌜ψ⌝ : ℕ) := by
   refine bounded_induction (P := fun n φ ↦ IsBounded (⌜φ⌝ : ℕ))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ n ψ h
@@ -411,7 +411,7 @@ lemma isBounded_of_bounded {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : ψ.
 
 open Bootstrapping in
 lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-    IsBounded (⌜ψ⌝ : ℕ) → ψ.Bounded := by
+    IsBounded (⌜ψ⌝ : ℕ) → DeltaZero ψ := by
   induction ψ using Semiformula.rec' with
   | hverum => intro _; simp
   | hfalsum => intro _; simp
@@ -442,8 +442,8 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
         apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
         rw [Semiformula.quote_all (V := ℕ) φ, hφeq, quote_ball, hs, hφ₂]
         rfl
-      have hφ : φ.Bounded := ihφ (by rw [hφeq]; simp [IsBounded.or_iff, hq, Arithmetic.qqNLT])
-      have hφ2 : φ₂.Bounded := by
+      have hφ : DeltaZero φ := ihφ (by rw [hφeq]; simp [IsBounded.or_iff, hq, Arithmetic.qqNLT])
+      have hφ2 : DeltaZero φ₂ := by
         have hform : φ = (“#0 < !!(Rew.bShift s)” 🡒 φ₂) :=
           (Semiformula.all_inj _ _).mp (by rw [← Semiformula.ball_eq]; exact heq)
         rw [hform, Semiformula.imp_eq] at hφ
@@ -469,8 +469,8 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
         apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
         rw [Semiformula.quote_ex (V := ℕ) φ, hφeq, quote_bex, hs, hφ₂]
         rfl
-      have hφ : φ.Bounded := ihφ (by rw [hφeq]; simp [IsBounded.and_iff, hq, Arithmetic.qqLT])
-      have hφ2 : φ₂.Bounded := by
+      have hφ : DeltaZero φ := ihφ (by rw [hφeq]; simp [IsBounded.and_iff, hq, Arithmetic.qqLT])
+      have hφ2 : DeltaZero φ₂ := by
         have hform : φ = (“#0 < !!(Rew.bShift s)” ⋏ φ₂) :=
           (Semiformula.exs_inj _ _).mp (by rw [← Semiformula.bexs_eq]; exact heq)
         rw [hform] at hφ
@@ -479,14 +479,14 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
       exact .bexs (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
 
 lemma isBounded_iff_bounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-    Bootstrapping.IsBounded (⌜ψ⌝ : ℕ) ↔ ψ.Bounded :=
+    Bootstrapping.IsBounded (⌜ψ⌝ : ℕ) ↔ DeltaZero ψ :=
   ⟨bounded_of_isBounded ψ, isBounded_of_bounded⟩
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Bootstrapping in
 lemma isBounded_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-    IsBounded (⌜ψ⌝ : V) ↔ ψ.Bounded :=
+    IsBounded (⌜ψ⌝ : V) ↔ DeltaZero ψ :=
   have h : V ⊧/![(⌜ψ⌝ : V)] isBounded.val ↔ ℕ ⊧/![(⌜ψ⌝ : ℕ)] isBounded.val := by
     simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
       using models_iff_of_Delta1 (V := V) (σ := isBounded)
@@ -496,7 +496,7 @@ lemma isBounded_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
 
 open Bootstrapping in
 lemma isBounded_quote_iff {n : ℕ} (σ : ArithmeticSemisentence n) :
-    IsBounded (⌜σ⌝ : V) ↔ σ.Bounded := by
+    IsBounded (⌜σ⌝ : V) ↔ DeltaZero σ := by
   simp [Sentence.quote_def, isBounded_quote_iff_s]
 
 end FFL.FirstOrder.Arithmetic

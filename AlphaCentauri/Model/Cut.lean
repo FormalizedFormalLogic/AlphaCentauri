@@ -69,7 +69,7 @@ namespace EndExtension
 variable {N : Type v} [hMN : M ⊆ₑ N]
 
 private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : ArithmeticSemiformula ℕ 1}
-    (hφ : φ.Bounded)
+    (hφ : DeltaZero φ)
     (v : ℕ → M) (h0 : φ.Eval ![0] v) (hs : ∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) (a : M) :
     φ.Eval ![a] v := by
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := hMN.models_peanoMinus
@@ -98,7 +98,7 @@ theorem models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ]
   · apply Semantics.ModelsSet.setOf_iff.mpr;
     rintro _ ⟨φ, hφ, rfl⟩
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
-      using hMN.eval_of_endExtension hφ.bounded
+      using hMN.eval_of_endExtension (Hierarchy.zero_iff_delta_zero.mp hφ)
 
 end EndExtension
 

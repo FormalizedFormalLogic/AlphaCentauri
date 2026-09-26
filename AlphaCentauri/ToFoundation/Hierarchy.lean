@@ -35,6 +35,21 @@ variable {L : Language} [L.LT] {ξ : Type*} {Γ : Polarity} {s n : ℕ}
     Hierarchy 𝚷 (s + 1) (Semiformula.univCl φ) ↔ Hierarchy 𝚷 (s + 1) φ := by
   simp [Semiformula.univCl, Semiformula.univCl']
 
+/-- Every formula lies at some level of the arithmetical hierarchy. -/
+lemma exists_forall_hierarchy (φ : Semiformula L ξ n) : ∃ s, ∀ Γ, Hierarchy Γ s φ := by
+  induction φ using Semiformula.rec' with
+  | hverum | hfalsum | hrel | hnrel => exact ⟨0, by simp⟩
+  | hand φ ψ ihφ ihψ | hor φ ψ ihφ ihψ =>
+    obtain ⟨s, hs⟩ := ihφ
+    obtain ⟨t, ht⟩ := ihψ
+    exact ⟨max s t, fun Γ ↦ by simp [(hs Γ).mono (le_max_left s t), (ht Γ).mono (le_max_right s t)]⟩
+  | hall φ ih =>
+    obtain ⟨s, hs⟩ := ih
+    exact ⟨s + 2, (pi (hs 𝚺)).accum⟩
+  | hexs φ ih =>
+    obtain ⟨s, hs⟩ := ih
+    exact ⟨s + 2, (sigma (hs 𝚷)).accum⟩
+
 /-- Every axiom of `𝗘𝗤 ℒₒᵣ` is $\Pi_2$. -/
 lemma of_mem_eqAxiom {σ : ArithmeticSentence} (hσ : σ ∈ 𝗘𝗤 ℒₒᵣ) : Hierarchy 𝚷 2 σ := by
   cases hσ with

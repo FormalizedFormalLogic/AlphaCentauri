@@ -7,7 +7,8 @@ public import AlphaCentauri.ToFoundation.StandardProvability
 # Provability logics under local reflection
 
 If `U` proves the local $\Sigma_1$ reflection principle of `T`, the provability logic of `T`
-relative to `U` has trace `ω` and contains `𝐃`.
+relative to `U` has trace `ω` and contains `𝐃`; if `U` proves the full local reflection principle
+of `T`, it contains `𝐒`.
 -/
 
 @[expose] public section
@@ -45,5 +46,12 @@ theorem D_weakerThan_provabilityLogic_of_provable_localReflectionOn_Sigma1
     have hσ : Hierarchy 𝚺 1 (f T (□B ⋎ □C)) := by
       simp [standardInterpret, interpret, Arithmetic.standardProvability_def]
     exact h ⟨_, hσ, rfl⟩
+
+theorem S_weakerThan_provabilityLogic_of_provable_localReflection
+    (h : U ⊢* 𝗥𝗳𝗻[Set.univ] T) :
+    𝐒 ⪯ T.provabilityLogicRelativeTo U (α := α) := by
+  apply sumQuasiNormal_weakerThan_provabilityLogic
+  rintro _ ⟨C, rfl⟩ f
+  exact h ⟨_, trivial, rfl⟩
 
 end FFL.ProvabilityLogic

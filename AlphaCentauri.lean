@@ -33,11 +33,13 @@ public import AlphaCentauri.OmegaLogic.Inversion
 public import AlphaCentauri.OmegaLogic.Reduction
 public import AlphaCentauri.ProvabilityLogic.Consistency
 public import AlphaCentauri.ProvabilityLogic.ISigma
+public import AlphaCentauri.ProvabilityLogic.Peano
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.Reflection.ISigma
+public import AlphaCentauri.Reflection.Peano
 public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Reflection.Unboundedness

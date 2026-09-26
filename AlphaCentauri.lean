@@ -32,6 +32,7 @@ public import AlphaCentauri.OmegaLogic.Embedding
 public import AlphaCentauri.OmegaLogic.Inversion
 public import AlphaCentauri.OmegaLogic.Reduction
 public import AlphaCentauri.ProvabilityLogic.ISigma
+public import AlphaCentauri.ProvabilityLogic.Sigma1Reflection
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons

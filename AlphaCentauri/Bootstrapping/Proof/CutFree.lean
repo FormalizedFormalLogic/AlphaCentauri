@@ -334,7 +334,7 @@ it suffices to prove it for each rule of the cut-free calculus (axiom leaf, `⊤
 and/or/all/exists-introduction, weakening, shift, `T`-axiom leaf), assuming `P` for the
 immediate subderivation(s).
 - [Bus98, Ch. I §2.4] -/
-lemma induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     {d} (hd : CutFreeDerivation T d)
     (hAxL : ∀ s, IsFormulaSet L s → ∀ p ∈ s, neg L p ∈ s → P (axL s p))
     (hVerumIntro : ∀ s, IsFormulaSet L s → ^⊤ ∈ s → P (verumIntro s))

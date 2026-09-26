@@ -611,4 +611,11 @@ lemma isStrictPi_quote_iff {n k : ℕ} (ψ : ArithmeticSemisentence k) :
     IsStrictPi n (⌜ψ⌝ : V) ↔ StrictHierarchy 𝚷 n ψ := by
   simp [Sentence.quote_def, isStrictPi_quote_iff_s]
 
+/-- Strict $\Sigma_s$ recognition is absolute between `ℕ` and a model of `𝗜𝚺₁` at standard codes. -/
+lemma isStrictSigma_natCast_iff {s m : ℕ} :
+    IsStrictSigma s m ↔ IsStrictSigma s (m : V) := by
+  simpa using Defined.shigmaOne_absolute V (φ := isStrictSigma s)
+    (R := fun v ↦ IsStrictSigma s (v 0)) (R' := fun v ↦ IsStrictSigma s (v 0))
+    (IsStrictSigma.defined s) (IsStrictSigma.defined s) ![m]
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

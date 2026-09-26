@@ -34,6 +34,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive

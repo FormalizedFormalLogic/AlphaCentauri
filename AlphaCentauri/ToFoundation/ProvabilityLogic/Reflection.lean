@@ -1,7 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.Classification.General
-public import Foundation.FirstOrder.Incompleteness.Reflection.Local
+public import AlphaCentauri.ToFoundation.StandardProvability
 
 /-!
 # Provability logics under local reflection
@@ -17,10 +17,6 @@ namespace FFL.ProvabilityLogic
 open Entailment FirstOrder FirstOrder.Arithmetic Formula LetterlessFormula
 
 variable {α : Type*} {T U : ArithmeticTheory} [T.Δ₁]
-
-lemma hierarchy_iterate_standardProvability_bot (n : ℕ) :
-    Hierarchy 𝚺 1 (T.standardProvability^[n] ⊥) := by
-  rcases n with _ | n <;> simp [Function.iterate_succ_apply', Arithmetic.standardProvability_def]
 
 lemma alpha_mem_provabilityLogic_of_provable_localReflectionOn_Sigma1
     (h : U ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) (n : ℕ) :

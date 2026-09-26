@@ -66,6 +66,7 @@ public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata
 public import AlphaCentauri.ToFoundation.Semiformula
+public import AlphaCentauri.ToFoundation.StandardProvability
 public import AlphaCentauri.ToFoundation.Theory
 public import AlphaCentauri.ToMathlib.Goodstein
 public import AlphaCentauri.ToMathlib.ONote.Computability

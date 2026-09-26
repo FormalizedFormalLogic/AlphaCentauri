@@ -31,10 +31,13 @@ public import AlphaCentauri.OmegaLogic.Elimination
 public import AlphaCentauri.OmegaLogic.Embedding
 public import AlphaCentauri.OmegaLogic.Inversion
 public import AlphaCentauri.OmegaLogic.Reduction
+public import AlphaCentauri.ProvabilityLogic.ISigma
+public import AlphaCentauri.ProvabilityLogic.Sigma1Reflection
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.Reflection.CollapseFormula
+public import AlphaCentauri.Reflection.ISigma
 public import AlphaCentauri.Reflection.IteratedConsistency
 public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.Sigma1Reflection
@@ -56,6 +59,7 @@ public import AlphaCentauri.ToFoundation.Coding
 public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
+public import AlphaCentauri.ToFoundation.Definability
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Factorial
@@ -64,9 +68,11 @@ public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.AddAlpha
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata
 public import AlphaCentauri.ToFoundation.Semiformula
+public import AlphaCentauri.ToFoundation.StandardProvability
 public import AlphaCentauri.ToFoundation.SubstNumeral
 public import AlphaCentauri.ToFoundation.Theory
 public import AlphaCentauri.ToMathlib.Goodstein

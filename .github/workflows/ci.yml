@@ -121,6 +121,8 @@ jobs:
       - uses: ./.github/actions/setup-lean
       - uses: typst-community/setup-typst@v5
 
+      # The generator imports all of `Foundation` at run time, beyond what `AlphaCentauri` imports.
+      - run: lake build Foundation
       - run: lake build AlphaCentauri
       - run: just zoo
 

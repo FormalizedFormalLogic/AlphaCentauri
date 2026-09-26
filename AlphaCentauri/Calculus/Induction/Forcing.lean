@@ -547,12 +547,12 @@ theorem nonempty_anchored_of_provable [RewriteClosed C] [RewriteClosed D]
   obtain ⟨Δ, hΔ, ⟨d⟩⟩ := Theory.Proof.provable_iff.mp h
   exact nonempty_anchored_of_derivation hCD hPA hΔ d
 
-/-- A proof in `𝗜 𝚺 1` becomes a derivation anchored in the strict $\Sigma_1$ and the strict
+/-- A proof in `𝗜𝚺₁` becomes a derivation anchored in the strict $\Sigma_1$ and the strict
 $\Pi_1$ propositions: the free cuts are eliminated.
 
 - [Bus98A, Section 1.4.2] -/
-theorem nonempty_anchored_of_provable_inductionOnStrictHierarchy {σ : ArithmeticSentence}
-    (h : 𝗜 𝚺 1 ⊢ σ) :
+theorem nonempty_anchored_of_provable_ISigma1 {σ : ArithmeticSentence}
+    (h : 𝗜𝚺₁ ⊢ σ) :
     ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1, fun φ ↦ StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ]
       ⦃σ⦄ :=
   nonempty_anchored_of_provable (fun _ hη _ ↦ .inl (StrictHierarchy.rew _ hη))

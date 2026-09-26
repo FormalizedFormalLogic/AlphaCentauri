@@ -137,7 +137,7 @@ private lemma inconsistent_union_of_inconsistent_insert_pi
   have : 𝗜𝚺₁ ⪯ T ∪ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   have : 𝗘𝗤 ℒₒᵣ ⪯ T ∪ U := WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   have hneg : T ⊢ ∼collapseSentence T U n 𝚷 := provable_neg_of_inconsistent_insert h
-  have hnegζ : T ⊢ ∼fixedpoint (collapseFormula T U n 𝚷) :=
+  obtain ⟨d⟩ : T ⊢ ∼fixedpoint (collapseFormula T U n 𝚷) :=
     neg_collapseSentence_iff.mp hneg
   have hprov : T ∪ U ⊢ collapseSentence T U n 𝚷 := by
     apply Arithmetic.complete.{0}
@@ -145,9 +145,9 @@ private lemma inconsistent_union_of_inconsistent_insert_pi
     have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory M 𝗜𝚺₁ (T ∪ U) inferInstance
     apply models_collapseSentence_pi_iff.mpr
     intro y hmem hsemi _ hlt
-    have hp : Proof T ((⌜hnegζ.get⌝ : ℕ) : M) ⌜∼fixedpoint (collapseFormula T U n 𝚷)⌝ := by
+    have hp : Proof T ((⌜d⌝ : ℕ) : M) ⌜∼fixedpoint (collapseFormula T U n 𝚷)⌝ := by
       simp [coe_quote_proof_eq]
-    have hle : y ≤ ((⌜hnegζ.get⌝ : ℕ) : M) := by
+    have hle : y ≤ ((⌜d⌝ : ℕ) : M) := by
       by_contra hcon
       exact hlt _ (not_le.mp hcon) hp
     obtain ⟨m, rfl⟩ := eq_nat_of_le_nat hle
@@ -165,16 +165,16 @@ private lemma inconsistent_union_of_inconsistent_insert_sigma
   have : 𝗜𝚺₁ ⪯ T ∪ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   have : 𝗘𝗤 ℒₒᵣ ⪯ T ∪ U := WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   have hneg : T ⊢ ∼collapseSentence T U n 𝚺 := provable_neg_of_inconsistent_insert h
-  have hnegζ : T ⊢ ∼fixedpoint (collapseFormula T U n 𝚺) :=
+  obtain ⟨d⟩ : T ⊢ ∼fixedpoint (collapseFormula T U n 𝚺) :=
     neg_collapseSentence_iff.mp hneg
   have hprov : T ∪ U ⊢ collapseSentence T U n 𝚺 := by
     apply Arithmetic.complete.{0}
     intro M _ _
     have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory M 𝗜𝚺₁ (T ∪ U) inferInstance
-    have hp : Proof T ((⌜hnegζ.get⌝ : ℕ) : M) ⌜∼fixedpoint (collapseFormula T U n 𝚺)⌝ := by
+    have hp : Proof T ((⌜d⌝ : ℕ) : M) ⌜∼fixedpoint (collapseFormula T U n 𝚺)⌝ := by
       simp [coe_quote_proof_eq]
     refine models_collapseSentence_sigma_iff.mpr
-      ⟨((⌜hnegζ.get⌝ : ℕ) + 1 : ℕ), ⟨_, by push_cast; simp, hp⟩, ?_⟩
+      ⟨((⌜d⌝ : ℕ) + 1 : ℕ), ⟨_, by push_cast; simp, hp⟩, ?_⟩
     intro z hz hmem hsemi _
     obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat hz
     obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi

@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.LK.Completeness
 public import AlphaCentauri.ToFoundation.Hierarchy
@@ -189,12 +189,12 @@ private lemma models_existsUnique_minimalPairGraph {θ : 𝚺₀.Semisentence (k
   obtain ⟨y₀, z₀, hz₀⟩ := hex
   have hP : (existsAtSum θ).Evalb ((z₀ + y₀) :> v) :=
     (eval_existsAtSum θ _).mpr ⟨y₀, by simp, z₀, by simp, by simp, by simpa using hz₀⟩
-  obtain ⟨n₀, hn₀, hnmin⟩ := InductionOnHierarchy.least_number 𝚺 0
+  obtain ⟨n₀, hn₀, hnmin⟩ := InductionOnBroadHierarchy.least_number 𝚺 0
     (definablePred_existsAtSum θ v) hP
   obtain ⟨y₁, hy₁len, z₁, hz₁len, hsum₁, hθ₁⟩ := (eval_existsAtSum θ _).mp hn₀
   have hPy : (pairGraph θ).Evalb (n₀ :> y₁ :> v) :=
     (eval_pairGraph θ _).mpr ⟨z₁, hz₁len, hsum₁, hθ₁⟩
-  obtain ⟨ymin, hymin, hyminmin⟩ := InductionOnHierarchy.least_number 𝚺 0
+  obtain ⟨ymin, hymin, hyminmin⟩ := InductionOnBroadHierarchy.least_number 𝚺 0
     (definablePred_pairGraph θ n₀ v) hPy
   have toExistsAtSum : ∀ {n y : V}, (∃ z ≤ n, z + y = n ∧ θ.val.Evalb (z :> y :> v)) →
       ∃ y' ≤ n, ∃ z' ≤ n, z' + y' = n ∧ θ.val.Evalb (z' :> y' :> v) := by
@@ -324,7 +324,7 @@ lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ un
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
   constructor
   · obtain ⟨y, hy⟩ := h.models V v
-    obtain ⟨y₀, h₀, hmin⟩ := InductionOnHierarchy.least_number 𝚺 1 (definablePred_evalb φ v) hy
+    obtain ⟨y₀, h₀, hmin⟩ := InductionOnBroadHierarchy.least_number 𝚺 1 (definablePred_evalb φ v) hy
     exact ⟨y₀, by simpa using ⟨h₀, hmin⟩⟩
   · intro y y' hy hy'
     simp only [eval_leastGraph, Matrix.cons_val_zero, Matrix.cons_val_succ] at hy hy'

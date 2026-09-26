@@ -119,7 +119,7 @@ lemma finiteAxiomatizable_iff_exists_finite_subset :
       ⟨h𝓕.le.trans (WeakerThan.ofAxm! ?_), Theory.Proof.weakerThan_of_le hsub'⟩⟩
     intro σ hσ
     replace hσ : σ ∈ 𝓕 := by simpa using hσ
-    exact Axiomatized.weakening! (Set.subset_biUnion_of_mem hσ) (hprf σ hσ)
+    exact Axiomatized.weakening (Set.subset_biUnion_of_mem hσ) (hprf σ hσ)
   · rintro ⟨F, _, hfin, heq⟩
     exact ⟨F, hfin, heq⟩
 

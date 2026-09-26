@@ -268,7 +268,7 @@ lemma IsBounded.of_ex {p : V} (h : IsBounded (^∃ p)) :
       | (rw [show qqBex u q = ^∃ ((Arithmetic.qqLT (qqBvar 0) u) ^⋏ q) from rfl, qqExs_inj] at h
          exact ⟨u, q, hguard, hq, h⟩)
 
-lemma IsBounded.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma IsBounded.induction (Γ : Polarity) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hverum : P ^⊤) (hfalsum : P ^⊥)
     (hrel : ∀ k r v, P (^rel k r v)) (hnrel : ∀ k r v, P (^nrel k r v))
     (hand : ∀ p q, IsBounded p → IsBounded q → P p → P q → P (p ^⋏ q))

@@ -4,11 +4,14 @@ public import AlphaCentauri.Schemata.Induction
 public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
 
 /-!
-# The `Δ` induction schemes from the collection scheme `𝗕𝚺(n + 1)`
+# The `Δ` induction schemes between `𝗜𝚺 n` and `𝗕𝚺(n + 1)`
 
 A $\Delta_{n + 1}$ predicate of a model of `𝗕𝚺(n + 1)` is at once the existential quantification
-of a $\Pi_n$ relation and the complement of another such, and it obeys successor induction.
+of a $\Pi_n$ relation and the complement of another such, and it obeys successor induction. In
+the other direction, a strict $\Sigma_n$ formula and its negation are an admissible pair for the
+`Δ` induction axiom, so `𝗜𝚫 (n + 1)` proves `𝗜𝚺 n`.
 
+- [Sla04, §1.2]
 - [Sla04, §2.1]
 -/
 
@@ -45,7 +48,7 @@ lemma succ_induction_of_complementary_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n
     (hQ : 𝚷-[n].DefinableRel Q) (hR : 𝚷-[n].DefinableRel R) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (hPR : ∀ x, ¬P x ↔ ∃ w, R x w) (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n := models_ISigma_of_models_BSigma_succ
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ n := models_IBroadSigma_of_models_BSigma_succ
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚷 n :=
     models_of_ss inferInstance (CollectionOnHierarchy_subset_BSigma_succ 𝚷 n)
   intro a
@@ -62,7 +65,7 @@ lemma succ_induction_of_complementary_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n
     · exact ⟨y, hy, hQy⟩
     · exact absurd hPx ((hPR x).mpr ⟨y, hRy⟩)
   have key : ∀ x, a < x ∨ ∃ y < b, Q x y := by
-    apply InductionOnHierarchy.succ_induction 𝚷 n (definablePred_lt_or_witness_below hQ a b)
+    apply InductionOnBroadHierarchy.succ_induction 𝚷 n (definablePred_lt_or_witness_below hQ a b)
     · exact Or.inr (h 0 (lt_of_le_of_lt (by simp) (lt_add_one a)) zero)
     · rintro x (hx | ⟨y, -, hy⟩)
       · exact Or.inl (lt_trans hx (lt_add_one x))
@@ -122,6 +125,34 @@ lemma models_IDeltaOnBroadHierarchy_of_models_BSigma_succ (n : ℕ) (V : Type*) 
 theorem IDeltaOnBroadHierarchy_weakerThan_BSigma (n : ℕ) : 𝗜𝚫⁺(n + 1) ⪯ 𝗕𝚺(n + 1) :=
   weakerThan_of_models.{0} _ _ fun V _ _ ↦
     models_IDeltaOnBroadHierarchy_of_models_BSigma_succ n V
+
+/-- Every model of `𝗜𝚫 (n + 1)` satisfies `𝗜𝚺 n`: a strict $\Sigma_n$ formula and its negation
+are an admissible pair for the `Δ` induction axiom.
+- [Sla04, §1.2] -/
+private lemma models_ISigma_of_models_IDelta_succ (n : ℕ) (V : Type*) [ORingStructure V]
+    [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 (n + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 n := by
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_ss (U := 𝗜𝚫 (n + 1)) inferInstance Set.subset_union_left
+  have hPA : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
+  suffices V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (StrictHierarchy 𝚺 n) by
+    simpa [ISigma, InductionOnHierarchy, Semantics.ModelsSet.union_iff] using ⟨hPA, this⟩
+  simp only [InductionScheme]
+  apply Semantics.ModelsSet.setOf_iff.mpr
+  rintro _ ⟨φ, hφ, rfl⟩
+  have hax : V↓[ℒₒᵣ] ⊧ (.univCl (deltaInd φ (∼φ)) : ArithmeticSentence) :=
+    models_of_mem (T := 𝗜𝚫 (n + 1)) (Set.mem_union_right _
+      (mem_DeltaInductionScheme_of_mem (hφ.mono (Nat.le_succ n))
+        (StrictHierarchy.ofAlt (Γ := 𝚺) hφ.neg)))
+  suffices ∀ f : ℕ → V, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →
+      ∀ x, φ.Eval ![x] f by
+    simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
+      Matrix.constant_eq_singleton] using this
+  intro f
+  exact (models_deltaInd_iff φ (∼φ)).mp hax f (by simp)
+
+/-- `𝗜𝚺 n` is at most as strong as `𝗜𝚫 (n + 1)`.
+- [Sla04, §1.2] -/
+theorem ISigma_weakerThan_IDelta_succ (n : ℕ) : 𝗜𝚺n ⪯ 𝗜𝚫 (n + 1) :=
+  weakerThan_of_models.{0} _ _ fun V _ _ ↦ models_ISigma_of_models_IDelta_succ n V
 
 end theorems
 

@@ -90,12 +90,12 @@ theorem derivable_of_provable_induction (h : 𝗣𝗔⁻ ∪ InductionScheme ℒ
   · exact derivable_of_mem_peanoMinus hσ
   · exact derivable_of_mem_inductionScheme hσ
 
-/-- `LKI` over the strict $\Sigma_1$ formulas derives everything `𝗜 𝚺 1` proves: the induction
-scheme of `𝗜 𝚺 1` is the one its induction rule is as strong as.
+/-- `LKI` over the strict $\Sigma_1$ formulas derives everything `𝗜𝚺₁` proves: the induction
+scheme of `𝗜𝚺₁` is the one its induction rule is as strong as.
 
 - [Bus98A, Section 1.4.2] -/
-theorem derivable_of_provable_inductionOnStrictHierarchy {b : Polarity} {s : ℕ}
-    (h : 𝗜 b s ⊢ σ) : ⊢ᴸᴷᴵ[StrictHierarchy b s] ⦃σ⦄ := derivable_of_provable_induction h
+theorem derivable_of_provable_inductionOnHierarchy {b : Polarity} {s : ℕ}
+    (h : 𝗜𝗡𝗗 b s ⊢ σ) : ⊢ᴸᴷᴵ[StrictHierarchy b s] ⦃σ⦄ := derivable_of_provable_induction h
 
 end FFL.FirstOrder.Arithmetic.LKI
 

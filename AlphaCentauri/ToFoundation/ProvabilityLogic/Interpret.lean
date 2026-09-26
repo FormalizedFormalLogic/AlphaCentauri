@@ -1,35 +1,19 @@
 module
 
 public import Foundation.ProvabilityLogic.Arithmetic.Interpret
-public import Foundation.ProvabilityLogic.Kripke.Basic
 
 @[expose] public section
 /-!
-# Finite conjunctions of modal formulas
+# Arithmetical interpretation of finite conjunctions of modal formulas
 -/
 
 namespace FFL.ProvabilityLogic
-
-section Kripke
-
-open Kripke.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Kripke.Model κ α} {x : M.World}
-
-lemma Kripke.Model.World.forces_conj₂ {L : List (Formula α)} :
-    x ⊩[M] ⋀L ↔ ∀ B ∈ L, x ⊩[M] B := by
-  induction L using List.induction_with_singleton with
-  | hnil => simp
-  | hsingle => simp
-  | hcons C L hL ih => simp [List.conj₂_cons_nonempty hL, forces_and, ih]
-
-end Kripke
 
 section interpret
 
 open FFL.FirstOrder FFL.FirstOrder.ProvabilityAbstraction FFL.Entailment
 
-variable {L : Language} [L.ReferenceableBy L] [L.DecidableEq] {T₀ T : Theory L}
+variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
   {𝔅 : Provability T₀ T} {α : Type*} {f : Realization α L}
 
 lemma interpret_conj_left {Γ : List (Formula α)} {B : Formula α} (hB : B ∈ Γ) :

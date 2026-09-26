@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflection
-public import AlphaCentauri.ToFoundation.ProvabilityLogic.Interpret
+public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.ProvabilityLogic.GL.Arithmetic
 
 @[expose] public section

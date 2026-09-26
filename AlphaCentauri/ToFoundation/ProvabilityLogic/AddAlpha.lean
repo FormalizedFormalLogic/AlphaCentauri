@@ -41,4 +41,18 @@ lemma provable_neg_iterate_addAlpha {n : ℕ} (hN : ∀ i < n, i ∈ N) :
 
 end FirstOrder.ArithmeticTheory
 
+namespace ProvabilityLogic
+
+open LetterlessFormula
+
+variable {α : Type*} {T U : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
+
+lemma trace_provabilityLogic_addAlpha_univ :
+    (T.provabilityLogicRelativeTo (T.addAlpha U Set.univ) (α := α)).trace = .univ :=
+  Set.eq_univ_of_forall fun n ↦ mem_trace_provabilityLogic_iff.mpr fun _ ↦
+    by_axm <| Set.mem_union_right U
+      ⟨n, Set.mem_univ n, by simpa using (interpret_lift (A := alpha n)).symm⟩
+
+end ProvabilityLogic
+
 end FFL

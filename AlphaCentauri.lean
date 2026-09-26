@@ -31,6 +31,7 @@ public import AlphaCentauri.OmegaLogic.Elimination
 public import AlphaCentauri.OmegaLogic.Embedding
 public import AlphaCentauri.OmegaLogic.Inversion
 public import AlphaCentauri.OmegaLogic.Reduction
+public import AlphaCentauri.ProvabilityLogic.ISigma
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
@@ -61,6 +62,7 @@ public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata
 public import AlphaCentauri.ToFoundation.Semiformula

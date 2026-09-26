@@ -18,6 +18,11 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  LAKE_ARTIFACT_CACHE: true
+  LAKE_RESTORE_ARTIFACTS: true
+  LAKE_NO_CACHE: true
+
 jobs:
   build:
     name: Build project
@@ -25,40 +30,15 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    env:
-      LAKE_ARTIFACT_CACHE: true
-      LAKE_RESTORE_ARTIFACTS: true
-      LAKE_NO_CACHE: true
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 100
-      - uses: extractions/setup-just@v3
-      - uses: leanprover/lean-action@v1
-        with:
-          build: false
-          use-github-cache: false
-
-      - name: Restore remote cache (Foundation)
-        env:
-          LAKE_CONFIG: lake-cache.toml
+      - uses: ./.github/actions/setup-lean
+      - name: Print tool versions
         run: |
-          lake cache get \
-            --service ffl \
-            --max-revs=100 \
-            --repo FormalizedFormalLogic/Foundation \
-            --package Foundation \
-          || echo "::warning::Foundation's cache is incomplete; the build will compile the rest from source"
-
-      - name: Restore remote cache (AlphaCentauri)
-        env:
-          LAKE_CONFIG: lake-cache.toml
-        run: |
-          lake cache get \
-            --service ffl \
-            --max-revs=100 \
-            --repo FormalizedFormalLogic/AlphaCentauri \
-          || echo "::warning::AlphaCentauri's cache is incomplete; the build will compile the rest from source"
+          lake --version
+          lean --version
 
       - run: lake build Foundation
       - run: lake build AlphaCentauri --wfail
@@ -87,8 +67,12 @@ jobs:
           echo "the axiom audit failed; see the 'Audit axioms' step"
           exit 1
 
+      # A merge-queue commit becomes `main` as is, so publishing it there lets the push run that
+      # follows, and the jobs below, restore it instead of compiling it again.
       - name: Save remote cache
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: >-
+          github.event_name == 'merge_group' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main')
         env:
           LAKE_CONFIG: lake-cache.toml
           LAKE_CACHE_KEY: ${{ secrets.LAKE_CACHE_KEY }}
@@ -99,34 +83,48 @@ jobs:
             --service ffl-upload \
             --repo FormalizedFormalLogic/AlphaCentauri
 
-      - uses: typst-community/setup-typst@v4
-      - uses: ts-graphviz/setup-graphviz@v2
+  # Only produces what `deploy` publishes from `main`; `workflow_dispatch` lets a branch try it out.
+  zoo:
+    name: Generate zoo
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
+      - uses: typst-community/setup-typst@v5
+
+      - run: lake build AlphaCentauri
       - run: just zoo
-      - name: Upload the zoo
-        uses: actions/upload-artifact@v7
+
+      - uses: actions/upload-artifact@v7
         with:
           name: zoo
           path: pages/zoo
+          retention-days: 1
 
   no-sorry:
     name: Check no sorry
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v4
       - name: Forbid sorry
         run: just no-sorry
 
+  # `mk_all` needs none of Mathlib's oleans, so this job skips the caches `setup-lean` fetches.
   mk-all-check:
     name: Check mk_all executed
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: extractions/setup-just@v3
-      - uses: leanprover/lean-action@v1
-        with:
-          build: false
-          use-github-cache: false
+      - uses: extractions/setup-just@v4
+      - name: Setup elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Check mk_all executed
         run: |
           just mk-all
@@ -141,6 +139,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs:
       - build
+      - zoo
       - no-sorry
       - mk-all-check
     permissions:

@@ -88,11 +88,9 @@ jobs:
 
       # elan only: the mathlib cache refuses this tree, whose toolchain and manifest disagree.
       - name: Install elan
-        uses: leanprover/lean-action@v1
-        with:
-          build: false
-          use-github-cache: false
-          use-mathlib-cache: false
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
       - name: Update the manifest
         id: rev

@@ -35,6 +35,7 @@ public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.Reflection.CollapseFormula
+public import AlphaCentauri.Reflection.ISigma
 public import AlphaCentauri.Reflection.IteratedConsistency
 public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.Sigma1Reflection
@@ -56,6 +57,7 @@ public import AlphaCentauri.ToFoundation.Coding
 public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
+public import AlphaCentauri.ToFoundation.Definability
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Factorial

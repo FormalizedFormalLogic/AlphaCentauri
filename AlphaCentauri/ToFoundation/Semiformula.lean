@@ -56,4 +56,16 @@ Equations identifying logical notation with `Semiformula` constructors. -/
 
 end GrindConstructors
 
+/-- A formula fixed by the shift of free variables has no free variables. -/
+lemma freeVariables_eq_empty_of_shift_eq {φ : Semiformula L ℕ n} (h : Rewriting.shift φ = φ) :
+    φ.freeVariables = ∅ := by
+  classical
+  by_contra hne
+  have hex : ∃ x, φ.FVar? x := Finset.nonempty_iff_ne_empty.mpr hne
+  have hx : (Rewriting.shift φ).FVar? (Nat.find hex) := by rw [h]; exact Nat.find_spec hex
+  rcases fvar?_rew hx with ⟨i, hi⟩ | ⟨z, hz, hzx⟩
+  · simp at hi
+  · simp at hzx
+    exact Nat.find_min hex (by omega) hz
+
 end FFL.FirstOrder.Semiformula

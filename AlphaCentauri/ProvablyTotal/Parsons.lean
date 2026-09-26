@@ -3,7 +3,6 @@ module
 public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.ProvablyTotal.Basic
-public import AlphaCentauri.Schemata.StrictInduction
 public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToMathlib.Vector
 public import Foundation.FirstOrder.Arithmetic.HFS.PRF
@@ -17,7 +16,7 @@ Ackermann function is therefore not `𝗜𝚺₁`-provably total.
 
 One direction is a construction inside a model: the graph of a primitive recursive function is
 assembled by composition and primitive recursion, and `𝗜𝚺₁` proves it functional. For the other,
-a function whose graph is a strict $\Sigma_1$ formula whose totality `𝗜 𝚺 1` proves is primitive
+a function whose graph is a strict $\Sigma_1$ formula whose totality `𝗜𝚺₁` proves is primitive
 recursive: the proof of totality becomes an anchored derivation of the graph at the arguments as
 free variables, witnessing reads a primitive recursive bound off that derivation, and the value
 is recovered by a bounded search below the bound.
@@ -211,11 +210,11 @@ lemma strictHierarchy_embSubsts_exs (hφ : StrictHierarchy 𝚺 1 φ.val) :
       (Rew.embSubsts (fun i : Fin k ↦ (&i : ArithmeticTerm ℕ)) ▹ (∃¹ φ.val)) :=
   StrictHierarchy.rew _ hφ.exs
 
-/-- A proof of totality in `𝗜 𝚺 1` becomes an anchored derivation of the graph of `φ` at the
+/-- A proof of totality in `𝗜𝚺₁` becomes an anchored derivation of the graph of `φ` at the
 free variables `&0 … &(k-1)`.
 
 - [Bus98A, Section 3.1.3] -/
-theorem nonempty_anchored_instance_of_provable_totality (h : 𝗜 𝚺 1 ⊢ totalitySentence φ) :
+theorem nonempty_anchored_instance_of_provable_totality (h : 𝗜𝚺₁ ⊢ totalitySentence φ) :
     ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1, fun ψ ↦ StrictHierarchy 𝚺 1 ψ ∨ StrictHierarchy 𝚷 1 ψ]
       ⦃Rew.embSubsts (fun i : Fin k ↦ (&i : ArithmeticTerm ℕ)) ▹ (∃¹ φ.val)⦄ := by
   obtain ⟨Δ, hΔ, ⟨d⟩⟩ := Theory.Proof.provable_iff.mp h
@@ -269,11 +268,11 @@ private lemma evalBound_graph {v : Fin k → ℕ} {y b : ℕ} :
     funext j; cases j using Fin.cases <;> simp
   rw [e]
 
-/-- A `𝗜 𝚺 1`-proof of totality yields a primitive recursive bound on the witness of the graph.
+/-- A `𝗜𝚺₁`-proof of totality yields a primitive recursive bound on the witness of the graph.
 
 - [Bus98A, Section 3.1.3] -/
 private lemma exists_primrec_bound (hφ : StrictHierarchy 𝚺 1 φ.val)
-    (h : 𝗜 𝚺 1 ⊢ totalitySentence φ) :
+    (h : 𝗜𝚺₁ ⊢ totalitySentence φ) :
     ∃ g : List ℕ → ℕ → ℕ, Primrec₂ g ∧ ∀ v : Fin k → ℕ,
       ∃ y < g (List.ofFn v) 0, EvalBound (y :> v) Empty.elim (g (List.ofFn v) 0) φ.val := by
   obtain ⟨d, hd⟩ := Classical.choice (nonempty_anchored_instance_of_provable_totality h)
@@ -286,13 +285,13 @@ private lemma exists_primrec_bound (hφ : StrictHierarchy 𝚺 1 φ.val)
   rw [Multiset.mem_singleton.mp hχ] at hbnd
   exact evalBound_instance.mp hbnd
 
-/-- Every function that is `𝗜 𝚺 1`-provably total via a strict $\Sigma_1$ graph is primitive
+/-- Every function that is `𝗜𝚺₁`-provably total via a strict $\Sigma_1$ graph is primitive
 recursive.
 
 - [Bus98A, Theorem 3.1.1]
 - [HP98, Corollary IV.3.7] -/
 theorem primrec_of_provablyTotalVia (hφ : StrictHierarchy 𝚺 1 φ.val)
-    (h : (𝗜 𝚺 1).ProvablyTotalVia f φ) : Primrec fun v : List.Vector ℕ k ↦ f v.get := by
+    (h : 𝗜𝚺₁.ProvablyTotalVia f φ) : Primrec fun v : List.Vector ℕ k ↦ f v.get := by
   classical
   obtain ⟨g, hg, hgb⟩ := exists_primrec_bound hφ h.total
   set χ : ArithmeticProposition :=
@@ -318,13 +317,13 @@ theorem primrec_of_provablyTotalVia (hφ : StrictHierarchy 𝚺 1 φ.val)
   rw [← e]
   exact hval w.get
 
-/-- Every function that is `𝗜 𝚺 1`-provably total via a strict $\Sigma_1$ graph is primitive
+/-- Every function that is `𝗜𝚺₁`-provably total via a strict $\Sigma_1$ graph is primitive
 recursive, in `Nat.Primrec'` form.
 
 - [Bus98A, Theorem 3.1.1]
 - [HP98, Corollary IV.3.7] -/
 theorem primrec'_of_provablyTotalVia (hφ : StrictHierarchy 𝚺 1 φ.val)
-    (h : (𝗜 𝚺 1).ProvablyTotalVia f φ) : Nat.Primrec' fun v : List.Vector ℕ k ↦ f v.get :=
+    (h : 𝗜𝚺₁.ProvablyTotalVia f φ) : Nat.Primrec' fun v : List.Vector ℕ k ↦ f v.get :=
   Nat.Primrec'.prim_iff.mpr (primrec_of_provablyTotalVia hφ h)
 
 end
@@ -342,19 +341,16 @@ private lemma models_allClosure_iff_evalb {k : ℕ} {φ ψ : ArithmeticSemisente
       ∀ v : Fin (k + 1) → V, φ.Evalb v ↔ ψ.Evalb v := by
   simp [models_iff]
 
-/-- An `𝗜𝚺₁`-provably total function has a strict $\Sigma_1$ graph whose totality is already
-provable in the strict induction theory `𝗜 𝚺 1`.
+/-- An `𝗜𝚺₁`-provably total function has a strict $\Sigma_1$ graph whose totality `𝗜𝚺₁` proves.
 - [HP98, Theorem I.2.5(3)]
 - [HP98, Lemma I.2.9] -/
 theorem exists_strictHierarchy_provablyTotalVia {k : ℕ} {f : (Fin k → ℕ) → ℕ}
     (h : 𝗜𝚺₁.ProvablyTotal f) :
-    ∃ φ : 𝚺₁.Semisentence (k + 1), StrictHierarchy 𝚺 1 φ.val ∧ (𝗜 𝚺 1).ProvablyTotalVia f φ := by
-  obtain ⟨φ, hφ⟩ := h
-  have : 𝗕𝚺₁ ⪯ 𝗜 𝚺 1 :=
-    WeakerThan.trans (𝓣 := 𝗜𝚺₁) BSigma_weakerThan_ISigma inferInstance
-  obtain ⟨ψ, hψ, hprov⟩ := exists_strictHierarchy_of_hierarchy (𝗜 𝚺 1) φ.sigma_prop
-  have hmono : (𝗜 𝚺 1).ProvablyTotalVia f φ := hφ.mono inferInstance
-  have heval : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜 𝚺 1],
+    ∃ φ : 𝚺₁.Semisentence (k + 1), StrictHierarchy 𝚺 1 φ.val ∧ 𝗜𝚺₁.ProvablyTotalVia f φ := by
+  obtain ⟨φ, hmono⟩ := h
+  have : 𝗕𝚺₁ ⪯ 𝗜𝚺₁ := BSigma_weakerThan_ISigma
+  obtain ⟨ψ, hψ, hprov⟩ := exists_strictHierarchy_of_hierarchy 𝗜𝚺₁ φ.sigma_prop
+  have heval : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁],
       ∀ v : Fin (k + 1) → V, φ.val.Evalb v ↔ ψ.Evalb v := fun V _ _ ↦
     models_allClosure_iff_evalb.mp (consequence_iff'.mp (Theory.Proof.sound hprov) V)
   refine ⟨.mkSigma ψ hψ.hierarchy, by simpa using hψ, ?_, ?_⟩

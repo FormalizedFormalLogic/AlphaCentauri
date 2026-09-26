@@ -23,11 +23,11 @@ variable {M : Type u} {N : Type v} [ORingStructure M] [hMN : M ⊂ₑ N]
 below some element outside it.
 - [HP98, Corollary IV.1.16]
 - [vO99, Lemma 3.2, Corollary 3.3] -/
-theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m]
+theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m]
     {φ : ArithmeticSemiformula ℕ 1} (hφ : Hierarchy Γ m φ) (e : ℕ → N)
     (h : ∀ a : M, φ.Eval ![hMN.emb a] e) :
     ∃ c : N, c ∉ Set.range hMN.emb ∧ ∀ x < c, φ.Eval ![x] e := by
-  have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗 Γ m)
+  have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m)
   by_contra! hc
   have h₁ : ∀ x : N, (∀ y < x, φ.Eval ![y] e) → x ∈ Set.range hMN.emb := by grind;
   have h₂ : ∀ x : N, (∀ y < x, φ.Eval ![y] e) → ∀ y < x + 1, φ.Eval ![y] e := by

@@ -4,16 +4,12 @@ public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-!
-# The induction schemes `𝗜` and `𝗜𝚫` over the strict hierarchy
-
-The $\Sigma_n$ and $\Pi_n$ of the literature are the strict hierarchy, so `𝗜 Γ s` is the induction
-scheme over `StrictHierarchy Γ s`; `𝗜𝗡𝗗 Γ s` is its broad counterpart, as `𝗕⁺ Γ s` is of `𝗕 Γ s`.
+# The `Δ` induction scheme `𝗜𝚫` over the strict hierarchy
 
 A $\Delta_s$ formula is not a syntactic class, so the induction scheme for it carries its own
 equivalence hypothesis: the axiom for a pair `φ`, `ψ` of $\Sigma_s$ formulas assumes that `φ` and
 `¬ψ` define the same set and concludes successor induction for `φ`.
 
-- [HP98, §I.2(a)]
 - [Sla04, §1.2]
 -/
 
@@ -26,44 +22,6 @@ open _root_.FFL.Entailment
 section axioms
 
 variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
-
-/-- `𝗜 Γ s` is `𝗣𝗔⁻` together with the induction scheme for `StrictHierarchy Γ s`.
-- [HP98, §I.2(a)] -/
-abbrev InductionOnStrictHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
-  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (Arithmetic.StrictHierarchy Γ s)
-
-prefix:max "𝗜 " => InductionOnStrictHierarchy
-
-lemma InductionOnStrictHierarchy_subset_InductionOnHierarchy (Γ : Polarity) (s : ℕ) :
-    𝗜 Γ s ⊆ 𝗜𝗡𝗗 Γ s :=
-  Set.union_subset_union_right _ (InductionScheme_subset (·.hierarchy))
-
-instance InductionOnStrictHierarchy_weakerThan_InductionOnHierarchy (Γ : Polarity) (s : ℕ) :
-    𝗜 Γ s ⪯ 𝗜𝗡𝗗 Γ s :=
-  WeakerThan.ofSubset (InductionOnStrictHierarchy_subset_InductionOnHierarchy Γ s)
-
-lemma InductionOnStrictHierarchy_zero (Γ : Polarity) : 𝗜 Γ 0 = 𝗜𝚺₀ := by
-  refine congrArg _ (Set.ext fun σ ↦ ⟨?_, ?_⟩)
-  · rintro ⟨φ, hφ, rfl⟩; exact ⟨φ, Arithmetic.Hierarchy.zero_iff.mp hφ.hierarchy, rfl⟩
-  · rintro ⟨φ, hφ, rfl⟩; exact ⟨φ, .zero (Hierarchy.zero_iff_delta_zero.mp hφ), rfl⟩
-
-lemma InductionOnStrictHierarchy_subset_mono {Γ : Polarity} {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) :
-    𝗜 Γ s₁ ⊆ 𝗜 Γ s₂ :=
-  Set.union_subset_union_right _ (InductionScheme_subset (fun H ↦ H.mono h))
-
-lemma InductionOnStrictHierarchy_subset_of_lt {Γ Γ' : Polarity} {s₁ s₂ : ℕ} (h : s₁ < s₂) :
-    𝗜 Γ s₁ ⊆ 𝗜 Γ' s₂ :=
-  Set.union_subset_union_right _ (InductionScheme_subset (fun H ↦ H.strict_mono _ h))
-
-lemma InductionOnStrictHierarchy_weakerThan_of_le {Γ : Polarity} {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) :
-    𝗜 Γ s₁ ⪯ 𝗜 Γ s₂ :=
-  WeakerThan.ofSubset (InductionOnStrictHierarchy_subset_mono h)
-
-instance (Γ : Polarity) (s : ℕ) : 𝗣𝗔⁻ ⪯ 𝗜 Γ s := WeakerThan.ofSubset Set.subset_union_left
-
-instance (Γ : Polarity) (s : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜 Γ s :=
-  have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻ := inferInstance
-  WeakerThan.trans this inferInstance
 
 /-- The `Δ` induction axiom for the pair `φ`, `ψ`: successor induction for `φ`, under the
 hypothesis that `φ` and `¬ψ` define the same set.
@@ -133,9 +91,6 @@ lemma models_deltaInd_iff (φ ψ : ArithmeticSemiformula ℕ 1) :
 end models
 
 section standardModel
-
-instance models_InductionOnStrictHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜 Γ s :=
-  models_of_ss inferInstance (InductionOnStrictHierarchy_subset_InductionOnHierarchy Γ s)
 
 instance models_IDeltaOnBroadHierarchy (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚫⁺ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩

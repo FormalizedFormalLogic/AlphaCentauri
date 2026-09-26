@@ -98,7 +98,8 @@ theorem models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ]
   · apply Semantics.ModelsSet.setOf_iff.mpr;
     rintro _ ⟨φ, hφ, rfl⟩
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
-      using hMN.eval_of_endExtension (Hierarchy.zero_iff_delta_zero.mp hφ)
+      using hMN.eval_of_endExtension
+        (Hierarchy.zero_iff_delta_zero.mp (StrictHierarchy.zero_iff.mp hφ))
 
 end EndExtension
 

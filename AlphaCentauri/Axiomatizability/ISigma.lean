@@ -4,7 +4,7 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Schemata
-public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-!
 # Finite axiomatizability of `𝗜𝚺 n`
@@ -137,7 +137,8 @@ theorem provable_finiteAxiomatization (n : ℕ) : 𝗜𝚺 (n + 1) ⊢* finiteAx
   · exact by_axm (Set.mem_union_left _ hσ)
   · exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega))
       (ISigma1.provable_tarski n hσ)
-  · exact by_axm (Set.mem_union_right _ indSentence_mem_inductionScheme)
+  · exact WeakerThan.pbl (h := InductionOnBroadHierarchy_weakerThan_InductionOnHierarchy 𝚺 (n + 1))
+      (by_axm (Set.mem_union_right _ indSentence_mem_inductionScheme))
   · have h : 𝗕⁺ 𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
     exact WeakerThan.pbl (h := h)
       (by_axm (Set.mem_union_right _ collSentence_mem_collectionScheme))
@@ -263,61 +264,16 @@ theorem provable_collectionAxiom_of_strictHierarchy {n : ℕ} {φ : ArithmeticSe
 
 /-! ## The equivalence with `𝗜𝚺 (n + 1)` -/
 
-/-- A theory extending `𝗣𝗔⁻` that proves the induction axiom and the collection axiom of every
-strict prenex $\Sigma_{n + 1}$ formula is at least as strong as `𝗜𝚺 (n + 1)`.
-- [HP98, Theorem I.2.5(3)]
-- [HP98, Lemma I.2.9]
-- [HP98, Theorem I.2.52] -/
-theorem hierarchyInduction_of_strictInduction (n : ℕ) (T : ArithmeticTheory) [𝗣𝗔⁻ ⪯ T]
-    (hind : ∀ φ : ArithmeticSemiformula ℕ 1, StrictHierarchy 𝚺 (n + 1) φ → T ⊢ .univCl (succInd φ))
-    (hcol : ∀ φ : ArithmeticSemiformula ℕ 2, StrictHierarchy 𝚺 (n + 1) φ →
-      T ⊢ .univCl (collectionAxiom φ)) :
-    𝗜𝚺 (n + 1) ⪯ T := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T := WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻) inferInstance
-  apply WeakerThan.ofAxm!
-  intro σ hσ
-  rcases hσ with hσ | ⟨φ, hφ, rfl⟩
-  · exact WeakerThan.pbl (h := inferInstance) (by_axm hσ)
-  · apply Arithmetic.complete.{0}
-    intro M _ _
-    have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (T := 𝗣𝗔⁻) (U := T) inferInstance
-    have hI : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := Semantics.ModelsSet.union_iff.mpr
-      ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr <| by
-        rintro _ ⟨ψ, hψ, rfl⟩
-        exact consequence_iff.mp (Theory.Proof.sound
-          (hind ψ ((StrictHierarchy.zero (Hierarchy.zero_iff_delta_zero.mp hψ)).mono
-            (Nat.zero_le (n + 1))))) M inferInstance⟩
-    have : M↓[ℒₒᵣ] ⊧* 𝗕𝚺 (n + 1) := Semantics.ModelsSet.union_iff.mpr
-      ⟨hI, Semantics.ModelsSet.setOf_iff.mpr <| by
-        rintro _ ⟨ψ, hψ, rfl⟩
-        exact consequence_iff.mp (Theory.Proof.sound (hcol ψ hψ)) M inferInstance⟩
-    suffices ∀ f : ℕ → M, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →
-      ∀ x, φ.Eval ![x] f by
-      simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
-        Matrix.constant_eq_singleton] using this
-    intro f hzero hsucc
-    obtain ⟨g, ψ, hψ, hiff⟩ :=
-      (StrictDefinable.of_definable (Γ' := 𝚺) (definablePred_of_hierarchy hφ f)).exists_eval_iff
-    have heval : ∀ x : M, φ.Eval ![x] f ↔ ψ.Eval ![x] g := fun x ↦ by simpa using hiff ![x]
-    have hInd : M↓[ℒₒᵣ] ⊧ (.univCl (succInd ψ) : ArithmeticSentence) :=
-      consequence_iff.mp (Theory.Proof.sound (hind ψ hψ)) M inferInstance
-    have hind' : ∀ g : ℕ → M, ψ.Eval ![0] g → (∀ x, ψ.Eval ![x] g → ψ.Eval ![x + 1] g) →
-      ∀ x, ψ.Eval ![x] g := by
-      simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
-        Matrix.constant_eq_singleton] using hInd
-    have hstep : ∀ y : M, ψ.Eval ![y] g → ψ.Eval ![y + 1] g := fun y hy ↦
-      (heval (y + 1)).mp (hsucc y ((heval y).mpr hy))
-    exact fun x ↦ (heval x).mpr (hind' g ((heval 0).mp hzero) hstep x)
-
 /-- The finite theory is equivalent to `𝗜𝚺 (n + 1)`.
 - [HP98, Theorem I.2.52] -/
 theorem finiteAxiomatization_equiv (n : ℕ) : finiteAxiomatization n ≊ 𝗜𝚺 (n + 1) := by
   apply Equiv.antisymm_iff.mpr
   constructor
   · exact WeakerThan.ofAxm! (provable_finiteAxiomatization n)
-  · exact hierarchyInduction_of_strictInduction n _
-      (fun _ hφ ↦ provable_succInd_of_strictHierarchy hφ)
-      (fun _ hφ ↦ provable_collectionAxiom_of_strictHierarchy hφ)
+  · apply WeakerThan.ofAxm!
+    rintro σ (hσ | ⟨φ, hφ, rfl⟩)
+    · exact by_axm (peanoMinus_subset_finiteAxiomatization hσ)
+    · exact provable_succInd_of_strictHierarchy hφ
 
 /-- `𝗜𝚺 (n + 1)` is finitely axiomatized by `finiteAxiomatization n`.
 - [HP98, Theorem I.2.52] -/

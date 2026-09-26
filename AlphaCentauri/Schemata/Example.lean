@@ -1,7 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Collection.Equiv
-public import Foundation.FirstOrder.Arithmetic.LeastNumber.Basic
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-!
 # Instances of the fragment hierarchy

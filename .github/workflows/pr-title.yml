@@ -4,8 +4,6 @@ name: PR title
 # time a body is reworded.
 on:
   pull_request:
-    branches:
-      - main
     types:
       - opened
       - reopened

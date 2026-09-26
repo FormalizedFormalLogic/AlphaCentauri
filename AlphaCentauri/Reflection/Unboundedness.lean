@@ -1,6 +1,5 @@
 module
 
-public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.ToFoundation.Theory
 
@@ -254,7 +253,7 @@ private lemma provable_of_mem (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ
   | sigma => exact provable_of_mem_sigma hΓ hcon hσ
   | pi => exact provable_of_mem_pi hΓ hcon hσ
 
-/-- The case of `exists_sentence_weakerThan_of_consistent` where `U` axiomatizes itself.
+/-- The case `U = U'` of `exists_sentence_weakerThan_of_consistent`.
 - [Lin97, Theorem 4.3] -/
 private lemma exists_sentence_weakerThan_of_forall_mem
     (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) [Consistent (T ∪ U)] :
@@ -276,39 +275,40 @@ end
 
 variable {U U' : ArithmeticTheory} [U'.Δ₁] [𝗜𝚺₁ ⪯ T]
 
-/-- A consistent extension of `T` by a $\Gamma_{n + 1}$-axiomatizable theory is contained in a
-consistent extension of `T` by a single `Γ (n + 1)` sentence.
+/-- A consistent extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a $\Delta_1$-presented set
+`U'` of strict `Γ (n + 1)` sentences, is contained in a consistent extension of `T` by a single
+`Γ (n + 1)` sentence.
 - [Lin97, Theorem 4.3] -/
 theorem exists_sentence_weakerThan_of_consistent
-    (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U') [Consistent (T ∪ U)] :
+    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U') [Consistent (T ∪ U)] :
     ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
-  have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right hΓ.equiv T
   have : Consistent (T ∪ U') := Consistent.of_le ‹Consistent (T ∪ U)› e.symm.le
-  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_forall_mem (T := T) hΓ.forall_mem
+  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_forall_mem (T := T) hΓ
   exact ⟨θ, hθ, e.le.trans hle, hcon⟩
 
-/-- Unboundedness: a $\Gamma_{n + 1}$-axiomatizable extension of `T` proving the local reflection
-schema of `T` on the strict sentences of the dual class is inconsistent.
+/-- Unboundedness: an extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a $\Delta_1$-presented
+set `U'` of strict `Γ (n + 1)` sentences, proving the local reflection schema of `T` on the strict
+sentences of the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
 theorem inconsistent_of_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
-    (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U')
+    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
     (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
   by_contra hc
   have : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
-  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent (T := T) hΓ
+  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent hΓ e
   exact hcon.not_inc
     (inconsistent_of_provable_localReflectionOn_insert hθ fun hσ ↦ hle.pbl (h hσ))
 
-/-- Unboundedness: a consistent $\Gamma_{n + 1}$-axiomatizable extension of `T` does not prove
-the local reflection schema of `T` on the strict sentences of the dual class.
+/-- Unboundedness: a consistent extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a
+$\Delta_1$-presented set `U'` of strict `Γ (n + 1)` sentences, does not prove the local reflection
+schema of `T` on the strict sentences of the dual class.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
 theorem not_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
-    (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U') [Consistent (T ∪ U)] :
+    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U') [Consistent (T ∪ U)] :
     ¬T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T :=
-  fun h ↦ (inconsistent_of_provable_localReflectionOn_union hΓ h).not_con
-    inferInstance
+  fun h ↦ (inconsistent_of_provable_localReflectionOn_union hΓ e h).not_con inferInstance
 
 end FFL.FirstOrder.Arithmetic

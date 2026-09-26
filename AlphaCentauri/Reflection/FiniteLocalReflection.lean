@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Reflection.ProvabilityAbstraction
+public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflection
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Interpret
 public import Foundation.ProvabilityLogic.GL.Arithmetic
 
@@ -107,8 +107,8 @@ lemma card_refuted {w : M.World} (hw : ∀ x, x = w ∨ w ≺ x → x ⊩[M] hyp
 
 end Semantics
 
-theorem collapse_mem (m : ℕ) :
-    (hyp m 🡒 □hyp m 🡒 reflection m 🡒 #none) ∈ 𝐆𝐋 := by
+theorem provable_collapse (m : ℕ) :
+    𝐆𝐋 ⊢ hyp m 🡒 □hyp m 🡒 reflection m 🡒 #none := by
   classical
   rw [Logic.GL.iff_valid_finite]
   intro κ _ M _ w
@@ -143,7 +143,7 @@ namespace FFL.FirstOrder.ProvabilityAbstraction.Provability
 
 open FFL.Entailment FFL.ProvabilityLogic FFL.ProvabilityLogic.FiniteLocalReflection
 
-variable {L : Language} [L.ReferenceableBy L] [L.DecidableEq] {T₀ T : Theory L}
+variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
   (𝔅 : Provability T₀ T) [T₀ ⪯ T]
 
 section interpret
@@ -168,22 +168,22 @@ end interpret
 those at `collapseSeq σ 0, …, collapseSeq σ m`.
 - [Bek99, Lemma 4.2] -/
 theorem collapse_localReflection [𝔅.HBL] [Diagonalization T₀] {m : ℕ} {σ : Sentence L}
-    {τ : Fin (m + 1) → Sentence L} (h : T ⊢ (⩕ i, 𝔅.localReflectionSchema (τ i)) 🡒 σ) :
-    T ⊢ (⩕ i : Fin (m + 1), 𝔅.localReflectionSchema (𝔅.collapseSeq σ i)) 🡒 σ := by
+    {τ : Fin (m + 1) → Sentence L} (h : T ⊢ (⩕ i, 𝔅.refl (τ i)) 🡒 σ) :
+    T ⊢ (⩕ i : Fin (m + 1), 𝔅.refl (𝔅.collapseSeq σ i)) 🡒 σ := by
   classical
   let f : Realization (Option (Fin (m + 1))) L := ⟨fun o ↦ o.elim σ τ⟩
   have hH : T ⊢ (hyp m).interpret f 𝔅 := by
     have : T ⊢ (⋀(List.ofFn fun i ↦
           □#(some i) 🡒 #(some i))).interpret f 𝔅 🡒
-        ⩕ i, 𝔅.localReflectionSchema (τ i) :=
+        ⩕ i, 𝔅.refl (τ i) :=
       right_Uconj_intro _ _ fun i ↦ interpret_conj_left (List.mem_ofFn.mpr ⟨i, rfl⟩)
     simp only [hyp, FFL.ProvabilityLogic.Formula.interpret] at this ⊢
     cl_prover [this, h]
   have hbox : T ⊢ 𝔅 ((hyp m).interpret f 𝔅) := WeakerThan.pbl (𝔅.D1 hH)
   have hG₀ : T₀ ⊢ (hyp m 🡒 □hyp m 🡒 reflection m 🡒 #none).interpret f 𝔅 :=
-    Logic.GL.arithmetical_soundness (collapse_mem m)
+    Logic.GL.arithmetical_soundness (provable_collapse m)
   have hG : T ⊢ (hyp m 🡒 □hyp m 🡒 reflection m 🡒 #none).interpret f 𝔅 := WeakerThan.pbl hG₀
-  have hR : T ⊢ (⩕ i : Fin (m + 1), 𝔅.localReflectionSchema (𝔅.collapseSeq σ i)) 🡒
+  have hR : T ⊢ (⩕ i : Fin (m + 1), 𝔅.refl (𝔅.collapseSeq σ i)) 🡒
       (reflection m).interpret f 𝔅 := by
     refine interpret_conj_right fun B hB ↦ ?_
     obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hB
@@ -191,7 +191,7 @@ theorem collapse_localReflection [𝔅.HBL] [Diagonalization T₀] {m : ℕ} {σ
     have eb : T ⊢ 𝔅 ((seq (#none) i).interpret f 𝔅) 🡘 𝔅 (𝔅.collapseSeq σ i) :=
       WeakerThan.pbl (𝔅.ext e)
     have l := left_Uconj_intro (𝓢 := T)
-      (fun i : Fin (m + 1) ↦ 𝔅.localReflectionSchema (𝔅.collapseSeq σ i)) i
+      (fun i : Fin (m + 1) ↦ 𝔅.refl (𝔅.collapseSeq σ i)) i
     simp only [FFL.ProvabilityLogic.Formula.interpret] at e eb l ⊢
     cl_prover [e, eb, l]
   simp only [FFL.ProvabilityLogic.Formula.interpret] at hG
@@ -226,11 +226,11 @@ end iterate
 - [Bek99, Lemma 4.2]
 - [Bek99, Lemma 5.2] -/
 theorem iterate_bot_of_refutable_localReflection [𝔅.HBL] [Diagonalization T₀] {m : ℕ}
-    {τ : Fin (m + 1) → Sentence L} (h : T ⊢ ∼⩕ i, 𝔅.localReflectionSchema (τ i)) :
+    {τ : Fin (m + 1) → Sentence L} (h : T ⊢ ∼⩕ i, 𝔅.refl (τ i)) :
     T ⊢ 𝔅^[m + 1] ⊥ := by
   have hc := 𝔅.collapse_localReflection (σ := ⊥) (τ := τ) (by cl_prover [h])
   have hr : T ⊢ (∼𝔅^[m + 1] ⊥ : Sentence L) 🡒
-      ⩕ i : Fin (m + 1), 𝔅.localReflectionSchema (𝔅.collapseSeq ⊥ i) :=
+      ⩕ i : Fin (m + 1), 𝔅.refl (𝔅.collapseSeq ⊥ i) :=
     right_Uconj_intro _ _ fun i ↦ by
       have e := 𝔅.collapseSeq_bot i
       have eb : T ⊢ 𝔅 (𝔅.collapseSeq ⊥ i) 🡘 𝔅^[i + 1] ⊥ := by

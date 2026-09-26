@@ -26,6 +26,11 @@ namespace FirstOrder.ArithmeticTheory
 
 variable {T U : ArithmeticTheory} [T.Δ₁] {N : Set ℕ}
 
+/-- $T_\omega = T + \{\neg\Box_T^{n + 1}\bot\}_n$, the $\omega$-th stage of the Turing progression
+of `T` by consistency.
+- [AB05, §4.1] -/
+abbrev turingOmega (T : ArithmeticTheory) [T.Δ₁] : ArithmeticTheory := T.addAlpha T Set.univ
+
 /-- If `N` contains every index below `n`, the extension of `U` by the standard interpretations
 of `alpha i` for `i ∈ N` proves that `n` iterations of `T`'s provability predicate do not prove
 `⊥`. -/

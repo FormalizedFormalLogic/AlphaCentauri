@@ -8,9 +8,10 @@ public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 /-!
 # A strict $\Pi_1$ axiomatization of $T_\omega$
 
-`T.addAlpha T Set.univ` is $T_\omega = T + \{\neg\Box_T^{n + 1}\bot\}_n$. It is equivalent to `T`
-extended by the $\Delta_1$-presented set `notProvableIterateBotTheory T` of strict $\Pi_1$
-sentences: the numeral instances of one strict $\Pi_1$ formula, which `𝗜𝚺₁` proves equivalent to
+`T.turingOmega` is $T_\omega = T + \{\neg\Box_T^{n + 1}\bot\}_n$, the $\omega$-th stage of the
+Turing progression of `T` by consistency. It is equivalent to `T` extended by the
+$\Delta_1$-presented set `notProvableIterateBotTheory T` of strict $\Pi_1$ sentences: the numeral
+instances of one strict $\Pi_1$ formula, which `𝗜𝚺₁` proves equivalent to
 $\neg\mathrm{Pr}_T(\ulcorner\Box_T^{x}\bot\urcorner)$.
 
 - [AB05, §4.1]
@@ -120,8 +121,8 @@ variable [𝗜𝚺₁ ⪯ T]
 
 /-- $T_\omega$ is equivalent to `T` extended by `notProvableIterateBotTheory T`.
 - [AB05, §4.1] -/
-theorem addAlpha_equiv_union_notProvableIterateBotTheory :
-    T.addAlpha T Set.univ ≊ T ∪ notProvableIterateBotTheory T := by
+theorem turingOmega_equiv_union_notProvableIterateBotTheory :
+    T.turingOmega ≊ T ∪ notProvableIterateBotTheory T := by
   have hU : 𝗜𝚺₁ ⪯ T ∪ notProvableIterateBotTheory T :=
     WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left)
   apply Equiv.antisymm
@@ -137,20 +138,20 @@ theorem addAlpha_equiv_union_notProvableIterateBotTheory :
   · apply WeakerThan.ofAxm!
     rintro σ (hσ | ⟨n, rfl⟩)
     · exact by_axm <| Set.mem_union_left _ hσ
-    · have h₁ : T.addAlpha T Set.univ ⊢ ∼(T.standardProvability^[n + 1] ⊥) :=
+    · have h₁ : T.turingOmega ⊢ ∼(T.standardProvability^[n + 1] ⊥) :=
         provable_neg_iterate_addAlpha fun i _ ↦ Set.mem_univ i
-      have h₂ := (inferInstance : 𝗜𝚺₁ ⪯ T.addAlpha T Set.univ).pbl
+      have h₂ := (inferInstance : 𝗜𝚺₁ ⪯ T.turingOmega).pbl
         (provable_notProvableIterateBotStrict_iff (T := T) n)
       cl_prover [h₁, h₂]
 
 /-- $T_\omega$ is `T` extended by a $\Delta_1$-presented set of strict $\Pi_1$ sentences.
 - [AB05, §4.1] -/
-theorem exists_strictPi1_axiomatization_addAlpha :
+theorem exists_strictPi1_axiomatization_turingOmega :
     ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, StrictHierarchy 𝚷 1 σ) ∧
-      T.addAlpha T Set.univ ≊ T ∪ U := by
+      T.turingOmega ≊ T ∪ U := by
   have h : ∀ σ ∈ notProvableIterateBotTheory T, StrictHierarchy 𝚷 1 σ := by
     rintro _ ⟨n, rfl⟩
     exact StrictHierarchy.rew _ strictHierarchy_notProvableIterateBotStrict
-  exact ⟨_, inferInstance, h, addAlpha_equiv_union_notProvableIterateBotTheory⟩
+  exact ⟨_, inferInstance, h, turingOmega_equiv_union_notProvableIterateBotTheory⟩
 
 end FFL.FirstOrder.Arithmetic

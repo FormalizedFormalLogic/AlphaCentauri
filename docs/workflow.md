@@ -82,9 +82,9 @@ activity for 14 days may be released by anyone, with a comment.
 `sorry`, no `native_decide`, no axiom outside `propext`, `Classical.choice`, `Quot.sound` except
 what `forgive.yml` forgives by name); `just no-sorry`; `just mk-all` leaves no diff. The audit
 writes `.lake/audit.json`, which `.github/scripts/audit-comment.py` renders into one PR comment,
-overwritten on each run, unless the PR is labelled `infrastructure`. The zoo is generated in a
-job of its own after the build, only on `main` (or `workflow_dispatch`), since it only feeds the
-GitHub Pages deployment. `actionlint.yml`
+overwritten on each run, unless the PR is labelled `infrastructure`. The zoo and the import
+graph are generated in jobs of their own after the build, only on `main` (or `workflow_dispatch`),
+since they only feed the GitHub Pages deployment. `actionlint.yml`
 lints the workflow files, and `update-deps.yml` and `repair-deps.yml` move the dependency pins
 and repair what the move breaks (below).
 

@@ -83,7 +83,32 @@ jobs:
             --service ffl-upload \
             --repo FormalizedFormalLogic/AlphaCentauri
 
-  # Only produces what `deploy` publishes from `main`; `workflow_dispatch` lets a branch try it out.
+  # The jobs below only produce what `deploy` publishes from `main`; `workflow_dispatch` lets a
+  # branch try them out.
+  import-graph:
+    name: Generate import graph
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
+      - uses: ts-graphviz/setup-graphviz@v2
+
+      - run: lake build AlphaCentauri
+      - run: just import-graph
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: import-graph
+          path: |
+            import_graph.png
+            import_graph.pdf
+            import_graph.html
+          retention-days: 1
+
   zoo:
     name: Generate zoo
     runs-on: ubuntu-latest
@@ -139,6 +164,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs:
       - build
+      - import-graph
       - zoo
       - no-sorry
       - mk-all-check
@@ -149,6 +175,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Download the import graph
+        uses: actions/download-artifact@v8
+        with:
+          name: import-graph
+          path: pages
       - name: Download the zoo
         uses: actions/download-artifact@v8
         with:

@@ -27,6 +27,7 @@ just build           # the above, then AlphaCentauri
 just axiom-audit     # the axiom allowlist
 just no-sorry        # sorry-freeness
 just hooks           # run the CI checks before every push (needs lefthook)
+just import-graph    # the module import graph, as import_graph.{png,pdf,html}
 ```
 
 ## Zoo
@@ -42,6 +43,10 @@ locally.
 ### Arithmetic Theory Zoo
 
 <a href="https://formalizedformallogic.github.io/AlphaCentauri/zoo/arithmetic.png"><img alt="Arithmetic Theory Zoo" src="https://formalizedformallogic.github.io/AlphaCentauri/zoo/arithmetic.png" height="600"></a>
+
+## Import graph
+
+The import graph of the modules of AlphaCentauri, regenerated on every push to `main`: [PNG](https://formalizedformallogic.github.io/AlphaCentauri/import_graph.png), [PDF](https://formalizedformallogic.github.io/AlphaCentauri/import_graph.pdf), [HTML](https://formalizedformallogic.github.io/AlphaCentauri/import_graph.html).
 
 ## Related projects
 

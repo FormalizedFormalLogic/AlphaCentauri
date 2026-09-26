@@ -76,6 +76,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive
+  FFL.FirstOrder.Arithmetic.Peano.provable_localReflection_ISigma:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.exists_prime_gt:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
@@ -86,5 +89,8 @@ declaration:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.ProvabilityLogic.provabilityLogic_ISigma1_add_con_Peano_eq_A:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.ProvabilityLogic.provabilityLogic_ISigma_Peano_eq_S:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi

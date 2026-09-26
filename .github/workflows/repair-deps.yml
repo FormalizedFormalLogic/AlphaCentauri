@@ -90,28 +90,11 @@ jobs:
           echo "number=$number" >> "$GITHUB_OUTPUT"
           echo "repairing #$number at $(git rev-parse --short HEAD)"
 
-      - uses: extractions/setup-just@v3
-        if: steps.decide.outputs.number != ''
-      - uses: leanprover/lean-action@v1
-        if: steps.decide.outputs.number != ''
-        with:
-          build: false
-          use-github-cache: false
-
-      # `ci.yml`'s steps, so the agent starts from the build its repair will be judged against.
+      # `ci.yml`'s setup, so the agent starts from the build its repair will be judged against.
       # The bump moves the pin onto a revision Foundation's own CI has published, which is what
       # makes this a download rather than the hour the agent would otherwise spend elaborating it.
-      - name: Restore remote cache (Foundation)
+      - uses: ./.github/actions/setup-lean
         if: steps.decide.outputs.number != ''
-        env:
-          LAKE_CONFIG: lake-cache.toml
-        run: |
-          lake cache get \
-            --service ffl \
-            --max-revs=100 \
-            --repo FormalizedFormalLogic/Foundation \
-            --package Foundation \
-          || echo "::warning::Foundation's cache is incomplete; the build will compile the rest from source"
       - name: Build the dependency
         if: steps.decide.outputs.number != ''
         run: lake build Foundation

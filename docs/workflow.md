@@ -82,7 +82,9 @@ activity for 14 days may be released by anyone, with a comment.
 `sorry`, no `native_decide`, no axiom outside `propext`, `Classical.choice`, `Quot.sound` except
 what `forgive.yml` forgives by name); `just no-sorry`; `just mk-all` leaves no diff. The audit
 writes `.lake/audit.json`, which `.github/scripts/audit-comment.py` renders into one PR comment,
-overwritten on each run, unless the PR is labelled `infrastructure`. `actionlint.yml`
+overwritten on each run, unless the PR is labelled `infrastructure`. The zoo and the import
+graph are generated in jobs of their own after the build, only on `main` (or `workflow_dispatch`),
+since they only feed the GitHub Pages deployment. `actionlint.yml`
 lints the workflow files, and `update-deps.yml` and `repair-deps.yml` move the dependency pins
 and repair what the move breaks (below).
 
@@ -106,11 +108,13 @@ branch. Foundation's CI publishes on every push to its `master`, so **the revisi
 pins is one that has been published**, and moving that pin costs a download rather than the hour
 that building Foundation from source takes — which is what makes a dependency bump cheap, here and
 in [`repair-deps.yml`](../.github/workflows/repair-deps.yml). This repository publishes its own
-outputs the same way, on pushes to `main` only: a pull request builds a tree that will not exist
-after the squash-merge.
+outputs the same way, from the merge queue and on pushes to `main` only: a pull request builds a
+tree that will not exist after the squash-merge, whereas a merge-queue commit becomes `main` as is,
+so the push run that follows restores it instead of compiling it again.
 
-`ci.yml` and `repair-deps.yml` call `lake cache get` / `lake cache put` directly, as `just cache`
-does. Reading needs nothing configured; publishing needs the secret `LAKE_CACHE_KEY`, an R2 token
+`ci.yml` and `repair-deps.yml` fetch all three through
+[`.github/actions/setup-lean`](../.github/actions/setup-lean/action.yml), and `ci.yml` calls
+`lake cache put` directly. Reading needs nothing configured; publishing needs the secret `LAKE_CACHE_KEY`, an R2 token
 scoped to that bucket alone. A miss costs only time — the build compiles from source, slowly but
 never wrongly, as it does whenever the cache is short of something.
 

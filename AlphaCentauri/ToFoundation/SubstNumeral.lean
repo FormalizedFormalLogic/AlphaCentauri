@@ -3,10 +3,11 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 
 /-!
-# Iterated numeral substitution
+# Numeral substitution
 
 The internal function that substitutes the numeral of a code into a formula with one free
-variable, iterated a given number of times.
+variable, iterated a given number of times, and a $\Delta_1$ presentation of the set of numeral
+instances of a formula with one free variable.
 -/
 
 @[expose] public section
@@ -75,3 +76,41 @@ lemma substNumeralItr_quote (σ : ArithmeticSemisentence 1) (π : ArithmeticSent
 end substNumeralItr
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
+
+namespace FFL.FirstOrder.Theory.Δ₁
+
+open Arithmetic Arithmetic.HierarchySymbol.Semiformula Arithmetic.Bootstrapping
+  Arithmetic.Bootstrapping.Arithmetic
+
+variable (φ : ArithmeticSemisentence 1)
+
+/-- The recognizer of the codes of the numeral instances `φ/[↑n]`. -/
+noncomputable def numeralInstancesCh : 𝚫₁.Semisentence 1 := .mkDelta
+  (.mkSigma “x. ∃ n <⁺ x, !ssnum x ↑(⌜φ⌝ : ℕ) n”)
+  (.mkPi “x. ∃ n <⁺ x, ∀ y, !ssnum y ↑(⌜φ⌝ : ℕ) n → x = y”)
+
+/-- The numeral instances of `φ` form a $\Delta_1$-presented theory, provided the code of each
+instance `φ/[↑n]` is at least `n`. -/
+noncomputable abbrev numeralInstances
+    (hφ : ∀ n : ℕ, n ≤ (⌜(φ/[↑n] : ArithmeticSentence)⌝ : ℕ)) :
+    Theory.Δ₁ (Set.range fun n : ℕ ↦ (φ/[↑n] : ArithmeticSentence)) where
+  ch := numeralInstancesCh φ
+  mem_iff ψ := by
+    have h (n : ℕ) : substNumeral (⌜φ⌝ : ℕ) n = ⌜(φ/[↑n] : ArithmeticSentence)⌝ := by
+      simpa using substNumeral_app_natCast (V := ℕ) φ n
+    simp only [Nat.succ_eq_add_one, Nat.reduceAdd, numeralInstancesCh, Fin.Fin1.eq_one,
+      Fin.isValue, Sentence.coe_quote, val_mkDelta, val_mkSigma, eval_bexsLTSucc',
+      Semiterm.val_bvar, Matrix.cons_val_fin_one, Semiformula.eval_substs, Matrix.comp₃,
+      Matrix.cons_val_one, Sentence.val_quote, Matrix.cons_val_zero, HierarchySymbol.Defined.iff,
+      Fin.succ_zero_eq_one, Fin.succ_one_eq_two, Matrix.cons_app_two, h, Set.mem_range,
+      exists_exists_eq_and]
+    constructor
+    · rintro ⟨n, -, hn⟩
+      exact ⟨n, (Semiformula.quote_inj_iff (V := ℕ)).mp hn⟩
+    · rintro ⟨n, rfl⟩
+      exact ⟨n, Nat.eq_or_lt_of_le (hφ n), rfl⟩
+  isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
+    intro v
+    simp [numeralInstancesCh]
+
+end FFL.FirstOrder.Theory.Δ₁

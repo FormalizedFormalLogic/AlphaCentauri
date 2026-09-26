@@ -43,6 +43,9 @@ zoo:
     typst compile AlphaCentauriZoo/arithmetic.typ pages/zoo/arithmetic.png
     typst compile AlphaCentauriZoo/arithmetic.typ pages/zoo/arithmetic.pdf
 
+import-graph:
+    lake exe graph --to AlphaCentauri import_graph.png import_graph.pdf import_graph.html
+
 mk-all:
     lake exe mk_all --lib AlphaCentauri --module
 

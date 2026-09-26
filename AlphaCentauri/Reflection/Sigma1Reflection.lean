@@ -3,6 +3,7 @@ module
 public import AlphaCentauri.Reflection.Unboundedness
 public import AlphaCentauri.ToFoundation.Coding
 public import AlphaCentauri.ToFoundation.Semiformula
+public import AlphaCentauri.ToFoundation.SubstNumeral
 
 @[expose] public section
 /-!
@@ -12,7 +13,8 @@ public import AlphaCentauri.ToFoundation.Semiformula
 $\theta(x) :\equiv (\mathrm{Sent}(x) \wedge \mathrm{Str}\Sigma_1(x) \wedge \mathrm{Pr}_T(x)) \to
 \mathrm{Tr}_{\Sigma_1}(x)$, built from the recognizer of strict $\Sigma_1$ codes and the strict
 $\Sigma_1$ partial truth predicate. Its numeral instances axiomatize local $\Sigma_1$ reflection
-over `T`.
+over `T`. A strict $\Pi_2$ prenex form of it gives a $\Delta_1$-presented set of strict $\Pi_2$
+sentences, `sigma1ReflectionTheory T`, with the same property.
 
 - [AB05, §4.2]
 -/
@@ -111,6 +113,88 @@ theorem provable_sigma1ReflectionFormula_iff {σ : ArithmeticSentence}
       simp [(isStrictSigma_quote_iff σ).mpr hσ]
     simpa [models_iff, Arithmetic.standardProvability_def, numeral_eq_natCast] using h
 
+variable (T) in
+lemma exists_matrix_sigma1ReflectionPremise :
+    ∃ θ : 𝚺₀.Semisentence 2, 𝗜𝚺₁ ⊢ ∀¹* ((sigma1ReflectionPremise T).val 🡘 ∃¹ θ.val) :=
+  ISigma1.exists_matrix_provable (by simp)
+
+lemma exists_matrix_sigma1ReflectionConclusion :
+    ∃ θ : 𝚺₀.Semisentence 2, 𝗜𝚺₁ ⊢ ∀¹* (sigma1ReflectionConclusion.val 🡘 ∃¹ θ.val) :=
+  ISigma1.exists_matrix_provable (by simp)
+
+variable (T) in
+/-- A $\Delta_0$ matrix of a prenex form of `sigma1ReflectionPremise T`. -/
+noncomputable def sigma1ReflectionPremiseMatrix : 𝚺₀.Semisentence 2 :=
+  (exists_matrix_sigma1ReflectionPremise T).choose
+
+/-- A $\Delta_0$ matrix of a prenex form of `sigma1ReflectionConclusion`. -/
+noncomputable def sigma1ReflectionConclusionMatrix : 𝚺₀.Semisentence 2 :=
+  exists_matrix_sigma1ReflectionConclusion.choose
+
+variable (T) in
+/-- A strict $\Pi_2$ formula equivalent to `sigma1ReflectionFormula T` over `𝗜𝚺₁`. The vacuous
+disjunct `x ≠ x` makes the free variable occur in every numeral instance. -/
+noncomputable def sigma1ReflectionFormulaStrict : ArithmeticSemisentence 1 :=
+  “x. ∀ u, ∃ w, x ≠ x ∨ ¬!(sigma1ReflectionPremiseMatrix T).val u x ∨
+    !sigma1ReflectionConclusionMatrix.val w x”
+
+lemma strictHierarchy_sigma1ReflectionFormulaStrict :
+    StrictHierarchy 𝚷 2 (sigma1ReflectionFormulaStrict T) := by
+  apply StrictHierarchy.all
+  apply StrictHierarchy.ofAlt
+  apply StrictHierarchy.exs
+  apply StrictHierarchy.of_deltaZero
+  simp
+
+lemma le_quote_sigma1ReflectionFormulaStrict (n : ℕ) :
+    n ≤ (⌜((sigma1ReflectionFormulaStrict T)/[↑n] : ArithmeticSentence)⌝ : ℕ) := by
+  simp only [sigma1ReflectionFormulaStrict, Rewriting.app_all, Rewriting.app_exs,
+    LogicalConnective.HomClass.map_or, LogicalConnective.HomClass.map_neg, Rew.hom_finitary2,
+    Sentence.quote_def, Rew.q_emb, Semiformula.quote_all, Semiformula.quote_ex,
+    Semiformula.quote_or]
+  apply LE.le.trans' <| le_of_lt <|
+    lt_trans (lt_or_left _ _) (lt_trans (lt_exists _) (lt_forall _))
+  have : (2 : Fin 3) = (0 : Fin 1).succ.succ := rfl
+  rw [this, Rew.q_bvar_succ, Rew.q_bvar_succ]
+  simp only [Semiformula.quote_def, Rew.subst_bvar, Matrix.cons_val_fin_one, Rew.finitary0,
+    LCWQIsoGödelQuote.neg, Semiformula.typed_quote_eq, Semiterm.typed_quote_numeral_eq_numeral,
+    natCast_nat, Arithmetic.neg_equals, Arithmetic.val_notEquals,
+    Bootstrapping.Arithmetic.val_numeral]
+  have h := Arithmetic.lt_qqNEQ_left (V := ℕ) (Arithmetic.numeral n) (Arithmetic.numeral n)
+  rcases Arithmetic.le_numeral_self (V := ℕ) n with e | e
+  · exact e ▸ h.le
+  · exact (e.trans h).le
+
+section
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+lemma eval_sigma1ReflectionFormulaStrict (x : V) :
+    V ⊧/![x] (sigma1ReflectionFormulaStrict T) ↔ V ⊧/![x] (sigma1ReflectionFormula T) := by
+  have hA := models_of_provable (M := V) inferInstance
+    (exists_matrix_sigma1ReflectionPremise T).choose_spec
+  have hB := models_of_provable (M := V) inferInstance
+    exists_matrix_sigma1ReflectionConclusion.choose_spec
+  simp [models_iff] at hA hB
+  simp [sigma1ReflectionFormulaStrict, sigma1ReflectionFormula, hA, hB,
+    sigma1ReflectionPremiseMatrix, sigma1ReflectionConclusionMatrix, exists_or, imp_iff_not_or,
+    forall_or_right]
+
+end
+
+lemma provable_sigma1ReflectionFormulaStrict_iff (n : ℕ) :
+    𝗜𝚺₁ ⊢ (sigma1ReflectionFormulaStrict T)/[↑n] 🡘 (sigma1ReflectionFormula T)/[↑n] :=
+  complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    simpa [models_iff, numeral_eq_natCast] using eval_sigma1ReflectionFormulaStrict (T := T) (n : V)
+
+variable (T) in
+/-- The numeral instances of `sigma1ReflectionFormulaStrict T`. -/
+noncomputable def sigma1ReflectionTheory : ArithmeticTheory :=
+  Set.range fun n : ℕ ↦ ((sigma1ReflectionFormulaStrict T)/[↑n] : ArithmeticSentence)
+
+noncomputable instance : (sigma1ReflectionTheory T).Δ₁ :=
+  Theory.Δ₁.numeralInstances _ le_quote_sigma1ReflectionFormulaStrict
+
 variable [𝗜𝚺₁ ⪯ T]
 
 /-- Local $\Sigma_1$ reflection over `T` is axiomatized by the numeral instances of
@@ -150,5 +234,44 @@ theorem localReflectionOn_Sigma1_equiv_union_range :
         cl_prover [h₁, h₂]
       · exact hRfn.pbl <|
           provable_sigma1ReflectionFormula_of_not_code fun σ hσ e ↦ hn ⟨σ, hσ, e⟩
+
+/-- Local $\Sigma_1$ reflection over `T` is axiomatized by `sigma1ReflectionTheory T`.
+- [AB05, §4.2] -/
+theorem localReflectionOn_Sigma1_equiv_union_sigma1ReflectionTheory :
+    T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T ≊ T ∪ sigma1ReflectionTheory T := by
+  apply localReflectionOn_Sigma1_equiv_union_range.trans
+  have hR : 𝗜𝚺₁ ⪯ T ∪ Set.range fun n : ℕ ↦
+      ((sigma1ReflectionFormula T)/[↑n] : ArithmeticSentence) :=
+    WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left)
+  have hS : 𝗜𝚺₁ ⪯ T ∪ sigma1ReflectionTheory T :=
+    WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left)
+  apply Equiv.antisymm
+  constructor
+  · apply WeakerThan.ofAxm!
+    rintro φ (hφ | ⟨n, rfl⟩)
+    · exact by_axm <| Set.mem_union_left _ hφ
+    · have h₁ : T ∪ sigma1ReflectionTheory T ⊢ (sigma1ReflectionFormulaStrict T)/[↑n] :=
+        by_axm <| Set.mem_union_right _ ⟨n, rfl⟩
+      have h₂ := hS.pbl (provable_sigma1ReflectionFormulaStrict_iff (T := T) n)
+      cl_prover [h₁, h₂]
+  · apply WeakerThan.ofAxm!
+    rintro φ (hφ | ⟨n, rfl⟩)
+    · exact by_axm <| Set.mem_union_left _ hφ
+    · have h₁ : T ∪ (Set.range fun n : ℕ ↦ ((sigma1ReflectionFormula T)/[↑n] : ArithmeticSentence))
+          ⊢ (sigma1ReflectionFormula T)/[↑n] :=
+        by_axm <| Set.mem_union_right _ ⟨n, rfl⟩
+      have h₂ := hR.pbl (provable_sigma1ReflectionFormulaStrict_iff (T := T) n)
+      cl_prover [h₁, h₂]
+
+/-- Local $\Sigma_1$ reflection over `T` is axiomatized over `T` by a $\Delta_1$-presented set of
+strict $\Pi_2$ sentences.
+- [AB05, §4.2] -/
+theorem exists_strictPi2_axiomatization_localReflectionOn_Sigma1 :
+    ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, StrictHierarchy 𝚷 2 σ) ∧
+      T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T ≊ T ∪ U := by
+  have h : ∀ σ ∈ sigma1ReflectionTheory T, StrictHierarchy 𝚷 2 σ := by
+    rintro _ ⟨n, rfl⟩
+    exact StrictHierarchy.rew _ strictHierarchy_sigma1ReflectionFormulaStrict
+  exact ⟨_, inferInstance, h, localReflectionOn_Sigma1_equiv_union_sigma1ReflectionTheory⟩
 
 end FFL.FirstOrder.Arithmetic

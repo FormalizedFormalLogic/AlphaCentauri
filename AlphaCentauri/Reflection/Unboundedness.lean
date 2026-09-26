@@ -287,6 +287,22 @@ theorem exists_sentence_weakerThan_of_consistent
   obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_forall_mem (T := T) hΓ
   exact ⟨θ, hθ, e.le.trans hle, hcon⟩
 
+/-- Unboundedness for the broad class: an extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a
+$\Delta_1$-presented set `U'` of strict `Γ (n + 1)` sentences, proving the local reflection schema
+of `T` on the sentences of the dual class is inconsistent. Only `𝗜𝚺₁ ⪯ T` is assumed.
+- [AB05, Theorem 23]
+- [Lin97, Corollary 4.2] -/
+theorem inconsistent_of_provable_localReflectionOn_hierarchy_union
+    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
+    (h : T ∪ U ⊢* 𝗥𝗳𝗻[Hierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
+  by_contra hc
+  have : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
+  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent hΓ e
+  have : 𝗜𝚺₁ ⪯ insert θ T :=
+    WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset (Set.subset_insert _ _))
+  exact hcon.not_inc <| T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
+    (fun _ hσ ↦ by simpa using hσ) hθ fun hσ ↦ hle.pbl (h hσ)
+
 /-- Unboundedness: an extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a $\Delta_1$-presented
 set `U'` of strict `Γ (n + 1)` sentences, proving the local reflection schema of `T` on the strict
 sentences of the dual class is inconsistent.
@@ -294,12 +310,10 @@ sentences of the dual class is inconsistent.
 - [Lin97, Corollary 4.2] -/
 theorem inconsistent_of_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
     (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
-    (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
-  by_contra hc
-  have : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
-  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent hΓ e
-  exact hcon.not_inc
-    (inconsistent_of_provable_localReflectionOn_insert hθ fun hσ ↦ hle.pbl (h hσ))
+    (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) :=
+  inconsistent_of_provable_localReflectionOn_hierarchy_union hΓ e <|
+    provable_localReflectionOn_hierarchy_of_strictHierarchy
+      (WeakerThan.ofSubset Set.subset_union_left) h
 
 /-- Unboundedness: a consistent extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a
 $\Delta_1$-presented set `U'` of strict `Γ (n + 1)` sentences, does not prove the local reflection

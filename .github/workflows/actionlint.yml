@@ -1,7 +1,5 @@
 name: Actionlint
 
-# No `merge_group`: `paths` filters do not apply to that event, so the lint would run on every
-# queue entry. This gates the pull request, not the queue.
 on:
   push:
     branches:
@@ -28,7 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      # Pinned: a new actionlint release must not turn CI red without a commit here.
       - name: Run actionlint
         uses: docker://rhysd/actionlint:1.7.12
         with:

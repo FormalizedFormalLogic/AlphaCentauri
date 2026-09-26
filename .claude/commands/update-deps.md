@@ -5,8 +5,7 @@ description: Pick up the dependency pin-bump pull request and make it green
 Handle the automated dependency pin bump. `.github/workflows/update-deps.yml` keeps one branch,
 `update-deps`, behind one pull request labelled `update-deps`, whose body tabulates the revisions
 it moved; the workflow moves the pins and nothing else, so the bump is red until this repository
-is repaired. `.github/workflows/repair-deps.yml` does that in the cloud, once per bump, and this
-command is the same runbook from a local session. `docs/workflow.md`, "Dependency pins and
+is repaired, which this command does from a local session. `docs/workflow.md`, "Dependency pins and
 Foundation", is normative — read it before acting.
 
 Comment your session's link on the pull request when you pick it up, as `docs/workflow.md` asks

@@ -1,5 +1,8 @@
 .lake
 
+# import graph (`just import-graph`)
+import_graph.*
+
 # Verso
 _out
 

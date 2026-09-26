@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.ProvabilityLogic.AddTBB
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.AddAlpha
 public import AlphaCentauri.ToFoundation.SubstNumeral
 public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 
@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 /-!
 # A strict $\Pi_1$ axiomatization of $T_\omega$
 
-`T.addTBB T Set.univ` is $T_\omega = T + \{\neg\Box_T^{n + 1}\bot\}_n$. It is equivalent to `T`
+`T.addAlpha T Set.univ` is $T_\omega = T + \{\neg\Box_T^{n + 1}\bot\}_n$. It is equivalent to `T`
 extended by the $\Delta_1$-presented set `notProvableIterateBotTheory T` of strict $\Pi_1$
 sentences: the numeral instances of one strict $\Pi_1$ formula, which `𝗜𝚺₁` proves equivalent to
 $\neg\mathrm{Pr}_T(\ulcorner\Box_T^{x}\bot\urcorner)$.
@@ -120,8 +120,8 @@ variable [𝗜𝚺₁ ⪯ T]
 
 /-- $T_\omega$ is equivalent to `T` extended by `notProvableIterateBotTheory T`.
 - [AB05, §4.1] -/
-theorem addTBB_equiv_union_notProvableIterateBotTheory :
-    T.addTBB T Set.univ ≊ T ∪ notProvableIterateBotTheory T := by
+theorem addAlpha_equiv_union_notProvableIterateBotTheory :
+    T.addAlpha T Set.univ ≊ T ∪ notProvableIterateBotTheory T := by
   have hU : 𝗜𝚺₁ ⪯ T ∪ notProvableIterateBotTheory T :=
     WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left)
   apply Equiv.antisymm
@@ -132,25 +132,25 @@ theorem addTBB_equiv_union_notProvableIterateBotTheory :
     · have h₁ : T ∪ notProvableIterateBotTheory T ⊢ (notProvableIterateBotStrict T)/[↑n] :=
         by_axm <| Set.mem_union_right _ ⟨n, rfl⟩
       have h₂ := hU.pbl (provable_notProvableIterateBotStrict_iff (T := T) n)
-      simp only [ProvabilityLogic.Formula.interpret_TBB]
+      simp only [ProvabilityLogic.Formula.interpret_alpha]
       cl_prover [h₁, h₂]
   · apply WeakerThan.ofAxm!
     rintro σ (hσ | ⟨n, rfl⟩)
     · exact by_axm <| Set.mem_union_left _ hσ
-    · have h₁ : T.addTBB T Set.univ ⊢ ∼(T.standardProvability^[n + 1] ⊥) :=
-        provable_neg_iterate_addTBB fun i _ ↦ Set.mem_univ i
-      have h₂ := (inferInstance : 𝗜𝚺₁ ⪯ T.addTBB T Set.univ).pbl
+    · have h₁ : T.addAlpha T Set.univ ⊢ ∼(T.standardProvability^[n + 1] ⊥) :=
+        provable_neg_iterate_addAlpha fun i _ ↦ Set.mem_univ i
+      have h₂ := (inferInstance : 𝗜𝚺₁ ⪯ T.addAlpha T Set.univ).pbl
         (provable_notProvableIterateBotStrict_iff (T := T) n)
       cl_prover [h₁, h₂]
 
 /-- $T_\omega$ is `T` extended by a $\Delta_1$-presented set of strict $\Pi_1$ sentences.
 - [AB05, §4.1] -/
-theorem exists_strictPi1_axiomatization_addTBB :
+theorem exists_strictPi1_axiomatization_addAlpha :
     ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, StrictHierarchy 𝚷 1 σ) ∧
-      T.addTBB T Set.univ ≊ T ∪ U := by
+      T.addAlpha T Set.univ ≊ T ∪ U := by
   have h : ∀ σ ∈ notProvableIterateBotTheory T, StrictHierarchy 𝚷 1 σ := by
     rintro _ ⟨n, rfl⟩
     exact StrictHierarchy.rew _ strictHierarchy_notProvableIterateBotStrict
-  exact ⟨_, inferInstance, h, addTBB_equiv_union_notProvableIterateBotTheory⟩
+  exact ⟨_, inferInstance, h, addAlpha_equiv_union_notProvableIterateBotTheory⟩
 
 end FFL.FirstOrder.Arithmetic

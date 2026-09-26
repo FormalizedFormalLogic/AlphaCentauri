@@ -1,22 +1,29 @@
 module
 
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.AddTBB
 public import AlphaCentauri.ToFoundation.SubstNumeral
-public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
-public import Foundation.ProvabilityLogic.Classification.General
-public import Foundation.Meta.ClProver
 
 @[expose] public section
 /-!
 # A strict $\Pi_1$ axiomatization of $T_\omega$
+
+`T.addTBB T Set.univ` is $T_\omega = T + \{\neg\Box_T^{n + 1}\bot\}_n$. It is equivalent to `T`
+extended by the $\Delta_1$-presented set `notProvableIterateBotTheory T` of strict $\Pi_1$
+sentences: the numeral instances of one strict $\Pi_1$ formula, which `𝗜𝚺₁` proves equivalent to
+$\neg\mathrm{Pr}_T(\ulcorner\Box_T^{x}\bot\urcorner)$.
+
+- [AB05, §4.1]
 -/
 
 namespace FFL.FirstOrder.Arithmetic
 
-open FFL.Entailment Bootstrapping
+open FFL.Entailment Bootstrapping ArithmeticTheory
 
 variable (T : ArithmeticTheory) [T.Δ₁]
 
+/-- The $\Pi_1$ formula $\neg\mathrm{Pr}_T(\ulcorner\Box_T^{x}\bot\urcorner)$, with the code of
+$\Box_T^{x}\bot$ computed by `substNumeralItr`. -/
 noncomputable def notProvableIterateBot : 𝚷₁.Semisentence 1 := .mkPi
   “x. ∀ y, !substNumeralItrDef y !!(⌜(provable T).val⌝) !!(⌜(⊥ : ArithmeticSentence)⌝) x →
     ¬!(provable T) y”
@@ -45,10 +52,13 @@ lemma exists_matrix_notProvableIterateBot :
   ISigma1.exists_matrix_provable_pi (by simp)
 
 variable (T) in
+/-- A $\Delta_0$ matrix of a prenex form of `notProvableIterateBot T`. -/
 noncomputable def notProvableIterateBotMatrix : 𝚺₀.Semisentence 2 :=
   (exists_matrix_notProvableIterateBot T).choose
 
 variable (T) in
+/-- A strict $\Pi_1$ formula equivalent to `notProvableIterateBot T` over `𝗜𝚺₁`. The vacuous
+disjunct `x ≠ x` makes the free variable occur in every numeral instance. -/
 noncomputable def notProvableIterateBotStrict : ArithmeticSemisentence 1 :=
   “x. ∀ y, x ≠ x ∨ !(notProvableIterateBotMatrix T).val y x”
 
@@ -63,7 +73,7 @@ lemma le_quote_notProvableIterateBotStrict (n : ℕ) :
   simp only [notProvableIterateBotStrict, Rewriting.app_all, LogicalConnective.HomClass.map_or,
     LogicalConnective.HomClass.map_neg, Rew.hom_finitary2, Sentence.quote_def, Rew.q_emb,
     Semiformula.quote_all, Semiformula.quote_or]
-  refine le_trans ?_ (le_of_lt <| lt_trans (lt_or_left _ _) (lt_forall _))
+  apply LE.le.trans' (le_of_lt <| lt_trans (lt_or_left _ _) (lt_forall _))
   have : (1 : Fin 2) = (0 : Fin 1).succ := rfl
   rw [this, Rew.q_bvar_succ]
   simp only [Semiformula.quote_def, Rew.subst_bvar, Matrix.cons_val_fin_one, Rew.finitary0,
@@ -99,29 +109,17 @@ lemma provable_notProvableIterateBotStrict_iff (n : ℕ) :
       numeral_eq_natCast] using h
 
 variable (T) in
+/-- The numeral instances of `notProvableIterateBotStrict T`. -/
 noncomputable def notProvableIterateBotTheory : ArithmeticTheory :=
   Set.range fun n : ℕ ↦ ((notProvableIterateBotStrict T)/[↑n] : ArithmeticSentence)
 
 noncomputable instance : (notProvableIterateBotTheory T).Δ₁ :=
   Theory.Δ₁.numeralInstances _ le_quote_notProvableIterateBotStrict
 
-open ProvabilityLogic Formula in
-lemma interpret_TBB (n : ℕ) :
-    (TBB n : LetterlessFormula).interpret ⟨Empty.elim⟩ T.standardProvability =
-      (T.standardProvability^[n + 1] ⊥ 🡒 T.standardProvability^[n] ⊥) := by
-  simp [TBB, interpret, Function.iterate_succ_apply']
-
-lemma addTBB_provable_neg_iterate (n : ℕ) :
-    T.addTBB T Set.univ ⊢ ∼(T.standardProvability^[n] ⊥) := by
-  induction n with
-  | zero => simp only [Function.iterate_zero, id]; cl_prover
-  | succ n ih =>
-    have h : T.addTBB T Set.univ ⊢ T.standardProvability^[n + 1] ⊥ 🡒 T.standardProvability^[n] ⊥ :=
-      by_axm <| Set.mem_union_right T ⟨n, Set.mem_univ n, interpret_TBB n⟩
-    cl_prover [h, ih]
-
 variable [𝗜𝚺₁ ⪯ T]
 
+/-- $T_\omega$ is equivalent to `T` extended by `notProvableIterateBotTheory T`.
+- [AB05, §4.1] -/
 theorem addTBB_equiv_union_notProvableIterateBotTheory :
     T.addTBB T Set.univ ≊ T ∪ notProvableIterateBotTheory T := by
   have hU : 𝗜𝚺₁ ⪯ T ∪ notProvableIterateBotTheory T :=
@@ -134,22 +132,25 @@ theorem addTBB_equiv_union_notProvableIterateBotTheory :
     · have h₁ : T ∪ notProvableIterateBotTheory T ⊢ (notProvableIterateBotStrict T)/[↑n] :=
         by_axm <| Set.mem_union_right _ ⟨n, rfl⟩
       have h₂ := hU.pbl (provable_notProvableIterateBotStrict_iff (T := T) n)
-      simp only [interpret_TBB]
+      simp only [ProvabilityLogic.Formula.interpret_TBB]
       cl_prover [h₁, h₂]
   · apply WeakerThan.ofAxm!
     rintro σ (hσ | ⟨n, rfl⟩)
     · exact by_axm <| Set.mem_union_left _ hσ
-    · have h₁ := addTBB_provable_neg_iterate (T := T) (n + 1)
+    · have h₁ : T.addTBB T Set.univ ⊢ ∼(T.standardProvability^[n + 1] ⊥) :=
+        provable_neg_iterate_addTBB fun i _ ↦ Set.mem_univ i
       have h₂ := (inferInstance : 𝗜𝚺₁ ⪯ T.addTBB T Set.univ).pbl
         (provable_notProvableIterateBotStrict_iff (T := T) n)
       cl_prover [h₁, h₂]
 
+/-- $T_\omega$ is `T` extended by a $\Delta_1$-presented set of strict $\Pi_1$ sentences.
+- [AB05, §4.1] -/
 theorem exists_strictPi1_axiomatization_addTBB :
     ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, StrictHierarchy 𝚷 1 σ) ∧
       T.addTBB T Set.univ ≊ T ∪ U := by
-  refine ⟨notProvableIterateBotTheory T, inferInstance, ?_,
-    addTBB_equiv_union_notProvableIterateBotTheory⟩
-  rintro _ ⟨n, rfl⟩
-  exact StrictHierarchy.rew _ strictHierarchy_notProvableIterateBotStrict
+  have h : ∀ σ ∈ notProvableIterateBotTheory T, StrictHierarchy 𝚷 1 σ := by
+    rintro _ ⟨n, rfl⟩
+    exact StrictHierarchy.rew _ strictHierarchy_notProvableIterateBotStrict
+  exact ⟨_, inferInstance, h, addTBB_equiv_union_notProvableIterateBotTheory⟩
 
 end FFL.FirstOrder.Arithmetic

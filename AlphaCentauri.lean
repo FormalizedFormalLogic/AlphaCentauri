@@ -61,6 +61,7 @@ public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.AddTBB
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Interpret
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata

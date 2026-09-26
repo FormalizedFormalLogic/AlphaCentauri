@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  # Every pull request, including one stacked on another pull request's branch.
   pull_request:
   merge_group:
     branches:
@@ -67,8 +66,6 @@ jobs:
           echo "the axiom audit failed; see the 'Audit axioms' step"
           exit 1
 
-      # A merge-queue commit becomes `main` as is, so publishing it there lets the push run that
-      # follows, and the jobs below, restore it instead of compiling it again.
       - name: Save remote cache
         if: >-
           github.event_name == 'merge_group' ||
@@ -83,8 +80,6 @@ jobs:
             --service ffl-upload \
             --repo FormalizedFormalLogic/AlphaCentauri
 
-  # The jobs below only produce what `deploy` publishes from `main`; `workflow_dispatch` lets a
-  # branch try them out.
   import-graph:
     name: Generate import graph
     runs-on: ubuntu-latest
@@ -121,7 +116,6 @@ jobs:
       - uses: ./.github/actions/setup-lean
       - uses: typst-community/setup-typst@v5
 
-      # The generator imports all of `Foundation` at run time, beyond what `AlphaCentauri` imports.
       - run: lake build Foundation
       - run: lake build AlphaCentauri
       - run: just zoo
@@ -141,7 +135,6 @@ jobs:
       - name: Forbid sorry
         run: just no-sorry
 
-  # `mk_all` needs none of Mathlib's oleans, so this job skips the caches `setup-lean` fetches.
   mk-all-check:
     name: Check mk_all executed
     runs-on: ubuntu-latest

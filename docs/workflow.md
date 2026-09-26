@@ -85,8 +85,7 @@ writes `.lake/audit.json`, which `.github/scripts/audit-comment.py` renders into
 overwritten on each run, unless the PR is labelled `infrastructure`. The zoo and the import
 graph are generated in jobs of their own after the build, only on `main` (or `workflow_dispatch`),
 since they only feed the GitHub Pages deployment. `actionlint.yml`
-lints the workflow files, and `update-deps.yml` and `repair-deps.yml` move the dependency pins
-and repair what the move breaks (below).
+lints the workflow files, and `update-deps.yml` moves the dependency pins (below).
 
 A red check is fixed in the PR, never worked around.
 
@@ -106,14 +105,13 @@ which is the same file in every repository that uses it. `just cache` fetches al
 The scope of an entry is the package's GitHub repository and the revision it was built at, not a
 branch. Foundation's CI publishes on every push to its `master`, so **the revision this repository
 pins is one that has been published**, and moving that pin costs a download rather than the hour
-that building Foundation from source takes — which is what makes a dependency bump cheap, here and
-in [`repair-deps.yml`](../.github/workflows/repair-deps.yml). This repository publishes its own
+that building Foundation from source takes — which is what makes a dependency bump cheap. This repository publishes its own
 outputs the same way, from the merge queue and on pushes to `main` only: a pull request builds a
 tree that will not exist after the squash-merge, whereas a merge-queue commit becomes `main` as is,
 so the push run that follows restores it instead of compiling it again.
 
-`ci.yml` and `repair-deps.yml` fetch all three through
-[`.github/actions/setup-lean`](../.github/actions/setup-lean/action.yml), and `ci.yml` calls
+`ci.yml` fetches all three through
+[`.github/actions/setup-lean`](../.github/actions/setup-lean/action.yml) and calls
 `lake cache put` directly. Reading needs nothing configured; publishing needs the secret `LAKE_CACHE_KEY`, an R2 token
 scoped to that bucket alone. A miss costs only time — the build compiles from source, slowly but
 never wrongly, as it does whenever the cache is short of something.
@@ -187,14 +185,8 @@ it once the checks are green; the checks are the whole review, because there is 
 the diff to read. A branch that carries more than the pins is never queued. Nothing waits on the
 branch being current, because the merge queue tests each entry against the tip of `main` itself.
 
-[`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes the rest: when
-CI fails on that branch it hands it to Claude Code, which repairs this repository in place and
-commits. The agent cannot push: the workflow runs the checks `ci.yml` runs and pushes only if they
-pass, so the branch never advances to a commit that does not build, and cancels the queued merge
-when it does — a repaired bump is read by a human before it lands. Each bump gets one attempt, drawn from the maintainer's Claude subscription through the
-organization secret `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`); without it, or after that
-attempt, the pull request says so and waits. `/update-deps` is the same
-runbook from a local session.
+A bump that breaks something waits for a repair on its branch; `/update-deps` is the runbook
+for a local session.
 
 Repairing a bump is a session's work, not an issue's:
 

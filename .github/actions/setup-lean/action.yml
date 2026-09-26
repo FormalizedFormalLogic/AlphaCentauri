@@ -27,7 +27,6 @@ runs:
           --package Foundation \
         || echo "::warning::Foundation's cache is incomplete; the build will compile the rest from source"
 
-    # Looked up along the checked-out history, so the job has to check out with `fetch-depth`.
     - name: Restore remote cache (AlphaCentauri)
       shell: bash
       env:

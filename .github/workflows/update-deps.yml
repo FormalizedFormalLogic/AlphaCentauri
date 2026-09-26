@@ -1,15 +1,10 @@
 name: Update dependencies
 
-# Moves the followed pins onto one long-lived branch behind one pull request, and nothing else;
-# `repair-deps.yml` fixes what the move breaks. See docs/workflow.md.
-#
-# It pushes as the organization's GitHub App because a `github.token` push starts no checks.
 on:
   schedule:
     - cron: '17 */6 * * *'
   workflow_dispatch:
 
-# Shared with `repair-deps.yml`: a bump landing under an agent costs it the push it cannot force.
 concurrency:
   group: update-deps-branch
   cancel-in-progress: false
@@ -22,7 +17,6 @@ env:
   BRANCH: update-deps
   LABEL: update-deps
   TITLE: 'chore: Update dependencies'
-  # `lakefile.toml` names; the repositories behind them are read from `lakefile.toml` too.
   FOLLOWED: Foundation
   TOOLCHAIN_PINNED: Forgive
 
@@ -55,7 +49,6 @@ jobs:
           echo "number=$number" >> "$GITHUB_OUTPUT"
           echo "found the pull request: ${number:-none}"
 
-      # Built on top of, never rewritten: the previous bump's repairs live on that branch.
       - name: Prepare the branch
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
@@ -68,7 +61,6 @@ jobs:
             git switch --force-create "$BRANCH" origin/main
           fi
 
-      # Before lake runs, so it resolves under the toolchain it is resolving for.
       - name: Take the upstream toolchain
         run: |
           set -euo pipefail
@@ -76,7 +68,6 @@ jobs:
           curl -fsSL "https://raw.githubusercontent.com/$first/master/lean-toolchain" -o lean-toolchain
           echo "the toolchain is $(cat lean-toolchain), taken from $first"
 
-      # Lake builds every dependency under the root toolchain, so a pin tied to it has to move.
       - name: Move the pins tied to the toolchain
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
@@ -86,13 +77,10 @@ jobs:
             python3 .github/scripts/deps.py pin-tag lakefile.toml "$package" "$(cat lean-toolchain)"
           done
 
-      # elan only: the mathlib cache refuses this tree, whose toolchain and manifest disagree.
       - name: Install elan
-        uses: leanprover/lean-action@v1
-        with:
-          build: false
-          use-github-cache: false
-          use-mathlib-cache: false
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
       - name: Update the manifest
         id: rev
@@ -143,7 +131,6 @@ jobs:
           fi
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
-      # Rewritten every run, so notes about the bump belong in a comment.
       - name: Open or refresh the pull request
         id: open
         if: steps.push.outputs.pushed == 'true'

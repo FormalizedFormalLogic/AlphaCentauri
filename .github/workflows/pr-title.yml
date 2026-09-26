@@ -1,7 +1,5 @@
 name: PR title
 
-# Its own workflow because of `edited`: that event in `ci.yml` would rebuild the library every
-# time a body is reworded.
 on:
   pull_request:
     types:

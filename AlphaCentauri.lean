@@ -38,6 +38,7 @@ public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.Reflection.IteratedConsistency
 public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.StandardProvability
+public import AlphaCentauri.Reflection.TuringOmega
 public import AlphaCentauri.Reflection.Unboundedness
 public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.DeltaInduction

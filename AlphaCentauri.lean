@@ -31,6 +31,7 @@ public import AlphaCentauri.OmegaLogic.Elimination
 public import AlphaCentauri.OmegaLogic.Embedding
 public import AlphaCentauri.OmegaLogic.Inversion
 public import AlphaCentauri.OmegaLogic.Reduction
+public import AlphaCentauri.ProvabilityLogic.Consistency
 public import AlphaCentauri.ProvabilityLogic.ISigma
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parikh
@@ -56,6 +57,7 @@ public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definability
 public import AlphaCentauri.ToFoundation.Definable
+public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar

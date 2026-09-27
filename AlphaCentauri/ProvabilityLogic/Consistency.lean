@@ -42,6 +42,17 @@ lemma trace_provabilityLogic_add_con_eq_univ
 
 /-- Let `T` and `U` be theories such that `𝗜𝚺₁` proves $\mathrm{Pr}_T(\sigma) \to
 \mathrm{Pr}_U(\sigma)$ for every `σ`, and `U` proves the local $\Sigma_1$ reflection principle of
+`T`. Then `𝐀` is weaker than the provability logic of `T` relative to `T + Con(U)`. -/
+lemma A_weakerThan_provabilityLogic_add_con
+    (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
+    (hU : U ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) :
+    𝐀 ⪯ T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) :=
+  have : 𝗜𝚺₁ ⪯ T ∪ U.Con := (inferInstance : 𝗜𝚺₁ ⪯ T).trans <|
+    WeakerThan.ofSubset Set.subset_union_left
+  A_weakerThan_provabilityLogic (trace_provabilityLogic_add_con_eq_univ hTU hU)
+
+/-- Let `T` and `U` be theories such that `𝗜𝚺₁` proves $\mathrm{Pr}_T(\sigma) \to
+\mathrm{Pr}_U(\sigma)$ for every `σ`, and `U` proves the local $\Sigma_1$ reflection principle of
 `T`. If `T + Con(U)` is consistent, the provability logic of `T` relative to `T + Con(U)` is `𝐀`.
 - [AB05, Example 63] -/
 theorem provabilityLogic_add_con_eq_A
@@ -51,9 +62,9 @@ theorem provabilityLogic_add_con_eq_A
   have : 𝗜𝚺₁ ⪯ T ∪ U.Con := (inferInstance : 𝗜𝚺₁ ⪯ T).trans <|
     WeakerThan.ofSubset Set.subset_union_left
   have hT := trace_provabilityLogic_add_con_eq_univ (α := α) hTU hU
-  -- (i) `𝐀` is a lower bound, by the trace computation.
+  -- (i) `𝐀` is a lower bound.
   have hA : 𝐀 ⪯ T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) :=
-    A_weakerThan_provabilityLogic hT
+    A_weakerThan_provabilityLogic_add_con hTU hU
   refine Logic.weakerThan_antisymm ?_ hA
   -- (ii) a logic strictly above `𝐀` would give `T ∪ Con(U)` the local `Σ1` reflection schema of
   -- `T` from its single `Π1` axiom `Con(U)`, which Theorem 23 forbids.

@@ -256,13 +256,13 @@ private lemma provable_of_mem (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ
 /-- The case `U = U'` of `exists_sentence_weakerThan_of_consistent`.
 - [Lin97, Theorem 4.3] -/
 private lemma exists_sentence_weakerThan_of_forall_mem
-    (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) [Consistent (T ∪ U)] :
+    (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) (hC : Consistent (T ∪ U)) :
     ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
   have hcon : Consistent (insert (collapseSentence T U n Γ) T) := by
     by_contra hc
     exact (inconsistent_union_of_inconsistent_insert hΓ
-      (not_consistent_iff_inconsistent.mp hc)).not_con inferInstance
+      (not_consistent_iff_inconsistent.mp hc)).not_con hC
   refine ⟨collapseSentence T U n Γ, hierarchy_collapseSentence T U n Γ, ?_, hcon⟩
   apply WeakerThan.ofAxm!
   rintro φ (hφ | hφ)
@@ -280,11 +280,11 @@ variable {U U' : ArithmeticTheory} [U'.Δ₁] [𝗜𝚺₁ ⪯ T]
 `Γ (n + 1)` sentence.
 - [Lin97, Theorem 4.3] -/
 theorem exists_sentence_weakerThan_of_consistent
-    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U') [Consistent (T ∪ U)] :
+    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U') (hC : Consistent (T ∪ U)) :
     ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
-  have : Consistent (T ∪ U') := Consistent.of_le ‹Consistent (T ∪ U)› e.symm.le
-  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_forall_mem (T := T) hΓ
+  have hC' : Consistent (T ∪ U') := Consistent.of_le hC e.symm.le
+  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_forall_mem (T := T) hΓ hC'
   exact ⟨θ, hθ, e.le.trans hle, hcon⟩
 
 /-- Unboundedness for the broad class: an extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a
@@ -296,8 +296,8 @@ theorem inconsistent_of_provable_localReflectionOn_hierarchy_union
     (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
     (h : T ∪ U ⊢* 𝗥𝗳𝗻[Hierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
   by_contra hc
-  have : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
-  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent hΓ e
+  have hC : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
+  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent hΓ e hC
   have : 𝗜𝚺₁ ⪯ insert θ T :=
     WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset (Set.subset_insert _ _))
   exact hcon.not_inc <| T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
@@ -321,8 +321,8 @@ schema of `T` on the strict sentences of the dual class.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
 theorem not_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
-    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U') [Consistent (T ∪ U)] :
+    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U') (hC : Consistent (T ∪ U)) :
     ¬T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T :=
-  fun h ↦ (inconsistent_of_provable_localReflectionOn_union hΓ e h).not_con inferInstance
+  fun h ↦ (inconsistent_of_provable_localReflectionOn_union hΓ e h).not_con hC
 
 end FFL.FirstOrder.Arithmetic

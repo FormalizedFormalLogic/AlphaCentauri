@@ -70,7 +70,13 @@ declaration:
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stSigma1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Sigma1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Sigma1_of_lt:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
@@ -85,6 +91,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.not_finiteAxiomatizable_of_Peano_le:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
+  FFL.ProvabilityLogic.D_weakerThan_provabilityLogic_ISigma_ISigma:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.ProvabilityLogic.provabilityLogic_ISigma_ISigma_eq_D:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
@@ -92,5 +101,8 @@ declaration:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.ProvabilityLogic.provabilityLogic_ISigma_Peano_eq_S:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.ProvabilityLogic.trace_provabilityLogic_ISigma_ISigma_eq_univ:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi

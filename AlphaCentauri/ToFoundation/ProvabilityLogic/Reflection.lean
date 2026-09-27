@@ -1,6 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.Classification.General
+public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 public import AlphaCentauri.ToFoundation.StandardProvability
 
 /-!
@@ -8,7 +9,8 @@ public import AlphaCentauri.ToFoundation.StandardProvability
 
 If `U` proves the local $\Sigma_1$ reflection principle of `T`, the provability logic of `T`
 relative to `U` has trace `ω` and contains `𝐃`; if `U` proves the full local reflection principle
-of `T`, it contains `𝐒`.
+of `T`, it contains `𝐒`. A consistent extension of `T` by a single sentence never proves the full
+local reflection schema of `T`.
 -/
 
 @[expose] public section
@@ -20,9 +22,9 @@ open Entailment FirstOrder FirstOrder.Arithmetic Formula LetterlessFormula
 variable {α : Type*} {T U : ArithmeticTheory} [T.Δ₁]
 
 lemma alpha_mem_provabilityLogic_of_provable_localReflectionOn_Sigma1
-    (h : U ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) (n : ℕ) :
-    alpha n ∈ T.provabilityLogicRelativeTo U (α := α) := by
-  intro f
+    (h : U ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) :
+    ∀ n, alpha n ∈ T.provabilityLogicRelativeTo U (α := α) := by
+  intro n f;
   simpa [alpha, standardInterpret, interpret, interpret_boxItr, Function.iterate_succ_apply'] using
     h ⟨_, hierarchy_iterate_standardProvability_bot n, rfl⟩
 
@@ -30,8 +32,11 @@ variable [𝗜𝚺₁ ⪯ T] [𝗜𝚺₁ ⪯ U]
 
 lemma trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1
     (h : U ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) :
-    (T.provabilityLogicRelativeTo U (α := α)).trace = .univ :=
-  Set.eq_univ_of_forall fun n ↦ mem_trace_provabilityLogic_iff.mpr <|
+    (T.provabilityLogicRelativeTo U (α := α)).trace = .univ := by
+  apply Set.eq_univ_of_forall;
+  intro n;
+  exact
+    mem_trace_provabilityLogic_iff.mpr <|
     alpha_mem_provabilityLogic_of_provable_localReflectionOn_Sigma1 h n
 
 theorem D_weakerThan_provabilityLogic_of_provable_localReflectionOn_Sigma1
@@ -42,10 +47,23 @@ theorem D_weakerThan_provabilityLogic_of_provable_localReflectionOn_Sigma1
   · exact (A_weakerThan_provabilityLogic
       (trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1 h)).wk
       (Logic.A.neg_boxItr_bot (n := 1))
-  · intro f
-    have hσ : Hierarchy 𝚺 1 (f T (□B ⋎ □C)) := by
-      simp [standardInterpret, interpret, Arithmetic.standardProvability_def]
-    exact h ⟨_, hσ, rfl⟩
+  · intro f;
+    apply h;
+    use f T (□B ⋎ □C);
+    and_intros;
+    · -- TODO: `suffices` にしないといけない理由がわからない．
+      suffices Hierarchy 𝚺 1 (f T (□B ⋎ □C)) by simpa;
+      simp [standardInterpret, interpret, Arithmetic.standardProvability_def];
+    · rfl;
+
+/-- A consistent extension of `T` by a single sentence does not prove the full local reflection
+schema of `T`.
+- [AB05, Theorem 23] -/
+theorem not_provable_localReflectionOn_univ_insert {π : ArithmeticSentence}
+    [Consistent (insert π T)] :
+    ¬ insert π T ⊢* 𝗥𝗳𝗻[Set.univ] T := fun h ↦
+  (T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
+    (Γ := fun _ ↦ True) (fun _ _ ↦ trivial) trivial h).not_con inferInstance
 
 theorem S_weakerThan_provabilityLogic_of_provable_localReflection
     (h : U ⊢* 𝗥𝗳𝗻[Set.univ] T) :

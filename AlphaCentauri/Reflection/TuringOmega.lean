@@ -22,7 +22,7 @@ variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 /-- If $T_\omega$ is consistent, the provability logic of `T` relative to $T_\omega$ is `𝐀`.
 - [AB05, Example 59] -/
-theorem provabilityLogic_turingOmega_eq_A [Consistent T.turingOmega] :
+theorem provabilityLogic_turingOmega_eq_A (hC : Consistent T.turingOmega) :
     T.provabilityLogicRelativeTo T.turingOmega (α := α) = 𝐀 := by
   have hT := trace_provabilityLogic_addAlpha_univ (T := T) (U := T) (α := α)
   apply Logic.weakerThan_antisymm _ (A_weakerThan_provabilityLogic hT)
@@ -34,7 +34,6 @@ theorem provabilityLogic_turingOmega_eq_A [Consistent T.turingOmega] :
   obtain ⟨U, _, hU, e⟩ := exists_strictPi1_axiomatization_turingOmega (T := T)
   have h' : T.turingOmega ⊢* 𝗥𝗳𝗻[StrictHierarchy (Polarity.alt 𝚷) 1] T := fun hσ ↦
     h <| T.standardProvability.localReflectionOn_mono (fun _ hσ ↦ hσ.hierarchy) hσ
-  exact (inconsistent_of_provable_localReflectionOn_union (n := 0) hU e h').not_con
-    ‹Consistent T.turingOmega›
+  exact (inconsistent_of_provable_localReflectionOn_union (n := 0) hU e h').not_con hC
 
 end FFL.ProvabilityLogic

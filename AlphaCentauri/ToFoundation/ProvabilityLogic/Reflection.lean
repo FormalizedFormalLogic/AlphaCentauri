@@ -7,7 +7,8 @@ public import AlphaCentauri.ToFoundation.StandardProvability
 # Provability logics under local reflection
 
 If `U` proves the local $\Sigma_1$ reflection principle of `T`, the provability logic of `T`
-relative to `U` has trace `ω` and contains `𝐃`.
+relative to `U` has trace `ω` and contains `𝐃`. A consistent extension of `T` by a single sentence
+never proves the full local reflection schema of `T`.
 -/
 
 @[expose] public section
@@ -45,5 +46,14 @@ theorem D_weakerThan_provabilityLogic_of_provable_localReflectionOn_Sigma1
     have hσ : Hierarchy 𝚺 1 (f T (□B ⋎ □C)) := by
       simp [standardInterpret, interpret, Arithmetic.standardProvability_def]
     exact h ⟨_, hσ, rfl⟩
+
+/-- A consistent extension of `T` by a single sentence does not prove the full local reflection
+schema of `T`.
+- [AB05, Theorem 23] -/
+theorem not_provable_localReflectionOn_univ_insert {π : ArithmeticSentence}
+    [Consistent (insert π T)] :
+    ¬ insert π T ⊢* 𝗥𝗳𝗻[Set.univ] T := fun h ↦
+  (T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
+    (Γ := fun _ ↦ True) (fun _ _ ↦ trivial) trivial h).not_con inferInstance
 
 end FFL.ProvabilityLogic

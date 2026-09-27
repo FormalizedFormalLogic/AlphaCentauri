@@ -1,6 +1,7 @@
 module
 
 public import Foundation.ProvabilityLogic.Classification.General
+public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 public import AlphaCentauri.ToFoundation.StandardProvability
 
 /-!

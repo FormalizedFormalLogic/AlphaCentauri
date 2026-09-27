@@ -64,4 +64,13 @@ theorem not_provable_localReflectionOn_univ_insert {π : ArithmeticSentence}
   (T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
     (Γ := fun _ ↦ True) (fun _ _ ↦ trivial) trivial h).not_con inferInstance
 
+/-- A consistent extension of `T` by a single $\Pi_1$ sentence does not prove the local
+$\Sigma_1$ reflection schema of `T`.
+- [AB05, Theorem 23] -/
+theorem not_provable_localReflectionOn_sigma1_insert {π : ArithmeticSentence}
+    (hπ : Hierarchy 𝚷 1 π) [Consistent (insert π T)] :
+    ¬ insert π T ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T := fun h ↦
+  (T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
+    (Γ := Hierarchy 𝚷 1) (fun _ hσ ↦ by simpa using hσ) hπ h).not_con inferInstance
+
 end FFL.ProvabilityLogic

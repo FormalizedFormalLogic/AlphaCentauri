@@ -22,7 +22,7 @@ variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 is `𝐃`.
 - [AB05, Example 60] -/
 theorem provabilityLogic_add_localReflectionOn_Sigma1_eq_D
-    [Consistent (T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T)] :
+    (hC : Consistent (T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T)) :
     T.provabilityLogicRelativeTo (T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) (α := α) = 𝐃 := by
   have : 𝗜𝚺₁ ⪯ T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T :=
     WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left)
@@ -38,7 +38,7 @@ theorem provabilityLogic_add_localReflectionOn_Sigma1_eq_D
     exact provable_reflection_of_not_D
       (trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1 hR) hA hAD
   exact ((inconsistent_of_provable_localReflectionOn_hierarchy_union (n := 1) hU e hrfn).not_con
-    inferInstance).elim
+    hC).elim
 
 /-- For a $\Sigma_1$-sound `T`, the provability logic of `T` relative to
 $T + \mathrm{Rfn}_{\Sigma_1}(T)$ is `𝐃`.
@@ -46,9 +46,8 @@ $T + \mathrm{Rfn}_{\Sigma_1}(T)$ is `𝐃`.
 theorem provabilityLogic_add_localReflectionOn_Sigma1_eq_D_of_sigma1Sound
     [T.SoundOnHierarchy 𝚺 1] :
     T.provabilityLogicRelativeTo (T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) (α := α) = 𝐃 :=
-  have : Consistent (T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) :=
-    Consistent.of_le inferInstance <| WeakerThan.ofSubset <| Set.union_subset_union_right T <|
-      T.standardProvability.localReflectionOn_mono (Γ' := Set.univ) fun _ _ ↦ trivial
   provabilityLogic_add_localReflectionOn_Sigma1_eq_D
+    (Consistent.of_le inferInstance <| WeakerThan.ofSubset <| Set.union_subset_union_right T <|
+      T.standardProvability.localReflectionOn_mono (Γ' := Set.univ) fun _ _ ↦ trivial)
 
 end FFL.ProvabilityLogic

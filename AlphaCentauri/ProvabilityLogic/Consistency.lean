@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Reflection.ISigma
+public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.StandardProvability
 public import Foundation.ProvabilityLogic.Classification.General
@@ -57,40 +58,36 @@ lemma A_weakerThan_provabilityLogic_add_con
 - [AB05, Example 63] -/
 theorem provabilityLogic_add_con_eq_A
     (hTU : ∀ σ, 𝗜𝚺₁ ⊢ T.standardProvability σ 🡒 U.standardProvability σ)
-    (hU : U ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) [Consistent (T ∪ U.Con)] :
+    (hU : U ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) (hC : Consistent (T ∪ U.Con)) :
     T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) = 𝐀 := by
   have : 𝗜𝚺₁ ⪯ T ∪ U.Con := (inferInstance : 𝗜𝚺₁ ⪯ T).trans <|
     WeakerThan.ofSubset Set.subset_union_left
-  have hT := trace_provabilityLogic_add_con_eq_univ (α := α) hTU hU
-  -- (i) `𝐀` is a lower bound.
-  have hA : 𝐀 ⪯ T.provabilityLogicRelativeTo (T ∪ U.Con) (α := α) :=
-    A_weakerThan_provabilityLogic_add_con hTU hU
-  refine Logic.weakerThan_antisymm ?_ hA
-  -- (ii) a logic strictly above `𝐀` would give `T ∪ Con(U)` the local `Σ1` reflection schema of
-  -- `T` from its single `Π1` axiom `Con(U)`, which Theorem 23 forbids.
-  by_contra! h
-  obtain ⟨-, A, hAA, hAL⟩ := strictlyWeakerThan_iff.mp (⟨hA, h⟩ : 𝐀 ⪱ _)
-  have h₁ : T ∪ U.Con ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T :=
-    provable_localReflectionOn_sigma1_of_mem_of_not_A hT hAL hAA
-  rw [Set.union_singleton] at h₁
-  have hc : Consistent (insert U.consistent.val T) := by
-    rw [← Set.union_singleton]
-    infer_instance
-  exact not_provable_localReflectionOn_sigma1_insert (by simp) h₁
+  apply Logic.weakerThan_antisymm;
+  · -- (ii) a logic strictly above `𝐀` would give `T ∪ Con(U)` the local `Σ1` reflection schema of
+    -- `T` from its single `Π1` axiom `Con(U)`, which Theorem 23 forbids.
+    by_contra! h
+    obtain ⟨-, A, hAA, hAL⟩ := strictlyWeakerThan_iff.mp
+      (⟨A_weakerThan_provabilityLogic_add_con hTU hU, h⟩ : 𝐀 ⪱ _)
+    have h₁ : T ∪ U.Con ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T :=
+      provable_localReflectionOn_sigma1_of_mem_of_not_A
+        (trace_provabilityLogic_add_con_eq_univ hTU hU) hAL hAA
+    rw [Set.union_singleton] at h₁
+    exact not_provable_localReflectionOn_sigma1_insert (by simp) (Set.union_singleton ▸ hC) h₁
+  · exact A_weakerThan_provabilityLogic_add_con hTU hU;
 
 /-- The provability logic of `𝗜𝚺₁` relative to `𝗜𝚺₁ + Con(𝗣𝗔)` is `𝐀`.
 - [AB05, Example 63] -/
 theorem provabilityLogic_ISigma1_add_con_Peano_eq_A :
     (𝗜𝚺₁).provabilityLogicRelativeTo (𝗜𝚺₁ ∪ 𝗣𝗔.Con) (α := α) = 𝐀 := by
-  have : Consistent 𝗣𝗔 := Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], inferInstance⟩
-  have : ℕ↓[ℒₒᵣ] ⊧* (𝗜𝚺₁ ∪ 𝗣𝗔.Con) := by
-    apply Semantics.modelsSet_iff.mpr
+  apply provabilityLogic_add_con_eq_A;
+  · exact ISigma.provable_standardProvability_imp_Peano 1;
+  · intro σ hσ;
+    exact (inferInstance : 𝗜𝚺 2 ⪯ 𝗣𝗔).pbl (ISigma.provable_localReflectionOn_Sigma1 le_rfl hσ)
+  · apply Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], ?_⟩;
+    apply Semantics.modelsSet_iff.mpr;
     rintro φ (hφ | rfl)
     · exact Semantics.modelsSet_iff.mp inferInstance hφ
-    · simpa [models_iff]
-  have : Consistent (𝗜𝚺₁ ∪ 𝗣𝗔.Con) := Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], this⟩
-  have h₁ : 𝗣𝗔 ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] 𝗜𝚺₁ := fun hσ ↦
-    (inferInstance : 𝗜𝚺 2 ⪯ 𝗣𝗔).pbl (ISigma.provable_localReflectionOn_Sigma1 le_rfl hσ)
-  exact provabilityLogic_add_con_eq_A (ISigma.provable_standardProvability_imp_Peano 1) h₁
+    · simp [models_iff]
+
 
 end FFL.ProvabilityLogic

@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.ProvabilityLogic.AddAlpha
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.TuringOmega
 public import AlphaCentauri.ToFoundation.SubstNumeral
 public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 
@@ -17,6 +17,8 @@ $\neg\mathrm{Pr}_T(\ulcorner\Box_T^{x}\bot\urcorner)$.
 - [AB05, §4.1]
 -/
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic
 
 open FFL.Entailment Bootstrapping ArithmeticTheory
@@ -25,7 +27,7 @@ variable (T : ArithmeticTheory) [T.Δ₁]
 
 /-- The $\Pi_1$ formula $\neg\mathrm{Pr}_T(\ulcorner\Box_T^{x}\bot\urcorner)$, with the code of
 $\Box_T^{x}\bot$ computed by `substNumeralItr`. -/
-noncomputable def notProvableIterateBot : 𝚷₁.Semisentence 1 := .mkPi
+noncomputable def notProvableIterateBot : 𝚷ᴬ₁.Semisentence 1 := .mkPi
   “x. ∀ y, !substNumeralItrDef y !!(⌜(provable T).val⌝) !!(⌜(⊥ : ArithmeticSentence)⌝) x →
     ¬!(provable T) y”
 
@@ -49,12 +51,12 @@ end
 
 variable (T) in
 lemma exists_matrix_notProvableIterateBot :
-    ∃ θ : 𝚺₀.Semisentence 2, 𝗜𝚺₁ ⊢ ∀¹* ((notProvableIterateBot T).val 🡘 ∀¹ θ.val) :=
+    ∃ θ : 𝚺ᴬ₀.Semisentence 2, 𝗜𝚺₁ ⊢ ∀¹* ((notProvableIterateBot T).val 🡘 ∀¹ θ.val) :=
   ISigma1.exists_matrix_provable_pi (by simp)
 
 variable (T) in
 /-- A $\Delta_0$ matrix of a prenex form of `notProvableIterateBot T`. -/
-noncomputable def notProvableIterateBotMatrix : 𝚺₀.Semisentence 2 :=
+noncomputable def notProvableIterateBotMatrix : 𝚺ᴬ₀.Semisentence 2 :=
   (exists_matrix_notProvableIterateBot T).choose
 
 variable (T) in
@@ -123,25 +125,25 @@ variable [𝗜𝚺₁ ⪯ T]
 - [AB05, §4.1] -/
 theorem turingOmega_equiv_union_notProvableIterateBotTheory :
     T.turingOmega ≊ T ∪ notProvableIterateBotTheory T := by
-  have hU : 𝗜𝚺₁ ⪯ T ∪ notProvableIterateBotTheory T :=
-    WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left)
   apply Equiv.antisymm
   constructor
   · apply WeakerThan.ofAxm!
-    rintro σ (hσ | ⟨n, -, rfl⟩)
+    rintro σ (hσ | ⟨_, ⟨n, rfl⟩, rfl⟩)
     · exact by_axm <| Set.mem_union_left _ hσ
     · have h₁ : T ∪ notProvableIterateBotTheory T ⊢ (notProvableIterateBotStrict T)/[↑n] :=
         by_axm <| Set.mem_union_right _ ⟨n, rfl⟩
-      have h₂ := hU.pbl (provable_notProvableIterateBotStrict_iff (T := T) n)
-      simp only [ProvabilityLogic.Formula.interpret_alpha]
+      have h₂ : T ∪ notProvableIterateBotTheory T ⊢
+          (notProvableIterateBotStrict T)/[↑n] 🡘 ∼T.standardProvability^[n + 1] ⊥ :=
+        WeakerThan.pbl <| provable_notProvableIterateBotStrict_iff n
+      rw [Function.iterate_succ_apply'] at h₂
       cl_prover [h₁, h₂]
   · apply WeakerThan.ofAxm!
     rintro σ (hσ | ⟨n, rfl⟩)
     · exact by_axm <| Set.mem_union_left _ hσ
-    · have h₁ : T.turingOmega ⊢ ∼(T.standardProvability^[n + 1] ⊥) :=
-        provable_neg_iterate_addAlpha fun i _ ↦ Set.mem_univ i
-      have h₂ := (inferInstance : 𝗜𝚺₁ ⪯ T.turingOmega).pbl
-        (provable_notProvableIterateBotStrict_iff (T := T) n)
+    · have h₁ := provable_neg_iterate_turingOmega (T := T) (n + 1)
+      have h₂ : T.turingOmega ⊢
+          (notProvableIterateBotStrict T)/[↑n] 🡘 ∼T.standardProvability^[n + 1] ⊥ :=
+        WeakerThan.pbl <| provable_notProvableIterateBotStrict_iff n
       cl_prover [h₁, h₂]
 
 /-- $T_\omega$ is `T` extended by a $\Delta_1$-presented set of strict $\Pi_1$ sentences.

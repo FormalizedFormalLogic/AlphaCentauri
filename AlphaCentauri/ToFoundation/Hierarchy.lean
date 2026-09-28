@@ -42,9 +42,11 @@ lemma exists_forall_hierarchy (φ : Semiformula L ξ n) : ∃ s, ∀ Γ, Hierarc
   | hand φ ψ ihφ ihψ | hor φ ψ ihφ ihψ =>
     obtain ⟨s, hs⟩ := ihφ
     obtain ⟨t, ht⟩ := ihψ
-    exact ⟨max s t, fun Γ ↦ by simp [(hs Γ).mono (le_max_left s t), (ht Γ).mono (le_max_right s t)]⟩
+    use max s t;
+    intro Γ;
+    simp [(hs Γ).mono (le_max_left s t), (ht Γ).mono (le_max_right s t)]
   | hall φ ih =>
-    obtain ⟨s, hs⟩ := ih
+    obtain ⟨s, hs⟩ := ih;
     exact ⟨s + 2, (pi (hs 𝚺)).accum⟩
   | hexs φ ih =>
     obtain ⟨s, hs⟩ := ih

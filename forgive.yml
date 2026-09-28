@@ -79,6 +79,15 @@ declaration:
   FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Sigma1_of_lt:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stPi_of_le:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stPi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi_self:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive

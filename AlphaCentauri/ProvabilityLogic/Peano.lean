@@ -1,7 +1,6 @@
 module
 
 public import AlphaCentauri.Reflection.Peano
-public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import Foundation.ProvabilityLogic.Classification.Truth
 
 /-!

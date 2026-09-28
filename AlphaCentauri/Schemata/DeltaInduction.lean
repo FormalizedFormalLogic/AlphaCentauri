@@ -17,6 +17,9 @@ the other direction, a strict $\Sigma_n$ formula and its negation are an admissi
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+
 namespace FFL.FirstOrder.Arithmetic
 
 open _root_.FFL.Entailment
@@ -27,25 +30,25 @@ section models
 
 variable {P : V → Prop} {Q R : V → V → Prop}
 
-/-- Lying beyond `a` or having a witness below `b` is `𝚷-[n]`-definable. -/
-private lemma definablePred_lt_or_witness_below [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hQ : 𝚷-[n].DefinableRel Q)
-    (a b : V) : 𝚷-[n].DefinablePred fun x ↦ a < x ∨ ∃ y < b, Q x y := by
-  have h₁ : 𝚷-[n].Definable fun v : Fin 1 → V ↦ a < v 0 :=
+/-- Lying beyond `a` or having a witness below `b` is `𝚷ᴬ-[n]`-definable. -/
+private lemma definablePred_lt_or_witness_below [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hQ : 𝚷ᴬ-[n].DefinableRel Q)
+    (a b : V) : 𝚷ᴬ-[n].DefinablePred fun x ↦ a < x ∨ ∃ y < b, Q x y := by
+  have h₁ : 𝚷ᴬ-[n].Definable fun v : Fin 1 → V ↦ a < v 0 :=
     .of_iff
-      (HierarchySymbol.Definable.retractiont 1
-        (inferInstance : 𝚷-[n].DefinableRel (LT.lt : V → V → Prop)) ![&a, #0])
+      (HierarchySymbol.Definable.retractiont (n := 1)
+        (inferInstance : 𝚷ᴬ-[n].DefinableRel (LT.lt : V → V → Prop)) ![&a, #0])
       (by intro v; simp)
-  have h₂ : 𝚷-[n].Definable
+  have h₂ : 𝚷ᴬ-[n].Definable
       fun v : Fin 1 → V ↦ ∃ y < (&b : ArithmeticSemiterm V 1).val v id, Q (v 0) y := by
-    apply HierarchySymbol.Definable.bexs
+    apply HierarchySymbol.Definable.arithmetic_bexs
     exact .of_iff (hQ.retraction ![1, 0]) (by intro w; simp)
   exact (h₁.or h₂).of_iff (by intro v; simp)
 
 /-- Successor induction holds for a predicate that is at once the existential quantification of a
-`𝚷-[n]`-definable relation and the complement of another, in a model of `𝗕𝚺(n + 1)`.
+`𝚷ᴬ-[n]`-definable relation and the complement of another, in a model of `𝗕𝚺(n + 1)`.
 - [Sla04, §2.1] -/
 lemma succ_induction_of_complementary_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1)]
-    (hQ : 𝚷-[n].DefinableRel Q) (hR : 𝚷-[n].DefinableRel R) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
+    (hQ : 𝚷ᴬ-[n].DefinableRel Q) (hR : 𝚷ᴬ-[n].DefinableRel R) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (hPR : ∀ x, ¬P x ↔ ∃ w, R x w) (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ n := models_IBroadSigma_of_models_BSigma_succ
@@ -53,7 +56,7 @@ lemma succ_induction_of_complementary_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n
     models_of_ss inferInstance (CollectionOnHierarchy_subset_BSigma_succ 𝚷 n)
   intro a
   by_contra ha
-  have hQR : 𝚷-[n].DefinableRel fun x y ↦ Q x y ∨ R x y := .of_iff (hQ.or hR) (by intro v; simp)
+  have hQR : 𝚷ᴬ-[n].DefinableRel fun x y ↦ Q x y ∨ R x y := .of_iff (hQ.or hR) (by intro v; simp)
   obtain ⟨b, hb⟩ := CollectionOnHierarchy.collection_of_definable (Γ := 𝚷) hQR (a + 1) <| by
     intro x _
     by_cases hx : P x
@@ -82,12 +85,12 @@ end models
 section theorems
 
 /-- Every model of `𝗕𝚺(n + 1)` satisfies the `Δ` induction scheme for a class of formulas whose
-evaluations are `𝚺-[n + 1]`-definable.
+evaluations are `𝚺ᴬ-[n + 1]`-definable.
 - [Sla04, §2.1] -/
 private lemma models_DeltaInductionScheme_of_definablePred
     {C : ArithmeticSemiformula ℕ 1 → Prop} [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1)]
     (hC : ∀ {φ : ArithmeticSemiformula ℕ 1}, C φ → ∀ f : ℕ → V,
-      𝚺-[n + 1].DefinablePred fun x : V ↦ φ.Eval ![x] f) :
+      𝚺ᴬ-[n + 1].DefinablePred fun x : V ↦ φ.Eval ![x] f) :
     V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ DeltaInductionScheme C := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
   have h₀ : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
@@ -107,7 +110,7 @@ private lemma models_DeltaInductionScheme_of_definablePred
 lemma models_IDelta_of_models_BSigma_succ (n : ℕ) (V : Type*) [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚫(n + 1) :=
   models_DeltaInductionScheme_of_definablePred fun hφ f ↦
-    definablePred_of_hierarchy hφ.hierarchy f
+    Bounding.definablePred_of_hierarchy hφ.hierarchy f
 
 /-- `𝗜𝚫(n + 1)` is at most as strong as `𝗕𝚺(n + 1)`.
 - [Sla04, §2.1] -/
@@ -118,7 +121,7 @@ theorem IDelta_weakerThan_BSigma (n : ℕ) : 𝗜𝚫(n + 1) ⪯ 𝗕𝚺(n + 1)
 - [Sla04, §2.1] -/
 lemma models_IDeltaOnBroadHierarchy_of_models_BSigma_succ (n : ℕ) (V : Type*) [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚫⁺(n + 1) :=
-  models_DeltaInductionScheme_of_definablePred fun hφ f ↦ definablePred_of_hierarchy hφ f
+  models_DeltaInductionScheme_of_definablePred fun hφ f ↦ Bounding.definablePred_of_hierarchy hφ f
 
 /-- `𝗜𝚫⁺(n + 1)` is at most as strong as `𝗕𝚺(n + 1)`.
 - [Sla04, §2.1] -/

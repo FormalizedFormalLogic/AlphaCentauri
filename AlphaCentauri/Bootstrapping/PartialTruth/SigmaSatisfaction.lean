@@ -14,6 +14,9 @@ proves their definability, Tarski conditions, duality, monotonicity, and substit
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -35,82 +38,83 @@ end
 
 /-- The $\Pi_{m + 1}$ formula for `PiSatisfaction (m + 1)` associated with a formula for
 `SigmaSatisfaction (m + 1)`. -/
-noncomputable def piOfSigma (m : ℕ) (σ : 𝚺-[m + 1].Semisentence 2) :
-    𝚷-[m + 1].Semisentence 2 := .mkPi
+noncomputable def piOfSigma (m : ℕ) (σ : 𝚺ᴬ-[m + 1].Semisentence 2) :
+    𝚷ᴬ-[m + 1].Semisentence 2 := .mkPi
   “z e. !(isStrictPi (m + 1)).pi z ∧ !(isUFormula ℒₒᵣ).pi z ∧ ∀ nz, !(negGraph ℒₒᵣ).val nz z →
     ¬!σ.val nz e”
   (by
-    have h1 : Hierarchy 𝚷 (m + 1) (isStrictPi (m + 1)).pi.val :=
+    have h1 : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (isStrictPi (m + 1)).pi.val :=
       (isStrictPi (m + 1)).pi.pi_prop.mono (Nat.le_add_left 1 m)
-    have h2 : Hierarchy 𝚷 (m + 1) (isUFormula ℒₒᵣ).pi.val :=
+    have h2 : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) (isUFormula ℒₒᵣ).pi.val :=
       (isUFormula ℒₒᵣ).pi.pi_prop.mono (Nat.le_add_left 1 m)
-    have h3 : Hierarchy 𝚺 (m + 1) (negGraph ℒₒᵣ).val :=
+    have h3 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (m + 1) (negGraph ℒₒᵣ).val :=
       (negGraph ℒₒᵣ).sigma_prop.mono (Nat.le_add_left 1 m)
-    have h4 : Hierarchy 𝚺 (m + 1) σ.val := σ.sigma_prop
+    have h4 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (m + 1) σ.val := σ.sigma_prop
     simp [h1, h2, h3, h4])
 
 /-- The $\Sigma_{m + 2}$ formula for `SigmaSatisfaction (m + 2)` associated with a formula for
 `PiSatisfaction (m +
 1)`. -/
-noncomputable def sigmaOfPi (m : ℕ) (π : 𝚷-[m + 1].Semisentence 2) :
-    𝚺-[m + 2].Semisentence 2 := .mkSigma
+noncomputable def sigmaOfPi (m : ℕ) (π : 𝚷ᴬ-[m + 1].Semisentence 2) :
+    𝚺ᴬ-[m + 2].Semisentence 2 := .mkSigma
   “z e. ∃ k q w e', !qqExssDef z q k ∧ !(isStrictPi (m + 1)).val q ∧ !lenDef k w ∧
     !vecAppendDef e' w e ∧ !π.val q e'”
   (by
-    have h1 : Hierarchy 𝚺 (m + 2) qqExssDef.val :=
+    have h1 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (m + 2) qqExssDef.val :=
       qqExssDef.sigma_prop.mono (show 1 ≤ m + 2 by omega)
-    have h2 : Hierarchy 𝚺 (m + 2) (isStrictPi (m + 1)).val :=
+    have h2 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (m + 2) (isStrictPi (m + 1)).val :=
       (isStrictPi (m + 1)).sigma.sigma_prop.mono (show 1 ≤ m + 2 by omega)
-    have h3 : Hierarchy 𝚺 (m + 2) lenDef.val := lenDef.sigma_prop.mono (show 1 ≤ m + 2 by omega)
-    have h4 : Hierarchy 𝚺 (m + 2) vecAppendDef.val :=
+    have h3 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (m + 2) lenDef.val :=
+      lenDef.sigma_prop.mono (show 1 ≤ m + 2 by omega)
+    have h4 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (m + 2) vecAppendDef.val :=
       vecAppendDef.sigma_prop.mono (show 1 ≤ m + 2 by omega)
-    have h5 : Hierarchy 𝚺 (m + 2) π.val := π.pi_prop.accum 𝚺
+    have h5 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (m + 2) π.val := π.pi_prop.accum 𝚺
     simp [h1, h2, h3, h4, h5])
 
 /-- The $\Sigma_1$ formula for `SigmaSatisfaction 1`. -/
-noncomputable def sigmaZero : 𝚺-[1].Semisentence 2 := .mkSigma
+noncomputable def sigmaZero : 𝚺ᴬ-[1].Semisentence 2 := .mkSigma
   “z e. ∃ k q w e', !qqExssDef z q k ∧ !(isStrictPi 0).val q ∧ !lenDef k w ∧
     !vecAppendDef e' w e ∧ !boundedSatisfaction.val q e'”
   (by
-    have h1 : Hierarchy 𝚺 1 qqExssDef.val := qqExssDef.sigma_prop
-    have h2 : Hierarchy 𝚺 1 (isStrictPi 0).val := (isStrictPi 0).sigma.sigma_prop
-    have h3 : Hierarchy 𝚺 1 lenDef.val := lenDef.sigma_prop
-    have h4 : Hierarchy 𝚺 1 vecAppendDef.val := vecAppendDef.sigma_prop
-    have h5 : Hierarchy 𝚺 1 boundedSatisfaction.val :=
+    have h1 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 qqExssDef.val := qqExssDef.sigma_prop
+    have h2 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (isStrictPi 0).val := (isStrictPi 0).sigma.sigma_prop
+    have h3 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 lenDef.val := lenDef.sigma_prop
+    have h4 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 vecAppendDef.val := vecAppendDef.sigma_prop
+    have h5 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 boundedSatisfaction.val :=
       HierarchySymbol.Semiformula.val_sigma boundedSatisfaction ▸
         boundedSatisfaction.sigma.sigma_prop
     simp [h1, h2, h3, h4, h5])
 
 /-- The $\Sigma_{n + 1}$ formula defining `SigmaSatisfaction (n + 1)`, with arguments `(z, e)`. -/
-noncomputable def sigmaSatisfaction : (n : ℕ) → 𝚺-[n + 1].Semisentence 2
+noncomputable def sigmaSatisfaction : (n : ℕ) → 𝚺ᴬ-[n + 1].Semisentence 2
   | 0 => sigmaZero
   | n + 1 => sigmaOfPi n (piOfSigma n (sigmaSatisfaction n))
 
 /-- The $\Pi_{n + 1}$ formula defining `PiSatisfaction (n + 1)`, with arguments `(z, e)`. -/
 noncomputable def piSatisfaction (n : ℕ) :
-    𝚷-[n + 1].Semisentence 2 := piOfSigma n (sigmaSatisfaction n)
+    𝚷ᴬ-[n + 1].Semisentence 2 := piOfSigma n (sigmaSatisfaction n)
 
 private lemma sigmaSatisfaction_succ (n : ℕ) :
     sigmaSatisfaction (n + 1) = sigmaOfPi n (piSatisfaction n) := rfl
 
-private lemma piDefined_of_sigmaDefined {m : ℕ} {σ : 𝚺-[m + 1].Semisentence 2}
-    (hσ : 𝚺-[m + 1]-Relation (SigmaSatisfaction (m + 1) : V → V → Prop) via σ) :
-    𝚷-[m + 1]-Relation (PiSatisfaction (m + 1) : V → V → Prop) via piOfSigma m σ := .mk fun v ↦ by
+private lemma piDefined_of_sigmaDefined {m : ℕ} {σ : 𝚺ᴬ-[m + 1].Semisentence 2}
+    (hσ : 𝚺ᴬ-[m + 1]-Relation (SigmaSatisfaction (m + 1) : V → V → Prop) via σ) :
+    𝚷ᴬ-[m + 1]-Relation (PiSatisfaction (m + 1) : V → V → Prop) via piOfSigma m σ := .mk fun v ↦ by
   have := hσ
   simp [piOfSigma, PiSatisfaction]
 
-private lemma sigmaDefined_of_piDefined {m : ℕ} {π : 𝚷-[m + 1].Semisentence 2}
-    (hπ : 𝚷-[m + 1]-Relation (PiSatisfaction (m + 1) : V → V → Prop) via π) :
-    𝚺-[m + 2]-Relation (SigmaSatisfaction (m + 2) : V → V → Prop) via sigmaOfPi m π :=
+private lemma sigmaDefined_of_piDefined {m : ℕ} {π : 𝚷ᴬ-[m + 1].Semisentence 2}
+    (hπ : 𝚷ᴬ-[m + 1]-Relation (PiSatisfaction (m + 1) : V → V → Prop) via π) :
+    𝚺ᴬ-[m + 2]-Relation (SigmaSatisfaction (m + 2) : V → V → Prop) via sigmaOfPi m π :=
       .mk fun v ↦ by
   have := hπ
   simp [sigmaOfPi, SigmaSatisfaction]
 
 private lemma sigmaZero_defined :
-    𝚺-[1]-Relation (SigmaSatisfaction 1 : V → V → Prop) via sigmaZero := .mk fun v ↦ by
+    𝚺ᴬ-[1]-Relation (SigmaSatisfaction 1 : V → V → Prop) via sigmaZero := .mk fun v ↦ by
   simp [sigmaZero, SigmaSatisfaction, PiSatisfaction]
 
-private lemma sigmaDefined : ∀ n : ℕ, 𝚺-[n + 1]-Relation (SigmaSatisfaction (n + 1) : V → V →
+private lemma sigmaDefined : ∀ n : ℕ, 𝚺ᴬ-[n + 1]-Relation (SigmaSatisfaction (n + 1) : V → V →
   Prop) via sigmaSatisfaction n
   | 0 => sigmaZero_defined
   | n + 1 => by
@@ -120,23 +124,23 @@ private lemma sigmaDefined : ∀ n : ℕ, 𝚺-[n + 1]-Relation (SigmaSatisfacti
 /-- The formula `sigmaSatisfaction n` defines satisfaction for strict prenex $\Sigma_{n + 1}$
 formulas. -/
 instance SigmaSatisfaction.defined (n : ℕ) :
-    𝚺-[n + 1]-Relation (SigmaSatisfaction (n + 1) : V → V → Prop) via sigmaSatisfaction n :=
+    𝚺ᴬ-[n + 1]-Relation (SigmaSatisfaction (n + 1) : V → V → Prop) via sigmaSatisfaction n :=
       sigmaDefined n
 
 /-- The formula `piSatisfaction n` defines satisfaction for strict prenex $\Pi_{n + 1}$ formulas. -/
 instance PiSatisfaction.defined (n : ℕ) :
-    𝚷-[n + 1]-Relation (PiSatisfaction (n + 1) : V → V → Prop) via piSatisfaction n :=
+    𝚷ᴬ-[n + 1]-Relation (PiSatisfaction (n + 1) : V → V → Prop) via piSatisfaction n :=
   piDefined_of_sigmaDefined (sigmaDefined n)
 
 /-- Satisfaction for strict prenex $\Sigma_{n + 1}$ formulas
 is definable at level $\Sigma_{n + 1}$. -/
 instance SigmaSatisfaction.definable (n : ℕ) :
-    𝚺-[n + 1]-Relation (SigmaSatisfaction (n + 1) : V → V → Prop) :=
+    𝚺ᴬ-[n + 1]-Relation (SigmaSatisfaction (n + 1) : V → V → Prop) :=
   (SigmaSatisfaction.defined n).to_definable
 
 /-- Satisfaction for strict prenex $\Pi_{n + 1}$ formulas is definable at level $\Pi_{n + 1}$. -/
 instance PiSatisfaction.definable (n : ℕ) :
-    𝚷-[n + 1]-Relation (PiSatisfaction (n + 1) : V → V → Prop) :=
+    𝚷ᴬ-[n + 1]-Relation (PiSatisfaction (n + 1) : V → V → Prop) :=
   (PiSatisfaction.defined n).to_definable
 
 @[simp] lemma SigmaSatisfaction.zero : SigmaSatisfaction 0 = (BoundedSatisfaction : V → V →
@@ -636,18 +640,18 @@ noncomputable def qVecIter (w k : V) : V := QVecIter.construction.result ![w] k
   simp [qVecIter, QVecIter.construction]
 
 /-- Defining formula for the iterated quantifier lift. -/
-noncomputable def _root_.FFL.FirstOrder.Arithmetic.qVecIterDef : 𝚺₁.Semisentence 3 :=
+noncomputable def _root_.FFL.FirstOrder.Arithmetic.qVecIterDef : 𝚺ᴬ₁.Semisentence 3 :=
   QVecIter.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
 /-- The iterated quantifier lift is $\Sigma_1$-definable. -/
-instance qVecIter_defined : 𝚺₁-Function₂ (qVecIter : V → V → V) via qVecIterDef := .mk
+instance qVecIter_defined : 𝚺ᴬ₁-Function₂ (qVecIter : V → V → V) via qVecIterDef := .mk
   fun v ↦ by simp [QVecIter.construction.result_defined_iff, qVecIterDef]; rfl
 
 /-- The $\Sigma_1$ definability instance for the iterated quantifier lift. -/
-instance qVecIter_definable : 𝚺₁-Function₂ (qVecIter : V → V → V) := qVecIter_defined.to_definable
+instance qVecIter_definable : 𝚺ᴬ₁-Function₂ (qVecIter : V → V → V) := qVecIter_defined.to_definable
 
 /-- The iterated quantifier lift is definable at every positive hierarchy level. -/
-instance qVecIter_definable' (Γ m) : Γ-[m + 1]-Function₂ (qVecIter : V → V → V) :=
+instance qVecIter_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (qVecIter : V → V → V) :=
   qVecIter_definable.of_sigmaOne
 
 private lemma isSemitermVec_qVecIter {m l w : V} (hw : IsSemitermVec ℒₒᵣ m l w) (k : V) :
@@ -783,14 +787,14 @@ theorem SigmaSatisfaction.subst {n : ℕ} {m l w p e : V} (hw : IsSemitermVec �
 - [HP98, Definition I.1.78(2)] -/
 
 /-- `sigmaSatisfactionVec n k` defines `SigmaSatisfaction (n + 1)` under its `k` free variables. -/
-noncomputable def sigmaSatisfactionVec (n k : ℕ) : 𝚺-[n + 1].Semisentence (k + 1) := .mkSigma
+noncomputable def sigmaSatisfactionVec (n k : ℕ) : 𝚺ᴬ-[n + 1].Semisentence (k + 1) := .mkSigma
   “p. ∃ e, !lenDef ↑k e ∧ (⋀ i, ∃ z, !nthDef z e ↑(i : Fin k).val ∧ z = #i.succ.succ.succ) ∧
     !(sigmaSatisfaction n).val p e”
   (by simp [lenDef.sigma_prop.mono (Nat.le_add_left 1 n),
         nthDef.sigma_prop.mono (Nat.le_add_left 1 n)])
 
 theorem sigmaSatisfactionVec.defined (n k : ℕ) :
-    𝚺-[n + 1].Defined
+    𝚺ᴬ-[n + 1].Defined
       (fun v : Fin (k + 1) → V ↦ SigmaSatisfaction (n + 1) (v 0) (matrixToVec (v ·.succ)))
       (sigmaSatisfactionVec n k) := .mk fun v ↦ by
   simp only [sigmaSatisfactionVec, Nat.succ_eq_add_one, Nat.reduceAdd,

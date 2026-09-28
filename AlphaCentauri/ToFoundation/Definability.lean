@@ -12,6 +12,8 @@ the theories `𝗜𝗡𝗗 Γ s`, in particular `𝗜𝚺 s`.
 
 @[expose] public section
 
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+
 namespace FFL.FirstOrder.Arithmetic
 
 open FFL.FirstOrder.Theory Bootstrapping
@@ -27,8 +29,9 @@ noncomputable instance InductionScheme.delta1_strictHierarchy :
         rw [h]
         exact (inductionR_quote_iff isStrictSigma_quote_iff_s φ).trans
           (mem_inductionScheme_iff φ).symm
-      isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun _ _ _ ↦ by
-        simp }
+      isDelta1 :=
+        HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
+          fun _ _ _ ↦ by simp }
   | 𝚷, s =>
     { ch := chInd (isStrictPi s)
       mem_iff φ := by
@@ -38,8 +41,9 @@ noncomputable instance InductionScheme.delta1_strictHierarchy :
         rw [h]
         exact (inductionR_quote_iff isStrictPi_quote_iff_s φ).trans
           (mem_inductionScheme_iff φ).symm
-      isDelta1 := HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun _ _ _ ↦ by
-        simp }
+      isDelta1 :=
+        HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
+          fun _ _ _ ↦ by simp }
 
 noncomputable instance InductionOnHierarchy.delta1 (Γ : Polarity) (s : ℕ) : (𝗜𝗡𝗗 Γ s).Δ₁ :=
   Theory.Δ₁.add PeanoMinus.delta1 inferInstance

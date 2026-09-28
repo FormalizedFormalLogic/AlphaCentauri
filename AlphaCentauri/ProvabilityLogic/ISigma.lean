@@ -53,10 +53,10 @@ theorem provabilityLogic_ISigma_ISigma_eq_D (hm : 1 ≤ m) (hmn : m < n) :
       ⟨D_weakerThan_provabilityLogic_ISigma_ISigma hm hmn, ‹_›⟩ : 𝐃 ⪱ L
     );
     obtain ⟨π, hπ⟩ := ISigma.exists_pi_axiomatization_insert n (by omega) m (by omega)
-    have hC : Consistent (insert π.val (𝗜𝚺 m)) :=
+    have : Consistent (insert π.val (𝗜𝚺 m)) :=
       (Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], inferInstance⟩ : Consistent (𝗜𝚺 n)).of_le
         hπ.symm.le
-    apply not_provable_localReflectionOn_univ_insert (T := 𝗜𝚺 m) (π := π.val) hC;
+    apply not_provable_localReflectionOn_univ_insert (T := 𝗜𝚺 m) (π := π.val) this;
     rintro _ ⟨σ, -, rfl⟩;
     exact hπ.le.pbl <| provable_reflection_of_not_D
       (trace_provabilityLogic_ISigma_ISigma_eq_univ hm hmn) hA hAD

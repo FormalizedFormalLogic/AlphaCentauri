@@ -8,8 +8,9 @@ public import AlphaCentauri.ToFoundation.StandardProvability
 # Provability logics under local reflection
 
 If `U` proves the local $\Sigma_1$ reflection principle of `T`, the provability logic of `T`
-relative to `U` has trace `ω` and contains `𝐃`. A consistent extension of `T` by a single sentence
-never proves the full local reflection schema of `T`.
+relative to `U` has trace `ω` and contains `𝐃`; if `U` proves the full local reflection principle
+of `T`, it contains `𝐒`. A consistent extension of `T` by a single sentence never proves the full
+local reflection schema of `T`.
 -/
 
 @[expose] public section
@@ -63,5 +64,21 @@ theorem not_provable_localReflectionOn_univ_insert {π : ArithmeticSentence}
     ¬ insert π T ⊢* 𝗥𝗳𝗻[Set.univ] T := fun h ↦
   (T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
     (Γ := fun _ ↦ True) (fun _ _ ↦ trivial) trivial h).not_con hC
+
+/-- A consistent extension of `T` by a single $\Pi_1$ sentence does not prove the local
+$\Sigma_1$ reflection schema of `T`.
+- [AB05, Theorem 23] -/
+theorem not_provable_localReflectionOn_sigma1_insert {π : ArithmeticSentence}
+    (hπ : Hierarchy 𝚷 1 π) (hC : Consistent (insert π T)) :
+    ¬ insert π T ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T := fun h ↦
+  (T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
+    (Γ := Hierarchy 𝚷 1) (fun _ hσ ↦ by simpa using hσ) hπ h).not_con hC
+
+theorem S_weakerThan_provabilityLogic_of_provable_localReflection
+    (h : U ⊢* 𝗥𝗳𝗻[Set.univ] T) :
+    𝐒 ⪯ T.provabilityLogicRelativeTo U (α := α) := by
+  apply sumQuasiNormal_weakerThan_provabilityLogic
+  rintro _ ⟨C, rfl⟩ f
+  exact h ⟨_, trivial, rfl⟩
 
 end FFL.ProvabilityLogic

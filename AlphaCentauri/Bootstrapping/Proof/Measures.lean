@@ -11,6 +11,8 @@ Both are total on all codes; on codes that are not proof-rule constructors their
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1
@@ -59,89 +61,89 @@ noncomputable def pre₄ (d : V) : V := π₁ (π₂ (π₂ (π₂ (sndIdx d))))
 /-- The $\Sigma_1$ graph of `tag`.
 
 No source; a formalization device. -/
-def tagGraph : 𝚺₁.Semisentence 2 := .mkSigma
+def tagGraph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “t d. ∃ r, !sndIdxDef r d ∧ !pi₁Def t r”
 
 /-- The $\Sigma_1$ graph of `last₁`.
 
 No source; a formalization device. -/
-def last₁Graph : 𝚺₁.Semisentence 2 := .mkSigma
+def last₁Graph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “a d. ∃ r, !sndIdxDef r d ∧ !pi₂Def a r”
 
 /-- The $\Sigma_1$ graph of `last₂`.
 
 No source; a formalization device. -/
-def last₂Graph : 𝚺₁.Semisentence 2 := .mkSigma
+def last₂Graph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧ !pi₂Def a q”
 
 /-- The $\Sigma_1$ graph of `last₃`.
 
 No source; a formalization device. -/
-def last₃Graph : 𝚺₁.Semisentence 2 := .mkSigma
+def last₃Graph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧
     ∃ q', !pi₂Def q' q ∧ !pi₂Def a q'”
 
 /-- The $\Sigma_1$ graph of `last₄`.
 
 No source; a formalization device. -/
-def last₄Graph : 𝚺₁.Semisentence 2 := .mkSigma
+def last₄Graph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧
     ∃ q', !pi₂Def q' q ∧ ∃ q'', !pi₂Def q'' q' ∧ !pi₂Def a q''”
 
 /-- The $\Sigma_1$ graph of `pre₃`.
 
 No source; a formalization device. -/
-def pre₃Graph : 𝚺₁.Semisentence 2 := .mkSigma
+def pre₃Graph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧
     ∃ q', !pi₂Def q' q ∧ !pi₁Def a q'”
 
 /-- The $\Sigma_1$ graph of `pre₄`.
 
 No source; a formalization device. -/
-def pre₄Graph : 𝚺₁.Semisentence 2 := .mkSigma
+def pre₄Graph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧
     ∃ q', !pi₂Def q' q ∧ ∃ q'', !pi₂Def q'' q' ∧ !pi₁Def a q''”
 
 /-- `tag` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance tag_def : 𝚺₁-Function₁[V] tag via tagGraph := .mk fun v ↦ by
+instance tag_def : 𝚺ᴬ₁-Function₁[V] tag via tagGraph := .mk fun v ↦ by
   simp [tagGraph, tag]
 
 /-- `last₁` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance last₁_def : 𝚺₁-Function₁[V] last₁ via last₁Graph := .mk fun v ↦ by
+instance last₁_def : 𝚺ᴬ₁-Function₁[V] last₁ via last₁Graph := .mk fun v ↦ by
   simp [last₁Graph, last₁]
 
 /-- `last₂` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance last₂_def : 𝚺₁-Function₁[V] last₂ via last₂Graph := .mk fun v ↦ by
+instance last₂_def : 𝚺ᴬ₁-Function₁[V] last₂ via last₂Graph := .mk fun v ↦ by
   simp [last₂Graph, last₂]
 
 /-- `last₃` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance last₃_def : 𝚺₁-Function₁[V] last₃ via last₃Graph := .mk fun v ↦ by
+instance last₃_def : 𝚺ᴬ₁-Function₁[V] last₃ via last₃Graph := .mk fun v ↦ by
   simp [last₃Graph, last₃]
 
 /-- `last₄` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance last₄_def : 𝚺₁-Function₁[V] last₄ via last₄Graph := .mk fun v ↦ by
+instance last₄_def : 𝚺ᴬ₁-Function₁[V] last₄ via last₄Graph := .mk fun v ↦ by
   simp [last₄Graph, last₄]
 
 /-- `pre₃` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance pre₃_def : 𝚺₁-Function₁[V] pre₃ via pre₃Graph := .mk fun v ↦ by
+instance pre₃_def : 𝚺ᴬ₁-Function₁[V] pre₃ via pre₃Graph := .mk fun v ↦ by
   simp [pre₃Graph, pre₃]
 
 /-- `pre₄` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance pre₄_def : 𝚺₁-Function₁[V] pre₄ via pre₄Graph := .mk fun v ↦ by
+instance pre₄_def : 𝚺ᴬ₁-Function₁[V] pre₄ via pre₄Graph := .mk fun v ↦ by
   simp [pre₄Graph, pre₄]
 
 /-- The rule tag of `axL s p` is `0`, the constructor's own tag.
@@ -294,7 +296,7 @@ noncomputable def nodeHeight (d ih : V) : V :=
 /-- The $\Sigma_1$ graph of `nodeHeight`.
 
 No source; a formalization device. -/
-def nodeHeightGraph : 𝚺₁.Semisentence 3 := .mkSigma
+def nodeHeightGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “h d ih. (∃ t, !tagGraph t d ∧ t = 2 ∧ ∃ p, !pre₄Graph p d ∧ ∃ q, !last₄Graph q d ∧
       ∃ hp, !znthDef hp ih p ∧ ∃ hq, !znthDef hq ih q ∧ ∃ m, !max.dfn m hp hq ∧ h = m + 1) ∨
     (∃ t, !tagGraph t d ∧ t = 3 ∧ ∃ p, !last₃Graph p d ∧ ∃ hp, !znthDef hp ih p ∧ h = hp + 1) ∨
@@ -309,7 +311,7 @@ def nodeHeightGraph : 𝚺₁.Semisentence 3 := .mkSigma
 /-- `nodeHeight` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance nodeHeight_def : 𝚺₁-Function₂[V] nodeHeight via nodeHeightGraph := .mk fun v ↦ by
+instance nodeHeight_def : 𝚺ᴬ₁-Function₂[V] nodeHeight via nodeHeightGraph := .mk fun v ↦ by
   simp [nodeHeightGraph, nodeHeight]
   split_ifs <;> simp_all [numeral_eq_natCast]
 
@@ -350,12 +352,12 @@ No source; a formalization device. -/
 /-- The $\Sigma_1$ graph of `heightSeq`.
 
 No source; a formalization device. -/
-noncomputable def heightSeqGraph : 𝚺₁.Semisentence 2 := heightBlueprint.resultDef
+noncomputable def heightSeqGraph : 𝚺ᴬ₁.Semisentence 2 := heightBlueprint.resultDef
 
 /-- `heightSeq` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance heightSeq_def : 𝚺₁-Function₁[V] heightSeq via heightSeqGraph := .mk fun v ↦ by
+instance heightSeq_def : 𝚺ᴬ₁-Function₁[V] heightSeq via heightSeqGraph := .mk fun v ↦ by
   have h := heightConstruction.result_defined_iff v
   have hv : (fun x : Fin 0 ↦ v x.succ.succ) = (![] : Fin 0 → V) := by
     ext x
@@ -368,7 +370,7 @@ instance heightSeq_def : 𝚺₁-Function₁[V] heightSeq via heightSeqGraph := 
 /-- `heightSeq` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance heightSeq_definable : 𝚺₁-Function₁[V] heightSeq := heightSeq_def.to_definable
+instance heightSeq_definable : 𝚺ᴬ₁-Function₁[V] heightSeq := heightSeq_def.to_definable
 
 /-- The primitive-recursive height assigned to an internal proof code: the length of the longest
 branch of the derivation `d` denotes, or `0` if `d` is not a proof-rule constructor.
@@ -379,13 +381,13 @@ noncomputable def height (d : V) : V := znth (heightSeq d) d
 /-- The $\Sigma_1$ graph of `height`.
 
 No source; a formalization device. -/
-noncomputable def heightGraph : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def heightGraph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “h d. ∃ s, !heightBlueprint.resultDef s d ∧ !znthDef h s d”
 
 /-- `height` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance height_def : 𝚺₁-Function₁[V] height via heightGraph := .mk fun v ↦ by
+instance height_def : 𝚺ᴬ₁-Function₁[V] height via heightGraph := .mk fun v ↦ by
   have h (s d : V) : heightBlueprint.resultDef.val.Evalb ![s, d] ↔ s = heightSeq d := by
     have hparam : (fun _ : Fin 0 ↦ d) = (![] : Fin 0 → V) := by
       ext x
@@ -399,7 +401,7 @@ instance height_def : 𝚺₁-Function₁[V] height via heightGraph := .mk fun v
 /-- `height` is $\Sigma_1$-definable.
 
 No source; a formalization device. -/
-instance height_definable : 𝚺₁-Function₁[V] height := height_def.to_definable
+instance height_definable : 𝚺ᴬ₁-Function₁[V] height := height_def.to_definable
 
 /-- `0` is not a proof-rule constructor, so its height is `0`.
 
@@ -584,11 +586,11 @@ No source; direct computation from the definition of `height`. -/
 noncomputable def pre₂ (d : V) : V := π₁ (π₂ (sndIdx d))
 
 /-- The $\Sigma_1$ graph of `pre₂`. -/
-def pre₂Graph : 𝚺₁.Semisentence 2 := .mkSigma
+def pre₂Graph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “a d. ∃ r, !sndIdxDef r d ∧ ∃ q, !pi₂Def q r ∧ !pi₁Def a q”
 
 /-- `pre₂` is $\Sigma_1$-definable. -/
-instance pre₂_def : 𝚺₁-Function₁[V] pre₂ via pre₂Graph := .mk fun v ↦ by
+instance pre₂_def : 𝚺ᴬ₁-Function₁[V] pre₂ via pre₂Graph := .mk fun v ↦ by
   simp [pre₂Graph, pre₂]
 
 /-- `pre₂` recovers the cut formula `p` stored by `cutRule s p d₁ d₂`. -/
@@ -615,7 +617,7 @@ noncomputable def nodeCutRank (d ih : V) : V :=
   else 0
 
 /-- The $\Sigma_1$ graph of `nodeCutRank`. -/
-noncomputable def nodeCutRankGraph : 𝚺₁.Semisentence 3 := .mkSigma
+noncomputable def nodeCutRankGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “r d ih. (∃ t, !tagGraph t d ∧ t = 2 ∧ ∃ p, !pre₄Graph p d ∧ ∃ q, !last₄Graph q d ∧
       ∃ rp, !znthDef rp ih p ∧ ∃ rq, !znthDef rq ih q ∧ !max.dfn r rp rq) ∨
     (∃ t, !tagGraph t d ∧ t = 3 ∧ ∃ p, !last₃Graph p d ∧ !znthDef r ih p) ∨
@@ -630,7 +632,7 @@ noncomputable def nodeCutRankGraph : 𝚺₁.Semisentence 3 := .mkSigma
 
 /-- `nodeCutRank` is $\Sigma_1$-definable. -/
 instance nodeCutRank_def :
-    𝚺₁-Function₂[V] nodeCutRank L via nodeCutRankGraph L := .mk fun v ↦ by
+    𝚺ᴬ₁-Function₂[V] nodeCutRank L via nodeCutRankGraph L := .mk fun v ↦ by
   simp [nodeCutRankGraph, nodeCutRank, (formulaComplexity.defined (L := L) (V := V)).iff]
   have h₂₅ : (2 : V) ≠ ORingStructure.numeral 5 := by simp [numeral_eq_natCast]
   have h₂₆ : (2 : V) ≠ ORingStructure.numeral 6 := by simp [numeral_eq_natCast]
@@ -683,12 +685,12 @@ variable {L}
 variable (L)
 
 /-- The $\Sigma_1$ graph of `cutRankSeq`. -/
-noncomputable def cutRankSeqGraph : 𝚺₁.Semisentence 2 := (cutRankBlueprint L).resultDef
+noncomputable def cutRankSeqGraph : 𝚺ᴬ₁.Semisentence 2 := (cutRankBlueprint L).resultDef
 
 variable {L}
 
 /-- `cutRankSeq` is $\Sigma_1$-definable. -/
-instance cutRankSeq_def : 𝚺₁-Function₁[V] cutRankSeq L via cutRankSeqGraph L := .mk fun v ↦ by
+instance cutRankSeq_def : 𝚺ᴬ₁-Function₁[V] cutRankSeq L via cutRankSeqGraph L := .mk fun v ↦ by
   have h := (cutRankConstruction L).result_defined_iff (V := V) v
   have hv : (fun x : Fin 0 ↦ v x.succ.succ) = (![] : Fin 0 → V) := by
     ext x
@@ -699,7 +701,7 @@ instance cutRankSeq_def : 𝚺₁-Function₁[V] cutRankSeq L via cutRankSeqGrap
   simpa [cutRankSeqGraph, cutRankSeq, cutRankBlueprint, hv, hv'] using h
 
 /-- `cutRankSeq` is $\Sigma_1$-definable. -/
-instance cutRankSeq_definable : 𝚺₁-Function₁[V] cutRankSeq L := cutRankSeq_def.to_definable
+instance cutRankSeq_definable : 𝚺ᴬ₁-Function₁[V] cutRankSeq L := cutRankSeq_def.to_definable
 
 variable (L)
 
@@ -710,13 +712,13 @@ complexity of a formula cut on in `d`, and `0` when `d` cuts on nothing.
 noncomputable def cutRank (d : V) : V := znth (cutRankSeq L d) d
 
 /-- The $\Sigma_1$ graph of `cutRank`. -/
-noncomputable def cutRankGraph : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def cutRankGraph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “r d. ∃ s, !(cutRankBlueprint L).resultDef s d ∧ !znthDef r s d”
 
 variable {L}
 
 /-- `cutRank` is $\Sigma_1$-definable. -/
-instance cutRank_def : 𝚺₁-Function₁[V] cutRank L via cutRankGraph L := .mk fun v ↦ by
+instance cutRank_def : 𝚺ᴬ₁-Function₁[V] cutRank L via cutRankGraph L := .mk fun v ↦ by
   have h (s d : V) : (cutRankBlueprint L).resultDef.val.Evalb ![s, d] ↔ s = cutRankSeq L d := by
     have hparam : (fun _ : Fin 0 ↦ d) = (![] : Fin 0 → V) := by
       ext x
@@ -728,7 +730,7 @@ instance cutRank_def : 𝚺₁-Function₁[V] cutRank L via cutRankGraph L := .m
   simp [cutRankGraph, cutRank, h]
 
 /-- `cutRank` is $\Sigma_1$-definable. -/
-instance cutRank_definable : 𝚺₁-Function₁[V] cutRank L := cutRank_def.to_definable
+instance cutRank_definable : 𝚺ᴬ₁-Function₁[V] cutRank L := cutRank_def.to_definable
 
 /-- `cutRankSeq d` is always a sequence. -/
 private lemma cutRankSeq_seq (d : V) : Seq (cutRankSeq L d) := by

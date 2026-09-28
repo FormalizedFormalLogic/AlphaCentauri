@@ -12,6 +12,9 @@ It also defines internal predicates for the strict prenex hierarchy.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -50,22 +53,22 @@ noncomputable def qqExss (p k : V) : V := qqExss.construction.result ![p] k
 
 /-- Defining formula for iterated existential quantification.
 - [HP98, Lemma I.1.69] -/
-def _root_.FFL.FirstOrder.Arithmetic.qqExssDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.qqExssDef : 𝚺ᴬ₁.Semisentence 3 :=
   qqExss.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
 /-- Iterated existential quantification is $\Sigma_1$-definable.
 - [HP98, Lemma I.1.69] -/
-instance qqExss_defined : 𝚺₁-Function₂ (qqExss : V → V → V) via qqExssDef := .mk
+instance qqExss_defined : 𝚺ᴬ₁-Function₂ (qqExss : V → V → V) via qqExssDef := .mk
   fun v ↦ by simp [qqExss.construction.result_defined_iff, qqExssDef]; rfl
 
 /-- The $\Sigma_1$ definability instance for iterated existential quantification.
 - [HP98, Lemma I.1.69] -/
-instance qqExss_definable : 𝚺₁-Function₂ (qqExss : V → V → V) :=
+instance qqExss_definable : 𝚺ᴬ₁-Function₂ (qqExss : V → V → V) :=
   qqExss_defined.to_definable
 
 /-- Iterated existential quantification is definable at every positive hierarchy level.
 - [HP98, Lemma I.1.69] -/
-instance qqExss_definable' {m : ℕ} (Γ) : Γ-[m + 1]-Function₂ (qqExss : V → V → V) :=
+instance qqExss_definable' {m : ℕ} (Γ) : Γᴬ-[m + 1]-Function₂ (qqExss : V → V → V) :=
   qqExss_definable.of_sigmaOne
 
 /-- One existential quantifier does not exceed the formula it quantifies.
@@ -156,16 +159,16 @@ noncomputable def vecAppend (v w : V) : V := VecAppend.construction.result ![w] 
 @[simp] lemma vecAppend_adjoin (x v w : V) : vecAppend (x ∷ v) w = x ∷ vecAppend v w := by
   simp [vecAppend, VecAppend.construction]
 
-def _root_.FFL.FirstOrder.Arithmetic.vecAppendDef : 𝚺₁.Semisentence 3 :=
+def _root_.FFL.FirstOrder.Arithmetic.vecAppendDef : 𝚺ᴬ₁.Semisentence 3 :=
   VecAppend.blueprint.resultDef
 
-instance vecAppend_defined : 𝚺₁-Function₂ (vecAppend : V → V → V) via vecAppendDef :=
+instance vecAppend_defined : 𝚺ᴬ₁-Function₂ (vecAppend : V → V → V) via vecAppendDef :=
   VecAppend.construction.result_defined
 
-instance vecAppend_definable : 𝚺₁-Function₂ (vecAppend : V → V → V) :=
+instance vecAppend_definable : 𝚺ᴬ₁-Function₂ (vecAppend : V → V → V) :=
   vecAppend_defined.to_definable
 
-instance vecAppend_definable' (Γ m) : Γ-[m + 1]-Function₂ (vecAppend : V → V → V) :=
+instance vecAppend_definable' (Γ m) : Γᴬ-[m + 1]-Function₂ (vecAppend : V → V → V) :=
   vecAppend_definable.of_sigmaOne
 
 @[simp] lemma len_vecAppend (v w : V) : len (vecAppend v w) = len v + len w := by
@@ -216,7 +219,7 @@ end
 mutual
   /-- A $\Delta_1$ recognizer for internally coded strict prenex $\Sigma_n$ formulas.
   - [HP98, Lemma I.1.69(1)] -/
-  noncomputable def isStrictSigma : ℕ → 𝚫₁.Semisentence 1
+  noncomputable def isStrictSigma : ℕ → 𝚫ᴬ₁.Semisentence 1
     | 0 => isBounded
     | n + 1 => .mkDelta
         (.mkSigma “p. ∃ k < p + 1, ∃ q < p + 1, !qqExssDef p q k ∧ !(isStrictPi n).sigma q”)
@@ -225,7 +228,7 @@ mutual
 
   /-- A $\Delta_1$ recognizer for internally coded strict prenex $\Pi_n$ formulas.
   - [HP98, Lemma I.1.69(1)] -/
-  noncomputable def isStrictPi : ℕ → 𝚫₁.Semisentence 1
+  noncomputable def isStrictPi : ℕ → 𝚫ᴬ₁.Semisentence 1
     | 0 => isBounded
     | n + 1 => .mkDelta
         (.mkSigma “p. ∃ k < p + 1, ∃ q < p + 1, !qqAllsDef p q k ∧ !(isStrictSigma n).sigma q”)
@@ -246,10 +249,10 @@ mutual
   /-- The strict prenex $\Sigma_n$ recognizer defines `IsStrictSigma n`.
   - [HP98, Lemma I.1.69(1)] -/
   instance IsStrictSigma.defined :
-      ∀ n : ℕ, 𝚫₁-Predicate (IsStrictSigma n : V → Prop) via isStrictSigma n
+      ∀ n : ℕ, 𝚫ᴬ₁-Predicate (IsStrictSigma n : V → Prop) via isStrictSigma n
     | 0 => IsBounded.defined
     | n + 1 =>
-      have : 𝚫₁-Predicate (IsStrictPi n : V → Prop) via isStrictPi n := IsStrictPi.defined n
+      have : 𝚫ᴬ₁-Predicate (IsStrictPi n : V → Prop) via isStrictPi n := IsStrictPi.defined n
       .mk ⟨fun v ↦ by simp [isStrictSigma, HierarchySymbol.Semiformula.val_sigma, eq_comm],
         fun v ↦ by
           simpa [isStrictSigma, IsStrictSigma, lt_succ_iff_le] using
@@ -258,10 +261,10 @@ mutual
   /-- The strict prenex $\Pi_n$ recognizer defines `IsStrictPi n`.
   - [HP98, Lemma I.1.69(1)] -/
   instance IsStrictPi.defined :
-      ∀ n : ℕ, 𝚫₁-Predicate (IsStrictPi n : V → Prop) via isStrictPi n
+      ∀ n : ℕ, 𝚫ᴬ₁-Predicate (IsStrictPi n : V → Prop) via isStrictPi n
     | 0 => IsBounded.defined
     | n + 1 =>
-      have : 𝚫₁-Predicate (IsStrictSigma n : V → Prop) via isStrictSigma n :=
+      have : 𝚫ᴬ₁-Predicate (IsStrictSigma n : V → Prop) via isStrictSigma n :=
         IsStrictSigma.defined n
       .mk ⟨fun v ↦ by simp [isStrictPi, HierarchySymbol.Semiformula.val_sigma, eq_comm],
         fun v ↦ by
@@ -271,12 +274,12 @@ end
 
 /-- Internal strict prenex $\Sigma_n$ membership is $\Delta_1$-definable.
 - [HP98, Lemma I.1.69(1)] -/
-instance IsStrictSigma.definable (n : ℕ) : 𝚫₁-Predicate (IsStrictSigma n : V → Prop) :=
+instance IsStrictSigma.definable (n : ℕ) : 𝚫ᴬ₁-Predicate (IsStrictSigma n : V → Prop) :=
   (IsStrictSigma.defined n).to_definable
 
 /-- Internal strict prenex $\Pi_n$ membership is $\Delta_1$-definable.
 - [HP98, Lemma I.1.69(1)] -/
-instance IsStrictPi.definable (n : ℕ) : 𝚫₁-Predicate (IsStrictPi n : V → Prop) :=
+instance IsStrictPi.definable (n : ℕ) : 𝚫ᴬ₁-Predicate (IsStrictPi n : V → Prop) :=
   (IsStrictPi.defined n).to_definable
 
 /-- A strict $\Pi_n$ formula belongs to the next strict `Σ` level.

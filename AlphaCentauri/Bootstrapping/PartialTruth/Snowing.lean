@@ -12,6 +12,8 @@ both in every model of `𝗜𝚺₁` and, uniformly, over `𝗣𝗔⁻` together
 
 @[expose] public section
 
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+
 namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
@@ -131,7 +133,7 @@ private lemma quote_mulTerm_sentence {k : ℕ} (w : Fin 2 → ClosedSemiterm ℒ
 - [HP98, Remark I.1.80] -/
 
 theorem boundedSatisfaction_quote_iff {k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : DeltaZero φ) (v : Fin k → V) :
+    (hφ : ℬ[<, ℒₒᵣ].Closure φ) (v : Fin k → V) :
     BoundedSatisfaction (⌜φ⌝ : V) (matrixToVec v) ↔ V ⊧/v φ := by
   revert v
   refine bounded_induction (ξ := Empty)
@@ -299,7 +301,7 @@ private lemma uFormula_quote_cast {k : ℕ} (φ : ArithmeticSemisentence k) :
     UFormula ((⌜φ⌝ : ℕ) : M) :=
   Delta1_cast₁ (isUFormula ℒₒᵣ) (by simpa using isUFormula_quote (V := ℕ) φ)
 
-private lemma bounded_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k} (h : DeltaZero φ) :
+private lemma bounded_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k} (h : ℬ[<, ℒₒᵣ].Closure φ) :
     Reading.Bounded ((⌜φ⌝ : ℕ) : M) :=
   Delta1_cast₁ isBounded (by simpa using (isBounded_quote_iff (V := ℕ) φ).mpr h)
 
@@ -380,7 +382,7 @@ include hM in
 a bounded
 formula agrees with truth. -/
 private lemma boundedSatisfaction_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : DeltaZero φ) :
+    (hφ : ℬ[<, ℒₒᵣ].Closure φ) :
     ∀ (v : Fin k → M) (ev : M), Codes v ev →
       (BoundedSatisfaction ((⌜φ⌝ : ℕ) : M) ev ↔ M ⊧/v φ) := by
   refine bounded_induction (ξ := Empty)

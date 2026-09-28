@@ -5,6 +5,8 @@ public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.ToFoundation.Theory
 
 @[expose] public section
+
+open FFL.FirstOrder.Bounding (HierarchySymbol)
 /-!
 # The unboundedness theorem for a $\Gamma_{n + 1}$-axiomatizable extension
 
@@ -258,7 +260,7 @@ private lemma provable_of_mem (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ
 - [Lin97, Theorem 4.3] -/
 private lemma exists_sentence_weakerThan_of_forall_mem
     (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) [Consistent (T ∪ U)] :
-    ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
+    ∃ θ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
   have hcon : Consistent (insert (collapseSentence T U n Γ) T) := by
     by_contra hc
@@ -281,7 +283,7 @@ consistent extension of `T` by a single `Γ (n + 1)` sentence.
 - [Lin97, Theorem 4.3] -/
 theorem exists_sentence_weakerThan_of_consistent
     (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U') [Consistent (T ∪ U)] :
-    ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
+    ∃ θ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
   have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right hΓ.equiv T
   have : Consistent (T ∪ U') := Consistent.of_le ‹Consistent (T ∪ U)› e.symm.le

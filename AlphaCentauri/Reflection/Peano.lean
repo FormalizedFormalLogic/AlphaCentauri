@@ -20,7 +20,7 @@ open _root_.FFL.Entailment ProvabilityAbstraction
 - [HP98, Corollary I.4.34(3)] -/
 theorem Peano.provable_localReflection_ISigma (n : ℕ) : 𝗣𝗔 ⊢* 𝗥𝗳𝗻[Set.univ] (𝗜𝚺 n) := by
   rintro _ ⟨σ, -, rfl⟩;
-  obtain ⟨k, hk⟩ := Hierarchy.exists_forall_hierarchy σ;
+  obtain ⟨k, hk⟩ := Bounding.Hierarchy.exists_forall_hierarchy σ;
   set j := n + k + 1;
   have : 𝗜𝚺₁ ⪯ 𝗜𝚺 j := ISigma_weakerThan_of_le (by omega);
   apply (inferInstance : 𝗜𝚺 (j + 1) ⪯ 𝗣𝗔).pbl;

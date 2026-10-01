@@ -290,108 +290,135 @@ section Hierarchy
 variable {s m : ℕ}
 
 /-! Each Tarski sentence is a universal closure of a Boolean combination of formulas of level at
-most $\Sigma_{m + 1}$, so `Hierarchy.iff_iff` splits the biconditionals and `Hierarchy.dummy_sigma`,
-`Hierarchy.dummy_pi` absorb the quantifier blocks that raise the level by one.
+most $\Sigma_{m + 1}$, so `Bounding.Hierarchy.iff_iff` splits the biconditionals and
+`Bounding.Hierarchy.dummy_sigma`, `Bounding.Hierarchy.dummy_pi` absorb the quantifier blocks that
+raise the level by one.
 
 - [HP98, Remark I.1.77] -/
-attribute [local simp] Hierarchy.iff_iff Hierarchy.dummy_sigma Hierarchy.dummy_pi
+attribute [local simp] Bounding.Hierarchy.iff_iff Bounding.Hierarchy.dummy_sigma
+  Bounding.Hierarchy.dummy_pi
 
-@[simp] lemma hierarchy_boundedSatisfactionDom : Hierarchy 𝚷 (s + 3) boundedSatisfactionDom := by
+@[simp] lemma hierarchy_boundedSatisfactionDom :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionDom := by
   simp [boundedSatisfactionDom]
 
 @[simp] lemma hierarchy_boundedSatisfactionVerum :
-    Hierarchy 𝚷 (s + 3) boundedSatisfactionVerum := by
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionVerum := by
   simp [boundedSatisfactionVerum]
 
 @[simp] lemma hierarchy_boundedSatisfactionFalsum :
-    Hierarchy 𝚷 (s + 3) boundedSatisfactionFalsum := by
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionFalsum := by
   simp [boundedSatisfactionFalsum]
 
-@[simp] lemma hierarchy_boundedSatisfactionEq : Hierarchy 𝚷 (s + 3) boundedSatisfactionEq := by
+@[simp] lemma hierarchy_boundedSatisfactionEq :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionEq := by
   simp [boundedSatisfactionEq]
 
-@[simp] lemma hierarchy_boundedSatisfactionNeq : Hierarchy 𝚷 (s + 3) boundedSatisfactionNeq := by
+@[simp] lemma hierarchy_boundedSatisfactionNeq :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionNeq := by
   simp [boundedSatisfactionNeq]
 
-@[simp] lemma hierarchy_boundedSatisfactionLt : Hierarchy 𝚷 (s + 3) boundedSatisfactionLt := by
+@[simp] lemma hierarchy_boundedSatisfactionLt :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionLt := by
   simp [boundedSatisfactionLt]
 
-@[simp] lemma hierarchy_boundedSatisfactionNlt : Hierarchy 𝚷 (s + 3) boundedSatisfactionNlt := by
+@[simp] lemma hierarchy_boundedSatisfactionNlt :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionNlt := by
   simp [boundedSatisfactionNlt]
 
-@[simp] lemma hierarchy_boundedSatisfactionAnd : Hierarchy 𝚷 (s + 3) boundedSatisfactionAnd := by
+@[simp] lemma hierarchy_boundedSatisfactionAnd :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionAnd := by
   simp [boundedSatisfactionAnd]
 
-@[simp] lemma hierarchy_boundedSatisfactionOr : Hierarchy 𝚷 (s + 3) boundedSatisfactionOr := by
+@[simp] lemma hierarchy_boundedSatisfactionOr :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionOr := by
   simp [boundedSatisfactionOr]
 
-@[simp] lemma hierarchy_boundedSatisfactionNeg : Hierarchy 𝚷 (s + 3) boundedSatisfactionNeg := by
+@[simp] lemma hierarchy_boundedSatisfactionNeg :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionNeg := by
   simp [boundedSatisfactionNeg]
 
-@[simp] lemma hierarchy_boundedSatisfactionBall : Hierarchy 𝚷 (s + 3) boundedSatisfactionBall := by
+@[simp] lemma hierarchy_boundedSatisfactionBall :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionBall := by
   simp [boundedSatisfactionBall]
 
-@[simp] lemma hierarchy_boundedSatisfactionBex : Hierarchy 𝚷 (s + 3) boundedSatisfactionBex := by
+@[simp] lemma hierarchy_boundedSatisfactionBex :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) boundedSatisfactionBex := by
   simp [boundedSatisfactionBex]
 
-@[simp] lemma hierarchy_termValBvar : Hierarchy 𝚷 (s + 3) termValBvar := by simp [termValBvar]
+@[simp] lemma hierarchy_termValBvar :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) termValBvar := by simp [termValBvar]
 
-@[simp] lemma hierarchy_termValZero : Hierarchy 𝚷 (s + 3) termValZero := by simp [termValZero]
+@[simp] lemma hierarchy_termValZero :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) termValZero := by simp [termValZero]
 
-@[simp] lemma hierarchy_termValOne : Hierarchy 𝚷 (s + 3) termValOne := by simp [termValOne]
+@[simp] lemma hierarchy_termValOne :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) termValOne := by simp [termValOne]
 
-@[simp] lemma hierarchy_termValAdd : Hierarchy 𝚷 (s + 3) termValAdd := by simp [termValAdd]
+@[simp] lemma hierarchy_termValAdd :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) termValAdd := by simp [termValAdd]
 
-@[simp] lemma hierarchy_termValMul : Hierarchy 𝚷 (s + 3) termValMul := by simp [termValMul]
+@[simp] lemma hierarchy_termValMul :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) termValMul := by simp [termValMul]
 
-@[simp] lemma hierarchy_adjoinTotal : Hierarchy 𝚷 (s + 3) adjoinTotal := by simp [adjoinTotal]
+@[simp] lemma hierarchy_adjoinTotal :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) adjoinTotal := by simp [adjoinTotal]
 
-@[simp] lemma hierarchy_adjoinUnique : Hierarchy 𝚷 (s + 3) adjoinUnique := by simp [adjoinUnique]
+@[simp] lemma hierarchy_adjoinUnique :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) adjoinUnique := by simp [adjoinUnique]
 
-@[simp] lemma hierarchy_nthAdjoinZero : Hierarchy 𝚷 (s + 3) nthAdjoinZero := by
+@[simp] lemma hierarchy_nthAdjoinZero : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) nthAdjoinZero := by
   simp [nthAdjoinZero]
 
-@[simp] lemma hierarchy_nthAdjoinSucc : Hierarchy 𝚷 (s + 3) nthAdjoinSucc := by
+@[simp] lemma hierarchy_nthAdjoinSucc : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) nthAdjoinSucc := by
   simp [nthAdjoinSucc]
 
-@[simp] lemma hierarchy_lenNil : Hierarchy 𝚷 (s + 3) lenNil := by simp [lenNil]
+@[simp] lemma hierarchy_lenNil : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) lenNil := by simp [lenNil]
 
-@[simp] lemma hierarchy_lenAdjoin : Hierarchy 𝚷 (s + 3) lenAdjoin := by simp [lenAdjoin]
+@[simp] lemma hierarchy_lenAdjoin : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) lenAdjoin := by simp [lenAdjoin]
 
-@[simp] lemma hierarchy_sigmaSatisfactionOfPi : Hierarchy 𝚷 (m + 2) (sigmaSatisfactionOfPi m) := by
+@[simp] lemma hierarchy_sigmaSatisfactionOfPi :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 2) (sigmaSatisfactionOfPi m) := by
   cases m <;> simp [sigmaSatisfactionOfPi]
 
-@[simp] lemma hierarchy_piSatisfactionOfSigma : Hierarchy 𝚷 (m + 2) (piSatisfactionOfSigma m) := by
+@[simp] lemma hierarchy_piSatisfactionOfSigma :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 2) (piSatisfactionOfSigma m) := by
   cases m <;> simp [piSatisfactionOfSigma]
 
-@[simp] lemma hierarchy_sigmaSatisfactionDom : Hierarchy 𝚷 (m + 2) (sigmaSatisfactionDom m) := by
+@[simp] lemma hierarchy_sigmaSatisfactionDom :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 2) (sigmaSatisfactionDom m) := by
   simp [sigmaSatisfactionDom]
 
-@[simp] lemma hierarchy_piSatisfactionDom : Hierarchy 𝚷 (m + 2) (piSatisfactionDom m) := by
+@[simp] lemma hierarchy_piSatisfactionDom :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 2) (piSatisfactionDom m) := by
   simp [piSatisfactionDom]
 
-@[simp] lemma hierarchy_sigmaSatisfactionExs : Hierarchy 𝚷 (m + 2) (sigmaSatisfactionExs m) := by
+@[simp] lemma hierarchy_sigmaSatisfactionExs :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 2) (sigmaSatisfactionExs m) := by
   simp [sigmaSatisfactionExs]
 
-@[simp] lemma hierarchy_piSatisfactionAll : Hierarchy 𝚷 (m + 2) (piSatisfactionAll m) := by
+@[simp] lemma hierarchy_piSatisfactionAll :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 2) (piSatisfactionAll m) := by
   simp [piSatisfactionAll]
 
-@[simp] lemma hierarchy_piSatisfactionNeg : Hierarchy 𝚷 (m + 2) (piSatisfactionNeg m) := by
+@[simp] lemma hierarchy_piSatisfactionNeg :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 2) (piSatisfactionNeg m) := by
   simp [piSatisfactionNeg]
 
-@[simp] lemma hierarchy_sigmaSatisfactionNeg : Hierarchy 𝚷 (m + 2) (sigmaSatisfactionNeg m) := by
+@[simp] lemma hierarchy_sigmaSatisfactionNeg :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 2) (sigmaSatisfactionNeg m) := by
   simp [sigmaSatisfactionNeg]
 
 lemma hierarchy_of_mem_boundedSatisfactionAxioms {σ : ArithmeticSentence}
   (hσ : σ ∈ boundedSatisfactionAxioms) :
-    Hierarchy 𝚷 (s + 3) σ := by
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (s + 3) σ := by
   simp only [boundedSatisfactionAxioms, Set.mem_insert_iff, Set.mem_singleton_iff] at hσ
   rcases hσ with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
     rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> simp
 
 lemma hierarchy_of_mem_sigmaSatisfactionAxioms {σ : ArithmeticSentence}
   (hσ : σ ∈ sigmaSatisfactionAxioms m) :
-    Hierarchy 𝚷 (m + 2) σ := by
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 2) σ := by
   simp only [sigmaSatisfactionAxioms, Set.mem_insert_iff, Set.mem_singleton_iff] at hσ
   rcases hσ with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> simp
 
@@ -400,7 +427,7 @@ end Hierarchy
 end Tarski
 
 lemma hierarchy_of_tarski {n : ℕ} {σ : ArithmeticSentence} (hσ : tarski n σ) :
-    Hierarchy 𝚷 (n + 3) σ := by
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 3) σ := by
   induction hσ with
   | zero n φ hφ => exact Tarski.hierarchy_of_mem_boundedSatisfactionAxioms hφ
   | prev n φ _ ih => exact ih.mono (by omega)

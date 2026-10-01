@@ -41,9 +41,9 @@ abbrev IDelta (s : ℕ) : ArithmeticTheory :=
 
 prefix:max "𝗜𝚫 " => IDelta
 
-/-- The `Δ` induction scheme for the broad hierarchy `Hierarchy 𝚺 s`. -/
+/-- The `Δ` induction scheme for the broad hierarchy `ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s`. -/
 abbrev IDeltaOnBroadHierarchy (s : ℕ) : ArithmeticTheory :=
-  𝗜𝚺₀ ∪ DeltaInductionScheme (Arithmetic.Hierarchy 𝚺 s)
+  𝗜𝚺₀ ∪ DeltaInductionScheme (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s)
 
 prefix:max "𝗜𝚫⁺ " => IDeltaOnBroadHierarchy
 

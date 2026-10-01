@@ -11,6 +11,8 @@ code `p`, including `p` itself, by structural recursion on `p` via `UformulaRec1
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* ISigma 1]
@@ -89,7 +91,7 @@ noncomputable def subformulas (p : V) : V := (Subformula.construction L).result 
 
 No source; a formalization device.
 -/
-noncomputable def subformulasGraph : 𝚺₁.Semisentence 2 :=
+noncomputable def subformulasGraph : 𝚺ᴬ₁.Semisentence 2 :=
   ((Subformula.blueprint L).result L).rew (Rew.subst ![#0, ‘0’, #1])
 
 variable {L}
@@ -100,19 +102,19 @@ variable {Γ : SigmaPiDelta} {m : ℕ}
 
 /-- `subformulas` is $\Sigma_1$-definable through `subformulasGraph`.
 - No source; a formalization device mirroring the external subformula relation. -/
-instance subformulas.defined : 𝚺₁-Function₁ subformulas (V := V) L via subformulasGraph L :=
+instance subformulas.defined : 𝚺ᴬ₁-Function₁ subformulas (V := V) L via subformulasGraph L :=
   .mk fun v ↦ by
     simpa [subformulasGraph, subformulas, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using!
       (Subformula.construction L).result_defined.defined ![v 0, 0, v 1]
 
 /-- `subformulas` is a $\Sigma_1$-definable function.
 - No source; a formalization device mirroring the external subformula relation. -/
-instance subformulas.definable : 𝚺₁-Function₁ subformulas (V := V) L :=
+instance subformulas.definable : 𝚺ᴬ₁-Function₁ subformulas (V := V) L :=
   subformulas.defined.to_definable
 
-/-- `subformulas` is definable at every level `Γ-[m + 1]` of the hierarchy.
+/-- `subformulas` is definable at every level `Γᴬ-[m + 1]` of the hierarchy.
 - No source; a formalization device mirroring the external subformula relation. -/
-instance subformulas.definable' : Γ-[m + 1]-Function₁ subformulas (V := V) L :=
+instance subformulas.definable' : Γᴬ-[m + 1]-Function₁ subformulas (V := V) L :=
   subformulas.definable.of_sigmaOne
 
 end
@@ -367,7 +369,7 @@ variable {L}
 
 /-- Membership in `subformulasSet L s`: `q` is a subformula of some code in `s`. -/
 lemma mem_subformulasSet_iff {s q : V} : q ∈ subformulasSet L s ↔ ∃ p ∈ s, q ∈ subformulas L p := by
-  have := (subformulas.definable : 𝚺₁-Function₁ subformulas (V := V) L)
+  have := (subformulas.definable : 𝚺ᴬ₁-Function₁ subformulas (V := V) L)
   constructor
   · intro h
     rcases mem_sUnion_iff.mp h with ⟨c, hc, hqc⟩

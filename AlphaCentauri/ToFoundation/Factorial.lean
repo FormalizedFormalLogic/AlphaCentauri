@@ -12,6 +12,8 @@ number whose blocks list the partial products $0!, 1!, \dots, x!$.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic
 
 noncomputable section
@@ -161,13 +163,13 @@ lemma exists_isSeq (x : V) : ∃ L S, IsSeq L S x := by
   obtain ⟨S, _, H⟩ := exists_lt_isSeq hL hI (le_refl ((I ⨳ L) ^ 2)) x le_rfl
   exact ⟨L, S, H⟩
 
-def isSeqDef : 𝚺₀.Semisentence 3 := .mkSigma
+def isSeqDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “L S k.
     !Nuon.extDef 1 L S 0 ∧
     ∀ i < k, ∃ b <⁺ S, !Nuon.extDef b L S i ∧ !Nuon.extDef (b * (i + 1)) L S (i + 1)”
 
 instance isSeq_defined :
-    𝚺₀.Defined (V := V) (fun v ↦ IsSeq (v 0) (v 1) (v 2)) isSeqDef := .mk fun v ↦ by
+    𝚺ᴬ₀.Defined (V := V) (fun v ↦ IsSeq (v 0) (v 1) (v 2)) isSeqDef := .mk fun v ↦ by
   simp [IsSeq, isSeqDef, Eq.comm]
 
 end Factorial
@@ -204,13 +206,13 @@ lemma Factorial.eq_iff {x y : V} : y = factorial x ↔ Factorial x y :=
     Factorial.factorial_eq (⟨L, S, H.of_le (by simp), rfl⟩ : Factorial x _),
     H.2 x (by simp)]
 
-def factorialDef : 𝚺₁.Semisentence 2 := .mkSigma
+def factorialDef : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “y x. ∃ L, ∃ S, !Factorial.isSeqDef L S x ∧ !Nuon.extDef y L S x”
 
-instance factorial_defined : 𝚺₁-Function₁[V] factorial via factorialDef := .mk fun v ↦ by
+instance factorial_defined : 𝚺ᴬ₁-Function₁[V] factorial via factorialDef := .mk fun v ↦ by
   simp [factorialDef, Factorial.eq_iff, Factorial, Eq.comm]
 
-instance factorial_definable : 𝚺₁-Function₁[V] factorial := factorial_defined.to_definable
+instance factorial_definable : 𝚺ᴬ₁-Function₁[V] factorial := factorial_defined.to_definable
 
 @[simp] lemma factorial_pos (x : V) : 0 < factorial x := by
   obtain ⟨L, S, H⟩ := Factorial.exists_isSeq x

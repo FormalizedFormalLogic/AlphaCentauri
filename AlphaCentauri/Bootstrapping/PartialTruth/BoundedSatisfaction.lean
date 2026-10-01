@@ -45,6 +45,9 @@ uniqueness turns this $\Sigma_1$ statement into a $\Delta_1$ one.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -493,37 +496,37 @@ namespace BoundedSatisfactionTableF
 - [HP98, Lemma I.1.72(1)] -/
 
 /-- Defining formula for `n ∈ domain q`. -/
-def inDomDef : 𝚺₀.Semisentence 2 := .mkSigma “q n. ∃ v < q, :⟪n, v⟫:∈ q”
+def inDomDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma “q n. ∃ v < q, :⟪n, v⟫:∈ q”
 
 /-- `inDomDef` defines membership in the domain of a finite mapping. -/
-instance inDom_defined : 𝚺₀-Relation (fun q n : V ↦ n ∈ domain q) via inDomDef := .mk fun v ↦ by
+instance inDom_defined : 𝚺ᴬ₀-Relation (fun q n : V ↦ n ∈ domain q) via inDomDef := .mk fun v ↦ by
   suffices (∃ y < v 0, ⟪v 1, y⟫ ∈ v 0) ↔ v 1 ∈ domain (v 0) by simpa [inDomDef]
   rw [mem_domain_iff]
   exact ⟨fun ⟨y, _, h⟩ ↦ ⟨y, h⟩, fun ⟨y, h⟩ ↦ ⟨y, lt_of_mem_rng h, h⟩⟩
 
 /-- Defining formula for `⟪⟪p, e⟫, v⟫ ∈ q`: the table `q` gives the node `⟪p, e⟫` the value
 `v`. -/
-def nodeValDef : 𝚺₀.Semisentence 4 := .mkSigma
+def nodeValDef : 𝚺ᴬ₀.Semisentence 4 := .mkSigma
   “q p e v. ∃ n <⁺ (p + e + 1)², !pairDef n p e ∧ :⟪n, v⟫:∈ q”
 
 /-- `nodeValDef` defines the value of a table at a node. -/
 instance nodeVal_defined :
-    𝚺₀-Relation₄ (fun q p e v : V ↦ ⟪⟪p, e⟫, v⟫ ∈ q) via nodeValDef := .mk fun v ↦ by
+    𝚺ᴬ₀-Relation₄ (fun q p e v : V ↦ ⟪⟪p, e⟫, v⟫ ∈ q) via nodeValDef := .mk fun v ↦ by
   simp [nodeValDef]
 
 /-- Defining formula for `⟪p, e⟫ ∈ domain q`. -/
-def nodeDomDef : 𝚺₀.Semisentence 3 := .mkSigma “q p e. ∃ v < q, !nodeValDef q p e v”
+def nodeDomDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma “q p e. ∃ v < q, !nodeValDef q p e v”
 
 /-- `nodeDomDef` defines membership of a node in a table. -/
 instance nodeDom_defined :
-    𝚺₀-Relation₃ (fun q p e : V ↦ ⟪p, e⟫ ∈ domain q) via nodeDomDef := .mk fun v ↦ by
+    𝚺ᴬ₀-Relation₃ (fun q p e : V ↦ ⟪p, e⟫ ∈ domain q) via nodeDomDef := .mk fun v ↦ by
   suffices (∃ y < v 0, ⟪⟪v 1, v 2⟫, y⟫ ∈ v 0) ↔ ⟪v 1, v 2⟫ ∈ domain (v 0) by
     simpa [nodeDomDef, nodeVal_defined.df]
   rw [mem_domain_iff]
   exact ⟨fun ⟨y, _, h⟩ ↦ ⟨y, h⟩, fun ⟨y, h⟩ ↦ ⟨y, lt_of_mem_rng h, h⟩⟩
 
 /-- Defining formula for `⟪⟪p, x ∷ e⟫, v⟫ ∈ q`. -/
-def childValDef : 𝚺₀.Semisentence 5 := .mkSigma
+def childValDef : 𝚺ᴬ₀.Semisentence 5 := .mkSigma
   “q p x e v. ∃ xe <⁺ (x + e + 1)² + 1, !adjoinDef xe x e ∧ !nodeValDef q p xe v”
 
 /-- `childValDef` defines the value of a table at a node under an extended assignment. -/
@@ -532,21 +535,21 @@ instance childVal_defined :
   .mk fun v ↦ by simp [childValDef, nodeVal_defined.df, adjoin_def]
 
 /-- Defining formula for `⟪p, x ∷ e⟫ ∈ domain q`. -/
-def childDomDef : 𝚺₀.Semisentence 4 := .mkSigma
+def childDomDef : 𝚺ᴬ₀.Semisentence 4 := .mkSigma
   “q p x e. ∃ xe <⁺ (x + e + 1)² + 1, !adjoinDef xe x e ∧ !nodeDomDef q p xe”
 
 /-- `childDomDef` defines membership of a node under an extended assignment. -/
 instance childDom_defined :
-    𝚺₀-Relation₄ (fun q p x e : V ↦ ⟪p, x ∷ e⟫ ∈ domain q) via childDomDef := .mk fun v ↦ by
+    𝚺ᴬ₀-Relation₄ (fun q p x e : V ↦ ⟪p, x ∷ e⟫ ∈ domain q) via childDomDef := .mk fun v ↦ by
   simp [childDomDef, nodeDom_defined.df, adjoin_def]
 
 /-- Defining formula for `n = ⟪p, x ∷ e⟫`. -/
-def childPairDef : 𝚺₀.Semisentence 4 := .mkSigma
+def childPairDef : 𝚺ᴬ₀.Semisentence 4 := .mkSigma
   “n p x e. ∃ xe <⁺ (x + e + 1)² + 1, !adjoinDef xe x e ∧ !pairDef n p xe”
 
 /-- `childPairDef` defines the code of a node under an extended assignment. -/
 instance childPair_defined :
-    𝚺₀-Relation₄ (fun n p x e : V ↦ n = ⟪p, x ∷ e⟫) via childPairDef := .mk fun v ↦ by
+    𝚺ᴬ₀-Relation₄ (fun n p x e : V ↦ n = ⟪p, x ∷ e⟫) via childPairDef := .mk fun v ↦ by
   simp [childPairDef, adjoin_def]
 
 /-! #### The ten Tarski clauses
@@ -557,20 +560,20 @@ instance childPair_defined :
 def SpecVerum (q z e : V) : Prop := z = ^⊤ ∧ ⟪⟪z, e⟫, 1⟫ ∈ q
 
 /-- Defining formula for `SpecVerum`. -/
-def specVerumDef : 𝚺₀.Semisentence 3 := .mkSigma “q z e. !qqVerumDef z ∧ !nodeValDef q z e 1”
+def specVerumDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma “q z e. !qqVerumDef z ∧ !nodeValDef q z e 1”
 
 /-- `specVerumDef` defines `SpecVerum`. -/
-instance specVerum_defined : 𝚺₀-Relation₃ (SpecVerum : V → V → V → Prop) via specVerumDef :=
+instance specVerum_defined : 𝚺ᴬ₀-Relation₃ (SpecVerum : V → V → V → Prop) via specVerumDef :=
   .mk fun v ↦ by simp [specVerumDef, SpecVerum, nodeVal_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is the falsehood constant. -/
 def SpecFalsum (q z e : V) : Prop := z = ^⊥ ∧ ⟪⟪z, e⟫, 0⟫ ∈ q
 
 /-- Defining formula for `SpecFalsum`. -/
-def specFalsumDef : 𝚺₀.Semisentence 3 := .mkSigma “q z e. !qqFalsumDef z ∧ !nodeValDef q z e 0”
+def specFalsumDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma “q z e. !qqFalsumDef z ∧ !nodeValDef q z e 0”
 
 /-- `specFalsumDef` defines `SpecFalsum`. -/
-instance specFalsum_defined : 𝚺₀-Relation₃ (SpecFalsum : V → V → V → Prop) via specFalsumDef :=
+instance specFalsum_defined : 𝚺ᴬ₀-Relation₃ (SpecFalsum : V → V → V → Prop) via specFalsumDef :=
   .mk fun v ↦ by simp [specFalsumDef, SpecFalsum, nodeVal_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is an equality atom. -/
@@ -579,7 +582,7 @@ def SpecEq (q z e : V) : Prop := ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ I
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ termVal e t ≠ termVal e u)
 
 /-- Defining formula for the values of `SpecEq` once the two term values are known. -/
-def eqMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
+def eqMatrixDef : 𝚺ᴬ₀.Semisentence 5 := .mkSigma
   “q z e a b. (!nodeValDef q z e 1 ↔ a = b) ∧ (!nodeValDef q z e 0 ↔ a ≠ b)”
 
 /-- `eqMatrixDef` defines the values of `SpecEq` at given term values. -/
@@ -589,7 +592,7 @@ instance eqMatrix_defined :
   .mk fun v ↦ by simp [eqMatrixDef, nodeVal_defined.df]
 
 /-- Defining formula for `SpecEq`. -/
-noncomputable def specEqDef : 𝚫₁.Semisentence 3 := .mkDelta
+noncomputable def specEqDef : 𝚫ᴬ₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧
     !qqEQDef z t u ∧
     ∃ a, !termValGraph a e t ∧ ∃ b, !termValGraph b e u ∧ !eqMatrixDef q z e a b”)
@@ -598,7 +601,7 @@ noncomputable def specEqDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !eqMatrixDef q z e a b”)
 
 /-- `specEqDef` defines `SpecEq`. -/
-instance specEq_defined : 𝚫₁-Relation₃ (SpecEq : V → V → V → Prop) via specEqDef := .mk <| by
+instance specEq_defined : 𝚫ᴬ₁-Relation₃ (SpecEq : V → V → V → Prop) via specEqDef := .mk <| by
   constructor
   · intro v
     simp [specEqDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -613,7 +616,7 @@ def SpecNeq (q z e : V) : Prop := ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ 
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ termVal e t = termVal e u)
 
 /-- Defining formula for the values of `SpecNeq` once the two term values are known. -/
-def neqMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
+def neqMatrixDef : 𝚺ᴬ₀.Semisentence 5 := .mkSigma
   “q z e a b. (!nodeValDef q z e 1 ↔ a ≠ b) ∧ (!nodeValDef q z e 0 ↔ a = b)”
 
 /-- `neqMatrixDef` defines the values of `SpecNeq` at given term values. -/
@@ -623,7 +626,7 @@ instance neqMatrix_defined :
   .mk fun v ↦ by simp [neqMatrixDef, nodeVal_defined.df]
 
 /-- Defining formula for `SpecNeq`. -/
-noncomputable def specNeqDef : 𝚫₁.Semisentence 3 := .mkDelta
+noncomputable def specNeqDef : 𝚫ᴬ₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧
     !qqNEQDef z t u ∧
     ∃ a, !termValGraph a e t ∧ ∃ b, !termValGraph b e u ∧ !neqMatrixDef q z e a b”)
@@ -632,7 +635,7 @@ noncomputable def specNeqDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !neqMatrixDef q z e a b”)
 
 /-- `specNeqDef` defines `SpecNeq`. -/
-instance specNeq_defined : 𝚫₁-Relation₃ (SpecNeq : V → V → V → Prop) via specNeqDef := .mk <| by
+instance specNeq_defined : 𝚫ᴬ₁-Relation₃ (SpecNeq : V → V → V → Prop) via specNeqDef := .mk <| by
   constructor
   · intro v
     simp [specNeqDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -647,7 +650,7 @@ def SpecLt (q z e : V) : Prop := ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ I
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ¬termVal e t < termVal e u)
 
 /-- Defining formula for the values of `SpecLt` once the two term values are known. -/
-def ltMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
+def ltMatrixDef : 𝚺ᴬ₀.Semisentence 5 := .mkSigma
   “q z e a b. (!nodeValDef q z e 1 ↔ a < b) ∧ (!nodeValDef q z e 0 ↔ ¬a < b)”
 
 /-- `ltMatrixDef` defines the values of `SpecLt` at given term values. -/
@@ -657,7 +660,7 @@ instance ltMatrix_defined :
   .mk fun v ↦ by simp [ltMatrixDef, nodeVal_defined.df]
 
 /-- Defining formula for `SpecLt`. -/
-noncomputable def specLtDef : 𝚫₁.Semisentence 3 := .mkDelta
+noncomputable def specLtDef : 𝚫ᴬ₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧
     !qqLTDef z t u ∧
     ∃ a, !termValGraph a e t ∧ ∃ b, !termValGraph b e u ∧ !ltMatrixDef q z e a b”)
@@ -666,7 +669,7 @@ noncomputable def specLtDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !ltMatrixDef q z e a b”)
 
 /-- `specLtDef` defines `SpecLt`. -/
-instance specLt_defined : 𝚫₁-Relation₃ (SpecLt : V → V → V → Prop) via specLtDef := .mk <| by
+instance specLt_defined : 𝚫ᴬ₁-Relation₃ (SpecLt : V → V → V → Prop) via specLtDef := .mk <| by
   constructor
   · intro v
     simp [specLtDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -681,7 +684,7 @@ def SpecNlt (q z e : V) : Prop := ∃ t < z, ∃ u < z, IsUTerm ℒₒᵣ t ∧ 
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ termVal e t < termVal e u)
 
 /-- Defining formula for the values of `SpecNlt` once the two term values are known. -/
-def nltMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
+def nltMatrixDef : 𝚺ᴬ₀.Semisentence 5 := .mkSigma
   “q z e a b. (!nodeValDef q z e 1 ↔ ¬a < b) ∧ (!nodeValDef q z e 0 ↔ a < b)”
 
 /-- `nltMatrixDef` defines the values of `SpecNlt` at given term values. -/
@@ -691,7 +694,7 @@ instance nltMatrix_defined :
   .mk fun v ↦ by simp [nltMatrixDef, nodeVal_defined.df]
 
 /-- Defining formula for `SpecNlt`. -/
-noncomputable def specNltDef : 𝚫₁.Semisentence 3 := .mkDelta
+noncomputable def specNltDef : 𝚫ᴬ₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ t < z, ∃ u < z, !(isUTerm ℒₒᵣ).sigma t ∧ !(isUTerm ℒₒᵣ).sigma u ∧
     !qqNLTDef z t u ∧
     ∃ a, !termValGraph a e t ∧ ∃ b, !termValGraph b e u ∧ !nltMatrixDef q z e a b”)
@@ -700,7 +703,7 @@ noncomputable def specNltDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ a, !termValGraph a e t → ∀ b, !termValGraph b e u → !nltMatrixDef q z e a b”)
 
 /-- `specNltDef` defines `SpecNlt`. -/
-instance specNlt_defined : 𝚫₁-Relation₃ (SpecNlt : V → V → V → Prop) via specNltDef := .mk <| by
+instance specNlt_defined : 𝚫ᴬ₁-Relation₃ (SpecNlt : V → V → V → Prop) via specNltDef := .mk <| by
   constructor
   · intro v
     simp [specNltDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -716,13 +719,13 @@ def SpecAnd (q z e : V) : Prop :=
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 0⟫ ∈ q ∨ ⟪⟪p₂, e⟫, 0⟫ ∈ q)
 
 /-- Defining formula for `SpecAnd`. -/
-def specAndDef : 𝚺₀.Semisentence 3 := .mkSigma
+def specAndDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “q z e. ∃ p₁ < z, ∃ p₂ < z, !qqAndDef z p₁ p₂ ∧ !nodeDomDef q p₁ e ∧ !nodeDomDef q p₂ e ∧
     (!nodeValDef q z e 1 ↔ !nodeValDef q p₁ e 1 ∧ !nodeValDef q p₂ e 1) ∧
     (!nodeValDef q z e 0 ↔ !nodeValDef q p₁ e 0 ∨ !nodeValDef q p₂ e 0)”
 
 /-- `specAndDef` defines `SpecAnd`. -/
-instance specAnd_defined : 𝚺₀-Relation₃ (SpecAnd : V → V → V → Prop) via specAndDef :=
+instance specAnd_defined : 𝚺ᴬ₀-Relation₃ (SpecAnd : V → V → V → Prop) via specAndDef :=
   .mk fun v ↦ by simp [specAndDef, SpecAnd, nodeVal_defined.df, nodeDom_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a disjunction. -/
@@ -732,13 +735,13 @@ def SpecOr (q z e : V) : Prop :=
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ⟪⟪p₁, e⟫, 0⟫ ∈ q ∧ ⟪⟪p₂, e⟫, 0⟫ ∈ q)
 
 /-- Defining formula for `SpecOr`. -/
-def specOrDef : 𝚺₀.Semisentence 3 := .mkSigma
+def specOrDef : 𝚺ᴬ₀.Semisentence 3 := .mkSigma
   “q z e. ∃ p₁ < z, ∃ p₂ < z, !qqOrDef z p₁ p₂ ∧ !nodeDomDef q p₁ e ∧ !nodeDomDef q p₂ e ∧
     (!nodeValDef q z e 1 ↔ !nodeValDef q p₁ e 1 ∨ !nodeValDef q p₂ e 1) ∧
     (!nodeValDef q z e 0 ↔ !nodeValDef q p₁ e 0 ∧ !nodeValDef q p₂ e 0)”
 
 /-- `specOrDef` defines `SpecOr`. -/
-instance specOr_defined : 𝚺₀-Relation₃ (SpecOr : V → V → V → Prop) via specOrDef :=
+instance specOr_defined : 𝚺ᴬ₀-Relation₃ (SpecOr : V → V → V → Prop) via specOrDef :=
   .mk fun v ↦ by simp [specOrDef, SpecOr, nodeVal_defined.df, nodeDom_defined.df]
 
 /-- The clause of `BoundedSatisfactionTable.spec` at a node whose code is a bounded universal. -/
@@ -749,7 +752,7 @@ def SpecBall (q z e : V) : Prop :=
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ∃ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 0⟫ ∈ q)
 
 /-- Defining formula for the values of `SpecBall` once the bound is known. -/
-def ballMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
+def ballMatrixDef : 𝚺ᴬ₀.Semisentence 5 := .mkSigma
   “q z e p b. (∀ x < b, !childDomDef q p x e) ∧
     (!nodeValDef q z e 1 ↔ ∀ x < b, !childValDef q p x e 1) ∧
     (!nodeValDef q z e 0 ↔ ∃ x < b, !childValDef q p x e 0)”
@@ -763,7 +766,7 @@ instance ballMatrix_defined :
     simp [ballMatrixDef, nodeVal_defined.df, childVal_defined.df, childDom_defined.df]
 
 /-- Defining formula for `SpecBall`. -/
-noncomputable def specBallDef : 𝚫₁.Semisentence 3 := .mkDelta
+noncomputable def specBallDef : 𝚫ᴬ₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ u < z, ∃ p < z,
     (∃ t <⁺ u, !(isUTerm ℒₒᵣ).sigma t ∧ !(termBShiftGraph ℒₒᵣ) u t) ∧ !qqBallDef z u p ∧
     ∃ e0, !adjoinDef e0 0 e ∧ ∃ b, !termValGraph b e0 u ∧ !ballMatrixDef q z e p b”)
@@ -773,7 +776,7 @@ noncomputable def specBallDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !ballMatrixDef q z e p b”)
 
 /-- `specBallDef` defines `SpecBall`. -/
-instance specBall_defined : 𝚫₁-Relation₃ (SpecBall : V → V → V → Prop) via specBallDef := .mk <| by
+instance specBall_defined : 𝚫ᴬ₁-Relation₃ (SpecBall : V → V → V → Prop) via specBallDef := .mk <| by
   constructor
   · intro v
     simp [specBallDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -792,7 +795,7 @@ def SpecBex (q z e : V) : Prop :=
     (⟪⟪z, e⟫, 0⟫ ∈ q ↔ ∀ x < termVal (0 ∷ e) u, ⟪⟪p, x ∷ e⟫, 0⟫ ∈ q)
 
 /-- Defining formula for the values of `SpecBex` once the bound is known. -/
-def bexMatrixDef : 𝚺₀.Semisentence 5 := .mkSigma
+def bexMatrixDef : 𝚺ᴬ₀.Semisentence 5 := .mkSigma
   “q z e p b. (∀ x < b, !childDomDef q p x e) ∧
     (!nodeValDef q z e 1 ↔ ∃ x < b, !childValDef q p x e 1) ∧
     (!nodeValDef q z e 0 ↔ ∀ x < b, !childValDef q p x e 0)”
@@ -806,7 +809,7 @@ instance bexMatrix_defined :
     simp [bexMatrixDef, nodeVal_defined.df, childVal_defined.df, childDom_defined.df]
 
 /-- Defining formula for `SpecBex`. -/
-noncomputable def specBexDef : 𝚫₁.Semisentence 3 := .mkDelta
+noncomputable def specBexDef : 𝚫ᴬ₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. ∃ u < z, ∃ p < z,
     (∃ t <⁺ u, !(isUTerm ℒₒᵣ).sigma t ∧ !(termBShiftGraph ℒₒᵣ) u t) ∧ !qqBexDef z u p ∧
     ∃ e0, !adjoinDef e0 0 e ∧ ∃ b, !termValGraph b e0 u ∧ !bexMatrixDef q z e p b”)
@@ -816,7 +819,7 @@ noncomputable def specBexDef : 𝚫₁.Semisentence 3 := .mkDelta
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !bexMatrixDef q z e p b”)
 
 /-- `specBexDef` defines `SpecBex`. -/
-instance specBex_defined : 𝚫₁-Relation₃ (SpecBex : V → V → V → Prop) via specBexDef := .mk <| by
+instance specBex_defined : 𝚫ᴬ₁-Relation₃ (SpecBex : V → V → V → Prop) via specBexDef := .mk <| by
   constructor
   · intro v
     simp [specBexDef, HierarchySymbol.Semiformula.val_sigma, (termVal.defined (V := V)).df,
@@ -837,7 +840,7 @@ def SpecAt (q z e : V) : Prop :=
     SpecNlt q z e ∨ SpecAnd q z e ∨ SpecOr q z e ∨ SpecBall q z e ∨ SpecBex q z e
 
 /-- Defining formula for `SpecAt`. -/
-noncomputable def specDef : 𝚫₁.Semisentence 3 := .mkDelta
+noncomputable def specDef : 𝚫ᴬ₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. !specVerumDef q z e ∨ !specFalsumDef q z e ∨ !specEqDef.sigma q z e ∨
     !specNeqDef.sigma q z e ∨ !specLtDef.sigma q z e ∨ !specNltDef.sigma q z e ∨
     !specAndDef q z e ∨ !specOrDef q z e ∨ !specBallDef.sigma q z e ∨ !specBexDef.sigma q z e”)
@@ -846,7 +849,7 @@ noncomputable def specDef : 𝚫₁.Semisentence 3 := .mkDelta
     !specAndDef q z e ∨ !specOrDef q z e ∨ !specBallDef.pi q z e ∨ !specBexDef.pi q z e”)
 
 /-- `specDef` defines `SpecAt`. -/
-instance specAt_defined : 𝚫₁-Relation₃ (SpecAt : V → V → V → Prop) via specDef := .mk <| by
+instance specAt_defined : 𝚫ᴬ₁-Relation₃ (SpecAt : V → V → V → Prop) via specDef := .mk <| by
   constructor
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma]
   · intro v; simp [specDef, HierarchySymbol.Semiformula.val_sigma, SpecAt]
@@ -861,12 +864,12 @@ def MinAnd (q n : V) : Prop :=
     (n = ⟪p₁, e⟫ ∨ n = ⟪p₂, e⟫)
 
 /-- Defining formula for `MinAnd`. -/
-def minAndDef : 𝚺₀.Semisentence 2 := .mkSigma
+def minAndDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “q n. ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, !qqAndDef c p₁ p₂ ∧ !nodeDomDef q c e ∧
     (!pairDef n p₁ e ∨ !pairDef n p₂ e)”
 
 /-- `minAndDef` defines `MinAnd`. -/
-instance minAnd_defined : 𝚺₀-Relation (MinAnd : V → V → Prop) via minAndDef := .mk fun v ↦ by
+instance minAnd_defined : 𝚺ᴬ₀-Relation (MinAnd : V → V → Prop) via minAndDef := .mk fun v ↦ by
   simp [minAndDef, MinAnd, nodeDom_defined.df]
 
 /-- A node of the domain that is an immediate subformula of a coded disjunction in it. -/
@@ -875,20 +878,20 @@ def MinOr (q n : V) : Prop :=
     (n = ⟪p₁, e⟫ ∨ n = ⟪p₂, e⟫)
 
 /-- Defining formula for `MinOr`. -/
-def minOrDef : 𝚺₀.Semisentence 2 := .mkSigma
+def minOrDef : 𝚺ᴬ₀.Semisentence 2 := .mkSigma
   “q n. ∃ c < q, ∃ p₁ < c, ∃ p₂ < c, ∃ e < q, !qqOrDef c p₁ p₂ ∧ !nodeDomDef q c e ∧
     (!pairDef n p₁ e ∨ !pairDef n p₂ e)”
 
 /-- `minOrDef` defines `MinOr`. -/
-instance minOr_defined : 𝚺₀-Relation (MinOr : V → V → Prop) via minOrDef := .mk fun v ↦ by
+instance minOr_defined : 𝚺ᴬ₀-Relation (MinOr : V → V → Prop) via minOrDef := .mk fun v ↦ by
   simp [minOrDef, MinOr, nodeDom_defined.df]
 
 /-- `∃ x < b, n = ⟪p, x ∷ e⟫`. -/
-def minChildDef : 𝚺₀.Semisentence 4 := .mkSigma “n p e b. ∃ x < b, !childPairDef n p x e”
+def minChildDef : 𝚺ᴬ₀.Semisentence 4 := .mkSigma “n p e b. ∃ x < b, !childPairDef n p x e”
 
 /-- `minChildDef` defines the codes of the nodes below a bounded quantifier. -/
 instance minChild_defined :
-    𝚺₀-Relation₄ (fun n p e b : V ↦ ∃ x < b, n = ⟪p, x ∷ e⟫) via minChildDef := .mk fun v ↦ by
+    𝚺ᴬ₀-Relation₄ (fun n p e b : V ↦ ∃ x < b, n = ⟪p, x ∷ e⟫) via minChildDef := .mk fun v ↦ by
   simp [minChildDef, childPair_defined.df]
 
 /-- A node of the domain reached by entering a coded bounded universal in it. -/
@@ -897,7 +900,7 @@ def MinBall (q n : V) : Prop :=
     ∃ x < termVal (0 ∷ e) u, n = ⟪p, x ∷ e⟫
 
 /-- Defining formula for `MinBall`. -/
-noncomputable def minBallDef : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def minBallDef : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, !qqBallDef c u p ∧ !nodeDomDef q c e ∧
     ∃ e0, !adjoinDef e0 0 e ∧ ∃ b, !termValGraph b e0 u ∧ !minChildDef n p e b”)
   (.mkPi “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, (∀ c', !qqBallDef c' u p → c = c') ∧
@@ -905,7 +908,7 @@ noncomputable def minBallDef : 𝚫₁.Semisentence 2 := .mkDelta
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !minChildDef n p e b”)
 
 /-- `minBallDef` defines `MinBall`. -/
-instance minBall_defined : 𝚫₁-Relation (MinBall : V → V → Prop) via minBallDef := .mk <| by
+instance minBall_defined : 𝚫ᴬ₁-Relation (MinBall : V → V → Prop) via minBallDef := .mk <| by
   constructor
   · intro v
     simp [minBallDef, (termVal.defined (V := V)).df,
@@ -921,7 +924,7 @@ def MinBex (q n : V) : Prop :=
     ∃ x < termVal (0 ∷ e) u, n = ⟪p, x ∷ e⟫
 
 /-- Defining formula for `MinBex`. -/
-noncomputable def minBexDef : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def minBexDef : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, !qqBexDef c u p ∧ !nodeDomDef q c e ∧
     ∃ e0, !adjoinDef e0 0 e ∧ ∃ b, !termValGraph b e0 u ∧ !minChildDef n p e b”)
   (.mkPi “q n. ∃ c < q, ∃ u < c, ∃ p < c, ∃ e < q, (∀ c', !qqBexDef c' u p → c = c') ∧
@@ -929,7 +932,7 @@ noncomputable def minBexDef : 𝚫₁.Semisentence 2 := .mkDelta
     ∀ e0, !adjoinDef e0 0 e → ∀ b, !termValGraph b e0 u → !minChildDef n p e b”)
 
 /-- `minBexDef` defines `MinBex`. -/
-instance minBex_defined : 𝚫₁-Relation (MinBex : V → V → Prop) via minBexDef := .mk <| by
+instance minBex_defined : 𝚫ᴬ₁-Relation (MinBex : V → V → Prop) via minBexDef := .mk <| by
   constructor
   · intro v
     simp [minBexDef, (termVal.defined (V := V)).df,
@@ -943,7 +946,7 @@ instance minBex_defined : 𝚫₁-Relation (MinBex : V → V → Prop) via minBe
 def MinimalAt (q z e n : V) : Prop := n = ⟪z, e⟫ ∨ MinAnd q n ∨ MinOr q n ∨ MinBall q n ∨ MinBex q n
 
 /-- Defining formula for `MinimalAt`. -/
-noncomputable def minimalDef : 𝚫₁.Semisentence 4 := .mkDelta
+noncomputable def minimalDef : 𝚫ᴬ₁.Semisentence 4 := .mkDelta
   (.mkSigma “q z e n. !pairDef n z e ∨ !minAndDef q n ∨ !minOrDef q n ∨ !minBallDef.sigma q n ∨
     !minBexDef.sigma q n”)
   (.mkPi “q z e n. !pairDef n z e ∨ !minAndDef q n ∨ !minOrDef q n ∨ !minBallDef.pi q n ∨
@@ -951,7 +954,7 @@ noncomputable def minimalDef : 𝚫₁.Semisentence 4 := .mkDelta
 
 /-- `minimalDef` defines `MinimalAt`. -/
 instance minimalAt_defined :
-    𝚫₁-Relation₄ (MinimalAt : V → V → V → V → Prop) via minimalDef := .mk <| by
+    𝚫ᴬ₁-Relation₄ (MinimalAt : V → V → V → V → Prop) via minimalDef := .mk <| by
   constructor
   · intro v; simp [minimalDef, HierarchySymbol.Semiformula.val_sigma]
   · intro v; simp [minimalDef, HierarchySymbol.Semiformula.val_sigma, MinimalAt]
@@ -1044,7 +1047,7 @@ section defining
 open BoundedSatisfactionTableF
 
 /-- The $\Delta_1$ formula defining satisfaction tables. -/
-noncomputable def boundedSatisfactionTable : 𝚫₁.Semisentence 3 := .mkDelta
+noncomputable def boundedSatisfactionTable : 𝚫ᴬ₁.Semisentence 3 := .mkDelta
   (.mkSigma “q z e. !isMappingDef q ∧ !nodeDomDef q z e ∧
     (∀ z' < q, ∀ e' < q, !nodeDomDef q z' e' → !specDef.sigma q z' e') ∧
     (∀ n < q, !inDomDef q n → !minimalDef.sigma q z e n)”)
@@ -1054,7 +1057,7 @@ noncomputable def boundedSatisfactionTable : 𝚫₁.Semisentence 3 := .mkDelta
 
 /-- The formula `boundedSatisfactionTable` defines satisfaction tables. -/
 instance BoundedSatisfactionTable.defined :
-    𝚫₁-Relation₃ (BoundedSatisfactionTable : V → V → V → Prop) via boundedSatisfactionTable :=
+    𝚫ᴬ₁-Relation₃ (BoundedSatisfactionTable : V → V → V → Prop) via boundedSatisfactionTable :=
   .mk <| by
     constructor
     · intro v
@@ -1066,7 +1069,7 @@ instance BoundedSatisfactionTable.defined :
 
 /-- Satisfaction tables form a $\Delta_1$-definable relation. -/
 instance BoundedSatisfactionTable.definable :
-    𝚫₁-Relation₃ (BoundedSatisfactionTable : V → V → V → Prop) :=
+    𝚫ᴬ₁-Relation₃ (BoundedSatisfactionTable : V → V → V → Prop) :=
   BoundedSatisfactionTable.defined.to_definable
 
 end defining
@@ -2253,14 +2256,14 @@ lemma iff_exists {z e : V} :
 end BoundedSatisfaction
 
 /-- The $\Delta_1$ formula defining satisfaction for internally coded $\Delta_0$ formulas. -/
-noncomputable def boundedSatisfaction : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def boundedSatisfaction : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “z e. (!isBounded.sigma z ∧ !(isUFormula ℒₒᵣ).sigma z) ∧
     ∃ q, !boundedSatisfactionTable.sigma q z e ∧ !BoundedSatisfactionTableF.nodeValDef q z e 1”)
   (.mkPi “z e. (!isBounded.pi z ∧ !(isUFormula ℒₒᵣ).pi z) ∧
     ∀ q, !boundedSatisfactionTable.sigma q z e → !BoundedSatisfactionTableF.nodeValDef q z e 1”)
 
 /-- The formula `boundedSatisfaction` defines `BoundedSatisfaction`. -/
-instance BoundedSatisfaction.defined : 𝚫₁-Relation (BoundedSatisfaction : V → V →
+instance BoundedSatisfaction.defined : 𝚫ᴬ₁-Relation (BoundedSatisfaction : V → V →
   Prop) via boundedSatisfaction := .mk <| by
   constructor
   · intro v
@@ -2279,7 +2282,7 @@ instance BoundedSatisfaction.defined : 𝚫₁-Relation (BoundedSatisfaction : V
       (BoundedSatisfactionTable.defined (V := V)).df, BoundedSatisfactionTableF.nodeVal_defined.df]
 
 /-- Satisfaction for internally coded $\Delta_0$ formulas is $\Delta_1$-definable. -/
-instance BoundedSatisfaction.definable : 𝚫₁-Relation (BoundedSatisfaction : V → V → Prop) :=
+instance BoundedSatisfaction.definable : 𝚫ᴬ₁-Relation (BoundedSatisfaction : V → V → Prop) :=
   BoundedSatisfaction.defined.to_definable
 
 /-! ### Tarski conditions

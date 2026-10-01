@@ -82,8 +82,8 @@ variable {n s : ℕ} {b : Polarity} {C D : ArithmeticSemiformula ℕ n → Prop}
 instance strictHierarchy : RewriteClosed (n := n) (StrictHierarchy b s) where
   rewrite f := StrictHierarchy.rew (Rew.rewrite f)
 
-instance hierarchy : RewriteClosed (n := n) (Hierarchy b s) where
-  rewrite f := Hierarchy.rew (Rew.rewrite f)
+instance hierarchy : RewriteClosed (n := n) (ℬ[<, ℒₒᵣ].Hierarchy b s) where
+  rewrite f := Bounding.Hierarchy.rew (Rew.rewrite f)
 
 instance or [RewriteClosed C] [RewriteClosed D] : RewriteClosed fun φ ↦ C φ ∨ D φ where
   rewrite f := fun h ↦ h.imp (rewrite f) (rewrite f)

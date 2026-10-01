@@ -88,10 +88,10 @@ theorem provable_all_of_uniformReflection {T₀ : ArithmeticTheory} [T₀.Δ₁]
     · definability
     case zero => exact hbase
     case succ x ih => exact hstep x ih
-  have hσmem : U.globalReflectionSchema φ ∈ (U ∪ 𝗥𝗙𝗡[Γ] U) :=
+  have hσmem : U.uniformReflectionSchema φ ∈ (U ∪ 𝗥𝗙𝗡[Γ] U) :=
     Set.mem_union_right _ ⟨1, φ, hφ, rfl⟩
-  have hσmodel : V↓[ℒₒᵣ] ⊧ U.globalReflectionSchema φ := hVmod.models_set hσmem
-  have hrfn := (models_globalReflectionSchema_iff U φ).mp (by simpa [models_iff] using hσmodel)
+  have hσmodel : V↓[ℒₒᵣ] ⊧ U.uniformReflectionSchema φ := hVmod.models_set hσmem
+  have hrfn := (models_uniformReflectionSchema_iff U φ).mp (by simpa [models_iff] using hσmodel)
   simp only [models_iff, Semiformula.eval_all]
   intro x
   have hx' : Provable U (substNumerals (⌜φ⌝ : V) ![x]) := by

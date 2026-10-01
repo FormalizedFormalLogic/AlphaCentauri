@@ -2,6 +2,10 @@ name = "AlphaCentauri"
 version = "0.1.0"
 defaultTargets = ["AlphaCentauri"]
 
+# One published Lake cache then serves every platform, not just CI's Linux. Revisit if a native
+# library is added; Lake already drops platform-dependent executable outputs by itself.
+platformIndependent = true
+
 # Mathlib's own options: `autoImplicit` off, and the standard linter set that downstream
 # projects are meant to opt into wholesale (see `register_linter_set linter.mathlibStandardSet`
 # in `Mathlib/Init.lean`), which subsumes the individual linters this file used to list. Only

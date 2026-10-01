@@ -1,10 +1,11 @@
 module
 
-public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.ToFoundation.Theory
 
 @[expose] public section
+
+open FFL.FirstOrder.Bounding (HierarchySymbol)
 /-!
 # The unboundedness theorem for a $\Gamma_{n + 1}$-axiomatizable extension
 
@@ -137,7 +138,7 @@ private lemma inconsistent_union_of_inconsistent_insert_pi
   have : 𝗜𝚺₁ ⪯ T ∪ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   have : 𝗘𝗤 ℒₒᵣ ⪯ T ∪ U := WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   have hneg : T ⊢ ∼collapseSentence T U n 𝚷 := provable_neg_of_inconsistent_insert h
-  have hnegζ : T ⊢ ∼fixedpoint (collapseFormula T U n 𝚷) :=
+  obtain ⟨d⟩ : T ⊢ ∼fixedpoint (collapseFormula T U n 𝚷) :=
     neg_collapseSentence_iff.mp hneg
   have hprov : T ∪ U ⊢ collapseSentence T U n 𝚷 := by
     apply Arithmetic.complete.{0}
@@ -145,9 +146,9 @@ private lemma inconsistent_union_of_inconsistent_insert_pi
     have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory M 𝗜𝚺₁ (T ∪ U) inferInstance
     apply models_collapseSentence_pi_iff.mpr
     intro y hmem hsemi _ hlt
-    have hp : Proof T ((⌜hnegζ.get⌝ : ℕ) : M) ⌜∼fixedpoint (collapseFormula T U n 𝚷)⌝ := by
+    have hp : Proof T ((⌜d⌝ : ℕ) : M) ⌜∼fixedpoint (collapseFormula T U n 𝚷)⌝ := by
       simp [coe_quote_proof_eq]
-    have hle : y ≤ ((⌜hnegζ.get⌝ : ℕ) : M) := by
+    have hle : y ≤ ((⌜d⌝ : ℕ) : M) := by
       by_contra hcon
       exact hlt _ (not_le.mp hcon) hp
     obtain ⟨m, rfl⟩ := eq_nat_of_le_nat hle
@@ -165,16 +166,16 @@ private lemma inconsistent_union_of_inconsistent_insert_sigma
   have : 𝗜𝚺₁ ⪯ T ∪ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   have : 𝗘𝗤 ℒₒᵣ ⪯ T ∪ U := WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
   have hneg : T ⊢ ∼collapseSentence T U n 𝚺 := provable_neg_of_inconsistent_insert h
-  have hnegζ : T ⊢ ∼fixedpoint (collapseFormula T U n 𝚺) :=
+  obtain ⟨d⟩ : T ⊢ ∼fixedpoint (collapseFormula T U n 𝚺) :=
     neg_collapseSentence_iff.mp hneg
   have hprov : T ∪ U ⊢ collapseSentence T U n 𝚺 := by
     apply Arithmetic.complete.{0}
     intro M _ _
     have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory M 𝗜𝚺₁ (T ∪ U) inferInstance
-    have hp : Proof T ((⌜hnegζ.get⌝ : ℕ) : M) ⌜∼fixedpoint (collapseFormula T U n 𝚺)⌝ := by
+    have hp : Proof T ((⌜d⌝ : ℕ) : M) ⌜∼fixedpoint (collapseFormula T U n 𝚺)⌝ := by
       simp [coe_quote_proof_eq]
     refine models_collapseSentence_sigma_iff.mpr
-      ⟨((⌜hnegζ.get⌝ : ℕ) + 1 : ℕ), ⟨_, by push_cast; simp, hp⟩, ?_⟩
+      ⟨((⌜d⌝ : ℕ) + 1 : ℕ), ⟨_, by push_cast; simp, hp⟩, ?_⟩
     intro z hz hmem hsemi _
     obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat hz
     obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi
@@ -254,16 +255,16 @@ private lemma provable_of_mem (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ
   | sigma => exact provable_of_mem_sigma hΓ hcon hσ
   | pi => exact provable_of_mem_pi hΓ hcon hσ
 
-/-- The case of `exists_sentence_weakerThan_of_consistent` where `U` axiomatizes itself.
+/-- The case `U = U'` of `exists_sentence_weakerThan_of_consistent`.
 - [Lin97, Theorem 4.3] -/
 private lemma exists_sentence_weakerThan_of_forall_mem
-    (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) [Consistent (T ∪ U)] :
-    ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
+    (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) (hC : Consistent (T ∪ U)) :
+    ∃ θ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
   have hcon : Consistent (insert (collapseSentence T U n Γ) T) := by
     by_contra hc
     exact (inconsistent_union_of_inconsistent_insert hΓ
-      (not_consistent_iff_inconsistent.mp hc)).not_con inferInstance
+      (not_consistent_iff_inconsistent.mp hc)).not_con hC
   refine ⟨collapseSentence T U n Γ, hierarchy_collapseSentence T U n Γ, ?_, hcon⟩
   apply WeakerThan.ofAxm!
   rintro φ (hφ | hφ)
@@ -276,39 +277,54 @@ end
 
 variable {U U' : ArithmeticTheory} [U'.Δ₁] [𝗜𝚺₁ ⪯ T]
 
-/-- A consistent extension of `T` by a $\Gamma_{n + 1}$-axiomatizable theory is contained in a
-consistent extension of `T` by a single `Γ (n + 1)` sentence.
+/-- A consistent extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a $\Delta_1$-presented set
+`U'` of strict `Γ (n + 1)` sentences, is contained in a consistent extension of `T` by a single
+`Γ (n + 1)` sentence.
 - [Lin97, Theorem 4.3] -/
 theorem exists_sentence_weakerThan_of_consistent
-    (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U') [Consistent (T ∪ U)] :
-    ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
+    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U') (hC : Consistent (T ∪ U)) :
+    ∃ θ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
-  have e : T ∪ U ≊ T ∪ U' := Theory.equiv_union_right hΓ.equiv T
-  have : Consistent (T ∪ U') := Consistent.of_le ‹Consistent (T ∪ U)› e.symm.le
-  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_forall_mem (T := T) hΓ.forall_mem
+  have hC' : Consistent (T ∪ U') := Consistent.of_le hC e.symm.le
+  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_forall_mem (T := T) hΓ hC'
   exact ⟨θ, hθ, e.le.trans hle, hcon⟩
 
-/-- Unboundedness: a $\Gamma_{n + 1}$-axiomatizable extension of `T` proving the local reflection
-schema of `T` on the strict sentences of the dual class is inconsistent.
+/-- Unboundedness for the broad class: an extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a
+$\Delta_1$-presented set `U'` of strict `Γ (n + 1)` sentences, proving the local reflection schema
+of `T` on the sentences of the dual class is inconsistent. Only `𝗜𝚺₁ ⪯ T` is assumed.
+- [AB05, Theorem 23]
+- [Lin97, Corollary 4.2] -/
+theorem inconsistent_of_provable_localReflectionOn_hierarchy_union
+    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
+    (h : T ∪ U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
+  by_contra hc
+  have hC : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
+  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent hΓ e hC
+  have : 𝗜𝚺₁ ⪯ insert θ T :=
+    WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset (Set.subset_insert _ _))
+  exact hcon.not_inc <| T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
+    (fun _ hσ ↦ by simpa using hσ) hθ fun hσ ↦ hle.pbl (h hσ)
+
+/-- Unboundedness: an extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a $\Delta_1$-presented
+set `U'` of strict `Γ (n + 1)` sentences, proving the local reflection schema of `T` on the strict
+sentences of the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
 theorem inconsistent_of_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
-    (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U')
-    (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
-  by_contra hc
-  have : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
-  obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent (T := T) hΓ
-  exact hcon.not_inc
-    (inconsistent_of_provable_localReflectionOn_insert hθ fun hσ ↦ hle.pbl (h hσ))
+    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
+    (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) :=
+  inconsistent_of_provable_localReflectionOn_hierarchy_union hΓ e <|
+    provable_localReflectionOn_hierarchy_of_strictHierarchy
+      (WeakerThan.ofSubset Set.subset_union_left) h
 
-/-- Unboundedness: a consistent $\Gamma_{n + 1}$-axiomatizable extension of `T` does not prove
-the local reflection schema of `T` on the strict sentences of the dual class.
+/-- Unboundedness: a consistent extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a
+$\Delta_1$-presented set `U'` of strict `Γ (n + 1)` sentences, does not prove the local reflection
+schema of `T` on the strict sentences of the dual class.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
 theorem not_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
-    (hΓ : AxiomatizableBy (StrictHierarchy Γ (n + 1)) U U') [Consistent (T ∪ U)] :
+    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U') (hC : Consistent (T ∪ U)) :
     ¬T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T :=
-  fun h ↦ (inconsistent_of_provable_localReflectionOn_union hΓ h).not_con
-    inferInstance
+  fun h ↦ (inconsistent_of_provable_localReflectionOn_union hΓ e h).not_con hC
 
 end FFL.FirstOrder.Arithmetic

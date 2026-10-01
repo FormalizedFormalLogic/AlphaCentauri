@@ -233,7 +233,7 @@ section Embedding
 
 - [Tow20, Section 16]
 - [Buc03, Section 5.5] -/
-theorem of_derivation2 (d : 𝗣𝗔 ⟹₂Γ) :
+theorem of_derivation2 (d : 𝗣𝗔 ⟹₂ Γ) :
     ∃ c, ∀ e : ℕ → ℕ, ∃ α, Z∞ ⊢[α, c] (Γ.image fun φ => asg e ▹ φ) := by
   induction d with
   | closed Γ φ hp hn =>
@@ -314,7 +314,7 @@ theorem of_derivation2 (d : 𝗣𝗔 ⟹₂Γ) :
 /-- Every `𝗣𝗔` derivation embeds cut-free into `Z_∞` under a numeral assignment.
 
 - [Tow20, Section 16] -/
-theorem of_derivation2_cutFree (d : 𝗣𝗔 ⟹₂Γ) (e : ℕ → ℕ) :
+theorem of_derivation2_cutFree (d : 𝗣𝗔 ⟹₂ Γ) (e : ℕ → ℕ) :
     ∃ α, Z∞ ⊢[α, 0] (Γ.image fun φ => asg e ▹ φ) := by
   obtain ⟨c, h⟩ := of_derivation2 d
   obtain ⟨α, hα⟩ := h e

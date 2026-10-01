@@ -64,7 +64,7 @@ namespace BooleanCombination
 polarity.
 - [Bek99, §2] -/
 theorem hierarchy_succ (h : BooleanCombination (StrictHierarchy Γ s) φ)
-    (Γ' : Polarity) : Hierarchy Γ' (s + 1) φ := by
+    (Γ' : Polarity) : ℬ[<, L].Hierarchy Γ' (s + 1) φ := by
   induction h with
   | pos hφ => exact hφ.hierarchy.strict_mono Γ' (by omega)
   | neg hφ => exact hφ.neg.hierarchy.strict_mono Γ' (by omega)

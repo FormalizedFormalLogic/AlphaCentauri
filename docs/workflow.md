@@ -8,7 +8,7 @@ has not happened.
 
 | Who | Owns | Does |
 | --- | --- | --- |
-| Humans | `docs/`, `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `AGENTS.md`, `CLAUDE.md`, `README.md` | Decide what to formalize, by opening the issues; maintain the infrastructure; merge. |
+| Humans | `docs/`, `.github/`, `lakefile.toml`, `Justfile`, `lefthook.yml`, `AGENTS.md`, `README.md` | Decide what to formalize, by opening the issues; maintain the infrastructure; merge. |
 | AI agents | `AlphaCentauri/`, `AlphaCentauri.lean` | Claim issues; write the Lean code; open, review, and address PRs. |
 
 A PR touching a human-owned path needs a human approval.
@@ -71,7 +71,9 @@ activity for 14 days may be released by anyone, with a comment.
   "Route", "Verification", or "Design" sections — the diff and CI already say how it was built
   and verified.
 - AI disclosure: every commit carries a `Co-Authored-By` trailer for the model, and the body
-  says an AI agent wrote it.
+  says an AI agent wrote it. An agent working from a session also links that session in a comment
+  when it opens the pull request, or when it picks up one a workflow opened, so that the
+  conversation behind the change can be read from the pull request.
 
 ### CI
 
@@ -80,15 +82,39 @@ activity for 14 days may be released by anyone, with a comment.
 `sorry`, no `native_decide`, no axiom outside `propext`, `Classical.choice`, `Quot.sound` except
 what `forgive.yml` forgives by name); `just no-sorry`; `just mk-all` leaves no diff. The audit
 writes `.lake/audit.json`, which `.github/scripts/audit-comment.py` renders into one PR comment,
-overwritten on each run, unless the PR is labelled `infrastructure`. `actionlint.yml`
-lints the workflow files, and `update-deps.yml` and `repair-deps.yml` move the dependency pins
-and repair what the move breaks (below).
+overwritten on each run, unless the PR is labelled `infrastructure`. The zoo and the import
+graph are generated in jobs of their own after the build, only on `main` (or `workflow_dispatch`),
+since they only feed the GitHub Pages deployment. `actionlint.yml`
+lints the workflow files, and `update-deps.yml` moves the dependency pins (below).
 
 A red check is fixed in the PR, never worked around.
 
 [`lefthook.yml`](../lefthook.yml) runs the same checks before every `git push`, so a red run is
 caught locally. Install [lefthook](https://lefthook.dev), then `just hooks` once per clone;
 `LEFTHOOK=0 git push` skips them for a branch that does not need them, and CI runs them regardless.
+
+### Build caches
+
+Nothing is elaborated twice if a cache can supply it. Mathlib comes from its own cache
+(`lake exe cache get`); Foundation and this library come from the Lake build cache the
+organization shares, an R2 bucket read anonymously through
+`https://cache.formalizedformallogic.org` and described by [`lake-cache.toml`](../lake-cache.toml),
+which is the same file in every repository that uses it. `just cache` fetches all three, and
+`just build` runs it first, so a fresh clone compiles nothing it did not write.
+
+The scope of an entry is the package's GitHub repository and the revision it was built at, not a
+branch. Foundation's CI publishes on every push to its `master`, so **the revision this repository
+pins is one that has been published**, and moving that pin costs a download rather than the hour
+that building Foundation from source takes — which is what makes a dependency bump cheap. This repository publishes its own
+outputs the same way, from the merge queue and on pushes to `main` only: a pull request builds a
+tree that will not exist after the squash-merge, whereas a merge-queue commit becomes `main` as is,
+so the push run that follows restores it instead of compiling it again.
+
+`ci.yml` fetches all three through
+[`.github/actions/setup-lean`](../.github/actions/setup-lean/action.yml) and calls
+`lake cache put` directly. Reading needs nothing configured; publishing needs the secret `LAKE_CACHE_KEY`, an R2 token
+scoped to that bucket alone. A miss costs only time — the build compiles from source, slowly but
+never wrongly, as it does whenever the cache is short of something.
 
 ### Review and merge
 
@@ -98,8 +124,12 @@ against one rubric adapted from
 humans. Findings are addressed by pushing to the same branch; contradictory findings are
 contested in the thread, not resolved silently.
 
-Squash merge into `main` once CI is green and every review approves. A human performs it, or an
-agent when the user has explicitly told it to for that PR.
+`main` is behind a merge queue, so nothing merges into it directly: "Merge when ready" puts the
+pull request in the queue, the queue squashes it onto the tip and runs `Build project`,
+`Check mk_all executed` and `Check no sorry` there (`merge_group` in `ci.yml`), and it lands only
+if they pass. Queue it once CI is green and every review approves; a human does that, or an agent
+when the user has explicitly told it to for that PR. Nothing has to be up to date with `main`
+first — that is what the queue is for.
 
 ## Labels
 
@@ -152,15 +182,11 @@ secret `BOT_APP_PRIVATE_KEY`), because a push made with `github.token` starts no
 A bump that breaks nothing lands by itself. When the branch's diff against `main` is the pin
 files alone, the workflow queues its merge (`gh pr merge --squash --auto`) and GitHub performs
 it once the checks are green; the checks are the whole review, because there is nothing else in
-the diff to read. A branch that carries more than the pins is never queued.
+the diff to read. A branch that carries more than the pins is never queued. Nothing waits on the
+branch being current, because the merge queue tests each entry against the tip of `main` itself.
 
-[`.github/workflows/repair-deps.yml`](../.github/workflows/repair-deps.yml) takes the rest: when
-CI fails on that branch it hands it to Claude Code, which repairs this repository in place, pushes,
-reports in a comment, and cancels the queued merge — so a repaired bump is read by a human before
-it lands. Each bump gets one attempt, drawn from the maintainer's Claude subscription through the
-organization secret `CLAUDE_CODE_OAUTH_TOKEN` (`claude setup-token`); without it, or after that
-attempt, the pull request says so and waits. `/update-deps` is the same
-runbook from a local session.
+A bump that breaks something waits for a repair on its branch; `/update-deps` is the runbook
+for a local session.
 
 Repairing a bump is a session's work, not an issue's:
 

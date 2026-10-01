@@ -92,13 +92,15 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     intro x y
     exact inj (by simp [add_comm])
   case addEqOfLt =>
-    suffices ∀ x y : M, x < y → ∃ z, x + z = y by simpa [models_iff] using this
+    suffices ∀ x y : M, x < y → ∃ z < y + 1, x + z = y by
+      simpa [models_iff, Semiformula.eval_bexsLTSucc] using this
     intro x y h
-    obtain ⟨z, hz⟩ := Arithmetic.add_eq_of_lt (hMN.emb x) (hMN.emb y) (by simpa using h)
-    have h₁ : z ≤ hMN.emb y := hz ▸ le_add_self
+    obtain ⟨z, hz, hzeq⟩ :=
+      Arithmetic.add_eq_of_lt_bounded (hMN.emb x) (hMN.emb y) (by simpa using h)
+    have h₁ : z ≤ hMN.emb y := hzeq ▸ le_add_self
     obtain ⟨w, rfl⟩ : z ∈ Set.range hMN.emb :=
       h₁.lt_or_eq.elim hMN.mem_range_of_lt fun h₂ ↦ ⟨y, h₂.symm⟩
-    exact ⟨w, inj (by simpa using hz)⟩
+    exact ⟨w, hMN.emb_lt_emb.mp (by simpa using hz), inj (by simpa using hzeq)⟩
   case zeroLe =>
     suffices ∀ x : M, 0 ≤ x by simpa [models_iff, le_iff_of_eq_of_lt, le_def] using this
     intro x
@@ -162,9 +164,9 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
 
 /-- Satisfaction of a $\Sigma_1$ formula carries over from `M` to an end extension of `M`.
 - [HP98, Fact IV.1.3(4)] -/
-theorem eval_of_Sigma1 {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hierarchy 𝚺 1 φ)
+theorem eval_of_Sigma1 {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ)
     (e : Fin n → M) (f : ξ → M) : φ.Eval e f → φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f) :=
-  sigma₁_induction'
+  Bounding.Hierarchy.arithmetic_sigma₁_induction'
     (P := fun n φ ↦ ∀ (e : Fin n → M) (f : ξ → M), φ.Eval e f → φ.Eval (hMN.emb ∘ e) (hMN.emb ∘ f))
     hφ
     (fun _ _ _ _ ↦ by simp)
@@ -190,7 +192,8 @@ theorem eval_of_Sigma1 {n : ℕ} {φ : ArithmeticSemiformula ξ n} (hφ : Hierar
 /-- A theory all of whose members are $\Pi_1$ sentences holds in `M` as soon as it holds in an
 end extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
-theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 1 σ) [N↓[ℒₒᵣ] ⊧* T] :
+theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 σ)
+    [N↓[ℒₒᵣ] ⊧* T] :
     M↓[ℒₒᵣ] ⊧* T :=
   models_theory_iff.mpr <| by
     intro σ hσ
@@ -205,7 +208,7 @@ theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, Hierarchy 𝚷 
 /-- A $\Pi_1$-axiomatizable theory holds in `M` as soon as it holds in an end extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
 theorem models_of_Pi1Axiomatizable {T : ArithmeticTheory}
-    (hT : Axiomatizable (Hierarchy 𝚷 1) T) [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T := by
+    (hT : Axiomatizable (ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1) T) [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T := by
   obtain ⟨U, hU, hTU⟩ := hT
   have : U ⪯ T := hTU.symm.le
   have : T ⪯ U := hTU.le
@@ -283,7 +286,7 @@ lemma bexsLT_absolute (hθ : Absolute.{u, v, _} T θ) : Absolute.{u, v, _} T (θ
 - [HP98, Fact IV.1.3(4), Remark IV.1.18]
 - [vO99, Exercise 37] -/
 @[simp, grind .]
-theorem absolute_of_bounded (hφ : φ.Bounded) : Absolute T φ :=
+theorem absolute_of_bounded (hφ : ℬ[<, ℒₒᵣ].Closure φ) : Absolute T φ :=
   bounded_induction_open (P := fun _ φ ↦ Absolute T φ)
     (fun _ _ hφ ↦ absolute_of_open T hφ)
     (fun _ _ _ _ _ ihφ ihψ ↦ and_absolute ihφ ihψ)

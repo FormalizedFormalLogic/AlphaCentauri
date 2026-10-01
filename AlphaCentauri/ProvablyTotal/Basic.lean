@@ -14,6 +14,9 @@ composition.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+
 namespace FFL.FirstOrder
 
 namespace Arithmetic
@@ -23,23 +26,23 @@ variable {k l : ℕ} {V : Type*} [ORingStructure V]
 
 /-- The totality sentence `∀ x⃗, ∃ y, φ(y, x⃗)` of a graph formula `φ`.
 - [HP98, Definition I.1.51] -/
-def totalitySentence (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSentence := ∀¹* ∃¹ φ.val
+def totalitySentence (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSentence := ∀¹* ∃¹ φ.val
 
-@[simp] lemma hierarchy_totalitySentence (φ : 𝚺₁.Semisentence (k + 1)) :
-    Hierarchy 𝚷 2 (totalitySentence φ) :=
-  Hierarchy.allClosure_iff.mpr (Hierarchy.accum φ.sigma_prop.exs 𝚷)
+@[simp] lemma hierarchy_totalitySentence (φ : 𝚺ᴬ₁.Semisentence (k + 1)) :
+    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 (totalitySentence φ) :=
+  Bounding.Hierarchy.allClosure_iff.mpr (Bounding.Hierarchy.accum φ.sigma_prop.exs 𝚷)
 
-lemma models_totalitySentence_iff {φ : 𝚺₁.Semisentence (k + 1)} :
+lemma models_totalitySentence_iff {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ totalitySentence φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) := by
   simp [totalitySentence, models_iff]
 
 /-- The functionality sentence `∀ x⃗, ∀ y y', φ(y, x⃗) ∧ φ(y', x⃗) → y = y'` of a graph formula `φ`.
 - [HP98, Definition I.1.51(2)] -/
-def functionalitySentence (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSentence :=
+def functionalitySentence (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSentence :=
   ∀¹* ∀¹ ∀¹ (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val) ⋏
     (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val)) 🡒 “#1 = #0”)
 
-lemma models_functionalitySentence_iff {φ : 𝚺₁.Semisentence (k + 1)} :
+lemma models_functionalitySentence_iff {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ functionalitySentence φ ↔ ∀ (v : Fin k → V) (y y'),
       φ.val.Evalb (y :> v) → φ.val.Evalb (y' :> v) → y = y' := by
   simp [functionalitySentence, models_iff, Semiformula.eval_rew, Function.comp_def,
@@ -47,15 +50,15 @@ lemma models_functionalitySentence_iff {φ : 𝚺₁.Semisentence (k + 1)} :
 
 /-- A graph formula for the composite `fun x⃗ ↦ f (fun i ↦ g i x⃗)`.
 - [HP98, Lemma I.1.53] -/
-def compGraph (ψ : 𝚺₁.Semisentence (l + 1)) (χ : Fin l → 𝚺₁.Semisentence (k + 1)) :
-    𝚺₁.Semisentence (k + 1) :=
+def compGraph (ψ : 𝚺ᴬ₁.Semisentence (l + 1)) (χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)) :
+    𝚺ᴬ₁.Semisentence (k + 1) :=
   .mkSigma
     (Rew.bind ![] (#·) ▹ (∃¹* ((Rew.bind (&0 :> (#·)) Empty.elim ▹ ψ.val) ⋏
       Matrix.conj fun i ↦ Rew.bind (#i :> (&·.succ)) Empty.elim ▹ (χ i).val)))
-    (Hierarchy.rew _ (Hierarchy.exsClosure (by simp)))
+    (Bounding.Hierarchy.rew _ (Bounding.Hierarchy.exsClosure (by simp)))
 
-@[simp] lemma eval_compGraph (ψ : 𝚺₁.Semisentence (l + 1))
-    (χ : Fin l → 𝚺₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
+@[simp] lemma eval_compGraph (ψ : 𝚺ᴬ₁.Semisentence (l + 1))
+    (χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
     (compGraph ψ χ).val.Evalb w ↔
       ∃ z : Fin l → V, ψ.val.Evalb (w 0 :> z) ∧ ∀ i, (χ i).val.Evalb (z i :> (w ·.succ)) := by
   simp [compGraph, Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq,
@@ -63,28 +66,28 @@ def compGraph (ψ : 𝚺₁.Semisentence (l + 1)) (χ : Fin l → 𝚺₁.Semise
 
 /-- `compGraph ψ χ` defines the composite of the functions defined by `ψ` and `χ`.
 - [HP98, Lemma I.1.53] -/
-lemma definedFunction_compGraph {ψ : 𝚺₁.Semisentence (l + 1)}
-    {χ : Fin l → 𝚺₁.Semisentence (k + 1)} {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V}
-    (hf : 𝚺₁.DefinedFunction f ψ) (hg : ∀ i, 𝚺₁.DefinedFunction (g i) (χ i)) :
-    𝚺₁.DefinedFunction (fun v ↦ f fun i ↦ g i v) (compGraph ψ χ) :=
+lemma definedFunction_compGraph {ψ : 𝚺ᴬ₁.Semisentence (l + 1)}
+    {χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)} {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V}
+    (hf : 𝚺ᴬ₁.DefinedFunction f ψ) (hg : ∀ i, 𝚺ᴬ₁.DefinedFunction (g i) (χ i)) :
+    𝚺ᴬ₁.DefinedFunction (fun v ↦ f fun i ↦ g i v) (compGraph ψ χ) :=
   .mk fun w ↦ by
     simp only [eval_compGraph, hf.iff, (hg _).iff, Matrix.cons_val_zero, Matrix.cons_val_succ]
     exact ⟨fun ⟨z, hz, hχ⟩ ↦ by simpa [funext hχ] using hz,
       fun e ↦ ⟨_, by simpa using e, fun _ ↦ rfl⟩⟩
 
-lemma definablePred_evalb (φ : 𝚺₁.Semisentence (k + 1)) (v : Fin k → V) :
-    𝚺₁-Predicate fun y ↦ φ.val.Evalb (y :> v) :=
+lemma definablePred_evalb (φ : 𝚺ᴬ₁.Semisentence (k + 1)) (v : Fin k → V) :
+    𝚺ᴬ₁-Predicate fun y ↦ φ.val.Evalb (y :> v) :=
   HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 1)
     (Rew.bind (#0 :> fun i ↦ &(v i)) Empty.elim ▹ φ.val)
-    (Hierarchy.rew _ (by simp)) fun w ↦ by
+    (Bounding.Hierarchy.rew _ (by simp)) fun w ↦ by
       simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
 
 /-- `φ` refined so that the value is the least witness: `φ(y, x⃗) ∧ ∀ y' < y, ¬φ(y', x⃗)`.
 - [HP98, Lemma IV.3.4] -/
-def leastGraph (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSemisentence (k + 1) :=
+def leastGraph (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSemisentence (k + 1) :=
   φ.val ⋏ (∀¹[“#0 < #1”] ∼(Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val))
 
-@[simp] lemma eval_leastGraph (φ : 𝚺₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
+@[simp] lemma eval_leastGraph (φ : 𝚺ᴬ₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
     (leastGraph φ).Evalb w ↔ φ.val.Evalb w ∧ ∀ y < w 0, ¬φ.val.Evalb (y :> (w ·.succ)) := by
   simp [leastGraph, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
 
@@ -92,12 +95,12 @@ def leastGraph (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSemisentence (k +
 fixed once and for all so that it does not depend on the ambient theory.
 - [HP98, Theorem I.2.5(3)]
 - [HP98, Lemma I.2.9] -/
-noncomputable def minimalGraphMatrix (φ : 𝚺₁.Semisentence (k + 1)) : 𝚺₀.Semisentence (k + 2) :=
+noncomputable def minimalGraphMatrix (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : 𝚺ᴬ₀.Semisentence (k + 2) :=
   (Classical.choose (Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺) (s := 1)
     φ.sigma_prop)).matrix
 
 lemma provable_iff_exists_minimalGraphMatrix (T : ArithmeticTheory) [𝗕𝚺₁ ⪯ T]
-    (φ : 𝚺₁.Semisentence (k + 1)) :
+    (φ : 𝚺ᴬ₁.Semisentence (k + 1)) :
     T ⊢ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := 1)
   refine provable_iff_of_models_iff fun V _ _ e ↦ ?_
@@ -105,31 +108,31 @@ lemma provable_iff_exists_minimalGraphMatrix (T : ArithmeticTheory) [𝗕𝚺₁
   exact Classical.choose_spec (Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺) (s := 1)
     φ.sigma_prop) V e Empty.elim
 
-lemma models_iff_exists_minimalGraphMatrix {φ : 𝚺₁.Semisentence (k + 1)} :
+lemma models_iff_exists_minimalGraphMatrix {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) ↔
       ∀ v : Fin (k + 1) → V, φ.val.Evalb v ↔ ∃ z, (minimalGraphMatrix φ).val.Evalb (z :> v) := by
   simp [models_iff]
 
 /-- `∃ z ≤ n, z + y = n ∧ θ(z, y, x⃗)`: there is a pair `(z, y)` with sum `n` at which `θ` holds.
 - [HP98, Lemma IV.3.4] -/
-def pairGraph (θ : 𝚺₀.Semisentence (k + 2)) : ArithmeticSemisentence (k + 2) :=
+def pairGraph (θ : 𝚺ᴬ₀.Semisentence (k + 2)) : ArithmeticSemisentence (k + 2) :=
   (“(#0 + #2) = #1” ⋏
     (Rew.subst (#0 :> #2 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ θ.val)).bexsLTSucc
     (#0 : ArithmeticSemiterm Empty (k + 2))
 
-@[simp] lemma eval_pairGraph [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺₀.Semisentence (k + 2)) (w : Fin (k + 2) → V) :
+@[simp] lemma eval_pairGraph [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺ᴬ₀.Semisentence (k + 2)) (w : Fin (k + 2) → V) :
     (pairGraph θ).Evalb w ↔
       ∃ z ≤ w 0, z + w 1 = w 0 ∧ θ.val.Evalb (z :> w 1 :> (w ·.succ.succ)) := by
   simp [pairGraph, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim,
     Matrix.constant_eq_singleton]
 
 /-- `∃ y' ≤ n, ∃ z' ≤ n, z' + y' = n ∧ θ(z', y', x⃗)`: some pair with sum `n` witnesses `θ`. -/
-def existsAtSum (θ : 𝚺₀.Semisentence (k + 2)) : ArithmeticSemisentence (k + 1) :=
+def existsAtSum (θ : 𝚺ᴬ₀.Semisentence (k + 2)) : ArithmeticSemisentence (k + 1) :=
   ((“(#0 + #1) = #2” ⋏
     (Rew.subst (#0 :> #1 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ θ.val)).bexsLTSucc
       (#1 : ArithmeticSemiterm Empty (k + 2))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (k + 1))
 
-@[simp] lemma eval_existsAtSum [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺₀.Semisentence (k + 2))
+@[simp] lemma eval_existsAtSum [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺ᴬ₀.Semisentence (k + 2))
     (w : Fin (k + 1) → V) :
     (existsAtSum θ).Evalb w ↔
       ∃ y' ≤ w 0, ∃ z' ≤ w 0, z' + y' = w 0 ∧ θ.val.Evalb (z' :> y' :> (w ·.succ)) := by
@@ -139,12 +142,12 @@ def existsAtSum (θ : 𝚺₀.Semisentence (k + 2)) : ArithmeticSemisentence (k 
 /-- The minimal-pair refinement of `θ`: the code `n` is least among sums of pairs witnessing `θ`,
 and `y` is least among values at that sum.
 - [HP98, Lemma IV.3.4] -/
-def minimalPairGraph (θ : 𝚺₀.Semisentence (k + 2)) : ArithmeticSemisentence (k + 1) :=
+def minimalPairGraph (θ : 𝚺ᴬ₀.Semisentence (k + 2)) : ArithmeticSemisentence (k + 1) :=
   ∃¹ (pairGraph θ ⋏
     (∀¹[“#0 < #1”] ∼(Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ existsAtSum θ)) ⋏
     (∀¹[“#0 < #2”] ∼(Rew.subst (#1 :> #0 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ pairGraph θ)))
 
-@[simp] lemma eval_minimalPairGraph [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺₀.Semisentence (k + 2))
+@[simp] lemma eval_minimalPairGraph [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺ᴬ₀.Semisentence (k + 2))
     (w : Fin (k + 1) → V) :
     (minimalPairGraph θ).Evalb w ↔
       ∃ n, (∃ z ≤ n, z + w 0 = n ∧ θ.val.Evalb (z :> w 0 :> (w ·.succ))) ∧
@@ -157,31 +160,31 @@ def minimalPairGraph (θ : 𝚺₀.Semisentence (k + 2)) : ArithmeticSemisentenc
 `minimalGraphMatrix φ` is least, using only $\Delta_0$ minimization.
 - [Bek99, §1]
 - [HP98, Lemma IV.3.4] -/
-noncomputable def minimalGraph (φ : 𝚺₁.Semisentence (k + 1)) : 𝚺₁.Semisentence (k + 1) :=
+noncomputable def minimalGraph (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : 𝚺ᴬ₁.Semisentence (k + 1) :=
   .mkSigma (minimalPairGraph (minimalGraphMatrix φ)) (by
     unfold minimalPairGraph pairGraph existsAtSum
-    apply Hierarchy.exs
+    apply Bounding.Hierarchy.exs
     simp)
 
-private lemma definablePred_existsAtSum (θ : 𝚺₀.Semisentence (k + 2)) (v : Fin k → V) :
-    𝚺₀-Predicate fun n ↦ (existsAtSum θ).Evalb (n :> v) :=
+private lemma definablePred_existsAtSum (θ : 𝚺ᴬ₀.Semisentence (k + 2)) (v : Fin k → V) :
+    𝚺ᴬ₀-Predicate fun n ↦ (existsAtSum θ).Evalb (n :> v) :=
   HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 0)
     (Rew.bind (#0 :> fun i ↦ &(v i)) Empty.elim ▹ existsAtSum θ)
-    (Hierarchy.rew _ (by simp [existsAtSum])) fun w ↦ by
+    (Bounding.Hierarchy.rew _ (by simp [existsAtSum])) fun w ↦ by
       simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
 
-private lemma definablePred_pairGraph (θ : 𝚺₀.Semisentence (k + 2)) (n₀ : V) (v : Fin k → V) :
-    𝚺₀-Predicate fun y ↦ (pairGraph θ).Evalb (n₀ :> y :> v) :=
+private lemma definablePred_pairGraph (θ : 𝚺ᴬ₀.Semisentence (k + 2)) (n₀ : V) (v : Fin k → V) :
+    𝚺ᴬ₀-Predicate fun y ↦ (pairGraph θ).Evalb (n₀ :> y :> v) :=
   HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 0)
     (Rew.bind (&n₀ :> #0 :> fun i ↦ &(v i)) Empty.elim ▹ pairGraph θ)
-    (Hierarchy.rew _ (by simp [pairGraph])) fun w ↦ by
+    (Bounding.Hierarchy.rew _ (by simp [pairGraph])) fun w ↦ by
       simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
 
 open PeanoMinus in
 /-- In any model of `𝗜𝚺₀`, if a pair witnesses `θ` at all, then the minimal-pair refinement of
 `θ` has an existing and unique value.
 - [HP98, Lemma IV.3.4] -/
-private lemma models_existsUnique_minimalPairGraph {θ : 𝚺₀.Semisentence (k + 2)}
+private lemma models_existsUnique_minimalPairGraph {θ : 𝚺ᴬ₀.Semisentence (k + 2)}
     [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {v : Fin k → V} (hex : ∃ y z : V, θ.val.Evalb (z :> y :> v)) :
     (∃ y, (minimalPairGraph θ).Evalb (y :> v)) ∧
       ∀ y y', (minimalPairGraph θ).Evalb (y :> v) → (minimalPairGraph θ).Evalb (y' :> v) →
@@ -222,12 +225,12 @@ private lemma models_existsUnique_minimalPairGraph {θ : 𝚺₀.Semisentence (k
 refinement `leastGraph φ`.
 - [HP98, Definition I.1.51]
 - [HP98, Lemma IV.3.4] -/
-def uniqueTotalitySentence (φ : 𝚺₁.Semisentence (k + 1)) : ArithmeticSentence :=
+def uniqueTotalitySentence (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSentence :=
   ∀¹* ((∃¹ leastGraph φ) ⋏ (∀¹ ∀¹
     (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ) ⋏
       (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ)) 🡒 “#1 = #0”)))
 
-lemma models_uniqueTotalitySentence_iff {φ : 𝚺₁.Semisentence (k + 1)} :
+lemma models_uniqueTotalitySentence_iff {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ uniqueTotalitySentence φ ↔ ∀ v : Fin k → V,
       (∃ y, (leastGraph φ).Evalb (y :> v)) ∧
         ∀ y y', (leastGraph φ).Evalb (y :> v) → (leastGraph φ).Evalb (y' :> v) → y = y' := by
@@ -242,14 +245,14 @@ open Arithmetic
 
 namespace ArithmeticTheory
 
-variable {T U : ArithmeticTheory} {k : ℕ} {f : (Fin k → ℕ) → ℕ} {φ : 𝚺₁.Semisentence (k + 1)}
+variable {T U : ArithmeticTheory} {k : ℕ} {f : (Fin k → ℕ) → ℕ} {φ : 𝚺ᴬ₁.Semisentence (k + 1)}
 
 /-- `f` is `T`-provably total via `φ` iff `φ` defines the graph of `f` over `ℕ` and `T` proves its
 totality sentence.
 - [HP98, Definition I.1.51]
 - [HP98, Definition IV.3.1] -/
 structure ProvablyTotalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ)
-    (φ : 𝚺₁.Semisentence (k + 1)) : Prop where
+    (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : Prop where
   defined : HierarchySymbol.DefinedFunction (V := ℕ) f φ
   total : T ⊢ totalitySentence φ
 
@@ -257,7 +260,7 @@ structure ProvablyTotalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ)
 that `φ` is single-valued.
 - [HP98, Definition I.1.51(2)] -/
 structure ProvablyFunctionalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ)
-    (φ : 𝚺₁.Semisentence (k + 1)) : Prop extends T.ProvablyTotalVia f φ where
+    (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : Prop extends T.ProvablyTotalVia f φ where
   functional : T ⊢ functionalitySentence φ
 
 /-- `f` is `T`-provably total: some $\Sigma_1$ formula witnesses `T.ProvablyTotalVia f`.
@@ -294,7 +297,8 @@ lemma mono (h : T.ProvablyTotalVia f φ) (hT : T ⪯ U) : U.ProvablyTotalVia f �
 /-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
 lemma of_Pi2 (h : T.ProvablyTotalVia f φ)
-    (H : ∀ σ : ArithmeticSentence, Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) : U.ProvablyTotalVia f φ :=
+    (H : ∀ σ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) :
+    U.ProvablyTotalVia f φ :=
   ⟨h.defined, H _ (by simp) h.total⟩
 
 lemma models (h : T.ProvablyTotalVia f φ)
@@ -395,7 +399,7 @@ lemma provablyFunctionalVia_minimalGraph [𝗕𝚺₁ ⪯ T] (h : T.ProvablyTota
 
 section
 variable {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
-  {ψ : 𝚺₁.Semisentence (l + 1)} {χ : Fin l → 𝚺₁.Semisentence (k + 1)}
+  {ψ : 𝚺ᴬ₁.Semisentence (l + 1)} {χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)}
 
 /-- The `T`-provably total functions are closed under composition.
 - [HP98, Lemma I.1.53] -/
@@ -416,7 +420,7 @@ namespace ProvablyFunctionalVia
 lemma toProvablyFunctional (h : T.ProvablyFunctionalVia f φ) : T.ProvablyFunctional f := ⟨φ, h⟩
 
 lemma models (h : T.ProvablyFunctionalVia f φ) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] :
-    ∃ F : (Fin k → V) → V, 𝚺₁.DefinedFunction F φ := by
+    ∃ F : (Fin k → V) → V, 𝚺ᴬ₁.DefinedFunction F φ := by
   have h₁ := models_functionalitySentence_iff.mp
     (consequence_iff'.mp (Theory.Proof.sound h.functional) V)
   choose F hF using h.toProvablyTotalVia.models V
@@ -425,7 +429,7 @@ lemma models (h : T.ProvablyFunctionalVia f φ) (V : Type*) [ORingStructure V] [
 
 lemma of_models [𝗘𝗤 ℒₒᵣ ⪯ T] (hf : HierarchySymbol.DefinedFunction (V := ℕ) f φ)
     (H : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T],
-      ∃ F : (Fin k → V) → V, 𝚺₁.DefinedFunction F φ) : T.ProvablyFunctionalVia f φ where
+      ∃ F : (Fin k → V) → V, 𝚺ᴬ₁.DefinedFunction F φ) : T.ProvablyFunctionalVia f φ where
   toProvablyTotalVia := .of_models hf fun V _ _ v ↦ have ⟨F, hF⟩ := H V; ⟨F v, by simp [hF.iff]⟩
   functional := Arithmetic.complete T _ fun V _ _ ↦
     models_functionalitySentence_iff.mpr fun v y y' hy hy' ↦ by
@@ -442,7 +446,7 @@ lemma mono (h : T.ProvablyTotal f) (hT : T ⪯ U) : U.ProvablyTotal f :=
 /-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
 lemma of_Pi2 (h : T.ProvablyTotal f)
-    (H : ∀ σ : ArithmeticSentence, Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) : U.ProvablyTotal f :=
+    (H : ∀ σ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) : U.ProvablyTotal f :=
   have ⟨_, h⟩ := h; ⟨_, h.of_Pi2 H⟩
 
 section
@@ -472,7 +476,7 @@ lemma provablyTotalFunctions_subset (h : T ⪯ U) :
 /-- The class of provably total functions depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
 lemma provablyTotalFunctions_subset_of_Pi2
-    (H : ∀ σ : ArithmeticSentence, Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) :
+    (H : ∀ σ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) :
     T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.of_Pi2 H
 
 namespace ProvablyFunctional

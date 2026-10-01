@@ -24,12 +24,12 @@ variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 - [AB05, Example 59] -/
 theorem provabilityLogic_turingOmega_eq_A (hC : Consistent T.turingOmega) :
     T.provabilityLogicRelativeTo T.turingOmega (α := α) = 𝐀 := by
-  have hT := trace_provabilityLogic_addAlpha_univ (T := T) (U := T) (α := α)
+  have hT := trace_provabilityLogic_turingOmega_eq_univ (T := T) (α := α)
   apply Logic.weakerThan_antisymm _ (A_weakerThan_provabilityLogic hT)
   constructor
   intro A hA
   by_contra hAA
-  have h : T.turingOmega ⊢* T.standardProvability.reflOn (Hierarchy 𝚺 1) :=
+  have h : T.turingOmega ⊢* T.standardProvability.reflOn (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1) :=
     provable_localReflectionOn_sigma1_of_mem_of_not_A hT (Logic.provable_iff_mem.mp hA) hAA
   obtain ⟨U, _, hU, e⟩ := exists_strictPi1_axiomatization_turingOmega (T := T)
   have h' : T.turingOmega ⊢* 𝗥𝗳𝗻[StrictHierarchy (Polarity.alt 𝚷) 1] T := fun hσ ↦

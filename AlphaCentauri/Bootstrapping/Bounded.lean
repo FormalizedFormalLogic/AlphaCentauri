@@ -20,6 +20,9 @@ formulas.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -32,14 +35,14 @@ noncomputable def qqBex (u q : V) : V := ^∃ ((^#0 ^< u) ^⋏ q)
   lt_trans (Arithmetic.lt_qqLT_right _ _) (lt_trans (lt_K!_left _ _) (lt_exists _))
 
 /-- Defining formula for the bounded existential coding operation. -/
-def _root_.FFL.FirstOrder.Arithmetic.qqBexDef : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.FFL.FirstOrder.Arithmetic.qqBexDef : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “p u q. ∃ bv, !qqBvarDef bv 0 ∧ ∃ lt, !qqLTDef lt bv u ∧ ∃ g, !qqAndDef g lt q ∧ !qqExsDef p g”
 
 /-- The bounded existential coding operation is $\Sigma_1$-definable. -/
-instance qqBex_defined : 𝚺₁-Function₂ (qqBex : V → V → V) via qqBexDef := .mk fun v ↦ by
+instance qqBex_defined : 𝚺ᴬ₁-Function₂ (qqBex : V → V → V) via qqBexDef := .mk fun v ↦ by
   simp [qqBexDef, qqBex, (Arithmetic.qqLT_defined (V := V)).df]
 /-- The bounded existential coding operation is definable at every hierarchy level. -/
-instance qqBex_definable (Γ m) : Γ-[m + 1]-Function₂ (qqBex : V → V → V) :=
+instance qqBex_definable (Γ m) : Γᴬ-[m + 1]-Function₂ (qqBex : V → V → V) :=
   .of_sigmaOne qqBex_defined.to_definable
 
 lemma neg_qqBall {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q) :
@@ -184,14 +187,15 @@ lemma shift_qqBex {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒ�
 def IsBounded (p : V) : Prop := IsBoundedF.construction.Fixpoint ![] p
 
 /-- $\Delta_1$ recognizer for `IsBounded`. -/
-noncomputable def isBounded : 𝚫₁.Semisentence 1 := IsBoundedF.blueprint.fixpointDefΔ₁
+noncomputable def isBounded : 𝚫ᴬ₁.Semisentence 1 := IsBoundedF.blueprint.fixpointDefΔ₁
 
 /-- The recognizer defines the internal $\Delta_0$ shape predicate. -/
-instance IsBounded.defined : 𝚫₁-Predicate (IsBounded (V := V)) via isBounded :=
+instance IsBounded.defined : 𝚫ᴬ₁-Predicate (IsBounded (V := V)) via isBounded :=
   IsBoundedF.construction.fixpoint_definedΔ₁
 
 /-- The internal $\Delta_0$ shape predicate is $\Delta_1$-definable. -/
-instance IsBounded.definable : 𝚫₁-Predicate (IsBounded : V → Prop) := IsBounded.defined.to_definable
+instance IsBounded.definable : 𝚫ᴬ₁-Predicate (IsBounded : V → Prop) :=
+  IsBounded.defined.to_definable
 
 lemma IsBounded.case_iff {p : V} :
     IsBounded p ↔
@@ -268,7 +272,7 @@ lemma IsBounded.of_ex {p : V} (h : IsBounded (^∃ p)) :
       | (rw [show qqBex u q = ^∃ ((Arithmetic.qqLT (qqBvar 0) u) ^⋏ q) from rfl, qqExs_inj] at h
          exact ⟨u, q, hguard, hq, h⟩)
 
-lemma IsBounded.induction (Γ : Polarity) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+lemma IsBounded.induction (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
     (hverum : P ^⊤) (hfalsum : P ^⊥)
     (hrel : ∀ k r v, P (^rel k r v)) (hnrel : ∀ k r v, P (^nrel k r v))
     (hand : ∀ p q, IsBounded p → IsBounded q → P p → P q → P (p ^⋏ q))
@@ -353,7 +357,7 @@ lemma IsBounded.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
   exact H p h hp
 
 lemma IsBounded.isSigma1 {p : V} (h : IsBounded p) : IsSigma1 p := by
-  have : 𝚫₁-Predicate (IsSigma1 : V → Prop) := IsSigma1.defined.to_definable
+  have : 𝚫ᴬ₁-Predicate (IsSigma1 : V → Prop) := IsSigma1.defined.to_definable
   have H : ∀ p : V, IsBounded p → IsSigma1 p := by
     apply IsBounded.induction 𝚺 (P := fun p ↦ IsSigma1 p)
     · definability
@@ -390,7 +394,7 @@ lemma quote_bex {n : ℕ} (t : SyntacticSemiterm ℒₒᵣ n) (φ : ArithmeticSe
   rfl
 
 open Bootstrapping in
-lemma isBounded_of_bounded {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : DeltaZero ψ) :
+lemma isBounded_of_bounded {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : ℬ[<, ℒₒᵣ].Closure ψ) :
     IsBounded (⌜ψ⌝ : ℕ) := by
   refine bounded_induction (P := fun n φ ↦ IsBounded (⌜φ⌝ : ℕ))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ n ψ h
@@ -411,7 +415,7 @@ lemma isBounded_of_bounded {n : ℕ} {ψ : ArithmeticSemiproposition n} (h : Del
 
 open Bootstrapping in
 lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-    IsBounded (⌜ψ⌝ : ℕ) → DeltaZero ψ := by
+    IsBounded (⌜ψ⌝ : ℕ) → ℬ[<, ℒₒᵣ].Closure ψ := by
   induction ψ using Semiformula.rec' with
   | hverum => intro _; simp
   | hfalsum => intro _; simp
@@ -442,14 +446,15 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
         apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
         rw [Semiformula.quote_all (V := ℕ) φ, hφeq, quote_ball, hs, hφ₂]
         rfl
-      have hφ : DeltaZero φ := ihφ (by rw [hφeq]; simp [IsBounded.or_iff, hq, Arithmetic.qqNLT])
-      have hφ2 : DeltaZero φ₂ := by
+      have hφ : ℬ[<, ℒₒᵣ].Closure φ :=
+        ihφ (by rw [hφeq]; simp [IsBounded.or_iff, hq, Arithmetic.qqNLT])
+      have hφ2 : ℬ[<, ℒₒᵣ].Closure φ₂ := by
         have hform : φ = (“#0 < !!(Rew.bShift s)” 🡒 φ₂) :=
           (Semiformula.all_inj _ _).mp (by rw [← Semiformula.ball_eq]; exact heq)
         rw [hform, Semiformula.imp_eq] at hφ
-        exact (Semiformula.Bounded.or_iff.mp hφ).2
+        exact (Bounding.Closure.or_iff.mp hφ).2
       rw [heq]
-      exact .ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
+      exact .arithmetic_ball (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
   | hexs φ ihφ =>
       intro h
       rw [Semiformula.quote_ex (V := ℕ) φ] at h
@@ -469,24 +474,25 @@ lemma bounded_of_isBounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
         apply (Semiformula.quote_inj_iff (L := ℒₒᵣ) (V := ℕ)).mp
         rw [Semiformula.quote_ex (V := ℕ) φ, hφeq, quote_bex, hs, hφ₂]
         rfl
-      have hφ : DeltaZero φ := ihφ (by rw [hφeq]; simp [IsBounded.and_iff, hq, Arithmetic.qqLT])
-      have hφ2 : DeltaZero φ₂ := by
+      have hφ : ℬ[<, ℒₒᵣ].Closure φ :=
+        ihφ (by rw [hφeq]; simp [IsBounded.and_iff, hq, Arithmetic.qqLT])
+      have hφ2 : ℬ[<, ℒₒᵣ].Closure φ₂ := by
         have hform : φ = (“#0 < !!(Rew.bShift s)” ⋏ φ₂) :=
           (Semiformula.exs_inj _ _).mp (by rw [← Semiformula.bexs_eq]; exact heq)
         rw [hform] at hφ
-        exact (Semiformula.Bounded.and_iff.mp hφ).2
+        exact (Bounding.Closure.and_iff.mp hφ).2
       rw [heq]
-      exact .bexs (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
+      exact .arithmetic_bexs (Rew.positive_iff.mpr ⟨s, rfl⟩) hφ2
 
 lemma isBounded_iff_bounded {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-    Bootstrapping.IsBounded (⌜ψ⌝ : ℕ) ↔ DeltaZero ψ :=
+    Bootstrapping.IsBounded (⌜ψ⌝ : ℕ) ↔ ℬ[<, ℒₒᵣ].Closure ψ :=
   ⟨bounded_of_isBounded ψ, isBounded_of_bounded⟩
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Bootstrapping in
 lemma isBounded_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
-    IsBounded (⌜ψ⌝ : V) ↔ DeltaZero ψ :=
+    IsBounded (⌜ψ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Closure ψ :=
   have h : V ⊧/![(⌜ψ⌝ : V)] isBounded.val ↔ ℕ ⊧/![(⌜ψ⌝ : ℕ)] isBounded.val := by
     simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
       using models_iff_of_Delta1 (V := V) (σ := isBounded)
@@ -496,7 +502,7 @@ lemma isBounded_quote_iff_s {n : ℕ} (ψ : ArithmeticSemiproposition n) :
 
 open Bootstrapping in
 lemma isBounded_quote_iff {n : ℕ} (σ : ArithmeticSemisentence n) :
-    IsBounded (⌜σ⌝ : V) ↔ DeltaZero σ := by
+    IsBounded (⌜σ⌝ : V) ↔ ℬ[<, ℒₒᵣ].Closure σ := by
   simp [Sentence.quote_def, isBounded_quote_iff_s]
 
 end FFL.FirstOrder.Arithmetic

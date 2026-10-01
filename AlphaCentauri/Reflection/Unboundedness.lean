@@ -4,6 +4,8 @@ public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.ToFoundation.Theory
 
 @[expose] public section
+
+open FFL.FirstOrder.Bounding (HierarchySymbol)
 /-!
 # The unboundedness theorem for a $\Gamma_{n + 1}$-axiomatizable extension
 
@@ -257,7 +259,7 @@ private lemma provable_of_mem (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ
 - [Lin97, Theorem 4.3] -/
 private lemma exists_sentence_weakerThan_of_forall_mem
     (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) (hC : Consistent (T ∪ U)) :
-    ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
+    ∃ θ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
   have hcon : Consistent (insert (collapseSentence T U n Γ) T) := by
     by_contra hc
@@ -281,7 +283,7 @@ variable {U U' : ArithmeticTheory} [U'.Δ₁] [𝗜𝚺₁ ⪯ T]
 - [Lin97, Theorem 4.3] -/
 theorem exists_sentence_weakerThan_of_consistent
     (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U') (hC : Consistent (T ∪ U)) :
-    ∃ θ : ArithmeticSentence, Hierarchy Γ (n + 1) θ ∧
+    ∃ θ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
   have hC' : Consistent (T ∪ U') := Consistent.of_le hC e.symm.le
   obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_forall_mem (T := T) hΓ hC'
@@ -294,7 +296,7 @@ of `T` on the sentences of the dual class is inconsistent. Only `𝗜𝚺₁ ⪯
 - [Lin97, Corollary 4.2] -/
 theorem inconsistent_of_provable_localReflectionOn_hierarchy_union
     (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
-    (h : T ∪ U ⊢* 𝗥𝗳𝗻[Hierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
+    (h : T ∪ U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
   by_contra hc
   have hC : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
   obtain ⟨θ, hθ, hle, hcon⟩ := exists_sentence_weakerThan_of_consistent hΓ e hC

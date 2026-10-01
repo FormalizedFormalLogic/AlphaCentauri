@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Reflection.Sigma1Reflection
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
+public import Foundation.ProvabilityLogic.Classification.General
 
 /-!
 # The provability logic of `T` relative to `T` plus local $\Sigma_1$ reflection
@@ -11,6 +12,8 @@ If $T + \mathrm{Rfn}_{\Sigma_1}(T)$ is consistent, the provability logic of `T` 
 -/
 
 @[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.ProvabilityLogic
 
@@ -22,18 +25,19 @@ variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 is `𝐃`.
 - [AB05, Example 60] -/
 theorem provabilityLogic_add_localReflectionOn_Sigma1_eq_D
-    (hC : Consistent (T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T)) :
-    T.provabilityLogicRelativeTo (T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) (α := α) = 𝐃 := by
-  have : 𝗜𝚺₁ ⪯ T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T :=
+    (hC : Consistent (T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T)) :
+    T.provabilityLogicRelativeTo (T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) (α := α) = 𝐃 := by
+  have : 𝗜𝚺₁ ⪯ T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T :=
     WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left)
-  have hR : T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T := fun hσ ↦
+  have hR : T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T := fun hσ ↦
     by_axm <| Set.mem_union_right _ hσ
   rcases Logic.eq_or_strictlyWeakerThan
     (D_weakerThan_provabilityLogic_of_provable_localReflectionOn_Sigma1 (α := α) hR) with h | h
   · exact h.symm
   obtain ⟨-, A, hAD, hA⟩ := strictlyWeakerThan_iff.mp h
   obtain ⟨U, _, hU, e⟩ := exists_strictPi2_axiomatization_localReflectionOn_Sigma1 (T := T)
-  have hrfn : T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T ⊢* 𝗥𝗳𝗻[Hierarchy (Polarity.alt 𝚷) 2] T := by
+  have hrfn :
+      T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy (Polarity.alt 𝚷) 2] T := by
     rintro _ ⟨σ, -, rfl⟩
     exact provable_reflection_of_not_D
       (trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1 hR) hA hAD
@@ -45,7 +49,7 @@ $T + \mathrm{Rfn}_{\Sigma_1}(T)$ is `𝐃`.
 - [AB05, Example 60] -/
 theorem provabilityLogic_add_localReflectionOn_Sigma1_eq_D_of_sigma1Sound
     [T.SoundOnHierarchy 𝚺 1] :
-    T.provabilityLogicRelativeTo (T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T) (α := α) = 𝐃 :=
+    T.provabilityLogicRelativeTo (T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T) (α := α) = 𝐃 :=
   provabilityLogic_add_localReflectionOn_Sigma1_eq_D
     (Consistent.of_le inferInstance <| WeakerThan.ofSubset <| Set.union_subset_union_right T <|
       T.standardProvability.localReflectionOn_mono (Γ' := Set.univ) fun _ _ ↦ trivial)

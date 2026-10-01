@@ -12,6 +12,8 @@ instances of a formula with one free variable.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open Arithmetic
@@ -53,14 +55,14 @@ noncomputable def substNumeralItr (p a k : V) : V := construction.result ![p, a]
     substNumeralItr p a (k + 1) = substNumeral p (substNumeralItr p a k) := by
   simp [substNumeralItr, construction]
 
-noncomputable def _root_.FFL.FirstOrder.Arithmetic.substNumeralItrDef : 𝚺₁.Semisentence 4 :=
+noncomputable def _root_.FFL.FirstOrder.Arithmetic.substNumeralItrDef : 𝚺ᴬ₁.Semisentence 4 :=
   blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
 
 instance substNumeralItr.defined :
-    𝚺₁-Function₃[V] substNumeralItr via substNumeralItrDef := .mk fun v ↦ by
+    𝚺ᴬ₁-Function₃[V] substNumeralItr via substNumeralItrDef := .mk fun v ↦ by
   simp [construction.result_defined_iff, substNumeralItrDef, substNumeralItr]
 
-instance substNumeralItr.definable : 𝚺₁-Function₃ (substNumeralItr : V → V → V → V) :=
+instance substNumeralItr.definable : 𝚺ᴬ₁-Function₃ (substNumeralItr : V → V → V → V) :=
   substNumeralItr.defined.to_definable
 
 lemma substNumeralItr_quote (σ : ArithmeticSemisentence 1) (π : ArithmeticSentence) (k : ℕ) :
@@ -79,13 +81,13 @@ end FFL.FirstOrder.Arithmetic.Bootstrapping
 
 namespace FFL.FirstOrder.Theory.Δ₁
 
-open Arithmetic Arithmetic.HierarchySymbol.Semiformula Arithmetic.Bootstrapping
+open Arithmetic Bounding.HierarchySymbol.Semiformula Arithmetic.Bootstrapping
   Arithmetic.Bootstrapping.Arithmetic
 
 variable (φ : ArithmeticSemisentence 1)
 
 /-- The recognizer of the codes of the numeral instances `φ/[↑n]`. -/
-noncomputable def numeralInstancesCh : 𝚫₁.Semisentence 1 := .mkDelta
+noncomputable def numeralInstancesCh : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
   (.mkSigma “x. ∃ n <⁺ x, !ssnum x ↑(⌜φ⌝ : ℕ) n”)
   (.mkPi “x. ∃ n <⁺ x, ∀ y, !ssnum y ↑(⌜φ⌝ : ℕ) n → x = y”)
 
@@ -101,15 +103,15 @@ noncomputable abbrev numeralInstances
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, numeralInstancesCh, Fin.Fin1.eq_one,
       Fin.isValue, Sentence.coe_quote, val_mkDelta, val_mkSigma, eval_bexsLTSucc',
       Semiterm.val_bvar, Matrix.cons_val_fin_one, Semiformula.eval_substs, Matrix.comp₃,
-      Matrix.cons_val_one, Sentence.val_quote, Matrix.cons_val_zero, HierarchySymbol.Defined.iff,
-      Fin.succ_zero_eq_one, Fin.succ_one_eq_two, Matrix.cons_app_two, h, Set.mem_range,
-      exists_exists_eq_and]
+      Matrix.cons_val_one, Sentence.val_quote, Matrix.cons_val_zero,
+      Bounding.HierarchySymbol.Defined.iff, Fin.succ_zero_eq_one, Fin.succ_one_eq_two,
+      Matrix.cons_app_two, h, Set.mem_range, exists_exists_eq_and]
     constructor
     · rintro ⟨n, -, hn⟩
       exact ⟨n, (Semiformula.quote_inj_iff (V := ℕ)).mp hn⟩
     · rintro ⟨n, rfl⟩
       exact ⟨n, Nat.eq_or_lt_of_le (hφ n), rfl⟩
-  isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by
+  isDelta1 := ProvablyProperOn.arithmetic_ofProperOn.{0} _ fun V _ _ ↦ by
     intro v
     simp [numeralInstancesCh]
 

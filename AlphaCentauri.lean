@@ -70,8 +70,8 @@ public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
-public import AlphaCentauri.ToFoundation.ProvabilityLogic.AddAlpha
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.TuringOmega
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata
 public import AlphaCentauri.ToFoundation.Semiformula

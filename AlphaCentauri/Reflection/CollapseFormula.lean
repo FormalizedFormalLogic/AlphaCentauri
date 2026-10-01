@@ -51,35 +51,36 @@ noncomputable def collapseFormula : Polarity → ArithmeticSemisentence 1
 - [AB05, Theorem 23]
 - [AB05, Remark 24] -/
 theorem hierarchy_collapseFormula (Γ : Polarity) :
-    Hierarchy Γ (n + 1) (collapseFormula T U n Γ) := by
+    ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) (collapseFormula T U n Γ) := by
   cases Γ with
   | pi =>
-    change Hierarchy 𝚷 (n + 1) (collapseFormula T U n 𝚷)
-    have hξ : Hierarchy 𝚺 (n + 1) U.Δ₁ch.sigma.val :=
+    change ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 1) (collapseFormula T U n 𝚷)
+    have hξ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) U.Δ₁ch.sigma.val :=
       U.Δ₁ch.sigma.sigma_prop.mono (Nat.le_add_left 1 n)
-    have hU : Hierarchy 𝚺 (n + 1) (isSemiformula ℒₒᵣ).sigma.val :=
+    have hU : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (isSemiformula ℒₒᵣ).sigma.val :=
       (isSemiformula ℒₒᵣ).sigma.sigma_prop.mono (Nat.le_add_left 1 n)
-    have hSP : Hierarchy 𝚺 (n + 1) (isStrictPi (n + 1)).sigma.val :=
+    have hSP : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (isStrictPi (n + 1)).sigma.val :=
       (isStrictPi (n + 1)).sigma.sigma_prop.mono (Nat.le_add_left 1 n)
-    have hneg : Hierarchy 𝚺 (n + 1) (negGraph ℒₒᵣ).val :=
+    have hneg : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (negGraph ℒₒᵣ).val :=
       (negGraph ℒₒᵣ).sigma_prop.mono (Nat.le_add_left 1 n)
-    have hproof : Hierarchy 𝚷 (n + 1) (proof T).pi.val :=
+    have hproof : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 1) (proof T).pi.val :=
       (proof T).pi.pi_prop.mono (Nat.le_add_left 1 n)
-    have hTr : Hierarchy 𝚷 (n + 1) (piSatisfaction n).val := (piSatisfaction n).pi_prop
+    have hTr : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 1) (piSatisfaction n).val := (piSatisfaction n).pi_prop
     simp [collapseFormula, hξ, hU, hSP, hneg, hproof, hTr]
   | sigma =>
-    change Hierarchy 𝚺 (n + 1) (collapseFormula T U n 𝚺)
-    have hneg : Hierarchy 𝚺 (n + 1) (negGraph ℒₒᵣ).val :=
+    change ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (collapseFormula T U n 𝚺)
+    have hneg : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (negGraph ℒₒᵣ).val :=
       (negGraph ℒₒᵣ).sigma_prop.mono (Nat.le_add_left 1 n)
-    have hproof : Hierarchy 𝚺 (n + 1) (proof T).sigma.val :=
+    have hproof : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (proof T).sigma.val :=
       (proof T).sigma.sigma_prop.mono (Nat.le_add_left 1 n)
-    have hξ : Hierarchy 𝚷 (n + 1) U.Δ₁ch.pi.val :=
+    have hξ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 1) U.Δ₁ch.pi.val :=
       U.Δ₁ch.pi.pi_prop.mono (Nat.le_add_left 1 n)
-    have hU : Hierarchy 𝚷 (n + 1) (isSemiformula ℒₒᵣ).pi.val :=
+    have hU : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 1) (isSemiformula ℒₒᵣ).pi.val :=
       (isSemiformula ℒₒᵣ).pi.pi_prop.mono (Nat.le_add_left 1 n)
-    have hSS : Hierarchy 𝚷 (n + 1) (isStrictSigma (n + 1)).pi.val :=
+    have hSS : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 1) (isStrictSigma (n + 1)).pi.val :=
       (isStrictSigma (n + 1)).pi.pi_prop.mono (Nat.le_add_left 1 n)
-    have hTr : Hierarchy 𝚺 (n + 1) (sigmaSatisfaction n).val := (sigmaSatisfaction n).sigma_prop
+    have hTr : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (sigmaSatisfaction n).val :=
+      (sigmaSatisfaction n).sigma_prop
     simp [collapseFormula, hneg, hproof, hξ, hU, hSS, hTr]
 
 /-- The one-step unfolding of the fixed point of `collapseFormula`, at the code of that very fixed
@@ -97,7 +98,7 @@ noncomputable def collapseSentence (Γ : Polarity) : ArithmeticSentence :=
 - [AB05, Theorem 23]
 - [AB05, Remark 24] -/
 theorem hierarchy_collapseSentence (Γ : Polarity) :
-    Hierarchy Γ (n + 1) (collapseSentence T U n Γ) := by
+    ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) (collapseSentence T U n Γ) := by
   simpa [collapseSentence] using hierarchy_collapseFormula T U n Γ
 
 /-- `collapseSentence` is, over `𝗜𝚺₁`, equivalent to the fixed point of `collapseFormula`.

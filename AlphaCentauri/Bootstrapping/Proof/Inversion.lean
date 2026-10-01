@@ -16,6 +16,8 @@ records the injectivity of the external-variable shift on codes, which the shift
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1 InternalMeasures
@@ -321,7 +323,7 @@ omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 /-- No code is an axiom of the empty theory. -/
 lemma not_mem_empty_Δ₁Class (p : V) : p ∉ (∅ : Theory L).Δ₁Class := by
   intro h
-  have : V ⊧/![p] (⊥ : 𝚫₁.Semisentence 1).val := h
+  have : V ⊧/![p] (⊥ : 𝚫ᴬ₁.Semisentence 1).val := h
   simp at this
 
 namespace CutFreeDerivation
@@ -416,7 +418,7 @@ private lemma inversion_and_aux :
     ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋏ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert c s) ∧ height d' ≤ height d + 1 := by
-  have hP : 𝚺-[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
+  have hP : 𝚺ᴬ-[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋏ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert c s) ∧ height d' ≤ height d + 1 := by
     definability
@@ -686,7 +688,7 @@ private lemma inversion_or_aux :
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋎ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert p (insert q s)) ∧
         height d' ≤ height d + 1 := by
-  have hP : 𝚺-[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,
+  have hP : 𝚺ᴬ-[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋎ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert p (insert q s)) ∧
         height d' ≤ height d + 1 := by

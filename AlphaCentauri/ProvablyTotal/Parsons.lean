@@ -27,11 +27,13 @@ is recovered by a bounded search below the bound.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder
 
 /-! ## The graphs of the primitive recursive functions -/
 
-open Arithmetic HierarchySymbol
+open Arithmetic Bounding.HierarchySymbol
 
 variable {k n : ℕ}
 
@@ -40,32 +42,32 @@ namespace Arithmetic
 variable {V : Type*} [ORingStructure V]
 
 private lemma definedFunction_zero :
-    𝚺₁.DefinedFunction (fun _ : Fin 0 → V ↦ 0) (.mkSigma “y. y = 0”) := .mk fun _ ↦ by simp
+    𝚺ᴬ₁.DefinedFunction (fun _ : Fin 0 → V ↦ 0) (.mkSigma “y. y = 0”) := .mk fun _ ↦ by simp
 
 private lemma definedFunction_succ :
-    𝚺₁.DefinedFunction (fun v : Fin 1 → V ↦ v 0 + 1) (.mkSigma “y x. y = x + 1”) :=
+    𝚺ᴬ₁.DefinedFunction (fun v : Fin 1 → V ↦ v 0 + 1) (.mkSigma “y x. y = x + 1”) :=
   .mk fun _ ↦ by simp
 
 private lemma definedFunction_get (i : Fin k) :
-    𝚺₁.DefinedFunction (fun v : Fin k → V ↦ v i)
-      ((.mkSigma “y x. y = x” : 𝚺₁.Semisentence 2).rew (Rew.subst ![#0, #i.succ])) :=
+    𝚺ᴬ₁.DefinedFunction (fun v : Fin k → V ↦ v i)
+      ((.mkSigma “y x. y = x” : 𝚺ᴬ₁.Semisentence 2).rew (Rew.subst ![#0, #i.succ])) :=
   .mk fun _ ↦ by simp
 
 /-- The blueprint of the primitive recursion whose base and step are given by the graphs `ψ` and
 `χ`, the arguments of `χ` being the recursion variable, the previous value, and the parameters.
 - [HP98, Lemma I.1.55] -/
-private def precBlueprint (ψ : 𝚺₁.Semisentence (n + 1)) (χ : 𝚺₁.Semisentence (n + 3)) :
+private def precBlueprint (ψ : 𝚺ᴬ₁.Semisentence (n + 1)) (χ : 𝚺ᴬ₁.Semisentence (n + 3)) :
     PR.Blueprint n where
   zero := ψ
   succ := χ.rew (Rew.subst (#0 :> #2 :> #1 :> (#·.succ.succ.succ)))
 
-variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ψ : 𝚺₁.Semisentence (n + 1)} {χ : 𝚺₁.Semisentence (n + 3)}
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {ψ : 𝚺ᴬ₁.Semisentence (n + 1)} {χ : 𝚺ᴬ₁.Semisentence (n + 3)}
 
 /-- The primitive recursion built inside a model of `𝗜𝚺₁` from the functions defined by `ψ` and
 `χ`.
 - [HP98, Lemma I.1.55] -/
 private def precConstruction {f : (Fin n → V) → V} {g : (Fin (n + 2) → V) → V}
-    (hf : 𝚺₁.DefinedFunction f ψ) (hg : 𝚺₁.DefinedFunction g χ) :
+    (hf : 𝚺ᴬ₁.DefinedFunction f ψ) (hg : 𝚺ᴬ₁.DefinedFunction g χ) :
     PR.Construction V (precBlueprint ψ χ) where
   zero := f
   succ := fun v i z ↦ g (i :> z :> v)
@@ -74,7 +76,7 @@ private def precConstruction {f : (Fin n → V) → V} {g : (Fin (n + 2) → V) 
     simp [precBlueprint, Semiformula.eval_rew, Empty.eq_elim, hg.iff, Matrix.comp_vecCons']
 
 private lemma result_precConstruction {f : (Fin n → ℕ) → ℕ} {g : (Fin (n + 2) → ℕ) → ℕ}
-    (hf : 𝚺₁.DefinedFunction (V := ℕ) f ψ) (hg : 𝚺₁.DefinedFunction (V := ℕ) g χ)
+    (hf : 𝚺ᴬ₁.DefinedFunction (V := ℕ) f ψ) (hg : 𝚺ᴬ₁.DefinedFunction (V := ℕ) g χ)
     (v : Fin n → ℕ) (u : ℕ) :
     (precConstruction hf hg).result v u = u.rec (f v) fun y ih ↦ g (y :> ih :> v) := by
   induction u with
@@ -88,7 +90,7 @@ namespace ArithmeticTheory.ProvablyFunctionalVia
 variable {T : ArithmeticTheory}
 
 section
-variable {f g : (Fin k → ℕ) → ℕ} {φ : 𝚺₁.Semisentence (k + 1)}
+variable {f g : (Fin k → ℕ) → ℕ} {φ : 𝚺ᴬ₁.Semisentence (k + 1)}
 
 private lemma of_eq (hf : T.ProvablyFunctionalVia f φ) (h : ∀ v, f v = g v) :
     T.ProvablyFunctionalVia g φ :=
@@ -108,12 +110,12 @@ private lemma succ :
 
 private lemma get (i : Fin k) :
     T.ProvablyFunctionalVia (fun v : Fin k → ℕ ↦ v i)
-      ((.mkSigma “y x. y = x” : 𝚺₁.Semisentence 2).rew (Rew.subst ![#0, #i.succ])) :=
+      ((.mkSigma “y x. y = x” : 𝚺ᴬ₁.Semisentence 2).rew (Rew.subst ![#0, #i.succ])) :=
   of_models (definedFunction_get i) fun _ _ _ ↦ ⟨_, definedFunction_get i⟩
 
 section comp
 variable {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
-  {ψ : 𝚺₁.Semisentence (l + 1)} {χ : Fin l → 𝚺₁.Semisentence (k + 1)}
+  {ψ : 𝚺ᴬ₁.Semisentence (l + 1)} {χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)}
 
 private lemma comp (hg : T.ProvablyFunctionalVia g ψ)
     (hh : ∀ i, T.ProvablyFunctionalVia (h i) (χ i)) :
@@ -127,7 +129,7 @@ end comp
 
 section prec
 variable {f : (Fin n → ℕ) → ℕ} {g : (Fin (n + 2) → ℕ) → ℕ}
-  {ψ : 𝚺₁.Semisentence (n + 1)} {χ : 𝚺₁.Semisentence (n + 3)}
+  {ψ : 𝚺ᴬ₁.Semisentence (n + 1)} {χ : 𝚺ᴬ₁.Semisentence (n + 3)}
 
 private lemma prec [𝗜𝚺₁ ⪯ T] (hf : T.ProvablyFunctionalVia f ψ)
     (hg : T.ProvablyFunctionalVia g χ) :
@@ -202,7 +204,7 @@ namespace LKI.Canonical
 
 open LK.Derivation Rewriting
 
-variable {k : ℕ} {φ : 𝚺₁.Semisentence (k + 1)}
+variable {k : ℕ} {φ : 𝚺ᴬ₁.Semisentence (k + 1)}
 
 /-- The graph of `φ` at the free variables `&0 … &(k-1)` is strict $\Sigma_1$. -/
 lemma strictHierarchy_embSubsts_exs (hφ : StrictHierarchy 𝚺 1 φ.val) :
@@ -236,7 +238,7 @@ section
 
 open Rewriting LKI LKI.Canonical
 
-variable {k : ℕ} {f : (Fin k → ℕ) → ℕ} {φ : 𝚺₁.Semisentence (k + 1)}
+variable {k : ℕ} {f : (Fin k → ℕ) → ℕ} {φ : 𝚺ᴬ₁.Semisentence (k + 1)}
 
 /-- Substituting terms with free variables into a sentence reads the values of those terms as the
 assignment to the bound variables. -/
@@ -346,7 +348,7 @@ private lemma models_allClosure_iff_evalb {k : ℕ} {φ ψ : ArithmeticSemisente
 - [HP98, Lemma I.2.9] -/
 theorem exists_strictHierarchy_provablyTotalVia {k : ℕ} {f : (Fin k → ℕ) → ℕ}
     (h : 𝗜𝚺₁.ProvablyTotal f) :
-    ∃ φ : 𝚺₁.Semisentence (k + 1), StrictHierarchy 𝚺 1 φ.val ∧ 𝗜𝚺₁.ProvablyTotalVia f φ := by
+    ∃ φ : 𝚺ᴬ₁.Semisentence (k + 1), StrictHierarchy 𝚺 1 φ.val ∧ 𝗜𝚺₁.ProvablyTotalVia f φ := by
   obtain ⟨φ, hmono⟩ := h
   have : 𝗕𝚺₁ ⪯ 𝗜𝚺₁ := BSigma_weakerThan_ISigma
   obtain ⟨ψ, hψ, hprov⟩ := exists_strictHierarchy_of_hierarchy 𝗜𝚺₁ φ.sigma_prop

@@ -17,6 +17,8 @@ over `T`.
 - [AB05, §4.2]
 -/
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic
 
 open FFL.Entailment Bootstrapping
@@ -25,13 +27,13 @@ variable (T : ArithmeticTheory) [T.Δ₁]
 
 /-- The $\Sigma_1$ formula saying that `x` codes a strict $\Sigma_1$ sentence provable in `T`; a
 code without free variables is one fixed by `shift`. -/
-noncomputable def sigma1ReflectionPremise : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def sigma1ReflectionPremise : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
   “x. !(isSemiformula ℒₒᵣ).sigma 0 x ∧ !(shiftGraph ℒₒᵣ) x x ∧ !(isStrictSigma 1).sigma x ∧
     !(provable T) x”
 
 /-- The $\Sigma_1$ formula saying that `x` codes a true strict $\Sigma_1$ formula. -/
-noncomputable def sigma1ReflectionConclusion : 𝚺₁.Semisentence 1 := .mkSigma
-  “x. !(sigmaSatisfaction 0) x 0”
+noncomputable def sigma1ReflectionConclusion : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
+  “x. !(sigmaSatisfaction 0).val x 0”
 
 /-- $\theta(x) :\equiv (\mathrm{Sent}(x) \wedge \mathrm{Str}\Sigma_1(x) \wedge \mathrm{Pr}_T(x))
 \to \mathrm{Tr}_{\Sigma_1}(x)$.
@@ -117,12 +119,12 @@ variable [𝗜𝚺₁ ⪯ T]
 `sigma1ReflectionFormula T`.
 - [AB05, §4.2] -/
 theorem localReflectionOn_Sigma1_equiv_union_range :
-    T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T ≊
+    T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T ≊
       T ∪ Set.range fun n : ℕ ↦ ((sigma1ReflectionFormula T)/[↑n] : ArithmeticSentence) := by
   set R := Set.range fun n : ℕ ↦ ((sigma1ReflectionFormula T)/[↑n] : ArithmeticSentence)
   have hR : 𝗜𝚺₁ ⪯ T ∪ R :=
     WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left)
-  have hRfn : 𝗜𝚺₁ ⪯ T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T :=
+  have hRfn : 𝗜𝚺₁ ⪯ T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T :=
     WeakerThan.trans (𝓣 := T) inferInstance (WeakerThan.ofSubset Set.subset_union_left)
   have hstrict : T ∪ R ⊢* 𝗥𝗳𝗻[StrictHierarchy 𝚺 1] T := by
     rintro _ ⟨σ, hσ, rfl⟩
@@ -130,7 +132,7 @@ theorem localReflectionOn_Sigma1_equiv_union_range :
       by_axm <| Set.mem_union_right _ ⟨⌜σ⌝, rfl⟩
     have h₂ := hR.pbl (provable_sigma1ReflectionFormula_iff (T := T) hσ)
     cl_prover [h₁, h₂]
-  have hbroad : T ∪ R ⊢* 𝗥𝗳𝗻[Hierarchy 𝚺 1] T :=
+  have hbroad : T ∪ R ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T :=
     provable_localReflectionOn_hierarchy_of_strictHierarchy (n := 1)
     (WeakerThan.ofSubset Set.subset_union_left) hstrict
   apply Equiv.antisymm
@@ -144,7 +146,7 @@ theorem localReflectionOn_Sigma1_equiv_union_range :
     · exact by_axm <| Set.mem_union_left _ hφ
     · by_cases hn : ∃ σ : ArithmeticSentence, StrictHierarchy 𝚺 1 σ ∧ n = ⌜σ⌝
       · obtain ⟨σ, hσ, rfl⟩ := hn
-        have h₁ : T ∪ 𝗥𝗳𝗻[Hierarchy 𝚺 1] T ⊢ T.standardProvability σ 🡒 σ :=
+        have h₁ : T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T ⊢ T.standardProvability σ 🡒 σ :=
           by_axm <| Set.mem_union_right _ ⟨σ, hσ.hierarchy, rfl⟩
         have h₂ := hRfn.pbl (provable_sigma1ReflectionFormula_iff (T := T) hσ)
         cl_prover [h₁, h₂]

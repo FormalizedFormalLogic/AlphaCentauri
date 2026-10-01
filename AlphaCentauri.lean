@@ -41,6 +41,7 @@ public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.Reflection.CollapseFormula
 public import AlphaCentauri.Reflection.ISigma
+public import AlphaCentauri.Reflection.InductionFromReflection
 public import AlphaCentauri.Reflection.IteratedConsistency
 public import AlphaCentauri.Reflection.Peano
 public import AlphaCentauri.Reflection.RelativizedProvability
@@ -74,6 +75,7 @@ public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.TuringOmega
+public import AlphaCentauri.ToFoundation.Provable
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata
 public import AlphaCentauri.ToFoundation.Semiformula

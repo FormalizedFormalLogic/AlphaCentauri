@@ -15,6 +15,8 @@ provability predicate.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping ProvabilityAbstraction
@@ -25,15 +27,17 @@ variable (T : ArithmeticTheory) [T.Δ₁] {n : ℕ}
 `n = 0` this is definitionally the standard provability predicate of `T`.
 - [Bek99, §3] -/
 noncomputable def _root_.FFL.FirstOrder.Theory.relativizedProvabilityPred :
-    (n : ℕ) → 𝚺-[n + 1].Semisentence 1
+    (n : ℕ) → 𝚺ᴬ-[n + 1].Semisentence 1
   | 0 => provable T
   | n + 1 => .mkSigma
       “x. ∃ s, !(piSatisfaction n).val s 0 ∧ ∃ i, !(impGraph ℒₒᵣ).val i s x ∧ !(provable T).val i”
       (by
-        have h1 : Hierarchy 𝚺 (n + 2) (piSatisfaction n).val := (piSatisfaction n).pi_prop.accum 𝚺
-        have h2 : Hierarchy 𝚺 (n + 2) (impGraph ℒₒᵣ).val :=
+        have h1 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 2) (piSatisfaction n).val :=
+          (piSatisfaction n).pi_prop.accum 𝚺
+        have h2 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 2) (impGraph ℒₒᵣ).val :=
           (impGraph ℒₒᵣ).sigma_prop.mono (by omega)
-        have h3 : Hierarchy 𝚺 (n + 2) (provable T).val := (provable T).sigma_prop.mono (by omega)
+        have h3 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 2) (provable T).val :=
+          (provable T).sigma_prop.mono (by omega)
         simp [h1, h2, h3])
 
 @[simp] lemma relativizedProvabilityPred_zero :
@@ -48,7 +52,7 @@ def RelativizedProv (n : ℕ) (x : V) : Prop :=
   ∃ s, PiSatisfaction (n + 1) s 0 ∧ ∃ i, Bootstrapping.imp ℒₒᵣ s x = i ∧ Provable T i
 
 instance RelativizedProv.defined (n : ℕ) :
-    𝚺-[n + 2]-Predicate[V] (RelativizedProv T n) via T.relativizedProvabilityPred (n + 1) :=
+    𝚺ᴬ-[n + 2]-Predicate[V] (RelativizedProv T n) via T.relativizedProvabilityPred (n + 1) :=
   .mk fun v ↦ by
     simp [RelativizedProv, Theory.relativizedProvabilityPred, (PiSatisfaction.defined n).df,
       (imp.defined (V := V) (L := ℒₒᵣ)).df, (Provable.defined (T := T) (V := V)).df]
@@ -62,7 +66,7 @@ end
 
 /-- `⊤` lies at every level of the $\Pi$ hierarchy. -/
 private lemma top_strictHierarchy_pi (n : ℕ) : StrictHierarchy 𝚷 n (⊤ : ArithmeticSentence) :=
-  (StrictHierarchy.zero (show Hierarchy 𝚺 0 (⊤ : ArithmeticSentence) by simp)).mono (Nat.zero_le _)
+  (StrictHierarchy.of_bounded (φ := (⊤ : ArithmeticSentence)) (by simp)).mono (Nat.zero_le _)
 
 /-- A true strict $\Pi_{n + 1}$ sentence's code satisfies the level-$(n + 1)$ partial truth
 predicate. -/
@@ -162,7 +166,7 @@ theorem relativizedProvability_formalizedCompleteOn_of_pi (n : ℕ) {σ : Arithm
     𝗜𝚺₁ ⊢ σ 🡒 T.relativizedProvability n σ := by
   match n with
   | 0 =>
-    have h1 : Hierarchy 𝚺 1 σ := hσ.hierarchy.of_zero
+    have h1 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 σ := hσ.hierarchy.of_zero
     simpa [Theory.relativizedProvability, Provability.pr] using
       provable_sigma_one_complete (T := T) h1
   | m + 1 =>

@@ -51,7 +51,7 @@ theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T] 
 
 /-- `𝗜𝚺₂` proves the consistency of `𝗜𝚺₁`.
 - [HP98, Corollary I.4.34(1)] -/
-axiom ISigma.provable_con_ISigma1 : 𝗜𝚺 2 ⊢ 𝗜𝚺₁.consistent.val
+axiom ISigma.provable_con_ISigma1 : 𝗜𝚺 2 ⊢ 𝗜𝚺⁺₁.consistent.val
 
 /-- `𝗣𝗔` is reflexive.
 - [Lin97, Corollary 1.8]

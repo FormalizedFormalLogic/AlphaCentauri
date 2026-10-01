@@ -1,21 +1,12 @@
 name: Update dependencies
 
-# Every six hours (and on demand) the followed pins are moved to the tip of their `master`, on one
-# long-lived branch, `update-deps`, behind one pull request labelled `update-deps`. Only the pins
-# move here: `repair-deps.yml` fixes what the move breaks, and a bump that breaks nothing merges
-# itself (see docs/workflow.md). What is followed is the `env` block below and `lakefile.toml`.
-#
-# The branch and the pull request belong to the organization's GitHub App (`BOT_APP_ID`,
-# `BOT_APP_PRIVATE_KEY`), because a push made with `github.token` starts no checks.
 on:
   schedule:
     - cron: '17 */6 * * *'
   workflow_dispatch:
 
-# Runs share a branch, so they never overlap; one waiting behind another finishes rather than
-# dies, because it may carry a newer revision.
 concurrency:
-  group: update-deps
+  group: update-deps-branch
   cancel-in-progress: false
 
 permissions:
@@ -26,8 +17,6 @@ env:
   BRANCH: update-deps
   LABEL: update-deps
   TITLE: 'chore: Update dependencies'
-  # `lakefile.toml` names: the packages followed on `master`, and those pinned to the tag naming
-  # our toolchain. The repositories behind them are read from `lakefile.toml` too.
   FOLLOWED: Foundation
   TOOLCHAIN_PINNED: Forgive
 
@@ -45,7 +34,6 @@ jobs:
           app-id: ${{ vars.BOT_APP_ID }}
           private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
 
-      # Full history: the force-push below leases the tip fetched here.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
@@ -61,8 +49,6 @@ jobs:
           echo "number=$number" >> "$GITHUB_OUTPUT"
           echo "found the pull request: ${number:-none}"
 
-      # An open pull request's branch is built on top of, never rewritten: the previous bump's
-      # repairs live there.
       - name: Prepare the branch
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
@@ -75,8 +61,6 @@ jobs:
             git switch --force-create "$BRANCH" origin/main
           fi
 
-      # Before lake runs, so that it resolves under the toolchain it is resolving for. The
-      # followed packages share one, so the first's is ours.
       - name: Take the upstream toolchain
         run: |
           set -euo pipefail
@@ -84,7 +68,6 @@ jobs:
           curl -fsSL "https://raw.githubusercontent.com/$first/master/lean-toolchain" -o lean-toolchain
           echo "the toolchain is $(cat lean-toolchain), taken from $first"
 
-      # Lake builds every dependency under the root toolchain, so a pin tied to it has to move.
       - name: Move the pins tied to the toolchain
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
@@ -94,16 +77,11 @@ jobs:
             python3 .github/scripts/deps.py pin-tag lakefile.toml "$package" "$(cat lean-toolchain)"
           done
 
-      # elan only: `lake exe cache get` refuses a tree whose toolchain is already the upstream's
-      # while the manifest still pins the old Mathlib.
       - name: Install elan
-        uses: leanprover/lean-action@v1
-        with:
-          build: false
-          use-github-cache: false
-          use-mathlib-cache: false
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
 
-      # The body is written here, where both manifests are at hand.
       - name: Update the manifest
         id: rev
         run: |
@@ -136,7 +114,6 @@ jobs:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
         run: |
           set -euo pipefail
-          # The bot's noreply address is built from its user id.
           author=${APP_SLUG:+${APP_SLUG}[bot]}
           author=${author:-github-actions[bot]}
           git config user.name "$author"
@@ -150,12 +127,10 @@ jobs:
           if [ -n "$PR_NUMBER" ]; then
             git push origin "HEAD:refs/heads/$BRANCH"
           else
-            # A leftover branch nothing points at is replaced, against the tip fetched above.
             git push --force-with-lease origin "HEAD:$BRANCH"
           fi
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
-      # The body is rewritten on every run, so notes about the bump belong in a comment.
       - name: Open or refresh the pull request
         id: open
         if: steps.push.outputs.pushed == 'true'
@@ -173,7 +148,6 @@ jobs:
           fi
           echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
 
-      # A pins-only bump has no diff to read, so its checks are the whole review.
       - name: Queue the merge of a pins-only bump
         if: steps.push.outputs.pushed == 'true'
         env:

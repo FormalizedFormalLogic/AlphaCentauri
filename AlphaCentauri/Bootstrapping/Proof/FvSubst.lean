@@ -13,6 +13,8 @@ free variables are left unchanged.
 
 @[expose] public section
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* ISigma 1]
@@ -64,12 +66,12 @@ noncomputable def termFvSubstVec (k w v : V) : V := construction.resultVec L ![w
 
 /-- The $\Sigma_1$ graph of `termFvSubst`; argument order `(y, w, t)`, `y = termFvSubst L w t`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-noncomputable def termFvSubstGraph : 𝚺₁.Semisentence 3 :=
+noncomputable def termFvSubstGraph : 𝚺ᴬ₁.Semisentence 3 :=
   (blueprint.result L).rew <| Rew.subst ![#0, #2, #1]
 
 /-- The $\Sigma_1$ graph of `termFvSubstVec`; argument order `(y, w, k, v)`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-noncomputable def termFvSubstVecGraph : 𝚺₁.Semisentence 4 :=
+noncomputable def termFvSubstVecGraph : 𝚺ᴬ₁.Semisentence 4 :=
   (blueprint.resultVec L).rew <| Rew.subst ![#0, #1, #3, #2]
 
 variable {L}
@@ -101,37 +103,37 @@ variable {Γ : SigmaPiDelta} {m : ℕ}
 
 /-- The $\Sigma_1$ definability witness for `termFvSubst`, via `termFvSubstGraph`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubst.defined : 𝚺₁-Function₂ termFvSubst (V := V) L via termFvSubstGraph L :=
+instance termFvSubst.defined : 𝚺ᴬ₁-Function₂ termFvSubst (V := V) L via termFvSubstGraph L :=
   .mk fun v ↦ by
     simpa [termFvSubstGraph, termFvSubst, Matrix.constant_eq_singleton,
       Matrix.comp_vecCons'] using construction.result_defined.defined ![v 0, v 2, v 1]
 
 /-- The $\Sigma_1$ definability instance for `termFvSubst`, forgetting the specific witness graph.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubst.definable : 𝚺₁-Function₂ termFvSubst (V := V) L :=
+instance termFvSubst.definable : 𝚺ᴬ₁-Function₂ termFvSubst (V := V) L :=
   termFvSubst.defined.to_definable
 
 /-- `termFvSubst` is `Γ`-definable at every level `m + 1` above $\Sigma_1$.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubst.definable' : Γ-[m + 1]-Function₂ termFvSubst (V := V) L :=
+instance termFvSubst.definable' : Γᴬ-[m + 1]-Function₂ termFvSubst (V := V) L :=
   termFvSubst.definable.of_sigmaOne
 
 /-- The $\Sigma_1$ definability witness for `termFvSubstVec`, via `termFvSubstVecGraph`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 instance termFvSubstVec.defined :
-    𝚺₁-Function₃ termFvSubstVec (V := V) L via termFvSubstVecGraph L := .mk fun v ↦ by
+    𝚺ᴬ₁-Function₃ termFvSubstVec (V := V) L via termFvSubstVecGraph L := .mk fun v ↦ by
   simpa [termFvSubstVecGraph, termFvSubstVec, Matrix.constant_eq_singleton,
     Matrix.comp_vecCons'] using construction.resultVec_defined.defined ![v 0, v 1, v 3, v 2]
 
 /-- The $\Sigma_1$ definability instance for `termFvSubstVec`, forgetting the specific witness
 graph.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubstVec.definable : 𝚺₁-Function₃ termFvSubstVec (V := V) L :=
+instance termFvSubstVec.definable : 𝚺ᴬ₁-Function₃ termFvSubstVec (V := V) L :=
   termFvSubstVec.defined.to_definable
 
 /-- `termFvSubstVec` is `Γ`-definable at every level `m + 1` above $\Sigma_1$.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubstVec.definable' : Γ-[m + 1]-Function₃ termFvSubstVec (V := V) L :=
+instance termFvSubstVec.definable' : Γᴬ-[m + 1]-Function₃ termFvSubstVec (V := V) L :=
   termFvSubstVec.definable.of_sigmaOne
 
 end
@@ -273,7 +275,7 @@ noncomputable def fvSubst (w p : V) : V := (FvSubst.construction L).result L w p
 
 /-- The $\Sigma_1$ graph of `fvSubst`; argument order `(y, w, p)`, `y = fvSubst L w p`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-noncomputable def fvSubstGraph : 𝚺₁.Semisentence 3 := (blueprint L).result L
+noncomputable def fvSubstGraph : 𝚺ᴬ₁.Semisentence 3 := (blueprint L).result L
 
 variable {L}
 
@@ -283,16 +285,16 @@ variable {Γ : SigmaPiDelta} {m : ℕ}
 
 /-- The $\Sigma_1$ definability witness for `fvSubst`, via `fvSubstGraph`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance fvSubst.defined : 𝚺₁-Function₂[V] fvSubst L via fvSubstGraph L :=
+instance fvSubst.defined : 𝚺ᴬ₁-Function₂[V] fvSubst L via fvSubstGraph L :=
   (FvSubst.construction L).result_defined
 
 /-- The $\Sigma_1$ definability instance for `fvSubst`, forgetting the specific witness graph.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance fvSubst.definable : 𝚺₁-Function₂[V] fvSubst L := fvSubst.defined.to_definable
+instance fvSubst.definable : 𝚺ᴬ₁-Function₂[V] fvSubst L := fvSubst.defined.to_definable
 
 /-- `fvSubst` is `Γ`-definable at every level `m + 1` above $\Sigma_1$.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance fvSubst.definable' : Γ-[m + 1]-Function₂[V] fvSubst L :=
+instance fvSubst.definable' : Γᴬ-[m + 1]-Function₂[V] fvSubst L :=
   fvSubst.definable.of_sigmaOne
 
 end
@@ -651,7 +653,7 @@ lemma termFvSubstVec_qVec_closed {n m w v : V}
 the coded set `s`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 noncomputable def fvSubstImage (w s : V) : V := by
-  letI : 𝚺₁-Function₁ (fvSubst L w) := by definability
+  letI : 𝚺ᴬ₁-Function₁ (fvSubst L w) := by definability
   exact hfsImage (fvSubst L w) s
 
 /-- A formula code belongs to `fvSubstImage w s` iff it is `fvSubst L w q` for some formula code
@@ -659,7 +661,7 @@ noncomputable def fvSubstImage (w s : V) : V := by
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 lemma mem_fvSubstImage_iff {w s p : V} :
     p ∈ fvSubstImage (L := L) w s ↔ ∃ q ∈ s, p = fvSubst L w q := by
-  let _ : 𝚺₁-Function₁ (fvSubst L w) := by definability
+  let _ : 𝚺ᴬ₁-Function₁ (fvSubst L w) := by definability
   exact mem_hfsImage_iff
 
 /-- Free-variable substitution by a vector of closed terms carries a coded formula set to a coded

@@ -5,9 +5,11 @@ description: Pick up the dependency pin-bump pull request and make it green
 Handle the automated dependency pin bump. `.github/workflows/update-deps.yml` keeps one branch,
 `update-deps`, behind one pull request labelled `update-deps`, whose body tabulates the revisions
 it moved; the workflow moves the pins and nothing else, so the bump is red until this repository
-is repaired. `.github/workflows/repair-deps.yml` does that in the cloud, once per bump, and this
-command is the same runbook from a local session. `docs/workflow.md`, "Dependency pins and
+is repaired, which this command does from a local session. `docs/workflow.md`, "Dependency pins and
 Foundation", is normative — read it before acting.
+
+Comment your session's link on the pull request when you pick it up, as `docs/workflow.md` asks
+of every pull request.
 
 Stop immediately, reporting nothing but the reason, when there is no open pull request labelled
 `update-deps`, or its checks are still running.
@@ -24,9 +26,10 @@ Otherwise the bump is red and it is yours to repair:
 1. Find the pull request:
    `gh pr list --label update-deps --state open --json number,headRefName,url`.
 2. Add a git worktree for its branch under `.claude/worktrees/`, and give it its own
-   `.lake/packages` (`cp -a <main>/.lake/packages <main>/.lake/config .lake/`) so `lake build` works
-   there. Pull the branch first — the workflow commits new pins on top of it, so your local copy may
-   be behind.
+   `.lake/packages` (`cp -a <main>/.lake/packages <main>/.lake/config .lake/`), then `just cache`:
+   the bump moves the pin onto a revision Foundation's CI has published, so its build is a download
+   rather than the hour it takes to elaborate. Pull the branch first — the workflow commits new pins
+   on top of it, so your local copy may be behind.
 3. Build. Read the compiler's complaints against the upstream's own diff over the range the body's
    table links, and repair this repository: renames, changed signatures, lemmas that moved.
    Where Foundation has absorbed material ported from here, Foundation's version wins — delete the

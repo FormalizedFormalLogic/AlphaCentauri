@@ -34,24 +34,15 @@ declaration:
   FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
   FFL.FirstOrder.Arithmetic.Peano.reflexive:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive
-  FFL.FirstOrder.Arithmetic.parsons:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.parsons
-  FFL.FirstOrder.Arithmetic.parsons_primrec:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.parsons_primrec
-  FFL.FirstOrder.Arithmetic.primrec'_of_provablyTotal:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.primrec'_of_provablyTotal
-  FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ElementaryArithmetic:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ElementaryArithmetic
   FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0:
     forgive:
       # An open problem, not a theorem awaiting formalization: [PWW88, Problem 1].
@@ -85,21 +76,48 @@ declaration:
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stSigma1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Sigma1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Sigma1_of_lt:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stPi_of_le:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stPi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi_self:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive
+  FFL.FirstOrder.Arithmetic.Peano.provable_localReflection_ISigma:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.exists_prime_gt:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.not_finiteAxiomatizable_of_Peano_le:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
-  FFL.FirstOrder.Arithmetic.not_provablyTotal_ackermann:
+  FFL.ProvabilityLogic.D_weakerThan_provabilityLogic_ISigma_ISigma:
     forgive:
-      - FFL.FirstOrder.Arithmetic.parsons
-  FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma1:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.ProvabilityLogic.provabilityLogic_ISigma_ISigma_eq_D:
     forgive:
-      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ElementaryArithmetic
-  FFL.FirstOrder.Arithmetic.provablyTotalFunctions_ISigma1:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.ProvabilityLogic.provabilityLogic_ISigma1_add_con_Peano_eq_A:
     forgive:
-      - FFL.FirstOrder.Arithmetic.parsons
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.ProvabilityLogic.provabilityLogic_ISigma_Peano_eq_S:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.ProvabilityLogic.trace_provabilityLogic_ISigma_ISigma_eq_univ:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi

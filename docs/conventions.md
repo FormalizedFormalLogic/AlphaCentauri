@@ -3,12 +3,8 @@
 AlphaCentauri follows **Foundation's contribution guidelines**: [`index.md`](index.md),
 [`style.md`](style.md), and [`refactoring.md`](refactoring.md) in this directory are copied
 verbatim from the `contribute/` directory of
-[Foundation](https://github.com/FormalizedFormalLogic/Foundation/tree/master/contribute), at
-the commit pinned in `lake-manifest.json` when they were copied:
-
-- source: https://github.com/FormalizedFormalLogic/Foundation/tree/a77e4e903062c05ce502e331f7215a5a07cb780a/contribute
-- commit: `a77e4e903062c05ce502e331f7215a5a07cb780a`
-- license: Apache-2.0 (Foundation's)
+[Foundation](https://github.com/FormalizedFormalLogic/Foundation/tree/master/contribute),
+under its Apache-2.0 license:
 
 - [`index.md`](index.md): the flow to the main branch, PR titles and the commit convention,
   pre-submission checks, disclosure of AI involvement.
@@ -18,9 +14,12 @@ the commit pinned in `lake-manifest.json` when they were copied:
 
 Those documents are the authority; AlphaCentauri follows them as written. This file does not
 restate them; it records only where AlphaCentauri differs or adds. Where the two conflict,
-Foundation's guidelines win, and the conflict is reported as a `meta` issue. When the Foundation
-pin is bumped, re-copy the three files above in the same PR if they changed upstream, and update
-the commit noted above.
+Foundation's guidelines win, and the conflict is reported in an issue — with one standing
+exception: [`style.md`](style.md)'s citation rule requires a docstring to say so and explain why
+when a definition or theorem has no source; AGENTS.md's "Cite the source" rule instead has such
+a declaration omit the docstring outright, unless a genuinely useful statement-level explanation
+remains. AGENTS.md's rule wins here. When the Foundation pin is bumped, re-copy the three files
+above in the same PR if they changed upstream.
 
 Where they say "Foundation", read "Foundation, and AlphaCentauri"; where they name
 Foundation-specific files (`Foundation.lean`, `references.bib`, `just` recipes), the
@@ -36,9 +35,10 @@ rewrite, so it is written as if it were already there.
   `@[expose] public section`.
 - **Root module.** `AlphaCentauri.lean` imports every module and is regenerated with
   `just mk-all` (`lake exe mk_all --lib AlphaCentauri --module`); CI checks it.
-- **Linters.** The library builds with Foundation's linter set (`lakefile.toml`). Warnings are not
-  errors, since a statement formalized with `sorry` must build; a warning is still fixed, not
-  suppressed, and review treats one as a finding.
+- **Linters.** The library builds with Mathlib's standard linter set, which `lakefile.toml`
+  opts into wholesale (`weak.linter.mathlibStandardSet`), minus the header linter; `autoImplicit`
+  is off, as in Mathlib. A warning is an error: CI and the pre-push hook build with
+  `lake build AlphaCentauri --wfail`. Fix a warning, never suppress it.
 - **Citations.** The bibliography is [`references.yml`](../references.yml) at the repository
   root, written in [Hayagriva](https://github.com/typst/hayagriva) YAML rather than
   Foundation's BibTeX `references.bib`; there is no `bibtool` step, the file is edited by
@@ -59,10 +59,25 @@ rewrite, so it is written as if it were already there.
   `sorry` collapses into one anonymous `sorryAx`. Proving the statement turns the `axiom` into a
   `theorem` and deletes its entry; a `sorry` that would sit inside a proof becomes its own named
   axiom for the fact it stands for.
+- **An `axiom` can silently drop a hypothesis.** Lean pulls a `variable`-bound instance argument
+  into a declaration only when the declaration's own type mentions it; an `axiom` has no body to
+  mention it indirectly, so a hypothesis like `[U.Δ₁]` or `[𝗜𝚺₁ ⪯ T]` can vanish from the type
+  without any error — the resulting statement is *stronger* than intended, and neither
+  `lake build`, `just axiom-audit`, nor `just mk-all` catches it. This happened in PR #107 and was
+  fixed in PR #112. A `statement-formalized` PR must run `#check @Name` on every `axiom` it adds
+  and confirm the printed type keeps every intended hypothesis.
 - **Reuse before restating.** Foundation's theories, notations, definability classes, and the
   hierarchy are the vocabulary. A definition that duplicates a Foundation definition under a
-  new name is rejected in review. If Foundation's API is missing or awkward, open a
-  `foundation` issue rather than working around it.
+  new name is rejected in review. If Foundation's API is missing or awkward, say so in the
+  issue you are working on rather than working around it; a human takes it upstream.
+- **`<|` for low-precedence application.** Write `f <| x`, not `f $ x`, and prefer it to
+  parentheses whenever the argument runs to the end of the term: `exact Or.inr <| Or.inl h`, not
+  `exact Or.inr (Or.inl h)`. Foundation's guidelines do not choose between the two spellings;
+  Mathlib's `style.dollarSyntax` linter does, and this repository follows it.
+- **Avoid `?_`.** Prefer `apply f` to `refine f ?_`, and a direct term to a `refine` with holes;
+  [`style.md`](style.md)'s preference for direct term construction is the same rule seen from the
+  other side. `use` takes data only — a witness of a `Type`, never a proof of a hypothesis: split
+  what remains with `and_intros` rather than passing the proof to `use`.
 - **AI disclosure.** As in Foundation: every commit carries a `Co-Authored-By` trailer for the
   model, and the PR body says an AI agent wrote it. Here that is the normal case, not the
   exception, so every PR body says so explicitly.
@@ -70,8 +85,11 @@ rewrite, so it is written as if it were already there.
 ## Checks before opening a pull request
 
 ```bash
-lake build            # no errors; fix the warnings
-just axiom-audit      # no axiom outside the allowlist, except what forgive.yml forgives
-just no-sorry         # no `sorry` in the sources, no `sorryAx` in forgive.yml
-just mk-all           # AlphaCentauri.lean up to date
+lake build AlphaCentauri --wfail   # no errors and no warnings
+just axiom-audit                   # no axiom outside the allowlist, except what forgive.yml forgives
+just no-sorry                      # no `sorry` in the sources, no `sorryAx` in forgive.yml
+just mk-all                        # AlphaCentauri.lean up to date
 ```
+
+A `statement-formalized` PR additionally runs `#check @Name` on every `axiom` it adds — see
+"An `axiom` can silently drop a hypothesis" above.

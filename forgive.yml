@@ -3,15 +3,16 @@
 # AlphaCentauri does not use `sorry`: a statement that is formalized but not yet proved is
 # declared as an `axiom`, so the audit reports it under its own name and every declaration that
 # leans on it says which unproved result it leans on. This file is that ledger, read by
-# `lake env lean --run Audit/Main.lean` (`just axiom-audit`); the format is documented in
-# `Audit/Main.lean`.
+# `lake exe forgive AlphaCentauri` (`just axiom-audit`); the format is documented in
+# https://github.com/FormalizedFormalLogic/forgive.
 #
-#   AlphaCentauri.someLemma:
-#     forgive:
-#       - AlphaCentauri.someLemma      # the axiom standing in for its own proof
-#   AlphaCentauri.usesSomeLemma:
-#     forgive:
-#       - AlphaCentauri.someLemma      # only the debt reached through `someLemma`
+#   declaration:
+#     AlphaCentauri.someLemma:
+#       forgive:
+#         - AlphaCentauri.someLemma    # the axiom standing in for its own proof
+#     AlphaCentauri.usesSomeLemma:
+#       forgive:
+#         - AlphaCentauri.someLemma    # only the debt reached through `someLemma`
 #
 # Every entry and every forgiven name must be needed, so the file stays exact: proving a
 # statement means deleting its `axiom` and every entry that named it. `sorryAx` must never
@@ -19,72 +20,98 @@
 
 version: v0
 
-# The unproved statements themselves.
-LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound:
-  forgive:
-    - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sigma_one_sound
-LO.FirstOrder.Arithmetic.consistent_localReflection_of_sound:
-  forgive:
-    - LO.FirstOrder.Arithmetic.consistent_localReflection_of_sound
-LO.FirstOrder.Arithmetic.exists_sentence_weakerThan_of_consistent:
-  forgive:
-    - LO.FirstOrder.Arithmetic.exists_sentence_weakerThan_of_consistent
-LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union:
-  forgive:
-    - LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union
-LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con:
-  forgive:
-    - LO.FirstOrder.Arithmetic.localReflection_pi_one_equiv_con
-LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
-  forgive:
-    - LO.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
-LO.FirstOrder.Arithmetic.provablyTotal_of_primrec:
-  forgive:
-    - LO.FirstOrder.Arithmetic.provablyTotal_of_primrec
-LO.FirstOrder.Arithmetic.provablyTotal_of_primrec':
-  forgive:
-    - LO.FirstOrder.Arithmetic.provablyTotal_of_primrec'
-LO.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection:
-  forgive:
-    - LO.FirstOrder.Arithmetic.strictlyWeakerThan_localReflection
-LO.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ:
-  forgive:
-    - LO.FirstOrder.Arithmetic.uniformReflectionOnHierarchy_sigma_equiv_pi_succ
-LO.FirstOrder.ISigma.provable_con_ISigma1:
-  forgive:
-    - LO.FirstOrder.ISigma.provable_con_ISigma1
-LO.FirstOrder.Peano.essentiallyReflexive:
-  forgive:
-    - LO.FirstOrder.Peano.essentiallyReflexive
-LO.FirstOrder.Peano.reflexive:
-  forgive:
-    - LO.FirstOrder.Peano.reflexive
-LO.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection:
-  forgive:
-    - LO.FirstOrder.ProvabilityAbstraction.Provability.con_of_localReflection
-LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con:
-  forgive:
-    - LO.FirstOrder.ProvabilityAbstraction.Provability.localReflection_of_con
-LO.FirstOrder.parsons:
-  forgive:
-    - LO.FirstOrder.parsons
-LO.FirstOrder.parsons_primrec:
-  forgive:
-    - LO.FirstOrder.parsons_primrec
-LO.FirstOrder.primrec'_of_provablyTotal:
-  forgive:
-    - LO.FirstOrder.primrec'_of_provablyTotal
-LO.FirstOrder.provablyTotal_of_primrec':
-  forgive:
-    - LO.FirstOrder.provablyTotal_of_primrec'
+# The axioms every declaration may use.
+accept:
+  - propext
+  - Classical.choice
+  - Quot.sound
 
-# Declarations that inherit the debt of an unproved statement.
-LO.FirstOrder.Arithmetic.not_localReflectionOnHierarchy_weakerThan_union:
-  forgive:
-    - LO.FirstOrder.Arithmetic.inconsistent_of_localReflectionOnHierarchy_weakerThan_union
-LO.FirstOrder.Peano.not_finiteAxiomatizable:
-  forgive:
-    - LO.FirstOrder.Peano.reflexive
-LO.FirstOrder.not_finiteAxiomatizable_of_Peano_le:
-  forgive:
-    - LO.FirstOrder.Peano.essentiallyReflexive
+declaration:
+  # The unproved statements themselves.
+  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
+  FFL.FirstOrder.Arithmetic.Peano.reflexive:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Peano.reflexive
+  FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [PWW88, Problem 1].
+      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0
+  FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
+  FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
+  FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.uniformReflectionOn_Sigma_equiv_Pi_succ
+
+  # Declarations that inherit the debt of an unproved statement.
+  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_fresh:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_free:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stSigma1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Sigma1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Sigma1_of_lt:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stPi_of_le:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stPi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi_self:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Peano.reflexive
+  FFL.FirstOrder.Arithmetic.Peano.provable_localReflection_ISigma:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.exists_prime_gt:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
+  FFL.FirstOrder.Arithmetic.not_finiteAxiomatizable_of_Peano_le:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
+  FFL.ProvabilityLogic.D_weakerThan_provabilityLogic_ISigma_ISigma:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.ProvabilityLogic.provabilityLogic_ISigma_ISigma_eq_D:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.ProvabilityLogic.provabilityLogic_ISigma1_add_con_Peano_eq_A:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.ProvabilityLogic.provabilityLogic_ISigma_Peano_eq_S:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.ProvabilityLogic.trace_provabilityLogic_ISigma_ISigma_eq_univ:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi

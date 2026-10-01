@@ -11,7 +11,9 @@ code `p`, including `p` itself, by structural recursion on `p` via `UformulaRec1
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* ISigma 1]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
@@ -24,7 +26,8 @@ its subformula codes.
 No source; a formalization device mirroring `UformulaRec1.Blueprint` for a codomain of finite
 sets rather than of formula/term codes.
 -/
-noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] : UformulaRec1.Blueprint where
+noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] :
+    UformulaRec1.Blueprint where
   rel := .mkSigma
     “y param k R v. ∃ z, !qqRelDef z k R v ∧ !insertDef y z 0”
   nrel := .mkSigma
@@ -88,28 +91,30 @@ noncomputable def subformulas (p : V) : V := (Subformula.construction L).result 
 
 No source; a formalization device.
 -/
-noncomputable def subformulasGraph : HierarchySymbol.sigmaOne.Semisentence 2 :=
+noncomputable def subformulasGraph : 𝚺ᴬ₁.Semisentence 2 :=
   ((Subformula.blueprint L).result L).rew (Rew.subst ![#0, ‘0’, #1])
 
 variable {L}
 
 section
 
-/-- `subformulas` is `𝚺₁`-definable through `subformulasGraph`.
+variable {Γ : SigmaPiDelta} {m : ℕ}
+
+/-- `subformulas` is $\Sigma_1$-definable through `subformulasGraph`.
 - No source; a formalization device mirroring the external subformula relation. -/
-instance subformulas.defined : 𝚺₁-Function₁ subformulas (V := V) L via subformulasGraph L :=
+instance subformulas.defined : 𝚺ᴬ₁-Function₁ subformulas (V := V) L via subformulasGraph L :=
   .mk fun v ↦ by
     simpa [subformulasGraph, subformulas, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using!
       (Subformula.construction L).result_defined.defined ![v 0, 0, v 1]
 
-/-- `subformulas` is a `𝚺₁`-definable function.
+/-- `subformulas` is a $\Sigma_1$-definable function.
 - No source; a formalization device mirroring the external subformula relation. -/
-instance subformulas.definable : 𝚺₁-Function₁ subformulas (V := V) L :=
+instance subformulas.definable : 𝚺ᴬ₁-Function₁ subformulas (V := V) L :=
   subformulas.defined.to_definable
 
-/-- `subformulas` is definable at every level `Γ-[m + 1]` of the hierarchy.
+/-- `subformulas` is definable at every level `Γᴬ-[m + 1]` of the hierarchy.
 - No source; a formalization device mirroring the external subformula relation. -/
-instance subformulas.definable' : Γ-[m + 1]-Function₁ subformulas (V := V) L :=
+instance subformulas.definable' : Γᴬ-[m + 1]-Function₁ subformulas (V := V) L :=
   subformulas.definable.of_sigmaOne
 
 end
@@ -173,7 +178,8 @@ lemma subformulas_not_uformula {p : V} (hp : ¬IsUFormula L p) : subformulas L p
 -/
 lemma mem_subformulas_self {p : V} (hp : IsUFormula L p) : p ∈ subformulas L p := by
   have H : ∀ p : V, IsUFormula L p → p ∈ subformulas L p := by
-    apply IsUFormula.ISigma1.sigma1_succ_induction (P := fun p ↦ p ∈ subformulas L p) (by definability)
+    apply IsUFormula.ISigma1.sigma1_succ_induction (P := fun p ↦ p ∈ subformulas L p)
+      (by definability)
     case hrel => intro k R v hR hv; simp [hR, hv]
     case hnrel => intro k R v hR hv; simp [hR, hv]
     case hverum => simp
@@ -321,18 +327,22 @@ lemma subformulas_subset_of_mem {p q : V} (hp : IsUFormula L p) (hq : q ∈ subf
       rcases hq with rfl | hq | hq
       · simp [hp₁, hp₂]
       · exact subset_trans (ih₁ q hq) (by
-          rw [subformulas_and hp₁ hp₂]; exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
+          rw [subformulas_and hp₁ hp₂];
+          exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
       · exact subset_trans (ih₂ q hq) (by
-          rw [subformulas_and hp₁ hp₂]; exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
+          rw [subformulas_and hp₁ hp₂];
+          exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
     case hor =>
       intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ q hq
       simp only [subformulas_or hp₁ hp₂, mem_bitInsert_iff, mem_cup_iff] at hq
       rcases hq with rfl | hq | hq
       · simp [hp₁, hp₂]
       · exact subset_trans (ih₁ q hq) (by
-          rw [subformulas_or hp₁ hp₂]; exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
+          rw [subformulas_or hp₁ hp₂];
+          exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
       · exact subset_trans (ih₂ q hq) (by
-          rw [subformulas_or hp₁ hp₂]; exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
+          rw [subformulas_or hp₁ hp₂];
+          exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
     case hall =>
       intro p₁ hp₁ ih₁ q hq
       simp only [subformulas_all hp₁, mem_bitInsert_iff] at hq
@@ -359,7 +369,7 @@ variable {L}
 
 /-- Membership in `subformulasSet L s`: `q` is a subformula of some code in `s`. -/
 lemma mem_subformulasSet_iff {s q : V} : q ∈ subformulasSet L s ↔ ∃ p ∈ s, q ∈ subformulas L p := by
-  have := (subformulas.definable : 𝚺₁-Function₁ subformulas (V := V) L)
+  have := (subformulas.definable : 𝚺ᴬ₁-Function₁ subformulas (V := V) L)
   constructor
   · intro h
     rcases mem_sUnion_iff.mp h with ⟨c, hc, hqc⟩
@@ -368,4 +378,4 @@ lemma mem_subformulasSet_iff {s q : V} : q ∈ subformulasSet L s ↔ ∃ p ∈ 
   · rintro ⟨p, hp, hq⟩
     exact mem_sUnion_iff.mpr ⟨subformulas L p, app_mem_hfsImage hp, hq⟩
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

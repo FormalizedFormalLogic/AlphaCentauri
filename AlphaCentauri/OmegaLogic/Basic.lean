@@ -16,7 +16,7 @@ file is cited from them. The presentation followed is [Tow20].
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic.OmegaLogic
 
 /-- A `Z_∞` sequent: a finite set of arithmetic formulas, read disjunctively.
 
@@ -25,8 +25,7 @@ abbrev Sequent := Finset (ArithmeticFormula ℕ)
 
 section Truth
 
-variable {k : ℕ} {b : Bool} {r : (ℒₒᵣ).Rel k} {v : Fin k → ArithmeticTerm ℕ}
-  {φ ψ : ArithmeticFormula ℕ} {φₓ : ArithmeticSemiformula ℕ 1}
+variable {φ ψ : ArithmeticFormula ℕ} {φₓ : ArithmeticSemiformula ℕ 1}
 
 /-- Truth of an arithmetic formula in the standard model `ℕ`.
 
@@ -69,6 +68,8 @@ lemma litTrue_exs : LitTrue (∃¹ φₓ) ↔ ∃ n : ℕ, LitTrue (φₓ/[(↑n
 def signedLit : Bool → {k : ℕ} → (ℒₒᵣ).Rel k → (Fin k → ArithmeticTerm ℕ) → ArithmeticFormula ℕ
   |  true, _, r, v => Semiformula.rel r v
   | false, _, r, v => Semiformula.nrel r v
+
+variable {k : ℕ} {b : Bool} {r : (ℒₒᵣ).Rel k} {v : Fin k → ArithmeticTerm ℕ}
 
 @[simp, grind =] lemma neg_signedLit : ∼(signedLit b r v) = signedLit (!b) r v := by
   cases b <;> simp [signedLit]
@@ -168,7 +169,8 @@ theorem sound {Γ : Sequent} (D : Derivation Γ) : ∃ φ ∈ Γ, LitTrue φ := 
     by_cases h : ∃ χ ∈ Γ', LitTrue χ
     · obtain ⟨χ, hχ, ht⟩ := h
       exact ⟨χ, Finset.mem_insert_of_mem hχ, ht⟩
-    · refine ⟨_, Finset.mem_insert_self _ _, litTrue_all.mpr fun n => ?_⟩
+    · refine ⟨_, Finset.mem_insert_self _ _, litTrue_all.mpr ?_⟩
+      intro n
       obtain ⟨χ, hχ, ht⟩ := ih n
       rcases Finset.mem_insert.mp hχ with rfl | hχ
       · exact ht
@@ -204,7 +206,7 @@ namespace Provable
 section
 
 variable {α β : Ordinal.{0}} {c c' k : ℕ} {φ ψ : ArithmeticFormula ℕ}
-  {φₓ : ArithmeticSemiformula ℕ 1} {Γ Δ : Sequent}
+  {φₓ : ArithmeticSemiformula ℕ 1} {Γ : Sequent}
 
 /-- Both bounds may be relaxed.
 
@@ -217,6 +219,9 @@ lemma mono_ordinalBound (h : α ≤ β) : Z∞ ⊢[α, c] Γ → Z∞ ⊢[β, c]
 
 lemma mono_cutRank (h : c ≤ c') : Z∞ ⊢[α, c] Γ → Z∞ ⊢[α, c'] Γ := mono le_rfl h
 
+section
+variable {Δ : Sequent}
+
 /-- Weakening preserves both derivation bounds.
 
 - [Tow20, Section 14] -/
@@ -224,6 +229,8 @@ lemma weakening (h : Γ ⊆ Δ) : Z∞ ⊢[α, c] Γ → Z∞ ⊢[α, c] Δ := b
   rintro ⟨D, ho, hcr⟩
   exact ⟨D.weak h, by simpa [Derivation.ordinalBound] using ho,
     by simpa [Derivation.cutRank] using hcr⟩
+
+end
 
 lemma insert_absorb (h : Z∞ ⊢[α, c] insert φ Γ) (hmem : φ ∈ Γ) : Z∞ ⊢[α, c] Γ := by
   rwa [Finset.insert_eq_self.mpr hmem] at h
@@ -268,9 +275,8 @@ lemma andI (hφ : Z∞ ⊢[α, c] insert φ Γ) (hψ : Z∞ ⊢[β, c] insert ψ
 lemma orI (h : Z∞ ⊢[α, c] insert φ (insert ψ Γ)) :
     Z∞ ⊢[α + 1, c] insert (φ ⋎ ψ) Γ := by
   obtain ⟨D, ho, hcr⟩ := h
-  refine ⟨Derivation.orI φ ψ D, ?_, ?_⟩
-  · simpa [Derivation.ordinalBound] using add_le_add_left ho 1
-  · simpa [Derivation.cutRank] using hcr
+  exact ⟨Derivation.orI φ ψ D, by simpa [Derivation.ordinalBound] using add_le_add_left ho 1,
+    by simpa [Derivation.cutRank] using hcr⟩
 
 /-- The bounded `∃`-rule with a numeral witness.
 
@@ -278,9 +284,8 @@ lemma orI (h : Z∞ ⊢[α, c] insert φ (insert ψ Γ)) :
 lemma exI (n : ℕ) (h : Z∞ ⊢[α, c] insert (φₓ/[(↑n : ArithmeticTerm ℕ)]) Γ) :
     Z∞ ⊢[α + 1, c] insert (∃¹ φₓ) Γ := by
   obtain ⟨D, ho, hcr⟩ := h
-  refine ⟨Derivation.exI φₓ n D, ?_, ?_⟩
-  · simpa [Derivation.ordinalBound] using add_le_add_left ho 1
-  · simpa [Derivation.cutRank] using hcr
+  exact ⟨Derivation.exI φₓ n D, by simpa [Derivation.ordinalBound] using add_le_add_left ho 1,
+    by simpa [Derivation.cutRank] using hcr⟩
 
 /-- The bounded ω-rule for universal formulas.
 
@@ -317,7 +322,8 @@ end
 
 section ExcludedMiddle
 
-variable {α : Ordinal.{0}} {k : ℕ} {φ : ArithmeticFormula ℕ} {Γ : Sequent}
+section
+variable {α : Ordinal.{0}} {Γ : Sequent}
 
 private lemma em_binaryStep {A B C D : ArithmeticFormula ℕ} (hab : A ⋏ B ∈ Γ) (hcd : C ⋎ D ∈ Γ)
     (h₁ : Z∞ ⊢[α, 0] insert A (insert C (insert D Γ)))
@@ -332,8 +338,12 @@ private lemma em_quantStep {φₓ ψₓ : ArithmeticSemiformula ℕ 1} (hall : (
     Z∞ ⊢[α + 1 + 1, 0] Γ := by
   have h : ∀ n : ℕ, Z∞ ⊢[α + 1, 0] insert (φₓ/[(↑n : ArithmeticTerm ℕ)]) Γ :=
     fun n => (exI n (fam n)).insert_absorb (Finset.mem_insert_of_mem hexs)
-  refine ((allω h).insert_absorb hall).mono_ordinalBound ?_
-  exact add_le_add_left (Ordinal.iSup_le fun _ => le_rfl) 1
+  exact ((allω h).insert_absorb hall).mono_ordinalBound
+    (add_le_add_left (Ordinal.iSup_le fun _ => le_rfl) 1)
+
+end
+
+variable {k : ℕ} {φ : ArithmeticFormula ℕ} {Γ : Sequent}
 
 private lemma lemAux (hk : φ.complexity ≤ k) (hp : φ ∈ Γ) (hn : ∼φ ∈ Γ) :
     Z∞ ⊢[((2 * k : ℕ) : Ordinal.{0}), 0] Γ := by
@@ -370,13 +380,15 @@ private lemma lemAux (hk : φ.complexity ≤ k) (hp : φ ∈ Γ) (hn : ∼φ ∈
         (by simp)
       exact em_binaryStep (show (∼φ ⋏ ∼ψ) ∈ Γ by simpa using hn) hp h₁ h₂
     | hall ψ =>
-      refine em_quantStep hp (show (∃¹ ∼ψ) ∈ Γ by simpa using hn) fun n => ?_
+      apply em_quantStep hp (show (∃¹ ∼ψ) ∈ Γ by simpa using hn)
+      intro n
       have h := ih (φ := ψ/[(↑n : ArithmeticTerm ℕ)])
         (Γ := insert (∼(ψ/[(↑n : ArithmeticTerm ℕ)])) (insert (ψ/[(↑n : ArithmeticTerm ℕ)]) Γ))
         (by simpa using hk) (by simp) (by simp)
       simpa using h
     | hexs ψ =>
-      refine em_quantStep (show (∀¹ ∼ψ) ∈ Γ by simpa using hn) hp fun n => ?_
+      apply em_quantStep (show (∀¹ ∼ψ) ∈ Γ by simpa using hn) hp
+      intro n
       have h := ih (φ := ψ/[(↑n : ArithmeticTerm ℕ)])
         (Γ := insert (ψ/[(↑n : ArithmeticTerm ℕ)]) (insert (∼(ψ/[(↑n : ArithmeticTerm ℕ)])) Γ))
         (by simpa using hk) (by simp) (by simp)
@@ -430,7 +442,7 @@ private lemma of_trueAux (hk : φ.complexity ≤ k) (ht : LitTrue φ) (hmem : φ
       have h : ∀ n : ℕ, Z∞ ⊢[(k : Ordinal.{0}), 0]
           insert (ψ/[(↑n : ArithmeticTerm ℕ)]) Γ := fun n =>
         ih (by simpa using hk) (litTrue_all.mp ht n) (by simp)
-      refine ((allω h).insert_absorb hmem).mono_ordinalBound ?_
+      apply ((allω h).insert_absorb hmem).mono_ordinalBound
       rw [hcast]
       exact add_le_add_left (Ordinal.iSup_le fun _ => le_rfl) 1
     | hexs ψ =>
@@ -450,4 +462,4 @@ end OmegaCompleteness
 
 end Provable
 
-end LO.FirstOrder.Arithmetic.OmegaLogic
+end FFL.FirstOrder.Arithmetic.OmegaLogic

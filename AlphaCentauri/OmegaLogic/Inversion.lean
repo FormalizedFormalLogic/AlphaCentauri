@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.OmegaLogic.Basic
-public import AlphaCentauri.Vorspiel.Semiformula
+public import AlphaCentauri.ToFoundation.Semiformula
 
 /-!
 # Inversion for `Z_∞`
@@ -14,9 +14,9 @@ Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20]
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic.OmegaLogic
 
-variable {α : Ordinal.{0}} {c k : ℕ} {φ ψ : ArithmeticFormula ℕ}
+variable {α : Ordinal.{0}} {c : ℕ} {φ ψ : ArithmeticFormula ℕ}
   {φₓ : ArithmeticSemiformula ℕ 1} {Γ : Sequent}
 
 section Frame
@@ -34,8 +34,6 @@ private lemma inv_pull {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s : Sequent)
   intro x hx
   simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
   rcases hx with rfl | hx <;> tauto
-
-variable {b}
 
 private lemma inv_push₂ (a : ArithmeticFormula ℕ) (s : Sequent) :
     insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ)))
@@ -87,7 +85,7 @@ private lemma orInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (h
           ⟨D', le_rfl, hcr⟩).weakening ?_).mono_ordinalBound (lt_add_one _).le
         intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
     · refine (orI ?_).weakening (inv_pull₂ hhd Γ₀)
-      refine (ih hcr (by grind)).weakening ?_
+      apply (ih hcr (by grind)).weakening
       intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
   | @allω Γ₀ χ Dₓ ih =>
     refine (allω ?_).weakening (inv_pull₂ (by grind) Γ₀)
@@ -141,7 +139,7 @@ private lemma allInvAux (n : ℕ) (D : Derivation Γ) (hcr : D.cutRank ≤ (c : 
     · exact (ih₂ ((le_max_right _ _).trans hcr) (by grind)).weakening (inv_push _ ψ' _ Γ₀)
   | @orI Γ₀ φ' ψ' D' ih =>
     refine (orI ?_).weakening (inv_pull _ (by grind) Γ₀)
-    refine (ih hcr (by grind)).weakening ?_
+    apply (ih hcr (by grind)).weakening
     intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
   | @allω Γ₀ χ Dₓ ih =>
     by_cases hhd : (∀¹ χ) = (∀¹ φₓ)
@@ -242,10 +240,10 @@ private lemma andInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (
   | @orI Γ₀ φ' ψ' D' ih =>
     constructor
     · refine (orI ?_).weakening (inv_pull _ (by grind) Γ₀)
-      refine (ih hcr (by grind)).1.weakening ?_
+      apply (ih hcr (by grind)).1.weakening
       intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
     · refine (orI ?_).weakening (inv_pull _ (by grind) Γ₀)
-      refine (ih hcr (by grind)).2.weakening ?_
+      apply (ih hcr (by grind)).2.weakening
       intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
   | @allω Γ₀ χ Dₓ ih =>
     constructor
@@ -297,4 +295,4 @@ end InversionAnd
 
 end Provable
 
-end LO.FirstOrder.Arithmetic.OmegaLogic
+end FFL.FirstOrder.Arithmetic.OmegaLogic

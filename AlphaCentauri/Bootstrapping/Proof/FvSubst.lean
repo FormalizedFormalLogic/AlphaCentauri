@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Bootstrapping.Syntax
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
 # Internal substitution for free variables
@@ -13,7 +13,9 @@ free variables are left unchanged.
 
 @[expose] public section
 
-namespace LO.FirstOrder.Arithmetic.Bootstrapping
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* ISigma 1]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
@@ -33,7 +35,7 @@ def blueprint : Language.TermRec.Blueprint 1 where
   func := .mkSigma “y k f v v' w. !qqFuncDef y k f v'”
 
 /-- The realization of `TermFvSubst.blueprint` as a `Language.TermRec.Construction`, together
-with the `𝚺₁`-definability witness for each clause.
+with the $\Sigma_1$-definability witness for each clause.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (_ z) := ^#z
@@ -62,14 +64,14 @@ noncomputable def termFvSubst (w t : V) : V := construction.result L ![w] t
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 noncomputable def termFvSubstVec (k w v : V) : V := construction.resultVec L ![w] k v
 
-/-- The `𝚺₁` graph of `termFvSubst`; argument order `(y, w, t)`, `y = termFvSubst L w t`.
+/-- The $\Sigma_1$ graph of `termFvSubst`; argument order `(y, w, t)`, `y = termFvSubst L w t`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-noncomputable def termFvSubstGraph : HierarchySymbol.sigmaOne.Semisentence 3 :=
+noncomputable def termFvSubstGraph : 𝚺ᴬ₁.Semisentence 3 :=
   (blueprint.result L).rew <| Rew.subst ![#0, #2, #1]
 
-/-- The `𝚺₁` graph of `termFvSubstVec`; argument order `(y, w, k, v)`.
+/-- The $\Sigma_1$ graph of `termFvSubstVec`; argument order `(y, w, k, v)`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-noncomputable def termFvSubstVecGraph : HierarchySymbol.sigmaOne.Semisentence 4 :=
+noncomputable def termFvSubstVecGraph : 𝚺ᴬ₁.Semisentence 4 :=
   (blueprint.resultVec L).rew <| Rew.subst ![#0, #1, #3, #2]
 
 variable {L}
@@ -97,38 +99,41 @@ function symbol and recursing into the argument vector.
 
 section
 
-/-- The `𝚺₁` definability witness for `termFvSubst`, via `termFvSubstGraph`.
+variable {Γ : SigmaPiDelta} {m : ℕ}
+
+/-- The $\Sigma_1$ definability witness for `termFvSubst`, via `termFvSubstGraph`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubst.defined : HierarchySymbol.sigmaOne-Function₂ termFvSubst (V := V) L via termFvSubstGraph L :=
+instance termFvSubst.defined : 𝚺ᴬ₁-Function₂ termFvSubst (V := V) L via termFvSubstGraph L :=
   .mk fun v ↦ by
     simpa [termFvSubstGraph, termFvSubst, Matrix.constant_eq_singleton,
       Matrix.comp_vecCons'] using construction.result_defined.defined ![v 0, v 2, v 1]
 
-/-- The `𝚺₁` definability instance for `termFvSubst`, forgetting the specific witness graph.
+/-- The $\Sigma_1$ definability instance for `termFvSubst`, forgetting the specific witness graph.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubst.definable : HierarchySymbol.sigmaOne-Function₂ termFvSubst (V := V) L :=
+instance termFvSubst.definable : 𝚺ᴬ₁-Function₂ termFvSubst (V := V) L :=
   termFvSubst.defined.to_definable
 
-/-- `termFvSubst` is `Γ`-definable at every level `m + 1` above `𝚺₁`.
+/-- `termFvSubst` is `Γ`-definable at every level `m + 1` above $\Sigma_1$.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubst.definable' : Γ-[m + 1]-Function₂ termFvSubst (V := V) L :=
+instance termFvSubst.definable' : Γᴬ-[m + 1]-Function₂ termFvSubst (V := V) L :=
   termFvSubst.definable.of_sigmaOne
 
-/-- The `𝚺₁` definability witness for `termFvSubstVec`, via `termFvSubstVecGraph`.
+/-- The $\Sigma_1$ definability witness for `termFvSubstVec`, via `termFvSubstVecGraph`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 instance termFvSubstVec.defined :
-    HierarchySymbol.sigmaOne-Function₃ termFvSubstVec (V := V) L via termFvSubstVecGraph L := .mk fun v ↦ by
+    𝚺ᴬ₁-Function₃ termFvSubstVec (V := V) L via termFvSubstVecGraph L := .mk fun v ↦ by
   simpa [termFvSubstVecGraph, termFvSubstVec, Matrix.constant_eq_singleton,
     Matrix.comp_vecCons'] using construction.resultVec_defined.defined ![v 0, v 1, v 3, v 2]
 
-/-- The `𝚺₁` definability instance for `termFvSubstVec`, forgetting the specific witness graph.
+/-- The $\Sigma_1$ definability instance for `termFvSubstVec`, forgetting the specific witness
+graph.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubstVec.definable : HierarchySymbol.sigmaOne-Function₃ termFvSubstVec (V := V) L :=
+instance termFvSubstVec.definable : 𝚺ᴬ₁-Function₃ termFvSubstVec (V := V) L :=
   termFvSubstVec.defined.to_definable
 
-/-- `termFvSubstVec` is `Γ`-definable at every level `m + 1` above `𝚺₁`.
+/-- `termFvSubstVec` is `Γ`-definable at every level `m + 1` above $\Sigma_1$.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubstVec.definable' : Γ-[m + 1]-Function₃ termFvSubstVec (V := V) L :=
+instance termFvSubstVec.definable' : Γᴬ-[m + 1]-Function₃ termFvSubstVec (V := V) L :=
   termFvSubstVec.definable.of_sigmaOne
 
 end
@@ -162,7 +167,7 @@ semiterm.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 @[simp] lemma IsSemiterm.termFvSubst {n w t : V} (hw : IsSemitermVec L (len w) n w)
     (ht : IsSemiterm L n t) : IsSemiterm L n (termFvSubst L w t) := by
-  apply IsSemiterm.induction SigmaSymbol.sigma ?_ ?_ ?_ ?_ t ht
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz
     simp [hz]
@@ -215,7 +220,8 @@ namespace FvSubst
 pass through unchanged, and the substitution vector `w` is left untouched when crossing a
 quantifier.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] : UformulaRec1.Blueprint where
+noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] :
+    UformulaRec1.Blueprint where
   rel := .mkSigma
     “y w k R v. ∃ v', !(termFvSubstVecGraph L) v' k w v ∧ !qqRelDef y k R v'”
   nrel := .mkSigma
@@ -230,7 +236,7 @@ noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] : Ufor
   exsChanges := .mkSigma “w' w. w' = w”
 
 /-- The realization of `FvSubst.blueprint` as a `UformulaRec1.Construction`, together with the
-`𝚺₁`-definability witness for each clause.
+$\Sigma_1$-definability witness for each clause.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 noncomputable def construction (L : Language) [L.Encodable] [L.LORDefinable] :
     UformulaRec1.Construction V (blueprint L) where
@@ -267,26 +273,28 @@ and out-of-range free variables unchanged.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 noncomputable def fvSubst (w p : V) : V := (FvSubst.construction L).result L w p
 
-/-- The `𝚺₁` graph of `fvSubst`; argument order `(y, w, p)`, `y = fvSubst L w p`.
+/-- The $\Sigma_1$ graph of `fvSubst`; argument order `(y, w, p)`, `y = fvSubst L w p`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-noncomputable def fvSubstGraph : HierarchySymbol.sigmaOne.Semisentence 3 := (blueprint L).result L
+noncomputable def fvSubstGraph : 𝚺ᴬ₁.Semisentence 3 := (blueprint L).result L
 
 variable {L}
 
 section
 
-/-- The `𝚺₁` definability witness for `fvSubst`, via `fvSubstGraph`.
+variable {Γ : SigmaPiDelta} {m : ℕ}
+
+/-- The $\Sigma_1$ definability witness for `fvSubst`, via `fvSubstGraph`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance fvSubst.defined : HierarchySymbol.sigmaOne-Function₂[V] fvSubst L via fvSubstGraph L :=
+instance fvSubst.defined : 𝚺ᴬ₁-Function₂[V] fvSubst L via fvSubstGraph L :=
   (FvSubst.construction L).result_defined
 
-/-- The `𝚺₁` definability instance for `fvSubst`, forgetting the specific witness graph.
+/-- The $\Sigma_1$ definability instance for `fvSubst`, forgetting the specific witness graph.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance fvSubst.definable : HierarchySymbol.sigmaOne-Function₂[V] fvSubst L := fvSubst.defined.to_definable
+instance fvSubst.definable : 𝚺ᴬ₁-Function₂[V] fvSubst L := fvSubst.defined.to_definable
 
-/-- `fvSubst` is `Γ`-definable at every level `m + 1` above `𝚺₁`.
+/-- `fvSubst` is `Γ`-definable at every level `m + 1` above $\Sigma_1$.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance fvSubst.definable' : Γ-[m + 1]-Function₂[V] fvSubst L :=
+instance fvSubst.definable' : Γᴬ-[m + 1]-Function₂[V] fvSubst L :=
   fvSubst.definable.of_sigmaOne
 
 end
@@ -351,7 +359,7 @@ semiformula.
     (hp : IsSemiformula L n p) : IsSemiformula L n (fvSubst L w p) := by
   apply IsSemiformula.pi1_structural_induction
     (P := fun n p ↦ ∀ w, IsSemitermVec L (len w) n w →
-      IsSemiformula L n (LO.FirstOrder.Arithmetic.Bootstrapping.fvSubst L w p))
+      IsSemiformula L n (FFL.FirstOrder.Arithmetic.Bootstrapping.fvSubst L w p))
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp w hw
   · definability
   · intro n k R v hR hv w hw
@@ -420,7 +428,7 @@ lemma termShift_termFvSubst {n w t : V}
     (hw : IsSemitermVec L (len w) n w) (ht : IsSemiterm L n t) :
     termShift L (termFvSubst L w t) =
       termFvSubst L (^&0 ∷ termShiftVec L (len w) w) (termShift L t) := by
-  apply IsSemiterm.induction SigmaSymbol.sigma ?_ ?_ ?_ ?_ t ht
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z _
     simp
@@ -515,7 +523,7 @@ lemma shift_fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)
 none to replace.
 - No source; a routine technical bridge. -/
 lemma termSubst_zero {v t : V} (ht : IsSemiterm L 0 t) : termSubst L v t = t := by
-  apply IsSemiterm.induction SigmaSymbol.sigma ?_ ?_ ?_ ?_ t ht
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz
     simp at hz
@@ -533,7 +541,7 @@ lemma termSubst_zero {v t : V} (ht : IsSemiterm L 0 t) : termSubst L v t = t := 
 shift.
 - No source; a routine technical bridge. -/
 lemma termBShift_zero {t : V} (ht : IsSemiterm L 0 t) : termBShift L t = t := by
-  apply IsSemiterm.induction SigmaSymbol.sigma ?_ ?_ ?_ ?_ t ht
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz
     simp at hz
@@ -554,13 +562,13 @@ lemma termFvSubst_termBShift_closed {n w t : V}
     (hw : IsSemitermVec L (len w) 0 w) (ht : IsSemiterm L n t) :
     termFvSubst L w (termBShift L t) = termBShift L (termFvSubst L w t) := by
   have hw' : IsSemitermVec L (len w) n w := hw.weaken (by simp)
-  apply IsSemiterm.induction SigmaSymbol.sigma ?_ ?_ ?_ ?_ t ht
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z _
     simp
   · intro x
     by_cases hx : x < len w
-    · rw [termBShift_fvar, termFvSubst_fvar, if_pos hx]
+    · rw [termBShift_fvar, termFvSubst_fvar, ite_eq_left hx]
       exact (termBShift_zero (hw.nth hx)).symm
     · simp [termFvSubst_fvar, termBShift_fvar, hx]
   · intro k f ts hf hts ih
@@ -589,14 +597,14 @@ lemma termFvSubst_termSubst {n m w v t : V}
     termFvSubst L w (termSubst L v t) =
       termSubst L (termFvSubstVec L n w v) (termFvSubst L w t) := by
   have hw' : IsSemitermVec L (len w) n w := hw.weaken (by simp)
-  apply IsSemiterm.induction SigmaSymbol.sigma ?_ ?_ ?_ ?_ t ht
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz
     rw [termSubst_bvar, termFvSubst_bvar, termSubst_bvar,
       nth_termFvSubstVec hv.isUTerm hz]
   · intro x
     by_cases hx : x < len w
-    · rw [termFvSubst_fvar, termSubst_fvar, termFvSubst_fvar, if_pos hx]
+    · rw [termFvSubst_fvar, termSubst_fvar, termFvSubst_fvar, ite_eq_left hx]
       exact (termSubst_zero (v := termFvSubstVec L n w v) (hw.nth hx)).symm
     · simp [termFvSubst_fvar, termSubst_fvar, hx]
   · intro k f ts hf hts ih
@@ -645,7 +653,7 @@ lemma termFvSubstVec_qVec_closed {n m w v : V}
 the coded set `s`.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 noncomputable def fvSubstImage (w s : V) : V := by
-  letI : HierarchySymbol.sigmaOne-Function₁ (fvSubst L w) := by definability
+  letI : 𝚺ᴬ₁-Function₁ (fvSubst L w) := by definability
   exact hfsImage (fvSubst L w) s
 
 /-- A formula code belongs to `fvSubstImage w s` iff it is `fvSubst L w q` for some formula code
@@ -653,7 +661,7 @@ noncomputable def fvSubstImage (w s : V) : V := by
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
 lemma mem_fvSubstImage_iff {w s p : V} :
     p ∈ fvSubstImage (L := L) w s ↔ ∃ q ∈ s, p = fvSubst L w q := by
-  let _ : HierarchySymbol.sigmaOne-Function₁ (fvSubst L w) := by definability
+  let _ : 𝚺ᴬ₁-Function₁ (fvSubst L w) := by definability
   exact mem_hfsImage_iff
 
 /-- Free-variable substitution by a vector of closed terms carries a coded formula set to a coded
@@ -759,4 +767,4 @@ lemma fvSubst_substs1 {n w t p : V}
       ht.isUTerm (by simp))
   rw [hvec]
 
-end LO.FirstOrder.Arithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic.Bootstrapping

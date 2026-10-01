@@ -42,7 +42,9 @@ public import AlphaCentauri.Reflection.ISigma
 public import AlphaCentauri.Reflection.IteratedConsistency
 public import AlphaCentauri.Reflection.Peano
 public import AlphaCentauri.Reflection.RelativizedProvability
+public import AlphaCentauri.Reflection.Sigma1Reflection
 public import AlphaCentauri.Reflection.StandardProvability
+public import AlphaCentauri.Reflection.TuringOmega
 public import AlphaCentauri.Reflection.Unboundedness
 public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.DeltaInduction
@@ -55,6 +57,7 @@ public import AlphaCentauri.Tactic.Primrec
 public import AlphaCentauri.Tactic.PrimrecInit
 public import AlphaCentauri.ToFoundation.Absoluteness
 public import AlphaCentauri.ToFoundation.BooleanCombination
+public import AlphaCentauri.ToFoundation.Coding
 public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension

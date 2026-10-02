@@ -4,17 +4,17 @@ public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Primrec
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
 public import Foundation.FirstOrder.Tarski.Basic
 
 /-!
 # Bounded approximation and witnessing
 
 `EvalBound e ε b φ` says that `φ` holds under `e` and `ε` with every leading existential
-witnessed below `b`, which approximates a strict $\Sigma_1$ formula by a $\Delta_0$ one. The
-approximation implies `φ`, it grows with the bound, and a true strict $\Sigma_1$ formula has one.
+witnessed below `b`, which approximates a $\Sigma_1$-block formula by a $\Delta_0$ one. The
+approximation implies `φ`, it grows with the bound, and a true $\Sigma_1$-block formula has one.
 
-From an anchored `LKI[C]` derivation of a sequent of strict $\Sigma_1$ and strict $\Pi_1$
+A $\Sigma_1$-block (resp. $\Pi_1$-block) formula is a `ℬ[<, ℒₒᵣ].PrenexBlock 𝚺` (resp. `𝚷`) one.
+From an anchored `LKI[C]` derivation of a sequent of $\Sigma_1$-block and $\Pi_1$-block
 formulas one reads a primitive recursive bound on the witnesses: if every non-$\Sigma_1$ formula
 of the sequent is refuted below `b`, then some $\Sigma_1$ formula of the sequent holds below
 `h l b`. The induction rule contributes the primitive recursion, every other rule a `max`.
@@ -27,7 +27,7 @@ of the sequent is refuted below `b`, then some $\Sigma_1$ formula of the sequent
 
 namespace FFL.FirstOrder.Arithmetic
 
-/-! ## Bounded approximation of strict $\Sigma_1$ formulas -/
+/-! ## Bounded approximation of $\Sigma_1$-block formulas -/
 
 section
 variable {ξ : Type*} {n : ℕ}
@@ -45,13 +45,13 @@ private def bound {n : ℕ} (u : ArithmeticSemiterm ξ n) :
     (φ : ArithmeticSemiformula ξ (n + 1)) :
     bound u (∃¹ φ) = ∃¹[“#0 < !!(Rew.bShift u)”] bound (Rew.bShift u) φ := rfl
 
-/-- The approximation of a strict $\Sigma_1$ formula is $\Delta_0$. -/
-private lemma bounded_bound {n : ℕ} {φ : ArithmeticSemiformula ξ n} (h : StrictHierarchy 𝚺 1 φ)
+/-- The approximation of a $\Sigma_1$-block formula is $\Delta_0$. -/
+private lemma bounded_bound {n : ℕ} {φ : ArithmeticSemiformula ξ n} (h : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ)
     (u : ArithmeticSemiterm ξ n) : ℬ[<, ℒₒᵣ].Closure (bound u φ) := by
   induction φ using Semiformula.rec' with
   | hexs φ ih =>
-    exact .arithmetic_bexs (Rew.positive_iff.mpr ⟨u, rfl⟩) (ih (StrictHierarchy.of_exs h) _)
-  | _ => cases h with | ofAlt h => exact StrictHierarchy.zero_iff_bounded.mp h
+    exact .arithmetic_bexs (Rew.positive_iff.mpr ⟨u, rfl⟩) (ih (Bounding.PrenexBlock.of_exs h) _)
+  | _ => cases h with | bounded h => exact h
 
 /-! ## The approximation, read semantically -/
 
@@ -126,13 +126,13 @@ lemma evalBound_mono {n : ℕ} {φ : ArithmeticSemiformula ξ n} {b b' : ℕ} (h
   | hexs φ ih => grind
   | _ => exact h
 
-/-- A true strict $\Sigma_1$ formula has an approximation. -/
-lemma exists_evalBound {φ : ArithmeticSemiformula ξ n} (hφ : StrictHierarchy 𝚺 1 φ)
+/-- A true $\Sigma_1$-block formula has an approximation. -/
+lemma exists_evalBound {φ : ArithmeticSemiformula ξ n} (hφ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ)
     {e : Fin n → ℕ} {ε : ξ → ℕ} (h : Semiformula.Eval e ε φ) : ∃ b, EvalBound e ε b φ := by
   induction φ using Semiformula.rec' with
   | hexs φ ih =>
     obtain ⟨x, hx⟩ : ∃ x, Semiformula.Eval (x :> e) ε φ := by simpa using h
-    obtain ⟨b, hb⟩ := ih (StrictHierarchy.of_exs hφ) hx
+    obtain ⟨b, hb⟩ := ih (Bounding.PrenexBlock.of_exs hφ) hx
     exact ⟨max (x + 1) b, x, lt_of_lt_of_le (Nat.lt_succ_self x) (le_max_left _ _),
       evalBound_mono (le_max_right _ _) hb⟩
   | _ => exact ⟨0, h⟩
@@ -196,9 +196,9 @@ end
 section
 variable {φ : ArithmeticProposition} {b : ℕ} {ε : ℕ → ℕ}
 
-/-- A true strict $\Sigma_1$ sentence has an approximation that does not depend on the
+/-- A true $\Sigma_1$-block sentence has an approximation that does not depend on the
 assignment. -/
-lemma exists_evalBound_of_closed (hφ : StrictHierarchy 𝚺 1 φ) (hfv : ∀ x, ¬φ.FVar? x)
+lemma exists_evalBound_of_closed (hφ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ) (hfv : ∀ x, ¬φ.FVar? x)
     (h : ∀ ε : ℕ → ℕ, φ.Evalf ε) : ∃ c, ∀ ε, EvalBound ![] ε c φ := by
   obtain ⟨c, hc⟩ := exists_evalBound hφ (h fun _ ↦ 0)
   exact ⟨c, fun ε ↦ (evalBound_congr_fvar fun x hx ↦ absurd hx (hfv x)).mp hc⟩
@@ -216,10 +216,10 @@ private lemma evalBound_iff_eval_bound_bShift :
 /-- The approximation is a primitive recursive predicate of the bound and the assignment.
 
 - [HP98, Theorem 0.35] -/
-lemma primrecRel_evalBound (hφ : StrictHierarchy 𝚺 1 φ) :
+lemma primrecRel_evalBound (hφ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ) :
     PrimrecRel fun (b : ℕ) (l : List ℕ) ↦ EvalBound ![] (l.getD · 0) b φ := by
   set ψ := bound #0 (Rew.bShift ▹ φ) with hψ
-  have hb : ℬ[<, ℒₒᵣ].Closure ψ := bounded_bound (StrictHierarchy.rew _ hφ) _
+  have hb : ℬ[<, ℒₒᵣ].Closure ψ := bounded_bound (Bounding.PrenexBlock.rew _ hφ) _
   have hσ : ℬ[<, ℒₒᵣ].Closure (ψ.toSemisentence ![#0]) := Bounding.Closure.rew _ hb
   have key : ∀ (b : ℕ) (l : List ℕ), EvalBound ![] (l.getD · 0) b φ ↔
       ℕ ⊧/(b :> fun i : Fin ψ.fvSup ↦ l.getD i 0) (ψ.toSemisentence ![#0]) := by
@@ -238,7 +238,7 @@ lemma primrecRel_evalBound (hφ : StrictHierarchy 𝚺 1 φ) :
 /-- `primrecRel_evalBound` in the form the `primrec` tactic reads off a goal: the bound and the
 assignment are themselves primitive recursive in a common argument. -/
 @[primrec]
-lemma primrecPred_evalBound {α : Type*} [Primcodable α] (hφ : StrictHierarchy 𝚺 1 φ)
+lemma primrecPred_evalBound {α : Type*} [Primcodable α] (hφ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ)
     {b : α → ℕ} (hb : Primrec b) {l : α → List ℕ} (hl : Primrec l) :
     PrimrecPred fun a ↦ EvalBound ![] ((l a).getD · 0) (b a) φ :=
   PrimrecRel.comp (primrecRel_evalBound hφ) hb hl
@@ -260,8 +260,8 @@ holds below `f l b`.
 - [Bus98A, Section 3.1.3] -/
 def Witnesses (Γ : LK.Sequent ℒₒᵣ) (f : List ℕ → ℕ → ℕ) : Prop :=
   ∀ (l : List ℕ) (b : ℕ),
-      (∀ ψ ∈ Γ, ¬StrictHierarchy 𝚺 1 ψ → EvalBound ![] (l.getD · 0) b (∼ψ)) →
-    ∃ φ ∈ Γ, StrictHierarchy 𝚺 1 φ ∧ EvalBound ![] (l.getD · 0) (f l b) φ
+      (∀ ψ ∈ Γ, ¬ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 ψ → EvalBound ![] (l.getD · 0) b (∼ψ)) →
+    ∃ φ ∈ Γ, ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ ∧ EvalBound ![] (l.getD · 0) (f l b) φ
 
 namespace Witnesses
 
@@ -299,7 +299,7 @@ lemma exists_witnesses_axm {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) 
   have htrue : ∀ ε : ℕ → ℕ, (Rewriting.emb σ).Evalf ε := by
     intro ε
     simpa [models_iff] using Theory.models (M := ℕ) _ hσ
-  by_cases hs : StrictHierarchy 𝚺 1 (Rewriting.emb σ : ArithmeticProposition)
+  by_cases hs : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (Rewriting.emb σ : ArithmeticProposition)
   · obtain ⟨c, hc⟩ := exists_evalBound_of_closed hs (by simp [Semiformula.FVar?]) htrue
     exact ⟨c, fun l _ _ ↦ ⟨_, by simp, hs, hc _⟩⟩
   · refine ⟨0, fun l b hb ↦ absurd (htrue (l.getD · 0)) ?_⟩
@@ -337,13 +337,13 @@ lemma witnesses_and (hd : ℬ[<, ℒₒᵣ].Closure (φ ⋏ ψ)) (H₁ : Witness
     (H₂ : Witnesses (Γ + ⦃ψ⦄) g) : Witnesses (Γ + ⦃φ ⋏ ψ⦄) fun l b ↦ max (f l b) (g l b) := by
   obtain ⟨hφ, hψ⟩ := Bounding.Closure.and_iff.mp hd
   intro l b hb
-  have hb₁ : ∀ χ ∈ Γ + ⦃φ⦄, ¬StrictHierarchy 𝚺 1 χ →
+  have hb₁ : ∀ χ ∈ Γ + ⦃φ⦄, ¬ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 χ →
       EvalBound ![] (l.getD · 0) b (∼χ) := fun χ hχ hnσ ↦ by
     rcases Multiset.mem_add.mp hχ with hχ | hχ
     · exact hb χ (by simp [hχ]) hnσ
     · rcases show χ = φ by simpa using hχ
       grind
-  have hb₂ : ∀ χ ∈ Γ + ⦃ψ⦄, ¬StrictHierarchy 𝚺 1 χ →
+  have hb₂ : ∀ χ ∈ Γ + ⦃ψ⦄, ¬ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 χ →
       EvalBound ![] (l.getD · 0) b (∼χ) := fun χ hχ hnσ ↦ by
     rcases Multiset.mem_add.mp hχ with hχ | hχ
     · exact hb χ (by simp [hχ]) hnσ
@@ -363,9 +363,9 @@ lemma witnesses_and (hd : ℬ[<, ℒₒᵣ].Closure (φ ⋏ ψ)) (H₁ : Witness
 /-! ## The existential rule -/
 
 lemma witnesses_exs {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
-    (hσ : StrictHierarchy 𝚺 1 (∃¹ ξ)) (H : Witnesses (Γ + ⦃ξ/[t]⦄) f) :
+    (hσ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (∃¹ ξ)) (H : Witnesses (Γ + ⦃ξ/[t]⦄) f) :
     Witnesses (Γ + ⦃∃¹ ξ⦄) fun l b ↦ max (f l b) (Semiterm.val ![] (l.getD · 0) t + 1) := by
-  have hsub : StrictHierarchy 𝚺 1 (ξ/[t]) := by grind
+  have hsub : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (ξ/[t]) := (Bounding.PrenexBlock.of_exs hσ).rew _
   intro l b hb
   obtain ⟨χ, hχ, hσχ, hbnd⟩ := H l b fun χ hχ hnσ ↦ by
     rcases Multiset.mem_add.mp hχ with hχ | hχ
@@ -393,7 +393,7 @@ lemma witnesses_exs {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
 
 /-! ## The cut rule -/
 
-private lemma witnesses_cut_sigma {χ : ArithmeticProposition} (hσ : StrictHierarchy 𝚺 1 χ)
+private lemma witnesses_cut_sigma {χ : ArithmeticProposition} (hσ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 χ)
     (H₁ : Witnesses (Γ + ⦃χ⦄) f) (H₂ : Witnesses (Δ + ⦃∼χ⦄) g) :
     Witnesses (Γ + Δ) fun l b ↦ max (f l b) (g l (max b (f l b))) := by
   intro l b hb
@@ -416,14 +416,14 @@ private lemma witnesses_cut_sigma {χ : ArithmeticProposition} (hσ : StrictHier
   exact absurd (eval_of_evalBound hbnd₁) (by simpa using eval_of_evalBound hbnd₂)
 
 lemma witnesses_cut {χ : ArithmeticProposition}
-    (hχ : StrictHierarchy 𝚺 1 χ ∨ StrictHierarchy 𝚷 1 χ)
+    (hχ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 χ ∨ ℬ[<, ℒₒᵣ].PrenexBlock 𝚷 χ)
     (H₁ : Witnesses (Γ + ⦃χ⦄) f) (H₂ : Witnesses (Δ + ⦃∼χ⦄) g) :
     Witnesses (Γ + Δ) fun l b ↦
       max (max (f l b) (g l (max b (f l b)))) (max (g l b) (f l (max b (g l b)))) := by
   rcases hχ with hσ | hπ
   · exact (witnesses_cut_sigma hσ H₁ H₂).mono fun _ _ ↦ le_max_left _ _
   · have H₁' : Witnesses (Γ + ⦃∼∼χ⦄) f := by simpa using H₁
-    exact ((witnesses_cut_sigma (StrictHierarchy.neg hπ) H₂ H₁').cast (by abel)).mono
+    exact ((witnesses_cut_sigma (Bounding.PrenexBlock.neg hπ) H₂ H₁').cast (by abel)).mono
       fun _ _ ↦ le_max_right _ _
 
 /-! ## The universal rule -/
@@ -500,7 +500,7 @@ private lemma evalBound_free {χ : ArithmeticSemiformula ℕ 1} {c x : ℕ} {l :
 
 /-- The universal rule when the principal formula is not $\Sigma_1$: the hypothesis refutes it
 below `b`, which bounds the counterexample. -/
-lemma witnesses_all_pi {ξ : ArithmeticSemiformula ℕ 1} (hnσ : ¬StrictHierarchy 𝚺 1 (∀¹ ξ))
+lemma witnesses_all_pi {ξ : ArithmeticSemiformula ℕ 1} (hnσ : ¬ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (∀¹ ξ))
     (H : Witnesses (Γ⁺ + ⦃Rewriting.free ξ⦄) f) :
     Witnesses (Γ + ⦃∀¹ ξ⦄) fun l b ↦ maxBelow (fun x ↦ f (x :: l) b) b := by
   intro l b hb
@@ -509,7 +509,7 @@ lemma witnesses_all_pi {ξ : ArithmeticSemiformula ℕ 1} (hnσ : ¬StrictHierar
   obtain ⟨χ, hχ, hσχ, hbnd⟩ := H (x₀ :: l) b fun ψ hψ hnσψ ↦ by
     rcases Multiset.mem_add.mp hψ with hψ | hψ
     · obtain ⟨ψ', hψ', rfl⟩ := Multiset.mem_map.mp hψ
-      have : ¬StrictHierarchy 𝚺 1 ψ' := by grind
+      have : ¬ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 ψ' := by grind
       simpa using evalBound_shift.mpr (hb ψ' (by simp [hψ']) this)
     · rcases show ψ = Rewriting.free ξ by simpa using hψ
       simpa using evalBound_free.mpr hrefute
@@ -534,7 +534,7 @@ lemma witnesses_all_bounded {ψ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTe
     Bounding.Closure.imp_iff.mpr ⟨.rel _ _, hψ⟩
   intro l b hb
   by_cases hex : ∃ x < Semiterm.val ![] (l.getD · 0) t,
-      ∃ γ ∈ Γ, StrictHierarchy 𝚺 1 γ ∧ EvalBound ![] (l.getD · 0) (f (x :: l) b) γ
+      ∃ γ ∈ Γ, ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 γ ∧ EvalBound ![] (l.getD · 0) (f (x :: l) b) γ
   · obtain ⟨x, hx, γ, hγ, hσγ, hbnd⟩ := hex
     exact ⟨γ, by simp [hγ], hσγ, evalBound_mono (le_maxBelow _ hx) hbnd⟩
   push Not at hex
@@ -544,10 +544,10 @@ lemma witnesses_all_bounded {ψ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTe
     obtain ⟨χ, hχ, hσχ, hbnd⟩ := H (x :: l) b fun ρ hρ hnσρ ↦ by
       rcases Multiset.mem_add.mp hρ with hρ | hρ
       · obtain ⟨ρ', hρ', rfl⟩ := Multiset.mem_map.mp hρ
-        have : ¬StrictHierarchy 𝚺 1 ρ' := by grind
+        have : ¬ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 ρ' := by grind
         simpa using evalBound_shift.mpr (hb ρ' (by simp [hρ']) this)
       · rcases show ρ = Rewriting.free (“#0 < !!(Rew.bShift t)” 🡒 ψ) by simpa using hρ
-        exact absurd (StrictHierarchy.of_bounded (Bounding.Closure.rew _ hbody)) hnσρ
+        exact absurd (Bounding.PrenexBlock.bounded (Bounding.Closure.rew _ hbody)) hnσρ
     rcases Multiset.mem_add.mp hχ with hm | hm
     · obtain ⟨χ', hχ', rfl⟩ := Multiset.mem_map.mp hm
       exact absurd (evalBound_shift.mp hbnd)
@@ -578,7 +578,7 @@ lemma le_indBound (f : List ℕ → ℕ → ℕ) (l : List ℕ) (b : ℕ) : ∀ 
 /-- The induction rule: the bound is iterated along the term. `B` supplies the standard bound of
 the induction formula, which is called for only when that formula is $\Delta_0$. -/
 lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} {B : List ℕ → ℕ}
-    (hξ : StrictHierarchy 𝚺 1 ξ)
+    (hξ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 ξ)
     (hB : ℬ[<, ℒₒᵣ].Closure ξ → ∀ l : List ℕ,
       (Semiformula.Eval ![0] (l.getD · 0) ξ → EvalBound ![0] (l.getD · 0) (B l) ξ) ∧
         (Semiformula.Eval ![0] (l.getD · 0) (∼ξ) → EvalBound ![0] (l.getD · 0) (B l) (∼ξ)))
@@ -590,13 +590,14 @@ lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} 
   have hbc : ∀ n, b ≤ c n := fun n ↦ le_trans (le_max_left _ _) (le_indBound _ _ _ n)
   have key : ∀ n : ℕ,
       (∃ φ ∈ Γ + ⦃∼(ξ/[‘0’]), ξ/[t]⦄,
-        StrictHierarchy 𝚺 1 φ ∧ EvalBound ![] (l.getD · 0) (c n) φ) ∨
+        ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ ∧ EvalBound ![] (l.getD · 0) (c n) φ) ∨
       EvalBound ![n] (l.getD · 0) (c n) ξ := by
     intro n
     induction n with
     | zero =>
-      by_cases hz : StrictHierarchy 𝚺 1 (∼(ξ/[‘0’]) : ArithmeticProposition)
-      · have hπξ : StrictHierarchy 𝚷 1 ξ := by simpa [Rewriting.subst] using hz
+      by_cases hz : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (∼(ξ/[‘0’]) : ArithmeticProposition)
+      · have hπξ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚷 ξ := by
+          simpa [Rewriting.subst] using (Bounding.PrenexBlock.neg_iff (Γ := 𝚷)).mp hz
         have hΔ : ℬ[<, ℒₒᵣ].Closure ξ := by grind
         have hBc : B l ≤ c 0 := le_trans (le_max_right _ _) (le_indBound _ _ _ 0)
         by_cases hev : Semiformula.Eval ![0] (l.getD · 0) ξ
@@ -617,7 +618,7 @@ lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} 
       obtain ⟨χ, hχ, hσχ, hbndχ⟩ := H (n :: l) (c n) fun ρ hρ hnσρ ↦ by
         rcases Multiset.mem_add.mp hρ with hρ | hρ
         · obtain ⟨ρ', hρ', rfl⟩ := Multiset.mem_map.mp hρ
-          have hnσ' : ¬StrictHierarchy 𝚺 1 ρ' := by grind
+          have hnσ' : ¬ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 ρ' := by grind
           simpa using evalBound_shift.mpr (evalBound_mono (hbc n) (hb ρ' (by simp [hρ']) hnσ'))
         · rcases show ρ = ∼(Rewriting.free ξ) ∨ ρ = (Rewriting.shift ξ)/[‘&0 + 1’] by
             simpa using hρ with rfl | rfl
@@ -662,21 +663,13 @@ lemma primrec_indBound {α : Type*} [Primcodable α] {f : List ℕ → ℕ → �
 
 /-! ## The witnessing lemma -/
 
-private lemma bounded_of_strictOne {b : Polarity}
-    (h : StrictHierarchy b 1 φ) (hne : ∀ ψ, φ ≠ ∃¹ ψ) (hna : ∀ ψ, φ ≠ ∀¹ ψ) :
-    ℬ[<, ℒₒᵣ].Closure φ := by
-  cases h with
-  | ofAlt h => grind
-  | exs => exact absurd rfl (hne _)
-  | all => exact absurd rfl (hna _)
-
-/-- Witnessing: from an anchored derivation of a sequent of strict $\Sigma_1$ and strict $\Pi_1$
+/-- Witnessing: from an anchored derivation of a sequent of $\Sigma_1$-block and $\Pi_1$-block
 formulas one reads a primitive recursive bound on the witnesses.
 
 - [Bus98A, Section 3.1.3] -/
-theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
-    (hd : Derivation.Anchored (fun φ ↦ StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ) d)
-    (hΓ : ∀ φ ∈ Γ, StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ) :
+theorem exists_witnesses (d : ⊢ᴸᴷᴵ[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1]! Γ)
+    (hd : Derivation.Anchored (fun φ ↦ ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ ∨ ℬ[<, ℒₒᵣ].PrenexBlock 𝚷 φ) d)
+    (hΓ : ∀ φ ∈ Γ, ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ ∨ ℬ[<, ℒₒᵣ].PrenexBlock 𝚷 φ) :
     ∃ f : List ℕ → ℕ → ℕ, Primrec₂ f ∧ Witnesses Γ f := by
   induction d with
   | axm hσ =>
@@ -697,7 +690,7 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
     rename_i φ ψ
     have hd0 : ℬ[<, ℒₒᵣ].Closure (φ ⋎ ψ) := by
       rcases hΓ (φ ⋎ ψ) (by simp) with h | h <;>
-        exact bounded_of_strictOne h (by simp) (by simp)
+        exact h.bounded_of_ne (by simp) (by simp)
     obtain ⟨hφ, hψ⟩ := Bounding.Closure.or_iff.mp hd0
     obtain ⟨f, hf, H⟩ := ih hd fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
@@ -708,7 +701,7 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
     rename_i φ ψ
     have hd0 : ℬ[<, ℒₒᵣ].Closure (φ ⋏ ψ) := by
       rcases hΓ (φ ⋏ ψ) (by simp) with h | h <;>
-        exact bounded_of_strictOne h (by simp) (by simp)
+        exact h.bounded_of_ne (by simp) (by simp)
     obtain ⟨hφ, hψ⟩ := Bounding.Closure.and_iff.mp hd0
     obtain ⟨f₁, hf₁, H₁⟩ := ih₁ hd.1 fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
@@ -733,16 +726,16 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
       · exact hΓ ρ (by simp [hρ])
       · rcases show ρ = ∼χ by simpa using hρ
         rcases hd.1 with h | h
-        · exact Or.inr (StrictHierarchy.neg_iff.mpr h)
-        · exact Or.inl (StrictHierarchy.neg_iff.mpr h)
+        · exact Or.inr (Bounding.PrenexBlock.neg_iff.mpr h)
+        · exact Or.inl (Bounding.PrenexBlock.neg_iff.mpr h)
     exact ⟨_, by primrec, witnesses_cut hd.1 H₁ H₂⟩
   | exs d ih =>
     rename_i ξ t
-    have hσ : StrictHierarchy 𝚺 1 (∃¹ ξ) := by
+    have hσ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (∃¹ ξ) := by
       rcases hΓ (∃¹ ξ) (by simp) with h | h
       · exact h
       · cases h with
-        | ofAlt h => grind
+        | bounded h => exact .bounded h
     obtain ⟨f, hf, H⟩ := ih hd fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
       · exact hΓ χ (by simp [hχ])
@@ -751,9 +744,9 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
     exact ⟨_, by primrec, witnesses_exs hσ H⟩
   | all d ih =>
     rename_i ξ
-    by_cases hσ : StrictHierarchy 𝚺 1 (∀¹ ξ)
+    by_cases hσ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (∀¹ ξ)
     · have hd0 : ℬ[<, ℒₒᵣ].Closure (∀¹ ξ) := by
-        cases hσ with | ofAlt h => grind
+        cases hσ with | bounded h => exact h
       obtain ⟨f, hf, H⟩ := ih hd fun χ hχ ↦ by
         rcases Multiset.mem_add.mp hχ with hχ | hχ
         · obtain ⟨χ', hχ', rfl⟩ := Multiset.mem_map.mp hχ
@@ -774,10 +767,11 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
           rcases hΓ (∀¹ ξ) (by simp) with h | h
           · exact absurd h hσ
           · cases h with
-            | ofAlt h => grind
-            | all h => exact Or.inr (StrictHierarchy.rew _ h)
+            | bounded h => exact absurd (.bounded h) hσ
+            | all h => exact Or.inr (Bounding.PrenexBlock.rew _ h)
       exact ⟨_, by primrec, witnesses_all_pi hσ H⟩
   | ind ξ hξ t d ih =>
+    replace hξ := hξ.prenexBlock
     obtain ⟨f, hf, H⟩ := ih hd fun χ hχ ↦ by
       rcases Multiset.mem_add.mp hχ with hχ | hχ
       · obtain ⟨χ', hχ', rfl⟩ := Multiset.mem_map.mp hχ
@@ -786,7 +780,7 @@ theorem exists_witnesses (d : ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1]! Γ)
         · grind
       · rcases show χ = ∼(Rewriting.free ξ) ∨ χ = (Rewriting.shift ξ)/[‘&0 + 1’] by
           simpa using hχ with rfl | rfl
-        · exact Or.inr (by simpa using hξ)
+        · exact Or.inr (Bounding.PrenexBlock.neg (Bounding.PrenexBlock.rew _ hξ))
         · grind
     by_cases hΔ : ℬ[<, ℒₒᵣ].Closure ξ
     · obtain ⟨s, hs⟩ := exists_term_evalBound_of_bounded hΔ

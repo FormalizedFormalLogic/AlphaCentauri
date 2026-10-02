@@ -141,6 +141,24 @@ lemma rew {Γ : Polarity} {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {φ : Semiform
   | exs h ih => simpa using (ih ω.q).exs
   | all h ih => simpa using (ih ω.q).all
 
+lemma of_rew {Γ : Polarity} {n₂ : ℕ} {ξ₂ : Type*} {ψ : Semiformula L ξ₂ n₂}
+    (h : ℬ[<, L].PrenexBlock Γ ψ) {ξ₁ : Type*} {n₁ : ℕ} {ω : Rew L ξ₁ n₁ ξ₂ n₂}
+    {φ : Semiformula L ξ₁ n₁} (e : ω ▹ φ = ψ) : ℬ[<, L].PrenexBlock Γ φ := by
+  induction h generalizing n₁ with
+  | bounded h => exact bounded (by rw [← e] at h; simpa using h)
+  | exs h ih =>
+    obtain ⟨φ', hφ', rfl⟩ := (Semiformula.eq_exs_iff _).mp e
+    exact exs (ih hφ')
+  | all h ih =>
+    obtain ⟨φ', hφ', rfl⟩ := (Semiformula.eq_all_iff _).mp e
+    exact all (ih hφ')
+
+@[simp, grind =]
+lemma rew_iff {Γ : Polarity} {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {ω : Rew L ξ₁ n₁ ξ₂ n₂}
+    {φ : Semiformula L ξ₁ n₁} :
+    ℬ[<, L].PrenexBlock Γ (ω ▹ φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
+  ⟨fun h ↦ h.of_rew rfl, rew ω⟩
+
 lemma of_deltaZero {Γ : Polarity} {φ : Semiformula L ξ n} (h : ℬ[<, L].Hierarchy 𝚺 0 φ) :
     ℬ[<, L].PrenexBlock Γ φ := bounded (Hierarchy.zero_iff_bounded.mp h)
 

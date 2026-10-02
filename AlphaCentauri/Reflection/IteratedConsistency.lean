@@ -52,7 +52,8 @@ end
 variable (T) in
 lemma exists_matrix_notProvableIterateBot :
     ∃ θ : 𝚺ᴬ₀.Semisentence 2, 𝗜𝚺₁ ⊢ ∀¹* ((notProvableIterateBot T).val 🡘 ∀¹ θ.val) :=
-  ISigma1.exists_matrix_provable_pi (by simp)
+  have ⟨θ, h⟩ := ISigma1.exists_matrix_provable_pi (φ := (notProvableIterateBot T).val) (by simp)
+  ⟨.mkSigma θ.val (by simp), by simpa using h⟩
 
 variable (T) in
 /-- A $\Delta_0$ matrix of a prenex form of `notProvableIterateBot T`. -/
@@ -65,10 +66,10 @@ disjunct `x ≠ x` makes the free variable occur in every numeral instance. -/
 noncomputable def notProvableIterateBotStrict : ArithmeticSemisentence 1 :=
   “x. ∀ y, x ≠ x ∨ !(notProvableIterateBotMatrix T).val y x”
 
-lemma strictHierarchy_notProvableIterateBotStrict :
-    StrictHierarchy 𝚷 1 (notProvableIterateBotStrict T) := by
-  apply StrictHierarchy.all
-  apply StrictHierarchy.of_deltaZero
+lemma prenexHierarchy_notProvableIterateBotStrict :
+    ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 1 (notProvableIterateBotStrict T) := by
+  apply Bounding.PrenexHierarchy.all
+  apply Bounding.PrenexHierarchy.zero_iff.mpr
   simp
 
 lemma le_quote_notProvableIterateBotStrict (n : ℕ) :
@@ -149,11 +150,11 @@ theorem turingOmega_equiv_union_notProvableIterateBotTheory :
 /-- $T_\omega$ is `T` extended by a $\Delta_1$-presented set of strict $\Pi_1$ sentences.
 - [AB05, §4.1] -/
 theorem exists_strictPi1_axiomatization_turingOmega :
-    ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, StrictHierarchy 𝚷 1 σ) ∧
+    ∃ (U : ArithmeticTheory) (_ : U.Δ₁), (∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 1 σ) ∧
       T.turingOmega ≊ T ∪ U := by
-  have h : ∀ σ ∈ notProvableIterateBotTheory T, StrictHierarchy 𝚷 1 σ := by
+  have h : ∀ σ ∈ notProvableIterateBotTheory T, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 1 σ := by
     rintro _ ⟨n, rfl⟩
-    exact StrictHierarchy.rew _ strictHierarchy_notProvableIterateBotStrict
+    exact Bounding.PrenexHierarchy.rew _ prenexHierarchy_notProvableIterateBotStrict
   exact ⟨_, inferInstance, h, turingOmega_equiv_union_notProvableIterateBotTheory⟩
 
 end FFL.FirstOrder.Arithmetic

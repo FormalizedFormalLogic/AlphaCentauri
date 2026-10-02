@@ -16,10 +16,11 @@ Ackermann function is therefore not `𝗜𝚺₁`-provably total.
 
 One direction is a construction inside a model: the graph of a primitive recursive function is
 assembled by composition and primitive recursion, and `𝗜𝚺₁` proves it functional. For the other,
-a function whose graph is a strict $\Sigma_1$ formula whose totality `𝗜𝚺₁` proves is primitive
-recursive: the proof of totality becomes an anchored derivation of the graph at the arguments as
-free variables, witnessing reads a primitive recursive bound off that derivation, and the value
-is recovered by a bounded search below the bound.
+a function whose graph is a block of existential quantifiers over a bounded formula whose
+totality `𝗜𝚺₁` proves is primitive recursive: the proof of totality becomes an anchored
+derivation of the graph at the arguments as free variables, witnessing reads a primitive
+recursive bound off that derivation, and the value is recovered by a bounded search below the
+bound.
 
 - [Bus98A, Theorem 3.1.1, Section 3.1.3]
 - [HP98, Theorem I.1.54, Lemma I.1.55, Corollary IV.3.7]
@@ -206,18 +207,20 @@ open LK.Derivation Rewriting
 
 variable {k : ℕ} {φ : 𝚺ᴬ₁.Semisentence (k + 1)}
 
-/-- The graph of `φ` at the free variables `&0 … &(k-1)` is strict $\Sigma_1$. -/
-lemma strictHierarchy_embSubsts_exs (hφ : StrictHierarchy 𝚺 1 φ.val) :
-    StrictHierarchy 𝚺 1
+/-- The graph of `φ` at the free variables `&0 … &(k-1)` is a block of existential quantifiers over
+a bounded formula. -/
+lemma prenexBlock_embSubsts_exs (hφ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ.val) :
+    ℬ[<, ℒₒᵣ].PrenexBlock 𝚺
       (Rew.embSubsts (fun i : Fin k ↦ (&i : ArithmeticTerm ℕ)) ▹ (∃¹ φ.val)) :=
-  StrictHierarchy.rew _ hφ.exs
+  Bounding.PrenexBlock.rew _ hφ.exs
 
 /-- A proof of totality in `𝗜𝚺₁` becomes an anchored derivation of the graph of `φ` at the
 free variables `&0 … &(k-1)`.
 
 - [Bus98A, Section 3.1.3] -/
 theorem nonempty_anchored_instance_of_provable_totality (h : 𝗜𝚺₁ ⊢ totalitySentence φ) :
-    ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1, fun ψ ↦ StrictHierarchy 𝚺 1 ψ ∨ StrictHierarchy 𝚷 1 ψ]
+    ⊢ᴸᴷᴵ[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1,
+      fun ψ ↦ ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 ψ ∨ ℬ[<, ℒₒᵣ].PrenexBlock 𝚷 ψ]
       ⦃Rew.embSubsts (fun i : Fin k ↦ (&i : ArithmeticTerm ℕ)) ▹ (∃¹ φ.val)⦄ := by
   obtain ⟨Δ, hΔ, ⟨d⟩⟩ := Theory.Proof.provable_iff.mp h
   have dcut : ⊢ᴸᴷ¹ ⦃Rew.embSubsts (fun i : Fin k ↦ (&i : ArithmeticTerm ℕ)) ▹ (∃¹ φ.val)⦄
@@ -227,8 +230,9 @@ theorem nonempty_anchored_instance_of_provable_totality (h : 𝗜𝚺₁ ⊢ tot
       (d.cast (by simp [add_comm]))
       ((specializeMany (∃¹ φ.val) fun i ↦ &i).cast
         (by simp [totalitySentence, add_comm]))).cast (by simp [add_comm])
-  exact nonempty_anchored_of_derivation (fun _ hη _ ↦ .inl (StrictHierarchy.rew _ hη))
-    (fun τ hτ ↦ .inr (StrictHierarchy.rew _ (PeanoMinus.strictHierarchy τ hτ))) hΔ dcut
+  exact nonempty_anchored_of_derivation
+    (fun _ hη _ ↦ .inl (Bounding.PrenexBlock.rew _ hη.prenexBlock))
+    (fun τ hτ ↦ .inr (Bounding.PrenexBlock.rew _ (PeanoMinus.prenexBlock τ hτ))) hΔ dcut
 
 end LKI.Canonical
 
@@ -273,26 +277,26 @@ private lemma evalBound_graph {v : Fin k → ℕ} {y b : ℕ} :
 /-- A `𝗜𝚺₁`-proof of totality yields a primitive recursive bound on the witness of the graph.
 
 - [Bus98A, Section 3.1.3] -/
-private lemma exists_primrec_bound (hφ : StrictHierarchy 𝚺 1 φ.val)
+private lemma exists_primrec_bound (hφ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ.val)
     (h : 𝗜𝚺₁ ⊢ totalitySentence φ) :
     ∃ g : List ℕ → ℕ → ℕ, Primrec₂ g ∧ ∀ v : Fin k → ℕ,
       ∃ y < g (List.ofFn v) 0, EvalBound (y :> v) Empty.elim (g (List.ofFn v) 0) φ.val := by
   obtain ⟨d, hd⟩ := Classical.choice (nonempty_anchored_instance_of_provable_totality h)
   obtain ⟨g, hg, H⟩ := exists_witnesses d hd
-    (by simpa using Or.inl (strictHierarchy_embSubsts_exs hφ))
+    (by simpa using Or.inl (prenexBlock_embSubsts_exs hφ))
   refine ⟨g, hg, fun v ↦ ?_⟩
   obtain ⟨χ, hχ, -, hbnd⟩ := H (List.ofFn v) 0 fun ψ hψ hn ↦ by
     rw [Multiset.mem_singleton.mp hψ] at hn
-    exact absurd (strictHierarchy_embSubsts_exs hφ) hn
+    exact absurd (prenexBlock_embSubsts_exs hφ) hn
   rw [Multiset.mem_singleton.mp hχ] at hbnd
   exact evalBound_instance.mp hbnd
 
-/-- Every function that is `𝗜𝚺₁`-provably total via a strict $\Sigma_1$ graph is primitive
-recursive.
+/-- Every function that is `𝗜𝚺₁`-provably total via a graph that is a block of existential
+quantifiers over a bounded formula is primitive recursive.
 
 - [Bus98A, Theorem 3.1.1]
 - [HP98, Corollary IV.3.7] -/
-theorem primrec_of_provablyTotalVia (hφ : StrictHierarchy 𝚺 1 φ.val)
+theorem primrec_of_provablyTotalVia (hφ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ.val)
     (h : 𝗜𝚺₁.ProvablyTotalVia f φ) : Primrec fun v : List.Vector ℕ k ↦ f v.get := by
   classical
   obtain ⟨g, hg, hgb⟩ := exists_primrec_bound hφ h.total
@@ -310,8 +314,8 @@ theorem primrec_of_provablyTotalVia (hφ : StrictHierarchy 𝚺 1 φ.val)
   have hB : Primrec fun w : List.Vector ℕ k ↦ g w.toList 0 := by primrec
   have hstep : Primrec₂ fun (w : List.Vector ℕ k) (y : ℕ) ↦
       if EvalBound ![] ((y :: w.toList).getD · 0) (g w.toList 0) χ then y else 0 := by
-    have := StrictHierarchy.rew (Rew.embSubsts (&0 :> fun i : Fin k ↦ (&i.succ : ArithmeticTerm ℕ)))
-      hφ
+    have := Bounding.PrenexBlock.rew
+      (Rew.embSubsts (&0 :> fun i : Fin k ↦ (&i.succ : ArithmeticTerm ℕ))) hφ
     primrec
   refine (primrec_maxBelow hstep hB).of_eq fun w ↦ ?_
   have e : List.ofFn w.get = w.toList := by
@@ -319,12 +323,13 @@ theorem primrec_of_provablyTotalVia (hφ : StrictHierarchy 𝚺 1 φ.val)
   rw [← e]
   exact hval w.get
 
-/-- Every function that is `𝗜𝚺₁`-provably total via a strict $\Sigma_1$ graph is primitive
+/-- Every function that is `𝗜𝚺₁`-provably total via a graph that is a block of existential
+quantifiers over a bounded formula is primitive
 recursive, in `Nat.Primrec'` form.
 
 - [Bus98A, Theorem 3.1.1]
 - [HP98, Corollary IV.3.7] -/
-theorem primrec'_of_provablyTotalVia (hφ : StrictHierarchy 𝚺 1 φ.val)
+theorem primrec'_of_provablyTotalVia (hφ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ.val)
     (h : 𝗜𝚺₁.ProvablyTotalVia f φ) : Nat.Primrec' fun v : List.Vector ℕ k ↦ f v.get :=
   Nat.Primrec'.prim_iff.mpr (primrec_of_provablyTotalVia hφ h)
 
@@ -346,12 +351,13 @@ private lemma models_allClosure_iff_evalb {k : ℕ} {φ ψ : ArithmeticSemisente
 /-- An `𝗜𝚺₁`-provably total function has a strict $\Sigma_1$ graph whose totality `𝗜𝚺₁` proves.
 - [HP98, Theorem I.2.5(3)]
 - [HP98, Lemma I.2.9] -/
-theorem exists_strictHierarchy_provablyTotalVia {k : ℕ} {f : (Fin k → ℕ) → ℕ}
+theorem exists_prenexHierarchy_provablyTotalVia {k : ℕ} {f : (Fin k → ℕ) → ℕ}
     (h : 𝗜𝚺₁.ProvablyTotal f) :
-    ∃ φ : 𝚺ᴬ₁.Semisentence (k + 1), StrictHierarchy 𝚺 1 φ.val ∧ 𝗜𝚺₁.ProvablyTotalVia f φ := by
+    ∃ φ : 𝚺ᴬ₁.Semisentence (k + 1),
+      ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1 φ.val ∧ 𝗜𝚺₁.ProvablyTotalVia f φ := by
   obtain ⟨φ, hmono⟩ := h
   have : 𝗕𝚺₁ ⪯ 𝗜𝚺₁ := BSigma_weakerThan_ISigma
-  obtain ⟨ψ, hψ, hprov⟩ := exists_strictHierarchy_of_hierarchy 𝗜𝚺₁ φ.sigma_prop
+  obtain ⟨ψ, hψ, hprov⟩ := exists_prenexHierarchy_of_hierarchy 𝗜𝚺₁ φ.sigma_prop
   have heval : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁],
       ∀ v : Fin (k + 1) → V, φ.val.Evalb v ↔ ψ.Evalb v := fun V _ _ ↦
     models_allClosure_iff_evalb.mp (consequence_iff'.mp (Theory.Proof.sound hprov) V)
@@ -370,8 +376,8 @@ end
 - [HP98, Corollary IV.3.7] -/
 theorem primrec'_of_provablyTotal {k : ℕ} {f : List.Vector ℕ k → ℕ}
     (hf : 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))) : Nat.Primrec' f :=
-  have ⟨_, hφ, h⟩ := exists_strictHierarchy_provablyTotalVia hf
-  (primrec'_of_provablyTotalVia hφ h).of_eq fun v ↦ by simp
+  have ⟨_, hφ, h⟩ := exists_prenexHierarchy_provablyTotalVia hf
+  (primrec'_of_provablyTotalVia hφ.prenexBlock h).of_eq fun v ↦ by simp
 
 /-- **Parsons' theorem**: the `𝗜𝚺₁`-provably total functions are exactly the primitive recursive
 functions.

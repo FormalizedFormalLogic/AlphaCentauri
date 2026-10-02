@@ -372,7 +372,50 @@ theorem CutFreeDerivable.cut {p s : V} (h₁ : CutFreeDerivable (∅ : Theory L)
 - [AB05, Theorem 152] -/
 theorem Derivable.cutFree {s : V} (h : Derivable (∅ : Theory L) s) :
     CutFreeDerivable (∅ : Theory L) s := by
-  sorry
+  obtain ⟨d, rfl, hd⟩ := h
+  apply Derivation.induction1 𝚺 (P := fun d ↦ CutFreeDerivable (∅ : Theory L) (fstIdx d)) ?_ hd
+  · intro s hs p hp hn
+    rw [fstIdx_axL]
+    exact ⟨_, by simp, CutFreeDerivation.axL hs hp hn⟩
+  · intro s hs hv
+    rw [fstIdx_verumIntro]
+    exact ⟨_, by simp, CutFreeDerivation.verumIntro hs hv⟩
+  · intro s _ p q dp dq hpq hdp hdq ihp ihq
+    rw [hdp.1] at ihp
+    rw [hdq.1] at ihq
+    obtain ⟨ep, hep⟩ := ihp
+    obtain ⟨eq, heq⟩ := ihq
+    rw [fstIdx_andIntro]
+    exact ⟨_, by simp, CutFreeDerivation.andIntro hpq hep heq⟩
+  · intro s _ p q d hpq hd ih
+    rw [hd.1] at ih
+    obtain ⟨e, he⟩ := ih
+    rw [fstIdx_orIntro]
+    exact ⟨_, by simp, CutFreeDerivation.orIntro hpq he⟩
+  · intro s _ p d hp hd ih
+    rw [hd.1] at ih
+    obtain ⟨e, he⟩ := ih
+    rw [fstIdx_allIntro]
+    exact ⟨_, by simp, CutFreeDerivation.allIntro hp he⟩
+  · intro s _ p t d hp ht hd ih
+    rw [hd.1] at ih
+    obtain ⟨e, he⟩ := ih
+    rw [fstIdx_exsIntro]
+    exact ⟨_, by simp, CutFreeDerivation.exsIntro hp ht he⟩
+  · intro s hs d hsub _ ih
+    rw [fstIdx_wkRule]
+    exact ih.wk hs hsub
+  · rintro s _ d rfl _ ih
+    rw [fstIdx_shiftRule]
+    exact ih.shift
+  · intro s _ p d₁ d₂ hd₁ hd₂ ih₁ ih₂
+    rw [hd₁.1] at ih₁
+    rw [hd₂.1] at ih₂
+    rw [fstIdx_cutRule]
+    exact CutFreeDerivable.cut ih₁ ih₂
+  · intro s _ p _ hT
+    exact absurd hT (not_mem_empty_Δ₁Class p)
+  · definability
 
 end
 

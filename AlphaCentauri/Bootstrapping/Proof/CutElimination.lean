@@ -33,7 +33,22 @@ lemma termFvSubst_termFvSubst_eq_self (hu : IsSemitermVec L (len u) 0 u)
     (h : ∀ x < N, x < len u ∧ termFvSubst L v u.[x] = ^&x)
     {n t : V} (ht : IsSemiterm L n t) (htN : t ≤ N) :
     termFvSubst L v (termFvSubst L u t) = t := by
-  sorry
+  revert htN
+  apply IsSemiterm.induction 𝚷
+    (P := fun t ↦ t ≤ N → termFvSubst L v (termFvSubst L u t) = t) ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z _ _; simp
+  · intro x hx
+    have hxN : x < N := lt_of_lt_of_le (by simp) hx
+    rw [termFvSubst_fvar u, ite_eq_left (h x hxN).1, (h x hxN).2]
+  · intro k f ts hf hts ih hle
+    have hts' : IsUTermVec L k (termFvSubstVec L k u ts) :=
+      hu.isUTerm.termFvSubstVec hts.isUTerm
+    rw [termFvSubst_func hf hts.isUTerm, termFvSubst_func hf hts']
+    refine congrArg _ (nth_ext' k (by simp [hts']) hts.lh fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts' hi, nth_termFvSubstVec hts.isUTerm hi]
+    exact ih i hi
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqFunc_of_lt (by rw [hts.lh]; exact hi)) hle)
 
 /-- If `v` sends the entry of `u` at `x` back to `^&x` for every `x < N`, then substituting by `u`
 and then by `v` fixes the formulas coded by a number at most `N`. -/
@@ -41,15 +56,63 @@ lemma fvSubst_fvSubst_eq_self (hu : IsSemitermVec L (len u) 0 u)
     (h : ∀ x < N, x < len u ∧ termFvSubst L v u.[x] = ^&x)
     {n p : V} (hp : IsSemiformula L n p) (hpN : p ≤ N) :
     fvSubst L v (fvSubst L u p) = p := by
-  sorry
+  revert hpN
+  apply IsSemiformula.pi1_structural_induction
+    (P := fun _ p ↦ p ≤ N → fvSubst L v (fvSubst L u p) = p) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R ts hR hts hle
+    have hts' : IsUTermVec L k (termFvSubstVec L k u ts) :=
+      hu.isUTerm.termFvSubstVec hts.isUTerm
+    rw [fvSubst_rel hR hts.isUTerm, fvSubst_rel hR hts']
+    refine congrArg _ (nth_ext' k (by simp [hts']) hts.lh fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts' hi, nth_termFvSubstVec hts.isUTerm hi]
+    exact termFvSubst_termFvSubst_eq_self hu h (hts.nth hi)
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqRel_of_lt (by rw [hts.lh]; exact hi)) hle)
+  · intro n k R ts hR hts hle
+    have hts' : IsUTermVec L k (termFvSubstVec L k u ts) :=
+      hu.isUTerm.termFvSubstVec hts.isUTerm
+    rw [fvSubst_nrel hR hts.isUTerm, fvSubst_nrel hR hts']
+    refine congrArg _ (nth_ext' k (by simp [hts']) hts.lh fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts' hi, nth_termFvSubstVec hts.isUTerm hi]
+    exact termFvSubst_termFvSubst_eq_self hu h (hts.nth hi)
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqNRel_of_lt (by rw [hts.lh]; exact hi)) hle)
+  · intro n _; simp
+  · intro n _; simp
+  · intro n p q hp hq ihp ihq hle
+    have hu' : IsSemitermVec L (len u) n u := hu.weaken (by simp)
+    rw [fvSubst_and hp.isUFormula hq.isUFormula,
+      fvSubst_and (hp.fvSubst hu').isUFormula (hq.fvSubst hu').isUFormula,
+      ihp (le_of_lt <| lt_of_lt_of_le (by simp) hle),
+      ihq (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p q hp hq ihp ihq hle
+    have hu' : IsSemitermVec L (len u) n u := hu.weaken (by simp)
+    rw [fvSubst_or hp.isUFormula hq.isUFormula,
+      fvSubst_or (hp.fvSubst hu').isUFormula (hq.fvSubst hu').isUFormula,
+      ihp (le_of_lt <| lt_of_lt_of_le (by simp) hle),
+      ihq (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p hp ih hle
+    rw [fvSubst_all hp.isUFormula, fvSubst_all (hp.fvSubst (hu.weaken (by simp))).isUFormula,
+      ih (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p hp ih hle
+    rw [fvSubst_exs hp.isUFormula, fvSubst_exs (hp.fvSubst (hu.weaken (by simp))).isUFormula,
+      ih (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
 
 /-- If `v` sends the entry of `u` at `x` back to `^&x` for every `x < N`, then the image under `v`
 of the image under `u` of a coded formula set bounded by `N` is the set itself. -/
 lemma fvSubstImage_fvSubstImage_eq_self (hu : IsSemitermVec L (len u) 0 u)
     (h : ∀ x < N, x < len u ∧ termFvSubst L v u.[x] = ^&x)
     {s : V} (hs : IsFormulaSet L s) (hsN : s ≤ N) :
-    fvSubstImage (L := L) v (fvSubstImage (L := L) u s) = s := by
-  sorry
+    fvSubstImage (L := L) v (fvSubstImage (L := L) u s) = s :=
+  mem_ext fun x ↦ by
+    constructor
+    · intro hx
+      obtain ⟨y, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
+      obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hy
+      rwa [fvSubst_fvSubst_eq_self hu h (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) hsN)]
+    · intro hx
+      exact mem_fvSubstImage_iff.mpr ⟨fvSubst L u x, mem_fvSubstImage_iff.mpr ⟨x, hx, rfl⟩,
+        (fvSubst_fvSubst_eq_self hu h (hs x hx)
+          (le_of_lt <| lt_of_lt_of_le (lt_of_mem hx) hsN)).symm⟩
 
 end composition
 
@@ -61,7 +124,16 @@ lemma exists_exs_of_shift_eq_exs {r p : V} (hr : IsUFormula L r) (h : shift L r 
 
 /-- No formula code is its own negation. -/
 private lemma neg_ne_self {p : V} (hp : IsUFormula L p) : neg L p ≠ p := by
-  sorry
+  rcases hp.case with (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
+    ⟨q, r, hq, hr, rfl⟩ | ⟨q, r, hq, hr, rfl⟩ | ⟨q, hq, rfl⟩ | ⟨q, hq, rfl⟩)
+  · rw [neg_rel hR hv]; simp [qqRel, qqNRel]
+  · rw [neg_nrel hR hv]; simp [qqRel, qqNRel]
+  · rw [neg_verum]; simp [qqVerum, qqFalsum]
+  · rw [neg_falsum]; simp [qqVerum, qqFalsum]
+  · rw [neg_and hq hr]; simp [qqAnd, qqOr]
+  · rw [neg_or hq hr]; simp [qqAnd, qqOr]
+  · rw [neg_all hq]; simp [qqAll, qqExs]
+  · rw [neg_ex hq]; simp [qqAll, qqExs]
 
 /-- Adding two codes to a coded set does not depend on their order. -/
 private lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) :=
@@ -78,11 +150,18 @@ private lemma mem_of_mem_insert_of_ne {x y s : V} (h : x ∈ insert y s) (hne : 
 /-- Adding a code on both sides preserves a sequent being covered by a formula beside a set. -/
 private lemma insert_subset_insert_insert {a p Γ s : V} (h : Γ ⊆ insert p s) :
     insert a Γ ⊆ insert p (insert a s) := by
-  sorry
+  intro x hx
+  rcases mem_bitInsert_iff.mp hx with rfl | hx
+  · simp
+  · rcases mem_bitInsert_iff.mp (h hx) with rfl | hx
+    · simp
+    · simp [hx]
 
 /-- The external-variable shift of coded formula sets is monotone. -/
 private lemma setShift_subset_setShift {s t : V} (h : s ⊆ t) : setShift L s ⊆ setShift L t := by
-  sorry
+  intro x hx
+  obtain ⟨y, hy, rfl⟩ := mem_setShift_iff.mp hx
+  exact shift_mem_setShift (h hy)
 
 namespace CutFreeDerivable
 
@@ -91,17 +170,20 @@ variable {T : Theory L} [T.Δ₁]
 /-- Cut-free derivability is closed under weakening. -/
 lemma wk {s s' : V} (hs : IsFormulaSet L s) (h : s' ⊆ s) (hd : CutFreeDerivable T s') :
     CutFreeDerivable T s := by
-  sorry
+  obtain ⟨d, hd⟩ := hd
+  exact ⟨_, by simp, CutFreeDerivation.wkRule hs h hd⟩
 
 /-- Cut-free derivability is closed under the external-variable shift. -/
 lemma shift {s : V} (hd : CutFreeDerivable T s) : CutFreeDerivable T (setShift L s) := by
-  sorry
+  obtain ⟨d, hd⟩ := hd
+  exact ⟨_, by simp, CutFreeDerivation.shiftRule hd⟩
 
 /-- Adding a formula beside the first one of a cut-free derivable sequent keeps it cut-free
 derivable. -/
 private lemma wk_insert {x a s : V} (ha : IsFormula L a) (hd : CutFreeDerivable T (insert x s)) :
     CutFreeDerivable T (insert x (insert a s)) := by
-  sorry
+  have hs := IsFormulaSet.insert_iff.mp hd.isFormulaSet
+  exact hd.wk (by simp [hs.1, hs.2, ha]) (insert_subset_insert_of_subset x (susbset_insert a s))
 
 end CutFreeDerivable
 

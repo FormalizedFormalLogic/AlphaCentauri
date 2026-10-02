@@ -126,15 +126,16 @@ lemma isFalseBlock_neg_quote_of_mem_peanoMinus {σ : ArithmeticSentence} (h : σ
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 1)
   exact isFalseBlock_neg_quote_allClosure hθ hn (Semantics.ModelsSet.models _ h)
 
-/-- Each axiom of $\mathsf{PA}^-$ follows in pure logic from its own negation, which is a false
-block. -/
-theorem exists_derivable_isFalseBlock_of_mem_peanoMinus {p : V}
-    (hp : p ∈ (𝗣𝗔⁻ : ArithmeticTheory).Δ₁Class) (k D : ℕ) :
-    Derivable (∅ : Theory ℒₒᵣ) (insert (neg ℒₒᵣ p) ({p} : V)) ∧ IsFalseBlock k D (neg ℒₒᵣ p) := by
+lemma isFalseBlock_neg_of_mem_peanoMinus_Δ₁Class {p : V}
+    (hp : p ∈ (𝗣𝗔⁻ : ArithmeticTheory).Δ₁Class) (k D : ℕ) : IsFalseBlock k D (neg ℒₒᵣ p) := by
   obtain ⟨σ, hσ, rfl⟩ := (mem_peanoMinus_Δ₁Class_iff p).mp hp
+  exact isFalseBlock_neg_quote_of_mem_peanoMinus hσ k D
+
+lemma derivable_of_mem_peanoMinus_Δ₁Class {p : V} (hp : p ∈ (𝗣𝗔⁻ : ArithmeticTheory).Δ₁Class) :
+    Derivable (∅ : Theory ℒₒᵣ) (insert (neg ℒₒᵣ p) ({p} : V)) := by
+  obtain ⟨σ, -, rfl⟩ := (mem_peanoMinus_Δ₁Class_iff p).mp hp
   have hf : IsFormula ℒₒᵣ (⌜σ⌝ : V) := Sentence.quote_isSemiformula₀ σ
-  exact ⟨Derivable.em (by simp [hf]) (⌜σ⌝ : V) (by simp) (by simp),
-    isFalseBlock_neg_quote_of_mem_peanoMinus hσ k D⟩
+  exact Derivable.em (by simp [hf]) (⌜σ⌝ : V) (by simp) (by simp)
 
 end peanoMinus
 

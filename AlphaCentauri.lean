@@ -5,6 +5,7 @@ public import AlphaCentauri.Axiomatizability.ISigma
 public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
+public import AlphaCentauri.Bootstrapping.Proof.CutFreeRewrite
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.Measures

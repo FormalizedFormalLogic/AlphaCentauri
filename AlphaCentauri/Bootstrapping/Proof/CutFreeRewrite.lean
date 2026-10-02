@@ -255,7 +255,23 @@ private lemma substs1_of_free {t p s : V} (ht : IsTerm L t) (hp : IsSemiformula 
     (hs : IsFormulaSet L s)
     (h : CutFreeDerivable (∅ : Theory L) (insert (free L p) (setShift L s))) :
     CutFreeDerivable (∅ : Theory L) (insert (substs1 L t p) s) := by
-  sorry
+  obtain ⟨ι, hιl, hι⟩ := sigmaOne_skolem_vec (R := fun x y : V ↦ y = ^&x) (by definability)
+    (l := p + s) (fun x _ ↦ ⟨_, rfl⟩)
+  have hιc : IsSemitermVec L (len ι) 0 ι := IsSemitermVec.iff.mpr ⟨rfl, fun i hi ↦ by
+    rw [hι i (by rwa [hιl] at hi)]
+    simp⟩
+  have hu : IsSemitermVec L (len (t ∷ ι)) 0 (t ∷ ι) := by simp [hιc, ht]
+  have h₀ : termFvSubst L (t ∷ ι) ^&0 = t := by simp
+  have h₁ : ∀ x < p + s, x < len ι ∧ ι.[x] = termFvSubst L (t ∷ ι) ^&(x + 1) := by
+    intro x hx
+    have hx' : x < len ι := by rwa [hιl]
+    exact ⟨hx', by simp [hx']⟩
+  have h₂ : ∀ x < p + s, x < len ι ∧ ι.[x] = ^&x := fun x hx ↦ ⟨by rwa [hιl], hι x hx⟩
+  have := rewrite hu h
+  rwa [fvSubstImage_insert, free,
+    fvSubst_substs1 hu (by simp : IsSemiterm L 0 (^&0 : V)) hp.shift, h₀,
+    fvSubst_shift h₁ hp (by simp), fvSubst_eq_self h₂ hp (by simp),
+    fvSubstImage_setShift h₁ hs (by simp), fvSubstImage_eq_self h₂ hs (by simp)] at this
 
 /-- From the instance of `p` at a free variable `^&M` above the codes of `p` and of the sequent,
 the instance of the shift of `p` at a closed term beside the shifted sequent. -/
@@ -263,7 +279,24 @@ private lemma shift_substs1_of_fvar {M t p s : V} (ht : IsTerm L t) (hp : IsSemi
     (hpM : p ≤ M) (hs : IsFormulaSet L s) (hsM : s ≤ M)
     (h : CutFreeDerivable (∅ : Theory L) (insert (substs1 L ^&M p) s)) :
     CutFreeDerivable (∅ : Theory L) (insert (substs1 L t (shift L p)) (setShift L s)) := by
-  sorry
+  obtain ⟨w, hwl, hw⟩ := sigmaOne_skolem_vec
+    (R := fun x y : V ↦ (x < M → y = ^&(x + 1)) ∧ (M ≤ x → y = t)) (by definability)
+    (l := M + 1) (fun x _ ↦ by
+      by_cases hx : x < M
+      · exact ⟨^&(x + 1), fun _ ↦ rfl, fun h ↦ absurd hx (not_lt.mpr h)⟩
+      · exact ⟨t, fun h ↦ absurd h hx, fun _ ↦ rfl⟩)
+  have hM : M < len w := by simp [hwl]
+  have hw₁ : ∀ x < M, w.[x] = ^&(x + 1) := fun x hx ↦ (hw x (lt_trans hx (by simp))).1 hx
+  have hwc : IsSemitermVec L (len w) 0 w := IsSemitermVec.iff.mpr ⟨rfl, fun i hi ↦ by
+    rcases lt_or_ge i M with hiM | hiM
+    · rw [hw₁ i hiM]
+      simp
+    · rw [(hw i (by rwa [hwl] at hi)).2 hiM]
+      exact ht⟩
+  have := rewrite hwc h
+  rwa [fvSubstImage_insert, fvSubst_substs1 hwc (by simp : IsSemiterm L 0 (^&M : V)) hp,
+    termFvSubst_fvar, ite_eq_left hM, (hw M (by simp)).2 le_rfl, fvSubst_eq_shift hM hw₁ hp hpM,
+    fvSubstImage_eq_setShift hM hw₁ hs hsM] at this
 
 end
 

@@ -1038,6 +1038,22 @@ section quote
 
 variable {k D : ℕ} {Γ : Polarity} {s n : ℕ}
 
+/-- An instance of a prenex formula `qqToPrenex Γ s θ` with a $\Delta_0$ matrix, read directly, by
+closed terms is true exactly when the matrix is satisfied by the values of the terms.
+- [HP98, Theorem I.1.75] -/
+theorem ReadableTruth.subst_qqToPrenex_iff {n θ u : V} (hs : IsAtomLevel k Γ s)
+    (hθ : IsSemiformula ℒₒᵣ (n + s) θ) (hb : IsBounded θ) (hu : IsSemitermVec ℒₒᵣ n 0 u) :
+    ReadableTruth k D (subst ℒₒᵣ u (qqToPrenex Γ s θ)) ↔
+      HierarchicalSatisfaction Γ s θ (termValVec 0 n u) := by
+  have he : subst ℒₒᵣ u (qqToPrenex Γ s θ) =
+      qqToPrenex Γ s (subst ℒₒᵣ ((qVec ℒₒᵣ)^[s] u) θ) := subst_qqToPrenex hθ.isUFormula
+  have hb' := hb.subst (hu.iterate_qVec s) hθ
+  have hφ : IsSemiformula ℒₒᵣ n (qqToPrenex Γ s θ) := isSemiformula_qqToPrenex.mpr hθ
+  have ha : IsPrenexAtom k (subst ℒₒᵣ u (qqToPrenex Γ s θ)) :=
+    he ▸ IsPrenexAtom.of_qqToPrenex hs hb'
+  rw [iff_atomReading ha, AtomReading.iff ha he hb' (hφ.subst hu).isUFormula,
+    HierarchicalSatisfaction.subst hu hθ hb]
+
 /-- An instance of a standard prenex formula by closed terms is true exactly when the formula
 holds of the values of the terms.
 - [HP98, Theorem I.1.75] -/

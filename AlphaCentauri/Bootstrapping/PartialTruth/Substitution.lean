@@ -66,6 +66,10 @@ lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
   simpa [termValVec, termVal] using
     TermVal.construction.resultVec_cons ℒₒᵣ ![e] (IsUTermVec.empty (L := ℒₒᵣ)) ht
 
+lemma termValVec_cons {e k t v : V} (ht : IsUTerm ℒₒᵣ t) (hv : IsUTermVec ℒₒᵣ k v) :
+    termValVec e (k + 1) (t ∷ v) = termVal e t ∷ termValVec e k v := by
+  simpa [termValVec, termVal] using TermVal.construction.resultVec_cons ℒₒᵣ ![e] hv ht
+
 @[simp] lemma termVal_numeral (e x : V) : termVal e (numeral x) = x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability

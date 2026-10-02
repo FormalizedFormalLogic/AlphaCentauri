@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 public import AlphaCentauri.Reflection.StandardProvability
 
 @[expose] public section
@@ -14,7 +14,7 @@ elsewhere; this module supplies only the sentence and its syntactic properties.
 
 The sentence is the one-step unfolding of the fixed point of `collapseFormula T U n Γ`, a formula
 built from `U`'s $\Delta_1$ presentation, a syntactic guard against junk codes, and the partial
-truth predicates of `AlphaCentauri.Bootstrapping.PartialTruth.Snowing`.
+truth predicates for prenex sentences.
 
 - [Lin97, Theorem 4.3]
 - [AB05, Theorem 23]
@@ -37,13 +37,13 @@ exists at a stage by which every member of `U` still true is caught".
 - [AB05, Remark 24] -/
 noncomputable def collapseFormula : Polarity → ArithmeticSemisentence 1
   | 𝚷 => “v. ∀ y, ((!U.Δ₁ch.sigma.val y ∧ !(isSemiformula ℒₒᵣ).sigma.val 0 y ∧
-        !(isStrictPi (n + 1)).sigma.val y ∧
+        !(isPrenexHierarchy 𝚷 (n + 1)).sigma.val y ∧
         ∀ u < y, ∃ w, !(negGraph ℒₒᵣ).val w v ∧ ¬!(proof T).pi.val u w)
-      → !(piSatisfaction n).val y 0)”
+      → !(partialTruth 𝚷 (n + 1)).val y)”
   | 𝚺 => “v. ∃ y, ((∃ u < y, ∃ w, !(negGraph ℒₒᵣ).val w v ∧ !(proof T).sigma.val u w) ∧
       ∀ z < y, ((!U.Δ₁ch.pi.val z ∧ !(isSemiformula ℒₒᵣ).pi.val 0 z ∧
-          !(isStrictSigma (n + 1)).pi.val z)
-        → !(sigmaSatisfaction n).val z 0))”
+          !(isPrenexHierarchy 𝚺 (n + 1)).pi.val z)
+        → !(partialTruth 𝚺 (n + 1)).val z))”
 
 /-- `collapseFormula` lies in `Γ_{n + 1}` of the arithmetical hierarchy, for either polarity `Γ`.
 
@@ -59,13 +59,13 @@ theorem hierarchy_collapseFormula (Γ : Polarity) :
       U.Δ₁ch.sigma.sigma_prop.mono (Nat.le_add_left 1 n)
     have hU : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (isSemiformula ℒₒᵣ).sigma.val :=
       (isSemiformula ℒₒᵣ).sigma.sigma_prop.mono (Nat.le_add_left 1 n)
-    have hSP : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (isStrictPi (n + 1)).sigma.val :=
-      (isStrictPi (n + 1)).sigma.sigma_prop.mono (Nat.le_add_left 1 n)
+    have hSP : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (isPrenexHierarchy 𝚷 (n + 1)).sigma.val :=
+      (isPrenexHierarchy 𝚷 (n + 1)).sigma.sigma_prop.mono (Nat.le_add_left 1 n)
     have hneg : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (negGraph ℒₒᵣ).val :=
       (negGraph ℒₒᵣ).sigma_prop.mono (Nat.le_add_left 1 n)
     have hproof : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 1) (proof T).pi.val :=
       (proof T).pi.pi_prop.mono (Nat.le_add_left 1 n)
-    have hTr : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 1) (piSatisfaction n).val := (piSatisfaction n).pi_prop
+    have hTr := (partialTruth 𝚷 (n + 1)).pi_prop
     simp [collapseFormula, hξ, hU, hSP, hneg, hproof, hTr]
   | sigma =>
     change ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (collapseFormula T U n 𝚺)
@@ -77,10 +77,9 @@ theorem hierarchy_collapseFormula (Γ : Polarity) :
       U.Δ₁ch.pi.pi_prop.mono (Nat.le_add_left 1 n)
     have hU : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 1) (isSemiformula ℒₒᵣ).pi.val :=
       (isSemiformula ℒₒᵣ).pi.pi_prop.mono (Nat.le_add_left 1 n)
-    have hSS : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 1) (isStrictSigma (n + 1)).pi.val :=
-      (isStrictSigma (n + 1)).pi.pi_prop.mono (Nat.le_add_left 1 n)
-    have hTr : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (sigmaSatisfaction n).val :=
-      (sigmaSatisfaction n).sigma_prop
+    have hSS : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (n + 1) (isPrenexHierarchy 𝚺 (n + 1)).pi.val :=
+      (isPrenexHierarchy 𝚺 (n + 1)).pi.pi_prop.mono (Nat.le_add_left 1 n)
+    have hTr := (partialTruth 𝚺 (n + 1)).sigma_prop
     simp [collapseFormula, hneg, hproof, hξ, hU, hSS, hTr]
 
 /-- The one-step unfolding of the fixed point of `collapseFormula`, at the code of that very fixed

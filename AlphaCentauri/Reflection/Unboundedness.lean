@@ -17,7 +17,7 @@ one sentence.
 
 Two narrowings of [AB05], which asks only for an r.e. extension: the axiomatization is
 $\Delta_1$-presented, since Craig's trick is in neither Foundation nor this repository, and its
-sentences are strict prenex, since the partial truth predicates agree with truth only there.
+sentences are prenex, since the partial truth predicates agree with truth only there.
 
 - [AB05, Theorem 23]
 - [AB05, Remark 24]
@@ -68,40 +68,40 @@ lemma exists_mem_eq_quote {m : ℕ} (hmem : (m : V) ∈ U.Δ₁Class)
 /-- Truth of `collapseFormula` at polarity `𝚷` in a model of `𝗜𝚺₁`. -/
 lemma eval_collapseFormula_pi (c : V) :
     V ⊧/![c] (collapseFormula T U n 𝚷) ↔
-      ∀ y ∈ U.Δ₁Class, IsSemiformula ℒₒᵣ (0 : V) y → IsStrictPi (n + 1) y →
-        (∀ u < y, ¬Proof T u (neg ℒₒᵣ c)) → PiSatisfaction (n + 1) y 0 := by
+      ∀ y ∈ U.Δ₁Class, IsSemiformula ℒₒᵣ (0 : V) y → IsPrenexHierarchy 𝚷 (n + 1) y →
+        (∀ u < y, ¬Proof T u (neg ℒₒᵣ c)) → PartialTruth 𝚷 (n + 1) y := by
   simp [collapseFormula, HierarchySymbol.Semiformula.val_sigma,
     (Δ₁Class.defined (T := U) (V := V)).df,
     (IsSemiformula.defined (L := ℒₒᵣ) (V := V)).df,
-    (IsStrictPi.defined (V := V) (n + 1)).df,
+    (IsPrenexHierarchy.defined (V := V) 𝚷 (n + 1)).df,
     (neg.defined (L := ℒₒᵣ) (V := V)).df,
     (Proof.defined (T := T) (V := V)).proper.iff',
     (Proof.defined (T := T) (V := V)).df,
-    (PiSatisfaction.defined (V := V) n).df]
+    (PartialTruth.pi_defined (V := V) (n + 1)).df]
 
 /-- Truth of `collapseFormula` at polarity `𝚺` in a model of `𝗜𝚺₁`. -/
 lemma eval_collapseFormula_sigma (c : V) :
     V ⊧/![c] (collapseFormula T U n 𝚺) ↔
       ∃ y : V, (∃ u < y, Proof T u (neg ℒₒᵣ c)) ∧
-        ∀ z < y, z ∈ U.Δ₁Class → IsSemiformula ℒₒᵣ (0 : V) z → IsStrictSigma (n + 1) z →
-          SigmaSatisfaction (n + 1) z 0 := by
+        ∀ z < y, z ∈ U.Δ₁Class → IsSemiformula ℒₒᵣ (0 : V) z → IsPrenexHierarchy 𝚺 (n + 1) z →
+          PartialTruth 𝚺 (n + 1) z := by
   simp [collapseFormula, HierarchySymbol.Semiformula.val_sigma,
     (Δ₁Class.defined (T := U) (V := V)).proper.iff',
     (Δ₁Class.defined (T := U) (V := V)).df,
     (IsSemiformula.defined (L := ℒₒᵣ) (V := V)).proper.iff',
     (IsSemiformula.defined (L := ℒₒᵣ) (V := V)).df,
-    (IsStrictSigma.defined (V := V) (n + 1)).proper.iff',
-    (IsStrictSigma.defined (V := V) (n + 1)).df,
+    (IsPrenexHierarchy.defined (V := V) 𝚺 (n + 1)).proper.iff',
+    (IsPrenexHierarchy.defined (V := V) 𝚺 (n + 1)).df,
     (neg.defined (L := ℒₒᵣ) (V := V)).df,
     (Proof.defined (T := T) (V := V)).df,
-    (SigmaSatisfaction.defined (V := V) n).df]
+    (PartialTruth.sigma_defined (V := V) (n + 1)).df]
 
 /-- Truth of `collapseSentence` at polarity `𝚷` in a model of `𝗜𝚺₁`. -/
 lemma models_collapseSentence_pi_iff :
     V↓[ℒₒᵣ] ⊧ collapseSentence T U n 𝚷 ↔
-      ∀ y ∈ U.Δ₁Class, IsSemiformula ℒₒᵣ (0 : V) y → IsStrictPi (n + 1) y →
+      ∀ y ∈ U.Δ₁Class, IsSemiformula ℒₒᵣ (0 : V) y → IsPrenexHierarchy 𝚷 (n + 1) y →
         (∀ u < y, ¬Proof T u (⌜∼fixedpoint (collapseFormula T U n 𝚷)⌝ : V)) →
-          PiSatisfaction (n + 1) y 0 := by
+          PartialTruth 𝚷 (n + 1) y := by
   have h : V↓[ℒₒᵣ] ⊧ collapseSentence T U n 𝚷 ↔
       V ⊧/![(⌜fixedpoint (collapseFormula T U n 𝚷)⌝ : V)] (collapseFormula T U n 𝚷) := by
     simp [collapseSentence, models_iff]
@@ -112,8 +112,8 @@ lemma models_collapseSentence_pi_iff :
 lemma models_collapseSentence_sigma_iff :
     V↓[ℒₒᵣ] ⊧ collapseSentence T U n 𝚺 ↔
       ∃ y : V, (∃ u < y, Proof T u (⌜∼fixedpoint (collapseFormula T U n 𝚺)⌝ : V)) ∧
-        ∀ z < y, z ∈ U.Δ₁Class → IsSemiformula ℒₒᵣ (0 : V) z → IsStrictSigma (n + 1) z →
-          SigmaSatisfaction (n + 1) z 0 := by
+        ∀ z < y, z ∈ U.Δ₁Class → IsSemiformula ℒₒᵣ (0 : V) z → IsPrenexHierarchy 𝚺 (n + 1) z →
+          PartialTruth 𝚺 (n + 1) z := by
   have h : V↓[ℒₒᵣ] ⊧ collapseSentence T U n 𝚺 ↔
       V ⊧/![(⌜fixedpoint (collapseFormula T U n 𝚺)⌝ : V)] (collapseFormula T U n 𝚺) := by
     simp [collapseSentence, models_iff]
@@ -133,7 +133,7 @@ private lemma neg_collapseSentence_iff :
 
 /-- The polarity `𝚷` case of `inconsistent_union_of_inconsistent_insert`. -/
 private lemma inconsistent_union_of_inconsistent_insert_pi
-    (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚷 (n + 1) σ)
+    (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1) σ)
     (h : Inconsistent (insert (collapseSentence T U n 𝚷) T)) : Inconsistent (T ∪ U) := by
   have : 𝗜𝚺₁ ⪯ T ∪ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   have : 𝗘𝗤 ℒₒᵣ ⪯ T ∪ U := WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
@@ -153,15 +153,15 @@ private lemma inconsistent_union_of_inconsistent_insert_pi
       exact hlt _ (not_le.mp hcon) hp
     obtain ⟨m, rfl⟩ := eq_nat_of_le_nat hle
     obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi
-    rw [hmσ]
-    apply (piSatisfaction_quote_iff (hΓ σ hσ) ![]).mpr
     have hσM : M↓[ℒₒᵣ] ⊧ σ := models_of_mem (Set.mem_union_right T hσ)
-    simpa [models_iff] using hσM
+    rw [hmσ]
+    obtain ⟨φ, rfl⟩ := hΓ σ hσ
+    exact (partialTruth_quote_iff φ).mpr hσM
   exact inconsistent_of_provable_of_unprovable hprov (WeakerThan.pbl hneg)
 
 /-- The polarity `𝚺` case of `inconsistent_union_of_inconsistent_insert`. -/
 private lemma inconsistent_union_of_inconsistent_insert_sigma
-    (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚺 (n + 1) σ)
+    (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 (n + 1) σ)
     (h : Inconsistent (insert (collapseSentence T U n 𝚺) T)) : Inconsistent (T ∪ U) := by
   have : 𝗜𝚺₁ ⪯ T ∪ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   have : 𝗘𝗤 ℒₒᵣ ⪯ T ∪ U := WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
@@ -179,23 +179,23 @@ private lemma inconsistent_union_of_inconsistent_insert_sigma
     intro z hz hmem hsemi _
     obtain ⟨m, rfl⟩ := eq_nat_of_lt_nat hz
     obtain ⟨σ, hσ, hmσ⟩ := exists_mem_eq_quote hmem hsemi
-    rw [hmσ]
-    apply (sigmaSatisfaction_quote_iff (hΓ σ hσ) ![]).mpr
     have hσM : M↓[ℒₒᵣ] ⊧ σ := models_of_mem (Set.mem_union_right T hσ)
-    simpa [models_iff] using hσM
+    rw [hmσ]
+    obtain ⟨φ, rfl⟩ := hΓ σ hσ
+    exact (partialTruth_quote_iff φ).mpr hσM
   exact inconsistent_of_provable_of_unprovable hprov (WeakerThan.pbl hneg)
 
 /-- If adjoining `collapseSentence` to `T` is inconsistent then so is `T ∪ U`.
 - [Lin97, Theorem 4.3] -/
 private lemma inconsistent_union_of_inconsistent_insert
-    (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ)
+    (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ)
     (h : Inconsistent (insert (collapseSentence T U n Γ) T)) : Inconsistent (T ∪ U) := by
   cases Γ with
   | sigma => exact inconsistent_union_of_inconsistent_insert_sigma hΓ h
   | pi => exact inconsistent_union_of_inconsistent_insert_pi hΓ h
 
 /-- The polarity `𝚷` case of `provable_of_mem`. -/
-private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚷 (n + 1) σ)
+private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1) σ)
     (hcon : Consistent (insert (collapseSentence T U n 𝚷) T))
     {σ : ArithmeticSentence} (hσ : σ ∈ U) :
     insert (collapseSentence T U n 𝚷) T ⊢ σ := by
@@ -207,8 +207,9 @@ private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚷 (n + 
     simp only [Semantics.Imp.models_imply]
     intro hθ
     have hsat := models_collapseSentence_pi_iff.mp hθ (⌜σ⌝ : M) (by simp [hσ])
-      (by simp) ((isStrictPi_quote_iff σ).mpr (hΓ σ hσ)) ?_
-    · exact (piSatisfaction_quote_iff (hΓ σ hσ) ![]).mp (by simpa using hsat)
+      (by simp) ((isPrenexHierarchy_quote_iff σ).mpr (hΓ σ hσ)) ?_
+    · obtain ⟨φ, rfl⟩ := hΓ σ hσ
+      exact (partialTruth_quote_iff φ).mp hsat
     · intro u hu hpu
       rw [← Sentence.coe_quote_eq_quote] at hu
       obtain ⟨j, rfl⟩ := eq_nat_of_lt_nat hu
@@ -219,7 +220,7 @@ private lemma provable_of_mem_pi (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚷 (n + 
   exact key' ⨀ by_axm (Set.mem_insert _ _)
 
 /-- The polarity `𝚺` case of `provable_of_mem`. -/
-private lemma provable_of_mem_sigma (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚺 (n + 1) σ)
+private lemma provable_of_mem_sigma (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 (n + 1) σ)
     (hcon : Consistent (insert (collapseSentence T U n 𝚺) T))
     {σ : ArithmeticSentence} (hσ : σ ∈ U) :
     insert (collapseSentence T U n 𝚺) T ⊢ σ := by
@@ -238,8 +239,9 @@ private lemma provable_of_mem_sigma (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚺 (n
       exact hnζ (provable_of_standard_proof (V := M) hpu)
     have hlt : (⌜σ⌝ : M) < y := lt_trans (not_le.mp hnu) huy
     have hsat := hall (⌜σ⌝ : M) hlt (by simp [hσ]) (by simp)
-      ((isStrictSigma_quote_iff σ).mpr (hΓ σ hσ))
-    exact (sigmaSatisfaction_quote_iff (hΓ σ hσ) ![]).mp (by simpa using hsat)
+      ((isPrenexHierarchy_quote_iff σ).mpr (hΓ σ hσ))
+    obtain ⟨φ, rfl⟩ := hΓ σ hσ
+    exact (partialTruth_quote_iff φ).mp hsat
   have hT : T ⪯ insert (collapseSentence T U n 𝚺) T := WeakerThan.ofSubset (Set.subset_insert _ _)
   have key' : insert (collapseSentence T U n 𝚺) T ⊢ collapseSentence T U n 𝚺 🡒 σ :=
     hT.pbl (WeakerThan.pbl (𝓢 := 𝗜𝚺₁) key)
@@ -247,7 +249,7 @@ private lemma provable_of_mem_sigma (hΓ : ∀ σ ∈ U, StrictHierarchy 𝚺 (n
 
 /-- A consistent extension of `T` by `collapseSentence` proves every member of `U`.
 - [Lin97, Theorem 4.3] -/
-private lemma provable_of_mem (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ)
+private lemma provable_of_mem (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ)
     (hcon : Consistent (insert (collapseSentence T U n Γ) T))
     {σ : ArithmeticSentence} (hσ : σ ∈ U) :
     insert (collapseSentence T U n Γ) T ⊢ σ := by
@@ -258,7 +260,7 @@ private lemma provable_of_mem (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ
 /-- The case `U = U'` of `exists_sentence_weakerThan_of_consistent`.
 - [Lin97, Theorem 4.3] -/
 private lemma exists_sentence_weakerThan_of_forall_mem
-    (hΓ : ∀ σ ∈ U, StrictHierarchy Γ (n + 1) σ) (hC : Consistent (T ∪ U)) :
+    (hΓ : ∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) (hC : Consistent (T ∪ U)) :
     ∃ θ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
   have hcon : Consistent (insert (collapseSentence T U n Γ) T) := by
@@ -278,11 +280,12 @@ end
 variable {U U' : ArithmeticTheory} [U'.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 /-- A consistent extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a $\Delta_1$-presented set
-`U'` of strict `Γ (n + 1)` sentences, is contained in a consistent extension of `T` by a single
+`U'` of prenex `Γ (n + 1)` sentences, is contained in a consistent extension of `T` by a single
 `Γ (n + 1)` sentence.
 - [Lin97, Theorem 4.3] -/
 theorem exists_sentence_weakerThan_of_consistent
-    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U') (hC : Consistent (T ∪ U)) :
+    (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
+    (hC : Consistent (T ∪ U)) :
     ∃ θ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy Γ (n + 1) θ ∧
       T ∪ U ⪯ insert θ T ∧ Consistent (insert θ T) := by
   have hC' : Consistent (T ∪ U') := Consistent.of_le hC e.symm.le
@@ -290,12 +293,12 @@ theorem exists_sentence_weakerThan_of_consistent
   exact ⟨θ, hθ, e.le.trans hle, hcon⟩
 
 /-- Unboundedness for the broad class: an extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a
-$\Delta_1$-presented set `U'` of strict `Γ (n + 1)` sentences, proving the local reflection schema
+$\Delta_1$-presented set `U'` of prenex `Γ (n + 1)` sentences, proving the local reflection schema
 of `T` on the sentences of the dual class is inconsistent. Only `𝗜𝚺₁ ⪯ T` is assumed.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
 theorem inconsistent_of_provable_localReflectionOn_hierarchy_union
-    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
+    (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
     (h : T ∪ U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) := by
   by_contra hc
   have hC : Consistent (T ∪ U) := not_inconsistent_iff_consistent.mp hc
@@ -306,25 +309,26 @@ theorem inconsistent_of_provable_localReflectionOn_hierarchy_union
     (fun _ hσ ↦ by simpa using hσ) hθ fun hσ ↦ hle.pbl (h hσ)
 
 /-- Unboundedness: an extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a $\Delta_1$-presented
-set `U'` of strict `Γ (n + 1)` sentences, proving the local reflection schema of `T` on the strict
+set `U'` of prenex `Γ (n + 1)` sentences, proving the local reflection schema of `T` on the prenex
 sentences of the dual class is inconsistent.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
 theorem inconsistent_of_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
-    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
-    (h : T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) :=
+    (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
+    (h : T ∪ U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy Γ.alt (n + 1)] T) : Inconsistent (T ∪ U) :=
   inconsistent_of_provable_localReflectionOn_hierarchy_union hΓ e <|
-    provable_localReflectionOn_hierarchy_of_strictHierarchy
+    provable_localReflectionOn_hierarchy_of_prenexHierarchy
       (WeakerThan.ofSubset Set.subset_union_left) h
 
 /-- Unboundedness: a consistent extension `T ∪ U` of `T`, equivalent to `T ∪ U'` for a
-$\Delta_1$-presented set `U'` of strict `Γ (n + 1)` sentences, does not prove the local reflection
-schema of `T` on the strict sentences of the dual class.
+$\Delta_1$-presented set `U'` of prenex `Γ (n + 1)` sentences, does not prove the local reflection
+schema of `T` on the prenex sentences of the dual class.
 - [AB05, Theorem 23]
 - [Lin97, Corollary 4.2] -/
 theorem not_provable_localReflectionOn_union [𝗜𝚺(n + 1) ⪯ T]
-    (hΓ : ∀ σ ∈ U', StrictHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U') (hC : Consistent (T ∪ U)) :
-    ¬T ∪ U ⊢* 𝗥𝗳𝗻[StrictHierarchy Γ.alt (n + 1)] T :=
+    (hΓ : ∀ σ ∈ U', ℬ[<, ℒₒᵣ].PrenexHierarchy Γ (n + 1) σ) (e : T ∪ U ≊ T ∪ U')
+    (hC : Consistent (T ∪ U)) :
+    ¬T ∪ U ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy Γ.alt (n + 1)] T :=
   fun h ↦ (inconsistent_of_provable_localReflectionOn_union hΓ e h).not_con hC
 
 end FFL.FirstOrder.Arithmetic

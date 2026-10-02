@@ -32,7 +32,7 @@ theorem provabilityLogic_turingOmega_eq_A (hC : Consistent T.turingOmega) :
   have h : T.turingOmega ⊢* T.standardProvability.reflOn (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1) :=
     provable_localReflectionOn_sigma1_of_mem_of_not_A hT (Logic.provable_iff_mem.mp hA) hAA
   obtain ⟨U, _, hU, e⟩ := exists_strictPi1_axiomatization_turingOmega (T := T)
-  have h' : T.turingOmega ⊢* 𝗥𝗳𝗻[StrictHierarchy (Polarity.alt 𝚷) 1] T := fun hσ ↦
+  have h' : T.turingOmega ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy (Polarity.alt 𝚷) 1] T := fun hσ ↦
     h <| T.standardProvability.localReflectionOn_mono (fun _ hσ ↦ hσ.hierarchy) hσ
   exact (inconsistent_of_provable_localReflectionOn_union (n := 0) hU e h').not_con hC
 

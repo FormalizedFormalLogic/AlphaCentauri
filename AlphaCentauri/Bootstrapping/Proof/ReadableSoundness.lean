@@ -80,6 +80,14 @@ lemma qqExss_succ' (p k : V) : qqExss p (k + 1) = qqExss (^∃ p) k := by
   case zero => simp
   case succ k ih => rw [qqExss_succ, IsUFormula.ex, ih]
 
+lemma neg_qqAlls {p : V} (hp : IsUFormula L p) (k : V) :
+    neg L (qqAlls p k) = qqExss (neg L p) k := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih =>
+    rw [qqAlls_succ, neg_all (isUFormula_qqAlls.mpr hp), ih, qqExss_succ]
+
 lemma IsSemiformula.qqExss {n k p : V} (h : IsSemiformula L (n + k) p) :
     IsSemiformula L n (qqExss p k) := by
   induction k using ISigma1.pi1_succ_induction generalizing n

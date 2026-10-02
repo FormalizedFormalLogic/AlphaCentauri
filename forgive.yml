@@ -80,7 +80,7 @@ declaration:
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stSigma1:
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_prenexSigma1:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Sigma1:
@@ -89,10 +89,16 @@ declaration:
   FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Sigma1_of_lt:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stPi_of_le:
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_prenexPi_of_le:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stPi:
+  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_prenexPi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.IBroadSigma.provable_localReflectionOn_Pi_self:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.IBroadSigma.provable_localReflectionOn_prenexPi_of_le:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi_self:

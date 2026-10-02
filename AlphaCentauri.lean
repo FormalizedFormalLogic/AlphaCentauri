@@ -3,19 +3,13 @@ module  -- shake: keep-all --deprecated_module: ignore
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Axiomatizability.ISigma
 public import AlphaCentauri.Axiomatizability.Reflexive
-public import AlphaCentauri.Bootstrapping.Bounded
-public import AlphaCentauri.Bootstrapping.PartialTruth.BoundedSatisfaction
-public import AlphaCentauri.Bootstrapping.PartialTruth.SigmaSatisfaction
-public import AlphaCentauri.Bootstrapping.PartialTruth.Snowing
-public import AlphaCentauri.Bootstrapping.PartialTruth.Tarski
-public import AlphaCentauri.Bootstrapping.Prenex
+public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
-public import AlphaCentauri.Bootstrapping.TermVal
 public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Theory
@@ -64,7 +58,6 @@ public import AlphaCentauri.ToFoundation.Coding
 public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
-public import AlphaCentauri.ToFoundation.Definability
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
@@ -76,6 +69,7 @@ public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.TuringOmega
 public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.ToFoundation.Reflection
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata
 public import AlphaCentauri.ToFoundation.Semiformula
@@ -92,5 +86,4 @@ public import AlphaCentauri.ToMathlib.ONote.Hardy
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds
 public import AlphaCentauri.ToMathlib.Ordinal.Rank
 public import AlphaCentauri.ToMathlib.Primrec
-public import AlphaCentauri.ToMathlib.Util.Disjunct
 public import AlphaCentauri.ToMathlib.Vector

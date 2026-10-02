@@ -24,10 +24,12 @@ theorem Peano.provable_localReflection_ISigma (n : ℕ) : 𝗣𝗔 ⊢* 𝗥𝗳
   set j := n + k + 1;
   have : 𝗜𝚺₁ ⪯ 𝗜𝚺 j := ISigma_weakerThan_of_le (by omega);
   apply (inferInstance : 𝗜𝚺 (j + 1) ⪯ 𝗣𝗔).pbl;
-  apply C_trans (ψ := (𝗜𝚺 j).standardProvability σ);
-  · exact (ISigma_weakerThan_of_le (by omega)).pbl <|
-      ISigma.provable_standardProvability_imp_of_le (by omega) σ;
-  · apply ISigma.provable_localReflectionOn_Pi_self (by omega);
+  apply C_trans (ψ := (𝗜𝚺⁺ j).standardProvability σ);
+  · apply (ISigma_weakerThan_of_le (s₁ := 1) (s₂ := j + 1) (by omega)).pbl;
+    apply C_trans
+      (InductionOnPrenexHierarchy.provable_standardProvability_imp_InductionOnHierarchy 𝚺 n σ);
+    exact InductionOnHierarchy.provable_standardProvability_imp_of_le (by omega) σ;
+  · apply IBroadSigma.provable_localReflectionOn_Pi_self (by omega);
     simp only [Provability.mem_localReflectionOn_iff, Semiformula.imp_inj,
       exists_eq_right_right', and_true];
     apply (hk 𝚷).mono (by omega);

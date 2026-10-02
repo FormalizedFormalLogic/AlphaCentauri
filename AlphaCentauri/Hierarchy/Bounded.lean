@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
+public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 
 /-! # $\Delta_0$ formulas
 
@@ -8,8 +8,6 @@ In Foundation the class $\Delta_0$ of formulas all of whose quantifiers are boun
 `ℬ[<, L].Closure`; `Bounding.Hierarchy.zero_iff_bounded` identifies it with
 `ℬ[<, L].Hierarchy Γ 0`. `bounded_induction` is a recursor for it on arithmetical formulas that
 Foundation does not provide.
-
-`StrictHierarchy.of_bounded` places such a formula at the bottom of the strict hierarchy.
 -/
 
 @[expose] public section
@@ -30,11 +28,6 @@ attribute [grind .] Bounding.Closure.verum Bounding.Closure.falsum Bounding.Clos
 theorem Bounding.Closure.hierarchy {Γ : Polarity} (h : ℬ[<, L].Closure φ) :
     ℬ[<, L].Hierarchy Γ 0 φ :=
   .bounded _ _ _ h
-
-/-- A bounded formula is strictly `Γ`-[s] at every level. -/
-@[grind =>]
-theorem Arithmetic.StrictHierarchy.of_bounded {Γ : Polarity} {s : ℕ} (h : ℬ[<, L].Closure φ) :
-    StrictHierarchy Γ s φ := (zero h).mono (Nat.zero_le s)
 
 namespace Bounding.Closure
 

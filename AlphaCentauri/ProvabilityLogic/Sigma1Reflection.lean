@@ -35,7 +35,7 @@ theorem provabilityLogic_add_localReflectionOn_Sigma1_eq_D
     (D_weakerThan_provabilityLogic_of_provable_localReflectionOn_Sigma1 (α := α) hR) with h | h
   · exact h.symm
   obtain ⟨-, A, hAD, hA⟩ := strictlyWeakerThan_iff.mp h
-  obtain ⟨U, _, hU, e⟩ := exists_strictPi2_axiomatization_localReflectionOn_Sigma1 (T := T)
+  obtain ⟨U, _, hU, e⟩ := exists_prenexPi2_axiomatization_localReflectionOn_Sigma1 (T := T)
   have hrfn :
       T ∪ 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] T ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy (Polarity.alt 𝚷) 2] T := by
     rintro _ ⟨σ, -, rfl⟩

@@ -1,6 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic.StrictHierarchy
+public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
 
 /-!
 # Boolean combinations of a class of formulas
@@ -55,15 +55,16 @@ end FFL.FirstOrder
 namespace FFL.FirstOrder.Arithmetic
 
 open FFL.FirstOrder (BooleanCombination)
+open scoped FFL.FirstOrder.Bounding
 
 variable {L : Language} [L.LT] {ξ : Type*} {Γ : Polarity} {s n : ℕ} {φ : Semiformula L ξ n}
 
 namespace BooleanCombination
 
-/-- Every Boolean combination of formulas strictly at level `s` lies at level `s + 1` of either
+/-- Every Boolean combination of prenex formulas of level `s` lies at level `s + 1` of either
 polarity.
 - [Bek99, §2] -/
-theorem hierarchy_succ (h : BooleanCombination (StrictHierarchy Γ s) φ)
+theorem hierarchy_succ (h : BooleanCombination (ℬ[<, L].PrenexHierarchy Γ s) φ)
     (Γ' : Polarity) : ℬ[<, L].Hierarchy Γ' (s + 1) φ := by
   induction h with
   | pos hφ => exact hφ.hierarchy.strict_mono Γ' (by omega)
@@ -71,20 +72,21 @@ theorem hierarchy_succ (h : BooleanCombination (StrictHierarchy Γ s) φ)
   | and _ _ ih₁ ih₂ => exact ih₁.and ih₂
   | or _ _ ih₁ ih₂ => exact ih₁.or ih₂
 
-theorem strictHierarchy_alt (h : BooleanCombination (StrictHierarchy Γ s) φ) :
-    BooleanCombination (StrictHierarchy Γ.alt s) φ := by
+theorem prenexHierarchy_alt (h : BooleanCombination (ℬ[<, L].PrenexHierarchy Γ s) φ) :
+    BooleanCombination (ℬ[<, L].PrenexHierarchy Γ.alt s) φ := by
   induction h with
   | pos hφ => simpa using (BooleanCombination.neg hφ.neg)
   | neg hφ => exact .pos hφ.neg
   | and _ _ ih₁ ih₂ => exact ih₁.and ih₂
   | or _ _ ih₁ ih₂ => exact ih₁.or ih₂
 
-/-- $\mathcal{B}(\Sigma_s) = \mathcal{B}(\Pi_s)$: a Boolean combination of formulas strictly at
+/-- $\mathcal{B}(\Sigma_s) = \mathcal{B}(\Pi_s)$: a Boolean combination of prenex formulas of
 level `s` and polarity `Γ` is one of polarity `Γ.alt`, and conversely.
 - [Bek99, §2] -/
-theorem strictHierarchy_alt_iff :
-    BooleanCombination (StrictHierarchy Γ s) φ ↔ BooleanCombination (StrictHierarchy Γ.alt s) φ :=
-  ⟨strictHierarchy_alt, fun h ↦ by simpa using strictHierarchy_alt h⟩
+theorem prenexHierarchy_alt_iff :
+    BooleanCombination (ℬ[<, L].PrenexHierarchy Γ s) φ ↔
+      BooleanCombination (ℬ[<, L].PrenexHierarchy Γ.alt s) φ :=
+  ⟨prenexHierarchy_alt, fun h ↦ by simpa using prenexHierarchy_alt h⟩
 
 end BooleanCombination
 

@@ -8,7 +8,9 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 # The arithmetical hierarchy of a universal closure
 
 `ℬ[<, L].Hierarchy 𝚷 (s + 1)` passes through `Semiformula.univCl`, and every axiom of `𝗣𝗔⁻` is
-$\Pi_2$.
+$\Pi_2$. `ℬ.PrenexBlock Γ` collects the formulas that are a block of `Γ`-quantifiers over a
+`ℬ`-bounded matrix, which `ℬ.PrenexHierarchy Γ 1` does not, as it has exactly one quantifier; every
+axiom of `𝗣𝗔⁻` is such a block of universal quantifiers.
 -/
 
 @[expose] public section
@@ -73,16 +75,14 @@ lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) :
 
 end FFL.FirstOrder.Bounding.Hierarchy
 
-namespace FFL.FirstOrder.Arithmetic
+namespace FFL.FirstOrder.Bounding
 
-namespace StrictHierarchy
-
-variable {L : Language} [L.LT] {ξ : Type*} {Γ : Polarity} {s n : ℕ}
+variable {L : Language} [L.LT] {ξ : Type*} {n : ℕ}
 
 /-- The body of a bounded existential is bounded. -/
 @[grind →]
-lemma _root_.FFL.FirstOrder.Bounding.Closure.of_exs {φ : Semiformula L ξ (n + 1)}
-    (h : ℬ[<, L].Closure (∃¹ φ)) : ℬ[<, L].Closure φ := by
+lemma Closure.of_exs {φ : Semiformula L ξ (n + 1)} (h : ℬ[<, L].Closure (∃¹ φ)) :
+    ℬ[<, L].Closure φ := by
   cases h with
   | bexs hR _ hφ =>
     obtain rfl := Set.mem_singleton_iff.mp hR
@@ -90,17 +90,16 @@ lemma _root_.FFL.FirstOrder.Bounding.Closure.of_exs {φ : Semiformula L ξ (n + 
 
 /-- The body of a bounded universal is bounded. -/
 @[grind →]
-lemma _root_.FFL.FirstOrder.Bounding.Closure.of_all {φ : Semiformula L ξ (n + 1)}
-    (h : ℬ[<, L].Closure (∀¹ φ)) : ℬ[<, L].Closure φ := by
+lemma Closure.of_all {φ : Semiformula L ξ (n + 1)} (h : ℬ[<, L].Closure (∀¹ φ)) :
+    ℬ[<, L].Closure φ := by
   cases h with
   | ball hR _ hφ =>
     obtain rfl := Set.mem_singleton_iff.mp hR
-    exact Bounding.Closure.imp_iff.mpr ⟨.rel _ _, hφ⟩
+    exact Closure.imp_iff.mpr ⟨.rel _ _, hφ⟩
 
 /-- A bounded universal quantifies below a term. -/
 @[grind →]
-lemma _root_.FFL.FirstOrder.Bounding.Closure.exists_of_all
-    {φ : Semiformula L ξ (n + 1)} (h : ℬ[<, L].Closure (∀¹ φ)) :
+lemma Closure.exists_of_all {φ : Semiformula L ξ (n + 1)} (h : ℬ[<, L].Closure (∀¹ φ)) :
     ∃ (t : Semiterm L ξ n) (ψ : Semiformula L ξ (n + 1)),
       φ = “#0 < !!(Rew.bShift t)” 🡒 ψ ∧ ℬ[<, L].Closure ψ := by
   cases h with
@@ -110,30 +109,134 @@ lemma _root_.FFL.FirstOrder.Bounding.Closure.exists_of_all
     obtain ⟨t, rfl⟩ := Rew.positive_iff.mp pt
     exact ⟨t, ψ, rfl, hψ⟩
 
-/-- The body of a strict $\Sigma_1$ existential is strict $\Sigma_1$. -/
+/-- A block of `Γ`-quantifiers in front of a `ℬ`-bounded formula; a bounded formula is the block
+of length zero.
+
+- [HP98, Definition I.2.1] -/
+inductive PrenexBlock (ℬ : Bounding L) : Polarity → {n : ℕ} → Semiformula L ξ n → Prop
+  | bounded {Γ : Polarity} {n : ℕ} {φ : Semiformula L ξ n} : ℬ.Closure φ → PrenexBlock ℬ Γ φ
+  | exs {n : ℕ} {φ : Semiformula L ξ (n + 1)} : PrenexBlock ℬ 𝚺 φ → PrenexBlock ℬ 𝚺 (∃¹ φ)
+  | all {n : ℕ} {φ : Semiformula L ξ (n + 1)} : PrenexBlock ℬ 𝚷 φ → PrenexBlock ℬ 𝚷 (∀¹ φ)
+
+namespace PrenexBlock
+
+variable {Γ : Polarity} {φ : Semiformula L ξ n}
+
+attribute [grind .] bounded exs all
+
+lemma neg : ∀ {Γ n} {φ : Semiformula L ξ n}, ℬ[<, L].PrenexBlock Γ φ →
+    ℬ[<, L].PrenexBlock Γ.alt (∼φ)
+  | _, _, _, bounded h => bounded h.neg
+  | _, _, _, exs h => by simpa using (neg h).all
+  | _, _, _, all h => by simpa using (neg h).exs
+
+@[simp, grind =] lemma neg_iff : ℬ[<, L].PrenexBlock Γ.alt (∼φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
+  ⟨fun h ↦ by simpa using h.neg, fun h ↦ by simpa using h.neg⟩
+
+lemma rew {Γ : Polarity} {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁}
+    (ω : Rew L ξ₁ n₁ ξ₂ n₂) (h : ℬ[<, L].PrenexBlock Γ φ) :
+    ℬ[<, L].PrenexBlock Γ (ω ▹ φ) := by
+  induction h generalizing n₂ with
+  | bounded h => exact bounded (h.rew ω)
+  | exs h ih => simpa using (ih ω.q).exs
+  | all h ih => simpa using (ih ω.q).all
+
+lemma of_rew {Γ : Polarity} {n₂ : ℕ} {ξ₂ : Type*} {ψ : Semiformula L ξ₂ n₂}
+    (h : ℬ[<, L].PrenexBlock Γ ψ) {ξ₁ : Type*} {n₁ : ℕ} {ω : Rew L ξ₁ n₁ ξ₂ n₂}
+    {φ : Semiformula L ξ₁ n₁} (e : ω ▹ φ = ψ) : ℬ[<, L].PrenexBlock Γ φ := by
+  induction h generalizing n₁ with
+  | bounded h => exact bounded (by rw [← e] at h; simpa using h)
+  | exs h ih =>
+    obtain ⟨φ', hφ', rfl⟩ := (Semiformula.eq_exs_iff _).mp e
+    exact exs (ih hφ')
+  | all h ih =>
+    obtain ⟨φ', hφ', rfl⟩ := (Semiformula.eq_all_iff _).mp e
+    exact all (ih hφ')
+
+@[simp, grind =]
+lemma rew_iff {Γ : Polarity} {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {ω : Rew L ξ₁ n₁ ξ₂ n₂}
+    {φ : Semiformula L ξ₁ n₁} :
+    ℬ[<, L].PrenexBlock Γ (ω ▹ φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
+  ⟨fun h ↦ h.of_rew rfl, rew ω⟩
+
+lemma of_deltaZero {Γ : Polarity} {φ : Semiformula L ξ n} (h : ℬ[<, L].Hierarchy 𝚺 0 φ) :
+    ℬ[<, L].PrenexBlock Γ φ := bounded (Hierarchy.zero_iff_bounded.mp h)
+
+lemma allClosure : ∀ {n} {φ : Semiformula L ξ n},
+    ℬ[<, L].PrenexBlock 𝚷 φ → ℬ[<, L].PrenexBlock 𝚷 (∀¹* φ)
+  | 0, _, h => h
+  | _ + 1, _, h => by rw [allClosure_succ]; exact allClosure h.all
+
+/-- The body of a block of existential quantifiers is a block of existential quantifiers. -/
 @[grind →]
-lemma of_exs {φ : Semiformula L ξ (n + 1)} (h : StrictHierarchy 𝚺 1 (∃¹ φ)) :
-    StrictHierarchy 𝚺 1 φ := by
+lemma of_exs {φ : Semiformula L ξ (n + 1)} (h : ℬ[<, L].PrenexBlock 𝚺 (∃¹ φ)) :
+    ℬ[<, L].PrenexBlock 𝚺 φ := by
   cases h with
-  | ofAlt h => exact .ofAlt (.zero (Bounding.Closure.of_exs (zero_iff_bounded.mp h)))
+  | bounded h => exact .bounded h.of_exs
   | exs h => exact h
 
--- `witnesses_exs`/`exists_witnesses`'s `exs` case transport a `StrictHierarchy` fact across a
--- substitution, and their bounded cases read a level-`0` formula as bounded; `rew_iff` and
--- `zero_iff_bounded` are not `@[grind]` upstream.
-attribute [grind =] rew_iff zero_iff_bounded
-
-/-- A formula that is both strict $\Sigma_1$ and strict $\Pi_1$ is $\Delta_0$. -/
+/-- A formula that is both a block of existential and a block of universal quantifiers is
+bounded. -/
 @[grind →]
-lemma bounded_of_sigmaOne_of_piOne {φ : Semiformula L ξ n} (hσ : StrictHierarchy 𝚺 1 φ)
-    (hπ : StrictHierarchy 𝚷 1 φ) : ℬ[<, L].Closure φ := by
+lemma bounded_of_sigma_of_pi (hσ : ℬ[<, L].PrenexBlock 𝚺 φ) (hπ : ℬ[<, L].PrenexBlock 𝚷 φ) :
+    ℬ[<, L].Closure φ := by
   cases hσ with
-  | ofAlt h => exact zero_iff_bounded.mp h
-  | exs _ => cases hπ with | ofAlt h => exact zero_iff_bounded.mp h
+  | bounded h => exact h
+  | exs _ => cases hπ with | bounded h => exact h
 
-end StrictHierarchy
+/-- A block that does not start with a quantifier is bounded. -/
+lemma bounded_of_ne (h : ℬ[<, L].PrenexBlock Γ φ) (hne : ∀ ψ, φ ≠ ∃¹ ψ)
+    (hna : ∀ ψ, φ ≠ ∀¹ ψ) : ℬ[<, L].Closure φ := by
+  cases h with
+  | bounded h => exact h
+  | exs => exact absurd rfl (hne _)
+  | all => exact absurd rfl (hna _)
 
-end FFL.FirstOrder.Arithmetic
+end PrenexBlock
+
+lemma PrenexHierarchy.prenexBlock {Γ : Polarity} {φ : Semiformula L ξ n}
+    (h : ℬ[<, L].PrenexHierarchy Γ 1 φ) : ℬ[<, L].PrenexBlock Γ φ := by
+  rcases Γ
+  · obtain ⟨ψ, hψ, rfl⟩ := PrenexHierarchy.sigma_succ_iff.mp h
+    exact .exs (.bounded (PrenexHierarchy.zero_iff_bounded.mp hψ))
+  · obtain ⟨ψ, hψ, rfl⟩ := PrenexHierarchy.pi_succ_iff.mp h
+    exact .all (.bounded (PrenexHierarchy.zero_iff_bounded.mp hψ))
+
+end FFL.FirstOrder.Bounding
+
+namespace FFL.FirstOrder.Arithmetic.PeanoMinus
+
+open Bounding
+
+/-- Every axiom of `𝗣𝗔⁻` is a block of universal quantifiers over a bounded formula. -/
+theorem prenexBlock : ∀ φ ∈ 𝗣𝗔⁻, ℬ[<, ℒₒᵣ].PrenexBlock 𝚷 φ := by
+  rintro φ ⟨⟩
+  case equal h =>
+    rcases h
+    case refl => exact .all (.of_deltaZero (by simp))
+    case symm => exact .all (.all (.of_deltaZero (by simp)))
+    case trans => exact .all (.all (.all (.of_deltaZero (by simp))))
+    case funcExt => exact .allClosure (.of_deltaZero (by simp))
+    case relExt => exact .allClosure (.of_deltaZero (by simp))
+  case addZero => exact .all (.of_deltaZero (by simp))
+  case addAssoc => exact .all (.all (.all (.of_deltaZero (by simp))))
+  case addComm => exact .all (.all (.of_deltaZero (by simp)))
+  case addEqOfLt => exact .all (.all (.of_deltaZero (by simp)))
+  case zeroLe => exact .all (.of_deltaZero (by simp))
+  case zeroLtOne => exact .of_deltaZero (by simp)
+  case oneLeOfZeroLt => exact .all (.of_deltaZero (by simp))
+  case addLtAdd => exact .all (.all (.all (.of_deltaZero (by simp))))
+  case mulZero => exact .all (.of_deltaZero (by simp))
+  case mulOne => exact .all (.of_deltaZero (by simp))
+  case mulAssoc => exact .all (.all (.all (.of_deltaZero (by simp))))
+  case mulComm => exact .all (.all (.of_deltaZero (by simp)))
+  case mulLtMul => exact .all (.all (.all (.of_deltaZero (by simp))))
+  case distr => exact .all (.all (.all (.of_deltaZero (by simp))))
+  case ltIrrefl => exact .all (.of_deltaZero (by simp))
+  case ltTrans => exact .all (.all (.all (.of_deltaZero (by simp))))
+  case ltTri => exact .all (.all (.of_deltaZero (by simp)))
+
+end FFL.FirstOrder.Arithmetic.PeanoMinus
 
 namespace FFL.FirstOrder.Bounding.HierarchySymbol.Semiformula
 

@@ -96,8 +96,8 @@ fixed once and for all so that it does not depend on the ambient theory.
 - [HP98, Theorem I.2.5(3)]
 - [HP98, Lemma I.2.9] -/
 noncomputable def minimalGraphMatrix (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : 𝚺ᴬ₀.Semisentence (k + 2) :=
-  (Classical.choose (Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺) (s := 1)
-    φ.sigma_prop)).matrix
+  .mkSigma (Classical.choose (Bounding.Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺)
+    (s := 1) φ.sigma_prop)).matrix.val (by simp)
 
 lemma provable_iff_exists_minimalGraphMatrix (T : ArithmeticTheory) [𝗕𝚺₁ ⪯ T]
     (φ : 𝚺ᴬ₁.Semisentence (k + 1)) :
@@ -105,8 +105,9 @@ lemma provable_iff_exists_minimalGraphMatrix (T : ArithmeticTheory) [𝗕𝚺₁
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := 1)
   refine provable_iff_of_models_iff fun V _ _ e ↦ ?_
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁ := models_of_subtheory (T := 𝗕𝚺₁) (U := T) inferInstance
-  exact Classical.choose_spec (Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺) (s := 1)
-    φ.sigma_prop) V e Empty.elim
+  simpa [minimalGraphMatrix, Bounding.Prenex.val] using
+    Classical.choose_spec (Bounding.Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺)
+      (s := 1) φ.sigma_prop) V e Empty.elim
 
 lemma models_iff_exists_minimalGraphMatrix {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
     V↓[ℒₒᵣ] ⊧ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) ↔
@@ -192,12 +193,12 @@ private lemma models_existsUnique_minimalPairGraph {θ : 𝚺ᴬ₀.Semisentence
   obtain ⟨y₀, z₀, hz₀⟩ := hex
   have hP : (existsAtSum θ).Evalb ((z₀ + y₀) :> v) :=
     (eval_existsAtSum θ _).mpr ⟨y₀, by simp, z₀, by simp, by simp, by simpa using hz₀⟩
-  obtain ⟨n₀, hn₀, hnmin⟩ := InductionOnBroadHierarchy.least_number 𝚺 0
+  obtain ⟨n₀, hn₀, hnmin⟩ := InductionOnHierarchy.least_number 𝚺 0
     (definablePred_existsAtSum θ v) hP
   obtain ⟨y₁, hy₁len, z₁, hz₁len, hsum₁, hθ₁⟩ := (eval_existsAtSum θ _).mp hn₀
   have hPy : (pairGraph θ).Evalb (n₀ :> y₁ :> v) :=
     (eval_pairGraph θ _).mpr ⟨z₁, hz₁len, hsum₁, hθ₁⟩
-  obtain ⟨ymin, hymin, hyminmin⟩ := InductionOnBroadHierarchy.least_number 𝚺 0
+  obtain ⟨ymin, hymin, hyminmin⟩ := InductionOnHierarchy.least_number 𝚺 0
     (definablePred_pairGraph θ n₀ v) hPy
   have toExistsAtSum : ∀ {n y : V}, (∃ z ≤ n, z + y = n ∧ θ.val.Evalb (z :> y :> v)) →
       ∃ y' ≤ n, ∃ z' ≤ n, z' + y' = n ∧ θ.val.Evalb (z' :> y' :> v) := by
@@ -328,7 +329,7 @@ lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ un
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
   constructor
   · obtain ⟨y, hy⟩ := h.models V v
-    obtain ⟨y₀, h₀, hmin⟩ := InductionOnBroadHierarchy.least_number 𝚺 1 (definablePred_evalb φ v) hy
+    obtain ⟨y₀, h₀, hmin⟩ := InductionOnHierarchy.least_number 𝚺 1 (definablePred_evalb φ v) hy
     exact ⟨y₀, by simpa using ⟨h₀, hmin⟩⟩
   · intro y y' hy hy'
     simp only [eval_leastGraph, Matrix.cons_val_zero, Matrix.cons_val_succ] at hy hy'

@@ -230,10 +230,8 @@ noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] :
   falsum := .mkSigma “y w. !qqFalsumDef y”
   and := .mkSigma “y w p q p' q'. !qqAndDef y p' q'”
   or := .mkSigma “y w p q p' q'. !qqOrDef y p' q'”
-  all := .mkSigma “y w p p'. !qqAllDef y p'”
-  exs := .mkSigma “y w p p'. !qqExsDef y p'”
-  allChanges := .mkSigma “w' w. w' = w”
-  exsChanges := .mkSigma “w' w. w' = w”
+  all := .mkSigma “y w p ys. ∃ p', !nthDef p' ys 0 ∧ !qqAllDef y p'”
+  exs := .mkSigma “y w p ys. ∃ p', !nthDef p' ys 0 ∧ !qqExsDef y p'”
 
 /-- The realization of `FvSubst.blueprint` as a `UformulaRec1.Construction`, together with the
 $\Sigma_1$-definability witness for each clause.
@@ -246,10 +244,8 @@ noncomputable def construction (L : Language) [L.Encodable] [L.LORDefinable] :
   falsum _ := ^⊥
   and _ := fun _ _ p q ↦ p ^⋏ q
   or _ := fun _ _ p q ↦ p ^⋎ q
-  all _ := fun _ p ↦ ^∀ p
-  exs _ := fun _ p ↦ ^∃ p
-  allChanges := id
-  exsChanges := id
+  all _ := fun _ ys ↦ ^∀ ys.[0]
+  exs _ := fun _ ys ↦ ^∃ ys.[0]
   rel_defined := .mk fun v ↦ by simp [blueprint]
   nrel_defined := .mk fun v ↦ by simp [blueprint]
   verum_defined := .mk fun v ↦ by simp [blueprint]
@@ -258,8 +254,6 @@ noncomputable def construction (L : Language) [L.Encodable] [L.LORDefinable] :
   or_defined := .mk fun v ↦ by simp [blueprint]
   all_defined := .mk fun v ↦ by simp [blueprint]
   exs_defined := .mk fun v ↦ by simp [blueprint]
-  allChanges_defined := .mk fun v ↦ by simp [blueprint]
-  exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
 end FvSubst
 

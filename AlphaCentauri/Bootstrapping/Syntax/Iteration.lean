@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Proof.FvSubst
+public import AlphaCentauri.ToFoundation.Syntax
 
 /-!
 # Blocks of quantifiers and vectors of bound variables

@@ -36,8 +36,7 @@ lemma setShift_subset_setShift {s t : V} (h : s ⊆ t) : setShift L s ⊆ setShi
   obtain ⟨y, hy, rfl⟩ := mem_setShift_iff.mp hx
   exact shift_mem_setShift (h hy)
 
-/-- Substituting the bound variables of a closed (`0`-ary) semiterm is the identity, since it has
-none to replace. -/
+/-- Substituting the bound variables of a closed semiterm is the identity. -/
 lemma termSubst_zero {v t : V} (ht : IsSemiterm L 0 t) : termSubst L v t = t := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -53,8 +52,7 @@ lemma termSubst_zero {v t : V} (ht : IsSemiterm L 0 t) : termSubst L v t = t := 
     rw [nth_termSubstVec hts.isUTerm hi]
     exact ih i hi
 
-/-- Bound-shifting a closed (`0`-ary) semiterm is the identity, since it has no bound variables to
-shift. -/
+/-- Bound-shifting a closed semiterm is the identity. -/
 lemma termBShift_zero {t : V} (ht : IsSemiterm L 0 t) : termBShift L t = t := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability

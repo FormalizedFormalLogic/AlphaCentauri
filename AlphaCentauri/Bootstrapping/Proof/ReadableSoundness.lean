@@ -25,6 +25,7 @@ open FFL.FirstOrder.Bounding (HierarchySymbol)
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1
+open Arithmetic (numeral numeral_semiterm)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -230,5 +231,51 @@ lemma IsPartialInstance.succ {r φ : V} (h : IsPartialInstance E (r + 1) φ) :
       exact hwc i hi (succ_le_iff_lt.mpr hri)
 
 end partialInstance
+
+/-! ### Blocks with false instances -/
+
+/-- `IsFalseBlock k D e`: `e` is a block `qqExss χ m` of existential quantifiers over a matrix `χ`
+that has no free variables, is not existential, and belongs to `IsReadable k D`, such that every
+instance of `χ` by closed terms is false under `ReadableTruth k D`. -/
+def IsFalseBlock (k D : ℕ) (e : V) : Prop :=
+  ∃ m χ, e = qqExss χ m ∧ IsSemiformula ℒₒᵣ m χ ∧ shift ℒₒᵣ χ = χ ∧ (∀ p, χ ≠ ^∃ p) ∧
+    IsReadable k D χ ∧ ∀ w, IsSemitermVec ℒₒᵣ m 0 w → ¬ReadableTruth k D (subst ℒₒᵣ w χ)
+
+section falseBlock
+
+variable {k D : ℕ} {E : V}
+
+lemma IsPartialInstance.zero (hE : ∀ e ∈ E, IsFalseBlock k D e) {φ : V}
+    (h : IsPartialInstance E 0 φ) : IsReadable k D φ ∧ ¬ReadableTruth k D φ := by
+  obtain ⟨m, χ, hmem, hχ, hmax, -, w, hw, -, -, rfl⟩ := h
+  obtain ⟨m', χ', he, -, -, hmax', hr, hf⟩ := hE _ hmem
+  obtain ⟨rfl, rfl⟩ := qqExss_inj (fun a ha ↦ hmax a (by simp [ha]) ha) hmax' he
+  exact ⟨by simpa using hr.subst hw hχ, by simpa using hf w hw⟩
+
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
+
+/-- The negation of a partial instance of a block of `E` is true whenever it is readable. -/
+lemma IsPartialInstance.readableTruth_neg (hE : ∀ e ∈ E, IsFalseBlock k D e) {r φ : V}
+    (h : IsPartialInstance E r φ) (hn : IsReadable k D (neg ℒₒᵣ φ)) :
+    ReadableTruth k D (neg ℒₒᵣ φ) := by
+  have hP : 𝚷ᴬ-[k + 1].DefinablePred fun r : V ↦ ∀ φ, IsPartialInstance E r φ →
+      IsReadable k D (neg ℒₒᵣ φ) → ReadableTruth k D (neg ℒₒᵣ φ) := by
+    definability
+  refine InductionOnHierarchy.succ_induction_sigma 𝚷 (k + 1) hP ?_ ?_ r φ h hn
+  · intro φ h hn
+    obtain ⟨hr, hf⟩ := h.zero hE
+    exact (ReadableTruth.neg_iff hr hn h.isFormula.isUFormula).mpr hf
+  · intro r ih φ h hn
+    obtain ⟨p, rfl, hp, hinst⟩ := h.succ
+    rw [neg_ex hp.isUFormula] at hn ⊢
+    apply (ReadableTruth.all_iff hn hp.neg).mpr
+    intro x
+    have e : substs1 ℒₒᵣ (numeral x) (neg ℒₒᵣ p) = neg ℒₒᵣ (substs1 ℒₒᵣ (numeral x) p) :=
+      substs_neg hp (by simp : IsSemitermVec ℒₒᵣ 1 0 (?[numeral x] : V))
+    have hx := hn.substs1_of_all (m := 0) (numeral_semiterm 0 x) hp.neg
+    rw [e] at hx ⊢
+    exact ih _ (hinst _ (numeral_semiterm 0 x)) hx
+
+end falseBlock
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

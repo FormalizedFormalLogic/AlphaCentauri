@@ -22,7 +22,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable {T : Theory L} [T.Δ₁]
 
 /-- If the free instance of `p` follows from that of `q`, then `^∀ p` follows from `^∀ q`. -/
-lemma Derivable.neg_all_all {p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
+private lemma Derivable.neg_all_all {p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
     (h : Derivable T (insert (neg L (free L q)) ({free L p} : V))) :
     Derivable T (insert (neg L (^∀ q)) ({^∀ p} : V)) := by
   have he : substs1 L ^&0 (neg L (Bootstrapping.shift L q)) = neg L (free L q) :=

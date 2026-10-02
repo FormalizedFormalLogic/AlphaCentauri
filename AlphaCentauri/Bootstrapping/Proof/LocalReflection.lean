@@ -28,7 +28,7 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {k n 
 
 /-- For $n \le k$, below any code `d` there is a set of false blocks, closed under the shift, that
 contains the negation of a replacement of each axiom of $\mathsf{I}\Sigma_n$ below `d`. -/
-theorem exists_falseBlock_set [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hn : n ≤ k) (d : V) :
+private theorem exists_falseBlock_set [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hn : n ≤ k) (d : V) :
     ∃ a : V, IsFormulaSet ℒₒᵣ a ∧ setShift ℒₒᵣ a = a ∧ (∀ e ∈ a, IsFalseBlock k 3 e) ∧
       ∀ p ≤ d, p ∈ (𝗜𝚺 n).Δ₁Class →
         ∃ q, neg ℒₒᵣ q ∈ a ∧ Derivable (∅ : Theory ℒₒᵣ) (insert (neg ℒₒᵣ q) ({p} : V)) := by
@@ -83,7 +83,7 @@ private lemma not_readableTruth_subst_subst_qVec (ρ : ℬ[<, ℒₒᵣ].Prenex 
 
 /-- The instance by the numeral of `a` of a code `∃y ρ(x, y)`, with `ρ` a prenex $\Pi_{k+1}$
 formula, is a false block when `ρ(a, b)` fails for all `b`. -/
-lemma isFalseBlock_substNumeral_exs (ρ : ℬ[<, ℒₒᵣ].Prenex 𝚷 (k + 1) Empty 2) (a : V)
+private lemma isFalseBlock_substNumeral_exs (ρ : ℬ[<, ℒₒᵣ].Prenex 𝚷 (k + 1) Empty 2) (a : V)
     (h : ∀ b : V, ¬V ⊧/![b, a] ρ.val) :
     IsFalseBlock k 3 (substNumeral (⌜∃¹ ρ.val⌝ : V) a) := by
   have hr : IsSemiformula ℒₒᵣ 2 (⌜ρ.val⌝ : V) := Sentence.quote_isSemiformula ρ.val

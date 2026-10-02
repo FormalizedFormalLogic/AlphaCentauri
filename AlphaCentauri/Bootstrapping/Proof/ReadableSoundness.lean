@@ -316,7 +316,7 @@ private lemma hasWitness_definable :
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
 
-lemma IsPartialInstance.readableTruth_neg (hE : ∀ e ∈ E, IsFalseBlock k D e) {r φ : V}
+private lemma IsPartialInstance.readableTruth_neg (hE : ∀ e ∈ E, IsFalseBlock k D e) {r φ : V}
     (h : IsPartialInstance E r φ) (hn : IsReadable k D (neg ℒₒᵣ φ)) :
     ReadableTruth k D (neg ℒₒᵣ φ) := by
   have hP : 𝚷ᴬ-[k + 1].DefinablePred fun r : V ↦ ∀ φ, IsPartialInstance E r φ →
@@ -407,7 +407,7 @@ private lemma hasWitness_aux (hE : ∀ e ∈ E, IsFalseBlock k D e) :
 /-- If, under the assignment `f`, every formula of a sequent derivable in pure logic without cuts
 is readable or a partial instance of a block of `E`, then some formula of the sequent is true under
 `f`, and its value under `f` is not a partial instance of a block of `E` with a quantifier left. -/
-theorem CutFreeDerivable.exists_readableSatisfaction (hE : ∀ e ∈ E, IsFalseBlock k D e)
+private theorem CutFreeDerivable.exists_readableSatisfaction (hE : ∀ e ∈ E, IsFalseBlock k D e)
     {s f : V} (h : CutFreeDerivable (∅ : Theory ℒₒᵣ) s)
     (hs : ∀ ψ ∈ s, IsReadable k D (fvAssign f ψ) ∨ ∃ r, IsPartialInstance E r (fvAssign f ψ)) :
     ∃ ψ ∈ s, (∀ r, ¬IsPartialInstance E (r + 1) (fvAssign f ψ)) ∧

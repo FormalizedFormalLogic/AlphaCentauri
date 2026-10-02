@@ -29,7 +29,7 @@ section falseBlock
 
 /-- The negation of the code of a universal closure of a $\Delta_0$ formula that is true in `V`
 is a block of existential quantifiers whose instances are all false. -/
-lemma isFalseBlock_neg_quote_allClosure {k D m : ℕ} {θ : ArithmeticSemisentence m}
+private lemma isFalseBlock_neg_quote_allClosure {k D m : ℕ} {θ : ArithmeticSemisentence m}
     (hθ : ℬ[<, ℒₒᵣ].Closure θ) (hn : ∀ ψ, θ ≠ ∀¹ ψ)
     (hσ : V↓[ℒₒᵣ] ⊧ (∀¹* θ : ArithmeticSentence)) :
     IsFalseBlock k D (neg ℒₒᵣ (⌜∀¹* θ⌝ : V)) := by
@@ -53,7 +53,7 @@ end falseBlock
 
 section classification
 
-lemma exists_allClosure_closure_of_peanoMinus {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) :
+private lemma exists_allClosure_closure_of_peanoMinus {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) :
     ∃ m, ∃ θ : ArithmeticSemisentence m, σ = ∀¹* θ ∧ ℬ[<, ℒₒᵣ].Closure θ ∧ ∀ ψ, θ ≠ ∀¹ ψ := by
   rcases h with ⟨φ, hφ⟩ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _
   · rcases hφ with _ | _ | _ | @⟨k, f⟩ | @⟨k, r⟩
@@ -83,8 +83,8 @@ end classification
 
 section peanoMinus
 
-lemma isFalseBlock_neg_quote_of_mem_peanoMinus {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) (k D : ℕ) :
-    IsFalseBlock k D (neg ℒₒᵣ (⌜σ⌝ : V)) := by
+private lemma isFalseBlock_neg_quote_of_mem_peanoMinus {σ : ArithmeticSentence}
+    (h : σ ∈ 𝗣𝗔⁻) (k D : ℕ) : IsFalseBlock k D (neg ℒₒᵣ (⌜σ⌝ : V)) := by
   obtain ⟨m, θ, rfl, hθ, hn⟩ := exists_allClosure_closure_of_peanoMinus h
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 1)
   exact isFalseBlock_neg_quote_allClosure hθ hn (Semantics.ModelsSet.models _ h)

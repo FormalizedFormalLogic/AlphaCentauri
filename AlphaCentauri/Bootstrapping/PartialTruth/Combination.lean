@@ -471,4 +471,340 @@ instance IsReadable.definable (D : ℕ) : 𝚫ᴬ₁-Predicate (IsReadable k D :
 
 end definability
 
+/-! ## Truth -/
+
+section truth
+
+variable (k : ℕ)
+
+/-- `q` is true when read as `qqToPrenex Γ s θ` with a $\Delta_0$ matrix `θ`. -/
+def PrenexReading (Γ : Polarity) (s : ℕ) (q : V) : Prop :=
+  ∀ θ ≤ q, q = qqToPrenex Γ s θ → IsBounded θ → HierarchicalSatisfaction Γ s θ 0
+
+/-- `q` is true when read as a prenex formula of any class read directly. -/
+def AtomReading (q : V) : Prop := ∀ Γ s, IsAtomLevel k Γ s → PrenexReading Γ s q
+
+/-- The truth of a combination of depth at most `D`, computed by its truth table from the
+prenex formulas it is built from. -/
+def CombinationReading : ℕ → V → Prop
+  | 0 => AtomReading k
+  | D + 1 => fun q ↦ (IsPrenexAtom k q → AtomReading k q) ∧
+      (¬IsPrenexAtom k q → ∀ q₁ < q, ∀ q₂ < q, q = q₁ ^⋏ q₂ →
+        CombinationReading D q₁ ∧ CombinationReading D q₂) ∧
+      (¬IsPrenexAtom k q → ∀ q₁ < q, ∀ q₂ < q, q = q₁ ^⋎ q₂ →
+        CombinationReading D q₁ ∨ CombinationReading D q₂)
+
+/-- `q` belongs to `IsReadable k D` and is true, its free variables being read as `0`. -/
+def ReadableTruth (D : ℕ) (q : V) : Prop :=
+  IsReadable k D q ∧ CombinationReading k D q ∧
+    (¬IsPrenexAtom k q → ∀ χ < q, q = ^∀ χ →
+      ∀ x, CombinationReading k D (substs1 ℒₒᵣ (numeral x) χ))
+
+/-- `p`, with its free variables `^&i` valued by `f.[i]`, belongs to `IsReadable k D` and is
+true. -/
+def ReadableSatisfaction (D : ℕ) (p f : V) : Prop := ReadableTruth k D (fvAssign f p)
+
+end truth
+
+section reading
+
+variable {k D : ℕ} {Γ : Polarity} {s : ℕ} {q θ : V}
+
+lemma PrenexReading.iff (heq : q = qqToPrenex Γ s θ) (hθ : IsBounded θ) :
+    PrenexReading Γ s q ↔ HierarchicalSatisfaction Γ s θ 0 := by
+  subst heq
+  refine ⟨fun h ↦ h θ le_qqToPrenex rfl hθ, ?_⟩
+  intro h θ' _ he _
+  obtain rfl := qqToPrenex_inj.mp he.symm
+  exact h
+
+lemma AtomReading.of_not_isPrenexAtom (ha : ¬IsPrenexAtom k q) : AtomReading k q := by
+  intro Γ s hs θ _ he hθ
+  exact absurd (he ▸ IsPrenexAtom.of_qqToPrenex hs hθ) ha
+
+lemma AtomReading.iff (ha : IsPrenexAtom k q) (heq : q = qqToPrenex Γ s θ) (hθ : IsBounded θ)
+    (hq : IsUFormula ℒₒᵣ q) : AtomReading k q ↔ HierarchicalSatisfaction Γ s θ 0 := by
+  have hθ' : IsUFormula ℒₒᵣ θ := isUFormula_qqToPrenex.mp (heq ▸ hq)
+  obtain ⟨Γ', s', θ', hs', heq', hθ''⟩ := ha.exists_qqToPrenex
+  constructor
+  · intro h
+    exact (HierarchicalSatisfaction.iff_of_qqToPrenex_eq (heq'.symm.trans heq) hθ'' hθ
+      (isUFormula_qqToPrenex.mp (heq' ▸ hq))).mp ((PrenexReading.iff heq' hθ'').mp (h Γ' s' hs'))
+  · intro h Γ'' s'' _ θ'' _ he hb
+    exact (HierarchicalSatisfaction.iff_of_qqToPrenex_eq (heq.symm.trans he) hθ hb hθ').mp h
+
+lemma AtomReading.neg (ha : IsPrenexAtom k q) (hna : IsPrenexAtom k (neg ℒₒᵣ q))
+    (hq : IsUFormula ℒₒᵣ q) : AtomReading k (neg ℒₒᵣ q) ↔ ¬AtomReading k q := by
+  obtain ⟨Γ, s, θ, -, rfl, hθ⟩ := ha.exists_qqToPrenex
+  have hθ' : IsUFormula ℒₒᵣ θ := isUFormula_qqToPrenex.mp hq
+  rw [AtomReading.iff ha rfl hθ hq, AtomReading.iff hna (neg_qqToPrenex hθ') (hθ.neg hθ') hq.neg,
+    HierarchicalSatisfaction.neg_iff hθ hθ']
+
+/-- An instance of a prenex formula with at most `k` quantifiers by a closed term is read with the
+value of the term. -/
+lemma AtomReading.substs1_iff {t : V} (hs : s ≤ k) (hθ : IsBounded θ)
+    (hχ : IsSemiformula ℒₒᵣ 1 (qqToPrenex Γ s θ)) (ht : IsSemiterm ℒₒᵣ 0 t) :
+    IsPrenexAtom k (substs1 ℒₒᵣ t (qqToPrenex Γ s θ)) ∧
+      (AtomReading k (substs1 ℒₒᵣ t (qqToPrenex Γ s θ)) ↔
+        HierarchicalSatisfaction Γ s θ (termVal 0 t ∷ 0)) := by
+  have hθs : IsSemiformula ℒₒᵣ (1 + s : V) θ := isSemiformula_qqToPrenex.mp hχ
+  have hw : IsSemitermVec ℒₒᵣ 1 0 (?[t] : V) := by simp [ht]
+  have he : substs1 ℒₒᵣ t (qqToPrenex Γ s θ) =
+      qqToPrenex Γ s (subst ℒₒᵣ ((qVec ℒₒᵣ)^[s] ?[t]) θ) :=
+    subst_qqToPrenex hθs.isUFormula
+  have hb : IsBounded (subst ℒₒᵣ ((qVec ℒₒᵣ)^[s] ?[t]) θ) := hθ.subst (hw.iterate_qVec s) hθs
+  have ha : IsPrenexAtom k (substs1 ℒₒᵣ t (qqToPrenex Γ s θ)) :=
+    he ▸ IsPrenexAtom.of_qqToPrenex (.of_le hs) hb
+  refine ⟨ha, ?_⟩
+  rw [AtomReading.iff ha he hb (hχ.substs1 ht).isUFormula, HierarchicalSatisfaction.subst hw hθs hθ,
+    termValVec_cons₁ ht.isUTerm]
+
+lemma CombinationReading.iff_atomReading (ha : IsPrenexAtom k q) :
+    CombinationReading k D q ↔ AtomReading k q := by
+  cases D with
+  | zero => rfl
+  | succ D => simp [CombinationReading, ha]
+
+lemma CombinationReading.of_not_isPrenexAtom_all {χ : V} (ha : ¬IsPrenexAtom k (^∀ χ)) :
+    CombinationReading k D (^∀ χ) := by
+  cases D with
+  | zero => exact AtomReading.of_not_isPrenexAtom ha
+  | succ D =>
+    refine ⟨fun h ↦ absurd h ha, ?_, ?_⟩ <;>
+    · intro _ q₁ _ q₂ _ he
+      simp [qqAll, qqAnd, qqOr] at he
+
+lemma CombinationReading.and_iff {q₁ q₂ : V} (hq₁ : IsUFormula ℒₒᵣ q₁) (hq₂ : IsUFormula ℒₒᵣ q₂) :
+    CombinationReading k (D + 1) (q₁ ^⋏ q₂) ↔
+      CombinationReading k D q₁ ∧ CombinationReading k D q₂ := by
+  by_cases ha : IsPrenexAtom k (q₁ ^⋏ q₂)
+  · have hb := ha.isBounded_of_and
+    obtain ⟨hb₁, hb₂⟩ := IsBounded.and_iff.mp hb
+    rw [iff_atomReading ha, iff_atomReading (IsPrenexAtMost.of_isBounded hb₁).isPrenexAtom,
+      iff_atomReading (IsPrenexAtMost.of_isBounded hb₂).isPrenexAtom,
+      AtomReading.iff (Γ := 𝚺) (s := 0) (θ := q₁ ^⋏ q₂) ha rfl hb (by simp [hq₁, hq₂]),
+      AtomReading.iff (Γ := 𝚺) (s := 0) (θ := q₁) (IsPrenexAtMost.of_isBounded hb₁).isPrenexAtom
+        rfl hb₁ hq₁,
+      AtomReading.iff (Γ := 𝚺) (s := 0) (θ := q₂) (IsPrenexAtMost.of_isBounded hb₂).isPrenexAtom
+        rfl hb₂ hq₂]
+    simp only [HierarchicalSatisfaction.zero_iff, BoundedSatisfaction.and_iff]
+  · simp only [CombinationReading, ha, IsEmpty.forall_iff, not_false_eq_true, forall_const,
+      true_and]
+    constructor
+    · rintro ⟨h, -⟩
+      exact h q₁ (by simp) q₂ (by simp) rfl
+    · intro h
+      refine ⟨?_, ?_⟩
+      · rintro q₁' - q₂' - he
+        obtain ⟨rfl, rfl⟩ := (qqAnd_inj _ _ _ _).mp he
+        exact h
+      · rintro q₁' - q₂' - he
+        simp [qqAnd, qqOr] at he
+
+lemma CombinationReading.or_iff {q₁ q₂ : V} (hq₁ : IsUFormula ℒₒᵣ q₁) (hq₂ : IsUFormula ℒₒᵣ q₂) :
+    CombinationReading k (D + 1) (q₁ ^⋎ q₂) ↔
+      CombinationReading k D q₁ ∨ CombinationReading k D q₂ := by
+  by_cases ha : IsPrenexAtom k (q₁ ^⋎ q₂)
+  · have hb := ha.isBounded_of_or
+    obtain ⟨hb₁, hb₂⟩ := IsBounded.or_iff.mp hb
+    rw [iff_atomReading ha, iff_atomReading (IsPrenexAtMost.of_isBounded hb₁).isPrenexAtom,
+      iff_atomReading (IsPrenexAtMost.of_isBounded hb₂).isPrenexAtom,
+      AtomReading.iff (Γ := 𝚺) (s := 0) (θ := q₁ ^⋎ q₂) ha rfl hb (by simp [hq₁, hq₂]),
+      AtomReading.iff (Γ := 𝚺) (s := 0) (θ := q₁) (IsPrenexAtMost.of_isBounded hb₁).isPrenexAtom
+        rfl hb₁ hq₁,
+      AtomReading.iff (Γ := 𝚺) (s := 0) (θ := q₂) (IsPrenexAtMost.of_isBounded hb₂).isPrenexAtom
+        rfl hb₂ hq₂]
+    simp only [HierarchicalSatisfaction.zero_iff, BoundedSatisfaction.or_iff hb₁ hq₁ hb₂ hq₂]
+  · simp only [CombinationReading, ha, IsEmpty.forall_iff, not_false_eq_true, forall_const,
+      true_and]
+    constructor
+    · rintro ⟨-, h⟩
+      exact h q₁ (by simp) q₂ (by simp) rfl
+    · intro h
+      refine ⟨?_, ?_⟩
+      · rintro q₁' - q₂' - he
+        simp [qqAnd, qqOr] at he
+      · rintro q₁' - q₂' - he
+        obtain ⟨rfl, rfl⟩ := (qqOr_inj _ _ _ _).mp he
+        exact h
+
+lemma CombinationReading.succ_iff (h : IsCombination k D q) (hq : IsUFormula ℒₒᵣ q) :
+    CombinationReading k (D + 1) q ↔ CombinationReading k D q := by
+  induction D generalizing q with
+  | zero => exact iff_atomReading (IsPrenexAtMost.isPrenexAtom h)
+  | succ D ih =>
+    rcases h.cases with h | ⟨D', hD, ⟨q₁, q₂, rfl, h₁, h₂⟩ | ⟨q₁, q₂, rfl, h₁, h₂⟩⟩
+    · rw [iff_atomReading h.isPrenexAtom, iff_atomReading h.isPrenexAtom]
+    · obtain rfl : D' = D := by omega
+      obtain ⟨hq₁, hq₂⟩ := IsUFormula.and.mp hq
+      rw [and_iff hq₁ hq₂, and_iff hq₁ hq₂, ih h₁ hq₁, ih h₂ hq₂]
+    · obtain rfl : D' = D := by omega
+      obtain ⟨hq₁, hq₂⟩ := IsUFormula.or.mp hq
+      rw [or_iff hq₁ hq₂, or_iff hq₁ hq₂, ih h₁ hq₁, ih h₂ hq₂]
+
+lemma CombinationReading.le_iff {D' : ℕ} (h : IsCombination k D q) (hq : IsUFormula ℒₒᵣ q)
+    (hD : D ≤ D') : CombinationReading k D' q ↔ CombinationReading k D q := by
+  induction hD with
+  | refl => rfl
+  | step hD ih => exact (succ_iff (h.mono hD) hq).trans ih
+
+lemma CombinationReading.neg (h : IsCombination k D q) (hq : IsUFormula ℒₒᵣ q) :
+    CombinationReading k D (neg ℒₒᵣ q) ↔ ¬CombinationReading k D q := by
+  induction D generalizing q with
+  | zero =>
+    have ha : IsPrenexAtMost k q := h
+    rw [iff_atomReading ha.isPrenexAtom,
+      iff_atomReading (h.neg hq : IsPrenexAtMost k (neg ℒₒᵣ q)).isPrenexAtom,
+      AtomReading.neg ha.isPrenexAtom (h.neg hq : IsPrenexAtMost k (neg ℒₒᵣ q)).isPrenexAtom hq]
+  | succ D ih =>
+    rcases h.cases with ha | ⟨D', hD, ⟨q₁, q₂, rfl, h₁, h₂⟩ | ⟨q₁, q₂, rfl, h₁, h₂⟩⟩
+    · have hna : IsPrenexAtMost k (neg ℒₒᵣ q) :=
+        IsCombination.neg (D := 0) hq ha
+      rw [iff_atomReading ha.isPrenexAtom, iff_atomReading hna.isPrenexAtom,
+        AtomReading.neg ha.isPrenexAtom hna.isPrenexAtom hq]
+    · obtain rfl : D' = D := by omega
+      obtain ⟨hq₁, hq₂⟩ := IsUFormula.and.mp hq
+      rw [neg_and hq₁ hq₂, or_iff hq₁.neg hq₂.neg, and_iff hq₁ hq₂, ih h₁ hq₁, ih h₂ hq₂]
+      tauto
+    · obtain rfl : D' = D := by omega
+      obtain ⟨hq₁, hq₂⟩ := IsUFormula.or.mp hq
+      rw [neg_or hq₁ hq₂, and_iff hq₁.neg hq₂.neg, or_iff hq₁ hq₂, ih h₁ hq₁, ih h₂ hq₂]
+      tauto
+
+end reading
+
+/-! ### The Tarski conditions for closed formulas -/
+
+section readableTruth
+
+variable {k D : ℕ} {q χ : V}
+
+lemma ReadableTruth.iff_atomReading (ha : IsPrenexAtom k q) :
+    ReadableTruth k D q ↔ AtomReading k q := by
+  simp [ReadableTruth, IsReadable.of_isPrenexAtom ha, CombinationReading.iff_atomReading ha, ha]
+
+lemma ReadableTruth.iff_combinationReading (h : IsCombination k D q) :
+    ReadableTruth k D q ↔ CombinationReading k D q := by
+  refine ⟨fun h' ↦ h'.2.1, fun h' ↦ ⟨.of_isCombination h, h', ?_⟩⟩
+  rintro ha χ - rfl
+  exact absurd h.isPrenexAtMost_of_all.isPrenexAtom ha
+
+@[simp] lemma ReadableTruth.verum : ReadableTruth k D (^⊤ : V) := by
+  have ha : IsPrenexAtom k (^⊤ : V) := (IsPrenexAtMost.of_isBounded (by simp)).isPrenexAtom
+  rw [iff_atomReading ha, AtomReading.iff (Γ := 𝚺) (s := 0) (θ := ^⊤) ha rfl (by simp) (by simp)]
+  simp
+
+lemma ReadableTruth.and_iff {q₁ q₂ : V} (h : IsReadable k D (q₁ ^⋏ q₂))
+    (hq₁ : IsUFormula ℒₒᵣ q₁) (hq₂ : IsUFormula ℒₒᵣ q₂) :
+    ReadableTruth k D (q₁ ^⋏ q₂) ↔ ReadableTruth k D q₁ ∧ ReadableTruth k D q₂ := by
+  have hc := h.isCombination_of_and
+  rcases hc.cases with ha | ⟨D, rfl, ⟨p₁, p₂, he, h₁, h₂⟩ | ⟨p₁, p₂, he, -, -⟩⟩
+  · obtain ⟨ha₁, ha₂⟩ := IsPrenexAtMost.of_and ha.isPrenexAtom
+    rw [iff_atomReading ha.isPrenexAtom, iff_atomReading ha₁.isPrenexAtom,
+      iff_atomReading ha₂.isPrenexAtom,
+      ← CombinationReading.iff_atomReading (D := 1) ha.isPrenexAtom,
+      CombinationReading.and_iff hq₁ hq₂]
+    rfl
+  · obtain ⟨rfl, rfl⟩ := (qqAnd_inj _ _ _ _).mp he
+    rw [iff_combinationReading hc, iff_combinationReading h₁.succ, iff_combinationReading h₂.succ,
+      CombinationReading.and_iff hq₁ hq₂, CombinationReading.succ_iff h₁ hq₁,
+      CombinationReading.succ_iff h₂ hq₂]
+  · simp [qqAnd, qqOr] at he
+
+lemma ReadableTruth.or_iff {q₁ q₂ : V} (h : IsReadable k D (q₁ ^⋎ q₂))
+    (hq₁ : IsUFormula ℒₒᵣ q₁) (hq₂ : IsUFormula ℒₒᵣ q₂) :
+    ReadableTruth k D (q₁ ^⋎ q₂) ↔ ReadableTruth k D q₁ ∨ ReadableTruth k D q₂ := by
+  have hc := h.isCombination_of_or
+  rcases hc.cases with ha | ⟨D, rfl, ⟨p₁, p₂, he, -, -⟩ | ⟨p₁, p₂, he, h₁, h₂⟩⟩
+  · obtain ⟨ha₁, ha₂⟩ := IsPrenexAtMost.of_or ha.isPrenexAtom
+    rw [iff_atomReading ha.isPrenexAtom, iff_atomReading ha₁.isPrenexAtom,
+      iff_atomReading ha₂.isPrenexAtom,
+      ← CombinationReading.iff_atomReading (D := 1) ha.isPrenexAtom,
+      CombinationReading.or_iff hq₁ hq₂]
+    rfl
+  · simp [qqAnd, qqOr] at he
+  · obtain ⟨rfl, rfl⟩ := (qqOr_inj _ _ _ _).mp he
+    rw [iff_combinationReading hc, iff_combinationReading h₁.succ, iff_combinationReading h₂.succ,
+      CombinationReading.or_iff hq₁ hq₂, CombinationReading.succ_iff h₁ hq₁,
+      CombinationReading.succ_iff h₂ hq₂]
+
+lemma ReadableTruth.all_iff (h : IsReadable k D (^∀ χ)) (hχ : IsSemiformula ℒₒᵣ 1 χ) :
+    ReadableTruth k D (^∀ χ) ↔ ∀ x, ReadableTruth k D (substs1 ℒₒᵣ (numeral x) χ) := by
+  by_cases ha : IsPrenexAtom k (^∀ χ)
+  · obtain ⟨s, θ, hs, rfl, hθ⟩ := ha.exists_of_all
+    rw [iff_atomReading ha,
+      AtomReading.iff (Γ := 𝚷) (s := s + 1) ha rfl hθ (by simpa using hχ.isUFormula)]
+    refine forall_congr' fun x ↦ ?_
+    obtain ⟨ha', hr⟩ := AtomReading.substs1_iff hs hθ hχ (Arithmetic.numeral_semiterm 0 x)
+    rw [iff_atomReading ha', hr, termVal_numeral]
+  · have hc := h.isCombination_of_all
+    have hc' (x : V) : IsCombination k D (substs1 ℒₒᵣ (numeral x) χ) :=
+      hc.subst (m := 0) (by simp) hχ
+    have e : ReadableTruth k D (^∀ χ) ↔
+        ∀ x, CombinationReading k D (substs1 ℒₒᵣ (numeral x) χ) := by
+      refine ⟨fun h' x ↦ h'.2.2 ha χ (by simp) rfl x,
+        fun h' ↦ ⟨h, CombinationReading.of_not_isPrenexAtom_all ha, ?_⟩⟩
+      rintro - χ' - he
+      obtain rfl := (qqAll_inj _ _).mp he
+      exact h'
+    rw [e]
+    exact forall_congr' fun x ↦ (iff_combinationReading (hc' x)).symm
+
+lemma ReadableTruth.exs_iff (h : IsReadable k D (^∃ χ)) (hχ : IsSemiformula ℒₒᵣ 1 χ) :
+    ReadableTruth k D (^∃ χ) ↔ ∃ x, ReadableTruth k D (substs1 ℒₒᵣ (numeral x) χ) := by
+  have ha := h.isPrenexAtom_of_exs
+  obtain ⟨s, θ, hs, rfl, hθ⟩ := ha.exists_of_exs
+  rw [iff_atomReading ha,
+    AtomReading.iff (Γ := 𝚺) (s := s + 1) ha rfl hθ (by simpa using hχ.isUFormula)]
+  refine exists_congr fun x ↦ ?_
+  obtain ⟨ha', hr⟩ := AtomReading.substs1_iff hs hθ hχ (Arithmetic.numeral_semiterm 0 x)
+  rw [iff_atomReading ha', hr, termVal_numeral]
+
+lemma ReadableTruth.substs1_iff {t : V} (h : IsReadable k D (^∃ χ)) (hχ : IsSemiformula ℒₒᵣ 1 χ)
+    (ht : IsSemiterm ℒₒᵣ 0 t) :
+    ReadableTruth k D (substs1 ℒₒᵣ t χ) ↔
+      ReadableTruth k D (substs1 ℒₒᵣ (numeral (termVal 0 t)) χ) := by
+  obtain ⟨s, θ, hs, rfl, hθ⟩ := h.isPrenexAtom_of_exs.exists_of_exs
+  obtain ⟨ha, hr⟩ := AtomReading.substs1_iff hs hθ hχ ht
+  obtain ⟨ha', hr'⟩ :=
+    AtomReading.substs1_iff hs hθ hχ (Arithmetic.numeral_semiterm 0 (termVal 0 t))
+  rw [iff_atomReading ha, iff_atomReading ha', hr, hr', termVal_numeral]
+
+lemma ReadableTruth.exs_of_substs1 {t : V} (h : IsReadable k D (^∃ χ))
+    (hχ : IsSemiformula ℒₒᵣ 1 χ) (ht : IsSemiterm ℒₒᵣ 0 t)
+    (ht' : ReadableTruth k D (substs1 ℒₒᵣ t χ)) : ReadableTruth k D (^∃ χ) :=
+  (exs_iff h hχ).mpr ⟨termVal 0 t, (substs1_iff h hχ ht).mp ht'⟩
+
+/-- A prenex atom whose negation is readable has a negation that is a prenex atom. -/
+lemma IsReadable.isPrenexAtom_neg (ha : IsPrenexAtom k q) (hn : IsReadable k D (neg ℒₒᵣ q))
+    (hq : IsUFormula ℒₒᵣ q) : IsPrenexAtom k (neg ℒₒᵣ q) := by
+  obtain ⟨Γ, s, θ, hs, rfl, hθ⟩ := ha.exists_qqToPrenex
+  have hθ' : IsUFormula ℒₒᵣ θ := isUFormula_qqToPrenex.mp hq
+  rw [neg_qqToPrenex hθ'] at hn ⊢
+  rcases hs with hs | ⟨rfl, rfl⟩
+  · exact IsPrenexAtom.of_qqToPrenex (.of_le hs) (hθ.neg hθ')
+  · exact hn.isPrenexAtom_of_exs
+
+lemma ReadableTruth.neg_iff (h : IsReadable k D q) (hn : IsReadable k D (neg ℒₒᵣ q))
+    (hq : IsUFormula ℒₒᵣ q) : ReadableTruth k D (neg ℒₒᵣ q) ↔ ¬ReadableTruth k D q := by
+  by_cases ha : IsPrenexAtom k q
+  · have hna := hn.isPrenexAtom_neg ha hq
+    rw [iff_atomReading ha, iff_atomReading hna, AtomReading.neg ha hna hq]
+  · by_cases hna : IsPrenexAtom k (neg ℒₒᵣ q)
+    · have h' : IsReadable k D (neg ℒₒᵣ (neg ℒₒᵣ q)) := by rwa [IsUFormula.neg_neg hq]
+      have := IsReadable.isPrenexAtom_neg hna h' hq.neg
+      rw [IsUFormula.neg_neg hq] at this
+      exact absurd this ha
+    · have hc : IsCombination k D q := by
+        rcases h with h | ⟨χ, -, rfl, -⟩ | h
+        · exact h
+        · have hχ : IsUFormula ℒₒᵣ χ := IsUFormula.all.mp hq
+          rw [neg_all hχ] at hn hna
+          exact absurd hn.isPrenexAtom_of_exs hna
+        · exact absurd (isPrenexAtom_iff.mpr (Or.inr h)) ha
+      rw [iff_combinationReading hc, iff_combinationReading (hc.neg hq),
+        CombinationReading.neg hc hq]
+
+end readableTruth
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

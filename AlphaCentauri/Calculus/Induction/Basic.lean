@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.Hierarchy.Bounded
+public import AlphaCentauri.ToFoundation.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.LK.Basic
 
@@ -13,9 +14,9 @@ leaf `axm` for the axioms of `𝗣𝗔⁻`, and an induction rule for the formul
 carrying the side formulas that make it as strong as the induction axioms for `C`. A derivation
 is `Anchored D` when every cut formula belongs to `D`.
 
-The induction class is a parameter: taking `C` to be the strict $\Sigma_1$ formulas and `D` the
-strict $\Sigma_1$ and $\Pi_1$ ones gives the calculus for $\mathsf{I}\Sigma_1$, and the same
-calculus serves the other induction schemes.
+The induction class is a parameter: taking `C` to be the prenex $\Sigma_1$ formulas and `D` the
+blocks of existential and of universal quantifiers over a bounded matrix gives the calculus for
+$\mathsf{I}\Sigma_1$, and the same calculus serves the other induction schemes.
 
 - [Bus98A, Section 1.4.1]
 - [Bus98A, Section 1.4.2]
@@ -79,8 +80,11 @@ namespace RewriteClosed
 
 variable {n s : ℕ} {b : Polarity} {C D : ArithmeticSemiformula ℕ n → Prop}
 
-instance strictHierarchy : RewriteClosed (n := n) (StrictHierarchy b s) where
-  rewrite f := StrictHierarchy.rew (Rew.rewrite f)
+instance prenexHierarchy : RewriteClosed (n := n) (ℬ[<, ℒₒᵣ].PrenexHierarchy b s) where
+  rewrite f := Bounding.PrenexHierarchy.rew (Rew.rewrite f)
+
+instance prenexBlock : RewriteClosed (n := n) (ℬ[<, ℒₒᵣ].PrenexBlock b) where
+  rewrite f := Bounding.PrenexBlock.rew (Rew.rewrite f)
 
 instance hierarchy : RewriteClosed (n := n) (ℬ[<, ℒₒᵣ].Hierarchy b s) where
   rewrite f := Bounding.Hierarchy.rew (Rew.rewrite f)

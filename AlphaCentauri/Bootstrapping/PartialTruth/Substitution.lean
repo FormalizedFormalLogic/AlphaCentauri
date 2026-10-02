@@ -42,8 +42,9 @@ lemma termVal_termSubst {e n m w t : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     simp
   · intro k f v hf hv ih
     rw [termSubst_func hf hv.isUTerm]
-    exact termVal_func_congr hf (hw.termSubstVec hv).isUTerm hv.isUTerm fun i hi ↦ by
-      rw [nth_termSubstVec hv.isUTerm hi, ih i hi]
+    apply termVal_func_congr hf (hw.termSubstVec hv).isUTerm hv.isUTerm
+    intro i hi
+    rw [nth_termSubstVec hv.isUTerm hi, ih i hi]
 
 lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
     termValVec (x ∷ e) (n + 1) (qVec ℒₒᵣ w) = x ∷ termValVec e n w := by
@@ -309,6 +310,36 @@ lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
     rw [neg_qqBex ht.termBShift hfq, ball_iff ht (hdq.neg hfq) hfq.neg, bex_iff ht]
     simp only [ih hfq, not_exists, not_and]
 
+private lemma subst_rel {n m w k r v e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+    (hp : IsSemiformula ℒₒᵣ n (^rel k r v)) :
+    BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w (^rel k r v)) e ↔
+      BoundedSatisfaction (^rel k r v) (termValVec e n w) := by
+  rcases hp.isUFormula.rel_cases with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩ <;>
+    rw [heq] at hp ⊢
+  · obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+      simpa [Arithmetic.qqEQ] using hp
+    rw [subst_qqEQ ht hu, eq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
+      eq_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus]
+  · obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+      simpa [Arithmetic.qqLT] using hp
+    rw [subst_qqLT ht hu, lt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
+      lt_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus]
+
+private lemma subst_nrel {n m w k r v e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+    (hp : IsSemiformula ℒₒᵣ n (^nrel k r v)) :
+    BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w (^nrel k r v)) e ↔
+      BoundedSatisfaction (^nrel k r v) (termValVec e n w) := by
+  rcases hp.isUFormula.nrel_cases with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩ <;>
+    rw [heq] at hp ⊢
+  · obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+      simpa [Arithmetic.qqNEQ] using hp
+    rw [subst_qqNEQ ht hu, neq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
+      neq_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus]
+  · obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
+      simpa [qqNLT] using hp
+    rw [subst_qqNLT ht hu, nlt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
+      nlt_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus]
+
 lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsBounded p) :
     BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔
@@ -324,29 +355,9 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
   · intro n m w e _ _
     simp
   · intro k r v n m w e hw hp
-    rcases hp.isUFormula.rel_cases with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩
-    · rw [heq] at hp ⊢
-      obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
-        simpa [Arithmetic.qqEQ] using hp
-      rw [subst_qqEQ ht hu, eq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
-        eq_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus]
-    · rw [heq] at hp ⊢
-      obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
-        simpa [Arithmetic.qqLT] using hp
-      rw [subst_qqLT ht hu, lt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
-        lt_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus]
+    exact subst_rel hw hp
   · intro k r v n m w e hw hp
-    rcases hp.isUFormula.nrel_cases with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩
-    · rw [heq] at hp ⊢
-      obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
-        simpa [Arithmetic.qqNEQ] using hp
-      rw [subst_qqNEQ ht hu, neq_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
-        neq_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus]
-    · rw [heq] at hp ⊢
-      obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
-        simpa [Arithmetic.qqNLT] using hp
-      rw [subst_qqNLT ht hu, nlt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
-        nlt_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus]
+    exact subst_nrel hw hp
   · intro p q _ _ ihp ihq n m w e hw hpq
     obtain ⟨hp, hq⟩ := IsSemiformula.and.mp hpq
     rw [substs_and hp.isUFormula hq.isUFormula, and_iff, and_iff, ihp n m w e hw hp,
@@ -361,14 +372,18 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     rw [subst_qqBall hw hts hq.isUFormula,
       ball_iff (hw.termSubst hts).isUTerm (hdq.subst hw.qVec hq) (hq.subst hw.qVec).isUFormula,
       ball_iff ht hdq hq.isUFormula, termVal_termSubst hw hts]
-    exact forall₂_congr fun x _ ↦ by
-      rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
+    apply forall₂_congr
+    intro x _
+    rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
   · intro t q ht hdq ih n m w e hw hpq
     obtain ⟨hts, hq⟩ := hpq.of_qqBex ht
     rw [subst_qqBex hw hts hq.isUFormula, bex_iff (hw.termSubst hts).isUTerm, bex_iff ht,
       termVal_termSubst hw hts]
-    exact exists_congr fun x ↦ and_congr_right fun _ ↦ by
-      rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
+    apply exists_congr
+    intro x
+    apply and_congr_right
+    intro _
+    rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
 
 /-- A $\Delta_0$ formula `qqQuant Γ θ` is satisfied exactly when `θ` is satisfied for all, or
 some, values of the quantified variable. -/
@@ -387,7 +402,8 @@ lemma qqQuant_iff {Γ : Polarity} {θ e : V} (h : IsBounded (qqQuant Γ θ))
     have hn : IsUFormula ℒₒᵣ (qqNLT (^#0 : V) (termBShift ℒₒᵣ t)) := by simp [qqNLT, ht.termBShift]
     have hb : IsBounded (qqNLT (^#0 : V) (termBShift ℒₒᵣ t)) := by simp [qqNLT]
     rw [ball_iff ht hq hq']
-    refine forall_congr' fun x ↦ ?_
+    apply forall_congr'
+    intro x
     change _ ↔ BoundedSatisfaction (qqNLT (^#0 : V) (termBShift ℒₒᵣ t) ^⋎ q) (x ∷ e)
     rw [or_iff hb hn hq hq', nlt_iff (by simp) ht.termBShift, termVal_termBShift ht]
     simp [or_iff_not_imp_left]

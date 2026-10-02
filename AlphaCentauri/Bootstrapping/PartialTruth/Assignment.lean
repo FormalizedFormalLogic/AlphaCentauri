@@ -134,14 +134,21 @@ lemma termFvAssignVec_cons {k t v : V} (ht : IsUTerm ℒₒᵣ t) (hv : IsUTermV
     simp
   · intro k g v hg hv ih
     simp only [termFvAssign_func hg hv.isUTerm, IsSemiterm.func, hg, true_and]
-    exact IsSemitermVec.iff.mpr
-      ⟨by simp [hv.isUTerm], fun i hi ↦ by rw [nth_termFvAssignVec hv.isUTerm hi]; exact ih i hi⟩
+    apply IsSemitermVec.iff.mpr
+    constructor
+    · simp [hv.isUTerm]
+    · intro i hi
+      rw [nth_termFvAssignVec hv.isUTerm hi]
+      exact ih i hi
 
 @[simp] lemma IsSemitermVec.termFvAssignVec {k n v : V} (hv : IsSemitermVec ℒₒᵣ k n v) :
-    IsSemitermVec ℒₒᵣ k n (termFvAssignVec k f v) :=
-  IsSemitermVec.iff.mpr ⟨by simp [hv.isUTerm], fun i hi ↦ by
+    IsSemitermVec ℒₒᵣ k n (termFvAssignVec k f v) := by
+  apply IsSemitermVec.iff.mpr
+  constructor
+  · simp [hv.isUTerm]
+  · intro i hi
     rw [nth_termFvAssignVec hv.isUTerm hi]
-    exact (hv.nth hi).termFvAssign⟩
+    exact (hv.nth hi).termFvAssign
 
 lemma IsUTermVec.termFvAssignVec {k v : V} (hv : IsUTermVec ℒₒᵣ k v) :
     IsUTermVec ℒₒᵣ k (termFvAssignVec k f v) :=
@@ -229,6 +236,24 @@ lemma termFvAssignVec_qVec {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
       rw [qVec, len_termFvAssignVec hw.isUTerm]
       simp [nth_termBShiftVec hw.termFvAssignVec.isUTerm hj, hw.isUTerm, hj]
     rw [h₁, h₂, termFvAssign_termBShift (hw.isUTerm.nth hj)]
+
+lemma termFvAssignVec_termShiftVec {k b v : V} (hv : IsUTermVec ℒₒᵣ k v) :
+    termFvAssignVec k (b ∷ f) (termShiftVec ℒₒᵣ k v) = termFvAssignVec k f v := by
+  apply nth_ext' k (by simp [hv.termShiftVec]) (by simp [hv])
+  intro i hi
+  rw [nth_termFvAssignVec hv.termShiftVec hi, nth_termShiftVec hv hi, nth_termFvAssignVec hv hi,
+    termFvAssign_termShift (hv.nth hi)]
+
+lemma termFvAssignVec_termSubstVec {k n m w v : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+    (hv : IsSemitermVec ℒₒᵣ k n v) :
+    termFvAssignVec k f (termSubstVec ℒₒᵣ k w v) =
+      termSubstVec ℒₒᵣ k (termFvAssignVec n f w) (termFvAssignVec k f v) := by
+  apply nth_ext' k (by simp [(hw.termSubstVec hv).isUTerm])
+    (by simp [hv.termFvAssignVec.isUTerm])
+  intro i hi
+  rw [nth_termFvAssignVec (hw.termSubstVec hv).isUTerm hi, nth_termSubstVec hv.isUTerm hi,
+    nth_termSubstVec hv.termFvAssignVec.isUTerm hi, nth_termFvAssignVec hv.isUTerm hi,
+    termFvAssign_termSubst hw (hv.nth hi)]
 
 end
 
@@ -372,19 +397,11 @@ lemma fvAssign_shift {b p : V} (hp : IsUFormula ℒₒᵣ p) :
   apply IsUFormula.induction1 𝚺 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
   · definability
   · intro k R v hR hv
-    rw [shift_rel hR hv, fvAssign_rel hR hv.termShiftVec, fvAssign_rel hR hv]
-    simp only [qqRel_inj, true_and]
-    apply nth_ext' k (by simp [hv.termShiftVec]) (by simp [hv])
-    intro i hi
-    rw [nth_termFvAssignVec hv.termShiftVec hi, nth_termShiftVec hv hi,
-      nth_termFvAssignVec hv hi, termFvAssign_termShift (hv.nth hi)]
+    rw [shift_rel hR hv, fvAssign_rel hR hv.termShiftVec, fvAssign_rel hR hv,
+      termFvAssignVec_termShiftVec hv]
   · intro k R v hR hv
-    rw [shift_nrel hR hv, fvAssign_nrel hR hv.termShiftVec, fvAssign_nrel hR hv]
-    simp only [qqNRel_inj, true_and]
-    apply nth_ext' k (by simp [hv.termShiftVec]) (by simp [hv])
-    intro i hi
-    rw [nth_termFvAssignVec hv.termShiftVec hi, nth_termShiftVec hv hi,
-      nth_termFvAssignVec hv hi, termFvAssign_termShift (hv.nth hi)]
+    rw [shift_nrel hR hv, fvAssign_nrel hR hv.termShiftVec, fvAssign_nrel hR hv,
+      termFvAssignVec_termShiftVec hv]
   · simp
   · simp
   · intro p q hp hq ihp ihq
@@ -403,24 +420,12 @@ lemma fvAssign_subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : Is
   · definability
   · intro n k R v hR hv m w hw
     rw [substs_rel hR hv.isUTerm, fvAssign_rel hR (hw.termSubstVec hv).isUTerm,
-      fvAssign_rel hR hv.isUTerm, substs_rel hR hv.termFvAssignVec.isUTerm]
-    simp only [qqRel_inj, true_and]
-    apply nth_ext' k (by simp [(hw.termSubstVec hv).isUTerm])
-      (by simp [hv.termFvAssignVec.isUTerm])
-    intro i hi
-    rw [nth_termFvAssignVec (hw.termSubstVec hv).isUTerm hi, nth_termSubstVec hv.isUTerm hi,
-      nth_termSubstVec hv.termFvAssignVec.isUTerm hi, nth_termFvAssignVec hv.isUTerm hi,
-      termFvAssign_termSubst hw (hv.nth hi)]
+      fvAssign_rel hR hv.isUTerm, substs_rel hR hv.termFvAssignVec.isUTerm,
+      termFvAssignVec_termSubstVec hw hv]
   · intro n k R v hR hv m w hw
     rw [substs_nrel hR hv.isUTerm, fvAssign_nrel hR (hw.termSubstVec hv).isUTerm,
-      fvAssign_nrel hR hv.isUTerm, substs_nrel hR hv.termFvAssignVec.isUTerm]
-    simp only [qqNRel_inj, true_and]
-    apply nth_ext' k (by simp [(hw.termSubstVec hv).isUTerm])
-      (by simp [hv.termFvAssignVec.isUTerm])
-    intro i hi
-    rw [nth_termFvAssignVec (hw.termSubstVec hv).isUTerm hi, nth_termSubstVec hv.isUTerm hi,
-      nth_termSubstVec hv.termFvAssignVec.isUTerm hi, nth_termFvAssignVec hv.isUTerm hi,
-      termFvAssign_termSubst hw (hv.nth hi)]
+      fvAssign_nrel hR hv.isUTerm, substs_nrel hR hv.termFvAssignVec.isUTerm,
+      termFvAssignVec_termSubstVec hw hv]
   · intros
     simp
   · intros
@@ -536,9 +541,18 @@ lemma termFvAssign_eq_self {t : V} (ht : IsUTerm ℒₒᵣ t) (h : termShift ℒ
   · intro k g v hg hv ih h
     rw [termShift_func hg hv, qqFunc_inj] at h
     rw [termFvAssign_func hg hv, qqFunc_inj]
-    refine ⟨rfl, rfl, nth_ext' k (by simp [hv]) hv.lh.symm fun i hi ↦ ?_⟩
+    refine ⟨rfl, rfl, ?_⟩
+    apply nth_ext' k (by simp [hv]) hv.lh.symm
+    intro i hi
     rw [nth_termFvAssignVec hv hi]
     exact ih i hi (by rw [← nth_termShiftVec hv hi, h.2.2])
+
+lemma termFvAssignVec_eq_self {k v : V} (hv : IsUTermVec ℒₒᵣ k v)
+    (h : termShiftVec ℒₒᵣ k v = v) : termFvAssignVec k f v = v := by
+  apply nth_ext' k (by simp [hv]) hv.lh.symm
+  intro i hi
+  rw [nth_termFvAssignVec hv hi]
+  exact termFvAssign_eq_self (hv.nth hi) (by rw [← nth_termShiftVec hv hi, h])
 
 lemma fvAssign_eq_self {p : V} (hp : IsUFormula ℒₒᵣ p) (h : shift ℒₒᵣ p = p) :
     fvAssign f p = p := by
@@ -547,16 +561,10 @@ lemma fvAssign_eq_self {p : V} (hp : IsUFormula ℒₒᵣ p) (h : shift ℒₒ�
   · definability
   · intro k R v hR hv h
     rw [shift_rel hR hv, qqRel_inj] at h
-    rw [fvAssign_rel hR hv, qqRel_inj]
-    refine ⟨rfl, rfl, nth_ext' k (by simp [hv]) hv.lh.symm fun i hi ↦ ?_⟩
-    rw [nth_termFvAssignVec hv hi]
-    exact termFvAssign_eq_self (hv.nth hi) (by rw [← nth_termShiftVec hv hi, h.2.2])
+    rw [fvAssign_rel hR hv, termFvAssignVec_eq_self hv h.2.2]
   · intro k R v hR hv h
     rw [shift_nrel hR hv, qqNRel_inj] at h
-    rw [fvAssign_nrel hR hv, qqNRel_inj]
-    refine ⟨rfl, rfl, nth_ext' k (by simp [hv]) hv.lh.symm fun i hi ↦ ?_⟩
-    rw [nth_termFvAssignVec hv hi]
-    exact termFvAssign_eq_self (hv.nth hi) (by rw [← nth_termShiftVec hv hi, h.2.2])
+    rw [fvAssign_nrel hR hv, termFvAssignVec_eq_self hv h.2.2]
   · simp
   · simp
   · intro p q hp hq ihp ihq h
@@ -598,18 +606,20 @@ lemma termFvAssign_congr (h : ∀ i, f.[i] = g.[i]) {t : V} (ht : IsUTerm ℒₒ
     intro i hi
     rw [nth_termFvAssignVec hv hi, nth_termFvAssignVec hv hi, ih i hi]
 
+lemma termFvAssignVec_congr (h : ∀ i, f.[i] = g.[i]) {k v : V} (hv : IsUTermVec ℒₒᵣ k v) :
+    termFvAssignVec k f v = termFvAssignVec k g v := by
+  apply nth_ext' k (by simp [hv]) (by simp [hv])
+  intro i hi
+  rw [nth_termFvAssignVec hv hi, nth_termFvAssignVec hv hi, termFvAssign_congr h (hv.nth hi)]
+
 lemma fvAssign_congr (h : ∀ i, f.[i] = g.[i]) (p : V) : fvAssign f p = fvAssign g p := by
   by_cases hp : IsUFormula ℒₒᵣ p
   · apply IsUFormula.induction1 𝚺 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
     · definability
     · intro k R v hR hv
-      rw [fvAssign_rel hR hv, fvAssign_rel hR hv, qqRel_inj]
-      refine ⟨rfl, rfl, nth_ext' k (by simp [hv]) (by simp [hv]) fun i hi ↦ ?_⟩
-      rw [nth_termFvAssignVec hv hi, nth_termFvAssignVec hv hi, termFvAssign_congr h (hv.nth hi)]
+      rw [fvAssign_rel hR hv, fvAssign_rel hR hv, termFvAssignVec_congr h hv]
     · intro k R v hR hv
-      rw [fvAssign_nrel hR hv, fvAssign_nrel hR hv, qqNRel_inj]
-      refine ⟨rfl, rfl, nth_ext' k (by simp [hv]) (by simp [hv]) fun i hi ↦ ?_⟩
-      rw [nth_termFvAssignVec hv hi, nth_termFvAssignVec hv hi, termFvAssign_congr h (hv.nth hi)]
+      rw [fvAssign_nrel hR hv, fvAssign_nrel hR hv, termFvAssignVec_congr h hv]
     · simp
     · simp
     · intro p q hp hq ihp ihq
@@ -636,6 +646,43 @@ lemma fvSubst_qqToPrenex {Γ : Polarity} {s : ℕ} {θ : V} (hθ : IsUFormula �
   | zero => simp
   | succ s ih => cases Γ <;> simp [isUFormula_qqToPrenex.mpr hθ, ih]
 
+section
+
+variable (hw : IsSemitermVec ℒₒᵣ (len w) 0 w) {t : V} (ht : IsUTerm ℒₒᵣ t)
+include hw ht
+
+private lemma termFvSubstVec_two :
+    termFvSubstVec ℒₒᵣ 2 w (?[^#0, termBShift ℒₒᵣ t] : V) =
+      ?[^#0, termBShift ℒₒᵣ (termFvSubst ℒₒᵣ w t)] := by
+  have hts : IsSemiterm ℒₒᵣ (termBV ℒₒᵣ t) t := IsSemiterm.def.mpr ⟨ht, le_rfl⟩
+  rw [show (2 : V) = 0 + 1 + 1 by simp [one_add_one_eq_two],
+    termFvSubstVec_cons (by simp) (by simp [ht.termBShift]), termFvSubstVec_cons ht.termBShift
+      (by simp), termFvSubstVec_nil, termFvSubst_termBShift_closed hw hts]
+  simp
+
+variable {q : V} (hq : IsUFormula ℒₒᵣ q)
+include hq
+
+lemma fvSubst_qqBall :
+    fvSubst ℒₒᵣ w (qqBall (termBShift ℒₒᵣ t) q) =
+      qqBall (termBShift ℒₒᵣ (termFvSubst ℒₒᵣ w t)) (fvSubst ℒₒᵣ w q) := by
+  have hv : IsUTermVec ℒₒᵣ 2 (?[^#0, termBShift ℒₒᵣ t] : V) := by simp [ht.termBShift]
+  have hn : IsUFormula ℒₒᵣ (qqNLT (^#0 : V) (termBShift ℒₒᵣ t)) := by
+    simp [qqNLT, ht.termBShift]
+  rw [qqBall, fvSubst_all (by simp [hn, hq]), fvSubst_or hn hq, qqNLT, fvSubst_nrel (by simp) hv,
+    termFvSubstVec_two hw ht, qqBall, qqNLT]
+
+lemma fvSubst_qqBex :
+    fvSubst ℒₒᵣ w (qqBex (termBShift ℒₒᵣ t) q) =
+      qqBex (termBShift ℒₒᵣ (termFvSubst ℒₒᵣ w t)) (fvSubst ℒₒᵣ w q) := by
+  have hv : IsUTermVec ℒₒᵣ 2 (?[^#0, termBShift ℒₒᵣ t] : V) := by simp [ht.termBShift]
+  have hn : IsUFormula ℒₒᵣ (qqLT (^#0 : V) (termBShift ℒₒᵣ t)) := by
+    simp [qqLT, ht.termBShift]
+  rw [qqBex, fvSubst_exs (by simp [hn, hq]), fvSubst_and hn hq, qqLT, fvSubst_rel (by simp) hv,
+    termFvSubstVec_two hw ht, qqBex, qqLT]
+
+end
+
 lemma IsBounded.fvSubst (hw : IsSemitermVec ℒₒᵣ (len w) 0 w) {p : V} (hp : IsUFormula ℒₒᵣ p)
     (h : IsBounded p) : IsBounded (fvSubst ℒₒᵣ w p) := by
   suffices ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p →
@@ -660,34 +707,12 @@ lemma IsBounded.fvSubst (hw : IsSemitermVec ℒₒᵣ (len w) 0 w) {p : V} (hp :
   · intro t q ht _ ih h
     have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBall]
     have hts : IsSemiterm ℒₒᵣ (termBV ℒₒᵣ t) t := IsSemiterm.def.mpr ⟨ht, le_rfl⟩
-    have hv : IsUTermVec ℒₒᵣ 2 (?[^#0, termBShift ℒₒᵣ t] : V) := by simp [ht.termBShift]
-    have hn : IsUFormula ℒₒᵣ (qqNLT (^#0 : V) (termBShift ℒₒᵣ t)) := by
-      simp [qqNLT, ht.termBShift]
-    have he : Bootstrapping.fvSubst ℒₒᵣ w (qqBall (termBShift ℒₒᵣ t) q) =
-        qqBall (termBShift ℒₒᵣ (termFvSubst ℒₒᵣ w t)) (Bootstrapping.fvSubst ℒₒᵣ w q) := by
-      rw [qqBall, fvSubst_all (by simp [hn, hq]), fvSubst_or hn hq, qqNLT,
-        fvSubst_nrel (by simp) hv]
-      rw [show (2 : V) = 0 + 1 + 1 by simp [one_add_one_eq_two],
-        termFvSubstVec_cons (by simp) (by simp [ht.termBShift]), termFvSubstVec_cons ht.termBShift
-          (by simp), termFvSubstVec_nil, termFvSubst_termBShift_closed hw hts]
-      simp [qqBall, qqNLT, one_add_one_eq_two]
-    rw [he]
+    rw [fvSubst_qqBall hw ht hq]
     exact IsBounded.ball (hts.termFvSubst (hw.weaken (by simp))).isUTerm (ih hq)
   · intro t q ht _ ih h
     have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBex]
     have hts : IsSemiterm ℒₒᵣ (termBV ℒₒᵣ t) t := IsSemiterm.def.mpr ⟨ht, le_rfl⟩
-    have hv : IsUTermVec ℒₒᵣ 2 (?[^#0, termBShift ℒₒᵣ t] : V) := by simp [ht.termBShift]
-    have hn : IsUFormula ℒₒᵣ (qqLT (^#0 : V) (termBShift ℒₒᵣ t)) := by
-      simp [qqLT, ht.termBShift]
-    have he : Bootstrapping.fvSubst ℒₒᵣ w (qqBex (termBShift ℒₒᵣ t) q) =
-        qqBex (termBShift ℒₒᵣ (termFvSubst ℒₒᵣ w t)) (Bootstrapping.fvSubst ℒₒᵣ w q) := by
-      rw [qqBex, fvSubst_exs (by simp [hn, hq]), fvSubst_and hn hq, qqLT,
-        fvSubst_rel (by simp) hv]
-      rw [show (2 : V) = 0 + 1 + 1 by simp [one_add_one_eq_two],
-        termFvSubstVec_cons (by simp) (by simp [ht.termBShift]), termFvSubstVec_cons ht.termBShift
-          (by simp), termFvSubstVec_nil, termFvSubst_termBShift_closed hw hts]
-      simp [qqBex, qqLT, one_add_one_eq_two]
-    rw [he]
+    rw [fvSubst_qqBex hw ht hq]
     exact IsBounded.bex (hts.termFvSubst (hw.weaken (by simp))).isUTerm (ih hq)
 
 lemma IsPrenexHierarchy.fvSubst {Γ : Polarity} {s : ℕ} (hw : IsSemitermVec ℒₒᵣ (len w) 0 w)
@@ -793,12 +818,20 @@ lemma IsUTerm.termFvUnshift {t : V} (ht : IsUTerm ℒₒᵣ t) : IsUTerm ℒₒ�
     simp
   · intro k g v hg hv ih
     rw [termFvUnshift_func hg hv]
-    exact IsUTerm.func hg ⟨by simp [hv], fun i hi ↦ by
-      rw [nth_termFvUnshiftVec hv hi]; exact ih i hi⟩
+    apply IsUTerm.func hg
+    constructor
+    · simp [hv]
+    · intro i hi
+      rw [nth_termFvUnshiftVec hv hi]
+      exact ih i hi
 
 lemma IsUTermVec.termFvUnshiftVec {k v : V} (hv : IsUTermVec ℒₒᵣ k v) :
-    IsUTermVec ℒₒᵣ k (termFvUnshiftVec k v) :=
-  ⟨by simp [hv], fun i hi ↦ by rw [nth_termFvUnshiftVec hv hi]; exact (hv.nth hi).termFvUnshift⟩
+    IsUTermVec ℒₒᵣ k (termFvUnshiftVec k v) := by
+  constructor
+  · simp [hv]
+  · intro i hi
+    rw [nth_termFvUnshiftVec hv hi]
+    exact (hv.nth hi).termFvUnshift
 
 lemma termFvUnshift_termShift {t : V} (ht : IsUTerm ℒₒᵣ t) :
     termFvUnshift (termShift ℒₒᵣ t) = t := by
@@ -831,6 +864,13 @@ lemma termFvUnshift_termBShift {t : V} (ht : IsUTerm ℒₒᵣ t) :
     intro i hi
     rw [nth_termFvUnshiftVec hv.termBShiftVec hi, nth_termBShiftVec hv hi,
       nth_termBShiftVec hv.termFvUnshiftVec hi, nth_termFvUnshiftVec hv hi, ih i hi]
+
+lemma termFvUnshiftVec_termShiftVec {k v : V} (hv : IsUTermVec ℒₒᵣ k v) :
+    termFvUnshiftVec k (termShiftVec ℒₒᵣ k v) = v := by
+  apply nth_ext' k (by simp [hv.termShiftVec]) hv.lh.symm
+  intro i hi
+  rw [nth_termFvUnshiftVec hv.termShiftVec hi, nth_termShiftVec hv hi,
+    termFvUnshift_termShift (hv.nth hi)]
 
 namespace FvUnshift
 
@@ -902,19 +942,9 @@ lemma fvUnshift_shift {p : V} (hp : IsUFormula ℒₒᵣ p) : fvUnshift (shift �
   apply IsUFormula.induction1 𝚺 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
   · definability
   · intro k R v hR hv
-    rw [shift_rel hR hv, fvUnshift_rel hR hv.termShiftVec]
-    simp only [qqRel_inj, true_and]
-    apply nth_ext' k (by simp [hv.termShiftVec]) hv.lh.symm
-    intro i hi
-    rw [nth_termFvUnshiftVec hv.termShiftVec hi, nth_termShiftVec hv hi,
-      termFvUnshift_termShift (hv.nth hi)]
+    rw [shift_rel hR hv, fvUnshift_rel hR hv.termShiftVec, termFvUnshiftVec_termShiftVec hv]
   · intro k R v hR hv
-    rw [shift_nrel hR hv, fvUnshift_nrel hR hv.termShiftVec]
-    simp only [qqNRel_inj, true_and]
-    apply nth_ext' k (by simp [hv.termShiftVec]) hv.lh.symm
-    intro i hi
-    rw [nth_termFvUnshiftVec hv.termShiftVec hi, nth_termShiftVec hv hi,
-      termFvUnshift_termShift (hv.nth hi)]
+    rw [shift_nrel hR hv, fvUnshift_nrel hR hv.termShiftVec, termFvUnshiftVec_termShiftVec hv]
   · simp
   · simp
   · intro p q hp hq ihp ihq
@@ -950,6 +980,33 @@ lemma fvUnshift_qqToPrenex {Γ : Polarity} {s : ℕ} {θ : V} (hθ : IsUFormula 
   | zero => simp
   | succ s ih => cases Γ <;> simp [isUFormula_qqToPrenex.mpr hθ, ih]
 
+section
+
+variable {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsUFormula ℒₒᵣ q)
+include ht hq
+
+lemma fvUnshift_qqBall :
+    fvUnshift (qqBall (termBShift ℒₒᵣ t) q) =
+      qqBall (termBShift ℒₒᵣ (termFvUnshift t)) (fvUnshift q) := by
+  have hv : IsUTermVec ℒₒᵣ 2 (?[^#0, termBShift ℒₒᵣ t] : V) := by simp [ht.termBShift]
+  have hn : IsUFormula ℒₒᵣ (qqNLT (^#0 : V) (termBShift ℒₒᵣ t)) := by
+    simp [qqNLT, ht.termBShift]
+  rw [qqBall, fvUnshift_all (by simp [hn, hq]), fvUnshift_or hn hq, qqNLT,
+    fvUnshift_nrel (by simp) hv]
+  simp [qqBall, qqNLT, ht.termBShift, termFvUnshift_termBShift ht]
+
+lemma fvUnshift_qqBex :
+    fvUnshift (qqBex (termBShift ℒₒᵣ t) q) =
+      qqBex (termBShift ℒₒᵣ (termFvUnshift t)) (fvUnshift q) := by
+  have hv : IsUTermVec ℒₒᵣ 2 (?[^#0, termBShift ℒₒᵣ t] : V) := by simp [ht.termBShift]
+  have hn : IsUFormula ℒₒᵣ (qqLT (^#0 : V) (termBShift ℒₒᵣ t)) := by
+    simp [qqLT, ht.termBShift]
+  rw [qqBex, fvUnshift_exs (by simp [hn, hq]), fvUnshift_and hn hq, qqLT,
+    fvUnshift_rel (by simp) hv]
+  simp [qqBex, qqLT, ht.termBShift, termFvUnshift_termBShift ht]
+
+end
+
 lemma IsBounded.fvUnshift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     IsBounded (fvUnshift p) := by
   suffices ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.fvUnshift p) from
@@ -972,27 +1029,11 @@ lemma IsBounded.fvUnshift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p
     simpa [hp, hq] using ⟨ihp hp, ihq hq⟩
   · intro t q ht _ ih h
     have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBall]
-    have hv : IsUTermVec ℒₒᵣ 2 (?[^#0, termBShift ℒₒᵣ t] : V) := by simp [ht.termBShift]
-    have hn : IsUFormula ℒₒᵣ (qqNLT (^#0 : V) (termBShift ℒₒᵣ t)) := by
-      simp [qqNLT, ht.termBShift]
-    have he : Bootstrapping.fvUnshift (qqBall (termBShift ℒₒᵣ t) q) =
-        qqBall (termBShift ℒₒᵣ (termFvUnshift t)) (Bootstrapping.fvUnshift q) := by
-      rw [qqBall, fvUnshift_all (by simp [hn, hq]), fvUnshift_or hn hq, qqNLT,
-        fvUnshift_nrel (by simp) hv]
-      simp [qqBall, qqNLT, ht.termBShift, termFvUnshift_termBShift ht]
-    rw [he]
+    rw [fvUnshift_qqBall ht hq]
     exact IsBounded.ball ht.termFvUnshift (ih hq)
   · intro t q ht _ ih h
     have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBex]
-    have hv : IsUTermVec ℒₒᵣ 2 (?[^#0, termBShift ℒₒᵣ t] : V) := by simp [ht.termBShift]
-    have hn : IsUFormula ℒₒᵣ (qqLT (^#0 : V) (termBShift ℒₒᵣ t)) := by
-      simp [qqLT, ht.termBShift]
-    have he : Bootstrapping.fvUnshift (qqBex (termBShift ℒₒᵣ t) q) =
-        qqBex (termBShift ℒₒᵣ (termFvUnshift t)) (Bootstrapping.fvUnshift q) := by
-      rw [qqBex, fvUnshift_exs (by simp [hn, hq]), fvUnshift_and hn hq, qqLT,
-        fvUnshift_rel (by simp) hv]
-      simp [qqBex, qqLT, ht.termBShift, termFvUnshift_termBShift ht]
-    rw [he]
+    rw [fvUnshift_qqBex ht hq]
     exact IsBounded.bex ht.termFvUnshift (ih hq)
 
 lemma IsPrenexHierarchy.fvUnshift {Γ : Polarity} {s : ℕ} {p : V} (hp : IsUFormula ℒₒᵣ p)

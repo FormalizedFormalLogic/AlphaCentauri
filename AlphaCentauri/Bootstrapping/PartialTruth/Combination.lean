@@ -15,7 +15,7 @@ falls into several of the clauses above.
 
 ## References
 
-- [HP98, Definition I.1.74, Theorem I.1.75]
+- [HP98, Theorem I.1.75]
 -/
 
 @[expose] public section
@@ -341,7 +341,7 @@ lemma IsReadable.map {P : V → Prop} {F : V → V}
 
 lemma IsCombination.neg (hp : IsUFormula ℒₒᵣ p) (h : IsCombination k D p) :
     IsCombination k D (neg ℒₒᵣ p) := by
-  refine IsCombination.map (P := IsUFormula ℒₒᵣ) ?_ ?_ ?_ hp h
+  apply IsCombination.map (P := IsUFormula ℒₒᵣ) (hp := hp) (h := h)
   · rintro p hp ⟨Γ, s, hs, h⟩
     exact ⟨Γ.alt, s, hs, h.neg hp⟩
   · intro p q h
@@ -354,7 +354,7 @@ lemma IsCombination.neg (hp : IsUFormula ℒₒᵣ p) (h : IsCombination k D p) 
 lemma IsCombination.subst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (h : IsCombination k D p) :
     IsCombination k D (subst ℒₒᵣ w p) := by
-  refine IsCombination.map (P := IsSemiformula ℒₒᵣ n) ?_ ?_ ?_ hp h
+  apply IsCombination.map (P := IsSemiformula ℒₒᵣ n) (hp := hp) (h := h)
   · rintro p hp ⟨Γ, s, hs, h⟩
     exact ⟨Γ, s, hs, h.subst hw hp⟩
   · intro p q h
@@ -372,7 +372,7 @@ lemma IsReadable.map_uformula {F : V → V}
     (hor : ∀ p q, IsUFormula ℒₒᵣ p → IsUFormula ℒₒᵣ q → F (p ^⋎ q) = F p ^⋎ F q)
     (hall : ∀ p, IsUFormula ℒₒᵣ p → F (^∀ p) = ^∀ (F p))
     (hp : IsUFormula ℒₒᵣ p) (h : IsReadable k D p) : IsReadable k D (F p) := by
-  refine IsReadable.map (P := IsUFormula ℒₒᵣ) hprenex ?_ ?_ ?_ hp h
+  apply IsReadable.map (P := IsUFormula ℒₒᵣ) hprenex (hp := hp) (h := h)
   · intro p q h
     obtain ⟨hp, hq⟩ := IsUFormula.and.mp h
     exact ⟨hp, hq, hand p q hp hq⟩
@@ -394,8 +394,11 @@ lemma IsReadable.fvUnshift (hp : IsUFormula ℒₒᵣ p) (h : IsReadable k D p) 
     (fun _ _ ↦ fvUnshift_or) (fun _ ↦ fvUnshift_all) hp h
 
 @[simp] lemma IsReadable.shift_iff (hp : IsUFormula ℒₒᵣ p) :
-    IsReadable k D (Bootstrapping.shift ℒₒᵣ p) ↔ IsReadable k D p :=
-  ⟨fun h ↦ by simpa [fvUnshift_shift hp] using h.fvUnshift hp.shift, IsReadable.shift hp⟩
+    IsReadable k D (Bootstrapping.shift ℒₒᵣ p) ↔ IsReadable k D p := by
+  constructor
+  · intro h
+    simpa [fvUnshift_shift hp] using h.fvUnshift hp.shift
+  · exact IsReadable.shift hp
 
 lemma IsReadable.fvAssign {f : V} (hp : IsUFormula ℒₒᵣ p) (h : IsReadable k D p) :
     IsReadable k D (fvAssign f p) :=
@@ -434,20 +437,28 @@ open FFL.FirstOrder.Bounding.HierarchySymbol
 
 variable {k : ℕ}
 
-lemma exists_polarity_iff {P : Polarity → Prop} : (∃ Γ, P Γ) ↔ P 𝚺 ∨ P 𝚷 :=
-  ⟨fun ⟨Γ, h⟩ ↦ by rcases Γ <;> simp_all, fun h ↦ h.elim (⟨𝚺, ·⟩) (⟨𝚷, ·⟩)⟩
-
-lemma forall_polarity_iff {P : Polarity → Prop} : (∀ Γ, P Γ) ↔ P 𝚺 ∧ P 𝚷 :=
-  ⟨fun h ↦ ⟨h 𝚺, h 𝚷⟩, fun h Γ ↦ by rcases Γ <;> simp_all⟩
+private lemma exists_polarity_iff {P : Polarity → Prop} : (∃ Γ, P Γ) ↔ P 𝚺 ∨ P 𝚷 := by
+  constructor
+  · rintro ⟨Γ, h⟩
+    rcases Γ <;> simp_all
+  · rintro (h | h)
+    · exact ⟨𝚺, h⟩
+    · exact ⟨𝚷, h⟩
 
 instance IsPrenexAtMost.definable : 𝚫ᴬ₁-Predicate (IsPrenexAtMost k : V → Prop) := by
-  have h : ∀ Γ : Polarity,
+  have h (Γ : Polarity) :
       𝚫ᴬ₁-Predicate fun p : V ↦ ∃ s : Fin (k + 1), IsPrenexHierarchy Γ s p :=
-    fun Γ ↦ Definable.fintype_exs fun s ↦ IsPrenexHierarchy.definable Γ s
-  refine ((h 𝚺).or (h 𝚷)).of_iff fun v ↦ ?_
-  simp only [IsPrenexAtMost, exists_polarity_iff]
-  exact or_congr ⟨fun ⟨s, hs, h⟩ ↦ ⟨⟨s, by omega⟩, h⟩, fun ⟨s, h⟩ ↦ ⟨s, by omega, h⟩⟩
-    ⟨fun ⟨s, hs, h⟩ ↦ ⟨⟨s, by omega⟩, h⟩, fun ⟨s, h⟩ ↦ ⟨s, by omega, h⟩⟩
+    Definable.fintype_exs fun s ↦ IsPrenexHierarchy.definable Γ s
+  have e (Γ : Polarity) (p : V) :
+      (∃ s ≤ k, IsPrenexHierarchy Γ s p) ↔ ∃ s : Fin (k + 1), IsPrenexHierarchy Γ s p := by
+    constructor
+    · rintro ⟨s, hs, h⟩
+      exact ⟨⟨s, by omega⟩, h⟩
+    · rintro ⟨s, h⟩
+      exact ⟨s, by omega, h⟩
+  apply ((h 𝚺).or (h 𝚷)).of_iff
+  intro v
+  simp only [IsPrenexAtMost, exists_polarity_iff, e]
 
 instance IsPrenexAtMost.definable' (Γ : SigmaPiDelta) (m : ℕ) :
     Γᴬ-[m + 1]-Predicate (IsPrenexAtMost k : V → Prop) :=
@@ -529,10 +540,12 @@ variable {k D : ℕ} {Γ : Polarity} {s : ℕ} {q θ : V}
 lemma PrenexReading.iff (heq : q = qqToPrenex Γ s θ) (hθ : IsBounded θ) :
     PrenexReading Γ s q ↔ HierarchicalSatisfaction Γ s θ 0 := by
   subst heq
-  refine ⟨fun h ↦ h θ le_qqToPrenex rfl hθ, ?_⟩
-  intro h θ' _ he _
-  obtain rfl := qqToPrenex_inj.mp he.symm
-  exact h
+  constructor
+  · intro h
+    exact h θ le_qqToPrenex rfl hθ
+  · intro h θ' _ he _
+    obtain rfl := qqToPrenex_inj.mp he.symm
+    exact h
 
 lemma AtomReading.of_not_isPrenexAtom (ha : ¬IsPrenexAtom k q) : AtomReading k q := by
   intro Γ s hs θ _ he hθ
@@ -586,8 +599,11 @@ lemma CombinationReading.of_not_isPrenexAtom_all {χ : V} (ha : ¬IsPrenexAtom k
   cases D with
   | zero => exact AtomReading.of_not_isPrenexAtom ha
   | succ D =>
-    refine ⟨fun h ↦ absurd h ha, ?_, ?_⟩ <;>
-    · intro _ q₁ _ q₂ _ he
+    and_intros
+    · intro h
+      exact absurd h ha
+    all_goals
+      intro _ q₁ _ q₂ _ he
       simp [qqAll, qqAnd, qqOr] at he
 
 lemma CombinationReading.and_iff {q₁ q₂ : V} (hq₁ : IsUFormula ℒₒᵣ q₁) (hq₂ : IsUFormula ℒₒᵣ q₂) :
@@ -610,7 +626,7 @@ lemma CombinationReading.and_iff {q₁ q₂ : V} (hq₁ : IsUFormula ℒₒᵣ q
     · rintro ⟨h, -⟩
       exact h q₁ (by simp) q₂ (by simp) rfl
     · intro h
-      refine ⟨?_, ?_⟩
+      constructor
       · rintro q₁' - q₂' - he
         obtain ⟨rfl, rfl⟩ := (qqAnd_inj _ _ _ _).mp he
         exact h
@@ -637,7 +653,7 @@ lemma CombinationReading.or_iff {q₁ q₂ : V} (hq₁ : IsUFormula ℒₒᵣ q�
     · rintro ⟨-, h⟩
       exact h q₁ (by simp) q₂ (by simp) rfl
     · intro h
-      refine ⟨?_, ?_⟩
+      constructor
       · rintro q₁' - q₂' - he
         simp [qqAnd, qqOr] at he
       · rintro q₁' - q₂' - he
@@ -701,9 +717,13 @@ lemma ReadableTruth.iff_atomReading (ha : IsPrenexAtom k q) :
 
 lemma ReadableTruth.iff_combinationReading (h : IsCombination k D q) :
     ReadableTruth k D q ↔ CombinationReading k D q := by
-  refine ⟨fun h' ↦ h'.2.1, fun h' ↦ ⟨.of_isCombination h, h', ?_⟩⟩
-  rintro ha χ - rfl
-  exact absurd h.isPrenexAtMost_of_all.isPrenexAtom ha
+  constructor
+  · intro h'
+    exact h'.2.1
+  · intro h'
+    refine ⟨.of_isCombination h, h', ?_⟩
+    rintro ha χ - rfl
+    exact absurd h.isPrenexAtMost_of_all.isPrenexAtom ha
 
 @[simp] lemma ReadableTruth.verum : ReadableTruth k D (^⊤ : V) := by
   have ha : IsPrenexAtom k (^⊤ : V) := (IsPrenexAtMost.of_isBounded (by simp)).isPrenexAtom
@@ -750,7 +770,8 @@ lemma ReadableTruth.all_iff (h : IsReadable k D (^∀ χ)) (hχ : IsSemiformula 
   · obtain ⟨s, θ, hs, rfl, hθ⟩ := ha.exists_of_all
     rw [iff_atomReading ha,
       AtomReading.iff (Γ := 𝚷) (s := s + 1) ha rfl hθ (by simpa using hχ.isUFormula)]
-    refine forall_congr' fun x ↦ ?_
+    apply forall_congr'
+    intro x
     obtain ⟨ha', hr⟩ := AtomReading.substs1_iff hs hθ hχ (Arithmetic.numeral_semiterm 0 x)
     rw [iff_atomReading ha', hr, termVal_numeral]
   · have hc := h.isCombination_of_all
@@ -758,13 +779,18 @@ lemma ReadableTruth.all_iff (h : IsReadable k D (^∀ χ)) (hχ : IsSemiformula 
       hc.subst (m := 0) (by simp) hχ
     have e : ReadableTruth k D (^∀ χ) ↔
         ∀ x, CombinationReading k D (substs1 ℒₒᵣ (numeral x) χ) := by
-      refine ⟨fun h' x ↦ h'.2.2 ha χ (by simp) rfl x,
-        fun h' ↦ ⟨h, CombinationReading.of_not_isPrenexAtom_all ha, ?_⟩⟩
-      rintro - χ' - he
-      obtain rfl := (qqAll_inj _ _).mp he
-      exact h'
+      constructor
+      · intro h' x
+        exact h'.2.2 ha χ (by simp) rfl x
+      · intro h'
+        refine ⟨h, CombinationReading.of_not_isPrenexAtom_all ha, ?_⟩
+        rintro - χ' - he
+        obtain rfl := (qqAll_inj _ _).mp he
+        exact h'
     rw [e]
-    exact forall_congr' fun x ↦ (iff_combinationReading (hc' x)).symm
+    apply forall_congr'
+    intro x
+    exact (iff_combinationReading (hc' x)).symm
 
 lemma ReadableTruth.exs_iff (h : IsReadable k D (^∃ χ)) (hχ : IsSemiformula ℒₒᵣ 1 χ) :
     ReadableTruth k D (^∃ χ) ↔ ∃ x, ReadableTruth k D (substs1 ℒₒᵣ (numeral x) χ) := by
@@ -772,7 +798,8 @@ lemma ReadableTruth.exs_iff (h : IsReadable k D (^∃ χ)) (hχ : IsSemiformula 
   obtain ⟨s, θ, hs, rfl, hθ⟩ := ha.exists_of_exs
   rw [iff_atomReading ha,
     AtomReading.iff (Γ := 𝚺) (s := s + 1) ha rfl hθ (by simpa using hχ.isUFormula)]
-  refine exists_congr fun x ↦ ?_
+  apply exists_congr
+  intro x
   obtain ⟨ha', hr⟩ := AtomReading.substs1_iff hs hθ hχ (Arithmetic.numeral_semiterm 0 x)
   rw [iff_atomReading ha', hr, termVal_numeral]
 
@@ -834,8 +861,10 @@ variable {k : ℕ} {Γ : Polarity} {s : ℕ}
 lemma HierarchicalSatisfaction.definable_of_isAtomLevel (hs : IsAtomLevel k Γ s) :
     𝚷ᴬ-[k + 1]-Relation (HierarchicalSatisfaction Γ s : V → V → Prop) := by
   rcases s with _ | s
-  · have : 𝚫ᴬ₁-Relation (HierarchicalSatisfaction Γ 0 : V → V → Prop) :=
-      BoundedSatisfaction.definable.of_iff fun v ↦ by simp
+  · have : 𝚫ᴬ₁-Relation (HierarchicalSatisfaction Γ 0 : V → V → Prop) := by
+      apply BoundedSatisfaction.definable.of_iff
+      intro v
+      simp
     exact this.of_deltaOne
   · rcases Γ with _ | _
     · have hs : s + 1 ≤ k := by rcases hs with hs | ⟨h, -⟩ <;> simp_all
@@ -860,16 +889,23 @@ instance AtomReading.definable : 𝚷ᴬ-[k + 1]-Predicate (AtomReading k : V �
   have h (Γ : Polarity) (s : Fin (k + 2)) :
       𝚷ᴬ-[k + 1]-Predicate fun q : V ↦ IsAtomLevel k Γ s → PrenexReading Γ s q := by
     by_cases hs : IsAtomLevel k Γ s
-    · exact (PrenexReading.definable hs).of_iff fun _ ↦ by simp [hs]
-    · exact (Definable.const (P := True)).of_iff fun _ ↦ by simp [hs]
+    · apply (PrenexReading.definable hs).of_iff
+      simp [hs]
+    · apply (Definable.const (P := True)).of_iff
+      simp [hs]
   have : 𝚷ᴬ-[k + 1]-Predicate fun q : V ↦ ∀ s : Fin (k + 2),
       (IsAtomLevel k 𝚺 s → PrenexReading 𝚺 s q) ∧ (IsAtomLevel k 𝚷 s → PrenexReading 𝚷 s q) :=
     Definable.fintype_all fun s ↦ (h 𝚺 s).and (h 𝚷 s)
-  refine this.of_iff fun v ↦ ⟨fun H s ↦ ⟨H 𝚺 s, H 𝚷 s⟩, fun H Γ s hs ↦ ?_⟩
-  have hs' : s < k + 2 := by rcases hs with hs | ⟨-, hs⟩ <;> omega
-  rcases Γ with _ | _
-  · exact (H ⟨s, hs'⟩).1 hs
-  · exact (H ⟨s, hs'⟩).2 hs
+  apply this.of_iff
+  intro v
+  constructor
+  · intro H s
+    exact ⟨H 𝚺 s, H 𝚷 s⟩
+  · intro H Γ s hs
+    have hs' : s < k + 2 := by rcases hs with hs | ⟨-, hs⟩ <;> omega
+    rcases Γ with _ | _
+    · exact (H ⟨s, hs'⟩).1 hs
+    · exact (H ⟨s, hs'⟩).2 hs
 
 instance CombinationReading.definable :
     (D : ℕ) → 𝚷ᴬ-[k + 1]-Predicate (CombinationReading k D : V → Prop)
@@ -892,8 +928,6 @@ instance ReadableTruth.definable (D : ℕ) :
     definability
   exact this.of_iff fun _ ↦ Iff.rfl
 
-/-- The truth `ReadableSatisfaction k D` is $\Pi_{k+1}$.
-- [HP98, Theorem I.1.75] -/
 instance ReadableSatisfaction.definable (D : ℕ) :
     𝚷ᴬ-[k + 1]-Relation (ReadableSatisfaction k D : V → V → Prop) := by
   have : 𝚷ᴬ-[k + 1]-Relation fun p f : V ↦ ReadableTruth k D (fvAssign f p) := by
@@ -1020,8 +1054,9 @@ theorem ReadableSatisfaction.subst_quote_iff (hs : IsAtomLevel k Γ s)
   rw [ReadableSatisfaction, fvAssign_subst hw hf, fvAssign_quote,
     ReadableTruth.subst_quote_iff hs φ hw.termFvAssignVec]
   have e : (fun i : Fin n ↦ termVal 0 (termFvAssignVec (n : V) f w).[((i : ℕ) : V)]) =
-      fun i : Fin n ↦ termVal 0 (termFvAssign f w.[((i : ℕ) : V)]) :=
-    funext fun i ↦ by rw [nth_termFvAssignVec hw.isUTerm (by exact_mod_cast i.isLt)]
+      fun i : Fin n ↦ termVal 0 (termFvAssign f w.[((i : ℕ) : V)]) := by
+    funext i
+    rw [nth_termFvAssignVec hw.isUTerm (by exact_mod_cast i.isLt)]
   rw [e]
 
 end quote

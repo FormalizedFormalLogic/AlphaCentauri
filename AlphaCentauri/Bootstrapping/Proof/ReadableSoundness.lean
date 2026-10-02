@@ -361,8 +361,6 @@ private lemma hasWitness_of_all (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p f : 
   rw [hsh q hq] at hψN
   exact ⟨q, hq, hψN, ReadableSatisfaction.shift_iff.mp hψT⟩
 
-/-- The existential case when the principal formula is a partial instance of a block of `E` with a
-quantifier left. -/
 private lemma hasWitness_of_exs_of_isPartialInstance (hE : ∀ e ∈ E, IsFalseBlock k D e)
     {s p t f q r : V} (hpq : fvAssign f p = q) (ht : IsSemiterm ℒₒᵣ 0 t)
     (hinst : ∀ u, IsSemiterm ℒₒᵣ 0 u → IsPartialInstance E r (substs1 ℒₒᵣ u q))

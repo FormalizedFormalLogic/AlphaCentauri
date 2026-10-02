@@ -319,7 +319,44 @@ private lemma cut_complexity :
       CutFreeDerivationOf (∅ : Theory L) d₁ (insert p s) →
       CutFreeDerivationOf (∅ : Theory L) d₂ (insert (neg L p) s) →
       CutFreeDerivable (∅ : Theory L) s := by
-  sorry
+  have hP : 𝚷ᴬ-[2].DefinablePred fun c : V ↦ ∀ p s d₁ d₂ : V, formulaComplexity L p = c →
+      CutFreeDerivationOf (∅ : Theory L) d₁ (insert p s) →
+      CutFreeDerivationOf (∅ : Theory L) d₂ (insert (neg L p) s) →
+      CutFreeDerivable (∅ : Theory L) s := by
+    apply HierarchySymbol.Definable.all
+    apply HierarchySymbol.Definable.all
+    apply HierarchySymbol.Definable.all
+    apply HierarchySymbol.Definable.all
+    exact HierarchySymbol.Definable.of_lt (C := 𝚺ᴬ-[1]) (by definability) (by simp)
+  intro c
+  refine InductionOnHierarchy.order_induction_sigma 𝚷 2 hP ?_ c
+  intro c ih p s d₁ d₂ hpc hd₁ hd₂
+  have hcut : ∀ q s : V, formulaComplexity L q < c →
+      CutFreeDerivable (∅ : Theory L) (insert q s) →
+      CutFreeDerivable (∅ : Theory L) (insert (neg L q) s) → CutFreeDerivable (∅ : Theory L) s := by
+    rintro q s hq ⟨e₁, he₁⟩ ⟨e₂, he₂⟩
+    exact ih _ hq q s e₁ e₂ rfl he₁ he₂
+  have hsub₁ : fstIdx d₁ ⊆ insert p s := by rw [hd₁.1]
+  have hpF : IsUFormula L p := (IsFormulaSet.insert_iff.mp hd₁.isFormulaSet).1.isUFormula
+  rcases hpF.case with (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
+    ⟨q, r, hq, hr, rfl⟩ | ⟨q, r, hq, hr, rfl⟩ | ⟨q, hq, rfl⟩ | ⟨q, hq, rfl⟩)
+  · exact cut_aux hcut d₁ _ s d₂ hpc.le (Or.inl (by simp [hR, hv])) hd₁.2 hsub₁ hd₂
+  · exact cut_aux hcut d₁ _ s d₂ hpc.le (Or.inl (by simp [hR, hv])) hd₁.2 hsub₁ hd₂
+  · exact cut_aux hcut d₁ _ s d₂ hpc.le (Or.inl (by simp)) hd₁.2 hsub₁ hd₂
+  · exact cut_aux hcut d₁ _ s d₂ hpc.le (Or.inl (by simp)) hd₁.2 hsub₁ hd₂
+  · exact cut_and hcut hpc.le ⟨d₁, hd₁⟩ ⟨d₂, hd₂⟩
+  · rw [neg_or hq hr] at hd₂
+    have h₁ : CutFreeDerivable (∅ : Theory L) (insert (neg L (neg L q ^⋏ neg L r)) s) := by
+      rw [neg_and hq.neg hr.neg, hq.neg_neg, hr.neg_neg]
+      exact ⟨d₁, hd₁⟩
+    exact cut_and hcut (by simpa [hq, hr, hq.neg, hr.neg] using hpc.le) ⟨d₂, hd₂⟩ h₁
+  · rw [neg_all hq] at hd₂
+    have hsub₂ : fstIdx d₂ ⊆ insert (^∃ neg L q) s := by rw [hd₂.1]
+    have hd₁' : CutFreeDerivationOf (∅ : Theory L) d₁ (insert (neg L (^∃ neg L q)) s) := by
+      rwa [neg_ex hq.neg, hq.neg_neg]
+    exact cut_aux hcut d₂ _ s d₁ (by simpa [hq, hq.neg] using hpc.le)
+      (Or.inr ⟨neg L q, by simp, rfl⟩) hd₂.2 hsub₂ hd₁'
+  · exact cut_aux hcut d₁ _ s d₂ hpc.le (Or.inr ⟨q, by simp, rfl⟩) hd₁.2 hsub₁ hd₂
 
 /-- The cut rule is admissible in the cut-free calculus over the empty theory.
 - [Bus98, Lemma 2.4.2.1] -/

@@ -272,6 +272,16 @@ lemma le_one_of_isBounded_qqToPrenex (h : IsBounded (qqToPrenex Γ s θ)) : s �
     · obtain ⟨_, _, -, -, he⟩ := IsBounded.of_all h
       simp [qqExs, qqOr] at he
 
+lemma qqToPrenex_eq_and {p q : V} (h : qqToPrenex Γ s θ = p ^⋏ q) : s = 0 := by
+  rcases s with _ | s
+  · rfl
+  · cases Γ <;> simp [qqExs, qqAll, qqAnd] at h
+
+lemma qqToPrenex_eq_or {p q : V} (h : qqToPrenex Γ s θ = p ^⋎ q) : s = 0 := by
+  rcases s with _ | s
+  · rfl
+  · cases Γ <;> simp [qqExs, qqAll, qqOr] at h
+
 end qqToPrenex
 
 /-! ## $\Delta_0$ satisfaction -/

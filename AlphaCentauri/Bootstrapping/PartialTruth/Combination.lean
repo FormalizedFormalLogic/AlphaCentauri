@@ -94,16 +94,6 @@ lemma IsPrenexAtMost.of_qqToPrenex (hs : s ≤ k) (hθ : IsBounded θ) :
     IsPrenexAtMost k (qqToPrenex Γ s θ) :=
   ⟨Γ, s, hs, isPrenexHierarchy_iff_exists_qqToPrenex.mpr ⟨θ, rfl, hθ⟩⟩
 
-lemma qqToPrenex_eq_and (h : qqToPrenex Γ s θ = p ^⋏ q) : s = 0 := by
-  rcases s with _ | s
-  · rfl
-  · cases Γ <;> simp [qqExs, qqAll, qqAnd] at h
-
-lemma qqToPrenex_eq_or (h : qqToPrenex Γ s θ = p ^⋎ q) : s = 0 := by
-  rcases s with _ | s
-  · rfl
-  · cases Γ <;> simp [qqExs, qqAll, qqOr] at h
-
 lemma IsPrenexAtom.isBounded_of_and (h : IsPrenexAtom k (p ^⋏ q)) : IsBounded (p ^⋏ q) := by
   obtain ⟨Γ, s, θ, -, he, hθ⟩ := h.exists_qqToPrenex
   obtain rfl := qqToPrenex_eq_and he.symm

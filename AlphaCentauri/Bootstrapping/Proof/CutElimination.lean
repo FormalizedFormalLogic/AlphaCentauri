@@ -25,10 +25,27 @@ open PeanoMinus ISigma0 ISigma1
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-/-- A formula code has complexity zero or is existential exactly when its shift does. -/
-private lemma complexity_eq_zero_or_exs_shift_iff {p : V} (hp : IsUFormula L p) :
-    (formulaComplexity L (shift L p) = 0 ∨ ∃ a < shift L p, shift L p = ^∃ a) ↔
-      (formulaComplexity L p = 0 ∨ ∃ a < p, p = ^∃ a) := by
+variable (L) in
+/-- `p` has complexity zero or is existential. -/
+private def IsZeroOrExs (p : V) : Prop := formulaComplexity L p = 0 ∨ ∃ a < p, p = ^∃ a
+
+variable (L) in
+/-- Cut is admissible on every formula of complexity below `c`. -/
+private def CutLower (c : V) : Prop :=
+  ∀ p s : V, formulaComplexity L p < c → CutFreeDerivable (∅ : Theory L) (insert p s) →
+    CutFreeDerivable (∅ : Theory L) (insert (neg L p) s) → CutFreeDerivable (∅ : Theory L) s
+
+variable (L) in
+/-- Cut is admissible on a formula of complexity at most `c` that has complexity zero or is
+existential, beside a sequent that a cut-free derivation coded below `d` derives. -/
+private def CutBelow (c d : V) : Prop :=
+  ∀ d₀ < d, ∀ q s₀ : V, formulaComplexity L q ≤ c → IsZeroOrExs L q →
+    CutFreeDerivation (∅ : Theory L) d₀ → fstIdx d₀ ⊆ insert q s₀ →
+    CutFreeDerivable (∅ : Theory L) (insert (neg L q) s₀) → CutFreeDerivable (∅ : Theory L) s₀
+
+private lemma isZeroOrExs_shift_iff {p : V} (hp : IsUFormula L p) :
+    IsZeroOrExs L (shift L p) ↔ IsZeroOrExs L p := by
+  unfold IsZeroOrExs
   rw [formulaComplexity_shift hp]
   apply or_congr_right
   constructor
@@ -53,9 +70,7 @@ private lemma wk_insert {x a s : V} (ha : IsFormula L a) (hd : CutFreeDerivable 
 end CutFreeDerivable
 
 /-- Cut on a conjunction, given cut on every formula of smaller complexity. -/
-private lemma cut_and {c q r s : V}
-    (hcut : ∀ p s : V, formulaComplexity L p < c → CutFreeDerivable (∅ : Theory L) (insert p s) →
-      CutFreeDerivable (∅ : Theory L) (insert (neg L p) s) → CutFreeDerivable (∅ : Theory L) s)
+private lemma cut_and {c q r s : V} (hcut : CutLower L c)
     (hc : formulaComplexity L (q ^⋏ r) ≤ c)
     (h₁ : CutFreeDerivable (∅ : Theory L) (insert (q ^⋏ r) s))
     (h₂ : CutFreeDerivable (∅ : Theory L) (insert (neg L (q ^⋏ r)) s)) :
@@ -73,6 +88,97 @@ private lemma cut_and {c q r s : V}
     hcut r _ (lt_of_lt_of_le (lt_max_succ_right _ _) hc)
       (CutFreeDerivable.wk_insert hqr.1.neg ⟨er, her⟩) (by rw [insert_comm]; exact ⟨e, he⟩)
   exact hcut q s (lt_of_lt_of_le (lt_max_succ_left _ _) hc) ⟨eq, heq⟩ h₃
+
+section cutBase
+
+variable {c p s e : V}
+
+private lemma mem_of_mem_insert_of_isZeroOrExs {x : V} (hpg : IsZeroOrExs L p)
+    (hx : x ∈ insert p s) (h₀ : formulaComplexity L x ≠ 0) (h₁ : ∀ a, x ≠ ^∃ a) : x ∈ s := by
+  apply mem_of_mem_insert_of_ne hx
+  rintro rfl
+  rcases hpg with h | ⟨a, -, rfl⟩
+  · exact h₀ h
+  · exact h₁ a rfl
+
+private lemma cut_aux_axL {Γ r : V} (hΓF : IsFormulaSet L Γ) (hsF : IsFormulaSet L s)
+    (hpF : IsFormula L p) (hr : r ∈ Γ) (hnr : neg L r ∈ Γ) (hsub : Γ ⊆ insert p s)
+    (he : CutFreeDerivationOf (∅ : Theory L) e (insert (neg L p) s)) :
+    CutFreeDerivable (∅ : Theory L) s := by
+  by_cases hn : neg L p ∈ s
+  · rw [insert_eq_self_of_mem hn] at he
+    exact ⟨e, he⟩
+  · have h₁ : r ≠ p := by
+      rintro rfl
+      exact hn (mem_of_mem_insert_of_ne (hsub hnr) (neg_ne_self hpF.isUFormula))
+    have h₂ : neg L r ≠ p := by
+      intro h
+      have hrp : r = neg L p := by rw [← h, (hΓF r hr).isUFormula.neg_neg]
+      exact hn (hrp ▸ mem_of_mem_insert_of_ne (hsub hr) (hrp ▸ neg_ne_self hpF.isUFormula))
+    exact .em hsF _ (mem_of_mem_insert_of_ne (hsub hr) h₁) (mem_of_mem_insert_of_ne (hsub hnr) h₂)
+
+private lemma cut_aux_verum {Γ : V} (hsF : IsFormulaSet L s) (hv : ^⊤ ∈ Γ)
+    (hsub : Γ ⊆ insert p s) (he : CutFreeDerivationOf (∅ : Theory L) e (insert (neg L p) s)) :
+    CutFreeDerivable (∅ : Theory L) s := by
+  by_cases hv' : (^⊤ : V) ∈ s
+  · exact .verum hsF hv'
+  · obtain rfl : (^⊤ : V) = p := (mem_bitInsert_iff.mp (hsub hv)).resolve_right hv'
+    rw [neg_verum] at he
+    exact CutFreeDerivable.of_insert_falsum ⟨e, he⟩
+
+private lemma cut_aux_and {Γ a b da db : V} (ih : CutBelow L c (andIntro Γ a b da db))
+    (hpc : formulaComplexity L p ≤ c) (hpg : IsZeroOrExs L p) (hΓF : IsFormulaSet L Γ)
+    (hab : a ^⋏ b ∈ Γ) (hda : CutFreeDerivationOf (∅ : Theory L) da (insert a Γ))
+    (hdb : CutFreeDerivationOf (∅ : Theory L) db (insert b Γ)) (hsub : Γ ⊆ insert p s)
+    (he : CutFreeDerivationOf (∅ : Theory L) e (insert (neg L p) s)) :
+    CutFreeDerivable (∅ : Theory L) s := by
+  have habF : IsFormula L a ∧ IsFormula L b := by simpa using hΓF _ hab
+  have hab' : a ^⋏ b ∈ s := mem_of_mem_insert_of_isZeroOrExs hpg (hsub hab)
+    (by simp [habF.1.isUFormula, habF.2.isUFormula]) (by simp [qqAnd, qqExs])
+  exact .and_m hab'
+    (ih da (dp_lt_andIntro _ _ _ _ _) p _ hpc hpg hda.2
+      (by rw [hda.1]; exact insert_subset_insert_insert hsub)
+      (CutFreeDerivable.wk_insert habF.1 ⟨e, he⟩))
+    (ih db (dq_lt_andIntro _ _ _ _ _) p _ hpc hpg hdb.2
+      (by rw [hdb.1]; exact insert_subset_insert_insert hsub)
+      (CutFreeDerivable.wk_insert habF.2 ⟨e, he⟩))
+
+private lemma cut_aux_or {Γ a b d₀ : V} (ih : CutBelow L c (orIntro Γ a b d₀))
+    (hpc : formulaComplexity L p ≤ c) (hpg : IsZeroOrExs L p) (hΓF : IsFormulaSet L Γ)
+    (hab : a ^⋎ b ∈ Γ) (hd₀ : CutFreeDerivationOf (∅ : Theory L) d₀ (insert a (insert b Γ)))
+    (hsub : Γ ⊆ insert p s) (he : CutFreeDerivationOf (∅ : Theory L) e (insert (neg L p) s)) :
+    CutFreeDerivable (∅ : Theory L) s := by
+  have habF : IsFormula L a ∧ IsFormula L b := by simpa using hΓF _ hab
+  have hab' : a ^⋎ b ∈ s := mem_of_mem_insert_of_isZeroOrExs hpg (hsub hab)
+    (by simp [habF.1.isUFormula, habF.2.isUFormula]) (by simp [qqOr, qqExs])
+  exact .or_m hab' <| ih d₀ (d_lt_orIntro _ _ _ _) p _ hpc hpg hd₀.2
+    (by rw [hd₀.1]; exact insert_subset_insert_insert (insert_subset_insert_insert hsub))
+    (CutFreeDerivable.wk_insert habF.1 (CutFreeDerivable.wk_insert habF.2 ⟨e, he⟩))
+
+private lemma cut_aux_all {Γ a d₀ : V} (ih : CutBelow L c (allIntro Γ a d₀))
+    (hpc : formulaComplexity L p ≤ c) (hpg : IsZeroOrExs L p) (hpF : IsFormula L p)
+    (hΓF : IsFormulaSet L Γ) (ha : ^∀ a ∈ Γ)
+    (hd₀ : CutFreeDerivationOf (∅ : Theory L) d₀ (insert (free L a) (setShift L Γ)))
+    (hsub : Γ ⊆ insert p s) (he : CutFreeDerivationOf (∅ : Theory L) e (insert (neg L p) s)) :
+    CutFreeDerivable (∅ : Theory L) s := by
+  have haF : IsSemiformula L 1 a := by simpa using hΓF _ ha
+  have ha' : ^∀ a ∈ s := mem_of_mem_insert_of_isZeroOrExs hpg (hsub ha)
+    (by simp [haF.isUFormula]) (by simp [qqAll, qqExs])
+  have hfree : IsFormula L (free L a) := (IsFormulaSet.insert_iff.mp hd₀.isFormulaSet).1
+  have hsh : CutFreeDerivable (∅ : Theory L) (setShift L (insert (neg L p) s)) :=
+    CutFreeDerivable.shift_m ⟨e, he⟩
+  rw [mem_setShift_insert, shift_neg hpF] at hsh
+  exact .all_m ha' <| ih d₀ (s_lt_allIntro _ _ _) (shift L p) _
+    (by rwa [formulaComplexity_shift hpF.isUFormula])
+    ((isZeroOrExs_shift_iff hpF.isUFormula).mpr hpg) hd₀.2
+    (by
+      rw [hd₀.1]
+      apply insert_subset_insert_insert
+      rw [← mem_setShift_insert]
+      exact setShift_subset_setShift hsub)
+    (CutFreeDerivable.wk_insert hfree hsh)
+
+end cutBase
 
 section
 
@@ -110,22 +216,62 @@ private lemma cut_of_setShift_subset {Δ p s : V} (hΔ : IsFormulaSet L Δ) (hp 
   have h₃ := CutFreeDerivable.rewrite (isSemitermVec_freshVec N) (hcut _ e h₂ he)
   rwa [fvSubstImage_fvSubstImage_eq_self hw hwv hsF hsN] at h₃
 
+section cutAux
+
+variable {c p s e : V}
+
+private lemma cut_aux_exs {Γ a t d₀ : V} (hcut : CutLower L c)
+    (ih : CutBelow L c (exsIntro Γ a t d₀)) (hpc : formulaComplexity L p ≤ c)
+    (hpg : IsZeroOrExs L p) (hΓF : IsFormulaSet L Γ) (ha : ^∃ a ∈ Γ) (ht : IsTerm L t)
+    (hd₀ : CutFreeDerivationOf (∅ : Theory L) d₀ (insert (substs1 L t a) Γ))
+    (hsub : Γ ⊆ insert p s) (he : CutFreeDerivationOf (∅ : Theory L) e (insert (neg L p) s)) :
+    CutFreeDerivable (∅ : Theory L) s := by
+  have haF : IsSemiformula L 1 a := by simpa using hΓF _ ha
+  have h₁ := ih d₀ (d_lt_exsIntro _ _ _ _) p _ hpc hpg hd₀.2
+    (by rw [hd₀.1]; exact insert_subset_insert_insert hsub)
+    (CutFreeDerivable.wk_insert (haF.substs1 ht) ⟨e, he⟩)
+  by_cases hap : ^∃ a = p
+  · subst hap
+    rw [neg_ex haF.isUFormula] at he
+    rw [formulaComplexity_ex haF.isUFormula] at hpc
+    have h₂ := CutFreeDerivation.inversion_all ht he
+    rw [show substs1 L t (neg L a) = neg L (substs1 L t a) from
+      substs_neg haF (by simp [ht] : IsSemitermVec L 1 0 (?[t] : V))] at h₂
+    exact hcut _ s (by rw [fomulaComplexity_substs1 haF ht]; exact lt_of_lt_of_le (by simp) hpc)
+      h₁ h₂
+  · exact .ex_m (mem_of_mem_insert_of_ne (hsub ha) hap) ht h₁
+
+private lemma cut_aux_shift {d₀ : V}
+    (ih : CutBelow L c (shiftRule (setShift L (fstIdx d₀)) d₀)) (hpc : formulaComplexity L p ≤ c)
+    (hpg : IsZeroOrExs L p) (hsF : IsFormulaSet L s) (hd₀ : CutFreeDerivation (∅ : Theory L) d₀)
+    (hsub : setShift L (fstIdx d₀) ⊆ insert p s)
+    (he : CutFreeDerivationOf (∅ : Theory L) e (insert (neg L p) s)) :
+    CutFreeDerivable (∅ : Theory L) s := by
+  by_cases hp' : p ∈ setShift L (fstIdx d₀)
+  · obtain ⟨p₀, hp₀, rfl⟩ := mem_setShift_iff.mp hp'
+    have hp₀F : IsUFormula L p₀ := (hd₀.isFormulaSet p₀ hp₀).isUFormula
+    exact cut_of_setShift_subset hd₀.isFormulaSet hp₀ hsub ⟨e, he⟩ fun s' e' hs' he' ↦
+      ih d₀ (d_lt_shiftRule _ _) p₀ s' (by rwa [formulaComplexity_shift hp₀F] at hpc)
+        ((isZeroOrExs_shift_iff hp₀F).mp hpg) hd₀ hs' ⟨e', he'⟩
+  · refine ⟨_, by simp, CutFreeDerivation.wkRule hsF ?_
+      ⟨rfl, CutFreeDerivation.shiftRule ⟨rfl, hd₀⟩⟩⟩
+    intro x hx
+    rw [fstIdx_shiftRule] at hx
+    exact mem_of_mem_insert_of_ne (hsub hx) (by rintro rfl; exact hp' hx)
+
 /-- Cut on a formula `p` of complexity zero, or existential of complexity at most `c`, where the
 end-sequent of a cut-free derivation code is covered by `p` beside the context, given cut on every
 formula of complexity below `c`. -/
-private lemma cut_aux {c : V}
-    (hcut : ∀ p s : V, formulaComplexity L p < c → CutFreeDerivable (∅ : Theory L) (insert p s) →
-      CutFreeDerivable (∅ : Theory L) (insert (neg L p) s) → CutFreeDerivable (∅ : Theory L) s) :
-    ∀ d p s e : V, formulaComplexity L p ≤ c →
-      (formulaComplexity L p = 0 ∨ ∃ a < p, p = ^∃ a) →
+private lemma cut_aux {c : V} (hcut : CutLower L c) :
+    ∀ d p s e : V, formulaComplexity L p ≤ c → IsZeroOrExs L p →
       CutFreeDerivation (∅ : Theory L) d → fstIdx d ⊆ insert p s →
       CutFreeDerivationOf (∅ : Theory L) e (insert (neg L p) s) →
       CutFreeDerivable (∅ : Theory L) s := by
   have hP : 𝚷ᴬ-[2].DefinablePred fun d : V ↦ ∀ p s e : V, formulaComplexity L p ≤ c →
-      (formulaComplexity L p = 0 ∨ ∃ a < p, p = ^∃ a) →
-      CutFreeDerivation (∅ : Theory L) d → fstIdx d ⊆ insert p s →
+      IsZeroOrExs L p → CutFreeDerivation (∅ : Theory L) d → fstIdx d ⊆ insert p s →
       CutFreeDerivationOf (∅ : Theory L) e (insert (neg L p) s) →
       CutFreeDerivable (∅ : Theory L) s := by
+    unfold IsZeroOrExs
     apply HierarchySymbol.Definable.all
     apply HierarchySymbol.Definable.all
     apply HierarchySymbol.Definable.all
@@ -133,116 +279,36 @@ private lemma cut_aux {c : V}
   intro d
   refine InductionOnHierarchy.order_induction_sigma 𝚷 2 hP ?_ d
   intro d ih p s e hpc hpg hd hsub he
-  have ih' : ∀ d₀ < d, ∀ q s₀, formulaComplexity L q ≤ c →
-      (formulaComplexity L q = 0 ∨ ∃ a < q, q = ^∃ a) →
-      CutFreeDerivation (∅ : Theory L) d₀ → fstIdx d₀ ⊆ insert q s₀ →
-      CutFreeDerivable (∅ : Theory L) (insert (neg L q) s₀) →
-      CutFreeDerivable (∅ : Theory L) s₀ := by
+  have ih' : CutBelow L c d := by
     rintro d₀ hd₀ q s₀ hqc hqg hd₀' hsub₀ ⟨e₀, he₀⟩
     exact ih d₀ hd₀ q s₀ e₀ hqc hqg hd₀' hsub₀ he₀
   have hsF : IsFormulaSet L s := (IsFormulaSet.insert_iff.mp he.isFormulaSet).2
   have hpF : IsFormula L p := (IsFormulaSet.insert_iff.mp he.isFormulaSet).1.elim_neg
-  have hmem : ∀ x ∈ insert p s, formulaComplexity L x ≠ 0 → (∀ a, x ≠ ^∃ a) → x ∈ s := by
-    intro x hx h₀ h₁
-    apply mem_of_mem_insert_of_ne hx
-    rintro rfl
-    rcases hpg with h | ⟨a, -, rfl⟩
-    · exact h₀ h
-    · exact h₁ a rfl
   have hΓF := hd.isFormulaSet
   rcases hd.case.2 with (⟨Γ, r, rfl, hr, hnr⟩ | ⟨Γ, rfl, hv⟩ |
     ⟨Γ, a, b, da, db, rfl, hab, hda, hdb⟩ | ⟨Γ, a, b, d₀, rfl, hab, hd₀⟩ |
     ⟨Γ, a, d₀, rfl, ha, hd₀⟩ | ⟨Γ, a, t, d₀, rfl, ha, ht, hd₀⟩ |
     ⟨Γ, d₀, rfl, hΓ, hd₀⟩ | ⟨Γ, d₀, rfl, hΓ, hd₀⟩ | ⟨Γ, r, rfl, -, hT⟩)
   · rw [fstIdx_axL] at hsub hΓF
-    by_cases hn : neg L p ∈ s
-    · rw [insert_eq_self_of_mem hn] at he
-      exact ⟨e, he⟩
-    · have h₁ : r ≠ p := by
-        rintro rfl
-        exact hn (mem_of_mem_insert_of_ne (hsub hnr) (neg_ne_self hpF.isUFormula))
-      have h₂ : neg L r ≠ p := by
-        intro h
-        have hrp : r = neg L p := by rw [← h, (hΓF r hr).isUFormula.neg_neg]
-        exact hn (hrp ▸ mem_of_mem_insert_of_ne (hsub hr) (hrp ▸ neg_ne_self hpF.isUFormula))
-      exact ⟨_, by simp, CutFreeDerivation.axL hsF (mem_of_mem_insert_of_ne (hsub hr) h₁)
-        (mem_of_mem_insert_of_ne (hsub hnr) h₂)⟩
+    exact cut_aux_axL hΓF hsF hpF hr hnr hsub he
   · rw [fstIdx_verumIntro] at hsub
-    by_cases hv' : (^⊤ : V) ∈ s
-    · exact ⟨_, by simp, CutFreeDerivation.verumIntro hsF hv'⟩
-    · obtain rfl : (^⊤ : V) = p := by
-        rcases mem_bitInsert_iff.mp (hsub hv) with h | h
-        · exact h
-        · exact absurd h hv'
-      rw [neg_verum] at he
-      exact CutFreeDerivable.of_insert_falsum ⟨e, he⟩
+    exact cut_aux_verum hsF hv hsub he
   · rw [fstIdx_andIntro] at hsub hΓF
-    have habF : IsFormula L a ∧ IsFormula L b := by simpa using hΓF _ hab
-    have hab' : a ^⋏ b ∈ s := hmem _ (hsub hab)
-      (by simp [habF.1.isUFormula, habF.2.isUFormula]) (by simp [qqAnd, qqExs])
-    obtain ⟨ea, hea⟩ := ih' da (dp_lt_andIntro _ _ _ _ _) p _ hpc hpg hda.2
-      (by rw [hda.1]; exact insert_subset_insert_insert hsub)
-      (CutFreeDerivable.wk_insert habF.1 ⟨e, he⟩)
-    obtain ⟨eb, heb⟩ := ih' db (dq_lt_andIntro _ _ _ _ _) p _ hpc hpg hdb.2
-      (by rw [hdb.1]; exact insert_subset_insert_insert hsub)
-      (CutFreeDerivable.wk_insert habF.2 ⟨e, he⟩)
-    exact ⟨_, by simp, CutFreeDerivation.andIntro hab' hea heb⟩
+    exact cut_aux_and ih' hpc hpg hΓF hab hda hdb hsub he
   · rw [fstIdx_orIntro] at hsub hΓF
-    have habF : IsFormula L a ∧ IsFormula L b := by simpa using hΓF _ hab
-    have hab' : a ^⋎ b ∈ s := hmem _ (hsub hab)
-      (by simp [habF.1.isUFormula, habF.2.isUFormula]) (by simp [qqOr, qqExs])
-    obtain ⟨e₀, he₀⟩ := ih' d₀ (d_lt_orIntro _ _ _ _) p _ hpc hpg hd₀.2
-      (by rw [hd₀.1]; exact insert_subset_insert_insert (insert_subset_insert_insert hsub))
-      (CutFreeDerivable.wk_insert habF.1 (CutFreeDerivable.wk_insert habF.2 ⟨e, he⟩))
-    exact ⟨_, by simp, CutFreeDerivation.orIntro hab' he₀⟩
+    exact cut_aux_or ih' hpc hpg hΓF hab hd₀ hsub he
   · rw [fstIdx_allIntro] at hsub hΓF
-    have haF : IsSemiformula L 1 a := by simpa using hΓF _ ha
-    have ha' : ^∀ a ∈ s := hmem _ (hsub ha) (by simp [haF.isUFormula]) (by simp [qqAll, qqExs])
-    have hfree : IsFormula L (free L a) := (IsFormulaSet.insert_iff.mp hd₀.isFormulaSet).1
-    have hsh : CutFreeDerivable (∅ : Theory L) (setShift L (insert (neg L p) s)) :=
-      ⟨_, by simp, CutFreeDerivation.shiftRule he⟩
-    rw [mem_setShift_insert, shift_neg hpF] at hsh
-    obtain ⟨e₀, he₀⟩ := ih' d₀ (s_lt_allIntro _ _ _) (shift L p) _
-      (by rwa [formulaComplexity_shift hpF.isUFormula])
-      ((complexity_eq_zero_or_exs_shift_iff hpF.isUFormula).mpr hpg) hd₀.2
-      (by
-        rw [hd₀.1]
-        apply insert_subset_insert_insert
-        rw [← mem_setShift_insert]
-        exact setShift_subset_setShift hsub)
-      (CutFreeDerivable.wk_insert hfree hsh)
-    exact ⟨_, by simp, CutFreeDerivation.allIntro ha' he₀⟩
+    exact cut_aux_all ih' hpc hpg hpF hΓF ha hd₀ hsub he
   · rw [fstIdx_exsIntro] at hsub hΓF
-    have haF : IsSemiformula L 1 a := by simpa using hΓF _ ha
-    have h₁ := ih' d₀ (d_lt_exsIntro _ _ _ _) p _ hpc hpg hd₀.2
-      (by rw [hd₀.1]; exact insert_subset_insert_insert hsub)
-      (CutFreeDerivable.wk_insert (haF.substs1 ht) ⟨e, he⟩)
-    by_cases hap : ^∃ a = p
-    · subst hap
-      rw [neg_ex haF.isUFormula] at he
-      rw [formulaComplexity_ex haF.isUFormula] at hpc
-      have h₂ := CutFreeDerivation.inversion_all ht he
-      rw [show substs1 L t (neg L a) = neg L (substs1 L t a) from
-        substs_neg haF (by simp [ht] : IsSemitermVec L 1 0 (?[t] : V))] at h₂
-      exact hcut _ s (by rw [fomulaComplexity_substs1 haF ht]; exact lt_of_lt_of_le (by simp) hpc)
-        h₁ h₂
-    · obtain ⟨e₀, he₀⟩ := h₁
-      exact ⟨_, by simp, CutFreeDerivation.exsIntro (mem_of_mem_insert_of_ne (hsub ha) hap) ht he₀⟩
+    exact cut_aux_exs hcut ih' hpc hpg hΓF ha ht hd₀ hsub he
   · rw [fstIdx_wkRule] at hsub
     exact ih' d₀ (d_lt_wkRule _ _) p s hpc hpg hd₀ (fun x hx ↦ hsub (hΓ hx)) ⟨e, he⟩
   · rw [fstIdx_shiftRule] at hsub
     subst hΓ
-    by_cases hp' : p ∈ setShift L (fstIdx d₀)
-    · obtain ⟨p₀, hp₀, rfl⟩ := mem_setShift_iff.mp hp'
-      have hp₀F : IsUFormula L p₀ := (hd₀.isFormulaSet p₀ hp₀).isUFormula
-      exact cut_of_setShift_subset hd₀.isFormulaSet hp₀ hsub ⟨e, he⟩ fun s' e' hs' he' ↦
-        ih d₀ (d_lt_shiftRule _ _) p₀ s' e' (by rwa [formulaComplexity_shift hp₀F] at hpc)
-          ((complexity_eq_zero_or_exs_shift_iff hp₀F).mp hpg) hd₀ hs' he'
-    · refine ⟨_, by simp, CutFreeDerivation.wkRule hsF ?_ ⟨rfl, hd⟩⟩
-      intro x hx
-      rw [fstIdx_shiftRule] at hx
-      exact mem_of_mem_insert_of_ne (hsub hx) (by rintro rfl; exact hp' hx)
+    exact cut_aux_shift ih' hpc hpg hsF hd₀ hsub he
   · exact absurd hT (not_mem_empty_Δ₁Class r)
+
+end cutAux
 
 /-- Cut on a formula of complexity `c`, for every `c`. -/
 private lemma cut_complexity :
@@ -262,9 +328,7 @@ private lemma cut_complexity :
   intro c
   refine InductionOnHierarchy.order_induction_sigma 𝚷 2 hP ?_ c
   intro c ih p s d₁ d₂ hpc hd₁ hd₂
-  have hcut : ∀ q s : V, formulaComplexity L q < c →
-      CutFreeDerivable (∅ : Theory L) (insert q s) →
-      CutFreeDerivable (∅ : Theory L) (insert (neg L q) s) → CutFreeDerivable (∅ : Theory L) s := by
+  have hcut : CutLower L c := by
     rintro q s hq ⟨e₁, he₁⟩ ⟨e₂, he₂⟩
     exact ih _ hq q s e₁ e₂ rfl he₁ he₂
   have hsub₁ : fstIdx d₁ ⊆ insert p s := by rw [hd₁.1]
@@ -307,44 +371,31 @@ theorem Derivable.cutFree {s : V} (h : Derivable (∅ : Theory L) s) :
   apply Derivation.induction1 𝚺 (P := fun d ↦ CutFreeDerivable (∅ : Theory L) (fstIdx d)) ?_ hd
   · intro s hs p hp hn
     rw [fstIdx_axL]
-    exact ⟨_, by simp, CutFreeDerivation.axL hs hp hn⟩
+    exact .em hs p hp hn
   · intro s hs hv
     rw [fstIdx_verumIntro]
-    exact ⟨_, by simp, CutFreeDerivation.verumIntro hs hv⟩
+    exact .verum hs hv
   · intro s _ p q dp dq hpq hdp hdq ihp ihq
-    rw [hdp.1] at ihp
-    rw [hdq.1] at ihq
-    obtain ⟨ep, hep⟩ := ihp
-    obtain ⟨eq, heq⟩ := ihq
     rw [fstIdx_andIntro]
-    exact ⟨_, by simp, CutFreeDerivation.andIntro hpq hep heq⟩
+    exact .and_m hpq (hdp.1 ▸ ihp) (hdq.1 ▸ ihq)
   · intro s _ p q d hpq hd ih
-    rw [hd.1] at ih
-    obtain ⟨e, he⟩ := ih
     rw [fstIdx_orIntro]
-    exact ⟨_, by simp, CutFreeDerivation.orIntro hpq he⟩
+    exact .or_m hpq (hd.1 ▸ ih)
   · intro s _ p d hp hd ih
-    rw [hd.1] at ih
-    obtain ⟨e, he⟩ := ih
     rw [fstIdx_allIntro]
-    exact ⟨_, by simp, CutFreeDerivation.allIntro hp he⟩
+    exact .all_m hp (hd.1 ▸ ih)
   · intro s _ p t d hp ht hd ih
-    rw [hd.1] at ih
-    obtain ⟨e, he⟩ := ih
     rw [fstIdx_exsIntro]
-    exact ⟨_, by simp, CutFreeDerivation.exsIntro hp ht he⟩
+    exact .ex_m hp ht (hd.1 ▸ ih)
   · intro s hs d hsub _ ih
     rw [fstIdx_wkRule]
     exact ih.wk hs hsub
   · rintro s _ d rfl _ ih
-    obtain ⟨e, he⟩ := ih
     rw [fstIdx_shiftRule]
-    exact ⟨_, by simp, CutFreeDerivation.shiftRule he⟩
+    exact ih.shift_m
   · intro s _ p d₁ d₂ hd₁ hd₂ ih₁ ih₂
-    rw [hd₁.1] at ih₁
-    rw [hd₂.1] at ih₂
     rw [fstIdx_cutRule]
-    exact CutFreeDerivable.cut ih₁ ih₂
+    exact CutFreeDerivable.cut (hd₁.1 ▸ ih₁) (hd₂.1 ▸ ih₂)
   · intro s _ p _ hT
     exact absurd hT (not_mem_empty_Δ₁Class p)
   · definability

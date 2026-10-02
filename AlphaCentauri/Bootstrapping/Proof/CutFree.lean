@@ -529,6 +529,38 @@ lemma wk {s s' : V} (hs : IsFormulaSet L s) (h : s' ⊆ s) (hd : CutFreeDerivabl
   obtain ⟨d, hd⟩ := hd
   exact ⟨_, by simp, CutFreeDerivation.wkRule hs h hd⟩
 
+lemma em {s : V} (hs : IsFormulaSet L s) (p : V) (h : p ∈ s) (hn : neg L p ∈ s) :
+    CutFreeDerivable T s :=
+  ⟨_, by simp, CutFreeDerivation.axL hs h hn⟩
+
+lemma verum {s : V} (hs : IsFormulaSet L s) (h : ^⊤ ∈ s) : CutFreeDerivable T s :=
+  ⟨_, by simp, CutFreeDerivation.verumIntro hs h⟩
+
+lemma and_m {s p q : V} (h : p ^⋏ q ∈ s) (hp : CutFreeDerivable T (insert p s))
+    (hq : CutFreeDerivable T (insert q s)) : CutFreeDerivable T s := by
+  obtain ⟨dp, hdp⟩ := hp
+  obtain ⟨dq, hdq⟩ := hq
+  exact ⟨_, by simp, CutFreeDerivation.andIntro h hdp hdq⟩
+
+lemma or_m {s p q : V} (h : p ^⋎ q ∈ s) (hpq : CutFreeDerivable T (insert p (insert q s))) :
+    CutFreeDerivable T s := by
+  obtain ⟨d, hd⟩ := hpq
+  exact ⟨_, by simp, CutFreeDerivation.orIntro h hd⟩
+
+lemma all_m {s p : V} (h : ^∀ p ∈ s)
+    (hp : CutFreeDerivable T (insert (free L p) (setShift L s))) : CutFreeDerivable T s := by
+  obtain ⟨d, hd⟩ := hp
+  exact ⟨_, by simp, CutFreeDerivation.allIntro h hd⟩
+
+lemma ex_m {s p t : V} (h : ^∃ p ∈ s) (ht : IsTerm L t)
+    (hp : CutFreeDerivable T (insert (substs1 L t p) s)) : CutFreeDerivable T s := by
+  obtain ⟨d, hd⟩ := hp
+  exact ⟨_, by simp, CutFreeDerivation.exsIntro h ht hd⟩
+
+lemma shift_m {s : V} (hd : CutFreeDerivable T s) : CutFreeDerivable T (setShift L s) := by
+  obtain ⟨d, hd⟩ := hd
+  exact ⟨_, by simp, CutFreeDerivation.shiftRule hd⟩
+
 /-- A cut-free-derivable sequent is derivable in Foundation's full calculus.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 lemma toDerivable {s : V} : CutFreeDerivable T s → Derivable T s := by

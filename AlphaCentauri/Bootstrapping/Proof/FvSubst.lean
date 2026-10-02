@@ -757,15 +757,19 @@ lemma fvSubst_substs1 {n w t p : V}
       ht.isUTerm (by simp))
   rw [hvec]
 
+/-- The shift of a vector of closed terms with `&0` prepended is a vector of closed terms. -/
+lemma IsSemitermVec.fvar_cons_termShiftVec {w : V} (hw : IsSemitermVec L (len w) 0 w) :
+    IsSemitermVec L (len (^&0 ∷ Bootstrapping.termShiftVec L (len w) w)) 0
+      (^&0 ∷ Bootstrapping.termShiftVec L (len w) w) := by
+  simp [hw.isUTerm, hw.termShiftVec]
+
 /-- For a substitution vector of closed terms, the free instance after free-variable substitution
 equals free-variable substitution, by the shifted substitution vector with `&0` prepended, applied
 to the free instance. -/
 lemma free_fvSubst {w p : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsSemiformula L 1 p) :
     free L (fvSubst L w p) = fvSubst L (^&0 ∷ termShiftVec L (len w) w) (free L p) := by
-  have hw' : IsSemitermVec L (len (^&0 ∷ termShiftVec L (len w) w)) 0
-      (^&0 ∷ termShiftVec L (len w) w) := by
-    simp [hw.isUTerm, hw.termShiftVec]
-  rw [free, free, fvSubst_substs1 hw' (by simp : IsSemiterm L 0 (^&0 : V)) hp.shift,
+  rw [free, free, fvSubst_substs1 hw.fvar_cons_termShiftVec (by simp : IsSemiterm L 0 (^&0 : V))
+      hp.shift,
     ← shift_fvSubst (hw.weaken (by simp)) hp]
   simp
 

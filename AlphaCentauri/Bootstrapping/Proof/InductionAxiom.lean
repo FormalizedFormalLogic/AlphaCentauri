@@ -195,7 +195,6 @@ private lemma subst_qVec_qVec_prenexInductionAtom {t : V} (hZ : IsSemiformula �
   have hv : IsSemitermVec ℒₒᵣ (m + 2) 2 (qVec ℒₒᵣ (qVec ℒₒᵣ (fvarVec m))) := by
     simpa [add_assoc, one_add_one_eq_two] using (isSemitermVec_fvarVec m 0).qVec.qVec
   have hb : IsSemitermVec ℒₒᵣ m (m + 2) (bvarVec 2 m) := IsSemitermVec.bvarVec (by rw [add_comm])
-  have h₁ : IsUTermVec ℒₒᵣ m (fvarVec m) := (isSemitermVec_fvarVec m 0).isUTerm
   have h₂ : IsUTermVec ℒₒᵣ (m + 1) (qVec ℒₒᵣ (fvarVec m)) :=
     (isSemitermVec_fvarVec m 0).qVec.isUTerm
   rw [prenexInductionAtom, substs_substs hZ hv (isSemitermVec_cons_bvarVec ht'),

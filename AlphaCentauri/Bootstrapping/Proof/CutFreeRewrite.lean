@@ -15,6 +15,7 @@ hold in every model of `𝗜𝚺⁺2`, the last in every model of `𝗜𝚺₁`.
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
@@ -45,6 +46,11 @@ private lemma all_bounds {d p s : V} (h : fstIdx d = insert (^∀ p) s) : p ≤ 
   have hp : ^∀ p ∈ fstIdx d := by rw [h]; simp
   exact ⟨le_of_lt <| lt_of_lt_of_le (lt_trans (by simp) (lt_of_mem hp)) (fstIdx_le d),
     le_of_fstIdx_eq_insert h⟩
+
+/-- The substitution of a member of a coded formula set is a member of its image. -/
+private lemma fvSubst_mem_fvSubstImage {w q s : V} (h : q ∈ s) :
+    fvSubst L w q ∈ fvSubstImage (L := L) w s :=
+  mem_fvSubstImage_iff.mpr ⟨q, h, rfl⟩
 
 namespace CutFreeDerivable
 
@@ -154,7 +160,85 @@ proves. -/
 private lemma rewrite_aux :
     ∀ d : V, ∀ w, IsSemitermVec L (len w) 0 w → CutFreeDerivation (∅ : Theory L) d →
       CutFreeDerivable (∅ : Theory L) (fvSubstImage (L := L) w (fstIdx d)) := by
-  sorry
+  have hP : 𝚷ᴬ-[2].DefinablePred fun d : V ↦ ∀ w, IsSemitermVec L (len w) 0 w →
+      CutFreeDerivation (∅ : Theory L) d →
+      CutFreeDerivable (∅ : Theory L) (fvSubstImage (L := L) w (fstIdx d)) := by
+    apply HierarchySymbol.Definable.all
+    exact HierarchySymbol.Definable.of_lt (C := 𝚺ᴬ-[1]) (by definability) (by simp)
+  intro d
+  refine InductionOnHierarchy.order_induction_sigma 𝚷 2 hP ?_ d
+  intro d ih w hw hd
+  have hsF := hd.isFormulaSet
+  rcases hd.case.2 with (⟨s, p, rfl, hp, hnp⟩ | ⟨s, rfl, hv⟩ |
+    ⟨s, p, q, dp, dq, rfl, hpq, hdp, hdq⟩ | ⟨s, p, q, d₀, rfl, hpq, hd₀⟩ |
+    ⟨s, p, d₀, rfl, hp, hd₀⟩ | ⟨s, p, t, d₀, rfl, hp, ht, hd₀⟩ |
+    ⟨s, d₀, rfl, hsub, hd₀⟩ | ⟨s, d₀, rfl, rfl, hd₀⟩ | ⟨s, p, rfl, -, hT⟩)
+  · rw [fstIdx_axL] at hsF ⊢
+    refine ⟨_, by simp, CutFreeDerivation.axL (formulaSet_fvSubstImage hw hsF)
+      (fvSubst_mem_fvSubstImage hp) ?_⟩
+    rw [← fvSubst_neg hw (hsF p hp)]
+    exact fvSubst_mem_fvSubstImage hnp
+  · rw [fstIdx_verumIntro] at hsF ⊢
+    exact ⟨_, by simp, CutFreeDerivation.verumIntro (formulaSet_fvSubstImage hw hsF)
+      (by simpa using fvSubst_mem_fvSubstImage (L := L) (w := w) hv)⟩
+  · rw [fstIdx_andIntro] at hsF ⊢
+    have hpqF : IsFormula L p ∧ IsFormula L q := by simpa using hsF _ hpq
+    obtain ⟨ep, hep⟩ := ih dp (dp_lt_andIntro _ _ _ _ _) w hw hdp.2
+    obtain ⟨eq, heq⟩ := ih dq (dq_lt_andIntro _ _ _ _ _) w hw hdq.2
+    rw [hdp.1, fvSubstImage_insert] at hep
+    rw [hdq.1, fvSubstImage_insert] at heq
+    have h := fvSubst_mem_fvSubstImage (L := L) (w := w) hpq
+    rw [fvSubst_and hpqF.1.isUFormula hpqF.2.isUFormula] at h
+    exact ⟨_, by simp, CutFreeDerivation.andIntro h hep heq⟩
+  · rw [fstIdx_orIntro] at hsF ⊢
+    have hpqF : IsFormula L p ∧ IsFormula L q := by simpa using hsF _ hpq
+    obtain ⟨e, he⟩ := ih d₀ (d_lt_orIntro _ _ _ _) w hw hd₀.2
+    rw [hd₀.1, fvSubstImage_insert, fvSubstImage_insert] at he
+    have h := fvSubst_mem_fvSubstImage (L := L) (w := w) hpq
+    rw [fvSubst_or hpqF.1.isUFormula hpqF.2.isUFormula] at h
+    exact ⟨_, by simp, CutFreeDerivation.orIntro h he⟩
+  · rw [fstIdx_allIntro] at hsF ⊢
+    have hpF : IsSemiformula L 1 p := by simpa using hsF _ hp
+    have hw' : IsSemitermVec L (len (^&0 ∷ termShiftVec L (len w) w)) 0
+        (^&0 ∷ termShiftVec L (len w) w) := by
+      simp [hw.isUTerm, hw.termShiftVec]
+    obtain ⟨e, he⟩ := ih d₀ (s_lt_allIntro _ _ _) _ hw' hd₀.2
+    rw [hd₀.1, fvSubstImage_insert, ← free_fvSubst hw hpF, ← setShift_fvSubstImage hw hsF] at he
+    have h := fvSubst_mem_fvSubstImage (L := L) (w := w) hp
+    rw [fvSubst_all hpF.isUFormula] at h
+    exact ⟨_, by simp, CutFreeDerivation.allIntro h he⟩
+  · rw [fstIdx_exsIntro] at hsF ⊢
+    have hpF : IsSemiformula L 1 p := by simpa using hsF _ hp
+    obtain ⟨e, he⟩ := ih d₀ (d_lt_exsIntro _ _ _ _) w hw hd₀.2
+    rw [hd₀.1, fvSubstImage_insert, fvSubst_substs1 hw ht hpF] at he
+    have h := fvSubst_mem_fvSubstImage (L := L) (w := w) hp
+    rw [fvSubst_exs hpF.isUFormula] at h
+    exact ⟨_, by simp, CutFreeDerivation.exsIntro h (ht.termFvSubst hw) he⟩
+  · rw [fstIdx_wkRule] at hsF ⊢
+    obtain ⟨e, he⟩ := ih d₀ (d_lt_wkRule _ _) w hw hd₀
+    refine ⟨_, by simp, CutFreeDerivation.wkRule (formulaSet_fvSubstImage hw hsF) ?_ he⟩
+    intro x hx
+    obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hx
+    exact fvSubst_mem_fvSubstImage (hsub hq)
+  · rw [fstIdx_shiftRule]
+    obtain ⟨v, hvl, hv⟩ := sigmaOne_skolem_vec
+      (R := fun x y : V ↦ (x + 1 < len w → y = w.[x + 1]) ∧ (len w ≤ x + 1 → y = ^&(x + 1)))
+      (by definability) (l := d₀)
+      (fun x _ ↦ ⟨termFvSubst L w ^&(x + 1), fun h ↦ by simp [h], fun h ↦ by simp [not_lt.mpr h]⟩)
+    replace hv : ∀ x < d₀, v.[x] = termFvSubst L w ^&(x + 1) := by
+      intro x hx
+      rw [termFvSubst_fvar]
+      split_ifs with h
+      · exact (hv x hx).1 h
+      · exact (hv x hx).2 (not_lt.mp h)
+    have hvc : IsSemitermVec L (len v) 0 v := IsSemitermVec.iff.mpr ⟨rfl, fun i hi ↦ by
+      rw [hv i (by rwa [hvl] at hi)]
+      exact IsSemiterm.termFvSubst hw (by simp)⟩
+    obtain ⟨e, he⟩ := ih d₀ (d_lt_shiftRule _ _) v hvc hd₀
+    rw [← fvSubstImage_setShift (fun x hx ↦ ⟨by rwa [hvl], hv x hx⟩) hd₀.isFormulaSet
+      (fstIdx_le d₀)] at he
+    exact ⟨e, he⟩
+  · exact absurd hT (not_mem_empty_Δ₁Class p)
 
 /-- Cut-free derivability over the empty theory is closed under substituting closed terms for
 free variables.

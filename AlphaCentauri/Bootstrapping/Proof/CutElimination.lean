@@ -38,7 +38,8 @@ private lemma neg_ne_self {p : V} (hp : IsUFormula L p) : neg L p ≠ p := by
 
 /-- Adding two codes to a coded set does not depend on their order. -/
 private lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) :=
-  mem_ext fun z ↦ by
+  mem_ext <| by
+    intro z
     simp only [mem_bitInsert_iff]
     tauto
 
@@ -93,7 +94,7 @@ end CutFreeDerivable
 
 /-- Cut on a conjunction, given cut on every formula of smaller complexity. -/
 private lemma cut_and {c q r s : V}
-    (ih : ∀ p s : V, formulaComplexity L p < c → CutFreeDerivable (∅ : Theory L) (insert p s) →
+    (hcut : ∀ p s : V, formulaComplexity L p < c → CutFreeDerivable (∅ : Theory L) (insert p s) →
       CutFreeDerivable (∅ : Theory L) (insert (neg L p) s) → CutFreeDerivable (∅ : Theory L) s)
     (hc : formulaComplexity L (q ^⋏ r) ≤ c)
     (h₁ : CutFreeDerivable (∅ : Theory L) (insert (q ^⋏ r) s))
@@ -109,9 +110,9 @@ private lemma cut_and {c q r s : V}
   obtain ⟨er, her, -⟩ := CutFreeDerivation.inversion_and (Or.inr rfl) hd₁
   obtain ⟨e, he, -⟩ := CutFreeDerivation.inversion_or hd₂
   have h₃ : CutFreeDerivable (∅ : Theory L) (insert (neg L q) s) :=
-    ih r _ (lt_of_lt_of_le (lt_max_succ_right _ _) hc)
+    hcut r _ (lt_of_lt_of_le (lt_max_succ_right _ _) hc)
       (CutFreeDerivable.wk_insert hqr.1.neg ⟨er, her⟩) (by rw [insert_comm]; exact ⟨e, he⟩)
-  exact ih q s (lt_of_lt_of_le (lt_max_succ_left _ _) hc) ⟨eq, heq⟩ h₃
+  exact hcut q s (lt_of_lt_of_le (lt_max_succ_left _ _) hc) ⟨eq, heq⟩ h₃
 
 section
 
@@ -122,7 +123,7 @@ reduces to cuts on `p` itself beside sets covering `Δ`. -/
 private lemma cut_of_setShift_subset {Δ p s : V} (hΔ : IsFormulaSet L Δ) (hp : p ∈ Δ)
     (hsub : setShift L Δ ⊆ insert (shift L p) s)
     (he : CutFreeDerivable (∅ : Theory L) (insert (neg L (shift L p)) s))
-    (ih : ∀ s' e' : V, Δ ⊆ insert p s' →
+    (hcut : ∀ s' e' : V, Δ ⊆ insert p s' →
       CutFreeDerivationOf (∅ : Theory L) e' (insert (neg L p) s') →
       CutFreeDerivable (∅ : Theory L) s') :
     CutFreeDerivable (∅ : Theory L) s := by
@@ -146,12 +147,12 @@ private lemma cut_of_setShift_subset {Δ p s : V} (hΔ : IsFormulaSet L Δ) (hp 
     · exact mem_bitInsert_iff.mpr <| Or.inr <|
         mem_fvSubstImage_iff.mpr ⟨_, h, (hback x (hΔ x hx) hxN).symm⟩
   obtain ⟨e, he⟩ := h₁
-  have h₃ := CutFreeDerivable.rewrite (isSemitermVec_freshVec N) (ih _ e h₂ he)
+  have h₃ := CutFreeDerivable.rewrite (isSemitermVec_freshVec N) (hcut _ e h₂ he)
   rwa [fvSubstImage_fvSubstImage_eq_self hw hwv hsF hsN] at h₃
 
-/-- Cut on a formula of complexity zero or on an existential formula of complexity at most `c`,
-whose side is covered by the end-sequent of a cut-free derivation code, given cut on every formula
-of complexity below `c`. -/
+/-- Cut on a formula `p` of complexity zero, or existential of complexity at most `c`, where the
+end-sequent of a cut-free derivation code is covered by `p` beside the context, given cut on every
+formula of complexity below `c`. -/
 private lemma cut_aux {c : V}
     (hcut : ∀ p s : V, formulaComplexity L p < c → CutFreeDerivable (∅ : Theory L) (insert p s) →
       CutFreeDerivable (∅ : Theory L) (insert (neg L p) s) → CutFreeDerivable (∅ : Theory L) s) :
@@ -183,7 +184,7 @@ private lemma cut_aux {c : V}
   have hpF : IsFormula L p := (IsFormulaSet.insert_iff.mp he.isFormulaSet).1.elim_neg
   have hmem : ∀ x ∈ insert p s, formulaComplexity L x ≠ 0 → (∀ a, x ≠ ^∃ a) → x ∈ s := by
     intro x hx h₀ h₁
-    refine mem_of_mem_insert_of_ne hx ?_
+    apply mem_of_mem_insert_of_ne hx
     rintro rfl
     rcases hpg with h | ⟨a, -, rfl⟩
     · exact h₀ h

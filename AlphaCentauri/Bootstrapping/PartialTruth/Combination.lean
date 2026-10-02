@@ -449,9 +449,17 @@ instance IsPrenexAtMost.definable : 𝚫ᴬ₁-Predicate (IsPrenexAtMost k : V �
   exact or_congr ⟨fun ⟨s, hs, h⟩ ↦ ⟨⟨s, by omega⟩, h⟩, fun ⟨s, h⟩ ↦ ⟨s, by omega, h⟩⟩
     ⟨fun ⟨s, hs, h⟩ ↦ ⟨⟨s, by omega⟩, h⟩, fun ⟨s, h⟩ ↦ ⟨s, by omega, h⟩⟩
 
+instance IsPrenexAtMost.definable' (Γ : SigmaPiDelta) (m : ℕ) :
+    Γᴬ-[m + 1]-Predicate (IsPrenexAtMost k : V → Prop) :=
+  IsPrenexAtMost.definable.of_deltaOne
+
 instance IsPrenexAtom.definable : 𝚫ᴬ₁-Predicate (IsPrenexAtom k : V → Prop) :=
   (IsPrenexAtMost.definable.or (IsPrenexHierarchy.definable 𝚷 (k + 1))).of_iff
     fun _ ↦ isPrenexAtom_iff
+
+instance IsPrenexAtom.definable' (Γ : SigmaPiDelta) (m : ℕ) :
+    Γᴬ-[m + 1]-Predicate (IsPrenexAtom k : V → Prop) :=
+  IsPrenexAtom.definable.of_deltaOne
 
 instance IsCombination.definable : (D : ℕ) → 𝚫ᴬ₁-Predicate (IsCombination k D : V → Prop)
   | 0 => IsPrenexAtMost.definable
@@ -463,11 +471,19 @@ instance IsCombination.definable : (D : ℕ) → 𝚫ᴬ₁-Predicate (IsCombina
       definability
     exact this.of_iff fun _ ↦ Iff.rfl
 
+instance IsCombination.definable' (D : ℕ) (Γ : SigmaPiDelta) (m : ℕ) :
+    Γᴬ-[m + 1]-Predicate (IsCombination k D : V → Prop) :=
+  (IsCombination.definable D).of_deltaOne
+
 instance IsReadable.definable (D : ℕ) : 𝚫ᴬ₁-Predicate (IsReadable k D : V → Prop) := by
   have : 𝚫ᴬ₁-Predicate fun p : V ↦ IsCombination k D p ∨
       (∃ q < p, p = ^∀ q ∧ IsCombination k D q) ∨ IsPrenexHierarchy 𝚷 (k + 1) p := by
     definability
   exact this.of_iff fun _ ↦ Iff.rfl
+
+instance IsReadable.definable' (D : ℕ) (Γ : SigmaPiDelta) (m : ℕ) :
+    Γᴬ-[m + 1]-Predicate (IsReadable k D : V → Prop) :=
+  (IsReadable.definable D).of_deltaOne
 
 end definability
 
@@ -806,5 +822,208 @@ lemma ReadableTruth.neg_iff (h : IsReadable k D q) (hn : IsReadable k D (neg ℒ
         CombinationReading.neg hc hq]
 
 end readableTruth
+
+/-! ### Definability of truth -/
+
+section truthDefinability
+
+open FFL.FirstOrder.Bounding.HierarchySymbol
+
+variable {k : ℕ} {Γ : Polarity} {s : ℕ}
+
+lemma HierarchicalSatisfaction.definable_of_isAtomLevel (hs : IsAtomLevel k Γ s) :
+    𝚷ᴬ-[k + 1]-Relation (HierarchicalSatisfaction Γ s : V → V → Prop) := by
+  rcases s with _ | s
+  · have : 𝚫ᴬ₁-Relation (HierarchicalSatisfaction Γ 0 : V → V → Prop) :=
+      BoundedSatisfaction.definable.of_iff fun v ↦ by simp
+    exact this.of_deltaOne
+  · rcases Γ with _ | _
+    · have hs : s + 1 ≤ k := by rcases hs with hs | ⟨h, -⟩ <;> simp_all
+      exact (HierarchicalSatisfaction.sigma_definable (s + 1)).of_lt (by simp; omega)
+    · rcases hs with hs | ⟨-, hs⟩
+      · exact (HierarchicalSatisfaction.pi_definable (s + 1)).of_lt (by simp; omega)
+      · obtain rfl : s = k := by omega
+        exact HierarchicalSatisfaction.pi_definable (s + 1)
+
+lemma PrenexReading.definable (hs : IsAtomLevel k Γ s) :
+    𝚷ᴬ-[k + 1]-Predicate (PrenexReading Γ s : V → Prop) := by
+  have := HierarchicalSatisfaction.definable_of_isAtomLevel (V := V) hs
+  have : 𝚺ᴬ-[k + 1]-Predicate (IsBounded : V → Prop) := IsBounded.definable.of_deltaOne
+  have : 𝚺ᴬ-[k + 1]-Function₁ (qqToPrenex Γ s : V → V) :=
+    Definable.of_zero (qqToPrenex_defined Γ s).to_definable
+  have : 𝚷ᴬ-[k + 1]-Predicate fun q : V ↦ ∀ θ ≤ q, q = qqToPrenex Γ s θ → IsBounded θ →
+      HierarchicalSatisfaction Γ s θ 0 := by
+    definability
+  exact this.of_iff fun _ ↦ Iff.rfl
+
+instance AtomReading.definable : 𝚷ᴬ-[k + 1]-Predicate (AtomReading k : V → Prop) := by
+  have h (Γ : Polarity) (s : Fin (k + 2)) :
+      𝚷ᴬ-[k + 1]-Predicate fun q : V ↦ IsAtomLevel k Γ s → PrenexReading Γ s q := by
+    by_cases hs : IsAtomLevel k Γ s
+    · exact (PrenexReading.definable hs).of_iff fun _ ↦ by simp [hs]
+    · exact (Definable.const (P := True)).of_iff fun _ ↦ by simp [hs]
+  have : 𝚷ᴬ-[k + 1]-Predicate fun q : V ↦ ∀ s : Fin (k + 2),
+      (IsAtomLevel k 𝚺 s → PrenexReading 𝚺 s q) ∧ (IsAtomLevel k 𝚷 s → PrenexReading 𝚷 s q) :=
+    Definable.fintype_all fun s ↦ (h 𝚺 s).and (h 𝚷 s)
+  refine this.of_iff fun v ↦ ⟨fun H s ↦ ⟨H 𝚺 s, H 𝚷 s⟩, fun H Γ s hs ↦ ?_⟩
+  have hs' : s < k + 2 := by rcases hs with hs | ⟨-, hs⟩ <;> omega
+  rcases Γ with _ | _
+  · exact (H ⟨s, hs'⟩).1 hs
+  · exact (H ⟨s, hs'⟩).2 hs
+
+instance CombinationReading.definable :
+    (D : ℕ) → 𝚷ᴬ-[k + 1]-Predicate (CombinationReading k D : V → Prop)
+  | 0 => AtomReading.definable
+  | D + 1 => by
+    have := CombinationReading.definable D
+    have : 𝚷ᴬ-[k + 1]-Predicate fun q : V ↦ (IsPrenexAtom k q → AtomReading k q) ∧
+        (¬IsPrenexAtom k q → ∀ q₁ < q, ∀ q₂ < q, q = q₁ ^⋏ q₂ →
+          CombinationReading k D q₁ ∧ CombinationReading k D q₂) ∧
+        (¬IsPrenexAtom k q → ∀ q₁ < q, ∀ q₂ < q, q = q₁ ^⋎ q₂ →
+          CombinationReading k D q₁ ∨ CombinationReading k D q₂) := by
+      definability
+    exact this.of_iff fun _ ↦ Iff.rfl
+
+instance ReadableTruth.definable (D : ℕ) :
+    𝚷ᴬ-[k + 1]-Predicate (ReadableTruth k D : V → Prop) := by
+  have : 𝚷ᴬ-[k + 1]-Predicate fun q : V ↦ IsReadable k D q ∧ CombinationReading k D q ∧
+      (¬IsPrenexAtom k q → ∀ χ < q, q = ^∀ χ →
+        ∀ x, CombinationReading k D (substs1 ℒₒᵣ (numeral x) χ)) := by
+    definability
+  exact this.of_iff fun _ ↦ Iff.rfl
+
+/-- The truth `ReadableSatisfaction k D` is $\Pi_{k+1}$.
+- [HP98, Theorem I.1.75] -/
+instance ReadableSatisfaction.definable (D : ℕ) :
+    𝚷ᴬ-[k + 1]-Relation (ReadableSatisfaction k D : V → V → Prop) := by
+  have : 𝚷ᴬ-[k + 1]-Relation fun p f : V ↦ ReadableTruth k D (fvAssign f p) := by
+    definability
+  exact this.of_iff fun _ ↦ Iff.rfl
+
+end truthDefinability
+
+/-! ### The Tarski conditions -/
+
+section readableSatisfaction
+
+variable {k D : ℕ} {p q f : V}
+
+lemma ReadableSatisfaction.isReadable (h : ReadableSatisfaction k D p f) :
+    IsReadable k D (fvAssign f p) := h.1
+
+@[simp] lemma ReadableSatisfaction.verum : ReadableSatisfaction k D (^⊤ : V) f := by
+  simp [ReadableSatisfaction]
+
+lemma ReadableSatisfaction.and_iff (h : IsReadable k D (p ^⋏ q)) (hp : IsUFormula ℒₒᵣ p)
+    (hq : IsUFormula ℒₒᵣ q) :
+    ReadableSatisfaction k D (p ^⋏ q) f ↔
+      ReadableSatisfaction k D p f ∧ ReadableSatisfaction k D q f := by
+  have h' := h.fvAssign (f := f) (by simp [hp, hq])
+  rw [fvAssign_and hp hq] at h'
+  rw [ReadableSatisfaction, fvAssign_and hp hq]
+  exact ReadableTruth.and_iff h' hp.fvAssign hq.fvAssign
+
+lemma ReadableSatisfaction.or_iff (h : IsReadable k D (p ^⋎ q)) (hp : IsUFormula ℒₒᵣ p)
+    (hq : IsUFormula ℒₒᵣ q) :
+    ReadableSatisfaction k D (p ^⋎ q) f ↔
+      ReadableSatisfaction k D p f ∨ ReadableSatisfaction k D q f := by
+  have h' := h.fvAssign (f := f) (by simp [hp, hq])
+  rw [fvAssign_or hp hq] at h'
+  rw [ReadableSatisfaction, fvAssign_or hp hq]
+  exact ReadableTruth.or_iff h' hp.fvAssign hq.fvAssign
+
+lemma ReadableSatisfaction.all_iff (h : IsReadable k D (^∀ p)) (hp : IsSemiformula ℒₒᵣ 1 p) :
+    ReadableSatisfaction k D (^∀ p) f ↔ ∀ x, ReadableSatisfaction k D (free ℒₒᵣ p) (x ∷ f) := by
+  have h' := h.fvAssign (f := f) (by simpa using hp.isUFormula)
+  rw [fvAssign_all hp.isUFormula] at h'
+  simp only [ReadableSatisfaction, fvAssign_all hp.isUFormula, fvAssign_free hp]
+  exact ReadableTruth.all_iff h' hp.fvAssign
+
+lemma ReadableSatisfaction.exs_iff (h : IsReadable k D (^∃ p)) (hp : IsSemiformula ℒₒᵣ 1 p) :
+    ReadableSatisfaction k D (^∃ p) f ↔ ∃ x, ReadableSatisfaction k D (free ℒₒᵣ p) (x ∷ f) := by
+  have h' := h.fvAssign (f := f) (by simpa using hp.isUFormula)
+  rw [fvAssign_exs hp.isUFormula] at h'
+  simp only [ReadableSatisfaction, fvAssign_exs hp.isUFormula, fvAssign_free hp]
+  exact ReadableTruth.exs_iff h' hp.fvAssign
+
+lemma ReadableSatisfaction.exs_of_substs1 {t : V} (h : IsReadable k D (^∃ p))
+    (hp : IsSemiformula ℒₒᵣ 1 p) (ht : IsSemiterm ℒₒᵣ 0 t)
+    (ht' : ReadableSatisfaction k D (substs1 ℒₒᵣ t p) f) : ReadableSatisfaction k D (^∃ p) f := by
+  have h' := h.fvAssign (f := f) (by simpa using hp.isUFormula)
+  rw [fvAssign_exs hp.isUFormula] at h'
+  rw [ReadableSatisfaction, fvAssign_substs1 ht hp] at ht'
+  rw [ReadableSatisfaction, fvAssign_exs hp.isUFormula]
+  exact ReadableTruth.exs_of_substs1 h' hp.fvAssign ht.termFvAssign ht'
+
+@[simp] lemma ReadableSatisfaction.shift_iff {b : V} :
+    ReadableSatisfaction k D (shift ℒₒᵣ p) (b ∷ f) ↔ ReadableSatisfaction k D p f := by
+  by_cases hp : IsUFormula ℒₒᵣ p
+  · rw [ReadableSatisfaction, fvAssign_shift hp, ReadableSatisfaction]
+  · rw [ReadableSatisfaction, shift_not_uformula hp, ReadableSatisfaction,
+      fvAssign_not_uformula hp, fvAssign_not_uformula (by simp)]
+
+lemma ReadableSatisfaction.congr {g : V} (h : ∀ i, f.[i] = g.[i]) :
+    ReadableSatisfaction k D p f ↔ ReadableSatisfaction k D p g := by
+  rw [ReadableSatisfaction, ReadableSatisfaction, fvAssign_congr h]
+
+lemma ReadableSatisfaction.neg_iff (h : IsReadable k D p) (hn : IsReadable k D (neg ℒₒᵣ p))
+    (hp : IsUFormula ℒₒᵣ p) :
+    ReadableSatisfaction k D (neg ℒₒᵣ p) f ↔ ¬ReadableSatisfaction k D p f := by
+  have hn' := hn.fvAssign (f := f) hp.neg
+  rw [fvAssign_neg hp] at hn'
+  rw [ReadableSatisfaction, ReadableSatisfaction, fvAssign_neg hp]
+  exact ReadableTruth.neg_iff (h.fvAssign hp) hn' hp.fvAssign
+
+end readableSatisfaction
+
+/-! ### Formulas of the meta level -/
+
+section quote
+
+variable {k D : ℕ} {Γ : Polarity} {s n : ℕ}
+
+/-- An instance of a standard prenex formula by closed terms is true exactly when the formula
+holds of the values of the terms.
+- [HP98, Theorem I.1.75] -/
+theorem ReadableTruth.subst_quote_iff (hs : IsAtomLevel k Γ s)
+    (φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty n) {w : V} (hw : IsSemitermVec ℒₒᵣ (n : V) 0 w) :
+    ReadableTruth k D (subst ℒₒᵣ w ⌜φ.val⌝) ↔ V ⊧/(fun i ↦ termVal 0 w.[i]) φ.val := by
+  have hb : IsBounded (⌜φ.matrix.val⌝ : V) := (isBounded_quote_iff _).mpr φ.matrix.bounded
+  have hf : IsSemiformula ℒₒᵣ (n + s : V) ⌜φ.matrix.val⌝ := by
+    simpa using Sentence.quote_isSemiformula (V := V) φ.matrix.val
+  have hφ : IsSemiformula ℒₒᵣ (n : V) ⌜φ.val⌝ := by simp
+  have he : subst ℒₒᵣ w ⌜φ.val⌝ =
+      qqToPrenex Γ s (subst ℒₒᵣ ((qVec ℒₒᵣ)^[s] w) ⌜φ.matrix.val⌝) := by
+    rw [Bounding.Prenex.val, quote_toPrenex, subst_qqToPrenex hf.isUFormula]
+  have hb' := hb.subst (hw.iterate_qVec s) hf
+  have ha : IsPrenexAtom k (subst ℒₒᵣ w ⌜φ.val⌝) := by
+    rw [he]
+    exact IsPrenexAtom.of_qqToPrenex hs hb'
+  have hv : termValVec 0 (n : V) w = matrixToVec fun i : Fin n ↦ termVal 0 w.[((i : ℕ) : V)] := by
+    apply nth_ext' (n : V) (by simp [hw.isUTerm]) (by simp)
+    intro i hi
+    rw [nth_termValVec hw.isUTerm hi]
+    obtain ⟨j, rfl⟩ := eq_nat_of_lt_nat hi
+    have hj : j < n := by exact_mod_cast hi
+    simpa using (matrixToVec_nth (fun i : Fin n ↦ termVal 0 w.[((i : ℕ) : V)]) ⟨j, hj⟩).symm
+  rw [iff_atomReading ha, AtomReading.iff ha he hb' (hφ.subst hw).isUFormula,
+    HierarchicalSatisfaction.subst hw hf hb, hv, hierarchicalSatisfaction_quote_iff]
+
+/-- An instance of a standard prenex formula by terms is true under an assignment exactly when the
+formula holds of the values of the terms.
+- [HP98, Theorem I.1.75] -/
+theorem ReadableSatisfaction.subst_quote_iff (hs : IsAtomLevel k Γ s)
+    (φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty n) {w : V} (hw : IsSemitermVec ℒₒᵣ (n : V) 0 w) (f : V) :
+    ReadableSatisfaction k D (subst ℒₒᵣ w ⌜φ.val⌝) f ↔
+      V ⊧/(fun i ↦ termVal 0 (termFvAssign f w.[i])) φ.val := by
+  have hf : IsSemiformula ℒₒᵣ (n : V) ⌜φ.val⌝ := by simp
+  rw [ReadableSatisfaction, fvAssign_subst hw hf, fvAssign_quote,
+    ReadableTruth.subst_quote_iff hs φ hw.termFvAssignVec]
+  have e : (fun i : Fin n ↦ termVal 0 (termFvAssignVec (n : V) f w).[((i : ℕ) : V)]) =
+      fun i : Fin n ↦ termVal 0 (termFvAssign f w.[((i : ℕ) : V)]) :=
+    funext fun i ↦ by rw [nth_termFvAssignVec hw.isUTerm (by exact_mod_cast i.isLt)]
+  rw [e]
+
+end quote
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -518,6 +518,112 @@ lemma IsPrenexHierarchy.fvAssign {Γ : Polarity} {s : ℕ} {p : V} (hp : IsUForm
 
 end
 
+/-! ## Formulas without free variables and agreeing assignments -/
+
+section fixed
+
+variable {f g : V}
+
+lemma termFvAssign_eq_self {t : V} (ht : IsUTerm ℒₒᵣ t) (h : termShift ℒₒᵣ t = t) :
+    termFvAssign f t = t := by
+  revert h
+  apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z _
+    simp
+  · intro x h
+    simp at h
+  · intro k g v hg hv ih h
+    rw [termShift_func hg hv, qqFunc_inj] at h
+    rw [termFvAssign_func hg hv, qqFunc_inj]
+    refine ⟨rfl, rfl, nth_ext' k (by simp [hv]) hv.lh.symm fun i hi ↦ ?_⟩
+    rw [nth_termFvAssignVec hv hi]
+    exact ih i hi (by rw [← nth_termShiftVec hv hi, h.2.2])
+
+lemma fvAssign_eq_self {p : V} (hp : IsUFormula ℒₒᵣ p) (h : shift ℒₒᵣ p = p) :
+    fvAssign f p = p := by
+  revert h
+  apply IsUFormula.induction1 𝚺 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
+  · definability
+  · intro k R v hR hv h
+    rw [shift_rel hR hv, qqRel_inj] at h
+    rw [fvAssign_rel hR hv, qqRel_inj]
+    refine ⟨rfl, rfl, nth_ext' k (by simp [hv]) hv.lh.symm fun i hi ↦ ?_⟩
+    rw [nth_termFvAssignVec hv hi]
+    exact termFvAssign_eq_self (hv.nth hi) (by rw [← nth_termShiftVec hv hi, h.2.2])
+  · intro k R v hR hv h
+    rw [shift_nrel hR hv, qqNRel_inj] at h
+    rw [fvAssign_nrel hR hv, qqNRel_inj]
+    refine ⟨rfl, rfl, nth_ext' k (by simp [hv]) hv.lh.symm fun i hi ↦ ?_⟩
+    rw [nth_termFvAssignVec hv hi]
+    exact termFvAssign_eq_self (hv.nth hi) (by rw [← nth_termShiftVec hv hi, h.2.2])
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq h
+    rw [shift_and hp hq, qqAnd_inj] at h
+    rw [fvAssign_and hp hq, ihp h.1, ihq h.2]
+  · intro p q hp hq ihp ihq h
+    rw [shift_or hp hq, qqOr_inj] at h
+    rw [fvAssign_or hp hq, ihp h.1, ihq h.2]
+  · intro p hp ih h
+    rw [shift_all hp, qqAll_inj] at h
+    rw [fvAssign_all hp, ih h]
+  · intro p hp ih h
+    rw [shift_exs hp, qqExs_inj] at h
+    rw [fvAssign_exs hp, ih h]
+
+lemma shift_quote {n : ℕ} (σ : ArithmeticSemisentence n) :
+    shift ℒₒᵣ (⌜σ⌝ : V) = ⌜σ⌝ := by
+  have h : Rewriting.shift (Rewriting.emb σ : ArithmeticSemiproposition n) = Rewriting.emb σ := by
+    simpa [Rewriting.shifts] using
+      Rewriting.shifts_emb ({σ} : Multiset (ArithmeticSemisentence n))
+  rw [Sentence.quote_def, ← Semiformula.quote_shift, h]
+
+@[simp] lemma fvAssign_quote {n : ℕ} (σ : ArithmeticSemisentence n) :
+    fvAssign f (⌜σ⌝ : V) = ⌜σ⌝ :=
+  fvAssign_eq_self (by simp) (shift_quote σ)
+
+lemma termFvAssign_congr (h : ∀ i, f.[i] = g.[i]) {t : V} (ht : IsUTerm ℒₒᵣ t) :
+    termFvAssign f t = termFvAssign g t := by
+  apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z
+    simp
+  · intro x
+    simp [h x]
+  · intro k g' v hg hv ih
+    rw [termFvAssign_func hg hv, termFvAssign_func hg hv]
+    simp only [qqFunc_inj, true_and]
+    apply nth_ext' k (by simp [hv]) (by simp [hv])
+    intro i hi
+    rw [nth_termFvAssignVec hv hi, nth_termFvAssignVec hv hi, ih i hi]
+
+lemma fvAssign_congr (h : ∀ i, f.[i] = g.[i]) (p : V) : fvAssign f p = fvAssign g p := by
+  by_cases hp : IsUFormula ℒₒᵣ p
+  · apply IsUFormula.induction1 𝚺 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
+    · definability
+    · intro k R v hR hv
+      rw [fvAssign_rel hR hv, fvAssign_rel hR hv, qqRel_inj]
+      refine ⟨rfl, rfl, nth_ext' k (by simp [hv]) (by simp [hv]) fun i hi ↦ ?_⟩
+      rw [nth_termFvAssignVec hv hi, nth_termFvAssignVec hv hi, termFvAssign_congr h (hv.nth hi)]
+    · intro k R v hR hv
+      rw [fvAssign_nrel hR hv, fvAssign_nrel hR hv, qqNRel_inj]
+      refine ⟨rfl, rfl, nth_ext' k (by simp [hv]) (by simp [hv]) fun i hi ↦ ?_⟩
+      rw [nth_termFvAssignVec hv hi, nth_termFvAssignVec hv hi, termFvAssign_congr h (hv.nth hi)]
+    · simp
+    · simp
+    · intro p q hp hq ihp ihq
+      rw [fvAssign_and hp hq, fvAssign_and hp hq, ihp, ihq]
+    · intro p q hp hq ihp ihq
+      rw [fvAssign_or hp hq, fvAssign_or hp hq, ihp, ihq]
+    · intro p hp ih
+      rw [fvAssign_all hp, fvAssign_all hp, ih]
+    · intro p hp ih
+      rw [fvAssign_exs hp, fvAssign_exs hp, ih]
+  · rw [fvAssign_not_uformula hp, fvAssign_not_uformula hp]
+
+end fixed
+
 /-! ## Free-variable substitution by closed terms -/
 
 section fvSubst

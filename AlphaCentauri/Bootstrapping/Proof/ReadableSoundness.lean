@@ -158,4 +158,77 @@ lemma substs1_qqExss {t q v r : V} (ht : IsSemiterm ℒₒᵣ 0 t) (hq : IsSemif
     rw [qqExss_succ', ih (by simpa using hq) hv'l (fun i hi ↦ (hv' i (lt_trans hi (by simp))).1 hi)
       ((hv' r (by simp)).2 le_rfl), substs_ex hq.isUFormula, qqExss_exs, ← qqExss_succ, hqv]
 
+/-! ### Partial instances of blocks -/
+
+/-- `IsPartialInstance E r φ`: `φ` is obtained from a member `qqExss χ m` of `E`, whose matrix `χ`
+is not existential, by instantiating the outermost `m - r` existential quantifiers with closed
+terms. -/
+def IsPartialInstance (E r φ : V) : Prop :=
+  ∃ m χ, qqExss χ m ∈ E ∧ IsSemiformula ℒₒᵣ m χ ∧ (∀ p < χ, χ ≠ ^∃ p) ∧ r ≤ m ∧
+    ∃ w, IsSemitermVec ℒₒᵣ m r w ∧ (∀ i < r, w.[i] = ^#i) ∧
+      (∀ i < m, r ≤ i → IsSemiterm ℒₒᵣ 0 w.[i]) ∧ φ = qqExss (subst ℒₒᵣ w χ) r
+
+section partialInstance
+
+variable {E : V}
+
+instance IsPartialInstance.definable :
+    𝚺ᴬ₁-Relation₃ (IsPartialInstance : V → V → V → Prop) := by
+  unfold IsPartialInstance
+  definability
+
+instance IsPartialInstance.definable' (m : ℕ) :
+    𝚺ᴬ-[m + 1]-Relation₃ (IsPartialInstance : V → V → V → Prop) := by
+  rcases m with _ | m
+  · exact IsPartialInstance.definable
+  · exact IsPartialInstance.definable.of_lt (by simp)
+
+lemma IsPartialInstance.of_mem {m χ : V} (hχ : IsSemiformula ℒₒᵣ m χ) (hmax : ∀ p, χ ≠ ^∃ p)
+    (h : qqExss χ m ∈ E) : IsPartialInstance E m (qqExss χ m) := by
+  obtain ⟨w, hwl, hw⟩ := sigmaOne_skolem_vec (R := fun i y : V ↦ y = ^#i) (by definability)
+    (l := m) (fun i _ ↦ ⟨_, rfl⟩)
+  have hwv : IsSemitermVec ℒₒᵣ m m w :=
+    IsSemitermVec.iff.mpr ⟨hwl, fun i hi ↦ by simp [hw i hi, hi]⟩
+  exact ⟨m, χ, h, hχ, fun p _ ↦ hmax p, le_rfl, w, hwv, hw,
+    fun i hi hmi ↦ absurd hi (not_lt.mpr hmi), by rw [subst_eq_self hχ hwv hw]⟩
+
+lemma IsPartialInstance.isFormula {r φ : V} (h : IsPartialInstance E r φ) :
+    IsFormula ℒₒᵣ φ := by
+  obtain ⟨m, χ, -, hχ, -, -, w, hw, -, -, rfl⟩ := h
+  exact IsSemiformula.qqExss (by simpa using hχ.subst hw)
+
+lemma IsPartialInstance.succ {r φ : V} (h : IsPartialInstance E (r + 1) φ) :
+    ∃ p, φ = ^∃ p ∧ IsSemiformula ℒₒᵣ 1 p ∧
+      ∀ t, IsSemiterm ℒₒᵣ 0 t → IsPartialInstance E r (substs1 ℒₒᵣ t p) := by
+  obtain ⟨m, χ, hmem, hχ, hmax, hrm, w, hw, hwb, hwc, rfl⟩ := h
+  have hχw : IsSemiformula ℒₒᵣ (r + 1) (subst ℒₒᵣ w χ) := hχ.subst hw
+  refine ⟨qqExss (subst ℒₒᵣ w χ) r, qqExss_succ _ _, IsSemiformula.qqExss (by rwa [add_comm]), ?_⟩
+  intro t ht
+  obtain ⟨v, hvl, hv⟩ := sigmaOne_skolem_vec
+    (R := fun i y : V ↦ (i < r → y = ^#i) ∧ (r ≤ i → y = t)) (by definability) (l := r + 1)
+    (fun i _ ↦ by
+      by_cases hi : i < r
+      · exact ⟨^#i, fun _ ↦ rfl, fun h ↦ absurd hi (not_lt.mpr h)⟩
+      · exact ⟨t, fun h ↦ absurd h hi, fun _ ↦ rfl⟩)
+  have hvs : IsSemitermVec ℒₒᵣ (r + 1) r v := IsSemitermVec.iff.mpr ⟨hvl, fun i hi ↦ by
+    by_cases hir : i < r
+    · simp [(hv i hi).1 hir, hir]
+    · rw [(hv i hi).2 (not_lt.mp hir)]
+      exact IsSemiterm.def.mpr ⟨ht.isUTerm, le_trans (IsSemiterm.def.mp ht).2 (by simp)⟩⟩
+  have hrm' : r < m := lt_of_lt_of_le (by simp) hrm
+  rw [substs1_qqExss ht hχw hvl (fun i hi ↦ (hv i (lt_trans hi (by simp))).1 hi)
+    ((hv r (by simp)).2 le_rfl), substs_substs hχ hvs hw]
+  refine ⟨m, χ, hmem, hχ, hmax, hrm'.le, termSubstVec ℒₒᵣ m v w, hvs.termSubstVec hw, ?_, ?_, rfl⟩
+  · intro i hi
+    rw [nth_termSubstVec hw.isUTerm (lt_trans hi hrm'), hwb i (lt_trans hi (by simp)),
+      termSubst_bvar, (hv i (lt_trans hi (by simp))).1 hi]
+  · intro i hi hri
+    rw [nth_termSubstVec hw.isUTerm hi]
+    rcases eq_or_lt_of_le hri with rfl | hri
+    · rwa [hwb r (by simp), termSubst_bvar, (hv r (by simp)).2 le_rfl]
+    · rw [termSubst_eq_self (hwc i hi (succ_le_iff_lt.mpr hri)) (by simp)]
+      exact hwc i hi (succ_le_iff_lt.mpr hri)
+
+end partialInstance
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

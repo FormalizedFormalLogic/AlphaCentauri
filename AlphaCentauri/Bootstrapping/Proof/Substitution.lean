@@ -282,6 +282,93 @@ lemma fvSubstImage_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
       exact mem_fvSubstImage_iff.mpr
         ⟨x, hx, (fvSubst_eq_self hv (hs x hx) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hx) h)).symm⟩
 
+/-- If `v` sends the entry of `w` at `x` back to `^&x` for every `x < u`, then substituting by `w`
+and then by `v` fixes the terms coded by a number at most `u`. -/
+lemma termFvSubst_termFvSubst_eq_self (hw : IsSemitermVec L (len w) 0 w)
+    (h : ∀ x < u, x < len w ∧ termFvSubst L v w.[x] = ^&x)
+    {n t : V} (ht : IsSemiterm L n t) (htu : t ≤ u) :
+    termFvSubst L v (termFvSubst L w t) = t := by
+  revert htu
+  apply IsSemiterm.induction 𝚷
+    (P := fun t ↦ t ≤ u → termFvSubst L v (termFvSubst L w t) = t) ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z _ _; simp
+  · intro x hx
+    have hxu : x < u := lt_of_lt_of_le (by simp) hx
+    rw [termFvSubst_fvar w, ite_eq_left (h x hxu).1, (h x hxu).2]
+  · intro k f ts hf hts ih hle
+    have hts' : IsUTermVec L k (termFvSubstVec L k w ts) :=
+      hw.isUTerm.termFvSubstVec hts.isUTerm
+    rw [termFvSubst_func hf hts.isUTerm, termFvSubst_func hf hts']
+    refine congrArg _ (nth_ext' k (by simp [hts']) hts.lh fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts' hi, nth_termFvSubstVec hts.isUTerm hi]
+    exact ih i hi
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqFunc_of_lt (by rw [hts.lh]; exact hi)) hle)
+
+/-- If `v` sends the entry of `w` at `x` back to `^&x` for every `x < u`, then substituting by `w`
+and then by `v` fixes the formulas coded by a number at most `u`. -/
+lemma fvSubst_fvSubst_eq_self (hw : IsSemitermVec L (len w) 0 w)
+    (h : ∀ x < u, x < len w ∧ termFvSubst L v w.[x] = ^&x)
+    {n p : V} (hp : IsSemiformula L n p) (hpu : p ≤ u) :
+    fvSubst L v (fvSubst L w p) = p := by
+  revert hpu
+  apply IsSemiformula.pi1_structural_induction
+    (P := fun _ p ↦ p ≤ u → fvSubst L v (fvSubst L w p) = p) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R ts hR hts hle
+    have hts' : IsUTermVec L k (termFvSubstVec L k w ts) :=
+      hw.isUTerm.termFvSubstVec hts.isUTerm
+    rw [fvSubst_rel hR hts.isUTerm, fvSubst_rel hR hts']
+    refine congrArg _ (nth_ext' k (by simp [hts']) hts.lh fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts' hi, nth_termFvSubstVec hts.isUTerm hi]
+    exact termFvSubst_termFvSubst_eq_self hw h (hts.nth hi)
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqRel_of_lt (by rw [hts.lh]; exact hi)) hle)
+  · intro n k R ts hR hts hle
+    have hts' : IsUTermVec L k (termFvSubstVec L k w ts) :=
+      hw.isUTerm.termFvSubstVec hts.isUTerm
+    rw [fvSubst_nrel hR hts.isUTerm, fvSubst_nrel hR hts']
+    refine congrArg _ (nth_ext' k (by simp [hts']) hts.lh fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts' hi, nth_termFvSubstVec hts.isUTerm hi]
+    exact termFvSubst_termFvSubst_eq_self hw h (hts.nth hi)
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqNRel_of_lt (by rw [hts.lh]; exact hi)) hle)
+  · intro n _; simp
+  · intro n _; simp
+  · intro n p q hp hq ihp ihq hle
+    have hw' : IsSemitermVec L (len w) n w := hw.weaken (by simp)
+    rw [fvSubst_and hp.isUFormula hq.isUFormula,
+      fvSubst_and (hp.fvSubst hw').isUFormula (hq.fvSubst hw').isUFormula,
+      ihp (le_of_lt <| lt_of_lt_of_le (by simp) hle),
+      ihq (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p q hp hq ihp ihq hle
+    have hw' : IsSemitermVec L (len w) n w := hw.weaken (by simp)
+    rw [fvSubst_or hp.isUFormula hq.isUFormula,
+      fvSubst_or (hp.fvSubst hw').isUFormula (hq.fvSubst hw').isUFormula,
+      ihp (le_of_lt <| lt_of_lt_of_le (by simp) hle),
+      ihq (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p hp ih hle
+    rw [fvSubst_all hp.isUFormula, fvSubst_all (hp.fvSubst (hw.weaken (by simp))).isUFormula,
+      ih (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p hp ih hle
+    rw [fvSubst_exs hp.isUFormula, fvSubst_exs (hp.fvSubst (hw.weaken (by simp))).isUFormula,
+      ih (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+
+/-- If `v` sends the entry of `w` at `x` back to `^&x` for every `x < u`, then the image under `v`
+of the image under `w` of a coded formula set bounded by `u` is the set itself. -/
+lemma fvSubstImage_fvSubstImage_eq_self (hw : IsSemitermVec L (len w) 0 w)
+    (h : ∀ x < u, x < len w ∧ termFvSubst L v w.[x] = ^&x)
+    {s : V} (hs : IsFormulaSet L s) (hsu : s ≤ u) :
+    fvSubstImage (L := L) v (fvSubstImage (L := L) w s) = s :=
+  mem_ext fun x ↦ by
+    constructor
+    · intro hx
+      obtain ⟨y, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
+      obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hy
+      rwa [fvSubst_fvSubst_eq_self hw h (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) hsu)]
+    · intro hx
+      exact mem_fvSubstImage_iff.mpr ⟨fvSubst L w x, mem_fvSubstImage_iff.mpr ⟨x, hx, rfl⟩,
+        (fvSubst_fvSubst_eq_self hw h (hs x hx)
+          (le_of_lt <| lt_of_lt_of_le (lt_of_mem hx) hsu)).symm⟩
+
 end shiftComp
 
 section freshVec

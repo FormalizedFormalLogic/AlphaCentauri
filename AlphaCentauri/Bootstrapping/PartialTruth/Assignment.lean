@@ -1,7 +1,9 @@
 module
 
-public import AlphaCentauri.Bootstrapping.PartialTruth.Substitution
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
+public import AlphaCentauri.Bootstrapping.Syntax.Iteration
+public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.PartialTruth
 
 /-!
 # Numeral assignments to free variables
@@ -580,16 +582,17 @@ lemma fvAssign_eq_self {p : V} (hp : IsUFormula ℒₒᵣ p) (h : shift ℒₒ�
     rw [shift_exs hp, qqExs_inj] at h
     rw [fvAssign_exs hp, ih h]
 
-lemma shift_quote {n : ℕ} (σ : ArithmeticSemisentence n) :
-    shift ℒₒᵣ (⌜σ⌝ : V) = ⌜σ⌝ := by
-  have h : Rewriting.shift (Rewriting.emb σ : ArithmeticSemiproposition n) = Rewriting.emb σ := by
-    simpa [Rewriting.shifts] using
-      Rewriting.shifts_emb ({σ} : Multiset (ArithmeticSemisentence n))
-  rw [Sentence.quote_def, ← Semiformula.quote_shift, h]
-
 @[simp] lemma fvAssign_quote {n : ℕ} (σ : ArithmeticSemisentence n) :
     fvAssign f (⌜σ⌝ : V) = ⌜σ⌝ :=
-  fvAssign_eq_self (by simp) (shift_quote σ)
+  fvAssign_eq_self (by simp) (Semisentence.shift_quote σ)
+
+lemma fvAssign_qqExss {f p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
+    fvAssign f (qqExss p k) = qqExss (fvAssign f p) k := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih => rw [qqExss_succ, fvAssign_exs (by simpa using hp), ih, qqExss_succ]
+
 
 lemma termFvAssign_congr (h : ∀ i, f.[i] = g.[i]) {t : V} (ht : IsUTerm ℒₒᵣ t) :
     termFvAssign f t = termFvAssign g t := by

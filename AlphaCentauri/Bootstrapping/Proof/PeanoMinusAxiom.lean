@@ -74,7 +74,7 @@ lemma isFalseBlock_neg_quote_allClosure {k D m : ℕ} {θ : ArithmeticSemisenten
   refine ⟨m, ⌜∼θ⌝, ?_, ?_, ?_, quote_neg_ne_exs hn, ?_, ?_⟩
   · rw [quote_allClosure_sentence, neg_qqAlls (Sentence.quote_isUFormula θ), quote_neg_sentence]
   · exact Sentence.quote_isSemiformula _
-  · exact shift_quote _
+  · exact Semisentence.shift_quote _
   · exact .of_isPrenexAtom (IsPrenexAtMost.of_isBounded hb).isPrenexAtom
   · intro w hw
     have := ReadableTruth.subst_quote_iff (V := V) (k := k) (D := D) (Γ := 𝚺) (s := 0)

@@ -8,17 +8,20 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Sentence
+namespace FFL.FirstOrder.Semisentence
 
 open Arithmetic Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-@[simp] lemma shift_quote (σ : ArithmeticSentence) : shift ℒₒᵣ (⌜σ⌝ : V) = ⌜σ⌝ := by
-  rw [Sentence.quote_def, ← Semiformula.quote_shift]
-  simp
+@[simp] lemma shift_quote {n : ℕ} (σ : ArithmeticSemisentence n) :
+    shift ℒₒᵣ (⌜σ⌝ : V) = ⌜σ⌝ := by
+  have h : Rewriting.shift (Rewriting.emb σ : ArithmeticSemiproposition n) = Rewriting.emb σ := by
+    simpa [Rewriting.shifts] using
+      Rewriting.shifts_emb ({σ} : Multiset (ArithmeticSemisentence n))
+  rw [Sentence.quote_def, ← Semiformula.quote_shift, h]
 
-end FFL.FirstOrder.Sentence
+end FFL.FirstOrder.Semisentence
 
 namespace FFL.FirstOrder.Semiterm
 

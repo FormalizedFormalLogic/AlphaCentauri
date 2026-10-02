@@ -97,8 +97,13 @@ lemma isFalseBlock_substNumeral_exs (ρ : ℬ[<, ℒₒᵣ].Prenex 𝚷 (k + 1) 
       qqExss (subst ℒₒᵣ (qVec ℒₒᵣ (?[numeral a] : V)) ⌜ρ.val⌝) 1 := by
     rw [substNumeral, Sentence.quote_ex, substs_ex hr.isUFormula, ← zero_add (1 : V), qqExss_succ,
       qqExss_zero]
+  have hs : shift ℒₒᵣ (subst ℒₒᵣ (qVec ℒₒᵣ (?[numeral a] : V)) ⌜ρ.val⌝) =
+      subst ℒₒᵣ (qVec ℒₒᵣ (?[numeral a] : V)) ⌜ρ.val⌝ := by
+    rw [shift_substs hr hw, Semisentence.shift_quote]
+    congr 1
+    simp [qVec]
   rw [e]
-  exact ⟨1, _, rfl, hr.subst hw, by rw [shift_substs hr hw, shift_quote]; congr 1; simp [qVec],
+  exact ⟨1, _, rfl, hr.subst hw, hs,
     hne, .subst hw hr (Or.inr <| Or.inr <| (isPrenexHierarchy_quote_iff ρ.val).mpr ⟨ρ, rfl⟩),
     fun _ hw' ↦ not_readableTruth_subst_subst_qVec ρ a h hw'⟩
 

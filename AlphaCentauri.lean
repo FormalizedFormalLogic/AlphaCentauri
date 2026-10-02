@@ -6,7 +6,6 @@ public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
-public import AlphaCentauri.Bootstrapping.PartialTruth.Substitution
 public import AlphaCentauri.Bootstrapping.Proof.AxiomReplacement
 public import AlphaCentauri.Bootstrapping.Proof.CutElimination
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
@@ -77,6 +76,7 @@ public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
+public import AlphaCentauri.ToFoundation.PartialTruth
 public import AlphaCentauri.ToFoundation.PrenexNormalForm
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec

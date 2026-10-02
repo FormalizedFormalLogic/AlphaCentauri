@@ -425,6 +425,26 @@ lemma isSemitermVec_freshVec (u : V) :
     · simp [nth_freshVec_of_lt h]
     · simp⟩
 
+/-- For every `u` there is a closed term vector `w` such that `w` and `freshVec u` undo each
+other on the free variables below `u`. -/
+lemma exists_inverse_freshVec (u : V) : ∃ w : V, IsSemitermVec L (len w) 0 w ∧
+    (∀ x < u, x < len (freshVec u : V) ∧ termFvSubst L w (freshVec u : V).[x] = ^&x) ∧
+    (∀ x < u, x < len w ∧ termFvSubst L (freshVec u) w.[x] = ^&x) := by
+  obtain ⟨ι, hιl, hι⟩ := sigmaOne_skolem_vec (R := fun x y : V ↦ y = ^&x) (by definability)
+    (l := u) (fun x _ ↦ ⟨_, rfl⟩)
+  have hιc : IsSemitermVec L (len ι) 0 ι := IsSemitermVec.iff.mpr ⟨rfl, fun i hi ↦ by
+    rw [hι i (by rwa [hιl] at hi)]
+    simp⟩
+  refine ⟨^&u ∷ ι, by simp [hιc], ?_, ?_⟩
+  · intro x hx
+    exact ⟨lt_trans hx (by simp), by simp [nth_freshVec_of_lt hx, hιl, hx, hι x hx]⟩
+  · intro x hx
+    rcases zero_or_succ x with rfl | ⟨x, rfl⟩
+    · simp
+    · have hx' : x < u := lt_trans (by simp) hx
+      have hx₁ : x < u + 1 := lt_trans hx' (by simp)
+      exact ⟨by simp [hιl, hx'], by simp [hι x hx', hx₁, nth_freshVec_of_lt hx']⟩
+
 end freshVec
 
 /-- The internal `∀`-introduction rule with an arbitrary free variable as eigenvariable: `w`

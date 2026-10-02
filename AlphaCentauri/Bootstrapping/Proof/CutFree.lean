@@ -523,6 +523,12 @@ lemma isFormulaSet {s : V} (h : CutFreeDerivable T s) : IsFormulaSet L s := by
   rcases h with ⟨d, hd⟩
   exact hd.isFormulaSet
 
+/-- Cut-free derivability is closed under weakening. -/
+lemma wk {s s' : V} (hs : IsFormulaSet L s) (h : s' ⊆ s) (hd : CutFreeDerivable T s') :
+    CutFreeDerivable T s := by
+  obtain ⟨d, hd⟩ := hd
+  exact ⟨_, by simp, CutFreeDerivation.wkRule hs h hd⟩
+
 /-- A cut-free-derivable sequent is derivable in Foundation's full calculus.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
 lemma toDerivable {s : V} : CutFreeDerivable T s → Derivable T s := by

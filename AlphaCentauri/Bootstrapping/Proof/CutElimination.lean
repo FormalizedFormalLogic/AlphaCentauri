@@ -82,17 +82,6 @@ namespace CutFreeDerivable
 
 variable {T : Theory L} [T.Δ₁]
 
-/-- Cut-free derivability is closed under weakening. -/
-lemma wk {s s' : V} (hs : IsFormulaSet L s) (h : s' ⊆ s) (hd : CutFreeDerivable T s') :
-    CutFreeDerivable T s := by
-  obtain ⟨d, hd⟩ := hd
-  exact ⟨_, by simp, CutFreeDerivation.wkRule hs h hd⟩
-
-/-- Cut-free derivability is closed under the external-variable shift. -/
-lemma shift {s : V} (hd : CutFreeDerivable T s) : CutFreeDerivable T (setShift L s) := by
-  obtain ⟨d, hd⟩ := hd
-  exact ⟨_, by simp, CutFreeDerivation.shiftRule hd⟩
-
 /-- Adding a formula beside the first one of a cut-free derivable sequent keeps it cut-free
 derivable. -/
 private lemma wk_insert {x a s : V} (ha : IsFormula L a) (hd : CutFreeDerivable T (insert x s)) :
@@ -127,26 +116,6 @@ private lemma cut_and {c q r s : V}
 section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2]
-
-/-- For every `N` there is a closed term vector `w` such that `w` and `freshVec N` undo each
-other on the free variables below `N`. -/
-private lemma exists_inverse_freshVec (N : V) : ∃ w : V, IsSemitermVec L (len w) 0 w ∧
-    (∀ x < N, x < len (freshVec N : V) ∧ termFvSubst L w (freshVec N : V).[x] = ^&x) ∧
-    (∀ x < N, x < len w ∧ termFvSubst L (freshVec N) w.[x] = ^&x) := by
-  obtain ⟨ι, hιl, hι⟩ := sigmaOne_skolem_vec (R := fun x y : V ↦ y = ^&x) (by definability)
-    (l := N) (fun x _ ↦ ⟨_, rfl⟩)
-  have hιc : IsSemitermVec L (len ι) 0 ι := IsSemitermVec.iff.mpr ⟨rfl, fun i hi ↦ by
-    rw [hι i (by rwa [hιl] at hi)]
-    simp⟩
-  refine ⟨^&N ∷ ι, by simp [hιc], ?_, ?_⟩
-  · intro x hx
-    exact ⟨lt_trans hx (by simp), by simp [nth_freshVec_of_lt hx, hιl, hx, hι x hx]⟩
-  · intro x hx
-    rcases zero_or_succ x with rfl | ⟨x, rfl⟩
-    · simp
-    · have hx' : x < N := lt_trans (by simp) hx
-      have hx₁ : x < N + 1 := lt_trans hx' (by simp)
-      exact ⟨by simp [hιl, hx'], by simp [hι x hx', hx₁, nth_freshVec_of_lt hx']⟩
 
 /-- A cut on the shift of `p` beside a set `s` covering the shift of a sequent `Δ` containing `p`
 reduces to cuts on `p` itself beside sets covering `Δ`. -/
@@ -269,7 +238,8 @@ private lemma cut_aux {c : V}
     have haF : IsSemiformula L 1 a := by simpa using hΓF _ ha
     have ha' : ^∀ a ∈ s := hmem _ (hsub ha) (by simp [haF.isUFormula]) (by simp [qqAll, qqExs])
     have hfree : IsFormula L (free L a) := (IsFormulaSet.insert_iff.mp hd₀.isFormulaSet).1
-    have hsh := CutFreeDerivable.shift ⟨e, he⟩
+    have hsh : CutFreeDerivable (∅ : Theory L) (setShift L (insert (neg L p) s)) :=
+      ⟨_, by simp, CutFreeDerivation.shiftRule he⟩
     rw [mem_setShift_insert, shift_neg hpF] at hsh
     obtain ⟨e₀, he₀⟩ := ih' d₀ (s_lt_allIntro _ _ _) (shift L p) _
       (by rwa [formulaComplexity_shift hpF.isUFormula])
@@ -406,8 +376,9 @@ theorem Derivable.cutFree {s : V} (h : Derivable (∅ : Theory L) s) :
     rw [fstIdx_wkRule]
     exact ih.wk hs hsub
   · rintro s _ d rfl _ ih
+    obtain ⟨e, he⟩ := ih
     rw [fstIdx_shiftRule]
-    exact ih.shift
+    exact ⟨_, by simp, CutFreeDerivation.shiftRule he⟩
   · intro s _ p d₁ d₂ hd₁ hd₂ ih₁ ih₂
     rw [hd₁.1] at ih₁
     rw [hd₂.1] at ih₂

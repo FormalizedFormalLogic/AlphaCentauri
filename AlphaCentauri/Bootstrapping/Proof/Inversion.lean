@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.Measures
-public import AlphaCentauri.ToMathlib.Util.Disjunct
+public import Foundation.Vorspiel.Tactic.Disj
 
 /-!
 # Inversion for the internal cut-free calculus

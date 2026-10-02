@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToMathlib.Util.Disjunct
+public import Foundation.Vorspiel.Tactic.Disj
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!

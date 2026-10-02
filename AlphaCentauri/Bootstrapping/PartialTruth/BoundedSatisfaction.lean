@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Bounded
 public import AlphaCentauri.Bootstrapping.TermVal
-public import AlphaCentauri.ToMathlib.Util.Disjunct
+public import Foundation.Vorspiel.Tactic.Disj
 public import Foundation.FirstOrder.Arithmetic.HFS.Superexp
 import Mathlib.Tactic.Ring
 

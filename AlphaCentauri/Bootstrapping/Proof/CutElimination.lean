@@ -1,6 +1,8 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutFreeRewrite
+public import AlphaCentauri.ToFoundation.Set
+public import AlphaCentauri.ToFoundation.Syntax
 
 /-!
 # Cut elimination for the internal calculus
@@ -22,48 +24,6 @@ open PeanoMinus ISigma0 ISigma1
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
-
-/-- No formula code is its own negation. -/
-private lemma neg_ne_self {p : V} (hp : IsUFormula L p) : neg L p ≠ p := by
-  rcases hp.case with (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
-    ⟨q, r, hq, hr, rfl⟩ | ⟨q, r, hq, hr, rfl⟩ | ⟨q, hq, rfl⟩ | ⟨q, hq, rfl⟩)
-  · rw [neg_rel hR hv]; simp [qqRel, qqNRel]
-  · rw [neg_nrel hR hv]; simp [qqRel, qqNRel]
-  · rw [neg_verum]; simp [qqVerum, qqFalsum]
-  · rw [neg_falsum]; simp [qqVerum, qqFalsum]
-  · rw [neg_and hq hr]; simp [qqAnd, qqOr]
-  · rw [neg_or hq hr]; simp [qqAnd, qqOr]
-  · rw [neg_all hq]; simp [qqAll, qqExs]
-  · rw [neg_ex hq]; simp [qqAll, qqExs]
-
-/-- Adding two codes to a coded set does not depend on their order. -/
-private lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) :=
-  mem_ext <| by
-    intro z
-    simp only [mem_bitInsert_iff]
-    tauto
-
-/-- A member of `insert y s` other than `y` is a member of `s`. -/
-private lemma mem_of_mem_insert_of_ne {x y s : V} (h : x ∈ insert y s) (hne : x ≠ y) : x ∈ s := by
-  rcases mem_bitInsert_iff.mp h with rfl | h
-  · exact absurd rfl hne
-  · exact h
-
-/-- Adding a code on both sides preserves a sequent being covered by a formula beside a set. -/
-private lemma insert_subset_insert_insert {a p Γ s : V} (h : Γ ⊆ insert p s) :
-    insert a Γ ⊆ insert p (insert a s) := by
-  intro x hx
-  rcases mem_bitInsert_iff.mp hx with rfl | hx
-  · simp
-  · rcases mem_bitInsert_iff.mp (h hx) with rfl | hx
-    · simp
-    · simp [hx]
-
-/-- The external-variable shift of coded formula sets is monotone. -/
-private lemma setShift_subset_setShift {s t : V} (h : s ⊆ t) : setShift L s ⊆ setShift L t := by
-  intro x hx
-  obtain ⟨y, hy, rfl⟩ := mem_setShift_iff.mp hx
-  exact shift_mem_setShift (h hy)
 
 /-- A formula code has complexity zero or is existential exactly when its shift does. -/
 private lemma complexity_eq_zero_or_exs_shift_iff {p : V} (hp : IsUFormula L p) :

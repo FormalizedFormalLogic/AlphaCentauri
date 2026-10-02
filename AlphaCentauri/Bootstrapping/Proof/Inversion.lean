@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.Measures
+public import AlphaCentauri.ToFoundation.Set
 public import Foundation.Vorspiel.Tactic.Disj
 
 /-!
@@ -323,19 +324,6 @@ lemma exists_exs_of_shift_eq_exs {r p : V} (hr : IsUFormula L r) (h : shift L r 
 section
 
 variable {T : Theory L} [T.Δ₁]
-
-/-- Adding the same code twice to a coded set is adding it once. -/
-private lemma insert_insert_self (x s : V) : insert x (insert x s) = insert x s := mem_ext <| by
-  intro z
-  simp only [mem_bitInsert_iff]
-  tauto
-
-/-- Adding two codes to a coded set does not depend on their order. -/
-private lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) :=
-  mem_ext <| by
-    intro z
-    simp only [mem_bitInsert_iff]
-    tauto
 
 /-- Removing a code just added to a coded set that did not contain it recovers the set. -/
 private lemma bitRemove_insert_of_not_mem {x s : V} (h : x ∉ s) : bitRemove x (insert x s) = s :=

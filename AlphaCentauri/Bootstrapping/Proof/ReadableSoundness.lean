@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutElimination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
+public import AlphaCentauri.ToFoundation.Set
 
 /-!
 # Soundness of pure logic for the readable truth
@@ -306,22 +307,6 @@ private lemma hasWitness_of_shift {Γ f : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
   obtain ⟨ψ, hψ, hψN, hψT⟩ := ih g hadm'
   exact ⟨_, shift_mem_setShift hψ, by rwa [hsh ψ hψ],
     (ReadableSatisfaction.congr hfg).mpr (ReadableSatisfaction.shift_iff.mpr hψT)⟩
-
-private lemma forall_mem_iff_forall_lt {s : V} {P : V → Prop} :
-    (∀ x ∈ s, P x) ↔ ∀ x < s, x ∈ s → P x := by
-  constructor
-  · intro h x _ hx
-    exact h x hx
-  · intro h x hx
-    exact h x (lt_of_mem hx) hx
-
-private lemma exists_mem_iff_exists_lt {s : V} {P : V → Prop} :
-    (∃ x ∈ s, P x) ↔ ∃ x < s, x ∈ s ∧ P x := by
-  constructor
-  · rintro ⟨x, hx, h⟩
-    exact ⟨x, lt_of_mem hx, hx, h⟩
-  · rintro ⟨x, -, hx, h⟩
-    exact ⟨x, hx, h⟩
 
 private lemma hasWitness_definable :
     𝚷ᴬ-[k + 1].DefinablePred fun d : V ↦ ∀ f, CutFreeDerivation (∅ : Theory ℒₒᵣ) d →

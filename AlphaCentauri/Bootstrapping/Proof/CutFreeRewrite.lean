@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
+public import AlphaCentauri.ToFoundation.Set
 
 /-!
 # Free-variable substitution and universal inversion for cut-free derivations
@@ -23,24 +24,6 @@ open PeanoMinus ISigma0 ISigma1
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
-
-/-- Adding two codes to a coded set does not depend on their order. -/
-private lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) :=
-  mem_ext fun z ↦ by
-    simp only [mem_bitInsert_iff]
-    tauto
-
-/-- Adding the same code twice to a coded set is adding it once. -/
-private lemma insert_insert_self (x s : V) : insert x (insert x s) = insert x s :=
-  mem_ext fun z ↦ by
-    simp only [mem_bitInsert_iff]
-    tauto
-
-/-- A member of `insert y s` other than `y` is a member of `s`. -/
-private lemma mem_of_mem_insert_of_ne {x y s : V} (h : x ∈ insert y s) (hne : x ≠ y) : x ∈ s := by
-  rcases mem_bitInsert_iff.mp h with rfl | h
-  · exact absurd rfl hne
-  · exact h
 
 /-- The rest of an end-sequent split off by `insert` is bounded by the proof code. -/
 private lemma le_of_fstIdx_eq_insert {d x s : V} (h : fstIdx d = insert x s) : s ≤ d :=

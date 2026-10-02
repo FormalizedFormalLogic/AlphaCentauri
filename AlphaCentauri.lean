@@ -4,6 +4,7 @@ public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Axiomatizability.ISigma
 public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
+public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
 public import AlphaCentauri.Bootstrapping.PartialTruth.Substitution
 public import AlphaCentauri.Bootstrapping.Proof.CutElimination

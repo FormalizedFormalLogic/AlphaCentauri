@@ -237,6 +237,18 @@ lemma IsPrenexHierarchy.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
   exact isPrenexHierarchy_iff_exists_qqToPrenex.mpr
     ⟨_, subst_qqToPrenex hθs.isUFormula, hθ.subst (hw.iterate_qVec s) hθs⟩
 
+lemma shift_qqToPrenex (hθ : IsUFormula ℒₒᵣ θ) :
+    shift ℒₒᵣ (qqToPrenex Γ s θ) = qqToPrenex Γ s (shift ℒₒᵣ θ) := by
+  induction s generalizing Γ with
+  | zero => simp
+  | succ s ih => cases Γ <;> simp [isUFormula_qqToPrenex.mpr hθ, ih]
+
+lemma IsPrenexHierarchy.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsPrenexHierarchy Γ s p) :
+    IsPrenexHierarchy Γ s (shift ℒₒᵣ p) := by
+  obtain ⟨θ, rfl, hθ⟩ := isPrenexHierarchy_iff_exists_qqToPrenex.mp h
+  have hθ' : IsUFormula ℒₒᵣ θ := isUFormula_qqToPrenex.mp hp
+  exact isPrenexHierarchy_iff_exists_qqToPrenex.mpr ⟨_, shift_qqToPrenex hθ', hθ.shift hθ'⟩
+
 /-- A $\Delta_0$ formula is of the form `qqToPrenex Γ s θ` only for `s ≤ 1`. -/
 lemma le_one_of_isBounded_qqToPrenex (h : IsBounded (qqToPrenex Γ s θ)) : s ≤ 1 := by
   match s, h with

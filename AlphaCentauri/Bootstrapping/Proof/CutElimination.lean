@@ -88,6 +88,28 @@ private lemma wk_insert {x a s : V} (ha : IsFormula L a) (hd : CutFreeDerivable 
 
 end CutFreeDerivable
 
+/-- Cut on a conjunction, given cut on every formula of smaller complexity. -/
+private lemma cut_and {c q r s : V}
+    (ih : ∀ p s : V, formulaComplexity L p < c → CutFreeDerivable (∅ : Theory L) (insert p s) →
+      CutFreeDerivable (∅ : Theory L) (insert (neg L p) s) → CutFreeDerivable (∅ : Theory L) s)
+    (hc : formulaComplexity L (q ^⋏ r) ≤ c)
+    (h₁ : CutFreeDerivable (∅ : Theory L) (insert (q ^⋏ r) s))
+    (h₂ : CutFreeDerivable (∅ : Theory L) (insert (neg L (q ^⋏ r)) s)) :
+    CutFreeDerivable (∅ : Theory L) s := by
+  have hqr : IsFormula L q ∧ IsFormula L r := by
+    simpa using (IsFormulaSet.insert_iff.mp h₁.isFormulaSet).1
+  rw [neg_and hqr.1.isUFormula hqr.2.isUFormula] at h₂
+  rw [formulaComplexity_and hqr.1.isUFormula hqr.2.isUFormula] at hc
+  obtain ⟨d₁, hd₁⟩ := h₁
+  obtain ⟨d₂, hd₂⟩ := h₂
+  obtain ⟨eq, heq, -⟩ := CutFreeDerivation.inversion_and (Or.inl rfl) hd₁
+  obtain ⟨er, her, -⟩ := CutFreeDerivation.inversion_and (Or.inr rfl) hd₁
+  obtain ⟨e, he, -⟩ := CutFreeDerivation.inversion_or hd₂
+  have h₃ : CutFreeDerivable (∅ : Theory L) (insert (neg L q) s) :=
+    ih r _ (lt_of_lt_of_le (lt_max_succ_right _ _) hc)
+      (CutFreeDerivable.wk_insert hqr.1.neg ⟨er, her⟩) (by rw [insert_comm]; exact ⟨e, he⟩)
+  exact ih q s (lt_of_lt_of_le (lt_max_succ_left _ _) hc) ⟨eq, heq⟩ h₃
+
 section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2]
@@ -100,16 +122,6 @@ private lemma cut_of_setShift_subset {Δ p s : V} (hΔ : IsFormulaSet L Δ) (hp 
     (ih : ∀ s' e' : V, Δ ⊆ insert p s' →
       CutFreeDerivationOf (∅ : Theory L) e' (insert (neg L p) s') →
       CutFreeDerivable (∅ : Theory L) s') :
-    CutFreeDerivable (∅ : Theory L) s := by
-  sorry
-
-/-- Cut on a conjunction, given cut on every formula of smaller complexity. -/
-private lemma cut_and {c q r s : V}
-    (ih : ∀ p s : V, formulaComplexity L p < c → CutFreeDerivable (∅ : Theory L) (insert p s) →
-      CutFreeDerivable (∅ : Theory L) (insert (neg L p) s) → CutFreeDerivable (∅ : Theory L) s)
-    (hc : formulaComplexity L (q ^⋏ r) ≤ c)
-    (h₁ : CutFreeDerivable (∅ : Theory L) (insert (q ^⋏ r) s))
-    (h₂ : CutFreeDerivable (∅ : Theory L) (insert (neg L (q ^⋏ r)) s)) :
     CutFreeDerivable (∅ : Theory L) s := by
   sorry
 

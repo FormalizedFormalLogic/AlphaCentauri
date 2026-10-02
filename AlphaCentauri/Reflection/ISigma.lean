@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 public import AlphaCentauri.ToFoundation.Reflection
 
@@ -24,8 +25,17 @@ variable {k m n : ℕ}
 /-- For $1 \le k$ and $n \le k$, $\mathsf{I}\Sigma_{k+1}$ proves the local reflection principle of
 $\mathsf{I}\Sigma_n$ for prenex $\Pi_{k+3}$ sentences.
 - [HP98, Corollary I.4.34(3)] -/
-axiom ISigma.provable_localReflectionOn_Pi (hk : 1 ≤ k) (hn : n ≤ k) :
-    𝗜𝚺 (k + 1) ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (k + 3)] (𝗜𝚺 n)
+theorem ISigma.provable_localReflectionOn_Pi (hk : 1 ≤ k) (hn : n ≤ k) :
+    𝗜𝚺 (k + 1) ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (k + 3)] (𝗜𝚺 n) := by
+  intro φ hφ
+  obtain ⟨π, hπ, rfl⟩ := (Provability.mem_localReflectionOn_iff _).mp hφ
+  apply Arithmetic.complete.{0}
+  intro V _ _
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (s₁ := 1) (s₂ := k + 1) (by omega)
+  simp only [Semantics.Imp.models_imply]
+  intro hp
+  exact Bootstrapping.models_of_provable_prenexPi hk hn hπ
+    (by simpa [models_iff, standardProvability_def] using hp)
 
 theorem ISigma.provable_localReflectionOn_prenexSigma1 (hk : 1 ≤ k) :
     𝗜𝚺 (k + 1) ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1] (𝗜𝚺 k) :=

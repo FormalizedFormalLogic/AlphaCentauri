@@ -33,9 +33,9 @@ lemma rew_succInd (ω : SyntacticRew L 0 0) (φ : Semiformula L ℕ 1) :
       · simp [Rew.comp_app]
   simp [succInd, h₀, h₁]
 
-/-- The reading of the collection axiom in a model of `𝗣𝗔⁻`.
+/-- The reading of the collection axiom in a structure.
 - [HP98, §I.2(a)] -/
-lemma models_collectionAxiom_iff {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+lemma models_collectionAxiom_iff {V : Type*} [ORingStructure V]
     (φ : ArithmeticSemiformula ℕ 2) :
     V↓[ℒₒᵣ] ⊧ .univCl (collectionAxiom φ) ↔
       ∀ f : ℕ → V, ∀ a : V, (∀ x < a, ∃ y, φ.Eval ![x, y] f) →

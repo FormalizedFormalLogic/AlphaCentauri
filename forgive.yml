@@ -95,12 +95,6 @@ declaration:
   FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_prenexPi:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.IBroadSigma.provable_localReflectionOn_Pi_self:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.IBroadSigma.provable_localReflectionOn_prenexPi_of_le:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi_self:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi

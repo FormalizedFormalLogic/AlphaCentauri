@@ -2,7 +2,6 @@ module
 
 public import AlphaCentauri.Reflection.ISigma
 public import AlphaCentauri.ToFoundation.Entailment
-public import AlphaCentauri.ToFoundation.StandardProvability
 public import Foundation.ProvabilityLogic.Classification.General
 
 /-!

@@ -30,16 +30,17 @@ section image
 
 lemma fvSubstImage_insert (w p s : V) :
     fvSubstImage (L := L) w (insert p s) =
-      insert (fvSubst L w p) (fvSubstImage (L := L) w s) :=
-  mem_ext fun x ↦ by
-    simp only [mem_fvSubstImage_iff, mem_bitInsert_iff]
-    constructor
-    · rintro ⟨q, (rfl | hq), rfl⟩
-      · exact Or.inl rfl
-      · exact Or.inr ⟨q, hq, rfl⟩
-    · rintro (rfl | ⟨q, hq, rfl⟩)
-      · exact ⟨p, Or.inl rfl, rfl⟩
-      · exact ⟨q, Or.inr hq, rfl⟩
+      insert (fvSubst L w p) (fvSubstImage (L := L) w s) := by
+  apply mem_ext
+  intro x
+  simp only [mem_fvSubstImage_iff, mem_bitInsert_iff]
+  constructor
+  · rintro ⟨q, (rfl | hq), rfl⟩
+    · exact Or.inl rfl
+    · exact Or.inr ⟨q, hq, rfl⟩
+  · rintro (rfl | ⟨q, hq, rfl⟩)
+    · exact ⟨p, Or.inl rfl, rfl⟩
+    · exact ⟨q, Or.inr hq, rfl⟩
 
 end image
 
@@ -114,15 +115,16 @@ lemma fvSubst_eq_shift (hu : u < len w) (hw : ∀ x < u, w.[x] = ^&(x + 1))
 a coded formula set bounded by `u` as `setShift`. -/
 lemma fvSubstImage_eq_setShift (hu : u < len w) (hw : ∀ x < u, w.[x] = ^&(x + 1))
     {s : V} (hs : IsFormulaSet L s) (h : s ≤ u) :
-    fvSubstImage (L := L) w s = setShift L s :=
-  mem_ext fun x ↦ by
-    simp only [mem_fvSubstImage_iff, mem_setShift_iff]
-    constructor
-    · rintro ⟨q, hq, rfl⟩
-      exact ⟨q, hq, fvSubst_eq_shift hu hw (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)⟩
-    · rintro ⟨q, hq, rfl⟩
-      exact ⟨q, hq,
-        (fvSubst_eq_shift hu hw (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)).symm⟩
+    fvSubstImage (L := L) w s = setShift L s := by
+  apply mem_ext
+  intro x
+  simp only [mem_fvSubstImage_iff, mem_setShift_iff]
+  constructor
+  · rintro ⟨q, hq, rfl⟩
+    exact ⟨q, hq, fvSubst_eq_shift hu hw (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)⟩
+  · rintro ⟨q, hq, rfl⟩
+    exact ⟨q, hq,
+      (fvSubst_eq_shift hu hw (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)).symm⟩
 
 end eqShift
 
@@ -203,18 +205,19 @@ lemma fvSubst_shift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L w ^&(x 
 under `w` of the shift of a coded formula set bounded by `u` is its image under `v`. -/
 lemma fvSubstImage_setShift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L w ^&(x + 1))
     {s : V} (hs : IsFormulaSet L s) (h : s ≤ u) :
-    fvSubstImage (L := L) w (setShift L s) = fvSubstImage (L := L) v s :=
-  mem_ext fun x ↦ by
-    constructor
-    · intro hx
-      obtain ⟨_, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
-      obtain ⟨q, hq, rfl⟩ := mem_setShift_iff.mp hy
-      exact mem_fvSubstImage_iff.mpr
-        ⟨q, hq, fvSubst_shift hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)⟩
-    · intro hx
-      obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hx
-      exact mem_fvSubstImage_iff.mpr ⟨shift L q, shift_mem_setShift hq,
-        (fvSubst_shift hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)).symm⟩
+    fvSubstImage (L := L) w (setShift L s) = fvSubstImage (L := L) v s := by
+  apply mem_ext
+  intro x
+  constructor
+  · intro hx
+    obtain ⟨_, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
+    obtain ⟨q, hq, rfl⟩ := mem_setShift_iff.mp hy
+    exact mem_fvSubstImage_iff.mpr
+      ⟨q, hq, fvSubst_shift hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)⟩
+  · intro hx
+    obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hx
+    exact mem_fvSubstImage_iff.mpr ⟨shift L q, shift_mem_setShift hq,
+      (fvSubst_shift hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)).symm⟩
 
 /-- A substitution vector sending `^&x` to itself for every `x < u` fixes the terms coded by a
 number at most `u`. -/
@@ -272,15 +275,16 @@ lemma fvSubst_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
 /-- A substitution vector sending `^&x` to itself for every `x < u` fixes a coded formula set
 bounded by `u`. -/
 lemma fvSubstImage_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
-    {s : V} (hs : IsFormulaSet L s) (h : s ≤ u) : fvSubstImage (L := L) v s = s :=
-  mem_ext fun x ↦ by
-    constructor
-    · intro hx
-      obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hx
-      rwa [fvSubst_eq_self hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)]
-    · intro hx
-      exact mem_fvSubstImage_iff.mpr
-        ⟨x, hx, (fvSubst_eq_self hv (hs x hx) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hx) h)).symm⟩
+    {s : V} (hs : IsFormulaSet L s) (h : s ≤ u) : fvSubstImage (L := L) v s = s := by
+  apply mem_ext
+  intro x
+  constructor
+  · intro hx
+    obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hx
+    rwa [fvSubst_eq_self hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)]
+  · intro hx
+    exact mem_fvSubstImage_iff.mpr
+      ⟨x, hx, (fvSubst_eq_self hv (hs x hx) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hx) h)).symm⟩
 
 /-- If `v` sends the entry of `w` at `x` back to `^&x` for every `x < u`, then substituting by `w`
 and then by `v` fixes the terms coded by a number at most `u`. -/
@@ -357,17 +361,18 @@ of the image under `w` of a coded formula set bounded by `u` is the set itself. 
 lemma fvSubstImage_fvSubstImage_eq_self (hw : IsSemitermVec L (len w) 0 w)
     (h : ∀ x < u, x < len w ∧ termFvSubst L v w.[x] = ^&x)
     {s : V} (hs : IsFormulaSet L s) (hsu : s ≤ u) :
-    fvSubstImage (L := L) v (fvSubstImage (L := L) w s) = s :=
-  mem_ext fun x ↦ by
-    constructor
-    · intro hx
-      obtain ⟨y, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
-      obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hy
-      rwa [fvSubst_fvSubst_eq_self hw h (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) hsu)]
-    · intro hx
-      exact mem_fvSubstImage_iff.mpr ⟨fvSubst L w x, mem_fvSubstImage_iff.mpr ⟨x, hx, rfl⟩,
-        (fvSubst_fvSubst_eq_self hw h (hs x hx)
-          (le_of_lt <| lt_of_lt_of_le (lt_of_mem hx) hsu)).symm⟩
+    fvSubstImage (L := L) v (fvSubstImage (L := L) w s) = s := by
+  apply mem_ext
+  intro x
+  constructor
+  · intro hx
+    obtain ⟨y, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
+    obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hy
+    rwa [fvSubst_fvSubst_eq_self hw h (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) hsu)]
+  · intro hx
+    exact mem_fvSubstImage_iff.mpr ⟨fvSubst L w x, mem_fvSubstImage_iff.mpr ⟨x, hx, rfl⟩,
+      (fvSubst_fvSubst_eq_self hw h (hs x hx)
+        (le_of_lt <| lt_of_lt_of_le (lt_of_mem hx) hsu)).symm⟩
 
 end shiftComp
 

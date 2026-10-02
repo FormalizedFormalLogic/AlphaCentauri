@@ -14,15 +14,17 @@ namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) :=
-  mem_ext fun z ↦ by
-    simp only [mem_bitInsert_iff]
-    tauto
+lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) := by
+  apply mem_ext
+  intro z
+  simp only [mem_bitInsert_iff]
+  tauto
 
-lemma insert_insert_self (x s : V) : insert x (insert x s) = insert x s :=
-  mem_ext fun z ↦ by
-    simp only [mem_bitInsert_iff]
-    tauto
+lemma insert_insert_self (x s : V) : insert x (insert x s) = insert x s := by
+  apply mem_ext
+  intro z
+  simp only [mem_bitInsert_iff]
+  tauto
 
 lemma mem_of_mem_insert_of_ne {x y s : V} (h : x ∈ insert y s) (hne : x ≠ y) : x ∈ s :=
   (mem_bitInsert_iff.mp h).resolve_left hne

@@ -723,17 +723,18 @@ prepended. -/
 lemma setShift_fvSubstImage {w s : V} (hw : IsSemitermVec L (len w) 0 w)
     (hs : IsFormulaSet L s) :
     setShift L (fvSubstImage (L := L) w s) =
-      fvSubstImage (L := L) (^&0 ∷ termShiftVec L (len w) w) (setShift L s) :=
-  mem_ext fun x ↦ by
-    constructor
-    · intro hx
-      obtain ⟨_, hy, rfl⟩ := mem_setShift_iff.mp hx
-      obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hy
-      exact mem_fvSubstImage_iff.mpr ⟨shift L q, shift_mem_setShift hq, shift_fvSubst hw (hs q hq)⟩
-    · intro hx
-      obtain ⟨_, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
-      obtain ⟨q, hq, rfl⟩ := mem_setShift_iff.mp hy
-      exact mem_setShift_iff.mpr
-        ⟨fvSubst L w q, mem_fvSubstImage_iff.mpr ⟨q, hq, rfl⟩, (shift_fvSubst hw (hs q hq)).symm⟩
+      fvSubstImage (L := L) (^&0 ∷ termShiftVec L (len w) w) (setShift L s) := by
+  apply mem_ext
+  intro x
+  constructor
+  · intro hx
+    obtain ⟨_, hy, rfl⟩ := mem_setShift_iff.mp hx
+    obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hy
+    exact mem_fvSubstImage_iff.mpr ⟨shift L q, shift_mem_setShift hq, shift_fvSubst hw (hs q hq)⟩
+  · intro hx
+    obtain ⟨_, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
+    obtain ⟨q, hq, rfl⟩ := mem_setShift_iff.mp hy
+    exact mem_setShift_iff.mpr
+      ⟨fvSubst L w q, mem_fvSubstImage_iff.mpr ⟨q, hq, rfl⟩, (shift_fvSubst hw (hs q hq)).symm⟩
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

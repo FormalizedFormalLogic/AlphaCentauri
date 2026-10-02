@@ -58,7 +58,6 @@ public import AlphaCentauri.ToFoundation.Coding
 public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
-public import AlphaCentauri.ToFoundation.Definability
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
@@ -70,6 +69,7 @@ public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.TuringOmega
 public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.ToFoundation.Reflection
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata
 public import AlphaCentauri.ToFoundation.Semiformula

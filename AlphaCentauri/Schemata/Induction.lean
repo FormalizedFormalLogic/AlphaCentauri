@@ -81,6 +81,30 @@ lemma models_deltaInd_iff (φ ψ : ArithmeticSemiformula ℕ 1) :
         φ.Eval ![0] f → (∀ x : V, φ.Eval ![x] f → φ.Eval ![x + 1] f) → ∀ x : V, φ.Eval ![x] f := by
   simp [models_iff, Semiformula.eval_univCl, deltaInd, Semiformula.eval_substs]
 
+lemma DeltaInductionScheme.models_of_exists_eval_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+    {C C' : ArithmeticSemiformula ℕ 1 → Prop} [V↓[ℒₒᵣ] ⊧* DeltaInductionScheme C']
+    (h : ∀ φ, C φ → ∃ ψ, C' ψ ∧
+      ∀ (e : Fin 1 → V) (f : ℕ → V), Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ) :
+    V↓[ℒₒᵣ] ⊧* DeltaInductionScheme C := by
+  apply Semantics.modelsSet_iff.mpr
+  rintro _ ⟨φ, ψ, hφ, hψ, rfl⟩
+  obtain ⟨φ', hφ', Hφ⟩ := h φ hφ
+  obtain ⟨ψ', hψ', Hψ⟩ := h ψ hψ
+  have := Theory.models (T := DeltaInductionScheme C') V
+    (mem_DeltaInductionScheme_of_mem hφ' hψ')
+  simp only [models_deltaInd_iff, Hφ, Hψ] at this ⊢
+  exact this
+
+lemma IDelta_weakerThan_of_le {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) : 𝗜𝚫 s₁ ⪯ 𝗜𝚫 s₂ :=
+  weakerThan_of_models.{0} _ _ fun V _ hV ↦ by
+    have h₀ : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_ss hV Set.subset_union_left
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
+    refine Semantics.ModelsSet.union_iff.mpr ⟨h₀, ?_⟩
+    have : V↓[ℒₒᵣ] ⊧* DeltaInductionScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 s₂) :=
+      models_of_ss hV Set.subset_union_right
+    exact DeltaInductionScheme.models_of_exists_eval_iff fun _ hφ ↦
+      (hφ.exists_eval_iff_of_le h).imp fun _ H ↦ ⟨H.1, H.2 V⟩
+
 end models
 
 section standardModel

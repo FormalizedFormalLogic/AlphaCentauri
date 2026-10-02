@@ -658,6 +658,44 @@ lemma mem_fvSubstImage_iff {w s p : V} :
   let _ : 𝚺ᴬ₁-Function₁ (fvSubst L w) := by definability
   exact mem_hfsImage_iff
 
+variable (L) in
+/-- The $\Sigma_1$ graph of `fvSubstImage`; argument order `(t, w, s)`, `t = fvSubstImage w s`. -/
+noncomputable def fvSubstImageGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
+  “t w s. (∀ y ∈' t, ∃ x ∈' s, !(fvSubstGraph L) y w x) ∧
+    (∀ x ∈' s, ∃ y, !(fvSubstGraph L) y w x ∧ y ∈ t)”
+
+section
+
+variable {Γ : SigmaPiDelta} {m : ℕ}
+
+private lemma fvSubstImage_graph (t w s : V) :
+    t = fvSubstImage (L := L) w s ↔
+      (∀ y ∈ t, ∃ x ∈ s, y = fvSubst L w x) ∧ (∀ x ∈ s, fvSubst L w x ∈ t) := by
+  constructor
+  · rintro rfl
+    exact ⟨fun y hy ↦ mem_fvSubstImage_iff.mp hy, fun x hx ↦ mem_fvSubstImage_iff.mpr ⟨x, hx, rfl⟩⟩
+  · rintro ⟨h₁, h₂⟩
+    apply mem_ext
+    intro y
+    constructor
+    · intro hy
+      exact mem_fvSubstImage_iff.mpr (h₁ y hy)
+    · intro hy
+      obtain ⟨x, hx, rfl⟩ := mem_fvSubstImage_iff.mp hy
+      exact h₂ x hx
+
+instance fvSubstImage.defined :
+    𝚺ᴬ₁-Function₂[V] fvSubstImage (L := L) via fvSubstImageGraph L :=
+  .mk fun v ↦ by simp [fvSubstImageGraph, fvSubstImage_graph]
+
+instance fvSubstImage.definable : 𝚺ᴬ₁-Function₂[V] fvSubstImage (L := L) :=
+  fvSubstImage.defined.to_definable
+
+instance fvSubstImage.definable' : Γᴬ-[m + 1]-Function₂[V] fvSubstImage (L := L) :=
+  fvSubstImage.definable.of_sigmaOne
+
+end
+
 /-- Free-variable substitution by a vector of closed terms carries a coded formula set to a coded
 formula set.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
@@ -760,5 +798,36 @@ lemma fvSubst_substs1 {n w t p : V}
     simpa using (termFvSubstVec_cons (L := L) (k := 0) (w := w) (t := t) (v := 0)
       ht.isUTerm (by simp))
   rw [hvec]
+
+/-- For a substitution vector of closed terms, the free instance after free-variable substitution
+equals free-variable substitution, by the shifted substitution vector with `&0` prepended, applied
+to the free instance. -/
+lemma free_fvSubst {w p : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsSemiformula L 1 p) :
+    free L (fvSubst L w p) = fvSubst L (^&0 ∷ termShiftVec L (len w) w) (free L p) := by
+  have hw' : IsSemitermVec L (len (^&0 ∷ termShiftVec L (len w) w)) 0
+      (^&0 ∷ termShiftVec L (len w) w) := by
+    simp [hw.isUTerm, hw.termShiftVec]
+  rw [free, free, fvSubst_substs1 hw' (by simp : IsSemiterm L 0 (^&0 : V)) hp.shift,
+    ← shift_fvSubst (hw.weaken (by simp)) hp]
+  simp
+
+/-- For a substitution vector of closed terms, the external-variable shift of a substituted coded
+formula set equals the image of the shifted set under the shifted substitution vector with `&0`
+prepended. -/
+lemma setShift_fvSubstImage {w s : V} (hw : IsSemitermVec L (len w) 0 w)
+    (hs : IsFormulaSet L s) :
+    setShift L (fvSubstImage (L := L) w s) =
+      fvSubstImage (L := L) (^&0 ∷ termShiftVec L (len w) w) (setShift L s) :=
+  mem_ext fun x ↦ by
+    constructor
+    · intro hx
+      obtain ⟨_, hy, rfl⟩ := mem_setShift_iff.mp hx
+      obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hy
+      exact mem_fvSubstImage_iff.mpr ⟨shift L q, shift_mem_setShift hq, shift_fvSubst hw (hs q hq)⟩
+    · intro hx
+      obtain ⟨_, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
+      obtain ⟨q, hq, rfl⟩ := mem_setShift_iff.mp hy
+      exact mem_setShift_iff.mpr
+        ⟨fvSubst L w q, mem_fvSubstImage_iff.mpr ⟨q, hq, rfl⟩, (shift_fvSubst hw (hs q hq)).symm⟩
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

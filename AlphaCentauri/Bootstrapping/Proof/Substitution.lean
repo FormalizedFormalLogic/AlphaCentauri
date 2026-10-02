@@ -126,6 +126,164 @@ lemma fvSubstImage_eq_setShift (hu : u < len w) (hw : ∀ x < u, w.[x] = ^&(x + 
 
 end eqShift
 
+section shiftComp
+
+variable {u w v : V}
+
+/-- If `v` sends `^&x` to the image of `^&(x + 1)` under `w` for every `x < u`, then substituting
+by `w` after the shift of free variables is substituting by `v`, on the terms coded by a number
+at most `u`. -/
+lemma termFvSubst_termShift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L w ^&(x + 1))
+    {n t : V} (ht : IsSemiterm L n t) (h : t ≤ u) :
+    termFvSubst L w (termShift L t) = termFvSubst L v t := by
+  revert h
+  apply IsSemiterm.induction 𝚷
+    (P := fun t ↦ t ≤ u → termFvSubst L w (termShift L t) = termFvSubst L v t) ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z _ _; simp
+  · intro x hx
+    have hxu : x < u := lt_of_lt_of_le (by simp) hx
+    rw [termShift_fvar, termFvSubst_fvar v, ite_eq_left (hv x hxu).1, (hv x hxu).2]
+  · intro k f ts hf hts ih hle
+    rw [termShift_func hf hts.isUTerm, termFvSubst_func hf hts.termShiftVec.isUTerm,
+      termFvSubst_func hf hts.isUTerm]
+    refine congrArg _ (nth_ext' k (by simp [hts.isUTerm]) (by simp [hts.isUTerm]) fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts.termShiftVec.isUTerm hi, nth_termShiftVec hts.isUTerm hi,
+      nth_termFvSubstVec hts.isUTerm hi]
+    exact ih i hi
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqFunc_of_lt (by rw [hts.lh]; exact hi)) hle)
+
+/-- If `v` sends `^&x` to the image of `^&(x + 1)` under `w` for every `x < u`, then substituting
+by `w` after the shift of free variables is substituting by `v`, on the formulas coded by a number
+at most `u`. -/
+lemma fvSubst_shift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L w ^&(x + 1))
+    {n p : V} (hp : IsSemiformula L n p) (h : p ≤ u) :
+    fvSubst L w (shift L p) = fvSubst L v p := by
+  revert h
+  apply IsSemiformula.pi1_structural_induction
+    (P := fun _ p ↦ p ≤ u → fvSubst L w (shift L p) = fvSubst L v p)
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R ts hR hts hle
+    rw [shift_rel hR hts.isUTerm, fvSubst_rel hR hts.termShiftVec.isUTerm,
+      fvSubst_rel hR hts.isUTerm]
+    refine congrArg _ (nth_ext' k (by simp [hts.isUTerm]) (by simp [hts.isUTerm]) fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts.termShiftVec.isUTerm hi, nth_termShiftVec hts.isUTerm hi,
+      nth_termFvSubstVec hts.isUTerm hi]
+    exact termFvSubst_termShift hv (hts.nth hi)
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqRel_of_lt (by rw [hts.lh]; exact hi)) hle)
+  · intro n k R ts hR hts hle
+    rw [shift_nrel hR hts.isUTerm, fvSubst_nrel hR hts.termShiftVec.isUTerm,
+      fvSubst_nrel hR hts.isUTerm]
+    refine congrArg _ (nth_ext' k (by simp [hts.isUTerm]) (by simp [hts.isUTerm]) fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts.termShiftVec.isUTerm hi, nth_termShiftVec hts.isUTerm hi,
+      nth_termFvSubstVec hts.isUTerm hi]
+    exact termFvSubst_termShift hv (hts.nth hi)
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqNRel_of_lt (by rw [hts.lh]; exact hi)) hle)
+  · intro n _; simp
+  · intro n _; simp
+  · intro n p q hp hq ihp ihq hle
+    rw [shift_and hp.isUFormula hq.isUFormula,
+      fvSubst_and hp.shift.isUFormula hq.shift.isUFormula, fvSubst_and hp.isUFormula hq.isUFormula,
+      ihp (le_of_lt <| lt_of_lt_of_le (by simp) hle),
+      ihq (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p q hp hq ihp ihq hle
+    rw [shift_or hp.isUFormula hq.isUFormula,
+      fvSubst_or hp.shift.isUFormula hq.shift.isUFormula, fvSubst_or hp.isUFormula hq.isUFormula,
+      ihp (le_of_lt <| lt_of_lt_of_le (by simp) hle),
+      ihq (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p hp ih hle
+    rw [shift_all hp.isUFormula, fvSubst_all hp.shift.isUFormula, fvSubst_all hp.isUFormula,
+      ih (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p hp ih hle
+    rw [shift_exs hp.isUFormula, fvSubst_exs hp.shift.isUFormula, fvSubst_exs hp.isUFormula,
+      ih (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+
+/-- If `v` sends `^&x` to the image of `^&(x + 1)` under `w` for every `x < u`, then the image
+under `w` of the shift of a coded formula set bounded by `u` is its image under `v`. -/
+lemma fvSubstImage_setShift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L w ^&(x + 1))
+    {s : V} (hs : IsFormulaSet L s) (h : s ≤ u) :
+    fvSubstImage (L := L) w (setShift L s) = fvSubstImage (L := L) v s :=
+  mem_ext fun x ↦ by
+    constructor
+    · intro hx
+      obtain ⟨_, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
+      obtain ⟨q, hq, rfl⟩ := mem_setShift_iff.mp hy
+      exact mem_fvSubstImage_iff.mpr
+        ⟨q, hq, fvSubst_shift hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)⟩
+    · intro hx
+      obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hx
+      exact mem_fvSubstImage_iff.mpr ⟨shift L q, shift_mem_setShift hq,
+        (fvSubst_shift hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)).symm⟩
+
+/-- A substitution vector sending `^&x` to itself for every `x < u` fixes the terms coded by a
+number at most `u`. -/
+lemma termFvSubst_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
+    {n t : V} (ht : IsSemiterm L n t) (h : t ≤ u) : termFvSubst L v t = t := by
+  revert h
+  apply IsSemiterm.induction 𝚷 (P := fun t ↦ t ≤ u → termFvSubst L v t = t) ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z _ _; simp
+  · intro x hx
+    have hxu : x < u := lt_of_lt_of_le (by simp) hx
+    rw [termFvSubst_fvar, ite_eq_left (hv x hxu).1, (hv x hxu).2]
+  · intro k f ts hf hts ih hle
+    rw [termFvSubst_func hf hts.isUTerm]
+    refine congrArg _ (nth_ext' k (by simp [hts.isUTerm]) hts.lh fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts.isUTerm hi]
+    exact ih i hi
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqFunc_of_lt (by rw [hts.lh]; exact hi)) hle)
+
+/-- A substitution vector sending `^&x` to itself for every `x < u` fixes the formulas coded by a
+number at most `u`. -/
+lemma fvSubst_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
+    {n p : V} (hp : IsSemiformula L n p) (h : p ≤ u) : fvSubst L v p = p := by
+  revert h
+  apply IsSemiformula.pi1_structural_induction (P := fun _ p ↦ p ≤ u → fvSubst L v p = p)
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R ts hR hts hle
+    rw [fvSubst_rel hR hts.isUTerm]
+    refine congrArg _ (nth_ext' k (by simp [hts.isUTerm]) hts.lh fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts.isUTerm hi]
+    exact termFvSubst_eq_self hv (hts.nth hi)
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqRel_of_lt (by rw [hts.lh]; exact hi)) hle)
+  · intro n k R ts hR hts hle
+    rw [fvSubst_nrel hR hts.isUTerm]
+    refine congrArg _ (nth_ext' k (by simp [hts.isUTerm]) hts.lh fun i hi ↦ ?_)
+    rw [nth_termFvSubstVec hts.isUTerm hi]
+    exact termFvSubst_eq_self hv (hts.nth hi)
+      (le_of_lt <| lt_of_lt_of_le (nth_lt_qqNRel_of_lt (by rw [hts.lh]; exact hi)) hle)
+  · intro n _; simp
+  · intro n _; simp
+  · intro n p q hp hq ihp ihq hle
+    rw [fvSubst_and hp.isUFormula hq.isUFormula,
+      ihp (le_of_lt <| lt_of_lt_of_le (by simp) hle),
+      ihq (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p q hp hq ihp ihq hle
+    rw [fvSubst_or hp.isUFormula hq.isUFormula,
+      ihp (le_of_lt <| lt_of_lt_of_le (by simp) hle),
+      ihq (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p hp ih hle
+    rw [fvSubst_all hp.isUFormula, ih (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+  · intro n p hp ih hle
+    rw [fvSubst_exs hp.isUFormula, ih (le_of_lt <| lt_of_lt_of_le (by simp) hle)]
+
+/-- A substitution vector sending `^&x` to itself for every `x < u` fixes a coded formula set
+bounded by `u`. -/
+lemma fvSubstImage_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
+    {s : V} (hs : IsFormulaSet L s) (h : s ≤ u) : fvSubstImage (L := L) v s = s :=
+  mem_ext fun x ↦ by
+    constructor
+    · intro hx
+      obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hx
+      rwa [fvSubst_eq_self hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)]
+    · intro hx
+      exact mem_fvSubstImage_iff.mpr
+        ⟨x, hx, (fvSubst_eq_self hv (hs x hx) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hx) h)).symm⟩
+
+end shiftComp
+
 section freshVec
 
 lemma freshVec_exists_aux (u : V) : ∀ j, ∀ m ≤ u, j + m = u →

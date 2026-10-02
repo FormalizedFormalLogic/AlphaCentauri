@@ -286,6 +286,23 @@ lemma exists_or_of_shift_eq_or {r p q : V} (hr : IsUFormula L r) (h : shift L r 
   · simp [qqOr, qqAll] at h
   · simp [qqOr, qqExs] at h
 
+/-- A formula code whose external-variable shift is a universal quantification is itself one, and
+its body shifts to the given one. -/
+lemma exists_all_of_shift_eq_all {r p : V} (hr : IsUFormula L r) (h : shift L r = ^∀ p) :
+    ∃ r₁, IsUFormula L r₁ ∧ r = ^∀ r₁ ∧ shift L r₁ = p := by
+  rcases shift_case hr with
+    (⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨rfl, hs⟩ | ⟨rfl, hs⟩ |
+      ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ |
+      ⟨r₁, hr₁, rfl, hs⟩ | ⟨r₁, hr₁, rfl, hs⟩) <;> rw [hs] at h
+  · simp [qqRel, qqAll] at h
+  · simp [qqNRel, qqAll] at h
+  · simp [qqVerum, qqAll] at h
+  · simp [qqFalsum, qqAll] at h
+  · simp [qqAnd, qqAll] at h
+  · simp [qqOr, qqAll] at h
+  · exact ⟨r₁, hr₁, rfl, by simpa using h⟩
+  · simp [qqAll, qqExs] at h
+
 section
 
 variable {T : Theory L} [T.Δ₁]

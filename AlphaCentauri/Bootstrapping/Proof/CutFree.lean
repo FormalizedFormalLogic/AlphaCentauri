@@ -632,6 +632,74 @@ theorem deductionAux {a d : V} (ha : IsFormulaSet L a) (hsa : setShift L a = a)
       Derivation.axL (by simp [hs, ha]) (by simp [hp])
       (by simp [hax p hT]), by simp⟩
 
+/-- Given a coded formula set `a` closed under the external-variable shift such that every axiom
+`p ≤ d` of `T` follows in pure logic from the negation of some member of `a`, a derivation `d`
+from `T` yields a pure derivation of its end-sequent with `a` adjoined.
+- [HP98, Section I.4(a)] -/
+theorem derivable_union_of_replacement {a d : V} (ha : IsFormulaSet L a)
+    (hsa : setShift L a = a)
+    (hax : ∀ p ≤ d, p ∈ T.Δ₁Class →
+      ∃ q, neg L q ∈ a ∧ Derivable (∅ : Theory L) (insert (neg L q) ({p} : V)))
+    (hd : Derivation T d) : Derivable (∅ : Theory L) (fstIdx d ∪ a) := by
+  have insert_union (x s : V) : insert x s ∪ a = insert x (s ∪ a) :=
+    mem_ext fun z ↦ by simp only [mem_cup_iff, mem_bitInsert_iff]; tauto
+  suffices d ≤ d → Derivable (∅ : Theory L) (fstIdx d ∪ a) from this le_rfl
+  apply Derivation.induction1 𝚺 (P := fun e ↦ e ≤ d → Derivable (∅ : Theory L) (fstIdx e ∪ a))
+    (by definability) hd
+  · intro s hs p hp hnp _
+    rw [fstIdx_axL]
+    exact Derivable.em (by simp [hs, ha]) p (by simp [hp]) (by simp [hnp])
+  · intro s hs hv _
+    rw [fstIdx_verumIntro]
+    exact Derivable.verum (by simp [hs, ha]) (by simp [hv])
+  · intro s _ p q dp dq hpq hdp hdq ihp ihq hle
+    have h₁ := ihp ((dp_lt_andIntro _ _ _ _ _).le.trans hle)
+    have h₂ := ihq ((dq_lt_andIntro _ _ _ _ _).le.trans hle)
+    rw [hdp.1, insert_union] at h₁
+    rw [hdq.1, insert_union] at h₂
+    rw [fstIdx_andIntro]
+    exact Derivable.and_m (mem_cup_iff.mpr <| Or.inl hpq) h₁ h₂
+  · intro s _ p q dp hpq hdp ih hle
+    have h := ih ((d_lt_orIntro _ _ _ _).le.trans hle)
+    rw [hdp.1, insert_union, insert_union] at h
+    rw [fstIdx_orIntro]
+    exact Derivable.or_m (mem_cup_iff.mpr <| Or.inl hpq) h
+  · intro s _ p dp hp hdp ih hle
+    have h := ih ((s_lt_allIntro _ _ _).le.trans hle)
+    rw [hdp.1, insert_union, ← hsa, ← mem_setShift_union] at h
+    rw [fstIdx_allIntro]
+    exact Derivable.all_m (mem_cup_iff.mpr <| Or.inl hp) h
+  · intro s _ p t dp hp ht hdp ih hle
+    have h := ih ((d_lt_exsIntro _ _ _ _).le.trans hle)
+    rw [hdp.1, insert_union] at h
+    rw [fstIdx_exsIntro]
+    exact Derivable.ex_m (mem_cup_iff.mpr <| Or.inl hp) ht h
+  · intro s hs e hse _ ih hle
+    rw [fstIdx_wkRule]
+    refine Derivable.wk (by simp [hs, ha]) ?_ (ih ((d_lt_wkRule _ _).le.trans hle))
+    intro x hx
+    rcases mem_cup_iff.mp hx with hx | hx
+    · exact mem_cup_iff.mpr <| Or.inl <| hse hx
+    · exact mem_cup_iff.mpr <| Or.inr hx
+  · rintro _ _ e rfl _ ih hle
+    have h := (ih ((d_lt_shiftRule _ _).le.trans hle)).shift
+    rwa [mem_setShift_union, hsa, ← fstIdx_shiftRule (setShift L (fstIdx e)) e] at h
+  · intro s _ p d₁ d₂ hd₁ hd₂ ih₁ ih₂ hle
+    have h₁ := ih₁ ((d₁_lt_cutRule _ _ _ _).le.trans hle)
+    have h₂ := ih₂ ((d₂_lt_cutRule _ _ _ _).le.trans hle)
+    rw [hd₁.1, insert_union] at h₁
+    rw [hd₂.1, insert_union] at h₂
+    rw [fstIdx_cutRule]
+    exact Derivable.cut p h₁ h₂
+  · intro s hs p hp hT hle
+    obtain ⟨q, hq, hqp⟩ := hax p ((p_lt_axm _ _).le.trans hle) hT
+    rw [fstIdx_axm]
+    refine Derivable.wk (by simp [hs, ha]) ?_ hqp
+    intro x hx
+    rcases mem_bitInsert_iff.mp hx with rfl | hx
+    · exact mem_cup_iff.mpr <| Or.inr hq
+    · exact mem_cup_iff.mpr <| Or.inl <| (mem_singleton_iff.mp hx) ▸ hp
+
 section Deduction
 
 variable [L.DecidableEq]

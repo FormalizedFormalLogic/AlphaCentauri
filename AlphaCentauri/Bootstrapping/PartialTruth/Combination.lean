@@ -857,6 +857,19 @@ lemma ReadableTruth.neg_iff (h : IsReadable k D q) (hn : IsReadable k D (neg ℒ
       rw [iff_combinationReading hc, iff_combinationReading (hc.neg hq),
         CombinationReading.neg hc hq]
 
+lemma ReadableTruth.and_or_neg_iff {α β γ δ : V} (hα : IsUFormula ℒₒᵣ α) (hβ : IsUFormula ℒₒᵣ β)
+    (hγ : IsUFormula ℒₒᵣ γ) (hδ : IsUFormula ℒₒᵣ δ) (hβr : IsReadable k D β)
+    (hδr : IsReadable k D δ) (h : IsReadable k D (α ^⋏ ((neg ℒₒᵣ β ^⋎ γ) ^⋏ neg ℒₒᵣ δ))) :
+    ReadableTruth k D (α ^⋏ ((neg ℒₒᵣ β ^⋎ γ) ^⋏ neg ℒₒᵣ δ)) ↔
+      ReadableTruth k D α ∧ (¬ReadableTruth k D β ∨ ReadableTruth k D γ) ∧
+        ¬ReadableTruth k D δ := by
+  obtain ⟨-, hX⟩ := h.of_and
+  obtain ⟨hY, hδ'⟩ := hX.of_and
+  obtain ⟨hβ', -⟩ := hY.of_or
+  have hu : IsUFormula ℒₒᵣ (neg ℒₒᵣ β ^⋎ γ) := IsUFormula.or.mpr ⟨hβ.neg, hγ⟩
+  rw [and_iff h hα (IsUFormula.and.mpr ⟨hu, hδ.neg⟩), and_iff hX hu hδ.neg, or_iff hY hβ.neg hγ,
+    neg_iff hβr hβ' hβ, neg_iff hδr hδ' hδ]
+
 end readableTruth
 
 /-! ### Definability of truth -/

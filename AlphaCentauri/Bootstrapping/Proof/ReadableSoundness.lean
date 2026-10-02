@@ -7,9 +7,10 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 # Soundness of pure logic for the readable truth
 
 `IsFalseBlock k D e` says that `e` is a block of existential quantifiers over a closed matrix in
-the class `IsReadable k D` whose instances by closed terms are all false. In every model of
-`𝗜𝚺⁺ (k + 1)`, a sequent consisting of such formulas has no cut-free derivation in pure logic, and
-in every model that also satisfies `𝗜𝚺⁺2` it has no derivation at all.
+the class `IsReadable k D` whose instances by closed terms are all false under `ReadableTruth k D`.
+In every model of `𝗜𝚺⁺(k + 1)`, a sequent consisting of such formulas has no cut-free derivation
+in pure logic, and in every model that also satisfies `𝗜𝚺⁺2` it has no derivation in pure logic at
+all.
 
 ## References
 
@@ -35,12 +36,10 @@ section qqExss
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-/-- The primitive recursion blueprint of `qqExss`. -/
 def qqExss.blueprint : PR.Blueprint 1 where
   zero := .mkSigma “y x. y = x”
   succ := .mkSigma “y ih n x. !qqExsDef y ih”
 
-/-- The primitive recursion construction of `qqExss`. -/
 noncomputable def qqExss.construction : PR.Construction V qqExss.blueprint where
   zero := fun x ↦ x 0
   succ := fun _ _ ih ↦ ^∃ ih
@@ -55,7 +54,6 @@ noncomputable def qqExss (p k : V) : V := qqExss.construction.result ![p] k
 @[simp] lemma qqExss_succ (p k : V) : qqExss p (k + 1) = ^∃ (qqExss p k) := by
   simp [qqExss, qqExss.construction]
 
-/-- The $\Sigma_1$ semisentence defining `qqExss`. -/
 def _root_.FFL.FirstOrder.Arithmetic.qqExssDef : 𝚺ᴬ₁.Semisentence 3 :=
   qqExss.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
@@ -91,8 +89,6 @@ lemma IsSemiformula.qqExss {n k p : V} (h : IsSemiformula L (n + k) p) :
     rw [qqExss_succ, IsSemiformula.exs]
     exact ih (by rwa [add_right_comm, add_assoc])
 
-/-- Two blocks of existential quantifiers over matrices that are not existential coincide only if
-their lengths and their matrices do. -/
 lemma qqExss_inj {p q m n : V} (hp : ∀ a, p ≠ ^∃ a) (hq : ∀ a, q ≠ ^∃ a)
     (h : qqExss p m = qqExss q n) : m = n ∧ p = q := by
   induction m using ISigma1.pi1_succ_induction generalizing n
@@ -107,6 +103,9 @@ lemma qqExss_inj {p q m n : V} (hp : ∀ a, p ≠ ^∃ a) (hq : ∀ a, q ≠ ^�
     · obtain ⟨rfl, rfl⟩ := ih (by simpa using h)
       exact ⟨rfl, rfl⟩
 
+lemma termBShift_eq_self {t : V} (ht : IsSemiterm L 0 t) : termBShift L t = t := by
+  simpa [substs_nil ht] using bShift_substs ht (w := 0) (m := 0) (by simp)
+
 end qqExss
 
 lemma fvAssign_qqExss {f p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
@@ -116,13 +115,19 @@ lemma fvAssign_qqExss {f p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
   case zero => simp
   case succ k ih => rw [qqExss_succ, fvAssign_exs (by simpa using hp), ih, qqExss_succ]
 
-/-- A closed term is fixed by the shift of bound variables. -/
-lemma termBShift_eq_self {L : Language} [L.Encodable] [L.LORDefinable] {t : V}
-    (ht : IsSemiterm L 0 t) : termBShift L t = t := by
-  simpa [substs_nil ht] using bShift_substs ht (w := 0) (m := 0) (by simp)
+/-- The vector `^#0, …, ^#(r - 1), t`. -/
+private lemma exists_vec_bvar_term (r t : V) :
+    ∃ v, len v = r + 1 ∧ (∀ i < r, v.[i] = ^#i) ∧ v.[r] = t := by
+  have h : ∀ i < r + 1, ∃ y : V, (i < r → y = ^#i) ∧ (r ≤ i → y = t) := by
+    intro i _
+    by_cases hi : i < r
+    · exact ⟨^#i, fun _ ↦ rfl, fun h ↦ absurd hi (not_lt.mpr h)⟩
+    · exact ⟨t, fun h ↦ absurd h hi, fun _ ↦ rfl⟩
+  obtain ⟨v, hvl, hv⟩ := sigmaOne_skolem_vec (by definability) h
+  exact ⟨v, hvl, fun i hi ↦ (hv i (lt_trans hi (by simp))).1 hi, (hv r (by simp)).2 le_rfl⟩
 
 /-- Instantiating the outermost quantifier of `qqExss q r` with a closed term `t` instantiates the
-outermost bound variable of `q`. -/
+outermost bound variable `^#r` of `q`, where `v` is the vector `^#0, …, ^#(r - 1), t`. -/
 lemma substs1_qqExss {t q v r : V} (ht : IsSemiterm ℒₒᵣ 0 t) (hq : IsSemiformula ℒₒᵣ (r + 1) q)
     (hv : len v = r + 1) (hvb : ∀ i < r, v.[i] = ^#i) (hvr : v.[r] = t) :
     substs1 ℒₒᵣ t (qqExss q r) = qqExss (subst ℒₒᵣ v q) r := by
@@ -135,16 +140,13 @@ lemma substs1_qqExss {t q v r : V} (ht : IsSemiterm ℒₒᵣ 0 t) (hq : IsSemif
       simpa using hvr)
     simp [substs1, this]
   case succ r ih =>
-    obtain ⟨v', hv'l, hv'⟩ := sigmaOne_skolem_vec
-      (R := fun i y : V ↦ (i < r → y = ^#i) ∧ (r ≤ i → y = t)) (by definability) (l := r + 1)
-      (fun i _ ↦ by
-        by_cases hi : i < r
-        · exact ⟨^#i, fun _ ↦ rfl, fun h ↦ absurd hi (not_lt.mpr h)⟩
-        · exact ⟨t, fun h ↦ absurd h hi, fun _ ↦ rfl⟩)
-    have hv'u : IsUTermVec ℒₒᵣ (r + 1) v' := ⟨hv'l.symm, fun i hi ↦ by
-      by_cases hir : i < r
-      · simp [(hv' i hi).1 hir]
-      · simpa [(hv' i hi).2 (not_lt.mp hir)] using ht.isUTerm⟩
+    obtain ⟨v', hv'l, hv'b, hv'r⟩ := exists_vec_bvar_term r t
+    have hv'u : IsUTermVec ℒₒᵣ (r + 1) v' := by
+      refine ⟨hv'l.symm, ?_⟩
+      intro i hi
+      rcases lt_or_eq_of_le (lt_succ_iff_le.mp hi) with hir | rfl
+      · simp [hv'b i hir]
+      · simpa [hv'r] using ht.isUTerm
     have hqv : qVec ℒₒᵣ v' = v := by
       apply nth_ext' (r + 1 + 1) (len_qVec hv'u) hv
       intro i hi
@@ -152,12 +154,11 @@ lemma substs1_qqExss {t q v r : V} (ht : IsSemiterm ℒₒᵣ 0 t) (hq : IsSemif
       · simp [qVec, hvb 0 (by simp)]
       · have hi : i < r + 1 := by simpa using hi
         rw [qVec, nth_adjoin_succ, hv'l, nth_termBShiftVec hv'u hi]
-        rcases lt_or_ge i r with hir | hir
-        · simp [(hv' i hi).1 hir, hvb (i + 1) (by simpa using hir)]
-        · obtain rfl : i = r := le_antisymm (lt_succ_iff_le.mp hi) hir
-          rw [(hv' i hi).2 le_rfl, termBShift_eq_self ht, hvr]
-    rw [qqExss_succ', ih (by simpa using hq) hv'l (fun i hi ↦ (hv' i (lt_trans hi (by simp))).1 hi)
-      ((hv' r (by simp)).2 le_rfl), substs_ex hq.isUFormula, qqExss_exs, ← qqExss_succ, hqv]
+        rcases lt_or_eq_of_le (lt_succ_iff_le.mp hi) with hir | rfl
+        · simp [hv'b i hir, hvb (i + 1) (by simpa using hir)]
+        · rw [hv'r, termBShift_eq_self ht, hvr]
+    rw [qqExss_succ', ih (by simpa using hq) hv'l hv'b hv'r, substs_ex hq.isUFormula, qqExss_exs,
+      ← qqExss_succ, hqv]
 
 /-! ### Partial instances of blocks -/
 
@@ -205,28 +206,24 @@ lemma IsPartialInstance.succ {r φ : V} (h : IsPartialInstance E (r + 1) φ) :
   have hχw : IsSemiformula ℒₒᵣ (r + 1) (subst ℒₒᵣ w χ) := hχ.subst hw
   refine ⟨qqExss (subst ℒₒᵣ w χ) r, qqExss_succ _ _, IsSemiformula.qqExss (by rwa [add_comm]), ?_⟩
   intro t ht
-  obtain ⟨v, hvl, hv⟩ := sigmaOne_skolem_vec
-    (R := fun i y : V ↦ (i < r → y = ^#i) ∧ (r ≤ i → y = t)) (by definability) (l := r + 1)
-    (fun i _ ↦ by
-      by_cases hi : i < r
-      · exact ⟨^#i, fun _ ↦ rfl, fun h ↦ absurd hi (not_lt.mpr h)⟩
-      · exact ⟨t, fun h ↦ absurd h hi, fun _ ↦ rfl⟩)
-  have hvs : IsSemitermVec ℒₒᵣ (r + 1) r v := IsSemitermVec.iff.mpr ⟨hvl, fun i hi ↦ by
-    by_cases hir : i < r
-    · simp [(hv i hi).1 hir, hir]
-    · rw [(hv i hi).2 (not_lt.mp hir)]
-      exact IsSemiterm.def.mpr ⟨ht.isUTerm, le_trans (IsSemiterm.def.mp ht).2 (by simp)⟩⟩
+  obtain ⟨v, hvl, hvb, hvr⟩ := exists_vec_bvar_term r t
+  have hvs : IsSemitermVec ℒₒᵣ (r + 1) r v := by
+    refine IsSemitermVec.iff.mpr ⟨hvl, ?_⟩
+    intro i hi
+    rcases lt_or_eq_of_le (lt_succ_iff_le.mp hi) with hir | rfl
+    · simp [hvb i hir, hir]
+    · rw [hvr]
+      exact IsSemiterm.def.mpr ⟨ht.isUTerm, le_trans (IsSemiterm.def.mp ht).2 (by simp)⟩
   have hrm' : r < m := lt_of_lt_of_le (by simp) hrm
-  rw [substs1_qqExss ht hχw hvl (fun i hi ↦ (hv i (lt_trans hi (by simp))).1 hi)
-    ((hv r (by simp)).2 le_rfl), substs_substs hχ hvs hw]
+  rw [substs1_qqExss ht hχw hvl hvb hvr, substs_substs hχ hvs hw]
   refine ⟨m, χ, hmem, hχ, hmax, hrm'.le, termSubstVec ℒₒᵣ m v w, hvs.termSubstVec hw, ?_, ?_, rfl⟩
   · intro i hi
     rw [nth_termSubstVec hw.isUTerm (lt_trans hi hrm'), hwb i (lt_trans hi (by simp)),
-      termSubst_bvar, (hv i (lt_trans hi (by simp))).1 hi]
+      termSubst_bvar, hvb i hi]
   · intro i hi hri
     rw [nth_termSubstVec hw.isUTerm hi]
     rcases eq_or_lt_of_le hri with rfl | hri
-    · rwa [hwb r (by simp), termSubst_bvar, (hv r (by simp)).2 le_rfl]
+    · rwa [hwb r (by simp), termSubst_bvar, hvr]
     · rw [termSubst_eq_self (hwc i hi (succ_le_iff_lt.mpr hri)) (by simp)]
       exact hwc i hi (succ_le_iff_lt.mpr hri)
 
@@ -364,6 +361,26 @@ private lemma hasWitness_of_all (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p f : 
   rw [hsh q hq] at hψN
   exact ⟨q, hq, hψN, ReadableSatisfaction.shift_iff.mp hψT⟩
 
+/-- The existential case when the principal formula is a partial instance of a block of `E` with a
+quantifier left. -/
+private lemma hasWitness_of_exs_of_isPartialInstance (hE : ∀ e ∈ E, IsFalseBlock k D e)
+    {s p t f q r : V} (hpq : fvAssign f p = q) (ht : IsSemiterm ℒₒᵣ 0 t)
+    (hinst : ∀ u, IsSemiterm ℒₒᵣ 0 u → IsPartialInstance E r (substs1 ℒₒᵣ u q))
+    (et : fvAssign f (substs1 ℒₒᵣ t p) = substs1 ℒₒᵣ (termFvAssign f t) (fvAssign f p))
+    (hadm : ∀ ψ ∈ s, Admissible k D E (fvAssign f ψ))
+    (ih : (∀ ψ ∈ insert (substs1 ℒₒᵣ t p) s, Admissible k D E (fvAssign f ψ)) →
+      HasWitness k D E (insert (substs1 ℒₒᵣ t p) s) f) :
+    HasWitness k D E s f := by
+  have hnew : IsPartialInstance E r (fvAssign f (substs1 ℒₒᵣ t p)) := by
+    rw [et, hpq]
+    exact hinst _ ht.termFvAssign
+  obtain ⟨ψ, hψ, hψN, hψT⟩ := ih (admissible_insert (.inr ⟨r, hnew⟩) hadm)
+  rcases mem_bitInsert_iff.mp hψ with rfl | hψ
+  · rcases zero_or_succ r with rfl | ⟨r, rfl⟩
+    · exact absurd hψT (hnew.zero hE).2
+    · exact absurd hnew (hψN r)
+  · exact ⟨ψ, hψ, hψN, hψT⟩
+
 private lemma hasWitness_of_exs (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p t f : V}
     (hs : IsFormulaSet ℒₒᵣ s) (hp : ^∃ p ∈ s) (ht : IsTerm ℒₒᵣ t)
     (hadm : ∀ ψ ∈ s, Admissible k D E (fvAssign f ψ))
@@ -374,32 +391,23 @@ private lemma hasWitness_of_exs (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p t f 
   have e : fvAssign f (^∃ p) = ^∃ (fvAssign f p) := fvAssign_exs hpF.isUFormula
   have et : fvAssign f (substs1 ℒₒᵣ t p) = substs1 ℒₒᵣ (termFvAssign f t) (fvAssign f p) :=
     fvAssign_substs1 ht hpF
-  have ht' : IsSemiterm ℒₒᵣ 0 (termFvAssign f t) := ht.termFvAssign
   by_cases hφ : ∃ r, IsPartialInstance E (r + 1) (fvAssign f (^∃ p))
   · obtain ⟨r, hr⟩ := hφ
     obtain ⟨q, hq, -, hinst⟩ := hr.succ
     rw [e, qqExs_inj] at hq
-    have hnew : IsPartialInstance E r (fvAssign f (substs1 ℒₒᵣ t p)) := by
-      rw [et, hq]
-      exact hinst _ ht'
-    obtain ⟨ψ, hψ, hψN, hψT⟩ := ih (admissible_insert (.inr ⟨r, hnew⟩) hadm)
-    rcases mem_bitInsert_iff.mp hψ with rfl | hψ
-    · rcases zero_or_succ r with rfl | ⟨r, rfl⟩
-      · exact absurd hψT (hnew.zero hE).2
-      · exact absurd hnew (hψN r)
-    · exact ⟨ψ, hψ, hψN, hψT⟩
+    exact hasWitness_of_exs_of_isPartialInstance hE hq ht hinst et hadm ih
   rw [not_exists] at hφ
   have hR := isReadable_of_admissible hE (hadm _ hp) hφ
   rw [e] at hR
   have hnew : IsReadable k D (fvAssign f (substs1 ℒₒᵣ t p)) := by
     rw [et]
-    exact hR.substs1_of_exs ht' hpF.fvAssign
+    exact hR.substs1_of_exs ht.termFvAssign hpF.fvAssign
   obtain ⟨ψ, hψ, hψN, hψT⟩ := ih (admissible_insert (.inl hnew) hadm)
   rcases mem_bitInsert_iff.mp hψ with rfl | hψ
   · rw [ReadableSatisfaction, et] at hψT
     refine ⟨_, hp, hφ, ?_⟩
     rw [ReadableSatisfaction, e]
-    exact ReadableTruth.exs_of_substs1 hR hpF.fvAssign ht' hψT
+    exact ReadableTruth.exs_of_substs1 hR hpF.fvAssign ht.termFvAssign hψT
   · exact ⟨ψ, hψ, hψN, hψT⟩
 
 private lemma hasWitness_of_shift {Γ f : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
@@ -423,9 +431,37 @@ private lemma hasWitness_of_shift {Γ f : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
   exact ⟨_, shift_mem_setShift hψ, by rwa [hsh ψ hψ],
     (ReadableSatisfaction.congr hfg).mpr (ReadableSatisfaction.shift_iff.mpr hψT)⟩
 
+private lemma forall_mem_iff_forall_lt {s : V} {P : V → Prop} :
+    (∀ x ∈ s, P x) ↔ ∀ x < s, x ∈ s → P x := by
+  constructor
+  · intro h x _ hx
+    exact h x hx
+  · intro h x hx
+    exact h x (lt_of_mem hx) hx
+
+private lemma exists_mem_iff_exists_lt {s : V} {P : V → Prop} :
+    (∃ x ∈ s, P x) ↔ ∃ x < s, x ∈ s ∧ P x := by
+  constructor
+  · rintro ⟨x, hx, h⟩
+    exact ⟨x, lt_of_mem hx, hx, h⟩
+  · rintro ⟨x, -, hx, h⟩
+    exact ⟨x, hx, h⟩
+
+private lemma hasWitness_definable :
+    𝚷ᴬ-[k + 1].DefinablePred fun d : V ↦ ∀ f, CutFreeDerivation (∅ : Theory ℒₒᵣ) d →
+      (∀ ψ ∈ fstIdx d, Admissible k D E (fvAssign f ψ)) → HasWitness k D E (fstIdx d) f := by
+  have : 𝚷ᴬ-[k + 1].DefinablePred fun d : V ↦ ∀ f, CutFreeDerivation (∅ : Theory ℒₒᵣ) d →
+      (∀ ψ < fstIdx d, ψ ∈ fstIdx d →
+        IsReadable k D (fvAssign f ψ) ∨ ∃ r, IsPartialInstance E r (fvAssign f ψ)) →
+      ∃ ψ < fstIdx d, ψ ∈ fstIdx d ∧ (∀ r, ¬IsPartialInstance E (r + 1) (fvAssign f ψ)) ∧
+        ReadableSatisfaction k D ψ f := by
+    definability
+  apply this.of_iff
+  intro v
+  simp only [Admissible, HasWitness, forall_mem_iff_forall_lt, exists_mem_iff_exists_lt]
+
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
 
-/-- The negation of a partial instance of a block of `E` is true whenever it is readable. -/
 lemma IsPartialInstance.readableTruth_neg (hE : ∀ e ∈ E, IsFalseBlock k D e) {r φ : V}
     (h : IsPartialInstance E r φ) (hn : IsReadable k D (neg ℒₒᵣ φ)) :
     ReadableTruth k D (neg ℒₒᵣ φ) := by
@@ -478,37 +514,11 @@ private lemma hasWitness_of_axL (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p f : 
   rw [ReadableSatisfaction, e]
   exact (ReadableTruth.neg_iff hR₁ hR₂ hpU).mpr ht
 
-private lemma forall_mem_iff_forall_lt {s : V} {P : V → Prop} :
-    (∀ x ∈ s, P x) ↔ ∀ x < s, x ∈ s → P x := by
-  constructor
-  · intro h x _ hx
-    exact h x hx
-  · intro h x hx
-    exact h x (lt_of_mem hx) hx
-
-private lemma exists_mem_iff_exists_lt {s : V} {P : V → Prop} :
-    (∃ x ∈ s, P x) ↔ ∃ x < s, x ∈ s ∧ P x := by
-  constructor
-  · rintro ⟨x, hx, h⟩
-    exact ⟨x, lt_of_mem hx, hx, h⟩
-  · rintro ⟨x, -, hx, h⟩
-    exact ⟨x, hx, h⟩
-
 private lemma hasWitness_aux (hE : ∀ e ∈ E, IsFalseBlock k D e) :
     ∀ d f : V, CutFreeDerivation (∅ : Theory ℒₒᵣ) d →
       (∀ ψ ∈ fstIdx d, Admissible k D E (fvAssign f ψ)) → HasWitness k D E (fstIdx d) f := by
-  have hP : 𝚷ᴬ-[k + 1].DefinablePred fun d : V ↦ ∀ f, CutFreeDerivation (∅ : Theory ℒₒᵣ) d →
-      (∀ ψ ∈ fstIdx d, Admissible k D E (fvAssign f ψ)) → HasWitness k D E (fstIdx d) f := by
-    have : 𝚷ᴬ-[k + 1].DefinablePred fun d : V ↦ ∀ f, CutFreeDerivation (∅ : Theory ℒₒᵣ) d →
-        (∀ ψ < fstIdx d, ψ ∈ fstIdx d →
-          IsReadable k D (fvAssign f ψ) ∨ ∃ r, IsPartialInstance E r (fvAssign f ψ)) →
-        ∃ ψ < fstIdx d, ψ ∈ fstIdx d ∧ (∀ r, ¬IsPartialInstance E (r + 1) (fvAssign f ψ)) ∧
-          ReadableSatisfaction k D ψ f := by
-      definability
-    exact this.of_iff fun v ↦ by
-      simp only [Admissible, HasWitness, forall_mem_iff_forall_lt, exists_mem_iff_exists_lt]
   intro d
-  refine InductionOnHierarchy.order_induction_sigma 𝚷 (k + 1) hP ?_ d
+  refine InductionOnHierarchy.order_induction_sigma 𝚷 (k + 1) hasWitness_definable ?_ d
   intro d ih f hd hadm
   have ih' : ∀ d₀ < d, ∀ s, CutFreeDerivationOf (∅ : Theory ℒₒᵣ) d₀ s → ∀ g,
       (∀ ψ ∈ s, Admissible k D E (fvAssign g ψ)) → HasWitness k D E s g := by

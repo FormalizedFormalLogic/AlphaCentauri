@@ -97,6 +97,17 @@ lemma shift_qqAlls {p : V} (hp : IsUFormula L p) (k : V) :
   case zero => simp
   case succ k ih => rw [qqAlls_succ, shift_all (isUFormula_qqAlls.mpr hp), ih, qqAlls_succ]
 
+lemma exists_vec_bvar_append (w k : V) :
+    ∃ v : V, len v = k + len w ∧ (∀ i < k, v.[i] = ^#i) ∧ ∀ j < len w, v.[k + j] = w.[j] := by
+  obtain ⟨v, hvl, hv⟩ := sigmaOne_skolem_vec
+    (R := fun i y : V ↦ (i < k → y = ^#i) ∧ (k ≤ i → y = w.[i - k])) (by definability)
+    (l := k + len w) (fun i _ ↦ by
+      by_cases hi : i < k
+      · exact ⟨^#i, fun _ ↦ rfl, fun h ↦ absurd hi (not_lt.mpr h)⟩
+      · exact ⟨w.[i - k], fun h ↦ absurd h hi, fun _ ↦ rfl⟩)
+  exact ⟨v, hvl, fun i hi ↦ (hv i (by simp [lt_of_lt_of_le hi])).1 hi,
+    fun j hj ↦ by simpa using (hv (k + j) (by simpa using hj)).2 (by simp)⟩
+
 /-- Substituting terms `w` without bound variables for the outermost bound variables of a block of
 `k` universal quantifiers: inside the block they become `w'`, which keeps the `k` variables bound
 by the block and continues with `w`. -/
@@ -109,17 +120,10 @@ lemma subst_qqAlls {k w w' p : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsUFo
     have : w' = w := nth_ext' (len w) (by simpa using hl) rfl fun i hi ↦ by simpa using h₂ i hi
     simp [this]
   case succ k ih =>
-    obtain ⟨v, hvl, hv⟩ := sigmaOne_skolem_vec
-      (R := fun i y : V ↦ (i < k → y = ^#i) ∧ (k ≤ i → y = w.[i - k])) (by definability)
-      (l := k + len w) (fun i _ ↦ by
-        by_cases hi : i < k
-        · exact ⟨^#i, fun _ ↦ rfl, fun h ↦ absurd hi (not_lt.mpr h)⟩
-        · exact ⟨w.[i - k], fun h ↦ absurd h hi, fun _ ↦ rfl⟩)
-    have hvk (j : V) (hj : j < len w) : v.[k + j] = w.[j] := by
-      simpa using (hv (k + j) (by simpa using hj)).2 (by simp)
+    obtain ⟨v, hvl, hv₁, hvk⟩ := exists_vec_bvar_append w k
     have hvu : IsUTermVec L (len v) v := ⟨rfl, fun i hi ↦ by
       rcases lt_or_ge i k with hik | hik
-      · simp [(hv i (hvl ▸ hi)).1 hik]
+      · simp [hv₁ i hik]
       · obtain ⟨j, rfl⟩ := exists_add_of_le hik
         have hj : j < len w := by simpa [hvl] using hi
         simpa [hvk j hj] using (hw.nth hj).isUTerm⟩
@@ -131,12 +135,12 @@ lemma subst_qqAlls {k w w' p : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsUFo
       · have hi' : i < len v := by simpa [hvl] using hi
         rw [qVec, nth_adjoin_succ, nth_termBShiftVec hvu hi']
         rcases lt_or_ge i k with hik | hik
-        · rw [(hv i (hvl ▸ hi')).1 hik, termBShift_bvar, h₁ (i + 1) (by simpa using hik)]
+        · rw [hv₁ i hik, termBShift_bvar, h₁ (i + 1) (by simpa using hik)]
         · obtain ⟨j, rfl⟩ := exists_add_of_le hik
           have hj : j < len w := by simpa [hvl] using hi'
           rw [hvk j hj, termBShift_zero (hw.nth hj), ← h₂ j hj, add_right_comm]
-    rw [qqAlls_succ', ih (by simpa using hp) hvl (fun i hi ↦ (hv i (by simp [lt_of_lt_of_le hi]
-      )).1 hi) hvk, substs_all hp, ← qqAlls_succ', hqv]
+    rw [qqAlls_succ', ih (by simpa using hp) hvl (fun i hi ↦ hv₁ i hi) hvk, substs_all hp,
+      ← qqAlls_succ', hqv]
 
 lemma free_qqAlls {k w p : V} (hp : IsUFormula L p) (hl : len w = k + 1)
     (h₁ : ∀ i < k, w.[i] = ^#i) (h₂ : w.[k] = ^&0) :
@@ -245,13 +249,8 @@ end qqExss
 /-- The vector `^#0, …, ^#(r - 1), t`. -/
 lemma exists_vec_bvar_term (r t : V) :
     ∃ v, len v = r + 1 ∧ (∀ i < r, v.[i] = ^#i) ∧ v.[r] = t := by
-  have h : ∀ i < r + 1, ∃ y : V, (i < r → y = ^#i) ∧ (r ≤ i → y = t) := by
-    intro i _
-    by_cases hi : i < r
-    · exact ⟨^#i, fun _ ↦ rfl, fun h ↦ absurd hi (not_lt.mpr h)⟩
-    · exact ⟨t, fun h ↦ absurd h hi, fun _ ↦ rfl⟩
-  obtain ⟨v, hvl, hv⟩ := sigmaOne_skolem_vec (by definability) h
-  exact ⟨v, hvl, fun i hi ↦ (hv i (lt_trans hi (by simp))).1 hi, (hv r (by simp)).2 le_rfl⟩
+  obtain ⟨v, hvl, hv₁, hvk⟩ := exists_vec_bvar_append (?[t] : V) r
+  exact ⟨v, by simpa using hvl, hv₁, by simpa using hvk 0 (by simp)⟩
 
 /-- Instantiating the outermost quantifier of `qqExss q r` with a closed term `t` instantiates the
 outermost bound variable `^#r` of `q`, where `v` is the vector `^#0, …, ^#(r - 1), t`. -/

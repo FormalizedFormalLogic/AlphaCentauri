@@ -38,6 +38,24 @@ lemma Derivable.neg_all_all {p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemifor
       tauto
   · simp [shift_neg hq, shift_exs hq.neg.isUFormula]
 
+private lemma isSemitermVec_of_bvar_fvar {m i v : V} (hvl : len v = m)
+    (hv : ∀ x < m, (x < i → v.[x] = ^#x) ∧ (i ≤ x → v.[x] = ^&(x - i))) :
+    IsSemitermVec L m i v :=
+  IsSemitermVec.iff.mpr ⟨hvl, fun x hx ↦ by
+    rcases lt_or_ge x i with h | h
+    · simp [(hv x hx).1 h, h]
+    · simp [(hv x hx).2 h]⟩
+
+private lemma exists_vec_bvar_fvar (m i : V) :
+    ∃ v : V, len v = m ∧ ∀ x < m, (x < i → v.[x] = ^#x) ∧ (i ≤ x → v.[x] = ^&(x - i)) := by
+  obtain ⟨v, hvl, hv⟩ := sigmaOne_skolem_vec
+    (R := fun x y : V ↦ (x < i → y = ^#x) ∧ (i ≤ x → y = ^&(x - i))) (by definability) (l := m)
+    (fun x _ ↦ by
+      by_cases hx : x < i
+      · exact ⟨^#x, fun _ ↦ rfl, fun h ↦ absurd hx (not_lt.mpr h)⟩
+      · exact ⟨^&(x - i), fun h ↦ absurd h hx, fun _ ↦ rfl⟩)
+  exact ⟨v, hvl, hv⟩
+
 /-- Opening the outermost quantifier of `qqAlls (subst L v' r) i`, where `v'` keeps the innermost
 `i + 1` bound variables of `r` and replaces the others by free variables, with the eigenvariable
 `^&0`. -/
@@ -46,31 +64,23 @@ private lemma free_qqAlls_subst {m i v v' r : V} (hr : IsSemiformula L m r)
     (hv : ∀ x < m, (x < i → v.[x] = ^#x) ∧ (i ≤ x → v.[x] = ^&(x - i))) (hv'l : len v' = m)
     (hv' : ∀ x < m, (x < i + 1 → v'.[x] = ^#x) ∧ (i + 1 ≤ x → v'.[x] = ^&(x - (i + 1)))) :
     free L (qqAlls (subst L v' r) i) = qqAlls (subst L v r) i := by
-  have hv's : IsSemitermVec L m (i + 1) v' := IsSemitermVec.iff.mpr ⟨hv'l, fun x hx ↦ by
-    rcases lt_or_ge x (i + 1) with h | h
-    · simp [(hv' x hx).1 h, h]
-    · simp [(hv' x hx).2 h]⟩
-  obtain ⟨u, hul, hu⟩ := sigmaOne_skolem_vec
-    (R := fun x y : V ↦ (x < i → y = ^#x) ∧ (i ≤ x → y = ^&0)) (by definability) (l := i + 1)
-    (fun x _ ↦ by
-      by_cases hx : x < i
-      · exact ⟨^#x, fun _ ↦ rfl, fun h ↦ absurd hx (not_lt.mpr h)⟩
-      · exact ⟨^&0, fun h ↦ absurd h hx, fun _ ↦ rfl⟩)
+  have hv's : IsSemitermVec L m (i + 1) v' := isSemitermVec_of_bvar_fvar hv'l hv'
+  obtain ⟨u, hul, hu₁, hu₂⟩ := exists_vec_bvar_term i (^&0 : V)
   have hus : IsSemitermVec L (i + 1) i u := IsSemitermVec.iff.mpr ⟨hul, fun x hx ↦ by
-    rcases lt_or_ge x i with h | h
-    · simp [(hu x hx).1 h, h]
-    · simp [(hu x hx).2 h]⟩
-  rw [free_qqAlls (hr.subst hv's).isUFormula hul (fun x hx ↦ (hu x (lt_trans hx (by simp))).1 hx)
-    ((hu i (by simp)).2 le_rfl), shift_substs hr hv's, hsr, substs_substs hr hus hv's.termShiftVec]
+    rcases lt_or_eq_of_le (lt_succ_iff_le.mp hx) with h | rfl
+    · simp [hu₁ x h, h]
+    · simp [hu₂]⟩
+  rw [free_qqAlls (hr.subst hv's).isUFormula hul hu₁ hu₂, shift_substs hr hv's, hsr,
+    substs_substs hr hus hv's.termShiftVec]
   congr 2
   apply nth_ext' m (by simp [hv's.termShiftVec.isUTerm]) hvl
   intro x hx
   rw [nth_termSubstVec hv's.termShiftVec.isUTerm hx, nth_termShiftVec hv's.isUTerm hx]
   rcases lt_trichotomy x i with hxi | rfl | hxi
-  · rw [(hv' x hx).1 (lt_trans hxi (by simp)), termShift_bvar, termSubst_bvar,
-      (hu x (lt_trans hxi (by simp))).1 hxi, (hv x hx).1 hxi]
-  · rw [(hv' x hx).1 (by simp), termShift_bvar, termSubst_bvar, (hu x (by simp)).2 le_rfl,
-      (hv x hx).2 le_rfl, tsub_self]
+  · rw [(hv' x hx).1 (lt_trans hxi (by simp)), termShift_bvar, termSubst_bvar, hu₁ x hxi,
+      (hv x hx).1 hxi]
+  · rw [(hv' x hx).1 (by simp), termShift_bvar, termSubst_bvar, hu₂, (hv x hx).2 le_rfl,
+      tsub_self]
   · obtain ⟨j, rfl⟩ := exists_add_of_le (succ_le_iff_lt.mpr hxi)
     rw [(hv' _ hx).2 (by simp), termShift_fvar, termSubst_fvar, (hv _ hx).2 (by simp)]
     congr 1
@@ -86,8 +96,7 @@ theorem Derivable.neg_qqAlls_qqAlls {m p q : V} (hp : IsSemiformula L m p)
   suffices ∀ i ≤ m, ∃ v, (len v = m ∧ ∀ x < m, (x < i → v.[x] = ^#x) ∧ (i ≤ x → v.[x] = ^&(x - i)))
       ∧ Derivable T (insert (neg L (qqAlls (subst L v q) i)) ({qqAlls (subst L v p) i} : V)) by
     obtain ⟨v, ⟨hvl, hv⟩, hd⟩ := this m le_rfl
-    have hvm : IsSemitermVec L m m v :=
-      IsSemitermVec.iff.mpr ⟨hvl, fun x hx ↦ by simp [(hv x hx).1 hx, hx]⟩
+    have hvm : IsSemitermVec L m m v := isSemitermVec_of_bvar_fvar hvl hv
     rwa [subst_eq_self hp hvm fun x hx ↦ (hv x hx).1 hx,
       subst_eq_self hq hvm fun x hx ↦ (hv x hx).1 hx] at hd
   intro i
@@ -100,16 +109,8 @@ theorem Derivable.neg_qqAlls_qqAlls {m p q : V} (hp : IsSemiformula L m p)
   case succ i ih =>
     intro hi
     obtain ⟨v, ⟨hvl, hv⟩, hd⟩ := ih (le_trans (by simp) hi)
-    obtain ⟨v', hv'l, hv'⟩ := sigmaOne_skolem_vec
-      (R := fun x y : V ↦ (x < i + 1 → y = ^#x) ∧ (i + 1 ≤ x → y = ^&(x - (i + 1))))
-      (by definability) (l := m) (fun x _ ↦ by
-        by_cases hx : x < i + 1
-        · exact ⟨^#x, fun _ ↦ rfl, fun h ↦ absurd hx (not_lt.mpr h)⟩
-        · exact ⟨^&(x - (i + 1)), fun h ↦ absurd h hx, fun _ ↦ rfl⟩)
-    have hv's : IsSemitermVec L m (i + 1) v' := IsSemitermVec.iff.mpr ⟨hv'l, fun x hx ↦ by
-      rcases lt_or_ge x (i + 1) with h | h
-      · simp [(hv' x hx).1 h, h]
-      · simp [(hv' x hx).2 h]⟩
+    obtain ⟨v', hv'l, hv'⟩ := exists_vec_bvar_fvar m (i + 1)
+    have hv's : IsSemitermVec L m (i + 1) v' := isSemitermVec_of_bvar_fvar hv'l hv'
     have hs (r : V) (hr : IsSemiformula L m r) : IsSemiformula L 1 (qqAlls (subst L v' r) i) :=
       IsSemiformula.qqAlls (by simpa [add_comm] using hr.subst hv's)
     refine ⟨v', ⟨hv'l, hv'⟩, ?_⟩

@@ -410,6 +410,15 @@ lemma IsReadable.fvSubst {w : V} (hw : IsSemitermVec ℒₒᵣ (len w) 0 w)
   IsReadable.map_uformula (fun _ _ _ hp h ↦ h.fvSubst hw hp) (fun _ _ ↦ fvSubst_and)
     (fun _ _ ↦ fvSubst_or) (fun _ ↦ fvSubst_all) hp h
 
+lemma IsReadable.subst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+    (hp : IsSemiformula ℒₒᵣ n p) (h : IsReadable k D p) : IsReadable k D (subst ℒₒᵣ w p) := by
+  rcases h with h | ⟨q, -, rfl, hq⟩ | h
+  · exact .of_isCombination (h.subst hw hp)
+  · have hq' : IsSemiformula ℒₒᵣ (n + 1) q := by simpa using hp
+    rw [substs_all hq'.isUFormula]
+    exact .all (hq.subst hw.qVec hq')
+  · exact Or.inr <| Or.inr <| h.subst hw hp
+
 lemma IsReadable.substs1_of_all {m t : V} (ht : IsSemiterm ℒₒᵣ m t)
     (hp : IsSemiformula ℒₒᵣ 1 p) (h : IsReadable k D (^∀ p)) :
     IsReadable k D (substs1 ℒₒᵣ t p) :=

@@ -989,6 +989,19 @@ lemma ReadableSatisfaction.exs_of_substs1 {t : V} (h : IsReadable k D (^∃ p))
   rw [ReadableSatisfaction, fvAssign_exs hp.isUFormula]
   exact ReadableTruth.exs_of_substs1 h' hp.fvAssign ht.termFvAssign ht'
 
+lemma ReadableSatisfaction.qqToPrenex_iff {Γ : Polarity} {s : ℕ} {θ : V}
+    (hs : IsAtomLevel k Γ s) (hθ : IsBounded θ) (hθ' : IsUFormula ℒₒᵣ θ) :
+    ReadableSatisfaction k D (qqToPrenex Γ s θ) f ↔
+      HierarchicalSatisfaction Γ s (fvAssign f θ) 0 := by
+  have hb := hθ.fvAssign (f := f) hθ'
+  have ha := IsPrenexAtom.of_qqToPrenex (k := k) hs hb
+  rw [ReadableSatisfaction, fvAssign_qqToPrenex hθ', ReadableTruth.iff_atomReading ha,
+    AtomReading.iff ha rfl hb (by simpa using hθ'.fvAssign)]
+
+lemma ReadableSatisfaction.isBounded_iff (h : IsBounded p) (hp : IsUFormula ℒₒᵣ p) :
+    ReadableSatisfaction k D p f ↔ BoundedSatisfaction (fvAssign f p) 0 := by
+  simpa using qqToPrenex_iff (D := D) (f := f) (Γ := 𝚺) (s := 0) (.of_le (Nat.zero_le k)) h hp
+
 @[simp] lemma ReadableSatisfaction.shift_iff {b : V} :
     ReadableSatisfaction k D (shift ℒₒᵣ p) (b ∷ f) ↔ ReadableSatisfaction k D p f := by
   by_cases hp : IsUFormula ℒₒᵣ p

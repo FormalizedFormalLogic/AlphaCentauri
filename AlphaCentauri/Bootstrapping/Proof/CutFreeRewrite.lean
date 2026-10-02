@@ -8,7 +8,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Substitution
 
 This module shows that cut-free derivability over the empty theory is closed under substituting
 closed terms for free variables, that the universal rule is invertible with an arbitrary closed
-term as the instance, and that `⊥` can be deleted from a cut-free derivable sequent.  The first two
+term as the instance, and that `⊥` can be deleted from a cut-free derivable sequent. The first two
 hold in every model of `𝗜𝚺⁺2`, the last in every model of `𝗜𝚺₁`.
 -/
 
@@ -60,7 +60,7 @@ private lemma fvSubst_mem_fvSubstImage {w q s : V} (h : q ∈ s) :
 
 namespace CutFreeDerivable
 
-/-- The $\Sigma_1$ form of the deletion of `⊥` that the course-of-values induction proves. -/
+/-- Deleting `⊥` from the end-sequent of a cut-free derivation code bounding the rest of it. -/
 private lemma of_insert_falsum_aux :
     ∀ d : V, ∀ s ≤ d, CutFreeDerivationOf (∅ : Theory L) d (insert ^⊥ s) →
       CutFreeDerivable (∅ : Theory L) s := by
@@ -161,8 +161,8 @@ section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2]
 
-/-- The $\Pi_2$ form of the substitution for free variables that the course-of-values induction
-proves. -/
+/-- Substituting closed terms for free variables in the end-sequent of a cut-free derivation
+code. -/
 private lemma rewrite_aux :
     ∀ d : V, ∀ w, IsSemitermVec L (len w) 0 w → CutFreeDerivation (∅ : Theory L) d →
       CutFreeDerivable (∅ : Theory L) (fvSubstImage (L := L) w (fstIdx d)) := by
@@ -312,7 +312,8 @@ namespace CutFreeDerivation
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2]
 
-/-- The $\Pi_2$ form of the universal inversion that the course-of-values induction proves. -/
+/-- Universal inversion for an end-sequent whose universal body and rest are bounded by the
+derivation code. -/
 private lemma inversion_all_aux :
     ∀ d : V, ∀ t, ∀ p ≤ d, ∀ s ≤ d, IsTerm L t →
       CutFreeDerivationOf (∅ : Theory L) d (insert (^∀ p) s) →

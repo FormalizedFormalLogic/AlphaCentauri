@@ -16,6 +16,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
+public import AlphaCentauri.Bootstrapping.Proof.UniversalClosure
 public import AlphaCentauri.Bootstrapping.Syntax.Iteration
 public import AlphaCentauri.Bootstrapping.Syntax.SubstInversion
 public import AlphaCentauri.Calculus.Induction.Basic

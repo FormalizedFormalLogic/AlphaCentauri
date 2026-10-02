@@ -30,6 +30,12 @@ private lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert
     simp only [mem_bitInsert_iff]
     tauto
 
+/-- Adding the same code twice to a coded set is adding it once. -/
+private lemma insert_insert_self (x s : V) : insert x (insert x s) = insert x s :=
+  mem_ext fun z ↦ by
+    simp only [mem_bitInsert_iff]
+    tauto
+
 /-- A member of `insert y s` other than `y` is a member of `s`. -/
 private lemma mem_of_mem_insert_of_ne {x y s : V} (h : x ∈ insert y s) (hne : x ≠ y) : x ∈ s := by
   rcases mem_bitInsert_iff.mp h with rfl | h
@@ -311,7 +317,126 @@ private lemma inversion_all_aux :
     ∀ d : V, ∀ t, ∀ p ≤ d, ∀ s ≤ d, IsTerm L t →
       CutFreeDerivationOf (∅ : Theory L) d (insert (^∀ p) s) →
       CutFreeDerivable (∅ : Theory L) (insert (substs1 L t p) s) := by
-  sorry
+  have hP : 𝚷ᴬ-[2].DefinablePred fun d : V ↦ ∀ t, ∀ p ≤ d, ∀ s ≤ d, IsTerm L t →
+      CutFreeDerivationOf (∅ : Theory L) d (insert (^∀ p) s) →
+      CutFreeDerivable (∅ : Theory L) (insert (substs1 L t p) s) := by
+    apply HierarchySymbol.Definable.all
+    exact HierarchySymbol.Definable.of_lt (C := 𝚺ᴬ-[1]) (by definability) (by simp)
+  intro d
+  refine InductionOnHierarchy.order_induction_sigma 𝚷 2 hP ?_ d
+  intro d ih
+  rintro t p - s - ht ⟨hd1, hd2⟩
+  have ih' : ∀ d₀ < d, ∀ t₀ p₀ s₀, IsTerm L t₀ →
+      CutFreeDerivationOf (∅ : Theory L) d₀ (insert (^∀ p₀) s₀) →
+      CutFreeDerivable (∅ : Theory L) (insert (substs1 L t₀ p₀) s₀) :=
+    fun d₀ hd₀ t₀ p₀ s₀ ht₀ h ↦ ih d₀ hd₀ t₀ p₀ (all_bounds h.1).1 s₀ (all_bounds h.1).2 ht₀ h
+  have hfs : IsFormulaSet L (insert (^∀ p) s) := hd1 ▸ hd2.isFormulaSet
+  have hpF : IsSemiformula L 1 p := by simpa using hfs (^∀ p) (by simp)
+  have hsF : IsFormulaSet L s := fun x hx ↦ hfs x (by simp [hx])
+  have hT : IsFormulaSet L (insert (substs1 L t p) s) := by simp [hsF, hpF.substs1 ht]
+  rcases hd2.case.2 with (⟨Γ, r, rfl, hrs, hnrs⟩ | ⟨Γ, rfl, hv⟩ |
+    ⟨Γ, a, b, dp, dq, rfl, hab, hdp, hdq⟩ | ⟨Γ, a, b, d₀, rfl, hab, hd₀⟩ |
+    ⟨Γ, a, d₀, rfl, ha, hd₀⟩ | ⟨Γ, a, u, d₀, rfl, ha, hu, hd₀⟩ |
+    ⟨Γ, d₀, rfl, hsub, hd₀⟩ | ⟨Γ, d₀, rfl, hsh, hd₀⟩ | ⟨Γ, r, rfl, -, hr⟩)
+  · rw [fstIdx_axL] at hd1
+    subst hd1
+    by_cases hex : ^∃ (neg L p) ∈ s
+    · have e : substs1 L t (neg L p) = neg L (substs1 L t p) :=
+        substs_neg hpF (by simp [ht] : IsSemitermVec L 1 0 (?[t] : V))
+      refine ⟨Bootstrapping.exsIntro (insert (substs1 L t p) s) (neg L p) t
+          (Bootstrapping.axL (insert (substs1 L t (neg L p)) (insert (substs1 L t p) s))
+            (substs1 L t p)),
+        by simp, CutFreeDerivation.exsIntro (by simp [hex]) ht ⟨by simp, ?_⟩⟩
+      exact CutFreeDerivation.axL (by simp [hT, hpF.neg.substs1 ht]) (by simp) (by rw [← e]; simp)
+    · have hr : r ≠ ^∀ p := by
+        rintro rfl
+        rw [neg_all hpF.isUFormula] at hnrs
+        exact hex (mem_of_mem_insert_of_ne hnrs (by simp [qqAll, qqExs]))
+      have hnr : neg L r ≠ ^∀ p := by
+        intro h
+        have : r = ^∃ (neg L p) := by
+          rw [← (hfs r hrs).isUFormula.neg_neg, h, neg_all hpF.isUFormula]
+        exact hex (mem_of_mem_insert_of_ne (this ▸ hrs) (by simp [qqAll, qqExs]))
+      exact ⟨Bootstrapping.axL _ r, by simp,
+        CutFreeDerivation.axL hT (by simp [mem_of_mem_insert_of_ne hrs hr])
+        (by simp [mem_of_mem_insert_of_ne hnrs hnr])⟩
+  · rw [fstIdx_verumIntro] at hd1
+    subst hd1
+    exact ⟨_, by simp, CutFreeDerivation.verumIntro hT
+      (by simp [mem_of_mem_insert_of_ne hv (by simp [qqVerum, qqAll])])⟩
+  · rw [fstIdx_andIntro] at hd1
+    subst hd1
+    rw [insert_comm a] at hdp
+    rw [insert_comm b] at hdq
+    obtain ⟨ep, hep⟩ := ih' dp (dp_lt_andIntro _ _ _ _ _) t p _ ht hdp
+    obtain ⟨eq, heq⟩ := ih' dq (dq_lt_andIntro _ _ _ _ _) t p _ ht hdq
+    rw [insert_comm] at hep heq
+    exact ⟨_, by simp, CutFreeDerivation.andIntro
+      (by simp [mem_of_mem_insert_of_ne hab (by simp [qqAnd, qqAll])]) hep heq⟩
+  · rw [fstIdx_orIntro] at hd1
+    subst hd1
+    rw [insert_comm b, insert_comm a] at hd₀
+    obtain ⟨e, he⟩ := ih' d₀ (d_lt_orIntro _ _ _ _) t p _ ht hd₀
+    rw [insert_comm _ a, insert_comm _ b] at he
+    exact ⟨_, by simp, CutFreeDerivation.orIntro
+      (by simp [mem_of_mem_insert_of_ne hab (by simp [qqOr, qqAll])]) he⟩
+  · rw [fstIdx_allIntro] at hd1
+    subst hd1
+    rw [mem_setShift_insert, shift_all hpF.isUFormula, insert_comm] at hd₀
+    by_cases hap : a = p
+    · rw [hap] at hd₀
+      obtain ⟨e, he⟩ := ih' d₀ (s_lt_allIntro _ _ _) ^&0 (shift L p) _ (by simp) hd₀
+      rw [← free, insert_insert_self] at he
+      exact CutFreeDerivable.substs1_of_free ht hpF hsF ⟨e, he⟩
+    · have e₁ : substs1 L (termShift L t) (shift L p) = shift L (substs1 L t p) := by
+        rw [substs1, substs1, shift_substs hpF (by simp [ht] : IsSemitermVec L 1 0 (?[t] : V))]
+        simp [ht.isUTerm]
+      obtain ⟨e, he⟩ := ih' d₀ (s_lt_allIntro _ _ _) (termShift L t) (shift L p) _ ht.termShift hd₀
+      rw [e₁, insert_comm, ← mem_setShift_insert] at he
+      exact ⟨_, by simp, CutFreeDerivation.allIntro
+        (by simp [mem_of_mem_insert_of_ne ha (by simpa using hap)]) he⟩
+  · rw [fstIdx_exsIntro] at hd1
+    subst hd1
+    rw [insert_comm] at hd₀
+    obtain ⟨e, he⟩ := ih' d₀ (d_lt_exsIntro _ _ _ _) t p _ ht hd₀
+    rw [insert_comm] at he
+    exact ⟨_, by simp, CutFreeDerivation.exsIntro
+      (by simp [mem_of_mem_insert_of_ne ha (by simp [qqAll, qqExs])]) hu he⟩
+  · rw [fstIdx_wkRule] at hd1
+    subst hd1
+    by_cases hA : ^∀ p ∈ fstIdx d₀
+    · obtain ⟨e, he⟩ := ih' d₀ (d_lt_wkRule _ _) t p (bitRemove (^∀ p) (fstIdx d₀)) ht
+        ⟨(insert_remove hA).symm, hd₀⟩
+      refine ⟨_, by simp, CutFreeDerivation.wkRule hT ?_ he⟩
+      intro x hx
+      rcases mem_bitInsert_iff.mp hx with rfl | hx
+      · simp
+      · have hx' := mem_bitRemove_iff.mp hx
+        simp [mem_of_mem_insert_of_ne (hsub hx'.2) hx'.1]
+    · refine ⟨_, by simp, CutFreeDerivation.wkRule hT ?_ ⟨rfl, hd₀⟩⟩
+      intro x hx
+      simp [mem_of_mem_insert_of_ne (hsub hx) (by rintro rfl; exact hA hx)]
+  · rw [fstIdx_shiftRule] at hd1
+    subst hd1
+    have hΔ := hd₀.isFormulaSet
+    obtain ⟨r, hr, hre⟩ :=
+      mem_setShift_iff.mp (show ^∀ p ∈ setShift L (fstIdx d₀) by rw [← hsh]; simp)
+    obtain ⟨p₀, -, rfl, rfl⟩ := exists_all_of_shift_eq_all (hΔ _ hr).isUFormula hre.symm
+    have hp₀ : IsSemiformula L 1 p₀ := by simpa using hΔ _ hr
+    obtain ⟨e, he⟩ := ih' d₀ (d_lt_shiftRule _ _) ^&d₀ p₀ (bitRemove (^∀ p₀) (fstIdx d₀))
+      (by simp) ⟨(insert_remove hr).symm, hd₀⟩
+    obtain ⟨e', he'⟩ := CutFreeDerivable.shift_substs1_of_fvar ht hp₀
+      (le_of_lt <| lt_of_lt_of_le (lt_trans (by simp) (lt_of_mem hr)) (fstIdx_le d₀))
+      (fun x hx ↦ hΔ x (mem_bitRemove_iff.mp hx).2)
+      (le_trans (le_of_subset fun x hx ↦ (mem_bitRemove_iff.mp hx).2) (fstIdx_le d₀)) ⟨e, he⟩
+    rw [setShift_bitRemove hΔ (hΔ _ hr).isUFormula, shift_all hp₀.isUFormula, ← hsh] at he'
+    refine ⟨_, by simp, CutFreeDerivation.wkRule hT ?_ he'⟩
+    intro x hx
+    rcases mem_bitInsert_iff.mp hx with rfl | hx
+    · simp
+    · have hx' := mem_bitRemove_iff.mp hx
+      simp [mem_of_mem_insert_of_ne hx'.2 hx'.1]
+  · exact absurd hr (not_mem_empty_Δ₁Class r)
 
 /-- Inversion for the universal rule: a cut-free derivation of a sequent containing `^∀ p` yields,
 for every closed term `t`, a cut-free derivation of the sequent with the instance of `p` at `t` in

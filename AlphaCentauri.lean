@@ -6,6 +6,7 @@ public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
 public import AlphaCentauri.Bootstrapping.PartialTruth.Substitution
+public import AlphaCentauri.Bootstrapping.Proof.CutElimination
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.CutFreeRewrite
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst

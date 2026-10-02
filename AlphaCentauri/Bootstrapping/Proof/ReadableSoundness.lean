@@ -80,6 +80,13 @@ lemma qqExss_succ' (p k : V) : qqExss p (k + 1) = qqExss (^∃ p) k := by
   case zero => simp
   case succ k ih => rw [qqExss_succ, IsUFormula.ex, ih]
 
+lemma shift_qqExss {p : V} (hp : IsUFormula L p) (k : V) :
+    shift L (qqExss p k) = qqExss (shift L p) k := by
+  induction k using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ k ih => rw [qqExss_succ, shift_exs (isUFormula_qqExss.mpr hp), ih, qqExss_succ]
+
 lemma neg_qqAlls {p : V} (hp : IsUFormula L p) (k : V) :
     neg L (qqAlls p k) = qqExss (neg L p) k := by
   induction k using ISigma1.sigma1_succ_induction
@@ -245,6 +252,14 @@ instance of `χ` by closed terms is false under `ReadableTruth k D`. -/
 def IsFalseBlock (k D : ℕ) (e : V) : Prop :=
   ∃ m χ, e = qqExss χ m ∧ IsSemiformula ℒₒᵣ m χ ∧ shift ℒₒᵣ χ = χ ∧ (∀ p, χ ≠ ^∃ p) ∧
     IsReadable k D χ ∧ ∀ w, IsSemitermVec ℒₒᵣ m 0 w → ¬ReadableTruth k D (subst ℒₒᵣ w χ)
+
+lemma IsFalseBlock.isFormula {k D : ℕ} {e : V} (h : IsFalseBlock k D e) : IsFormula ℒₒᵣ e := by
+  obtain ⟨m, χ, rfl, hχ, -⟩ := h
+  exact IsSemiformula.qqExss (by simpa using hχ)
+
+lemma IsFalseBlock.shift_eq {k D : ℕ} {e : V} (h : IsFalseBlock k D e) : shift ℒₒᵣ e = e := by
+  obtain ⟨m, χ, rfl, hχ, hs, -⟩ := h
+  rw [shift_qqExss hχ.isUFormula, hs]
 
 /-- `φ` is readable or a partial instance of a block of `E`. -/
 private def Admissible (k D : ℕ) (E φ : V) : Prop :=

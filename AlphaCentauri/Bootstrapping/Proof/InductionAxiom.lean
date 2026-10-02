@@ -454,13 +454,13 @@ private lemma subst_prenexInductionAtom {a b w' t : V} (ha : IsSemiterm ℒₒ�
     show (2 + i : V) = i + 1 + 1 by rw [add_comm, add_assoc, one_add_one_eq_two]]
   simp
 
-private lemma IsSemitermVec.exists_cons {w : V} (hw : IsSemitermVec ℒₒᵣ (m + 1) 0 w) :
+lemma IsSemitermVec.exists_cons {w : V} (hw : IsSemitermVec ℒₒᵣ (m + 1) 0 w) :
     ∃ w₀ w', w = w₀ ∷ w' ∧ IsSemiterm ℒₒᵣ 0 w₀ ∧ IsSemitermVec ℒₒᵣ m 0 w' := by
   rcases nil_or_adjoin w with rfl | ⟨w₀, w', rfl⟩
   · simpa using hw.lh
   · exact ⟨w₀, w', rfl, IsSemitermVec.cons_iff.mp hw⟩
 
-private lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec ℒₒᵣ j 0 w)
+lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec ℒₒᵣ j 0 w)
     (hq : IsSemiformula ℒₒᵣ (j + 1) q) (ht : IsSemiterm ℒₒᵣ 0 t) :
     substs1 ℒₒᵣ t (subst ℒₒᵣ (qVec ℒₒᵣ w) q) = subst ℒₒᵣ (t ∷ w) q := by
   have h₁ : IsSemitermVec ℒₒᵣ 1 0 (?[t] : V) := by simp [ht]

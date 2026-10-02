@@ -242,10 +242,6 @@ end qqExss
 
 /-! ## Instantiating the outermost quantifier of a block -/
 
-lemma termBShift_eq_self {L : Language} [L.Encodable] [L.LORDefinable] {t : V}
-    (ht : IsSemiterm L 0 t) : termBShift L t = t := by
-  simpa [substs_nil ht] using bShift_substs ht (w := 0) (m := 0) (by simp)
-
 /-- The vector `^#0, …, ^#(r - 1), t`. -/
 lemma exists_vec_bvar_term (r t : V) :
     ∃ v, len v = r + 1 ∧ (∀ i < r, v.[i] = ^#i) ∧ v.[r] = t := by
@@ -287,7 +283,7 @@ lemma substs1_qqExss {t q v r : V} (ht : IsSemiterm ℒₒᵣ 0 t) (hq : IsSemif
         rw [qVec, nth_adjoin_succ, hv'l, nth_termBShiftVec hv'u hi]
         rcases lt_or_eq_of_le (lt_succ_iff_le.mp hi) with hir | rfl
         · simp [hv'b i hir, hvb (i + 1) (by simpa using hir)]
-        · rw [hv'r, termBShift_eq_self ht, hvr]
+        · rw [hv'r, termBShift_zero ht, hvr]
     rw [qqExss_succ', ih (by simpa using hq) hv'l hv'b hv'r, substs_ex hq.isUFormula, qqExss_exs,
       ← qqExss_succ, hqv]
 

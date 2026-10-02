@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Basic
 /-!
 # Elementary facts about coded sets
 
-Adding an element to a coded set, and quantifying over the members of a coded set.
+Adding elements to a coded set.
 -/
 
 @[expose] public section
@@ -35,13 +35,5 @@ lemma insert_subset_insert_insert {a p Γ s : V} (h : Γ ⊆ insert p s) :
   · rcases mem_bitInsert_iff.mp (h hx) with rfl | hx
     · simp
     · simp [hx]
-
-lemma forall_mem_iff_forall_lt {s : V} {P : V → Prop} :
-    (∀ x ∈ s, P x) ↔ ∀ x < s, x ∈ s → P x :=
-  ⟨fun h x _ hx ↦ h x hx, fun h x hx ↦ h x (lt_of_mem hx) hx⟩
-
-lemma exists_mem_iff_exists_lt {s : V} {P : V → Prop} :
-    (∃ x ∈ s, P x) ↔ ∃ x < s, x ∈ s ∧ P x :=
-  ⟨fun ⟨x, hx, h⟩ ↦ ⟨x, lt_of_mem hx, hx, h⟩, fun ⟨x, _, hx, h⟩ ↦ ⟨x, hx, h⟩⟩
 
 end FFL.FirstOrder.Arithmetic

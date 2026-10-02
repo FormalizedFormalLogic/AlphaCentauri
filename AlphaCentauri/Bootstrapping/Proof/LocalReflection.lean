@@ -3,6 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Proof.AxiomReplacement
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.ToFoundation.Syntax
 
 /-!
 # Local reflection in a model of $\mathsf{I}\Sigma_{k+1}$

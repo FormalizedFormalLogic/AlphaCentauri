@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
+public import AlphaCentauri.ToFoundation.Coding
 public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!
@@ -18,49 +19,11 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-section membership
-
-lemma satisfies_ofList_ch (l : List ArithmeticSentence) (p : V) :
-    V ⊧/![p] (Theory.Δ₁.ofList l).ch.val ↔ ∃ σ ∈ l, p = (⌜σ⌝ : V) := by
-  induction l with
-  | nil =>
-    change V ⊧/![p] (⊥ : 𝚫ᴬ₁.Semisentence 1).val ↔ _
-    simp
-  | cons φ l ih =>
-    change V ⊧/![p] (Theory.Δ₁.ch ({φ} : Theory ℒₒᵣ) ⋎ (Theory.Δ₁.ofList l).ch).val ↔ _
-    simp only [Bounding.HierarchySymbol.Semiformula.val_or, LogicalConnective.HomClass.map_or,
-      Theory.Δ₁.singleton_toTDef_ch_val, ih]
-    simp [Sentence.quote_eq_encode, numeral_eq_natCast]
-
 lemma mem_peanoMinus_Δ₁Class_iff (p : V) :
     p ∈ (𝗣𝗔⁻ : ArithmeticTheory).Δ₁Class ↔ ∃ σ ∈ 𝗣𝗔⁻, p = (⌜σ⌝ : V) := by
   change V ⊧/![p] (Theory.Δ₁.ofList PeanoMinus.finite.toFinset.toList).ch.val ↔ _
   rw [satisfies_ofList_ch]
   simp
-
-end membership
-
-section quote
-
-lemma quote_neg_sentence {n : ℕ} (σ : ArithmeticSemisentence n) :
-    (⌜∼σ⌝ : V) = neg ℒₒᵣ (⌜σ⌝ : V) := by
-  simp [Sentence.quote_eq, Sentence.typed_quote_def]
-
-lemma quote_allClosure_sentence {m : ℕ} (θ : ArithmeticSemisentence m) :
-    (⌜∀¹* θ⌝ : V) = qqAlls (⌜θ⌝ : V) (m : V) := by
-  induction m with
-  | zero => simp
-  | succ m ih =>
-    rw [show (∀¹* θ : ArithmeticSentence) = ∀¹* (∀¹ θ) from rfl]
-    simpa [Sentence.quote_all, qqAlls_all] using ih (∀¹ θ)
-
-lemma quote_neg_ne_exs {m : ℕ} {θ : ArithmeticSemisentence m} (h : ∀ ψ, θ ≠ ∀¹ ψ) (p : V) :
-    (⌜∼θ⌝ : V) ≠ ^∃ p := by
-  induction θ using Semiformula.rec' <;> first
-    | exact absurd rfl (h _)
-    | simp [Sentence.quote_def, qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
-
-end quote
 
 section falseBlock
 

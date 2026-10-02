@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToFoundation.Syntax
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
@@ -416,8 +417,7 @@ lemma fvSubst_neg {n w p : V} (hw : IsSemitermVec L (len w) n w)
       neg_ex (hp.fvSubst hw.succ).isUFormula]
 
 /-- The external-variable shift after free-variable substitution equals free-variable substitution
-by the shifted substitution vector with a fresh variable `&0` prepended, applied after the shift.
-- No source; a routine technical bridge. -/
+by the shifted substitution vector with a fresh variable `&0` prepended, applied after the shift. -/
 lemma termShift_termFvSubst {n w t : V}
     (hw : IsSemitermVec L (len w) n w) (ht : IsSemiterm L n t) :
     termShift L (termFvSubst L w t) =
@@ -447,8 +447,7 @@ lemma termShift_termFvSubst {n w t : V}
     exact ih i hi
 
 /-- The external-variable shift after free-variable substitution equals free-variable substitution,
-by the shifted substitution vector with a fresh variable `&0` prepended, applied after the shift.
-- No source; a routine technical bridge. -/
+by the shifted substitution vector with a fresh variable `&0` prepended, applied after the shift. -/
 lemma shift_fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)
     (hp : IsSemiformula L n p) :
     shift L (fvSubst L w p) =
@@ -513,45 +512,8 @@ lemma shift_fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)
       fvSubst_exs hp.shift.isUFormula,
       ihp hw.succ]
 
-/-- Substituting the bound variables of a closed (`0`-ary) semiterm is the identity, since it has
-none to replace.
-- No source; a routine technical bridge. -/
-lemma termSubst_zero {v t : V} (ht : IsSemiterm L 0 t) : termSubst L v t = t := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z hz
-    simp at hz
-  · intro x
-    simp
-  · intro k f ts hf hts ih
-    rw [termSubst_func hf hts.isUTerm]
-    simp only [qqFunc_inj, true_and]
-    apply nth_ext' k (by rw [len_termSubstVec hts.isUTerm]) (by simpa using hts.lh)
-    intro i hi
-    rw [nth_termSubstVec hts.isUTerm hi]
-    exact ih i hi
-
-/-- Bound-shifting a closed (`0`-ary) semiterm is the identity, since it has no bound variables to
-shift.
-- No source; a routine technical bridge. -/
-lemma termBShift_zero {t : V} (ht : IsSemiterm L 0 t) : termBShift L t = t := by
-  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
-  · definability
-  · intro z hz
-    simp at hz
-  · intro x
-    simp
-  · intro k f ts hf hts ih
-    rw [termBShift_func hf hts.isUTerm]
-    simp only [qqFunc_inj, true_and]
-    apply nth_ext' k (by rw [len_termBShiftVec hts.isUTerm]) (by simpa using hts.lh)
-    intro i hi
-    rw [nth_termBShiftVec hts.isUTerm hi]
-    exact ih i hi
-
 /-- For a substitution vector of closed terms, free-variable substitution commutes with the
-bound-variable shift.
-- No source; a routine technical bridge. -/
+bound-variable shift. -/
 lemma termFvSubst_termBShift_closed {n w t : V}
     (hw : IsSemitermVec L (len w) 0 w) (ht : IsSemiterm L n t) :
     termFvSubst L w (termBShift L t) = termBShift L (termFvSubst L w t) := by
@@ -583,8 +545,7 @@ lemma termFvSubst_termBShift_closed {n w t : V}
 
 /-- For a substitution vector of closed terms, free-variable substitution commutes with
 bound-variable substitution, substituting the entries of the bound-variable substitution vector as
-well.
-- No source; a routine technical bridge. -/
+well. -/
 lemma termFvSubst_termSubst {n m w v t : V}
     (hw : IsSemitermVec L (len w) 0 w) (hv : IsSemitermVec L n m v)
     (ht : IsSemiterm L n t) :
@@ -618,8 +579,7 @@ lemma termFvSubst_termSubst {n m w v t : V}
     exact ih i hi
 
 /-- For a substitution vector of closed terms, free-variable substitution commutes with prefixing
-the bound variable `#0` used to enter a quantifier (`qVec`).
-- No source; a routine technical bridge. -/
+the bound variable `#0` used to enter a quantifier (`qVec`). -/
 lemma termFvSubstVec_qVec_closed {n m w v : V}
     (hw : IsSemitermVec L (len w) 0 w) (hv : IsSemitermVec L n m v) :
     termFvSubstVec L (n + 1) w (qVec L v) =
@@ -707,8 +667,7 @@ lemma formulaSet_fvSubstImage {w s : V} (hw : IsSemitermVec L (len w) 0 w)
 
 /-- For a substitution vector of closed terms, free-variable substitution commutes with
 bound-variable substitution at the formula level, substituting the entries of the bound-variable
-substitution vector as well.
-- No source; a routine technical bridge. -/
+substitution vector as well. -/
 lemma fvSubst_subst {n m w v p : V}
     (hw : IsSemitermVec L (len w) 0 w) (hv : IsSemitermVec L n m v)
     (hp : IsSemiformula L n p) :
@@ -783,8 +742,7 @@ lemma fvSubst_subst {n m w v p : V}
       ihp hw hv.qVec, termFvSubstVec_qVec_closed hw hv]
 
 /-- For a substitution vector of closed terms, free-variable substitution commutes with
-single-variable substitution, substituting the term being substituted as well.
-- No source; a routine technical bridge. -/
+single-variable substitution, substituting the term being substituted as well. -/
 lemma fvSubst_substs1 {n w t p : V}
     (hw : IsSemitermVec L (len w) 0 w) (ht : IsSemiterm L n t)
     (hp : IsSemiformula L 1 p) :

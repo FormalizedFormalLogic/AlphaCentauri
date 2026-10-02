@@ -311,15 +311,8 @@ private lemma hasWitness_of_shift {Γ f : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
 private lemma hasWitness_definable :
     𝚷ᴬ-[k + 1].DefinablePred fun d : V ↦ ∀ f, CutFreeDerivation (∅ : Theory ℒₒᵣ) d →
       (∀ ψ ∈ fstIdx d, Admissible k D E (fvAssign f ψ)) → HasWitness k D E (fstIdx d) f := by
-  have : 𝚷ᴬ-[k + 1].DefinablePred fun d : V ↦ ∀ f, CutFreeDerivation (∅ : Theory ℒₒᵣ) d →
-      (∀ ψ < fstIdx d, ψ ∈ fstIdx d →
-        IsReadable k D (fvAssign f ψ) ∨ ∃ r, IsPartialInstance E r (fvAssign f ψ)) →
-      ∃ ψ < fstIdx d, ψ ∈ fstIdx d ∧ (∀ r, ¬IsPartialInstance E (r + 1) (fvAssign f ψ)) ∧
-        ReadableSatisfaction k D ψ f := by
-    definability
-  apply this.of_iff
-  intro v
-  simp only [Admissible, HasWitness, forall_mem_iff_forall_lt, exists_mem_iff_exists_lt]
+  unfold Admissible HasWitness
+  definability
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
 

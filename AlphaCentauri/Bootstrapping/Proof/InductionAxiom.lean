@@ -4,6 +4,7 @@ public import AlphaCentauri.Bootstrapping.Proof.UniversalClosure
 public import AlphaCentauri.Bootstrapping.Syntax.SubstInversion
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
+public import AlphaCentauri.ToFoundation.Syntax
 public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!
@@ -184,39 +185,6 @@ private lemma coe_substCode_succ :
   ext i
   obtain rfl := Fin.fin_one_eq_zero i
   simp
-
-private lemma isSemitermVec_fvarVec (m n : V) : IsSemitermVec ℒₒᵣ m n (fvarVec m) :=
-  IsSemitermVec.iff.mpr ⟨len_fvarVec m, fun i hi ↦ by simp [nth_fvarVec m i hi]⟩
-
-private lemma nth_qVec_succ {k w j : V} (hw : IsUTermVec ℒₒᵣ k w) (hj : j < k) :
-    (qVec ℒₒᵣ w).[j + 1] = termBShift ℒₒᵣ w.[j] := by
-  rw [qVec, ← hw.lh, nth_adjoin_succ, nth_termBShiftVec hw hj]
-
-private lemma nth_qVec_qVec_fvarVec {m i : V} (hi : i < m) :
-    (qVec ℒₒᵣ (qVec ℒₒᵣ (fvarVec m))).[i + 1 + 1] = ^&i := by
-  have h₁ : IsUTermVec ℒₒᵣ m (fvarVec m) := (isSemitermVec_fvarVec m 0).isUTerm
-  have h₂ : IsUTermVec ℒₒᵣ (m + 1) (qVec ℒₒᵣ (fvarVec m)) :=
-    (isSemitermVec_fvarVec m 0).qVec.isUTerm
-  rw [nth_qVec_succ h₂ (by simpa using hi), nth_qVec_succ h₁ hi, nth_fvarVec m i hi]
-  simp
-
-private lemma subst_subst_qVec_fvarVec {t : V} (hZ : IsSemiformula ℒₒᵣ (m + 1) Z)
-    (ht : IsSemiterm ℒₒᵣ 2 t) :
-    subst ℒₒᵣ ?[t] (subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec m)) Z) = subst ℒₒᵣ (t ∷ fvarVec m) Z := by
-  have h₁ : IsSemitermVec ℒₒᵣ 1 2 (?[t] : V) := by simp [ht]
-  have h₂ : IsSemitermVec ℒₒᵣ (m + 1) 1 (qVec ℒₒᵣ (fvarVec m)) := by
-    simpa using (isSemitermVec_fvarVec m 0).qVec
-  rw [substs_substs hZ h₁ h₂]
-  congr 1
-  have h₃ : IsUTermVec ℒₒᵣ m (fvarVec m) := (isSemitermVec_fvarVec m 0).isUTerm
-  apply nth_ext' (m + 1) (by simp [(h₁.termSubstVec h₂).lh])
-    (by simp)
-  intro i hi
-  rw [nth_termSubstVec h₂.isUTerm hi]
-  rcases zero_or_succ i with rfl | ⟨i, rfl⟩
-  · simp [qVec]
-  · have hi : i < m := by simpa using hi
-    simp [nth_qVec_succ h₃ hi, nth_fvarVec m i hi]
 
 private lemma subst_qVec_qVec_prenexInductionAtom {t : V} (hZ : IsSemiformula ℒₒᵣ (m + 1) Z)
     (ht : IsSemiterm ℒₒᵣ 2 t) :
@@ -432,12 +400,6 @@ lemma IsInductionMatrix.isReadable_all_neg_prenexInductionMatrix (h : IsInductio
     (hn : n ≤ k) : IsReadable k 3 (^∀ neg ℒₒᵣ (prenexInductionMatrix m Z)) :=
   .all (h.isCombination_neg_prenexInductionMatrix hn)
 
-private lemma isSemitermVec_cons_cons {a b w' : V} (ha : IsSemiterm ℒₒᵣ 0 a)
-    (hb : IsSemiterm ℒₒᵣ 0 b) (hw' : IsSemitermVec ℒₒᵣ m 0 w') :
-    IsSemitermVec ℒₒᵣ (m + 2) 0 (a ∷ b ∷ w') := by
-  rw [← one_add_one_eq_two, ← add_assoc]
-  simp [ha, hb, hw']
-
 private lemma subst_prenexInductionAtom {a b w' t : V} (ha : IsSemiterm ℒₒᵣ 0 a)
     (hb : IsSemiterm ℒₒᵣ 0 b) (hw' : IsSemitermVec ℒₒᵣ m 0 w') (hZ : IsSemiformula ℒₒᵣ (m + 1) Z)
     (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
@@ -453,29 +415,6 @@ private lemma subst_prenexInductionAtom {a b w' t : V} (ha : IsSemiterm ℒₒ�
   rw [nth_termSubstVec hv.isUTerm hi, nth_bvarVec 2 m i hi, termSubst_bvar,
     show (2 + i : V) = i + 1 + 1 by rw [add_comm, add_assoc, one_add_one_eq_two]]
   simp
-
-lemma IsSemitermVec.exists_cons {w : V} (hw : IsSemitermVec ℒₒᵣ (m + 1) 0 w) :
-    ∃ w₀ w', w = w₀ ∷ w' ∧ IsSemiterm ℒₒᵣ 0 w₀ ∧ IsSemitermVec ℒₒᵣ m 0 w' := by
-  rcases nil_or_adjoin w with rfl | ⟨w₀, w', rfl⟩
-  · simpa using hw.lh
-  · exact ⟨w₀, w', rfl, IsSemitermVec.cons_iff.mp hw⟩
-
-lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec ℒₒᵣ j 0 w)
-    (hq : IsSemiformula ℒₒᵣ (j + 1) q) (ht : IsSemiterm ℒₒᵣ 0 t) :
-    substs1 ℒₒᵣ t (subst ℒₒᵣ (qVec ℒₒᵣ w) q) = subst ℒₒᵣ (t ∷ w) q := by
-  have h₁ : IsSemitermVec ℒₒᵣ 1 0 (?[t] : V) := by simp [ht]
-  have h₂ : IsSemitermVec ℒₒᵣ (j + 1) 1 (qVec ℒₒᵣ w) := by simpa using hw.qVec
-  rw [substs1, substs_substs hq h₁ h₂]
-  congr 1
-  apply nth_ext' (j + 1) (by simp [(h₁.termSubstVec h₂).lh]) (by simp [hw.lh])
-  intro i hi
-  rw [nth_termSubstVec h₂.isUTerm hi]
-  rcases zero_or_succ i with rfl | ⟨i, rfl⟩
-  · simp [qVec]
-  · have hi : i < j := by simpa using hi
-    rw [qVec, nth_adjoin_succ, hw.lh, nth_termBShiftVec hw.isUTerm hi,
-      termBShift_zero (hw.nth hi), termSubst_eq_self (hw.nth hi) (by simp)]
-    simp
 
 private lemma readableTruth_subst_prenexInductionAtom_iff {D : ℕ} {θ a b w' t : V}
     (hθ : Z = qqToPrenex 𝚺 n θ) (hθb : IsBounded θ) (hZ : IsSemiformula ℒₒᵣ (m + 1) Z)

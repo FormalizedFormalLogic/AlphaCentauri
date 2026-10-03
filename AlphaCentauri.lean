@@ -6,12 +6,16 @@ public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
+public import AlphaCentauri.Bootstrapping.Proof.AxiomReplacement
 public import AlphaCentauri.Bootstrapping.Proof.CutElimination
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.CutFreeRewrite
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
+public import AlphaCentauri.Bootstrapping.Proof.InductionAxiom
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
+public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 public import AlphaCentauri.Bootstrapping.Proof.Measures
+public import AlphaCentauri.Bootstrapping.Proof.PeanoMinusAxiom
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution

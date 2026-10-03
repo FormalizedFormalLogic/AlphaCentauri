@@ -29,16 +29,16 @@ variable (T : ArithmeticTheory) [T.Δ₁] {n : ℕ}
 `True_{Π_{n + 1}}` the partial truth predicate for prenex $\Pi_{n + 1}$ sentences.
 - [Bek99, §3] -/
 noncomputable def _root_.FFL.FirstOrder.Theory.relativizedProvabilityPred :
-    (n : ℕ) → 𝚺ᴬ-[n + 1].Semisentence 1
+    (n : ℕ) → 𝚺ᴬ_[n + 1].Semisentence 1
   | 0 => provable T
   | n + 1 => .mkSigma
       “x. !(Theory.relativizedProvabilityPred n).val x ∨
-        ∃ s, !(partialTruth 𝚷 (n + 1)).val s ∧ ∃ i, !(impGraph ℒₒᵣ).val i s x ∧
+        ∃ s, !(partialTrue 𝚷 (n + 1)).val s ∧ ∃ i, !(impGraph ℒₒᵣ).val i s x ∧
           !(provable T).val i”
       (by
         have h0 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 2) (Theory.relativizedProvabilityPred n).val :=
           (Theory.relativizedProvabilityPred n).sigma_prop.mono (by omega)
-        have h1 := (partialTruth 𝚷 (n + 1)).pi_prop.accum 𝚺
+        have h1 := (partialTrue 𝚷 (n + 1)).pi_prop.accum 𝚺
         have h2 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 2) (impGraph ℒₒᵣ).val :=
           (impGraph ℒₒᵣ).sigma_prop.mono (by omega)
         have h3 : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 2) (provable T).val :=
@@ -55,14 +55,14 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 in `T` from the code of a true prenex $\Pi_k$ sentence for some `1 ≤ k ≤ n`. -/
 def RelativizedProv : ℕ → V → Prop
   | 0, x => Provable T x
-  | n + 1, x => RelativizedProv n x ∨ ∃ s, PartialTruth 𝚷 (n + 1) s ∧ Provable T (imp ℒₒᵣ s x)
+  | n + 1, x => RelativizedProv n x ∨ ∃ s, PartialTrue 𝚷 (n + 1) s ∧ Provable T (imp ℒₒᵣ s x)
 
 instance RelativizedProv.defined : (n : ℕ) →
-    𝚺ᴬ-[n + 1]-Predicate[V] (RelativizedProv T n) via T.relativizedProvabilityPred n
+    𝚺ᴬ_[n + 1]-Predicate[V] (RelativizedProv T n) via T.relativizedProvabilityPred n
   | 0 => Provable.defined
   | n + 1 => .mk fun v ↦ by
     simp [RelativizedProv, Theory.relativizedProvabilityPred, (RelativizedProv.defined n).df,
-      (PartialTruth.pi_defined (V := V) (n + 1)).df, (imp.defined (V := V) (L := ℒₒᵣ)).df,
+      (PartialTrue.pi_defined (V := V) (n + 1)).df, (imp.defined (V := V) (L := ℒₒᵣ)).df,
       (Provable.defined (T := T) (V := V)).df]
 
 lemma RelativizedProv.of_provable {x : V} (h : Provable T x) : ∀ n, RelativizedProv T n x
@@ -82,7 +82,7 @@ private lemma relativizedProv_of_pi {V : Type*} [ORingStructure V] [V↓[ℒₒ�
     (n : ℕ) {π σ : ArithmeticSentence} (hπ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1) π)
     (hπtrue : V↓[ℒₒᵣ] ⊧ π) (h : T ⊢ π 🡒 σ) : RelativizedProv T (n + 1) (⌜σ⌝ : V) := by
   obtain ⟨φ, rfl⟩ := hπ
-  exact Or.inr ⟨⌜φ.val⌝, (partialTruth_quote_iff φ).mpr hπtrue,
+  exact Or.inr ⟨⌜φ.val⌝, (partialTrue_quote_iff φ).mpr hπtrue,
     by simpa using internalize_provability (V := V) h⟩
 
 /-- The derivability condition D1 for `Prov^n_T`. -/

@@ -41,7 +41,7 @@ theorem provabilityLogic_add_localReflectionOn_Sigma1_eq_D
     rintro _ ⟨σ, -, rfl⟩
     exact provable_reflection_of_not_D
       (trace_provabilityLogic_eq_univ_of_provable_localReflectionOn_Sigma1 hR) hA hAD
-  exact ((inconsistent_of_provable_localReflectionOn_hierarchy_union (n := 1) hU e hrfn).not_con
+  exact ((inconsistent_of_provable_localReflectionOn_union (n := 1) hU e hrfn).not_con
     hC).elim
 
 /-- For a $\Sigma_1$-sound `T`, the provability logic of `T` relative to

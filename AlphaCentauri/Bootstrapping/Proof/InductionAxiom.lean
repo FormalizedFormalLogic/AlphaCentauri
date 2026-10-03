@@ -424,8 +424,7 @@ private lemma readableTruth_subst_prenexInductionAtom_iff {D : ℕ} {θ a b w' t
     (hn : n ≤ k) (ha : IsSemiterm ℒₒᵣ 0 a) (hb : IsSemiterm ℒₒᵣ 0 b)
     (hw' : IsSemitermVec ℒₒᵣ m 0 w') (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
     ReadableTruth k D (subst ℒₒᵣ (a ∷ b ∷ w') (prenexInductionAtom m Z t)) ↔
-      HierarchicalSatisfaction 𝚺 n θ
-        (termVal 0 (termSubst ℒₒᵣ (a ∷ b ∷ w') t) ∷ termValVec 0 m w') := by
+      PrenexSatisfied 𝚺 n (termVal 0 (termSubst ℒₒᵣ (a ∷ b ∷ w') t) ∷ termValVec 0 m w') θ := by
   have hu := isSemitermVec_cons_cons ha hb hw'
   have hc : IsSemiterm ℒₒᵣ 0 (termSubst ℒₒᵣ (a ∷ b ∷ w') t) := hu.termSubst ht
   have hcons : IsSemitermVec ℒₒᵣ (m + 1) 0 (termSubst ℒₒᵣ (a ∷ b ∷ w') t ∷ w') :=
@@ -468,10 +467,10 @@ private lemma readableTruth_subst_neg_prenexInductionMatrix_iff {θ a b w' : V}
     (h : IsInductionMatrix n m Z) (hn : n ≤ k) (hθ : Z = qqToPrenex 𝚺 n θ) (hθb : IsBounded θ)
     (ha : IsSemiterm ℒₒᵣ 0 a) (hb : IsSemiterm ℒₒᵣ 0 b) (hw' : IsSemitermVec ℒₒᵣ m 0 w') :
     ReadableTruth k 3 (subst ℒₒᵣ (a ∷ b ∷ w') (neg ℒₒᵣ (prenexInductionMatrix m Z))) ↔
-      HierarchicalSatisfaction 𝚺 n θ (0 ∷ termValVec 0 m w') ∧
-        (¬HierarchicalSatisfaction 𝚺 n θ (termVal 0 a ∷ termValVec 0 m w') ∨
-          HierarchicalSatisfaction 𝚺 n θ ((termVal 0 a + 1) ∷ termValVec 0 m w')) ∧
-        ¬HierarchicalSatisfaction 𝚺 n θ (termVal 0 b ∷ termValVec 0 m w') := by
+      PrenexSatisfied 𝚺 n (0 ∷ termValVec 0 m w') θ ∧
+        (¬PrenexSatisfied 𝚺 n (termVal 0 a ∷ termValVec 0 m w') θ ∨
+          PrenexSatisfied 𝚺 n ((termVal 0 a + 1) ∷ termValVec 0 m w') θ) ∧
+        ¬PrenexSatisfied 𝚺 n (termVal 0 b ∷ termValVec 0 m w') θ := by
   have hu := isSemitermVec_cons_cons ha hb hw'
   have hA {t : V} (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
       IsSemiformula ℒₒᵣ 0 (subst ℒₒᵣ (a ∷ b ∷ w') (prenexInductionAtom m Z t)) :=
@@ -502,10 +501,10 @@ private lemma readableTruth_subst_all_neg_prenexInductionMatrix_iff {θ w₀ w' 
     (h : IsInductionMatrix n m Z) (hn : n ≤ k) (hθ : Z = qqToPrenex 𝚺 n θ) (hθb : IsBounded θ)
     (hw₀ : IsSemiterm ℒₒᵣ 0 w₀) (hw' : IsSemitermVec ℒₒᵣ m 0 w') :
     ReadableTruth k 3 (subst ℒₒᵣ (w₀ ∷ w') (^∀ neg ℒₒᵣ (prenexInductionMatrix m Z))) ↔
-      ∀ x : V, HierarchicalSatisfaction 𝚺 n θ (0 ∷ termValVec 0 m w') ∧
-        (¬HierarchicalSatisfaction 𝚺 n θ (x ∷ termValVec 0 m w') ∨
-          HierarchicalSatisfaction 𝚺 n θ ((x + 1) ∷ termValVec 0 m w')) ∧
-        ¬HierarchicalSatisfaction 𝚺 n θ (termVal 0 w₀ ∷ termValVec 0 m w') := by
+      ∀ x : V, PrenexSatisfied 𝚺 n (0 ∷ termValVec 0 m w') θ ∧
+        (¬PrenexSatisfied 𝚺 n (x ∷ termValVec 0 m w') θ ∨
+          PrenexSatisfied 𝚺 n ((x + 1) ∷ termValVec 0 m w') θ) ∧
+        ¬PrenexSatisfied 𝚺 n (termVal 0 w₀ ∷ termValVec 0 m w') θ := by
   have hw : IsSemitermVec ℒₒᵣ (m + 1) 0 (w₀ ∷ w') := IsSemitermVec.cons_iff.mpr ⟨hw₀, hw'⟩
   have hB : IsSemiformula ℒₒᵣ (m + 1 + 1) (neg ℒₒᵣ (prenexInductionMatrix m Z)) := by
     rw [add_assoc, one_add_one_eq_two]
@@ -533,9 +532,9 @@ theorem IsInductionMatrix.not_readableTruth_subst [V↓[ℒₒᵣ] ⊧* 𝗜𝚺
   obtain ⟨θ, hθ, hθb⟩ := isPrenexHierarchy_iff_exists_qqToPrenex.mp h.2.2
   intro hT
   have hP := (readableTruth_subst_all_neg_prenexInductionMatrix_iff h hn hθ hθb hw₀ hw').mp hT
-  have hd : 𝚷ᴬ-[k + 1].DefinablePred fun a : V ↦
-      HierarchicalSatisfaction 𝚺 n θ (a ∷ termValVec 0 m w') := by
-    have := HierarchicalSatisfaction.definable_of_isAtomLevel (V := V) (Γ := 𝚺) (.of_le hn)
+  have hd : 𝚷ᴬ_[k + 1].DefinablePred fun a : V ↦
+      PrenexSatisfied 𝚺 n (a ∷ termValVec 0 m w') θ := by
+    have := PrenexSatisfied.definable_of_isAtomLevel (V := V) (Γ := 𝚺) (.of_le hn)
     definability
   have hall := InductionOnHierarchy.succ_induction_sigma 𝚷 (k + 1) hd (hP 0).1
     fun x ih ↦ ((hP x).2.1).resolve_left (not_not.mpr ih)

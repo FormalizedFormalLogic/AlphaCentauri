@@ -71,7 +71,7 @@ instance termFvAssign.defined :
 instance termFvAssign.definable : 𝚺ᴬ₁-Function₂ (termFvAssign : V → V → V) :=
   termFvAssign.defined.to_definable
 
-instance termFvAssign.definable' : Γᴬ-[m + 1]-Function₂ (termFvAssign : V → V → V) :=
+instance termFvAssign.definable' : Γᴬ_[m + 1]-Function₂ (termFvAssign : V → V → V) :=
   termFvAssign.definable.of_sigmaOne
 
 instance termFvAssignVec.defined :
@@ -82,7 +82,7 @@ instance termFvAssignVec.defined :
 instance termFvAssignVec.definable : 𝚺ᴬ₁-Function₃ (termFvAssignVec : V → V → V → V) :=
   termFvAssignVec.defined.to_definable
 
-instance termFvAssignVec.definable' : Γᴬ-[m + 1]-Function₃ (termFvAssignVec : V → V → V → V) :=
+instance termFvAssignVec.definable' : Γᴬ_[m + 1]-Function₃ (termFvAssignVec : V → V → V → V) :=
   termFvAssignVec.definable.of_sigmaOne
 
 end
@@ -309,7 +309,7 @@ instance fvAssign.defined : 𝚺ᴬ₁-Function₂ (fvAssign : V → V → V) vi
 instance fvAssign.definable : 𝚺ᴬ₁-Function₂ (fvAssign : V → V → V) :=
   fvAssign.defined.to_definable
 
-instance fvAssign.definable' : Γᴬ-[m + 1]-Function₂ (fvAssign : V → V → V) :=
+instance fvAssign.definable' : Γᴬ_[m + 1]-Function₂ (fvAssign : V → V → V) :=
   fvAssign.definable.of_sigmaOne
 
 end

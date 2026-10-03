@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Genera
 /-!
 # Substitution and negation for the partial satisfaction predicates
 
-`BoundedSatisfaction` and `HierarchicalSatisfaction` read a formula with closed-off bound
+`BoundedSatisfied` and `PrenexSatisfied` read a formula with closed-off bound
 variables by putting the values of the substituted terms into the assignment, swap under negation,
 and give the same value to every decomposition `qqToPrenex Γ s θ` of the same code.
 
@@ -286,14 +286,14 @@ end qqToPrenex
 
 /-! ## $\Delta_0$ satisfaction -/
 
-namespace BoundedSatisfaction
+namespace BoundedSatisfied
 
 lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
-    BoundedSatisfaction (neg ℒₒᵣ p) e ↔ ¬BoundedSatisfaction p e := by
+    BoundedSatisfied e (neg ℒₒᵣ p) ↔ ¬BoundedSatisfied e p := by
   suffices ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p →
-      ∀ e, (BoundedSatisfaction (neg ℒₒᵣ p) e ↔ ¬BoundedSatisfaction p e) from this p hp hp' e
+      ∀ e, (BoundedSatisfied e (neg ℒₒᵣ p) ↔ ¬BoundedSatisfied e p) from this p hp hp' e
   apply IsBounded.induction 𝚷 (P := fun p ↦ IsUFormula ℒₒᵣ p →
-    ∀ e, (BoundedSatisfaction (neg ℒₒᵣ p) e ↔ ¬BoundedSatisfaction p e)) (by definability)
+    ∀ e, (BoundedSatisfied e (neg ℒₒᵣ p) ↔ ¬BoundedSatisfied e p)) (by definability)
   · intro _ e
     simp
   · intro _ e
@@ -326,8 +326,8 @@ lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
 
 private lemma subst_rel {n m w k r v e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n (^rel k r v)) :
-    BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w (^rel k r v)) e ↔
-      BoundedSatisfaction (^rel k r v) (termValVec e n w) := by
+    BoundedSatisfied e (Bootstrapping.subst ℒₒᵣ w (^rel k r v)) ↔
+      BoundedSatisfied (termValVec e n w) (^rel k r v) := by
   rcases hp.isUFormula.rel_cases with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩ <;>
     rw [heq] at hp ⊢
   · obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
@@ -341,8 +341,8 @@ private lemma subst_rel {n m w k r v e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
 
 private lemma subst_nrel {n m w k r v e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n (^nrel k r v)) :
-    BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w (^nrel k r v)) e ↔
-      BoundedSatisfaction (^nrel k r v) (termValVec e n w) := by
+    BoundedSatisfied e (Bootstrapping.subst ℒₒᵣ w (^nrel k r v)) ↔
+      BoundedSatisfied (termValVec e n w) (^nrel k r v) := by
   rcases hp.isUFormula.nrel_cases with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩ <;>
     rw [heq] at hp ⊢
   · obtain ⟨hts, hus⟩ : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by
@@ -358,8 +358,8 @@ private lemma subst_nrel {n m w k r v e : V} (hw : IsSemitermVec ℒₒᵣ n m w
 the values of the substituted terms. -/
 private def SubstReads (p : V) : Prop :=
   ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
-    (BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔
-      BoundedSatisfaction p (termValVec e n w))
+    (BoundedSatisfied e (Bootstrapping.subst ℒₒᵣ w p) ↔
+      BoundedSatisfied (termValVec e n w) p)
 
 private lemma substReads_and {p q : V} (ihp : SubstReads p) (ihq : SubstReads q) :
     SubstReads (p ^⋏ q) := by
@@ -401,8 +401,8 @@ private lemma substReads_bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (ih : SubstRea
 
 lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsBounded p) :
-    BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔
-      BoundedSatisfaction p (termValVec e n w) := by
+    BoundedSatisfied e (Bootstrapping.subst ℒₒᵣ w p) ↔
+      BoundedSatisfied (termValVec e n w) p := by
   suffices SubstReads p from this n m w e hw hp
   unfold SubstReads
   apply IsBounded.induction 𝚷 (by definability) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp'
@@ -427,87 +427,87 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
 some, values of the quantified variable. -/
 lemma qqQuant_iff {Γ : Polarity} {θ e : V} (h : IsBounded (qqQuant Γ θ))
     (hθ : IsUFormula ℒₒᵣ θ) :
-    BoundedSatisfaction (qqQuant Γ θ) e ↔ HierarchicalSatisfaction Γ 1 θ e := by
+    BoundedSatisfied e (qqQuant Γ θ) ↔ PrenexSatisfied Γ 1 e θ := by
   cases Γ
   · obtain ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsBounded.of_ex h
     have hq' : IsUFormula ℒₒᵣ q := by simp_all [Arithmetic.qqLT]
-    change BoundedSatisfaction (qqBex (termBShift ℒₒᵣ t) q) e ↔ _
+    change BoundedSatisfied e (qqBex (termBShift ℒₒᵣ t) q) ↔ _
     rw [bex_iff ht]
     simp [ht.termBShift, termVal_termBShift ht]
   · obtain ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsBounded.of_all h
     have hq' : IsUFormula ℒₒᵣ q := by simp_all [qqNLT]
-    change BoundedSatisfaction (qqBall (termBShift ℒₒᵣ t) q) e ↔ _
+    change BoundedSatisfied e (qqBall (termBShift ℒₒᵣ t) q) ↔ _
     have hn : IsUFormula ℒₒᵣ (qqNLT (^#0 : V) (termBShift ℒₒᵣ t)) := by simp [qqNLT, ht.termBShift]
     have hb : IsBounded (qqNLT (^#0 : V) (termBShift ℒₒᵣ t)) := by simp [qqNLT]
     rw [ball_iff ht hq hq']
     apply forall_congr'
     intro x
-    change _ ↔ BoundedSatisfaction (qqNLT (^#0 : V) (termBShift ℒₒᵣ t) ^⋎ q) (x ∷ e)
+    change _ ↔ BoundedSatisfied (x ∷ e) (qqNLT (^#0 : V) (termBShift ℒₒᵣ t) ^⋎ q)
     rw [or_iff hb hn hq hq', nlt_iff (by simp) ht.termBShift, termVal_termBShift ht]
     simp [or_iff_not_imp_left]
 
-end BoundedSatisfaction
+end BoundedSatisfied
 
 /-! ## Prenex satisfaction -/
 
-namespace HierarchicalSatisfaction
+namespace PrenexSatisfied
 
 variable {Γ Γ' : Polarity} {s s' : ℕ} {θ θ' : V}
 
 lemma neg_iff (hθ : IsBounded θ) (hθ' : IsUFormula ℒₒᵣ θ) {e : V} :
-    HierarchicalSatisfaction Γ.alt s (neg ℒₒᵣ θ) e ↔ ¬HierarchicalSatisfaction Γ s θ e := by
+    PrenexSatisfied Γ.alt s e (neg ℒₒᵣ θ) ↔ ¬PrenexSatisfied Γ s e θ := by
   induction s generalizing Γ e with
-  | zero => simpa using BoundedSatisfaction.neg_iff hθ hθ'
+  | zero => simpa using BoundedSatisfied.neg_iff hθ hθ'
   | succ s ih =>
-    have hσ : ∀ e, HierarchicalSatisfaction 𝚷 s (neg ℒₒᵣ θ) e ↔
-        ¬HierarchicalSatisfaction 𝚺 s θ e := fun e ↦ ih (Γ := 𝚺)
-    have hπ : ∀ e, HierarchicalSatisfaction 𝚺 s (neg ℒₒᵣ θ) e ↔
-        ¬HierarchicalSatisfaction 𝚷 s θ e := fun e ↦ ih (Γ := 𝚷)
+    have hσ : ∀ e, PrenexSatisfied 𝚷 s e (neg ℒₒᵣ θ) ↔
+        ¬PrenexSatisfied 𝚺 s e θ := fun e ↦ ih (Γ := 𝚺)
+    have hπ : ∀ e, PrenexSatisfied 𝚺 s e (neg ℒₒᵣ θ) ↔
+        ¬PrenexSatisfied 𝚷 s e θ := fun e ↦ ih (Γ := 𝚷)
     cases Γ <;> simp [hσ, hπ]
 
 lemma subst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hθ : IsSemiformula ℒₒᵣ (n + s) θ)
     (hθ' : IsBounded θ) {e : V} :
-    HierarchicalSatisfaction Γ s (Bootstrapping.subst ℒₒᵣ ((qVec ℒₒᵣ)^[s] w) θ) e ↔
-      HierarchicalSatisfaction Γ s θ (termValVec e n w) := by
+    PrenexSatisfied Γ s e (Bootstrapping.subst ℒₒᵣ ((qVec ℒₒᵣ)^[s] w) θ) ↔
+      PrenexSatisfied Γ s (termValVec e n w) θ := by
   induction s generalizing Γ n m w e with
-  | zero => simpa using BoundedSatisfaction.subst hw (by simpa using hθ) hθ'
+  | zero => simpa using BoundedSatisfied.subst hw (by simpa using hθ) hθ'
   | succ s ih =>
     have hθs : IsSemiformula ℒₒᵣ (n + 1 + s) θ := by
       simpa [add_assoc, add_comm (1 : V)] using hθ
     cases Γ <;> simp [Function.iterate_succ_apply, ih hw.qVec hθs, termValVec_qVec hw]
 
-/-- A $\Delta_0$ formula `qqToPrenex Γ s θ` is read the same by `HierarchicalSatisfaction Γ s`
-and by `BoundedSatisfaction`. -/
-lemma iff_boundedSatisfaction (h : IsBounded (qqToPrenex Γ s θ)) (hθ : IsUFormula ℒₒᵣ θ)
+/-- A $\Delta_0$ formula `qqToPrenex Γ s θ` is read the same by `PrenexSatisfied Γ s`
+and by `BoundedSatisfied`. -/
+lemma iff_boundedSatisfied (h : IsBounded (qqToPrenex Γ s θ)) (hθ : IsUFormula ℒₒᵣ θ)
     {e : V} :
-    HierarchicalSatisfaction Γ s θ e ↔ BoundedSatisfaction (qqToPrenex Γ s θ) e := by
+    PrenexSatisfied Γ s e θ ↔ BoundedSatisfied e (qqToPrenex Γ s θ) := by
   match s, le_one_of_isBounded_qqToPrenex h with
   | 0, _ => simp
-  | 1, _ => exact (BoundedSatisfaction.qqQuant_iff h hθ).symm
+  | 1, _ => exact (BoundedSatisfied.qqQuant_iff h hθ).symm
 
 /-- Two decompositions of the same code as a prenex formula with a $\Delta_0$ matrix are read the
 same. -/
 lemma iff_of_qqToPrenex_eq (heq : qqToPrenex Γ s θ = qqToPrenex Γ' s' θ') (hθ : IsBounded θ)
     (hθ' : IsBounded θ') (hf : IsUFormula ℒₒᵣ θ) {e : V} :
-    HierarchicalSatisfaction Γ s θ e ↔ HierarchicalSatisfaction Γ' s' θ' e := by
+    PrenexSatisfied Γ s e θ ↔ PrenexSatisfied Γ' s' e θ' := by
   have hf' : IsUFormula ℒₒᵣ θ' := isUFormula_qqToPrenex.mp (heq ▸ isUFormula_qqToPrenex.mpr hf)
   induction s generalizing Γ Γ' s' θ' e with
   | zero =>
     simp only [qqToPrenex_zero] at heq
     subst heq
-    rw [zero_iff, iff_boundedSatisfaction hθ hf']
+    rw [zero_iff, iff_boundedSatisfied hθ hf']
   | succ s ih =>
     cases s' with
     | zero =>
       simp only [qqToPrenex_zero] at heq
       subst heq
-      rw [zero_iff, iff_boundedSatisfaction hθ' hf]
+      rw [zero_iff, iff_boundedSatisfied hθ' hf]
     | succ s' =>
       obtain ⟨rfl, heq⟩ := qqQuant_inj.mp heq
       cases Γ
       · exact exists_congr fun x ↦ ih heq hθ' hf'
       · exact forall_congr' fun x ↦ ih heq hθ' hf'
 
-end HierarchicalSatisfaction
+end PrenexSatisfied
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

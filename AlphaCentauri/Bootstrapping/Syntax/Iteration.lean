@@ -56,7 +56,7 @@ instance bvarVec_definable : 𝚺ᴬ₁-Function₂ (bvarVec : V → V → V) :=
   bvarVec_defined.to_definable
 
 instance bvarVec_definable' {Γ : Polarity} {m : ℕ} :
-    Γᴬ-[m + 1]-Function₂ (bvarVec : V → V → V) := bvarVec_definable.of_sigmaOne
+    Γᴬ_[m + 1]-Function₂ (bvarVec : V → V → V) := bvarVec_definable.of_sigmaOne
 
 @[simp] lemma len_bvarVec (j k : V) : len (bvarVec j k) = k := by
   induction k using ISigma1.sigma1_succ_induction
@@ -187,7 +187,7 @@ instance qqExss.defined : 𝚺ᴬ₁-Function₂ (qqExss : V → V → V) via qq
 instance qqExss.definable : 𝚺ᴬ₁-Function₂ (qqExss : V → V → V) := qqExss.defined.to_definable
 
 instance qqExss.definable' {Γ : Polarity} {m : ℕ} :
-    Γᴬ-[m + 1]-Function₂ (qqExss : V → V → V) := qqExss.definable.of_sigmaOne
+    Γᴬ_[m + 1]-Function₂ (qqExss : V → V → V) := qqExss.definable.of_sigmaOne
 
 lemma qqExss_exs (p k : V) : qqExss (^∃ p) k = ^∃ (qqExss p k) := by
   induction k using ISigma1.sigma1_succ_induction

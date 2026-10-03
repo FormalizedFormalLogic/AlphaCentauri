@@ -1,9 +1,9 @@
 module
 
-public import AlphaCentauri.Reflection.Unboundedness
+public import Foundation.FirstOrder.Incompleteness.Reflection.Unboundedness
 public import AlphaCentauri.ToFoundation.Coding
 public import AlphaCentauri.ToFoundation.Semiformula
-public import AlphaCentauri.ToFoundation.SubstNumeral
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 
 @[expose] public section
 /-!
@@ -35,7 +35,7 @@ noncomputable def sigma1ReflectionPremise : 𝚺ᴬ₁.Semisentence 1 := .mkSigm
 
 /-- The $\Sigma_1$ formula saying that `x` codes a true prenex $\Sigma_1$ sentence. -/
 noncomputable def sigma1ReflectionConclusion : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
-  “x. !(partialTruth 𝚺 1).val x” (by simpa using (partialTruth 𝚺 1).sigma_prop)
+  “x. !(partialTrue 𝚺 1).val x” (by simpa using (partialTrue 𝚺 1).sigma_prop)
 
 /-- $\theta(x) :\equiv (\mathrm{Sent}(x) \wedge \mathrm{Str}\Sigma_1(x) \wedge \mathrm{Pr}_T(x))
 \to \mathrm{Tr}_{\Sigma_1}(x)$.
@@ -55,13 +55,13 @@ lemma eval_sigma1ReflectionPremise (x : V) :
   simp [sigma1ReflectionPremise, eq_comm]
 
 lemma eval_sigma1ReflectionConclusion (x : V) :
-    V ⊧/![x] sigma1ReflectionConclusion.val ↔ PartialTruth 𝚺 1 x := by
-  simp [sigma1ReflectionConclusion, (PartialTruth.sigma_defined (V := V) 1).df]
+    V ⊧/![x] sigma1ReflectionConclusion.val ↔ PartialTrue 𝚺 1 x := by
+  simp [sigma1ReflectionConclusion, (PartialTrue.sigma_defined (V := V) 1).df]
 
 lemma eval_sigma1ReflectionFormula (x : V) :
     V ⊧/![x] (sigma1ReflectionFormula T) ↔
       (IsSemiformula ℒₒᵣ (0 : V) x ∧ shift ℒₒᵣ x = x ∧ IsPrenexHierarchy 𝚺 1 x ∧ Provable T x →
-        PartialTruth 𝚺 1 x) := by
+        PartialTrue 𝚺 1 x) := by
   simp [sigma1ReflectionFormula, eval_sigma1ReflectionPremise, eval_sigma1ReflectionConclusion]
 
 /-- A standard number that a model of `𝗜𝚺₁` recognizes as the code of a prenex $\Sigma_1$
@@ -107,9 +107,9 @@ theorem provable_sigma1ReflectionFormula_iff {σ : ArithmeticSentence}
     (hσ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1 σ) :
     𝗜𝚺₁ ⊢ (sigma1ReflectionFormula T)/[↑(⌜σ⌝ : ℕ)] 🡘 (T.standardProvability σ 🡒 σ) :=
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
-    have ht : PartialTruth 𝚺 1 (⌜σ⌝ : V) ↔ V↓[ℒₒᵣ] ⊧ σ := by
+    have ht : PartialTrue 𝚺 1 (⌜σ⌝ : V) ↔ V↓[ℒₒᵣ] ⊧ σ := by
       obtain ⟨φ, rfl⟩ := hσ
-      exact partialTruth_quote_iff φ
+      exact partialTrue_quote_iff φ
     have h : V ⊧/![(⌜σ⌝ : V)] (sigma1ReflectionFormula T) ↔
         (Provable T (⌜σ⌝ : V) → V↓[ℒₒᵣ] ⊧ σ) := by
       rw [eval_sigma1ReflectionFormula, ← ht]

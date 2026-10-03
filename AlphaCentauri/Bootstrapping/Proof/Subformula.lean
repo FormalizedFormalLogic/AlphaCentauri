@@ -106,9 +106,9 @@ instance subformulas.defined : 𝚺ᴬ₁-Function₁ subformulas (V := V) L via
 instance subformulas.definable : 𝚺ᴬ₁-Function₁ subformulas (V := V) L :=
   subformulas.defined.to_definable
 
-/-- `subformulas` is definable at every level `Γᴬ-[m + 1]` of the hierarchy.
+/-- `subformulas` is definable at every level `Γᴬ_[m + 1]` of the hierarchy.
 - No source; a formalization device mirroring the external subformula relation. -/
-instance subformulas.definable' : Γᴬ-[m + 1]-Function₁ subformulas (V := V) L :=
+instance subformulas.definable' : Γᴬ_[m + 1]-Function₁ subformulas (V := V) L :=
   subformulas.definable.of_sigmaOne
 
 end

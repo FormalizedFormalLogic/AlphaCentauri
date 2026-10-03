@@ -267,7 +267,7 @@ private lemma cut_aux {c : V} (hcut : CutLower L c) :
       CutFreeDerivation (∅ : Theory L) d → fstIdx d ⊆ insert p s →
       CutFreeDerivationOf (∅ : Theory L) e (insert (neg L p) s) →
       CutFreeDerivable (∅ : Theory L) s := by
-  have hP : 𝚷ᴬ-[2].DefinablePred fun d : V ↦ ∀ p s e : V, formulaComplexity L p ≤ c →
+  have hP : 𝚷ᴬ_[2].DefinablePred fun d : V ↦ ∀ p s e : V, formulaComplexity L p ≤ c →
       IsZeroOrExs L p → CutFreeDerivation (∅ : Theory L) d → fstIdx d ⊆ insert p s →
       CutFreeDerivationOf (∅ : Theory L) e (insert (neg L p) s) →
       CutFreeDerivable (∅ : Theory L) s := by
@@ -275,7 +275,7 @@ private lemma cut_aux {c : V} (hcut : CutLower L c) :
     apply HierarchySymbol.Definable.all
     apply HierarchySymbol.Definable.all
     apply HierarchySymbol.Definable.all
-    exact HierarchySymbol.Definable.of_lt (C := 𝚺ᴬ-[1]) (by definability) (by simp)
+    exact HierarchySymbol.Definable.of_lt (C := 𝚺ᴬ_[1]) (by definability) (by simp)
   intro d
   refine InductionOnHierarchy.order_induction_sigma 𝚷 2 hP ?_ d
   intro d ih p s e hpc hpg hd hsub he
@@ -316,7 +316,7 @@ private lemma cut_complexity :
       CutFreeDerivationOf (∅ : Theory L) d₁ (insert p s) →
       CutFreeDerivationOf (∅ : Theory L) d₂ (insert (neg L p) s) →
       CutFreeDerivable (∅ : Theory L) s := by
-  have hP : 𝚷ᴬ-[2].DefinablePred fun c : V ↦ ∀ p s d₁ d₂ : V, formulaComplexity L p = c →
+  have hP : 𝚷ᴬ_[2].DefinablePred fun c : V ↦ ∀ p s d₁ d₂ : V, formulaComplexity L p = c →
       CutFreeDerivationOf (∅ : Theory L) d₁ (insert p s) →
       CutFreeDerivationOf (∅ : Theory L) d₂ (insert (neg L p) s) →
       CutFreeDerivable (∅ : Theory L) s := by
@@ -324,7 +324,7 @@ private lemma cut_complexity :
     apply HierarchySymbol.Definable.all
     apply HierarchySymbol.Definable.all
     apply HierarchySymbol.Definable.all
-    exact HierarchySymbol.Definable.of_lt (C := 𝚺ᴬ-[1]) (by definability) (by simp)
+    exact HierarchySymbol.Definable.of_lt (C := 𝚺ᴬ_[1]) (by definability) (by simp)
   intro c
   refine InductionOnHierarchy.order_induction_sigma 𝚷 2 hP ?_ c
   intro c ih p s d₁ d₂ hpc hd₁ hd₂

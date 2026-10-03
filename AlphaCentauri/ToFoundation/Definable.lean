@@ -19,9 +19,9 @@ namespace FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V] {Γ : Polarity} {s k : ℕ}
 
-/-- A `Γᴬ-[s]`-definable predicate is the evaluation of a `ℬ[<, ℒₒᵣ].Hierarchy Γ s` formula at a
+/-- A `Γᴬ_[s]`-definable predicate is the evaluation of a `ℬ[<, ℒₒᵣ].Hierarchy Γ s` formula at a
 fixed valuation. -/
-lemma exists_hierarchy_eval_iff {P : (Fin k → V) → Prop} (hP : Γᴬ-[s].Definable P) :
+lemma exists_hierarchy_eval_iff {P : (Fin k → V) → Prop} (hP : Γᴬ_[s].Definable P) :
     ∃ (e : ℕ → V) (φ : ArithmeticSemiformula ℕ k),
       ℬ[<, ℒₒᵣ].Hierarchy Γ s φ ∧ ∀ v, P v ↔ φ.Eval v e := by
   classical

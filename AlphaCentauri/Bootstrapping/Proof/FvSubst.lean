@@ -115,7 +115,7 @@ instance termFvSubst.definable : 𝚺ᴬ₁-Function₂ termFvSubst (V := V) L :
 
 /-- `termFvSubst` is `Γ`-definable at every level `m + 1` above $\Sigma_1$.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubst.definable' : Γᴬ-[m + 1]-Function₂ termFvSubst (V := V) L :=
+instance termFvSubst.definable' : Γᴬ_[m + 1]-Function₂ termFvSubst (V := V) L :=
   termFvSubst.definable.of_sigmaOne
 
 /-- The $\Sigma_1$ definability witness for `termFvSubstVec`, via `termFvSubstVecGraph`.
@@ -133,7 +133,7 @@ instance termFvSubstVec.definable : 𝚺ᴬ₁-Function₃ termFvSubstVec (V := 
 
 /-- `termFvSubstVec` is `Γ`-definable at every level `m + 1` above $\Sigma_1$.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance termFvSubstVec.definable' : Γᴬ-[m + 1]-Function₃ termFvSubstVec (V := V) L :=
+instance termFvSubstVec.definable' : Γᴬ_[m + 1]-Function₃ termFvSubstVec (V := V) L :=
   termFvSubstVec.definable.of_sigmaOne
 
 end
@@ -288,7 +288,7 @@ instance fvSubst.definable : 𝚺ᴬ₁-Function₂[V] fvSubst L := fvSubst.defi
 
 /-- `fvSubst` is `Γ`-definable at every level `m + 1` above $\Sigma_1$.
 - No source; a formalization device: Foundation has no substitution for free variables on codes. -/
-instance fvSubst.definable' : Γᴬ-[m + 1]-Function₂[V] fvSubst L :=
+instance fvSubst.definable' : Γᴬ_[m + 1]-Function₂[V] fvSubst L :=
   fvSubst.definable.of_sigmaOne
 
 end

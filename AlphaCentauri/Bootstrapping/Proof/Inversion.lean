@@ -418,7 +418,7 @@ private lemma inversion_and_aux :
     ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋏ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert c s) ∧ height d' ≤ height d + 1 := by
-  have hP : 𝚺ᴬ-[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
+  have hP : 𝚺ᴬ_[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋏ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert c s) ∧ height d' ≤ height d + 1 := by
     definability
@@ -688,7 +688,7 @@ private lemma inversion_or_aux :
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋎ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert p (insert q s)) ∧
         height d' ≤ height d + 1 := by
-  have hP : 𝚺ᴬ-[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,
+  have hP : 𝚺ᴬ_[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋎ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert p (insert q s)) ∧
         height d' ≤ height d + 1 := by

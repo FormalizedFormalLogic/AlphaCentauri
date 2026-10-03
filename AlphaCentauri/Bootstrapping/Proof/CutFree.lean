@@ -268,7 +268,7 @@ instance CutFreeDerivation.definable : 𝚫ᴬ₁-Predicate[V] CutFreeDerivation
 
 /-- `CutFreeDerivation` is `Γ`-definable at every level `m + 1` above $\Delta_1$.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
-instance CutFreeDerivation.definable' : Γᴬ-[m + 1]-Predicate[V] CutFreeDerivation T :=
+instance CutFreeDerivation.definable' : Γᴬ_[m + 1]-Predicate[V] CutFreeDerivation T :=
   CutFreeDerivation.definable.of_deltaOne
 
 /-- The $\Delta_1$ definability witness for `CutFreeDerivationOf`, via `cutFreeDerivationOf`.
@@ -285,7 +285,7 @@ instance CutFreeDerivationOf.definable : 𝚫ᴬ₁-Relation[V] CutFreeDerivatio
 
 /-- `CutFreeDerivationOf` is `Γ`-definable at every level `m + 1` above $\Delta_1$.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
-instance CutFreeDerivationOf.definable' : Γᴬ-[m + 1]-Relation[V] CutFreeDerivationOf T :=
+instance CutFreeDerivationOf.definable' : Γᴬ_[m + 1]-Relation[V] CutFreeDerivationOf T :=
   CutFreeDerivationOf.definable.of_deltaOne
 
 /-- The $\Sigma_1$ definability witness for `CutFreeDerivable`, via `cutFreeDerivable`.
@@ -301,7 +301,7 @@ instance CutFreeDerivable.definable : 𝚺ᴬ₁-Predicate[V] CutFreeDerivable T
 
 /-- `CutFreeDerivable` is $\Sigma_{0 + 1}$-definable.
 - No source; formalization device mirroring Foundation's `Derivation`. -/
-instance CutFreeDerivable.definable' : 𝚺ᴬ-[0 + 1]-Predicate[V] CutFreeDerivable T :=
+instance CutFreeDerivable.definable' : 𝚺ᴬ_[0 + 1]-Predicate[V] CutFreeDerivable T :=
   CutFreeDerivable.definable
 
 end
@@ -337,7 +337,7 @@ it suffices to prove it for each rule of the cut-free calculus (axiom leaf, `⊤
 and/or/all/exists-introduction, weakening, shift, `T`-axiom leaf), assuming `P` for the
 immediate subderivation(s).
 - [Bus98, Ch. I §2.4] -/
-lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ-[1]-Predicate P)
+lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     {d} (hd : CutFreeDerivation T d)
     (hAxL : ∀ s, IsFormulaSet L s → ∀ p ∈ s, neg L p ∈ s → P (axL s p))
     (hVerumIntro : ∀ s, IsFormulaSet L s → ^⊤ ∈ s → P (verumIntro s))

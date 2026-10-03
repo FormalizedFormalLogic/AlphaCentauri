@@ -94,16 +94,6 @@ lemma IsPrenexAtMost.of_qqToPrenex (hs : s ≤ k) (hθ : IsBounded θ) :
     IsPrenexAtMost k (qqToPrenex Γ s θ) :=
   ⟨Γ, s, hs, isPrenexHierarchy_iff_exists_qqToPrenex.mpr ⟨θ, rfl, hθ⟩⟩
 
-lemma qqToPrenex_eq_and (h : qqToPrenex Γ s θ = p ^⋏ q) : s = 0 := by
-  rcases s with _ | s
-  · rfl
-  · cases Γ <;> simp [qqExs, qqAll, qqAnd] at h
-
-lemma qqToPrenex_eq_or (h : qqToPrenex Γ s θ = p ^⋎ q) : s = 0 := by
-  rcases s with _ | s
-  · rfl
-  · cases Γ <;> simp [qqExs, qqAll, qqOr] at h
-
 lemma IsPrenexAtom.isBounded_of_and (h : IsPrenexAtom k (p ^⋏ q)) : IsBounded (p ^⋏ q) := by
   obtain ⟨Γ, s, θ, -, he, hθ⟩ := h.exists_qqToPrenex
   obtain rfl := qqToPrenex_eq_and he.symm
@@ -857,6 +847,19 @@ lemma ReadableTruth.neg_iff (h : IsReadable k D q) (hn : IsReadable k D (neg ℒ
       rw [iff_combinationReading hc, iff_combinationReading (hc.neg hq),
         CombinationReading.neg hc hq]
 
+lemma ReadableTruth.and_or_neg_iff {α β γ δ : V} (hα : IsUFormula ℒₒᵣ α) (hβ : IsUFormula ℒₒᵣ β)
+    (hγ : IsUFormula ℒₒᵣ γ) (hδ : IsUFormula ℒₒᵣ δ) (hβr : IsReadable k D β)
+    (hδr : IsReadable k D δ) (h : IsReadable k D (α ^⋏ ((neg ℒₒᵣ β ^⋎ γ) ^⋏ neg ℒₒᵣ δ))) :
+    ReadableTruth k D (α ^⋏ ((neg ℒₒᵣ β ^⋎ γ) ^⋏ neg ℒₒᵣ δ)) ↔
+      ReadableTruth k D α ∧ (¬ReadableTruth k D β ∨ ReadableTruth k D γ) ∧
+        ¬ReadableTruth k D δ := by
+  obtain ⟨-, hX⟩ := h.of_and
+  obtain ⟨hY, hδ'⟩ := hX.of_and
+  obtain ⟨hβ', -⟩ := hY.of_or
+  have hu : IsUFormula ℒₒᵣ (neg ℒₒᵣ β ^⋎ γ) := IsUFormula.or.mpr ⟨hβ.neg, hγ⟩
+  rw [and_iff h hα (IsUFormula.and.mpr ⟨hu, hδ.neg⟩), and_iff hX hu hδ.neg, or_iff hY hβ.neg hγ,
+    neg_iff hβr hβ' hβ, neg_iff hδr hδ' hδ]
+
 end readableTruth
 
 /-! ### Definability of truth -/
@@ -1037,6 +1040,22 @@ end readableSatisfaction
 section quote
 
 variable {k D : ℕ} {Γ : Polarity} {s n : ℕ}
+
+/-- An instance of a prenex formula `qqToPrenex Γ s θ` with a $\Delta_0$ matrix, read directly, by
+closed terms is true exactly when the matrix is satisfied by the values of the terms.
+- [HP98, Theorem I.1.75] -/
+theorem ReadableTruth.subst_qqToPrenex_iff {n θ u : V} (hs : IsAtomLevel k Γ s)
+    (hθ : IsSemiformula ℒₒᵣ (n + s) θ) (hb : IsBounded θ) (hu : IsSemitermVec ℒₒᵣ n 0 u) :
+    ReadableTruth k D (subst ℒₒᵣ u (qqToPrenex Γ s θ)) ↔
+      HierarchicalSatisfaction Γ s θ (termValVec 0 n u) := by
+  have he : subst ℒₒᵣ u (qqToPrenex Γ s θ) =
+      qqToPrenex Γ s (subst ℒₒᵣ ((qVec ℒₒᵣ)^[s] u) θ) := subst_qqToPrenex hθ.isUFormula
+  have hb' := hb.subst (hu.iterate_qVec s) hθ
+  have hφ : IsSemiformula ℒₒᵣ n (qqToPrenex Γ s θ) := isSemiformula_qqToPrenex.mpr hθ
+  have ha : IsPrenexAtom k (subst ℒₒᵣ u (qqToPrenex Γ s θ)) :=
+    he ▸ IsPrenexAtom.of_qqToPrenex hs hb'
+  rw [iff_atomReading ha, AtomReading.iff ha he hb' (hφ.subst hu).isUFormula,
+    HierarchicalSatisfaction.subst hu hθ hb]
 
 /-- An instance of a standard prenex formula by closed terms is true exactly when the formula
 holds of the values of the terms.

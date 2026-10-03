@@ -176,6 +176,14 @@ end term
 
 section hierarchy
 
+private lemma eq_bvar_zero_and_exists_termBShift {n m w a c u : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+    (ha : IsSemiterm ℒₒᵣ (n + 1) a) (hc : IsSemiterm ℒₒᵣ (n + 1) c) (hu : IsUTerm ℒₒᵣ u)
+    (h : termSubstVec ℒₒᵣ 2 (qVec ℒₒᵣ w) (?[a, c] : V) = ?[^#0, termBShift ℒₒᵣ u]) :
+    a = ^#0 ∧ ∃ t, IsUTerm ℒₒᵣ t ∧ c = termBShift ℒₒᵣ t := by
+  simp only [termSubstVec_cons₂ ha.isUTerm hc.isUTerm, adjoin_inj] at h
+  exact ⟨eq_bvar_zero_of_termSubst_qVec_eq hw ha h.1,
+    exists_eq_termBShift_of_termSubst_qVec_eq hc hu h.2.1⟩
+
 lemma IsBounded.of_subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (h : IsBounded (subst ℒₒᵣ w p)) : IsBounded p := by
   apply IsSemiformula.pi1_structural_induction (P := fun n p ↦ ∀ m w, IsSemitermVec ℒₒᵣ n m w →
@@ -201,9 +209,7 @@ lemma IsBounded.of_subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     obtain ⟨a, c, rfl⟩ := eq_doubleton_of_len_eq_two.mp hv.lh.symm
     obtain ⟨ha, hc⟩ : IsSemiterm ℒₒᵣ (n + 1) a ∧ IsSemiterm ℒₒᵣ (n + 1) c := by
       simpa using hp₁
-    simp only [termSubstVec_cons₂ ha.isUTerm hc.isUTerm, adjoin_inj] at hvv
-    obtain rfl := eq_bvar_zero_of_termSubst_qVec_eq hw ha hvv.1
-    obtain ⟨t, ht, rfl⟩ := exists_eq_termBShift_of_termSubst_qVec_eq hc hu hvv.2.1
+    obtain ⟨rfl, t, ht, rfl⟩ := eq_bvar_zero_and_exists_termBShift hw ha hc hu hvv
     exact IsBounded.ball ht (IsBounded.or_iff.mp hb).2
   · intro n p hp ih m w hw h
     rw [substs_ex hp.isUFormula] at h
@@ -215,9 +221,7 @@ lemma IsBounded.of_subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     obtain ⟨a, c, rfl⟩ := eq_doubleton_of_len_eq_two.mp hv.lh.symm
     obtain ⟨ha, hc⟩ : IsSemiterm ℒₒᵣ (n + 1) a ∧ IsSemiterm ℒₒᵣ (n + 1) c := by
       simpa using hp₁
-    simp only [termSubstVec_cons₂ ha.isUTerm hc.isUTerm, adjoin_inj] at hvv
-    obtain rfl := eq_bvar_zero_of_termSubst_qVec_eq hw ha hvv.1
-    obtain ⟨t, ht, rfl⟩ := exists_eq_termBShift_of_termSubst_qVec_eq hc hu hvv.2.1
+    obtain ⟨rfl, t, ht, rfl⟩ := eq_bvar_zero_and_exists_termBShift hw ha hc hu hvv
     exact IsBounded.bex ht (IsBounded.and_iff.mp hb).2
 
 lemma IsPrenexHierarchy.of_subst {Γ : Polarity} {s : ℕ} {n m w p : V}

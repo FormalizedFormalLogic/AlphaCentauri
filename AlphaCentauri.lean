@@ -6,7 +6,6 @@ public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
-public import AlphaCentauri.Bootstrapping.PartialTruth.Substitution
 public import AlphaCentauri.Bootstrapping.Proof.CutElimination
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.CutFreeRewrite
@@ -73,6 +72,7 @@ public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
+public import AlphaCentauri.ToFoundation.PartialTruth
 public import AlphaCentauri.ToFoundation.PrenexNormalForm
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
@@ -83,7 +83,9 @@ public import AlphaCentauri.ToFoundation.Reflection
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata
 public import AlphaCentauri.ToFoundation.Semiformula
+public import AlphaCentauri.ToFoundation.Set
 public import AlphaCentauri.ToFoundation.SubstNumeral
+public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.Theory
 public import AlphaCentauri.ToMathlib.ElementaryClosure
 public import AlphaCentauri.ToMathlib.Goodstein

@@ -66,6 +66,10 @@ lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
   simpa [termValVec, termVal] using
     TermVal.construction.resultVec_cons ℒₒᵣ ![e] (IsUTermVec.empty (L := ℒₒᵣ)) ht
 
+lemma termValVec_cons {e k t v : V} (ht : IsUTerm ℒₒᵣ t) (hv : IsUTermVec ℒₒᵣ k v) :
+    termValVec e (k + 1) (t ∷ v) = termVal e t ∷ termValVec e k v := by
+  simpa [termValVec, termVal] using TermVal.construction.resultVec_cons ℒₒᵣ ![e] hv ht
+
 @[simp] lemma termVal_numeral (e x : V) : termVal e (numeral x) = x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
@@ -268,6 +272,16 @@ lemma le_one_of_isBounded_qqToPrenex (h : IsBounded (qqToPrenex Γ s θ)) : s �
     · obtain ⟨_, _, -, -, he⟩ := IsBounded.of_all h
       simp [qqExs, qqOr] at he
 
+lemma qqToPrenex_eq_and {p q : V} (h : qqToPrenex Γ s θ = p ^⋏ q) : s = 0 := by
+  rcases s with _ | s
+  · rfl
+  · cases Γ <;> simp [qqExs, qqAll, qqAnd] at h
+
+lemma qqToPrenex_eq_or {p q : V} (h : qqToPrenex Γ s θ = p ^⋎ q) : s = 0 := by
+  rcases s with _ | s
+  · rfl
+  · cases Γ <;> simp [qqExs, qqAll, qqOr] at h
+
 end qqToPrenex
 
 /-! ## $\Delta_0$ satisfaction -/
@@ -340,16 +354,58 @@ private lemma subst_nrel {n m w k r v e : V} (hw : IsSemitermVec ℒₒᵣ n m w
     rw [subst_qqNLT ht hu, nlt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
       nlt_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus]
 
+/-- Substituting for the bound variables of `p` and reading the result agrees with reading `p` at
+the values of the substituted terms. -/
+private def SubstReads (p : V) : Prop :=
+  ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
+    (BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔
+      BoundedSatisfaction p (termValVec e n w))
+
+private lemma substReads_and {p q : V} (ihp : SubstReads p) (ihq : SubstReads q) :
+    SubstReads (p ^⋏ q) := by
+  intro n m w e hw hpq
+  obtain ⟨hp, hq⟩ := IsSemiformula.and.mp hpq
+  rw [substs_and hp.isUFormula hq.isUFormula, and_iff, and_iff, ihp n m w e hw hp,
+    ihq n m w e hw hq]
+
+private lemma substReads_or {p q : V} (hdp : IsBounded p) (hdq : IsBounded q)
+    (ihp : SubstReads p) (ihq : SubstReads q) : SubstReads (p ^⋎ q) := by
+  intro n m w e hw hpq
+  obtain ⟨hp, hq⟩ := IsSemiformula.or.mp hpq
+  rw [substs_or hp.isUFormula hq.isUFormula,
+    or_iff (hdp.subst hw hp) (hp.subst hw).isUFormula (hdq.subst hw hq) (hq.subst hw).isUFormula,
+    or_iff hdp hp.isUFormula hdq hq.isUFormula, ihp n m w e hw hp, ihq n m w e hw hq]
+
+private lemma substReads_ball {t q : V} (ht : IsUTerm ℒₒᵣ t) (hdq : IsBounded q)
+    (ih : SubstReads q) : SubstReads (qqBall (termBShift ℒₒᵣ t) q) := by
+  intro n m w e hw hpq
+  obtain ⟨hts, hq⟩ := hpq.of_qqBall ht
+  rw [subst_qqBall hw hts hq.isUFormula,
+    ball_iff (hw.termSubst hts).isUTerm (hdq.subst hw.qVec hq) (hq.subst hw.qVec).isUFormula,
+    ball_iff ht hdq hq.isUFormula, termVal_termSubst hw hts]
+  apply forall₂_congr
+  intro x _
+  rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
+
+private lemma substReads_bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (ih : SubstReads q) :
+    SubstReads (qqBex (termBShift ℒₒᵣ t) q) := by
+  intro n m w e hw hpq
+  obtain ⟨hts, hq⟩ := hpq.of_qqBex ht
+  rw [subst_qqBex hw hts hq.isUFormula, bex_iff (hw.termSubst hts).isUTerm, bex_iff ht,
+    termVal_termSubst hw hts]
+  apply exists_congr
+  intro x
+  apply and_congr_right
+  intro _
+  rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
+
 lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsBounded p) :
     BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔
       BoundedSatisfaction p (termValVec e n w) := by
-  suffices ∀ p : V, IsBounded p → ∀ n m w e, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
-      (BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔
-        BoundedSatisfaction p (termValVec e n w)) from this p hp' n m w e hw hp
-  apply IsBounded.induction 𝚷 (P := fun p ↦ ∀ n m w e, IsSemitermVec ℒₒᵣ n m w →
-    IsSemiformula ℒₒᵣ n p → (BoundedSatisfaction (Bootstrapping.subst ℒₒᵣ w p) e ↔
-      BoundedSatisfaction p (termValVec e n w))) (by definability)
+  suffices SubstReads p from this n m w e hw hp
+  unfold SubstReads
+  apply IsBounded.induction 𝚷 (by definability) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp'
   · intro n m w e _ _
     simp
   · intro n m w e _ _
@@ -358,32 +414,14 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     exact subst_rel hw hp
   · intro k r v n m w e hw hp
     exact subst_nrel hw hp
-  · intro p q _ _ ihp ihq n m w e hw hpq
-    obtain ⟨hp, hq⟩ := IsSemiformula.and.mp hpq
-    rw [substs_and hp.isUFormula hq.isUFormula, and_iff, and_iff, ihp n m w e hw hp,
-      ihq n m w e hw hq]
-  · intro p q hdp hdq ihp ihq n m w e hw hpq
-    obtain ⟨hp, hq⟩ := IsSemiformula.or.mp hpq
-    rw [substs_or hp.isUFormula hq.isUFormula,
-      or_iff (hdp.subst hw hp) (hp.subst hw).isUFormula (hdq.subst hw hq) (hq.subst hw).isUFormula,
-      or_iff hdp hp.isUFormula hdq hq.isUFormula, ihp n m w e hw hp, ihq n m w e hw hq]
-  · intro t q ht hdq ih n m w e hw hpq
-    obtain ⟨hts, hq⟩ := hpq.of_qqBall ht
-    rw [subst_qqBall hw hts hq.isUFormula,
-      ball_iff (hw.termSubst hts).isUTerm (hdq.subst hw.qVec hq) (hq.subst hw.qVec).isUFormula,
-      ball_iff ht hdq hq.isUFormula, termVal_termSubst hw hts]
-    apply forall₂_congr
-    intro x _
-    rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
-  · intro t q ht hdq ih n m w e hw hpq
-    obtain ⟨hts, hq⟩ := hpq.of_qqBex ht
-    rw [subst_qqBex hw hts hq.isUFormula, bex_iff (hw.termSubst hts).isUTerm, bex_iff ht,
-      termVal_termSubst hw hts]
-    apply exists_congr
-    intro x
-    apply and_congr_right
-    intro _
-    rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
+  · intro p q _ _ ihp ihq
+    exact substReads_and ihp ihq
+  · intro p q hdp hdq ihp ihq
+    exact substReads_or hdp hdq ihp ihq
+  · intro t q ht hdq ih
+    exact substReads_ball ht hdq ih
+  · intro t q ht hdq ih
+    exact substReads_bex ht ih
 
 /-- A $\Delta_0$ formula `qqQuant Γ θ` is satisfied exactly when `θ` is satisfied for all, or
 some, values of the quantified variable. -/

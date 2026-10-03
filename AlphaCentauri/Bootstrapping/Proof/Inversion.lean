@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.Measures
+public import AlphaCentauri.ToFoundation.Set
 public import Foundation.Vorspiel.Tactic.Disj
 
 /-!
@@ -324,19 +325,6 @@ section
 
 variable {T : Theory L} [T.Δ₁]
 
-/-- Adding the same code twice to a coded set is adding it once. -/
-private lemma insert_insert_self (x s : V) : insert x (insert x s) = insert x s := mem_ext <| by
-  intro z
-  simp only [mem_bitInsert_iff]
-  tauto
-
-/-- Adding two codes to a coded set does not depend on their order. -/
-private lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) :=
-  mem_ext <| by
-    intro z
-    simp only [mem_bitInsert_iff]
-    tauto
-
 /-- Removing a code just added to a coded set that did not contain it recovers the set. -/
 private lemma bitRemove_insert_of_not_mem {x s : V} (h : x ∉ s) : bitRemove x (insert x s) = s :=
   mem_ext <| by
@@ -445,8 +433,8 @@ private lemma succ_le_succ {x y : V} (h : x ≤ y) : x + 1 ≤ y + 1 := by simpa
 
 namespace CutFreeDerivation
 
-/-- The $\Sigma_1$ form of the conjunction inversion that the course-of-values induction proves:
-every piece of data is bounded by the derivation it is read off.
+/-- The $\Sigma_1$ form of the conjunction inversion: every piece of data is bounded by the
+derivation it is read off.
 - [Bus98, Ch. I §2.4] -/
 private lemma inversion_and_aux :
     ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
@@ -714,8 +702,8 @@ theorem inversion_and {p q c s d : V} (hc : c = p ∨ c = q)
   obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc hd.1
   exact inversion_and_aux d _ b₁ _ b₂ _ b₃ _ b₄ hc hd
 
-/-- The $\Sigma_1$ form of the disjunction inversion that the course-of-values induction proves:
-every piece of data is bounded by the derivation it is read off.
+/-- The $\Sigma_1$ form of the disjunction inversion: every piece of data is bounded by the
+derivation it is read off.
 - [Bus98, Ch. I §2.4] -/
 private lemma inversion_or_aux :
     ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,

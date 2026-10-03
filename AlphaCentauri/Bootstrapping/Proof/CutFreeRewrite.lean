@@ -279,11 +279,11 @@ code. -/
 private lemma rewrite_aux :
     ∀ d : V, ∀ w, IsSemitermVec L (len w) 0 w → CutFreeDerivation (∅ : Theory L) d →
       CutFreeDerivable (∅ : Theory L) (fvSubstImage (L := L) w (fstIdx d)) := by
-  have hP : 𝚷ᴬ-[2].DefinablePred fun d : V ↦ ∀ w, IsSemitermVec L (len w) 0 w →
+  have hP : 𝚷ᴬ_[2].DefinablePred fun d : V ↦ ∀ w, IsSemitermVec L (len w) 0 w →
       CutFreeDerivation (∅ : Theory L) d →
       CutFreeDerivable (∅ : Theory L) (fvSubstImage (L := L) w (fstIdx d)) := by
     apply HierarchySymbol.Definable.all
-    exact HierarchySymbol.Definable.of_lt (C := 𝚺ᴬ-[1]) (by definability) (by simp)
+    exact HierarchySymbol.Definable.of_lt (C := 𝚺ᴬ_[1]) (by definability) (by simp)
   intro d
   refine InductionOnHierarchy.order_induction_sigma 𝚷 2 hP ?_ d
   intro d ih w hw hd
@@ -526,11 +526,11 @@ private lemma inversion_all_aux :
     ∀ d : V, ∀ t, ∀ p ≤ d, ∀ s ≤ d, IsTerm L t →
       CutFreeDerivationOf (∅ : Theory L) d (insert (^∀ p) s) →
       CutFreeDerivable (∅ : Theory L) (insert (substs1 L t p) s) := by
-  have hP : 𝚷ᴬ-[2].DefinablePred fun d : V ↦ ∀ t, ∀ p ≤ d, ∀ s ≤ d, IsTerm L t →
+  have hP : 𝚷ᴬ_[2].DefinablePred fun d : V ↦ ∀ t, ∀ p ≤ d, ∀ s ≤ d, IsTerm L t →
       CutFreeDerivationOf (∅ : Theory L) d (insert (^∀ p) s) →
       CutFreeDerivable (∅ : Theory L) (insert (substs1 L t p) s) := by
     apply HierarchySymbol.Definable.all
-    exact HierarchySymbol.Definable.of_lt (C := 𝚺ᴬ-[1]) (by definability) (by simp)
+    exact HierarchySymbol.Definable.of_lt (C := 𝚺ᴬ_[1]) (by definability) (by simp)
   intro d
   refine InductionOnHierarchy.order_induction_sigma 𝚷 2 hP ?_ d
   intro d ih

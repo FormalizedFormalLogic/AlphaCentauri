@@ -101,7 +101,7 @@ instance termFvSubst.defined : 𝚺ᴬ₁-Function₂ termFvSubst (V := V) L via
 instance termFvSubst.definable : 𝚺ᴬ₁-Function₂ termFvSubst (V := V) L :=
   termFvSubst.defined.to_definable
 
-instance termFvSubst.definable' : Γᴬ-[m + 1]-Function₂ termFvSubst (V := V) L :=
+instance termFvSubst.definable' : Γᴬ_[m + 1]-Function₂ termFvSubst (V := V) L :=
   termFvSubst.definable.of_sigmaOne
 
 instance termFvSubstVec.defined :
@@ -112,7 +112,7 @@ instance termFvSubstVec.defined :
 instance termFvSubstVec.definable : 𝚺ᴬ₁-Function₃ termFvSubstVec (V := V) L :=
   termFvSubstVec.defined.to_definable
 
-instance termFvSubstVec.definable' : Γᴬ-[m + 1]-Function₃ termFvSubstVec (V := V) L :=
+instance termFvSubstVec.definable' : Γᴬ_[m + 1]-Function₃ termFvSubstVec (V := V) L :=
   termFvSubstVec.definable.of_sigmaOne
 
 end
@@ -247,7 +247,7 @@ instance fvSubst.defined : 𝚺ᴬ₁-Function₂[V] fvSubst L via fvSubstGraph 
 
 instance fvSubst.definable : 𝚺ᴬ₁-Function₂[V] fvSubst L := fvSubst.defined.to_definable
 
-instance fvSubst.definable' : Γᴬ-[m + 1]-Function₂[V] fvSubst L :=
+instance fvSubst.definable' : Γᴬ_[m + 1]-Function₂[V] fvSubst L :=
   fvSubst.definable.of_sigmaOne
 
 end
@@ -596,7 +596,7 @@ instance fvSubstImage.defined :
 instance fvSubstImage.definable : 𝚺ᴬ₁-Function₂[V] fvSubstImage (L := L) :=
   fvSubstImage.defined.to_definable
 
-instance fvSubstImage.definable' : Γᴬ-[m + 1]-Function₂[V] fvSubstImage (L := L) :=
+instance fvSubstImage.definable' : Γᴬ_[m + 1]-Function₂[V] fvSubstImage (L := L) :=
   fvSubstImage.definable.of_sigmaOne
 
 end

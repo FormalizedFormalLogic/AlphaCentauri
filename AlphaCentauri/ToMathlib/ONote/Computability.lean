@@ -3,7 +3,7 @@ module
 public import Mathlib.Computability.RE
 public import Mathlib.Tactic.Cases
 public import Mathlib.Tactic.Linarith
-public import AlphaCentauri.Tactic.Primrec
+public import Foundation.Vorspiel.Computability.Primrec
 public import AlphaCentauri.ToMathlib.ONote.Epsilon0
 
 /-!

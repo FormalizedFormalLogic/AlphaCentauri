@@ -51,7 +51,7 @@ instance IsPartialInstance.definable :
   definability
 
 instance IsPartialInstance.definable' (m : ℕ) :
-    𝚺ᴬ-[m + 1]-Relation₃ (IsPartialInstance : V → V → V → Prop) := by
+    𝚺ᴬ_[m + 1]-Relation₃ (IsPartialInstance : V → V → V → Prop) := by
   rcases m with _ | m
   · exact IsPartialInstance.definable
   · exact IsPartialInstance.definable.of_lt (by simp)
@@ -309,7 +309,7 @@ private lemma hasWitness_of_shift {Γ f : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
     (ReadableSatisfaction.congr hfg).mpr (ReadableSatisfaction.shift_iff.mpr hψT)⟩
 
 private lemma hasWitness_definable :
-    𝚷ᴬ-[k + 1].DefinablePred fun d : V ↦ ∀ f, CutFreeDerivation (∅ : Theory ℒₒᵣ) d →
+    𝚷ᴬ_[k + 1].DefinablePred fun d : V ↦ ∀ f, CutFreeDerivation (∅ : Theory ℒₒᵣ) d →
       (∀ ψ ∈ fstIdx d, Admissible k D E (fvAssign f ψ)) → HasWitness k D E (fstIdx d) f := by
   unfold Admissible HasWitness
   definability
@@ -319,7 +319,7 @@ variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
 private lemma IsPartialInstance.readableTruth_neg (hE : ∀ e ∈ E, IsFalseBlock k D e) {r φ : V}
     (h : IsPartialInstance E r φ) (hn : IsReadable k D (neg ℒₒᵣ φ)) :
     ReadableTruth k D (neg ℒₒᵣ φ) := by
-  have hP : 𝚷ᴬ-[k + 1].DefinablePred fun r : V ↦ ∀ φ, IsPartialInstance E r φ →
+  have hP : 𝚷ᴬ_[k + 1].DefinablePred fun r : V ↦ ∀ φ, IsPartialInstance E r φ →
       IsReadable k D (neg ℒₒᵣ φ) → ReadableTruth k D (neg ℒₒᵣ φ) := by
     definability
   refine InductionOnHierarchy.succ_induction_sigma 𝚷 (k + 1) hP ?_ ?_ r φ h hn

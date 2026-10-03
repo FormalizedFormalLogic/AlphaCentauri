@@ -30,25 +30,25 @@ section models
 
 variable {P : V → Prop} {Q R : V → V → Prop}
 
-/-- Lying beyond `a` or having a witness below `b` is `𝚷ᴬ-[n]`-definable. -/
-private lemma definablePred_lt_or_witness_below [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hQ : 𝚷ᴬ-[n].DefinableRel Q)
-    (a b : V) : 𝚷ᴬ-[n].DefinablePred fun x ↦ a < x ∨ ∃ y < b, Q x y := by
-  have h₁ : 𝚷ᴬ-[n].Definable fun v : Fin 1 → V ↦ a < v 0 :=
+/-- Lying beyond `a` or having a witness below `b` is `𝚷ᴬ_[n]`-definable. -/
+private lemma definablePred_lt_or_witness_below [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hQ : 𝚷ᴬ_[n].DefinableRel Q)
+    (a b : V) : 𝚷ᴬ_[n].DefinablePred fun x ↦ a < x ∨ ∃ y < b, Q x y := by
+  have h₁ : 𝚷ᴬ_[n].Definable fun v : Fin 1 → V ↦ a < v 0 :=
     .of_iff
       (HierarchySymbol.Definable.retractiont (n := 1)
-        (inferInstance : 𝚷ᴬ-[n].DefinableRel (LT.lt : V → V → Prop)) ![&a, #0])
+        (inferInstance : 𝚷ᴬ_[n].DefinableRel (LT.lt : V → V → Prop)) ![&a, #0])
       (by intro v; simp)
-  have h₂ : 𝚷ᴬ-[n].Definable
+  have h₂ : 𝚷ᴬ_[n].Definable
       fun v : Fin 1 → V ↦ ∃ y < (&b : ArithmeticSemiterm V 1).val v id, Q (v 0) y := by
     apply HierarchySymbol.Definable.arithmetic_bexs
     exact .of_iff (hQ.retraction ![1, 0]) (by intro w; simp)
   exact (h₁.or h₂).of_iff (by intro v; simp)
 
 /-- Successor induction holds for a predicate that is at once the existential quantification of a
-`𝚷ᴬ-[n]`-definable relation and the complement of another, in a model of `𝗕𝚺(n + 1)`.
+`𝚷ᴬ_[n]`-definable relation and the complement of another, in a model of `𝗕𝚺(n + 1)`.
 - [Sla04, §2.1] -/
 lemma succ_induction_of_complementary_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1)]
-    (hQ : 𝚷ᴬ-[n].DefinableRel Q) (hR : 𝚷ᴬ-[n].DefinableRel R) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
+    (hQ : 𝚷ᴬ_[n].DefinableRel Q) (hR : 𝚷ᴬ_[n].DefinableRel R) (hPQ : ∀ x, P x ↔ ∃ w, Q x w)
     (hPR : ∀ x, ¬P x ↔ ∃ w, R x w) (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ n := models_IBroadSigma_of_models_BSigma_succ
@@ -57,7 +57,7 @@ lemma succ_induction_of_complementary_exists_pi [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n
     models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
   intro a
   by_contra ha
-  have hQR : 𝚷ᴬ-[n].DefinableRel fun x y ↦ Q x y ∨ R x y := .of_iff (hQ.or hR) (by intro v; simp)
+  have hQR : 𝚷ᴬ_[n].DefinableRel fun x y ↦ Q x y ∨ R x y := .of_iff (hQ.or hR) (by intro v; simp)
   obtain ⟨b, hb⟩ := CollectionOnPrenexHierarchy.collection_of_definable (Γ := 𝚷) hQR (a + 1) <| by
     intro x _
     by_cases hx : P x
@@ -86,12 +86,12 @@ end models
 section theorems
 
 /-- Every model of `𝗕𝚺(n + 1)` satisfies the `Δ` induction scheme for a class of formulas whose
-evaluations are `𝚺ᴬ-[n + 1]`-definable.
+evaluations are `𝚺ᴬ_[n + 1]`-definable.
 - [Sla04, §2.1] -/
 private lemma models_DeltaInductionScheme_of_definablePred
     {C : ArithmeticSemiformula ℕ 1 → Prop} [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1)]
     (hC : ∀ {φ : ArithmeticSemiformula ℕ 1}, C φ → ∀ f : ℕ → V,
-      𝚺ᴬ-[n + 1].DefinablePred fun x : V ↦ φ.Eval ![x] f) :
+      𝚺ᴬ_[n + 1].DefinablePred fun x : V ↦ φ.Eval ![x] f) :
     V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ DeltaInductionScheme C := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
   have h₀ : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))

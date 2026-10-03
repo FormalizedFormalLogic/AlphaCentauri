@@ -134,6 +134,21 @@ HP98:
     type: Anthology
     title: Perspectives in Mathematical Logic
 
+Kay91:
+  type: Book
+  title: Models of Peano Arithmetic
+  author: "Kaye, Richard"
+  date: 1991
+  publisher:
+    name: Oxford University Press
+    location: Oxford
+  serial-number:
+    isbn: "0-19-853213-X"
+  parent:
+    type: Anthology
+    title: Oxford Logic Guides
+    volume: 15
+
 Lin97:
   type: Book
   title: Aspects of Incompleteness

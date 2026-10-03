@@ -30,8 +30,7 @@ variable (T)
 /-- The one-step unfolding of cut-free derivability: `d` is a coded axiom leaf, a
 `⊤`-introduction, an and/or/all/exists-introduction whose immediate subderivation(s) lie in
 `C`, a weakening or shift of a derivation in `C`, or a `T`-axiom leaf — the clauses of Foundation's
-`Derivation.Phi` with the cut clause omitted.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+`Derivation.Phi` with the cut clause omitted. -/
 def Phi (C : Set V) (d : V) : Prop :=
   IsFormulaSet L (fstIdx d) ∧
   ( (∃ s p, d = axL s p ∧ p ∈ s ∧ neg L p ∈ s) ∨
@@ -48,9 +47,7 @@ def Phi (C : Set V) (d : V) : Prop :=
     (∃ s d', d = shiftRule s d' ∧ s = setShift L (fstIdx d') ∧ d' ∈ C) ∨
     (∃ s p, d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) )
 
-/-- A bounded restatement of `Phi`, replacing each existential over `C` with an explicit bound
-`< d`, so it can be expressed as a bounded arithmetical formula for the fixpoint blueprint below.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- A restatement of `Phi` in which each existential over `C` is bounded by `d`. -/
 private lemma phi_iff (C d : V) :
     Phi T {x | x ∈ C} d ↔
     IsFormulaSet L (fstIdx d) ∧
@@ -108,9 +105,7 @@ private lemma phi_iff (C d : V) :
     · right; right; right; right; right; right; right; left; exact ⟨s, d', rfl, h⟩
     · right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
 
-/-- The $\Delta_1$ fixpoint blueprint encoding `Phi` as a bounded arithmetical formula, needed to
-run the least-fixpoint construction inside the model.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- The $\Delta_1$ fixpoint blueprint of `Phi`. -/
 noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “d C.
     (∃ fst, !fstIdxDef fst d ∧ !(isFormulaSet L).sigma fst) ∧
@@ -162,16 +157,14 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
           s = ss ∧ d' ∈ C) ∨
       (∃ s < d, ∃ p < d, !axmGraph d s p ∧ p ∈ s ∧ !T.Δ₁ch.pi p) )”)⟩
 
-/-- `Phi` is $\Delta_1$-defined by `blueprint`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- `Phi` is $\Delta_1$-defined by `blueprint`. -/
 lemma Phi_definable :
     𝚫ᴬ₁.Defined (fun v : Fin 2 → V ↦ Phi T {x | x ∈ v 1} (v 0)) (blueprint T).core := .mk <| by
   constructor
   · intro v; simp [blueprint]
   · intro v; simp [phi_iff, blueprint]
 
-/-- The fixpoint construction realizing `blueprint`, whose least fixpoint is `CutFreeDerivation`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- The fixpoint construction realizing `blueprint`, whose least fixpoint is `CutFreeDerivation`. -/
 def construction : Fixpoint.Construction V (blueprint T) where
   Φ := fun _ ↦ Phi T
   defined := Phi_definable _
@@ -193,9 +186,6 @@ def construction : Fixpoint.Construction V (blueprint T) where
     · right; right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hC hdC⟩
     · right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
 
-/-- `Phi` only ever asks for finitely many derivations to already be in the approximating set `C`,
-as the least-fixpoint construction requires.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
 instance : (construction T).StrongFinite V where
   strong_finite := by
     rintro C _ d ⟨hs, H⟩
@@ -226,28 +216,23 @@ cut rule.
 def CutFreeDerivation (T : Theory L) [T.Δ₁] (d : V) : Prop :=
   (CutFreeDerivation.construction T).Fixpoint ![] d
 
-/-- `CutFreeDerivationOf T d s`: `d` codes a cut-free derivation of `T` whose end-sequent is `s`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- `CutFreeDerivationOf T d s`: `d` codes a cut-free derivation of `T` whose end-sequent is `s`. -/
 def CutFreeDerivationOf (T : Theory L) [T.Δ₁] (d s : V) : Prop :=
   fstIdx d = s ∧ CutFreeDerivation T d
 
-/-- `CutFreeDerivable T s`: the sequent `s` has some cut-free derivation over `T`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- `CutFreeDerivable T s`: the sequent `s` has some cut-free derivation over `T`. -/
 def CutFreeDerivable (T : Theory L) [T.Δ₁] (s : V) : Prop := ∃ d, CutFreeDerivationOf T d s
 
-/-- The $\Delta_1$ semisentence defining `CutFreeDerivation`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- The $\Delta_1$ semisentence defining `CutFreeDerivation`. -/
 noncomputable def cutFreeDerivation (T : Theory L) [T.Δ₁] : 𝚫ᴬ₁.Semisentence 1 :=
   (CutFreeDerivation.blueprint T).fixpointDefΔ₁
 
-/-- The $\Delta_1$ semisentence defining `CutFreeDerivationOf`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- The $\Delta_1$ semisentence defining `CutFreeDerivationOf`. -/
 noncomputable def cutFreeDerivationOf (T : Theory L) [T.Δ₁] : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “d s. !fstIdxDef s d ∧ !(cutFreeDerivation T).sigma d”)
   (.mkPi “d s. !fstIdxDef s d ∧ !(cutFreeDerivation T).pi d”)
 
-/-- The $\Sigma_1$ semisentence defining `CutFreeDerivable`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- The $\Sigma_1$ semisentence defining `CutFreeDerivable`. -/
 noncomputable def cutFreeDerivable (T : Theory L) [T.Δ₁] : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
   “Γ. ∃ d, !(cutFreeDerivationOf T).sigma d Γ”
 
@@ -255,52 +240,34 @@ section
 
 variable {Γ : SigmaPiDelta} {m : ℕ}
 
-/-- The $\Delta_1$ definability witness for `CutFreeDerivation`, via `cutFreeDerivation`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivation.defined :
     𝚫ᴬ₁-Predicate[V] CutFreeDerivation T via cutFreeDerivation T :=
   (CutFreeDerivation.construction T).fixpoint_definedΔ₁
 
-/-- The $\Delta_1$ definability instance for `CutFreeDerivation`, forgetting the specific witness.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivation.definable : 𝚫ᴬ₁-Predicate[V] CutFreeDerivation T :=
   CutFreeDerivation.defined.to_definable
 
-/-- `CutFreeDerivation` is `Γ`-definable at every level `m + 1` above $\Delta_1$.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivation.definable' : Γᴬ_[m + 1]-Predicate[V] CutFreeDerivation T :=
   CutFreeDerivation.definable.of_deltaOne
 
-/-- The $\Delta_1$ definability witness for `CutFreeDerivationOf`, via `cutFreeDerivationOf`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivationOf.defined :
     𝚫ᴬ₁-Relation[V] CutFreeDerivationOf T via cutFreeDerivationOf T := .mk
   ⟨by intro v; simp [cutFreeDerivationOf],
    by intro v; simp [cutFreeDerivationOf, eq_comm (b := fstIdx (v 0))]; rfl⟩
 
-/-- The $\Delta_1$ definability instance for `CutFreeDerivationOf`, forgetting the specific witness.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivationOf.definable : 𝚫ᴬ₁-Relation[V] CutFreeDerivationOf T :=
   CutFreeDerivationOf.defined.to_definable
 
-/-- `CutFreeDerivationOf` is `Γ`-definable at every level `m + 1` above $\Delta_1$.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivationOf.definable' : Γᴬ_[m + 1]-Relation[V] CutFreeDerivationOf T :=
   CutFreeDerivationOf.definable.of_deltaOne
 
-/-- The $\Sigma_1$ definability witness for `CutFreeDerivable`, via `cutFreeDerivable`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivable.defined :
     𝚺ᴬ₁-Predicate[V] CutFreeDerivable T via cutFreeDerivable T := .mk fun v ↦ by
   simp [cutFreeDerivable, CutFreeDerivable]
 
-/-- The $\Sigma_1$ definability instance for `CutFreeDerivable`, forgetting the specific witness.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivable.definable : 𝚺ᴬ₁-Predicate[V] CutFreeDerivable T :=
   CutFreeDerivable.defined.to_definable
 
-/-- `CutFreeDerivable` is $\Sigma_{0 + 1}$-definable.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
 instance CutFreeDerivable.definable' : 𝚺ᴬ_[0 + 1]-Predicate[V] CutFreeDerivable T :=
   CutFreeDerivable.definable
 
@@ -310,8 +277,7 @@ namespace CutFreeDerivation
 
 /-- `CutFreeDerivation T d` unfolds one step: `d` is one of the cut-free rule applications (axiom
 leaf, `⊤`-introduction, and/or/all/exists-introduction, weakening, shift, or a `T`-axiom leaf),
-with its immediate subderivation(s) again cut-free.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+with its immediate subderivation(s) again cut-free. -/
 lemma case_iff {d : V} :
     CutFreeDerivation T d ↔
     IsFormulaSet L (fstIdx d) ∧
@@ -373,33 +339,28 @@ lemma induction1 (Γ : Polarity) {P : V → Prop} (hP : Γᴬ_[1]-Predicate P)
     · exact hShift s (by simpa using hds) d h (ih d hC).1 (ih d hC).2
     · exact hRoot s (by simpa using hds) p hs hT) d hd
 
-/-- The end-sequent of a cut-free derivation is a coded formula set.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- The end-sequent of a cut-free derivation is a coded formula set. -/
 lemma isFormulaSet {d : V} (h : CutFreeDerivation T d) : IsFormulaSet L (fstIdx d) := h.case.1
 
-/-- The sequent of a `CutFreeDerivationOf` witness is a coded formula set.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- The sequent of a `CutFreeDerivationOf` witness is a coded formula set. -/
 lemma _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.CutFreeDerivationOf.isFormulaSet {d s : V}
     (h : CutFreeDerivationOf T d s) : IsFormulaSet L s := by
   simpa [h.1] using h.2.case.1
 
 /-- An axiom leaf `axL s p` is a cut-free derivation of `s` whenever `s` contains both `p` and its
-negation.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+negation. -/
 lemma axL {s p : V} (hs : IsFormulaSet L s) (h : p ∈ s) (hn : neg L p ∈ s) :
     CutFreeDerivation T (axL s p) :=
   CutFreeDerivation.mk ⟨by simpa using hs, Or.inl ⟨s, p, rfl, h, hn⟩⟩
 
 /-- A `⊤`-introduction leaf `verumIntro s` is a cut-free derivation of `s` whenever `s` contains
-`⊤`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+`⊤`. -/
 lemma verumIntro {s : V} (hs : IsFormulaSet L s) (h : ^⊤ ∈ s) :
     CutFreeDerivation T (verumIntro s) :=
   CutFreeDerivation.mk ⟨by simpa using hs, by disj 2; exact ⟨s, rfl, h⟩⟩
 
 /-- An and-introduction `andIntro s p q dp dq` is a cut-free derivation of `s` whenever `s`
-contains `p ^⋏ q` and `dp`, `dq` cut-free derive `s` extended by `p`, respectively `q`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+contains `p ^⋏ q` and `dp`, `dq` cut-free derive `s` extended by `p`, respectively `q`. -/
 lemma andIntro {s p q dp dq : V} (h : p ^⋏ q ∈ s)
     (hdp : CutFreeDerivationOf T dp (insert p s)) (hdq : CutFreeDerivationOf T dq (insert q s)) :
     CutFreeDerivation T (andIntro s p q dp dq) :=
@@ -408,8 +369,7 @@ lemma andIntro {s p q dp dq : V} (h : p ^⋏ q ∈ s)
       by disj 3; exact ⟨s, p, q, dp, dq, rfl, h, hdp, hdq⟩⟩
 
 /-- An or-introduction `orIntro s p q dpq` is a cut-free derivation of `s` whenever `s` contains
-`p ^⋎ q` and `dpq` cut-free derives `s` extended by both `p` and `q`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+`p ^⋎ q` and `dpq` cut-free derives `s` extended by both `p` and `q`. -/
 lemma orIntro {s p q dpq : V} (h : p ^⋎ q ∈ s)
     (hdpq : CutFreeDerivationOf T dpq (insert p (insert q s))) :
     CutFreeDerivation T (orIntro s p q dpq) :=
@@ -418,8 +378,7 @@ lemma orIntro {s p q dpq : V} (h : p ^⋎ q ∈ s)
       by disj 4; exact ⟨s, p, q, dpq, rfl, h, hdpq⟩⟩
 
 /-- An all-introduction `allIntro s p dp` is a cut-free derivation of `s` whenever `s` contains
-`^∀ p` and `dp` cut-free derives the shifted sequent extended by the free instance of `p`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+`^∀ p` and `dp` cut-free derives the shifted sequent extended by the free instance of `p`. -/
 lemma allIntro {s p dp : V} (h : ^∀ p ∈ s)
     (hdp : CutFreeDerivationOf T dp (insert (free L p) (setShift L s))) :
     CutFreeDerivation T (allIntro s p dp) :=
@@ -430,8 +389,7 @@ lemma allIntro {s p dp : V} (h : ^∀ p ∈ s)
 
 /-- An exists-introduction `exsIntro s p t dp` is a cut-free derivation of `s` whenever `s`
 contains `^∃ p`, `t` is a term, and `dp` cut-free derives `s` extended by the instance of `p` at
-`t`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+`t`. -/
 lemma exsIntro {s p t dp : V} (h : ^∃ p ∈ s) (ht : IsTerm L t)
     (hdp : CutFreeDerivationOf T dp (insert (substs1 L t p) s)) :
     CutFreeDerivation T (exsIntro s p t dp) :=
@@ -440,8 +398,7 @@ lemma exsIntro {s p t dp : V} (h : ^∃ p ∈ s) (ht : IsTerm L t)
       by disj 6; exact ⟨s, p, t, dp, rfl, h, ht, hdp⟩⟩
 
 /-- A weakening `wkRule s d` is a cut-free derivation of `s` whenever `d` cut-free derives some
-subset `s'` of `s`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+subset `s'` of `s`. -/
 lemma wkRule {s s' d : V} (hs : IsFormulaSet L s) (h : s' ⊆ s)
     (hd : CutFreeDerivationOf T d s') : CutFreeDerivation T (wkRule s d) :=
   CutFreeDerivation.mk
@@ -449,8 +406,7 @@ lemma wkRule {s s' d : V} (hs : IsFormulaSet L s) (h : s' ⊆ s)
       by disj 7; exact ⟨s, d, rfl, by simp [hd.1, h], hd.2⟩⟩
 
 /-- A shift `shiftRule (setShift L s) d` is a cut-free derivation of the shifted sequent whenever
-`d` cut-free derives `s`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+`d` cut-free derives `s`. -/
 lemma shiftRule {s d : V} (hd : CutFreeDerivationOf T d s) :
     CutFreeDerivation T (shiftRule (setShift L s) d) :=
   CutFreeDerivation.mk
@@ -458,8 +414,7 @@ lemma shiftRule {s d : V} (hd : CutFreeDerivationOf T d s) :
       by disj 8; exact ⟨setShift L s, d, rfl, by simp [hd.1], hd.2⟩⟩
 
 /-- An axiom-set leaf `axm s p` is a cut-free derivation of `s` whenever `s` contains `p` and `p`
-is (the code of) an axiom of `T`.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+is (the code of) an axiom of `T`. -/
 lemma axm {s p : V} (hs : IsFormulaSet L s) (hp : p ∈ s) (hT : p ∈ T.Δ₁Class) :
     CutFreeDerivation T (axm s p) :=
   CutFreeDerivation.mk
@@ -469,8 +424,7 @@ lemma axm {s p : V} (hs : IsFormulaSet L s) (hp : p ∈ s) (hT : p ∈ T.Δ₁Cl
 variable {U : Theory L} [U.Δ₁]
 
 /-- Cut-free derivability is monotone in the theory: enlarging the set of $\Delta_1$-axioms
-preserves cut-free derivations.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+preserves cut-free derivations. -/
 lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {d : V} :
     CutFreeDerivation T d → CutFreeDerivation U d := by
   intro hd
@@ -496,8 +450,7 @@ lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {d : V} :
   · definability
 
 /-- Every cut-free derivation is in particular a derivation of Foundation's full calculus, which
-additionally allows the cut rule.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+additionally allows the cut rule. -/
 lemma toDerivation {d : V} : CutFreeDerivation T d → Derivation T d := by
   intro hd
   apply CutFreeDerivation.induction1 𝚺 ?_ hd
@@ -517,14 +470,50 @@ end CutFreeDerivation
 
 namespace CutFreeDerivable
 
-/-- A cut-free-derivable sequent is a coded formula set.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- A cut-free-derivable sequent is a coded formula set. -/
 lemma isFormulaSet {s : V} (h : CutFreeDerivable T s) : IsFormulaSet L s := by
   rcases h with ⟨d, hd⟩
   exact hd.isFormulaSet
 
-/-- A cut-free-derivable sequent is derivable in Foundation's full calculus.
-- No source; formalization device mirroring Foundation's `Derivation`. -/
+/-- Cut-free derivability is closed under weakening. -/
+lemma wk {s s' : V} (hs : IsFormulaSet L s) (h : s' ⊆ s) (hd : CutFreeDerivable T s') :
+    CutFreeDerivable T s := by
+  obtain ⟨d, hd⟩ := hd
+  exact ⟨_, by simp, CutFreeDerivation.wkRule hs h hd⟩
+
+lemma em {s : V} (hs : IsFormulaSet L s) (p : V) (h : p ∈ s) (hn : neg L p ∈ s) :
+    CutFreeDerivable T s :=
+  ⟨_, by simp, CutFreeDerivation.axL hs h hn⟩
+
+lemma verum {s : V} (hs : IsFormulaSet L s) (h : ^⊤ ∈ s) : CutFreeDerivable T s :=
+  ⟨_, by simp, CutFreeDerivation.verumIntro hs h⟩
+
+lemma and_m {s p q : V} (h : p ^⋏ q ∈ s) (hp : CutFreeDerivable T (insert p s))
+    (hq : CutFreeDerivable T (insert q s)) : CutFreeDerivable T s := by
+  obtain ⟨dp, hdp⟩ := hp
+  obtain ⟨dq, hdq⟩ := hq
+  exact ⟨_, by simp, CutFreeDerivation.andIntro h hdp hdq⟩
+
+lemma or_m {s p q : V} (h : p ^⋎ q ∈ s) (hpq : CutFreeDerivable T (insert p (insert q s))) :
+    CutFreeDerivable T s := by
+  obtain ⟨d, hd⟩ := hpq
+  exact ⟨_, by simp, CutFreeDerivation.orIntro h hd⟩
+
+lemma all_m {s p : V} (h : ^∀ p ∈ s)
+    (hp : CutFreeDerivable T (insert (free L p) (setShift L s))) : CutFreeDerivable T s := by
+  obtain ⟨d, hd⟩ := hp
+  exact ⟨_, by simp, CutFreeDerivation.allIntro h hd⟩
+
+lemma ex_m {s p t : V} (h : ^∃ p ∈ s) (ht : IsTerm L t)
+    (hp : CutFreeDerivable T (insert (substs1 L t p) s)) : CutFreeDerivable T s := by
+  obtain ⟨d, hd⟩ := hp
+  exact ⟨_, by simp, CutFreeDerivation.exsIntro h ht hd⟩
+
+lemma shift_m {s : V} (hd : CutFreeDerivable T s) : CutFreeDerivable T (setShift L s) := by
+  obtain ⟨d, hd⟩ := hd
+  exact ⟨_, by simp, CutFreeDerivation.shiftRule hd⟩
+
+/-- A cut-free-derivable sequent is derivable in Foundation's full calculus. -/
 lemma toDerivable {s : V} : CutFreeDerivable T s → Derivable T s := by
   rintro ⟨d, hd⟩
   exact ⟨d, hd.1, hd.2.toDerivation⟩
@@ -534,8 +523,7 @@ end CutFreeDerivable
 namespace Derivation
 
 /-- A formula code belongs to the $\Delta_1$-class of a finite list of sentences, presented as a
-theory, iff it is the quote of one of the listed sentences.
-- No source; a routine technical bridge. -/
+theory, iff it is the quote of one of the listed sentences. -/
 lemma mem_deltaClass_ofList_iff (l : List (Sentence L)) (p : V) :
     p ∈ @Theory.Δ₁Class V _ L _ _ {p | p ∈ l} (Theory.Δ₁.ofList l) ↔
       ∃ σ ∈ l, p = (⌜σ⌝ : V) := by
@@ -560,8 +548,7 @@ lemma mem_deltaClass_ofList_iff (l : List (Sentence L)) (p : V) :
 
 /-- Given a coded formula set `a` closed under the external-variable shift whose members are
 negations of axioms of `T`, every derivation from `T` yields a pure (axiom-free) derivation of the
-same end-sequent with `a` adjoined.
-- No source; a routine technical bridge. -/
+same end-sequent with `a` adjoined. -/
 theorem deductionAux {a d : V} (ha : IsFormulaSet L a) (hsa : setShift L a = a)
     (hax : ∀ p, p ∈ T.Δ₁Class → neg L p ∈ a) (hd : Derivation T d) :
     ∃ d', Derivation (∅ : Theory L) d' ∧ fstIdx d' = fstIdx d ∪ a := by
@@ -626,6 +613,74 @@ theorem deductionAux {a d : V} (ha : IsFormulaSet L a) (hsa : setShift L a = a)
       Derivation.axL (by simp [hs, ha]) (by simp [hp])
       (by simp [hax p hT]), by simp⟩
 
+/-- Given a coded formula set `a` closed under the external-variable shift such that every axiom
+`p ≤ d` of `T` follows in pure logic from the negation of some member of `a`, a derivation `d`
+from `T` yields a pure derivation of its end-sequent with `a` adjoined.
+- [HP98, Section I.4(a)] -/
+theorem derivable_union_of_replacement {a d : V} (ha : IsFormulaSet L a)
+    (hsa : setShift L a = a)
+    (hax : ∀ p ≤ d, p ∈ T.Δ₁Class →
+      ∃ q, neg L q ∈ a ∧ Derivable (∅ : Theory L) (insert (neg L q) ({p} : V)))
+    (hd : Derivation T d) : Derivable (∅ : Theory L) (fstIdx d ∪ a) := by
+  have insert_union (x s : V) : insert x s ∪ a = insert x (s ∪ a) :=
+    mem_ext fun z ↦ by simp only [mem_cup_iff, mem_bitInsert_iff]; tauto
+  suffices d ≤ d → Derivable (∅ : Theory L) (fstIdx d ∪ a) from this le_rfl
+  apply Derivation.induction1 𝚺 (P := fun e ↦ e ≤ d → Derivable (∅ : Theory L) (fstIdx e ∪ a))
+    (by definability) hd
+  · intro s hs p hp hnp _
+    rw [fstIdx_axL]
+    exact Derivable.em (by simp [hs, ha]) p (by simp [hp]) (by simp [hnp])
+  · intro s hs hv _
+    rw [fstIdx_verumIntro]
+    exact Derivable.verum (by simp [hs, ha]) (by simp [hv])
+  · intro s _ p q dp dq hpq hdp hdq ihp ihq hle
+    have h₁ := ihp ((dp_lt_andIntro _ _ _ _ _).le.trans hle)
+    have h₂ := ihq ((dq_lt_andIntro _ _ _ _ _).le.trans hle)
+    rw [hdp.1, insert_union] at h₁
+    rw [hdq.1, insert_union] at h₂
+    rw [fstIdx_andIntro]
+    exact Derivable.and_m (mem_cup_iff.mpr <| Or.inl hpq) h₁ h₂
+  · intro s _ p q dp hpq hdp ih hle
+    have h := ih ((d_lt_orIntro _ _ _ _).le.trans hle)
+    rw [hdp.1, insert_union, insert_union] at h
+    rw [fstIdx_orIntro]
+    exact Derivable.or_m (mem_cup_iff.mpr <| Or.inl hpq) h
+  · intro s _ p dp hp hdp ih hle
+    have h := ih ((s_lt_allIntro _ _ _).le.trans hle)
+    rw [hdp.1, insert_union, ← hsa, ← mem_setShift_union] at h
+    rw [fstIdx_allIntro]
+    exact Derivable.all_m (mem_cup_iff.mpr <| Or.inl hp) h
+  · intro s _ p t dp hp ht hdp ih hle
+    have h := ih ((d_lt_exsIntro _ _ _ _).le.trans hle)
+    rw [hdp.1, insert_union] at h
+    rw [fstIdx_exsIntro]
+    exact Derivable.ex_m (mem_cup_iff.mpr <| Or.inl hp) ht h
+  · intro s hs e hse _ ih hle
+    rw [fstIdx_wkRule]
+    refine Derivable.wk (by simp [hs, ha]) ?_ (ih ((d_lt_wkRule _ _).le.trans hle))
+    intro x hx
+    rcases mem_cup_iff.mp hx with hx | hx
+    · exact mem_cup_iff.mpr <| Or.inl <| hse hx
+    · exact mem_cup_iff.mpr <| Or.inr hx
+  · rintro _ _ e rfl _ ih hle
+    have h := (ih ((d_lt_shiftRule _ _).le.trans hle)).shift
+    rwa [mem_setShift_union, hsa, ← fstIdx_shiftRule (setShift L (fstIdx e)) e] at h
+  · intro s _ p d₁ d₂ hd₁ hd₂ ih₁ ih₂ hle
+    have h₁ := ih₁ ((d₁_lt_cutRule _ _ _ _).le.trans hle)
+    have h₂ := ih₂ ((d₂_lt_cutRule _ _ _ _).le.trans hle)
+    rw [hd₁.1, insert_union] at h₁
+    rw [hd₂.1, insert_union] at h₂
+    rw [fstIdx_cutRule]
+    exact Derivable.cut p h₁ h₂
+  · intro s hs p hp hT hle
+    obtain ⟨q, hq, hqp⟩ := hax p ((p_lt_axm _ _).le.trans hle) hT
+    rw [fstIdx_axm]
+    refine Derivable.wk (by simp [hs, ha]) ?_ hqp
+    intro x hx
+    rcases mem_bitInsert_iff.mp hx with rfl | hx
+    · exact mem_cup_iff.mpr <| Or.inr hq
+    · exact mem_cup_iff.mpr <| Or.inl <| (mem_singleton_iff.mp hx) ▸ hp
+
 section Deduction
 
 variable [L.DecidableEq]
@@ -670,9 +725,7 @@ theorem deduction (l : List (Sentence L)) {d : V} :
       (show ∼(↑σ : Proposition L) ∈ negatedAxioms l by simp [negatedAxioms, hσ])
   · exact hd
 
-/-- The internal deduction transform for a finite set of axioms.  The explicit `ofList`
-presentation is definitionally the same classifier as the corresponding finite theory, while
-avoiding proof-dependent reduction through `Set.Finite.toFinset`.
+/-- The internal deduction transform for a finite set of axioms.
 - [HP98, Section I.4(a)] -/
 theorem deductionFinset (F : Finset (Sentence L)) {d : V} :
     let _ : Theory.Δ₁ {p | p ∈ F} :=

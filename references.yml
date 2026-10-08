@@ -105,6 +105,18 @@ Bus98A:
       title: Studies in Logic and the Foundations of Mathematics
       volume: 137
 
+ELV25:
+  type: Article
+  title: Completions of restricted complexity I, weak arithmetical theories
+  author: ["Enayat, Ali", "Łełyk, Mateusz", "Visser, Albert"]
+  date: 2025
+  serial-number:
+    arxiv: "2508.14758"
+  url: https://arxiv.org/abs/2508.14758
+  parent:
+    type: Repository
+    title: arXiv
+
 EW12:
   type: Article
   title: "A simplified characterisation of provably computable functions of the system {ID₁} of inductive definitions"
@@ -240,3 +252,23 @@ vO99:
   note: >-
     Notes of a course in the 1998-1999 Master Class Program in Mathematical
     Logic of the Mathematical Research Institute, Utrecht
+
+WP89:
+  type: Chapter
+  title: On the existence of end extensions of models of bounded induction
+  author: ["Wilkie, Alex J.", "Paris, Jeff B."]
+  page-range: 143-161
+  date: 1989
+  serial-number:
+    doi: "10.1016/S0049-237X(08)70042-9"
+  parent:
+    type: Proceedings
+    title: Logic, Methodology and Philosophy of Science VIII
+    editor: ["Fenstad, J. E.", "Frolov, I. T.", "Hilpinen, R."]
+    publisher:
+      name: North-Holland
+      location: Amsterdam
+    parent:
+      type: Anthology
+      title: Studies in Logic and the Foundations of Mathematics
+      volume: 126

@@ -44,6 +44,10 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [PWW88, Problem 1].
       - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0
+  FFL.FirstOrder.Arithmetic.exists_complete_extension_ISigma0_of_restricted_complexity:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [ELV25, Question 1.2].
+      - FFL.FirstOrder.Arithmetic.exists_complete_extension_ISigma0_of_restricted_complexity
   FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1

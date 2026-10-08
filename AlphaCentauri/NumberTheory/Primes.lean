@@ -5,7 +5,7 @@ public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Prime
 
 /-!
-# The infinitude of primes
+# The infinitude of primes and Bertrand's postulate
 
 Euclid's argument needs a bound on the next prime: $x!$ over $\mathsf{E}\mathsf{A} =
 \mathsf{I}\Delta_0 + \mathrm{Exp}$, from which $\mathsf{I}\Sigma_1$ inherits it; over
@@ -15,8 +15,13 @@ over $\mathsf{I}\Delta_0$ alone it is an open problem. $\mathsf{I}\Delta_0 + \Om
 $\mathsf{I}\Delta_0$ each have the sentence as an axiom of its own, so that neither carries the
 debt of the other.
 
+Bertrand's postulate is a $\Pi_1$ sentence, and is likewise an axiom of its own over
+$\mathsf{I}\Delta_0 + \Omega_1$, where it is a theorem, and over $\mathsf{I}\Delta_0$, where it is
+open.
+
 - [HP98, Theorem I.1.58(2), Remark I.1.59(3)]
 - [PWW88, Problem 1, Corollary 8]
+- [HP98, §V.5(f)]
 -/
 
 @[expose] public section
@@ -86,5 +91,17 @@ lemma exists_prime_gt [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] (x : V) : �
       (Theory.Proof.sound provable_infinitudeOfPrimes_ISigma0_union_Omega1) V inferInstance) x
 
 end
+
+/-- Between $n$ and $2n$ there is a prime, for every $n \ge 1$. -/
+def bertrandPostulate : ArithmeticSentence :=
+  “∀ n, 1 ≤ n → ∃ p, n < p ∧ p ≤ 2 * n ∧ !isPrime p”
+
+/-- - [HP98, §V.5(f), p. 392]
+- [PWW88] -/
+axiom provable_bertrandPostulate_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮₁ ⊢ bertrandPostulate
+
+/-- An open problem.
+- [HP98, §V.5(f), p. 393] -/
+axiom provable_bertrandPostulate_ISigma0 : 𝗜𝚺₀ ⊢ bertrandPostulate
 
 end FFL.FirstOrder.Arithmetic

@@ -1,8 +1,11 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
+public import AlphaCentauri.Axiomatizability.BSigma
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Axiomatizability.ISigma
+public import AlphaCentauri.Axiomatizability.ISigma0
 public import AlphaCentauri.Axiomatizability.Reflexive
+public import AlphaCentauri.Axiomatizability.RestrictedComplexity
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
@@ -26,6 +29,7 @@ public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Theory
 public import AlphaCentauri.Calculus.Induction.Witnessing
+public import AlphaCentauri.Conservativity.Omega1
 public import AlphaCentauri.Hierarchy.Bounded
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.Cut
@@ -58,6 +62,7 @@ public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.Schemata.ParameterFreeInduction
 public import AlphaCentauri.Schemata.Pigeonhole
+public import AlphaCentauri.Schemata.Strictness
 public import AlphaCentauri.ToFoundation.Absoluteness
 public import AlphaCentauri.ToFoundation.BooleanCombination
 public import AlphaCentauri.ToFoundation.Coding

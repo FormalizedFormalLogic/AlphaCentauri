@@ -34,6 +34,10 @@ declaration:
   FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1
+  FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1_weakerThanOn_Pi1_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [HP98, §V.1(a), p. 274].
+      - FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1_weakerThanOn_Pi1_ISigma0
   FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive

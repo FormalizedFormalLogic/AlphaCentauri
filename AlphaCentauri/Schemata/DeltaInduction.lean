@@ -163,6 +163,12 @@ private lemma models_ISigma_of_models_IDelta_succ (n : ℕ) (V : Type*) [ORingSt
 theorem ISigma_weakerThan_IDelta_succ (n : ℕ) : 𝗜𝚺n ⪯ 𝗜𝚫 (n + 1) :=
   weakerThan_of_models.{0} _ _ fun V _ _ ↦ models_ISigma_of_models_IDelta_succ n V
 
+/-- `𝗕𝚺(n + 1)` is at most as strong as `𝗜𝚫(n + 1)`. This is an open problem; it holds over
+`𝗜𝚺₀` extended by exponentiation.
+- [HP98, Remark after Theorem I.2.5]
+- [Sla04] -/
+axiom BSigma_weakerThan_IDelta (n : ℕ) : 𝗕𝚺(n + 1) ⪯ 𝗜𝚫(n + 1)
+
 end theorems
 
 end FFL.FirstOrder.Arithmetic

@@ -62,6 +62,10 @@ declaration:
   FFL.FirstOrder.Arithmetic.Peano.reflexive:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive
+  FFL.FirstOrder.Arithmetic.BSigma_weakerThan_IDelta:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [HP98, Remark after Theorem I.2.5].
+      - FFL.FirstOrder.Arithmetic.BSigma_weakerThan_IDelta
   FFL.FirstOrder.Arithmetic.PigeonholeOnPrenexHierarchy_weakerThan_ISigma0:
     forgive:
       # An open problem, not a theorem awaiting formalization: [PWW88, Problem 2].

@@ -100,7 +100,8 @@ def bertrandPostulate : ArithmeticSentence :=
 - [PWW88] -/
 axiom provable_bertrandPostulate_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮₁ ⊢ bertrandPostulate
 
-/-- An open problem. - [HP98, §V.5(f), p. 393] -/
+/-- An open problem.
+- [HP98, §V.5(f), p. 393] -/
 axiom provable_bertrandPostulate_ISigma0 : 𝗜𝚺₀ ⊢ bertrandPostulate
 
 end FFL.FirstOrder.Arithmetic

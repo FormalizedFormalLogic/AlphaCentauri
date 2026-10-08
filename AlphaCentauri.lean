@@ -3,6 +3,7 @@ module  -- shake: keep-all --deprecated_module: ignore
 public import AlphaCentauri.Axiomatizability.BSigma
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Axiomatizability.ISigma
+public import AlphaCentauri.Axiomatizability.ISigma0
 public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Axiomatizability.RestrictedComplexity
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment

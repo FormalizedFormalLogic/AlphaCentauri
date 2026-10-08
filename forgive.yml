@@ -32,6 +32,9 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [Kay91, Exercise 10.4].
       - FFL.FirstOrder.Arithmetic.BSigma1.finiteAxiomatizable
+  FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite

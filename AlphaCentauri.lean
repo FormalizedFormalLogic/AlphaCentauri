@@ -52,6 +52,7 @@ public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.Sigma1Reflection
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Reflection.UniformReflection
+public import AlphaCentauri.Schemata.CollectionWithoutExp
 public import AlphaCentauri.Schemata.DeltaInduction
 public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Schemata.Induction

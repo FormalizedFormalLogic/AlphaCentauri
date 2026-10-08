@@ -40,6 +40,13 @@ declaration:
   FFL.FirstOrder.Arithmetic.Peano.reflexive:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive
+  FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [HP98, §V.5(f), p. 393].
+      - FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0
+  FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0:
     forgive:
       # An open problem, not a theorem awaiting formalization: [PWW88, Problem 1].

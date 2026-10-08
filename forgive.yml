@@ -46,6 +46,9 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [HP98, Corollary V.4.39], [Kay91, Exercise 10.4].
       - FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1.finiteAxiomatizable
+  FFL.FirstOrder.Arithmetic.ISigma_strictlyWeakerThan_BSigma_succ:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma_strictlyWeakerThan_BSigma_succ
   FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive

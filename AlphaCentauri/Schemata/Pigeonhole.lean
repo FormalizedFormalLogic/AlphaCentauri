@@ -1,6 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Schemata
+public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 
 /-!
 # The pigeonhole schemata `𝗣𝗛𝗣` and `𝗪𝗣𝗛𝗣`
@@ -209,5 +210,20 @@ instance (Γ : Polarity) (s : ℕ) : Consistent (𝗪𝗣𝗛𝗣 Γ s) :=
   (𝗪𝗣𝗛𝗣 Γ s).consistent_of_sound (Eq ⊥) rfl
 
 end standardModel
+
+section openProblems
+
+/-- $\mathsf{I}\Delta_0$ proves the pigeonhole principle for $\Delta_0$ formulas. This is an open
+problem.
+- [PWW88, Problem 2]
+- [HP98, §V.1(a), p. 276] -/
+axiom PigeonholeOnPrenexHierarchy_weakerThan_ISigma0 : 𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀
+
+/-- $\mathsf{I}\Delta_0 + \Omega_1$ proves the pigeonhole principle for $\Delta_0$ formulas. This
+is an open problem.
+- [HP98, §V.5(g), p. 395] -/
+axiom PigeonholeOnPrenexHierarchy_weakerThan_ISigma0_union_Omega1 : 𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀ ∪ 𝝮₁
+
+end openProblems
 
 end FFL.FirstOrder.Arithmetic

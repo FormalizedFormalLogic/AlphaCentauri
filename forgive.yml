@@ -62,6 +62,10 @@ declaration:
   FFL.FirstOrder.Arithmetic.Peano.reflexive:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive
+  FFL.FirstOrder.Arithmetic.exists_properEndExtension_of_BSigma1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Kay91, Chapter 16, p. 269], [WP89].
+      - FFL.FirstOrder.Arithmetic.exists_properEndExtension_of_BSigma1
   FFL.FirstOrder.Arithmetic.BSigma_weakerThan_IDelta:
     forgive:
       # An open problem, not a theorem awaiting formalization: [HP98, Remark after Theorem I.2.5].

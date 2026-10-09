@@ -4,6 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.LK.Completeness
 public import AlphaCentauri.ToFoundation.Hierarchy
+public import AlphaCentauri.ToFoundation.Theory
 
 /-!
 # Provably total functions
@@ -109,10 +110,14 @@ lemma provable_iff_exists_minimalGraphMatrix (T : ArithmeticTheory) [𝗕𝚺₁
     Classical.choose_spec (Bounding.Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺)
       (s := 1) φ.sigma_prop) V e Empty.elim
 
-lemma models_iff_exists_minimalGraphMatrix {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
-    V↓[ℒₒᵣ] ⊧ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) ↔
-      ∀ v : Fin (k + 1) → V, φ.val.Evalb v ↔ ∃ z, (minimalGraphMatrix φ).val.Evalb (z :> v) := by
-  simp [models_iff]
+lemma evalb_iff_exists_minimalGraphMatrix [V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁] (φ : 𝚺ᴬ₁.Semisentence (k + 1))
+    (v : Fin (k + 1) → V) : φ.val.Evalb v ↔ ∃ z, (minimalGraphMatrix φ).val.Evalb (z :> v) := by
+  have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗕𝚺₁ := eq_weakerThan_of_BSigma (s := 1)
+  have : ∀ v : Fin (k + 1) → V,
+      φ.val.Evalb v ↔ ∃ z, (minimalGraphMatrix φ).val.Evalb (z :> v) := by
+    simpa [models_iff] using consequence_iff'.mp
+      (Theory.Proof.sound (provable_iff_exists_minimalGraphMatrix 𝗕𝚺₁ φ)) V
+  exact this v
 
 /-- `∃ z ≤ n, z + y = n ∧ θ(z, y, x⃗)`: there is a pair `(z, y)` with sum `n` at which `θ` holds.
 - [HP98, Lemma IV.3.4] -/
@@ -287,8 +292,6 @@ def provablyTotalFunctions (T : ArithmeticTheory) (k : ℕ) : Set ((Fin k → �
 
 namespace ProvablyTotalVia
 
-lemma toProvablyTotal (h : T.ProvablyTotalVia f φ) : T.ProvablyTotal f := ⟨φ, h⟩
-
 lemma graph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
     φ.val.Evalb v ↔ v 0 = f (v ·.succ) := h.defined.iff
 
@@ -298,7 +301,7 @@ lemma mono (h : T.ProvablyTotalVia f φ) (hT : T ⪯ U) : U.ProvablyTotalVia f �
 /-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
 lemma of_Pi2 (h : T.ProvablyTotalVia f φ)
-    (H : ∀ σ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) :
+    (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     U.ProvablyTotalVia f φ :=
   ⟨h.defined, H _ (by simp) h.total⟩
 
@@ -318,22 +321,40 @@ lemma leastGraph_iff (h : T.ProvablyTotalVia f φ) {v : Fin (k + 1) → ℕ} :
   simp [h.graph_iff]
   omega
 
-open PeanoMinus in
-/-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality implies the stronger `∃!` form
+/-- Over a theory containing `𝗟𝚺1`, the `∃` form of totality implies the stronger `∃!` form
 stating that the least witness of `φ` exists and is unique in every model of `T`.
 - [HP98, Lemma IV.3.4] -/
-lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ uniqueTotalitySentence φ := by
-  have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
-  refine Arithmetic.complete T _ fun (V : Type) _ _ ↦
-    models_uniqueTotalitySentence_iff.mpr fun v ↦ ?_
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
+lemma exists_unique [𝗟𝚺1 ⪯ T] (h : T.ProvablyTotalVia f φ) : T ⊢ uniqueTotalitySentence φ := by
+  have : 𝗣𝗔⁻ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗟𝚺1) inferInstance inferInstance;
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance;
+  have : 𝗟𝚺⁺1 ⪯ T := (LSigma_equiv_LBroadSigma 1).symm.le.trans inferInstance;
+  apply Arithmetic.complete.{0};
+  intro (V : Type) _ _;
+  have : V↓[ℒₒᵣ] ⊧* 𝗟𝚺⁺1 := ModelsTheory.of_provably_subtheory V 𝗟𝚺⁺1 T inferInstance;
+  apply models_uniqueTotalitySentence_iff.mpr;
+  intro v;
   constructor
   · obtain ⟨y, hy⟩ := h.models V v
-    obtain ⟨y₀, h₀, hmin⟩ := InductionOnHierarchy.least_number 𝚺 1 (definablePred_evalb φ v) hy
-    exact ⟨y₀, by simpa using ⟨h₀, hmin⟩⟩
+    obtain ⟨y₀, h₀, hmin⟩ := LeastNumberOnHierarchy.least_number 𝚺 1 (definablePred_evalb φ v) hy
+    use y₀;
+    simp_all;
   · intro y y' hy hy'
     simp only [eval_leastGraph, Matrix.cons_val_zero, Matrix.cons_val_succ] at hy hy'
-    grind
+    grind;
+
+/-- In any model of `𝗕𝚺₁`, if `φ` has a witness, then `minimalGraph φ` has an existing and unique
+value.
+- [HP98, Lemma IV.3.4] -/
+private lemma models_existsUnique_minimalGraph {V : Type*} [ORingStructure V]
+    [V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁] {φ : 𝚺ᴬ₁.Semisentence (k + 1)} {v : Fin k → V}
+    (hex : ∃ y, φ.val.Evalb (y :> v)) :
+    (∃ y, (minimalGraph φ).val.Evalb (y :> v)) ∧
+      ∀ y y', (minimalGraph φ).val.Evalb (y :> v) → (minimalGraph φ).val.Evalb (y' :> v) →
+        y = y' := by
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₀ 𝗕𝚺₁ inferInstance
+  obtain ⟨y, hy⟩ := hex
+  obtain ⟨z, hz⟩ := (evalb_iff_exists_minimalGraphMatrix φ (y :> v)).mp hy
+  exact models_existsUnique_minimalPairGraph ⟨y, z, hz⟩
 
 open PeanoMinus in
 /-- Over a theory containing `𝗕𝚺₁`, a `T`-provably total function is `T`-provably functional via
@@ -343,60 +364,33 @@ $\Delta_0$ minimization.
 - [HP98, Lemma IV.3.4] -/
 lemma provablyFunctionalVia_minimalGraph [𝗕𝚺₁ ⪯ T] (h : T.ProvablyTotalVia f φ) :
     T.ProvablyFunctionalVia f (minimalGraph φ) := by
-  have hTIS1 : T ⊢ ∀¹* (φ.val 🡘 ∃¹ (minimalGraphMatrix φ).val) :=
-    provable_iff_exists_minimalGraphMatrix T φ
-  have heqN : ∀ v : Fin (k + 1) → ℕ,
-      φ.val.Evalb v ↔ ∃ z, (minimalGraphMatrix φ).val.Evalb (z :> v) :=
-    models_iff_exists_minimalGraphMatrix.mp
-      (consequence_iff'.mp
-        (Theory.Proof.sound (provable_iff_exists_minimalGraphMatrix 𝗕𝚺₁ φ)) ℕ)
-  have hforce : ∀ (y : ℕ) (x : Fin k → ℕ) (z : ℕ),
-      (minimalGraphMatrix φ).val.Evalb (z :> y :> x) → y = f x := fun y x z hz ↦ by
-    simpa using h.graph_iff.mp ((heqN (y :> x)).mpr ⟨z, hz⟩)
-  have hforce' : ∀ (y : ℕ) (x : Fin k → ℕ),
-      (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y :> x) → y = f x := fun y x hy ↦ by
-    obtain ⟨_, ⟨z, _, _, hθ⟩, _, _⟩ := (eval_minimalPairGraph _ _).mp hy
-    exact hforce y x z hθ
-  have hmodelN : ∀ x : Fin k → ℕ,
-      (∃ y, (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y :> x)) ∧
-        ∀ y y', (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y :> x) →
-          (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y' :> x) → y = y' := fun x ↦ by
-    apply models_existsUnique_minimalPairGraph
-    obtain ⟨z, hz⟩ := (heqN (f x :> x)).mp (h.graph_iff.mpr (by simp))
-    exact ⟨f x, z, hz⟩
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := 1)
+  have hforce : ∀ {y z} {x : Fin k → ℕ}, (minimalGraphMatrix φ).val.Evalb (z :> y :> x) →
+      y = f x := fun {y z x} hz ↦ by
+    simpa using h.graph_iff.mp ((evalb_iff_exists_minimalGraphMatrix φ (y :> x)).mpr ⟨z, hz⟩)
+  have hforce' : ∀ {y} {x : Fin k → ℕ}, (minimalGraph φ).val.Evalb (y :> x) → y = f x :=
+    fun {y x} hy ↦ by
+      obtain ⟨_, ⟨z, _, _, hθ⟩, _, _⟩ := (eval_minimalPairGraph _ _).mp hy
+      exact hforce hθ
   have hdef : HierarchySymbol.DefinedFunction (V := ℕ) f (minimalGraph φ) := .mk fun v ↦ by
-    change (minimalPairGraph (minimalGraphMatrix φ)).Evalb v ↔ v 0 = f (fun i ↦ v i.succ)
+    obtain ⟨y₀, x, rfl⟩ : ∃ y x, v = y :> x := ⟨v 0, _, (Fin.cons_self_tail v).symm⟩
+    obtain ⟨⟨y₁, hy₁⟩, -⟩ := models_existsUnique_minimalGraph (V := ℕ) (φ := φ) (v := x)
+      ⟨f x, h.graph_iff.mpr (by simp)⟩
     constructor
-    · exact fun hv ↦ hforce' (v 0) (fun i ↦ v i.succ) (by simpa using hv)
-    · intro hv
-      obtain ⟨y₁, hy₁⟩ := (hmodelN (fun i ↦ v i.succ)).1
-      have hy₁eq : y₁ = f (fun i ↦ v i.succ) := hforce' y₁ (fun i ↦ v i.succ) hy₁
-      have hveq : v = v 0 :> fun i ↦ v i.succ := by
-        ext i; cases i using Fin.cases <;> simp
-      rw [hveq, hv]
-      simpa [hy₁eq] using hy₁
-  have hmodelV : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T], ∀ v : Fin k → V,
-      (∃ y, (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y :> v)) ∧
-        ∀ y y', (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y :> v) →
-          (minimalPairGraph (minimalGraphMatrix φ)).Evalb (y' :> v) → y = y' := by
-    intro V _ _ v
-    have hIS0T : 𝗜𝚺₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗕𝚺₁) inferInstance inferInstance
-    have hVIS0 : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₀ T inferInstance
-    apply models_existsUnique_minimalPairGraph
+    · exact fun hv ↦ hforce' hv
+    · intro e
+      obtain rfl : y₀ = f x := e
+      rwa [hforce' hy₁] at hy₁
+  refine ⟨⟨hdef, ?_⟩, ?_⟩ <;> apply Arithmetic.complete.{0} <;> intro (V : Type) _ _ <;>
+    have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗕𝚺₁ T inferInstance
+  · apply models_totalitySentence_iff.mpr
+    intro v
     obtain ⟨y, hy⟩ := h.models V v
-    exact ⟨y, (models_iff_exists_minimalGraphMatrix.mp
-      (consequence_iff'.mp (Theory.Proof.sound hTIS1) V) (y :> v)).mp hy⟩
-  have hPA : 𝗣𝗔⁻ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗕𝚺₁) inferInstance inferInstance
-  have hEQ : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance hPA
-  have htotal : T ⊢ totalitySentence (minimalGraph φ) :=
-    Arithmetic.complete T _ fun (V : Type) _ _ ↦
-      models_totalitySentence_iff.mpr fun v ↦ (hmodelV V v).1
-  have hfunctional : T ⊢ functionalitySentence (minimalGraph φ) :=
-    Arithmetic.complete T _ fun (V : Type) _ _ ↦
-      models_functionalitySentence_iff.mpr fun v y y' hy hy' ↦ by
-        simpa [minimalGraph] using (hmodelV V v).2 y y'
-          (by simpa [minimalGraph] using hy) (by simpa [minimalGraph] using hy')
-  exact ⟨⟨hdef, htotal⟩, hfunctional⟩
+    exact (models_existsUnique_minimalGraph ⟨y, hy⟩).1
+  · apply models_functionalitySentence_iff.mpr
+    intro v y y' hy hy'
+    obtain ⟨y₀, hy₀⟩ := h.models V v
+    exact (models_existsUnique_minimalGraph ⟨y₀, hy₀⟩).2 y y' hy hy'
 
 section
 variable {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
@@ -417,8 +411,6 @@ end
 end ProvablyTotalVia
 
 namespace ProvablyFunctionalVia
-
-lemma toProvablyFunctional (h : T.ProvablyFunctionalVia f φ) : T.ProvablyFunctional f := ⟨φ, h⟩
 
 lemma models (h : T.ProvablyFunctionalVia f φ) (V : Type*) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* T] :
     ∃ F : (Fin k → V) → V, 𝚺ᴬ₁.DefinedFunction F φ := by
@@ -447,7 +439,7 @@ lemma mono (h : T.ProvablyTotal f) (hT : T ⪯ U) : U.ProvablyTotal f :=
 /-- Provable totality depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
 lemma of_Pi2 (h : T.ProvablyTotal f)
-    (H : ∀ σ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) : U.ProvablyTotal f :=
+    (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) : U.ProvablyTotal f :=
   have ⟨_, h⟩ := h; ⟨_, h.of_Pi2 H⟩
 
 section
@@ -463,9 +455,9 @@ lemma comp (hg : T.ProvablyTotal g) (hh : ∀ i, T.ProvablyTotal (h i)) :
 
 end
 
-/-- Over a theory containing `𝗜𝚺₁`, the `∃` form of totality implies the stronger `∃!` form.
+/-- Over a theory containing `𝗟𝚺1`, the `∃` form of totality implies the stronger `∃!` form.
 - [HP98, Lemma IV.3.4] -/
-lemma exists_unique [𝗜𝚺₁ ⪯ T] (h : T.ProvablyTotal f) :
+lemma exists_unique [𝗟𝚺1 ⪯ T] (h : T.ProvablyTotal f) :
     ∃ φ, T.ProvablyTotalVia f φ ∧ T ⊢ uniqueTotalitySentence φ :=
   have ⟨_, h⟩ := h; ⟨_, h, h.exists_unique⟩
 
@@ -477,13 +469,14 @@ lemma provablyTotalFunctions_subset (h : T ⪯ U) :
 /-- The class of provably total functions depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
 lemma provablyTotalFunctions_subset_of_Pi2
-    (H : ∀ σ : ArithmeticSentence, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ → T ⊢ σ → U ⊢ σ) :
+    (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.of_Pi2 H
 
 namespace ProvablyFunctional
 
 lemma toProvablyTotal (h : T.ProvablyFunctional f) : T.ProvablyTotal f :=
-  have ⟨_, h⟩ := h; h.toProvablyTotalVia.toProvablyTotal
+  have ⟨_, h⟩ := h;
+  ⟨_, h.toProvablyTotalVia⟩
 
 end ProvablyFunctional
 
@@ -492,9 +485,10 @@ coincide, identifying `provablyTotalFunctions` with Bek99's class of functions w
 `∃!`-provably total graph.
 - [Bek99, §1] -/
 theorem provablyTotal_iff_provablyFunctional [𝗕𝚺₁ ⪯ T] :
-    T.ProvablyTotal f ↔ T.ProvablyFunctional f :=
-  ⟨fun h ↦ have ⟨_, h⟩ := h; ⟨_, h.provablyFunctionalVia_minimalGraph⟩,
-    ProvablyFunctional.toProvablyTotal⟩
+  T.ProvablyTotal f ↔ T.ProvablyFunctional f := ⟨
+    fun ⟨_, h⟩ ↦ ⟨_, h.provablyFunctionalVia_minimalGraph⟩,
+    fun ⟨_, h⟩ ↦ ⟨_, h.toProvablyTotalVia⟩,
+  ⟩
 
 end ArithmeticTheory
 

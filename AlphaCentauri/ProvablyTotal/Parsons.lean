@@ -163,17 +163,17 @@ open ProvablyFunctionalVia in
 theorem provablyFunctional_of_primrec' {f : List.Vector ℕ k → ℕ} (hf : Nat.Primrec' f) :
     𝗜𝚺₁.ProvablyFunctional (fun v ↦ f (.ofFn v)) := by
   induction hf with
-  | zero => exact (zero.of_eq (by simp)).toProvablyFunctional
-  | succ => exact (succ.of_eq (by simp)).toProvablyFunctional
-  | get i => exact ((get i).of_eq (by simp)).toProvablyFunctional
+  | zero => exact ⟨_, zero.of_eq (by simp)⟩
+  | succ => exact ⟨_, succ.of_eq (by simp)⟩
+  | get i => exact ⟨_, (get i).of_eq (by simp)⟩
   | comp g _ _ ihf ihg =>
     obtain ⟨ψ, hψ⟩ := ihf
     choose χ hχ using ihg
-    exact ((hψ.comp hχ).of_eq (by simp)).toProvablyFunctional
+    exact ⟨_, (hψ.comp hχ).of_eq (by simp)⟩
   | prec _ _ ihf ihg =>
     obtain ⟨ψ, hψ⟩ := ihf
     obtain ⟨χ, hχ⟩ := ihg
-    exact ((hψ.prec hχ).of_eq (by simp)).toProvablyFunctional
+    exact ⟨_, (hψ.prec hχ).of_eq (by simp)⟩
 
 /-- Every primitive recursive function, in Mathlib's curried form `Primrec`, is `𝗜𝚺₁`-provably
 functional.

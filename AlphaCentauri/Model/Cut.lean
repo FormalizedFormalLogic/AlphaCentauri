@@ -99,7 +99,7 @@ theorem models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ]
     rintro _ ⟨φ, hφ, rfl⟩
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
       using hMN.eval_of_endExtension
-        (Bounding.Hierarchy.zero_iff_bounded.mp (StrictHierarchy.zero_iff.mp hφ))
+        (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
 
 end EndExtension
 

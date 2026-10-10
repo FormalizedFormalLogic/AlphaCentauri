@@ -28,25 +28,75 @@ accept:
 
 declaration:
   # The unproved statements themselves.
+  FFL.FirstOrder.Arithmetic.BSigma1.finiteAxiomatizable:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Kay91, Exercise 10.4].
+      - FFL.FirstOrder.Arithmetic.BSigma1.finiteAxiomatizable
+  FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
   FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1
-  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi:
+  FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1_weakerThanOn_Pi1_ISigma0:
     forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
+      # An open problem, not a theorem awaiting formalization: [HP98, §V.1(a), p. 274].
+      - FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1_weakerThanOn_Pi1_ISigma0
+  FFL.FirstOrder.Arithmetic.ISigma0.finiteAxiomatizable:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [HP98, Corollary V.4.39], [Kay91, Exercise 10.4].
+      - FFL.FirstOrder.Arithmetic.ISigma0.finiteAxiomatizable
+  FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1.finiteAxiomatizable:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [HP98, Corollary V.4.39], [Kay91, Exercise 10.4].
+      - FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1.finiteAxiomatizable
+  FFL.FirstOrder.Arithmetic.ISigma_strictlyWeakerThan_BSigma_succ:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma_strictlyWeakerThan_BSigma_succ
   FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
   FFL.FirstOrder.Arithmetic.Peano.reflexive:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive
+  FFL.FirstOrder.Arithmetic.BSigma1_weakerThan_ISigma0_add_not_exp:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [WP89].
+      - FFL.FirstOrder.Arithmetic.BSigma1_weakerThan_ISigma0_add_not_exp
+  FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [HP98, §V.5(f), p. 393].
+      - FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0
+  FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1
+  FFL.FirstOrder.Arithmetic.exists_properEndExtension_of_BSigma1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Kay91, Chapter 16, p. 269], [WP89].
+      - FFL.FirstOrder.Arithmetic.exists_properEndExtension_of_BSigma1
+  FFL.FirstOrder.Arithmetic.BSigma_weakerThan_IDelta:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [HP98, Remark after Theorem I.2.5].
+      - FFL.FirstOrder.Arithmetic.BSigma_weakerThan_IDelta
+  FFL.FirstOrder.Arithmetic.PigeonholeOnPrenexHierarchy_weakerThan_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [PWW88, Problem 2].
+      - FFL.FirstOrder.Arithmetic.PigeonholeOnPrenexHierarchy_weakerThan_ISigma0
+  FFL.FirstOrder.Arithmetic.PigeonholeOnPrenexHierarchy_weakerThan_ISigma0_union_Omega1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [HP98, §V.5(g)].
+      - FFL.FirstOrder.Arithmetic.PigeonholeOnPrenexHierarchy_weakerThan_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0:
     forgive:
       # An open problem, not a theorem awaiting formalization: [PWW88, Problem 1].
       - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0
+  FFL.FirstOrder.Arithmetic.exists_complete_extension_ISigma0_of_restricted_complexity:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [ELV25, Question 1.2].
+      - FFL.FirstOrder.Arithmetic.exists_complete_extension_ISigma0_of_restricted_complexity
   FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
@@ -80,48 +130,12 @@ declaration:
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stSigma1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Sigma1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Sigma1_of_lt:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stPi_of_le:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_stPi:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi_self:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive
-  FFL.FirstOrder.Arithmetic.Peano.provable_localReflection_ISigma:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.exists_prime_gt:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.not_finiteAxiomatizable_of_Peano_le:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
-  FFL.ProvabilityLogic.D_weakerThan_provabilityLogic_ISigma_ISigma:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.ProvabilityLogic.provabilityLogic_ISigma_ISigma_eq_D:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.ProvabilityLogic.provabilityLogic_ISigma1_add_con_Peano_eq_A:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.ProvabilityLogic.provabilityLogic_ISigma_Peano_eq_S:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi
-  FFL.ProvabilityLogic.trace_provabilityLogic_ISigma_ISigma_eq_univ:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_localReflectionOn_Pi

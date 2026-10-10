@@ -41,11 +41,9 @@ noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] :
   or := .mkSigma
     “y param p₁ p₂ y₁ y₂. ∃ z, !qqOrDef z p₁ p₂ ∧ ∃ u, !unionDef u y₁ y₂ ∧ !insertDef y z u”
   all := .mkSigma
-    “y param p₁ y₁. ∃ z, !qqAllDef z p₁ ∧ !insertDef y z y₁”
+    “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ ∃ z, !qqAllDef z p₁ ∧ !insertDef y z y₁”
   exs := .mkSigma
-    “y param p₁ y₁. ∃ z, !qqExsDef z p₁ ∧ !insertDef y z y₁”
-  allChanges := .mkSigma “param' param. param' = param”
-  exsChanges := .mkSigma “param' param. param' = param”
+    “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ ∃ z, !qqExsDef z p₁ ∧ !insertDef y z y₁”
 
 /-- Construction realizing `blueprint`: the immediate subformulas of a compound code are
 inserted into the union of the subformula sets already computed for its parts; the parameter
@@ -58,10 +56,8 @@ noncomputable def construction (L : Language) [L.Encodable] [L.LORDefinable] :
   falsum _ := insert (^⊥ : V) ∅
   and _ := fun p₁ p₂ y₁ y₂ ↦ insert (p₁ ^⋏ p₂) (y₁ ∪ y₂)
   or _ := fun p₁ p₂ y₁ y₂ ↦ insert (p₁ ^⋎ p₂) (y₁ ∪ y₂)
-  all _ := fun p₁ y₁ ↦ insert (^∀ p₁) y₁
-  exs _ := fun p₁ y₁ ↦ insert (^∃ p₁) y₁
-  allChanges := id
-  exsChanges := id
+  all _ := fun p₁ ys ↦ insert (^∀ p₁) ys.[0]
+  exs _ := fun p₁ ys ↦ insert (^∃ p₁) ys.[0]
   rel_defined := .mk fun v ↦ by simp [blueprint, emptyset_def]
   nrel_defined := .mk fun v ↦ by simp [blueprint, emptyset_def]
   verum_defined := .mk fun v ↦ by simp [blueprint, emptyset_def]
@@ -70,8 +66,6 @@ noncomputable def construction (L : Language) [L.Encodable] [L.LORDefinable] :
   or_defined := .mk fun v ↦ by simp [blueprint]
   all_defined := .mk fun v ↦ by simp [blueprint]
   exs_defined := .mk fun v ↦ by simp [blueprint]
-  allChanges_defined := .mk fun v ↦ by simp [blueprint]
-  exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
 end Subformula
 
@@ -112,9 +106,9 @@ instance subformulas.defined : 𝚺ᴬ₁-Function₁ subformulas (V := V) L via
 instance subformulas.definable : 𝚺ᴬ₁-Function₁ subformulas (V := V) L :=
   subformulas.defined.to_definable
 
-/-- `subformulas` is definable at every level `Γᴬ-[m + 1]` of the hierarchy.
+/-- `subformulas` is definable at every level `Γᴬ_[m + 1]` of the hierarchy.
 - No source; a formalization device mirroring the external subformula relation. -/
-instance subformulas.definable' : Γᴬ-[m + 1]-Function₁ subformulas (V := V) L :=
+instance subformulas.definable' : Γᴬ_[m + 1]-Function₁ subformulas (V := V) L :=
   subformulas.definable.of_sigmaOne
 
 end

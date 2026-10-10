@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Schemata.EA
+public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 
 /-!

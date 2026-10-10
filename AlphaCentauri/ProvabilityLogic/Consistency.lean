@@ -2,7 +2,6 @@ module
 
 public import AlphaCentauri.Reflection.ISigma
 public import AlphaCentauri.ToFoundation.Entailment
-public import AlphaCentauri.ToFoundation.StandardProvability
 public import Foundation.ProvabilityLogic.Classification.General
 
 /-!
@@ -24,7 +23,7 @@ variable {α : Type*}
 theorem provabilityLogic_ISigma1_add_con_Peano_eq_A :
     (𝗜𝚺₁).provabilityLogicRelativeTo (𝗜𝚺₁ ∪ 𝗣𝗔.Con) (α := α) = 𝐀 := by
   apply provabilityLogic_add_con_eq_A;
-  · exact ISigma.provable_standardProvability_imp_Peano 1;
+  · exact InductionOnPrenexHierarchy.provable_standardProvability_imp_Peano 1;
   · intro σ hσ;
     exact (inferInstance : 𝗜𝚺 2 ⪯ 𝗣𝗔).pbl (ISigma.provable_localReflectionOn_Sigma1 le_rfl hσ)
   · apply Theory.consistent_of_satisfiable ⟨ℕ↓[ℒₒᵣ], ?_⟩;

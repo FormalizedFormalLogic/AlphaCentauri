@@ -547,16 +547,17 @@ theorem nonempty_anchored_of_provable [RewriteClosed C] [RewriteClosed D]
   obtain ⟨Δ, hΔ, ⟨d⟩⟩ := Theory.Proof.provable_iff.mp h
   exact nonempty_anchored_of_derivation hCD hPA hΔ d
 
-/-- A proof in `𝗜𝚺₁` becomes a derivation anchored in the strict $\Sigma_1$ and the strict
-$\Pi_1$ propositions: the free cuts are eliminated.
+/-- A proof in `𝗜𝚺₁` becomes a derivation anchored in the blocks of existential and the
+blocks of universal quantifiers over a bounded matrix: the free cuts are eliminated.
 
 - [Bus98A, Section 1.4.2] -/
 theorem nonempty_anchored_of_provable_ISigma1 {σ : ArithmeticSentence}
     (h : 𝗜𝚺₁ ⊢ σ) :
-    ⊢ᴸᴷᴵ[StrictHierarchy 𝚺 1, fun φ ↦ StrictHierarchy 𝚺 1 φ ∨ StrictHierarchy 𝚷 1 φ]
+    ⊢ᴸᴷᴵ[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1,
+      fun φ ↦ ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ ∨ ℬ[<, ℒₒᵣ].PrenexBlock 𝚷 φ]
       ⦃σ⦄ :=
-  nonempty_anchored_of_provable (fun _ hη _ ↦ .inl (StrictHierarchy.rew _ hη))
-    (fun τ hτ ↦ .inr (StrictHierarchy.rew _ (PeanoMinus.strictHierarchy τ hτ))) h
+  nonempty_anchored_of_provable (fun _ hη _ ↦ .inl (Bounding.PrenexBlock.rew _ hη.prenexBlock))
+    (fun τ hτ ↦ .inr (Bounding.PrenexBlock.rew _ (PeanoMinus.prenexBlock τ hτ))) h
 
 end Canonical
 

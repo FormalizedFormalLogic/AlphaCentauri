@@ -104,9 +104,9 @@ proving `P 🡒 σ`, for every uniform $\Pi_{n + 1}$ reflection instance `σ` fo
 - [Bek99, Proposition 2.1]
 - [Bek99, Lemma 5.1] -/
 axiom uniformReflection_of_parameterFreeInduction {n : ℕ} {T₀ : ArithmeticTheory} [T₀.Δ₁]
-    (hT₀ : 𝗜𝚺₁ ⪯ T₀) (P : ArithmeticSentence) (hP : StrictHierarchy 𝚷 (n + 2) P) :
-    ∃ φ : ArithmeticSemisentence 1, StrictHierarchy 𝚷 (n + 1) φ ∧
-      ∀ σ ∈ 𝗥𝗙𝗡[StrictHierarchy 𝚷 (n + 1)] (T₀ ∪ {P}),
+    (hT₀ : 𝗜𝚺₁ ⪯ T₀) (P : ArithmeticSentence) (hP : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2) P) :
+    ∃ φ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1) φ ∧
+      ∀ σ ∈ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1)] (T₀ ∪ {P}),
         T₀ ∪ {parameterFreeSuccInd ℒₒᵣ φ} ⊢ P 🡒 σ
 
 end FFL.FirstOrder.Arithmetic

@@ -2,7 +2,8 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.Measures
-public import AlphaCentauri.ToMathlib.Util.Disjunct
+public import AlphaCentauri.ToFoundation.Set
+public import Foundation.Vorspiel.Tactic.Disj
 
 /-!
 # Inversion for the internal cut-free calculus
@@ -286,22 +287,43 @@ lemma exists_or_of_shift_eq_or {r p q : V} (hr : IsUFormula L r) (h : shift L r 
   · simp [qqOr, qqAll] at h
   · simp [qqOr, qqExs] at h
 
+/-- A formula code whose external-variable shift is a universal quantification is itself one, and
+its body shifts to the given one. -/
+lemma exists_all_of_shift_eq_all {r p : V} (hr : IsUFormula L r) (h : shift L r = ^∀ p) :
+    ∃ r₁, IsUFormula L r₁ ∧ r = ^∀ r₁ ∧ shift L r₁ = p := by
+  rcases shift_case hr with
+    (⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨rfl, hs⟩ | ⟨rfl, hs⟩ |
+      ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ |
+      ⟨r₁, hr₁, rfl, hs⟩ | ⟨r₁, hr₁, rfl, hs⟩) <;> rw [hs] at h
+  · simp [qqRel, qqAll] at h
+  · simp [qqNRel, qqAll] at h
+  · simp [qqVerum, qqAll] at h
+  · simp [qqFalsum, qqAll] at h
+  · simp [qqAnd, qqAll] at h
+  · simp [qqOr, qqAll] at h
+  · exact ⟨r₁, hr₁, rfl, by simpa using h⟩
+  · simp [qqAll, qqExs] at h
+
+/-- A formula code whose external-variable shift is an existential quantification is itself one,
+and its body shifts to the given one. -/
+lemma exists_exs_of_shift_eq_exs {r p : V} (hr : IsUFormula L r) (h : shift L r = ^∃ p) :
+    ∃ r₁, IsUFormula L r₁ ∧ r = ^∃ r₁ ∧ shift L r₁ = p := by
+  rcases shift_case hr with
+    (⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨rfl, hs⟩ | ⟨rfl, hs⟩ |
+      ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ |
+      ⟨r₁, hr₁, rfl, hs⟩ | ⟨r₁, hr₁, rfl, hs⟩) <;> rw [hs] at h
+  · simp [qqRel, qqExs] at h
+  · simp [qqNRel, qqExs] at h
+  · simp [qqVerum, qqExs] at h
+  · simp [qqFalsum, qqExs] at h
+  · simp [qqAnd, qqExs] at h
+  · simp [qqOr, qqExs] at h
+  · simp [qqAll, qqExs] at h
+  · exact ⟨r₁, hr₁, rfl, by simpa using h⟩
+
 section
 
 variable {T : Theory L} [T.Δ₁]
-
-/-- Adding the same code twice to a coded set is adding it once. -/
-private lemma insert_insert_self (x s : V) : insert x (insert x s) = insert x s := mem_ext <| by
-  intro z
-  simp only [mem_bitInsert_iff]
-  tauto
-
-/-- Adding two codes to a coded set does not depend on their order. -/
-private lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) :=
-  mem_ext <| by
-    intro z
-    simp only [mem_bitInsert_iff]
-    tauto
 
 /-- Removing a code just added to a coded set that did not contain it recovers the set. -/
 private lemma bitRemove_insert_of_not_mem {x s : V} (h : x ∉ s) : bitRemove x (insert x s) = s :=
@@ -411,14 +433,14 @@ private lemma succ_le_succ {x y : V} (h : x ≤ y) : x + 1 ≤ y + 1 := by simpa
 
 namespace CutFreeDerivation
 
-/-- The $\Sigma_1$ form of the conjunction inversion that the course-of-values induction proves:
-every piece of data is bounded by the derivation it is read off.
+/-- The $\Sigma_1$ form of the conjunction inversion: every piece of data is bounded by the
+derivation it is read off.
 - [Bus98, Ch. I §2.4] -/
 private lemma inversion_and_aux :
     ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋏ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert c s) ∧ height d' ≤ height d + 1 := by
-  have hP : 𝚺ᴬ-[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
+  have hP : 𝚺ᴬ_[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋏ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert c s) ∧ height d' ≤ height d + 1 := by
     definability
@@ -680,15 +702,15 @@ theorem inversion_and {p q c s d : V} (hc : c = p ∨ c = q)
   obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc hd.1
   exact inversion_and_aux d _ b₁ _ b₂ _ b₃ _ b₄ hc hd
 
-/-- The $\Sigma_1$ form of the disjunction inversion that the course-of-values induction proves:
-every piece of data is bounded by the derivation it is read off.
+/-- The $\Sigma_1$ form of the disjunction inversion: every piece of data is bounded by the
+derivation it is read off.
 - [Bus98, Ch. I §2.4] -/
 private lemma inversion_or_aux :
     ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋎ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert p (insert q s)) ∧
         height d' ≤ height d + 1 := by
-  have hP : 𝚺ᴬ-[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,
+  have hP : 𝚺ᴬ_[1]-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,
       CutFreeDerivationOf (∅ : Theory L) d (insert (p ^⋎ q) s) →
       ∃ d', CutFreeDerivationOf (∅ : Theory L) d' (insert p (insert q s)) ∧
         height d' ≤ height d + 1 := by

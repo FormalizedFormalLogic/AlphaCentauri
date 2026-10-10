@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Tactic.Primrec
+public import Foundation.Vorspiel.Computability.Primrec
 public import AlphaCentauri.ToMathlib.Primrec
 public import AlphaCentauri.Hierarchy.Bounded
 public import Foundation.FirstOrder.Arithmetic.R0.Representation

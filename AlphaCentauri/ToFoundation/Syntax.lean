@@ -68,7 +68,7 @@ lemma termBShift_zero {t : V} (ht : IsSemiterm L 0 t) : termBShift L t = t := by
     rw [nth_termBShiftVec hts.isUTerm hi]
     exact ih i hi
 
-lemma isSemitermVec_fvarVec (m n : V) : IsSemitermVec ℒₒᵣ m n (fvarVec m) :=
+lemma isSemitermVec_fvarVec (m n : V) : IsSemitermVec L m n (fvarVec m) :=
   IsSemitermVec.iff.mpr ⟨len_fvarVec m, fun i hi ↦ by simp [nth_fvarVec m i hi]⟩
 
 lemma nth_qVec_succ {k w j : V} (hw : IsUTermVec ℒₒᵣ k w) (hj : j < k) :

@@ -193,10 +193,10 @@ private lemma subst_qVec_qVec_prenexInductionAtom {t : V} (hZ : IsSemiformula �
   have ht' : IsSemiterm ℒₒᵣ (m + 2) t :=
     IsSemiterm.def.mpr ⟨ht.isUTerm, (IsSemiterm.def.mp ht).2.trans le_add_self⟩
   have hv : IsSemitermVec ℒₒᵣ (m + 2) 2 (qVec ℒₒᵣ (qVec ℒₒᵣ (fvarVec m))) := by
-    simpa [add_assoc, one_add_one_eq_two] using (isSemitermVec_fvarVec m 0).qVec.qVec
+    simpa [add_assoc, one_add_one_eq_two] using (isSemitermVec_fvarVec (L := ℒₒᵣ) m 0).qVec.qVec
   have hb : IsSemitermVec ℒₒᵣ m (m + 2) (bvarVec 2 m) := IsSemitermVec.bvarVec (by rw [add_comm])
   have h₂ : IsUTermVec ℒₒᵣ (m + 1) (qVec ℒₒᵣ (fvarVec m)) :=
-    (isSemitermVec_fvarVec m 0).qVec.isUTerm
+    (isSemitermVec_fvarVec (L := ℒₒᵣ) m 0).qVec.isUTerm
   rw [prenexInductionAtom, substs_substs hZ hv (isSemitermVec_cons_bvarVec ht'),
     termSubstVec_cons ht'.isUTerm hb.isUTerm]
   congr 2
@@ -286,7 +286,7 @@ private lemma prenexIndFormula_val {n : ℕ} (h : IsInductionMatrix n m Z)
     Fin.coe_ofNat_eq_mod, Nat.zero_mod, Nat.cast_zero, Arithmetic.val_add, Nat.mod_succ,
     Nat.cast_one]
   have hv : IsSemitermVec ℒₒᵣ (m + 2) 2 (qVec ℒₒᵣ (qVec ℒₒᵣ (fvarVec m))) := by
-    simpa [add_assoc, one_add_one_eq_two] using (isSemitermVec_fvarVec m 0).qVec.qVec
+    simpa [add_assoc, one_add_one_eq_two] using (isSemitermVec_fvarVec (L := ℒₒᵣ) m 0).qVec.qVec
   have hB := h.isSemiformula_prenexInductionMatrix
   have h₀ := isSemiformula_prenexInductionAtom h.1 (numeral_semiterm _ 0)
   have h₁ := isSemiformula_prenexInductionAtom h.1 isSemiterm_bvar_zero
@@ -333,7 +333,7 @@ theorem exists_derivable_prenexInductionAxiom {n : ℕ} {p : V}
       Derivable (∅ : Theory ℒₒᵣ) (insert (neg ℒₒᵣ (prenexInductionAxiom m Z)) ({p} : V)) := by
   obtain ⟨m, hm, b, hb, rfl, hU, hsh, hbv, K, hK, hKs, hKS, hsub⟩ := h
   have hbs : IsSemiformula ℒₒᵣ m b := hbv ▸ hU.isSemiformula
-  have hfv := isSemitermVec_fvarVec m 0
+  have hfv := isSemitermVec_fvarVec (L := ℒₒᵣ) m 0
   have hsub₀ := hsub
   rw [show indBodyVal K = _ ^⋎ (_ ^⋎ ^∀ K) from rfl] at hsub
   obtain ⟨b₁, b₂, rfl, -, h₂⟩ := exists_eq_or_of_subst_eq hU hsub

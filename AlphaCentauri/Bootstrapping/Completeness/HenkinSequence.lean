@@ -6,12 +6,8 @@ public import AlphaCentauri.Bootstrapping.Completeness.Henkin
 # The Henkin set
 
 The decision sequence of Henkin's construction exists and is unique in a model of
-$\mathsf{PA}$, and the set of formulas decided positively is $\Delta_2$-definable.
-
-## References
-
-- [Lin97, Theorem 6.4]
-- [HP98, Theorem I.4.25]
+$\mathsf{PA}$, and the set of formulas decided positively along it, the Henkin set, is
+$\Delta_2$-definable.
 -/
 
 @[expose] public section
@@ -111,6 +107,7 @@ lemma IsHenkinSeq.znth_eq {n m y y' : V} (hy : IsHenkinSeq S n y) (hy' : IsHenki
     have hm' : i < m := succ_le_iff_lt.mp hm
     rw [hy.2.2.2 i hn', hy'.2.2.2 i hm', ih hn'.le hm'.le]
 
+/-- There is a $\Delta_2$-definable Henkin context. -/
 theorem exists_isHenkinContext :
     ∃ c : V → V, IsHenkinContext S c ∧ 𝚫ᴬ_[2]-Function₁[V] c := by
   choose f hf using exists_isHenkinSeq (V := V) S
@@ -158,7 +155,6 @@ lemma IsHenkinContext.unique {c c' : V → V} (hc : IsHenkinContext S c)
   funext n
   exact InductionOnHierarchy.succ_induction_sigma 𝚫 2 hP hzero hsucc n
 
-open Classical in
 /-- The contexts of the decision sequence of the Henkin completion of `S`. -/
 noncomputable def henkinContext : V → V := Classical.choose (exists_isHenkinContext (V := V) S)
 
@@ -168,9 +164,13 @@ lemma isHenkinContext_henkinContext : IsHenkinContext S (henkinContext S : V →
 lemma henkinContext_definable : 𝚫ᴬ_[2]-Function₁[V] (henkinContext S) :=
   (Classical.choose_spec (exists_isHenkinContext (V := V) S)).2
 
-/-- The Henkin set of `S`: the formulas decided positively along the decision sequence. -/
+/-- The Henkin set of `S`: the formulas decided positively along `henkinContext S`. -/
 def HenkinSet (x : V) : Prop := HenkinMem S (henkinContext S) x
 
+/-- The Henkin set is $\Delta_2$-definable.
+
+- [Lin97, Theorem 6.4]
+- [HP98, Theorem I.4.25] -/
 theorem henkinSet_definable : 𝚫ᴬ_[2]-Predicate[V] (HenkinSet S) := by
   have hmem : 𝚺ᴬ₁-Relation fun x c : V ↦
       IsFormula L x ∧ Derivable S (insert (neg L (henkinFormula L x (x + c))) (insert x c)) := by

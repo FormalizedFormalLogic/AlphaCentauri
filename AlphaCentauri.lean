@@ -6,6 +6,8 @@ public import AlphaCentauri.Axiomatizability.ISigma
 public import AlphaCentauri.Axiomatizability.ISigma0
 public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Axiomatizability.RestrictedComplexity
+public import AlphaCentauri.Bootstrapping.Completeness.Henkin
+public import AlphaCentauri.Bootstrapping.Completeness.HenkinSequence
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation

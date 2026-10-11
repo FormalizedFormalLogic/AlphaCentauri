@@ -79,7 +79,30 @@ lemma funcGraph_subst_fvar {k : ℕ} (c : V) (d : Semiformula V L 1)
     (funcGraph d A γ).subst ![Semiterm.fvar c] =
       relativizedImp d A (γ.subst (Semiterm.fvar c :> fun i : Fin k ↦
         Semiterm.bvar (i.addCast 0))) := by
-  sorry
+  unfold funcGraph relativizedImp
+  rw [allItr_subst_fvar]
+  congr 1
+  simp only [Semiformula.substs_imp, Semiformula.substs_conj, Semiformula.substs_and,
+    Semiformula.substs_substs]
+  have h₁ : ∀ i : Fin k, (Semiterm.subst fun j : Fin (1 + k) ↦
+      if h : (j : ℕ) < k then Semiterm.bvar ((⟨j, h⟩ : Fin k).addCast 0) else Semiterm.fvar c) ⨟
+      ![(Semiterm.bvar (i.addCast 1) : Semiterm V L (1 + k))] =
+      ![(Semiterm.bvar (i.addCast 0) : Semiterm V L (0 + k))] := by
+    intro i
+    funext j
+    obtain rfl : j = 0 := Subsingleton.elim _ _
+    simp
+  have h₂ : (Semiterm.subst fun j : Fin (1 + k) ↦
+      if h : (j : ℕ) < k then Semiterm.bvar ((⟨j, h⟩ : Fin k).addCast 0) else Semiterm.fvar c) ⨟
+      ((Semiterm.bvar (Fin.cast (Nat.add_comm k 1) (Fin.last k)) : Semiterm V L (1 + k)) :>
+        fun i ↦ Semiterm.bvar (i.addCast 1) : SemitermVec V L (k + 1) (1 + k)) =
+      (Semiterm.fvar c : Semiterm V L (0 + k)) :> fun i : Fin k ↦
+        (Semiterm.bvar (i.addCast 0) : Semiterm V L (0 + k)) := by
+    funext j
+    cases j using Fin.cases with
+    | zero => simp
+    | succ i => simp
+  simp only [h₁, h₂]
 
 /-- Replacement of domain-equivalent hypotheses in `funcGraph`. -/
 theorem funcGraph_congr {k : ℕ} (d : Semiformula V L 1) (A B : Fin k → Semiformula V L 1)

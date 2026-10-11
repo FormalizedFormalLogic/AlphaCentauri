@@ -34,7 +34,8 @@ omit [𝗘𝗤 L ⪯ S] in
 private lemma henkinEq_definable (u : V) : 𝚫ᴬ_[2]-Predicate[V] fun a ↦ HenkinEq S a u := by
   have hf : 𝚺ᴬ₁-Function₁[V] fun a ↦
       (Semiformula.equal (Semiterm.fvar a) (Semiterm.fvar u) : Formula V L).val := by
-    simp [Semiformula.equal]
+    simp only [Semiformula.equal, Semiformula.rel_val, Nat.cast_ofNat, SemitermVec.val_succ,
+      Matrix.head_cons, Semiterm.fvar_val, Matrix.tail_cons, SemitermVec.val_nil]
     definability
   exact (henkinSet_definable S).comp (hf.of_lt (by simp))
 

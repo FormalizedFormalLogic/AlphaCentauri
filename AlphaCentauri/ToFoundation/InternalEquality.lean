@@ -25,9 +25,11 @@ noncomputable def Semiformula.equal {n : ℕ} (s t : Semiterm V L n) : Semiformu
 lemma quote_eqop {n : ℕ} (t u : ClosedSemiterm L n) :
     (⌜(op(=).operator ![t, u] : Semisentence L n)⌝ : Semiformula V L n) =
       Semiformula.equal ⌜t⌝ ⌜u⌝ := by
-  simp [Semiformula.Operator.operator, Semiformula.Operator.Eq.sentence_eq, Semiformula.equal]
+  simp only [Semiformula.Operator.operator, Semiformula.Operator.Eq.sentence_eq,
+    Semiformula.rew_rel_eq_comp, Rew.emb_eq_id, Semiformula.equal]
   rw [Sentence.typed_quote_def]
-  simp
+  simp only [Semiformula.rew_rel_eq_comp, Semiformula.typed_quote_rel, Function.comp_apply,
+    Rew.id_app, Rew.subst_bvar]
   congr 1
   funext i
   match i with
@@ -151,8 +153,8 @@ theorem tprovable_equal_func [𝗘𝗤 L ⪯ S] {k : ℕ} (f : L.Func k) {s u : 
     (tprovable_quote_eqAxiom S (Theory.eqAxiom.funcExt f))
   simp only [LCWQIsoGödelQuote.imply, quote_conj, quote_eqop, Semiformula.substs_imp,
     Semiformula.substs_equal, Semiformula.substs_conj] at h₁
-  simp [Semiterm.empty_typed_quote_bvar, Semiterm.empty_typed_quote_func,
-    append_addCast, append_addNat] at h₁
+  simp only [Semiterm.empty_typed_quote_bvar, Semiterm.substs_bvar, append_addCast,
+    append_addNat, Semiterm.empty_typed_quote_func, Semiterm.substs_func] at h₁
   have e₁ : (Semiterm.subst (Fin.append s u))⨟ (fun i ↦ Semiterm.bvar (Fin.addCast k i)) = s := by
     funext i
     simp [append_addCast]

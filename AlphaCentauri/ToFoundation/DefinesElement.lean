@@ -172,10 +172,100 @@ theorem definesElement_exists (d A : Semiformula V L 1) [𝗘𝗤 L ⪯ T] :
     SemitermVec.q_zero, Semiterm.substs_fvar, Matrix.cons_val_zero, v₁, v₂, v₃] at h₁ ⊢
   cl_prover [h₁, h₂]
 
+lemma definesElement_inner (d A : Semiformula V L 1) [𝗘𝗤 L ⪯ T] (c x z : V) :
+    T.internalize V ⊢
+      (d ⋏ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒
+        (A.subst ![Semiterm.bvar 0] 🡘
+              Semiformula.equal (Semiterm.bvar 0) (Semiterm.bvar 1))))).subst
+          ![Semiterm.fvar c] 🡒
+      d.subst ![Semiterm.fvar x] 🡒 A.subst ![Semiterm.fvar x] 🡒
+        (d.subst ![Semiterm.fvar z] 🡒
+          (A.subst ![Semiterm.fvar z] 🡘
+            Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar x))) := by
+  have h₁ := TProof.all_imp_subst (T := T)
+    (d.subst ![Semiterm.bvar 0] 🡒
+      (A.subst ![Semiterm.bvar 0] 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar c)))
+    (Semiterm.fvar z)
+  have h₂ := TProof.all_imp_subst (T := T)
+    (d.subst ![Semiterm.bvar 0] 🡒
+      (A.subst ![Semiterm.bvar 0] 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar c)))
+    (Semiterm.fvar x)
+  have h₃ : T.internalize V ⊢ Semiformula.equal (Semiterm.fvar x) (Semiterm.fvar c) 🡒
+      Semiformula.equal (Semiterm.fvar c) (Semiterm.fvar x) :=
+    tprovable_equal_symm_imp (S := T) (Semiterm.fvar x) (Semiterm.fvar c)
+  have h₄ : T.internalize V ⊢ Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar c) ⋏
+      Semiformula.equal (Semiterm.fvar c) (Semiterm.fvar x) 🡒
+        Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar x) :=
+    tprovable_equal_trans_imp (S := T) (Semiterm.fvar z) (Semiterm.fvar c) (Semiterm.fvar x)
+  have h₅ : T.internalize V ⊢ Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar x) ⋏
+      Semiformula.equal (Semiterm.fvar x) (Semiterm.fvar c) 🡒
+        Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar c) :=
+    tprovable_equal_trans_imp (S := T) (Semiterm.fvar z) (Semiterm.fvar x) (Semiterm.fvar c)
+  have v₁ : ∀ c : V, SemitermVec.q ![(Semiterm.fvar c : Semiterm V L 0)] 1 =
+      Semiterm.fvar c := by
+    intro c
+    rw [show (1 : Fin 2) = Fin.succ 0 from rfl, SemitermVec.q_succ]
+    simp
+  have w₁ : ∀ z : V, ((Semiterm.subst ![(Semiterm.fvar z : Semiterm V L 0)])⨟
+      ![(Semiterm.bvar 0 : Semiterm V L 1)]) = ![Semiterm.fvar z] := by
+    intro z
+    funext j
+    obtain rfl : j = 0 := Subsingleton.elim _ _
+    simp
+  have w₂ : ∀ c : V, ((Semiterm.subst (SemitermVec.q ![(Semiterm.fvar c : Semiterm V L 0)]))⨟
+      ![(Semiterm.bvar 0 : Semiterm V L 2)]) = ![(Semiterm.bvar 0 : Semiterm V L 1)] := by
+    intro c
+    funext j
+    obtain rfl : j = 0 := Subsingleton.elim _ _
+    simp
+  simp only [Semiformula.substs_and, Semiformula.substs_all, Semiformula.substs_imp,
+    Semiformula.substs_imply, Semiformula.substs_substs, Semiformula.substs_equal,
+    Semiterm.substs_bvar, Semiterm.substs_fvar, SemitermVec.q_zero, Matrix.cons_val_zero,
+    v₁, w₁, w₂, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue] at h₁ h₂ ⊢
+  have h₁' : T.internalize V ⊢ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 (A.subst ![Semiterm.bvar 0] 🡘
+        Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar c)))) 🡒
+      (d.subst ![Semiterm.fvar z] 🡒
+        (A.subst ![Semiterm.fvar z] 🡘 Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar c))) :=
+    h₁
+  have h₂' : T.internalize V ⊢ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 (A.subst ![Semiterm.bvar 0] 🡘
+        Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar c)))) 🡒
+      (d.subst ![Semiterm.fvar x] 🡒
+        (A.subst ![Semiterm.fvar x] 🡘 Semiformula.equal (Semiterm.fvar x) (Semiterm.fvar c))) :=
+    h₂
+  have kB : T.internalize V ⊢ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 (A.subst ![Semiterm.bvar 0] 🡘
+        Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar c)))) 🡒
+      d.subst ![Semiterm.fvar x] 🡒 A.subst ![Semiterm.fvar x] 🡒
+        Semiformula.equal (Semiterm.fvar c) (Semiterm.fvar x) := by
+    cl_prover [h₂', h₃]
+  have kB₂ : T.internalize V ⊢ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 (A.subst ![Semiterm.bvar 0] 🡘
+        Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar c)))) 🡒
+      d.subst ![Semiterm.fvar x] 🡒 A.subst ![Semiterm.fvar x] 🡒
+        Semiformula.equal (Semiterm.fvar x) (Semiterm.fvar c) := by
+    cl_prover [h₂']
+  have kH : T.internalize V ⊢ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 (A.subst ![Semiterm.bvar 0] 🡘
+        Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar c)))) 🡒
+      d.subst ![Semiterm.fvar z] 🡒 (A.subst ![Semiterm.fvar z] 🡘
+            Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar c)) := by
+    cl_prover [h₁']
+  have m₁ : T.internalize V ⊢ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 (A.subst ![Semiterm.bvar 0] 🡘
+        Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar c)))) 🡒
+      d.subst ![Semiterm.fvar x] 🡒 A.subst ![Semiterm.fvar x] 🡒 d.subst ![Semiterm.fvar z] 🡒
+        (Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar c) 🡒
+              Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar x)) := by
+    cl_prover [h₄, kB]
+  have m₂ : T.internalize V ⊢ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 (A.subst ![Semiterm.bvar 0] 🡘
+        Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar c)))) 🡒
+      d.subst ![Semiterm.fvar x] 🡒 A.subst ![Semiterm.fvar x] 🡒 d.subst ![Semiterm.fvar z] 🡒
+        (Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar x) 🡒
+              Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar c)) := by
+    cl_prover [h₅, kB₂]
+  sorry -- STUCK: cl_prover does not combine kH, m₁ and m₂ (suspected atom mismatch)
+
 theorem definesElement_iff_equal (d A : Semiformula V L 1) (b : V) [𝗘𝗤 L ⪯ T] :
     T.internalize V ⊢ definesElement d A 🡒 d.subst ![Semiterm.fvar b] 🡒
       A.subst ![Semiterm.fvar b] 🡒
       ∀¹ (d 🡒 (A 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar b))) := by
+  -- STUCK: needs the closed form (∀ b) plus generalisation over the existential witness
   sorry
 
 end definesElement

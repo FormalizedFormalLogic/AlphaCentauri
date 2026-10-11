@@ -127,10 +127,18 @@ open _root_.FFL.Entailment
 
 variable [L.Eq]
 
+/-- The matrix `d(y) ∧ ∀ z (d(z) → (A(z) ↔ z = y))` of `definesElement`. -/
+noncomputable def definesElementBody (d A : Semiformula V L 1) : Semiformula V L 1 :=
+  d ⋏ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒
+    (A.subst ![Semiterm.bvar 0] 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.bvar 1))))
+
 /-- `∃ y (d(y) ∧ ∀ z (d(z) → (A(z) ↔ z = y)))`: `A` defines a unique element of `d`. -/
 noncomputable def definesElement (d A : Semiformula V L 1) : Formula V L :=
   ∃¹ (d ⋏ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒
     (A.subst ![Semiterm.bvar 0] 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.bvar 1)))))
+
+lemma definesElement_eq (d A : Semiformula V L 1) :
+    definesElement d A = ∃¹ definesElementBody d A := rfl
 
 lemma shift_equal_eq {n : ℕ} (s t : Semiterm V L n) :
     (Semiformula.equal s t).shift = Semiformula.equal s.shift t.shift := by
@@ -388,13 +396,16 @@ theorem definesElement_funcGraph [𝗘𝗤 L ⪯ T] {k : ℕ} (d : Semiformula V
       Matrix.conj (fun i ↦ d.subst ![w i]) 🡒
         ∃¹ (d ⋏ γ.subst (Semiterm.bvar 0 :> fun i ↦ (w i).bShift)))
     (huniq : ∀ (y z : Term V L) (w : Fin k → Term V L), T.internalize V ⊢
-      d.subst ![y] ⋏ d.subst ![z] ⋏ γ.subst (y :> w) ⋏ γ.subst (z :> w) 🡒 Semiformula.equal y z)
+      Matrix.conj (fun i ↦ d.subst ![w i]) ⋏ d.subst ![y] ⋏ d.subst ![z] ⋏
+        γ.subst (y :> w) ⋏ γ.subst (z :> w) 🡒 Semiformula.equal y z)
     (hcongr : ∀ (y z : Term V L) (w w' : Fin k → Term V L), T.internalize V ⊢
       Semiformula.equal y z ⋏ Matrix.conj (fun i ↦ Semiformula.equal (w i) (w' i)) 🡒
-        γ.subst (y :> w) 🡒 γ.subst (z :> w')) :
-    T.internalize V ⊢ Matrix.conj (fun i ↦ definesElement d (A i)) 🡒
-      definesElement d (funcGraph d A γ) := by
-  -- STUCK: k-fold existential elimination and the generalisation over the k arguments
+        γ.subst (y :> w) 🡒 γ.subst (z :> w'))
+    (c : Fin k → V) :
+    T.internalize V ⊢
+      Matrix.conj (fun i ↦ (definesElementBody d (A i)).subst ![Semiterm.fvar (c i)]) 🡒
+        definesElement d (funcGraph d A γ) := by
+  -- STUCK: see report
   sorry
 
 end definesElement

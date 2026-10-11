@@ -109,7 +109,15 @@ theorem funcGraph_congr {k : ℕ} (d : Semiformula V L 1) (A B : Fin k → Semif
     (γ : Semiformula V L (k + 1)) :
     T.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (d 🡒 (A i 🡘 B i))) 🡒
       ∀¹ (funcGraph d A γ 🡘 funcGraph d B γ) := by
-  sorry
+  refine TProof.allItr_generalize_imp (k := 1) ?_
+  have h₁ : (fun i : Fin 1 ↦ (Semiterm.fvar (i : V) : Semiterm V L 0)) = ![Semiterm.fvar 0] := by
+    funext i
+    obtain rfl := Subsingleton.elim i 0
+    simp
+  simp only [Function.iterate_one, Semiformula.shift_iff, shift_funcGraph, h₁,
+    Semiformula.substs_imply, funcGraph_subst_fvar, Semiformula.shift_imp, shift_conj_fin,
+    Semiformula.shift_all]
+  exact relativizedImp_congr (T := T) d.shift (fun i ↦ (A i).shift) (fun i ↦ (B i).shift) _
 
 end funcGraph
 

@@ -80,8 +80,8 @@ section relocate
 variable (L : Language) [L.Encodable] [L.LORDefinable]
 
 /-- `relocate L i s p` substitutes `^#i` for the bound variable `^#0` of `p` and `^#(s + j)` for
-`^#(j + 1)`, for every `j < p`. -/
-noncomputable def relocate (i s p : V) : V := subst L (^#i ∷ bvarVec s p) p
+`^#(j + 1)`, for every `j < bv L p`. -/
+noncomputable def relocate (i s p : V) : V := subst L (^#i ∷ bvarVec s (bv L p)) p
 
 /-- `domainAt L tbl i` is the domain formula of `tbl` applied to the bound variable `^#i`. -/
 noncomputable def domainAt (tbl i : V) : V := subst L ?[^#i] (tableDomain tbl)
@@ -91,8 +91,8 @@ noncomputable def domainAt (tbl i : V) : V := subst L ?[^#i] (tableDomain tbl)
 noncomputable def funcTail (tbl k f : V) : V := subst L (^#k ∷ bvarVec 0 k) (tableFunc tbl k f)
 
 noncomputable def relocateGraph : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
-  “y i s p. ∃ b, !qqBvarDef b i ∧ ∃ bs, !bvarVecDef bs s p ∧ ∃ w, !adjoinDef w b bs ∧
-    !(substsGraph L) y w p”
+  “y i s p. ∃ b, !qqBvarDef b i ∧ ∃ m, !(bvGraph L) m p ∧ ∃ bs, !bvarVecDef bs s m ∧
+    ∃ w, !adjoinDef w b bs ∧ !(substsGraph L) y w p”
 
 noncomputable def domainAtGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “y tbl i. ∃ d, !tableDomainGraph d tbl ∧ ∃ b, !qqBvarDef b i ∧ ∃ w, !mkVec₁Def w b ∧

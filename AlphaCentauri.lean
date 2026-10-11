@@ -14,6 +14,7 @@ public import AlphaCentauri.Bootstrapping.Completeness.HenkinOperators
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinRepresentative
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinSequence
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinTyped
+public import AlphaCentauri.Bootstrapping.Interpretability.Quote
 public import AlphaCentauri.Bootstrapping.Interpretability.Translation
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
@@ -33,6 +34,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.Bootstrapping.Proof.UniversalClosure
 public import AlphaCentauri.Bootstrapping.Syntax.Iteration
+public import AlphaCentauri.Bootstrapping.Syntax.SubstCongruence
 public import AlphaCentauri.Bootstrapping.Syntax.SubstInversion
 public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.Calculus.Induction.Forcing
@@ -82,6 +84,7 @@ public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
+public import AlphaCentauri.ToFoundation.DirectTranslation
 public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Factorial
@@ -95,6 +98,7 @@ public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.Proof
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.ToFoundation.Quote
 public import AlphaCentauri.ToFoundation.Reflection
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata

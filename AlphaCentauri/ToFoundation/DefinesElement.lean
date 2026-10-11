@@ -382,6 +382,21 @@ theorem definesElement_iff_equal (d A : Semiformula V L 1) (b : V) [𝗘𝗤 L �
   unfold definesElement
   exact h₂
 
+theorem definesElement_funcGraph [𝗘𝗤 L ⪯ T] {k : ℕ} (d : Semiformula V L 1)
+    (γ : Semiformula V L (k + 1)) (A : Fin k → Semiformula V L 1)
+    (hex : ∀ w : Fin k → Term V L, T.internalize V ⊢
+      Matrix.conj (fun i ↦ d.subst ![w i]) 🡒
+        ∃¹ (d ⋏ γ.subst (Semiterm.bvar 0 :> fun i ↦ (w i).bShift)))
+    (huniq : ∀ (y z : Term V L) (w : Fin k → Term V L), T.internalize V ⊢
+      d.subst ![y] ⋏ d.subst ![z] ⋏ γ.subst (y :> w) ⋏ γ.subst (z :> w) 🡒 Semiformula.equal y z)
+    (hcongr : ∀ (y z : Term V L) (w w' : Fin k → Term V L), T.internalize V ⊢
+      Semiformula.equal y z ⋏ Matrix.conj (fun i ↦ Semiformula.equal (w i) (w' i)) 🡒
+        γ.subst (y :> w) 🡒 γ.subst (z :> w')) :
+    T.internalize V ⊢ Matrix.conj (fun i ↦ definesElement d (A i)) 🡒
+      definesElement d (funcGraph d A γ) := by
+  -- STUCK: k-fold existential elimination and the generalisation over the k arguments
+  sorry
+
 end definesElement
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -146,9 +146,9 @@ theorem tprovable_equal_trans [𝗘𝗤 L ⪯ S] {s t u : Semiterm V L 0}
     S.internalize V ⊢ Semiformula.equal s u :=
   tprovable_equal_trans_imp S s t u ⨀ _root_.FFL.Entailment.K_intro h₁ h₂
 
-theorem tprovable_equal_func [𝗘𝗤 L ⪯ S] {k : ℕ} (f : L.Func k) {s u : SemitermVec V L k 0}
-    (h : ∀ i, S.internalize V ⊢ Semiformula.equal (s i) (u i)) :
-    S.internalize V ⊢ Semiformula.equal (Semiterm.func f s) (Semiterm.func f u) := by
+theorem tprovable_equal_func_imp [𝗘𝗤 L ⪯ S] {k : ℕ} (f : L.Func k) (s u : SemitermVec V L k 0) :
+    S.internalize V ⊢ Matrix.conj (fun i ↦ Semiformula.equal (s i) (u i)) 🡒
+      Semiformula.equal (Semiterm.func f s) (Semiterm.func f u) := by
   have h₁ := tprovable_subst_of_allClosure S (n := k + k) (w := Fin.append s u)
     (tprovable_quote_eqAxiom S (Theory.eqAxiom.funcExt f))
   simp only [LCWQIsoGödelQuote.imply, quote_conj, quote_eqop, Semiformula.substs_imp,
@@ -162,11 +162,11 @@ theorem tprovable_equal_func [𝗘𝗤 L ⪯ S] {k : ℕ} (f : L.Func k) {s u : 
     funext i
     simp [append_addNat]
   rw [e₁, e₂] at h₁
-  exact h₁ ⨀ tprovable_conj S h
+  exact h₁
 
-theorem tprovable_rel_congr [𝗘𝗤 L ⪯ S] {k : ℕ} (R : L.Rel k) {s u : SemitermVec V L k 0}
-    (h : ∀ i, S.internalize V ⊢ Semiformula.equal (s i) (u i))
-    (hs : S.internalize V ⊢ Semiformula.rel R s) : S.internalize V ⊢ Semiformula.rel R u := by
+theorem tprovable_rel_congr_imp [𝗘𝗤 L ⪯ S] {k : ℕ} (R : L.Rel k) (s u : SemitermVec V L k 0) :
+    S.internalize V ⊢ Matrix.conj (fun i ↦ Semiformula.equal (s i) (u i)) 🡒
+      (Semiformula.rel R s 🡒 Semiformula.rel R u) := by
   have h₁ := tprovable_subst_of_allClosure S (n := k + k) (w := Fin.append s u)
     (tprovable_quote_eqAxiom S (Theory.eqAxiom.relExt R))
   simp only [LCWQIsoGödelQuote.imply, quote_conj, quote_eqop, quote_rel_sentence,
@@ -181,6 +181,16 @@ theorem tprovable_rel_congr [𝗘𝗤 L ⪯ S] {k : ℕ} (R : L.Rel k) {s u : Se
     funext i
     simp [append_addNat]
   rw [e₁, e₂] at h₁
-  exact h₁ ⨀ tprovable_conj S h ⨀ hs
+  exact h₁
+
+theorem tprovable_equal_func [𝗘𝗤 L ⪯ S] {k : ℕ} (f : L.Func k) {s u : SemitermVec V L k 0}
+    (h : ∀ i, S.internalize V ⊢ Semiformula.equal (s i) (u i)) :
+    S.internalize V ⊢ Semiformula.equal (Semiterm.func f s) (Semiterm.func f u) :=
+  tprovable_equal_func_imp S f s u ⨀ tprovable_conj S h
+
+theorem tprovable_rel_congr [𝗘𝗤 L ⪯ S] {k : ℕ} (R : L.Rel k) {s u : SemitermVec V L k 0}
+    (h : ∀ i, S.internalize V ⊢ Semiformula.equal (s i) (u i))
+    (hs : S.internalize V ⊢ Semiformula.rel R s) : S.internalize V ⊢ Semiformula.rel R u :=
+  tprovable_rel_congr_imp S R s u ⨀ tprovable_conj S h ⨀ hs
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

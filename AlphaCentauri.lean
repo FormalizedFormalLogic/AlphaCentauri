@@ -15,9 +15,13 @@ public import AlphaCentauri.Bootstrapping.Completeness.HenkinRepresentative
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinSequence
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinTyped
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
+public import AlphaCentauri.Bootstrapping.Interpretability.FormSubst
 public import AlphaCentauri.Bootstrapping.Interpretability.FreeVariables
 public import AlphaCentauri.Bootstrapping.Interpretability.PiFacts
 public import AlphaCentauri.Bootstrapping.Interpretability.Quote
+public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
+public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessCorollaries
+public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessExs
 public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
 public import AlphaCentauri.Bootstrapping.Interpretability.SubstCommutation
 public import AlphaCentauri.Bootstrapping.Interpretability.TermSubst

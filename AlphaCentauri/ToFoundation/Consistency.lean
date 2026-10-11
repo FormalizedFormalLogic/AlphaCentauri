@@ -22,7 +22,8 @@ variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 /-- $\mathsf{I}\Sigma_1$ proves that $\mathrm{Con}_T$ implies the unprovability of $\mathrm{Con}_T$
 in $T$.
-- [HP98, Corollary III.1.6] -/
+- [HP98, Theorem III.2.21]
+- [HP98, Corollary III.2.22] -/
 theorem provable_consistent_imp_not_standardProvability_consistent :
     𝗜𝚺₁ ⊢ T.standardProvability.con 🡒 ∼T.standardProvability T.standardProvability.con := by
   have h₁ : 𝗜𝚺₁ ⊢ gödel T.standardProvability 🡘 T.standardProvability.con :=

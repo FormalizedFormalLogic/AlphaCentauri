@@ -132,9 +132,45 @@ noncomputable def definesElement (d A : Semiformula V L 1) : Formula V L :=
   ∃¹ (d ⋏ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒
     (A.subst ![Semiterm.bvar 0] 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.bvar 1)))))
 
+lemma shift_equal_eq {n : ℕ} (s t : Semiterm V L n) :
+    (Semiformula.equal s t).shift = Semiformula.equal s.shift t.shift := by
+  unfold Semiformula.equal
+  simp only [Semiformula.shift_rel]
+  congr 1
+  funext j
+  match j with
+  | 0 => rfl
+  | 1 => rfl
+
 theorem definesElement_exists (d A : Semiformula V L 1) [𝗘𝗤 L ⪯ T] :
     T.internalize V ⊢ definesElement d A 🡒 ∃¹ (d ⋏ A) := by
-  sorry
+  unfold definesElement
+  refine FiniteContext.emptyPrf <| TProof.exs_imp_exs! (Γ := []) <| FiniteContext.of ?_
+  have h₁ := TProof.all_imp_subst (T := T)
+    (d.shift.subst ![Semiterm.bvar 0] 🡒
+      (A.shift.subst ![Semiterm.bvar 0] 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar 0)))
+    (Semiterm.fvar 0)
+  have h₂ := tprovable_equal_refl (S := T) (Semiterm.fvar (0 : V))
+  have v₁ : ((Semiterm.subst (SemitermVec.q ![(Semiterm.fvar 0 : Semiterm V L 0)]))⨟
+      (Semiterm.shift ⨟ ![(Semiterm.bvar 0 : Semiterm V L 2)])) =
+      ![(Semiterm.bvar 0 : Semiterm V L 1)] := by
+    funext j
+    obtain rfl : j = 0 := Subsingleton.elim _ _
+    simp
+  have v₂ : SemitermVec.q ![(Semiterm.fvar 0 : Semiterm V L 0)] 1 = Semiterm.fvar 0 := by
+    rw [show (1 : Fin 2) = Fin.succ 0 from rfl, SemitermVec.q_succ]
+    simp
+  have v₃ : ((Semiterm.subst ![(Semiterm.fvar 0 : Semiterm V L 0)])⨟
+      ![(Semiterm.bvar 0 : Semiterm V L 1)]) = ![(Semiterm.fvar 0 : Semiterm V L 0)] := by
+    funext j
+    obtain rfl : j = 0 := Subsingleton.elim _ _
+    simp
+  simp only [Semiformula.free, Semiformula.shift_and, Semiformula.shift_all, Semiformula.shift_imp,
+    Semiformula.shift_iff, Semiformula.substs_and, Semiformula.substs_all, Semiformula.substs_imp,
+    Semiformula.substs_imply, Semiformula.substs_substs, Semiformula.shift_substs,
+    shift_equal_eq, Semiformula.substs_equal, Semiterm.shift_bvar, Semiterm.substs_bvar,
+    SemitermVec.q_zero, Semiterm.substs_fvar, Matrix.cons_val_zero, v₁, v₂, v₃] at h₁ ⊢
+  cl_prover [h₁, h₂]
 
 theorem definesElement_iff_equal (d A : Semiformula V L 1) (b : V) [𝗘𝗤 L ⪯ T] :
     T.internalize V ⊢ definesElement d A 🡒 d.subst ![Semiterm.fvar b] 🡒

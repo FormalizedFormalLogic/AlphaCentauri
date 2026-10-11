@@ -142,6 +142,48 @@ lemma shift_equal_eq {n : ℕ} (s t : Semiterm V L n) :
   | 0 => rfl
   | 1 => rfl
 
+omit [L.Eq] in
+lemma shift_vec_fvar (x : V) :
+    (Semiterm.shift ⨟ ![(Semiterm.fvar x : Semiterm V L 0)]) = ![Semiterm.fvar (x + 1)] := by
+  funext j
+  obtain rfl : j = 0 := Subsingleton.elim _ _
+  simp
+
+omit [L.Eq] in
+lemma shift_vec_bvar {n : ℕ} :
+    (Semiterm.shift ⨟ ![(Semiterm.bvar 0 : Semiterm V L (n + 1))]) = ![Semiterm.bvar 0] := by
+  funext j
+  obtain rfl : j = 0 := Subsingleton.elim _ _
+  simp
+
+omit [L.Eq] in
+lemma q_fvar_one (x : V) :
+    SemitermVec.q ![(Semiterm.fvar x : Semiterm V L 0)] 1 = Semiterm.fvar x := by
+  rw [show (1 : Fin 2) = Fin.succ 0 from rfl, SemitermVec.q_succ]
+  simp
+
+omit [L.Eq] in
+lemma shift_vec_q_fvar (x : V) :
+    ((Semiterm.shift : Semiterm V L 1 → Semiterm V L 1) ⨟
+      (SemitermVec.q ![(Semiterm.fvar x : Semiterm V L 0)])) =
+      (SemitermVec.q ![(Semiterm.fvar (x + 1) : Semiterm V L 0)]) := by
+  funext j
+  cases j using Fin.cases with
+  | zero => simp
+  | succ i =>
+    obtain rfl := Subsingleton.elim i 0
+    change Semiterm.shift (SemitermVec.q ![(Semiterm.fvar x : Semiterm V L 0)] (Fin.succ 0)) =
+      SemitermVec.q ![(Semiterm.fvar (x + 1) : Semiterm V L 0)] (Fin.succ 0)
+    simp only [SemitermVec.q_succ]
+    simp
+
+omit [L.Eq] in
+lemma fvar_vec_fin_one :
+    (fun i : Fin 1 ↦ (Semiterm.fvar (i : V) : Semiterm V L 0)) = ![Semiterm.fvar 0] := by
+  funext i
+  obtain rfl := Subsingleton.elim i 0
+  simp
+
 theorem definesElement_exists (d A : Semiformula V L 1) [𝗘𝗤 L ⪯ T] :
     T.internalize V ⊢ definesElement d A 🡒 ∃¹ (d ⋏ A) := by
   unfold definesElement
@@ -171,6 +213,36 @@ theorem definesElement_exists (d A : Semiformula V L 1) [𝗘𝗤 L ⪯ T] :
     shift_equal_eq, Semiformula.substs_equal, Semiterm.shift_bvar, Semiterm.substs_bvar,
     SemitermVec.q_zero, Semiterm.substs_fvar, Matrix.cons_val_zero, v₁, v₂, v₃] at h₁ ⊢
   cl_prover [h₁, h₂]
+
+omit [L.Eq] in
+lemma TProof.exs_imp_of_free {φ : Semiformula V L 1} {R : Formula V L}
+    (h : T.internalize V ⊢ φ.free 🡒 R.shift) : T.internalize V ⊢ ∃¹ φ 🡒 R := by
+  have h₁ : [∼R] ⊢[T.internalize V] ∀¹ (∼φ) := by
+    apply TProof.generalize!
+    apply FiniteContext.provable_iff.mpr
+    have h₄ : T.internalize V ⊢ ∼R.shift 🡒 ∼(φ.free) := by cl_prover [h]
+    simpa [Semiformula.free] using h₄
+  have h₂ : T.internalize V ⊢ ∀¹ (∼φ) 🡒 ∼(∃¹ φ) := by
+    simp
+  have h₃ : T.internalize V ⊢ ∼R 🡒 ∀¹ (∼φ) := by
+    simpa using FiniteContext.provable_iff.mp h₁
+  cl_prover [h₂, h₃]
+
+omit [L.Eq] in
+private lemma prop_combine {Dc Hq Dx Ax Dz Az Ezc Ezx : Formula V L}
+    (h₁ : T.internalize V ⊢ Hq 🡒 Dz 🡒 (Az 🡘 Ezc))
+    (h₂ : T.internalize V ⊢ Hq 🡒 Dx 🡒 Ax 🡒 Dz 🡒 (Ezc 🡒 Ezx))
+    (h₃ : T.internalize V ⊢ Hq 🡒 Dx 🡒 Ax 🡒 Dz 🡒 (Ezx 🡒 Ezc)) :
+    T.internalize V ⊢ (Dc ⋏ Hq) 🡒 Dx 🡒 Ax 🡒 Dz 🡒 (Az 🡘 Ezx) := by
+  have k₁ : T.internalize V ⊢ Hq 🡒 Dz 🡒 (Az 🡒 Ezc) := by
+    cl_prover 128 [h₁]
+  have k₂ : T.internalize V ⊢ Hq 🡒 Dz 🡒 (Ezc 🡒 Az) := by
+    cl_prover 128 [h₁]
+  have g₁ : T.internalize V ⊢ (Dc ⋏ Hq) 🡒 Dx 🡒 Ax 🡒 Dz 🡒 (Az 🡒 Ezx) := by
+    cl_prover 128 [k₁, h₂]
+  have g₂ : T.internalize V ⊢ (Dc ⋏ Hq) 🡒 Dx 🡒 Ax 🡒 Dz 🡒 (Ezx 🡒 Az) := by
+    cl_prover 128 [k₂, h₃]
+  cl_prover 128 [g₁, g₂]
 
 lemma definesElement_inner (d A : Semiformula V L 1) [𝗘𝗤 L ⪯ T] (c x z : V) :
     T.internalize V ⊢
@@ -259,14 +331,56 @@ lemma definesElement_inner (d A : Semiformula V L 1) [𝗘𝗤 L ⪯ T] (c x z :
         (Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar x) 🡒
               Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar c)) := by
     cl_prover [h₅, kB₂]
-  sorry -- STUCK: cl_prover does not combine kH, m₁ and m₂ (suspected atom mismatch)
+  exact prop_combine kH m₁ m₂
+
+lemma definesElement_imp_theta (d A : Semiformula V L 1) [𝗘𝗤 L ⪯ T] (c x : V) :
+    T.internalize V ⊢
+      (d ⋏ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒
+        (A.subst ![Semiterm.bvar 0] 🡘
+              Semiformula.equal (Semiterm.bvar 0) (Semiterm.bvar 1))))).subst
+          ![Semiterm.fvar c] 🡒
+      d.subst ![Semiterm.fvar x] 🡒 A.subst ![Semiterm.fvar x] 🡒
+        (∀¹ (d 🡒 (A 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar x)))) := by
+  have key : T.internalize V ⊢
+      ((d ⋏ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒
+        (A.subst ![Semiterm.bvar 0] 🡘
+              Semiformula.equal (Semiterm.bvar 0) (Semiterm.bvar 1))))).subst
+          ![Semiterm.fvar c] ⋏
+        d.subst ![Semiterm.fvar x] ⋏ A.subst ![Semiterm.fvar x]) 🡒
+        (∀¹ (d 🡒 (A 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar x)))) := by
+    refine TProof.allItr_generalize_imp (k := 1) ?_
+    have h₁ := definesElement_inner (T := T) d.shift A.shift (c + 1) (x + 1) 0
+    simp only [Function.iterate_one, Semiformula.shift_and, Semiformula.shift_imp,
+      Semiformula.shift_iff, Semiformula.shift_substs, Semiformula.shift_all,
+      shift_vec_fvar, shift_vec_bvar, q_fvar_one, fvar_vec_fin_one,
+      shift_equal_eq, Semiterm.shift_bvar,
+      Semiterm.shift_fvar, Semiformula.substs_and, Semiformula.substs_imp, Semiformula.substs_imply,
+      Semiformula.substs_all, Semiformula.substs_equal, Semiterm.substs_bvar, Semiterm.substs_fvar,
+      SemitermVec.q_zero, Matrix.cons_val_zero] at h₁ ⊢
+    rw [shift_vec_q_fvar]
+    cl_prover 128 [h₁]
+  cl_prover [key]
 
 theorem definesElement_iff_equal (d A : Semiformula V L 1) (b : V) [𝗘𝗤 L ⪯ T] :
     T.internalize V ⊢ definesElement d A 🡒 d.subst ![Semiterm.fvar b] 🡒
       A.subst ![Semiterm.fvar b] 🡒
       ∀¹ (d 🡒 (A 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar b))) := by
-  -- STUCK: needs the closed form (∀ b) plus generalisation over the existential witness
-  sorry
+  have hi := definesElement_imp_theta (T := T) d.shift A.shift 0 (b + 1)
+  have h₁ : T.internalize V ⊢
+      (d ⋏ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒
+        (A.subst ![Semiterm.bvar 0] 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.bvar 1))))).free
+        🡒 (d.subst ![Semiterm.fvar b] 🡒 A.subst ![Semiterm.fvar b] 🡒
+          ∀¹ (d 🡒 (A 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar b)))).shift := by
+    simp only [Semiformula.free, Semiformula.shift_and, Semiformula.shift_all,
+      Semiformula.shift_imp, Semiformula.shift_iff, Semiformula.shift_substs,
+      shift_vec_fvar, shift_vec_bvar, shift_equal_eq, Semiterm.shift_bvar, Semiterm.shift_fvar,
+      Semiformula.substs_and, Semiformula.substs_imp, Semiformula.substs_imply,
+      Semiformula.substs_all, Semiformula.substs_equal, Semiterm.substs_bvar,
+      SemitermVec.q_zero] at hi ⊢
+    exact hi
+  have h₂ := TProof.exs_imp_of_free (T := T) h₁
+  unfold definesElement
+  exact h₂
 
 end definesElement
 

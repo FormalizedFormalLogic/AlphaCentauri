@@ -14,6 +14,7 @@ public import AlphaCentauri.Bootstrapping.Completeness.HenkinOperators
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinRepresentative
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinSequence
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinTyped
+public import AlphaCentauri.Bootstrapping.Interpretability.Translation
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation

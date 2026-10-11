@@ -68,6 +68,62 @@ lemma termBShift_zero {t : V} (ht : IsSemiterm L 0 t) : termBShift L t = t := by
     rw [nth_termBShiftVec hts.isUTerm hi]
     exact ih i hi
 
+/-- The shift of free variables does not decrease the code of a term. -/
+lemma le_termShift {n t : V} (ht : IsSemiterm L n t) : t ≤ termShift L t := by
+  apply IsSemiterm.induction 𝚷 ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z _
+    simp
+  · intro x
+    rw [termShift_fvar]
+    simpa [qqFvar] using pair_le_pair_right 1 (show x ≤ x + 1 by simp)
+  · intro k f v hf hv ih
+    have hv' : v ≤ termShiftVec L k v := le_of_nth_le_nth (by simp [hv.isUTerm, hv.lh])
+      fun i hi ↦ by
+        rw [nth_termShiftVec hv.isUTerm (by simpa [hv.lh] using hi)]
+        exact ih i (by simpa [hv.lh] using hi)
+    rw [termShift_func hf hv.isUTerm]
+    simpa [qqFunc] using
+      pair_le_pair_right 2 <| pair_le_pair_right k <| pair_le_pair_right f hv'
+
+/-- The shift of free variables does not decrease the code of a formula. -/
+lemma le_shift {n p : V} (hp : IsSemiformula L n p) : p ≤ shift L p := by
+  apply IsSemiformula.pi1_structural_induction (P := fun _ p ↦ p ≤ shift L p)
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R v hR hv
+    have hv' : v ≤ termShiftVec L k v := le_of_nth_le_nth (by simp [hv.isUTerm, hv.lh])
+      fun i hi ↦ by
+        rw [nth_termShiftVec hv.isUTerm (by simpa [hv.lh] using hi)]
+        exact le_termShift (hv.nth (by simpa [hv.lh] using hi))
+    rw [shift_rel hR hv.isUTerm]
+    simpa [qqRel] using
+      pair_le_pair_right 0 <| pair_le_pair_right k <| pair_le_pair_right R hv'
+  · intro n k R v hR hv
+    have hv' : v ≤ termShiftVec L k v := le_of_nth_le_nth (by simp [hv.isUTerm, hv.lh])
+      fun i hi ↦ by
+        rw [nth_termShiftVec hv.isUTerm (by simpa [hv.lh] using hi)]
+        exact le_termShift (hv.nth (by simpa [hv.lh] using hi))
+    rw [shift_nrel hR hv.isUTerm]
+    simpa [qqNRel] using
+      pair_le_pair_right 1 <| pair_le_pair_right k <| pair_le_pair_right R hv'
+  · intro n
+    simp
+  · intro n
+    simp
+  · intro n p q hp hq ihp ihq
+    rw [shift_and hp.isUFormula hq.isUFormula]
+    simpa [qqAnd] using pair_le_pair_right 4 <| pair_le_pair ihp ihq
+  · intro n p q hp hq ihp ihq
+    rw [shift_or hp.isUFormula hq.isUFormula]
+    simpa [qqOr] using pair_le_pair_right 5 <| pair_le_pair ihp ihq
+  · intro n p hp ih
+    rw [shift_all hp.isUFormula]
+    simpa [qqAll] using pair_le_pair_right 6 ih
+  · intro n p hp ih
+    rw [shift_exs hp.isUFormula]
+    simpa [qqExs] using pair_le_pair_right 7 ih
+
 lemma isSemitermVec_fvarVec (m n : V) : IsSemitermVec ℒₒᵣ m n (fvarVec m) :=
   IsSemitermVec.iff.mpr ⟨len_fvarVec m, fun i hi ↦ by simp [nth_fvarVec m i hi]⟩
 
@@ -113,11 +169,11 @@ lemma IsSemitermVec.exists_cons {m w : V} (hw : IsSemitermVec ℒₒᵣ (m + 1) 
   · simpa using hw.lh
   · exact ⟨w₀, w', rfl, IsSemitermVec.cons_iff.mp hw⟩
 
-lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec ℒₒᵣ j 0 w)
-    (hq : IsSemiformula ℒₒᵣ (j + 1) q) (ht : IsSemiterm ℒₒᵣ 0 t) :
-    substs1 ℒₒᵣ t (subst ℒₒᵣ (qVec ℒₒᵣ w) q) = subst ℒₒᵣ (t ∷ w) q := by
-  have h₁ : IsSemitermVec ℒₒᵣ 1 0 (?[t] : V) := by simp [ht]
-  have h₂ : IsSemitermVec ℒₒᵣ (j + 1) 1 (qVec ℒₒᵣ w) := by simpa using hw.qVec
+lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec L j 0 w)
+    (hq : IsSemiformula L (j + 1) q) (ht : IsSemiterm L 0 t) :
+    substs1 L t (subst L (qVec L w) q) = subst L (t ∷ w) q := by
+  have h₁ : IsSemitermVec L 1 0 (?[t] : V) := by simp [ht]
+  have h₂ : IsSemitermVec L (j + 1) 1 (qVec L w) := by simpa using hw.qVec
   rw [substs1, substs_substs hq h₁ h₂]
   congr 1
   apply nth_ext' (j + 1) (by simp [(h₁.termSubstVec h₂).lh]) (by simp [hw.lh])

@@ -28,7 +28,8 @@ noncomputable def funcGraph {k : ℕ} (d : Semiformula V L 1) (A : Fin k → Sem
     (γ : Semiformula V L (k + 1)) : Semiformula V L 1 :=
   ∀¹^[k] (Matrix.conj (fun i : Fin k ↦
       d.subst ![Semiterm.bvar (i.addCast 1)] ⋏ (A i).subst ![Semiterm.bvar (i.addCast 1)]) 🡒
-    γ.subst (Semiterm.bvar ((0 : Fin 1).addNat k) :> fun i ↦ Semiterm.bvar (i.addCast 1)))
+    γ.subst (Semiterm.bvar (Fin.cast (Nat.add_comm k 1) (Fin.last k)) :>
+      fun i ↦ Semiterm.bvar (i.addCast 1)))
 
 lemma shift_conj_fin {m n : ℕ} (v : Fin m → Semiformula V L n) :
     (Matrix.conj v).shift = Matrix.conj fun i ↦ (v i).shift := by
@@ -42,23 +43,41 @@ lemma shift_funcGraph {k : ℕ} (d : Semiformula V L 1) (A : Fin k → Semiformu
   have h₁ : ∀ {m : ℕ} (φ : Semiformula V L (1 + m)), (∀¹^[m] φ).shift = ∀¹^[m] φ.shift := by
     intro m φ
     simpa using Semiformula.shift_iterate_allItr (k := 1) φ
-  simp only [funcGraph, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.Fin1.eq_one, Fin.isValue, h₁,
-    Semiformula.shift_imp, shift_conj_fin, Semiformula.shift_and, Semiformula.shift_substs,
-    Matrix.vecMap_cons', Matrix.head_cons, Semiterm.shift_bvar, Matrix.tail_cons, Matrix.vecMap_nil]
+  simp only [funcGraph, Nat.succ_eq_add_one, Nat.reduceAdd, h₁, Semiformula.shift_imp,
+    shift_conj_fin, Semiformula.shift_and, Semiformula.shift_substs, Matrix.vecMap_cons',
+    Matrix.head_cons, Semiterm.shift_bvar, Matrix.tail_cons, Matrix.vecMap_nil]
   congr 3
   funext i
   cases i using Fin.cases <;> simp
 
 lemma allItr_subst_fvar {k : ℕ} (c : V) (B : Semiformula V L (1 + k)) :
     (∀¹^[k] B).subst ![Semiterm.fvar c] =
-      ∀¹^[k] (B.subst (Fin.addCases (fun _ : Fin 1 ↦ Semiterm.fvar (c + k))
-        fun i : Fin k ↦ Semiterm.bvar (i.addCast 0))) := by
-  sorry
+      ∀¹^[k] (B.subst fun j : Fin (1 + k) ↦
+        if h : (j : ℕ) < k then Semiterm.bvar ((⟨j, h⟩ : Fin k).addCast 0)
+          else Semiterm.fvar c) := by
+  induction k with
+  | zero =>
+    simp only [allItr_zero]
+    congr 1
+    funext j
+    have hj : j = 0 := Subsingleton.elim _ _
+    subst hj
+    simp
+  | succ k ih =>
+    rw [allItr_succ, allItr_succ, ih, Semiformula.substs_all]
+    congr 3
+    funext j
+    cases j using Fin.cases with
+    | zero => simp [Fin.ext_iff]
+    | succ i =>
+      by_cases hi : (i : ℕ) < k
+      · simp [hi, Semiterm.bShift_bvar, Fin.ext_iff]
+      · simp [hi]
 
 lemma funcGraph_subst_fvar {k : ℕ} (c : V) (d : Semiformula V L 1)
     (A : Fin k → Semiformula V L 1) (γ : Semiformula V L (k + 1)) :
     (funcGraph d A γ).subst ![Semiterm.fvar c] =
-      relativizedImp d A (γ.subst ((Semiterm.fvar (c + k)) :> fun i : Fin k ↦
+      relativizedImp d A (γ.subst (Semiterm.fvar c :> fun i : Fin k ↦
         Semiterm.bvar (i.addCast 0))) := by
   sorry
 

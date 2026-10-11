@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinRepresentative
+public import AlphaCentauri.ToFoundation.Quote
 
 /-!
 # The arithmetical operators of the Henkin translation
@@ -21,23 +22,6 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 open Bounding
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq]
-
-section
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔]
-
-lemma eq_matrixToVec_iff {k : ℕ} {w : V} {u : Fin k → V} :
-    w = matrixToVec u ↔ (k : V) = len w ∧ ∀ i : Fin k, w.[((i : ℕ) : V)] = u i := by
-  constructor
-  · rintro rfl
-    simp
-  · rintro ⟨h₁, h₂⟩
-    apply nth_ext' (k : V) h₁.symm (by simp)
-    intro i hi
-    obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi
-    simp [h₂]
-
-end
 
 variable (S : Theory L) [S.Δ₁]
 

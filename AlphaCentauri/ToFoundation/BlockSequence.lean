@@ -46,6 +46,37 @@ private lemma mod_mul_eq_mod_add {p β : V} (S : V) (hp : 0 < p) (hβ : 0 < β) 
     _           = (S / p % β) * p + S % p := mod_mul_add_of_lt _ _ h₂
     _           = S % p + (S / p % β) * p := add_comm _ _
 
+private lemma mod_add_div_mul_eq (S q : V) : S % q + S / q * q = S := by
+  rw [mul_comm (S / q) q, add_comm]
+  exact div_add_mod S q
+
+private lemma bexp_succ_mul_length {a b k : V} (h : (k + 1) * ‖a‖ < ‖b‖) :
+    bexp b ((k + 1) * ‖a‖) = bexp b (k * ‖a‖) * (a ⨳ 1) := by
+  have hsum : k * ‖a‖ + ‖a‖ < ‖b‖ := by simpa [add_mul] using h
+  rw [show (k + 1) * ‖a‖ = k * ‖a‖ + ‖a‖ by simp [add_mul], bexp_add hsum]
+  congr 1
+  exact bexp_eq_of_exp (lt_of_le_of_lt le_add_self hsum) (exponential_smash_one a)
+
+private lemma mod_add_mul_lt {P Q S v c : V} (hP : 0 < P) (hv : v < c) (hQ : Q = P * c) :
+    S % P + v * P < Q := by
+  calc S % P + v * P < P + v * P := add_lt_add_left (mod_lt S hP) _
+    _ = (v + 1) * P := by grind
+    _ ≤ c * P := mul_le_mul_right (succ_le_iff_lt.mpr hv)
+    _ = Q := by rw [hQ, mul_comm]
+
+private lemma add_div_mul_lt {B Q S T : V} (hQ : Q ∣ B) (hS : S < B) (hT : T < Q) :
+    T + S / Q * Q < B := by
+  obtain ⟨D, hD⟩ := hQ
+  have hcD : S / Q < D := by
+    by_contra h
+    have h₁ : Q * D ≤ Q * (S / Q) := mul_le_mul_left (not_lt.mp h)
+    have h₂ : Q * (S / Q) ≤ S := le_self_add.trans_eq (div_add_mod S Q)
+    exact absurd hS (not_lt.mpr (hD ▸ h₁.trans h₂))
+  calc T + S / Q * Q < Q + S / Q * Q := add_lt_add_left hT _
+    _ = (S / Q + 1) * Q := by grind
+    _ ≤ D * Q := mul_le_mul_right (succ_le_iff_lt.mpr hcD)
+    _ = B := (mul_comm _ _).trans hD.symm
+
 namespace Nuon
 
 section
@@ -90,11 +121,7 @@ lemma ext_ext {S S' b : V} (hb : Exponential (i * ‖a‖) b) (hS : S < b) (hS' 
       have hk' : k < i := succ_le_iff_lt.mp hk
       have hk₁ : (k + 1) * ‖a‖ < ‖b‖ := lt_of_le_of_lt (mul_le_mul_right hk) hib
       have hkb : k * ‖a‖ < ‖b‖ := lt_of_le_of_lt (mul_le_mul_right le_self_add) hk₁
-      have hβ : bexp b ((k + 1) * ‖a‖) = bexp b (k * ‖a‖) * (a ⨳ 1) := by
-        have hsum : k * ‖a‖ + ‖a‖ < ‖b‖ := by simpa [add_mul] using hk₁
-        rw [show (k + 1) * ‖a‖ = k * ‖a‖ + ‖a‖ by simp [add_mul], bexp_add hsum]
-        congr 1
-        exact bexp_eq_of_exp (lt_of_le_of_lt le_add_self hsum) (exponential_smash_one a)
+      have hβ := bexp_succ_mul_length (a := a) hk₁
       have hp : 0 < bexp b (k * ‖a‖) := bexp_pos hkb
       have IHk : S % bexp b (k * ‖a‖) = S' % bexp b (k * ‖a‖) := IH (le_trans (by simp) hk)
       rw [hβ, mod_mul_eq_mod_add S hp (smash_pos a 1), mod_mul_eq_mod_add S' hp (smash_pos a 1),
@@ -117,56 +144,21 @@ lemma exists_update {I S j v : V} (hS : S < I ⨳ a) (hj : j < ‖I‖) (hv : v 
   have hPlen : j * ‖a‖ < ‖I ⨳ a‖ := Nuon.mul_len_lt_len_smash hjI
   have hQlen : (j + 1) * ‖a‖ < ‖I ⨳ a‖ := Nuon.mul_len_lt_len_smash hj1
   have hBlen : ‖I‖ * ‖a‖ < ‖I ⨳ a‖ := Nuon.mul_len_lt_len_smash le_rfl
-  have hβ : bexp (I ⨳ a) ((j + 1) * ‖a‖) = bexp (I ⨳ a) (j * ‖a‖) * (a ⨳ 1) := by
-    have hsum : j * ‖a‖ + ‖a‖ < ‖I ⨳ a‖ := by simpa [add_mul] using hQlen
-    rw [show (j + 1) * ‖a‖ = j * ‖a‖ + ‖a‖ by simp [add_mul], bexp_add hsum]
-    congr 1
-    exact bexp_eq_of_exp (lt_of_le_of_lt le_add_self hsum) (exponential_smash_one a)
+  have hβ := bexp_succ_mul_length (a := a) hQlen
   have hPpos : 0 < bexp (I ⨳ a) (j * ‖a‖) := bexp_pos hPlen
   have hQpos : 0 < bexp (I ⨳ a) ((j + 1) * ‖a‖) := bexp_pos hQlen
   have hdvd : bexp (I ⨳ a) ((j + 1) * ‖a‖) ∣ I ⨳ a := by
     have := Pow2.dvd_of_le (bexp_pow2 hQlen) (bexp_pow2 hBlen)
       ((bexp_monotone_le hQlen hBlen).mpr (mul_le_mul_right hj1))
     rwa [bexp_eq_smash] at this
-  obtain ⟨D, hD⟩ := hdvd
-  have hT : S % bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖) <
-      bexp (I ⨳ a) ((j + 1) * ‖a‖) := by
-    have hv' : v + 1 ≤ a ⨳ 1 := succ_le_iff_lt.mpr hv
-    calc S % bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖)
-        < bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖) :=
-          add_lt_add_left (mod_lt S hPpos) _
-      _ = (v + 1) * bexp (I ⨳ a) (j * ‖a‖) := by grind
-      _ ≤ (a ⨳ 1) * bexp (I ⨳ a) (j * ‖a‖) := mul_le_mul_right hv'
-      _ = bexp (I ⨳ a) ((j + 1) * ‖a‖) := by rw [hβ, mul_comm]
+  have hT := mod_add_mul_lt (S := S) hPpos hv hβ
   have hTlen : ‖S % bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖)‖ ≤ (j + 1) * ‖a‖ :=
     (exp_bexp_of_lt hQlen).lt_iff_len_le.mp hT
-  have hSQ : S % bexp (I ⨳ a) ((j + 1) * ‖a‖) +
-      S / bexp (I ⨳ a) ((j + 1) * ‖a‖) * bexp (I ⨳ a) ((j + 1) * ‖a‖) = S := by
-    rw [add_comm, mul_comm (S / _) _]
-    exact div_add_mod S _
   have hSQlen : ‖S % bexp (I ⨳ a) ((j + 1) * ‖a‖)‖ ≤ (j + 1) * ‖a‖ :=
     (exp_bexp_of_lt hQlen).lt_iff_len_le.mp (mod_lt _ hQpos)
-  have hcQ : bexp (I ⨳ a) ((j + 1) * ‖a‖) * (S / bexp (I ⨳ a) ((j + 1) * ‖a‖)) ≤ S := by
-    have h := div_add_mod S (bexp (I ⨳ a) ((j + 1) * ‖a‖))
-    exact le_self_add.trans_eq h
-  have hcD : S / bexp (I ⨳ a) ((j + 1) * ‖a‖) < D := by
-    by_contra h
-    have h' : D ≤ S / bexp (I ⨳ a) ((j + 1) * ‖a‖) := not_lt.mp h
-    have h1 : bexp (I ⨳ a) ((j + 1) * ‖a‖) * D ≤
-        bexp (I ⨳ a) ((j + 1) * ‖a‖) * (S / bexp (I ⨳ a) ((j + 1) * ‖a‖)) :=
-      mul_le_mul_left h'
-    have h2 : I ⨳ a ≤ S := by rw [hD]; exact h1.trans hcQ
-    exact absurd hS (not_lt.mpr h2)
   refine ⟨S % bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖) +
-    S / bexp (I ⨳ a) ((j + 1) * ‖a‖) * bexp (I ⨳ a) ((j + 1) * ‖a‖), ?_, ?_, ?_⟩
-  · calc S % bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖) +
-        S / bexp (I ⨳ a) ((j + 1) * ‖a‖) * bexp (I ⨳ a) ((j + 1) * ‖a‖)
-        < bexp (I ⨳ a) ((j + 1) * ‖a‖) +
-          S / bexp (I ⨳ a) ((j + 1) * ‖a‖) * bexp (I ⨳ a) ((j + 1) * ‖a‖) :=
-          add_lt_add_left hT _
-      _ = (S / bexp (I ⨳ a) ((j + 1) * ‖a‖) + 1) * bexp (I ⨳ a) ((j + 1) * ‖a‖) := by grind
-      _ ≤ D * bexp (I ⨳ a) ((j + 1) * ‖a‖) := mul_le_mul_right (succ_le_iff_lt.mpr hcD)
-      _ = I ⨳ a := (mul_comm _ _).trans hD.symm
+    S / bexp (I ⨳ a) ((j + 1) * ‖a‖) * bexp (I ⨳ a) ((j + 1) * ‖a‖),
+    add_div_mul_lt hdvd hS hT, ?_, ?_⟩
   · rw [Nuon.ext_add₁_bexp (i := j + 1) hj1 (by simp)]
     exact Nuon.ext_append_last I a S hjI (lt_smash_one_iff.mp hv)
   · intro l hl hne
@@ -180,7 +172,7 @@ lemma exists_update {I S j v : V} (hS : S < I ⨳ a) (hj : j < ‖I‖) (hv : v 
       have h2 := Nuon.ext_add₂_bexp (I := I) (L := a) (i := j + 1) (j := k)
         (S₁ := S % bexp (I ⨳ a) ((j + 1) * ‖a‖))
         (S₂ := S / bexp (I ⨳ a) ((j + 1) * ‖a‖)) hl hSQlen
-      rw [hSQ] at h2
+      rw [mod_add_div_mul_eq] at h2
       rw [h1]
       exact h2.symm
 
@@ -204,10 +196,6 @@ lemma ext_mod_smash {I S j : V} (hj : j < ‖I‖) : Nuon.ext a (S % (I ⨳ a)) 
     (S₁ := S % (I ⨳ a)) (S₂ := S / (I ⨳ a)) le_rfl hj
   rw [bexp_eq_smash, hS] at h
   exact h.symm
-
-private lemma mod_add_div_mul_eq (S q : V) : S % q + S / q * q = S := by
-  rw [mul_comm (S / q) q, add_comm]
-  exact div_add_mod S q
 
 lemma ext_div_pow2 {I S q k m : V} (hm : k + m ≤ ‖I‖) (hq : Exponential (k * ‖a‖) q) :
     Nuon.ext a (S / q) m = Nuon.ext a S (k + m) := by

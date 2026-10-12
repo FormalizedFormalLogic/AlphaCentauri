@@ -51,34 +51,6 @@ lemma enumCode.anti {a B i z t t' : V} {G : V → V → Prop}
     · exact hmin x hx w hwt hGw hyw
     · exact hw₂.trans (not_le.mp hwt).le
 
-lemma enumCode.strictMono {a B i z t : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G)
-    (hfun : ∀ x y y', G x y → G x y' → y = y') (h : enumCode a B G i z t)
-    {j k : V} (hjk : j < k) (hki : k ≤ i) {y y' : V} (hy : G (entry a z j) y)
-    (hy' : G (entry a z k) y') : y < y' := by
-  obtain ⟨-, -, -, h4, -, h6⟩ := h
-  have hbd : ∀ j ≤ i, ∀ y, G (entry a z j) y → y ≤ t := by
-    intro j hj y hy
-    obtain ⟨-, y', hy', hG'⟩ := h4 j hj
-    rw [hfun _ _ _ hy hG']
-    exact hy'
-  have key : ∀ k, k ≤ i → ∀ j < k, ∀ y ≤ t, ∀ y' ≤ t,
-      G (entry a z j) y → G (entry a z k) y' → y < y' := by
-    intro k
-    induction k using ISigma0.succ_induction
-    · clear h4 h6 hbd hy hy' hfun
-      unfold entry
-      definability
-    case zero => intro _ j hj; exact absurd hj (by simp)
-    case succ k IH =>
-      intro hk j hj y hyt y' hy't hGj hGk
-      have hkz : k ≤ i := le_trans le_self_add hk
-      have hki : k < i := (lt_add_one k).trans_le hk
-      rcases lt_or_eq_of_le (lt_succ_iff_le.mp hj) with hjk | rfl
-      · obtain ⟨-, w, hw, hGw⟩ := h4 k hkz
-        exact (IH hkz j hjk y hyt w hw hGj hGw).trans (h6 k hki w hw y' hy't hGw hGk).1
-      · exact (h6 j hki y hyt y' hy't hGj hGk).1
-  exact key k hki j hjk y (hbd j (hjk.le.trans hki) y hy) y' (hbd k hki y' hy') hy hy'
-
 lemma exists_enumCode_of_not_definable {a I : V} {G : V → V → Prop}
     (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y')
     (K : Cut V) (hK : ∀ i, i ∈ K.carrier ↔ ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) G i z t)
@@ -102,6 +74,49 @@ lemma exists_enumCode_of_not_definable {a I : V} {G : V → V → Prop}
     exact hP.of_iff fun i ↦ hmem i
   exact Cut.not_proper_of_definable K hdef ⟨hzero, a, fun ha ↦ lt_irrefl a (hlt a ha)⟩
 
+private def LimitFails (a c : V) (G : V → V → Prop) (p y'' y' : V) : Prop :=
+  a < p ∨ a ≤ entry a c p ∨
+    ∃ i'' < p, G (entry a c i'') y'' ∧ G (entry a c p) y' ∧ y' ≤ y''
+
+private lemma exists_limitFails_of_not_mem {a I c p : V} {G : V → V → Prop}
+    (htot : ∀ x < a, ∃ y, G x y) (K : Cut V)
+    (hK : ∀ i, i ∈ K.carrier ↔ ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) G i z t)
+    (hD : ∀ T, ∃ i z t, enumCode a (I ⨳ a) G i z t ∧ ∃ j ≤ i, ∃ y, G (entry a z j) y ∧ T < y)
+    (hc : ∀ i ∈ K.carrier, ∀ z t, enumCode a (I ⨳ a) G i z t → ∀ j ≤ i, entry a c j = entry a z j)
+    (hn : p ∉ K.carrier) : ∃ y'' y', LimitFails a c G p y'' y' := by
+  by_cases h₁ : a < p
+  · exact ⟨0, 0, Or.inl h₁⟩
+  by_cases h₂ : a ≤ entry a c p
+  · exact ⟨0, 0, Or.inr (Or.inl h₂)⟩
+  obtain ⟨y₀, hy₀⟩ := htot _ (not_le.mp h₂)
+  obtain ⟨i', z, t, hcode, j, hji, y, hGy, hyy⟩ := hD y₀
+  have hi'K : i' ∈ K.carrier := (hK i').mpr ⟨z, hcode.2.1, t, hcode⟩
+  have hi'lt : i' < p := by
+    by_contra hle
+    rcases lt_or_eq_of_le (not_lt.mp hle) with h | h
+    · exact hn (K.mem_of_lt h hi'K)
+    · exact hn (by rw [h]; exact hi'K)
+  refine ⟨y, y₀, Or.inr (Or.inr ⟨j, lt_of_le_of_lt hji hi'lt, ?_, hy₀, hyy.le⟩)⟩
+  rw [hc i' hi'K z t hcode j hji]
+  exact hGy
+
+private lemma not_mem_of_limitFails {a I c p y'' y' : V} {G : V → V → Prop}
+    (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y') (K : Cut V)
+    (hK : ∀ i, i ∈ K.carrier ↔ ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) G i z t)
+    (hlt : ∀ i ∈ K.carrier, i < a)
+    (hc : ∀ i ∈ K.carrier, ∀ z t, enumCode a (I ⨳ a) G i z t → ∀ j ≤ i, entry a c j = entry a z j)
+    (h : LimitFails a c G p y'' y') : p ∉ K.carrier := by
+  intro hmem
+  obtain ⟨z, hz, t, hcode⟩ := (hK p).mp hmem
+  have hz' : ∀ j ≤ p, entry a c j = entry a z j := hc p hmem z t hcode
+  obtain h | h | ⟨i'', hi'', hG'', hG', hle⟩ := h
+  · exact lt_asymm h (hlt _ hmem)
+  · rw [hz' p le_rfl] at h
+    exact not_lt.mpr h (hcode.2.2.2.1 p le_rfl).1
+  · rw [hz' i'' hi''.le] at hG''
+    rw [hz' p le_rfl] at hG'
+    exact not_le.mpr (enumCode.strictMono hG hfun hcode hi'' le_rfl hG'' hG') hle
+
 lemma prenexDefinable_compl_of_enumCode {a I c : V} {G : V → V → Prop}
     (hG : 𝚺ᴬ₀.DefinableRel G)
     (hfun : ∀ x y y', G x y → G x y' → y = y') (htot : ∀ x < a, ∃ y, G x y)
@@ -110,45 +125,13 @@ lemma prenexDefinable_compl_of_enumCode {a I c : V} {G : V → V → Prop}
     (hD : ∀ T, ∃ i z t, enumCode a (I ⨳ a) G i z t ∧ ∃ j ≤ i, ∃ y, G (entry a z j) y ∧ T < y)
     (hc : ∀ i ∈ K.carrier, ∀ z t, enumCode a (I ⨳ a) G i z t → ∀ j ≤ i, entry a c j = entry a z j) :
     PrenexDefinablePred 𝚺 1 (· ∉ K.carrier) := by
-  have hR : 𝚺ᴬ₀.Definable fun v : Fin (1 + 2) → V ↦
-      a < v 2 ∨ a ≤ entry a c (v 2) ∨
-        ∃ i'' < v 2, (G (entry a c i'') (v 0) ∧ G (entry a c (v 2)) (v 1) ∧ v 1 ≤ v 0) := by
-    unfold entry
+  have hR : 𝚺ᴬ₀.Definable fun v : Fin (1 + 2) → V ↦ LimitFails a c G (v 2) (v 0) (v 1) := by
+    unfold LimitFails entry
     definability
-  have h := PrenexDefinable.exists_exists_of_sigmaZero
-    (R := fun (p : Fin 1 → V) (y'' y' : V) ↦ a < p 0 ∨ a ≤ entry a c (p 0) ∨
-      ∃ i'' < p 0, (G (entry a c i'') y'' ∧ G (entry a c (p 0)) y' ∧ y' ≤ y'')) hR
-  refine h.of_iff fun v ↦ ?_
-  change v 0 ∉ K.carrier ↔ _
-  constructor
-  · intro hn
-    by_cases h1 : a < v 0
-    · exact ⟨0, 0, Or.inl h1⟩
-    by_cases h2 : a ≤ entry a c (v 0)
-    · exact ⟨0, 0, Or.inr (Or.inl h2)⟩
-    obtain ⟨y₀, hy₀⟩ := htot _ (not_le.mp h2)
-    obtain ⟨i', z, t, hcode, j, hji, y, hGy, hyy⟩ := hD y₀
-    have hi'K : i' ∈ K.carrier := (hK i').mpr ⟨z, hcode.2.1, t, hcode⟩
-    have hi'lt : i' < v 0 := by
-      by_contra hle
-      rcases lt_or_eq_of_le (not_lt.mp hle) with h | h
-      · exact hn (K.mem_of_lt h hi'K)
-      · exact hn (by rw [h]; exact hi'K)
-    have hej : entry a c j = entry a z j := hc i' hi'K z t hcode j hji
-    refine ⟨y, y₀, Or.inr (Or.inr ⟨j, lt_of_le_of_lt hji hi'lt, ?_, hy₀, hyy.le⟩)⟩
-    rw [hej]
-    exact hGy
-  · rintro ⟨y'', y', h⟩ hmem
-    obtain ⟨z, hz, t, hcode⟩ := (hK (v 0)).mp hmem
-    have hz' : ∀ j ≤ v 0, entry a c j = entry a z j := hc (v 0) hmem z t hcode
-    obtain h | h | ⟨i'', hi'', hG'', hG', hle⟩ := h
-    · exact lt_asymm h (hlt _ hmem)
-    · rw [hz' (v 0) le_rfl] at h
-      exact not_lt.mpr h (hcode.2.2.2.1 (v 0) le_rfl).1
-    · rw [hz' i'' hi''.le] at hG''
-      rw [hz' (v 0) le_rfl] at hG'
-      have hlt' := enumCode.strictMono hG hfun hcode hi'' le_rfl hG'' hG'
-      exact not_le.mpr hlt' hle
+  refine (PrenexDefinable.exists_exists_of_sigmaZero
+    (R := fun (p : Fin 1 → V) y'' y' ↦ LimitFails a c G (p 0) y'' y') hR).of_iff fun v ↦ ?_
+  exact ⟨exists_limitFails_of_not_mem htot K hK hD hc, fun ⟨_, _, h⟩ ↦
+    not_mem_of_limitFails hG hfun K hK hlt hc h⟩
 
 lemma prenexDefinable_mem_of_enumCode {a I : V} {G : V → V → Prop}
     (hG : 𝚺ᴬ₀.DefinableRel G) (K : Cut V)

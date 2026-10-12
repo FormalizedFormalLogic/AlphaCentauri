@@ -93,39 +93,44 @@ lemma enumCode.mono {a B i z t t' : V} {G : V → V → Prop}
     · exact hmin x hx w hwt hGw hyw
     · exact hy't.trans (not_le.mp hwt).le
 
+lemma enumCode.exists_common_value {a I i i' z z' t t' : V} {G : V → V → Prop}
+    (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y') (hii' : i ≤ i')
+    (h : enumCode a (I ⨳ a) G i z t) (h' : enumCode a (I ⨳ a) G i' z' t') :
+    ∀ j ≤ i, ∃ y ≤ t + t', G (entry a z j) y ∧ G (entry a z' j) y := by
+  have h₁ := h.mono hfun (le_self_add (a := t) (b := t'))
+  have h₂ := h'.mono hfun (le_add_self (a := t') (b := t))
+  intro j
+  induction j using ISigma0.succ_induction
+  · unfold entry
+    definability
+  case zero =>
+    intro _
+    obtain ⟨-, y, hy, hGy⟩ := h₁.2.2.2.1 0 (Arithmetic.zero_le i)
+    obtain ⟨-, y', hy', hGy'⟩ := h₂.2.2.2.1 0 (Arithmetic.zero_le i')
+    have hy₁ : y ≤ y' :=
+      h₁.2.2.2.2.1 (entry a z' 0) (h₂.2.2.2.1 0 (Arithmetic.zero_le i')).1 y' hy' hGy' y hy hGy
+    have hy₂ : y' ≤ y :=
+      h₂.2.2.2.2.1 (entry a z 0) (h₁.2.2.2.1 0 (Arithmetic.zero_le i)).1 y hy hGy y' hy' hGy'
+    exact ⟨y, hy, hGy, (le_antisymm hy₁ hy₂) ▸ hGy'⟩
+  case succ j IH =>
+    intro hj
+    obtain ⟨c, hc, hGc, hGc'⟩ := IH (le_trans le_self_add hj)
+    have hjlt : j < i := (lt_add_one j).trans_le hj
+    obtain ⟨hza, v, hv, hGv⟩ := h₁.2.2.2.1 (j + 1) hj
+    obtain ⟨hza', v', hv', hGv'⟩ := h₂.2.2.2.1 (j + 1) (hj.trans hii')
+    obtain ⟨hcv, hminv⟩ := h₁.2.2.2.2.2 j hjlt c hc v hv hGc hGv
+    obtain ⟨hcv', hminv'⟩ := h₂.2.2.2.2.2 j (hjlt.trans_le hii') c hc v' hv' hGc' hGv'
+    have hvv' : v ≤ v' := hminv (entry a z' (j + 1)) hza' v' hv' hGv' hcv'
+    have hv'v : v' ≤ v := hminv' (entry a z (j + 1)) hza v hv hGv hcv
+    exact ⟨v, hv, hGv, (le_antisymm hvv' hv'v) ▸ hGv'⟩
+
 lemma enumCode.unique {a I i z z' t t' : V} {G : V → V → Prop}
     (hG : 𝚺ᴬ₀.DefinableRel G)
     (hfun : ∀ x y y', G x y → G x y' → y = y')
     (hinj : ∀ x x' y, G x y → G x' y → x = x') (hI : ‖I‖ = a + 1)
     (hz : z < I ⨳ a) (hz' : z' < I ⨳ a)
     (h : enumCode a (I ⨳ a) G i z t) (h' : enumCode a (I ⨳ a) G i z' t') : z = z' := by
-  have h₁ := h.mono hfun (le_self_add (a := t) (b := t'))
-  have h₂ := h'.mono hfun (le_add_self (a := t') (b := t))
-  have key : ∀ j, j ≤ i → ∃ y ≤ t + t', G (entry a z j) y ∧ G (entry a z' j) y := by
-    intro j
-    induction j using ISigma0.succ_induction
-    · unfold entry
-      definability
-    case zero =>
-      intro _
-      obtain ⟨-, y, hy, hGy⟩ := h₁.2.2.2.1 0 (Arithmetic.zero_le i)
-      obtain ⟨-, y', hy', hGy'⟩ := h₂.2.2.2.1 0 (Arithmetic.zero_le i)
-      have hy₁ : y ≤ y' :=
-        h₁.2.2.2.2.1 (entry a z' 0) (h₂.2.2.2.1 0 (Arithmetic.zero_le i)).1 y' hy' hGy' y hy hGy
-      have hy₂ : y' ≤ y :=
-        h₂.2.2.2.2.1 (entry a z 0) (h₁.2.2.2.1 0 (Arithmetic.zero_le i)).1 y hy hGy y' hy' hGy'
-      exact ⟨y, hy, hGy, (le_antisymm hy₁ hy₂) ▸ hGy'⟩
-    case succ j IH =>
-      intro hj
-      obtain ⟨c, hc, hGc, hGc'⟩ := IH (le_trans le_self_add hj)
-      have hjlt : j < i := (lt_add_one j).trans_le hj
-      obtain ⟨hza, v, hv, hGv⟩ := h₁.2.2.2.1 (j + 1) hj
-      obtain ⟨hza', v', hv', hGv'⟩ := h₂.2.2.2.1 (j + 1) hj
-      obtain ⟨hcv, hminv⟩ := h₁.2.2.2.2.2 j hjlt c hc v hv hGc hGv
-      obtain ⟨hcv', hminv'⟩ := h₂.2.2.2.2.2 j hjlt c hc v' hv' hGc' hGv'
-      have hvv' : v ≤ v' := hminv (entry a z' (j + 1)) hza' v' hv' hGv' hcv'
-      have hv'v : v' ≤ v := hminv' (entry a z (j + 1)) hza v hv hGv hcv
-      exact ⟨v, hv, hGv, (le_antisymm hvv' hv'v) ▸ hGv'⟩
+  have key := enumCode.exists_common_value hG hfun le_rfl h h'
   have hentry : ∀ k ≤ a, entry a z k = entry a z' k := by
     intro k hk
     by_cases hki : k ≤ i
@@ -140,54 +145,61 @@ lemma enumCode.unique {a I i z z' t t' : V} {G : V → V → Prop}
   have hja : j ≤ a := lt_succ_iff_le.mp hj
   rw [ext_eq_entry hja, ext_eq_entry hja, hentry (a - j) (sub_le_self a j)]
 
-lemma enumCode.lt_of_enumCode {a I i z t : V} {G : V → V → Prop}
-    (hG : 𝚺ᴬ₀.DefinableRel G)
-    (hfun : ∀ x y y', G x y → G x y' → y = y') (hI : ‖I‖ = a + 1)
-    (h : enumCode a (I ⨳ a) G i z t) : i < a := by
-  obtain ⟨hia, -, hc2, hc3, -, hc5⟩ := h
-  by_contra hlt
-  have hia' : i = a := le_antisymm hia (not_lt.mp hlt)
-  have chain : ∀ k, k ≤ i → ∀ j < k, ∀ y ≤ t, ∀ y' ≤ t,
+lemma enumCode.strictMono {a B i z t : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G)
+    (hfun : ∀ x y y', G x y → G x y' → y = y') (h : enumCode a B G i z t)
+    {j k : V} (hjk : j < k) (hki : k ≤ i) {y y' : V} (hy : G (entry a z j) y)
+    (hy' : G (entry a z k) y') : y < y' := by
+  obtain ⟨-, -, -, h4, -, h6⟩ := h
+  have hbd : ∀ j ≤ i, ∀ y, G (entry a z j) y → y ≤ t := by
+    intro j hj y hy
+    obtain ⟨-, y', hy', hG'⟩ := h4 j hj
+    rw [hfun _ _ _ hy hG']
+    exact hy'
+  have key : ∀ k, k ≤ i → ∀ j < k, ∀ y ≤ t, ∀ y' ≤ t,
       G (entry a z j) y → G (entry a z k) y' → y < y' := by
     intro k
     induction k using ISigma0.succ_induction
-    · unfold entry
+    · clear h4 h6 hbd hy hy' hfun
+      unfold entry
       definability
     case zero => intro _ j hj; exact absurd hj (by simp)
     case succ k IH =>
-      intro hk j hj y hy y' hy' hGj hGk
+      intro hk j hj y hyt y' hy't hGj hGk
       have hkz : k ≤ i := le_trans le_self_add hk
       have hki : k < i := (lt_add_one k).trans_le hk
       rcases lt_or_eq_of_le (lt_succ_iff_le.mp hj) with hjk | rfl
-      · obtain ⟨-, yk, hyk, hGyk⟩ := hc3 k hkz
-        exact (IH hkz j hjk y hy yk hyk hGj hGyk).trans (hc5 k hki yk hyk y' hy' hGyk hGk).1
-      · exact (hc5 j hki y hy y' hy' hGj hGk).1
-  have hinj' : ∀ k ≤ a, ∀ k' ≤ a, entry a z k = entry a z k' → k = k' := by
+      · obtain ⟨-, w, hw, hGw⟩ := h4 k hkz
+        exact (IH hkz j hjk y hyt w hw hGj hGw).trans (h6 k hki w hw y' hy't hGw hGk).1
+      · exact (h6 j hki y hyt y' hy't hGj hGk).1
+  exact key k hki j hjk y (hbd j (hjk.le.trans hki) y hy) y' (hbd k hki y' hy') hy hy'
+
+lemma enumCode.entry_ne {a B i z t j k : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G)
+    (hfun : ∀ x y y', G x y → G x y' → y = y') (h : enumCode a B G i z t) (hjk : j < k)
+    (hki : k ≤ i) : entry a z j ≠ entry a z k := by
+  intro heq
+  obtain ⟨-, y, -, hy⟩ := h.2.2.2.1 j (hjk.le.trans hki)
+  obtain ⟨-, y', -, hy'⟩ := h.2.2.2.1 k hki
+  exact (enumCode.strictMono hG hfun h hjk hki hy hy').ne (hfun _ _ _ (heq ▸ hy) hy')
+
+lemma enumCode.lt_of_enumCode {a I i z t : V} {G : V → V → Prop}
+    (hG : 𝚺ᴬ₀.DefinableRel G)
+    (hfun : ∀ x y y', G x y → G x y' → y = y') (h : enumCode a (I ⨳ a) G i z t) : i < a := by
+  by_contra hlt
+  have hia : i = a := le_antisymm h.1 (not_lt.mp hlt)
+  have hinj : ∀ k ≤ a, ∀ k' ≤ a, entry a z k = entry a z k' → k = k' := by
     intro k hk k' hk' heq
     by_contra hne
     rcases lt_or_gt_of_ne hne with hlt' | hgt'
-    · obtain ⟨-, yk, hyk, hGk⟩ := hc3 k (by rw [hia']; exact hk)
-      obtain ⟨-, yk', hyk', hGk'⟩ := hc3 k' (by rw [hia']; exact hk')
-      have hlt'' := chain k' (by rw [hia']; exact hk') k hlt' yk hyk yk' hyk' hGk hGk'
-      rw [heq] at hGk
-      have := hfun _ _ _ hGk hGk'
-      rw [this] at hlt''
-      exact lt_irrefl _ hlt''
-    · obtain ⟨-, yk, hyk, hGk⟩ := hc3 k (by rw [hia']; exact hk)
-      obtain ⟨-, yk', hyk', hGk'⟩ := hc3 k' (by rw [hia']; exact hk')
-      have hlt'' := chain k (by rw [hia']; exact hk) k' hgt' yk' hyk' yk hyk hGk' hGk
-      rw [← heq] at hGk'
-      have := hfun _ _ _ hGk hGk'
-      rw [this] at hlt''
-      exact lt_irrefl _ hlt''
+    · exact enumCode.entry_ne hG hfun h hlt' (hia ▸ hk') heq
+    · exact enumCode.entry_ne hG hfun h hgt' (hia ▸ hk) heq.symm
   have hlt_ext : ∀ j ≤ a, Nuon.ext a z j < a := by
     intro j hj
     rw [ext_eq_entry hj]
-    exact (hc3 (a - j) (by rw [hia']; exact sub_le_self a j)).1
+    exact (h.2.2.2.1 (a - j) (hia ▸ sub_le_self a j)).1
   have hinj_ext : ∀ j ≤ a, ∀ j' ≤ a, Nuon.ext a z j = Nuon.ext a z j' → j = j' := by
     intro j hj j' hj' heq
     rw [ext_eq_entry hj, ext_eq_entry hj'] at heq
-    exact sub_inj_of_le hj hj' (hinj' _ (sub_le_self a j) _ (sub_le_self a j') heq)
+    exact sub_inj_of_le hj hj' (hinj _ (sub_le_self a j) _ (sub_le_self a j') heq)
   exact no_coded_injection a a z le_rfl hlt_ext hinj_ext
 
 lemma enumCode.exists_zero {a I : V} {G : V → V → Prop}
@@ -250,7 +262,7 @@ lemma enumCode.exists_succ {a I i z t : V} {G : V → V → Prop}
     (hunb : ∀ s, ∃ x y, G x y ∧ s < y) (hI : ‖I‖ = a + 1)
     (h : enumCode a (I ⨳ a) G i z t) :
     ∃ z' < I ⨳ a, ∃ t', enumCode a (I ⨳ a) G (i + 1) z' t' := by
-  have hia : i < a := enumCode.lt_of_enumCode hG hfun hI h
+  have hia : i < a := enumCode.lt_of_enumCode hG hfun h
   obtain ⟨-, c, hc, hGc⟩ := h.2.2.2.1 i le_rfl
   obtain ⟨x₁, y₁, hGx₁, hcy₁⟩ := hunb c
   have hP : 𝚺ᴬ₀.DefinablePred fun s ↦ ∃ x < a, G x s ∧ c < s := by
@@ -351,7 +363,7 @@ lemma lt_of_mem_enumerationCut (f : V → V) (hI : ‖I‖ = a + 1) (hunb : ∀ 
     (hgraph : 𝚺ᴬ₀.DefinableRel fun x y ↦ x < a ∧ f x = y) {i : V}
     (hi : i ∈ (enumerationCut a I f hI hunb hgraph).carrier) : i < a := by
   obtain ⟨z, hz, t, h⟩ := hi
-  exact enumCode.lt_of_enumCode hgraph (fun x y y' h h' ↦ h.2.symm.trans h'.2) hI h
+  exact enumCode.lt_of_enumCode hgraph (fun x y y' h h' ↦ h.2.symm.trans h'.2) h
 
 end
 

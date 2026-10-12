@@ -33,6 +33,7 @@ public import AlphaCentauri.Conservativity.Omega1
 public import AlphaCentauri.Hierarchy.Bounded
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Model.Basic
+public import AlphaCentauri.Model.CodedLimit
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut

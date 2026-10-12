@@ -205,6 +205,28 @@ lemma ext_mod_smash {I S j : V} (hj : j < ‖I‖) : Nuon.ext a (S % (I ⨳ a)) 
   rw [bexp_eq_smash, hS] at h
   exact h.symm
 
+private lemma mod_add_div_mul_eq (S q : V) : S % q + S / q * q = S := by
+  rw [mul_comm (S / q) q, add_comm]
+  exact div_add_mod S q
+
+lemma ext_div_pow2 {I S q k m : V} (hm : k + m ≤ ‖I‖) (hq : Exponential (k * ‖a‖) q) :
+    Nuon.ext a (S / q) m = Nuon.ext a S (k + m) := by
+  have hk : k ≤ ‖I‖ := le_self_add.trans hm
+  have hqb : bexp (I ⨳ a) (k * ‖a‖) = q := bexp_eq_of_exp (Nuon.mul_len_lt_len_smash hk) hq
+  have hS₁ : ‖S % q‖ ≤ k * ‖a‖ := hq.lt_iff_len_le.mp (mod_lt S hq.range_pos)
+  have h := Nuon.ext_add₂_bexp (I := I) (L := a) (i := k) (j := m) (S₁ := S % q)
+    (S₂ := S / q) hm hS₁
+  rw [hqb, mod_add_div_mul_eq] at h
+  exact h.symm
+
+lemma ext_mod_pow2 {I S q k m : V} (hk : k ≤ ‖I‖) (hm : m < k) (hq : Exponential (k * ‖a‖) q) :
+    Nuon.ext a (S % q) m = Nuon.ext a S m := by
+  have hqb : bexp (I ⨳ a) (k * ‖a‖) = q := bexp_eq_of_exp (Nuon.mul_len_lt_len_smash hk) hq
+  have h := Nuon.ext_add₁_bexp (I := I) (L := a) (i := k) (j := m) (S₁ := S % q)
+    (S₂ := S / q) hk hm
+  rw [hqb, mod_add_div_mul_eq] at h
+  exact h.symm
+
 end Blocks
 
 end

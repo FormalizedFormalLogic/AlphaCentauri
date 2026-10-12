@@ -116,6 +116,18 @@ declaration:
     forgive:
       # Quoted by Bek99 from Beklemishev 1997 without proof.
       - FFL.FirstOrder.Arithmetic.uniformReflection_of_parameterFreeInduction
+  FFL.FirstOrder.Arithmetic.exists_exponential_mul_length:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_exponential_mul_length
+  FFL.FirstOrder.Arithmetic.Nuon.ext_add_mul_of_lt:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Nuon.ext_add_mul_of_lt
+  FFL.FirstOrder.Arithmetic.Nuon.ext_add_mul_self:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Nuon.ext_add_mul_self
+  FFL.FirstOrder.Arithmetic.Nuon.ext_ext:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Nuon.ext_ext
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:

@@ -35,6 +35,7 @@ public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
+public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.NumberTheory.Primes
 public import AlphaCentauri.OmegaLogic.Basic

@@ -32,8 +32,11 @@ section
 
 variable {a i j : V}
 
-axiom ext_add_mul_of_lt {S b x : V} (hb : Exponential (i * ‖a‖) b) (hS : S < b)
-    (hx : x < a ⨳ 1) (hj : j < i) : Nuon.ext a (S + x * b) j = Nuon.ext a S j
+lemma ext_add_mul_of_lt {S b x : V} (hb : Exponential (i * ‖a‖) b) (_hS : S < b)
+    (_hx : x < a ⨳ 1) (hj : j < i) : Nuon.ext a (S + x * b) j = Nuon.ext a S j :=
+  ext_add₁_pow2 hb.range_pow2 (by
+    rw [hb.length_eq]
+    exact lt_succ_iff_le.mpr (mul_le_mul_right (succ_le_iff_lt.mpr hj)))
 
 axiom ext_add_mul_self {S b x : V} (hb : Exponential (i * ‖a‖) b) (hS : S < b)
     (hx : x < a ⨳ 1) : Nuon.ext a (S + x * b) i = x

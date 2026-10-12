@@ -106,6 +106,107 @@ end
 
 end Nuon
 
+section Blocks
+
+variable {a : V}
+
+lemma exists_update {I S j v : V} (hS : S < I ⨳ a) (hj : j < ‖I‖) (hv : v < a ⨳ 1) :
+    ∃ S' < I ⨳ a, Nuon.ext a S' j = v ∧ ∀ l ≤ ‖I‖, l ≠ j → Nuon.ext a S' l = Nuon.ext a S l := by
+  have hj1 : j + 1 ≤ ‖I‖ := succ_le_iff_lt.mpr hj
+  have hjI : j ≤ ‖I‖ := le_of_lt hj
+  have hPlen : j * ‖a‖ < ‖I ⨳ a‖ := Nuon.mul_len_lt_len_smash hjI
+  have hQlen : (j + 1) * ‖a‖ < ‖I ⨳ a‖ := Nuon.mul_len_lt_len_smash hj1
+  have hBlen : ‖I‖ * ‖a‖ < ‖I ⨳ a‖ := Nuon.mul_len_lt_len_smash le_rfl
+  have hβ : bexp (I ⨳ a) ((j + 1) * ‖a‖) = bexp (I ⨳ a) (j * ‖a‖) * (a ⨳ 1) := by
+    have hsum : j * ‖a‖ + ‖a‖ < ‖I ⨳ a‖ := by simpa [add_mul] using hQlen
+    rw [show (j + 1) * ‖a‖ = j * ‖a‖ + ‖a‖ by simp [add_mul], bexp_add hsum]
+    congr 1
+    exact bexp_eq_of_exp (lt_of_le_of_lt le_add_self hsum) (exponential_smash_one a)
+  have hPpos : 0 < bexp (I ⨳ a) (j * ‖a‖) := bexp_pos hPlen
+  have hQpos : 0 < bexp (I ⨳ a) ((j + 1) * ‖a‖) := bexp_pos hQlen
+  have hdvd : bexp (I ⨳ a) ((j + 1) * ‖a‖) ∣ I ⨳ a := by
+    have := Pow2.dvd_of_le (bexp_pow2 hQlen) (bexp_pow2 hBlen)
+      ((bexp_monotone_le hQlen hBlen).mpr (mul_le_mul_right hj1))
+    rwa [bexp_eq_smash] at this
+  obtain ⟨D, hD⟩ := hdvd
+  have hT : S % bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖) <
+      bexp (I ⨳ a) ((j + 1) * ‖a‖) := by
+    have hv' : v + 1 ≤ a ⨳ 1 := succ_le_iff_lt.mpr hv
+    calc S % bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖)
+        < bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖) :=
+          add_lt_add_left (mod_lt S hPpos) _
+      _ = (v + 1) * bexp (I ⨳ a) (j * ‖a‖) := by grind
+      _ ≤ (a ⨳ 1) * bexp (I ⨳ a) (j * ‖a‖) := mul_le_mul_right hv'
+      _ = bexp (I ⨳ a) ((j + 1) * ‖a‖) := by rw [hβ, mul_comm]
+  have hTlen : ‖S % bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖)‖ ≤ (j + 1) * ‖a‖ :=
+    (exp_bexp_of_lt hQlen).lt_iff_len_le.mp hT
+  have hSQ : S % bexp (I ⨳ a) ((j + 1) * ‖a‖) +
+      S / bexp (I ⨳ a) ((j + 1) * ‖a‖) * bexp (I ⨳ a) ((j + 1) * ‖a‖) = S := by
+    rw [add_comm, mul_comm (S / _) _]
+    exact div_add_mod S _
+  have hSQlen : ‖S % bexp (I ⨳ a) ((j + 1) * ‖a‖)‖ ≤ (j + 1) * ‖a‖ :=
+    (exp_bexp_of_lt hQlen).lt_iff_len_le.mp (mod_lt _ hQpos)
+  have hcQ : bexp (I ⨳ a) ((j + 1) * ‖a‖) * (S / bexp (I ⨳ a) ((j + 1) * ‖a‖)) ≤ S := by
+    have h := div_add_mod S (bexp (I ⨳ a) ((j + 1) * ‖a‖))
+    exact le_self_add.trans_eq h
+  have hcD : S / bexp (I ⨳ a) ((j + 1) * ‖a‖) < D := by
+    by_contra h
+    have h' : D ≤ S / bexp (I ⨳ a) ((j + 1) * ‖a‖) := not_lt.mp h
+    have h1 : bexp (I ⨳ a) ((j + 1) * ‖a‖) * D ≤
+        bexp (I ⨳ a) ((j + 1) * ‖a‖) * (S / bexp (I ⨳ a) ((j + 1) * ‖a‖)) :=
+      mul_le_mul_left h'
+    have h2 : I ⨳ a ≤ S := by rw [hD]; exact h1.trans hcQ
+    exact absurd hS (not_lt.mpr h2)
+  refine ⟨S % bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖) +
+    S / bexp (I ⨳ a) ((j + 1) * ‖a‖) * bexp (I ⨳ a) ((j + 1) * ‖a‖), ?_, ?_, ?_⟩
+  · calc S % bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖) +
+        S / bexp (I ⨳ a) ((j + 1) * ‖a‖) * bexp (I ⨳ a) ((j + 1) * ‖a‖)
+        < bexp (I ⨳ a) ((j + 1) * ‖a‖) +
+          S / bexp (I ⨳ a) ((j + 1) * ‖a‖) * bexp (I ⨳ a) ((j + 1) * ‖a‖) :=
+          add_lt_add_left hT _
+      _ = (S / bexp (I ⨳ a) ((j + 1) * ‖a‖) + 1) * bexp (I ⨳ a) ((j + 1) * ‖a‖) := by grind
+      _ ≤ D * bexp (I ⨳ a) ((j + 1) * ‖a‖) := mul_le_mul_right (succ_le_iff_lt.mpr hcD)
+      _ = I ⨳ a := (mul_comm _ _).trans hD.symm
+  · rw [Nuon.ext_add₁_bexp (i := j + 1) hj1 (by simp)]
+    exact Nuon.ext_append_last I a S hjI (lt_smash_one_iff.mp hv)
+  · intro l hl hne
+    rcases lt_or_gt_of_ne hne with hlt | hgt
+    · rw [Nuon.ext_add₁_bexp (i := j + 1) hj1 (lt_trans hlt (by simp))]
+      exact Nuon.ext_append_lt I a S hjI hlt
+    · obtain ⟨k, rfl⟩ := le_iff_exists_add.mp (succ_le_iff_lt.mpr hgt)
+      have h1 := Nuon.ext_add₂_bexp (I := I) (L := a) (i := j + 1) (j := k)
+        (S₁ := S % bexp (I ⨳ a) (j * ‖a‖) + v * bexp (I ⨳ a) (j * ‖a‖))
+        (S₂ := S / bexp (I ⨳ a) ((j + 1) * ‖a‖)) hl hTlen
+      have h2 := Nuon.ext_add₂_bexp (I := I) (L := a) (i := j + 1) (j := k)
+        (S₁ := S % bexp (I ⨳ a) ((j + 1) * ‖a‖))
+        (S₂ := S / bexp (I ⨳ a) ((j + 1) * ‖a‖)) hl hSQlen
+      rw [hSQ] at h2
+      rw [h1]
+      exact h2.symm
+
+lemma exists_swap {I S j k : V} (hS : S < I ⨳ a) (hj : j < ‖I‖) (hk : k < ‖I‖) :
+    ∃ S' < I ⨳ a, Nuon.ext a S' j = Nuon.ext a S k ∧ Nuon.ext a S' k = Nuon.ext a S j ∧
+      ∀ l ≤ ‖I‖, l ≠ j → l ≠ k → Nuon.ext a S' l = Nuon.ext a S l := by
+  have hv : ∀ l, Nuon.ext a S l < a ⨳ 1 := fun l => mod_lt _ (smash_pos a 1)
+  obtain ⟨S₁, hS₁, h₁j, h₁l⟩ := exists_update hS hj (hv k)
+  obtain ⟨S₂, hS₂, h₂k, h₂l⟩ := exists_update hS₁ hk (hv j)
+  refine ⟨S₂, hS₂, ?_, h₂k, ?_⟩
+  · rcases eq_or_ne j k with rfl | hjk
+    · exact h₂k
+    · exact (h₂l j (le_of_lt hj) hjk).trans h₁j
+  · intro l hl hlj hlk
+    exact (h₂l l hl hlk).trans (h₁l l hl hlj)
+
+lemma ext_mod_smash {I S j : V} (hj : j < ‖I‖) : Nuon.ext a (S % (I ⨳ a)) j = Nuon.ext a S j := by
+  have hS : S % (I ⨳ a) + S / (I ⨳ a) * (I ⨳ a) = S := by
+    rw [mul_comm, add_comm, div_add_mod]
+  have h := Nuon.ext_add₁_bexp (I := I) (L := a) (i := ‖I‖) (j := j)
+    (S₁ := S % (I ⨳ a)) (S₂ := S / (I ⨳ a)) le_rfl hj
+  rw [bexp_eq_smash, hS] at h
+  exact h.symm
+
+end Blocks
+
 end
 
 end FFL.FirstOrder.Arithmetic

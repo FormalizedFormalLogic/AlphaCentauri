@@ -116,9 +116,6 @@ declaration:
     forgive:
       # Quoted by Bek99 from Beklemishev 1997 without proof.
       - FFL.FirstOrder.Arithmetic.uniformReflection_of_parameterFreeInduction
-  FFL.FirstOrder.Arithmetic.Nuon.ext_ext:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Nuon.ext_ext
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:

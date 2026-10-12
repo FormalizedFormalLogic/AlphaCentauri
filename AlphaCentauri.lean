@@ -37,6 +37,7 @@ public import AlphaCentauri.Model.CodedLimit
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut
+public import AlphaCentauri.Model.InjectiveEnumeration
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
 public import AlphaCentauri.NumberTheory.Primes

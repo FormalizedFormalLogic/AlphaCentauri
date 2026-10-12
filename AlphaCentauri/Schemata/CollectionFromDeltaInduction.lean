@@ -8,8 +8,8 @@ public import AlphaCentauri.ToFoundation.PrenexDefinable
 /-!
 # Collection for $\Delta_0$ formulas from $\Delta_1$ induction
 
-Over a model of $\mathsf{EA}$, $\mathsf{I}\Delta_1$ yields collection for $\Delta_0$ formulas with
-parameters.
+Over a model of $\mathsf{EA}$, $\mathsf{I}\Delta_1$ yields collection for $\Delta_0$-definable
+relations, and hence the collection scheme $\mathsf{B}\Sigma_1$.
 -/
 
 @[expose] public section
@@ -166,18 +166,19 @@ lemma prenexDefinable_mem_of_enumCode {a I : V} {G : V → V → Prop}
     rw [hK]
     exact ⟨fun ⟨z, hz, t, h⟩ ↦ ⟨z, t, h⟩, fun ⟨z, t, h⟩ ↦ ⟨z, h.2.1, t, h⟩⟩
 
-/-- An unbounded injection on `[0, a)` whose graph is `Δ₀`-definable, `I` of length `a + 1`:
-$\mathsf{I}\Delta_1$ gives collection for `Δ₀` formulas with parameters. -/
+/-- If a $\Delta_0$-definable relation `Q` has a witness `u` for every `x < a`, then the witnesses
+can be bounded uniformly by some `w`.
+- [Sla04, Theorem 2.1]
+- [Tha05, Theorem 2] -/
 theorem collection_of_models_IDelta_one [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1]
-    {m : ℕ} {θ : ArithmeticSemisentence (m + 2)} (hθ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 θ)
-    (e : Fin m → V) (a : V) (hex : ∀ x < a, ∃ u, V ⊧/(u :> x :> e) θ) :
-    ∃ w, ∀ x < a, ∃ u < w, V ⊧/(u :> x :> e) θ := by
+    {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q) (a : V) (hex : ∀ x < a, ∃ u, Q u x) :
+    ∃ w, ∀ x < a, ∃ u < w, Q u x := by
   by_contra hne
   push Not at hne
-  have hnb : ∀ w, ∃ x < a, ∀ u ≤ w, ¬V ⊧/(u :> x :> e) θ := fun w ↦ by
+  have hnb : ∀ w, ∃ x < a, ∀ u ≤ w, ¬Q u x := fun w ↦ by
     obtain ⟨x, hx, hu⟩ := hne (w + 1)
     exact ⟨x, hx, fun u hu' ↦ hu u (lt_of_le_of_lt hu' (lt_add_one w))⟩
-  obtain ⟨f, hinj, hunb, hgraph⟩ := exists_injective_unbounded_of_not_collection hθ e a hex hnb
+  obtain ⟨f, hinj, hunb, hgraph⟩ := exists_injective_unbounded_of_not_collection hQ a hex hnb
   obtain ⟨I, hIe⟩ := ElementaryArithmetic.exponential_total a
   have hIlen : ‖I‖ = a + 1 := hIe.length_eq
   have hfun : ∀ x y y' : V, (x < a ∧ f x = y) → (x < a ∧ f x = y') → y = y' :=
@@ -197,6 +198,70 @@ theorem collection_of_models_IDelta_one [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1]
   have hσ := prenexDefinable_mem_of_enumCode hgraph _ hK
   exact not_models_IDelta_of_proper_cut _ 1 ⟨hzero, a, fun ha ↦ lt_irrefl a (hlt a ha)⟩ hσ hπ
     inferInstance
+
+/-- The pairing of a witness `u` with a value `y`, relating a bound on a single code to the
+pair of its components. -/
+lemma definableRel_exists_pair {Q : V → V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel₃ Q) :
+    𝚺ᴬ₀.DefinableRel fun p x : V ↦ ∃ y ≤ p, ∃ u ≤ p, p = ⟪y, u⟫ ∧ Q u x y := by
+  have hpair : 𝚺ᴬ₀.DefinableRel₃ fun y u p : V ↦ p = ⟪y, u⟫ := by definability
+  definability
+
+/-- Collection for a $\Delta_0$-definable three-place relation whose witnesses are pairs. -/
+theorem collection_of_exists_pair [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] {Q : V → V → V → Prop}
+    (hQ : 𝚺ᴬ₀.DefinableRel₃ Q) (a : V) (h : ∀ x < a, ∃ y u, Q u x y) :
+    ∃ b, ∀ x < a, ∃ y < b, ∃ u, Q u x y := by
+  obtain ⟨w, hw⟩ := collection_of_models_IDelta_one (definableRel_exists_pair hQ) a
+    (fun x hx ↦ by
+      obtain ⟨y, u, hq⟩ := h x hx
+      exact ⟨⟪y, u⟫, y, le_pair_left y u, u, le_pair_right y u, rfl, hq⟩)
+  refine ⟨w, fun x hx ↦ ?_⟩
+  obtain ⟨p, hp, y, hy, u, -, -, hq⟩ := hw x hx
+  exact ⟨y, lt_of_le_of_lt hy hp, u, hq⟩
+
+/-- Collection for the prenex $\Sigma_1$ formulas, as a scheme over `V`. -/
+lemma models_collection_prenex_sigmaOne [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] :
+    V↓[ℒₒᵣ] ⊧* CollectionScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1) := by
+  apply Semantics.ModelsSet.setOf_iff.mpr
+  rintro _ ⟨φ, hφ, rfl⟩
+  suffices ∀ e : ℕ → V, ∀ a : V, (∀ x < a, ∃ y, φ.Eval ![x, y] e) →
+      ∃ b, ∀ x < a, ∃ y < b, φ.Eval ![x, y] e by
+    simpa [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
+      Semiformula.eval_bexsLT, Semiformula.eval_substs] using this
+  intro e a h
+  obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hφ
+  have hψ₀ := Bounding.PrenexHierarchy.zero_iff.mp hψ
+  have hdef : 𝚺ᴬ₀.DefinableRel₃ fun u x y : V ↦ ψ.Eval ![u, x, y] e := by
+    refine (Bounding.definable_of_hierarchy hψ₀ e).of_iff fun v ↦ ?_
+    change ψ.Eval ![v 0, v 1, v 2] e ↔ ψ.Eval v e
+    rw [← Matrix.fun_eq_vec_three v]
+  have hEq : ∀ x y : V, (∃¹ψ).Eval ![x, y] e ↔ ∃ u, ψ.Eval ![u, x, y] e := by
+    intro x y
+    simp
+  obtain ⟨w, hw⟩ := collection_of_exists_pair hdef a fun x hx ↦ by
+    obtain ⟨y, hy⟩ := h x hx
+    obtain ⟨u, hu⟩ := (hEq x y).mp hy
+    exact ⟨y, u, hu⟩
+  exact ⟨w, fun x hx ↦ by
+    obtain ⟨y, hy, u, hu⟩ := hw x hx
+    exact ⟨y, hy, (hEq x y).mpr ⟨u, hu⟩⟩⟩
+
+/-- The collection scheme `𝗕𝚺 1`, over a model of `𝗘𝗔` and `𝗜𝚫 1`. -/
+lemma models_BSigma_one [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 1 :=
+  Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, models_collection_prenex_sigmaOne⟩
+
+/-- Over `𝗘𝗔`, `𝗜𝚫 1` proves the collection scheme `𝗕𝚺 1`.
+- [Sla04, Theorem 2.1]
+- [Tha05, Theorem 2] -/
+theorem BSigma_one_weakerThan_EA_IDelta_one : 𝗘𝗔 ∪ 𝗕𝚺 1 ⪯ 𝗘𝗔 ∪ 𝗜𝚫 1 := by
+  have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗘𝗔 ∪ 𝗜𝚫 1 :=
+    _root_.FFL.Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗘𝗔)
+      (_root_.FFL.Entailment.WeakerThan.ofSubset Set.subset_union_left)
+  refine weakerThan_of_models.{0} _ _ fun M _ _ ↦ ?_
+  have hEA : M↓[ℒₒᵣ] ⊧* 𝗘𝗔 := models_of_ss (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗘𝗔 ∪ 𝗜𝚫 1)
+    Set.subset_union_left
+  have hID : M↓[ℒₒᵣ] ⊧* 𝗜𝚫 1 := models_of_ss (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗘𝗔 ∪ 𝗜𝚫 1)
+    Set.subset_union_right
+  exact Semantics.ModelsSet.union_iff.mpr ⟨hEA, models_BSigma_one⟩
 
 end
 

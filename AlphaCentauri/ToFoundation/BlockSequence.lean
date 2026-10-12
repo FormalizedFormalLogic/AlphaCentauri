@@ -23,7 +23,8 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 attribute [local instance] ElementaryArithmetic.models_ISigma0_union_Omega1
 
-axiom exists_exponential_mul_length (i a : V) : ∃ b, Exponential (i * ‖a‖) b
+lemma exists_exponential_mul_length (i a : V) : ∃ b, Exponential (i * ‖a‖) b :=
+  ElementaryArithmetic.exponential_total _
 
 namespace Nuon
 

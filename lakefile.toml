@@ -36,7 +36,7 @@ rev = "master"
 [[require]]
 name = "Forgive"
 git = "https://github.com/FormalizedFormalLogic/forgive"
-rev = "v4.34.0"
+rev = "v4.35.0"
 
 # Generator of the theory zoo. Kept out of `defaultTargets`: it is built by `just zoo`.
 [[lean_lib]]

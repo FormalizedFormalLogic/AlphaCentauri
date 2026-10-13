@@ -22,7 +22,9 @@ variable {M : Type*} [ORingStructure M]
 /-- A cut is proper when it contains `0` and omits some element.
 - [HP98, Definition IV.1.14]
 - [Sla04, §1.1] -/
-def Cut.Proper (I : Cut M) : Prop := (0 : M) ∈ I.carrier ∧ ∃ c, c ∉ I.carrier
+structure Cut.Proper (I : Cut M) : Prop where
+  zero_mem : (0 : M) ∈ I.carrier
+  exists_not_mem : ∃ c, c ∉ I.carrier
 
 /-- A cut definable by a $\Sigma_0$ formula with parameters is not proper.
 - [HP98, Observation IV.1.15] -/

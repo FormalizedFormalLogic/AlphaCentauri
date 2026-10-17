@@ -35,9 +35,6 @@ declaration:
   FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma:
     forgive:
       - FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
   FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1
@@ -118,18 +115,6 @@ declaration:
       - FFL.FirstOrder.Arithmetic.uniformReflection_of_parameterFreeInduction
 
   # Declarations that inherit the debt of an unproved statement.
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_fresh:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_free:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
   FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive

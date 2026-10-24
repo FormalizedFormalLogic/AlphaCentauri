@@ -504,7 +504,7 @@ private lemma inversion_all_shift {d₀ : V}
   have hΔ := hd₀.isFormulaSet
   obtain ⟨r, hr, hre⟩ :=
     mem_setShift_iff.mp (show ^∀ p ∈ setShift L (fstIdx d₀) by rw [← hsh]; simp)
-  obtain ⟨p₀, -, rfl, rfl⟩ := exists_all_of_shift_eq_all (hΔ _ hr).isUFormula hre.symm
+  obtain ⟨p₀, rfl, rfl⟩ := exists_eq_all_of_shift_eq (hΔ _ hr).isUFormula hre.symm
   have hp₀ : IsSemiformula L 1 p₀ := by simpa using hΔ _ hr
   have h := CutFreeDerivable.shift_substs1_of_fvar ht hp₀
     (le_of_lt <| lt_of_lt_of_le (lt_trans (by simp) (lt_of_mem hr)) (fstIdx_le d₀))

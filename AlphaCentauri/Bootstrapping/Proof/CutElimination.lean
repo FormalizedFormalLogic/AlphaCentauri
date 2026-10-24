@@ -50,7 +50,7 @@ private lemma isZeroOrExs_shift_iff {p : V} (hp : IsUFormula L p) :
   apply or_congr_right
   constructor
   · rintro ⟨a, -, ha⟩
-    obtain ⟨a₀, -, rfl, -⟩ := exists_exs_of_shift_eq_exs hp ha
+    obtain ⟨a₀, rfl, -⟩ := exists_eq_exs_of_shift_eq hp ha
     exact ⟨a₀, by simp, rfl⟩
   · rintro ⟨a, -, rfl⟩
     have ha : IsUFormula L a := by simpa using hp

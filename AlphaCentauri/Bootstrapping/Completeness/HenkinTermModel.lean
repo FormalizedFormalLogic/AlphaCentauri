@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Completeness.Henkin
 public import AlphaCentauri.ToFoundation.InternalEquality
+public import AlphaCentauri.ToFoundation.Quote
 
 /-!
 # The Henkin set as a term model
@@ -267,17 +268,6 @@ theorem henkinSet_rel_iff {k : ℕ} (R : L.Rel k) {s u : SemitermVec V L k 0}
 end congruence
 
 section operators
-
-lemma eq_matrixToVec_iff {k : ℕ} {w : V} {u : Fin k → V} :
-    w = matrixToVec u ↔ (k : V) = len w ∧ ∀ i : Fin k, w.[((i : ℕ) : V)] = u i := by
-  constructor
-  · rintro rfl
-    simp
-  · rintro ⟨h₁, h₂⟩
-    apply nth_ext' (k : V) h₁.symm (by simp)
-    intro i hi
-    obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi
-    simp [h₂]
 
 /-- The $\Pi_2$ formula of `henkinDomain S`. -/
 noncomputable def henkinDomainDef : 𝚷ᴬ_[2].Semisentence 1 := .mkPi

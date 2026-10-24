@@ -27,19 +27,14 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 /-- The rest of an end-sequent split off by `insert` is bounded by the proof code. -/
 private lemma le_of_fstIdx_eq_insert {d x s : V} (h : fstIdx d = insert x s) : s ≤ d :=
-  le_trans (le_of_subset (by rw [h]; exact susbset_insert x s)) (fstIdx_le d)
+  le_trans (le_of_subset (by rw [h]; exact susbset_insert x s)) (fstIdx_le_self d)
 
 /-- The body and the rest of an end-sequent containing a universal formula are bounded by the
 proof code. -/
 private lemma all_bounds {d p s : V} (h : fstIdx d = insert (^∀ p) s) : p ≤ d ∧ s ≤ d := by
   have hp : ^∀ p ∈ fstIdx d := by rw [h]; simp
-  exact ⟨le_of_lt <| lt_of_lt_of_le (lt_trans (by simp) (lt_of_mem hp)) (fstIdx_le d),
+  exact ⟨le_of_lt <| lt_of_lt_of_le (lt_trans (by simp) (lt_of_mem hp)) (fstIdx_le_self d),
     le_of_fstIdx_eq_insert h⟩
-
-/-- The substitution of a member of a coded formula set is a member of its image. -/
-private lemma fvSubst_mem_fvSubstImage {w q s : V} (h : q ∈ s) :
-    fvSubst L w q ∈ fvSubstImage (L := L) w s :=
-  mem_fvSubstImage_iff.mpr ⟨q, h, rfl⟩
 
 namespace CutFreeDerivable
 
@@ -272,7 +267,7 @@ private lemma rewrite_shift {d₀ w : V}
     exact IsSemiterm.termFvSubst hw (by simp)⟩
   have he := ih d₀ (d_lt_shiftRule _ _) v hvc hd₀
   rwa [← fvSubstImage_setShift (fun x hx ↦ ⟨by rwa [hvl], hv x hx⟩) hd₀.isFormulaSet
-    (fstIdx_le d₀)] at he
+    (fstIdx_le_self d₀)] at he
 
 /-- Substituting closed terms for free variables in the end-sequent of a cut-free derivation
 code. -/
@@ -507,9 +502,9 @@ private lemma inversion_all_shift {d₀ : V}
   obtain ⟨p₀, rfl, rfl⟩ := exists_eq_all_of_shift_eq (hΔ _ hr).isUFormula hre.symm
   have hp₀ : IsSemiformula L 1 p₀ := by simpa using hΔ _ hr
   have h := CutFreeDerivable.shift_substs1_of_fvar ht hp₀
-    (le_of_lt <| lt_of_lt_of_le (lt_trans (by simp) (lt_of_mem hr)) (fstIdx_le d₀))
+    (le_of_lt <| lt_of_lt_of_le (lt_trans (by simp) (lt_of_mem hr)) (fstIdx_le_self d₀))
     (fun x hx ↦ hΔ x (mem_bitRemove_iff.mp hx).2)
-    (le_trans (le_of_subset fun x hx ↦ (mem_bitRemove_iff.mp hx).2) (fstIdx_le d₀))
+    (le_trans (le_of_subset fun x hx ↦ (mem_bitRemove_iff.mp hx).2) (fstIdx_le_self d₀))
     (ih d₀ (d_lt_shiftRule _ _) ^&d₀ p₀ (bitRemove (^∀ p₀) (fstIdx d₀)) (by simp)
       ⟨(insert_remove hr).symm, hd₀⟩)
   rw [setShift_bitRemove hΔ (hΔ _ hr).isUFormula, shift_all hp₀.isUFormula, ← hsh] at h

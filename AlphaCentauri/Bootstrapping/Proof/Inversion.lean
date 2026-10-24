@@ -2,7 +2,6 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.Measures
-public import AlphaCentauri.ToFoundation.Proof
 public import AlphaCentauri.Bootstrapping.Syntax.SubstInversion
 public import AlphaCentauri.ToFoundation.Set
 public import Foundation.Vorspiel.Tactic.Disj
@@ -188,11 +187,11 @@ private lemma insert_eq_self {x s : V} (h : x ∈ s) : insert x s = s := mem_ext
 
 /-- A code in the end-sequent of a proof code is bounded by the proof code. -/
 private lemma le_of_mem_fstIdx {x d : V} (h : x ∈ fstIdx d) : x ≤ d :=
-  le_trans (le_of_lt (lt_of_mem h)) (fstIdx_le d)
+  le_trans (le_of_lt (lt_of_mem h)) (fstIdx_le_self d)
 
 /-- A subset of the end-sequent of a proof code is bounded by the proof code. -/
 private lemma le_of_subset_fstIdx {u d : V} (h : u ⊆ fstIdx d) : u ≤ d :=
-  le_trans (le_of_subset h) (fstIdx_le d)
+  le_trans (le_of_subset h) (fstIdx_le_self d)
 
 /-- The formulas and the context of a conjunction inversion are bounded by the derivation. -/
 private lemma and_bounds {p q c s d : V} (hc : c = p ∨ c = q)

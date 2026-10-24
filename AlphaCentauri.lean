@@ -8,7 +8,10 @@ public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Axiomatizability.RestrictedComplexity
 public import AlphaCentauri.Bootstrapping.Completeness.Henkin
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinTermModel
+public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
+public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
 public import AlphaCentauri.Bootstrapping.Interpretability.Translation
+public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
@@ -16,6 +19,7 @@ public import AlphaCentauri.Bootstrapping.Proof.AxiomReplacement
 public import AlphaCentauri.Bootstrapping.Proof.CutElimination
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.CutFreeRewrite
+public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
 public import AlphaCentauri.Bootstrapping.Proof.InductionAxiom
 public import AlphaCentauri.Bootstrapping.Proof.Instance
@@ -84,6 +88,7 @@ public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
+public import AlphaCentauri.ToFoundation.FvarInduction
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.PartialTruth
@@ -104,6 +109,7 @@ public import AlphaCentauri.ToFoundation.SententialAxioms
 public import AlphaCentauri.ToFoundation.Set
 public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.Theory
+public import AlphaCentauri.ToFoundation.TypedProof
 public import AlphaCentauri.ToMathlib.ElementaryClosure
 public import AlphaCentauri.ToMathlib.Goodstein
 public import AlphaCentauri.ToMathlib.ONote.Computability

@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
-public import AlphaCentauri.Bootstrapping.Syntax.SubstInversion
+public import AlphaCentauri.ToFoundation.SubstInversion
 
 /-!
 # Instances of a coded set of formulas in cut-free derivations

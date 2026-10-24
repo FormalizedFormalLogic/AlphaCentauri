@@ -7,13 +7,7 @@ public import AlphaCentauri.Axiomatizability.ISigma0
 public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Axiomatizability.RestrictedComplexity
 public import AlphaCentauri.Bootstrapping.Completeness.Henkin
-public import AlphaCentauri.Bootstrapping.Completeness.HenkinCongruence
-public import AlphaCentauri.Bootstrapping.Completeness.HenkinDefinability
-public import AlphaCentauri.Bootstrapping.Completeness.HenkinFunction
-public import AlphaCentauri.Bootstrapping.Completeness.HenkinOperators
-public import AlphaCentauri.Bootstrapping.Completeness.HenkinRepresentative
-public import AlphaCentauri.Bootstrapping.Completeness.HenkinSequence
-public import AlphaCentauri.Bootstrapping.Completeness.HenkinTyped
+public import AlphaCentauri.Bootstrapping.Completeness.HenkinTermModel
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
@@ -43,8 +37,6 @@ public import AlphaCentauri.Hierarchy.Bounded
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Henkin
-public import AlphaCentauri.Interpretability.HenkinTranslation
-public import AlphaCentauri.Interpretability.HenkinTruth
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.EndExtensionOfBSigma1

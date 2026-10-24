@@ -3,6 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
 public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
 public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
+public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.Provable
 public import AlphaCentauri.ToFoundation.TypedProof
@@ -147,16 +148,10 @@ omit [L₁.Encodable] [L₁.LORDefinable] [L₂.Encodable] [L₂.LORDefinable] [
 lemma funcExists_external (F : L₂.Func k) : S ⊢ ∀¹* (funcExistsSent π F) := by
   apply Theory.Proof.complete_on_eq_models.{_, 0}
   intro M _ _ _ hT
-  have h := models_of_provable hT (π.func_defined F)
-  simp only [BinderNotation.finSuccItr, Nat.add_zero, Matrix.zero_cons_succ_eq_self, models_iff,
-    Semiformula.eval_allClosure, LogicalConnective.HomClass.map_imply, Matrix.conj_hom_prop,
-    Semiformula.eval_operator, Matrix.comp₁, Semiterm.val_bvar, Semiformula.eval_existsUnique,
-    Nat.succ_eq_add_one, LogicalConnective.HomClass.map_and, Matrix.cons_val_zero,
-    LogicalConnective.Prop.and_eq, LogicalConnective.Prop.arrow_eq, funcExistsSent,
-    Semiformula.eval_ex] at h ⊢
-  intro e' hD
-  obtain ⟨x, hx, -⟩ := h e' hD
-  exact ⟨x, hx⟩
+  have h := (DirectTranslation.models_funcDefined_iff _ _).mp
+    (models_of_provable hT (π.func_defined F))
+  simpa [models_iff, funcExistsSent, Function.comp_def, Matrix.constant_eq_singleton] using
+    fun e' hD ↦ (h e' hD).exists
 
 omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
 lemma quote_funcExistsSent (F : L₂.Func k) :
@@ -195,31 +190,22 @@ omit [L₁.Encodable] [L₁.LORDefinable] [L₂.Encodable] [L₂.LORDefinable] [
 lemma uniqSent_external (F : L₂.Func k) : S ⊢ ∀¹* (uniqSent π F) := by
   apply Theory.Proof.complete_on_eq_models.{_, 0}
   intro M _ _ _ hT
-  have h := models_of_provable hT (π.func_defined F)
-  simp only [BinderNotation.finSuccItr, Nat.add_zero, Matrix.zero_cons_succ_eq_self, models_iff,
-    Semiformula.eval_allClosure, LogicalConnective.HomClass.map_imply, Matrix.conj_hom_prop,
-    Semiformula.eval_operator, Matrix.comp₁, Semiterm.val_bvar, Semiformula.eval_existsUnique,
-    Nat.succ_eq_add_one, LogicalConnective.HomClass.map_and, Matrix.cons_val_zero,
-    LogicalConnective.Prop.and_eq, LogicalConnective.Prop.arrow_eq, uniqSent, Matrix.comp₂,
-    Nat.reduceAdd, Tarski.Structure.eq_iff_eq, Fin.isValue, Matrix.cons_val_one, Fin.Fin1.eq_one,
-    Matrix.cons_val_fin_one, and_imp] at h ⊢
+  have h := (DirectTranslation.models_funcDefined_iff _ _).mp
+    (models_of_provable hT (π.func_defined F))
+  have key (e' : Fin (k + 2) → M) (a : Fin (k + 2)) :
+      (FirstOrder.Semiterm.val (L := L₁) (M := M) e' Empty.elim ∘
+        (#a :> fun i : Fin k ↦ #i.succ.succ) : Fin (k + 1) → M) =
+          (e' a :> fun i ↦ e' i.succ.succ) := by
+    funext j
+    cases j using Fin.cases <;> simp
+  suffices H : ∀ e' : Fin (k + 2) → M, (∀ i : Fin k, π.domain.val ![e' i.succ.succ]) →
+      π.domain.val ![e' 0] → π.domain.val ![e' 1] →
+      (π.func F).val (e' 0 :> fun i ↦ e' i.succ.succ) →
+      (π.func F).val (e' 1 :> fun i ↦ e' i.succ.succ) → e' 0 = e' 1 by
+    simpa [models_iff, uniqSent, key] using H
   intro e' hW hD0 hD1 hG0 hG1
   obtain ⟨x, -, hu⟩ := h (fun i ↦ e' i.succ.succ) hW
-  have v₀ : (FirstOrder.Semiterm.val (L := L₁) (M := M)
-        (e' 0 :> fun i ↦ e' i.succ.succ) Empty.elim ∘ FirstOrder.Semiterm.bvar) =
-      (FirstOrder.Semiterm.val (L := L₁) (M := M) e' Empty.elim ∘
-        (#0 :> fun i : Fin k ↦ #i.succ.succ) : Fin (k + 1) → M) := by
-    funext j
-    cases j using Fin.cases <;> simp
-  have v₁ : (FirstOrder.Semiterm.val (L := L₁) (M := M)
-        (e' 1 :> fun i ↦ e' i.succ.succ) Empty.elim ∘ FirstOrder.Semiterm.bvar) =
-      (FirstOrder.Semiterm.val (L := L₁) (M := M) e' Empty.elim ∘
-        (#1 :> fun i : Fin k ↦ #i.succ.succ) : Fin (k + 1) → M) := by
-    funext j
-    cases j using Fin.cases <;> simp
-  have h₀ := hu (e' 0) ⟨hD0, by rw [v₀]; exact hG0⟩
-  have h₁ := hu (e' 1) ⟨hD1, by rw [v₁]; exact hG1⟩
-  exact h₀.trans h₁.symm
+  exact (hu _ ⟨hD0, hG0⟩).trans (hu _ ⟨hD1, hG1⟩).symm
 
 noncomputable abbrev congrSent (F : L₂.Func k) : Semisentence L₁ ((k + 1) + (k + 1)) :=
   (op(=).operator ![#(Fin.castAdd (k + 1) 0), #(Fin.natAdd (k + 1) 0)] ⋏

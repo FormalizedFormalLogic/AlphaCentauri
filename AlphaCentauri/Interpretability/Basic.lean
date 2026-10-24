@@ -30,6 +30,8 @@ def ofWeakerThan (π : DirectTranslation T L₂) {T' : Theory L₁} [𝗘𝗤 _ 
   func_defined f := Entailment.WeakerThan.pbl (π.func_defined f)
   preserve_eq := Entailment.WeakerThan.pbl π.preserve_eq
 
+section ofWeakerThan
+
 variable {T' : Theory L₁} [𝗘𝗤 _ ⪯ T'] [T ⪯ T'] (π : DirectTranslation T L₂)
 
 @[simp] lemma ofWeakerThan_domain : (π.ofWeakerThan (T' := T')).domain = π.domain := rfl
@@ -61,37 +63,74 @@ variable {T' : Theory L₁} [𝗘𝗤 _ ⪯ T'] [T ⪯ T'] (π : DirectTranslati
   | hall _ ih => simp [translate_all, DirectTranslation.fal, ih]
   | hexs _ ih => simp [translate_ex, DirectTranslation.exs, ih]
 
-omit [𝗘𝗤 L₁ ⪯ T] [T ⪯ T'] in
-private lemma func_defined_iff {U : Theory L₁} [𝗘𝗤 _ ⪯ U] (τ : DirectTranslation U L₂)
-    {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] [Tarski.Structure.Eq L₁ M] (hU : M↓[L₁] ⊧* U)
-    {k} (g : L₂.Func k) {e' : Fin k → M} (h : ∀ i, τ.domain.val ![e' i]) :
-    ∃! y : M, τ.domain.val ![y] ∧ (τ.func g).val (y :> e') := by
-  have H := models_of_provable hU (τ.func_defined g)
-  rw [models_iff, Semiformula.Realize] at H
-  simp only [Semiformula.eval_allClosure, LogicalConnective.HomClass.map_imply,
-    Semiformula.eval_operator, Matrix.conj_hom_prop, Semiformula.eval_existsUnique,
-    Function.comp_def, Matrix.comp_vecCons', Semiterm.val_bvar, Matrix.empty_eq] at H
-  simpa [Function.comp_def, Semiterm.val_bvar, Matrix.constant_eq_singleton] using H e' h
+end ofWeakerThan
 
-omit [𝗘𝗤 L₁ ⪯ T] [T ⪯ T'] in
-private lemma preserve_eq_iff {U : Theory L₁} [𝗘𝗤 _ ⪯ U] (τ : DirectTranslation U L₂)
-    {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] [Tarski.Structure.Eq L₁ M] (hU : M↓[L₁] ⊧* U)
-    {x y : M} (hx : τ.domain.val ![x]) (hy : τ.domain.val ![y]) :
-    (τ.rel Language.Eq.eq).val ![x, y] ↔ x = y := by
-  have H := models_of_provable hU τ.preserve_eq
-  rw [models_iff, Semiformula.Realize] at H
-  simp only [LogicalConnective.HomClass.map_imply, Semiformula.eval_operator, Function.comp_def,
-    Matrix.comp_vecCons', Semiterm.val_bvar, Matrix.empty_eq, Semiformula.eval_all] at H
-  simpa using H x y hx hy
+section models
+
+variable {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] [Tarski.Structure.Eq L₁ M]
+
+omit [L₁.Eq] [Tarski.Structure.Eq L₁ M] in
+lemma models_domainNonempty_iff (D : Semiformula.Operator L₁ 1) :
+    M↓[L₁] ⊧ “∃ x, %D x” ↔ ∃ x : M, D.val ![x] := by
+  simp [models_iff]
+
+lemma models_funcDefined_iff {k} (D : Semiformula.Operator L₁ 1)
+    (F : Semiformula.Operator L₁ (k + 1)) :
+    M↓[L₁] ⊧ ∀¹* “(⋀ i, %D #(i : Fin k)) → ∃! y, %D y ∧ %F y ⋯” ↔
+      ∀ e : Fin k → M, (∀ i, D.val ![e i]) → ∃! y : M, D.val ![y] ∧ F.val (y :> e) := by
+  simp [models_iff, Function.comp_def, Matrix.constant_eq_singleton]
+
+lemma models_preserveEq_iff (D : Semiformula.Operator L₁ 1) (E : Semiformula.Operator L₁ 2) :
+    M↓[L₁] ⊧ “∀ x y, %D x → %D y → (%E x y ↔ x = y)” ↔
+      ∀ x y : M, D.val ![x] → D.val ![y] → (E.val ![x, y] ↔ x = y) := by
+  simp [models_iff]
+
+end models
+
+section congruence
+
+variable {U : Theory L₁} [𝗘𝗤 _ ⪯ U] {M : Type*} [Tarski.Structure L₁ M]
+  (π : DirectTranslation T L₂) (π' : DirectTranslation U L₂)
+  (hD : ∀ e : Fin 1 → M, π.domain.val e ↔ π'.domain.val e)
+  (hR : ∀ {k} (R : L₂.Rel k) (e : Fin k → M), (π.rel R).val e ↔ (π'.rel R).val e)
+  (hF : ∀ {k} (f : L₂.Func k) (e : Fin (k + 1) → M), (π.func f).val e ↔ (π'.func f).val e)
+
+include hD hF in
+lemma eval_varEqual_congr {ξ n} (t : Semiterm L₂ ξ n) :
+    ∀ {e : Fin (n + 1) → M} {ε : ξ → M},
+      Semiformula.Eval e ε (π.varEqual t) ↔ Semiformula.Eval e ε (π'.varEqual t) := by
+  induction t with
+  | bvar x => intro e ε; rfl
+  | fvar x => intro e ε; rfl
+  | func f v ih =>
+    intro e ε
+    simp [varEqual, ih, hD, hF]
+
+include hD hR hF in
+lemma eval_translateRel_congr {ξ n k} (r : L₂.Rel k) (v : Fin k → Semiterm L₂ ξ n)
+    {e : Fin n → M} {ε : ξ → M} :
+    Semiformula.Eval e ε (π.translateRel r v) ↔ Semiformula.Eval e ε (π'.translateRel r v) := by
+  simp [translateRel, eval_varEqual_congr π π' hD hF, hD, hR]
+
+include hD hR hF in
+lemma eval_translate_congr {ξ n} (σ : Semiformula L₂ ξ n) {e : Fin n → M} {ε : ξ → M} :
+    Semiformula.Eval e ε (π.translate σ) ↔ Semiformula.Eval e ε (π'.translate σ) := by
+  induction σ using Semiformula.rec' with
+  | hverum => rfl
+  | hfalsum => rfl
+  | hrel r v => exact eval_translateRel_congr π π' hD hR hF r v
+  | hnrel r v => simp [translate_nrel, eval_translateRel_congr π π' hD hR hF]
+  | hand _ _ ih₁ ih₂ => simp [ih₁, ih₂]
+  | hor _ _ ih₁ ih₂ => simp [ih₁, ih₂]
+  | hall _ ih => simp [translate_all, fal, hD, ih]
+  | hexs _ ih => simp [translate_ex, exs, hD, ih]
+
+end congruence
 
 section ite
 
 variable (φ : Sentence L₁) [𝗘𝗤 _ ⪯ insert φ T] [𝗘𝗤 _ ⪯ insert (∼φ) T]
   (π₀ : DirectTranslation (insert φ T) L₂) (π₁ : DirectTranslation (insert (∼φ) T) L₂)
-
-@[simp] private lemma isEmpty_elim_eq_elim {α : Sort*} :
-    (IsEmpty.elim (α := Empty) inferInstance : Empty → α) = Empty.elim :=
-  funext fun a ↦ a.elim
 
 omit [L₁.Eq] in
 private lemma eval_rew_empty_iff {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] {n}
@@ -103,26 +142,31 @@ private lemma eval_rew_empty_iff {M : Type*} [Nonempty M] [Tarski.Structure L₁
     fun h ↦ Semiformula.Eval.of_eq h rfl (funext fun a ↦ a.elim)⟩
 
 omit [L₁.Eq] in
+private lemma models_insert_cases {M : Type*} [Nonempty M] [Tarski.Structure L₁ M]
+    (hT : M↓[L₁] ⊧* T) : (M↓[L₁] ⊧ φ ∧ M↓[L₁] ⊧* insert φ T) ∨
+      (M↓[L₁] ⊧ ∼φ ∧ M↓[L₁] ⊧* insert (∼φ) T) := by
+  rcases Classical.em (M↓[L₁] ⊧ φ) with hφ | hφ
+  · exact Or.inl ⟨hφ, Semantics.ModelsSet.insert_iff.mpr ⟨hφ, hT⟩⟩
+  · have hφ' : M↓[L₁] ⊧ ∼φ := by simp [hφ]
+    exact Or.inr ⟨hφ', Semantics.ModelsSet.insert_iff.mpr ⟨hφ', hT⟩⟩
+
+omit [L₁.Eq] in
 private lemma ite_gate_iff {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] (hφ : M↓[L₁] ⊧ φ) {k}
-    {e : Fin k → M}
-    {X Y : Semiformula.Operator L₁ k} :
-    (M↓[L₁] ⊧ φ ∧ X.val e) ∨ (M↓[L₁] ⊧ ∼φ ∧ Y.val e) ↔ X.val e := by
-  constructor
-  · rintro (⟨_, h⟩ | ⟨hne, _⟩)
-    · exact h
-    · exact absurd hφ (by simpa using hne)
-  · exact fun h ↦ Or.inl ⟨hφ, h⟩
+    {e : Fin k → M} {X Y : Semiformula.Operator L₁ k} :
+    (((⟨Rew.empty ▹ φ⟩ : Semiformula.Operator L₁ k).and X).or
+      ((⟨Rew.empty ▹ ∼φ⟩ : Semiformula.Operator L₁ k).and Y)).val e ↔ X.val e := by
+  have hφ' : ¬ M↓[L₁] ⊧ ∼φ := by simpa using hφ
+  simp only [Semiformula.val_operator_or, Semiformula.val_operator_and, eval_rew_empty_iff]
+  tauto
 
 omit [L₁.Eq] in
 private lemma ite_gate_iff' {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] (hφ' : M↓[L₁] ⊧ ∼φ)
-    {k} {e : Fin k → M}
-    {X Y : Semiformula.Operator L₁ k} :
-    (M↓[L₁] ⊧ φ ∧ X.val e) ∨ (M↓[L₁] ⊧ ∼φ ∧ Y.val e) ↔ Y.val e := by
-  constructor
-  · rintro (⟨hφ, _⟩ | ⟨_, h⟩)
-    · exact absurd hφ (by simpa using hφ')
-    · exact h
-  · exact fun h ↦ Or.inr ⟨hφ', h⟩
+    {k} {e : Fin k → M} {X Y : Semiformula.Operator L₁ k} :
+    (((⟨Rew.empty ▹ φ⟩ : Semiformula.Operator L₁ k).and X).or
+      ((⟨Rew.empty ▹ ∼φ⟩ : Semiformula.Operator L₁ k).and Y)).val e ↔ Y.val e := by
+  have hφ : ¬ M↓[L₁] ⊧ φ := by simpa using hφ'
+  simp only [Semiformula.val_operator_or, Semiformula.val_operator_and, eval_rew_empty_iff]
+  tauto
 
 /-- Combine an interpretation of `insert φ T` and one of `insert (∼φ) T` into one interpretation
 of `T`, following `π₀` where `φ` holds and `π₁` where `∼φ` holds.
@@ -138,211 +182,44 @@ def ite : DirectTranslation T L₂ where
   domain_nonempty := by
     apply Theory.Proof.complete_on_eq_models.{_, 0}
     intro M _ _ _ hT
-    rcases Classical.em (M↓[L₁] ⊧ φ) with hφ | hφ
-    · have hT' : M↓[L₁] ⊧* insert φ T := Semantics.ModelsSet.insert_iff.mpr ⟨hφ, hT⟩
-      obtain ⟨x, hx⟩ : ∃ x : M, π₀.domain.val ![x] := by
-        simpa [models_iff] using models_of_provable hT' π₀.domain_nonempty
-      have hx' : π₀.domain.val (Semiterm.val (L := L₁) (M := M) ![x] Empty.elim ∘ ![#0]) := by
-        simpa using hx
-      have h : Semiformula.Eval (M := M) (L := L₁) ![x] Empty.elim
-          ((((⟨Rew.empty ▹ φ⟩ : Semiformula.Operator L₁ 1).and π₀.domain).or
-            ((⟨Rew.empty ▹ ∼φ⟩ : Semiformula.Operator L₁ 1).and π₁.domain)).operator ![#0]) :=
-        Semiformula.eval_operator.mpr (Or.inl ⟨(eval_rew_empty_iff φ).mpr hφ, hx'⟩)
-      exact models_iff.mpr ⟨x, h⟩
-    · have hφ' : M↓[L₁] ⊧ ∼φ := by simp [hφ]
-      have hT' : M↓[L₁] ⊧* insert (∼φ) T := Semantics.ModelsSet.insert_iff.mpr ⟨hφ', hT⟩
-      obtain ⟨x, hx⟩ : ∃ x : M, π₁.domain.val ![x] := by
-        simpa [models_iff] using models_of_provable hT' π₁.domain_nonempty
-      have hx' : π₁.domain.val (Semiterm.val (L := L₁) (M := M) ![x] Empty.elim ∘ ![#0]) := by
-        simpa using hx
-      have h : Semiformula.Eval (M := M) (L := L₁) ![x] Empty.elim
-          ((((⟨Rew.empty ▹ φ⟩ : Semiformula.Operator L₁ 1).and π₀.domain).or
-            ((⟨Rew.empty ▹ ∼φ⟩ : Semiformula.Operator L₁ 1).and π₁.domain)).operator ![#0]) :=
-        Semiformula.eval_operator.mpr (Or.inr ⟨(eval_rew_empty_iff (∼φ)).mpr hφ', hx'⟩)
-      exact models_iff.mpr ⟨x, h⟩
+    rw [models_domainNonempty_iff]
+    rcases models_insert_cases φ hT with ⟨hφ, hT'⟩ | ⟨hφ', hT'⟩
+    · have H := (models_domainNonempty_iff _).mp (models_of_provable hT' π₀.domain_nonempty)
+      simpa only [ite_gate_iff φ hφ] using H
+    · have H := (models_domainNonempty_iff _).mp (models_of_provable hT' π₁.domain_nonempty)
+      simpa only [ite_gate_iff' φ hφ'] using H
   func_defined f := by
     apply Theory.Proof.complete_on_eq_models.{_, 0}
     intro M _ _ _ hT
-    rw [models_iff, Semiformula.Realize]
-    simp only [Semiformula.eval_allClosure]
-    intro e'
-    simp only [LogicalConnective.HomClass.map_imply, Matrix.conj_hom_prop,
-      Semiformula.eval_existsUnique, Semiformula.eval_operator,
-      Semiformula.val_operator_or, Semiformula.val_operator_and, eval_rew_empty_iff,
-      LogicalConnective.HomClass.map_and, Function.comp_def, Matrix.comp_vecCons',
-      Semiterm.val_bvar, Matrix.empty_eq]
-    intro h
-    rcases Classical.em (M↓[L₁] ⊧ φ) with hφ | hφ
-    · have hT' : M↓[L₁] ⊧* insert φ T := Semantics.ModelsSet.insert_iff.mpr ⟨hφ, hT⟩
-      have hdom : ∀ i, π₀.domain.val ![e' i] := fun i ↦ by
-        rcases h i with ⟨_, hi⟩ | ⟨hne, _⟩
-        · exact hi
-        · exact absurd hφ (by simpa using hne)
-      obtain ⟨y, ⟨hy1, hy2⟩, huniq⟩ := func_defined_iff π₀ hT' f hdom
-      refine ⟨y, ⟨Or.inl ⟨hφ, hy1⟩, Or.inl ⟨hφ, hy2⟩⟩, ?_⟩
-      rintro z ⟨(⟨_, hzdom⟩ | ⟨hne, _⟩), (⟨_, hzfunc⟩ | ⟨hne', _⟩)⟩
-      · exact huniq z ⟨hzdom, hzfunc⟩
-      · exact absurd hφ (by simpa using hne')
-      · exact absurd hφ (by simpa using hne)
-      · exact absurd hφ (by simpa using hne)
-    · have hφ' : M↓[L₁] ⊧ ∼φ := by simp [hφ]
-      have hT' : M↓[L₁] ⊧* insert (∼φ) T := Semantics.ModelsSet.insert_iff.mpr ⟨hφ', hT⟩
-      have hdom : ∀ i, π₁.domain.val ![e' i] := fun i ↦ by
-        rcases h i with ⟨hne, _⟩ | ⟨_, hi⟩
-        · exact absurd hne hφ
-        · exact hi
-      obtain ⟨y, ⟨hy1, hy2⟩, huniq⟩ := func_defined_iff π₁ hT' f hdom
-      refine ⟨y, ⟨Or.inr ⟨hφ', hy1⟩, Or.inr ⟨hφ', hy2⟩⟩, ?_⟩
-      rintro z ⟨(⟨hne, _⟩ | ⟨_, hzdom⟩), (⟨hne', _⟩ | ⟨_, hzfunc⟩)⟩
-      · exact absurd hne hφ
-      · exact absurd hne hφ
-      · exact absurd hne' hφ
-      · exact huniq z ⟨hzdom, hzfunc⟩
+    rw [models_funcDefined_iff]
+    rcases models_insert_cases φ hT with ⟨hφ, hT'⟩ | ⟨hφ', hT'⟩
+    · have H := (models_funcDefined_iff _ _).mp (models_of_provable hT' (π₀.func_defined f))
+      simpa only [ite_gate_iff φ hφ] using H
+    · have H := (models_funcDefined_iff _ _).mp (models_of_provable hT' (π₁.func_defined f))
+      simpa only [ite_gate_iff' φ hφ'] using H
   preserve_eq := by
     apply Theory.Proof.complete_on_eq_models.{_, 0}
     intro M _ _ _ hT
-    rw [models_iff, Semiformula.Realize]
-    simp only [Semiformula.eval_all, LogicalConnective.HomClass.map_imply,
-      LogicalConnective.HomClass.map_iff, LogicalConnective.Prop.iff_eq, Semiformula.eval_operator,
-      Semiformula.val_operator_or, Semiformula.val_operator_and,
-      eval_rew_empty_iff, Function.comp_def, Matrix.comp_vecCons', Semiterm.val_bvar,
-      Matrix.empty_eq]
-    intro x y hx hy
-    rcases Classical.em (M↓[L₁] ⊧ φ) with hφ | hφ
-    · have hT' : M↓[L₁] ⊧* insert φ T := Semantics.ModelsSet.insert_iff.mpr ⟨hφ, hT⟩
-      have hx' : π₀.domain.val ![x] := (hx.resolve_right (fun h ↦ absurd hφ (by simpa using h.1))).2
-      have hy' : π₀.domain.val ![y] := (hy.resolve_right (fun h ↦ absurd hφ (by simpa using h.1))).2
-      have heq := preserve_eq_iff π₀ hT' hx' hy'
-      simpa [hφ, Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq] using heq
-    · have hφ' : M↓[L₁] ⊧ ∼φ := by simp [hφ]
-      have hx' : π₁.domain.val ![x] := (hx.resolve_left (fun h ↦ hφ h.1)).2
-      have hy' : π₁.domain.val ![y] := (hy.resolve_left (fun h ↦ hφ h.1)).2
-      have hT' : M↓[L₁] ⊧* insert (∼φ) T := Semantics.ModelsSet.insert_iff.mpr ⟨hφ', hT⟩
-      have heq := preserve_eq_iff π₁ hT' hx' hy'
-      simpa [hφ, hφ', Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq] using heq
+    rw [models_preserveEq_iff]
+    rcases models_insert_cases φ hT with ⟨hφ, hT'⟩ | ⟨hφ', hT'⟩
+    · have H := (models_preserveEq_iff _ _).mp (models_of_provable hT' π₀.preserve_eq)
+      simpa only [ite_gate_iff φ hφ] using H
+    · have H := (models_preserveEq_iff _ _).mp (models_of_provable hT' π₁.preserve_eq)
+      simpa only [ite_gate_iff' φ hφ'] using H
 
 variable {M : Type*} [Nonempty M] [Tarski.Structure L₁ M]
 
-@[simp] lemma ite_domain_def :
-    (ite φ π₀ π₁).domain = ((⟨Rew.empty ▹ φ⟩ : Semiformula.Operator L₁ 1).and π₀.domain).or
-      ((⟨Rew.empty ▹ ∼φ⟩ : Semiformula.Operator L₁ 1).and π₁.domain) := rfl
+private lemma ite_translate_iff (hφ : M↓[L₁] ⊧ φ) {ξ n} (σ : Semiformula L₂ ξ n) {e : Fin n → M}
+    {ε : ξ → M} :
+    Semiformula.Eval e ε ((ite φ π₀ π₁).translate σ) ↔ Semiformula.Eval e ε (π₀.translate σ) :=
+  eval_translate_congr _ _ (fun _ ↦ ite_gate_iff φ hφ) (fun _ _ ↦ ite_gate_iff φ hφ)
+    (fun _ _ ↦ ite_gate_iff φ hφ) σ
 
-@[simp] lemma ite_rel_def {k} (R : L₂.Rel k) :
-    (ite φ π₀ π₁).rel R = ((⟨Rew.empty ▹ φ⟩ : Semiformula.Operator L₁ k).and (π₀.rel R)).or
-      ((⟨Rew.empty ▹ ∼φ⟩ : Semiformula.Operator L₁ k).and (π₁.rel R)) := rfl
-
-@[simp] lemma ite_func_def {k} (f : L₂.Func k) :
-    (ite φ π₀ π₁).func f = ((⟨Rew.empty ▹ φ⟩ : Semiformula.Operator L₁ (k + 1)).and (π₀.func f)).or
-      ((⟨Rew.empty ▹ ∼φ⟩ : Semiformula.Operator L₁ (k + 1)).and (π₁.func f)) := rfl
-
-private lemma ite_varEqual_iff (hφ : M↓[L₁] ⊧ φ) {ξ n} (t : Semiterm L₂ ξ n) :
-    ∀ {e : Fin (n + 1) → M} {ε : ξ → M},
-      Semiformula.Eval e ε ((ite φ π₀ π₁).varEqual t) ↔ Semiformula.Eval e ε (π₀.varEqual t) := by
-  induction t with
-  | bvar x => intro e ε; rfl
-  | fvar x => intro e ε; rfl
-  | func f v ih =>
-    rename_i k
-    intro e ε
-    simp only [varEqual]
-    simp only [Semiformula.eval_allItr, LogicalConnective.HomClass.map_imply, Matrix.conj_hom_prop,
-      Function.comp_def, Matrix.comp_vecCons',
-      LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Semiterm.val_bvar,
-      Matrix.empty_eq, ih, ite_domain_def, ite_func_def, Semiformula.eval_operator,
-      Semiformula.val_operator_or, Semiformula.val_operator_and, eval_rew_empty_iff,
-      ite_gate_iff φ hφ]
-
-private lemma ite_translateRel_iff (hφ : M↓[L₁] ⊧ φ) {ξ n k} (r : L₂.Rel k)
-    (v : Fin k → Semiterm L₂ ξ n) {e : Fin n → M} {ε : ξ → M} :
-    Semiformula.Eval e ε ((ite φ π₀ π₁).translateRel r v) ↔
-      Semiformula.Eval e ε (π₀.translateRel r v) := by
-  simp only [translateRel]
-  simp only [Semiformula.eval_allItr, LogicalConnective.HomClass.map_imply, Matrix.conj_hom_prop,
-    Function.comp_def, Matrix.comp_vecCons',
-    LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Semiterm.val_bvar, Matrix.empty_eq,
-    ite_varEqual_iff φ π₀ π₁ hφ, ite_domain_def, ite_rel_def, Semiformula.eval_operator,
-    Semiformula.val_operator_or, Semiformula.val_operator_and, eval_rew_empty_iff,
-    ite_gate_iff φ hφ]
-
-private lemma ite_translate_iff (hφ : M↓[L₁] ⊧ φ) {ξ n} (σ : Semiformula L₂ ξ n)
-    {e : Fin n → M} {ε : ξ → M} :
-    Semiformula.Eval e ε ((ite φ π₀ π₁).translate σ) ↔
-      Semiformula.Eval e ε (π₀.translate σ) := by
-  induction σ using Semiformula.rec' with
-  | hverum => rfl
-  | hfalsum => rfl
-  | hrel r v => exact ite_translateRel_iff φ π₀ π₁ hφ r v
-  | hnrel r v =>
-    simp only [translate_nrel, LogicalConnective.HomClass.map_neg, ite_translateRel_iff φ π₀ π₁ hφ]
-  | hand _ _ ih₁ ih₂ => simp only [LogicalConnective.HomClass.map_and, ih₁, ih₂]
-  | hor _ _ ih₁ ih₂ => simp only [LogicalConnective.HomClass.map_or, ih₁, ih₂]
-  | hall _ ih =>
-    simp only [translate_all, fal]
-    simp only [Semiformula.eval_ball,
-      Function.comp_def, Matrix.comp_vecCons', Semiterm.val_bvar,
-      ite_domain_def, Semiformula.eval_operator, Semiformula.val_operator_or,
-      Semiformula.val_operator_and, eval_rew_empty_iff, ite_gate_iff φ hφ, ih]
-  | hexs _ ih =>
-    simp only [translate_ex, exs]
-    simp only [Semiformula.eval_bexs,
-      Function.comp_def, Matrix.comp_vecCons', Semiterm.val_bvar,
-      ite_domain_def, Semiformula.eval_operator, Semiformula.val_operator_or,
-      Semiformula.val_operator_and, eval_rew_empty_iff, ite_gate_iff φ hφ, ih]
-
-private lemma ite_varEqual_iff' (hφ' : M↓[L₁] ⊧ ∼φ) {ξ n} (t : Semiterm L₂ ξ n) :
-    ∀ {e : Fin (n + 1) → M} {ε : ξ → M},
-      Semiformula.Eval e ε ((ite φ π₀ π₁).varEqual t) ↔ Semiformula.Eval e ε (π₁.varEqual t) := by
-  induction t with
-  | bvar x => intro e ε; rfl
-  | fvar x => intro e ε; rfl
-  | func f v ih =>
-    rename_i k
-    intro e ε
-    simp only [varEqual]
-    simp only [Semiformula.eval_allItr, LogicalConnective.HomClass.map_imply, Matrix.conj_hom_prop,
-      Function.comp_def, Matrix.comp_vecCons',
-      LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Semiterm.val_bvar,
-      Matrix.empty_eq, ih, ite_domain_def, ite_func_def, Semiformula.eval_operator,
-      Semiformula.val_operator_or, Semiformula.val_operator_and, eval_rew_empty_iff,
-      ite_gate_iff' φ hφ']
-
-private lemma ite_translateRel_iff' (hφ' : M↓[L₁] ⊧ ∼φ) {ξ n k} (r : L₂.Rel k)
-    (v : Fin k → Semiterm L₂ ξ n) {e : Fin n → M} {ε : ξ → M} :
-    Semiformula.Eval e ε ((ite φ π₀ π₁).translateRel r v) ↔
-      Semiformula.Eval e ε (π₁.translateRel r v) := by
-  simp only [translateRel]
-  simp only [Semiformula.eval_allItr, LogicalConnective.HomClass.map_imply, Matrix.conj_hom_prop,
-    Function.comp_def, Matrix.comp_vecCons',
-    LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Semiterm.val_bvar, Matrix.empty_eq,
-    ite_varEqual_iff' φ π₀ π₁ hφ', ite_domain_def, ite_rel_def, Semiformula.eval_operator,
-    Semiformula.val_operator_or, Semiformula.val_operator_and, eval_rew_empty_iff,
-    ite_gate_iff' φ hφ']
-
-private lemma ite_translate_iff' (hφ' : M↓[L₁] ⊧ ∼φ) {ξ n} (σ : Semiformula L₂ ξ n)
-    {e : Fin n → M} {ε : ξ → M} :
-    Semiformula.Eval e ε ((ite φ π₀ π₁).translate σ) ↔
-      Semiformula.Eval e ε (π₁.translate σ) := by
-  induction σ using Semiformula.rec' with
-  | hverum => rfl
-  | hfalsum => rfl
-  | hrel r v => exact ite_translateRel_iff' φ π₀ π₁ hφ' r v
-  | hnrel r v =>
-    simp only [translate_nrel, LogicalConnective.HomClass.map_neg,
-      ite_translateRel_iff' φ π₀ π₁ hφ']
-  | hand _ _ ih₁ ih₂ => simp only [LogicalConnective.HomClass.map_and, ih₁, ih₂]
-  | hor _ _ ih₁ ih₂ => simp only [LogicalConnective.HomClass.map_or, ih₁, ih₂]
-  | hall _ ih =>
-    simp only [translate_all, fal]
-    simp only [Semiformula.eval_ball,
-      Function.comp_def, Matrix.comp_vecCons', Semiterm.val_bvar,
-      ite_domain_def, Semiformula.eval_operator, Semiformula.val_operator_or,
-      Semiformula.val_operator_and, eval_rew_empty_iff, ite_gate_iff' φ hφ', ih]
-  | hexs _ ih =>
-    simp only [translate_ex, exs]
-    simp only [Semiformula.eval_bexs,
-      Function.comp_def, Matrix.comp_vecCons', Semiterm.val_bvar,
-      ite_domain_def, Semiformula.eval_operator, Semiformula.val_operator_or,
-      Semiformula.val_operator_and, eval_rew_empty_iff, ite_gate_iff' φ hφ', ih]
+private lemma ite_translate_iff' (hφ' : M↓[L₁] ⊧ ∼φ) {ξ n} (σ : Semiformula L₂ ξ n) {e : Fin n → M}
+    {ε : ξ → M} :
+    Semiformula.Eval e ε ((ite φ π₀ π₁).translate σ) ↔ Semiformula.Eval e ε (π₁.translate σ) :=
+  eval_translate_congr _ _ (fun _ ↦ ite_gate_iff' φ hφ') (fun _ _ ↦ ite_gate_iff' φ hφ')
+    (fun _ _ ↦ ite_gate_iff' φ hφ') σ
 
 end ite
 
@@ -385,14 +262,11 @@ abbrev orCases (φ : Sentence L₁) [𝗘𝗤 _ ⪯ insert φ T] [𝗘𝗤 _ ⪯
   interpret_theory σ hσ := by
     apply Theory.Proof.complete_on_eq_models.{_, 0}
     intro M _ _ _ hT
-    rcases Classical.em (M↓[L₁] ⊧ φ) with hφ | hφ
-    · have hT' : M↓[L₁] ⊧* insert φ T := Semantics.ModelsSet.insert_iff.mpr ⟨hφ, hT⟩
-      have h := models_of_provable hT' (π₀.interpret_theory σ hσ)
-      exact (DirectTranslation.ite_translate_iff φ π₀.trln π₁.trln hφ σ).mpr h
-    · have hφ' : M↓[L₁] ⊧ ∼φ := by simp [hφ]
-      have hT' : M↓[L₁] ⊧* insert (∼φ) T := Semantics.ModelsSet.insert_iff.mpr ⟨hφ', hT⟩
-      have h := models_of_provable hT' (π₁.interpret_theory σ hσ)
-      exact (DirectTranslation.ite_translate_iff' φ π₀.trln π₁.trln hφ' σ).mpr h
+    rcases DirectTranslation.models_insert_cases φ hT with ⟨hφ, hT'⟩ | ⟨hφ', hT'⟩
+    · exact (DirectTranslation.ite_translate_iff φ π₀.trln π₁.trln hφ σ).mpr
+        (models_of_provable hT' (π₀.interpret_theory σ hσ))
+    · exact (DirectTranslation.ite_translate_iff' φ π₀.trln π₁.trln hφ' σ).mpr
+        (models_of_provable hT' (π₁.interpret_theory σ hσ))
 
 /-- An interpretation is faithful when provability of a translated sentence in `T` implies
 provability of the sentence itself in `U`.

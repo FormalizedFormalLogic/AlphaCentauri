@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Completeness.HenkinTermModel
+public import AlphaCentauri.Bootstrapping.Completeness.Henkin
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.ToFoundation.SententialAxioms
 

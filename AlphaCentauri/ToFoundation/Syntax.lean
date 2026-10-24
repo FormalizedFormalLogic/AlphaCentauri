@@ -92,27 +92,24 @@ lemma le_termShift {n t : V} (ht : IsSemiterm L n t) : t ≤ termShift L t := by
     simpa [qqFunc] using
       pair_le_pair_right 2 <| pair_le_pair_right k <| pair_le_pair_right f hv'
 
+lemma le_termShiftVec {k n v : V} (hv : IsSemitermVec L k n v) : v ≤ termShiftVec L k v :=
+  le_of_nth_le_nth (by simp [hv.isUTerm, hv.lh]) fun i hi ↦ by
+    rw [nth_termShiftVec hv.isUTerm (by simpa [hv.lh] using hi)]
+    exact le_termShift (hv.nth (by simpa [hv.lh] using hi))
+
 /-- The shift of free variables does not decrease the code of a formula. -/
 lemma le_shift {n p : V} (hp : IsSemiformula L n p) : p ≤ shift L p := by
   apply IsSemiformula.pi1_structural_induction (P := fun _ p ↦ p ≤ shift L p)
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intro n k R v hR hv
-    have hv' : v ≤ termShiftVec L k v := le_of_nth_le_nth (by simp [hv.isUTerm, hv.lh])
-      fun i hi ↦ by
-        rw [nth_termShiftVec hv.isUTerm (by simpa [hv.lh] using hi)]
-        exact le_termShift (hv.nth (by simpa [hv.lh] using hi))
     rw [shift_rel hR hv.isUTerm]
     simpa [qqRel] using
-      pair_le_pair_right 0 <| pair_le_pair_right k <| pair_le_pair_right R hv'
+      pair_le_pair_right 0 <| pair_le_pair_right k <| pair_le_pair_right R (le_termShiftVec hv)
   · intro n k R v hR hv
-    have hv' : v ≤ termShiftVec L k v := le_of_nth_le_nth (by simp [hv.isUTerm, hv.lh])
-      fun i hi ↦ by
-        rw [nth_termShiftVec hv.isUTerm (by simpa [hv.lh] using hi)]
-        exact le_termShift (hv.nth (by simpa [hv.lh] using hi))
     rw [shift_nrel hR hv.isUTerm]
     simpa [qqNRel] using
-      pair_le_pair_right 1 <| pair_le_pair_right k <| pair_le_pair_right R hv'
+      pair_le_pair_right 1 <| pair_le_pair_right k <| pair_le_pair_right R (le_termShiftVec hv)
   · intro n
     simp
   · intro n

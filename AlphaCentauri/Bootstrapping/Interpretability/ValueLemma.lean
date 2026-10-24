@@ -351,15 +351,8 @@ omit [L₁.Eq] in
 lemma val_bvar_addCast_vec {k l : ℕ} :
     SemitermVec.val (fun i : Fin k ↦ (Semiterm.bvar (i.addCast l) : Semiterm V L₁ (l + k))) =
       bvarVec 0 (k : V) := by
-  change matrixToVec (fun i : Fin k ↦
-    (Semiterm.bvar (i.addCast l) : Semiterm V L₁ (l + k)).val) = _
-  symm
-  rw [eq_matrixToVec_iff]
-  constructor
-  · simp
-  · intro i
-    have hi : ((i : ℕ) : V) < (k : V) := by simp
-    simp [nth_bvarVec _ _ _ hi]
+  rw [bvarVec_zero_eq_matrixToVec (L := L₁) l k]
+  rfl
 
 section guard
 
@@ -456,19 +449,6 @@ lemma translate_rel_typed (h : IsTableOf π tbl) (hT : IsTable L₁ L₂ tbl) {k
 
 end direct
 
-section symbols
-
-lemma exists_termVec {k : ℕ} {v : V} (hv : IsSemitermVec L₂ (k : V) 0 v) :
-    ∃ u : Fin k → Term V L₂, SemitermVec.val u = v := by
-  have hu : ∀ i : Fin k, IsSemiterm L₂ 0 v.[((i : ℕ) : V)] := fun i ↦ hv.nth (by simp)
-  exact ⟨fun i ↦ ⟨v.[((i : ℕ) : V)], hu i⟩, by
-    change matrixToVec (fun i : Fin k ↦ v.[((i : ℕ) : V)]) = v
-    symm
-    rw [eq_matrixToVec_iff]
-    exact ⟨hv.lh.symm, fun i ↦ rfl⟩⟩
-
-end symbols
-
 end typedShapes
 
 /-! ## Derivability of the defining formulas -/
@@ -539,6 +519,13 @@ variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
   {π : DirectTranslation S L₂} {tbl : V}
 
+omit [S.Δ₁] in
+lemma definesElement_domT_val (h : IsTableOf π tbl) (hT : IsTable L₁ L₂ tbl) (t : Term V L₂) :
+    (definesElement (domT π) (varEqualT hT t)).val =
+      definesCode L₁ tbl.[0] (varEqual L₁ L₂ tbl t.val) := by
+  have hd : tbl.[0] = (domT π).val := h.domain
+  rw [definesElement_val, varEqualT_val, ← hd]
+
 lemma derivable_definesElement_fvar (hT : IsTable L₁ L₂ tbl) (h : IsTableOf π tbl) (x : V) :
     Derivable S (insert (definesCode L₁ tbl.[0] (varEqual L₁ L₂ tbl ^&x))
       (negDomSet L₁ tbl.[0] ^&x)) := by
@@ -561,11 +548,7 @@ lemma derivable_definesElement_fvar (hT : IsTable L₁ L₂ tbl) (h : IsTableOf 
   have hTP := tprovable_definesElement_fvar (T := S) (domT π) x
   rw [← varEqualT_fvar hT x] at hTP
   have h₁ := Derivable.of_tprovable_imp hTP hφD
-  have hv : (definesElement (domT π) (varEqualT hT (Semiterm.fvar x))).val =
-      definesCode L₁ tbl.[0] (varEqual L₁ L₂ tbl ^&x) := by
-    rw [definesElement_val, varEqualT_val, ← hd]
-    simp
-  rw [hv] at h₁
+  rw [definesElement_domT_val h hT] at h₁
   exact h₁
 
 omit [L₂.Eq] in
@@ -594,9 +577,7 @@ lemma derivable_definesElement_func (hS : ∀ p ∈ S.Δ₁Class (V := V), Boots
     simpa using h₁
   have hsU (i : Fin k) : Derivable S (insert (definesElement (domT π) (varEqualT hT (u i))).val
       (negDomSet L₁ tbl.[0] (Semiterm.func F u).val)) := by
-    have hv : (definesElement (domT π) (varEqualT hT (u i))).val =
-        definesCode L₁ tbl.[0] (varEqual L₁ L₂ tbl (u i).val) := by
-      rw [definesElement_val, varEqualT_val, ← hd]
+    have hv := definesElement_domT_val h hT (u i)
     have hF : IsFormulaSet L₁ (insert (definesElement (domT π) (varEqualT hT (u i))).val
         (negDomSet L₁ tbl.[0] (Semiterm.func F u).val)) :=
       IsFormulaSet.insert_iff.mpr ⟨Semiformula.isSemiformula_zero _, hsF⟩
@@ -621,10 +602,7 @@ lemma derivable_definesElement_func (hS : ∀ p ∈ S.Δ₁Class (V := V), Boots
   have hYeq : definesElement (domT π) (funcGraph (domT π) (fun i ↦ varEqualT hT (u i))
       (funcT π F)) = definesElement (domT π) (varEqualT hT (Semiterm.func F u)) := by
     rw [varEqualT_func h hT F u]
-  have hv : (definesElement (domT π) (varEqualT hT (Semiterm.func F u))).val =
-      definesCode L₁ tbl.[0] (varEqual L₁ L₂ tbl (Semiterm.func F u).val) := by
-    rw [definesElement_val, varEqualT_val, ← hd]
-  rw [hYeq, hv] at hfin
+  rw [hYeq, definesElement_domT_val h hT] at hfin
   exact hfin
 
 lemma derivable_definesElement_func' (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
@@ -715,9 +693,7 @@ lemma derivable_definesElement_substHyp
       (varEqualT (h.isTable hL₂) (⟨t, ht⟩ : Term V L₂))).val (substHyp L₁ L₂ tbl t b)) := by
   have hT := h.isTable hL₂
   have hd : tbl.[0] = (domT π).val := h.domain
-  have hv : (definesElement (domT π) (varEqualT hT (⟨t, ht⟩ : Term V L₂))).val =
-      definesCode L₁ tbl.[0] (varEqual L₁ L₂ tbl t) := by
-    rw [definesElement_val, varEqualT_val, ← hd]
+  have hv := definesElement_domT_val h hT (⟨t, ht⟩ : Term V L₂)
   have hF : IsFormulaSet L₁ (insert (definesElement (domT π)
       (varEqualT hT (⟨t, ht⟩ : Term V L₂))).val (substHyp L₁ L₂ tbl t b)) :=
     IsFormulaSet.insert_iff.mpr ⟨Semiformula.isSemiformula_zero _, isFormulaSet_substHyp hT ht b⟩

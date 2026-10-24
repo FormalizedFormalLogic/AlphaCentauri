@@ -186,15 +186,12 @@ end generic
 section rules
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
-  {π : DirectTranslation S L₂} {tbl : V}
+  [L₂.Encodable] [L₂.LORDefinable] {S : Theory L₁} [S.Δ₁] {tbl : V}
 
-omit [L₂.Eq] in
 lemma isFormulaSet_translated_union {Γ : V} (hT : IsTable L₁ L₂ tbl) (hΓ : IsFormulaSet L₂ Γ)
     (M : V) : IsFormulaSet L₁ (translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] M) :=
   IsFormulaSet.union.mpr ⟨IsFormulaSet.translateSet hT hΓ, IsFormulaSet.negDomSet hT.domain M⟩
 
-omit [L₂.Eq] in
 lemma translateSet_insert_cup (p s t : V) :
     translateSet L₁ L₂ tbl (insert p s) ∪ t =
       insert (translate L₁ L₂ tbl p) (translateSet L₁ L₂ tbl s ∪ t) := by
@@ -202,7 +199,6 @@ lemma translateSet_insert_cup (p s t : V) :
   intro x
   simp; grind
 
-omit [L₂.Eq] in
 lemma domainAt_zero (hT : IsTable L₁ L₂ tbl) : domainAt L₁ tbl 0 = tbl.[0] := by
   unfold domainAt
   have hw : IsUTermVec L₁ (1 : V) ?[^#0] :=
@@ -213,25 +209,23 @@ lemma domainAt_zero (hT : IsTable L₁ L₂ tbl) : domainAt L₁ tbl 0 = tbl.[0]
     simp
   exact subst_eq_self_of_le hT.domain hw (le_refl _) H
 
-omit [L₂.Eq] in
 lemma translate_free (hT : IsTable L₁ L₂ tbl) {p : V} (hp : IsSemiformula L₂ 1 p) :
     translate L₁ L₂ tbl (free L₂ p) = free L₁ (translate L₁ L₂ tbl p) := by
   simp only [free]
   rw [translate_substs1_fvar hT 0 hp.shift, translate_shift hT hp]
 
 lemma elim_translateSet (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ₁ m M : V} (hΓ₁ : IsFormulaSet L₂ Γ₁)
-    (hm : m ≤ M)
+    (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ₁ m M : V}
+    (hΓ₁ : IsFormulaSet L₂ Γ₁) (hm : m ≤ M)
     (hfresh : ∀ j, m ≤ j → j < M → ∀ q ∈ Γ₁, fvSubst L₂ (freshVec j) q = shift L₂ q)
     (hd : Derivable S (translateSet L₁ L₂ tbl Γ₁ ∪ negDomSet L₁ tbl.[0] M)) :
-    Derivable S (translateSet L₁ L₂ tbl Γ₁ ∪ negDomSet L₁ tbl.[0] m) := by
-  have hT := h.isTable hL₂
-  exact Derivable.elim_negDomSet hS hT.domain hT.domain_shift (provable_exs_domain π h)
+    Derivable S (translateSet L₁ L₂ tbl Γ₁ ∪ negDomSet L₁ tbl.[0] m) :=
+  Derivable.elim_negDomSet hS hT.domain hT.domain_shift hdom
     (IsFormulaSet.translateSet hT hΓ₁) hm
     (fun j hmj hjM ↦ fvSubstImage_freshVec_translateSet_of hT hΓ₁ (hfresh j hmj hjM)) hd
 
 lemma translated_of_le (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ M : V} (hΓ : IsFormulaSet L₂ Γ)
+    (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ M : V} (hΓ : IsFormulaSet L₂ Γ)
     (hM : Γ ≤ M)
     (hd : Derivable S (translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] M)) :
     TranslatedDerivable S L₂ tbl Γ := by
@@ -242,12 +236,11 @@ lemma translated_of_le (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shif
       exact lt_add_one j
     exact fvSubst_eq_shift hu (fun x hx ↦ nth_freshVec_of_lt hx) (hΓ q hq)
       (le_trans (lt_of_mem hq).le hΓj)
-  exact elim_translateSet hS h hL₂ hΓ hM hfresh hd
+  exact elim_translateSet hS hT hdom hΓ hM hfresh hd
 
-lemma derivable_translated_bound (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ M : V}
+lemma derivable_translated_bound (hT : IsTable L₁ L₂ tbl) {Γ M : V}
     (hΓ : IsFormulaSet L₂ Γ) (hM : Γ ≤ M) (hd : TranslatedDerivable S L₂ tbl Γ) :
     Derivable S (translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] M) := by
-  have hT := h.isTable hL₂
   unfold TranslatedDerivable at hd
   have hU : translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] Γ ⊆
       translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] M := by
@@ -255,19 +248,18 @@ lemma derivable_translated_bound (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsSta
     exact mem_cup_iff.mpr ((mem_cup_iff.mp hx).imp id (negDomSet_mono hM ·))
   exact Derivable.wk (isFormulaSet_translated_union hT hΓ M) hU hd
 
-lemma translated_insert (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {p Γ M : V}
+lemma translated_insert (hT : IsTable L₁ L₂ tbl) {p Γ M : V}
     (hp : IsFormula L₂ p) (hΓ : IsFormulaSet L₂ Γ) (hM : insert p Γ ≤ M)
     (hd : TranslatedDerivable S L₂ tbl (insert p Γ)) :
     Derivable S
       (insert (translate L₁ L₂ tbl p) (translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] M)) := by
-  have hw := derivable_translated_bound h hL₂ (IsFormulaSet.insert_iff.mpr ⟨hp, hΓ⟩) hM hd
+  have hw := derivable_translated_bound hT (IsFormulaSet.insert_iff.mpr ⟨hp, hΓ⟩) hM hd
   rw [translateSet_insert_cup] at hw
   exact hw
 
-lemma translated_em (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ p : V}
+lemma translated_em (hT : IsTable L₁ L₂ tbl) {Γ p : V}
     (hΓ : IsFormulaSet L₂ Γ) (hp : p ∈ Γ) (hnp : neg L₂ p ∈ Γ) :
     TranslatedDerivable S L₂ tbl Γ := by
-  have hT := h.isTable hL₂
   unfold TranslatedDerivable
   have hp' : translate L₁ L₂ tbl p ∈ translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] Γ :=
     by simp; grind
@@ -276,87 +268,81 @@ lemma translated_em (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ 
   exact Derivable.em (isFormulaSet_translated_union hT hΓ Γ) _ hp'
     (mem_cup_iff.mpr (Or.inl hn))
 
-lemma translated_verum (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ : V}
+lemma translated_verum (hT : IsTable L₁ L₂ tbl) {Γ : V}
     (hΓ : IsFormulaSet L₂ Γ) (hv : ^⊤ ∈ Γ) :
     TranslatedDerivable S L₂ tbl Γ := by
-  have hT := h.isTable hL₂
   unfold TranslatedDerivable
   have hv' : ^⊤ ∈ translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] Γ :=
     by simp; grind [translate_verum]
   exact Derivable.verum (isFormulaSet_translated_union hT hΓ Γ) hv'
 
-lemma translated_axm (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ p : V}
+lemma translated_axm (hT : IsTable L₁ L₂ tbl) {Γ p : V}
     (hΓ : IsFormulaSet L₂ Γ) (hp : p ∈ Γ) (hax : Provable S (translate L₁ L₂ tbl p)) :
     TranslatedDerivable S L₂ tbl Γ := by
-  have hT := h.isTable hL₂
   unfold TranslatedDerivable
   exact Derivable.wk (isFormulaSet_translated_union hT hΓ Γ)
     (by intro x hx; simp at hx ⊢; grind) hax.toDerivable
 
 lemma translated_and (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ p q : V}
+    (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ p q : V}
     (hΓ : IsFormulaSet L₂ Γ) (hpq : p ^⋏ q ∈ Γ)
     (h₁ : TranslatedDerivable S L₂ tbl (insert p Γ))
     (h₂ : TranslatedDerivable S L₂ tbl (insert q Γ)) :
     TranslatedDerivable S L₂ tbl Γ := by
-  have hT := h.isTable hL₂
   have hpq' := hΓ _ hpq
   have hp : IsFormula L₂ p := (IsSemiformula.and.mp hpq').1
   have hq : IsFormula L₂ q := (IsSemiformula.and.mp hpq').2
   have hpM : insert p Γ ≤ insert p Γ + insert q Γ + Γ := le_add_right (le_add_right le_rfl)
   have hqM : insert q Γ ≤ insert p Γ + insert q Γ + Γ := le_add_right (le_add_left le_rfl)
   have hΓM : Γ ≤ insert p Γ + insert q Γ + Γ := le_add_left le_rfl
-  have d₁ := translated_insert h hL₂ hp hΓ hpM h₁
-  have d₂ := translated_insert h hL₂ hq hΓ hqM h₂
+  have d₁ := translated_insert hT hp hΓ hpM h₁
+  have d₂ := translated_insert hT hq hΓ hqM h₂
   have hmem : translate L₁ L₂ tbl (p ^⋏ q) ∈
       translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] (insert p Γ + insert q Γ + Γ) :=
     by simp; grind
   rw [translate_and (IsSemiformula.isUFormula hp) (IsSemiformula.isUFormula hq)] at hmem
-  exact translated_of_le hS h hL₂ hΓ hΓM (Derivable.and_m hmem d₁ d₂)
+  exact translated_of_le hS hT hdom hΓ hΓM (Derivable.and_m hmem d₁ d₂)
 
 lemma translated_or (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ p q : V}
+    (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ p q : V}
     (hΓ : IsFormulaSet L₂ Γ) (hpq : p ^⋎ q ∈ Γ)
     (hd : TranslatedDerivable S L₂ tbl (insert p (insert q Γ))) :
     TranslatedDerivable S L₂ tbl Γ := by
-  have hT := h.isTable hL₂
   have hpq' := hΓ _ hpq
   have hp : IsFormula L₂ p := (IsSemiformula.or.mp hpq').1
   have hq : IsFormula L₂ q := (IsSemiformula.or.mp hpq').2
   have hM : insert p (insert q Γ) ≤ insert p (insert q Γ) + Γ := le_add_right le_rfl
   have hΓM : Γ ≤ insert p (insert q Γ) + Γ := le_add_left le_rfl
-  have hd' := derivable_translated_bound h hL₂
+  have hd' := derivable_translated_bound hT
     (IsFormulaSet.insert_iff.mpr ⟨hp, IsFormulaSet.insert_iff.mpr ⟨hq, hΓ⟩⟩) hM hd
   rw [translateSet_insert_cup, translateSet_insert_cup] at hd'
   have hmem : translate L₁ L₂ tbl p ^⋎ translate L₁ L₂ tbl q ∈
       translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] (insert p (insert q Γ) + Γ) := by
     rw [← translate_or (IsSemiformula.isUFormula hp) (IsSemiformula.isUFormula hq)]
     simp; grind
-  exact translated_of_le hS h hL₂ hΓ hΓM (Derivable.or_m hmem hd')
+  exact translated_of_le hS hT hdom hΓ hΓM (Derivable.or_m hmem hd')
 
 lemma translated_cut (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ p : V}
+    (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ p : V}
     (hΓ : IsFormulaSet L₂ Γ) (hp : IsFormula L₂ p)
     (h₁ : TranslatedDerivable S L₂ tbl (insert p Γ))
     (h₂ : TranslatedDerivable S L₂ tbl (insert (neg L₂ p) Γ)) :
     TranslatedDerivable S L₂ tbl Γ := by
-  have hT := h.isTable hL₂
   have hnp : IsFormula L₂ (neg L₂ p) := IsSemiformula.neg hp
   have hpM : insert p Γ ≤ insert p Γ + insert (neg L₂ p) Γ + Γ :=
     le_add_right (le_add_right le_rfl)
   have hnpM : insert (neg L₂ p) Γ ≤ insert p Γ + insert (neg L₂ p) Γ + Γ :=
     le_add_right (le_add_left le_rfl)
   have hΓM : Γ ≤ insert p Γ + insert (neg L₂ p) Γ + Γ := le_add_left le_rfl
-  have d₁ := translated_insert h hL₂ hp hΓ hpM h₁
-  have d₂ := translated_insert h hL₂ hnp hΓ hnpM h₂
+  have d₁ := translated_insert hT hp hΓ hpM h₁
+  have d₂ := translated_insert hT hnp hΓ hnpM h₂
   rw [translate_neg hT hp] at d₂
-  exact translated_of_le hS h hL₂ hΓ hΓM (Derivable.cut (translate L₁ L₂ tbl p) d₁ d₂)
+  exact translated_of_le hS hT hdom hΓ hΓM (Derivable.cut (translate L₁ L₂ tbl p) d₁ d₂)
 
-lemma translated_wk (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ Γ' : V}
+lemma translated_wk (hT : IsTable L₁ L₂ tbl) {Γ Γ' : V}
     (hΓ' : IsFormulaSet L₂ Γ') (hsub : Γ ⊆ Γ')
     (hd : TranslatedDerivable S L₂ tbl Γ) :
     TranslatedDerivable S L₂ tbl Γ' := by
-  have hT := h.isTable hL₂
   unfold TranslatedDerivable at hd ⊢
   have hU : translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] Γ ⊆
       translateSet L₁ L₂ tbl Γ' ∪ negDomSet L₁ tbl.[0] Γ' := by
@@ -366,10 +352,9 @@ lemma translated_wk (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ 
   exact Derivable.wk (isFormulaSet_translated_union hT hΓ' Γ') hU hd
 
 lemma translated_shift (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ : V}
+    (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ : V}
     (hΓ : IsFormulaSet L₂ Γ) (hd : TranslatedDerivable S L₂ tbl Γ) :
     TranslatedDerivable S L₂ tbl (setShift L₂ Γ) := by
-  have hT := h.isTable hL₂
   have hΓs : IsFormulaSet L₂ (setShift L₂ Γ) := IsFormulaSet.setShift hΓ
   have hM : setShift L₂ Γ ≤ Γ + setShift L₂ Γ + 1 := le_add_right (le_add_left le_rfl)
   unfold TranslatedDerivable at hd ⊢
@@ -389,14 +374,13 @@ lemma translated_shift (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shif
   have hd' : Derivable S
       (translateSet L₁ L₂ tbl (setShift L₂ Γ) ∪ negDomSet L₁ tbl.[0] (Γ + setShift L₂ Γ + 1)) :=
     Derivable.wk (isFormulaSet_translated_union hT hΓs _) hU (Derivable.shift hd)
-  exact translated_of_le hS h hL₂ hΓs hM hd'
+  exact translated_of_le hS hT hdom hΓs hM hd'
 
 lemma translated_all (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ p : V}
+    (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ p : V}
     (hΓ : IsFormulaSet L₂ Γ) (hp : ^∀ p ∈ Γ)
     (hd : TranslatedDerivable S L₂ tbl (insert (free L₂ p) (setShift L₂ Γ))) :
     TranslatedDerivable S L₂ tbl Γ := by
-  have hT := h.isTable hL₂
   have hpΓ : p ≤ Γ := le_trans (le_qqAll p) (lt_of_mem hp).le
   have hp1 : IsSemiformula L₂ 1 p := by simpa using IsSemiformula.all.mp (hΓ _ hp)
   have hΓ₁ : IsFormulaSet L₂ (insert (free L₂ p) (setShift L₂ Γ)) :=
@@ -412,8 +396,8 @@ lemma translated_all (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
     · exact fvSubst_freshVec_free hp1 hpΓ hΓj
     · obtain ⟨ψ, hψ, rfl⟩ := mem_setShift_iff.mp hq
       exact fvSubst_freshVec_shift (hΓ ψ hψ) (lt_of_mem hψ).le hΓj
-  have hd' := derivable_translated_bound h hL₂ hΓ₁ hM₁ hd
-  have hd'' := elim_translateSet hS h hL₂ hΓ₁ hΓM hfresh hd'
+  have hd' := derivable_translated_bound hT hΓ₁ hM₁ hd
+  have hd'' := elim_translateSet hS hT hdom hΓ₁ hΓM hfresh hd'
   rw [translateSet_insert, translate_free hT hp1, translateSet_setShift hT hΓ,
     negDomSet_succ_eq_insert_setShift (d := tbl.[0]) hT.domain hT.domain_shift Γ] at hd''
   have hd3 : Derivable S (insert (neg L₁ (substs1 L₁ (^&0) tbl.[0]))

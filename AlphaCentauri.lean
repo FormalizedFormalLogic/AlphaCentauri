@@ -95,7 +95,6 @@ public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.ProvabilityAbstraction
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.Provable
-public import AlphaCentauri.ToFoundation.Quote
 public import AlphaCentauri.ToFoundation.Reflection
 public import AlphaCentauri.ToFoundation.Rew
 public import AlphaCentauri.ToFoundation.Schemata

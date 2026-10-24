@@ -10,7 +10,10 @@ negation of its code, and the code of its universal closure is a block of univer
 over its code. The code of the negation of a semisentence that is not universal is not existential.
 A number codes a sentence of a finite list exactly when the defining formula of the list holds of
 it. The symbols of a language are standard in a model when every relation and function symbol
-of the model is the code of a symbol of the language.
+of the model is the code of a symbol of the language. A vector is `matrixToVec u` exactly when it
+has the length of `u` and the entries of `u`. The code of a negation, an implication, a block of
+universal quantifiers, a finite conjunction or a substitution instance of a formula is obtained
+from the code of the formula by the corresponding function on codes.
 -/
 
 @[expose] public section
@@ -116,5 +119,73 @@ lemma satisfies_ofList_ch (l : List ArithmeticSentence) (p : V) :
     simp only [Bounding.HierarchySymbol.Semiformula.val_or, LogicalConnective.HomClass.map_or,
       Theory.Δ₁.singleton_toTDef_ch_val, ih]
     simp [Sentence.quote_eq_encode, numeral_eq_natCast]
+
+end FFL.FirstOrder.Arithmetic.Bootstrapping
+
+namespace FFL.FirstOrder
+
+open Arithmetic Bootstrapping
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+lemma Arithmetic.Bootstrapping.eq_matrixToVec_iff {k : ℕ} {w : V} {u : Fin k → V} :
+    w = matrixToVec u ↔ (k : V) = len w ∧ ∀ i : Fin k, w.[((i : ℕ) : V)] = u i := by
+  constructor
+  · rintro rfl
+    simp
+  · rintro ⟨h₁, h₂⟩
+    apply nth_ext' (k : V) h₁.symm (by simp)
+    intro i hi
+    obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi
+    simp [h₂]
+
+namespace Semiformula
+
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+@[simp] lemma quote_neg {n : ℕ} (φ : Semiproposition L n) :
+    (⌜∼φ⌝ : V) = Bootstrapping.neg L ⌜φ⌝ := by
+  simp [quote_def]
+
+@[simp] lemma quote_imp {n : ℕ} (φ ψ : Semiproposition L n) :
+    (⌜φ 🡒 ψ⌝ : V) = Bootstrapping.imp L ⌜φ⌝ ⌜ψ⌝ := by
+  simp [quote_def, Bootstrapping.imp]
+
+lemma quote_allItr {n k : ℕ} (φ : Semiproposition L (n + k)) :
+    (⌜∀¹^[k] φ⌝ : V) = qqAlls (⌜φ⌝ : V) (k : V) := by
+  induction k with
+  | zero => simp
+  | succ k ih => simpa [allItr_succ, qqAlls_all] using ih (∀¹ φ)
+
+lemma quote_conj {n k : ℕ} (φ : Fin k → Semiproposition L n) :
+    (⌜Matrix.conj φ⌝ : V) = ^⋀ matrixToVec fun i ↦ (⌜φ i⌝ : V) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    simpa [Matrix.conj, Matrix.vecHead, Matrix.vecTail, Function.comp_def] using
+      ih (Matrix.vecTail φ)
+
+lemma quote_substs {n m : ℕ} (w : Fin n → SyntacticSemiterm L m) (φ : Semiproposition L n) :
+    (⌜φ ⇜ w⌝ : V) = Bootstrapping.subst L (matrixToVec fun i ↦ (⌜w i⌝ : V)) ⌜φ⌝ := by
+  simp [quote_def, Semiterm.quote_def]
+  rfl
+
+end Semiformula
+
+end FFL.FirstOrder
+
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {L : Language} [L.Encodable]
+  [L.LORDefinable]
+
+lemma exists_termVec {k : ℕ} {v : V} (hv : IsSemitermVec L (k : V) 0 v) :
+    ∃ u : Fin k → Term V L, SemitermVec.val u = v := by
+  have hu : ∀ i : Fin k, IsSemiterm L 0 v.[((i : ℕ) : V)] := fun i ↦ hv.nth (by simp)
+  exact ⟨fun i ↦ ⟨v.[((i : ℕ) : V)], hu i⟩, by
+    change matrixToVec (fun i : Fin k ↦ v.[((i : ℕ) : V)]) = v
+    symm
+    rw [eq_matrixToVec_iff]
+    exact ⟨hv.lh.symm, fun i ↦ rfl⟩⟩
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

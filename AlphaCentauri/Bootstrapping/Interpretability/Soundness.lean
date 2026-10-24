@@ -63,35 +63,11 @@ variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   {π : DirectTranslation S L₂} {tbl : V}
 
 omit [L₂.Eq] in
-lemma isSemiterm_of_zero {n t : V} (ht : IsSemiterm L₂ 0 t) : IsSemiterm L₂ n t :=
-  IsSemiterm.def.mpr ⟨(IsSemiterm.def.mp ht).1, (IsSemiterm.def.mp ht).2.trans (by simp)⟩
-
-omit [L₂.Eq] in
-lemma substs1_subst_fvar_bvar {t u q : V} (ht : IsSemiterm L₂ 0 t) (hq : IsSemiformula L₂ 2 q) :
-    substs1 L₂ t (subst L₂ ?[^&u, ^#(0 : V)] q) =
-      substs1 L₂ (^&u) (subst L₂ ?[^#(0 : V), t] q) := by
-  have h₁ : IsSemitermVec L₂ 2 1 (?[^&u, ^#(0 : V)] : V) := isSemitermVec_fvar_bvar u
-  have h₂ : IsSemitermVec L₂ 1 0 (?[t] : V) := by simp [ht]
-  have h₃ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by
-    simp [isSemiterm_of_zero ht]
-  have h₄ : IsSemitermVec L₂ 1 1 (?[^&u] : V) := by simp
-  have h₅ : termSubstVec L₂ 2 (?[t] : V) (?[^&u, ^#(0 : V)] : V) =
-      termSubstVec L₂ 2 (?[^&u] : V) (?[^#(0 : V), t] : V) := by
-    simp [termSubstVec_cons₂ (t₁ := ^#(0 : V)) (by simp) ht.isUTerm, termSubst_zero ht]
-  unfold substs1
-  rw [substs_substs hq h₂ h₁, substs_substs hq h₄ h₃, h₅]
-
-omit [L₂.Eq] in
-lemma qVec_closed {t : V} (ht : IsSemiterm L₂ 0 t) :
-    qVec L₂ (?[t] : V) = (?[^#(0 : V), t] : V) := by
-  simp [qVec, len_adjoin, termBShift_zero ht, termBShiftVec_cons₁ ht.isUTerm]
-
-omit [L₂.Eq] in
 lemma translate_substs1_all {t q : V} (ht : IsSemiterm L₂ 0 t)
     (hq : IsSemiformula L₂ 2 q) :
     translate L₁ L₂ tbl (substs1 L₂ t (^∀ q)) =
       ^∀ imp L₁ (domainAt L₁ tbl 0) (translate L₁ L₂ tbl (subst L₂ ?[^#(0 : V), t] q)) := by
-  have h₁ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [isSemiterm_of_zero ht]
+  have h₁ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [IsSemiterm.of_zero ht]
   unfold substs1
   rw [substs_all hq.isUFormula, qVec_closed ht, translate_all (hq.subst h₁).isUFormula]
 
@@ -100,19 +76,9 @@ lemma translate_substs1_exs {t q : V} (ht : IsSemiterm L₂ 0 t)
     (hq : IsSemiformula L₂ 2 q) :
     translate L₁ L₂ tbl (substs1 L₂ t (^∃ q)) =
       ^∃ (domainAt L₁ tbl 0 ^⋏ translate L₁ L₂ tbl (subst L₂ ?[^#(0 : V), t] q)) := by
-  have h₁ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [isSemiterm_of_zero ht]
+  have h₁ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [IsSemiterm.of_zero ht]
   unfold substs1
   rw [substs_ex hq.isUFormula, qVec_closed ht, translate_exs (hq.subst h₁).isUFormula]
-
-omit [L₁.Eq] in
-lemma substs_iff_V {m w p q : V} (hp : IsSemiformula L₁ 1 p) (hq : IsSemiformula L₁ 1 q)
-    (hw : IsSemitermVec L₁ 1 m w) :
-    subst L₁ w (iff L₁ p q) = iff L₁ (subst L₁ w p) (subst L₁ w q) := by
-  have hpq : IsUFormula L₁ (neg L₁ p ^⋎ q) := (IsSemiformula.imp.mpr ⟨hp, hq⟩).isUFormula
-  have hqp : IsUFormula L₁ (neg L₁ q ^⋎ p) := (IsSemiformula.imp.mpr ⟨hq, hp⟩).isUFormula
-  unfold iff imp
-  rw [substs_and hpq hqp, substs_or hp.isUFormula.neg hq.isUFormula,
-    substs_or hq.isUFormula.neg hp.isUFormula, substs_neg hp hw, substs_neg hq hw]
 
 omit [L₁.Eq] [𝗘𝗤 L₁ ⪯ S] in
 lemma derivable_all_iff_V {δ θ₁ θ₂ s : V} (hδ : IsSemiformula L₁ 1 δ)
@@ -233,24 +199,6 @@ lemma derivable_iff_translate_rel (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstr
   simpa only [Semiformula.val_iff] using hg
 
 omit [L₂.Eq] in
-lemma substs1_and_V {t p q : V} (hp : IsSemiformula L₂ 1 p) (hq : IsSemiformula L₂ 1 q) :
-    substs1 L₂ t (p ^⋏ q) = substs1 L₂ t p ^⋏ substs1 L₂ t q := by
-  unfold substs1
-  exact substs_and hp.isUFormula hq.isUFormula
-
-omit [L₂.Eq] in
-lemma substs1_or_V {t p q : V} (hp : IsSemiformula L₂ 1 p) (hq : IsSemiformula L₂ 1 q) :
-    substs1 L₂ t (p ^⋎ q) = substs1 L₂ t p ^⋎ substs1 L₂ t q := by
-  unfold substs1
-  exact substs_or hp.isUFormula hq.isUFormula
-
-lemma pi2_qqAll_sub_one (q : V) : π₂ ((^∀ q) - 1) = q := by
-  simp [qqAll]
-
-lemma pi2_qqExs_sub_one (q : V) : π₂ ((^∃ q) - 1) = q := by
-  simp [qqExs]
-
-omit [L₂.Eq] in
 lemma quantFresh_all (tbl t b q : V) :
     quantFresh L₁ L₂ tbl t b (^∀ q) = max (substHyp L₁ L₂ tbl t b)
       (iff L₁ (translate L₁ L₂ tbl (subst L₂ ?[^#(0 : V), t] q))
@@ -264,9 +212,6 @@ lemma quantFresh_exs (tbl t b q : V) :
         (translate L₁ L₂ tbl (subst L₂ ?[^#(0 : V), ^&b] q))) := by
   simp only [quantFresh, pi2_qqExs_sub_one]
 
-omit [L₂.Eq] in
-lemma isSemiterm_fvar_closed (b : V) : IsSemiterm L₂ 0 (^&b) := by simp
-
 theorem derivable_translateSubstEquiv
     (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
     (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {t b p : V} (ht : IsSemiterm L₂ 0 t)
@@ -274,7 +219,7 @@ theorem derivable_translateSubstEquiv
     Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b p) (substHyp L₁ L₂ tbl t b)) := by
   have hT := h.isTable hL₂
   have hH := isFormulaSet_substHyp hT ht b
-  have hb : IsSemiterm L₂ 0 (^&b) := isSemiterm_fvar_closed b
+  have hb : IsSemiterm L₂ 0 (^&b) := by simp
   have hδ : IsSemiformula L₁ 1 (domainAt L₁ tbl 0) := hT.isSemiformula_domainAt (by simp)
   have hP : 𝚺ᴬ₁-Predicate fun p : V ↦
       Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b p) (substHyp L₁ L₂ tbl t b)) := by
@@ -317,7 +262,7 @@ theorem derivable_translateSubstEquiv
         (substHyp L₁ L₂ tbl t b)) := by
     intro p q hp₁ hq₁ ih₁ ih₂
     unfold translateSubstEquiv at ih₁ ih₂ ⊢
-    rw [substs1_and_V hp₁ hq₁, substs1_and_V hp₁ hq₁ (t := ^&b),
+    rw [substs1_and hp₁ hq₁, substs1_and hp₁ hq₁ (t := ^&b),
       translate_and (IsSemiformula.substs1 ht hp₁).isUFormula
         (IsSemiformula.substs1 ht hq₁).isUFormula,
       translate_and (IsSemiformula.substs1 hb hp₁).isUFormula
@@ -333,7 +278,7 @@ theorem derivable_translateSubstEquiv
         (substHyp L₁ L₂ tbl t b)) := by
     intro p q hp₁ hq₁ ih₁ ih₂
     unfold translateSubstEquiv at ih₁ ih₂ ⊢
-    rw [substs1_or_V hp₁ hq₁, substs1_or_V hp₁ hq₁ (t := ^&b),
+    rw [substs1_or hp₁ hq₁, substs1_or hp₁ hq₁ (t := ^&b),
       translate_or (IsSemiformula.substs1 ht hp₁).isUFormula
         (IsSemiformula.substs1 ht hq₁).isUFormula,
       translate_or (IsSemiformula.substs1 hb hp₁).isUFormula
@@ -348,7 +293,7 @@ theorem derivable_translateSubstEquiv
       Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b (^∀ q))
         (substHyp L₁ L₂ tbl t b)) := by
     intro q hq ih
-    have h₁ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [isSemiterm_of_zero ht]
+    have h₁ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [IsSemiterm.of_zero ht]
     have h₂ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), ^&b] : V) := by simp
     have hθ₁ : IsSemiformula L₂ 1 (subst L₂ ?[^#(0 : V), t] q) := hq.subst h₁
     have hθ₂ : IsSemiformula L₂ 1 (subst L₂ ?[^#(0 : V), ^&b] q) := hq.subst h₂
@@ -367,7 +312,7 @@ theorem derivable_translateSubstEquiv
         (substs1 L₁ (^&(quantFresh L₁ L₂ tbl t b (^∀ q)))
           (translate L₁ L₂ tbl (subst L₂ ?[^#(0 : V), ^&b] q))) := by
       unfold substs1
-      exact substs_iff_V (m := 0) hA₁ hA₂ (by simp)
+      exact subst_iff (m := 0) hA₁ hA₂ (by simp)
     have hsu : substHyp L₁ L₂ tbl t b ≤ quantFresh L₁ L₂ tbl t b (^∀ q) := by
       rw [quantFresh_all]
       exact le_max_left _ _
@@ -387,7 +332,7 @@ theorem derivable_translateSubstEquiv
       Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b (^∃ q))
         (substHyp L₁ L₂ tbl t b)) := by
     intro q hq ih
-    have h₁ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [isSemiterm_of_zero ht]
+    have h₁ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [IsSemiterm.of_zero ht]
     have h₂ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), ^&b] : V) := by simp
     have hθ₁ : IsSemiformula L₂ 1 (subst L₂ ?[^#(0 : V), t] q) := hq.subst h₁
     have hθ₂ : IsSemiformula L₂ 1 (subst L₂ ?[^#(0 : V), ^&b] q) := hq.subst h₂
@@ -406,7 +351,7 @@ theorem derivable_translateSubstEquiv
         (substs1 L₁ (^&(quantFresh L₁ L₂ tbl t b (^∃ q)))
           (translate L₁ L₂ tbl (subst L₂ ?[^#(0 : V), ^&b] q))) := by
       unfold substs1
-      exact substs_iff_V (m := 0) hA₁ hA₂ (by simp)
+      exact subst_iff (m := 0) hA₁ hA₂ (by simp)
     have hsu : substHyp L₁ L₂ tbl t b ≤ quantFresh L₁ L₂ tbl t b (^∃ q) := by
       rw [quantFresh_exs]
       exact le_max_left _ _

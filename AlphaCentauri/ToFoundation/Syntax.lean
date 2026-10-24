@@ -806,6 +806,66 @@ lemma isSemitermVec_of_fvar {w : V} (n : V) (hw : ∀ i < len w, ∃ x, w.[i] = 
     IsSemitermVec L (len w) n w :=
   IsSemitermVec.iff.mpr ⟨rfl, fun i hi ↦ by obtain ⟨x, hx⟩ := hw i hi; simp [hx]⟩
 
+lemma IsSemiterm.of_zero {n t : V} (ht : IsSemiterm L 0 t) : IsSemiterm L n t :=
+  IsSemiterm.def.mpr ⟨(IsSemiterm.def.mp ht).1, (IsSemiterm.def.mp ht).2.trans (by simp)⟩
+
+lemma substs1_subst_fvar_bvar {t u q : V} (ht : IsSemiterm L 0 t) (hq : IsSemiformula L 2 q) :
+    substs1 L t (subst L ?[^&u, ^#(0 : V)] q) =
+      substs1 L (^&u) (subst L ?[^#(0 : V), t] q) := by
+  have h₁ : IsSemitermVec L 2 1 (?[^&u, ^#(0 : V)] : V) := isSemitermVec_fvar_bvar u
+  have h₂ : IsSemitermVec L 1 0 (?[t] : V) := by simp [ht]
+  have h₃ : IsSemitermVec L 2 1 (?[^#(0 : V), t] : V) := by
+    simp [IsSemiterm.of_zero ht]
+  have h₄ : IsSemitermVec L 1 1 (?[^&u] : V) := by simp
+  have h₅ : termSubstVec L 2 (?[t] : V) (?[^&u, ^#(0 : V)] : V) =
+      termSubstVec L 2 (?[^&u] : V) (?[^#(0 : V), t] : V) := by
+    simp [termSubstVec_cons₂ (t₁ := ^#(0 : V)) (by simp) ht.isUTerm, termSubst_zero ht]
+  unfold substs1
+  rw [substs_substs hq h₂ h₁, substs_substs hq h₄ h₃, h₅]
+
+lemma qVec_closed {t : V} (ht : IsSemiterm L 0 t) :
+    qVec L (?[t] : V) = (?[^#(0 : V), t] : V) := by
+  simp [qVec, len_adjoin, termBShift_zero ht, termBShiftVec_cons₁ ht.isUTerm]
+
+lemma subst_iff {m w p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
+    (hw : IsSemitermVec L 1 m w) :
+    subst L w (iff L p q) = iff L (subst L w p) (subst L w q) := by
+  have hpq : IsUFormula L (neg L p ^⋎ q) := (IsSemiformula.imp.mpr ⟨hp, hq⟩).isUFormula
+  have hqp : IsUFormula L (neg L q ^⋎ p) := (IsSemiformula.imp.mpr ⟨hq, hp⟩).isUFormula
+  unfold iff imp
+  rw [substs_and hpq hqp, substs_or hp.isUFormula.neg hq.isUFormula,
+    substs_or hq.isUFormula.neg hp.isUFormula, substs_neg hp hw, substs_neg hq hw]
+
+lemma substs1_and {t p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q) :
+    substs1 L t (p ^⋏ q) = substs1 L t p ^⋏ substs1 L t q := by
+  unfold substs1
+  exact substs_and hp.isUFormula hq.isUFormula
+
+lemma substs1_or {t p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q) :
+    substs1 L t (p ^⋎ q) = substs1 L t p ^⋎ substs1 L t q := by
+  unfold substs1
+  exact substs_or hp.isUFormula hq.isUFormula
+
+lemma pi2_qqAll_sub_one (q : V) : π₂ ((^∀ q) - 1) = q := by
+  simp [qqAll]
+
+lemma pi2_qqExs_sub_one (q : V) : π₂ ((^∃ q) - 1) = q := by
+  simp [qqExs]
+
+lemma shift_substs1_qqFvar {p j : V} (hp : IsSemiformula L 1 p) :
+    shift L (substs1 L (^&j) p) = substs1 L (^&(j + 1)) (shift L p) := by
+  have hv : IsSemitermVec L 1 (0 : V) ?[^&j] := by simp
+  rw [substs1, shift_substs hp hv]
+  congr 1
+  apply nth_ext' 1 (by simp) (by simp)
+  intro i hi
+  rcases (show i = 0 by simpa using hi)
+  simp
+
+lemma shift_neg_substs1_qqFvar {d j : V} (hd : IsSemiformula L 1 d) (hds : shift L d = d) :
+    shift L (neg L (substs1 L (^&j) d)) = neg L (substs1 L (^&(j + 1)) d) := by
+  rw [shift_neg (IsSemiformula.substs1 (n := 0) (by simp) hd), shift_substs1_qqFvar hd, hds]
+
 end substLemmas
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

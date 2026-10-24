@@ -9,10 +9,23 @@ The code of a semisentence is fixed by the shift of free variables, the code of 
 negation of its code, and the code of its universal closure is a block of universal quantifiers
 over its code. The code of the negation of a semisentence that is not universal is not existential.
 A number codes a sentence of a finite list exactly when the defining formula of the list holds of
-it.
+it. The symbols of a language are standard in a model when every relation and function symbol
+of the model is the code of a symbol of the language.
 -/
 
 @[expose] public section
+
+namespace FFL.FirstOrder.Language
+
+open Arithmetic Bootstrapping
+
+/-- Every relation and function symbol of `L` in `V` is a standard one. -/
+def SymbolsStandard (L : Language) [L.Encodable] [L.LORDefinable] (V : Type*) [ORingStructure V]
+    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : Prop :=
+  (∀ k r : V, L.IsRel k r → ∃ (k' : ℕ) (R : L.Rel k'), k = k' ∧ r = (⌜R⌝ : V)) ∧
+  (∀ k f : V, L.IsFunc k f → ∃ (k' : ℕ) (F : L.Func k'), k = k' ∧ f = (⌜F⌝ : V))
+
+end FFL.FirstOrder.Language
 
 namespace FFL.FirstOrder.Semisentence
 

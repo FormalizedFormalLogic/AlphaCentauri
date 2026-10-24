@@ -78,7 +78,6 @@ public import AlphaCentauri.ToFoundation.BooleanCombination
 public import AlphaCentauri.ToFoundation.Coding
 public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
-public import AlphaCentauri.ToFoundation.Consistency
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.DirectTranslation

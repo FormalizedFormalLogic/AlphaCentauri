@@ -297,16 +297,6 @@ end negShift
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping
 
-namespace FFL.FirstOrder.Language
-
-/-- Every relation and function symbol of `L` in `V` is a standard one. -/
-def SymbolsStandard (L : Language) [L.Encodable] [L.LORDefinable] (V : Type*) [ORingStructure V]
-    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] : Prop :=
-  (∀ k r : V, L.IsRel k r → ∃ (k' : ℕ) (R : L.Rel k'), k = k' ∧ r = (⌜R⌝ : V)) ∧
-  (∀ k f : V, L.IsFunc k f → ∃ (k' : ℕ) (F : L.Func k'), k = k' ∧ f = (⌜F⌝ : V))
-
-end FFL.FirstOrder.Language
-
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]

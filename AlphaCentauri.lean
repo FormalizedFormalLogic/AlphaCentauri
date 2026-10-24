@@ -9,13 +9,8 @@ public import AlphaCentauri.Axiomatizability.RestrictedComplexity
 public import AlphaCentauri.Bootstrapping.Completeness.Henkin
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinTermModel
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
-public import AlphaCentauri.Bootstrapping.Interpretability.FreeVariables
-public import AlphaCentauri.Bootstrapping.Interpretability.PiFacts
 public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
-public import AlphaCentauri.Bootstrapping.Interpretability.SubstCommutation
-public import AlphaCentauri.Bootstrapping.Interpretability.TermSubst
 public import AlphaCentauri.Bootstrapping.Interpretability.Translation
-public import AlphaCentauri.Bootstrapping.Interpretability.TypedShapes
 public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
@@ -30,7 +25,6 @@ public import AlphaCentauri.Bootstrapping.Proof.InductionAxiom
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 public import AlphaCentauri.Bootstrapping.Proof.Measures
-public import AlphaCentauri.Bootstrapping.Proof.NegDomSet
 public import AlphaCentauri.Bootstrapping.Proof.PeanoMinusAxiom
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
@@ -85,7 +79,6 @@ public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
-public import AlphaCentauri.ToFoundation.DefinesElement
 public import AlphaCentauri.ToFoundation.DirectTranslation
 public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
@@ -110,8 +103,7 @@ public import AlphaCentauri.ToFoundation.SententialAxioms
 public import AlphaCentauri.ToFoundation.Set
 public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.Theory
-public import AlphaCentauri.ToFoundation.TypedBridge
-public import AlphaCentauri.ToFoundation.TypedQuantifierBlock
+public import AlphaCentauri.ToFoundation.TypedProof
 public import AlphaCentauri.ToMathlib.ElementaryClosure
 public import AlphaCentauri.ToMathlib.Goodstein
 public import AlphaCentauri.ToMathlib.ONote.Computability

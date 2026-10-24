@@ -1,29 +1,187 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Interpretability.FreeVariables
-public import AlphaCentauri.Bootstrapping.Interpretability.PiFacts
-public import AlphaCentauri.Bootstrapping.Interpretability.SubstCommutation
-public import AlphaCentauri.Bootstrapping.Proof.NegDomSet
+public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
+public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
+public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
 
 /-!
 # Translated derivability is closed under the rules of derivations
 
-For a set `Γ` of $L_2$-formulas, `TranslatedDerivable` states that $\Gamma^*$ together with the
-negated instances of the domain formula is derivable in `S`. The lemmas of this module show that
-this property is preserved by each rule of the derivation calculus.
+The coded set of the translations of a set of formulas along a table, its definability, and its
+behaviour under shift and under free-variable substitution. For a set `Γ` of $L_2$-formulas,
+`TranslatedDerivable` states that $\Gamma^*$ together with the negated instances of the domain
+formula is derivable in `S`. The lemmas of this module show that this property is preserved by
+each rule of the derivation calculus.
 -/
 
 @[expose] public section
 
+namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+/-! ## Translated sets -/
+
+section translateSets
+
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+/-! ## Translated sets -/
+
+section translateSet
+
+variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
+  [L₂.Encodable] [L₂.LORDefinable]
+
+variable (L₁ L₂) in
+lemma translate_sigmaOne (tbl : V) : 𝚺ᴬ₁-Function₁ (translate L₁ L₂ tbl) := by
+  definability
+
+variable (L₁ L₂) in
+/-- `translateSet L₁ L₂ tbl s` is the coded set of the translations along `tbl` of the coded
+$L_2$-formulas in `s`. -/
+noncomputable def translateSet (tbl s : V) : V := by
+  letI : 𝚺ᴬ₁-Function₁ (translate L₁ L₂ tbl) := translate_sigmaOne L₁ L₂ tbl
+  exact hfsImage (translate L₁ L₂ tbl) s
+
+variable (L₁ L₂) in
+/-- The $\Sigma_1$ graph of `translateSet`; argument order `(t, tbl, s)`,
+`t = translateSet tbl s`. -/
+noncomputable def translateSetGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
+  “t tbl s. (∀ z ∈' t, ∃ p ∈' s, !(translateGraph L₁ L₂) z tbl p) ∧
+    (∀ p ∈' s, ∃ z, !(translateGraph L₁ L₂) z tbl p ∧ z ∈ t)”
+
+lemma mem_translateSet_iff {tbl s x : V} :
+    x ∈ translateSet L₁ L₂ tbl s ↔ ∃ p ∈ s, x = translate L₁ L₂ tbl p := by
+  let _ : 𝚺ᴬ₁-Function₁ (translate L₁ L₂ tbl) := translate_sigmaOne L₁ L₂ tbl
+  exact mem_hfsImage_iff
+
+section graph
+
+variable {Γ : SigmaPiDelta} {m : ℕ}
+
+private lemma translateSet_graph (t tbl s : V) :
+    t = translateSet L₁ L₂ tbl s ↔ (∀ z ∈ t, ∃ p ∈ s, z = translate L₁ L₂ tbl p) ∧
+      (∀ p ∈ s, translate L₁ L₂ tbl p ∈ t) := by
+  constructor
+  · rintro rfl
+    exact ⟨fun y hy ↦ mem_translateSet_iff.mp hy, fun x hx ↦ mem_translateSet_iff.mpr ⟨x, hx, rfl⟩⟩
+  · rintro ⟨h₁, h₂⟩
+    apply mem_ext
+    intro y
+    constructor
+    · intro hy
+      exact mem_translateSet_iff.mpr (h₁ y hy)
+    · intro hy
+      obtain ⟨p, hp, rfl⟩ := mem_translateSet_iff.mp hy
+      exact h₂ p hp
+
+instance translateSet.defined : 𝚺ᴬ₁-Function₂[V] translateSet L₁ L₂ via translateSetGraph L₁ L₂ :=
+  .mk fun v ↦ by simp [translateSetGraph, translateSet_graph]
+
+instance translateSet.definable : 𝚺ᴬ₁-Function₂[V] translateSet L₁ L₂ :=
+  translateSet.defined.to_definable
+
+instance translateSet.definable' : Γᴬ_[m + 1]-Function₂[V] translateSet L₁ L₂ :=
+  translateSet.definable.of_sigmaOne
+
+end graph
+
+lemma translateSet_empty (tbl : V) : translateSet L₁ L₂ tbl ∅ = ∅ := by
+  apply mem_ext
+  intro x
+  simp [mem_translateSet_iff]
+
+lemma translateSet_insert (tbl p s : V) :
+    translateSet L₁ L₂ tbl (insert p s) =
+      insert (translate L₁ L₂ tbl p) (translateSet L₁ L₂ tbl s) := by
+  apply mem_ext
+  intro x
+  simp only [mem_translateSet_iff, mem_bitInsert_iff]
+  constructor
+  · rintro ⟨q, (rfl | hq), rfl⟩
+    · exact Or.inl rfl
+    · exact Or.inr ⟨q, hq, rfl⟩
+  · rintro (rfl | ⟨q, hq, rfl⟩)
+    · exact ⟨p, Or.inl rfl, rfl⟩
+    · exact ⟨q, Or.inr hq, rfl⟩
+
+lemma translateSet_union (tbl s t : V) :
+    translateSet L₁ L₂ tbl (s ∪ t) = translateSet L₁ L₂ tbl s ∪ translateSet L₁ L₂ tbl t := by
+  apply mem_ext
+  intro x
+  simp only [mem_translateSet_iff, mem_cup_iff]
+  constructor
+  · rintro ⟨q, hq | hq, rfl⟩
+    · exact Or.inl ⟨q, hq, rfl⟩
+    · exact Or.inr ⟨q, hq, rfl⟩
+  · rintro (⟨q, hq, rfl⟩ | ⟨q, hq, rfl⟩)
+    · exact ⟨q, Or.inl hq, rfl⟩
+    · exact ⟨q, Or.inr hq, rfl⟩
+
+lemma translateSet_mono {tbl s s' : V} (h : s ⊆ s') :
+    translateSet L₁ L₂ tbl s ⊆ translateSet L₁ L₂ tbl s' := by
+  intro x hx
+  obtain ⟨p, hp, rfl⟩ := mem_translateSet_iff.mp hx
+  exact mem_translateSet_iff.mpr ⟨p, h hp, rfl⟩
+
+lemma IsFormulaSet.translateSet {tbl s : V} (hT : IsTable L₁ L₂ tbl) (hs : IsFormulaSet L₂ s) :
+    IsFormulaSet L₁ (Bootstrapping.translateSet L₁ L₂ tbl s) := by
+  intro p hp
+  obtain ⟨q, hq, rfl⟩ := mem_translateSet_iff.mp hp
+  exact IsSemiformula.translate hT (hs q hq)
+
+lemma translateSet_setShift {tbl s : V} (hT : IsTable L₁ L₂ tbl) (hs : IsFormulaSet L₂ s) :
+    translateSet L₁ L₂ tbl (setShift L₂ s) = setShift L₁ (translateSet L₁ L₂ tbl s) := by
+  apply mem_ext
+  intro x
+  simp only [mem_translateSet_iff, mem_setShift_iff]
+  constructor
+  · rintro ⟨p, ⟨q, hq, rfl⟩, rfl⟩
+    exact ⟨translate L₁ L₂ tbl q, ⟨q, hq, rfl⟩, translate_shift hT (hs q hq)⟩
+  · rintro ⟨y, ⟨q, hq, rfl⟩, rfl⟩
+    exact ⟨shift L₂ q, ⟨q, hq, rfl⟩, (translate_shift hT (hs q hq)).symm⟩
+
+lemma fvSubstImage_freshVec_translateSet_of {tbl Γ j : V} (hT : IsTable L₁ L₂ tbl)
+    (hΓ : IsFormulaSet L₂ Γ) (h : ∀ q ∈ Γ, fvSubst L₂ (freshVec j) q = shift L₂ q) :
+    fvSubstImage (L := L₁) (freshVec j) (translateSet L₁ L₂ tbl Γ) =
+      setShift L₁ (translateSet L₁ L₂ tbl Γ) := by
+  have hw : ∀ i < len (freshVec j : V), ∃ x, (freshVec j : V).[i] = ^&x := by
+    intro i hi
+    rw [len_freshVec] at hi
+    rcases lt_or_eq_of_le (lt_succ_iff_le.mp hi) with h' | rfl
+    · exact ⟨i + 1, nth_freshVec_of_lt h'⟩
+    · exact ⟨0, by simp⟩
+  have key : ∀ p ∈ Γ, fvSubst L₁ (freshVec j) (translate L₁ L₂ tbl p) =
+      shift L₁ (translate L₁ L₂ tbl p) := by
+    intro p hp
+    rw [← translate_fvSubst hT hw (hΓ p hp), h p hp, translate_shift hT (hΓ p hp)]
+  apply mem_ext
+  intro x
+  rw [mem_fvSubstImage_iff]
+  constructor
+  · rintro ⟨q, hq, rfl⟩
+    obtain ⟨p, hp, rfl⟩ := mem_translateSet_iff.mp hq
+    exact mem_setShift_iff.mpr ⟨_, mem_translateSet_iff.mpr ⟨p, hp, rfl⟩, key p hp⟩
+  · intro hx
+    obtain ⟨y, hy, rfl⟩ := mem_setShift_iff.mp hx
+    obtain ⟨p, hp, rfl⟩ := mem_translateSet_iff.mp hy
+    exact ⟨_, mem_translateSet_iff.mpr ⟨p, hp, rfl⟩, (key p hp).symm⟩
+
+end translateSet
+
+end translateSets
+
+/-! ## The rules of derivations -/
+
+section rules
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 open PeanoMinus ISigma0 ISigma1
 
 section definition
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L₁ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
 variable (S : Theory L₁) [S.Δ₁]
 variable (L₂ : Language) [L₂.Encodable] [L₂.LORDefinable]
@@ -44,7 +202,6 @@ end definition
 
 section generic
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 lemma free_imp {δ q : V} (hδ : IsSemiformula L 1 δ) (hds : shift L δ = δ)
@@ -71,7 +228,6 @@ end generic
 
 section rules
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
   {π : DirectTranslation S L₂} {tbl : V}
@@ -340,6 +496,8 @@ lemma translated_all (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
     exact hX
   unfold TranslatedDerivable
   exact Derivable.all_m (mem_cup_iff.mpr (Or.inl hmem)) hp'
+
+end rules
 
 end rules
 

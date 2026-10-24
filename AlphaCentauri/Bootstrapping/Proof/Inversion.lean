@@ -3,6 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.ToFoundation.Proof
+public import AlphaCentauri.Bootstrapping.Syntax.SubstInversion
 public import AlphaCentauri.ToFoundation.Set
 public import Foundation.Vorspiel.Tactic.Disj
 
@@ -35,60 +36,29 @@ lemma termShift_inj {t u : V} (ht : IsUTerm L t) (hu : IsUTerm L u)
       (P := fun t ↦ ∀ u, IsUTerm L u → termShift L t = termShift L u → t = u)
     · definability
     · intro z u hu h
-      rcases hu.case with (⟨z', rfl⟩ | ⟨x', rfl⟩ | ⟨k', f', v', hf', hv', rfl⟩)
-      · simpa using h
-      · rw [termShift_bvar, termShift_fvar] at h
-        simp [qqBvar, qqFvar] at h
-      · rw [termShift_bvar, termShift_func hf' hv'] at h
-        simp [qqBvar, qqFunc] at h
+      rcases hu.case with (⟨z', rfl⟩ | ⟨x', rfl⟩ | ⟨k', f', v', hf', hv', rfl⟩) <;> simp_all
+      all_goals simp_all [qqBvar, qqFvar, qqFunc]
     · intro x u hu h
-      rcases hu.case with (⟨z', rfl⟩ | ⟨x', rfl⟩ | ⟨k', f', v', hf', hv', rfl⟩)
-      · rw [termShift_bvar, termShift_fvar] at h
-        simp [qqBvar, qqFvar] at h
-      · simpa using h
-      · rw [termShift_fvar, termShift_func hf' hv'] at h
-        simp [qqFvar, qqFunc] at h
+      rcases hu.case with (⟨z', rfl⟩ | ⟨x', rfl⟩ | ⟨k', f', v', hf', hv', rfl⟩) <;> simp_all
+      all_goals simp_all [qqBvar, qqFvar, qqFunc]
     · intro k f v hf hv ih u hu h
       rcases hu.case with (⟨z', rfl⟩ | ⟨x', rfl⟩ | ⟨k', f', v', hf', hv', rfl⟩)
-      · rw [termShift_func hf hv, termShift_bvar] at h
-        simp [qqBvar, qqFunc] at h
-      · rw [termShift_func hf hv, termShift_fvar] at h
-        simp [qqFvar, qqFunc] at h
-      · rw [termShift_func hf hv, termShift_func hf' hv'] at h
-        obtain ⟨rfl, rfl, hvv⟩ :
-            k = k' ∧ f = f' ∧ termShiftVec L k v = termShiftVec L k' v' := by simpa using h
-        have : v = v' := by
-          apply nth_ext' k hv.lh.symm hv'.lh.symm
-          intro i hi
-          apply ih i hi _ (hv'.nth hi)
-          rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, hvv]
-        rw [this]
+      case inr.inr =>
+        rw [termShift_func hf hv, termShift_func hf' hv', qqFunc_inj] at h
+        obtain ⟨rfl, rfl, hvv⟩ := h
+        rw [nth_ext' k hv.lh.symm hv'.lh.symm fun i hi ↦ ih i hi _ (hv'.nth hi) <| by
+          rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, hvv]]
+      all_goals simp_all
+      all_goals simp_all [qqBvar, qqFvar, qqFunc]
   exact H t ht u hu h
 
-/-- The shape of a formula code, together with the value the external-variable shift takes on it. -/
-private lemma shift_case {q : V} (hq : IsUFormula L q) :
-    (∃ k R v, L.IsRel k R ∧ IsUTermVec L k v ∧ q = ^rel k R v ∧
-      shift L q = ^rel k R (termShiftVec L k v)) ∨
-    (∃ k R v, L.IsRel k R ∧ IsUTermVec L k v ∧ q = ^nrel k R v ∧
-      shift L q = ^nrel k R (termShiftVec L k v)) ∨
-    (q = ^⊤ ∧ shift L q = (^⊤ : V)) ∨
-    (q = ^⊥ ∧ shift L q = (^⊥ : V)) ∨
-    (∃ q₁ q₂, IsUFormula L q₁ ∧ IsUFormula L q₂ ∧ q = q₁ ^⋏ q₂ ∧
-      shift L q = shift L q₁ ^⋏ shift L q₂) ∨
-    (∃ q₁ q₂, IsUFormula L q₁ ∧ IsUFormula L q₂ ∧ q = q₁ ^⋎ q₂ ∧
-      shift L q = shift L q₁ ^⋎ shift L q₂) ∨
-    (∃ q₁, IsUFormula L q₁ ∧ q = ^∀ q₁ ∧ shift L q = ^∀ (shift L q₁)) ∨
-    (∃ q₁, IsUFormula L q₁ ∧ q = ^∃ q₁ ∧ shift L q = ^∃ (shift L q₁)) := by
-  rcases hq.case with (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
-    ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, hq₁, rfl⟩ | ⟨q₁, hq₁, rfl⟩)
-  · disj 1; exact ⟨k, R, v, hR, hv, rfl, shift_rel hR hv⟩
-  · disj 2; exact ⟨k, R, v, hR, hv, rfl, shift_nrel hR hv⟩
-  · disj 3; exact ⟨rfl, by simp⟩
-  · disj 4; exact ⟨rfl, by simp⟩
-  · disj 5; exact ⟨q₁, q₂, hq₁, hq₂, rfl, shift_and hq₁ hq₂⟩
-  · disj 6; exact ⟨q₁, q₂, hq₁, hq₂, rfl, shift_or hq₁ hq₂⟩
-  · disj 7; exact ⟨q₁, hq₁, rfl, shift_all hq₁⟩
-  · disj 8; exact ⟨q₁, hq₁, rfl, shift_exs hq₁⟩
+/-- The external-variable shift is injective on vectors of term codes. -/
+lemma termShiftVec_inj {k v v' : V} (hv : IsUTermVec L k v) (hv' : IsUTermVec L k v')
+    (h : termShiftVec L k v = termShiftVec L k v') : v = v' := by
+  apply nth_ext' k hv.lh.symm hv'.lh.symm
+  intro i hi
+  apply termShift_inj (hv.nth hi) (hv'.nth hi)
+  rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, h]
 
 /-- The external-variable shift is injective on formula codes. -/
 lemma shift_inj {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q)
@@ -98,140 +68,54 @@ lemma shift_inj {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q)
       (P := fun p ↦ ∀ q, IsUFormula L q → shift L p = shift L q → p = q) (by definability)
     case hrel =>
       intro k R v hR hv q hq h
-      rw [shift_rel hR hv] at h
-      rcases shift_case hq with
-        (⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨rfl, hs⟩ |
-          ⟨rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ |
-          ⟨q₁, hq₁, rfl, hs⟩ | ⟨q₁, hq₁, rfl, hs⟩) <;> simp only [hs] at h
-      · obtain ⟨rfl, rfl, hvv⟩ :
-            k = k' ∧ R = R' ∧ termShiftVec L k v = termShiftVec L k' v' := by simpa using h
-        have : v = v' := by
-          apply nth_ext' k hv.lh.symm hv'.lh.symm
-          intro i hi
-          apply termShift_inj (hv.nth hi) (hv'.nth hi)
-          rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, hvv]
-        rw [this]
-      · simp [qqRel, qqNRel] at h
-      · simp [qqRel, qqVerum] at h
-      · simp [qqRel, qqFalsum] at h
-      · simp [qqRel, qqAnd] at h
-      · simp [qqRel, qqOr] at h
-      · simp [qqRel, qqAll] at h
-      · simp [qqRel, qqExs] at h
+      rcases hq.case with (⟨k', R', v', hR', hv', rfl⟩ | ⟨k', R', v', hR', hv', rfl⟩ | rfl | rfl |
+        ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, hq₁, rfl⟩ | ⟨q₁, hq₁, rfl⟩)
+      case inl =>
+        rw [shift_rel hR hv, shift_rel hR' hv', qqRel_inj] at h
+        obtain ⟨rfl, rfl, h⟩ := h
+        rw [termShiftVec_inj hv hv' h]
+      all_goals simp_all
+      all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
     case hnrel =>
       intro k R v hR hv q hq h
-      rw [shift_nrel hR hv] at h
-      rcases shift_case hq with
-        (⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨rfl, hs⟩ |
-          ⟨rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ |
-          ⟨q₁, hq₁, rfl, hs⟩ | ⟨q₁, hq₁, rfl, hs⟩) <;> simp only [hs] at h
-      · simp [qqRel, qqNRel] at h
-      · obtain ⟨rfl, rfl, hvv⟩ :
-            k = k' ∧ R = R' ∧ termShiftVec L k v = termShiftVec L k' v' := by simpa using h
-        have : v = v' := by
-          apply nth_ext' k hv.lh.symm hv'.lh.symm
-          intro i hi
-          apply termShift_inj (hv.nth hi) (hv'.nth hi)
-          rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, hvv]
-        rw [this]
-      · simp [qqNRel, qqVerum] at h
-      · simp [qqNRel, qqFalsum] at h
-      · simp [qqNRel, qqAnd] at h
-      · simp [qqNRel, qqOr] at h
-      · simp [qqNRel, qqAll] at h
-      · simp [qqNRel, qqExs] at h
+      rcases hq.case with (⟨k', R', v', hR', hv', rfl⟩ | ⟨k', R', v', hR', hv', rfl⟩ | rfl | rfl |
+        ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, hq₁, rfl⟩ | ⟨q₁, hq₁, rfl⟩)
+      case inr.inl =>
+        rw [shift_nrel hR hv, shift_nrel hR' hv', qqNRel_inj] at h
+        obtain ⟨rfl, rfl, h⟩ := h
+        rw [termShiftVec_inj hv hv' h]
+      all_goals simp_all
+      all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
     case hverum =>
       intro q hq h
-      rw [shift_verum] at h
-      rcases shift_case hq with
-        (⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨rfl, hs⟩ |
-          ⟨rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ |
-          ⟨q₁, hq₁, rfl, hs⟩ | ⟨q₁, hq₁, rfl, hs⟩) <;> simp only [hs] at h
-      · simp [qqRel, qqVerum] at h
-      · simp [qqNRel, qqVerum] at h
-      · rfl
-      · simp [qqVerum, qqFalsum] at h
-      · simp [qqVerum, qqAnd] at h
-      · simp [qqVerum, qqOr] at h
-      · simp [qqVerum, qqAll] at h
-      · simp [qqVerum, qqExs] at h
+      rcases hq.case with (⟨k', R', v', hR', hv', rfl⟩ | ⟨k', R', v', hR', hv', rfl⟩ | rfl | rfl |
+        ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, hq₁, rfl⟩ | ⟨q₁, hq₁, rfl⟩)
+      all_goals simp_all
+      all_goals simp_all [qqRel, qqNRel, qqVerum, qqAnd, qqOr, qqAll, qqExs]
     case hfalsum =>
       intro q hq h
-      rw [shift_falsum] at h
-      rcases shift_case hq with
-        (⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨rfl, hs⟩ |
-          ⟨rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ |
-          ⟨q₁, hq₁, rfl, hs⟩ | ⟨q₁, hq₁, rfl, hs⟩) <;> simp only [hs] at h
-      · simp [qqRel, qqFalsum] at h
-      · simp [qqNRel, qqFalsum] at h
-      · simp [qqVerum, qqFalsum] at h
-      · rfl
-      · simp [qqFalsum, qqAnd] at h
-      · simp [qqFalsum, qqOr] at h
-      · simp [qqFalsum, qqAll] at h
-      · simp [qqFalsum, qqExs] at h
+      rcases hq.case with (⟨k', R', v', hR', hv', rfl⟩ | ⟨k', R', v', hR', hv', rfl⟩ | rfl | rfl |
+        ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl⟩ | ⟨q₁, hq₁, rfl⟩ | ⟨q₁, hq₁, rfl⟩)
+      all_goals simp_all
+      all_goals simp_all [qqRel, qqNRel, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
     case hand =>
       intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ q hq h
-      rw [shift_and hp₁ hp₂] at h
-      rcases shift_case hq with
-        (⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨rfl, hs⟩ |
-          ⟨rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ |
-          ⟨q₁, hq₁, rfl, hs⟩ | ⟨q₁, hq₁, rfl, hs⟩) <;> simp only [hs] at h
-      · simp [qqRel, qqAnd] at h
-      · simp [qqNRel, qqAnd] at h
-      · simp [qqVerum, qqAnd] at h
-      · simp [qqFalsum, qqAnd] at h
-      · obtain ⟨h₁, h₂⟩ : shift L p₁ = shift L q₁ ∧ shift L p₂ = shift L q₂ := by simpa using h
-        rw [ih₁ q₁ hq₁ h₁, ih₂ q₂ hq₂ h₂]
-      · simp [qqAnd, qqOr] at h
-      · simp [qqAnd, qqAll] at h
-      · simp [qqAnd, qqExs] at h
+      obtain ⟨q₁, q₂, rfl, h₁, h₂⟩ := exists_eq_and_of_shift_eq hq (by rw [← h, shift_and hp₁ hp₂])
+      obtain ⟨hq₁, hq₂⟩ := IsUFormula.and.mp hq
+      rw [ih₁ q₁ hq₁ h₁.symm, ih₂ q₂ hq₂ h₂.symm]
     case hor =>
       intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ q hq h
-      rw [shift_or hp₁ hp₂] at h
-      rcases shift_case hq with
-        (⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨rfl, hs⟩ |
-          ⟨rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ |
-          ⟨q₁, hq₁, rfl, hs⟩ | ⟨q₁, hq₁, rfl, hs⟩) <;> simp only [hs] at h
-      · simp [qqRel, qqOr] at h
-      · simp [qqNRel, qqOr] at h
-      · simp [qqVerum, qqOr] at h
-      · simp [qqFalsum, qqOr] at h
-      · simp [qqAnd, qqOr] at h
-      · obtain ⟨h₁, h₂⟩ : shift L p₁ = shift L q₁ ∧ shift L p₂ = shift L q₂ := by simpa using h
-        rw [ih₁ q₁ hq₁ h₁, ih₂ q₂ hq₂ h₂]
-      · simp [qqOr, qqAll] at h
-      · simp [qqOr, qqExs] at h
+      obtain ⟨q₁, q₂, rfl, h₁, h₂⟩ := exists_eq_or_of_shift_eq hq (by rw [← h, shift_or hp₁ hp₂])
+      obtain ⟨hq₁, hq₂⟩ := IsUFormula.or.mp hq
+      rw [ih₁ q₁ hq₁ h₁.symm, ih₂ q₂ hq₂ h₂.symm]
     case hall =>
       intro p₁ hp₁ ih₁ q hq h
-      rw [shift_all hp₁] at h
-      rcases shift_case hq with
-        (⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨rfl, hs⟩ |
-          ⟨rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ |
-          ⟨q₁, hq₁, rfl, hs⟩ | ⟨q₁, hq₁, rfl, hs⟩) <;> simp only [hs] at h
-      · simp [qqRel, qqAll] at h
-      · simp [qqNRel, qqAll] at h
-      · simp [qqVerum, qqAll] at h
-      · simp [qqFalsum, qqAll] at h
-      · simp [qqAnd, qqAll] at h
-      · simp [qqOr, qqAll] at h
-      · rw [ih₁ q₁ hq₁ (by simpa using h)]
-      · simp [qqAll, qqExs] at h
+      obtain ⟨q₁, rfl, h₁⟩ := exists_eq_all_of_shift_eq hq (by rw [← h, shift_all hp₁])
+      rw [ih₁ q₁ (IsUFormula.all.mp hq) h₁.symm]
     case hexs =>
       intro p₁ hp₁ ih₁ q hq h
-      rw [shift_exs hp₁] at h
-      rcases shift_case hq with
-        (⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨k', R', v', hR', hv', rfl, hs⟩ | ⟨rfl, hs⟩ |
-          ⟨rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ | ⟨q₁, q₂, hq₁, hq₂, rfl, hs⟩ |
-          ⟨q₁, hq₁, rfl, hs⟩ | ⟨q₁, hq₁, rfl, hs⟩) <;> simp only [hs] at h
-      · simp [qqRel, qqExs] at h
-      · simp [qqNRel, qqExs] at h
-      · simp [qqVerum, qqExs] at h
-      · simp [qqFalsum, qqExs] at h
-      · simp [qqAnd, qqExs] at h
-      · simp [qqOr, qqExs] at h
-      · simp [qqAll, qqExs] at h
-      · rw [ih₁ q₁ hq₁ (by simpa using h)]
+      obtain ⟨q₁, rfl, h₁⟩ := exists_eq_exs_of_shift_eq hq (by rw [← h, shift_exs hp₁])
+      rw [ih₁ q₁ (IsUFormula.ex.mp hq) h₁.symm]
   exact H p hp q hq h
 
 /-- Removing a formula from a coded set commutes with the external-variable shift. -/
@@ -249,78 +133,6 @@ lemma setShift_bitRemove {p s : V} (hs : IsFormulaSet L s) (hp : IsUFormula L p)
     have hy' := mem_bitRemove_iff.mp hy
     rcases mem_setShift_iff.mp hy'.2 with ⟨x, hx, rfl⟩
     exact mem_setShift_iff.mpr ⟨x, mem_bitRemove_iff.mpr ⟨fun e ↦ hy'.1 (by rw [e]), hx⟩, rfl⟩
-
-/-- A formula code whose external-variable shift is a conjunction is itself a conjunction, and its
-conjuncts shift to the given ones. -/
-lemma exists_and_of_shift_eq_and {r p q : V} (hr : IsUFormula L r) (h : shift L r = p ^⋏ q) :
-    ∃ r₁ r₂, IsUFormula L r₁ ∧ IsUFormula L r₂ ∧ r = r₁ ^⋏ r₂ ∧
-      shift L r₁ = p ∧ shift L r₂ = q := by
-  rcases shift_case hr with
-    (⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨rfl, hs⟩ | ⟨rfl, hs⟩ |
-      ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ |
-      ⟨r₁, hr₁, rfl, hs⟩ | ⟨r₁, hr₁, rfl, hs⟩) <;> rw [hs] at h
-  · simp [qqRel, qqAnd] at h
-  · simp [qqNRel, qqAnd] at h
-  · simp [qqVerum, qqAnd] at h
-  · simp [qqFalsum, qqAnd] at h
-  · obtain ⟨h₁, h₂⟩ : shift L r₁ = p ∧ shift L r₂ = q := by simpa using h
-    exact ⟨r₁, r₂, hr₁, hr₂, rfl, h₁, h₂⟩
-  · simp [qqAnd, qqOr] at h
-  · simp [qqAnd, qqAll] at h
-  · simp [qqAnd, qqExs] at h
-
-/-- A formula code whose external-variable shift is a disjunction is itself a disjunction, and its
-disjuncts shift to the given ones. -/
-lemma exists_or_of_shift_eq_or {r p q : V} (hr : IsUFormula L r) (h : shift L r = p ^⋎ q) :
-    ∃ r₁ r₂, IsUFormula L r₁ ∧ IsUFormula L r₂ ∧ r = r₁ ^⋎ r₂ ∧
-      shift L r₁ = p ∧ shift L r₂ = q := by
-  rcases shift_case hr with
-    (⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨rfl, hs⟩ | ⟨rfl, hs⟩ |
-      ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ |
-      ⟨r₁, hr₁, rfl, hs⟩ | ⟨r₁, hr₁, rfl, hs⟩) <;> rw [hs] at h
-  · simp [qqRel, qqOr] at h
-  · simp [qqNRel, qqOr] at h
-  · simp [qqVerum, qqOr] at h
-  · simp [qqFalsum, qqOr] at h
-  · simp [qqAnd, qqOr] at h
-  · obtain ⟨h₁, h₂⟩ : shift L r₁ = p ∧ shift L r₂ = q := by simpa using h
-    exact ⟨r₁, r₂, hr₁, hr₂, rfl, h₁, h₂⟩
-  · simp [qqOr, qqAll] at h
-  · simp [qqOr, qqExs] at h
-
-/-- A formula code whose external-variable shift is a universal quantification is itself one, and
-its body shifts to the given one. -/
-lemma exists_all_of_shift_eq_all {r p : V} (hr : IsUFormula L r) (h : shift L r = ^∀ p) :
-    ∃ r₁, IsUFormula L r₁ ∧ r = ^∀ r₁ ∧ shift L r₁ = p := by
-  rcases shift_case hr with
-    (⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨rfl, hs⟩ | ⟨rfl, hs⟩ |
-      ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ |
-      ⟨r₁, hr₁, rfl, hs⟩ | ⟨r₁, hr₁, rfl, hs⟩) <;> rw [hs] at h
-  · simp [qqRel, qqAll] at h
-  · simp [qqNRel, qqAll] at h
-  · simp [qqVerum, qqAll] at h
-  · simp [qqFalsum, qqAll] at h
-  · simp [qqAnd, qqAll] at h
-  · simp [qqOr, qqAll] at h
-  · exact ⟨r₁, hr₁, rfl, by simpa using h⟩
-  · simp [qqAll, qqExs] at h
-
-/-- A formula code whose external-variable shift is an existential quantification is itself one,
-and its body shifts to the given one. -/
-lemma exists_exs_of_shift_eq_exs {r p : V} (hr : IsUFormula L r) (h : shift L r = ^∃ p) :
-    ∃ r₁, IsUFormula L r₁ ∧ r = ^∃ r₁ ∧ shift L r₁ = p := by
-  rcases shift_case hr with
-    (⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨rfl, hs⟩ | ⟨rfl, hs⟩ |
-      ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ |
-      ⟨r₁, hr₁, rfl, hs⟩ | ⟨r₁, hr₁, rfl, hs⟩) <;> rw [hs] at h
-  · simp [qqRel, qqExs] at h
-  · simp [qqNRel, qqExs] at h
-  · simp [qqVerum, qqExs] at h
-  · simp [qqFalsum, qqExs] at h
-  · simp [qqAnd, qqExs] at h
-  · simp [qqOr, qqExs] at h
-  · simp [qqAll, qqExs] at h
-  · exact ⟨r₁, hr₁, rfl, by simpa using h⟩
 
 section
 
@@ -658,8 +470,8 @@ private lemma inversion_and_aux :
     have hmem : p ^⋏ q ∈ setShift L (fstIdx d₀) := by rw [hd1]; simp
     rcases mem_setShift_iff.mp hmem with ⟨r, hrt, hrshift⟩
     have hrF : IsUFormula L r := (hd₀.isFormulaSet r hrt).isUFormula
-    obtain ⟨r₁, r₂, hr₁, hr₂, rfl, hs₁, hs₂⟩ :=
-      exists_and_of_shift_eq_and hrF hrshift.symm
+    obtain ⟨r₁, r₂, rfl, hs₁, hs₂⟩ :=
+      exists_eq_and_of_shift_eq hrF hrshift.symm
     obtain ⟨c', hc'sel, hc'shift⟩ : ∃ c', (c' = r₁ ∨ c' = r₂) ∧ shift L c' = c := by
       rcases hc with rfl | rfl
       · exact ⟨r₁, Or.inl rfl, hs₁⟩
@@ -919,8 +731,8 @@ private lemma inversion_or_aux :
     have hmem : p ^⋎ q ∈ setShift L (fstIdx d₀) := by rw [hd1]; simp
     rcases mem_setShift_iff.mp hmem with ⟨r, hrt, hrshift⟩
     have hrF : IsUFormula L r := (hd₀.isFormulaSet r hrt).isUFormula
-    obtain ⟨r₁, r₂, hr₁, hr₂, rfl, hs₁, hs₂⟩ :=
-      exists_or_of_shift_eq_or hrF hrshift.symm
+    obtain ⟨r₁, r₂, rfl, hs₁, hs₂⟩ :=
+      exists_eq_or_of_shift_eq hrF hrshift.symm
     by_cases hps : p ^⋎ q ∈ s
     · have heq : fstIdx d₀ = insert (r₁ ^⋎ r₂) (fstIdx d₀) := (insert_eq_self hrt).symm
       obtain ⟨b₁, b₂, b₃⟩ := or_bounds heq

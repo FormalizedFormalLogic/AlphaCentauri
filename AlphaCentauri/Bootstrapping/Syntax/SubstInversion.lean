@@ -4,11 +4,11 @@ public import AlphaCentauri.Bootstrapping.Syntax.Iteration
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 
 /-!
-# Recovering a formula from a substitution instance
+# Recovering a formula from a substitution or shift instance
 
-A substitution instance `subst w p` of a coded formula `p` has the same outermost connective as
-`p`. A substitution instance of a formula is $\Delta_0$, or prenex of a class, only if the formula
-itself is.
+A substitution instance `subst w p` of a coded formula `p`, and likewise its shift `shift p`, has
+the same outermost connective as `p`. A substitution instance of a formula is $\Delta_0$, or prenex
+of a class, only if the formula itself is.
 -/
 
 @[expose] public section
@@ -25,55 +25,38 @@ section connective
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] {w p : V}
 
+attribute [local simp] substs_rel substs_nrel substs_verum substs_falsum substs_and substs_or
+  substs_all substs_ex
+
 lemma exists_eq_or_of_subst_eq (hp : IsUFormula L p) {q₁ q₂ : V}
     (h : subst L w p = q₁ ^⋎ q₂) :
     ∃ p₁ p₂, p = p₁ ^⋎ p₂ ∧ subst L w p₁ = q₁ ∧ subst L w p₂ = q₂ := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
-    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩)
-  case inr.inr.inr.inr.inr.inl =>
-    rw [substs_or hp₁ hp₂, qqOr_inj] at h
-    exact ⟨p₁, p₂, rfl, h⟩
-  all_goals
-    simp_all only [substs_rel, substs_nrel, substs_verum, substs_falsum, substs_and,
-      substs_all, substs_ex]
-    simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
+    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
+    simp_all
+  all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
 lemma exists_eq_and_of_subst_eq (hp : IsUFormula L p) {q₁ q₂ : V}
     (h : subst L w p = q₁ ^⋏ q₂) :
     ∃ p₁ p₂, p = p₁ ^⋏ p₂ ∧ subst L w p₁ = q₁ ∧ subst L w p₂ = q₂ := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
-    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩)
-  case inr.inr.inr.inr.inl =>
-    rw [substs_and hp₁ hp₂, qqAnd_inj] at h
-    exact ⟨p₁, p₂, rfl, h⟩
-  all_goals
-    simp_all only [substs_rel, substs_nrel, substs_verum, substs_falsum, substs_or,
-      substs_all, substs_ex]
-    simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
+    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
+    simp_all
+  all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
 lemma exists_eq_all_of_subst_eq (hp : IsUFormula L p) {q : V} (h : subst L w p = ^∀ q) :
     ∃ p₁, p = ^∀ p₁ ∧ subst L (qVec L w) p₁ = q := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
-    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩)
-  case inr.inr.inr.inr.inr.inr.inl =>
-    rw [substs_all hp₁, qqAll_inj] at h
-    exact ⟨p₁, rfl, h⟩
-  all_goals
-    simp_all only [substs_rel, substs_nrel, substs_verum, substs_falsum, substs_and,
-      substs_or, substs_ex]
-    simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
+    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
+    simp_all
+  all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
 lemma exists_eq_exs_of_subst_eq (hp : IsUFormula L p) {q : V} (h : subst L w p = ^∃ q) :
     ∃ p₁, p = ^∃ p₁ ∧ subst L (qVec L w) p₁ = q := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
-    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩)
-  case inr.inr.inr.inr.inr.inr.inr =>
-    rw [substs_ex hp₁, qqExs_inj] at h
-    exact ⟨p₁, rfl, h⟩
-  all_goals
-    simp_all only [substs_rel, substs_nrel, substs_verum, substs_falsum, substs_and,
-      substs_or, substs_all]
-    simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
+    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
+    simp_all
+  all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
 lemma exists_eq_rel_of_subst_eq (hp : IsUFormula L p) {k R v : V}
     (h : subst L w p = ^rel k R v) :
@@ -84,10 +67,8 @@ lemma exists_eq_rel_of_subst_eq (hp : IsUFormula L p) {k R v : V}
     rw [substs_rel hR hv, qqRel_inj] at h
     obtain ⟨rfl, rfl, rfl⟩ := h
     exact ⟨v', hv, rfl, rfl⟩
-  all_goals
-    simp_all only [substs_nrel, substs_verum, substs_falsum, substs_and, substs_or,
-      substs_all, substs_ex]
-    simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
+  all_goals simp_all
+  all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
 lemma exists_eq_nrel_of_subst_eq (hp : IsUFormula L p) {k R v : V}
     (h : subst L w p = ^nrel k R v) :
@@ -98,10 +79,38 @@ lemma exists_eq_nrel_of_subst_eq (hp : IsUFormula L p) {k R v : V}
     rw [substs_nrel hR hv, qqNRel_inj] at h
     obtain ⟨rfl, rfl, rfl⟩ := h
     exact ⟨v', hv, rfl, rfl⟩
-  all_goals
-    simp_all only [substs_rel, substs_verum, substs_falsum, substs_and, substs_or,
-      substs_all, substs_ex]
-    simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs] at h
+  all_goals simp_all
+  all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
+
+lemma exists_eq_or_of_shift_eq (hp : IsUFormula L p) {q₁ q₂ : V}
+    (h : shift L p = q₁ ^⋎ q₂) :
+    ∃ p₁ p₂, p = p₁ ^⋎ p₂ ∧ shift L p₁ = q₁ ∧ shift L p₂ = q₂ := by
+  rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
+    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
+    simp_all
+  all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
+
+lemma exists_eq_and_of_shift_eq (hp : IsUFormula L p) {q₁ q₂ : V}
+    (h : shift L p = q₁ ^⋏ q₂) :
+    ∃ p₁ p₂, p = p₁ ^⋏ p₂ ∧ shift L p₁ = q₁ ∧ shift L p₂ = q₂ := by
+  rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
+    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
+    simp_all
+  all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
+
+lemma exists_eq_all_of_shift_eq (hp : IsUFormula L p) {q : V} (h : shift L p = ^∀ q) :
+    ∃ p₁, p = ^∀ p₁ ∧ shift L p₁ = q := by
+  rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
+    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
+    simp_all
+  all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
+
+lemma exists_eq_exs_of_shift_eq (hp : IsUFormula L p) {q : V} (h : shift L p = ^∃ q) :
+    ∃ p₁, p = ^∃ p₁ ∧ shift L p₁ = q := by
+  rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
+    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
+    simp_all
+  all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
 end connective
 
@@ -112,12 +121,8 @@ section term
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 lemma termBShift_ne_bvar_zero {t : V} (ht : IsUTerm L t) : termBShift L t ≠ ^#0 := by
-  rcases ht.case with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, hv, rfl⟩)
-  · simp
-  · rw [termBShift_fvar]
-    simp [qqBvar, qqFvar]
-  · rw [termBShift_func hf hv]
-    simp [qqBvar, qqFunc]
+  rcases ht.case with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, hv, rfl⟩) <;> simp_all
+  all_goals simp_all [qqBvar, qqFvar, qqFunc]
 
 lemma eq_bvar_zero_of_termSubst_qVec_eq {n m w t : V} (hw : IsSemitermVec L n m w)
     (ht : IsSemiterm L (n + 1) t) (h : termSubst L (qVec L w) t = ^#0) : t = ^#0 := by

@@ -3,6 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
+public import AlphaCentauri.Bootstrapping.Syntax.SubstInversion
 
 /-!
 # Instances of a coded set of formulas in cut-free derivations
@@ -34,109 +35,6 @@ def Instance (X p : V) : Prop :=
 instance Instance.definable : 𝚺ᴬ₁-Relation (Instance (V := V) L) := by
   unfold Instance
   definability
-
-section inversion
-
-variable {w : V}
-
-/-- The shape of a formula code, together with the value substitution by `w` takes on it. -/
-private lemma subst_case {r : V} (hr : IsUFormula L r) :
-    (∃ k R v, L.IsRel k R ∧ IsUTermVec L k v ∧ r = ^rel k R v ∧
-      subst L w r = ^rel k R (termSubstVec L k w v)) ∨
-    (∃ k R v, L.IsRel k R ∧ IsUTermVec L k v ∧ r = ^nrel k R v ∧
-      subst L w r = ^nrel k R (termSubstVec L k w v)) ∨
-    (r = ^⊤ ∧ subst L w r = (^⊤ : V)) ∨
-    (r = ^⊥ ∧ subst L w r = (^⊥ : V)) ∨
-    (∃ r₁ r₂, IsUFormula L r₁ ∧ IsUFormula L r₂ ∧ r = r₁ ^⋏ r₂ ∧
-      subst L w r = subst L w r₁ ^⋏ subst L w r₂) ∨
-    (∃ r₁ r₂, IsUFormula L r₁ ∧ IsUFormula L r₂ ∧ r = r₁ ^⋎ r₂ ∧
-      subst L w r = subst L w r₁ ^⋎ subst L w r₂) ∨
-    (∃ r₁, IsUFormula L r₁ ∧ r = ^∀ r₁ ∧ subst L w r = ^∀ (subst L (qVec L w) r₁)) ∨
-    (∃ r₁, IsUFormula L r₁ ∧ r = ^∃ r₁ ∧ subst L w r = ^∃ (subst L (qVec L w) r₁)) := by
-  rcases hr.case with (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
-    ⟨r₁, r₂, hr₁, hr₂, rfl⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl⟩ | ⟨r₁, hr₁, rfl⟩ | ⟨r₁, hr₁, rfl⟩)
-  · disj 1; exact ⟨k, R, v, hR, hv, rfl, substs_rel hR hv⟩
-  · disj 2; exact ⟨k, R, v, hR, hv, rfl, substs_nrel hR hv⟩
-  · disj 3; exact ⟨rfl, by simp⟩
-  · disj 4; exact ⟨rfl, by simp⟩
-  · disj 5; exact ⟨r₁, r₂, hr₁, hr₂, rfl, substs_and hr₁ hr₂⟩
-  · disj 6; exact ⟨r₁, r₂, hr₁, hr₂, rfl, substs_or hr₁ hr₂⟩
-  · disj 7; exact ⟨r₁, hr₁, rfl, substs_all hr₁⟩
-  · disj 8; exact ⟨r₁, hr₁, rfl, substs_ex hr₁⟩
-
-/-- A formula code whose substitution instance is a conjunction is itself a conjunction, and its
-conjuncts substitute to the given ones. -/
-lemma exists_and_of_subst_eq_and {r p q : V} (hr : IsUFormula L r) (h : subst L w r = p ^⋏ q) :
-    ∃ r₁ r₂, IsUFormula L r₁ ∧ IsUFormula L r₂ ∧ r = r₁ ^⋏ r₂ ∧
-      subst L w r₁ = p ∧ subst L w r₂ = q := by
-  rcases subst_case (w := w) hr with
-    (⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨rfl, hs⟩ | ⟨rfl, hs⟩ |
-      ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ |
-      ⟨r₁, hr₁, rfl, hs⟩ | ⟨r₁, hr₁, rfl, hs⟩) <;> rw [hs] at h
-  · simp [qqRel, qqAnd] at h
-  · simp [qqNRel, qqAnd] at h
-  · simp [qqVerum, qqAnd] at h
-  · simp [qqFalsum, qqAnd] at h
-  · obtain ⟨h₁, h₂⟩ : subst L w r₁ = p ∧ subst L w r₂ = q := by simpa using h
-    exact ⟨r₁, r₂, hr₁, hr₂, rfl, h₁, h₂⟩
-  · simp [qqAnd, qqOr] at h
-  · simp [qqAnd, qqAll] at h
-  · simp [qqAnd, qqExs] at h
-
-/-- A formula code whose substitution instance is a disjunction is itself a disjunction, and its
-disjuncts substitute to the given ones. -/
-lemma exists_or_of_subst_eq_or {r p q : V} (hr : IsUFormula L r) (h : subst L w r = p ^⋎ q) :
-    ∃ r₁ r₂, IsUFormula L r₁ ∧ IsUFormula L r₂ ∧ r = r₁ ^⋎ r₂ ∧
-      subst L w r₁ = p ∧ subst L w r₂ = q := by
-  rcases subst_case (w := w) hr with
-    (⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨rfl, hs⟩ | ⟨rfl, hs⟩ |
-      ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ |
-      ⟨r₁, hr₁, rfl, hs⟩ | ⟨r₁, hr₁, rfl, hs⟩) <;> rw [hs] at h
-  · simp [qqRel, qqOr] at h
-  · simp [qqNRel, qqOr] at h
-  · simp [qqVerum, qqOr] at h
-  · simp [qqFalsum, qqOr] at h
-  · simp [qqAnd, qqOr] at h
-  · obtain ⟨h₁, h₂⟩ : subst L w r₁ = p ∧ subst L w r₂ = q := by simpa using h
-    exact ⟨r₁, r₂, hr₁, hr₂, rfl, h₁, h₂⟩
-  · simp [qqOr, qqAll] at h
-  · simp [qqOr, qqExs] at h
-
-/-- A formula code whose substitution instance is a universal quantification is itself one, and
-its body substitutes, under the quantified vector, to the given one. -/
-lemma exists_all_of_subst_eq_all {r p : V} (hr : IsUFormula L r) (h : subst L w r = ^∀ p) :
-    ∃ r₁, IsUFormula L r₁ ∧ r = ^∀ r₁ ∧ subst L (qVec L w) r₁ = p := by
-  rcases subst_case (w := w) hr with
-    (⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨rfl, hs⟩ | ⟨rfl, hs⟩ |
-      ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ |
-      ⟨r₁, hr₁, rfl, hs⟩ | ⟨r₁, hr₁, rfl, hs⟩) <;> rw [hs] at h
-  · simp [qqRel, qqAll] at h
-  · simp [qqNRel, qqAll] at h
-  · simp [qqVerum, qqAll] at h
-  · simp [qqFalsum, qqAll] at h
-  · simp [qqAnd, qqAll] at h
-  · simp [qqOr, qqAll] at h
-  · exact ⟨r₁, hr₁, rfl, by simpa using h⟩
-  · simp [qqAll, qqExs] at h
-
-/-- A formula code whose substitution instance is an existential quantification is itself one,
-and its body substitutes, under the quantified vector, to the given one. -/
-lemma exists_exs_of_subst_eq_exs {r p : V} (hr : IsUFormula L r) (h : subst L w r = ^∃ p) :
-    ∃ r₁, IsUFormula L r₁ ∧ r = ^∃ r₁ ∧ subst L (qVec L w) r₁ = p := by
-  rcases subst_case (w := w) hr with
-    (⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨k, R, v, hR, hv, rfl, hs⟩ | ⟨rfl, hs⟩ | ⟨rfl, hs⟩ |
-      ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ | ⟨r₁, r₂, hr₁, hr₂, rfl, hs⟩ |
-      ⟨r₁, hr₁, rfl, hs⟩ | ⟨r₁, hr₁, rfl, hs⟩) <;> rw [hs] at h
-  · simp [qqRel, qqExs] at h
-  · simp [qqNRel, qqExs] at h
-  · simp [qqVerum, qqExs] at h
-  · simp [qqFalsum, qqExs] at h
-  · simp [qqAnd, qqExs] at h
-  · simp [qqOr, qqExs] at h
-  · simp [qqAll, qqExs] at h
-  · exact ⟨r₁, hr₁, rfl, by simpa using h⟩
-
-end inversion
 
 /-- A substitution vector sending `^&0` to itself and `^&(x + 1)` to `^&x` for every `x < N`
 undoes the shift of the formulas coded by a number at most `N`. -/
@@ -181,7 +79,8 @@ lemma of_shift (hshift : ∀ r ∈ X, Bootstrapping.shift L r = r) {p : V} (hp :
 lemma of_and_left (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q : V}
     (h : Instance L X (p ^⋏ q)) : Instance L X p := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
-  obtain ⟨r₁, r₂, hr₁, hr₂, rfl, h₁, h₂⟩ := exists_and_of_subst_eq_and hr.isUFormula he.symm
+  obtain ⟨r₁, r₂, rfl, h₁, h₂⟩ := exists_eq_and_of_subst_eq hr.isUFormula he.symm
+  obtain ⟨hr₁, hr₂⟩ := IsUFormula.and.mp hr.isUFormula
   have h₃ : IsSemiformula L n r₁ ∧ IsSemiformula L n r₂ := by simpa using hr
   exact ⟨r₁, hsub _ hrX r₁ (by simp [subformulas_and hr₁ hr₂, mem_subformulas_self hr₁]), n, w,
     h₃.1, hw, h₁.symm⟩
@@ -190,7 +89,8 @@ lemma of_and_left (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q 
 lemma of_and_right (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q : V}
     (h : Instance L X (p ^⋏ q)) : Instance L X q := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
-  obtain ⟨r₁, r₂, hr₁, hr₂, rfl, h₁, h₂⟩ := exists_and_of_subst_eq_and hr.isUFormula he.symm
+  obtain ⟨r₁, r₂, rfl, h₁, h₂⟩ := exists_eq_and_of_subst_eq hr.isUFormula he.symm
+  obtain ⟨hr₁, hr₂⟩ := IsUFormula.and.mp hr.isUFormula
   have h₃ : IsSemiformula L n r₁ ∧ IsSemiformula L n r₂ := by simpa using hr
   exact ⟨r₂, hsub _ hrX r₂ (by simp [subformulas_and hr₁ hr₂, mem_subformulas_self hr₂]), n, w,
     h₃.2, hw, h₂.symm⟩
@@ -199,7 +99,8 @@ lemma of_and_right (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q
 lemma of_or_left (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q : V}
     (h : Instance L X (p ^⋎ q)) : Instance L X p := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
-  obtain ⟨r₁, r₂, hr₁, hr₂, rfl, h₁, h₂⟩ := exists_or_of_subst_eq_or hr.isUFormula he.symm
+  obtain ⟨r₁, r₂, rfl, h₁, h₂⟩ := exists_eq_or_of_subst_eq hr.isUFormula he.symm
+  obtain ⟨hr₁, hr₂⟩ := IsUFormula.or.mp hr.isUFormula
   have h₃ : IsSemiformula L n r₁ ∧ IsSemiformula L n r₂ := by simpa using hr
   exact ⟨r₁, hsub _ hrX r₁ (by simp [subformulas_or hr₁ hr₂, mem_subformulas_self hr₁]), n, w,
     h₃.1, hw, h₁.symm⟩
@@ -208,7 +109,8 @@ lemma of_or_left (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q :
 lemma of_or_right (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q : V}
     (h : Instance L X (p ^⋎ q)) : Instance L X q := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
-  obtain ⟨r₁, r₂, hr₁, hr₂, rfl, h₁, h₂⟩ := exists_or_of_subst_eq_or hr.isUFormula he.symm
+  obtain ⟨r₁, r₂, rfl, h₁, h₂⟩ := exists_eq_or_of_subst_eq hr.isUFormula he.symm
+  obtain ⟨hr₁, hr₂⟩ := IsUFormula.or.mp hr.isUFormula
   have h₃ : IsSemiformula L n r₁ ∧ IsSemiformula L n r₂ := by simpa using hr
   exact ⟨r₂, hsub _ hrX r₂ (by simp [subformulas_or hr₁ hr₂, mem_subformulas_self hr₂]), n, w,
     h₃.2, hw, h₂.symm⟩
@@ -219,7 +121,8 @@ lemma free_of_all (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
     (hshift : ∀ r ∈ X, Bootstrapping.shift L r = r) {p : V} (h : Instance L X (^∀ p)) :
     Instance L X (free L p) := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
-  obtain ⟨r₁, hr₁, rfl, h₁⟩ := exists_all_of_subst_eq_all hr.isUFormula he.symm
+  obtain ⟨r₁, rfl, h₁⟩ := exists_eq_all_of_subst_eq hr.isUFormula he.symm
+  have hr₁ := IsUFormula.all.mp hr.isUFormula
   have hr₁' : IsSemiformula L (n + 1) r₁ := by simpa using hr
   have hr₁X : r₁ ∈ X := hsub _ hrX r₁ (by simp [subformulas_all hr₁, mem_subformulas_self hr₁])
   exact ⟨r₁, hr₁X, n + 1, ^&0 ∷ termShiftVec L n w, hr₁', by simp [hw.termShiftVec], by
@@ -231,7 +134,8 @@ subformulas is an instance. -/
 lemma substs1_of_exs (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p t : V}
     (h : Instance L X (^∃ p)) (ht : IsTerm L t) : Instance L X (substs1 L t p) := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
-  obtain ⟨r₁, hr₁, rfl, h₁⟩ := exists_exs_of_subst_eq_exs hr.isUFormula he.symm
+  obtain ⟨r₁, rfl, h₁⟩ := exists_eq_exs_of_subst_eq hr.isUFormula he.symm
+  have hr₁ := IsUFormula.ex.mp hr.isUFormula
   have hr₁' : IsSemiformula L (n + 1) r₁ := by simpa using hr
   exact ⟨r₁, hsub _ hrX r₁ (by simp [subformulas_exs hr₁, mem_subformulas_self hr₁]), n + 1,
     t ∷ w, hr₁', by simp [ht, hw], by rw [← h₁, substs1_subst_qVec hw hr₁' ht]⟩

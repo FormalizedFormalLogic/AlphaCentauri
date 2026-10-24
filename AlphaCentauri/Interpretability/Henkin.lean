@@ -102,24 +102,14 @@ noncomputable def henkinTranslation : DirectTranslation (T ∪ S.Con) L where
   domain := henkinDomain S
   rel := henkinRel S
   func := henkinFunc S
-  domain_nonempty := provable_of_models_henkin S T _ fun V _ _ _ _ ↦ by
-    simpa [models_iff] using henkinDomain_nonempty S (V := V)
-  func_defined f := provable_of_models_henkin S T _ fun V _ _ hS hcons ↦ by
-    simp only [BinderNotation.finSuccItr, Nat.add_zero, Matrix.zero_cons_succ_eq_self, models_iff,
-      Semiformula.eval_allClosure, LogicalConnective.HomClass.map_imply, Matrix.conj_hom_prop,
-      Semiformula.eval_operator, Matrix.comp₁, Semiterm.val_bvar, Semiformula.eval_existsUnique,
-      Nat.succ_eq_add_one, LogicalConnective.HomClass.map_and, Matrix.cons_val_zero,
-      LogicalConnective.Prop.and_eq, LogicalConnective.Prop.arrow_eq]
-    intro e _
-    simpa only [Function.comp_def, Semiterm.val_bvar] using henkinFunc_existsUnique S hS hcons f e
-  preserve_eq := provable_of_models_henkin S T _ fun V _ _ hS hcons ↦ by
-    simp only [Nat.reduceAdd, Fin.isValue, models_iff, Semiformula.eval_all, Nat.succ_eq_add_one,
-      LogicalConnective.HomClass.map_imply, Semiformula.eval_operator, Matrix.comp₁,
-      Semiterm.val_bvar, Matrix.cons_val_one, Fin.Fin1.eq_one, Matrix.cons_val_fin_one,
-      Matrix.cons_val_zero, LogicalConnective.HomClass.map_iff, Matrix.comp₂,
-      Tarski.Structure.eq_iff_eq, LogicalConnective.Prop.iff_eq, LogicalConnective.Prop.arrow_eq]
-    intro a b ha hb
-    exact henkinRel_eq_iff S hS hcons ha hb
+  domain_nonempty := provable_of_models_henkin S T _ fun _ _ _ _ _ ↦
+    (DirectTranslation.models_domainNonempty_iff _).mpr (henkinDomain_nonempty S)
+  func_defined f := provable_of_models_henkin S T _ fun _ _ _ hS hcons ↦
+    (DirectTranslation.models_funcDefined_iff _ _).mpr fun e _ ↦
+      henkinFunc_existsUnique S hS hcons f e
+  preserve_eq := provable_of_models_henkin S T _ fun _ _ _ hS hcons ↦
+    (DirectTranslation.models_preserveEq_iff _ _).mpr fun _ _ ha hb ↦
+      henkinRel_eq_iff S hS hcons ha hb
 
 section truth
 
@@ -159,22 +149,6 @@ private lemma sentence_typed_quote_nrel {k : ℕ} (R : L.Rel k) (v : Fin k → C
     (⌜(Semiformula.nrel R v : Semisentence L n)⌝ : Bootstrapping.Semiformula V L n) =
       Bootstrapping.Semiformula.nrel R fun i ↦ ⌜v i⌝ :=
   rfl
-
-private lemma sentence_typed_quote_and (φ ψ : Semisentence L n) :
-    (⌜φ ⋏ ψ⌝ : Bootstrapping.Semiformula V L n) = ⌜φ⌝ ⋏ ⌜ψ⌝ :=
-  rfl
-
-private lemma sentence_typed_quote_or (φ ψ : Semisentence L n) :
-    (⌜φ ⋎ ψ⌝ : Bootstrapping.Semiformula V L n) = ⌜φ⌝ ⋎ ⌜ψ⌝ :=
-  rfl
-
-private lemma sentence_typed_quote_all (φ : Semisentence L (n + 1)) :
-    (⌜∀¹ φ⌝ : Bootstrapping.Semiformula V L n) = ∀¹ ⌜φ⌝ := by
-  simp only [LCWQIsoGödelQuote.all, Sentence.typed_quote_def]
-
-private lemma sentence_typed_quote_exs (φ : Semisentence L (n + 1)) :
-    (⌜∃¹ φ⌝ : Bootstrapping.Semiformula V L n) = ∃¹ ⌜φ⌝ := by
-  simp only [LCWQIsoGödelQuote.exs, Sentence.typed_quote_def]
 
 private lemma subst_q_subst_single (w : Bootstrapping.SemitermVec V L n 0)
     (t : Bootstrapping.Term V L) (φ : Bootstrapping.Semiformula V L (n + 1)) :
@@ -245,17 +219,17 @@ theorem henkinTranslation_truth {n : ℕ} (β : Semisentence L n)
       Bootstrapping.Semiformula.substs_falsum, false_iff]
     exact henkinSet_not_falsum S hS hcons
   | hand φ ψ ihφ ihψ =>
-    rw [sentence_typed_quote_and, Bootstrapping.Semiformula.substs_and,
+    rw [LCWQIsoGödelQuote.and, Bootstrapping.Semiformula.substs_and,
       henkinSet_and_iff S hS hcons, LogicalConnective.HomClass.map_and,
       LogicalConnective.Prop.and_eq]
     exact and_congr (ihφ h) (ihψ h)
   | hor φ ψ ihφ ihψ =>
-    rw [sentence_typed_quote_or, Bootstrapping.Semiformula.substs_or,
+    rw [LCWQIsoGödelQuote.or, Bootstrapping.Semiformula.substs_or,
       henkinSet_or_iff S hS hcons, LogicalConnective.HomClass.map_or,
       LogicalConnective.Prop.or_eq]
     exact or_congr (ihφ h) (ihψ h)
   | hall φ ih =>
-    rw [sentence_typed_quote_all, Bootstrapping.Semiformula.substs_all,
+    rw [LCWQIsoGödelQuote.all, Bootstrapping.Semiformula.substs_all,
       henkinSet_all_iff S hS hcons, Semiformula.eval_all]
     simp only [subst_fvar_cons]
     constructor
@@ -265,7 +239,7 @@ theorem henkinTranslation_truth {n : ℕ} (β : Semisentence L n)
     · intro hφ a
       exact (ih (henkinEq_cons S T (HenkinEq.refl S _) h)).mpr (hφ a)
   | hexs φ ih =>
-    rw [sentence_typed_quote_exs, Bootstrapping.Semiformula.substs_ex,
+    rw [LCWQIsoGödelQuote.exs, Bootstrapping.Semiformula.substs_ex,
       henkinSet_exs_iff S hS hcons, Semiformula.eval_ex]
     simp only [subst_fvar_cons]
     constructor

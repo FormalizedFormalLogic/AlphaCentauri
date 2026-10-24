@@ -461,14 +461,6 @@ lemma translate_rel_typed (h : IsTableOf π tbl) (hT : IsTable L₁ L₂ tbl) {k
       (d := (⌜π.domain.sentence⌝ : Semiformula V L₁ 1)) (n := 0) (k : V) h.domain.symm,
     tableRel_typed h R, relativizedImp, val_allItr_imp_conj]
 
-omit [L₂.Eq] in
-lemma translate_nrel_typed {k : ℕ} (R : L₂.Rel k) (v : Fin k → Term V L₂) :
-    translate L₁ L₂ tbl (Semiformula.nrel R v : Formula V L₂).val =
-      neg L₁ (translate L₁ L₂ tbl (Semiformula.rel R v : Formula V L₂).val) := by
-  rw [Semiformula.nrel_val, Semiformula.rel_val,
-    translate_nrel (by simp) (SemitermVec.isUTermVec v),
-    translate_rel (by simp) (SemitermVec.isUTermVec v)]
-
 end direct
 
 section symbols
@@ -481,36 +473,6 @@ lemma exists_termVec {k : ℕ} {v : V} (hv : IsSemitermVec L₂ (k : V) 0 v) :
     symm
     rw [eq_matrixToVec_iff]
     exact ⟨hv.lh.symm, fun i ↦ rfl⟩⟩
-
-lemma exists_func_typed (hL₂ : L₂.SymbolsStandard V) {t : V} (ht : IsSemiterm L₂ 0 t)
-    {k f v : V} (hf : t = ^func k f v) :
-    ∃ (k' : ℕ) (F : L₂.Func k') (u : Fin k' → Term V L₂),
-      k = k' ∧ f = (⌜F⌝ : V) ∧ t = (Semiterm.func F u).val := by
-  subst hf
-  obtain ⟨hfun, hv⟩ := IsSemiterm.func.mp ht
-  obtain ⟨k', F, rfl, rfl⟩ := hL₂.2 _ _ hfun
-  obtain ⟨u, hu⟩ := exists_termVec hv
-  exact ⟨k', F, u, rfl, rfl, by rw [Semiterm.func_val, hu]⟩
-
-lemma exists_rel_typed (hL₂ : L₂.SymbolsStandard V) {p k R v : V} (hp : IsSemiformula L₂ 0 p)
-    (hrel : p = ^rel k R v) :
-    ∃ (k' : ℕ) (R' : L₂.Rel k') (u : Fin k' → Term V L₂),
-      k = k' ∧ R = (⌜R'⌝ : V) ∧ p = (Semiformula.rel R' u : Formula V L₂).val := by
-  subst hrel
-  obtain ⟨hR, hv⟩ := IsSemiformula.rel.mp hp
-  obtain ⟨k', R', rfl, rfl⟩ := hL₂.1 _ _ hR
-  obtain ⟨u, hu⟩ := exists_termVec hv
-  exact ⟨k', R', u, rfl, rfl, by rw [Semiformula.rel_val, hu]⟩
-
-lemma exists_nrel_typed (hL₂ : L₂.SymbolsStandard V) {p k R v : V} (hp : IsSemiformula L₂ 0 p)
-    (hnrel : p = ^nrel k R v) :
-    ∃ (k' : ℕ) (R' : L₂.Rel k') (u : Fin k' → Term V L₂),
-      k = k' ∧ R = (⌜R'⌝ : V) ∧ p = (Semiformula.nrel R' u : Formula V L₂).val := by
-  subst hnrel
-  obtain ⟨hR, hv⟩ := IsSemiformula.nrel.mp hp
-  obtain ⟨k', R', rfl, rfl⟩ := hL₂.1 _ _ hR
-  obtain ⟨u, hu⟩ := exists_termVec hv
-  exact ⟨k', R', u, rfl, rfl, by rw [Semiformula.nrel_val, hu]⟩
 
 end symbols
 

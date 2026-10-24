@@ -466,17 +466,14 @@ lemma derivable_insert_translate_substs (hT : IsTable L₁ L₂ tbl) {t b p Θ :
     IsFormulaSet.insert_iff.mpr ⟨hn₁, IsFormulaSet.insert_iff.mpr ⟨hn₂, hΘ⟩⟩
   have hXs := Derivable.wk (IsFormulaSet.insert_iff.mpr ⟨hX', hs⟩) (by
     intro x hx
-    simp only [mem_bitInsert_iff] at hx ⊢
+    simp at hx ⊢
     tauto) hX
   have hIs := Derivable.wk (IsFormulaSet.insert_iff.mpr
     ⟨IsSemiformula.iff.mpr ⟨hX', hY'⟩, hs⟩) (by
     intro x hx
     simp only [substHyp, mem_bitInsert_iff] at hx ⊢
-    rcases hx with hx | hx | hx | hx
-    · exact Or.inl hx
-    · exact Or.inr (Or.inl hx)
-    · exact Or.inr (Or.inr (Or.inl hx))
-    · exact Or.inr (Or.inr (Or.inr (hD hx)))) hI
+    have := @hD x
+    grind) hI
   exact derivable_of_iff_mp (⟨_, hX'⟩ : Formula V L₁) ⟨_, hY'⟩ hIs hXs
 
 omit [L₂.Eq] [𝗘𝗤 _ ⪯ S] in
@@ -506,7 +503,7 @@ lemma derivable_exs_body (hT : IsTable L₁ L₂ tbl) {p b s : V} (hs : IsFormul
     (mem_bitInsert_iff.mpr (Or.inr (mem_bitInsert_iff.mpr (Or.inr hn))))
   have d₂ := Derivable.wk (IsFormulaSet.insert_iff.mpr ⟨hB, hs'⟩) (by
     intro x hx
-    simp only [mem_bitInsert_iff] at hx ⊢
+    simp at hx ⊢
     tauto) hd
   have h₁ : Derivable S (insert (substs1 L₁ (^&b) (tbl.[0] ^⋏ translate L₁ L₂ tbl p)) s) := by
     rw [hmem]
@@ -573,9 +570,8 @@ lemma derivable_exs_definesElement
   exact Derivable.wk hF (by
     intro x hx
     simp only [mem_bitInsert_iff] at hx ⊢
-    rcases hx with hx | hx
-    · exact Or.inl hx
-    · exact Or.inr (hD hx)) h₁
+    have := @hD x
+    grind) h₁
 
 lemma translated_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
     (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ p t : V} (hΓ : IsFormulaSet L₂ Γ)
@@ -592,7 +588,7 @@ lemma translated_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
   have hΓM : Γ ≤ M := by
     have h₁ : Γ ≤ insert (substs1 L₂ t p) Γ := le_of_subset (by
       intro x hx
-      exact mem_bitInsert_iff.mpr (Or.inr hx))
+      simp [hx])
     exact le_trans h₁ hM
   have hΘf : IsFormulaSet L₁ Θ := isFormulaSet_translated_union hT hΓ M
   obtain ⟨b, hb₁, hb₂⟩ : ∃ b, Θ ≤ b ∧ tbl.[0] ^⋏ varEqual L₁ L₂ tbl t ≤ b :=
@@ -604,7 +600,7 @@ lemma translated_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
   have hK := derivable_insert_translate_substs hT ht hp1 hΘf hD hX
     (derivable_translateSubstEquiv (t := t) (b := b) hS h hL₂ ht hp1)
   have hm0 : translate L₁ L₂ tbl (^∃ p) ∈ translateSet L₁ L₂ tbl Γ :=
-    mem_translateSet_iff.mpr ⟨^∃ p, hp, rfl⟩
+    by simp; grind
   rw [translate_exs (IsSemiformula.isUFormula hp1), domainAt_zero hT] at hm0
   have hm : ^∃ (tbl.[0] ^⋏ translate L₁ L₂ tbl p) ∈
       insert (neg L₁ (substs1 L₁ (^&b) tbl.[0]))

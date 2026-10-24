@@ -97,7 +97,6 @@ public import AlphaCentauri.ToFoundation.PrenexDefinable
 public import AlphaCentauri.ToFoundation.PrenexNormalForm
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
-public import AlphaCentauri.ToFoundation.Proof
 public import AlphaCentauri.ToFoundation.ProvabilityAbstraction
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.Provable

@@ -122,7 +122,7 @@ noncomputable def negDomSet (d m : V) : V := by
   letI : 𝚺ᴬ₁-Function₁ (fun i : V ↦ neg L (substs1 L (^&i) d)) := by definability
   exact hfsImage (fun i : V ↦ neg L (substs1 L (^&i) d)) (under m)
 
-lemma mem_negDomSet_iff {d m x : V} :
+@[simp] lemma mem_negDomSet_iff {d m x : V} :
     x ∈ negDomSet L d m ↔ ∃ i < m, x = neg L (substs1 L (^&i) d) := by
   let _ : 𝚺ᴬ₁-Function₁ (fun i : V ↦ neg L (substs1 L (^&i) d)) := by definability
   change x ∈ hfsImage (fun i : V ↦ neg L (substs1 L (^&i) d)) (under m) ↔ _
@@ -144,16 +144,13 @@ private lemma negDomSet_graph (t d m : V) :
       (∀ i < m, neg L (substs1 L (^&i) d) ∈ t) := by
   constructor
   · rintro rfl
-    exact ⟨fun z hz ↦ mem_negDomSet_iff.mp hz, fun i hi ↦ mem_negDomSet_iff.mpr ⟨i, hi, rfl⟩⟩
+    simp only [mem_negDomSet_iff, forall_exists_index, and_imp]
+    exact ⟨by grind, fun i hi ↦ ⟨i, hi, rfl⟩⟩
   · rintro ⟨h₁, h₂⟩
     apply mem_ext
     intro z
-    constructor
-    · intro hz
-      exact mem_negDomSet_iff.mpr (h₁ z hz)
-    · intro hz
-      obtain ⟨i, hi, rfl⟩ := mem_negDomSet_iff.mp hz
-      exact h₂ i hi
+    simp only [mem_negDomSet_iff]
+    grind
 
 instance negDomSet.defined : 𝚺ᴬ₁-Function₂[V] negDomSet L via negDomSetGraph L :=
   .mk fun v ↦ by simp [negDomSetGraph, negDomSet_graph]
@@ -169,26 +166,19 @@ end graph
 @[simp] lemma negDomSet_zero (d : V) : negDomSet L d 0 = ∅ := by
   apply mem_ext
   intro x
-  simp [mem_negDomSet_iff]
+  simp
 
 lemma negDomSet_succ (d m : V) :
     negDomSet L d (m + 1) = insert (neg L (substs1 L (^&m) d)) (negDomSet L d m) := by
   apply mem_ext
   intro x
-  simp only [mem_negDomSet_iff, mem_bitInsert_iff]
-  constructor
-  · rintro ⟨i, hi, rfl⟩
-    rcases lt_or_eq_of_le (lt_succ_iff_le.mp hi) with h | rfl
-    · exact Or.inr ⟨i, h, rfl⟩
-    · exact Or.inl rfl
-  · rintro (rfl | ⟨i, hi, rfl⟩)
-    · exact ⟨m, by simp, rfl⟩
-    · exact ⟨i, lt_trans hi (by simp), rfl⟩
+  simp only [mem_negDomSet_iff, mem_bitInsert_iff, lt_succ_iff_le, le_iff_lt_or_eq]
+  grind
 
 lemma negDomSet_mono {d m m' : V} (h : m ≤ m') : negDomSet L d m ⊆ negDomSet L d m' := by
-  intro x hx
-  obtain ⟨i, hi, rfl⟩ := mem_negDomSet_iff.mp hx
-  exact mem_negDomSet_iff.mpr ⟨i, lt_of_lt_of_le hi h, rfl⟩
+  intro x
+  simp only [mem_negDomSet_iff]
+  grind
 
 lemma IsFormulaSet.negDomSet {d : V} (hd : IsSemiformula L 1 d) (m : V) :
     IsFormulaSet L (negDomSet L d m) := by
@@ -201,49 +191,29 @@ lemma negDomSet_succ_eq_insert_setShift {d : V} (hd : IsSemiformula L 1 d)
     negDomSet L d (m + 1) = insert (neg L (substs1 L (^&0) d)) (setShift L (negDomSet L d m)) := by
   apply mem_ext
   intro x
+  have := fun j : V ↦ shift_neg_substs1_qqFvar (j := j) hd hds
   simp only [mem_negDomSet_iff, mem_bitInsert_iff, mem_setShift_iff]
   constructor
   · rintro ⟨i, hi, rfl⟩
     rcases zero_or_succ i with rfl | ⟨j, rfl⟩
     · exact Or.inl rfl
-    · have hj : j < m := by simpa using hi
-      exact Or.inr ⟨neg L (substs1 L (^&j) d), ⟨j, hj, rfl⟩,
-        (shift_neg_substs1_qqFvar hd hds).symm⟩
+    · exact Or.inr ⟨_, ⟨j, by simpa using hi, rfl⟩, (this j).symm⟩
   · rintro (rfl | ⟨y, ⟨j, hj, rfl⟩, rfl⟩)
     · exact ⟨0, by simp, rfl⟩
-    · exact ⟨j + 1, by simpa using hj, (shift_neg_substs1_qqFvar hd hds)⟩
+    · exact ⟨j + 1, by simpa using hj, this j⟩
 
 lemma fvSubstImage_freshVec_negDomSet {d : V} (hd : IsSemiformula L 1 d)
     (hds : Bootstrapping.shift L d = d) (j : V) :
     fvSubstImage (L := L) (freshVec j) (negDomSet L d j) = setShift L (negDomSet L d j) := by
   apply mem_ext
   intro x
-  rw [mem_fvSubstImage_iff]
+  have := fun i : V ↦ shift_neg_substs1_qqFvar (j := i) hd hds
+  simp only [mem_fvSubstImage_iff, mem_negDomSet_iff, mem_setShift_iff]
   constructor
-  · rintro ⟨q, hq, rfl⟩
-    obtain ⟨i, hi, rfl⟩ := mem_negDomSet_iff.mp hq
-    rw [fvSubst_freshVec_neg_substs1_qqFvar hd hds hi]
-    exact mem_setShift_iff.mpr ⟨neg L (substs1 L (^&i) d), mem_negDomSet_iff.mpr ⟨i, hi, rfl⟩,
-      (shift_neg_substs1_qqFvar hd hds).symm⟩
-  · intro hx
-    obtain ⟨y, hy, rfl⟩ := mem_setShift_iff.mp hx
-    obtain ⟨i, hi, rfl⟩ := mem_negDomSet_iff.mp hy
-    exact ⟨neg L (substs1 L (^&i) d), mem_negDomSet_iff.mpr ⟨i, hi, rfl⟩,
-      (shift_neg_substs1_qqFvar hd hds).trans (fvSubst_freshVec_neg_substs1_qqFvar hd hds hi).symm⟩
-
-lemma fvSubstImage_union (w s₁ s₂ : V) :
-    fvSubstImage (L := L) w (s₁ ∪ s₂) =
-      fvSubstImage (L := L) w s₁ ∪ fvSubstImage (L := L) w s₂ := by
-  apply mem_ext
-  intro x
-  simp only [mem_fvSubstImage_iff, mem_cup_iff]
-  constructor
-  · rintro ⟨q, hq | hq, rfl⟩
-    · exact Or.inl ⟨q, hq, rfl⟩
-    · exact Or.inr ⟨q, hq, rfl⟩
-  · rintro (⟨q, hq, rfl⟩ | ⟨q, hq, rfl⟩)
-    · exact ⟨q, Or.inl hq, rfl⟩
-    · exact ⟨q, Or.inr hq, rfl⟩
+  · rintro ⟨_, ⟨i, hi, rfl⟩, rfl⟩
+    exact ⟨_, ⟨i, hi, rfl⟩, by rw [fvSubst_freshVec_neg_substs1_qqFvar hd hds hi, this]⟩
+  · rintro ⟨_, ⟨i, hi, rfl⟩, rfl⟩
+    exact ⟨_, ⟨i, hi, rfl⟩, by rw [fvSubst_freshVec_neg_substs1_qqFvar hd hds hi, this]⟩
 
 section freshShift
 

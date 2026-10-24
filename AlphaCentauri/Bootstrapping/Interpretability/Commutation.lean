@@ -39,9 +39,6 @@ section generic
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-lemma IsSemiformula.of_le {n m p : V} (h : IsSemiformula L n p) (hnm : n ≤ m) :
-    IsSemiformula L m p := isSemiformula_iff.mpr ⟨h.isUFormula, h.bv_le.trans hnm⟩
-
 lemma add_arity_comm (k n : V) : k + 1 + n = n + 1 + k := by
   simp only [add_comm, add_left_comm]
 
@@ -214,7 +211,7 @@ lemma IsTable.isSemiformula_relBody {tbl n k R v : V} (hT : IsTable L₁ L₂ tb
       (imp L₁ (^⋀ guardVec L₁ tbl k (varEqualVec L₁ L₂ tbl k v) k) (tableRel tbl k R)) :=
   IsSemiformula.imp.mpr
     ⟨IsSemiformula.qqConj_guardVec hT (by simp) (add_comm k n).le
-      fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi, (hT.rel hR).of_le (by simp)⟩
+      fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi, (hT.rel hR).weaken (by simp)⟩
 
 lemma IsSemiformula.translateRel {tbl n k R v : V} (hT : IsTable L₁ L₂ tbl) (hR : L₂.IsRel k R)
     (hv : IsSemitermVec L₂ k n v) :

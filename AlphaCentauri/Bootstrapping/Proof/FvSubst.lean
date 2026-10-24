@@ -550,18 +550,40 @@ lemma termFvSubstVec_qVec_closed {n m w v : V}
       nth_termFvSubstVec hv.isUTerm hi'']
     exact termFvSubst_termBShift_closed hw (hv.nth hi'')
 
+lemma fvSubst_sigmaOne (w : V) : 𝚺ᴬ₁-Function₁ (fvSubst L w) := by definability
+
 /-- `fvSubstImage w s`: the coded set obtained by applying `fvSubst L w` to every formula code in
 the coded set `s`. -/
 noncomputable def fvSubstImage (w s : V) : V := by
-  letI : 𝚺ᴬ₁-Function₁ (fvSubst L w) := by definability
+  letI := fvSubst_sigmaOne (L := L) w
   exact hfsImage (fvSubst L w) s
 
 /-- A formula code belongs to `fvSubstImage w s` iff it is `fvSubst L w q` for some formula code
 `q ∈ s`. -/
-lemma mem_fvSubstImage_iff {w s p : V} :
+@[simp] lemma mem_fvSubstImage_iff {w s p : V} :
     p ∈ fvSubstImage (L := L) w s ↔ ∃ q ∈ s, p = fvSubst L w q := by
-  let _ : 𝚺ᴬ₁-Function₁ (fvSubst L w) := by definability
+  let _ := fvSubst_sigmaOne (L := L) w
   exact mem_hfsImage_iff
+
+lemma fvSubst_mem_fvSubstImage {w q s : V} (h : q ∈ s) :
+    fvSubst L w q ∈ fvSubstImage (L := L) w s :=
+  mem_fvSubstImage_iff.mpr ⟨q, h, rfl⟩
+
+@[simp] lemma fvSubstImage_empty (w : V) : fvSubstImage (L := L) w ∅ = ∅ := by
+  let _ := fvSubst_sigmaOne (L := L) w
+  exact hfsImage_empty
+
+@[simp] lemma fvSubstImage_insert (w p s : V) :
+    fvSubstImage (L := L) w (insert p s) =
+      insert (fvSubst L w p) (fvSubstImage (L := L) w s) := by
+  let _ := fvSubst_sigmaOne (L := L) w
+  exact mem_hfsImage_insert
+
+@[simp] lemma fvSubstImage_union (w s₁ s₂ : V) :
+    fvSubstImage (L := L) w (s₁ ∪ s₂) =
+      fvSubstImage (L := L) w s₁ ∪ fvSubstImage (L := L) w s₂ := by
+  let _ := fvSubst_sigmaOne (L := L) w
+  exact mem_hfsImage_union
 
 variable (L) in
 /-- The $\Sigma_1$ graph of `fvSubstImage`; argument order `(t, w, s)`, `t = fvSubstImage w s`. -/
@@ -578,16 +600,13 @@ private lemma fvSubstImage_graph (t w s : V) :
       (∀ y ∈ t, ∃ x ∈ s, y = fvSubst L w x) ∧ (∀ x ∈ s, fvSubst L w x ∈ t) := by
   constructor
   · rintro rfl
-    exact ⟨fun y hy ↦ mem_fvSubstImage_iff.mp hy, fun x hx ↦ mem_fvSubstImage_iff.mpr ⟨x, hx, rfl⟩⟩
+    simp only [mem_fvSubstImage_iff, forall_exists_index, and_imp]
+    exact ⟨by grind, fun x hx ↦ ⟨x, hx, rfl⟩⟩
   · rintro ⟨h₁, h₂⟩
     apply mem_ext
     intro y
-    constructor
-    · intro hy
-      exact mem_fvSubstImage_iff.mpr (h₁ y hy)
-    · intro hy
-      obtain ⟨x, hx, rfl⟩ := mem_fvSubstImage_iff.mp hy
-      exact h₂ x hx
+    simp only [mem_fvSubstImage_iff]
+    grind
 
 instance fvSubstImage.defined :
     𝚺ᴬ₁-Function₂[V] fvSubstImage (L := L) via fvSubstImageGraph L :=
@@ -724,17 +743,12 @@ lemma setShift_fvSubstImage {w s : V} (hw : IsSemitermVec L (len w) 0 w)
     (hs : IsFormulaSet L s) :
     setShift L (fvSubstImage (L := L) w s) =
       fvSubstImage (L := L) (^&0 ∷ termShiftVec L (len w) w) (setShift L s) := by
-  apply mem_ext
-  intro x
+  refine mem_ext fun x ↦ ?_
+  simp only [mem_fvSubstImage_iff, mem_setShift_iff]
   constructor
-  · intro hx
-    obtain ⟨_, hy, rfl⟩ := mem_setShift_iff.mp hx
-    obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hy
-    exact mem_fvSubstImage_iff.mpr ⟨shift L q, shift_mem_setShift hq, shift_fvSubst hw (hs q hq)⟩
-  · intro hx
-    obtain ⟨_, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
-    obtain ⟨q, hq, rfl⟩ := mem_setShift_iff.mp hy
-    exact mem_setShift_iff.mpr
-      ⟨fvSubst L w q, mem_fvSubstImage_iff.mpr ⟨q, hq, rfl⟩, (shift_fvSubst hw (hs q hq)).symm⟩
+  · rintro ⟨_, ⟨q, hq, rfl⟩, rfl⟩
+    exact ⟨_, ⟨q, hq, rfl⟩, shift_fvSubst hw (hs q hq)⟩
+  · rintro ⟨_, ⟨q, hq, rfl⟩, rfl⟩
+    exact ⟨_, ⟨q, hq, rfl⟩, (shift_fvSubst hw (hs q hq)).symm⟩
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

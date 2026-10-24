@@ -1,7 +1,6 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
-public import AlphaCentauri.ToFoundation.Proof
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 
 /-!
@@ -25,27 +24,6 @@ open PeanoMinus ISigma0 ISigma1
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable {T : Theory L} [T.Δ₁]
-
-section image
-
-@[simp] lemma fvSubstImage_empty (w : V) : fvSubstImage (L := L) w ∅ = ∅ :=
-  mem_ext fun x ↦ by simp [mem_fvSubstImage_iff]
-
-lemma fvSubstImage_insert (w p s : V) :
-    fvSubstImage (L := L) w (insert p s) =
-      insert (fvSubst L w p) (fvSubstImage (L := L) w s) := by
-  apply mem_ext
-  intro x
-  simp only [mem_fvSubstImage_iff, mem_bitInsert_iff]
-  constructor
-  · rintro ⟨q, (rfl | hq), rfl⟩
-    · exact Or.inl rfl
-    · exact Or.inr ⟨q, hq, rfl⟩
-  · rintro (rfl | ⟨q, hq, rfl⟩)
-    · exact ⟨p, Or.inl rfl, rfl⟩
-    · exact ⟨q, Or.inr hq, rfl⟩
-
-end image
 
 section eqShift
 
@@ -204,15 +182,12 @@ lemma fvSubstImage_setShift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L
     fvSubstImage (L := L) w (setShift L s) = fvSubstImage (L := L) v s := by
   apply mem_ext
   intro x
+  simp only [mem_fvSubstImage_iff, mem_setShift_iff]
   constructor
-  · intro hx
-    obtain ⟨_, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
-    obtain ⟨q, hq, rfl⟩ := mem_setShift_iff.mp hy
-    exact mem_fvSubstImage_iff.mpr
-      ⟨q, hq, fvSubst_shift hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)⟩
-  · intro hx
-    obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hx
-    exact mem_fvSubstImage_iff.mpr ⟨shift L q, shift_mem_setShift hq,
+  · rintro ⟨_, ⟨q, hq, rfl⟩, rfl⟩
+    exact ⟨q, hq, fvSubst_shift hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)⟩
+  · rintro ⟨q, hq, rfl⟩
+    exact ⟨_, ⟨q, hq, rfl⟩,
       (fvSubst_shift hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)).symm⟩
 
 /-- A substitution vector sending `^&x` to itself for every `x < u` fixes the terms coded by a
@@ -274,13 +249,10 @@ lemma fvSubstImage_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
     {s : V} (hs : IsFormulaSet L s) (h : s ≤ u) : fvSubstImage (L := L) v s = s := by
   apply mem_ext
   intro x
-  constructor
-  · intro hx
-    obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hx
-    rwa [fvSubst_eq_self hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)]
-  · intro hx
-    exact mem_fvSubstImage_iff.mpr
-      ⟨x, hx, (fvSubst_eq_self hv (hs x hx) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hx) h)).symm⟩
+  have key : ∀ q ∈ s, fvSubst L v q = q := fun q hq ↦
+    fvSubst_eq_self hv (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) h)
+  simp only [mem_fvSubstImage_iff]
+  grind
 
 /-- If `v` sends the entry of `w` at `x` back to `^&x` for every `x < u`, then substituting by `w`
 and then by `v` fixes the terms coded by a number at most `u`. -/
@@ -360,15 +332,10 @@ lemma fvSubstImage_fvSubstImage_eq_self (hw : IsSemitermVec L (len w) 0 w)
     fvSubstImage (L := L) v (fvSubstImage (L := L) w s) = s := by
   apply mem_ext
   intro x
-  constructor
-  · intro hx
-    obtain ⟨y, hy, rfl⟩ := mem_fvSubstImage_iff.mp hx
-    obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hy
-    rwa [fvSubst_fvSubst_eq_self hw h (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) hsu)]
-  · intro hx
-    exact mem_fvSubstImage_iff.mpr ⟨fvSubst L w x, mem_fvSubstImage_iff.mpr ⟨x, hx, rfl⟩,
-      (fvSubst_fvSubst_eq_self hw h (hs x hx)
-        (le_of_lt <| lt_of_lt_of_le (lt_of_mem hx) hsu)).symm⟩
+  have key : ∀ q ∈ s, fvSubst L v (fvSubst L w q) = q := fun q hq ↦
+    fvSubst_fvSubst_eq_self hw h (hs q hq) (le_of_lt <| lt_of_lt_of_le (lt_of_mem hq) hsu)
+  simp only [mem_fvSubstImage_iff]
+  grind
 
 end shiftComp
 
@@ -468,10 +435,6 @@ private def RewritesBelow (d w : V) : Prop :=
   ∀ d₀ < d, ∀ w' ≤ rewriteBound (L := L) d w, Derivation T d₀ → IsSemitermVec L (len w') 0 w' →
     Derivable T (fvSubstImage (L := L) w' (fstIdx d₀))
 
-private lemma fvSubst_mem_fvSubstImage {q : V} (h : q ∈ s) :
-    fvSubst L w q ∈ fvSubstImage (L := L) w s :=
-  mem_fvSubstImage_iff.mpr ⟨q, h, rfl⟩
-
 private lemma rewrite_axL {p : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
     (hp : p ∈ s) (hnp : neg L p ∈ s) : Derivable T (fvSubstImage (L := L) w s) :=
   .em (formulaSet_fvSubstImage hw hsF) _ (fvSubst_mem_fvSubstImage hp)
@@ -546,7 +509,7 @@ private lemma rewrite_shift {d d₀ : V} (ih : RewritesBelow T d w)
     rw [hvl]
     exact hw.termFvSubstVec hfv
   have he := ih d₀ (hd ▸ d_lt_shiftRule _ _) _ (le_rewriteBound_shift d w) hd₀ hvc
-  rwa [← fvSubstImage_setShift ?_ hd₀.isFormulaSet (fstIdx_le d₀)] at he
+  rwa [← fvSubstImage_setShift ?_ hd₀.isFormulaSet (fstIdx_le_self d₀)] at he
   intro x hx
   have hxd : x < d := lt_trans hx (hd ▸ d_lt_shiftRule _ _)
   refine ⟨by rwa [hvl], ?_⟩

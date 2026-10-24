@@ -37,6 +37,7 @@ public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.Conservativity.Omega1
 public import AlphaCentauri.Hierarchy.Bounded
 public import AlphaCentauri.Interpretability.Basic
+public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Henkin
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.Cut
@@ -75,6 +76,7 @@ public import AlphaCentauri.ToFoundation.BooleanCombination
 public import AlphaCentauri.ToFoundation.Coding
 public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
+public import AlphaCentauri.ToFoundation.Consistency
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.DirectTranslation
@@ -90,6 +92,7 @@ public import AlphaCentauri.ToFoundation.PrenexNormalForm
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.Proof
+public import AlphaCentauri.ToFoundation.ProvabilityAbstraction
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.Provable
 public import AlphaCentauri.ToFoundation.Quote

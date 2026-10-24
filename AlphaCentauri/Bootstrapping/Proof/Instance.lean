@@ -168,57 +168,9 @@ end Instance
 
 /-- The subformulas of a formula code without free variables have no free variables. -/
 lemma shift_eq_self_of_mem_subformulas {p q : V} (hp : IsUFormula L p) (hps : shift L p = p)
-    (hq : q ∈ subformulas L p) : shift L q = q := by
-  have H : ∀ p : V, IsUFormula L p → shift L p = p → ∀ q ∈ subformulas L p, shift L q = q := by
-    apply IsUFormula.ISigma1.pi1_succ_induction
-      (P := fun p ↦ shift L p = p → ∀ q ∈ subformulas L p, shift L q = q) (by definability)
-    case hrel =>
-      intro k R v hR hv hps q hq
-      simp only [subformulas_rel hR hv, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      rwa [hq]
-    case hnrel =>
-      intro k R v hR hv hps q hq
-      simp only [subformulas_nrel hR hv, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      rwa [hq]
-    case hverum =>
-      intro _ q hq
-      simp only [subformulas_verum, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      simp [hq]
-    case hfalsum =>
-      intro _ q hq
-      simp only [subformulas_falsum, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      simp [hq]
-    case hand =>
-      intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ hps q hq
-      obtain ⟨h₁, h₂⟩ : shift L p₁ = p₁ ∧ shift L p₂ = p₂ := by
-        simpa [shift_and hp₁ hp₂] using hps
-      simp only [subformulas_and hp₁ hp₂, mem_bitInsert_iff, mem_cup_iff] at hq
-      rcases hq with rfl | hq | hq
-      · exact hps
-      · exact ih₁ h₁ q hq
-      · exact ih₂ h₂ q hq
-    case hor =>
-      intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ hps q hq
-      obtain ⟨h₁, h₂⟩ : shift L p₁ = p₁ ∧ shift L p₂ = p₂ := by
-        simpa [shift_or hp₁ hp₂] using hps
-      simp only [subformulas_or hp₁ hp₂, mem_bitInsert_iff, mem_cup_iff] at hq
-      rcases hq with rfl | hq | hq
-      · exact hps
-      · exact ih₁ h₁ q hq
-      · exact ih₂ h₂ q hq
-    case hall =>
-      intro p₁ hp₁ ih₁ hps q hq
-      simp only [subformulas_all hp₁, mem_bitInsert_iff] at hq
-      rcases hq with rfl | hq
-      · exact hps
-      · exact ih₁ (by simpa [shift_all hp₁] using hps) q hq
-    case hexs =>
-      intro p₁ hp₁ ih₁ hps q hq
-      simp only [subformulas_exs hp₁, mem_bitInsert_iff] at hq
-      rcases hq with rfl | hq
-      · exact hps
-      · exact ih₁ (by simpa [shift_exs hp₁] using hps) q hq
-  exact H p hp hps q hq
+    (hq : q ∈ subformulas L p) : shift L q = q :=
+  subformulas_induction (P := fun p q ↦ shift L p = p → shift L q = q) (by definability)
+    (fun _ _ h ↦ h) (fun _ _ _ h ih hp ↦ ih (h.shift_eq hp)) hp hq hps
 
 /-- The members of a coded formula set fixed by the shift have no free variables. -/
 lemma shift_eq_self_of_setShift_eq_self {s p : V} (hs : IsFormulaSet L s)

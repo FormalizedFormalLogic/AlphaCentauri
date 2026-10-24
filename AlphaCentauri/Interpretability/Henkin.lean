@@ -92,7 +92,7 @@ lemma provable_of_models_henkin (σ : ArithmeticSentence)
     T ∪ S.Con ⊢ σ :=
   Arithmetic.complete.{0} _ _ fun V _ _ ↦
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔 := models_of_subtheory (T := 𝗣𝗔) (U := T ∪ S.Con) inferInstance
-    H V (fun _ h ↦ Theory.Δ₁.Sentential.shift_eq h) (consistent_of_models_con S T)
+    H V (Theory.Δ₁.Sentential.forall_shift_eq S) (consistent_of_models_con S T)
 
 /-- The translation of `L` into arithmetic by the Henkin set of `S`.
 
@@ -124,8 +124,7 @@ theorem henkinTranslation_term {n : ℕ} (t : ClosedSemiterm L n)
       (Bootstrapping.Semiterm.fvar
         ((t.val e Empty.elim : (henkinTranslation S T).Model V) : V)) :
         Bootstrapping.Formula V L).val := by
-  have hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p := fun _ hp ↦
-    Theory.Δ₁.Sentential.shift_eq hp
+  have hS := Theory.Δ₁.Sentential.forall_shift_eq (V := V) S
   have hcons : S.Consistent V := consistent_of_models_con S T
   induction t with
   | bvar i =>
@@ -145,29 +144,12 @@ omit [L.Eq]
 
 variable {n : ℕ}
 
-private lemma sentence_typed_quote_nrel {k : ℕ} (R : L.Rel k) (v : Fin k → ClosedSemiterm L n) :
-    (⌜(Semiformula.nrel R v : Semisentence L n)⌝ : Bootstrapping.Semiformula V L n) =
-      Bootstrapping.Semiformula.nrel R fun i ↦ ⌜v i⌝ :=
-  rfl
-
-private lemma subst_q_subst_single (w : Bootstrapping.SemitermVec V L n 0)
-    (t : Bootstrapping.Term V L) (φ : Bootstrapping.Semiformula V L (n + 1)) :
-    (φ.subst w.q).subst ![t] = φ.subst (t :> w) := by
-  rw [Bootstrapping.Semiformula.substs_substs]
-  congr 1
-  funext i
-  cases i using Fin.cases
-  · simp only [Matrix.vecMap_app, Bootstrapping.SemitermVec.q_zero,
-      Bootstrapping.Semiterm.substs_bvar, Matrix.cons_val_fin_one, Matrix.cons_val_zero]
-  · simp only [Matrix.vecMap_app, Bootstrapping.SemitermVec.q_succ,
-      Bootstrapping.Semiterm.bShift_substs_sing, Matrix.cons_val_succ]
-
 private lemma subst_fvar_cons (x : V) (u : Fin n → V) (φ : Bootstrapping.Semiformula V L (n + 1)) :
     (φ.subst (Bootstrapping.SemitermVec.q fun i ↦ Bootstrapping.Semiterm.fvar (u i) :
         Bootstrapping.SemitermVec V L (n + 1) 1)).subst ![Bootstrapping.Semiterm.fvar x] =
       φ.subst (fun i ↦ Bootstrapping.Semiterm.fvar ((x :> u) i) :
         Bootstrapping.SemitermVec V L (n + 1) 0) := by
-  rw [subst_q_subst_single]
+  rw [Bootstrapping.Semiformula.substs_q_substs_single]
   congr 1
   funext i
   cases i using Fin.cases <;> rfl
@@ -197,8 +179,7 @@ theorem henkinTranslation_truth {n : ℕ} (β : Semisentence L n)
     ((henkinTranslation S T).Model V) ⊧/e β ↔
       HenkinSet S ((⌜β⌝ : Bootstrapping.Semiformula V L n).subst
         (fun i ↦ Bootstrapping.Semiterm.fvar (u i) : Bootstrapping.SemitermVec V L n 0)).val := by
-  have hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p := fun _ hp ↦
-    Theory.Δ₁.Sentential.shift_eq hp
+  have hS := Theory.Δ₁.Sentential.forall_shift_eq (V := V) S
   have hcons : S.Consistent V := consistent_of_models_con S T
   induction β using Semiformula.rec' with
   | hrel R v =>
@@ -206,7 +187,7 @@ theorem henkinTranslation_truth {n : ℕ} (β : Semisentence L n)
     exact (henkinRel_val S R _).trans
       (henkinSet_rel_iff S hS hcons R fun i ↦ henkinTranslation_term S T (v i) h).symm
   | hnrel R v =>
-    rw [sentence_typed_quote_nrel, Bootstrapping.Semiformula.substs_nrel, Semiformula.eval_nrel,
+    rw [quote_nrel_sentence, Bootstrapping.Semiformula.substs_nrel, Semiformula.eval_nrel,
       ← Bootstrapping.Semiformula.neg_rel, henkinSet_neg_iff S hS hcons]
     exact not_congr <| (henkinRel_val S R _).trans
       (henkinSet_rel_iff S hS hcons R fun i ↦ henkinTranslation_term S T (v i) h).symm
@@ -269,7 +250,7 @@ noncomputable abbrev henkinInterpretationOfSentential : T ∪ S.Con ⊳ S where
   interpret_theory σ hσ := Arithmetic.complete.{0} _ _ fun V _ _ ↦ by
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔 := models_of_subtheory (T := 𝗣𝗔) (U := T ∪ S.Con) inferInstance
     have hcons := consistent_of_models_con S T (V := V)
-    have hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p := fun _ h ↦ Theory.Δ₁.Sentential.shift_eq h
+    have hS := Theory.Δ₁.Sentential.forall_shift_eq (V := V) S
     have : Nonempty V := ⟨0⟩
     rw [DirectTranslation.Model.translate_iff]
     simp only [models_iff]

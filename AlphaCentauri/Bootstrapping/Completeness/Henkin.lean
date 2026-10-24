@@ -3,6 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.Quote
+public import AlphaCentauri.ToFoundation.TypedProof
 public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!
@@ -538,21 +539,6 @@ theorem henkinSet_of_tprovable {φ : Formula V L} (h : S.internalize V ⊢ φ) :
     HenkinSet S φ.val :=
   HenkinSet.of_provable S (Semiformula.isSemiformula_zero φ) (tprovable_iff_provable.mp h)
 
-private lemma tprovable_subst_imp_exs (φ : Semiformula V L 1) (t : Semiterm V L 0) :
-    S.internalize V ⊢ φ.subst ![t] 🡒 ∃¹ φ := ⟨by
-  rw [Semiformula.imp_def]
-  apply TDerivation.or
-  apply TDerivation.rotate₁
-  apply TDerivation.exs t
-  exact TDerivation.em (φ.subst ![t])⟩
-
-private lemma tprovable_all_imp_subst (φ : Semiformula V L 1) (t : Semiterm V L 0) :
-    S.internalize V ⊢ ∀¹ φ 🡒 φ.subst ![t] := ⟨by
-  rw [Semiformula.imp_def, Semiformula.neg_all]
-  apply TDerivation.or
-  apply TDerivation.exs t
-  simpa using TDerivation.em (φ.subst ![t])⟩
-
 variable (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (hcons : S.Consistent V)
 include hS hcons
 
@@ -592,14 +578,14 @@ theorem henkinSet_exs_iff {φ : Semiformula V L 1} :
     obtain ⟨u, hu⟩ := HenkinSet.exists_substs1 hS hcons (Semiformula.isSemiformula_one φ) h
     exact ⟨u, by simpa [substs1] using hu⟩
   · rintro ⟨u, hu⟩
-    exact henkinSet_of_tprovable_imp S hS hcons (tprovable_subst_imp_exs S φ _) hu
+    exact henkinSet_of_tprovable_imp S hS hcons (TProof.subst_imp_exs (T := S) φ _) hu
 
 theorem henkinSet_all_iff {φ : Semiformula V L 1} :
     HenkinSet S (∀¹ φ).val ↔
       ∀ u : V, HenkinSet S (φ.subst ![(Semiterm.fvar u : Semiterm V L 0)]).val := by
   constructor
   · intro h u
-    exact henkinSet_of_tprovable_imp S hS hcons (tprovable_all_imp_subst S φ _) h
+    exact henkinSet_of_tprovable_imp S hS hcons (TProof.all_imp_subst (T := S) φ _) h
   · intro h
     by_contra hn
     have h₁ : HenkinSet S (∼(∀¹ φ)).val := (henkinSet_neg_iff S hS hcons).mpr hn

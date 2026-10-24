@@ -251,15 +251,6 @@ lemma TProof.subst_imp_exs (φ : Semiformula V L 1) (t : Term V L) :
   apply TDerivation.exs t
   exact TDerivation.em (φ.subst ![t])⟩
 
-private lemma subst_q_subst {k : ℕ} (φ : Semiformula V L (k + 1)) (w : SemitermVec V L (k + 1) 0) :
-    (φ.subst (SemitermVec.q (Matrix.vecTail w))).subst ![w 0] = φ.subst w := by
-  rw [Semiformula.substs_substs]
-  congr 1
-  funext i
-  cases i using Fin.cases with
-  | zero => simp
-  | succ i => simp; rfl
-
 /-- Specialisation of `k` universal quantifiers. -/
 lemma TProof.allItr_specialize {k : ℕ} (φ : Semiformula V L (0 + k))
     (w : SemitermVec V L (0 + k) 0) : T.internalize V ⊢ (∀¹^[k] φ) 🡒 φ.subst w := by
@@ -268,7 +259,8 @@ lemma TProof.allItr_specialize {k : ℕ} (φ : Semiformula V L (0 + k))
   | succ k ih =>
     have h₁ := ih (∀¹ φ) (Matrix.vecTail w)
     have h₂ := all_imp_subst (T := T) (φ.subst (SemitermVec.q (Matrix.vecTail w))) (w 0)
-    rw [subst_q_subst (k := 0 + k)] at h₂
+    rw [Semiformula.substs_q_substs_single,
+      show (w 0 :> Matrix.vecTail w) = w from Matrix.cons_head_tail w] at h₂
     rw [Semiformula.substs_all] at h₁
     exact C_trans h₁ h₂
 

@@ -122,6 +122,24 @@ instance relocate.definable : 𝚺ᴬ₁-Function₃[V] relocate L := relocate.d
 instance relocate.definable' : Γᴬ_[m + 1]-Function₃[V] relocate L :=
   relocate.definable.of_sigmaOne
 
+lemma relocate_eq_subst {n i s p : V} (hp : IsSemiformula L (n + 1) p) :
+    relocate L i s p = subst L (^#i ∷ bvarVec s n) p := by
+  have h₁ : IsSemiformula L (bv L p) p := isSemiformula_iff.mpr ⟨hp.isUFormula, le_rfl⟩
+  have h₂ : IsUTermVec L (bv L p + 1) (^#i ∷ bvarVec s (bv L p)) :=
+    (IsSemitermVec.bvarVec (L := L) (n := s + bv L p) le_rfl).isUTerm.adjoin (by simp)
+  have h₃ : IsUTermVec L (n + 1) (^#i ∷ bvarVec s n) :=
+    (IsSemitermVec.bvarVec (L := L) (n := s + n) le_rfl).isUTerm.adjoin (by simp)
+  rw [relocate]
+  apply subst_congr h₁ h₂ h₃ (by simp) hp.bv_le
+  intro j hj
+  rcases zero_or_succ j with (rfl | ⟨j, rfl⟩)
+  · simp
+  · have h₄ : j < n := by
+      have h₅ : j + 1 < n + 1 := lt_of_lt_of_le hj hp.bv_le
+      simpa using h₅
+    have h₆ : j < bv L p := lt_trans (by simp) hj
+    rw [nth_adjoin_succ, nth_adjoin_succ, nth_bvarVec _ _ _ h₆, nth_bvarVec _ _ _ h₄]
+
 instance domainAt.defined : 𝚺ᴬ₁-Function₂[V] domainAt L via domainAtGraph L :=
   .mk fun v ↦ by simp [domainAtGraph, domainAt]
 
@@ -475,22 +493,15 @@ lemma relocate_quote {m l : ℕ} (ψ : Semiproposition L (m + 1)) (x : Fin l) (s
     (y : Fin m → Fin l) (hy : ∀ j, (y j : ℕ) = s + j) :
     relocate L (x : V) (s : V) ⌜ψ⌝ =
       ⌜(Rew.subst (#x :> fun j ↦ #(y j)) ▹ ψ : Semiproposition L l)⌝ := by
-  have hψ : IsSemiformula L ↑(m + 1) (⌜ψ⌝ : V) := Semiformula.quote_isSemiformula ψ
-  have hw : IsUTermVec L (bv L ⌜ψ⌝ + 1) (^#(x : V) ∷ bvarVec (s : V) (bv L ⌜ψ⌝)) :=
-    (IsSemitermVec.bvarVec (L := L) le_rfl).isUTerm.adjoin (by simp)
-  let w : Fin (m + 1) → SyntacticSemiterm L l := #x :> fun j ↦ #(y j)
-  have hw' : IsUTermVec L ↑(m + 1) (matrixToVec fun i ↦ (⌜w i⌝ : V)) :=
-    (SemitermVec.isSemitermVec fun i ↦ (⌜w i⌝ : Bootstrapping.Semiterm V L l)).isUTerm
-  rw [relocate, Semiformula.quote_substs]
-  apply subst_congr hψ.isUFormula.isSemiformula hw hw' (by simp) hψ.bv_le
-  intro i hi
-  rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
-  · simp [Matrix.vecHead, w]
-  · have hi' : i < (m : V) := by simpa using lt_of_lt_of_le hi hψ.bv_le
-    obtain ⟨j, rfl⟩ := eq_fin_of_lt_nat hi'
-    rw [nth_adjoin_succ, nth_bvarVec _ _ _ (lt_trans (by simp) hi), matrixToVec_succ,
-      nth_adjoin_succ]
-    simp [Matrix.vecTail, w, hy]
+  have hψ : IsSemiformula L ((m : V) + 1) (⌜ψ⌝ : V) := by
+    simpa using Semiformula.quote_isSemiformula (V := V) ψ
+  rw [relocate_eq_subst hψ, Semiformula.quote_substs]
+  congr 1
+  rw [eq_matrixToVec_iff]
+  refine ⟨by simp, fun i ↦ ?_⟩
+  cases i using Fin.cases with
+  | zero => simp
+  | succ j => simp [nth_bvarVec _ _ _ (show (j : V) < m by simp), hy]
 
 lemma isUTermVec_matrixToVec_quote {n k : ℕ} (v : Fin k → SyntacticSemiterm L n) :
     IsUTermVec L (k : V) (matrixToVec fun i ↦ (⌜v i⌝ : V)) :=

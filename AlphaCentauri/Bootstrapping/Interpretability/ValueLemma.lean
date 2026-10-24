@@ -47,13 +47,6 @@ lemma operator_bvar_eq_sentence (o : Semiformula.Operator L₁ 1) :
     (o.operator ![#0] : Semisentence L₁ 1) = o.sentence := by
   simp [Semiformula.Operator.operator, Rewriting.emb]
 
-omit [L₁.Eq] in
-lemma shift_quote_typed {n : ℕ} (σ : Semisentence L₁ n) :
-    (⌜σ⌝ : Semiformula V L₁ n).shift = ⌜σ⌝ := by
-  have h₁ : Rewriting.shift (Rewriting.emb σ : Semiproposition L₁ n) = Rewriting.emb σ := by
-    simpa [Rewriting.shifts] using Rewriting.shifts_emb ({σ} : Multiset (Semisentence L₁ n))
-  rw [Sentence.typed_quote_def, ← Semiformula.typed_quote_shift, h₁]
-
 /-- The code of the domain formula of `π`. -/
 noncomputable abbrev domT : Semiformula V L₁ 1 := ⌜π.domain.sentence⌝
 
@@ -63,11 +56,11 @@ noncomputable abbrev funcT (F : L₂.Func k) : Semiformula V L₁ (k + 1) := ⌜
 
 omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
 lemma domT_shift : (domT π : Semiformula V L₁ 1).shift = domT π :=
-  shift_quote_typed _
+  Semisentence.shift_typed_quote _
 
 omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
 lemma funcT_shift (F : L₂.Func k) : (funcT π F : Semiformula V L₁ (k + 1)).shift = funcT π F :=
-  shift_quote_typed _
+  Semisentence.shift_typed_quote _
 
 end domain
 

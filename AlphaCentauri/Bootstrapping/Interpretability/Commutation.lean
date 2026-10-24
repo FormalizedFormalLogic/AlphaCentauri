@@ -3,6 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Interpretability.Translation
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.Bootstrapping.Syntax.SubstCongruence
+public import AlphaCentauri.ToFoundation.Coding
 
 /-!
 # Commutation of the internal translation
@@ -357,12 +358,6 @@ section isTable
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq]
 
-lemma shift_quote_semisentence {L : Language} [L.Encodable] [L.LORDefinable] {n : ℕ}
-    (σ : Semisentence L n) : shift L (⌜σ⌝ : V) = ⌜σ⌝ := by
-  have h₁ : Rewriting.shift (Rewriting.emb σ : Semiproposition L n) = Rewriting.emb σ := by
-    simpa [Rewriting.shifts] using Rewriting.shifts_emb ({σ} : Multiset (Semisentence L n))
-  rw [Sentence.quote_def, ← Semiformula.quote_shift, h₁]
-
 lemma IsTableOf.isTable {T : Theory L₁} [𝗘𝗤 _ ⪯ T] {π : DirectTranslation T L₂} {tbl : V}
     (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) : IsTable L₁ L₂ tbl where
   domain := by
@@ -370,7 +365,7 @@ lemma IsTableOf.isTable {T : Theory L₁} [𝗘𝗤 _ ⪯ T] {π : DirectTransla
     simp
   domain_shift := by
     rw [h.domain]
-    exact shift_quote_semisentence _
+    exact Semisentence.shift_quote _
   rel hr := by
     obtain ⟨k', R, rfl, rfl⟩ := hL₂.1 _ _ hr
     rw [h.rel R]
@@ -378,7 +373,7 @@ lemma IsTableOf.isTable {T : Theory L₁} [𝗘𝗤 _ ⪯ T] {π : DirectTransla
   rel_shift hr := by
     obtain ⟨k', R, rfl, rfl⟩ := hL₂.1 _ _ hr
     rw [h.rel R]
-    exact shift_quote_semisentence _
+    exact Semisentence.shift_quote _
   func hf := by
     obtain ⟨k', F, rfl, rfl⟩ := hL₂.2 _ _ hf
     rw [h.func F]
@@ -386,7 +381,7 @@ lemma IsTableOf.isTable {T : Theory L₁} [𝗘𝗤 _ ⪯ T] {π : DirectTransla
   func_shift hf := by
     obtain ⟨k', F, rfl, rfl⟩ := hL₂.2 _ _ hf
     rw [h.func F]
-    exact shift_quote_semisentence _
+    exact Semisentence.shift_quote _
 
 end isTable
 

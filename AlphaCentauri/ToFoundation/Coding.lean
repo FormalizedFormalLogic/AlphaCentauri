@@ -18,14 +18,19 @@ namespace FFL.FirstOrder.Semisentence
 
 open Arithmetic Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {L : Language} [L.Encodable]
+  [L.LORDefinable]
 
-@[simp] lemma shift_quote {n : ℕ} (σ : ArithmeticSemisentence n) :
-    shift ℒₒᵣ (⌜σ⌝ : V) = ⌜σ⌝ := by
-  have h : Rewriting.shift (Rewriting.emb σ : ArithmeticSemiproposition n) = Rewriting.emb σ := by
-    simpa [Rewriting.shifts] using
-      Rewriting.shifts_emb ({σ} : Multiset (ArithmeticSemisentence n))
+@[simp] lemma shift_quote {n : ℕ} (σ : Semisentence L n) : shift L (⌜σ⌝ : V) = ⌜σ⌝ := by
+  have h : Rewriting.shift (Rewriting.emb σ : Semiproposition L n) = Rewriting.emb σ := by
+    simpa [Rewriting.shifts] using Rewriting.shifts_emb ({σ} : Multiset (Semisentence L n))
   rw [Sentence.quote_def, ← Semiformula.quote_shift, h]
+
+lemma shift_typed_quote {n : ℕ} (σ : Semisentence L n) :
+    (⌜σ⌝ : Bootstrapping.Semiformula V L n).shift = ⌜σ⌝ := by
+  have h : Rewriting.shift (Rewriting.emb σ : Semiproposition L n) = Rewriting.emb σ := by
+    simpa [Rewriting.shifts] using Rewriting.shifts_emb ({σ} : Multiset (Semisentence L n))
+  rw [Sentence.typed_quote_def, ← Semiformula.typed_quote_shift, h]
 
 end FFL.FirstOrder.Semisentence
 

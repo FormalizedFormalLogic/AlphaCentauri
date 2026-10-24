@@ -211,19 +211,6 @@ lemma free_imp {δ q : V} (hδ : IsSemiformula L 1 δ) (hds : shift L δ = δ)
   rw [free, shift_imp hδ hq, hds, substs1, subst_imp hw hδ hq.shift]
   rfl
 
-lemma derivable_insert_or {T : Theory L} [T.Δ₁] {nd tf s : V} (hs : IsFormulaSet L s)
-    (hnd : IsFormula L nd) (htf : IsFormula L tf) (h : Derivable T (insert nd (insert tf s))) :
-    Derivable T (insert (nd ^⋎ tf) s) := by
-  have hX : IsFormula L (nd ^⋎ tf) := IsSemiformula.or.mpr ⟨hnd, htf⟩
-  have hsub : insert nd (insert tf s) ⊆ insert nd (insert tf (insert (nd ^⋎ tf) s)) := by
-    intro x hx
-    simp only [mem_bitInsert_iff] at hx ⊢
-    tauto
-  have hF : IsFormulaSet L (insert nd (insert tf (insert (nd ^⋎ tf) s))) :=
-    IsFormulaSet.insert_iff.mpr ⟨hnd, IsFormulaSet.insert_iff.mpr ⟨htf,
-      IsFormulaSet.insert_iff.mpr ⟨hX, hs⟩⟩⟩
-  exact Derivable.or_m (mem_bitInsert_iff.mpr (Or.inl rfl)) (Derivable.wk hF hsub h)
-
 end generic
 
 section rules

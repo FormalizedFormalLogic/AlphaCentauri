@@ -9,6 +9,7 @@ public import AlphaCentauri.Axiomatizability.RestrictedComplexity
 public import AlphaCentauri.Bootstrapping.Completeness.Henkin
 public import AlphaCentauri.Bootstrapping.Completeness.HenkinTermModel
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
+public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
 public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
 public import AlphaCentauri.Bootstrapping.Interpretability.Translation

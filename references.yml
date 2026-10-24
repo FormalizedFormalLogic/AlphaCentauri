@@ -232,6 +232,20 @@ Sla04:
     type: Periodical
     title: Proceedings of the American Mathematical Society
 
+Tha05:
+  type: Article
+  title: "A note on Δ₁ induction and Σ₁ collection"
+  author: ["Thapen, Neil"]
+  volume: 186
+  issue: 1
+  page-range: 79-84
+  date: 2005
+  serial-number:
+    doi: "10.4064/fm186-1-6"
+  parent:
+    type: Periodical
+    title: Fundamenta Mathematicae
+
 Tow20:
   type: Misc
   title: "{Goodstein}'s theorem, ε₀, and unprovability"

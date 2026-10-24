@@ -404,6 +404,86 @@ lemma fvSubst_eq_self_of_shift {w n p : V} (hp : IsSemiformula L n p) (h : shift
 
 end fvFree
 
+section sequentRules
+
+variable (L) in
+/-- A predicate on sequents is closed under the rules of the one-sided calculus other than the
+cut rule and the shift rule. -/
+structure SequentRules (D : V → Prop) : Prop where
+  em {s : V} : IsFormulaSet L s → ∀ p, p ∈ s → neg L p ∈ s → D s
+  verum {s : V} : IsFormulaSet L s → ^⊤ ∈ s → D s
+  and_m {s p q : V} : p ^⋏ q ∈ s → D (insert p s) → D (insert q s) → D s
+  or_m {s p q : V} : p ^⋎ q ∈ s → D (insert p (insert q s)) → D s
+  all_m {s p : V} : ^∀ p ∈ s → D (insert (free L p) (setShift L s)) → D s
+  ex_m {s p t : V} : ^∃ p ∈ s → IsTerm L t → D (insert (substs1 L t p) s) → D s
+  wk {s s' : V} : IsFormulaSet L s → s' ⊆ s → D s' → D s
+
+variable (T) in
+lemma Derivable.sequentRules : SequentRules L (Derivable (V := V) T) :=
+  ⟨Derivable.em, Derivable.verum, Derivable.and_m, Derivable.or_m, Derivable.all_m,
+    Derivable.ex_m, Derivable.wk⟩
+
+namespace SequentRules
+
+variable {D : V → Prop} (R : SequentRules L D) {w s : V}
+
+include R
+
+lemma image_axL {p : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
+    (hp : p ∈ s) (hnp : neg L p ∈ s) : D (fvSubstImage (L := L) w s) :=
+  R.em (formulaSet_fvSubstImage hw hsF) _ (fvSubst_mem_fvSubstImage hp)
+    (by rw [← fvSubst_neg hw (hsF p hp)]; exact fvSubst_mem_fvSubstImage hnp)
+
+lemma image_verum (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hv : ^⊤ ∈ s) :
+    D (fvSubstImage (L := L) w s) :=
+  R.verum (formulaSet_fvSubstImage hw hsF) (by simpa using fvSubst_mem_fvSubstImage (L := L) hv)
+
+lemma image_and {p q : V} (hsF : IsFormulaSet L s) (hpq : p ^⋏ q ∈ s)
+    (hp : D (fvSubstImage (L := L) w (insert p s)))
+    (hq : D (fvSubstImage (L := L) w (insert q s))) : D (fvSubstImage (L := L) w s) := by
+  have hpqF : IsFormula L p ∧ IsFormula L q := by simpa using hsF _ hpq
+  rw [fvSubstImage_insert] at hp hq
+  have h := fvSubst_mem_fvSubstImage (L := L) (w := w) hpq
+  rw [fvSubst_and hpqF.1.isUFormula hpqF.2.isUFormula] at h
+  exact R.and_m h hp hq
+
+lemma image_or {p q : V} (hsF : IsFormulaSet L s) (hpq : p ^⋎ q ∈ s)
+    (h : D (fvSubstImage (L := L) w (insert p (insert q s)))) : D (fvSubstImage (L := L) w s) := by
+  have hpqF : IsFormula L p ∧ IsFormula L q := by simpa using hsF _ hpq
+  rw [fvSubstImage_insert, fvSubstImage_insert] at h
+  have h' := fvSubst_mem_fvSubstImage (L := L) (w := w) hpq
+  rw [fvSubst_or hpqF.1.isUFormula hpqF.2.isUFormula] at h'
+  exact R.or_m h' h
+
+lemma image_all {p : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
+    (hp : ^∀ p ∈ s)
+    (h : D (fvSubstImage (L := L) (^&0 ∷ termShiftVec L (len w) w)
+      (insert (free L p) (setShift L s)))) : D (fvSubstImage (L := L) w s) := by
+  have hpF : IsSemiformula L 1 p := by simpa using hsF _ hp
+  rw [fvSubstImage_insert, ← free_fvSubst hw hpF, ← setShift_fvSubstImage hw hsF] at h
+  have h' := fvSubst_mem_fvSubstImage (L := L) (w := w) hp
+  rw [fvSubst_all hpF.isUFormula] at h'
+  exact R.all_m h' h
+
+lemma image_exs {p t : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
+    (hp : ^∃ p ∈ s) (ht : IsTerm L t) (h : D (fvSubstImage (L := L) w (insert (substs1 L t p) s))) :
+    D (fvSubstImage (L := L) w s) := by
+  have hpF : IsSemiformula L 1 p := by simpa using hsF _ hp
+  rw [fvSubstImage_insert, fvSubst_substs1 hw ht hpF] at h
+  have h' := fvSubst_mem_fvSubstImage (L := L) (w := w) hp
+  rw [fvSubst_exs hpF.isUFormula] at h'
+  exact R.ex_m h' (ht.termFvSubst hw) h
+
+lemma image_wk {s' : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
+    (hsub : s' ⊆ s) (h : D (fvSubstImage (L := L) w s')) : D (fvSubstImage (L := L) w s) :=
+  R.wk (formulaSet_fvSubstImage hw hsF) (fun x hx ↦ by
+    obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hx
+    exact fvSubst_mem_fvSubstImage (hsub hq)) h
+
+end SequentRules
+
+end sequentRules
+
 section rewrite
 
 variable {w s : V}
@@ -435,66 +515,46 @@ private def RewritesBelow (d w : V) : Prop :=
   ∀ d₀ < d, ∀ w' ≤ rewriteBound (L := L) d w, Derivation T d₀ → IsSemitermVec L (len w') 0 w' →
     Derivable T (fvSubstImage (L := L) w' (fstIdx d₀))
 
-private lemma rewrite_axL {p : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
-    (hp : p ∈ s) (hnp : neg L p ∈ s) : Derivable T (fvSubstImage (L := L) w s) :=
-  .em (formulaSet_fvSubstImage hw hsF) _ (fvSubst_mem_fvSubstImage hp)
-    (by rw [← fvSubst_neg hw (hsF p hp)]; exact fvSubst_mem_fvSubstImage hnp)
-
 private lemma rewrite_and {d p q dp dq : V} (ih : RewritesBelow T d w)
     (hd : d = andIntro s p q dp dq) (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
     (hpq : p ^⋏ q ∈ s) (hdp : DerivationOf T dp (insert p s))
     (hdq : DerivationOf T dq (insert q s)) : Derivable T (fvSubstImage (L := L) w s) := by
-  have hpqF : IsFormula L p ∧ IsFormula L q := by simpa using hsF _ hpq
   have hep := ih dp (hd ▸ dp_lt_andIntro _ _ _ _ _) w (le_rewriteBound_self d w) hdp.2 hw
   have heq := ih dq (hd ▸ dq_lt_andIntro _ _ _ _ _) w (le_rewriteBound_self d w) hdq.2 hw
-  rw [hdp.1, fvSubstImage_insert] at hep
-  rw [hdq.1, fvSubstImage_insert] at heq
-  have h := fvSubst_mem_fvSubstImage (L := L) (w := w) hpq
-  rw [fvSubst_and hpqF.1.isUFormula hpqF.2.isUFormula] at h
-  exact .and_m h hep heq
+  rw [hdp.1] at hep
+  rw [hdq.1] at heq
+  exact (Derivable.sequentRules T).image_and hsF hpq hep heq
 
 private lemma rewrite_or {d p q d₀ : V} (ih : RewritesBelow T d w) (hd : d = orIntro s p q d₀)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hpq : p ^⋎ q ∈ s)
     (hd₀ : DerivationOf T d₀ (insert p (insert q s))) :
     Derivable T (fvSubstImage (L := L) w s) := by
-  have hpqF : IsFormula L p ∧ IsFormula L q := by simpa using hsF _ hpq
   have he := ih d₀ (hd ▸ d_lt_orIntro _ _ _ _) w (le_rewriteBound_self d w) hd₀.2 hw
-  rw [hd₀.1, fvSubstImage_insert, fvSubstImage_insert] at he
-  have h := fvSubst_mem_fvSubstImage (L := L) (w := w) hpq
-  rw [fvSubst_or hpqF.1.isUFormula hpqF.2.isUFormula] at h
-  exact .or_m h he
+  rw [hd₀.1] at he
+  exact (Derivable.sequentRules T).image_or hsF hpq he
 
 private lemma rewrite_all {d p d₀ : V} (ih : RewritesBelow T d w) (hd : d = allIntro s p d₀)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hp : ^∀ p ∈ s)
     (hd₀ : DerivationOf T d₀ (insert (free L p) (setShift L s))) :
     Derivable T (fvSubstImage (L := L) w s) := by
-  have hpF : IsSemiformula L 1 p := by simpa using hsF _ hp
   have he := ih d₀ (hd ▸ s_lt_allIntro _ _ _) _ (le_rewriteBound_cons d w) hd₀.2
     hw.fvar_cons_termShiftVec
-  rw [hd₀.1, fvSubstImage_insert, ← free_fvSubst hw hpF, ← setShift_fvSubstImage hw hsF] at he
-  have h := fvSubst_mem_fvSubstImage (L := L) (w := w) hp
-  rw [fvSubst_all hpF.isUFormula] at h
-  exact .all_m h he
+  rw [hd₀.1] at he
+  exact (Derivable.sequentRules T).image_all hw hsF hp he
 
 private lemma rewrite_exs {d p t d₀ : V} (ih : RewritesBelow T d w) (hd : d = exsIntro s p t d₀)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hp : ^∃ p ∈ s) (ht : IsTerm L t)
     (hd₀ : DerivationOf T d₀ (insert (substs1 L t p) s)) :
     Derivable T (fvSubstImage (L := L) w s) := by
-  have hpF : IsSemiformula L 1 p := by simpa using hsF _ hp
   have he := ih d₀ (hd ▸ d_lt_exsIntro _ _ _ _) w (le_rewriteBound_self d w) hd₀.2 hw
-  rw [hd₀.1, fvSubstImage_insert, fvSubst_substs1 hw ht hpF] at he
-  have h := fvSubst_mem_fvSubstImage (L := L) (w := w) hp
-  rw [fvSubst_exs hpF.isUFormula] at h
-  exact .ex_m h (ht.termFvSubst hw) he
+  rw [hd₀.1] at he
+  exact (Derivable.sequentRules T).image_exs hw hsF hp ht he
 
 private lemma rewrite_wk {d d₀ : V} (ih : RewritesBelow T d w) (hd : d = wkRule s d₀)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hsub : fstIdx d₀ ⊆ s)
-    (hd₀ : Derivation T d₀) : Derivable T (fvSubstImage (L := L) w s) := by
-  refine .wk (formulaSet_fvSubstImage hw hsF) ?_
+    (hd₀ : Derivation T d₀) : Derivable T (fvSubstImage (L := L) w s) :=
+  (Derivable.sequentRules T).image_wk hw hsF hsub
     (ih d₀ (hd ▸ d_lt_wkRule _ _) w (le_rewriteBound_self d w) hd₀ hw)
-  intro x hx
-  obtain ⟨q, hq, rfl⟩ := mem_fvSubstImage_iff.mp hx
-  exact fvSubst_mem_fvSubstImage (hsub hq)
 
 private lemma rewrite_shift {d d₀ : V} (ih : RewritesBelow T d w)
     (hd : d = shiftRule (setShift L (fstIdx d₀)) d₀) (hw : IsSemitermVec L (len w) 0 w)
@@ -546,10 +606,9 @@ private lemma rewrite_aux (hT : ∀ p ∈ T.Δ₁Class (V := V), shift L p = p) 
     ⟨s, d₀, rfl, hsub, hd₀⟩ | ⟨s, d₀, rfl, rfl, hd₀⟩ | ⟨s, p, d₁, d₂, rfl, h₁, h₂⟩ |
     ⟨s, p, rfl, hp, hpT⟩)
   · rw [fstIdx_axL] at hsF ⊢
-    exact rewrite_axL hw hsF hp hnp
+    exact (Derivable.sequentRules T).image_axL hw hsF hp hnp
   · rw [fstIdx_verumIntro] at hsF ⊢
-    exact .verum (formulaSet_fvSubstImage hw hsF)
-      (by simpa using fvSubst_mem_fvSubstImage (L := L) (w := w) hv)
+    exact (Derivable.sequentRules T).image_verum hw hsF hv
   · rw [fstIdx_andIntro] at hsF ⊢
     exact rewrite_and ih rfl hw hsF hpq hdp hdq
   · rw [fstIdx_orIntro] at hsF ⊢

@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.UniversalClosure
-public import AlphaCentauri.Bootstrapping.Syntax.SubstInversion
+public import AlphaCentauri.ToFoundation.SubstInversion
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.ToFoundation.Syntax

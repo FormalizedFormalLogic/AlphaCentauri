@@ -21,11 +21,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 namespace Subformula
 
 /-- Blueprint of the primitive recursion computing, for a formula code, the coded set of all
-its subformula codes.
-
-No source; a formalization device mirroring `UformulaRec1.Blueprint` for a codomain of finite
-sets rather than of formula/term codes.
--/
+its subformula codes. -/
 noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] :
     UformulaRec1.Blueprint where
   rel := .mkSigma
@@ -81,10 +77,7 @@ formula's immediate parts are inserted into the union of their own subformula se
 -/
 noncomputable def subformulas (p : V) : V := (Subformula.construction L).result L 0 p
 
-/-- The Σ₁ graph of `subformulas`.
-
-No source; a formalization device.
--/
+/-- The Σ₁ graph of `subformulas`. -/
 noncomputable def subformulasGraph : 𝚺ᴬ₁.Semisentence 2 :=
   ((Subformula.blueprint L).result L).rew (Rew.subst ![#0, ‘0’, #1])
 
@@ -94,70 +87,45 @@ section
 
 variable {Γ : SigmaPiDelta} {m : ℕ}
 
-/-- `subformulas` is $\Sigma_1$-definable through `subformulasGraph`.
-- No source; a formalization device mirroring the external subformula relation. -/
 instance subformulas.defined : 𝚺ᴬ₁-Function₁ subformulas (V := V) L via subformulasGraph L :=
   .mk fun v ↦ by
     simpa [subformulasGraph, subformulas, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using!
       (Subformula.construction L).result_defined.defined ![v 0, 0, v 1]
 
-/-- `subformulas` is a $\Sigma_1$-definable function.
-- No source; a formalization device mirroring the external subformula relation. -/
 instance subformulas.definable : 𝚺ᴬ₁-Function₁ subformulas (V := V) L :=
   subformulas.defined.to_definable
 
-/-- `subformulas` is definable at every level `Γᴬ_[m + 1]` of the hierarchy.
-- No source; a formalization device mirroring the external subformula relation. -/
 instance subformulas.definable' : Γᴬ_[m + 1]-Function₁ subformulas (V := V) L :=
   subformulas.definable.of_sigmaOne
 
 end
 
-/-- The subformulas of an atomic formula are the formula itself.
-- No source; a formalization device mirroring the external subformula relation. -/
 @[simp] lemma subformulas_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     subformulas L (^rel k R v) = insert (^rel k R v) ∅ := by
   simp [subformulas, hR, hv, Subformula.construction]
 
-/-- The subformulas of a negated atomic formula are the formula itself.
-- No source; a formalization device mirroring the external subformula relation. -/
 @[simp] lemma subformulas_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     subformulas L (^nrel k R v) = insert (^nrel k R v) ∅ := by
   simp [subformulas, hR, hv, Subformula.construction]
 
-/-- The subformulas of `⊤` are `⊤` itself.
-- No source; a formalization device mirroring the external subformula relation. -/
 @[simp] lemma subformulas_verum : subformulas L (^⊤ : V) = insert (^⊤ : V) ∅ := by
   simp [subformulas, Subformula.construction]
 
-/-- The subformulas of `⊥` are `⊥` itself.
-- No source; a formalization device mirroring the external subformula relation. -/
 @[simp] lemma subformulas_falsum : subformulas L (^⊥ : V) = insert (^⊥ : V) ∅ := by
   simp [subformulas, Subformula.construction]
 
-/-- The subformulas of a conjunction are the conjunction and the subformulas of both
-conjuncts.
-- No source; a formalization device mirroring the external subformula relation. -/
 @[simp] lemma subformulas_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
     subformulas L (p ^⋏ q) = insert (p ^⋏ q) (subformulas L p ∪ subformulas L q) := by
   simp [subformulas, hp, hq, Subformula.construction]
 
-/-- The subformulas of a disjunction are the disjunction and the subformulas of both
-disjuncts.
-- No source; a formalization device mirroring the external subformula relation. -/
 @[simp] lemma subformulas_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
     subformulas L (p ^⋎ q) = insert (p ^⋎ q) (subformulas L p ∪ subformulas L q) := by
   simp [subformulas, hp, hq, Subformula.construction]
 
-/-- The subformulas of a universal formula are the formula and the subformulas of its body.
-- No source; a formalization device mirroring the external subformula relation. -/
 @[simp] lemma subformulas_all {p : V} (hp : IsUFormula L p) :
     subformulas L (^∀ p) = insert (^∀ p) (subformulas L p) := by
   simp [subformulas, hp, Subformula.construction]
 
-/-- The subformulas of an existential formula are the formula and the subformulas of its
-body.
-- No source; a formalization device mirroring the external subformula relation. -/
 @[simp] lemma subformulas_exs {p : V} (hp : IsUFormula L p) :
     subformulas L (^∃ p) = insert (^∃ p) (subformulas L p) := by
   simp [subformulas, hp, Subformula.construction]
@@ -184,179 +152,135 @@ lemma mem_subformulas_self {p : V} (hp : IsUFormula L p) : p ∈ subformulas L p
     case hexs => intro p hp _; simp [hp]
   exact H p hp
 
-/-- Every subformula code of a formula code is bounded by it.
+variable (L) in
+/-- `r` is an immediate subformula of `p`. -/
+def IsImmediateSub (r p : V) : Prop :=
+  IsUFormula L r ∧ ((∃ s, IsUFormula L s ∧
+    (p = r ^⋏ s ∨ p = s ^⋏ r ∨ p = r ^⋎ s ∨ p = s ^⋎ r)) ∨ p = ^∀ r ∨ p = ^∃ r)
 
-- [HP98, §V.3(g)]
--/
-lemma le_of_mem_subformulas {p q : V} (hp : IsUFormula L p) (hq : q ∈ subformulas L p) : q ≤ p := by
-  have H : ∀ p : V, IsUFormula L p → ∀ q ∈ subformulas L p, q ≤ p := by
-    apply IsUFormula.ISigma1.pi1_succ_induction
-      (P := fun p ↦ ∀ q ∈ subformulas L p, q ≤ p) (by definability)
+namespace IsImmediateSub
+
+variable {r p : V}
+
+lemma isUFormula (h : IsImmediateSub L r p) : IsUFormula L p := by
+  rcases h with ⟨hr, ⟨s, hs, rfl | rfl | rfl | rfl⟩ | rfl | rfl⟩ <;> simp [*]
+
+lemma lt (h : IsImmediateSub L r p) : r < p := by
+  rcases h with ⟨hr, ⟨s, hs, rfl | rfl | rfl | rfl⟩ | rfl | rfl⟩ <;> simp
+
+lemma subformulas_subset (h : IsImmediateSub L r p) : subformulas L r ⊆ subformulas L p := by
+  rcases h with ⟨hr, ⟨s, hs, rfl | rfl | rfl | rfl⟩ | rfl | rfl⟩
+  · rw [subformulas_and hr hs]
+    exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _)
+  · rw [subformulas_and hs hr]
+    exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _)
+  · rw [subformulas_or hr hs]
+    exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _)
+  · rw [subformulas_or hs hr]
+    exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _)
+  · rw [subformulas_all hr]
+    exact susbset_insert _ _
+  · rw [subformulas_exs hr]
+    exact susbset_insert _ _
+
+lemma shift_eq (h : IsImmediateSub L r p) (hp : shift L p = p) : shift L r = r := by
+  rcases h with ⟨hr, ⟨s, hs, rfl | rfl | rfl | rfl⟩ | rfl | rfl⟩
+  · exact (by simpa [shift_and hr hs] using hp : shift L r = r ∧ shift L s = s).1
+  · exact (by simpa [shift_and hs hr] using hp : shift L s = s ∧ shift L r = r).2
+  · exact (by simpa [shift_or hr hs] using hp : shift L r = r ∧ shift L s = s).1
+  · exact (by simpa [shift_or hs hr] using hp : shift L s = s ∧ shift L r = r).2
+  · simpa [shift_all hr] using hp
+  · simpa [shift_exs hr] using hp
+
+end IsImmediateSub
+
+/-- Induction on the subformula relation: a property of pairs `(p, q)` with `q` a subformula of
+`p` holds if it holds reflexively and is passed from an immediate subformula to the formula. -/
+theorem subformulas_induction {P : V → V → Prop}
+    (hP : 𝚷ᴬ₁-Predicate fun p : V ↦ ∀ q ∈ subformulas L p, P p q)
+    (hself : ∀ p, IsUFormula L p → P p p)
+    (hstep : ∀ r p q, IsImmediateSub L r p → P r q → P p q) {p q : V} (hp : IsUFormula L p)
+    (hq : q ∈ subformulas L p) : P p q := by
+  have H : ∀ p : V, IsUFormula L p → ∀ q ∈ subformulas L p, P p q := by
+    apply IsUFormula.ISigma1.pi1_succ_induction (P := fun p ↦ ∀ q ∈ subformulas L p, P p q) hP
     case hrel =>
       intro k R v hR hv q hq
       simp only [subformulas_rel hR hv, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      exact hq.le
+      subst hq
+      exact hself _ (by simp [hR, hv])
     case hnrel =>
       intro k R v hR hv q hq
       simp only [subformulas_nrel hR hv, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      exact hq.le
+      subst hq
+      exact hself _ (by simp [hR, hv])
     case hverum =>
       intro q hq
       simp only [subformulas_verum, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      exact hq.le
+      subst hq
+      exact hself _ (by simp)
     case hfalsum =>
       intro q hq
       simp only [subformulas_falsum, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      exact hq.le
+      subst hq
+      exact hself _ (by simp)
     case hand =>
       intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ q hq
       simp only [subformulas_and hp₁ hp₂, mem_bitInsert_iff, mem_cup_iff] at hq
       rcases hq with rfl | hq | hq
-      · rfl
-      · exact le_of_lt (lt_of_le_of_lt (ih₁ q hq) (by simp))
-      · exact le_of_lt (lt_of_le_of_lt (ih₂ q hq) (by simp))
+      · exact hself _ (by simp [hp₁, hp₂])
+      · exact hstep _ _ _ ⟨hp₁, Or.inl ⟨p₂, hp₂, Or.inl rfl⟩⟩ (ih₁ q hq)
+      · exact hstep _ _ _ ⟨hp₂, Or.inl ⟨p₁, hp₁, Or.inr <| Or.inl rfl⟩⟩ (ih₂ q hq)
     case hor =>
       intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ q hq
       simp only [subformulas_or hp₁ hp₂, mem_bitInsert_iff, mem_cup_iff] at hq
       rcases hq with rfl | hq | hq
-      · rfl
-      · exact le_of_lt (lt_of_le_of_lt (ih₁ q hq) (by simp))
-      · exact le_of_lt (lt_of_le_of_lt (ih₂ q hq) (by simp))
+      · exact hself _ (by simp [hp₁, hp₂])
+      · exact hstep _ _ _ ⟨hp₁, Or.inl ⟨p₂, hp₂, Or.inr <| Or.inr <| Or.inl rfl⟩⟩ (ih₁ q hq)
+      · exact hstep _ _ _ ⟨hp₂, Or.inl ⟨p₁, hp₁, Or.inr <| Or.inr <| Or.inr rfl⟩⟩ (ih₂ q hq)
     case hall =>
       intro p₁ hp₁ ih₁ q hq
       simp only [subformulas_all hp₁, mem_bitInsert_iff] at hq
       rcases hq with rfl | hq
-      · rfl
-      · exact le_of_lt (lt_of_le_of_lt (ih₁ q hq) (by simp))
+      · exact hself _ (by simp [hp₁])
+      · exact hstep _ _ _ ⟨hp₁, Or.inr <| Or.inl rfl⟩ (ih₁ q hq)
     case hexs =>
       intro p₁ hp₁ ih₁ q hq
       simp only [subformulas_exs hp₁, mem_bitInsert_iff] at hq
       rcases hq with rfl | hq
-      · rfl
-      · exact le_of_lt (lt_of_le_of_lt (ih₁ q hq) (by simp))
+      · exact hself _ (by simp [hp₁])
+      · exact hstep _ _ _ ⟨hp₁, Or.inr <| Or.inr rfl⟩ (ih₁ q hq)
   exact H p hp q hq
+
+/-- Every subformula code of a formula code is bounded by it.
+
+- [HP98, §V.3(g)]
+-/
+lemma le_of_mem_subformulas {p q : V} (hp : IsUFormula L p) (hq : q ∈ subformulas L p) : q ≤ p :=
+  subformulas_induction (P := fun p q ↦ q ≤ p) (by definability) (fun _ _ ↦ le_rfl)
+    (fun _ _ _ h ih ↦ ih.trans h.lt.le) hp hq
 
 /-- Every subformula code of a formula code is itself a formula code.
 
 - [HP98, §V.3(g)]
 -/
 lemma IsUFormula.of_mem_subformulas {p q : V} (hp : IsUFormula L p) (hq : q ∈ subformulas L p) :
-    IsUFormula L q := by
-  have H : ∀ p : V, IsUFormula L p → ∀ q ∈ subformulas L p, IsUFormula L q := by
-    apply IsUFormula.ISigma1.pi1_succ_induction
-      (P := fun p ↦ ∀ q ∈ subformulas L p, IsUFormula L q) (by definability)
-    case hrel =>
-      intro k R v hR hv q hq
-      simp only [subformulas_rel hR hv, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      simp [hq, hR, hv]
-    case hnrel =>
-      intro k R v hR hv q hq
-      simp only [subformulas_nrel hR hv, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      simp [hq, hR, hv]
-    case hverum =>
-      intro q hq
-      simp only [subformulas_verum, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      simp [hq]
-    case hfalsum =>
-      intro q hq
-      simp only [subformulas_falsum, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      simp [hq]
-    case hand =>
-      intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ q hq
-      simp only [subformulas_and hp₁ hp₂, mem_bitInsert_iff, mem_cup_iff] at hq
-      rcases hq with rfl | hq | hq
-      · simp [hp₁, hp₂]
-      · exact ih₁ q hq
-      · exact ih₂ q hq
-    case hor =>
-      intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ q hq
-      simp only [subformulas_or hp₁ hp₂, mem_bitInsert_iff, mem_cup_iff] at hq
-      rcases hq with rfl | hq | hq
-      · simp [hp₁, hp₂]
-      · exact ih₁ q hq
-      · exact ih₂ q hq
-    case hall =>
-      intro p₁ hp₁ ih₁ q hq
-      simp only [subformulas_all hp₁, mem_bitInsert_iff] at hq
-      rcases hq with rfl | hq
-      · simp [hp₁]
-      · exact ih₁ q hq
-    case hexs =>
-      intro p₁ hp₁ ih₁ q hq
-      simp only [subformulas_exs hp₁, mem_bitInsert_iff] at hq
-      rcases hq with rfl | hq
-      · simp [hp₁]
-      · exact ih₁ q hq
-  exact H p hp q hq
+    IsUFormula L q :=
+  subformulas_induction (P := fun _ q ↦ IsUFormula L q) (by definability) (fun _ hp ↦ hp)
+    (fun _ _ _ _ ih ↦ ih) hp hq
 
-/-- The subformula relation is transitive: the subformulas of a subformula of `p` are among
-the subformulas of `p`.
+/-- The subformula relation is transitive: the subformulas of a subformula of `p` and the
+subformulas of `p`.
 
 - [HP98, §V.3(g)]
 -/
 lemma subformulas_subset_of_mem {p q : V} (hp : IsUFormula L p) (hq : q ∈ subformulas L p) :
-    subformulas L q ⊆ subformulas L p := by
-  have H : ∀ p : V, IsUFormula L p → ∀ q ∈ subformulas L p, subformulas L q ⊆ subformulas L p := by
-    apply IsUFormula.ISigma1.pi1_succ_induction
-      (P := fun p : V ↦ ∀ q ∈ subformulas L p, subformulas L q ⊆ subformulas L p) (by definability)
-    case hrel =>
-      intro k R v hR hv q hq
-      simp only [subformulas_rel hR hv, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      simp [hq]
-    case hnrel =>
-      intro k R v hR hv q hq
-      simp only [subformulas_nrel hR hv, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      simp [hq]
-    case hverum =>
-      intro q hq
-      simp only [subformulas_verum, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      simp [hq]
-    case hfalsum =>
-      intro q hq
-      simp only [subformulas_falsum, mem_bitInsert_iff, not_mem_empty, or_false] at hq
-      simp [hq]
-    case hand =>
-      intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ q hq
-      simp only [subformulas_and hp₁ hp₂, mem_bitInsert_iff, mem_cup_iff] at hq
-      rcases hq with rfl | hq | hq
-      · simp [hp₁, hp₂]
-      · exact subset_trans (ih₁ q hq) (by
-          rw [subformulas_and hp₁ hp₂];
-          exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
-      · exact subset_trans (ih₂ q hq) (by
-          rw [subformulas_and hp₁ hp₂];
-          exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
-    case hor =>
-      intro p₁ p₂ hp₁ hp₂ ih₁ ih₂ q hq
-      simp only [subformulas_or hp₁ hp₂, mem_bitInsert_iff, mem_cup_iff] at hq
-      rcases hq with rfl | hq | hq
-      · simp [hp₁, hp₂]
-      · exact subset_trans (ih₁ q hq) (by
-          rw [subformulas_or hp₁ hp₂];
-          exact subset_trans (union_succ_union_left _ _) (susbset_insert _ _))
-      · exact subset_trans (ih₂ q hq) (by
-          rw [subformulas_or hp₁ hp₂];
-          exact subset_trans (union_succ_union_right _ _) (susbset_insert _ _))
-    case hall =>
-      intro p₁ hp₁ ih₁ q hq
-      simp only [subformulas_all hp₁, mem_bitInsert_iff] at hq
-      rcases hq with rfl | hq
-      · simp [hp₁]
-      · exact subset_trans (ih₁ q hq) (by rw [subformulas_all hp₁]; exact susbset_insert _ _)
-    case hexs =>
-      intro p₁ hp₁ ih₁ q hq
-      simp only [subformulas_exs hp₁, mem_bitInsert_iff] at hq
-      rcases hq with rfl | hq
-      · simp [hp₁]
-      · exact subset_trans (ih₁ q hq) (by rw [subformulas_exs hp₁]; exact susbset_insert _ _)
-  exact H p hp q hq
+    subformulas L q ⊆ subformulas L p :=
+  subformulas_induction (P := fun p q ↦ subformulas L q ⊆ subformulas L p) (by definability)
+    (fun _ _ ↦ subset_refl _) (fun _ _ _ h ih ↦ subset_trans ih h.subformulas_subset) hp hq
 
 variable (L)
 
-/-- The union, over all codes in the coded set `s`, of their subformula sets.
-
-No source; a formalization device.
--/
+/-- The union, over all codes in the coded set `s`, of their subformula sets. -/
 noncomputable def subformulasSet (s : V) : V := ⋃ʰᶠ (hfsImage (subformulas L) s)
 
 variable {L}

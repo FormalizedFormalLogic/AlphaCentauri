@@ -1,9 +1,8 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Syntax.Iteration
-public import AlphaCentauri.Bootstrapping.Syntax.SubstCongruence
+public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.DirectTranslation
-public import AlphaCentauri.ToFoundation.Quote
+public import AlphaCentauri.ToFoundation.Coding
 
 /-!
 # Internal translation of formulas along a table of operators

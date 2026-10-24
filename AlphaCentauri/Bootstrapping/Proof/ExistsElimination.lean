@@ -86,20 +86,6 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 section shiftSubsts1
 
-lemma shift_substs1_qqFvar {p j : V} (hp : IsSemiformula L 1 p) :
-    shift L (substs1 L (^&j) p) = substs1 L (^&(j + 1)) (shift L p) := by
-  have hv : IsSemitermVec L 1 (0 : V) ?[^&j] := by simp
-  rw [substs1, shift_substs hp hv]
-  congr 1
-  apply nth_ext' 1 (by simp) (by simp)
-  intro i hi
-  rcases (show i = 0 by simpa using hi)
-  simp
-
-lemma shift_neg_substs1_qqFvar {d j : V} (hd : IsSemiformula L 1 d) (hds : shift L d = d) :
-    shift L (neg L (substs1 L (^&j) d)) = neg L (substs1 L (^&(j + 1)) d) := by
-  rw [shift_neg (IsSemiformula.substs1 (n := 0) (by simp) hd), shift_substs1_qqFvar hd, hds]
-
 lemma fvSubst_freshVec_neg_substs1_qqFvar {d i j : V} (hd : IsSemiformula L 1 d)
     (hds : shift L d = d) (hij : i < j) :
     fvSubst L (freshVec j) (neg L (substs1 L (^&i) d)) = neg L (substs1 L (^&(i + 1)) d) := by

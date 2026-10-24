@@ -45,6 +45,12 @@ omit [L.Eq] in
   simp
   rfl
 
+omit [L.Eq] in
+@[simp] lemma quote_nrel_sentence {n k : ℕ} (R : L.Rel k) (v : Fin k → ClosedSemiterm L n) :
+    (⌜(FirstOrder.Semiformula.nrel R v : Semisentence L n)⌝ : Semiformula V L n) =
+      Semiformula.nrel R fun i ↦ ⌜v i⌝ :=
+  rfl
+
 @[simp] lemma Semiformula.substs_equal {n m : ℕ} (w : SemitermVec V L n m) (s t : Semiterm V L n) :
     (Semiformula.equal s t).subst w = Semiformula.equal (s.subst w) (t.subst w) := by
   simp only [Semiformula.equal, Semiformula.substs_rel]
@@ -71,6 +77,15 @@ lemma Matrix.conj_map {α β : Type*} [Top α] [Wedge α] [Top β] [Wedge β] (f
   | succ m ih => simp [Matrix.conj, hand, ih]; rfl
 
 omit [L.Eq] in
+lemma Semiformula.substs_q_substs_single {n : ℕ} (φ : Semiformula V L (n + 1))
+    (w : SemitermVec V L n 0) (t : Semiterm V L 0) :
+    (φ.subst w.q).subst ![t] = φ.subst (t :> w) := by
+  rw [Semiformula.substs_substs]
+  congr 1
+  funext i
+  cases i using Fin.cases <;> simp
+
+omit [L.Eq] in
 @[simp] lemma Semiformula.substs_conj {n m k : ℕ} (w : SemitermVec V L n m)
     (v : Fin k → Semiformula V L n) :
     (Matrix.conj v).subst w = Matrix.conj fun i ↦ (v i).subst w :=
@@ -81,15 +96,11 @@ omit [L.Eq] in
     (⌜Matrix.conj v⌝ : Semiformula V L n) = Matrix.conj fun i ↦ ⌜v i⌝ :=
   Matrix.conj_map (fun φ : Semisentence L n ↦ (⌜φ⌝ : Semiformula V L n)) (by simp) (by simp) v
 
-private lemma append_addCast {α : Type*} {k : ℕ} (s u : Fin k → α) (i : Fin k) :
-    Fin.append s u (Fin.addCast k i) = s i := by
-  simp [Fin.addCast]
-
 omit [L.Eq] in
 private lemma subst_append_addCast {k : ℕ} (s u : SemitermVec V L k 0) :
     (Semiterm.subst (Fin.append s u))⨟ (fun i ↦ Semiterm.bvar (Fin.addCast k i)) = s := by
   funext i
-  simp [append_addCast]
+  simp [Fin.append_addCast]
 
 omit [L.Eq] in
 private lemma subst_append_addNat {k : ℕ} (s u : SemitermVec V L k 0) :
@@ -116,12 +127,8 @@ lemma tprovable_subst_of_allClosure :
     have h₁ := tprovable_subst_of_allClosure (σ := ∀¹ σ) (Matrix.vecTail w) h
     simp only [LCWQIsoGödelQuote.all, Semiformula.substs_all] at h₁
     have h₂ := TProof.specialize! h₁ (w 0)
-    rw [Semiformula.substs_substs] at h₂
-    convert h₂ using 2
-    funext i
-    refine Fin.cases ?_ (fun i ↦ ?_) i
-    · simp
-    · simp [Semiterm.bShift_substs_sing]; rfl
+    rwa [Semiformula.substs_q_substs_single,
+      show (w 0 :> Matrix.vecTail w) = w from Matrix.cons_head_tail w] at h₂
 
 lemma tprovable_quote_eqAxiom [𝗘𝗤 L ⪯ S] {σ : Sentence L} (h : 𝗘𝗤 L σ) :
     S.internalize V ⊢ (⌜σ⌝ : Formula V L) := by
@@ -170,7 +177,7 @@ theorem tprovable_equal_func_imp [𝗘𝗤 L ⪯ S] {k : ℕ} (f : L.Func k) (s 
     (tprovable_quote_eqAxiom S (Theory.eqAxiom.funcExt f))
   simp only [LCWQIsoGödelQuote.imply, quote_conj, quote_eqop, Semiformula.substs_imp,
     Semiformula.substs_equal, Semiformula.substs_conj] at h₁
-  simp only [Semiterm.empty_typed_quote_bvar, Semiterm.substs_bvar, append_addCast,
+  simp only [Semiterm.empty_typed_quote_bvar, Semiterm.substs_bvar, Fin.append_addCast,
     Fin.append_addNat, Semiterm.empty_typed_quote_func, Semiterm.substs_func] at h₁
   rw [subst_append_addCast, subst_append_addNat] at h₁
   exact h₁
@@ -183,7 +190,7 @@ theorem tprovable_rel_congr_imp [𝗘𝗤 L ⪯ S] {k : ℕ} (R : L.Rel k) (s u 
   simp only [LCWQIsoGödelQuote.imply, quote_conj, quote_eqop, quote_rel_sentence,
     Semiformula.substs_imp, Semiformula.substs_equal, Semiformula.substs_conj,
     Semiformula.substs_rel] at h₁
-  simp only [Semiterm.empty_typed_quote_bvar, Semiterm.substs_bvar, append_addCast,
+  simp only [Semiterm.empty_typed_quote_bvar, Semiterm.substs_bvar, Fin.append_addCast,
     Fin.append_addNat] at h₁
   rw [subst_append_addCast, subst_append_addNat] at h₁
   exact h₁

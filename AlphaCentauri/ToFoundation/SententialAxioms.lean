@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToFoundation.Coding
 public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!
@@ -49,6 +50,11 @@ class Theory.Δ₁.Sentential (T : Theory L) [T.Δ₁] : Prop where
   shift_eq {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {p : V}
     (h : p ∈ T.Δ₁Class) : Arithmetic.Bootstrapping.shift L p = p
 
+lemma Theory.Δ₁.Sentential.forall_shift_eq (T : Theory L) [T.Δ₁] [Theory.Δ₁.Sentential T] {V : Type}
+    [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
+    ∀ p ∈ T.Δ₁Class (V := V), Arithmetic.Bootstrapping.shift L p = p :=
+  fun _ h ↦ shift_eq h
+
 /-- The numeration of `T` restricted to the codes fixed by the shift of free variables. -/
 noncomputable abbrev Theory.Δ₁.sentential (T : Theory L) (d : T.Δ₁) : T.Δ₁ where
   ch := T.Δ₁ch ⋏ Arithmetic.Bootstrapping.shiftFixed L
@@ -62,8 +68,8 @@ noncomputable abbrev Theory.Δ₁.sentential (T : Theory L) (d : T.Δ₁) : T.Δ
     · rintro ⟨σ, hσ, rfl⟩
       apply And.intro ⟨σ, hσ, rfl⟩
       change ℕ ⊧/![_] (Arithmetic.Bootstrapping.shiftFixed L).sigma.val
-      rw [Arithmetic.Bootstrapping.shiftFixed_sigma_iff, ← Semiformula.quote_shift]
-      simp
+      rw [Arithmetic.Bootstrapping.shiftFixed_sigma_iff]
+      exact Semisentence.shift_quote σ
   isDelta1 :=
     Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
       (fun V _ _ ↦

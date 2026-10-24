@@ -40,15 +40,11 @@ private lemma eraseOut {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s : Sequent)
 
 private lemma frameIn (a e : ArithmeticFormula ℕ) (s t : Sequent) :
     (insert a s).erase e ∪ t ⊆ insert a (s.erase e ∪ t) := by
-  intro x hx
-  simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢
-  tauto
+  grind
 
 private lemma frameOut {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s t : Sequent) :
     insert a (s.erase e ∪ t) ⊆ (insert a s).erase e ∪ t := by
-  intro x hx
-  simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx ⊢
-  rcases hx with rfl | hx <;> tauto
+  grind
 
 end Frame
 
@@ -287,9 +283,7 @@ lemma atom_cut (r : (ℒₒᵣ).Rel k) (v) (hC : Z∞ ⊢[α, 0] insert (Semifor
   obtain ⟨D, ho, hcr⟩ := hC
   refine ((atom_cutAux r v hNC D hcr (Finset.mem_insert_self _ _)).weakening ?_).mono_ordinalBound
     (by gcongr)
-  intro x hx
-  simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx
-  tauto
+  grind
 
 /-- An atomic formula reduces at rank `0`.
 
@@ -460,9 +454,7 @@ lemma cut_reduce_all (hθ : 0 < θ) (hqr : φₓ.qr < c) : CutReducible θ c (�
   refine ⟨γ + δ + 1, Ordinal.add_one_lt_omega0_opow hθ (Ordinal.add_lt_omega0_opow hγ hδ), ?_⟩
   refine ((cut_reduce_allAux hqr fam D hcr
     (Finset.mem_insert_self _ _)).weakening ?_).mono_ordinalBound (by gcongr)
-  intro x hx
-  simp only [Finset.mem_union, Finset.mem_erase, Finset.mem_insert] at hx
-  tauto
+  grind
 
 end Quantifier
 

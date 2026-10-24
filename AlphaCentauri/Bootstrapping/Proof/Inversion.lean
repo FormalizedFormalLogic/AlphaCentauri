@@ -137,18 +137,6 @@ section
 
 variable {T : Theory L} [T.Δ₁]
 
-/-- Removing a code just added to a coded set that did not contain it recovers the set. -/
-private lemma bitRemove_insert_of_not_mem {x s : V} (h : x ∉ s) : bitRemove x (insert x s) = s :=
-  mem_ext <| by
-    intro z
-    simp only [mem_bitRemove_iff, mem_bitInsert_iff]
-    constructor
-    · rintro ⟨hz, rfl | hz'⟩
-      · exact absurd rfl hz
-      · exact hz'
-    · intro hz
-      exact ⟨by rintro rfl; exact h hz, Or.inr hz⟩
-
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 /-- No code is an axiom of the empty theory. -/
 lemma not_mem_empty_Δ₁Class (p : V) : p ∉ (∅ : Theory L).Δ₁Class := by
@@ -175,16 +163,6 @@ lemma cutRank_eq_zero {d : V} (h : CutFreeDerivation T d) : cutRank L d = 0 := b
 
 end CutFreeDerivation
 
-/-- Adding a code already present to a coded set changes nothing. -/
-private lemma insert_eq_self {x s : V} (h : x ∈ s) : insert x s = s := mem_ext <| by
-  intro z
-  simp only [mem_bitInsert_iff]
-  constructor
-  · rintro (rfl | hz)
-    · exact h
-    · exact hz
-  · exact Or.inr
-
 /-- A code in the end-sequent of a proof code is bounded by the proof code. -/
 private lemma le_of_mem_fstIdx {x d : V} (h : x ∈ fstIdx d) : x ≤ d :=
   le_trans (le_of_lt (lt_of_mem h)) (fstIdx_le_self d)
@@ -203,28 +181,6 @@ private lemma and_bounds {p q c s d : V} (hc : c = p ∨ c = q)
   rcases hc with rfl | rfl
   · exact hp
   · exact hq
-
-/-- Adding two codes to a coded set already containing them changes nothing. -/
-private lemma insert_pair_absorb (x y s : V) :
-    insert x (insert y (insert x (insert y s))) = insert x (insert y s) := mem_ext <| by
-  intro z
-  simp only [mem_bitInsert_iff]
-  tauto
-
-/-- Adding two codes and then a third is adding the third and then the two. -/
-private lemma insert_pair_comm (x y a s : V) :
-    insert x (insert y (insert a s)) = insert a (insert x (insert y s)) := mem_ext <| by
-  intro z
-  simp only [mem_bitInsert_iff]
-  tauto
-
-/-- Adding two codes and then two more is adding the last two and then the first two. -/
-private lemma insert_pair_comm₂ (x y a b s : V) :
-    insert x (insert y (insert a (insert b s))) = insert a (insert b (insert x (insert y s))) :=
-  mem_ext <| by
-    intro z
-    simp only [mem_bitInsert_iff]
-    tauto
 
 /-- The formulas and the context of a disjunction inversion are bounded by the derivation. -/
 private lemma or_bounds {p q s d : V} (h : fstIdx d = insert (p ^⋎ q) s) :
@@ -262,11 +218,7 @@ private lemma inversion_and_aux :
   have hqF : IsFormula L q := (by simpa using hpqF : IsFormula L p ∧ IsFormula L q).2
   have hsF : IsFormulaSet L s := fun x hx ↦ hfs x (by simp [hx])
   have hcF : IsFormula L c := by rcases hc with rfl | rfl <;> assumption
-  have hcsF : IsFormulaSet L (insert c s) := by
-    intro x hx
-    rcases mem_bitInsert_iff.mp hx with rfl | hx
-    · exact hcF
-    · exact hsF x hx
+  have hcsF : IsFormulaSet L (insert c s) := IsFormulaSet.insert_iff.mpr ⟨hcF, hsF⟩
   obtain ⟨-, hcase⟩ := hd2.case
   rcases hcase with (⟨s₀, r, rfl, hrs, hnrs⟩ | ⟨s₀, rfl, hv⟩ |
     ⟨s₀, a, b, dp, dq, rfl, hab, hdp, hdq⟩ | ⟨s₀, a, b, d₀, rfl, hab, hd₀⟩ |
@@ -283,12 +235,7 @@ private lemma inversion_and_aux :
         (Bootstrapping.axL (insert (neg L p) (insert (neg L q) (insert c s))) c),
         ⟨by simp, CutFreeDerivation.orIntro (by simp [hor]) ⟨by simp, ?_⟩⟩, ?_⟩
       · refine CutFreeDerivation.axL ?_ (by simp) ?_
-        · intro x hx
-          rcases mem_bitInsert_iff.mp hx with rfl | hx
-          · exact hpF.neg
-          · rcases mem_bitInsert_iff.mp hx with rfl | hx
-            · exact hqF.neg
-            · exact hcsF x hx
+        · exact IsFormulaSet.insert_iff.mpr ⟨hpF.neg, IsFormulaSet.insert_iff.mpr ⟨hqF.neg, hcsF⟩⟩
         · rcases hc with rfl | rfl <;> simp
       · simp
     · have hnotmem : neg L p ^⋎ neg L q ∉ insert (p ^⋏ q) s := by
@@ -306,14 +253,8 @@ private lemma inversion_and_aux :
           rw [← hnegpq, ← he, (hfs r hrs).isUFormula.neg_neg]
         rw [hre] at hrs
         exact hnotmem hrs
-      have hrs' : r ∈ s := by
-        rcases mem_bitInsert_iff.mp hrs with he | h
-        · exact absurd he hrne
-        · exact h
-      have hnrs' : neg L r ∈ s := by
-        rcases mem_bitInsert_iff.mp hnrs with he | h
-        · exact absurd he hnrne
-        · exact h
+      have hrs' : r ∈ s := mem_of_mem_insert_of_ne hrs hrne
+      have hnrs' : neg L r ∈ s := mem_of_mem_insert_of_ne hnrs hnrne
       refine ⟨Bootstrapping.axL (insert c s) r,
         ⟨by simp, CutFreeDerivation.axL hcsF (by simp [hrs']) (by simp [hnrs'])⟩, ?_⟩
       simp only [height_axL]
@@ -321,10 +262,7 @@ private lemma inversion_and_aux :
   · -- verum leaf
     simp only [fstIdx_verumIntro] at hd1
     subst hd1
-    have hvs : (^⊤ : V) ∈ s := by
-      rcases mem_bitInsert_iff.mp hv with he | h
-      · exact absurd he (by simp [qqVerum, qqAnd])
-      · exact h
+    have hvs : (^⊤ : V) ∈ s := mem_of_mem_insert_of_ne hv (by simp [qqVerum, qqAnd])
     refine ⟨Bootstrapping.verumIntro (insert c s),
       ⟨by simp, CutFreeDerivation.verumIntro hcsF (by simp [hvs])⟩, ?_⟩
     simp only [height_verumIntro]
@@ -355,10 +293,7 @@ private lemma inversion_and_aux :
         apply le_trans hh
         simp only [height_andIntro]
         exact le_trans (succ_le_succ (le_max_right (height dp) (height dq))) (le_add_one _)
-    · have habs : a ^⋏ b ∈ s := by
-        rcases mem_bitInsert_iff.mp hab with he | h
-        · exact absurd he hab'
-        · exact h
+    · have habs : a ^⋏ b ∈ s := mem_of_mem_insert_of_ne hab hab'
       have heqp : fstIdx dp = insert (p ^⋏ q) (insert a s) := by
         rw [hdp.1, insert_comm a (p ^⋏ q) s]
       obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc heqp
@@ -380,10 +315,7 @@ private lemma inversion_and_aux :
   · -- disjunction rule
     simp only [fstIdx_orIntro] at hd1
     subst hd1
-    have habs : a ^⋎ b ∈ s := by
-      rcases mem_bitInsert_iff.mp hab with he | h
-      · exact absurd he (by simp [qqAnd, qqOr])
-      · exact h
+    have habs : a ^⋎ b ∈ s := mem_of_mem_insert_of_ne hab (by simp [qqAnd, qqOr])
     have heq : fstIdx d₀ = insert (p ^⋏ q) (insert a (insert b s)) := by
       rw [hd₀.1, insert_comm b (p ^⋏ q) s, insert_comm a (p ^⋏ q) (insert b s)]
     obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc heq
@@ -397,10 +329,7 @@ private lemma inversion_and_aux :
   · -- universal rule
     simp only [fstIdx_allIntro] at hd1
     subst hd1
-    have halls : ^∀ a ∈ s := by
-      rcases mem_bitInsert_iff.mp ha with he | h
-      · exact absurd he (by simp [qqAnd, qqAll])
-      · exact h
+    have halls : ^∀ a ∈ s := mem_of_mem_insert_of_ne ha (by simp [qqAnd, qqAll])
     have heq : fstIdx d₀ =
         insert (shift L p ^⋏ shift L q) (insert (free L a) (setShift L s)) := by
       rw [hd₀.1]
@@ -421,10 +350,7 @@ private lemma inversion_and_aux :
   · -- existential rule
     simp only [fstIdx_exsIntro] at hd1
     subst hd1
-    have hexss : ^∃ a ∈ s := by
-      rcases mem_bitInsert_iff.mp ha with he | h
-      · exact absurd he (by simp [qqAnd, qqExs])
-      · exact h
+    have hexss : ^∃ a ∈ s := mem_of_mem_insert_of_ne ha (by simp [qqAnd, qqExs])
     have heq : fstIdx d₀ = insert (p ^⋏ q) (insert (substs1 L t a) s) := by
       rw [hd₀.1, insert_comm (substs1 L t a) (p ^⋏ q) s]
     obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc heq
@@ -476,13 +402,13 @@ private lemma inversion_and_aux :
       · exact ⟨r₁, Or.inl rfl, hs₁⟩
       · exact ⟨r₂, Or.inr rfl, hs₂⟩
     by_cases hps : p ^⋏ q ∈ s
-    · have heq : fstIdx d₀ = insert (r₁ ^⋏ r₂) (fstIdx d₀) := (insert_eq_self hrt).symm
+    · have heq : fstIdx d₀ = insert (r₁ ^⋏ r₂) (fstIdx d₀) := (insert_eq_self_of_mem hrt).symm
       obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc'sel heq
       obtain ⟨d', hd', hh⟩ :=
         ih d₀ (d_lt_shiftRule _ _) _ b₁ _ b₂ _ b₃ _ b₄ hc'sel ⟨heq, hd₀⟩
       refine ⟨Bootstrapping.shiftRule (setShift L (insert c' (fstIdx d₀))) d',
         ⟨?_, CutFreeDerivation.shiftRule hd'⟩, ?_⟩
-      · rw [fstIdx_shiftRule, mem_setShift_insert, hc'shift, hd1, insert_eq_self hps]
+      · rw [fstIdx_shiftRule, mem_setShift_insert, hc'shift, hd1, insert_eq_self_of_mem hps]
       · simp only [height_shiftRule]
         exact succ_le_succ hh
     · have heq : fstIdx d₀ = insert (r₁ ^⋏ r₂) (bitRemove (r₁ ^⋏ r₂) (fstIdx d₀)) :=
@@ -532,13 +458,8 @@ private lemma inversion_or_aux :
   have hpF : IsFormula L p := (by simpa using hpqF : IsFormula L p ∧ IsFormula L q).1
   have hqF : IsFormula L q := (by simpa using hpqF : IsFormula L p ∧ IsFormula L q).2
   have hsF : IsFormulaSet L s := fun x hx ↦ hfs x (by simp [hx])
-  have htF : IsFormulaSet L (insert p (insert q s)) := by
-    intro x hx
-    rcases mem_bitInsert_iff.mp hx with rfl | hx
-    · exact hpF
-    · rcases mem_bitInsert_iff.mp hx with rfl | hx
-      · exact hqF
-      · exact hsF x hx
+  have htF : IsFormulaSet L (insert p (insert q s)) :=
+    IsFormulaSet.insert_iff.mpr ⟨hpF, IsFormulaSet.insert_iff.mpr ⟨hqF, hsF⟩⟩
   obtain ⟨-, hcase⟩ := hd2.case
   rcases hcase with (⟨s₀, r, rfl, hrs, hnrs⟩ | ⟨s₀, rfl, hv⟩ |
     ⟨s₀, a, b, dp, dq, rfl, hab, hdp, hdq⟩ | ⟨s₀, a, b, d₀, rfl, hab, hd₀⟩ |
@@ -556,15 +477,9 @@ private lemma inversion_or_aux :
         (Bootstrapping.axL (insert (neg L q) (insert p (insert q s))) q),
         ⟨by simp, CutFreeDerivation.andIntro (by simp [hand]) ⟨by simp, ?_⟩ ⟨by simp, ?_⟩⟩, ?_⟩
       · refine CutFreeDerivation.axL ?_ (by simp) (by simp)
-        intro x hx
-        rcases mem_bitInsert_iff.mp hx with rfl | hx
-        · exact hpF.neg
-        · exact htF x hx
+        exact IsFormulaSet.insert_iff.mpr ⟨hpF.neg, htF⟩
       · refine CutFreeDerivation.axL ?_ (by simp) (by simp)
-        intro x hx
-        rcases mem_bitInsert_iff.mp hx with rfl | hx
-        · exact hqF.neg
-        · exact htF x hx
+        exact IsFormulaSet.insert_iff.mpr ⟨hqF.neg, htF⟩
       · simp
     · have hnotmem : neg L p ^⋏ neg L q ∉ insert (p ^⋎ q) s := by
         intro hm
@@ -581,14 +496,8 @@ private lemma inversion_or_aux :
           rw [← hnegpq, ← he, (hfs r hrs).isUFormula.neg_neg]
         rw [hre] at hrs
         exact hnotmem hrs
-      have hrs' : r ∈ s := by
-        rcases mem_bitInsert_iff.mp hrs with he | h
-        · exact absurd he hrne
-        · exact h
-      have hnrs' : neg L r ∈ s := by
-        rcases mem_bitInsert_iff.mp hnrs with he | h
-        · exact absurd he hnrne
-        · exact h
+      have hrs' : r ∈ s := mem_of_mem_insert_of_ne hrs hrne
+      have hnrs' : neg L r ∈ s := mem_of_mem_insert_of_ne hnrs hnrne
       refine ⟨Bootstrapping.axL (insert p (insert q s)) r,
         ⟨by simp, CutFreeDerivation.axL htF (by simp [hrs']) (by simp [hnrs'])⟩, ?_⟩
       simp only [height_axL]
@@ -596,10 +505,7 @@ private lemma inversion_or_aux :
   · -- verum leaf
     simp only [fstIdx_verumIntro] at hd1
     subst hd1
-    have hvs : (^⊤ : V) ∈ s := by
-      rcases mem_bitInsert_iff.mp hv with he | h
-      · exact absurd he (by simp [qqVerum, qqOr])
-      · exact h
+    have hvs : (^⊤ : V) ∈ s := mem_of_mem_insert_of_ne hv (by simp [qqVerum, qqOr])
     refine ⟨Bootstrapping.verumIntro (insert p (insert q s)),
       ⟨by simp, CutFreeDerivation.verumIntro htF (by simp [hvs])⟩, ?_⟩
     simp only [height_verumIntro]
@@ -607,10 +513,7 @@ private lemma inversion_or_aux :
   · -- conjunction rule
     simp only [fstIdx_andIntro] at hd1
     subst hd1
-    have habs : a ^⋏ b ∈ s := by
-      rcases mem_bitInsert_iff.mp hab with he | h
-      · exact absurd he (by simp [qqAnd, qqOr])
-      · exact h
+    have habs : a ^⋏ b ∈ s := mem_of_mem_insert_of_ne hab (by simp [qqAnd, qqOr])
     have heqp : fstIdx dp = insert (p ^⋎ q) (insert a s) := by
       rw [hdp.1, insert_comm a (p ^⋎ q) s]
     obtain ⟨b₁, b₂, b₃⟩ := or_bounds heqp
@@ -643,10 +546,7 @@ private lemma inversion_or_aux :
       apply le_trans hh
       simp only [height_orIntro]
       exact le_add_one _
-    · have habs : a ^⋎ b ∈ s := by
-        rcases mem_bitInsert_iff.mp hab with he | h
-        · exact absurd he hab'
-        · exact h
+    · have habs : a ^⋎ b ∈ s := mem_of_mem_insert_of_ne hab hab'
       have heq : fstIdx d₀ = insert (p ^⋎ q) (insert a (insert b s)) := by
         rw [hd₀.1, insert_comm b (p ^⋎ q) s, insert_comm a (p ^⋎ q) (insert b s)]
       obtain ⟨b₁, b₂, b₃⟩ := or_bounds heq
@@ -660,10 +560,7 @@ private lemma inversion_or_aux :
   · -- universal rule
     simp only [fstIdx_allIntro] at hd1
     subst hd1
-    have halls : ^∀ a ∈ s := by
-      rcases mem_bitInsert_iff.mp ha with he | h
-      · exact absurd he (by simp [qqOr, qqAll])
-      · exact h
+    have halls : ^∀ a ∈ s := mem_of_mem_insert_of_ne ha (by simp [qqOr, qqAll])
     have heq : fstIdx d₀ =
         insert (shift L p ^⋎ shift L q) (insert (free L a) (setShift L s)) := by
       rw [hd₀.1]
@@ -680,10 +577,7 @@ private lemma inversion_or_aux :
   · -- existential rule
     simp only [fstIdx_exsIntro] at hd1
     subst hd1
-    have hexss : ^∃ a ∈ s := by
-      rcases mem_bitInsert_iff.mp ha with he | h
-      · exact absurd he (by simp [qqOr, qqExs])
-      · exact h
+    have hexss : ^∃ a ∈ s := mem_of_mem_insert_of_ne ha (by simp [qqOr, qqExs])
     have heq : fstIdx d₀ = insert (p ^⋎ q) (insert (substs1 L t a) s) := by
       rw [hd₀.1, insert_comm (substs1 L t a) (p ^⋎ q) s]
     obtain ⟨b₁, b₂, b₃⟩ := or_bounds heq
@@ -733,7 +627,7 @@ private lemma inversion_or_aux :
     obtain ⟨r₁, r₂, rfl, hs₁, hs₂⟩ :=
       exists_eq_or_of_shift_eq hrF hrshift.symm
     by_cases hps : p ^⋎ q ∈ s
-    · have heq : fstIdx d₀ = insert (r₁ ^⋎ r₂) (fstIdx d₀) := (insert_eq_self hrt).symm
+    · have heq : fstIdx d₀ = insert (r₁ ^⋎ r₂) (fstIdx d₀) := (insert_eq_self_of_mem hrt).symm
       obtain ⟨b₁, b₂, b₃⟩ := or_bounds heq
       obtain ⟨d', hd', hh⟩ :=
         ih d₀ (d_lt_shiftRule _ _) _ b₁ _ b₂ _ b₃ ⟨heq, hd₀⟩
@@ -741,7 +635,7 @@ private lemma inversion_or_aux :
           (setShift L (insert r₁ (insert r₂ (fstIdx d₀)))) d',
         ⟨?_, CutFreeDerivation.shiftRule hd'⟩, ?_⟩
       · rw [fstIdx_shiftRule, mem_setShift_insert, mem_setShift_insert, hs₁, hs₂, hd1,
-          insert_eq_self hps]
+          insert_eq_self_of_mem hps]
       · simp only [height_shiftRule]
         exact succ_le_succ hh
     · have heq : fstIdx d₀ = insert (r₁ ^⋎ r₂) (bitRemove (r₁ ^⋎ r₂) (fstIdx d₀)) :=

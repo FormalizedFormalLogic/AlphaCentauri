@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToMathlib.Vector
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 
 /-!
@@ -71,11 +72,6 @@ lemma quote_conj {n k : ℕ} (v : Fin k → Semisentence L n) :
 private lemma append_addCast {α : Type*} {k : ℕ} (s u : Fin k → α) (i : Fin k) :
     Fin.append s u (Fin.addCast k i) = s i := by
   simp [Fin.addCast]
-
-private lemma append_addNat {α : Type*} {k : ℕ} (s u : Fin k → α) (i : Fin k) :
-    Fin.append s u (i.addNat k) = u i := by
-  have : i.addNat k = Fin.natAdd k i := Fin.ext (Nat.add_comm _ _)
-  rw [this, Fin.append_right]
 
 variable (S : Theory L) [S.Δ₁]
 
@@ -154,13 +150,13 @@ theorem tprovable_equal_func_imp [𝗘𝗤 L ⪯ S] {k : ℕ} (f : L.Func k) (s 
   simp only [LCWQIsoGödelQuote.imply, quote_conj, quote_eqop, Semiformula.substs_imp,
     Semiformula.substs_equal, Semiformula.substs_conj] at h₁
   simp only [Semiterm.empty_typed_quote_bvar, Semiterm.substs_bvar, append_addCast,
-    append_addNat, Semiterm.empty_typed_quote_func, Semiterm.substs_func] at h₁
+    Fin.append_addNat, Semiterm.empty_typed_quote_func, Semiterm.substs_func] at h₁
   have e₁ : (Semiterm.subst (Fin.append s u))⨟ (fun i ↦ Semiterm.bvar (Fin.addCast k i)) = s := by
     funext i
     simp [append_addCast]
   have e₂ : (Semiterm.subst (Fin.append s u))⨟ (fun i ↦ Semiterm.bvar (i.addNat k)) = u := by
     funext i
-    simp [append_addNat]
+    simp [Fin.append_addNat]
   rw [e₁, e₂] at h₁
   exact h₁
 
@@ -173,13 +169,13 @@ theorem tprovable_rel_congr_imp [𝗘𝗤 L ⪯ S] {k : ℕ} (R : L.Rel k) (s u 
     Semiformula.substs_imp, Semiformula.substs_equal, Semiformula.substs_conj,
     Semiformula.substs_rel] at h₁
   simp only [Semiterm.empty_typed_quote_bvar, Semiterm.substs_bvar, append_addCast,
-    append_addNat] at h₁
+    Fin.append_addNat] at h₁
   have e₁ : (Semiterm.subst (Fin.append s u))⨟ (fun i ↦ Semiterm.bvar (Fin.addCast k i)) = s := by
     funext i
     simp [append_addCast]
   have e₂ : (Semiterm.subst (Fin.append s u))⨟ (fun i ↦ Semiterm.bvar (i.addNat k)) = u := by
     funext i
-    simp [append_addNat]
+    simp [Fin.append_addNat]
   rw [e₁, e₂] at h₁
   exact h₁
 

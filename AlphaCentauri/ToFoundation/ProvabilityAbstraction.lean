@@ -29,7 +29,7 @@ theorem formalized_con_unprovable : T₀ ⊢ 𝔅.con 🡒 ∼𝔅 𝔅.con := b
 /-- $T_0$ proves that $\mathrm{Con}_{\mathfrak{B}}$ implies that $\neg\mathrm{Con}_{\mathfrak{B}}$
 is not refutable in $\mathfrak{B}$.
 - [HP98, Lemma III.4.9] -/
-theorem formalized_con_unrefutable : T₀ ⊢ 𝔅.con 🡒 ∼𝔅 (∼𝔅.con 🡒 ⊥) := by
+theorem formalized_not_con_unrefutable : T₀ ⊢ 𝔅.con 🡒 ∼𝔅 (∼𝔅.con 🡒 ⊥) := by
   have h₁ : T₀ ⊢ 𝔅 (∼𝔅.con 🡒 ⊥) 🡒 𝔅 𝔅.con := mono' <| by cl_prover
   exact C_trans (formalized_con_unprovable 𝔅) (contra h₁)
 

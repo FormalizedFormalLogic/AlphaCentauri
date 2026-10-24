@@ -27,7 +27,7 @@ theorem provable_consistent_imp_consistent_union_incon :
     𝗜𝚺₁ ⊢ T.consistent.val 🡒 (T ∪ T.Incon).consistent.val := by
   have h₁ : 𝗜𝚺₁ ⊢ T.standardProvability.con 🡒
       ∼T.standardProvability (∼T.standardProvability.con 🡒 ⊥) :=
-    formalized_con_unrefutable T.standardProvability
+    formalized_not_con_unrefutable T.standardProvability
   apply complete.{0}
   intro (V : Type) _ _
   have e₁ := models_of_provable (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁) h₁

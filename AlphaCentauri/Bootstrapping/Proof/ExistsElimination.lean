@@ -30,20 +30,6 @@ section
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
 
-lemma Derivable.insert_neg_of_imp {s : V} {φ ψ : Formula V L}
-    (h : Derivable T (insert (φ 🡒 ψ).val s)) :
-    Derivable T (insert (∼φ).val (insert ψ.val s)) := by
-  have hs : IsFormulaSet L s := (IsFormulaSet.insert_iff.mp h.isFormulaSet).2
-  have d : T.internalize V ⊢!ᵈᵉʳ insert (φ 🡒 ψ) ⟨s, hs⟩ :=
-    Derivable.toTDerivation _ (by simpa using! h)
-  have d' : T.internalize V ⊢!ᵈᵉʳ insert (∼φ) (insert ψ ⟨s, hs⟩) :=
-    TDerivation.orInv (by simpa [Semiformula.imp_def] using d)
-  simpa using! d'.toDerivable
-
-lemma Semiformula.val_subst_fvar {φ : Semiformula V L 1} {u : V} :
-    (φ.subst ![(Semiterm.fvar u : Semiterm V L 0)]).val = substs1 L ^&u φ.val := by
-  simp [substs1]
-
 /-- If `T` proves `⋀ᵢ ψᵢ(uᵢ) 🡒 Y` for every assignment `u` of free variables, and each `∃¹ ψᵢ` is
 derivable under `s`, then `Y` is derivable under `s`.
 - [HP98, Theorem I.4.9] -/

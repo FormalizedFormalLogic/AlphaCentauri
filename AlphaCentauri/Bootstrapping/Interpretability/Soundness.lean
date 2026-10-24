@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
+public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
 public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
 public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
@@ -32,77 +33,6 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 section formSubst
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-section tautology
-
-variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
-
-lemma tprovable_all_imp_imp_all (E F : Semiformula V L 1) :
-    T.internalize V ⊢ ∀¹ (E 🡒 F) 🡒 ∀¹ E 🡒 ∀¹ F := by
-  have h₂ := TProof.all_imp_subst (T := T) (E.shift 🡒 F.shift) (Semiterm.fvar 0)
-  have h₃ := TProof.all_imp_subst (T := T) E.shift (Semiterm.fvar 0)
-  simp only [Semiformula.substs_imp] at h₂ h₃
-  have h₁ : T.internalize V ⊢ ((∀¹ (E 🡒 F)) ⋏ (∀¹ E)) 🡒 ∀¹ F := by
-    have h₄ : T.internalize V ⊢ ((∀¹ (E 🡒 F)) ⋏ (∀¹ E)).shift 🡒 F.free := by
-      simp only [Semiformula.shift_and, Semiformula.shift_all, Semiformula.shift_imp,
-        Semiformula.free]
-      cl_prover [h₂, h₃]
-    exact Nonempty.map TProof.generalizeAux h₄
-  cl_prover [h₁]
-
-lemma tprovable_all_iff_all (E F : Semiformula V L 1) :
-    T.internalize V ⊢ ∀¹ (E 🡘 F) 🡒 (∀¹ E 🡘 ∀¹ F) := by
-  have h₁ : T.internalize V ⊢ ∀¹ (E 🡘 F) 🡒 ∀¹ (E 🡒 F) := by
-    apply TProof.all_imp_all_of_free
-    simp only [Semiformula.free, Semiformula.shift_imp, Semiformula.shift_iff,
-      Semiformula.substs_imp, Semiformula.substs_imply]
-    cl_prover
-  have h₂ : T.internalize V ⊢ ∀¹ (E 🡘 F) 🡒 ∀¹ (F 🡒 E) := by
-    apply TProof.all_imp_all_of_free
-    simp only [Semiformula.free, Semiformula.shift_imp, Semiformula.shift_iff,
-      Semiformula.substs_imp, Semiformula.substs_imply]
-    cl_prover
-  cl_prover [h₁, h₂, tprovable_all_imp_imp_all (T := T) E F,
-    tprovable_all_imp_imp_all (T := T) F E]
-
-lemma tprovable_all_iff_all_domain (d A B : Semiformula V L 1) :
-    T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 (∀¹ (d 🡒 A) 🡘 ∀¹ (d 🡒 B)) := by
-  have h₁ : T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 ∀¹ ((d 🡒 A) 🡘 (d 🡒 B)) := by
-    apply TProof.all_imp_all_of_free
-    simp only [Semiformula.free, Semiformula.shift_imp, Semiformula.shift_iff,
-      Semiformula.substs_imp, Semiformula.substs_imply]
-    cl_prover
-  cl_prover [h₁, tprovable_all_iff_all (T := T) (d 🡒 A) (d 🡒 B)]
-
-lemma tprovable_all_iff_exs_domain (d A B : Semiformula V L 1) :
-    T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 (∃¹ (d ⋏ A) 🡘 ∃¹ (d ⋏ B)) := by
-  have h₁ : T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 ∀¹ (∼(d ⋏ A) 🡘 ∼(d ⋏ B)) := by
-    apply TProof.all_imp_all_of_free
-    simp only [Semiformula.free, Semiformula.shift_iff,
-      Semiformula.shift_and, Semiformula.shift_neg, Semiformula.substs_imply,
-      Semiformula.substs_and, Semiformula.substs_neg]
-    cl_prover
-  have h₂ : T.internalize V ⊢ ∀¹ (∼(d ⋏ A) 🡘 ∼(d ⋏ B)) 🡒 (∼(∃¹ (d ⋏ A)) 🡘 ∼(∃¹ (d ⋏ B))) := by
-    simp only [Semiformula.neg_ex]
-    exact tprovable_all_iff_all (T := T) _ _
-  cl_prover [h₁, h₂]
-
-lemma tprovable_iff_and_iff (X X' Y Y' : Formula V L) :
-    T.internalize V ⊢ (X 🡘 X') 🡒 (Y 🡘 Y') 🡒 ((X ⋏ Y) 🡘 (X' ⋏ Y')) := by
-  cl_prover
-
-lemma tprovable_iff_or_iff (X X' Y Y' : Formula V L) :
-    T.internalize V ⊢ (X 🡘 X') 🡒 (Y 🡘 Y') 🡒 ((X ⋎ Y) 🡘 (X' ⋎ Y')) := by
-  cl_prover
-
-lemma tprovable_iff_neg_iff (X X' : Formula V L) :
-    T.internalize V ⊢ (X 🡘 X') 🡒 (∼X 🡘 ∼X') := by
-  cl_prover
-
-lemma tprovable_iff_self (X : Formula V L) : T.internalize V ⊢ X 🡘 X := by
-  cl_prover
-
-end tautology
 
 section defs
 
@@ -221,8 +151,9 @@ lemma derivable_iff_and_V {X X' Y Y' s : V} (hX : IsSemiformula L₁ 0 X)
     simpa only [Semiformula.val_iff] using h₁
   have h₄ : Derivable S (insert ((⟨Y, hY⟩ : Formula V L₁) 🡘 ⟨Y', hY'⟩).val s) := by
     simpa only [Semiformula.val_iff] using h₂
-  have h₅ := Derivable.of_tprovable_imp₂
-    (tprovable_iff_and_iff (T := S) ⟨X, hX⟩ ⟨X', hX'⟩ ⟨Y, hY⟩ ⟨Y', hY'⟩) h₃ h₄
+  have h₅ : Derivable S (insert
+      (((⟨X, hX⟩ : Formula V L₁) ⋏ ⟨Y, hY⟩) 🡘 ((⟨X', hX'⟩ : Formula V L₁) ⋏ ⟨Y', hY'⟩)).val s) :=
+    Derivable.of_tprovable_imp₂ (by cl_prover) h₃ h₄
   simpa only [Semiformula.val_and, Semiformula.val_iff] using h₅
 
 omit [L₁.Eq] [𝗘𝗤 L₁ ⪯ S] in
@@ -235,8 +166,9 @@ lemma derivable_iff_or_V {X X' Y Y' s : V} (hX : IsSemiformula L₁ 0 X)
     simpa only [Semiformula.val_iff] using h₁
   have h₄ : Derivable S (insert ((⟨Y, hY⟩ : Formula V L₁) 🡘 ⟨Y', hY'⟩).val s) := by
     simpa only [Semiformula.val_iff] using h₂
-  have h₅ := Derivable.of_tprovable_imp₂
-    (tprovable_iff_or_iff (T := S) ⟨X, hX⟩ ⟨X', hX'⟩ ⟨Y, hY⟩ ⟨Y', hY'⟩) h₃ h₄
+  have h₅ : Derivable S (insert
+      (((⟨X, hX⟩ : Formula V L₁) ⋎ ⟨Y, hY⟩) 🡘 ((⟨X', hX'⟩ : Formula V L₁) ⋎ ⟨Y', hY'⟩)).val s) :=
+    Derivable.of_tprovable_imp₂ (by cl_prover) h₃ h₄
   simpa only [Semiformula.val_or, Semiformula.val_iff] using h₅
 
 omit [L₁.Eq] [𝗘𝗤 L₁ ⪯ S] in
@@ -245,7 +177,9 @@ lemma derivable_iff_neg_V {X X' s : V} (hX : IsSemiformula L₁ 0 X)
     Derivable S (insert (iff L₁ (neg L₁ X) (neg L₁ X')) s) := by
   have h₁ : Derivable S (insert ((⟨X, hX⟩ : Formula V L₁) 🡘 ⟨X', hX'⟩).val s) := by
     simpa only [Semiformula.val_iff] using h
-  have h₂ := Derivable.of_tprovable_imp (tprovable_iff_neg_iff (T := S) ⟨X, hX⟩ ⟨X', hX'⟩) h₁
+  have h₂ : Derivable S (insert
+      ((∼(⟨X, hX⟩ : Formula V L₁)) 🡘 ∼(⟨X', hX'⟩ : Formula V L₁)).val s) :=
+    Derivable.of_tprovable_imp (by cl_prover) h₁
   simpa only [Semiformula.val_neg, Semiformula.val_iff] using h₂
 
 omit [L₂.Eq] in
@@ -369,12 +303,12 @@ theorem derivable_translateSubstEquiv
     exact derivable_iff_neg_V hX₁ hX₂ hX
   have hverum : Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b ^⊤)
       (substHyp L₁ L₂ tbl t b)) := by
-    have h₁ := Derivable.of_tprovable hH (tprovable_iff_self (T := S) (⊤ : Formula V L₁))
+    have h₁ := Derivable.of_tprovable (T := S) (φ := (⊤ : Formula V L₁) 🡘 ⊤) hH (by cl_prover)
     simp only [translateSubstEquiv, substs1, substs_verum, translate_verum]
     simpa only [Semiformula.val_iff, Semiformula.val_verum] using h₁
   have hfalsum : Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b ^⊥)
       (substHyp L₁ L₂ tbl t b)) := by
-    have h₁ := Derivable.of_tprovable hH (tprovable_iff_self (T := S) (⊥ : Formula V L₁))
+    have h₁ := Derivable.of_tprovable (T := S) (φ := (⊥ : Formula V L₁) 🡘 ⊥) hH (by cl_prover)
     simp only [translateSubstEquiv, substs1, substs_falsum, translate_falsum]
     simpa only [Semiformula.val_iff, Semiformula.val_falsum] using h₁
   have hand : ∀ p q, IsSemiformula L₂ 1 p → IsSemiformula L₂ 1 q →
@@ -499,18 +433,6 @@ section existsRule
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 open PeanoMinus ISigma0 ISigma1
-
-section generic
-
-variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
-
-lemma derivable_of_iff_mp {s : V} (X Y : Formula V L)
-    (hI : Derivable T (insert (X 🡘 Y).val s)) (hX : Derivable T (insert X.val s)) :
-    Derivable T (insert Y.val s) := by
-  have h : T.internalize V ⊢ (X 🡘 Y) 🡒 X 🡒 Y := by cl_prover
-  exact Derivable.of_tprovable_imp₂ h hI hX
-
-end generic
 
 section rules
 

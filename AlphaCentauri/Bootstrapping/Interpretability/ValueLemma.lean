@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
+public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
 public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
 public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.Provable
@@ -21,6 +22,8 @@ along the substitution of a closed term for a variable.
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+
+attribute [local simp] Semiformula.substs_substs
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -132,21 +135,6 @@ lemma quote_eq_bvar {n : ℕ} (i j : Fin n) :
   | 0 => rfl
   | 1 => rfl
 
-omit [L₁.Eq] in
-lemma subst_vec_bvar {n m : ℕ} (w : Fin n → Semiterm V L₁ m) (i : Fin n) :
-    (Semiterm.subst w) ⨟ ![Semiterm.bvar i] = ![w i] := by
-  funext j
-  obtain rfl : j = 0 := Subsingleton.elim _ _
-  simp
-
-omit [L₁.Eq] in
-lemma subst_vec_cons {n m p : ℕ} (w : Fin n → Semiterm V L₁ m) (a : Fin n)
-    (u : Fin p → Fin n) :
-    (Semiterm.subst w) ⨟ (Semiterm.bvar a :> fun i ↦ Semiterm.bvar (u i)) =
-      (w a :> fun i ↦ w (u i)) := by
-  funext j
-  cases j using Fin.cases <;> simp
-
 end quote
 
 section external
@@ -179,22 +167,13 @@ lemma quote_funcExistsSent (F : L₂.Func k) :
   simp only [funcExistsSent, LCWQIsoGödelQuote.imply, LCWQIsoGödelQuote.exs,
     LCWQIsoGödelQuote.and, quote_conj, quote_domain_bvar, quote_operator_cons]
 
-omit [L₁.Eq] in
-lemma q_eq_cons (w : Fin k → Term V L₁) :
-    SemitermVec.q w = (Semiterm.bvar 0 :> fun i ↦ (w i).bShift) := by
-  funext j
-  cases j using Fin.cases <;> simp [SemitermVec.q]
-
 omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
 lemma funcExistsSent_subst (F : L₂.Func k) (w : Fin k → Term V L₁) :
     (⌜funcExistsSent π F⌝ : Semiformula V L₁ k).subst w =
       Matrix.conj (fun i ↦ (domT π).subst ![w i]) 🡒
         ∃¹ (domT π ⋏ (funcT π F).subst (Semiterm.bvar 0 :> fun i ↦ (w i).bShift)) := by
   rw [quote_funcExistsSent]
-  simp only [Semiformula.substs_imp, Semiformula.substs_conj, Semiformula.substs_ex,
-    Semiformula.substs_and, Semiformula.substs_substs, subst_vec_bvar, q_eq_cons,
-    subst_vec_cons]
-  simp
+  simp [SemitermVec.q_eq_cons]
 
 noncomputable abbrev uniqSent (F : L₂.Func k) : Semisentence L₁ (k + 2) :=
   (Matrix.conj (fun i : Fin k ↦ π.domain.operator ![#i.succ.succ]) ⋏ π.domain.operator ![#0] ⋏
@@ -275,8 +254,6 @@ lemma uniqSent_subst (F : L₂.Func k) (y z : Term V L₁) (w : Fin k → Term V
         (domT π).subst ![z] ⋏ (funcT π F).subst (y :> w) ⋏ (funcT π F).subst (z :> w) 🡒
           Semiformula.equal y z := by
   rw [quote_uniqSent]
-  simp only [Semiformula.substs_imp, Semiformula.substs_conj, Semiformula.substs_and,
-    Semiformula.substs_equal, Semiformula.substs_substs, subst_vec_bvar, subst_vec_cons]
   simp
 
 omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
@@ -292,21 +269,12 @@ lemma quote_congrSent (F : L₂.Func k) :
   simp only [congrSent, LCWQIsoGödelQuote.imply, LCWQIsoGödelQuote.and, quote_conj,
     quote_eq_bvar, quote_operator_bvar]
 
-omit [L₁.Eq] in
-lemma subst_vec_fun {n m p : ℕ} (w : Fin n → Semiterm V L₁ m) (u : Fin p → Fin n) :
-    (Semiterm.subst w) ⨟ (fun i ↦ Semiterm.bvar (u i)) = fun i ↦ w (u i) := by
-  funext i
-  simp
-
 omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
 lemma congrSent_subst (F : L₂.Func k) (y z : Term V L₁) (w w' : Fin k → Term V L₁) :
     (⌜congrSent π F⌝ : Semiformula V L₁ ((k + 1) + (k + 1))).subst (Fin.append (y :> w) (z :> w')) =
       (Semiformula.equal y z ⋏ Matrix.conj (fun i ↦ Semiformula.equal (w i) (w' i))) 🡒
         ((funcT π F).subst (y :> w) 🡒 (funcT π F).subst (z :> w')) := by
   rw [quote_congrSent]
-  simp only [Semiformula.substs_imp, Semiformula.substs_and, Semiformula.substs_conj,
-    Semiformula.substs_equal, Semiformula.substs_substs, subst_vec_fun, Fin.append_left,
-    Fin.append_right]
   simp [Fin.append_addNat]
 
 end external
@@ -588,8 +556,9 @@ variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq]
 
 lemma definesElement_val (d A : Semiformula V L 1) :
     (definesElement d A).val = definesCode L d.val A.val := by
-  simp only [definesElement, definesCode, Semiformula.val_exs, Semiformula.val_and,
-    Semiformula.val_all, Semiformula.val_imp, Semiformula.val_iff, Semiformula.val_substs]
+  simp only [definesElement, definesElementBody, definesCode, Semiformula.val_exs,
+    Semiformula.val_and, Semiformula.val_all, Semiformula.val_imp, Semiformula.val_iff,
+    Semiformula.val_substs]
   simp [Semiformula.equal]
   rfl
 
@@ -603,28 +572,22 @@ lemma tprovable_definesElement_fvar [𝗘𝗤 L ⪯ T] (d : Semiformula V L 1) (
     T.internalize V ⊢ d.subst ![Semiterm.fvar x] 🡒
       definesElement d
         (Semiformula.rel (Language.Eq.eq : L.Rel 2) ![Semiterm.bvar 0, Semiterm.fvar x]) := by
-  have h₁ : T.internalize V ⊢ ∀¹ (d.subst ![Semiterm.bvar 0] 🡒
-      ((Semiformula.rel (Language.Eq.eq : L.Rel 2) ![Semiterm.bvar 0, Semiterm.fvar x]).subst
-          ![Semiterm.bvar 0] 🡘
-        Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar x))) := by
+  change T.internalize V ⊢ d.subst ![Semiterm.fvar x] 🡒
+    definesElement d (Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar x))
+  have h₁ : T.internalize V ⊢
+      ∀¹ (uniqueAt d (Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar x)) x) := by
     apply TProof.all!
-    simp only [Semiformula.free, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.Fin1.eq_one, Fin.isValue,
-      Semiformula.subst_eq_self₁, Semiformula.substs_rel, Matrix.vecMap_cons', Matrix.head_cons,
-      Semiterm.substs_bvar, Matrix.cons_val_fin_one, Matrix.tail_cons, Semiterm.substs_fvar,
-      Matrix.vecMap_nil, Semiformula.equal, Semiformula.shift_imp, Semiformula.shift_iff,
-      Semiformula.shift_rel, Semiterm.shift_bvar, Semiterm.shift_fvar, Semiformula.substs_imp,
-      Semiformula.substs_imply]
+    simp only [uniqueAt, Semiformula.free_imp, Semiformula.free_iff]
     cl_prover
   have h₂ : T.internalize V ⊢ d.subst ![Semiterm.fvar x] 🡒
-      (definesElementBody d
-        (Semiformula.rel (Language.Eq.eq : L.Rel 2) ![Semiterm.bvar 0, Semiterm.fvar x])).subst
-          ![Semiterm.fvar x] := by
+      (definesElementBody d (Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar x))).subst
+        ![Semiterm.fvar x] := by
     rw [definesElementBody_subst_fvar]
     cl_prover [h₁]
-  have h₃ := TProof.subst_imp_exs (T := T) (definesElementBody d
-    (Semiformula.rel (Language.Eq.eq : L.Rel 2) ![Semiterm.bvar 0, Semiterm.fvar x]))
+  have h₃ := TProof.subst_imp_exs (T := T)
+    (definesElementBody d (Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar x)))
     (Semiterm.fvar x)
-  rw [definesElement_eq]
+  unfold definesElement
   cl_prover [h₂, h₃]
 
 end fvar
@@ -708,9 +671,9 @@ lemma derivable_definesElement_func (hS : ∀ p ∈ S.Δ₁Class (V := V), Boots
       Matrix.conj (fun i ↦ (definesElementBody (domT π) (varEqualT hT (u i))).subst
         ![Semiterm.fvar (c i)]) 🡒
         definesElement (domT π) (funcGraph (domT π) (fun i ↦ varEqualT hT (u i)) (funcT π F)) :=
-    definesElement_funcGraph (domT π) (funcT π F) (fun i ↦ varEqualT hT (u i)) (domT_shift π)
-      (funcT_shift π F) (tprovable_func_exists π F) (tprovable_func_unique π F)
-      (tprovable_func_congr π F) c
+    definesElement_funcGraph (domT π) (funcT π F) (domT_shift π) (funcT_shift π F)
+      (fun i ↦ varEqualT hT (u i)) (tprovable_func_unique π F) (tprovable_func_congr π F)
+      (tprovable_func_exists π F) c
   have hfin := Derivable.conj_exs_elim hS (fun i ↦ definesElementBody (domT π) (varEqualT hT (u i)))
     (definesElement (domT π) (funcGraph (domT π) (fun i ↦ varEqualT hT (u i)) (funcT π F))) hsF
     hY hsU
@@ -788,16 +751,6 @@ instance termSubstEquiv.definable : 𝚺ᴬ₁-Function₄[V] termSubstEquiv L�
   definability
 
 end defs
-
-section tautology
-
-variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
-
-lemma tprovable_all_imp_all (d φ : Semiformula V L 1) :
-    T.internalize V ⊢ ∀¹ φ 🡒 ∀¹ (d 🡒 φ) :=
-  TProof.all_imp_all_of_free (by simp [Semiformula.free])
-
-end tautology
 
 section value
 

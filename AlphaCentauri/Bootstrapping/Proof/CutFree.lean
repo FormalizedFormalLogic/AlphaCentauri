@@ -546,19 +546,21 @@ lemma mem_deltaClass_ofList_iff (l : List (Sentence L)) (p : V) :
     rw [ih']
     simp [Sentence.quote_eq_encode, numeral_eq_natCast]
 
-/-- Given a coded formula set `a` closed under the external-variable shift whose members are
-negations of axioms of `T`, every derivation from `T` yields a pure (axiom-free) derivation of the
-same end-sequent with `a` adjoined. -/
+variable {U : Theory L} [U.Δ₁]
+
+/-- Given a coded formula set `a` closed under the external-variable shift such that every axiom
+of `T` is an axiom of `U` or has its negation in `a`, every derivation from `T` yields a derivation
+from `U` of the same end-sequent with `a` adjoined. -/
 theorem deductionAux {a d : V} (ha : IsFormulaSet L a) (hsa : setShift L a = a)
-    (hax : ∀ p, p ∈ T.Δ₁Class → neg L p ∈ a) (hd : Derivation T d) :
-    ∃ d', Derivation (∅ : Theory L) d' ∧ fstIdx d' = fstIdx d ∪ a := by
+    (hax : ∀ p, p ∈ T.Δ₁Class → p ∈ U.Δ₁Class ∨ neg L p ∈ a) (hd : Derivation T d) :
+    ∃ d', Derivation U d' ∧ fstIdx d' = fstIdx d ∪ a := by
   have insert_union (x s : V) : insert x s ∪ a = insert x (s ∪ a) := by
     apply mem_ext
     intro z
     simp only [mem_cup_iff, mem_bitInsert_iff]
     tauto
   apply Derivation.induction1 𝚺 (P := fun d ↦
-      ∃ d', Derivation (∅ : Theory L) d' ∧ fstIdx d' = fstIdx d ∪ a) (by definability) hd
+      ∃ d', Derivation U d' ∧ fstIdx d' = fstIdx d ∪ a) (by definability) hd
   · intro s hs p hp hnp
     exact ⟨Bootstrapping.axL (s ∪ a) p,
       Derivation.axL (by simp [hs, ha]) (by simp [hp]) (by simp [hnp]), by simp⟩
@@ -609,9 +611,11 @@ theorem deductionAux {a d : V} (ha : IsFormulaSet L a) (hsa : setShift L a = a)
       Derivation.cutRule ⟨by rw [ed₁, hd₁.1, insert_union], hd₁'⟩
         ⟨by rw [ed₂, hd₂.1, insert_union], hd₂'⟩, by simp⟩
   · intro s hs p hp hT
-    exact ⟨Bootstrapping.axL (s ∪ a) p,
-      Derivation.axL (by simp [hs, ha]) (by simp [hp])
-      (by simp [hax p hT]), by simp⟩
+    rcases hax p hT with hU | hn
+    · exact ⟨Bootstrapping.axm (s ∪ a) p,
+        Derivation.axm (by simp [hs, ha]) (by simp [hp]) hU, by simp⟩
+    · exact ⟨Bootstrapping.axL (s ∪ a) p,
+        Derivation.axL (by simp [hs, ha]) (by simp [hp]) (by simp [hn]), by simp⟩
 
 /-- Given a coded formula set `a` closed under the external-variable shift such that every axiom
 `p ≤ d` of `T` follows in pure logic from the negation of some member of `a`, a derivation `d`
@@ -681,6 +685,96 @@ theorem derivable_union_of_replacement {a d : V} (ha : IsFormulaSet L a)
     · exact mem_cup_iff.mpr <| Or.inr hq
     · exact mem_cup_iff.mpr <| Or.inl <| (mem_singleton_iff.mp hx) ▸ hp
 
+section InsertAxiom
+
+private lemma shift_neg_quote (σ : Sentence L) : shift L (neg L (⌜σ⌝ : V)) = neg L ⌜σ⌝ := by
+  rw [shift_neg (n := 0) (by simp), Sentence.quote_def, ← Semiformula.quote_shift]
+  congr 2
+  simp
+
+/-- The $\Delta_1$-class of the singleton theory `{σ}` consists of the code of `σ` alone. -/
+lemma mem_deltaClass_singleton_iff (σ : Sentence L) (p : V) :
+    p ∈ ({σ} : Theory L).Δ₁Class ↔ p = ⌜σ⌝ := by
+  change V ⊧/![p] ({σ} : Theory L).Δ₁ch.val ↔ p = ⌜σ⌝
+  rw [Theory.Δ₁.singleton_toTDef_ch_val]
+  simp [Sentence.quote_eq_encode, numeral_eq_natCast]
+
+/-- If every axiom of `U` is an axiom of `T` or the sentence `σ`, every derivation from `U` yields
+a derivation from `T` of the same end-sequent with `¬σ` adjoined.
+- [HP98, Section I.4(a)] -/
+theorem deduction_insert {σ : Sentence L} {d : V}
+    (hU : ∀ p : V, p ∈ U.Δ₁Class → p ∈ T.Δ₁Class ∨ p = ⌜σ⌝) (hd : Derivation U d) :
+    ∃ d', Derivation T d' ∧ fstIdx d' = insert (neg L ⌜σ⌝) (fstIdx d) := by
+  have hax (p : V) (hp : p ∈ U.Δ₁Class) : p ∈ T.Δ₁Class ∨ neg L p ∈ insert (neg L ⌜σ⌝) (∅ : V) := by
+    rcases hU p hp with hp | rfl
+    · exact Or.inl hp
+    · exact Or.inr <| by simp
+  obtain ⟨d', hd', e⟩ :=
+    deductionAux (by simp) (by rw [mem_setShift_insert, setShift_empty, shift_neg_quote]) hax hd
+  refine ⟨d', hd', ?_⟩
+  rw [e]
+  apply mem_ext
+  intro x
+  simp [or_comm]
+
+/-- If `U` contains the axioms of `T` and the sentence `σ`, a sequent derivable from `T` with
+`¬σ` adjoined is derivable from `U`. -/
+theorem derivable_of_derivable_insert_neg {σ : Sentence L} {s : V}
+    (hU : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) (hσ : (⌜σ⌝ : V) ∈ U.Δ₁Class)
+    (hd : Derivable T (insert (neg L ⌜σ⌝) s)) : Derivable U s := by
+  have hs : IsFormulaSet L s := (IsFormulaSet.insert_iff.mp hd.isFormulaSet).2
+  have h : Derivable U (insert (⌜σ⌝ : V) s) := Derivable.by_axm (by simp [hs]) _ (by simp) hσ
+  exact Derivable.cut _ h <| Derivable.of_ss hU hd
+
+/-- A formula is provable from a theory whose axioms are those of `T` together with `σ` iff the
+sequent consisting of it and `¬σ` is derivable from `T`.
+- [HP98, Section I.4(a)] -/
+theorem provable_iff_derivable_insert_neg {σ : Sentence L} {p : V}
+    (hU : ∀ p : V, p ∈ U.Δ₁Class → p ∈ T.Δ₁Class ∨ p = ⌜σ⌝)
+    (hU' : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) (hσ : (⌜σ⌝ : V) ∈ U.Δ₁Class) :
+    Provable U p ↔ Derivable T (insert (neg L ⌜σ⌝) ({p} : V)) := by
+  constructor
+  · rintro ⟨d, e, hd⟩
+    obtain ⟨d', hd', e'⟩ := deduction_insert hU hd
+    exact ⟨d', by rw [e', e], hd'⟩
+  · exact derivable_of_derivable_insert_neg hU' hσ
+
+/-- A formula is provable from a theory whose axioms are those of `T` together with `σ` iff
+`σ → p` is provable from `T`.
+- [HP98, Section I.4(a)] -/
+theorem provable_iff_provable_imp {σ : Sentence L} {p : V}
+    (hU : ∀ p : V, p ∈ U.Δ₁Class → p ∈ T.Δ₁Class ∨ p = ⌜σ⌝)
+    (hU' : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) (hσ : (⌜σ⌝ : V) ∈ U.Δ₁Class) :
+    Provable U p ↔ Provable T (imp L ⌜σ⌝ p) := by
+  rw [provable_iff_derivable_insert_neg hU hU' hσ]
+  constructor
+  · intro h
+    exact Derivable.toProvable <| Derivable.or <| h.ofSetEq <| by intro x; simp
+  · intro h
+    have hd := h.toDerivable
+    have hp : IsFormula L p := by simpa [Bootstrapping.imp] using hd.isFormulaSet
+    have h₁ : Derivable T (insert (imp L ⌜σ⌝ p) (insert (neg L ⌜σ⌝) ({p} : V))) :=
+      hd.wk (by simp [hp]) (by intro x; simp +contextual)
+    have h₂ : Derivable T (insert (⌜σ⌝ ^⋏ neg L p) (insert (neg L ⌜σ⌝) ({p} : V))) :=
+      Derivable.and (Derivable.em (by simp [hp]) ⌜σ⌝ (by simp) (by simp))
+        (Derivable.em (by simp [hp]) p (by simp) (by simp))
+    apply Derivable.cut _ h₁
+    simpa [Bootstrapping.imp, hp.isUFormula] using h₂
+
+/-- The internal deduction theorem: `p` is provable from `T ∪ {σ}` iff `σ → p` is provable
+from `T`.
+- [HP98, Section I.4(a)] -/
+theorem provable_union_singleton_iff (σ : Sentence L) {p : V} :
+    Provable (T ∪ {σ}) p ↔ Provable T (imp L ⌜σ⌝ p) := by
+  apply provable_iff_provable_imp
+  · intro q hq
+    simpa [mem_deltaClass_singleton_iff] using hq
+  · intro q hq
+    simp [hq]
+  · simp
+
+end InsertAxiom
+
 section Deduction
 
 variable [L.DecidableEq]
@@ -715,6 +809,7 @@ theorem deduction (l : List (Sentence L)) {d : V} :
         Rewriting.shift (↑σ : Proposition L) = (↑σ : Proposition L) := by simp
     simp [negatedAxioms, hshift]
   · intro p hp
+    right
     rw [mem_deltaClass_ofList_iff l p] at hp
     obtain ⟨σ, hσ, rfl⟩ := hp
     have hneg : neg L (⌜σ⌝ : V) = (⌜∼(↑σ : Proposition L)⌝ : V) := by

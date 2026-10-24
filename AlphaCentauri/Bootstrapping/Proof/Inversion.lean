@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.Measures
+public import AlphaCentauri.ToFoundation.Proof
 public import AlphaCentauri.ToFoundation.Set
 public import Foundation.Vorspiel.Tactic.Disj
 
@@ -336,10 +337,6 @@ private lemma bitRemove_insert_of_not_mem {x s : V} (h : x ∉ s) : bitRemove x 
       · exact hz'
     · intro hz
       exact ⟨by rintro rfl; exact h hz, Or.inr hz⟩
-
-/-- The end-sequent of a proof code is bounded by the code itself. -/
-lemma fstIdx_le (d : V) : fstIdx d ≤ d :=
-  le_trans (pi₁_le_self (d - 1)) (by simp)
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 /-- No code is an axiom of the empty theory. -/

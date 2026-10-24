@@ -32,10 +32,12 @@ public import AlphaCentauri.Calculus.Induction.Theory
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.Conservativity.Omega1
 public import AlphaCentauri.Hierarchy.Bounded
+public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.Overspill
+public import AlphaCentauri.Model.ProperCut
 public import AlphaCentauri.NumberTheory.Primes
 public import AlphaCentauri.OmegaLogic.Basic
 public import AlphaCentauri.OmegaLogic.Consistency
@@ -76,9 +78,11 @@ public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.PartialTruth
+public import AlphaCentauri.ToFoundation.PrenexDefinable
 public import AlphaCentauri.ToFoundation.PrenexNormalForm
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ToFoundation.Proof
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.Provable
 public import AlphaCentauri.ToFoundation.Reflection

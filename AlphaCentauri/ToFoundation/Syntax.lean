@@ -124,7 +124,7 @@ lemma le_shift {n p : V} (hp : IsSemiformula L n p) : p ≤ shift L p := by
     rw [shift_exs hp.isUFormula]
     simpa [qqExs] using pair_le_pair_right 7 ih
 
-lemma isSemitermVec_fvarVec (m n : V) : IsSemitermVec ℒₒᵣ m n (fvarVec m) :=
+lemma isSemitermVec_fvarVec (m n : V) : IsSemitermVec L m n (fvarVec m) :=
   IsSemitermVec.iff.mpr ⟨len_fvarVec m, fun i hi ↦ by simp [nth_fvarVec m i hi]⟩
 
 lemma nth_qVec_succ {k w j : V} (hw : IsUTermVec ℒₒᵣ k w) (hj : j < k) :

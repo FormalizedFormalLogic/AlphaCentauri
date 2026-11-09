@@ -332,6 +332,17 @@ Ros84:
     title: Oxford Logic Guides
     volume: 9
 
+She64:
+  type: Article
+  title: A non-standard model for a free variable fragment of number theory
+  author: Shepherdson, John C.
+  date: 1964
+  page-range: 79-86
+  parent:
+    type: Periodical
+    title: Bulletin de l'Académie Polonaise des Sciences, Série des Sciences Mathématiques, Astronomiques et Physiques
+    volume: 12
+
 Sla04:
   type: Article
   title: "Σₙ-bounding and Δₙ-induction"

@@ -27,67 +27,39 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ �
 
 namespace WeakPigeonhole
 
-variable (R : V → V → Prop) (a : V)
+section tree
 
-/-- `x` is the left (`β = 0`) or right (`β = 1`) child of `e` in the tree of `R`: `R` sends a pair
-with `x` in that coordinate to `e`. -/
-def IsChild (β e x : V) : Prop :=
-  (β = 0 ∧ ∃ w < a, R (x + a * w) e) ∨ (β = 1 ∧ ∃ w < a, R (w + a * x) e)
+variable (C : V → V → V → Prop) (a : V)
 
 /-- The blocks of `s` of width `‖a‖` trace a path of length `d` from `c` along the bits of `τ`,
-lowest bit first.
+lowest bit first, each step going from a node `e` to a node `x` with `C β e x` for the current bit
+`β`.
 - [PWW88, proof of Theorem 1] -/
 def IsPath (d s c τ : V) : Prop :=
   Nuon.ext a s 0 = c ∧
-    ∀ i < d, Nuon.ext a s (i + 1) < a ∧
-      IsChild R a (fbit τ i) (Nuon.ext a s i) (Nuon.ext a s (i + 1))
+    ∀ i < d, Nuon.ext a s (i + 1) < a ∧ C (fbit τ i) (Nuon.ext a s i) (Nuon.ext a s (i + 1))
 
 /-- The path of length `d` from `c` along `τ` ends at `e`: $H^d_c(\tau) = e$.
 - [PWW88, proof of Theorem 1] -/
 def IsLeaf (d c τ e : V) : Prop :=
-  ∃ s < (2 * a) ⨳ a, IsPath R a d s c τ ∧ Nuon.ext a s d = e
+  ∃ s < (2 * a) ⨳ a, IsPath C a d s c τ ∧ Nuon.ext a s d = e
 
-variable {R a}
+variable {C a}
 
-lemma definable_isChild (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel₃ (IsChild R a) := by
-  unfold IsChild
-  definability
-
-lemma definable_isLeaf (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel₄ (IsLeaf R a) := by
-  have := definable_isChild (a := a) hR
+lemma definable_isLeaf (hC : 𝚺ᴬ₀.DefinableRel₃ C) : 𝚺ᴬ₀.DefinableRel₄ (IsLeaf C a) := by
   unfold IsLeaf IsPath
   definability
 
-lemma IsPath.ext_lt {d s c τ i : V} (hc : c < a) (h : IsPath R a d s c τ) (hi : i ≤ d) :
+lemma IsPath.ext_lt {d s c τ i : V} (hc : c < a) (h : IsPath C a d s c τ) (hi : i ≤ d) :
     Nuon.ext a s i < a := by
   rcases zero_or_succ i with rfl | ⟨j, rfl⟩
   · rwa [h.1]
   · exact (h.2 j (succ_le_iff_lt.mp hi)).1
 
-section injective
-
-variable (hinj : ∀ x < a * a, ∀ x' < a * a, ∀ y < a, R x y → R x' y → x = x')
-include hinj
-
-lemma IsChild.unique {β e x x' : V} (he : e < a) (hx : x < a) (hx' : x' < a)
-    (h : IsChild R a β e x) (h' : IsChild R a β e x') : x = x' := by
-  have hmod : ∀ {u v : V}, u < a → (u + a * v) % a = u := by
-    intro u v hu
-    rw [add_comm, mul_comm, mod_mul_add_of_lt _ _ hu]
-  have hdiv : ∀ {u v : V}, u < a → (u + a * v) / a = v := by
-    intro u v hu
-    rw [add_comm, mul_comm, div_mul_add _ _ hu]
-  rcases h with ⟨rfl, w, hw, hR⟩ | ⟨rfl, w, hw, hR⟩ <;>
-    rcases h' with ⟨h0, w', hw', hR'⟩ | ⟨h1, w', hw', hR'⟩
-  · have := hinj _ (add_mul_lt_mul_self hx hw) _ (add_mul_lt_mul_self hx' hw') e he hR hR'
-    rw [← hmod (v := w) hx, ← hmod (v := w') hx', this]
-  · simp at h1
-  · simp at h0
-  · have := hinj _ (add_mul_lt_mul_self hw hx) _ (add_mul_lt_mul_self hw' hx') e he hR hR'
-    rw [← hdiv (v := x) hw, ← hdiv (v := x') hw', this]
-
-lemma IsPath.ext_eq {d s s' c τ : V} (hc : c < a) (h : IsPath R a d s c τ)
-    (h' : IsPath R a d s' c τ) : ∀ i ≤ d, Nuon.ext a s i = Nuon.ext a s' i := by
+lemma IsPath.ext_eq {d s s' c τ τ' : V} (hc : c < a)
+    (hC : ∀ i < d, ∀ e < a, ∀ x < a, ∀ x' < a, C (fbit τ i) e x → C (fbit τ' i) e x' → x = x')
+    (h : IsPath C a d s c τ) (h' : IsPath C a d s' c τ') :
+    ∀ i ≤ d, Nuon.ext a s i = Nuon.ext a s' i := by
   intro i
   induction i using ISigma0.succ_induction
   · definability
@@ -98,19 +70,23 @@ lemma IsPath.ext_eq {d s s' c τ : V} (hc : c < a) (h : IsPath R a d s c τ)
     obtain ⟨hlt, hch⟩ := h.2 i hid
     obtain ⟨hlt', hch'⟩ := h'.2 i hid
     rw [← IH hid.le] at hch'
-    exact IsChild.unique hinj (h.ext_lt hc hid.le) hlt hlt' hch hch'
+    exact hC i hid _ (h.ext_lt hc hid.le) _ hlt _ hlt' hch hch'
 
-lemma IsLeaf.unique {d c τ e e' : V} (hc : c < a) (h : IsLeaf R a d c τ e)
-    (h' : IsLeaf R a d c τ e') : e = e' := by
-  obtain ⟨s, -, hs, rfl⟩ := h
-  obtain ⟨s', -, hs', rfl⟩ := h'
-  exact hs.ext_eq hinj hc hs' d le_rfl
-
-end injective
+lemma isLeaf_zero {e : V} (he : e < a) (τ : V) : IsLeaf C a 0 e τ e := by
+  have hext : Nuon.ext a e 0 = e := Nuon.ext_zero_eq_self_of_le (length_monotone he.le)
+  use e
+  and_intros
+  · calc e < a := he
+      _ < a ⨳ 1 := lt_smash_one_right a
+      _ ≤ (2 * a) ⨳ a := smash_monotone (by simp) (pos_iff_one_le.mp (pos_of_gt he))
+  · exact hext
+  · intro i hi
+    simp at hi
+  · exact hext
 
 lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c < a) (hc' : c' < a)
-    (hβ : β < 2) (hch : IsChild R a β c c') (h : IsLeaf R a d c' τ e) :
-    IsLeaf R a (d + 1) c (2 * τ + β) e := by
+    (hβ : β < 2) (hch : C β c c') (h : IsLeaf C a d c' τ e) :
+    IsLeaf C a (d + 1) c (2 * τ + β) e := by
   obtain ⟨s', -, hs', rfl⟩ := h
   have hI : ‖2 * a‖ = ‖a‖ + 1 := length_two_mul_of_pos ha
   have hK : Exponential (1 * ‖a‖) (a ⨳ 1) := by simpa using exponential_smash_one a
@@ -153,6 +129,47 @@ lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c <
       exact hs'.2 j hj
   · exact hext d le_rfl
 
+end tree
+
+section square
+
+variable (R : V → V → Prop) (a : V)
+
+/-- `x` is the left (`β = 0`) or right (`β = 1`) child of `e` in the tree of `R`: `R` sends a pair
+with `x` in that coordinate to `e`. -/
+def IsChild (β e x : V) : Prop :=
+  (β = 0 ∧ ∃ w < a, R (x + a * w) e) ∨ (β = 1 ∧ ∃ w < a, R (w + a * x) e)
+
+variable {R a}
+
+lemma definable_isChild (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel₃ (IsChild R a) := by
+  unfold IsChild
+  definability
+
+section injective
+
+variable (hinj : ∀ x < a * a, ∀ x' < a * a, ∀ y < a, R x y → R x' y → x = x')
+include hinj
+
+lemma IsChild.unique {β e x x' : V} (he : e < a) (hx : x < a) (hx' : x' < a)
+    (h : IsChild R a β e x) (h' : IsChild R a β e x') : x = x' := by
+  rcases h with ⟨rfl, w, hw, hR⟩ | ⟨rfl, w, hw, hR⟩ <;>
+    rcases h' with ⟨h0, w', hw', hR'⟩ | ⟨h1, w', hw', hR'⟩
+  · exact ((add_mul_eq_add_mul_iff hx hx').mp <|
+      hinj _ (add_mul_lt_mul_of_lt hx hw) _ (add_mul_lt_mul_of_lt hx' hw') e he hR hR').1
+  · simp at h1
+  · simp at h0
+  · exact ((add_mul_eq_add_mul_iff hw hw').mp <|
+      hinj _ (add_mul_lt_mul_of_lt hw hx) _ (add_mul_lt_mul_of_lt hw' hx') e he hR hR').2
+
+lemma IsLeaf.unique {d c τ e e' : V} (hc : c < a) (h : IsLeaf (IsChild R a) a d c τ e)
+    (h' : IsLeaf (IsChild R a) a d c τ e') : e = e' := by
+  obtain ⟨s, -, hs, rfl⟩ := h
+  obtain ⟨s', -, hs', rfl⟩ := h'
+  exact hs.ext_eq hc (fun _ _ _ he _ hx _ hx' ↦ IsChild.unique hinj he hx hx') hs' d le_rfl
+
+end injective
+
 /-- For a $\Delta_0$-definable relation `T` with a value below `a` everywhere, every
 $\rho < 2^{\|a\| - d}$ has a root `c < a` whose leaf along each $\tau < 2^d$ is a value of `T`
 at $\rho + 2^{\|a\| - d} \tau$.
@@ -160,16 +177,15 @@ at $\rho + 2^{\|a\| - d} \tau$.
 lemma exists_root (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a) (htot : ∀ x < a * a, ∃ y < a, R x y)
     {T : V → V → Prop} (hT : 𝚺ᴬ₀.DefinableRel T) (hTa : ∀ σ, ∃ e < a, T σ e) :
     ∀ d ≤ ‖a‖, ∀ ρ < bexp (2 * a) (‖a‖ - d), ∃ c < a, ∀ τ < bexp (2 * a) d,
-      ∃ e < a, T (ρ + bexp (2 * a) (‖a‖ - d) * τ) e ∧ IsLeaf R a d c τ e := by
+      ∃ e < a, T (ρ + bexp (2 * a) (‖a‖ - d) * τ) e ∧ IsLeaf (IsChild R a) a d c τ e := by
   have hI : ‖2 * a‖ = ‖a‖ + 1 := length_two_mul_of_pos ha
   intro d
   induction d using ISigma0.succ_induction
-  · have := definable_isLeaf (a := a) hR
+  · have := definable_isLeaf (a := a) (definable_isChild (a := a) hR)
     definability
   case zero =>
     intro _ ρ _
     obtain ⟨e, he, hTe⟩ := hTa ρ
-    have hext : Nuon.ext a e 0 = e := Nuon.ext_zero_eq_self_of_le (length_monotone he.le)
     use e
     constructor
     · exact he
@@ -180,15 +196,7 @@ lemma exists_root (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a) (htot : ∀ x < 
       and_intros
       · exact he
       · simpa using hTe
-      use e
-      and_intros
-      · calc e < a := he
-          _ < a ⨳ 1 := lt_smash_one_right a
-          _ ≤ (2 * a) ⨳ a := smash_monotone (by simp) (pos_iff_one_le.mp ha)
-      · exact hext
-      · intro i hi
-        simp at hi
-      · exact hext
+      · exact isLeaf_zero he 0
   case succ d IH =>
     intro hd ρ hρ
     have hd' : d < ‖a‖ := succ_le_iff_lt.mp hd
@@ -201,17 +209,12 @@ lemma exists_root (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a) (htot : ∀ x < 
     set p := bexp (2 * a) (‖a‖ - (d + 1))
     obtain ⟨c₀, hc₀, H₀⟩ := IH hd'.le ρ (by rw [hP, two_mul]; exact lt_of_lt_of_le hρ le_self_add)
     obtain ⟨c₁, hc₁, H₁⟩ := IH hd'.le (ρ + p) (by rw [hP, two_mul]; simpa using hρ)
-    obtain ⟨c, hc, hRc⟩ := htot (c₀ + a * c₁) (add_mul_lt_mul_self hc₀ hc₁)
+    obtain ⟨c, hc, hRc⟩ := htot (c₀ + a * c₁) (add_mul_lt_mul_of_lt hc₀ hc₁)
     use c
     constructor
     · exact hc
     · intro τ' hτ'
-      have hτ : τ' / 2 < bexp (2 * a) d := by
-        by_contra! h
-        have : 2 * bexp (2 * a) d ≤ τ' := calc
-          2 * bexp (2 * a) d ≤ 2 * (τ' / 2) := mul_le_mul_left h
-          _ ≤ τ' := le_self_add.trans_eq (div_add_mod τ' 2)
-        exact absurd hτ' (not_lt.mpr (hQ ▸ this))
+      have hτ : τ' / 2 < bexp (2 * a) d := div_lt_of_lt_mul (by rwa [hQ, mul_comm] at hτ')
       rw [← div_add_mod τ' 2]
       rcases mod_two τ' with h | h <;> rw [h]
       · obtain ⟨e, he, hTe, hl⟩ := H₀ (τ' / 2) hτ
@@ -235,9 +238,11 @@ lemma exists_root (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a) (htot : ∀ x < 
 
 lemma definable_diagonal (hR : 𝚺ᴬ₀.DefinableRel R) :
     𝚺ᴬ₀.DefinableRel fun σ e ↦
-      (IsLeaf R a ‖a‖ σ σ 0 ∧ e = 1) ∨ (¬IsLeaf R a ‖a‖ σ σ 0 ∧ e = 0) := by
-  have := definable_isLeaf (a := a) hR
+      (IsLeaf (IsChild R a) a ‖a‖ σ σ 0 ∧ e = 1) ∨ (¬IsLeaf (IsChild R a) a ‖a‖ σ σ 0 ∧ e = 0) := by
+  have := definable_isLeaf (a := a) (definable_isChild (a := a) hR)
   definability
+
+end square
 
 end WeakPigeonhole
 
@@ -256,9 +261,10 @@ theorem weakPigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {
   have ha0 : 0 < a := lt_trans zero_lt_one ha
   have hT := definable_diagonal (a := a) hR
   have hTa : ∀ σ, ∃ e < a,
-      (IsLeaf R a ‖a‖ σ σ 0 ∧ e = 1) ∨ (¬IsLeaf R a ‖a‖ σ σ 0 ∧ e = 0) := by
+      (IsLeaf (IsChild R a) a ‖a‖ σ σ 0 ∧ e = 1) ∨
+        (¬IsLeaf (IsChild R a) a ‖a‖ σ σ 0 ∧ e = 0) := by
     intro σ
-    by_cases h : IsLeaf R a ‖a‖ σ σ 0
+    by_cases h : IsLeaf (IsChild R a) a ‖a‖ σ σ 0
     · use 1
       constructor
       · exact ha

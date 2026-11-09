@@ -1,0 +1,64 @@
+module
+
+public import Foundation.FirstOrder.Arithmetic.HFS.Seq
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
+
+/-!
+# Pieces and strong collection in `𝗜𝚺 (n + 1)`
+
+In a model of $\mathsf{I}\Sigma_{n + 1}$ every $\Sigma_{n + 1}$ predicate is piecewise coded, and
+the witnesses of a $\Sigma_{n + 1}$ relation are bounded on an interval even at the arguments
+where it has none.
+
+- [HP98, Definition I.2.6, Lemma I.2.13(a), Lemma I.2.27]
+-/
+
+@[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+namespace FFL.FirstOrder.Arithmetic
+
+variable {V : Type*} [ORingStructure V] {n : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(n + 1)]
+
+/-- A $\Sigma_{n + 1}$ predicate has a piece of every length `z`: a sequence of length `z`
+whose `i`-th entry is `1` exactly when the predicate holds at `i`.
+- [HP98, Definition I.2.6, Lemma I.2.13(a)] -/
+theorem exists_piece [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚺ᴬ_[n + 1].DefinablePred P) (z : V) :
+    ∃ q, Seq q ∧ lh q = z ∧ ∀ i < z, (znth q i = 1 ↔ P i) := by
+  have : Fact (1 ≤ n + 1) := ⟨by omega⟩
+  obtain ⟨s, -, hs⟩ := finset_comprehension hP z
+  obtain ⟨q, hq, hlh, hmem⟩ := sigmaOne_skolem_seq
+    (R := fun i x ↦ (i ∈ s ∧ x = 1) ∨ (i ∉ s ∧ x = 0)) (by definability) (l := z)
+    (fun i _ ↦ by by_cases h : i ∈ s <;> simp [h])
+  use q
+  refine ⟨hq, hlh, ?_⟩
+  intro i hi
+  obtain ⟨x, hx⟩ := hq.exists (hlh ▸ hi)
+  rw [hq.znth_eq_of_mem hx, ← hs i hi]
+  rcases hmem i x hx with ⟨h, rfl⟩ | ⟨h, rfl⟩ <;> simp [h]
+
+/-- Strong $\Sigma_{n + 1}$ collection: below every `u`, the witnesses of a $\Sigma_{n + 1}$
+relation are bounded at all arguments that have one.
+- [HP98, Lemma I.2.27] -/
+theorem strong_collection {R : V → V → Prop} (hR : 𝚺ᴬ_[n + 1].DefinableRel R) (u : V) :
+    ∃ v, ∀ x < u, (∃ y, R x y) → ∃ y < v, R x y := by
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ n + 1 by omega)
+  obtain ⟨q, -, -, hq⟩ := exists_piece (n := n) (P := fun x ↦ ∃ y, R x y) (by definability) u
+  obtain ⟨v, hv⟩ := IBroadSigma.collection (s := n) (R := fun x y ↦ znth q x = 1 → R x y)
+    (by definability) u fun x hx ↦ by
+      by_cases h : znth q x = 1
+      · obtain ⟨y, hy⟩ := (hq x hx).mp h
+        use y
+        intro
+        exact hy
+      · use 0
+        intro
+        contradiction
+  use v
+  intro x hx h
+  obtain ⟨y, hy, hRy⟩ := hv x hx
+  use y
+  exact ⟨hy, hRy <| (hq x hx).mpr h⟩
+
+end FFL.FirstOrder.Arithmetic

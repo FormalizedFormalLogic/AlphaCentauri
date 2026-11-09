@@ -31,6 +31,10 @@ def ArithmeticTheory.Reflexive (T : ArithmeticTheory) : Prop :=
 def ArithmeticTheory.EssentiallyReflexive (T : ArithmeticTheory) : Prop :=
   ∀ U : ArithmeticTheory, T ⊆ U → U.Reflexive
 
+lemma ArithmeticTheory.EssentiallyReflexive.reflexive {T : ArithmeticTheory}
+    (h : T.EssentiallyReflexive) : T.Reflexive :=
+  h T Set.Subset.rfl
+
 end FFL.FirstOrder
 
 namespace FFL.FirstOrder.Arithmetic
@@ -57,7 +61,7 @@ axiom ISigma.provable_con_ISigma1 : 𝗜𝚺 2 ⊢ 𝗜𝚺⁺₁.consistent.val
 open Bootstrapping in
 /-- In a model of `𝗣𝗔`, a finite set of true sentences is consistent.
 - [HP98, Corollary I.4.34] -/
-lemma Peano.consistent_of_models {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔]
+private lemma Peano.consistent_of_models {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔]
     (U : ArithmeticTheory) (hU : U.Finite) (h : ∀ σ ∈ U, V↓[ℒₒᵣ] ⊧ σ) :
     let _ : U.Δ₁ := Theory.Δ₁.ofFinite U hU
     U.Consistent V := by
@@ -88,17 +92,6 @@ lemma Peano.consistent_of_models {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ]
   · obtain rfl : σ = ∼τ := Rewriting.emb_injective (by simpa using hτσ.symm)
     simp [hl τ hτ] at hmodel
 
-/-- `𝗣𝗔` is reflexive.
-- [Lin97, Corollary 1.8]
-- [HP98, Theorem III.2.35] -/
-theorem Peano.reflexive : 𝗣𝗔.Reflexive := by
-  intro U hUT hU
-  let _ : U.Δ₁ := Theory.Δ₁.ofFinite U hU
-  apply Arithmetic.complete.{0} 𝗣𝗔 _
-  intro V _ _
-  exact (Bootstrapping.consistent.defined U).mpr <|
-    Peano.consistent_of_models (V := V) U hU fun σ hσ ↦ Theory.models V 𝗣𝗔 (hUT hσ)
-
 /-- `𝗣𝗔` is essentially reflexive.
 - [Lin97, Corollary 1.8]
 - [HP98, Theorem III.2.35] -/
@@ -111,6 +104,11 @@ theorem Peano.essentiallyReflexive : 𝗣𝗔.EssentiallyReflexive := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔 := ModelsTheory.of_provably_subtheory V 𝗣𝗔 U inferInstance
   exact (Bootstrapping.consistent.defined W).mpr <|
     Peano.consistent_of_models (V := V) W hfin fun σ hσ ↦ Theory.models V U (hW hσ)
+
+/-- `𝗣𝗔` is reflexive.
+- [Lin97, Corollary 1.8]
+- [HP98, Theorem III.2.35] -/
+theorem Peano.reflexive : 𝗣𝗔.Reflexive := Peano.essentiallyReflexive.reflexive
 
 /-- `𝗣𝗔` is not finitely axiomatizable.
 - [Lin97, Corollary 2.1]

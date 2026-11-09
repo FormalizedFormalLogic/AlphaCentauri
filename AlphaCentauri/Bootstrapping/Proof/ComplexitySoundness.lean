@@ -44,9 +44,12 @@ private lemma formulaComplexity_insert_le (hp : formulaComplexity ℒₒᵣ p �
     (hs : ∀ r ∈ s, formulaComplexity ℒₒᵣ r ≤ N) :
     ∀ r ∈ insert p s, formulaComplexity ℒₒᵣ r ≤ N := by
   intro r hr
-  rcases mem_bitInsert_iff.mp hr with rfl | hr
-  · exact hp
-  · exact hs r hr
+  rcases mem_bitInsert_iff.mp hr with rfl | hr <;> grind
+
+private lemma formulaComplexity_fvAssign_le (hs : IsFormulaSet ℒₒᵣ s) (hp : p ∈ s)
+    (hb : ∀ r ∈ s, formulaComplexity ℒₒᵣ r ≤ N) : formulaComplexity ℒₒᵣ (fvAssign f p) ≤ N := by
+  rw [formulaComplexity_fvAssign (hs p hp).isUFormula]
+  exact hb p hp
 
 private lemma hasWitness_of_and (hs : IsFormulaSet ℒₒᵣ s) (hpq : p ^⋏ q ∈ s)
     (hb : ∀ r ∈ s, formulaComplexity ℒₒᵣ r ≤ N)
@@ -95,13 +98,12 @@ private lemma hasWitness_of_all (hs : IsFormulaSet ℒₒᵣ s) (hp : ^∀ p ∈
       HasWitness N (insert (free ℒₒᵣ p) (setShift ℒₒᵣ s)) g) :
     HasWitness N s f := by
   have hpF : IsSemiformula ℒₒᵣ 1 p := by simpa using hs _ hp
-  have e : fvAssign f (^∀ p) = ^∀ (fvAssign f p) := fvAssign_all hpF.isUFormula
   have hc := hb _ hp
-  have hc' : formulaComplexity ℒₒᵣ (^∀ (fvAssign f p)) ≤ N := by
-    rwa [← e, formulaComplexity_fvAssign (hs _ hp).isUFormula]
+  have hc' := formulaComplexity_fvAssign_le (f := f) hs hp hb
   by_cases ht : ComplexitySatisfied N 0 (fvAssign f (^∀ p))
-  · exact ⟨_, hp, ht⟩
-  rw [e, ComplexitySatisfied.all_iff hpF.fvAssign.isUFormula hc', not_forall] at ht
+  · use ^∀ p, hp
+  rw [fvAssign_all hpF.isUFormula] at ht hc'
+  rw [ComplexitySatisfied.all_iff hpF.fvAssign.isUFormula hc', not_forall] at ht
   obtain ⟨x, hx⟩ := ht
   have hsh : ∀ q ∈ s, fvAssign (x ∷ f) (shift ℒₒᵣ q) = fvAssign f q :=
     fun q hq ↦ fvAssign_shift (hs q hq).isUFormula
@@ -129,7 +131,6 @@ private lemma hasWitness_of_exs {t : V} (hs : IsFormulaSet ℒₒᵣ s) (hp : ^�
       HasWitness N (insert (substs1 ℒₒᵣ t p) s) f) :
     HasWitness N s f := by
   have hpF : IsSemiformula ℒₒᵣ 1 p := by simpa using hs _ hp
-  have e : fvAssign f (^∃ p) = ^∃ (fvAssign f p) := fvAssign_exs hpF.isUFormula
   have et : fvAssign f (substs1 ℒₒᵣ t p) = substs1 ℒₒᵣ (termFvAssign f t) (fvAssign f p) :=
     fvAssign_substs1 ht hpF
   have hc := hb _ hp
@@ -140,11 +141,13 @@ private lemma hasWitness_of_exs {t : V} (hs : IsFormulaSet ℒₒᵣ s) (hp : ^�
     exact le_self_add.trans hc
   obtain ⟨r, hr, hrT⟩ := ih hb'
   rcases mem_bitInsert_iff.mp hr with rfl | hr
-  · have hc' : formulaComplexity ℒₒᵣ (^∃ (fvAssign f p)) ≤ N := by
-      rwa [← e, formulaComplexity_fvAssign (hs _ hp).isUFormula]
+  · have hc' := formulaComplexity_fvAssign_le (f := f) hs hp hb
+    rw [fvAssign_exs hpF.isUFormula] at hc'
     rw [et, substs1, ComplexitySatisfied.subst (m := 0) (by simp [ht.termFvAssign])
       hpF.fvAssign, termValVec_cons₁ ht.termFvAssign.isUTerm] at hrT
-    exact ⟨_, hp, (e ▸ ComplexitySatisfied.exs_iff hpF.fvAssign.isUFormula hc').mpr ⟨_, hrT⟩⟩
+    use ^∃ p, hp
+    rw [fvAssign_exs hpF.isUFormula]
+    exact (ComplexitySatisfied.exs_iff hpF.fvAssign.isUFormula hc').mpr ⟨_, hrT⟩
   · exact ⟨r, hr, hrT⟩
 
 private lemma hasWitness_of_shift {Γ : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
@@ -167,14 +170,11 @@ private lemma hasWitness_of_shift {Γ : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
 private lemma hasWitness_of_axL (hs : IsFormulaSet ℒₒᵣ s) (hp : p ∈ s) (hnp : neg ℒₒᵣ p ∈ s)
     (hb : ∀ r ∈ s, formulaComplexity ℒₒᵣ r ≤ N) : HasWitness N s f := by
   have hpU : IsUFormula ℒₒᵣ p := (hs p hp).isUFormula
-  have e : fvAssign f (neg ℒₒᵣ p) = neg ℒₒᵣ (fvAssign f p) := fvAssign_neg hpU
-  have hc : formulaComplexity ℒₒᵣ (fvAssign f p) ≤ N := by
-    rw [formulaComplexity_fvAssign hpU]
-    exact hb p hp
   by_cases ht : ComplexitySatisfied N 0 (fvAssign f p)
-  · exact ⟨p, hp, ht⟩
+  · use p, hp
   · use neg ℒₒᵣ p, hnp
-    rw [e, ComplexitySatisfied.neg_iff hpU.fvAssign hc]
+    rw [fvAssign_neg hpU, ComplexitySatisfied.neg_iff hpU.fvAssign
+      (formulaComplexity_fvAssign_le hs hp hb)]
     exact ht
 
 private lemma hasWitness_definable :
@@ -220,34 +220,20 @@ private lemma hasWitness_aux :
     exact hasWitness_of_shift hd₀.isFormulaSet hb (ih d₀ (d_lt_shiftRule _ _) · hd₀)
   · exact absurd hT (not_mem_empty_Δ₁Class p)
 
-/-- Under every assignment of the free variables, some formula of a sequent derivable without cuts
-in pure logic, all of whose formulas have complexity at most `N`, is satisfied. -/
-theorem CutFreeDerivable.exists_complexitySatisfied (h : CutFreeDerivable (∅ : Theory ℒₒᵣ) s)
-    (hs : ∀ r ∈ s, formulaComplexity ℒₒᵣ r ≤ N) (f : V) :
-    ∃ r ∈ s, ComplexitySatisfied N 0 (fvAssign f r) := by
-  obtain ⟨d, rfl, hd⟩ := h
-  exact hasWitness_aux d f hd hs
-
-/-- A sequent of codes of sentences of complexity at most `N` derivable without cuts in pure logic
-contains the code of a true sentence. -/
-theorem CutFreeDerivable.exists_models (h : CutFreeDerivable (∅ : Theory ℒₒᵣ) s)
+/-- A sequent of codes of sentences of complexity at most `N` derivable in pure logic contains the
+code of a true sentence.
+- [HP98, Corollary I.4.34] -/
+theorem Derivable.exists_models [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2] (h : Derivable (∅ : Theory ℒₒᵣ) s)
     (hs : ∀ r ∈ s, ∃ σ : ArithmeticSentence, σ.complexity ≤ N ∧ r = ⌜σ⌝) :
     ∃ σ : ArithmeticSentence, (⌜σ⌝ : V) ∈ s ∧ V↓[ℒₒᵣ] ⊧ σ := by
-  obtain ⟨r, hr, hrT⟩ := h.exists_complexitySatisfied (f := 0) fun r hr ↦ by
+  obtain ⟨d, rfl, hd⟩ := h.cutFree
+  obtain ⟨r, hr, hrT⟩ := hasWitness_aux d 0 hd fun r hr ↦ by
     obtain ⟨σ, hσ, rfl⟩ := hs r hr
     simpa using hσ
   obtain ⟨σ, hσ, rfl⟩ := hs r hr
   use σ, hr
   rw [fvAssign_quote] at hrT
   exact (ComplexitySatisfied.quote_sentence_iff hσ).mp hrT
-
-/-- A sequent of codes of sentences of complexity at most `N` derivable in pure logic contains the
-code of a true sentence.
-- [HP98, Corollary I.4.34] -/
-theorem Derivable.exists_models [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2] (h : Derivable (∅ : Theory ℒₒᵣ) s)
-    (hs : ∀ r ∈ s, ∃ σ : ArithmeticSentence, σ.complexity ≤ N ∧ r = ⌜σ⌝) :
-    ∃ σ : ArithmeticSentence, (⌜σ⌝ : V) ∈ s ∧ V↓[ℒₒᵣ] ⊧ σ :=
-  h.cutFree.exists_models hs
 
 end complexitySoundness
 

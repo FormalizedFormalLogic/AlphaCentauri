@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 public import Mathlib.Data.Nat.Prime.Defs
 public import AlphaCentauri.Schemata.BoundedInduction
+public import AlphaCentauri.ToFoundation.BinderNotation
 
 /-!
 # Quadratic residues in $\mathsf{I}\mathsf{E}_1$ and $\mathsf{I}\Delta_0$
@@ -49,8 +50,7 @@ axiom provable_existsQuadraticNonresidue_ISigma0 : 𝗜𝚺₀ ⊢ existsQuadrat
 /-- `-1` has a `k`-th root modulo `m`: `xᵏ ≡ -1 (mod m)` has a solution.
 - [Smi93, Lemma 3.2, Question 5.3] -/
 def negOneHasRoot (k : ℕ) : ArithmeticSemisentence 1 :=
-  let pow (t : ArithmeticSemiterm Empty 2) := (Semiterm.Operator.npow ℒₒᵣ k).operator ![t]
-  “m. ∃ x, m ∣ !!(pow #0) + 1”
+  “m. ∃ x, m ∣ x ^' k + 1”
 
 /-- `q` is of the form `x² + n y²`.
 - [Smi93, §4] -/

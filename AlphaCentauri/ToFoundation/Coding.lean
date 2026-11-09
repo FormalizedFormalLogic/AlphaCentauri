@@ -42,6 +42,18 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {L : 
     simpa [Rewriting.shifts] using Rewriting.shifts_emb ({σ} : Multiset (Semisentence L n))
   rw [Sentence.quote_def, ← Semiformula.quote_shift, h]
 
+@[simp] lemma formulaComplexity_quote {n : ℕ} (σ : Semisentence L n) :
+    formulaComplexity L (⌜σ⌝ : V) = σ.complexity := by
+  induction σ using Semiformula.rec' with
+  | hrel R v => simp [Sentence.quote_def]
+  | hnrel R v => simp [Sentence.quote_def]
+  | hverum => simp [Sentence.quote_verum]
+  | hfalsum => simp [Sentence.quote_falsum]
+  | hand φ ψ ihφ ihψ => simp [ihφ, ihψ, max_def]
+  | hor φ ψ ihφ ihψ => simp [ihφ, ihψ, max_def]
+  | hall φ ih => simp [ih]
+  | hexs φ ih => simp [ih]
+
 lemma shift_typed_quote {n : ℕ} (σ : Semisentence L n) :
     (⌜σ⌝ : Bootstrapping.Semiformula V L n).shift = ⌜σ⌝ := by
   have h : Rewriting.shift (Rewriting.emb σ : Semiproposition L n) = Rewriting.emb σ := by

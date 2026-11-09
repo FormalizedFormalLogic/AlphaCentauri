@@ -68,6 +68,15 @@ theorem provable_substNumerals_of_provable_substNumerals_all {m : ℕ}
   simp only [Semiformula.val_substs, ψ, SemitermVec.val_succ] at h₂
   simpa [e, w, substNumerals, Matrix.vecHead, Matrix.vecTail, Function.comp_def] using h₂
 
+/-- Instantiating an internally-provable universal closure at numerals. -/
+theorem provable_substNumerals_of_provable_allClosure {k : ℕ} (φ : ArithmeticSemisentence k)
+    (h : Provable T (⌜∀¹* φ⌝ : V)) (v : Fin k → V) : Provable T (substNumerals (⌜φ⌝ : V) v) := by
+  induction k with
+  | zero => simpa using h
+  | succ k ih =>
+    rw [← Matrix.cons_head_tail v]
+    exact provable_substNumerals_of_provable_substNumerals_all φ (ih (∀¹ φ) h _) _
+
 end specialize
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

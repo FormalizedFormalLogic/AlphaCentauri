@@ -79,15 +79,17 @@ private lemma cut_and {c q r s : V} (hcut : CutLower L c)
     simpa using (IsFormulaSet.insert_iff.mp h₁.isFormulaSet).1
   rw [neg_and hqr.1.isUFormula hqr.2.isUFormula] at h₂
   rw [formulaComplexity_and hqr.1.isUFormula hqr.2.isUFormula] at hc
-  obtain ⟨d₁, hd₁⟩ := h₁
-  obtain ⟨d₂, hd₂⟩ := h₂
-  obtain ⟨eq, heq, -⟩ := CutFreeDerivation.inversion_and (Or.inl rfl) hd₁
-  obtain ⟨er, her, -⟩ := CutFreeDerivation.inversion_and (Or.inr rfl) hd₁
-  obtain ⟨e, he, -⟩ := CutFreeDerivation.inversion_or hd₂
+  obtain ⟨d₁, hd₁⟩ := RankedDerivable.iff_cutFreeDerivable.mpr h₁
+  obtain ⟨d₂, hd₂⟩ := RankedDerivable.iff_cutFreeDerivable.mpr h₂
+  have heq := RankedDerivable.iff_cutFreeDerivable.mp
+    (RankedDerivation.inversion_and (Or.inl rfl) hd₁)
+  have her := RankedDerivable.iff_cutFreeDerivable.mp
+    (RankedDerivation.inversion_and (Or.inr rfl) hd₁)
+  have he := RankedDerivable.iff_cutFreeDerivable.mp (RankedDerivation.inversion_or hd₂)
   have h₃ : CutFreeDerivable (∅ : Theory L) (insert (neg L q) s) :=
     hcut r _ (lt_of_lt_of_le (lt_max_succ_right _ _) hc)
-      (CutFreeDerivable.wk_insert hqr.1.neg ⟨er, her⟩) (by rw [insert_comm]; exact ⟨e, he⟩)
-  exact hcut q s (lt_of_lt_of_le (lt_max_succ_left _ _) hc) ⟨eq, heq⟩ h₃
+      (CutFreeDerivable.wk_insert hqr.1.neg her) (by rw [insert_comm]; exact he)
+  exact hcut q s (lt_of_lt_of_le (lt_max_succ_left _ _) hc) heq h₃
 
 section cutBase
 
@@ -124,7 +126,8 @@ private lemma cut_aux_verum {Γ : V} (hsF : IsFormulaSet L s) (hv : ^⊤ ∈ Γ)
   · exact .verum hsF hv'
   · obtain rfl : (^⊤ : V) = p := (mem_bitInsert_iff.mp (hsub hv)).resolve_right hv'
     rw [neg_verum] at he
-    exact CutFreeDerivable.of_insert_falsum ⟨e, he⟩
+    exact RankedDerivable.iff_cutFreeDerivable.mp
+      (RankedDerivable.of_insert_falsum (RankedDerivable.iff_cutFreeDerivable.mpr ⟨e, he⟩))
 
 private lemma cut_aux_and {Γ a b da db : V} (ih : CutBelow L c (andIntro Γ a b da db))
     (hpc : formulaComplexity L p ≤ c) (hpg : IsZeroOrExs L p) (hΓF : IsFormulaSet L Γ)

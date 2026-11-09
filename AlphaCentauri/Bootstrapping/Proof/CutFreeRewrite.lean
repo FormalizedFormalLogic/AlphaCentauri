@@ -8,9 +8,8 @@ public import AlphaCentauri.ToFoundation.Set
 # Free-variable substitution and universal inversion for cut-free derivations
 
 This module shows that cut-free derivability over the empty theory is closed under substituting
-closed terms for free variables, that the universal rule is invertible with an arbitrary closed
-term as the instance, and that `⊥` can be deleted from a cut-free derivable sequent. The first two
-hold in every model of `𝗜𝚺⁺2`, the last in every model of `𝗜𝚺₁`.
+closed terms for free variables and that the universal rule is invertible with an arbitrary closed
+term as the instance. Both hold in every model of `𝗜𝚺⁺2`.
 -/
 
 @[expose] public section
@@ -25,10 +24,6 @@ open PeanoMinus ISigma0 ISigma1
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-/-- The rest of an end-sequent split off by `insert` is bounded by the proof code. -/
-private lemma le_of_fstIdx_eq_insert {d x s : V} (h : fstIdx d = insert x s) : s ≤ d :=
-  le_trans (le_of_subset (by rw [h]; exact susbset_insert x s)) (fstIdx_le_self d)
-
 /-- The body and the rest of an end-sequent containing a universal formula are bounded by the
 proof code. -/
 private lemma all_bounds {d p s : V} (h : fstIdx d = insert (^∀ p) s) : p ≤ d ∧ s ≤ d := by
@@ -37,146 +32,6 @@ private lemma all_bounds {d p s : V} (h : fstIdx d = insert (^∀ p) s) : p ≤ 
     le_of_fstIdx_eq_insert h⟩
 
 namespace CutFreeDerivable
-
-variable (L) in
-/-- `⊥` can be deleted from the end-sequent of every cut-free derivation coded below `d`. -/
-private def DeletesFalsumBelow (d : V) : Prop :=
-  ∀ d₀ < d, ∀ s₀ : V, CutFreeDerivationOf (∅ : Theory L) d₀ (insert ^⊥ s₀) →
-    CutFreeDerivable (∅ : Theory L) s₀
-
-section deleteFalsum
-
-variable {s : V}
-
-private lemma falsum_axL {r : V} (hfs : IsFormulaSet L (insert ^⊥ s)) (hrs : r ∈ insert ^⊥ s)
-    (hnrs : neg L r ∈ insert ^⊥ s) : CutFreeDerivable (∅ : Theory L) s := by
-  have hsF : IsFormulaSet L s := fun x hx ↦ hfs x (by simp [hx])
-  have hvf : (^⊤ : V) ≠ ^⊥ := by simp [qqVerum, qqFalsum]
-  by_cases hv : (^⊤ : V) ∈ s
-  · exact .verum hsF hv
-  · have hr : r ≠ ^⊥ := by
-      rintro rfl
-      rw [neg_falsum] at hnrs
-      exact hv (mem_of_mem_insert_of_ne hnrs hvf)
-    have hnr : neg L r ≠ ^⊥ := by
-      intro h
-      have : r = ^⊤ := by rw [← (hfs r hrs).isUFormula.neg_neg, h, neg_falsum]
-      exact hv (mem_of_mem_insert_of_ne (this ▸ hrs) hvf)
-    exact .em hsF r (mem_of_mem_insert_of_ne hrs hr) (mem_of_mem_insert_of_ne hnrs hnr)
-
-private lemma falsum_and {a b dp dq : V}
-    (ih : DeletesFalsumBelow L (andIntro (insert ^⊥ s) a b dp dq)) (hab : a ^⋏ b ∈ insert ^⊥ s)
-    (hdp : CutFreeDerivationOf (∅ : Theory L) dp (insert a (insert ^⊥ s)))
-    (hdq : CutFreeDerivationOf (∅ : Theory L) dq (insert b (insert ^⊥ s))) :
-    CutFreeDerivable (∅ : Theory L) s := by
-  rw [insert_comm] at hdp hdq
-  exact .and_m (mem_of_mem_insert_of_ne hab (by simp [qqAnd, qqFalsum]))
-    (ih dp (dp_lt_andIntro _ _ _ _ _) _ hdp) (ih dq (dq_lt_andIntro _ _ _ _ _) _ hdq)
-
-private lemma falsum_or {a b d₀ : V} (ih : DeletesFalsumBelow L (orIntro (insert ^⊥ s) a b d₀))
-    (hab : a ^⋎ b ∈ insert ^⊥ s)
-    (hd₀ : CutFreeDerivationOf (∅ : Theory L) d₀ (insert a (insert b (insert ^⊥ s)))) :
-    CutFreeDerivable (∅ : Theory L) s := by
-  rw [insert_comm b, insert_comm a] at hd₀
-  exact .or_m (mem_of_mem_insert_of_ne hab (by simp [qqOr, qqFalsum]))
-    (ih d₀ (d_lt_orIntro _ _ _ _) _ hd₀)
-
-private lemma falsum_all {a d₀ : V} (ih : DeletesFalsumBelow L (allIntro (insert ^⊥ s) a d₀))
-    (ha : ^∀ a ∈ insert ^⊥ s)
-    (hd₀ : CutFreeDerivationOf (∅ : Theory L) d₀ (insert (free L a) (setShift L (insert ^⊥ s)))) :
-    CutFreeDerivable (∅ : Theory L) s := by
-  rw [mem_setShift_insert, shift_falsum, insert_comm] at hd₀
-  exact .all_m (mem_of_mem_insert_of_ne ha (by simp [qqAll, qqFalsum]))
-    (ih d₀ (s_lt_allIntro _ _ _) _ hd₀)
-
-private lemma falsum_exs {a t d₀ : V} (ih : DeletesFalsumBelow L (exsIntro (insert ^⊥ s) a t d₀))
-    (ha : ^∃ a ∈ insert ^⊥ s) (ht : IsTerm L t)
-    (hd₀ : CutFreeDerivationOf (∅ : Theory L) d₀ (insert (substs1 L t a) (insert ^⊥ s))) :
-    CutFreeDerivable (∅ : Theory L) s := by
-  rw [insert_comm] at hd₀
-  exact .ex_m (mem_of_mem_insert_of_ne ha (by simp [qqExs, qqFalsum])) ht
-    (ih d₀ (d_lt_exsIntro _ _ _ _) _ hd₀)
-
-private lemma falsum_wk {d₀ : V} (ih : DeletesFalsumBelow L (wkRule (insert ^⊥ s) d₀))
-    (hsF : IsFormulaSet L s) (hsub : fstIdx d₀ ⊆ insert ^⊥ s)
-    (hd₀ : CutFreeDerivation (∅ : Theory L) d₀) : CutFreeDerivable (∅ : Theory L) s := by
-  by_cases hf : (^⊥ : V) ∈ fstIdx d₀
-  · refine .wk hsF ?_
-      (ih d₀ (d_lt_wkRule _ _) (bitRemove ^⊥ (fstIdx d₀)) ⟨(insert_remove hf).symm, hd₀⟩)
-    intro x hx
-    have hx' := mem_bitRemove_iff.mp hx
-    exact mem_of_mem_insert_of_ne (hsub hx'.2) hx'.1
-  · refine .wk hsF ?_ ⟨d₀, rfl, hd₀⟩
-    intro x hx
-    exact mem_of_mem_insert_of_ne (hsub hx) (by rintro rfl; exact hf hx)
-
-private lemma falsum_shift {d₀ : V} (ih : DeletesFalsumBelow L (shiftRule (insert ^⊥ s) d₀))
-    (hsF : IsFormulaSet L s) (hsh : insert ^⊥ s = setShift L (fstIdx d₀))
-    (hd₀ : CutFreeDerivation (∅ : Theory L) d₀) : CutFreeDerivable (∅ : Theory L) s := by
-  have hΔ := hd₀.isFormulaSet
-  obtain ⟨r, hr, hre⟩ :=
-    mem_setShift_iff.mp (show (^⊥ : V) ∈ setShift L (fstIdx d₀) by rw [← hsh]; simp)
-  obtain rfl : r = ^⊥ := shift_inj (hΔ r hr).isUFormula (by simp) (by rw [← hre, shift_falsum])
-  refine .wk hsF ?_
-    (ih d₀ (d_lt_shiftRule _ _) (bitRemove ^⊥ (fstIdx d₀)) ⟨(insert_remove hr).symm, hd₀⟩).shift_m
-  rw [setShift_bitRemove hΔ (by simp), shift_falsum, ← hsh]
-  intro x hx
-  have hx' := mem_bitRemove_iff.mp hx
-  exact mem_of_mem_insert_of_ne hx'.2 hx'.1
-
-end deleteFalsum
-
-/-- Deleting `⊥` from the end-sequent of a cut-free derivation code bounding the rest of it. -/
-private lemma of_insert_falsum_aux :
-    ∀ d : V, ∀ s ≤ d, CutFreeDerivationOf (∅ : Theory L) d (insert ^⊥ s) →
-      CutFreeDerivable (∅ : Theory L) s := by
-  have hP : 𝚺ᴬ₁-Predicate fun d : V ↦ ∀ s ≤ d,
-      CutFreeDerivationOf (∅ : Theory L) d (insert ^⊥ s) → CutFreeDerivable (∅ : Theory L) s := by
-    definability
-  intro d
-  refine ISigma1.order_induction 𝚺 hP ?_ d
-  intro d ih
-  have ih' : DeletesFalsumBelow L d :=
-    fun d₀ hd₀ s₀ h ↦ ih d₀ hd₀ s₀ (le_of_fstIdx_eq_insert h.1) h
-  rintro s - ⟨hd1, hd2⟩
-  have hfs : IsFormulaSet L (insert ^⊥ s) := hd1 ▸ hd2.isFormulaSet
-  have hsF : IsFormulaSet L s := fun x hx ↦ hfs x (by simp [hx])
-  rcases hd2.case.2 with (⟨s₀, r, rfl, hrs, hnrs⟩ | ⟨s₀, rfl, hv⟩ |
-    ⟨s₀, a, b, dp, dq, rfl, hab, hdp, hdq⟩ | ⟨s₀, a, b, d₀, rfl, hab, hd₀⟩ |
-    ⟨s₀, a, d₀, rfl, ha, hd₀⟩ | ⟨s₀, a, t, d₀, rfl, ha, ht, hd₀⟩ |
-    ⟨s₀, d₀, rfl, hsub, hd₀⟩ | ⟨s₀, d₀, rfl, hsh, hd₀⟩ | ⟨s₀, r, rfl, -, hT⟩)
-  · rw [fstIdx_axL] at hd1
-    subst hd1
-    exact falsum_axL hfs hrs hnrs
-  · rw [fstIdx_verumIntro] at hd1
-    subst hd1
-    exact .verum hsF (mem_of_mem_insert_of_ne hv (by simp [qqVerum, qqFalsum]))
-  · rw [fstIdx_andIntro] at hd1
-    subst hd1
-    exact falsum_and ih' hab hdp hdq
-  · rw [fstIdx_orIntro] at hd1
-    subst hd1
-    exact falsum_or ih' hab hd₀
-  · rw [fstIdx_allIntro] at hd1
-    subst hd1
-    exact falsum_all ih' ha hd₀
-  · rw [fstIdx_exsIntro] at hd1
-    subst hd1
-    exact falsum_exs ih' ha ht hd₀
-  · rw [fstIdx_wkRule] at hd1
-    subst hd1
-    exact falsum_wk ih' hsF hsub hd₀
-  · rw [fstIdx_shiftRule] at hd1
-    subst hd1
-    exact falsum_shift ih' hsF hsh hd₀
-  · exact absurd hT (not_mem_empty_Δ₁Class r)
-
-/-- Deleting `⊥` from a cut-free derivable sequent over the empty theory leaves it cut-free
-derivable. -/
-theorem of_insert_falsum {s : V} (h : CutFreeDerivable (∅ : Theory L) (insert ^⊥ s)) :
-    CutFreeDerivable (∅ : Theory L) s := by
-  obtain ⟨d, hd⟩ := h
-  exact of_insert_falsum_aux d s (le_of_fstIdx_eq_insert hd.1) hd
 
 variable (L) in
 /-- Cut-free derivability of the image of the end-sequent under every substitution of closed terms

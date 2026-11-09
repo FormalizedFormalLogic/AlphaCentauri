@@ -149,7 +149,7 @@ declaration:
       - FFL.FirstOrder.Arithmetic.IE1_strictlyWeakerThan_ISigma0
   FFL.FirstOrder.Arithmetic.IE_strictlyWeakerThan_IE_succ:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (1)], already for IE₁ and IE₂.
+      # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (1)].
       - FFL.FirstOrder.Arithmetic.IE_strictlyWeakerThan_IE_succ
 
   # Declarations that inherit the debt of an unproved statement.

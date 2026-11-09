@@ -65,7 +65,7 @@ instance (k : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ IE k :=
 axiom IE1_strictlyWeakerThan_ISigma0 : 𝗜𝗘₁ ⪱ 𝗜𝚺₀
 
 /-- $\mathsf{I}\mathsf{E}_k$ is strictly weaker than $\mathsf{I}\mathsf{E}_{k + 1}$ for each
-$k \ge 1$. An open problem, already for $k = 1$ and $k = 2$.
+$k \ge 1$. An open problem.
 - [Wil85, §4.13, Problem (1)]
 - [Car16] -/
 axiom IE_strictlyWeakerThan_IE_succ {k : ℕ} (hk : 1 ≤ k) : IE k ⪱ IE (k + 1)

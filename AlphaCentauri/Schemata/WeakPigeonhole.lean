@@ -34,13 +34,15 @@ def IsChild (β e x : V) : Prop :=
   (β = 0 ∧ ∃ w < a, R (x + a * w) e) ∨ (β = 1 ∧ ∃ w < a, R (w + a * x) e)
 
 /-- The blocks of `s` of width `‖a‖` trace a path of length `d` from `c` along the bits of `τ`,
-lowest bit first. -/
+lowest bit first.
+- [PWW88, proof of Theorem 1] -/
 def IsPath (d s c τ : V) : Prop :=
   Nuon.ext a s 0 = c ∧
     ∀ i < d, Nuon.ext a s (i + 1) < a ∧
       IsChild R a (fbit τ i) (Nuon.ext a s i) (Nuon.ext a s (i + 1))
 
-/-- The path of length `d` from `c` along `τ` ends at `e`. -/
+/-- The path of length `d` from `c` along `τ` ends at `e`: $H^d_c(\tau) = e$.
+- [PWW88, proof of Theorem 1] -/
 def IsLeaf (d c τ e : V) : Prop :=
   ∃ s < (2 * a) ⨳ a, IsPath R a d s c τ ∧ Nuon.ext a s d = e
 
@@ -157,6 +159,10 @@ lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c <
 lemma bexp_succ {b x : V} (h : x + 1 < ‖b‖) : bexp b (x + 1) = 2 * bexp b x :=
   bexp_eq_of_exp h (exp_bexp_of_lt (lt_of_le_of_lt le_self_add h)).succ
 
+/-- For a $\Delta_0$-definable relation `T` with a value below `a` everywhere, every
+$\rho < 2^{\|a\| - d}$ has a root `c < a` whose leaf along each $\tau < 2^d$ is a value of `T`
+at $\rho + 2^{\|a\| - d} \tau$.
+- [PWW88, Claim in the proof of Theorem 1] -/
 lemma exists_root (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a) (htot : ∀ x < a * a, ∃ y < a, R x y)
     {T : V → V → Prop} (hT : 𝚺ᴬ₀.DefinableRel T) (hTa : ∀ σ, ∃ e < a, T σ e) :
     ∀ d ≤ ‖a‖, ∀ ρ < bexp (2 * a) (‖a‖ - d), ∃ c < a, ∀ τ < bexp (2 * a) d,

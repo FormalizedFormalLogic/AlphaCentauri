@@ -33,6 +33,17 @@ Ada87:
     title: Journal of Symbolic Logic
     volume: 52
 
+BCR98:
+  type: Book
+  title: Real Algebraic Geometry
+  author: ["Bochnak, Jacek", "Coste, Michel", "Roy, Marie-Françoise"]
+  date: 1998
+  publisher:
+    name: Springer
+    location: Berlin
+  serial-number:
+    doi: "10.1007/978-3-662-03718-8"
+
 BI91:
   type: Article
   title: Combinatorial principles in elementary number theory
@@ -266,6 +277,21 @@ Jer21:
   note: DSc. dissertation
   organization: Institute of Mathematics, Czech Academy of Sciences
   url: https://users.math.cas.cz/~jerabek/papers/dsc.pdf
+
+KKS97:
+  type: Article
+  title: Exponentiation in power series fields
+  author: ["Kuhlmann, Franz-Viktor", "Kuhlmann, Salma", "Shelah, Saharon"]
+  date: 1997
+  page-range: 3177-3183
+  parent:
+    type: Periodical
+    title: Proceedings of the American Mathematical Society
+    volume: 125
+    issue: 11
+  serial-number:
+    doi: "10.1090/S0002-9939-97-03964-6"
+    arxiv: "math/9608214"
 
 Kay91:
   type: Book

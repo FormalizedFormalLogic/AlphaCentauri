@@ -25,6 +25,10 @@ open Polynomial
 
 namespace HahnSeries
 
+/-- The field of Hahn series with real coefficients and rational exponents is real closed.
+- [KKS97] -/
+axiom isRealClosed_lex : IsRealClosed (Lex ℝ⟦ℚ⟧)
+
 variable (G : AddSubgroup ℚ)
 
 /-- The Hahn series whose support lies in `G`. -/

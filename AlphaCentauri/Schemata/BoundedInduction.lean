@@ -10,6 +10,8 @@ $U_k$ count the alternations of blocks of bounded quantifiers over an open matri
 
 - [Wil85]
 - [Smi93, Definition 2.1, Definition 2.2]
+- [DAq05, §8]
+- [Car16]
 -/
 
 @[expose] public section
@@ -58,7 +60,17 @@ instance (k : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ IE k :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻)
     (Entailment.WeakerThan.ofSubset Set.subset_union_left)
 
-/-- $\mathsf{IE}_1$ proves the least number principle for $U_1$ formulas. An open problem.
+/-- $\mathsf{I}\mathsf{E}_1$ is strictly weaker than $\mathsf{I}\Delta_0$. An open problem.
+- [DAq05, §8] -/
+axiom IE1_strictlyWeakerThan_ISigma0 : 𝗜𝗘₁ ⪱ 𝗜𝚺₀
+
+/-- $\mathsf{I}\mathsf{E}_k$ is strictly weaker than $\mathsf{I}\mathsf{E}_{k + 1}$ for each
+$k \ge 1$. An open problem.
+- [Wil85, §4.13, Problem (1)]
+- [Car16] -/
+axiom IE_strictlyWeakerThan_IE_succ {k : ℕ} (hk : 1 ≤ k) : IE k ⪱ IE (k + 1)
+
+/-- $\mathsf{I}\mathsf{E}_1$ proves the least number principle for $U_1$ formulas. An open problem.
 - [Wil85, §4.13, Problem (2)] -/
 axiom leastNumberBoundedUniversal_weakerThan_IE1 :
     𝗣𝗔⁻ ∪ LeastNumberScheme (Semiformula.BoundedUniversal 1) ⪯ 𝗜𝗘₁

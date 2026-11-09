@@ -119,6 +119,33 @@ Bus98A:
       title: Studies in Logic and the Foundations of Mathematics
       volume: 137
 
+Car16:
+  type: Article
+  title: A note on ℤ as a direct summand of nonstandard models of weak systems of arithmetic
+  author: Carl, Merlin
+  date: 2016
+  serial-number:
+    arxiv: "1605.09222"
+
+DAq05:
+  type: Chapter
+  title: Weak fragments of Peano arithmetic
+  author: D'Aquino, Paola
+  date: 2005
+  page-range: 149-184
+  serial-number:
+    doi: "10.1017/9781316755907.005"
+  parent:
+    type: Anthology
+    title: The Notre Dame Lectures
+    editor: Cholak, Peter
+    publisher:
+      name: Association for Symbolic Logic
+    parent:
+      type: Anthology
+      title: Lecture Notes in Logic
+      volume: 18
+
 ELV25:
   type: Article
   title: Completions of restricted complexity I, weak arithmetical theories
@@ -280,6 +307,20 @@ Smi93:
     title: Notre Dame Journal of Formal Logic
     volume: 34
     issue: 3
+
+Tha05:
+  type: Article
+  title: "A note on Δ₁ induction and Σ₁ collection"
+  author: ["Thapen, Neil"]
+  volume: 186
+  issue: 1
+  page-range: 79-84
+  date: 2005
+  serial-number:
+    doi: "10.4064/fm186-1-6"
+  parent:
+    type: Periodical
+    title: Fundamenta Mathematicae
 
 Tow20:
   type: Misc

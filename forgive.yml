@@ -47,12 +47,6 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [HP98, Corollary V.4.39], [Kay91, Exercise 10.4].
       - FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1.finiteAxiomatizable
-  FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
-  FFL.FirstOrder.Arithmetic.Peano.reflexive:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Peano.reflexive
   FFL.FirstOrder.Arithmetic.BSigma1_weakerThan_ISigma0_add_not_exp:
     forgive:
       # An open problem, not a theorem awaiting formalization: [WP89].
@@ -143,18 +137,20 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.6].
       - FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE2
+  FFL.FirstOrder.Arithmetic.IE1_strictlyWeakerThan_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [DAq05, §8].
+      - FFL.FirstOrder.Arithmetic.IE1_strictlyWeakerThan_ISigma0
+  FFL.FirstOrder.Arithmetic.IE_strictlyWeakerThan_IE_succ:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (1)].
+      - FFL.FirstOrder.Arithmetic.IE_strictlyWeakerThan_IE_succ
   FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1:
     forgive:
       # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (2)].
       - FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1
 
   # Declarations that inherit the debt of an unproved statement.
-  FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Peano.reflexive
   FFL.FirstOrder.Arithmetic.exists_prime_gt:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
-  FFL.FirstOrder.Arithmetic.not_finiteAxiomatizable_of_Peano_le:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive

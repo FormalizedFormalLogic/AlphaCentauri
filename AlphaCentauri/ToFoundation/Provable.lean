@@ -1,15 +1,16 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D3
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
+public import AlphaCentauri.ToFoundation.TypedProof
 
 @[expose] public section
 /-!
 # Internal provability: universal instantiation and modus ponens
 
-Two generic facts about `Bootstrapping.Provable` needed to internalize induction over a model:
-instantiating an internally-provable universal sentence at a numeral, and modus ponens for
-arbitrary (not necessarily quoted) codes.
+Generic facts about `Bootstrapping.Provable`: instantiating an internally-provable universal
+sentence at a numeral, modus ponens for arbitrary (not necessarily quoted) codes, and the internal
+provability of the numeral instances of a theorem of `𝗜𝚺₁` and of a true $\Sigma_1$ formula.
 -/
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
@@ -51,6 +52,22 @@ theorem provable_substNumeral_of_provable_quote_all (φ : ArithmeticSemisentence
   have h2 : T.internalize V ⊢ ∀¹ (⌜φ⌝ : Semiformula V ℒₒᵣ 1) := by simpa using h1
   have h3 := TProof.specialize! h2 (𝕹 x)
   simpa [substNumeral, Sentence.quote_eq] using tprovable_iff_provable.mp h3
+
+variable [𝗜𝚺₁ ⪯ T]
+
+/-- A theorem of `𝗜𝚺₁`, given by its truth in every model, is internally provable at numerals. -/
+theorem tprovable_subst_numeral_of_models {k : ℕ} {φ : ArithmeticSemisentence k}
+    (h : ∀ (W : Type) [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin k → W), W ⊧/e φ)
+    (w : Fin k → V) :
+    T.internalize V ⊢ (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst (fun i ↦ 𝕹 (w i)) :=
+  tprovable_subst_of_allClosure T _ <| internal_provable_of_outer_provable <|
+    Entailment.WeakerThan.pbl <| complete 𝗜𝚺₁ _ fun W _ _ ↦ by simpa [models_iff] using h W
+
+/-- A $\Sigma_1$ formula true at `w` is internally provable at the numerals of `w`. -/
+theorem tprovable_subst_numeral_of_sigma1 {k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ) {w : Fin k → V} (h : V ⊧/w φ) :
+    T.internalize V ⊢ (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst (fun i ↦ 𝕹 (w i)) :=
+  bold_sigma_one_complete T hφ h
 
 end specialize
 

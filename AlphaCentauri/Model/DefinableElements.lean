@@ -118,8 +118,8 @@ namespace definableElements
 
 variable (j M) in
 instance oringStructure : ORingStructure (definableElements (j + 1) M) where
-  zero := ⟨0, “#0 = 0”, by simp, by simp⟩
-  one := ⟨1, “#0 = 1”, by simp, by simp⟩
+  zero := ⟨0, by use “#0 = 0”; simp⟩
+  one := ⟨1, by use “#0 = 1”; simp⟩
   add a b := ⟨a.1 + b.1, mem_definableElements_of_unique (Nat.le_add_left 1 j)
     (ψ := “#0 = #1 + #2”) (v := ![a.1, b.1]) (by simp) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩)
     fun x ↦ by simp⟩
@@ -157,8 +157,37 @@ theorem sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : SigmaElementary (emb j
   · intro m hm n φ hφ
     exact witness (hφ.hierarchy.mono (by omega))
 
+variable (j) in
 /-- [HP98, Corollary IV.1.40] -/
-axiom models_ISigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] (j : ℕ) : (definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗜𝚺 j
+theorem models_ISigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : (definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗜𝚺 j := by
+  have hK : SigmaElementary (emb j M) (j + 1) := sigmaElementary j
+  have : (definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+    SigmaElementary.models_peanoMinus fun hm ↦ hK (hm.trans (Nat.zero_le _))
+  apply Semantics.ModelsSet.union_iff.mpr
+  and_intros
+  · exact this
+  apply Semantics.ModelsSet.setOf_iff.mpr
+  rintro _ ⟨φ, hφ, rfl⟩
+  suffices ∀ v : ℕ → definableElements (j + 1) M, φ.Eval ![0] v →
+      (∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) → ∀ x, φ.Eval ![x] v by
+    simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
+      Matrix.constant_eq_singleton] using this
+  intro v h₀ hs a
+  have hM (x : definableElements (j + 1) M) : φ.Eval ![x.1] (emb j M ∘ v) ↔ φ.Eval ![x] v := by
+    simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using hK (by omega) hφ ![x] v
+  by_contra ha
+  obtain ⟨x₀, hx₀, h₁, h₂⟩ := exists_least_mem_definableElements (φ := ∼φ) (e := ![])
+    (f := emb j M ∘ v) (by simpa using hφ.hierarchy) (fun i ↦ i.elim0) (fun i ↦ (v i).2) <| by
+      use a.1
+      simpa using (hM a).not.mpr ha
+  have h₃ : ¬φ.Eval ![⟨x₀, hx₀⟩] v := by simpa [← hM] using h₁
+  obtain ⟨y, rfl⟩ : ∃ y, x₀ = y + 1 := eq_succ_of_pos <| pos_iff_ne_zero.mpr <| by
+    rintro rfl
+    exact h₃ h₀
+  have hy : y ∈ definableElements (j + 1) M :=
+    mem_definableElements_of_unique (Nat.le_add_left 1 j) (ψ := “#0 + 1 = #1”) (v := ![y + 1])
+      (by simp) (Fin.forall_fin_one.mpr hx₀) fun x ↦ by simp
+  exact h₃ <| hs ⟨y, hy⟩ <| (hM ⟨y, hy⟩).mp <| by simpa using h₂ y (lt_add_one y)
 
 end definableElements
 

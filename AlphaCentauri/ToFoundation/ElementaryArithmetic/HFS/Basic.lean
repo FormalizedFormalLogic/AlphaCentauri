@@ -269,7 +269,7 @@ instance product_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 lemma product_bound {a b : V} : a ×ʰᶠ b < Exp.exp ((log a + log b + 1) ^ 2 + 1) := by
   unfold product
   have : 𝚺ᴬ₀-Predicate fun x ↦ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫ := by definability
-  refine finite_comprehension!_bound (m := (log a + log b + 1) ^ 2 + 1) this ?_
+  apply finite_comprehension!_bound (m := (log a + log b + 1) ^ 2 + 1) this
   rintro i ⟨y, hymem, z, hzmem, rfl⟩
   apply le_log_of_mem at hymem
   apply le_log_of_mem at hzmem
@@ -651,15 +651,15 @@ instance IsMapping.isFunction_defined :
   .mk fun v ↦ by
     simp [IsMapping.isFunctionDef]
     constructor <;> intro h
-    · refine ⟨h.1, ?_⟩
+    · apply And.intro h.1
       intro p hpmem
       have hplt : p < v 0 := lt_of_mem hpmem
       obtain ⟨x, hxlt, y, hylt, rfl⟩ := h.2 p hplt hpmem
-      refine mem_product_iff.mpr ?_
+      apply mem_product_iff.mpr
       have hxmem : x ∈ domain (v 0) := mem_domain_iff.mpr ⟨y, hpmem⟩
       have hymem : y ∈ range (v 0) := mem_range_iff.mpr ⟨x, hpmem⟩
-      refine ⟨x, hxmem, y, hymem, rfl⟩
-    · refine ⟨h.1, ?_⟩
+      exact ⟨x, hxmem, y, hymem, rfl⟩
+    · apply And.intro h.1
       intro p hplt hpmem
       obtain ⟨x, hx, y, hy, rfl⟩ := mem_product_iff.mp (h.2 hpmem)
       have hxlt : x < v 0 := lt_of_le_of_lt (le_pair_left x y) hplt
@@ -726,11 +726,7 @@ theorem sigmaZero_skolem {R : V → V → Prop} (hR : 𝚺ᴬ₀-Relation R) {s 
         · exact hRf x (lt_of_mem_dom h) y (lt_of_mem_rng h) h
   obtain ⟨f, _, mf, hdom, hf⟩ := this s (subset_refl s)
   use f
-  and_intros
-  · exact mf
-  · exact hdom
-  · intro x y hxy
-    exact hf x (lt_of_mem_dom hxy) y (lt_of_mem_rng hxy) hxy
+  exact ⟨mf, hdom, fun x y hxy ↦ hf x (lt_of_mem_dom hxy) y (lt_of_mem_rng hxy) hxy⟩
 
 theorem sigmaZero_replacement {f : V → V} (hf : 𝚺ᴬ₀-Function₁ f) {s B : V}
     (hB : ∀ x ∈ s, f x < B) : ∃! t : V, ∀ y, y ∈ t ↔ ∃ x ∈ s, y = f x := by

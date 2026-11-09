@@ -37,6 +37,20 @@ BI91:
     volume: 55
     issue: 1
 
+BO96:
+  type: Article
+  title: A recursive nonstandard model of normal open induction
+  author: ["Berarducci, Alessandro", "Otero, Margarita"]
+  date: 1996
+  page-range: 1228-1241
+  serial-number:
+    doi: "10.2307/2275813"
+  parent:
+    type: Periodical
+    title: Journal of Symbolic Logic
+    volume: 61
+    issue: 4
+
 BW87:
   type: Chapter
   title: Provably computable functions and the fast growing hierarchy
@@ -384,6 +398,18 @@ vO99:
   note: >-
     Notes of a course in the 1998-1999 Master Class Program in Mathematical
     Logic of the Mathematical Research Institute, Utrecht
+
+Wil78:
+  type: Article
+  title: Some results and problems on weak systems of arithmetic
+  author: Wilkie, Alex
+  date: 1978
+  page-range: 285-296
+  parent:
+    type: Anthology
+    title: Logic Colloquium '77
+    editor: Macintyre, Angus
+    publisher: North-Holland
 
 Wil85:
   type: Article

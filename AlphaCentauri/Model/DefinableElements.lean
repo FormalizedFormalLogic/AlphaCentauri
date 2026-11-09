@@ -329,18 +329,41 @@ theorem definableElements.not_models_BSigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {a :
 
 /-- The elements of `M` below a $\Sigma_{j+1}$-definable element.
 - [HP98, Definition IV.1.32] -/
-axiom definableCut (j : ℕ) (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : Cut M
+def definableCut (j : ℕ) (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : Cut M where
+  carrier := {a | ∃ c ∈ definableElements (j + 1) M, a < c}
+  succ_mem := by
+    rintro a ⟨c, hc, hac⟩
+    use c + 1
+    and_intros
+    · exact ((⟨c, hc⟩ : definableElements (j + 1) M) + 1).2
+    · simpa using hac
+  mem_of_lt := by
+    rintro a b hab ⟨c, hc, hbc⟩
+    exact ⟨c, hc, hab.trans hbc⟩
 
 namespace definableCut
 
 variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
 
-axiom mem_iff {a : M} :
-    a ∈ (definableCut j M).carrier ↔ ∃ c ∈ definableElements (j + 1) M, a < c
+@[simp]
+lemma mem_iff {a : M} :
+    a ∈ (definableCut j M).carrier ↔ ∃ c ∈ definableElements (j + 1) M, a < c := Iff.rfl
 
-axiom closed (j : ℕ) (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : (definableCut j M).Closed
-
-attribute [instance] closed
+instance closed : (definableCut j M).Closed where
+  zero_mem := ⟨1, (1 : definableElements (j + 1) M).2, zero_lt_one⟩
+  one_mem := ⟨1 + 1, (1 + 1 : definableElements (j + 1) M).2, lt_add_one 1⟩
+  add_mem := by
+    rintro a b ⟨c, hc, hac⟩ ⟨d, hd, hbd⟩
+    use c + d
+    and_intros
+    · exact ((⟨c, hc⟩ : definableElements (j + 1) M) + ⟨d, hd⟩).2
+    · exact _root_.add_lt_add hac hbd
+  mul_mem := by
+    rintro a b ⟨c, hc, hac⟩ ⟨d, hd, hbd⟩
+    use c * d
+    and_intros
+    · exact ((⟨c, hc⟩ : definableElements (j + 1) M) * ⟨d, hd⟩).2
+    · exact mul_lt_mul'' hac hbd _root_.zero_le _root_.zero_le
 
 /-- [HP98, Lemma IV.1.42] -/
 axiom sigmaElementary : SigmaElementary (definableCut j M).endExtension.emb j

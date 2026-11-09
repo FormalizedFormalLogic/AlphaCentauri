@@ -76,6 +76,7 @@ public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.Schemata.ParameterFreeInduction
 public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.Schemata.Strictness
+public import AlphaCentauri.Schemata.StrongCollection
 public import AlphaCentauri.ToFoundation.Absoluteness
 public import AlphaCentauri.ToFoundation.BooleanCombination
 public import AlphaCentauri.ToFoundation.Coding

@@ -282,6 +282,23 @@ Lin97:
     title: Lecture Notes in Logic
     volume: 10
 
+Moh11:
+  type: Chapter
+  title: Hierarchies of subsystems of weak arithmetic
+  author: Mohsenipour, Shahram
+  date: 2011
+  page-range: 80-92
+  serial-number:
+    doi: "10.1017/CBO9780511910616.006"
+    arxiv: "1003.2117"
+  parent:
+    type: Anthology
+    title: Set Theory, Arithmetic, and Foundations of Mathematics
+    editor: ["Kennedy, Juliette", "Kossak, Roman"]
+    publisher:
+      name: Cambridge University Press
+      location: Cambridge
+
 PWW88:
   type: Article
   title: Provability of the pigeonhole principle and the existence of infinitely many primes

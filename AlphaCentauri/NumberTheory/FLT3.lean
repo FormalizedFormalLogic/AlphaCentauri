@@ -11,10 +11,11 @@ $\mathsf{I}\mathsf{E}_1$ is induction for bounded existential formulas over $\ma
 Over a model $V$ of $\mathsf{I}\mathsf{E}_1$, the ring of differences of $V$ satisfies the least
 number principle `LeastNumberPrinciple` for bounded existential open predicates, and
 `FermatThree.flt3_of_leastNumberPrinciple` applies to it. Smith proved the statement over
-$\mathsf{I}\mathsf{E}_2$ and asked whether $\mathsf{I}\mathsf{E}_1$ suffices.
+$\mathsf{I}\mathsf{E}_2$ and asked whether $\mathsf{I}\mathsf{E}_1$ suffices, and whether
+$\mathsf{I}\mathsf{E}_2$ proves the other odd exponents, which is open.
 
 - [Wil85]
-- [Smi93, Question 5.5]
+- [Smi93, Question 5.5, Question 5.6]
 -/
 
 @[expose] public section
@@ -75,9 +76,10 @@ namespace FFL.FirstOrder.Arithmetic
 
 open RingOfDifferences OpenPredicate
 
-/-- Fermat's Last Theorem for exponent 3. -/
-def fermatLastTheoremThree : ArithmeticSentence :=
-  “∀ x y z, x * x * x + y * y * y = z * z * z → x = 0 ∨ y = 0 ∨ z = 0”
+/-- Fermat's Last Theorem for exponent `n`. -/
+def fermatLastTheorem (n : ℕ) : ArithmeticSentence :=
+  let pow (t : ArithmeticSemiterm Empty 3) := (Semiterm.Operator.npow ℒₒᵣ n).operator ![t]
+  “∀ x y z, !!(pow #2) + !!(pow #1) = !!(pow #0) → x = 0 ∨ y = 0 ∨ z = 0”
 
 section
 
@@ -91,7 +93,7 @@ private def bexsBlock {ξ : Type} (k : ξ) {m : ℕ} :
 
 private lemma bexsBlock_boundedExistential {ξ : Type} (k : ξ) {m : ℕ} :
     ∀ (n : ℕ) {φ : ArithmeticSemiformula ξ (m + n)},
-      Semiformula.BoundedExistential φ → Semiformula.BoundedExistential (bexsBlock k n φ)
+      Semiformula.BoundedExistential 1 φ → Semiformula.BoundedExistential 1 (bexsBlock k n φ)
   | 0, _, h => h
   | n + 1, _, h => bexsBlock_boundedExistential k n (.bexsLT _ h)
 
@@ -167,7 +169,7 @@ private lemma open_translate {P : (W → RingOfDifferences V) → Prop} (hP : Is
 
 private lemma exists_e1 {n : ℕ} {Φ : (Fin (n + 1) → RingOfDifferences V) → Prop}
     (hΦ : IsOpen Φ) (B : RingOfDifferences V) :
-    ∃ (ε : ℕ → V) (φ : ArithmeticSemiformula ℕ 1), Semiformula.BoundedExistential φ ∧
+    ∃ (ε : ℕ → V) (φ : ArithmeticSemiformula ℕ 1), Semiformula.BoundedExistential 1 φ ∧
       ∀ x : V, BoundedExists B Φ (of x) ↔ φ.Eval ![x] ε := by
   classical
   obtain ⟨b, hb⟩ := exists_forall_abs_lt_exists_sub B
@@ -214,7 +216,7 @@ end
 /-- $\mathsf{I}\mathsf{E}_1$ proves Fermat's Last Theorem for exponent $3$.
 - [Wil85]
 - [Smi93, Question 5.5] -/
-theorem provable_fermatLastTheoremThree_IE1 : 𝗜𝗘₁ ⊢ fermatLastTheoremThree := by
+theorem provable_fermatLastTheorem_three_IE1 : 𝗜𝗘₁ ⊢ fermatLastTheorem 3 := by
   apply complete
   intro V _ hV
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := Semantics.ModelsSet.of_subset hV Set.subset_union_left
@@ -223,15 +225,17 @@ theorem provable_fermatLastTheoremThree_IE1 : 𝗜𝗘₁ ⊢ fermatLastTheoremT
     ⟨fun x hx ↦ one_le_of_pos one_le_of_zero_lt hx⟩
   have hL : LeastNumberPrinciple (RingOfDifferences V) :=
     leastNumberPrinciple_of_boundedExists_induction fun hΦ B h0 hs t ↦
-      InductionScheme.succ_induction (C := Semiformula.BoundedExistential)
+      InductionScheme.succ_induction (C := Semiformula.BoundedExistential 1)
         (P := fun t ↦ BoundedExists B _ (of t)) (exists_e1 hΦ B) h0 hs t
-  suffices ∀ a b c : V, a * a * a + b * b * b = c * c * c → a = 0 ∨ b = 0 ∨ c = 0 by
-    simpa [models_iff, fermatLastTheoremThree]
+  suffices ∀ a b c : V, a ^ 3 + b ^ 3 = c ^ 3 → a = 0 ∨ b = 0 ∨ c = 0 by
+    simpa [models_iff, fermatLastTheorem]
   intro a b c h
-  have e : of a ^ 3 + of b ^ 3 = of c ^ 3 := by
-    have := congrArg of h
-    simp only [map_add (of : V →+* _), map_mul (of : V →+* _)] at this
-    convert this using 1 <;> ring
+  have e : of a ^ 3 + of b ^ 3 = of c ^ 3 := by simpa [map_add (of : V →+* _)] using congrArg of h
   simpa [map_eq_zero_iff _ of_injective] using FermatThree.flt3_of_leastNumberPrinciple hL _ _ _ e
+
+/-- $\mathsf{I}\mathsf{E}_2$ proves Fermat's Last Theorem for every odd exponent $n \ge 5$.
+- [Smi93, Question 5.6] -/
+axiom provable_fermatLastTheorem_IE2 {n : ℕ} (hn : Odd n) (h5 : 5 ≤ n) :
+    𝗜𝗘₂ ⊢ fermatLastTheorem n
 
 end FFL.FirstOrder.Arithmetic

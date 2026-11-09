@@ -339,7 +339,10 @@ def definableCut (j : ℕ) (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* �
     · simpa using hac
   mem_of_lt := by
     rintro a b hab ⟨c, hc, hbc⟩
-    exact ⟨c, hc, hab.trans hbc⟩
+    use c
+    and_intros
+    · exact hc
+    · exact hab.trans hbc
 
 namespace definableCut
 
@@ -449,7 +452,7 @@ lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSemiformul
     exact (hP x).mpr hx
   use x
   and_intros
-  · exact ⟨d, hd, hx⟩
+  · use d
   · exact (hP x).mp hPx
 
 /-- [HP98, Lemma IV.1.42] -/

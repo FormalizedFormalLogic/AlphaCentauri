@@ -218,6 +218,10 @@ instance DefinesElement.defined : (j : ℕ) →
     simp [definesElementDef, DefinesElement, (PrenexSatisfied.pi_defined' j).df,
       eq_comm]
 
+instance DefinesElement.definable (j : ℕ) :
+    𝚺ᴬ_[j + 1]-Relation (DefinesElement j : V → V → Prop) :=
+  (DefinesElement.defined j).to_definable
+
 lemma DefinesElement.unique {c x x' : V} (h : DefinesElement j c x)
     (h' : DefinesElement j c x') : x = x' := by
   obtain ⟨p, rfl, hp, hmin⟩ := h
@@ -268,8 +272,20 @@ lemma exists_definesElement [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {x : V}
 /-- In a nonstandard model of $\mathsf{I}\Sigma_{j+1}$ the $\Sigma_{j+1}$-definable elements are
 bounded.
 - [HP98, Lemma IV.1.37] -/
-axiom exists_bound_definableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {a : V}
-    (ha : ∀ m : ℕ, (m : V) < a) : ∃ b, ∀ x ∈ definableElements (j + 1) V, x < b
+lemma exists_bound_definableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {a : V}
+    (ha : ∀ m : ℕ, (m : V) < a) : ∃ b, ∀ x ∈ definableElements (j + 1) V, x < b := by
+  have : Fact (1 ≤ j + 1) := ⟨Nat.le_add_left 1 j⟩
+  obtain ⟨u, -, hu⟩ := finset_comprehension (m := j + 1) (Γ := 𝚺)
+    (P := fun c ↦ ∃ x, DefinesElement j c x) (by definability) a
+  obtain ⟨b, hb⟩ := IBroadSigma.collection (s := j) (R := fun c x ↦ c ∈ u → DefinesElement j c x)
+    (by definability) a <| by
+      intro c hc
+      simpa [imp_iff_not_or, exists_or, hu c hc] using em' (∃ x, DefinesElement j c x)
+  use b
+  intro x hx
+  obtain ⟨c, hc⟩ := exists_definesElement hx
+  obtain ⟨y, hy, hcy⟩ := hb c (ha c)
+  rwa [← (hcy <| (hu c (ha c)).mpr ⟨x, hc⟩).unique hc]
 
 end code
 

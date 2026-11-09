@@ -35,9 +35,6 @@ declaration:
   FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma:
     forgive:
       - FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
   FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1
@@ -116,20 +113,44 @@ declaration:
     forgive:
       # Quoted by Bek99 from Beklemishev 1997 without proof.
       - FFL.FirstOrder.Arithmetic.uniformReflection_of_parameterFreeInduction
+  FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_IE1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.1]; Jeřábek states that his proof can be formalized in IE₁ + Count₂(∇₁) [Jer21, Chapter 0, §2.2].
+      - FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_IE1
+  FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.1]; with Δ₀EQ adjoined it is [BI91, Theorem 3.5], with Count₂(Δ₀) adjoined [Jer10, Theorem 5.7].
+      - FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_ISigma0
+  FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_IE1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.2]; Jeřábek states that a proof of quadratic reciprocity can be formalized in IE₁ + Count₂(∇₁) [Jer21, Chapter 0, §2.2].
+      - FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_IE1
+  FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.2]; with Count₂(Δ₀) adjoined it is [Jer10, Theorem 5.7].
+      - FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_ISigma0
+  FFL.FirstOrder.Arithmetic.provable_quadraticReciprocity_IE1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.2]; Jeřábek states that his proof can be formalized in IE₁ + Count₂(∇₁) [Jer21, Chapter 0, §2.2].
+      - FFL.FirstOrder.Arithmetic.provable_quadraticReciprocity_IE1
+  FFL.FirstOrder.Arithmetic.provable_noRootNegOne_IE1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.3].
+      - FFL.FirstOrder.Arithmetic.provable_noRootNegOne_IE1
+  FFL.FirstOrder.Arithmetic.provable_noRootNegOne_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.3].
+      - FFL.FirstOrder.Arithmetic.provable_noRootNegOne_ISigma0
+  FFL.FirstOrder.Arithmetic.provable_squareAddMulSquareIff_IE1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: one reading of [Smi93, Question 5.4].
+      - FFL.FirstOrder.Arithmetic.provable_squareAddMulSquareIff_IE1
+  FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE2:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.6].
+      - FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE2
 
   # Declarations that inherit the debt of an unproved statement.
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_free:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.all_of_fresh:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_free:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.neg_exs_of_fresh:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Derivable.rewrite
   FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
     forgive:
       - FFL.FirstOrder.Arithmetic.Peano.reflexive

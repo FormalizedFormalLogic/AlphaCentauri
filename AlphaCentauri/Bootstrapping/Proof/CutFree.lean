@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Vorspiel.Tactic.Disj
+public import AlphaCentauri.ToFoundation.Coding
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Coding
 
 /-!
@@ -687,11 +688,6 @@ theorem derivable_union_of_replacement {a d : V} (ha : IsFormulaSet L a)
 
 section InsertAxiom
 
-private lemma shift_neg_quote (σ : Sentence L) : shift L (neg L (⌜σ⌝ : V)) = neg L ⌜σ⌝ := by
-  rw [shift_neg (n := 0) (by simp), Sentence.quote_def, ← Semiformula.quote_shift]
-  congr 2
-  simp
-
 /-- The $\Delta_1$-class of the singleton theory `{σ}` consists of the code of `σ` alone. -/
 lemma mem_deltaClass_singleton_iff (σ : Sentence L) (p : V) :
     p ∈ ({σ} : Theory L).Δ₁Class ↔ p = ⌜σ⌝ := by
@@ -709,8 +705,10 @@ theorem deduction_insert {σ : Sentence L} {d : V}
     rcases hU p hp with hp | rfl
     · exact Or.inl hp
     · exact Or.inr <| by simp
+  have hs : shift L (neg L (⌜σ⌝ : V)) = neg L ⌜σ⌝ := by
+    rw [shift_neg (n := 0) (by simp), Semisentence.shift_quote]
   obtain ⟨d', hd', e⟩ :=
-    deductionAux (by simp) (by rw [mem_setShift_insert, setShift_empty, shift_neg_quote]) hax hd
+    deductionAux (by simp) (by rw [mem_setShift_insert, setShift_empty, hs]) hax hd
   refine ⟨d', hd', ?_⟩
   rw [e]
   apply mem_ext

@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
-public import AlphaCentauri.Bootstrapping.Syntax.Iteration
+public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.Coding
 public import AlphaCentauri.ToFoundation.PartialTruth
 

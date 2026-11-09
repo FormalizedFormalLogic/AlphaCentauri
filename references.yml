@@ -23,6 +23,20 @@ AB05:
       name: Springer
       location: Dordrecht
 
+BI91:
+  type: Article
+  title: Combinatorial principles in elementary number theory
+  author: ["Berarducci, Alessandro", "Intrigila, Benedetto"]
+  date: 1991
+  page-range: 35-50
+  serial-number:
+    doi: "10.1016/0168-0072(91)90096-5"
+  parent:
+    type: Periodical
+    title: Annals of Pure and Applied Logic
+    volume: 55
+    issue: 1
+
 BW87:
   type: Chapter
   title: Provably computable functions and the fast growing hierarchy
@@ -146,6 +160,29 @@ HP98:
     type: Anthology
     title: Perspectives in Mathematical Logic
 
+Jer10:
+  type: Article
+  title: Abelian groups and quadratic residues in weak arithmetic
+  author: Jeřábek, Emil
+  date: 2010
+  page-range: 262-278
+  serial-number:
+    doi: "10.1002/malq.200910009"
+  parent:
+    type: Periodical
+    title: Mathematical Logic Quarterly
+    volume: 56
+    issue: 3
+
+Jer21:
+  type: Thesis
+  title: Bounded arithmetic and complexity
+  author: Jeřábek, Emil
+  date: 2021
+  note: DSc. dissertation
+  organization: Institute of Mathematics, Czech Academy of Sciences
+  url: https://users.math.cas.cz/~jerabek/papers/dsc.pdf
+
 Kay91:
   type: Book
   title: Models of Peano Arithmetic
@@ -232,6 +269,18 @@ Sla04:
     type: Periodical
     title: Proceedings of the American Mathematical Society
 
+Smi93:
+  type: Article
+  title: "Quadratic residues and x³ + y³ = z³ in models of IE₁ and IE₂"
+  author: Smith, Stuart T.
+  page-range: 420-439
+  date: 1993
+  parent:
+    type: Periodical
+    title: Notre Dame Journal of Formal Logic
+    volume: 34
+    issue: 3
+
 Tha05:
   type: Article
   title: "A note on Δ₁ induction and Σ₁ collection"
@@ -266,6 +315,20 @@ vO99:
   note: >-
     Notes of a course in the 1998-1999 Master Class Program in Mathematical
     Logic of the Mathematical Research Institute, Utrecht
+
+Wil85:
+  type: Article
+  title: Bounded existential induction
+  author: Wilmers, George
+  page-range: 72-90
+  date: 1985
+  serial-number:
+    doi: "10.2307/2273790"
+  parent:
+    type: Periodical
+    title: The Journal of Symbolic Logic
+    volume: 50
+    issue: 1
 
 WP89:
   type: Chapter

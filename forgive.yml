@@ -143,6 +143,10 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.6].
       - FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE2
+  FFL.FirstOrder.Arithmetic.definableFunction_card_of_definablePred:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [dA05, Question 7.9], [HP98, Bibliographical Remarks to Chapter V].
+      - FFL.FirstOrder.Arithmetic.definableFunction_card_of_definablePred
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:

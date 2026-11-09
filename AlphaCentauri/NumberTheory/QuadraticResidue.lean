@@ -12,9 +12,11 @@ $\mathsf{I}\mathsf{E}_1$ and $\mathsf{I}\Delta_0$, each stated as the provabilit
 For a prime $q$, the Legendre symbol $(a/q)$ is $1$ exactly when `quadraticResidue` holds of
 $a$ and $q$, and $-1$ exactly when $q \nmid a$ and it fails. The questions are open, so the
 affirmative answers are axioms, one for each theory, so that neither carries the debt of the
-other.
+other. With the counting principle $\mathrm{Count}_2(\Delta_0)$ adjoined, $\mathsf{I}\Delta_0$
+proves quadratic reciprocity and its supplementary laws.
 
 - [Smi93, §6]
+- [Jer10, Theorem 5.7]
 -/
 
 @[expose] public section
@@ -42,15 +44,18 @@ def squareAddMulSquare (n : ℕ) : ArithmeticSemisentence 1 := “q. ∃ x y, q 
 def quadraticResidueNegOne : ArithmeticSentence :=
   “∀ q, !isPrime q → (∃ k, q = 4 * k + 1) → !(negOneHasRoot 2) q”
 
-/-- $\mathsf{I}\mathsf{E}_1$ proves that $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$.
+/-- $\mathsf{I}\mathsf{E}_1$ proves that $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$. An
+open problem.
 - [Smi93, Question 5.1] -/
 axiom provable_quadraticResidueNegOne_IE1 : 𝗜𝗘₁ ⊢ quadraticResidueNegOne
 
-/-- $\mathsf{I}\Delta_0$ proves that $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$.
-- [Smi93, Question 5.1] -/
+/-- $\mathsf{I}\Delta_0$ proves that $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$. An open
+problem; $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ proves it.
+- [Smi93, Question 5.1]
+- [Jer10, Theorem 5.7] -/
 axiom provable_quadraticResidueNegOne_ISigma0 : 𝗜𝚺₀ ⊢ quadraticResidueNegOne
 
-/-- The converse of Smith's half of quadratic reciprocity for the odd prime `p`: for every odd
+/-- The converse of [Smi93, Theorem 3.11] for the odd prime `p`: for every odd
 prime $q \ne p$, $(p/q) = 1$ implies $(q/p) = 1$ unless $p \equiv q \equiv 3 \pmod 4$, in which
 case $(p/q) = -1$ implies $(q/p) = 1$.
 - [Smi93, Theorem 3.11, Question 5.2] -/
@@ -61,15 +66,16 @@ def quadraticReciprocityConverse (p : ℕ) : ArithmeticSentence :=
     (¬((∃ k, ↑p = 4 * k + 3) ∧ (∃ k, q = 4 * k + 3)) →
       !quadraticResidue ↑p q → !quadraticResidue q ↑p)”
 
-/-- $\mathsf{I}\mathsf{E}_1$ proves the converse of its half of quadratic reciprocity for each
-standard odd prime `p`.
-- [Smi93, Theorem 3.11, Question 5.2] -/
+/-- $\mathsf{I}\mathsf{E}_1$ proves the converse of [Smi93, Theorem 3.11] for each standard odd
+prime `p`. An open problem.
+- [Smi93, Question 5.2] -/
 axiom provable_quadraticReciprocityConverse_IE1 {p : ℕ} (hp : p.Prime) (hp₂ : p ≠ 2) :
     𝗜𝗘₁ ⊢ quadraticReciprocityConverse p
 
-/-- $\mathsf{I}\Delta_0$ proves the converse of Smith's half of quadratic reciprocity for each
-standard odd prime `p`.
-- [Smi93, Theorem 3.11, Question 5.2] -/
+/-- $\mathsf{I}\Delta_0$ proves the converse of [Smi93, Theorem 3.11] for each standard odd prime
+`p`. An open problem; $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ proves it.
+- [Smi93, Question 5.2]
+- [Jer10, Theorem 5.7] -/
 axiom provable_quadraticReciprocityConverse_ISigma0 {p : ℕ} (hp : p.Prime) (hp₂ : p ≠ 2) :
     𝗜𝚺₀ ⊢ quadraticReciprocityConverse p
 
@@ -84,8 +90,9 @@ def quadraticReciprocity : ArithmeticSentence :=
       (!quadraticResidue p q ↔ !quadraticResidue q p))”
 
 /-- $\mathsf{I}\mathsf{E}_1$ proves quadratic reciprocity for arbitrary, possibly nonstandard,
-primes.
-- [Smi93, Question 5.2] -/
+primes. An open problem; $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ proves it.
+- [Smi93, Question 5.2]
+- [Jer10, Theorem 5.7] -/
 axiom provable_quadraticReciprocity_IE1 : 𝗜𝗘₁ ⊢ quadraticReciprocity
 
 /-- If $m - 1 = 2^r s$ with $s$ odd, then $-1$ has no $2^r$-th root modulo $m$. Smith prints the
@@ -96,12 +103,12 @@ def noRootNegOne (r : ℕ) : ArithmeticSentence :=
   “∀ m, (∃ k, m = ↑(2 ^ (r + 1)) * k + ↑(2 ^ r + 1)) → ¬!(negOneHasRoot (2 ^ r)) m”
 
 /-- $\mathsf{I}\mathsf{E}_1$ proves that $-1$ has no $2^r$-th root modulo any $m$ with
-$m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 2$.
+$m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 2$. An open problem.
 - [Smi93, Question 5.3] -/
 axiom provable_noRootNegOne_IE1 {r : ℕ} (hr : 2 ≤ r) : 𝗜𝗘₁ ⊢ noRootNegOne r
 
 /-- $\mathsf{I}\Delta_0$ proves that $-1$ has no $2^r$-th root modulo any $m$ with
-$m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 2$.
+$m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 2$. An open problem.
 - [Smi93, Question 5.3] -/
 axiom provable_noRootNegOne_ISigma0 {r : ℕ} (hr : 2 ≤ r) : 𝗜𝚺₀ ⊢ noRootNegOne r
 
@@ -112,7 +119,9 @@ noncomputable def squareAddMulSquareIff (n : ℕ) (S : Finset ℕ) : ArithmeticS
   “∀ q, !isPrime q → ¬q ∣ ↑(4 * n) → (!(squareAddMulSquare n) q ↔ !residue q)”
 
 /-- For $n > 4$, $\mathsf{I}\mathsf{E}_1$ proves each characterization of the primes of the form
-$x^2 + ny^2$ by a congruence modulo $4n$ that holds in $\mathbb{N}$.
+$x^2 + ny^2$ by a congruence modulo $4n$ that holds in $\mathbb{N}$. Smith asks what can be said
+of these primes for $n > 4$, where $(-n/q) = 1$ no longer suffices; under this reading the
+question is open.
 - [Smi93, Question 5.4] -/
 axiom provable_squareAddMulSquareIff_IE1 {n : ℕ} {S : Finset ℕ} (hn : 4 < n)
     (hS : ∀ r ∈ S, r < 4 * n)

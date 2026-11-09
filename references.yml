@@ -146,6 +146,20 @@ HP98:
     type: Anthology
     title: Perspectives in Mathematical Logic
 
+Jer10:
+  type: Article
+  title: Abelian groups and quadratic residues in weak arithmetic
+  author: Jeřábek, Emil
+  date: 2010
+  page-range: 262-278
+  serial-number:
+    doi: "10.1002/malq.200910009"
+  parent:
+    type: Periodical
+    title: Mathematical Logic Quarterly
+    volume: 56
+    issue: 3
+
 Kay91:
   type: Book
   title: Models of Peano Arithmetic

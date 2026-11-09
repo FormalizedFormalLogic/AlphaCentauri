@@ -72,6 +72,7 @@ public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.Reflection.ISigma
 public import AlphaCentauri.Reflection.InductionFromReflection
 public import AlphaCentauri.Reflection.Peano
+public import AlphaCentauri.Reflection.RelativizedLocalReflection
 public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Reflection.UniformReflection

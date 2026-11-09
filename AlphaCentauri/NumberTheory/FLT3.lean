@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Schemata.BoundedInduction
+public import AlphaCentauri.ToFoundation.BinderNotation
 public import AlphaCentauri.ToMathlib.FLT3.Descent
 public import AlphaCentauri.ToMathlib.RingOfDifferences
 
@@ -79,8 +80,7 @@ open RingOfDifferences OpenPredicate
 
 /-- Fermat's Last Theorem for exponent `n`. -/
 def fermatLastTheorem (n : ℕ) : ArithmeticSentence :=
-  let pow (t : ArithmeticSemiterm Empty 3) := (Semiterm.Operator.npow ℒₒᵣ n).operator ![t]
-  “∀ x y z, !!(pow #2) + !!(pow #1) = !!(pow #0) → x = 0 ∨ y = 0 ∨ z = 0”
+  “∀ x y z, x ^' n + y ^' n = z ^' n → x = 0 ∨ y = 0 ∨ z = 0”
 
 section
 
@@ -248,21 +248,18 @@ def bezout : ArithmeticSentence := “∀ x y, ∃ z s t, s * y = t * x + z ∧ 
 `n ∤ x y z`.
 - [Smi92b, §2] -/
 def fermatLastTheoremCaseOne (n : ℕ) : ArithmeticSentence :=
-  let pow (t : ArithmeticSemiterm Empty 3) := (Semiterm.Operator.npow ℒₒᵣ n).operator ![t]
-  “∀ x y z, !!(pow #2) + !!(pow #1) = !!(pow #0) → ¬↑n ∣ x * y * z”
+  “∀ x y z, x ^' n + y ^' n = z ^' n → ¬↑n ∣ x * y * z”
 
 /-- Case II of Fermat's Last Theorem for exponent `n`: every solution of `xⁿ + yⁿ = zⁿ` with
 `n ∣ x y z` is trivial.
 - [Smi92b, §2] -/
 def fermatLastTheoremCaseTwo (n : ℕ) : ArithmeticSentence :=
-  let pow (t : ArithmeticSemiterm Empty 3) := (Semiterm.Operator.npow ℒₒᵣ n).operator ![t]
-  “∀ x y z, !!(pow #2) + !!(pow #1) = !!(pow #0) → ↑n ∣ x * y * z → x = 0 ∨ y = 0 ∨ z = 0”
+  “∀ x y z, x ^' n + y ^' n = z ^' n → ↑n ∣ x * y * z → x = 0 ∨ y = 0 ∨ z = 0”
 
 /-- `xⁿ ± yⁿ = z²` has only trivial solutions.
 - [Smi92b, Question 5.6] -/
 def powerAddPowerNeSquare (n : ℕ) : ArithmeticSentence :=
-  let pow (t : ArithmeticSemiterm Empty 3) := (Semiterm.Operator.npow ℒₒᵣ n).operator ![t]
-  “∀ x y z, !!(pow #2) + !!(pow #1) = z * z ∨ !!(pow #2) = !!(pow #1) + z * z →
+  “∀ x y z, x ^' n + y ^' n = z * z ∨ x ^' n = y ^' n + z * z →
     x = 0 ∨ y = 0 ∨ z = 0”
 
 /-- Some model of $\mathsf{IOpen}$ contains a counterexample to Case I of Fermat's Last Theorem

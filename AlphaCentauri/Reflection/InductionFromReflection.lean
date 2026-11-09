@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.ParameterFreeInduction
+public import AlphaCentauri.ToFoundation.PrenexCombination
 public import AlphaCentauri.ToFoundation.Provable
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.PeanoMinus
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.EquationalTheory
@@ -108,5 +109,48 @@ axiom uniformReflection_of_parameterFreeInduction {n : ℕ} {T₀ : ArithmeticTh
     ∃ φ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1) φ ∧
       ∀ σ ∈ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1)] (T₀ ∪ {P}),
         T₀ ∪ {parameterFreeSuccInd ℒₒᵣ φ} ⊢ P 🡒 σ
+
+section inductionImplication
+
+open Bounding
+
+universe u
+
+variable {ξ : Type*} {n m : ℕ}
+
+/-- The induction instance of a prenex $\Sigma_n$ formula `ψ(x, p⃗)` at `x` is equivalent, in every
+model of `𝗜𝗢𝗽𝗲𝗻`, to a prenex $\Pi_{n + 2}$ formula. -/
+lemma exists_inductionImplication (ψ : ℬ[<, ℒₒᵣ].Prenex 𝚺 n ξ (m + 1)) :
+    ∃ θ : Semiformula ℒₒᵣ ξ (m + 1), ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2) θ ∧
+      ∀ (V : Type u) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] (f : ξ → V) (x : V) (p : Fin m → V),
+        Semiformula.Eval (x :> p) f θ ↔
+          (Semiformula.Eval (0 :> p) f ψ.val →
+            (∀ y, Semiformula.Eval (y :> p) f ψ.val → Semiformula.Eval ((y + 1) :> p) f ψ.val) →
+              Semiformula.Eval (x :> p) f ψ.val) := by
+  obtain ⟨_, ⟨A, rfl⟩, hA⟩ := (PrenexHierarchy.rew (Rew.subst (‘0’ :> fun i ↦ #i.succ))
+    ψ.val_prenexHierarchy).neg.exists_eval_iff_of_lt.{_, u} 𝚺 (Nat.lt_succ_self n)
+  obtain ⟨_, ⟨B, rfl⟩, hB⟩ := (PrenexHierarchy.rew (Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ.succ))
+    ψ.val_prenexHierarchy).neg.exists_eval_iff_of_lt.{_, u} 𝚺 (Nat.lt_succ_self n)
+  obtain ⟨_, ⟨θ, rfl⟩, hθ⟩ := (Prenex.pairOr A <| Prenex.pairOr
+      (Prenex.pairExs <| Prenex.pairAnd (ψ.rew (Rew.subst (#0 :> fun i ↦ #i.succ.succ))).succ B)
+      ψ.succ).val_prenexHierarchy.exists_eval_iff_of_lt.{_, u} 𝚷 (Nat.lt_succ_self (n + 1))
+  refine ⟨θ.val, θ.val_prenexHierarchy, fun V _ _ f x p ↦ ?_⟩
+  have h₀ : (fun i ↦ Semiterm.val (x :> p) f
+      ((‘0’ :> fun i ↦ #i.succ : Fin (m + 1) → ArithmeticSemiterm ξ (m + 1)) i)) = 0 :> p :=
+    funext <| Fin.cases (by simp) (by simp)
+  have h₁ (y : V) : (fun i ↦ Semiterm.val (y :> x :> p) f
+      ((#0 :> fun i ↦ #i.succ.succ : Fin (m + 1) → ArithmeticSemiterm ξ (m + 2)) i)) = y :> p :=
+    funext <| Fin.cases (by simp) (by simp)
+  have h₂ (y : V) : (fun i ↦ Semiterm.val (y :> x :> p) f
+      ((‘#0 + 1’ :> fun i ↦ #i.succ.succ : Fin (m + 1) → ArithmeticSemiterm ξ (m + 2)) i)) =
+      (y + 1) :> p :=
+    funext <| Fin.cases (by simp) (by simp)
+  simp only [← hθ, Prenex.eval_pairOr, Prenex.eval_pairExs, Prenex.eval_pairAnd,
+    Prenex.models_succ, ← hA, ← hB, LogicalConnective.HomClass.map_neg, Prenex.val_rew,
+    Semiformula.eval_rew, Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar,
+    h₀, h₁, h₂, LogicalConnective.Prop.neg_eq]
+  grind
+
+end inductionImplication
 
 end FFL.FirstOrder.Arithmetic

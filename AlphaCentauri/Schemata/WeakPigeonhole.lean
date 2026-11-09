@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.ToFoundation.BlockSequence
+public import AlphaCentauri.ToFoundation.Exponential
 
 /-!
 # The weak pigeonhole principle over $\mathsf{I}\Delta_0 + \Omega_1$
@@ -63,11 +64,6 @@ lemma IsPath.ext_lt {d s c τ i : V} (hc : c < a) (h : IsPath R a d s c τ) (hi 
   · rwa [h.1]
   · exact (h.2 j (succ_le_iff_lt.mp hi)).1
 
-lemma add_mul_lt_mul_self {u v : V} (hu : u < a) (hv : v < a) : u + a * v < a * a := calc
-  u + a * v < a + a * v := by simpa using hu
-  _ = a * (v + 1) := by rw [mul_add, mul_one, add_comm]
-  _ ≤ a * a := mul_le_mul_left (succ_le_iff_lt.mpr hv)
-
 section injective
 
 variable (hinj : ∀ x < a * a, ∀ x' < a * a, ∀ y < a, R x y → R x' y → x = x')
@@ -112,13 +108,6 @@ lemma IsLeaf.unique {d c τ e e' : V} (hc : c < a) (h : IsLeaf R a d c τ e)
 
 end injective
 
-lemma fbit_two_mul_add_zero {τ β : V} (hβ : β < 2) : fbit (2 * τ + β) 0 = β := by
-  rcases le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hβ) with rfl | rfl <;> simp
-
-lemma fbit_two_mul_add_succ {τ β : V} (hβ : β < 2) (i : V) :
-    fbit (2 * τ + β) (i + 1) = fbit τ i := by
-  rcases le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hβ) with rfl | rfl <;> simp
-
 lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c < a) (hc' : c' < a)
     (hβ : β < 2) (hch : IsChild R a β c c') (h : IsLeaf R a d c' τ e) :
     IsLeaf R a (d + 1) c (2 * τ + β) e := by
@@ -140,7 +129,11 @@ lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c <
     rw [add_comm i 1, ← ext_div_pow2 hi' hK,
       div_add_mul_self _ _ hK.range_pos, div_eq_zero_of_lt _ hcK, zero_add,
       ext_mod_pow2 (I := 2 * a) (by simpa [hI] using hd.le) (lt_succ_iff_le.mpr hi) hK']
-  refine ⟨c + s' % q * K, ?_, ⟨hext0, ?_⟩, hext d le_rfl⟩
+  have hfbit : ∀ i, fbit (2 * τ + β) (i + 1) = fbit τ i := by
+    intro i
+    rcases le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hβ) with rfl | rfl <;> simp
+  use c + s' % q * K
+  and_intros
   · have hqK : Exponential ((d + 1) * ‖a‖ + 1 * ‖a‖) (q * K) := hK'.add_mul hK
     calc c + s' % q * K < K + s' % q * K := by simpa using hcK
       _ = (s' % q + 1) * K := by rw [add_mul, one_mul, add_comm]
@@ -148,16 +141,17 @@ lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c <
       _ ≤ (2 * a) ⨳ a := hqK.monotone_le (exponential_smash _ _) (by
         rw [← add_mul, hI]
         exact mul_le_mul_right (add_le_add_left (succ_le_iff_lt.mpr hd) 1))
+  · exact hext0
   · intro i hi
     rcases zero_or_succ i with rfl | ⟨j, rfl⟩
-    · rw [hext 0 (Arithmetic.zero_le d), hext0, hs'.1, fbit_two_mul_add_zero hβ]
+    · have : fbit (2 * τ + β) 0 = β := by
+        rcases le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hβ) with rfl | rfl <;> simp
+      rw [hext 0 (Arithmetic.zero_le d), hext0, hs'.1, this]
       exact ⟨hc', hch⟩
     · have hj : j < d := by simpa using hi
-      rw [hext (j + 1) (succ_le_iff_lt.mpr hj), hext j hj.le, fbit_two_mul_add_succ hβ]
+      rw [hext (j + 1) (succ_le_iff_lt.mpr hj), hext j hj.le, hfbit]
       exact hs'.2 j hj
-
-lemma bexp_succ {b x : V} (h : x + 1 < ‖b‖) : bexp b (x + 1) = 2 * bexp b x :=
-  bexp_eq_of_exp h (exp_bexp_of_lt (lt_of_le_of_lt le_self_add h)).succ
+  · exact hext d le_rfl
 
 /-- For a $\Delta_0$-definable relation `T` with a value below `a` everywhere, every
 $\rho < 2^{\|a\| - d}$ has a root `c < a` whose leaf along each $\tau < 2^d$ is a value of `T`

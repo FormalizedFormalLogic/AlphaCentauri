@@ -14,6 +14,16 @@ of that polarity and level. Unlike `Bounding.Prenex.and`, this needs no collecti
 
 @[expose] public section
 
+namespace FFL.FirstOrder.Semiterm
+
+lemma val_comp_vecCons {L : Language} {M : Type*} [Tarski.Structure L M] {ξ : Type*}
+    {k n : ℕ} (e : Fin n → M) (f : ξ → M) (t : Semiterm L ξ n) (w : Fin k → Semiterm L ξ n) :
+    (fun i ↦ Semiterm.val e f ((t :> w) i)) =
+      Semiterm.val e f t :> fun i ↦ Semiterm.val e f (w i) :=
+  funext <| Fin.cases rfl fun _ ↦ rfl
+
+end FFL.FirstOrder.Semiterm
+
 namespace FFL.FirstOrder.Bounding.Prenex
 
 open Arithmetic
@@ -71,10 +81,6 @@ lemma eval_contract {Γ : Polarity} {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex �
       Semiformula.Eval (π₁ z :> π₂ z :> e) f φ.val := by
   induction s generalizing Γ n with
   | zero =>
-    have h (a b : V) : (fun i ↦ Semiterm.val (b :> a :> z :> e) f
-        ((#1 :> #0 :> fun i ↦ #i.succ.succ.succ : Fin (n + 2) → ArithmeticSemiterm ξ (n + 3)) i)) =
-        a :> b :> e :=
-      funext <| Fin.cases (by simp) <| Fin.cases (by simp) (by simp)
     simp only [val, Nat.add_zero, contract, and_zero, bexs_zero, Rew.finitary2, Rew.bShift_bvar,
       Fin.succ_one_eq_two, Rew.finitary0, Fin.succ_zero_eq_one, Polarity.quantItr_zero,
       Semiformula.eval_bexs, Semiformula.eval_operator, Matrix.comp₂, Semiterm.val_bvar,
@@ -84,26 +90,30 @@ lemma eval_contract {Γ : Polarity} {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex �
       Matrix.cons_app_two, LogicalConnective.HomClass.map_and, Semiformula.eval_embSubsts,
       Matrix.comp₃, HierarchySymbol.Defined.iff, LogicalConnective.Prop.and_eq]
     simp only [Prenex.rew, Rew.qpow_zero, Bounding.Semiformula.val_rew, Semiformula.eval_rew,
-      Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar, h]
+      Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar,
+      Semiterm.val_comp_vecCons]
     constructor
     · rintro ⟨a, -, b, -, rfl, hφ⟩
       simpa using hφ
     · intro hφ
-      exact ⟨π₁ z, pi₁_le_self z, π₂ z, pi₂_le_self z, by simp, hφ⟩
+      use π₁ z
+      and_intros
+      · exact pi₁_le_self z
+      · use π₂ z
+        and_intros
+        · exact pi₂_le_self z
+        · simp
+        · exact hφ
   | succ s ih =>
-    have h₁ (u : V) : (fun i ↦ Semiterm.val (u :> z :> e) f
-        ((#1 :> #0 :> fun i ↦ #i.succ.succ : Fin (n + 2) → ArithmeticSemiterm ξ (n + 2)) i)) =
-        z :> u :> e :=
-      funext <| Fin.cases (by simp) <| Fin.cases (by simp) (by simp)
-    have h₂ (u : V) : (fun i ↦ Semiterm.val (π₁ z :> π₂ z :> u :> e) f
-        ((#2 :> #0 :> #1 :> fun i ↦ #i.succ.succ.succ :
-          Fin (n + 3) → ArithmeticSemiterm ξ (n + 3)) i)) = u :> π₁ z :> π₂ z :> e :=
-      funext <| Fin.cases (by simp) <| Fin.cases (by simp) <| Fin.cases (by simp) (by simp)
     rcases Γ with _ | _
-    · simp only [contract, models_sigma, val_rew, Semiformula.eval_rew, Function.comp_def,
-        Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar, h₁, ih, h₂, ← models_sigmaInv]
-    · simp only [contract, models_pi, val_rew, Semiformula.eval_rew, Function.comp_def,
-        Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar, h₁, ih, h₂, ← models_piInv]
+    · simp only [contract, models_sigma, val_rew, Semiformula.eval_rew,
+        Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar,
+        Semiterm.val_comp_vecCons,
+        Semiterm.val_bvar, Matrix.cons_val, Matrix.cons_val_succ, ih, ← models_sigmaInv]
+    · simp only [contract, models_pi, val_rew, Semiformula.eval_rew,
+        Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar,
+        Semiterm.val_comp_vecCons,
+        Semiterm.val_bvar, Matrix.cons_val, Matrix.cons_val_succ, ih, ← models_piInv]
 
 lemma eval_pairAnd {Γ : Polarity} {s n : ℕ} (φ ψ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n) (e : Fin n → V) :
     Semiformula.Eval e f (pairAnd φ ψ).val ↔
@@ -112,22 +122,16 @@ lemma eval_pairAnd {Γ : Polarity} {s n : ℕ} (φ ψ : ℬ[<, ℒₒᵣ].Prenex
   | zero => simp [pairAnd, Prenex.val]
   | succ s ih =>
     rcases Γ with _ | _
-    · have h₁ (a b : V) : (fun i ↦ Semiterm.val (a :> b :> e) f
-          ((#0 :> fun i ↦ #i.succ.succ : Fin (n + 1) → ArithmeticSemiterm ξ (n + 2)) i)) =
-          a :> e :=
-        funext <| Fin.cases (by simp) (by simp)
-      have h₂ (a b : V) : (fun i ↦ Semiterm.val (a :> b :> e) f
-          ((#1 :> fun i ↦ #i.succ.succ : Fin (n + 1) → ArithmeticSemiterm ξ (n + 2)) i)) =
-          b :> e :=
-        funext <| Fin.cases (by simp) (by simp)
-      simp only [pairAnd, models_sigma, eval_contract, ih, val_rew, Semiformula.eval_rew,
-        Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar, h₁, h₂,
+    · simp only [pairAnd, models_sigma, eval_contract, ih, val_rew, Semiformula.eval_rew,
+        Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar,
+        Semiterm.val_comp_vecCons,
         models_sigmaInv φ, models_sigmaInv ψ]
       constructor
       · rintro ⟨z, ha, hb⟩
         exact ⟨⟨_, ha⟩, ⟨_, hb⟩⟩
       · rintro ⟨⟨a, ha⟩, ⟨b, hb⟩⟩
-        exact ⟨⟪a, b⟫, by simpa using ha, by simpa using hb⟩
+        use ⟪a, b⟫
+        and_intros <;> simpa
     · simp only [pairAnd, models_pi, ih, models_piInv φ, models_piInv ψ, forall_and]
 
 lemma eval_pairOr {Γ : Polarity} {s n : ℕ} (φ ψ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n) (e : Fin n → V) :
@@ -138,16 +142,9 @@ lemma eval_pairOr {Γ : Polarity} {s n : ℕ} (φ ψ : ℬ[<, ℒₒᵣ].Prenex 
   | succ s ih =>
     rcases Γ with _ | _
     · simp only [pairOr, models_sigma, ih, models_sigmaInv φ, models_sigmaInv ψ, exists_or]
-    · have h₁ (a b : V) : (fun i ↦ Semiterm.val (a :> b :> e) f
-          ((#0 :> fun i ↦ #i.succ.succ : Fin (n + 1) → ArithmeticSemiterm ξ (n + 2)) i)) =
-          a :> e :=
-        funext <| Fin.cases (by simp) (by simp)
-      have h₂ (a b : V) : (fun i ↦ Semiterm.val (a :> b :> e) f
-          ((#1 :> fun i ↦ #i.succ.succ : Fin (n + 1) → ArithmeticSemiterm ξ (n + 2)) i)) =
-          b :> e :=
-        funext <| Fin.cases (by simp) (by simp)
-      simp only [pairOr, models_pi, eval_contract, ih, val_rew, Semiformula.eval_rew,
-        Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar, h₁, h₂,
+    · simp only [pairOr, models_pi, eval_contract, ih, val_rew, Semiformula.eval_rew,
+        Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar,
+        Semiterm.val_comp_vecCons,
         models_piInv φ, models_piInv ψ]
       constructor
       · intro h
@@ -167,7 +164,8 @@ lemma eval_pairExs {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n
   · rintro ⟨z, h⟩
     exact ⟨_, _, h⟩
   · rintro ⟨x, y, h⟩
-    exact ⟨⟪y, x⟫, by simpa using h⟩
+    use ⟪y, x⟫
+    simpa using h
 
 end eval
 

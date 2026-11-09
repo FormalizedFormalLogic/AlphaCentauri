@@ -195,30 +195,47 @@ section code
 
 open Bootstrapping
 
-variable {V : Type} [ORingStructure V]
+variable {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-- `x` is the element defined by the code `c`: `c` codes the matrix of a prenex $\Pi_j$ formula
 in one variable, and `x` is the first component of the least element satisfying it. -/
-def DefinesElement [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (j : ℕ) (c x : V) : Prop :=
+def DefinesElement (j : ℕ) (c x : V) : Prop :=
   ∃ p, π₁ p = x ∧ PrenexSatisfied 𝚷 j (p ∷ 0) c ∧ ∀ q < p, ¬PrenexSatisfied 𝚷 j (q ∷ 0) c
 
-axiom definesElementDef (j : ℕ) : 𝚺ᴬ_[j + 1].Semisentence 2
+/-- The $\Sigma_{j+1}$ definition of `DefinesElement j`. -/
+noncomputable def definesElementDef : (j : ℕ) → 𝚺ᴬ_[j + 1].Semisentence 2
+  | 0 => .mkSigma “c x. ∃ p, !pi₁Def x p ∧ (∃ e, !adjoinDef e p 0 ∧ !boundedSatisfied.sigma e c) ∧
+      ∀ q < p, ∃ e, !adjoinDef e q 0 ∧ ¬!boundedSatisfied.pi e c”
+  | j + 1 => .mkSigma “c x. ∃ p, !pi₁Def x p ∧
+      (∃ e, !adjoinDef e p 0 ∧ !(prenexSatisfied' 𝚷 j).val e c) ∧
+      ∀ q < p, ∃ e, !adjoinDef e q 0 ∧ ¬!(prenexSatisfied' 𝚷 j).val e c”
+      (by simp [(prenexSatisfied' 𝚷 j).pi_prop.accum])
 
-axiom DefinesElement.defined [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (j : ℕ) :
+instance DefinesElement.defined : (j : ℕ) →
     𝚺ᴬ_[j + 1]-Relation (DefinesElement j : V → V → Prop) via definesElementDef j
+  | 0 => .mk fun v ↦ by simp [definesElementDef, DefinesElement, eq_comm]
+  | j + 1 => .mk fun v ↦ by
+    simp [definesElementDef, DefinesElement, (PrenexSatisfied.pi_defined' j).df,
+      eq_comm]
 
-axiom DefinesElement.unique [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {c x x' : V} (h : DefinesElement j c x)
-    (h' : DefinesElement j c x') : x = x'
+lemma DefinesElement.unique {c x x' : V} (h : DefinesElement j c x)
+    (h' : DefinesElement j c x') : x = x' := by
+  obtain ⟨p, rfl, hp, hmin⟩ := h
+  obtain ⟨p', rfl, hp', hmin'⟩ := h'
+  rcases lt_trichotomy p p' with h | rfl | h
+  · exact absurd hp (hmin' p h)
+  · rfl
+  · exact absurd hp' (hmin p' h)
 
 /-- Every $\Sigma_{j+1}$-definable element of a model of $\mathsf{I}\Sigma_{j+1}$ is defined by a
 standard code. -/
-axiom exists_definesElement [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (j + 1)] {x : V}
+axiom exists_definesElement [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {x : V}
     (hx : x ∈ definableElements (j + 1) V) : ∃ c : ℕ, DefinesElement j (c : V) x
 
 /-- In a nonstandard model of $\mathsf{I}\Sigma_{j+1}$ the $\Sigma_{j+1}$-definable elements are
 bounded.
 - [HP98, Lemma IV.1.37] -/
-axiom exists_bound_definableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺 (j + 1)] {a : V}
+axiom exists_bound_definableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {a : V}
     (ha : ∀ m : ℕ, (m : V) < a) : ∃ b, ∀ x ∈ definableElements (j + 1) V, x < b
 
 end code

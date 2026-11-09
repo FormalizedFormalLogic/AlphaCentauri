@@ -17,6 +17,7 @@ $\mathsf{I}\mathsf{E}_2$ proves the other odd exponents, which is open.
 
 - [Wil85]
 - [Smi93, Question 5.5, Question 5.6]
+- [Smi92b, Question 5.1, Question 5.3, Question 5.5, Question 5.6]
 -/
 
 @[expose] public section
@@ -238,5 +239,59 @@ open problem.
 - [Smi93, Question 5.6] -/
 axiom provable_fermatLastTheorem_IE2 {n : ℕ} (hn : Odd n) (h5 : 5 ≤ n) :
     𝗜𝗘₂ ⊢ fermatLastTheorem n
+
+/-- Bézout's theorem: any two numbers have a common divisor `z` with `s y = t x + z`.
+- [Smi92b, Definition 3.5] -/
+def bezout : ArithmeticSentence := “∀ x y, ∃ z s t, s * y = t * x + z ∧ z ∣ x ∧ z ∣ y”
+
+/-- Case I of Fermat's Last Theorem for exponent `n`: there is no solution of `xⁿ + yⁿ = zⁿ` with
+`n ∤ x y z`.
+- [Smi92b, §2] -/
+def fermatLastTheoremCaseOne (n : ℕ) : ArithmeticSentence :=
+  “∀ x y z, x ^' n + y ^' n = z ^' n → ¬↑n ∣ x * y * z”
+
+/-- Case II of Fermat's Last Theorem for exponent `n`: every solution of `xⁿ + yⁿ = zⁿ` with
+`n ∣ x y z` is trivial.
+- [Smi92b, §2] -/
+def fermatLastTheoremCaseTwo (n : ℕ) : ArithmeticSentence :=
+  “∀ x y z, x ^' n + y ^' n = z ^' n → ↑n ∣ x * y * z → x = 0 ∨ y = 0 ∨ z = 0”
+
+/-- `xⁿ ± yⁿ = z²` has only trivial solutions.
+- [Smi92b, Question 5.6] -/
+def powerAddPowerNeSquare (n : ℕ) : ArithmeticSentence :=
+  “∀ x y z, x ^' n + y ^' n = z * z ∨ x ^' n = y ^' n + z * z →
+    x = 0 ∨ y = 0 ∨ z = 0”
+
+/-- Some model of $\mathsf{IOpen}$ contains a counterexample to Case I of Fermat's Last Theorem
+for some exponent $n \ge 3$. An open problem.
+- [Smi92b, Question 5.1] -/
+axiom exists_not_provable_fermatLastTheoremCaseOne_IOpen :
+    ∃ n : ℕ, 3 ≤ n ∧ ¬𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseOne n
+
+/-- $\mathsf{IOpen} + \mathrm{Bez}$ proves Case II of Fermat's Last Theorem for some exponent
+$n \ge 3$. An open problem.
+- [Smi92b, Question 5.3] -/
+axiom exists_provable_fermatLastTheoremCaseTwo_IOpen_bezout :
+    ∃ n : ℕ, 3 ≤ n ∧ insert bezout 𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseTwo n
+
+/-- $\mathsf{IE}_1$ proves Case I of Fermat's Last Theorem for each standard $n \ge 3$. An open
+problem; since $\mathsf{IE}_1$ proves $\mathsf{IOpen} + \mathrm{Bez}$, which proves
+$\mathsf{IOpen} + \mathrm{GCD}$, it is equivalent to asking whether Case I is provable in any of
+the three.
+- [Smi92b, Question 5.5]
+- [Smi92b, Lemma 3.11] -/
+axiom provable_fermatLastTheoremCaseOne_IE1 {n : ℕ} (hn : 3 ≤ n) :
+    𝗜𝗘₁ ⊢ fermatLastTheoremCaseOne n
+
+/-- $\mathsf{IE}_1$ proves Fermat's Last Theorem for each even standard $n > 2$. An open problem.
+- [Smi92b, Question 5.6] -/
+axiom provable_fermatLastTheorem_IE1_of_even {n : ℕ} (hn : Even n) (h : 2 < n) :
+    𝗜𝗘₁ ⊢ fermatLastTheorem n
+
+/-- $\mathsf{IE}_1$ proves that $x^n \pm y^n = z^2$ has no nontrivial solutions for each even
+standard $n \ge 4$. An open problem.
+- [Smi92b, Question 5.6] -/
+axiom provable_powerAddPowerNeSquare_IE1 {n : ℕ} (hn : Even n) (h : 4 ≤ n) :
+    𝗜𝗘₁ ⊢ powerAddPowerNeSquare n
 
 end FFL.FirstOrder.Arithmetic

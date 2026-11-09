@@ -203,6 +203,29 @@ lemma IsBounded.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
 
 end subst
 
+/-! ## Formulas of complexity zero -/
+
+section complexity
+
+variable {p : V}
+
+lemma IsUFormula.isBounded_of_formulaComplexity_eq_zero (hp : IsUFormula ℒₒᵣ p)
+    (h : formulaComplexity ℒₒᵣ p = 0) : IsBounded p := by
+  rcases hp.case with (⟨k, R, v, -, -, rfl⟩ | ⟨k, R, v, -, -, rfl⟩ | rfl | rfl |
+    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
+    simp_all
+
+lemma IsUFormula.cases_of_formulaComplexity_ne_zero (hp : IsUFormula ℒₒᵣ p)
+    (h : formulaComplexity ℒₒᵣ p ≠ 0) :
+    (∃ q r, IsUFormula ℒₒᵣ q ∧ IsUFormula ℒₒᵣ r ∧ p = q ^⋏ r) ∨
+    (∃ q r, IsUFormula ℒₒᵣ q ∧ IsUFormula ℒₒᵣ r ∧ p = q ^⋎ r) ∨
+    (∃ q, IsUFormula ℒₒᵣ q ∧ p = ^∀ q) ∨ (∃ q, IsUFormula ℒₒᵣ q ∧ p = ^∃ q) := by
+  rcases hp.case with (⟨k, R, v, -, -, rfl⟩ | ⟨k, R, v, -, -, rfl⟩ | rfl | rfl |
+    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
+    simp_all
+
+end complexity
+
 /-! ## Prenex decompositions -/
 
 section qqToPrenex

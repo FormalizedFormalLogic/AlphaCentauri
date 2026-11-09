@@ -10,7 +10,7 @@ Whether the counting function of a $\Delta_0$-definable set is $\Delta_0$-defina
 question of Paris and Wilkie. By a result of Toda the answer is negative unless the polynomial
 hierarchy collapses.
 
-- [dA05, Question 7.9]
+- [DAq05, Question 7.9]
 - [HP98, Bibliographical Remarks to Chapter V]
 -/
 
@@ -20,7 +20,7 @@ namespace FFL.FirstOrder.Arithmetic
 
 /-- An open problem: the counting function $x \mapsto |A \cap [0, x)|$ of a $\Delta_0$-definable
 set $A \subseteq \mathbb{N}$ is $\Delta_0$-definable.
-- [dA05, Question 7.9]
+- [DAq05, Question 7.9]
 - [HP98, Bibliographical Remarks to Chapter V] -/
 axiom definableFunction_card_of_definablePred {A : ℕ → Prop} [DecidablePred A]
     (hA : 𝚺ᴬ₀.DefinablePred A) :

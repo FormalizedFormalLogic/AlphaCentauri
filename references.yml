@@ -127,6 +127,20 @@ Car16:
   serial-number:
     arxiv: "1605.09222"
 
+Cor13:
+  type: Article
+  title: Weak forms of the Regularity Principle in the presence of IE₁
+  author: Cornaros, Charalampos
+  date: 2013
+  page-range: 84-100
+  serial-number:
+    doi: "10.1002/malq.201100100"
+  parent:
+    type: Periodical
+    title: Mathematical Logic Quarterly
+    volume: 59
+    issue: 1-2
+
 DAq05:
   type: Chapter
   title: Weak fragments of Peano arithmetic

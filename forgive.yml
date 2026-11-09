@@ -85,6 +85,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
+  FFL.FirstOrder.Arithmetic.iterUniformReflection_one_equiv_iterCon:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.iterUniformReflection_one_equiv_iterCon
   FFL.FirstOrder.Arithmetic.provablyTotalFunctions_IParameterFree_Pi:
     forgive:
       - FFL.FirstOrder.Arithmetic.provablyTotalFunctions_IParameterFree_Pi

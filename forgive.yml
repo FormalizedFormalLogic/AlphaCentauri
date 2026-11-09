@@ -32,9 +32,6 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [Kay91, Exercise 10.4].
       - FFL.FirstOrder.Arithmetic.BSigma1.finiteAxiomatizable
-  FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma
   FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1
@@ -50,9 +47,6 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [HP98, Corollary V.4.39], [Kay91, Exercise 10.4].
       - FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1.finiteAxiomatizable
-  FFL.FirstOrder.Arithmetic.ISigma_strictlyWeakerThan_BSigma_succ:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma_strictlyWeakerThan_BSigma_succ
   FFL.FirstOrder.Arithmetic.BSigma1_weakerThan_ISigma0_add_not_exp:
     forgive:
       # An open problem, not a theorem awaiting formalization: [WP89].

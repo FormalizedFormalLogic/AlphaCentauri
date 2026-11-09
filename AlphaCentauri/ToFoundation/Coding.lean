@@ -48,6 +48,14 @@ lemma shift_typed_quote {n : ℕ} (σ : Semisentence L n) :
     simpa [Rewriting.shifts] using Rewriting.shifts_emb ({σ} : Multiset (Semisentence L n))
   rw [Sentence.typed_quote_def, ← Semiformula.typed_quote_shift, h]
 
+lemma quote_conj {n k : ℕ} (φ : Fin k → Semisentence L n) :
+    (⌜Matrix.conj φ⌝ : V) = ^⋀ matrixToVec fun i ↦ (⌜φ i⌝ : V) := by
+  induction k with
+  | zero => simp [Sentence.quote_verum]
+  | succ k ih =>
+    simpa [Matrix.conj, Matrix.vecHead, Matrix.vecTail, Function.comp_def] using
+      ih (Matrix.vecTail φ)
+
 end FFL.FirstOrder.Semisentence
 
 namespace FFL.FirstOrder.Semiterm

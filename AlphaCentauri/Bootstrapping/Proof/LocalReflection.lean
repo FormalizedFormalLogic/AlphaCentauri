@@ -4,12 +4,14 @@ public import AlphaCentauri.Bootstrapping.Proof.AxiomReplacement
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.ToFoundation.Provable
 public import AlphaCentauri.ToFoundation.Syntax
+public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!
 # Local reflection in a model of $\mathsf{I}\Sigma_{k+1}$
 
 In a model of $\mathsf{I}\Sigma_{k+1}$, a prenex $\Pi_{k+3}$ sentence that the internal
-$\mathsf{I}\Sigma_n$, for $n \le k$, proves, holds.
+$\mathsf{I}\Sigma_n$, for $n \le k$, proves, holds. In particular, the internal
+$\mathsf{I}\Sigma_n$ is consistent.
 
 ## References
 
@@ -133,5 +135,24 @@ theorem models_of_provable_prenexPi [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (h
   · rw [hd.1, mem_singleton_iff] at he
     exact he ▸ isFalseBlock_substNumeral_exs ρ a ha
   · exact hAfb e he
+
+/-- In a model of $\mathsf{I}\Sigma^+_{k+1}$, the internal $\mathsf{I}\Sigma_n$ is consistent, for
+$1 \le k$ and $n \le k$.
+- [HP98, Corollary I.4.34] -/
+lemma consistent_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hk : 1 ≤ k) (hn : n ≤ k) :
+    (𝗜𝚺 n).Consistent V := by
+  intro h
+  let π : ArithmeticSentence := (Bounding.Prenex.falsum : ℬ[<, ℒₒᵣ].Prenex 𝚷 (k + 3) Empty 0).val
+  have hπ : Provable 𝗜𝚺n (⌜π⌝ : V) := by
+    apply Derivable.toProvable
+    apply Derivable.cut (^⊥ : V)
+    · apply Derivable.wk (s' := insert (^⊥ : V) ∅) (by simp)
+      · exact insert_subset_insert_of_subset _ (by simp)
+      · have := h.toDerivable
+        rwa [Sentence.quote_falsum] at this
+    · exact Derivable.verum (by simp) (by simp)
+  have := models_of_provable_prenexPi hk hn ⟨_, rfl⟩ hπ
+  rw [models_iff] at this
+  simpa using (Bounding.Prenex.models_falsum ![]).mp this
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

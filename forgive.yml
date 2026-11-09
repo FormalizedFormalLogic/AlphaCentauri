@@ -32,12 +32,6 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [Kay91, Exercise 10.4].
       - FFL.FirstOrder.Arithmetic.BSigma1.finiteAxiomatizable
-  FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.BSigma_strictlyWeakerThan_ISigma
-  FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma.provable_con_ISigma1
   FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1_weakerThanOn_Pi1_ISigma0:
     forgive:
       # An open problem, not a theorem awaiting formalization: [HP98, §V.1(a), p. 274].
@@ -50,15 +44,6 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [HP98, Corollary V.4.39], [Kay91, Exercise 10.4].
       - FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1.finiteAxiomatizable
-  FFL.FirstOrder.Arithmetic.ISigma_strictlyWeakerThan_BSigma_succ:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma_strictlyWeakerThan_BSigma_succ
-  FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive
-  FFL.FirstOrder.Arithmetic.Peano.reflexive:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Peano.reflexive
   FFL.FirstOrder.Arithmetic.BSigma1_weakerThan_ISigma0_add_not_exp:
     forgive:
       # An open problem, not a theorem awaiting formalization: [WP89].
@@ -149,14 +134,48 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.6].
       - FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE2
+  FFL.FirstOrder.Arithmetic.exists_not_provable_fermatLastTheoremCaseOne_IOpen:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi92b, Question 5.1].
+      - FFL.FirstOrder.Arithmetic.exists_not_provable_fermatLastTheoremCaseOne_IOpen
+  FFL.FirstOrder.Arithmetic.exists_provable_fermatLastTheoremCaseTwo_IOpen_bezout:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi92b, Question 5.3].
+      - FFL.FirstOrder.Arithmetic.exists_provable_fermatLastTheoremCaseTwo_IOpen_bezout
+  FFL.FirstOrder.Arithmetic.provable_fermatLastTheoremCaseOne_IE1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi92b, Question 5.5].
+      - FFL.FirstOrder.Arithmetic.provable_fermatLastTheoremCaseOne_IE1
+  FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE1_of_even:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi92b, Question 5.6].
+      - FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE1_of_even
+  FFL.FirstOrder.Arithmetic.provable_powerAddPowerNeSquare_IE1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi92b, Question 5.6].
+      - FFL.FirstOrder.Arithmetic.provable_powerAddPowerNeSquare_IE1
+  FFL.FirstOrder.Arithmetic.exists_diophantine_equiv_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [DAq05, Question 8.1].
+      - FFL.FirstOrder.Arithmetic.exists_diophantine_equiv_ISigma0
+  FFL.FirstOrder.Arithmetic.exists_diophantine_equiv_ISigma0_union_Omega1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [DAq05, §8].
+      - FFL.FirstOrder.Arithmetic.exists_diophantine_equiv_ISigma0_union_Omega1
+  FFL.FirstOrder.Arithmetic.IE1_strictlyWeakerThan_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [DAq05, §8].
+      - FFL.FirstOrder.Arithmetic.IE1_strictlyWeakerThan_ISigma0
+  FFL.FirstOrder.Arithmetic.IE_strictlyWeakerThan_IE_succ:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (1)].
+      - FFL.FirstOrder.Arithmetic.IE_strictlyWeakerThan_IE_succ
+  FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (2)].
+      - FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1
 
   # Declarations that inherit the debt of an unproved statement.
-  FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Peano.reflexive
   FFL.FirstOrder.Arithmetic.exists_prime_gt:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
-  FFL.FirstOrder.Arithmetic.not_finiteAxiomatizable_of_Peano_le:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Peano.essentiallyReflexive

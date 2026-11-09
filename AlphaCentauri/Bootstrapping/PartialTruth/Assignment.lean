@@ -394,6 +394,19 @@ lemma fvAssign_neg {p : V} (hp : IsUFormula ℒₒᵣ p) :
   · intro p hp ih
     rw [neg_ex hp, fvAssign_all hp.neg, fvAssign_exs hp, neg_ex hp.fvAssign, ih]
 
+@[simp] lemma formulaComplexity_fvAssign {p : V} :
+    IsUFormula ℒₒᵣ p → formulaComplexity ℒₒᵣ (fvAssign f p) = formulaComplexity ℒₒᵣ p := by
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+  · definability
+  · intro k r v hr hv; simp [hr, hv, hv.termFvAssignVec]
+  · intro k r v hr hv; simp [hr, hv, hv.termFvAssignVec]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.fvAssign, hq.fvAssign, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.fvAssign, hq.fvAssign, ihp, ihq]
+  · intro p hp ihp; simp [hp, hp.fvAssign, ihp]
+  · intro p hp ihp; simp [hp, hp.fvAssign, ihp]
+
 lemma fvAssign_shift {b p : V} (hp : IsUFormula ℒₒᵣ p) :
     fvAssign (b ∷ f) (shift ℒₒᵣ p) = fvAssign f p := by
   apply IsUFormula.induction1 𝚺 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp

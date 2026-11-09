@@ -119,6 +119,14 @@ Bus98A:
       title: Studies in Logic and the Foundations of Mathematics
       volume: 137
 
+Car16:
+  type: Article
+  title: A note on ℤ as a direct summand of nonstandard models of weak systems of arithmetic
+  author: Carl, Merlin
+  date: 2016
+  serial-number:
+    arxiv: "1605.09222"
+
 ELV25:
   type: Article
   title: Completions of restricted complexity I, weak arithmetical theories
@@ -290,6 +298,25 @@ Tow20:
   date: 2020
   url: https://www.sas.upenn.edu/~htowsner/GoodsteinsTheorem.pdf
   note: Undated; the PDF is dated 2020
+
+dA05:
+  type: Chapter
+  title: Weak fragments of Peano arithmetic
+  author: D'Aquino, Paola
+  date: 2005
+  page-range: 149-184
+  serial-number:
+    doi: "10.1017/9781316755907.005"
+  parent:
+    type: Anthology
+    title: The Notre Dame Lectures
+    editor: Cholak, Peter
+    publisher:
+      name: Association for Symbolic Logic
+    parent:
+      type: Anthology
+      title: Lecture Notes in Logic
+      volume: 18
 
 vO99:
   type: Misc

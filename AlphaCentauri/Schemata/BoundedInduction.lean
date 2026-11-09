@@ -10,6 +10,8 @@ $U_k$ count the alternations of blocks of bounded quantifiers over an open matri
 
 - [Wil85]
 - [Smi93, Definition 2.1, Definition 2.2]
+- [dA05, §8]
+- [Car16]
 -/
 
 @[expose] public section
@@ -57,5 +59,15 @@ abbrev IE (k : ℕ) : ArithmeticTheory :=
 instance (k : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ IE k :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻)
     (Entailment.WeakerThan.ofSubset Set.subset_union_left)
+
+/-- $\mathsf{I}\mathsf{E}_1$ is strictly weaker than $\mathsf{I}\Delta_0$. An open problem.
+- [dA05, §8] -/
+axiom IE1_strictlyWeakerThan_ISigma0 : 𝗜𝗘₁ ⪱ 𝗜𝚺₀
+
+/-- $\mathsf{I}\mathsf{E}_k$ is strictly weaker than $\mathsf{I}\mathsf{E}_{k + 1}$ for each
+$k \ge 1$. An open problem, already for $k = 1$ and $k = 2$.
+- [Wil85, §4.13, Problem (1)]
+- [Car16] -/
+axiom IE_strictlyWeakerThan_IE_succ {k : ℕ} (hk : 1 ≤ k) : IE k ⪱ IE (k + 1)
 
 end FFL.FirstOrder.Arithmetic

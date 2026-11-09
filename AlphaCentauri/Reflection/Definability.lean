@@ -9,7 +9,9 @@ public import AlphaCentauri.ToFoundation.Rew
 /-!
 # $\Delta_1$ presentation of the uniform reflection schema
 
-The uniform reflection schema of a $\Delta_1$ theory over the prenex classes is $\Delta_1$.
+The code of `ssnums` as a function of the arity, the code of the uniform reflection schema as a
+function of the arity and the code of the formula, the $\Delta_1$ predicate on codes defining the
+schema, and the resulting $\Delta_1$ presentation of `𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n] T`.
 -/
 
 @[expose] public section
@@ -105,19 +107,6 @@ noncomputable def ssnumsCodeGraph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
 instance ssnumsCode.defined : 𝚺ᴬ₁-Function₁ (ssnumsCode : V → V) via ssnumsCodeGraph :=
   .mk fun v ↦ by simp [ssnumsCodeGraph, ssnumsCode]
 
-lemma ssnumsConjunct_quote {k : ℕ} (i : Fin k) :
-    ssnumsConjunct ((i : ℕ) : V) =
-      ⌜(∃¹ ((nthDef.val : ArithmeticSemisentence 3) ⇜ ![#0, #1, ↑(i : ℕ)] ⋏
-        (numeralGraph.val : ArithmeticSemisentence 2) ⇜ ![#0, #i.succ.succ.succ.succ]) :
-          ArithmeticSemisentence (k + 2 + 1))⌝ := by
-  rw [Sentence.quote_ex, Sentence.quote_and, Semisentence.quote_substs, Semisentence.quote_substs]
-  simp only [matrixToVec_succ, matrixToVec_nil, Matrix.vecHead, Matrix.vecTail, Function.comp_def,
-    Matrix.cons_val_zero, Matrix.cons_val_succ, Semiterm.empty_quote_bvar,
-    Semiterm.empty_quote_numeral, Fin.val_succ, ssnumsConjunct]
-  have h : ((i : ℕ) : V) + 1 + 1 + 1 + 1 = (i : ℕ) + 4 := by
-    simp only [add_assoc]; norm_num
-  simp [h]
-
 lemma ssnumsCode_quote (k : ℕ) : ssnumsCode (k : V) = ⌜(ssnums (k := k)).val⌝ := by
   unfold ssnums
   rw [Bounding.HierarchySymbol.Semiformula.val_mkSigma]
@@ -132,7 +121,15 @@ lemma ssnumsCode_quote (k : ℕ) : ssnumsCode (k : V) = ⌜(ssnums (k := k)).val
     constructor
     · simp
     · intro i
-      rw [nth_ssnumsConjuncts _ _ (by simp), ssnumsConjunct_quote]
+      rw [nth_ssnumsConjuncts _ _ (by simp)]
+      rw [Sentence.quote_ex, Sentence.quote_and, Semisentence.quote_substs,
+        Semisentence.quote_substs]
+      simp only [matrixToVec_succ, matrixToVec_nil, Matrix.vecHead, Matrix.vecTail,
+        Function.comp_def, Matrix.cons_val_zero, Matrix.cons_val_succ, Semiterm.empty_quote_bvar,
+        Semiterm.empty_quote_numeral, Fin.val_succ, ssnumsConjunct]
+      have h : ((i : ℕ) : V) + 1 + 1 + 1 + 1 = (i : ℕ) + 4 := by
+        simp only [add_assoc]; norm_num
+      simp [h]
   rw [hc]
   simp only [matrixToVec_succ, matrixToVec_nil, Matrix.vecHead, Matrix.vecTail, Function.comp_def,
     Matrix.cons_val_zero, Matrix.cons_val_succ, Semiterm.empty_quote_bvar,

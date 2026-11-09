@@ -75,4 +75,26 @@ axiom IE_strictlyWeakerThan_IE_succ {k : ℕ} (hk : 1 ≤ k) : IE k ⪱ IE (k + 
 axiom leastNumberBoundedUniversal_weakerThan_IE1 :
     𝗣𝗔⁻ ∪ LeastNumberScheme (Semiformula.BoundedUniversal 1) ⪯ 𝗜𝗘₁
 
+mutual
+
+lemma Semiformula.BoundedExistential.hierarchy {k n : ℕ} {φ : ArithmeticSemiformula ξ n} :
+    Semiformula.BoundedExistential k φ → ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ
+  | .of_open h => Bounding.Hierarchy.of_open h
+  | .of_boundedUniversal h => h.hierarchy
+  | .bexsLT _ h => Bounding.Hierarchy.arithmetic_bexsLT_iff.mpr h.hierarchy
+
+lemma Semiformula.BoundedUniversal.hierarchy {k n : ℕ} {φ : ArithmeticSemiformula ξ n} :
+    Semiformula.BoundedUniversal k φ → ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ
+  | .of_open h => Bounding.Hierarchy.of_open h
+  | .of_boundedExistential h => h.hierarchy
+  | .ballLT _ h => Bounding.Hierarchy.arithmetic_ballLT_iff.mpr h.hierarchy
+
+end
+
+/-- $\mathsf{I}\mathsf{E}_k$ is weaker than $\mathsf{I}\Delta_0$. -/
+lemma IE_weakerThan_ISigma0 (k : ℕ) : IE k ⪯ 𝗜𝚺₀ := by
+  rw [ISigmaZero_eq_IBroadSigmaZero]
+  exact Entailment.WeakerThan.ofSubset
+    (Set.union_subset_union_right _ (InductionScheme_subset (·.hierarchy)))
+
 end FFL.FirstOrder.Arithmetic

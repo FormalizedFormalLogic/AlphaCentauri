@@ -138,4 +138,5 @@ public import AlphaCentauri.ToMathlib.Ordinal.Bounds
 public import AlphaCentauri.ToMathlib.Ordinal.Rank
 public import AlphaCentauri.ToMathlib.Primrec
 public import AlphaCentauri.ToMathlib.RingOfDifferences
+public import AlphaCentauri.ToMathlib.TwoNonresidue
 public import AlphaCentauri.ToMathlib.Vector

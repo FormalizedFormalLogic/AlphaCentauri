@@ -291,9 +291,40 @@ end code
 
 /-- The definable elements refute $\mathsf{B}\Sigma_{j+1}$ once one of them is nonstandard.
 - [HP98, Lemma IV.1.41] -/
-axiom definableElements.not_models_BSigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {a : M}
+theorem definableElements.not_models_BSigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {a : M}
     (ha : a ∈ definableElements (j + 1) M) (hns : ∀ m : ℕ, (m : M) < a) :
-    ¬(definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1)
+    ¬(definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := by
+  intro hK
+  have : (definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+    models_of_subtheory (definableElements.models_ISigma j (M := M))
+  have transfer {n : ℕ} {φ : ArithmeticSemisentence n} (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (j + 1) φ)
+      (v : Fin n → definableElements (j + 1) M) : M ⊧/(Subtype.val ∘ v) φ ↔ _ ⊧/v φ := by
+    obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
+    rw [hφ' M, hφ' (definableElements (j + 1) M)]
+    have := definableElements.sigmaElementary j (M := M) le_rfl
+      (φ'.rew Rew.emb).val_prenexHierarchy v (fun _ ↦ 0)
+    rwa [Bounding.Prenex.val_rew, eval_emb, eval_emb] at this
+  have hcast (c : ℕ) : ((c : definableElements (j + 1) M) : M) = c := by
+    induction c with
+    | zero => rfl
+    | succ c ih => simp [Nat.cast_succ, ← ih]; rfl
+  have h₁ (x : definableElements (j + 1) M) : ∃ c < (⟨a, ha⟩ : definableElements (j + 1) M),
+      _ ⊧/![c, x] (definesElementDef j).val := by
+    obtain ⟨c, hc⟩ := exists_definesElement x.2
+    use c
+    and_intros
+    · change ((c : definableElements (j + 1) M) : M) < a
+      rw [hcast]
+      exact hns c
+    · apply (transfer (definesElementDef j).sigma_prop ![c, x]).mp
+      simpa [hcast, Matrix.comp_vecCons''] using hc
+  have h₂ : ∀ x < a + 1, ∃ c < a, DefinesElement j c x := by
+    simpa using (transfer (φ := “s. ∀ x < s + 1, ∃ c < s, !(definesElementDef j).val c x”)
+      (by simp) ![⟨a, ha⟩]).mpr (by simpa [-Subtype.forall, -Subtype.exists] using fun x _ ↦ h₁ x)
+  have : Fact (1 ≤ j + 1) := ⟨Nat.le_add_left 1 j⟩
+  obtain ⟨x, -, x', -, c, -, hne, hx, hx'⟩ :=
+    pigeonhole (m := j + 1) (R := fun x c ↦ DefinesElement j c x) (by definability) a h₂
+  exact hne <| hx.unique hx'
 
 /-- The elements of `M` below a $\Sigma_{j+1}$-definable element.
 - [HP98, Definition IV.1.32] -/

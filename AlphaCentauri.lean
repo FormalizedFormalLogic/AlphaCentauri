@@ -43,6 +43,8 @@ public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Henkin
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.Cut
+public import AlphaCentauri.Model.DefinableElements
+public import AlphaCentauri.Model.Elementary
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
@@ -92,6 +94,7 @@ public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.PartialTruth
+public import AlphaCentauri.ToFoundation.Pigeonhole
 public import AlphaCentauri.ToFoundation.PrenexDefinable
 public import AlphaCentauri.ToFoundation.PrenexNormalForm
 public import AlphaCentauri.ToFoundation.Prime

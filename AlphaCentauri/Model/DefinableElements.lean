@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Model.Elementary
+public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Pigeonhole
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
@@ -64,11 +65,54 @@ lemma mem_definableElements_of_unique {k m : ℕ} (hk : 1 ≤ k)
 
 /-- A $\Pi_j$ formula with parameters among the $\Sigma_{j+1}$-definable elements and a witness
 has a least witness, and it is $\Sigma_{j+1}$-definable. -/
-axiom exists_least_mem_definableElements [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ}
+lemma exists_least_mem_definableElements [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ}
     {φ : ArithmeticSemiformula ℕ (n + 1)} (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 j φ) {e : Fin n → M}
     {f : ℕ → M} (he : ∀ i, e i ∈ definableElements (j + 1) M)
     (hf : ∀ i, f i ∈ definableElements (j + 1) M) (h : ∃ x, φ.Eval (x :> e) f) :
-    ∃ x ∈ definableElements (j + 1) M, φ.Eval (x :> e) f ∧ ∀ y < x, ¬φ.Eval (y :> e) f
+    ∃ x ∈ definableElements (j + 1) M, φ.Eval (x :> e) f ∧ ∀ y < x, ¬φ.Eval (y :> e) f := by
+  obtain ⟨x₀, hx₀⟩ := h
+  obtain ⟨x, hx, hmin⟩ := InductionOnHierarchy.least_number_sigma 𝚷 j
+    (P := fun x ↦ φ.Eval (x :> e) f)
+    (((Bounding.definable_of_hierarchy hφ f).retractiont
+      (#0 :> fun i ↦ &(e i))).of_iff fun v ↦ by
+        congr! 2
+        ext i
+        cases i using Fin.cases <;> simp) hx₀
+  let χ : ArithmeticSemiformula ℕ (n + 1) :=
+    φ ⋏ (∼(φ ⇜ (#0 :> fun i ↦ #i.succ.succ))).ballLT #0
+  let w : Fin (χ.fvSup + n) → M := fun i ↦ if h : (i : ℕ) < n then e ⟨i, h⟩ else f (i - n)
+  have hχ (y : M) :
+      M ⊧/(y :> w) (χ.toSemisentence fun i ↦ #(Fin.castLE (by omega) i)) ↔ χ.Eval (y :> e) f :=
+    eval_toSemisentence (φ := χ) (v := y :> w) _
+      (fun i ↦ by cases i using Fin.cases <;> simp [w]) fun i ↦ by
+        change (y :> w) (Fin.succ ⟨i + n, by omega⟩) = f i
+        simp [w]
+  use x
+  and_intros
+  · apply mem_definableElements_of_unique (Nat.le_add_left 1 j)
+      (ψ := χ.toSemisentence fun i ↦ #(Fin.castLE (by omega) i)) (v := w)
+    · exact Bounding.Hierarchy.rew _ (by simp [χ, hφ.accum 𝚺, hφ.strict_mono 𝚷 (lt_add_one j)])
+    · intro i
+      simp only [w]
+      split_ifs
+      exacts [he _, hf _]
+    · intro y
+      have hv (z : M) : Semiterm.val (z :> y :> e) f ∘
+          (fun i : Fin n ↦ (#i.succ.succ : ArithmeticSemiterm ℕ (n + 2))) = e := by
+        ext
+        simp
+      suffices φ.Eval (y :> e) f ∧ (∀ z < y, ¬φ.Eval (z :> e) f) ↔ y = x by
+        simpa [hχ, χ, Matrix.comp_vecCons'', hv] using this
+      constructor
+      · rintro ⟨h₁, h₂⟩
+        rcases lt_trichotomy y x with h | h | h
+        · exact absurd h₁ (hmin y h)
+        · exact h
+        · exact absurd hx (h₂ x h)
+      · rintro rfl
+        exact ⟨hx, hmin⟩
+  · exact hx
+  · exact hmin
 
 namespace definableElements
 

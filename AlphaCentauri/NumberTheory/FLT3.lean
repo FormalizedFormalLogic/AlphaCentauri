@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Schemata.BoundedInduction
+public import AlphaCentauri.ToFoundation.BinderNotation
 public import AlphaCentauri.ToMathlib.FLT3.Descent
 public import AlphaCentauri.ToMathlib.RingOfDifferences
 
@@ -78,8 +79,7 @@ open RingOfDifferences OpenPredicate
 
 /-- Fermat's Last Theorem for exponent `n`. -/
 def fermatLastTheorem (n : ℕ) : ArithmeticSentence :=
-  let pow (t : ArithmeticSemiterm Empty 3) := (Semiterm.Operator.npow ℒₒᵣ n).operator ![t]
-  “∀ x y z, !!(pow #2) + !!(pow #1) = !!(pow #0) → x = 0 ∨ y = 0 ∨ z = 0”
+  “∀ x y z, x ^' n + y ^' n = z ^' n → x = 0 ∨ y = 0 ∨ z = 0”
 
 section
 

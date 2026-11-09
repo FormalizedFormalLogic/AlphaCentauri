@@ -42,8 +42,8 @@ axiom provable_existsQuadraticNonresidue_IE1 : 𝗜𝗘₁ ⊢ existsQuadraticNo
 
 /-- $\mathsf{I}\Delta_0$ proves that every odd prime has a quadratic nonresidue. An open problem;
 $\mathsf{I}\Delta_0$ with the $\Delta_0$ pigeonhole principle adjoined proves it.
-- [MM89]
-- [Smi93, §3] -/
+- [Smi93, §3]
+- [MM89] -/
 axiom provable_existsQuadraticNonresidue_ISigma0 : 𝗜𝚺₀ ⊢ existsQuadraticNonresidue
 
 /-- `-1` has a `k`-th root modulo `m`: `xᵏ ≡ -1 (mod m)` has a solution.

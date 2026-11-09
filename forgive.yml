@@ -149,7 +149,7 @@ declaration:
       - FFL.FirstOrder.Arithmetic.provable_existsQuadraticNonresidue_IE1
   FFL.FirstOrder.Arithmetic.provable_existsQuadraticNonresidue_ISigma0:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [MM89]; with the Δ₀ pigeonhole principle adjoined it is provable [Smi93, §3].
+      # An open problem, not a theorem awaiting formalization: [Smi93, §3]; with the Δ₀ pigeonhole principle adjoined it is provable [MM89].
       - FFL.FirstOrder.Arithmetic.provable_existsQuadraticNonresidue_ISigma0
 
   # Declarations that inherit the debt of an unproved statement.

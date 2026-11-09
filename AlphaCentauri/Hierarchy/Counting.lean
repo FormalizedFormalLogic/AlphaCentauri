@@ -6,9 +6,7 @@ public import Mathlib.Data.Finset.Card
 /-!
 # $\Delta_0$ counting functions
 
-Whether the counting function of a $\Delta_0$-definable set is $\Delta_0$-definable is open, a
-question of Paris and Wilkie. By a result of Toda the answer is negative unless the polynomial
-hierarchy collapses.
+Counting functions of $\Delta_0$-definable sets.
 
 - [DAq05, Question 7.9]
 - [HP98, Bibliographical Remarks to Chapter V]
@@ -18,8 +16,8 @@ hierarchy collapses.
 
 namespace FFL.FirstOrder.Arithmetic
 
-/-- An open problem: the counting function $x \mapsto |A \cap [0, x)|$ of a $\Delta_0$-definable
-set $A \subseteq \mathbb{N}$ is $\Delta_0$-definable.
+/-- The counting function $x \mapsto |A \cap [0, x)|$ of a $\Delta_0$-definable set
+$A \subseteq \mathbb{N}$ is $\Delta_0$-definable. An open problem.
 - [DAq05, Question 7.9]
 - [HP98, Bibliographical Remarks to Chapter V] -/
 axiom definableFunction_card_of_definablePred {A : ℕ → Prop} [DecidablePred A]

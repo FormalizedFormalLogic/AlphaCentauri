@@ -35,6 +35,21 @@ def SigmaElementary (ι : S ↪ₛ[ℒₒᵣ] M) (s : ℕ) : Prop :=
 
 variable (ι : S ↪ₛ[ℒₒᵣ] M)
 
+lemma eval_ex_iff_of_witness {n : ℕ} {χ : ArithmeticSemiformula ℕ (n + 1)} {e : Fin n → S}
+    {f : ℕ → S}
+    (witness : (∃ x : M, χ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, χ.Eval (ι x :> ι ∘ e) (ι ∘ f))
+    (h : ∀ x : S, χ.Eval (ι ∘ (x :> e)) (ι ∘ f) ↔ χ.Eval (x :> e) f) :
+    (∃¹ χ).Eval (ι ∘ e) (ι ∘ f) ↔ (∃¹ χ).Eval e f := by
+  simp only [eval_ex, Matrix.comp_vecCons''] at h ⊢
+  constructor
+  · intro h₁
+    obtain ⟨x, hx⟩ := witness h₁
+    use x
+    exact (h x).mp hx
+  · rintro ⟨x, hx⟩
+    use ι x
+    exact (h x).mpr hx
+
 /-- The Tarski–Vaught test: bounded formulas are absolute along `ι`, and every prenex $\Pi_m$
 formula, `m < s`, with parameters from `S` and a witness in `M` has a witness in `S`.
 - [HP98, Lemma IV.1.19] -/
@@ -52,38 +67,35 @@ theorem sigmaElementary_of_tarskiVaught (s : ℕ)
     intro e f
     rcases Γ
     · obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hφ
-      simp only [eval_ex]
-      constructor
-      · intro h
-        obtain ⟨x, hx⟩ := witness m (by omega) hψ e f h
-        use x
-        rw [← Matrix.comp_vecCons''] at hx
-        exact (ih (by omega) hψ (x :> e) f).mp hx
-      · rintro ⟨x, hx⟩
-        use ι x
-        rw [← Matrix.comp_vecCons'']
-        exact (ih (by omega) hψ (x :> e) f).mpr hx
+      exact eval_ex_iff_of_witness ι (witness m (by omega) hψ e f)
+        fun x ↦ ih (by omega) hψ (x :> e) f
     · obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.pi_succ_iff.mp hφ
-      simp only [eval_all]
-      constructor
-      · intro h x
-        have h₁ := h (ι x)
-        rw [← Matrix.comp_vecCons''] at h₁
-        exact (ih (by omega) hψ (x :> e) f).mp h₁
-      · intro h
-        by_contra! h₁
-        obtain ⟨x, hx⟩ := witness m (by omega) hψ.neg e f (by simpa using h₁)
-        rw [← Matrix.comp_vecCons''] at hx
-        exact absurd (h x) (by simpa using (ih (by omega) hψ.neg (x :> e) f).mp hx)
+      simpa using (eval_ex_iff_of_witness ι (witness m (by omega) hψ.neg e f)
+        fun x ↦ ih (by omega) hψ.neg (x :> e) f).not
 
 /-- Bounded formulas are absolute along `ι` as soon as every bounded formula with parameters from
 `S` and a witness in `M` has a witness in `S`. -/
-axiom eval_iff_of_bounded_of_witness
+lemma eval_iff_of_bounded_of_witness
     (witness : ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)}, ℬ[<, ℒₒᵣ].Closure φ →
       ∀ (e : Fin n → S) (f : ℕ → S),
         (∃ x : M, φ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, φ.Eval (ι x :> ι ∘ e) (ι ∘ f))
     {n : ℕ} {φ : ArithmeticSemiformula ℕ n} (hφ : ℬ[<, ℒₒᵣ].Closure φ)
-    (e : Fin n → S) (f : ℕ → S) : φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f
+    (e : Fin n → S) (f : ℕ → S) : φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f :=
+  bounded_induction_open
+    (P := fun n φ ↦ ∀ (e : Fin n → S) (f : ℕ → S), φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f)
+    (fun _ _ hφ _ _ ↦ (eval_hom_iff_of_open ι hφ).symm)
+    (fun _ _ _ _ _ ihφ ihψ e f ↦ by simp [ihφ e f, ihψ e f])
+    (fun _ _ _ _ _ ihφ ihψ e f ↦ by simp [ihφ e f, ihψ e f])
+    (fun _ t θ hθ ih e f ↦ by
+      have hχ : ℬ[<, ℒₒᵣ].Closure (“#0 < !!(Rew.bShift t)” ⋏ ∼θ) :=
+        .and (.of_open (by simp)) hθ.neg
+      simpa [ball] using (eval_ex_iff_of_witness ι (witness hχ e f) fun x ↦ by
+        simp [ih (x :> e) f, ← eval_hom_iff_of_open ι (φ := “#0 < !!(Rew.bShift t)”)]).not)
+    (fun _ t θ hθ ih e f ↦ by
+      have hχ : ℬ[<, ℒₒᵣ].Closure (“#0 < !!(Rew.bShift t)” ⋏ θ) := .and (.of_open (by simp)) hθ
+      exact eval_ex_iff_of_witness ι (witness hχ e f) fun x ↦ by
+        simp [ih (x :> e) f, ← eval_hom_iff_of_open ι (φ := “#0 < !!(Rew.bShift t)”)])
+    n φ hφ e f
 
 /-- A $\Sigma_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/

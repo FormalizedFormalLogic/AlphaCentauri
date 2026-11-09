@@ -21,9 +21,7 @@ namespace FFL.FirstOrder.Arithmetic
 
 open Semiformula
 
-universe u v
-
-variable {S : Type u} {M : Type v} [ORingStructure S] [ORingStructure M]
+variable {S M : Type} [ORingStructure S] [ORingStructure M]
 
 /-- `ι` is $\Sigma_s$-elementary: for `m ≤ s`, prenex $\Sigma_m$ and $\Pi_m$ formulas take the same
 truth value at elements of `S` as at their images.
@@ -118,11 +116,21 @@ theorem SigmaElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M} (hι : Si
   simpa [models_iff] using h ((PeanoMinus.prenexBlock σ hσ).rew Rew.emb) rfl ![] (fun _ ↦ 0)
     (by simpa [models_iff] using h₁)
 
+/-- A $\Sigma_s$-elementary embedding preserves the truth of $\Sigma_s$ and $\Pi_s$ sentences
+between models of $\mathsf{B}\Sigma_s$. -/
+lemma SigmaElementary.models_iff_of_hierarchy {ι : S ↪ₛ[ℒₒᵣ] M} {s : ℕ} (hι : SigmaElementary ι s)
+    [S↓[ℒₒᵣ] ⊧* 𝗕𝚺s] [M↓[ℒₒᵣ] ⊧* 𝗕𝚺s] {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemisentence n}
+    (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) (v : Fin n → S) : M ⊧/(ι ∘ v) φ ↔ S ⊧/v φ := by
+  obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
+  rw [hφ' M, hφ' S]
+  have := hι le_rfl (φ'.rew Rew.emb).val_prenexHierarchy v (fun _ ↦ 0)
+  rwa [Bounding.Prenex.val_rew, eval_emb, eval_emb] at this
+
 namespace Cut
 
 variable {j : ℕ} [M↓[ℒₒᵣ] ⊧* 𝗜𝚺j] (I : Cut M) [I.Closed]
 
-lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
+private lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
     (hj : SigmaElementary I.endExtension.emb j) {ψ : ArithmeticSemiformula ℕ 3}
     (hψ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 j ψ) (e : ℕ → I.carrier) (a : I.carrier)
     (h : ∀ x < a, ∃ y z, ψ.Eval ![z, x, y] e) :

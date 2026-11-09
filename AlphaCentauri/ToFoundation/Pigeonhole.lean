@@ -57,7 +57,9 @@ private lemma exists_isInjection_of_succ {a w : V} (h : IsInjection (a + 1) w) :
     obtain ⟨y, hy, hxy⟩ := hT x (by simp [lt_succ_iff_le, hx.le])
     rcases lt_or_eq_of_le (lt_succ_iff_le.mp hy) with hy | hya
     · use y
-      exact ⟨hy, (hw' x hx y hy).2 (Or.inl hxy)⟩
+      and_intros
+      · exact hy
+      · exact (hw' x hx y hy).2 (Or.inl hxy)
     · rw [hya] at hxy
       obtain ⟨y', hy', hxy'⟩ := hT (a + 1) (by simp)
       have hne : y' ≠ a := by
@@ -67,7 +69,9 @@ private lemma exists_isInjection_of_succ {a w : V} (h : IsInjection (a + 1) w) :
         exact this.not_lt hx
       have hy'' : y' < a := lt_of_le_of_ne (lt_succ_iff_le.mp hy') hne
       use y'
-      exact ⟨hy'', (hw' x hx y' hy'').2 (Or.inr ⟨hxy, hxy'⟩)⟩
+      and_intros
+      · exact hy''
+      · exact (hw' x hx y' hy'').2 (Or.inr ⟨hxy, hxy'⟩)
   · intro x hx x' hx' y hy h h'
     rw [hw' x hx y hy] at h
     rw [hw' x' hx' y hy] at h'
@@ -113,7 +117,9 @@ theorem pigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ_[m].DefinableRel R) (a :
   · intro x hx
     obtain ⟨y, hy, hxy⟩ := total x hx
     use y
-    exact ⟨hy, (hw x hx y hy).2 hxy⟩
+    and_intros
+    · exact hy
+    · exact (hw x hx y hy).2 hxy
   · intro x hx x' hx' y hy h h'
     by_contra hxx
     apply hne
@@ -124,6 +130,10 @@ theorem pigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ_[m].DefinableRel R) (a :
       and_intros
       · exact hx'
       · use y
-        exact ⟨hy, hxx, (hw x hx y hy).1 h, (hw x' hx' y hy).1 h'⟩
+        and_intros
+        · exact hy
+        · exact hxx
+        · exact (hw x hx y hy).1 h
+        · exact (hw x' hx' y hy).1 h'
 
 end FFL.FirstOrder.Arithmetic

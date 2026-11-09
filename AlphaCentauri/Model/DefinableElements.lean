@@ -273,7 +273,7 @@ lemma exists_definesElement [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {x : V}
 /-- In a nonstandard model of $\mathsf{I}\Sigma_{j+1}$ the $\Sigma_{j+1}$-definable elements are
 bounded.
 - [HP98, Lemma IV.1.37] -/
-lemma exists_bound_definableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {a : V}
+theorem exists_bound_definableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {a : V}
     (ha : ∀ m : ℕ, (m : V) < a) : ∃ b, ∀ x ∈ definableElements (j + 1) V, x < b := by
   have : Fact (1 ≤ j + 1) := ⟨Nat.le_add_left 1 j⟩
   obtain ⟨u, -, hu⟩ := finset_comprehension (m := j + 1) (Γ := 𝚺)
@@ -299,12 +299,8 @@ theorem definableElements.not_models_BSigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {a :
   have : (definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     models_of_subtheory (definableElements.models_ISigma j (M := M))
   have transfer {n : ℕ} {φ : ArithmeticSemisentence n} (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (j + 1) φ)
-      (v : Fin n → definableElements (j + 1) M) : M ⊧/(Subtype.val ∘ v) φ ↔ _ ⊧/v φ := by
-    obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
-    rw [hφ' M, hφ' (definableElements (j + 1) M)]
-    have := definableElements.sigmaElementary j (M := M) le_rfl
-      (φ'.rew Rew.emb).val_prenexHierarchy v (fun _ ↦ 0)
-    rwa [Bounding.Prenex.val_rew, eval_emb, eval_emb] at this
+      (v : Fin n → definableElements (j + 1) M) : M ⊧/(Subtype.val ∘ v) φ ↔ _ ⊧/v φ :=
+    SigmaElementary.models_iff_of_hierarchy (sigmaElementary j (M := M)) hφ v
   have hcast (c : ℕ) : ((c : definableElements (j + 1) M) : M) = c := by
     induction c with
     | zero => rfl
@@ -371,7 +367,7 @@ instance closed : (definableCut j M).Closed where
 open Bootstrapping in
 /-- A prenex $\Pi_m$ formula, `m < j`, with parameters from the cut and a witness in `M` has a
 witness in the cut. -/
-lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)}
+private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)}
     (hφ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 m φ) (e : Fin n → (definableCut j M).carrier)
     (f : ℕ → (definableCut j M).carrier)
     (h : ∃ x : M, φ.Eval (x :> Subtype.val ∘ e) (Subtype.val ∘ f)) :
@@ -491,11 +487,14 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
       ⟨x, hxI⟩ ∈ definableElements (j + 1) (definableCut j M).carrier := by
     obtain ⟨φ, hφ, hφx⟩ := id hx
     obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
+    have := models_BSigma (j := j) hns
+    have : M↓[ℒₒᵣ] ⊧* 𝗕𝚺 j :=
+      haveI : 𝗕𝚺 j ⪯ 𝗣𝗔 := BSigma_weakerThan_Peano
+      models_of_subtheory (U := 𝗣𝗔) inferInstance
+    have : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 j := mod_BSigma_of_le (Nat.le_succ j)
     have transfer (v : Fin 2 → (definableCut j M).carrier) :
-        M ⊧/(Subtype.val ∘ v) φ'.sigmaInv.val ↔ _ ⊧/v φ'.sigmaInv.val := by
-      have := sigmaElementary (j := j) (M := M) le_rfl
-        (φ'.sigmaInv.rew Rew.emb).val_prenexHierarchy v (fun _ ↦ 0)
-      rwa [Bounding.Prenex.val_rew, eval_emb, eval_emb] at this
+        M ⊧/(Subtype.val ∘ v) φ'.sigmaInv.val ↔ _ ⊧/v φ'.sigmaInv.val :=
+      SigmaElementary.models_iff_of_hierarchy sigmaElementary Bounding.Prenex.val_hierarchy v
     use φ'.val
     and_intros
     · exact Bounding.Prenex.val_hierarchy

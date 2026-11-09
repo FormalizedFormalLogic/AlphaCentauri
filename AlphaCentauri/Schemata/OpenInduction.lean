@@ -3,28 +3,19 @@ module
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.NumberTheory.FLT3
 public import AlphaCentauri.NumberTheory.Primes
-public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Mathlib.Computability.Halting
 
 /-!
 # What $\mathsf{IOpen}$ does not prove
 
-Shepherdson's model of Puiseux polynomials over the real algebraic numbers with integer constant
-term is a model of $\mathsf{IOpen}$ in which every irreducible element is standard. Together with
-the models of Macintyre and Marker and of Adamowicz, and with Smith's open induction domains with
-greatest common divisors, it shows that $\mathsf{IOpen}$ does not prove the infinitude of primes,
-Euclid's lemma, or, over the existence of greatest common divisors, Bézout's theorem. It is not
-finitely axiomatizable, and, unlike $\mathsf{PA}$ by Tennenbaum's theorem, it has a computable
-nonstandard model.
-
-- [She64]
+Statements about the first-order theory $\mathsf{IOpen}$ of induction for open formulas: it does not
+prove the infinitude of primes, Euclid's lemma, or Bézout's theorem over the existence of greatest
+common divisors; it is not finitely axiomatizable; and it has a computable nonstandard model.
 -/
 
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
-
-open scoped FFL.FirstOrder.Bounding FFL.FirstOrder.Arithmetic
 
 /-- Euclid's lemma: a prime dividing a product divides one of the factors. -/
 def primeDvdMul : ArithmeticSentence := “∀ p a b, !isPrime p → p ∣ a * b → p ∣ a ∨ p ∣ b”
@@ -33,28 +24,25 @@ def primeDvdMul : ArithmeticSentence := “∀ p a b, !isPrime p → p ∣ a * b
 def greatestCommonDivisor : ArithmeticSentence :=
   “∀ x y, ∃ z, z ∣ x ∧ z ∣ y ∧ ∀ w, w ∣ x → w ∣ y → w ∣ z”
 
-/-- $\mathsf{IOpen}$ does not prove the infinitude of primes.
-- [She64]
+/-- - [She64]
 - [Wil78]
 - [DAq05, §2, §3]
 - [MM89]
 - [Ada87] -/
 axiom not_provable_infinitudeOfPrimes_IOpen : ¬𝗜𝗢𝗽𝗲𝗻 ⊢ infinitudeOfPrimes
 
-/-- $\mathsf{IOpen}$ does not prove Euclid's lemma.
-- [MM89]
+/-- - [MM89]
 - [DAq05, §2] -/
 axiom not_provable_primeDvdMul_IOpen : ¬𝗜𝗢𝗽𝗲𝗻 ⊢ primeDvdMul
 
-/-- $\mathsf{IOpen} + \mathrm{GCD}$ does not prove Bézout's theorem.
+/-- $\mathsf{IOpen}$ with greatest common divisors does not prove Bézout's theorem.
 - [Smi93a]
 - [Smi92b, §3]
 - [Moh11, §2] -/
 axiom not_provable_bezout_IOpen_greatestCommonDivisor :
     ¬insert greatestCommonDivisor 𝗜𝗢𝗽𝗲𝗻 ⊢ bezout
 
-/-- $\mathsf{IOpen}$ is not finitely axiomatizable.
-- [Bou91]
+/-- - [Bou91]
 - [Moh11, Corollary E]
 - [Kov24, Theorem 2.2] -/
 axiom IOpen.not_finiteAxiomatizable : ¬FiniteAxiomatizable 𝗜𝗢𝗽𝗲𝗻

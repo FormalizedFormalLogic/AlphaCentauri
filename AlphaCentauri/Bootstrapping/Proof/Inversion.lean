@@ -1,7 +1,6 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Proof.CutFree
-public import AlphaCentauri.Bootstrapping.Proof.Measures
+public import AlphaCentauri.Bootstrapping.Proof.RankedDerivation
 public import AlphaCentauri.ToFoundation.SubstInversion
 public import AlphaCentauri.ToFoundation.Set
 public import Foundation.Vorspiel.Tactic.Disj
@@ -143,23 +142,6 @@ lemma not_mem_empty_Δ₁Class (p : V) : p ∉ (∅ : Theory L).Δ₁Class := by
   intro h
   have : V ⊧/![p] (⊥ : 𝚫ᴬ₁.Semisentence 1).val := h
   simp at this
-
-namespace CutFreeDerivation
-
-/-- A cut-free derivation cuts on nothing, so its cut rank is `0`.
-- [Bus98, Ch. I §2.4] -/
-lemma cutRank_eq_zero {d : V} (h : CutFreeDerivation T d) : cutRank L d = 0 := by
-  apply CutFreeDerivation.induction1 𝚺 ?_ h
-  · intro s _ p _ _; simp
-  · intro s _ _; simp
-  · intro s _ p q dp dq _ _ _ ihp ihq; simp [ihp, ihq]
-  · intro s _ p q d _ _ ih; simp [ih]
-  · intro s _ p d _ _ ih; simp [ih]
-  · intro s _ p t d _ _ _ ih; simp [ih]
-  · intro s _ d _ _ ih; simp [ih]
-  · rintro _ _ d rfl _ ih; simp [ih]
-  · intro s _ p _ _; simp
-  · definability
 
 end CutFreeDerivation
 

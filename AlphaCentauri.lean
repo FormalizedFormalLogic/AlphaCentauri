@@ -86,6 +86,7 @@ public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.Schemata.Strictness
 public import AlphaCentauri.Schemata.StrongCollection
 public import AlphaCentauri.ToFoundation.Absoluteness
+public import AlphaCentauri.ToFoundation.BinderNotation
 public import AlphaCentauri.ToFoundation.BlockSequence
 public import AlphaCentauri.ToFoundation.BooleanCombination
 public import AlphaCentauri.ToFoundation.CodedPigeonhole

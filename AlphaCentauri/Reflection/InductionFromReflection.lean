@@ -153,4 +153,48 @@ lemma exists_inductionImplication (ψ : ℬ[<, ℒₒᵣ].Prenex 𝚺 n ξ (m + 
 
 end inductionImplication
 
+section Kreisel
+
+variable {m : ℕ} {ψ θ : ArithmeticSemisentence (m + 1)}
+
+variable (hθ : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] (x : V) (p : Fin m → V),
+  V ⊧/(x :> p) θ ↔
+    (V ⊧/(0 :> p) ψ → (∀ y, V ⊧/(y :> p) ψ → V ⊧/((y + 1) :> p) ψ) → V ⊧/(x :> p) ψ))
+include hθ
+
+private lemma provable_inductionImplication_zero :
+    𝗘𝗔 ⊢ ∀¹* (Rew.subst (‘0’ :> fun i ↦ #i) ▹ θ) := by
+  apply Arithmetic.complete.{0}
+  intro V _ _
+  have h (p : Fin m → V) : (fun i ↦ Semiterm.val p Empty.elim
+      ((‘0’ :> fun i ↦ #i : Fin (m + 1) → ArithmeticSemiterm Empty m) i)) = 0 :> p :=
+    funext <| Fin.cases (by simp) (by simp)
+  simp only [models_iff, Semiformula.eval_allClosure]
+  intro p
+  simp only [Semiformula.eval_rew, Function.comp_def, Rew.subst_bvar, h,
+    show ∀ g : Empty → V, g = Empty.elim from fun _ ↦ funext (·.elim)]
+  erw [hθ]
+  intro h₀ _
+  exact h₀
+
+private lemma provable_inductionImplication_succ :
+    𝗘𝗔 ⊢ ∀¹* (θ 🡒 Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ) ▹ θ) := by
+  apply Arithmetic.complete.{0}
+  intro V _ _
+  have h (x : V) (p : Fin m → V) : (fun i ↦ Semiterm.val (x :> p) Empty.elim
+      ((‘#0 + 1’ :> fun i ↦ #i.succ : Fin (m + 1) → ArithmeticSemiterm Empty (m + 1)) i)) =
+      (x + 1) :> p :=
+    funext <| Fin.cases (by simp) (by simp)
+  simp only [models_iff, Semiformula.eval_allClosure]
+  intro e
+  obtain ⟨x, p, rfl⟩ : ∃ x p, e = x :> p := ⟨_, _, (Matrix.cons_head_tail e).symm⟩
+  simp only [LogicalConnective.HomClass.map_imply, Semiformula.eval_rew, Function.comp_def,
+    Rew.subst_bvar, h, show ∀ g : Empty → V, g = Empty.elim from fun _ ↦ funext (·.elim),
+    LogicalConnective.Prop.arrow_eq]
+  erw [hθ, hθ]
+  intro hx h₀ hs
+  exact hs _ (hx h₀ hs)
+
+end Kreisel
+
 end FFL.FirstOrder.Arithmetic

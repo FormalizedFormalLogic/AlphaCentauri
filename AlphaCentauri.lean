@@ -66,6 +66,7 @@ public import AlphaCentauri.OmegaLogic.Reduction
 public import AlphaCentauri.ProvabilityLogic.Consistency
 public import AlphaCentauri.ProvabilityLogic.ISigma
 public import AlphaCentauri.ProvabilityLogic.Peano
+public import AlphaCentauri.ProvabilityLogic.SelfReference
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.FastGrowing
 public import AlphaCentauri.ProvablyTotal.Parikh

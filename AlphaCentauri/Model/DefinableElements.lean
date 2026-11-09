@@ -365,8 +365,104 @@ instance closed : (definableCut j M).Closed where
     · exact ((⟨c, hc⟩ : definableElements (j + 1) M) * ⟨d, hd⟩).2
     · exact mul_lt_mul'' hac hbd _root_.zero_le _root_.zero_le
 
+open Bootstrapping in
+/-- A prenex $\Pi_m$ formula, `m < j`, with parameters from the cut and a witness in `M` has a
+witness in the cut. -/
+lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)}
+    (hφ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 m φ) (e : Fin n → (definableCut j M).carrier)
+    (f : ℕ → (definableCut j M).carrier)
+    (h : ∃ x : M, φ.Eval (x :> Subtype.val ∘ e) (Subtype.val ∘ f)) :
+    ∃ x ∈ (definableCut j M).carrier, φ.Eval (x :> Subtype.val ∘ e) (Subtype.val ∘ f) := by
+  obtain ⟨φ, rfl⟩ := hφ
+  let ψ := φ.rew (φ.val.paramSubst fun i ↦ #(Fin.castLE (by omega) i))
+  let w : Fin (φ.val.fvSup + n) → (definableCut j M).carrier :=
+    fun i ↦ if h : (i : ℕ) < n then e ⟨i, h⟩ else f (i - n)
+  let q : ℕ := ⌜ψ.matrix.val⌝
+  have hP (x : M) : PrenexSatisfied 𝚷 m (x ∷ matrixToVec (Subtype.val ∘ w)) (q : M) ↔
+      φ.val.Eval (x :> Subtype.val ∘ e) (Subtype.val ∘ f) := by
+    rw [Sentence.coe_quote_eq_quote, show x ∷ matrixToVec (Subtype.val ∘ w) =
+      matrixToVec (x :> Subtype.val ∘ w) by simp, prenexSatisfied_quote_iff,
+      Bounding.Prenex.val_rew]
+    exact eval_toSemisentence (φ := φ.val) _ (fun i ↦ by cases i using Fin.cases <;> simp [w])
+      fun i ↦ by
+        change (x :> Subtype.val ∘ w) (Fin.succ ⟨i + n, by omega⟩) = (f i).1
+        simp [w]
+  have hcode {N : ℕ} (v : Fin N → (definableCut j M).carrier) :
+      matrixToVec (Subtype.val ∘ v) ∈ (definableCut j M).carrier := by
+    induction N with
+    | zero => exact Cut.Closed.zero_mem
+    | succ N ih =>
+      rw [matrixToVec_succ, adjoin_def]
+      apply Cut.succ_mem
+      have h₁ := (Matrix.vecHead v).2
+      have h₂ := ih (Matrix.vecTail v)
+      unfold pair
+      split_ifs <;> apply_rules [Cut.Closed.add_mem, Cut.Closed.mul_mem]
+  obtain ⟨c, hc, hyc⟩ := hcode w
+  obtain ⟨θ, hθ, hθP⟩ : ∃ θ : ArithmeticSemisentence 2, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) θ ∧
+      ∀ e p : M, M ⊧/![e, p] θ ↔ PrenexSatisfied 𝚷 m e p := by
+    cases m with
+    | zero =>
+      use boundedSatisfied.pi.val
+      simp
+    | succ m =>
+      use (prenexSatisfied' 𝚷 m).val
+      and_intros
+      · exact (prenexSatisfied' 𝚷 m).pi_prop.mono (by omega)
+      · intro e p
+        simp [(PrenexSatisfied.pi_defined' m).df]
+  let σ := (prenexSatisfied' 𝚺 m).val
+  let ρ : ArithmeticSemiformula ℕ 2 := “y x. !σ y ↑q → ∀ p, !adjoinDef p x y → !θ p ↑q”
+  let C : ArithmeticSemiformula ℕ 2 :=
+    “d c. ∀ y < c, !σ y ↑q → ∃ x < d, ∀ p, !adjoinDef p x y → !θ p ↑q”
+  have hρ (y x : M) : ρ.Eval ![y, x] (fun _ ↦ 0) ↔
+      (PrenexSatisfied 𝚺 (m + 1) y q → PrenexSatisfied 𝚷 m (x ∷ y) q) := by
+    simp [ρ, σ, hθP, (PrenexSatisfied.sigma_defined' m).df, numeral_eq_natCast]
+  have hC (d : M) : C.Eval ![d, c] (fun _ ↦ 0) ↔
+      ∀ y < c, PrenexSatisfied 𝚺 (m + 1) y q → ∃ x < d, PrenexSatisfied 𝚷 m (x ∷ y) q := by
+    simp [C, σ, hθP, (PrenexSatisfied.sigma_defined' m).df, numeral_eq_natCast]
+  have hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (m + 1) σ := (prenexSatisfied' 𝚺 m).sigma_prop
+  have hρ' : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) ρ := by simp [ρ, hσ, hθ]
+  obtain ⟨d₀, hd₀⟩ := IBroadSigma.collection (s := m + 1)
+    (Bounding.definableRel_of_hierarchy (hρ'.accum 𝚺) fun _ ↦ 0) c <| by
+      intro y _
+      by_cases hy : PrenexSatisfied 𝚺 (m + 1) y q
+      · obtain ⟨x, hx⟩ := hy
+        use x
+        exact (hρ y x).mpr fun _ ↦ hx
+      · use 0
+        simp [hρ, hy]
+  obtain ⟨d, hd, hCd, -⟩ := exists_least_mem_definableElements (φ := C)
+    ((by simp [C, hσ, hθ] : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) C).mono hm) (e := ![c])
+    (f := fun _ ↦ 0) (Fin.forall_fin_one.mpr hc) (fun _ ↦ (0 : definableElements (j + 1) M).2) <| by
+      use d₀
+      apply (hC d₀).mpr
+      intro y hy hS
+      obtain ⟨x, hx, hR⟩ := hd₀ y hy
+      use x
+      and_intros
+      · exact hx
+      · exact (hρ y x).mp hR hS
+  obtain ⟨x, hx, hPx⟩ := (hC d).mp hCd _ hyc <| by
+    obtain ⟨x, hx⟩ := h
+    use x
+    exact (hP x).mpr hx
+  use x
+  and_intros
+  · exact ⟨d, hd, hx⟩
+  · exact (hP x).mp hPx
+
 /-- [HP98, Lemma IV.1.42] -/
-axiom sigmaElementary : SigmaElementary (definableCut j M).endExtension.emb j
+theorem sigmaElementary : SigmaElementary (definableCut j M).endExtension.emb j := by
+  let := (definableCut j M).endExtension
+  have : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := EndExtension.models_peanoMinus (N := M)
+  apply sigmaElementary_of_tarskiVaught
+  · intro n φ hφ e f
+    exact (absolute_of_bounded (T := 𝗣𝗔⁻) hφ _ M e f).symm
+  · intro m hm n φ hφ e f h
+    obtain ⟨x, hx, hφx⟩ := exists_witness hm hφ e f h
+    use ⟨x, hx⟩
+    exact hφx
 
 /-- [HP98, Lemma IV.1.44(1)] -/
 axiom models_BSigma {a : M} (ha : a ∈ definableElements (j + 1) M) (hns : ∀ m : ℕ, (m : M) < a) :

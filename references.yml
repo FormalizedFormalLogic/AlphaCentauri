@@ -119,6 +119,25 @@ Bus98A:
       title: Studies in Logic and the Foundations of Mathematics
       volume: 137
 
+dA05:
+  type: Chapter
+  title: Weak fragments of Peano arithmetic
+  author: D'Aquino, Paola
+  date: 2005
+  page-range: 149-184
+  serial-number:
+    doi: "10.1017/9781316755907.005"
+  parent:
+    type: Anthology
+    title: The Notre Dame Lectures
+    editor: Cholak, Peter
+    publisher:
+      name: Association for Symbolic Logic
+    parent:
+      type: Anthology
+      title: Lecture Notes in Logic
+      volume: 18
+
 ELV25:
   type: Article
   title: Completions of restricted complexity I, weak arithmetical theories

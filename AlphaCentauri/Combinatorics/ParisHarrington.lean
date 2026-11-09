@@ -4,6 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 public import AlphaCentauri.ToFoundation.NatCoding
 public import AlphaCentauri.ToMathlib.List
+public import AlphaCentauri.ToMathlib.Combinatorics.Ramsey
 
 /-!
 # The two-colour diagonal Paris–Harrington sentence
@@ -165,5 +166,27 @@ lemma nat_models_diagonalRamseyTwoColours_iff : ℕ↓[ℒₒᵣ] ⊧ diagonalRa
       · left
         intro s hsY hse
         simpa using hhom s (hsY.trans hYn) hse hsY
+
+/-- The two-colour diagonal Paris–Harrington sentence is true in $\mathbb{N}$.
+
+- [Qui80, p. 77]
+- [Kay91, §14.3] -/
+theorem nat_models_diagonalRamseyTwoColours : ℕ↓[ℒₒᵣ] ⊧ diagonalRamseyTwoColours := by
+  apply nat_models_diagonalRamseyTwoColours_iff.mpr
+  intro e he
+  obtain ⟨n, hn⟩ := exists_diagonal_paris_harrington he
+  use n
+  intro F
+  obtain ⟨Y, hYn, hY, ⟨x, hxY, hx⟩, i, hi⟩ :=
+    hn fun s ↦ if h : s ∈ (Finset.range n).powersetCard e then F ⟨s, h⟩ else 0
+  use Y
+  and_intros
+  · exact hYn
+  · omega
+  · use x, hxY
+    omega
+  use i
+  intro s hs
+  simpa [s.2] using hi s hs (mem_powersetCard.mp s.2).2
 
 end FFL.FirstOrder.Arithmetic

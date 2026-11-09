@@ -48,32 +48,6 @@ private lemma formulaComplexity_insert_le (hp : formulaComplexity ℒₒᵣ p �
   · exact hp
   · exact hs r hr
 
-private lemma formulaComplexity_le_of_and (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q)
-    (h : formulaComplexity ℒₒᵣ (p ^⋏ q) ≤ N) :
-    formulaComplexity ℒₒᵣ p ≤ N ∧ formulaComplexity ℒₒᵣ q ≤ N := by
-  rw [formulaComplexity_and hp hq] at h
-  constructor
-  · exact (le_max_left _ _).trans (le_self_add.trans h)
-  · exact (le_max_right _ _).trans (le_self_add.trans h)
-
-private lemma formulaComplexity_le_of_or (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q)
-    (h : formulaComplexity ℒₒᵣ (p ^⋎ q) ≤ N) :
-    formulaComplexity ℒₒᵣ p ≤ N ∧ formulaComplexity ℒₒᵣ q ≤ N := by
-  rw [formulaComplexity_or hp hq] at h
-  constructor
-  · exact (le_max_left _ _).trans (le_self_add.trans h)
-  · exact (le_max_right _ _).trans (le_self_add.trans h)
-
-private lemma formulaComplexity_le_of_all (hp : IsUFormula ℒₒᵣ p)
-    (h : formulaComplexity ℒₒᵣ (^∀ p) ≤ N) : formulaComplexity ℒₒᵣ p ≤ N := by
-  rw [formulaComplexity_all hp] at h
-  exact le_self_add.trans h
-
-private lemma formulaComplexity_le_of_ex (hp : IsUFormula ℒₒᵣ p)
-    (h : formulaComplexity ℒₒᵣ (^∃ p) ≤ N) : formulaComplexity ℒₒᵣ p ≤ N := by
-  rw [formulaComplexity_ex hp] at h
-  exact le_self_add.trans h
-
 private lemma hasWitness_of_and (hs : IsFormulaSet ℒₒᵣ s) (hpq : p ^⋏ q ∈ s)
     (hb : ∀ r ∈ s, formulaComplexity ℒₒᵣ r ≤ N)
     (ihp : (∀ r ∈ insert p s, formulaComplexity ℒₒᵣ r ≤ N) → HasWitness N (insert p s) f)
@@ -89,7 +63,8 @@ private lemma hasWitness_of_and (hs : IsFormulaSet ℒₒᵣ s) (hpq : p ^⋏ q 
   · exact ⟨_, hpq, ht⟩
   rw [e, ComplexitySatisfied.and_iff hF.1.isUFormula.fvAssign hF.2.isUFormula.fvAssign hc',
     not_and_or] at ht
-  obtain ⟨hp, hq⟩ := formulaComplexity_le_of_and hF.1.isUFormula hF.2.isUFormula hc
+  rw [formulaComplexity_and hF.1.isUFormula hF.2.isUFormula] at hc
+  obtain ⟨hp, hq⟩ := max_le_iff.mp (le_self_add.trans hc)
   rcases ht with ht | ht
   · exact hasWitness_of_insert (ihp (formulaComplexity_insert_le hp hb)) ht
   · exact hasWitness_of_insert (ihq (formulaComplexity_insert_le hq hb)) ht
@@ -109,7 +84,8 @@ private lemma hasWitness_of_or (hs : IsFormulaSet ℒₒᵣ s) (hpq : p ^⋎ q �
   · exact ⟨_, hpq, ht⟩
   rw [e, ComplexitySatisfied.or_iff hF.1.isUFormula.fvAssign hF.2.isUFormula.fvAssign hc',
     not_or] at ht
-  obtain ⟨hp, hq⟩ := formulaComplexity_le_of_or hF.1.isUFormula hF.2.isUFormula hc
+  rw [formulaComplexity_or hF.1.isUFormula hF.2.isUFormula] at hc
+  obtain ⟨hp, hq⟩ := max_le_iff.mp (le_self_add.trans hc)
   exact hasWitness_of_insert (hasWitness_of_insert
     (ih (formulaComplexity_insert_le hp (formulaComplexity_insert_le hq hb))) ht.1) ht.2
 
@@ -134,7 +110,8 @@ private lemma hasWitness_of_all (hs : IsFormulaSet ℒₒᵣ s) (hp : ^∀ p ∈
   have hb' : ∀ r ∈ insert (free ℒₒᵣ p) (setShift ℒₒᵣ s), formulaComplexity ℒₒᵣ r ≤ N := by
     apply formulaComplexity_insert_le
     · rw [fomulaComplexity_free hpF]
-      exact formulaComplexity_le_of_all hpF.isUFormula hc
+      rw [formulaComplexity_all hpF.isUFormula] at hc
+      exact le_self_add.trans hc
     · intro r hr
       obtain ⟨q, hq, rfl⟩ := mem_setShift_iff.mp hr
       rw [formulaComplexity_shift (hs q hq).isUFormula]
@@ -159,16 +136,15 @@ private lemma hasWitness_of_exs {t : V} (hs : IsFormulaSet ℒₒᵣ s) (hp : ^�
   have hb' : ∀ r ∈ insert (substs1 ℒₒᵣ t p) s, formulaComplexity ℒₒᵣ r ≤ N := by
     apply formulaComplexity_insert_le _ hb
     rw [fomulaComplexity_substs1 hpF ht]
-    exact formulaComplexity_le_of_ex hpF.isUFormula hc
+    rw [formulaComplexity_ex hpF.isUFormula] at hc
+    exact le_self_add.trans hc
   obtain ⟨r, hr, hrT⟩ := ih hb'
   rcases mem_bitInsert_iff.mp hr with rfl | hr
-  · refine ⟨_, hp, ?_⟩
-    have hc' : formulaComplexity ℒₒᵣ (^∃ (fvAssign f p)) ≤ N := by
+  · have hc' : formulaComplexity ℒₒᵣ (^∃ (fvAssign f p)) ≤ N := by
       rwa [← e, formulaComplexity_fvAssign (hs _ hp).isUFormula]
-    rw [e, ComplexitySatisfied.exs_iff hpF.fvAssign.isUFormula hc']
     rw [et, substs1, ComplexitySatisfied.subst (m := 0) (by simp [ht.termFvAssign])
       hpF.fvAssign, termValVec_cons₁ ht.termFvAssign.isUTerm] at hrT
-    exact ⟨_, hrT⟩
+    exact ⟨_, hp, (e ▸ ComplexitySatisfied.exs_iff hpF.fvAssign.isUFormula hc').mpr ⟨_, hrT⟩⟩
   · exact ⟨r, hr, hrT⟩
 
 private lemma hasWitness_of_shift {Γ : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
@@ -177,7 +153,7 @@ private lemma hasWitness_of_shift {Γ : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
     HasWitness N (setShift ℒₒᵣ Γ) f := by
   obtain ⟨b, g, hfg⟩ : ∃ b g : V, ∀ i, f.[i] = (b ∷ g).[i] := by
     rcases adjoin_cases f with rfl | ⟨b, g, rfl⟩
-    · refine ⟨0, 0, ?_⟩
+    · use 0, 0
       intro i
       rcases zero_or_succ i with rfl | ⟨i, rfl⟩ <;> simp
     · exact ⟨b, g, fun _ ↦ rfl⟩
@@ -186,8 +162,7 @@ private lemma hasWitness_of_shift {Γ : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
     rw [fvAssign_congr hfg, fvAssign_shift (hΓ q hq).isUFormula]
   obtain ⟨r, hr, hrT⟩ := ih g fun r hr ↦ by
     simpa [formulaComplexity_shift (hΓ r hr).isUFormula] using hb _ (shift_mem_setShift hr)
-  use shift ℒₒᵣ r, shift_mem_setShift hr
-  rwa [hsh r hr]
+  exact ⟨_, shift_mem_setShift hr, by rwa [hsh r hr]⟩
 
 private lemma hasWitness_of_axL (hs : IsFormulaSet ℒₒᵣ s) (hp : p ∈ s) (hnp : neg ℒₒᵣ p ∈ s)
     (hb : ∀ r ∈ s, formulaComplexity ℒₒᵣ r ≤ N) : HasWitness N s f := by
@@ -214,7 +189,7 @@ private lemma hasWitness_aux :
     ∀ d f : V, CutFreeDerivation (∅ : Theory ℒₒᵣ) d →
       (∀ r ∈ fstIdx d, formulaComplexity ℒₒᵣ r ≤ N) → HasWitness N (fstIdx d) f := by
   intro d
-  refine InductionOnHierarchy.order_induction_sigma 𝚷 (N + 1) hasWitness_definable ?_ d
+  apply InductionOnHierarchy.order_induction_sigma 𝚷 (N + 1) hasWitness_definable
   intro d ih f hd hb
   have ih' : ∀ d₀ < d, ∀ s, CutFreeDerivationOf (∅ : Theory ℒₒᵣ) d₀ s → ∀ g,
       (∀ r ∈ s, formulaComplexity ℒₒᵣ r ≤ N) → HasWitness N s g := by

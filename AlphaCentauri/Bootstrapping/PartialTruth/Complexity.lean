@@ -63,21 +63,6 @@ instance ComplexitySatisfied.definable' (Γ : SigmaPiDelta) (N : ℕ) :
 
 variable {N : ℕ} {e p q r : V}
 
-lemma IsUFormula.isBounded_of_formulaComplexity_eq_zero (hp : IsUFormula ℒₒᵣ p)
-    (h : formulaComplexity ℒₒᵣ p = 0) : IsBounded p := by
-  rcases hp.case with (⟨k, R, v, -, -, rfl⟩ | ⟨k, R, v, -, -, rfl⟩ | rfl | rfl |
-    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
-    simp_all
-
-lemma IsUFormula.cases_of_formulaComplexity_ne_zero (hp : IsUFormula ℒₒᵣ p)
-    (h : formulaComplexity ℒₒᵣ p ≠ 0) :
-    (∃ q r, IsUFormula ℒₒᵣ q ∧ IsUFormula ℒₒᵣ r ∧ p = q ^⋏ r) ∨
-    (∃ q r, IsUFormula ℒₒᵣ q ∧ IsUFormula ℒₒᵣ r ∧ p = q ^⋎ r) ∨
-    (∃ q, IsUFormula ℒₒᵣ q ∧ p = ^∀ q) ∨ (∃ q, IsUFormula ℒₒᵣ q ∧ p = ^∃ q) := by
-  rcases hp.case with (⟨k, R, v, -, -, rfl⟩ | ⟨k, R, v, -, -, rfl⟩ | rfl | rfl |
-    ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
-    simp_all
-
 namespace ComplexitySatisfied
 
 lemma iff_boundedSatisfied (h : formulaComplexity ℒₒᵣ p = 0) :
@@ -106,13 +91,12 @@ lemma iff_boundedSatisfied (h : formulaComplexity ℒₒᵣ p = 0) :
 private lemma succ_and (hq : IsUFormula ℒₒᵣ q) (hr : IsUFormula ℒₒᵣ r) :
     ComplexitySatisfied (N + 1) e (q ^⋏ r) ↔
       ComplexitySatisfied N e q ∧ ComplexitySatisfied N e r := by
-  have hc : formulaComplexity ℒₒᵣ (q ^⋏ r) ≠ 0 := by simp [hq, hr]
   constructor
   · intro h
     exact h.2.1 q (by simp) r (by simp) rfl
   · intro h
     and_intros
-    · exact fun h' ↦ absurd h' hc
+    · simp [hq, hr]
     · rintro q' - r' - he
       obtain ⟨rfl, rfl⟩ := (qqAnd_inj _ _ _ _).mp he
       exact h
@@ -124,13 +108,12 @@ private lemma succ_and (hq : IsUFormula ℒₒᵣ q) (hr : IsUFormula ℒₒᵣ 
 private lemma succ_or (hq : IsUFormula ℒₒᵣ q) (hr : IsUFormula ℒₒᵣ r) :
     ComplexitySatisfied (N + 1) e (q ^⋎ r) ↔
       ComplexitySatisfied N e q ∨ ComplexitySatisfied N e r := by
-  have hc : formulaComplexity ℒₒᵣ (q ^⋎ r) ≠ 0 := by simp [hq, hr]
   constructor
   · intro h
     exact h.2.2.1 q (by simp) r (by simp) rfl
   · intro h
     and_intros
-    · exact fun h' ↦ absurd h' hc
+    · simp [hq, hr]
     · rintro q' - r' - he
       simp [qqAnd, qqOr] at he
     · rintro q' - r' - he
@@ -142,13 +125,12 @@ private lemma succ_or (hq : IsUFormula ℒₒᵣ q) (hr : IsUFormula ℒₒᵣ r
 
 private lemma succ_all (hq : IsUFormula ℒₒᵣ q) :
     ComplexitySatisfied (N + 1) e (^∀ q) ↔ ∀ x, ComplexitySatisfied N (x ∷ e) q := by
-  have hc : formulaComplexity ℒₒᵣ (^∀ q) ≠ 0 := by simp [hq]
   constructor
   · intro h
     exact h.2.2.2.1 q (by simp) rfl
   · intro h
     and_intros
-    · exact fun h' ↦ absurd h' hc
+    · simp [hq]
     · rintro q' - r' - he
       simp [qqAnd, qqAll] at he
     · rintro q' - r' - he
@@ -161,13 +143,12 @@ private lemma succ_all (hq : IsUFormula ℒₒᵣ q) :
 
 private lemma succ_exs (hq : IsUFormula ℒₒᵣ q) :
     ComplexitySatisfied (N + 1) e (^∃ q) ↔ ∃ x, ComplexitySatisfied N (x ∷ e) q := by
-  have hc : formulaComplexity ℒₒᵣ (^∃ q) ≠ 0 := by simp [hq]
   constructor
   · intro h
     exact h.2.2.2.2 q (by simp) rfl
   · intro h
     and_intros
-    · exact fun h' ↦ absurd h' hc
+    · simp [hq]
     · rintro q' - r' - he
       simp [qqAnd, qqExs] at he
     · rintro q' - r' - he
@@ -189,20 +170,16 @@ lemma succ_iff (hp : IsUFormula ℒₒᵣ p) (h : formulaComplexity ℒₒᵣ p 
     · rw [iff_boundedSatisfied hc, iff_boundedSatisfied hc]
     rcases hp.cases_of_formulaComplexity_ne_zero hc with
       ⟨q, r, hq, hr, rfl⟩ | ⟨q, r, hq, hr, rfl⟩ | ⟨q, hq, rfl⟩ | ⟨q, hq, rfl⟩
-    · simp only [formulaComplexity_and hq hr] at h
-      simp only [Nat.cast_add, Nat.cast_one, add_le_add_iff_right, max_le_iff] at h
-      rw [succ_and hq hr, succ_and hq hr, ih hq h.1, ih hr h.2]
-    · simp only [formulaComplexity_or hq hr] at h
-      simp only [Nat.cast_add, Nat.cast_one, add_le_add_iff_right, max_le_iff] at h
-      rw [succ_or hq hr, succ_or hq hr, ih hq h.1, ih hr h.2]
-    · simp only [formulaComplexity_all hq, Nat.cast_add, Nat.cast_one,
-        add_le_add_iff_right] at h
-      rw [succ_all hq, succ_all hq]
-      exact forall_congr' fun x ↦ ih hq h
-    · simp only [formulaComplexity_ex hq, Nat.cast_add, Nat.cast_one,
-        add_le_add_iff_right] at h
-      rw [succ_exs hq, succ_exs hq]
-      exact exists_congr fun x ↦ ih hq h
+    · obtain ⟨h₁, h₂⟩ : formulaComplexity ℒₒᵣ q ≤ N ∧ formulaComplexity ℒₒᵣ r ≤ N := by
+        simpa [hq, hr] using h
+      rw [succ_and hq hr, succ_and hq hr, ih hq h₁, ih hr h₂]
+    · obtain ⟨h₁, h₂⟩ : formulaComplexity ℒₒᵣ q ≤ N ∧ formulaComplexity ℒₒᵣ r ≤ N := by
+        simpa [hq, hr] using h
+      rw [succ_or hq hr, succ_or hq hr, ih hq h₁, ih hr h₂]
+    · rw [succ_all hq, succ_all hq]
+      exact forall_congr' fun x ↦ ih hq (by simpa [hq] using h)
+    · rw [succ_exs hq, succ_exs hq]
+      exact exists_congr fun x ↦ ih hq (by simpa [hq] using h)
 
 lemma and_iff (hq : IsUFormula ℒₒᵣ q) (hr : IsUFormula ℒₒᵣ r)
     (h : formulaComplexity ℒₒᵣ (q ^⋏ r) ≤ N) :
@@ -211,9 +188,9 @@ lemma and_iff (hq : IsUFormula ℒₒᵣ q) (hr : IsUFormula ℒₒᵣ r)
   cases N with
   | zero => simp [hq, hr] at h
   | succ N =>
-    simp only [formulaComplexity_and hq hr, Nat.cast_add, Nat.cast_one, add_le_add_iff_right,
-      max_le_iff] at h
-    rw [succ_and hq hr, succ_iff hq h.1, succ_iff hr h.2]
+    obtain ⟨h₁, h₂⟩ : formulaComplexity ℒₒᵣ q ≤ N ∧ formulaComplexity ℒₒᵣ r ≤ N := by
+      simpa [hq, hr] using h
+    rw [succ_and hq hr, succ_iff hq h₁, succ_iff hr h₂]
 
 lemma or_iff (hq : IsUFormula ℒₒᵣ q) (hr : IsUFormula ℒₒᵣ r)
     (h : formulaComplexity ℒₒᵣ (q ^⋎ r) ≤ N) :
@@ -222,29 +199,25 @@ lemma or_iff (hq : IsUFormula ℒₒᵣ q) (hr : IsUFormula ℒₒᵣ r)
   cases N with
   | zero => simp [hq, hr] at h
   | succ N =>
-    simp only [formulaComplexity_or hq hr, Nat.cast_add, Nat.cast_one, add_le_add_iff_right,
-      max_le_iff] at h
-    rw [succ_or hq hr, succ_iff hq h.1, succ_iff hr h.2]
+    obtain ⟨h₁, h₂⟩ : formulaComplexity ℒₒᵣ q ≤ N ∧ formulaComplexity ℒₒᵣ r ≤ N := by
+      simpa [hq, hr] using h
+    rw [succ_or hq hr, succ_iff hq h₁, succ_iff hr h₂]
 
 lemma all_iff (hq : IsUFormula ℒₒᵣ q) (h : formulaComplexity ℒₒᵣ (^∀ q) ≤ N) :
     ComplexitySatisfied N e (^∀ q) ↔ ∀ x, ComplexitySatisfied N (x ∷ e) q := by
   cases N with
   | zero => simp [hq] at h
   | succ N =>
-    simp only [formulaComplexity_all hq, Nat.cast_add, Nat.cast_one,
-      add_le_add_iff_right] at h
     rw [succ_all hq]
-    exact forall_congr' fun x ↦ (succ_iff hq h).symm
+    exact forall_congr' fun x ↦ (succ_iff hq (by simpa [hq] using h)).symm
 
 lemma exs_iff (hq : IsUFormula ℒₒᵣ q) (h : formulaComplexity ℒₒᵣ (^∃ q) ≤ N) :
     ComplexitySatisfied N e (^∃ q) ↔ ∃ x, ComplexitySatisfied N (x ∷ e) q := by
   cases N with
   | zero => simp [hq] at h
   | succ N =>
-    simp only [formulaComplexity_ex hq, Nat.cast_add, Nat.cast_one,
-      add_le_add_iff_right] at h
     rw [succ_exs hq]
-    exact exists_congr fun x ↦ (succ_iff hq h).symm
+    exact exists_congr fun x ↦ (succ_iff hq (by simpa [hq] using h)).symm
 
 @[simp] lemma verum : ComplexitySatisfied N e (^⊤ : V) := by
   rw [iff_boundedSatisfied (by simp)]
@@ -260,7 +233,8 @@ lemma subst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula
   induction N generalizing n m w e p with
   | zero =>
     simp only [ComplexitySatisfied, fomulaComplexity_substs hp hw]
-    refine and_congr_right fun hc ↦ ?_
+    apply and_congr_right
+    intro hc
     exact BoundedSatisfied.subst hw hp (hp.isUFormula.isBounded_of_formulaComplexity_eq_zero hc)
   | succ N ih =>
     by_cases hc : formulaComplexity ℒₒᵣ p = 0
@@ -294,34 +268,23 @@ lemma neg_iff (hp : IsUFormula ℒₒᵣ p) (h : formulaComplexity ℒₒᵣ p �
       exact BoundedSatisfied.neg_iff (hp.isBounded_of_formulaComplexity_eq_zero hc) hp
     rcases hp.cases_of_formulaComplexity_ne_zero hc with
       ⟨q, r, hq, hr, rfl⟩ | ⟨q, r, hq, hr, rfl⟩ | ⟨q, hq, rfl⟩ | ⟨q, hq, rfl⟩
-    · simp only [formulaComplexity_and hq hr, Nat.cast_add, Nat.cast_one, add_le_add_iff_right,
-        max_le_iff] at h
-      rw [neg_and hq hr, succ_or hq.neg hr.neg, succ_and hq hr, ih hq h.1, ih hr h.2, not_and_or]
-    · simp only [formulaComplexity_or hq hr, Nat.cast_add, Nat.cast_one, add_le_add_iff_right,
-        max_le_iff] at h
-      rw [neg_or hq hr, succ_and hq.neg hr.neg, succ_or hq hr, ih hq h.1, ih hr h.2, not_or]
-    · simp only [formulaComplexity_all hq, Nat.cast_add, Nat.cast_one,
-        add_le_add_iff_right] at h
-      rw [neg_all hq, succ_exs hq.neg, succ_all hq, not_forall]
-      exact exists_congr fun x ↦ ih hq h
-    · simp only [formulaComplexity_ex hq, Nat.cast_add, Nat.cast_one,
-        add_le_add_iff_right] at h
-      rw [neg_ex hq, succ_all hq.neg, succ_exs hq, not_exists]
-      exact forall_congr' fun x ↦ ih hq h
+    · obtain ⟨h₁, h₂⟩ : formulaComplexity ℒₒᵣ q ≤ N ∧ formulaComplexity ℒₒᵣ r ≤ N := by
+        simpa [hq, hr] using h
+      rw [neg_and hq hr, succ_or hq.neg hr.neg, succ_and hq hr, ih hq h₁, ih hr h₂,
+        not_and_or]
+    · obtain ⟨h₁, h₂⟩ : formulaComplexity ℒₒᵣ q ≤ N ∧ formulaComplexity ℒₒᵣ r ≤ N := by
+        simpa [hq, hr] using h
+      rw [neg_or hq hr, succ_and hq.neg hr.neg, succ_or hq hr, ih hq h₁, ih hr h₂,
+        not_or]
+    · rw [neg_all hq, succ_exs hq.neg, succ_all hq, not_forall]
+      exact exists_congr fun x ↦ ih hq (by simpa [hq] using h)
+    · rw [neg_ex hq, succ_all hq.neg, succ_exs hq, not_exists]
+      exact forall_congr' fun x ↦ ih hq (by simpa [hq] using h)
 
 theorem quote_iff {n : ℕ} (φ : ArithmeticSemisentence n) (h : φ.complexity ≤ N)
     (v : Fin n → V) : ComplexitySatisfied N (matrixToVec v) ⌜φ⌝ ↔ V ⊧/v φ := by
   induction φ using Semiformula.rec' generalizing N with
-  | hrel R w =>
-    rw [iff_boundedSatisfied (by simp)]
-    exact boundedSatisfied_quote_iff (by simp) v
-  | hnrel R w =>
-    rw [iff_boundedSatisfied (by simp)]
-    exact boundedSatisfied_quote_iff (by simp) v
-  | hverum =>
-    rw [iff_boundedSatisfied (by simp)]
-    exact boundedSatisfied_quote_iff (by simp) v
-  | hfalsum =>
+  | hrel R w | hnrel R w | hverum | hfalsum =>
     rw [iff_boundedSatisfied (by simp)]
     exact boundedSatisfied_quote_iff (by simp) v
   | hand φ ψ ihφ ihψ =>

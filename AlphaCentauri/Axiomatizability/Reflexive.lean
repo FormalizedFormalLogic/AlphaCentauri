@@ -77,17 +77,16 @@ lemma Peano.consistent_of_models {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ]
       simp only [Derivation.negatedAxioms, List.mem_toFinset, Finset.mem_image] at hφ
       obtain ⟨τ, hτ, rfl⟩ := hφ
       exact ⟨∼τ, by simpa using hN τ hτ, by simp [Sentence.quote_def]⟩
-  have hσ' : (⌜(σ : Proposition ℒₒᵣ)⌝ : V) ∈
-      (⌜insert (⊥ : Proposition ℒₒᵣ) (Derivation.negatedAxioms l)⌝ : V) := by
-    simpa [Sentence.quote_def] using hσ
-  rw [LK2.Derivation.Sequent.mem_quote_iff] at hσ'
+  have hσ' := LK2.Derivation.Sequent.mem_quote_iff.mp (by simpa [Sentence.quote_def] using hσ :
+    (⌜(σ : Proposition ℒₒᵣ)⌝ : V) ∈
+      (⌜insert (⊥ : Proposition ℒₒᵣ) (Derivation.negatedAxioms l)⌝ : V))
   simp only [Derivation.negatedAxioms, Finset.mem_insert, List.mem_toFinset,
     Finset.mem_image] at hσ'
   rcases hσ' with hσ' | ⟨τ, hτ, hτσ⟩
-  · have : σ = ⊥ := by simpa using hσ'
-    simp [this] at hmodel
-  · have : σ = ∼τ := Rewriting.emb_injective (by simpa using hτσ.symm)
-    simp [this, hl τ hτ] at hmodel
+  · obtain rfl : σ = ⊥ := by simpa using hσ'
+    simp at hmodel
+  · obtain rfl : σ = ∼τ := Rewriting.emb_injective (by simpa using hτσ.symm)
+    simp [hl τ hτ] at hmodel
 
 /-- `𝗣𝗔` is reflexive.
 - [Lin97, Corollary 1.8]

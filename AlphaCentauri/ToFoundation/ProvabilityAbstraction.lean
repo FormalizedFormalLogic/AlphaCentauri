@@ -4,8 +4,7 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Reflec
 public import AlphaCentauri.ToFoundation.BooleanCombination
 
 /-!
-# Abstract provability: formalized consistency statements and local reflection on Boolean
-combinations
+# Abstract provability: formalized consistency and Boolean combinations
 -/
 
 @[expose] public section
@@ -110,7 +109,7 @@ theorem provable_refl_of_booleanCombination
     have h₂ : T ∪ 𝔅.reflOn Γ ⊢ σ 🡘 τ := WeakerThan.pbl h
     cl_prover [h₁, h₂, hσ]
   obtain ⟨ψ, hψ, e⟩ := exists_clauseConj hand hor htop hbot hφ
-  refine hext e ?_
+  apply hext e
   clear e
   induction hψ with
   | @clause C D hC hD =>

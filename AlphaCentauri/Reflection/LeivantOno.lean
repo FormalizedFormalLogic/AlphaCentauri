@@ -39,7 +39,7 @@ axiom ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi (hn :
 reflection principle of $\mathsf{EA}$ for prenex $\Pi_{n + 2}$ formulas.
 - [AB05, Theorem 154]
 - [Bek05, Theorem 7] -/
-theorem ISigma_equiv_uniformReflection_EA (hn : 1 ≤ n) :
+theorem ISigma_equiv_uniformReflection_ElementaryArithmetic (hn : 1 ≤ n) :
     𝗜𝚺 n ≊ 𝗘𝗔 ∪ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔 := by
   apply Equiv.antisymm
   constructor
@@ -58,12 +58,12 @@ theorem ISigma_equiv_uniformReflection_EA (hn : 1 ≤ n) :
       · exact ISigma.provable_uniformReflectionOn_Pi_ElementaryArithmetic (k := k + 1)
           (by omega) hφ
 
-theorem ISigma1_equiv_uniformReflection_EA :
+theorem ISigma1_equiv_uniformReflection_ElementaryArithmetic :
     𝗜𝚺 1 ≊ 𝗘𝗔 ∪ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 3] 𝗘𝗔 :=
-  ISigma_equiv_uniformReflection_EA le_rfl
+  ISigma_equiv_uniformReflection_ElementaryArithmetic le_rfl
 
-theorem ISigma2_equiv_uniformReflection_EA :
+theorem ISigma2_equiv_uniformReflection_ElementaryArithmetic :
     𝗜𝚺 2 ≊ 𝗘𝗔 ∪ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 4] 𝗘𝗔 :=
-  ISigma_equiv_uniformReflection_EA (by norm_num)
+  ISigma_equiv_uniformReflection_ElementaryArithmetic (by norm_num)
 
 end FFL.FirstOrder.Arithmetic

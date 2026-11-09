@@ -182,15 +182,15 @@ declaration:
       - FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1
 
   # Declarations that inherit the debt of an unproved statement.
-  FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_EA:
+  FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
       - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.ISigma1_equiv_uniformReflection_EA:
+  FFL.FirstOrder.Arithmetic.ISigma1_equiv_uniformReflection_ElementaryArithmetic:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
       - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.ISigma2_equiv_uniformReflection_EA:
+  FFL.FirstOrder.Arithmetic.ISigma2_equiv_uniformReflection_ElementaryArithmetic:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
       - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi

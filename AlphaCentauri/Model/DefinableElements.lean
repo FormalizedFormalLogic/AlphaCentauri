@@ -28,7 +28,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 def definableElements (k : ℕ) (M : Type*) [ORingStructure M] : Set M :=
   {a | ∃ φ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k φ ∧ ∀ x : M, M ⊧/![x] φ ↔ x = a}
 
-variable {M : Type} [ORingStructure M] {j : ℕ}
+variable {j : ℕ} {M : Type} [ORingStructure M]
 
 lemma definableElements_mono {k k' : ℕ} (h : k ≤ k') :
     definableElements k M ⊆ definableElements k' M := by
@@ -116,15 +116,29 @@ lemma exists_least_mem_definableElements [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : �
 
 namespace definableElements
 
-axiom oringStructure (j : ℕ) (M : Type) [ORingStructure M] :
-    ORingStructure (definableElements (j + 1) M)
+variable (j M) in
+instance oringStructure : ORingStructure (definableElements (j + 1) M) where
+  zero := ⟨0, “#0 = 0”, by simp, by simp⟩
+  one := ⟨1, “#0 = 1”, by simp, by simp⟩
+  add a b := ⟨a.1 + b.1, mem_definableElements_of_unique (Nat.le_add_left 1 j)
+    (ψ := “#0 = #1 + #2”) (v := ![a.1, b.1]) (by simp) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩)
+    fun x ↦ by simp⟩
+  mul a b := ⟨a.1 * b.1, mem_definableElements_of_unique (Nat.le_add_left 1 j)
+    (ψ := “#0 = #1 * #2”) (v := ![a.1, b.1]) (by simp) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩)
+    fun x ↦ by simp⟩
+  lt a b := a.1 < b.1
 
-attribute [instance] oringStructure
-
+variable (j M) in
 /-- The inclusion of the definable elements into `M`. -/
-axiom emb (j : ℕ) (M : Type) [ORingStructure M] : definableElements (j + 1) M ↪ₛ[ℒₒᵣ] M
+def emb : definableElements (j + 1) M ↪ₛ[ℒₒᵣ] M where
+  toFun := Subtype.val
+  func' f v := by cases f <;> rfl
+  rel' r _ := by cases r; exacts [congrArg Subtype.val, id]
+  toFun_inj := Subtype.val_injective
+  rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
 
-axiom emb_apply (x : definableElements (j + 1) M) : emb j M x = x.val
+@[simp]
+lemma emb_apply (x : definableElements (j + 1) M) : emb j M x = x.val := rfl
 
 /-- [HP98, Lemma IV.1.39] -/
 axiom sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] (j : ℕ) : SigmaElementary (emb j M) (j + 1)

@@ -92,6 +92,10 @@ variable (w : Fin 2 → ClosedSemiterm ℒₒᵣ n)
 
 end
 
+@[simp] lemma empty_quote_numeral (k : ℕ) :
+    (⌜(↑k : ClosedSemiterm ℒₒᵣ n)⌝ : V) = Bootstrapping.Arithmetic.numeral (k : V) := by
+  simp [empty_quote_eq]
+
 end FFL.FirstOrder.Semiterm
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping

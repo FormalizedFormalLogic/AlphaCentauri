@@ -142,12 +142,13 @@ theorem provable_noRootNegOne_IE1_two : 𝗜𝗘₁ ⊢ noRootNegOne 2 := by
     obtain ⟨c, hc⟩ := h'.1 (by convert h)
     exact this _ x c ⟨a, by simp [numeral_eq_natCast_app]⟩ hc
   rintro m x c ⟨k, rfl⟩ hc
-  refine OpenPredicate.not_dvd_pow_four_add_one hL (m := of (8 * k + 5)) (x := of x) ?_ ⟨of c, ?_⟩
+  apply OpenPredicate.not_dvd_pow_four_add_one hL (m := of (8 * k + 5)) (x := of x)
   · use of k
     and_intros
     · exact of_nonneg k
-    · rw [map_add, map_mul, map_ofNat, map_ofNat]
-  · simpa [map_add (of : V →+* _), map_mul (of : V →+* _)] using congrArg of hc
+    · simp [map_ofNat, map_add (of : V →+* _), map_mul (of : V →+* _)]
+  · use of c
+    simpa [map_add (of : V →+* _), map_mul (of : V →+* _)] using congrArg of hc
 
 /-- $\mathsf{I}\Delta_0$ proves that $-1$ has no fourth root modulo any $m \equiv 5 \pmod 8$.
 - [Smi93, Lemma 3.5(i), Question 5.3] -/

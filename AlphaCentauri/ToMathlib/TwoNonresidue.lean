@@ -21,7 +21,25 @@ and consequently `m` divides no `x⁴ + 1` when `m` is `5` modulo `8` (`not_dvd_
 
 namespace OpenPredicate
 
-variable {R : Type*} [CommRing R] [LinearOrder R] [IsStrictOrderedRing R] [DiscretelyOrdered R]
+variable {R : Type*} [CommRing R] [LinearOrder R]
+
+private def sqrtTwoPredicate (w : Fin 5 → R) : Prop :=
+  0 ≤ w 1 ∧ (w 0 = 8 * w 1 + 3 ∨ w 0 = 8 * w 1 + 5) ∧ 0 ≤ w 2 ∧ w 3 = 2 * w 2 + 1 ∧
+    w 3 < w 0 ∧ w 3 * w 3 = 2 + w 4 * w 0
+
+private lemma isOpen_sqrtTwoPredicate : IsOpen (sqrtTwoPredicate (R := R)) := by
+  unfold sqrtTwoPredicate
+  is_open
+
+/-- `a` is `3` or `5` modulo `8`. -/
+def IsThreeOrFiveModEight (a : R) : Prop := ∃ q, 0 ≤ q ∧ (a = 8 * q + 3 ∨ a = 8 * q + 5)
+
+variable [IsStrictOrderedRing R]
+
+lemma IsThreeOrFiveModEight.three_le {a : R} (h : IsThreeOrFiveModEight a) : 3 ≤ a := by
+  obtain ⟨q, hq, rfl | rfl⟩ := h <;> linarith
+
+variable [DiscretelyOrdered R]
 
 lemma add_one_le_of_lt {x y : R} (h : x < y) : x + 1 ≤ y := by
   linarith [DiscretelyOrdered.one_le_of_pos (y - x) (sub_pos.2 h)]
@@ -41,12 +59,16 @@ lemma exists_natCast_eq (n : ℕ) {r : R} (h₀ : 0 ≤ r) (h : r < n) : ∃ i :
       · push_cast
         linarith
 
-/-- `a` is `3` or `5` modulo `8`. -/
-def IsThreeOrFiveModEight (a : R) : Prop := ∃ q, 0 ≤ q ∧ (a = 8 * q + 3 ∨ a = 8 * q + 5)
-
-omit [DiscretelyOrdered R] in
-lemma IsThreeOrFiveModEight.three_le {a : R} (h : IsThreeOrFiveModEight a) : 3 ≤ a := by
-  obtain ⟨q, hq, rfl | rfl⟩ := h <;> linarith
+lemma lt_of_sq_eq_two_add_mul {a w k : R} (ha : 3 ≤ a) (hw₀ : 1 ≤ w) (hwa : w < a)
+    (h : w * w = 2 + k * a) : 0 ≤ k ∧ k < a := by
+  have h₁ : 1 ≤ w * w := by nlinarith
+  have h₂ : w * w < a * a := mul_self_lt_mul_self (by linarith) hwa
+  and_intros
+  · by_contra hk
+    have := add_one_le_of_lt (not_le.1 hk)
+    nlinarith
+  · by_contra hk
+    nlinarith
 
 variable (hL : LeastNumberPrinciple R)
 
@@ -160,18 +182,6 @@ lemma exists_odd_sq_eq_two_add_mul {a w k : R} (ha : IsThreeOrFiveModEight a) (h
     · exact hwa
     · exact h
 
-omit hL in
-lemma lt_of_sq_eq_two_add_mul {a w k : R} (ha : 3 ≤ a) (hw₀ : 1 ≤ w) (hwa : w < a)
-    (h : w * w = 2 + k * a) : 0 ≤ k ∧ k < a := by
-  have h₁ : 1 ≤ w * w := by nlinarith
-  have h₂ : w * w < a * a := mul_self_lt_mul_self (by linarith) hwa
-  and_intros
-  · by_contra hk
-    have := add_one_le_of_lt (not_le.1 hk)
-    nlinarith
-  · by_contra hk
-    nlinarith
-
 lemma exists_normal_form {a w k : R} (ha : IsThreeOrFiveModEight a) (h : w * w = 2 + k * a) :
     ∃ q t w k, 0 ≤ q ∧ (a = 8 * q + 3 ∨ a = 8 * q + 5) ∧ 0 ≤ t ∧ w = 2 * t + 1 ∧ w < a ∧
       w * w = 2 + k * a ∧ |q| ≤ a ∧ |t| ≤ a ∧ |w| ≤ a ∧ |k| ≤ a := by
@@ -182,12 +192,7 @@ lemma exists_normal_form {a w k : R} (ha : IsThreeOrFiveModEight a) (h : w * w =
   obtain ⟨q, hq, hq'⟩ := ha
   use q, t, w', k₂
   and_intros
-  · exact hq
-  · exact hq'
-  · exact ht
-  · exact hw
-  · exact hwa
-  · exact hk
+  any_goals assumption
   · rw [abs_of_nonneg hq]
     rcases hq' with rfl | rfl <;> linarith
   · rw [abs_of_nonneg ht]
@@ -212,21 +217,10 @@ lemma descent {a q t w k : R} (hq : 0 ≤ q)
   have hk : IsThreeOrFiveModEight k :=
     isThreeOrFiveModEight_of_mul hL ⟨q, hq, ha⟩ hk₀ hka
   and_intros
-  · exact hk
-  · exact hk₀
-  · exact hk₁
+  any_goals assumption
   · obtain ⟨r, k', -, -, hr⟩ := exists_sq_eq_two_add_mul_lt hL (a := k) (w := w) (k := a)
       (by linarith [hk.three_le]) (by linarith)
     use r, k'
-
-private def sqrtTwoPredicate (w : Fin 5 → R) : Prop :=
-  0 ≤ w 1 ∧ (w 0 = 8 * w 1 + 3 ∨ w 0 = 8 * w 1 + 5) ∧ 0 ≤ w 2 ∧ w 3 = 2 * w 2 + 1 ∧
-    w 3 < w 0 ∧ w 3 * w 3 = 2 + w 4 * w 0
-
-omit [IsStrictOrderedRing R] [DiscretelyOrdered R] hL in
-private lemma isOpen_sqrtTwoPredicate : IsOpen (sqrtTwoPredicate (R := R)) := by
-  unfold sqrtTwoPredicate
-  is_open
 
 private lemma boundedExists_sqrtTwoPredicate {b B : R} (hb : IsThreeOrFiveModEight b)
     (h : ∃ w k, w * w = 2 + k * b) (hB : b < B) : BoundedExists B sqrtTwoPredicate b := by

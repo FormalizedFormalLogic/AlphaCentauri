@@ -36,11 +36,10 @@ lemma exists_preHomogeneous
     intro α _ X _ f
     use ∅
     and_intros
-    · exact empty_subset X
-    · exact Nat.zero_le _
+    · simp
+    · simp
     use fun _ ↦ f ∅
-    intro s hs hcard
-    simp [subset_empty.mp hs] at hcard
+    simp
   | succ m ihm =>
     obtain ⟨M, hM⟩ := ihm
     obtain ⟨R, hR⟩ := ih M
@@ -82,7 +81,11 @@ theorem exists_ramsey (k c q : ℕ) :
   | zero =>
     use q
     intro α _ X hX f
-    use X, Subset.rfl, hX, f ∅
+    use X
+    and_intros
+    · exact Subset.rfl
+    · exact hX
+    use f ∅
     intro s _ hs
     rw [card_eq_zero.mp hs]
   | succ k ih =>

@@ -204,6 +204,8 @@ lemma le_uniformReflectionCode (k q : V) :
     subst ℒₒᵣ (bvarVec 1 k) q ≤ uniformReflectionCode T k q :=
   (lt_or_right _ _).le.trans <| (lt_or_right _ _).le.trans <| (le_qqAll _).trans <| le_qqAlls _ _
 
+/-- `UniformReflectionR T S p` holds when `p` codes `T.uniformReflectionSchema φ` for a
+semisentence `φ` whose code satisfies `S`. -/
 def UniformReflectionR (S : V → Prop) (p : V) : Prop :=
   ∃ k ≤ p, ∃ b ≤ p, ∃ q, q = subst ℒₒᵣ (numeral 0 ∷ bvarVec 0 k) b ∧
     IsSemiformula ℒₒᵣ k q ∧ shift ℒₒᵣ q = q ∧ S q ∧ p = uniformReflectionCode T k q

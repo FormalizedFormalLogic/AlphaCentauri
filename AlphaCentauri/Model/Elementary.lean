@@ -38,13 +38,43 @@ variable (ι : S ↪ₛ[ℒₒᵣ] M)
 /-- The Tarski–Vaught test: bounded formulas are absolute along `ι`, and every prenex $\Pi_m$
 formula, `m < s`, with parameters from `S` and a witness in `M` has a witness in `S`.
 - [HP98, Lemma IV.1.19] -/
-axiom sigmaElementary_of_tarskiVaught (s : ℕ)
+theorem sigmaElementary_of_tarskiVaught (s : ℕ)
     (bounded : ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ n}, ℬ[<, ℒₒᵣ].Closure φ →
       ∀ (e : Fin n → S) (f : ℕ → S), φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f)
     (witness : ∀ m < s, ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)},
       ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 m φ → ∀ (e : Fin n → S) (f : ℕ → S),
         (∃ x : M, φ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, φ.Eval (ι x :> ι ∘ e) (ι ∘ f)) :
-    SigmaElementary ι s
+    SigmaElementary ι s := by
+  intro Γ m n φ hm hφ
+  induction m generalizing Γ n φ with
+  | zero => exact bounded (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
+  | succ m ih =>
+    intro e f
+    rcases Γ
+    · obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hφ
+      simp only [eval_ex]
+      constructor
+      · intro h
+        obtain ⟨x, hx⟩ := witness m (by omega) hψ e f h
+        use x
+        rw [← Matrix.comp_vecCons''] at hx
+        exact (ih (by omega) hψ (x :> e) f).mp hx
+      · rintro ⟨x, hx⟩
+        use ι x
+        rw [← Matrix.comp_vecCons'']
+        exact (ih (by omega) hψ (x :> e) f).mpr hx
+    · obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.pi_succ_iff.mp hφ
+      simp only [eval_all]
+      constructor
+      · intro h x
+        have h₁ := h (ι x)
+        rw [← Matrix.comp_vecCons''] at h₁
+        exact (ih (by omega) hψ (x :> e) f).mp h₁
+      · intro h
+        by_contra! h₁
+        obtain ⟨x, hx⟩ := witness m (by omega) hψ.neg e f (by simpa using h₁)
+        rw [← Matrix.comp_vecCons''] at hx
+        exact absurd (h x) (by simpa using (ih (by omega) hψ.neg (x :> e) f).mp hx)
 
 /-- Bounded formulas are absolute along `ι` as soon as every bounded formula with parameters from
 `S` and a witness in `M` has a witness in `S`. -/

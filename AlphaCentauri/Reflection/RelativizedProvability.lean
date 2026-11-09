@@ -183,10 +183,8 @@ lemma RelativizedProv.succ {σ : ArithmeticSentence} :
       · exact absurd (by rw [show k = m + 1 by omega]) (hn _ hp θ
           ((le_pair_left θ x).trans (le_pair_right _ _)) x
           ((le_pair_right θ x).trans (le_pair_right _ _)))) ![c]
-    simp only [Fin.Fin1.eq_one, Fin.isValue, Matrix.cons_val_fin_one, Matrix.constant_eq_singleton,
-      Sentence.typed_quote_def, Nat.succ_eq_add_one, Nat.reduceAdd, Rewriting.subst1_bvar0_eq,
-      LCWQIsoGödelQuote.imply, Semiformula.substs_imp, hypothesisFormula] at hno hstd hσ ⊢
-    exact Entailment.C_trans (hstd ⨀ hno) hσ
+    simp [Matrix.constant_eq_singleton] at hno hstd
+    simpa [hypothesisFormula] using Entailment.C_trans (hstd ⨀ hno) hσ
 
 lemma tprovable_hypothesisFormula_of_subset {c d : V} (h : c ⊆ d) :
     T.internalize V ⊢ hypothesisFormula n d 🡒 hypothesisFormula n c := by
@@ -337,7 +335,7 @@ private lemma models_relativizedProvability_iff {V : Type} [ORingStructure V]
 /-- The standard provability predicate implies provability relativized to true $\Pi_n$
 sentences, over the standard model.
 - [Bek99, §3] -/
-theorem models_relativizedProvability_of_standardProvability {σ : ArithmeticSentence}
+lemma models_relativizedProvability_of_standardProvability {σ : ArithmeticSentence}
     (h : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ) :
     ℕ↓[ℒₒᵣ] ⊧ T.relativizedProvability n σ :=
   models_of_provable inferInstance

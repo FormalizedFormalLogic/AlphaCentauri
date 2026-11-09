@@ -6,12 +6,7 @@ public import AlphaCentauri.Schemata.ZRing
 # Models of open induction extending $\mathbb{Z}$-rings
 
 Wilkie's extension theorem: every discretely ordered $\mathbb{Z}$-ring embeds into a discretely
-ordered ring satisfying open induction. In the language of ordered semirings, every model of
-$\mathsf{ZR}$ is a substructure of a model of $\mathsf{IOpen}$.
-
-- [Wil78]
-- [BO96, Theorem 1.2]
-- [Raf10, Wilkie's Extension Theorem]
+ordered ring satisfying open induction.
 -/
 
 @[expose] public section

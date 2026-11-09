@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.ParameterFreeInduction
+public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.PrenexCombination
 public import AlphaCentauri.ToFoundation.Provable
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.PeanoMinus
@@ -153,13 +154,17 @@ lemma exists_inductionImplication (ψ : ℬ[<, ℒₒᵣ].Prenex 𝚺 n ξ (m + 
 
 end inductionImplication
 
-section Kreisel
+section uniformReflection
 
 variable {m : ℕ} {ψ θ : ArithmeticSemisentence (m + 1)}
 
-variable (hθ : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] (x : V) (p : Fin m → V),
-  V ⊧/(x :> p) θ ↔
-    (V ⊧/(0 :> p) ψ → (∀ y, V ⊧/(y :> p) ψ → V ⊧/((y + 1) :> p) ψ) → V ⊧/(x :> p) ψ))
+section
+
+variable (hθ : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] (f : Empty → V) (x : V)
+  (p : Fin m → V), Semiformula.Eval (x :> p) f θ ↔
+    (Semiformula.Eval (0 :> p) f ψ →
+      (∀ y, Semiformula.Eval (y :> p) f ψ → Semiformula.Eval ((y + 1) :> p) f ψ) →
+        Semiformula.Eval (x :> p) f ψ))
 include hθ
 
 private lemma provable_inductionImplication_zero :
@@ -172,8 +177,7 @@ private lemma provable_inductionImplication_zero :
   simp only [models_iff, Semiformula.eval_allClosure]
   intro p
   simp only [Semiformula.eval_rew, Function.comp_def, Rew.subst_bvar, h,
-    show ∀ g : Empty → V, g = Empty.elim from fun _ ↦ funext (·.elim)]
-  erw [hθ]
+    show ∀ g : Empty → V, g = Empty.elim from fun _ ↦ funext (·.elim), hθ]
   intro h₀ _
   exact h₀
 
@@ -190,11 +194,56 @@ private lemma provable_inductionImplication_succ :
   obtain ⟨x, p, rfl⟩ : ∃ x p, e = x :> p := ⟨_, _, (Matrix.cons_head_tail e).symm⟩
   simp only [LogicalConnective.HomClass.map_imply, Semiformula.eval_rew, Function.comp_def,
     Rew.subst_bvar, h, show ∀ g : Empty → V, g = Empty.elim from fun _ ↦ funext (·.elim),
-    LogicalConnective.Prop.arrow_eq]
-  erw [hθ, hθ]
+    LogicalConnective.Prop.arrow_eq, hθ]
   intro hx h₀ hs
   exact hs _ (hx h₀ hs)
 
-end Kreisel
+end
+
+/-- A model of `𝗜𝚺₁` and of uniform prenex $\Pi_{n + 2}$ reflection for `𝗘𝗔` satisfies induction
+for prenex $\Sigma_n$ formulas.
+- [Bek05, Theorem 7] -/
+lemma models_succInd_of_uniformReflection {n : ℕ} {V : Type} [ORingStructure V]
+    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [V↓[ℒₒᵣ] ⊧* 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔]
+    {φ : ArithmeticSemiformula ℕ 1} (hφ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 n φ) :
+    V↓[ℒₒᵣ] ⊧ .univCl (succInd φ) := by
+  obtain ⟨χ, rfl⟩ := hφ
+  set ψ := χ.rew (χ.val.paramSubst ![#0])
+  obtain ⟨θ, hθ, hθψ⟩ := exists_inductionImplication.{0} ψ
+  simp only [models_iff, Semiformula.eval_univCl, succInd]
+  simp only [LogicalConnective.HomClass.map_imply, Semiformula.eval_substs, Semiformula.eval_all,
+    LogicalConnective.Prop.arrow_eq]
+  intro f
+  have hψ (x : V) :
+      Semiformula.Eval (x :> fun i ↦ f i) Empty.elim ψ.val ↔ χ.val.Eval ![x] f :=
+    (χ.val_rew _).symm ▸ Semiformula.eval_toSemisentence_one χ.val x f
+  have hrfn : V ⊧/![] (𝗘𝗔.uniformReflectionSchema θ) :=
+    models_iff.mp <| Semantics.ModelsSet.models _
+      (show _ ∈ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔 from ⟨_, θ, hθ, rfl⟩)
+  intro h₀ hs x
+  have hprov := provable_substNumerals_of_provable_zero_of_provable_succ θ
+    (provable_inductionImplication_zero hθψ) (provable_inductionImplication_succ hθψ) x
+    (fun i ↦ f i)
+  have h := (hθψ V Empty.elim x _).mp ((models_uniformReflectionSchema_iff 𝗘𝗔 θ).mp hrfn _ hprov)
+  simp only [hψ] at h
+  simpa using h (by simpa using h₀) (by simpa using hs)
+
+/-- Uniform prenex $\Pi_{n + 2}$ reflection for `𝗘𝗔` over `𝗜𝚺₁` yields `𝗜𝚺 n`.
+- [Bek05, Theorem 7] -/
+theorem ISigma_weakerThan_ISigma1_union_uniformReflectionOn_Pi (n : ℕ) :
+    𝗜𝚺 n ⪯ 𝗜𝚺₁ ∪ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔 :=
+  weakerThan_of_models.{0} _ _ fun V _ hV ↦ by
+    have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ :=
+      ModelsTheory.of_add_left V 𝗜𝚺₁ (𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔)
+    have : V↓[ℒₒᵣ] ⊧* 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔 :=
+      ModelsTheory.of_add_right V 𝗜𝚺₁ (𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔)
+    simp only [Semantics.ModelsSet.union_iff, InductionScheme]
+    and_intros
+    · infer_instance
+    · apply Semantics.ModelsSet.setOf_iff.mpr
+      rintro _ ⟨φ, hφ, rfl⟩
+      exact models_succInd_of_uniformReflection hφ
+
+end uniformReflection
 
 end FFL.FirstOrder.Arithmetic

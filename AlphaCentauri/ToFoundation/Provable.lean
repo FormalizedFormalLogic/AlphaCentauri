@@ -3,14 +3,17 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import AlphaCentauri.ToFoundation.Syntax
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.PeanoMinus
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.EquationalTheory
 
 @[expose] public section
 /-!
-# Internal provability: universal instantiation and modus ponens
+# Internal provability: universal instantiation, modus ponens and induction
 
-Two generic facts about `Bootstrapping.Provable`: instantiating an internally-provable instance by
-numerals of a universal formula at one more numeral, and modus ponens for arbitrary (not
-necessarily quoted) codes.
+Generic facts about `Bootstrapping.Provable`: instantiating an internally-provable instance by
+numerals of a universal formula at one more numeral, modus ponens for arbitrary (not necessarily
+quoted) codes, and induction on a numeral of a formula whose base case and induction step are
+provable.
 -/
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
@@ -78,5 +81,73 @@ theorem provable_substNumerals_of_provable_allClosure {k : ℕ} (φ : Arithmetic
     exact provable_substNumerals_of_provable_substNumerals_all φ (ih (∀¹ φ) h _) _
 
 end specialize
+
+section induction
+
+open Bootstrapping.Arithmetic
+
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗣𝗔⁻ ⪯ T]
+
+lemma substNumerals_eq_subst {k : ℕ} (φ : ArithmeticSemisentence k) (v : Fin k → V) :
+    substNumerals (⌜φ⌝ : V) v =
+      ((⌜φ⌝ : Semiformula V ℒₒᵣ k).subst fun i ↦ (𝕹 (v i) : Term V ℒₒᵣ)).val := by
+  simp [substNumerals, Sentence.quote_eq]
+  rfl
+
+lemma typed_quote_rew_subst {k j : ℕ} (φ : ArithmeticSemisentence k)
+    (w : Fin k → ArithmeticSemiterm Empty j) :
+    (⌜Rew.subst w ▹ φ⌝ : Semiformula V ℒₒᵣ j) =
+      (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst fun i ↦ ⌜(Rew.emb (w i) : SyntacticSemiterm ℒₒᵣ j)⌝ := by
+  simp [Sentence.typed_quote_def, Rewriting.emb_subst_eq_subst_emb]
+
+/-- If `T` proves the base case `∀ p⃗, φ(0, p⃗)` and the induction step
+`∀ x p⃗, φ(x, p⃗) 🡒 φ(x + 1, p⃗)`, then every instance of `φ` by numerals is internally provable. -/
+theorem provable_substNumerals_of_provable_zero_of_provable_succ {m : ℕ}
+    (φ : ArithmeticSemisentence (m + 1)) (h₀ : T ⊢ ∀¹* (Rew.subst (‘0’ :> fun i ↦ #i) ▹ φ))
+    (hs : T ⊢ ∀¹* (φ 🡒 Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ) ▹ φ)) (x : V) (p : Fin m → V) :
+    Provable T (substNumerals (⌜φ⌝ : V) (x :> p)) := by
+  let Φ : Semiformula V ℒₒᵣ 1 :=
+    (⌜φ⌝ : Semiformula V ℒₒᵣ (m + 1)).subst (Semiterm.bvar 0 :> fun i ↦ 𝕹 (p i))
+  have hΦ (t : Term V ℒₒᵣ) :
+      Φ.subst ![t] = (⌜φ⌝ : Semiformula V ℒₒᵣ (m + 1)).subst (t :> fun i ↦ 𝕹 (p i)) := by
+    simp only [Φ, Semiformula.substs_substs]
+    congr 1
+    funext i
+    cases i using Fin.cases <;> simp
+  have hnum (y : V) : substNumeral Φ.val y = (Φ.subst ![(𝕹 y : Term V ℒₒᵣ)]).val := by
+    simp [substNumeral]
+  have key (y : V) : substNumerals (⌜φ⌝ : V) (y :> p) = substNumeral Φ.val y := by
+    rw [substNumerals_eq_subst, hnum, hΦ]
+    congr 2
+    funext i
+    cases i using Fin.cases <;> simp
+  rw [key]
+  induction x using ISigma1.sigma1_succ_induction
+  · definability
+  case zero =>
+    have h :=
+      provable_substNumerals_of_provable_allClosure _ (internalize_provability (V := V) h₀) p
+    rw [substNumerals_eq_subst, typed_quote_rew_subst, Semiformula.substs_substs] at h
+    rw [hnum, hΦ]
+    convert h using 3
+    funext i
+    cases i using Fin.cases <;> simp
+  case succ y ih =>
+    have h := provable_substNumerals_of_provable_allClosure _ (internalize_provability (V := V) hs)
+      (y :> p)
+    rw [substNumerals_eq_subst] at h
+    have h₁ : T.internalize V ⊢ Φ.subst ![(𝕹 y : Term V ℒₒᵣ)] 🡒 Φ.subst ![𝕹 y + 𝕹 1] := by
+      apply tprovable_iff_provable.mpr
+      convert h using 2
+      rw [hΦ, hΦ, LCWQIsoGödelQuote.imply, Semiformula.substs_imp, typed_quote_rew_subst,
+        Semiformula.substs_substs]
+      congr 2 <;> funext i <;> cases i using Fin.cases <;> simp
+    have h₂ : T.internalize V ⊢ Φ.subst ![(𝕹 y : Term V ℒₒᵣ)] :=
+      tprovable_iff_provable.mpr (by simpa [hnum] using ih)
+    have h₃ := Arithmetic.replace T Φ (𝕹 y + 𝕹 1) (𝕹 (y + 1)) ⨀ Arithmetic.numeral_add T y 1 ⨀
+      (h₁ ⨀ h₂)
+    simpa [hnum] using tprovable_iff_provable.mp h₃
+
+end induction
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

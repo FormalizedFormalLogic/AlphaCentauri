@@ -26,7 +26,8 @@ def contract : {Γ : Polarity} → {s n : ℕ} →
   | Γ, 0, n, φ =>
     bexs ‘#0 + 1’ <| bexs ‘#1 + 1’ <|
       (⟨⟨Rew.embSubsts ![#2, #1, #0] ▹ pairDef.val,
-        (Hierarchy.zero_iff_bounded.mp pairDef.sigma_prop).rew _⟩⟩ : ℬ[<, ℒₒᵣ].Prenex Γ 0 ξ (n + 3)) ⋏
+          (Hierarchy.zero_iff_bounded.mp pairDef.sigma_prop).rew _⟩⟩ :
+        ℬ[<, ℒₒᵣ].Prenex Γ 0 ξ (n + 3)) ⋏
         φ.rew (Rew.subst (#1 :> #0 :> fun i ↦ #i.succ.succ.succ))
   | 𝚺, _ + 1, _, φ =>
     ((contract (φ.sigmaInv.rew (Rew.subst (#2 :> #0 :> #1 :> fun i ↦ #i.succ.succ.succ)))).rew
@@ -74,7 +75,14 @@ lemma eval_contract {Γ : Polarity} {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex �
         ((#1 :> #0 :> fun i ↦ #i.succ.succ.succ : Fin (n + 2) → ArithmeticSemiterm ξ (n + 3)) i)) =
         a :> b :> e :=
       funext <| Fin.cases (by simp) <| Fin.cases (by simp) (by simp)
-    simp [contract, Prenex.val, Arithmetic.lt_succ_iff_le]
+    simp only [val, Nat.add_zero, contract, and_zero, bexs_zero, Rew.finitary2, Rew.bShift_bvar,
+      Fin.succ_one_eq_two, Rew.finitary0, Fin.succ_zero_eq_one, Polarity.quantItr_zero,
+      Semiformula.eval_bexs, Semiformula.eval_operator, Matrix.comp₂, Semiterm.val_bvar,
+      Matrix.cons_val_zero, Semiterm.val_operator, Matrix.cons_val_one, Matrix.comp₀,
+      Tarski.Structure.numeral_eq_numeral, ORingStructure.one_eq_one, Tarski.Structure.Add.add,
+      Tarski.Structure.lt_iff_lt, Matrix.cons_val_fin_one, Arithmetic.lt_succ_iff_le,
+      Matrix.cons_app_two, LogicalConnective.HomClass.map_and, Semiformula.eval_embSubsts,
+      Matrix.comp₃, HierarchySymbol.Defined.iff, LogicalConnective.Prop.and_eq]
     simp only [Prenex.rew, Rew.qpow_zero, Bounding.Semiformula.val_rew, Semiformula.eval_rew,
       Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar, h]
     constructor

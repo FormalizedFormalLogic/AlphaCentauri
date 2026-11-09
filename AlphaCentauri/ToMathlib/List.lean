@@ -23,11 +23,7 @@ lemma subset_iff_getD : t ⊆ l ↔ ∀ i < t.length, ∃ j < l.length, t.getD i
   rw [subset_def, forall_mem_iff_getD d]
   refine forall₂_congr fun i hi ↦ ?_
   simp only [mem_iff_getElem]
-  constructor
-  · rintro ⟨j, hj, h⟩
-    exact ⟨j, hj, by simpa [hi, hj] using h.symm⟩
-  · rintro ⟨j, hj, h⟩
-    exact ⟨j, hj, by simpa [hi, hj] using h.symm⟩
+  constructor <;> rintro ⟨j, hj, h⟩ <;> exact ⟨j, hj, by simpa [hi, hj] using h.symm⟩
 
 lemma sortedLT_iff_getD_lt_getD [Preorder α] :
     l.SortedLT ↔ ∀ j < l.length, ∀ i < j, l.getD i d < l.getD j d := by

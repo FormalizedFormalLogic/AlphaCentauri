@@ -60,8 +60,10 @@ lemma exists_finset_iff_increasingList {e : ℕ} {y : List ℕ} {t : ℕ} :
     rw [← List.sortedLT_iff_getD_lt_getD] at hinc
     rw [← List.subset_iff_getD] at hsub
     use l.toFinset
-    refine ⟨fun x hx ↦ by simpa using hsub (by simpa using hx),
-      List.toFinset_card_of_nodup hinc.nodup, ?_⟩
+    and_intros
+    · intro x hx
+      simpa using hsub (by simpa using hx)
+    · exact List.toFinset_card_of_nodup hinc.nodup
     rw [(List.toFinset_sort _ hinc.nodup).mpr]
     exact (List.sortedLT_iff_pairwise.mp hinc).imp le_of_lt
   · rintro ⟨s, hs, rfl, hl⟩
@@ -118,17 +120,24 @@ lemma nat_models_diagonalRamseyTwoColours_iff : ℕ↓[ℒₒᵣ] ⊧ diagonalRa
         obtain rfl : a = s := by simpa using congrArg List.toFinset (encode_injective h)
         exact hFa
       · intro h
-        exact ⟨s, hs, h, rfl⟩
+        use s
+        exact ⟨hs, h, rfl⟩
     obtain ⟨y, hinc, hlen, hmin, hlt, hhom⟩ := H (∑ i ∈ S, 2 ^ i)
     obtain ⟨y, rfl⟩ : ∃ l : List ℕ, encode l = y := ⟨_, Denumerable.encode_ofNat y⟩
     simp only [len_encode_list, nth_encode_list, ← List.sortedLT_iff_getD_lt_getD,
       forall_increasingList_iff] at hinc hlen hmin hlt hhom
     replace hlt := (List.forall_mem_iff_getD (P := (· < n)) 0).mpr hlt
     have hcard : y.toFinset.card = y.length := List.toFinset_card_of_nodup hinc.nodup
-    refine ⟨y.toFinset, fun x hx ↦ by simpa using hlt x (by simpa using hx), by omega,
-      ⟨y.getD 0 0, ?_, by omega⟩, ?_⟩
-    · rw [List.mem_toFinset, List.getD_eq_getElem _ _ (by omega)]
-      exact List.getElem_mem _
+    use y.toFinset
+    and_intros
+    · intro x hx
+      simpa using hlt x (by simpa using hx)
+    · omega
+    · use y.getD 0 0
+      and_intros
+      · rw [List.mem_toFinset, List.getD_eq_getElem _ _ (by omega)]
+        exact List.getElem_mem _
+      · omega
     · rcases hhom with hhom | hhom
       · right
         intro a han hae haY
@@ -141,11 +150,14 @@ lemma nat_models_diagonalRamseyTwoColours_iff : ℕ↓[ℒₒᵣ] ⊧ diagonalRa
       H fun s ↦ if encode (s.1.sort (· ≤ ·)) ∈ F then 1 else 0
     use encode Y.sort
     simp only [len_encode_list, nth_encode_list, forall_increasingList_iff, sort_toFinset]
-    refine ⟨(List.sortedLT_iff_getD_lt_getD 0).mp (sortedLT_sort Y), by simpa using hcard, ?_,
-      (List.forall_mem_iff_getD (P := (· < n)) 0).mp fun x hx ↦ by
-        simpa using hYn (by simpa using hx), ?_⟩
+    and_intros
+    · exact (List.sortedLT_iff_getD_lt_getD 0).mp (sortedLT_sort Y)
+    · simpa using hcard
     · rw [length_sort, List.getD_eq_getElem _ _ (by rw [length_sort]; omega), sorted_zero_eq_min']
       exact (min'_le Y x hxY).trans hx
+    · apply (List.forall_mem_iff_getD (P := (· < n)) 0).mp
+      intro x hx
+      simpa using hYn (by simpa using hx)
     · rcases hhom with hhom | hhom
       · right
         intro s hsY hse

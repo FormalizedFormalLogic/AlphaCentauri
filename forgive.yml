@@ -183,9 +183,12 @@ declaration:
   FFL.FirstOrder.Arithmetic.not_provable_bezout_IOpen_greatestCommonDivisor:
     forgive:
       - FFL.FirstOrder.Arithmetic.not_provable_bezout_IOpen_greatestCommonDivisor
-  FFL.FirstOrder.Arithmetic.IOpen.not_finiteAxiomatizable:
+  HahnSeries.isRealClosed_lex:
     forgive:
-      - FFL.FirstOrder.Arithmetic.IOpen.not_finiteAxiomatizable
+      - HahnSeries.isRealClosed_lex
+  IsRealClosed.exists_mem_Ioo_isRoot:
+    forgive:
+      - IsRealClosed.exists_mem_Ioo_isRoot
   FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen
@@ -194,3 +197,15 @@ declaration:
   FFL.FirstOrder.Arithmetic.exists_prime_gt:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
+  HahnSeries.factorialIntegerPartSubring.induction:
+    forgive:
+      - HahnSeries.isRealClosed_lex
+      - IsRealClosed.exists_mem_Ioo_isRoot
+  HahnSeries.factorialIntegerPartSubring.models:
+    forgive:
+      - HahnSeries.isRealClosed_lex
+      - IsRealClosed.exists_mem_Ioo_isRoot
+  FFL.FirstOrder.Arithmetic.IOpen.not_finiteAxiomatizable:
+    forgive:
+      - HahnSeries.isRealClosed_lex
+      - IsRealClosed.exists_mem_Ioo_isRoot

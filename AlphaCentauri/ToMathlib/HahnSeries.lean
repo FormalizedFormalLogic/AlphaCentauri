@@ -1,8 +1,13 @@
 module
 
+public import AlphaCentauri.ToMathlib.BoundedDegreeOpenInduction
+public import AlphaCentauri.ToMathlib.RealClosedField
+public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 public import Mathlib.Algebra.Polynomial.Lifts
 public import Mathlib.Algebra.Polynomial.Roots
-public import Mathlib.Algebra.Order.Archimedean.Real.Basic
+public import Mathlib.Algebra.Ring.Subring.Order
+public import Mathlib.Data.Nat.Prime.Factorial
+public import Mathlib.Data.Nat.Prime.Infinite
 public import Mathlib.FieldTheory.IsRealClosed.Basic
 public import Mathlib.Order.Int.LeastGreatest
 public import Mathlib.RingTheory.HahnSeries.Lex
@@ -380,3 +385,70 @@ lemma mul_ne_neg_one_of_mem_powDenominators {p : ℕ} (hp : p.Prime) (hpn : ¬p 
   exact hpn ((Nat.prime_iff.mp hp).dvd_of_dvd_pow this)
 
 end AddSubgroup
+
+namespace HahnSeries
+
+open OpenPredicate
+
+variable (N : ℕ)
+
+/-- The Hahn series supported in the non-positive part of $\mathbb{Z}[1/N!]$ with an integer
+constant coefficient. -/
+abbrev factorialIntegerPartSubring : Subring (Lex ℝ⟦ℚ⟧) :=
+  integerPartSubring (AddSubgroup.powDenominators N.factorial)
+
+instance : DiscretelyOrdered (factorialIntegerPartSubring N) where
+  one_le_of_pos x hx := one_le_of_mem_integerPartSubring x.2 hx
+
+/-- `factorialIntegerPartSubring N` satisfies induction for the predicates determined by the signs
+of polynomials of degree at most `N`.
+- [Kov24, Theorem 2.2] -/
+theorem factorialIntegerPartSubring.induction {P : factorialIntegerPartSubring N → Prop}
+    (hP : DeterminedBySigns N P) (h0 : P 0) (hs : ∀ x, 0 ≤ x → P x → P (x + 1)) :
+    ∀ x, 0 ≤ x → P x := by
+  have := isRealClosed_lex
+  apply DeterminedBySigns.induction (factorialIntegerPartSubring N).subtype (fun _ _ h ↦ h) _ _ hP
+    h0 hs
+  · intro f a b hab ha hb
+    obtain ⟨c, ⟨hc₁, hc₂⟩, hc⟩ := IsRealClosed.exists_mem_Ioo_isRoot hab ha hb
+    exact ⟨c, hc₁, hc₂, hc⟩
+  · intro f hf hfN α hα
+    have hαG := mem_supportedIn_of_isRoot (N := N)
+      (fun d hd hdN q hq ↦ AddSubgroup.mem_powDenominators_of_mul_mem (Nat.dvd_factorial hd hdN) hq)
+      ((Polynomial.map_ne_zero_iff (factorialIntegerPartSubring N).subtype_injective).mpr hf)
+      (natDegree_map_le.trans hfN)
+      (fun i ↦ by
+        rw [coeff_map]
+        exact integerPartSubring_le_supportedIn (f.coeff i).2) hα
+    obtain ⟨r, hr, hrα⟩ := exists_mem_integerPartSubring_le_lt hαG
+    exact ⟨⟨r, hr⟩, hrα⟩
+
+/-- `factorialIntegerPartSubring N` does not satisfy open induction: the series `single (-1) 1` has
+no integer `p`-th root for a prime `p > N`.
+- [Kov24, Theorem 2.2] -/
+theorem factorialIntegerPartSubring.not_openInduction :
+    ¬OpenInduction (factorialIntegerPartSubring N) := by
+  intro hind
+  obtain ⟨p, hNp, hp⟩ := Nat.exists_infinite_primes (N + 1)
+  have hpG (q : ℚ) (hq : q ∈ AddSubgroup.powDenominators N.factorial) : (p : ℚ) * q ≠ -1 :=
+    AddSubgroup.mul_ne_neg_one_of_mem_powDenominators hp
+      (fun h ↦ by have := (Nat.Prime.dvd_factorial hp).mp h; omega) hq
+  set a : factorialIntegerPartSubring N := ⟨toLex (single (-1 : ℚ) (1 : ℝ)), fun g hg ↦ by
+    simp only [ofLex_toLex, support_single_of_ne one_ne_zero, Set.mem_singleton_iff] at hg
+    subst hg
+    exact ⟨AddSubgroup.neg_one_mem_powDenominators, by norm_num⟩, 0, by simp⟩
+  have ha : (1 : factorialIntegerPartSubring N) < a := by
+    change (1 : Lex ℝ⟦ℚ⟧) < toLex (single (-1 : ℚ) (1 : ℝ))
+    exact lt_of_order_lt (pos_of_coeff (i := -1) (fun j hj ↦ by simp [hj.ne])
+      (by simp)) one_pos (by simp)
+  by_cases hstep : ∀ x : factorialIntegerPartSubring N, 0 ≤ x → x ^ p ≤ a → (x + 1) ^ p ≤ a
+  · have := hind (fun w ↦ w 0 ^ p ≤ a) (by is_open) (by simp [zero_pow hp.ne_zero]; linarith)
+      (fun x hx h ↦ hstep x hx h) a (by linarith)
+    simp only [Matrix.cons_val_zero] at this
+    have : a < a ^ p := lt_self_pow₀ ha hp.one_lt
+    linarith
+  · push Not at hstep
+    obtain ⟨x, hx0, hx₁, hx₂⟩ := hstep
+    exact not_pow_le_lt_add_one_pow hpG x.2 hx0 ⟨hx₁, hx₂⟩
+
+end HahnSeries

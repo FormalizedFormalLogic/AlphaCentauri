@@ -15,6 +15,7 @@ public import AlphaCentauri.Bootstrapping.Interpretability.Translation
 public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
+public import AlphaCentauri.Bootstrapping.PartialTruth.Complexity
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
 public import AlphaCentauri.Bootstrapping.Proof.AxiomReplacement
 public import AlphaCentauri.Bootstrapping.Proof.CutElimination

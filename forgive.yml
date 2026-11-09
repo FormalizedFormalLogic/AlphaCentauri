@@ -145,7 +145,7 @@ declaration:
       - FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE2
   FFL.FirstOrder.Arithmetic.IE1_strictlyWeakerThan_ISigma0:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [dA05, §8].
+      # An open problem, not a theorem awaiting formalization: [DAq05, §8].
       - FFL.FirstOrder.Arithmetic.IE1_strictlyWeakerThan_ISigma0
   FFL.FirstOrder.Arithmetic.IE_strictlyWeakerThan_IE_succ:
     forgive:

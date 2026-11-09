@@ -269,6 +269,13 @@ Poh09:
     type: Anthology
     title: Universitext
 
+Qui80:
+  type: Thesis
+  title: "Some problems in logic: Applications of Kripke's notion of fulfilment"
+  author: Quinsey, Joseph E.
+  date: 1980
+  organization: University of Oxford
+
 Ros84:
   type: Book
   title: "Subrecursion: Functions and Hierarchies"

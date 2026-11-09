@@ -123,6 +123,7 @@ public import AlphaCentauri.ToFoundation.SubstInversion
 public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.Theory
 public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToMathlib.Combinatorics.Ramsey
 public import AlphaCentauri.ToMathlib.EisensteinInteger
 public import AlphaCentauri.ToMathlib.ElementaryClosure
 public import AlphaCentauri.ToMathlib.FLT3.Descent

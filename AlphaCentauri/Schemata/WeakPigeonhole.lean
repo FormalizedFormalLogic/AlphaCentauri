@@ -22,9 +22,9 @@ namespace FFL.FirstOrder.Arithmetic
 
 noncomputable section
 
-namespace WeakPigeonhole
-
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
+
+namespace WeakPigeonhole
 
 variable (R : V → V → Prop) (a : V)
 
@@ -61,6 +61,11 @@ lemma IsPath.ext_lt {d s c τ i : V} (hc : c < a) (h : IsPath R a d s c τ) (hi 
   · rwa [h.1]
   · exact (h.2 j (succ_le_iff_lt.mp hi)).1
 
+lemma add_mul_lt_mul_self {u v : V} (hu : u < a) (hv : v < a) : u + a * v < a * a := calc
+  u + a * v < a + a * v := by simpa using hu
+  _ = a * (v + 1) := by rw [mul_add, mul_one, add_comm]
+  _ ≤ a * a := mul_le_mul_left (succ_le_iff_lt.mpr hv)
+
 section injective
 
 variable (hinj : ∀ x < a * a, ∀ x' < a * a, ∀ y < a, R x y → R x' y → x = x')
@@ -68,11 +73,6 @@ include hinj
 
 lemma IsChild.unique {β e x x' : V} (he : e < a) (hx : x < a) (hx' : x' < a)
     (h : IsChild R a β e x) (h' : IsChild R a β e x') : x = x' := by
-  have hlt : ∀ {u v : V}, u < a → v < a → u + a * v < a * a := by
-    intro u v hu hv
-    calc u + a * v < a + a * v := by simpa using hu
-      _ = a * (v + 1) := by rw [mul_add, mul_one, add_comm]
-      _ ≤ a * a := mul_le_mul_left (succ_le_iff_lt.mpr hv)
   have hmod : ∀ {u v : V}, u < a → (u + a * v) % a = u := by
     intro u v hu
     rw [add_comm, mul_comm, mod_mul_add_of_lt _ _ hu]
@@ -81,11 +81,11 @@ lemma IsChild.unique {β e x x' : V} (he : e < a) (hx : x < a) (hx' : x' < a)
     rw [add_comm, mul_comm, div_mul_add _ _ hu]
   rcases h with ⟨rfl, w, hw, hR⟩ | ⟨rfl, w, hw, hR⟩ <;>
     rcases h' with ⟨h0, w', hw', hR'⟩ | ⟨h1, w', hw', hR'⟩
-  · have := hinj _ (hlt hx hw) _ (hlt hx' hw') e he hR hR'
+  · have := hinj _ (add_mul_lt_mul_self hx hw) _ (add_mul_lt_mul_self hx' hw') e he hR hR'
     rw [← hmod (v := w) hx, ← hmod (v := w') hx', this]
   · simp at h1
   · simp at h0
-  · have := hinj _ (hlt hw hx) _ (hlt hw' hx') e he hR hR'
+  · have := hinj _ (add_mul_lt_mul_self hw hx) _ (add_mul_lt_mul_self hw' hx') e he hR hR'
     rw [← hdiv (v := x) hw, ← hdiv (v := x') hw', this]
 
 lemma IsPath.ext_eq {d s s' c τ : V} (hc : c < a) (h : IsPath R a d s c τ)
@@ -153,8 +153,146 @@ lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c <
       rw [hext (j + 1) (succ_le_iff_lt.mpr hj), hext j hj.le, fbit_two_mul_add_succ hβ]
       exact hs'.2 j hj
 
+lemma bexp_succ {b x : V} (h : x + 1 < ‖b‖) : bexp b (x + 1) = 2 * bexp b x :=
+  bexp_eq_of_exp h (exp_bexp_of_lt (lt_of_le_of_lt le_self_add h)).succ
+
+lemma exists_root (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a) (htot : ∀ x < a * a, ∃ y < a, R x y)
+    {T : V → V → Prop} (hT : 𝚺ᴬ₀.DefinableRel T) (hTa : ∀ σ, ∃ e < a, T σ e) :
+    ∀ d ≤ ‖a‖, ∀ ρ < bexp (2 * a) (‖a‖ - d), ∃ c < a, ∀ τ < bexp (2 * a) d,
+      ∃ e < a, T (ρ + bexp (2 * a) (‖a‖ - d) * τ) e ∧ IsLeaf R a d c τ e := by
+  have hI : ‖2 * a‖ = ‖a‖ + 1 := length_two_mul_of_pos ha
+  intro d
+  induction d using ISigma0.succ_induction
+  · have := definable_isLeaf (a := a) hR
+    definability
+  case zero =>
+    intro _ ρ _
+    obtain ⟨e, he, hTe⟩ := hTa ρ
+    have hext : Nuon.ext a e 0 = e := Nuon.ext_zero_eq_self_of_le (length_monotone he.le)
+    use e
+    constructor
+    · exact he
+    · intro τ hτ
+      have hτ0 : τ = 0 := by simpa [bexp_pos_zero (show 0 < 2 * a by simpa using ha)] using hτ
+      subst hτ0
+      use e
+      and_intros
+      · exact he
+      · simpa using hTe
+      use e
+      and_intros
+      · calc e < a := he
+          _ < a ⨳ 1 := lt_smash_one_right a
+          _ ≤ (2 * a) ⨳ a := smash_monotone (by simp) (pos_iff_one_le.mp ha)
+      · exact hext
+      · intro i hi
+        simp at hi
+      · exact hext
+  case succ d IH =>
+    intro hd ρ hρ
+    have hd' : d < ‖a‖ := succ_le_iff_lt.mp hd
+    obtain ⟨k, hk⟩ := le_iff_exists_add.mp hd
+    have hP : bexp (2 * a) (‖a‖ - d) = 2 * bexp (2 * a) (‖a‖ - (d + 1)) := by
+      have : ‖a‖ - d = ‖a‖ - (d + 1) + 1 := by
+        rw [hk, add_tsub_cancel_left, add_assoc, add_tsub_cancel_left, add_comm]
+      rw [this, bexp_succ (by rw [hI, ← this]; exact lt_succ_iff_le.mpr (sub_le_self _ _))]
+    have hQ : bexp (2 * a) (d + 1) = 2 * bexp (2 * a) d := bexp_succ (by simpa [hI] using hd')
+    set p := bexp (2 * a) (‖a‖ - (d + 1))
+    obtain ⟨c₀, hc₀, H₀⟩ := IH hd'.le ρ (by rw [hP, two_mul]; exact lt_of_lt_of_le hρ le_self_add)
+    obtain ⟨c₁, hc₁, H₁⟩ := IH hd'.le (ρ + p) (by rw [hP, two_mul]; simpa using hρ)
+    obtain ⟨c, hc, hRc⟩ := htot (c₀ + a * c₁) (add_mul_lt_mul_self hc₀ hc₁)
+    use c
+    constructor
+    · exact hc
+    · intro τ' hτ'
+      have hτ : τ' / 2 < bexp (2 * a) d := by
+        by_contra! h
+        have : 2 * bexp (2 * a) d ≤ τ' := calc
+          2 * bexp (2 * a) d ≤ 2 * (τ' / 2) := mul_le_mul_left h
+          _ ≤ τ' := le_self_add.trans_eq (div_add_mod τ' 2)
+        exact absurd hτ' (not_lt.mpr (hQ ▸ this))
+      rw [← div_add_mod τ' 2]
+      rcases mod_two τ' with h | h <;> rw [h]
+      · obtain ⟨e, he, hTe, hl⟩ := H₀ (τ' / 2) hτ
+        have heq : ρ + p * (2 * (τ' / 2) + 0) = ρ + bexp (2 * a) (‖a‖ - d) * (τ' / 2) := by
+          rw [hP]
+          grind
+        use e
+        and_intros
+        · exact he
+        · rwa [heq]
+        · exact hl.cons ha hd' hc hc₀ (by simp) (Or.inl ⟨rfl, c₁, hc₁, hRc⟩)
+      · obtain ⟨e, he, hTe, hl⟩ := H₁ (τ' / 2) hτ
+        have heq : ρ + p * (2 * (τ' / 2) + 1) = ρ + p + bexp (2 * a) (‖a‖ - d) * (τ' / 2) := by
+          rw [hP]
+          grind
+        use e
+        and_intros
+        · exact he
+        · rwa [heq]
+        · exact hl.cons ha hd' hc hc₁ one_lt_two (Or.inr ⟨rfl, c₀, hc₀, hRc⟩)
+
+lemma definable_diagonal (hR : 𝚺ᴬ₀.DefinableRel R) :
+    𝚺ᴬ₀.DefinableRel fun σ e ↦
+      (IsLeaf R a ‖a‖ σ σ 0 ∧ e = 1) ∨ (¬IsLeaf R a ‖a‖ σ σ 0 ∧ e = 0) := by
+  have := definable_isLeaf (a := a) hR
+  definability
+
 end WeakPigeonhole
 
+open WeakPigeonhole in
+/-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
+of $a^2$ into $a$, for $a > 1$.
+- [PWW88, Theorem 1] -/
+theorem weakPigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {a : V} (ha : 1 < a)
+    (total : ∀ x < a * a, ∃ y < a, R x y) :
+    ∃ x < a * a, ∃ x' < a * a, ∃ y < a, x ≠ x' ∧ R x y ∧ R x' y := by
+  by_contra! hne
+  have hinj : ∀ x < a * a, ∀ x' < a * a, ∀ y < a, R x y → R x' y → x = x' := by
+    intro x hx x' hx' y hy h h'
+    by_contra hxx
+    exact hne x hx x' hx' y hy hxx h h'
+  have ha0 : 0 < a := lt_trans zero_lt_one ha
+  have hT := definable_diagonal (a := a) hR
+  have hTa : ∀ σ, ∃ e < a,
+      (IsLeaf R a ‖a‖ σ σ 0 ∧ e = 1) ∨ (¬IsLeaf R a ‖a‖ σ σ 0 ∧ e = 0) := by
+    intro σ
+    by_cases h : IsLeaf R a ‖a‖ σ σ 0
+    · use 1
+      constructor
+      · exact ha
+      · exact Or.inl ⟨h, rfl⟩
+    · use 0
+      constructor
+      · exact ha0
+      · exact Or.inr ⟨h, rfl⟩
+  obtain ⟨c, hc, H⟩ := exists_root hR ha0 total hT hTa ‖a‖ le_rfl 0 (by simp [ha0])
+  have hcK : c < bexp (2 * a) ‖a‖ :=
+    hc.trans (lt_bexp_len (by rw [length_two_mul_of_pos ha0]; exact lt_add_one _))
+  obtain ⟨e, -, hTe, hl⟩ := H c hcK
+  have h0 : bexp (2 * a) (‖a‖ - ‖a‖) = 1 := by simp [ha0]
+  rw [h0, one_mul, zero_add] at hTe
+  rcases hTe with ⟨h, rfl⟩ | ⟨h, rfl⟩
+  · exact one_ne_zero (hl.unique hinj hc h)
+  · exact h hl
+
 end
+
+/-- $\mathsf{I}\Delta_0 + \Omega_1$ proves the weak pigeonhole principle for $\Delta_0$ formulas.
+- [PWW88, Theorem 1] -/
+theorem WeakPigeonholeOnPrenexHierarchy_weakerThan_ISigma0_union_Omega1 :
+    𝗪𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀ ∪ 𝝮₁ := by
+  have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀ ∪ 𝝮₁ :=
+    Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) inferInstance
+  exact weakerThan_of_models.{0} _ _ fun V _ _ ↦ by
+    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
+    refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
+    rintro _ ⟨φ, hφ, rfl⟩
+    apply (models_weakPigeonholeAxiom_iff φ).mpr
+    intro f a ha total
+    apply weakPigeonhole _ ha total
+    exact HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 0) (Rew.rewriteMap f ▹ φ)
+      (Bounding.Hierarchy.rew _ (Bounding.PrenexHierarchy.zero_iff.mp hφ))
+      fun v ↦ by simp [Semiformula.eval_rewriteMap, ← Matrix.fun_eq_vec_two]
 
 end FFL.FirstOrder.Arithmetic

@@ -54,6 +54,7 @@ public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.InjectiveEnumeration
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
+public import AlphaCentauri.NumberTheory.EuclideanDivision
 public import AlphaCentauri.NumberTheory.FLT3
 public import AlphaCentauri.NumberTheory.Primes
 public import AlphaCentauri.NumberTheory.QuadraticResidue

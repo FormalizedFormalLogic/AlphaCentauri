@@ -210,6 +210,14 @@ Jer21:
   organization: Institute of Mathematics, Czech Academy of Sciences
   url: https://users.math.cas.cz/~jerabek/papers/dsc.pdf
 
+Kat26b:
+  type: Article
+  title: Equivalence of restricted and full division
+  author: Kato, Naoya
+  date: 2026
+  serial-number:
+    arxiv: "2610.24976"
+
 Kay91:
   type: Book
   title: Models of Peano Arithmetic
@@ -345,6 +353,14 @@ Tow20:
   date: 2020
   url: https://www.sas.upenn.edu/~htowsner/GoodsteinsTheorem.pdf
   note: Undated; the PDF is dated 2020
+
+Vis26:
+  type: Article
+  title: From numbers to container strings
+  author: Visser, Albert
+  date: 2026
+  serial-number:
+    arxiv: "2411.15873"
 
 vO99:
   type: Misc

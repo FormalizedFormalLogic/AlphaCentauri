@@ -58,6 +58,20 @@ BW87:
       title: Contemporary Mathematics
       volume: 65
 
+Bek05:
+  type: Article
+  title: Reflection principles and provability algebras in formal arithmetic
+  author: Beklemishev, Lev D.
+  page-range: 197-268
+  date: 2005
+  serial-number:
+    doi: "10.1070/RM2005v060n02ABEH000823"
+  parent:
+    type: Periodical
+    title: Russian Mathematical Surveys
+    volume: 60
+    issue: 2
+
 Bek99:
   type: Article
   title: Parameter free induction and provably total computable functions
@@ -224,6 +238,20 @@ Kay91:
     type: Anthology
     title: Oxford Logic Guides
     volume: 15
+
+Lei83:
+  type: Article
+  title: The optimality of induction as an axiomatization of arithmetic
+  author: Leivant, Daniel
+  page-range: 182-184
+  date: 1983
+  serial-number:
+    doi: "10.2307/2273332"
+  parent:
+    type: Periodical
+    title: The Journal of Symbolic Logic
+    volume: 48
+    issue: 1
 
 Lin97:
   type: Book

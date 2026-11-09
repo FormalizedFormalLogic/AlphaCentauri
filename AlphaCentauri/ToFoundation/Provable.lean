@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
+public import AlphaCentauri.ToFoundation.Syntax
 
 @[expose] public section
 /-!
@@ -43,14 +44,29 @@ open Bootstrapping.Arithmetic
 
 variable {T : ArithmeticTheory} [T.Δ₁]
 
-/-- Instantiating an internally-provable `∀¹ φ` at the numeral for `x`. -/
-theorem provable_substNumeral_of_provable_quote_all (φ : ArithmeticSemisentence 1)
-    (h : Provable T (⌜∀¹ φ⌝ : V)) (x : V) : Provable T (substNumeral (⌜φ⌝ : V) x) := by
-  have h1 : T.internalize V ⊢ (⌜∀¹ φ⌝ : Formula V ℒₒᵣ) :=
-    tprovable_tquote_iff_provable_quote_sentence.mpr h
-  have h2 : T.internalize V ⊢ ∀¹ (⌜φ⌝ : Semiformula V ℒₒᵣ 1) := by simpa using h1
-  have h3 := TProof.specialize! h2 (𝕹 x)
-  simpa [substNumeral, Sentence.quote_eq] using tprovable_iff_provable.mp h3
+@[simp] lemma substNumerals_quote_of_isEmpty (σ : ArithmeticSentence) (v : Fin 0 → V) :
+    substNumerals (⌜σ⌝ : V) v = ⌜σ⌝ := by
+  simpa [Matrix.empty_eq] using substNumerals_app_quote (V := V) σ ![]
+
+/-- Instantiating an internally-provable instance by numerals of `∀¹ φ` at one more numeral. -/
+theorem provable_substNumerals_of_provable_substNumerals_all {m : ℕ}
+    (φ : ArithmeticSemisentence (m + 1)) {v : Fin m → V}
+    (h : Provable T (substNumerals (⌜∀¹ φ⌝ : V) v)) (x : V) :
+    Provable T (substNumerals (⌜φ⌝ : V) (x :> v)) := by
+  let w : V := matrixToVec fun i ↦ numeral (v i)
+  have hw : IsSemitermVec ℒₒᵣ (m : V) 0 w :=
+    SemitermVec.isSemitermVec (V := V) (L := ℒₒᵣ) (k := m) (n := 0) fun i ↦ 𝕹 (v i)
+  have hφ : IsSemiformula ℒₒᵣ (m + 1 : V) (⌜φ⌝ : V) := by
+    simpa using Sentence.quote_isSemiformula (V := V) φ
+  let ψ : Semiformula V ℒₒᵣ 1 :=
+    ⟨subst ℒₒᵣ (qVec ℒₒᵣ w) ⌜φ⌝, by simpa using hφ.subst hw.qVec⟩
+  have h₁ : T.internalize V ⊢ ∀¹ ψ :=
+    tprovable_iff_provable.mpr (by simpa [ψ, w, substNumerals] using h)
+  have h₂ := tprovable_iff_provable.mp (TProof.specialize! h₁ (𝕹 x))
+  have e := substs1_subst_qVec hw hφ (t := numeral x) (by simp)
+  simp only [substs1] at e
+  simp only [Semiformula.val_substs, ψ, SemitermVec.val_succ] at h₂
+  simpa [e, w, substNumerals, Matrix.vecHead, Matrix.vecTail, Function.comp_def] using h₂
 
 end specialize
 

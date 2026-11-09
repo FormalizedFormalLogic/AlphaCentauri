@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.ToFoundation.Hierarchy
-public import Foundation.FirstOrder.Arithmetic.Collection.Basic
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-!
 # Elementary substructures
@@ -118,11 +118,76 @@ theorem SigmaElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M} (hι : Si
   simpa [models_iff] using h ((PeanoMinus.prenexBlock σ hσ).rew Rew.emb) rfl ![] (fun _ ↦ 0)
     (by simpa [models_iff] using h₁)
 
+namespace Cut
+
+variable {j : ℕ} [M↓[ℒₒᵣ] ⊧* 𝗜𝚺j] (I : Cut M) [I.Closed]
+
+lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
+    (hj : SigmaElementary I.endExtension.emb j) {ψ : ArithmeticSemiformula ℕ 3}
+    (hψ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 j ψ) (e : ℕ → I.carrier) (a : I.carrier)
+    (h : ∀ x < a, ∃ y z, ψ.Eval ![z, x, y] e) :
+    ∃ b, ∀ x < a, ∃ y < b, ∃ z, ψ.Eval ![z, x, y] e := by
+  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗜𝚺j)
+  obtain ⟨c₀, hc₀⟩ := hI
+  let _ : I.carrier ⊂ₑ M := { I.endExtension with
+    not_surjective h := hc₀ <| by obtain ⟨x, rfl⟩ := h c₀; exact x.2 }
+  have hψ' (x y z : I.carrier) :
+      ψ.Eval ![z.1, x.1, y.1] (I.endExtension.emb ∘ e) ↔ ψ.Eval ![z, x, y] e := by
+    simpa [Matrix.comp_vecCons''] using hj le_rfl hψ ![z, x, y] e
+  have hlt {y c : M} (hy : y ∈ I.carrier) (hc : c ∉ I.carrier) : y < c := by
+    by_contra! h₁
+    exact hc <| h₁.lt_or_eq.elim (I.mem_of_lt · hy) (· ▸ hy)
+  let Θ : ArithmeticSemiformula ℕ 1 :=
+    ((((Rew.rewriteMap Nat.succ ▹ ψ) ⇜ ![#0, #2, #1]).bexsLT #2).bexsLT #1).ballLT &0
+  let g : ℕ → M := a.1 :>ₙ (Subtype.val ∘ e)
+  have hΘ (c : M) : Θ.Eval ![c] g ↔
+      ∀ x < a.1, ∃ y < c, ∃ z < c, ψ.Eval ![z, x, y] fun i ↦ (e i).1 := by
+    simp [Θ, g, eval_rewriteMap, Matrix.comp_vecCons'']
+  have h₁ {c : M} (hc : c ∉ I.carrier) : Θ.Eval ![c] g := by
+    apply (hΘ c).mpr
+    intro x hx
+    obtain ⟨y, z, h₂⟩ := h ⟨x, I.mem_of_lt hx a.2⟩ hx
+    use y
+    and_intros
+    · exact hlt y.2 hc
+    use z
+    and_intros
+    · exact hlt z.2 hc
+    exact (hψ' _ y z).mpr h₂
+  obtain ⟨b, hb, h₂⟩ : ∃ b ∈ I.carrier, Θ.Eval ![b] g := by
+    by_contra! h₂
+    obtain ⟨c, hc, h₃⟩ := overspill (M := I.carrier) 𝚺 j (φ := ∼Θ)
+      (by simp [Θ, hψ.hierarchy]) g fun b ↦ by simpa using h₂ b.1 b.2
+    have hc' : c ∉ I.carrier := fun h ↦ hc ⟨⟨c, h⟩, rfl⟩
+    obtain ⟨d, rfl⟩ := eq_succ_of_pos (hlt Closed.zero_mem hc')
+    exact absurd (h₁ fun h ↦ hc' (I.succ_mem h)) (by simpa using h₃ d (lt_add_one d))
+  use ⟨b, hb⟩
+  intro x hx
+  obtain ⟨y, hy, z, hz, h₃⟩ := (hΘ b).mp h₂ x.1 hx
+  use ⟨y, I.mem_of_lt hy hb⟩
+  and_intros
+  · exact hy
+  use ⟨z, I.mem_of_lt hz hb⟩
+  exact (hψ' x ⟨y, _⟩ ⟨z, _⟩).mp h₃
+
 /-- A proper cut of a model of $\mathsf{I}\Sigma_j$ which is closed under the operations and
 $\Sigma_j$-elementary satisfies $\mathsf{B}\Sigma_{j+1}$.
 - [HP98, Lemma IV.1.22] -/
-axiom Cut.models_BSigma_succ {j : ℕ} [M↓[ℒₒᵣ] ⊧* 𝗜𝚺j] (I : Cut M) [I.Closed]
-    (hI : ∃ c, c ∉ I.carrier) (hj : SigmaElementary I.endExtension.emb j) :
-    I.carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1)
+theorem models_BSigma_succ (hI : ∃ c, c ∉ I.carrier) (hj : SigmaElementary I.endExtension.emb j) :
+    I.carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := by
+  have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := mod_ISigma_of_le (Nat.zero_le j)
+  apply Semantics.ModelsSet.union_iff.mpr
+  and_intros
+  · exact I.endExtension.models_ISigma0
+  · apply Semantics.ModelsSet.setOf_iff.mpr
+    rintro _ ⟨φ, hφ, rfl⟩
+    suffices ∀ (e : ℕ → I.carrier) (a : I.carrier), (∀ x < a, ∃ y, φ.Eval ![x, y] e) →
+        ∃ b, ∀ x < a, ∃ y < b, φ.Eval ![x, y] e by
+      simpa [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
+        Semiformula.eval_bexsLT, Semiformula.eval_substs] using this
+    obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hφ
+    simpa using I.exists_bound_of_sigmaElementary hI hj hψ
+
+end Cut
 
 end FFL.FirstOrder.Arithmetic

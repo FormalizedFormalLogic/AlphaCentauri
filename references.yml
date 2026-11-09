@@ -213,6 +213,17 @@ Lin97:
     title: Lecture Notes in Logic
     volume: 10
 
+MM89:
+  type: Article
+  title: Primes and their residue rings in models of open induction
+  author: ["Macintyre, Angus", "Marker, David"]
+  date: 1989
+  page-range: 57-77
+  parent:
+    type: Periodical
+    title: Annals of Pure and Applied Logic
+    volume: 43
+
 PWW88:
   type: Article
   title: Provability of the pigeonhole principle and the existence of infinitely many primes

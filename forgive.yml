@@ -143,6 +143,14 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.6].
       - FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE2
+  FFL.FirstOrder.Arithmetic.provable_existsQuadraticNonresidue_IE1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Smi93, §1].
+      - FFL.FirstOrder.Arithmetic.provable_existsQuadraticNonresidue_IE1
+  FFL.FirstOrder.Arithmetic.provable_existsQuadraticNonresidue_ISigma0:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [MM89]; with the Δ₀ pigeonhole principle adjoined it is provable [Smi93, §3].
+      - FFL.FirstOrder.Arithmetic.provable_existsQuadraticNonresidue_ISigma0
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:

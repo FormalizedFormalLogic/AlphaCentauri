@@ -17,6 +17,7 @@ proves quadratic reciprocity and its supplementary laws.
 
 - [Smi93, §6]
 - [Jer10, Theorem 5.7]
+- [MM89]
 -/
 
 @[expose] public section
@@ -28,6 +29,22 @@ solution.
 - [Smi93, §3] -/
 def quadraticResidue : ArithmeticSemisentence 2 :=
   “a m. (∀ d, d ∣ a → d ∣ m → d = 1) ∧ ∃ x k, x * x = a + k * m ∨ a = x * x + k * m”
+
+/-- Every odd prime has a quadratic nonresidue.
+- [Smi93, §1] -/
+def existsQuadraticNonresidue : ArithmeticSentence :=
+  “∀ q, !isPrime q → q ≠ 2 → ∃ a, ¬q ∣ a ∧ ¬!quadraticResidue a q”
+
+/-- $\mathsf{I}\mathsf{E}_1$ proves that every odd prime has a quadratic nonresidue. An open
+problem.
+- [Smi93, §1] -/
+axiom provable_existsQuadraticNonresidue_IE1 : 𝗜𝗘₁ ⊢ existsQuadraticNonresidue
+
+/-- $\mathsf{I}\Delta_0$ proves that every odd prime has a quadratic nonresidue. An open problem;
+$\mathsf{I}\Delta_0$ with the $\Delta_0$ pigeonhole principle adjoined proves it.
+- [MM89]
+- [Smi93, §3] -/
+axiom provable_existsQuadraticNonresidue_ISigma0 : 𝗜𝚺₀ ⊢ existsQuadraticNonresidue
 
 /-- `-1` has a `k`-th root modulo `m`: `xᵏ ≡ -1 (mod m)` has a solution.
 - [Smi93, Lemma 3.2, Question 5.3] -/

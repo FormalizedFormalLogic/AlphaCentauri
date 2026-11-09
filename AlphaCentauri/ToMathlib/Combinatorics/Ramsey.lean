@@ -11,6 +11,10 @@ public import Mathlib.Order.Interval.Finset.Nat
 For all `k`, `c` and `q` there is `N` such that every colouring with `c` colours of the
 `k`-element subsets of a finite set with at least `N` elements has a homogeneous set of size `q`:
 a subset all of whose `k`-element subsets have the same colour.
+
+As an application, every colouring with two colours of the `e`-element subsets of
+`{0, …, n - 1}`, for `n` large enough, has a homogeneous set `Y` with `e + 1` elements and
+`#Y ≥ min Y`.
 -/
 
 @[expose] public section
@@ -160,27 +164,25 @@ theorem exists_diagonal_paris_harrington {e : ℕ} (he : 1 ≤ e) :
   intro G
   set L := range (e + 2)
   obtain ⟨B, hBX, heB, hB⟩ := hN G (Ico (e + 2) (e + 2 + N)) (by simp)
+  have hBIco : ∀ b ∈ B, e + 2 ≤ b ∧ b < e + 2 + N := by
+    intro b hb
+    simpa using hBX hb
   have hBL : ∀ b ∈ B, b ∉ L := by
     intro b hb
-    have := mem_Ico.mp <| hBX hb
-    simp [L]
-    omega
+    simpa [L] using (hBIco b hb).1
   have hLB : L ∪ B ⊆ range (e + 2 + N) := by
     apply union_subset (range_subset_range.mpr (by omega))
     intro b hb
-    have := mem_Ico.mp <| hBX hb
-    simp
-    omega
+    simpa using (hBIco b hb).2
   by_contra! hno
   have hcol : ∀ t ⊆ L ∪ B, ∀ t' ⊆ L ∪ B, #t = e → #t' = e → t ∩ L = t' ∩ L → G t = G t' := by
     intro t ht t' ht' hte ht'e h
     have := card_sdiff_add_card_inter t L
     have := card_sdiff_add_card_inter t' L
     rw [← sdiff_union_inter t L, ← sdiff_union_inter t' L, h]
-    have hsub : ∀ u ⊆ L ∪ B, u \ L ⊆ B := by
-      intro u hu x hx
-      obtain ⟨hxu, hxL⟩ := mem_sdiff.mp hx
-      exact (mem_union.mp (hu hxu)).resolve_left hxL
+    have hsub (u) (hu : u ⊆ L ∪ B) : u \ L ⊆ B := by
+      intro x hx
+      exact (mem_union.mp (hu (mem_sdiff.mp hx).1)).resolve_left (mem_sdiff.mp hx).2
     apply hB _ (hsub t ht) _ (hsub t' ht')
     · rw [h] at *
       omega

@@ -45,13 +45,17 @@ def quadraticResidueNegOne : ArithmeticSentence :=
   “∀ q, !isPrime q → (∃ k, q = 4 * k + 1) → !(negOneHasRoot 2) q”
 
 /-- $\mathsf{I}\mathsf{E}_1$ proves that $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$. An
-open problem.
-- [Smi93, Question 5.1] -/
+open problem; Jeřábek states that his proof of the supplementary laws of quadratic reciprocity
+can be formalized in $\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
+- [Smi93, Question 5.1]
+- [Jer21, Chapter 0, §2.2] -/
 axiom provable_quadraticResidueNegOne_IE1 : 𝗜𝗘₁ ⊢ quadraticResidueNegOne
 
 /-- $\mathsf{I}\Delta_0$ proves that $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$. An open
-problem; $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ proves it.
+problem; $\mathsf{I}\Delta_0 + \Delta_0\mathrm{EQ}$ and
+$\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ prove it.
 - [Smi93, Question 5.1]
+- [BI91, Theorem 3.5]
 - [Jer10, Theorem 5.7] -/
 axiom provable_quadraticResidueNegOne_ISigma0 : 𝗜𝚺₀ ⊢ quadraticResidueNegOne
 
@@ -67,8 +71,11 @@ def quadraticReciprocityConverse (p : ℕ) : ArithmeticSentence :=
       !quadraticResidue ↑p q → !quadraticResidue q ↑p)”
 
 /-- $\mathsf{I}\mathsf{E}_1$ proves the converse of [Smi93, Theorem 3.11] for each standard odd
-prime `p`. An open problem.
-- [Smi93, Question 5.2] -/
+prime `p`. An open problem; it follows from quadratic reciprocity, and Jeřábek states that his
+proof of quadratic reciprocity and its supplementary laws can be formalized in
+$\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
+- [Smi93, Question 5.2]
+- [Jer21, Chapter 0, §2.2] -/
 axiom provable_quadraticReciprocityConverse_IE1 {p : ℕ} (hp : p.Prime) (hp₂ : p ≠ 2) :
     𝗜𝗘₁ ⊢ quadraticReciprocityConverse p
 
@@ -90,9 +97,12 @@ def quadraticReciprocity : ArithmeticSentence :=
       (!quadraticResidue p q ↔ !quadraticResidue q p))”
 
 /-- $\mathsf{I}\mathsf{E}_1$ proves quadratic reciprocity for arbitrary, possibly nonstandard,
-primes. An open problem; $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ proves it.
+primes. An open problem; $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ proves it, and
+Jeřábek states that his proof of quadratic reciprocity and its supplementary laws can be
+formalized in $\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
 - [Smi93, Question 5.2]
-- [Jer10, Theorem 5.7] -/
+- [Jer10, Theorem 5.7]
+- [Jer21, Chapter 0, §2.2] -/
 axiom provable_quadraticReciprocity_IE1 : 𝗜𝗘₁ ⊢ quadraticReciprocity
 
 /-- If $m - 1 = 2^r s$ with $s$ odd, then $-1$ has no $2^r$-th root modulo $m$. Smith prints the

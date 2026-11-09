@@ -115,15 +115,15 @@ declaration:
       - FFL.FirstOrder.Arithmetic.uniformReflection_of_parameterFreeInduction
   FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_IE1:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.1].
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.1]; Jeřábek states that his proof can be formalized in IE₁ + Count₂(∇₁) [Jer21, Chapter 0, §2.2].
       - FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_IE1
   FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_ISigma0:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.1]; with Count₂(Δ₀) adjoined it is [Jer10, Theorem 5.7].
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.1]; with Δ₀EQ adjoined it is [BI91, Theorem 3.5], with Count₂(Δ₀) adjoined [Jer10, Theorem 5.7].
       - FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_ISigma0
   FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_IE1:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.2].
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.2]; Jeřábek states that a proof of quadratic reciprocity can be formalized in IE₁ + Count₂(∇₁) [Jer21, Chapter 0, §2.2].
       - FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_IE1
   FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_ISigma0:
     forgive:
@@ -131,7 +131,7 @@ declaration:
       - FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_ISigma0
   FFL.FirstOrder.Arithmetic.provable_quadraticReciprocity_IE1:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.2].
+      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.2]; Jeřábek states that his proof can be formalized in IE₁ + Count₂(∇₁) [Jer21, Chapter 0, §2.2].
       - FFL.FirstOrder.Arithmetic.provable_quadraticReciprocity_IE1
   FFL.FirstOrder.Arithmetic.provable_noRootNegOne_IE1:
     forgive:

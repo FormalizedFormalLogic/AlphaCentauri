@@ -37,6 +37,20 @@ BI91:
     volume: 55
     issue: 1
 
+BO96:
+  type: Article
+  title: A recursive nonstandard model of normal open induction
+  author: ["Berarducci, Alessandro", "Otero, Margarita"]
+  date: 1996
+  page-range: 1228-1241
+  parent:
+    type: Periodical
+    title: Journal of Symbolic Logic
+    volume: 61
+    issue: 4
+  serial-number:
+    doi: "10.2307/2275813"
+
 BW87:
   type: Chapter
   title: Provably computable functions and the fast growing hierarchy
@@ -183,6 +197,14 @@ EW12:
   parent:
     type: Repository
     title: arXiv
+
+GG17:
+  type: Article
+  title: Shepherdson's theorems for fragments of open induction
+  author: ["Glivická, Jana", "Glivický, Petr"]
+  date: 2017
+  serial-number:
+    arxiv: "1701.02001"
 
 HP98:
   type: Book

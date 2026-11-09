@@ -99,6 +99,7 @@ public import AlphaCentauri.ToFoundation.DirectTranslation
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Basic
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Seq
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.LocallyDelta0
 public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Factorial

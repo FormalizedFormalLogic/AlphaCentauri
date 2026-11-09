@@ -1,6 +1,7 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Schemata
+public import Foundation.FirstOrder.Arithmetic.EA.Basic
+public import AlphaCentauri.Schemata.BoundedInduction
 public import AlphaCentauri.ToFoundation.BinderNotation
 
 /-!
@@ -37,5 +38,16 @@ def boundedRegularity (m : ℕ) (φ : ArithmeticSemiformula ℕ 3) : ArithmeticS
 def boundedRegularityOn (m : ℕ) (Γ : ArithmeticSemiformula ℕ 3 → Prop) :
     Set ArithmeticSentence :=
   boundedRegularity m '' {φ | Γ φ}
+
+/-- $\mathsf{EA}$ proves the regularity principle for $E_1$ formulas. An open problem.
+- [Cor13, Problem 1.5] -/
+axiom regularityBoundedExistential_weakerThan_ElementaryArithmetic :
+    𝗣𝗔⁻ ∪ regularityOn (Semiformula.BoundedExistential 1) ⪯ 𝗘𝗔
+
+/-- $\mathsf{EA}$ proves the bounded regularity principle with exponent $3$ for $E_1$ formulas.
+An open problem.
+- [Cor13, Problem 1.7] -/
+axiom boundedRegularityBoundedExistential_weakerThan_ElementaryArithmetic :
+    𝗣𝗔⁻ ∪ boundedRegularityOn 3 (Semiformula.BoundedExistential 1) ⪯ 𝗘𝗔
 
 end FFL.FirstOrder.Arithmetic

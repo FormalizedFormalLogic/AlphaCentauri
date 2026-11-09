@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Proof.RankedDerivation
+public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.ToFoundation.SubstInversion
 public import AlphaCentauri.ToFoundation.Set
 public import Foundation.Vorspiel.Tactic.Disj
@@ -731,5 +731,306 @@ theorem of_insert_falsum {s : V} (h : RankedDerivable (∅ : Theory L) r (insert
   exact of_insert_falsum_aux r d s (le_of_fstIdx_eq_insert hd.1) hd
 
 end RankedDerivable
+
+/-- The body and the rest of an end-sequent containing a universal formula are bounded by the
+proof code. -/
+private lemma all_bounds {d p s : V} (h : fstIdx d = insert (^∀ p) s) : p ≤ d ∧ s ≤ d := by
+  have hp : ^∀ p ∈ fstIdx d := by rw [h]; simp
+  exact ⟨le_of_lt <| lt_of_lt_of_le (lt_trans (by simp) (lt_of_mem hp)) (fstIdx_le_self d),
+    le_of_fstIdx_eq_insert h⟩
+
+/-! ### Universal inversion -/
+
+/-- The empty theory has no axioms, so in particular none with free variables. -/
+private lemma shift_eq_of_mem_empty (p : V) (hp : p ∈ (∅ : Theory L).Δ₁Class) : shift L p = p :=
+  absurd hp (not_mem_empty_Δ₁Class p)
+
+namespace RankedDerivable
+
+/-- From the free instance of `p` beside the shifted sequent, the instance of `p` at a term beside
+the sequent itself. -/
+lemma substs1_of_free {t p s : V} (ht : IsTerm L t) (hp : IsSemiformula L 1 p)
+    (hs : IsFormulaSet L s)
+    (h : RankedDerivable (∅ : Theory L) r (insert (free L p) (setShift L s))) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
+  obtain ⟨ι, hιl, hι⟩ := sigmaOne_skolem_vec (R := fun x y : V ↦ y = ^&x) (by definability)
+    (l := p + s) (fun x _ ↦ ⟨_, rfl⟩)
+  have hιc : IsSemitermVec L (len ι) 0 ι := IsSemitermVec.iff.mpr ⟨rfl, fun i hi ↦ by
+    rw [hι i (by rwa [hιl] at hi)]
+    simp⟩
+  have hu : IsSemitermVec L (len (t ∷ ι)) 0 (t ∷ ι) := by simp [hιc, ht]
+  have h₀ : termFvSubst L (t ∷ ι) ^&0 = t := by simp
+  have h₁ : ∀ x < p + s, x < len ι ∧ ι.[x] = termFvSubst L (t ∷ ι) ^&(x + 1) := by
+    intro x hx
+    have hx' : x < len ι := by rwa [hιl]
+    exact ⟨hx', by simp [hx']⟩
+  have h₂ : ∀ x < p + s, x < len ι ∧ ι.[x] = ^&x := fun x hx ↦ ⟨by rwa [hιl], hι x hx⟩
+  have := rewrite shift_eq_of_mem_empty hu h
+  rwa [fvSubstImage_insert, free,
+    fvSubst_substs1 hu (by simp : IsSemiterm L 0 (^&0 : V)) hp.shift, h₀,
+    fvSubst_shift h₁ hp (by simp), fvSubst_eq_self h₂ hp (by simp),
+    fvSubstImage_setShift h₁ hs (by simp), fvSubstImage_eq_self h₂ hs (by simp)] at this
+
+/-- From the instance of `p` at a free variable `^&M` above the codes of `p` and of the sequent,
+the instance of the shift of `p` at a term beside the shifted sequent. -/
+lemma shift_substs1_of_fvar {M t p s : V} (ht : IsTerm L t) (hp : IsSemiformula L 1 p)
+    (hpM : p ≤ M) (hs : IsFormulaSet L s) (hsM : s ≤ M)
+    (h : RankedDerivable (∅ : Theory L) r (insert (substs1 L ^&M p) s)) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t (shift L p)) (setShift L s)) := by
+  obtain ⟨w, hwl, hw⟩ := sigmaOne_skolem_vec
+    (R := fun x y : V ↦ (x < M → y = ^&(x + 1)) ∧ (M ≤ x → y = t)) (by definability)
+    (l := M + 1) (fun x _ ↦ by
+      by_cases hx : x < M
+      · exact ⟨^&(x + 1), fun _ ↦ rfl, fun h ↦ absurd hx (not_lt.mpr h)⟩
+      · exact ⟨t, fun h ↦ absurd h hx, fun _ ↦ rfl⟩)
+  have hM : M < len w := by simp [hwl]
+  have hw₁ : ∀ x < M, w.[x] = ^&(x + 1) := fun x hx ↦ (hw x (lt_trans hx (by simp))).1 hx
+  have hwc : IsSemitermVec L (len w) 0 w := IsSemitermVec.iff.mpr ⟨rfl, fun i hi ↦ by
+    rcases lt_or_ge i M with hiM | hiM
+    · rw [hw₁ i hiM]
+      simp
+    · rw [(hw i (by rwa [hwl] at hi)).2 hiM]
+      exact ht⟩
+  have := rewrite shift_eq_of_mem_empty hwc h
+  rwa [fvSubstImage_insert, fvSubst_substs1 hwc (by simp : IsSemiterm L 0 (^&M : V)) hp,
+    termFvSubst_fvar, ite_eq_left hM, (hw M (by simp)).2 le_rfl, fvSubst_eq_shift hM hw₁ hp hpM,
+    fvSubstImage_eq_setShift hM hw₁ hs hsM] at this
+
+end RankedDerivable
+
+namespace RankedDerivation
+
+/-- The terms at which the premises of a node coded by `d` are inverted, when its end-sequent is
+inverted at `t`. -/
+private noncomputable def allInversionBound (d t : V) : V := t + termShift L t + ^&0 + ^&d
+
+private instance : 𝚺ᴬ₁-Function₂ (allInversionBound (L := L) : V → V → V) := by
+  unfold allInversionBound
+  definability
+
+variable (L) in
+/-- Universal inversion at every term below `B` holds for every derivation of cut rank at most `r`
+coded below `d`. -/
+private def InvertsAllBelow (r d B : V) : Prop :=
+  ∀ d₀ < d, ∀ t₀ ≤ B, ∀ p₀ s₀ : V, IsTerm L t₀ →
+    RankedDerivationOf (∅ : Theory L) r d₀ (insert (^∀ p₀) s₀) →
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t₀ p₀) s₀)
+
+section invertAll
+
+variable {d t p s : V}
+
+private lemma inversion_all_axL {e : V} (ht : IsTerm L t) (hpF : IsSemiformula L 1 p)
+    (hfs : IsFormulaSet L (insert (^∀ p) s)) (hes : e ∈ insert (^∀ p) s)
+    (hnes : neg L e ∈ insert (^∀ p) s) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
+  have hsF : IsFormulaSet L s := fun x hx ↦ hfs x (by simp [hx])
+  have hT : IsFormulaSet L (insert (substs1 L t p) s) := by simp [hsF, hpF.substs1 ht]
+  by_cases hex : ^∃ (neg L p) ∈ s
+  · have e : substs1 L t (neg L p) = neg L (substs1 L t p) :=
+      substs_neg hpF (by simp [ht] : IsSemitermVec L 1 0 (?[t] : V))
+    exact .ex_m (p := neg L p) (by simp [hex]) ht
+      (.em (by simp [hT, hpF.neg.substs1 ht]) (substs1 L t p) (by simp) (by rw [← e]; simp))
+  · have he : e ≠ ^∀ p := by
+      rintro rfl
+      rw [neg_all hpF.isUFormula] at hnes
+      exact hex (mem_of_mem_insert_of_ne hnes (by simp [qqAll, qqExs]))
+    have hne : neg L e ≠ ^∀ p := by
+      intro h
+      have : e = ^∃ (neg L p) := by
+        rw [← (hfs e hes).isUFormula.neg_neg, h, neg_all hpF.isUFormula]
+      exact hex (mem_of_mem_insert_of_ne (this ▸ hes) (by simp [qqAll, qqExs]))
+    exact .em hT e (by simp [mem_of_mem_insert_of_ne hes he])
+      (by simp [mem_of_mem_insert_of_ne hnes hne])
+
+private lemma inversion_all_verum (ht : IsTerm L t) (hpF : IsSemiformula L 1 p)
+    (hsF : IsFormulaSet L s) (hv : ^⊤ ∈ insert (^∀ p) s) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) :=
+  .verum (by simp [hsF, hpF.substs1 ht])
+    (by simp [mem_of_mem_insert_of_ne hv (by simp [qqVerum, qqAll])])
+
+private lemma inversion_all_and {a b dp dq B : V}
+    (ih : InvertsAllBelow L r (andIntro (insert (^∀ p) s) a b dp dq) B) (htB : t ≤ B)
+    (ht : IsTerm L t) (hab : a ^⋏ b ∈ insert (^∀ p) s)
+    (hdp : RankedDerivationOf (∅ : Theory L) r dp (insert a (insert (^∀ p) s)))
+    (hdq : RankedDerivationOf (∅ : Theory L) r dq (insert b (insert (^∀ p) s))) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
+  rw [insert_comm a] at hdp
+  rw [insert_comm b] at hdq
+  have hep := ih dp (dp_lt_andIntro _ _ _ _ _) t htB p _ ht hdp
+  have heq := ih dq (dq_lt_andIntro _ _ _ _ _) t htB p _ ht hdq
+  rw [insert_comm] at hep heq
+  exact .and_m (by simp [mem_of_mem_insert_of_ne hab (by simp [qqAnd, qqAll])]) hep heq
+
+private lemma inversion_all_or {a b d₀ B : V}
+    (ih : InvertsAllBelow L r (orIntro (insert (^∀ p) s) a b d₀) B) (htB : t ≤ B)
+    (ht : IsTerm L t) (hab : a ^⋎ b ∈ insert (^∀ p) s)
+    (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert a (insert b (insert (^∀ p) s)))) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
+  rw [insert_comm b, insert_comm a] at hd₀
+  have he := ih d₀ (d_lt_orIntro _ _ _ _) t htB p _ ht hd₀
+  rw [insert_comm _ a, insert_comm _ b] at he
+  exact .or_m (by simp [mem_of_mem_insert_of_ne hab (by simp [qqOr, qqAll])]) he
+
+private lemma inversion_all_exs {a u d₀ B : V}
+    (ih : InvertsAllBelow L r (exsIntro (insert (^∀ p) s) a u d₀) B) (htB : t ≤ B)
+    (ht : IsTerm L t) (ha : ^∃ a ∈ insert (^∀ p) s) (hu : IsTerm L u)
+    (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert (substs1 L u a) (insert (^∀ p) s))) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
+  rw [insert_comm] at hd₀
+  have he := ih d₀ (d_lt_exsIntro _ _ _ _) t htB p _ ht hd₀
+  rw [insert_comm] at he
+  exact .ex_m (by simp [mem_of_mem_insert_of_ne ha (by simp [qqAll, qqExs])]) hu he
+
+private lemma inversion_all_wk {d₀ B : V}
+    (ih : InvertsAllBelow L r (wkRule (insert (^∀ p) s) d₀) B) (htB : t ≤ B) (ht : IsTerm L t)
+    (hpF : IsSemiformula L 1 p) (hsF : IsFormulaSet L s)
+    (hsub : fstIdx d₀ ⊆ insert (^∀ p) s) (hd₀ : RankedDerivation (∅ : Theory L) r d₀) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
+  have hT : IsFormulaSet L (insert (substs1 L t p) s) := by simp [hsF, hpF.substs1 ht]
+  by_cases hA : ^∀ p ∈ fstIdx d₀
+  · refine .wk hT ?_ (ih d₀ (d_lt_wkRule _ _) t htB p (bitRemove (^∀ p) (fstIdx d₀)) ht
+      ⟨(insert_remove hA).symm, hd₀⟩)
+    intro x hx
+    rcases mem_bitInsert_iff.mp hx with rfl | hx
+    · simp
+    · have hx' := mem_bitRemove_iff.mp hx
+      simp [mem_of_mem_insert_of_ne (hsub hx'.2) hx'.1]
+  · refine .wk hT ?_ ⟨d₀, rfl, hd₀⟩
+    intro x hx
+    simp [mem_of_mem_insert_of_ne (hsub hx) (by rintro rfl; exact hA hx)]
+
+private lemma inversion_all_all {a d₀ : V}
+    (ih : InvertsAllBelow L r (allIntro (insert (^∀ p) s) a d₀)
+      (allInversionBound (L := L) (allIntro (insert (^∀ p) s) a d₀) t))
+    (ht : IsTerm L t) (hpF : IsSemiformula L 1 p) (hsF : IsFormulaSet L s)
+    (ha : ^∀ a ∈ insert (^∀ p) s)
+    (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀
+      (insert (free L a) (setShift L (insert (^∀ p) s)))) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
+  rw [mem_setShift_insert, shift_all hpF.isUFormula, insert_comm] at hd₀
+  by_cases hap : a = p
+  · rw [hap] at hd₀
+    have he := ih d₀ (s_lt_allIntro _ _ _) ^&0 (by unfold allInversionBound; simp)
+      (shift L p) _ (by simp) hd₀
+    rw [← free, insert_insert_self] at he
+    exact RankedDerivable.substs1_of_free ht hpF hsF he
+  · have e₁ : substs1 L (termShift L t) (shift L p) = shift L (substs1 L t p) := by
+      rw [substs1, substs1, shift_substs hpF (by simp [ht] : IsSemitermVec L 1 0 (?[t] : V))]
+      simp [ht.isUTerm]
+    have he := ih d₀ (s_lt_allIntro _ _ _) (termShift L t)
+      (by unfold allInversionBound; exact le_trans le_add_self (le_trans le_self_add le_self_add))
+      (shift L p) _ ht.termShift hd₀
+    rw [e₁, insert_comm, ← mem_setShift_insert] at he
+    exact .all_m (by simp [mem_of_mem_insert_of_ne ha (by simpa using hap)]) he
+
+private lemma inversion_all_shift {d₀ : V}
+    (ih : InvertsAllBelow L r (shiftRule (insert (^∀ p) s) d₀)
+      (allInversionBound (L := L) (shiftRule (insert (^∀ p) s) d₀) t))
+    (ht : IsTerm L t) (hpF : IsSemiformula L 1 p) (hsF : IsFormulaSet L s)
+    (hsh : insert (^∀ p) s = setShift L (fstIdx d₀))
+    (hd₀ : RankedDerivation (∅ : Theory L) r d₀) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
+  set d := shiftRule (insert (^∀ p) s) d₀
+  have hT : IsFormulaSet L (insert (substs1 L t p) s) := by simp [hsF, hpF.substs1 ht]
+  have hΔ := hd₀.isFormulaSet
+  have hd₀d : fstIdx d₀ ≤ d := le_trans (fstIdx_le_self d₀) (le_of_lt (d_lt_shiftRule _ _))
+  obtain ⟨e, he, hee⟩ :=
+    mem_setShift_iff.mp (show ^∀ p ∈ setShift L (fstIdx d₀) by rw [← hsh]; simp)
+  obtain ⟨p₀, rfl, rfl⟩ := exists_eq_all_of_shift_eq (hΔ _ he).isUFormula hee.symm
+  have hp₀ : IsSemiformula L 1 p₀ := by simpa using hΔ _ he
+  have h := RankedDerivable.shift_substs1_of_fvar (M := d) ht hp₀
+    (le_of_lt <| lt_of_lt_of_le (lt_trans (by simp) (lt_of_mem he)) hd₀d)
+    (fun x hx ↦ hΔ x (mem_bitRemove_iff.mp hx).2)
+    (le_trans (le_of_subset fun x hx ↦ (mem_bitRemove_iff.mp hx).2) hd₀d)
+    (ih d₀ (d_lt_shiftRule _ _) ^&d (by unfold allInversionBound; simp) p₀
+      (bitRemove (^∀ p₀) (fstIdx d₀)) (by simp) ⟨(insert_remove he).symm, hd₀⟩)
+  rw [setShift_bitRemove hΔ (hΔ _ he).isUFormula, shift_all hp₀.isUFormula, ← hsh] at h
+  refine .wk hT ?_ h
+  intro x hx
+  rcases mem_bitInsert_iff.mp hx with rfl | hx
+  · simp
+  · have hx' := mem_bitRemove_iff.mp hx
+    simp [mem_of_mem_insert_of_ne hx'.2 hx'.1]
+
+private lemma inversion_all_cut {e d₁ d₂ B : V}
+    (ih : InvertsAllBelow L r (cutRule (insert (^∀ p) s) e d₁ d₂) B) (htB : t ≤ B)
+    (ht : IsTerm L t) (he : formulaComplexity L e < r)
+    (hd₁ : RankedDerivationOf (∅ : Theory L) r d₁ (insert e (insert (^∀ p) s)))
+    (hd₂ : RankedDerivationOf (∅ : Theory L) r d₂ (insert (neg L e) (insert (^∀ p) s))) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
+  rw [insert_comm e] at hd₁
+  rw [insert_comm (neg L e)] at hd₂
+  have h₁ := ih d₁ (d₁_lt_cutRule _ _ _ _) t htB p _ ht hd₁
+  have h₂ := ih d₂ (d₂_lt_cutRule _ _ _ _) t htB p _ ht hd₂
+  rw [insert_comm] at h₁ h₂
+  exact .cut he h₁ h₂
+
+end invertAll
+
+/-- Universal inversion for an end-sequent whose universal body and rest are bounded by the
+derivation code. -/
+private lemma inversion_all_aux :
+    ∀ d t : V, ∀ p ≤ d, ∀ s ≤ d, IsTerm L t →
+      RankedDerivationOf (∅ : Theory L) r d (insert (^∀ p) s) →
+      RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
+  apply bounded_all_sigma1_order_induction (f := allInversionBound (L := L)) inferInstance
+    (P := fun d t ↦ ∀ p ≤ d, ∀ s ≤ d, IsTerm L t →
+      RankedDerivationOf (∅ : Theory L) r d (insert (^∀ p) s) →
+      RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s)) (by definability)
+  intro d t ih
+  rintro p - s - ht ⟨hd1, hd2⟩
+  have ih' : InvertsAllBelow L r d (allInversionBound (L := L) d t) :=
+    fun d₀ hd₀ t₀ ht₀ p₀ s₀ ht₀' h ↦
+      ih d₀ hd₀ t₀ ht₀ p₀ (all_bounds h.1).1 s₀ (all_bounds h.1).2 ht₀' h
+  have htB : t ≤ allInversionBound (L := L) d t :=
+    le_trans le_self_add (le_trans le_self_add le_self_add)
+  have hfs : IsFormulaSet L (insert (^∀ p) s) := hd1 ▸ hd2.isFormulaSet
+  have hpF : IsSemiformula L 1 p := by simpa using hfs (^∀ p) (by simp)
+  have hsF : IsFormulaSet L s := fun x hx ↦ hfs x (by simp [hx])
+  rcases hd2.case.2 with (⟨Γ, e, rfl, hes, hnes⟩ | ⟨Γ, rfl, hv⟩ |
+    ⟨Γ, a, b, dp, dq, rfl, hab, hdp, hdq⟩ | ⟨Γ, a, b, d₀, rfl, hab, hd₀⟩ |
+    ⟨Γ, a, d₀, rfl, ha, hd₀⟩ | ⟨Γ, a, u, d₀, rfl, ha, hu, hd₀⟩ |
+    ⟨Γ, d₀, rfl, hsub, hd₀⟩ | ⟨Γ, d₀, rfl, hsh, hd₀⟩ | ⟨Γ, e, d₁, d₂, rfl, he, hd₁, hd₂⟩ |
+    ⟨Γ, e, rfl, -, he⟩)
+  · rw [fstIdx_axL] at hd1
+    subst hd1
+    exact inversion_all_axL ht hpF hfs hes hnes
+  · rw [fstIdx_verumIntro] at hd1
+    subst hd1
+    exact inversion_all_verum ht hpF hsF hv
+  · rw [fstIdx_andIntro] at hd1
+    subst hd1
+    exact inversion_all_and ih' htB ht hab hdp hdq
+  · rw [fstIdx_orIntro] at hd1
+    subst hd1
+    exact inversion_all_or ih' htB ht hab hd₀
+  · rw [fstIdx_allIntro] at hd1
+    subst hd1
+    exact inversion_all_all ih' ht hpF hsF ha hd₀
+  · rw [fstIdx_exsIntro] at hd1
+    subst hd1
+    exact inversion_all_exs ih' htB ht ha hu hd₀
+  · rw [fstIdx_wkRule] at hd1
+    subst hd1
+    exact inversion_all_wk ih' htB ht hpF hsF hsub hd₀
+  · rw [fstIdx_shiftRule] at hd1
+    subst hd1
+    exact inversion_all_shift ih' ht hpF hsF hsh hd₀
+  · rw [fstIdx_cutRule] at hd1
+    subst hd1
+    exact inversion_all_cut ih' htB ht he hd₁ hd₂
+  · exact absurd he (not_mem_empty_Δ₁Class e)
+
+/-- Inversion for the universal rule: a derivation of cut rank at most `r` of a sequent containing
+`^∀ p` yields, for every term `t`, one of the sequent with the instance of `p` at `t` in place of
+`^∀ p`.
+- [Bus98, Ch. I §2.4] -/
+theorem inversion_all {p s t d : V} (ht : IsTerm L t)
+    (hd : RankedDerivationOf (∅ : Theory L) r d (insert (^∀ p) s)) :
+    RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) :=
+  inversion_all_aux d t p (all_bounds hd.1).1 s (all_bounds hd.1).2 ht hd
+
+end RankedDerivation
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

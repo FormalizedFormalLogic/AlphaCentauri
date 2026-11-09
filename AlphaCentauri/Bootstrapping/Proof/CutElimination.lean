@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Proof.CutFreeRewrite
+public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.ToFoundation.Set
 public import AlphaCentauri.ToFoundation.Syntax
 
@@ -187,6 +187,7 @@ section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2]
 
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2] in
 /-- A cut on the shift of `p` beside a set `s` covering the shift of a sequent `Δ` containing `p`
 reduces to cuts on `p` itself beside sets covering `Δ`. -/
 private lemma cut_of_setShift_subset {Δ p s : V} (hΔ : IsFormulaSet L Δ) (hp : p ∈ Δ)
@@ -205,7 +206,9 @@ private lemma cut_of_setShift_subset {Δ p s : V} (hΔ : IsFormulaSet L Δ) (hp 
     intro q hq hqN
     rw [← fvSubst_eq_shift (by simp) (fun x hx ↦ nth_freshVec_of_lt hx) hq hqN]
     exact fvSubst_fvSubst_eq_self (isSemitermVec_freshVec N) hvw hq hqN
-  have h₁ := CutFreeDerivable.rewrite hw he
+  have h₁ := RankedDerivable.iff_cutFreeDerivable.mp <| RankedDerivable.rewrite
+    (fun p hp ↦ absurd hp (not_mem_empty_Δ₁Class p)) hw
+    (RankedDerivable.iff_cutFreeDerivable.mpr he)
   rw [fvSubstImage_insert, ← shift_neg hpF, hback _ hpF.neg hpN] at h₁
   have h₂ : Δ ⊆ insert p (fvSubstImage (L := L) w s) := by
     intro x hx
@@ -216,13 +219,16 @@ private lemma cut_of_setShift_subset {Δ p s : V} (hΔ : IsFormulaSet L Δ) (hp 
     · exact mem_bitInsert_iff.mpr <| Or.inr <|
         mem_fvSubstImage_iff.mpr ⟨_, h, (hback x (hΔ x hx) hxN).symm⟩
   obtain ⟨e, he⟩ := h₁
-  have h₃ := CutFreeDerivable.rewrite (isSemitermVec_freshVec N) (hcut _ e h₂ he)
+  have h₃ := RankedDerivable.iff_cutFreeDerivable.mp <| RankedDerivable.rewrite
+    (fun p hp ↦ absurd hp (not_mem_empty_Δ₁Class p)) (isSemitermVec_freshVec N)
+    (RankedDerivable.iff_cutFreeDerivable.mpr (hcut _ e h₂ he))
   rwa [fvSubstImage_fvSubstImage_eq_self hw hwv hsF hsN] at h₃
 
 section cutAux
 
 variable {c p s e : V}
 
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2] in
 private lemma cut_aux_exs {Γ a t d₀ : V} (hcut : CutLower L c)
     (ih : CutBelow L c (exsIntro Γ a t d₀)) (hpc : formulaComplexity L p ≤ c)
     (hpg : IsZeroOrExs L p) (hΓF : IsFormulaSet L Γ) (ha : ^∃ a ∈ Γ) (ht : IsTerm L t)
@@ -237,13 +243,15 @@ private lemma cut_aux_exs {Γ a t d₀ : V} (hcut : CutLower L c)
   · subst hap
     rw [neg_ex haF.isUFormula] at he
     rw [formulaComplexity_ex haF.isUFormula] at hpc
-    have h₂ := CutFreeDerivation.inversion_all ht he
+    have h₂ := RankedDerivable.iff_cutFreeDerivable.mp <|
+      RankedDerivation.inversion_all ht ⟨he.1, .of_cutFreeDerivation he.2⟩
     rw [show substs1 L t (neg L a) = neg L (substs1 L t a) from
       substs_neg haF (by simp [ht] : IsSemitermVec L 1 0 (?[t] : V))] at h₂
     exact hcut _ s (by rw [fomulaComplexity_substs1 haF ht]; exact lt_of_lt_of_le (by simp) hpc)
       h₁ h₂
   · exact .ex_m (mem_of_mem_insert_of_ne (hsub ha) hap) ht h₁
 
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2] in
 private lemma cut_aux_shift {d₀ : V}
     (ih : CutBelow L c (shiftRule (setShift L (fstIdx d₀)) d₀)) (hpc : formulaComplexity L p ≤ c)
     (hpg : IsZeroOrExs L p) (hsF : IsFormulaSet L s) (hd₀ : CutFreeDerivation (∅ : Theory L) d₀)

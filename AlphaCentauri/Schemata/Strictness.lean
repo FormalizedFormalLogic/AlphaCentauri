@@ -28,7 +28,7 @@ theorem ISigma_strictlyWeakerThan_BSigma_succ (n : ℕ) : 𝗜𝚺 n ⪱ 𝗕�
 theorem BSigma_strictlyWeakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪱ 𝗜𝚺 (n + 1) := by
   obtain ⟨M, _, _, a, ha, hns⟩ := exists_model_nonstandard_definableElement
   have ha' := definableElements_mono (k' := n + 1) (by omega) ha
-  have := definableCut.models_BSigma ha' hns
+  have := definableCut.models_BSigma (j := n) hns
   refine ⟨BSigma_weakerThan_ISigma, fun h ↦ ?_⟩
   exact definableCut.not_models_ISigma ha' hns
     (models_of_subtheory (T := 𝗜𝚺 (n + 1)) (U := 𝗕𝚺 (n + 1)) this)

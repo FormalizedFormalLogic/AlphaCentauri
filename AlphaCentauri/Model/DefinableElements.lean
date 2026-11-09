@@ -464,13 +464,72 @@ theorem sigmaElementary : SigmaElementary (definableCut j M).endExtension.emb j 
     use ⟨x, hx⟩
     exact hφx
 
-/-- [HP98, Lemma IV.1.44(1)] -/
-axiom models_BSigma {a : M} (ha : a ∈ definableElements (j + 1) M) (hns : ∀ m : ℕ, (m : M) < a) :
-    (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1)
+variable {a : M} (ha : a ∈ definableElements (j + 1) M) (hns : ∀ m : ℕ, (m : M) < a)
+include hns
 
-/-- [HP98, Lemma IV.1.44(3)] -/
-axiom not_models_ISigma {a : M} (ha : a ∈ definableElements (j + 1) M)
-    (hns : ∀ m : ℕ, (m : M) < a) : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜𝚺 (j + 1)
+/-- The cut below the definable elements satisfies $\mathsf{B}\Sigma_{j+1}$ once `M` is
+nonstandard.
+- [HP98, Lemma IV.1.44(1)] -/
+theorem models_BSigma : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := by
+  obtain ⟨b, hb⟩ := exists_bound_definableElements (j := j) hns
+  have hI : ∃ c, c ∉ (definableCut j M).carrier := by
+    use b
+    rintro ⟨c, hc, hbc⟩
+    exact lt_asymm hbc (hb c hc)
+  exact (definableCut j M).models_BSigma_succ hI sigmaElementary
+
+include ha in
+/-- The cut below the definable elements refutes $\mathsf{I}\Sigma_{j+1}$ once one of them is
+nonstandard.
+- [HP98, Lemma IV.1.44(3)] -/
+theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜𝚺 (j + 1) := by
+  intro hI
+  have hK {x : M} (hx : x ∈ definableElements (j + 1) M) (hxI : x ∈ (definableCut j M).carrier) :
+      ⟨x, hxI⟩ ∈ definableElements (j + 1) (definableCut j M).carrier := by
+    obtain ⟨φ, hφ, hφx⟩ := id hx
+    obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
+    have transfer (v : Fin 2 → (definableCut j M).carrier) :
+        M ⊧/(Subtype.val ∘ v) φ'.sigmaInv.val ↔ _ ⊧/v φ'.sigmaInv.val := by
+      have := sigmaElementary (j := j) (M := M) le_rfl
+        (φ'.sigmaInv.rew Rew.emb).val_prenexHierarchy v (fun _ ↦ 0)
+      rwa [Bounding.Prenex.val_rew, eval_emb, eval_emb] at this
+    use φ'.val
+    and_intros
+    · exact Bounding.Prenex.val_hierarchy
+    intro z
+    have h₁ (y : M) : M ⊧/![y] φ ↔ ∃ w, M ⊧/![w, y] φ'.sigmaInv.val :=
+      (hφ' M ![y] Empty.elim).trans <| φ'.models_sigmaInv ![y]
+    rw [Bounding.Prenex.models_sigmaInv]
+    constructor
+    · rintro ⟨w, hw⟩
+      apply Subtype.ext
+      apply (hφx z.1).mp
+      apply (h₁ z.1).mpr
+      use w.1
+      simpa [Matrix.comp_vecCons''] using (transfer ![w, z]).mpr hw
+    · rintro rfl
+      obtain ⟨w, hw, hχ, -⟩ := exists_least_mem_definableElements
+        (φ := (φ'.sigmaInv.rew Rew.emb).val) (e := ![x]) (f := fun _ ↦ 0)
+        Bounding.Prenex.val_hierarchy (Fin.forall_fin_one.mpr hx)
+        (fun _ ↦ (0 : definableElements (j + 1) M).2) <| by
+          simpa [eval_emb] using (h₁ x).mp ((hφx x).mpr rfl)
+      use ⟨w, w + 1, ((⟨w, hw⟩ : definableElements (j + 1) M) + 1).2, lt_add_one w⟩
+      apply (transfer _).mp
+      simpa [Matrix.comp_vecCons'', eval_emb] using hχ
+  have : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (Nat.le_add_left 1 j)
+  have hcast (c : ℕ) : ((c : (definableCut j M).carrier) : M) = c := by
+    induction c with
+    | zero => rfl
+    | succ c ih => simp [Nat.cast_succ, ← ih]; rfl
+  have hI' {c : M} (hc : c ∈ definableElements (j + 1) M) : c ∈ (definableCut j M).carrier :=
+    ⟨c + 1, ((⟨c, hc⟩ : definableElements (j + 1) M) + 1).2, lt_add_one c⟩
+  obtain ⟨b, hb⟩ := exists_bound_definableElements (V := (definableCut j M).carrier) (j := j)
+    (a := ⟨a, hI' ha⟩) fun m ↦ by
+    change ((m : (definableCut j M).carrier) : M) < a
+    rw [hcast]
+    exact hns m
+  obtain ⟨c, hc, hbc⟩ := b.2
+  exact lt_asymm hbc (hb ⟨c, hI' hc⟩ (hK hc (hI' hc)) : c < b.1)
 
 end definableCut
 

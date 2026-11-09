@@ -192,6 +192,10 @@ lemma Semisentence.quote_substs {n m : ℕ} (w : Fin n → ClosedSemiterm L m)
   simp [Sentence.quote_def, Rewriting.emb_subst_eq_subst_emb, Semiformula.quote_substs,
     Semiterm.empty_quote_def]
 
+lemma Semisentence.quote_imp {n : ℕ} (σ τ : Semisentence L n) :
+    (⌜σ 🡒 τ⌝ : V) = Bootstrapping.imp L ⌜σ⌝ ⌜τ⌝ := by
+  simp [Sentence.quote_def]
+
 end FFL.FirstOrder
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping

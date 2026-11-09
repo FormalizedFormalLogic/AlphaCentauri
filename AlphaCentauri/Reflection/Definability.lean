@@ -4,6 +4,7 @@ public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 public import Foundation.FirstOrder.Incompleteness.Definability
 public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.Rew
 
 /-!
 # $\Delta_1$ presentation of the uniform reflection schema
@@ -139,5 +140,44 @@ lemma ssnumsCode_quote (k : ℕ) : ssnumsCode (k : V) = ⌜(ssnums (k := k)).val
   simp [Nat.mod_eq_of_lt (show 2 < k + 2 + 1 by omega)]
 
 end ssnums
+
+section uniformReflectionCode
+
+variable (T : ArithmeticTheory) [T.Δ₁]
+
+/-- The code of `T.uniformReflectionSchema φ` as a function of the arity `k` and the code `q` of
+`φ`. -/
+noncomputable def uniformReflectionCode (k q : V) : V :=
+  qqAlls (^∀ (imp ℒₒᵣ (subst ℒₒᵣ (^#0 ∷ numeral q ∷ bvarVec 1 k) (ssnumsCode k))
+    (imp ℒₒᵣ (subst ℒₒᵣ ?[^#0] ⌜T.standardProvability.prov⌝) (subst ℒₒᵣ (bvarVec 1 k) q)))) k
+
+lemma uniformReflectionCode_quote {k : ℕ} (φ : ArithmeticSemisentence k) :
+    uniformReflectionCode T (k : V) ⌜φ⌝ = ⌜T.uniformReflectionSchema φ⌝ := by
+  rw [Theory.uniformReflectionSchema, Bootstrapping.quote_allClosure_sentence, Sentence.quote_all,
+    Semisentence.quote_imp, Semisentence.quote_imp]
+  erw [Semisentence.quote_substs, Semisentence.quote_substs, Rew.bShift_eq_subst,
+    Semisentence.quote_substs]
+  simp only [matrixToVec_succ, Matrix.vecHead, Matrix.vecTail, Function.comp_def,
+    Matrix.cons_val_zero, Matrix.cons_val_succ, matrixToVec_nil,
+    Semiterm.empty_quote_bvar, Semiterm.empty_quote_numeral, Fin.val_succ, Nat.cast_succ,
+    ← bvarVec_eq_matrixToVec, ← ssnumsCode_quote, ← Sentence.quote_eq_encode]
+  simp [uniformReflectionCode]
+
+noncomputable def uniformReflectionCodeGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
+  “y k q.
+    ∃ z₀, !qqBvarDef z₀ 0 ∧ ∃ m, !numeralGraph m q ∧ ∃ bs, !bvarVecDef bs 1 k ∧
+    ∃ v₁, !adjoinDef v₁ m bs ∧ ∃ v₀, !adjoinDef v₀ z₀ v₁ ∧ ∃ c, !ssnumsCodeGraph c k ∧
+    ∃ a, !(substsGraph ℒₒᵣ) a v₀ c ∧ ∃ u, !adjoinDef u z₀ 0 ∧
+    ∃ pr, !(substsGraph ℒₒᵣ) pr u ↑(Encodable.encode T.standardProvability.prov) ∧
+    ∃ sh, !(substsGraph ℒₒᵣ) sh bs q ∧ ∃ i₂, !(impGraph ℒₒᵣ) i₂ pr sh ∧
+    ∃ i₁, !(impGraph ℒₒᵣ) i₁ a i₂ ∧ ∃ al, !qqAllDef al i₁ ∧ !qqAllsDef y al k”
+
+instance uniformReflectionCode.defined :
+    𝚺ᴬ₁-Function₂ (uniformReflectionCode T : V → V → V) via uniformReflectionCodeGraph T :=
+  .mk fun v ↦ by
+    simp [uniformReflectionCodeGraph, uniformReflectionCode, Sentence.quote_eq_encode,
+      numeral_eq_natCast]
+
+end uniformReflectionCode
 
 end FFL.FirstOrder.Arithmetic

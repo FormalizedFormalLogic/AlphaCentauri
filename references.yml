@@ -269,6 +269,20 @@ Sla04:
     type: Periodical
     title: Proceedings of the American Mathematical Society
 
+Smi92b:
+  type: Article
+  title: Fermat's last theorem and Bezout's theorem in GCD domains
+  author: Smith, Stuart T.
+  date: 1992
+  page-range: 63-85
+  serial-number:
+    doi: "10.1016/0022-4049(92)90127-2"
+  parent:
+    type: Periodical
+    title: Journal of Pure and Applied Algebra
+    volume: 79
+    issue: 1
+
 Smi93:
   type: Article
   title: "Quadratic residues and x³ + y³ = z³ in models of IE₁ and IE₂"

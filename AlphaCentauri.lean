@@ -44,10 +44,13 @@ public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Henkin
 public import AlphaCentauri.Model.Basic
+public import AlphaCentauri.Model.CodedLimit
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.DefinableElements
 public import AlphaCentauri.Model.Elementary
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
+public import AlphaCentauri.Model.EnumerationCut
+public import AlphaCentauri.Model.InjectiveEnumeration
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
 public import AlphaCentauri.NumberTheory.FLT3
@@ -73,6 +76,7 @@ public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.BoundedInduction
+public import AlphaCentauri.Schemata.CollectionFromDeltaInduction
 public import AlphaCentauri.Schemata.CollectionWithoutExp
 public import AlphaCentauri.Schemata.DeltaInduction
 public import AlphaCentauri.Schemata.Example
@@ -82,7 +86,9 @@ public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.Schemata.Strictness
 public import AlphaCentauri.Schemata.StrongCollection
 public import AlphaCentauri.ToFoundation.Absoluteness
+public import AlphaCentauri.ToFoundation.BlockSequence
 public import AlphaCentauri.ToFoundation.BooleanCombination
+public import AlphaCentauri.ToFoundation.CodedPigeonhole
 public import AlphaCentauri.ToFoundation.Coding
 public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness

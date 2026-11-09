@@ -71,11 +71,15 @@ theorem IOpen.not_finiteAxiomatizable : ¬FiniteAxiomatizable 𝗜𝗢𝗽𝗲�
     rcases hsub hσ with h | ⟨φ, hφ, rfl⟩
     · exact Or.inl h
     · have h : ∃ φ' : ArithmeticSemiformula ℕ 1, φ'.Open ∧ Semiformula.univCl (succInd φ) =
-          .univCl (succInd φ') := ⟨φ, hφ, rfl⟩
+          .univCl (succInd φ') := by use φ
       have hdeg : deg (.univCl (succInd φ)) ≤ N := Finset.le_sup (by simpa using hσ)
       simp only [deg, h, ↓reduceDIte] at hdeg
-      exact Or.inr ⟨h.choose, ⟨h.choose_spec.1, hdeg⟩, h.choose_spec.2⟩
-  refine ⟨Theory.Proof.weakerThan_of_le hsub, fun hle ↦ ?_⟩
+      right
+      use h.choose
+      exact ⟨⟨h.choose_spec.1, hdeg⟩, h.choose_spec.2⟩
+  constructor
+  · exact Theory.Proof.weakerThan_of_le hsub
+  intro hle
   exact HahnSeries.factorialIntegerPartSubring.not_models_IOpen N
     (ModelsTheory.of_provably_subtheory _ 𝗜𝗢𝗽𝗲𝗻 F
       (Semantics.ModelsSet.of_subset (HahnSeries.factorialIntegerPartSubring.models N) hF))

@@ -22,6 +22,10 @@ lexicographically, whose support lies in the additive subgroup `G` of `ℚ`, and
 with an integer constant coefficient. If `G` is closed under division by `1, …, N`, then every root
 of a nonzero polynomial of degree at most `N` with coefficients in `supportedIn G` lies in
 `supportedIn G`, and so has an integer part in `integerPartSubring G`.
+
+For `G` = $\mathbb{Z}[1/N!]$, the ring `factorialIntegerPartSubring N` therefore satisfies induction
+for predicates determined by the signs of polynomials of degree at most `N`, given that `Lex ℝ⟦ℚ⟧`
+is real closed (`HahnSeries.isRealClosed_lex`), but not open induction.
 -/
 
 @[expose] public section
@@ -123,9 +127,6 @@ lemma lt_of_order_lt {x y : Lex ℝ⟦ℚ⟧} (hx : 0 < x) (hy : 0 < y)
 lemma order_mem_of_mem_supportedIn {x : Lex ℝ⟦ℚ⟧} (hx : x ∈ supportedIn G) (h : x ≠ 0) :
     (ofLex x).order ∈ G :=
   hx _ (coeff_order_ne_zero (x := ofLex x) h)
-
-lemma integerPartSubring_le_supportedIn : integerPartSubring G ≤ supportedIn G :=
-  fun _ hx g hg ↦ (hx.1 g hg).1
 
 /-- A Hahn series supported in the non-negative rationals lies between consecutive integers. -/
 lemma exists_intCast_le_lt_of_support_nonneg {β : Lex ℝ⟦ℚ⟧}
@@ -367,8 +368,6 @@ lemma mem_powDenominators_of_mul_mem {d : ℕ} (hdn : d ∣ n) {q : ℚ}
   rw [← hz]
   ring
 
-lemma neg_one_mem_powDenominators : (-1 : ℚ) ∈ powDenominators n := ⟨0, -1, by simp⟩
-
 lemma mul_ne_neg_one_of_mem_powDenominators {p : ℕ} (hp : p.Prime) (hpn : ¬p ∣ n) {q : ℚ}
     (hq : q ∈ powDenominators n) : (p : ℚ) * q ≠ -1 := by
   obtain ⟨k, z, hz⟩ := hq
@@ -411,15 +410,15 @@ theorem factorialIntegerPartSubring.induction {P : factorialIntegerPartSubring N
     h0 hs
   · intro f a b hab ha hb
     obtain ⟨c, ⟨hc₁, hc₂⟩, hc⟩ := IsRealClosed.exists_mem_Ioo_isRoot hab ha hb
-    exact ⟨c, hc₁, hc₂, hc⟩
+    use c
   · intro f hf hfN α hα
     have hαG := mem_supportedIn_of_isRoot (N := N)
       (fun d hd hdN q hq ↦ AddSubgroup.mem_powDenominators_of_mul_mem (Nat.dvd_factorial hd hdN) hq)
       ((Polynomial.map_ne_zero_iff (factorialIntegerPartSubring N).subtype_injective).mpr hf)
       (natDegree_map_le.trans hfN)
-      (fun i ↦ by
-        rw [coeff_map]
-        exact integerPartSubring_le_supportedIn (f.coeff i).2) hα
+      (fun i g hg ↦ by
+        rw [coeff_map] at hg
+        exact ((f.coeff i).2.1 g hg).1) hα
     obtain ⟨r, hr, hrα⟩ := exists_mem_integerPartSubring_le_lt hαG
     exact ⟨⟨r, hr⟩, hrα⟩
 
@@ -436,7 +435,7 @@ theorem factorialIntegerPartSubring.not_openInduction :
   set a : factorialIntegerPartSubring N := ⟨toLex (single (-1 : ℚ) (1 : ℝ)), fun g hg ↦ by
     simp only [ofLex_toLex, support_single_of_ne one_ne_zero, Set.mem_singleton_iff] at hg
     subst hg
-    exact ⟨AddSubgroup.neg_one_mem_powDenominators, by norm_num⟩, 0, by simp⟩
+    exact ⟨⟨0, -1, by simp⟩, by norm_num⟩, 0, by simp⟩
   have ha : (1 : factorialIntegerPartSubring N) < a := by
     change (1 : Lex ℝ⟦ℚ⟧) < toLex (single (-1 : ℚ) (1 : ℝ))
     exact lt_of_order_lt (pos_of_coeff (i := -1) (fun j hj ↦ by simp [hj.ne])

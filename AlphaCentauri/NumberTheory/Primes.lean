@@ -82,52 +82,10 @@ noncomputable section
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
 
-lemma eq_of_sub_one_div_two_eq {p p' : V} (hp : IsPrime p) (hp' : IsPrime p')
-    (h : (p - 1) / 2 = (p' - 1) / 2) : p = p' := by
-  have key : ∀ {q : V}, IsPrime q → q = 2 ∨ q - 1 = 2 * ((q - 1) / 2) := by
-    intro q hq
-    by_cases h2 : 2 ∣ q
-    · left
-      rcases hq.2 2 (le_of_dvd (pos_of_gt hq.1) h2) h2 with h | h
-      · simp at h
-      · exact h.symm
-    · right
-      have hmod : q % 2 = 1 := by
-        rcases mod_two q with h | h
-        · exact absurd (mod_eq_zero_iff_dvd.mp h) h2
-        · exact h
-      have hq' : q - 1 = 2 * (q / 2) := by
-        conv_lhs => rw [← div_add_mod q 2, hmod]
-        simp
-      rw [hq']
-      simp
-  have hle : ∀ {q : V}, IsPrime q → 1 ≤ q := fun hq ↦ hq.1.le
-  have htwo : ∀ {q : V}, IsPrime q → (q - 1) / 2 = 0 → q = 2 := by
-    intro q hq h0
-    rcases key hq with h | h
-    · exact h
-    · rw [h0, mul_zero] at h
-      have : q = 1 := by
-        rw [← tsub_add_cancel_of_le (hle hq), h, zero_add]
-      exact absurd hq.1 (by simp [this])
-  have hzero : ((2 : V) - 1) / 2 = 0 := by
-    rw [show (2 : V) - 1 = 1 from tsub_eq_of_eq_add one_add_one_eq_two.symm]
-    exact div_eq_zero_of_lt _ one_lt_two
-  rcases key hp with rfl | hp2 <;> rcases key hp' with rfl | hp2'
-  · rfl
-  · exact (htwo hp' (h.symm.trans hzero)).symm
-  · exact htwo hp (h.trans hzero)
-  · rw [← tsub_add_cancel_of_le (hle hp), ← tsub_add_cancel_of_le (hle hp'), hp2, hp2', h]
-
 variable (a A l : V)
 
 /-- `t` is the first index below `a` with `P ∣ A + t`. -/
 def IsFirst (P t : V) : Prop := t < a ∧ P ∣ A + t ∧ ∀ s < t, ¬P ∣ A + s
-
-/-- The position `x + 1` falls between the lengths of the largest divisors of `y` whose
-prime-power divisors are at most `T` and at most `T + 1`. -/
-def IsSegment (y x T : V) : Prop :=
-  ‖divisorUpTo y T‖ ≤ x + 1 ∧ x + 1 < ‖divisorUpTo y (T + 1)‖
 
 /-- The images `z` of the position `x` in the block of `A + i`. -/
 def Image (i x z : V) : Prop :=
@@ -150,10 +108,6 @@ lemma definable_isFirst : 𝚺ᴬ₀.DefinableRel (IsFirst a A) := by
   unfold IsFirst
   definability
 
-lemma definable_isSegment : 𝚺ᴬ₀.DefinableRel₃ (IsSegment : V → V → V → Prop) := by
-  unfold IsSegment
-  definability
-
 lemma definable_image : 𝚺ᴬ₀.DefinableRel₃ (Image a A l) := by
   have := definable_isFirst (a := a) (A := A)
   have := definable_isSegment (V := V)
@@ -171,77 +125,17 @@ lemma IsFirst.unique {P t t' : V} (h : IsFirst a A P t) (h' : IsFirst a A P t') 
   · exact heq
   · exact absurd h'.2.1 (h.2.2 t' hgt)
 
-section segment
+section image
 
-variable {y x T D p o : V}
+variable {i x z D p o T : V}
 
-lemma IsSegment.exists_isPrimePower (hy : 0 < y) (h : IsSegment y x T) :
-    ∃ p, IsPrimePower p (T + 1) ∧ T + 1 ∣ y ∧ x + 1 - ‖divisorUpTo y T‖ < ‖p‖ := by
-  have hlt : divisorUpTo y T < divisorUpTo y (T + 1) := by
-    by_contra! hle
-    exact absurd (h.1.trans_lt h.2) (not_lt.mpr (length_monotone hle))
-  obtain ⟨p, hP, hdvd, hle⟩ := exists_isPrimePower_of_divisorUpTo_lt hy hlt
-  use p
-  constructor
-  · exact hP
-  constructor
-  · exact hdvd
-  · apply (tsub_lt_iff_left h.1).mpr
-    rw [add_comm (‖divisorUpTo y T‖)]
-    exact h.2.trans_le <| (length_monotone hle).trans (length_mul_le _ _)
-
-lemma two_mul_length_add_lt (hD : 0 < D) (hP : IsPrimePower p (T + 1)) (hdvd : T + 1 ∣ D)
-    (ho : o < ‖p‖) : 2 * ‖divisorUpTo D T‖ + o < 2 * ‖divisorUpTo D (T + 1)‖ := by
-  have h1 : ‖p‖ + ‖divisorUpTo D T‖ ≤ ‖divisorUpTo D (T + 1)‖ + 1 :=
-    (length_add_length_le (pos_of_gt hP.1.1) (divisorUpTo_pos hD)).trans <|
-      (add_le_add_iff_right 1).mpr (length_monotone (mul_divisorUpTo_le hD hP hdvd))
-  have h2 : 2 ≤ ‖p‖ := by
-    have h : ‖(2 : V)‖ = 2 := by
-      simpa [one_add_one_eq_two] using length_two_mul_of_pos (show (0 : V) < 1 from zero_lt_one)
-    rw [← h]
-    exact length_monotone (by simpa [one_add_one_eq_two] using succ_le_iff_lt.mpr hP.1.1)
-  have : 2 * ‖divisorUpTo D T‖ + o + 2 < 2 * ‖divisorUpTo D (T + 1)‖ + 2 := calc
-    2 * ‖divisorUpTo D T‖ + o + 2 < 2 * ‖divisorUpTo D T‖ + ‖p‖ + ‖p‖ := by
-      rw [add_assoc, add_assoc]
-      exact (add_lt_add_iff_left _).mpr (add_lt_add_of_lt_of_le ho h2)
-    _ = 2 * (‖p‖ + ‖divisorUpTo D T‖) := by grind
-    _ ≤ 2 * (‖divisorUpTo D (T + 1)‖ + 1) := mul_le_mul_left h1
-    _ = 2 * ‖divisorUpTo D (T + 1)‖ + 2 := by grind
-  exact lt_of_add_lt_add_right this
-
-lemma eq_of_two_mul_length_add_eq {T' p' o' : V} (hD : 0 < D) (hP : IsPrimePower p (T + 1))
-    (hdvd : T + 1 ∣ D) (ho : o < ‖p‖) (hP' : IsPrimePower p' (T' + 1)) (hdvd' : T' + 1 ∣ D)
-    (ho' : o' < ‖p'‖) (h : 2 * ‖divisorUpTo D T‖ + o = 2 * ‖divisorUpTo D T'‖ + o') :
-    T = T' ∧ o = o' := by
-  have key : ∀ {T T' p o o' : V}, IsPrimePower p (T + 1) → T + 1 ∣ D → o < ‖p‖ → T < T' →
-      2 * ‖divisorUpTo D T‖ + o ≠ 2 * ‖divisorUpTo D T'‖ + o' := by
-    intro T T' p o o' hP hdvd ho hlt heq
-    have hlen : ‖divisorUpTo D (T + 1)‖ ≤ ‖divisorUpTo D T'‖ :=
-      length_monotone (divisorUpTo_monotone (succ_le_iff_lt.mpr hlt))
-    have := two_mul_length_add_lt hD hP hdvd ho
-    rw [heq] at this
-    exact absurd this <| not_lt.mpr <| (mul_le_mul_left hlen).trans le_self_add
-  have hT : T = T' := by
-    rcases lt_trichotomy T T' with hlt | heq | hgt
-    · exact absurd h (key hP hdvd ho hlt)
-    · exact heq
-    · exact absurd h.symm (key hP' hdvd' ho' hgt)
-  subst hT
-  exact ⟨rfl, add_left_cancel h⟩
-
-lemma two_mul_length_add_lt_two_mul_length (hD : 0 < D) (hDa : D < a)
+lemma two_mul_length_add_lt_of_dvd (hD : 0 < D) (hDa : D < a)
     (hP : IsPrimePower p (T + 1)) (hdvd : T + 1 ∣ D) (ho : o < ‖p‖) :
     2 * ‖divisorUpTo D T‖ + o < 2 * ‖a‖ :=
   (two_mul_length_add_lt hD hP hdvd ho).trans_le <| mul_le_mul_left <|
     (length_monotone (divisorUpTo_le D (T + 1))).trans (length_monotone hDa.le)
 
-end segment
-
-section image
-
-variable {i x z : V}
-
-lemma add_two_mul_length_mul_lt {W D f : V} (hW : W < 2 * ‖a‖) (hD : D < a) (hf : f ≤ 1) :
+lemma add_mul_lt_four_mul_mul_length {W D f : V} (hW : W < 2 * ‖a‖) (hD : D < a) (hf : f ≤ 1) :
     W + 2 * ‖a‖ * (f + 2 * D) < 4 * a * ‖a‖ := by
   have hDa : 1 + f + 2 * D ≤ 2 * a := calc
     1 + f + 2 * D ≤ 1 + 1 + 2 * D := (add_le_add_iff_right _).mpr ((add_le_add_iff_left 1).mpr hf)
@@ -276,18 +170,9 @@ lemma exists_image (hA : 0 < A) (hl : l < ‖A‖) (hprime : ∀ p, IsPrime p �
     use 2 * ‖divisorUpTo D T‖ + (x + 1 - ‖divisorUpTo (A + (t + D)) T‖) + 2 * ‖a‖ * (2 * D)
     constructor
     · apply lt_of_lt_of_le _ hbound
-      simpa using add_two_mul_length_mul_lt
-        (two_mul_length_add_lt_two_mul_length hD hDa hP hdvdD ho) hDa zero_le_one
-    · use T
-      constructor
-      · exact hTN
-      constructor
-      · exact hT
-      use t
-      constructor
-      · exact hlt.le
-      constructor
-      · exact hfirst
+      simpa using add_mul_lt_four_mul_mul_length
+        (two_mul_length_add_lt_of_dvd hD hDa hP hdvdD ho) hDa zero_le_one
+    · use T, hTN, hT, t, hlt.le, hfirst
       left
       use D
   · by_cases hnext : ∃ s < a, t < s ∧ T + 1 ∣ A + s
@@ -298,54 +183,24 @@ lemma exists_image (hA : 0 < A) (hl : l < ‖A‖) (hprime : ∀ p, IsPrime p �
       have hdvdD : T + 1 ∣ D := dvd_of_dvd_add htP (by rwa [← add_assoc] at hsP)
       use 2 * ‖divisorUpTo D T‖ + (x + 1 - ‖divisorUpTo (A + t) T‖) + 2 * ‖a‖ * (1 + 2 * D)
       constructor
-      · exact (add_two_mul_length_mul_lt
-          (two_mul_length_add_lt_two_mul_length hD hDa hP hdvdD ho) hDa le_rfl).trans_le hbound
-      · use T
-        constructor
-        · exact hTN
-        constructor
-        · exact hT
-        use t
-        constructor
-        · exact le_rfl
-        constructor
-        · exact hfirst
+      · exact (add_mul_lt_four_mul_mul_length
+          (two_mul_length_add_lt_of_dvd hD hDa hP hdvdD ho) hDa le_rfl).trans_le hbound
+      · use T, hTN, hT, t, le_rfl, hfirst
         right
         left
-        constructor
-        · rfl
-        use D
+        exact ⟨rfl, D, hDa, hD, hs, hsP, rfl⟩
     · push Not at hnext
-      have hpa : p ≤ a := hprime p hP.1
       use x + l * ((p - 1) / 2) + 4 * a * ‖a‖
       constructor
       · apply (add_lt_add_iff_right _).mpr
         calc x + l * ((p - 1) / 2) < l + l * ((p - 1) / 2) := (add_lt_add_iff_right _).mpr hx
           _ = l * ((p - 1) / 2 + 1) := by grind
           _ ≤ l * ((a - 1) / 2 + 1) := mul_le_mul_left <|
-            (add_le_add_iff_right 1).mpr (div_monotone (tsub_le_tsub_right hpa 1) 2)
-      · use T
-        constructor
-        · exact hTN
-        constructor
-        · exact hT
-        use t
-        constructor
-        · exact le_rfl
-        constructor
-        · exact hfirst
+            (add_le_add_iff_right 1).mpr (div_monotone (tsub_le_tsub_right (hprime p hP.1) 1) 2)
+      · use T, hTN, hT, t, le_rfl, hfirst
         right
         right
-        constructor
-        · rfl
-        constructor
-        · exact hnext
-        use p
-        constructor
-        · exact le_of_dvd (by simp) hP.dvd
-        constructor
-        · exact hP
-        · rfl
+        exact ⟨rfl, hnext, p, le_of_dvd (by simp) hP.dvd, hP, rfl⟩
 
 lemma Image.cases (hA : 0 < A) (hi : i < a) (h : Image a A l i x z) :
     (∃ T t D f p, IsSegment (A + i) x T ∧ IsFirst a A (T + 1) t ∧ IsPrimePower p (T + 1) ∧
@@ -382,8 +237,8 @@ lemma image_injective (hA : 0 < A) {i' x' : V} (hi : i < a) (hi' : i' < a) (hx :
     rcases h'.cases hA hi' with
       ⟨T', t', D', f', p', hT', hfirst', hP', hdvd', hD', hDa', hf', hf0', hf1', ho', heq⟩ |
       ⟨T', p', hP', hdvd', hlone', heq⟩
-  · have hW := two_mul_length_add_lt_two_mul_length hD hDa hP hdvd ho
-    have hW' := two_mul_length_add_lt_two_mul_length hD' hDa' hP' hdvd' ho'
+  · have hW := two_mul_length_add_lt_of_dvd hD hDa hP hdvd ho
+    have hW' := two_mul_length_add_lt_of_dvd hD' hDa' hP' hdvd' ho'
     obtain ⟨hWeq, hfD⟩ := (add_mul_eq_add_mul_iff hW hW').mp heq
     obtain ⟨rfl, rfl⟩ :=
       (add_mul_eq_add_mul_iff (lt_two_iff_le_one.mpr hf) (lt_two_iff_le_one.mpr hf')).mp hfD
@@ -397,16 +252,16 @@ lemma image_injective (hA : 0 < A) {i' x' : V} (hi : i < a) (hi' : i' < a) (hx :
     constructor
     · rfl
     · exact add_right_cancel <| (tsub_left_inj hT.1 hT'.1).mp hoeq
-  · have := add_two_mul_length_mul_lt
-      (two_mul_length_add_lt_two_mul_length hD hDa hP hdvd ho) hDa hf
+  · have := add_mul_lt_four_mul_mul_length
+      (two_mul_length_add_lt_of_dvd hD hDa hP hdvd ho) hDa hf
     rw [heq] at this
     exact absurd this (not_lt.mpr le_add_self)
-  · have := add_two_mul_length_mul_lt
-      (two_mul_length_add_lt_two_mul_length hD' hDa' hP' hdvd' ho') hDa' hf'
+  · have := add_mul_lt_four_mul_mul_length
+      (two_mul_length_add_lt_of_dvd hD' hDa' hP' hdvd' ho') hDa' hf'
     rw [← heq] at this
     exact absurd this (not_lt.mpr le_add_self)
   · obtain ⟨rfl, hk⟩ := (add_mul_eq_add_mul_iff hx hx').mp (add_right_cancel heq)
-    obtain rfl := eq_of_sub_one_div_two_eq hP.1 hP'.1 hk
+    obtain rfl := hP.1.eq_of_sub_one_div_two_eq hP'.1 hk
     constructor
     · by_contra hne
       rcases hP.dvd_or_dvd hP' with h | h
@@ -510,17 +365,8 @@ lemma exists_prime_gt [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] (x : V) : �
     use z
     constructor
     · simpa using hz'
-    constructor
-    · use X / l
-      constructor
-      · exact div_lt_of_lt_mul hXl
-      use X % l
-      constructor
-      · exact mod_lt X hl0
-      constructor
-      · rw [add_comm, div_add_mod]
-      · exact himage
-    · exact hz'
+    · exact ⟨⟨X / l, div_lt_of_lt_mul hXl, X % l, mod_lt X hl0, by rw [add_comm, div_add_mod],
+        himage⟩, hz'⟩
   obtain ⟨X, -, X', -, z, -, hne, ⟨⟨i, hi, y, hy, rfl, h⟩, -⟩, ⟨⟨i', hi', y', hy', rfl, h'⟩, -⟩⟩ :=
     weakPigeonhole_succ_mul 8 hR (by simp [m, ha0, L]) total
   obtain ⟨rfl, rfl⟩ := image_injective hA hi hi' hy hy' h h'

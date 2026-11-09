@@ -4,6 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Foundation.FirstOrder.Arithmetic.Exponential
+public import AlphaCentauri.ToFoundation.Exponential
 
 /-!
 # Prime factors and prime powers
@@ -68,6 +69,43 @@ def IsPrimePower (p q : V) : Prop := IsPrime p ∧ 1 < q ∧ ∀ r ≤ q, IsPrim
 lemma IsPrime.isPrimePower (hp : IsPrime p) : IsPrimePower p p := by
   refine ⟨hp, hp.1, fun r hr hrp hrd ↦ ?_⟩
   exact (hp.2 r hr hrd).resolve_left hrp.1.ne'
+
+lemma IsPrime.eq_of_sub_one_div_two_eq (hp : IsPrime p) (hp' : IsPrime p')
+    (h : (p - 1) / 2 = (p' - 1) / 2) : p = p' := by
+  have key : ∀ {q : V}, IsPrime q → q = 2 ∨ q - 1 = 2 * ((q - 1) / 2) := by
+    intro q hq
+    by_cases h2 : 2 ∣ q
+    · left
+      rcases hq.2 2 (le_of_dvd (pos_of_gt hq.1) h2) h2 with h | h
+      · simp at h
+      · exact h.symm
+    · right
+      have hmod : q % 2 = 1 := by
+        rcases mod_two q with h | h
+        · exact absurd (mod_eq_zero_iff_dvd.mp h) h2
+        · exact h
+      have hq' : q - 1 = 2 * (q / 2) := by
+        conv_lhs => rw [← div_add_mod q 2, hmod]
+        simp
+      rw [hq']
+      simp
+  have hle : ∀ {q : V}, IsPrime q → 1 ≤ q := fun hq ↦ hq.1.le
+  have htwo : ∀ {q : V}, IsPrime q → (q - 1) / 2 = 0 → q = 2 := by
+    intro q hq h0
+    rcases key hq with h | h
+    · exact h
+    · rw [h0, mul_zero] at h
+      have : q = 1 := by
+        rw [← tsub_add_cancel_of_le (hle hq), h, zero_add]
+      exact absurd hq.1 (by simp [this])
+  have hzero : ((2 : V) - 1) / 2 = 0 := by
+    rw [show (2 : V) - 1 = 1 from tsub_eq_of_eq_add one_add_one_eq_two.symm]
+    exact div_eq_zero_of_lt _ one_lt_two
+  rcases key hp with rfl | hp2 <;> rcases key hp' with rfl | hp2'
+  · rfl
+  · exact (htwo hp' (h.symm.trans hzero)).symm
+  · exact htwo hp (h.trans hzero)
+  · rw [← tsub_add_cancel_of_le (hle hp), ← tsub_add_cancel_of_le (hle hp'), hp2, hp2', h]
 
 namespace IsPrimePower
 
@@ -192,7 +230,7 @@ noncomputable def divisorUpTo (y T : V) : V :=
 
 section divisorUpTo
 
-variable {x y T T' : V}
+variable {x y T T' o o' : V}
 
 lemma divisorUpTo_le (y T : V) : divisorUpTo y T ≤ y :=
   (Classical.choose_spec (exists_greatest_primePowerDivisorsLE y T)).1
@@ -329,6 +367,69 @@ lemma eq_of_length_divisorUpTo_le_lt {X : V} (h₁ : ‖divisorUpTo y T‖ ≤ X
       (lt_iff_succ_le.mp hlt)).trans h₁) (lt_irrefl _)
   · exact absurd (h₂.trans_le <| (length_monotone <| divisorUpTo_monotone
       (lt_iff_succ_le.mp hlt)).trans h₁') (lt_irrefl _)
+
+/-- The position `x + 1` falls between the lengths of the largest divisors of `y` whose
+prime-power divisors are at most `T` and at most `T + 1`. -/
+def IsSegment (y x T : V) : Prop :=
+  ‖divisorUpTo y T‖ ≤ x + 1 ∧ x + 1 < ‖divisorUpTo y (T + 1)‖
+
+@[definability] lemma definable_isSegment : 𝚺ᴬ₀.DefinableRel₃ (IsSegment : V → V → V → Prop) := by
+  unfold IsSegment
+  definability
+
+lemma IsSegment.exists_isPrimePower (hy : 0 < y) (h : IsSegment y x T) :
+    ∃ p, IsPrimePower p (T + 1) ∧ T + 1 ∣ y ∧ x + 1 - ‖divisorUpTo y T‖ < ‖p‖ := by
+  have hlt : divisorUpTo y T < divisorUpTo y (T + 1) := by
+    by_contra! hle
+    exact absurd (h.1.trans_lt h.2) (not_lt.mpr (length_monotone hle))
+  obtain ⟨p, hP, hdvd, hle⟩ := exists_isPrimePower_of_divisorUpTo_lt hy hlt
+  use p
+  constructor
+  · exact hP
+  constructor
+  · exact hdvd
+  · apply (tsub_lt_iff_left h.1).mpr
+    rw [add_comm (‖divisorUpTo y T‖)]
+    exact h.2.trans_le <| (length_monotone hle).trans (length_mul_le _ _)
+
+lemma two_mul_length_add_lt (hD : 0 < d) (hP : IsPrimePower p (T + 1)) (hdvd : T + 1 ∣ d)
+    (ho : o < ‖p‖) : 2 * ‖divisorUpTo d T‖ + o < 2 * ‖divisorUpTo d (T + 1)‖ := by
+  have h1 : ‖p‖ + ‖divisorUpTo d T‖ ≤ ‖divisorUpTo d (T + 1)‖ + 1 :=
+    (length_add_length_le (pos_of_gt hP.1.1) (divisorUpTo_pos hD)).trans <|
+      (add_le_add_iff_right 1).mpr (length_monotone (mul_divisorUpTo_le hD hP hdvd))
+  have h2 : 2 ≤ ‖p‖ := by
+    have h : ‖(2 : V)‖ = 2 := by
+      simpa [one_add_one_eq_two] using length_two_mul_of_pos (show (0 : V) < 1 from zero_lt_one)
+    rw [← h]
+    exact length_monotone (by simpa [one_add_one_eq_two] using succ_le_iff_lt.mpr hP.1.1)
+  have : 2 * ‖divisorUpTo d T‖ + o + 2 < 2 * ‖divisorUpTo d (T + 1)‖ + 2 := calc
+    2 * ‖divisorUpTo d T‖ + o + 2 < 2 * ‖divisorUpTo d T‖ + ‖p‖ + ‖p‖ := by
+      rw [add_assoc, add_assoc]
+      exact (add_lt_add_iff_left _).mpr (add_lt_add_of_lt_of_le ho h2)
+    _ = 2 * (‖p‖ + ‖divisorUpTo d T‖) := by grind
+    _ ≤ 2 * (‖divisorUpTo d (T + 1)‖ + 1) := mul_le_mul_left h1
+    _ = 2 * ‖divisorUpTo d (T + 1)‖ + 2 := by grind
+  exact lt_of_add_lt_add_right this
+
+lemma eq_of_two_mul_length_add_eq {T' p' o' : V} (hD : 0 < d) (hP : IsPrimePower p (T + 1))
+    (hdvd : T + 1 ∣ d) (ho : o < ‖p‖) (hP' : IsPrimePower p' (T' + 1)) (hdvd' : T' + 1 ∣ d)
+    (ho' : o' < ‖p'‖) (h : 2 * ‖divisorUpTo d T‖ + o = 2 * ‖divisorUpTo d T'‖ + o') :
+    T = T' ∧ o = o' := by
+  have key : ∀ {T T' p o o' : V}, IsPrimePower p (T + 1) → T + 1 ∣ d → o < ‖p‖ → T < T' →
+      2 * ‖divisorUpTo d T‖ + o ≠ 2 * ‖divisorUpTo d T'‖ + o' := by
+    intro T T' p o o' hP hdvd ho hlt heq
+    have hlen : ‖divisorUpTo d (T + 1)‖ ≤ ‖divisorUpTo d T'‖ :=
+      length_monotone (divisorUpTo_monotone (succ_le_iff_lt.mpr hlt))
+    have := two_mul_length_add_lt hD hP hdvd ho
+    rw [heq] at this
+    exact absurd this <| not_lt.mpr <| (mul_le_mul_left hlen).trans le_self_add
+  have hT : T = T' := by
+    rcases lt_trichotomy T T' with hlt | heq | hgt
+    · exact absurd h (key hP hdvd ho hlt)
+    · exact heq
+    · exact absurd h.symm (key hP' hdvd' ho' hgt)
+  subst hT
+  exact ⟨rfl, add_left_cancel h⟩
 
 end divisorUpTo
 

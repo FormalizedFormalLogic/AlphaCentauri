@@ -232,6 +232,18 @@ Sla04:
     type: Periodical
     title: Proceedings of the American Mathematical Society
 
+Smi93:
+  type: Article
+  title: "Quadratic residues and x³ + y³ = z³ in models of IE₁ and IE₂"
+  author: Smith, Stuart T.
+  page-range: 420-439
+  date: 1993
+  parent:
+    type: Periodical
+    title: Notre Dame Journal of Formal Logic
+    volume: 34
+    issue: 3
+
 Tow20:
   type: Misc
   title: "{Goodstein}'s theorem, ε₀, and unprovability"
@@ -252,6 +264,20 @@ vO99:
   note: >-
     Notes of a course in the 1998-1999 Master Class Program in Mathematical
     Logic of the Mathematical Research Institute, Utrecht
+
+Wil85:
+  type: Article
+  title: Bounded existential induction
+  author: Wilmers, George
+  page-range: 72-90
+  date: 1985
+  serial-number:
+    doi: "10.2307/2273790"
+  parent:
+    type: Periodical
+    title: The Journal of Symbolic Logic
+    volume: 50
+    issue: 1
 
 WP89:
   type: Chapter

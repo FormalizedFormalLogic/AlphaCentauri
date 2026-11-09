@@ -35,10 +35,32 @@ lemma definableElements_mono {k k' : ℕ} (h : k ≤ k') :
   exact ⟨φ, hφ.mono h, ha⟩
 
 /-- An element defined uniquely from definable elements by a $\Sigma_k$ formula is definable. -/
-axiom mem_definableElements_of_unique {k m : ℕ} (hk : 1 ≤ k)
+lemma mem_definableElements_of_unique {k m : ℕ} (hk : 1 ≤ k)
     {ψ : ArithmeticSemisentence (m + 1)} (hψ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k ψ) {v : Fin m → M}
     (hv : ∀ i, v i ∈ definableElements k M) {a : M} (ha : ∀ x, M ⊧/(x :> v) ψ ↔ x = a) :
-    a ∈ definableElements k M
+    a ∈ definableElements k M := by
+  induction m with
+  | zero =>
+    use ψ
+    and_intros
+    · exact hψ
+    simpa [Matrix.empty_eq] using ha
+  | succ m ih =>
+    obtain ⟨δ, hδ, hv₀⟩ := hv 0
+    obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le' hk
+    apply ih (ψ := ∃¹ (δ ⇜ ![#0] ⋏ ψ ⇜ (#1 :> #0 :> fun i ↦ #i.succ.succ))) (v := Fin.tail v)
+    · simp [hδ.rew, hψ.rew]
+    · intro i
+      exact hv i.succ
+    · intro x
+      have hw : Semiterm.val (v 0 :> x :> Fin.tail v) Empty.elim ∘
+          (#1 :> #0 :> fun i ↦ #i.succ.succ : Fin (m + 2) → ArithmeticSemiterm Empty (m + 2)) =
+            x :> v := by
+        ext i
+        cases i using Fin.cases with
+        | zero => simp
+        | succ i => cases i using Fin.cases <;> simp [Fin.tail]
+      simp [← ha x, hv₀, hw]
 
 /-- A $\Pi_j$ formula with parameters among the $\Sigma_{j+1}$-definable elements and a witness
 has a least witness, and it is $\Sigma_{j+1}$-definable. -/

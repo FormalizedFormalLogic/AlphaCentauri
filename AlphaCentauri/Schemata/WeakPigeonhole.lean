@@ -411,7 +411,7 @@ lemma exists_root_of_two_mul (ha : 0 < a) (hR : 𝚺ᴬ₀.DefinableRel R)
     · rw [← div_add_mod τ' 2]
       exact hl.cons ha hd' hc hc' (mod_lt _ two_pos) hRc
 
-lemma definable_pairLeaf (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel fun x c ↦
+lemma definable_isLeafPair (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel fun x c ↦
     ∃ e < a, ∃ τ < a, x = e + a * τ ∧ IsLeaf (IsPreimage R a) a ‖a‖ c τ e := by
   have := definable_isLeaf (a := a) (definable_isPreimage (a := a) hR)
   definability
@@ -462,7 +462,7 @@ theorem weakPigeonhole_two_mul {R : V → V → Prop} (hR : 𝚺ᴬ₀.Definable
         · rw [add_comm, div_add_mod]
         · exact hl
   obtain ⟨x, -, x', -, c, hc, hxx, ⟨e, he, τ, hτ, rfl, s, -, hs, rfl⟩,
-    ⟨e', he', τ', hτ', rfl, s', -, hs', rfl⟩⟩ := weakPigeonhole (definable_pairLeaf hR) ha1 hQtot
+    ⟨e', he', τ', hτ', rfl, s', -, hs', rfl⟩⟩ := weakPigeonhole (definable_isLeafPair hR) ha1 hQtot
   have hext := hs.ext_eq hc (fun _ _ _ he _ hx _ hx' h h' ↦
     (hC (fbit_lt_two _ _) (fbit_lt_two _ _) he hx hx' h h').1) hs'
   have hbit : ∀ i, fbit τ i = fbit τ' i := by

@@ -79,9 +79,6 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [ELV25, Question 1.2].
       - FFL.FirstOrder.Arithmetic.exists_complete_extension_ISigma0_of_restricted_complexity
-  FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
@@ -174,8 +171,3 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (2)].
       - FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1
-
-  # Declarations that inherit the debt of an unproved statement.
-  FFL.FirstOrder.Arithmetic.exists_prime_gt:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1

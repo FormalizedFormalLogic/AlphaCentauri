@@ -396,7 +396,8 @@ lemma image_injective (hA : 0 < A) {i' x' : V} (hi : i < a) (hi' : i' < a) (hx :
     constructor
     · rfl
     · exact add_right_cancel <| (tsub_left_inj hT.1 hT'.1).mp hoeq
-  · have := add_two_mul_length_mul_lt (two_mul_length_add_lt_two_mul_length hD hDa hP hdvd ho) hDa hf
+  · have := add_two_mul_length_mul_lt
+      (two_mul_length_add_lt_two_mul_length hD hDa hP hdvd ho) hDa hf
     rw [heq] at this
     exact absurd this (not_lt.mpr le_add_self)
   · have := add_two_mul_length_mul_lt
@@ -418,23 +419,124 @@ end
 
 end InfinitudeOfPrimes
 
-/-- - [PWW88, Corollary 8] -/
-axiom provable_infinitudeOfPrimes_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮₁ ⊢ infinitudeOfPrimes
-
-/-- - [PWW88, Problem 1] -/
-axiom provable_infinitudeOfPrimes_ISigma0 : 𝗜𝚺₀ ⊢ infinitudeOfPrimes
-
 noncomputable section
 
 variable {V : Type*} [ORingStructure V]
 
-/-- - [PWW88, Corollary 8] -/
-lemma exists_prime_gt [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] (x : V) : ∃ p, x < p ∧ IsPrime p :=
-  models_infinitudeOfPrimes_iff.mp
-    (consequence_iff.mp
-      (Theory.Proof.sound provable_infinitudeOfPrimes_ISigma0_union_Omega1) V inferInstance) x
+open InfinitudeOfPrimes in
+/-- - [PWW88, Theorem 11, Corollary 8] -/
+lemma exists_prime_gt [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] (x : V) : ∃ p, x < p ∧ IsPrime p := by
+  by_contra! hx
+  have hlen2 : ∀ (k : ℕ) {y : V}, 0 < y → ‖(2 : V) ^ k * y‖ = ‖y‖ + k := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+      intro y hy
+      rw [show (2 : V) ^ (k + 1) * y = 2 * (2 ^ k * y) by grind,
+        length_two_mul_of_pos (mul_pos (pow_pos two_pos k) hy), ih hy]
+      push_cast
+      grind
+  set a : V := 2 ^ 9 * (x + 1)
+  have hx1 : (0 : V) < x + 1 := by simp
+  have hLa : 10 ≤ ‖a‖ := by
+    rw [hlen2 9 hx1, Nat.cast_ofNat]
+    calc (10 : V) = 1 + 9 := by grind
+      _ ≤ ‖x + 1‖ + 9 := (add_le_add_iff_right _).mpr (pos_iff_one_le.mp (length_pos_iff.mpr hx1))
+  have ha : 10 ≤ a := hLa.trans (length_le a)
+  have ha0 : 0 < a := mul_pos (pow_pos two_pos 9) hx1
+  have hprime : ∀ p, IsPrime p → p ≤ a := by
+    intro p hp
+    have hpx : p ≤ x := not_lt.mp fun h ↦ hx p h hp
+    exact hpx.trans <| le_self_add.trans <| le_mul_of_one_le_left (Arithmetic.zero_le _) <|
+      one_le_pow₀ one_le_two
+  set L := ‖a‖
+  set A : V := a ^ 20
+  set l : V := 18 * L
+  have hA : 0 < A := pow_pos ha0 20
+  have hpow : ∀ k : ℕ, (k + 1 : V) * L ≤ ‖a ^ (k + 1)‖ + k := by
+    intro k
+    induction k with
+    | zero => simp [L]
+    | succ k ih =>
+      calc ((k + 1 : ℕ) + 1 : V) * L = (k + 1) * L + L := by push_cast; grind
+        _ ≤ ‖a ^ (k + 1)‖ + k + L := (add_le_add_iff_right _).mpr ih
+        _ = ‖a ^ (k + 1)‖ + ‖a‖ + k := by grind
+        _ ≤ ‖a ^ (k + 1) * a‖ + 1 + k :=
+          (add_le_add_iff_right _).mpr (length_add_length_le (pow_pos ha0 _) ha0)
+        _ = ‖a ^ (k + 1 + 1)‖ + ((k + 1 : ℕ) : V) := by rw [← pow_succ]; push_cast; grind
+  have hl : l < ‖A‖ := by
+    have h20 := hpow 19
+    have : l + 20 ≤ ‖A‖ + 19 := calc
+      l + 20 ≤ 18 * L + 2 * L := (add_le_add_iff_left _).mpr <| calc
+        (20 : V) = 2 * 10 := by grind
+        _ ≤ 2 * L := mul_le_mul_left hLa
+      _ = ((19 : ℕ) + 1 : V) * L := by push_cast; grind
+      _ ≤ ‖A‖ + ((19 : ℕ) : V) := h20
+      _ = ‖A‖ + 19 := by simp
+    exact succ_le_iff_lt.mp <| (add_le_add_iff_right 19).mp <| by
+      rwa [show l + 1 + 19 = l + 20 by grind]
+  set m : V := 2 * a * L
+  have hl0 : 0 < l := mul_pos (by exact_mod_cast Nat.succ_pos 17) (length_pos_iff.mpr ha0)
+  have hR : 𝚺ᴬ₀.DefinableRel fun X z ↦ Code a A l X z ∧ z < 8 * m := by
+    have := definable_code (a := a) (A := A) (l := l)
+    definability
+  have hbound : l * ((a - 1) / 2 + 1) + 4 * a * L ≤ 8 * m := by
+    have h2 : 2 * ((a - 1) / 2) ≤ a - 1 := mul_div_le _ _
+    have h3 : a - 1 + 2 = a + 1 := by
+      rw [show (2 : V) = 1 + 1 by grind, ← add_assoc, tsub_add_cancel_of_le (pos_iff_one_le.mp ha0)]
+    calc l * ((a - 1) / 2 + 1) + 4 * a * L = 9 * L * (2 * ((a - 1) / 2) + 2) + 4 * a * L := by
+          grind
+      _ ≤ 9 * L * (a - 1 + 2) + 4 * a * L :=
+        (add_le_add_iff_right _).mpr (mul_le_mul_left ((add_le_add_iff_right 2).mpr h2))
+      _ = 9 * L * a + 9 * L + 4 * a * L := by rw [h3]; grind
+      _ ≤ 9 * L * a + 3 * L * a + 4 * a * L :=
+        (add_le_add_iff_right _).mpr ((add_le_add_iff_left _).mpr
+          (by
+            have h := mul_le_mul_left (a := 3 * L)
+              ((show (3 : V) ≤ 10 by exact_mod_cast (show 3 ≤ 10 by decide)).trans ha)
+            rwa [show 3 * L * 3 = 9 * L by grind] at h))
+      _ = 8 * m := by grind
+  have total : ∀ X < ((8 : ℕ) + 1 : V) * m, ∃ z < ((8 : ℕ) : V) * m,
+      Code a A l X z ∧ z < 8 * m := by
+    intro X hX
+    have hXl : X < a * l := by
+      rw [show ((8 : ℕ) + 1 : V) * m = a * l by push_cast; grind] at hX
+      exact hX
+    obtain ⟨z, hz, himage⟩ :=
+      exists_image hA hl hprime (div_lt_of_lt_mul hXl) (mod_lt X hl0)
+    have hz' : z < 8 * m := hz.trans_le hbound
+    use z
+    constructor
+    · simpa using hz'
+    constructor
+    · use X / l
+      constructor
+      · exact div_lt_of_lt_mul hXl
+      use X % l
+      constructor
+      · exact mod_lt X hl0
+      constructor
+      · rw [add_comm, div_add_mod]
+      · exact himage
+    · exact hz'
+  obtain ⟨X, -, X', -, z, -, hne, ⟨⟨i, hi, y, hy, rfl, h⟩, -⟩, ⟨⟨i', hi', y', hy', rfl, h'⟩, -⟩⟩ :=
+    weakPigeonhole_succ_mul 8 hR (by simp [m, ha0, L]) total
+  obtain ⟨rfl, rfl⟩ := image_injective hA hi hi' hy hy' h h'
+  exact hne rfl
 
 end
+
+/-- - [PWW88, Corollary 8] -/
+theorem provable_infinitudeOfPrimes_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮₁ ⊢ infinitudeOfPrimes :=
+  have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀ ∪ 𝝮₁ :=
+    Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) inferInstance
+  complete (𝗜𝚺₀ ∪ 𝝮₁) infinitudeOfPrimes fun (M : Type) _ _ ↦ by
+    have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
+    exact models_infinitudeOfPrimes_iff.mpr exists_prime_gt
+
+/-- - [PWW88, Problem 1] -/
+axiom provable_infinitudeOfPrimes_ISigma0 : 𝗜𝚺₀ ⊢ infinitudeOfPrimes
 
 /-- Between $n$ and $2n$ there is a prime, for every $n \ge 1$. -/
 def bertrandPostulate : ArithmeticSentence :=

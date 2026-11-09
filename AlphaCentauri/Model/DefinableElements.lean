@@ -140,8 +140,22 @@ def emb : definableElements (j + 1) M ↪ₛ[ℒₒᵣ] M where
 @[simp]
 lemma emb_apply (x : definableElements (j + 1) M) : emb j M x = x.val := rfl
 
+variable (j) in
 /-- [HP98, Lemma IV.1.39] -/
-axiom sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] (j : ℕ) : SigmaElementary (emb j M) (j + 1)
+theorem sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : SigmaElementary (emb j M) (j + 1) := by
+  have witness {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)} (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 j φ)
+      (e : Fin n → definableElements (j + 1) M) (f : ℕ → definableElements (j + 1) M)
+      (h : ∃ x : M, φ.Eval (x :> emb j M ∘ e) (emb j M ∘ f)) :
+      ∃ x, φ.Eval (emb j M x :> emb j M ∘ e) (emb j M ∘ f) := by
+    obtain ⟨x, hx, h, -⟩ :=
+      exists_least_mem_definableElements hφ (fun i ↦ (e i).2) (fun i ↦ (f i).2) h
+    use ⟨x, hx⟩
+    exact h
+  apply sigmaElementary_of_tarskiVaught
+  · intro n φ hφ
+    exact eval_iff_of_bounded_of_witness _ (fun hψ ↦ witness (.bounded 𝚷 j _ hψ)) hφ
+  · intro m hm n φ hφ
+    exact witness (hφ.hierarchy.mono (by omega))
 
 /-- [HP98, Corollary IV.1.40] -/
 axiom models_ISigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] (j : ℕ) : (definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗜𝚺 j

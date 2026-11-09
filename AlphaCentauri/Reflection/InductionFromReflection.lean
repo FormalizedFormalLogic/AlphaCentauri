@@ -93,7 +93,9 @@ lemma exists_inductionImplication (ψ : ℬ[<, ℒₒᵣ].Prenex 𝚺 n ξ (m + 
   obtain ⟨_, ⟨θ, rfl⟩, hθ⟩ := (Prenex.pairOr A <| Prenex.pairOr
       (Prenex.pairExs <| Prenex.pairAnd (ψ.rew (Rew.subst (#0 :> fun i ↦ #i.succ.succ))).succ B)
       ψ.succ).val_prenexHierarchy.exists_eval_iff_of_lt.{_, u} 𝚷 (Nat.lt_succ_self (n + 1))
-  use θ.val, θ.val_prenexHierarchy
+  use θ.val
+  and_intros
+  · exact θ.val_prenexHierarchy
   intro V _ _ f x p
   have h₀ : (fun i ↦ Semiterm.val (x :> p) f
       ((‘0’ :> fun i ↦ #i.succ : Fin (m + 1) → ArithmeticSemiterm ξ (m + 1)) i)) = 0 :> p :=

@@ -134,7 +134,8 @@ lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c <
     exact Nuon.ext_zero_eq_self_of_le (length_monotone hc.le)
   have hext : ∀ i ≤ d, Nuon.ext a (c + s' % q * K) (i + 1) = Nuon.ext a s' i := by
     intro i hi
-    rw [add_comm i 1, ← ext_div_pow2 (I := 2 * a) (by simpa [hI, add_comm 1 i] using hi.trans hd.le) hK,
+    have hi' : 1 + i ≤ ‖2 * a‖ := by simpa [hI, add_comm 1 i] using hi.trans hd.le
+    rw [add_comm i 1, ← ext_div_pow2 hi' hK,
       div_add_mul_self _ _ hK.range_pos, div_eq_zero_of_lt _ hcK, zero_add,
       ext_mod_pow2 (I := 2 * a) (by simpa [hI] using hd.le) (lt_succ_iff_le.mpr hi) hK']
   refine ⟨c + s' % q * K, ?_, ⟨hext0, ?_⟩, hext d le_rfl⟩

@@ -446,8 +446,11 @@ theorem finset_comprehension (hP : 𝚺ᴬ₀.DefinablePred P) (a : V) :
     by_contra Hi
     exact t_minimal (bitRemove i t) (bitRemove_lt_of_mem hit) fun j hj Hj ↦
       mem_bitRemove_iff.mpr ⟨by rintro rfl; exact Hi Hj, ht j hj Hj⟩
-  exact ⟨t, lt_of_le_of_lt t_le_s (pred_lt_self_of_pos (by simp)),
-    fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
+  use t
+  and_intros
+  · exact lt_of_le_of_lt t_le_s (pred_lt_self_of_pos (by simp))
+  · intro i hi
+    exact ⟨this i hi, ht i hi⟩
 
 theorem finset_comprehension! (hP : 𝚺ᴬ₀.DefinablePred P) (a : V) :
     ∃! s, s < Exp.exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
@@ -471,7 +474,11 @@ theorem finite_comprehension! (hP : 𝚺ᴬ₀.DefinablePred P) (fin : ∃ m, �
   have H : ∀ i, i ∈ s ↔ P i := fun i ↦
     ⟨fun h ↦ (Hs i (exp_monotone.mp (lt_of_le_of_lt (exp_le_of_mem h) hs))).mp h,
       fun h ↦ (Hs i (hm i h)).mpr h⟩
-  exact ExistsUnique.intro s H fun s' H' ↦ mem_ext fun i ↦ by simp [H, H']
+  apply ExistsUnique.intro s H
+  intro s' H'
+  apply mem_ext
+  intro i
+  simp [H, H']
 
 /-- The set given by `finite_comprehension!` lies below `Exp.exp m` for a bound `m` of `P`. -/
 theorem finite_comprehension!_bound {m : V} (hP : 𝚺ᴬ₀.DefinablePred P)

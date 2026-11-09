@@ -143,6 +143,10 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.6].
       - FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE2
+  FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (2)], a question of Kirby.
+      - FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.Peano.not_finiteAxiomatizable:

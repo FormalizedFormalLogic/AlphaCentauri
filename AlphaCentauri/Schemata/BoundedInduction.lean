@@ -58,4 +58,10 @@ instance (k : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ IE k :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻)
     (Entailment.WeakerThan.ofSubset Set.subset_union_left)
 
+/-- $\mathsf{IE}_1$ proves the least number principle for $U_1$ formulas. An open problem, a
+question of Kirby; the converse holds.
+- [Wil85, §4.13, Problem (2)] -/
+axiom leastNumberBoundedUniversal_weakerThan_IE1 :
+    𝗣𝗔⁻ ∪ LeastNumberScheme (Semiformula.BoundedUniversal 1) ⪯ 𝗜𝗘₁
+
 end FFL.FirstOrder.Arithmetic

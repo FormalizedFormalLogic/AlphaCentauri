@@ -21,6 +21,7 @@
       "expAxiom": $sans("Exp")$,
       "LeastNumberScheme": Γ => $Theory(L)#Γ$,
       "BoundedUniversal": n => $U_#n$,
+      "ZRing": $sans("ZR")$,
     ),
     // Labels of whole theories the rule above draws badly, keyed by the pretty-printed theory.
     labels: (:),

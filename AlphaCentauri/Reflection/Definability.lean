@@ -104,29 +104,6 @@ noncomputable def ssnumsCodeGraph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
 instance ssnumsCode.defined : 𝚺ᴬ₁-Function₁ (ssnumsCode : V → V) via ssnumsCodeGraph :=
   .mk fun v ↦ by simp [ssnumsCodeGraph, ssnumsCode]
 
-lemma ssnumsCode_quote (k : ℕ) : ssnumsCode (k : V) = ⌜(ssnums (k := k)).val⌝ := by
-  unfold ssnums
-  simp only [Bounding.HierarchySymbol.Semiformula.val_mkSigma, ssnumsCode, Sentence.quote_ex,
-    Sentence.quote_and]
-  congr 2
-  · simp [Sentence.quote_def, Rewriting.emb_subst_eq_subst_emb, Semiformula.quote_substs,
-      Matrix.vecHead, Matrix.vecTail, Semiterm.quote_def]
-  · congr 1
-    · rw [Semisentence.quote_conj]
-      congr 1
-      rw [eq_matrixToVec_iff]
-      constructor
-      · simp
-      · intro i
-        rw [nth_ssnumsConjuncts _ _ (by simp)]
-        simp only [ssnumsConjunct, Sentence.quote_ex, Sentence.quote_and]
-        congr 2
-        · sorry
-        · sorry
-    · simp [Sentence.quote_def, Rewriting.emb_subst_eq_subst_emb, Semiformula.quote_substs,
-        Matrix.vecHead, Matrix.vecTail, Semiterm.quote_def]
-      sorry
-
 end ssnums
 
 end FFL.FirstOrder.Arithmetic

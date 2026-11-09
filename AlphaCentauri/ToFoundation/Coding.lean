@@ -180,6 +180,14 @@ lemma quote_substs {n m : ℕ} (w : Fin n → SyntacticSemiterm L m) (φ : Semip
 
 end Semiformula
 
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+lemma Semisentence.quote_substs {n m : ℕ} (w : Fin n → ClosedSemiterm L m)
+    (σ : Semisentence L n) :
+    (⌜σ ⇜ w⌝ : V) = Bootstrapping.subst L (matrixToVec fun i ↦ (⌜w i⌝ : V)) ⌜σ⌝ := by
+  simp [Sentence.quote_def, Rewriting.emb_subst_eq_subst_emb, Semiformula.quote_substs,
+    Semiterm.empty_quote_def]
+
 end FFL.FirstOrder
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping

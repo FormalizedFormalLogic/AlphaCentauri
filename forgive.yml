@@ -145,7 +145,7 @@ declaration:
       - FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE2
   FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (2)], a question of Kirby.
+      # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (2)].
       - FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1
 
   # Declarations that inherit the debt of an unproved statement.

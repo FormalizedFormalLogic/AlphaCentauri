@@ -52,16 +52,21 @@ private lemma exists_falseBlock_set (hT : AdmitsFalseBlockReplacement T V k) (d 
     obtain ⟨x, hx⟩ := mem_range_iff.mp he
     obtain ⟨q, rfl, hq⟩ := hFR x e hx
     exact (hR x q hq).2
-  refine ⟨range F, fun e he ↦ (hmem e he).isFormula, ?_, hmem, ?_⟩
+  use range F
+  and_intros
+  · intro e he
+    exact (hmem e he).isFormula
   · apply mem_ext
     intro y
     rw [mem_setShift_iff]
     exact ⟨fun ⟨x, hx, hy⟩ ↦ by rwa [hy, (hmem x hx).shift_eq], fun hy ↦
       ⟨y, hy, ((hmem y hy).shift_eq).symm⟩⟩
+  · exact hmem
   · intro p hp hpT
     obtain ⟨y, hy⟩ := mem_domain_iff.mp ((hsP p (lt_succ_iff_le.mpr hp)).mpr hpT)
     obtain ⟨q, rfl, hq⟩ := hFR p y hy
-    exact ⟨q, mem_range_iff.mpr ⟨p, hy⟩, (hR p q hq).1⟩
+    use q
+    exact ⟨mem_range_iff.mpr ⟨p, hy⟩, (hR p q hq).1⟩
 
 /-- In a model of $\mathsf{I}\Sigma^+_{k+1}$, for $1 \le k$, a prenex $\Pi_{k+3}$ formula holds of
 `v` if the internal `T`, each of whose axioms has a replacement by a false block, proves its

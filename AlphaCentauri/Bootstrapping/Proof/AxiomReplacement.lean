@@ -143,7 +143,8 @@ lemma admitsFalseBlockReplacement_ElementaryArithmetic [V↓[ℒₒᵣ] ⊧* �
   · intro p hp
     rcases Theory.Δ₁Class.mem_union.mp hp with hp | hp
     · obtain ⟨q, hq⟩ := exists_isAxiomReplacement hp
-      exact ⟨q, .inl hq⟩
+      use q
+      exact .inl hq
     · use p
       right
       simpa [Theory.Δ₁Class, Sentence.quote_eq_encode, numeral_eq_natCast] using hp

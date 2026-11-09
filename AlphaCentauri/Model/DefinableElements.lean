@@ -229,13 +229,46 @@ lemma DefinesElement.unique {c x x' : V} (h : DefinesElement j c x)
 
 /-- Every $\Sigma_{j+1}$-definable element of a model of $\mathsf{I}\Sigma_{j+1}$ is defined by a
 standard code. -/
-axiom exists_definesElement [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {x : V}
-    (hx : x ∈ definableElements (j + 1) V) : ∃ c : ℕ, DefinesElement j (c : V) x
+lemma exists_definesElement [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {x : V}
+    (hx : x ∈ definableElements (j + 1) V) : ∃ c : ℕ, DefinesElement j (c : V) x := by
+  obtain ⟨φ, hφ, hφx⟩ := hx
+  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1))
+  have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 j := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1))
+  obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
+  let χ := φ'.sigmaInv
+  let θ : ArithmeticSemisentence 1 := “p. ∃ y <⁺ p, ∃ w <⁺ p, !pairDef p y w ∧ !χ.val w y”
+  have hθ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 j θ := by simp [θ]
+  obtain ⟨χ', hχ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hθ
+  have hS (p : V) : PrenexSatisfied 𝚷 j (p ∷ 0) ((⌜χ'.matrix.val⌝ : ℕ) : V) ↔ V ⊧/![p] χ'.val := by
+    rw [Sentence.coe_quote_eq_quote, show p ∷ 0 = matrixToVec ![p] by simp,
+      prenexSatisfied_quote_iff]
+  have hχ (p : V) : V ⊧/![p] χ'.val ↔ V ⊧/![π₂ p, π₁ p] χ.val := by
+    rw [← hχ' V]
+    simp [θ]
+    grind [le_pair_left, le_pair_right, pi₁_le_self, pi₂_le_self]
+  have h₁ (y : V) : V ⊧/![y] φ ↔ ∃ w, V ⊧/![w, y] χ.val :=
+    (hφ' V ![y] Empty.elim).trans <| φ'.models_sigmaInv ![y]
+  obtain ⟨w, hw⟩ := (h₁ x).mp <| (hφx x).mpr rfl
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺 j := mod_ISigma_of_le (Nat.le_succ j)
+  obtain ⟨p, hp, hmin⟩ := InductionOnHierarchy.least_number_sigma 𝚷 j
+    (P := fun p ↦ V ⊧/![p] χ'.val)
+    ((Bounding.definable_of_hierarchy χ'.val_hierarchy Empty.elim).of_iff fun v ↦ by
+      beta_reduce; rw [← Matrix.fun_eq_vec_one]) (x := ⟪x, w⟫) (by simpa [hχ] using hw)
+  use ⌜χ'.matrix.val⌝
+  simp only [DefinesElement, hS]
+  use p
+  and_intros
+  · apply (hφx _).mp
+    apply (h₁ _).mpr
+    use π₂ p
+    exact (hχ p).mp hp
+  · exact hp
+  · exact hmin
 
 /-- In a nonstandard model of $\mathsf{I}\Sigma_{j+1}$ the $\Sigma_{j+1}$-definable elements are
 bounded.
 - [HP98, Lemma IV.1.37] -/
-axiom exists_bound_definableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {a : V}
+axiom exists_bound_definableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {a : V}
     (ha : ∀ m : ℕ, (m : V) < a) : ∃ b, ∀ x ∈ definableElements (j + 1) V, x < b
 
 end code

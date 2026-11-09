@@ -70,4 +70,9 @@ $k \ge 1$. An open problem.
 - [Car16] -/
 axiom IE_strictlyWeakerThan_IE_succ {k : ℕ} (hk : 1 ≤ k) : IE k ⪱ IE (k + 1)
 
+/-- $\mathsf{I}\mathsf{E}_1$ proves the least number principle for $U_1$ formulas. An open problem.
+- [Wil85, §4.13, Problem (2)] -/
+axiom leastNumberBoundedUniversal_weakerThan_IE1 :
+    𝗣𝗔⁻ ∪ LeastNumberScheme (Semiformula.BoundedUniversal 1) ⪯ 𝗜𝗘₁
+
 end FFL.FirstOrder.Arithmetic

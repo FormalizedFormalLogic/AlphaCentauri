@@ -145,6 +145,10 @@ declaration:
     forgive:
       # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (1)].
       - FFL.FirstOrder.Arithmetic.IE_strictlyWeakerThan_IE_succ
+  FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (2)].
+      - FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.exists_prime_gt:

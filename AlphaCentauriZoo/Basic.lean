@@ -183,10 +183,10 @@ def diagram (proved conjectured : Edges) (keep : String → Bool) : Except Strin
     unless follows e || edges.contains e do edges := edges.push e
   -- Drop the classes left with no edge, and renumber the others.
   let used := edges.foldl (init := (∅ : Std.HashSet Nat)) fun s e => (s.insert e.src).insert e.dst
-  let index : Std.HashMap Nat Nat := (List.range n).filter used.contains |>.zipIdx |>.foldl
-    (init := ∅) fun m (i, k) => m.insert i k
+  let drawn := (List.range n).filter used.contains
+  let index : Std.HashMap Nat Nat := drawn.zipIdx.foldl (init := ∅) fun m (i, k) => m.insert i k
   return {
-    classes := (List.range n).filter used.contains |>.toArray.map (classes[·]!)
+    classes := drawn.toArray.map (classes[·]!)
     edges := edges.map fun e => { e with src := index[e.src]!, dst := index[e.dst]! } }
 
 end Edges

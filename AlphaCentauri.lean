@@ -81,6 +81,7 @@ public import AlphaCentauri.Schemata.CollectionFromDeltaInduction
 public import AlphaCentauri.Schemata.CollectionWithoutExp
 public import AlphaCentauri.Schemata.DeltaInduction
 public import AlphaCentauri.Schemata.Induction
+public import AlphaCentauri.Schemata.OpenInduction
 public import AlphaCentauri.Schemata.ParameterFreeInduction
 public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.Schemata.Strictness

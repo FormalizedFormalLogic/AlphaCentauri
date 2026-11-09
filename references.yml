@@ -219,6 +219,14 @@ EW12:
     type: Repository
     title: arXiv
 
+GG17:
+  type: Article
+  title: Shepherdson's theorems for fragments of open induction
+  author: ["Glivická, Jana", "Glivický, Petr"]
+  date: 2017
+  serial-number:
+    arxiv: "1701.02001"
+
 HP98:
   type: Book
   title: Metamathematics of First-Order Arithmetic

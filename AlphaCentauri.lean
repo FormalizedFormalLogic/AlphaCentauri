@@ -52,6 +52,7 @@ public import AlphaCentauri.Model.Elementary
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.InjectiveEnumeration
+public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
 public import AlphaCentauri.NumberTheory.FLT3
@@ -104,6 +105,7 @@ public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
+public import AlphaCentauri.ToFoundation.OpenPredicate
 public import AlphaCentauri.ToFoundation.PartialTruth
 public import AlphaCentauri.ToFoundation.Pigeonhole
 public import AlphaCentauri.ToFoundation.PrenexDefinable

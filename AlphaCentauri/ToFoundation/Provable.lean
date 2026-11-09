@@ -8,9 +8,9 @@ public import AlphaCentauri.ToFoundation.Syntax
 /-!
 # Internal provability: universal instantiation and modus ponens
 
-Two generic facts about `Bootstrapping.Provable` needed to internalize induction over a model:
-instantiating an internally-provable universal sentence at a numeral, and modus ponens for
-arbitrary (not necessarily quoted) codes.
+Two generic facts about `Bootstrapping.Provable`: instantiating an internally-provable instance by
+numerals of a universal formula at one more numeral, and modus ponens for arbitrary (not
+necessarily quoted) codes.
 -/
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping

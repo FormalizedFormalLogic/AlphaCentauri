@@ -30,13 +30,13 @@ theorem exists_piece [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : V → Prop} (hP : �
   obtain ⟨s, -, hs⟩ := finset_comprehension hP z
   obtain ⟨q, hq, hlh, hmem⟩ := sigmaOne_skolem_seq
     (R := fun i x ↦ (i ∈ s ∧ x = 1) ∨ (i ∉ s ∧ x = 0)) (by definability) (l := z)
-    (fun i _ ↦ by by_cases h : i ∈ s <;> simp [h])
+    (by intro i _; by_cases h : i ∈ s <;> simp [h])
+  have : ∀ i < z, (znth q i = 1 ↔ P i) := by
+    intro i hi
+    obtain ⟨x, hx⟩ := hq.exists (hlh ▸ hi)
+    rw [hq.znth_eq_of_mem hx, ← hs i hi]
+    rcases hmem i x hx with ⟨h, rfl⟩ | ⟨h, rfl⟩ <;> simp [h]
   use q
-  refine ⟨hq, hlh, ?_⟩
-  intro i hi
-  obtain ⟨x, hx⟩ := hq.exists (hlh ▸ hi)
-  rw [hq.znth_eq_of_mem hx, ← hs i hi]
-  rcases hmem i x hx with ⟨h, rfl⟩ | ⟨h, rfl⟩ <;> simp [h]
 
 /-- Strong $\Sigma_{n + 1}$ collection: below every `u`, the witnesses of a $\Sigma_{n + 1}$
 relation are bounded at all arguments that have one.
@@ -45,20 +45,14 @@ theorem strong_collection {R : V → V → Prop} (hR : 𝚺ᴬ_[n + 1].Definable
     ∃ v, ∀ x < u, (∃ y, R x y) → ∃ y < v, R x y := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ n + 1 by omega)
   obtain ⟨q, -, -, hq⟩ := exists_piece (n := n) (P := fun x ↦ ∃ y, R x y) (by definability) u
-  obtain ⟨v, hv⟩ := IBroadSigma.collection (s := n) (R := fun x y ↦ znth q x = 1 → R x y)
-    (by definability) u fun x hx ↦ by
-      by_cases h : znth q x = 1
-      · obtain ⟨y, hy⟩ := (hq x hx).mp h
-        use y
-        intro
-        exact hy
-      · use 0
-        intro
-        contradiction
+  obtain ⟨v, hv⟩ := IBroadSigma.collection (R := fun x y ↦ znth q x = 1 → R x y)
+    (by definability) u (by intro x hx; by_cases h : znth q x = 1 <;> simp_all)
   use v
   intro x hx h
   obtain ⟨y, hy, hRy⟩ := hv x hx
   use y
-  exact ⟨hy, hRy <| (hq x hx).mpr h⟩
+  and_intros
+  · exact hy
+  · exact hRy <| (hq x hx).mpr h
 
 end FFL.FirstOrder.Arithmetic

@@ -99,8 +99,24 @@ lemma eval_iff_of_bounded_of_witness
 
 /-- A $\Sigma_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/
-axiom SigmaElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M} (hι : SigmaElementary ι 0)
-    [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : S↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻
+theorem SigmaElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M} (hι : SigmaElementary ι 0)
+    [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : S↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := by
+  have h {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemiformula ℕ n}
+      (hφ : ℬ[<, ℒₒᵣ].PrenexBlock Γ φ) (hΓ : Γ = 𝚷) (e : Fin n → S) (f : ℕ → S) :
+      φ.Eval (ι ∘ e) (ι ∘ f) → φ.Eval e f := by
+    induction hφ with
+    | bounded h =>
+      exact (hι (Γ := 𝚷) le_rfl (Bounding.PrenexHierarchy.zero_iff_bounded.mpr h) e f).mp
+    | exs => simp at hΓ
+    | all _ ih =>
+      simp only [eval_all]
+      intro h₁ x
+      exact ih rfl (x :> e) (by simpa [Matrix.comp_vecCons''] using h₁ (ι x))
+  apply models_theory_iff.mpr
+  intro σ hσ
+  have h₁ := models_theory_iff.mp (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻) σ hσ
+  simpa [models_iff] using h ((PeanoMinus.prenexBlock σ hσ).rew Rew.emb) rfl ![] (fun _ ↦ 0)
+    (by simpa [models_iff] using h₁)
 
 /-- A proper cut of a model of $\mathsf{I}\Sigma_j$ which is closed under the operations and
 $\Sigma_j$-elementary satisfies $\mathsf{B}\Sigma_{j+1}$.

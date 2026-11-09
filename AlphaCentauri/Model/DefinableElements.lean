@@ -4,6 +4,7 @@ public import AlphaCentauri.Model.Elementary
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Pigeonhole
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
+public import Foundation.FirstOrder.Incompleteness.Second
 
 /-!
 # Definable elements
@@ -356,8 +357,29 @@ end definableCut
 
 /-- A model of `𝗣𝗔` with a nonstandard $\Sigma_1$-definable element.
 - [HP98, Observation IV.1.31] -/
-axiom exists_model_nonstandard_definableElement :
+theorem exists_model_nonstandard_definableElement :
     ∃ (M : Type) (_ : ORingStructure M) (_ : M↓[ℒₒᵣ] ⊧* 𝗣𝗔),
-      ∃ a ∈ definableElements 1 M, ∀ m : ℕ, (m : M) < a
+      ∃ a ∈ definableElements 1 M, ∀ m : ℕ, (m : M) < a := by
+  obtain ⟨φ, hφ⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ := 𝚺) (s := 1) (Γ' := 𝚺)
+    (φ := ∼(𝗣𝗔.consistent.val : ArithmeticSentence)) 𝗣𝗔.consistent.pi_prop.neg
+  by_contra! h
+  apply consistent_unprovable 𝗣𝗔
+  apply Arithmetic.complete.{0}
+  intro M _ _
+  by_contra hM
+  have h₁ : ∃ x : M, φ.sigmaInv.val.Eval ![x] Empty.elim :=
+    (φ.models_sigmaInv ![]).mp <| (hφ M ![] Empty.elim).mp <| by simpa [models_iff] using hM
+  obtain ⟨x, hx, h₂, -⟩ := exists_least_mem_definableElements (j := 0)
+    (φ := (φ.sigmaInv.rew Rew.emb).val) (e := ![]) (f := fun _ ↦ 0) Bounding.Prenex.val_hierarchy
+    (fun i ↦ i.elim0) (fun _ ↦ (0 : definableElements (0 + 1) M).2) (by simpa using h₁)
+  obtain ⟨m, hm⟩ := h M _ inferInstance x hx
+  obtain ⟨i, hi⟩ := eq_nat_of_le_nat hm
+  rw [hi] at h₂
+  have h₃ : φ.sigmaInv.val.Eval ![i] Empty.elim := by
+    apply (models_iff_of_Sigma0 (V := M) φ.sigmaInv.val_deltaZero (e := ![i])).mp
+    simpa using h₂
+  have h₄ := (hφ ℕ ![] Empty.elim).mpr <| (φ.models_sigmaInv ![]).mpr ⟨i, h₃⟩
+  have h₅ : Entailment.Inconsistent 𝗣𝗔 := by simpa using h₄
+  exact Entailment.Consistent.not_inconsistent h₅
 
 end FFL.FirstOrder.Arithmetic

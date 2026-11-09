@@ -38,6 +38,7 @@ public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Theory
 public import AlphaCentauri.Calculus.Induction.Witnessing
+public import AlphaCentauri.Combinatorics.ParisHarrington
 public import AlphaCentauri.Conservativity.Omega1
 public import AlphaCentauri.Hierarchy.Bounded
 public import AlphaCentauri.Hierarchy.Diophantine
@@ -103,6 +104,7 @@ public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
+public import AlphaCentauri.ToFoundation.NatCoding
 public import AlphaCentauri.ToFoundation.PartialTruth
 public import AlphaCentauri.ToFoundation.Pigeonhole
 public import AlphaCentauri.ToFoundation.PrenexDefinable
@@ -122,11 +124,13 @@ public import AlphaCentauri.ToFoundation.SubstInversion
 public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.Theory
 public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToMathlib.Combinatorics.Ramsey
 public import AlphaCentauri.ToMathlib.EisensteinInteger
 public import AlphaCentauri.ToMathlib.ElementaryClosure
 public import AlphaCentauri.ToMathlib.FLT3.Descent
 public import AlphaCentauri.ToMathlib.FLT3.Eisenstein
 public import AlphaCentauri.ToMathlib.Goodstein
+public import AlphaCentauri.ToMathlib.List
 public import AlphaCentauri.ToMathlib.ONote.Computability
 public import AlphaCentauri.ToMathlib.ONote.Epsilon0
 public import AlphaCentauri.ToMathlib.ONote.FastGrowing

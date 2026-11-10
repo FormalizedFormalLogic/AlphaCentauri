@@ -70,6 +70,7 @@ public import AlphaCentauri.NumberTheory.DirectSummand
 public import AlphaCentauri.NumberTheory.EuclideanDivision
 public import AlphaCentauri.NumberTheory.FLT3
 public import AlphaCentauri.NumberTheory.FermatCaseOne
+public import AlphaCentauri.NumberTheory.FermatIOpen
 public import AlphaCentauri.NumberTheory.IrrationalSqrtTwo
 public import AlphaCentauri.NumberTheory.Primes
 public import AlphaCentauri.NumberTheory.QuadraticResidue

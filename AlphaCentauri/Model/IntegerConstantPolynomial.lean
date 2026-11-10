@@ -45,10 +45,8 @@ theorem models_ZRing : (Nonneg (IntegerConstantPolynomial K))↓[ℒₒᵣ] ⊧*
     have hcast (m : ℕ) :
         @Nat.cast _ F.toNatCast m = (m : Nonneg (IntegerConstantPolynomial K)) := by
       induction m with
-      | zero => exact (@Nat.cast_zero _ F.toAddMonoidWithOne).trans Nat.cast_zero.symm
-      | succ m ih =>
-        exact (@Nat.cast_succ _ F.toAddMonoidWithOne m).trans
-          ((congrArg (· + 1) ih).trans (Nat.cast_succ m).symm)
+      | zero => rw [@Nat.cast_zero _ F.toAddMonoidWithOne, Nat.cast_zero]
+      | succ m ih => rw [@Nat.cast_succ _ F.toAddMonoidWithOne, Nat.cast_succ, ih]
     rw [hcast]
     exact ⟨h₁, h₂⟩
 

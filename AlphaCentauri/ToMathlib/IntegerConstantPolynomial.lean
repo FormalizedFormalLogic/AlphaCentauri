@@ -19,6 +19,18 @@ divided with remainder by every positive natural number.
 
 open Polynomial OpenPredicate
 
+variable {K : Type*} [Field K] [LinearOrder K] [IsStrictOrderedRing K] in
+lemma Polynomial.leadingCoeff_add_nonneg {p q : K[X]} (hp : 0 ≤ p.leadingCoeff)
+    (hq : 0 ≤ q.leadingCoeff) : 0 ≤ (p + q).leadingCoeff := by
+  rcases lt_trichotomy p.degree q.degree with h | h | h
+  · rwa [leadingCoeff_add_of_degree_lt h]
+  · by_cases hpq : p.leadingCoeff + q.leadingCoeff = 0
+    · obtain rfl : p = 0 := leadingCoeff_eq_zero.mp (by linarith)
+      simpa using hq
+    · rw [leadingCoeff_add_of_degree_eq h hpq]
+      exact add_nonneg hp hq
+  · rwa [leadingCoeff_add_of_degree_lt' h]
+
 /-- The polynomials over `K` whose constant term is an integer.
 - [DAq05, §2]
 - [Raf10, Introduction] -/
@@ -33,28 +45,16 @@ lemma mem_iff {p : K[X]} : p ∈ IntegerConstantPolynomial K ↔ ∃ n : ℤ, p.
   simp [IntegerConstantPolynomial, eq_comm]
 
 variable (K) in
-/-- The indeterminate. -/
 def X : IntegerConstantPolynomial K := ⟨Polynomial.X, mem_iff.mpr ⟨0, by simp⟩⟩
 
 variable [LinearOrder K] [IsStrictOrderedRing K]
-
-lemma leadingCoeff_add_nonneg {p q : K[X]} (hp : 0 ≤ p.leadingCoeff)
-    (hq : 0 ≤ q.leadingCoeff) : 0 ≤ (p + q).leadingCoeff := by
-  rcases lt_trichotomy p.degree q.degree with h | h | h
-  · rwa [leadingCoeff_add_of_degree_lt h]
-  · by_cases hpq : p.leadingCoeff + q.leadingCoeff = 0
-    · obtain rfl : p = 0 := leadingCoeff_eq_zero.mp (by linarith)
-      simpa using hq
-    · rw [leadingCoeff_add_of_degree_eq h hpq]
-      exact add_nonneg hp hq
-  · rwa [leadingCoeff_add_of_degree_lt' h]
 
 /-- The polynomials with non-negative leading coefficient. -/
 def cone : RingCone (IntegerConstantPolynomial K) where
   carrier := {p | 0 ≤ (p : K[X]).leadingCoeff}
   zero_mem' := by simp
   one_mem' := by simp
-  add_mem' hp hq := leadingCoeff_add_nonneg hp hq
+  add_mem' := Polynomial.leadingCoeff_add_nonneg
   mul_mem' hp hq := by simpa [leadingCoeff_mul] using mul_nonneg hp hq
   eq_zero_of_mem_of_neg_mem' {p} hp hnp := by
     have : (p : K[X]).leadingCoeff = 0 := le_antisymm (by simpa using hnp) hp
@@ -81,9 +81,8 @@ lemma le_iff : p ≤ q ↔ 0 ≤ ((q - p : IntegerConstantPolynomial K) : K[X]).
 lemma nonneg_iff : 0 ≤ p ↔ 0 ≤ (p : K[X]).leadingCoeff := by simp [le_iff]
 
 lemma pos_iff : 0 < p ↔ 0 < (p : K[X]).leadingCoeff := by
-  rw [lt_iff_le_and_ne, nonneg_iff, lt_iff_le_and_ne]
-  simp only [ne_comm (a := (0 : K)), ne_comm (a := (0 : IntegerConstantPolynomial K)), ne_eq,
-    leadingCoeff_eq_zero, Subring.coe_eq_zero_iff]
+  simp [lt_iff_le_and_ne, nonneg_iff, eq_comm (a := (0 : K)),
+    eq_comm (a := (0 : IntegerConstantPolynomial K))]
 
 instance : DiscretelyOrdered (IntegerConstantPolynomial K) where
   one_le_of_pos p hp := by
@@ -105,10 +104,7 @@ instance : DiscretelyOrdered (IntegerConstantPolynomial K) where
 
 lemma natCast_lt_X (n : ℕ) : (n : IntegerConstantPolynomial K) < X K := by
   rw [← sub_pos, pos_iff]
-  have : ((X K - n : IntegerConstantPolynomial K) : K[X]) = Polynomial.X - C (n : K) := by
-    simp [IntegerConstantPolynomial.X]
-  rw [this, leadingCoeff_X_sub_C]
-  exact one_pos
+  simp [IntegerConstantPolynomial.X, ← C_eq_natCast, -map_natCast]
 
 lemma exists_eq_mul_add_of_pos (a : IntegerConstantPolynomial K) {n : ℕ} (hn : 0 < n) :
     ∃ q r : IntegerConstantPolynomial K, 0 ≤ r ∧ r < n ∧ a = n * q + r := by

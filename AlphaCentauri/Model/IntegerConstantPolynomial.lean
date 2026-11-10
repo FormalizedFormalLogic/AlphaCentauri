@@ -40,14 +40,7 @@ theorem models_ZRing : (Nonneg (IntegerConstantPolynomial K))↓[ℒₒᵣ] ⊧*
       apply Subtype.ext
       simpa using e
     use ⟨q, hq⟩, ⟨r, hr₀⟩
-    let F : CommSemiring (Nonneg (IntegerConstantPolynomial K)) :=
-      Arithmetic.instCommSemiring_foundation
-    have hcast (m : ℕ) :
-        @Nat.cast _ F.toNatCast m = (m : Nonneg (IntegerConstantPolynomial K)) := by
-      induction m with
-      | zero => rw [@Nat.cast_zero _ F.toAddMonoidWithOne, Nat.cast_zero]
-      | succ m ih => rw [@Nat.cast_succ _ F.toAddMonoidWithOne, Nat.cast_succ, ih]
-    rw [hcast]
+    rw [Nonneg.natCast_foundation]
     exact ⟨h₁, h₂⟩
 
 end IntegerConstantPolynomial

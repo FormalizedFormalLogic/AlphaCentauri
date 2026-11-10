@@ -39,4 +39,20 @@ theorem provable_univCl_IOpen_iff {φ : ArithmeticSemiformula ℕ 0} (hφ : φ.O
     simpa [Matrix.empty_eq] using hN (Θ ∘ f)
   · exact ZRing_weakerThan_IOpen.pbl
 
+open Semiformula in
+/-- The universal closure of an open formula that fails in some model of $\mathsf{ZR}$ is not
+provable in $\mathsf{IOpen}$.
+- [Wil78, §1] -/
+lemma not_provable_IOpen_allClosure {n : ℕ} {φ : ArithmeticSemisentence n} (hφ : φ.Open)
+    {M : Type} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* ZRing] {e : Fin n → M} (h : ¬ Evalb e φ) :
+    ¬ 𝗜𝗢𝗽𝗲𝗻 ⊢ ∀¹* φ := by
+  intro hp
+  obtain ⟨N, _, hN, ⟨Θ⟩⟩ := exists_embedding_models_IOpen M
+  have := models_of_provable hN hp
+  simp only [models_iff, eval_allClosure] at this
+  apply h
+  apply (eval_hom_iff_of_open Θ hφ (ε₁ := Empty.elim)).mpr
+  rw [Subsingleton.elim (Θ ∘ Empty.elim) Empty.elim]
+  exact this _
+
 end FFL.FirstOrder.Arithmetic

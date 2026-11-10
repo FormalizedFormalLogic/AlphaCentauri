@@ -92,4 +92,14 @@ theorem models_IOpen_iff [DiscretelyOrdered R] :
     simp only [hφP] at h0 hs ⊢
     exact h _ (isOpen_eval _ hφ) h0 (fun r hr ↦ hs ⟨r, hr⟩) x x.2
 
+/-- The natural number cast of the semiring structure that the $\mathsf{PA}^-$ model structure on
+`Nonneg R` induces agrees with the cast of `Nonneg R` itself. -/
+lemma natCast_foundation [DiscretelyOrdered R] (m : ℕ) :
+    @Nat.cast (Nonneg R) Arithmetic.instCommSemiring_foundation.toNatCast m = (m : Nonneg R) := by
+  induction m with
+  | zero => rw [@Nat.cast_zero _ Arithmetic.instCommSemiring_foundation.toAddMonoidWithOne,
+      Nat.cast_zero]
+  | succ m ih => rw [@Nat.cast_succ _ Arithmetic.instCommSemiring_foundation.toAddMonoidWithOne,
+      Nat.cast_succ, ih]
+
 end Nonneg

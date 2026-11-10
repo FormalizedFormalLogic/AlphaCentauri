@@ -772,19 +772,6 @@ private instance : countermodelM.IsIL where
 private instance : countermodelM.HasR := ⟨by decide⟩
 private instance : countermodelM.HasW := HasW.of_finite (by decide)
 
-instance : (𝐈𝐋𝐑𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐌 :=
-  .of_unprovable_provable (φ := Axioms.M (#0) (#1) (#2)) (fun h ↦ by
-    have H := ILRW.sound (M := countermodelM) h 0;
-    have h₁ : (0 : countermodelM.World) ⊩[countermodelM] #0 ▷ #1 := by
-      intro v _ hv;
-      obtain rfl : v = 1 := hv;
-      exact ⟨2, by decide, rfl⟩;
-    obtain ⟨t, _, ht⟩ := H h₁ 1 (by decide) (forces_and.mpr ⟨rfl, fun y hy ↦
-      ((by decide : ∀ y, ¬countermodelM.Rel 1 y) y hy).elim⟩);
-    obtain ⟨htz, ht⟩ := forces_and.mp ht;
-    obtain rfl : t = 2 := htz;
-    exact ht 3 (by decide)) ILM.axiomM
-
 end Logic
 
 end FFL.InterpretabilityLogic

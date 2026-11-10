@@ -632,6 +632,7 @@ lemma quote_allClosure_semisentence {L : Language} [L.Encodable] [L.LORDefinable
     rw [show (∀¹* θ : Sentence L) = ∀¹* (∀¹ θ) from rfl]
     simpa [Sentence.quote_all, qqAlls_all] using ih (∀¹ θ)
 
+variable {π} in
 /-- A table of a direct translation `π` is a table of a translation. -/
 theorem IsTableOf.isTranslationTable (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) :
     IsTranslationTable L₂ S tbl where

@@ -324,7 +324,7 @@ lemma ILR.axiomM₀ : 𝐈𝐋𝐑 ⊢ Axioms.M₀ A B C := by
   have h₅ : 𝐈𝐋𝐑 ⊢ Axioms.J2 (◇A ⋏ □C) (∼(A ▷ ∼C)) (B ⋏ □C) := axiomJ2;
   cl_prover [axiomR (A := A) (B := B) (C := C), h₄, h₅];
 
-/-- - [GJ11, Lemma 4.4] -/
+/-- - [GJ11] -/
 lemma ILR.axiomP₀ : 𝐈𝐋𝐑 ⊢ Axioms.P₀ A B := by
   have h₁ : 𝐈𝐋𝐑 ⊢ ∼□(∼B) ⋏ □(∼B) 🡒 ⊥ := by cl_prover;
   have h₂ : 𝐈𝐋𝐑 ⊢ ∼(A ▷ ∼∼B) ▷ (◇B ⋏ □(∼B)) 🡒 ∼(A ▷ ∼∼B) ▷ ⊥ := rhd_mono_right h₁;
@@ -344,7 +344,7 @@ lemma ILRStar.axiomR : 𝐈𝐋𝐑* ⊢ Axioms.R A B C := by
     rhd_mono_right (by cl_prover);
   cl_prover [axiomRstar (A := A) (B := B) (C := C), h];
 
-/-- - [GJ11, Lemma 4.5] -/
+/-- - [GJ11] -/
 lemma ILRStar.axiomW : 𝐈𝐋𝐑* ⊢ Axioms.W A B := by
   have h₁ : 𝐈𝐋𝐑* ⊢ A ▷ ∼⊤ 🡒 ∼□(∼A) 🡒 ∼□(∼∼⊤) := axiomJ4;
   have h₂ : (𝐈𝐋𝐑* : Logic α) ⊢ ∼∼⊤ := by cl_prover;

@@ -413,6 +413,15 @@ instance : (ILMinusJ4Plus : Logic α) ⪯ ILMinusJ2Plus :=
 instance : (ILMinusJ2Plus : Logic α) ⪯ 𝐂𝐋 :=
   weakerThan_iff.mpr <| subset_of_provable <| by rintro _ ⟨A, B, C, rfl⟩; simp
 
+instance : (ILMinusJ4Plus : Logic α) ⪯ 𝐂𝐋 :=
+  WeakerThan.trans (𝓣 := ILMinusJ2Plus) inferInstance inferInstance
+
+instance : (ILMinusJ4Plus : Logic α) ⪯ ILMinusJ2PlusJ5 :=
+  WeakerThan.trans (𝓣 := ILMinusJ2Plus) inferInstance inferInstance
+
+instance : (ILMinusJ4Plus : Logic α) ⪯ ILMinusJ1J4PlusJ5 :=
+  WeakerThan.trans (𝓣 := ILMinusJ1J4Plus) inferInstance inferInstance
+
 /-- - [KO21, Corollary 3.14] -/
 @[simp] lemma CL.axiomJ4Plus : 𝐂𝐋 ⊢ Axioms.J4Plus A B C :=
   WeakerThan.pbl (𝓢 := ILMinusJ2Plus) (by simp)

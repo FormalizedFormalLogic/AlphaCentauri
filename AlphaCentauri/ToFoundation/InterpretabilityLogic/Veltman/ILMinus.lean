@@ -19,8 +19,7 @@ namespace Veltman.Model
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {V : M.World → α → Prop}
 
-/-- `≺` is transitive and conversely well-founded, and `≺[w]` relates only `≺`-successors of `w`
-on the left.
+/-- `≺` is transitive and conversely well-founded, and `x ≺[w] y` implies `w ≺ x`.
 
 - [KO21, Definition 2.2]
 -/
@@ -456,7 +455,7 @@ namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World Entailment ofAxiomsMinus
 
-variable {α : Type*}
+variable {α : Type*} {L : Logic α}
 
 private abbrev counterJ1 (α : Type*) : Model (Fin 2) α :=
   ⟨(· < ·), fun _ _ _ ↦ False, fun _ _ ↦ False⟩
@@ -472,8 +471,9 @@ private instance : (counterJ1 α).IsJ2 where
 
 private instance : (counterJ1 α).IsJ5 := ⟨by omega⟩
 
-private lemma unprovable_J1 : (ILMinusJ2PlusJ5 : Logic α) ⊬ Axioms.J1 ⊤ ⊤ := by
+private lemma unprovable_J1 [L ⪯ ILMinusJ2PlusJ5] : L ⊬ Axioms.J1 ⊤ ⊤ := by
   intro h;
+  replace h := WeakerThan.pbl (𝓣 := ILMinusJ2PlusJ5) h;
   obtain ⟨z, h, -⟩ :=
     ILMinusJ2PlusJ5.sound (M := counterJ1 α) h 0 (fun _ _ ↦ id) 1 (by omega) forces_top;
   exact h;
@@ -492,8 +492,9 @@ private instance : (counterJ5 α).IsJ2 where
   rel_of_s_right := by omega
   s_trans := by omega
 
-private lemma unprovable_J5 : (𝐂𝐋 : Logic α) ⊬ Axioms.J5 (□⊥) := by
+private lemma unprovable_J5 [L ⪯ 𝐂𝐋] : L ⊬ Axioms.J5 (□⊥) := by
   intro h;
+  replace h := WeakerThan.pbl (𝓣 := 𝐂𝐋) h;
   have h₁ : (1 : Fin 3) ⊩[counterJ5 α] ◇□⊥ := by
     apply forces_dia.mpr;
     use 2;
@@ -516,8 +517,9 @@ private instance : (counterJ4 α).IsJ1 := ⟨by tauto⟩
 
 private instance : (counterJ4 α).IsJ5 := ⟨by tauto⟩
 
-private lemma unprovable_J4Plus : (ILMinusJ1J5 : Logic α) ⊬ Axioms.J4Plus (◇⊤) ⊥ ⊤ := by
+private lemma unprovable_J4Plus [L ⪯ ILMinusJ1J5] : L ⊬ Axioms.J4Plus (◇⊤) ⊥ ⊤ := by
   intro h;
+  replace h := WeakerThan.pbl (𝓣 := ILMinusJ1J5) h;
   have h₁ : (1 : Fin 3) ⊩[counterJ4 α] □(◇⊤ 🡒 ⊥) := by
     intro y Rxy hy;
     obtain ⟨z, Ryz, -⟩ := forces_dia.mp hy;
@@ -546,9 +548,9 @@ private instance : (counterJ2 α).IsJ4 := ⟨by omega⟩
 
 private instance : (counterJ2 α).IsJ5 := ⟨by omega⟩
 
-private lemma unprovable_J2 :
-    (ILMinusJ1J4PlusJ5 : Logic α) ⊬ Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤) := by
+private lemma unprovable_J2 [L ⪯ ILMinusJ1J4PlusJ5] : L ⊬ Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤) := by
   intro h;
+  replace h := WeakerThan.pbl (𝓣 := ILMinusJ1J4PlusJ5) h;
   have h₁ : (0 : Fin 4) ⊩[counterJ2 α] □⊥ ▷ (◇⊤ ⋏ □□⊥) ⋏ (◇⊤ ⋏ □□⊥) ▷ ◇◇⊤ := by
     apply forces_and.mpr;
     constructor;
@@ -565,95 +567,74 @@ private lemma unprovable_J2 :
     · intro y _ hy;
       obtain ⟨hy₁, hy₂⟩ := forces_and.mp hy;
       obtain ⟨z, hz, -⟩ := forces_dia.mp hy₁;
-      have : ¬y < 2 := fun h ↦ hy₂ 2 h 3 (by omega);
+      have : ¬y < 2 := by
+        intro h;
+        exact hy₂ 2 h 3 (by omega);
       use 1;
       constructor;
       · omega;
       · exact forces_dia.mpr ⟨2, by omega, forces_dia.mpr ⟨3, by omega, forces_top⟩⟩;
-  obtain ⟨z, hz, hz'⟩ :=
-    ILMinusJ1J4PlusJ5.sound (M := counterJ2 α) h 0 h₁ 3 (by omega) (fun _ h ↦ by omega);
+  have h₂ : (3 : Fin 4) ⊩[counterJ2 α] □⊥ := by
+    intro y hy;
+    omega;
+  obtain ⟨z, hz, hz'⟩ := ILMinusJ1J4PlusJ5.sound (M := counterJ2 α) h 0 h₁ 3 (by omega) h₂;
   obtain ⟨u, hu, hu'⟩ := forces_dia.mp hz';
   obtain ⟨v, hv, -⟩ := forces_dia.mp hu';
   omega;
 
-instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ1 :=
-  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤) (fun h ↦ unprovable_J1 <| WeakerThan.pbl h)
-    (by simp)
+instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ1 := .of_unprovable_provable unprovable_J1 (by simp)
 
 instance : (ILMinusJ4Plus : Logic α) ⪱ ILMinusJ1J4Plus :=
-  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤)
-    (fun h ↦ unprovable_J1 <| WeakerThan.pbl <| WeakerThan.pbl (𝓣 := ILMinusJ2Plus) h)
-    (axm (by simp))
+  .of_unprovable_provable unprovable_J1 (axm (by simp))
 
 instance : (ILMinusJ5 : Logic α) ⪱ ILMinusJ1J5 :=
-  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤) (fun h ↦ unprovable_J1 <| WeakerThan.pbl h)
-    (axm (by simp))
+  .of_unprovable_provable unprovable_J1 (axm (by simp))
 
 instance : (ILMinusJ4PlusJ5 : Logic α) ⪱ ILMinusJ1J4PlusJ5 :=
-  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤) (fun h ↦ unprovable_J1 <| WeakerThan.pbl h)
-    (axm (by simp))
+  .of_unprovable_provable unprovable_J1 (axm (by simp))
 
-instance : (ILMinusJ2Plus : Logic α) ⪱ 𝐂𝐋 :=
-  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤) (fun h ↦ unprovable_J1 <| WeakerThan.pbl h)
-    (by simp)
+instance : (ILMinusJ2Plus : Logic α) ⪱ 𝐂𝐋 := .of_unprovable_provable unprovable_J1 (by simp)
 
 instance : (ILMinusJ2PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
-  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤) unprovable_J1 ofAxioms.axiomJ1
+  .of_unprovable_provable unprovable_J1 ofAxioms.axiomJ1
 
-instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ5 :=
-  .of_unprovable_provable (φ := Axioms.J5 (□⊥)) (fun h ↦ unprovable_J5 <| WeakerThan.pbl h)
-    (by simp)
+instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ5 := .of_unprovable_provable unprovable_J5 (by simp)
 
 instance : (ILMinusJ4Plus : Logic α) ⪱ ILMinusJ4PlusJ5 :=
-  .of_unprovable_provable (φ := Axioms.J5 (□⊥))
-    (fun h ↦ unprovable_J5 <| WeakerThan.pbl <| WeakerThan.pbl (𝓣 := ILMinusJ2Plus) h)
-    (axm (by simp))
+  .of_unprovable_provable unprovable_J5 (axm (by simp))
 
 instance : (ILMinusJ2Plus : Logic α) ⪱ ILMinusJ2PlusJ5 :=
-  .of_unprovable_provable (φ := Axioms.J5 (□⊥)) (fun h ↦ unprovable_J5 <| WeakerThan.pbl h)
-    (axm (by simp))
+  .of_unprovable_provable unprovable_J5 (axm (by simp))
 
 instance : (ILMinusJ1 : Logic α) ⪱ ILMinusJ1J5 :=
-  .of_unprovable_provable (φ := Axioms.J5 (□⊥)) (fun h ↦ unprovable_J5 <| WeakerThan.pbl h)
-    (axm (by simp))
+  .of_unprovable_provable unprovable_J5 (axm (by simp))
 
 instance : (ILMinusJ1J4Plus : Logic α) ⪱ ILMinusJ1J4PlusJ5 :=
-  .of_unprovable_provable (φ := Axioms.J5 (□⊥)) (fun h ↦ unprovable_J5 <| WeakerThan.pbl h)
-    (axm (by simp))
+  .of_unprovable_provable unprovable_J5 (axm (by simp))
 
-instance : (𝐂𝐋 : Logic α) ⪱ 𝐈𝐋 :=
-  .of_unprovable_provable (φ := Axioms.J5 (□⊥)) unprovable_J5 ofAxioms.axiomJ5
+instance : (𝐂𝐋 : Logic α) ⪱ 𝐈𝐋 := .of_unprovable_provable unprovable_J5 ofAxioms.axiomJ5
 
-instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ4Plus :=
-  .of_unprovable_provable (φ := Axioms.J4Plus (◇⊤) ⊥ ⊤)
-    (fun h ↦ unprovable_J4Plus <| WeakerThan.pbl h) (by simp)
+instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ4Plus := .of_unprovable_provable unprovable_J4Plus (by simp)
 
 instance : (ILMinusJ1 : Logic α) ⪱ ILMinusJ1J4Plus :=
-  .of_unprovable_provable (φ := Axioms.J4Plus (◇⊤) ⊥ ⊤)
-    (fun h ↦ unprovable_J4Plus <| WeakerThan.pbl h) (axm (by simp))
+  .of_unprovable_provable unprovable_J4Plus (axm (by simp))
 
 instance : (ILMinusJ5 : Logic α) ⪱ ILMinusJ4PlusJ5 :=
-  .of_unprovable_provable (φ := Axioms.J4Plus (◇⊤) ⊥ ⊤)
-    (fun h ↦ unprovable_J4Plus <| WeakerThan.pbl h) (axm (by simp))
+  .of_unprovable_provable unprovable_J4Plus (axm (by simp))
 
 instance : (ILMinusJ1J5 : Logic α) ⪱ ILMinusJ1J4PlusJ5 :=
-  .of_unprovable_provable (φ := Axioms.J4Plus (◇⊤) ⊥ ⊤) unprovable_J4Plus (axm (by simp))
+  .of_unprovable_provable unprovable_J4Plus (axm (by simp))
 
 instance : (ILMinusJ4Plus : Logic α) ⪱ ILMinusJ2Plus :=
-  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
-    (fun h ↦ unprovable_J2 <| WeakerThan.pbl <| WeakerThan.pbl (𝓣 := ILMinusJ1J4Plus) h)
-    (by simp)
+  .of_unprovable_provable unprovable_J2 (by simp)
 
-instance : (ILMinusJ1J4Plus : Logic α) ⪱ 𝐂𝐋 :=
-  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
-    (fun h ↦ unprovable_J2 <| WeakerThan.pbl h) (by simp)
+instance : (ILMinusJ1J4Plus : Logic α) ⪱ 𝐂𝐋 := .of_unprovable_provable unprovable_J2 (by simp)
 
 instance : (ILMinusJ4PlusJ5 : Logic α) ⪱ ILMinusJ2PlusJ5 :=
-  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
-    (fun h ↦ unprovable_J2 <| WeakerThan.pbl h) (WeakerThan.pbl (𝓢 := ILMinusJ2Plus) (by simp))
+  .of_unprovable_provable unprovable_J2 (WeakerThan.pbl (𝓢 := ILMinusJ2Plus) (by simp))
 
 instance : (ILMinusJ1J4PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
-  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤)) unprovable_J2 ofAxioms.axiomJ2
+  .of_unprovable_provable unprovable_J2 ofAxioms.axiomJ2
 
 end Logic
 

@@ -630,7 +630,6 @@ structure Construction (φ : Blueprint) where
   iter (param d : V) : V := param
   iter_zero : ∀ param, iter param 0 = param := by intros; rfl
   iter_succ : ∀ param d, iter param (d + 1) = change (iter param d) := by intros; rfl
-  iter_monotone : ∀ param {d e}, d ≤ e → iter param d ≤ iter param e := by intros; exact le_rfl
   iter_locallyDelta0 : LocallyDelta0Function fun w : Fin 2 → V ↦ iter (w 0) (w 1) := by
     exact LocallyDelta0Function.var 0
   rel_locallyDelta0 :
@@ -1135,6 +1134,22 @@ lemma boundMax_monotone {P J n m : V} (h : n ≤ m) : c.boundMax P J n ≤ c.bou
   rw [nth_listMap c.boundAt_locallyDelta0 _ _ hi, nth_rangeList (by simpa using hi)]
   exact le_trans (c.bound_monotone _ h) (c.le_boundMax (lt_succ_iff_le.mp (by simpa using hi)))
 
+private lemma iterAt_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 2 → V ↦
+      (fun (r : Fin 1 → V) d ↦ c.iter (r 0) d) (w ·.succ) (w 0) :=
+  c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
+
+/-- The largest of the parameters over the depths `d ≤ J`. -/
+noncomputable def iterMax (P J : V) : V :=
+  listMax (listMap (fun r d ↦ c.iter (r 0) d) ![P] (rangeList (J + 1)))
+
+lemma le_iterMax {P J d : V} (hd : d ≤ J) : c.iter P d ≤ c.iterMax P J := by
+  have hd' : d < len (rangeList (J + 1)) := by simpa [lt_succ_iff_le] using hd
+  have := nth_le_listMax (v := listMap (fun r d ↦ c.iter (r 0) d) ![P] (rangeList (J + 1)))
+    (i := d) (by rwa [len_listMap c.iterAt_locallyDelta0])
+  rw [nth_listMap c.iterAt_locallyDelta0 _ _ hd', nth_rangeList (by simpa using hd')] at this
+  exact this
+
 lemma boundMax_locallyDelta0 :
     LocallyDelta0Function fun w : Fin 3 → V ↦ c.boundMax (w 0) (w 1) (w 2) := by
   have := (listMap_locallyDelta0 (g := fun (r : Fin 2 → V) d ↦ c.bound (c.iter (r 0) d) (r 1))
@@ -1583,8 +1598,8 @@ lemma isUFormula_and_eq_of_mem_limSeq {s z : V} (h : z ∈ (c.construction L).li
 
 lemma mem_limSeq_of_isUFormula {P p : V} (hp : IsUFormula L p) :
     ⟪P, p, c.courseOfValuesResult P p⟫ ∈
-      (c.construction L).limSeq ![] (⟪c.iter P p, p, c.boundMax P p p⟫ + p + 1) := by
-  set K := ⟪c.iter P p, p, c.boundMax P p p⟫
+      (c.construction L).limSeq ![] (⟪c.iterMax P p, p, c.boundMax P p p⟫ + p + 1) := by
+  set K := ⟪c.iterMax P p, p, c.boundMax P p p⟫
   have hP : LocallyDelta0Pred fun p' ↦ ∀ d ≤ p, d + p' ≤ p → IsUFormula L p' →
       ⟪c.iter P d, p', c.courseOfValuesResult (c.iter P d) p'⟫ ∈
         (c.construction L).limSeq ![] (K + p' + 1) := by
@@ -1609,7 +1624,7 @@ lemma mem_limSeq_of_isUFormula {P p : V} (hp : IsUFormula L p) :
     intro p' ih d hd hdp hu
     have hp' : p' ≤ p := le_trans le_add_self hdp
     have hle : ⟪c.iter P d, p', c.courseOfValuesResult (c.iter P d) p'⟫ ≤ K :=
-      pair_le_pair (c.iter_monotone P hd) <| pair_le_pair hp' <|
+      pair_le_pair (c.le_iterMax hd) <| pair_le_pair hp' <|
         le_trans (c.courseOfValuesResult_le_bound _ _)
           (le_trans (c.bound_monotone _ hp') (c.le_boundMax hd))
     have hsub {p₁ e : V} (hp₁ : p₁ < p') (he : e ≤ 1) (hu₁ : IsUFormula L p₁) :

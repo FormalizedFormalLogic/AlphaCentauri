@@ -54,8 +54,10 @@ public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.InjectiveEnumeration
 public import AlphaCentauri.Model.NonnegativePart
+public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
+public import AlphaCentauri.NumberTheory.EuclideanDivision
 public import AlphaCentauri.NumberTheory.FLT3
 public import AlphaCentauri.NumberTheory.FermatCaseOne
 public import AlphaCentauri.NumberTheory.Primes
@@ -102,6 +104,7 @@ public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.DirectTranslation
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
 public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Exponential

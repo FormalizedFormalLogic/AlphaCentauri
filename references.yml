@@ -278,6 +278,18 @@ Jer21:
   organization: Institute of Mathematics, Czech Academy of Sciences
   url: https://users.math.cas.cz/~jerabek/papers/dsc.pdf
 
+JMMV20:
+  type: Article
+  title: An overview of Generalised {Veltman} Semantics
+  author: ["Joosten, Joost J.", "Mas Rovira, Jan", "Mikec, Luka", "Vuković, Mladen"]
+  date: 2020
+  serial-number:
+    arxiv: "2007.04722"
+  url: https://arxiv.org/abs/2007.04722
+  parent:
+    type: Repository
+    title: arXiv
+
 Kat26b:
   type: Article
   title: Equivalence of restricted and full division
@@ -374,6 +386,15 @@ Lin97:
     type: Anthology
     title: Lecture Notes in Logic
     volume: 10
+
+Mas20:
+  type: Thesis
+  title: Interpretability logics and generalized {Veltman} semantics in {Agda}
+  author: Mas Rovira, Jan
+  date: 2020
+  note: Master's thesis
+  organization: Universitat de Barcelona
+  url: https://gitlab.com/janmasrovira/interpretability-logics
 
 MM89:
   type: Article
@@ -541,6 +562,13 @@ Tow20:
   date: 2020
   url: https://www.sas.upenn.edu/~htowsner/GoodsteinsTheorem.pdf
   note: Undated; the PDF is dated 2020
+
+Ver92:
+  type: Misc
+  title: "Verzamelingen-{Veltman} frames en modellen (Set {Veltman} frames and models)"
+  author: Verbrugge, Rineke
+  date: 1992
+  note: Unpublished manuscript
 
 Vis26:
   type: Article

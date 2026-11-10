@@ -44,9 +44,6 @@ declaration:
     forgive:
       # Quoted by Bek99 from Beklemishev 1997 without proof.
       - FFL.FirstOrder.Arithmetic.uniformReflection_of_parameterFreeInduction
-  FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.not_provable_infinitudeOfPrimes_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.not_provable_infinitudeOfPrimes_IOpen
@@ -82,15 +79,6 @@ declaration:
       - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
 
   # Declarations that inherit the debt of an unproved statement.
-  FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.ISigma1_equiv_uniformReflection_ElementaryArithmetic:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.ISigma2_equiv_uniformReflection_ElementaryArithmetic:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
   FFL.FirstOrder.not_provable_fermatLastTheorem_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen

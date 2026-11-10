@@ -487,6 +487,135 @@ lemma result_locallyDelta0 :
     LocallyDelta0Function fun w : Fin (arity + 1) → V ↦ c.result (w ·.succ) (w 0) :=
   c.courseOfValues.result_locallyDelta0
 
+private lemma limSeq_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
+    LocallyDelta0Function fun w : Fin n → V ↦ c.adjointruction.limSeq param (f w) := by
+  simpa using c.adjointruction.limSeq_locallyDelta0.comp_cons hf fun j ↦
+    LocallyDelta0Function.const (param j)
+
+private lemma result_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
+    LocallyDelta0Function fun w : Fin n → V ↦ c.result param (f w) := by
+  simpa using c.result_locallyDelta0.comp_cons hf fun j ↦ LocallyDelta0Function.const (param j)
+
+lemma eq_of_mem_limSeq {s z : V} (h : z ∈ c.adjointruction.limSeq param s) :
+    z = ⟪π₁ z, c.result param (π₁ z)⟫ := by
+  have hR : LocallyDelta0 fun y : Fin 2 → V ↦
+      y 0 ∈ c.adjointruction.limSeq param (y 1) →
+        y 0 = ⟪π₁ (y 0), c.result param (π₁ (y 0))⟫ := by
+    have := (LocallyDelta0.of_definable
+      (R := fun t : Fin 3 → V ↦ t 0 ∈ t 1 → t 0 = ⟪π₁ (t 0), t 2⟫) (by definability)).comp₃
+        (LocallyDelta0Function.var (V := V) (0 : Fin 2))
+        (c.limSeq_comp param (LocallyDelta0Function.var (V := V) (1 : Fin 2)))
+        (c.result_comp param <| LocallyDelta0Function.pi₁.comp₁ <|
+          LocallyDelta0Function.var (V := V) (0 : Fin 2))
+    simpa using this
+  have hP : LocallyDelta0Pred fun s ↦ ∀ z < c.adjointruction.limSeq param s,
+      z ∈ c.adjointruction.limSeq param s → z = ⟪π₁ z, c.result param (π₁ z)⟫ :=
+    (LocallyDelta0.ball_lt_function
+      (c.limSeq_comp param (LocallyDelta0Function.var (V := V) (0 : Fin 1))) hR).of_iff
+        fun w ↦ by simp
+  have : ∀ s, ∀ z < c.adjointruction.limSeq param s,
+      z ∈ c.adjointruction.limSeq param s → z = ⟪π₁ z, c.result param (π₁ z)⟫ := by
+    apply LocallyDelta0Pred.succ_induction hP
+    · intro z _ hz
+      simp at hz
+    · intro s ih z _ hz
+      have hΦ : c.Phi param {z | z ∈ c.adjointruction.limSeq param s} z :=
+        (c.adjointruction.mem_limSeq_succ_iff.mp hz).2
+      rcases hΦ with (rfl | ⟨x, xs, y, rfl, hC⟩)
+      · simp
+      · have hC : ⟪xs, y⟫ ∈ c.adjointruction.limSeq param s := hC
+        have := ih _ (lt_of_mem hC) hC
+        have hy : y = c.result param xs := by simpa using congrArg (fun p ↦ π₂ p) this
+        simp [hy]
+  exact this s z (lt_of_mem h) h
+
+lemma mem_limSeq_result (xs : V) :
+    ⟪xs, c.result param xs⟫ ∈
+      c.adjointruction.limSeq param (⟪xs, c.bound param xs⟫ + xs + 1) := by
+  set K := ⟪xs, c.bound param xs⟫
+  have hP : LocallyDelta0Pred fun ys ↦
+      ys ≤ xs → ⟪ys, c.result param ys⟫ ∈ c.adjointruction.limSeq param (K + ys + 1) := by
+    have hmem := (LocallyDelta0.of_definable (R := fun t : Fin 2 → V ↦ t 0 ∈ t 1)
+      (by definability)).comp₂
+        (LocallyDelta0Function.pairing.comp₂ (LocallyDelta0Function.var (V := V) (0 : Fin 1))
+          (c.result_comp param (LocallyDelta0Function.var (V := V) (0 : Fin 1))))
+        (c.limSeq_comp param <| LocallyDelta0Function.add_one <|
+          LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const K)
+            (LocallyDelta0Function.var (V := V) (0 : Fin 1)))
+    exact (LocallyDelta0.of_definable (R := fun t : Fin 1 → V ↦ t 0 ≤ xs)
+      (by definability)).imp (by simpa using hmem)
+  have : ∀ ys, ys ≤ xs →
+      ⟪ys, c.result param ys⟫ ∈ c.adjointruction.limSeq param (K + ys + 1) := by
+    apply LocallyDelta0Pred.order_induction hP
+    intro ys ih hys
+    have hle : ⟪ys, c.result param ys⟫ ≤ K :=
+      pair_le_pair hys (le_trans (c.result_le_bound param ys) (c.bound_monotone param hys))
+    apply c.adjointruction.mem_limSeq_succ_iff.mpr
+    refine ⟨le_trans hle le_self_add, ?_⟩
+    show c.Phi param _ _
+    rcases nil_or_adjoin ys with (rfl | ⟨x, ys', rfl⟩)
+    · left; simp
+    · right
+      use x, ys', c.result param ys'
+      constructor
+      · simp
+      · have hys' : ys' < x ∷ ys' := by simp
+        exact c.adjointruction.limSeq_cumulative
+          (by rw [add_assoc]; exact add_le_add_right (succ_le_iff_lt.mpr hys') K)
+          (ih ys' hys' (le_trans hys'.le hys))
+  exact this xs le_rfl
+
+variable {param}
+
+lemma graph_iff {xs y : V} : c.Graph param ⟪xs, y⟫ ↔ y = c.result param xs := by
+  constructor
+  · rintro ⟨s, h⟩
+    simpa using c.eq_of_mem_limSeq param h
+  · rintro rfl
+    exact ⟨_, c.mem_limSeq_result param xs⟩
+
+lemma graph_nil {l : V} : c.Graph param ⟪0, l⟫ ↔ l = c.nil param := by
+  simp [graph_iff]
+
+lemma graph_adjoin {x xs y : V} :
+    c.Graph param ⟪x ∷ xs, y⟫ ↔ ∃ y', y = c.adjoin param x xs y' ∧ c.Graph param ⟪xs, y'⟫ := by
+  simp [graph_iff]
+
+variable (param)
+
+lemma result_graph (xs : V) : c.Graph param ⟪xs, c.result param xs⟫ := c.graph_iff.mpr rfl
+
+lemma graph_exists (xs : V) : ∃ y, c.Graph param ⟪xs, y⟫ := ⟨_, c.result_graph param xs⟩
+
+variable {param}
+
+lemma graph_unique {xs y₁ y₂ : V} :
+    c.Graph param ⟪xs, y₁⟫ → c.Graph param ⟪xs, y₂⟫ → y₁ = y₂ := by
+  simp only [graph_iff]
+  rintro rfl rfl; rfl
+
+variable (param)
+
+lemma graph_existsUnique (xs : V) : ∃! y, c.Graph param ⟪xs, y⟫ :=
+  ExistsUnique.intro _ (c.result_graph param xs) fun _ h ↦ c.graph_unique h (c.result_graph param xs)
+
+lemma result_eq_of_graph {xs y : V} (h : c.Graph param ⟪xs, y⟫) : c.result param xs = y :=
+  (c.graph_iff.mp h).symm
+
+set_option linter.flexible false in
+lemma result_defined :
+    𝚺ᴬ₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) β.resultDef := .mk fun v ↦ by
+  simp [Arithmetic.VecRec.Blueprint.resultDef, c.graph_defined.iff]
+  constructor
+  · intro h; symm; simpa using c.result_eq_of_graph _ h
+  · intro h; rw [h]; exact c.result_graph _ _
+
+@[simp] lemma eval_resultDef (v : Fin (arity + 2) → V) :
+    β.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
+
+lemma result_definable : 𝚺ᴬ₁.DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
+  c.result_defined.to_definable
+
 end Construction
 
 end VecRec

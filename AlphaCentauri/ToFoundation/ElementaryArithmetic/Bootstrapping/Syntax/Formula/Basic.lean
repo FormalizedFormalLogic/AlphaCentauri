@@ -1148,7 +1148,7 @@ lemma boundMax_locallyDelta0 :
   funext j
   cases j using Fin.cases with
   | zero => rfl
-  | succ j => simp [Fin.fin_one_eq_zero j]
+  | succ j => simp
 
 private lemma depthValueAt_locallyDelta0 :
     LocallyDelta0Function fun w : Fin 4 → V ↦
@@ -1175,7 +1175,7 @@ noncomputable def courseOfValues : CourseOfValues.Construction V 2 where
     | succ j =>
       cases j using Fin.cases with
       | zero => rfl
-      | succ j => simp [Fin.fin_one_eq_zero j]
+      | succ j => simp
   bound q n := Exp.exp (Exp.exp ((q 1 + 1) + (q 1 + 1) + c.boundMax (q 0) (q 1) n + 3))
   bound_monotone q {_ _} h :=
     exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr; exact c.boundMax_monotone h))
@@ -1240,6 +1240,101 @@ lemma depthValue_le {P q T d : V}
       (by rw [← c.iter_succ]; exact hT _ hb _)
     rwa [e] at h
   · exact zero_le
+
+private lemma depthValueList_locallyDelta0 (P J : V) :
+    LocallyDelta0Function fun w : Fin 1 → V ↦
+      listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d)
+        ![P, w 0, c.courseOfValues.table ![P, J] (w 0)] (rangeList (J + 1)) := by
+  have htable : LocallyDelta0Function fun w : Fin 1 → V ↦ c.courseOfValues.table ![P, J] (w 0) := by
+    have := c.courseOfValues.table_locallyDelta0.comp_cons (LocallyDelta0Function.var 0)
+      (u := ![fun _ : Fin 1 → V ↦ P, fun _ ↦ J]) <| Fin.forall_fin_succ.mpr
+        ⟨LocallyDelta0Function.const P, Fin.forall_fin_succ.mpr
+          ⟨LocallyDelta0Function.const J, finZeroElim⟩⟩
+    convert this using 2 with w
+    congr 1
+    funext j
+    cases j using Fin.cases with
+    | zero => rfl
+    | succ j => simp
+  have := (listMap_locallyDelta0 (g := fun (r : Fin 3 → V) d ↦ c.depthValue (r 0) (r 1) (r 2) d)
+    c.depthValueAt_locallyDelta0).comp_cons (LocallyDelta0Function.const (rangeList (J + 1)))
+    (u := ![fun _ : Fin 1 → V ↦ P, fun w ↦ w 0, fun w ↦ c.courseOfValues.table ![P, J] (w 0)]) <|
+      Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.const P, Fin.forall_fin_succ.mpr
+        ⟨LocallyDelta0Function.var 0, Fin.forall_fin_succ.mpr ⟨htable, finZeroElim⟩⟩⟩
+  convert this using 2 with w
+  congr 1
+  funext j
+  cases j using Fin.cases with
+  | zero => rfl
+  | succ j =>
+    cases j using Fin.cases with
+    | zero => rfl
+    | succ j => simp
+
+lemma depthList_locallyDelta0 (P J : V) :
+    LocallyDelta0Function fun w : Fin 1 → V ↦ c.depthList P J (w 0) := by
+  have := c.courseOfValues.result_locallyDelta0.comp_cons (LocallyDelta0Function.var 0)
+    (u := ![fun _ : Fin 1 → V ↦ P, fun _ ↦ J]) <| Fin.forall_fin_succ.mpr
+      ⟨LocallyDelta0Function.const P, Fin.forall_fin_succ.mpr
+        ⟨LocallyDelta0Function.const J, finZeroElim⟩⟩
+  convert this using 2 with w
+  simp only [depthList]
+  congr 1
+  funext j
+  cases j using Fin.cases with
+  | zero => rfl
+  | succ j => simp
+
+lemma depthList_spec (P J q : V) :
+    c.depthList P J q = listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d)
+        ![P, q, c.courseOfValues.table ![P, J] q] (rangeList (J + 1)) ∧
+      ∀ e < len (c.depthList P J q), (c.depthList P J q).[e] ≤ c.bound (c.iter P e) q := by
+  have hdl := c.depthList_locallyDelta0 P J
+  have hP : LocallyDelta0Pred fun q ↦ c.depthList P J q =
+        listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d)
+          ![P, q, c.courseOfValues.table ![P, J] q] (rangeList (J + 1)) ∧
+      ∀ e < len (c.depthList P J q), (c.depthList P J q).[e] ≤ c.bound (c.iter P e) q := by
+    have hentry : LocallyDelta0 fun u : Fin 2 → V ↦
+        (c.depthList P J (u 1)).[u 0] ≤ c.bound (c.iter P (u 0)) (u 1) :=
+      LocallyDelta0.le (nth_locallyDelta0.comp₂ (hdl.comp₁ (LocallyDelta0Function.var 1))
+        (LocallyDelta0Function.var 0))
+        (c.bound_locallyDelta0.comp₂ (c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.const P)
+          (LocallyDelta0Function.var 0)) (LocallyDelta0Function.var 1))
+    exact (LocallyDelta0.eq hdl (c.depthValueList_locallyDelta0 P J)).and
+      (LocallyDelta0.ball_lt_function (len_locallyDelta0.comp₁ hdl) hentry)
+  revert q
+  apply LocallyDelta0Pred.order_induction hP
+  intro q ih
+  set T := c.courseOfValues.table ![P, J] q
+  have hg : LocallyDelta0Function fun w : Fin 4 → V ↦
+      (fun (r : Fin 3 → V) d ↦ c.depthValue (r 0) (r 1) (r 2) d) (w ·.succ) (w 0) :=
+    c.depthValueAt_locallyDelta0
+  have hT : ∀ q' < q, ∀ e, (znth T q').[e] ≤ c.bound (c.iter P e) q' := by
+    intro q' hq' e
+    have hz : znth T q' = c.depthList P J q' := c.courseOfValues.znth_table hq'
+    rw [hz]
+    by_cases he : e < len (c.depthList P J q')
+    · exact (ih q' hq').2 e he
+    · rw [nth_lt_len (not_lt.mp he)]; exact zero_le
+  have hentries : ∀ i < len (listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d) ![P, q, T]
+      (rangeList (J + 1))), (listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d) ![P, q, T]
+      (rangeList (J + 1))).[i] ≤ c.boundMax P J q := by
+    intro i hi
+    rw [len_listMap hg] at hi
+    rw [nth_listMap hg _ _ hi, nth_rangeList (by simpa using hi)]
+    exact le_trans (c.depthValue_le hT) (c.le_boundMax (lt_succ_iff_le.mp (by simpa using hi)))
+  have hval_le : c.courseOfValues.val ![P, J] q T ≤ c.courseOfValues.bound ![P, J] q := by
+    have := le_exp_exp_of_nth_le _ hentries
+    rw [len_listMap hg, len_rangeList] at this
+    exact this
+  have heq : c.depthList P J q = listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d) ![P, q, T]
+      (rangeList (J + 1)) :=
+    c.courseOfValues.result_eq_val hval_le
+  refine ⟨heq, fun e he ↦ ?_⟩
+  rw [heq] at he ⊢
+  rw [len_listMap hg] at he
+  rw [nth_listMap hg _ _ he, nth_rangeList (by simpa using he)]
+  exact c.depthValue_le hT
 
 end Construction
 

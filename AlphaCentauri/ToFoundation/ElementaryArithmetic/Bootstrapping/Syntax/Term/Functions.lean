@@ -910,6 +910,11 @@ lemma qqAdd_one_le_exp_exp {t n : V} (hn : ((𝟏 + addIndex + 2 : ℕ) : V) ≤
   refine le_trans h5 (exp_monotone_le.mpr (exp_monotone_le.mpr (le_of_eq ?_)))
   grind
 
+lemma bound_locallyDelta0 : LocallyDelta0Function fun v : Fin (0 + 1) → V ↦
+    Exp.exp (Exp.exp (16 * v 0 + ((𝟏 + addIndex + 2 : ℕ) : V))) :=
+  LocallyDelta0Function.exp_exp_mul_add 16 (LocallyDelta0Function.var 0)
+    (LocallyDelta0Function.const (((𝟏 + addIndex + 2 : ℕ) : V)))
+
 noncomputable def construction : PR.Construction V blueprint where
   zero _ := 𝟏
   succ _ _ t := t ^+ 𝟏
@@ -920,6 +925,7 @@ noncomputable def construction : PR.Construction V blueprint where
     (LocallyDelta0Function.const (𝟏 : V))
   bound _ i := Exp.exp (Exp.exp (16 * i + ((𝟏 + addIndex + 2 : ℕ) : V)))
   zero_lt_bound _ := by
+    beta_reduce
     rw [mul_zero, zero_add]
     exact lt_of_le_of_lt (by exact_mod_cast (by omega : 𝟏 ≤ 𝟏 + addIndex + 2))
       (lt_trans (lt_exp _) (exp_monotone.mpr (lt_exp _)))
@@ -931,8 +937,10 @@ noncomputable def construction : PR.Construction V blueprint where
     gcongr
     exact_mod_cast (by norm_num : (10 : ℕ) < 16)
   bound_monotone _ _ _ h := exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr))
-  bound_locallyDelta0 := LocallyDelta0Function.exp_exp_mul_add 16 (LocallyDelta0Function.var 0)
-    (LocallyDelta0Function.const (((𝟏 + addIndex + 2 : ℕ) : V)))
+  bound_locallyDelta0 := bound_locallyDelta0
+  inv_locallyDelta0 := PR.lt_bound_locallyDelta0
+    (bound := fun _ i ↦ Exp.exp (Exp.exp (16 * i + ((𝟏 + addIndex + 2 : ℕ) : V))))
+    bound_locallyDelta0
 
 /-- The code of the numeral for `x + 1`. -/
 noncomputable def numeralAux (x : V) : V := construction.result ![] x

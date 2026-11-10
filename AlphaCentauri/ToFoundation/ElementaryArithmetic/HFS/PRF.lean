@@ -30,6 +30,12 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 namespace PR
 
+/-- The default invariant `z < bound v i` is locally $\Delta_0$. -/
+lemma lt_bound_locallyDelta0 {k : ℕ} {bound : (Fin k → V) → V → V}
+    (h : LocallyDelta0Function fun v : Fin (k + 1) → V ↦ bound (v ·.succ) (v 0)) :
+    LocallyDelta0 fun w : Fin (k + 2) → V ↦ w 0 < bound (w ·.succ.succ) (w 1) :=
+  LocallyDelta0.lt (LocallyDelta0Function.var 0) (h.retraction Fin.succ)
+
 variable (V)
 
 /-- A primitive recursion in a model of $\mathsf{EA}$, with a monotone bound on its values. -/
@@ -43,10 +49,15 @@ structure Recursion (k : ℕ) where
     LocallyDelta0Function fun v : Fin (k + 2) → V ↦ succ (v ·.succ.succ) (v 1) (v 0)
   /-- `c.bound v i` bounds the value at `i`. -/
   bound : (Fin k → V) → V → V
-  zero_lt_bound : ∀ v, zero v < bound v 0
-  succ_lt_bound : ∀ v i z, z < bound v i → succ v i z < bound v (i + 1)
   bound_monotone : ∀ v {i j}, i ≤ j → bound v i ≤ bound v j
   bound_locallyDelta0 : LocallyDelta0Function fun v : Fin (k + 1) → V ↦ bound (v ·.succ) (v 0)
+  /-- `c.inv v i z` is an invariant of the value `z` at `i`. -/
+  inv : (Fin k → V) → V → V → Prop := fun v i z ↦ z < bound v i
+  inv_locallyDelta0 :
+    LocallyDelta0 fun w : Fin (k + 2) → V ↦ inv (w ·.succ.succ) (w 1) (w 0)
+  lt_bound_of_inv : ∀ v i z, inv v i z → z < bound v i := by intro _ _ _ h; exact h
+  zero_lt_bound : ∀ v, inv v 0 (zero v)
+  succ_lt_bound : ∀ v i z, inv v i z → inv v (i + 1) (succ v i z)
 
 /-- A primitive recursion whose functions are defined by the formulas of a blueprint. -/
 structure Construction {k : ℕ} (p : Arithmetic.PR.Blueprint k) extends Recursion V k where
@@ -166,18 +177,19 @@ lemma successor {s l z : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z�
     · simp only [mem_seqCons_iff]; right
       exact Hs.succ i (by simp [← hl, hil]) w hiws ⟩
 
-/-- Every value of a computation sequence lies below the bound. -/
-lemma lt_bound (H : c.CSeq v s) {i z : V} (h : ⟪i, z⟫ ∈ s) : z < c.bound v i := by
-  have hb : LocallyDelta0Function fun x : Fin 2 → V ↦ c.bound v (x 1) := by
-    simpa using c.bound_locallyDelta0.comp_cons (LocallyDelta0Function.var (1 : Fin 2))
-      fun j ↦ LocallyDelta0Function.const (v j)
-  have hQ : LocallyDelta0 fun x : Fin 2 → V ↦ ⟪x 1, x 0⟫ ∈ s → x 0 < c.bound v (x 1) :=
-    ((LocallyDelta0.of_definable (R := fun y : Fin 3 → V ↦ ⟪y 0, y 1⟫ ∈ s → y 1 < y 2)
-      (by definability)).comp₃ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
-        hb).of_iff fun x ↦ by simp
-  have hP : LocallyDelta0Pred fun i ↦ ∀ z < s, ⟪i, z⟫ ∈ s → z < c.bound v i :=
+/-- Every value of a computation sequence satisfies the invariant. -/
+lemma inv_of_mem (H : c.CSeq v s) {i z : V} (h : ⟪i, z⟫ ∈ s) : c.inv v i z := by
+  have hinv : LocallyDelta0 fun x : Fin 2 → V ↦ c.inv v (x 1) (x 0) := by
+    have := c.inv_locallyDelta0.comp (f := (fun x : Fin 2 → V ↦ x 0) :> (fun x ↦ x 1) :>
+      fun j _ ↦ v j) <| Fin.cases (LocallyDelta0Function.var 0) <|
+        Fin.cases (LocallyDelta0Function.var 1) fun j ↦ LocallyDelta0Function.const (v j)
+    exact this.of_iff fun x ↦ iff_of_eq <| by congr
+  have hQ : LocallyDelta0 fun x : Fin 2 → V ↦ ⟪x 1, x 0⟫ ∈ s → c.inv v (x 1) (x 0) :=
+    ((LocallyDelta0.of_definable (R := fun y : Fin 2 → V ↦ ⟪y 1, y 0⟫ ∈ s)
+      (by definability)).imp hinv)
+  have hP : LocallyDelta0Pred fun i ↦ ∀ z < s, ⟪i, z⟫ ∈ s → c.inv v i z :=
     (LocallyDelta0.ball_lt_function (LocallyDelta0Function.const s) hQ).of_iff fun x ↦ by simp
-  have : ∀ i, ∀ z < s, ⟪i, z⟫ ∈ s → z < c.bound v i := by
+  have : ∀ i, ∀ z < s, ⟪i, z⟫ ∈ s → c.inv v i z := by
     apply LocallyDelta0Pred.succ_induction hP
     · intro z _ hz
       rw [H.seq.isMapping.uniq hz H.zero]
@@ -190,6 +202,10 @@ lemma lt_bound (H : c.CSeq v s) {i z : V} (h : ⟪i, z⟫ ∈ s) : z < c.bound v
       rw [H.seq.isMapping.uniq hz hsucc]
       exact c.succ_lt_bound v i _ (ih _ (lt_of_mem_rng hmem) hmem)
   exact this i z (lt_of_mem_rng h) h
+
+/-- Every value of a computation sequence lies below the bound. -/
+lemma lt_bound (H : c.CSeq v s) {i z : V} (h : ⟪i, z⟫ ∈ s) : z < c.bound v i :=
+  c.lt_bound_of_inv v i z (H.inv_of_mem h)
 
 /-- A computation sequence of length at most `l + 1` lies below `Exp.exp ⟪l + 1, c.bound v l⟫`. -/
 lemma lt_exp_of_lh_le (H : c.CSeq v s) {l : V} (hl : lh s ≤ l + 1) :

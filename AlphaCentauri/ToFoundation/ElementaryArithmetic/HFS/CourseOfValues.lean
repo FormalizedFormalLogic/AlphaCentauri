@@ -125,6 +125,8 @@ noncomputable def recursion : PR.Recursion V k where
   bound_monotone v {m n} h :=
     exp_monotone_le.mpr <| pair_le_pair h (by simpa using c.bound_monotone v h)
   bound_locallyDelta0 := c.bound_succ_locallyDelta0
+  inv_locallyDelta0 := PR.lt_bound_locallyDelta0
+    (bound := fun v n ↦ Exp.exp ⟪n, c.bound v n + 1⟫) c.bound_succ_locallyDelta0
 
 /-- The table `⟪0, r 0⟫, …, ⟪n - 1, r (n - 1)⟫` of the values below `n`. -/
 noncomputable def table (n : V) : V := c.recursion.result v n

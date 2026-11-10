@@ -60,6 +60,19 @@ instance (k : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ IE k :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻)
     (Entailment.WeakerThan.ofSubset Set.subset_union_left)
 
+section
+
+variable {V : Type*} [ORingStructure V]
+
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝗘₁] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+  Semantics.ModelsSet.of_subset (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝗘₁) Set.subset_union_left
+
+instance {k : ℕ} [V↓[ℒₒᵣ] ⊧* IE k] :
+    V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Semiformula.BoundedExistential k) :=
+  Semantics.ModelsSet.of_subset (inferInstance : V↓[ℒₒᵣ] ⊧* IE k) Set.subset_union_right
+
+end
+
 /-- $\mathsf{I}\mathsf{E}_1$ is strictly weaker than $\mathsf{I}\Delta_0$. An open problem.
 - [DAq05, §8] -/
 def IE1StrictlyWeakerThanISigma0 : Prop := 𝗜𝗘₁ ⪱ 𝗜𝚺₀

@@ -1295,6 +1295,13 @@ noncomputable def repeatVec.construction :
         (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.var 0)
           (LocallyDelta0Function.var 0)) (LocallyDelta0Function.var 1))
         (LocallyDelta0Function.const 3)
+  inv_locallyDelta0 := LocallyDelta0.lt (LocallyDelta0Function.var (V := V) 0) <|
+    LocallyDelta0Function.add_one <|
+      LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
+        LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.add.comp₂
+          (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.var 1)
+            (LocallyDelta0Function.var 1)) (LocallyDelta0Function.var 2))
+          (LocallyDelta0Function.const 3)
 
 /-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0` -/
 noncomputable def repeatVec (x k : V) : V := repeatVec.construction.result ![x] k

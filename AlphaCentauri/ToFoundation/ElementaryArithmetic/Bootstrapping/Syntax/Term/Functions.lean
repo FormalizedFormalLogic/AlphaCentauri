@@ -920,6 +920,7 @@ noncomputable def construction : PR.Construction V blueprint where
     (LocallyDelta0Function.const (𝟏 : V))
   bound _ i := Exp.exp (Exp.exp (16 * i + ((𝟏 + addIndex + 2 : ℕ) : V)))
   zero_lt_bound _ := by
+    beta_reduce
     rw [mul_zero, zero_add]
     exact lt_of_le_of_lt (by exact_mod_cast (by omega : 𝟏 ≤ 𝟏 + addIndex + 2))
       (lt_trans (lt_exp _) (exp_monotone.mpr (lt_exp _)))
@@ -933,6 +934,9 @@ noncomputable def construction : PR.Construction V blueprint where
   bound_monotone _ _ _ h := exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr))
   bound_locallyDelta0 := LocallyDelta0Function.exp_exp_mul_add 16 (LocallyDelta0Function.var 0)
     (LocallyDelta0Function.const (((𝟏 + addIndex + 2 : ℕ) : V)))
+  inv_locallyDelta0 := LocallyDelta0.lt (LocallyDelta0Function.var (V := V) 0) <|
+    LocallyDelta0Function.exp_exp_mul_add 16 (LocallyDelta0Function.var 1)
+      (LocallyDelta0Function.const (((𝟏 + addIndex + 2 : ℕ) : V)))
 
 /-- The code of the numeral for `x + 1`. -/
 noncomputable def numeralAux (x : V) : V := construction.result ![] x

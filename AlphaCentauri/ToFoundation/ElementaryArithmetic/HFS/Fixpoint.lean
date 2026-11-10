@@ -140,6 +140,8 @@ noncomputable def prConstruction : PR.Construction V φ.prBlueprint where
   bound_monotone := fun _ _ _ h ↦ exp_monotone_le.mpr h
   bound_locallyDelta0 := by
     simpa using LocallyDelta0Function.exp.retraction (fun _ : Fin 1 ↦ (0 : Fin (k + 1)))
+  inv_locallyDelta0 := PR.Recursion.lt_bound_locallyDelta0 (bound := fun _ i ↦ Exp.exp i) <| by
+    simpa using LocallyDelta0Function.exp.retraction (fun _ : Fin 1 ↦ (0 : Fin (k + 1)))
 
 variable (v)
 

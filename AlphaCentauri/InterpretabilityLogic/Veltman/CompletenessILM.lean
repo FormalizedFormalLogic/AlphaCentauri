@@ -570,6 +570,169 @@ lemma CriticalSuccessor.exists_criticalSuccessor_box_subset (hE : IsRhdOperand �
 
 end MaximalConsistentSet
 
+/-! ### The countermodel -/
+
+namespace Veltman
+
+open MaximalConsistentSet
+
+namespace IndexedSet
+
+variable {L : Logic α} {Φ : Finset (Formula α)}
+
+/-- `S w x y`, the sequence of `x` is an initial segment of the sequence of `y`, and every
+`□`-formula in the set of `x` is in the set of `y`.
+
+- [dJV90, Theorem 6.3]
+-/
+def SM (w x y : IndexedSet L Φ) : Prop :=
+  S w x y ∧ x.seq <+: y.seq ∧ ∀ {A}, □A ∈ x.set → □A ∈ y.set
+
+/-- The set `Δ` indexed by the sequence of `x`. -/
+def withSet (x : IndexedSet L Φ) (Δ : MaximalConsistentSet L Φ) (h : ∀ {A}, □A ∈ x.set → □A ∈ Δ) :
+    IndexedSet L Φ :=
+  ⟨Δ, x.seq, x.isRhdOperand_of_mem_seq, x.length_seq_le.trans <| Finset.card_le_card fun A hA ↦
+    mem_prebox.mpr <| h <| mem_prebox.mp hA⟩
+
+end IndexedSet
+
+open IndexedSet
+
+variable {Φ : Finset (Formula α)}
+
+/-- - [dJV90, Theorem 6.3] -/
+def countermodelM (Φ : Finset (Formula α)) [Nonempty (IndexedSet 𝐈𝐋𝐌 Φ)] :
+    Model (IndexedSet 𝐈𝐋𝐌 Φ) α where
+  Rel' := IndexedSet.Rel
+  S' := IndexedSet.SM
+  Val' x a := #a ∈ x.set
+
+namespace countermodelM
+
+open Model Model.World
+
+variable [Nonempty (IndexedSet 𝐈𝐋𝐌 Φ)]
+
+instance [Adequate Φ] : (countermodelM Φ).IsIL where
+  trans _ _ _ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
+  cwf := by
+    have : IsTrans _ (flip (countermodelM Φ).Rel) :=
+      ⟨fun _ _ _ h₁ h₂ ↦ ⟨h₂.1.trans h₁.1, h₂.2.trans h₁.2⟩⟩;
+    have : Std.Irrefl (flip (countermodelM Φ).Rel) := ⟨fun _ h ↦ h.1.irrefl⟩;
+    exact Finite.wellFounded_of_trans_of_irrefl _;
+  rel_of_s_left h := h.1.1.1
+  rel_of_s_right h := h.1.1.2
+  s_refl h := ⟨⟨⟨h, h⟩, fun _ h₁ h₂ ↦ ⟨h₁, h₂⟩⟩, List.prefix_refl _, id⟩
+  s_trans h₁ h₂ := ⟨⟨⟨h₁.1.1.1, h₂.1.1.2⟩, fun C h₃ h₄ ↦
+    have h := h₁.1.2 C h₃ h₄;
+    h₂.1.2 C h.1 h.2⟩, h₁.2.1.trans h₂.2.1, fun h ↦ h₂.2.2 (h₁.2.2 h)⟩
+  s_of_rel h₁ h₂ := ⟨⟨⟨h₁, h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩,
+    fun _ h₃ h₄ ↦ ⟨h₃.trans h₂.2, h₄.trans_successor h₂.1⟩⟩, h₂.2, h₂.1.box_mem_of_box_mem⟩
+
+instance : (countermodelM Φ).HasM where
+  rel_of_s_rel h₁ h₂ :=
+    have ⟨A, hA, hA'⟩ := h₂.1.exists_box;
+    ⟨⟨fun h ↦ h₂.1.mem_of_box_mem (h₁.2.2 h), fun h ↦ h₂.1.box_mem_of_box_mem (h₁.2.2 h),
+      A, hA, fun h ↦ hA' (h₁.2.2 h)⟩, h₁.2.1.trans h₂.2⟩
+
+variable [MAdequate Φ]
+
+/-- - [dJV90, Theorem 6.3] -/
+lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ) :
+    x ⊩ A ↔ A ∈ x.set := by
+  induction A generalizing x with
+  | atom a => rfl;
+  | falsum => exact ⟨False.elim, fun h ↦ bot_not_mem h⟩;
+  | imp A B ihA ihB =>
+    have hA' := Adequate.imp_left hA;
+    have hB' := Adequate.imp_right hA;
+    rw [imp_mem_iff hA hA' hB', ← ihA hA', ← ihB hB'];
+    rfl;
+  | box A ih =>
+    have hA' := Adequate.box hA;
+    constructor;
+    · intro h;
+      by_contra hn;
+      obtain ⟨Δ, hΔ, hA⟩ := exists_successor_of_box_not_mem hA hn;
+      exact not_mem_of_provable_neg hA (Context.by_axm rfl) <|
+        (ih hA').mp <| h (x.successor Δ hΔ) ⟨hΔ, List.prefix_refl _⟩;
+    · intro h y Rxy;
+      exact (ih hA').mpr <| Rxy.1.mem_of_box_mem h;
+  | rhd B C ihB ihC =>
+    have hB := Adequate.rhd_left hA;
+    have hC := Adequate.rhd_right hA;
+    constructor;
+    · intro h;
+      by_contra hn;
+      obtain ⟨Δ, hΔ, hBΔ⟩ := exists_criticalSuccessor_of_rhd_not_mem hA hn;
+      have hC' : IsRhdOperand Φ C := .of_rhd_right hA;
+      obtain ⟨v, hS, hv⟩ := h (x.criticalSuccessor C hC' Δ hΔ.toSuccessor)
+        ⟨hΔ.toSuccessor, List.prefix_append _ _⟩ ((ihB hB).mpr hBΔ);
+      have hCC : C ▷ C ∈ x.set :=
+        (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofAxioms.rhd_refl;
+      exact (hS.1.2 C (List.prefix_refl _) hΔ).2.not_mem hCC <| (ihC hC).mp hv;
+    · intro h u Rxu hu;
+      replace hu := (ihB hB).mp hu;
+      have hF : ∃ F, IsRhdOperand Φ F ∧ CriticalSuccessor F x.set u.set ∧
+          ∀ F', x.seq ++ [F'] <+: u.seq → CriticalSuccessor F' x.set u.set → F' = F := by
+        by_cases hc : ∃ F, x.seq ++ [F] <+: u.seq ∧ CriticalSuccessor F x.set u.set;
+        · obtain ⟨F, hpre, hcrit⟩ := hc;
+          use F;
+          and_intros;
+          · exact u.isRhdOperand_of_mem_seq F <| hpre.subset (by simp);
+          · exact hcrit;
+          · intro F' hpre' _;
+            have h₁ : x.seq ++ [F'] = x.seq ++ [F] :=
+              (List.prefix_of_prefix_length_le hpre' hpre (by simp)).eq_of_length (by simp);
+            simpa using h₁;
+        · use ⊥;
+          and_intros;
+          · exact .bot;
+          · exact Rxu.1.criticalSuccessor_bot Logic.ofAxioms.rhd_bot;
+          · intro F' hpre' hcrit';
+            exact (hc ⟨F', hpre', hcrit'⟩).elim;
+      obtain ⟨F, hF, hcrit, huniq⟩ := hF;
+      obtain ⟨Θ, hΘ, hCΘ, hbox⟩ := hcrit.exists_criticalSuccessor_box_subset hF h hu;
+      use u.withSet Θ hbox;
+      constructor;
+      · refine ⟨⟨⟨Rxu, hΘ.toSuccessor, Rxu.2⟩, fun F' hpre' hcrit' ↦ ?_⟩, List.prefix_refl _, hbox⟩;
+        obtain rfl := huniq F' hpre' hcrit';
+        exact ⟨hpre', hΘ⟩;
+      · exact (ihC hC).mpr hCΘ;
+
+end countermodelM
+
+end Veltman
+
+/-! ### Completeness -/
+
+namespace Logic.ILM
+
+open Veltman Veltman.Model.World MaximalConsistentSet
+
+universe u
+
+variable {α : Type u} {A : Formula α}
+
+/-- - [dJV90, Theorem 6.3] -/
+theorem complete (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] →
+    [M.HasM] → M ⊧ A) : 𝐈𝐋𝐌 ⊢ A := by
+  classical
+  by_contra hA;
+  have : Entailment.Consistent (𝐈𝐋𝐌 : Logic α) := .of_unprovable hA;
+  let Φ := mAdequateClosure (adequateClosure {A});
+  have hX : ({∼A} : Set (Formula α)) *⊬[𝐈𝐋𝐌] ⊥ := by
+    intro h₁;
+    apply hA;
+    have h₂ : 𝐈𝐋𝐌 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+    cl_prover [h₂];
+  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := Φ) hX;
+  have hAΦ : A ∈ Φ := mAdequateClosure.subset <| adequateClosure.subset (by simp);
+  exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+    (countermodelM.truthlemma hAΦ).mp <| h (countermodelM Φ) ⟨Γ, [], by simp, by simp⟩
+
+end Logic.ILM
+
 end FFL.InterpretabilityLogic
 
 end

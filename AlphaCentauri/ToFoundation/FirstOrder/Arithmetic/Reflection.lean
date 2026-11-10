@@ -1,27 +1,18 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.LK.Completeness
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 
 /-!
-# Counter-models and local reflection for arithmetic theories
+# Local reflection over the prenex hierarchy
 
-Supplements `Foundation.FirstOrder.LK.Completeness` and
-`Foundation.FirstOrder.Incompleteness.Reflection.Local`: an arithmetic sentence a theory does not
-prove fails in some model of that theory, and local reflection over the prenex hierarchy.
+Local reflection for $\Sigma_{s'}$ or $\Pi_{s'}$ prenex sentences yields local reflection for prenex
+sentences of a lower or equal level, since a prenex sentence is provably equivalent to one of a
+higher level.
 -/
 
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
-
-/-- A sentence unprovable in `T` fails in some model of `T`. -/
-lemma exists_countermodel_of_unprovable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T]
-    {σ : ArithmeticSentence} (h : T ⊬ σ) :
-    ∃ (M : Type) (_ : ORingStructure M) (_ : M↓[ℒₒᵣ] ⊧* T), ¬M↓[ℒₒᵣ] ⊧ σ := by
-  by_contra! hc
-  exact h (complete T σ fun M _ _ ↦ hc M ‹_› ‹_›)
 
 section Reflection
 

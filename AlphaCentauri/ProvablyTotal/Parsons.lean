@@ -3,7 +3,9 @@ module
 public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.ProvablyTotal.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Definability
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Absoluteness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
 public import AlphaCentauri.ToMathlib.Data.Vector.Basic
 public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 public import Mathlib.Computability.Ackermann

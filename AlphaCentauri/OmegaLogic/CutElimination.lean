@@ -2,6 +2,9 @@ module
 
 public import AlphaCentauri.OmegaLogic.Basic
 public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Bounds
+public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
+public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
+public import AlphaCentauri.ToFoundation.FirstOrder.Rew
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 
 /-!

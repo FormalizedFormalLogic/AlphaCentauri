@@ -1,12 +1,19 @@
 module
 
 public import AlphaCentauri.Model.EndExtension
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.CodedPigeonhole
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Injection
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
+public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
+public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
+public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
+public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.PrenexNormalForm
+public import AlphaCentauri.ToFoundation.FirstOrder.Rew
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Incompleteness.Second
-public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 
 /-!
 # Elementary substructures and definable elements

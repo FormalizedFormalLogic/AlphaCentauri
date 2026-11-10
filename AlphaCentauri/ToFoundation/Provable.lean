@@ -168,4 +168,31 @@ theorem provable_substNumerals_of_provable_zero_of_provable_succ {m : ℕ}
 
 end induction
 
+section conditional
+
+open Bootstrapping.Arithmetic
+
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗣𝗔⁻ ⪯ T]
+
+/-- If `T` proves that a $\Sigma_1$ condition on the first `k` variables implies `φ`, then `T`
+internally proves every instance of `φ` by terms whose first `k` are the numerals of a true instance
+of the condition. -/
+lemma tprovable_subst_of_provable_imp {k m : ℕ} (c : 𝚺ᴬ₁.Semisentence k)
+    (φ : ArithmeticSemisentence (k + m))
+    (h : T ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd m)) ▹ c.val) 🡒 φ)) {w : Fin k → V}
+    (hw : V ⊧/w c.val) (v : SemitermVec V ℒₒᵣ (k + m) 0) (hv : ∀ i, v (i.castAdd m) = 𝕹(w i)) :
+    T.internalize V ⊢ (⌜φ⌝ : Semiformula V ℒₒᵣ (k + m)).subst v := by
+  have h₁ := tprovable_subst_of_allClosure T v (internal_provable_of_outer_provable h)
+  rw [LCWQIsoGödelQuote.imply, Semiformula.substs_imp, typed_quote_rew_subst,
+    Semiformula.substs_substs] at h₁
+  have e : ((Semiterm.subst v)⨟ fun i ↦
+      (⌜(Rew.emb (#(i.castAdd m) : ArithmeticSemiterm Empty (k + m)) :
+        SyntacticSemiterm ℒₒᵣ (k + m))⌝ : Semiterm V ℒₒᵣ (k + m))) = fun i ↦ 𝕹 (w i) := by
+    funext i
+    simp [hv]
+  rw [e] at h₁
+  exact h₁ ⨀ bold_sigma_one_complete T c.sigma_prop hw
+
+end conditional
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

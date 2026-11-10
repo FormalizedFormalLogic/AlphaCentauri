@@ -380,7 +380,164 @@ lemma tprovable_all_iff_exs_domain (d A B : Semiformula V L 1) :
     simpa using tprovable_all_iff_all (T := T) (∼(d ⋏ A)) (∼(d ⋏ B))
   cl_prover [h₁, h₂]
 
+lemma TProof.all₂_imp_subst (φ : Semiformula V L 2) (t u : Term V L) :
+    T.internalize V ⊢ ∀¹ ∀¹ φ 🡒 φ.subst ![t, u] := by
+  have h₁ := all_imp_subst (T := T) (∀¹ φ) u
+  have h₂ := all_imp_subst (T := T) (φ.subst (SemitermVec.q ![u])) t
+  rw [Semiformula.substs_all] at h₁
+  have e : (φ.subst (SemitermVec.q ![u])).subst ![t] = φ.subst ![t, u] := by
+    simp [Semiformula.substs_substs]
+  rw [e] at h₂
+  exact C_trans h₁ h₂
+
 end allItr
+
+section representative
+
+open _root_.FFL.Entailment
+
+variable {T : Theory L} [T.Δ₁]
+
+/-- Relativizing a universal quantifier to `d`, along a relation `e` relating every element to
+an element of `d` and every element to itself. -/
+lemma tprovable_all_iff_all_domain_of_rep (d : Semiformula V L 1) (e : Semiformula V L 2)
+    (Φ Θ : Semiformula V L 1)
+    (hrep : T.internalize V ⊢
+      ∀¹ ∃¹ (d.subst ![Semiterm.bvar 0] ⋏ e.subst ![Semiterm.bvar 0, Semiterm.bvar 1]))
+    (hrefl : T.internalize V ⊢ ∀¹ e.subst ![Semiterm.bvar 0, Semiterm.bvar 0]) :
+    T.internalize V ⊢
+      ∀¹ ∀¹ ((d.subst ![Semiterm.bvar 1] ⋏ e.subst ![Semiterm.bvar 1, Semiterm.bvar 0]) 🡒
+        (Φ.subst ![Semiterm.bvar 0] 🡘 Θ.subst ![Semiterm.bvar 1])) 🡒
+      ((∀¹ Φ) 🡘 ∀¹ (d 🡒 Θ)) := by
+  set B : Semiformula V L 2 :=
+    (d.subst ![Semiterm.bvar 1] ⋏ e.subst ![Semiterm.bvar 1, Semiterm.bvar 0]) 🡒
+      (Φ.subst ![Semiterm.bvar 0] 🡘 Θ.subst ![Semiterm.bvar 1])
+  have h₁ : T.internalize V ⊢ ((∀¹ ∀¹ B) ⋏ (∀¹ Φ)) 🡒 ∀¹ (d 🡒 Θ) := by
+    apply TProof.generalize_imp
+    have a₁ : T.internalize V ⊢ (∀¹ ∀¹ B).shift 🡒
+        (d.shift.subst ![Semiterm.fvar 0] ⋏ e.shift.subst ![Semiterm.fvar 0, Semiterm.fvar 0]) 🡒
+          (Φ.shift.subst ![Semiterm.fvar 0] 🡘 Θ.shift.subst ![Semiterm.fvar 0]) := by
+      simpa [B, Semiformula.shift_substs, Semiformula.substs_substs] using
+        TProof.all₂_imp_subst (T := T) B.shift (Semiterm.fvar 0) (Semiterm.fvar 0)
+    have a₂ : T.internalize V ⊢ (∀¹ Φ).shift 🡒 Φ.shift.subst ![Semiterm.fvar 0] := by
+      simpa using TProof.all_imp_subst (T := T) Φ.shift (Semiterm.fvar 0)
+    have a₃ : T.internalize V ⊢ e.shift.subst ![Semiterm.fvar 0, Semiterm.fvar 0] := by
+      simpa [Semiformula.shift_substs, Semiformula.substs_substs] using
+        TProof.all_imp_subst (T := T) (e.subst ![Semiterm.bvar 0, Semiterm.bvar 0]).shift
+          (Semiterm.fvar 0) ⨀ (by simpa only [Semiformula.shift_all] using TProof.shift! hrefl)
+    rw [Semiformula.shift_and, Semiformula.free_imp]
+    simp only [Semiformula.free]
+    cl_prover [a₁, a₂, a₃]
+  have h₂ : T.internalize V ⊢ ((∀¹ ∀¹ B) ⋏ (∀¹ (d 🡒 Θ))) 🡒 ∀¹ Φ := by
+    apply TProof.generalize_imp
+    let ψ : Semiformula V L 1 := d.shift ⋏ e.shift.subst ![Semiterm.bvar 0, Semiterm.fvar 0]
+    have a₀ : T.internalize V ⊢ ∃¹ ψ := by
+      have h := TProof.all_imp_subst (T := T)
+          (∃¹ (d.subst ![Semiterm.bvar 0] ⋏ e.subst ![Semiterm.bvar 0, Semiterm.bvar 1])).shift
+          (Semiterm.fvar 0) ⨀ (by simpa only [Semiformula.shift_all] using TProof.shift! hrep)
+      simp only [Semiformula.shift_exs, Semiformula.substs_ex, Semiformula.shift_and,
+        Semiformula.substs_and, Semiformula.shift_substs, Semiformula.substs_substs] at h
+      simpa [ψ] using h
+    refine TProof.exs_imp_of_free ?_ ⨀ a₀
+    have a₁ : T.internalize V ⊢ (∀¹ ∀¹ B).shift.shift 🡒
+        (d.shift.shift.subst ![Semiterm.fvar 0] ⋏
+          e.shift.shift.subst ![Semiterm.fvar 0, Semiterm.fvar 1]) 🡒
+          (Φ.shift.shift.subst ![Semiterm.fvar 1] 🡘 Θ.shift.shift.subst ![Semiterm.fvar 0]) := by
+      simpa [B, Semiformula.shift_substs, Semiformula.substs_substs] using
+        TProof.all₂_imp_subst (T := T) B.shift.shift (Semiterm.fvar 1) (Semiterm.fvar 0)
+    have a₂ : T.internalize V ⊢ (∀¹ (d 🡒 Θ)).shift.shift 🡒
+        d.shift.shift.subst ![Semiterm.fvar 0] 🡒 Θ.shift.shift.subst ![Semiterm.fvar 0] := by
+      simpa using TProof.all_imp_subst (T := T) (d.shift.shift 🡒 Θ.shift.shift) (Semiterm.fvar 0)
+    have e₁ : ψ.free = d.shift.shift.subst ![Semiterm.fvar 0] ⋏
+        e.shift.shift.subst ![Semiterm.fvar 0, Semiterm.fvar 1] := by
+      simp [ψ, Semiformula.free, Semiformula.shift_substs, Semiformula.substs_substs]
+    have e₂ : (Φ.free).shift = Φ.shift.shift.subst ![Semiterm.fvar 1] := by
+      simp [Semiformula.free, Semiformula.shift_substs]
+    rw [e₁, Semiformula.shift_imp, e₂]
+    simp only [Semiformula.shift_and]
+    generalize (∀¹ ∀¹ B).shift.shift = X at a₁ ⊢
+    generalize (∀¹ (d 🡒 Θ)).shift.shift = Y at a₂ ⊢
+    generalize d.shift.shift.subst ![Semiterm.fvar 0] = D at a₁ a₂ ⊢
+    generalize e.shift.shift.subst ![Semiterm.fvar 0, Semiterm.fvar 1] = E at a₁ ⊢
+    generalize Φ.shift.shift.subst ![Semiterm.fvar 1] = P at a₁ ⊢
+    generalize Θ.shift.shift.subst ![Semiterm.fvar 0] = Q at a₁ a₂
+    cl_prover [a₁, a₂]
+  cl_prover [h₁, h₂]
+
+/-- Relativizing an existential quantifier to `d`, along a relation `e` relating every element to
+an element of `d` and every element to itself. -/
+lemma tprovable_exs_iff_exs_domain_of_rep (d : Semiformula V L 1) (e : Semiformula V L 2)
+    (Φ Θ : Semiformula V L 1)
+    (hrep : T.internalize V ⊢
+      ∀¹ ∃¹ (d.subst ![Semiterm.bvar 0] ⋏ e.subst ![Semiterm.bvar 0, Semiterm.bvar 1]))
+    (hrefl : T.internalize V ⊢ ∀¹ e.subst ![Semiterm.bvar 0, Semiterm.bvar 0]) :
+    T.internalize V ⊢
+      ∀¹ ∀¹ ((d.subst ![Semiterm.bvar 1] ⋏ e.subst ![Semiterm.bvar 1, Semiterm.bvar 0]) 🡒
+        (Φ.subst ![Semiterm.bvar 0] 🡘 Θ.subst ![Semiterm.bvar 1])) 🡒
+      ((∃¹ Φ) 🡘 ∃¹ (d ⋏ Θ)) := by
+  set B : Semiformula V L 2 :=
+    (d.subst ![Semiterm.bvar 1] ⋏ e.subst ![Semiterm.bvar 1, Semiterm.bvar 0]) 🡒
+      (Φ.subst ![Semiterm.bvar 0] 🡘 Θ.subst ![Semiterm.bvar 1])
+  have h₁ : T.internalize V ⊢ (∃¹ Φ) 🡒 (∀¹ ∀¹ B) 🡒 ∃¹ (d ⋏ Θ) := by
+    apply TProof.exs_imp_of_free
+    let ψ : Semiformula V L 1 := d.shift ⋏ e.shift.subst ![Semiterm.bvar 0, Semiterm.fvar 0]
+    have a₀ : T.internalize V ⊢ ∃¹ ψ := by
+      have h := TProof.all_imp_subst (T := T)
+          (∃¹ (d.subst ![Semiterm.bvar 0] ⋏ e.subst ![Semiterm.bvar 0, Semiterm.bvar 1])).shift
+          (Semiterm.fvar 0) ⨀ (by simpa only [Semiformula.shift_all] using TProof.shift! hrep)
+      simp only [Semiformula.shift_exs, Semiformula.substs_ex, Semiformula.shift_and,
+        Semiformula.substs_and, Semiformula.shift_substs, Semiformula.substs_substs] at h
+      simpa [ψ] using h
+    refine TProof.exs_imp_of_free ?_ ⨀ a₀
+    have a₁ : T.internalize V ⊢ (∀¹ ∀¹ B).shift.shift 🡒
+        (d.shift.shift.subst ![Semiterm.fvar 0] ⋏
+          e.shift.shift.subst ![Semiterm.fvar 0, Semiterm.fvar 1]) 🡒
+          (Φ.shift.shift.subst ![Semiterm.fvar 1] 🡘 Θ.shift.shift.subst ![Semiterm.fvar 0]) := by
+      simpa [B, Semiformula.shift_substs, Semiformula.substs_substs] using
+        TProof.all₂_imp_subst (T := T) B.shift.shift (Semiterm.fvar 1) (Semiterm.fvar 0)
+    have a₂ : T.internalize V ⊢
+        (d.shift.shift.subst ![Semiterm.fvar 0] ⋏ Θ.shift.shift.subst ![Semiterm.fvar 0]) 🡒
+          ∃¹ (d.shift.shift ⋏ Θ.shift.shift) := by
+      simpa using TProof.subst_imp_exs (T := T) (d.shift.shift ⋏ Θ.shift.shift) (Semiterm.fvar 0)
+    have e₁ : ψ.free = d.shift.shift.subst ![Semiterm.fvar 0] ⋏
+        e.shift.shift.subst ![Semiterm.fvar 0, Semiterm.fvar 1] := by
+      simp [ψ, Semiformula.free, Semiformula.shift_substs, Semiformula.substs_substs]
+    have e₂ : (Φ.free).shift = Φ.shift.shift.subst ![Semiterm.fvar 1] := by
+      simp [Semiformula.free, Semiformula.shift_substs]
+    rw [e₁, Semiformula.shift_imp, e₂]
+    simp only [Semiformula.shift_imp, Semiformula.shift_exs, Semiformula.shift_and]
+    generalize (∀¹ ∀¹ B).shift.shift = X at a₁ ⊢
+    generalize ∃¹ (d.shift.shift ⋏ Θ.shift.shift) = Y at a₂ ⊢
+    generalize d.shift.shift.subst ![Semiterm.fvar 0] = D at a₁ a₂ ⊢
+    generalize e.shift.shift.subst ![Semiterm.fvar 0, Semiterm.fvar 1] = E at a₁ ⊢
+    generalize Φ.shift.shift.subst ![Semiterm.fvar 1] = P at a₁ ⊢
+    generalize Θ.shift.shift.subst ![Semiterm.fvar 0] = Q at a₁ a₂
+    cl_prover [a₁, a₂]
+  have h₂ : T.internalize V ⊢ ∃¹ (d ⋏ Θ) 🡒 (∀¹ ∀¹ B) 🡒 ∃¹ Φ := by
+    apply TProof.exs_imp_of_free
+    have a₁ : T.internalize V ⊢ (∀¹ ∀¹ B).shift 🡒
+        (d.shift.subst ![Semiterm.fvar 0] ⋏ e.shift.subst ![Semiterm.fvar 0, Semiterm.fvar 0]) 🡒
+          (Φ.shift.subst ![Semiterm.fvar 0] 🡘 Θ.shift.subst ![Semiterm.fvar 0]) := by
+      simpa [B, Semiformula.shift_substs, Semiformula.substs_substs] using
+        TProof.all₂_imp_subst (T := T) B.shift (Semiterm.fvar 0) (Semiterm.fvar 0)
+    have a₂ : T.internalize V ⊢ Φ.shift.subst ![Semiterm.fvar 0] 🡒 ∃¹ Φ.shift :=
+      TProof.subst_imp_exs (T := T) Φ.shift (Semiterm.fvar 0)
+    have a₃ : T.internalize V ⊢ e.shift.subst ![Semiterm.fvar 0, Semiterm.fvar 0] := by
+      simpa [Semiformula.shift_substs, Semiformula.substs_substs] using
+        TProof.all_imp_subst (T := T) (e.subst ![Semiterm.bvar 0, Semiterm.bvar 0]).shift
+          (Semiterm.fvar 0) ⨀ (by simpa only [Semiformula.shift_all] using TProof.shift! hrefl)
+    rw [Semiformula.free_and]
+    simp only [Semiformula.shift_imp, Semiformula.shift_exs, Semiformula.free]
+    generalize (∀¹ ∀¹ B).shift = X at a₁ ⊢
+    generalize ∃¹ Φ.shift = Y at a₂ ⊢
+    generalize d.shift.subst ![Semiterm.fvar 0] = D at a₁ ⊢
+    generalize e.shift.subst ![Semiterm.fvar 0, Semiterm.fvar 0] = E at a₁ a₃
+    generalize Φ.shift.subst ![Semiterm.fvar 0] = P at a₁ a₂
+    generalize Θ.shift.subst ![Semiterm.fvar 0] = Q at a₁ ⊢
+    cl_prover [a₁, a₂, a₃]
+  cl_prover [h₁, h₂]
+
+end representative
 
 end quantifierBlock
 

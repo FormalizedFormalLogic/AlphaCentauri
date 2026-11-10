@@ -47,9 +47,13 @@ public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Henkin
 public import AlphaCentauri.InterpretabilityLogic.Extension
 public import AlphaCentauri.InterpretabilityLogic.Formula
+public import AlphaCentauri.InterpretabilityLogic.Gentzen.Basic
+public import AlphaCentauri.InterpretabilityLogic.Gentzen.Hilbert
+public import AlphaCentauri.InterpretabilityLogic.Gentzen.Veltman
 public import AlphaCentauri.InterpretabilityLogic.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Logic
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
+public import AlphaCentauri.InterpretabilityLogic.Sequent
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
@@ -72,6 +76,7 @@ public import AlphaCentauri.NumberTheory.DirectSummand
 public import AlphaCentauri.NumberTheory.EuclideanDivision
 public import AlphaCentauri.NumberTheory.FLT3
 public import AlphaCentauri.NumberTheory.FermatCaseOne
+public import AlphaCentauri.NumberTheory.FermatIOpen
 public import AlphaCentauri.NumberTheory.IrrationalSqrtTwo
 public import AlphaCentauri.NumberTheory.Primes
 public import AlphaCentauri.NumberTheory.QuadraticResidue

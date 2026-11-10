@@ -32,12 +32,12 @@ theorem not_provable_irrationalSqrtTwo_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊬ Arithmet
     simp [Arithmetic.irrationalSqrtTwo, allClosure_succ]]
   have := IntegerConstantPolynomial.models_ZRing ℝ
   have hy : 0 ≤ IntegerConstantPolynomial.X ℝ := by
-    rw [IntegerConstantPolynomial.nonneg_iff]
+    rw [LeadingCoeffOrder.nonneg_iff]
     simp [IntegerConstantPolynomial.X]
   let x : IntegerConstantPolynomial ℝ :=
     ⟨C (Real.sqrt 2) * Polynomial.X, IntegerConstantPolynomial.mem_iff.mpr ⟨0, by simp⟩⟩
   have hx : 0 ≤ x := by
-    rw [IntegerConstantPolynomial.nonneg_iff]
+    rw [LeadingCoeffOrder.nonneg_iff]
     simp [x]
   apply Arithmetic.not_provable_IOpen_allClosure (M := Nonneg (IntegerConstantPolynomial ℝ))
     (e := ![⟨_, hy⟩, ⟨x, hx⟩]) (by simp)

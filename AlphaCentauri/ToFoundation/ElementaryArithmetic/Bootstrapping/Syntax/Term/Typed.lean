@@ -77,7 +77,7 @@ lemma fvarVecClosed_le (k : V) :
     exact qqFvar_le_qqFvar hi.le
   simpa [len_fvarVecClosed] using this
 
-lemma bound_locallyDelta0 :
+lemma fvarVecBound_locallyDelta0 :
     LocallyDelta0Function fun v : Fin (0 + 1) → V ↦
       Exp.exp (Exp.exp (v 0 + v 0 + ^&(v 0) + 3)) + 1 :=
   LocallyDelta0Function.add_one <|
@@ -100,7 +100,7 @@ noncomputable def fvarVec.construction : PR.Construction V blueprint where
   bound_monotone _ _ _ h :=
     add_le_add (exp_monotone_le.mpr (exp_monotone_le.mpr
       (add_le_add (add_le_add (add_le_add h h) (qqFvar_le_qqFvar h)) le_rfl))) le_rfl
-  bound_locallyDelta0 := bound_locallyDelta0
+  bound_locallyDelta0 := fvarVecBound_locallyDelta0
   inv _ i z := z = fvarVecClosed i
   inv_locallyDelta0 := LocallyDelta0.eq (LocallyDelta0Function.var (V := V) 0)
     (fvarVecClosed_locallyDelta0.comp₁ (LocallyDelta0Function.var 1))

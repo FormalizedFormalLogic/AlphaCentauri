@@ -1472,6 +1472,27 @@ lemma IsSemiformula.substs1 {n t p : V} (ht : IsSemiterm L n t) (hp : IsSemiform
     IsSemiformula L n (substs1 L t p) :=
   IsSemiformula.subst hp (by simp [ht])
 
+lemma subst_imp {n m w p q : V} (hp : IsSemiformula L n p) (hq : IsSemiformula L n q)
+    (hw : IsSemitermVec L n m w) : subst L w (imp L p q) = imp L (subst L w p) (subst L w q) := by
+  simp [imp, hp.isUFormula, hq.isUFormula, substs_neg hp hw]
+
+lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec L j 0 w)
+    (hq : IsSemiformula L (j + 1) q) (ht : IsSemiterm L 0 t) :
+    substs1 L t (subst L (qVec L w) q) = subst L (t ∷ w) q := by
+  have h₁ : IsSemitermVec L 1 0 (?[t] : V) := by simp [ht]
+  have h₂ : IsSemitermVec L (j + 1) 1 (qVec L w) := by simpa using hw.qVec
+  rw [substs1, substs_substs hq h₁ h₂]
+  congr 1
+  apply nth_ext' (j + 1) (by simp [(h₁.termSubstVec h₂).lh]) (by simp [hw.lh])
+  intro i hi
+  rw [nth_termSubstVec h₂.isUTerm hi]
+  rcases zero_or_succ i with rfl | ⟨i, rfl⟩
+  · simp [qVec]
+  · have hi : i < j := by simpa using hi
+    rw [qVec, nth_adjoin_succ, hw.lh, nth_termBShiftVec hw.isUTerm hi,
+      substs_cons_bShift (hw.nth hi), substs_nil (hw.nth hi)]
+    simp
+
 end substs1
 
 variable (L)

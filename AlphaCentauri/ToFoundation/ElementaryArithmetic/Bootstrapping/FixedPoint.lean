@@ -41,6 +41,34 @@ noncomputable def matrixToVec {k : ℕ} (v : Fin k → V) : V := Matrix.foldr (f
     · simp; rfl
     · simp [*]; rfl
 
+section matrixToVec
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] {v : Fin k → V}
+
+lemma isSemitermVec_matrixToVec {n : V} :
+    IsSemitermVec L (k : V) n (matrixToVec v) ↔ ∀ i, IsSemiterm L n (v i) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [matrixToVec_succ, Nat.cast_succ, IsSemitermVec.cons_iff, ih, Fin.forall_fin_succ]
+    rfl
+
+lemma isUTermVec_matrixToVec (hv : ∀ i, IsUTerm L (v i)) : IsUTermVec L (k : V) (matrixToVec v) :=
+  ⟨by simp, fun i hi ↦ by obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi; simpa using hv i⟩
+
+lemma termSubstVec_matrixToVec {w : V} (hv : ∀ i, IsUTerm L (v i)) :
+    termSubstVec L (k : V) w (matrixToVec v) = matrixToVec fun i ↦ termSubst L w (v i) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [matrixToVec_succ, matrixToVec_succ, Nat.cast_succ,
+      termSubstVec_cons (t := Matrix.vecHead v) (hv 0)
+        (isUTermVec_matrixToVec (v := Matrix.vecTail v) fun i ↦ hv i.succ),
+      ih (v := Matrix.vecTail v) fun i ↦ hv i.succ]
+    rfl
+
+end matrixToVec
+
 namespace Bootstrapping.Arithmetic
 
 set_option linter.dupNamespace false

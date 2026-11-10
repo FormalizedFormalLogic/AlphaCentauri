@@ -853,6 +853,11 @@ lemma qqAdd_locallyDelta0 : LocallyDelta0Function₂ (qqAdd : V → V → V) :=
       (LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.var 1)
         (LocallyDelta0Function.const 0)))
 
+lemma termSubst_qqAdd {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
+    termSubst ℒₒᵣ w (t ^+ u) = termSubst ℒₒᵣ w t ^+ termSubst ℒₒᵣ w u := by
+  rw [qqAdd, termSubst_func (by simp) (by simp [ht, hu])]
+  simp [qqAdd, ht, hu]
+
 lemma qqZero_eq_qqFunc : (𝟎 : V) = ^func 0 (zeroIndex : V) 0 := by
   have h : (𝟎 : ℕ) = qqFuncN 0 zeroIndex 0 := rfl
   rw [h, qqFuncN_eq_qqFunc]

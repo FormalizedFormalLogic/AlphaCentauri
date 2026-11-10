@@ -579,6 +579,43 @@ lemma rangeList_locallyDelta0 : LocallyDelta0Function₁ (rangeList : V → V) w
 
 end rangeList
 
+section prefixMax
+
+variable {f : V → V}
+
+/-- The largest of the values of `f` at the elements at most `x`. -/
+noncomputable def prefixMax (f : V → V) (x : V) : V :=
+  listMax (listMap (fun _ i ↦ f i) ![] (rangeList (x + 1)))
+
+variable (hf : LocallyDelta0Function₁ f)
+include hf
+
+lemma le_prefixMax {i x : V} (h : i ≤ x) : f i ≤ prefixMax f x := by
+  have hi : i < len (rangeList (x + 1)) := by simpa [lt_succ_iff_le] using h
+  have := nth_le_listMax (v := listMap (fun (_ : Fin 0 → V) i ↦ f i) ![] (rangeList (x + 1)))
+    (i := i) (by rwa [len_listMap hf])
+  rwa [nth_listMap hf _ _ hi, nth_rangeList (by simpa using hi)] at this
+
+lemma prefixMax_monotone {x y : V} (h : x ≤ y) : prefixMax f x ≤ prefixMax f y := by
+  apply listMaxss_le
+  intro i hi
+  rw [len_listMap hf] at hi
+  rw [nth_listMap hf _ _ hi, nth_rangeList (by simpa using hi)]
+  exact le_prefixMax hf (le_trans (lt_succ_iff_le.mp (by simpa using hi)) h)
+
+lemma prefixMax_locallyDelta0 : LocallyDelta0Function₁ (prefixMax f) := by
+  have := (listMap_locallyDelta0 (g := fun (_ : Fin 0 → V) i ↦ f i) hf).comp_cons
+    (rangeList_locallyDelta0.comp₁
+      (LocallyDelta0Function.add_one (LocallyDelta0Function.var (V := V) (0 : Fin 1))))
+    (u := ![]) finZeroElim
+  convert listMax_locallyDelta0.comp₁ this using 2 with u
+  simp only [prefixMax]
+  congr 2
+  funext j
+  exact j.elim0
+
+end prefixMax
+
 private lemma add_add_le_of_lt {d e p₁ p' p : V} (he : e ≤ 1) (hp₁ : p₁ < p') (hdp : d + p' ≤ p) :
     d + e + p₁ ≤ p := by
   refine le_trans ?_ hdp

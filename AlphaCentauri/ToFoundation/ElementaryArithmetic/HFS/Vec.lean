@@ -128,6 +128,9 @@ lemma adjoin_le_exp_exp {a b n : V} (hn : 1 ≤ n) (ha : a ≤ Exp.exp (Exp.exp 
   rw [exp_exp_add_two, adjoin_def]
   exact lt_iff_succ_le.mp this
 
+lemma le_exp_exp {a n : V} (h : a ≤ n) : a ≤ Exp.exp (Exp.exp n) :=
+  le_trans h (lt_trans (lt_exp n) (exp_monotone.mpr (lt_exp n))).le
+
 end adjoin
 
 /-! ### The `i`-th element of a list -/
@@ -307,7 +310,6 @@ lemma adjoin_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
   · simp
   · right; exact ⟨π₁ z, π₂ z, by simp [adjoin]⟩
 
-@[elab_as_elim]
 lemma adjoin_induction {P : V → Prop} (hP : LocallyDelta0Pred P)
     (nil : P 0) (adjoin : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   hP.order_induction <| by
@@ -645,5 +647,226 @@ lemma result_definable : 𝚺ᴬ₁.DefinableFunction (fun v ↦ c.result (v ·.
 end Construction
 
 end VecRec
+
+/-! ### Length of a list -/
+
+namespace Len
+
+noncomputable def adjointruction : VecRec.Construction V Arithmetic.Len.blueprint where
+  nil _ := 0
+  adjoin _ _ _ ih := ih + 1
+  nil_defined := .mk fun v ↦ by simp [Arithmetic.Len.blueprint]
+  adjoin_defined := .mk fun v ↦ by simp [Arithmetic.Len.blueprint]
+  nil_locallyDelta0 := LocallyDelta0Function.const 0
+  adjoin_locallyDelta0 := LocallyDelta0Function.add_one (LocallyDelta0Function.var 2)
+  bound _ xs := xs
+  nil_le_bound _ := le_rfl
+  adjoin_le_bound _ x xs _ h := succ_le_iff_lt.mpr (lt_of_le_of_lt h (lt_adjoin' x xs))
+  bound_monotone _ _ _ h := h
+  bound_locallyDelta0 := LocallyDelta0Function.var 0
+
+end Len
+
+section len
+
+/-- The length of the list `v`. -/
+noncomputable def len (v : V) : V := Len.adjointruction.result ![] v
+
+@[simp] lemma len_nil : len (0 : V) = 0 := by simp [len, Len.adjointruction]
+
+@[simp] lemma len_adjoin (x v : V) : len (x ∷ v) = len v + 1 := by simp [len, Len.adjointruction]
+
+instance len_defined : 𝚺ᴬ₁-Function₁ (len : V → V) via lenDef :=
+  Len.adjointruction.result_defined
+
+instance len_definable : 𝚺ᴬ₁-Function₁ (len : V → V) := len_defined.to_definable
+
+instance len_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (len : V → V) := len_definable.of_sigmaOne
+
+lemma len_locallyDelta0 : LocallyDelta0Function₁ (len : V → V) := by
+  convert Len.adjointruction.result_locallyDelta0 (V := V) using 3
+  simp [len, Matrix.empty_eq]
+
+@[simp] lemma len_zero_iff_eq_nil {v : V} : len v = 0 ↔ v = 0 := by
+  rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩) <;> simp
+
+@[simp] lemma len_le (v : V) : len v ≤ v := by
+  have hP : LocallyDelta0Pred fun v : V ↦ len v ≤ v :=
+    LocallyDelta0.le (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
+      (LocallyDelta0Function.var (0 : Fin 1))
+  apply adjoin_induction hP
+  · simp
+  · intro x v ih
+    rw [len_adjoin]
+    exact succ_le_iff_lt.mpr (lt_of_le_of_lt ih (lt_adjoin' x v))
+
+end len
+
+lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
+  have hR : LocallyDelta0 fun w : Fin 2 → V ↦ len (w 1) ≤ w 0 → (w 1).[w 0] = 0 :=
+    (LocallyDelta0.le (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))
+      (LocallyDelta0Function.var 0)).imp
+      (LocallyDelta0.eq (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+        (LocallyDelta0Function.var 0)) (LocallyDelta0Function.const 0))
+  have hP : LocallyDelta0Pred fun u ↦ ∀ j ≤ i, len u ≤ j → u.[j] = 0 :=
+    (LocallyDelta0.ball_le_function (LocallyDelta0Function.const i) hR).of_iff fun w ↦ by simp
+  have : ∀ j ≤ i, len v ≤ j → v.[j] = 0 := by
+    apply adjoin_induction hP
+    · intro j _ _
+      simp
+    · intro x v ih j hj hl'
+      rcases zero_or_succ j with (rfl | ⟨j, rfl⟩)
+      · simp at hl'
+      · simpa using ih j (le_trans le_self_add hj) (by simpa using hl')
+  exact this i le_rfl hl
+
+lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] = v₂.[i]) :
+    v₁ = v₂ := by
+  have hR : LocallyDelta0 fun w : Fin 2 → V ↦
+      len (w 1) = len (w 0) → (∀ i < len (w 1), (w 1).[i] = (w 0).[i]) → w 1 = w 0 := by
+    apply LocallyDelta0.imp
+    · exact LocallyDelta0.eq (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))
+        (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 2)))
+    apply LocallyDelta0.imp
+    · have hnth : LocallyDelta0 fun t : Fin 3 → V ↦ (t 2).[t 0] = (t 1).[t 0] :=
+        LocallyDelta0.eq (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 2)
+          (LocallyDelta0Function.var 0)) (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+            (LocallyDelta0Function.var 0))
+      exact (LocallyDelta0.ball_lt_function
+        (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2))) hnth).of_iff
+          fun w ↦ by simp
+    · exact LocallyDelta0.eq (LocallyDelta0Function.var (1 : Fin 2)) (LocallyDelta0Function.var 0)
+  have hP : LocallyDelta0Pred fun u ↦ ∀ u' ≤ v₂, len u = len u' →
+      (∀ i < len u, u.[i] = u'.[i]) → u = u' :=
+    (LocallyDelta0.ball_le_function (LocallyDelta0Function.const v₂) hR).of_iff fun w ↦ by simp
+  have : ∀ u' ≤ v₂, len v₁ = len u' → (∀ i < len v₁, v₁.[i] = u'.[i]) → v₁ = u' := by
+    apply adjoin_induction hP
+    · intro u' _ h _
+      exact Eq.symm <| len_zero_iff_eq_nil.mp (by simp [← h])
+    · intro x v ih u' hu' hl H
+      rcases nil_or_adjoin u' with (rfl | ⟨y, w, rfl⟩)
+      · simp at hl
+      have hx : x = y := by simpa using H 0 (by simp)
+      have hv : v = w :=
+        ih w (le_trans (lt_adjoin' y w).le hu') (by simpa using hl)
+          (by intro i hi; simpa using H (i + 1) (by simpa using hi))
+      simp [hx, hv]
+  exact this v₂ le_rfl hl H
+
+lemma nth_ext' (l : V) {v₁ v₂ : V} (hl₁ : len v₁ = l) (hl₂ : len v₂ = l)
+    (H : ∀ i < l, v₁.[i] = v₂.[i]) : v₁ = v₂ := by
+  rcases hl₂; exact nth_ext hl₁ (by simpa [hl₁] using H)
+
+lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂)
+    (H : ∀ i < len v₁, v₁.[i] ≤ v₂.[i]) : v₁ ≤ v₂ := by
+  have hR : LocallyDelta0 fun w : Fin 2 → V ↦
+      len (w 1) = len (w 0) → (∀ i < len (w 1), (w 1).[i] ≤ (w 0).[i]) → w 1 ≤ w 0 := by
+    apply LocallyDelta0.imp
+    · exact LocallyDelta0.eq (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))
+        (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 2)))
+    apply LocallyDelta0.imp
+    · have hnth : LocallyDelta0 fun t : Fin 3 → V ↦ (t 2).[t 0] ≤ (t 1).[t 0] :=
+        LocallyDelta0.le (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 2)
+          (LocallyDelta0Function.var 0)) (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+            (LocallyDelta0Function.var 0))
+      exact (LocallyDelta0.ball_lt_function
+        (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2))) hnth).of_iff
+          fun w ↦ by simp
+    · exact LocallyDelta0.le (LocallyDelta0Function.var (1 : Fin 2)) (LocallyDelta0Function.var 0)
+  have hP : LocallyDelta0Pred fun u ↦ ∀ u' ≤ v₂, len u = len u' →
+      (∀ i < len u, u.[i] ≤ u'.[i]) → u ≤ u' :=
+    (LocallyDelta0.ball_le_function (LocallyDelta0Function.const v₂) hR).of_iff fun w ↦ by simp
+  have : ∀ u' ≤ v₂, len v₁ = len u' → (∀ i < len v₁, v₁.[i] ≤ u'.[i]) → v₁ ≤ u' := by
+    apply adjoin_induction hP
+    · intro u' _ _ _
+      simp
+    · intro x v ih u' hu' hl H
+      rcases nil_or_adjoin u' with (rfl | ⟨y, w, rfl⟩)
+      · simp at hl
+      have hx : x ≤ y := by simpa using H 0 (by simp)
+      have hv : v ≤ w :=
+        ih w (le_trans (lt_adjoin' y w).le hu') (by simpa using hl)
+          (by intro i hi; simpa using H (i + 1) (by simpa using hi))
+      exact adjoin_le_adjoin hx hv
+  exact this v₂ le_rfl hl H
+
+lemma nth_lt_self {v i : V} (hi : i < len v) : v.[i] < v := by
+  have hR : LocallyDelta0 fun w : Fin 2 → V ↦ w 0 < len (w 1) → (w 1).[w 0] < w 1 :=
+    (LocallyDelta0.lt (LocallyDelta0Function.var (0 : Fin 2))
+      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))).imp
+      (LocallyDelta0.lt (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+        (LocallyDelta0Function.var 0)) (LocallyDelta0Function.var 1))
+  have hP : LocallyDelta0Pred fun u ↦ ∀ j ≤ i, j < len u → u.[j] < u :=
+    (LocallyDelta0.ball_le_function (LocallyDelta0Function.const i) hR).of_iff fun w ↦ by simp
+  have : ∀ j ≤ i, j < len v → v.[j] < v := by
+    apply adjoin_induction hP
+    · intro j _ h
+      simp at h
+    · intro x v ih j hj hl
+      rcases zero_or_succ j with (rfl | ⟨j, rfl⟩)
+      · simp
+      · simpa using lt_trans (ih j (le_trans le_self_add hj) (by simpa using hl)) (by simp)
+  exact this i le_rfl hi
+
+theorem sigmaZero_skolem_vec {R : V → V → Prop} (hR : LocallyDelta0Rel R) {l B : V}
+    (H : ∀ x < l, ∃ y < B, R x y) : ∃ v, len v = l ∧ ∀ i < l, R i v.[i] := by
+  have hE : LocallyDelta0Function fun w : Fin 1 → V ↦ Exp.exp (Exp.exp (w 0 + w 0 + B + 3)) :=
+    LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
+      LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.add.comp₂
+        (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.var 0)
+          (LocallyDelta0Function.var 0)) (LocallyDelta0Function.const B))
+        (LocallyDelta0Function.const 3)
+  have hRi : LocallyDelta0 fun t : Fin 3 → V ↦ R (l - t 2 + t 0) (t 1).[t 0] :=
+    (hR.comp₂ (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.sub.comp₂
+      (LocallyDelta0Function.const l) (LocallyDelta0Function.var 2)) (LocallyDelta0Function.var 0))
+      (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0))).of_iff
+        fun t ↦ by simp
+  have hbody : LocallyDelta0 fun u : Fin 2 → V ↦
+      len (u 0) = u 1 ∧ ∀ i < u 1, R (l - u 1 + i) (u 0).[i] :=
+    (LocallyDelta0.eq (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 2)))
+      (LocallyDelta0Function.var 1)).and
+      ((LocallyDelta0.ball_lt_function (LocallyDelta0Function.var (1 : Fin 2)) hRi).of_iff
+        fun w ↦ by simp)
+  have hP : LocallyDelta0Pred fun k ↦ k ≤ l →
+      ∃ v ≤ Exp.exp (Exp.exp (k + k + B + 3)), len v = k ∧ ∀ i < k, R (l - k + i) v.[i] :=
+    ((LocallyDelta0.le (LocallyDelta0Function.var (0 : Fin 1))
+      (LocallyDelta0Function.const l)).imp (LocallyDelta0.bexs_le_function hE hbody)).of_iff
+        fun w ↦ by simp
+  have key : ∀ k ≤ l, ∃ v ≤ Exp.exp (Exp.exp (k + k + B + 3)),
+      len v = k ∧ ∀ i < k, R (l - k + i) v.[i] := by
+    apply LocallyDelta0Pred.succ_induction hP
+    · intro _
+      use 0
+      and_intros <;> simp
+    · intro k ih hk
+      obtain ⟨v, hv, hvk, hvR⟩ := ih (le_trans le_self_add hk)
+      obtain ⟨y, hyB, hy⟩ := H (l - (k + 1)) (by simp [tsub_lt_iff_left hk])
+      use y ∷ v
+      and_intros
+      · have e : k + 1 + (k + 1) + B + 3 = (k + k + B + 3) + 2 := by grind
+        rw [e]
+        have hn : (1 : V) ≤ k + k + B + 3 := le_trans (by norm_num) le_add_self
+        exact adjoin_le_exp_exp hn
+          (le_exp_exp (le_trans hyB.le (le_trans le_add_self le_self_add))) hv
+      · simp [hvk]
+      · intro i hi
+        rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+        · simpa using hy
+        · simpa [sub_succ_add_succ (succ_le_iff_lt.mp hk) i] using hvR i (by simpa [hvk] using hi)
+  obtain ⟨v, -, hv⟩ := key l le_rfl
+  use v
+  simpa using hv
+
+lemma eq_singleton_iff_len_eq_one {v : V} : len v = 1 ↔ ∃ x, v = ?[x] := by
+  constructor
+  · intro h; exact ⟨v.[0], nth_ext (by simp [h]) (by simp [h])⟩
+  · rintro ⟨x, rfl⟩; simp
+
+lemma eq_doubleton_of_len_eq_two {v : V} : len v = 2 ↔ ∃ x y, v = ?[x, y] := by
+  constructor
+  · intro h; exact ⟨v.[0], v.[1],
+      nth_ext (by simp [h, one_add_one_eq_two])
+        (by simp [lt_two_iff_le_one, le_one_iff_eq_zero_or_one, h])⟩
+  · rintro ⟨x, y, rfl⟩; simp [one_add_one_eq_two]
 
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic

@@ -262,6 +262,18 @@ lemma comp₃ {R : (Fin 3 → V) → Prop} {f f' f'' : (Fin k → V) → V} (h :
     fun _ ↦ iff_of_eq <| congrArg R <|
       funext (Fin.cases rfl (Fin.cases rfl (Fin.cases rfl finZeroElim)))
 
+lemma eq {f' : (Fin k → V) → V} (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+    LocallyDelta0 fun v ↦ f v = f' v :=
+  (of_definable (R := fun w : Fin 2 → V ↦ w 0 = w 1) (by definability)).comp₂ hf hf'
+
+lemma le {f' : (Fin k → V) → V} (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+    LocallyDelta0 fun v ↦ f v ≤ f' v :=
+  (of_definable (R := fun w : Fin 2 → V ↦ w 0 ≤ w 1) (by definability)).comp₂ hf hf'
+
+lemma lt {f' : (Fin k → V) → V} (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+    LocallyDelta0 fun v ↦ f v < f' v :=
+  (of_definable (R := fun w : Fin 2 → V ↦ w 0 < w 1) (by definability)).comp₂ hf hf'
+
 /-- Substitution of locally $\Delta_0$ functions for the variables of a locally $\Delta_0$
 relation, one of them for the first variable. -/
 lemma comp_cons {R : (Fin (l + 1) → V) → Prop} {u : Fin l → (Fin k → V) → V}

@@ -172,6 +172,7 @@ public import AlphaCentauri.ToMathlib.HahnSeries
 public import AlphaCentauri.ToMathlib.IntegerConstantDyadicPolynomial
 public import AlphaCentauri.ToMathlib.IntegerConstantPolynomial
 public import AlphaCentauri.ToMathlib.IntegerPart
+public import AlphaCentauri.ToMathlib.LeadingCoeffOrder
 public import AlphaCentauri.ToMathlib.ONote.Computability
 public import AlphaCentauri.ToMathlib.ONote.Epsilon0
 public import AlphaCentauri.ToMathlib.ONote.FastGrowing

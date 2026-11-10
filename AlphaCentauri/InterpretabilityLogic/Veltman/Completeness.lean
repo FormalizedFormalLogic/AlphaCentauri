@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.MaximalConsistentSet
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import Mathlib.Data.Set.Finite.List
 
 /-!

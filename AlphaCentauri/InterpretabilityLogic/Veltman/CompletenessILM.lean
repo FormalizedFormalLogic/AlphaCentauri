@@ -457,7 +457,9 @@ instance : MAdequate (mAdequateClosure Φ) where
       have c₂ : 𝐈𝐋 ⊢ Y.conj ⋏ X.conj 🡒 (Y ∪ X).conj := CKFconjFconjUnion;
       have c₃ : 𝐈𝐋 ⊢ ◇(b ⋏ (Y ∪ X).conj) 🡒 ◇((b ⋏ Y.conj) ⋏ X.conj) :=
         Logic.dia_mono <| by cl_prover [c₁];
-      refine ⟨A, isRhdOperand_iff.mpr <| Finset.mem_union_right _ hA, ?_, ?_⟩;
+      use A;
+      and_intros;
+      · exact isRhdOperand_iff.mpr <| Finset.mem_union_right _ hA;
       · cl_prover [c₂, h₁];
       · cl_prover [c₁, h₂, c₃];
 
@@ -497,18 +499,21 @@ lemma CriticalSuccessor.exists_criticalSuccessor_box_subset (hE : IsRhdOperand �
       exact Context.by_axm <| mem_literals (Finset.mem_filter.mp hG).2;
     have h₄ : Γ.literals *⊢[𝐈𝐋𝐌] (H ⋎ ◇H) ▷ H := Context.of or_dia_rhd;
     have h₅ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <| axiomJ1 (A := C ⋏ P) (B := H ⋎ ◇H);
-    have h₆ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <| axiomJ2 (A := C ⋏ P) (B := H ⋎ ◇H) (C := H);
+    have h₆ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <|
+      axiomJ2 (A := C ⋏ P) (B := H ⋎ ◇H) (C := H);
     have h₇ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <| axiomJ2 (A := C ⋏ P) (B := H) (C := E);
     have h₈ : Γ.literals *⊢[𝐈𝐋𝐌] (C ⋏ P) ▷ E := by cl_prover [h₂, h₃, h₄, h₅, h₆, h₇];
     have h₉ : 𝐈𝐋𝐌 ⊢ □Δ.prebox.conj 🡘 P := Logic.box_iff_conj_image_box;
     have h₁₀ : Γ.literals *⊢[𝐈𝐋𝐌] (B ⋏ P) ▷ (C ⋏ P) := by
       have i₁ : 𝐈𝐋𝐌 ⊢ B ▷ C 🡒 (B ⋏ □Δ.prebox.conj) ▷ (C ⋏ □Δ.prebox.conj) := Logic.ILM.axiomM;
-      have i₂ : 𝐈𝐋𝐌 ⊢ (B ⋏ □Δ.prebox.conj) ▷ (C ⋏ □Δ.prebox.conj) 🡒 (B ⋏ P) ▷ (C ⋏ □Δ.prebox.conj) :=
+      have i₂ : 𝐈𝐋𝐌 ⊢
+          (B ⋏ □Δ.prebox.conj) ▷ (C ⋏ □Δ.prebox.conj) 🡒 (B ⋏ P) ▷ (C ⋏ □Δ.prebox.conj) :=
         rhd_anti_left <| by cl_prover [h₉];
       have i₃ : 𝐈𝐋𝐌 ⊢ (B ⋏ P) ▷ (C ⋏ □Δ.prebox.conj) 🡒 (B ⋏ P) ▷ (C ⋏ P) :=
         rhd_mono_right <| by cl_prover [h₉];
       exact Context.of (C_trans i₁ <| C_trans i₂ i₃) ⨀ Context.by_axm (mem_literals hBC);
-    have h₁₁ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <| axiomJ2 (A := B ⋏ P) (B := C ⋏ P) (C := E);
+    have h₁₁ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <|
+      axiomJ2 (A := B ⋏ P) (B := C ⋏ P) (C := E);
     have h₁₂ : Γ.literals *⊢[𝐈𝐋𝐌] (B ⋏ P) ▷ E := by cl_prover [h₈, h₁₀, h₁₁];
     obtain ⟨B', hB', i₁, i₂⟩ := MAdequate.exists_isRhdOperand (Φ := Φ)
       (IsRhdOperand.of_rhd_left (mem_of_mem hBC)) (X := Δ.prebox.image (□·)) <| by
@@ -591,7 +596,7 @@ def SM (w x y : IndexedSet L Φ) : Prop :=
 /-- The set `Δ` indexed by the sequence of `x`. -/
 def withSet (x : IndexedSet L Φ) (Δ : MaximalConsistentSet L Φ) (h : ∀ {A}, □A ∈ x.set → □A ∈ Δ) :
     IndexedSet L Φ :=
-  ⟨Δ, x.seq, x.isRhdOperand_of_mem_seq, x.length_seq_le.trans <| Finset.card_le_card fun A hA ↦
+  ⟨Δ, x.seq, x.isRhdOperand_of_mem_seq, x.length_seq_le.trans <| Finset.card_le_card fun _ hA ↦
     mem_prebox.mpr <| h <| mem_prebox.mp hA⟩
 
 end IndexedSet
@@ -695,9 +700,9 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
       obtain ⟨Θ, hΘ, hCΘ, hbox⟩ := hcrit.exists_criticalSuccessor_box_subset hF h hu;
       use u.withSet Θ hbox;
       constructor;
-      · refine ⟨⟨⟨Rxu, hΘ.toSuccessor, Rxu.2⟩, fun F' hpre' hcrit' ↦ ?_⟩, List.prefix_refl _, hbox⟩;
-        obtain rfl := huniq F' hpre' hcrit';
-        exact ⟨hpre', hΘ⟩;
+      · exact ⟨⟨⟨Rxu, hΘ.toSuccessor, Rxu.2⟩, fun F' hpre' hcrit' ↦ by
+          obtain rfl := huniq F' hpre' hcrit';
+          exact ⟨hpre', hΘ⟩⟩, List.prefix_refl _, hbox⟩;
       · exact (ihC hC).mpr hCΘ;
 
 end countermodelM

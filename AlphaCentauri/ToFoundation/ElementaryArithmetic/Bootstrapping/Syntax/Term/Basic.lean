@@ -367,4 +367,76 @@ end IsUTerm
 
 end term
 
+namespace Language.TermRec
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Language.TermRec (Blueprint)
+
+variable (V)
+
+/-- A recursion on terms in a model of $\mathsf{EA}$, with a monotone bound on its values. -/
+structure Construction {k : ℕ} (φ : Blueprint k) where
+  bvar : (Fin k → V) → V → V
+  fvar : (Fin k → V) → V → V
+  func : (Fin k → V) → V → V → V → V → V
+  bvar_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ bvar (v ·.succ) (v 0)) φ.bvar
+  fvar_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ fvar (v ·.succ) (v 0)) φ.fvar
+  func_defined :
+    𝚺ᴬ₁.DefinedFunction (fun v ↦ func (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)) φ.func
+  bvar_locallyDelta0 : LocallyDelta0Function fun v : Fin (k + 1) → V ↦ bvar (v ·.succ) (v 0)
+  fvar_locallyDelta0 : LocallyDelta0Function fun v : Fin (k + 1) → V ↦ fvar (v ·.succ) (v 0)
+  func_locallyDelta0 : LocallyDelta0Function fun v : Fin (k + 4) → V ↦
+    func (v ·.succ.succ.succ.succ) (v 0) (v 1) (v 2) (v 3)
+  /-- `c.bound param t` bounds the value at the term `t`. -/
+  bound : (Fin k → V) → V → V
+  bvar_le_bound : ∀ param z, bvar param z ≤ bound param (^#z)
+  fvar_le_bound : ∀ param x, fvar param x ≤ bound param (^&x)
+  func_le_bound : ∀ param (k f v w : V), k = len w → (∀ i < k, w.[i] ≤ bound param v.[i]) →
+    func param k f v w ≤ bound param (^func k f v)
+  bound_monotone : ∀ param {s t}, s ≤ t → bound param s ≤ bound param t
+  bound_locallyDelta0 : LocallyDelta0Function fun v : Fin (k + 1) → V ↦ bound (v ·.succ) (v 0)
+
+variable {V} (L)
+
+namespace Construction
+
+variable {arity : ℕ} {β : Blueprint arity} (c : Construction V β)
+
+/-- The rules generating the graph `⟪t, y⟫` of the recursion. -/
+def Phi (param : Fin arity → V) (C : Set V) (pr : V) : Prop :=
+  IsUTerm L (π₁ pr) ∧
+  ( (∃ z, pr = ⟪^#z, c.bvar param z⟫) ∨
+    (∃ x, pr = ⟪^&x, c.fvar param x⟫) ∨
+    (∃ k f v w : V,
+      (k = len w ∧ ∀ i < k, ⟪v.[i], w.[i]⟫ ∈ C) ∧ pr = ⟪^func k f v, c.func param k f v w⟫) )
+
+private lemma phi_iff (param : Fin arity → V) (C pr : V) :
+    c.Phi L param {x | x ∈ C} pr ↔
+    ∃ t ≤ pr, ∃ y ≤ pr, pr = ⟪t, y⟫ ∧ IsUTerm L t ∧
+    ( (∃ z < t, t = ^#z ∧ y = c.bvar param z) ∨
+      (∃ x < t, t = ^&x ∧ y = c.fvar param x) ∨
+      (∃ k < t, ∃ f < t, ∃ v < t, ∃ w ≤ repeatVec C k,
+        (k = len w ∧ ∀ i < k, ⟪v.[i], w.[i]⟫ ∈ C) ∧
+        t = ^func k f v ∧ y = c.func param k f v w) ) := by
+  constructor
+  · rintro ⟨ht, H⟩
+    refine ⟨π₁ pr, by simp, π₂ pr, by simp, by simp, ht, ?_⟩
+    rcases H with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, w, ⟨hk, hw⟩, hk, rfl⟩)
+    · disj 1; exact ⟨z, by simp⟩
+    · disj 2; exact ⟨x, by simp⟩
+    · disj 3
+      refine ⟨k, by simp, f, by simp, v, by simp, w, ?_, ⟨hk, hw⟩, by simp⟩
+      rcases hk
+      exact len_repeatVec_of_nth_le fun i hi ↦ le_of_lt <| lt_of_mem_rng <| hw i hi
+  · rintro ⟨t, _, y, _, rfl, ht, H⟩
+    refine ⟨by simpa using ht, ?_⟩
+    rcases H with
+      (⟨z, _, rfl, rfl⟩ | ⟨x, _, rfl, rfl⟩ | ⟨k, _, f, _, v, _, w, _, ⟨hk, hw⟩, rfl, rfl⟩)
+    · disj 1; exact ⟨z, rfl⟩
+    · disj 2; exact ⟨x, rfl⟩
+    · disj 3; exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hw i hi⟩, rfl⟩
+
+end Construction
+
+end Language.TermRec
+
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

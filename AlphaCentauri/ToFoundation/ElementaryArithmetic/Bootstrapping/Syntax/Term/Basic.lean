@@ -378,12 +378,11 @@ of a list `v` of the same length is bounded by `Exp.exp (Exp.exp (8 * v + c))`. 
 lemma le_exp_exp_of_nth_le_exp_exp (hc : 1 ≤ c) {v w : V} (hl : len w = len v)
     (h : ∀ i < len v, w.[i] ≤ Exp.exp (Exp.exp (8 * v.[i] + c))) :
     w ≤ Exp.exp (Exp.exp (8 * v + c)) := by
-  have hmul : LocallyDelta0Function₂ ((· * ·) : V → V → V) :=
-    LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
   have hG' {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
       LocallyDelta0Function fun u ↦ Exp.exp (Exp.exp (8 * g u + c)) :=
     LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
-      LocallyDelta0Function.add.comp₂ (hmul.comp₂ (LocallyDelta0Function.const 8) hg)
+      LocallyDelta0Function.add.comp₂
+        (LocallyDelta0Function.mul.comp₂ (LocallyDelta0Function.const 8) hg)
         (LocallyDelta0Function.const c)
   set W := w
   have hP : LocallyDelta0Pred fun v ↦ ∀ w ≤ W, len w = len v →
@@ -478,6 +477,15 @@ lemma qqFunc_le_exp_exp (hc : 1 ≤ c) {k f v w : V} (hw : w ≤ Exp.exp (Exp.ex
     _ = 8 * (m + 1) + c := by grind
     _ ≤ 8 * ^func k f v + c := by gcongr
 
+lemma qqFunc_le_exp_exp_of_nth_le (hc : 1 ≤ c) {k f v w : V} (hv : k = len v) (hw : k = len w)
+    (h : ∀ i < k, w.[i] ≤ Exp.exp (Exp.exp (8 * v.[i] + c))) :
+    ^func k f w ≤ Exp.exp (Exp.exp (8 * ^func k f v + c)) :=
+  qqFunc_le_exp_exp hc <| le_exp_exp_of_nth_le_exp_exp hc (by rw [← hw, ← hv]) fun i hi ↦
+    h i (by rwa [hv])
+
+lemma le_exp_exp_eight_mul_add (a c : V) : a ≤ Exp.exp (Exp.exp (8 * a + c)) :=
+  le_exp_exp <| le_trans (le_mul_of_one_le_left (by simp) (by norm_num)) le_self_add
+
 end structuralBound
 
 end term
@@ -505,8 +513,8 @@ structure Construction {k : ℕ} (φ : Blueprint k) where
   bound : (Fin k → V) → V → V
   bvar_le_bound : ∀ param z, bvar param z ≤ bound param (^#z)
   fvar_le_bound : ∀ param x, fvar param x ≤ bound param (^&x)
-  func_le_bound : ∀ param (k f v w : V), k = len w → (∀ i < k, w.[i] ≤ bound param v.[i]) →
-    func param k f v w ≤ bound param (^func k f v)
+  func_le_bound : ∀ param (k f v w : V), k = len v → k = len w →
+    (∀ i < k, w.[i] ≤ bound param v.[i]) → func param k f v w ≤ bound param (^func k f v)
   bound_monotone : ∀ param {s t}, s ≤ t → bound param s ≤ bound param t
   bound_locallyDelta0 : LocallyDelta0Function fun v : Fin (k + 1) → V ↦ bound (v ·.succ) (v 0)
 
@@ -818,7 +826,7 @@ lemma courseOfValuesResult_func {k f v : V} (hk : k = len v) :
     rfl
   have e : c.courseOfValues.val param (^func k f v) (c.courseOfValues.table param (^func k f v)) =
       c.func param k f v w := by simp [courseOfValues, qqFunc, w]
-  have hle := c.func_le_bound param k f v w hw.symm fun i hi ↦ by
+  have hle := c.func_le_bound param k f v w hk hw.symm fun i hi ↦ by
     rw [hwv i hi]; exact c.courseOfValuesResult_le_bound param _
   rw [← e] at hle
   exact ⟨w, hw, hwv, by rw [courseOfValuesResult, c.courseOfValues.result_eq_val hle, e]⟩
@@ -1190,7 +1198,7 @@ noncomputable def construction : Language.TermRec.Construction V blueprint where
   bound _ t := t
   bvar_le_bound _ z := succ_le_iff_lt.mpr (var_lt_qqBvar z)
   fvar_le_bound _ _ := zero_le
-  func_le_bound _ k f v w hk h :=
+  func_le_bound _ k f v w _ hk h :=
     listMaxss_le fun i hi ↦ le_trans (le_trans (h i (hk ▸ hi)) (nth_le _ _))
       (terms_lt_qqFunc k f v).le
   bound_monotone _ _ _ h := h

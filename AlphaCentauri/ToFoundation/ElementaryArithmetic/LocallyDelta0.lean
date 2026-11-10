@@ -218,6 +218,13 @@ lemma comp₂ {g : V → V → V} {f f' : (Fin k → V) → V} (hg : LocallyDelt
   hg.comp (f := ![f, f']) <|
     Fin.forall_fin_succ.mpr ⟨hf, Fin.forall_fin_succ.mpr ⟨hf', finZeroElim⟩⟩
 
+lemma comp₃ {g : V → V → V → V} {f f' f'' : (Fin k → V) → V}
+    (hg : LocallyDelta0Function (k := 3) fun v ↦ g (v 0) (v 1) (v 2))
+    (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f')
+    (hf'' : LocallyDelta0Function f'') : LocallyDelta0Function fun v ↦ g (f v) (f' v) (f'' v) :=
+  hg.comp (f := ![f, f', f'']) <| Fin.forall_fin_succ.mpr ⟨hf, Fin.forall_fin_succ.mpr
+    ⟨hf', Fin.forall_fin_succ.mpr ⟨hf'', finZeroElim⟩⟩⟩
+
 /-- Substitution of locally $\Delta_0$ functions for the variables of a locally $\Delta_0$
 function, one of them for the first variable. -/
 lemma comp_cons {g : (Fin (l + 1) → V) → V} {f : (Fin k → V) → V}
@@ -233,6 +240,9 @@ lemma comp_cons {g : (Fin (l + 1) → V) → V} {f : (Fin k → V) → V}
   cases i using Fin.cases <;> simp
 
 lemma add : LocallyDelta0Function₂ (· + · : V → V → V) :=
+  of_definableBoundedFunction ⟨inferInstance, by definability⟩
+
+lemma mul : LocallyDelta0Function₂ (· * · : V → V → V) :=
   of_definableBoundedFunction ⟨inferInstance, by definability⟩
 
 lemma add_one {f : (Fin k → V) → V} (hf : LocallyDelta0Function f) :

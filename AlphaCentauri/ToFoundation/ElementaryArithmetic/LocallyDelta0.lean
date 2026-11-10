@@ -210,6 +210,66 @@ lemma comp {g : (Fin l → V) → V} {f : Fin l → (Fin k → V) → V} (hg : L
 
 end LocallyDelta0Function
 
+namespace LocallyDelta0
+
+variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {P : (Fin (k + 1) → V) → Prop} {f : (Fin k → V) → V}
+
+/-- Bounded existential quantification below a locally $\Delta_0$ function. -/
+lemma bexs_le_function (hf : LocallyDelta0Function f) (h : LocallyDelta0 P) :
+    LocallyDelta0 fun v ↦ ∃ x ≤ f v, P (x :> v) := by
+  have := (bexs_le h).comp (f := f :> fun i v ↦ v i) fun j ↦ by
+    cases j using Fin.cases with
+    | zero => simpa using hf
+    | succ j => simpa using LocallyDelta0Function.var j
+  apply this.of_iff
+  intro v
+  apply exists_congr
+  intro x
+  apply and_congr (by simp)
+  apply iff_of_eq
+  congr 1
+
+/-- Bounded universal quantification below a locally $\Delta_0$ function. -/
+lemma ball_le_function (hf : LocallyDelta0Function f) (h : LocallyDelta0 P) :
+    LocallyDelta0 fun v ↦ ∀ x ≤ f v, P (x :> v) :=
+  (bexs_le_function hf h.not).not.of_iff fun _ ↦ by simp
+
+private lemma lt_function (hf : LocallyDelta0Function f) :
+    LocallyDelta0 fun v : Fin (k + 1) → V ↦ v 0 < f (v ·.succ) := by
+  have := (LocallyDelta0.of_definable (R := fun w : Fin 2 → V ↦ w 0 < w 1) (by definability)).comp
+    (f := ![fun v : Fin (k + 1) → V ↦ v 0, fun v ↦ f (v ·.succ)]) fun j ↦ by
+      cases j using Fin.cases with
+      | zero => simpa using LocallyDelta0Function.var 0
+      | succ j => simpa [Fin.fin_one_eq_zero j] using hf.retraction Fin.succ
+  exact this.of_iff fun v ↦ by simp
+
+/-- Bounded existential quantification strictly below a locally $\Delta_0$ function. -/
+lemma bexs_lt_function (hf : LocallyDelta0Function f) (h : LocallyDelta0 P) :
+    LocallyDelta0 fun v ↦ ∃ x < f v, P (x :> v) :=
+  (bexs_le_function hf ((lt_function hf).and h)).of_iff fun v ↦
+    ⟨fun ⟨x, hx, hP⟩ ↦ ⟨x, hx.le, by simpa using hx, hP⟩,
+      fun ⟨x, _, hx, hP⟩ ↦ ⟨x, by simpa using hx, hP⟩⟩
+
+/-- Bounded universal quantification strictly below a locally $\Delta_0$ function. -/
+lemma ball_lt_function (hf : LocallyDelta0Function f) (h : LocallyDelta0 P) :
+    LocallyDelta0 fun v ↦ ∀ x < f v, P (x :> v) :=
+  (bexs_lt_function hf h.not).not.of_iff fun _ ↦ by simp
+
+end LocallyDelta0
+
+section exponential
+
+variable [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+
+lemma LocallyDelta0Function.exp : LocallyDelta0Function₁ (Exp.exp : V → V) where
+  graph := LocallyDelta0.of_definable exp_definable_deltaZero
+  bounded X := by
+    use Exp.exp X
+    intro v hv
+    exact exp_monotone_le.mpr (hv 0)
+
+end exponential
+
 section induction
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {P : V → Prop}

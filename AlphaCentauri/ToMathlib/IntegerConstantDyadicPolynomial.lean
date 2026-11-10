@@ -55,8 +55,10 @@ lemma mem_iff {c : ℚ} : c ∈ DyadicRational ↔ ∃ k : ℕ, ∃ m : ℤ, 2 ^
 
 lemma two_zpow_mem (e : ℤ) : (2 : ℚ) ^ e ∈ DyadicRational := by
   rcases e.eq_nat_or_neg with ⟨n, rfl | rfl⟩
-  · exact ⟨0, 2 ^ n, by simp⟩
-  · exact ⟨n, 1, by simp⟩
+  · use 0, 2 ^ n
+    simp
+  · use n, 1
+    simp
 
 lemma div_two_mem {c : ℚ} (hc : c ∈ DyadicRational) : c / 2 ∈ DyadicRational := by
   obtain ⟨k, m, hm⟩ := hc
@@ -173,10 +175,14 @@ lemma mem_iff {p : ℚ[X]} :
 
 lemma C_mul_X_pow_mem {c : ℚ} (hc : c ∈ DyadicRational) {h : ℕ} (hh : 0 < h) :
     C c * X ^ h ∈ 𝔻 := by
-  refine mem_iff.mpr ⟨⟨0, by simp [hh.ne]⟩, fun i ↦ ?_⟩
-  rw [coeff_C_mul_X_pow]
-  split_ifs
-  exacts [hc, zero_mem _]
+  rw [mem_iff]
+  and_intros
+  · use 0
+    simp [hh.ne]
+  · intro i
+    rw [coeff_C_mul_X_pow]
+    split_ifs
+    exacts [hc, zero_mem _]
 
 lemma C_two_zpow_mul_X_pow_mem {e : ℤ} {h : ℕ} (he : 0 < h ∨ 0 ≤ e) :
     C (2 ^ e) * X ^ h ∈ 𝔻 := by
@@ -288,10 +294,13 @@ lemma exists_eq_C_two_zpow_mul_X_pow
   have hlc : 0 ≤ q.leadingCoeff := by
     simpa [hq, leadingCoeff_mul] using nonneg_iff.mp x.2
   have ho : C (2 ^ (-e)) * q ∈ 𝔻 := by
-    refine mem_iff.mpr ⟨⟨m, ?_⟩, fun i ↦ ?_⟩
-    · rw [coeff_C_mul, hqm, ← mul_assoc, ← zpow_add₀ two_ne_zero, neg_add_cancel, zpow_zero,
+    rw [mem_iff]
+    and_intros
+    · use m
+      rw [coeff_C_mul, hqm, ← mul_assoc, ← zpow_add₀ two_ne_zero, neg_add_cancel, zpow_zero,
         one_mul]
-    · rw [coeff_C_mul]
+    · intro i
+      rw [coeff_C_mul]
       exact mul_mem (DyadicRational.two_zpow_mem _) (hqc i)
   have he : 0 < r ∨ 0 ≤ e := by
     rcases Nat.eq_zero_or_pos r with hr | hr
@@ -503,9 +512,12 @@ lemma X_ne_three_mul_add (a r : 𝔻) (hr₀ : 0 ≤ r) (hr : r < 3) :
         rcases (show (2 : 𝔻) ≤ r by linarith).lt_or_eq with h₃ | rfl
         · have := OpenPredicate.DiscretelyOrdered.one_le_of_pos (r - 2) (sub_pos.mpr h₃)
           linarith
-        · exact ⟨2, by norm_num⟩
-      · exact ⟨1, by simp⟩
-    · exact ⟨0, by simp⟩
+        · use 2
+          norm_num
+      · use 1
+        simp
+    · use 0
+      simp
   obtain ⟨n, rfl⟩ := hr'
   intro h
   have h₃ : ((3 : 𝔻) : ℚ[X]) = 3 := map_ofNat (Subring.subtype 𝔻) 3

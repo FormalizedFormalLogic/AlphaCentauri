@@ -60,7 +60,8 @@ lemma eventually_evalTwoPow_rel {k : ℕ} (r : Language.Rel ℒₒᵣ k) (v : Fi
     · exact .of_forall fun n ↦ by simp [h]
     have hp : ((v 1 : 𝔻) : ℚ[X]) - ((v 0 : 𝔻) : ℚ[X]) ≠ 0 := by
       rw [sub_ne_zero]
-      exact fun e ↦ h (Subtype.ext (Subtype.ext e.symm))
+      intro e
+      exact h (Subtype.ext (Subtype.ext e.symm))
     filter_upwards [eventually_evalTwoPow (v 0), eventually_evalTwoPow (v 1),
       eventually_eval_two_pow_ne_zero hp] with n h₀ h₁ hne
     simp only [h, false_iff]

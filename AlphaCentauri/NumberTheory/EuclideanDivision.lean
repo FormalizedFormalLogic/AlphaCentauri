@@ -117,23 +117,27 @@ theorem exists_model_PeanoMinusSmu_not_standardEuclideanDivisionBy_three :
       (∀ φ : ArithmeticSemiformula ℕ 0, φ.Open → ℕ↓[ℒₒᵣ] ⊧ φ.univCl → M↓[ℒₒᵣ] ⊧ φ.univCl) ∧
       ¬M↓[ℒₒᵣ] ⊧ Arithmetic.standardEuclideanDivisionBy 3 := by
   use Nonneg IntegerConstantDyadicPolynomial, inferInstance
-  exact ⟨IntegerConstantDyadicPolynomial.models_PeanoMinusSmu,
-    fun _ ↦ IntegerConstantDyadicPolynomial.models_univCl_of_open,
-    IntegerConstantDyadicPolynomial.not_models_standardEuclideanDivisionBy_three⟩
+  and_intros
+  · exact IntegerConstantDyadicPolynomial.models_PeanoMinusSmu
+  · intro _ hφ h
+    exact IntegerConstantDyadicPolynomial.models_univCl_of_open hφ h
+  · exact IntegerConstantDyadicPolynomial.not_models_standardEuclideanDivisionBy_three
 
 /-- $\mathsf{PA}^-_{\mathrm{smu}}$ does not prove division with remainder by `3`.
 - [Kat26a, Corollary 11] -/
 theorem not_provable_standardEuclideanDivisionBy_three_PeanoMinusSmu :
-    Arithmetic.PeanoMinusSmu ⊬ Arithmetic.standardEuclideanDivisionBy 3 := fun h ↦
-  IntegerConstantDyadicPolynomial.not_models_standardEuclideanDivisionBy_three <|
+    Arithmetic.PeanoMinusSmu ⊬ Arithmetic.standardEuclideanDivisionBy 3 := by
+  intro h
+  exact IntegerConstantDyadicPolynomial.not_models_standardEuclideanDivisionBy_three <|
     models_of_provable IntegerConstantDyadicPolynomial.models_PeanoMinusSmu h
 
 /-- $\mathsf{PA}^-_{\mathrm{smu}}$ does not prove the Euclidean Division Principle.
 - [Kat26a, Corollary 12]
 - [Vis26, Open Question 3.2] -/
 theorem not_provable_euclideanDivision_PeanoMinusSmu :
-    Arithmetic.PeanoMinusSmu ⊬ Arithmetic.euclideanDivision :=
-  fun h ↦ IntegerConstantDyadicPolynomial.not_models_standardEuclideanDivisionBy_three <|
+    Arithmetic.PeanoMinusSmu ⊬ Arithmetic.euclideanDivision := by
+  intro h
+  exact IntegerConstantDyadicPolynomial.not_models_standardEuclideanDivisionBy_three <|
     Arithmetic.models_standardEuclideanDivisionBy_of_models_euclideanDivision
       (models_of_provable IntegerConstantDyadicPolynomial.models_PeanoMinusSmu h) three_ne_zero
 

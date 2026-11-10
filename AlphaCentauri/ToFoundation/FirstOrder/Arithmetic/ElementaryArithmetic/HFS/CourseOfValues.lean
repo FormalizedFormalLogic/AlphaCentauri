@@ -19,7 +19,8 @@ primitive recursion, and `r` is locally $\Delta_0$.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -181,4 +182,5 @@ end Construction
 
 end CourseOfValues
 
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

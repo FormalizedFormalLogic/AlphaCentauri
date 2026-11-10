@@ -19,13 +19,12 @@ system.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## From typed proofs to derivability -/
-
-section typedBridge
 
 open scoped FFL.FirstOrder.Arithmetic
 
@@ -96,6 +95,5 @@ lemma Semiformula.val_subst_fvar {φ : Semiformula V L 1} {u : V} :
     (φ.subst ![(Semiterm.fvar u : Semiterm V L 0)]).val = substs1 L ^&u φ.val := by
   simp [substs1]
 
-end typedBridge
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

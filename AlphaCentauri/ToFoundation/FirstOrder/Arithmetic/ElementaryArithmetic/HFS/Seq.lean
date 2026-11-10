@@ -15,7 +15,8 @@ on the values.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -111,8 +112,6 @@ lemma Seq.lt_lh_of_mem {s : V} (h : Seq s) {i x} (hix : ⟪i, x⟫ ∈ s) : i < 
 
 noncomputable def seqCons (s x : V) : V := insert ⟪lh s, x⟫ s
 
-section znth
-
 theorem znth_existsUnique (s i : V) :
     ∃! x, (Seq s ∧ i < lh s → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < lh s) → x = 0) := by
   by_cases h : Seq s ∧ i < lh s
@@ -142,8 +141,6 @@ instance znth_definable : 𝚺ᴬ₀-Function₂ (znth : V → V → V) := znth_
 
 instance znth_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₂ (znth : V → V → V) := znth_definable.of_zero
-
-end znth
 
 scoped macro_rules
   | `($s ⁀' $x) => `(seqCons $s $x)
@@ -190,8 +187,6 @@ lemma Seq.mem_seqCons_iff_of_lt {s x z i : V} (hi : i < lh s) : ⟪i, x⟫ ∈ s
   intro h
   have := Ss.lt_lh_of_mem h; simp at this
 
-section
-
 lemma seqCons_graph (t x s : V) :
     t = s ⁀' x ↔ ∃ l ≤ 2 * s, l = lh s ∧ ∃ p ≤ (2 * s + x + 1)^2, p = ⟪l, x⟫ ∧ t = insert p s :=
   ⟨by rintro rfl
@@ -208,8 +203,6 @@ instance seqCons_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₂ (seqCons : V → V → V) := seqCons_definable.of_zero
 
 @[simp] lemma natCast_empty : ((∅ : ℕ) : V) = ∅ := by simp [emptyset_def]
-
-end
 
 lemma Seq.restr {s : V} (H : Seq s) {i : V} (hi : i ≤ lh s) : Seq (s ↾ under i) :=
   ⟨H.isMapping.restr (under i), i, domain_restr_of_subset_domain (by simp [H.domain_eq, hi])⟩
@@ -323,8 +316,6 @@ meta def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
 
 @[simp] lemma mem_singleton_seq_iff (x y : V) : ⟪0, x⟫ ∈ !⟦y⟧ ↔ x = y := by simp [mem_seqCons_iff]
 
-section
-
 instance mkSeq₁_defined : 𝚺ᴬ₀-Function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁Def :=
   .mk fun v ↦ by simp [mkSeq₁Def]; rfl
 
@@ -340,10 +331,6 @@ instance mkSeq₂_definable : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ !⟦x, y�
 
 instance mkSeq₂_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (fun x y : V ↦ !⟦x, y⟧) :=
   mkSeq₂_definable.of_sigmaOne
-
-end
-
-section seqToVec
 
 noncomputable def vecToSeq : {n : ℕ} → (Fin n → V) → V
   | 0,     _ => ∅
@@ -364,6 +351,5 @@ noncomputable def vecToSeq : {n : ℕ} → (Fin n → V) → V
   | zero => simp [vecToSeq]
   | succ n ih => simp [vecToSeq, *]
 
-end seqToVec
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

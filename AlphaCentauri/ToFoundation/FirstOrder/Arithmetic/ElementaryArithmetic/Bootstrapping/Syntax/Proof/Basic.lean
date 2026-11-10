@@ -24,7 +24,8 @@ with induction on locally $\Delta_0$ predicates.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
   {L : Language} [L.Encodable] [L.LORDefinable]
@@ -90,8 +91,6 @@ lemma setShift_existsUnique (s : V) :
 variable (L) in
 /-- The set of the shifts of the elements of `s`. -/
 noncomputable def setShift (s : V) : V := Classical.choose! (setShift_existsUnique L s)
-
-section setShift
 
 lemma mem_setShift_iff {s y : V} : y ∈ setShift L s ↔ ∃ x ∈ s, y = shift L x :=
   Classical.choose!_spec (setShift_existsUnique L s) y
@@ -163,8 +162,6 @@ lemma setShift_locallyDelta0 : LocallyDelta0Function₁ (setShift (V := V) L) wh
       intro i
       simpa using le_trans (lt_of_mem hx).le (hv 0)
     exact lt_succ_iff_le.mpr <| hY ![x] this
-
-end setShift
 
 section code
 
@@ -904,4 +901,5 @@ lemma internal_provable_iff_internal_derivable {φ : V} :
 
 alias ⟨Provable.toDerivable, Derivable.toProvable⟩ := internal_provable_iff_internal_derivable
 
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+end ElementaryArithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic

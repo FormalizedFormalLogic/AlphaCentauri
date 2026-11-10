@@ -17,9 +17,8 @@ $a + 1$ into $a$.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
-
-section PigeonholeIOpen
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -144,6 +143,5 @@ theorem pigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ_[m].DefinableRel R) (a :
         · exact (hw x hx y hy).1 h
         · exact (hw x' hx' y hy).1 h'
 
-end PigeonholeIOpen
-
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

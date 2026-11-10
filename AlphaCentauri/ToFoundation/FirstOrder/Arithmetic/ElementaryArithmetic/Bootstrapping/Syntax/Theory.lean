@@ -17,7 +17,8 @@ theories, unions and insertion.
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
 
 open Bounding
 
@@ -86,4 +87,5 @@ instance insert {φ : Sentence L} [T.Δ₁] [LocallyDelta0Axioms T V] :
 
 end LocallyDelta0Axioms
 
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

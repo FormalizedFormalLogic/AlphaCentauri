@@ -12,9 +12,8 @@ higher level.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
-
-section Reflection
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 open scoped FFL.FirstOrder.Bounding
 
@@ -51,6 +50,5 @@ lemma provable_localReflectionOn_prenexHierarchy_of_lt (hTS : T ⪯ S) (hs : s <
       simpa using provable_iff_of_models_iff.{0} (T := T) (n := 0) fun V _ _ e ↦ by
         simpa [models_iff] using H.2 V e Empty.elim⟩
 
-end Reflection
-
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

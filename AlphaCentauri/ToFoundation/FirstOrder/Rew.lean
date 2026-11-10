@@ -11,7 +11,8 @@ Commutation and congruence lemmas for substitutions and rewritings.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Rew
+namespace FFL.FirstOrder
+namespace Rew
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
 
@@ -113,13 +114,13 @@ lemma shift_subst_eq (φ : Semiformula L ℕ 1) (t : SyntacticSemiterm L n) :
 lemma bShift_eq_subst : (Rew.bShift : Rew L ξ n ξ (n + 1)) = Rew.subst fun i ↦ #i.succ := by
   ext x <;> rfl
 
-end FFL.FirstOrder.Rew
+end Rew
+end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Semiformula
+namespace FFL.FirstOrder
+namespace Semiformula
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
-
-section
 
 variable {m : ℕ}
 
@@ -148,6 +149,5 @@ lemma map_rewriteMap_eq_shifts (Γ : Multiset (Semiformula L ℕ 0))
     Γ.map (fun φ ↦ (@Rew.rewriteMap L ℕ ℕ 0 fun x ↦ if x = m then 0 else x + 1) ▹ φ) = Γ⁺ :=
   Multiset.map_congr rfl fun φ hφ ↦ rewriteMap_eq_shift φ (h φ hφ)
 
-end
-
-end FFL.FirstOrder.Semiformula
+end Semiformula
+end FFL.FirstOrder

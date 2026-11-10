@@ -15,13 +15,12 @@ Provable equivalences between formula codes in the typed internal calculus.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Provable equivalences of formula codes -/
-
-section provableIff
 
 open scoped FFL.FirstOrder.Arithmetic
 
@@ -131,6 +130,5 @@ lemma provable_exs_and_iff_exs_and {d d' p q : V} (hd : IsSemiformula L 1 d)
   simpa only [tprovable_iff_provable, Semiformula.val_iff, Semiformula.val_exs,
     Semiformula.val_and] using tprovable_all_iff_exs _ _ ⨀ tprovable_all_of_all_imp_imp h₃ h₂ h₁
 
-end provableIff
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

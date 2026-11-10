@@ -19,9 +19,8 @@ $\{\langle r, x \rangle : r < R, x \in X_r\}$.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
-
-section Injection
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -273,6 +272,5 @@ lemma definable_tagged {t : V} {X : V → Prop} (hX : 𝚺ᴬ₀.DefinablePred X
   unfold Tagged
   definability
 
-end Injection
-
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

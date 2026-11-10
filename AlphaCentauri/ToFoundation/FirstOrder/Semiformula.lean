@@ -10,7 +10,8 @@ Quantifier-rank invariance, distinctness lemmas, and constructor equations for `
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Semiformula
+namespace FFL.FirstOrder
+namespace Semiformula
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
 
@@ -50,4 +51,5 @@ attribute [grind .] ne_or_left ne_or_right ex_ne_subst
 
 attribute [grind =] Multiset.mem_atom_iff
 
-end FFL.FirstOrder.Semiformula
+end Semiformula
+end FFL.FirstOrder

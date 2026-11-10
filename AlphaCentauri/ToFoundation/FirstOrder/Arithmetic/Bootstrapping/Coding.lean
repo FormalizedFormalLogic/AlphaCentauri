@@ -20,7 +20,8 @@ from the code of the formula by the corresponding function on codes.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Language
+namespace FFL.FirstOrder
+namespace Language
 
 open Arithmetic Bootstrapping
 
@@ -51,9 +52,11 @@ lemma SymbolsStandard.oRing {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧*
     · use 2, Language.Mul.mul
       simp
 
-end FFL.FirstOrder.Language
+end Language
+end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Semisentence
+namespace FFL.FirstOrder
+namespace Semisentence
 
 open Arithmetic Bootstrapping
 
@@ -85,9 +88,11 @@ lemma quote_conj {n k : ℕ} (φ : Fin k → Semisentence L n) :
     simpa [Matrix.conj, Matrix.vecHead, Matrix.vecTail, Function.comp_def] using
       ih (Matrix.vecTail φ)
 
-end FFL.FirstOrder.Semisentence
+end Semisentence
+end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Semiterm
+namespace FFL.FirstOrder
+namespace Semiterm
 
 open Arithmetic Bootstrapping
 
@@ -125,9 +130,11 @@ end
     (⌜(↑k : ClosedSemiterm ℒₒᵣ n)⌝ : V) = Bootstrapping.Arithmetic.numeral (k : V) := by
   simp [empty_quote_eq]
 
-end FFL.FirstOrder.Semiterm
+end Semiterm
+end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -161,7 +168,8 @@ lemma satisfies_ofList_ch (l : List ArithmeticSentence) (p : V) :
       Theory.Δ₁.singleton_toTDef_ch_val, ih]
     simp [Sentence.quote_eq_encode, numeral_eq_natCast]
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic
 
 namespace FFL.FirstOrder
 
@@ -227,7 +235,8 @@ lemma Semisentence.quote_imp {n : ℕ} (σ τ : Semisentence L n) :
 
 end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {L : Language} [L.Encodable]
   [L.LORDefinable]
@@ -241,4 +250,5 @@ lemma exists_termVec {k : ℕ} {v : V} (hv : IsSemitermVec L (k : V) 0 v) :
     rw [eq_matrixToVec_iff]
     exact ⟨hv.lh.symm, fun i ↦ rfl⟩⟩
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

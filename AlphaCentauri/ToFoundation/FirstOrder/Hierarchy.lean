@@ -16,7 +16,8 @@ axiom of `𝗣𝗔⁻` is such a block of universal quantifiers.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Bounding.Hierarchy
+namespace FFL.FirstOrder
+namespace Bounding.Hierarchy
 
 open Arithmetic
 
@@ -57,9 +58,11 @@ lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) :
     exact .all (.all (by rw [Semiformula.imp_eq]; exact .or (by simp) (.dummy_pi (by simp))))
   | _ => simp
 
-end FFL.FirstOrder.Bounding.Hierarchy
+end Bounding.Hierarchy
+end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Bounding
+namespace FFL.FirstOrder
+namespace Bounding
 
 variable {L : Language} [L.LT] {ξ : Type*} {n : ℕ}
 
@@ -186,9 +189,11 @@ lemma PrenexHierarchy.prenexBlock {Γ : Polarity} {φ : Semiformula L ξ n}
   · obtain ⟨ψ, hψ, rfl⟩ := PrenexHierarchy.pi_succ_iff.mp h
     exact .all (.bounded (PrenexHierarchy.zero_iff_bounded.mp hψ))
 
-end FFL.FirstOrder.Bounding
+end Bounding
+end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic.PeanoMinus
+namespace FFL.FirstOrder.Arithmetic
+namespace PeanoMinus
 
 open Bounding
 
@@ -220,13 +225,16 @@ theorem prenexBlock : ∀ φ ∈ 𝗣𝗔⁻, ℬ[<, ℒₒᵣ].PrenexBlock 𝚷
   case ltTrans => exact .all (.all (.all (.of_deltaZero (by simp))))
   case ltTri => exact .all (.all (.of_deltaZero (by simp)))
 
-end FFL.FirstOrder.Arithmetic.PeanoMinus
+end PeanoMinus
+end FFL.FirstOrder.Arithmetic
 
-namespace FFL.FirstOrder.Bounding.HierarchySymbol.Semiformula
+namespace FFL.FirstOrder
+namespace Bounding.HierarchySymbol.Semiformula
 
 variable {L : Language} {ℬ : Bounding L} {ξ : Type*} {n s : ℕ}
 
 @[simp] lemma hierarchy_succ {C : HierarchySymbol ℬ} {Γ : Polarity} (φ : C.Semiformula ξ n)
     (h : C.rank ≤ s + 1) : ℬ.Hierarchy Γ (s + 2) φ.val := hierarchy_of_lt φ (by omega)
 
-end FFL.FirstOrder.Bounding.HierarchySymbol.Semiformula
+end Bounding.HierarchySymbol.Semiformula
+end FFL.FirstOrder

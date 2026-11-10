@@ -18,13 +18,12 @@ Comprehension holds for $\Delta_0$ predicates on bounded domains. The instances 
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
-
-section exponential
 
 noncomputable scoped instance : Exp V := ⟨fun a ↦ Classical.choose! (exponential_exists_unique a)⟩
 
@@ -92,10 +91,6 @@ lemma lt_two_mul_exponential_log {a : V} (pos : 0 < a) : a < 2 * Exp.exp (log a)
 lemma exp_le_iff_le_log {i a : V} (pos : 0 < a) : Exp.exp i ≤ a ↔ i ≤ log a :=
   ⟨by intro h; simpa using log_monotone h,
     fun h ↦ le_trans (exp_monotone_le.mpr h) (exp_log_le_self pos)⟩
-
-end exponential
-
-section mem
 
 /-- `i ∈ a` states that the `i`-th bit of `a` is one. -/
 def Bit (i a : V) : Prop := LenBit (Exp.exp i) a
@@ -191,8 +186,6 @@ instance memRel₃_defined : 𝚺ᴬ₀-Relation₄ (fun r x y z : V ↦ ⟪x, y
 lemma mem_iff_mul_exp_add_exp_add {i a : V} :
     i ∈ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + Exp.exp i + r := by
   simpa [mem_iff_bit, exp_succ] using! lenbit_iff_add_mul (exp_pow2 i) (a := a)
-
-end mem
 
 section finiteSet
 
@@ -465,8 +458,6 @@ lemma insert_remove {i a : V} (h : i ∈ a) : insert i (bitRemove i a) = a := me
 
 end finiteSet
 
-section comprehension
-
 variable {P : V → Prop}
 
 /-- Comprehension for a $\Delta_0$ predicate on `{0, …, a - 1}`.
@@ -509,6 +500,5 @@ theorem finite_comprehension! (hP : 𝚺ᴬ₀.DefinablePred P) (fin : ∃ m, �
   intro i
   simp [H, H']
 
-end comprehension
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

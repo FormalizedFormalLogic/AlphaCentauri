@@ -18,8 +18,6 @@ the partial powers $x^0, \dots, x^k$. The graph is $\Delta_0$ in the parameter `
 
 namespace FFL.FirstOrder.Arithmetic
 
-section Power
-
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 noncomputable section
@@ -136,8 +134,6 @@ open Power
 open Classical in
 /-- $x^k$, computed with blocks of width `‖B‖`; it is $0$ if no such sequence exists. -/
 def bpow (B x k : V) : V := if h : ∃ y, IsPow B x k y then h.choose else 0
-
-section bpow
 
 variable {B x y k : V}
 
@@ -272,10 +268,6 @@ lemma length_bpow_two_mul {w : V} (hB : 0 < B) (hw : 0 < w) (hk : k * ‖(2 : V)
         (lt_of_le_of_lt (mul_le_mul_right (by simp)) hk)) hw),
       IH (lt_of_le_of_lt (mul_le_mul_right (by simp)) hk), add_assoc]
 
-end bpow
-
 end
-
-end Power
 
 end FFL.FirstOrder.Arithmetic

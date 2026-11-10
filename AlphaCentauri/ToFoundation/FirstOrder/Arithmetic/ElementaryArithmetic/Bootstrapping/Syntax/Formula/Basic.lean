@@ -21,7 +21,8 @@ codes of formulas with induction on locally $\Delta_0$ predicates. The formulas 
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic.Bootstrapping
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isUFormula)
 
@@ -526,8 +527,6 @@ end IsUFormula
 
 end formula
 
-section rangeList
-
 lemma rangeList_exists (n : V) : ∃ w, len w = n ∧ ∀ i < n, w.[i] = i :=
   sigmaZero_skolem_vec (R := fun i y ↦ y = i) (B := n)
     (LocallyDelta0.eq (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0))
@@ -576,8 +575,6 @@ lemma rangeList_locallyDelta0 : LocallyDelta0Function₁ (rangeList : V → V) w
     apply exp_monotone_le.mpr
     apply exp_monotone_le.mpr
     gcongr <;> exact hw 0
-
-end rangeList
 
 section prefixMax
 
@@ -730,7 +727,6 @@ def Phi (C : Set V) (pr : V) : Prop :=
       ∀ i < c.exsSize param p₁, ⟪c.exsChanges param i, p₁, ys.[i]⟫ ∈ C) ∧
     p = ^∃ p₁ ∧ y = c.exs param p₁ ys) )
 
-
 private lemma phi_iff (C pr : V) :
     c.Phi L {x | x ∈ C} pr ↔
     ∃ param ≤ pr, ∃ p ≤ pr, ∃ y ≤ pr, pr = ⟪param, p, y⟫ ∧ IsUFormula L p ∧
@@ -790,7 +786,6 @@ private lemma phi_iff (C pr : V) :
     · disj 6; exact ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩;
     · disj 7; exact ⟨p₁, ys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
     · disj 8; exact ⟨p₁, ys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
-
 
 private lemma le_pair_pair_right (a b d : V) : d ≤ ⟪a, b, d⟫ :=
   le_trans (le_pair_right _ _) (le_pair_right _ _)
@@ -1036,7 +1031,6 @@ lemma phi_locallyDelta0 :
     ((htag_eq 6).and (hquant c.all c.all_locallyDelta0)).or
     ((htag_eq 7).and (hquant c.exs c.exs_locallyDelta0))
   exact this.of_iff fun w ↦ by simpa using c.phi_iff_decode L (w 1) (w 0)
-
 
 /-- The construction of the graph of the recursion. -/
 def construction : Fixpoint.Construction V (β.blueprint L) where
@@ -1934,14 +1928,10 @@ lemma result_locallyDelta0 :
     ((isUFormula_locallyDelta0 (L := L)).pred_comp (LocallyDelta0Function.var 1))
     c.courseOfValuesResult_locallyDelta0 (LocallyDelta0Function.const 0)
 
-section
-
 lemma result_defined : 𝚺ᴬ₁-Function₂ c.result L via β.result L := .mk fun v ↦ by
   simp [Blueprint.result, result, c.eval_graphDef]
 
 instance result_definable : 𝚺ᴬ_[0 + 1]-Function₂ c.result L := c.result_defined.to_definable
-
-end
 
 end Construction
 
@@ -2016,7 +2006,6 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   bound_locallyDelta0 := LocallyDelta0Function.var (1 : Fin 2)
 
 end BV
-
 
 open BV
 
@@ -2098,8 +2087,6 @@ lemma isSemiformula_locallyDelta0 : LocallyDelta0Rel (IsSemiformula (V := V) L) 
         (LocallyDelta0Function.var 0))
   exact h.of_iff fun w ↦ isSemiformula_iff
 
-section
-
 instance IsSemiformula.defined : 𝚫ᴬ₁-Relation IsSemiformula (V := V) L via isSemiformula L := .mk <|
   by
   constructor
@@ -2112,8 +2099,6 @@ instance IsSemiformula.definable : 𝚫ᴬ₁-Relation IsSemiformula (V := V) L 
 
 instance IsSemiformula.definable' : Γᴬ_[m + 1]-Relation IsSemiformula (V := V) L :=
   IsSemiformula.definable.of_deltaOne
-
-end
 
 @[simp] lemma IsUFormula.isSemiformula {p : V} (h : IsUFormula L p) : IsSemiformula L (bv L p) p
   where
@@ -2312,4 +2297,5 @@ variable {β : Blueprint} {c : Construction V β} {param : V}
 
 end UformulaRec1.Construction
 
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+end ElementaryArithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic

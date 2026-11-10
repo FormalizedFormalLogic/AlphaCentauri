@@ -12,8 +12,6 @@ public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 
 namespace FFL.FirstOrder.Arithmetic
 
-section Exponential
-
 open scoped FFL.FirstOrder.Arithmetic
 
 noncomputable section
@@ -25,8 +23,6 @@ lemma add_mul_lt_mul_of_lt [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {a b u v : V} (hu 
   u + a * v < a + a * v := by simpa using hu
   _ = a * (v + 1) := by rw [mul_add, mul_one, add_comm]
   _ ≤ a * b := mul_le_mul_left (succ_le_iff_lt.mpr hv)
-
-section ISigma0
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
 
@@ -84,8 +80,6 @@ lemma fbit_ext {x y : V} (h : ∀ i, fbit x i = fbit y i) : x = y := by
         exact hb 0 (Arithmetic.zero_le _)
       rw [← div_add_mod u 2, ← div_add_mod w 2, this, hmod]
   exact key (x + y) le_rfl x le_self_add y le_add_self fun i _ ↦ h i
-
-section Length
 
 variable {u v : V}
 
@@ -148,12 +142,6 @@ lemma exists_natCast_of_length_le (j : ℕ) {x : V} (h : ‖x‖ ≤ j) : ∃ k 
       rw [h₁, hk] at hx₂
       simpa using hx₂.symm
 
-end Length
-
-end ISigma0
-
 end
-
-end Exponential
 
 end FFL.FirstOrder.Arithmetic

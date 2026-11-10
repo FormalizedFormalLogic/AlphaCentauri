@@ -17,9 +17,8 @@ statement that witnesses below a bound admit a common bound.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
-
-section Schemata
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 open Rewriting LawfulSyntacticRewriting
 
@@ -49,6 +48,5 @@ lemma models_collectionAxiom_iff {V : Type*} [ORingStructure V]
   simp [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
     Semiformula.eval_bexsLT, Semiformula.eval_substs]
 
-end Schemata
-
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

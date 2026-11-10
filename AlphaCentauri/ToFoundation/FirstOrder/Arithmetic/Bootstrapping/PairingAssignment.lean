@@ -13,7 +13,8 @@ into lists (`∷`).
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -142,16 +143,12 @@ instance : construction.Finite V where
 
 def Graph : V → Prop := construction.Fixpoint ![]
 
-section
-
 def graphDef : 𝚺ᴬ₁.Semisentence 1 := blueprint.fixpointDef
 
 instance graph_defined : 𝚺ᴬ₁-Predicate (Graph : V → Prop) via graphDef :=
   construction.fixpoint_defined
 
 instance graph_definable : 𝚺ᴬ₁-Predicate (Graph : V → Prop) := graph_defined.to_definable
-
-end
 
 lemma graph_case {pr : V} :
     Graph pr ↔
@@ -205,8 +202,6 @@ lemma graph_existsUnique (a : V) : ∃! s, Graph ⟪a, s⟫ := by
 
 end Dec
 
-section dec
-
 open Dec
 
 noncomputable def dec (a : V) : V := Classical.choose! (graph_existsUnique a)
@@ -242,6 +237,5 @@ instance dec_definable : 𝚺ᴬ₁-Function₁ (dec : V → V) := dec_defined.t
 instance dec_definable' {Γ : Polarity} {m : ℕ} : Γᴬ_[m + 1]-Function₁ (dec : V → V) :=
   dec_definable.of_sigmaOne
 
-end dec
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

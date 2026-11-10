@@ -21,7 +21,8 @@ carry a bound on their values, and inductions are on locally $\Delta_0$ predicat
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
@@ -325,8 +326,6 @@ noncomputable def iff (p q : V) : V := (imp L p q) ^⋏ (imp L q p)
 
 variable {L}
 
-section imp
-
 @[simp] lemma IsUFormula.imp {p q : V} :
     IsUFormula L (imp L p q) ↔ IsUFormula L p ∧ IsUFormula L q := by
   simp [Bootstrapping.imp]
@@ -352,8 +351,6 @@ lemma imp_locallyDelta0 : LocallyDelta0Function₂ (imp (V := V) L) :=
   qqOr_locallyDelta0.comp₂ (neg_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
     (LocallyDelta0Function.var 1)
 
-end imp
-
 section iff
 
 @[simp] lemma IsUFormula.iff {p q : V} :
@@ -370,8 +367,6 @@ section iff
 
 @[simp] lemma lt_iff_right (p q : V) : q < iff L p q := lt_trans (lt_or_right _ _) (lt_K!_left _ _)
 
-section
-
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (iffGraph)
 
 instance iff.defined : 𝚺ᴬ₁-Function₂ iff (V := V) L via iffGraph L :=
@@ -380,8 +375,6 @@ instance iff.defined : 𝚺ᴬ₁-Function₂ iff (V := V) L via iffGraph L :=
 instance iff.definable : 𝚺ᴬ₁-Function₂ iff (V := V) L := iff.defined.to_definable
 
 instance iff_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ iff (V := V) L := iff.definable.of_sigmaOne
-
-end
 
 end iff
 
@@ -587,7 +580,6 @@ lemma shift_neg {n p : V} (hp : IsSemiformula L n p) :
 end shift
 
 section subst
-
 
 private lemma bvarAt_locallyDelta0 :
     LocallyDelta0Function fun w : Fin 2 → V ↦
@@ -796,7 +788,6 @@ lemma qVecIter_locallyDelta0 :
       cases j using Fin.cases with
       | zero => rfl
       | succ j => exact j.elim0
-
 
 private lemma qVecIter_var_locallyDelta0 {n : ℕ} (w : V) (i : Fin n) :
     LocallyDelta0Function fun u : Fin n → V ↦ qVecIter L w (u i) :=
@@ -1354,8 +1345,6 @@ noncomputable def substs1 (t u : V) : V := subst L ?[t] u
 
 variable {L}
 
-section substs1
-
 section
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (substs1Graph)
@@ -1401,8 +1390,6 @@ lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec L j 0 w)
       substs_cons_bShift (hw.nth hi), substs_nil (hw.nth hi)]
     simp
 
-end substs1
-
 variable (L)
 
 noncomputable def free (p : V) : V := substs1 L ^&0 (shift L p)
@@ -1410,8 +1397,6 @@ noncomputable def free (p : V) : V := substs1 L ^&0 (shift L p)
 variable {L}
 
 /-! ### free function -/
-
-section free
 
 section
 
@@ -1432,8 +1417,6 @@ lemma free_locallyDelta0 : LocallyDelta0Function₁ (free (V := V) L) :=
 
 @[simp] lemma IsSemiformula.free {p : V} (hp : IsSemiformula L 1 p) : IsFormula L (free L p) :=
   IsSemiformula.substs1 (by simp) hp.shift
-
-end free
 
 section free1
 
@@ -1758,8 +1741,6 @@ end Arithmetic
 
 /-! ### Bounded universal quantifier -/
 
-section qqBall
-
 /-- `qqBall u q = ^∀ ((^#0 ^≮ u) ^⋎ q)`, the code of `∀¹[“#0 < u”] q`. -/
 noncomputable def qqBall (u q : V) : V := qqAll (qqOr (Arithmetic.qqNLT (qqBvar 0) u) q)
 
@@ -1776,6 +1757,5 @@ instance qqBall_defined :
 instance qqBall_definable (Γ m) : Γᴬ_[m + 1]-Function₂ (qqBall : V → V → V) :=
   .of_sigmaOne qqBall_defined.to_definable
 
-end qqBall
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+end ElementaryArithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic

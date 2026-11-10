@@ -17,9 +17,8 @@ public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
-
-section Prime
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 open scoped FFL.FirstOrder.Arithmetic
 
@@ -235,8 +234,6 @@ lemma exists_greatest_primePowerDivisorsLE (y T : V) :
 noncomputable def divisorUpTo (y T : V) : V :=
   Classical.choose (exists_greatest_primePowerDivisorsLE y T)
 
-section divisorUpTo
-
 variable {x y T T' o o' : V}
 
 lemma divisorUpTo_le (y T : V) : divisorUpTo y T ≤ y :=
@@ -431,8 +428,5 @@ lemma eq_of_two_mul_length_add_eq {T' p' o' : V} (hD : 0 < d) (hP : IsPrimePower
   subst hT
   exact ⟨rfl, add_left_cancel h⟩
 
-end divisorUpTo
-
-end Prime
-
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

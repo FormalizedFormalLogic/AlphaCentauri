@@ -20,7 +20,8 @@ these formulas then define the result.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -376,8 +377,6 @@ end Construction
 
 end PR
 
-section functions
-
 lemma LocallyDelta0Function.min : LocallyDelta0Function₂ (min : V → V → V) :=
   LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
 
@@ -417,6 +416,5 @@ lemma Seq.znth_seqCons_of_lt {s x i : V} (h : Seq s) (hi : i < lh s) :
 lemma Seq.znth_seqCons_lh {s x : V} (h : Seq s) : znth (s ⁀' x) (lh s) = x :=
   (h.seqCons x).znth_eq_of_mem (Seq.mem_seqCons s x)
 
-end functions
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

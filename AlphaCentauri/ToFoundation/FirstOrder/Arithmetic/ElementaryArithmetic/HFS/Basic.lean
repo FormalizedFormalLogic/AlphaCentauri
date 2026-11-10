@@ -17,7 +17,8 @@ the values.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -37,8 +38,6 @@ lemma insert_subset_insert_of_subset {a b : V} (x : V) (h : a ⊆ b) : insert x 
   · simp
   · simp [h hz]
 
-section under
-
 @[simp] lemma under_subset_under_of_le {i j : V} : under i ⊆ under j ↔ i ≤ j :=
   ⟨by intro h; by_contra hij
       have : j < i := by simpa using hij
@@ -47,10 +46,6 @@ section under
       simp only [mem_under_iff]
       intro hx
       exact lt_of_lt_of_le hx hij⟩
-
-end under
-
-section sUnion
 
 lemma sUnion_exists_unique (s : V) :
     ∃! u : V, ∀ x, (x ∈ u ↔ ∃ t ∈ s, x ∈ t) := by
@@ -100,10 +95,6 @@ instance sUnion_definable : 𝚺ᴬ₀-Function₁[V] sUnion := sUnion_defined.t
 instance sUnion_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₁[V] sUnion :=
   sUnion_definable.of_zero
-
-end sUnion
-
-section union
 
 noncomputable def union (a b : V) : V := ⋃ʰᶠ {a, b}
 
@@ -162,10 +153,6 @@ instance : Bounded₂ ((· ∪ ·) : V → V → V) := ⟨‘x y. 2 * (x + y)’
 
 @[simp] lemma union_empty_eq_left (a : V) : ∅ ∪ a = a := mem_ext <| by simp
 
-end union
-
-section sInter
-
 lemma sInter_exists_unique (s : V) :
     ∃! u : V, ∀ x, (x ∈ u ↔ s ≠ ∅ ∧ ∀ t ∈ s, x ∈ t) := by
   have : 𝚺ᴬ₀-Predicate fun x ↦ s ≠ ∅ ∧ ∀ t ∈ s, x ∈ t := by definability
@@ -188,10 +175,6 @@ lemma mem_sInter_iff {x s : V} : x ∈ ⋂ʰᶠ s ↔ s ≠ ∅ ∧ ∀ t ∈ s,
 lemma mem_sInter_iff_of_pos {x s : V} (h : s ≠ ∅) : x ∈ ⋂ʰᶠ s ↔ ∀ t ∈ s, x ∈ t := by
   simp [mem_sInter_iff, h]
 
-end sInter
-
-section inter
-
 noncomputable def inter (a b : V) : V := ⋂ʰᶠ {a, b}
 
 noncomputable scoped instance : Inter V := ⟨inter⟩
@@ -203,10 +186,6 @@ lemma inter_comm (a b : V) : a ∩ b = b ∩ a := mem_ext (by simp [and_comm])
 
 lemma inter_eq_self_of_subset {a b : V} (h : a ⊆ b) :
   a ∩ b = a := mem_ext (by simpa using fun i hi↦ h hi)
-
-end inter
-
-section product
 
 lemma product_exists_unique (a b : V) :
     ∃! u : V, ∀ x, (x ∈ u ↔ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫) := by
@@ -260,10 +239,6 @@ instance product_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 
 @[simp] lemma product_zero {a : V} : a ×ʰᶠ ∅ = ∅ := by
   refine mem_ext (fun i ↦ ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩) <;> simp_all [mem_product_iff]
-
-end product
-
-section domain
 
 lemma domain_exists_unique (s : V) :
     ∃! d : V, ∀ x, x ∈ d ↔ ∃ y, ⟪x, y⟫ ∈ s := by
@@ -348,11 +323,7 @@ lemma domain_subset_domain_of_subset {s t : V} (h : s ⊆ t) : domain s ⊆ doma
       intro h x hx
       exact h (π₁ x) (π₂ x) (by simpa using hx), by rintro rfl; simp⟩
 
-end domain
-
 /-! ### Range -/
-
-section range
 
 lemma range_exists_unique (s : V) :
     ∃! r : V, ∀ y, y ∈ r ↔ ∃ x, ⟪x, y⟫ ∈ s := by
@@ -364,7 +335,6 @@ lemma range_exists_unique (s : V) :
   exact finite_comprehension!
     this
     (⟨s, fun y ↦ by rintro ⟨x, hx⟩; exact lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hx)⟩)
-
 
 noncomputable def range (s : V) : V := Classical.choose! (range_exists_unique s)
 
@@ -409,11 +379,7 @@ instance range_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 
 instance : Bounded₁ (range : V → V) := ⟨‘x. 2 * x’, fun _ ↦ by simp⟩
 
-end range
-
 /-! ### Disjoint -/
-
-section disjoint
 
 def Disjoint (s t : V) : Prop := s ∩ t = ∅
 
@@ -429,15 +395,9 @@ lemma Disjoint.symm {s t : V} (h : Disjoint s t) : Disjoint t s := by
 @[simp] lemma Disjoint.singleton_iff {a s : V} : Disjoint ({a} : V) s ↔ a ∉ s := by
   simp [Disjoint, isempty_iff]
 
-end disjoint
-
 /-! ### Mapping -/
 
-section mapping
-
 def IsMapping (m : V) : Prop := ∀ x ∈ domain m, ∃! y, ⟪x, y⟫ ∈ m
-
-section
 
 private lemma isMapping_iff {m : V} :
     IsMapping m ↔ ∃ d ≤ 2 * m, d = domain m ∧ ∀ x ∈ d, ∃ y < m,
@@ -459,8 +419,6 @@ instance isMapping_definable : 𝚺ᴬ₀-Predicate[V] IsMapping :=
 instance isMapping_definable'
     (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) : ℌ-Predicate[V] IsMapping :=
   isMapping_definable.of_zero
-
-end
 
 lemma IsMapping.get_exists_uniq {m : V} (h : IsMapping m) {x : V} (hx : x ∈ domain m) :
     ∃! y, ⟪x, y⟫ ∈ m := h x hx
@@ -572,11 +530,7 @@ instance IsMapping.surjective_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, 
 
 @[simp] lemma IsMapping.surjective_empty : IsMapping.Surjective (∅ : V) := by intro y; simp
 
-end mapping
-
 /-! ### Restriction of mapping -/
-
-section restriction
 
 lemma restr_exists_unique (f s : V) :
     ∃! g : V, ∀ x, (x ∈ g ↔ x ∈ f ∧ π₁ x ∈ s) := by
@@ -609,10 +563,6 @@ lemma domain_restr (f s : V) : domain (f ↾ s) = domain f ∩ s :=
 lemma domain_restr_of_subset_domain {f s : V} (h : s ⊆ domain f) : domain (f ↾ s) = s := by
   simp [domain_restr, inter_comm, inter_eq_self_of_subset h]
 
-end restriction
-
-section function
-
 def IsMapping.IsFunction (f : V) : Prop := IsMapping f ∧ f ⊆ domain f ×ʰᶠ range f
 
 set_option linter.flexible false in
@@ -643,8 +593,6 @@ instance IsMapping.isFunction_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, 
     ℌ-Predicate[V] IsMapping.IsFunction :=
   IsMapping.isFunction_definable.of_zero
 
-end function
-
 /-- Induction on $\Delta_0$ predicates along insertion of an element. -/
 @[elab_as_elim]
 theorem insert_induction {P : V → Prop} (hP : 𝚺ᴬ₀-Predicate P)
@@ -657,8 +605,6 @@ theorem insert_induction {P : V → Prop} (hP : 𝚺ᴬ₀-Predicate P)
     · exact hempty
     · simpa [insert_remove hx] using
         hinsert x (bitRemove x s) (by simp) (IH _ (bitRemove_lt_of_mem hx))
-
-section fstIdx
 
 noncomputable def fstIdx (p : V) : V := π₁ (p - 1)
 
@@ -673,10 +619,6 @@ instance fstIdx_definable : 𝚺ᴬ₀-Function₁[V] fstIdx := fstIdx_defined.t
 instance fstIdx_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     Γ-Function₁[V] fstIdx := fstIdx_definable.of_zero
 
-end fstIdx
-
-section sndIdx
-
 noncomputable def sndIdx (p : V) : V := π₂ (p - 1)
 
 @[simp] lemma sndIdx_le_self (p : V) : sndIdx p ≤ p :=
@@ -690,6 +632,5 @@ instance sndIdx_definable : 𝚺ᴬ₀-Function₁[V] sndIdx := sndIdx_defined.t
 instance sndIdx_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     Γ-Function₁[V] sndIdx := sndIdx_definable.of_zero
 
-end sndIdx
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

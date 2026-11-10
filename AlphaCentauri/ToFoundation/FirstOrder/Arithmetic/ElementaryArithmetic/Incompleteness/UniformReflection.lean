@@ -17,7 +17,8 @@ theories `T` whose axioms are locally $\Delta_0$ in the model.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
 
 open _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
 
@@ -31,4 +32,5 @@ lemma models_uniformReflectionSchema_iff (T : ArithmeticTheory) [T.Δ₁] [Local
           V ⊧/v φ := by
   simp [Theory.uniformReflectionSchema, Sentence.quote_eq_encode, numeral_eq_natCast]
 
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

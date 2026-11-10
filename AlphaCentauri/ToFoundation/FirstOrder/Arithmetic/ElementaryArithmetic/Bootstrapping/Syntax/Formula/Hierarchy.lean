@@ -23,7 +23,8 @@ Foundation's `qqQuantDef`, `qqToPrenexDef`, `IsHierarchyF.blueprint`, `isHierarc
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic.Bootstrapping
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isHierarchy isPrenexHierarchy)
 
@@ -193,10 +194,6 @@ instance (Γ : Polarity) {P : V → Prop} {θ : 𝚫ᴬ₁.Semisentence 1}
     rintro C _ x (h | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨p₁, p₂, hp, hq, rfl⟩ | ⟨u, q, ht, hq, rfl⟩
       | ⟨u, q, ht, hq, rfl⟩ | ⟨q, hq, rfl⟩) <;>
       grind [lt_K!_left, lt_K!_right, lt_or_left, lt_or_right, lt_q_qqBall, lt_q_qqBex, lt_qqQuant]
-
-end IsHierarchyF
-
-namespace IsHierarchyF
 
 -- The predicate of each level is bundled with its definability and local $\Delta_0$-ness, which
 -- the construction of the next level depends on.
@@ -447,8 +444,6 @@ end isHierarchy
 
 /-! ## Internal prenex classes -/
 
-section isPrenexHierarchy
-
 /-- The predicate that `p` is the code of a formula consisting of `n` alternating blocks of
 unbounded quantifiers of polarity `Γ` first, followed by a bounded formula. -/
 def IsPrenexHierarchy : Polarity → ℕ → V → Prop
@@ -506,6 +501,5 @@ lemma IsPrenexHierarchy.neg (hp : IsUFormula ℒₒᵣ p) (h : IsPrenexHierarchy
     have hq' : IsUFormula ℒₒᵣ q := isUFormula_qqQuant.mp hp
     exact ⟨neg ℒₒᵣ q, neg_qqQuant hq', ih hq' hq⟩
 
-end isPrenexHierarchy
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+end ElementaryArithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic

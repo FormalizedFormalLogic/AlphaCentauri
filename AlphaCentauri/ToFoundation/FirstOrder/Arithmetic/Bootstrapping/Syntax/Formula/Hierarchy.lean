@@ -15,15 +15,14 @@ decompositions `qqToPrenex Γ s θ` commute with negation, substitution and shif
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Arithmetic (qqNLT)
 
 /-! ## Substitution -/
-
-section subst
 
 lemma IsUFormula.rel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^rel k r v)) :
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r v = t ^= u) ∨
@@ -139,8 +138,6 @@ lemma IsBounded.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     obtain ⟨ht', hq⟩ := hpq.of_qqBex ht
     rw [subst_qqBex hw ht' hq.isUFormula]
     exact IsBounded.bex (hw.termSubst ht').isUTerm (ih (n + 1) (m + 1) _ hw.qVec hq)
-
-end subst
 
 /-! ## Formulas of complexity zero -/
 
@@ -311,4 +308,5 @@ lemma IsPrenexHierarchy.of_subst {Γ : Polarity} {s : ℕ} {n m w p : V}
     · obtain ⟨p₁, rfl, hp₁⟩ := exists_eq_all_of_subst_eq hp.isUFormula hq
       exact ⟨p₁, rfl, ih hw.qVec (IsSemiformula.all.mp hp) (hp₁ ▸ hqs)⟩
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

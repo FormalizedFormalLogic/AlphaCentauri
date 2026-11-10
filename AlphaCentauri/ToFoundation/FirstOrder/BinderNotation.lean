@@ -11,7 +11,8 @@ the power of `t` by the numeral `n`, as `t ^' 3` is for a numeral literal.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.BinderNotation
+namespace FFL.FirstOrder
+namespace BinderNotation
 
 open Semiterm
 
@@ -21,4 +22,5 @@ macro_rules
   | `(⤫term(lit)[ $binders* | $fbinders* | $e ^' $n:ident ]) =>
     `((Semiterm.Operator.npow _ $n).operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
 
-end FFL.FirstOrder.BinderNotation
+end BinderNotation
+end FFL.FirstOrder

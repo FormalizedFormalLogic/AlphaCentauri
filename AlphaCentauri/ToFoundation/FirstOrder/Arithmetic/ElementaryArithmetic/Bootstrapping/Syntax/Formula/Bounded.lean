@@ -21,7 +21,8 @@ Foundation's `qqBexDef`, `IsBoundedF.blueprint` and `isBounded`.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic.Bootstrapping
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isBounded)
 
@@ -87,8 +88,6 @@ lemma shift_qqBex : shift ℒₒᵣ (qqBex u q) = qqBex (termShift ℒₒᵣ u) 
 end qqBex
 
 /-! ## Internal $\Delta_0$ predicate `IsBounded` -/
-
-section isBounded
 
 namespace IsBoundedF
 
@@ -361,6 +360,5 @@ lemma IsBounded.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     simpa [shift_qqBex ht.termBShift hq, ← termBShift_termShift ht.isSemiterm]
       using IsBounded.bex ht.termShift (ih hq)
 
-end isBounded
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+end ElementaryArithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic

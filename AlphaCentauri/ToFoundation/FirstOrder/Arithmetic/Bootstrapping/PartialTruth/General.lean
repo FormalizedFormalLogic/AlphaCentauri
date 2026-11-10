@@ -19,15 +19,14 @@ and give the same value to every decomposition `qqToPrenex Γ s θ` of the same 
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open Arithmetic (numeral numeral_add_two qqNLT)
 
 /-! ## Values of substituted terms -/
-
-section termVal
 
 lemma termVal_termSubst {e n m w t : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     (ht : IsSemiterm ℒₒᵣ n t) :
@@ -77,8 +76,6 @@ lemma termValVec_cons {e k t v : V} (ht : IsUTerm ℒₒᵣ t) (hv : IsUTermVec 
     · simp
     · rw [numeral_add_two, termVal_add (Arithmetic.numeral_uterm _)
         (Arithmetic.one_semiterm (n := 0)).isUTerm, ih, termVal_one]
-
-end termVal
 
 /-! ## $\Delta_0$ satisfaction -/
 
@@ -306,4 +303,5 @@ lemma iff_of_qqToPrenex_eq (heq : qqToPrenex Γ s θ = qqToPrenex Γ' s' θ') (h
 
 end PrenexSatisfied
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

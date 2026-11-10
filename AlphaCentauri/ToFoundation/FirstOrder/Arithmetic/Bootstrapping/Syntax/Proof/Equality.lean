@@ -17,13 +17,12 @@ symmetry, transitivity and the congruence of function and relation symbols from 
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Equality -/
-
-section equality
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq]
 
@@ -201,6 +200,5 @@ lemma tprovable_rel_congr_imp [𝗘𝗤 L ⪯ S] {k : ℕ} (R : L.Rel k) (s u : 
   rw [subst_append_addCast, subst_append_addNat] at h₁
   exact h₁
 
-end equality
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

@@ -17,7 +17,8 @@ the induction on a numeral of a formula whose base case and induction step are t
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
@@ -254,8 +255,6 @@ lemma derivationOf_modusPonensCode {d₁ d₂ a b : V} (ha : IsFormula L a) (hb 
 
 end codes
 
-section size
-
 variable {n : V}
 
 private lemma le_exp_exp_add {a : V} (k : V) (h : a ≤ Exp.exp (Exp.exp n)) :
@@ -394,11 +393,7 @@ lemma modusPonensCode_le_exp_exp {n d₁ d₂ a b : V} (hn : 2 ≤ n) (hN : modu
     (le_trans hwk₁ (exp_exp_le_of_le (by simp [add_assoc]))) hand'
   exact le_trans this (exp_exp_le_of_le (le_of_eq (by norm_num [add_assoc])))
 
-end size
-
 end
-
-section numerals
 
 open FFL.FirstOrder Arithmetic
 
@@ -639,6 +634,5 @@ theorem provable_substNumerals_of_provable_zero_of_provable_succ [𝗣𝗔⁻ �
     (fun y ↦ (isSemiformula_natCast_quote φ).subst (hW y)) he hd₁
     (fun _ hy ↦ substs1_subst_qVec_numerals_imp φ p hy) y
 
-end numerals
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+end ElementaryArithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic

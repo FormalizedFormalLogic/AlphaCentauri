@@ -14,7 +14,8 @@ and of every large enough level.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Bounding
+namespace FFL.FirstOrder
+namespace Bounding
 
 universe u
 
@@ -118,4 +119,5 @@ theorem exists_prenexHierarchy_eval_iff (φ : Semiformula L ξ n) :
         Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ :=
   hasPrenexNormalForm φ
 
-end FFL.FirstOrder.Bounding
+end Bounding
+end FFL.FirstOrder

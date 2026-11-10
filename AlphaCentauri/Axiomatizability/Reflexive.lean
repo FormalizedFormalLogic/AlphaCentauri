@@ -62,7 +62,7 @@ theorem ISigma.provable_con_ISigma1 : 𝗜𝚺 2 ⊢ 𝗜𝚺₁.consistent.val 
   intro V _ _
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := mod_IBroadSigma_of_le (s₂ := 2) (by simp)
   exact (Bootstrapping.consistent.defined _).mpr <|
-    Bootstrapping.consistent_ISigma (k := 1) le_rfl le_rfl
+    Bootstrapping.consistent_ISigma (k := 1) le_rfl
 
 open Bootstrapping in
 /-- In a model of `𝗣𝗔`, a finite set of true sentences is consistent.
@@ -79,7 +79,6 @@ private lemma Peano.consistent_of_models {V : Type*} [ORingStructure V] [V↓[�
   have hN : ∀ σ ∈ l, σ.complexity ≤ N := fun σ hσ ↦
     Finset.le_sup (f := fun σ : ArithmeticSentence ↦ σ.complexity) (by simpa [l] using hσ)
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(N + 1) := ModelsTheory.of_provably_subtheory V _ 𝗣𝗔 inferInstance
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2 := ModelsTheory.of_provably_subtheory V _ 𝗣𝗔 inferInstance
   obtain ⟨σ, hσ, hmodel⟩ := hd.exists_models (N := N) fun r hr ↦ by
     rcases mem_bitInsert_iff.mp hr with rfl | hr
     · exact ⟨⊥, by simp, rfl⟩

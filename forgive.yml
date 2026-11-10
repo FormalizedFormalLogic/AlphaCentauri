@@ -98,9 +98,6 @@ declaration:
     forgive:
       # Quoted by Bek99 from Beklemishev 1997 without proof.
       - FFL.FirstOrder.Arithmetic.uniformReflection_of_parameterFreeInduction
-  FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
   FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
@@ -184,15 +181,12 @@ declaration:
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:
     forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
       - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.ISigma1_equiv_uniformReflection_ElementaryArithmetic:
     forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
       - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.ISigma2_equiv_uniformReflection_ElementaryArithmetic:
     forgive:
-      - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
       - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.exists_prime_gt:
     forgive:

@@ -481,6 +481,18 @@ Moh11:
       name: Cambridge University Press
       location: Cambridge
 
+MV20:
+  type: Article
+  title: Interpretability logics and generalized {Veltman} semantics
+  author: ["Mikec, Luka", "Vuković, Mladen"]
+  date: 2020
+  serial-number:
+    arxiv: "1907.03849"
+  url: https://arxiv.org/abs/1907.03849
+  parent:
+    type: Repository
+    title: arXiv
+
 PWW88:
   type: Article
   title: Provability of the pigeonhole principle and the existence of infinitely many primes

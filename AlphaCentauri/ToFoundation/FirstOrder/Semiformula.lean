@@ -1,11 +1,17 @@
 module
 
+public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
+public import Foundation.FirstOrder.Syntax.Classical.Rew
 public import Foundation.FirstOrder.Tarski.Basic
 
 /-!
-# Substitution against a rewriting
+# Semiformulas and their rewritings
 
-Commutation and congruence lemmas for substitutions and rewritings.
+Companion of Foundation's `Semiformula` and `Rew` (`Syntax/Classical/Rew.lean`): commutation and
+congruence lemmas for substitutions and rewritings, quantifier-rank invariance, distinctness lemmas
+and constructor equations for `Semiformula`, formulas with `ℕ`-indexed free variables read as
+semisentences, and `t ^' n` in the term notation of `“…”`, the power of `t` by the numeral `n` for
+a natural number `n` given by an identifier.
 -/
 
 @[expose] public section
@@ -68,7 +74,7 @@ lemma val_subst_congr {M : Type*} [Tarski.Structure L M] {ε : ξ → M} {w w' :
     (h : ∀ i, Semiterm.val ![] ε (w i) = Semiterm.val ![] ε (w' i)) (t : Semiterm L ξ n) :
     Semiterm.val ![] ε (Rew.subst w t) = Semiterm.val ![] ε (Rew.subst w' t) := by
   simp only [Semiterm.val_substs]
-  exact congrArg (Semiterm.val · ε t) (funext fun i => h i)
+  exact congrArg (Semiterm.val · ε t) (funext h)
 
 lemma rewrite_subst_shift_eq (f : ℕ → SyntacticTerm L) (t : SyntacticTerm L)
     (φ : Semiformula L ℕ 1) :
@@ -116,7 +122,47 @@ end FFL.FirstOrder.Rew
 
 namespace FFL.FirstOrder.Semiformula
 
-variable {L : Language} {m : ℕ}
+variable {L : Language} {ξ : Type*} {n : ℕ}
+
+section
+variable {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ}
+
+@[simp] lemma qr_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : (ω ▹ φ).qr = φ.qr := by
+  induction φ using Semiformula.rec' generalizing n₂ <;> simp [*]
+
+end
+
+@[simp] lemma qr_substs (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) : (φ/[t]).qr = φ.qr :=
+  qr_rew _ φ
+
+@[simp, grind .] lemma ne_and_left (φ ψ : Semiformula L ξ n) : φ ≠ φ ⋏ ψ :=
+  ne_of_ne_complexity (by simp)
+
+@[simp, grind .] lemma ne_and_right (φ ψ : Semiformula L ξ n) : ψ ≠ φ ⋏ ψ :=
+  ne_of_ne_complexity (by simp)
+
+@[simp, grind .] lemma all_ne_subst (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) : φ/[t] ≠ ∀¹ φ :=
+  ne_of_ne_complexity (by simp)
+
+attribute [grind .] ne_or_left ne_or_right ex_ne_subst
+
+@[grind =] lemma verum_eq : (⊤ : Semiformula L ξ n) = Semiformula.verum := rfl
+
+@[grind =] lemma falsum_eq : (⊥ : Semiformula L ξ n) = Semiformula.falsum := rfl
+
+@[grind =] lemma and_eq (φ ψ : Semiformula L ξ n) : φ ⋏ ψ = Semiformula.and φ ψ := rfl
+
+@[grind =] lemma or_eq (φ ψ : Semiformula L ξ n) : φ ⋎ ψ = Semiformula.or φ ψ := rfl
+
+@[grind =] lemma all_eq (φ : Semiformula L ξ (n + 1)) : ∀¹ φ = Semiformula.all φ := rfl
+
+@[grind =] lemma exs_eq (φ : Semiformula L ξ (n + 1)) : ∃¹ φ = Semiformula.exs φ := rfl
+
+attribute [grind =] Multiset.mem_atom_iff
+
+section
+
+variable {m : ℕ}
 
 /-- Substituting a variable that the formula avoids, and then renaming it to the new bound
 variable, is `Rewriting.free`. -/
@@ -143,4 +189,74 @@ lemma map_rewriteMap_eq_shifts (Γ : Multiset (Semiformula L ℕ 0))
     Γ.map (fun φ ↦ (@Rew.rewriteMap L ℕ ℕ 0 fun x ↦ if x = m then 0 else x + 1) ▹ φ) = Γ⁺ :=
   Multiset.map_congr rfl fun φ hφ ↦ rewriteMap_eq_shift φ (h φ hφ)
 
+end
+
+section Fvar
+
+variable {k : ℕ}
+
+/-- The substitution sending the bound variables of `φ` to `b` and the free variables below
+`φ.fvSup` to the remaining bound variables. -/
+noncomputable def paramSubst [NeZero k] (φ : Semiformula L ℕ k)
+    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Rew L ℕ k Empty (φ.fvSup + k) :=
+  haveI : NeZero (φ.fvSup + k) := ⟨by have := Nat.pos_of_ne_zero (NeZero.ne k); omega⟩
+  Rew.bind b fun x ↦ if h : x < φ.fvSup then #⟨x + k, by omega⟩ else #0
+
+/-- `φ`, viewed as a semisentence whose extra bound variables are its free variables, with its
+own bound variables placed by `b`. -/
+noncomputable def toSemisentence [NeZero k] (φ : Semiformula L ℕ k)
+    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Semisentence L (φ.fvSup + k) :=
+  paramSubst φ b ▹ φ
+
+variable {M : Type*} [Tarski.Structure L M]
+
+lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
+    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) {v : Fin (φ.fvSup + k) → M} {w : Fin k → M}
+    {f : ℕ → M} (hb : ∀ i, Semiterm.val v Empty.elim (b i) = w i)
+    (hv : ∀ y : Fin φ.fvSup, v ⟨y + k, by omega⟩ = f y) :
+    M ⊧/v (φ.toSemisentence b) ↔ φ.Eval w f := by
+  rw [toSemisentence, Semiformula.eval_rew]
+  have hbv : (Semiterm.val v Empty.elim ∘ φ.paramSubst b ∘ Semiterm.bvar) = w := funext hb
+  rw [hbv]
+  apply Semiformula.eval_iff_of_funEqOn φ
+  intro y hy
+  have hlt : y < φ.fvSup := Semiformula.lt_fvSup_of_fvar? hy
+  simp [paramSubst, hlt, hv ⟨y, hlt⟩]
+
+/-- `eval_toSemisentence` at `k = 1`, with `b` placing the bound variable at `#0`. -/
+lemma eval_toSemisentence_one (φ : Semiformula L ℕ 1) (x : M)
+    (f : ℕ → M) :
+    M ⊧/(x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#0]) ↔ φ.Eval ![x] f :=
+  eval_toSemisentence ![#0]
+    (fun i ↦ by induction i using Fin.cases with | zero => simp | succ i => exact i.elim0)
+    (fun _ ↦ by simp)
+
+/-- `eval_toSemisentence` at `k = 2`, with `b` placing the two bound variables at `#1`, `#0` (the
+witness-then-bound order). -/
+lemma eval_toSemisentence_two (φ : Semiformula L ℕ 2) (x y : M)
+    (f : ℕ → M) :
+    M ⊧/(y :> x :> fun i : Fin φ.fvSup ↦ f i) (φ.toSemisentence ![#1, #0]) ↔ φ.Eval ![x, y] f :=
+  eval_toSemisentence ![#1, #0]
+    (fun i ↦ by
+      induction i using Fin.cases with
+      | zero => simp
+      | succ i => induction i using Fin.cases with
+        | zero => simp
+        | succ i => exact i.elim0)
+    (fun _ ↦ by simp)
+
+end Fvar
+
 end FFL.FirstOrder.Semiformula
+
+namespace FFL.FirstOrder.BinderNotation
+
+open Semiterm
+
+syntax:70 first_order_term " ^' " ident : first_order_term
+
+macro_rules
+  | `(⤫term(lit)[ $binders* | $fbinders* | $e ^' $n:ident ]) =>
+    `((Semiterm.Operator.npow _ $n).operator ![⤫term(lit)[ $binders* | $fbinders* | $e ]])
+
+end FFL.FirstOrder.BinderNotation

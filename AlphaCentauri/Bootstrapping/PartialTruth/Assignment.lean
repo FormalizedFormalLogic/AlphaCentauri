@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
 public import AlphaCentauri.ToFoundation.Syntax
-public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
 public import AlphaCentauri.ToFoundation.PartialTruth
 
 /-!

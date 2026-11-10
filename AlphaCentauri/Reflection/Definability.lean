@@ -3,8 +3,8 @@ module
 public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 public import Foundation.FirstOrder.Incompleteness.Definability
 public import AlphaCentauri.ToFoundation.Syntax
-public import AlphaCentauri.ToFoundation.Coding
-public import AlphaCentauri.ToFoundation.Rew
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 
 /-!
 # $\Delta_1$ presentation of the uniform reflection schema

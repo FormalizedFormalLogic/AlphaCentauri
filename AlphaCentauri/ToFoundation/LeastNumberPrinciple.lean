@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Schemata.BoundedInduction
-public import AlphaCentauri.ToFoundation.BinderNotation
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import AlphaCentauri.ToMathlib.OpenPredicate
 public import AlphaCentauri.ToMathlib.RingOfDifferences
 

@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Model.NonnegativePart
-public import AlphaCentauri.ToFoundation.OpenFormulaDegree
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenFormula
 public import AlphaCentauri.ToMathlib.HahnSeries
 
 /-!

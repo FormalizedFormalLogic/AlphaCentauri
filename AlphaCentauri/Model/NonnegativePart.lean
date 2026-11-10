@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Schemata.ZRing
-public import AlphaCentauri.ToFoundation.OpenPredicate
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenFormula
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Mathlib.Algebra.Order.Group.MinMax
 public import Mathlib.Algebra.Order.Nonneg.Ring

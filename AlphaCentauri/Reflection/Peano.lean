@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Reflection.ISigma
-public import AlphaCentauri.ToFoundation.PrenexNormalForm
+public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 
 /-!
 # `𝗣𝗔` proves the local reflection principle of `𝗜𝚺 n`

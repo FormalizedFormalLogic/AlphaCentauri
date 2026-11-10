@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Interpretability.Basic
-public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
 public import AlphaCentauri.ToFoundation.Syntax
 
 /-!

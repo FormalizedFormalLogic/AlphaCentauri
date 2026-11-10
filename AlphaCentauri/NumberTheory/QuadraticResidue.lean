@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 public import Mathlib.Data.Nat.Prime.Defs
 public import AlphaCentauri.Schemata.BoundedInduction
-public import AlphaCentauri.ToFoundation.BinderNotation
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 
 /-!
 # Quadratic residues in $\mathsf{I}\mathsf{E}_1$ and $\mathsf{I}\Delta_0$

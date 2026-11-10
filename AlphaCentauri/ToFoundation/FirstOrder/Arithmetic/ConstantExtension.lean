@@ -5,9 +5,10 @@ public import Foundation.FirstOrder.Tarski.Eq
 
 /-! # The language of ordered rings with finitely many extra constants
 
-`Language.oringConst k` is `ℒₒᵣ` together with `k` new constant symbols. An `ℒₒᵣ`-formula in `k`
-free variables becomes a sentence of that language by filling its variables with the constants,
-and a model of `ℒₒᵣ` becomes a model of it by choosing a `k`-tuple.
+Extension of Foundation's `ℒₒᵣ` (`Arithmetic/Basic.lean`). `Language.oringConst k` is `ℒₒᵣ`
+together with `k` new constant symbols. An `ℒₒᵣ`-formula in `k` free variables becomes a sentence
+of that language by filling its variables with the constants, and a model of `ℒₒᵣ` becomes a model
+of it by choosing a `k`-tuple.
 -/
 
 @[expose] public section

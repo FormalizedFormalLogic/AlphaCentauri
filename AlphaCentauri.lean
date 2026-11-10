@@ -72,6 +72,7 @@ public import AlphaCentauri.InterpretabilityLogic.Sequent
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
 public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILM
+public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILMinus
 public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILP
 public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILW
 public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILWStar

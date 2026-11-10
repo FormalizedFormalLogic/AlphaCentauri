@@ -356,6 +356,12 @@ instance : (ILMinusJ1J5 : Logic α) ⪯ ILMinusJ1J4PlusJ5 :=
 instance : (ILMinusJ4PlusJ5 : Logic α) ⪯ ILMinusJ1J4PlusJ5 :=
   weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
 
+instance : (ILMinusJ1 : Logic α) ⪯ ILMinusJ1J4PlusJ5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ5 : Logic α) ⪯ ILMinusJ1J4PlusJ5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
 instance : (ILMinusJ2 : Logic α) ⪯ ILMinusJ2J4Plus :=
   weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
 

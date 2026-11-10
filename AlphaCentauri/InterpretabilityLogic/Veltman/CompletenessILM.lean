@@ -751,43 +751,21 @@ instance [Adequate Φ] : (countermodelM Φ).IsIL where
   rel_of_s_right h := h.1.1.2
   s_refl h := by
     constructor;
-    · constructor;
-      · constructor;
-        · exact h;
-        · exact h;
-      · intro _ h₁ h₂;
-        constructor;
-        · exact h₁;
-        · exact h₂;
+    · exact S.refl Logic.ofAxioms.rhd_refl h;
     · constructor;
       · exact List.prefix_refl _;
       · intro _ h;
         exact h;
   s_trans h₁ h₂ := by
     constructor;
-    · constructor;
-      · constructor;
-        · exact h₁.1.1.1;
-        · exact h₂.1.1.2;
-      · intro C h₃ h₄;
-        have h := h₁.1.2 C h₃ h₄;
-        exact h₂.1.2 C h.1 h.2;
+    · exact h₁.1.trans h₂.1;
     · constructor;
       · exact h₁.2.1.trans h₂.2.1;
       · intro _ h;
         exact h₂.2.2 (h₁.2.2 h);
   s_of_rel h₁ h₂ := by
     constructor;
-    · constructor;
-      · constructor;
-        · exact h₁;
-        · constructor;
-          · exact h₁.1.trans h₂.1;
-          · exact h₁.2.trans h₂.2;
-      · intro _ h₃ h₄;
-        constructor;
-        · exact h₃.trans h₂.2;
-        · exact h₄.trans_successor h₂.1;
+    · exact S.of_rel h₁ h₂;
     · constructor;
       · exact h₂.2;
       · intro _ h;
@@ -855,7 +833,7 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
       obtain ⟨v, hS, hv⟩ := h _ hR ((ihB hB).mpr hBΔ);
       have hCC : C ▷ C ∈ x.set :=
         (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofAxioms.rhd_refl;
-      exact (hS.1.2 C (List.prefix_refl _) hΔ).2.not_mem hCC <| (ihC hC).mp hv;
+      exact (hS.1.2 C (List.prefix_refl _) hΔ (hΔ.box_neg_mem hCC)).2.2.1 <| (ihC hC).mp hv;
     · intro h u Rxu hu;
       replace hu := (ihB hB).mp hu;
       have hF : ∃ F, IsRhdOperand Φ F ∧ CriticalSuccessor F x.set u.set ∧
@@ -883,17 +861,13 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
       use u.withSet Θ hbox;
       constructor;
       · constructor;
-        · constructor;
-          · constructor;
-            · exact Rxu;
-            · constructor;
-              · exact hΘ.toSuccessor;
-              · exact Rxu.2;
-          · intro F' hpre' hcrit';
-            obtain rfl := huniq F' hpre' hcrit';
-            constructor;
-            · exact hpre';
-            · exact hΘ;
+        · apply S.of_rhd_refl (y := u.withSet Θ hbox) Logic.ofAxioms.rhd_refl Rxu
+            ⟨hΘ.toSuccessor, Rxu.2⟩;
+          intro F' hpre' hcrit';
+          obtain rfl := huniq F' hpre' hcrit';
+          constructor;
+          · exact hpre';
+          · exact hΘ;
         · constructor;
           · exact List.prefix_refl _;
           · exact hbox;

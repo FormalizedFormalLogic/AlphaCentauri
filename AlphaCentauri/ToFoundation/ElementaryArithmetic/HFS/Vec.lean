@@ -1268,6 +1268,15 @@ end vecSubset
 
 section repeatVec
 
+lemma repeatVec.bound_locallyDelta0 : LocallyDelta0Function fun v : Fin (1 + 1) → V ↦
+    Exp.exp (Exp.exp (v 0 + v 0 + v 1 + 3)) + 1 :=
+  LocallyDelta0Function.add_one <|
+    LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
+      LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.add.comp₂
+        (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.var 0)
+          (LocallyDelta0Function.var 0)) (LocallyDelta0Function.var 1))
+        (LocallyDelta0Function.const 3)
+
 noncomputable def repeatVec.construction :
     PR.Construction V Arithmetic.repeatVec.blueprint where
   zero := fun _ ↦ 0
@@ -1289,19 +1298,10 @@ noncomputable def repeatVec.construction :
   bound_monotone _ _ _ h :=
     add_le_add (exp_monotone_le.mpr (exp_monotone_le.mpr
       (add_le_add (add_le_add (add_le_add h h) le_rfl) le_rfl))) le_rfl
-  bound_locallyDelta0 := LocallyDelta0Function.add_one <|
-    LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
-      LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.add.comp₂
-        (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.var 0)
-          (LocallyDelta0Function.var 0)) (LocallyDelta0Function.var 1))
-        (LocallyDelta0Function.const 3)
-  inv_locallyDelta0 := LocallyDelta0.lt (LocallyDelta0Function.var (V := V) 0) <|
-    LocallyDelta0Function.add_one <|
-      LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
-        LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.add.comp₂
-          (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.var 1)
-            (LocallyDelta0Function.var 1)) (LocallyDelta0Function.var 2))
-          (LocallyDelta0Function.const 3)
+  bound_locallyDelta0 := repeatVec.bound_locallyDelta0
+  inv_locallyDelta0 := PR.lt_bound_locallyDelta0
+    (bound := fun (p : Fin 1 → V) i ↦ Exp.exp (Exp.exp (i + i + p 0 + 3)) + 1)
+    repeatVec.bound_locallyDelta0
 
 /-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0` -/
 noncomputable def repeatVec (x k : V) : V := repeatVec.construction.result ![x] k

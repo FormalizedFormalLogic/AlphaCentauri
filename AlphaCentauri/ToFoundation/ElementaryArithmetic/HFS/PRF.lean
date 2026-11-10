@@ -30,6 +30,12 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 namespace PR
 
+/-- The default invariant `z < bound v i` is locally $\Delta_0$. -/
+lemma lt_bound_locallyDelta0 {k : ℕ} {bound : (Fin k → V) → V → V}
+    (h : LocallyDelta0Function fun v : Fin (k + 1) → V ↦ bound (v ·.succ) (v 0)) :
+    LocallyDelta0 fun w : Fin (k + 2) → V ↦ w 0 < bound (w ·.succ.succ) (w 1) :=
+  LocallyDelta0.lt (LocallyDelta0Function.var 0) (h.retraction Fin.succ)
+
 variable (V)
 
 /-- A primitive recursion in a model of $\mathsf{EA}$, with a monotone bound on its values. -/
@@ -52,13 +58,6 @@ structure Recursion (k : ℕ) where
   lt_bound_of_inv : ∀ v i z, inv v i z → z < bound v i := by intro _ _ _ h; exact h
   zero_lt_bound : ∀ v, inv v 0 (zero v)
   succ_lt_bound : ∀ v i z, inv v i z → inv v (i + 1) (succ v i z)
-
-variable {V} in
-/-- The default invariant `z < bound v i` is locally $\Delta_0$. -/
-lemma Recursion.lt_bound_locallyDelta0 {k : ℕ} {bound : (Fin k → V) → V → V}
-    (h : LocallyDelta0Function fun v : Fin (k + 1) → V ↦ bound (v ·.succ) (v 0)) :
-    LocallyDelta0 fun w : Fin (k + 2) → V ↦ w 0 < bound (w ·.succ.succ) (w 1) :=
-  LocallyDelta0.lt (LocallyDelta0Function.var 0) (h.retraction Fin.succ)
 
 /-- A primitive recursion whose functions are defined by the formulas of a blueprint. -/
 structure Construction {k : ℕ} (p : Arithmetic.PR.Blueprint k) extends Recursion V k where

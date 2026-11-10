@@ -49,7 +49,7 @@ noncomputable def qqAlls.construction : PR.Construction V blueprint where
     add_le_add (exp_monotone_le.mpr (exp_monotone_le.mpr
       (add_le_add (add_le_add (add_le_add le_rfl h) h) le_rfl))) le_rfl
   bound_locallyDelta0 := qqAlls.bound_locallyDelta0
-  inv_locallyDelta0 := PR.Recursion.lt_bound_locallyDelta0
+  inv_locallyDelta0 := PR.lt_bound_locallyDelta0
     (bound := fun (p : Fin 1 → V) k ↦ Exp.exp (Exp.exp (p 0 + k + k + 2)) + 1)
     qqAlls.bound_locallyDelta0
   zero_lt_bound p := lt_succ_iff_le.mpr (le_exp_exp (by simp))

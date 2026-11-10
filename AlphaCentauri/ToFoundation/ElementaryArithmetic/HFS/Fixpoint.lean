@@ -126,6 +126,10 @@ lemma succ_locallyDelta0 :
     intro w hw
     exact le_trans (c.succ_lt_exp _ _).le (exp_monotone_le.mpr (by simpa using hw 1))
 
+lemma stageBound_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin (k + 1) → V ↦ Exp.exp (w 0) := by
+  simpa using LocallyDelta0Function.exp.retraction (fun _ : Fin 1 ↦ (0 : Fin (k + 1)))
+
 /-- The stages of the construction, as a bounded primitive recursion. -/
 noncomputable def prConstruction : PR.Construction V φ.prBlueprint where
   zero := fun _ ↦ ∅
@@ -138,10 +142,9 @@ noncomputable def prConstruction : PR.Construction V φ.prBlueprint where
   zero_lt_bound := by simp [emptyset_def]
   succ_lt_bound := fun _ i z _ ↦ c.succ_lt_exp i z
   bound_monotone := fun _ _ _ h ↦ exp_monotone_le.mpr h
-  bound_locallyDelta0 := by
-    simpa using LocallyDelta0Function.exp.retraction (fun _ : Fin 1 ↦ (0 : Fin (k + 1)))
-  inv_locallyDelta0 := PR.Recursion.lt_bound_locallyDelta0 (bound := fun _ i ↦ Exp.exp i) <| by
-    simpa using LocallyDelta0Function.exp.retraction (fun _ : Fin 1 ↦ (0 : Fin (k + 1)))
+  bound_locallyDelta0 := stageBound_locallyDelta0
+  inv_locallyDelta0 :=
+    PR.lt_bound_locallyDelta0 (bound := fun _ i ↦ Exp.exp i) stageBound_locallyDelta0
 
 variable (v)
 

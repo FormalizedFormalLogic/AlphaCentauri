@@ -81,6 +81,39 @@ lemma fbit_ext {x y : V} (h : ∀ i, fbit x i = fbit y i) : x = y := by
       rw [← div_add_mod u 2, ← div_add_mod w 2, this, hmod]
   exact key (x + y) le_rfl x le_self_add y le_add_self fun i _ ↦ h i
 
+section Length
+
+variable {u v : V}
+
+lemma length_mul_le (u v : V) : ‖u * v‖ ≤ ‖u‖ + ‖v‖ := by
+  rcases (Arithmetic.zero_le u).eq_or_lt with rfl | hu
+  · simp
+  rcases (Arithmetic.zero_le v).eq_or_lt with rfl | hv
+  · simp
+  obtain ⟨a, -, ha, hua⟩ := log_pos hu
+  obtain ⟨b, -, hb, hvb⟩ := log_pos hv
+  have H := (ha.add_mul hb).add_mul Exponential.exponential_two_four
+  have hlt : u * v < a * b * 4 := calc
+    u * v < 2 * a * (2 * b) := mul_lt_mul'' hua hvb (Arithmetic.zero_le _) (Arithmetic.zero_le _)
+    _ = a * b * (2 * 2) := (mul_mul_mul_comm ..).trans (mul_comm ..)
+    _ = a * b * 4 := by simp [← two_add_two_eq_four, two_mul]
+  have := (H.lt_iff_log_lt (mul_pos hu hv)).mp hlt
+  rw [← one_add_one_eq_two, ← add_assoc, ← le_iff_lt_succ] at this
+  rw [length_of_pos hu, length_of_pos hv, length_of_pos (mul_pos hu hv)]
+  calc
+    log (u * v) + 1 ≤ log u + log v + 1 + 1 := by simpa using this
+    _ = log u + 1 + (log v + 1) := by simp [add_assoc, add_left_comm, add_comm]
+
+lemma length_add_length_le (hu : 0 < u) (hv : 0 < v) : ‖u‖ + ‖v‖ ≤ ‖u * v‖ + 1 := by
+  obtain ⟨a, hau, ha, -⟩ := log_pos hu
+  obtain ⟨b, hbv, hb, -⟩ := log_pos hv
+  have := (le_iff_le_log_of_exp (ha.add_mul hb) (mul_pos hu hv)).mp
+    (mul_le_mul hau hbv (Arithmetic.zero_le _) (Arithmetic.zero_le _))
+  rw [length_of_pos hu, length_of_pos hv, length_of_pos (mul_pos hu hv)]
+  simpa [add_assoc, add_left_comm, add_comm] using this
+
+end Length
+
 end ISigma0
 
 end

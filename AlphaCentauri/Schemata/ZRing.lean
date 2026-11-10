@@ -24,7 +24,7 @@ def standardEuclideanDivisionBy (n : ℕ) : ArithmeticSentence :=
 
 /-- $\mathsf{ZR}$: $\mathsf{PA}^-$ together with division with remainder by every standard
 positive integer.
-- [Wil78]
+- [Wil78, §2]
 - [BO96, §1] -/
 def ZRing : ArithmeticTheory := 𝗣𝗔⁻ ∪ Set.range fun n : ℕ ↦ standardEuclideanDivisionBy (n + 1)
 

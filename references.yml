@@ -23,6 +23,27 @@ AB05:
       name: Springer
       location: Dordrecht
 
+Ada87:
+  type: Article
+  title: Open induction and the true theory of rationals
+  author: Adamowicz, Zofia
+  date: 1987
+  parent:
+    type: Periodical
+    title: Journal of Symbolic Logic
+    volume: 52
+
+BCR98:
+  type: Book
+  title: Real Algebraic Geometry
+  author: ["Bochnak, Jacek", "Coste, Michel", "Roy, Marie-Françoise"]
+  date: 1998
+  publisher:
+    name: Springer
+    location: Berlin
+  serial-number:
+    doi: "10.1007/978-3-662-03718-8"
+
 BI91:
   type: Article
   title: Combinatorial principles in elementary number theory
@@ -99,6 +120,17 @@ Bek99:
     title: Theoretical Computer Science
     volume: 224
     issue: 1-2
+
+Bou91:
+  type: Article
+  title: L'arithmétique ouverte et ses modèles non-standards
+  author: Boughattas, Sedki
+  date: 1991
+  page-range: 700-714
+  parent:
+    type: Periodical
+    title: Journal of Symbolic Logic
+    volume: 56
 
 Buc03:
   type: Misc
@@ -246,6 +278,29 @@ Jer21:
   organization: Institute of Mathematics, Czech Academy of Sciences
   url: https://users.math.cas.cz/~jerabek/papers/dsc.pdf
 
+Kat26b:
+  type: Article
+  title: Equivalence of restricted and full division
+  author: Kato, Naoya
+  date: 2026
+  serial-number:
+    arxiv: "2610.24976"
+
+KKS97:
+  type: Article
+  title: Exponentiation in power series fields
+  author: ["Kuhlmann, Franz-Viktor", "Kuhlmann, Salma", "Shelah, Saharon"]
+  date: 1997
+  page-range: 3177-3183
+  parent:
+    type: Periodical
+    title: Proceedings of the American Mathematical Society
+    volume: 125
+    issue: 11
+  serial-number:
+    doi: "10.1090/S0002-9939-97-03964-6"
+    arxiv: "math/9608214"
+
 Kay91:
   type: Book
   title: Models of Peano Arithmetic
@@ -260,6 +315,21 @@ Kay91:
     type: Anthology
     title: Oxford Logic Guides
     volume: 15
+
+Kov24:
+  type: Article
+  title: Fragments of IOpen
+  author: Kovalyov, Konstantin
+  date: 2024
+  page-range: 969-986
+  parent:
+    type: Periodical
+    title: Archive for Mathematical Logic
+    volume: 63
+    issue: 7-8
+  serial-number:
+    doi: "10.1007/s00153-024-00929-2"
+    arxiv: "2304.00282"
 
 Lei83:
   type: Article
@@ -290,6 +360,34 @@ Lin97:
     title: Lecture Notes in Logic
     volume: 10
 
+MM89:
+  type: Article
+  title: Primes and their residue rings in models of open induction
+  author: ["Macintyre, Angus", "Marker, David"]
+  date: 1989
+  page-range: 57-77
+  parent:
+    type: Periodical
+    title: Annals of Pure and Applied Logic
+    volume: 43
+
+Moh11:
+  type: Chapter
+  title: Hierarchies of subsystems of weak arithmetic
+  author: Mohsenipour, Shahram
+  date: 2011
+  page-range: 80-92
+  serial-number:
+    doi: "10.1017/CBO9780511910616.006"
+    arxiv: "1003.2117"
+  parent:
+    type: Anthology
+    title: Set Theory, Arithmetic, and Foundations of Mathematics
+    editor: ["Kennedy, Juliette", "Kossak, Roman"]
+    publisher:
+      name: Cambridge University Press
+      location: Cambridge
+
 PWW88:
   type: Article
   title: Provability of the pigeonhole principle and the existence of infinitely many primes
@@ -318,6 +416,14 @@ Poh09:
   parent:
     type: Anthology
     title: Universitext
+
+Raf10:
+  type: Article
+  title: Diophantine correct open induction
+  author: Raffer, Sidney
+  date: 2010
+  serial-number:
+    arxiv: "1010.3798"
 
 Ros84:
   type: Book
@@ -383,6 +489,20 @@ Smi93:
     volume: 34
     issue: 3
 
+Smi93a:
+  type: Article
+  title: Building discretely ordered Bezout domains and GCD domains
+  author: Smith, Stuart T.
+  date: 1993
+  page-range: 191-239
+  serial-number:
+    doi: "10.1006/jabr.1993.1154"
+  parent:
+    type: Periodical
+    title: Journal of Algebra
+    volume: 159
+    issue: 1
+
 Tha05:
   type: Article
   title: "A note on Δ₁ induction and Σ₁ collection"
@@ -407,6 +527,14 @@ Tow20:
   url: https://www.sas.upenn.edu/~htowsner/GoodsteinsTheorem.pdf
   note: Undated; the PDF is dated 2020
 
+Vis26:
+  type: Article
+  title: From numbers to container strings
+  author: Visser, Albert
+  date: 2026
+  serial-number:
+    arxiv: "2411.15873"
+
 vO99:
   type: Misc
   title: "Introduction to {Peano} Arithmetic: Gödel Incompleteness and Nonstandard Models"
@@ -417,6 +545,18 @@ vO99:
   note: >-
     Notes of a course in the 1998-1999 Master Class Program in Mathematical
     Logic of the Mathematical Research Institute, Utrecht
+
+Wil78:
+  type: Article
+  title: Some results and problems on weak systems of arithmetic
+  author: Wilkie, Alex
+  date: 1978
+  page-range: 285-296
+  parent:
+    type: Anthology
+    title: Logic Colloquium '77
+    editor: Macintyre, Angus
+    publisher: North-Holland
 
 Wil85:
   type: Article
@@ -451,3 +591,15 @@ WP89:
       type: Anthology
       title: Studies in Logic and the Foundations of Mathematics
       volume: 126
+
+Wil78:
+  type: Article
+  title: Some results and problems on weak systems of arithmetic
+  author: Wilkie, Alex
+  date: 1978
+  page-range: 285-296
+  parent:
+    type: Anthology
+    title: Logic Colloquium '77
+    editor: Macintyre, Angus
+    publisher: North-Holland

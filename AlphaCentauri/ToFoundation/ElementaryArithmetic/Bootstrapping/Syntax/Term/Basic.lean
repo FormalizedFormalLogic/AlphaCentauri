@@ -664,6 +664,50 @@ noncomputable def courseOfValues : CourseOfValues.Construction V arity where
   bound_monotone := c.bound_monotone
   bound_locallyDelta0 := c.bound_locallyDelta0
 
+variable (param : Fin arity → V)
+
+/-- The value of the course-of-values recursion at `t`. -/
+noncomputable def courseOfValuesResult (t : V) : V := c.courseOfValues.result param t
+
+lemma courseOfValuesResult_le_bound (t : V) :
+    c.courseOfValuesResult param t ≤ c.bound param t :=
+  c.courseOfValues.result_le_bound (v := param) t
+
+lemma courseOfValuesResult_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin (arity + 1) → V ↦ c.courseOfValuesResult (w ·.succ) (w 0) :=
+  c.courseOfValues.result_locallyDelta0
+
+lemma courseOfValuesResult_bvar (z : V) : c.courseOfValuesResult param (^#z) = c.bvar param z := by
+  have e : c.courseOfValues.val param (^#z) (c.courseOfValues.table param (^#z)) =
+      c.bvar param z := by simp [courseOfValues, qqBvar]
+  have hle := c.bvar_le_bound param z
+  rw [← e] at hle
+  rw [courseOfValuesResult, c.courseOfValues.result_eq_val hle, e]
+
+lemma courseOfValuesResult_fvar (x : V) : c.courseOfValuesResult param (^&x) = c.fvar param x := by
+  have e : c.courseOfValues.val param (^&x) (c.courseOfValues.table param (^&x)) =
+      c.fvar param x := by simp [courseOfValues, qqFvar]
+  have hle := c.fvar_le_bound param x
+  rw [← e] at hle
+  rw [courseOfValuesResult, c.courseOfValues.result_eq_val hle, e]
+
+lemma courseOfValuesResult_func {k f v : V} (hk : k = len v) :
+    ∃ w, len w = k ∧ (∀ i < k, w.[i] = c.courseOfValuesResult param v.[i]) ∧
+      c.courseOfValuesResult param (^func k f v) = c.func param k f v w := by
+  set w := listMap tableLookup (fun _ ↦ c.courseOfValues.table param (^func k f v)) v
+  have hw : len w = k := by rw [len_listMap tableLookup_locallyDelta0, hk]
+  have hwv : ∀ i < k, w.[i] = c.courseOfValuesResult param v.[i] := by
+    intro i hi
+    rw [nth_listMap tableLookup_locallyDelta0 _ _ (by simpa [hk] using hi), tableLookup,
+      c.courseOfValues.znth_table (nth_lt_qqFunc_of_lt (by simpa [hk] using hi))]
+    rfl
+  have e : c.courseOfValues.val param (^func k f v) (c.courseOfValues.table param (^func k f v)) =
+      c.func param k f v w := by simp [courseOfValues, qqFunc, w]
+  have hle := c.func_le_bound param k f v w hw.symm fun i hi ↦ by
+    rw [hwv i hi]; exact c.courseOfValuesResult_le_bound param _
+  rw [← e] at hle
+  exact ⟨w, hw, hwv, by rw [courseOfValuesResult, c.courseOfValues.result_eq_val hle, e]⟩
+
 end Construction
 
 end Language.TermRec

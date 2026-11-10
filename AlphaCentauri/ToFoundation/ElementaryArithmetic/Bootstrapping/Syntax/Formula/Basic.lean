@@ -1516,6 +1516,157 @@ lemma courseOfValuesResult_exs (P p₁ : V) :
   rw [courseOfValuesResult_eq_depthValue, depthValue_exs, zero_add,
     c.znth_table_eq (by simp) le_rfl, ← c.change_eq_iter, c.iter_zero]
 
+private lemma limSeq_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
+    LocallyDelta0Function fun w : Fin n → V ↦ (c.construction L).limSeq ![] (f w) := by
+  have := (c.construction L).limSeq_locallyDelta0.comp_cons hf (u := fun j ↦ j.elim0)
+    fun j ↦ j.elim0
+  convert this using 2 with w
+  congr 1
+  funext j
+  exact j.elim0
+
+lemma isUFormula_and_eq_of_mem_limSeq {s z : V} (h : z ∈ (c.construction L).limSeq ![] s) :
+    IsUFormula L (π₁ (π₂ z)) ∧ π₂ (π₂ z) = c.courseOfValuesResult (π₁ z) (π₁ (π₂ z)) := by
+  have hz : LocallyDelta0Function fun y : Fin 2 → V ↦ y 0 := LocallyDelta0Function.var 0
+  have hR : LocallyDelta0 fun y : Fin 2 → V ↦ y 0 ∈ (c.construction L).limSeq ![] (y 1) →
+      IsUFormula L (π₁ (π₂ (y 0))) ∧
+        π₂ (π₂ (y 0)) = c.courseOfValuesResult (π₁ (y 0)) (π₁ (π₂ (y 0))) :=
+    (LocallyDelta0.mem hz (c.limSeq_comp L (LocallyDelta0Function.var 1))).imp
+      ((isUFormula_locallyDelta0.pred_comp
+          (LocallyDelta0Function.pi₁.comp₁ (LocallyDelta0Function.pi₂.comp₁ hz))).and
+        (LocallyDelta0.eq (LocallyDelta0Function.pi₂.comp₁ (LocallyDelta0Function.pi₂.comp₁ hz))
+          (c.courseOfValuesResult_locallyDelta0.comp₂ (LocallyDelta0Function.pi₁.comp₁ hz)
+            (LocallyDelta0Function.pi₁.comp₁ (LocallyDelta0Function.pi₂.comp₁ hz)))))
+  have hP : LocallyDelta0Pred fun s ↦ ∀ z < (c.construction L).limSeq ![] s,
+      z ∈ (c.construction L).limSeq ![] s →
+        IsUFormula L (π₁ (π₂ z)) ∧ π₂ (π₂ z) = c.courseOfValuesResult (π₁ z) (π₁ (π₂ z)) :=
+    (LocallyDelta0.ball_lt_function
+      (c.limSeq_comp L (LocallyDelta0Function.var (V := V) (0 : Fin 1))) hR).of_iff
+        fun w ↦ by simp
+  have : ∀ s, ∀ z < (c.construction L).limSeq ![] s, z ∈ (c.construction L).limSeq ![] s →
+      IsUFormula L (π₁ (π₂ z)) ∧ π₂ (π₂ z) = c.courseOfValuesResult (π₁ z) (π₁ (π₂ z)) := by
+    apply LocallyDelta0Pred.succ_induction hP
+    · intro z _ hz
+      simp at hz
+    · intro s ih z _ hz
+      have ih' {param p y : V} (h : ⟪param, p, y⟫ ∈ (c.construction L).limSeq ![] s) :
+          y = c.courseOfValuesResult param p := by
+        simpa using (ih _ (lt_of_mem h) h).2
+      obtain ⟨param, p, y, rfl, hp, H⟩ := ((c.construction L).mem_limSeq_succ_iff.mp hz).2
+      simp only [pi₁_pair, pi₂_pair]
+      refine ⟨hp, ?_⟩
+      rcases H with (⟨k, R, v, rfl, rfl⟩ | ⟨k, R, v, rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
+        ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ |
+        ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩)
+      · rw [c.courseOfValuesResult_rel]
+      · rw [c.courseOfValuesResult_nrel]
+      · rw [c.courseOfValuesResult_verum]
+      · rw [c.courseOfValuesResult_falsum]
+      · rw [c.courseOfValuesResult_and, ← ih' h₁, ← ih' h₂]
+      · rw [c.courseOfValuesResult_or, ← ih' h₁, ← ih' h₂]
+      · have h₀ := hys 0 (by simp [c.allSize_eq_one])
+        rw [c.allChanges_eq_change] at h₀
+        have hys₁ : ys = ?[ys.[0]] := nth_ext (by simp [hl, c.allSize_eq_one]) fun i hi ↦ by
+          rw [hl, c.allSize_eq_one] at hi
+          rcases lt_one_iff_eq_zero.mp hi
+          simp
+        rw [c.courseOfValuesResult_all, ← ih' h₀, ← hys₁]
+      · have h₀ := hys 0 (by simp [c.exsSize_eq_one])
+        rw [c.exsChanges_eq_change] at h₀
+        have hys₁ : ys = ?[ys.[0]] := nth_ext (by simp [hl, c.exsSize_eq_one]) fun i hi ↦ by
+          rw [hl, c.exsSize_eq_one] at hi
+          rcases lt_one_iff_eq_zero.mp hi
+          simp
+        rw [c.courseOfValuesResult_exs, ← ih' h₀, ← hys₁]
+  exact this s z (lt_of_mem h) h
+
+lemma mem_limSeq_of_isUFormula {P p : V} (hp : IsUFormula L p) :
+    ⟪P, p, c.courseOfValuesResult P p⟫ ∈
+      (c.construction L).limSeq ![] (⟪c.iter P p, p, c.boundMax P p p⟫ + p + 1) := by
+  set K := ⟪c.iter P p, p, c.boundMax P p p⟫
+  have hP : LocallyDelta0Pred fun p' ↦ ∀ d ≤ p, d + p' ≤ p → IsUFormula L p' →
+      ⟪c.iter P d, p', c.courseOfValuesResult (c.iter P d) p'⟫ ∈
+        (c.construction L).limSeq ![] (K + p' + 1) := by
+    have v2 : ∀ i : Fin 2, LocallyDelta0Function fun w : Fin 2 → V ↦ w i :=
+      LocallyDelta0Function.var
+    have hi : LocallyDelta0Function fun w : Fin 2 → V ↦ c.iter P (w 0) :=
+      c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.const P) (v2 0)
+    have hmem := LocallyDelta0.mem
+      (LocallyDelta0Function.pairing.comp₂ hi (LocallyDelta0Function.pairing.comp₂ (v2 1)
+        (c.courseOfValuesResult_locallyDelta0.comp₂ hi (v2 1))))
+      (c.limSeq_comp L <| LocallyDelta0Function.add_one <|
+        LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const K) (v2 1))
+    have := LocallyDelta0.ball_le_function (LocallyDelta0Function.const p) <|
+      (LocallyDelta0.le (LocallyDelta0Function.add.comp₂ (v2 0) (v2 1))
+        (LocallyDelta0Function.const p)).imp <|
+      ((isUFormula_locallyDelta0 (L := L)).pred_comp (v2 1)).imp hmem
+    exact this.of_iff fun w ↦ by simp
+  have : ∀ p', ∀ d ≤ p, d + p' ≤ p → IsUFormula L p' →
+      ⟪c.iter P d, p', c.courseOfValuesResult (c.iter P d) p'⟫ ∈
+        (c.construction L).limSeq ![] (K + p' + 1) := by
+    apply LocallyDelta0Pred.order_induction hP
+    intro p' ih d hd hdp hu
+    have hp' : p' ≤ p := le_trans le_add_self hdp
+    have hle : ⟪c.iter P d, p', c.courseOfValuesResult (c.iter P d) p'⟫ ≤ K :=
+      pair_le_pair (c.iter_monotone P hd) <| pair_le_pair hp' <|
+        le_trans (c.courseOfValuesResult_le_bound _ _)
+          (le_trans (c.bound_monotone _ hp') (c.le_boundMax hd))
+    have hsub {p₁ e : V} (hp₁ : p₁ < p') (he : e ≤ 1) (hu₁ : IsUFormula L p₁) :
+        ⟪c.iter P (d + e), p₁, c.courseOfValuesResult (c.iter P (d + e)) p₁⟫ ∈
+          (c.construction L).limSeq ![] (K + p') := by
+      have h₁ : d + e + p₁ ≤ p := by
+        refine le_trans ?_ hdp
+        calc d + e + p₁ ≤ d + (1 + p₁) := by rw [add_assoc]; gcongr
+          _ = d + (p₁ + 1) := by rw [add_comm 1 p₁]
+          _ ≤ d + p' := by gcongr; exact lt_iff_succ_le.mp hp₁
+      exact (c.construction L).limSeq_cumulative
+        (by rw [add_assoc]; exact add_le_add_right (succ_le_iff_lt.mpr hp₁) K)
+        (ih p₁ hp₁ (d + e) (le_trans le_self_add h₁) h₁ hu₁)
+    apply (c.construction L).mem_limSeq_succ_iff.mpr
+    refine ⟨le_trans hle le_self_add, ?_⟩
+    change c.Phi L _ _
+    refine ⟨c.iter P d, p', _, rfl, hu, ?_⟩
+    rcases IsUFormula.case hu with (⟨k, R, v, _, _, rfl⟩ | ⟨k, R, v, _, _, rfl⟩ | rfl | rfl |
+      ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩)
+    · disj 1; exact ⟨k, R, v, rfl, c.courseOfValuesResult_rel _ _ _ _⟩
+    · disj 2; exact ⟨k, R, v, rfl, c.courseOfValuesResult_nrel _ _ _ _⟩
+    · disj 3; exact ⟨rfl, c.courseOfValuesResult_verum _⟩
+    · disj 4; exact ⟨rfl, c.courseOfValuesResult_falsum _⟩
+    · disj 5
+      exact ⟨p₁, p₂, c.courseOfValuesResult (c.iter P d) p₁,
+        c.courseOfValuesResult (c.iter P d) p₂, by simpa using hsub (by simp) zero_le hp₁,
+        by simpa using hsub (by simp) zero_le hp₂, rfl, c.courseOfValuesResult_and _ _ _⟩
+    · disj 6
+      exact ⟨p₁, p₂, c.courseOfValuesResult (c.iter P d) p₁,
+        c.courseOfValuesResult (c.iter P d) p₂, by simpa using hsub (by simp) zero_le hp₁,
+        by simpa using hsub (by simp) zero_le hp₂, rfl, c.courseOfValuesResult_or _ _ _⟩
+    · disj 7
+      refine ⟨p₁, ?[c.courseOfValuesResult (c.change (c.iter P d)) p₁],
+        ⟨by simp [c.allSize_eq_one], fun i hi ↦ ?_⟩, rfl, c.courseOfValuesResult_all _ _⟩
+      rw [c.allSize_eq_one] at hi
+      rcases lt_one_iff_eq_zero.mp hi
+      have := hsub (by simp) le_rfl hp₁
+      rw [c.iter_succ] at this
+      simpa [c.allChanges_eq_change] using this
+    · disj 8
+      refine ⟨p₁, ?[c.courseOfValuesResult (c.change (c.iter P d)) p₁],
+        ⟨by simp [c.exsSize_eq_one], fun i hi ↦ ?_⟩, rfl, c.courseOfValuesResult_exs _ _⟩
+      rw [c.exsSize_eq_one] at hi
+      rcases lt_one_iff_eq_zero.mp hi
+      have := hsub (by simp) le_rfl hp₁
+      rw [c.iter_succ] at this
+      simpa [c.exsChanges_eq_change] using this
+  have := this p 0 zero_le (by simp) hp
+  rwa [c.iter_zero] at this
+
+lemma graph_iff {param p y : V} :
+    c.Graph L param p y ↔ IsUFormula L p ∧ y = c.courseOfValuesResult param p := by
+  constructor
+  · rintro ⟨s, h⟩
+    simpa using c.isUFormula_and_eq_of_mem_limSeq L h
+  · rintro ⟨hp, rfl⟩
+    exact ⟨_, c.mem_limSeq_of_isUFormula L hp⟩
+
 end Construction
 
 end UformulaRec1

@@ -175,6 +175,13 @@ instance [M.IsIL] : M.IsJ2 where
 
 instance [M.IsIL] : M.IsJ5 := ⟨s_of_rel⟩
 
+lemma IsIL.of_isILMinus [M.IsILMinus] [M.IsJ1] [M.IsJ2] [M.IsJ5] : M.IsIL where
+  rel_of_s_left := IsILMinus.rel_of_s_left
+  rel_of_s_right := IsJ4.rel_of_s_right
+  s_refl := IsJ1.s_refl
+  s_trans := IsJ2.s_trans
+  s_of_rel := IsJ5.s_of_rel
+
 end Model
 
 namespace Model.World

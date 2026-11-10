@@ -87,12 +87,11 @@ open Model Model.World
 
 variable {c : Condition L Φ} [Nonempty (LabelledSet L Φ)]
 
+instance : IsTrans _ (labelledModel c).Rel := ⟨fun _ _ _ h₁ h₂ ↦ h₁.trans h₂⟩
+
+instance : Std.Irrefl (labelledModel c).Rel := ⟨fun _ h ↦ Successor.irrefl h⟩
+
 instance [Adequate Φ] : (labelledModel c).IsILMinus where
-  trans _ _ _ h₁ h₂ := h₁.trans h₂
-  cwf := by
-    have : IsTrans _ (flip (labelledModel c).Rel) := ⟨fun _ _ _ h₁ h₂ ↦ h₂.trans h₁⟩;
-    have : Std.Irrefl (flip (labelledModel c).Rel) := ⟨fun _ h ↦ Successor.irrefl h⟩;
-    exact Finite.wellFounded_of_trans_of_irrefl _;
   rel_of_s_left h := h.1
 
 variable [Entailment.Cl L] [L.ExtendsGL] [Adequate Φ]
@@ -127,14 +126,10 @@ lemma truthlemma {x : (labelledModel c).World} {A : Formula α} (hA : A ∈ Φ) 
       obtain ⟨Δ, hΔ, hBΔ, hΔC⟩ := c.exists_of_rhd_not_mem hA hn;
       obtain ⟨⟨Θ, G, hG⟩, hS, hv⟩ := h ⟨Δ, C, .of_rhd_right hA⟩ hΔ ((ihB hB).mpr hBΔ);
       exact hΔC Θ G hS.2 <| (ihC hC).mp hv;
-    · intro h u Rxu hu;
+    · intro h u Rxu hu
       obtain ⟨Θ, G, hG, hCΘ, hP⟩ :=
-        c.exists_of_rhd_mem h Rxu ((ihB hB).mp hu) u.isRhdOperand_label;
-      use ⟨Θ, G, hG⟩;
-      and_intros;
-      · exact Rxu;
-      · exact hP;
-      · exact (ihC hC).mpr hCΘ;
+        c.exists_of_rhd_mem h Rxu ((ihB hB).mp hu) u.isRhdOperand_label
+      exact ⟨⟨Θ, G, hG⟩, ⟨Rxu, hP⟩, (ihC hC).mpr hCΘ⟩
 
 end labelledModel
 
@@ -150,15 +145,10 @@ is a weak `F`-critical successor. -/
 private lemma exists_weakCriticalSuccessor (hΔ : Successor Γ Δ) (hF : IsRhdOperand Φ F) :
     ∃ F', IsRhdOperand Φ F' ∧ WeakCriticalSuccessor F' Γ Δ ∧
       (WeakCriticalSuccessor F Γ Δ → F' = F) := by
-  by_cases h : WeakCriticalSuccessor F Γ Δ;
-  · use F;
-    tauto;
-  · use ⊥;
-    and_intros;
-    · exact .bot;
-    · exact (hΔ.criticalSuccessor_bot <|
-        K_right ofAxiomsMinus.box_neg_iff_rhd_bot).weakCriticalSuccessor;
-    · tauto;
+  by_cases h : WeakCriticalSuccessor F Γ Δ
+  · exact ⟨F, hF, h, fun _ ↦ rfl⟩
+  · exact ⟨⊥, .bot, (hΔ.criticalSuccessor_bot <|
+      K_right ofAxiomsMinus.box_neg_iff_rhd_bot).weakCriticalSuccessor, by tauto⟩
 
 /-- In the presence of $\mathbf{J1}$, a weak `C`-critical successor of `Γ` does not contain `C`. -/
 private lemma not_mem_of_weakCriticalSuccessor [ILMinusJ1 ⪯ ofAxiomsMinus 𝔸]
@@ -173,22 +163,12 @@ private lemma not_mem_of_weakCriticalSuccessor [ILMinusJ1 ⪯ ofAxiomsMinus 𝔸
 def ILMinus : Condition (ofAxiomsMinus 𝔸) Φ where
   toFun Γ Δ C Θ _ := WeakCriticalSuccessor C Γ Δ → C ∉ Θ
   exists_of_rhd_mem hDE hΔ hD hF := by
-    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF;
-    obtain ⟨Θ, hEΘ, hFΘ⟩ := hΔF'.exists_mem_not_mem hF' hDE hD;
-    use Θ, ⊥;
-    and_intros;
-    · exact .bot;
-    · exact hEΘ;
-    · intro h;
-      exact hF'F h ▸ hFΘ;
+    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF
+    obtain ⟨Θ, hEΘ, hFΘ⟩ := hΔF'.exists_mem_not_mem hF' hDE hD
+    exact ⟨Θ, ⊥, .bot, hEΘ, fun h ↦ hF'F h ▸ hFΘ⟩
   exists_of_rhd_not_mem hDE hn := by
-    obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem hDE hn;
-    use Δ;
-    and_intros;
-    · exact hΔ.toSuccessor;
-    · exact hD;
-    · intro Θ _ h;
-      exact h hΔ;
+    obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem hDE hn
+    exact ⟨Δ, hΔ.toSuccessor, hD, fun _ _ h ↦ h hΔ⟩
 
 /-- The condition for $\mathbf{IL}^-(\mathbf{J4}^+)$ and
 $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J4}^+)$.
@@ -198,23 +178,12 @@ $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J4}^+)$.
 def J4Plus [ILMinusJ4Plus ⪯ ofAxiomsMinus 𝔸] : Condition (ofAxiomsMinus 𝔸) Φ where
   toFun Γ Δ C Θ _ := Successor Γ Θ ∧ (WeakCriticalSuccessor C Γ Δ → C ∉ Θ)
   exists_of_rhd_mem hDE hΔ hD hF := by
-    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF;
-    obtain ⟨Θ, hΘ, hEΘ, hFΘ⟩ := hΔF'.exists_successor_mem_not_mem hF' hDE hD;
-    use Θ, ⊥;
-    and_intros;
-    · exact .bot;
-    · exact hEΘ;
-    · exact hΘ;
-    · intro h;
-      exact hF'F h ▸ hFΘ;
+    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF
+    obtain ⟨Θ, hΘ, hEΘ, hFΘ⟩ := hΔF'.exists_successor_mem_not_mem hF' hDE hD
+    exact ⟨Θ, ⊥, .bot, hEΘ, hΘ, fun h ↦ hF'F h ▸ hFΘ⟩
   exists_of_rhd_not_mem hDE hn := by
-    obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem hDE hn;
-    use Δ;
-    and_intros;
-    · exact hΔ.toSuccessor;
-    · exact hD;
-    · intro Θ _ h;
-      exact h.2 hΔ;
+    obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem hDE hn
+    exact ⟨Δ, hΔ.toSuccessor, hD, fun _ _ h ↦ h.2 hΔ⟩
 
 /-- The condition for $\mathbf{IL}^-(\mathbf{J2}^+)$ and $\mathbf{CL}$.
 
@@ -224,24 +193,14 @@ def J2Plus [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] : Condition (ofAxiomsMinus �
   toFun Γ Δ C Θ D := Successor Γ Θ ∧
     (WeakCriticalSuccessor C Γ Δ → D = C ∧ WeakCriticalSuccessor C Γ Θ ∧ C ∉ Θ)
   exists_of_rhd_mem hDE hΔ hD hF := by
-    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF;
-    obtain ⟨Θ, hΘ, hEΘ, hFΘ⟩ := hΔF'.exists_weakCriticalSuccessor_mem_not_mem hF' hDE hD;
-    use Θ, F';
-    and_intros;
-    · exact hF';
-    · exact hEΘ;
-    · exact hΘ.toSuccessor;
-    · intro h;
-      obtain rfl := hF'F h;
-      exact ⟨rfl, hΘ, hFΘ⟩;
+    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF
+    obtain ⟨Θ, hΘ, hEΘ, hFΘ⟩ := hΔF'.exists_weakCriticalSuccessor_mem_not_mem hF' hDE hD
+    refine ⟨Θ, F', hF', hEΘ, hΘ.toSuccessor, fun h ↦ ?_⟩
+    obtain rfl := hF'F h
+    exact ⟨rfl, hΘ, hFΘ⟩
   exists_of_rhd_not_mem hDE hn := by
-    obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem hDE hn;
-    use Δ;
-    and_intros;
-    · exact hΔ.toSuccessor;
-    · exact hD;
-    · intro Θ _ h;
-      exact (h.2 hΔ).2.2;
+    obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem hDE hn
+    exact ⟨Δ, hΔ.toSuccessor, hD, fun _ _ h ↦ (h.2 hΔ).2.2⟩
 
 /-- The condition for $\mathbf{IL}^-(\mathbf{J5})$ and $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J5})$.
 
@@ -250,22 +209,12 @@ def J2Plus [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] : Condition (ofAxiomsMinus �
 def J5 [ILMinusJ5 ⪯ ofAxiomsMinus 𝔸] : Condition (ofAxiomsMinus 𝔸) Φ where
   toFun Γ Δ C Θ _ := WeakCriticalSuccessor C Γ Δ → □(∼C) ∈ Δ → C ∉ Θ
   exists_of_rhd_mem hDE hΔ hD hF := by
-    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF;
-    obtain ⟨Θ, hEΘ, hFΘ⟩ := hΔF'.exists_mem_not_mem hF' hDE hD;
-    use Θ, ⊥;
-    and_intros;
-    · exact .bot;
-    · exact hEΘ;
-    · intro h _;
-      exact hF'F h ▸ hFΘ;
+    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF
+    obtain ⟨Θ, hEΘ, hFΘ⟩ := hΔF'.exists_mem_not_mem hF' hDE hD
+    exact ⟨Θ, ⊥, .bot, hEΘ, fun h _ ↦ hF'F h ▸ hFΘ⟩
   exists_of_rhd_not_mem hDE hn := by
-    obtain ⟨Δ, hΔ, hD, hEΔ⟩ := exists_weakCriticalSuccessor_box_neg_of_rhd_not_mem hDE hn;
-    use Δ;
-    and_intros;
-    · exact hΔ.toSuccessor;
-    · exact hD;
-    · intro Θ _ h;
-      exact h hΔ hEΔ;
+    obtain ⟨Δ, hΔ, hD, hEΔ⟩ := exists_weakCriticalSuccessor_box_neg_of_rhd_not_mem hDE hn
+    exact ⟨Δ, hΔ.toSuccessor, hD, fun _ _ h ↦ h hΔ hEΔ⟩
 
 /-- The condition for $\mathbf{IL}^-(\mathbf{J4}^+, \mathbf{J5})$ and
 $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J4}^+, \mathbf{J5})$.
@@ -276,23 +225,12 @@ def J4PlusJ5 [ILMinusJ4Plus ⪯ ofAxiomsMinus 𝔸] [ILMinusJ5 ⪯ ofAxiomsMinus
     Condition (ofAxiomsMinus 𝔸) Φ where
   toFun Γ Δ C Θ _ := Successor Γ Θ ∧ (WeakCriticalSuccessor C Γ Δ → □(∼C) ∈ Δ → C ∉ Θ)
   exists_of_rhd_mem hDE hΔ hD hF := by
-    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF;
-    obtain ⟨Θ, hΘ, hEΘ, hFΘ⟩ := hΔF'.exists_successor_mem_not_mem hF' hDE hD;
-    use Θ, ⊥;
-    and_intros;
-    · exact .bot;
-    · exact hEΘ;
-    · exact hΘ;
-    · intro h _;
-      exact hF'F h ▸ hFΘ;
+    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF
+    obtain ⟨Θ, hΘ, hEΘ, hFΘ⟩ := hΔF'.exists_successor_mem_not_mem hF' hDE hD
+    exact ⟨Θ, ⊥, .bot, hEΘ, hΘ, fun h _ ↦ hF'F h ▸ hFΘ⟩
   exists_of_rhd_not_mem hDE hn := by
-    obtain ⟨Δ, hΔ, hD, hEΔ⟩ := exists_weakCriticalSuccessor_box_neg_of_rhd_not_mem hDE hn;
-    use Δ;
-    and_intros;
-    · exact hΔ.toSuccessor;
-    · exact hD;
-    · intro Θ _ h;
-      exact h.2 hΔ hEΔ;
+    obtain ⟨Δ, hΔ, hD, hEΔ⟩ := exists_weakCriticalSuccessor_box_neg_of_rhd_not_mem hDE hn
+    exact ⟨Δ, hΔ.toSuccessor, hD, fun _ _ h ↦ h.2 hΔ hEΔ⟩
 
 /-! ### Frame conditions -/
 
@@ -320,13 +258,10 @@ instance [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] :
     (labelledModel (J2Plus (𝔸 := 𝔸) (Φ := Φ))).IsJ2 where
   rel_of_s_right h := h.2.1
   s_trans h₁ h₂ := by
-    and_intros;
-    · exact h₁.1;
-    · exact h₂.2.1;
-    · intro h;
-      obtain ⟨h₃, h₄, -⟩ := h₁.2.2 h;
-      obtain ⟨h₅, h₆, h₇⟩ := h₂.2.2 (h₃ ▸ h₄);
-      exact ⟨h₅.trans h₃, h₃ ▸ h₆, h₃ ▸ h₇⟩;
+    refine ⟨h₁.1, h₂.2.1, fun h ↦ ?_⟩
+    obtain ⟨h₃, h₄, -⟩ := h₁.2.2 h
+    obtain ⟨h₅, h₆, h₇⟩ := h₂.2.2 (h₃ ▸ h₄)
+    exact ⟨h₅.trans h₃, h₃ ▸ h₆, h₃ ▸ h₇⟩
 
 /-- - [KO21, Lemma 5.2] -/
 instance [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] [ILMinusJ1 ⪯ ofAxiomsMinus 𝔸] :
@@ -619,13 +554,12 @@ open Model Model.World
 
 variable [Nonempty (IndexedSet L Φ)]
 
+instance : IsTrans _ (countermodel L Φ).Rel :=
+  ⟨fun _ _ _ h₁ h₂ ↦ ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩⟩
+
+instance : Std.Irrefl (countermodel L Φ).Rel := ⟨fun _ h ↦ h.1.irrefl⟩
+
 instance [Adequate Φ] : (countermodel L Φ).IsILMinus where
-  trans _ _ _ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
-  cwf := by
-    have : IsTrans _ (flip (countermodel L Φ).Rel) :=
-      ⟨fun _ _ _ h₁ h₂ ↦ ⟨h₂.1.trans h₁.1, h₂.2.trans h₁.2⟩⟩;
-    have : Std.Irrefl (flip (countermodel L Φ).Rel) := ⟨fun _ h ↦ h.1.irrefl⟩;
-    exact Finite.wellFounded_of_trans_of_irrefl _;
   rel_of_s_left h := h.1.1
 
 instance : (countermodel L Φ).IsJ2 where
@@ -639,12 +573,7 @@ instance : (countermodel L Φ).IsJ5 := ⟨S.of_rel⟩
 instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsJ1 :=
   ⟨S.refl <| WeakerThan.pbl (𝓢 := ILMinusJ1) ILMinusJ1.axiomJ1'⟩
 
-instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsIL where
-  rel_of_s_left := IsILMinus.rel_of_s_left
-  rel_of_s_right := IsJ4.rel_of_s_right
-  s_refl := IsJ1.s_refl
-  s_trans := IsJ2.s_trans
-  s_of_rel := IsJ5.s_of_rel
+instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsIL := .of_isILMinus
 
 variable {𝔸 : Set (Formula α)} [Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ)] [ILMinusAdequate Φ]
   [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] [ILMinusJ5 ⪯ ofAxiomsMinus 𝔸]
@@ -692,30 +621,20 @@ lemma truthlemma {x : (countermodel (ofAxiomsMinus 𝔸) Φ).World} {A : Formula
         have hF : IsRhdOperand Φ F := u.isRhdOperand_of_mem_seq F <| hpre.subset (by simp);
         obtain ⟨Θ, hΘ, hCΘ, hFΘ, hbΘ⟩ :=
           hcrit.weakCriticalSuccessor.exists_criticalSuccessor_box_neg_mem_not_mem hF h hu;
-        use x.criticalSuccessor F hF Θ hΘ.toSuccessor;
-        and_intros;
-        · exact Rxu.1;
-        · exact Rxu.2;
-        · exact hΘ.toSuccessor;
-        · exact List.prefix_append _ _;
-        · intro C' hpre' _ _;
-          have h₁ : x.seq ++ [C'] = x.seq ++ [F] :=
-            (List.prefix_of_prefix_length_le hpre' hpre (by simp)).eq_of_length (by simp);
-          obtain rfl : C' = F := by simpa using h₁;
-          exact ⟨List.prefix_refl _, hΘ, hFΘ, hbΘ⟩;
-        · exact (ihC hC).mpr hCΘ;
+        refine ⟨x.criticalSuccessor F hF Θ hΘ.toSuccessor,
+          ⟨⟨Rxu, hΘ.toSuccessor, List.prefix_append _ _⟩, ?_⟩, (ihC hC).mpr hCΘ⟩
+        intro C' hpre' _ _
+        have h₁ : x.seq ++ [C'] = x.seq ++ [F] :=
+          (List.prefix_of_prefix_length_le hpre' hpre (by simp)).eq_of_length (by simp)
+        obtain rfl : C' = F := by simpa using h₁
+        exact ⟨List.prefix_refl _, hΘ, hFΘ, hbΘ⟩
       · have hbot := Rxu.1.criticalSuccessor_bot <| K_right ofAxiomsMinus.box_neg_iff_rhd_bot;
         obtain ⟨Θ, hΘ, hCΘ, -⟩ :=
           hbot.weakCriticalSuccessor.exists_criticalSuccessor_box_neg_mem_not_mem .bot h hu;
-        use x.successor Θ hΘ.toSuccessor;
-        and_intros;
-        · exact Rxu.1;
-        · exact Rxu.2;
-        · exact hΘ.toSuccessor;
-        · exact List.prefix_refl _;
-        · intro C' hpre' hcrit' hbox';
-          exact (hc ⟨C', hpre', hcrit', hbox'⟩).elim;
-        · exact (ihC hC).mpr hCΘ;
+        exact ⟨x.successor Θ hΘ.toSuccessor,
+          ⟨⟨Rxu, hΘ.toSuccessor, List.prefix_refl _⟩,
+            fun C' hpre' hcrit' hbox' ↦ (hc ⟨C', hpre', hcrit', hbox'⟩).elim⟩,
+          (ihC hC).mpr hCΘ⟩
 
 end countermodel
 
@@ -801,12 +720,7 @@ theorem IL.complete
     𝐈𝐋 ⊢ A := by
   apply IL.complete_ILMinus;
   intro κ _ _ M _ _ _ _;
-  have : M.IsIL := {
-    rel_of_s_left := IsILMinus.rel_of_s_left
-    rel_of_s_right := IsJ4.rel_of_s_right
-    s_refl := IsJ1.s_refl
-    s_trans := IsJ2.s_trans
-    s_of_rel := IsJ5.s_of_rel };
+  have : M.IsIL := .of_isILMinus
   exact h M
 
 end Logic

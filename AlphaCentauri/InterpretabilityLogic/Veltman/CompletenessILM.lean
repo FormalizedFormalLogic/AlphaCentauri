@@ -158,21 +158,13 @@ lemma Adequate.subformulas_subset {Φ : Finset (Formula α)} [Adequate Φ] {A : 
   | falsum => simpa [subformulas] using h;
   | imp A B ihA ihB =>
     simp only [subformulas, Finset.insert_subset_iff, Finset.union_subset_iff];
-    and_intros;
-    · exact h;
-    · exact ihA (Adequate.imp_left h);
-    · exact ihB (Adequate.imp_right h);
+    exact ⟨h, ihA (Adequate.imp_left h), ihB (Adequate.imp_right h)⟩
   | box A ih =>
     simp only [subformulas, Finset.insert_subset_iff];
-    and_intros;
-    · exact h;
-    · exact ih (Adequate.box h);
+    exact ⟨h, ih (Adequate.box h)⟩
   | rhd A B ihA ihB =>
     simp only [subformulas, Finset.insert_subset_iff, Finset.union_subset_iff];
-    and_intros;
-    · exact h;
-    · exact ihA (Adequate.rhd_left h);
-    · exact ihB (Adequate.rhd_right h);
+    exact ⟨h, ihA (Adequate.rhd_left h), ihB (Adequate.rhd_right h)⟩
 
 /-- `Φ` is adequate, and for every antecedent or consequent `B` of a `▷`-formula in `Φ` and every
 finite set `X` of `□`-formulas in `Φ`, some antecedent or consequent `B'` of a `▷`-formula in `Φ`
@@ -272,9 +264,7 @@ lemma exists_tree_erase (hA : A ∈ tree Φ O) :
       use B';
       and_intros;
       · apply Finset.mem_erase.mpr;
-        and_intros;
-        · exact hB;
-        · exact hB';
+        exact ⟨hB, hB'⟩
       · use X';
         and_intros;
         · simpa [Finset.erase_right_comm] using hX';
@@ -306,9 +296,7 @@ lemma exists_tree_of_conj {X : Finset (Formula α)} (hB : B ∈ O)
       · exact .inl <| Logic.box_mono <| by cl_prover [h];
       · right;
         use □(∼D');
-        and_intros;
-        · exact Finset.mem_union_right _ (Finset.mem_image_of_mem _ hD');
-        · exact Logic.box_neg_iff_of_box h;
+        exact ⟨Finset.mem_union_right _ (Finset.mem_image_of_mem _ hD'), Logic.box_neg_iff_of_box h⟩
   obtain ⟨X', hX', h⟩ := Logic.exists_conj_iff h;
   use B ⋏ X'.conj;
   and_intros;
@@ -402,23 +390,15 @@ lemma mem_of_mem_subformulas (hA : A ∈ mAdequateClosure Φ) (hB : B ∈ A.subf
     B ∈ mAdequateClosure Φ := by
   rcases mem_iff.mp hA with ⟨C, hC, h⟩ | ⟨C, hC, h⟩ | ⟨C, hC, D, hD, h⟩;
   · apply mem_iff.mpr <| .inl _;
-    use C;
-    and_intros;
-    · exact hC;
-    · exact subformulas_subset_of_mem h hB;
+    exact ⟨C, hC, subformulas_subset_of_mem h hB⟩
   · apply mem_iff.mpr <| .inr <| .inl _;
-    use C;
-    and_intros;
-    · exact hC;
-    · exact subformulas_subset_of_mem h hB;
+    exact ⟨C, hC, subformulas_subset_of_mem h hB⟩
   · apply mem_iff.mpr <| .inr <| .inr _;
     use C;
     and_intros;
     · exact hC;
     · use D;
-      and_intros;
-      · exact hD;
-      · exact subformulas_subset_of_mem h hB;
+      exact ⟨hD, subformulas_subset_of_mem h hB⟩
 
 lemma rhd_mem (hA : A ∈ operands Φ) (hB : B ∈ operands Φ) : A ▷ B ∈ mAdequateClosure Φ := by
   apply mem_iff.mpr <| .inr <| .inr _;
@@ -443,13 +423,9 @@ lemma operands_of_rhd_mem (h : A ▷ B ∈ mAdequateClosure Φ) : A ∈ operands
   have hΦ (h : A ▷ B ∈ Φ) : A ∈ operands Φ ∧ B ∈ operands Φ := by
     and_intros;
     · apply Finset.mem_union_left _ <| mem_rhdOperands.mpr _;
-      and_intros;
-      · exact Adequate.rhd_left h;
-      · exact .of_rhd_left h;
+      exact ⟨Adequate.rhd_left h, .of_rhd_left h⟩
     · apply Finset.mem_union_left _ <| mem_rhdOperands.mpr _;
-      and_intros;
-      · exact Adequate.rhd_right h;
-      · exact .of_rhd_right h;
+      exact ⟨Adequate.rhd_right h, .of_rhd_right h⟩
   have hΦ' (h : A ▷ B ∈ Φ ∨ ∃ D ∈ tree Φ (rhdOperands Φ), A ▷ B = □(∼D)) :
       A ∈ operands Φ ∧ B ∈ operands Φ := by
     rcases h with h | ⟨_, _, h⟩;
@@ -466,9 +442,7 @@ lemma operands_of_rhd_mem (h : A ▷ B ∈ mAdequateClosure Φ) : A ∈ operands
   · simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h;
     rcases h with h | h | h;
     · obtain ⟨rfl, rfl⟩ := rhd_inj.mp h;
-      and_intros;
-      · exact hC;
-      · exact hD;
+      exact ⟨hC, hD⟩
     · exact hΦ' <| mem_of_mem_operands hC h (.inl <| by use A, B);
     · exact hΦ' <| mem_of_mem_operands hD h (.inl <| by use A, B);
 
@@ -531,17 +505,10 @@ instance : MAdequate (mAdequateClosure Φ) where
       · exact Finset.mem_union_left _ h;
       · obtain ⟨E, hE, h⟩ := h;
         apply Finset.mem_union_right _ <| Finset.mem_image.mpr _;
-        use E;
-        and_intros;
-        · exact hE;
-        · exact h.symm;
+        exact ⟨E, hE, h.symm⟩
     rcases Finset.mem_union.mp (isRhdOperand_iff.mp hB) with hB | hB;
     · obtain ⟨A, hA, h⟩ := exists_tree_of_conj hB hX';
-      use A;
-      and_intros;
-      · exact isRhdOperand_iff.mpr <| Finset.mem_union_right _ hA;
-      · exact h.1;
-      · exact h.2;
+      exact ⟨A, isRhdOperand_iff.mpr <| Finset.mem_union_right _ hA, h.1, h.2⟩
     · obtain ⟨b, hb, Y, hY, rfl⟩ := mem_tree.mp hB;
       have hY' : Y ∪ X ⊆ boxes Φ ∪ (tree Φ (rhdOperands Φ)).image fun C ↦ □(∼C) := by
         apply Finset.union_subset _ hX';
@@ -653,9 +620,7 @@ lemma CriticalSuccessor.exists_criticalSuccessor_box_subset (hE : IsRhdOperand �
   have hG {G} (hG : G ▷ E ∈ Γ) : G ∉ Θ ∧ □(∼G) ∈ Θ := by
     have h₁ : G ∈ Φ.filter (· ▷ E ∈ Γ) := by
       apply Finset.mem_filter.mpr;
-      and_intros;
-      · exact Adequate.rhd_left (mem_of_mem hG);
-      · exact hG;
+      exact ⟨Adequate.rhd_left (mem_of_mem hG), hG⟩
     have h₂ : 𝐈𝐋𝐌 ⊢ G 🡒 H := right_Fdisj_intro _ h₁;
     have h₃ : 𝐈𝐋𝐌 ⊢ □(∼H) 🡒 □(∼G) := Logic.box_mono <| by cl_prover [h₂];
     have h₄ : Y *⊢[𝐈𝐋𝐌] ∼H := Context.by_axm <| by simp [Y];
@@ -675,9 +640,7 @@ lemma CriticalSuccessor.exists_criticalSuccessor_box_subset (hE : IsRhdOperand �
       · intro D h;
         exact hm (mem_of_mem h) (Context.by_axm <| by simp [Y, h]);
       · use A;
-        and_intros;
-        · exact hb hA;
-        · exact hA';
+        exact ⟨hb hA, hA'⟩
     · intro G h;
       exact (hG h).1;
     · intro G h;
@@ -732,16 +695,12 @@ variable [Nonempty (IndexedSet 𝐈𝐋𝐌 Φ)]
 
 instance [Adequate Φ] : (countermodelM Φ).IsIL where
   trans _ _ _ h₁ h₂ := by
-    constructor;
-    · exact h₁.1.trans h₂.1;
-    · exact h₁.2.trans h₂.2;
+    exact ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
   cwf := by
     have : IsTrans _ (flip (countermodelM Φ).Rel) := by
       constructor;
       intro _ _ _ h₁ h₂;
-      constructor;
-      · exact h₂.1.trans h₁.1;
-      · exact h₂.2.trans h₁.2;
+      exact ⟨h₂.1.trans h₁.1, h₂.2.trans h₁.2⟩
     have : Std.Irrefl (flip (countermodelM Φ).Rel) := by
       constructor;
       intro _ h;
@@ -812,9 +771,7 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
       by_contra hn;
       obtain ⟨Δ, hΔ, hA⟩ := exists_successor_of_box_not_mem hA hn;
       have hR : x ≺ x.successor Δ hΔ := by
-        constructor;
-        · exact hΔ;
-        · exact List.prefix_refl _;
+        exact ⟨hΔ, List.prefix_refl _⟩
       exact not_mem_of_provable_neg hA (Context.by_axm rfl) <| (ih hA').mp <| h _ hR;
     · intro h y Rxy;
       exact (ih hA').mpr <| Rxy.1.mem_of_box_mem h;
@@ -827,9 +784,7 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
       obtain ⟨Δ, hΔ, hBΔ⟩ := exists_criticalSuccessor_of_rhd_not_mem hA hn;
       have hC' : IsRhdOperand Φ C := .of_rhd_right hA;
       have hR : x ≺ x.criticalSuccessor C hC' Δ hΔ.toSuccessor := by
-        constructor;
-        · exact hΔ.toSuccessor;
-        · exact List.prefix_append _ _;
+        exact ⟨hΔ.toSuccessor, List.prefix_append _ _⟩
       obtain ⟨v, hS, hv⟩ := h _ hR ((ihB hB).mpr hBΔ);
       have hCC : C ▷ C ∈ x.set :=
         (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofAxioms.rhd_refl;
@@ -865,9 +820,7 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
             ⟨hΘ.toSuccessor, Rxu.2⟩;
           intro F' hpre' hcrit';
           obtain rfl := huniq F' hpre' hcrit';
-          constructor;
-          · exact hpre';
-          · exact hΘ;
+          exact ⟨hpre', hΘ⟩
         · constructor;
           · exact List.prefix_refl _;
           · exact hbox;

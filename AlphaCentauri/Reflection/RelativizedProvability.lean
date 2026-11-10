@@ -2,7 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 public import AlphaCentauri.Reflection.StandardProvability
-public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 
 /-!
 # Provability relativized to true $\Pi_n$ sentences

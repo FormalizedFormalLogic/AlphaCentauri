@@ -1,9 +1,12 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
-public import AlphaCentauri.ToFoundation.Syntax
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import AlphaCentauri.ToFoundation.Coding
-public import AlphaCentauri.ToFoundation.PartialTruth
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
 /-!
 # Numeral assignments to free variables

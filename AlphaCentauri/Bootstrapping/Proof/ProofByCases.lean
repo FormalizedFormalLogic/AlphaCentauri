@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.ToFoundation.Coding
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 
 /-!
 # Proof by cases on an added axiom

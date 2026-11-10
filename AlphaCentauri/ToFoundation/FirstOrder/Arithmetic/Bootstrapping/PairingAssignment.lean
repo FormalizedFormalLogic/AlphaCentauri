@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 
 /-!
-# Polynomial pairing and decoding of lists
+# Gaps in Foundation's `HFS.Vec`: polynomial pairing and decoding of lists
 
 A polynomial pairing `ppair x b = (x + b)² + b + 1` and the decoding `dec` of iterated `ppair`s
 into lists (`∷`).

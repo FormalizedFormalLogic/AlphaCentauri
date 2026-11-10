@@ -1,13 +1,14 @@
 module
 
-public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
-public import AlphaCentauri.ToFoundation.PartialTruth
-public import AlphaCentauri.ToFoundation.InternalTSchema
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.InternalTSchema
 
 /-!
-# The provability formula at a numeral
+# Gaps in Foundation's `DerivabilityCondition`: the provability formula at a numeral
 
 For an element `x` of a model of `𝗜𝚺₁`, `provabilityFormula T x` is the internal sentence
 obtained by substituting the numeral of `x` into the provability formula of `T`. Its internal
@@ -96,7 +97,8 @@ lemma tprovable_imp_provabilityFormula_subst [𝗜𝚺₁ ⪯ T] {ψ : Arithmeti
   have h₁ := tprovable_subst_numeral_of_models (T := T)
     (φ := provableSubstNumeralFormula (T := T) ψ)
     (fun W _ _ e ↦ by
-      have key : W ⊧/![e 0] ψ → Provable T (substNumeral (⌜ψ⌝ : W) (e 0)) := fun hz ↦ by
+      have key : W ⊧/![e 0] ψ → Provable T (substNumeral (⌜ψ⌝ : W) (e 0)) := by
+        intro hz
         simpa [substNumeral, Matrix.constant_eq_singleton, Sentence.quote_eq] using
           tprovable_iff_provable.mp (bold_sigma_one_complete (V := W) T hψ (w := ![e 0]) hz);
       simpa [provableSubstNumeralFormula] using fun hz (he : e 1 = _) ↦ he ▸ key hz)

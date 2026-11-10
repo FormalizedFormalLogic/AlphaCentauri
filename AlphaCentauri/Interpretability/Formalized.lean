@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.Interpretable
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
-public import AlphaCentauri.ToFoundation.SententialAxioms
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 /-!

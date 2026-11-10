@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Completeness.Henkin
 public import AlphaCentauri.Interpretability.Basic
-public import AlphaCentauri.ToFoundation.SententialAxioms
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 
 /-!
 # Interpretation of a theory in itself plus its consistency

@@ -1,10 +1,13 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.UniversalClosure
-public import AlphaCentauri.ToFoundation.SubstInversion
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
-public import AlphaCentauri.ToFoundation.Syntax
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!

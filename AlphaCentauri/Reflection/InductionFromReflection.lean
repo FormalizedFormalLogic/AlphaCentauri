@@ -4,7 +4,7 @@ public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.ParameterFreeInduction
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.PrenexCombination
-public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 
 @[expose] public section
 /-!

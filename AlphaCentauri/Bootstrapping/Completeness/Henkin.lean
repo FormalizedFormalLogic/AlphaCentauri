@@ -1,9 +1,8 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
-public import AlphaCentauri.ToFoundation.InternalEquality
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import AlphaCentauri.ToFoundation.Coding
-public import AlphaCentauri.ToFoundation.TypedProof
 public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!

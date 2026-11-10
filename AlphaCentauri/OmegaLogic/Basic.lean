@@ -44,10 +44,6 @@ def LitTrue (φ : ArithmeticFormula ℕ) : Prop := Semiformula.Evalf (M := ℕ) 
 
 lemma litTrue_or_neg (φ : ArithmeticFormula ℕ) : LitTrue φ ∨ LitTrue (∼φ) := by simp [LitTrue, em]
 
-@[simp, grind =]
-lemma litTrue_substs_numeral {n : ℕ} :
-    LitTrue (φₓ/[(↑n : ArithmeticTerm ℕ)]) ↔ Semiformula.Eval ![n] id φₓ := by simp [LitTrue]
-
 /-- A universal formula is true exactly when all its numeral instances are true.
 
 - [Tow20, Section 13] -/
@@ -73,9 +69,6 @@ variable {k : ℕ} {b : Bool} {r : (ℒₒᵣ).Rel k} {v : Fin k → ArithmeticT
 
 @[simp, grind =] lemma neg_signedLit : ∼(signedLit b r v) = signedLit (!b) r v := by
   cases b <;> simp [signedLit]
-
-@[grind =] lemma litTrue_signedLit_not :
-    LitTrue (signedLit (!b) r v) ↔ ¬LitTrue (signedLit b r v) := by simp [← neg_signedLit]
 
 @[simp, grind .] lemma signedLit_ne_verum : signedLit b r v ≠ ⊤ := by cases b <;> simp [signedLit]
 
@@ -118,11 +111,6 @@ noncomputable def ordinalBound : {Γ : Sequent} → Derivation Γ → Ordinal.{0
   | _, allω _ Dₓ => (⨆ n, (Dₓ n).ordinalBound) + 1
   | _, exI _ _ D => D.ordinalBound + 1
   | _, cut _ D₁ D₂ => max D₁.ordinalBound D₂.ordinalBound + 1
-
-lemma ordinalBound_lt_allω {Γ : Sequent} {φₓ : ArithmeticSemiformula ℕ 1} {n : ℕ}
-    {Dₓ : (n : ℕ) → Derivation (insert (φₓ/[(↑n : ArithmeticTerm ℕ)]) Γ)} :
-    (Dₓ n).ordinalBound < (allω φₓ Dₓ).ordinalBound :=
-  lt_of_le_of_lt (Ordinal.le_iSup _ n) (lt_add_of_pos_right _ one_pos)
 
 /-- The supremum of the quantifier ranks of a derivation's cut formulas, plus one per cut.
 
@@ -234,9 +222,6 @@ end
 
 lemma insert_absorb (h : Z∞ ⊢[α, c] insert φ Γ) (hmem : φ ∈ Γ) : Z∞ ⊢[α, c] Γ := by
   rwa [Finset.insert_eq_self.mpr hmem] at h
-
-lemma contr (h : Z∞ ⊢[α, c] insert φ (insert φ Γ)) : Z∞ ⊢[α, c] insert φ Γ := by
-  simpa using h
 
 /-- The identity axiom.
 

@@ -463,9 +463,6 @@ lemma exists_unique [𝗟𝚺1 ⪯ T] (h : T.ProvablyTotal f) :
 
 end ProvablyTotal
 
-lemma provablyTotalFunctions_subset (h : T ⪯ U) :
-    T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.mono h
-
 /-- The class of provably total functions depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/
 lemma provablyTotalFunctions_subset_of_Pi2

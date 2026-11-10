@@ -31,13 +31,21 @@ lemma not_models_fermatLastTheorem_of_pow_add_pow {R : Type*} [CommRing R] [Line
     [IsStrictOrderedRing R] [OpenPredicate.DiscretelyOrdered R] {n : ℕ} {a b c : R}
     (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) (ha₀ : a ≠ 0) (hb₀ : b ≠ 0) (hc₀ : c ≠ 0)
     (h : a ^ n + b ^ n = c ^ n) : ¬ (Nonneg R)↓[ℒₒᵣ] ⊧ Arithmetic.fermatLastTheorem n := by
-  simp [Arithmetic.fermatLastTheorem, models_iff]
+  simp only [Arithmetic.fermatLastTheorem, Nat.reduceAdd, Fin.isValue, models_iff,
+    Semiformula.eval_all, Nat.succ_eq_add_one, LogicalConnective.HomClass.map_imply,
+    Semiformula.eval_operator, Matrix.comp₂, Semiterm.val_operator, Matrix.comp₁,
+    Semiterm.val_bvar, Matrix.cons_app_two, Matrix.cons_val_one, Fin.Fin1.eq_one,
+    Matrix.cons_val_fin_one, Arithmetic.val_npow, Matrix.cons_val_zero, Tarski.Structure.Add.add,
+    Tarski.Structure.eq_iff_eq, LogicalConnective.HomClass.map_or, Matrix.comp₀,
+    Tarski.Structure.numeral_eq_numeral, ORingStructure.zero_eq_zero, LogicalConnective.Prop.or_eq,
+    LogicalConnective.Prop.arrow_eq, Subtype.forall, Nonneg.mk_eq_zero, not_forall,
+    not_or, exists_and_right]
   let F : CommSemiring (Nonneg R) := Arithmetic.instCommSemiring_foundation
   have hpow (p : Nonneg R) :=
     @map_pow_of_map_mul (Nonneg R) R F _ Subtype.val rfl (fun _ _ ↦ rfl) p n
   have h₁ := congrArg₂ (· + ·) (hpow ⟨a, ha⟩) (hpow ⟨b, hb⟩)
-  exact ⟨a, ha, b, hb, c, ⟨hc, Subtype.ext <| h₁.trans (h.trans (hpow ⟨c, hc⟩).symm)⟩,
-    ha₀, hb₀, hc₀⟩
+  exact ⟨a, ha, b, hb, c, ⟨hc, Subtype.ext <| h₁.trans (h.trans (hpow ⟨c, hc⟩).symm), ha₀⟩,
+    hb₀, hc₀⟩
 
 /-- $\mathsf{IOpen}$ does not prove Fermat's Last Theorem for any exponent $n \ge 3$.
 - [She64]

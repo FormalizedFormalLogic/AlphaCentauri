@@ -230,27 +230,13 @@ variable (M N) in
 private def Definable (n : ℕ) (S : Set (M.World ⊕ N.World)) : Prop :=
   ∃ A : Formula α, A.depth ≤ n ∧ ∀ z, z ∈ S ↔ SumForces M N z A
 
-variable {n : ℕ} {S T : Set (M.World ⊕ N.World)} {𝒮 : Set (Set (M.World ⊕ N.World))}
+variable {n : ℕ} {𝒮 : Set (Set (M.World ⊕ N.World))}
 
-private lemma Definable.inter (hS : Definable M N n S) (hT : Definable M N n T) :
-    Definable M N n (S ∩ T) := by
-  obtain ⟨A, hA, hS⟩ := hS;
-  obtain ⟨B, hB, hT⟩ := hT;
-  use A ⋏ B;
+private lemma definable_forces (hA : A.depth ≤ n) : Definable M N n {z | SumForces M N z A} := by
+  use A;
   and_intros;
-  · simpa using ⟨hA, hB⟩;
-  · intro z;
-    simp [sumForces_and, hS, hT];
-
-private lemma Definable.union (hS : Definable M N n S) (hT : Definable M N n T) :
-    Definable M N n (S ∪ T) := by
-  obtain ⟨A, hA, hS⟩ := hS;
-  obtain ⟨B, hB, hT⟩ := hT;
-  use A ⋎ B;
-  and_intros;
-  · simpa using ⟨hA, hB⟩;
-  · intro z;
-    simp [sumForces_or, hS, hT];
+  · exact hA;
+  · exact fun _ ↦ Iff.rfl;
 
 private lemma Definable.sInter (h𝒮 : 𝒮.Finite) (hS : ∀ S ∈ 𝒮, Definable M N n S) :
     Definable M N n (⋂₀ 𝒮) := by
@@ -262,8 +248,13 @@ private lemma Definable.sInter (h𝒮 : 𝒮.Finite) (hS : ∀ S ∈ 𝒮, Defin
     · intro z;
       exact iff_of_true (by simp) <| sumForces_imp.mpr id;
   | insert _ _ ih =>
-    rw [Set.sInter_insert];
-    exact (hS _ <| Set.mem_insert _ _).inter <| ih fun S hS' ↦ hS S <| Set.mem_insert_of_mem _ hS';
+    obtain ⟨A, hA, hS₀⟩ := hS _ <| Set.mem_insert _ _;
+    obtain ⟨B, hB, hS₁⟩ := ih fun S hS' ↦ hS S <| Set.mem_insert_of_mem _ hS';
+    use A ⋏ B;
+    and_intros;
+    · simpa using ⟨hA, hB⟩;
+    · intro z;
+      simp [Set.sInter_insert, sumForces_and, hS₀, hS₁];
 
 private lemma Definable.sUnion (h𝒮 : 𝒮.Finite) (hS : ∀ S ∈ 𝒮, Definable M N n S) :
     Definable M N n (⋃₀ 𝒮) := by
@@ -275,11 +266,16 @@ private lemma Definable.sUnion (h𝒮 : 𝒮.Finite) (hS : ∀ S ∈ 𝒮, Defin
     · intro z;
       exact iff_of_false (by simp) sumForces_bot;
   | insert _ _ ih =>
-    rw [Set.sUnion_insert];
-    exact (hS _ <| Set.mem_insert _ _).union <| ih fun S hS' ↦ hS S <| Set.mem_insert_of_mem _ hS';
+    obtain ⟨A, hA, hS₀⟩ := hS _ <| Set.mem_insert _ _;
+    obtain ⟨B, hB, hS₁⟩ := ih fun S hS' ↦ hS S <| Set.mem_insert_of_mem _ hS';
+    use A ⋎ B;
+    and_intros;
+    · simpa using ⟨hA, hB⟩;
+    · intro z;
+      simp [Set.sUnion_insert, sumForces_or, hS₀, hS₁];
 
 /-- If worlds with the same value of `σ` force the same formulas of modal depth at most `n`, then
-there are at most as many sets definable by such formulas as there are sets of values of `σ`. -/
+finitely many sets of worlds are definable by such formulas. -/
 private lemma finite_definable_of_invariant {β : Type*} [Finite β] (σ : M.World ⊕ N.World → β)
     (hσ : ∀ A : Formula α, A.depth ≤ n → ∀ z z', σ z = σ z' →
       (SumForces M N z A ↔ SumForces M N z' A)) :
@@ -321,8 +317,6 @@ private lemma finite_definable [Finite α] (n : ℕ) : {S | Definable M N n S}.F
     intro A hA z z' hz;
     simp only [Prod.mk.injEq] at hz;
     obtain ⟨hatom, hbox, hrhd⟩ := hz;
-    have hdef {B : Formula α} (hB : B.depth ≤ n) : Definable M N n {w | SumForces M N w B} :=
-      ⟨B, hB, fun _ ↦ Iff.rfl⟩;
     induction A with
     | atom a => exact Set.ext_iff.mp hatom a;
     | falsum => exact iff_of_false sumForces_bot sumForces_bot;
@@ -330,13 +324,13 @@ private lemma finite_definable [Finite α] (n : ℕ) : {S | Definable M N n S}.F
       simp only [Formula.depth_imp, max_le_iff] at hA;
       simp only [sumForces_imp, ihA hA.1, ihB hA.2];
     | box A =>
-      have hS := hrep ⟨_, hdef (B := A) (by simpa using hA)⟩;
+      have hS := hrep ⟨_, definable_forces (A := A) (by simpa using hA)⟩;
       rw [sumForces_box_congr hS, sumForces_box_congr hS];
       exact Set.ext_iff.mp hbox _;
     | rhd A B =>
       simp only [Formula.depth_rhd, add_le_add_iff_right, max_le_iff] at hA;
-      have hS := hrep ⟨_, hdef hA.1⟩;
-      have hT := hrep ⟨_, hdef hA.2⟩;
+      have hS := hrep ⟨_, definable_forces hA.1⟩;
+      have hT := hrep ⟨_, definable_forces hA.2⟩;
       rw [sumForces_rhd_congr hS hT, sumForces_rhd_congr hS hT];
       exact Set.ext_iff.mp hrhd (_, _);
 
@@ -354,9 +348,9 @@ private lemma definable_modalEquivalent_class [Finite α] (n : ℕ) (u : M.World
       exact (hS z).mpr <| (hz A hA).mpr <| (hS u).mp hu;
     · intro hz A hA;
       by_cases hu : SumForces M N u A;
-      · exact iff_of_true (hz _ ⟨A, hA, fun _ ↦ Iff.rfl⟩ hu) hu;
+      · exact iff_of_true (hz _ (definable_forces hA) hu) hu;
       · apply iff_of_false _ hu;
-        exact hz {w | ¬SumForces M N w A} ⟨∼A, by simpa, fun _ ↦ sumForces_neg.symm⟩ hu;
+        exact sumForces_neg.mp <| hz _ (definable_forces (by simpa)) <| sumForces_neg.mpr hu;
   rw [this];
   exact Definable.sInter ((finite_definable n).subset fun _ h ↦ h.1) fun _ h ↦ h.1;
 

@@ -1441,6 +1441,94 @@ lemma subst_eq_self₁ {p : V} (hp : IsSemiformula L 1 p) :
 
 end subst
 
+variable (L)
+
+noncomputable def substs1 (t u : V) : V := subst L ?[t] u
+
+variable {L}
+
+section substs1
+
+section
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (substs1Graph)
+
+instance substs1.defined : 𝚺ᴬ₁-Function₂[V] substs1 L via substs1Graph L :=
+  .mk fun v ↦ by simp [substs1Graph]; rfl
+
+instance substs1.definable : 𝚺ᴬ₁-Function₂[V] substs1 L := substs1.defined.to_definable
+
+instance substs1.definable' (Γ m) : Γᴬ_[m + 1]-Function₂[V] substs1 L :=
+  substs1.definable.of_sigmaOne
+
+end
+
+lemma substs1_locallyDelta0 : LocallyDelta0Function₂ (substs1 (V := V) L) :=
+  subst_locallyDelta0.comp₂
+    (LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.var 0)
+      (LocallyDelta0Function.const 0))
+    (LocallyDelta0Function.var 1)
+
+lemma IsSemiformula.substs1 {n t p : V} (ht : IsSemiterm L n t) (hp : IsSemiformula L 1 p) :
+    IsSemiformula L n (substs1 L t p) :=
+  IsSemiformula.subst hp (by simp [ht])
+
+end substs1
+
+variable (L)
+
+noncomputable def free (p : V) : V := substs1 L ^&0 (shift L p)
+
+variable {L}
+
+/-! ### free function -/
+
+section free
+
+section
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (freeGraph)
+
+instance free.defined : 𝚺ᴬ₁-Function₁[V] free L via freeGraph L :=
+  .mk fun v ↦ by simp [freeGraph, free]
+
+instance free.definable : 𝚺ᴬ₁-Function₁[V] free L := free.defined.to_definable
+
+instance free.definable' (Γ m) : Γᴬ_[m + 1]-Function₁[V] free L := free.definable.of_sigmaOne
+
+end
+
+lemma free_locallyDelta0 : LocallyDelta0Function₁ (free (V := V) L) :=
+  substs1_locallyDelta0.comp₂ (LocallyDelta0Function.const _)
+    (shift_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
+
+@[simp] lemma IsSemiformula.free {p : V} (hp : IsSemiformula L 1 p) : IsFormula L (free L p) :=
+  IsSemiformula.substs1 (by simp) hp.shift
+
+end free
+
+section free1
+
+variable (L)
+
+noncomputable def free1 (p : V) : V := subst L ?[^&0, ^#0] (shift L p)
+
+variable {L}
+
+@[simp] lemma IsSemiformula.free1 {p : V} (hp : IsSemiformula L 2 p) :
+    IsSemiformula L 1 (free1 L p) :=
+  IsSemiformula.subst (m := 1) hp.shift
+      (SemitermVec.adjoin (SemitermVec.adjoin (IsSemitermVec.empty _) (by simp)) (by simp))
+
+lemma free1_locallyDelta0 : LocallyDelta0Function₁ (free1 (V := V) L) :=
+  subst_locallyDelta0.comp₂
+    (LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.const _)
+      (LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.const _)
+        (LocallyDelta0Function.const 0)))
+    (shift_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
+
+end free1
+
 section complexity
 
 namespace FormulaComplexity

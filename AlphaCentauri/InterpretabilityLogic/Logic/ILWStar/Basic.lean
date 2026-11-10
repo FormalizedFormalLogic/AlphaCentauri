@@ -63,13 +63,25 @@ instance : (𝐈𝐋𝐖* : Logic α) ≊ 𝐈𝐋𝐌₀𝐖 := equiv_iff.mpr <
 
 end Logic
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILWStar : Prop extends M.IsILMZeroW
+
+instance (v : α → Prop) : (pointModel v).IsILWStar := {}
+
+instance (priority := low) [M.IsIL] [M.HasM₀] [M.HasW] : M.IsILWStar := {}
+
+end Veltman.Model
+
 namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILWStar.sound [M.IsIL] [M.HasM₀] [M.HasW] (h : 𝐈𝐋𝐖* ⊢ A) : M ⊧ A :=
+theorem ILWStar.sound [M.IsILWStar] (h : 𝐈𝐋𝐖* ⊢ A) : M ⊧ A :=
   ILM₀W.sound <| (equiv_iff.mp inferInstance : (𝐈𝐋𝐖* : Logic α) = 𝐈𝐋𝐌₀𝐖).subset h
 
 instance : Consistent (𝐈𝐋𝐖* : Logic α) :=
@@ -100,7 +112,7 @@ variable {α : Type*} {A : Formula α}
 /-- - [GJ08, Theorem 7.1] -/
 theorem ILWStar.iff_valid :
     𝐈𝐋𝐖* ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasW] → [M.HasM₀] → M ⊧ A := by
+      [M.IsILWStar] → M ⊧ A := by
   constructor;
   · intro h _ _ M;
     intros;

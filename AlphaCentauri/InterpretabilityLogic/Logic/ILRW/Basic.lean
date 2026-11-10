@@ -49,13 +49,25 @@ instance : (𝐈𝐋𝐌₀𝐖 : Logic α) ⪯ 𝐈𝐋𝐑𝐖 := weakerThan_i
 
 end Logic
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILRW : Prop extends M.IsIL, M.HasR, M.HasW
+
+instance (v : α → Prop) : (pointModel v).IsILRW := {}
+
+instance (priority := low) [M.IsIL] [M.HasR] [M.HasW] : M.IsILRW := {}
+
+end Veltman.Model
+
 namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILRW.sound [M.IsIL] [M.HasR] [M.HasW] (h : 𝐈𝐋𝐑𝐖 ⊢ A) : M ⊧ A := by
+theorem ILRW.sound [M.IsILRW] (h : 𝐈𝐋𝐑𝐖 ⊢ A) : M ⊧ A := by
   apply ofAxioms.sound _ h;
   rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩) x;
   · exact forces_axiomR;
@@ -136,18 +148,28 @@ instance : (𝐈𝐋𝐌₀𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐑𝐖 :=
 
 end Logic
 
+namespace Verbrugge.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILRW : Prop extends M.IsIL, M.HasR, M.HasW
+
+instance (priority := low) [M.IsIL] [M.HasR] [M.HasW] : M.IsILRW := {}
+
+end Verbrugge.Model
+
 /-- $\mathbf{ILRW}$ is complete with respect to Veltman frames. An open problem.
 - [JMMV20, §6.5] -/
 def ILRWVeltmanCompletenessProblem : Prop :=
   ∀ A : Formula ℕ,
-    (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsIL] [M.HasR] [M.HasW], M ⊧ A) →
+    (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsILRW], M ⊧ A) →
       𝐈𝐋𝐑𝐖 ⊢ A
 
 /-- $\mathbf{ILRW}$ is complete with respect to generalised Veltman frames. An open problem.
 - [JMMV20, §6.5] -/
 def ILRWVerbruggeCompletenessProblem : Prop :=
   ∀ A : Formula ℕ,
-    (∀ (κ : Type) [Nonempty κ] (M : Verbrugge.Model κ ℕ) [M.IsIL] [M.HasR] [M.HasW], M ⊧ A) →
+    (∀ (κ : Type) [Nonempty κ] (M : Verbrugge.Model κ ℕ) [M.IsILRW], M ⊧ A) →
       𝐈𝐋𝐑𝐖 ⊢ A
 
 end FFL.InterpretabilityLogic

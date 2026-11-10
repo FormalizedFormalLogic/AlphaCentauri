@@ -52,23 +52,15 @@ lemma ILM.axiomR : 𝐈𝐋𝐌 ⊢ Axioms.R A B C := by
 
 end Logic
 
-namespace Logic
+namespace Veltman.Model
 
-section
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
 
-open Veltman Veltman.Model Veltman.Model.World
+class IsILM : Prop extends M.IsIL, M.HasM
 
-variable {κ : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
+instance (v : α → Prop) : (pointModel v).IsILM := {}
 
-theorem ILM.sound [M.IsIL] [M.HasM] (h : 𝐈𝐋𝐌 ⊢ A) : M ⊧ A :=
-  ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM) h
-
-instance : Consistent (𝐈𝐋𝐌 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILM.sound (M := pointModel fun _ ↦ False) h 0
-
-end
-
-end Logic
+end Veltman.Model
 
 section
 
@@ -636,6 +628,8 @@ instance : (countermodelM Φ).HasM where
     exact ⟨⟨fun h ↦ h₂.1.mem_of_box_mem (h₁.2.2 h), fun h ↦ h₂.1.box_mem_of_box_mem (h₁.2.2 h),
       A, hA, fun h ↦ hA' (h₁.2.2 h)⟩, h₁.2.1.trans h₂.2⟩
 
+instance [Adequate Φ] : (countermodelM Φ).IsILM := {}
+
 variable [MAdequate Φ]
 
 /-- - [dJV90, Theorem 6.3] -/
@@ -716,19 +710,24 @@ namespace Logic
 
 section
 
-open Veltman
+open Veltman Veltman.Model Veltman.Model.World
 
 variable {α : Type} {A : Formula α}
 
 /-- - [dJV90, Theorem 6.3] -/
-theorem ILM.iff_valid_finite :
-    𝐈𝐋𝐌 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasM] → M ⊧ A := by
-  constructor;
-  · intro h _ _ _ M;
-    intros;
-    exact ILM.sound h;
-  · intro h;
+theorem ILM.semantics_TFAE : [
+    𝐈𝐋𝐌 ⊢ A,
+    ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsILM] → M ⊧ A,
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsILM] → M ⊧ A
+  ].TFAE := by
+  tfae_have 1 → 2 := by
+    intro h _ _ M _;
+    exact ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM) h;
+  tfae_have 2 → 3 := by
+    intro h _ _ _ M _;
+    exact h M;
+  tfae_have 3 → 1 := by
+    intro h;
     classical
     by_contra hA;
     have : Entailment.Consistent (𝐈𝐋𝐌 : Logic α) := .of_unprovable hA;
@@ -741,7 +740,24 @@ theorem ILM.iff_valid_finite :
     obtain ⟨Γ, hΓ⟩ := MaximalConsistentSet.exists_consistent_union (Φ := Φ) hX;
     have hAΦ : A ∈ Φ := mAdequateClosure.subset <| adequateClosure.subset (by simp);
     exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
-      (countermodelM.truthlemma hAΦ).mp <| h (countermodelM Φ) ⟨Γ, [], by simp, by simp⟩
+      (countermodelM.truthlemma hAΦ).mp <| h (countermodelM Φ) ⟨Γ, [], by simp, by simp⟩;
+  tfae_finish;
+
+theorem ILM.iff_valid :
+    𝐈𝐋𝐌 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsILM] → M ⊧ A :=
+  ILM.semantics_TFAE.out 1 2
+
+theorem ILM.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α} [M.IsILM] (h : 𝐈𝐋𝐌 ⊢ A) :
+    M ⊧ A :=
+  ILM.iff_valid.mp h M
+
+instance : Consistent (𝐈𝐋𝐌 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ ILM.sound (M := pointModel fun _ ↦ False) h 0
+
+/-- - [dJV90, Theorem 6.3] -/
+theorem ILM.iff_valid_finite :
+    𝐈𝐋𝐌 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsILM] → M ⊧ A :=
+  ILM.semantics_TFAE.out 1 3
 
 end
 

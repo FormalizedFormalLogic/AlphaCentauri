@@ -33,13 +33,25 @@ variable {A B C : Formula α}
 
 end Logic
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILMZero : Prop extends M.IsIL, M.HasM₀
+
+instance (v : α → Prop) : (pointModel v).IsILMZero := {}
+
+instance (priority := low) [M.IsIL] [M.HasM₀] : M.IsILMZero := {}
+
+end Veltman.Model
+
 namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILM₀.sound [M.IsIL] [M.HasM₀] (h : 𝐈𝐋𝐌₀ ⊢ A) : M ⊧ A :=
+theorem ILM₀.sound [M.IsILMZero] (h : 𝐈𝐋𝐌₀ ⊢ A) : M ⊧ A :=
   ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM₀) h
 
 instance : Consistent (𝐈𝐋𝐌₀ : Logic α) :=
@@ -70,7 +82,7 @@ variable {α : Type*} {A : Formula α}
 /-- - [GJ08, Theorem 6.1] -/
 theorem ILM₀.iff_valid :
     𝐈𝐋𝐌₀ ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasM₀] → M ⊧ A := by
+      [M.IsILMZero] → M ⊧ A := by
   constructor;
   · intro h _ _ M;
     intros;

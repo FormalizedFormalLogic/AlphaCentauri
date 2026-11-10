@@ -51,13 +51,25 @@ instance : (𝐈𝐋𝐌₀ : Logic α) ⪯ 𝐈𝐋𝐌₀𝐖 := weakerThan_if
 
 end Logic
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILMZeroW : Prop extends M.IsIL, M.HasM₀, M.HasW
+
+instance (v : α → Prop) : (pointModel v).IsILMZeroW := {}
+
+instance (priority := low) [M.IsIL] [M.HasM₀] [M.HasW] : M.IsILMZeroW := {}
+
+end Veltman.Model
+
 namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILM₀W.sound [M.IsIL] [M.HasM₀] [M.HasW] (h : 𝐈𝐋𝐌₀𝐖 ⊢ A) : M ⊧ A := by
+theorem ILM₀W.sound [M.IsILMZeroW] (h : 𝐈𝐋𝐌₀𝐖 ⊢ A) : M ⊧ A := by
   apply ofAxioms.sound _ h;
   rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩) x;
   · exact forces_axiomM₀;

@@ -37,9 +37,9 @@ section
 
 open Veltman Veltman.Model Veltman.Model.World
 
-variable {κ : Type*} [Nonempty κ] {M : Model κ α}
+variable {κ α : Type} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILF.sound [M.IsIL] [M.HasW] (h : 𝐈𝐋𝐅 ⊢ A) : M ⊧ A :=
+theorem ILF.sound [M.IsILKW2] (h : 𝐈𝐋𝐅 ⊢ A) : M ⊧ A :=
   ILKW2.sound <| weakerThan_iff.mp inferInstance h
 
 instance : Consistent (𝐈𝐋𝐅 : Logic α) :=

@@ -43,9 +43,9 @@ section
 
 open Veltman Veltman.Model Veltman.Model.World
 
-variable {κ : Type*} [Nonempty κ] {M : Model κ α}
+variable {κ α : Type} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILKW1Zero.sound [M.IsIL] [M.HasW] (h : 𝐈𝐋𝐊𝐖𝟏⁰ ⊢ A) : M ⊧ A :=
+theorem ILKW1Zero.sound [M.IsILKW2] (h : 𝐈𝐋𝐊𝐖𝟏⁰ ⊢ A) : M ⊧ A :=
   ILKW2.sound <| (equiv_iff.mp inferInstance : (𝐈𝐋𝐊𝐖𝟏⁰ : Logic α) = 𝐈𝐋𝐊𝐖𝟐).subset h
 
 instance : Consistent (𝐈𝐋𝐊𝐖𝟏⁰ : Logic α) :=

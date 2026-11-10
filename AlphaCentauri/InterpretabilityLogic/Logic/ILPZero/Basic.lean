@@ -40,7 +40,7 @@ open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILP₀.sound [M.IsIL] [M.HasR] (h : 𝐈𝐋𝐏₀ ⊢ A) : M ⊧ A :=
+theorem ILP₀.sound [M.IsILR] (h : 𝐈𝐋𝐏₀ ⊢ A) : M ⊧ A :=
   ILR.sound <| weakerThan_iff.mp inferInstance h
 
 instance : Consistent (𝐈𝐋𝐏₀ : Logic α) :=
@@ -80,13 +80,23 @@ instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐏₀ :=
 
 end Logic
 
+namespace Verbrugge.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILPZero : Prop extends M.IsIL, M.HasP₀
+
+instance (priority := low) [M.IsIL] [M.HasP₀] : M.IsILPZero := {}
+
+end Verbrugge.Model
+
 section Verbrugge
 
 variable {α : Type} {A : Formula α}
 
 /-- - [MV20, Theorem 23] -/
 theorem Logic.ILP₀.complete_verbrugge
-    (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsIL] → [M.HasP₀] → M ⊧ A) :
+    (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsILPZero] → M ⊧ A) :
     𝐈𝐋𝐏₀ ⊢ A := by
   classical
   by_contra hA;

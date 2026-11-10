@@ -53,13 +53,35 @@ instance : (𝐈𝐋𝐌₀ : Logic α) ⪯ 𝐈𝐋𝐑 :=
 
 end Logic
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILR : Prop extends M.IsIL, M.HasR
+
+instance (v : α → Prop) : (pointModel v).IsILR := {}
+
+instance (priority := low) [M.IsIL] [M.HasR] : M.IsILR := {}
+
+end Veltman.Model
+
+namespace Verbrugge.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILR : Prop extends M.IsIL, M.HasR
+
+instance (priority := low) [M.IsIL] [M.HasR] : M.IsILR := {}
+
+end Verbrugge.Model
+
 namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILR.sound [M.IsIL] [M.HasR] (h : 𝐈𝐋𝐑 ⊢ A) : M ⊧ A :=
+theorem ILR.sound [M.IsILR] (h : 𝐈𝐋𝐑 ⊢ A) : M ⊧ A :=
   ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomR) h
 
 instance : Consistent (𝐈𝐋𝐑 : Logic α) :=
@@ -73,7 +95,7 @@ variable {α : Type} {A : Formula α}
 
 /-- - [MV20, Theorem 25] -/
 theorem Logic.ILR.complete_verbrugge
-    (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsIL] → [M.HasR] → M ⊧ A) :
+    (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsILR] → M ⊧ A) :
     𝐈𝐋𝐑 ⊢ A := by
   classical
   by_contra hA;
@@ -87,7 +109,7 @@ end Verbrugge
 - [MV20, §2.5] -/
 def ILRVeltmanCompletenessProblem : Prop :=
   ∀ A : Formula ℕ,
-    (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsIL] [M.HasR], M ⊧ A) → 𝐈𝐋𝐑 ⊢ A
+    (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsILR], M ⊧ A) → 𝐈𝐋𝐑 ⊢ A
 
 end FFL.InterpretabilityLogic
 

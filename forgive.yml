@@ -97,13 +97,7 @@ declaration:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
       - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
-  FFL.FirstOrder.Arithmetic.not_provable_IOpen_allClosure:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
   FFL.FirstOrder.not_provable_fermatLastTheorem_IOpen:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
-  FFL.FirstOrder.not_provable_irrationalSqrtTwo_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
   FFL.FirstOrder.Arithmetic.provable_univCl_IOpen_iff:

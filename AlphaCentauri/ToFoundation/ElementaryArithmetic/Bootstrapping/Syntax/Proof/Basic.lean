@@ -579,6 +579,60 @@ lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
   exact (hfs.and <| h₁.or <| h₂.or <| h₃.or <| h₄.or <| h₅.or <| h₆.or <| h₇.or <| h₈.or <|
     h₉.or h₁₀).of_iff fun w ↦ phi_iff T (w 1) (w 0)
 
+variable [LocallyDelta0Axioms T V]
+
+variable (T) in
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Derivation (blueprint) in
+/-- The construction of the codes of derivations from the axioms of `T`. -/
+def construction : Fixpoint.Construction V (blueprint T) where
+  Φ := fun _ ↦ Phi T
+  defined := .mk <| by
+    constructor
+    · intro v
+      simp [blueprint, (LocallyDelta0Axioms.properOn (T := T) (V := V)).iff',
+        Bounding.HierarchySymbol.Semiformula.val_sigma]
+    · intro v
+      simp [phi_iff, blueprint, Theory.Δ₁Class, Bounding.HierarchySymbol.Semiformula.val_sigma]
+  monotone := by
+    rintro C C' hC _ d ⟨hs, H⟩
+    refine ⟨hs, ?_⟩
+    rcases H with (h | h | ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC⟩, ⟨hq, hqC⟩⟩ |
+      ⟨s, p, q, dpq, rfl, hpq, h, hdC⟩ |
+      ⟨s, p, dp, rfl, hp, h, hdC⟩ | ⟨s, p, t, dp, rfl, hp, ht, h, hdC⟩ |
+      ⟨s, d', rfl, ss, hdC⟩ | ⟨s, d', rfl, ss, hdC⟩ | ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C⟩, ⟨h₂, hd₂C⟩⟩ |
+      ⟨s, p, h⟩)
+    · disj 1; exact h
+    · disj 2; exact h
+    · disj 3; exact ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hC hpC⟩, ⟨hq, hC hqC⟩⟩
+    · disj 4; exact ⟨s, p, q, dpq, rfl, hpq, h, hC hdC⟩
+    · disj 5; exact ⟨s, p, dp, rfl, hp, h, hC hdC⟩
+    · disj 6; exact ⟨s, p, t, dp, rfl, hp, ht, h, hC hdC⟩
+    · disj 7; exact ⟨s, d', rfl, ss, hC hdC⟩
+    · disj 8; exact ⟨s, d', rfl, ss, hC hdC⟩
+    · disj 9; exact ⟨s, p, d₁, d₂, rfl, ⟨h₁, hC hd₁C⟩, ⟨h₂, hC hd₂C⟩⟩
+    · disj 10; exact ⟨s, p, h⟩
+  Φ_locallyDelta0 := phi_locallyDelta0
+
+instance : (construction T).StrongFinite V where
+  strong_finite := by
+    rintro C _ d ⟨hs, H⟩
+    refine ⟨hs, ?_⟩
+    rcases H with (h | h | ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC⟩, ⟨hq, hqC⟩⟩ |
+      ⟨s, p, q, dpq, rfl, hpq, h, hdC⟩ |
+      ⟨s, p, dp, rfl, hp, h, hdC⟩ | ⟨s, p, t, dp, rfl, hp, ht, h, hdC⟩ |
+      ⟨s, d', rfl, ss, hdC⟩ | ⟨s, d', rfl, ss, hdC⟩ | ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C⟩, ⟨h₂, hd₂C⟩⟩ |
+      ⟨s, p, h⟩)
+    · disj 1; exact h
+    · disj 2; exact h
+    · disj 3; exact ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC, by simp⟩, ⟨hq, hqC, by simp⟩⟩
+    · disj 4; exact ⟨s, p, q, dpq, rfl, hpq, h, hdC, by simp⟩
+    · disj 5; exact ⟨s, p, dp, rfl, hp, h, hdC, by simp⟩
+    · disj 6; exact ⟨s, p, t, dp, rfl, hp, ht, h, hdC, by simp⟩
+    · disj 7; exact ⟨s, d', rfl, ss, hdC, by simp⟩
+    · disj 8; exact ⟨s, d', rfl, ss, hdC, by simp⟩
+    · disj 9; exact ⟨s, p, d₁, d₂, rfl, ⟨h₁, hd₁C, by simp⟩, ⟨h₂, hd₂C, by simp⟩⟩
+    · disj 10; exact ⟨s, p, h⟩
+
 end Derivation
 
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

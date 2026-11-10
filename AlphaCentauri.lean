@@ -45,6 +45,7 @@ public import AlphaCentauri.Hierarchy.Diophantine
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Henkin
+public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Extension
 public import AlphaCentauri.InterpretabilityLogic.Formula
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Basic
@@ -57,6 +58,7 @@ public import AlphaCentauri.InterpretabilityLogic.OpenProblem
 public import AlphaCentauri.InterpretabilityLogic.Sequent
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
+public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILP
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Completeness
@@ -74,6 +76,10 @@ public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
+public import AlphaCentauri.NumberTheory.Bertrand
+public import AlphaCentauri.NumberTheory.Bertrand.Embedding
+public import AlphaCentauri.NumberTheory.Bertrand.Positions
+public import AlphaCentauri.NumberTheory.Bertrand.Sizes
 public import AlphaCentauri.NumberTheory.DirectSummand
 public import AlphaCentauri.NumberTheory.EuclideanDivision
 public import AlphaCentauri.NumberTheory.FLT3
@@ -137,6 +143,7 @@ public import AlphaCentauri.ToFoundation.Exponential
 public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
+public import AlphaCentauri.ToFoundation.Injection
 public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
 public import AlphaCentauri.ToFoundation.LeastWitness
@@ -144,6 +151,7 @@ public import AlphaCentauri.ToFoundation.OpenFormulaDegree
 public import AlphaCentauri.ToFoundation.OpenPredicate
 public import AlphaCentauri.ToFoundation.PartialTruth
 public import AlphaCentauri.ToFoundation.Pigeonhole
+public import AlphaCentauri.ToFoundation.Power
 public import AlphaCentauri.ToFoundation.PrenexCombination
 public import AlphaCentauri.ToFoundation.PrenexDefinable
 public import AlphaCentauri.ToFoundation.PrenexNormalForm
@@ -168,10 +176,12 @@ public import AlphaCentauri.ToMathlib.EisensteinInteger
 public import AlphaCentauri.ToMathlib.ElementaryClosure
 public import AlphaCentauri.ToMathlib.FLT3.Descent
 public import AlphaCentauri.ToMathlib.FLT3.Eisenstein
+public import AlphaCentauri.ToMathlib.FieldExtension
 public import AlphaCentauri.ToMathlib.Goodstein
 public import AlphaCentauri.ToMathlib.HahnSeries
 public import AlphaCentauri.ToMathlib.IntegerConstantPolynomial
 public import AlphaCentauri.ToMathlib.IntegerPart
+public import AlphaCentauri.ToMathlib.LeadingCoeffOrder
 public import AlphaCentauri.ToMathlib.ONote.Computability
 public import AlphaCentauri.ToMathlib.ONote.Epsilon0
 public import AlphaCentauri.ToMathlib.ONote.FastGrowing

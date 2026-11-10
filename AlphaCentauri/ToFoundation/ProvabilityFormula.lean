@@ -15,7 +15,8 @@ provability follows from the provability of `x`, it satisfies the internal form 
 derivability condition $\mathbf{D2}$, and every standard $\Sigma_1$ formula with one parameter
 internally implies its own `provabilityFormula` at every numeral. Together with the internal
 equivalence of an internal prenex $\Sigma_1$ sentence with its partial truth, every internal prenex
-$\Sigma_1$ sentence internally implies its own `provabilityFormula`.
+$\Sigma_1$ sentence internally implies its own `provabilityFormula`. A formula of the form
+`∀¹ (∀u < #0 + 1, A u ⋎ ∀x < #0 + 1, B x)` with $\Delta_0$ formulas `A` and `B` is prenex $\Pi_1$.
 -/
 
 @[expose] public section

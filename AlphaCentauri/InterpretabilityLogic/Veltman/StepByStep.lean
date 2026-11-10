@@ -2,6 +2,8 @@ module
 
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentTheory
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
+public import Mathlib.Logic.Encodable.Basic
+public import Mathlib.Data.Nat.Pairing
 
 /-!
 # Completeness of $\mathbf{ILM}_0$ with respect to Veltman models
@@ -533,7 +535,7 @@ lemma cr_aux (n : ℕ) :
         have := anc_le htρ';
         have := pre_lt hut;
         omega;
-      rw [hc, if_neg hua, hom ha (Finset.mem_filter.mpr ⟨htρ', hut⟩)];
+      rw [hc, ite_eq_right hua, hom ha (Finset.mem_filter.mpr ⟨htρ', hut⟩)];
     · obtain ⟨hp, -, -, hc⟩ := fields_deficiency hk';
       obtain ⟨ha, hs, has⟩ : a < n ∧ s < n ∧ a ∈ (𝒩 s).pre := by
         simpa [hk'] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
@@ -548,7 +550,7 @@ lemma cr_aux (n : ℕ) :
           have := anc_le htρ';
           have := pre_lt hut;
           omega;
-        rw [if_neg hua, hom ha (Finset.mem_filter.mpr ⟨htρ', hut⟩)];
+        rw [ite_eq_right hua, hom ha (Finset.mem_filter.mpr ⟨htρ', hut⟩)];
       | coe r =>
         rw [hr] at htρ';
         simp only [WithBot.unbotD_coe] at htρ';
@@ -556,9 +558,9 @@ lemma cr_aux (n : ℕ) :
         obtain ⟨har, -⟩ := mu_spec has hr;
         by_cases hua : u = a;
         · subst u;
-          rw [if_pos rfl, (ih s hs).2.1 a r has hr];
+          rw [ite_eq_left rfl, (ih s hs).2.1 a r has hr];
           exact (ih r (hrs.trans hs)).1 t a hut har htρ';
-        · rw [if_neg hua];
+        · rw [ite_eq_right hua];
           have haρ : a ∈ (𝒩 r).anc := pre_subset_anc har;
           rcases le_or_gt t a with hta | hta;
           · rw [hom ha (Finset.mem_filter.mpr ⟨mem_anc_of_le htρ' haρ hta, hut⟩)];
@@ -999,7 +1001,80 @@ lemma truthlemma {Ω : Finset (Formula α)}
 
 end
 
+/-! ### Enumerating the jobs -/
+
+/-- The jobs with formulas from `l`, each appearing infinitely often. -/
+noncomputable def enumJob (l : List (Formula α)) (n : ℕ) : Job α :=
+  match Encodable.decode (α := Bool × ℕ × ℕ × ℕ × ℕ) n.unpair.1 with
+  | some (true, x, _, i, j) => .problem x (l.getD i ⊥) (l.getD j ⊥)
+  | some (false, x, y, i, j) => .deficiency x y (l.getD i ⊥) (l.getD j ⊥)
+  | none => .problem 0 ⊥ ⊥
+
+private lemma getD_mem {Ω : Finset (Formula α)} (hbot : ⊥ ∈ Ω) (i : ℕ) : Ω.toList.getD i ⊥ ∈ Ω := by
+  by_cases hi : i < Ω.toList.length;
+  · rw [List.getD_eq_getElem _ _ hi];
+    exact Finset.mem_toList.mp (List.getElem_mem hi);
+  · rw [List.getD_eq_default _ _ (not_lt.mp hi)];
+    exact hbot;
+
+private lemma exists_getD {Ω : Finset (Formula α)} {A : Formula α} (hA : A ∈ Ω) :
+    ∃ i, Ω.toList.getD i ⊥ = A := by
+  obtain ⟨i, hi, rfl⟩ := List.mem_iff_getElem.mp (Finset.mem_toList.mpr hA);
+  exact ⟨i, List.getD_eq_getElem _ _ hi⟩
+
+lemma enumJob_mem {Ω : Finset (Formula α)} (hbot : ⊥ ∈ Ω) (n : ℕ) : (enumJob Ω.toList n).Mem Ω := by
+  unfold enumJob;
+  split <;> first | exact ⟨getD_mem hbot _, getD_mem hbot _⟩ | exact ⟨hbot, hbot⟩
+
+lemma enumJob_fair {Ω : Finset (Formula α)} (t : Job α) (ht : t.Mem Ω) (N : ℕ) :
+    ∃ n, N < n ∧ enumJob Ω.toList n = t := by
+  have key (c : Bool × ℕ × ℕ × ℕ × ℕ) : ∃ n, N < n ∧
+      Encodable.decode (α := Bool × ℕ × ℕ × ℕ × ℕ) n.unpair.1 = some c := by
+    refine ⟨Nat.pair (Encodable.encode c) (N + 1), ?_, ?_⟩;
+    · exact Nat.lt_of_lt_of_le (Nat.lt_succ_self N) (Nat.right_le_pair _ _);
+    · rw [Nat.unpair_pair];
+      exact Encodable.encodek c;
+  rcases t with ⟨x, A, B⟩ | ⟨x, y, A, B⟩;
+  · obtain ⟨i, hi⟩ := exists_getD ht.1;
+    obtain ⟨j, hj⟩ := exists_getD ht.2;
+    obtain ⟨n, hn, hd⟩ := key (true, x, 0, i, j);
+    exact ⟨n, hn, by unfold enumJob; rw [hd]; simp only [hi, hj]⟩;
+  · obtain ⟨i, hi⟩ := exists_getD ht.1;
+    obtain ⟨j, hj⟩ := exists_getD ht.2;
+    obtain ⟨n, hn, hd⟩ := key (false, x, y, i, j);
+    exact ⟨n, hn, by unfold enumJob; rw [hd]; simp only [hi, hj]⟩;
+
 end Veltman.StepByStep
+
+/-! ### Completeness -/
+
+namespace Logic.ILM₀
+
+open Veltman Veltman.StepByStep
+
+variable {α : Type*} {A : Formula α}
+
+/-- - [GJ08, Theorem 6.1] -/
+theorem complete
+    (h : ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsIL] → [M.HasM₀] → M ⊧ A) :
+    𝐈𝐋𝐌₀ ⊢ A := by
+  classical
+  by_contra hA;
+  have hX : ({∼A} : Set (Formula α)) *⊬[𝐈𝐋𝐌₀] ⊥ := by
+    intro h₁;
+    apply hA;
+    have h₂ : 𝐈𝐋𝐌₀ ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+    cl_prover [h₂];
+  obtain ⟨Γ₀, hΓ₀⟩ := MaximalConsistentTheory.exists_superset hX;
+  let Ω : Finset (Formula α) := A.subformulas ∪ A.subformulas.image (∼·) ∪ {⊥};
+  have hbot : ⊥ ∈ Ω := by simp [Ω];
+  have := model_isIL (Γ₀ := Γ₀) (τ := enumJob Ω.toList) (enumJob_mem hbot);
+  have hA' := (truthlemma (Γ₀ := Γ₀) (τ := enumJob Ω.toList) axiomM₀ enumJob_fair hbot (C := A)
+    (fun D hD ↦ ⟨by simp [Ω, hD], by simp only [Ω, Finset.mem_union, Finset.mem_image]; exact .inl (.inr ⟨D, hD, rfl⟩)⟩) 0).mp (h (model Γ₀ (enumJob Ω.toList)) 0);
+  rw [node_zero] at hA';
+  exact MaximalConsistentTheory.not_mem_of_neg_mem (hΓ₀ rfl) hA'
+
+end Logic.ILM₀
 
 end FFL.InterpretabilityLogic
 

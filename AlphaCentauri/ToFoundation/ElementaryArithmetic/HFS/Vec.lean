@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.CourseOfValues
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Fixpoint
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 
@@ -81,17 +82,16 @@ instance mkVec₂_definable : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ ?[x, y]) :
 instance mkVec₂_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (fun x y : V ↦ ?[x, y]) :=
   mkVec₂_definable.of_sigmaOne
 
+instance adjoin_bounded : Bounded₂ (adjoin : V → V → V) :=
+  ⟨‘x y. (x + y + 1) * (x + y + 1) + 1’, fun v ↦ by
+    simpa [adjoin_def, sq] using pair_polybound (v 0) (v 1)⟩
+
 lemma LocallyDelta0Function.adjoin : LocallyDelta0Function₂ (adjoin : V → V → V) :=
-  LocallyDelta0Function.of_definableBoundedFunction
-    ⟨⟨‘x y. (x + y + 1) * (x + y + 1) + 1’, fun v ↦ by
-      simpa [adjoin_def, sq] using pair_polybound (v 0) (v 1)⟩, adjoin_definable⟩
+  LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, adjoin_definable⟩
 
 instance fstIdx_bounded : Bounded₁ (fstIdx : V → V) := ⟨‘x. x’, fun _ ↦ by simp⟩
 
 instance sndIdx_bounded : Bounded₁ (sndIdx : V → V) := ⟨‘x. x’, fun _ ↦ by simp⟩
-
-lemma LocallyDelta0Function.pair : LocallyDelta0Function₂ (fun x y : V ↦ ⟪x, y⟫) :=
-  LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
 
 end adjoin
 
@@ -151,8 +151,8 @@ lemma graph_case {pr : V} :
 
 lemma graph_locallyDelta0 : LocallyDelta0 fun w : Fin 3 → V ↦ Graph ⟪w 0, w 1, w 2⟫ := by
   have := adjointruction.fixpoint_locallyDelta0.comp_cons (u := Fin.elim0)
-    (LocallyDelta0Function.pair.comp₂ (LocallyDelta0Function.var (V := V) (0 : Fin 3))
-      (LocallyDelta0Function.pair.comp₂ (LocallyDelta0Function.var (V := V) (1 : Fin 3))
+    (LocallyDelta0Function.pairing.comp₂ (LocallyDelta0Function.var (V := V) (0 : Fin 3))
+      (LocallyDelta0Function.pairing.comp₂ (LocallyDelta0Function.var (V := V) (1 : Fin 3))
         (LocallyDelta0Function.var (V := V) (2 : Fin 3)))) (fun j ↦ j.elim0)
   exact this.of_iff fun w ↦ by simp [Graph, Matrix.empty_eq]
 

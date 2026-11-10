@@ -5,7 +5,8 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Basic
 /-!
 # Elementary facts about coded sets
 
-Adding elements to a coded set.
+Supplements `Foundation.FirstOrder.Arithmetic.HFS.Basic`: commuting and absorbing insertions into a
+coded set.
 -/
 
 @[expose] public section
@@ -32,9 +33,6 @@ lemma insert_pair_comm (x y a s : V) :
 
 lemma insert_pair_comm₂ (x y a b s : V) :
     insert x (insert y (insert a (insert b s))) = insert a (insert b (insert x (insert y s))) :=
-  mem_ext fun _ ↦ by grind
-
-lemma bitRemove_insert_of_not_mem {x s : V} (h : x ∉ s) : bitRemove x (insert x s) = s :=
   mem_ext fun _ ↦ by grind
 
 lemma mem_of_mem_insert_of_ne {x y s : V} (h : x ∈ insert y s) (hne : x ≠ y) : x ∈ s :=

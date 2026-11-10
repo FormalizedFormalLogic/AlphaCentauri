@@ -2,9 +2,9 @@ module
 
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
-public import AlphaCentauri.ToFoundation.Schemata
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-!

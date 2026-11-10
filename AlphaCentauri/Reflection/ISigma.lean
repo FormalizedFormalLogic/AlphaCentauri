@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
-public import AlphaCentauri.ToFoundation.Reflection
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Metatheory
 public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 
 /-!

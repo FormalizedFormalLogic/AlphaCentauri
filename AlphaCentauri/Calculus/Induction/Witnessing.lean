@@ -1,9 +1,9 @@
 module
 
 public import AlphaCentauri.Calculus.Induction.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Definability
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
-public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Tarski.Basic
 
 /-!

@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
-public import AlphaCentauri.ToFoundation.Exponential
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 
 /-!
 # The sizes in the proof of Bertrand's postulate

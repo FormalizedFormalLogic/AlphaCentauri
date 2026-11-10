@@ -1,8 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
-public import AlphaCentauri.ToFoundation.Factorial
-public import AlphaCentauri.ToFoundation.Prime
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
 public import AlphaCentauri.Schemata.WeakPigeonhole
 
 /-!

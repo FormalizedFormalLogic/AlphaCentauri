@@ -1,8 +1,7 @@
 module
 
 public import AlphaCentauri.Schemata.Pigeonhole
-public import AlphaCentauri.ToFoundation.BlockSequence
-public import AlphaCentauri.ToFoundation.Exponential
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 
 /-!
 # The weak pigeonhole principle over $\mathsf{I}\Delta_0 + \Omega_1$

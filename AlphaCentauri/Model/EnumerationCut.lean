@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.CodedPigeonhole
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
 public import AlphaCentauri.Model.Cut
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 

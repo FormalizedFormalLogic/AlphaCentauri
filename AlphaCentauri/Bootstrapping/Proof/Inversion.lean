@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.ToFoundation.SubstInversion
-public import AlphaCentauri.ToFoundation.Set
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 public import Foundation.Vorspiel.Tactic.Disj
 
 /-!

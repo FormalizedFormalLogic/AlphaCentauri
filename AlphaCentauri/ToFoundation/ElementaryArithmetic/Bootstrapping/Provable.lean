@@ -606,18 +606,20 @@ lemma provable_succ_of_derivationOf_all {S e d : V} {A : V → V} (hA : LocallyD
     · rintro y ⟨d', hd'B, hd'⟩
       have hspec := derivationOf_specializeCode hS (numeral_semiterm 0 (y + 1)) he
       rw [hstep (y + 1) (by simp)] at hspec
+      have h₁ : 42 * (y + 1) + (prefixMax c (y + 1) + M) + 42 ≤
+          42 * (y + 1 + 1) + (prefixMax c (y + 1 + 1) + M) := by
+        have := prefixMax_monotone hc (le_self_add (a := y + 1) (b := 1))
+        calc 42 * (y + 1) + (prefixMax c (y + 1) + M) + 42
+            = 42 * (y + 1) + 42 + (prefixMax c (y + 1) + M) := by grind
+          _ ≤ 42 * (y + 1) + 42 + (prefixMax c (y + 1 + 1) + M) := by gcongr
+          _ = 42 * (y + 1 + 1) + (prefixMax c (y + 1 + 1) + M) := by grind
       use modusPonensCode ℒₒᵣ (specializeCode ℒₒᵣ e S (numeral (y + 1))) d'
         (A (y + 1)) (A (y + 1 + 1))
-      refine ⟨le_trans (modusPonensCode_specializeCode_le_exp_exp
+      exact ⟨le_trans (modusPonensCode_specializeCode_le_exp_exp
         (le_trans (by simp [M]) (hM (y + 1)))
         (le_trans (le_prefixMax hc le_rfl) (le_trans le_self_add le_add_self))
         (le_exp_exp (le_trans (le_trans le_add_self le_self_add) (hM (y + 1)))) hd'B)
-        (exp_exp_le_of_le ?_), derivationOf_modusPonensCode (hAf _) (hAf _) hspec hd'⟩
-      have h₁ := prefixMax_monotone hc (le_self_add (a := y + 1) (b := 1))
-      calc 42 * (y + 1) + (prefixMax c (y + 1) + M) + 42
-          = 42 * (y + 1) + 42 + (prefixMax c (y + 1) + M) := by grind
-        _ ≤ 42 * (y + 1) + 42 + (prefixMax c (y + 1 + 1) + M) := by gcongr
-        _ = 42 * (y + 1 + 1) + (prefixMax c (y + 1 + 1) + M) := by grind
+        (exp_exp_le_of_le h₁), derivationOf_modusPonensCode (hAf _) (hAf _) hspec hd'⟩
   obtain ⟨d', -, hd'⟩ := key y
   exact ⟨d', hd'⟩
 

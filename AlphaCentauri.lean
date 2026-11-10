@@ -57,6 +57,7 @@ public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
+public import AlphaCentauri.NumberTheory.DirectSummand
 public import AlphaCentauri.NumberTheory.EuclideanDivision
 public import AlphaCentauri.NumberTheory.FLT3
 public import AlphaCentauri.NumberTheory.FermatCaseOne
@@ -138,6 +139,7 @@ public import AlphaCentauri.ToFoundation.SubstInversion
 public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.Theory
 public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToMathlib.AddMonoidHomToInt
 public import AlphaCentauri.ToMathlib.BoundedDegreeOpenInduction
 public import AlphaCentauri.ToMathlib.EisensteinInteger
 public import AlphaCentauri.ToMathlib.ElementaryClosure

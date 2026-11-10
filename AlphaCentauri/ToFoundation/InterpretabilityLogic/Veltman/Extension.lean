@@ -88,14 +88,7 @@ open Model
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {x : M.World} {A B C : Formula α}
 
-lemma forces_axiomM [M.HasM] : x ⊩ Axioms.M A B C := by
-  intro h y Rxy hy;
-  obtain ⟨hA, hC⟩ := forces_and.mp hy;
-  obtain ⟨z, Sxyz, hz⟩ := h y Rxy hA;
-  use z;
-  and_intros;
-  · exact Sxyz;
-  · exact forces_and.mpr ⟨hz, fun u Rzu ↦ hC u (rel_of_s_rel Sxyz Rzu)⟩;
+lemma forces_axiomM [M.HasM] : x ⊩ Axioms.M A B C := by grind [rel_of_s_rel]
 
 lemma forces_axiomM₀ [M.IsIL] [M.HasM₀] : x ⊩ Axioms.M₀ A B C := by
   intro h y Rxy hy;
@@ -108,12 +101,8 @@ lemma forces_axiomM₀ [M.IsIL] [M.HasM₀] : x ⊩ Axioms.M₀ A B C := by
   · exact forces_and.mpr ⟨hu, fun v Ruv ↦ hC v (rel_of_rel_rel_s_rel Rxy Ryz Sxzu Ruv)⟩;
 
 lemma forces_axiomP [M.IsIL] [M.HasP] : x ⊩ Axioms.P A B := by
-  intro h y Rxy z Ryz hz;
-  obtain ⟨u, Sxzu, hu⟩ := h z (IsTrans.trans _ _ _ Rxy Ryz) hz;
-  use u;
-  and_intros;
-  · exact s_of_rel_rel_s Rxy Ryz Sxzu;
-  · exact hu;
+  have := IsTrans.trans (r := M.Rel);
+  grind [s_of_rel_rel_s]
 
 lemma forces_axiomR [M.IsIL] [M.HasR] : x ⊩ Axioms.R A B C := by
   intro h y Rxy hy;
@@ -132,11 +121,13 @@ lemma forces_axiomW [M.IsIL] [M.HasW] : x ⊩ Axioms.W A B := by
   use t;
   and_intros;
   · exact Sxyt;
-  · apply forces_and.mpr ⟨ht, ?_⟩;
-    intro u Rtu hu;
-    have Rxt : x ≺ t := rel_of_s_right Sxyt;
-    obtain ⟨v, Sxuv, hv⟩ := h u (IsTrans.trans _ _ _ Rxt Rtu) hu;
-    exact tmax v ⟨s_trans Sxyt <| s_trans (s_of_rel Rxt Rtu) Sxuv, hv⟩ ⟨u, Rtu, Sxuv⟩;
+  · apply forces_and.mpr;
+    and_intros;
+    · exact ht;
+    · intro u Rtu hu;
+      have Rxt : x ≺ t := rel_of_s_right Sxyt;
+      obtain ⟨v, Sxuv, hv⟩ := h u (IsTrans.trans _ _ _ Rxt Rtu) hu;
+      exact tmax v ⟨s_trans Sxyt <| s_trans (s_of_rel Rxt Rtu) Sxuv, hv⟩ ⟨u, Rtu, Sxuv⟩;
 
 end Model.World
 

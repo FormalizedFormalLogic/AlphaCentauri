@@ -1,8 +1,9 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D3
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import AlphaCentauri.ToFoundation.Syntax
+public import AlphaCentauri.ToFoundation.TypedProof
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.PeanoMinus
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.EquationalTheory
 
@@ -12,8 +13,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 
 Generic facts about `Bootstrapping.Provable`: instantiating an internally-provable instance by
 numerals of a universal formula at one more numeral, modus ponens for arbitrary (not necessarily
-quoted) codes, and induction on a numeral of a formula whose base case and induction step are
-provable.
+quoted) codes, induction on a numeral of a formula whose base case and induction step are
+provable, and the internal provability of the numeral instances of a theorem of `𝗜𝚺₁` and of a
+true $\Sigma_1$ formula.
 -/
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
@@ -79,6 +81,22 @@ lemma provable_substNumerals_of_provable_allClosure {k : ℕ} (φ : ArithmeticSe
   | succ k ih =>
     rw [← Matrix.cons_head_tail v]
     exact provable_substNumerals_of_provable_substNumerals_all φ (ih (∀¹ φ) h _) _
+
+variable [𝗜𝚺₁ ⪯ T]
+
+/-- A theorem of `𝗜𝚺₁`, given by its truth in every model, is internally provable at numerals. -/
+lemma tprovable_subst_numeral_of_models {k : ℕ} {φ : ArithmeticSemisentence k}
+    (h : ∀ (W : Type) [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin k → W), W ⊧/e φ)
+    (w : Fin k → V) :
+    T.internalize V ⊢ (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst (fun i ↦ 𝕹 (w i)) :=
+  tprovable_subst_of_allClosure T _ <| internal_provable_of_outer_provable <|
+    Entailment.WeakerThan.pbl <| complete 𝗜𝚺₁ _ fun W _ _ ↦ by simpa [models_iff] using h W
+
+/-- A $\Sigma_1$ formula true at `w` is internally provable at the numerals of `w`. -/
+lemma tprovable_subst_numeral_of_sigma1 {k : ℕ} {φ : ArithmeticSemisentence k}
+    (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ) {w : Fin k → V} (h : V ⊧/w φ) :
+    T.internalize V ⊢ (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst (fun i ↦ 𝕹 (w i)) :=
+  bold_sigma_one_complete T hφ h
 
 end specialize
 

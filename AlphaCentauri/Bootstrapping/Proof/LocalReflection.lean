@@ -68,16 +68,15 @@ private lemma exists_falseBlock_set (hT : AdmitsFalseBlockReplacement T V k) (d 
     use q
     exact ⟨mem_range_iff.mpr ⟨p, hy⟩, (hR p q hq).1⟩
 
-/-- In a model of $\mathsf{I}\Sigma^+_{k+1}$, for $1 \le k$, a prenex $\Pi_{k+3}$ formula holds of
+/-- In a model of $\mathsf{I}\Sigma^+_{k+1}$, a prenex $\Pi_{k+3}$ formula holds of
 `v` if the internal `T`, each of whose axioms has a replacement by a false block, proves its
 instance by the numerals of `v`.
 - [HP98, Corollary I.4.34]
 - [Bek05, Theorem 7] -/
-theorem models_of_provable_substNumerals [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hk : 1 ≤ k)
+theorem models_of_provable_substNumerals [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
     (hT : AdmitsFalseBlockReplacement T V k) {m : ℕ} {φ : ArithmeticSemisentence m}
     (hφ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (k + 3) φ) (v : Fin m → V)
     (h : Provable T (substNumerals (⌜φ⌝ : V) v)) : V ⊧/v φ := by
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2 := mod_IBroadSigma_of_le (s₁ := 2) (s₂ := k + 1) (by omega)
   by_contra hV
   obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.pi_succ_iff.mp hφ
   obtain ⟨ρ', hρ', rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hψ
@@ -95,10 +94,10 @@ theorem models_of_provable_substNumerals [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1
     exact he ▸ isFalseBlock_substNumerals_exs le_rfl ρ (a :> v) ha
   · exact hAfb e he
 
-/-- In a model of $\mathsf{I}\Sigma^+_{k+1}$, the internal $\mathsf{I}\Sigma_n$ is consistent, for
-$1 \le k$ and $n \le k$.
+/-- In a model of $\mathsf{I}\Sigma^+_{k+1}$, the internal $\mathsf{I}\Sigma_n$ is consistent for
+$n \le k$.
 - [HP98, Corollary I.4.34] -/
-lemma consistent_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hk : 1 ≤ k) (hn : n ≤ k) :
+lemma consistent_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hn : n ≤ k) :
     (𝗜𝚺 n).Consistent V := by
   intro h
   let π : ArithmeticSentence := (Bounding.Prenex.falsum : ℬ[<, ℒₒᵣ].Prenex 𝚷 (k + 3) Empty 0).val
@@ -110,7 +109,7 @@ lemma consistent_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hk : 1 ≤ k)
       · have := h.toDerivable
         rwa [Sentence.quote_falsum] at this
     · exact Derivable.verum (by simp) (by simp)
-  have := models_of_provable_substNumerals hk (admitsFalseBlockReplacement_ISigma hn) (φ := π)
+  have := models_of_provable_substNumerals (admitsFalseBlockReplacement_ISigma hn) (φ := π)
     ⟨_, rfl⟩ (![] : Fin 0 → V) (by rwa [substNumerals_quote_of_isEmpty])
   simpa using (Bounding.Prenex.models_falsum ![]).mp this
 

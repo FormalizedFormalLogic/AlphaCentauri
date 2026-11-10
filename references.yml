@@ -278,6 +278,18 @@ Jer21:
   organization: Institute of Mathematics, Czech Academy of Sciences
   url: https://users.math.cas.cz/~jerabek/papers/dsc.pdf
 
+JMMV20:
+  type: Article
+  title: An overview of Generalised {Veltman} Semantics
+  author: ["Joosten, Joost J.", "Mas Rovira, Jan", "Mikec, Luka", "Vuković, Mladen"]
+  date: 2020
+  serial-number:
+    arxiv: "2007.04722"
+  url: https://arxiv.org/abs/2007.04722
+  parent:
+    type: Repository
+    title: arXiv
+
 Kat26b:
   type: Article
   title: Equivalence of restricted and full division
@@ -300,6 +312,21 @@ KKS97:
   serial-number:
     doi: "10.1090/S0002-9939-97-03964-6"
     arxiv: "math/9608214"
+
+KO21:
+  type: Article
+  title: Modal completeness of sublogics of the interpretability logic IL
+  author: ["Kurahashi, Taishi", "Okawa, Yuya"]
+  date: 2021
+  page-range: 164-185
+  parent:
+    type: Periodical
+    title: Mathematical Logic Quarterly
+    volume: 67
+    issue: 2
+  serial-number:
+    doi: "10.1002/malq.202000037"
+    arxiv: "2004.03813"
 
 Kay91:
   type: Book
@@ -359,6 +386,15 @@ Lin97:
     type: Anthology
     title: Lecture Notes in Logic
     volume: 10
+
+Mas20:
+  type: Thesis
+  title: Interpretability logics and generalized {Veltman} semantics in {Agda}
+  author: Mas Rovira, Jan
+  date: 2020
+  note: Master's thesis
+  organization: Universitat de Barcelona
+  url: http://hdl.handle.net/2445/173054
 
 MM89:
   type: Article
@@ -527,6 +563,13 @@ Tow20:
   url: https://www.sas.upenn.edu/~htowsner/GoodsteinsTheorem.pdf
   note: Undated; the PDF is dated 2020
 
+Ver92:
+  type: Misc
+  title: "Verzamelingen-{Veltman} frames en modellen (Set {Veltman} frames and models)"
+  author: Verbrugge, Rineke
+  date: 1992
+  note: Unpublished manuscript
+
 Vis26:
   type: Article
   title: From numbers to container strings
@@ -534,6 +577,23 @@ Vis26:
   date: 2026
   serial-number:
     arxiv: "2411.15873"
+
+Vis90:
+  type: Chapter
+  title: Interpretability Logic
+  author: "Visser, Albert"
+  page-range: 175-209
+  date: 1990
+  serial-number:
+    doi: "10.1007/978-1-4613-0609-2_13"
+  parent:
+    type: Anthology
+    title: Mathematical Logic
+    editor: "Petkov, Petio P."
+    date: 1990
+    publisher:
+      name: Plenum Press
+      location: New York
 
 vO99:
   type: Misc

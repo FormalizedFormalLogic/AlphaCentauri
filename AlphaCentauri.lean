@@ -22,7 +22,6 @@ public import AlphaCentauri.Bootstrapping.Proof.AxiomReplacement
 public import AlphaCentauri.Bootstrapping.Proof.ComplexitySoundness
 public import AlphaCentauri.Bootstrapping.Proof.CutElimination
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
-public import AlphaCentauri.Bootstrapping.Proof.CutFreeRewrite
 public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
 public import AlphaCentauri.Bootstrapping.Proof.InductionAxiom
@@ -31,6 +30,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.PeanoMinusAxiom
+public import AlphaCentauri.Bootstrapping.Proof.RankedDerivation
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
@@ -106,7 +106,6 @@ public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
-public import AlphaCentauri.ToFoundation.DirectTranslation
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Basic
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.CourseOfValues
@@ -122,7 +121,12 @@ public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.InternalEquality
+public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Formula
+public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Logic
+public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
+public import AlphaCentauri.ToFoundation.LeastWitness
 public import AlphaCentauri.ToFoundation.OpenFormulaDegree
 public import AlphaCentauri.ToFoundation.OpenPredicate
 public import AlphaCentauri.ToFoundation.PartialTruth
@@ -153,6 +157,7 @@ public import AlphaCentauri.ToMathlib.FLT3.Descent
 public import AlphaCentauri.ToMathlib.FLT3.Eisenstein
 public import AlphaCentauri.ToMathlib.Goodstein
 public import AlphaCentauri.ToMathlib.HahnSeries
+public import AlphaCentauri.ToMathlib.IntegerPart
 public import AlphaCentauri.ToMathlib.ONote.Computability
 public import AlphaCentauri.ToMathlib.ONote.Epsilon0
 public import AlphaCentauri.ToMathlib.ONote.FastGrowing

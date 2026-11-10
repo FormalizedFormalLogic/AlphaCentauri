@@ -1,8 +1,8 @@
 module
 
-public import AlphaCentauri.ToFoundation.Syntax
-public import AlphaCentauri.ToFoundation.DirectTranslation
+public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.Syntax
 
 /-!
 # Internal translation of formulas along a table of operators

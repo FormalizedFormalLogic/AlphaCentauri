@@ -106,7 +106,6 @@ public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
-public import AlphaCentauri.ToFoundation.DirectTranslation
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Basic
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Seq

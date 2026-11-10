@@ -292,13 +292,11 @@ namespace Logic.ILP
 
 open Veltman Veltman.Model.World
 
-universe u
-
-variable {α : Type u} {A : Formula α}
+variable {α : Type} {A : Formula α}
 
 /-- - [dJV90, Theorem 5.2] -/
 theorem complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → [M.HasP] →
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → [M.HasP] →
       M ⊧ A) :
     𝐈𝐋𝐏 ⊢ A := by
   classical

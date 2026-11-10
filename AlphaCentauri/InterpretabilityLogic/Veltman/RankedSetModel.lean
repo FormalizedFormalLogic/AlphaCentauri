@@ -606,13 +606,11 @@ namespace Logic.ILW
 
 open Veltman
 
-universe u
-
-variable {α : Type u} {A : Formula α}
+variable {α : Type} {A : Formula α}
 
 /-- - [dJV99, Theorem 13] -/
 theorem complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsIL] → [M.HasW] → M ⊧ A) :
     𝐈𝐋𝐖 ⊢ A := by
   classical

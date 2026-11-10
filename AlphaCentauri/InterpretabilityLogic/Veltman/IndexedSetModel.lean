@@ -263,13 +263,11 @@ namespace Logic
 
 open Veltman Veltman.Model
 
-universe u
-
-variable {α : Type u} {A : Formula α}
+variable {α : Type} {A : Formula α}
 
 /-- - [KO21, Theorem 5.4] -/
 theorem ILMinusJ2PlusJ5.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ2] → [M.IsJ5] → M ⊧ A) :
     ILMinusJ2PlusJ5 ⊢ A := by
   classical
@@ -280,7 +278,7 @@ theorem ILMinusJ2PlusJ5.complete
 
 /-- - [KO21, Theorem 5.4] -/
 theorem IL.complete_ILMinus
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → [M.IsJ5] → M ⊧ A) :
     𝐈𝐋 ⊢ A := by
   classical
@@ -302,7 +300,7 @@ theorem IL.complete_ILMinus
 
 /-- - [dJV90, Theorem 4.1] -/
 theorem IL.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A) :
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A) :
     𝐈𝐋 ⊢ A := by
   apply IL.complete_ILMinus;
   intro κ _ _ M _ _ _ _;

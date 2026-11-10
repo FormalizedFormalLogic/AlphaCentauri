@@ -1,7 +1,14 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILM.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILP.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILWStar.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILKW2.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZero.Basic
 
 /-!
 # Veltman semantics of the extensions of $\mathbf{IL}$

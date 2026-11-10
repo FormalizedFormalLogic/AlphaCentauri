@@ -3,7 +3,8 @@ module
 public import AlphaCentauri.InterpretabilityLogic.Formula
 public import Mathlib.Data.Finset.Powerset
 public import Mathlib.Data.Finset.Max
-public import AlphaCentauri.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 
 /-!
 # A sequent calculus for $\mathbf{IL}$

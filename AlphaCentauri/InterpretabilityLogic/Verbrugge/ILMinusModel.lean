@@ -372,7 +372,6 @@ end ILMinus
 
 end LabelledSet
 
-
 /-! ### Indexed maximal consistent sets -/
 
 namespace IndexedModel
@@ -601,20 +600,17 @@ end IndexedModel
 
 end Verbrugge
 
-
 /-! ### Completeness -/
 
 namespace Logic
 
 open Verbrugge Verbrugge.Model
 
-universe u
-
-variable {α : Type u} {A : Formula α}
+variable {α : Type} {A : Formula α}
 
 /-- - [KO21, Theorem 7.1] -/
 theorem ILMinusJ4.complete_verbrugge
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
       [M.IsILMinus] → [M.IsJ4] → M ⊧ A) :
     ILMinusJ4 ⊢ A := by
   classical
@@ -628,7 +624,7 @@ theorem ILMinusJ4.complete_verbrugge
 
 /-- - [KO21, Theorem 7.1] -/
 theorem ILMinusJ1J4.complete_verbrugge
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
       [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → M ⊧ A) :
     ILMinusJ1J4 ⊢ A := by
   classical
@@ -642,7 +638,7 @@ theorem ILMinusJ1J4.complete_verbrugge
 
 /-- - [KO21, Theorem 7.1] -/
 theorem ILMinusJ4J5.complete_verbrugge
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
       [M.IsILMinus] → [M.IsJ4] → [M.IsJ5] → M ⊧ A) :
     ILMinusJ4J5 ⊢ A := by
   classical
@@ -656,7 +652,7 @@ theorem ILMinusJ4J5.complete_verbrugge
 
 /-- - [KO21, Theorem 7.1] -/
 theorem ILMinusJ1J4J5.complete_verbrugge
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
       [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → [M.IsJ5] → M ⊧ A) :
     ILMinusJ1J4J5 ⊢ A := by
   classical
@@ -670,7 +666,7 @@ theorem ILMinusJ1J4J5.complete_verbrugge
 
 /-- - [KO21, Theorem 7.1] -/
 theorem ILMinusJ2.complete_verbrugge
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
       [M.IsILMinus] → [M.IsJ2] → M ⊧ A) :
     ILMinusJ2 ⊢ A := by
   classical
@@ -684,7 +680,7 @@ theorem ILMinusJ2.complete_verbrugge
 
 /-- - [KO21, Theorem 7.1] -/
 theorem ILMinusJ2J4Plus.complete_verbrugge
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
       [M.IsILMinus] → [M.IsJ2] → [M.IsJ4Plus] → M ⊧ A) :
     ILMinusJ2J4Plus ⊢ A := by
   classical
@@ -698,7 +694,7 @@ theorem ILMinusJ2J4Plus.complete_verbrugge
 
 /-- - [KO21, Theorem 7.4] -/
 theorem ILMinusJ2J5.complete_verbrugge
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
       [M.IsILMinus] → [M.IsJ2] → [M.IsJ5] → M ⊧ A) :
     ILMinusJ2J5 ⊢ A := by
   classical
@@ -713,7 +709,7 @@ theorem ILMinusJ2J5.complete_verbrugge
 
 /-- - [KO21, Theorem 7.4] -/
 theorem ILMinusJ2J4PlusJ5.complete_verbrugge
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
       [M.IsILMinus] → [M.IsJ2] → [M.IsJ4Plus] → [M.IsJ5] → M ⊧ A) :
     ILMinusJ2J4PlusJ5 ⊢ A := by
   classical

@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic
-public import AlphaCentauri.InterpretabilityLogic.ILMinus
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
 
 /-!
 # Maximal consistent subsets of adequate sets

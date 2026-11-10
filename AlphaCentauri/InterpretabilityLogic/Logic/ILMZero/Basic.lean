@@ -1,33 +1,33 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStepModel
+public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 
 /-!
-# Soundness and completeness of $\mathbf{ILM}_0$
+# The logic $\mathbf{ILM}_0$
 
-$\mathbf{ILM}_0$ proves exactly the formulas valid in the Veltman models satisfying the frame
-condition of $\mathsf{M}_0$.
+The extension of $\mathbf{IL}$ by the principle $\mathsf{M}_0$.
 -/
 
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
 
+open Entailment Formula
+
+variable {α : Type*}
+
+/-- - [Vis97] -/
+abbrev Logic.ILM₀ : Logic α := Logic.ofAxioms {Axioms.M₀ A B C | (A) (B) (C)}
+
+notation "𝐈𝐋𝐌₀" => Logic.ILM₀
+
 namespace Logic
 
-universe u
+open ofAxioms
 
-variable {α : Type u} {A : Formula α}
+variable {A B C : Formula α}
 
-/-- - [GJ08, Theorem 6.1] -/
-theorem ILM₀.iff_valid :
-    𝐈𝐋𝐌₀ ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasM₀] → M ⊧ A := by
-  constructor;
-  · intro h _ _ M;
-    intros;
-    exact ILM₀.sound h;
-  · exact ILM₀.complete;
+@[simp] lemma ILM₀.axiomM₀ : 𝐈𝐋𝐌₀ ⊢ Axioms.M₀ A B C := axm ⟨A, B, C, rfl⟩
 
 end Logic
 

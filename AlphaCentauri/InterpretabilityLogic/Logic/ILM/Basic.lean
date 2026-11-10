@@ -1,33 +1,54 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModelM
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
 
 /-!
-# Soundness and completeness of $\mathbf{ILM}$
+# The logic $\mathbf{ILM}$
 
-$\mathbf{ILM}$ proves exactly the formulas valid in the finite Veltman models satisfying the frame
-condition of $\mathsf{M}$.
+The extension of $\mathbf{IL}$ by the principle $\mathsf{M}$.
 -/
 
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
 
+open Entailment Formula
+
+variable {α : Type*}
+
+/-- - [Vis90, §6.4] -/
+abbrev Logic.ILM : Logic α := Logic.ofAxioms {Axioms.M A B C | (A) (B) (C)}
+
+notation "𝐈𝐋𝐌" => Logic.ILM
+
 namespace Logic
 
-universe u
+open ofAxioms
 
-variable {α : Type u} {A : Formula α}
+variable {A B C : Formula α}
 
-/-- - [dJV90, Theorem 6.3] -/
-theorem ILM.iff_valid_finite :
-    𝐈𝐋𝐌 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasM] → M ⊧ A := by
-  constructor;
-  · intro h _ _ _ M;
-    intros;
-    exact ILM.sound h;
-  · exact ILM.complete;
+@[simp] lemma ILM.axiomM : 𝐈𝐋𝐌 ⊢ Axioms.M A B C := axm ⟨A, B, C, rfl⟩
+
+/-- - [Vis90, §6.4.1] -/
+lemma ILM.axiomW : 𝐈𝐋𝐌 ⊢ Axioms.W A B := by
+  have h₁ : 𝐈𝐋𝐌 ⊢ A ▷ (A ⋏ □(∼A)) := rhd_and_box_neg;
+  have h₂ : 𝐈𝐋𝐌 ⊢ Axioms.M A B (∼A) := axiomM;
+  have h₃ : 𝐈𝐋𝐌 ⊢ Axioms.J2 A (A ⋏ □(∼A)) (B ⋏ □(∼A)) := axiomJ2;
+  cl_prover [h₁, h₂, h₃];
+
+lemma ILM.axiomR : 𝐈𝐋𝐌 ⊢ Axioms.R A B C := by
+  have h₁ : 𝐈𝐋𝐌 ⊢ A ▷ A ⋏ ∼(A ▷ ∼C) 🡒 ◇(A ⋏ □C) := rhd_and_not_rhd_neg;
+  have h₂ : 𝐈𝐋𝐌 ⊢ A ▷ A := rhd_refl;
+  have h₃ : 𝐈𝐋𝐌 ⊢ ∼(A ▷ ∼C) 🡒 ◇(A ⋏ □C) := by cl_prover [h₁, h₂];
+  have h₄ : 𝐈𝐋𝐌 ⊢ ◇(A ⋏ □C) ▷ (A ⋏ □C) := axiomJ5;
+  have h₅ : 𝐈𝐋𝐌 ⊢ Axioms.J2 (∼(A ▷ ∼C)) (◇(A ⋏ □C)) (A ⋏ □C) := axiomJ2;
+  have h₆ : 𝐈𝐋𝐌 ⊢ Axioms.J2 (∼(A ▷ ∼C)) (A ⋏ □C) (B ⋏ □C) := axiomJ2;
+  cl_prover [rhd_of_provable h₃, h₄, h₅, h₆, axiomM (A := A) (B := B) (C := C)];
+
+instance : (𝐈𝐋𝐑𝐖 : Logic α) ⪯ 𝐈𝐋𝐌 := weakerThan_iff.mpr <| subset_of_provable <| by
+  rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩)
+  · exact ILM.axiomR
+  · exact ILM.axiomW
 
 end Logic
 

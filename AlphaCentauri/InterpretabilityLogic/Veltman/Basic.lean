@@ -1,9 +1,9 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import Foundation.Logic.Semantics
 public import Foundation.Vorspiel.Rel.CWF
-public import AlphaCentauri.InterpretabilityLogic.ILMinus
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
 
 /-!
 # Veltman semantics

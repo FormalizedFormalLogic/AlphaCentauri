@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentTheory
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 
 /-!
@@ -290,13 +291,11 @@ lemma not_models_verbrugge_countermodel [Nonempty (CountermodelWorld 𝔸 A)] (h
 
 end Logic.ofAxioms
 
-universe u
-
-variable {α : Type u} {A : Formula α}
+variable {α : Type} {A : Formula α}
 
 /-- - [MV20, Theorem 23] -/
 theorem Logic.ILP₀.complete_verbrugge
-    (h : ∀ {κ : Type u} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsIL] → [M.HasP₀] → M ⊧ A) :
+    (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsIL] → [M.HasP₀] → M ⊧ A) :
     𝐈𝐋𝐏₀ ⊢ A := by
   classical
   by_contra hA;
@@ -306,7 +305,7 @@ theorem Logic.ILP₀.complete_verbrugge
 
 /-- - [MV20, Theorem 25] -/
 theorem Logic.ILR.complete_verbrugge
-    (h : ∀ {κ : Type u} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsIL] → [M.HasR] → M ⊧ A) :
+    (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsIL] → [M.HasR] → M ⊧ A) :
     𝐈𝐋𝐑 ⊢ A := by
   classical
   by_contra hA;

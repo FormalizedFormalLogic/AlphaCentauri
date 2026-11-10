@@ -651,12 +651,10 @@ namespace Logic.ILM
 
 open Veltman Veltman.Model.World MaximalConsistentSet
 
-universe u
-
-variable {α : Type u} {A : Formula α}
+variable {α : Type} {A : Formula α}
 
 /-- - [dJV90, Theorem 6.3] -/
-theorem complete (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] →
+theorem complete (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] →
     [M.HasM] → M ⊧ A) : 𝐈𝐋𝐌 ⊢ A := by
   classical
   by_contra hA;

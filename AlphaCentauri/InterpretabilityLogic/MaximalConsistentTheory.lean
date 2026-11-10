@@ -1,8 +1,9 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import Mathlib.Data.Set.Finite.Lattice
 public import Mathlib.Order.Zorn
+public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 
 /-!
 # Maximal consistent sets of all formulas

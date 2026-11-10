@@ -1,54 +1,41 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
-public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 
 /-!
-# Soundness and completeness of $\mathbf{IL}$
+# Interpretability logic $\mathbf{IL}$
 
-$\mathbf{IL}$ proves exactly the formulas valid in the finite Veltman models, equivalently in the
-finite generalised Veltman models, equivalently in the finite $\mathbf{IL}^-$-models satisfying the
-frame conditions of $\mathbf{J1}$, $\mathbf{J2}$ and $\mathbf{J5}$.
+$\mathbf{IL}$ is the logic `ofAxioms ∅`, contained in every extension by axioms.
 -/
 
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
 
+open Entailment Formula
+
+variable {α : Type*}
+
+/-- - [Vis90, §6.1] -/
+abbrev Logic.IL : Logic α := Logic.ofAxioms ∅
+
+notation "𝐈𝐋" => Logic.IL
+
+namespace Logic.ofAxioms
+
+variable {𝔸 : Set (Formula α)}
+
+lemma IL_subset : (𝐈𝐋 : Logic α) ⊆ ofAxioms 𝔸 := subset_of_subset (Set.empty_subset _)
+
+end Logic.ofAxioms
+
 namespace Logic
 
-open Veltman.Model.World
+open ofAxioms
 
-universe u
+variable {A B C : Formula α}
 
-variable {α : Type u} {A : Formula α}
-
-/-- - [dJV90, Theorem 4.1]
-- [JMMV20, Theorem 3.2]
--/
-theorem IL.semantics_TFAE : [
-    𝐈𝐋 ⊢ A,
-    ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A,
-    ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α), [M.IsIL] → M ⊧ A
-  ].TFAE := by
-  tfae_have 1 → 3 := by
-    intro h _ _ _ M _;
-    exact ofAxioms.sound_verbrugge (by simp) h;
-  tfae_have 3 → 2 := by
-    intro h _ _ _ M _ x;
-    exact Veltman.Model.forces_toVerbrugge.mp (h M.toVerbrugge x);
-  tfae_have 2 → 1 := IL.complete;
-  tfae_finish;
-
-/-- - [KO21, Theorem 5.4] -/
-theorem IL.iff_valid_finite_ILMinus :
-    𝐈𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → [M.IsJ5] → M ⊧ A := by
-  constructor;
-  · intro h _ _ _ M _ _ _ _;
-    have : M.IsIL := .of_isILMinus;
-    exact ofAxioms.sound (by simp) h;
-  · exact IL.complete_ILMinus;
+instance {𝔸 : Set (Formula α)} : (𝐈𝐋 : Logic α) ⪯ ofAxioms 𝔸 := weakerThan_iff.mpr IL_subset
 
 end Logic
 

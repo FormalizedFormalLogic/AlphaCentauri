@@ -326,20 +326,18 @@ namespace Logic
 
 open Veltman Veltman.Model LabelledSet.Condition ofAxiomsMinus
 
-universe u
-
-variable {α : Type u} {A : Formula α}
+variable {α : Type} {A : Formula α}
 
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinus.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsILMinus] → M ⊧ A) :
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsILMinus] → M ⊧ A) :
     𝐈𝐋⁻ ⊢ A := by
   classical
   exact provable_of_models_labelledModel .ILMinus (h _)
 
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ1.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ1] → M ⊧ A) :
     ILMinusJ1 ⊢ A := by
   classical
@@ -347,7 +345,7 @@ theorem ILMinusJ1.complete
 
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ4Plus.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ4] → M ⊧ A) :
     ILMinusJ4Plus ⊢ A := by
   classical
@@ -355,7 +353,7 @@ theorem ILMinusJ4Plus.complete
 
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ1J4Plus.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → M ⊧ A) :
     ILMinusJ1J4Plus ⊢ A := by
   classical
@@ -363,7 +361,7 @@ theorem ILMinusJ1J4Plus.complete
 
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ2Plus.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ2] → M ⊧ A) :
     ILMinusJ2Plus ⊢ A := by
   classical
@@ -371,7 +369,7 @@ theorem ILMinusJ2Plus.complete
 
 /-- - [KO21, Theorem 5.1] -/
 theorem CL.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → M ⊧ A) :
     𝐂𝐋 ⊢ A := by
   classical
@@ -379,7 +377,7 @@ theorem CL.complete
 
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ5.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ5] → M ⊧ A) :
     ILMinusJ5 ⊢ A := by
   classical
@@ -387,7 +385,7 @@ theorem ILMinusJ5.complete
 
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ1J5.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ1] → [M.IsJ5] → M ⊧ A) :
     ILMinusJ1J5 ⊢ A := by
   classical
@@ -395,7 +393,7 @@ theorem ILMinusJ1J5.complete
 
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ4PlusJ5.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ4] → [M.IsJ5] → M ⊧ A) :
     ILMinusJ4PlusJ5 ⊢ A := by
   classical
@@ -403,7 +401,7 @@ theorem ILMinusJ4PlusJ5.complete
 
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ1J4PlusJ5.complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → [M.IsJ5] → M ⊧ A) :
     ILMinusJ1J4PlusJ5 ⊢ A := by
   classical

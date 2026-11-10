@@ -160,6 +160,7 @@ public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.PRF
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Seq
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Vec
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Incompleteness.Definability
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Incompleteness.UniformReflection
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.LocallyDelta0
 public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval

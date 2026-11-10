@@ -9,8 +9,12 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 
 The file `Foundation/FirstOrder/Arithmetic/HFS/Vec.lean` on lists coded by iterated pairing in
 models of $\mathsf{I}\Sigma_1$, ported to models of $\mathsf{EA}$: `x ∷ v`, the `i`-th element
-`v.[i]`, and induction on lists for locally $\Delta_0$ predicates. The formulas `adjoinDef`,
-`mkVec₁Def`, `mkVec₂Def` and `nthDef` define the $\mathsf{EA}$ versions.
+`v.[i]`, induction on lists for locally $\Delta_0$ predicates, recursion on lists with a monotone
+bound on its values, and the length, maximum, last elements, concatenation, membership,
+repetition and set of elements of a list. The formulas `adjoinDef`, `mkVec₁Def`, `mkVec₂Def`,
+`nthDef`, `lenDef`, `listMaxDef`, `takeLastDef`, `concatDef`, `memVecDef`, `subsetVecDef`,
+`repeatVecDef` and `vecToSetDef` define the $\mathsf{EA}$ versions. A Skolem function for a
+locally $\Delta_0$ relation with bounded witnesses is `sigmaZero_skolem_vec`.
 
 - [HP98, §V.3]
 -/
@@ -297,7 +301,8 @@ lemma nth_succ (v i : V) : v.[i + 1] = (sndIdx v).[i] :=
 lemma nth_locallyDelta0 : LocallyDelta0Function₂ (nth : V → V → V) where
   graph := by
     have := Nth.graph_locallyDelta0.comp₃ (LocallyDelta0Function.var (V := V) (1 : Fin 3))
-      (LocallyDelta0Function.var (V := V) (2 : Fin 3)) (LocallyDelta0Function.var (V := V) (0 : Fin 3))
+      (LocallyDelta0Function.var (V := V) (2 : Fin 3))
+      (LocallyDelta0Function.var (V := V) (0 : Fin 3))
     exact this.of_iff fun w ↦ ⟨by rintro h; simp [h, nth_graph], by
       intro h; exact (nth_eq_of_graph (by simpa using h)).symm⟩
   bounded X := by
@@ -580,7 +585,7 @@ lemma mem_limSeq_result (xs : V) :
       pair_le_pair hys (le_trans (c.result_le_bound param ys) (c.bound_monotone param hys))
     apply c.adjointruction.mem_limSeq_succ_iff.mpr
     refine ⟨le_trans hle le_self_add, ?_⟩
-    show c.Phi param _ _
+    change c.Phi param _ _
     rcases nil_or_adjoin ys with (rfl | ⟨x, ys', rfl⟩)
     · left; simp
     · right
@@ -625,7 +630,8 @@ lemma graph_unique {xs y₁ y₂ : V} :
 variable (param)
 
 lemma graph_existsUnique (xs : V) : ∃! y, c.Graph param ⟪xs, y⟫ :=
-  ExistsUnique.intro _ (c.result_graph param xs) fun _ h ↦ c.graph_unique h (c.result_graph param xs)
+  ExistsUnique.intro _ (c.result_graph param xs) fun _ h ↦
+    c.graph_unique h (c.result_graph param xs)
 
 lemma result_eq_of_graph {xs y : V} (h : c.Graph param ⟪xs, y⟫) : c.result param xs = y :=
   (c.graph_iff.mp h).symm
@@ -998,11 +1004,11 @@ section takeLast
 /-- The last `k` elements of the list `v`. -/
 noncomputable def takeLast (v k : V) : V := TakeLast.adjointruction.result ![k] v
 
-@[simp] lemma takeLast_nil : takeLast (0 : V) k = 0 := by
+@[simp] lemma takeLast_nil (k : V) : takeLast (0 : V) k = 0 := by
   simp [takeLast, TakeLast.adjointruction]
 
 open Classical in
-lemma takeLast_adjoin (x v : V) :
+lemma takeLast_adjoin (x v k : V) :
     takeLast (x ∷ v) k = if len v < k then x ∷ v else takeLast v k := by
   simp [takeLast, TakeLast.adjointruction]
 
@@ -1200,5 +1206,248 @@ lemma concat_nth_len' (v z : V) {i} (hi : len v = i) : (concat v z).[i] = z := b
   rcases hi; simp
 
 end concat
+
+/-! ### Membership -/
+
+section vecMembership
+
+/-- `x ∈ᵥ v` states that `x` is an element of the list `v`. -/
+def MemVec (x v : V) : Prop := ∃ i < len v, x = v.[i]
+
+scoped infix:40 " ∈ᵥ " => MemVec
+
+@[simp] lemma not_memVec_empty (x : V) : ¬x ∈ᵥ 0 := by rintro ⟨i, h, _⟩; simp at h
+
+lemma nth_mem_memVec {i v : V} (h : i < len v) : v.[i] ∈ᵥ v := ⟨i, by simp [h]⟩
+
+@[simp] lemma memVec_insert_fst {x v : V} : x ∈ᵥ x ∷ v := ⟨0, by simp⟩
+
+@[simp] lemma memVec_adjoin_iff {x y v : V} : x ∈ᵥ y ∷ v ↔ x = y ∨ x ∈ᵥ v := by
+  constructor
+  · rintro ⟨i, h, rfl⟩
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp
+    · right; simpa using nth_mem_memVec (by simpa using h)
+  · rintro (rfl | hx)
+    · simp
+    · rcases hx with ⟨i, hi, rfl⟩
+      exact ⟨i + 1, by simp [hi]⟩
+
+lemma le_of_memVec {x v : V} (h : x ∈ᵥ v) : x ≤ v := by
+  rcases h with ⟨i, _, rfl⟩; simp
+
+instance memVec_defined : 𝚫ᴬ₁-Relation (MemVec : V → V → Prop) via memVecDef :=
+  ⟨by intro v; simp [memVecDef], by intro v; simp [memVecDef, MemVec]⟩
+
+instance memVec_definable : 𝚫ᴬ₁-Relation (MemVec : V → V → Prop) := memVec_defined.to_definable
+
+instance memVec_definable' (Γ m) : Γᴬ_[m + 1]-Relation (MemVec : V → V → Prop) :=
+  memVec_definable.of_deltaOne
+
+end vecMembership
+
+/-! ### Subset -/
+
+section vecSubset
+
+/-- `v ⊆ᵥ w` states that every element of the list `v` is an element of the list `w`. -/
+def SubsetVec (v w : V) : Prop := ∀ x, x ∈ᵥ v → x ∈ᵥ w
+
+scoped infix:30 " ⊆ᵥ " => SubsetVec
+
+@[simp, refl] lemma SubsetVec.refl (v : V) : v ⊆ᵥ v := fun _ hx ↦ hx
+
+@[simp] lemma subsetVec_insert_tail (x v : V) : v ⊆ᵥ x ∷ v := by intro y hy; simp [hy]
+
+set_option linter.flexible false in
+instance subsetVec_defined : 𝚫ᴬ₁-Relation (SubsetVec : V → V → Prop) via subsetVecDef :=
+  ⟨by intro v; simp [subsetVecDef, Bounding.HierarchySymbol.Semiformula.val_sigma,
+    memVec_defined.proper.iff'],
+   by intro v
+      simp [subsetVecDef, Bounding.HierarchySymbol.Semiformula.val_sigma,
+        memVec_defined.proper.iff']
+      constructor
+      · intro h x hx; exact h x (le_of_memVec hx) hx
+      · intro h x _; exact h x⟩
+
+instance subsetVec_definable : 𝚫ᴬ₁-Relation (SubsetVec : V → V → Prop) :=
+  subsetVec_defined.to_definable
+
+instance subsetVec_definable' (Γ m) : Γᴬ_[m + 1]-Relation (SubsetVec : V → V → Prop) :=
+  subsetVec_definable.of_deltaOne
+
+end vecSubset
+
+/-! ### Repetition -/
+
+section repeatVec
+
+noncomputable def repeatVec.adjointruction :
+    PR.Construction V Arithmetic.repeatVec.blueprint where
+  zero := fun _ ↦ 0
+  succ := fun p _ ih ↦ p 0 ∷ ih
+  zero_defined := .mk fun v ↦ by simp [Arithmetic.repeatVec.blueprint]
+  succ_defined := .mk fun v ↦ by simp [Arithmetic.repeatVec.blueprint]
+  zero_locallyDelta0 := LocallyDelta0Function.const 0
+  succ_locallyDelta0 :=
+    LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.var 2) (LocallyDelta0Function.var 0)
+  bound p i := Exp.exp (Exp.exp (i + i + p 0 + 3)) + 1
+  zero_lt_bound _ := by simp
+  succ_lt_bound p i z h := by
+    have hn : (1 : V) ≤ i + i + p 0 + 3 := le_trans (by norm_num) le_add_self
+    have e : i + 1 + (i + 1) + p 0 + 3 = i + i + p 0 + 3 + 2 := by grind
+    have := adjoin_le_exp_exp hn (le_exp_exp (le_trans le_add_self le_self_add))
+      (lt_succ_iff_le.mp h)
+    rw [← e] at this
+    exact lt_succ_iff_le.mpr this
+  bound_monotone _ _ _ h :=
+    add_le_add (exp_monotone_le.mpr (exp_monotone_le.mpr
+      (add_le_add (add_le_add (add_le_add h h) le_rfl) le_rfl))) le_rfl
+  bound_locallyDelta0 := LocallyDelta0Function.add_one <|
+    LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
+      LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.add.comp₂
+        (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.var 0)
+          (LocallyDelta0Function.var 0)) (LocallyDelta0Function.var 1))
+        (LocallyDelta0Function.const 3)
+
+/-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0` -/
+noncomputable def repeatVec (x k : V) : V := repeatVec.adjointruction.result ![x] k
+
+@[simp] lemma repeatVec_zero (x : V) : repeatVec x 0 = 0 := by
+  simp [repeatVec, repeatVec.adjointruction]
+
+@[simp] lemma repeatVec_succ (x k : V) : repeatVec x (k + 1) = x ∷ repeatVec x k := by
+  simp [repeatVec, repeatVec.adjointruction]
+
+instance repeatVec_defined : 𝚺ᴬ₁-Function₂ (repeatVec : V → V → V) via repeatVecDef := .mk
+  fun v ↦ by simp [repeatVec.adjointruction.result_defined_iff, repeatVecDef]; rfl
+
+instance repeatVec_definable : 𝚺ᴬ₁-Function₂ (repeatVec : V → V → V) :=
+  repeatVec_defined.to_definable
+
+instance repeatVec_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (repeatVec : V → V → V) :=
+  repeatVec_definable.of_sigmaOne
+
+lemma repeatVec_locallyDelta0 : LocallyDelta0Function₂ (repeatVec : V → V → V) := by
+  have := (repeatVec.adjointruction (V := V)).result_locallyDelta0.retraction
+    (![1, 0] : Fin 2 → Fin 2)
+  convert this using 3
+  simp [repeatVec]
+  rfl
+
+@[simp] lemma len_repeatVec (x k : V) : len (repeatVec x k) = k := by
+  have hP : LocallyDelta0Pred fun k : V ↦ len (repeatVec x k) = k :=
+    LocallyDelta0.eq (len_locallyDelta0.comp₁ (repeatVec_locallyDelta0.comp₂
+      (LocallyDelta0Function.const x) (LocallyDelta0Function.var (0 : Fin 1))))
+      (LocallyDelta0Function.var 0)
+  apply LocallyDelta0Pred.succ_induction hP
+  · simp
+  · intro k ih
+    simp [ih]
+
+@[simp] lemma le_repaetVec (x k : V) : k ≤ repeatVec x k := by
+  simpa using len_le (repeatVec x k)
+
+lemma nth_repeatVec (x k : V) {i} (h : i < k) : (repeatVec x k).[i] = x := by
+  have hR : LocallyDelta0 fun w : Fin 2 → V ↦ w 0 < w 1 → (repeatVec x (w 1)).[w 0] = x :=
+    (LocallyDelta0.lt (LocallyDelta0Function.var (0 : Fin 2)) (LocallyDelta0Function.var 1)).imp
+      (LocallyDelta0.eq (nth_locallyDelta0.comp₂ (repeatVec_locallyDelta0.comp₂
+        (LocallyDelta0Function.const x) (LocallyDelta0Function.var 1))
+          (LocallyDelta0Function.var 0)) (LocallyDelta0Function.const x))
+  have hP : LocallyDelta0Pred fun k ↦ ∀ j ≤ i, j < k → (repeatVec x k).[j] = x :=
+    (LocallyDelta0.ball_le_function (LocallyDelta0Function.const i) hR).of_iff fun w ↦ by simp
+  have : ∀ j ≤ i, j < k → (repeatVec x k).[j] = x := by
+    apply LocallyDelta0Pred.succ_induction hP
+    · intro j _ h
+      simp at h
+    · intro k ih j hj hl
+      rcases zero_or_succ j with (rfl | ⟨j, rfl⟩)
+      · simp
+      · simpa using ih j (le_trans le_self_add hj) (by simpa using hl)
+  exact this i le_rfl h
+
+lemma len_repeatVec_of_nth_le {v m : V} (H : ∀ i < len v, v.[i] ≤ m) :
+    v ≤ repeatVec m (len v) :=
+  le_of_nth_le_nth (by simp) (fun i hi ↦ by simp [nth_repeatVec m (len v) hi, H i hi])
+
+end repeatVec
+
+/-! ### Conversion to a set -/
+
+namespace VecToSet
+
+noncomputable def adjointruction : VecRec.Construction V Arithmetic.VecToSet.blueprint where
+  nil _ := ∅
+  adjoin _ x _ ih := insert x ih
+  nil_defined := .mk fun v ↦ by simp [Arithmetic.VecToSet.blueprint, emptyset_def]
+  adjoin_defined := .mk fun v ↦ by simp [Arithmetic.VecToSet.blueprint]
+  nil_locallyDelta0 := LocallyDelta0Function.const ∅
+  adjoin_locallyDelta0 :=
+    LocallyDelta0Function.insert.comp₂ (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 2)
+  bound _ xs := Exp.exp (xs + 1)
+  nil_le_bound _ := zero_le
+  adjoin_le_bound _ x xs ih h := by
+    have h₁ : Exp.exp (xs + 1) ≤ Exp.exp (x ∷ xs) :=
+      exp_monotone_le.mpr (succ_le_iff_lt.mpr (lt_adjoin' x xs))
+    have h₂ : Exp.exp x ≤ Exp.exp (x ∷ xs) := exp_monotone_le.mpr (lt_adjoin x xs).le
+    calc insert x ih ≤ Exp.exp (xs + 1) + Exp.exp x := insert_le_of_le_of_le le_rfl h
+      _ ≤ Exp.exp (x ∷ xs) + Exp.exp (x ∷ xs) := add_le_add h₁ h₂
+      _ = Exp.exp (x ∷ xs + 1) := by rw [exp_succ, two_mul]
+  bound_monotone _ _ _ h := exp_monotone_le.mpr (add_le_add h le_rfl)
+  bound_locallyDelta0 := LocallyDelta0Function.exp.comp₁ (LocallyDelta0Function.add_one
+    (LocallyDelta0Function.var 0))
+
+end VecToSet
+
+section vecToSet
+
+/-- The set of the elements of the list `v`. -/
+noncomputable def vecToSet (v : V) : V := VecToSet.adjointruction.result ![] v
+
+@[simp] lemma vecToSet_nil : vecToSet (0 : V) = ∅ := by simp [vecToSet, VecToSet.adjointruction]
+
+@[simp] lemma vecToSet_adjoin (x v : V) :
+    vecToSet (x ∷ v) = insert x (vecToSet v) := by simp [vecToSet, VecToSet.adjointruction]
+
+instance vecToSet_defined : 𝚺ᴬ₁-Function₁ (vecToSet : V → V) via vecToSetDef :=
+  VecToSet.adjointruction.result_defined
+
+instance vecToSet_definable : 𝚺ᴬ₁-Function₁ (vecToSet : V → V) := vecToSet_defined.to_definable
+
+instance vecToSet_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (vecToSet : V → V) :=
+  vecToSet_definable.of_sigmaOne
+
+lemma vecToSet_locallyDelta0 : LocallyDelta0Function₁ (vecToSet : V → V) := by
+  convert VecToSet.adjointruction.result_locallyDelta0 (V := V) using 3
+  simp [vecToSet, Matrix.empty_eq]
+
+lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i] := by
+  have hex : LocallyDelta0 fun w : Fin 1 → V ↦ ∃ i < len (w 0), x = (w 0).[i] :=
+    (LocallyDelta0.bexs_lt_function (len_locallyDelta0.comp₁
+      (LocallyDelta0Function.var (0 : Fin 1)))
+      (LocallyDelta0.eq (LocallyDelta0Function.const x) (nth_locallyDelta0.comp₂
+        (LocallyDelta0Function.var (1 : Fin 2)) (LocallyDelta0Function.var 0)))).of_iff
+          fun w ↦ by simp
+  have hP : LocallyDelta0Pred fun u : V ↦ x ∈ vecToSet u ↔ ∃ i < len u, x = u.[i] :=
+    ((LocallyDelta0.of_definable (R := fun t : Fin 2 → V ↦ t 0 ∈ t 1) (by definability)).comp₂
+      (LocallyDelta0Function.const x) (vecToSet_locallyDelta0.comp₁
+        (LocallyDelta0Function.var (0 : Fin 1)))).iff hex |>.of_iff fun w ↦ by simp
+  apply adjoin_induction hP
+  · simp
+  · intro y v ih
+    simp only [vecToSet_adjoin, mem_bitInsert_iff, ih, len_adjoin]
+    constructor
+    · rintro (rfl | ⟨i, hi, rfl⟩)
+      · exact ⟨0, by simp⟩
+      · exact ⟨i + 1, by simp [hi]⟩
+    · rintro ⟨i, hi, rfl⟩
+      rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+      · simp
+      · right; exact ⟨i, by simpa using hi, by simp⟩
+
+@[simp] lemma nth_mem_vecToSet {v i : V} (h : i < len v) : v.[i] ∈ vecToSet v :=
+  mem_vecToSet_iff.mpr ⟨i, h, rfl⟩
+
+end vecToSet
 
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic

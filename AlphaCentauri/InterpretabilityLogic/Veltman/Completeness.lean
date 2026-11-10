@@ -1,22 +1,25 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet.ILMinus
+public import AlphaCentauri.InterpretabilityLogic.Veltman.ILMinus
 public import Mathlib.Data.Set.Finite.List
 
 /-!
-# Completeness of $\mathbf{IL}$ with respect to finite Veltman models
+# Completeness of $\mathbf{IL}^-(\mathbf{J2}^+, \mathbf{J5})$ and $\mathbf{IL}$
 
 A finite Veltman model whose worlds are maximal consistent subsets of an adequate set indexed by
-finite sequences of formulas, and the truth lemma for it, for every extension of $\mathbf{IL}$ by
-axioms. For $\mathbf{IL}$ itself this gives completeness with respect to finite Veltman models.
+finite sequences of formulas, and the truth lemma for it, for every extension of
+$\mathbf{IL}^-(\mathbf{J2}^+, \mathbf{J5})$ by axioms. For
+$\mathbf{IL}^-(\mathbf{J2}^+, \mathbf{J5})$ and $\mathbf{IL}$ this gives completeness with respect
+to finite $\mathbf{IL}^-$-frames satisfying the frame conditions of their axioms, and for
+$\mathbf{IL}$ completeness with respect to finite Veltman models.
 -/
 
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
 
-open Entailment Formula MaximalConsistentSet
+open Entailment Formula MaximalConsistentSet Logic
 
 namespace Veltman
 
@@ -57,14 +60,15 @@ instance [Adequate Φ] : Finite (IndexedSet L Φ) := by
 initial segment of the sequence of `y`. -/
 def Rel (x y : IndexedSet L Φ) : Prop := Successor x.set y.set ∧ x.seq <+: y.seq
 
-/-- `x` and `y` extend `w`, and whenever `x` is a `C`-critical successor of `w` indexed by
-`C` after the sequence of `w`, so is `y`.
+/-- `x` and `y` extend `w`, and whenever `x` is a `C`-critical successor of `w` containing `□∼C`
+and indexed by `C` after the sequence of `w`, so is `y`, which moreover does not contain `C`.
 
 - [KO21, Theorem 5.4]
 -/
 def S (w x y : IndexedSet L Φ) : Prop :=
   (w.Rel x ∧ w.Rel y) ∧ ∀ C, w.seq ++ [C] <+: x.seq → CriticalSuccessor C w.set x.set →
-    w.seq ++ [C] <+: y.seq ∧ CriticalSuccessor C w.set y.set
+    □(∼C) ∈ x.set → w.seq ++ [C] <+: y.seq ∧ CriticalSuccessor C w.set y.set ∧ C ∉ y.set ∧
+      □(∼C) ∈ y.set
 
 /-- The set `Δ` indexed by the sequence of `x`. -/
 def successor (x : IndexedSet L Φ) (Δ : MaximalConsistentSet L Φ) (h : Successor x.set Δ) :
@@ -87,12 +91,11 @@ end IndexedSet
 
 open IndexedSet
 
-variable {𝔸 : Set (Formula α)}
-
-/-- - [dJV90, Theorem 4.1] -/
-def countermodel (𝔸 : Set (Formula α)) (Φ : Finset (Formula α))
-    [Nonempty (IndexedSet (Logic.ofAxioms 𝔸) Φ)] :
-    Model (IndexedSet (Logic.ofAxioms 𝔸) Φ) α where
+/-- - [dJV90, Theorem 4.1]
+- [KO21, Theorem 5.4]
+-/
+def countermodel (L : Logic α) (Φ : Finset (Formula α)) [Nonempty (IndexedSet L Φ)] :
+    Model (IndexedSet L Φ) α where
   Rel' := IndexedSet.Rel
   S' := IndexedSet.S
   Val' x a := #a ∈ x.set
@@ -101,30 +104,51 @@ namespace countermodel
 
 open Model Model.World
 
-variable [Nonempty (IndexedSet (Logic.ofAxioms 𝔸) Φ)]
+variable [Nonempty (IndexedSet L Φ)]
 
-instance [Adequate Φ] : (countermodel 𝔸 Φ).IsIL where
+instance [Adequate Φ] : (countermodel L Φ).IsILMinus where
   trans _ _ _ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
   cwf := by
-    have : IsTrans _ (flip (countermodel 𝔸 Φ).Rel) :=
+    have : IsTrans _ (flip (countermodel L Φ).Rel) :=
       ⟨fun _ _ _ h₁ h₂ ↦ ⟨h₂.1.trans h₁.1, h₂.2.trans h₁.2⟩⟩;
-    have : Std.Irrefl (flip (countermodel 𝔸 Φ).Rel) := ⟨fun _ h ↦ h.1.irrefl⟩;
+    have : Std.Irrefl (flip (countermodel L Φ).Rel) := ⟨fun _ h ↦ h.1.irrefl⟩;
     exact Finite.wellFounded_of_trans_of_irrefl _;
   rel_of_s_left h := h.1.1
-  rel_of_s_right h := h.1.2
-  s_refl h := ⟨⟨h, h⟩, fun _ h₁ h₂ ↦ ⟨h₁, h₂⟩⟩
-  s_trans h₁ h₂ := ⟨⟨h₁.1.1, h₂.1.2⟩, fun C h₃ h₄ ↦
-    have h := h₁.2 C h₃ h₄;
-    h₂.2 C h.1 h.2⟩
-  s_of_rel h₁ h₂ := ⟨⟨h₁, h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩,
-    fun _ h₃ h₄ ↦ ⟨h₃.trans h₂.2, h₄.trans_successor h₂.1⟩⟩
 
-variable [Adequate Φ]
+instance : (countermodel L Φ).IsJ2 where
+  rel_of_s_right h := h.1.2
+  s_trans h₁ h₂ := ⟨⟨h₁.1.1, h₂.1.2⟩, fun C h₃ h₄ h₅ ↦
+    have h := h₁.2 C h₃ h₄ h₅;
+    h₂.2 C h.1 h.2.1 h.2.2.2⟩
+
+variable [Entailment.Cl L]
+
+instance : (countermodel L Φ).IsJ5 where
+  s_of_rel h₁ h₂ := ⟨⟨h₁, h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩, fun _ h₃ h₄ h₅ ↦
+    ⟨h₃.trans h₂.2, h₄.trans_successor h₂.1, h₂.1.not_mem_of_box_neg_mem h₅,
+      h₂.1.box_mem_of_box_mem h₅⟩⟩
+
+instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsJ1 where
+  s_refl {w x} h := by
+    refine ⟨⟨h, h⟩, fun C h₁ h₂ h₃ ↦ ⟨h₁, h₂, h₂.not_mem ?_, h₃⟩⟩;
+    have hC : IsRhdOperand Φ C := x.isRhdOperand_of_mem_seq C <| h₁.subset (by simp);
+    exact (mem_iff_provable (Adequate.rhd_mem hC hC)).mpr <|
+      Context.of <| WeakerThan.pbl (𝓢 := ILMinusJ1) ILMinusJ1.axiomJ1'
+
+instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsIL where
+  rel_of_s_left := IsILMinus.rel_of_s_left
+  rel_of_s_right := IsJ4.rel_of_s_right
+  s_refl := IsJ1.s_refl
+  s_trans := IsJ2.s_trans
+  s_of_rel := IsJ5.s_of_rel
+
+variable {𝔸 : Set (Formula α)} [Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ)] [ILMinusAdequate Φ]
+  [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] [ILMinusJ5 ⪯ ofAxiomsMinus 𝔸]
 
 /-- - [dJV90, Theorem 4.1]
 - [KO21, Lemma 5.6]
 -/
-lemma truthlemma {x : (countermodel 𝔸 Φ).World} {A : Formula α} (hA : A ∈ Φ) :
+lemma truthlemma {x : (countermodel (ofAxiomsMinus 𝔸) Φ).World} {A : Formula α} (hA : A ∈ Φ) :
     x ⊩ A ↔ A ∈ x.set := by
   induction A generalizing x with
   | atom a => rfl;
@@ -147,44 +171,46 @@ lemma truthlemma {x : (countermodel 𝔸 Φ).World} {A : Formula α} (hA : A ∈
   | rhd B C ihB ihC =>
     have hB := Adequate.rhd_left hA;
     have hC := Adequate.rhd_right hA;
+    have : ILMinusJ2 ⪯ ofAxiomsMinus 𝔸 :=
+      WeakerThan.trans (𝓣 := ILMinusJ2Plus) inferInstance inferInstance;
     constructor;
     · intro h;
       by_contra hn;
-      obtain ⟨Δ, hΔ, hBΔ⟩ := exists_criticalSuccessor_of_rhd_not_mem hA hn;
-      have hC' : IsRhdOperand Φ C := .of_rhd_right hA;
-      obtain ⟨v, hS, hv⟩ := h (x.criticalSuccessor C hC' Δ hΔ.toSuccessor)
+      obtain ⟨Δ, hΔ, hBΔ, hCΔ⟩ := exists_criticalSuccessor_box_neg_of_rhd_not_mem hA hn;
+      obtain ⟨v, hS, hv⟩ := h (x.criticalSuccessor C (.of_rhd_right hA) Δ hΔ.toSuccessor)
         ⟨hΔ.toSuccessor, List.prefix_append _ _⟩ ((ihB hB).mpr hBΔ);
-      have hCC : C ▷ C ∈ x.set :=
-        (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofAxioms.rhd_refl;
-      exact (hS.2 C (List.prefix_refl _) hΔ).2.not_mem hCC <| (ihC hC).mp hv;
+      exact (hS.2 C (List.prefix_refl _) hΔ hCΔ).2.2.1 <| (ihC hC).mp hv;
     · intro h u Rxu hu;
       replace hu := (ihB hB).mp hu;
-      by_cases hc : ∃ F, x.seq ++ [F] <+: u.seq ∧ CriticalSuccessor F x.set u.set;
-      · obtain ⟨F, hpre, hcrit⟩ := hc;
+      by_cases hc : ∃ F, x.seq ++ [F] <+: u.seq ∧ CriticalSuccessor F x.set u.set ∧
+          □(∼F) ∈ u.set;
+      · obtain ⟨F, hpre, hcrit, -⟩ := hc;
         have hF : IsRhdOperand Φ F := u.isRhdOperand_of_mem_seq F <| hpre.subset (by simp);
-        obtain ⟨Θ, hΘ, hCΘ⟩ := hcrit.exists_criticalSuccessor hF h hu;
+        obtain ⟨Θ, hΘ, hCΘ, hFΘ, hbΘ⟩ :=
+          hcrit.weakCriticalSuccessor.exists_criticalSuccessor_box_neg_mem_not_mem hF h hu;
         use x.criticalSuccessor F hF Θ hΘ.toSuccessor;
         and_intros;
         · exact Rxu.1;
         · exact Rxu.2;
         · exact hΘ.toSuccessor;
         · exact List.prefix_append _ _;
-        · intro C' hpre' _;
+        · intro C' hpre' _ _;
           have h₁ : x.seq ++ [C'] = x.seq ++ [F] :=
             (List.prefix_of_prefix_length_le hpre' hpre (by simp)).eq_of_length (by simp);
           obtain rfl : C' = F := by simpa using h₁;
-          exact ⟨List.prefix_refl _, hΘ⟩;
+          exact ⟨List.prefix_refl _, hΘ, hFΘ, hbΘ⟩;
         · exact (ihC hC).mpr hCΘ;
-      · have hbot := Rxu.1.criticalSuccessor_bot Logic.ofAxioms.rhd_bot;
-        obtain ⟨Θ, hΘ, hCΘ⟩ := hbot.exists_criticalSuccessor .bot h hu;
+      · have hbot := Rxu.1.criticalSuccessor_bot <| K_right ofAxiomsMinus.box_neg_iff_rhd_bot;
+        obtain ⟨Θ, hΘ, hCΘ, -⟩ :=
+          hbot.weakCriticalSuccessor.exists_criticalSuccessor_box_neg_mem_not_mem .bot h hu;
         use x.successor Θ hΘ.toSuccessor;
         and_intros;
         · exact Rxu.1;
         · exact Rxu.2;
         · exact hΘ.toSuccessor;
         · exact List.prefix_refl _;
-        · intro C' hpre' hcrit';
-          exact (hc ⟨C', hpre', hcrit'⟩).elim;
+        · intro C' hpre' hcrit' hbox';
+          exact (hc ⟨C', hpre', hcrit', hbox'⟩).elim;
         · exact (ihC hC).mpr hCΘ;
 
 end countermodel
@@ -193,58 +219,101 @@ end Veltman
 
 /-! ### Completeness -/
 
-namespace Logic.ofAxioms
+namespace Logic.ofAxiomsMinus
 
 open Veltman Veltman.Model.World
 
 variable {α : Type*} [DecidableEq α] {𝔸 : Set (Formula α)} {Φ : Finset (Formula α)}
   {A : Formula α}
 
-instance [Entailment.Consistent (ofAxioms 𝔸)] : Nonempty (IndexedSet (Logic.ofAxioms 𝔸) Φ) := by
-  obtain ⟨Γ, -⟩ := exists_consistent_union (Φ := Φ) (L := ofAxioms 𝔸) (X := ∅) <| by
+instance [Entailment.Consistent (ofAxiomsMinus 𝔸)] :
+    Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ) := by
+  obtain ⟨Γ, -⟩ := exists_consistent_union (Φ := Φ) (L := ofAxiomsMinus 𝔸) (X := ∅) <| by
     intro h;
-    exact Entailment.Consistent.not_inconsistent (𝓢 := ofAxioms 𝔸) fun _ ↦
+    exact Entailment.Consistent.not_inconsistent (𝓢 := ofAxiomsMinus 𝔸) fun _ ↦
       efq ⨀ Context.emptyPrf h;
   exact ⟨⟨Γ, [], by simp, by simp⟩⟩
 
-/-- If `ofAxioms 𝔸` does not prove `A`, then `A` fails at some world of the countermodel over the
-adequate closure of `{A}`.
+/-- If an extension of $\mathbf{IL}^-(\mathbf{J2}^+, \mathbf{J5})$ does not prove `A`, then `A`
+fails at some world of the countermodel over an adequate set containing `A`.
 
-- [dJV90, Theorem 4.1]
+- [KO21, Theorem 5.4]
 -/
-lemma not_models_countermodel [Entailment.Consistent (ofAxioms 𝔸)] (h : ofAxioms 𝔸 ⊬ A) :
-    ¬countermodel 𝔸 (adequateClosure {A}) ⊧ A := by
+lemma not_models_countermodel [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] [ILMinusJ5 ⪯ ofAxiomsMinus 𝔸]
+    [Entailment.Consistent (ofAxiomsMinus 𝔸)] (h : ofAxiomsMinus 𝔸 ⊬ A) :
+    ¬countermodel (ofAxiomsMinus 𝔸) (ilMinusAdequateClosure {A}) ⊧ A := by
   intro hM;
-  have hX : ({∼A} : Set (Formula α)) *⊬[ofAxioms 𝔸] ⊥ := by
+  have hX : ({∼A} : Set (Formula α)) *⊬[ofAxiomsMinus 𝔸] ⊥ := by
     intro h₁;
     apply h;
-    have h₂ : ofAxioms 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+    have h₂ : ofAxiomsMinus 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
     cl_prover [h₂];
-  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := adequateClosure {A}) hX;
-  have hA : A ∈ adequateClosure {A} := adequateClosure.subset (by simp);
+  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := ilMinusAdequateClosure {A}) hX;
+  have hA : A ∈ ilMinusAdequateClosure {A} := ilMinusAdequateClosure.subset (by simp);
   exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
     (countermodel.truthlemma hA).mp <| hM ⟨Γ, [], by simp, by simp⟩
 
-end Logic.ofAxioms
+end Logic.ofAxiomsMinus
 
-namespace Logic.IL
+namespace Logic
 
-open Veltman
+open Veltman Veltman.Model
 
 universe u
 
 variable {α : Type u} {A : Formula α}
 
-/-- - [dJV90, Theorem 4.1] -/
-theorem complete
-    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A) :
-    𝐈𝐋 ⊢ A := by
+/-- - [KO21, Theorem 5.4] -/
+theorem ILMinusJ2PlusJ5.complete
+    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+      [M.IsILMinus] → [M.IsJ2] → [M.IsJ5] → M ⊧ A) :
+    ILMinusJ2PlusJ5 ⊢ A := by
   classical
   by_contra hA;
-  have : Entailment.Consistent (𝐈𝐋 : Logic α) := .of_unprovable hA;
-  exact Logic.ofAxioms.not_models_countermodel hA <| h (countermodel ∅ (adequateClosure {A}))
+  have : Entailment.Consistent (ILMinusJ2PlusJ5 : Logic α) := .of_unprovable hA;
+  exact ofAxiomsMinus.not_models_countermodel hA <|
+    h (countermodel ILMinusJ2PlusJ5 (ilMinusAdequateClosure {A}))
 
-end Logic.IL
+/-- - [KO21, Theorem 5.4] -/
+theorem IL.complete_ILMinus
+    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → [M.IsJ5] → M ⊧ A) :
+    𝐈𝐋 ⊢ A := by
+  classical
+  rw [IL.eq_ofAxiomsMinus];
+  by_contra hA;
+  have : Entailment.Consistent (ofAxiomsMinus
+      ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A})) :=
+    .of_unprovable hA;
+  have : (ILMinusJ1 : Logic α) ⪯ ofAxiomsMinus
+      ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}) :=
+    weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_subset <|
+      Set.subset_union_left.trans Set.subset_union_left;
+  have : (ILMinusJ5 : Logic α) ⪯ ofAxiomsMinus
+      ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}) :=
+    weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_subset Set.subset_union_right;
+  have : (ILMinusJ2Plus : Logic α) ⪯ ofAxiomsMinus
+      ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}) :=
+    weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_provable <| by
+      rintro _ ⟨A, B, C, rfl⟩;
+      exact ofAxiomsMinus.subset_of_subset Set.subset_union_left CL.axiomJ2Plus;
+  exact ofAxiomsMinus.not_models_countermodel hA <| h (countermodel _ (ilMinusAdequateClosure {A}))
+
+/-- - [dJV90, Theorem 4.1] -/
+theorem IL.complete
+    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A) :
+    𝐈𝐋 ⊢ A := by
+  apply IL.complete_ILMinus;
+  intro κ _ _ M _ _ _ _;
+  have : M.IsIL := {
+    rel_of_s_left := IsILMinus.rel_of_s_left
+    rel_of_s_right := IsJ4.rel_of_s_right
+    s_refl := IsJ1.s_refl
+    s_trans := IsJ2.s_trans
+    s_of_rel := IsJ5.s_of_rel };
+  exact h M
+
+end Logic
 
 end FFL.InterpretabilityLogic
 

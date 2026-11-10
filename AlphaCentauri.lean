@@ -58,6 +58,7 @@ public import AlphaCentauri.InterpretabilityLogic.Sequent
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
+public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStep
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Completeness
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Extension

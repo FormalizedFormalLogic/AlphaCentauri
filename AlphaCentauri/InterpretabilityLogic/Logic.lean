@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Formula
+public import AlphaCentauri.InterpretabilityLogic.Formula
 public import Foundation.Propositional.Entailment.Cl
 public import Foundation.Meta.ClProver
 
@@ -36,6 +36,58 @@ lemma strictlyWeakerThan_iff : L₁ ⪱ L₂ ↔ L₁ ⊂ L₂ :=
     fun h ↦ ⟨weakerThan_iff.mpr h.1, fun h' ↦ h.2 (weakerThan_iff.mp h')⟩⟩
 
 lemma equiv_iff : L₁ ≊ L₂ ↔ L₁ = L₂ := ⟨fun h ↦ h.eq, fun h ↦ ⟨congrArg theory h⟩⟩
+
+end Logic
+
+/-! ### Logics containing $\mathbf{GL}$ -/
+
+/-- `L` is closed under necessitation and proves the axioms $\mathbf{K}$ and $\mathbf{L}$. -/
+class Logic.ExtendsGL (L : Logic α) : Prop where
+  nec {A : Formula α} : L ⊢ A → L ⊢ □A
+  axiomK {A B : Formula α} : L ⊢ □(A 🡒 B) 🡒 □A 🡒 □B
+  axiomL {A : Formula α} : L ⊢ □(□A 🡒 A) 🡒 □A
+
+namespace Logic
+
+variable {L : Logic α} [L.ExtendsGL] {X : Set (Formula α)} {A B : Formula α}
+
+lemma provable_box (h : L ⊢ A) : L ⊢ □A := ExtendsGL.nec h
+
+variable [Entailment.Cl L]
+
+lemma box_mono (h : L ⊢ A 🡒 B) : L ⊢ □A 🡒 □B := ExtendsGL.axiomK ⨀ provable_box h
+
+lemma box_and : L ⊢ □A ⋏ □B 🡒 □(A ⋏ B) := by
+  have h₁ : L ⊢ □A 🡒 □(B 🡒 A ⋏ B) := box_mono and₃;
+  have h₂ : L ⊢ □(B 🡒 A ⋏ B) 🡒 □B 🡒 □(A ⋏ B) := ExtendsGL.axiomK;
+  cl_prover [h₁, h₂];
+
+lemma axiom4 : L ⊢ □A 🡒 □□A := by
+  have h₁ : L ⊢ □(□A ⋏ A) 🡒 □A := box_mono and₂;
+  have h₂ : L ⊢ □A 🡒 □(□(□A ⋏ A) 🡒 □A ⋏ A) := box_mono <| by cl_prover [h₁];
+  have h₃ : L ⊢ □(□(□A ⋏ A) 🡒 □A ⋏ A) 🡒 □(□A ⋏ A) := ExtendsGL.axiomL;
+  have h₄ : L ⊢ □(□A ⋏ A) 🡒 □□A := box_mono and₁;
+  cl_prover [h₂, h₃, h₄];
+
+lemma box_conj_of_forall :
+    (Δ : List (Formula α)) → (∀ B ∈ Δ, X *⊢[L] □B) → X *⊢[L] □Δ.conj
+  | [], _ => Context.of <| provable_box verum
+  | B :: Δ, h =>
+    Context.of box_and ⨀
+      K_intro (h B (by simp)) (box_conj_of_forall Δ fun C hC ↦ h C (by simp [hC]))
+
+/-- If `A` follows from `T` together with the formulas `□B` for `B ∈ T`, then `□A` follows from the
+latter. -/
+lemma box_of_provable {T : Set (Formula α)} (h : (T ∪ (□·) '' T) *⊢[L] A) :
+    ((□·) '' T) *⊢[L] □A := by
+  obtain ⟨Δ, hΔ, hb⟩ := Context.provable_iff.mp h;
+  have h₁ : L ⊢ □Δ.conj 🡒 □A :=
+    box_mono <| C_trans (K_right EConj₂Conj) (FiniteContext.provable_iff.mp hb);
+  apply Context.of h₁ ⨀ box_conj_of_forall Δ _;
+  intro B hB;
+  rcases hΔ B hB with hB | ⟨C, hC, rfl⟩;
+  · exact Context.by_axm ⟨B, hB, rfl⟩;
+  · exact Context.of axiom4 ⨀ Context.by_axm ⟨C, hC, rfl⟩;
 
 end Logic
 
@@ -116,9 +168,9 @@ instance : Entailment.Minimal (ofAxioms 𝔸) where
 instance : Entailment.Cl (ofAxioms 𝔸) where
   dne := dne
 
-variable {A B C : Formula α}
+instance : (ofAxioms 𝔸).ExtendsGL := ⟨nec, axiomK, axiomL⟩
 
-lemma box_mono (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ □A 🡒 □B := axiomK ⨀ nec h
+variable {A B C : Formula α}
 
 lemma rhd_mono_right (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ C ▷ A 🡒 C ▷ B := by
   have h₁ : ofAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h;
@@ -159,6 +211,59 @@ lemma subset_of_subset (h : 𝔸 ⊆ 𝔹) : ofAxioms 𝔸 ⊆ ofAxioms 𝔹 :=
   subset_of_provable fun _ hA ↦ axm (h hA)
 
 lemma IL_subset : (𝐈𝐋 : Logic α) ⊆ ofAxioms 𝔸 := subset_of_subset (Set.empty_subset _)
+
+end Logic.ofAxioms
+
+/-! ### Theorems of extensions of $\mathbf{IL}$ -/
+
+namespace Logic.ofAxioms
+
+variable {𝔸 : Set (Formula α)} {A B : Formula α}
+
+lemma rhd_of_provable (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h
+
+lemma rhd_refl : ofAxioms 𝔸 ⊢ A ▷ A := rhd_of_provable C_id
+
+lemma box_neg_of_rhd : ofAxioms 𝔸 ⊢ A ▷ B 🡒 □(∼B) 🡒 □(∼A) := by
+  have h : ofAxioms 𝔸 ⊢ A ▷ B 🡒 ∼□(∼A) 🡒 ∼□(∼B) := axiomJ4;
+  cl_prover [h];
+
+/-- - [Vis90, §6.1.1] -/
+lemma rhd_bot : ofAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 □(∼A) := by
+  have h₁ : ofAxioms 𝔸 ⊢ □(∼⊥) := provable_box verum;
+  have h₂ : ofAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 □(∼⊥) 🡒 □(∼A) := box_neg_of_rhd;
+  cl_prover [h₁, h₂];
+
+lemma or_dia_rhd : ofAxioms 𝔸 ⊢ (A ⋎ ◇A) ▷ A := by
+  have h₁ : ofAxioms 𝔸 ⊢ A ▷ A := rhd_refl;
+  have h₂ : ofAxioms 𝔸 ⊢ ◇A ▷ A := axiomJ5;
+  have h₃ : ofAxioms 𝔸 ⊢ A ▷ A ⋏ ◇A ▷ A 🡒 (A ⋎ ◇A) ▷ A := axiomJ3;
+  cl_prover [h₁, h₂, h₃];
+
+/-- - [Vis90, §6.1.1] -/
+lemma rhd_and_box_neg : ofAxioms 𝔸 ⊢ A ▷ (A ⋏ □(∼A)) := by
+  have h₁ : ofAxioms 𝔸 ⊢ □(□(∼A) 🡒 ∼A) 🡒 □(∼A) := axiomL;
+  have h₂ : ofAxioms 𝔸 ⊢ □(∼(A ⋏ □(∼A))) 🡒 □(□(∼A) 🡒 ∼A) := box_mono <| by cl_prover;
+  have h₃ : ofAxioms 𝔸 ⊢ A ▷ ((A ⋏ □(∼A)) ⋎ ◇(A ⋏ □(∼A))) :=
+    axiomJ1 ⨀ provable_box
+      (show ofAxioms 𝔸 ⊢ A 🡒 (A ⋏ □(∼A)) ⋎ ∼□(∼(A ⋏ □(∼A))) by cl_prover [h₁, h₂]);
+  have h₄ : ofAxioms 𝔸 ⊢ ((A ⋏ □(∼A)) ⋎ ◇(A ⋏ □(∼A))) ▷ (A ⋏ □(∼A)) := or_dia_rhd;
+  have h₅ : ofAxioms 𝔸 ⊢
+      A ▷ ((A ⋏ □(∼A)) ⋎ ◇(A ⋏ □(∼A))) ⋏ ((A ⋏ □(∼A)) ⋎ ◇(A ⋏ □(∼A))) ▷ (A ⋏ □(∼A)) 🡒
+        A ▷ (A ⋏ □(∼A)) :=
+    axiomJ2;
+  cl_prover [h₃, h₄, h₅];
+
+variable [DecidableEq α] {X : Set (Formula α)} {F : Formula α}
+
+lemma fdisj_rhd {𝒢 : Finset (Formula α)} (h : ∀ G ∈ 𝒢, X *⊢[ofAxioms 𝔸] G ▷ F) :
+    X *⊢[ofAxioms 𝔸] 𝒢.disj ▷ F := by
+  induction 𝒢 using Finset.induction_on with
+  | empty => simpa using Context.of (axiomJ1 ⨀ provable_box efq);
+  | insert G 𝒢 _ ih =>
+    have h₁ : X *⊢[ofAxioms 𝔸] (G ⋎ 𝒢.disj) ▷ F :=
+      Context.of axiomJ3 ⨀ K_intro (h G (by simp)) (ih fun H hH ↦ h H (by simp [hH]));
+    exact Context.of (rhd_anti_left CinsertFDisjAFDisj) ⨀ h₁;
 
 end Logic.ofAxioms
 

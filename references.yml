@@ -206,6 +206,38 @@ DAq05:
       title: Lecture Notes in Logic
       volume: 18
 
+dJV90:
+  type: Chapter
+  title: Provability Logics for Relative Interpretability
+  author: ["de Jongh, Dick", "Veltman, Frank"]
+  page-range: 31-42
+  date: 1990
+  serial-number:
+    doi: "10.1007/978-1-4613-0609-2_3"
+  parent:
+    type: Anthology
+    title: Mathematical Logic
+    editor: "Petkov, Petio P."
+    date: 1990
+    publisher:
+      name: Plenum Press
+      location: New York
+
+dJV99:
+  type: Chapter
+  title: The Modal Completeness of ILW
+  author: ["de Jongh, Dick", "Veltman, Frank"]
+  date: 1999
+  url: https://festschriften.illc.uva.nl/j50/contribs/jongh/
+  parent:
+    type: Anthology
+    title: "JFAK: Essays Dedicated to Johan van Benthem on the Occasion of his 50th Birthday"
+    editor: ["Gerbrandy, Jelle", "Marx, Maarten", "de Rijke, Maarten", "Venema, Yde"]
+    date: 1999
+    publisher:
+      name: Amsterdam University Press
+      location: Amsterdam
+
 ELV25:
   type: Article
   title: Completions of restricted complexity I, weak arithmetical theories
@@ -230,6 +262,18 @@ EW12:
     type: Repository
     title: arXiv
 
+GBJM20:
+  type: Article
+  title: Assuring and critical labels for relations between maximal consistent sets for interpretability logics
+  author: ["Goris, Evan", "Bílková, Marta", "Joosten, Joost J.", "Mikec, Luka"]
+  date: 2020
+  serial-number:
+    arxiv: "2003.04623"
+  url: https://arxiv.org/abs/2003.04623
+  parent:
+    type: Repository
+    title: arXiv
+
 GG17:
   type: Article
   title: Shepherdson's theorems for fragments of open induction
@@ -237,6 +281,34 @@ GG17:
   date: 2017
   serial-number:
     arxiv: "1701.02001"
+
+GJ08:
+  type: Article
+  title: Modal matters for interpretability logics
+  author: ["Goris, Evan", "Joosten, Joost J."]
+  date: 2008
+  page-range: 371-412
+  parent:
+    type: Periodical
+    title: Logic Journal of the IGPL
+    volume: 16
+    issue: 4
+  serial-number:
+    doi: "10.1093/jigpal/jzn013"
+
+GJ11:
+  type: Article
+  title: A new principle in the interpretability logic of all reasonable arithmetical theories
+  author: ["Goris, Evan", "Joosten, Joost J."]
+  date: 2011
+  page-range: 1-17
+  parent:
+    type: Periodical
+    title: Logic Journal of the IGPL
+    volume: 19
+    issue: 1
+  serial-number:
+    doi: "10.1093/jigpal/jzp082"
 
 HP98:
   type: Book
@@ -254,6 +326,18 @@ HP98:
   parent:
     type: Anthology
     title: Perspectives in Mathematical Logic
+
+HSS25a:
+  type: Article
+  title: Uniform interpolation for interpretability logic
+  author: ["Horvat, Sebastijan", "Sierra Miranda, Borja", "Studer, Thomas"]
+  date: 2025
+  serial-number:
+    arxiv: "2511.01428"
+  url: https://arxiv.org/abs/2511.01428
+  parent:
+    type: Repository
+    title: arXiv
 
 Jer10:
   type: Article
@@ -424,6 +508,18 @@ Moh11:
       name: Cambridge University Press
       location: Cambridge
 
+MV20:
+  type: Article
+  title: Interpretability logics and generalized {Veltman} semantics
+  author: ["Mikec, Luka", "Vuković, Mladen"]
+  date: 2020
+  serial-number:
+    arxiv: "1907.03849"
+  url: https://arxiv.org/abs/1907.03849
+  parent:
+    type: Repository
+    title: arXiv
+
 PWW88:
   type: Article
   title: Provability of the pigeonhole principle and the existence of infinitely many primes
@@ -437,6 +533,18 @@ PWW88:
     title: The Journal of Symbolic Logic
     volume: 53
     issue: 4
+
+Per25:
+  type: Article
+  title: Transformation of any {Verbrugge} model to a bisimilar {Veltman} model
+  author: Perkov, Tin
+  date: 2025
+  serial-number:
+    doi: "10.1017/S096012952500012X"
+  parent:
+    type: Periodical
+    title: Mathematical Structures in Computer Science
+    volume: 35
 
 Poh09:
   type: Book
@@ -539,6 +647,20 @@ Smi93a:
     volume: 159
     issue: 1
 
+Sve91:
+  type: Article
+  title: Some independence results in interpretability logic
+  author: "Švejdar, Vítězslav"
+  date: 1991
+  page-range: 29-38
+  parent:
+    type: Periodical
+    title: Studia Logica
+    volume: 50
+    issue: 1
+  serial-number:
+    doi: "10.1007/BF00370385"
+
 Tha05:
   type: Article
   title: "A note on Δ₁ induction and Σ₁ collection"
@@ -578,6 +700,14 @@ Vis26:
   serial-number:
     arxiv: "2411.15873"
 
+Vis88:
+  type: Report
+  title: Preliminary notes on interpretability logic
+  author: "Visser, Albert"
+  date: 1988
+  note: Logic Group Preprint Series 29
+  organization: Department of Philosophy, Utrecht University
+
 Vis90:
   type: Chapter
   title: Interpretability Logic
@@ -594,6 +724,14 @@ Vis90:
     publisher:
       name: Plenum Press
       location: New York
+
+Vis97:
+  type: Report
+  title: An overview of interpretability logic
+  author: "Visser, Albert"
+  date: 1997
+  note: Logic Group Preprint Series 174
+  organization: Department of Philosophy, Utrecht University
 
 vO99:
   type: Misc
@@ -651,15 +789,3 @@ WP89:
       type: Anthology
       title: Studies in Logic and the Foundations of Mathematics
       volume: 126
-
-Wil78:
-  type: Article
-  title: Some results and problems on weak systems of arithmetic
-  author: Wilkie, Alex
-  date: 1978
-  page-range: 285-296
-  parent:
-    type: Anthology
-    title: Logic Colloquium '77
-    editor: Macintyre, Angus
-    publisher: North-Holland

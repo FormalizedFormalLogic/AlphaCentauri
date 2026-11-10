@@ -65,9 +65,6 @@ declaration:
   HahnSeries.isRealClosed_lex:
     forgive:
       - HahnSeries.isRealClosed_lex
-  IsRealClosed.exists_mem_Ioo_isRoot:
-    forgive:
-      - IsRealClosed.exists_mem_Ioo_isRoot
   FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen
@@ -97,12 +94,9 @@ declaration:
   HahnSeries.factorialIntegerPartSubring.induction:
     forgive:
       - HahnSeries.isRealClosed_lex
-      - IsRealClosed.exists_mem_Ioo_isRoot
   HahnSeries.factorialIntegerPartSubring.models:
     forgive:
       - HahnSeries.isRealClosed_lex
-      - IsRealClosed.exists_mem_Ioo_isRoot
   FFL.FirstOrder.Arithmetic.IOpen.not_finiteAxiomatizable:
     forgive:
       - HahnSeries.isRealClosed_lex
-      - IsRealClosed.exists_mem_Ioo_isRoot

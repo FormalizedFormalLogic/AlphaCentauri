@@ -23,6 +23,10 @@ open FirstOrder Bootstrapping.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {T : ArithmeticTheory} [T.Δ₁]
 
+@[simp] lemma models_provabilityPred_iff (σ : ArithmeticSentence) :
+    V↓[ℒₒᵣ] ⊧ provabilityPred T σ ↔ Provable T (⌜σ⌝ : V) := by
+  simp [models_iff]
+
 variable (T) in
 noncomputable def provabilityFormula (x : V) : Formula V ℒₒᵣ :=
   (⌜(provable T).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 x]

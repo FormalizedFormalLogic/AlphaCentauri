@@ -46,6 +46,7 @@ public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Henkin
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
+public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Pi1Conservativity
 public import AlphaCentauri.InterpretabilityLogic.Extension
 public import AlphaCentauri.InterpretabilityLogic.Formula
 public import AlphaCentauri.InterpretabilityLogic.Logic
@@ -142,6 +143,7 @@ public import AlphaCentauri.ToFoundation.PrenexNormalForm
 public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.ToFoundation.Primrec
 public import AlphaCentauri.ToFoundation.ProvabilityAbstraction
+public import AlphaCentauri.ToFoundation.ProvabilityFormula
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToFoundation.Provable
 public import AlphaCentauri.ToFoundation.Reflection

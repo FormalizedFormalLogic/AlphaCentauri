@@ -102,15 +102,89 @@ lemma Pi1Conservative.and_provabilityPred (h : Pi1Conservative T (⌜σ⌝ : V) 
   intro π hs hπ hτ;
   have hP : (⌜provabilityPred T χ⌝ : Formula V ℒₒᵣ) = provabilityFormula T ⌜χ⌝ := by simp;
   have hPs : (provabilityFormula T (⌜χ⌝ : V)).shift = provabilityFormula T ⌜χ⌝ := by
-    rw [← hP]; ext; simpa [Sentence.quote_eq] using Sentence.shift_quote (V := V) (provabilityPred T χ);
+    rw [← hP];
+    ext;
+    simpa [Sentence.quote_eq] using Sentence.shift_quote (V := V) (provabilityPred T χ);
   have hPσ : IsSigma 1 (provabilityFormula T (⌜χ⌝ : V)).val := by
     rw [← hP]; exact (isSigma_quote_iff (provabilityPred T χ)).mpr (by simp);
   have h₁ := h (provabilityFormula T ⌜χ⌝ 🡒 π) (by simp [hPs, hs]) (by
     simp only [Semiformula.val_imp, imp, IsHierarchy.or_iff];
-    exact ⟨by simpa using hPσ.neg (by simp), hπ⟩) (by simp at hτ; cl_prover [hτ]);
+    exact ⟨by simpa using hPσ.neg (by simp), hπ⟩) (by
+      have hτ' : T.internalize V ⊢ ⌜τ⌝ ⋏ provabilityFormula T ⌜χ⌝ 🡒 π := by simpa using hτ;
+      cl_prover [hτ']);
   have h₂ : T.internalize V ⊢ ⌜σ⌝ ⋏ provabilityFormula T ⌜χ⌝ 🡒 π := by cl_prover [h₁];
   simpa using h₂
 
 end Bootstrapping
 
+variable (T) in
+/-- The formula defining `Pi1Conservative T`. -/
+noncomputable def pi1ConservativeDef : ArithmeticSemisentence 2 :=
+  “a b. ∀ x, !(isSemiformula ℒₒᵣ).sigma 0 x → !(shiftGraph ℒₒᵣ) x x →
+    !(isHierarchy 𝚷 1).sigma x → ∀ y, !(impGraph ℒₒᵣ) y b x → ∀ z, !(impGraph ℒₒᵣ) z a x →
+      !(provable T) y → !(provable T) z”
+
+lemma eval_pi1ConservativeDef {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (a b : V) :
+    V ⊧/![a, b] (pi1ConservativeDef T) ↔ Pi1Conservative T a b := by
+  simp [pi1ConservativeDef, Pi1Conservative, eq_comm]
+
 end FFL.FirstOrder.Arithmetic
+
+namespace FFL.FirstOrder.ArithmeticTheory
+
+open Arithmetic
+
+variable (T : ArithmeticTheory) [T.Δ₁]
+
+/-- $\varphi \rhd \psi$ read as: every $\Pi_1$ sentence provable in $T + \psi$ is provable in
+$T + \varphi$.
+
+- [HM90, Definition 3.1]
+-/
+noncomputable def pi1Conservativity :
+    InterpretabilityLogic.Interpretability T.standardProvability where
+  rhd σ τ := (pi1ConservativeDef T)/[⌜σ⌝, ⌜τ⌝]
+
+variable {T}
+
+@[simp] lemma models_pi1Conservativity_iff {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+    {σ τ : ArithmeticSentence} :
+    V↓[ℒₒᵣ] ⊧ T.pi1Conservativity σ τ ↔ Bootstrapping.Pi1Conservative T (⌜σ⌝ : V) ⌜τ⌝ := by
+  simp [pi1Conservativity, models_iff, eval_pi1ConservativeDef]
+
+open Bootstrapping in
+instance instPi1ConservativityIL [𝗜𝚺₁ ⪯ T] : T.pi1Conservativity.IL where
+  J1 := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    simpa [standardProvability_def] using pi1Conservative_of_provable
+  J2 := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    simpa using Pi1Conservative.trans
+  J3 {σ τ χ} := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    have h := Pi1Conservative.or (T := T) (V := V) (σ := σ) (τ := τ) (χ := χ);
+    simpa using h
+  J4 := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    simpa [standardProvability_def] using fun h hσ hτ ↦ hσ <| Pi1Conservative.consistent h hτ
+  J5 {σ} := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    have h := pi1Conservative_dia (T := T) (V := V) (σ := σ);
+    simpa [ProvabilityAbstraction.Provability.dia, standardProvability_def] using h
+
+open Bootstrapping in
+instance instPi1ConservativityM : T.pi1Conservativity.M where
+  axiomM {σ τ χ} := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    have h := Pi1Conservative.and_provabilityPred (T := T) (V := V) (σ := σ) (τ := τ) (χ := χ);
+    simpa [standardProvability_def] using h
+
+end FFL.FirstOrder.ArithmeticTheory
+
+namespace FFL.InterpretabilityLogic
+
+open FirstOrder Arithmetic
+
+variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+  {f : ProvabilityLogic.Realization α ℒₒᵣ} {A : Formula α}
+
+/-- - [HM90, Definition 3.1] -/
+theorem Logic.ILM.arithmetical_soundness_pi1Conservativity (h : 𝐈𝐋𝐌 ⊢ A) :
+    T ⊢ A.interpret f T.standardProvability T.pi1Conservativity :=
+  Entailment.WeakerThan.pbl <| Logic.ILM.arithmetical_soundness h
+
+end FFL.InterpretabilityLogic

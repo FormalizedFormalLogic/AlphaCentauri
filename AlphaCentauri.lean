@@ -57,6 +57,7 @@ public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
 public import AlphaCentauri.NumberTheory.FLT3
+public import AlphaCentauri.NumberTheory.FermatCaseOne
 public import AlphaCentauri.NumberTheory.Primes
 public import AlphaCentauri.NumberTheory.QuadraticResidue
 public import AlphaCentauri.OmegaLogic.Basic

@@ -86,9 +86,8 @@ lemma false_of_mul_self_eq_two_mul_of_bezout {x y : V} (hbez : V↓[ℒₒᵣ] �
     apply mul_left_cancel₀ (two_ne_zero (α := V))
     grind
   obtain ⟨b, rfl⟩ : 2 ∣ y' := (two_prime (V := V)).dvd_of_dvd_pow (n := 2) ⟨a * a, by grind⟩
-  have h₄ : (1 + t * (2 * a)) % 2 = 1 % 2 := mod_add_remove_right_of_dvd ⟨t * a, by grind⟩ (by simp)
-  have h₅ : (1 + t * (2 * a)) % 2 = 0 := mod_eq_zero_iff_dvd.mpr ⟨s * b, by grind⟩
-  simp [h₅] at h₄
+  have h₄ : (1 + t * (2 * a)) % 2 = 0 := mod_eq_zero_iff_dvd.mpr ⟨s * b, by grind⟩
+  simp [mod_add_remove_right_of_dvd (b := t * (2 * a)) (m := 2) ⟨t * a, by grind⟩ (by simp)] at h₄
 
 /-- $\mathsf{IOpen} + \mathrm{Bez}$ proves the irrationality of $\sqrt{2}$.
 - [DAq05, §2]

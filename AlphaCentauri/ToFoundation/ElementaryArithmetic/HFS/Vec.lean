@@ -313,4 +313,110 @@ lemma nth_lt_of_pos {v} (hv : 0 < v) (i : V) : v.[i] < v := by
 
 end nth
 
+/-! ### Recursion on lists -/
+
+namespace VecRec
+
+variable (V)
+
+/-- A recursion on lists in a model of $\mathsf{EA}$, with a monotone bound on its values. -/
+structure Construction {arity : ℕ} (β : Arithmetic.VecRec.Blueprint arity) where
+  nil (param : Fin arity → V) : V
+  adjoin (param : Fin arity → V) (x xs ih : V) : V
+  nil_defined : 𝚺ᴬ₁.DefinedFunction nil β.nil
+  adjoin_defined :
+    𝚺ᴬ₁.DefinedFunction (fun v ↦ adjoin (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.adjoin
+  nil_locallyDelta0 : LocallyDelta0Function nil
+  adjoin_locallyDelta0 : LocallyDelta0Function fun v : Fin (arity + 3) → V ↦
+    adjoin (v ·.succ.succ.succ) (v 0) (v 1) (v 2)
+  /-- `c.bound param xs` bounds the value at `xs`. -/
+  bound (param : Fin arity → V) (xs : V) : V
+  nil_le_bound : ∀ param, nil param ≤ bound param 0
+  adjoin_le_bound : ∀ param x xs ih, ih ≤ bound param xs → adjoin param x xs ih ≤ bound param (x ∷ xs)
+  bound_monotone : ∀ param {xs ys}, xs ≤ ys → bound param xs ≤ bound param ys
+  bound_locallyDelta0 :
+    LocallyDelta0Function fun v : Fin (arity + 1) → V ↦ bound (v ·.succ) (v 0)
+
+variable {V}
+
+namespace Construction
+
+variable {arity : ℕ} {β : Arithmetic.VecRec.Blueprint arity} (c : Construction V β)
+
+/-- The rules generating the graph `⟪xs, y⟫` of the recursion. -/
+def Phi (param : Fin arity → V) (C : Set V) (pr : V) : Prop :=
+  pr = ⟪0, c.nil param⟫ ∨ (∃ x xs ih, pr = ⟪x ∷ xs, c.adjoin param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C)
+
+private lemma phi_iff (param : Fin arity → V) (C pr : V) :
+    c.Phi param {x | x ∈ C} pr ↔
+    pr = ⟪0, c.nil param⟫ ∨
+    (∃ x < pr, ∃ xs < pr, ∃ ih < C, pr = ⟪x ∷ xs, c.adjoin param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C) := by
+  constructor
+  · rintro (h | ⟨x, xs, ih, rfl, hC⟩)
+    · left; exact h
+    · right
+      exact ⟨x, lt_of_lt_of_le (by simp) (le_pair_left _ _),
+        xs, lt_of_lt_of_le (by simp) (le_pair_left _ _), ih, lt_of_mem_rng hC, rfl, hC⟩
+  · rintro (h | ⟨x, _, xs, _, ih, _, rfl, hC⟩)
+    · left; exact h
+    · right; exact ⟨x, xs, ih, rfl, hC⟩
+
+lemma phi_locallyDelta0 :
+    LocallyDelta0 fun w : Fin (arity + 2) → V ↦ c.Phi (w ·.succ.succ) {x | x ∈ w 1} (w 0) := by
+  have hnil : LocallyDelta0 fun w : Fin (arity + 2) → V ↦ w 0 = ⟪0, c.nil (w ·.succ.succ)⟫ :=
+    (LocallyDelta0.of_definable (R := fun t : Fin 2 → V ↦ t 0 = ⟪0, t 1⟫)
+      (by definability)).comp₂ (LocallyDelta0Function.var 0)
+        (c.nil_locallyDelta0.retraction fun j ↦ j.succ.succ)
+  have hadjoin : LocallyDelta0Function fun y : Fin (arity + 5) → V ↦
+      c.adjoin (fun j ↦ y j.succ.succ.succ.succ.succ) (y 2) (y 1) (y 0) := by
+    simpa using c.adjoin_locallyDelta0.retraction
+      (2 :> 1 :> 0 :> fun j ↦ j.succ.succ.succ.succ.succ)
+  have hbody : LocallyDelta0 fun y : Fin (arity + 5) → V ↦
+      y 3 = ⟪y 2 ∷ y 1, c.adjoin (fun j ↦ y j.succ.succ.succ.succ.succ) (y 2) (y 1) (y 0)⟫ ∧
+        ⟪y 1, y 0⟫ ∈ y 4 := by
+    have := (LocallyDelta0.of_definable (R := fun t : Fin 6 → V ↦
+        t 0 = ⟪t 1 ∷ t 2, t 3⟫ ∧ ⟪t 2, t 4⟫ ∈ t 5) (by definability)).comp
+      (f := ![fun y ↦ y 3, fun y ↦ y 2, fun y ↦ y 1,
+        fun y ↦ c.adjoin (fun j ↦ y j.succ.succ.succ.succ.succ) (y 2) (y 1) (y 0),
+        fun y ↦ y 0, fun y ↦ y 4]) <|
+      Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 3,
+        Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 2,
+          Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 1,
+            Fin.forall_fin_succ.mpr ⟨hadjoin,
+              Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 0,
+                Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 4, finZeroElim⟩⟩⟩⟩⟩⟩
+    simpa using this
+  have hex := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 0) <|
+    LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
+      LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 3) hbody
+  exact (hnil.or hex).of_iff fun w ↦ by simpa using c.phi_iff (w ·.succ.succ) (w 1) (w 0)
+
+/-- The construction of the graph of the recursion. -/
+def adjointruction : Fixpoint.Construction V β.blueprint where
+  Φ := c.Phi
+  defined := .mk ⟨by
+    intro v; simp [Arithmetic.VecRec.Blueprint.blueprint, c.nil_defined.iff,
+      c.adjoin_defined.iff], by
+    intro v
+    symm
+    simpa [Arithmetic.VecRec.Blueprint.blueprint, c.nil_defined.iff, c.adjoin_defined.iff]
+      using c.phi_iff _ _ _⟩
+  monotone := by
+    rintro C C' hC _ x (h | ⟨v, i, hv, rfl, h⟩)
+    · left; exact h
+    · right; exact ⟨v, i, hv, rfl, hC h⟩
+  Φ_locallyDelta0 := c.phi_locallyDelta0
+
+variable (param : Fin arity → V)
+
+/-- `c.Graph param ⟪xs, y⟫` states that the recursion takes the value `y` at `xs`. -/
+def Graph : V → Prop := c.adjointruction.Fixpoint param
+
+lemma graph_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.graphDef :=
+  c.adjointruction.fixpoint_defined
+
+end Construction
+
+end VecRec
+
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic

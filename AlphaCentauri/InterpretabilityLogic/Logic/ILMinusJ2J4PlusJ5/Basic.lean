@@ -29,43 +29,34 @@ abbrev ILMinusJ2J4PlusJ5 : Logic α :=
 
 end Logic
 
-section SoundnessVerbrugge
-
-namespace Logic
-
-open Verbrugge Verbrugge.Model Verbrugge.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
-
-theorem ILMinusJ2J4PlusJ5.sound_verbrugge [M.IsILMinus] [M.IsJ2] [M.IsJ4Plus] [M.IsJ5] :
-    ILMinusJ2J4PlusJ5 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound_verbrugge <| by
-    rintro _ ((⟨A, B, C, rfl⟩ | ⟨A, B, C, rfl⟩) | ⟨A, rfl⟩) x;
-    · exact forces_axiomJ2;
-    · exact forces_axiomJ4Plus;
-    · exact forces_axiomJ5;
-
-end Logic
-
-end SoundnessVerbrugge
-
 section CompletenessVerbrugge
 
 namespace Logic
 
-open Entailment Formula MaximalConsistentSet Verbrugge Verbrugge.Model
+open Entailment Formula MaximalConsistentSet Verbrugge Verbrugge.Model Verbrugge.Model.World
 
 variable {α : Type} {A : Formula α}
 
 /-- - [KO21, Theorem 7.4] -/
-theorem ILMinusJ2J4PlusJ5.iff_valid_finite_verbrugge :
-    ILMinusJ2J4PlusJ5 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
-      [M.IsILMinus] → [M.IsJ2] → [M.IsJ4Plus] → [M.IsJ5] → M ⊧ A := by
-  constructor;
-  · intro h _ _ _ M;
-    intros;
-    exact ILMinusJ2J4PlusJ5.sound_verbrugge h;
-  · intro h;
+theorem ILMinusJ2J4PlusJ5.semantics_TFAE : [
+    ILMinusJ2J4PlusJ5 ⊢ A,
+    ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ2] → [M.IsJ4Plus] → [M.IsJ5] → M ⊧ A,
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ2] → [M.IsJ4Plus] → [M.IsJ5] → M ⊧ A
+  ].TFAE := by
+  tfae_have 1 → 2 := by
+    intro h _ _ M _ _ _ _;
+    apply ofAxiomsMinus.sound_verbrugge _ h;
+    rintro _ ((⟨A, B, C, rfl⟩ | ⟨A, B, C, rfl⟩) | ⟨A, rfl⟩) x;
+    · exact forces_axiomJ2;
+    · exact forces_axiomJ4Plus;
+    · exact forces_axiomJ5;;
+  tfae_have 2 → 3 := by
+    intro h _ _ _ M _ _ _ _;
+    exact h M;
+  tfae_have 3 → 1 := by
+    intro h;
     classical
     by_contra hA;
     obtain ⟨Γ, hΓ⟩ := exists_neg_consistent (Φ := ilMinusAdequateClosure {A}) hA;
@@ -74,7 +65,23 @@ theorem ILMinusJ2J4PlusJ5.iff_valid_finite_verbrugge :
     exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
       (IndexedModel.truthlemma_condJ2J4PlusJ5 (x := ⟨Γ, [], by simp, by simp⟩)
         (ilMinusAdequateClosure.subset (by simp))).mp <|
-          h (IndexedModel.model IndexedModel.condJ2J4PlusJ5) ⟨Γ, [], by simp, by simp⟩
+          h (IndexedModel.model IndexedModel.condJ2J4PlusJ5) ⟨Γ, [], by simp, by simp⟩;
+  tfae_finish;
+
+theorem ILMinusJ2J4PlusJ5.iff_valid_verbrugge :
+    ILMinusJ2J4PlusJ5 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ2] → [M.IsJ4Plus] → [M.IsJ5] → M ⊧ A :=
+  ILMinusJ2J4PlusJ5.semantics_TFAE.out 1 2
+
+theorem ILMinusJ2J4PlusJ5.sound_verbrugge {κ : Type} [Nonempty κ] {M : Verbrugge.Model κ α}
+    [M.IsILMinus] [M.IsJ2] [M.IsJ4Plus] [M.IsJ5] (h : ILMinusJ2J4PlusJ5 ⊢ A) : M ⊧ A :=
+  ILMinusJ2J4PlusJ5.iff_valid_verbrugge.mp h M
+
+/-- - [KO21, Theorem 7.4] -/
+theorem ILMinusJ2J4PlusJ5.iff_valid_finite_verbrugge :
+    ILMinusJ2J4PlusJ5 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ2] → [M.IsJ4Plus] → [M.IsJ5] → M ⊧ A :=
+  ILMinusJ2J4PlusJ5.semantics_TFAE.out 1 3
 
 end Logic
 

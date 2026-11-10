@@ -28,54 +28,55 @@ abbrev ILMinusJ1 : Logic α := ofAxiomsMinus {Axioms.J1 A B | (A) (B)}
 
 end Logic
 
-section Soundness
-
-namespace Logic
-
-open Veltman Veltman.Model Veltman.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
-
-theorem ILMinusJ1.sound [M.IsILMinus] [M.IsJ1] : ILMinusJ1 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound <| by
-    rintro _ ⟨A, B, rfl⟩ x;
-    exact forces_axiomJ1
-
-end Logic
-
-end Soundness
-
-section Consistency
-
-open Veltman.Model Logic
-
-variable {α : Type*}
-
-instance : Entailment.Consistent (ILMinusJ1 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ1.sound (M := pointModel fun _ ↦ False) h 0
-
-end Consistency
 
 section Completeness
 
 namespace Logic
 
-open Entailment Formula MaximalConsistentSet Veltman Veltman.Model
+open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model.World
 open LabelledSet.Condition ofAxiomsMinus
 
 variable {α : Type} {A : Formula α}
 
 /-- - [KO21, Theorem 5.1] -/
+theorem ILMinusJ1.semantics_TFAE : [
+    ILMinusJ1 ⊢ A,
+    ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
+      [M.IsILMinus] → [M.IsJ1] → M ⊧ A,
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+      [M.IsILMinus] → [M.IsJ1] → M ⊧ A
+  ].TFAE := by
+  tfae_have 1 → 2 := by
+    intro h _ _ M _ _;
+    apply ofAxiomsMinus.sound _ h;
+    rintro _ ⟨A, B, rfl⟩ x;
+    exact forces_axiomJ1;
+  tfae_have 2 → 3 := by
+    intro h _ _ _ M _ _;
+    exact h M;
+  tfae_have 3 → 1 := by
+    intro h;
+    classical
+    exact provable_of_models_labelledModel .ILMinus (h _);
+  tfae_finish;
+
+theorem ILMinusJ1.iff_valid :
+    ILMinusJ1 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
+      [M.IsILMinus] → [M.IsJ1] → M ⊧ A :=
+  ILMinusJ1.semantics_TFAE.out 1 2
+
+theorem ILMinusJ1.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α}
+    [M.IsILMinus] [M.IsJ1] (h : ILMinusJ1 ⊢ A) : M ⊧ A :=
+  ILMinusJ1.iff_valid.mp h M
+
+instance : Entailment.Consistent (ILMinusJ1 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ1.sound (M := pointModel fun _ ↦ False) h 0
+
+/-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ1.iff_valid_finite :
     ILMinusJ1 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → M ⊧ A := by
-  constructor;
-  · intro h _ _ _ M;
-    intros;
-    exact ILMinusJ1.sound h;
-  · intro h;
-    classical
-    exact provable_of_models_labelledModel .ILMinus (h _)
+      [M.IsILMinus] → [M.IsJ1] → M ⊧ A :=
+  ILMinusJ1.semantics_TFAE.out 1 3
 
 end Logic
 
@@ -115,7 +116,7 @@ namespace Logic
 
 open Entailment
 
-variable {α : Type*}
+variable {α : Type}
 
 instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ1 :=
   .of_unprovable_provable unprovable_J1 (HasAxiomJ1.J1 _ _)

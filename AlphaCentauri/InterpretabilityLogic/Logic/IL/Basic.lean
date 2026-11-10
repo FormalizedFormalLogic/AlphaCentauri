@@ -192,6 +192,8 @@ namespace Logic
 
 open Entailment ofAxiomsMinus
 
+variable {α : Type}
+
 instance : (ILMinusJ2PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
   .of_unprovable_provable unprovable_J1 ofAxioms.axiomJ1
 

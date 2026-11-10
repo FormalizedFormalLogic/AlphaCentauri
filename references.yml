@@ -522,6 +522,18 @@ PWW88:
     volume: 53
     issue: 4
 
+Per25:
+  type: Article
+  title: Transformation of any {Verbrugge} model to a bisimilar {Veltman} model
+  author: Perkov, Tin
+  date: 2025
+  serial-number:
+    doi: "10.1017/S096012952500012X"
+  parent:
+    type: Periodical
+    title: Mathematical Structures in Computer Science
+    volume: 35
+
 Poh09:
   type: Book
   title: "Proof Theory: The First Step into Impredicativity"

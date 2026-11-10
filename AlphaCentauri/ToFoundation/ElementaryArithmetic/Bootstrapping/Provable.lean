@@ -442,4 +442,74 @@ end substitution
 
 end
 
+section numerals
+
+open FFL.FirstOrder Arithmetic
+
+variable {T : ArithmeticTheory} [T.Δ₁] [LocallyDelta0Axioms T V] {m : ℕ}
+
+lemma termSubst_qqAdd {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
+    termSubst ℒₒᵣ w (t ^+ u) = termSubst ℒₒᵣ w t ^+ termSubst ℒₒᵣ w u := by
+  rw [qqAdd, termSubst_func (by simp) (by simp [ht, hu])]
+  simp [qqAdd, ht, hu]
+
+lemma substNumerals_cons (φ x : V) (v : Fin m → V) :
+    substNumerals φ (x :> v) = subst ℒₒᵣ (numeral x ∷ matrixToVec fun i ↦ numeral (v i)) φ :=
+  rfl
+
+lemma isSemitermVec_numerals (v : Fin m → V) (n : V) :
+    IsSemitermVec ℒₒᵣ (m : V) n (matrixToVec fun i ↦ numeral (v i)) :=
+  isSemitermVec_matrixToVec.mpr fun i ↦ numeral_semiterm n (v i)
+
+lemma subst_natCast_quote_rew_subst {k j : ℕ} (φ : ArithmeticSemisentence k)
+    (u : Fin k → ArithmeticSemiterm Empty j) {u' : Fin k → V}
+    (hu : ∀ i, ((⌜(Rew.emb (u i) : SyntacticSemiterm ℒₒᵣ j)⌝ : ℕ) : V) = u' i)
+    (hu' : ∀ i, IsSemiterm ℒₒᵣ (j : V) (u' i)) {n W : V} (hW : IsSemitermVec ℒₒᵣ (j : V) n W) :
+    subst ℒₒᵣ W ((⌜Rew.subst u ▹ φ⌝ : ℕ) : V) =
+      subst ℒₒᵣ (matrixToVec fun i ↦ termSubst ℒₒᵣ W (u' i)) ((⌜φ⌝ : ℕ) : V) := by
+  rw [natCast_quote_rew_subst, funext hu,
+    substs_substs (isSemiformula_natCast_quote φ) hW (isSemitermVec_matrixToVec.mpr hu'),
+    termSubstVec_matrixToVec fun i ↦ (hu' i).isUTerm]
+
+lemma substNumerals_natCast_quote_all (φ : ArithmeticSemisentence (m + 1)) (v : Fin m → V) :
+    substNumerals ((⌜∀¹ φ⌝ : ℕ) : V) v =
+      ^∀ subst ℒₒᵣ (qVec ℒₒᵣ (matrixToVec fun i ↦ numeral (v i))) ((⌜φ⌝ : ℕ) : V) := by
+  rw [substNumerals, natCast_quote_all, substs_all (isSemiformula_natCast_quote φ).isUFormula]
+
+lemma isSemiformula_subst_qVec_numerals (φ : ArithmeticSemisentence (m + 1)) (v : Fin m → V) :
+    IsSemiformula ℒₒᵣ 1
+      (subst ℒₒᵣ (qVec ℒₒᵣ (matrixToVec fun i ↦ numeral (v i))) ((⌜φ⌝ : ℕ) : V)) := by
+  simpa using (isSemiformula_natCast_quote (V := V) φ).subst (isSemitermVec_numerals v 0).qVec
+
+lemma substs1_subst_qVec_numerals (φ : ArithmeticSemisentence (m + 1)) (v : Fin m → V) (x : V) :
+    substs1 ℒₒᵣ (numeral x)
+        (subst ℒₒᵣ (qVec ℒₒᵣ (matrixToVec fun i ↦ numeral (v i))) ((⌜φ⌝ : ℕ) : V)) =
+      substNumerals ((⌜φ⌝ : ℕ) : V) (x :> v) := by
+  rw [substNumerals_cons, substs1_subst_qVec (isSemitermVec_numerals v 0)
+    (by simpa using isSemiformula_natCast_quote (V := V) φ) (numeral_semiterm 0 x)]
+
+/-- Instantiating an internally provable instance by numerals of `∀¹ φ` at one more numeral. -/
+lemma provable_substNumerals_of_provable_substNumerals_all (φ : ArithmeticSemisentence (m + 1))
+    {v : Fin m → V} (h : Provable T (substNumerals ((⌜∀¹ φ⌝ : ℕ) : V) v)) (x : V) :
+    Provable T (substNumerals ((⌜φ⌝ : ℕ) : V) (x :> v)) := by
+  obtain ⟨d, hd⟩ := h
+  rw [substNumerals_natCast_quote_all] at hd
+  rw [← substs1_subst_qVec_numerals]
+  exact ⟨_, derivationOf_specializeCode (isSemiformula_subst_qVec_numerals φ v)
+    (numeral_semiterm 0 x) hd⟩
+
+/-- Instantiating an internally provable universal closure at numerals. -/
+lemma provable_substNumerals_of_provable_allClosure {k : ℕ} (φ : ArithmeticSemisentence k)
+    (h : Provable T ((⌜∀¹* φ⌝ : ℕ) : V)) (v : Fin k → V) :
+    Provable T (substNumerals ((⌜φ⌝ : ℕ) : V) v) := by
+  induction k with
+  | zero =>
+    rwa [substNumerals, matrixToVec_nil,
+      subst_eq_self (by simpa using isSemiformula_natCast_quote (V := V) φ) (by simp) (by simp)]
+  | succ k ih =>
+    rw [← Matrix.cons_head_tail v]
+    exact provable_substNumerals_of_provable_substNumerals_all φ (ih (∀¹ φ) h _) _
+
+end numerals
+
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

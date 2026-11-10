@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Term.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Term.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 
 /-!
@@ -119,9 +119,6 @@ lemma termSubstVec_locallyDelta0 :
   convert (construction.resultVec_locallyDelta0 (V := V) L).retraction
     (![0, 2, 1] : Fin 3 → Fin 3) using 3
   simp [termSubstVec, Matrix.constant_eq_singleton]
-
-lemma termSubst_le_exp_exp (w t : V) : termSubst L w t ≤ Exp.exp (Exp.exp (8 * t + (w + 4))) :=
-  construction.result_le_bound L ![w] t
 
 lemma termSubstVec_le_exp_exp (k w v : V) :
     termSubstVec L k w v ≤ Exp.exp (Exp.exp (8 * v + (w + 4))) :=
@@ -490,10 +487,6 @@ lemma termBShift_locallyDelta0 : LocallyDelta0Function₁ (termBShift L : V → 
   convert construction.result_locallyDelta0 (V := V) L using 3
   simp [termBShift, Matrix.empty_eq]
 
-lemma termBShiftVec_locallyDelta0 : LocallyDelta0Function₂ (termBShiftVec L : V → V → V) := by
-  convert construction.resultVec_locallyDelta0 (V := V) L using 3
-  simp [termBShiftVec, Matrix.empty_eq]
-
 @[simp] lemma len_termBShiftVec {k ts : V} (hts : IsUTermVec L k ts) :
     len (termBShiftVec L k ts) = k := construction.resultVec_lh L _ hts
 
@@ -642,11 +635,6 @@ instance qVec.definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (qVec (V := V) L) :=
   qVec.definable.of_sigmaOne
 
 end
-
-lemma qVec_locallyDelta0 : LocallyDelta0Function₁ (qVec L : V → V) :=
-  LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.const _)
-    (termBShiftVec_locallyDelta0.comp₂ (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
-      (LocallyDelta0Function.var 0))
 
 @[simp] lemma len_qVec {k w : V} (h : IsUTermVec L k w) : len (qVec L w) = k + 1 := by
   rcases h.lh; simp [qVec, h]

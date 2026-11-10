@@ -35,31 +35,13 @@ variable {V : Type*} [ORingStructure V]
     V↓[ℒₒᵣ] ⊧ infinitudeOfPrimes ↔ ∀ x : V, ∃ p, x < p ∧ IsPrime p := by
   simp [models_iff, infinitudeOfPrimes]
 
-end
-
-noncomputable section
-
-variable {V : Type*} [ORingStructure V]
-
 /-- - [HP98, Theorem I.1.58(2)] -/
 lemma ElementaryArithmetic.exists_prime_gt [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] (x : V) : ∃ p, x < p ∧ IsPrime p := by
   obtain ⟨p, hp, hpn⟩ := exists_isPrime_dvd (n := factorial x + 1) (by simp)
   refine ⟨p, ?_, hp⟩
-  by_contra hle
-  push Not at hle
-  obtain ⟨c, hc⟩ := dvd_factorial (zero_lt_one.trans hp.1) hle
-  obtain ⟨e, he⟩ := hpn
-  have heq : p * c + 1 = p * e := by rw [← hc, ← he]
-  rcases le_or_gt e c with hle' | hlt'
-  · have h1 : p * e ≤ p * c := mul_le_mul_of_nonneg_left hle' (Arithmetic.zero_le p)
-    rw [← heq] at h1
-    exact lt_irrefl _ (lt_of_le_of_lt h1 (lt_add_one (p * c)))
-  · have h1 : p * (c + 1) ≤ p * e :=
-      mul_le_mul_of_nonneg_left (lt_iff_succ_le.mp hlt') (Arithmetic.zero_le p)
-    rw [mul_add, mul_one, ← heq] at h1
-    exact absurd ((add_le_add_iff_left (p * c)).mp h1) (not_le.mpr hp.1)
-
-end
+  by_contra! hle
+  exact absurd (le_of_dvd one_pos (dvd_of_dvd_add (dvd_factorial (zero_lt_one.trans hp.1) hle) hpn))
+    (not_le.mpr hp.1)
 
 /-- - [HP98, Remark I.1.59(3)] -/
 theorem provable_infinitudeOfPrimes_ElementaryArithmetic : 𝗘𝗔 ⊢ infinitudeOfPrimes :=
@@ -273,10 +255,6 @@ end InfinitudeOfPrimes
 - [PWW88, Problem 1] -/
 def ProvableInfinitudeOfPrimesISigma0 : Prop := 𝗜𝚺₀ ⊢ infinitudeOfPrimes
 
-noncomputable section
-
-variable {V : Type*} [ORingStructure V]
-
 open InfinitudeOfPrimes in
 /-- - [PWW88, Theorem 11, Corollary 8] -/
 lemma exists_prime_gt [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] (x : V) : ∃ p, x < p ∧ IsPrime p := by
@@ -370,8 +348,6 @@ lemma exists_prime_gt [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] (x : V) : �
   obtain ⟨rfl, rfl⟩ := image_injective hA hi hi' hy hy' h h'
   exact hne rfl
 
-end
-
 /-- - [PWW88, Corollary 8] -/
 theorem provable_infinitudeOfPrimes_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮₁ ⊢ infinitudeOfPrimes :=
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀ ∪ 𝝮₁ :=
@@ -379,5 +355,7 @@ theorem provable_infinitudeOfPrimes_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮�
   complete (𝗜𝚺₀ ∪ 𝝮₁) infinitudeOfPrimes fun (M : Type) _ _ ↦ by
     have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
     exact models_infinitudeOfPrimes_iff.mpr exists_prime_gt
+
+end
 
 end FFL.FirstOrder.Arithmetic

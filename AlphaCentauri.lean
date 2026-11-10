@@ -103,14 +103,9 @@ public import AlphaCentauri.NumberTheory.Bertrand
 public import AlphaCentauri.NumberTheory.Bertrand.Embedding
 public import AlphaCentauri.NumberTheory.Bertrand.Positions
 public import AlphaCentauri.NumberTheory.Bertrand.Sizes
-public import AlphaCentauri.NumberTheory.DirectSummand
-public import AlphaCentauri.NumberTheory.EuclideanDivision
-public import AlphaCentauri.NumberTheory.FLT3
-public import AlphaCentauri.NumberTheory.FermatCaseOne
-public import AlphaCentauri.NumberTheory.FermatIOpen
-public import AlphaCentauri.NumberTheory.IrrationalSqrtTwo
+public import AlphaCentauri.NumberTheory.ElementaryNumberTheory
+public import AlphaCentauri.NumberTheory.FermatLastTheorem
 public import AlphaCentauri.NumberTheory.Primes
-public import AlphaCentauri.NumberTheory.QuadraticResidue
 public import AlphaCentauri.OmegaLogic.Basic
 public import AlphaCentauri.OmegaLogic.Consistency
 public import AlphaCentauri.OmegaLogic.Elimination

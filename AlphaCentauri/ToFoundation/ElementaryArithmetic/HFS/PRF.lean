@@ -8,11 +8,12 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 # Primitive recursion in models of $\mathsf{EA}$
 
 The file `Foundation/FirstOrder/Arithmetic/HFS/PRF.lean` on functions defined by primitive
-recursion in models of $\mathsf{I}\Sigma_1$, ported to models of $\mathsf{EA}$. A construction
-supplies, besides the functions and their defining formulas, a monotone bound on the values of
-the recursion, so that every computation sequence is bounded and the recursion is carried out by
-induction on a locally $\Delta_0$ predicate. The formulas of Foundation's `PR.Blueprint` define
-the result.
+recursion in models of $\mathsf{I}\Sigma_1$, ported to models of $\mathsf{EA}$. A recursion
+(`PR.Recursion`) consists of locally $\Delta_0$ functions together with a monotone bound on the
+values, so that every computation sequence is bounded and the recursion is carried out by
+induction on a locally $\Delta_0$ predicate; its result is locally $\Delta_0$. A construction
+(`PR.Construction`) adds the formulas of Foundation's `PR.Blueprint` defining the functions, and
+these formulas then define the result.
 
 - [HP98, §V.3]
 -/
@@ -32,13 +33,11 @@ namespace PR
 variable (V)
 
 /-- A primitive recursion in a model of $\mathsf{EA}$, with a monotone bound on its values. -/
-structure Construction {k : ℕ} (p : Arithmetic.PR.Blueprint k) where
+structure Recursion (k : ℕ) where
   /-- `c.zero v` is the value at `0`. -/
   zero : (Fin k → V) → V
   /-- `c.succ v i z` is the value at `i + 1`, where `z` is the value at `i`. -/
   succ : (Fin k → V) → V → V → V
-  zero_defined : 𝚺ᴬ₁.DefinedFunction zero p.zero
-  succ_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
   zero_locallyDelta0 : LocallyDelta0Function zero
   succ_locallyDelta0 :
     LocallyDelta0Function fun v : Fin (k + 2) → V ↦ succ (v ·.succ.succ) (v 1) (v 0)
@@ -49,41 +48,20 @@ structure Construction {k : ℕ} (p : Arithmetic.PR.Blueprint k) where
   bound_monotone : ∀ v {i j}, i ≤ j → bound v i ≤ bound v j
   bound_locallyDelta0 : LocallyDelta0Function fun v : Fin (k + 1) → V ↦ bound (v ·.succ) (v 0)
 
+/-- A primitive recursion whose functions are defined by the formulas of a blueprint. -/
+structure Construction {k : ℕ} (p : Arithmetic.PR.Blueprint k) extends Recursion V k where
+  zero_defined : 𝚺ᴬ₁.DefinedFunction zero p.zero
+  succ_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
+
 variable {V}
 
-namespace Construction
+namespace Recursion
 
-variable {k : ℕ} {p : Arithmetic.PR.Blueprint k} (c : Construction V p) (v : Fin k → V)
+variable {k : ℕ} (c : Recursion V k) (v : Fin k → V)
 
 /-- `s` is a computation sequence of the recursion. -/
 def CSeq (s : V) : Prop :=
   Seq s ∧ ⟪0, c.zero v⟫ ∈ s ∧ ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s
-
-private lemma cseq_iff (s : V) : c.CSeq v s ↔
-    Seq s
-    ∧ (∃ z < s, z = c.zero v ∧ ⟪0, z⟫ ∈ s)
-    ∧ (∀ i < 2 * s,
-      (∃ l ≤ 2 * s, l = lh s ∧ i + 1 < l) → ∀ z < s, ⟪i, z⟫ ∈ s →
-        ∃ u < s, u = c.succ v i z ∧ ⟪i + 1, u⟫ ∈ s) :=
-  ⟨by rintro ⟨Hs, hz, hs⟩
-      exact ⟨Hs, ⟨c.zero v, lt_of_mem_rng hz, rfl, hz⟩, fun i _ hi z _ hiz ↦
-      ⟨c.succ v i z, by
-        have := hs i (by rcases hi with ⟨l, _, rfl, hl⟩; simp [lt_tsub_iff_right, hl]) z hiz
-        exact ⟨lt_of_mem_rng this, rfl, this⟩⟩⟩,
-   by rintro ⟨Hs, ⟨z, _, rfl, hz⟩, h⟩
-      exact ⟨Hs, hz, fun i hi z hiz ↦ by
-        rcases h i
-          (lt_of_lt_of_le hi (by simpa using le_trans (lh_bound _) (by simp)))
-          ⟨lh s, by simp, rfl, by simpa [lt_tsub_iff_right] using hi⟩ z
-          (lt_of_mem_rng hiz) hiz with ⟨_, _, rfl, h⟩
-        exact h⟩⟩
-
-lemma cseq_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → V) → Prop)
-    p.cseqDef := .mk fun v ↦ by
-  simp [Arithmetic.PR.Blueprint.cseqDef, cseq_iff, c.zero_defined.iff, c.succ_defined.iff]
-
-@[simp] lemma cseq_defined_iff (v : Fin (k + 1) → V) :
-    p.cseqDef.val.Evalb v ↔ c.CSeq (v ·.succ) (v 0) := c.cseq_defined.iff
 
 private lemma cseq_iff_bounded (s : V) : c.CSeq v s ↔
     Seq s ∧ ⟪0, c.zero v⟫ ∈ s ∧
@@ -305,27 +283,6 @@ private lemma result_graph_bounded (z u : V) : z = c.result v u ↔
   · rintro ⟨s, _, Hs, _, h⟩
     exact (c.result_graph v z u).mpr ⟨s, Hs, h⟩
 
-set_option linter.flexible false in
-lemma result_defined : 𝚺ᴬ₁.DefinedFunction
-    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
-  simp [Arithmetic.PR.Blueprint.resultDef, result_graph, c.cseq_defined_iff]
-
-lemma result_defined_delta : 𝚫ᴬ₁.DefinedFunction
-    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
-  c.result_defined.graph_delta
-
-@[simp] lemma result_defined_iff (v : Fin (k + 2) → V) :
-    p.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) :=
-  c.result_defined.iff
-
-lemma result_definable : 𝚺ᴬ₁.DefinableFunction
-    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
-  c.result_defined.to_definable
-
-lemma result_definable_delta₁ : 𝚫ᴬ₁.DefinableFunction
-    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
-  c.result_defined_delta.to_definable
-
 lemma result_locallyDelta0 :
     LocallyDelta0Function fun w : Fin (k + 1) → V ↦ c.result (w ·.succ) (w 0) where
   graph := by
@@ -353,6 +310,59 @@ lemma result_locallyDelta0 :
     use Y
     intro w hw
     exact le_trans (c.result_lt_bound _ _).le (hY w hw)
+
+end Recursion
+
+namespace Construction
+
+variable {k : ℕ} {p : Arithmetic.PR.Blueprint k} (c : Construction V p) (v : Fin k → V)
+
+private lemma cseq_iff (s : V) : c.CSeq v s ↔
+    Seq s
+    ∧ (∃ z < s, z = c.zero v ∧ ⟪0, z⟫ ∈ s)
+    ∧ (∀ i < 2 * s,
+      (∃ l ≤ 2 * s, l = lh s ∧ i + 1 < l) → ∀ z < s, ⟪i, z⟫ ∈ s →
+        ∃ u < s, u = c.succ v i z ∧ ⟪i + 1, u⟫ ∈ s) :=
+  ⟨by rintro ⟨Hs, hz, hs⟩
+      exact ⟨Hs, ⟨c.zero v, lt_of_mem_rng hz, rfl, hz⟩, fun i _ hi z _ hiz ↦
+      ⟨c.succ v i z, by
+        have := hs i (by rcases hi with ⟨l, _, rfl, hl⟩; simp [lt_tsub_iff_right, hl]) z hiz
+        exact ⟨lt_of_mem_rng this, rfl, this⟩⟩⟩,
+   by rintro ⟨Hs, ⟨z, _, rfl, hz⟩, h⟩
+      exact ⟨Hs, hz, fun i hi z hiz ↦ by
+        rcases h i
+          (lt_of_lt_of_le hi (by simpa using le_trans (lh_bound _) (by simp)))
+          ⟨lh s, by simp, rfl, by simpa [lt_tsub_iff_right] using hi⟩ z
+          (lt_of_mem_rng hiz) hiz with ⟨_, _, rfl, h⟩
+        exact h⟩⟩
+
+lemma cseq_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → V) → Prop)
+    p.cseqDef := .mk fun v ↦ by
+  simp [Arithmetic.PR.Blueprint.cseqDef, cseq_iff, c.zero_defined.iff, c.succ_defined.iff]
+
+@[simp] lemma cseq_defined_iff (v : Fin (k + 1) → V) :
+    p.cseqDef.val.Evalb v ↔ c.CSeq (v ·.succ) (v 0) := c.cseq_defined.iff
+
+set_option linter.flexible false in
+lemma result_defined : 𝚺ᴬ₁.DefinedFunction
+    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
+  simp [Arithmetic.PR.Blueprint.resultDef, Recursion.result_graph, c.cseq_defined_iff]
+
+lemma result_defined_delta : 𝚫ᴬ₁.DefinedFunction
+    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
+  c.result_defined.graph_delta
+
+@[simp] lemma result_defined_iff (v : Fin (k + 2) → V) :
+    p.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) :=
+  c.result_defined.iff
+
+lemma result_definable : 𝚺ᴬ₁.DefinableFunction
+    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+  c.result_defined.to_definable
+
+lemma result_definable_delta₁ : 𝚫ᴬ₁.DefinableFunction
+    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+  c.result_defined_delta.to_definable
 
 end Construction
 

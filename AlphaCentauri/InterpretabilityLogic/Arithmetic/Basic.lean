@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Interpretability.Formalized
+public import AlphaCentauri.Interpretability.InterpretationExistence
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.ProvabilityFormula
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic

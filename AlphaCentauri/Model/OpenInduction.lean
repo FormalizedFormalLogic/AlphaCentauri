@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenFormula
-public import AlphaCentauri.ToMathlib.OpenPredicate.PolynomialRing
+public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Mathlib.Algebra.Order.Group.MinMax
 public import Mathlib.Algebra.Order.Nonneg.Ring

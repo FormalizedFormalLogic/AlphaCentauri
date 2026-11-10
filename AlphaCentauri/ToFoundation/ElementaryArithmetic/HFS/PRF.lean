@@ -363,7 +363,8 @@ lemma result_locallyDelta0 :
         ⟪w 1 + 1, c.bound (fun j ↦ w j.succ.succ) (w 1)⟫]) <|
           Fin.forall_fin_succ.mpr ⟨by simpa using this, finZeroElim⟩
       simpa using this
-    have hcseq : LocallyDelta0 fun x : Fin (k + 3) → V ↦ c.CSeq (fun j ↦ x j.succ.succ.succ) (x 0) := by
+    have hcseq : LocallyDelta0 fun x : Fin (k + 3) → V ↦
+        c.CSeq (fun j ↦ x j.succ.succ.succ) (x 0) := by
       have := c.cseq_locallyDelta0.comp
         (f := (fun x : Fin (k + 3) → V ↦ x 0) :> fun j x ↦ x j.succ.succ.succ) fun j ↦ by
           cases j using Fin.cases with

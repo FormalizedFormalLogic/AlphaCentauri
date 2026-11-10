@@ -1101,4 +1101,75 @@ theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), shift
 
 end compFormula
 
+/-! ## The conditions on the composite table -/
+
+section generalizeFvar
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] {S : Theory L} [S.Δ₁]
+
+lemma provable_qqAlls_of_tprovable_fvar : ∀ {n : ℕ} (φ : Semiformula V L n), φ.shift = φ →
+    S.internalize V ⊢ φ.subst (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) → Provable S (qqAlls φ.val n)
+  | 0, φ, _, h => by
+    rw [Semiformula.subst_nil_eq_self] at h
+    simpa using tprovable_iff_provable.mp h
+  | n + 1, φ, hφ, h => by
+    have h₁ := provable_qqAlls_of_tprovable_fvar (∀¹ φ) (by rw [Semiformula.shift_all, hφ]) (by
+      rw [Semiformula.substs_all]
+      apply TProof.all!
+      rw [free_subst_q_fvar', hφ]
+      exact h)
+    simpa [qqAlls_all] using h₁
+
+end generalizeFvar
+
+section leibniz
+
+open Arithmetic
+
+variable {S : ArithmeticTheory} [S.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S]
+
+omit [S.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] in
+lemma Semiterm.subst_closed (t : Term V ℒₒᵣ) (w : SemitermVec V ℒₒᵣ 0 0) : t.subst w = t := by
+  ext
+  rw [Semiterm.val_substs]
+  exact termSubst_eq_self t.isSemiterm (by simp)
+
+/-- Equal arguments may be replaced in any formula. -/
+lemma tprovable_subst_congr : ∀ {m : ℕ} (γ : Semiformula V ℒₒᵣ m) (s t : Fin m → Term V ℒₒᵣ),
+    S.internalize V ⊢ Matrix.conj (fun i ↦ Semiformula.equal (s i) (t i)) 🡒
+      γ.subst s 🡒 γ.subst t
+  | 0, γ, s, t => by
+    rw [show s = t from funext fun i ↦ i.elim0]
+    cl_prover
+  | m + 1, γ, s, t => by
+    let φ₀ : Semiformula V ℒₒᵣ 1 :=
+      γ.subst (Semiterm.bvar 0 :> fun i ↦ ((s i.succ).subst ![] : Semiterm V ℒₒᵣ 1))
+    have e₀ (u : Term V ℒₒᵣ) : φ₀.subst ![u] = γ.subst (u :> fun i ↦ s i.succ) := by
+      simp only [φ₀, Semiformula.substs_substs]
+      congr 1
+      funext j
+      cases j using Fin.cases with
+      | zero => simp
+      | succ j => simp [Semiterm.subst_nil_subst, Semiterm.subst_closed]
+    let γ' : Semiformula V ℒₒᵣ m := γ.subst (((t 0).subst ![] : Semiterm V ℒₒᵣ m) :> Semiterm.bvar)
+    have e₁ (v : Fin m → Term V ℒₒᵣ) : γ'.subst v = γ.subst (t 0 :> v) := by
+      simp only [γ', Semiformula.substs_substs]
+      congr 1
+      funext j
+      cases j using Fin.cases with
+      | zero => simp [Semiterm.subst_nil_subst, Semiterm.subst_closed]
+      | succ j => simp
+    have h₁ := Arithmetic.replace S φ₀ (s 0) (t 0)
+    rw [e₀, e₀, show (s 0 :> fun i ↦ s i.succ) = s from Matrix.cons_head_tail s] at h₁
+    have h₂ := tprovable_subst_congr γ' (fun i ↦ s i.succ) (fun i ↦ t i.succ)
+    rw [e₁, e₁, show (t 0 :> fun i ↦ t i.succ) = t from Matrix.cons_head_tail t] at h₂
+    have eqv : Semiformula.equal (s 0) (t 0) = (s 0 ≐ t 0) := by simp [Semiformula.equal]
+    simp only [Matrix.conj, eqv]
+    have key {E C A B D : Formula V ℒₒᵣ} (h₁ : S.internalize V ⊢ E 🡒 A 🡒 B)
+        (h₂ : S.internalize V ⊢ C 🡒 B 🡒 D) : S.internalize V ⊢ E ⋏ C 🡒 A 🡒 D := by
+      cl_prover [h₁, h₂]
+    exact key h₁ h₂
+
+end leibniz
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

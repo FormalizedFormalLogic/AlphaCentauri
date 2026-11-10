@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Henkin
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Incompleteness.Second

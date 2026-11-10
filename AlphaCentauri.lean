@@ -48,9 +48,11 @@ public import AlphaCentauri.Interpretability.Henkin
 public import AlphaCentauri.InterpretabilityLogic.Extension
 public import AlphaCentauri.InterpretabilityLogic.Formula
 public import AlphaCentauri.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.OpenProblem
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Extension
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.CodedLimit
 public import AlphaCentauri.Model.Cut

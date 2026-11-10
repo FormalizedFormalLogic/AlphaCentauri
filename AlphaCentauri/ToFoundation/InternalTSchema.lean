@@ -103,6 +103,10 @@ lemma numeral_vec_three (a b c : V) :
     (fun i ↦ (𝕹 (![a, b, c] i) : Term V ℒₒᵣ)) = ![𝕹 a, 𝕹 b, 𝕹 c] := by
   funext i; match i with | 0 => rfl | 1 => rfl | 2 => rfl
 
+lemma numeral_vec_four (a b c d : V) :
+    (fun i ↦ (𝕹 (![a, b, c, d] i) : Term V ℒₒᵣ)) = ![𝕹 a, 𝕹 b, 𝕹 c, 𝕹 d] := by
+  funext i; match i with | 0 => rfl | 1 => rfl | 2 => rfl | 3 => rfl
+
 /-! ### Terms -/
 
 private noncomputable def tvBvarZeroClause : ArithmeticSemisentence 3 :=
@@ -412,7 +416,8 @@ private noncomputable def psatNltClause : ArithmeticSemisentence 6 :=
 
 lemma tprovable_psatF_nlt (y z a : Term V ℒₒᵣ) {t u : V} (ht : IsUTerm ℒₒᵣ t)
     (hu : IsUTerm ℒₒᵣ u) :
-    T.internalize V ⊢ tvF y a t 🡒 tvF z a u 🡒 (psatF a (Arithmetic.qqNLT t u) 🡘 (Semiterm.notLessThan y z)) := by
+    T.internalize V ⊢ tvF y a t 🡒 tvF z a u 🡒
+      (psatF a (Arithmetic.qqNLT t u) 🡘 (Semiterm.notLessThan y z)) := by
   have h₁ := tprovable_subst_of_models (T := T) (φ := psatNltClause) (by
     intro W _ _ e;
     simpa [psatNltClause, nltCond] using
@@ -428,6 +433,78 @@ lemma tprovable_psatF_nlt (y z a : Term V ℒₒᵣ) {t u : V} (ht : IsUTerm ℒ
         tvF y a t 🡒 tvF z a u 🡒 (psatF a (Arithmetic.qqNLT t u) 🡘 (Semiterm.notLessThan y z)) := by
     simpa [psatNltClause, psatF, tvF, typed_quote_rew_subst, Semiformula.substs_substs,
       Matrix.vecHead, Matrix.vecTail] using h₁;
+  exact h₃ ⨀ h₂
+
+private noncomputable def ballCond : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
+  “c t q u. !(termBShiftGraph ℒₒᵣ) u t ∧ !qqBallDef c u q ∧ !(isUTerm ℒₒᵣ).sigma t ∧
+    !isBounded.sigma q ∧ !(isUFormula ℒₒᵣ).sigma q”
+
+private noncomputable def psatBallClause : ArithmeticSemisentence 6 :=
+  ballCond.val/[#4, #2, #3, #5] 🡒 tvDef.val/[#0, #1, #2] 🡒
+    (psatDef.val/[#1, #4] 🡘 ∀¹ (“#0 < #1” 🡒 psatDef.val/[‘(#0 + #2) * (#0 + #2) + #2 + 1’, #4]))
+
+lemma tprovable_psatF_ball (y a : Term V ℒₒᵣ) {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q)
+    (hq' : IsUFormula ℒₒᵣ q) :
+    T.internalize V ⊢ tvF y a t 🡒
+      (psatF a (qqBall (termBShift ℒₒᵣ t) q) 🡘
+        ∀¹ (Semiterm.lessThan (Semiterm.bvar 0) y.bShift 🡒
+          psatF (pTerm (Semiterm.bvar 0) a.bShift) q)) := by
+  have h₁ := tprovable_subst_of_models (T := T) (φ := psatBallClause) (by
+    intro W _ _ e;
+    simpa [psatBallClause, ballCond, add_mul_add_eq_ppair] using
+      fun (hu : e 5 = termBShift ℒₒᵣ (e 2)) (h : e 4 = qqBall (e 5) (e 3)) (ht : IsUTerm ℒₒᵣ (e 2))
+        (hq : IsBounded (e 3)) (hq' : IsUFormula ℒₒᵣ (e 3))
+        (h₁ : e 0 = termVal (dec (e 1)) (e 2)) ↦ by
+        simp [h, hu, h₁, ht, hq, hq'])
+    ![y, a, 𝕹 t, 𝕹 q, 𝕹 (qqBall (termBShift ℒₒᵣ t) q), 𝕹 (termBShift ℒₒᵣ t)];
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := ballCond.val) (by simp)
+    (w := ![qqBall (termBShift ℒₒᵣ t) q, t, q, termBShift ℒₒᵣ t]) (by simp [ballCond, ht, hq, hq']);
+  rw [numeral_vec_four] at h₂;
+  have h₃ : T.internalize V ⊢
+      (⌜ballCond.val⌝ : Semiformula V ℒₒᵣ 4).subst
+          ![𝕹 (qqBall (termBShift ℒₒᵣ t) q), 𝕹 t, 𝕹 q, 𝕹 (termBShift ℒₒᵣ t)] 🡒
+        tvF y a t 🡒
+          (psatF a (qqBall (termBShift ℒₒᵣ t) q) 🡘
+            ∀¹ (Semiterm.lessThan (Semiterm.bvar 0) y.bShift 🡒
+              psatF (pTerm (Semiterm.bvar 0) a.bShift) q)) := by
+    simpa [psatBallClause, psatF, tvF, pTerm, typed_quote_rew_subst, Semiformula.substs_substs,
+      SemitermVec.q, Matrix.vecHead, Matrix.vecTail] using h₁;
+  exact h₃ ⨀ h₂
+
+private noncomputable def bexCond : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
+  “c t q u. !(termBShiftGraph ℒₒᵣ) u t ∧ !qqBexDef c u q ∧ !(isUTerm ℒₒᵣ).sigma t ∧
+    !isBounded.sigma q ∧ !(isUFormula ℒₒᵣ).sigma q”
+
+private noncomputable def psatBexClause : ArithmeticSemisentence 6 :=
+  bexCond.val/[#4, #2, #3, #5] 🡒 tvDef.val/[#0, #1, #2] 🡒
+    (psatDef.val/[#1, #4] 🡘 ∃¹ (“#0 < #1” ⋏ psatDef.val/[‘(#0 + #2) * (#0 + #2) + #2 + 1’, #4]))
+
+lemma tprovable_psatF_bex (y a : Term V ℒₒᵣ) {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q)
+    (hq' : IsUFormula ℒₒᵣ q) :
+    T.internalize V ⊢ tvF y a t 🡒
+      (psatF a (qqBex (termBShift ℒₒᵣ t) q) 🡘
+        ∃¹ (Semiterm.lessThan (Semiterm.bvar 0) y.bShift ⋏
+          psatF (pTerm (Semiterm.bvar 0) a.bShift) q)) := by
+  have h₁ := tprovable_subst_of_models (T := T) (φ := psatBexClause) (by
+    intro W _ _ e;
+    simpa [psatBexClause, bexCond, add_mul_add_eq_ppair] using
+      fun (hu : e 5 = termBShift ℒₒᵣ (e 2)) (h : e 4 = qqBex (e 5) (e 3)) (ht : IsUTerm ℒₒᵣ (e 2))
+        (hq : IsBounded (e 3)) (hq' : IsUFormula ℒₒᵣ (e 3))
+        (h₁ : e 0 = termVal (dec (e 1)) (e 2)) ↦ by
+        simp [h, hu, h₁, ht, hq, hq'])
+    ![y, a, 𝕹 t, 𝕹 q, 𝕹 (qqBex (termBShift ℒₒᵣ t) q), 𝕹 (termBShift ℒₒᵣ t)];
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := bexCond.val) (by simp)
+    (w := ![qqBex (termBShift ℒₒᵣ t) q, t, q, termBShift ℒₒᵣ t]) (by simp [bexCond, ht, hq, hq']);
+  rw [numeral_vec_four] at h₂;
+  have h₃ : T.internalize V ⊢
+      (⌜bexCond.val⌝ : Semiformula V ℒₒᵣ 4).subst
+          ![𝕹 (qqBex (termBShift ℒₒᵣ t) q), 𝕹 t, 𝕹 q, 𝕹 (termBShift ℒₒᵣ t)] 🡒
+        tvF y a t 🡒
+          (psatF a (qqBex (termBShift ℒₒᵣ t) q) 🡘
+            ∃¹ (Semiterm.lessThan (Semiterm.bvar 0) y.bShift ⋏
+              psatF (pTerm (Semiterm.bvar 0) a.bShift) q)) := by
+    simpa [psatBexClause, psatF, tvF, pTerm, typed_quote_rew_subst, Semiformula.substs_substs,
+      SemitermVec.q, Matrix.vecHead, Matrix.vecTail] using h₁;
   exact h₃ ⨀ h₂
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

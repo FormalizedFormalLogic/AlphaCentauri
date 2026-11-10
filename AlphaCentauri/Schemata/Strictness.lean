@@ -36,7 +36,8 @@ theorem BSigma_strictlyWeakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪱ 𝗜�
   · have ha' := definableElements_mono (k' := n + 1) (by omega) ha
     intro h
     exact definableCut.not_models_ISigma ha' hns
-      (models_of_subtheory (T := 𝗜𝚺 (n + 1)) (U := 𝗕𝚺 (n + 1)) <| definableCut.models_BSigma (j := n) hns)
+      (models_of_subtheory (T := 𝗜𝚺 (n + 1)) (U := 𝗕𝚺 (n + 1)) <|
+        definableCut.models_BSigma (j := n) hns)
 
 end Strictness
 

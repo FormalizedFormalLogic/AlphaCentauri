@@ -409,6 +409,14 @@ Poh09:
     type: Anthology
     title: Universitext
 
+Raf10:
+  type: Article
+  title: Diophantine correct open induction
+  author: Raffer, Sidney
+  date: 2010
+  serial-number:
+    arxiv: "1010.3798"
+
 Ros84:
   type: Book
   title: "Subrecursion: Functions and Hierarchies"

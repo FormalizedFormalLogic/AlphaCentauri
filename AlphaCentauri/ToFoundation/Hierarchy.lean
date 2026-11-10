@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Hierarchy.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 

@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.ToFoundation.Rew
-public import AlphaCentauri.Hierarchy.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.LK.Basic

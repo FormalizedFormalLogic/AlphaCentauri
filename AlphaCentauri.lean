@@ -7,7 +7,7 @@ public import AlphaCentauri.Axiomatizability.ISigma
 public import AlphaCentauri.Axiomatizability.ISigma0
 public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Axiomatizability.RestrictedComplexity
-public import AlphaCentauri.Bootstrapping.Completeness.Henkin
+public import AlphaCentauri.Bootstrapping.Henkin
 public import AlphaCentauri.Bootstrapping.Interpretability.CaseSplit
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
 public import AlphaCentauri.Bootstrapping.Interpretability.Composition
@@ -46,14 +46,9 @@ public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Theory
 public import AlphaCentauri.Calculus.Induction.Witnessing
-public import AlphaCentauri.Conservativity.Omega1
-public import AlphaCentauri.Hierarchy.Bounded
-public import AlphaCentauri.Hierarchy.Diophantine
 public import AlphaCentauri.Interpretability.Basic
-public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Formalized
 public import AlphaCentauri.Interpretability.Henkin
-public import AlphaCentauri.Interpretability.InterpretationExistence
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Pi1Conservativity
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Standard
@@ -117,6 +112,7 @@ public import AlphaCentauri.OmegaLogic.Elimination
 public import AlphaCentauri.OmegaLogic.Embedding
 public import AlphaCentauri.OmegaLogic.Inversion
 public import AlphaCentauri.OmegaLogic.Reduction
+public import AlphaCentauri.OpenProblems.ISigma0
 public import AlphaCentauri.ProvabilityLogic.Consistency
 public import AlphaCentauri.ProvabilityLogic.ISigma
 public import AlphaCentauri.ProvabilityLogic.Peano
@@ -181,6 +177,7 @@ public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Exponential
 public import AlphaCentauri.ToFoundation.Factorial
+public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Injection

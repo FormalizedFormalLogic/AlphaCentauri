@@ -2,7 +2,7 @@ module
 
 public import Foundation.Vorspiel.Computability.Primrec
 public import AlphaCentauri.ToMathlib.Primrec
-public import AlphaCentauri.Hierarchy.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 /-!

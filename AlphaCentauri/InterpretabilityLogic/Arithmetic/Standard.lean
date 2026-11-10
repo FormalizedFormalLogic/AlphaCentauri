@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
-public import AlphaCentauri.Interpretability.InterpretationExistence
+public import AlphaCentauri.Interpretability.Formalized
 
 /-!
 # Arithmetical soundness of $\mathbf{IL}$ for formalized interpretability

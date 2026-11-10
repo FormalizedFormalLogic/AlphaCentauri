@@ -1,8 +1,8 @@
 module
 
 public import AlphaCentauri.Model.OpenInduction
-public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.Schemata.DeltaInduction
 
 /-!
 # Statements of Fermat's Last Theorem and its cases

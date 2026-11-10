@@ -1,9 +1,9 @@
 module
 
-public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Mathlib.Data.Nat.Prime.Defs
+public import AlphaCentauri.Schemata.DeltaInduction
 
 /-!
 # Quadratic residues in weak arithmetic

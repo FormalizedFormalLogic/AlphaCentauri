@@ -4,6 +4,9 @@ public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.NumberTheory.FermatLastTheorem.Basic
 public import AlphaCentauri.NumberTheory.Primes
 public import Mathlib.Computability.Halting
+public import AlphaCentauri.NumberTheory.FermatLastTheorem.CaseOne
+public import AlphaCentauri.NumberTheory.FermatLastTheorem.IOpenUnprovable
+public import AlphaCentauri.NumberTheory.FermatLastTheorem.Three
 
 /-!
 # What $\mathsf{IOpen}$ does not prove

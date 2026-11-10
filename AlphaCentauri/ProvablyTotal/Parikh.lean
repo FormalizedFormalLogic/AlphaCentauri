@@ -3,10 +3,11 @@ module
 public import AlphaCentauri.Model.EndExtension
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ConstantExtension
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Metatheory
 public import AlphaCentauri.ToFoundation.Logic.Compact
 public import Foundation.FirstOrder.Tarski.Ultraproduct
 public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.Grzegorczyk
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Completeness
 
 /-!
 # Parikh's theorem

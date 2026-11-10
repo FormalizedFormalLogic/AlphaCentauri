@@ -670,7 +670,7 @@ lemma IsVarVec.two_bvar {m : ℕ} (a b : Fin m) :
 
 omit [L.Eq] in
 lemma IsVarVec.fvar {n : ℕ} (f : Fin n → V) :
-    IsVarVec (fun i ↦ (Semiterm.fvar (f i) : Term V L)) := fun i ↦ Or.inr ⟨_, rfl⟩
+    IsVarVec (fun i ↦ (Semiterm.fvar (f i) : Term V L)) := fun _ ↦ Or.inr ⟨_, rfl⟩
 
 omit [L.Eq] in
 lemma IsVarVec.single_bvar {m : ℕ} (a : Fin m) :
@@ -1363,6 +1363,21 @@ lemma comp_func_exists {k : ℕ} (F : (ℒₒᵣ).Func k) :
       S.internalize V ⊢ CAB 🡒 EY := by
     cl_prover [hs, hsp, h₃]
   exact key hs (tprovable_conj_and_split _ _) (tprovable_exs_and_assoc _ _ _)
+
+omit [U.Δ₁] in
+include hc in
+lemma comp_func_congr {k : ℕ} (F : (ℒₒᵣ).Func k) :
+    Provable S (qqAlls (funcCongrCode ℒₒᵣ (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂) k ⌜F⌝)
+      (k + 1 + (k + 1))) := by
+  have h := provable_qqAlls_of_forall_tprovable (S := S) (funcCongrBody (hc.funcT F))
+    (funcCongrBody_shift (hc.funcT_shift F)) fun w ↦ by
+      simp only [funcCongrBody, Semiformula.substs_imp, Semiformula.substs_conj,
+        Semiformula.substs_equal, Semiformula.substs_substs, Semiterm.substs_bvar,
+        Semiterm.substs_vecMap_bvar]
+      exact tprovable_subst_congr (hc.funcT F) (fun j ↦ w (Fin.castAdd (k + 1) j))
+        (fun j ↦ w (Fin.natAdd (k + 1) j))
+  rw [funcCongrBody_val _ rfl] at h
+  simpa using h
 
 end compConditions
 

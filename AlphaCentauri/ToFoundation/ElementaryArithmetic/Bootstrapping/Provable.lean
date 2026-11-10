@@ -19,7 +19,6 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
-  {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁] [LocallyDelta0Axioms T V]
 
 section transfer
 
@@ -54,7 +53,130 @@ lemma of_natCast_of_defined {k : ℕ} {F : 𝚺ᴬ₁.Semisentence k}
   rw [e, e'] at hV
   simpa [hP.iff] using hV
 
+lemma natCast_qqAll (a : ℕ) : ((Arithmetic.Bootstrapping.qqAll a : ℕ) : V) = ^∀ (a : V) :=
+  (natCast_apply_of_defined (f := fun v ↦ ^∀ (v 0))
+    (g := fun v ↦ Arithmetic.Bootstrapping.qqAll (v 0))
+    (qqForall_defined.of_zero (ℌ := 𝚺ᴬ₁))
+    (Arithmetic.Bootstrapping.qqForall_defined.of_zero (ℌ := 𝚺ᴬ₁)) ![a]).symm
+
+lemma natCast_qqBvar (a : ℕ) : ((Arithmetic.Bootstrapping.qqBvar a : ℕ) : V) = ^#(a : V) :=
+  (natCast_apply_of_defined (f := fun v ↦ ^#(v 0))
+    (g := fun v ↦ Arithmetic.Bootstrapping.qqBvar (v 0))
+    (qqBvar_defined.of_zero (ℌ := 𝚺ᴬ₁))
+    (Arithmetic.Bootstrapping.qqBvar_defined.of_zero (ℌ := 𝚺ᴬ₁)) ![a]).symm
+
+lemma natCast_adjoin (a b : ℕ) : (((a ∷ b : ℕ) : ℕ) : V) = (a : V) ∷ (b : V) :=
+  (natCast_apply_of_defined (f := fun v ↦ v 0 ∷ v 1) (g := fun v ↦ v 0 ∷ v 1)
+    (adjoin_defined.of_zero (ℌ := 𝚺ᴬ₁))
+    (FFL.FirstOrder.Arithmetic.adjoin_defined.of_zero (ℌ := 𝚺ᴬ₁)) ![a, b]).symm
+
+lemma natCast_imp (a b : ℕ) :
+    ((Arithmetic.Bootstrapping.imp ℒₒᵣ a b : ℕ) : V) = imp ℒₒᵣ (a : V) (b : V) := by
+  simpa using (natCast_apply_of_defined (imp.defined (L := ℒₒᵣ))
+    (Arithmetic.Bootstrapping.imp.defined (L := ℒₒᵣ)) ![a, b]).symm
+
+lemma natCast_subst (a b : ℕ) :
+    ((Arithmetic.Bootstrapping.subst ℒₒᵣ a b : ℕ) : V) = subst ℒₒᵣ (a : V) (b : V) := by
+  simpa using (natCast_apply_of_defined (subst.defined (L := ℒₒᵣ))
+    (Arithmetic.Bootstrapping.subst.defined (L := ℒₒᵣ)) ![a, b]).symm
+
+lemma natCast_numeral (a : ℕ) :
+    ((Arithmetic.Bootstrapping.Arithmetic.numeral a : ℕ) : V) = Arithmetic.numeral (a : V) := by
+  simpa using (natCast_apply_of_defined Arithmetic.numeral_defined
+    Arithmetic.Bootstrapping.Arithmetic.numeral_defined ![a]).symm
+
+lemma natCast_qqAdd (a b : ℕ) :
+    ((Arithmetic.Bootstrapping.Arithmetic.qqAdd a b : ℕ) : V) =
+      Arithmetic.qqAdd (a : V) (b : V) := by
+  simpa using (natCast_apply_of_defined Arithmetic.qqAdd_defined
+    Arithmetic.Bootstrapping.Arithmetic.qqAdd_defined ![a, b]).symm
+
+lemma isSemiformula_natCast {n a : ℕ} (h : Arithmetic.Bootstrapping.IsSemiformula ℒₒᵣ n a) :
+    IsSemiformula ℒₒᵣ (n : V) (a : V) := by
+  simpa using of_natCast_of_defined
+    (F := (Arithmetic.Bootstrapping.isSemiformula ℒₒᵣ).sigma)
+    (P := fun v ↦ IsSemiformula ℒₒᵣ (v 0) (v 1))
+    (Q := fun v ↦ Arithmetic.Bootstrapping.IsSemiformula ℒₒᵣ (v 0) (v 1))
+    (.mk (IsSemiformula.defined (L := ℒₒᵣ) (V := V)).df)
+    (.mk (Arithmetic.Bootstrapping.IsSemiformula.defined (L := ℒₒᵣ) (V := ℕ)).df)
+    (a := ![n, a]) h
+
+lemma natCast_matrixToVec {k : ℕ} (v : Fin k → ℕ) :
+    ((FFL.FirstOrder.Arithmetic.matrixToVec v : ℕ) : V) = matrixToVec fun i ↦ (v i : V) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [FFL.FirstOrder.Arithmetic.matrixToVec_succ, natCast_adjoin, ih, matrixToVec_succ]
+    rfl
+
 end transfer
+
+section quote
+
+open FFL.FirstOrder
+
+variable {n : ℕ}
+
+lemma natCast_quote_all (φ : ArithmeticSemisentence (n + 1)) :
+    ((⌜∀¹ φ⌝ : ℕ) : V) = ^∀ ((⌜φ⌝ : ℕ) : V) := by
+  rw [Sentence.quote_all, natCast_qqAll]
+
+lemma natCast_quote_imply (φ ψ : ArithmeticSemisentence n) :
+    ((⌜φ 🡒 ψ⌝ : ℕ) : V) = imp ℒₒᵣ ((⌜φ⌝ : ℕ) : V) ((⌜ψ⌝ : ℕ) : V) := by
+  rw [← natCast_imp, Sentence.quote_eq, LCWQIsoGödelQuote.imply]
+  rfl
+
+lemma isSemiformula_natCast_quote (φ : ArithmeticSemisentence n) :
+    IsSemiformula ℒₒᵣ (n : V) ((⌜φ⌝ : ℕ) : V) := by
+  simpa using isSemiformula_natCast (V := V) (Sentence.quote_isSemiformula (V := ℕ) φ)
+
+lemma natCast_quote_rew_subst {k : ℕ} (φ : ArithmeticSemisentence k)
+    (w : Fin k → ArithmeticSemiterm Empty n) :
+    ((⌜Rew.subst w ▹ φ⌝ : ℕ) : V) = subst ℒₒᵣ
+      (matrixToVec fun i ↦ ((⌜(Rew.emb (w i) : SyntacticSemiterm ℒₒᵣ n)⌝ : ℕ) : V))
+      ((⌜φ⌝ : ℕ) : V) := by
+  rw [← natCast_matrixToVec, ← natCast_subst]
+  congr 1
+  simp [Sentence.quote_def, Semiformula.quote_def, Rewriting.emb_subst_eq_subst_emb]
+  rfl
+
+lemma natCast_quote_bvar (i : Fin n) :
+    ((⌜(Rew.emb (#i : ArithmeticSemiterm Empty n) : SyntacticSemiterm ℒₒᵣ n)⌝ : ℕ) : V) =
+      ^#(i : V) := by
+  simpa using natCast_qqBvar (V := V) i
+
+lemma natCast_quote_numeral (k : ℕ) :
+    ((⌜(Rew.emb (↑k : ArithmeticSemiterm Empty n) : SyntacticSemiterm ℒₒᵣ n)⌝ : ℕ) : V) =
+      Arithmetic.numeral (k : V) := by
+  have : (⌜(Rew.emb (↑k : ArithmeticSemiterm Empty n) : SyntacticSemiterm ℒₒᵣ n)⌝ : ℕ) =
+      (Arithmetic.Bootstrapping.Arithmetic.typedNumeral k :
+        Arithmetic.Bootstrapping.Semiterm ℕ ℒₒᵣ n).val :=
+    congrArg Arithmetic.Bootstrapping.Semiterm.val (by simp)
+  rw [this]
+  exact natCast_numeral k
+
+lemma natCast_quote_bvar_add_one :
+    ((⌜(Rew.emb (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)) :
+      SyntacticSemiterm ℒₒᵣ (n + 1))⌝ : ℕ) : V) = (Arithmetic.qqAdd (^#0) 𝟏 : V) := by
+  have : (⌜(Rew.emb (‘#0 + 1’ : ArithmeticSemiterm Empty (n + 1)) :
+      SyntacticSemiterm ℒₒᵣ (n + 1))⌝ : ℕ) =
+      (Arithmetic.Bootstrapping.Semiterm.bvar 0 +
+        Arithmetic.Bootstrapping.Arithmetic.typedNumeral 1 :
+          Arithmetic.Bootstrapping.Semiterm ℕ ℒₒᵣ (n + 1)).val :=
+    congrArg Arithmetic.Bootstrapping.Semiterm.val (by simp)
+  rw [this]
+  change ((Arithmetic.Bootstrapping.Arithmetic.qqAdd
+    (Arithmetic.Bootstrapping.qqBvar ((0 : ℕ) : ℕ))
+    (Arithmetic.Bootstrapping.Arithmetic.numeral ((1 : ℕ) : ℕ)) : ℕ) : V) = _
+  rw [natCast_qqAdd, natCast_qqBvar, natCast_numeral]
+  simp
+
+end quote
+
+section
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
+  [LocallyDelta0Axioms T V]
 
 /-- A theorem of `T` is internally provable. -/
 theorem provable_natCast_quote_of_provable {σ : Sentence L} (h : T ⊢ σ) :
@@ -268,5 +390,56 @@ lemma modusPonensCode_le_exp_exp {n d₁ d₂ a b : V} (hn : 2 ≤ n) (hN : modu
   exact le_trans this (exp_exp_le_of_le (le_of_eq (by norm_num [add_assoc])))
 
 end size
+
+section substitution
+
+lemma subst_imp {n m w p q : V} (hp : IsSemiformula L n p) (hq : IsSemiformula L n q)
+    (hw : IsSemitermVec L n m w) : subst L w (imp L p q) = imp L (subst L w p) (subst L w q) := by
+  simp [imp, hp.isUFormula, hq.isUFormula, substs_neg hp hw]
+
+lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec L j 0 w)
+    (hq : IsSemiformula L (j + 1) q) (ht : IsSemiterm L 0 t) :
+    substs1 L t (subst L (qVec L w) q) = subst L (t ∷ w) q := by
+  have h₁ : IsSemitermVec L 1 0 (?[t] : V) := by simp [ht]
+  have h₂ : IsSemitermVec L (j + 1) 1 (qVec L w) := by simpa using hw.qVec
+  rw [substs1, substs_substs hq h₁ h₂]
+  congr 1
+  apply nth_ext' (j + 1) (by simp [(h₁.termSubstVec h₂).lh]) (by simp [hw.lh])
+  intro i hi
+  rw [nth_termSubstVec h₂.isUTerm hi]
+  rcases zero_or_succ i with rfl | ⟨i, rfl⟩
+  · simp [qVec]
+  · have hi : i < j := by simpa using hi
+    rw [qVec, nth_adjoin_succ, hw.lh, nth_termBShiftVec hw.isUTerm hi,
+      substs_cons_bShift (hw.nth hi), substs_nil (hw.nth hi)]
+    simp
+
+variable {k : ℕ} {v : Fin k → V}
+
+lemma isSemitermVec_matrixToVec {n : V} :
+    IsSemitermVec L (k : V) n (matrixToVec v) ↔ ∀ i, IsSemiterm L n (v i) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [matrixToVec_succ, Nat.cast_succ, IsSemitermVec.cons_iff, ih, Fin.forall_fin_succ]
+    rfl
+
+lemma isUTermVec_matrixToVec (hv : ∀ i, IsUTerm L (v i)) : IsUTermVec L (k : V) (matrixToVec v) :=
+  ⟨by simp, fun i hi ↦ by obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi; simpa using hv i⟩
+
+lemma termSubstVec_matrixToVec {w : V} (hv : ∀ i, IsUTerm L (v i)) :
+    termSubstVec L (k : V) w (matrixToVec v) = matrixToVec fun i ↦ termSubst L w (v i) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [matrixToVec_succ, matrixToVec_succ, Nat.cast_succ,
+      termSubstVec_cons (t := Matrix.vecHead v) (hv 0)
+        (isUTermVec_matrixToVec (v := Matrix.vecTail v) fun i ↦ hv i.succ),
+      ih (v := Matrix.vecTail v) fun i ↦ hv i.succ]
+    rfl
+
+end substitution
+
+end
 
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

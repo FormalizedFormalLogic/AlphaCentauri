@@ -396,6 +396,8 @@ namespace FFL.InterpretabilityLogic
 
 namespace Logic
 
+open Entailment Formula MaximalConsistentSet Veltman Veltman.Model.World
+
 variable {α : Type} {A : Formula α}
 
 /-- - [dJV90, Theorem 5.2] -/

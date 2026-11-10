@@ -63,6 +63,8 @@ end
 
 namespace Logic
 
+open Veltman Veltman.StepByStep MaximalConsistentTheory
+
 variable {α : Type*} {A : Formula α}
 
 /-- - [GJ08, Theorem 6.1] -/
@@ -76,7 +78,7 @@ theorem ILM₀.iff_valid :
   · intro h;
     classical
     by_contra hA;
-    obtain ⟨Γ₀, hΓ₀⟩ := Veltman.StepByStep.exists_not_forces (ε := fun _ ↦ ∅) axiomM₀
+    obtain ⟨Γ₀, hΓ₀⟩ := exists_not_forces (ε := fun _ ↦ ∅) axiomM₀
       (fun h hAB hA ↦ by simpa using h.exists_of_rhd_mem hAB hA) hA;
     have := model_isIL (Γ₀ := Γ₀) (ε := fun _ ↦ ∅)
       (enumJob_mem (bot_mem_jobFormulas (A := A)));

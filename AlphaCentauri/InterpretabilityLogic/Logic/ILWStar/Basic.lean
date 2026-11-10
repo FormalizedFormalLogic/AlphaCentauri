@@ -93,6 +93,8 @@ end
 
 namespace Logic
 
+open Veltman Veltman.StepByStep MaximalConsistentTheory
+
 variable {α : Type*} {A : Formula α}
 
 /-- - [GJ08, Theorem 7.1] -/

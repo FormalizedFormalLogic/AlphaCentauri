@@ -715,6 +715,8 @@ namespace Logic
 
 section
 
+open Veltman
+
 variable {α : Type} {A : Formula α}
 
 /-- - [dJV90, Theorem 6.3] -/
@@ -737,7 +739,7 @@ theorem ILM.iff_valid_finite :
       cl_prover [h₂];
     obtain ⟨Γ, hΓ⟩ := MaximalConsistentSet.exists_consistent_union (Φ := Φ) hX;
     have hAΦ : A ∈ Φ := mAdequateClosure.subset <| adequateClosure.subset (by simp);
-    exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+    exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
       (countermodelM.truthlemma hAΦ).mp <| h (countermodelM Φ) ⟨Γ, [], by simp, by simp⟩
 
 end

@@ -3,13 +3,15 @@ module
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 public import AlphaCentauri.ToFoundation.Reflection
+public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 
 /-!
-# Local reflection between the fragments of arithmetic
+# Reflection principles proved by the fragments of arithmetic
 
 For $1 \le k$ and $n \le k$, $\mathsf{I}\Sigma_{k+1}$ proves the local reflection principle of
 $\mathsf{I}\Sigma_n$ for prenex $\Pi_{k+3}$ sentences, and hence, for $k \ge 1$, that of
-$\mathsf{I}\Sigma_k$ for all $\Sigma_1$ sentences.
+$\mathsf{I}\Sigma_k$ for all $\Sigma_1$ sentences. It also proves the uniform reflection principle
+of $\mathsf{EA}$ for prenex $\Pi_{k+3}$ formulas.
 -/
 
 @[expose] public section
@@ -34,8 +36,26 @@ theorem ISigma.provable_localReflectionOn_Pi (hk : 1 ≤ k) (hn : n ≤ k) :
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (s₁ := 1) (s₂ := k + 1) (by omega)
   simp only [Semantics.Imp.models_imply]
   intro hp
-  exact Bootstrapping.models_of_provable_prenexPi hk hn hπ
+  have := Bootstrapping.models_of_provable_substNumerals hk
+    (Bootstrapping.admitsFalseBlockReplacement_ISigma hn) hπ (![] : Fin 0 → V)
     (by simpa [models_iff, standardProvability_def] using hp)
+  simpa [models_iff] using this
+
+/-- For $1 \le k$, $\mathsf{I}\Sigma_{k+1}$ proves the uniform reflection principle of $\mathsf{EA}$
+for prenex $\Pi_{k+3}$ formulas.
+- [Bek05, Theorem 7]
+- [Lei83] -/
+theorem ISigma.provable_uniformReflectionOn_Pi_ElementaryArithmetic (hk : 1 ≤ k) :
+    𝗜𝚺 (k + 1) ⊢* 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (k + 3)] 𝗘𝗔 := by
+  intro σ hσ
+  obtain ⟨m, φ, hφ, rfl⟩ := mem_uniformReflectionOn_iff.mp hσ
+  apply Arithmetic.complete.{0}
+  intro V _ _
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (s₁ := 1) (s₂ := k + 1) (by omega)
+  rw [models_iff, models_uniformReflectionSchema_iff]
+  intro v hv
+  exact Bootstrapping.models_of_provable_substNumerals hk
+    Bootstrapping.admitsFalseBlockReplacement_ElementaryArithmetic hφ v hv
 
 theorem ISigma.provable_localReflectionOn_prenexSigma1 (hk : 1 ≤ k) :
     𝗜𝚺 (k + 1) ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1] (𝗜𝚺 k) :=

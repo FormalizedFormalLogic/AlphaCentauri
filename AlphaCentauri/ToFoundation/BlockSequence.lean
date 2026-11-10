@@ -4,11 +4,11 @@ public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 
 /-!
-# Block-coded sequences over $\mathsf{EA}$
+# Block-coded sequences over $\mathsf{I}\Sigma_0 + \Omega_1$
 
-Over a model of $\mathsf{EA}$, a number $S$ codes a sequence of length $i$ whose entries are the
-blocks of width $\|a\|$ of $S$ below $2^{i \|a\|}$, read off by `Nuon.ext`. This file collects the
-facts about appending an entry and about determining a code by its entries.
+Over a model of $\mathsf{I}\Sigma_0 + \Omega_1$, a number $S$ codes a sequence of length $i$ whose
+entries are the blocks of width $\|a\|$ of $S$ below $2^{i \|a\|}$, read off by `Nuon.ext`. This
+file collects the facts about appending an entry and about determining a code by its entries.
 -/
 
 @[expose] public section
@@ -19,12 +19,12 @@ namespace FFL.FirstOrder.Arithmetic
 
 noncomputable section
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V]
 
-attribute [local instance] ElementaryArithmetic.models_ISigma0_union_Omega1
-
-lemma exists_exponential_mul_length (i a : V) : ∃ b, Exponential (i * ‖a‖) b :=
+lemma exists_exponential_mul_length [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] (i a : V) : ∃ b, Exponential (i * ‖a‖) b :=
   ElementaryArithmetic.exponential_total _
+
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
 private lemma mod_mul_eq_mod_add {p β : V} (S : V) (hp : 0 < p) (hβ : 0 < β) :
     S % (p * β) = S % p + (S / p % β) * p := by

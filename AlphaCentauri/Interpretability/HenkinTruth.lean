@@ -255,6 +255,73 @@ lemma provable_equatesBvar :
 
 end representatives
 
+/-! ### Atomic formulas and function symbols -/
+
+section symbols
+
+variable {k : ℕ}
+
+noncomputable def relCond (R : L.Rel k) : 𝚺ᴬ₁.Semisentence (2 + k) := .mkSigma
+  “∃ v, !lenDef ↑k v ∧ (⋀ i, ∃ y, !nthDef y v ↑(i : Fin k).val ∧ y = #(Fin.natAdd 2 i).succ.succ) ∧
+    !qqRelDef #(Fin.castAdd k 0).succ ↑k ↑(Encodable.encode R) v ∧
+    ⋀ i, !(isSemiterm L).sigma #(Fin.castAdd k 1).succ #(Fin.natAdd 2 i).succ”
+
+noncomputable def funcCond (f : L.Func k) : 𝚺ᴬ₁.Semisentence (2 + k) := .mkSigma
+  “∃ v, !lenDef ↑k v ∧ (⋀ i, ∃ y, !nthDef y v ↑(i : Fin k).val ∧ y = #(Fin.natAdd 2 i).succ.succ) ∧
+    !qqFuncDef #(Fin.castAdd k 0).succ ↑k ↑(Encodable.encode f) v ∧
+    ⋀ i, !(isSemiterm L).sigma #(Fin.castAdd k 1).succ #(Fin.natAdd 2 i).succ”
+
+omit [L.Eq] in
+lemma relCond_iff {W : Type*} [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (R : L.Rel k) (c n : W)
+    (t : Fin k → W) :
+    W ⊧/(Fin.append ![c, n] t) (relCond R).val ↔
+      c = ^rel (k : W) ⌜R⌝ (matrixToVec t) ∧ ∀ j, IsSemiterm L n (t j) := by
+  simp [relCond, Fin.append_right, numeral_eq_natCast, quote_rel_def, ← and_assoc,
+    ← eq_matrixToVec_iff]
+
+omit [L.Eq] in
+lemma funcCond_iff {W : Type*} [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (f : L.Func k) (c n : W)
+    (t : Fin k → W) :
+    W ⊧/(Fin.append ![c, n] t) (funcCond f).val ↔
+      c = ^func (k : W) ⌜f⌝ (matrixToVec t) ∧ ∀ j, IsSemiterm L n (t j) := by
+  simp [funcCond, Fin.append_right, numeral_eq_natCast, quote_func_def, ← and_assoc,
+    ← eq_matrixToVec_iff]
+
+omit [L.Eq] [𝗘𝗤 L ⪯ S] [Theory.Δ₁.Sentential S] in
+lemma fin_append_pair_eq {W : Type*} {m : ℕ} (e : Fin ((2 + k) + m) → W) :
+    (fun i ↦ e (Fin.castAdd m i)) = Fin.append ![e (Fin.castAdd m (Fin.castAdd k 0)),
+      e (Fin.castAdd m (Fin.castAdd k 1))] (fun j ↦ e (Fin.castAdd m (Fin.natAdd 2 j))) := by
+  funext i
+  refine Fin.addCases (fun i ↦ ?_) (fun j ↦ ?_) i
+  · rw [Fin.append_left]
+    refine Fin.cases ?_ (fun i ↦ ?_) i
+    · rfl
+    · refine Fin.cases ?_ (fun i ↦ i.elim0) i
+      rfl
+  · rw [Fin.append_right]
+
+omit [L.Eq] in
+/-- The atomic clause of satisfaction: if the coded terms `tⱼ` equate to `zⱼ`, the atomic formula
+`R(t₀, …)` is satisfied exactly when `R` holds of the `zⱼ` in the Henkin translation. -/
+noncomputable def satisfiesRel [L.Eq] (R : L.Rel k) : ArithmeticSemisentence ((2 + k) + (1 + k)) :=
+  (Matrix.conj fun j : Fin k ↦ Rew.subst ![#(Fin.castAdd (1 + k) (Fin.natAdd 2 j)),
+      #(Fin.castAdd (1 + k) (Fin.castAdd k 1)), #(Fin.natAdd (2 + k) (Fin.castAdd k 0)),
+      #(Fin.natAdd (2 + k) (Fin.natAdd 1 j))] ▹ (henkinEquatesDef S).val) 🡒
+    ((Rew.subst ![#(Fin.castAdd (1 + k) (Fin.castAdd k 0)),
+        #(Fin.castAdd (1 + k) (Fin.castAdd k 1)), #(Fin.natAdd (2 + k) (Fin.castAdd k 0))] ▹
+        (henkinSatisfiesDef S).val) 🡘
+      (Rew.subst (fun j ↦ #(Fin.natAdd (2 + k) (Fin.natAdd 1 j))) ▹ (henkinRelDef S R).val))
+
+lemma provable_satisfiesRel (R : L.Rel k) :
+    T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd (1 + k))) ▹ (relCond R).val) 🡒
+      satisfiesRel S R) :=
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ hS hcons e hc ↦ by
+    rw [fin_append_pair_eq, relCond_iff] at hc
+    simp [satisfiesRel]
+    done
+
+end symbols
+
 end facts
 
 

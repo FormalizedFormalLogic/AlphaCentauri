@@ -275,10 +275,23 @@ lemma tprovable_funcExistsBody_imp {k : ℕ} (F : L₂.Func k) (w : Fin k → Te
     Matrix.vecMap_cons', Matrix.head_cons, Matrix.vecMap_nil]
   exact key₂ (hd _) (hf F _)
 
-include hd hf in
-/-- A table whose domain formula and graphs of function symbols are provably equivalent in `S` to
-those of a table of a translation in `S` is itself a table of a translation in `S`. -/
-theorem IsTranslationTable.of_provable_iff (h : IsTranslationTable L₂ S tbl)
+include hd hr in
+lemma tprovable_preserveEqBody_imp [L₂.Eq] (w : Fin 2 → Term V L₁) :
+    S.internalize V ⊢ (preserveEqBody hT.domT (hT.relT (Language.Eq.eq : L₂.Rel 2))).subst w 🡒
+      (preserveEqBody hT'.domT (hT'.relT (Language.Eq.eq : L₂.Rel 2))).subst w := by
+  simp only [preserveEqBody, LogicalConnective.iff, Semiformula.substs_imp, Semiformula.substs_and,
+    Semiformula.substs_substs, Matrix.vecMap_cons', Matrix.head_cons, Matrix.vecMap_nil,
+    Semiterm.substs_bvar]
+  have key {D₁ D₁' D₀ D₀' E E' Q : Formula V L₁} (h₁ : S.internalize V ⊢ D₁ 🡘 D₁')
+      (h₂ : S.internalize V ⊢ D₀ 🡘 D₀') (h₃ : S.internalize V ⊢ E 🡘 E') :
+      S.internalize V ⊢ (D₁ 🡒 D₀ 🡒 (E 🡒 Q) ⋏ (Q 🡒 E)) 🡒 (D₁' 🡒 D₀' 🡒 (E' 🡒 Q) ⋏ (Q 🡒 E')) := by
+    cl_prover 100 [h₁, h₂, h₃]
+  exact key (hd _) (hd _) (hr _ _)
+
+include hd hr hf in
+/-- A table whose domain formula and the entries of whose symbols are provably equivalent in `S`
+to those of a table of a translation in `S` is itself a table of a translation in `S`. -/
+theorem IsTranslationTable.of_provable_iff [L₂.Eq] (h : IsTranslationTable L₂ S tbl)
     (hL : L₂.SymbolsStandard V) : IsTranslationTable L₂ S tbl' where
   toIsTable := hT'
   exs_domain := by
@@ -311,6 +324,14 @@ theorem IsTranslationTable.of_provable_iff (h : IsTranslationTable L₂ S tbl)
           rw [funcCongrBody_val _ rfl]
           simpa using h.func_congr hf')
     rw [funcCongrBody_val _ rfl] at h₁
+    simpa using h₁
+  preserve_eq := by
+    have h₁ := provable_qqAlls_of_forall_tprovable (S := S) _ (preserveEqBody_shift
+      hT'.domT_shift (hT'.relT_shift (Language.Eq.eq : L₂.Rel 2))) fun w ↦
+        tprovable_preserveEqBody_imp hd hr w ⨀ tprovable_subst_of_provable_qqAlls _ w (by
+          rw [preserveEqBody_val _ rfl (hT.relT (Language.Eq.eq : L₂.Rel 2)) rfl]
+          simpa using h.preserve_eq)
+    rw [preserveEqBody_val _ rfl (hT'.relT (Language.Eq.eq : L₂.Rel 2)) rfl] at h₁
     simpa using h₁
 
 end congruence

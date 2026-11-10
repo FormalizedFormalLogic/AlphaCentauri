@@ -68,6 +68,24 @@ instance funcCongrCode.defined :
     𝚺ᴬ₁-Function₃[V] funcCongrCode L via funcCongrCodeGraph L :=
   .mk fun v ↦ by simp [funcCongrCodeGraph, funcCongrCode]
 
+variable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq]
+
+/-- The $\Sigma_1$ graph of `preserveEqCode`, with argument order `(y, tbl)`. -/
+noncomputable def preserveEqCodeGraph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
+  “y tbl. ∃ d₁, !(domainAtGraph L₁) d₁ tbl 1 ∧ ∃ d₀, !(domainAtGraph L₁) d₀ tbl 0 ∧
+    ∃ b₁, !qqBvarDef b₁ 1 ∧ ∃ b₀, !qqBvarDef b₀ 0 ∧ ∃ w, !mkVec₂Def w b₁ b₀ ∧
+    ∃ r, !tableRelGraph r tbl 2 ↑(Encodable.encode (Language.Eq.eq : L₂.Rel 2)) ∧
+    ∃ s, !(substsGraph L₁) s w r ∧
+    ∃ e, !qqRelDef e 2 ↑(Encodable.encode (Language.Eq.eq : L₁.Rel 2)) w ∧
+    ∃ i, !(iffGraph L₁) i s e ∧ ∃ j, !(impGraph L₁) j d₀ i ∧ !(impGraph L₁) y d₁ j”
+
+variable {L₁ L₂}
+
+instance preserveEqCode.defined :
+    𝚺ᴬ₁-Function₁[V] preserveEqCode L₁ L₂ via preserveEqCodeGraph L₁ L₂ :=
+  .mk fun v ↦ by simp [preserveEqCodeGraph, preserveEqCode, numeral_eq_natCast]
+
 end graphs
 
 /-! ## Interpretability in a model -/
@@ -75,7 +93,7 @@ end graphs
 section interpretable
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable]
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq]
 
 /-- `tbl` is a table of a translation of `L₂` in `S` along which every axiom of `U` in `V`
 translates to a formula provable in `S`.
@@ -106,7 +124,8 @@ section provableIff
 open _root_.FFL.Entailment
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable] {S : Theory L₁} [S.Δ₁] {U : Theory L₂} [U.Δ₁] {tbl tbl' : V}
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] {U : Theory L₂} [U.Δ₁]
+  {tbl tbl' : V}
   {hT : IsTable L₁ L₂ tbl} {hT' : IsTable L₁ L₂ tbl'}
   (hd : ∀ u : Term V L₁, S.internalize V ⊢ hT.domT.subst ![u] 🡘 hT'.domT.subst ![u])
   (hr : ∀ {k : ℕ} (R : L₂.Rel k) (w : Fin k → Term V L₁),
@@ -119,7 +138,7 @@ include hd hr hf in
 `S` interprets `U` in `S`. -/
 theorem IsInterpretationTable.of_provable_iff (h : IsInterpretationTable S U tbl)
     (hL : L₂.SymbolsStandard V) : IsInterpretationTable S U tbl' where
-  toIsTranslationTable := h.toIsTranslationTable.of_provable_iff hd hf hL
+  toIsTranslationTable := h.toIsTranslationTable.of_provable_iff hd hr hf hL
   translate_axiom {p} hp hp' := by
     have hq := IsSemiformula.translate hT hp'
     have h₁ := (provable_iff_iff_tprovable hq (IsSemiformula.translate hT' hp')).mp
@@ -135,13 +154,15 @@ lemma IsInterpretationTable.of_subset {S' : Theory L₁} [S'.Δ₁] (h : IsInter
   func_exists hf := Derivable.of_ss hS (h.func_exists hf)
   func_unique hf := Derivable.of_ss hS (h.func_unique hf)
   func_congr hf := Derivable.of_ss hS (h.func_congr hf)
+  preserve_eq := Derivable.of_ss hS h.preserve_eq
   translate_axiom hp hp' := Derivable.of_ss hS (h.translate_axiom hp hp')
 
 end provableIff
 
 section caseSplit
 
-variable (φ : ArithmeticSentence) {L₂ : Language} [L₂.Encodable] [L₂.LORDefinable] {tbl₁ tbl₂ : V}
+variable (φ : ArithmeticSentence) {L₂ : Language} [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq]
+  {tbl₁ tbl₂ : V}
   {S : ArithmeticTheory} [S.Δ₁] {U : Theory L₂} [U.Δ₁]
 
 /-- Along a table `tbl₁` interpreting `U` in `S`, the case-split table of `tbl₁` and `tbl₂` by a
@@ -230,6 +251,7 @@ theorem Interpretable.union_or {T W : ArithmeticTheory} [T.Δ₁] [W.Δ₁] {φ 
           func_exists hf := provable_union_or (c₁.func_exists hf) (c₂.func_exists hf)
           func_unique hf := provable_union_or (c₁.func_unique hf) (c₂.func_unique hf)
           func_congr hf := provable_union_or (c₁.func_congr hf) (c₂.func_congr hf)
+          preserve_eq := provable_union_or c₁.preserve_eq c₂.preserve_eq
           translate_axiom hp hp' :=
             provable_union_or (c₁.translate_axiom hp hp') (c₂.translate_axiom hp hp') }
 
@@ -241,7 +263,7 @@ end arithmetic
 section sentence
 
 variable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable]
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq]
 
 /-- The formula defining `IsTable L₁ L₂`. -/
 noncomputable def isTableDef : ArithmeticSemisentence 1 :=
@@ -252,6 +274,7 @@ noncomputable def isTableDef : ArithmeticSemisentence 1 :=
     (∀ k f, !L₂.isFunc.val k f → ∃ e, !tableFuncGraph.val e tbl k f ∧
       !(isSemiformula L₁).val (k + 1) e ∧ !(shiftGraph L₁).val e e)”
 
+omit [L₂.Eq] in
 variable {L₁ L₂} in
 lemma eval_isTableDef (tbl : V) : V ⊧/![tbl] (isTableDef L₁ L₂) ↔ IsTable L₁ L₂ tbl := by
   simp only [isTableDef, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Semiformula.eval_ex,
@@ -277,6 +300,8 @@ variable (S : Theory L₁) [S.Δ₁] (U : Theory L₂) [U.Δ₁]
 noncomputable def interpretableDef : ArithmeticSentence :=
   “∃ tbl, !(isTableDef L₁ L₂) tbl ∧
     (∃ d, !tableDomainGraph.val d tbl ∧ ∃ e, !qqExsDef.val e d ∧ !(provable S).val e) ∧
+    (∃ c, !(preserveEqCodeGraph L₁ L₂).val c tbl ∧ ∃ a, !qqAllsDef.val a c 2 ∧
+      !(provable S).val a) ∧
     (∀ k f, !L₂.isFunc.val k f →
       (∃ c, !(funcExistsCodeGraph L₁).val c tbl k f ∧ ∃ a, !qqAllsDef.val a c k ∧
         !(provable S).val a) ∧
@@ -291,19 +316,20 @@ variable {L₁ L₂ S U}
 
 lemma isInterpretationTable_iff {tbl : V} : IsInterpretationTable S U tbl ↔
     IsTable L₁ L₂ tbl ∧ Provable S (^∃ tableDomain tbl) ∧
+      Provable S (qqAlls (preserveEqCode L₁ L₂ tbl) 2) ∧
       (∀ k f : V, L₂.IsFunc k f → Provable S (qqAlls (funcExistsCode L₁ tbl k f) k) ∧
         Provable S (qqAlls (funcUniqueCode L₁ tbl k f) (k + 2)) ∧
         Provable S (qqAlls (funcCongrCode L₁ tbl k f) (k + 1 + (k + 1)))) ∧
       ∀ p ∈ U.Δ₁Class, IsFormula L₂ p → Provable S (translate L₁ L₂ tbl p) := by
   constructor
   · intro h
-    exact ⟨h.toIsTable, h.exs_domain,
+    exact ⟨h.toIsTable, h.exs_domain, h.preserve_eq,
       fun _ _ hf ↦ ⟨h.func_exists hf, h.func_unique hf, h.func_congr hf⟩,
       fun _ hp hf ↦ h.translate_axiom hp hf⟩
-  · rintro ⟨hT, hd, hf, ha⟩
+  · rintro ⟨hT, hd, he, hf, ha⟩
     exact { toIsTable := hT, exs_domain := hd, func_exists := fun h ↦ (hf _ _ h).1
             func_unique := fun h ↦ (hf _ _ h).2.1, func_congr := fun h ↦ (hf _ _ h).2.2
-            translate_axiom := fun hp hf ↦ ha _ hp hf }
+            preserve_eq := he, translate_axiom := fun hp hf ↦ ha _ hp hf }
 
 lemma models_interpretableDef_iff [Nonempty V] :
     V↓[ℒₒᵣ] ⊧ interpretableDef L₁ L₂ S U ↔ Interpretable V S U := by

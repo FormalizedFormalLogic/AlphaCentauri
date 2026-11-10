@@ -5,7 +5,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 
 /-!
-# Soundness and completeness of $\mathbf{IL}^-(\mathbf{J1})$
+# Soundness and completeness of $\mathbf{IL}^-(\mathbf{J5})$
 -/
 
 @[expose] public section
@@ -20,10 +20,10 @@ open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILMinusJ1.sound [M.IsILMinus] [M.IsJ1] : ILMinusJ1 ⊢ A → M ⊧ A :=
+theorem ILMinusJ5.sound [M.IsILMinus] [M.IsJ5] : ILMinusJ5 ⊢ A → M ⊧ A :=
   ofAxiomsMinus.sound <| by
-    rintro _ ⟨A, B, rfl⟩ x;
-    exact forces_axiomJ1
+    rintro _ ⟨A, rfl⟩ x;
+    exact forces_axiomJ5
 
 end Logic
 
@@ -35,8 +35,8 @@ open Veltman.Model Logic
 
 variable {α : Type*}
 
-instance : Entailment.Consistent (ILMinusJ1 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ1.sound (M := pointModel fun _ ↦ False) h 0
+instance : Entailment.Consistent (ILMinusJ5 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ5.sound (M := pointModel fun _ ↦ False) h 0
 
 end Consistency
 
@@ -50,28 +50,22 @@ open LabelledSet.Condition ofAxiomsMinus
 variable {α : Type} {A : Formula α}
 
 /-- - [KO21, Theorem 5.1] -/
-theorem ILMinusJ1.complete
-    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → M ⊧ A) :
-    ILMinusJ1 ⊢ A := by
-  classical
-  exact provable_of_models_labelledModel .ILMinus (h _)
-
-/-- - [KO21, Theorem 5.1] -/
-theorem ILMinusJ1.iff_valid_finite :
-    ILMinusJ1 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → M ⊧ A := by
+theorem ILMinusJ5.iff_valid_finite :
+    ILMinusJ5 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+      [M.IsILMinus] → [M.IsJ5] → M ⊧ A := by
   constructor;
   · intro h _ _ _ M;
     intros;
-    exact ILMinusJ1.sound h;
-  · exact ILMinusJ1.complete;
+    exact ILMinusJ5.sound h;
+  · intro h;
+    classical
+    exact provable_of_models_labelledModel .J5 (h _)
 
 end Logic
 
 end Completeness
 
 
+
 end FFL.InterpretabilityLogic
 
-end

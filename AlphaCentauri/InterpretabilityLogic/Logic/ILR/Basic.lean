@@ -74,4 +74,3 @@ def ILRVeltmanCompletenessProblem : Prop :=
 
 end FFL.InterpretabilityLogic
 
-end

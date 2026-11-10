@@ -555,7 +555,7 @@ lemma CriticalSuccessor.exists_criticalSuccessor_box_subset (hE : IsRhdOperand �
       change Δ.literals *⊢[𝐈𝐋𝐌] ⊥;
       change Δ.literals *⊢[𝐈𝐋𝐌] B ⋏ P 🡒 B' ⋎ ∼□(∼B') at h₁₈;
       cl_prover [h₁₅, h₁₆, h₁₇, h₁₈];
-  obtain ⟨Θ, hΘ⟩ := exists_consistent_union (Φ := Φ) hY;
+  obtain ⟨Θ, hΘ⟩ := MaximalConsistentSet.exists_consistent_union (Φ := Φ) hY;
   have hm {A} (hA : A ∈ Φ) (h : Y *⊢[𝐈𝐋𝐌] A) : A ∈ Θ := mem_of_provable hΘ hA h;
   have hPY : Y *⊢[𝐈𝐋𝐌] P := Context.by_axm <| by simp [Y];
   have hb {D} (hD : □D ∈ Δ) : □D ∈ Θ := hm (mem_of_mem hD) <| Context.of (hP hD) ⨀ hPY;
@@ -707,23 +707,6 @@ open Veltman Veltman.Model.World MaximalConsistentSet
 
 variable {α : Type} {A : Formula α}
 
-/-- - [dJV90, Theorem 6.3] -/
-theorem complete (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] →
-    [M.HasM] → M ⊧ A) : 𝐈𝐋𝐌 ⊢ A := by
-  classical
-  by_contra hA;
-  have : Entailment.Consistent (𝐈𝐋𝐌 : Logic α) := .of_unprovable hA;
-  let Φ := mAdequateClosure (adequateClosure {A});
-  have hX : ({∼A} : FormulaSet α) *⊬[𝐈𝐋𝐌] ⊥ := by
-    intro h₁;
-    apply hA;
-    have h₂ : 𝐈𝐋𝐌 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
-    cl_prover [h₂];
-  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := Φ) hX;
-  have hAΦ : A ∈ Φ := mAdequateClosure.subset <| adequateClosure.subset (by simp);
-  exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
-    (countermodelM.truthlemma hAΦ).mp <| h (countermodelM Φ) ⟨Γ, [], by simp, by simp⟩
-
 end Logic.ILM
 
 end
@@ -742,7 +725,20 @@ theorem ILM.iff_valid_finite :
   · intro h _ _ _ M;
     intros;
     exact ILM.sound h;
-  · exact ILM.complete;
+  · intro h;
+    classical
+    by_contra hA;
+    have : Entailment.Consistent (𝐈𝐋𝐌 : Logic α) := .of_unprovable hA;
+    let Φ := mAdequateClosure (adequateClosure {A});
+    have hX : ({∼A} : FormulaSet α) *⊬[𝐈𝐋𝐌] ⊥ := by
+      intro h₁;
+      apply hA;
+      have h₂ : 𝐈𝐋𝐌 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+      cl_prover [h₂];
+    obtain ⟨Γ, hΓ⟩ := MaximalConsistentSet.exists_consistent_union (Φ := Φ) hX;
+    have hAΦ : A ∈ Φ := mAdequateClosure.subset <| adequateClosure.subset (by simp);
+    exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+      (countermodelM.truthlemma hAΦ).mp <| h (countermodelM Φ) ⟨Γ, [], by simp, by simp⟩
 
 end
 
@@ -775,4 +771,3 @@ end Logic
 
 end FFL.InterpretabilityLogic
 
-end

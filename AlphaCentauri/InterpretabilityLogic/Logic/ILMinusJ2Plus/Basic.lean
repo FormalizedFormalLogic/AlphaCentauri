@@ -50,14 +50,6 @@ open LabelledSet.Condition ofAxiomsMinus
 variable {α : Type} {A : Formula α}
 
 /-- - [KO21, Theorem 5.1] -/
-theorem ILMinusJ2Plus.complete
-    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ2] → M ⊧ A) :
-    ILMinusJ2Plus ⊢ A := by
-  classical
-  exact provable_of_models_labelledModel .J2Plus (h _)
-
-/-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ2Plus.iff_valid_finite :
     ILMinusJ2Plus ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsILMinus] → [M.IsJ2] → M ⊧ A := by
@@ -65,13 +57,15 @@ theorem ILMinusJ2Plus.iff_valid_finite :
   · intro h _ _ _ M;
     intros;
     exact ILMinusJ2Plus.sound h;
-  · exact ILMinusJ2Plus.complete;
+  · intro h;
+    classical
+    exact provable_of_models_labelledModel .J2Plus (h _)
 
 end Logic
 
 end Completeness
 
 
+
 end FFL.InterpretabilityLogic
 
-end

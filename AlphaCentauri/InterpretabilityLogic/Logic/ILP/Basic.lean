@@ -388,25 +388,6 @@ open Veltman Veltman.Model.World
 
 variable {α : Type} {A : Formula α}
 
-/-- - [dJV90, Theorem 5.2] -/
-theorem complete
-    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → [M.HasP] →
-      M ⊧ A) :
-    𝐈𝐋𝐏 ⊢ A := by
-  classical
-  by_contra hA;
-  let Φ := boxClosure (adequateClosure {A});
-  have hX : ({∼A} : FormulaSet α) *⊬[𝐈𝐋𝐏] ⊥ := by
-    intro h₁;
-    apply hA;
-    have h₂ : 𝐈𝐋𝐏 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
-    cl_prover [h₂];
-  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := Φ) hX;
-  have hAΦ : A ∈ Φ := boxClosure.subset <| adequateClosure.subset (by simp);
-  exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
-    (treeCountermodel.truthlemma axiomP hAΦ).mp <|
-      h (treeCountermodel _ Φ) ⟨⟨Γ, [], by simp, by simp⟩, [], .singleton _⟩
-
 end Logic.ILP
 
 end FFL.InterpretabilityLogic
@@ -425,10 +406,22 @@ theorem ILP.iff_valid_finite :
   · intro h _ _ _ M;
     intros;
     exact ILP.sound h;
-  · exact ILP.complete;
+  · intro h;
+    classical
+    by_contra hA;
+    let Φ := boxClosure (adequateClosure {A});
+    have hX : ({∼A} : FormulaSet α) *⊬[𝐈𝐋𝐏] ⊥ := by
+      intro h₁;
+      apply hA;
+      have h₂ : 𝐈𝐋𝐏 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+      cl_prover [h₂];
+    obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := Φ) hX;
+    have hAΦ : A ∈ Φ := boxClosure.subset <| adequateClosure.subset (by simp);
+    exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+      (treeCountermodel.truthlemma axiomP hAΦ).mp <|
+        h (treeCountermodel _ Φ) ⟨⟨Γ, [], by simp, by simp⟩, [], .singleton _⟩
 
 end Logic
 
 end FFL.InterpretabilityLogic
 
-end

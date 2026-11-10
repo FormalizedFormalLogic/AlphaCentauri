@@ -665,16 +665,6 @@ open Veltman
 
 variable {α : Type} {A : Formula α}
 
-/-- - [dJV99, Theorem 13] -/
-theorem complete
-    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasW] → M ⊧ A) :
-    𝐈𝐋𝐖 ⊢ A := by
-  classical
-  by_contra hA;
-  exact Logic.ofAxioms.not_models_rankedCountermodel (fun {_ _} ↦ ILW.axiomW) hA <|
-    h (rankedCountermodel _ (adequateClosure {A}))
-
 end Logic.ILW
 
 end
@@ -691,10 +681,13 @@ theorem ILW.iff_valid_finite :
   · intro h _ _ _ M;
     intros;
     exact ILW.sound h;
-  · exact ILW.complete;
+  · intro h;
+    classical
+    by_contra hA;
+    exact Logic.ofAxioms.not_models_rankedCountermodel (fun {_ _} ↦ ILW.axiomW) hA <|
+      h (Veltman.rankedCountermodel _ (adequateClosure {A}))
 
 end Logic
 
 end FFL.InterpretabilityLogic
 
-end

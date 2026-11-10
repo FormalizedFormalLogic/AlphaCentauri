@@ -57,18 +57,6 @@ open Veltman Veltman.StepByStep
 
 variable {α : Type*} {A : Formula α}
 
-/-- - [GJ08, Theorem 6.1] -/
-theorem complete
-    (h : ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsIL] → [M.HasM₀] → M ⊧ A) :
-    𝐈𝐋𝐌₀ ⊢ A := by
-  classical
-  by_contra hA;
-  obtain ⟨Γ₀, hΓ₀⟩ := exists_not_forces (ε := fun _ ↦ ∅) axiomM₀
-    (fun h hAB hA ↦ by simpa using h.exists_of_rhd_mem hAB hA) hA;
-  have := model_isIL (Γ₀ := Γ₀) (ε := fun _ ↦ ∅)
-    (enumJob_mem (bot_mem_jobFormulas (A := A)));
-  exact hΓ₀ (h _ 0)
-
 end Logic.ILM₀
 
 end
@@ -85,7 +73,14 @@ theorem ILM₀.iff_valid :
   · intro h _ _ M;
     intros;
     exact ILM₀.sound h;
-  · exact ILM₀.complete;
+  · intro h;
+    classical
+    by_contra hA;
+    obtain ⟨Γ₀, hΓ₀⟩ := Veltman.StepByStep.exists_not_forces (ε := fun _ ↦ ∅) axiomM₀
+      (fun h hAB hA ↦ by simpa using h.exists_of_rhd_mem hAB hA) hA;
+    have := model_isIL (Γ₀ := Γ₀) (ε := fun _ ↦ ∅)
+      (enumJob_mem (bot_mem_jobFormulas (A := A)));
+    exact hΓ₀ (h _ 0)
 
 end Logic
 
@@ -112,4 +107,3 @@ end Logic
 
 end FFL.InterpretabilityLogic
 
-end

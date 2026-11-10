@@ -87,4 +87,3 @@ end Logic
 
 end FFL.InterpretabilityLogic
 
-end

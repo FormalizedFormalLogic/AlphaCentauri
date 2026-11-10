@@ -5,6 +5,9 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2PlusJ5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4PlusJ5.Basic
 
 /-!
 # Interpretability logic $\mathbf{IL}$
@@ -222,44 +225,16 @@ open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model
 
 variable {α : Type} {A : Formula α}
 
-/-- - [KO21, Theorem 5.4] -/
-theorem IL.complete_ILMinus
-    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → [M.IsJ5] → M ⊧ A) :
-    𝐈𝐋 ⊢ A := by
-  classical
-  let 𝔸 : FormulaSet α :=
-    {Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}
-  rw [IL.eq_ofAxiomsMinus];
-  by_contra hA;
-  have : Entailment.Consistent (ofAxiomsMinus 𝔸) := .of_unprovable hA;
-  have : (ILMinusJ1 : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
-    weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_subset <|
-      Set.subset_union_left.trans Set.subset_union_left;
-  have : (ILMinusJ5 : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
-    weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_subset Set.subset_union_right;
-  have : (ILMinusJ2Plus : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
-    weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_provable <| by
-      rintro _ ⟨A, B, C, rfl⟩;
-      exact ofAxiomsMinus.subset_of_subset Set.subset_union_left CL.axiomJ2Plus;
-  exact ofAxiomsMinus.not_models_countermodel hA <| h (countermodel _ (ilMinusAdequateClosure {A}))
-
-/-- - [dJV90, Theorem 4.1] -/
-theorem IL.complete
-    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A) :
-    𝐈𝐋 ⊢ A := by
-  apply IL.complete_ILMinus;
-  intro κ _ _ M _ _ _ _;
-  have : M.IsIL := .of_isILMinus
-  exact h M
-
 /-- - [dJV90, Theorem 4.1]
 - [JMMV20, Theorem 3.2]
+- [KO21, Theorem 5.4]
 -/
 theorem IL.semantics_TFAE : [
     𝐈𝐋 ⊢ A,
     ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A,
-    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α), [M.IsIL] → M ⊧ A
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α), [M.IsIL] → M ⊧ A,
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → [M.IsJ5] → M ⊧ A
   ].TFAE := by
   tfae_have 1 → 3 := by
     intro h _ _ _ M _;
@@ -267,18 +242,36 @@ theorem IL.semantics_TFAE : [
   tfae_have 3 → 2 := by
     intro h _ _ _ M _ x;
     exact Veltman.Model.forces_toVerbrugge.mp (h M.toVerbrugge x);
-  tfae_have 2 → 1 := IL.complete;
+  tfae_have 2 → 4 := by
+    intro h κ _ _ M _ _ _ _;
+    have : M.IsIL := .of_isILMinus;
+    exact h M;
+  tfae_have 4 → 1 := by
+    intro h;
+    classical
+    let 𝔸 : FormulaSet α :=
+      {Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}
+    rw [IL.eq_ofAxiomsMinus];
+    by_contra hA;
+    have : Entailment.Consistent (ofAxiomsMinus 𝔸) := .of_unprovable hA;
+    have : (ILMinusJ1 : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
+      weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_subset <|
+        Set.subset_union_left.trans Set.subset_union_left;
+    have : (ILMinusJ5 : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
+      weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_subset Set.subset_union_right;
+    have : (ILMinusJ2Plus : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
+      weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_provable <| by
+        rintro _ ⟨A, B, C, rfl⟩;
+        exact ofAxiomsMinus.subset_of_subset Set.subset_union_left CL.axiomJ2Plus;
+    exact ofAxiomsMinus.not_models_countermodel hA <|
+      h (countermodel _ (ilMinusAdequateClosure {A}));
   tfae_finish;
 
 /-- - [KO21, Theorem 5.4] -/
 theorem IL.iff_valid_finite_ILMinus :
     𝐈𝐋 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → [M.IsJ5] → M ⊧ A := by
-  constructor;
-  · intro h _ _ _ M _ _ _ _;
-    have : M.IsIL := .of_isILMinus;
-    exact ofAxioms.sound (by simp) h;
-  · exact IL.complete_ILMinus;
+      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → [M.IsJ5] → M ⊧ A :=
+  IL.semantics_TFAE.out 1 4
 
 end Logic
 
@@ -287,4 +280,3 @@ end Completeness
 
 end FFL.InterpretabilityLogic
 
-end

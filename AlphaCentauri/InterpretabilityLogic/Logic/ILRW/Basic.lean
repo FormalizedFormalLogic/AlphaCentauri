@@ -189,4 +189,3 @@ def ILRWVerbruggeCompletenessProblem : Prop :=
 
 end FFL.InterpretabilityLogic
 
-end

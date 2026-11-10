@@ -13,7 +13,9 @@ any $2^{\|a\|}$ values below $a$; diagonalizing against the roots gives a contra
 
 Nor is any an injection of $(n + 1)a$ into $na$, for a standard $n$ and $a > 0$. Composing $n$
 blockwise copies of one gives an injection of $2b$ into $b$, and following an injection of $2b$
-into $b$ for $\|b\|$ steps from each root gives an injection of $b^2$ into $b$.
+into $b$ for $\|b\|$ steps from each root gives an injection of $b^2$ into $b$. The ratio may even
+be $(K + 1) / K$ for $K \le \|I\|$: extended by the shift down by $b$, an injection of $(K + 1)b$
+into $Kb$ followed for $K$ steps is one of $2Kb$ into $Kb$.
 
 - [PWW88, Theorem 1, Corollary 2]
 -/
@@ -516,6 +518,193 @@ theorem weakPigeonhole_succ_mul (n : ℕ) {R : V → V → Prop} (hR : 𝚺ᴬ�
   obtain ⟨x, hx, x', hx', y, hy, hxx, h, h'⟩ :=
     weakPigeonhole_two_mul hS hb fun x hx ↦ hSinj.1 x (hx.trans_le hle)
   exact hxx (hSinj.2 x (hx.trans_le hle) x' (hx'.trans_le hle) y hy h h')
+
+namespace WeakPigeonhole
+
+section shift
+
+variable (R : V → V → Prop) (K b : V)
+
+/-- `R` on the first `(K + 1) * b` numbers and the shift down by `b` above them: an injection of
+`(k + 1) * b` into `k * b` for every `k ≥ K` if `R` is one of `(K + 1) * b` into `K * b`. -/
+def ShiftStep (e z : V) : Prop :=
+  (e < (K + 1) * b ∧ z < K * b ∧ R e z) ∨ ((K + 1) * b ≤ e ∧ z + b = e)
+
+/-- `z` is reached from `x` by `K` steps of `ShiftStep`, recorded in a sequence with blocks of
+width `‖2 * K * b‖`. -/
+def ShiftReach (I x z : V) : Prop :=
+  ∃ s < (I ⨳ (2 * K * b)) ^ 2, IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) K s x 0 ∧
+    Nuon.ext (2 * K * b) s K = z
+
+variable {R K b}
+
+lemma definable_shiftStep (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel (ShiftStep R K b) := by
+  unfold ShiftStep
+  definability
+
+lemma definable_shiftReach (hR : 𝚺ᴬ₀.DefinableRel R) (I : V) :
+    𝚺ᴬ₀.DefinableRel (ShiftReach R K b I) := by
+  have := definable_shiftStep (K := K) (b := b) hR
+  unfold ShiftReach IsPath
+  definability
+
+lemma ShiftStep.unique (hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, ∀ y < K * b,
+      R x y → R x' y → x = x') {e e' z : V} (h : ShiftStep R K b e z)
+    (h' : ShiftStep R K b e' z) : e = e' := by
+  have hKb : (K + 1) * b = K * b + b := by rw [add_mul, one_mul]
+  have hge : ∀ {e z : V}, (K + 1) * b ≤ e → z + b = e → K * b ≤ z := fun he hz ↦
+    (add_le_add_iff_right b).mp (by rw [hz, ← hKb]; exact he)
+  rcases h with ⟨he, hz, h⟩ | ⟨he, hz⟩ <;> rcases h' with ⟨he', hz', h'⟩ | ⟨he', hz'⟩
+  · exact hinj e he e' he' z hz h h'
+  · exact absurd hz (not_lt.mpr (hge he' hz'))
+  · exact absurd hz' (not_lt.mpr (hge he hz))
+  · rw [← hz, ← hz']
+
+/-- Every `x < 2 * K * b` starts a path of `j` steps of `ShiftStep` ending below
+`2 * K * b - j * b`. -/
+def ShiftPaths (R : V → V → Prop) (K b I j : V) : Prop :=
+  ∀ x < 2 * K * b, ∃ s < (I ⨳ (2 * K * b)) ^ 2,
+    IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) j s x 0 ∧
+      Nuon.ext (2 * K * b) s j + j * b < 2 * K * b
+
+lemma definable_shiftPaths (hR : 𝚺ᴬ₀.DefinableRel R) (I : V) :
+    𝚺ᴬ₀.DefinablePred (ShiftPaths R K b I) := by
+  have := definable_shiftStep (K := K) (b := b) hR
+  unfold ShiftPaths IsPath
+  definability
+
+lemma exists_shiftStep {j e : V} (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y)
+    (hj : j + 1 ≤ K) (he : e + j * b < 2 * K * b) :
+    ∃ z < 2 * K * b, ShiftStep R K b e z ∧ z + (j + 1) * b < 2 * K * b := by
+  have hjb : (j + 1) * b ≤ K * b := mul_le_mul_right hj
+  rcases lt_or_ge e ((K + 1) * b) with heK | heK
+  · obtain ⟨z, hz, hR⟩ := total _ heK
+    have : z + (j + 1) * b < 2 * K * b := calc
+      z + (j + 1) * b < K * b + K * b := add_lt_add_of_lt_of_le hz hjb
+      _ = 2 * K * b := by grind
+    use z
+    and_intros
+    · exact lt_of_le_of_lt le_self_add this
+    · exact Or.inl ⟨heK, hz, hR⟩
+    · exact this
+  · have hb1 : b ≤ (K + 1) * b := le_mul_of_one_le_left (Arithmetic.zero_le _) (by simp)
+    have hzv : e - b + b = e := tsub_add_cancel_of_le (le_trans hb1 heK)
+    have : e - b + (j + 1) * b < 2 * K * b := by
+      rw [add_mul, one_mul, ← add_assoc, add_right_comm, hzv]
+      exact he
+    use e - b
+    and_intros
+    · exact lt_of_le_of_lt le_self_add this
+    · exact Or.inr ⟨heK, hzv⟩
+    · exact this
+
+lemma shiftPaths (hR : 𝚺ᴬ₀.DefinableRel R) {I : V} (hb : 0 < b) (hK : 0 < K) (hKI : K ≤ ‖I‖)
+    (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y) : ∀ j ≤ K, ShiftPaths R K b I j := by
+  have ha : 0 < 2 * K * b := mul_pos (mul_pos two_pos hK) hb
+  have hIpos : 0 < I := length_pos_iff.mp (lt_of_lt_of_le hK hKI)
+  intro j
+  induction j using ISigma0.succ_induction
+  · have := definable_shiftPaths (K := K) (b := b) hR I
+    definability
+  case zero =>
+    intro _ x hx
+    have hext : Nuon.ext (2 * K * b) x 0 = x := Nuon.ext_zero_eq_self_of_le (length_monotone hx.le)
+    use x
+    and_intros
+    · calc x < 2 * K * b := hx
+        _ < (2 * K * b) ⨳ 1 := lt_smash_one_right _
+        _ ≤ I ⨳ (2 * K * b) := by
+          rw [smash_comm]
+          exact smash_monotone (pos_iff_one_le.mp hIpos) le_rfl
+        _ ≤ (I ⨳ (2 * K * b)) ^ 2 := by
+          rw [sq]
+          exact le_mul_of_one_le_left (Arithmetic.zero_le _) (pos_iff_one_le.mp (smash_pos _ _))
+    · exact hext
+    · simp
+    · simpa [hext] using hx
+  case succ j IH =>
+    intro hj x hx
+    obtain ⟨s, -, hs, hv⟩ := IH (le_trans (by simp) hj) x hx
+    have hjb : (j + 1) * b ≤ K * b := mul_le_mul_right hj
+    obtain ⟨z, hza, hzstep, hzb⟩ := exists_shiftStep total hj hv
+    have hjI : j + 1 ≤ ‖I‖ := le_trans hj hKI
+    have hzL : ‖z‖ ≤ ‖2 * K * b‖ := length_monotone hza.le
+    have hlast := Nuon.ext_append_last I (2 * K * b) s hjI hzL
+    have hlt : ∀ i < j + 1,
+        Nuon.ext (2 * K * b) (Nuon.append I (2 * K * b) s (j + 1) z) i =
+          Nuon.ext (2 * K * b) s i :=
+      fun i hi ↦ Nuon.ext_append_lt I (2 * K * b) s hjI hi
+    use Nuon.append I (2 * K * b) s (j + 1) z
+    and_intros
+    · exact Nuon.append_lt_sq_smash I (2 * K * b) s hjI hzL hIpos
+    · rw [hlt 0 (by simp)]; exact hs.1
+    · intro i hi
+      rcases lt_succ_iff_le.mp hi with rfl | hi'
+      · rw [hlast, hlt i (by simp)]
+        exact ⟨hza, hzstep⟩
+      · rw [hlt (i + 1) (by simpa using hi'), hlt i (lt_trans hi' (by simp))]
+        exact hs.2 i hi'
+    · rwa [hlast]
+
+lemma IsPath.eq_of_shiftStep (hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, ∀ y < K * b,
+      R x y → R x' y → x = x') {x x' s s' : V}
+    (hs : IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) K s x 0)
+    (hs' : IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) K s' x' 0)
+    (h : Nuon.ext (2 * K * b) s K = Nuon.ext (2 * K * b) s' K) : x = x' := by
+  have key : ∀ i ≤ K, Nuon.ext (2 * K * b) s (K - i) = Nuon.ext (2 * K * b) s' (K - i) := by
+    intro i
+    induction i using ISigma0.succ_induction
+    · clear hinj hs hs' h
+      definability
+    case zero => intro _; simpa using h
+    case succ i IH =>
+      intro hi
+      have hiK : i < K := succ_le_iff_lt.mp hi
+      have hKi : K - (i + 1) + (i + 1) = K := sub_add_self_of_le hi
+      have hKi' : K - (i + 1) + 1 + i = K := by rw [add_assoc, add_comm 1 i, hKi]
+      have heq : K - i = K - (i + 1) + 1 := calc
+        K - i = K - (i + 1) + 1 + i - i := by rw [hKi']
+        _ = K - (i + 1) + 1 := add_sub_self
+      have hj : K - (i + 1) < K := by
+        conv_rhs => rw [← hKi]
+        exact lt_add_of_pos_right _ (by simp)
+      have h₁ := (hs.2 _ hj).2
+      have h₂ := (hs'.2 _ hj).2
+      rw [← heq, IH hiK.le] at h₁
+      rw [← heq] at h₂
+      exact ShiftStep.unique hinj h₁ h₂
+  have := key K le_rfl
+  rwa [sub_self, hs.1, hs'.1] at this
+
+end shift
+
+end WeakPigeonhole
+
+open WeakPigeonhole in
+/-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
+of $(K + 1)b$ into $Kb$, for $b > 0$ and $0 < K \le \|I\|$. -/
+theorem weakPigeonhole_succ_mul_of_le_length {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R)
+    {K b I : V} (hb : 0 < b) (hK : 0 < K) (hKI : K ≤ ‖I‖)
+    (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y) :
+    ∃ x < (K + 1) * b, ∃ x' < (K + 1) * b, ∃ y < K * b, x ≠ x' ∧ R x y ∧ R x' y := by
+  by_contra! hne
+  have hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, ∀ y < K * b, R x y → R x' y → x = x' := by
+    intro x hx x' hx' y hy h h'
+    by_contra hxx
+    exact hne x hx x' hx' y hy hxx h h'
+  have hab : 2 * K * b = 2 * (K * b) := mul_assoc _ _ _
+  have htot : ∀ x < 2 * (K * b), ∃ y < K * b, ShiftReach R K b I x y := by
+    intro x hx
+    rw [← hab] at hx
+    obtain ⟨s, hs, hp, hv⟩ := shiftPaths hR hb hK hKI total K le_rfl x hx
+    use Nuon.ext (2 * K * b) s K
+    constructor
+    · have h2 : 2 * K * b = K * b + K * b := by rw [hab, two_mul]
+      exact (add_lt_add_iff_right _).mp (lt_of_lt_of_eq hv h2)
+    · use s
+  obtain ⟨x, -, x', -, y, -, hxx, ⟨s, -, hs, hsy⟩, ⟨s', -, hs', hsy'⟩⟩ :=
+    weakPigeonhole_two_mul (definable_shiftReach hR I) (mul_pos hK hb) htot
+  exact hxx (hs.eq_of_shiftStep hinj hs' (hsy.trans hsy'.symm))
 
 end
 

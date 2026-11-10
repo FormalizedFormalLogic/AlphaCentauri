@@ -131,6 +131,7 @@ public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.InternalEquality
+public import AlphaCentauri.ToFoundation.InternalTSchema
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
 public import AlphaCentauri.ToFoundation.LeastWitness
 public import AlphaCentauri.ToFoundation.OpenFormulaDegree

@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToMathlib.FLT3.Eisenstein
+public import AlphaCentauri.ToMathlib.NumberTheory.EisensteinInteger
 public import Mathlib.Algebra.GCDMonoid.IntegrallyClosed
 public import Mathlib.RingTheory.PrincipalIdealDomain
 
@@ -135,7 +135,7 @@ lemma eq_neg_of_lambda_sq_dvd (hv : IsUnit v) (he : e = 1 ∨ e = -1) (h : lambd
   by_contra hne
   have h₁ := norm_le_of_dvd h fun h₀ => hne (by linear_combination h₀)
   have h₂ := norm_add_le v e
-  rw [norm_lambda_sq] at h₁
+  rw [norm_pow, norm_lambda] at h₁
   rw [isUnit_iff_norm_eq_one.mp hv, show norm e = 1 by rcases he with rfl | rfl <;> simp] at h₂
   linarith
 

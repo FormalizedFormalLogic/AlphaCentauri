@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToMathlib.ONote.FastGrowing
+public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.FastGrowing
 
 /-!
 # The Hardy hierarchy `H_α`
@@ -261,12 +261,6 @@ theorem hardy_oadd_coeff (b : ONote) (hb : b ≠ 0) (k x : ℕ) :
   | zero => rfl
   | succ k ih =>
     rw [hardy_oadd_coeff_step b hb k x, ih (hardy (oadd b 1 0) x), ← Function.iterate_succ_apply]
-
-/-- `oadd e p 0` represents `ω^e · p`. -/
-lemma hardy_single_coeff (e : ONote) (he : e ≠ 0) (p : ℕ+) (x : ℕ) :
-    hardy (oadd e p 0) x = (hardy (oadd e 1 0))^[(p : ℕ)] x := by
-  obtain ⟨k, rfl⟩ : ∃ k : ℕ, p = k.succPNat := ⟨p.natPred, (PNat.succPNat_natPred p).symm⟩
-  rw [hardy_oadd_coeff e he k x, Nat.succPNat_coe]
 
 /-! ### The additive composition law
 

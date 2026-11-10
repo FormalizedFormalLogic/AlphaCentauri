@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenFormula
-public import AlphaCentauri.ToMathlib.HahnSeries
+public import AlphaCentauri.ToMathlib.RingTheory.HahnSeries.IntegerPart
 
 /-!
 # $\mathsf{IOpen}$ is not finitely axiomatizable

@@ -1,9 +1,10 @@
 module
 
+public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.FastGrowing
 public import Foundation.Vorspiel.Matrix
 
 /-!
-# Elementary closure
+# The extended Grzegorczyk hierarchy over `ONote`
 
 `Nat.ElementaryClosure K f` holds when `f` is reachable from a family `K` of functions,
 indexed by arity, together with the basic functions `0`, successor, projections, addition,
@@ -14,6 +15,9 @@ recursion. `Nat.elementaryClosure K` is the resulting family of function classes
 functions under composition and bounded recursion, leaving the elementary functions themselves to
 [Ros84]. The basic functions above, closed under the same two operations with no base family, are
 exactly those — Grzegorczyk's `E³` — so the two readings agree.
+
+`extendedGrzegorczyk o k` is the extended Grzegorczyk (fast-growing) hierarchy class `𝓔^o`: the
+elementary closure of `{F_β | β < o}`, where `F_β` is `ONote.fastGrowing β`.
 -/
 
 @[expose] public section
@@ -49,9 +53,6 @@ functions reachable from `K` by `Nat.ElementaryClosure`.
 def elementaryClosure (K : ∀ k, Set ((Fin k → ℕ) → ℕ)) (k : ℕ) : Set ((Fin k → ℕ) → ℕ) :=
   {f | ElementaryClosure K f}
 
-@[simp] lemma mem_elementaryClosure {K : ∀ k, Set ((Fin k → ℕ) → ℕ)} {k : ℕ}
-    {f : (Fin k → ℕ) → ℕ} : f ∈ elementaryClosure K k ↔ ElementaryClosure K f := .rfl
-
 namespace ElementaryClosure
 
 lemma mono {K K' : ∀ k, Set ((Fin k → ℕ) → ℕ)} (h : ∀ k, K k ⊆ K' k) {k : ℕ}
@@ -68,15 +69,40 @@ lemma mono {K K' : ∀ k, Set ((Fin k → ℕ) → ℕ)} (h : ∀ k, K k ⊆ K' 
   | comp _ _ ihg ihh => exact .comp ihg ihh
   | boundedRec _ _ _ hbound ihf ihg ihb => exact .boundedRec ihf ihg ihb hbound
 
-lemma of_mem {K : ∀ k, Set ((Fin k → ℕ) → ℕ)} {k : ℕ} {f : (Fin k → ℕ) → ℕ} (hf : f ∈ K k) :
-    ElementaryClosure K f := .base hf
-
 end ElementaryClosure
 
 lemma elementaryClosure_mono {K K' : ∀ k, Set ((Fin k → ℕ) → ℕ)} (h : ∀ k, K k ⊆ K' k) (k : ℕ) :
     elementaryClosure K k ⊆ elementaryClosure K' k := fun _ hf ↦ hf.mono h
 
-lemma subset_elementaryClosure (K : ∀ k, Set ((Fin k → ℕ) → ℕ)) (k : ℕ) :
-    K k ⊆ elementaryClosure K k := fun _ hf ↦ .of_mem hf
-
 end Nat
+
+namespace ONote
+
+/-- The family, by arity, of the fast-growing functions `F_β` for `β < o`; empty away from
+arity `1`.
+- [Bek99, §6] -/
+def fastGrowingFamily (o : ONote) : ∀ k, Set ((Fin k → ℕ) → ℕ)
+  | 1 => {f | ∃ β < o, f = fun v : Fin 1 → ℕ ↦ fastGrowing β (v 0)}
+  | _ => ∅
+
+lemma fastGrowingFamily_mono {o o' : ONote} (h : o ≤ o') (k : ℕ) :
+    fastGrowingFamily o k ⊆ fastGrowingFamily o' k := by
+  rcases k with _ | _ | k
+  · intro f hf
+    exact hf.elim
+  · rintro f ⟨β, hβ, rfl⟩
+    exact ⟨β, hβ.trans_le h, rfl⟩
+  · intro f hf
+    exact hf.elim
+
+/-- The extended Grzegorczyk (fast-growing) hierarchy class `𝓔^o` at arity `k`: the elementary
+closure of `{F_β | β < o}`.
+- [Bek99, §6] -/
+def extendedGrzegorczyk (o : ONote) (k : ℕ) : Set ((Fin k → ℕ) → ℕ) :=
+  Nat.elementaryClosure (fastGrowingFamily o) k
+
+lemma extendedGrzegorczyk_mono {o o' : ONote} (h : o ≤ o') (k : ℕ) :
+    extendedGrzegorczyk o k ⊆ extendedGrzegorczyk o' k :=
+  Nat.elementaryClosure_mono (fastGrowingFamily_mono h) k
+
+end ONote

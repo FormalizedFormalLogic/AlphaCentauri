@@ -2,11 +2,14 @@ module
 
 public import Mathlib.Order.OrderIsoNat
 public import Mathlib.SetTheory.Ordinal.Notation
+public import Mathlib.SetTheory.Ordinal.Rank
 public import Mathlib.SetTheory.Ordinal.Veblen
-public import AlphaCentauri.ToMathlib.Ordinal.Rank
 
 /-!
 # ε₀-completeness of CNF notations
+
+For a well-founded relation `r`, `WellFounded.orderType r` is its order type: the least ordinal
+above every `WellFounded.rank r a`.
 
 Mathlib's `Mathlib/SetTheory/Ordinal/Notation.lean` proves that `ONote.repr` is an embedding
 `NONote ↪ ε₀` but does not prove surjectivity onto ordinals `< ε₀`. This file supplies that
@@ -16,6 +19,19 @@ back along a bijection. A concrete bijection (`natCode`) is constructed from a s
 -/
 
 @[expose] public section
+
+namespace WellFounded
+
+variable {α : Type*} (r : α → α → Prop) [WellFounded r]
+
+lemma rank_le_of_forall {a : α} {o : Ordinal} (h : ∀ b, r b a → rank r b < o) : rank r a ≤ o := by
+  rw [rank_eq]
+  exact Ordinal.iSup_le fun b => Order.succ_le_of_lt (h b b.2)
+
+/-- The order type of `r`, the least ordinal above every `rank r a`. -/
+noncomputable def orderType : Ordinal := ⨆ a : α, Order.succ (rank r a)
+
+end WellFounded
 
 namespace ONote
 

@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.NumberTheory.FLT3
-public import AlphaCentauri.ToMathlib.PadicIntegralPolynomial
+public import AlphaCentauri.ToMathlib.OpenPredicate.PolynomialRing
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic

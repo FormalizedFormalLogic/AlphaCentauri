@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.Schemata.ParameterFreeInduction
-public import AlphaCentauri.ToMathlib.ONote.Grzegorczyk
+public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.Grzegorczyk
 
 /-!
 # Provably total functions and the fast-growing hierarchy

@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.ToMathlib.BoundedDegreeOpenInduction
 public import AlphaCentauri.ToMathlib.OpenPredicate
+public import AlphaCentauri.ToMathlib.OpenPredicate.Induction
 public import Foundation.FirstOrder.Arithmetic.Basic
 
 /-!

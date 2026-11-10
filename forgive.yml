@@ -77,6 +77,9 @@ declaration:
   OpenPredicate.openInduction_iff_integerPart:
     forgive:
       - OpenPredicate.openInduction_iff_integerPart
+  FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:
@@ -112,3 +115,15 @@ declaration:
   FFL.FirstOrder.Arithmetic.IOpen.not_finiteAxiomatizable:
     forgive:
       - HahnSeries.isRealClosed_lex
+  FFL.FirstOrder.Arithmetic.interpretable_union_singleton_neg_standardProvability_neg:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.FirstOrder.ArithmeticTheory.interpretability_consistency:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.InterpretabilityLogic.instILInterpretabilityAbstraction:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.InterpretabilityLogic.Logic.IL.arithmetical_soundness_interpretability:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation

@@ -182,7 +182,7 @@ lemma above_congr {get get' : ℕ → Node 𝔸} {P : Finset ℕ} {u : ℕ}
     (h : ∀ t ∈ P, get t = get' t) : above get P u = above get' P u :=
   Finset.filter_congr fun t ht ↦ by rw [h t ht]
 
-lemma bounds (n : ℕ) :
+lemma node_bounds (n : ℕ) :
     (∀ t ∈ (node Γ₀ τ n).anc, t ≤ n) ∧ (∀ u (r : ℕ), (node Γ₀ τ n).mu u = r → r < n) ∧
       (∀ t ∈ (node Γ₀ τ n).pre, t < n) := by
   induction n using Nat.strong_induction_on with
@@ -232,11 +232,11 @@ section
 
 local notation "𝒩" => node Γ₀ τ
 
-lemma anc_le {n t : ℕ} (h : t ∈ (𝒩 n).anc) : t ≤ n := (bounds n).1 t h
+lemma anc_le {n t : ℕ} (h : t ∈ (𝒩 n).anc) : t ≤ n := (node_bounds n).1 t h
 
-lemma mu_lt {n u r : ℕ} (h : (𝒩 n).mu u = r) : r < n := (bounds n).2.1 u r h
+lemma mu_lt {n u r : ℕ} (h : (𝒩 n).mu u = r) : r < n := (node_bounds n).2.1 u r h
 
-lemma pre_lt {n t : ℕ} (h : t ∈ (𝒩 n).pre) : t < n := (bounds n).2.2 t h
+lemma pre_lt {n t : ℕ} (h : t ∈ (𝒩 n).pre) : t < n := (node_bounds n).2.2 t h
 
 lemma above_restr {n a u : ℕ} (ha : a < n) :
     above (restr Γ₀ τ n) (𝒩 a).anc u = above 𝒩 (𝒩 a).anc u :=
@@ -499,171 +499,225 @@ private lemma biUnion_eq_of_forall {P : Finset ℕ} {f : ℕ → Set (Formula α
   · exact Set.iUnion₂_subset fun t ht ↦ (h t ht).le;
   · exact Set.subset_biUnion_of_mem (u := f) (Finset.mem_coe.mpr h₀);
 
+variable (Γ₀ τ) in
+private def CrConst (n : ℕ) : Prop :=
+  ∀ t u, u ∈ (𝒩 t).pre → u ∈ (𝒩 n).pre → t ∈ (𝒩 n).anc → (𝒩 t).cr u = (𝒩 n).cr u
+
+variable (Γ₀ τ) in
+private def CrMu (n : ℕ) : Prop :=
+  ∀ u (r : ℕ), u ∈ (𝒩 n).pre → (𝒩 n).mu u = r → (𝒩 n).cr u = (𝒩 r).cr u
+
+variable (Γ₀ τ) in
+private def CrGap (n : ℕ) : Prop :=
+  ∀ u a, u ∈ (𝒩 a).anc → u ≠ a → (∀ t ∈ (𝒩 a).anc, u ∉ (𝒩 t).pre) → a ∈ (𝒩 n).anc →
+    u ∈ (𝒩 n).pre → (𝒩 n).cr u = ∅
+
+variable (Γ₀ τ) in
+private def CrInvariant (n : ℕ) : Prop := CrConst Γ₀ τ n ∧ CrMu Γ₀ τ n ∧ CrGap Γ₀ τ n
+
+private lemma biUnion_cr_eq_of_lt {n a u t₀ : ℕ}
+    (ih : ∀ m < n, CrInvariant Γ₀ τ m) (ha : a < n)
+    (h₀ : t₀ ∈ above 𝒩 (𝒩 a).anc u) :
+    ⋃ t ∈ above 𝒩 (𝒩 a).anc u, (𝒩 t).cr u = (𝒩 t₀).cr u := by
+  apply biUnion_eq_of_forall h₀;
+  intro t ht;
+  obtain ⟨ht₁, ht₂⟩ := Finset.mem_filter.mp ht;
+  obtain ⟨h₀₁, h₀₂⟩ := Finset.mem_filter.mp h₀;
+  rcases le_total t t₀ with hle | hle;
+  · exact (ih t₀ ((anc_le h₀₁).trans_lt ha)).1 t u ht₂ h₀₂ (mem_anc_of_le ht₁ h₀₁ hle);
+  · exact ((ih t ((anc_le ht₁).trans_lt ha)).1 t₀ u h₀₂ ht₂ (mem_anc_of_le h₀₁ ht₁ hle)).symm;
+
+private lemma cr_const_problem {n a t u : ℕ} {B : Formula α}
+    (ih : ∀ m < n, CrInvariant Γ₀ τ m)
+    (hk : (𝒩 n).kind = .problem a B) (htρ : t ∈ (𝒩 a).anc) (hut : u ∈ (𝒩 t).pre) :
+    (𝒩 t).cr u = (𝒩 n).cr u := by
+  have ha : a < n := by simpa [hk] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
+  have hua : u ≠ a := by
+    rintro rfl;
+    have := anc_le htρ;
+    have := pre_lt hut;
+    omega;
+  rw [(fields_problem hk).2.2.2, ite_eq_right hua,
+    biUnion_cr_eq_of_lt ih ha (Finset.mem_filter.mpr ⟨htρ, hut⟩)]
+
+private lemma cr_const_deficiency_coe {n a s r t u : ℕ}
+    (ih : ∀ m < n, CrInvariant Γ₀ τ m)
+    (ha : a < n) (hs : s < n) (has : a ∈ (𝒩 s).pre) (hr : (𝒩 s).mu a = r)
+    (htρ : t ∈ (𝒩 r).anc) (hut : u ∈ (𝒩 t).pre) (hun : u ∈ (𝒩 a).anc) :
+    (𝒩 t).cr u = if u = a then (𝒩 s).cr a else ⋃ t ∈ above 𝒩 (𝒩 a).anc u, (𝒩 t).cr u := by
+  have hrs := mu_lt hr;
+  obtain ⟨har, -⟩ := mu_spec has hr;
+  by_cases hua : u = a;
+  · subst u;
+    rw [ite_eq_left rfl, (ih s hs).2.1 a r has hr];
+    exact (ih r (hrs.trans hs)).1 t a hut har htρ;
+  · rw [ite_eq_right hua];
+    have haρ : a ∈ (𝒩 r).anc := pre_subset_anc har;
+    rcases le_or_gt t a with hta | hta;
+    · rw [biUnion_cr_eq_of_lt ih ha (Finset.mem_filter.mpr ⟨mem_anc_of_le htρ haρ hta, hut⟩)];
+    · have hat : a ∈ (𝒩 t).anc := mem_anc_of_le haρ htρ hta.le;
+      have htn : t < n := (anc_le htρ).trans_lt (hrs.trans hs);
+      by_cases hne : (above 𝒩 (𝒩 a).anc u).Nonempty;
+      · obtain ⟨t'', ht''⟩ := hne;
+        rw [biUnion_cr_eq_of_lt ih ha ht''];
+        obtain ⟨ht''₁, ht''₂⟩ := Finset.mem_filter.mp ht'';
+        exact ((ih t htn).1 t'' u ht''₂ hut (anc_subset hat ht''₁)).symm;
+      · rw [Finset.not_nonempty_iff_eq_empty.mp hne];
+        simp only [Finset.notMem_empty, Set.iUnion_of_empty, Set.iUnion_empty];
+        refine (ih t htn).2.2 u a hun hua ?_ hat hut;
+        intro t' ht' hut';
+        exact hne ⟨t', Finset.mem_filter.mpr ⟨ht', hut'⟩⟩;
+
+private lemma cr_const_deficiency {n a s t u : ℕ}
+    (ih : ∀ m < n, CrInvariant Γ₀ τ m)
+    (hk : (𝒩 n).kind = .deficiency a s) (htρ : t ∈ (𝒩 (((𝒩 s).mu a).unbotD a)).anc)
+    (hut : u ∈ (𝒩 t).pre) (hun : u ∈ (𝒩 n).pre) : (𝒩 t).cr u = (𝒩 n).cr u := by
+  obtain ⟨ha, hs, has⟩ : a < n ∧ s < n ∧ a ∈ (𝒩 s).pre := by
+    simpa [hk] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
+  rw [(fields_deficiency hk).2.2.2];
+  induction hr : (𝒩 s).mu a using WithBot.recBotCoe with
+  | bot =>
+    rw [hr] at htρ;
+    simp only [WithBot.unbotD_bot] at htρ;
+    have hua : u ≠ a := by
+      rintro rfl;
+      have := anc_le htρ;
+      have := pre_lt hut;
+      omega;
+    rw [ite_eq_right hua, biUnion_cr_eq_of_lt ih ha (Finset.mem_filter.mpr ⟨htρ, hut⟩)];
+  | coe r =>
+    rw [hr] at htρ;
+    simp only [WithBot.unbotD_coe] at htρ;
+    exact cr_const_deficiency_coe ih ha hs has hr htρ hut (by rwa [(fields_deficiency hk).1] at hun)
+
+private lemma cr_const_step {n : ℕ} (ih : ∀ m < n, CrInvariant Γ₀ τ m) : CrConst Γ₀ τ n := by
+  intro t u hut hun htn;
+  by_cases htn' : t = n;
+  · rw [htn'];
+  have hk : (𝒩 n).kind ≠ .isolated := by
+    intro hk;
+    simp [(fields_isolated hk).1] at hun;
+  obtain ⟨he, -⟩ := anc_eq_insert hk;
+  rw [he] at htn;
+  have htρ := (Finset.mem_insert.mp htn).resolve_left htn';
+  rcases hk' : (𝒩 n).kind with _ | ⟨a, B⟩ | ⟨a, s⟩;
+  · exact absurd hk' hk;
+  · exact cr_const_problem ih hk' (by simpa [parent, hk'] using htρ) hut;
+  · exact cr_const_deficiency ih hk' (by simpa [parent, hk'] using htρ) hut hun;
+
+private lemma cr_mu_anchor {n u r : ℕ} (ih : ∀ m < n, CrInvariant Γ₀ τ m)
+    (hau : (𝒩 n).kind.anchor = u) (hr : (𝒩 n).mu u = r) : (𝒩 n).cr u = (𝒩 r).cr u := by
+  rcases hk : (𝒩 n).kind with _ | ⟨a, B⟩ | ⟨a, s⟩ <;> rw [hk] at hau <;>
+    simp only [Kind.anchor] at hau;
+  · simp at hau;
+  · obtain rfl : u = a := (WithBot.coe_injective hau).symm;
+    rw [(fields_problem hk).2.2.1] at hr;
+    simp at hr;
+  · obtain rfl : u = a := (WithBot.coe_injective hau).symm;
+    obtain ⟨-, hs, hus⟩ : u < n ∧ s < n ∧ u ∈ (𝒩 s).pre := by
+      simpa [hk] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
+    rw [(fields_deficiency hk).2.2.1] at hr;
+    simp only at hr;
+    rw [(fields_deficiency hk).2.2.2];
+    simp only;
+    exact (ih s hs).2.1 u r hus hr;
+
+private lemma cr_mu_step {n : ℕ} (ih : ∀ m < n, CrInvariant Γ₀ τ m) : CrMu Γ₀ τ n := by
+  intro u r hun hr;
+  by_cases hau : (𝒩 n).kind.anchor = u;
+  · exact cr_mu_anchor ih hau hr;
+  · rw [mu_of_anchor_ne hau] at hr;
+    have hrm := Finset.mem_of_max hr;
+    obtain ⟨hr₁, hr₂⟩ := Finset.mem_filter.mp hrm;
+    rw [cr_of_anchor_ne hau];
+    apply biUnion_eq_of_forall hrm;
+    intro t ht;
+    obtain ⟨ht₁, ht₂⟩ := Finset.mem_filter.mp ht;
+    have htr : t ≤ r := by
+      have := Finset.le_max ht;
+      rw [hr] at this;
+      exact WithBot.coe_le_coe.mp this;
+    obtain ⟨a, -, he⟩ := pre_eq_anc_anchor hun;
+    rw [he] at ht₁ hr₁;
+    exact (ih r (pre_lt (he ▸ hr₁))).1 t u ht₂ hr₂ (mem_anc_of_le ht₁ hr₁ htr);
+
+private lemma cr_gap_anchor {n u a : ℕ} (ih : ∀ m < n, CrInvariant Γ₀ τ m)
+    (hua : u ∈ (𝒩 a).anc) (hne : u ≠ a) (hgap : ∀ t ∈ (𝒩 a).anc, u ∉ (𝒩 t).pre)
+    (haρ : a ∈ (𝒩 (parent (Γ₀ := Γ₀) (τ := τ) n)).anc) (hau : (𝒩 n).kind.anchor = u) :
+    (𝒩 n).cr u = ∅ := by
+  have hlt : u < a := lt_of_le_of_ne (anc_le hua) hne;
+  rcases hk' : (𝒩 n).kind with _ | ⟨b, B⟩ | ⟨b, s⟩ <;> rw [hk'] at hau <;>
+    simp only [Kind.anchor] at hau;
+  · simp at hau;
+  · obtain rfl : u = b := (WithBot.coe_injective hau).symm;
+    have := anc_le (by simpa [parent, hk'] using haρ);
+    omega;
+  · obtain rfl : u = b := (WithBot.coe_injective hau).symm;
+    obtain ⟨-, hs, hus⟩ : u < n ∧ s < n ∧ u ∈ (𝒩 s).pre := by
+      simpa [hk'] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
+    rw [(fields_deficiency hk').2.2.2];
+    simp only;
+    have haρ' : a ∈ (𝒩 (((𝒩 s).mu u).unbotD u)).anc := by simpa [parent, hk'] using haρ;
+    induction hr : (𝒩 s).mu u using WithBot.recBotCoe with
+    | bot =>
+      rw [hr] at haρ';
+      have := anc_le (by simpa using haρ');
+      omega;
+    | coe r =>
+      rw [hr] at haρ';
+      simp only [WithBot.unbotD_coe] at haρ';
+      obtain ⟨hur, -⟩ := mu_spec hus hr;
+      have hra : a ≠ r := by
+        rintro rfl;
+        exact hgap a (mem_anc_self a) hur;
+      rw [(ih s hs).2.1 u r hus hr];
+      exact (ih r ((mu_lt hr).trans hs)).2.2 u a hua hne hgap haρ' hur;
+
+private lemma cr_gap_of_anchor_ne {n u a : ℕ} (ih : ∀ m < n, CrInvariant Γ₀ τ m)
+    (hua : u ∈ (𝒩 a).anc) (hne : u ≠ a) (hgap : ∀ t ∈ (𝒩 a).anc, u ∉ (𝒩 t).pre)
+    (han : a ∈ (𝒩 n).anc) (hau : (𝒩 n).kind.anchor ≠ u) : (𝒩 n).cr u = ∅ := by
+  rw [cr_of_anchor_ne hau];
+  apply Set.subset_empty_iff.mp;
+  refine Set.iUnion₂_subset fun t ht ↦ ?_;
+  obtain ⟨ht₁, ht₂⟩ := Finset.mem_filter.mp ht;
+  have hta : a < t := by
+    rcases lt_trichotomy t a with h | rfl | h;
+    · exact absurd ht₂ (hgap t (mem_anc_of_le (pre_subset_anc ht₁) han h.le));
+    · exact absurd ht₂ (hgap t (mem_anc_self t));
+    · exact h;
+  exact ((ih t (pre_lt ht₁)).2.2 u a hua hne hgap
+    (mem_anc_of_le han (pre_subset_anc ht₁) hta.le) ht₂).le;
+
+private lemma cr_gap_step {n : ℕ} (ih : ∀ m < n, CrInvariant Γ₀ τ m) : CrGap Γ₀ τ n := by
+  intro u a hua hne hgap han hun;
+  have hka : a ≠ n := by
+    rintro rfl;
+    exact hgap _ han hun;
+  have hk : (𝒩 n).kind ≠ .isolated := by
+    intro hk;
+    simp [(fields_isolated hk).1] at hun;
+  obtain ⟨he, -⟩ := anc_eq_insert hk;
+  have haρ : a ∈ (𝒩 (parent (Γ₀ := Γ₀) (τ := τ) n)).anc := by
+    rw [he] at han;
+    exact (Finset.mem_insert.mp han).resolve_left hka;
+  by_cases hau : (𝒩 n).kind.anchor = u;
+  · exact cr_gap_anchor ih hua hne hgap haρ hau;
+  · exact cr_gap_of_anchor_ne ih hua hne hgap han hau;
+
 /-- The criticality promises are constant along the ancestors above a world. -/
-lemma cr_aux (n : ℕ) :
+lemma cr_invariants (n : ℕ) :
     (∀ t u, u ∈ (𝒩 t).pre → u ∈ (𝒩 n).pre → t ∈ (𝒩 n).anc → (𝒩 t).cr u = (𝒩 n).cr u) ∧
     (∀ u (r : ℕ), u ∈ (𝒩 n).pre → (𝒩 n).mu u = r → (𝒩 n).cr u = (𝒩 r).cr u) ∧
     (∀ u a, u ∈ (𝒩 a).anc → u ≠ a → (∀ t ∈ (𝒩 a).anc, u ∉ (𝒩 t).pre) → a ∈ (𝒩 n).anc →
       u ∈ (𝒩 n).pre → (𝒩 n).cr u = ∅) := by
   induction n using Nat.strong_induction_on with
-  | _ n ih =>
-  have hom {a u t₀ : ℕ} (ha : a < n) (h₀ : t₀ ∈ above 𝒩 (𝒩 a).anc u) :
-      ⋃ t ∈ above 𝒩 (𝒩 a).anc u, (𝒩 t).cr u = (𝒩 t₀).cr u := by
-    apply biUnion_eq_of_forall h₀;
-    intro t ht;
-    obtain ⟨ht₁, ht₂⟩ := Finset.mem_filter.mp ht;
-    obtain ⟨h₀₁, h₀₂⟩ := Finset.mem_filter.mp h₀;
-    rcases le_total t t₀ with hle | hle;
-    · exact (ih t₀ ((anc_le h₀₁).trans_lt ha)).1 t u ht₂ h₀₂ (mem_anc_of_le ht₁ h₀₁ hle);
-    · exact ((ih t ((anc_le ht₁).trans_lt ha)).1 t₀ u h₀₂ ht₂ (mem_anc_of_le h₀₁ ht₁ hle)).symm;
-  refine ⟨?_, ?_, ?_⟩;
-  · intro t u hut hun htn;
-    by_cases htn' : t = n;
-    · rw [htn'];
-    have hk : (𝒩 n).kind ≠ .isolated := by
-      intro hk;
-      simp [(fields_isolated hk).1] at hun;
-    obtain ⟨he, hlt⟩ := anc_eq_insert hk;
-    rw [he] at htn;
-    have htρ := (Finset.mem_insert.mp htn).resolve_left htn';
-    rcases hk' : (𝒩 n).kind with _ | ⟨a, B⟩ | ⟨a, s⟩;
-    · exact absurd hk' hk;
-    · obtain ⟨hp, -, -, hc⟩ := fields_problem hk';
-      have ha : a < n := by simpa [hk'] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
-      have htρ' : t ∈ (𝒩 a).anc := by simpa [parent, hk'] using htρ;
-      have hua : u ≠ a := by
-        rintro rfl;
-        have := anc_le htρ';
-        have := pre_lt hut;
-        omega;
-      rw [hc, ite_eq_right hua, hom ha (Finset.mem_filter.mpr ⟨htρ', hut⟩)];
-    · obtain ⟨hp, -, -, hc⟩ := fields_deficiency hk';
-      obtain ⟨ha, hs, has⟩ : a < n ∧ s < n ∧ a ∈ (𝒩 s).pre := by
-        simpa [hk'] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
-      have htρ' : t ∈ (𝒩 (((𝒩 s).mu a).unbotD a)).anc := by simpa [parent, hk'] using htρ;
-      rw [hc];
-      induction hr : (𝒩 s).mu a using WithBot.recBotCoe with
-      | bot =>
-        rw [hr] at htρ';
-        simp only [WithBot.unbotD_bot] at htρ';
-        have hua : u ≠ a := by
-          rintro rfl;
-          have := anc_le htρ';
-          have := pre_lt hut;
-          omega;
-        rw [ite_eq_right hua, hom ha (Finset.mem_filter.mpr ⟨htρ', hut⟩)];
-      | coe r =>
-        rw [hr] at htρ';
-        simp only [WithBot.unbotD_coe] at htρ';
-        have hrs := mu_lt hr;
-        obtain ⟨har, -⟩ := mu_spec has hr;
-        by_cases hua : u = a;
-        · subst u;
-          rw [ite_eq_left rfl, (ih s hs).2.1 a r has hr];
-          exact (ih r (hrs.trans hs)).1 t a hut har htρ';
-        · rw [ite_eq_right hua];
-          have haρ : a ∈ (𝒩 r).anc := pre_subset_anc har;
-          rcases le_or_gt t a with hta | hta;
-          · rw [hom ha (Finset.mem_filter.mpr ⟨mem_anc_of_le htρ' haρ hta, hut⟩)];
-          · have hat : a ∈ (𝒩 t).anc := mem_anc_of_le haρ htρ' hta.le;
-            have htn₁ : t < n := ((anc_le htρ').trans_lt (hrs.trans hs));
-            by_cases hne : (above 𝒩 (𝒩 a).anc u).Nonempty;
-            · obtain ⟨t'', ht''⟩ := hne;
-              rw [hom ha ht''];
-              obtain ⟨ht''₁, ht''₂⟩ := Finset.mem_filter.mp ht'';
-              exact ((ih t htn₁).1 t'' u ht''₂ hut (anc_subset hat ht''₁)).symm;
-            · rw [Finset.not_nonempty_iff_eq_empty.mp hne];
-              simp only [Finset.notMem_empty, Set.iUnion_of_empty, Set.iUnion_empty];
-              have hua' : u ∈ (𝒩 a).anc := by rwa [hp] at hun;
-              refine (ih t htn₁).2.2 u a hua' hua ?_ hat hut;
-              intro t' ht' hut';
-              exact hne ⟨t', Finset.mem_filter.mpr ⟨ht', hut'⟩⟩;
-  · intro u r hun hr;
-    by_cases hau : (𝒩 n).kind.anchor = u;
-    · rcases hk : (𝒩 n).kind with _ | ⟨a, B⟩ | ⟨a, s⟩ <;> rw [hk] at hau <;>
-        simp only [Kind.anchor] at hau;
-      · simp at hau;
-      · obtain rfl : u = a := (WithBot.coe_injective hau).symm;
-        rw [(fields_problem hk).2.2.1] at hr;
-        simp at hr;
-      · obtain rfl : u = a := (WithBot.coe_injective hau).symm;
-        obtain ⟨-, hs, hus⟩ : u < n ∧ s < n ∧ u ∈ (𝒩 s).pre := by
-          simpa [hk] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
-        rw [(fields_deficiency hk).2.2.1] at hr;
-        simp only at hr;
-        rw [(fields_deficiency hk).2.2.2];
-        simp only;
-        exact (ih s hs).2.1 u r hus hr;
-    · rw [mu_of_anchor_ne hau] at hr;
-      have hrm := Finset.mem_of_max hr;
-      obtain ⟨hr₁, hr₂⟩ := Finset.mem_filter.mp hrm;
-      rw [cr_of_anchor_ne hau];
-      apply biUnion_eq_of_forall hrm;
-      intro t ht;
-      obtain ⟨ht₁, ht₂⟩ := Finset.mem_filter.mp ht;
-      have htr : t ≤ r := by
-        have := Finset.le_max ht;
-        rw [hr] at this;
-        exact WithBot.coe_le_coe.mp this;
-      obtain ⟨a, -, he⟩ := pre_eq_anc_anchor hun;
-      rw [he] at ht₁ hr₁;
-      exact (ih r (pre_lt (he ▸ hr₁))).1 t u ht₂ hr₂ (mem_anc_of_le ht₁ hr₁ htr);
-  · intro u a hua hne hgap han hun;
-    have hka : a ≠ n := by
-      rintro rfl;
-      exact hgap _ han hun;
-    have hk : (𝒩 n).kind ≠ .isolated := by
-      intro hk;
-      simp [(fields_isolated hk).1] at hun;
-    obtain ⟨he, hlt⟩ := anc_eq_insert hk;
-    have haρ : a ∈ (𝒩 (parent (Γ₀ := Γ₀) (τ := τ) n)).anc := by
-      rw [he] at han;
-      exact (Finset.mem_insert.mp han).resolve_left hka;
-    have hlt_ua : u < a := lt_of_le_of_ne (anc_le hua) hne;
-    by_cases hau : (𝒩 n).kind.anchor = u;
-    · rcases hk' : (𝒩 n).kind with _ | ⟨b, B⟩ | ⟨b, s⟩ <;> rw [hk'] at hau <;>
-        simp only [Kind.anchor] at hau;
-      · simp at hau;
-      · obtain rfl : u = b := (WithBot.coe_injective hau).symm;
-        have := anc_le (by simpa [parent, hk'] using haρ);
-        omega;
-      · obtain rfl : u = b := (WithBot.coe_injective hau).symm;
-        obtain ⟨-, hs, hus⟩ : u < n ∧ s < n ∧ u ∈ (𝒩 s).pre := by
-          simpa [hk'] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
-        rw [(fields_deficiency hk').2.2.2];
-        simp only;
-        have haρ' : a ∈ (𝒩 (((𝒩 s).mu u).unbotD u)).anc := by simpa [parent, hk'] using haρ;
-        induction hr : (𝒩 s).mu u using WithBot.recBotCoe with
-        | bot =>
-          rw [hr] at haρ';
-          have := anc_le (by simpa using haρ');
-          omega;
-        | coe r =>
-          rw [hr] at haρ';
-          simp only [WithBot.unbotD_coe] at haρ';
-          obtain ⟨hur, -⟩ := mu_spec hus hr;
-          have hra : a ≠ r := by
-            rintro rfl;
-            exact hgap a (mem_anc_self a) hur;
-          rw [(ih s hs).2.1 u r hus hr];
-          exact (ih r ((mu_lt hr).trans hs)).2.2 u a hua hne hgap haρ' hur;
-    · rw [cr_of_anchor_ne hau];
-      apply Set.subset_empty_iff.mp;
-      refine Set.iUnion₂_subset fun t ht ↦ ?_;
-      obtain ⟨ht₁, ht₂⟩ := Finset.mem_filter.mp ht;
-      have hta : a < t := by
-        rcases lt_trichotomy t a with h | rfl | h;
-        · exact absurd ht₂ (hgap t (mem_anc_of_le (pre_subset_anc ht₁) han h.le));
-        · exact absurd ht₂ (hgap t (mem_anc_self t));
-        · exact h;
-      exact ((ih t (pre_lt ht₁)).2.2 u a hua hne hgap
-        (mem_anc_of_le han (pre_subset_anc ht₁) hta.le) ht₂).le;
+  | _ n ih => exact ⟨cr_const_step ih, cr_mu_step ih, cr_gap_step ih⟩
 
 lemma cr_eq_of_mem_anc {t m u : ℕ} (hut : u ∈ (𝒩 t).pre) (hum : u ∈ (𝒩 m).pre)
-    (htm : t ∈ (𝒩 m).anc) : (𝒩 t).cr u = (𝒩 m).cr u := (cr_aux m).1 t u hut hum htm
+    (htm : t ∈ (𝒩 m).anc) : (𝒩 t).cr u = (𝒩 m).cr u := (cr_invariants m).1 t u hut hum htm
 
 lemma cr_eq_of_mu {x u r : ℕ} (hux : u ∈ (𝒩 x).pre) (hr : (𝒩 x).mu u = r) :
-    (𝒩 x).cr u = (𝒩 r).cr u := (cr_aux x).2.1 u r hux hr
+    (𝒩 x).cr u = (𝒩 r).cr u := (cr_invariants x).2.1 u r hux hr
 
 lemma biUnion_cr_eq {x u t₀ : ℕ} (h₀ : t₀ ∈ above 𝒩 (𝒩 x).pre u) :
     ⋃ t ∈ above 𝒩 (𝒩 x).pre u, (𝒩 t).cr u = (𝒩 t₀).cr u := by
@@ -924,6 +978,43 @@ lemma kind_of_deficiency {n x y : ℕ} {A B : Formula α} (hτn : τ n = .defici
     rw [restr_of_lt hx, restr_of_lt hy, label_restr_of_lt hy];
     exact ⟨hx, hy, hxy, hAB, hA, (assuring_label hM₀ hxy).exists_of_rhd_mem hAB hA⟩;
 
+private lemma exists_problem_child {Ω : Finset (Formula α)}
+    (hfair : ∀ t : Job α, t.Mem Ω → ∀ N, ∃ n, N < n ∧ τ n = t) {x : ℕ} {A B : Formula α}
+    (hΩ : A ∈ Ω ∧ B ∈ Ω) (h : A ▷ B ∉ (𝒩 x).set) :
+    ∃ n, x ∈ (𝒩 n).pre ∧ A ∈ (𝒩 n).set ∧ (𝒩 n).cr x = {∼B} := by
+  obtain ⟨n, hxn, hτn⟩ := hfair (.problem x A B) hΩ x;
+  have hk := kind_of_problem hτn hxn h;
+  have hs := kind_spec (Γ₀ := Γ₀) (τ := τ) n;
+  rw [hk] at hs;
+  obtain ⟨-, A', hτ', -, -, hA', -⟩ := hs;
+  obtain rfl : A' = A := by
+    rw [hτn] at hτ';
+    injection hτ' with _ h;
+    exact h.symm;
+  refine ⟨n, ?_, hA', ?_⟩;
+  · rw [(fields_problem hk).1];
+    exact mem_anc_self x;
+  · rw [(fields_problem hk).2.2.2];
+    simp;
+
+include hM₀ in
+private lemma exists_deficiency_child {Ω : Finset (Formula α)}
+    (hfair : ∀ t : Job α, t.Mem Ω → ∀ N, ∃ n, N < n ∧ τ n = t) {x y : ℕ} {A B : Formula α}
+    (hΩ : A ∈ Ω ∧ B ∈ Ω) (hxy : x ∈ (𝒩 y).pre) (h : A ▷ B ∈ (𝒩 x).set) (hy : A ∈ (𝒩 y).set) :
+    ∃ n, x ∈ (𝒩 n).pre ∧ Step (Γ₀ := Γ₀) (τ := τ) x y n ∧ B ∈ (𝒩 n).set := by
+  obtain ⟨n, hn, hτn⟩ := hfair (.deficiency x y A B) hΩ (max x y);
+  have hk := kind_of_deficiency hM₀ hτn (by omega) (by omega) hxy h hy;
+  have hs := kind_spec (Γ₀ := Γ₀) (τ := τ) n;
+  rw [hk] at hs;
+  obtain ⟨-, -, -, A', B', hτ', -, -, -, hB', -⟩ := hs;
+  obtain rfl : B' = B := by
+    rw [hτn] at hτ';
+    injection hτ' with _ _ _ h;
+    exact h.symm;
+  refine ⟨n, ?_, .inr hk, hB'⟩;
+  rw [(fields_deficiency hk).1];
+  exact mem_anc_self x;
+
 include hM₀ in
 lemma truthlemma {Ω : Finset (Formula α)}
     (hfair : ∀ t : Job α, t.Mem Ω → ∀ N, ∃ n, N < n ∧ τ n = t) (hbot : ⊥ ∈ Ω)
@@ -944,20 +1035,9 @@ lemma truthlemma {Ω : Finset (Formula α)}
       by_contra hn;
       have hn' : ∼A ▷ ⊥ ∉ (𝒩 x).set := fun h₁ ↦
         hn <| mem_of_imp (C_trans rhd_bot (box_mono Entailment.dne)) h₁;
-      obtain ⟨n, hxn, hτn⟩ := hfair (.problem x (∼A) ⊥)
-        ⟨(hC A (by simp [subformulas])).2, hbot⟩ x;
-      have hk := kind_of_problem hτn hxn hn';
-      have hs := kind_spec (Γ₀ := Γ₀) (τ := τ) n;
-      rw [hk] at hs;
-      obtain ⟨-, A', hτ', -, -, hA', -⟩ := hs;
-      obtain rfl : A' = ∼A := by
-        rw [hτn] at hτ';
-        injection hτ' with _ h;
-        exact h.symm;
-      have hxn' : x ∈ (𝒩 n).pre := by
-        rw [(fields_problem hk).1];
-        exact mem_anc_self x;
-      exact not_mem_of_neg_mem hA' <| (hA n).mp (h n hxn');
+      obtain ⟨n, hxn, hA', -⟩ :=
+        exists_problem_child hfair ⟨(hC A (by simp [subformulas])).2, hbot⟩ hn';
+      exact not_mem_of_neg_mem hA' <| (hA n).mp (h n hxn);
     · intro h y hxy;
       exact (hA y).mpr ((successor_of_mem_pre hxy).box_mem_of_box_mem h).1;
   | rhd A B ihA ihB =>
@@ -968,38 +1048,13 @@ lemma truthlemma {Ω : Finset (Formula α)}
     constructor;
     · intro h;
       by_contra hn;
-      obtain ⟨n, hxn, hτn⟩ := hfair (.problem x A B) hΩ x;
-      have hk := kind_of_problem hτn hxn hn;
-      have hs := kind_spec (Γ₀ := Γ₀) (τ := τ) n;
-      rw [hk] at hs;
-      obtain ⟨-, A', hτ', -, -, hA', -⟩ := hs;
-      obtain rfl : A' = A := by
-        rw [hτn] at hτ';
-        injection hτ' with _ h;
-        exact h.symm;
-      have hxn' : x ∈ (𝒩 n).pre := by
-        rw [(fields_problem hk).1];
-        exact mem_anc_self x;
-      obtain ⟨z, ⟨-, hxz, hnz⟩, hz⟩ := h n hxn' ((hA n).mpr hA');
-      have h₁ : ∼B ∈ (𝒩 z).cr x := by
-        apply cr_subset_of_reflTransGen hnz;
-        rw [(fields_problem hk).2.2.2];
-        simp;
+      obtain ⟨n, hxn, hA', hcr⟩ := exists_problem_child hfair hΩ hn;
+      obtain ⟨z, ⟨-, hxz, hnz⟩, hz⟩ := h n hxn ((hA n).mpr hA');
+      have h₁ : ∼B ∈ (𝒩 z).cr x := cr_subset_of_reflTransGen hnz (by simp [hcr]);
       exact not_mem_of_neg_mem ((assuring_cr hxz).subset h₁) ((hB z).mp hz);
     · intro h y hxy hy;
-      obtain ⟨n, hn, hτn⟩ := hfair (.deficiency x y A B) hΩ (max x y);
-      have hk := kind_of_deficiency hM₀ hτn (by omega) (by omega) hxy h ((hA y).mp hy);
-      have hs := kind_spec (Γ₀ := Γ₀) (τ := τ) n;
-      rw [hk] at hs;
-      obtain ⟨-, -, -, A', B', hτ', -, -, -, hB', -⟩ := hs;
-      obtain rfl : B' = B := by
-        rw [hτn] at hτ';
-        injection hτ' with _ _ _ h;
-        exact h.symm;
-      have hxn' : x ∈ (𝒩 n).pre := by
-        rw [(fields_deficiency hk).1];
-        exact mem_anc_self x;
-      exact ⟨n, ⟨hxy, hxn', .single (.inr hk)⟩, (hB n).mpr hB'⟩;
+      obtain ⟨n, hxn, hs, hBn⟩ := exists_deficiency_child hM₀ hfair hΩ hxy h ((hA y).mp hy);
+      exact ⟨n, ⟨hxy, hxn, .single hs⟩, (hB n).mpr hBn⟩;
 
 end
 

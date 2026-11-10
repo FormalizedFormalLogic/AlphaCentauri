@@ -526,6 +526,23 @@ Tow20:
   url: https://www.sas.upenn.edu/~htowsner/GoodsteinsTheorem.pdf
   note: Undated; the PDF is dated 2020
 
+Vis90:
+  type: Chapter
+  title: Interpretability Logic
+  author: "Visser, Albert"
+  page-range: 175-209
+  date: 1990
+  serial-number:
+    doi: "10.1007/978-1-4613-0609-2_13"
+  parent:
+    type: Anthology
+    title: Mathematical Logic
+    editor: "Petkov, Petio P."
+    date: 1990
+    publisher:
+      name: Plenum Press
+      location: New York
+
 vO99:
   type: Misc
   title: "Introduction to {Peano} Arithmetic: Gödel Incompleteness and Nonstandard Models"

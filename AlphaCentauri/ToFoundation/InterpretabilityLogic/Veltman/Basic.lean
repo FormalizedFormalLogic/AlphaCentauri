@@ -7,8 +7,8 @@ public import Foundation.Vorspiel.Rel.CWF
 /-!
 # Veltman semantics
 
-Veltman models, forcing, and the soundness of extensions of $\mathbf{IL}^-$ with respect to models
-validating their axioms.
+Veltman models, forcing, and the soundness of extensions of $\mathbf{IL}$ with respect to Veltman
+models validating their axioms.
 -/
 
 @[expose] public section
@@ -39,20 +39,21 @@ abbrev Val {M : Model κ α} : M.World → α → Prop := M.Val'
 
 instance : CoeFun (Model κ α) (fun M ↦ M.World → α → Prop) := ⟨fun M ↦ M.Val⟩
 
-/-- `≺` is transitive and conversely well-founded, and `≺[w]` relates only `≺`-successors of `w`.
+/-- `≺` is transitive and conversely well-founded, and each `≺[w]` is a reflexive and transitive
+relation on the `≺`-successors of `w` containing `≺` between them.
 
-- [KO21, Definition 2.2]
+- [KO21, §1]
 -/
-class IsILMinus (M : Model κ α) extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel where
-  rel_of_s {w x y : M.World} : x ≺[w] y → w ≺ x
+class IsIL (M : Model κ α) extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel where
+  rel_of_s_left {w x y : M.World} : x ≺[w] y → w ≺ x
+  rel_of_s_right {w x y : M.World} : x ≺[w] y → w ≺ y
+  s_refl {w x : M.World} : w ≺ x → x ≺[w] x
+  s_trans {w x y z : M.World} : x ≺[w] y → y ≺[w] z → x ≺[w] z
+  s_of_rel {w x y : M.World} : w ≺ x → x ≺ y → x ≺[w] y
 
-export IsILMinus (rel_of_s)
+export IsIL (rel_of_s_left rel_of_s_right s_refl s_trans s_of_rel)
 
-instance [M.IsILMinus] : Std.Irrefl M.Rel where
-  irrefl x h := by
-    obtain ⟨m, hm, hmax⟩ :=
-      ConverseWellFounded.iff_has_max.mp (IsConverseWellFounded.cwf (rel := M.Rel)) {x} ⟨x, rfl⟩;
-    exact hmax x rfl (hm ▸ h)
+instance [M.IsIL] : Std.Irrefl M.Rel := ConverseWellFounded.irrefl
 
 noncomputable def terminalOf (M : Model κ α) [IsConverseWellFounded _ M.Rel] (X : Set M.World)
     (hX : X.Nonempty) : { t // t ∈ X ∧ ∀ x ∈ X, ¬t ≺ x } :=
@@ -62,10 +63,14 @@ noncomputable def terminalOf (M : Model κ α) [IsConverseWellFounded _ M.Rel] (
 /-- The model on the frame of `M` with valuation `V`. -/
 def overwrite (M : Model κ α) (V : M.World → α → Prop) : Model κ α := ⟨M.Rel', M.S', V⟩
 
-instance {V : M.World → α → Prop} [M.IsILMinus] : (M.overwrite V).IsILMinus where
+instance {V : M.World → α → Prop} [M.IsIL] : (M.overwrite V).IsIL where
   toIsTrans := inferInstanceAs (IsTrans _ M.Rel)
   toIsConverseWellFounded := inferInstanceAs (IsConverseWellFounded _ M.Rel)
-  rel_of_s := rel_of_s (M := M)
+  rel_of_s_left := rel_of_s_left (M := M)
+  rel_of_s_right := rel_of_s_right (M := M)
+  s_refl := s_refl (M := M)
+  s_trans := s_trans (M := M)
+  s_of_rel := s_of_rel (M := M)
 
 end Model
 
@@ -147,32 +152,46 @@ open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : Set (Formula α)} {A : Formula α}
 
-theorem sound [M.IsILMinus] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxioms 𝔸 ⊢ A) : M ⊧ A := by
+theorem sound [M.IsIL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxioms 𝔸 ⊢ A) : M ⊧ A := by
   intro x;
   induction h generalizing x with
   | axm hA => exact h𝔸 _ hA x;
   | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x);
   | nec _ ih => exact fun y _ ↦ ih y;
-  | rule1 _ ih =>
-    intro hx y Rxy hy;
-    obtain ⟨z, Sxyz, hz⟩ := hx y Rxy hy;
-    exact ⟨z, Sxyz, ih z hz⟩;
-  | rule2 _ ih => exact fun hx y Rxy hy ↦ hx y Rxy (ih y hy);
   | axiomL => exact forces_axiomL;
+  | axiomJ1 =>
+    intro hx y Rxy hy;
+    use y;
+    and_intros;
+    · exact s_refl Rxy;
+    · exact hx y Rxy hy;
+  | axiomJ2 =>
+    intro hx y Rxy hy;
+    obtain ⟨hAB, hBC⟩ := forces_and.mp hx;
+    obtain ⟨z, Sxyz, hz⟩ := hAB y Rxy hy;
+    obtain ⟨u, Sxzu, hu⟩ := hBC z (rel_of_s_right Sxyz) hz;
+    use u;
+    and_intros;
+    · exact s_trans Sxyz Sxzu;
+    · exact hu;
   | axiomJ3 =>
-    intro hA hB y Rxy hy;
+    intro hx y Rxy hy;
+    obtain ⟨hAC, hBC⟩ := forces_and.mp hx;
     rcases forces_or.mp hy with hy | hy;
-    · exact hA y Rxy hy;
-    · exact hB y Rxy hy;
-  | axiomJ6 =>
-    apply forces_iff.mpr;
-    constructor;
-    · intro hx y Rxy hy;
-      exact absurd (hx y Rxy) hy;
-    · intro hx y Rxy;
-      by_contra hy;
-      obtain ⟨z, -, hz⟩ := hx y Rxy hy;
-      exact hz;
+    · exact hAC y Rxy hy;
+    · exact hBC y Rxy hy;
+  | axiomJ4 =>
+    intro hx hA;
+    obtain ⟨y, Rxy, hy⟩ := forces_dia.mp hA;
+    obtain ⟨z, Sxyz, hz⟩ := hx y Rxy hy;
+    exact forces_dia.mpr ⟨z, rel_of_s_right Sxyz, hz⟩;
+  | axiomJ5 =>
+    intro y Rxy hy;
+    obtain ⟨z, Ryz, hz⟩ := forces_dia.mp hy;
+    use z;
+    and_intros;
+    · exact s_of_rel Rxy Ryz;
+    · exact hz;
   | _ => grind;
 
 end Logic.ofAxioms

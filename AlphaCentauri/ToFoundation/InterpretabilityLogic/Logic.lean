@@ -7,10 +7,8 @@ public import Foundation.Meta.ClProver
 /-!
 # Interpretability logics
 
-A logic is a set of formulas, regarded as an `Entailment` via membership. Every logic here extends
-$\mathbf{IL}^-$: it is the smallest set containing a set of axioms together with those of
-$\mathbf{IL}^-$ and closed under modus ponens, necessitation and the rules $\mathbf{R1}$ and
-$\mathbf{R2}$.
+A logic is a set of formulas, regarded as an `Entailment` via membership. The logics here are the
+extensions of $\mathbf{IL}$ by sets of axioms.
 -/
 
 @[expose] public section
@@ -41,51 +39,40 @@ lemma equiv_iff : L₁ ≊ L₂ ↔ L₁ = L₂ := ⟨fun h ↦ h.eq, fun h ↦ 
 
 end Logic
 
-/-! ### Axioms -/
+/-! ### Axioms of $\mathbf{IL}$ -/
 
 namespace Axioms
 
 variable (A B C : Formula α)
 
-/-- - [KO21, §3.1] -/
+/-- - [Vis90, §6.1] -/
 protected abbrev J1 : Formula α := □(A 🡒 B) 🡒 A ▷ B
 
-/-- - [KO21, §3.3] -/
-protected abbrev J2 : Formula α := A ▷ B 🡒 B ▷ C 🡒 A ▷ C
+/-- - [Vis90, §6.1] -/
+protected abbrev J2 : Formula α := A ▷ B ⋏ B ▷ C 🡒 A ▷ C
 
-/-- - [KO21, §3.3] -/
-protected abbrev J2Plus : Formula α := A ▷ (B ⋎ C) 🡒 B ▷ C 🡒 A ▷ C
+/-- - [Vis90, §6.1] -/
+protected abbrev J3 : Formula α := A ▷ C ⋏ B ▷ C 🡒 (A ⋎ B) ▷ C
 
-/-- - [KO21, Definition 2.1] -/
-protected abbrev J3 : Formula α := A ▷ C 🡒 B ▷ C 🡒 (A ⋎ B) ▷ C
-
-/-- - [KO21, §3.2] -/
+/-- - [Vis90, §6.1] -/
 protected abbrev J4 : Formula α := A ▷ B 🡒 ◇A 🡒 ◇B
 
-/-- - [KO21, §3.2] -/
-protected abbrev J4Plus : Formula α := □(A 🡒 B) 🡒 C ▷ A 🡒 C ▷ B
-
-/-- - [KO21, §3.4] -/
+/-- - [Vis90, §6.1] -/
 protected abbrev J5 : Formula α := ◇A ▷ A
-
-/-- - [KO21, Definition 2.1] -/
-protected abbrev J6 : Formula α := □A 🡘 ∼A ▷ ⊥
 
 end Axioms
 
-/-! ### Extensions of $\mathbf{IL}^-$ -/
+/-! ### Extensions of $\mathbf{IL}$ -/
 
-/-- The smallest logic containing `𝔸` and the axioms of $\mathbf{IL}^-$, closed under modus ponens,
-necessitation, $\mathbf{R1}$ and $\mathbf{R2}$.
+/-- The smallest logic containing `𝔸` and the axioms of $\mathbf{IL}$, closed under modus ponens
+and necessitation.
 
-- [KO21, Definition 2.1]
+- [Vis90, §6.1]
 -/
 inductive Logic.ofAxioms (𝔸 : Set (Formula α)) : Logic α
   | axm {A}          : A ∈ 𝔸 → ofAxioms 𝔸 A
   | mdp {A B}        : ofAxioms 𝔸 (A 🡒 B) → ofAxioms 𝔸 A → ofAxioms 𝔸 B
   | nec {A}          : ofAxioms 𝔸 A → ofAxioms 𝔸 (□A)
-  | rule1 {A B C}    : ofAxioms 𝔸 (A 🡒 B) → ofAxioms 𝔸 (C ▷ A 🡒 C ▷ B)
-  | rule2 {A B C}    : ofAxioms 𝔸 (A 🡒 B) → ofAxioms 𝔸 (B ▷ C 🡒 A ▷ C)
   | verum            : ofAxioms 𝔸 Axioms.Verum
   | implyK {A B}     : ofAxioms 𝔸 (Axioms.ImplyK A B)
   | implyS {A B C}   : ofAxioms 𝔸 (Axioms.ImplyS A B C)
@@ -98,8 +85,16 @@ inductive Logic.ofAxioms (𝔸 : Set (Formula α)) : Logic α
   | dne {A}          : ofAxioms 𝔸 (Axioms.DNE A)
   | axiomK {A B}     : ofAxioms 𝔸 (□(A 🡒 B) 🡒 □A 🡒 □B)
   | axiomL {A}       : ofAxioms 𝔸 (□(□A 🡒 A) 🡒 □A)
+  | axiomJ1 {A B}    : ofAxioms 𝔸 (Axioms.J1 A B)
+  | axiomJ2 {A B C}  : ofAxioms 𝔸 (Axioms.J2 A B C)
   | axiomJ3 {A B C}  : ofAxioms 𝔸 (Axioms.J3 A B C)
-  | axiomJ6 {A}      : ofAxioms 𝔸 (Axioms.J6 A)
+  | axiomJ4 {A B}    : ofAxioms 𝔸 (Axioms.J4 A B)
+  | axiomJ5 {A}      : ofAxioms 𝔸 (Axioms.J5 A)
+
+/-- - [Vis90, §6.1] -/
+abbrev Logic.IL : Logic α := ofAxioms ∅
+
+notation "𝐈𝐋" => Logic.IL
 
 namespace Logic.ofAxioms
 
@@ -123,23 +118,25 @@ instance : Entailment.Cl (ofAxioms 𝔸) where
 
 variable {A B C : Formula α}
 
-lemma of_mem (h : A ∈ 𝔸) : ofAxioms 𝔸 ⊢ A := axm h
-
 lemma box_mono (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ □A 🡒 □B := axiomK ⨀ nec h
 
-lemma rhd_mono_right (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ C ▷ A 🡒 C ▷ B := rule1 h
+lemma rhd_mono_right (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ C ▷ A 🡒 C ▷ B := by
+  have h₁ : ofAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h;
+  have h₂ : ofAxioms 𝔸 ⊢ C ▷ A ⋏ A ▷ B 🡒 C ▷ B := axiomJ2;
+  cl_prover [h₁, h₂];
 
-lemma rhd_anti_left (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ B ▷ C 🡒 A ▷ C := rule2 h
+lemma rhd_anti_left (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ B ▷ C 🡒 A ▷ C := by
+  have h₁ : ofAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h;
+  have h₂ : ofAxioms 𝔸 ⊢ A ▷ B ⋏ B ▷ C 🡒 A ▷ C := axiomJ2;
+  cl_prover [h₁, h₂];
 
-/-- `ofAxioms 𝔸` is contained in every extension of $\mathbf{IL}^-$ that proves `𝔸`. -/
+/-- `ofAxioms 𝔸` is contained in every extension of $\mathbf{IL}$ that proves `𝔸`. -/
 lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofAxioms 𝔹 ⊢ A) : ofAxioms 𝔸 ⊆ ofAxioms 𝔹 := by
   intro A hA;
   induction hA with
   | axm hA => exact h _ hA;
   | mdp _ _ ihAB ihA => exact mdp ihAB ihA;
   | nec _ ih => exact nec ih;
-  | rule1 _ ih => exact rule1 ih;
-  | rule2 _ ih => exact rule2 ih;
   | verum => exact verum;
   | implyK => exact implyK;
   | implyS => exact implyS;
@@ -152,11 +149,16 @@ lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofAxioms 𝔹 ⊢ A) : ofAxioms �
   | dne => exact dne;
   | axiomK => exact axiomK;
   | axiomL => exact axiomL;
+  | axiomJ1 => exact axiomJ1;
+  | axiomJ2 => exact axiomJ2;
   | axiomJ3 => exact axiomJ3;
-  | axiomJ6 => exact axiomJ6;
+  | axiomJ4 => exact axiomJ4;
+  | axiomJ5 => exact axiomJ5;
 
 lemma subset_of_subset (h : 𝔸 ⊆ 𝔹) : ofAxioms 𝔸 ⊆ ofAxioms 𝔹 :=
   subset_of_provable fun _ hA ↦ axm (h hA)
+
+lemma IL_subset : (𝐈𝐋 : Logic α) ⊆ ofAxioms 𝔸 := subset_of_subset (Set.empty_subset _)
 
 end Logic.ofAxioms
 

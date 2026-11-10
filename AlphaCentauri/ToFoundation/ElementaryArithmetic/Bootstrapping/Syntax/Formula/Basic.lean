@@ -1423,6 +1423,99 @@ lemma nth_depthList_eq (P M J J' : V) (hJ : J ≤ M) (hJ' : J' ≤ M) :
     ih q' hq' a ha (d + 1) (le_trans (le_trans le_self_add hd1) hJ) b hb (e + 1)
       (le_trans (le_trans le_self_add he1) hJ') (by rw [← add_assoc, ← add_assoc, hsum]) hd1 he1⟩
 
+lemma len_depthList (P J q : V) : len (c.depthList P J q) = J + 1 := by
+  have hg : LocallyDelta0Function fun w : Fin 4 → V ↦
+      (fun (r : Fin 3 → V) d ↦ c.depthValue (r 0) (r 1) (r 2) d) (w ·.succ) (w 0) :=
+    c.depthValueAt_locallyDelta0
+  rw [(c.depthList_spec P J q).1, len_listMap hg, len_rangeList]
+
+/-- The value of the recursion at the code `q` with the parameter `P`. -/
+noncomputable def courseOfValuesResult (P q : V) : V := (c.depthList P q q).[0]
+
+lemma courseOfValuesResult_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 2 → V ↦ c.courseOfValuesResult (w 0) (w 1) :=
+  nth_locallyDelta0.comp₂ (c.depthList_locallyDelta0.comp₃ (LocallyDelta0Function.var 0)
+    (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 1)) (LocallyDelta0Function.const 0)
+
+lemma courseOfValuesResult_le_bound (P q : V) : c.courseOfValuesResult P q ≤ c.bound P q := by
+  simpa [c.iter_zero, courseOfValuesResult] using
+    (c.depthList_spec P q q).2 0 (by simp [c.len_depthList])
+
+lemma nth_depthList_eq_courseOfValuesResult {P J p d : V} (h : d + p ≤ J) :
+    (c.depthList P J p).[d] = c.courseOfValuesResult (c.iter P d) p := by
+  have hd : d ≤ J := le_trans le_self_add h
+  have := c.nth_depthList_eq P J J p le_rfl (le_trans le_add_self h) p 0 zero_le d hd d hd 0
+    zero_le (by simp) h (by simp)
+  simpa [c.iter_zero, courseOfValuesResult] using this
+
+private lemma courseOfValuesResult_eq_depthValue (P q : V) :
+    c.courseOfValuesResult P q = c.depthValue P q (c.courseOfValues.table ![P, q] q) 0 :=
+  c.nth_depthList zero_le
+
+private lemma znth_table_eq {P q p d : V} (hp : p < q) (hd : d ≤ 1) :
+    (znth (c.courseOfValues.table ![P, q] q) p).[d] = c.courseOfValuesResult (c.iter P d) p := by
+  rw [c.courseOfValues.znth_table hp]
+  refine c.nth_depthList_eq_courseOfValuesResult ?_
+  calc d + p ≤ 1 + p := by gcongr
+    _ = p + 1 := add_comm _ _
+    _ ≤ q := lt_iff_succ_le.mp hp
+
+lemma courseOfValuesResult_rel (P k R v : V) :
+    c.courseOfValuesResult P (^rel k R v) = c.rel P k R v := by
+  simp [courseOfValuesResult_eq_depthValue, depthValue, qqRel, c.iter_zero]
+
+lemma courseOfValuesResult_nrel (P k R v : V) :
+    c.courseOfValuesResult P (^nrel k R v) = c.nrel P k R v := by
+  simp [courseOfValuesResult_eq_depthValue, depthValue, qqNRel, c.iter_zero]
+
+lemma courseOfValuesResult_verum (P : V) : c.courseOfValuesResult P ^⊤ = c.verum P := by
+  simp [courseOfValuesResult_eq_depthValue, depthValue, qqVerum, c.iter_zero]
+
+lemma courseOfValuesResult_falsum (P : V) : c.courseOfValuesResult P ^⊥ = c.falsum P := by
+  simp [courseOfValuesResult_eq_depthValue, depthValue, qqFalsum, c.iter_zero]
+
+private lemma depthValue_and (P p₁ p₂ T d : V) :
+    c.depthValue P (p₁ ^⋏ p₂) T d =
+      c.and (c.iter P d) p₁ p₂ (znth T p₁).[d] (znth T p₂).[d] := by
+  simp [depthValue, qqAnd]
+
+private lemma depthValue_or (P p₁ p₂ T d : V) :
+    c.depthValue P (p₁ ^⋎ p₂) T d =
+      c.or (c.iter P d) p₁ p₂ (znth T p₁).[d] (znth T p₂).[d] := by
+  simp [depthValue, qqOr]
+
+private lemma depthValue_all (P p₁ T d : V) :
+    c.depthValue P (^∀ p₁) T d = c.all (c.iter P d) p₁ ?[(znth T p₁).[d + 1]] := by
+  simp [depthValue, qqAll]
+
+private lemma depthValue_exs (P p₁ T d : V) :
+    c.depthValue P (^∃ p₁) T d = c.exs (c.iter P d) p₁ ?[(znth T p₁).[d + 1]] := by
+  simp [depthValue, qqExs]
+
+lemma courseOfValuesResult_and (P p₁ p₂ : V) :
+    c.courseOfValuesResult P (p₁ ^⋏ p₂) =
+      c.and P p₁ p₂ (c.courseOfValuesResult P p₁) (c.courseOfValuesResult P p₂) := by
+  rw [courseOfValuesResult_eq_depthValue, depthValue_and, c.znth_table_eq (by simp) zero_le,
+    c.znth_table_eq (by simp) zero_le]
+  simp only [c.iter_zero]
+
+lemma courseOfValuesResult_or (P p₁ p₂ : V) :
+    c.courseOfValuesResult P (p₁ ^⋎ p₂) =
+      c.or P p₁ p₂ (c.courseOfValuesResult P p₁) (c.courseOfValuesResult P p₂) := by
+  rw [courseOfValuesResult_eq_depthValue, depthValue_or, c.znth_table_eq (by simp) zero_le,
+    c.znth_table_eq (by simp) zero_le]
+  simp only [c.iter_zero]
+
+lemma courseOfValuesResult_all (P p₁ : V) :
+    c.courseOfValuesResult P (^∀ p₁) = c.all P p₁ ?[c.courseOfValuesResult (c.change P) p₁] := by
+  rw [courseOfValuesResult_eq_depthValue, depthValue_all, zero_add,
+    c.znth_table_eq (by simp) le_rfl, ← c.change_eq_iter, c.iter_zero]
+
+lemma courseOfValuesResult_exs (P p₁ : V) :
+    c.courseOfValuesResult P (^∃ p₁) = c.exs P p₁ ?[c.courseOfValuesResult (c.change P) p₁] := by
+  rw [courseOfValuesResult_eq_depthValue, depthValue_exs, zero_add,
+    c.znth_table_eq (by simp) le_rfl, ← c.change_eq_iter, c.iter_zero]
+
 end Construction
 
 end UformulaRec1

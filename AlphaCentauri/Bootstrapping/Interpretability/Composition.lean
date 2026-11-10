@@ -627,6 +627,17 @@ lemma IsTable.compTable_funcT {k : ℕ} (F : L.Func k) : hc.funcT F = hT₁.tran
   ext; simp [tableFunc_compTable (hT₂.lt_len_func (codeIn_func_quote F))]
 
 omit [L.Eq] in
+lemma IsVarVec.two_bvar {m : ℕ} (a b : Fin m) :
+    IsVarVec (![Semiterm.bvar a, Semiterm.bvar b] : SemitermVec V L 2 m) := fun j ↦ by
+  match j with
+  | 0 => exact Or.inl ⟨a, rfl⟩
+  | 1 => exact Or.inl ⟨b, rfl⟩
+
+omit [L.Eq] in
+lemma IsVarVec.fvar {n : ℕ} (f : Fin n → V) :
+    IsVarVec (fun i ↦ (Semiterm.fvar (f i) : Term V L)) := fun i ↦ Or.inr ⟨_, rfl⟩
+
+omit [L.Eq] in
 lemma IsVarVec.single_bvar {m : ℕ} (a : Fin m) :
     IsVarVec (![Semiterm.bvar a] : SemitermVec V L 1 m) := fun j ↦ Or.inl ⟨a, by
   match j with
@@ -1171,5 +1182,90 @@ lemma tprovable_subst_congr : ∀ {m : ℕ} (γ : Semiformula V ℒₒᵣ m) (s 
     exact key h₁ h₂
 
 end leibniz
+
+section compConditions
+
+variable {S U : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] {tbl₁ tbl₂ : V}
+  (h₁ : IsTranslationTable ℒₒᵣ S tbl₁) (h₂ : IsTranslationTable ℒₒᵣ U tbl₂)
+  (hc : IsTable ℒₒᵣ ℒₒᵣ (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂))
+  (hsound : ∀ φ : V, shift ℒₒᵣ φ = φ → Provable U φ →
+    Provable S (translate ℒₒᵣ ℒₒᵣ tbl₁ φ))
+
+omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
+include h₁ h₂ hsound in
+lemma comp_exs_domain :
+    Provable S (^∃ tableDomain (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂)) := by
+  have hs : shift ℒₒᵣ (^∃ tableDomain tbl₂) = ^∃ tableDomain tbl₂ := by
+    simp [h₂.domain.isUFormula, h₂.domain_shift]
+  have h := hsound _ hs h₂.exs_domain
+  rwa [translate_exs h₂.domain.isUFormula, domainAt_zero h₁.toIsTable, ← tableDomain,
+    ← tableDomain_compTable] at h
+
+omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
+include h₁ hsound in
+/-- `τ₁` applied to a block of universal quantifiers provable in `U` yields the block relativized
+to the domain of `tbl₁`, provable in `S`. -/
+lemma tprovable_relAllItr_of_provable {k : ℕ} (φ : Semiformula V ℒₒᵣ (0 + k)) (hφ : φ.shift = φ)
+    (h : Provable U (∀¹^[k] φ).val) :
+    S.internalize V ⊢ relAllItr h₁.domT k (h₁.transT φ) := by
+  have hs : shift ℒₒᵣ (∀¹^[k] φ).val = (∀¹^[k] φ).val := by
+    rw [← Semiformula.val_shift, Semiformula.shift_allItr, hφ]
+  have h' := hsound _ hs h
+  rw [← IsTable.transT_val h₁.toIsTable, IsTable.transT_allItr] at h'
+  exact tprovable_iff_provable.mpr h'
+
+omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
+lemma conj_two_fvar (d : Semiformula V ℒₒᵣ 1) :
+    S.internalize V ⊢ d.subst ![Semiterm.fvar 0] ⋏ d.subst ![Semiterm.fvar 1] 🡒
+      Matrix.conj (fun i : Fin (0 + 2) ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)]) := by
+  apply matrixConj_intro
+  intro i
+  match i with
+  | 0 => simp
+  | 1 => simp
+
+omit [U.Δ₁] in
+include h₁ in
+lemma tprovable_comp_preserveEqBody (d : Semiformula V ℒₒᵣ 1) (E : Semiformula V ℒₒᵣ 2)
+    (hb : S.internalize V ⊢ relAllItr h₁.domT 2 (h₁.transT (preserveEqBody d E))) :
+    S.internalize V ⊢ (preserveEqBody (h₁.domT ⋏ h₁.transT d) (h₁.transT E)).subst
+      (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) := by
+  have hs := relAllItr_specialize (T := S) (k := 2) h₁.domT (h₁.transT (preserveEqBody d E))
+    (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) ⨀ hb
+  simp only [preserveEqBody, IsTable.transT_imp, IsTable.transT_iff,
+    h₁.toIsTable.transT_subst _ (IsVarVec.single_bvar _),
+    h₁.toIsTable.transT_subst _ (IsVarVec.two_bvar _ _)] at hs ⊢
+  simp only [LogicalConnective.iff, Semiformula.substs_imp, Semiformula.substs_and,
+    Semiformula.substs_substs, Semiformula.substs_equal, Matrix.vecMap_cons', Matrix.vecMap_nil,
+    Matrix.head_cons, Semiterm.substs_bvar] at hs ⊢
+  rw [← h₁.toIsTable.transT_subst _ (IsVarVec.fvar _), Semiformula.substs_equal,
+    Semiterm.substs_bvar, Semiterm.substs_bvar] at hs
+  simp only [Fin.isValue, Fin.val_zero, Fin.val_one, Nat.cast_zero, Nat.cast_one] at hs ⊢
+  have hp := h₁.tprovable_transT_equal_iff ((1 : ℕ) : V) ((0 : ℕ) : V)
+  simp only [LogicalConnective.iff, Nat.cast_zero, Nat.cast_one] at hp
+  have hcj := conj_two_fvar (S := S) h₁.domT
+  have key {C D0 D1 E0 E1 X T Q : Formula V ℒₒᵣ}
+      (hs : S.internalize V ⊢ C 🡒 E1 🡒 E0 🡒 (X 🡒 T) ⋏ (T 🡒 X))
+      (hcj : S.internalize V ⊢ D0 ⋏ D1 🡒 C)
+      (hp : S.internalize V ⊢ D1 🡒 D0 🡒 (T 🡒 Q) ⋏ (Q 🡒 T)) :
+      S.internalize V ⊢ D1 ⋏ E1 🡒 D0 ⋏ E0 🡒 (X 🡒 Q) ⋏ (Q 🡒 X) := by
+    have h₄ := C_trans hcj hs
+    cl_prover 100 [h₄, hp]
+  exact key hs hcj hp
+
+include h₁ h₂ hc hsound in
+lemma comp_preserve_eq :
+    Provable S (qqAlls (preserveEqCode ℒₒᵣ ℒₒᵣ (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂)) 2) := by
+  have hb := tprovable_relAllItr_of_provable h₁ hsound (k := 2)
+    (preserveEqBody h₂.domT (h₂.relT (Language.Eq.eq : (ℒₒᵣ).Rel 2)))
+    (preserveEqBody_shift h₂.domT_shift (h₂.relT_shift _))
+    (by rw [val_allItr, preserveEqBody_val _ rfl _ rfl]; simpa using h₂.preserve_eq)
+  rw [← preserveEqBody_val hc.domT rfl (hc.relT (Language.Eq.eq : (ℒₒᵣ).Rel 2)) rfl]
+  apply provable_qqAlls_of_tprovable_fvar _ (preserveEqBody_shift hc.domT_shift (hc.relT_shift _))
+  rw [IsTable.compTable_domT h₁.toIsTable h₂.toIsTable hc,
+    IsTable.compTable_relT h₁.toIsTable h₂.toIsTable hc]
+  exact tprovable_comp_preserveEqBody h₁ _ _ hb
+
+end compConditions
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -1,7 +1,6 @@
 module
 
-public import AlphaCentauri.Model.IntegerConstantPolynomial
-public import AlphaCentauri.Model.NonnegativePart
+
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.ToMathlib.OpenPredicate.PolynomialRing
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic

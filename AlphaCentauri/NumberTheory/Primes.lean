@@ -1,8 +1,8 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
+public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
-public import AlphaCentauri.Schemata.WeakPigeonhole
 
 /-!
 # The infinitude of primes

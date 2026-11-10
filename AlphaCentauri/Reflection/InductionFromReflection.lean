@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Reflection.UniformReflection
-public import AlphaCentauri.Schemata.ParameterFreeInduction
+public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prenex
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula

@@ -14,7 +14,8 @@ formulas are for — so the whole `C`-induction scheme is derivable. A theory wh
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.LKI
+namespace FFL.FirstOrder.Arithmetic
+namespace LKI
 
 open Rewriting LawfulSyntacticRewriting
 
@@ -78,4 +79,5 @@ scheme of `𝗜𝚺₁` is the one its induction rule is as strong as.
 theorem derivable_of_provable_inductionOnHierarchy {b : Polarity} {s : ℕ}
     (h : 𝗜𝗡𝗗 b s ⊢ σ) : ⊢ᴸᴷᴵ[ℬ[<, ℒₒᵣ].PrenexHierarchy b s] ⦃σ⦄ := derivable_of_provable_induction h
 
-end FFL.FirstOrder.Arithmetic.LKI
+end LKI
+end FFL.FirstOrder.Arithmetic

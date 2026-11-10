@@ -37,9 +37,8 @@ lemma ArithmeticTheory.EssentiallyReflexive.reflexive {T : ArithmeticTheory}
     (h : T.EssentiallyReflexive) : T.Reflexive :=
   h T Set.Subset.rfl
 
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic
+namespace Arithmetic
 
 variable {T : ArithmeticTheory}
 
@@ -135,4 +134,5 @@ theorem not_finiteAxiomatizable_of_Peano_le [𝗣𝗔 ⪯ T] [Consistent T] : ¬
   have : Consistent (𝗣𝗔 ∪ T) := Consistent.of_le ‹Consistent T› hUT
   exact mt (FiniteAxiomatizable.of_equiv hequiv) <| not_finiteAxiomatizable_of_reflexive hR
 
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

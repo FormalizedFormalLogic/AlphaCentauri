@@ -28,7 +28,8 @@ $\mathsf{IOpen}$ proves only the universal sentences true in every model of $\ma
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 variable {n : ℕ}
 
@@ -58,9 +59,8 @@ lemma not_provable_fermatLastTheoremCaseOne_IOpen_of_models_ZRing {M : Type} [OR
   rw [e₂, ← mod_eq_zero_iff_dvd, mod_mul_add_of_lt _ _ (by exact_mod_cast hr)] at this
   exact hr₀.ne' (by exact_mod_cast this)
 
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
 
-namespace FFL.FirstOrder
 
 open Polynomial Semiformula IntermediateField OpenPredicate
 

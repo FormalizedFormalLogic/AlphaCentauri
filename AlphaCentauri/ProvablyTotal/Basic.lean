@@ -25,7 +25,6 @@ namespace FFL.FirstOrder
 
 namespace Arithmetic
 
-section
 variable {k l : ℕ} {V : Type*} [ORingStructure V]
 
 /-- The totality sentence `∀ x⃗, ∃ y, φ(y, x⃗)` of a graph formula `φ`.
@@ -246,7 +245,6 @@ lemma models_uniqueTotalitySentence_iff {φ : 𝚺ᴬ₁.Semisentence (k + 1)} :
   simp [uniqueTotalitySentence, models_iff, Semiformula.eval_rew, Function.comp_def,
     Matrix.comp_vecCons', Empty.eq_elim]
 
-end
 
 end Arithmetic
 
@@ -396,7 +394,6 @@ lemma provablyFunctionalVia_minimalGraph [𝗕𝚺₁ ⪯ T] (h : T.ProvablyTota
     obtain ⟨y₀, hy₀⟩ := h.models V v
     exact (models_existsUnique_minimalGraph ⟨y₀, hy₀⟩).2 y y' hy hy'
 
-section
 variable {l : ℕ} {g : (Fin l → ℕ) → ℕ} {h : Fin l → (Fin k → ℕ) → ℕ}
   {ψ : 𝚺ᴬ₁.Semisentence (l + 1)} {χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)}
 
@@ -410,7 +407,6 @@ lemma comp [𝗘𝗤 ℒₒᵣ ⪯ T] (hg : T.ProvablyTotalVia g ψ) (hh : ∀ i
   obtain ⟨y, hy⟩ := hg.models V z
   exact ⟨y, by simpa using ⟨z, hy, hz⟩⟩
 
-end
 
 end ProvablyTotalVia
 
@@ -473,13 +469,11 @@ lemma provablyTotalFunctions_subset_of_Pi2
     (H : T ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ] U) :
     T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.of_Pi2 H
 
-namespace ProvablyFunctional
 
-lemma toProvablyTotal (h : T.ProvablyFunctional f) : T.ProvablyTotal f :=
+lemma ProvablyFunctional.toProvablyTotal (h : T.ProvablyFunctional f) : T.ProvablyTotal f :=
   have ⟨_, h⟩ := h;
   ⟨_, h.toProvablyTotalVia⟩
 
-end ProvablyFunctional
 
 /-- Over a theory containing `𝗕𝚺₁`, `T`-provable totality and `T`-provable functionality
 coincide, identifying `provablyTotalFunctions` with Bek99's class of functions with a

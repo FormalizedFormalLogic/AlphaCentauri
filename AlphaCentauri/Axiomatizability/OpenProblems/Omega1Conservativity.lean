@@ -22,15 +22,13 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder
 
-namespace Arithmetic
 
 /-- $\mathsf{I}\Delta_0 + \Omega_1$ is $\Pi_1$-conservative over $\mathsf{I}\Delta_0$. An open
 problem.
 - [HP98, §V.1(a), p. 274]
 - [HP98, §V.5(g), p. 395] -/
-def ISigma0UnionOmega1WeakerThanOnPi1ISigma0 : Prop :=
+def Arithmetic.ISigma0UnionOmega1WeakerThanOnPi1ISigma0 : Prop :=
   𝗜𝚺₀ ∪ 𝝮₁ ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 1 σ] 𝗜𝚺₀
 
-end Arithmetic
 
 end FFL.FirstOrder

@@ -18,7 +18,8 @@ eliminated, and the cuts on the axioms remain.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.LKI
+namespace FFL.FirstOrder.Arithmetic
+namespace LKI
 
 open Rewriting LawfulSyntacticRewriting
 open LK.Derivation.Canonical (StrongerThan inf_def)
@@ -560,6 +561,7 @@ theorem nonempty_anchored_of_provable_ISigma1 {σ : ArithmeticSentence}
 
 end Canonical
 
-end FFL.FirstOrder.Arithmetic.LKI
+end LKI
+end FFL.FirstOrder.Arithmetic
 
 end

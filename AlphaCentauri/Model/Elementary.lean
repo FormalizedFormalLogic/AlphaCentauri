@@ -19,7 +19,6 @@ $\mathsf{B}\Sigma_{j+1}$.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section Elementary
 
 open Semiformula
 
@@ -200,6 +199,5 @@ theorem models_BSigma_succ (hI : ∃ c, c ∉ I.carrier) (hj : SigmaElementary I
 
 end Cut
 
-end Elementary
 
 end FFL.FirstOrder.Arithmetic

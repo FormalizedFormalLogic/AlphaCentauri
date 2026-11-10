@@ -87,7 +87,6 @@ noncomputable def omegaTower : ℕ → Ordinal → Ordinal
   | 0, a => a
   | c + 1, a => omegaTower c (ω ^ a)
 
-section OmegaTower
 
 variable {a : Ordinal}
 
@@ -97,6 +96,5 @@ variable {a : Ordinal}
 
 @[grind =] lemma omegaTower_succ (c : ℕ) : omegaTower (c + 1) a = omegaTower c (ω ^ a) := rfl
 
-end OmegaTower
 
 end Ordinal

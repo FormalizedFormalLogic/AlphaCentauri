@@ -22,7 +22,6 @@ the domain has a value, not that it has exactly one.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section Pigeonhole
 
 open _root_.FFL.Entailment
 
@@ -112,7 +111,6 @@ lemma models_weakPigeonholeAxiom_iff (φ : ArithmeticSemiformula ℕ 2) :
 
 end models
 
-section standardModel
 
 instance models_PigeonholeOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗛𝗣 Γ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
@@ -144,9 +142,7 @@ instance (Γ : Polarity) (s : ℕ) : Consistent (𝗣𝗛𝗣 Γ s) := (𝗣𝗛
 instance (Γ : Polarity) (s : ℕ) : Consistent (𝗪𝗣𝗛𝗣 Γ s) :=
   (𝗪𝗣𝗛𝗣 Γ s).consistent_of_sound (Eq ⊥) rfl
 
-end standardModel
 
-section openProblems
 
 /-- $\mathsf{I}\Delta_0$ proves the pigeonhole principle for $\Delta_0$ formulas. An open problem.
 - [PWW88, Problem 2]
@@ -158,8 +154,6 @@ open problem.
 - [HP98, §V.5(g), p. 395] -/
 def PigeonholeOnPrenexHierarchyWeakerThanISigma0UnionOmega1 : Prop := 𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀ ∪ 𝝮₁
 
-end openProblems
 
-end Pigeonhole
 
 end FFL.FirstOrder.Arithmetic

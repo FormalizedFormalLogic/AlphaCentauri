@@ -16,7 +16,8 @@ Bound-preserving inversion for disjunctions, conjunctions, and universal formula
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic
+namespace OmegaLogic
 
 variable {α : Ordinal.{0}} {c : ℕ} {φ ψ : ArithmeticFormula ℕ}
   {φₓ : ArithmeticSemiformula ℕ 1} {Γ : Sequent}
@@ -54,7 +55,6 @@ lemma qr_lt_of_succ_le {χ : ArithmeticFormula ℕ} (h : ((χ.qr : ℕ∞) + 1) 
 
 namespace Provable
 
-section InversionOr
 
 /-- Replaces a disjunction in a derivation by its two disjuncts while preserving both bounds.
 
@@ -113,9 +113,7 @@ lemma or_inv (hmem : (φ ⋎ ψ) ∈ Γ) (h : Z∞ ⊢[α, c] Γ) :
   obtain ⟨D, ho, hcr⟩ := h
   exact (orInvAux D hcr hmem).mono_ordinalBound ho
 
-end InversionOr
 
-section InversionAll
 
 /-- Replaces a universal formula by a numeral instance while preserving both derivation bounds.
 
@@ -177,9 +175,7 @@ lemma all_inv (hmem : (∀¹ φₓ) ∈ Γ) (n : ℕ) (h : Z∞ ⊢[α, c] Γ) :
   obtain ⟨D, ho, hcr⟩ := h
   exact (allInvAux n D hcr hmem).mono_ordinalBound ho
 
-end InversionAll
 
-section InversionAnd
 
 /-- Replaces a conjunction by either conjunct while preserving both derivation bounds.
 
@@ -293,8 +289,8 @@ lemma and_inv_right (hmem : (φ ⋏ ψ) ∈ Γ) (h : Z∞ ⊢[α, c] Γ) :
   obtain ⟨D, ho, hcr⟩ := h
   exact (andInvAux D hcr hmem).2.mono_ordinalBound ho
 
-end InversionAnd
 
 end Provable
 
-end FFL.FirstOrder.Arithmetic.OmegaLogic
+end OmegaLogic
+end FFL.FirstOrder.Arithmetic

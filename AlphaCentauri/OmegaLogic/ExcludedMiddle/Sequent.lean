@@ -12,11 +12,11 @@ A sequent containing a formula and its negation is derivable cut-free.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic
+namespace OmegaLogic
 
 namespace Provable
 
-section ExcludedMiddle
 
 section
 variable {α : Ordinal.{0}} {Γ : Sequent}
@@ -97,8 +97,8 @@ complexity.
 theorem lem (hp : φ ∈ Γ) (hn : ∼φ ∈ Γ) :
     Z∞ ⊢[((2 * φ.complexity : ℕ) : Ordinal.{0}), 0] Γ := lemAux le_rfl hp hn
 
-end ExcludedMiddle
 
 end Provable
 
-end FFL.FirstOrder.Arithmetic.OmegaLogic
+end OmegaLogic
+end FFL.FirstOrder.Arithmetic

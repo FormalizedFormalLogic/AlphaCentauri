@@ -10,7 +10,6 @@ The correspondence between `Fin k → ℕ` and `List.Vector ℕ k` argument form
 
 @[expose] public section
 
-section vector
 
 variable {k : ℕ}
 
@@ -19,4 +18,3 @@ theorem PrimrecPred.comp_get_iff {p : (Fin k → ℕ) → Prop} :
   ⟨fun h ↦ (h.comp Primrec.vector_ofFn').of_eq fun v ↦ by
       rw [funext (List.Vector.get_ofFn v)], fun h ↦ h.comp Primrec.vector_get'⟩
 
-end vector

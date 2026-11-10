@@ -130,7 +130,6 @@ private lemma comp (hg : T.ProvablyFunctionalVia g ψ)
 
 end comp
 
-section prec
 variable {f : (Fin n → ℕ) → ℕ} {g : (Fin (n + 2) → ℕ) → ℕ}
   {ψ : 𝚺ᴬ₁.Semisentence (n + 1)} {χ : 𝚺ᴬ₁.Semisentence (n + 3)}
 
@@ -147,7 +146,6 @@ private lemma prec [𝗜𝚺₁ ⪯ T] (hf : T.ProvablyFunctionalVia f ψ)
   obtain ⟨G, hG⟩ := hg.models V
   exact ⟨_, (precConstruction hF hG).result_defined⟩
 
-end prec
 
 end
 

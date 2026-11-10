@@ -15,7 +15,8 @@ Consequently a sequent derivable at height `α` and cut rank `c` is derivable cu
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic
+namespace OmegaLogic
 
 open scoped Ordinal
 
@@ -83,4 +84,5 @@ theorem cut_elimination (h : Z∞ ⊢[α, c] Γ) : Z∞ ⊢[Ordinal.omegaTower c
 
 end Provable
 
-end FFL.FirstOrder.Arithmetic.OmegaLogic
+end OmegaLogic
+end FFL.FirstOrder.Arithmetic

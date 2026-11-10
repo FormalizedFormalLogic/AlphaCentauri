@@ -21,14 +21,14 @@ cut-reducible at rank `c`.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic
+namespace OmegaLogic
 
 open scoped Ordinal
 
 variable {θ α β : Ordinal.{0}} {c k : ℕ} {φ ψ : ArithmeticFormula ℕ}
   {φₓ : ArithmeticSemiformula ℕ 1} {Γ : Sequent}
 
-section Frame
 
 /-! ### Moving an `insert` across an `erase`
 
@@ -54,7 +54,6 @@ private lemma frameOut {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s t : Sequen
     insert a (s.erase e ∪ t) ⊆ (insert a s).erase e ∪ t := by
   grind
 
-end Frame
 
 /-- A cut formula is reducible below `ω ^ θ` at rank `c` when cutting two bounded derivations on it
 produces another derivation with the same bounds.
@@ -64,12 +63,10 @@ def CutReducible (θ : Ordinal.{0}) (c : ℕ) (φ : ArithmeticFormula ℕ) : Pro
   ∀ {Γ : Sequent} {γ δ : Ordinal.{0}}, γ < ω ^ θ → δ < ω ^ θ →
     Z∞ ⊢[γ, c] insert φ Γ → Z∞ ⊢[δ, c] insert (∼φ) Γ → ∃ ε < ω ^ θ, Z∞ ⊢[ε, c] Γ
 
-namespace CutReducible
 
-lemma neg (h : CutReducible θ c φ) : CutReducible θ c (∼φ) := fun hγ hδ h₁ h₂ =>
+lemma CutReducible.neg (h : CutReducible θ c φ) : CutReducible θ c (∼φ) := fun hγ hδ h₁ h₂ =>
   h hδ hγ (by simpa using h₂) h₁
 
-end CutReducible
 
 namespace Provable
 
@@ -80,7 +77,6 @@ lemma cutReducible_of_qr_lt (hθ : 0 < θ) (h : φ.qr < c) : CutReducible θ c �
   fun hγ hδ h₁ h₂ =>
     ⟨_, Ordinal.add_one_lt_omega0_opow hθ (max_lt hγ hδ), cut φ h h₁ h₂⟩
 
-section Falsum
 
 /-- Erases `⊥` from a cut-free derivation without increasing its height.
 
@@ -138,7 +134,6 @@ lemma cutReducible_verum : CutReducible θ 0 (⊤ : ArithmeticFormula ℕ) :=
 lemma cutReducible_falsum : CutReducible θ 0 (⊥ : ArithmeticFormula ℕ) :=
   fun hγ _ h₁ _ => ⟨_, hγ, remove_falsum h₁⟩
 
-end Falsum
 
 section Atom
 
@@ -324,7 +319,6 @@ lemma cutReducible_of_complexity_zero (hθ : 0 < θ) (hc : φ.complexity = 0) :
 
 end Atom
 
-section Binary
 
 /-- Reducibility of both conjuncts implies reducibility of their conjunction.
 
@@ -354,9 +348,7 @@ lemma cut_reduce_or (hφ : CutReducible θ c φ) (hψ : CutReducible θ c ψ) :
   intro Γ γ δ hγ hδ hC hNC
   exact cut_reduce_and hφ.neg hψ.neg hδ hγ (by simpa using hNC) (by simpa using hC)
 
-end Binary
 
-section Quantifier
 
 variable {Δ : Sequent}
 
@@ -464,7 +456,6 @@ lemma cut_reduce_all (hθ : 0 < θ) (hqr : φₓ.qr < c) : CutReducible θ c (�
     (Finset.mem_insert_self _ _)).weakening ?_).mono_ordinalBound (by gcongr)
   grind
 
-end Quantifier
 
 end Provable
 
@@ -474,7 +465,6 @@ variable {θ α : Ordinal.{0}} {c : ℕ}
 
 namespace Provable
 
-section
 variable {ξ : ArithmeticFormula ℕ}
 
 private lemma cutReducibleAux (hθ : 0 < θ) (m : ℕ) :
@@ -512,8 +502,8 @@ quantifier rank at most `c` can be traded for a derivation that stays below `ω 
 lemma cut_elim_principal (hθ : 0 < θ) (hqr : ξ.qr ≤ c) : CutReducible θ c ξ :=
   cutReducibleAux hθ ξ.complexity ξ le_rfl hqr
 
-end
 
 end Provable
 
-end FFL.FirstOrder.Arithmetic.OmegaLogic
+end OmegaLogic
+end FFL.FirstOrder.Arithmetic

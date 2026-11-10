@@ -29,7 +29,6 @@ open Ordinal
 
 /-! ### Definitions -/
 
-section Defs
 
 /-- The base read at step `k` of a Goodstein sequence. -/
 def base (k : ℕ) : ℕ := k + 2
@@ -64,11 +63,9 @@ def goodsteinSeq (m : ℕ) : ℕ → ℕ
   | 0 => m
   | k + 1 => bump (base k) (goodsteinSeq m k) - 1
 
-end Defs
 
 /-! ### Termination -/
 
-section Termination
 
 variable (b m k : ℕ)
 
@@ -393,6 +390,5 @@ lemma goodsteinLength_le {m N : ℕ} (h : goodsteinSeq m N = 0) : goodsteinLengt
 lemma goodsteinSeq_ne_zero_of_lt {m N : ℕ} (h : N < goodsteinLength m) : goodsteinSeq m N ≠ 0 :=
   Nat.find_min (goodstein_terminates m) h
 
-end Termination
 
 end Goodstein

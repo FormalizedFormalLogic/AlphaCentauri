@@ -9,7 +9,6 @@ public import AlphaCentauri.Model.DefinableElements
 
 namespace FFL.FirstOrder.Arithmetic
 
-section Strictness
 
 /-- $\mathsf{I}\Sigma_n$ is strictly weaker than $\mathsf{B}\Sigma_{n + 1}$.
 
@@ -39,6 +38,5 @@ theorem BSigma_strictlyWeakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪱ 𝗜�
       (models_of_subtheory (T := 𝗜𝚺 (n + 1)) (U := 𝗕𝚺 (n + 1)) <|
         definableCut.models_BSigma (j := n) hns)
 
-end Strictness
 
 end FFL.FirstOrder.Arithmetic

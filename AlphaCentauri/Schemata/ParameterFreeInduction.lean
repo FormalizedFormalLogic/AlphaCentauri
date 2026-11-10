@@ -20,7 +20,6 @@ namespace FFL.FirstOrder.Arithmetic
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open _root_.FFL.Entailment
 
-section ParameterFreeInduction
 
 section axioms
 
@@ -68,7 +67,6 @@ instance (Γ : Polarity) (s : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜ᶠ Γ s :=
 
 end axioms
 
-section standardModel
 
 instance models_IParameterFree (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜ᶠ Γ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
@@ -77,8 +75,6 @@ instance models_IParameterFree (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧
 
 instance (Γ : Polarity) (s : ℕ) : Consistent (𝗜ᶠ Γ s) := (𝗜ᶠ Γ s).consistent_of_sound (Eq ⊥) rfl
 
-end standardModel
 
-end ParameterFreeInduction
 
 end FFL.FirstOrder.Arithmetic

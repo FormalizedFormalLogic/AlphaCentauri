@@ -13,7 +13,6 @@ $\mathsf{ZR}$ in which `X` is a nonstandard element.
 
 @[expose] public section
 
-section IntegerConstantPolynomialModel
 
 open FFL FirstOrder Polynomial
 
@@ -29,4 +28,3 @@ theorem models_ZRing : (Nonneg (IntegerConstantPolynomial K))↓[ℒₒᵣ] ⊧*
 
 end IntegerConstantPolynomial
 
-end IntegerConstantPolynomialModel

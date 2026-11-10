@@ -14,7 +14,6 @@ extension of it.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section Cuts
 
 open Semiformula Tarski.Structure
 
@@ -65,6 +64,5 @@ def endExtension : I.carrier ⊆ₑ M where
 lemma endExtension_emb (x : I.carrier) : I.endExtension.emb x = x.val := rfl
 
 end Cut
-end Cuts
 
 end FFL.FirstOrder.Arithmetic

@@ -19,7 +19,6 @@ $\mathsf{I}\mathsf{E}_1$ suffices.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section DirectSummand
 
 open RingOfDifferences OpenPredicate
 
@@ -45,6 +44,5 @@ theorem not_int_directSummand_IE1 :
   rintro ⟨f, s, h⟩
   simpa [addMonoidHom_eq_zero_IE1 hV f] using DFunLike.congr_fun h 1
 
-end DirectSummand
 
 end FFL.FirstOrder.Arithmetic

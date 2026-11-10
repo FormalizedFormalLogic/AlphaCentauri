@@ -15,7 +15,8 @@ logical rules, and soundness.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic
+namespace OmegaLogic
 
 /-- `Z∞ ⊢[α, c] Γ` means that `Γ` has a derivation of height at most `α` and cut rank at most `c`.
 
@@ -27,7 +28,6 @@ def Provable (α : Ordinal.{0}) (c : ℕ) (Γ : Sequent) : Prop :=
 
 namespace Provable
 
-section
 
 variable {α β : Ordinal.{0}} {c c' k : ℕ} {φ ψ : ArithmeticFormula ℕ}
   {φₓ : ArithmeticSemiformula ℕ 1} {Γ : Sequent}
@@ -139,8 +139,8 @@ lemma sound (h : Z∞ ⊢[α, c] Γ) : ∃ φ ∈ Γ, LitTrue φ := h.choose.sou
 
 lemma not_empty : ¬(Z∞ ⊢[α, c] ∅) := fun h => by simpa using h.sound
 
-end
 
 end Provable
 
-end FFL.FirstOrder.Arithmetic.OmegaLogic
+end OmegaLogic
+end FFL.FirstOrder.Arithmetic

@@ -20,7 +20,6 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 open _root_.FFL.Entailment
 
-section StrongCollection
 
 variable {V : Type*} [ORingStructure V] {n : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(n + 1)]
 
@@ -58,6 +57,5 @@ theorem strong_collection {R : V → V → Prop} (hR : 𝚺ᴬ_[n + 1].Definable
   · exact hy
   · exact hRy <| (hq x hx).mpr h
 
-end StrongCollection
 
 end FFL.FirstOrder.Arithmetic

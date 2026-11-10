@@ -23,7 +23,8 @@ with bounded cut rank and then cut-free.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic
+namespace OmegaLogic
 
 variable {n : ℕ} {Γ : Sequent}
 
@@ -91,7 +92,6 @@ lemma exI_closed (ψ : ArithmeticSemiformula ℕ 1) (s : ArithmeticTerm ℕ)
 
 end ClosedWitness
 
-section Embedding
 
 /-- Every `𝗣𝗔` derivation embeds into `Z_∞` under every numeral assignment of its free variables.
 
@@ -184,8 +184,8 @@ theorem of_derivation2_cutFree (d : 𝗣𝗔 ⟹₂ Γ) (e : ℕ → ℕ) :
   obtain ⟨α, hα⟩ := h e
   exact ⟨_, cut_elimination hα⟩
 
-end Embedding
 
 end Provable
 
-end FFL.FirstOrder.Arithmetic.OmegaLogic
+end OmegaLogic
+end FFL.FirstOrder.Arithmetic

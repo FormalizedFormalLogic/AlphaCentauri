@@ -12,7 +12,6 @@ namespace FFL.FirstOrder.Arithmetic
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open _root_.FFL.Entailment
 
-section DeltaOnBroadHierarchy
 
 /-! ## The `Δ` induction scheme over the broad hierarchy
 
@@ -43,9 +42,7 @@ instance models_IDeltaOnBroadHierarchy (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜�
   | zero => exact hzero
   | succ x ih => exact hsucc x ih
 
-end DeltaOnBroadHierarchy
 
-section DeltaInduction
 
 /-! ## The `Δ` induction schemes between `𝗜𝚺 n` and `𝗕𝚺(n + 1)`
 
@@ -85,6 +82,5 @@ it holds once exponentiation is adjoined to $\mathsf{I}\Delta_0$.
 - [Sla04] -/
 def BSigmaWeakerThanIDelta : Prop := ∀ n : ℕ, 𝗕𝚺(n + 1) ⪯ 𝗜𝚫(n + 1)
 
-end DeltaInduction
 
 end FFL.FirstOrder.Arithmetic

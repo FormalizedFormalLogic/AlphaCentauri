@@ -1,8 +1,8 @@
 module
 
+public import AlphaCentauri.Model.IntegerConstantPolynomial
 public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
-public import AlphaCentauri.NumberTheory.FLT3
 public import AlphaCentauri.ToMathlib.OpenPredicate.PolynomialRing
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
@@ -11,7 +11,19 @@ public import Mathlib.FieldTheory.KummerPolynomial
 public import Mathlib.NumberTheory.Padics.Hensel
 
 /-!
-# Case I of Fermat's Last Theorem in $\mathsf{IOpen}$
+# Fermat's Last Theorem in $\mathsf{I}\mathsf{E}_1$ and $\mathsf{IOpen}$
+
+$\mathsf{I}\mathsf{E}_1$ is induction for bounded existential formulas over $\mathsf{PA}^-$.
+Over a model $V$ of $\mathsf{I}\mathsf{E}_1$, the ring of differences of $V$ satisfies the least
+number principle `LeastNumberPrinciple` for bounded existential open predicates, and
+`FermatThree.flt3_of_leastNumberPrinciple` applies to it. Smith proved the statement over
+$\mathsf{I}\mathsf{E}_2$ and asked whether $\mathsf{I}\mathsf{E}_1$ suffices, and whether
+$\mathsf{I}\mathsf{E}_2$ proves the other odd exponents, which is open.
+
+A nonzero solution of $x^n + y^n = z^n$ in a discretely ordered ring is a counterexample to
+Fermat's Last Theorem in its non-negative part. In the $\mathbb{Z}$-ring of real polynomials with
+integer constant term, $x = y = X$ and $z = 2^{1/n} X$ is such a solution, and $\mathsf{IOpen}$
+proves only the universal sentences true in every model of $\mathsf{ZR}$.
 
 In a model of $\mathsf{IOpen}$ every element is a standard remainder modulo $n^2$ plus a multiple of
 $n^2$, so a solution of $x^n + y^n = z^n$ reduces to a solution of the congruence
@@ -24,7 +36,11 @@ In the $\mathbb{Z}$-ring `PadicIntegralPolynomial χ`, the elements $x = X$, $y 
 $z = 5 X$ satisfy $x^7 + y^7 = z^7$ and $x y z \equiv 6 \pmod 7$. By Wilkie's extension theorem,
 this ring embeds into a model of $\mathsf{IOpen}$ in which Case I fails.
 
-- [Smi92b, Lemma 3.6, Question 5.1]
+- [Wil85]
+- [Smi93, Question 5.5, Question 5.6]
+- [Smi92b, Introduction, Lemma 3.6, Question 5.1, Question 5.3, Question 5.5, Question 5.6]
+- [She64]
+- [DAq05, §2]
 - [Wil78, Lemma 3.2]
 -/
 
@@ -32,7 +48,80 @@ this ring embeds into a model of $\mathsf{IOpen}$ in which Case I fails.
 
 namespace FFL.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] {N n e : ℕ}
+open RingOfDifferences OpenPredicate
+
+/-- Fermat's Last Theorem for exponent `n`. -/
+def fermatLastTheorem (n : ℕ) : ArithmeticSentence :=
+  “∀ x y z, x ^' n + y ^' n = z ^' n → x = 0 ∨ y = 0 ∨ z = 0”
+
+/-- $\mathsf{I}\mathsf{E}_1$ proves Fermat's Last Theorem for exponent $3$.
+- [Wil85]
+- [Smi93, Question 5.5] -/
+theorem provable_fermatLastTheorem_three_IE1 : 𝗜𝗘₁ ⊢ fermatLastTheorem 3 := by
+  apply complete
+  intro V _ hV
+  have hL := leastNumberPrinciple_of_models_induction (V := V)
+  suffices ∀ a b c : V, a ^ 3 + b ^ 3 = c ^ 3 → a = 0 ∨ b = 0 ∨ c = 0 by
+    simpa [models_iff, fermatLastTheorem]
+  intro a b c h
+  have e : of a ^ 3 + of b ^ 3 = of c ^ 3 := by simpa [map_add (of : V →+* _)] using congrArg of h
+  simpa [map_eq_zero_iff _ of_injective] using FermatThree.flt3_of_leastNumberPrinciple hL _ _ _ e
+
+/-- $\mathsf{I}\mathsf{E}_2$ proves Fermat's Last Theorem for every odd exponent $n \ge 5$. An
+open problem.
+- [Smi93, Question 5.6] -/
+def ProvableFermatLastTheoremIE2 : Prop := ∀ n : ℕ, Odd n → 5 ≤ n → 𝗜𝗘₂ ⊢ fermatLastTheorem n
+
+/-- Bézout's theorem: any `x` and nonzero `y` have a common divisor `z` with `s y = t x + z`.
+Smith prints it without the hypothesis `y ≠ 0`, which `x = 1`, `y = 0` violates.
+- [Smi92b, Definition 3.5] -/
+def bezout : ArithmeticSentence := “∀ x y, y ≠ 0 → ∃ z s t, s * y = t * x + z ∧ z ∣ x ∧ z ∣ y”
+
+/-- Case I of Fermat's Last Theorem for exponent `n`: every solution of `xⁿ + yⁿ = zⁿ` has
+`n ∣ x y z`.
+- [Smi92b, §2] -/
+def fermatLastTheoremCaseOne (n : ℕ) : ArithmeticSentence :=
+  “∀ x y z, x ^' n + y ^' n = z ^' n → ↑n ∣ x * y * z”
+
+/-- Case II of Fermat's Last Theorem for exponent `n`: every solution of `xⁿ + yⁿ = zⁿ` with
+`n ∣ x y z` is trivial.
+- [Smi92b, §2] -/
+def fermatLastTheoremCaseTwo (n : ℕ) : ArithmeticSentence :=
+  “∀ x y z, x ^' n + y ^' n = z ^' n → ↑n ∣ x * y * z → x = 0 ∨ y = 0 ∨ z = 0”
+
+/-- `xⁿ ± yⁿ = z²` has only trivial solutions.
+- [Smi92b, Question 5.6] -/
+def powerAddPowerNeSquare (n : ℕ) : ArithmeticSentence :=
+  “∀ x y z, x ^' n + y ^' n = z * z ∨ x ^' n = y ^' n + z * z →
+    x = 0 ∨ y = 0 ∨ z = 0”
+
+/-- $\mathsf{IOpen} + \mathrm{Bez}$ proves Case II of Fermat's Last Theorem for some exponent
+$n \ge 3$. An open problem.
+- [Smi92b, Question 5.3] -/
+def ExistsProvableFermatLastTheoremCaseTwoIOpenBezout : Prop :=
+  ∃ n : ℕ, 3 ≤ n ∧ insert bezout 𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseTwo n
+
+/-- $\mathsf{IE}_1$ proves Case I of Fermat's Last Theorem for each standard $n \ge 3$. An open
+problem; since $\mathsf{IE}_1$ proves $\mathsf{IOpen} + \mathrm{Bez}$, which proves
+$\mathsf{IOpen} + \mathrm{GCD}$, it is equivalent to asking whether Case I is provable in any of
+the three.
+- [Smi92b, Question 5.5]
+- [Smi92b, Lemma 3.11] -/
+def ProvableFermatLastTheoremCaseOneIE1 : Prop :=
+  ∀ n : ℕ, 3 ≤ n → 𝗜𝗘₁ ⊢ fermatLastTheoremCaseOne n
+
+/-- $\mathsf{IE}_1$ proves Fermat's Last Theorem for each even standard $n > 2$. An open problem.
+- [Smi92b, Question 5.6] -/
+def ProvableFermatLastTheoremIE1OfEven : Prop :=
+  ∀ n : ℕ, Even n → 2 < n → 𝗜𝗘₁ ⊢ fermatLastTheorem n
+
+/-- $\mathsf{IE}_1$ proves that $x^n \pm y^n = z^2$ has no nontrivial solutions for each even
+standard $n \ge 4$. An open problem.
+- [Smi92b, Question 5.6] -/
+def ProvablePowerAddPowerNeSquareIE1 : Prop :=
+  ∀ n : ℕ, Even n → 4 ≤ n → 𝗜𝗘₁ ⊢ powerAddPowerNeSquare n
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] {N n : ℕ}
 
 lemma exists_pow_add_mul_eq {R : Type*} [CommSemiring R] (a m k : R) (e : ℕ) :
     ∃ u, (a + m * k) ^ e = a ^ e + m * u := by
@@ -53,9 +142,18 @@ lemma exists_nat_lt_add_mul (hN : 0 < N) (x : V) : ∃ a < N, ∃ q, x = a + N *
   · exact_mod_cast hr
   · exact ⟨_, hx.trans (add_comm _ _)⟩
 
-lemma dvd_mul_mul_of_pow_add_pow_eq (hN : 0 < N) (hnN : n ∣ N)
-    (H : ∀ a < N, ∀ b < N, ∀ c < N, (a ^ e + b ^ e) % N = c ^ e % N → n ∣ a * b * c)
-    {x y z : V} (h : x ^ e + y ^ e = z ^ e) : (n : V) ∣ x * y * z := by
+lemma provable_fermatLastTheoremCaseOne_IOpen_of_forall (hn : 0 < n)
+    (H : ∀ a < n ^ 2, ∀ b < n ^ 2, ∀ c < n ^ 2, (a ^ n + b ^ n) % n ^ 2 = c ^ n % n ^ 2 →
+      n ∣ a * b * c) :
+    𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseOne n := by
+  apply complete
+  intro (V : Type) _ hV
+  suffices ∀ x y z : V, x ^ n + y ^ n = z ^ n → (n : V) ∣ x * y * z by
+    simpa [models_iff, fermatLastTheoremCaseOne, numeral_eq_natCast]
+  intro x y z h
+  have hN : 0 < n ^ 2 := by positivity
+  have hnN : n ∣ n ^ 2 := dvd_pow_self n two_ne_zero
+  generalize n ^ 2 = N at hN hnN H
   have hN' : (0 : V) < N := by exact_mod_cast hN
   have hmod (m : ℕ) (u : V) : ((m : V) + N * u) % N = ((m % N : ℕ) : V) := by
     have : (m : V) = N * ↑(m / N) + ↑(m % N) := by exact_mod_cast (Nat.div_add_mod m N).symm
@@ -64,13 +162,13 @@ lemma dvd_mul_mul_of_pow_add_pow_eq (hN : 0 < N) (hnN : n ∣ N)
   obtain ⟨a, ha, qx, rfl⟩ := exists_nat_lt_add_mul hN x
   obtain ⟨b, hb, qy, rfl⟩ := exists_nat_lt_add_mul hN y
   obtain ⟨c, hc, qz, rfl⟩ := exists_nat_lt_add_mul hN z
-  obtain ⟨ux, hux⟩ := exists_pow_add_mul_eq (a : V) N qx e
-  obtain ⟨uy, huy⟩ := exists_pow_add_mul_eq (b : V) N qy e
-  obtain ⟨uz, huz⟩ := exists_pow_add_mul_eq (c : V) N qz e
-  have h₁ : ((a ^ e + b ^ e : ℕ) : V) + N * (ux + uy) = ((c ^ e : ℕ) : V) + N * uz := by
+  obtain ⟨ux, hux⟩ := exists_pow_add_mul_eq (a : V) N qx n
+  obtain ⟨uy, huy⟩ := exists_pow_add_mul_eq (b : V) N qy n
+  obtain ⟨uz, huz⟩ := exists_pow_add_mul_eq (c : V) N qz n
+  have h₁ : ((a ^ n + b ^ n : ℕ) : V) + N * (ux + uy) = ((c ^ n : ℕ) : V) + N * uz := by
     push_cast
     calc
-      _ = (a ^ e + N * ux) + (b ^ e + N * uy) := by ring
+      _ = (a ^ n + N * ux) + (b ^ n + N * uy) := by ring
       _ = _ := by rw [← hux, ← huy, ← huz, h]
   have h₂ := (hmod _ _).symm.trans <| (congrArg (· % (N : V)) h₁).trans (hmod _ _)
   have h₃ : (n : V) ∣ a * b * c := by
@@ -82,17 +180,6 @@ lemma dvd_mul_mul_of_pow_add_pow_eq (hN : 0 < N) (hnN : n ∣ N)
       h₃.add <| h₄.mul_right _
     _ = _ := by ring
 
-lemma provable_fermatLastTheoremCaseOne_IOpen_of_forall (hn : 0 < n)
-    (H : ∀ a < n ^ 2, ∀ b < n ^ 2, ∀ c < n ^ 2, (a ^ n + b ^ n) % n ^ 2 = c ^ n % n ^ 2 →
-      n ∣ a * b * c) :
-    𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseOne n := by
-  apply complete
-  intro (V : Type) _ hV
-  suffices ∀ x y z : V, x ^ n + y ^ n = z ^ n → (n : V) ∣ x * y * z by
-    simpa [models_iff, fermatLastTheoremCaseOne, numeral_eq_natCast]
-  intro x y z h
-  exact dvd_mul_mul_of_pow_add_pow_eq (by positivity) (dvd_pow_self n two_ne_zero) H h
-
 /-- $\mathsf{IOpen}$ proves Case I of Fermat's Last Theorem for exponent $3$.
 - [Smi92b, Lemma 3.6] -/
 theorem provable_fermatLastTheoremCaseOne_three_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseOne 3 :=
@@ -103,6 +190,7 @@ theorem provable_fermatLastTheoremCaseOne_three_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊢
 theorem provable_fermatLastTheoremCaseOne_five_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseOne 5 :=
   provable_fermatLastTheoremCaseOne_IOpen_of_forall (by norm_num) (by decide +kernel)
 
+open Tarski.Structure in
 /-- A model of $\mathsf{ZR}$ with a solution of $x^n + y^n = z^n$ for which $x y z$ leaves a
 non-zero remainder modulo $n$ embeds into a model of $\mathsf{IOpen}$ refuting Case I of Fermat's
 Last Theorem for exponent $n$.
@@ -116,32 +204,82 @@ lemma not_provable_fermatLastTheoremCaseOne_IOpen_of_models_ZRing {M : Type} [OR
   have hC : ∀ a b c : W, a ^ n + b ^ n = c ^ n → (n : W) ∣ a * b * c := by
     simpa [models_iff, fermatLastTheoremCaseOne, numeral_eq_natCast] using
       models_of_provable hW hp
-  have hzero : Θ 0 = 0 := by
-    simpa [Function.comp_def] using Tarski.Structure.HomClass.func Θ Language.Zero.zero ![]
-  have hone : Θ 1 = 1 := by
-    simpa [Function.comp_def] using Tarski.Structure.HomClass.func Θ Language.One.one ![]
-  have hadd (a b : M) : Θ (a + b) = Θ a + Θ b := by
-    simpa [Function.comp_def] using Tarski.Structure.HomClass.func Θ Language.Add.add ![a, b]
-  have hmul (a b : M) : Θ (a * b) = Θ a * Θ b := by
-    simpa [Function.comp_def] using Tarski.Structure.HomClass.func Θ Language.Mul.mul ![a, b]
-  have hpow (a : M) (k : ℕ) : Θ (a ^ k) = Θ a ^ k := by
-    induction k with
-    | zero => rw [pow_zero, pow_zero, hone]
-    | succ k ih => rw [pow_succ, hmul, ih, pow_succ]
-  have hcast (k : ℕ) : Θ k = k := by
-    induction k with
-    | zero => rw [Nat.cast_zero, Nat.cast_zero, hzero]
-    | succ k ih => rw [Nat.cast_succ, hadd, ih, hone, Nat.cast_succ]
-  have e₁ : Θ x ^ n + Θ y ^ n = Θ z ^ n := by rw [← hpow, ← hpow, ← hpow, ← hadd, h]
-  have e₂ : Θ x * Θ y * Θ z = Θ w * n + r := by
-    rw [← hmul, ← hmul, ← hcast, ← hcast, ← hmul, ← hadd, hxyz]
+  let f : M →+* W :=
+    { toFun := Θ
+      map_zero' := by simpa [Function.comp_def] using HomClass.func Θ Language.Zero.zero ![]
+      map_one' := by simpa [Function.comp_def] using HomClass.func Θ Language.One.one ![]
+      map_add' a b := by simpa [Function.comp_def] using HomClass.func Θ Language.Add.add ![a, b]
+      map_mul' a b := by simpa [Function.comp_def] using HomClass.func Θ Language.Mul.mul ![a, b] }
+  have e₁ : f x ^ n + f y ^ n = f z ^ n := by simpa using congrArg f h
+  have e₂ : f x * f y * f z = f w * n + r := by simpa using congrArg f hxyz
   have := hC _ _ _ e₁
   rw [e₂, ← mod_eq_zero_iff_dvd, mod_mul_add_of_lt _ _ (by exact_mod_cast hr)] at this
   exact hr₀.ne' (by exact_mod_cast this)
 
 end FFL.FirstOrder.Arithmetic
 
-open Polynomial
+namespace FFL.FirstOrder
+
+open Polynomial Semiformula IntermediateField OpenPredicate
+
+private lemma map_pow_of_map_mul {M S : Type*} [CommSemiring M] [CommSemiring S] (f : M → S)
+    (hone : f 1 = 1) (hmul : ∀ a b, f (a * b) = f a * f b) (a : M) (k : ℕ) :
+    f (a ^ k) = f a ^ k :=
+  map_pow ({ toFun := f, map_one' := hone, map_mul' := hmul } : M →* S) a k
+
+private lemma not_evalb_fermatLastTheorem_of_pow_add_pow {R : Type*} [CommRing R]
+    [LinearOrder R] [IsStrictOrderedRing R] [OpenPredicate.DiscretelyOrdered R] {n : ℕ}
+    {a b c : R} (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) (ha₀ : a ≠ 0) (hb₀ : b ≠ 0)
+    (hc₀ : c ≠ 0) (h : a ^ n + b ^ n = c ^ n) :
+    ¬ Evalb (M := Nonneg R) ![⟨c, hc⟩, ⟨b, hb⟩, ⟨a, ha⟩]
+      (“#2 ^' n + #1 ^' n = #0 ^' n → #2 = 0 ∨ #1 = 0 ∨ #0 = 0” : ArithmeticSemisentence 3) := by
+  simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Evalb, Fin.isValue,
+    LogicalConnective.HomClass.map_imply, eval_operator, Matrix.comp₂, Semiterm.val_operator,
+    Matrix.comp₁, Semiterm.val_bvar, Matrix.cons_app_two, Matrix.cons_val_one, Fin.Fin1.eq_one,
+    Matrix.cons_val_fin_one, Arithmetic.val_npow, Matrix.cons_val_zero, Tarski.Structure.Add.add,
+    Tarski.Structure.eq_iff_eq, LogicalConnective.HomClass.map_or, Matrix.comp₀,
+    Tarski.Structure.numeral_eq_numeral, ORingStructure.zero_eq_zero, Nonneg.mk_eq_zero,
+    LogicalConnective.Prop.or_eq, LogicalConnective.Prop.arrow_eq, not_imp, not_or]
+  and_intros
+  · let F : CommSemiring (Nonneg R) := Arithmetic.instCommSemiring_foundation
+    have hpow (p : Nonneg R) :=
+      @map_pow_of_map_mul (Nonneg R) R F _ Subtype.val rfl (fun _ _ ↦ rfl) p n
+    exact Subtype.ext <| (congrArg₂ (· + ·) (hpow ⟨a, ha⟩) (hpow ⟨b, hb⟩)).trans
+      (h.trans (hpow ⟨c, hc⟩).symm)
+  all_goals assumption
+
+/-- $\mathsf{IOpen}$ does not prove Fermat's Last Theorem for any exponent $n \ge 3$.
+- [She64]
+- [Smi92b, Introduction]
+- [DAq05, §2] -/
+theorem not_provable_fermatLastTheorem_IOpen {n : ℕ} (hn : 3 ≤ n) :
+    𝗜𝗢𝗽𝗲𝗻 ⊬ Arithmetic.fermatLastTheorem n := by
+  have hF : Arithmetic.fermatLastTheorem n = ∀¹*
+      (“#2 ^' n + #1 ^' n = #0 ^' n → #2 = 0 ∨ #1 = 0 ∨ #0 = 0” : ArithmeticSemisentence 3) :=
+    rfl
+  obtain ⟨c, hc₀, hc⟩ : ∃ c : ℝ, 0 < c ∧ c ^ n = 2 :=
+    ⟨(2 : ℝ) ^ (n : ℝ)⁻¹, Real.rpow_pos_of_pos (by norm_num) _,
+      Real.rpow_inv_natCast_pow (by norm_num) (by omega)⟩
+  let z : IntegerConstantPolynomial ℝ :=
+    ⟨C c * Polynomial.X, IntegerConstantPolynomial.mem_iff.mpr ⟨0, by simp⟩⟩
+  have hx : 0 ≤ IntegerConstantPolynomial.X ℝ := by
+    rw [LeadingCoeffOrder.nonneg_iff]
+    simp [IntegerConstantPolynomial.X]
+  have hz : 0 ≤ z := by
+    rw [LeadingCoeffOrder.nonneg_iff]
+    simp [z, hc₀.le]
+  have := IntegerConstantPolynomial.models_ZRing ℝ
+  rw [hF]
+  apply Arithmetic.not_provable_IOpen_allClosure (M := Nonneg (IntegerConstantPolynomial ℝ))
+    (e := ![⟨z, hz⟩, ⟨_, hx⟩, ⟨_, hx⟩]) (by simp)
+  apply not_evalb_fermatLastTheorem_of_pow_add_pow hx hx hz
+  · simp [Subtype.ext_iff, IntegerConstantPolynomial.X]
+  · simp [Subtype.ext_iff, IntegerConstantPolynomial.X]
+  · simp [Subtype.ext_iff, z, hc₀.ne']
+  · apply Subtype.ext
+    simp only [z, IntegerConstantPolynomial.X, AddMemClass.coe_add, SubmonoidClass.coe_pow]
+    rw [mul_pow, ← C_pow, hc, C_ofNat]
+    ring
 
 private lemma irreducible_X_pow_seven_sub_C : Irreducible (X ^ 7 - C (5 ^ 7 - 1 : ℚ)) := by
   apply X_pow_sub_C_irreducible_of_prime (by decide : Nat.Prime 7)
@@ -187,10 +325,6 @@ private lemma exists_padicInt_pow_seven_eq [Fact (Nat.Prime 7)] :
   and_intros
   · simpa [sub_eq_zero] using hy
   · exact (PadicInt.norm_lt_one_iff_dvd _).mp (hy₄.trans (by norm_num))
-
-namespace FFL.FirstOrder
-
-open IntermediateField OpenPredicate
 
 /-- $\mathsf{IOpen}$ does not prove Case I of Fermat's Last Theorem for exponent $7$: some model of
 $\mathsf{IOpen}$ has $x^7 + y^7 = z^7$ with $x y z \equiv 6 \pmod 7$.
@@ -287,11 +421,8 @@ theorem not_provable_fermatLastTheoremCaseOne_seven_IOpen :
     linear_combination (-Polynomial.X ^ 3) * e₁ + e₂
   have := Nonneg.models_ZRing (R := R) PadicIntegralPolynomial.exists_eq_mul_add_of_pos
   let F : CommSemiring (Nonneg R) := Arithmetic.instCommSemiring_foundation
-  have hpow (a : Nonneg R) (k : ℕ) : letI := F; ((a ^ k : Nonneg R) : R) = (a : R) ^ k := by
-    let _ := F
-    induction k with
-    | zero => rfl
-    | succ k ih => rw [pow_succ, pow_succ, ← ih]; rfl
+  have hpow (a : Nonneg R) (k : ℕ) :=
+    @map_pow_of_map_mul (Nonneg R) R F _ Subtype.val rfl (fun _ _ ↦ rfl) a k
   apply Arithmetic.not_provable_fermatLastTheoremCaseOne_IOpen_of_models_ZRing (M := Nonneg R)
     (r := 6) (by norm_num) (by norm_num) (x := ⟨x, hx⟩) (y := ⟨y, hy⟩) (z := ⟨5 * x, hz⟩)
     (w := ⟨w, hw⟩)

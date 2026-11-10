@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Axiomatizability.Basic
-public import AlphaCentauri.NumberTheory.FLT3
+public import AlphaCentauri.NumberTheory.FermatLastTheorem
 public import AlphaCentauri.NumberTheory.Primes
 public import Mathlib.Computability.Halting
 

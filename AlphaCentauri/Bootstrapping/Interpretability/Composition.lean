@@ -327,6 +327,119 @@ lemma relAllItr_generalize_imp {d : Semiformula V L 1} (hd : d.shift = d) :
       Fin.coe_ofNat_eq_mod, zero_add, Nat.zero_mod, Nat.cast_zero] at h ⊢
     cl_prover [h]
 
+omit [T.Δ₁] in
+lemma conj_fin_zero_add {α : Type*} [Top α] [Wedge α] (k : ℕ) (f : ℕ → α) :
+    Matrix.conj (fun i : Fin (0 + k) ↦ f i) = Matrix.conj (fun i : Fin k ↦ f i) := by
+  have : ∀ m (_ : m = k), Matrix.conj (fun i : Fin m ↦ f i) = Matrix.conj (fun i : Fin k ↦ f i) := by
+    rintro m rfl; rfl
+  exact this _ (zero_add k)
+
+/-- Under hypotheses that `B i` and `C i` agree on `d`, the block `relativizedImp (d ⋏ e) B G` is
+equivalent to the block of quantifiers relativized to `d` over `⋀ᵢ (e(wᵢ) ∧ Cᵢ(wᵢ)) → G`. -/
+lemma relativizedImp_iff_relAllItr {k : ℕ} {d : Semiformula V L 1} (hd : d.shift = d)
+    (e : Semiformula V L 1) (B C : Fin k → Semiformula V L 1) (G : Semiformula V L (0 + k)) :
+    T.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (d 🡒 (B i 🡘 C i))) 🡒
+      (relativizedImp (d ⋏ e) B G 🡘 relAllItr d k (Matrix.conj (fun i : Fin k ↦
+        e.subst ![Semiterm.bvar (i.addCast 0)] ⋏ (C i).subst ![Semiterm.bvar (i.addCast 0)]) 🡒
+          G)) := by
+  have hdk : Semiformula.shift^[k] d = d := Function.iterate_fixed hd k
+  have hH (i : Fin k) : T.internalize V ⊢
+      Semiformula.shift^[k] (Matrix.conj fun i ↦ ∀¹ (d 🡒 (B i 🡘 C i))) 🡒
+        d.subst ![Semiterm.fvar ((i : ℕ) : V)] 🡒
+          ((Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar ((i : ℕ) : V)] 🡘
+            (Semiformula.shift^[k] (C i)).subst ![Semiterm.fvar ((i : ℕ) : V)]) := by
+    rw [Semiformula.shift_iterate_conj]
+    have h₁ := matrixConj_elim (𝓢 := T.internalize V)
+      (fun i ↦ Semiformula.shift^[k] (∀¹ (d 🡒 (B i 🡘 C i)))) i
+    have h₂ := TProof.all_imp_subst (T := T) (Semiformula.shift^[k] (d 🡒 (B i 🡘 C i)))
+      (Semiterm.fvar ((i : ℕ) : V))
+    simp only [Semiformula.shift_iterate_all, Semiformula.shift_iterate_imp,
+      Semiformula.shift_iterate_iff, hdk] at h₁ h₂ ⊢
+    simp only [LogicalConnective.iff, Semiformula.substs_imp, Semiformula.substs_and] at h₁ h₂ ⊢
+    exact C_trans h₁ h₂
+  have h₁ : T.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (d 🡒 (B i 🡘 C i))) ⋏
+      relativizedImp (d ⋏ e) B G 🡒 relAllItr d k (Matrix.conj (fun i : Fin k ↦
+        e.subst ![Semiterm.bvar (i.addCast 0)] ⋏ (C i).subst ![Semiterm.bvar (i.addCast 0)]) 🡒
+          G) := by
+    apply relAllItr_generalize_imp (k := k) hd
+    have hs := TProof.allItr_specialize (T := T) (Semiformula.shift^[k]
+      (Matrix.conj (fun i : Fin k ↦ (d ⋏ e).subst ![Semiterm.bvar (i.addCast 0)] ⋏
+        (B i).subst ![Semiterm.bvar (i.addCast 0)]) 🡒 G))
+      (fun i ↦ Semiterm.fvar ((i : ℕ) : V))
+    simp only [relativizedImp, Semiformula.shift_iterate_and, Semiformula.shift_iterate_allItr,
+      Semiformula.shift_iterate_imp, Semiformula.substs_imp, Semiformula.shift_iterate_conj,
+      Semiformula.substs_conj, Semiformula.substs_and, Semiformula.subst_shift_iterate_subst_bvar,
+      Fin.addCast_val, hdk] at hs ⊢
+    simp only [conj_fin_zero_add k (fun j ↦ d.subst ![Semiterm.fvar (j : V)])] at hs ⊢
+    have hZ : T.internalize V ⊢ (Matrix.conj fun i ↦ Semiformula.shift^[k] (∀¹ (d 🡒 (B i 🡘 C i)))) ⋏
+        (Matrix.conj fun i : Fin k ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
+        (Matrix.conj fun i : Fin k ↦ (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+          (Semiformula.shift^[k] (C i)).subst ![Semiterm.fvar ((i : ℕ) : V)]) 🡒
+        Matrix.conj fun i : Fin k ↦ (d.subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+          (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
+          (Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar ((i : ℕ) : V)] :=
+      matrixConj_intro fun i ↦ by
+        have a := matrixConj_elim (𝓢 := T.internalize V)
+          (fun i : Fin k ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)]) i
+        have b := matrixConj_elim (𝓢 := T.internalize V)
+          (fun i : Fin k ↦ (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+            (Semiformula.shift^[k] (C i)).subst ![Semiterm.fvar ((i : ℕ) : V)]) i
+        have c := hH i
+        rw [Semiformula.shift_iterate_conj] at c
+        cl_prover [a, b, c]
+    cl_prover [hs, hZ]
+  have h₂ : T.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (d 🡒 (B i 🡘 C i))) ⋏
+      relAllItr d k (Matrix.conj (fun i : Fin k ↦
+        e.subst ![Semiterm.bvar (i.addCast 0)] ⋏ (C i).subst ![Semiterm.bvar (i.addCast 0)]) 🡒
+          G) 🡒 relativizedImp (d ⋏ e) B G := by
+    unfold relativizedImp
+    apply TProof.allItr_generalize_imp
+    have hs := relAllItr_specialize (T := T) d (Semiformula.shift^[k]
+      (Matrix.conj (fun i : Fin k ↦ e.subst ![Semiterm.bvar (i.addCast 0)] ⋏
+        (C i).subst ![Semiterm.bvar (i.addCast 0)]) 🡒 G))
+      (fun i ↦ Semiterm.fvar ((i : ℕ) : V))
+    simp only [Semiformula.shift_iterate_and, shift_iterate_relAllItr hd,
+      Semiformula.shift_iterate_imp, Semiformula.substs_imp, Semiformula.shift_iterate_conj,
+      Semiformula.substs_conj, Semiformula.substs_and, Semiformula.subst_shift_iterate_subst_bvar,
+      Fin.addCast_val, hdk] at hs ⊢
+    simp only [conj_fin_zero_add k (fun j ↦ d.subst ![Semiterm.fvar (j : V)])] at hs ⊢
+    have hXY : T.internalize V ⊢
+        (Matrix.conj fun i ↦ Semiformula.shift^[k] (∀¹ (d 🡒 (B i 🡘 C i)))) ⋏
+        (Matrix.conj fun i : Fin k ↦ (d.subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+          (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
+          (Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar ((i : ℕ) : V)]) 🡒
+        (Matrix.conj fun i : Fin k ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
+        (Matrix.conj fun i : Fin k ↦ (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+          (Semiformula.shift^[k] (C i)).subst ![Semiterm.fvar ((i : ℕ) : V)]) := by
+      have a := matrixConj_intro (𝓢 := T.internalize V)
+        (φ := (Matrix.conj fun i ↦ Semiformula.shift^[k] (∀¹ (d 🡒 (B i 🡘 C i)))) ⋏
+          (Matrix.conj fun i : Fin k ↦ (d.subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+            (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
+            (Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar ((i : ℕ) : V)]))
+        (v := fun i : Fin k ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)]) fun i ↦ by
+          have b := matrixConj_elim (𝓢 := T.internalize V)
+            (fun i : Fin k ↦ (d.subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+              (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
+              (Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar ((i : ℕ) : V)]) i
+          cl_prover [b]
+      have b := matrixConj_intro (𝓢 := T.internalize V)
+        (φ := (Matrix.conj fun i ↦ Semiformula.shift^[k] (∀¹ (d 🡒 (B i 🡘 C i)))) ⋏
+          (Matrix.conj fun i : Fin k ↦ (d.subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+            (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
+            (Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar ((i : ℕ) : V)]))
+        (v := fun i : Fin k ↦ (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+          (Semiformula.shift^[k] (C i)).subst ![Semiterm.fvar ((i : ℕ) : V)]) fun i ↦ by
+          have b := matrixConj_elim (𝓢 := T.internalize V)
+            (fun i : Fin k ↦ (d.subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+              (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
+              (Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar ((i : ℕ) : V)]) i
+          have c := hH i
+          rw [Semiformula.shift_iterate_conj] at c
+          cl_prover [b, c]
+      cl_prover [a, b]
+    cl_prover [hs, hXY]
+  cl_prover [h₁, h₂]
+
 end relAllItrProof
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

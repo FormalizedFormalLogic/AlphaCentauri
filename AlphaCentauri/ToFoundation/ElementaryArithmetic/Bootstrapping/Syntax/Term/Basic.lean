@@ -478,6 +478,99 @@ private lemma phi_iff_decode (param : Fin arity → V) (C pr : V) :
         disj 3
         exact ⟨k, f, v, w, ⟨hk, hw⟩, by rw [hpr, hkfv, hy]⟩
 
+private lemma pred_comp {n : ℕ} {P : V → Prop} {g : (Fin n → V) → V} (hP : LocallyDelta0Pred P)
+    (hg : LocallyDelta0Function g) : LocallyDelta0 fun u ↦ P (g u) :=
+  (hP.comp (f := fun _ ↦ g) fun _ ↦ hg).of_iff fun _ ↦ Iff.rfl
+
+private lemma pi₁_comp {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
+    LocallyDelta0Function fun u ↦ π₁ (g u) := LocallyDelta0Function.pi₁.comp₁ hg
+
+private lemma pi₂_comp {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
+    LocallyDelta0Function fun u ↦ π₂ (g u) := LocallyDelta0Function.pi₂.comp₁ hg
+
+private lemma pred_sub_comp {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
+    LocallyDelta0Function fun u ↦ g u - 1 :=
+  LocallyDelta0Function.sub.comp₂ hg (LocallyDelta0Function.const 1)
+
+lemma phi_locallyDelta0 :
+    LocallyDelta0 fun w : Fin (arity + 2) → V ↦ c.Phi L (w ·.succ.succ) {x | x ∈ w 1} (w 0) := by
+  -- the code of the term, its tag, and its body, as functions of the pair `pr`
+  have hm {n : ℕ} (j : Fin n) : LocallyDelta0Function fun u : Fin n → V ↦ π₁ (u j) - 1 :=
+    pred_sub_comp (pi₁_comp (LocallyDelta0Function.var j))
+  have hb {n : ℕ} (j : Fin n) : LocallyDelta0Function fun u : Fin n → V ↦ π₂ (π₁ (u j) - 1) :=
+    pi₂_comp (hm j)
+  have hk {n : ℕ} (j : Fin n) :
+      LocallyDelta0Function fun u : Fin n → V ↦ π₁ (π₂ (π₁ (u j) - 1)) := pi₁_comp (hb j)
+  have hf {n : ℕ} (j : Fin n) :
+      LocallyDelta0Function fun u : Fin n → V ↦ π₁ (π₂ (π₂ (π₁ (u j) - 1))) :=
+    pi₁_comp (pi₂_comp (hb j))
+  have hv {n : ℕ} (j : Fin n) :
+      LocallyDelta0Function fun u : Fin n → V ↦ π₂ (π₂ (π₂ (π₁ (u j) - 1))) :=
+    pi₂_comp (pi₂_comp (hb j))
+  have hterm : LocallyDelta0 fun w : Fin (arity + 2) → V ↦ IsUTerm L (π₁ (w 0)) :=
+    pred_comp isUTerm_locallyDelta0 (pi₁_comp (LocallyDelta0Function.var 0))
+  have hbvar : LocallyDelta0 fun w : Fin (arity + 2) → V ↦
+      π₁ (π₁ (w 0) - 1) = 0 ∧ π₂ (w 0) = c.bvar (w ·.succ.succ) (π₂ (π₁ (w 0) - 1)) := by
+    apply LocallyDelta0.and
+    · exact LocallyDelta0.eq (pi₁_comp (hm 0)) (LocallyDelta0Function.const 0)
+    · apply LocallyDelta0.eq (pi₂_comp (LocallyDelta0Function.var 0))
+      simpa using c.bvar_locallyDelta0.comp_cons (hb 0) fun j ↦
+        LocallyDelta0Function.var j.succ.succ
+  have hfvar : LocallyDelta0 fun w : Fin (arity + 2) → V ↦
+      π₁ (π₁ (w 0) - 1) = 1 ∧ π₂ (w 0) = c.fvar (w ·.succ.succ) (π₂ (π₁ (w 0) - 1)) := by
+    apply LocallyDelta0.and
+    · exact LocallyDelta0.eq (pi₁_comp (hm 0)) (LocallyDelta0Function.const 1)
+    · apply LocallyDelta0.eq (pi₂_comp (LocallyDelta0Function.var 0))
+      simpa using c.fvar_locallyDelta0.comp_cons (hb 0) fun j ↦
+        LocallyDelta0Function.var j.succ.succ
+  have hentry : LocallyDelta0 fun x : Fin (arity + 4) → V ↦
+      ⟪(π₂ (π₂ (π₂ (π₁ (x 2) - 1)))).[x 0], (x 1).[x 0]⟫ ∈ x 3 :=
+    LocallyDelta0.mem (LocallyDelta0Function.pairing.comp₂
+      (nth_locallyDelta0.comp₂ (hv 2) (LocallyDelta0Function.var 0))
+      (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)))
+      (LocallyDelta0Function.var 3)
+  have hfunc' : LocallyDelta0Function fun u : Fin (arity + 3) → V ↦
+      c.func (fun j ↦ u j.succ.succ.succ) (π₁ (π₂ (π₁ (u 1) - 1))) (π₁ (π₂ (π₂ (π₁ (u 1) - 1))))
+        (π₂ (π₂ (π₂ (π₁ (u 1) - 1)))) (u 0) := by
+    have := c.func_locallyDelta0.comp
+      (f := (fun u : Fin (arity + 3) → V ↦ π₁ (π₂ (π₁ (u 1) - 1))) :>
+        (fun u ↦ π₁ (π₂ (π₂ (π₁ (u 1) - 1)))) :> (fun u ↦ π₂ (π₂ (π₂ (π₁ (u 1) - 1)))) :>
+          (fun u ↦ u 0) :> fun j u ↦ u j.succ.succ.succ) fun i ↦ by
+        cases i using Fin.cases with
+        | zero => exact hk 1
+        | succ i =>
+          cases i using Fin.cases with
+          | zero => exact hf 1
+          | succ i =>
+            cases i using Fin.cases with
+            | zero => exact hv 1
+            | succ i =>
+              cases i using Fin.cases with
+              | zero => exact LocallyDelta0Function.var 0
+              | succ i => exact LocallyDelta0Function.var i.succ.succ.succ
+    simpa using this
+  have hbody : LocallyDelta0 fun u : Fin (arity + 3) → V ↦
+      (π₁ (π₂ (π₁ (u 1) - 1)) = len (u 0) ∧ ∀ i < π₁ (π₂ (π₁ (u 1) - 1)),
+        ⟪(π₂ (π₂ (π₂ (π₁ (u 1) - 1)))).[i], (u 0).[i]⟫ ∈ u 2) ∧
+      π₂ (u 1) = c.func (fun j ↦ u j.succ.succ.succ) (π₁ (π₂ (π₁ (u 1) - 1)))
+        (π₁ (π₂ (π₂ (π₁ (u 1) - 1)))) (π₂ (π₂ (π₂ (π₁ (u 1) - 1)))) (u 0) := by
+    apply LocallyDelta0.and
+    · apply LocallyDelta0.and
+      · exact LocallyDelta0.eq (hk 1) (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
+      · exact LocallyDelta0.ball_lt_function (hk 1) hentry
+    · exact LocallyDelta0.eq (pi₂_comp (LocallyDelta0Function.var 1)) hfunc'
+  have hfunc : LocallyDelta0 fun w : Fin (arity + 2) → V ↦
+      π₁ (π₁ (w 0) - 1) = 2 ∧ ∃ w' ≤ repeatVec (w 1) (π₁ (π₂ (π₁ (w 0) - 1))),
+        (π₁ (π₂ (π₁ (w 0) - 1)) = len w' ∧ ∀ i < π₁ (π₂ (π₁ (w 0) - 1)),
+          ⟪(π₂ (π₂ (π₂ (π₁ (w 0) - 1)))).[i], w'.[i]⟫ ∈ w 1) ∧
+        π₂ (w 0) = c.func (w ·.succ.succ) (π₁ (π₂ (π₁ (w 0) - 1)))
+          (π₁ (π₂ (π₂ (π₁ (w 0) - 1)))) (π₂ (π₂ (π₂ (π₁ (w 0) - 1)))) w' :=
+    (LocallyDelta0.eq (pi₁_comp (hm 0)) (LocallyDelta0Function.const 2)).and
+      (LocallyDelta0.bexs_le_function
+        (repeatVec_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (hk 0)) hbody)
+  exact (hterm.and (hbvar.or (hfvar.or hfunc))).of_iff fun w ↦ by
+    simpa using c.phi_iff_decode L (w ·.succ.succ) (w 1) (w 0)
+
 end Construction
 
 end Language.TermRec

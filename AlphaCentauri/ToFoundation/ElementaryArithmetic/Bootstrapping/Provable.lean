@@ -621,6 +621,54 @@ lemma provable_succ_of_derivationOf_all {S e d : V} {A : V → V} (hA : LocallyD
   obtain ⟨d', -, hd'⟩ := key y
   exact ⟨d', hd'⟩
 
+private lemma provable_one_of_provable_zero_of_provable_succ [𝗣𝗔⁻ ⪯ T]
+    (φ : ArithmeticSemisentence (m + 1)) (h₀ : T ⊢ ∀¹* (Rew.subst (‘0’ :> fun i ↦ #i) ▹ φ))
+    (hs : T ⊢ ∀¹* (φ 🡒 Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ) ▹ φ)) :
+    T ⊢ ∀¹* (Rew.subst (‘1’ :> fun i ↦ #i) ▹ φ) := by
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
+  apply Arithmetic.complete.{0} T _
+  intro M _ hM
+  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory hM
+  have h₀' := models_of_provable hM h₀
+  have hs' := models_of_provable hM hs
+  simp only [models_iff, Semiformula.eval_allClosure, Semiformula.eval_substs,
+    LogicalConnective.HomClass.map_imply] at h₀' hs' ⊢
+  intro e
+  have e₀ : (Semiterm.val e Empty.elim ∘ ((‘0’ : ArithmeticSemiterm Empty m) :> fun i ↦ #i)) =
+      (0 :> e) := by
+    funext i; cases i using Fin.cases <;> simp
+  have e₁ : (Semiterm.val e Empty.elim ∘ ((‘1’ : ArithmeticSemiterm Empty m) :> fun i ↦ #i)) =
+      (1 :> e) := by
+    funext i; cases i using Fin.cases <;> simp
+  have e₂ : (Semiterm.val (0 :> e) Empty.elim ∘
+      ((‘#0 + 1’ : ArithmeticSemiterm Empty (m + 1)) :> fun i ↦ #i.succ)) = (1 :> e) := by
+    funext i; cases i using Fin.cases <;> simp
+  have h₁ := hs' (0 :> e)
+  have h₂ := h₀' e
+  rw [e₂] at h₁
+  rw [e₀] at h₂
+  rw [e₁]
+  exact h₁ h₂
+
+private lemma provable_subst_cons_numerals {p : Fin m → V} (φ : ArithmeticSemisentence (m + 1))
+    (t : ArithmeticSemiterm Empty m) {t' : V}
+    (ht : ((⌜(Rew.emb t : SyntacticSemiterm ℒₒᵣ m)⌝ : ℕ) : V) = t')
+    (ht' : IsSemiterm ℒₒᵣ (m : V) t') (h : T ⊢ ∀¹* (Rew.subst (t :> fun i ↦ #i) ▹ φ)) :
+    Provable T (subst ℒₒᵣ (termSubst ℒₒᵣ (matrixToVec fun i ↦ numeral (p i)) t' ∷
+      matrixToVec fun i ↦ numeral (p i)) ((⌜φ⌝ : ℕ) : V)) := by
+  have := provable_substNumerals_of_provable_allClosure _ (provable_natCast_quote_of_provable h) p
+  rw [substNumerals, subst_natCast_quote_rew_subst φ _ (u' := t' :> fun i ↦ ^#(i : V)) ?_ ?_
+    (isSemitermVec_numerals p 0), matrixToVec_succ] at this
+  · simpa [Matrix.vecHead, Matrix.vecTail, Function.comp_def] using this
+  · intro i
+    cases i using Fin.cases
+    · simpa using ht
+    · simpa using natCast_quote_bvar (V := V) _
+  · intro i
+    cases i using Fin.cases
+    · simpa using ht'
+    · simp
+
 end numerals
 
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

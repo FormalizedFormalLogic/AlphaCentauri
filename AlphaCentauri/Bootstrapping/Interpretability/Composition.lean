@@ -442,4 +442,72 @@ lemma relativizedImp_iff_relAllItr {k : ℕ} {d : Semiformula V L 1} (hd : d.shi
 
 end relAllItrProof
 
+/-! ## Translations of equations -/
+
+section equalBlock
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {T : Theory L} [T.Δ₁] [𝗘𝗤 L ⪯ T]
+
+lemma relativizedImp_equal_specialize {k : ℕ} (d : Semiformula V L 1) (u : Fin k → Term V L)
+    (X : Semiformula V L k) :
+    T.internalize V ⊢ relativizedImp d (fun i ↦ Semiformula.equal (Semiterm.bvar 0) (u i).bShift)
+      (X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) 🡒
+        Matrix.conj (fun i ↦ d.subst ![u i]) 🡒 X.subst u := by
+  have h₁ := TProof.allItr_specialize (T := T) (Matrix.conj (fun i : Fin k ↦
+      d.subst ![Semiterm.bvar (i.addCast 0)] ⋏
+        (Semiformula.equal (Semiterm.bvar 0) (u i).bShift).subst ![Semiterm.bvar (i.addCast 0)]) 🡒
+      X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) (fun j ↦ u (Fin.cast (zero_add k) j))
+  simp only [Semiformula.substs_equal, Semiterm.substs_bvar, Matrix.cons_val_fin_one,
+    Semiterm.bShift_substs_succ, Matrix.tail_cons, Semiformula.substs_imp, Semiformula.substs_conj,
+    Semiformula.substs_and, Semiformula.substs_substs, Matrix.vecMap_cons', Matrix.head_cons,
+    Matrix.vecMap_nil, Semiterm.substs_substs, Semiterm.bShift_substs_zero,
+    Semiterm.substs_vecMap_bvar] at h₁
+  have hc := matrixConj_imp_matrixConj (𝓢 := T.internalize V) (φ := ⊤)
+    (v := fun i : Fin k ↦ d.subst ![u i])
+    (u := fun i : Fin k ↦ d.subst ![u i] ⋏ Semiformula.equal (u i) (u i)) fun i ↦ by
+      have := tprovable_equal_refl T (u i)
+      cl_prover [this]
+  unfold relativizedImp
+  simp only [Semiformula.substs_equal, Semiterm.substs_bvar, Matrix.cons_val_fin_one,
+    Semiterm.bShift_substs_succ, Matrix.tail_cons]
+  cl_prover [h₁, hc]
+
+omit [𝗘𝗤 L ⪯ T] in
+lemma relativizedImp_equal_generalize {k : ℕ} {d : Semiformula V L 1} (hd : d.shift = d)
+    (u : Fin k → Term V L) (X : Semiformula V L k)
+    (hX : ∀ (j : ℕ) (s w : Fin k → Term V L), T.internalize V ⊢
+      Matrix.conj (fun i ↦ d.subst ![s i]) 🡒 Matrix.conj (fun i ↦ d.subst ![w i]) 🡒
+        Matrix.conj (fun i ↦ Semiformula.equal (s i) (w i)) 🡒
+          (Semiformula.shift^[j] X).subst w 🡒 (Semiformula.shift^[j] X).subst s) :
+    T.internalize V ⊢ Matrix.conj (fun i ↦ d.subst ![u i]) ⋏ X.subst u 🡒
+      relativizedImp d (fun i ↦ Semiformula.equal (Semiterm.bvar 0) (u i).bShift)
+        (X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) := by
+  have hdk : Semiformula.shift^[k] d = d := Function.iterate_fixed hd k
+  unfold relativizedImp
+  apply TProof.allItr_generalize_imp
+  simp only [Semiformula.shift_iterate_subst, Semiformula.substs_equal, Semiterm.substs_bvar,
+    Matrix.cons_val_fin_one, Semiterm.bShift_substs_succ, Matrix.tail_cons,
+    Semiformula.shift_iterate_imp, Semiformula.shift_iterate_conj, Semiformula.shift_iterate_and,
+    Matrix.vecMap_cons', Matrix.head_cons, Semiterm.shift_iterate_bvar, Matrix.vecMap_nil,
+    Semiformula.shift_iterate_equal, Semiterm.shift_iterate_subst_nil,
+    Semiterm.shift_iterate_vecMap_bvar, Semiformula.substs_imp, Semiformula.substs_conj,
+    Semiformula.substs_and, Semiformula.substs_substs, Fin.addCast_val, Semiterm.subst_nil_subst,
+    Semiterm.bShift_substs_zero, Semiterm.substs_vecMap_bvar, hdk]
+  have h₃ := hX k (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) (fun i ↦ Semiterm.shift^[k] (u i))
+  rw [show (Semiterm.shift^[k] ⨟ u) = fun i ↦ Semiterm.shift^[k] (u i) from rfl]
+  have h₄ := matrixConj_imp_matrixConj (𝓢 := T.internalize V) (φ := ⊤)
+    (v := fun i : Fin k ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+      Semiformula.equal (Semiterm.fvar ((i : ℕ) : V)) (Semiterm.shift^[k] (u i)))
+    (u := fun i : Fin k ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)]) fun i ↦ by cl_prover
+  have h₅ := matrixConj_imp_matrixConj (𝓢 := T.internalize V) (φ := ⊤)
+    (v := fun i : Fin k ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+      Semiformula.equal (Semiterm.fvar ((i : ℕ) : V)) (Semiterm.shift^[k] (u i)))
+    (u := fun i : Fin k ↦
+      Semiformula.equal (Semiterm.fvar ((i : ℕ) : V)) (Semiterm.shift^[k] (u i))) fun i ↦ by
+      cl_prover
+  cl_prover 60 [h₃, h₄, h₅]
+
+end equalBlock
+
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

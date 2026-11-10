@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Schemata.ZRing
 public import AlphaCentauri.ToFoundation.OpenPredicate
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Mathlib.Algebra.Order.Group.MinMax
@@ -109,5 +110,30 @@ lemma coe_ofNat_foundation [DiscretelyOrdered R] (n : ℕ) [n.AtLeastTwo] :
   rw [← @Nat.cast_ofNat (Nonneg R) n Arithmetic.instCommSemiring_foundation.toNatCast _,
     natCast_foundation]
   exact Nat.cast_ofNat
+
+/-- The non-negative part of a discretely ordered ring in which every element can be divided with
+remainder by every positive natural number is a model of $\mathsf{ZR}$.
+- [Wil78, §2]
+- [BO96, §1] -/
+theorem models_ZRing [DiscretelyOrdered R]
+    (h : ∀ (a : R) {n : ℕ}, 0 < n → ∃ q r : R, 0 ≤ r ∧ r < n ∧ a = n * q + r) :
+    (Nonneg R)↓[ℒₒᵣ] ⊧* Arithmetic.ZRing := by
+  apply models_theory_iff.mpr
+  rintro σ (hσ | ⟨n, rfl⟩)
+  · exact models_of_mem hσ
+  · apply (Arithmetic.models_standardEuclideanDivisionBy_iff (n + 1)).mpr
+    intro b
+    obtain ⟨q, r, hr₀, hr, e⟩ := h (b : R) n.succ_pos
+    have hq : 0 ≤ q := by
+      by_contra hq
+      have := DiscretelyOrdered.one_le_of_pos (-q) (neg_pos.mpr (not_le.mp hq))
+      nlinarith [b.2]
+    have h₁ : (⟨r, hr₀⟩ : Nonneg R) < ((n + 1 : ℕ) : Nonneg R) := by exact_mod_cast hr
+    have h₂ : b = ((n + 1 : ℕ) : Nonneg R) * ⟨q, hq⟩ + ⟨r, hr₀⟩ := by
+      apply Subtype.ext
+      simpa using e
+    use ⟨q, hq⟩, ⟨r, hr₀⟩
+    rw [natCast_foundation]
+    exact ⟨h₁, h₂⟩
 
 end Nonneg

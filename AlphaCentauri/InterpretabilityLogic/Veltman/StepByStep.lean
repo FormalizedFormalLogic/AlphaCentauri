@@ -662,6 +662,94 @@ lemma cr_eq_of_mem_anc {t m u : ℕ} (hut : u ∈ (𝒩 t).pre) (hum : u ∈ (�
 lemma cr_eq_of_mu {x u r : ℕ} (hux : u ∈ (𝒩 x).pre) (hr : (𝒩 x).mu u = r) :
     (𝒩 x).cr u = (𝒩 r).cr u := (cr_aux x).2.1 u r hux hr
 
+lemma biUnion_cr_eq {x u t₀ : ℕ} (h₀ : t₀ ∈ above 𝒩 (𝒩 x).pre u) :
+    ⋃ t ∈ above 𝒩 (𝒩 x).pre u, (𝒩 t).cr u = (𝒩 t₀).cr u := by
+  apply biUnion_eq_of_forall h₀;
+  intro t ht;
+  obtain ⟨ht₁, ht₂⟩ := Finset.mem_filter.mp ht;
+  obtain ⟨h₀₁, h₀₂⟩ := Finset.mem_filter.mp h₀;
+  obtain ⟨a, -, he⟩ := pre_eq_anc_anchor ht₁;
+  rw [he] at ht₁ h₀₁;
+  rcases le_total t t₀ with hle | hle;
+  · exact cr_eq_of_mem_anc ht₂ h₀₂ (mem_anc_of_le ht₁ h₀₁ hle);
+  · exact (cr_eq_of_mem_anc h₀₂ ht₂ (mem_anc_of_le h₀₁ ht₁ hle)).symm;
+
+lemma label_restr_of_lt {n x y : ℕ} (hy : y < n) : label (restr Γ₀ τ n) x y = label 𝒩 x y := by
+  unfold label boxes;
+  rw [restr_of_lt hy];
+  induction hm : (𝒩 y).mu x using WithBot.recBotCoe with
+  | bot => rfl;
+  | coe r => simp [restr_of_lt ((mu_lt hm).trans hy)];
+
+/-! ### Maximal consistent sets along the construction -/
+
+lemma assuring_anchor_problem {n a : ℕ} {B : Formula α} (h : (𝒩 n).kind = .problem a B) :
+    AssuringSuccessor {∼B} (𝒩 a).set (𝒩 n).set := by
+  have := kind_spec (Γ₀ := Γ₀) (τ := τ) n;
+  rw [h] at this;
+  obtain ⟨-, A, -, -, h, -⟩ := this;
+  exact h
+
+lemma assuring_anchor_deficiency {n a s : ℕ} (h : (𝒩 n).kind = .deficiency a s) :
+    AssuringSuccessor (label 𝒩 a s) (𝒩 a).set (𝒩 n).set := by
+  have := kind_spec (Γ₀ := Γ₀) (τ := τ) n;
+  rw [h] at this;
+  obtain ⟨-, -, -, A, B, -, -, -, h', -⟩ := this;
+  rwa [label_restr h] at h'
+
+lemma box_mem_of_parent {n : ℕ} {C : Formula α} (hk : (𝒩 n).kind ≠ .isolated)
+    (hC : □C ∈ (𝒩 (parent (Γ₀ := Γ₀) (τ := τ) n)).set) : □C ∈ (𝒩 n).set := by
+  unfold parent at hC;
+  rcases hk' : (𝒩 n).kind with _ | ⟨a, B⟩ | ⟨a, s⟩;
+  · exact absurd hk' hk;
+  · simp only [hk'] at hC;
+    exact ((assuring_anchor_problem hk').mono (Set.empty_subset _)).box_mem_of_box_mem hC |>.2;
+  · simp only [hk'] at hC;
+    have h := assuring_anchor_deficiency hk';
+    induction hr : (𝒩 s).mu a using WithBot.recBotCoe with
+    | bot =>
+      rw [hr] at hC;
+      exact (h.mono (Set.empty_subset _)).box_mem_of_box_mem (by simpa using hC) |>.2;
+    | coe r =>
+      rw [hr] at hC;
+      simp only [WithBot.unbotD_coe] at hC;
+      have h₁ : □(∼∼C) ∈ (𝒩 n).set := by
+        apply h.subset;
+        right;
+        simp only [boxes, hr, WithBot.recBotCoe_coe];
+        exact ⟨∼C, mem_antecedents_empty_iff.mpr (mem_of_imp (box_mono dni) hC), rfl⟩;
+      exact mem_of_imp (box_mono Entailment.dne) h₁;
+
+lemma box_mem_of_mem_anc {n p : ℕ} {C : Formula α} (hp : p ∈ (𝒩 n).anc) (hC : □C ∈ (𝒩 p).set) :
+    □C ∈ (𝒩 n).set := by
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+  by_cases hk : (𝒩 n).kind = .isolated;
+  · obtain rfl : p = n := by simpa [(fields_isolated hk).2.1] using hp;
+    exact hC;
+  · obtain ⟨he, hlt⟩ := anc_eq_insert hk;
+    rw [he] at hp;
+    rcases Finset.mem_insert.mp hp with rfl | hp;
+    · exact hC;
+    · exact box_mem_of_parent hk (ih _ hlt hp);
+
+lemma assuring_anchor {n a : ℕ} (ha : (𝒩 n).kind.anchor = a) :
+    AssuringSuccessor ∅ (𝒩 a).set (𝒩 n).set := by
+  rcases hk : (𝒩 n).kind with _ | ⟨b, B⟩ | ⟨b, s⟩ <;> rw [hk] at ha <;> simp only [Kind.anchor] at ha;
+  · simp at ha;
+  · obtain rfl : b = a := WithBot.coe_injective ha;
+    exact (assuring_anchor_problem hk).mono (Set.empty_subset _);
+  · obtain rfl : b = a := WithBot.coe_injective ha;
+    exact (assuring_anchor_deficiency hk).mono (Set.empty_subset _);
+
+lemma successor_of_mem_pre {n u : ℕ} (hu : u ∈ (𝒩 n).pre) :
+    AssuringSuccessor ∅ (𝒩 u).set (𝒩 n).set := by
+  obtain ⟨a, ha, he⟩ := pre_eq_anc_anchor hu;
+  rw [he] at hu;
+  intro A hA;
+  exact (assuring_anchor ha).box_mem_of_box_mem
+    (box_mem_of_mem_anc hu (mem_antecedents_empty_iff.mp hA))
+
 end
 
 end Veltman.StepByStep

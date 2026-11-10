@@ -463,6 +463,113 @@ instance : MAdequate (mAdequateClosure Φ) where
 
 end mAdequateClosure
 
+/-! ### Critical successors containing the `□`-formulas of another -/
+
+namespace MaximalConsistentSet
+
+open Logic.ofAxioms
+
+variable {Φ : Finset (Formula α)} [MAdequate Φ] {Γ Δ : MaximalConsistentSet 𝐈𝐋𝐌 Φ}
+  {B C E : Formula α}
+
+/-- - [dJV90, Theorem 6.3] -/
+lemma CriticalSuccessor.exists_criticalSuccessor_box_subset (hE : IsRhdOperand Φ E)
+    (hBC : B ▷ C ∈ Γ) (hΔ : CriticalSuccessor E Γ Δ) (hB : B ∈ Δ) :
+    ∃ Θ, CriticalSuccessor E Γ Θ ∧ C ∈ Θ ∧ ∀ {D}, □D ∈ Δ → □D ∈ Θ := by
+  let H := Γ.rhdDisj E;
+  let P := (Δ.prebox.image (□·)).conj;
+  let Y : Set (Formula α) := insert (∼H) <| insert (□(∼H)) <| insert C <| insert P <|
+    {A | □A ∈ Γ} ∪ (□·) '' {A | □A ∈ Γ};
+  have hP {D} (hD : □D ∈ Δ) : 𝐈𝐋𝐌 ⊢ P 🡒 □D :=
+    left_Fconj_intro <| Finset.mem_image_of_mem _ <| mem_prebox.mpr hD;
+  have hY : Y *⊬[𝐈𝐋𝐌] ⊥ := by
+    intro h;
+    have h₁ : ({A | □A ∈ Γ} ∪ (□·) '' {A | □A ∈ Γ}) *⊢[𝐈𝐋𝐌] C ⋏ P 🡒 H ⋎ ∼□(∼H) := by
+      have := Context.deduct <| Context.deduct <| Context.deduct <| Context.deduct h;
+      cl_prover [this];
+    have h₂ : Γ.literals *⊢[𝐈𝐋𝐌] □(C ⋏ P 🡒 H ⋎ ◇H) := by
+      apply Context.weakening _ (Logic.box_of_provable h₁);
+      rintro _ ⟨A, hA, rfl⟩;
+      exact mem_literals hA;
+    have h₃ : Γ.literals *⊢[𝐈𝐋𝐌] H ▷ E := by
+      apply fdisj_rhd;
+      intro G hG;
+      exact Context.by_axm <| mem_literals (Finset.mem_filter.mp hG).2;
+    have h₄ : Γ.literals *⊢[𝐈𝐋𝐌] (H ⋎ ◇H) ▷ H := Context.of or_dia_rhd;
+    have h₅ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <| axiomJ1 (A := C ⋏ P) (B := H ⋎ ◇H);
+    have h₆ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <| axiomJ2 (A := C ⋏ P) (B := H ⋎ ◇H) (C := H);
+    have h₇ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <| axiomJ2 (A := C ⋏ P) (B := H) (C := E);
+    have h₈ : Γ.literals *⊢[𝐈𝐋𝐌] (C ⋏ P) ▷ E := by cl_prover [h₂, h₃, h₄, h₅, h₆, h₇];
+    have h₉ : 𝐈𝐋𝐌 ⊢ □Δ.prebox.conj 🡘 P := Logic.box_iff_conj_image_box;
+    have h₁₀ : Γ.literals *⊢[𝐈𝐋𝐌] (B ⋏ P) ▷ (C ⋏ P) := by
+      have i₁ : 𝐈𝐋𝐌 ⊢ B ▷ C 🡒 (B ⋏ □Δ.prebox.conj) ▷ (C ⋏ □Δ.prebox.conj) := Logic.ILM.axiomM;
+      have i₂ : 𝐈𝐋𝐌 ⊢ (B ⋏ □Δ.prebox.conj) ▷ (C ⋏ □Δ.prebox.conj) 🡒 (B ⋏ P) ▷ (C ⋏ □Δ.prebox.conj) :=
+        rhd_anti_left <| by cl_prover [h₉];
+      have i₃ : 𝐈𝐋𝐌 ⊢ (B ⋏ P) ▷ (C ⋏ □Δ.prebox.conj) 🡒 (B ⋏ P) ▷ (C ⋏ P) :=
+        rhd_mono_right <| by cl_prover [h₉];
+      exact Context.of (C_trans i₁ <| C_trans i₂ i₃) ⨀ Context.by_axm (mem_literals hBC);
+    have h₁₁ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <| axiomJ2 (A := B ⋏ P) (B := C ⋏ P) (C := E);
+    have h₁₂ : Γ.literals *⊢[𝐈𝐋𝐌] (B ⋏ P) ▷ E := by cl_prover [h₈, h₁₀, h₁₁];
+    obtain ⟨B', hB', i₁, i₂⟩ := MAdequate.exists_isRhdOperand (Φ := Φ)
+      (IsRhdOperand.of_rhd_left (mem_of_mem hBC)) (X := Δ.prebox.image (□·)) <| by
+        intro D hD;
+        obtain ⟨D, hD', rfl⟩ := Finset.mem_image.mp hD;
+        exact ⟨mem_of_mem (mem_prebox.mp hD'), D, rfl⟩;
+    replace i₁ : 𝐈𝐋𝐌 ⊢ B ⋏ P 🡒 B' ⋎ ◇B' := IL_subset i₁;
+    replace i₂ : 𝐈𝐋𝐌 ⊢ B' 🡒 (B ⋏ P) ⋎ ◇(B ⋏ P) := IL_subset i₂;
+    have h₁₃ : Γ.literals *⊢[𝐈𝐋𝐌] B' ▷ E := by
+      have j₁ : 𝐈𝐋𝐌 ⊢ B' ▷ ((B ⋏ P) ⋎ ◇(B ⋏ P)) := rhd_of_provable i₂;
+      have j₂ : 𝐈𝐋𝐌 ⊢ ((B ⋏ P) ⋎ ◇(B ⋏ P)) ▷ (B ⋏ P) := or_dia_rhd;
+      have j₃ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <|
+        axiomJ2 (A := B') (B := (B ⋏ P) ⋎ ◇(B ⋏ P)) (C := B ⋏ P);
+      have j₄ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) <| axiomJ2 (A := B') (B := B ⋏ P) (C := E);
+      have j₅ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) j₁;
+      have j₆ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Γ.literals) j₂;
+      cl_prover [h₁₂, j₃, j₄, j₅, j₆];
+    have h₁₄ : B' ▷ E ∈ Γ := (mem_iff_provable (Adequate.rhd_mem hB' hE)).mpr h₁₃;
+    have h₁₅ : Δ.literals *⊢[𝐈𝐋𝐌] B ⋏ P := by
+      have k₁ : 𝐈𝐋𝐌 ⊢ Δ.set.conj 🡒 P := CFConjFConj_of_subset <| by
+        intro D hD;
+        obtain ⟨D, hD', rfl⟩ := Finset.mem_image.mp hD;
+        exact mem_prebox.mp hD';
+      have k₂ : Δ.literals *⊢[𝐈𝐋𝐌] Δ.set.conj :=
+        Context.weakening (fun _ h ↦ mem_literals h) <| FConj_DT.mp C_id;
+      exact K_intro (Context.by_axm <| mem_literals hB) (Context.of k₁ ⨀ k₂);
+    have h₁₆ : Δ.literals *⊢[𝐈𝐋𝐌] ∼B' :=
+      provable_neg_of_not_mem hB'.mem (hΔ.not_mem h₁₄);
+    have h₁₇ : Δ.literals *⊢[𝐈𝐋𝐌] □(∼B') := Context.by_axm <| mem_literals (hΔ.box_neg_mem h₁₄);
+    have h₁₈ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Δ.literals) i₁;
+    exact consistent_literals <| by
+      change Δ.literals *⊢[𝐈𝐋𝐌] ⊥;
+      change Δ.literals *⊢[𝐈𝐋𝐌] B ⋏ P 🡒 B' ⋎ ∼□(∼B') at h₁₈;
+      cl_prover [h₁₅, h₁₆, h₁₇, h₁₈];
+  obtain ⟨Θ, hΘ⟩ := exists_consistent_union (Φ := Φ) hY;
+  have hm {A} (hA : A ∈ Φ) (h : Y *⊢[𝐈𝐋𝐌] A) : A ∈ Θ := mem_of_provable hΘ hA h;
+  have hPY : Y *⊢[𝐈𝐋𝐌] P := Context.by_axm <| by simp [Y];
+  have hb {D} (hD : □D ∈ Δ) : □D ∈ Θ := hm (mem_of_mem hD) <| Context.of (hP hD) ⨀ hPY;
+  have hG {G} (hG : G ▷ E ∈ Γ) : G ∉ Θ ∧ □(∼G) ∈ Θ := by
+    have h₁ : G ∈ Φ.filter (· ▷ E ∈ Γ) :=
+      Finset.mem_filter.mpr ⟨Adequate.rhd_left (mem_of_mem hG), hG⟩;
+    have h₂ : 𝐈𝐋𝐌 ⊢ G 🡒 H := right_Fdisj_intro _ h₁;
+    have h₃ : 𝐈𝐋𝐌 ⊢ □(∼H) 🡒 □(∼G) := Logic.box_mono <| by cl_prover [h₂];
+    have h₄ : Y *⊢[𝐈𝐋𝐌] ∼H := Context.by_axm <| by simp [Y];
+    have h₅ : Y *⊢[𝐈𝐋𝐌] □(∼H) := Context.by_axm <| by simp [Y];
+    constructor;
+    · apply not_mem_of_provable_neg hΘ;
+      have h₆ := Context.of (𝓢 := 𝐈𝐋𝐌) (Γ := Y) h₂;
+      cl_prover [h₄, h₆];
+    · exact hm (Adequate.box_neg_mem <| .of_rhd_left (mem_of_mem hG)) <| Context.of h₃ ⨀ h₅;
+  obtain ⟨A, hA, hA'⟩ := hΔ.exists_box;
+  use Θ;
+  and_intros;
+  · exact ⟨⟨fun h ↦ hm (Adequate.box (mem_of_mem h)) (Context.by_axm <| by simp [Y, h]),
+      fun h ↦ hm (mem_of_mem h) (Context.by_axm <| by simp [Y, h]), A, hb hA, hA'⟩,
+      fun h ↦ (hG h).1, fun h ↦ (hG h).2⟩;
+  · exact hm (Adequate.rhd_right (mem_of_mem hBC)) (Context.by_axm <| by simp [Y]);
+  · exact hb;
+
+end MaximalConsistentSet
+
 end FFL.InterpretabilityLogic
 
 end

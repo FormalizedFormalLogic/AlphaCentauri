@@ -644,6 +644,13 @@ lemma translate_quote_sentence (h : IsTableOf π tbl) {n : ℕ} (σ : Semisenten
     translate L₁ L₂ tbl (⌜σ⌝ : V) = ⌜π.translate σ⌝ := by
   rw [Sentence.quote_def, h.translate_quote, DirectTranslation.translate_emb, Sentence.quote_def]
 
+omit [L₂.LORDefinable] in
+lemma of_ofWeakerThan {T' : Theory L₁} [𝗘𝗤 _ ⪯ T'] [T ⪯ T']
+    (h : IsTableOf (π.ofWeakerThan (T' := T')) tbl) : IsTableOf π tbl where
+  domain := h.domain
+  rel R := h.rel R
+  func f := h.func f
+
 end IsTableOf
 
 /-! ## Tables of translations of arithmetic -/

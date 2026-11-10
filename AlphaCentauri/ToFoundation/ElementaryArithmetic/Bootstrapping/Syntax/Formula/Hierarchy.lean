@@ -24,8 +24,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
 
-open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isBounded isHierarchy isPrenexHierarchy isUTerm
-  termBShiftGraph)
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isHierarchy isPrenexHierarchy)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
@@ -107,6 +106,8 @@ section isHierarchy
 
 namespace IsHierarchyF
 
+open IsBoundedF (locallyDelta0_binary locallyDelta0_bounded)
+
 /-- The operator generating the codes of formulas of a level of the hierarchy from the formulas
 of the lower level `P`. -/
 def Phi (Γ : Polarity) (P : V → Prop) (C : Set V) (p : V) : Prop :=
@@ -147,45 +148,16 @@ private lemma phi_iff (Γ : Polarity) (P : V → Prop) (C p : V) :
 
 lemma phi_locallyDelta0 (Γ : Polarity) {P : V → Prop} (hP : LocallyDelta0Pred P) :
     LocallyDelta0 fun w : Fin 2 → V ↦ Phi Γ P {x | x ∈ w 1} (w 0) := by
-  have hmem (i j : Fin 4) : LocallyDelta0 fun y : Fin 4 → V ↦ y i ∈ y j :=
-    LocallyDelta0.mem (LocallyDelta0Function.var i) (LocallyDelta0Function.var j)
-  have hand : LocallyDelta0 fun y : Fin 4 → V ↦ y 2 = qqAnd (y 1) (y 0) :=
-    LocallyDelta0.eq (LocallyDelta0Function.var 2) <|
-      qqAnd_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
-  have hor : LocallyDelta0 fun y : Fin 4 → V ↦ y 2 = qqOr (y 1) (y 0) :=
-    LocallyDelta0.eq (LocallyDelta0Function.var 2) <|
-      qqOr_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
-  have hterm : LocallyDelta0 fun y : Fin 5 → V ↦ IsUTerm ℒₒᵣ (y 0) ∧ y 2 = termBShift ℒₒᵣ (y 0) :=
-    (isUTerm_locallyDelta0.pred_comp (LocallyDelta0Function.var 0)).and <|
-      LocallyDelta0.eq (LocallyDelta0Function.var 2)
-        (termBShift_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
-  have hball : LocallyDelta0 fun y : Fin 4 → V ↦
-      (∃ t < y 2, IsUTerm ℒₒᵣ t ∧ y 1 = termBShift ℒₒᵣ t) ∧ y 0 ∈ y 3 ∧ y 2 = qqBall (y 1) (y 0) :=
-    (LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (2 : Fin 4)) hterm).and <|
-      (hmem 0 3).and <| LocallyDelta0.eq (LocallyDelta0Function.var 2) <|
-        qqBall_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
-  have hbex : LocallyDelta0 fun y : Fin 4 → V ↦
-      (∃ t < y 2, IsUTerm ℒₒᵣ t ∧ y 1 = termBShift ℒₒᵣ t) ∧ y 0 ∈ y 3 ∧ y 2 = qqBex (y 1) (y 0) :=
-    (LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (2 : Fin 4)) hterm).and <|
-      (hmem 0 3).and <| LocallyDelta0.eq (LocallyDelta0Function.var 2) <|
-        qqBex_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
   have hquant : LocallyDelta0 fun y : Fin 3 → V ↦ y 0 ∈ y 2 ∧ y 1 = qqQuant Γ (y 0) :=
     (LocallyDelta0.mem (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 2)).and <|
       LocallyDelta0.eq (LocallyDelta0Function.var 1)
         ((qqQuant_locallyDelta0 Γ).comp₁ (LocallyDelta0Function.var 0))
-  have hex₁ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
-    LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
-      (hmem 1 3).and <| (hmem 0 3).and hand
-  have hex₂ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
-    LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
-      (hmem 1 3).and <| (hmem 0 3).and hor
-  have hex₃ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
-    LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) hball
-  have hex₄ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
-    LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) hbex
-  have hex₅ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) hquant
-  exact (hP.pred_comp (LocallyDelta0Function.var (0 : Fin 2))).or
-    (hex₁.or <| hex₂.or <| hex₃.or <| hex₄.or hex₅) |>.of_iff
+  have hex := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) hquant
+  exact ((hP.pred_comp (LocallyDelta0Function.var (0 : Fin 2))).or <|
+    (locallyDelta0_binary qqAnd_locallyDelta0).or <|
+    (locallyDelta0_binary qqOr_locallyDelta0).or <|
+    (locallyDelta0_bounded qqBall_locallyDelta0).or <|
+    (locallyDelta0_bounded qqBex_locallyDelta0).or hex).of_iff
     fun w ↦ by simpa using phi_iff Γ P (w 1) (w 0)
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.IsHierarchyF (blueprint) in

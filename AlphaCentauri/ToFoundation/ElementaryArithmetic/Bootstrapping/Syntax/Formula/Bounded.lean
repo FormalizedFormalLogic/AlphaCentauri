@@ -23,7 +23,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
 
-open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isBounded isUTerm termBShiftGraph)
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isBounded)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
@@ -136,6 +136,32 @@ private lemma phi_iff (C p : V) :
       | ⟨p₁, _, p₂, _, hp, hq, rfl⟩ | ⟨p₁, _, p₂, _, hp, hq, rfl⟩
       | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩ | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩) <;> grind
 
+lemma locallyDelta0_mem (i j : Fin 4) : LocallyDelta0 fun y : Fin 4 → V ↦ y i ∈ y j :=
+  LocallyDelta0.mem (LocallyDelta0Function.var i) (LocallyDelta0Function.var j)
+
+lemma locallyDelta0_binary {f : V → V → V} (hf : LocallyDelta0Function₂ f) :
+    LocallyDelta0 fun w : Fin 2 → V ↦
+      ∃ p₁ < w 0, ∃ p₂ < w 0, p₁ ∈ w 1 ∧ p₂ ∈ w 1 ∧ w 0 = f p₁ p₂ :=
+  LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
+    LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
+      (locallyDelta0_mem 1 3).and <| (locallyDelta0_mem 0 3).and <|
+        LocallyDelta0.eq (LocallyDelta0Function.var 2) <|
+          hf.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
+
+lemma locallyDelta0_bounded {f : V → V → V} (hf : LocallyDelta0Function₂ f) :
+    LocallyDelta0 fun w : Fin 2 → V ↦
+      ∃ u < w 0, ∃ q < w 0,
+        (∃ t < w 0, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ q ∈ w 1 ∧ w 0 = f u q := by
+  have hterm : LocallyDelta0 fun y : Fin 5 → V ↦ IsUTerm ℒₒᵣ (y 0) ∧ y 2 = termBShift ℒₒᵣ (y 0) :=
+    (isUTerm_locallyDelta0.pred_comp (LocallyDelta0Function.var 0)).and <|
+      LocallyDelta0.eq (LocallyDelta0Function.var 2)
+        (termBShift_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
+  exact LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
+    LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
+      (LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (2 : Fin 4)) hterm).and <|
+        (locallyDelta0_mem 0 3).and <| LocallyDelta0.eq (LocallyDelta0Function.var 2) <|
+          hf.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
+
 lemma phi_locallyDelta0 :
     LocallyDelta0 fun w : Fin 2 → V ↦ Phi {x | x ∈ w 1} (w 0) := by
   have hrel : LocallyDelta0 fun y : Fin 5 → V ↦ y 3 = qqRel (y 2) (y 1) (y 0) :=
@@ -150,45 +176,17 @@ lemma phi_locallyDelta0 :
     LocallyDelta0.eq (LocallyDelta0Function.var 0) (LocallyDelta0Function.const _)
   have hfalsum : LocallyDelta0 fun w : Fin 2 → V ↦ w 0 = qqFalsum :=
     LocallyDelta0.eq (LocallyDelta0Function.var 0) (LocallyDelta0Function.const _)
-  have hmem (i j : Fin 4) : LocallyDelta0 fun y : Fin 4 → V ↦ y i ∈ y j :=
-    LocallyDelta0.mem (LocallyDelta0Function.var i) (LocallyDelta0Function.var j)
-  have hand : LocallyDelta0 fun y : Fin 4 → V ↦ y 2 = qqAnd (y 1) (y 0) :=
-    LocallyDelta0.eq (LocallyDelta0Function.var 2) <|
-      qqAnd_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
-  have hor : LocallyDelta0 fun y : Fin 4 → V ↦ y 2 = qqOr (y 1) (y 0) :=
-    LocallyDelta0.eq (LocallyDelta0Function.var 2) <|
-      qqOr_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
-  have hterm : LocallyDelta0 fun y : Fin 5 → V ↦ IsUTerm ℒₒᵣ (y 0) ∧ y 2 = termBShift ℒₒᵣ (y 0) :=
-    (isUTerm_locallyDelta0.pred_comp (LocallyDelta0Function.var 0)).and <|
-      LocallyDelta0.eq (LocallyDelta0Function.var 2)
-        (termBShift_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
-  have hball : LocallyDelta0 fun y : Fin 4 → V ↦
-      (∃ t < y 2, IsUTerm ℒₒᵣ t ∧ y 1 = termBShift ℒₒᵣ t) ∧ y 0 ∈ y 3 ∧ y 2 = qqBall (y 1) (y 0) :=
-    (LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (2 : Fin 4)) hterm).and <|
-      (hmem 0 3).and <| LocallyDelta0.eq (LocallyDelta0Function.var 2) <|
-        qqBall_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
-  have hbex : LocallyDelta0 fun y : Fin 4 → V ↦
-      (∃ t < y 2, IsUTerm ℒₒᵣ t ∧ y 1 = termBShift ℒₒᵣ t) ∧ y 0 ∈ y 3 ∧ y 2 = qqBex (y 1) (y 0) :=
-    (LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (2 : Fin 4)) hterm).and <|
-      (hmem 0 3).and <| LocallyDelta0.eq (LocallyDelta0Function.var 2) <|
-        qqBex_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
   have hex₁ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
     LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
       LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 2) hrel
   have hex₂ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
     LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
       LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 2) hnrel
-  have hex₃ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
-    LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
-      (hmem 1 3).and <| (hmem 0 3).and hand
-  have hex₄ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
-    LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
-      (hmem 1 3).and <| (hmem 0 3).and hor
-  have hex₅ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
-    LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) hball
-  have hex₆ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
-    LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) hbex
-  exact (hverum.or <| hfalsum.or <| hex₁.or <| hex₂.or <| hex₃.or <| hex₄.or <| hex₅.or hex₆).of_iff
+  exact (hverum.or <| hfalsum.or <| hex₁.or <| hex₂.or <|
+    (locallyDelta0_binary qqAnd_locallyDelta0).or <|
+    (locallyDelta0_binary qqOr_locallyDelta0).or <|
+    (locallyDelta0_bounded qqBall_locallyDelta0).or
+    (locallyDelta0_bounded qqBex_locallyDelta0)).of_iff
     fun w ↦ by simpa using phi_iff (w 1) (w 0)
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.IsBoundedF (blueprint) in

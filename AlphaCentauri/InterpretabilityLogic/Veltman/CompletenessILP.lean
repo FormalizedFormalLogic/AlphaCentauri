@@ -206,13 +206,12 @@ open Model Model.World
 
 variable [Nonempty (IndexedSet L Φ)]
 
+instance : IsTrans _ (treeCountermodel L Φ).Rel :=
+  ⟨fun _ _ _ h₁ h₂ ↦ h₁.trans <| (List.suffix_cons _ _).trans h₂⟩
+
+instance : Std.Irrefl (treeCountermodel L Φ).Rel := ⟨fun _ h ↦ by simpa using h.length_le⟩
+
 instance [Adequate Φ] : (treeCountermodel L Φ).IsIL where
-  trans _ _ _ h₁ h₂ := h₁.trans <| (List.suffix_cons _ _).trans h₂
-  cwf := by
-    have : IsTrans _ (flip (treeCountermodel L Φ).Rel) :=
-      ⟨fun _ _ _ h₁ h₂ ↦ h₂.trans <| (List.suffix_cons _ _).trans h₁⟩;
-    have : Std.Irrefl (flip (treeCountermodel L Φ).Rel) := ⟨fun _ h ↦ by simpa using h.length_le⟩;
-    exact Finite.wellFounded_of_trans_of_irrefl _;
   rel_of_s_left h := h.1
   rel_of_s_right h := h.1.trans h.2.1
   s_refl h := ⟨h, List.suffix_refl _, List.prefix_refl _⟩
@@ -277,21 +276,14 @@ lemma truthlemma (hP : ∀ {B C : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.P 
       rcases hs with ⟨hs, hseq⟩ | ⟨F, hF, hseq⟩;
       · obtain ⟨Θ, hΘ, hCΘ⟩ :=
           (hs.criticalSuccessor_bot Logic.ofAxioms.rhd_bot).exists_criticalSuccessor .bot hBC hu;
-        use p.cons (y.successor Θ hΘ.toSuccessor) (.inl ⟨hΘ.toSuccessor, rfl⟩);
-        and_intros;
-        · exact Rwu;
-        · exact List.suffix_refl _;
-        · exact hseq ▸ List.prefix_refl _;
-        · exact (ihC hC).mpr hCΘ;
+        exact ⟨p.cons (y.successor Θ hΘ.toSuccessor) (.inl ⟨hΘ.toSuccessor, rfl⟩),
+          ⟨Rwu, List.suffix_refl _, hseq ▸ List.prefix_refl _⟩, (ihC hC).mpr hCΘ⟩
       · have hF' : IsRhdOperand Φ F := x.isRhdOperand_of_mem_seq F (by simp [hseq]);
         obtain ⟨Θ, hΘ, hCΘ⟩ := hF.exists_criticalSuccessor hF' hBC hu;
-        use p.cons (y.criticalSuccessor F hF' Θ hΘ.toSuccessor) (.inr ⟨F, hΘ, rfl⟩);
-        and_intros;
-        · exact Rwu;
-        · exact List.suffix_refl _;
-        · change x.seq <+: y.seq ++ [F];
-          exact hseq ▸ List.prefix_refl _;
-        · exact (ihC hC).mpr hCΘ;
+        refine ⟨p.cons (y.criticalSuccessor F hF' Θ hΘ.toSuccessor) (.inr ⟨F, hΘ, rfl⟩),
+          ⟨Rwu, List.suffix_refl _, ?_⟩, (ihC hC).mpr hCΘ⟩
+        change x.seq <+: y.seq ++ [F]
+        exact hseq ▸ List.prefix_refl _
 
 end treeCountermodel
 

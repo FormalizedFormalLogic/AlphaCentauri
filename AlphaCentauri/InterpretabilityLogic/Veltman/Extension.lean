@@ -54,14 +54,11 @@ lemma HasW.of_finite [Finite M.World] [M.IsIL] (h : ∀ {w x y : M.World}, x ≺
     M.HasW where
   cwf_rel_comp_s w :=
     have : IsTrans _ (Relation.Comp M.Rel (M.S w)) := ⟨by
-      rintro x y z ⟨u, Rxu, Suy⟩ ⟨v, Ryv, Svz⟩;
-      use u;
-      and_intros;
-      · exact Rxu;
-      · exact s_trans Suy <| s_trans (s_of_rel (rel_of_s_right Suy) Ryv) Svz⟩;
+      rintro x y z ⟨u, Rxu, Suy⟩ ⟨v, Ryv, Svz⟩
+      exact ⟨u, Rxu, s_trans Suy <| s_trans (s_of_rel (rel_of_s_right Suy) Ryv) Svz⟩⟩
     have : Std.Irrefl (Relation.Comp M.Rel (M.S w)) := ⟨by
-      rintro x ⟨u, Rxu, Sux⟩;
-      exact h Rxu Sux⟩;
+      rintro x ⟨u, Rxu, Sux⟩
+      exact h Rxu Sux⟩
     Finite.converseWellFounded_of_trans_of_irrefl
 
 variable (v : α → Prop)
@@ -83,43 +80,34 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {x : M.World} {A B C : 
 lemma forces_axiomM [M.HasM] : x ⊩ Axioms.M A B C := by grind [rel_of_s_rel]
 
 lemma forces_axiomM₀ [M.IsIL] [M.HasM₀] : x ⊩ Axioms.M₀ A B C := by
-  intro h y Rxy hy;
-  obtain ⟨hA, hC⟩ := forces_and.mp hy;
-  obtain ⟨z, Ryz, hz⟩ := forces_dia.mp hA;
-  obtain ⟨u, Sxzu, hu⟩ := h z (IsTrans.trans _ _ _ Rxy Ryz) hz;
-  use u;
-  and_intros;
-  · exact s_trans (s_of_rel Rxy Ryz) Sxzu;
-  · exact forces_and.mpr ⟨hu, fun v Ruv ↦ hC v (rel_of_rel_rel_s_rel Rxy Ryz Sxzu Ruv)⟩;
+  intro h y Rxy hy
+  obtain ⟨hA, hC⟩ := forces_and.mp hy
+  obtain ⟨z, Ryz, hz⟩ := forces_dia.mp hA
+  obtain ⟨u, Sxzu, hu⟩ := h z (IsTrans.trans _ _ _ Rxy Ryz) hz
+  exact ⟨u, s_trans (s_of_rel Rxy Ryz) Sxzu,
+    forces_and.mpr ⟨hu, fun v Ruv ↦ hC v (rel_of_rel_rel_s_rel Rxy Ryz Sxzu Ruv)⟩⟩
 
 lemma forces_axiomP [M.IsIL] [M.HasP] : x ⊩ Axioms.P A B := by
-  have := IsTrans.trans (r := M.Rel);
+  have := IsTrans.trans (r := M.Rel)
   grind [s_of_rel_rel_s]
 
 lemma forces_axiomR [M.IsIL] [M.HasR] : x ⊩ Axioms.R A B C := by
-  intro h y Rxy hy;
-  obtain ⟨z, Ryz, hz, hC⟩ := not_forces_rhd.mp hy;
-  obtain ⟨u, Sxzu, hu⟩ := h z (IsTrans.trans _ _ _ Rxy Ryz) hz;
-  use u;
-  and_intros;
-  · exact s_trans (s_of_rel Rxy Ryz) Sxzu;
-  · exact forces_and.mpr ⟨hu, fun v Ruv ↦ not_not.mp <| hC v (s_of_rel_rel_s_rel Rxy Ryz Sxzu Ruv)⟩;
+  intro h y Rxy hy
+  obtain ⟨z, Ryz, hz, hC⟩ := not_forces_rhd.mp hy
+  obtain ⟨u, Sxzu, hu⟩ := h z (IsTrans.trans _ _ _ Rxy Ryz) hz
+  exact ⟨u, s_trans (s_of_rel Rxy Ryz) Sxzu,
+    forces_and.mpr ⟨hu, fun v Ruv ↦ not_not.mp <| hC v (s_of_rel_rel_s_rel Rxy Ryz Sxzu Ruv)⟩⟩
 
 lemma forces_axiomW [M.IsIL] [M.HasW] : x ⊩ Axioms.W A B := by
-  intro h y Rxy hy;
-  obtain ⟨z, Sxyz, hz⟩ := h y Rxy hy;
+  intro h y Rxy hy
+  obtain ⟨z, Sxyz, hz⟩ := h y Rxy hy
   obtain ⟨t, ⟨Sxyt, ht⟩, tmax⟩ := ConverseWellFounded.iff_has_max.mp (cwf_rel_comp_s x)
-    {z | y ≺[x] z ∧ z ⊩ B} ⟨z, Sxyz, hz⟩;
-  use t;
-  and_intros;
-  · exact Sxyt;
-  · apply forces_and.mpr;
-    and_intros;
-    · exact ht;
-    · intro u Rtu hu;
-      have Rxt : x ≺ t := rel_of_s_right Sxyt;
-      obtain ⟨v, Sxuv, hv⟩ := h u (IsTrans.trans _ _ _ Rxt Rtu) hu;
-      exact tmax v ⟨s_trans Sxyt <| s_trans (s_of_rel Rxt Rtu) Sxuv, hv⟩ ⟨u, Rtu, Sxuv⟩;
+    {z | y ≺[x] z ∧ z ⊩ B} ⟨z, Sxyz, hz⟩
+  refine ⟨t, Sxyt, forces_and.mpr ⟨ht, ?_⟩⟩
+  intro u Rtu hu
+  have Rxt : x ≺ t := rel_of_s_right Sxyt
+  obtain ⟨v, Sxuv, hv⟩ := h u (IsTrans.trans _ _ _ Rxt Rtu) hu
+  exact tmax v ⟨s_trans Sxyt <| s_trans (s_of_rel Rxt Rtu) Sxuv, hv⟩ ⟨u, Rtu, Sxuv⟩
 
 end Model.World
 
@@ -230,11 +218,6 @@ private instance : countermodelW.IsIL where
 
 private instance : countermodelW.HasM₀ := ⟨by decide⟩
 private instance : countermodelW.HasR := ⟨by decide⟩
-
-private lemma countermodelW.not_hasW : ¬countermodelW.HasW := fun _ ↦ by
-  obtain ⟨_, rfl, h⟩ :=
-    ConverseWellFounded.iff_has_max.mp (cwf_rel_comp_s (M := countermodelW) 0) {1} ⟨1, rfl⟩;
-  exact h 1 rfl ⟨2, by decide, by decide⟩
 
 private abbrev countermodelM₀ : Model (Fin 5) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 1 ∧ y = 2 ∨ x = 3 ∧ y = 4

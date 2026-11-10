@@ -109,6 +109,7 @@ public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.DirectTranslation
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Basic
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.CourseOfValues
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Fixpoint
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.PRF
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Seq

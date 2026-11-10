@@ -76,59 +76,57 @@ def BandStep (m : V) : V → V → Prop :=
       (bandBitsMap B s m))
     (bandDoubleMap B s m)
 
-lemma definable_legendreUp_uniform (t₀ t₁ t₂ : V) :
-    𝚺ᴬ₀.DefinableRel₃ fun m u v : V ↦ LegendreUp m t₀ t₁ t₂ u v := by
-  unfold LegendreUp
-  definability
+/-- The domain of the lower part: two copies of $\mathrm{Bits}(n)$ and $(2n - 1)s$ numbers. -/
+def LowerDomain (n u : V) : Prop :=
+  Tagged 0 (Bits B s n) u ∨ Tagged 1 (Bits B s n) u ∨ Tagged 2 (Below ((2 * n - 1) * s)) u
 
-lemma definable_doubleUp_uniform (t₀ t₁ t₂ : V) :
-    𝚺ᴬ₀.DefinableRel₃ fun m u v : V ↦ DoubleUp B s m t₀ t₁ t₂ u v := by
-  unfold DoubleUp
-  definability
+/-- The codomain of the lower part: two copies of $\mathrm{Bits}(n)$, $\mathrm{K}(n)$, and the
+errors $\mathrm{Top}(2n)$ and $\lambda(n)$. -/
+def LowerCodomain (n u : V) : Prop :=
+  (Tagged 0 (Bits B s n) u ∨ Tagged 1 (Bits B s n) u) ∨
+    (Tagged 6 (Kummer B s n) u ∨ Tagged 3 (Top (2 * n)) u ∨
+      Tagged 4 (Below (scaledLength B s n)) u)
 
-lemma definable_bandLevelMap : 𝚺ᴬ₀.DefinableRel₃ (bandLevelMap B s) := by
-  have := definable_bits B s
-  have := definable_kummer B s
-  have := definable_bitsToLevel B s 6 4
-  have := definable_bitsToLevel B s 7 5
-  unfold bandLevelMap UnionMap IdMap UntagMap Tagged
-  definability
+/-- $M_r = u_{r + 1} + 1$: the band $(M_r, 2M_r]$ of the Chebyshev estimate. -/
+def bandBound (n r : V) : V := bandSize n (r + 1) + 1
 
-lemma definable_bandLegendreMap : 𝚺ᴬ₀.DefinableRel₃ (bandLegendreMap B s) := by
-  have := definable_level B s
-  have := definable_kummer B s
-  have := definable_top (V := V)
-  have := definable_legendreUp_uniform (V := V) 6 7 2
-  unfold bandLegendreMap UnionMap IdMap TagOutMap Tagged
-  definability
+/-- $\{(p, o) : p \text{ prime}, p^2 \le 2n, o < \lambda(p)\}$: the proper prime powers in
+$(n, 2n]$, recorded by their primes. -/
+def Small (n w : V) : Prop :=
+  ∃ p ≤ w, ∃ o ≤ w, w = ⟪p, o⟫ ∧ IsPrime p ∧ p * p ≤ 2 * n ∧ o < scaledLength B s p
 
-lemma definable_bandBitsMap : 𝚺ᴬ₀.DefinableRel₃ (bandBitsMap B s) := by
-  have := definable_level B s
-  have := definable_top (V := V)
-  have := definable_levelToBits B s
-  unfold bandBitsMap UnionMap IdMap TagMap Tagged
-  definability
+/-- A position $(P, o)$ of $\binom{2n}{n}$ goes to the Chebyshev band of `P` if $P \le$
+`cutoff n`, and to `Small` otherwise. -/
+def ChebyshevMap (n u v : V) : Prop :=
+  ∃ P ≤ u, ∃ o ≤ u, π₂ u = ⟪6, P, o⟫ ∧
+    ((P ≤ cutoff n ∧ ∃ r < bandCount n, (∀ r' < r, P ≤ bandBound n r') ∧ bandBound n r < P ∧
+        v = ⟪1, r, 2, P, o⟫) ∨
+      (cutoff n < P ∧ ∃ p ≤ P, IsPrimePower p P ∧ v = ⟪0, 5, p, o⟫))
 
-lemma definable_bandDoubleMap : 𝚺ᴬ₀.DefinableRel₃ (bandDoubleMap B s) := by
-  have := definable_bits B s
-  have := definable_top (V := V)
-  have := definable_doubleUp_uniform B s 0 1 3
-  unfold bandDoubleMap UnionMap IdMap UntagMap Tagged
-  definability
+/-- The two copies of $\mathrm{Bits}(m)$ that a band carries along. -/
+def BandCarry (m u : V) : Prop := Tagged 0 (Bits B s m) u ∨ Tagged 1 (Bits B s m) u
 
-lemma definable_bandStep : 𝚺ᴬ₀.DefinableRel₃ (BandStep B s) := by
-  have := definable_bandLevelMap B s
-  have := definable_bandLegendreMap B s
-  have := definable_bandBitsMap B s
-  have := definable_bandDoubleMap B s
-  unfold BandStep CompMap payloadBound
-  definability
+/-- The domain of the whole injection. -/
+def Domain (n u : V) : Prop :=
+  Tagged 0 (LowerDomain B s n) u ∨
+    Tagged 1 (Family (bandCount n) fun r ↦ BandCarry B s (bandBound n r)) u
+
+/-- What remains of the lower part after the Chebyshev map. -/
+def LowerResidue (n u : V) : Prop :=
+  (Tagged 0 (Bits B s n) u ∨ Tagged 1 (Bits B s n) u) ∨
+    (Tagged 3 (Top (2 * n)) u ∨ Tagged 4 (Below (scaledLength B s n)) u ∨
+      Tagged 5 (Small B s n) u)
+
+/-- The codomain of the whole injection. -/
+def Codomain (n u : V) : Prop :=
+  Tagged 0 (LowerResidue B s n) u ∨
+    Tagged 1 (Family (bandCount n) fun r ↦ BandCodomain B s (bandBound n r)) u
 
 variable {B s}
 
 section bounds
 
-variable {m m' w : V}
+variable {n m m' w u : V}
 
 lemma Bits.le_payloadBound (h : Bits B s m' w) (hm : m' ≤ 2 * m) : w ≤ payloadBound B s m := by
   obtain ⟨k, -, y, -, rfl, -, hk, hy⟩ := h
@@ -165,20 +163,84 @@ lemma Below.le_payloadBound_of_scaledLength {y : V} (h : Below (scaledLength B s
   ((h.trans (scaledLength_lt B s y)).le.trans le_self_add).trans
     ((le_pair_right _ _).trans (le_pair_right _ _))
 
-lemma Tagged.lt_of_le {t t' β u : V} {X : V → Prop} (h : Tagged t X u) (ht : t ≤ t')
+lemma Tagged.lt_of_le {t t' β : V} {X : V → Prop} (h : Tagged t X u) (ht : t ≤ t')
     (hX : ∀ x, X x → x ≤ β) : u < ⟪t', β⟫ + 1 := by
   rw [← pair_unpair u, h.1]
   exact lt_succ_iff_le.mpr (pair_le_pair ht (hX _ h.2))
 
-lemma Tagged.le_pair_of_le {t t' β u : V} {X : V → Prop} (h : Tagged t X u) (ht : t ≤ t')
+lemma Tagged.le_pair_of_le {t t' β : V} {X : V → Prop} (h : Tagged t X u) (ht : t ≤ t')
     (hX : ∀ x, X x → x ≤ β) : u ≤ ⟪t', β⟫ :=
   lt_succ_iff_le.mp (Tagged.lt_of_le h ht hX)
 
-lemma payloadBound_mono (h : m ≤ m') : payloadBound B s m ≤ payloadBound B s m' := by
-  unfold payloadBound
-  apply pair_le_pair (mul_le_mul_left h)
-  apply pair_le_pair (mul_le_mul_left h)
-  exact add_le_add le_rfl (mul_le_mul_right (mul_le_mul_left h))
+lemma Tagged.lt_of_tagged_zero {Y : V → Prop} {β : V} (h : Tagged 0 Y u)
+    (hY : ∀ w, Y w → w ≤ ⟪10, β⟫) : u < ⟪1, n, 10, β⟫ + 1 :=
+  Tagged.lt_of_le h zero_le_one fun w hw ↦ (hY w hw).trans (le_pair_right _ _)
+
+lemma Tagged.lt_of_family {N : V} {Z : V → V → Prop} {β : V} (h : Tagged 1 (Family N Z) u)
+    (hN : N ≤ n) (hZ : ∀ r < N, ∀ x, Z r x → x ≤ ⟪10, β⟫) : u < ⟪1, n, 10, β⟫ + 1 := by
+  apply Tagged.lt_of_le h le_rfl
+  rintro w ⟨hr, hw⟩
+  calc w = ⟪π₁ w, π₂ w⟫ := (pair_unpair w).symm
+    _ ≤ ⟪n, ⟪10, β⟫⟫ := pair_le_pair (hr.le.trans hN) (hZ _ hr _ hw)
+
+lemma LowerDomain.le_bound (h : LowerDomain B s n w) : w ≤ ⟪10, payloadBound B s n⟫ := by
+  rcases h with h | h | h
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
+  · apply Tagged.le_pair_of_le h (by norm_cast)
+    intro x hx
+    exact Below.le_payloadBound (show Below (2 * n * s) x from
+      lt_of_lt_of_le hx (mul_le_mul_right (sub_le_self _ _)))
+
+lemma LowerCodomain.le_bound (h : LowerCodomain B s n w) : w ≤ ⟪10, payloadBound B s n⟫ := by
+  rcases h with (h | h) | h | h | h
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Kummer.le_payloadBound hx le_rfl
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Top.le_payloadBound hx le_rfl
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Below.le_payloadBound_of_scaledLength hx
+
+lemma LowerResidue.le_bound (h : LowerResidue B s n w) : w ≤ ⟪10, payloadBound B s n⟫ := by
+  rcases h with (h | h) | h | h | h
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Top.le_payloadBound hx le_rfl
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Below.le_payloadBound_of_scaledLength hx
+  · apply Tagged.le_pair_of_le h (by norm_cast)
+    rintro x ⟨p, -, o, -, rfl, hp, hpp, ho⟩
+    apply pair_le_pair ((le_mul_of_one_le_right (Arithmetic.zero_le p) hp.1.le).trans hpp)
+    exact ((ho.trans (scaledLength_lt B s p)).le.trans le_self_add).trans (le_pair_right _ _)
+
+lemma BandCarry.le_bound (hm : m ≤ n) (h : BandCarry B s m w) :
+    w ≤ ⟪10, payloadBound B s n⟫ := by
+  have hm₂ : m ≤ 2 * n := hm.trans (by simp)
+  rcases h with h | h
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
+
+lemma BandDomain.le_bound (hm : m ≤ n) (h : BandDomain B s m w) :
+    w ≤ ⟪10, payloadBound B s n⟫ := by
+  have hm₂ : m ≤ 2 * n := hm.trans (by simp)
+  rcases h with h | h | h
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Kummer.le_payloadBound hx hm
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
+
+lemma BandCodomain.le_bound (hm : m ≤ n) (h : BandCodomain B s m w) :
+    w ≤ ⟪10, payloadBound B s n⟫ := by
+  have hm₂ : m ≤ 2 * n := hm.trans (by simp)
+  rcases h with (h | h | h) | h | h
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
+  · apply Tagged.le_pair_of_le h (by norm_cast)
+    intro x hx
+    refine (Below.le_payloadBound (B := B) hx).trans ?_
+    unfold payloadBound
+    apply pair_le_pair (mul_le_mul_left hm)
+    apply pair_le_pair (mul_le_mul_left hm)
+    exact add_le_add le_rfl (mul_le_mul_right (mul_le_mul_left hm))
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Top.le_payloadBound hx hm₂
+  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Top.le_payloadBound hx hm₂
 
 end bounds
 
@@ -186,11 +248,249 @@ end bounds
 macro "tagged_disjoint" : tactic =>
   `(tactic| (intro y hy hy'; simp only [Tagged, Family] at hy hy'; aesop))
 
-section band
+section definability
 
-variable {m : V} (hB : 0 < B) (hm₄ : s * ‖2 * (2 * m)‖ < ‖B‖)
-include hB hm₄
+lemma definable_tagged_bits (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Bits B s m)) := by
+  have := definable_bits B s
+  apply definable_tagged
+  definability
 
+lemma definable_tagged_level (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Level B s m)) := by
+  have := definable_level B s
+  apply definable_tagged
+  definability
+
+lemma definable_tagged_top (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Top m)) := by
+  have := definable_top (V := V)
+  apply definable_tagged
+  definability
+
+lemma definable_tagged_kummer (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Kummer B s m)) := by
+  have := definable_kummer B s
+  apply definable_tagged
+  definability
+
+lemma definable_tagged_below (t c : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Below c)) := by
+  apply definable_tagged
+  unfold Below
+  definability
+
+lemma definable_tagged_carry (n : V) : 𝚺ᴬ₀.DefinablePred
+    (Tagged 1 (Family (bandCount n) fun r ↦ BandCarry B s (bandBound n r))) := by
+  have := definable_bits B s
+  apply definable_tagged
+  unfold Family BandCarry Tagged bandBound bandSize bandCount cutoff
+  definability
+
+lemma definable_bandLevelMap_bandBitsMap : 𝚺ᴬ₀.DefinableRel₃ (bandLevelMap B s) ∧
+    𝚺ᴬ₀.DefinableRel₃ (bandBitsMap B s) := by
+  and_intros
+  · have := definable_bits B s
+    have := definable_kummer B s
+    have := definable_bitsToLevel B s 6 4
+    have := definable_bitsToLevel B s 7 5
+    unfold bandLevelMap UnionMap IdMap UntagMap Tagged
+    definability
+  · have := definable_level B s
+    have := definable_top (V := V)
+    have := definable_levelToBits B s
+    unfold bandBitsMap UnionMap IdMap TagMap Tagged
+    definability
+
+lemma definable_bandLegendreMap : 𝚺ᴬ₀.DefinableRel₃ (bandLegendreMap B s) := by
+  have := definable_level B s
+  have := definable_kummer B s
+  have := definable_top (V := V)
+  have : 𝚺ᴬ₀.DefinableRel₃ fun m u v : V ↦ LegendreUp m 6 7 2 u v := by
+    unfold LegendreUp
+    definability
+  unfold bandLegendreMap UnionMap IdMap TagOutMap Tagged
+  definability
+
+lemma definable_bandDoubleMap : 𝚺ᴬ₀.DefinableRel₃ (bandDoubleMap B s) := by
+  have := definable_bits B s
+  have := definable_top (V := V)
+  have : 𝚺ᴬ₀.DefinableRel₃ fun m u v : V ↦ DoubleUp B s m 0 1 3 u v := by
+    unfold DoubleUp
+    definability
+  unfold bandDoubleMap UnionMap IdMap UntagMap Tagged
+  definability
+
+lemma definable_bandStep_bandBound (n : V) :
+    𝚺ᴬ₀.DefinableRel₃ fun r u v ↦ BandStep B s (bandBound n r) u v := by
+  obtain ⟨h₁, h₃⟩ := definable_bandLevelMap_bandBitsMap (B := B) (s := s)
+  have h₂ := definable_bandLegendreMap (B := B) (s := s)
+  have h₄ := definable_bandDoubleMap (B := B) (s := s)
+  have : 𝚺ᴬ₀.DefinableRel₃ (BandStep B s) := by
+    unfold BandStep CompMap payloadBound
+    definability
+  unfold bandBound bandSize cutoff
+  definability
+
+lemma definable_pieces (n : V) :
+    𝚺ᴬ₀.DefinablePred (Tagged 0 (LowerDomain B s n)) ∧
+    𝚺ᴬ₀.DefinablePred (Tagged 0 (Tagged 6 (Kummer B s n))) ∧
+    𝚺ᴬ₀.DefinablePred (fun u ↦
+      Tagged 0 (fun w ↦ (Tagged 0 (Bits B s n) w ∨ Tagged 1 (Bits B s n) w) ∨
+        (Tagged 3 (Top (2 * n)) w ∨ Tagged 4 (Below (scaledLength B s n)) w)) u ∨
+      Tagged 1 (Family (bandCount n) fun r ↦ BandCarry B s (bandBound n r)) u) ∧
+    𝚺ᴬ₀.DefinablePred (Tagged 0 (LowerResidue B s n)) ∧
+    𝚺ᴬ₀.DefinablePred
+      (Tagged 1 (Family (bandCount n) fun r ↦ BandDomain B s (bandBound n r))) ∧
+    𝚺ᴬ₀.DefinableRel (ChebyshevMap n : V → V → Prop) := by
+  and_intros
+  · have := definable_bits B s
+    apply definable_tagged
+    unfold LowerDomain Tagged Below
+    definability
+  · exact definable_tagged (definable_tagged_kummer 6 n)
+  · have := definable_tagged_bits (B := B) (s := s) 0 n
+    have := definable_tagged_bits (B := B) (s := s) 1 n
+    have := definable_tagged_top (V := V) 3 (2 * n)
+    have := definable_tagged_below (V := V) 4 (scaledLength B s n)
+    have := definable_tagged_carry (B := B) (s := s) n
+    have : 𝚺ᴬ₀.DefinablePred fun w ↦ (Tagged 0 (Bits B s n) w ∨ Tagged 1 (Bits B s n) w) ∨
+        (Tagged 3 (Top (2 * n)) w ∨ Tagged 4 (Below (scaledLength B s n)) w) := by
+      definability
+    have := definable_tagged (t := (0 : V)) this
+    definability
+  · have := definable_tagged_bits (B := B) (s := s) 0 n
+    have := definable_tagged_bits (B := B) (s := s) 1 n
+    have := definable_tagged_top (V := V) 3 (2 * n)
+    have := definable_tagged_below (V := V) 4 (scaledLength B s n)
+    have : 𝚺ᴬ₀.DefinablePred (Tagged 5 (Small B s n)) := by
+      apply definable_tagged
+      unfold Small
+      definability
+    apply definable_tagged
+    unfold LowerResidue
+    definability
+  · have := definable_bits B s
+    have := definable_kummer B s
+    apply definable_tagged
+    unfold Family BandDomain Tagged bandBound bandSize bandCount cutoff
+    definability
+  · unfold ChebyshevMap bandBound bandSize bandCount
+    definability
+
+end definability
+
+section chebyshev
+
+variable {n : V}
+
+lemma bandBound_le {r : V} (hr : r < bandCount n) (hn2 : 2 ≤ n) : bandBound n r ≤ n := by
+  have h₀ : 0 < bandCount n := pos_of_gt hr
+  have h₁ : bandSize n (r + 1) ≤ bandSize n (0 + 1) :=
+    bandSize_antitone (by simp) (succ_le_iff_lt.mpr hr)
+  have h₂ := (bandSize_succ h₀).1
+  have h₃ : 3 * cutoff n ≤ 2 * n := mul_div_le (2 * n) 3
+  rw [bandSize_zero] at h₂
+  have h₄ : 3 * bandSize n (r + 1) ≤ n := by
+    apply le_of_mul_le_mul_left (a := 2)
+    · calc 2 * (3 * bandSize n (r + 1)) = 3 * (2 * bandSize n (r + 1)) := by grind
+        _ ≤ 3 * cutoff n := mul_le_mul_left ((mul_le_mul_left h₁).trans h₂)
+        _ ≤ 2 * n := h₃
+    · exact two_pos
+  unfold bandBound
+  rcases (Arithmetic.zero_le (bandSize n (r + 1))).eq_or_lt with h | h
+  · rw [← h]
+    simpa using one_le_two.trans hn2
+  · calc bandSize n (r + 1) + 1 ≤ bandSize n (r + 1) + bandSize n (r + 1) :=
+          (add_le_add_iff_left _).mpr (pos_iff_one_le.mp h)
+      _ ≤ bandSize n (r + 1) + bandSize n (r + 1) + bandSize n (r + 1) := le_self_add
+      _ = 3 * bandSize n (r + 1) := by grind
+      _ ≤ n := h₄
+
+lemma Kummer.gt_of_cutoff_lt {P o : V} (h : Kummer B s n ⟪P, o⟫) (hP : cutoff n < P) :
+    n < P ∧ P ≤ 2 * n := by
+  have hodd := (kummer_pair_iff.mp h).1
+  have hP0 : 0 < P := pos_of_gt hP
+  have hle : P ≤ 2 * n := by
+    by_contra hlt
+    rw [div_eq_zero_of_lt _ (not_le.mp hlt)] at hodd
+    simp at hodd
+  refine ⟨?_, hle⟩
+  by_contra hPn
+  have h₁ : 2 * n < 3 * P := calc
+    2 * n < 3 * (cutoff n + 1) := lt_mul_div_succ (2 * n) (by norm_num)
+    _ ≤ 3 * P := mul_le_mul_left (succ_le_iff_lt.mpr hP)
+  have h₂ : 2 * n / P < 2 + 1 := by
+    simpa only [show (3 : V) = 2 + 1 by norm_num] using div_lt_of_lt_mul h₁
+  have h₃ : 2 ≤ 2 * n / P := by
+    by_contra h₃
+    have h₄ : 2 * n / P + 1 ≤ 2 := succ_le_iff_lt.mpr (not_le.mp h₃)
+    have : 2 * n < 2 * n := calc
+      2 * n < P * (2 * n / P + 1) := lt_mul_div_succ _ hP0
+      _ ≤ P * 2 := mul_le_mul_left h₄
+      _ ≤ n * 2 := mul_le_mul_right (not_lt.mp hPn)
+      _ = 2 * n := mul_comm _ _
+    exact lt_irrefl _ this
+  rw [le_antisymm (lt_succ_iff_le.mp h₂) h₃] at hodd
+  simp at hodd
+
+lemma bandCount_le : bandCount n ≤ n :=
+  calc bandCount n ≤ cutoff n := length_le _
+    _ ≤ n := by
+      apply le_of_mul_le_mul_left (a := 3) _ (by norm_num)
+      calc 3 * cutoff n ≤ 2 * n := mul_div_le _ _
+        _ ≤ 3 * n := mul_le_mul_right (by norm_cast)
+
+lemma tagged_pair_iff {t a b : V} {X : V → Prop} : Tagged t X ⟪a, b⟫ ↔ a = t ∧ X b := by
+  simp [Tagged]
+
+lemma family_pair_iff {N a b : V} {X : V → V → Prop} : Family N X ⟪a, b⟫ ↔ a < N ∧ X a b := by
+  simp [Family]
+
+lemma exists_tagged_tagged_kummer {u : V} (h : Tagged 0 (Tagged 6 (Kummer B s n)) u) :
+    ∃ P o, u = ⟪0, 6, P, o⟫ ∧ Kummer B s n ⟪P, o⟫ := by
+  obtain ⟨a, b, rfl⟩ := exists_pair₂ u
+  obtain ⟨c, w, rfl⟩ := exists_pair₂ b
+  obtain ⟨P, o, rfl⟩ := exists_pair₂ w
+  simp only [tagged_pair_iff] at h
+  obtain ⟨rfl, rfl, hk⟩ := h
+  use P, o
+
+lemma chebyshevMap_pair {P o v : V} :
+    ChebyshevMap n ⟪0, 6, P, o⟫ v ↔
+      (P ≤ cutoff n ∧ ∃ r < bandCount n, (∀ r' < r, P ≤ bandBound n r') ∧ bandBound n r < P ∧
+        v = ⟪1, r, 2, P, o⟫) ∨
+      (cutoff n < P ∧ ∃ p ≤ P, IsPrimePower p P ∧ v = ⟪0, 5, p, o⟫) := by
+  constructor
+  · rintro ⟨P', -, o', -, h, hh⟩
+    simp only [pi₂_pair, pair_ext_iff, true_and] at h
+    obtain ⟨rfl, rfl⟩ := h
+    exact hh
+  · intro hh
+    use P
+    and_intros
+    · exact (le_pair_left P o).trans ((le_pair_right 6 _).trans (le_pair_right 0 _))
+    · use o
+      and_intros
+      · exact (le_pair_right P o).trans ((le_pair_right 6 _).trans (le_pair_right 0 _))
+      · simp
+      · exact hh
+
+lemma not_lt_of_isPrimePower {p P P' : V} (hp : IsPrimePower p P) (hp' : IsPrimePower p P')
+    (hn : n < P) (hn' : P' ≤ 2 * n) : ¬P < P' := by
+  intro hlt
+  have h₁ : 2 ≤ p := by simpa [one_add_one_eq_two] using succ_le_iff_lt.mpr hp.1.1
+  have h₂ : n + n < P + P := add_lt_add_of_lt_of_le hn hn.le
+  have : P * 2 ≤ 2 * n := calc
+    P * 2 ≤ P * p := mul_le_mul_left h₁
+    _ ≤ P' := hp.mul_le_of_lt hp' hlt
+    _ ≤ 2 * n := hn'
+  simp only [two_mul, mul_comm P] at this
+  exact absurd (lt_of_lt_of_le h₂ this) (lt_irrefl _)
+
+end chebyshev
+
+section assembly
+
+variable {n m : V} (hB : 0 < B) (hs : 0 < s) (hm₄ : s * ‖2 * (2 * m)‖ < ‖B‖)
+  (hn₄ : s * ‖2 * (2 * n)‖ < ‖B‖) (H : ∀ p, n < p → p ≤ 2 * n → ¬IsPrime p)
+
+include hB hm₄ in
 lemma isInj_bandStep : IsInj (BandStep B s m) (BandDomain B s m) (BandCodomain B s m) := by
   have hm : s * ‖2 * m‖ < ‖B‖ := lt_of_le_of_lt (mul_le_mul_left (length_monotone (by simp))) hm₄
   have h₁ : IsInj (bandLevelMap B s m) (BandDomain B s m) fun u ↦
@@ -242,53 +542,7 @@ lemma isInj_bandStep : IsInj (BandStep B s m) (BandDomain B s m) (BandCodomain B
     · exact hb (by norm_cast) htop u hu
     · exact hb (by norm_cast) htop u hu
 
-end band
-
-variable (B s)
-
-/-- The domain of the lower part: two copies of $\mathrm{Bits}(n)$ and $(2n - 1)s$ numbers. -/
-def LowerDomain (n u : V) : Prop :=
-  Tagged 0 (Bits B s n) u ∨ Tagged 1 (Bits B s n) u ∨ Tagged 2 (Below ((2 * n - 1) * s)) u
-
-/-- The codomain of the lower part: two copies of $\mathrm{Bits}(n)$, $\mathrm{K}(n)$, and the
-errors $\mathrm{Top}(2n)$ and $\lambda(n)$. -/
-def LowerCodomain (n u : V) : Prop :=
-  (Tagged 0 (Bits B s n) u ∨ Tagged 1 (Bits B s n) u) ∨
-    (Tagged 6 (Kummer B s n) u ∨ Tagged 3 (Top (2 * n)) u ∨
-      Tagged 4 (Below (scaledLength B s n)) u)
-
-variable {B s}
-
-lemma definable_tagged_bits (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Bits B s m)) := by
-  have := definable_bits B s
-  apply definable_tagged
-  definability
-
-lemma definable_tagged_level (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Level B s m)) := by
-  have := definable_level B s
-  apply definable_tagged
-  definability
-
-lemma definable_tagged_top (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Top m)) := by
-  have := definable_top (V := V)
-  apply definable_tagged
-  definability
-
-lemma definable_tagged_kummer (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Kummer B s m)) := by
-  have := definable_kummer B s
-  apply definable_tagged
-  definability
-
-lemma definable_tagged_below (t c : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Below c)) := by
-  apply definable_tagged
-  unfold Below
-  definability
-
-section lower
-
-variable {n : V} (hB : 0 < B) (hs : 0 < s) (hn₄ : s * ‖2 * (2 * n)‖ < ‖B‖)
-include hB hs hn₄
-
+include hB hs hn₄ in
 /-- $2\,\mathrm{Bits}(n) + (2n - 1)s \le 2\,\mathrm{Bits}(n) + \mathrm{K}(n) + \mathrm{Top}(2n) +
 \lambda(n)$, i.e. $\log_2 \binom{2n}{n} \gtrsim 2n$. -/
 lemma embeds_lower : Embeds (LowerDomain B s n) (LowerCodomain B s n) := by
@@ -356,169 +610,7 @@ lemma embeds_lower : Embeds (LowerDomain B s n) (LowerCodomain B s n) := by
     · exact hb (by norm_cast) (fun x hx ↦ Top.le_payloadBound hx le_rfl) u hu
     · exact hb (by norm_cast) (fun x hx ↦ Below.le_payloadBound_of_scaledLength hx) u hu
 
-end lower
-
-/-- $M_r = u_{r + 1} + 1$: the band $(M_r, 2M_r]$ of the Chebyshev estimate. -/
-def bandBound (n r : V) : V := bandSize n (r + 1) + 1
-
-variable (B s)
-
-/-- $\{(p, o) : p \text{ prime}, p^2 \le 2n, o < \lambda(p)\}$: the proper prime powers in
-$(n, 2n]$, recorded by their primes. -/
-def Small (n w : V) : Prop :=
-  ∃ p ≤ w, ∃ o ≤ w, w = ⟪p, o⟫ ∧ IsPrime p ∧ p * p ≤ 2 * n ∧ o < scaledLength B s p
-
-/-- A position $(P, o)$ of $\binom{2n}{n}$ goes to the Chebyshev band of `P` if $P \le x$, and to
-`Small` otherwise. -/
-def ChebyshevMap (n u v : V) : Prop :=
-  ∃ P ≤ u, ∃ o ≤ u, π₂ u = ⟪6, P, o⟫ ∧
-    ((P ≤ cutoff n ∧ ∃ r < bandCount n, (∀ r' < r, P ≤ bandBound n r') ∧ bandBound n r < P ∧
-        v = ⟪1, r, 2, P, o⟫) ∨
-      (cutoff n < P ∧ ∃ p ≤ P, IsPrimePower p P ∧ v = ⟪0, 5, p, o⟫))
-
-lemma definable_small : 𝚺ᴬ₀.DefinableRel (Small B s) := by
-  unfold Small
-  definability
-
-lemma definable_chebyshevMap (n : V) : 𝚺ᴬ₀.DefinableRel (ChebyshevMap n : V → V → Prop) := by
-  unfold ChebyshevMap bandBound bandSize bandCount
-  definability
-
-variable {B s}
-
-section chebyshev
-
-variable {n : V}
-
-lemma bandBound_lt {r : V} (hr : r < bandCount n) {P : V} (hP : P ≤ cutoff n)
-    (hmin : ∀ r' < r, P ≤ bandBound n r') (hlt : bandBound n r < P) : P ≤ 2 * bandBound n r := by
-  rcases zero_or_succ r with rfl | ⟨r'', rfl⟩
-  · calc P ≤ cutoff n := hP
-      _ = bandSize n 0 := bandSize_zero.symm
-      _ ≤ 2 * bandSize n (0 + 1) + 1 := (bandSize_succ hr).2
-      _ ≤ 2 * bandBound n 0 := by
-        rw [bandBound, mul_add, mul_one]
-        exact (add_le_add_iff_left _).mpr one_le_two
-  · calc P ≤ bandBound n r'' := hmin r'' (by simp)
-      _ = bandSize n (r'' + 1) + 1 := rfl
-      _ ≤ 2 * bandSize n (r'' + 1 + 1) + 1 + 1 := (add_le_add_iff_right 1).mpr (bandSize_succ hr).2
-      _ = 2 * bandBound n (r'' + 1) := by rw [bandBound, mul_add, mul_one, add_assoc,
-          one_add_one_eq_two]
-
-lemma bandBound_le {r : V} (hr : r < bandCount n) (hn2 : 2 ≤ n) : bandBound n r ≤ n := by
-  have h₀ : 0 < bandCount n := pos_of_gt hr
-  have h₁ : bandSize n (r + 1) ≤ bandSize n (0 + 1) :=
-    bandSize_antitone (by simp) (succ_le_iff_lt.mpr hr)
-  have h₂ := (bandSize_succ h₀).1
-  have h₃ : 3 * cutoff n ≤ 2 * n := mul_div_le (2 * n) 3
-  rw [bandSize_zero] at h₂
-  have h₄ : 3 * bandSize n (r + 1) ≤ n := by
-    apply le_of_mul_le_mul_left (a := 2)
-    · calc 2 * (3 * bandSize n (r + 1)) = 3 * (2 * bandSize n (r + 1)) := by grind
-        _ ≤ 3 * cutoff n := mul_le_mul_left ((mul_le_mul_left h₁).trans h₂)
-        _ ≤ 2 * n := h₃
-    · exact two_pos
-  unfold bandBound
-  rcases (Arithmetic.zero_le (bandSize n (r + 1))).eq_or_lt with h | h
-  · rw [← h]
-    simpa using one_le_two.trans hn2
-  · calc bandSize n (r + 1) + 1 ≤ bandSize n (r + 1) + bandSize n (r + 1) :=
-          (add_le_add_iff_left _).mpr (pos_iff_one_le.mp h)
-      _ ≤ bandSize n (r + 1) + bandSize n (r + 1) + bandSize n (r + 1) := le_self_add
-      _ = 3 * bandSize n (r + 1) := by grind
-      _ ≤ n := h₄
-
-lemma Kummer.gt_of_cutoff_lt {P o : V} (h : Kummer B s n ⟪P, o⟫) (hP : cutoff n < P) :
-    n < P ∧ P ≤ 2 * n := by
-  have hodd := (kummer_pair_iff.mp h).1
-  have hP0 : 0 < P := pos_of_gt hP
-  have hle : P ≤ 2 * n := by
-    by_contra hlt
-    rw [div_eq_zero_of_lt _ (not_le.mp hlt)] at hodd
-    simp at hodd
-  refine ⟨?_, hle⟩
-  by_contra hPn
-  have h₁ : 2 * n < 3 * P := calc
-    2 * n < 3 * (cutoff n + 1) := lt_mul_div_succ (2 * n) (by norm_num)
-    _ ≤ 3 * P := mul_le_mul_left (succ_le_iff_lt.mpr hP)
-  have h₂ : 2 * n / P < 2 + 1 := by
-    simpa only [show (3 : V) = 2 + 1 by norm_num] using div_lt_of_lt_mul h₁
-  have h₃ : 2 ≤ 2 * n / P := by
-    by_contra h₃
-    have h₄ : 2 * n / P + 1 ≤ 2 := succ_le_iff_lt.mpr (not_le.mp h₃)
-    have : 2 * n < 2 * n := calc
-      2 * n < P * (2 * n / P + 1) := lt_mul_div_succ _ hP0
-      _ ≤ P * 2 := mul_le_mul_left h₄
-      _ ≤ n * 2 := mul_le_mul_right (not_lt.mp hPn)
-      _ = 2 * n := mul_comm _ _
-    exact lt_irrefl _ this
-  rw [le_antisymm (lt_succ_iff_le.mp h₂) h₃] at hodd
-  simp at hodd
-
-lemma bandCount_le : bandCount n ≤ n :=
-  calc bandCount n ≤ cutoff n := length_le _
-    _ ≤ n := by
-      apply le_of_mul_le_mul_left (a := 3) _ (by norm_num)
-      calc 3 * cutoff n ≤ 2 * n := mul_div_le _ _
-        _ ≤ 3 * n := mul_le_mul_right (by norm_cast)
-
-lemma Small.le_payloadBound {w : V} (h : Small B s n w) : w ≤ payloadBound B s n := by
-  obtain ⟨p, -, o, -, rfl, hp, hpp, ho⟩ := h
-  have hp₂ : p ≤ 2 * n :=
-    (le_mul_of_one_le_right (Arithmetic.zero_le p) hp.1.le).trans hpp
-  apply pair_le_pair hp₂
-  exact ((ho.trans (scaledLength_lt B s p)).le.trans le_self_add).trans (le_pair_right _ _)
-
-lemma tagged_pair_iff {t a b : V} {X : V → Prop} : Tagged t X ⟪a, b⟫ ↔ a = t ∧ X b := by
-  simp [Tagged]
-
-lemma family_pair_iff {N a b : V} {X : V → V → Prop} : Family N X ⟪a, b⟫ ↔ a < N ∧ X a b := by
-  simp [Family]
-
-lemma exists_tagged_tagged_kummer {u : V} (h : Tagged 0 (Tagged 6 (Kummer B s n)) u) :
-    ∃ P o, u = ⟪0, 6, P, o⟫ ∧ Kummer B s n ⟪P, o⟫ := by
-  obtain ⟨a, b, rfl⟩ := exists_pair₂ u
-  obtain ⟨c, w, rfl⟩ := exists_pair₂ b
-  obtain ⟨P, o, rfl⟩ := exists_pair₂ w
-  simp only [tagged_pair_iff] at h
-  obtain ⟨rfl, rfl, hk⟩ := h
-  use P, o
-
-lemma chebyshevMap_pair {P o v : V} :
-    ChebyshevMap n ⟪0, 6, P, o⟫ v ↔
-      (P ≤ cutoff n ∧ ∃ r < bandCount n, (∀ r' < r, P ≤ bandBound n r') ∧ bandBound n r < P ∧
-        v = ⟪1, r, 2, P, o⟫) ∨
-      (cutoff n < P ∧ ∃ p ≤ P, IsPrimePower p P ∧ v = ⟪0, 5, p, o⟫) := by
-  constructor
-  · rintro ⟨P', -, o', -, h, hh⟩
-    simp only [pi₂_pair, pair_ext_iff, true_and] at h
-    obtain ⟨rfl, rfl⟩ := h
-    exact hh
-  · intro hh
-    use P
-    and_intros
-    · exact (le_pair_left P o).trans ((le_pair_right 6 _).trans (le_pair_right 0 _))
-    · use o
-      and_intros
-      · exact (le_pair_right P o).trans ((le_pair_right 6 _).trans (le_pair_right 0 _))
-      · simp
-      · exact hh
-
-lemma not_lt_of_isPrimePower {p P P' : V} (hp : IsPrimePower p P) (hp' : IsPrimePower p P')
-    (hn : n < P) (hn' : P' ≤ 2 * n) : ¬P < P' := by
-  intro hlt
-  have h₁ : 2 ≤ p := by simpa [one_add_one_eq_two] using succ_le_iff_lt.mpr hp.1.1
-  have h₂ : n + n < P + P := add_lt_add_of_lt_of_le hn hn.le
-  have : P * 2 ≤ 2 * n := calc
-    P * 2 ≤ P * p := mul_le_mul_left h₁
-    _ ≤ P' := hp.mul_le_of_lt hp' hlt
-    _ ≤ 2 * n := hn'
-  rw [two_mul, mul_comm, two_mul] at this
-  exact absurd (lt_of_lt_of_le h₂ this) (lt_irrefl _)
-
-variable (H : ∀ p, n < p → p ≤ 2 * n → ¬IsPrime p)
-include H
-
+include H in
 lemma isInj_chebyshevMap : IsInj (ChebyshevMap n) (Tagged 0 (Tagged 6 (Kummer B s n)))
     (fun v ↦ Tagged 1 (Family (bandCount n) fun r ↦ Tagged 2 (Kummer B s (bandBound n r))) v ∨
       Tagged 0 (Tagged 5 (Small B s n)) v) := by
@@ -543,10 +635,16 @@ lemma isInj_chebyshevMap : IsInj (ChebyshevMap n) (Tagged 0 (Tagged 6 (Kummer B 
         by_contra h
         exact hmin r₀ (not_le.mp h) hb₀
       use ⟪1, r, 2, P, o⟫
-      exact chebyshevMap_pair.mpr
-        (Or.inl ⟨hPx, r, hrR, fun r' hr' ↦ not_lt.mp (hmin r' hr'), hr, rfl⟩)
+      apply chebyshevMap_pair.mpr
+      left
+      refine ⟨hPx, ?_⟩
+      use r
+      exact ⟨hrR, fun r' hr' ↦ not_lt.mp (hmin r' hr'), hr, rfl⟩
     · use ⟪0, 5, p, o⟫
-      exact chebyshevMap_pair.mpr (Or.inr ⟨not_le.mp hPx, p, hpP, hp, rfl⟩)
+      apply chebyshevMap_pair.mpr
+      right
+      refine ⟨not_le.mp hPx, ?_⟩
+      use p
   · intro u v hu huv
     obtain ⟨P, o, rfl, hk⟩ := exists_tagged_tagged_kummer hu
     obtain ⟨hodd, p, hpP, hp, ho⟩ := kummer_pair_iff.mp hk
@@ -556,17 +654,38 @@ lemma isInj_chebyshevMap : IsInj (ChebyshevMap n) (Tagged 0 (Tagged 6 (Kummer B 
       have h₂ : 2 * bandBound n r < 2 * P := by
         rw [two_mul, two_mul]
         exact add_lt_add_of_lt_of_le hlt hlt.le
+      have h₃ : P ≤ 2 * bandBound n r := by
+        rcases zero_or_succ r with rfl | ⟨r'', rfl⟩
+        · calc P ≤ cutoff n := hPx
+            _ = bandSize n 0 := bandSize_zero.symm
+            _ ≤ 2 * bandSize n (0 + 1) + 1 := (bandSize_succ hr).2
+            _ ≤ 2 * bandBound n 0 := by
+              simp only [bandBound, mul_add, mul_one]
+              exact (add_le_add_iff_left _).mpr one_le_two
+        · calc P ≤ bandBound n r'' := hmin r'' (by simp)
+            _ = bandSize n (r'' + 1) + 1 := rfl
+            _ ≤ 2 * bandSize n (r'' + 1 + 1) + 1 + 1 :=
+              (add_le_add_iff_right 1).mpr (bandSize_succ hr).2
+            _ = 2 * bandBound n (r'' + 1) := by
+              simp only [bandBound, mul_add, mul_one, add_assoc, one_add_one_eq_two]
       have h₁ : 2 * bandBound n r / P = 1 := by
         apply div_eq_of
-        · simpa using bandBound_lt hr hPx hmin hlt
+        · simpa using h₃
         · calc 2 * bandBound n r < 2 * P := h₂
             _ = P * (1 + 1) := by grind
-      exact ⟨hr, kummer_pair_iff.mpr ⟨by rw [h₁]; simp, p, hpP, hp, ho⟩⟩
+      refine ⟨hr, kummer_pair_iff.mpr ⟨?_, ?_⟩⟩
+      · rw [h₁]
+        simp
+      · use p
     · right
       simp only [tagged_pair_iff, true_and]
       obtain rfl := hp.unique hp'
       have hn := Kummer.gt_of_cutoff_lt hk hPx
-      refine ⟨p, le_pair_left _ _, o, le_pair_right _ _, rfl, hp.1, ?_, ho⟩
+      unfold Small
+      use p
+      refine ⟨le_pair_left _ _, ?_⟩
+      use o
+      refine ⟨le_pair_right _ _, rfl, hp.1, ?_, ho⟩
       rcases hp'.eq_or_exists_mul with hPp | ⟨Q, hQ, hPQ⟩
       · exact absurd hp.1 (H p (hPp ▸ hn.1) (hPp ▸ hn.2))
       · calc p * p ≤ p * Q := mul_le_mul_left (le_of_dvd hQ.pos hQ.dvd)
@@ -591,187 +710,26 @@ lemma isInj_chebyshevMap : IsInj (ChebyshevMap n) (Tagged 0 (Tagged 6 (Kummer B 
         (not_lt.mp (not_lt_of_isPrimePower hp hp' hn.1 hn'.2))
       rfl
 
-end chebyshev
-
-variable (B s)
-
-/-- The two copies of $\mathrm{Bits}(m)$ that a band carries along. -/
-def BandCarry (m u : V) : Prop := Tagged 0 (Bits B s m) u ∨ Tagged 1 (Bits B s m) u
-
-/-- The domain of the whole injection. -/
-def Domain (n u : V) : Prop :=
-  Tagged 0 (LowerDomain B s n) u ∨
-    Tagged 1 (Family (bandCount n) fun r ↦ BandCarry B s (bandBound n r)) u
-
-/-- What remains of the lower part after the Chebyshev map. -/
-def LowerResidue (n u : V) : Prop :=
-  (Tagged 0 (Bits B s n) u ∨ Tagged 1 (Bits B s n) u) ∨
-    (Tagged 3 (Top (2 * n)) u ∨ Tagged 4 (Below (scaledLength B s n)) u ∨
-      Tagged 5 (Small B s n) u)
-
-/-- The codomain of the whole injection. -/
-def Codomain (n u : V) : Prop :=
-  Tagged 0 (LowerResidue B s n) u ∨
-    Tagged 1 (Family (bandCount n) fun r ↦ BandCodomain B s (bandBound n r)) u
-
-variable {B s}
-
-section boundedness
-
-variable {n m w u : V}
-
-lemma Tagged.lt_of_tagged_zero {Y : V → Prop} {β : V} (h : Tagged 0 Y u)
-    (hY : ∀ w, Y w → w ≤ ⟪10, β⟫) : u < ⟪1, n, 10, β⟫ + 1 :=
-  Tagged.lt_of_le h zero_le_one fun w hw ↦ (hY w hw).trans (le_pair_right _ _)
-
-lemma Tagged.lt_of_family {N : V} {Z : V → V → Prop} {β : V} (h : Tagged 1 (Family N Z) u)
-    (hN : N ≤ n) (hZ : ∀ r < N, ∀ x, Z r x → x ≤ ⟪10, β⟫) : u < ⟪1, n, 10, β⟫ + 1 := by
-  apply Tagged.lt_of_le h le_rfl
-  rintro w ⟨hr, hw⟩
-  calc w = ⟪π₁ w, π₂ w⟫ := (pair_unpair w).symm
-    _ ≤ ⟪n, ⟪10, β⟫⟫ := pair_le_pair (hr.le.trans hN) (hZ _ hr _ hw)
-
-lemma LowerDomain.le_bound (h : LowerDomain B s n w) : w ≤ ⟪10, payloadBound B s n⟫ := by
-  rcases h with h | h | h
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
-  · apply Tagged.le_pair_of_le h (by norm_cast)
-    intro x hx
-    exact Below.le_payloadBound (show Below (2 * n * s) x from
-      lt_of_lt_of_le hx (mul_le_mul_right (sub_le_self _ _)))
-
-lemma LowerCodomain.le_bound (h : LowerCodomain B s n w) : w ≤ ⟪10, payloadBound B s n⟫ := by
-  rcases h with (h | h) | h | h | h
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Kummer.le_payloadBound hx le_rfl
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Top.le_payloadBound hx le_rfl
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Below.le_payloadBound_of_scaledLength hx
-
-lemma LowerResidue.le_bound (h : LowerResidue B s n w) : w ≤ ⟪10, payloadBound B s n⟫ := by
-  rcases h with (h | h) | h | h | h
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx (by simp)
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Top.le_payloadBound hx le_rfl
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Below.le_payloadBound_of_scaledLength hx
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Small.le_payloadBound hx
-
-lemma BandCarry.le_bound (hm : m ≤ n) (h : BandCarry B s m w) :
-    w ≤ ⟪10, payloadBound B s n⟫ := by
-  have hm₂ : m ≤ 2 * n := hm.trans (by simp)
-  rcases h with h | h
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
-
-lemma BandDomain.le_bound (hm : m ≤ n) (h : BandDomain B s m w) :
-    w ≤ ⟪10, payloadBound B s n⟫ := by
-  have hm₂ : m ≤ 2 * n := hm.trans (by simp)
-  rcases h with h | h | h
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Kummer.le_payloadBound hx hm
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
-
-lemma BandCodomain.le_bound (hm : m ≤ n) (h : BandCodomain B s m w) :
-    w ≤ ⟪10, payloadBound B s n⟫ := by
-  have hm₂ : m ≤ 2 * n := hm.trans (by simp)
-  rcases h with (h | h | h) | h | h
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Bits.le_payloadBound hx hm₂
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦
-      (Below.le_payloadBound hx).trans (payloadBound_mono hm)
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Top.le_payloadBound hx hm₂
-  · exact Tagged.le_pair_of_le h (by norm_cast) fun x hx ↦ Top.le_payloadBound hx hm₂
-
-end boundedness
-
-lemma definable_tagged_carry (n : V) : 𝚺ᴬ₀.DefinablePred
-    (Tagged 1 (Family (bandCount n) fun r ↦ BandCarry B s (bandBound n r))) := by
-  have := definable_bits B s
-  apply definable_tagged
-  unfold Family BandCarry Tagged bandBound bandSize bandCount cutoff
-  definability
-
-lemma definable_tagged_lowerDomain (n : V) : 𝚺ᴬ₀.DefinablePred (Tagged 0 (LowerDomain B s n)) := by
-  have := definable_bits B s
-  apply definable_tagged
-  unfold LowerDomain Tagged Below
-  definability
-
-lemma definable_tagged_tagged_kummer (n : V) :
-    𝚺ᴬ₀.DefinablePred (Tagged 0 (Tagged 6 (Kummer B s n))) :=
-  definable_tagged (definable_tagged_kummer 6 n)
-
-lemma definable_rest (n : V) : 𝚺ᴬ₀.DefinablePred fun u ↦
-    Tagged 0 (fun w ↦ (Tagged 0 (Bits B s n) w ∨ Tagged 1 (Bits B s n) w) ∨
-      (Tagged 3 (Top (2 * n)) w ∨ Tagged 4 (Below (scaledLength B s n)) w)) u ∨
-    Tagged 1 (Family (bandCount n) fun r ↦ BandCarry B s (bandBound n r)) u := by
-  have h₀ := definable_tagged_bits (B := B) (s := s) 0 n
-  have h₁ := definable_tagged_bits (B := B) (s := s) 1 n
-  have h₃ := definable_tagged_top (V := V) 3 (2 * n)
-  have h₄ := definable_tagged_below (V := V) 4 (scaledLength B s n)
-  have h : 𝚺ᴬ₀.DefinablePred fun w ↦ (Tagged 0 (Bits B s n) w ∨ Tagged 1 (Bits B s n) w) ∨
-      (Tagged 3 (Top (2 * n)) w ∨ Tagged 4 (Below (scaledLength B s n)) w) := by
-    definability
-  have := definable_tagged (t := (0 : V)) h
-  have := definable_tagged_carry (B := B) (s := s) n
-  definability
-
-lemma definable_tagged_lowerResidue (n : V) :
-    𝚺ᴬ₀.DefinablePred (Tagged 0 (LowerResidue B s n)) := by
-  have h₀ := definable_tagged_bits (B := B) (s := s) 0 n
-  have h₁ := definable_tagged_bits (B := B) (s := s) 1 n
-  have h₃ := definable_tagged_top (V := V) 3 (2 * n)
-  have h₄ := definable_tagged_below (V := V) 4 (scaledLength B s n)
-  have h₅ : 𝚺ᴬ₀.DefinablePred (Tagged 5 (Small B s n)) := by
-    have := definable_small B s
-    apply definable_tagged
-    definability
-  apply definable_tagged
-  unfold LowerResidue
-  definability
-
-lemma definable_tagged_bandDomain (n : V) : 𝚺ᴬ₀.DefinablePred
-    (Tagged 1 (Family (bandCount n) fun r ↦ BandDomain B s (bandBound n r))) := by
-  have := definable_bits B s
-  have := definable_kummer B s
-  apply definable_tagged
-  unfold Family BandDomain Tagged bandBound bandSize bandCount cutoff
-  definability
-
-lemma definable_bandStep_bandBound (n : V) :
-    𝚺ᴬ₀.DefinableRel₃ fun r u v ↦ BandStep B s (bandBound n r) u v := by
-  have := definable_bandStep B s
-  unfold bandBound bandSize cutoff
-  definability
-
-section whole
-
-variable {n : V} (hB : 0 < B) (hs : 0 < s) (hn₄ : s * ‖2 * (2 * n)‖ < ‖B‖)
-  (H : ∀ p, n < p → p ≤ 2 * n → ¬IsPrime p)
-include hB hs hn₄ H
-
+include hB hs hn₄ H in
 lemma embeds_domain_codomain (hn2 : 2 ≤ n) : Embeds (Domain B s n) (Codomain B s n) := by
+  obtain ⟨hdefLower, hdef6, hdefRest, hdefResidue, hdefBand, hdefCheb⟩ :=
+    definable_pieces (B := B) (s := s) n
   have hdefCarry := definable_tagged_carry (B := B) (s := s) n
-  have hdefLower := definable_tagged_lowerDomain (B := B) (s := s) n
   have eA : Embeds (Domain B s n) fun u ↦ Tagged 0 (LowerCodomain B s n) u ∨
       Tagged 1 (Family (bandCount n) fun r ↦ BandCarry B s (bandBound n r)) u :=
     (embeds_lower hB hs hn₄).tag.union hdefLower hdefCarry Embeds.refl (by tagged_disjoint)
-  have hdef6 := definable_tagged_tagged_kummer (B := B) (s := s) n
-  have hdefRest := definable_rest (B := B) (s := s) n
   have eB : Embeds
       (fun u ↦ Tagged 0 (LowerCodomain B s n) u ∨
         Tagged 1 (Family (bandCount n) fun r ↦ BandCarry B s (bandBound n r)) u)
       (fun u ↦ Tagged 0 (LowerResidue B s n) u ∨
         Tagged 1 (Family (bandCount n) fun r ↦ BandDomain B s (bandBound n r)) u) :=
-    ((Embeds.of_isInj (definable_chebyshevMap n) (isInj_chebyshevMap H)).union hdef6
+    ((Embeds.of_isInj hdefCheb (isInj_chebyshevMap H)).union hdef6
       hdefRest Embeds.refl (by
         intro y hy hy'
         simp only [Tagged, Family, BandCarry] at hy hy'
         aesop)).congr
       (fun _ ↦ by simp only [Tagged, LowerCodomain]; grind)
       (fun _ ↦ by simp only [Tagged, Family, LowerResidue, BandCarry, BandDomain]; grind)
-  have hdefResidue := definable_tagged_lowerResidue (B := B) (s := s) n
-  have hdefBand := definable_tagged_bandDomain (B := B) (s := s) n
   have hF := definable_bandStep_bandBound (B := B) (s := s) n
   have eC : Embeds
       (fun u ↦ Tagged 0 (LowerResidue B s n) u ∨
@@ -792,7 +750,7 @@ lemma embeds_domain_codomain (hn2 : 2 ≤ n) : Embeds (Domain B s n) (Codomain B
       · exact Tagged.lt_of_family hu bandCount_le fun r hr x hx ↦
           BandDomain.le_bound (bandBound_le hr hn2) hx)
 
-end whole
+end assembly
 
 end Bertrand
 

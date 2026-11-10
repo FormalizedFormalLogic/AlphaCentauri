@@ -53,6 +53,7 @@ public import AlphaCentauri.InterpretabilityLogic.Gentzen.Veltman
 public import AlphaCentauri.InterpretabilityLogic.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Logic
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
+public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Sequent
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness

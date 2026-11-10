@@ -57,7 +57,8 @@ variable (get : ℕ → Node 𝔸)
 def above (P : Finset ℕ) (u : ℕ) : Finset ℕ := P.filter (fun t ↦ u ∈ (get t).pre)
 
 /-- The boxed formulas of the world `r`, if any. -/
-def boxes (r : WithBot ℕ) : Set (Formula α) := WithBot.recBotCoe ∅ (fun r ↦ (get r).set.boxLabel ∅) r
+def boxes (r : WithBot ℕ) : Set (Formula α) :=
+  WithBot.recBotCoe ∅ (fun r ↦ (get r).set.boxLabel ∅) r
 
 /-- The promises a `≺[x]`-successor of `y` must keep. -/
 def label (x y : ℕ) : Set (Formula α) := (get y).cr x ∪ boxes get ((get y).mu x)
@@ -737,7 +738,8 @@ lemma box_mem_of_mem_anc {n p : ℕ} {C : Formula α} (hp : p ∈ (𝒩 n).anc) 
 
 lemma assuring_anchor {n a : ℕ} (ha : (𝒩 n).kind.anchor = a) :
     AssuringSuccessor ∅ (𝒩 a).set (𝒩 n).set := by
-  rcases hk : (𝒩 n).kind with _ | ⟨b, B⟩ | ⟨b, s⟩ <;> rw [hk] at ha <;> simp only [Kind.anchor] at ha;
+  rcases hk : (𝒩 n).kind with _ | ⟨b, B⟩ | ⟨b, s⟩ <;> rw [hk] at ha <;>
+    simp only [Kind.anchor] at ha;
   · simp at ha;
   · obtain rfl : b = a := WithBot.coe_injective ha;
     exact (assuring_anchor_problem hk).mono (Set.empty_subset _);
@@ -1069,8 +1071,12 @@ theorem complete
   let Ω : Finset (Formula α) := A.subformulas ∪ A.subformulas.image (∼·) ∪ {⊥};
   have hbot : ⊥ ∈ Ω := by simp [Ω];
   have := model_isIL (Γ₀ := Γ₀) (τ := enumJob Ω.toList) (enumJob_mem hbot);
-  have hA' := (truthlemma (Γ₀ := Γ₀) (τ := enumJob Ω.toList) axiomM₀ enumJob_fair hbot (C := A)
-    (fun D hD ↦ ⟨by simp [Ω, hD], by simp only [Ω, Finset.mem_union, Finset.mem_image]; exact .inl (.inr ⟨D, hD, rfl⟩)⟩) 0).mp (h (model Γ₀ (enumJob Ω.toList)) 0);
+  have hΩ (D : Formula α) (hD : D ∈ A.subformulas) : D ∈ Ω ∧ ∼D ∈ Ω := by
+    refine ⟨by simp [Ω, hD], ?_⟩;
+    simp only [Ω, Finset.mem_union, Finset.mem_image];
+    exact .inl (.inr ⟨D, hD, rfl⟩);
+  have hA' := (truthlemma (Γ₀ := Γ₀) (τ := enumJob Ω.toList) axiomM₀ enumJob_fair hbot hΩ 0).mp
+    (h (model Γ₀ (enumJob Ω.toList)) 0);
   rw [node_zero] at hA';
   exact MaximalConsistentTheory.not_mem_of_neg_mem (hΓ₀ rfl) hA'
 

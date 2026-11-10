@@ -55,6 +55,15 @@ lemma nil_or_adjoin (z : V) : z = 0 ∨ ∃ x v, z = x ∷ v := by
 @[simp] lemma adjoin_inj (x₁ x₂ v₁ v₂ : V) :
     x₁ ∷ v₁ = x₂ ∷ v₂ ↔ x₁ = x₂ ∧ v₁ = v₂ := by simp [adjoin_def]
 
+lemma LocallyDelta0Function.pi₁ : LocallyDelta0Function₁ (pi₁ : V → V) :=
+  LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
+
+lemma LocallyDelta0Function.pi₂ : LocallyDelta0Function₁ (pi₂ : V → V) :=
+  LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
+
+lemma LocallyDelta0Function.sub : LocallyDelta0Function₂ ((· - ·) : V → V → V) :=
+  LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
+
 lemma adjoin_le_adjoin {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤ v₂) :
     x₁ ∷ v₁ ≤ x₂ ∷ v₂ := by simpa [adjoin_def] using pair_le_pair hx hv
 
@@ -332,7 +341,8 @@ structure Construction {arity : ℕ} (β : Arithmetic.VecRec.Blueprint arity) wh
   /-- `c.bound param xs` bounds the value at `xs`. -/
   bound (param : Fin arity → V) (xs : V) : V
   nil_le_bound : ∀ param, nil param ≤ bound param 0
-  adjoin_le_bound : ∀ param x xs ih, ih ≤ bound param xs → adjoin param x xs ih ≤ bound param (x ∷ xs)
+  adjoin_le_bound : ∀ param x xs ih, ih ≤ bound param xs →
+    adjoin param x xs ih ≤ bound param (x ∷ xs)
   bound_monotone : ∀ param {xs ys}, xs ≤ ys → bound param xs ≤ bound param ys
   bound_locallyDelta0 :
     LocallyDelta0Function fun v : Fin (arity + 1) → V ↦ bound (v ·.succ) (v 0)
@@ -414,6 +424,68 @@ def Graph : V → Prop := c.adjointruction.Fixpoint param
 
 lemma graph_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.graphDef :=
   c.adjointruction.fixpoint_defined
+
+variable {param}
+
+open Classical in
+/-- The course-of-values recursion computing the values. -/
+noncomputable def courseOfValues : CourseOfValues.Construction V arity where
+  val param n T :=
+    if n = 0 then c.nil param else c.adjoin param (π₁ (n - 1)) (π₂ (n - 1)) (znth T (π₂ (n - 1)))
+  val_locallyDelta0 := by
+    have hpred : LocallyDelta0Function fun w : Fin (arity + 2) → V ↦ w 1 - 1 :=
+      LocallyDelta0Function.sub.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.const 1)
+    have hpi₁ : LocallyDelta0Function fun w : Fin (arity + 2) → V ↦ π₁ (w 1 - 1) :=
+      LocallyDelta0Function.pi₁.comp₁ hpred
+    have hpi₂ : LocallyDelta0Function fun w : Fin (arity + 2) → V ↦ π₂ (w 1 - 1) :=
+      LocallyDelta0Function.pi₂.comp₁ hpred
+    have hznth : LocallyDelta0Function fun w : Fin (arity + 2) → V ↦ znth (w 0) (π₂ (w 1 - 1)) :=
+      LocallyDelta0Function.znth.comp₂ (LocallyDelta0Function.var 0) hpi₂
+    have hadjoin := c.adjoin_locallyDelta0.comp_cons hpi₁
+      (u := (fun w : Fin (arity + 2) → V ↦ π₂ (w 1 - 1)) :>
+        (fun w ↦ znth (w 0) (π₂ (w 1 - 1))) :> fun j w ↦ w j.succ.succ) fun j ↦ by
+          cases j using Fin.cases with
+          | zero => exact hpi₂
+          | succ j =>
+            cases j using Fin.cases with
+            | zero => exact hznth
+            | succ j => simpa using LocallyDelta0Function.var j.succ.succ
+    exact LocallyDelta0Function.ite (LocallyDelta0.of_definable (by definability))
+      (c.nil_locallyDelta0.retraction fun j ↦ j.succ.succ) (by simpa using hadjoin)
+  bound := c.bound
+  bound_monotone := c.bound_monotone
+  bound_locallyDelta0 := c.bound_locallyDelta0
+
+variable (param)
+
+/-- The value of the recursion at `xs`. -/
+noncomputable def result (xs : V) : V := c.courseOfValues.result param xs
+
+lemma result_le_bound (xs : V) : c.result param xs ≤ c.bound param xs :=
+  c.courseOfValues.result_le_bound (v := param) xs
+
+@[simp] lemma result_nil : c.result param (0 : V) = c.nil param := by
+  have : c.courseOfValues.val param 0 (c.courseOfValues.table param 0) = c.nil param := by
+    simp [courseOfValues]
+  rw [result, c.courseOfValues.result_eq_val (by rw [this]; exact c.nil_le_bound param), this]
+
+@[simp] lemma result_adjoin (x xs : V) :
+    c.result param (x ∷ xs) = c.adjoin param x xs (c.result param xs) := by
+  have hz : znth (c.courseOfValues.table param (x ∷ xs)) xs = c.result param xs :=
+    c.courseOfValues.znth_table (show xs < x ∷ xs by simp)
+  have e : x ∷ xs - 1 = ⟪x, xs⟫ := by simp [adjoin_def]
+  have hval : c.courseOfValues.val param (x ∷ xs) (c.courseOfValues.table param (x ∷ xs)) =
+      c.adjoin param x xs (c.result param xs) := by
+    change (if x ∷ xs = 0 then c.nil param else c.adjoin param (π₁ (x ∷ xs - 1)) (π₂ (x ∷ xs - 1))
+      (znth (c.courseOfValues.table param (x ∷ xs)) (π₂ (x ∷ xs - 1)))) = _
+    simp [e, hz]
+  have hle := c.adjoin_le_bound param x xs _ (c.result_le_bound param xs)
+  rw [← hval] at hle
+  rw [result, c.courseOfValues.result_eq_val hle, hval]
+
+lemma result_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin (arity + 1) → V ↦ c.result (w ·.succ) (w 0) :=
+  c.courseOfValues.result_locallyDelta0
 
 end Construction
 

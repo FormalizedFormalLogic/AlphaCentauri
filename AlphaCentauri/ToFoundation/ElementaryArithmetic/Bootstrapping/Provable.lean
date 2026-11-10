@@ -99,4 +99,75 @@ lemma derivationOf_modusPonensCode {d₁ d₂ a b : V} (ha : IsFormula L a) (hb 
 
 end codes
 
+section size
+
+variable {n : V}
+
+private lemma le_exp_exp_add {a : V} (k : V) (h : a ≤ Exp.exp (Exp.exp n)) :
+    a ≤ Exp.exp (Exp.exp (n + k)) :=
+  le_trans h (exp_exp_le_of_le le_self_add)
+
+private lemma nine_le_exp_exp (hn : 2 ≤ n) : (9 : V) ≤ Exp.exp (Exp.exp n) := by
+  have h2 : Exp.exp (2 : V) = 4 := by
+    rw [show (2 : V) = 1 + 1 from one_add_one_eq_two.symm, exp_succ, exp_one]; norm_num
+  have h4 : Exp.exp (4 : V) = 16 := by
+    rw [show (4 : V) = 2 * 2 by norm_num, exp_even, h2, sq]; norm_num
+  refine le_trans ?_ (exp_exp_le_of_le hn)
+  rw [h2, h4]
+  exact_mod_cast (by norm_num : (9 : ℕ) ≤ 16)
+
+private lemma tag_le_exp_exp (hn : 2 ≤ n) {k : ℕ} (hk : k ≤ 9) :
+    (k : V) ≤ Exp.exp (Exp.exp n) :=
+  le_trans (by exact_mod_cast hk) (nine_le_exp_exp hn)
+
+/-- A set of elements at most `n` is at most `2 ^ 2 ^ n`. -/
+lemma set_le_exp_exp {s : V} (h : ∀ x ∈ s, x ≤ n) : s ≤ Exp.exp (Exp.exp n) :=
+  le_trans (lt_exp_iff.mpr fun x hx ↦ lt_succ_iff_le.mpr (h x hx)).le
+    (exp_monotone_le.mpr (succ_le_iff_lt.mpr (lt_exp n)))
+
+private lemma adjoin_le_of {a b m : V} (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
+    (hb : b ≤ Exp.exp (Exp.exp m)) (hnm : n ≤ m := by simp [add_assoc]) :
+    a ∷ b ≤ Exp.exp (Exp.exp (m + 2)) :=
+  adjoin_le_exp_exp (le_trans (le_trans one_le_two hn) hnm)
+    (le_trans ha (exp_exp_le_of_le hnm)) hb
+
+private lemma pair_le_of {a b m : V} (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
+    (hb : b ≤ Exp.exp (Exp.exp m)) (hnm : n ≤ m := by simp [add_assoc]) :
+    ⟪a, b⟫ ≤ Exp.exp (Exp.exp (m + 2)) :=
+  le_trans (by rw [adjoin_def]; exact le_self_add) (adjoin_le_of hn ha hb hnm)
+
+variable (hn : 2 ≤ n)
+include hn
+
+lemma axL_le_exp_exp {s p : V} (hs : s ≤ Exp.exp (Exp.exp n)) (hp : p ≤ Exp.exp (Exp.exp n)) :
+    axL s p ≤ Exp.exp (Exp.exp (n + 2 + 2)) :=
+  adjoin_le_of hn hs (pair_le_of hn zero_le hp)
+
+lemma wkRule_le_exp_exp {s d : V} (hs : s ≤ Exp.exp (Exp.exp n))
+    (hd : d ≤ Exp.exp (Exp.exp n)) : wkRule s d ≤ Exp.exp (Exp.exp (n + 2 + 2)) :=
+  adjoin_le_of hn hs (pair_le_of hn (tag_le_exp_exp hn (k := 6) (by simp)) hd)
+
+lemma exsIntro_le_exp_exp {s p t d : V} (hs : s ≤ Exp.exp (Exp.exp n))
+    (hp : p ≤ Exp.exp (Exp.exp n)) (ht : t ≤ Exp.exp (Exp.exp n))
+    (hd : d ≤ Exp.exp (Exp.exp n)) :
+    exsIntro s p t d ≤ Exp.exp (Exp.exp (n + 2 + 2 + 2 + 2)) :=
+  adjoin_le_of hn hs <| pair_le_of hn (tag_le_exp_exp hn (k := 5) (by simp)) <|
+    pair_le_of hn hp <| pair_le_of hn ht hd
+
+lemma andIntro_le_exp_exp {s p q dp dq : V} (hs : s ≤ Exp.exp (Exp.exp n))
+    (hp : p ≤ Exp.exp (Exp.exp n)) (hq : q ≤ Exp.exp (Exp.exp n))
+    (hdp : dp ≤ Exp.exp (Exp.exp n)) (hdq : dq ≤ Exp.exp (Exp.exp n)) :
+    andIntro s p q dp dq ≤ Exp.exp (Exp.exp (n + 2 + 2 + 2 + 2 + 2)) :=
+  adjoin_le_of hn hs <| pair_le_of hn (tag_le_exp_exp hn (k := 2) (by simp)) <|
+    pair_le_of hn hp <| pair_le_of hn hq <| pair_le_of hn hdp hdq
+
+lemma cutRule_le_exp_exp {s p d₁ d₂ : V} (hs : s ≤ Exp.exp (Exp.exp n))
+    (hp : p ≤ Exp.exp (Exp.exp n)) (hd₁ : d₁ ≤ Exp.exp (Exp.exp n))
+    (hd₂ : d₂ ≤ Exp.exp (Exp.exp n)) :
+    cutRule s p d₁ d₂ ≤ Exp.exp (Exp.exp (n + 2 + 2 + 2 + 2)) :=
+  adjoin_le_of hn hs <| pair_le_of hn (tag_le_exp_exp hn (k := 8) (by simp)) <|
+    pair_le_of hn hp <| pair_le_of hn hd₁ hd₂
+
+end size
+
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

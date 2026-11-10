@@ -869,4 +869,336 @@ lemma eq_doubleton_of_len_eq_two {v : V} : len v = 2 ↔ ∃ x y, v = ?[x, y] :=
         (by simp [lt_two_iff_le_one, le_one_iff_eq_zero_or_one, h])⟩
   · rintro ⟨x, y, rfl⟩; simp [one_add_one_eq_two]
 
+/-! ### Maximum of a list -/
+
+lemma LocallyDelta0Function.max : LocallyDelta0Function₂ (Max.max : V → V → V) :=
+  LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
+
+namespace ListMax
+
+noncomputable def adjointruction : VecRec.Construction V Arithmetic.ListMax.blueprint where
+  nil _ := 0
+  adjoin _ x _ ih := max x ih
+  nil_defined := .mk fun v ↦ by simp [Arithmetic.ListMax.blueprint]
+  adjoin_defined := .mk fun v ↦ by simp [Arithmetic.ListMax.blueprint]
+  nil_locallyDelta0 := LocallyDelta0Function.const 0
+  adjoin_locallyDelta0 :=
+    LocallyDelta0Function.max.comp₂ (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 2)
+  bound _ xs := xs
+  nil_le_bound _ := le_rfl
+  adjoin_le_bound _ x xs _ h := max_le (lt_adjoin x xs).le (le_trans h (lt_adjoin' x xs).le)
+  bound_monotone _ _ _ h := h
+  bound_locallyDelta0 := LocallyDelta0Function.var 0
+
+end ListMax
+
+section listMax
+
+/-- The maximum of the elements of the list `v`. -/
+noncomputable def listMax (v : V) : V := ListMax.adjointruction.result ![] v
+
+@[simp] lemma listMax_nil : listMax (0 : V) = 0 := by simp [listMax, ListMax.adjointruction]
+
+@[simp] lemma listMax_adjoin (x v : V) : listMax (x ∷ v) = max x (listMax v) := by
+  simp [listMax, ListMax.adjointruction]
+
+instance listMax_defined : 𝚺ᴬ₁-Function₁ (listMax : V → V) via listMaxDef :=
+  ListMax.adjointruction.result_defined
+
+instance listMax_definable : 𝚺ᴬ₁-Function₁ (listMax : V → V) := listMax_defined.to_definable
+
+instance listMax_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (listMax : V → V) :=
+  listMax_definable.of_sigmaOne
+
+lemma listMax_locallyDelta0 : LocallyDelta0Function₁ (listMax : V → V) := by
+  convert ListMax.adjointruction.result_locallyDelta0 (V := V) using 3
+  simp [listMax, Matrix.empty_eq]
+
+lemma nth_le_listMax {i v : V} (h : i < len v) : v.[i] ≤ listMax v := by
+  have hR : LocallyDelta0 fun w : Fin 2 → V ↦ w 0 < len (w 1) → (w 1).[w 0] ≤ listMax (w 1) :=
+    (LocallyDelta0.lt (LocallyDelta0Function.var (0 : Fin 2))
+      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))).imp
+      (LocallyDelta0.le (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+        (LocallyDelta0Function.var 0)) (listMax_locallyDelta0.comp₁ (LocallyDelta0Function.var 1)))
+  have hP : LocallyDelta0Pred fun u ↦ ∀ j ≤ i, j < len u → u.[j] ≤ listMax u :=
+    (LocallyDelta0.ball_le_function (LocallyDelta0Function.const i) hR).of_iff fun w ↦ by simp
+  have : ∀ j ≤ i, j < len v → v.[j] ≤ listMax v := by
+    apply adjoin_induction hP
+    · intro j _ h
+      simp at h
+    · intro x v ih j hj hl
+      rcases zero_or_succ j with (rfl | ⟨j, rfl⟩)
+      · simp
+      · simp [ih j (le_trans le_self_add hj) (by simpa using hl)]
+  exact this i le_rfl h
+
+lemma listMaxss_le {v z : V} (h : ∀ i < len v, v.[i] ≤ z) : listMax v ≤ z := by
+  have hnth : LocallyDelta0 fun t : Fin 2 → V ↦ (t 1).[t 0] ≤ z :=
+    LocallyDelta0.le (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+      (LocallyDelta0Function.var 0)) (LocallyDelta0Function.const z)
+  have hP : LocallyDelta0Pred fun u : V ↦ (∀ i < len u, u.[i] ≤ z) → listMax u ≤ z :=
+    ((LocallyDelta0.ball_lt_function
+      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1))) hnth).imp
+        (LocallyDelta0.le (listMax_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
+          (LocallyDelta0Function.const z))).of_iff fun w ↦ by simp
+  have : (∀ i < len v, v.[i] ≤ z) → listMax v ≤ z := by
+    apply adjoin_induction hP
+    · intro _
+      simp
+    · intro x v ih h
+      simp only [listMax_adjoin, max_le_iff]
+      constructor
+      · simpa using h 0 (by simp)
+      · exact ih (fun i hi ↦ by simpa using h (i + 1) (by simp [hi]))
+  exact this h
+
+lemma listMaxss_le_iff {v z : V} : listMax v ≤ z ↔ ∀ i < len v, v.[i] ≤ z := by
+  constructor
+  · intro h i hi; exact le_trans (nth_le_listMax hi) h
+  · exact listMaxss_le
+
+end listMax
+
+/-! ### The last `k` elements of a list -/
+
+namespace TakeLast
+
+open Classical in
+noncomputable def adjointruction : VecRec.Construction V Arithmetic.TakeLast.blueprint where
+  nil _ := 0
+  adjoin param x xs ih := if len xs < param 0 then x ∷ xs else ih
+  nil_defined := .mk fun v ↦ by simp [Arithmetic.TakeLast.blueprint]
+  adjoin_defined := .mk fun v ↦ by
+    suffices
+      (len (v 2) < v 4 → v 0 = v 1 ∷ v 2) ∧ (v 4 ≤ len (v 2) → v 0 = v 3) ↔
+      (v 0 = if len (v 2) < v 4 then v 1 ∷ v 2 else v 3) by
+      simpa [Arithmetic.TakeLast.blueprint, Fin.isValue]
+    rcases lt_or_ge (len (v 2)) (v 4) with (hv | hv)
+    · simp [hv]
+    · simp [hv, not_lt_of_ge hv]
+  nil_locallyDelta0 := LocallyDelta0Function.const 0
+  adjoin_locallyDelta0 := LocallyDelta0Function.ite
+    (LocallyDelta0.lt (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 1))
+      (LocallyDelta0Function.var 3))
+    (LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.var 0)
+      (LocallyDelta0Function.var 1)) (LocallyDelta0Function.var 2)
+  bound _ xs := xs
+  nil_le_bound _ := le_rfl
+  adjoin_le_bound _ x xs _ h := by
+    split_ifs
+    · exact le_rfl
+    · exact le_trans h (lt_adjoin' x xs).le
+  bound_monotone _ _ _ h := h
+  bound_locallyDelta0 := LocallyDelta0Function.var 0
+
+end TakeLast
+
+section takeLast
+
+/-- The last `k` elements of the list `v`. -/
+noncomputable def takeLast (v k : V) : V := TakeLast.adjointruction.result ![k] v
+
+@[simp] lemma takeLast_nil : takeLast (0 : V) k = 0 := by
+  simp [takeLast, TakeLast.adjointruction]
+
+open Classical in
+lemma takeLast_adjoin (x v : V) :
+    takeLast (x ∷ v) k = if len v < k then x ∷ v else takeLast v k := by
+  simp [takeLast, TakeLast.adjointruction]
+
+instance takeLast_defined : 𝚺ᴬ₁-Function₂ (takeLast : V → V → V) via takeLastDef :=
+  TakeLast.adjointruction.result_defined
+
+instance takeLast_definable : 𝚺ᴬ₁-Function₂ (takeLast : V → V → V) := takeLast_defined.to_definable
+
+instance takeLast_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (takeLast : V → V → V) :=
+  takeLast_definable.of_sigmaOne
+
+lemma takeLast_locallyDelta0 : LocallyDelta0Function₂ (takeLast : V → V → V) := by
+  convert TakeLast.adjointruction.result_locallyDelta0 (V := V) using 3
+  simp [takeLast]
+  rfl
+
+lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
+  have hP : LocallyDelta0Pred fun u ↦ k ≤ len u → len (takeLast u k) = k :=
+    ((LocallyDelta0.le (LocallyDelta0Function.const k)
+      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))).imp
+      (LocallyDelta0.eq (len_locallyDelta0.comp₁ (takeLast_locallyDelta0.comp₂
+        (LocallyDelta0Function.var (0 : Fin 1)) (LocallyDelta0Function.const k)))
+        (LocallyDelta0Function.const k))).of_iff fun w ↦ by simp
+  have : k ≤ len v → len (takeLast v k) = k := by
+    apply adjoin_induction hP
+    · intro h
+      simp_all
+    · intro x v ih h
+      have : k = len v + 1 ∨ k ≤ len v := by
+        rcases eq_or_lt_of_le h with (h | h)
+        · left; simpa using h
+        · right; simpa [lt_succ_iff_le] using h
+      rcases this with (rfl | hkv)
+      · simp [takeLast_adjoin]
+      · simp [takeLast_adjoin, not_lt_of_ge hkv, ih hkv]
+  exact this h
+
+@[simp] lemma takeLast_len_self (v : V) : takeLast v (len v) = v := by
+  rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩) <;> simp [takeLast_adjoin]
+
+@[simp] lemma takeLast_zero (v : V) : takeLast v 0 = 0 := by
+  have hP : LocallyDelta0Pred fun u : V ↦ takeLast u 0 = 0 :=
+    LocallyDelta0.eq (takeLast_locallyDelta0.comp₂ (LocallyDelta0Function.var (0 : Fin 1))
+      (LocallyDelta0Function.const 0)) (LocallyDelta0Function.const 0)
+  apply adjoin_induction hP
+  · simp
+  · intro x v ih
+    simp [takeLast_adjoin, ih]
+
+lemma takeLast_succ_of_lt {i v : V} (h : i < len v) :
+    takeLast v (i + 1) = v.[len v - (i + 1)] ∷ takeLast v i := by
+  have hR : LocallyDelta0 fun w : Fin 2 → V ↦ w 0 < len (w 1) →
+      takeLast (w 1) (w 0 + 1) = (w 1).[len (w 1) - (w 0 + 1)] ∷ takeLast (w 1) (w 0) :=
+    (LocallyDelta0.lt (LocallyDelta0Function.var (0 : Fin 2))
+      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))).imp <|
+      LocallyDelta0.eq (takeLast_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+        (LocallyDelta0Function.add_one (LocallyDelta0Function.var 0)))
+        (LocallyDelta0Function.adjoin.comp₂
+          (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+            (LocallyDelta0Function.sub.comp₂ (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 1))
+              (LocallyDelta0Function.add_one (LocallyDelta0Function.var 0))))
+          (takeLast_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+            (LocallyDelta0Function.var 0)))
+  have hP : LocallyDelta0Pred fun u ↦ ∀ j ≤ i, j < len u →
+      takeLast u (j + 1) = u.[len u - (j + 1)] ∷ takeLast u j :=
+    (LocallyDelta0.ball_le_function (LocallyDelta0Function.const i) hR).of_iff fun w ↦ by simp
+  have : ∀ j ≤ i, j < len v → takeLast v (j + 1) = v.[len v - (j + 1)] ∷ takeLast v j := by
+    apply adjoin_induction hP
+    · intro j _ h
+      simp at h
+    · intro x v ih j hj hl
+      rcases show j = len v ∨ j < len v from
+        eq_or_lt_of_le (by simpa [lt_succ_iff_le] using hl) with (rfl | hi)
+      · simp [takeLast_adjoin]
+      · have : len v - j = len v - (j + 1) + 1 := by
+          rw [← Arithmetic.sub_sub, sub_add_self_of_le
+            (le_tsub_of_add_le_left (lt_iff_succ_le.mp hi))]
+        simpa [takeLast_adjoin, lt_succ_iff_le, not_le_of_gt hi, this, not_lt_of_gt hi,
+          add_tsub_add_eq_tsub_right] using ih j hj hi
+  exact this i le_rfl h
+
+end takeLast
+
+/-! ### Concatenation -/
+
+namespace Concat
+
+noncomputable def adjointruction : VecRec.Construction V Arithmetic.Concat.blueprint where
+  nil param := ?[param 0]
+  adjoin _ x _ ih := x ∷ ih
+  nil_defined := .mk fun v ↦ by simp [Arithmetic.Concat.blueprint]
+  adjoin_defined := .mk fun v ↦ by simp [Arithmetic.Concat.blueprint, Fin.isValue]
+  nil_locallyDelta0 := LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.var 0)
+    (LocallyDelta0Function.const 0)
+  adjoin_locallyDelta0 :=
+    LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 2)
+  bound param xs := Exp.exp (Exp.exp (xs + xs + param 0 + 3))
+  nil_le_bound param := by
+    have e : (0 : V) + 0 + param 0 + 3 = param 0 + 1 + 2 := by grind
+    rw [e]
+    exact adjoin_le_exp_exp (le_add_self.trans' (by norm_num))
+      (le_exp_exp le_self_add) (le_exp_exp zero_le)
+  adjoin_le_bound param x xs ih h := by
+    have hm : xs + 1 ≤ x ∷ xs := succ_le_iff_lt.mpr (lt_adjoin' x xs)
+    have hn : xs + xs + param 0 + 3 ≤ (x ∷ xs) + (x ∷ xs) + param 0 + 1 := by
+      calc xs + xs + param 0 + 3 = (xs + 1) + (xs + 1) + param 0 + 1 := by grind
+        _ ≤ (x ∷ xs) + (x ∷ xs) + param 0 + 1 :=
+          add_le_add (add_le_add (add_le_add hm hm) le_rfl) le_rfl
+    have hx : x ≤ (x ∷ xs) + (x ∷ xs) + param 0 + 1 :=
+      le_trans (lt_adjoin x xs).le (le_trans le_self_add (le_trans le_self_add le_self_add))
+    have e : (x ∷ xs) + (x ∷ xs) + param 0 + 3 = (x ∷ xs) + (x ∷ xs) + param 0 + 1 + 2 := by
+      grind
+    rw [e]
+    exact adjoin_le_exp_exp (le_add_self.trans' (by norm_num)) (le_exp_exp hx)
+      (le_trans h (exp_monotone_le.mpr (exp_monotone_le.mpr hn)))
+  bound_monotone _ _ _ h :=
+    exp_monotone_le.mpr (exp_monotone_le.mpr
+      (add_le_add (add_le_add (add_le_add h h) le_rfl) le_rfl))
+  bound_locallyDelta0 := LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
+    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.add.comp₂
+      (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.var 0)
+        (LocallyDelta0Function.var 0)) (LocallyDelta0Function.var 1))
+      (LocallyDelta0Function.const 3)
+
+end Concat
+
+section concat
+
+/-- The list `v` followed by `z`. -/
+noncomputable def concat (v z : V) : V := Concat.adjointruction.result ![z] v
+
+@[simp] lemma concat_nil (z : V) : concat 0 z = ?[z] := by
+  simp [concat, Concat.adjointruction]
+
+@[simp] lemma concat_adjoin (x v z : V) : concat (x ∷ v) z = x ∷ concat v z := by
+  simp [concat, Concat.adjointruction]
+
+instance concat_defined : 𝚺ᴬ₁-Function₂ (concat : V → V → V) via concatDef :=
+  Concat.adjointruction.result_defined
+
+instance concat_definable : 𝚺ᴬ₁-Function₂ (concat : V → V → V) := concat_defined.to_definable
+
+instance concat_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (concat : V → V → V) :=
+  concat_definable.of_sigmaOne
+
+lemma concat_locallyDelta0 : LocallyDelta0Function₂ (concat : V → V → V) := by
+  convert Concat.adjointruction.result_locallyDelta0 (V := V) using 3
+  simp [concat]
+  rfl
+
+@[simp] lemma len_concat (v z : V) : len (concat v z) = len v + 1 := by
+  have hP : LocallyDelta0Pred fun u : V ↦ len (concat u z) = len u + 1 :=
+    LocallyDelta0.eq (len_locallyDelta0.comp₁ (concat_locallyDelta0.comp₂
+      (LocallyDelta0Function.var (0 : Fin 1)) (LocallyDelta0Function.const z)))
+      (LocallyDelta0Function.add_one (len_locallyDelta0.comp₁
+        (LocallyDelta0Function.var (0 : Fin 1))))
+  apply adjoin_induction hP
+  · simp
+  · intro x v ih
+    simp [ih]
+
+lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] := by
+  have hR : LocallyDelta0 fun w : Fin 2 → V ↦
+      w 0 < len (w 1) → (concat (w 1) z).[w 0] = (w 1).[w 0] :=
+    (LocallyDelta0.lt (LocallyDelta0Function.var (0 : Fin 2))
+      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))).imp
+      (LocallyDelta0.eq (nth_locallyDelta0.comp₂ (concat_locallyDelta0.comp₂
+        (LocallyDelta0Function.var 1) (LocallyDelta0Function.const z))
+          (LocallyDelta0Function.var 0))
+        (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)))
+  have hP : LocallyDelta0Pred fun u ↦ ∀ j ≤ i, j < len u → (concat u z).[j] = u.[j] :=
+    (LocallyDelta0.ball_le_function (LocallyDelta0Function.const i) hR).of_iff fun w ↦ by simp
+  have : ∀ j ≤ i, j < len v → (concat v z).[j] = v.[j] := by
+    apply adjoin_induction hP
+    · intro j _ h
+      simp at h
+    · intro x v ih j hj hl
+      rcases zero_or_succ j with (rfl | ⟨j, rfl⟩)
+      · simp
+      · simp [ih j (le_trans le_self_add hj) (by simpa using hl)]
+  exact this i le_rfl hi
+
+@[simp] lemma concat_nth_len (v z : V) : (concat v z).[len v] = z := by
+  have hP : LocallyDelta0Pred fun u : V ↦ (concat u z).[len u] = z :=
+    LocallyDelta0.eq (nth_locallyDelta0.comp₂ (concat_locallyDelta0.comp₂
+      (LocallyDelta0Function.var (0 : Fin 1)) (LocallyDelta0Function.const z))
+      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1))))
+      (LocallyDelta0Function.const z)
+  apply adjoin_induction hP
+  · simp
+  · intro x v ih
+    simp [ih]
+
+lemma concat_nth_len' (v z : V) {i} (hi : len v = i) : (concat v z).[i] = z := by
+  rcases hi; simp
+
+end concat
+
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic

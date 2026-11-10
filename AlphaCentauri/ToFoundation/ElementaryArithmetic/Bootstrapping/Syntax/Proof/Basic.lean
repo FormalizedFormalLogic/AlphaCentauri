@@ -225,21 +225,12 @@ open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (axLGraph verumIntroGraph an
 
 instance axL.defined : 𝚺ᴬ₀-Function₂[V] axL via axLGraph := .mk fun v ↦ by simp_all [axLGraph, axL]
 
-instance axL.definable : 𝚺ᴬ₀-Function₂ (axL : V → V → V) := axL.defined.to_definable
-
 instance verumIntro.defined : 𝚺ᴬ₀-Function₁[V] verumIntro via verumIntroGraph :=
   .mk fun v ↦ by simp_all [verumIntroGraph, verumIntro]
-
-instance verumIntro.definable : 𝚺ᴬ₀-Function₁ (verumIntro : V → V) :=
-  verumIntro.defined.to_definable
 
 instance andIntro.defined :
     𝚺ᴬ₀-Function₅ (andIntro : V → V → V → V → V → V) via andIntroGraph :=
   .mk fun v ↦ by simp_all [andIntroGraph, andIntro]
-
-instance andIntro.definable :
-    𝚺ᴬ₀.DefinableFunction₅ (andIntro : V → V → V → V → V → V) :=
-  andIntro.defined.to_definable
 
 instance orIntro.defined : 𝚺ᴬ₀-Function₄ (orIntro : V → V → V → V → V) via orIntroGraph :=
   .mk fun v ↦ by simp_all [orIntroGraph, orIntro]
@@ -247,31 +238,17 @@ instance orIntro.defined : 𝚺ᴬ₀-Function₄ (orIntro : V → V → V → V
 instance allIntro.defined : 𝚺ᴬ₀-Function₃ (allIntro : V → V → V → V) via allIntroGraph :=
   .mk fun v ↦ by simp_all [allIntroGraph, allIntro]
 
-instance allIntro.definable : 𝚺ᴬ₀-Function₃ (allIntro : V → V → V → V) :=
-  allIntro.defined.to_definable
-
 instance exsIntro.defined : 𝚺ᴬ₀-Function₄ (exsIntro : V → V → V → V → V) via exsIntroGraph :=
   .mk fun v ↦ by simp_all [exsIntroGraph, numeral_eq_natCast, exsIntro]
-
-instance exsIntro.definable : 𝚺ᴬ₀-Function₄ (exsIntro : V → V → V → V → V) :=
-  exsIntro.defined.to_definable
 
 instance wkRule.defined : 𝚺ᴬ₀-Function₂ (wkRule : V → V → V) via wkRuleGraph :=
   .mk fun v ↦ by simp_all [wkRuleGraph, numeral_eq_natCast, wkRule]
 
-instance wkRule.definable : 𝚺ᴬ₀-Function₂ (wkRule : V → V → V) := wkRule.defined.to_definable
-
 instance shiftRule.defined : 𝚺ᴬ₀-Function₂ (shiftRule : V → V → V) via shiftRuleGraph :=
   .mk fun v ↦ by simp_all [shiftRuleGraph, numeral_eq_natCast, shiftRule]
 
-instance shiftRule.definable : 𝚺ᴬ₀-Function₂ (shiftRule : V → V → V) :=
-  shiftRule.defined.to_definable
-
 instance cutRule_defined : 𝚺ᴬ₀-Function₄ (cutRule : V → V → V → V → V) via cutRuleGraph :=
   .mk fun v ↦ by simp_all [cutRuleGraph, numeral_eq_natCast, cutRule]
-
-instance cutRule_definable : 𝚺ᴬ₀-Function₄ (cutRule : V → V → V → V → V) :=
-  cutRule_defined.to_definable
 
 instance axm_defined : 𝚺ᴬ₀-Function₂ (axm : V → V → V) via axmGraph :=
   .mk fun v ↦ by simp_all [axmGraph, numeral_eq_natCast, axm]

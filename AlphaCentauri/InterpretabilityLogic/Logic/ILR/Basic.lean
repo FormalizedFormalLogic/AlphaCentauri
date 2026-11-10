@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZero.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.MaximalConsistentTheoryModel
 
 /-!
 # The logic $\mathbf{ILR}$
@@ -65,6 +66,22 @@ instance : Consistent (𝐈𝐋𝐑 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILR.sound (M := pointModel fun _ ↦ False) h 0
 
 end Logic
+
+section Verbrugge
+
+variable {α : Type} {A : Formula α}
+
+/-- - [MV20, Theorem 25] -/
+theorem Logic.ILR.complete_verbrugge
+    (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsIL] → [M.HasR] → M ⊧ A) :
+    𝐈𝐋𝐑 ⊢ A := by
+  classical
+  by_contra hA;
+  have := Logic.ofAxioms.nonempty_countermodelWorld hA;
+  have := Verbrugge.countermodel.hasR (A₀ := A) fun {_ _ _} ↦ Logic.ILR.axiomR;
+  exact Logic.ofAxioms.not_models_verbrugge_countermodel hA (h _)
+
+end Verbrugge
 
 /-- $\mathbf{ILR}$ is complete with respect to Veltman frames. An open problem.
 - [MV20, §2.5] -/

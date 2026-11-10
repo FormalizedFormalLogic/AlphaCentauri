@@ -95,9 +95,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ4PlusJ5.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ5.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILP.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILPZero.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILPZero.Verbrugge
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Verbrugge
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILRStar.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILRW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic

@@ -80,5 +80,21 @@ instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐏₀ :=
 
 end Logic
 
+section Verbrugge
+
+variable {α : Type} {A : Formula α}
+
+/-- - [MV20, Theorem 23] -/
+theorem Logic.ILP₀.complete_verbrugge
+    (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsIL] → [M.HasP₀] → M ⊧ A) :
+    𝐈𝐋𝐏₀ ⊢ A := by
+  classical
+  by_contra hA;
+  have := Logic.ofAxioms.nonempty_countermodelWorld hA;
+  have := Verbrugge.countermodel.hasP₀ (A₀ := A) fun {_ _} ↦ Logic.ILP₀.axiomP₀;
+  exact Logic.ofAxioms.not_models_verbrugge_countermodel hA (h _)
+
+end Verbrugge
+
 end FFL.InterpretabilityLogic
 

@@ -88,7 +88,7 @@ instance : (countermodel 𝔸 A₀).IsIL where
   rel_of_mem_of_s h hv := h.2.1 _ hv
   nonempty_of_s h := by
     obtain ⟨v, hv, -⟩ := h.2.2 ∅ h.1;
-    exact ⟨v, hv⟩
+    use v;
   s_refl {w u} h := by
     and_intros;
     · exact h;
@@ -225,7 +225,7 @@ lemma hasR (hR : ∀ {A B C : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.R A B 
           use z;
           and_intros;
           · exact hzC;
-          · exact ⟨v, hv, hwv', hvz⟩;
+          · use v;
           · exact (hwv.mono Set.subset_union_right).of_boxLabel hvz;
       exact hzZ.1 hzC;
     use {v ∈ V | ∀ z, v ≺ z → z ∈ C};
@@ -267,7 +267,10 @@ private lemma exists_neg_mem (h : ofAxioms 𝔸 ⊬ A) :
     have h₃ : ofAxioms 𝔸 ⊢ □(∼∼A) := Logic.ExtendsGL.axiomL ⨀ Logic.provable_box h₂;
     exact Entailment.dne ⨀ (h₂ ⨀ h₃);
   obtain ⟨Γ, hΓ⟩ := MaximalConsistentTheory.exists_superset hX;
-  exact ⟨Γ, hΓ (by simp), hΓ (by simp)⟩
+  use Γ;
+  and_intros;
+  · exact hΓ (by simp);
+  · exact hΓ (by simp);
 
 lemma nonempty_countermodelWorld (h : ofAxioms 𝔸 ⊬ A) : Nonempty (CountermodelWorld 𝔸 A) := by
   obtain ⟨Γ, hΓ, hΓ'⟩ := exists_neg_mem h;

@@ -129,7 +129,10 @@ variable {S T : Set (Formula α)}
 
 lemma antecedents_mono (h : S ⊆ T) : Γ.antecedents S ⊆ Γ.antecedents T := by
   rintro A ⟨U, hU, hA⟩;
-  exact ⟨U, hU.trans h, hA⟩
+  use U;
+  and_intros;
+  · exact hU.trans h;
+  · exact hA;
 
 lemma boxLabel_mono (h : S ⊆ T) : Γ.boxLabel S ⊆ Γ.boxLabel T :=
   Set.image_mono (antecedents_mono h)
@@ -143,8 +146,11 @@ open Logic.ofAxioms
 
 variable {𝔸 : Set (Formula α)} {Γ Δ Θ Λ : MaximalConsistentTheory (ofAxioms 𝔸)}
 
-lemma bot_mem_antecedents : ⊥ ∈ Γ.antecedents S :=
-  ⟨∅, by simp, mem_of_theorem <| rhd_of_provable efq⟩
+lemma bot_mem_antecedents : ⊥ ∈ Γ.antecedents S := by
+  use ∅;
+  and_intros;
+  · simp;
+  · exact mem_of_theorem <| rhd_of_provable efq;
 
 lemma or_mem_antecedents (hA : A ∈ Γ.antecedents S) (hB : B ∈ Γ.antecedents S) :
     A ⋎ B ∈ Γ.antecedents S := by
@@ -166,10 +172,16 @@ lemma antecedents_of_rhd_mem (h : B ▷ A ∈ Γ) (hA : A ∈ Γ.antecedents S) 
     B ∈ Γ.antecedents S := by
   obtain ⟨U, hU, hA⟩ := hA;
   have e : ofAxioms 𝔸 ⊢ Axioms.J2 B A (U.image (∼·)).disj := axiomJ2;
-  exact ⟨U, hU, mem_of_imp₂ (by cl_prover [e]) h hA⟩
+  use U;
+  and_intros;
+  · exact hU;
+  · exact mem_of_imp₂ (by cl_prover [e]) h hA;
 
-lemma neg_mem_antecedents {G : Formula α} (h : G ∈ S) : ∼G ∈ Γ.antecedents S :=
-  ⟨{G}, by simpa, mem_of_theorem <| rhd_of_provable <| right_Fdisj_intro _ (by simp)⟩
+lemma neg_mem_antecedents {G : Formula α} (h : G ∈ S) : ∼G ∈ Γ.antecedents S := by
+  use {G};
+  and_intros;
+  · simpa;
+  · exact mem_of_theorem <| rhd_of_provable <| right_Fdisj_intro _ (by simp);
 
 lemma mem_antecedents_empty_iff : A ∈ Γ.antecedents ∅ ↔ □(∼A) ∈ Γ := by
   constructor;

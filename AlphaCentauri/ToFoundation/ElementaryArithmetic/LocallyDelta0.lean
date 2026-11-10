@@ -208,11 +208,88 @@ lemma comp {g : (Fin l → V) → V} {f : Fin l → (Fin k → V) → V} (hg : L
     exact hZ _ fun i ↦ le_trans (hY i v hv)
       (Finset.single_le_sum (fun j _ ↦ by simp) (by simp))
 
+lemma comp₁ {g : V → V} {f : (Fin k → V) → V} (hg : LocallyDelta0Function₁ g)
+    (hf : LocallyDelta0Function f) : LocallyDelta0Function fun v ↦ g (f v) :=
+  hg.comp (f := fun _ ↦ f) fun _ ↦ hf
+
+lemma comp₂ {g : V → V → V} {f f' : (Fin k → V) → V} (hg : LocallyDelta0Function₂ g)
+    (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+    LocallyDelta0Function fun v ↦ g (f v) (f' v) :=
+  hg.comp (f := ![f, f']) <|
+    Fin.forall_fin_succ.mpr ⟨hf, Fin.forall_fin_succ.mpr ⟨hf', finZeroElim⟩⟩
+
+/-- Substitution of locally $\Delta_0$ functions for the variables of a locally $\Delta_0$
+function, one of them for the first variable. -/
+lemma comp_cons {g : (Fin (l + 1) → V) → V} {f : (Fin k → V) → V}
+    {u : Fin l → (Fin k → V) → V} (hg : LocallyDelta0Function g) (hf : LocallyDelta0Function f)
+    (hu : ∀ j, LocallyDelta0Function (u j)) :
+    LocallyDelta0Function fun v ↦ g (f v :> fun j ↦ u j v) := by
+  have := hg.comp (f := f :> u) fun i ↦ by
+    cases i using Fin.cases with
+    | zero => simpa using hf
+    | succ j => simpa using hu j
+  convert this using 3 with v
+  ext i
+  cases i using Fin.cases <;> simp
+
+lemma add : LocallyDelta0Function₂ (· + · : V → V → V) :=
+  of_definableBoundedFunction ⟨inferInstance, by definability⟩
+
+lemma add_one {f : (Fin k → V) → V} (hf : LocallyDelta0Function f) :
+    LocallyDelta0Function fun v ↦ f v + 1 :=
+  add.comp₂ hf (const 1)
+
 end LocallyDelta0Function
 
 namespace LocallyDelta0
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {P : (Fin (k + 1) → V) → Prop} {f : (Fin k → V) → V}
+
+lemma comp₂ {R : (Fin 2 → V) → Prop} {f f' : (Fin k → V) → V} (h : LocallyDelta0 R)
+    (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+    LocallyDelta0 fun v ↦ R ![f v, f' v] :=
+  (h.comp (f := ![f, f'])
+    (Fin.forall_fin_succ.mpr ⟨hf, Fin.forall_fin_succ.mpr ⟨hf', finZeroElim⟩⟩)).of_iff
+    fun _ ↦ iff_of_eq <| congrArg R <|
+      funext (Fin.cases rfl (Fin.cases rfl finZeroElim))
+
+lemma comp₃ {R : (Fin 3 → V) → Prop} {f f' f'' : (Fin k → V) → V} (h : LocallyDelta0 R)
+    (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f')
+    (hf'' : LocallyDelta0Function f'') : LocallyDelta0 fun v ↦ R ![f v, f' v, f'' v] :=
+  (h.comp (f := ![f, f', f''])
+    (Fin.forall_fin_succ.mpr ⟨hf, Fin.forall_fin_succ.mpr
+      ⟨hf', Fin.forall_fin_succ.mpr ⟨hf'', finZeroElim⟩⟩⟩)).of_iff
+    fun _ ↦ iff_of_eq <| congrArg R <|
+      funext (Fin.cases rfl (Fin.cases rfl (Fin.cases rfl finZeroElim)))
+
+/-- Substitution of locally $\Delta_0$ functions for the variables of a locally $\Delta_0$
+relation, one of them for the first variable. -/
+lemma comp_cons {R : (Fin (l + 1) → V) → Prop} {u : Fin l → (Fin k → V) → V}
+    (h : LocallyDelta0 R) (hf : LocallyDelta0Function f)
+    (hu : ∀ j, LocallyDelta0Function (u j)) : LocallyDelta0 fun v ↦ R (f v :> fun j ↦ u j v) :=
+  (h.comp (f := f :> u) fun i ↦ by
+    cases i using Fin.cases with
+    | zero => simpa using hf
+    | succ j => simpa using hu j).of_iff fun v ↦ iff_of_eq <| congrArg R <| funext fun i ↦ by
+      cases i using Fin.cases <;> simp
+
+/-- Substitution of locally $\Delta_0$ functions for the variables of a locally $\Delta_0$
+relation, two of them for the first two variables. -/
+lemma comp_cons₂ {R : (Fin (l + 2) → V) → Prop} {f' : (Fin k → V) → V}
+    {u : Fin l → (Fin k → V) → V} (h : LocallyDelta0 R) (hf : LocallyDelta0Function f)
+    (hf' : LocallyDelta0Function f') (hu : ∀ j, LocallyDelta0Function (u j)) :
+    LocallyDelta0 fun v ↦ R (f v :> f' v :> fun j ↦ u j v) :=
+  (h.comp (f := f :> f' :> u) fun i ↦ by
+    cases i using Fin.cases with
+    | zero => simpa using hf
+    | succ j =>
+      cases j using Fin.cases with
+      | zero => simpa using hf'
+      | succ j => simpa using hu j).of_iff fun v ↦ iff_of_eq <| congrArg R <| funext fun i ↦ by
+        cases i using Fin.cases
+        · simp
+        · rename_i j
+          cases j using Fin.cases <;> simp
 
 /-- Bounded existential quantification below a locally $\Delta_0$ function. -/
 lemma bexs_le_function (hf : LocallyDelta0Function f) (h : LocallyDelta0 P) :
@@ -235,13 +312,9 @@ lemma ball_le_function (hf : LocallyDelta0Function f) (h : LocallyDelta0 P) :
   (bexs_le_function hf h.not).not.of_iff fun _ ↦ by simp
 
 private lemma lt_function (hf : LocallyDelta0Function f) :
-    LocallyDelta0 fun v : Fin (k + 1) → V ↦ v 0 < f (v ·.succ) := by
-  have := (LocallyDelta0.of_definable (R := fun w : Fin 2 → V ↦ w 0 < w 1) (by definability)).comp
-    (f := ![fun v : Fin (k + 1) → V ↦ v 0, fun v ↦ f (v ·.succ)]) fun j ↦ by
-      cases j using Fin.cases with
-      | zero => simpa using LocallyDelta0Function.var 0
-      | succ j => simpa [Fin.fin_one_eq_zero j] using hf.retraction Fin.succ
-  exact this.of_iff fun v ↦ by simp
+    LocallyDelta0 fun v : Fin (k + 1) → V ↦ v 0 < f (v ·.succ) :=
+  ((LocallyDelta0.of_definable (R := fun w : Fin 2 → V ↦ w 0 < w 1) (by definability)).comp₂
+    (LocallyDelta0Function.var 0) (hf.retraction Fin.succ)).of_iff fun v ↦ by simp
 
 /-- Bounded existential quantification strictly below a locally $\Delta_0$ function. -/
 lemma bexs_lt_function (hf : LocallyDelta0Function f) (h : LocallyDelta0 P) :

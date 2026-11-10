@@ -285,12 +285,12 @@ lemma fields_problem {n a : ℕ} {B : Formula α} (h : (𝒩 n).kind = .problem 
       (∀ u, (𝒩 n).extra u = ∅) := by
   have ha := lt_of_kind_problem h
   rw [node_eq_mk n, h];
-  refine ⟨?_, ?_, fun u ↦ ?_, fun u ↦ ?_, fun u ↦ ?_⟩;
-  · simp only [mk, restr_of_lt ha];
-  · simp only [mk, restr_of_lt ha];
-  · simp only [mk, restr_of_lt ha, above_restr ha];
-  · simp only [mk, restr_of_lt ha, biUnion_restr ha];
-  · rfl;
+  refine ⟨?_, ?_, fun u ↦ ?_, fun u ↦ ?_, fun u ↦ ?_⟩
+  · simp only [mk, restr_of_lt ha]
+  · simp only [mk, restr_of_lt ha]
+  · simp only [mk, restr_of_lt ha, above_restr ha]
+  · simp only [mk, restr_of_lt ha, biUnion_restr ha]
+  · rfl
 
 lemma fields_deficiency {n a s : ℕ} {A : Formula α} (h : (𝒩 n).kind = .deficiency a s A) :
     (𝒩 n).pre = (𝒩 a).anc ∧ (𝒩 n).anc = insert n (𝒩 (((𝒩 s).mu a).unbotD a)).anc ∧
@@ -300,12 +300,12 @@ lemma fields_deficiency {n a s : ℕ} {A : Formula α} (h : (𝒩 n).kind = .def
   obtain ⟨ha, hs, -⟩ := lt_of_kind_deficiency h
   have hρ := unbotD_mu_lt (Γ₀ := Γ₀) (ε := ε) (τ := τ) ha hs;
   rw [node_eq_mk n, h];
-  refine ⟨?_, ?_, fun u ↦ ?_, fun u ↦ ?_, fun u ↦ ?_⟩;
-  · simp only [mk, restr_of_lt ha];
-  · simp only [mk, restr_of_lt hs, restr_of_lt hρ];
-  · simp only [mk, restr_of_lt ha, restr_of_lt hs, above_restr ha];
-  · simp only [mk, restr_of_lt ha, restr_of_lt hs, biUnion_restr ha];
-  · simp only [mk, restr_of_lt hs];
+  refine ⟨?_, ?_, fun u ↦ ?_, fun u ↦ ?_, fun u ↦ ?_⟩
+  · simp only [mk, restr_of_lt ha]
+  · simp only [mk, restr_of_lt hs, restr_of_lt hρ]
+  · simp only [mk, restr_of_lt ha, restr_of_lt hs, above_restr ha]
+  · simp only [mk, restr_of_lt ha, restr_of_lt hs, biUnion_restr ha]
+  · simp only [mk, restr_of_lt hs]
 
 lemma label_restr_of_lt {n x y : ℕ} (hy : y < n) : label (restr Γ₀ ε τ n) x y = label 𝒩 x y := by
   unfold label boxes;
@@ -1113,9 +1113,7 @@ lemma exists_not_forces {A : Formula α} (hA : ¬ofAxioms 𝔸 ⊢ A) :
   obtain ⟨Γ₀, hΓ₀⟩ := MaximalConsistentTheory.exists_superset hX;
   use Γ₀;
   have hΩ (D : Formula α) (hD : D ∈ A.subformulas) : D ∈ jobFormulas A ∧ ∼D ∈ jobFormulas A := by
-    refine ⟨by simp [jobFormulas, hD], ?_⟩;
-    simp only [jobFormulas, Finset.mem_union, Finset.mem_image];
-    exact .inl (.inr ⟨D, hD, rfl⟩);
+    grind [jobFormulas]
   rw [truthlemma hM₀ hε enumJob_fair bot_mem_jobFormulas hΩ 0, node_zero];
   exact MaximalConsistentTheory.not_mem_of_neg_mem (hΓ₀ rfl)
 

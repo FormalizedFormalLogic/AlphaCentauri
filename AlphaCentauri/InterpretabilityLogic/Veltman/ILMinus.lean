@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.ILMinus
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.ILMinus
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 
 /-!
 # Veltman semantics of the sublogics of $\mathbf{IL}$

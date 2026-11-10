@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Formula
+public import AlphaCentauri.InterpretabilityLogic.Formula
 public import Foundation.Propositional.Entailment.Cl
 public import Foundation.Meta.ClProver
 

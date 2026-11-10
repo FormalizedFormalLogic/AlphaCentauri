@@ -22,7 +22,6 @@ public import AlphaCentauri.Bootstrapping.Proof.AxiomReplacement
 public import AlphaCentauri.Bootstrapping.Proof.ComplexitySoundness
 public import AlphaCentauri.Bootstrapping.Proof.CutElimination
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
-public import AlphaCentauri.Bootstrapping.Proof.CutFreeRewrite
 public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
 public import AlphaCentauri.Bootstrapping.Proof.InductionAxiom
@@ -31,6 +30,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.PeanoMinusAxiom
+public import AlphaCentauri.Bootstrapping.Proof.RankedDerivation
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
@@ -45,6 +45,12 @@ public import AlphaCentauri.Hierarchy.Diophantine
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Henkin
+public import AlphaCentauri.InterpretabilityLogic.Formula
+public import AlphaCentauri.InterpretabilityLogic.ILMinus
+public import AlphaCentauri.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.ILMinus
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.CodedLimit
 public import AlphaCentauri.Model.Cut
@@ -108,7 +114,10 @@ public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Basic
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Fixpoint
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.PRF
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Seq
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.LocallyDelta0
 public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Exponential
@@ -116,12 +125,8 @@ public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.InternalEquality
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Formula
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.ILMinus
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Logic
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Veltman.Basic
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Veltman.ILMinus
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
+public import AlphaCentauri.ToFoundation.LeastWitness
 public import AlphaCentauri.ToFoundation.OpenFormulaDegree
 public import AlphaCentauri.ToFoundation.OpenPredicate
 public import AlphaCentauri.ToFoundation.PartialTruth

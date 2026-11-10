@@ -134,8 +134,9 @@ def S (a b c : M.VeltmanWorld) : Prop :=
 
 variable [M.IsIL] {u : M.World} {τ : M.Strategy}
 
-lemma irrefl (w : M.World) : ¬w ≺ w :=
-  (WellFounded.irrefl (r := flip M.Rel) IsConverseWellFounded.cwf).irrefl w
+lemma isPlay_singleton {a : M.VeltmanWorld} {x : M.World} (hx : x ≺ a.world) (hu : a.world ≺ u) :
+    M.IsPlay x (a.strategy x) [{u}] := by
+  simpa [(a.isStrategy hx).nil] using s_of_rel hx hu;
 
 open Classical in
 /-- The world over `u` whose strategy for the world of `a` is `τ` and whose strategy for each
@@ -149,8 +150,7 @@ noncomputable def successor (a : M.VeltmanWorld) (hu : a.world ≺ u)
     else Strategy.choose M u ∅
   isStrategy {x} _ := by
     split_ifs with hx hx';
-    · have hP : M.IsPlay x (a.strategy x) [{u}] := by
-        simpa [(a.isStrategy hx).nil] using s_of_rel hx hu;
+    · have hP := isPlay_singleton hx hu;
       have h := (a.isStrategy hx).shift hP;
       rwa [Set.mem_singleton_iff.mp <| (a.isStrategy hx).mem_cons hP.1 hP.2] at h;
     · exact hx' ▸ hτ;
@@ -161,7 +161,7 @@ variable {a : M.VeltmanWorld} {hu : a.world ≺ u} {hτ : M.IsStrategy a.world u
 @[simp] lemma successor_world : (a.successor hu hτ).world = u := rfl
 
 @[simp] lemma successor_strategy_self : (a.successor hu hτ).strategy a.world = τ := by
-  simp [successor, irrefl];
+  simp [successor, (ConverseWellFounded.irrefl (r := M.Rel)).irrefl a.world];
 
 lemma rel_successor : Rel a (a.successor hu hτ) := by
   constructor;
@@ -169,7 +169,7 @@ lemma rel_successor : Rel a (a.successor hu hτ) := by
   · intro x hx;
     use [{u}];
     constructor;
-    · simpa [(a.isStrategy hx).nil] using s_of_rel hx hu;
+    · exact isPlay_singleton hx hu;
     · simp [successor, hx];
 
 lemma rel_trans {a b c : M.VeltmanWorld} (Rab : Rel a b) (Rbc : Rel b c) : Rel a c := by
@@ -255,7 +255,7 @@ theorem forces_toVeltman {a : M.VeltmanWorld} {A : Formula α} :
     constructor;
     · intro ha u hu hA;
       by_contra hV;
-      set G := {v | a.world ≺ v ∧ ∀ V, v ≺[a.world] V → ∃ z ∈ V, z ⊮[M] B} with hG;
+      set G := {v | a.world ≺ v ∧ ∀ V, v ≺[a.world] V → ∃ z ∈ V, z ⊮[M] B};
       have hGZ : ∀ v ∈ G, ∀ Z, v ≺[a.world] Z → (Z ∩ G).Nonempty := by
         rintro v ⟨-, hv⟩ Z hZ;
         by_contra hZG;

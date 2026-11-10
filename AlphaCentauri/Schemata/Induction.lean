@@ -135,10 +135,6 @@ abbrev IParameterFree (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
 
 prefix:max "𝗜ᶠ " => IParameterFree
 
-lemma parameterFreeInductionOn_subset (h : ∀ {φ : Semisentence L 1}, C φ → C' φ) :
-    parameterFreeInductionOn L C ⊆ parameterFreeInductionOn L C' := by
-  rintro _ ⟨φ, hφ, rfl⟩; exact ⟨φ, h hφ, rfl⟩
-
 lemma parameterFreeInductionOn_subset_InductionScheme (Γ : Polarity) (s : ℕ) :
     parameterFreeInductionOn ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) ⊆
       InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) := by
@@ -157,34 +153,6 @@ instance (Γ : Polarity) (s : ℕ) : 𝗣𝗔⁻ ⪯ 𝗜ᶠ Γ s :=
 
 instance (Γ : Polarity) (s : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜ᶠ Γ s :=
   WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗘𝗔) inferInstance
-
-section monotonicity
-
-variable {V : Type*} [ORingStructure V]
-
-lemma parameterFreeInductionOn.models_of_exists_eval_iff {C C' : ArithmeticSemisentence 1 → Prop}
-    [V↓[ℒₒᵣ] ⊧* parameterFreeInductionOn ℒₒᵣ C']
-    (h : ∀ φ, C φ → ∃ ψ, C' ψ ∧
-      ∀ (e : Fin 1 → V) (f : Empty → V), Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ) :
-    V↓[ℒₒᵣ] ⊧* parameterFreeInductionOn ℒₒᵣ C := by
-  apply Semantics.modelsSet_iff.mpr
-  rintro _ ⟨φ, hφ, rfl⟩
-  obtain ⟨ψ, hψ, H⟩ := h φ hφ
-  have := Theory.models (T := parameterFreeInductionOn ℒₒᵣ C') V ⟨ψ, hψ, rfl⟩
-  simpa [parameterFreeSuccInd, models_iff, Semiformula.eval_univCl, succInd,
-    Semiformula.eval_substs, Semiformula.eval_emb, H] using this
-
-lemma IParameterFree_weakerThan_of_le {Γ : Polarity} {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) :
-    𝗜ᶠ Γ s₁ ⪯ 𝗜ᶠ Γ s₂ :=
-  weakerThan_of_models.{0} _ _ fun V _ hV ↦ by
-    have h₀ : V↓[ℒₒᵣ] ⊧* 𝗘𝗔 := models_of_ss hV Set.subset_union_left
-    have : V↓[ℒₒᵣ] ⊧* parameterFreeInductionOn ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s₂) :=
-      models_of_ss hV Set.subset_union_right
-    exact Semantics.ModelsSet.union_iff.mpr ⟨h₀,
-      parameterFreeInductionOn.models_of_exists_eval_iff fun _ hφ ↦
-        (hφ.exists_eval_iff_of_le h).imp fun _ H ↦ ⟨H.1, H.2 V⟩⟩
-
-end monotonicity
 
 end axioms
 

@@ -770,10 +770,7 @@ end DefinableElements
 
 section Strictness
 
-/-! ## Strictness of the fragment hierarchy
-
-
--/
+/-! ## Strictness of the fragment hierarchy -/
 
 /-- $\mathsf{I}\Sigma_n$ is strictly weaker than $\mathsf{B}\Sigma_{n + 1}$.
 

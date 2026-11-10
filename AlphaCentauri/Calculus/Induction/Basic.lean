@@ -459,9 +459,6 @@ lemma anchored_rewrite {Γ} : ∀ (d : ⊢ᴸᴷᴵ[C]! Γ) (f), Anchored D d �
 lemma anchored_map (d : ⊢ᴸᴷᴵ[C]! Γ) (f) (h : Anchored D d) : Anchored D (Derivation.map d f) :=
   anchored_rewrite d _ h
 
-lemma anchored_shift (d : ⊢ᴸᴷᴵ[C]! Γ) (h : Anchored D d) : Anchored D d.shift :=
-  anchored_map d Nat.succ h
-
 lemma anchored_indByNewVar {m} {hξ : C ξ} {hξm : ¬ξ.FVar? m} {hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m}
     {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄} (h : Anchored D d) :
     Anchored D (indByNewVar hξ t hξm hΓ d) := by
@@ -615,15 +612,6 @@ theorem derivable_of_provable (hT : ∀ σ ∈ T, ⊢ᴸᴷᴵ[C] ⦃σ⦄) (h :
     obtain ⟨ψ, hψ, rfl⟩ := Multiset.mem_map.mp (by simpa [LK.Sequent.embed] using hδ)
     exact hT ψ (hΔ ψ hψ)
 
-/-- Every axiom of `𝗣𝗔⁻` has an anchored derivation: it is a leaf of the calculus. -/
-theorem nonempty_anchored_of_mem_peanoMinus {D : ArithmeticProposition → Prop} (h : σ ∈ 𝗣𝗔⁻) :
-    ⊢ᴸᴷᴵ[C, D] ⦃(σ : ArithmeticProposition)⦄ := ⟨⟨.axm h, by simp⟩⟩
-
-/-- Every axiom of `𝗣𝗔⁻` is derivable. -/
-theorem derivable_of_mem_peanoMinus (h : σ ∈ 𝗣𝗔⁻) : ⊢ᴸᴷᴵ[C] ⦃(σ : ArithmeticProposition)⦄ :=
-  Nonempty.map Subtype.val
-    (nonempty_anchored_of_mem_peanoMinus (D := fun _ ↦ True) h)
-
 variable [RewriteClosed C]
 
 /-- The induction axiom for a formula of `C` is derivable: the induction rule, with its side
@@ -654,23 +642,15 @@ theorem derivable_succInd (hξ : C ξ) : ⊢ᴸᴷᴵ[C] ⦃succInd ξ⦄ := by
       + ⦃∼(ξ/[‘0’]), (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’]))) ⋎ (∀¹ ξ)⦄ := (Derivable.or h₁).cast (by abel)
   exact (Derivable.or h₂).cast (by simp)
 
-/-- The induction axiom of the scheme, universally closed, is derivable. -/
-theorem derivable_univCl_succInd (hξ : C ξ) : ⊢ᴸᴷᴵ[C] ⦃Semiformula.univCl (succInd ξ)⦄ := by
-  simpa using (derivable_succInd hξ).univCl'
-
-/-- Every axiom of the `C`-induction scheme is derivable. -/
-theorem derivable_of_mem_inductionScheme (h : σ ∈ InductionScheme ℒₒᵣ C) : ⊢ᴸᴷᴵ[C] ⦃σ⦄ := by
-  obtain ⟨ξ, hξ, rfl⟩ := by simpa [InductionScheme] using h
-  exact derivable_univCl_succInd hξ
-
 /-- `LKI[C]` derives everything that `𝗣𝗔⁻` with `C`-induction proves.
 
 - [Bus98A, Section 1.4.2] -/
 theorem derivable_of_provable_induction (h : 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ C ⊢ σ) : ⊢ᴸᴷᴵ[C] ⦃σ⦄ := by
   refine derivable_of_provable ?_ h
   rintro σ (hσ | hσ)
-  · exact derivable_of_mem_peanoMinus hσ
-  · exact derivable_of_mem_inductionScheme hσ
+  · exact ⟨.axm hσ⟩
+  · obtain ⟨ξ, hξ, rfl⟩ := by simpa [InductionScheme] using hσ
+    simpa using (derivable_succInd hξ).univCl'
 
 /-- `LKI` over the prenex $\Sigma_1$ formulas derives everything `𝗜𝚺₁` proves: the induction
 scheme of `𝗜𝚺₁` is the one its induction rule is as strong as.

@@ -63,11 +63,6 @@ variable [M↓[ℒₒᵣ] ⊧* ZRing]
 
 instance : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (U := ZRing) inferInstance
 
-lemma exists_lt_eq_mul_add {n : ℕ} (hn : 0 < n) (b : M) : ∃ q r : M, r < n ∧ b = n * q + r := by
-  obtain ⟨n, rfl⟩ := Nat.exists_eq_add_one_of_ne_zero hn.ne'
-  exact (models_standardEuclideanDivisionBy_iff (n + 1)).mp
-    (models_of_mem (T := ZRing) <| Or.inr ⟨n, rfl⟩) b
-
 end ZRing
 
 /-- $\mathsf{IOpen}$ proves $\mathsf{ZR}$.

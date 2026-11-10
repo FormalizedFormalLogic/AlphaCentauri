@@ -74,10 +74,7 @@ end StrongCollection
 
 section InjectiveEnumeration
 
-/-! ## An injective enumeration from a failure of collection
-
-
--/
+/-! ## An injective enumeration from a failure of collection -/
 
 open scoped FFL.FirstOrder.Bounding FFL.FirstOrder.Arithmetic
 

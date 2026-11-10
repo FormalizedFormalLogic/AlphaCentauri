@@ -11,12 +11,7 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 /-!
 # End extensions and cuts
 
-An end extension of an `ℒₒᵣ`-structure `M` is a structure into which `M` embeds with nothing new
-below the image of `M`. Bounded formulas take the same truth value in `M` and in an end extension
-of it, $\Sigma_1$ formulas satisfied in `M` stay satisfied, and both `𝗣𝗔⁻` and any theory
-axiomatized by $\Pi_1$ sentences hold in `M` as soon as they hold in an end extension of `M`. A cut
-of `M` closed under the operations of the language is a substructure of which `M` is an end
-extension.
+End extensions of `ℒₒᵣ`-structures, cuts, proper cuts, and overspill.
 -/
 
 @[expose] public section
@@ -233,15 +228,6 @@ theorem models_of_Pi1Axiomatizable {T : ArithmeticTheory}
   exact models_of_subtheory (hMN.models_of_Pi1 hU)
 
 end EndExtension
-
-namespace ProperEndExtension
-
-variable [hMN : M ⊂ₑ N]
-
-lemma exists_not_mem_range : ∃ c : N, c ∉ Set.range hMN.emb := by
-  simpa [Function.Surjective, Set.range, not_forall] using hMN.not_surjective
-
-end ProperEndExtension
 
 section Absolute
 

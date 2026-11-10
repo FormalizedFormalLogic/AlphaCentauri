@@ -81,24 +81,6 @@ abbrev WeakPigeonholeOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticThe
 
 prefix:max "𝗪𝗣𝗛𝗣 " => WeakPigeonholeOnPrenexHierarchy
 
-variable {C C' : ArithmeticSemiformula ℕ 2 → Prop}
-
-lemma PigeonholeScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 2}, C φ → C' φ) :
-    PigeonholeScheme C ⊆ PigeonholeScheme C' := by
-  rintro _ ⟨φ, hφ, rfl⟩; exact ⟨φ, h hφ, rfl⟩
-
-lemma mem_PigeonholeScheme_of_mem {φ : ArithmeticSemiformula ℕ 2} (hφ : C φ) :
-    .univCl (pigeonholeAxiom φ) ∈ PigeonholeScheme C := ⟨φ, hφ, rfl⟩
-
-lemma WeakPigeonholeScheme_subset (h : ∀ {φ : ArithmeticSemiformula ℕ 2}, C φ → C' φ) :
-    WeakPigeonholeScheme C ⊆ WeakPigeonholeScheme C' := by
-  rintro _ ⟨φ, hφ, rfl⟩; exact ⟨φ, h hφ, rfl⟩
-
-lemma mem_WeakPigeonholeScheme_of_mem {φ : ArithmeticSemiformula ℕ 2} (hφ : C φ) :
-    .univCl (weakPigeonholeAxiom φ) ∈ WeakPigeonholeScheme C := ⟨φ, hφ, rfl⟩
-
-variable {Γ : Polarity}
-
 instance (Γ : Polarity) (s : ℕ) : 𝗜𝚺₀ ⪯ 𝗣𝗛𝗣 Γ s := WeakerThan.ofSubset Set.subset_union_left
 
 instance (Γ : Polarity) (s : ℕ) : 𝗜𝚺₀ ⪯ 𝗪𝗣𝗛𝗣 Γ s := WeakerThan.ofSubset Set.subset_union_left
@@ -137,55 +119,7 @@ lemma models_weakPigeonholeAxiom_iff (φ : ArithmeticSemiformula ℕ 2) :
     Semiformula.eval_ballLT, Semiformula.eval_bexsLT, Semiformula.eval_substs,
     or_iff_not_imp_left, and_comm, and_left_comm]
 
-lemma PigeonholeScheme.models_of_exists_eval_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
-    {C C' : ArithmeticSemiformula ℕ 2 → Prop} [V↓[ℒₒᵣ] ⊧* PigeonholeScheme C']
-    (h : ∀ φ, C φ → ∃ ψ, C' ψ ∧
-      ∀ (e : Fin 2 → V) (f : ℕ → V), Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ) :
-    V↓[ℒₒᵣ] ⊧* PigeonholeScheme C := by
-  apply Semantics.modelsSet_iff.mpr
-  rintro _ ⟨φ, hφ, rfl⟩
-  obtain ⟨ψ, hψ, H⟩ := h φ hφ
-  have := Theory.models (T := PigeonholeScheme C') V (mem_PigeonholeScheme_of_mem hψ)
-  simpa only [models_pigeonholeAxiom_iff, H] using this
-
-lemma WeakPigeonholeScheme.models_of_exists_eval_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
-    {C C' : ArithmeticSemiformula ℕ 2 → Prop} [V↓[ℒₒᵣ] ⊧* WeakPigeonholeScheme C']
-    (h : ∀ φ, C φ → ∃ ψ, C' ψ ∧
-      ∀ (e : Fin 2 → V) (f : ℕ → V), Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ) :
-    V↓[ℒₒᵣ] ⊧* WeakPigeonholeScheme C := by
-  apply Semantics.modelsSet_iff.mpr
-  rintro _ ⟨φ, hφ, rfl⟩
-  obtain ⟨ψ, hψ, H⟩ := h φ hφ
-  have := Theory.models (T := WeakPigeonholeScheme C') V (mem_WeakPigeonholeScheme_of_mem hψ)
-  simpa only [models_weakPigeonholeAxiom_iff, H] using this
-
 end models
-
-section monotonicity
-
-variable {Γ Γ' : Polarity} {s s' : ℕ}
-
-lemma PigeonholeOnPrenexHierarchy_weakerThan_of_le (h : s ≤ s') : 𝗣𝗛𝗣 Γ s ⪯ 𝗣𝗛𝗣 Γ s' :=
-  weakerThan_of_models.{0} _ _ fun V _ hV ↦ by
-    have h₀ : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_ss hV Set.subset_union_left
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
-    refine Semantics.ModelsSet.union_iff.mpr ⟨h₀, ?_⟩
-    have : V↓[ℒₒᵣ] ⊧* PigeonholeScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s') :=
-      models_of_ss hV Set.subset_union_right
-    exact PigeonholeScheme.models_of_exists_eval_iff fun _ hφ ↦
-      (hφ.exists_eval_iff_of_le h).imp fun _ H ↦ ⟨H.1, H.2 V⟩
-
-lemma WeakPigeonholeOnPrenexHierarchy_weakerThan_of_le (h : s ≤ s') : 𝗪𝗣𝗛𝗣 Γ s ⪯ 𝗪𝗣𝗛𝗣 Γ s' :=
-  weakerThan_of_models.{0} _ _ fun V _ hV ↦ by
-    have h₀ : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_ss hV Set.subset_union_left
-    have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
-    refine Semantics.ModelsSet.union_iff.mpr ⟨h₀, ?_⟩
-    have : V↓[ℒₒᵣ] ⊧* WeakPigeonholeScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s') :=
-      models_of_ss hV Set.subset_union_right
-    exact WeakPigeonholeScheme.models_of_exists_eval_iff fun _ hφ ↦
-      (hφ.exists_eval_iff_of_le h).imp fun _ H ↦ ⟨H.1, H.2 V⟩
-
-end monotonicity
 
 section standardModel
 

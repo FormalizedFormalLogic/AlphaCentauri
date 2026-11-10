@@ -153,8 +153,8 @@ private lemma phi_iff (C : V) (t : V) :
   mpr := by
     unfold Phi
     rintro (⟨z, _, rfl⟩ | ⟨x, _, rfl⟩ | ⟨k, _, f, _, v, _, hkf, hk, hv, rfl⟩)
-    · disj 1; exact ⟨z, rfl⟩
-    · disj 2; exact ⟨x, rfl⟩
+    · disj 1; use z
+    · disj 2; use x
     · disj 3; exact ⟨k, f, v, hkf, hk, hv, rfl⟩
 
 lemma phi_locallyDelta0 :
@@ -179,10 +179,8 @@ lemma phi_locallyDelta0 :
       fun y ↦ by simp
   have hfunc : LocallyDelta0 fun y : Fin 5 → V ↦ y 3 = qqFunc (y 2) (y 1) (y 0) :=
     LocallyDelta0.eq (LocallyDelta0Function.var 3) <|
-      qqFunc_locallyDelta0.comp (f := ![fun y : Fin 5 → V ↦ y 2, fun y ↦ y 1, fun y ↦ y 0]) <|
-        Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 2, Fin.forall_fin_succ.mpr
-          ⟨LocallyDelta0Function.var 1, Fin.forall_fin_succ.mpr
-            ⟨LocallyDelta0Function.var 0, finZeroElim⟩⟩⟩
+      qqFunc_locallyDelta0.comp₃ (LocallyDelta0Function.var 2) (LocallyDelta0Function.var 1)
+        (LocallyDelta0Function.var 0)
   have hex₁ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) hbvar
   have hex₂ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) hfvar
   have hex₃ := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
@@ -337,10 +335,10 @@ lemma case_iff {t : V} :
 alias ⟨case, mk⟩ := case_iff
 
 @[simp] lemma bvar {z : V} : IsUTerm L ^#z :=
-  mk (by disj 1; exact ⟨z, rfl⟩)
+  mk (by disj 1; use z)
 
 @[simp] lemma fvar (x : V) : IsUTerm L ^&x :=
-  mk (by disj 2; exact ⟨x, rfl⟩)
+  mk (by disj 2; use x)
 
 @[simp] lemma func_iff {k f v : V} :
     IsUTerm L (^func k f v) ↔ L.IsFunc k f ∧ IsUTermVec L k v :=
@@ -382,10 +380,7 @@ lemma le_exp_exp_of_nth_le_exp_exp (hc : 1 ≤ c) {v w : V} (hl : len w = len v)
     w ≤ Exp.exp (Exp.exp (8 * v + c)) := by
   have hG' {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
       LocallyDelta0Function fun u ↦ Exp.exp (Exp.exp (8 * g u + c)) :=
-    LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
-      LocallyDelta0Function.add.comp₂
-        (LocallyDelta0Function.mul.comp₂ (LocallyDelta0Function.const 8) hg)
-        (LocallyDelta0Function.const c)
+    LocallyDelta0Function.exp_exp_mul_add 8 hg (LocallyDelta0Function.const c)
   set W := w
   have hP : LocallyDelta0Pred fun v ↦ ∀ w ≤ W, len w = len v →
       (∀ i < len v, w.[i] ≤ Exp.exp (Exp.exp (8 * v.[i] + c))) →
@@ -556,8 +551,8 @@ private lemma phi_iff (param : Fin arity → V) (C pr : V) :
     refine ⟨by simpa using ht, ?_⟩
     rcases H with
       (⟨z, _, rfl, rfl⟩ | ⟨x, _, rfl, rfl⟩ | ⟨k, _, f, _, v, _, w, _, ⟨hk, hw⟩, rfl, rfl⟩)
-    · disj 1; exact ⟨z, rfl⟩
-    · disj 2; exact ⟨x, rfl⟩
+    · disj 1; use z
+    · disj 2; use x
     · disj 3; exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hw i hi⟩, rfl⟩
 
 /-- The rules in a form that reads the term off its code by projections. -/
@@ -603,10 +598,6 @@ private lemma phi_iff_decode (param : Fin arity → V) (C pr : V) :
         disj 3
         exact ⟨k, f, v, w, ⟨hk, hw⟩, by rw [hpr, hkfv, hy]⟩
 
-private lemma pred_comp {n : ℕ} {P : V → Prop} {g : (Fin n → V) → V} (hP : LocallyDelta0Pred P)
-    (hg : LocallyDelta0Function g) : LocallyDelta0 fun u ↦ P (g u) :=
-  (hP.comp (f := fun _ ↦ g) fun _ ↦ hg).of_iff fun _ ↦ Iff.rfl
-
 private lemma pi₁_comp {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
     LocallyDelta0Function fun u ↦ π₁ (g u) := LocallyDelta0Function.pi₁.comp₁ hg
 
@@ -633,7 +624,7 @@ lemma phi_locallyDelta0 :
       LocallyDelta0Function fun u : Fin n → V ↦ π₂ (π₂ (π₂ (π₁ (u j) - 1))) :=
     pi₂_comp (pi₂_comp (hb j))
   have hterm : LocallyDelta0 fun w : Fin (arity + 2) → V ↦ IsUTerm L (π₁ (w 0)) :=
-    pred_comp isUTerm_locallyDelta0 (pi₁_comp (LocallyDelta0Function.var 0))
+    isUTerm_locallyDelta0.pred_comp (pi₁_comp (LocallyDelta0Function.var 0))
   have hbvar : LocallyDelta0 fun w : Fin (arity + 2) → V ↦
       π₁ (π₁ (w 0) - 1) = 0 ∧ π₂ (w 0) = c.bvar (w ·.succ.succ) (π₂ (π₁ (w 0) - 1)) := by
     apply LocallyDelta0.and
@@ -718,8 +709,8 @@ def construction : Fixpoint.Construction V (β.blueprint L) where
     rintro C C' hC v pr ⟨ht, H⟩
     refine ⟨ht, ?_⟩
     rcases H with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, w, ⟨hk, hw⟩, rfl⟩)
-    · disj 1; exact ⟨z, rfl⟩
-    · disj 2; exact ⟨x, rfl⟩
+    · disj 1; use z
+    · disj 2; use x
     · disj 3; exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hC (hw i hi)⟩, rfl⟩
   Φ_locallyDelta0 := c.phi_locallyDelta0 L
 
@@ -850,7 +841,7 @@ lemma isUTerm_and_eq_of_mem_limSeq {s z : V} (h : z ∈ (c.construction L).limSe
       IsUTerm L (π₁ (y 0)) ∧ π₂ (y 0) = c.courseOfValuesResult param (π₁ (y 0)) :=
     (LocallyDelta0.mem (LocallyDelta0Function.var 0)
       (c.limSeq_comp L param (LocallyDelta0Function.var 1))).imp
-      ((pred_comp isUTerm_locallyDelta0 (pi₁_comp (LocallyDelta0Function.var 0))).and
+      ((isUTerm_locallyDelta0.pred_comp (pi₁_comp (LocallyDelta0Function.var 0))).and
         (LocallyDelta0.eq (pi₂_comp (LocallyDelta0Function.var 0))
           (c.courseOfValuesResult_comp param (pi₁_comp (LocallyDelta0Function.var 0)))))
   have hP : LocallyDelta0Pred fun s ↦ ∀ z < (c.construction L).limSeq param s,
@@ -899,7 +890,7 @@ lemma mem_limSeq_of_isUTerm {t : V} (ht : IsUTerm L t) :
         LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const K)
           (LocallyDelta0Function.var (V := V) (0 : Fin 1)))
     exact (LocallyDelta0.le (LocallyDelta0Function.var 0) (LocallyDelta0Function.const t)).imp
-      ((pred_comp isUTerm_locallyDelta0 (LocallyDelta0Function.var 0)).imp hmem)
+      ((isUTerm_locallyDelta0.pred_comp (LocallyDelta0Function.var 0)).imp hmem)
   have : ∀ t', t' ≤ t → IsUTerm L t' →
       ⟪t', c.courseOfValuesResult param t'⟫ ∈ (c.construction L).limSeq param (K + t' + 1) := by
     apply LocallyDelta0Pred.order_induction hP
@@ -1084,7 +1075,7 @@ lemma result_locallyDelta0 :
       if IsUTerm L (w 0) then c.courseOfValuesResult (w ·.succ) (w 0) else 0 :=
     funext fun w ↦ c.result_eq_ite _
   rw [this]
-  exact LocallyDelta0Function.ite (pred_comp isUTerm_locallyDelta0 (LocallyDelta0Function.var 0))
+  exact LocallyDelta0Function.ite (isUTerm_locallyDelta0.pred_comp (LocallyDelta0Function.var 0))
     c.courseOfValuesResult_locallyDelta0 (LocallyDelta0Function.const 0)
 
 section vec
@@ -1401,7 +1392,7 @@ lemma SemitermVec.adjoin {n m w t : V} (h : IsSemitermVec L n m w) (ht : IsSemit
 section
 
 instance IsSemiterm.defined : 𝚫ᴬ₁-Relation (IsSemiterm (V := V) L) via (isSemiterm L) := .mk <| by
-  refine ⟨?_, ?_⟩
+  constructor
   · intro v
     simp [isSemiterm, Bounding.HierarchySymbol.Semiformula.val_sigma]
   · intro v
@@ -1415,7 +1406,7 @@ instance IsSemiterm.definable' (Γ : Polarity) (m : ℕ) :
 
 instance IsSemitermVec.defined : 𝚫ᴬ₁-Relation₃ (IsSemitermVec (V := V) L) via (isSemitermVec L) :=
   .mk <| by
-  refine ⟨?_, ?_⟩
+  constructor
   · intro v
     simp [isSemitermVec, Bounding.HierarchySymbol.Semiformula.val_sigma]
   · intro v
@@ -1438,7 +1429,7 @@ lemma IsSemiterm.case_iff {n t : V} :
   · intro h
     rcases h.isUTerm.case with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, _, rfl⟩)
     · disj 1; exact ⟨z, by simpa [succ_le_iff_lt] using h.bv, rfl⟩;
-    · disj 2; exact ⟨x, rfl⟩;
+    · disj 2; use x;
     · disj 3; exact ⟨k, f, v, hf, by simp_all, rfl⟩;
   · rintro (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, hv, rfl⟩)
     · simp [hz]

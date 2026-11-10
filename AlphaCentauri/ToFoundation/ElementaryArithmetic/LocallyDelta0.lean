@@ -389,6 +389,11 @@ lemma LocallyDelta0Function.exp : LocallyDelta0Function₁ (Exp.exp : V → V) w
     intro v hv
     exact exp_monotone_le.mpr (hv 0)
 
+lemma LocallyDelta0Function.exp_exp_mul_add {f g : (Fin k → V) → V} (a : V)
+    (hf : LocallyDelta0Function f) (hg : LocallyDelta0Function g) :
+    LocallyDelta0Function fun v ↦ Exp.exp (Exp.exp (a * f v + g v)) :=
+  exp.comp₁ <| exp.comp₁ <| add.comp₂ (mul.comp₂ (const a) hf) hg
+
 end exponential
 
 section induction

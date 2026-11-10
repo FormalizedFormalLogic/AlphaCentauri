@@ -51,11 +51,8 @@ noncomputable def construction : Language.TermRec.Construction V blueprint where
   func_le_bound param k f v w hv hw h :=
     qqFunc_le_exp_exp_of_nth_le (le_trans (by simp) le_add_self) hv hw h
   bound_monotone _ _ _ h := exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr))
-  bound_locallyDelta0 := LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
-    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.mul.comp₂ (LocallyDelta0Function.const 8)
-      (LocallyDelta0Function.var 0))
-      (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.var 1)
-        (LocallyDelta0Function.const 4))
+  bound_locallyDelta0 := LocallyDelta0Function.exp_exp_mul_add 8 (LocallyDelta0Function.var 0)
+    (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.const 4))
 
 end TermSubst
 
@@ -252,9 +249,8 @@ noncomputable def construction : Language.TermRec.Construction V blueprint where
   fvar_le_bound _ x := qqFvar_add_one_le x
   func_le_bound _ _ _ _ _ hv hw h := qqFunc_le_exp_exp_of_nth_le (by norm_num) hv hw h
   bound_monotone _ _ _ h := exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr))
-  bound_locallyDelta0 := LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
-    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.mul.comp₂ (LocallyDelta0Function.const 8)
-      (LocallyDelta0Function.var 0)) (LocallyDelta0Function.const 2)
+  bound_locallyDelta0 := LocallyDelta0Function.exp_exp_mul_add 8 (LocallyDelta0Function.var 0)
+    (LocallyDelta0Function.const 2)
 
 end TermShift
 
@@ -353,7 +349,8 @@ lemma termShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
   · intro x; simp
   · intro k f v hkf hv ih;
     simp only [hkf, hv.isUTerm, termShift_func, func, true_and]
-    refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
+    apply IsSemitermVec.iff.mpr
+    constructor
     · simp [termShiftVec, hv.isUTerm]
     · intro i hi
       rw [nth_termShiftVec hv.isUTerm hi]
@@ -416,9 +413,8 @@ noncomputable def construction : Language.TermRec.Construction V blueprint where
   fvar_le_bound _ _ := le_exp_exp_eight_mul_add _ _
   func_le_bound _ _ _ _ _ hv hw h := qqFunc_le_exp_exp_of_nth_le (by norm_num) hv hw h
   bound_monotone _ _ _ h := exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr))
-  bound_locallyDelta0 := LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
-    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.mul.comp₂ (LocallyDelta0Function.const 8)
-      (LocallyDelta0Function.var 0)) (LocallyDelta0Function.const 2)
+  bound_locallyDelta0 := LocallyDelta0Function.exp_exp_mul_add 8 (LocallyDelta0Function.var 0)
+    (LocallyDelta0Function.const 2)
 
 end TermBShift
 
@@ -506,7 +502,8 @@ lemma termBShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k t
   · intro x; simp
   · intro k f v hkf hv ih;
     simp only [hkf, hv.isUTerm, termBShift_func, func, true_and]
-    refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
+    apply IsSemitermVec.iff.mpr
+    constructor
     · simp [hv.isUTerm]
     · intro i hi
       rw [nth_termBShiftVec hv.isUTerm hi]
@@ -628,7 +625,8 @@ end
 lemma IsSemitermVec.qVec {k n w : V} (h : IsSemitermVec L k n w) :
     IsSemitermVec L (k + 1) (n + 1) (qVec L w) := by
   rcases h.lh
-  refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
+  apply IsSemitermVec.iff.mpr
+  constructor
   · simp [h.isUTerm, Bootstrapping.qVec]
   · intro i hi
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -904,11 +902,8 @@ noncomputable def construction : PR.Construction V blueprint where
     gcongr
     exact_mod_cast (by norm_num : (10 : ℕ) < 16)
   bound_monotone _ _ _ h := exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr))
-  bound_locallyDelta0 := LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
-    LocallyDelta0Function.add.comp₂
-      (LocallyDelta0Function.mul.comp₂ (LocallyDelta0Function.const 16)
-        (LocallyDelta0Function.var 0))
-      (LocallyDelta0Function.const (((𝟏 + addIndex + 2 : ℕ) : V)))
+  bound_locallyDelta0 := LocallyDelta0Function.exp_exp_mul_add 16 (LocallyDelta0Function.var 0)
+    (LocallyDelta0Function.const (((𝟏 + addIndex + 2 : ℕ) : V)))
 
 /-- The code of the numeral for `x + 1`. -/
 noncomputable def numeralAux (x : V) : V := construction.result ![] x
@@ -939,7 +934,7 @@ lemma numeralAux_locallyDelta0 : LocallyDelta0Function₁ (numeralAux : V → V)
   · rw [numeralAux_zero, qqOne_eq_qqFunc]
     exact arity_lt_qqFunc 0 _ 0
   · intro n ih
-    refine lt_of_lt_of_le ((add_lt_add_iff_right 1).mpr ih) (by simp [succ_le_iff_lt])
+    exact lt_of_lt_of_le ((add_lt_add_iff_right 1).mpr ih) (by simp [succ_le_iff_lt])
 
 @[simp] lemma numeralAux_semiterm (n x : V) : IsSemiterm ℒₒᵣ n (numeralAux x) := by
   refine LocallyDelta0Pred.succ_induction (P := fun x ↦ IsSemiterm ℒₒᵣ n (numeralAux x)) ?_ ?_ ?_ x

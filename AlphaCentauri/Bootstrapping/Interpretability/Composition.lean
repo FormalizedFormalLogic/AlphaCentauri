@@ -1430,6 +1430,42 @@ lemma tprovable_comp_funcUniqueBody {k : ℕ} (d : Semiformula V ℒₒᵣ 1)
     cl_prover 100 [h₄, hsp, hp]
   exact key hs hcj (tprovable_conj_and_split _ _) hp
 
+
+include h₁ h₂ hc hsound in
+lemma comp_func_unique {k : ℕ} (F : (ℒₒᵣ).Func k) :
+    Provable S (qqAlls (funcUniqueCode ℒₒᵣ (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂) k ⌜F⌝)
+      (k + 2)) := by
+  have hb := tprovable_relAlls_of_provable h₁ hsound (funcUniqueBody h₂.domT (h₂.funcT F))
+    (funcUniqueBody_shift h₂.domT_shift (h₂.funcT_shift F)) (by
+      rw [funcUniqueBody_val _ rfl _ rfl]
+      simpa [add_assoc, one_add_one_eq_two] using h₂.func_unique (codeIn_func_quote F))
+  have h := provable_qqAlls_of_tprovable_fvar _
+    (funcUniqueBody_shift hc.domT_shift (hc.funcT_shift F)) (by
+      rw [IsTable.compTable_domT h₁.toIsTable h₂.toIsTable hc,
+        IsTable.compTable_funcT h₁.toIsTable h₂.toIsTable hc]
+      exact tprovable_comp_funcUniqueBody h₁ _ _ hb)
+  rw [funcUniqueBody_val _ rfl _ rfl] at h
+  simpa [add_assoc, one_add_one_eq_two] using h
+
+include h₁ h₂ hsound in
+/-- The composite of a table of a translation in `S` and a table of a translation in `U`, along
+the first of which every theorem of `U` translates to a theorem of `S`, is a table of a
+translation in `S`. -/
+theorem IsTranslationTable.compTable :
+    IsTranslationTable ℒₒᵣ S (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂) where
+  toIsTable := h₁.toIsTable.compTable h₂.toIsTable
+  exs_domain := comp_exs_domain h₁ h₂ hsound
+  func_exists hf := by
+    obtain ⟨k, F, rfl, rfl⟩ := Language.SymbolsStandard.oRing.2 _ _ hf
+    exact comp_func_exists h₁ h₂ (h₁.toIsTable.compTable h₂.toIsTable) hsound F
+  func_unique hf := by
+    obtain ⟨k, F, rfl, rfl⟩ := Language.SymbolsStandard.oRing.2 _ _ hf
+    exact comp_func_unique h₁ h₂ (h₁.toIsTable.compTable h₂.toIsTable) hsound F
+  func_congr hf := by
+    obtain ⟨k, F, rfl, rfl⟩ := Language.SymbolsStandard.oRing.2 _ _ hf
+    exact comp_func_congr (h₁.toIsTable.compTable h₂.toIsTable) F
+  preserve_eq := comp_preserve_eq h₁ h₂ (h₁.toIsTable.compTable h₂.toIsTable) hsound
+
 end compConditions
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

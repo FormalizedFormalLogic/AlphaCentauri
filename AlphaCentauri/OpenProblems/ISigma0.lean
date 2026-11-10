@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.Theory
+public import AlphaCentauri.ToFoundation.FirstOrder.Theory
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata
 

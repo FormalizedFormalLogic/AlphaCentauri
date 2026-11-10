@@ -1,7 +1,10 @@
 module
 
+public import AlphaCentauri.Bootstrapping.Interpretability.CaseSplit
+public import AlphaCentauri.Bootstrapping.Interpretability.Congruence
 public import AlphaCentauri.Bootstrapping.Interpretability.Identity
 public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
+public import AlphaCentauri.Bootstrapping.Proof.ProofByCases
 
 /-!
 # Formalized relative interpretability
@@ -98,6 +101,89 @@ theorem Interpretable.consistent {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] 
 
 end interpretable
 
+section provableIff
+
+open _root_.FFL.Entailment
+
+variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
+  [L₂.Encodable] [L₂.LORDefinable] {S : Theory L₁} [S.Δ₁] {U : Theory L₂} [U.Δ₁] {tbl tbl' : V}
+  {hT : IsTable L₁ L₂ tbl} {hT' : IsTable L₁ L₂ tbl'}
+  (hd : ∀ u : Term V L₁, S.internalize V ⊢ hT.domT.subst ![u] 🡘 hT'.domT.subst ![u])
+  (hr : ∀ {k : ℕ} (R : L₂.Rel k) (w : Fin k → Term V L₁),
+    S.internalize V ⊢ (hT.relT R).subst w 🡘 (hT'.relT R).subst w)
+  (hf : ∀ {k : ℕ} (F : L₂.Func k) (w : Fin (k + 1) → Term V L₁),
+    S.internalize V ⊢ (hT.funcT F).subst w 🡘 (hT'.funcT F).subst w)
+
+include hd hr hf in
+/-- A table whose entries are provably equivalent in `S` to those of a table interpreting `U` in
+`S` interprets `U` in `S`. -/
+theorem IsInterpretationTable.of_provable_iff (h : IsInterpretationTable S U tbl)
+    (hL : L₂.SymbolsStandard V) : IsInterpretationTable S U tbl' where
+  toIsTranslationTable := h.toIsTranslationTable.of_provable_iff hd hf hL
+  translate_axiom {p} hp hp' := by
+    have hq := IsSemiformula.translate hT hp'
+    have h₁ := (provable_iff_iff_tprovable hq (IsSemiformula.translate hT' hp')).mp
+      (provable_iff_translate_of_equiv hd hr hf hL hp')
+    have h₂ : S.internalize V ⊢ (⟨_, hq⟩ : Formula V L₁) :=
+      tprovable_iff_provable.mpr (h.translate_axiom hp hp')
+    exact tprovable_iff_provable.mp (K_left h₁ ⨀ h₂)
+
+lemma IsInterpretationTable.of_subset {S' : Theory L₁} [S'.Δ₁] (h : IsInterpretationTable S U tbl)
+    (hS : S.Δ₁Class (V := V) ⊆ S'.Δ₁Class) : IsInterpretationTable S' U tbl where
+  toIsTable := h.toIsTable
+  exs_domain := Derivable.of_ss hS h.exs_domain
+  func_exists hf := Derivable.of_ss hS (h.func_exists hf)
+  func_unique hf := Derivable.of_ss hS (h.func_unique hf)
+  func_congr hf := Derivable.of_ss hS (h.func_congr hf)
+  translate_axiom hp hp' := Derivable.of_ss hS (h.translate_axiom hp hp')
+
+end provableIff
+
+section caseSplit
+
+variable (φ : ArithmeticSentence) {L₂ : Language} [L₂.Encodable] [L₂.LORDefinable] {tbl₁ tbl₂ : V}
+  {S : ArithmeticTheory} [S.Δ₁] {U : Theory L₂} [U.Δ₁]
+
+/-- Along a table `tbl₁` interpreting `U` in `S`, the case-split table of `tbl₁` and `tbl₂` by a
+sentence `φ` provable in `S` interprets `U` in `S`. -/
+lemma IsInterpretationTable.caseTable_left (h₁ : IsInterpretationTable S U tbl₁)
+    (hT₂ : IsTable ℒₒᵣ L₂ tbl₂) (hφ : S.internalize V ⊢ ⌜φ⌝) (hL : L₂.SymbolsStandard V) :
+    IsInterpretationTable S U (caseTable ℒₒᵣ ⌜φ⌝ tbl₁ tbl₂) := by
+  have hT := h₁.toIsTable.caseTable φ hT₂
+  have hd (u : Term V ℒₒᵣ) : S.internalize V ⊢ h₁.domT.subst ![u] 🡘 hT.domT.subst ![u] := by
+    rw [subst_eq_of_val_eq_caseCode φ (h₁.toIsTable.caseTable_domT_val φ hT₂)]
+    cl_prover [hφ]
+  have hr {k : ℕ} (R : L₂.Rel k) (w : Fin k → Term V ℒₒᵣ) :
+      S.internalize V ⊢ (h₁.relT R).subst w 🡘 (hT.relT R).subst w := by
+    rw [subst_eq_of_val_eq_caseCode φ (h₁.toIsTable.caseTable_relT_val φ hT₂ R)]
+    cl_prover [hφ]
+  have hf {k : ℕ} (F : L₂.Func k) (w : Fin (k + 1) → Term V ℒₒᵣ) :
+      S.internalize V ⊢ (h₁.funcT F).subst w 🡘 (hT.funcT F).subst w := by
+    rw [subst_eq_of_val_eq_caseCode φ (h₁.toIsTable.caseTable_funcT_val φ hT₂ F)]
+    cl_prover [hφ]
+  exact h₁.of_provable_iff hd hr hf hL
+
+/-- Along a table `tbl₂` interpreting `U` in `S`, the case-split table of `tbl₁` and `tbl₂` by a
+sentence `φ` refutable in `S` interprets `U` in `S`. -/
+lemma IsInterpretationTable.caseTable_right (h₂ : IsInterpretationTable S U tbl₂)
+    (hT₁ : IsTable ℒₒᵣ L₂ tbl₁) (hφ : S.internalize V ⊢ ∼⌜φ⌝) (hL : L₂.SymbolsStandard V) :
+    IsInterpretationTable S U (caseTable ℒₒᵣ ⌜φ⌝ tbl₁ tbl₂) := by
+  have hT := hT₁.caseTable φ h₂.toIsTable
+  have hd (u : Term V ℒₒᵣ) : S.internalize V ⊢ h₂.domT.subst ![u] 🡘 hT.domT.subst ![u] := by
+    rw [subst_eq_of_val_eq_caseCode φ (hT₁.caseTable_domT_val φ h₂.toIsTable)]
+    cl_prover [hφ]
+  have hr {k : ℕ} (R : L₂.Rel k) (w : Fin k → Term V ℒₒᵣ) :
+      S.internalize V ⊢ (h₂.relT R).subst w 🡘 (hT.relT R).subst w := by
+    rw [subst_eq_of_val_eq_caseCode φ (hT₁.caseTable_relT_val φ h₂.toIsTable R)]
+    cl_prover [hφ]
+  have hf {k : ℕ} (F : L₂.Func k) (w : Fin (k + 1) → Term V ℒₒᵣ) :
+      S.internalize V ⊢ (h₂.funcT F).subst w 🡘 (hT.funcT F).subst w := by
+    rw [subst_eq_of_val_eq_caseCode φ (hT₁.caseTable_funcT_val φ h₂.toIsTable F)]
+    cl_prover [hφ]
+  exact h₂.of_provable_iff hd hr hf hL
+
+end caseSplit
+
 section arithmetic
 
 /-- Every theory of arithmetic has, in every model of $\mathsf{I}\Sigma_1$, a table of a
@@ -125,11 +211,27 @@ axiom Interpretable.trans {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* �
 /-- If `W` is interpretable both in `T + φ` and in `T + ψ`, it is interpretable in
 `T + (φ ∨ ψ)`.
 - [Vis90, §6.1] -/
-axiom Interpretable.union_or {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-    {T W : ArithmeticTheory} [T.Δ₁] [W.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ T]
-    (hT : ∀ p ∈ T.Δ₁Class (V := V), Bootstrapping.shift ℒₒᵣ p = p) {φ ψ : ArithmeticSentence}
+theorem Interpretable.union_or {T W : ArithmeticTheory} [T.Δ₁] [W.Δ₁] {φ ψ : ArithmeticSentence}
     (h₁ : Interpretable V (T ∪ {φ}) W) (h₂ : Interpretable V (T ∪ {ψ}) W) :
-    Interpretable V (T ∪ {φ ⋎ ψ}) W
+    Interpretable V (T ∪ {φ ⋎ ψ}) W := by
+  obtain ⟨tbl₁, h₁⟩ := h₁
+  obtain ⟨tbl₂, h₂⟩ := h₂
+  have hL := Language.SymbolsStandard.oRing (V := V)
+  have hφ : (T ∪ {ψ} ∪ {∼φ}).internalize V ⊢ ∼⌜φ⌝ := by
+    have h₃ : (T ∪ {ψ} ∪ {∼φ}).internalize V ⊢ (⌜∼φ⌝ : Formula V ℒₒᵣ) :=
+      tprovable_union_singleton _
+    rwa [show (⌜∼φ⌝ : Formula V ℒₒᵣ) = ∼⌜φ⌝ by ext; simp [← Sentence.quote_eq]] at h₃
+  have c₁ := h₁.caseTable_left φ h₂.toIsTable (tprovable_union_singleton φ) hL
+  have c₂ := (h₂.of_subset (S' := T ∪ {ψ} ∪ {∼φ}) (by intro p hp; simp [hp])).caseTable_right φ
+    h₁.toIsTable hφ hL
+  use caseTable ℒₒᵣ ⌜φ⌝ tbl₁ tbl₂
+  exact { toIsTable := c₁.toIsTable
+          exs_domain := provable_union_or c₁.exs_domain c₂.exs_domain
+          func_exists hf := provable_union_or (c₁.func_exists hf) (c₂.func_exists hf)
+          func_unique hf := provable_union_or (c₁.func_unique hf) (c₂.func_unique hf)
+          func_congr hf := provable_union_or (c₁.func_congr hf) (c₂.func_congr hf)
+          translate_axiom hp hp' :=
+            provable_union_or (c₁.translate_axiom hp hp') (c₂.translate_axiom hp hp') }
 
 end arithmetic
 

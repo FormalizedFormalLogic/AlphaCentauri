@@ -83,9 +83,6 @@ declaration:
   FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.union_or:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.union_or
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:
@@ -118,6 +115,3 @@ declaration:
   FFL.FirstOrder.ArithmeticTheory.interpretability_trans:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans
-  FFL.FirstOrder.ArithmeticTheory.interpretability_or:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.union_or

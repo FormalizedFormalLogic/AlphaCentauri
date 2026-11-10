@@ -152,7 +152,6 @@ theorem _root_.FFL.FirstOrder.ArithmeticTheory.interpretability_or [𝗘𝗤 ℒ
     LogicalConnective.Prop.arrow_eq, LogicalConnective.Prop.and_eq]
   rintro ⟨h₁, h₂⟩
   exact models_interpretability_iff.mpr <|
-    (models_interpretability_iff.mp h₁).union_or (Theory.Δ₁.Sentential.forall_shift_eq T)
-      (models_interpretability_iff.mp h₂)
+    (models_interpretability_iff.mp h₁).union_or (models_interpretability_iff.mp h₂)
 
 end FFL.FirstOrder.Arithmetic

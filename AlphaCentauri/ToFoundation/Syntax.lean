@@ -325,6 +325,13 @@ lemma IsSemitermVec.bvarVec {j k n : V} (h : j + k ≤ n) : IsSemitermVec L k n 
     rw [nth_bvarVec j k i hi, IsSemiterm.bvar]
     exact lt_of_lt_of_le (by simpa using hi) h⟩
 
+lemma bvarVec_eq_matrixToVec (j : V) (k : ℕ) :
+    bvarVec j (k : V) = matrixToVec fun i : Fin k ↦ ^#(((i : ℕ) : V) + j) := by
+  apply nth_ext' (k : V) (by simp) (by simp)
+  intro i hi
+  obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi
+  simp [nth_bvarVec _ _ _ hi, add_comm]
+
 end bvarVec
 
 /-! ## Blocks of universal quantifiers -/

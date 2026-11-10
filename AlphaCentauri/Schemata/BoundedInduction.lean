@@ -10,6 +10,8 @@ $U_k$ count the alternations of blocks of bounded quantifiers over an open matri
 
 - [Wil85]
 - [Smi93, Definition 2.1, Definition 2.2]
+- [DAq05, §8]
+- [Car16]
 -/
 
 @[expose] public section
@@ -57,5 +59,33 @@ abbrev IE (k : ℕ) : ArithmeticTheory :=
 instance (k : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ IE k :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻)
     (Entailment.WeakerThan.ofSubset Set.subset_union_left)
+
+section
+
+variable {V : Type*} [ORingStructure V]
+
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝗘₁] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+  Semantics.ModelsSet.of_subset (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝗘₁) Set.subset_union_left
+
+instance {k : ℕ} [V↓[ℒₒᵣ] ⊧* IE k] :
+    V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Semiformula.BoundedExistential k) :=
+  Semantics.ModelsSet.of_subset (inferInstance : V↓[ℒₒᵣ] ⊧* IE k) Set.subset_union_right
+
+end
+
+/-- $\mathsf{I}\mathsf{E}_1$ is strictly weaker than $\mathsf{I}\Delta_0$. An open problem.
+- [DAq05, §8] -/
+def IE1StrictlyWeakerThanISigma0 : Prop := 𝗜𝗘₁ ⪱ 𝗜𝚺₀
+
+/-- $\mathsf{I}\mathsf{E}_k$ is strictly weaker than $\mathsf{I}\mathsf{E}_{k + 1}$ for each
+$k \ge 1$. An open problem.
+- [Wil85, §4.13, Problem (1)]
+- [Car16] -/
+def IEStrictlyWeakerThanIESucc : Prop := ∀ k : ℕ, 1 ≤ k → IE k ⪱ IE (k + 1)
+
+/-- $\mathsf{I}\mathsf{E}_1$ proves the least number principle for $U_1$ formulas. An open problem.
+- [Wil85, §4.13, Problem (2)] -/
+def LeastNumberBoundedUniversalWeakerThanIE1 : Prop :=
+  𝗣𝗔⁻ ∪ LeastNumberScheme (Semiformula.BoundedUniversal 1) ⪯ 𝗜𝗘₁
 
 end FFL.FirstOrder.Arithmetic

@@ -213,16 +213,15 @@ end standardModel
 
 section openProblems
 
-/-- $\mathsf{I}\Delta_0$ proves the pigeonhole principle for $\Delta_0$ formulas. This is an open
-problem.
+/-- $\mathsf{I}\Delta_0$ proves the pigeonhole principle for $\Delta_0$ formulas. An open problem.
 - [PWW88, Problem 2]
 - [HP98, §V.1(a), p. 276] -/
-axiom PigeonholeOnPrenexHierarchy_weakerThan_ISigma0 : 𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀
+def PigeonholeOnPrenexHierarchyWeakerThanISigma0 : Prop := 𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀
 
-/-- $\mathsf{I}\Delta_0 + \Omega_1$ proves the pigeonhole principle for $\Delta_0$ formulas. This
-is an open problem.
+/-- $\mathsf{I}\Delta_0 + \Omega_1$ proves the pigeonhole principle for $\Delta_0$ formulas. An
+open problem.
 - [HP98, §V.5(g), p. 395] -/
-axiom PigeonholeOnPrenexHierarchy_weakerThan_ISigma0_union_Omega1 : 𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀ ∪ 𝝮₁
+def PigeonholeOnPrenexHierarchyWeakerThanISigma0UnionOmega1 : Prop := 𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀ ∪ 𝝮₁
 
 end openProblems
 

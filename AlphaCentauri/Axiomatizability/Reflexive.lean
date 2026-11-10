@@ -4,6 +4,7 @@ public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.Definability
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Bootstrapping.Proof.ComplexitySoundness
+public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 
 /-!
 # Reflexive theories
@@ -56,7 +57,12 @@ theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T] 
 
 /-- `𝗜𝚺₂` proves the consistency of `𝗜𝚺₁`.
 - [HP98, Corollary I.4.34(1)] -/
-axiom ISigma.provable_con_ISigma1 : 𝗜𝚺 2 ⊢ 𝗜𝚺⁺₁.consistent.val
+theorem ISigma.provable_con_ISigma1 : 𝗜𝚺 2 ⊢ 𝗜𝚺₁.consistent.val := by
+  apply Arithmetic.complete.{0} (𝗜𝚺 2) _
+  intro V _ _
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := mod_IBroadSigma_of_le (s₂ := 2) (by simp)
+  exact (Bootstrapping.consistent.defined _).mpr <|
+    Bootstrapping.consistent_ISigma (k := 1) le_rfl le_rfl
 
 open Bootstrapping in
 /-- In a model of `𝗣𝗔`, a finite set of true sentences is consistent.

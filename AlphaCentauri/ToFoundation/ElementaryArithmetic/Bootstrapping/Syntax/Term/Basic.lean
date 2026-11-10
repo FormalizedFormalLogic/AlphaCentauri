@@ -435,6 +435,49 @@ private lemma phi_iff (param : Fin arity → V) (C pr : V) :
     · disj 2; exact ⟨x, rfl⟩
     · disj 3; exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hw i hi⟩, rfl⟩
 
+/-- The rules in a form that reads the term off its code by projections. -/
+private lemma phi_iff_decode (param : Fin arity → V) (C pr : V) :
+    c.Phi L param {x | x ∈ C} pr ↔ IsUTerm L (π₁ pr) ∧
+    ( (π₁ (π₁ pr - 1) = 0 ∧ π₂ pr = c.bvar param (π₂ (π₁ pr - 1))) ∨
+      (π₁ (π₁ pr - 1) = 1 ∧ π₂ pr = c.fvar param (π₂ (π₁ pr - 1))) ∨
+      (π₁ (π₁ pr - 1) = 2 ∧ ∃ w ≤ repeatVec C (π₁ (π₂ (π₁ pr - 1))),
+        (π₁ (π₂ (π₁ pr - 1)) = len w ∧ ∀ i < π₁ (π₂ (π₁ pr - 1)),
+          ⟪(π₂ (π₂ (π₂ (π₁ pr - 1)))).[i], w.[i]⟫ ∈ C) ∧
+        π₂ pr = c.func param (π₁ (π₂ (π₁ pr - 1))) (π₁ (π₂ (π₂ (π₁ pr - 1))))
+          (π₂ (π₂ (π₂ (π₁ pr - 1)))) w) ) := by
+  constructor
+  · rintro ⟨ht, H⟩
+    refine ⟨ht, ?_⟩
+    rcases H with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, w, ⟨hk, hw⟩, rfl⟩)
+    · disj 1; simp [qqBvar]
+    · disj 2; simp [qqFvar]
+    · disj 3
+      simp only [pi₁_pair, qqFunc, add_tsub_cancel_right, pi₂_pair, true_and]
+      refine ⟨w, ?_, ⟨hk, hw⟩, rfl⟩
+      rcases hk
+      exact len_repeatVec_of_nth_le fun i hi ↦ le_of_lt <| lt_of_mem_rng <| hw i hi
+  · rintro ⟨ht, H⟩
+    refine ⟨ht, ?_⟩
+    have hpr : pr = ⟪π₁ pr, π₂ pr⟫ := by simp
+    rcases IsUTerm.case ht with (⟨z, hz⟩ | ⟨x, hx⟩ | ⟨k, f, v, _, _, hkfv⟩)
+    · rw [hz] at H
+      rcases H with (⟨_, hy⟩ | ⟨h, _⟩ | ⟨h, _⟩)
+      · disj 1; exact ⟨z, by rw [hpr, hz, hy]; simp [qqBvar]⟩
+      · simp [qqBvar] at h
+      · simp [qqBvar] at h
+    · rw [hx] at H
+      rcases H with (⟨h, _⟩ | ⟨_, hy⟩ | ⟨h, _⟩)
+      · simp [qqFvar] at h
+      · disj 2; exact ⟨x, by rw [hpr, hx, hy]; simp [qqFvar]⟩
+      · simp [qqFvar] at h
+    · rw [hkfv] at H
+      rcases H with (⟨h, _⟩ | ⟨h, _⟩ | ⟨_, w, _, ⟨hk, hw⟩, hy⟩)
+      · simp [qqFunc] at h
+      · simp [qqFunc] at h
+      · simp only [qqFunc, add_tsub_cancel_right, pi₂_pair, pi₁_pair] at hk hw hy
+        disj 3
+        exact ⟨k, f, v, w, ⟨hk, hw⟩, by rw [hpr, hkfv, hy]⟩
+
 end Construction
 
 end Language.TermRec

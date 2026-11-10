@@ -619,4 +619,81 @@ lemma tprovable_tvF_fvar_assignment (n : V) :
 
 end assignment
 
+/-! ### Disquotation for terms -/
+
+section termDisquotation
+
+lemma LOR_func_cases {k f v : V} (hf : (ℒₒᵣ).IsFunc k f) (hv : IsUTermVec ℒₒᵣ k v) :
+    (k = 0 ∧ ^func k f v = (𝟎 : V)) ∨ (k = 0 ∧ ^func k f v = (𝟏 : V)) ∨
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ k = 2 ∧ v = ?[t, u] ∧ ^func k f v = t ^+ u) ∨
+    (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ k = 2 ∧ v = ?[t, u] ∧ ^func k f v = t ^* u) := by
+  rcases Arithmetic.isFunc_iff_LOR.mp hf with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+  · left; simp at hv; simp [hv, qqZero_eq_qqFunc]; rfl
+  · right; left; simp at hv; simp [hv, qqOne_eq_qqFunc]; rfl
+  · obtain ⟨a, b, ha, hb, rfl⟩ := IsUTermVec.two_iff.mp hv
+    right; right; left; use a, b; simp [ha, hb, qqAdd]; rfl
+  · obtain ⟨a, b, ha, hb, rfl⟩ := IsUTermVec.two_iff.mp hv
+    right; right; right; use a, b; simp [ha, hb, qqMul]; rfl
+
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+
+omit [𝗜𝚺₁ ⪯ T] in
+lemma tprovable_tvF_iff (y a : Term V ℒₒᵣ) (t : V) :
+    T.internalize V ⊢ tvF y a t ↔
+      Provable T (subst ℒₒᵣ ?[y.val, a.val, numeral t] (⌜tvDef.val⌝ : V)) := by
+  rw [tprovable_iff_provable, val_tvF]
+
+/-- The value of a term without free variables under `assignment n` is the term obtained by
+replacing each bound variable `#i` by `&i`. -/
+lemma provable_tvF_termSubst (n : V) :
+    ∀ t, IsSemiterm ℒₒᵣ n t → termShift ℒₒᵣ t = t →
+      Provable T (subst ℒₒᵣ ?[termSubst ℒₒᵣ (fvarVec n) t, assignmentCode n, numeral t]
+        (⌜tvDef.val⌝ : V)) := by
+  intro t ht;
+  apply IsSemiterm.induction 𝚺 (P := fun t ↦ termShift ℒₒᵣ t = t →
+    Provable T (subst ℒₒᵣ ?[termSubst ℒₒᵣ (fvarVec n) t, assignmentCode n, numeral t]
+      (⌜tvDef.val⌝ : V))) ?_ ?_ ?_ ?_ t ht;
+  · definability
+  · intro z hz _;
+    rw [termSubst_bvar, nth_fvarVec n z hz];
+    simpa using (tprovable_tvF_iff _ _ _).mp (tprovable_tvF_fvar_assignment (T := T) n z hz);
+  · intro x h;
+    simp at h;
+  · intro k f v hf hv ih hs;
+    have hvn := isSemitermVec_fvarVec (L := ℒₒᵣ) n 0;
+    rcases LOR_func_cases hf hv.isUTerm with
+      ⟨rfl, h⟩ | ⟨rfl, h⟩ | ⟨a, b, ha, hb, rfl, rfl, h⟩ | ⟨a, b, ha, hb, rfl, rfl, h⟩
+    · rw [h];
+      simpa [qqZero_eq_qqFunc] using
+        (tprovable_tvF_iff _ _ _).mp (tprovable_tvF_zero (T := T) (assignment n));
+    · rw [h];
+      simpa [qqOne_eq_qqFunc] using
+        (tprovable_tvF_iff _ _ _).mp (tprovable_tvF_one (T := T) (assignment n));
+    · rw [h] at hs ⊢;
+      have hab : termShift ℒₒᵣ a = a ∧ termShift ℒₒᵣ b = b := by simpa [qqAdd, ha, hb] using hs;
+      have ha' : IsSemiterm ℒₒᵣ n a := by simpa using hv.nth (i := 0) (by simp);
+      have hb' : IsSemiterm ℒₒᵣ n b := by simpa using hv.nth (i := 1) (by simp);
+      let a' : Term V ℒₒᵣ := ⟨termSubst ℒₒᵣ (fvarVec n) a, hvn.termSubst ha'⟩;
+      let b' : Term V ℒₒᵣ := ⟨termSubst ℒₒᵣ (fvarVec n) b, hvn.termSubst hb'⟩;
+      have h₁ : T.internalize V ⊢ tvF a' (assignment n) a :=
+        (tprovable_tvF_iff _ _ _).mpr <| by simpa using ih 0 (by simp) (by simpa using hab.1);
+      have h₂ : T.internalize V ⊢ tvF b' (assignment n) b :=
+        (tprovable_tvF_iff _ _ _).mpr <| by simpa using ih 1 (by simp) (by simpa using hab.2);
+      simpa [a', b', qqAdd, ha, hb] using
+        (tprovable_tvF_iff _ _ _).mp (tprovable_tvF_add (T := T) a' b' (assignment n) ha hb ⨀ h₁ ⨀ h₂);
+    · rw [h] at hs ⊢;
+      have hab : termShift ℒₒᵣ a = a ∧ termShift ℒₒᵣ b = b := by simpa [qqMul, ha, hb] using hs;
+      have ha' : IsSemiterm ℒₒᵣ n a := by simpa using hv.nth (i := 0) (by simp);
+      have hb' : IsSemiterm ℒₒᵣ n b := by simpa using hv.nth (i := 1) (by simp);
+      let a' : Term V ℒₒᵣ := ⟨termSubst ℒₒᵣ (fvarVec n) a, hvn.termSubst ha'⟩;
+      let b' : Term V ℒₒᵣ := ⟨termSubst ℒₒᵣ (fvarVec n) b, hvn.termSubst hb'⟩;
+      have h₁ : T.internalize V ⊢ tvF a' (assignment n) a :=
+        (tprovable_tvF_iff _ _ _).mpr <| by simpa using ih 0 (by simp) (by simpa using hab.1);
+      have h₂ : T.internalize V ⊢ tvF b' (assignment n) b :=
+        (tprovable_tvF_iff _ _ _).mpr <| by simpa using ih 1 (by simp) (by simpa using hab.2);
+      simpa [a', b', qqMul, ha, hb] using
+        (tprovable_tvF_iff _ _ _).mp (tprovable_tvF_mul (T := T) a' b' (assignment n) ha hb ⨀ h₁ ⨀ h₂)
+
+end termDisquotation
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

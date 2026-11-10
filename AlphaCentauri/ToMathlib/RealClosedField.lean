@@ -3,8 +3,8 @@ module
 public import AlphaCentauri.ToMathlib.FieldExtension
 public import Mathlib.Algebra.QuadraticDiscriminant
 public import Mathlib.FieldTheory.IsRealClosed.Basic
-import Mathlib.GroupTheory.Sylow
 public import Mathlib.FieldTheory.SplittingField.Construction
+import Mathlib.GroupTheory.Sylow
 
 /-!
 # The intermediate value property of real closed fields
@@ -66,8 +66,7 @@ lemma isSquare_of_finrank_eq_two {E : Type*} [Field E] [Algebra R E] (h : finran
       exact ⟨algebraMap R E s, map_mul _ _ _⟩
     · obtain ⟨θ, hθ⟩ := exists_notMem_range_of_finrank_ne_one (K := R) (M := E) <| by omega
       have hD := key θ hθ
-      obtain ⟨s, hs⟩ := IsSquare.of_nonneg <|
-        div_nonneg_of_nonpos hx.le hD.le
+      obtain ⟨s, hs⟩ := IsSquare.of_nonneg <| div_nonneg_of_nonpos hx.le hD.le
       have h₁ := Algebra.IsQuadraticExtension.sq_eq_trace_smul_sub_norm R θ
       rw [Algebra.smul_def] at h₁
       have h₂ : x = (Algebra.trace R E θ ^ 2 - 4 * Algebra.norm R θ) * (s * s) := by

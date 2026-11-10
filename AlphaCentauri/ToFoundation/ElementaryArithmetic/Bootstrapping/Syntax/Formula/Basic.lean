@@ -89,10 +89,10 @@ instance qqAnd_defined : 𝚺ᴬ₀-Function₂ (qqAnd : V → V → V) via qqAn
 instance qqOr_defined : 𝚺ᴬ₀-Function₂ (qqOr : V → V → V) via qqOrDef :=
   .mk fun v ↦ by simp_all [qqOrDef, numeral_eq_natCast, qqOr]
 
-instance qqAll_defined : 𝚺ᴬ₀-Function₁ (qqAll : V → V) via qqAllDef :=
+instance qqForall_defined : 𝚺ᴬ₀-Function₁ (qqAll : V → V) via qqAllDef :=
   .mk fun v ↦ by simp_all [qqAllDef, numeral_eq_natCast, qqAll]
 
-instance qqExs_defined : 𝚺ᴬ₀-Function₁ (qqExs : V → V) via qqExsDef :=
+instance qqExsists_defined : 𝚺ᴬ₀-Function₁ (qqExs : V → V) via qqExsDef :=
   .mk fun v ↦ by simp_all [qqExsDef, numeral_eq_natCast, qqExs]
 
 instance qqRel_definable : 𝚺ᴬ₀-Function₃ (qqRel : V → V → V → V) := qqRel_defined.to_definable
@@ -103,9 +103,9 @@ instance qqAnd_definable : 𝚺ᴬ₀-Function₂ (qqAnd : V → V → V) := qqA
 
 instance qqOr_definable : 𝚺ᴬ₀-Function₂ (qqOr : V → V → V) := qqOr_defined.to_definable
 
-instance qqAll_definable : 𝚺ᴬ₀-Function₁ (qqAll : V → V) := qqAll_defined.to_definable
+instance qqAll_definable : 𝚺ᴬ₀-Function₁ (qqAll : V → V) := qqForall_defined.to_definable
 
-instance qqExs_definable : 𝚺ᴬ₀-Function₁ (qqExs : V → V) := qqExs_defined.to_definable
+instance qqExs_definable : 𝚺ᴬ₀-Function₁ (qqExs : V → V) := qqExsists_defined.to_definable
 
 @[simp] lemma qqRel_inj (k₁ r₁ v₁ k₂ r₂ v₂ : V) :
     ^rel k₁ r₁ v₁ = ^rel k₂ r₂ v₂ ↔ k₁ = k₂ ∧ r₁ = r₂ ∧ v₁ = v₂ := by simp [qqRel]

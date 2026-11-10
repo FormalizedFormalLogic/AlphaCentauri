@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Basic
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Term.Functions
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 
@@ -382,11 +382,6 @@ instance iff.definable : 𝚺ᴬ₁-Function₂ iff (V := V) L := iff.defined.to
 instance iff_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ iff (V := V) L := iff.definable.of_sigmaOne
 
 end
-
-lemma iff_locallyDelta0 : LocallyDelta0Function₂ (iff (V := V) L) :=
-  qqAnd_locallyDelta0.comp₂ (imp_locallyDelta0.comp₂ (LocallyDelta0Function.var 0)
-    (LocallyDelta0Function.var 1)) (imp_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
-    (LocallyDelta0Function.var 0))
 
 end iff
 
@@ -1029,87 +1024,6 @@ variable {m w : V}
 @[simp] lemma substs_ex {p} (hp : IsUFormula L p) :
     subst L w (^∃ p) = ^∃ (subst L (qVec L w) p) := by simp [subst, hp, construction]
 
-lemma isUFormula_subst_induction {P : V → V → V → Prop}
-    (hP : LocallyDelta0 fun w : Fin 3 → V ↦ P (w 0) (w 1) (w 2))
-    (hRel : ∀ w k R v, L.IsRel k R → IsUTermVec L k v →
-        P w (^rel k R v) (^rel k R (termSubstVec L k w v)))
-    (hNRel : ∀ w k R v, L.IsRel k R → IsUTermVec L k v →
-        P w (^nrel k R v) (^nrel k R (termSubstVec L k w v)))
-    (hverum : ∀ w, P w ^⊤ ^⊤)
-    (hfalsum : ∀ w, P w ^⊥ ^⊥)
-    (hand : ∀ w p q, IsUFormula L p → IsUFormula L q →
-      P w p (subst L w p) → P w q (subst L w q) → P w (p ^⋏ q) (subst L w p ^⋏ subst L w q))
-    (hor : ∀ w p q, IsUFormula L p → IsUFormula L q →
-      P w p (subst L w p) → P w q (subst L w q) → P w (p ^⋎ q) (subst L w p ^⋎ subst L w q))
-    (hall : ∀ w p, IsUFormula L p → P (qVec L w) p (subst L (qVec L w) p) →
-        P w (^∀ p) (^∀ (subst L (qVec L w) p)))
-    (hexs : ∀ w p, IsUFormula L p → P (qVec L w) p (subst L (qVec L w) p) →
-        P w (^∃ p) (^∃ (subst L (qVec L w) p))) :
-    ∀ {w p}, IsUFormula L p → P w p (subst L w p) := by
-  suffices ∀ param p, IsUFormula L p → P param p ((construction L).result L param p) by
-    intro w p hp; simpa using! this w p hp
-  intro param p
-  refine (construction L).uformula_result_induction (L := L) (P := fun param p y ↦ P param p y) hP
-    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
-  · intro param k R v hkR hv; simpa using! hRel param k R v hkR hv
-  · intro param k R v hkR hv; simpa using! hNRel param k R v hkR hv
-  · intro param; simpa using! hverum param
-  · intro param; simpa using! hfalsum param
-  · intro param p q hp hq ihp ihq
-    simpa [subst] using!
-      hand param p q hp hq (by simpa [subst] using ihp) (by simpa [subst] using ihq)
-  · intro param p q hp hq ihp ihq
-    simpa [subst] using!
-      hor param p q hp hq (by simpa [subst] using ihp) (by simpa [subst] using ihq)
-  · intro param p hp ihp
-    have := ihp 0 (by simp [(construction L).allSize_eq_one])
-    simpa [hp, construction] using! hall param p hp (by simpa [construction] using! this)
-  · intro param p hp ihp
-    have := ihp 0 (by simp [(construction L).exsSize_eq_one])
-    simpa [hp, construction] using! hexs param p hp (by simpa [construction] using! this)
-
-lemma semiformula_subst_induction {P : V → V → V → V → Prop}
-    (hP : LocallyDelta0 fun w : Fin 4 → V ↦ P (w 0) (w 1) (w 2) (w 3))
-    (hRel : ∀ n w k R v, L.IsRel k R → IsSemitermVec L k n v →
-        P n w (^rel k R v) (^rel k R (termSubstVec L k w v)))
-    (hNRel : ∀ n w k R v, L.IsRel k R → IsSemitermVec L k n v →
-        P n w (^nrel k R v) (^nrel k R (termSubstVec L k w v)))
-    (hverum : ∀ n w, P n w ^⊤ ^⊤)
-    (hfalsum : ∀ n w, P n w ^⊥ ^⊥)
-    (hand : ∀ n w p q, IsSemiformula L n p → IsSemiformula L n q →
-      P n w p (subst L w p) → P n w q (subst L w q) → P n w (p ^⋏ q) (subst L w p ^⋏ subst L w q))
-    (hor : ∀ n w p q, IsSemiformula L n p → IsSemiformula L n q →
-      P n w p (subst L w p) → P n w q (subst L w q) → P n w (p ^⋎ q) (subst L w p ^⋎ subst L w q))
-    (hall : ∀ n w p, IsSemiformula L (n + 1) p →
-      P (n + 1) (qVec L w) p (subst L (qVec L w) p) → P n w (^∀ p) (^∀ (subst L (qVec L w) p)))
-    (hexs : ∀ n w p, IsSemiformula L (n + 1) p →
-      P (n + 1) (qVec L w) p (subst L (qVec L w) p) → P n w (^∃ p) (^∃ (subst L (qVec L w) p))) :
-    ∀ {n p w}, IsSemiformula L n p → P n w p (subst L w p) := by
-  suffices ∀ param n p, IsSemiformula L n p → P n param p ((construction L).result L param p) by
-    intro n p w hp; simpa using! this w n p hp
-  intro param n p
-  refine (construction L).semiformula_result_induction (L := L)
-    (P := fun param n p y ↦ P n param p y)
-    (hP.retraction ![1, 0, 2, 3] |>.of_iff fun v ↦ by simp) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
-  · intro n param k R v hkR hv; simpa using! hRel n param k R v hkR hv
-  · intro n param k R v hkR hv; simpa using! hNRel n param k R v hkR hv
-  · intro n param; simpa using! hverum n param
-  · intro n param; simpa using! hfalsum n param
-  · intro n param p q hp hq ihp ihq
-    simpa [subst] using!
-      hand n param p q hp hq (by simpa [subst] using ihp) (by simpa [subst] using ihq)
-  · intro n param p q hp hq ihp ihq
-    simpa [subst] using!
-      hor n param p q hp hq (by simpa [subst] using ihp) (by simpa [subst] using ihq)
-  · intro n param p hp ihp
-    have := ihp 0 (by simp [(construction L).allSize_eq_one])
-    simpa [hp.isUFormula, construction] using!
-      hall n param p hp (by simpa [construction] using! this)
-  · intro n param p hp ihp
-    have := ihp 0 (by simp [(construction L).exsSize_eq_one])
-    simpa [hp.isUFormula, construction] using!
-      hexs n param p hp (by simpa [construction] using! this)
-
 lemma IsSemitermVec.qVecIter {k m w d : V} (h : IsSemitermVec L k (m + d) (qVecIter L w d)) :
     IsSemitermVec L (k + 1) (m + (d + 1)) (qVecIter L w (d + 1)) := by
   rw [← qVec_qVecIter, ← add_assoc]; exact h.qVec
@@ -1169,9 +1083,6 @@ lemma IsSemiformula.depth_induction {Q : V → V → V → Prop}
     simpa [hp.isUFormula, qVec_qVecIter, add_assoc] using ih hw'.qVecIter
   · intro d n p hp ih hw'
     simpa [hp.isUFormula, qVec_qVecIter, add_assoc] using ih hw'.qVecIter
-
-lemma substs_not_uformula {w x : V} (h : ¬IsUFormula L x) :
-    subst L w x = 0 := (construction L).result_prop_not _ h
 
 lemma substs_neg {n m w p : V} (hp : IsSemiformula L n p) :
     IsSemitermVec L n m w → subst L w (neg L p) = neg L (subst L w p) := by
@@ -1435,9 +1346,6 @@ lemma subst_eq_self {n w p : V} (hp : IsSemiformula L n p) (hw : IsSemitermVec L
     rw [← qVec_qVecIter] at ih
     simp [hp.isUFormula, ih]
 
-lemma subst_eq_self₁ {p : V} (hp : IsSemiformula L 1 p) :
-    subst L (^#0 ∷ 0) p = p := subst_eq_self hp (by simp) (by simp)
-
 end subst
 
 variable (L)
@@ -1539,13 +1447,6 @@ variable {L}
     IsSemiformula L 1 (free1 L p) :=
   IsSemiformula.subst (m := 1) hp.shift
       (SemitermVec.adjoin (SemitermVec.adjoin (IsSemitermVec.empty _) (by simp)) (by simp))
-
-lemma free1_locallyDelta0 : LocallyDelta0Function₁ (free1 (V := V) L) :=
-  subst_locallyDelta0.comp₂
-    (LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.const _)
-      (LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.const _)
-        (LocallyDelta0Function.const 0)))
-    (shift_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
 
 end free1
 
@@ -1660,9 +1561,6 @@ lemma formulaComplexity_locallyDelta0 : LocallyDelta0Function₁ (formulaComplex
     formulaComplexity L (^∃ p) = formulaComplexity L p + 1 := by
   simp [formulaComplexity, hp, construction]
 
-lemma formulaComplexity_not_uformula {x : V} (h : ¬IsUFormula L x) :
-    formulaComplexity L x = 0 := construction.result_prop_not _ h
-
 @[simp] lemma formulaComplexity_neg {p : V} :
     IsUFormula L p → formulaComplexity L (neg L p) = formulaComplexity L p := by
   intro hp
@@ -1766,16 +1664,6 @@ lemma fomulaComplexity_free {p : V} (hp : IsSemiformula L 1 p) :
   rw [fomulaComplexity_substs1 hp.shift this,
     formulaComplexity_shift hp.isUFormula]
 
-lemma fomulaComplexity_free1 {p : V} (hp : IsSemiformula L 2 p) :
-    formulaComplexity L (free1 L p) = formulaComplexity L p := by
-  unfold free1
-  have : IsSemiterm (V := V) L 0 ^&0 := by simp
-  rw [fomulaComplexity_substs (m := 1) (V := V) hp.shift]
-  · rw [formulaComplexity_shift hp.isUFormula]
-  · apply IsSemitermVec.adjoin ?_ (by simp)
-    apply IsSemitermVec.adjoin ?_ (by simp)
-    exact IsSemitermVec.nil _
-
 end complexity
 
 @[simp] lemma lt_max_succ_left (a b : V) : a < max a b + 1 := lt_succ_iff_le.mpr <| by simp
@@ -1865,12 +1753,6 @@ lemma neg_lt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : n
 lemma neg_nlt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^≮ u) = t ^< u := by
   simp only [qqNLT, qqLT]
   rw [neg_nrel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
-
-lemma substs_eq {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
-    subst ℒₒᵣ w (t ^= u) = (termSubst ℒₒᵣ w t) ^= (termSubst ℒₒᵣ w u) := by
-  simp only [qqEQ]
-  rw [substs_rel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
-  simp [termSubstVec_cons₂ ht hu]
 
 end Arithmetic
 

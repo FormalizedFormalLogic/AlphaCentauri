@@ -68,6 +68,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen
+  FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.exists_prime_gt:

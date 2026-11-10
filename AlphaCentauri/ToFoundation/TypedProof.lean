@@ -487,6 +487,32 @@ lemma provable_all_iff_of_free {p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemi
   simpa only [tprovable_iff_provable, Semiformula.val_all, Semiformula.val_iff] using
     TProof.all! h₁
 
+lemma provable_all_iff_all_of_domain {d p q : V} (hd : IsSemiformula L 1 d)
+    (hdp : Provable T (^∀ d)) (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
+    (h : Provable T (iff L (free L p) (free L q))) :
+    Provable T (iff L (^∀ p) (^∀ imp L d q)) := by
+  have h₁ : T.internalize V ⊢ ∀¹ ((⟨p, by simpa using hp⟩ : Semiformula V L 1) 🡘
+      ⟨q, by simpa using hq⟩) := by
+    simpa only [tprovable_iff_provable, Semiformula.val_all, Semiformula.val_iff] using
+      provable_all_iff_of_free hp hq h
+  have h₂ : T.internalize V ⊢ ∀¹ (⟨d, by simpa using hd⟩ : Semiformula V L 1) :=
+    tprovable_iff_provable.mpr hdp
+  simpa only [tprovable_iff_provable, Semiformula.val_iff, Semiformula.val_all,
+    Semiformula.val_imp] using tprovable_all_iff_all_of_domain h₂ _ _ ⨀ h₁
+
+lemma provable_exs_iff_exs_of_domain {d p q : V} (hd : IsSemiformula L 1 d)
+    (hdp : Provable T (^∀ d)) (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
+    (h : Provable T (iff L (free L p) (free L q))) :
+    Provable T (iff L (^∃ p) (^∃ (d ^⋏ q))) := by
+  have h₁ : T.internalize V ⊢ ∀¹ ((⟨p, by simpa using hp⟩ : Semiformula V L 1) 🡘
+      ⟨q, by simpa using hq⟩) := by
+    simpa only [tprovable_iff_provable, Semiformula.val_all, Semiformula.val_iff] using
+      provable_all_iff_of_free hp hq h
+  have h₂ : T.internalize V ⊢ ∀¹ (⟨d, by simpa using hd⟩ : Semiformula V L 1) :=
+    tprovable_iff_provable.mpr hdp
+  simpa only [tprovable_iff_provable, Semiformula.val_iff, Semiformula.val_exs,
+    Semiformula.val_and] using tprovable_exs_iff_exs_of_domain h₂ _ _ ⨀ h₁
+
 end provableIff
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

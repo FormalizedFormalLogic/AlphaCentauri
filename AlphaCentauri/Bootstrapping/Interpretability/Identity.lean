@@ -48,14 +48,16 @@ lemma id_funcT {k : ℕ} (F : L.Func k) : (h.isTable hL).funcT F =
     Semiformula.ext (h.func F)]
   simp [DirectTranslation.id_func_def]
 
+lemma id_tprovable_domT_subst (t : Term V L) :
+    S.internalize V ⊢ (h.isTable hL).domT.subst ![t] := by
+  rw [h.id_domT hL, Semiformula.substs_verum]
+  cl_prover
+
 lemma id_tprovable_varEqualT_func {k : ℕ} (F : L.Func k) (u : Fin k → Term V L)
     (ih : ∀ i, S.internalize V ⊢ ∀¹ (varEqualT (h.isTable hL) (u i) 🡘
       Semiformula.equal (Semiterm.bvar 0) (u i).bShift)) :
     S.internalize V ⊢ ∀¹ (varEqualT (h.isTable hL) (Semiterm.func F u) 🡘
       Semiformula.equal (Semiterm.bvar 0) (Semiterm.func F u).bShift) := by
-  have hd (t : Term V L) : S.internalize V ⊢ (h.isTable hL).domT.subst ![t] := by
-    rw [h.id_domT hL, Semiformula.substs_verum]
-    cl_prover
   have hs (j : ℕ) : Semiformula.shift^[j]
       (Semiformula.equal (Semiterm.fvar 0) (Semiterm.func F Semiterm.bvar) : Semiformula V L k) =
         Semiformula.equal (Semiterm.fvar (j : V)) (Semiterm.func F Semiterm.bvar) := by
@@ -81,8 +83,8 @@ lemma id_tprovable_varEqualT_func {k : ℕ} (F : L.Func k) (u : Fin k → Term V
     have h₃ := tprovable_equal_trans_imp S (Semiterm.fvar (j : V)) (Semiterm.func F w)
       (Semiterm.func F s)
     cl_prover [h₁, h₂, h₃]
-  have h₄ := tprovable_relativizedImp_equal_iff (T := S) (h.isTable hL).domT hd
-    (fun i ↦ (u i).shift) _ hX
+  have h₄ := tprovable_relativizedImp_equal_iff (T := S) (h.isTable hL).domT
+    (h.id_tprovable_domT_subst hL) (fun i ↦ (u i).shift) _ hX
   have h₅ : S.internalize V ⊢ ∀¹ (funcGraph (h.isTable hL).domT
       (fun i ↦ Semiformula.equal (Semiterm.bvar 0) (u i).bShift) ((h.isTable hL).funcT F) 🡘
         Semiformula.equal (Semiterm.bvar 0) (Semiterm.func F u).bShift) := by
@@ -144,9 +146,6 @@ lemma id_tprovable_rel_iff {k : ℕ} (R : L.Rel k) (u : Fin k → Term V L) :
     S.internalize V ⊢ Semiformula.rel R u 🡘 relativizedImp (h.isTable hL).domT
       (fun i ↦ varEqualT (h.isTable hL) (u i))
       (((h.isTable hL).relT R).subst fun i ↦ Semiterm.bvar (i.addCast 0)) := by
-  have hd (t : Term V L) : S.internalize V ⊢ (h.isTable hL).domT.subst ![t] := by
-    rw [h.id_domT hL, Semiformula.substs_verum]
-    cl_prover
   have hX (j : ℕ) (s w : Fin k → Term V L) : S.internalize V ⊢
       Matrix.conj (fun i ↦ Semiformula.equal (s i) (w i)) 🡒
         (Semiformula.shift^[j] (Semiformula.rel R Semiterm.bvar)).subst w 🡒
@@ -173,7 +172,8 @@ lemma id_tprovable_rel_iff {k : ℕ} (R : L.Rel k) (u : Fin k → Term V L) :
   have h₂ : S.internalize V ⊢ Matrix.conj fun i ↦ ∀¹ ((h.isTable hL).domT 🡒
       (varEqualT (h.isTable hL) (u i) 🡘 Semiformula.equal (Semiterm.bvar 0) (u i).bShift)) :=
     tprovable_conj S fun i ↦ tprovable_all_imp_all _ _ ⨀ h.id_tprovable_varEqualT hL (u i)
-  have h₃ := tprovable_relativizedImp_equal_iff (T := S) (h.isTable hL).domT hd u _ hX
+  have h₃ := tprovable_relativizedImp_equal_iff (T := S) (h.isTable hL).domT
+    (h.id_tprovable_domT_subst hL) u _ hX
   rw [h.id_relT hL] at h₁ ⊢
   simp only [Semiformula.substs_rel, Semiterm.substs_vecMap_bvar_id] at h₁ h₃ ⊢
   cl_prover [h₁, h₂, h₃]
@@ -191,9 +191,11 @@ translation. -/
 theorem id_provable_iff_translate {p : V} (hp : IsFormula L p) :
     Provable S (iff L p (translate L L tbl p)) := by
   have hT := h.isTable hL
-  have hd : S.internalize V ⊢ ∀¹ hT.domT := by
-    rw [h.id_domT hL]
-    exact TProof.all! (by simp [Semiformula.free])
+  have hd : Provable S (^∀ tbl.[0]) := by
+    have h₁ : S.internalize V ⊢ ∀¹ hT.domT := by
+      rw [h.id_domT hL]
+      exact TProof.all! (by simp [Semiformula.free])
+    exact tprovable_iff_provable.mp h₁
   apply IsFormula.sigma1_structural_induction (by definability) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · intro k r v hR hv
     exact h.id_provable_iff_translate_rel hL hR hv
@@ -217,27 +219,13 @@ theorem id_provable_iff_translate {p : V} (hp : IsFormula L p) :
     exact provable_iff_or hp (IsSemiformula.translate hT hp) hq (IsSemiformula.translate hT hq)
       ihp ihq
   · intro p hp ih
-    have hq : IsSemiformula L 1 (translate L L tbl p) := IsSemiformula.translate hT hp
     rw [translate_free hT hp] at ih
-    have h₁ := provable_all_iff_of_free hp hq ih
-    have h₂ : S.internalize V ⊢ ∀¹ ((⟨p, by simpa using hp⟩ : Semiformula V L 1) 🡘
-        ⟨_, by simpa using hq⟩) := by
-      simpa only [tprovable_iff_provable, Semiformula.val_all, Semiformula.val_iff] using h₁
-    have h₃ := tprovable_all_iff_all_of_domain hd _ _ ⨀ h₂
     rw [translate_all hp.isUFormula, domainAt_zero hT]
-    simpa only [tprovable_iff_provable, Semiformula.val_iff, Semiformula.val_all,
-      Semiformula.val_imp, IsTable.domT_val, tableDomain] using h₃
+    exact provable_all_iff_all_of_domain hT.domain hd hp (IsSemiformula.translate hT hp) ih
   · intro p hp ih
-    have hq : IsSemiformula L 1 (translate L L tbl p) := IsSemiformula.translate hT hp
     rw [translate_free hT hp] at ih
-    have h₁ := provable_all_iff_of_free hp hq ih
-    have h₂ : S.internalize V ⊢ ∀¹ ((⟨p, by simpa using hp⟩ : Semiformula V L 1) 🡘
-        ⟨_, by simpa using hq⟩) := by
-      simpa only [tprovable_iff_provable, Semiformula.val_all, Semiformula.val_iff] using h₁
-    have h₃ := tprovable_exs_iff_exs_of_domain hd _ _ ⨀ h₂
     rw [translate_exs hp.isUFormula, domainAt_zero hT]
-    simpa only [tprovable_iff_provable, Semiformula.val_iff, Semiformula.val_exs,
-      Semiformula.val_and, IsTable.domT_val, tableDomain] using h₃
+    exact provable_exs_iff_exs_of_domain hT.domain hd hp (IsSemiformula.translate hT hp) ih
 
 /-- Along a table of the identity translation, the translation of a provable formula code is
 provable. -/

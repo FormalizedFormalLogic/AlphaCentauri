@@ -13,7 +13,8 @@ any extension of $\mathbf{IL}$ by axioms proving $\mathsf{M}_0$. One world is ad
 with no successors; its predecessors are the ancestors of the world it is added for along a parent
 map, so the predecessors of every world form a chain. Every world is labelled by a maximal
 consistent set, and the worlds added to remove deficiencies are assuring successors carrying the
-promises of criticality and the boxed formulas required by $\mathsf{M}_0$.
+promises of criticality, the boxed formulas required by $\mathsf{M}_0$, and, for a deficiency of
+`A ▷ B`, a set `ε A` of further promises fixed in advance.
 -/
 
 @[expose] public section

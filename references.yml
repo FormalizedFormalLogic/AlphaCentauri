@@ -306,6 +306,14 @@ Jer21:
   organization: Institute of Mathematics, Czech Academy of Sciences
   url: https://users.math.cas.cz/~jerabek/papers/dsc.pdf
 
+Kat26b:
+  type: Article
+  title: Equivalence of restricted and full division
+  author: Kato, Naoya
+  date: 2026
+  serial-number:
+    arxiv: "2610.24976"
+
 KKS97:
   type: Article
   title: Exponentiation in power series fields
@@ -452,6 +460,14 @@ Poh09:
     type: Anthology
     title: Universitext
 
+Raf10:
+  type: Article
+  title: Diophantine correct open induction
+  author: Raffer, Sidney
+  date: 2010
+  serial-number:
+    arxiv: "1010.3798"
+
 Ros84:
   type: Book
   title: "Subrecursion: Functions and Hierarchies"
@@ -568,6 +584,14 @@ Tow20:
   url: https://www.sas.upenn.edu/~htowsner/GoodsteinsTheorem.pdf
   note: Undated; the PDF is dated 2020
 
+Vis26:
+  type: Article
+  title: From numbers to container strings
+  author: Visser, Albert
+  date: 2026
+  serial-number:
+    arxiv: "2411.15873"
+
 Vis88:
   type: Report
   title: Preliminary notes on interpretability logic
@@ -600,7 +624,6 @@ Vis97:
   date: 1997
   note: Logic Group Preprint Series 174
   organization: Department of Philosophy, Utrecht University
-
 vO99:
   type: Misc
   title: "Introduction to {Peano} Arithmetic: Gödel Incompleteness and Nonstandard Models"

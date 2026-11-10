@@ -54,8 +54,11 @@ public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.InjectiveEnumeration
 public import AlphaCentauri.Model.NonnegativePart
+public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
+public import AlphaCentauri.NumberTheory.DirectSummand
+public import AlphaCentauri.NumberTheory.EuclideanDivision
 public import AlphaCentauri.NumberTheory.FLT3
 public import AlphaCentauri.NumberTheory.FermatCaseOne
 public import AlphaCentauri.NumberTheory.Primes
@@ -73,8 +76,10 @@ public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.FastGrowing
 public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
+public import AlphaCentauri.Reflection.Definability
 public import AlphaCentauri.Reflection.ISigma
 public import AlphaCentauri.Reflection.InductionFromReflection
+public import AlphaCentauri.Reflection.LeivantOno
 public import AlphaCentauri.Reflection.Peano
 public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.StandardProvability
@@ -101,7 +106,9 @@ public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
-public import AlphaCentauri.ToFoundation.DirectTranslation
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Basic
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Seq
 public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
 public import AlphaCentauri.ToFoundation.Exponential
@@ -137,6 +144,7 @@ public import AlphaCentauri.ToFoundation.SubstInversion
 public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.Theory
 public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToMathlib.AddMonoidHomToInt
 public import AlphaCentauri.ToMathlib.BoundedDegreeOpenInduction
 public import AlphaCentauri.ToMathlib.EisensteinInteger
 public import AlphaCentauri.ToMathlib.ElementaryClosure
@@ -144,6 +152,7 @@ public import AlphaCentauri.ToMathlib.FLT3.Descent
 public import AlphaCentauri.ToMathlib.FLT3.Eisenstein
 public import AlphaCentauri.ToMathlib.Goodstein
 public import AlphaCentauri.ToMathlib.HahnSeries
+public import AlphaCentauri.ToMathlib.IntegerPart
 public import AlphaCentauri.ToMathlib.ONote.Computability
 public import AlphaCentauri.ToMathlib.ONote.Epsilon0
 public import AlphaCentauri.ToMathlib.ONote.FastGrowing

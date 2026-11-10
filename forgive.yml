@@ -31,9 +31,6 @@ declaration:
   FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1
-  FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
@@ -50,6 +47,12 @@ declaration:
     forgive:
       # Quoted by Bek99 from Beklemishev 1997 without proof.
       - FFL.FirstOrder.Arithmetic.uniformReflection_of_parameterFreeInduction
+  FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
+  FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
   FFL.FirstOrder.Arithmetic.not_provable_infinitudeOfPrimes_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.not_provable_infinitudeOfPrimes_IOpen
@@ -68,11 +71,29 @@ declaration:
   FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen
+  FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  OpenPredicate.openInduction_iff_integerPart:
+    forgive:
+      - OpenPredicate.openInduction_iff_integerPart
 
   # Declarations that inherit the debt of an unproved statement.
-  FFL.FirstOrder.Arithmetic.exists_prime_gt:
+  FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:
     forgive:
-      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
+      - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
+      - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma1_equiv_uniformReflection_ElementaryArithmetic:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
+      - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.ISigma2_equiv_uniformReflection_ElementaryArithmetic:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
+      - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.provable_univCl_IOpen_iff:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
   HahnSeries.factorialIntegerPartSubring.induction:
     forgive:
       - HahnSeries.isRealClosed_lex

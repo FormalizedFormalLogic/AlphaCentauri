@@ -507,4 +507,116 @@ lemma tprovable_psatF_bex (y a : Term V ℒₒᵣ) {t q : V} (ht : IsUTerm ℒ�
       SemitermVec.q, Matrix.vecHead, Matrix.vecTail] using h₁;
   exact h₃ ⨀ h₂
 
+/-! ### The assignment terms -/
+
+section assignment
+
+/-- The code of the term `(t + u) * (t + u) + u + 1`. -/
+noncomputable def pTermCode (t u : V) : V := (t ^+ u) ^* (t ^+ u) ^+ u ^+ numeral 1
+
+noncomputable def _root_.FFL.FirstOrder.Arithmetic.pTermCodeGraph : 𝚺ᴬ₁.Semisentence 3 :=
+  .mkSigma “y t u. ∃ a, !qqAddGraph a t u ∧ ∃ m, !qqMulGraph m a a ∧ ∃ b, !qqAddGraph b m u ∧
+    ∃ o, !numeralGraph o 1 ∧ !qqAddGraph y b o”
+
+instance pTermCode_defined : 𝚺ᴬ₁-Function₂ (pTermCode : V → V → V) via pTermCodeGraph :=
+  .mk fun v ↦ by simp [pTermCodeGraph, pTermCode]
+
+instance pTermCode_definable : 𝚺ᴬ₁-Function₂ (pTermCode : V → V → V) :=
+  pTermCode_defined.to_definable
+
+@[simp] lemma val_pTerm {n : ℕ} (t u : Semiterm V ℒₒᵣ n) :
+    (pTerm t u).val = pTermCode t.val u.val := by
+  simp [pTerm, pTermCode]
+
+namespace AssignmentCode
+
+noncomputable def blueprint : PR.Blueprint 0 where
+  zero := .mkSigma “y. !numeralGraph y 0”
+  succ := .mkSigma “y ih n. ∃ f, !qqFvarDef f 0 ∧ ∃ s, !(termShiftGraph ℒₒᵣ) s ih ∧
+    !pTermCodeGraph y f s”
+
+noncomputable def construction : PR.Construction V blueprint where
+  zero _ := numeral 0
+  succ _ _ ih := pTermCode (^&0) (termShift ℒₒᵣ ih)
+  zero_defined := .mk fun v ↦ by simp [blueprint]
+  succ_defined := .mk fun v ↦ by simp [blueprint]
+
+end AssignmentCode
+
+/-- The code of the term assigning `^&i` to the bound variable `^#i` for `i < n`. -/
+noncomputable def assignmentCode (n : V) : V := AssignmentCode.construction.result ![] n
+
+@[simp] lemma assignmentCode_zero : assignmentCode (0 : V) = numeral 0 := by
+  simp [assignmentCode, AssignmentCode.construction]
+
+@[simp] lemma assignmentCode_succ (n : V) :
+    assignmentCode (n + 1) = pTermCode (^&0) (termShift ℒₒᵣ (assignmentCode n)) := by
+  simp [assignmentCode, AssignmentCode.construction]
+
+noncomputable def _root_.FFL.FirstOrder.Arithmetic.assignmentCodeGraph : 𝚺ᴬ₁.Semisentence 2 :=
+  AssignmentCode.blueprint.resultDef
+
+instance assignmentCode_defined : 𝚺ᴬ₁-Function₁ (assignmentCode : V → V) via assignmentCodeGraph :=
+  .mk fun v ↦ by
+    simp [AssignmentCode.construction.result_defined_iff, assignmentCodeGraph]; rfl
+
+instance assignmentCode_definable : 𝚺ᴬ₁-Function₁ (assignmentCode : V → V) :=
+  assignmentCode_defined.to_definable
+
+instance assignmentCode_definable' {Γ : Polarity} {m : ℕ} :
+    Γᴬ_[m + 1]-Function₁ (assignmentCode : V → V) := assignmentCode_definable.of_sigmaOne
+
+lemma isSemiterm_assignmentCode (n : V) : IsSemiterm ℒₒᵣ 0 (assignmentCode n) := by
+  induction n using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ n ih =>
+    simpa using (pTerm (Semiterm.fvar 0) (⟨assignmentCode n, ih⟩ : Term V ℒₒᵣ).shift).isSemiterm
+
+/-- The internal term assigning `&i` to the bound variable `#i` for `i < n`. -/
+noncomputable def assignment (n : V) : Term V ℒₒᵣ :=
+  ⟨assignmentCode n, isSemiterm_assignmentCode n⟩
+
+@[simp] lemma val_assignment (n : V) : (assignment n).val = assignmentCode n := rfl
+
+lemma assignment_zero : assignment (0 : V) = 𝕹 0 := by ext; simp [assignment]
+
+lemma assignment_succ (n : V) :
+    assignment (n + 1) = pTerm (Semiterm.fvar 0) (assignment n).shift := by
+  ext; simp [assignment]
+
+lemma val_tvF (y a : Term V ℒₒᵣ) (t : V) :
+    (tvF y a t).val = subst ℒₒᵣ ?[y.val, a.val, numeral t] (⌜tvDef.val⌝ : V) := by
+  simp [tvF, Sentence.quote_eq]
+
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+
+lemma tprovable_tvF_fvar_assignment (n : V) :
+    ∀ i < n, T.internalize V ⊢ tvF (Semiterm.fvar i) (assignment n) (^#i) := by
+  suffices ∀ i < n,
+      Provable T (subst ℒₒᵣ ?[^&i, assignmentCode n, numeral (^#i)] (⌜tvDef.val⌝ : V)) by
+    intro i hi;
+    apply tprovable_iff_provable.mpr;
+    simpa [val_tvF] using this i hi;
+  induction n using ISigma1.sigma1_succ_induction
+  · definability
+  case zero => simp
+  case succ n ih =>
+    intro i hi;
+    rcases zero_or_succ i with rfl | ⟨i, rfl⟩
+    · have h := tprovable_tvF_bvar_zero (T := T) (Semiterm.fvar 0) (assignment n).shift;
+      rw [← assignment_succ] at h;
+      simpa [val_tvF] using tprovable_iff_provable.mp h;
+    · have h₁ : T.internalize V ⊢ tvF (Semiterm.fvar i) (assignment n) (^#i) :=
+        tprovable_iff_provable.mpr <| by simpa [val_tvF] using ih i (by simpa using hi);
+      have h₂ := tprovable_tvF_bvar_succ (T := T) (Semiterm.fvar (i + 1)) (Semiterm.fvar 0)
+        (assignment n).shift i;
+      have h₃ : T.internalize V ⊢ tvF (Semiterm.fvar (i + 1)) (assignment n).shift (^#i) := by
+        simpa using TProof.shift! h₁;
+      have h₄ := h₂ ⨀ h₃;
+      rw [← assignment_succ] at h₄;
+      simpa [val_tvF] using tprovable_iff_provable.mp h₄
+
+end assignment
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

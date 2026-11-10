@@ -7,8 +7,10 @@
 // read glyph by glyph: bold sans-serif letters are the name, bold Greek capitals the class, and
 // the digits and super- and subscripts its attachments. `∪` becomes `+`, `∼` becomes `¬`, and a
 // set of sentences is drawn as its elements. Any other word must be a key of `names`, the last
-// component of its Lean name; a function there receives the word's arguments. A vertex whose name
-// cannot be read this way stops the compilation, unless `labels` gives it a label.
+// component of its Lean name; a function there receives the word's arguments. A word followed by
+// a bracket, such as `𝗥𝗙𝗡[𝚷 2] 𝗘𝗔`, is a key of `names` too, whose function receives the bracket
+// first. A vertex whose name cannot be read this way stops the compilation, unless `labels` gives
+// it a label.
 
 #let superscripts = (
   "⁺": "+", "⁻": "−", "ᶠ": "f",
@@ -65,7 +67,7 @@
 #let parse(tokens, pos) = {
   let operands = ()
   let items = ()
-  while pos < tokens.len() and tokens.at(pos) not in (")", "}", ",") {
+  while pos < tokens.len() and tokens.at(pos) not in (")", "]", "}", ",") {
     let t = tokens.at(pos)
     if t == "∪" {
       operands.push(items)
@@ -74,6 +76,10 @@
     } else if t == "(" {
       let (inner, next) = parse(tokens, pos + 1)
       items.push((kind: "group", operands: inner))
+      pos = next + 1
+    } else if t == "[" {
+      let (inner, next) = parse(tokens, pos + 1)
+      items.push((kind: "bracket", operands: inner))
       pos = next + 1
     } else if t == "{" {
       let elements = ()
@@ -114,6 +120,16 @@
       if rest.len() > 0 { fail("a set is applied to arguments") }
       return first.elements.map(e => draw(e, names, vertex)).join($,$)
     }
+    if first.kind == "bracket" { fail("a bracket follows no word") }
+    if rest.len() > 0 and rest.at(0).kind == "bracket" {
+      let value = names.at(first.text, default: none)
+      if type(value) != function { fail("`" + first.text + "` takes no bracket") }
+      let (bracket, ..arguments) = rest
+      return value(
+        draw(bracket.operands, names, vertex),
+        ..arguments.map(item => draw-items((item,))),
+      )
+    }
     let w = theory-word(first.text)
     if w != none {
       // Further words are the class and the index of a theory written with a space, `𝗜𝚫 2`.
@@ -145,7 +161,7 @@
 
 #let label-of(vertex, labels, names) = {
   if vertex in labels { return labels.at(vertex) }
-  let tokens = vertex.matches(regex("[(){},]|∪|∼|[^\s(){},∪∼]+")).map(m => m.text)
+  let tokens = vertex.matches(regex("[(){}\[\],]|∪|∼|[^\s(){}\[\],∪∼]+")).map(m => m.text)
   let (operands, pos) = parse(tokens, 0)
   if pos != tokens.len() { panic("the zoo cannot parse `" + vertex + "`") }
   $#draw(operands, names, vertex)$

@@ -3,6 +3,7 @@
 #set page(width: auto, height: auto, margin: 24pt)
 
 #let Con(T) = $sans("Con")(#T)$
+#let RFN(Γ, T) = $sans("RFN")_#Γ (#T)$
 
 #figure(
   caption: [
@@ -14,10 +15,12 @@
   #zoo(
     "./arithmetic.json",
     // The functions and sentences occurring in the theories, by the last component of their Lean
-    // names. Theories in Lean's notation, such as `𝗜𝚺₁` or `𝗕𝚺 2`, need no entry.
+    // names or, for a notation taking a bracket, by its symbol. Theories in Lean's notation, such
+    // as `𝗜𝚺₁` or `𝗕𝚺 2`, need no entry.
     names: (
       "Con": T => Con(T),
       "Incon": T => $not#Con(T)$,
+      "𝗥𝗙𝗡": RFN,
       "expAxiom": $sans("Exp")$,
       "LeastNumberScheme": Γ => $Theory(L)#Γ$,
       "BoundedUniversal": n => $U_#n$,

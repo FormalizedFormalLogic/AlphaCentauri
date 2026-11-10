@@ -2,6 +2,7 @@ module  -- shake: keep-all --deprecated_module: ignore
 
 public import AlphaCentauri.Axiomatizability.BSigma
 public import AlphaCentauri.Axiomatizability.Basic
+public import AlphaCentauri.Axiomatizability.IOpen
 public import AlphaCentauri.Axiomatizability.ISigma
 public import AlphaCentauri.Axiomatizability.ISigma0
 public import AlphaCentauri.Axiomatizability.Reflexive
@@ -105,6 +106,8 @@ public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
+public import AlphaCentauri.ToFoundation.OpenFormulaDegree
+public import AlphaCentauri.ToFoundation.OpenPredicate
 public import AlphaCentauri.ToFoundation.PartialTruth
 public import AlphaCentauri.ToFoundation.Pigeonhole
 public import AlphaCentauri.ToFoundation.PrenexCombination
@@ -125,11 +128,13 @@ public import AlphaCentauri.ToFoundation.SubstInversion
 public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.Theory
 public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToMathlib.BoundedDegreeOpenInduction
 public import AlphaCentauri.ToMathlib.EisensteinInteger
 public import AlphaCentauri.ToMathlib.ElementaryClosure
 public import AlphaCentauri.ToMathlib.FLT3.Descent
 public import AlphaCentauri.ToMathlib.FLT3.Eisenstein
 public import AlphaCentauri.ToMathlib.Goodstein
+public import AlphaCentauri.ToMathlib.HahnSeries
 public import AlphaCentauri.ToMathlib.ONote.Computability
 public import AlphaCentauri.ToMathlib.ONote.Epsilon0
 public import AlphaCentauri.ToMathlib.ONote.FastGrowing
@@ -139,5 +144,6 @@ public import AlphaCentauri.ToMathlib.OpenPredicate
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds
 public import AlphaCentauri.ToMathlib.Ordinal.Rank
 public import AlphaCentauri.ToMathlib.Primrec
+public import AlphaCentauri.ToMathlib.RealClosedField
 public import AlphaCentauri.ToMathlib.RingOfDifferences
 public import AlphaCentauri.ToMathlib.Vector

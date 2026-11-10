@@ -10,7 +10,7 @@ public import Mathlib.Computability.Halting
 
 Statements about the first-order theory $\mathsf{IOpen}$ of induction for open formulas: it does not
 prove the infinitude of primes, Euclid's lemma, or Bézout's theorem over the existence of greatest
-common divisors; it is not finitely axiomatizable; and it has a computable nonstandard model.
+common divisors, and it has a computable nonstandard model.
 -/
 
 @[expose] public section
@@ -41,11 +41,6 @@ axiom not_provable_primeDvdMul_IOpen : ¬𝗜𝗢𝗽𝗲𝗻 ⊢ primeDvdMul
 - [Moh11, §2] -/
 axiom not_provable_bezout_IOpen_greatestCommonDivisor :
     ¬insert greatestCommonDivisor 𝗜𝗢𝗽𝗲𝗻 ⊢ bezout
-
-/-- - [Bou91]
-- [Moh11, Corollary E]
-- [Kov24, Theorem 2.2] -/
-axiom IOpen.not_finiteAxiomatizable : ¬FiniteAxiomatizable 𝗜𝗢𝗽𝗲𝗻
 
 /-- $\mathsf{IOpen}$ has a nonstandard model, on the type $\mathbb{N}$ up to a bijection, whose
 addition, multiplication and order are computable.

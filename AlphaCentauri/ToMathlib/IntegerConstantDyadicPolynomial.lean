@@ -385,6 +385,132 @@ lemma eq_one_or_exists_mul_two_eq {e : ℤ} {h : ℕ} (hx : ((x : 𝔻) : ℚ[X]
     rw [mul_right_comm, show (2 : ℚ[X]) = C 2 from (map_ofNat C 2).symm, ← C_mul,
       div_mul_cancel₀ c two_ne_zero]
 
+/-- Every element `x` of the non-negative part has a monomial $u = 2^e X^h$ with
+`u ≤ x + 1 < 2 * u`. -/
+lemma exists_le_add_one_lt_two_mul (x : Nonneg 𝔻) :
+    ∃ (u : Nonneg 𝔻) (e : ℤ) (h : ℕ),
+      ((u : 𝔻) : ℚ[X]) = C (2 ^ e) * X ^ h ∧ u ≤ x + 1 ∧ x + 1 < 2 * u := by
+  set A : ℚ[X] := (((x + 1 : Nonneg 𝔻) : 𝔻) : ℚ[X]) with hA
+  have hA₁ : (1 : 𝔻) ≤ ((x + 1 : Nonneg 𝔻) : 𝔻) := by simpa using x.2
+  rcases Nat.eq_zero_or_pos A.natDegree with hd | hd
+  · obtain ⟨n, hn⟩ := (mem_iff.mp ((x + 1 : Nonneg 𝔻) : 𝔻).2).1
+    have hxn : ((x + 1 : Nonneg 𝔻) : 𝔻) = (n : 𝔻) := by
+      apply Subtype.ext
+      rw [Subring.coe_intCast, ← C_eq_intCast, ← hn, ← hA, ← eq_C_of_natDegree_eq_zero hd]
+    have hn₁ : 1 ≤ n := by exact_mod_cast hxn ▸ hA₁
+    lift n to ℕ using by omega
+    set k := Nat.log 2 n
+    use (2 ^ k : ℕ), k, 0
+    refine ⟨by simp [map_ofNat C 2], ?_, ?_⟩
+    · rw [← Subtype.coe_le_coe, Nonneg.coe_natCast, hxn, Int.cast_natCast, Nat.cast_le]
+      exact Nat.pow_log_le_self 2 (by omega)
+    · rw [show (2 : Nonneg 𝔻) * (2 ^ k : ℕ) = (2 ^ (k + 1) : ℕ) by push_cast; ring,
+        ← Subtype.coe_lt_coe, Nonneg.coe_natCast, hxn, Int.cast_natCast, Nat.cast_lt]
+      exact Nat.lt_pow_succ_log_self one_lt_two n
+  set b := A.leadingCoeff
+  have hb : 0 < b := by
+    have := lt_iff.mp (zero_lt_one.trans_le hA₁)
+    rwa [ZeroMemClass.coe_zero, sub_zero] at this
+  set a := Int.log 2 b
+  have hmem (t : ℤ) : C (2 ^ t) * X ^ A.natDegree ∈ 𝔻 := C_two_zpow_mul_X_pow_mem (Or.inl hd)
+  let m (t : ℤ) : Nonneg 𝔻 := ⟨⟨_, hmem t⟩, nonneg_iff.mpr (by
+    rw [leadingCoeff_C_mul_X_pow]
+    positivity)⟩
+  have hsub {c : ℚ} (hc : c ≠ b) : (C c * X ^ A.natDegree - A).leadingCoeff = c - b := by
+    by_cases hc₀ : c = 0
+    · simp [hc₀, b]
+    rw [leadingCoeff_sub_of_degree_eq, leadingCoeff_C_mul_X_pow]
+    · rw [degree_C_mul_X_pow _ hc₀, degree_eq_natDegree]
+      intro h₀
+      simp [h₀] at hd
+    · rwa [leadingCoeff_C_mul_X_pow]
+  have hlt : x + 1 < m (a + 1) := by
+    change ((x + 1 : Nonneg 𝔻) : 𝔻) < ⟨_, hmem (a + 1)⟩
+    rw [lt_iff]
+    have : b < 2 ^ (a + 1) := by exact_mod_cast Int.lt_zpow_succ_log_self one_lt_two b
+    rw [hsub this.ne', sub_pos]
+    exact this
+  have htwo (t : ℤ) : 2 * m t = m (t + 1) := by
+    apply Subtype.ext
+    apply Subtype.ext
+    simp only [m, Nonneg.coe_mul, Subring.coe_mul, coe_ofNat]
+    rw [← mul_assoc, show (2 : ℚ[X]) = C 2 from (map_ofNat C 2).symm, ← C_mul,
+      zpow_add_one₀ two_ne_zero, mul_comm (2 : ℚ)]
+  by_cases hle : m a ≤ x + 1
+  · use m a, a, A.natDegree
+    refine ⟨rfl, hle, ?_⟩
+    rwa [htwo]
+  · use m (a - 1), a - 1, A.natDegree
+    refine ⟨rfl, ?_, ?_⟩
+    · change (⟨_, hmem (a - 1)⟩ : 𝔻) ≤ ((x + 1 : Nonneg 𝔻) : 𝔻)
+      rw [le_iff]
+      have h₁ : (2 : ℚ) ^ a ≤ b := by exact_mod_cast Int.zpow_log_le_self one_lt_two hb
+      have h₂ : (2 : ℚ) ^ (a - 1) < 2 ^ a := zpow_lt_zpow_right₀ one_lt_two (by omega)
+      have := hsub (h₂.trans_le h₁).ne
+      rw [← neg_sub, leadingCoeff_neg] at this
+      change 0 ≤ (A - C (2 ^ (a - 1)) * X ^ A.natDegree).leadingCoeff
+      linarith
+    · rw [htwo, sub_add_cancel]
+      exact not_le.mp hle
+
+/-- Of two comparable monomials $2^a X^h \le 2^b X^k$ in the non-negative part, the first
+divides the second. -/
+lemma exists_mul_eq_of_le {a b : ℤ} {h k : ℕ} (hx : ((x : 𝔻) : ℚ[X]) = C (2 ^ a) * X ^ h)
+    (hy : ((y : 𝔻) : ℚ[X]) = C (2 ^ b) * X ^ k) (hxy : x ≤ y) : ∃ z, z * x = y := by
+  have hxy : 0 ≤ (C ((2 : ℚ) ^ b) * X ^ k - C (2 ^ a) * X ^ h).leadingCoeff := by
+    rw [← hx, ← hy]
+    exact le_iff.mp hxy
+  have hhk : h ≤ k := by
+    by_contra hkh
+    rw [leadingCoeff_sub_of_degree_lt', leadingCoeff_C_mul_X_pow] at hxy
+    · have : (0 : ℚ) < 2 ^ a := by positivity
+      linarith
+    · rw [degree_C_mul_X_pow _ (by positivity), degree_C_mul_X_pow _ (by positivity)]
+      exact_mod_cast not_le.mp hkh
+  have hz : 0 < k - h ∨ 0 ≤ b - a := by
+    rcases hhk.lt_or_eq with hhk | rfl
+    · exact Or.inl (by omega)
+    · right
+      rw [← sub_mul, ← C_sub, leadingCoeff_C_mul_X_pow, sub_nonneg] at hxy
+      have := (zpow_le_zpow_iff_right₀ one_lt_two).mp hxy
+      omega
+  use ⟨⟨_, C_two_zpow_mul_X_pow_mem hz⟩, nonneg_iff.mpr (by
+    rw [leadingCoeff_C_mul_X_pow]
+    positivity)⟩
+  apply Subtype.ext
+  apply Subtype.ext
+  simp only [Nonneg.coe_mul, Subring.coe_mul, hx, hy]
+  rw [mul_mul_mul_comm, ← C_mul, ← zpow_add₀ two_ne_zero, sub_add_cancel, ← pow_add,
+    Nat.sub_add_cancel hhk]
+
 end Nonneg
+
+/-- The indeterminate `X`. -/
+def X : 𝔻 := ⟨Polynomial.X, by simpa using C_mul_X_pow_mem (one_mem DyadicRational) one_pos⟩
+
+lemma X_nonneg : 0 ≤ IntegerConstantDyadicPolynomial.X := by
+  rw [nonneg_iff]
+  exact leadingCoeff_X (R := ℚ) ▸ zero_le_one
+
+/-- `X` cannot be divided by `3` with remainder. -/
+lemma X_ne_three_mul_add (a r : 𝔻) (hr₀ : 0 ≤ r) (hr : r < 3) :
+    IntegerConstantDyadicPolynomial.X ≠ 3 * a + r := by
+  have hr' : ∃ n : ℕ, r = n := by
+    rcases hr₀.lt_or_eq with h₁ | rfl
+    · have h₁ := OpenPredicate.DiscretelyOrdered.one_le_of_pos r h₁
+      rcases h₁.lt_or_eq with h₂ | rfl
+      · have h₂ := OpenPredicate.DiscretelyOrdered.one_le_of_pos (r - 1) (sub_pos.mpr h₂)
+        rcases (show (2 : 𝔻) ≤ r by linarith).lt_or_eq with h₃ | rfl
+        · have := OpenPredicate.DiscretelyOrdered.one_le_of_pos (r - 2) (sub_pos.mpr h₃)
+          linarith
+        · exact ⟨2, by norm_num⟩
+      · exact ⟨1, by simp⟩
+    · exact ⟨0, by simp⟩
+  obtain ⟨n, rfl⟩ := hr'
+  intro h
+  have h₃ : ((3 : 𝔻) : ℚ[X]) = 3 := map_ofNat (Subring.subtype 𝔻) 3
+  have := congrArg (fun p : 𝔻 ↦ (p : ℚ[X]).coeff 1) h
+  simp [IntegerConstantDyadicPolynomial.X, h₃] at this
+  exact DyadicRational.not_mem_of_three_mul_eq_one this.symm ((mem_iff.mp a.2).2 1)
 
 end IntegerConstantDyadicPolynomial

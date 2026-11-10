@@ -918,8 +918,6 @@ lemma free_subst_bvar_zero {d : Semiformula V L 1} (hd : d.shift = d) :
   simp [Semiformula.free, hd]
 
 omit [𝗘𝗤 L ⪯ S] in
-/-- The step of a quantifier: from the derivability for `free p`, the hypotheses for the fresh
-variables are discharged and the hypothesis for `&0` is put in a disjunction. -/
 lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
     (P : Semiformula V L 1) {M : V} (hM : P.val ≤ M)
     (ih : Derivable S (insert (hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free)).val

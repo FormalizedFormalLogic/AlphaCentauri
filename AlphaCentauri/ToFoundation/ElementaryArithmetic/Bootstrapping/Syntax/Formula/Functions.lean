@@ -1612,6 +1612,157 @@ lemma formulaComplexity_locallyDelta0 : LocallyDelta0Function₁ (formulaComplex
   (construction.result_locallyDelta0 L).comp₂ (LocallyDelta0Function.const 0)
     (LocallyDelta0Function.var 0)
 
+@[simp] lemma formulaComplexity_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+    formulaComplexity L (^rel k R v) = 0 := by simp [formulaComplexity, hR, hv, construction]
+
+@[simp] lemma formulaComplexity_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+    formulaComplexity L (^nrel k R v) = 0 := by simp [formulaComplexity, hR, hv, construction]
+
+@[simp] lemma formulaComplexity_verum :
+    formulaComplexity L (^⊤ : V) = 0 := by simp [formulaComplexity, construction]
+
+@[simp] lemma formulaComplexity_falsum :
+    formulaComplexity L (^⊥ : V) = 0 := by simp [formulaComplexity, construction]
+
+@[simp] lemma formulaComplexity_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+    formulaComplexity L (p ^⋏ q) = max (formulaComplexity L p) (formulaComplexity L q) + 1 := by
+  simp [formulaComplexity, hp, hq, construction]
+
+@[simp] lemma formulaComplexity_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+    formulaComplexity L (p ^⋎ q) = max (formulaComplexity L p) (formulaComplexity L q) + 1 := by
+  simp [formulaComplexity, hp, hq, construction]
+
+@[simp] lemma formulaComplexity_all {p : V} (hp : IsUFormula L p) :
+    formulaComplexity L (^∀ p) = formulaComplexity L p + 1 := by
+  simp [formulaComplexity, hp, construction]
+
+@[simp] lemma formulaComplexity_ex {p : V} (hp : IsUFormula L p) :
+    formulaComplexity L (^∃ p) = formulaComplexity L p + 1 := by
+  simp [formulaComplexity, hp, construction]
+
+lemma formulaComplexity_not_uformula {x : V} (h : ¬IsUFormula L x) :
+    formulaComplexity L x = 0 := construction.result_prop_not _ h
+
+@[simp] lemma formulaComplexity_neg {p : V} :
+    IsUFormula L p → formulaComplexity L (neg L p) = formulaComplexity L p := by
+  intro hp
+  refine IsUFormula.induction
+    (P := fun p ↦ formulaComplexity L (neg L p) = formulaComplexity L p) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    p hp
+  · exact LocallyDelta0.eq
+      (formulaComplexity_locallyDelta0.comp₁
+        (neg_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1))))
+      (formulaComplexity_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p hp ihp; simp [hp, ihp]
+  · intro p hp ihp; simp [hp, ihp]
+
+@[simp] lemma formulaComplexity_shift {p : V} :
+    IsUFormula L p → formulaComplexity L (shift L p) = formulaComplexity L p := by
+  intro hp
+  refine IsUFormula.induction
+    (P := fun p ↦ formulaComplexity L (shift L p) = formulaComplexity L p) ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    ?_ ?_ p hp
+  · exact LocallyDelta0.eq
+      (formulaComplexity_locallyDelta0.comp₁
+        (shift_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1))))
+      (formulaComplexity_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq
+    simp [hp, hq, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p hp ihp; simp [hp, ihp]
+  · intro p hp ihp; simp [hp, ihp]
+
+lemma fomulaComplexity_substs {n p : V} (hp : IsSemiformula L n p) {m w : V} :
+    IsSemitermVec L n m w → formulaComplexity L (subst L w p) = formulaComplexity L p := by
+  intro hw
+  suffices H : ∀ d ≤ n, IsSemitermVec L n (m + d) (qVecIter L w d) →
+      formulaComplexity L (subst L (qVecIter L w d) p) = formulaComplexity L p by
+    simpa using H 0 zero_le (by simpa using hw)
+  have v3 : ∀ i : Fin 3, LocallyDelta0Function fun u : Fin 3 → V ↦ u i :=
+    LocallyDelta0Function.var
+  have hwd : LocallyDelta0Function fun u : Fin 3 → V ↦ qVecIter L w (u 0) :=
+    qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (v3 0)
+  have hmd : LocallyDelta0Function fun u : Fin 3 → V ↦ m + u 0 :=
+    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (v3 0)
+  refine IsSemiformula.depth_induction
+    (Q := fun d n p ↦ IsSemitermVec L n (m + d) (qVecIter L w d) →
+      formulaComplexity L (subst L (qVecIter L w d) p) = formulaComplexity L p)
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · exact (isSemitermVec_locallyDelta0.comp₃ (v3 1) hmd hwd).imp <| LocallyDelta0.eq
+      (formulaComplexity_locallyDelta0.comp₁ (subst_locallyDelta0.comp₂ hwd (v3 2)))
+      (formulaComplexity_locallyDelta0.comp₁ (v3 2))
+  · intro d n k R v hR hv hw'
+    rw [formulaComplexity_rel hR hv.isUTerm, substs_rel hR hv.isUTerm,
+        formulaComplexity_rel hR (hw'.termSubstVec hv).isUTerm]
+  · intro d n k R v hR hv hw'
+    rw [formulaComplexity_nrel hR hv.isUTerm, substs_nrel hR hv.isUTerm,
+        formulaComplexity_nrel hR (hw'.termSubstVec hv).isUTerm]
+  · intro d n hw'
+    rw [substs_verum]
+  · intro d n hw'
+    rw [substs_falsum]
+  · intro d n p q hp hq ihp ihq hw'
+    rw [substs_and hp.isUFormula hq.isUFormula,
+      formulaComplexity_and (hp.subst hw').isUFormula (hq.subst hw').isUFormula,
+      ihp hw', ihq hw',
+      formulaComplexity_and hp.isUFormula hq.isUFormula]
+  · intro d n p q hp hq ihp ihq hw'
+    rw [substs_or hp.isUFormula hq.isUFormula,
+      formulaComplexity_or (hp.subst hw').isUFormula (hq.subst hw').isUFormula,
+      ihp hw', ihq hw',
+      formulaComplexity_or hp.isUFormula hq.isUFormula]
+  · intro d n p hp ih hw'
+    have ih := ih hw'.qVecIter
+    rw [← qVec_qVecIter] at ih
+    rw [substs_all hp.isUFormula,
+     formulaComplexity_all (hp.subst hw'.qVec).isUFormula,
+     ih,
+     formulaComplexity_all hp.isUFormula]
+  · intro d n p hp ih hw'
+    have ih := ih hw'.qVecIter
+    rw [← qVec_qVecIter] at ih
+    rw [substs_ex hp.isUFormula,
+     formulaComplexity_ex (hp.subst hw'.qVec).isUFormula,
+     ih,
+     formulaComplexity_ex hp.isUFormula]
+
+lemma fomulaComplexity_substs1 {p : V} (hp : IsSemiformula L 1 p) {m t : V}
+    (ht : IsSemiterm L m t) :
+    formulaComplexity L (substs1 L t p) = formulaComplexity L p := by
+  unfold substs1
+  rw [fomulaComplexity_substs hp (IsSemitermVec.singleton.mpr ht)]
+
+lemma fomulaComplexity_free {p : V} (hp : IsSemiformula L 1 p) :
+    formulaComplexity L (free L p) = formulaComplexity L p := by
+  unfold free
+  have : IsSemiterm (V := V) L 0 ^&0 := by simp
+  rw [fomulaComplexity_substs1 hp.shift this,
+    formulaComplexity_shift hp.isUFormula]
+
+lemma fomulaComplexity_free1 {p : V} (hp : IsSemiformula L 2 p) :
+    formulaComplexity L (free1 L p) = formulaComplexity L p := by
+  unfold free1
+  have : IsSemiterm (V := V) L 0 ^&0 := by simp
+  rw [fomulaComplexity_substs (m := 1) (V := V) hp.shift]
+  · rw [formulaComplexity_shift hp.isUFormula]
+  · apply IsSemitermVec.adjoin ?_ (by simp)
+    apply IsSemitermVec.adjoin ?_ (by simp)
+    exact IsSemitermVec.nil _
+
 end complexity
+
+@[simp] lemma lt_max_succ_left (a b : V) : a < max a b + 1 := lt_succ_iff_le.mpr <| by simp
+
+@[simp] lemma lt_max_succ_right (a b : V) : b < max a b + 1 := lt_succ_iff_le.mpr <| by simp
 
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

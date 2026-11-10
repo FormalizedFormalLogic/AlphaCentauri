@@ -1,9 +1,9 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Proof.UniversalClosure
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 public import AlphaCentauri.ToFoundation.SubstInversion
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
-public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
+public import AlphaCentauri.Bootstrapping.Proof.Soundness
 public import AlphaCentauri.ToFoundation.Syntax
 public import Foundation.FirstOrder.Incompleteness.Definability
 
@@ -143,18 +143,6 @@ lemma IsInductionMatrix.shift_prenexInductionMatrix (h : IsInductionMatrix n m Z
     (shift_prenexInductionAtom h.1 h.2.1 isSemiterm_bvar_zero (termShift_bvar 0))
     (shift_prenexInductionAtom h.1 h.2.1 isSemiterm_succ_bvar_zero termShift_succ_bvar_zero)
     (shift_prenexInductionAtom h.1 h.2.1 isSemiterm_bvar_one (termShift_bvar 1))
-
-lemma IsInductionMatrix.isFormula_prenexInductionAxiom (h : IsInductionMatrix n m Z) :
-    IsFormula ℒₒᵣ (prenexInductionAxiom m Z) := by
-  apply IsSemiformula.qqAlls
-  rw [zero_add, IsSemiformula.all, IsSemiformula.exs, add_assoc, one_add_one_eq_two]
-  exact h.isSemiformula_prenexInductionMatrix
-
-lemma IsInductionMatrix.shift_prenexInductionAxiom (h : IsInductionMatrix n m Z) :
-    shift ℒₒᵣ (prenexInductionAxiom m Z) = prenexInductionAxiom m Z := by
-  have hB := h.isSemiformula_prenexInductionMatrix.isUFormula
-  rw [prenexInductionAxiom, shift_qqAlls (by simpa using hB), shift_all (by simpa using hB),
-    shift_exs hB, h.shift_prenexInductionMatrix]
 
 end prenexInductionAxiom
 

@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.Interpretable
-public import AlphaCentauri.Bootstrapping.Proof.CutFree
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 public import AlphaCentauri.ToFoundation.SententialAxioms
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 

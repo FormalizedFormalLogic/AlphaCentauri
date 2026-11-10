@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Interpretability.Henkin
-public import AlphaCentauri.Bootstrapping.Proof.CutFree
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 public import AlphaCentauri.ToFoundation.ProvabilityAbstraction
 public import Foundation.FirstOrder.Incompleteness.Second
 

@@ -4,7 +4,7 @@ public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
 public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
 public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
 public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
-public import AlphaCentauri.Bootstrapping.Proof.CutFree
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 public import AlphaCentauri.ToFoundation.Syntax
 public import AlphaCentauri.ToFoundation.TypedProof
 public import Foundation.FirstOrder.Incompleteness.Consistency

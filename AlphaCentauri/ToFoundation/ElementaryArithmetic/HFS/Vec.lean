@@ -1435,4 +1435,143 @@ lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i]
 
 end vecToSet
 
+/-! ### Mapping a function over a list -/
+
+section listMap
+
+/-- A list of length `l` whose elements are at most `B` lies below
+`Exp.exp (Exp.exp (l + l + B + 3))`. -/
+lemma le_exp_exp_of_nth_le {B : V} :
+    ∀ w : V, (∀ i < len w, w.[i] ≤ B) → w ≤ Exp.exp (Exp.exp (len w + len w + B + 3)) := by
+  have hF : LocallyDelta0Function fun u : Fin 1 → V ↦
+      Exp.exp (Exp.exp (len (u 0) + len (u 0) + B + 3)) :=
+    LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
+      LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.add.comp₂
+        (LocallyDelta0Function.add.comp₂ (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
+          (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 0)))
+        (LocallyDelta0Function.const B)) (LocallyDelta0Function.const 3)
+  have hentry : LocallyDelta0 fun u : Fin 2 → V ↦ u 0 < len (u 1) → (u 1).[u 0] ≤ B :=
+    (LocallyDelta0.lt (LocallyDelta0Function.var 0)
+      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 1))).imp
+      (LocallyDelta0.le (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+        (LocallyDelta0Function.var 0)) (LocallyDelta0Function.const B))
+  have hP : LocallyDelta0Pred fun w : V ↦
+      (∀ i < len w, w.[i] ≤ B) → w ≤ Exp.exp (Exp.exp (len w + len w + B + 3)) := by
+    have hall := LocallyDelta0.ball_le_function (len_locallyDelta0.comp₁
+      (LocallyDelta0Function.var (V := V) (0 : Fin 1))) hentry
+    exact (hall.imp (LocallyDelta0.le (LocallyDelta0Function.var 0) hF)).of_iff fun u ↦ by
+      constructor
+      · intro h hlt; exact h fun i hi ↦ hlt i hi.le hi
+      · intro h hlt; exact h fun i _ hi ↦ hlt i hi
+  apply adjoin_induction hP
+  · intro _; simp
+  · intro x w ih h
+    have hx : x ≤ B := by simpa using h 0 (by simp)
+    have hw := ih fun i hi ↦ by simpa using h (i + 1) (by simpa using hi)
+    have e : len (x ∷ w) + len (x ∷ w) + B + 3 = (len w + len w + B + 3) + 2 := by
+      simp only [len_adjoin]; grind
+    rw [e]
+    exact adjoin_le_exp_exp (le_trans (by norm_num) le_add_self)
+      (le_exp_exp (le_trans hx (le_trans le_add_self le_self_add))) hw
+
+variable {k : ℕ} {g : (Fin k → V) → V → V}
+
+open Classical in
+/-- The list of the values of `g p` at the elements of the list `v`. -/
+noncomputable def listMap (g : (Fin k → V) → V → V) (p : Fin k → V) (v : V) : V :=
+  if h : ∃! w : V, len w = len v ∧ ∀ i < len v, nth w i = g p (nth v i) then Classical.choose! h
+  else 0
+
+variable (hg : LocallyDelta0Function fun w : Fin (k + 1) → V ↦ g (w ·.succ) (w 0))
+include hg
+
+lemma listMap_existsUnique (p : Fin k → V) (v : V) :
+    ∃! w : V, len w = len v ∧ ∀ i < len v, w.[i] = g p v.[i] := by
+  obtain ⟨Y, hY⟩ := hg.bounded (v + ∑ j, p j)
+  have hR : LocallyDelta0Rel fun i y ↦ y = g p v.[i] := by
+    have := LocallyDelta0.eq (LocallyDelta0Function.var (V := V) (1 : Fin 2))
+      (hg.comp_cons (nth_locallyDelta0.comp₂ (LocallyDelta0Function.const v)
+        (LocallyDelta0Function.var 0)) fun j ↦ LocallyDelta0Function.const (p j))
+    simpa using this
+  obtain ⟨w, hw, hwv⟩ := sigmaZero_skolem_vec hR (l := len v) (B := Y + 1) fun i hi ↦ by
+    use g p v.[i]
+    constructor
+    · apply lt_succ_iff_le.mpr
+      have := hY (v.[i] :> p) fun j ↦ by
+        cases j using Fin.cases with
+        | zero => exact le_trans (nth_le v i) le_self_add
+          | succ j =>
+          change p j ≤ v + ∑ j, p j
+          exact le_trans (Finset.single_le_sum (fun j _ ↦ by simp) (Finset.mem_univ j))
+            le_add_self
+      simpa using this
+    · rfl
+  apply ExistsUnique.intro w ⟨hw, hwv⟩
+  rintro w' ⟨hw', hw'v⟩
+  apply nth_ext (by rw [hw, hw'])
+  intro i hi
+  rw [hw'v i (by simpa [hw'] using hi), hwv i (by simpa [hw'] using hi)]
+
+lemma len_listMap (p : Fin k → V) (v : V) : len (listMap g p v) = len v := by
+  have h := listMap_existsUnique hg p v
+  simp only [listMap, h, ↓reduceDIte]
+  exact (Classical.choose!_spec h).1
+
+lemma nth_listMap (p : Fin k → V) (v : V) {i : V} (hi : i < len v) :
+    (listMap g p v).[i] = g p v.[i] := by
+  have h := listMap_existsUnique hg p v
+  simp only [listMap, h, ↓reduceDIte]
+  exact (Classical.choose!_spec h).2 i hi
+
+lemma listMap_eq_iff (p : Fin k → V) (v w : V) :
+    w = listMap g p v ↔ len w = len v ∧ ∀ i < len v, w.[i] = g p v.[i] := by
+  constructor
+  · rintro rfl; exact ⟨len_listMap hg p v, fun i hi ↦ nth_listMap hg p v hi⟩
+  · rintro ⟨hw, hwv⟩
+    apply nth_ext (by rw [hw, len_listMap hg])
+    intro i hi
+    rw [hwv i (by simpa [hw] using hi), nth_listMap hg p v (by simpa [hw] using hi)]
+
+lemma listMap_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin (k + 1) → V ↦ listMap g (w ·.succ) (w 0) where
+  graph := by
+    have hentry : LocallyDelta0 fun u : Fin (k + 3) → V ↦
+        u 0 < len (u 2) → (u 1).[u 0] = g (fun j ↦ u j.succ.succ.succ) (u 2).[u 0] :=
+      (LocallyDelta0.lt (LocallyDelta0Function.var 0)
+        (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 2))).imp
+        (LocallyDelta0.eq (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+          (LocallyDelta0Function.var 0))
+          (hg.comp_cons (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 2)
+            (LocallyDelta0Function.var 0)) fun j ↦ LocallyDelta0Function.var j.succ.succ.succ))
+    have hall := LocallyDelta0.ball_le_function
+      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (V := V) (1 : Fin (k + 2)))) hentry
+    have hlen := LocallyDelta0.eq (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
+      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (V := V) (1 : Fin (k + 2))))
+    exact (hlen.and hall).of_iff fun w ↦ by
+      rw [listMap_eq_iff hg]
+      apply and_congr Iff.rfl
+      constructor
+      · intro h i _ hi; exact h i hi
+      · intro h i hi; exact h i hi.le hi
+  bounded X := by
+    obtain ⟨Y, hY⟩ := hg.bounded X
+    use Exp.exp (Exp.exp (X + X + Y + 3))
+    intro w hw
+    have hl : len (listMap g (w ·.succ) (w 0)) ≤ X := by
+      rw [len_listMap hg]; exact le_trans (len_le _) (hw 0)
+    have hentries : ∀ i < len (listMap g (w ·.succ) (w 0)),
+        (listMap g (w ·.succ) (w 0)).[i] ≤ Y := by
+      intro i hi
+      rw [len_listMap hg] at hi
+      rw [nth_listMap hg _ _ hi]
+      have := hY ((w 0).[i] :> fun j ↦ w j.succ) fun j ↦ by
+        cases j using Fin.cases with
+        | zero => exact le_trans (nth_le _ _) (hw 0)
+        | succ j => exact hw j.succ
+      simpa using this
+    exact le_trans (le_exp_exp_of_nth_le _ hentries)
+      (exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr)))
+
+end listMap
+
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic

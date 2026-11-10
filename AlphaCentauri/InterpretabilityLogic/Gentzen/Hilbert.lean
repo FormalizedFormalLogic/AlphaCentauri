@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.Extension
 
 /-!
 # Soundness of the sequent calculus for $\mathbf{IL}$ with respect to the Hilbert system
@@ -18,55 +18,37 @@ open Entailment Formula IL
 
 variable {α : Type*}
 
-namespace Logic.ofAxioms
+namespace IL.Gentzen
+
+open Logic Logic.ofAxioms
 
 variable {𝔸 : Set (Formula α)} {A B C D X Y : Formula α}
 
-lemma axiom4 : ofAxioms 𝔸 ⊢ □A 🡒 □□A := by
+private lemma axiom4 : ofAxioms 𝔸 ⊢ □A 🡒 □□A := by
   have h₁ : ofAxioms 𝔸 ⊢ □(□A ⋏ A) 🡒 □A := box_mono (by cl_prover);
   have h₂ : ofAxioms 𝔸 ⊢ □(□A ⋏ A) 🡒 □□A := box_mono (by cl_prover);
   have h₃ : ofAxioms 𝔸 ⊢ A 🡒 □(□A ⋏ A) 🡒 □A ⋏ A := by cl_prover [h₁];
   have h₄ : ofAxioms 𝔸 ⊢ □(□(□A ⋏ A) 🡒 □A ⋏ A) 🡒 □(□A ⋏ A) := axiomL;
   cl_prover [box_mono h₃, h₂, h₄];
 
-lemma box_and : ofAxioms 𝔸 ⊢ □A ⋏ □B 🡒 □(A ⋏ B) := by
+private lemma box_and : ofAxioms 𝔸 ⊢ □A ⋏ □B 🡒 □(A ⋏ B) := by
   have h₁ : ofAxioms 𝔸 ⊢ □A 🡒 □(B 🡒 A ⋏ B) := box_mono and₃;
   have h₂ : ofAxioms 𝔸 ⊢ □(B 🡒 A ⋏ B) 🡒 □B 🡒 □(A ⋏ B) := axiomK;
   cl_prover [h₁, h₂];
 
-lemma rhd_self_conj : ofAxioms 𝔸 ⊢ D ▷ (D ⋏ □(∼D)) := by
-  have h₁ : ofAxioms 𝔸 ⊢ □(□(∼D) 🡒 ∼D) 🡒 □(∼D) := axiomL;
-  have h₂ : ofAxioms 𝔸 ⊢ □(∼(D ⋏ □(∼D))) 🡒 □(□(∼D) 🡒 ∼D) := box_mono (by cl_prover);
-  have h₃ : ofAxioms 𝔸 ⊢ D 🡒 (D ⋏ □(∼D)) ⋎ ∼□(∼(D ⋏ □(∼D))) := by cl_prover [h₁, h₂];
-  have h₄ : ofAxioms 𝔸 ⊢ D ▷ ((D ⋏ □(∼D)) ⋎ ◇(D ⋏ □(∼D))) := axiomJ1 ⨀ nec h₃;
-  have h₅ : ofAxioms 𝔸 ⊢ (D ⋏ □(∼D)) ▷ (D ⋏ □(∼D)) := axiomJ1 ⨀ nec (C_id (𝓢 := ofAxioms 𝔸));
-  have h₆ : ofAxioms 𝔸 ⊢ ◇(D ⋏ □(∼D)) ▷ (D ⋏ □(∼D)) := axiomJ5;
-  have h₇ : ofAxioms 𝔸 ⊢ (D ⋏ □(∼D)) ▷ (D ⋏ □(∼D)) ⋏ ◇(D ⋏ □(∼D)) ▷ (D ⋏ □(∼D)) 🡒
-    ((D ⋏ □(∼D)) ⋎ ◇(D ⋏ □(∼D))) ▷ (D ⋏ □(∼D)) := axiomJ3;
-  have h₈ : ofAxioms 𝔸 ⊢ D ▷ ((D ⋏ □(∼D)) ⋎ ◇(D ⋏ □(∼D))) ⋏
-    ((D ⋏ □(∼D)) ⋎ ◇(D ⋏ □(∼D))) ▷ (D ⋏ □(∼D)) 🡒 D ▷ (D ⋏ □(∼D)) := axiomJ2;
-  cl_prover [h₄, h₅, h₆, h₇, h₈];
-
-lemma rhd_of_imp (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h
-
-lemma rhd_trans_left (h : ofAxioms 𝔸 ⊢ A ▷ B) : ofAxioms 𝔸 ⊢ B ▷ C 🡒 A ▷ C := by
+private lemma rhd_trans_left (h : ofAxioms 𝔸 ⊢ A ▷ B) : ofAxioms 𝔸 ⊢ B ▷ C 🡒 A ▷ C := by
   have : ofAxioms 𝔸 ⊢ A ▷ B ⋏ B ▷ C 🡒 A ▷ C := axiomJ2;
   cl_prover [h, this];
 
-lemma rhd_of_cases {X₁ X₂ X₃ : Formula α} (h : ofAxioms 𝔸 ⊢ X 🡒 (X₁ ⋎ X₂) ⋎ X₃) :
+private lemma rhd_of_cases {X₁ X₂ X₃ : Formula α} (h : ofAxioms 𝔸 ⊢ X 🡒 (X₁ ⋎ X₂) ⋎ X₃) :
     ofAxioms 𝔸 ⊢ X₁ ▷ Y 🡒 X₂ ▷ Y 🡒 X₃ ▷ Y 🡒 X ▷ Y := by
   have h₁ : ofAxioms 𝔸 ⊢ X₁ ▷ Y ⋏ X₂ ▷ Y 🡒 (X₁ ⋎ X₂) ▷ Y := axiomJ3;
   have h₂ : ofAxioms 𝔸 ⊢ (X₁ ⋎ X₂) ▷ Y ⋏ X₃ ▷ Y 🡒 ((X₁ ⋎ X₂) ⋎ X₃) ▷ Y := axiomJ3;
   cl_prover [rhd_anti_left (C := Y) h, h₁, h₂];
 
-lemma box_neg_of_rhd_bot : ofAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 □(∼A) := by
-  have h₁ : ofAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 ∼□(∼A) 🡒 ∼□(⊥ 🡒 ⊥) := axiomJ4;
-  have h₂ : ofAxioms 𝔸 ⊢ □(⊥ 🡒 ⊥) := nec (C_id (𝓢 := ofAxioms 𝔸));
-  cl_prover [h₁, h₂];
-
 variable [DecidableEq α] {Γ N : FormulaFinset α}
 
-lemma box_conj : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 □Γ.conj := by
+private lemma box_conj : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 □Γ.conj := by
   induction Γ using Finset.induction_on with
   | empty =>
     have : ofAxioms 𝔸 ⊢ (∅ : FormulaFinset α).conj := by simp [Finset.conj];
@@ -80,7 +62,7 @@ lemma box_conj : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 □Γ.conj := by
     rw [FormulaFinset.box, Finset.image_insert];
     cl_prover [ih, h₁, h₂, h₃];
 
-lemma box_conj_box : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 □Γ.box.conj := by
+private lemma box_conj_box : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 □Γ.box.conj := by
   have h₁ : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 Γ.box.box.conj := by
     apply right_Fconj_intro;
     intro B hB;
@@ -90,7 +72,7 @@ lemma box_conj_box : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 □Γ.box.conj := by
   have h₂ : ofAxioms 𝔸 ⊢ Γ.box.box.conj 🡒 □Γ.box.conj := box_conj;
   cl_prover [h₁, h₂];
 
-lemma rhd_of_box_imp (N : FormulaFinset α) (X Y : Formula α) :
+private lemma rhd_of_box_imp (N : FormulaFinset α) (X Y : Formula α) :
     ofAxioms 𝔸 ⊢
       (N.image (· ▷ Y)).conj 🡒 □(X ⋏ (FormulaFinset.boxNeg N).conj 🡒 N.disj) 🡒 X ▷ Y := by
   induction N using Finset.induction_on generalizing X with
@@ -117,9 +99,9 @@ lemma rhd_of_box_imp (N : FormulaFinset α) (X Y : Formula α) :
       have g₂ : ofAxioms 𝔸 ⊢ (X ⋏ □(∼a) ⋏ (∼a)) ⋏ (FormulaFinset.boxNeg N).conj 🡒
           X ⋏ (FormulaFinset.boxNeg (insert a N)).conj ⋏ ∼a := by cl_prover [h₂];
       exact box_mono (by cl_prover [g₁, g₂]);
-    have h₅ : ofAxioms 𝔸 ⊢ (X ⋏ a) ▷ a := rhd_of_imp (by cl_prover);
+    have h₅ : ofAxioms 𝔸 ⊢ (X ⋏ a) ▷ a := rhd_of_provable (by cl_prover);
     have h₆ : ofAxioms 𝔸 ⊢ (X ⋏ ∼□(∼a)) ▷ a :=
-      (rhd_trans_left (rhd_of_imp (B := ∼□(∼a)) (by cl_prover)) ⨀ axiomJ5);
+      (rhd_trans_left (rhd_of_provable (B := ∼□(∼a)) (by cl_prover)) ⨀ axiomJ5);
     have h₇ : ofAxioms 𝔸 ⊢ X 🡒 ((X ⋏ a) ⋎ (X ⋏ ∼□(∼a))) ⋎ (X ⋏ □(∼a) ⋏ (∼a)) := by
       cl_prover;
     have k₁ : ofAxioms 𝔸 ⊢ ((insert a N).image (· ▷ Y)).conj 🡒 (X ⋏ a) ▷ Y := by
@@ -132,24 +114,26 @@ lemma rhd_of_box_imp (N : FormulaFinset α) (X Y : Formula α) :
       cl_prover [h₁, h₄, ih (X ⋏ □(∼a) ⋏ (∼a))];
     cl_prover [k₁, k₂, k₃, rhd_of_cases (Y := Y) h₇];
 
-lemma box_conj_self : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 □(Γ.conj ⋏ Γ.box.conj) := by
+private lemma box_conj_self : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 □(Γ.conj ⋏ Γ.box.conj) := by
   have h : ofAxioms 𝔸 ⊢ □Γ.conj ⋏ □Γ.box.conj 🡒 □(Γ.conj ⋏ Γ.box.conj) := box_and;
   cl_prover [h, box_conj (𝔸 := 𝔸) (Γ := Γ), box_conj_box (𝔸 := 𝔸) (Γ := Γ)];
 
-lemma boxNeg_eq_box : FormulaFinset.boxNeg N = (FormulaFinset.box (N.image Formula.neg)) := by
+private lemma boxNeg_eq_box :
+    FormulaFinset.boxNeg N = (FormulaFinset.box (N.image Formula.neg)) := by
   rw [FormulaFinset.boxNeg, FormulaFinset.box, Finset.image_image];
   rfl;
 
-lemma conj_boxNeg_imp_box : ofAxioms 𝔸 ⊢ (FormulaFinset.boxNeg N).conj 🡒 □N.boxNeg.conj := by
+private lemma conj_boxNeg_imp_box :
+    ofAxioms 𝔸 ⊢ (FormulaFinset.boxNeg N).conj 🡒 □N.boxNeg.conj := by
   rw [boxNeg_eq_box];
   exact box_conj_box;
 
-lemma conj_boxNeg_imp_box_conj_neg :
+private lemma conj_boxNeg_imp_box_conj_neg :
     ofAxioms 𝔸 ⊢ (FormulaFinset.boxNeg N).conj 🡒 □(N.image Formula.neg).conj := by
   rw [boxNeg_eq_box];
   exact box_conj;
 
-lemma conj_neg_imp_neg_disj : ofAxioms 𝔸 ⊢ (N.image Formula.neg).conj 🡒 ∼N.disj := by
+private lemma conj_neg_imp_neg_disj : ofAxioms 𝔸 ⊢ (N.image Formula.neg).conj 🡒 ∼N.disj := by
   have : ofAxioms 𝔸 ⊢ N.disj 🡒 ∼(N.image Formula.neg).conj := by
     apply left_Fdisj_intro;
     intro n hn;
@@ -158,7 +142,7 @@ lemma conj_neg_imp_neg_disj : ofAxioms 𝔸 ⊢ (N.image Formula.neg).conj 🡒 
     cl_prover [this];
   cl_prover [this];
 
-lemma conj_witness_ant {D : Formula α} :
+private lemma conj_witness_ant {D : Formula α} :
     ofAxioms 𝔸 ⊢ D ⋏ □(∼D) ⋏ (Γ.conj ⋏ Γ.box.conj) ⋏ (FormulaFinset.boxNeg N).conj 🡒
       (witness Γ N D).ant.conj := by
   apply right_Fconj_intro;
@@ -174,7 +158,7 @@ lemma conj_witness_ant {D : Formula α} :
   · have : ofAxioms 𝔸 ⊢ (FormulaFinset.boxNeg N).conj 🡒 B := left_Fconj_intro hB;
     cl_prover [this];
 
-lemma rhd_of_witness {D : Formula α}
+private lemma rhd_of_witness {D : Formula α}
     (h : ofAxioms 𝔸 ⊢ (witness Γ N D).ant.conj 🡒 (witness Γ N D).suc.disj) (Y : Formula α) :
     ofAxioms 𝔸 ⊢ Γ.box.conj ⋏ (N.image (· ▷ Y)).conj 🡒 D ▷ Y := by
   have h₁ : ofAxioms 𝔸 ⊢ D ⋏ □(∼D) ⋏ (Γ.conj ⋏ Γ.box.conj) ⋏ (FormulaFinset.boxNeg N).conj 🡒
@@ -184,23 +168,24 @@ lemma rhd_of_witness {D : Formula α}
   have h₃ := box_mono h₂';
   have h₄ : ofAxioms 𝔸 ⊢ D ▷ (D ⋏ □(∼D)) ⋏ (D ⋏ □(∼D)) ▷ Y 🡒 D ▷ Y := axiomJ2;
   cl_prover [h₃, h₄, box_conj_self (𝔸 := 𝔸) (Γ := Γ),
-    rhd_of_box_imp (𝔸 := 𝔸) N (D ⋏ □(∼D)) Y, rhd_self_conj (𝔸 := 𝔸) (D := D)];
+    rhd_of_box_imp (𝔸 := 𝔸) N (D ⋏ □(∼D)) Y, rhd_and_box_neg (𝔸 := 𝔸) (A := D)];
 
-lemma conj_rhd_bot_imp_boxNeg :
+private lemma conj_rhd_bot_imp_boxNeg :
     ofAxioms 𝔸 ⊢ (N.image (· ▷ ⊥)).conj 🡒 (FormulaFinset.boxNeg N).conj := by
   apply right_Fconj_intro;
   intro B hB;
   obtain ⟨n, hn, rfl⟩ := Finset.mem_image.mp hB;
-  exact C_trans (left_Fconj_intro (Finset.mem_image_of_mem _ hn)) box_neg_of_rhd_bot;
+  exact C_trans (left_Fconj_intro (Finset.mem_image_of_mem _ hn)) rhd_bot;
 
-lemma conj_union_imp {Δ : FormulaFinset α} : ofAxioms 𝔸 ⊢ (Γ ∪ Δ).conj 🡒 Γ.conj ⋏ Δ.conj := by
+private lemma conj_union_imp {Δ : FormulaFinset α} :
+    ofAxioms 𝔸 ⊢ (Γ ∪ Δ).conj 🡒 Γ.conj ⋏ Δ.conj := by
   have h₁ : ofAxioms 𝔸 ⊢ (Γ ∪ Δ).conj 🡒 Γ.conj := CFConjFConj_of_subset Finset.subset_union_left;
   have h₂ : ofAxioms 𝔸 ⊢ (Γ ∪ Δ).conj 🡒 Δ.conj := CFConjFConj_of_subset Finset.subset_union_right;
   cl_prover [h₁, h₂];
 
 /-- The formulas `n ▷ Y` for the antecedents `n` of the pairs of `l` and the members `n` of `M`
 follow from `□Γ` and the formulas of `l`, given the premises of the modal rules for `l`. -/
-lemma conj_rhd_of_premises {M : FormulaFinset α} {Y : Formula α}
+private lemma conj_rhd_of_premises {M : FormulaFinset α} {Y : Formula α}
     (hM : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 (M.image (· ▷ Y)).conj) :
     ∀ l : List (Formula α × Formula α),
       (∀ l₁ p l₂, l = l₁ ++ p :: l₂ → ofAxioms 𝔸 ⊢
@@ -221,11 +206,11 @@ lemma conj_rhd_of_premises {M : FormulaFinset α} {Y : Formula α}
     simp only [rhdFormulas_cons, antecedents_cons, Finset.union_insert, Finset.image_insert];
     cl_prover [ih, hD, h₁, h₂, h₃];
 
-end Logic.ofAxioms
+end IL.Gentzen
 
 namespace Logic.IL
 
-open Logic.ofAxioms
+open Logic.ofAxioms IL.Gentzen
 
 variable [DecidableEq α] {S : Sequent α}
 
@@ -249,7 +234,7 @@ lemma of_gentzen (h : ⊢ᴳ[𝐈𝐋] S) : 𝐈𝐋 ⊢ S.ant.conj 🡒 S.suc.d
   | @rhd Γ l A B _ _ ih ihA =>
     have hB : 𝐈𝐋 ⊢ Γ.box.conj 🡒 (({B} : FormulaFinset α).image (· ▷ B)).conj := by
       simp only [Finset.image_singleton, Finset.conj_singleton];
-      exact C_of_conseq (rhd_of_imp C_id);
+      exact C_of_conseq (rhd_of_provable C_id);
     have h₁ := conj_rhd_of_premises hB l (by simpa [← Finset.insert_eq] using ih);
     have h₂ := rhd_of_witness ihA B;
     have h₃ : 𝐈𝐋 ⊢ (Γ.box ∪ rhdFormulas l).conj 🡒 Γ.box.conj ⋏ (rhdFormulas l).conj :=

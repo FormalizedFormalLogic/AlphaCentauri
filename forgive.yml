@@ -62,6 +62,12 @@ declaration:
   FFL.FirstOrder.Arithmetic.not_provable_bezout_IOpen_greatestCommonDivisor:
     forgive:
       - FFL.FirstOrder.Arithmetic.not_provable_bezout_IOpen_greatestCommonDivisor
+  FFL.FirstOrder.Arithmetic.not_provable_IOpen_allClosure:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.not_provable_irrationalSqrtTwo_IOpen:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
   HahnSeries.isRealClosed_lex:
     forgive:
       - HahnSeries.isRealClosed_lex

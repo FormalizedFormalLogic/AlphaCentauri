@@ -104,6 +104,8 @@ instance : Entailment.Minimal (ofAxiomsMinus 𝔸) where
 instance : Entailment.Cl (ofAxiomsMinus 𝔸) where
   dne := dne
 
+instance : (ofAxiomsMinus 𝔸).ExtendsGL := ⟨nec, axiomK, axiomL⟩
+
 /-- `ofAxiomsMinus 𝔸` is contained in every extension of $\mathbf{IL}^-$ that proves `𝔸`. -/
 lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofAxiomsMinus 𝔹 ⊢ A) :
     ofAxiomsMinus 𝔸 ⊆ ofAxiomsMinus 𝔹 := by

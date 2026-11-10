@@ -872,4 +872,12 @@ lemma shift_neg_substs1_qqFvar {d j : V} (hd : IsSemiformula L 1 d) (hds : shift
 
 end substLemmas
 
+instance wkRule.definable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Function₂ (wkRule : V → V → V) :=
+  .of_zero wkRule.defined.to_definable
+
+instance shiftRule.definable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ-Function₂ (shiftRule : V → V → V) :=
+  .of_zero shiftRule.defined.to_definable
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Hilbert
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
 public import Mathlib.Data.Set.Finite.List
 
 /-!
@@ -682,15 +682,20 @@ universe u
 
 variable {α : Type u} [DecidableEq α] {A : Formula α}
 
+/-- - [dJV90, Theorem 4.1] -/
 theorem provability_TFAE : [
     𝐈𝐋 ⊢ A,
     ⊢ᴳ[𝐈𝐋] ∅ ⟹ {A},
-    ∀ {κ : Type u} [Nonempty κ] (M : Veltman.Model κ α), [Finite κ] → [M.IsIL] → M ⊧ A
+    ∀ {κ : Type u} [Nonempty κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A,
+    ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A
   ].TFAE := by
   tfae_have 1 → 3 := by
-    intro h _ _ M _ _;
+    intro h _ _ M _;
     exact Logic.ofAxioms.sound (by simp) h;
-  tfae_have 3 → 2 := by
+  tfae_have 3 → 4 := by
+    intro h _ _ _ M _;
+    exact h M;
+  tfae_have 4 → 2 := by
     intro h;
     apply IL.Gentzen.complete;
     intro _ _ M _ _ x _;
@@ -704,13 +709,6 @@ theorem provability_TFAE : [
   tfae_finish;
 
 lemma iff_provable_gentzen : 𝐈𝐋 ⊢ A ↔ ⊢ᴳ[𝐈𝐋] ∅ ⟹ {A} := provability_TFAE.out 1 2
-
-omit [DecidableEq α] in
-lemma iff_valid_finite :
-    𝐈𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Veltman.Model κ α), [Finite κ] → [M.IsIL] →
-      M ⊧ A := by
-  classical
-  exact provability_TFAE.out 1 3
 
 end Logic.IL
 

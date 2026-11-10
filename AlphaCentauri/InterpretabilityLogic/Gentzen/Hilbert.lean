@@ -24,18 +24,6 @@ open Logic Logic.ofAxioms
 
 variable {𝔸 : Set (Formula α)} {A B C D X Y : Formula α}
 
-private lemma axiom4 : ofAxioms 𝔸 ⊢ □A 🡒 □□A := by
-  have h₁ : ofAxioms 𝔸 ⊢ □(□A ⋏ A) 🡒 □A := box_mono (by cl_prover);
-  have h₂ : ofAxioms 𝔸 ⊢ □(□A ⋏ A) 🡒 □□A := box_mono (by cl_prover);
-  have h₃ : ofAxioms 𝔸 ⊢ A 🡒 □(□A ⋏ A) 🡒 □A ⋏ A := by cl_prover [h₁];
-  have h₄ : ofAxioms 𝔸 ⊢ □(□(□A ⋏ A) 🡒 □A ⋏ A) 🡒 □(□A ⋏ A) := axiomL;
-  cl_prover [box_mono h₃, h₂, h₄];
-
-private lemma box_and : ofAxioms 𝔸 ⊢ □A ⋏ □B 🡒 □(A ⋏ B) := by
-  have h₁ : ofAxioms 𝔸 ⊢ □A 🡒 □(B 🡒 A ⋏ B) := box_mono and₃;
-  have h₂ : ofAxioms 𝔸 ⊢ □(B 🡒 A ⋏ B) 🡒 □B 🡒 □(A ⋏ B) := axiomK;
-  cl_prover [h₁, h₂];
-
 private lemma rhd_trans_left (h : ofAxioms 𝔸 ⊢ A ▷ B) : ofAxioms 𝔸 ⊢ B ▷ C 🡒 A ▷ C := by
   have : ofAxioms 𝔸 ⊢ A ▷ B ⋏ B ▷ C 🡒 A ▷ C := axiomJ2;
   cl_prover [h, this];

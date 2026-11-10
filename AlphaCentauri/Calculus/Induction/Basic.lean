@@ -1,8 +1,8 @@
 module
 
-public import AlphaCentauri.ToFoundation.Rew
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import AlphaCentauri.Hierarchy.Bounded
-public import AlphaCentauri.ToFoundation.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.LK.Basic
 

@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
 public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!

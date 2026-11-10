@@ -2,8 +2,8 @@ module
 
 public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.ParameterFreeInduction
-public import AlphaCentauri.ToFoundation.Fvar
-public import AlphaCentauri.ToFoundation.PrenexCombination
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prenex
 public import AlphaCentauri.ToFoundation.Provable
 
 @[expose] public section

@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
-public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
 public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!

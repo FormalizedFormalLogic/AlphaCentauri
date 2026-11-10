@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
-public import AlphaCentauri.ToFoundation.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 
 /-!
 # Definable predicates and formulas evaluated at a fixed valuation

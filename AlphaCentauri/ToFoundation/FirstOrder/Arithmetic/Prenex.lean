@@ -6,6 +6,8 @@ public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 /-!
 # Boolean combinations of prenex formulas over open induction
 
+Companion of Foundation's `Arithmetic/Prenex.lean`.
+
 In models of `𝗜𝗢𝗽𝗲𝗻`, pairing merges two adjacent quantifiers of the same kind into one. Hence a
 conjunction or a disjunction of two prenex formulas of the same polarity and level, and the
 existential quantification of a prenex $\Sigma_{s + 1}$ formula, are equivalent to a prenex formula

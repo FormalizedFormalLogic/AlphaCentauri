@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Interpretability.Translation
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.ToFoundation.Syntax
-public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
 
 /-!
 # Commutation of the internal translation

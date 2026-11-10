@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.Overspill
-public import AlphaCentauri.ToFoundation.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-!

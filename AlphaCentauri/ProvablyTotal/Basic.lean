@@ -3,8 +3,8 @@ module
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.LK.Completeness
-public import AlphaCentauri.ToFoundation.Hierarchy
-public import AlphaCentauri.ToFoundation.Theory
+public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.Theory
 
 /-!
 # Provably total functions

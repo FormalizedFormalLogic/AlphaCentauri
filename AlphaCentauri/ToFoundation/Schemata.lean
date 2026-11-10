@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.Rew
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-!

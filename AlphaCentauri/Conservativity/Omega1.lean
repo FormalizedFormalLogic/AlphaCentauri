@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
-public import AlphaCentauri.ToFoundation.Theory
+public import AlphaCentauri.ToFoundation.FirstOrder.Theory
 
 /-!
 # Conservativity of $\Omega_1$

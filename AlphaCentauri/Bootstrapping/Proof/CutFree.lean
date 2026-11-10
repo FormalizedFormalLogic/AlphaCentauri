@@ -1,7 +1,7 @@
 module
 
 public import Foundation.Vorspiel.Tactic.Disj
-public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Coding
 
 /-!

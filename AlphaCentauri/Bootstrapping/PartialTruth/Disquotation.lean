@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.ToFoundation.Absoluteness
-public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
 public import AlphaCentauri.ToFoundation.Schemata
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 

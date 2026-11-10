@@ -2,7 +2,6 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
-public import AlphaCentauri.ToFoundation.SubstInversion
 
 /-!
 # Subformulas and instances of coded formula sets

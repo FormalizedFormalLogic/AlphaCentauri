@@ -1,10 +1,12 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
-public import AlphaCentauri.ToFoundation.Coding
-public import AlphaCentauri.ToFoundation.Syntax
-public import AlphaCentauri.ToFoundation.TypedProof
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 
 /-!
 # The deduction theorem and derivations under added axioms

@@ -646,4 +646,71 @@ lemma IsTable.transT_relativizedImp {k : ℕ} (d : Semiformula V L 1) (A : Fin k
 
 end compShapes
 
+/-! ## Values of terms along the composite table -/
+
+section compValue
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {S : Theory L} [S.Δ₁] [𝗘𝗤 L ⪯ S]
+  {tbl₁ tbl₂ : V} (h₁ : IsTranslationTable L S tbl₁) (hT₂ : IsTable L L tbl₂)
+  (hc : IsTable L L (Bootstrapping.compTable L L tbl₁ tbl₂))
+
+lemma tprovable_comp_varEqualT_fvar (x : V) :
+    S.internalize V ⊢ h₁.domT.subst ![Semiterm.fvar x] 🡒
+      ∀¹ (h₁.domT 🡒 (varEqualT hc (Semiterm.fvar x) 🡘
+        h₁.transT (varEqualT hT₂ (Semiterm.fvar x)))) := by
+  rw [varEqualT_fvar, varEqualT_fvar]
+  change S.internalize V ⊢ h₁.domT.subst ![Semiterm.fvar x] 🡒
+    ∀¹ (h₁.domT 🡒 (Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar x) 🡘
+      h₁.transT (Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar x))))
+  apply TProof.generalize_imp
+  rw [Semiformula.free_imp, Semiformula.free_iff, ← IsTable.transT_free]
+  simp only [Semiformula.free, Semiformula.shift_substs, IsTable.domT_shift,
+    Semiformula.shift_equal, Semiformula.substs_equal, Matrix.vecMap_cons', Matrix.vecMap_nil,
+    Matrix.head_cons, Semiterm.shift_fvar, Semiterm.shift_bvar, Semiterm.substs_bvar,
+    Semiterm.substs_fvar, Matrix.cons_val_fin_one]
+  have hp := h₁.tprovable_transT_equal_iff 0 (x + 1)
+  have key {A B E Q : Formula V L} (hp : S.internalize V ⊢ A 🡒 B 🡒 (E 🡘 Q)) :
+      S.internalize V ⊢ B 🡒 A 🡒 (Q 🡘 E) := by
+    cl_prover [hp]
+  exact key hp
+
+omit [L.Eq] [S.Δ₁] [𝗘𝗤 L ⪯ S] in
+lemma IsVarVec.fvar_cons_bvar {k : ℕ} (x : V) :
+    IsVarVec (Semiterm.fvar x :>
+      fun i : Fin k ↦ (Semiterm.bvar (i.addCast 0) : Semiterm V L (0 + k))) := by
+  intro j
+  cases j using Fin.cases with
+  | zero => exact Or.inr ⟨x, rfl⟩
+  | succ j => exact Or.inl ⟨_, rfl⟩
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma tprovable_comp_varEqualT_func {k : ℕ} (F : L.Func k) (u : Fin k → Term V L) :
+    S.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (h₁.domT 🡒 (varEqualT hc (u i) 🡘
+        h₁.transT (varEqualT hT₂ (u i))))) 🡒
+      ∀¹ (h₁.domT 🡒 (varEqualT hc (Semiterm.func F u) 🡘
+        h₁.transT (varEqualT hT₂ (Semiterm.func F u)))) := by
+  rw [varEqualT_func hc, varEqualT_func hT₂, IsTable.compTable_domT h₁.toIsTable hT₂ hc,
+    IsTable.compTable_funcT h₁.toIsTable hT₂ hc]
+  apply TProof.generalize_imp
+  rw [Semiformula.free_imp, Semiformula.free_iff, ← IsTable.transT_free]
+  have hd₂ : (h₁.transT hT₂.domT).shift = h₁.transT hT₂.domT := by
+    rw [← IsTable.transT_shift, hT₂.domT_shift]
+  have hg : (h₁.transT (hT₂.funcT F)).shift = h₁.transT (hT₂.funcT F) := by
+    rw [← IsTable.transT_shift, hT₂.funcT_shift]
+  simp only [Semiformula.free, shift_funcGraph, Semiformula.shift_and, h₁.domT_shift, hd₂, hg,
+    hT₂.domT_shift, hT₂.funcT_shift, funcGraph_subst_fvar, Semiformula.shift_conj,
+    Semiformula.shift_all, Semiformula.shift_imp, Semiformula.shift_iff]
+  rw [IsTable.transT_relativizedImp h₁.toIsTable,
+    h₁.toIsTable.transT_subst _ (IsVarVec.fvar_cons_bvar 0)]
+  simp only [← IsTable.transT_shift]
+  have hr := relativizedImp_iff_relAllItr (T := S) h₁.domT_shift (h₁.transT hT₂.domT)
+    (fun i ↦ (varEqualT hc (u i)).shift) (fun i ↦ h₁.transT (varEqualT hT₂ (u i)).shift)
+    ((h₁.transT (hT₂.funcT F)).subst (Semiterm.fvar 0 :> fun i ↦ Semiterm.bvar (i.addCast 0)))
+  have key {H D X Y : Formula V L} (hr : S.internalize V ⊢ H 🡒 (X 🡘 Y)) :
+      S.internalize V ⊢ H 🡒 D 🡒 (X 🡘 Y) := by
+    cl_prover [hr]
+  exact key hr
+
+end compValue
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToFoundation.FirstOrder.Rew
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.LK.Basic
 

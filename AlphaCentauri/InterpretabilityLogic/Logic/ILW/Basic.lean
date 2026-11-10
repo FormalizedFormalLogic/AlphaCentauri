@@ -62,8 +62,14 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 theorem ILW.sound [M.IsIL] [M.HasW] (h : 𝐈𝐋𝐖 ⊢ A) : M ⊧ A :=
   ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomW) h
 
+theorem ILKW2.sound [M.IsIL] [M.HasW] (h : 𝐈𝐋𝐊𝐖𝟐 ⊢ A) : M ⊧ A :=
+  ILW.sound <| weakerThan_iff.mp inferInstance h
+
 instance : Consistent (𝐈𝐋𝐖 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILW.sound (M := pointModel fun _ ↦ False) h 0
+
+instance : Consistent (𝐈𝐋𝐊𝐖𝟐 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ ILKW2.sound (M := pointModel fun _ ↦ False) h 0
 
 end Logic
 

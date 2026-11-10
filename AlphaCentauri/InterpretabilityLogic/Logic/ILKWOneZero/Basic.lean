@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILKW2.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 
 /-!

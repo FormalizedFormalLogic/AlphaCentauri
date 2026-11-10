@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Mathlib.Data.Nat.Prime.Defs

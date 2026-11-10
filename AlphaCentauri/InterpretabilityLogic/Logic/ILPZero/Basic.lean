@@ -52,15 +52,15 @@ namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World
 
-private abbrev countermodelM₀ : Model (Fin 5) ℕ where
+private abbrev countermodelPZeroM₀ : Model (Fin 5) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 1 ∧ y = 2 ∨ x = 3 ∧ y = 4
   S' w x y := w = 0 ∧ 1 ≤ x ∧ x ≤ y ∨ w = 1 ∧ x = 2 ∧ y = 2 ∨ w = 3 ∧ x = 4 ∧ y = 4
   Val' t a := match a with | 0 => t = 2 | 1 => t = 3 | 2 => t = 2 | _ => t = 4
 
-private instance : IsTrans _ countermodelM₀.Rel := ⟨by decide⟩
-private instance : Std.Irrefl countermodelM₀.Rel := ⟨by decide⟩
+private instance : IsTrans _ countermodelPZeroM₀.Rel := ⟨by decide⟩
+private instance : Std.Irrefl countermodelPZeroM₀.Rel := ⟨by decide⟩
 
-private instance : countermodelM₀.IsIL where
+private instance : countermodelPZeroM₀.IsIL where
   rel_of_s_left := by decide
   rel_of_s_right := by decide
   s_refl := by decide
@@ -69,8 +69,8 @@ private instance : countermodelM₀.IsIL where
 
 instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐏₀ :=
   .of_unprovable_provable (φ := Axioms.P₀ (#0) (#3)) (fun h ↦ by
-    have H := ofAxioms.sound (M := countermodelM₀) (𝔸 := ∅) (by simp) h 0;
-    have h₁ : (0 : countermodelM₀.World) ⊩[countermodelM₀] #0 ▷ ◇(#3) := by
+    have H := ofAxioms.sound (M := countermodelPZeroM₀) (𝔸 := ∅) (by simp) h 0;
+    have h₁ : (0 : countermodelPZeroM₀.World) ⊩[countermodelPZeroM₀] #0 ▷ ◇(#3) := by
       intro v _ hv;
       obtain rfl : v = 2 := hv;
       exact ⟨3, by decide, forces_dia.mpr ⟨4, by decide, rfl⟩⟩;

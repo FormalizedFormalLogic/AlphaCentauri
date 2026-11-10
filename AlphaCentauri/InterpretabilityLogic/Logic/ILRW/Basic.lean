@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILM.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZeroW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 
@@ -74,22 +75,22 @@ namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World
 
-private abbrev countermodelW : Model (Fin 3) ℕ where
+private abbrev countermodelRW : Model (Fin 3) ℕ where
   Rel' := (· < ·)
   S' w x y := w = 0 ∧ x ≠ 0 ∧ y ≠ 0 ∨ w = 1 ∧ x = 2 ∧ y = 2
   Val' u a := match a with | 1 => u = 1 | _ => u ≠ 0
 
-private instance : IsTrans _ countermodelW.Rel := ⟨by decide⟩
-private instance : Std.Irrefl countermodelW.Rel := ⟨by decide⟩
+private instance : IsTrans _ countermodelRW.Rel := ⟨by decide⟩
+private instance : Std.Irrefl countermodelRW.Rel := ⟨by decide⟩
 
-private instance : countermodelW.IsIL where
+private instance : countermodelRW.IsIL where
   rel_of_s_left := by decide
   rel_of_s_right := by decide
   s_refl := by decide
   s_trans := by decide
   s_of_rel := by decide
 
-private instance : countermodelW.HasR := ⟨by decide⟩
+private instance : countermodelRW.HasR := ⟨by decide⟩
 
 private abbrev countermodelR : Model (Fin 5) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 1 ∧ (y = 2 ∨ y = 4) ∨ x = 3 ∧ y = 4
@@ -130,8 +131,8 @@ private instance : countermodelM.HasW := HasW.of_finite (by decide)
 
 instance : (𝐈𝐋𝐑 : Logic ℕ) ⪱ 𝐈𝐋𝐑𝐖 :=
   .of_unprovable_provable (φ := Axioms.W (#0) (#1)) (fun h ↦ by
-    have H := ILR.sound (M := countermodelW) h 0;
-    have h₁ : (0 : countermodelW.World) ⊩[countermodelW] #0 ▷ #1 := by
+    have H := ILR.sound (M := countermodelRW) h 0;
+    have h₁ : (0 : countermodelRW.World) ⊩[countermodelRW] #0 ▷ #1 := by
       intro u _ hu;
       exact ⟨1, Or.inl ⟨rfl, hu, by decide⟩, rfl⟩;
     obtain ⟨z, _, hz⟩ := H h₁ 1 (by decide) (show (1 : Fin 3) ≠ 0 by decide);

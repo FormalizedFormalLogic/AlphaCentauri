@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.CaseSplit
+public import AlphaCentauri.Bootstrapping.Interpretability.Composition
 public import AlphaCentauri.Bootstrapping.Interpretability.Congruence
 public import AlphaCentauri.Bootstrapping.Interpretability.Identity
 public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
@@ -221,13 +222,33 @@ theorem exists_isTranslationTable_provable_translate (V : Type*) [ORingStructure
   · intro p hp
     exact h.id_provable_translate Language.SymbolsStandard.oRing hp
 
+open _root_.FFL.Entailment in
 /-- Interpretability is transitive.
 - [Vis90, §6.1] -/
-axiom Interpretable.trans {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-    {S U W : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [W.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] [𝗘𝗤 ℒₒᵣ ⪯ U]
+theorem Interpretable.trans {S U W : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [W.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S]
     (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift ℒₒᵣ p = p)
-    (hU : ∀ p ∈ U.Δ₁Class (V := V), Bootstrapping.shift ℒₒᵣ p = p)
-    (h₁ : Interpretable V S U) (h₂ : Interpretable V U W) : Interpretable V S W
+    (hW : ∀ p ∈ W.Δ₁Class (V := V), Bootstrapping.shift ℒₒᵣ p = p)
+    (h₁ : Interpretable V S U) (h₂ : Interpretable V U W) : Interpretable V S W := by
+  obtain ⟨tbl₁, h₁⟩ := h₁
+  obtain ⟨tbl₂, h₂⟩ := h₂
+  have hL := Language.SymbolsStandard.oRing (V := V)
+  have hsound : ∀ φ : V, Bootstrapping.shift ℒₒᵣ φ = φ → Provable U φ →
+      Provable S (translate ℒₒᵣ ℒₒᵣ tbl₁ φ) := fun φ hφ hpr ↦
+    provable_translate hS h₁.toIsTranslationTable hL (fun _ hp hf ↦ h₁.translate_axiom hp hf) hφ hpr
+  have hc := h₁.toIsTable.compTable h₂.toIsTable
+  use compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂
+  exact { toIsTranslationTable := h₁.toIsTranslationTable.compTable h₂.toIsTranslationTable hsound
+          translate_axiom := fun {p} hp hp' ↦ by
+            have hps := hW p hp
+            have h₃ := hsound _ (by rw [← translate_shift h₂.toIsTable hp', hps])
+              (h₂.translate_axiom hp hp')
+            have ha := IsSemiformula.translate hc hp'
+            have hb := IsSemiformula.translate h₁.toIsTable
+              (IsSemiformula.translate h₂.toIsTable hp')
+            have h₄ := (provable_iff_iff_tprovable ha hb).mp
+              (provable_comp_translate_iff h₁.toIsTranslationTable h₂.toIsTable hc hS hL hp' hps)
+            have h₅ : S.internalize V ⊢ (⟨_, hb⟩ : Formula V ℒₒᵣ) := tprovable_iff_provable.mpr h₃
+            exact tprovable_iff_provable.mp (K_right h₄ ⨀ h₅) }
 
 /-- If `W` is interpretable both in `T + φ` and in `T + ψ`, it is interpretable in
 `T + (φ ∨ ψ)`.

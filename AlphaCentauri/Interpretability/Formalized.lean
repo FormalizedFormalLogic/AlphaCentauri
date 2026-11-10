@@ -138,7 +138,7 @@ theorem _root_.FFL.FirstOrder.ArithmeticTheory.interpretability_trans [𝗘𝗤 
   rintro ⟨h₁, h₂⟩
   exact models_interpretability_iff.mpr <|
     (models_interpretability_iff.mp h₁).trans (union_singleton_shift_eq φ)
-      (union_singleton_shift_eq ψ) (models_interpretability_iff.mp h₂)
+      (union_singleton_shift_eq χ) (models_interpretability_iff.mp h₂)
 
 /-- The arithmetical form of $\mathbf{J3}$: interpretability in each disjunct yields
 interpretability in the disjunction.

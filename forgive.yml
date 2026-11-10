@@ -77,9 +77,6 @@ declaration:
   OpenPredicate.openInduction_iff_integerPart:
     forgive:
       - OpenPredicate.openInduction_iff_integerPart
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:
@@ -115,6 +112,3 @@ declaration:
   FFL.FirstOrder.Arithmetic.IOpen.not_finiteAxiomatizable:
     forgive:
       - HahnSeries.isRealClosed_lex
-  FFL.FirstOrder.ArithmeticTheory.interpretability_trans:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans

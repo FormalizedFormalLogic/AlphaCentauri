@@ -65,10 +65,10 @@ theorem not_provable_fermatLastTheorem_IOpen {n : ℕ} (hn : 3 ≤ n) :
   let z : IntegerConstantPolynomial ℝ :=
     ⟨C c * Polynomial.X, IntegerConstantPolynomial.mem_iff.mpr ⟨0, by simp⟩⟩
   have hx : 0 ≤ IntegerConstantPolynomial.X ℝ := by
-    rw [IntegerConstantPolynomial.nonneg_iff]
+    rw [LeadingCoeffOrder.nonneg_iff]
     simp [IntegerConstantPolynomial.X]
   have hz : 0 ≤ z := by
-    rw [IntegerConstantPolynomial.nonneg_iff]
+    rw [LeadingCoeffOrder.nonneg_iff]
     simp [z, hc₀.le]
   have := IntegerConstantPolynomial.models_ZRing ℝ
   rw [hF]

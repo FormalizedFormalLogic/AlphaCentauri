@@ -124,20 +124,18 @@ scoped prefix:max "^func " => qqFunc
 lemma qqFuncN_eq_qqFunc (k f v : ℕ) : qqFuncN k f v = qqFunc k f v := by
   simp [qqFunc, qqFuncN, nat_pair_eq]
 
-@[simp] lemma var_lt_qqBvar (z : V) : z < ^#z := lt_succ_iff_le.mpr <| le_pair_right 0 z
+@[simp] lemma var_lt_qqBvar (z : V) : z < ^#z := by simp [qqBvar, lt_succ_iff_le]
 
-@[simp] lemma var_lt_qqFvar (x : V) : x < ^&x := lt_succ_iff_le.mpr <| le_pair_right 1 x
+@[simp] lemma var_lt_qqFvar (x : V) : x < ^&x := by simp [qqFvar, lt_succ_iff_le]
 
-@[simp] lemma arity_lt_qqFunc (k f v : V) : k < ^func k f v :=
-  le_iff_lt_succ.mp <| le_trans (le_pair_right 2 k) <| pair_le_pair_right 2 <| le_pair_left k ⟪f, v⟫
+@[simp] lemma arity_lt_qqFunc (k f v : V) : k < ^func k f v := by
+  grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma func_lt_qqFunc (k f v : V) : f < ^func k f v :=
-  le_iff_lt_succ.mp <| le_trans (le_pair_left f v) <|
-    le_trans (le_pair_right k ⟪f, v⟫) <| le_pair_right 2 ⟪k, ⟪f, v⟫⟫
+@[simp] lemma func_lt_qqFunc (k f v : V) : f < ^func k f v := by
+  grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma terms_lt_qqFunc (k f v : V) : v < ^func k f v :=
-  le_iff_lt_succ.mp <| le_trans (le_pair_right f v) <|
-    le_trans (le_pair_right k ⟪f, v⟫) <| le_pair_right 2 ⟪k, ⟪f, v⟫⟫
+@[simp] lemma terms_lt_qqFunc (k f v : V) : v < ^func k f v := by
+  grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 lemma nth_lt_qqFunc_of_lt {i k f v : V} (hi : i < len v) : v.[i] < ^func k f v :=
   lt_trans (nth_lt_self hi) (terms_lt_qqFunc _ _ _)
@@ -340,11 +338,7 @@ lemma nth {n w : V} (h : IsUTermVec L n w) {i} : i < n → IsUTerm L w.[i] := h.
 @[simp] lemma empty : IsUTermVec (V := V) L 0 0 := ⟨by simp, by simp⟩
 
 @[simp] lemma empty_iff : IsUTermVec L 0 v ↔ v = 0 := by
-  constructor
-  · intro h
-    exact len_zero_iff_eq_nil.mp h.lh.symm
-  · rintro rfl
-    simp
+  simp [IsUTermVec, ← len_zero_iff_eq_nil, eq_comm]
 
 lemma two_iff {v : V} :
     IsUTermVec L 2 v ↔ ∃ t₁ t₂, IsUTerm L t₁ ∧ IsUTerm L t₂ ∧ v = ?[t₁, t₂] := by
@@ -366,11 +360,7 @@ lemma two_iff {v : V} :
 
 @[simp] lemma adjoin₁_iff {t : V} :
     IsUTermVec L 1 (?[t] : V) ↔ IsUTerm L t := by
-  constructor
-  · intro h
-    simpa using h.nth (i := 0) (by simp)
-  · intro h
-    simpa using empty.adjoin h
+  simp [IsUTermVec]
 
 @[simp] lemma mkSeq₂_iff {t₁ t₂ : V} :
     IsUTermVec L 2 (?[t₁, t₂] : V) ↔ IsUTerm L t₁ ∧ IsUTerm L t₂ := by

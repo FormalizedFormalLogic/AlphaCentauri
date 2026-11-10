@@ -147,6 +147,7 @@ public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Synt
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Language
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Term.Basic
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Term.Functions
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Term.Typed
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Basic
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.CourseOfValues
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Fixpoint

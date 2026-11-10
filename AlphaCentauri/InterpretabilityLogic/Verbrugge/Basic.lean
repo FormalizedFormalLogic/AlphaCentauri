@@ -146,7 +146,7 @@ namespace Logic.ofAxioms
 
 open Verbrugge Verbrugge.Model Verbrugge.Model.World
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : Set (Formula α)} {A : Formula α}
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : FormulaSet α} {A : Formula α}
 
 /-- - [JMMV20, Theorem 3.2]
 - [Mas20, §6.2]
@@ -531,29 +531,29 @@ instance : M.toVeltman.IsIL where
   rel_of_s_left h := h.1
   rel_of_s_right h := h.2.1
   s_refl h := by
-    constructor;
+    constructor
     · exact h;
-    constructor;
-    · exact h;
-    · use [];
-      simp;
+    · constructor
+      · exact h;
+      · use [];
+        simp;
   s_trans := by
     rintro a b c d ⟨Rab, Rac, H₁, hH₁, ec⟩ ⟨-, Rad, H₂, hH₂, ed⟩;
-    constructor;
+    constructor
     · exact Rab;
-    constructor;
-    · exact Rad;
-    · use H₂ ++ H₁;
-      constructor;
-      · exact isPlay_append.mpr ⟨hH₁, ec ▸ hH₂⟩;
-      · simp [ed, ec];
+    · constructor
+      · exact Rad;
+      · use H₂ ++ H₁;
+        constructor;
+        · exact isPlay_append.mpr ⟨hH₁, ec ▸ hH₂⟩;
+        · simp [ed, ec];
   s_of_rel := by
     intro a b c Rab Rbc;
-    constructor;
+    constructor
     · exact Rab;
-    constructor;
-    · exact rel_trans Rab Rbc;
-    · exact Rbc.2 a.world Rab.1;
+    · constructor
+      · exact rel_trans Rab Rbc;
+      · exact Rbc.2 a.world Rab.1;
 
 open Veltman.Model.World Verbrugge.Model.World in
 /-- `M` forces at a world exactly what `M.toVeltman` forces at the worlds over it.
@@ -611,14 +611,14 @@ theorem forces_toVeltman {a : M.VeltmanWorld} {A : Formula α} :
       have hv := hb.mem_cons hP.1 hP.2;
       use a.successor (rel_of_mem_of_s hV hv) (hb.shift hP);
       constructor;
-      · constructor;
+      · constructor
         · exact Rab;
-        constructor;
-        · exact rel_successor;
-        · use [V];
-          constructor;
-          · exact hP;
-          · simp;
+        · constructor
+          · exact rel_successor;
+          · use [V];
+            constructor;
+            · exact hP;
+            · simp;
       · exact ihB.mpr <| hVB _ hv;
 
 end Verbrugge.Model

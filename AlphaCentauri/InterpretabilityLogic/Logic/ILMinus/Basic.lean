@@ -60,7 +60,7 @@ necessitation, $\mathbf{R1}$ and $\mathbf{R2}$.
 
 - [KO21, Definition 2.1]
 -/
-inductive Logic.ofAxiomsMinus (𝔸 : Set (Formula α)) : Logic α
+inductive Logic.ofAxiomsMinus (𝔸 : FormulaSet α) : Logic α
   | axm {A}          : A ∈ 𝔸 → ofAxiomsMinus 𝔸 A
   | mdp {A B}        : ofAxiomsMinus 𝔸 (A 🡒 B) → ofAxiomsMinus 𝔸 A → ofAxiomsMinus 𝔸 B
   | nec {A}          : ofAxiomsMinus 𝔸 A → ofAxiomsMinus 𝔸 (□A)
@@ -88,7 +88,7 @@ notation "𝐈𝐋⁻" => Logic.ILMinus
 
 namespace Logic.ofAxiomsMinus
 
-variable {𝔸 𝔹 : Set (Formula α)}
+variable {𝔸 𝔹 : FormulaSet α}
 
 instance : ModusPonens (ofAxiomsMinus 𝔸) := ⟨mdp⟩
 instance : HasAxiomImplyK (ofAxiomsMinus 𝔸) := ⟨implyK⟩
@@ -177,7 +177,7 @@ lemma J2_of_J2Plus : ofAxiomsMinus 𝔸 ⊢ Axioms.J2Plus A B C 🡒 Axioms.J2 A
   have : ofAxiomsMinus 𝔸 ⊢ A ▷ B 🡒 A ▷ (B ⋎ C) := rhd_mono_right or₁;
   cl_prover [this];
 
-lemma fdisj_rhd [DecidableEq α] {X : Set (Formula α)} {𝒢 : Finset (Formula α)}
+lemma fdisj_rhd [DecidableEq α] {X : FormulaSet α} {𝒢 : Finset (Formula α)}
     (h : ∀ G ∈ 𝒢, X *⊢[ofAxiomsMinus 𝔸] G ▷ C) : X *⊢[ofAxiomsMinus 𝔸] 𝒢.disj ▷ C := by
   induction 𝒢 using Finset.induction_on with
   | empty => simpa using Context.of (rhd_of_box_neg (A := ⊥) (B := C) ⨀ provable_box verum);

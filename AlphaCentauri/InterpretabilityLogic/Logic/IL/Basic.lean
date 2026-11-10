@@ -32,7 +32,7 @@ notation "𝐈𝐋" => Logic.IL
 
 namespace Logic.ofAxioms
 
-variable {𝔸 : Set (Formula α)}
+variable {𝔸 : FormulaSet α}
 
 lemma IL_subset : (𝐈𝐋 : Logic α) ⊆ ofAxioms 𝔸 := subset_of_subset (Set.empty_subset _)
 
@@ -44,7 +44,7 @@ open ofAxioms
 
 variable {A B C : Formula α}
 
-instance {𝔸 : Set (Formula α)} : (𝐈𝐋 : Logic α) ⪯ ofAxioms 𝔸 := weakerThan_iff.mpr IL_subset
+instance {𝔸 : FormulaSet α} : (𝐈𝐋 : Logic α) ⪯ ofAxioms 𝔸 := weakerThan_iff.mpr IL_subset
 
 end Logic
 
@@ -59,7 +59,7 @@ namespace Logic.ofAxioms
 
 open Veltman Veltman.Model Veltman.Model.World
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : Set (Formula α)} {A : Formula α}
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : FormulaSet α} {A : Formula α}
 
 theorem sound [M.IsIL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxioms 𝔸 ⊢ A) : M ⊧ A := by
   intro x
@@ -94,7 +94,7 @@ variable {α : Type*}
 
 namespace Logic.ofAxioms
 
-variable {𝔸 : Set (Formula α)} {A : Formula α}
+variable {𝔸 : FormulaSet α} {A : Formula α}
 
 /-- - [KO21, Proposition 3.20.1] -/
 lemma axiomJ6 : ofAxioms 𝔸 ⊢ Axioms.J6 A := by
@@ -174,7 +174,7 @@ open ofAxiomsMinus
 theorem IL.eq_ofAxiomsMinus :
     (𝐈𝐋 : Logic α) = ofAxiomsMinus
       ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}) := by
-  simpa using ofAxioms.eq_ofAxiomsMinus (𝔸 := (∅ : Set (Formula α)));
+  simpa using ofAxioms.eq_ofAxiomsMinus (𝔸 := (∅ : FormulaSet α));
 
 instance : (𝐂𝐋 : Logic α) ⪯ 𝐈𝐋 :=
   weakerThan_iff.mpr <| IL.eq_ofAxiomsMinus ▸ subset_of_subset Set.subset_union_left
@@ -228,7 +228,7 @@ theorem IL.complete_ILMinus
       [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → [M.IsJ5] → M ⊧ A) :
     𝐈𝐋 ⊢ A := by
   classical
-  let 𝔸 : Set (Formula α) :=
+  let 𝔸 : FormulaSet α :=
     {Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}
   rw [IL.eq_ofAxiomsMinus];
   by_contra hA;

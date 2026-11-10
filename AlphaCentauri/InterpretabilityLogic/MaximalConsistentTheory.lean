@@ -23,7 +23,7 @@ variable {α : Type*}
 
 /-- A set of formulas consistent in `L` that contains `A` or `∼A` for every formula `A`. -/
 structure MaximalConsistentTheory (L : Logic α) where
-  set : Set (Formula α)
+  set : FormulaSet α
   consistent : set *⊬[L] ⊥
   mem_or_neg_mem (A : Formula α) : A ∈ set ∨ ∼A ∈ set
 
@@ -31,7 +31,7 @@ namespace MaximalConsistentTheory
 
 open Logic
 
-variable {L : Logic α} {Γ Δ Θ Λ : MaximalConsistentTheory L} {X : Set (Formula α)}
+variable {L : Logic α} {Γ Δ Θ Λ : MaximalConsistentTheory L} {X : FormulaSet α}
   {A B C : Formula α}
 
 instance : Membership (Formula α) (MaximalConsistentTheory L) := ⟨fun Γ A ↦ A ∈ Γ.set⟩
@@ -108,14 +108,14 @@ end
 variable [DecidableEq α]
 
 /-- The formulas `A` with $A ▷ \bigvee_{G ∈ S'} ¬G ∈ Γ$ for some finite $S' \subseteq S$. -/
-def antecedents (Γ : MaximalConsistentTheory L) (S : Set (Formula α)) : Set (Formula α) :=
+def antecedents (Γ : MaximalConsistentTheory L) (S : FormulaSet α) : FormulaSet α :=
   {A | ∃ T : Finset (Formula α), ↑T ⊆ S ∧ A ▷ (T.image (∼·)).disj ∈ Γ}
 
 /-- The formulas `□∼A` with `A ∈ Γ.antecedents S`.
 
 - [MV20, Definition 5]
 -/
-def boxLabel (Γ : MaximalConsistentTheory L) (S : Set (Formula α)) : Set (Formula α) :=
+def boxLabel (Γ : MaximalConsistentTheory L) (S : FormulaSet α) : FormulaSet α :=
   (fun A ↦ □(∼A)) '' Γ.antecedents S
 
 /-- `Δ` is an `S`-assuring successor of `Γ`: `∼A` and `□∼A` belong to `Δ` whenever
@@ -123,10 +123,10 @@ $A ▷ \bigvee_{G ∈ S'} ¬G ∈ Γ$ for some finite $S' \subseteq S$.
 
 - [MV20, Definition 4]
 -/
-def AssuringSuccessor (S : Set (Formula α)) (Γ Δ : MaximalConsistentTheory L) : Prop :=
+def AssuringSuccessor (S : FormulaSet α) (Γ Δ : MaximalConsistentTheory L) : Prop :=
   ∀ A ∈ Γ.antecedents S, ∼A ∈ Δ ∧ □(∼A) ∈ Δ
 
-variable {S T : Set (Formula α)}
+variable {S T : FormulaSet α}
 
 lemma antecedents_mono (h : S ⊆ T) : Γ.antecedents S ⊆ Γ.antecedents T := by
   rintro A ⟨U, hU, hA⟩;
@@ -145,7 +145,7 @@ section
 
 open Logic.ofAxioms
 
-variable {𝔸 : Set (Formula α)} {Γ Δ Θ Λ : MaximalConsistentTheory (ofAxioms 𝔸)}
+variable {𝔸 : FormulaSet α} {Γ Δ Θ Λ : MaximalConsistentTheory (ofAxioms 𝔸)}
 
 lemma bot_mem_antecedents : ⊥ ∈ Γ.antecedents S := by
   use ∅;

@@ -21,6 +21,8 @@ inductive Formula (α : Type*) where
   | rhd    : Formula α → Formula α → Formula α
   deriving DecidableEq
 
+abbrev FormulaSet (α : Type*) := Set (Formula α)
+
 namespace Formula
 
 variable {α : Type*} {A B : Formula α}

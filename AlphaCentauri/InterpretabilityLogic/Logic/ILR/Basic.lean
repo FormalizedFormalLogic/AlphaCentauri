@@ -66,6 +66,12 @@ instance : Consistent (𝐈𝐋𝐑 : Logic α) :=
 
 end Logic
 
+/-- $\mathbf{ILR}$ is complete with respect to Veltman frames. An open problem.
+- [MV20, §2.5] -/
+def ILRVeltmanCompletenessProblem : Prop :=
+  ∀ A : Formula ℕ,
+    (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsIL] [M.HasR], M ⊧ A) → 𝐈𝐋𝐑 ⊢ A
+
 end FFL.InterpretabilityLogic
 
 end

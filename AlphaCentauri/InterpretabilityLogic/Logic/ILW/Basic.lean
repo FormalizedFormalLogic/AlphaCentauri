@@ -79,7 +79,7 @@ open Entailment Formula
 
 namespace Logic.ofAxioms
 
-variable {α : Type*} {𝔸 : Set (Formula α)} {X : Set (Formula α)} {A B C : Formula α}
+variable {α : Type*} {𝔸 : FormulaSet α} {X : FormulaSet α} {A B C : Formula α}
 
 lemma rhd_trans (h₁ : X *⊢[ofAxioms 𝔸] A ▷ B) (h₂ : X *⊢[ofAxioms 𝔸] B ▷ C) :
     X *⊢[ofAxioms 𝔸] A ▷ C :=
@@ -146,7 +146,7 @@ noncomputable def rank (Γ : MaximalConsistentSet L Φ) (E : Formula α) :
 
 section
 
-variable {𝔸 : Set (Formula α)} {Γ : MaximalConsistentSet (ofAxioms 𝔸) Φ}
+variable {𝔸 : FormulaSet α} {Γ : MaximalConsistentSet (ofAxioms 𝔸) Φ}
 
 lemma provable_rhd_or_of_inconsistent (h : (Γ.criticalSet F C ∪ {∼D}) *⊢[ofAxioms 𝔸] ⊥) :
     Γ.literals *⊢[ofAxioms 𝔸] C ▷ (D ⋎ F) := by
@@ -200,7 +200,7 @@ lemma exists_criticalSolution_or_provable (hE : IsRhdOperand Φ E) (hp : p ∈ �
       Context.by_axm (mem_literals h);
   obtain ⟨Δ, hΔ, hCΔ, hX⟩ :=
     exists_criticalSuccessor_of_consistent_union (.of_rhd_right <| mem_of_mem hpΓ) hc hs;
-  have hD : ({∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj)} : Set (Formula α))
+  have hD : ({∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj)} : FormulaSet α)
       *⊢[ofAxioms 𝔸] ∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj) :=
     Context.by_axm rfl;
   refine .inl ⟨Δ, .mk hΔ hCΔ ?_ ?_⟩
@@ -479,7 +479,7 @@ open RankedSet
 
 - [dJV99, Theorem 13]
 -/
-def rankedCountermodel (𝔸 : Set (Formula α)) (Φ : Finset (Formula α))
+def rankedCountermodel (𝔸 : FormulaSet α) (Φ : Finset (Formula α))
     [Nonempty (RankedSet (Logic.ofAxioms 𝔸) Φ)] :
     Model (RankedSet (Logic.ofAxioms 𝔸) Φ) α where
   Rel' := RankedSet.Rel
@@ -491,7 +491,7 @@ namespace rankedCountermodel
 
 open Model Model.World
 
-variable {𝔸 : Set (Formula α)} [Nonempty (RankedSet (Logic.ofAxioms 𝔸) Φ)]
+variable {𝔸 : FormulaSet α} [Nonempty (RankedSet (Logic.ofAxioms 𝔸) Φ)]
 
 instance : IsTrans _ (rankedCountermodel 𝔸 Φ).Rel :=
   ⟨fun _ _ _ h₁ h₂ ↦ Rel.trans (L := Logic.ofAxioms 𝔸) h₁ h₂⟩
@@ -629,7 +629,7 @@ namespace Logic.ofAxioms
 
 open Veltman Veltman.Model.World MaximalConsistentSet
 
-variable {𝔸 : Set (Formula α)} {Φ : Finset (Formula α)} {A : Formula α}
+variable {𝔸 : FormulaSet α} {Φ : Finset (Formula α)} {A : Formula α}
 
 instance [Entailment.Consistent (ofAxioms 𝔸)] : Nonempty (RankedSet (ofAxioms 𝔸) Φ) := by
   obtain ⟨Γ, -⟩ := exists_consistent_union (Φ := Φ) (L := ofAxioms 𝔸) (X := ∅) <| by
@@ -647,7 +647,7 @@ lemma not_models_rankedCountermodel [Entailment.Consistent (ofAxioms 𝔸)]
     (hW : ∀ {A B : Formula α}, ofAxioms 𝔸 ⊢ Axioms.W A B) (h : ofAxioms 𝔸 ⊬ A) :
     ¬rankedCountermodel 𝔸 (adequateClosure {A}) ⊧ A := by
   intro hM;
-  have hX : ({∼A} : Set (Formula α)) *⊬[ofAxioms 𝔸] ⊥ := by
+  have hX : ({∼A} : FormulaSet α) *⊬[ofAxioms 𝔸] ⊥ := by
     intro h₁;
     apply h;
     have h₂ : ofAxioms 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;

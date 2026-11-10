@@ -311,7 +311,7 @@ instance [Adequate Φ] : (treeCountermodel L Φ).IsIL where
 
 instance : (treeCountermodel L Φ).HasP := ⟨fun _ h₁ h₂ ↦ ⟨h₁, h₂.2⟩⟩
 
-variable {𝔸 : Set (Formula α)} [Nonempty (IndexedSet (Logic.ofAxioms 𝔸) Φ)] [ILPAdequate Φ]
+variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (Logic.ofAxioms 𝔸) Φ)] [ILPAdequate Φ]
 
 /-- - [dJV90, Theorem 5.2] -/
 lemma truthlemma (hP : ∀ {B C : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.P B C)
@@ -396,7 +396,7 @@ theorem complete
   classical
   by_contra hA;
   let Φ := boxClosure (adequateClosure {A});
-  have hX : ({∼A} : Set (Formula α)) *⊬[𝐈𝐋𝐏] ⊥ := by
+  have hX : ({∼A} : FormulaSet α) *⊬[𝐈𝐋𝐏] ⊥ := by
     intro h₁;
     apply hA;
     have h₂ : 𝐈𝐋𝐏 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;

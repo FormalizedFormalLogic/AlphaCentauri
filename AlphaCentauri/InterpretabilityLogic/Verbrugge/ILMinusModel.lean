@@ -192,7 +192,7 @@ section ILMinus
 
 open Model Model.World Logic
 
-variable {𝔸 : Set (Formula α)} [ILMinusAdequate Φ]
+variable {𝔸 : FormulaSet α} [ILMinusAdequate Φ]
   [Nonempty (LabelledSet (ofAxiomsMinus 𝔸) Φ)]
 
 omit [Nonempty (LabelledSet (ofAxiomsMinus 𝔸) Φ)] in
@@ -507,7 +507,7 @@ section ILMinus
 
 open Model Model.World Logic
 
-variable {𝔸 : Set (Formula α)} [ILMinusAdequate Φ] [Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ)]
+variable {𝔸 : FormulaSet α} [ILMinusAdequate Φ] [Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ)]
 
 private lemma exists_successor_not_mem {P : IndexedSet (ofAxiomsMinus 𝔸) Φ → Formula α →
       Set (IndexedSet (ofAxiomsMinus 𝔸) Φ) → Prop}

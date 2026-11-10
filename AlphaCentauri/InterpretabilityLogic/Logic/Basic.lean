@@ -17,7 +17,7 @@ individual logics are in `Logic/<logic>/Basic.lean`.
 
 namespace FFL.InterpretabilityLogic
 
-abbrev Logic (α : Type*) := Set (Formula α)
+abbrev Logic (α : Type*) := FormulaSet α
 
 open Entailment Formula
 
@@ -49,7 +49,7 @@ class Logic.ExtendsGL (L : Logic α) : Prop where
 
 namespace Logic
 
-variable {L : Logic α} [L.ExtendsGL] {X : Set (Formula α)} {A B : Formula α}
+variable {L : Logic α} [L.ExtendsGL] {X : FormulaSet α} {A B : Formula α}
 
 lemma provable_box (h : L ⊢ A) : L ⊢ □A := ExtendsGL.nec h
 
@@ -78,7 +78,7 @@ lemma box_conj_of_forall :
 
 /-- If `A` follows from `T` together with the formulas `□B` for `B ∈ T`, then `□A` follows from the
 latter. -/
-lemma box_of_provable {T : Set (Formula α)} (h : (T ∪ (□·) '' T) *⊢[L] A) :
+lemma box_of_provable {T : FormulaSet α} (h : (T ∪ (□·) '' T) *⊢[L] A) :
     ((□·) '' T) *⊢[L] □A := by
   obtain ⟨Δ, hΔ, hb⟩ := Context.provable_iff.mp h;
   have h₁ : L ⊢ □Δ.conj 🡒 □A :=
@@ -121,7 +121,7 @@ and necessitation.
 
 - [Vis90, §6.1]
 -/
-inductive Logic.ofAxioms (𝔸 : Set (Formula α)) : Logic α
+inductive Logic.ofAxioms (𝔸 : FormulaSet α) : Logic α
   | axm {A}          : A ∈ 𝔸 → ofAxioms 𝔸 A
   | mdp {A B}        : ofAxioms 𝔸 (A 🡒 B) → ofAxioms 𝔸 A → ofAxioms 𝔸 B
   | nec {A}          : ofAxioms 𝔸 A → ofAxioms 𝔸 (□A)
@@ -145,7 +145,7 @@ inductive Logic.ofAxioms (𝔸 : Set (Formula α)) : Logic α
 
 namespace Logic.ofAxioms
 
-variable {𝔸 𝔹 : Set (Formula α)}
+variable {𝔸 𝔹 : FormulaSet α}
 
 instance : ModusPonens (ofAxioms 𝔸) := ⟨mdp⟩
 instance : HasAxiomImplyK (ofAxioms 𝔸) := ⟨implyK⟩
@@ -211,7 +211,7 @@ end Logic.ofAxioms
 
 namespace Logic.ofAxioms
 
-variable {𝔸 : Set (Formula α)} {A B : Formula α}
+variable {𝔸 : FormulaSet α} {A B : Formula α}
 
 lemma rhd_of_provable (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h
 
@@ -247,7 +247,7 @@ lemma rhd_and_box_neg : ofAxioms 𝔸 ⊢ A ▷ (A ⋏ □(∼A)) := by
     axiomJ2;
   cl_prover [h₃, h₄, h₅];
 
-variable [DecidableEq α] {X : Set (Formula α)} {F : Formula α}
+variable [DecidableEq α] {X : FormulaSet α} {F : Formula α}
 
 lemma fdisj_rhd {𝒢 : Finset (Formula α)} (h : ∀ G ∈ 𝒢, X *⊢[ofAxioms 𝔸] G ▷ F) :
     X *⊢[ofAxioms 𝔸] 𝒢.disj ▷ F := by
@@ -322,7 +322,7 @@ end Axioms
 
 namespace Logic.ofAxioms
 
-variable {𝔸 : Set (Formula α)} {A B C : Formula α}
+variable {𝔸 : FormulaSet α} {A B C : Formula α}
 
 lemma rhd_and_not_rhd_neg : ofAxioms 𝔸 ⊢ A ▷ B ⋏ ∼(A ▷ ∼C) 🡒 ◇(B ⋏ □C) := by
   have h₀ : ofAxioms 𝔸 ⊢ □(∼∼C) 🡒 □C := box_mono dne;

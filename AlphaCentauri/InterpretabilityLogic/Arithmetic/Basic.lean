@@ -95,7 +95,7 @@ open Interpretability Formula
 
 variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T]
   {𝔅 : Provability T₀ T} [𝔅.HBL] {𝔍 : Interpretability 𝔅} [𝔍.IL]
-  {f : ProvabilityLogic.Realization α L} {𝔸 : Set (Formula α)} {A : Formula α}
+  {f : ProvabilityLogic.Realization α L} {𝔸 : FormulaSet α} {A : Formula α}
 
 theorem Logic.ofAxioms.arithmetical_soundness (h𝔸 : ∀ A ∈ 𝔸, T₀ ⊢ A.interpret f 𝔅 𝔍)
     (h : ofAxioms 𝔸 ⊢ A) : T₀ ⊢ A.interpret f 𝔅 𝔍 := by

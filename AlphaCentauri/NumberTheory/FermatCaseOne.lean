@@ -143,7 +143,7 @@ end FFL.FirstOrder.Arithmetic
 
 open Polynomial
 
-lemma irreducible_X_pow_seven_sub_C : Irreducible (X ^ 7 - C (5 ^ 7 - 1 : ℚ)) := by
+private lemma irreducible_X_pow_seven_sub_C : Irreducible (X ^ 7 - C (5 ^ 7 - 1 : ℚ)) := by
   apply X_pow_sub_C_irreducible_of_prime (by decide : Nat.Prime 7)
   intro b hb
   have hden : b.den = 1 := by
@@ -162,7 +162,7 @@ lemma irreducible_X_pow_seven_sub_C : Irreducible (X ^ 7 - C (5 ^ 7 - 1 : ℚ)) 
     omega
   omega
 
-lemma exists_padicInt_pow_seven_eq [Fact (Nat.Prime 7)] :
+private lemma exists_padicInt_pow_seven_eq [Fact (Nat.Prime 7)] :
     ∃ y : ℤ_[7], y ^ 7 = 5 ^ 7 - 1 ∧ (7 : ℤ_[7]) ∣ y - 4 := by
   have h₇ : ‖(7 : ℤ_[7])‖ = 7⁻¹ := by exact_mod_cast PadicInt.norm_p (p := 7)
   have hu (k : ℤ) (hk : ¬(7 : ℤ) ∣ k) : ‖(k : ℤ_[7])‖ = 1 :=

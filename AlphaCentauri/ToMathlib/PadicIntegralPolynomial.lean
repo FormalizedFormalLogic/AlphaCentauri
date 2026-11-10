@@ -57,71 +57,6 @@ variable {χ : K →+* ℚ_[p]}
 lemma mem_iff {f : K[X]} : f ∈ PadicIntegralPolynomial χ ↔
     (∃ k : ℕ, ∃ a : ℤ, (p : K) ^ k * f.eval 0 = a) ∧ ‖χ (f.eval 1)‖ ≤ 1 := Iff.rfl
 
-lemma exists_eq_prime_mul_add (f : PadicIntegralPolynomial χ) {l : ℕ} (hl : l.Prime) :
-    ∃ q : PadicIntegralPolynomial χ, ∃ r < l, f = l * q + r := by
-  obtain ⟨⟨k, a, ha⟩, h₁⟩ := mem_iff.mp f.2
-  have hl₀ : (l : K) ≠ 0 := by
-    intro h
-    have := congrArg χ h
-    rw [map_natCast, map_zero, Nat.cast_eq_zero] at this
-    exact hl.ne_zero this
-  suffices ∃ r < l, (∃ k : ℕ, ∃ a : ℤ, (p : K) ^ k * ((f.1.eval 0 - r) / l) = a) ∧
-      ‖χ ((f.1.eval 1 - r) / l)‖ ≤ 1 by
-    obtain ⟨r, hr, hq⟩ := this
-    use ⟨C (l : K)⁻¹ * (f - r), by simpa [mem_iff, div_eq_inv_mul] using hq⟩, r
-    and_intros
-    · exact hr
-    · apply Subtype.ext
-      push_cast
-      rw [← C_eq_natCast, ← mul_assoc, ← C_mul, mul_inv_cancel₀ hl₀, C_1, one_mul,
-        sub_add_cancel]
-  let u : ℤ_[p] := ⟨χ (f.1.eval 1), h₁⟩
-  by_cases hlp : l = p
-  · subst hlp
-    obtain ⟨t, ht⟩ := (PadicInt.norm_lt_one_iff_dvd _).mp <|
-      PadicInt.mem_nonunits.mp (PadicInt.sub_zmodRepr_mem u)
-    use PadicInt.zmodRepr u
-    and_intros
-    · exact PadicInt.zmodRepr_lt_p u
-    · use k + 1, a - l ^ k * PadicInt.zmodRepr u
-      push_cast
-      rw [← ha]
-      field_simp
-      ring
-    · have : χ ((f.1.eval 1 - PadicInt.zmodRepr u) / l) = t := by
-        rw [map_div₀, map_sub, map_natCast, map_natCast]
-        have := congrArg ((↑) : ℤ_[l] → ℚ_[l]) ht
-        push_cast at this
-        rw [this]
-        exact mul_div_cancel_left₀ _ (by exact_mod_cast hl.ne_zero)
-      rw [this]
-      exact t.2
-  · have hpl : (p : ZMod l) ≠ 0 := by
-      rw [Ne, ZMod.natCast_eq_zero_iff]
-      exact fun h ↦ hlp ((Nat.prime_dvd_prime_iff_eq hl hp.out).mp h)
-    have : NeZero l := ⟨hl.ne_zero⟩
-    let r := ((a : ZMod l) * ((p : ZMod l) ^ k)⁻¹).val
-    obtain ⟨b, hb⟩ : (l : ℤ) ∣ a - p ^ k * r := by
-      have := Fact.mk hl
-      rw [← ZMod.intCast_zmod_eq_zero_iff_dvd]
-      push_cast
-      rw [ZMod.natCast_val, ZMod.cast_id', id, mul_left_comm,
-        mul_inv_cancel₀ (pow_ne_zero _ hpl), mul_one, sub_self]
-    use r
-    and_intros
-    · exact ZMod.val_lt _
-    · use k, b
-      have : ((a - p ^ k * r : ℤ) : K) = l * b := by rw [hb]; push_cast; ring
-      push_cast at this
-      rw [mul_div_assoc', mul_sub, ha, this]
-      field_simp
-    · have hl₁ : ‖(l : ℚ_[p])‖ = 1 :=
-        Padic.norm_natCast_eq_one_iff.mpr ((Nat.coprime_primes hp.out hl).mpr (Ne.symm hlp))
-      rw [map_div₀, norm_div, map_natCast, hl₁, div_one, map_sub, map_natCast, sub_eq_add_neg]
-      exact (Padic.nonarchimedean _ _).trans <| max_le h₁ <| by
-        rw [norm_neg]
-        exact PadicInt.norm_le_one (r : ℤ_[p])
-
 variable [LinearOrder K] [IsStrictOrderedRing K]
 
 open scoped LeadingCoeffOrder
@@ -159,7 +94,70 @@ lemma exists_eq_mul_add_of_pos (f : PadicIntegralPolynomial χ) {n : ℕ} (hn : 
   induction n using Nat.recOnMul with
   | zero => intro h; omega
   | one => intro _ f; use f, 0; simp
-  | prime l hl => intro _ f; exact exists_eq_prime_mul_add f hl
+  | prime l hl =>
+    intro _ f
+    obtain ⟨⟨k, a, ha⟩, h₁⟩ := mem_iff.mp f.2
+    have hl₀ : (l : K) ≠ 0 := by
+      intro h
+      have := congrArg χ h
+      rw [map_natCast, map_zero, Nat.cast_eq_zero] at this
+      exact hl.ne_zero this
+    suffices ∃ r < l, (∃ k : ℕ, ∃ a : ℤ, (p : K) ^ k * ((f.1.eval 0 - r) / l) = a) ∧
+        ‖χ ((f.1.eval 1 - r) / l)‖ ≤ 1 by
+      obtain ⟨r, hr, hq⟩ := this
+      use ⟨C (l : K)⁻¹ * (f - r), by simpa [mem_iff, div_eq_inv_mul] using hq⟩, r
+      and_intros
+      · exact hr
+      · apply Subtype.ext
+        push_cast
+        rw [← C_eq_natCast, ← mul_assoc, ← C_mul, mul_inv_cancel₀ hl₀, C_1, one_mul,
+          sub_add_cancel]
+    let u : ℤ_[p] := ⟨χ (f.1.eval 1), h₁⟩
+    by_cases hlp : l = p
+    · subst hlp
+      obtain ⟨t, ht⟩ := (PadicInt.norm_lt_one_iff_dvd _).mp <|
+        PadicInt.mem_nonunits.mp (PadicInt.sub_zmodRepr_mem u)
+      use PadicInt.zmodRepr u
+      and_intros
+      · exact PadicInt.zmodRepr_lt_p u
+      · use k + 1, a - l ^ k * PadicInt.zmodRepr u
+        push_cast
+        rw [← ha]
+        field_simp
+        ring
+      · have : χ ((f.1.eval 1 - PadicInt.zmodRepr u) / l) = t := by
+          rw [map_div₀, map_sub, map_natCast, map_natCast]
+          have := congrArg ((↑) : ℤ_[l] → ℚ_[l]) ht
+          push_cast at this
+          rw [this]
+          exact mul_div_cancel_left₀ _ (by exact_mod_cast hl.ne_zero)
+        rw [this]
+        exact t.2
+    · have hpl : (p : ZMod l) ≠ 0 := by
+        rw [Ne, ZMod.natCast_eq_zero_iff]
+        exact fun h ↦ hlp ((Nat.prime_dvd_prime_iff_eq hl hp.out).mp h)
+      have : NeZero l := ⟨hl.ne_zero⟩
+      let r := ((a : ZMod l) * ((p : ZMod l) ^ k)⁻¹).val
+      obtain ⟨b, hb⟩ : (l : ℤ) ∣ a - p ^ k * r := by
+        have := Fact.mk hl
+        rw [← ZMod.intCast_zmod_eq_zero_iff_dvd]
+        push_cast
+        rw [ZMod.natCast_val, ZMod.cast_id', id, mul_left_comm,
+          mul_inv_cancel₀ (pow_ne_zero _ hpl), mul_one, sub_self]
+      use r
+      and_intros
+      · exact ZMod.val_lt _
+      · use k, b
+        have : ((a - p ^ k * r : ℤ) : K) = l * b := by rw [hb]; push_cast; ring
+        push_cast at this
+        rw [mul_div_assoc', mul_sub, ha, this]
+        field_simp
+      · have hl₁ : ‖(l : ℚ_[p])‖ = 1 :=
+          Padic.norm_natCast_eq_one_iff.mpr ((Nat.coprime_primes hp.out hl).mpr (Ne.symm hlp))
+        rw [map_div₀, norm_div, map_natCast, hl₁, div_one, map_sub, map_natCast, sub_eq_add_neg]
+        exact (Padic.nonarchimedean _ _).trans <| max_le h₁ <| by
+          rw [norm_neg]
+          exact PadicInt.norm_le_one (r : ℤ_[p])
   | mul a b iha ihb =>
     intro hab f
     obtain ⟨q, r, hr, rfl⟩ := iha (Nat.pos_of_mul_pos_right hab) f

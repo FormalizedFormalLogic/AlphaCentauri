@@ -253,6 +253,38 @@ lemma exists_tree_erase (hA : A ∈ tree Φ O) :
         · rfl;
     · cl_prover [h];
 
+private lemma exists_box_of_subset {Y : Finset (Formula α)}
+    (hY : Y ⊆ boxes Φ ∪ (tree Φ O).image fun C ↦ □(∼C)) : ∀ C ∈ Y, ∃ D, C = □D := by
+  intro C hC;
+  rcases Finset.mem_union.mp (hY hC) with hC | hC;
+  · exact (mem_boxes.mp hC).2;
+  · obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hC;
+    exact ⟨_, rfl⟩;
+
+lemma exists_tree_of_conj {X : Finset (Formula α)} (hB : B ∈ O)
+    (hX : X ⊆ boxes Φ ∪ (tree Φ O).image fun C ↦ □(∼C)) :
+    ∃ A ∈ tree Φ O, 𝐈𝐋 ⊢ B ⋏ X.conj 🡒 A ⋎ ◇A ∧ 𝐈𝐋 ⊢ A 🡒 (B ⋏ X.conj) ⋎ ◇(B ⋏ X.conj) := by
+  have h : ∀ C ∈ X, 𝐈𝐋 ⊢ □(∼B) 🡒 C ∨ ∃ C' ∈ boxes Φ ∪
+      (tree Φ (O.erase B)).image (fun C ↦ □(∼C)), 𝐈𝐋 ⊢ □(∼B) 🡒 (C 🡘 C') := by
+    intro C hC;
+    rcases Finset.mem_union.mp (hX hC) with hC | hC;
+    · exact .inr ⟨C, Finset.mem_union_left _ hC, by cl_prover⟩;
+    · obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hC;
+      rcases exists_tree_erase (B := B) hD with h | ⟨D', hD', h⟩;
+      · exact .inl <| Logic.box_mono <| by cl_prover [h];
+      · exact .inr ⟨□(∼D'), Finset.mem_union_right _ (Finset.mem_image_of_mem _ hD'),
+          Logic.box_neg_iff_of_box h⟩;
+  obtain ⟨X', hX', h⟩ := Logic.exists_conj_iff h;
+  use B ⋏ X'.conj;
+  and_intros;
+  · apply mem_tree.mpr;
+    use B;
+    and_intros;
+    · exact hB;
+    · use X';
+  · exact Logic.imp_or_dia_of_box_neg_imp_iff (exists_box_of_subset hX) h;
+  · exact Logic.imp_or_dia_of_box_neg_imp_iff (exists_box_of_subset hX') <| by cl_prover [h];
+
 variable [Adequate Φ]
 
 private lemma mem_subformulas_and_conj {X : Finset (Formula α)}

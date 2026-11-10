@@ -6,6 +6,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ConstantExtension
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Metatheory
 public import AlphaCentauri.ToFoundation.Logic.Compact
 public import Foundation.FirstOrder.Tarski.Ultraproduct
+public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.Grzegorczyk
 
 /-!
 # Growth of provably total functions

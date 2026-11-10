@@ -4,8 +4,7 @@ public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Metatheory
 public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
-public import AlphaCentauri.ToFoundation.PrenexNormalForm
-public import AlphaCentauri.ToFoundation.Reflection
+public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 
 /-!
 # Reflection principles proved by the fragments of arithmetic

@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.OmegaLogic.Basic
 public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Bounds
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 
 /-!
 # Cut elimination for `Z_∞`

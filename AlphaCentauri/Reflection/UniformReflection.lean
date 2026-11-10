@@ -2,13 +2,11 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 public import AlphaCentauri.Reflection.ISigma
-public import AlphaCentauri.Schemata.ParameterFreeInduction
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Provable
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Incompleteness.Definability
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Incompleteness.UniformReflection
-public import AlphaCentauri.ToFoundation.Fvar
-public import AlphaCentauri.ToFoundation.PrenexCombination
-public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prenex
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.UniformReflection
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.Definability
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Provable
+public import AlphaCentauri.Schemata.Induction
 
 /-!
 # Induction and uniform reflection

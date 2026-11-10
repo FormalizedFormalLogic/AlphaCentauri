@@ -4,7 +4,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.LK.Simplified
 public import AlphaCentauri.OmegaLogic.CutElimination
-public import AlphaCentauri.ToFoundation.Rew
 
 /-!
 # Embedding `𝗣𝗔` into `Z_∞`

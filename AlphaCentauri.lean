@@ -1,12 +1,10 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
-public import AlphaCentauri.Axiomatizability.BSigma
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Axiomatizability.IOpen
 public import AlphaCentauri.Axiomatizability.ISigma
-public import AlphaCentauri.Axiomatizability.ISigma0
+public import AlphaCentauri.Axiomatizability.OpenProblems
 public import AlphaCentauri.Axiomatizability.Reflexive
-public import AlphaCentauri.Axiomatizability.RestrictedComplexity
 public import AlphaCentauri.Bootstrapping.Henkin
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
 public import AlphaCentauri.Bootstrapping.Interpretability.CompositeTable
@@ -75,26 +73,16 @@ public import AlphaCentauri.NumberTheory.ElementaryNumberTheory
 public import AlphaCentauri.NumberTheory.FermatLastTheorem
 public import AlphaCentauri.NumberTheory.Primes
 public import AlphaCentauri.OmegaLogic.Basic
-public import AlphaCentauri.OmegaLogic.Consistency
-public import AlphaCentauri.OmegaLogic.Elimination
+public import AlphaCentauri.OmegaLogic.CutElimination
 public import AlphaCentauri.OmegaLogic.Embedding
-public import AlphaCentauri.OmegaLogic.Inversion
-public import AlphaCentauri.OmegaLogic.Reduction
 public import AlphaCentauri.OpenProblems.ISigma0
-public import AlphaCentauri.ProvabilityLogic.Consistency
-public import AlphaCentauri.ProvabilityLogic.ISigma
-public import AlphaCentauri.ProvabilityLogic.Peano
 public import AlphaCentauri.ProvablyTotal.Basic
-public import AlphaCentauri.ProvablyTotal.FastGrowing
-public import AlphaCentauri.ProvablyTotal.Parikh
+public import AlphaCentauri.ProvablyTotal.Growth
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.Reflection.Definability
 public import AlphaCentauri.Reflection.ISigma
-public import AlphaCentauri.Reflection.InductionFromReflection
-public import AlphaCentauri.Reflection.LeivantOno
-public import AlphaCentauri.Reflection.Peano
-public import AlphaCentauri.Reflection.RelativizedProvability
-public import AlphaCentauri.Reflection.StandardProvability
+public import AlphaCentauri.Reflection.Provability
+public import AlphaCentauri.Reflection.ProvabilityLogic
 public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.Collection
 public import AlphaCentauri.Schemata.Induction

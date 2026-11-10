@@ -4,7 +4,6 @@ public import Foundation.ProvabilityLogic.Classification.General
 public import Foundation.ProvabilityLogic.Classification.Truth
 public import AlphaCentauri.Axiomatizability.ISigma
 public import AlphaCentauri.Reflection.ISigma
-public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 
 /-!

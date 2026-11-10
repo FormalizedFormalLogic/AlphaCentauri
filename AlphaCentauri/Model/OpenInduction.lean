@@ -78,6 +78,106 @@ instance ZRing_weakerThan_IOpen : ZRing ⪯ 𝗜𝗢𝗽𝗲𝗻 :=
 
 end ZRing
 
+section WilkieExtension
+
+/-! ## Models of open induction extending $\mathbb{Z}$-rings
+
+Wilkie's extension theorem: every discretely ordered $\mathbb{Z}$-ring embeds into a discretely
+ordered ring satisfying open induction. As a consequence, $\mathsf{IOpen}$ and $\mathsf{ZR}$ prove
+the same universal sentences.
+-/
+
+/-- Every model of $\mathsf{ZR}$ embeds into a model of $\mathsf{IOpen}$.
+- [Wil78, Lemma 3.2]
+- [BO96, Theorem 1.2]
+- [Raf10, Wilkie's Extension Theorem] -/
+axiom exists_embedding_models_IOpen (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* ZRing] :
+    ∃ (N : Type) (_ : ORingStructure N), N↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 ∧ Nonempty (M ↪ₛ[ℒₒᵣ] N)
+
+open _root_.FFL.FirstOrder.Semiformula in
+/-- $\mathsf{IOpen}$ and $\mathsf{ZR}$ prove the same universal closures of open formulas.
+- [Wil78, §1]
+- [Moh11, §1] -/
+theorem provable_univCl_IOpen_iff {φ : ArithmeticSemiformula ℕ 0} (hφ : φ.Open) :
+    𝗜𝗢𝗽𝗲𝗻 ⊢ φ.univCl ↔ ZRing ⊢ φ.univCl := by
+  constructor
+  · intro h
+    apply complete.{0}
+    intro M _ _
+    obtain ⟨N, _, hN, ⟨Θ⟩⟩ := exists_embedding_models_IOpen M
+    have hN := models_iff_proposition.mp <| models_of_provable hN h
+    apply models_iff_proposition.mpr
+    intro f
+    apply (eval_hom_iff_of_open Θ hφ).mpr
+    simpa [Matrix.empty_eq] using hN (Θ ∘ f)
+  · exact ZRing_weakerThan_IOpen.pbl
+
+open _root_.FFL.FirstOrder.Semiformula in
+/-- The universal closure of an open formula that fails in some model of $\mathsf{ZR}$ is not
+provable in $\mathsf{IOpen}$.
+- [Wil78, §1] -/
+lemma not_provable_IOpen_allClosure {n : ℕ} {φ : ArithmeticSemisentence n} (hφ : φ.Open)
+    {M : Type} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* ZRing] {e : Fin n → M} (h : ¬ Evalb e φ) :
+    𝗜𝗢𝗽𝗲𝗻 ⊬ ∀¹* φ := by
+  intro hp
+  obtain ⟨N, _, hN, ⟨Θ⟩⟩ := exists_embedding_models_IOpen M
+  have := models_of_provable hN hp
+  simp only [models_iff, eval_allClosure] at this
+  apply h
+  apply (eval_hom_iff_of_open Θ hφ (ε₁ := Empty.elim)).mpr
+  rw [Subsingleton.elim (Θ ∘ Empty.elim) Empty.elim]
+  exact this _
+
+end WilkieExtension
+
+section IOpenNonprovability
+
+/-! ## What $\mathsf{IOpen}$ does not prove
+
+Statements about the first-order theory $\mathsf{IOpen}$ of induction for open formulas: it does not
+prove the infinitude of primes, Euclid's lemma, or Bézout's theorem over the existence of greatest
+common divisors, and it has a computable nonstandard model.
+-/
+
+/-- Euclid's lemma: a prime dividing a product divides one of the factors. -/
+def primeDvdMul : ArithmeticSentence := “∀ p a b, !isPrime p → p ∣ a * b → p ∣ a ∨ p ∣ b”
+
+/-- Any two elements have a greatest common divisor. -/
+def greatestCommonDivisor : ArithmeticSentence :=
+  “∀ x y, ∃ z, z ∣ x ∧ z ∣ y ∧ ∀ w, w ∣ x → w ∣ y → w ∣ z”
+
+/-- - [She64]
+- [Wil78]
+- [DAq05, §2, §3]
+- [MM89]
+- [Ada87] -/
+axiom not_provable_infinitudeOfPrimes_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊬ infinitudeOfPrimes
+
+/-- - [MM89]
+- [DAq05, §2] -/
+axiom not_provable_primeDvdMul_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊬ primeDvdMul
+
+/-- $\mathsf{IOpen}$ with greatest common divisors does not prove Bézout's theorem.
+- [Smi93a]
+- [Smi92b, §3]
+- [Moh11, §2] -/
+axiom not_provable_bezout_IOpen_greatestCommonDivisor :
+    insert greatestCommonDivisor 𝗜𝗢𝗽𝗲𝗻 ⊬ bezout
+
+/-- $\mathsf{IOpen}$ has a nonstandard model, on the type $\mathbb{N}$ up to a bijection, whose
+addition, multiplication and order are computable.
+- [She64]
+- [BO96, §1] -/
+axiom exists_computable_nonstandard_model_IOpen :
+    ∃ (M : Type) (_ : ORingStructure M) (e : M ≃ ℕ),
+      Computable₂ (fun a b : ℕ ↦ e (e.symm a + e.symm b)) ∧
+      Computable₂ (fun a b : ℕ ↦ e (e.symm a * e.symm b)) ∧
+      ComputablePred (fun p : ℕ × ℕ ↦ e.symm p.1 < e.symm p.2) ∧
+      M↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 ∧
+      ∃ a : M, ∀ n : ℕ, M ⊧/![a] (“x. ↑n < x” : ArithmeticSemisentence 1)
+
+end IOpenNonprovability
+
 end FFL.FirstOrder.Arithmetic
 
 section NonnegativePart
@@ -213,62 +313,6 @@ end Nonneg
 
 end NonnegativePart
 
-namespace FFL.FirstOrder.Arithmetic
-
-section WilkieExtension
-
-/-! ## Models of open induction extending $\mathbb{Z}$-rings
-
-Wilkie's extension theorem: every discretely ordered $\mathbb{Z}$-ring embeds into a discretely
-ordered ring satisfying open induction. As a consequence, $\mathsf{IOpen}$ and $\mathsf{ZR}$ prove
-the same universal sentences.
--/
-
-/-- Every model of $\mathsf{ZR}$ embeds into a model of $\mathsf{IOpen}$.
-- [Wil78, Lemma 3.2]
-- [BO96, Theorem 1.2]
-- [Raf10, Wilkie's Extension Theorem] -/
-axiom exists_embedding_models_IOpen (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* ZRing] :
-    ∃ (N : Type) (_ : ORingStructure N), N↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 ∧ Nonempty (M ↪ₛ[ℒₒᵣ] N)
-
-open _root_.FFL.FirstOrder.Semiformula in
-/-- $\mathsf{IOpen}$ and $\mathsf{ZR}$ prove the same universal closures of open formulas.
-- [Wil78, §1]
-- [Moh11, §1] -/
-theorem provable_univCl_IOpen_iff {φ : ArithmeticSemiformula ℕ 0} (hφ : φ.Open) :
-    𝗜𝗢𝗽𝗲𝗻 ⊢ φ.univCl ↔ ZRing ⊢ φ.univCl := by
-  constructor
-  · intro h
-    apply complete.{0}
-    intro M _ _
-    obtain ⟨N, _, hN, ⟨Θ⟩⟩ := exists_embedding_models_IOpen M
-    have hN := models_iff_proposition.mp <| models_of_provable hN h
-    apply models_iff_proposition.mpr
-    intro f
-    apply (eval_hom_iff_of_open Θ hφ).mpr
-    simpa [Matrix.empty_eq] using hN (Θ ∘ f)
-  · exact ZRing_weakerThan_IOpen.pbl
-
-open _root_.FFL.FirstOrder.Semiformula in
-/-- The universal closure of an open formula that fails in some model of $\mathsf{ZR}$ is not
-provable in $\mathsf{IOpen}$.
-- [Wil78, §1] -/
-lemma not_provable_IOpen_allClosure {n : ℕ} {φ : ArithmeticSemisentence n} (hφ : φ.Open)
-    {M : Type} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* ZRing] {e : Fin n → M} (h : ¬ Evalb e φ) :
-    𝗜𝗢𝗽𝗲𝗻 ⊬ ∀¹* φ := by
-  intro hp
-  obtain ⟨N, _, hN, ⟨Θ⟩⟩ := exists_embedding_models_IOpen M
-  have := models_of_provable hN hp
-  simp only [models_iff, eval_allClosure] at this
-  apply h
-  apply (eval_hom_iff_of_open Θ hφ (ε₁ := Empty.elim)).mpr
-  rw [Subsingleton.elim (Θ ∘ Empty.elim) Empty.elim]
-  exact this _
-
-end WilkieExtension
-
-end FFL.FirstOrder.Arithmetic
-
 section IntegerConstantPolynomialModel
 
 /-! ## The non-negative part of the $\mathbb{Z}$-ring of polynomials with integer constant term
@@ -292,55 +336,3 @@ theorem models_ZRing : (Nonneg (IntegerConstantPolynomial K))↓[ℒₒᵣ] ⊧*
 end IntegerConstantPolynomial
 
 end IntegerConstantPolynomialModel
-
-namespace FFL.FirstOrder.Arithmetic
-
-section IOpenNonprovability
-
-/-! ## What $\mathsf{IOpen}$ does not prove
-
-Statements about the first-order theory $\mathsf{IOpen}$ of induction for open formulas: it does not
-prove the infinitude of primes, Euclid's lemma, or Bézout's theorem over the existence of greatest
-common divisors, and it has a computable nonstandard model.
--/
-
-/-- Euclid's lemma: a prime dividing a product divides one of the factors. -/
-def primeDvdMul : ArithmeticSentence := “∀ p a b, !isPrime p → p ∣ a * b → p ∣ a ∨ p ∣ b”
-
-/-- Any two elements have a greatest common divisor. -/
-def greatestCommonDivisor : ArithmeticSentence :=
-  “∀ x y, ∃ z, z ∣ x ∧ z ∣ y ∧ ∀ w, w ∣ x → w ∣ y → w ∣ z”
-
-/-- - [She64]
-- [Wil78]
-- [DAq05, §2, §3]
-- [MM89]
-- [Ada87] -/
-axiom not_provable_infinitudeOfPrimes_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊬ infinitudeOfPrimes
-
-/-- - [MM89]
-- [DAq05, §2] -/
-axiom not_provable_primeDvdMul_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊬ primeDvdMul
-
-/-- $\mathsf{IOpen}$ with greatest common divisors does not prove Bézout's theorem.
-- [Smi93a]
-- [Smi92b, §3]
-- [Moh11, §2] -/
-axiom not_provable_bezout_IOpen_greatestCommonDivisor :
-    insert greatestCommonDivisor 𝗜𝗢𝗽𝗲𝗻 ⊬ bezout
-
-/-- $\mathsf{IOpen}$ has a nonstandard model, on the type $\mathbb{N}$ up to a bijection, whose
-addition, multiplication and order are computable.
-- [She64]
-- [BO96, §1] -/
-axiom exists_computable_nonstandard_model_IOpen :
-    ∃ (M : Type) (_ : ORingStructure M) (e : M ≃ ℕ),
-      Computable₂ (fun a b : ℕ ↦ e (e.symm a + e.symm b)) ∧
-      Computable₂ (fun a b : ℕ ↦ e (e.symm a * e.symm b)) ∧
-      ComputablePred (fun p : ℕ × ℕ ↦ e.symm p.1 < e.symm p.2) ∧
-      M↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 ∧
-      ∃ a : M, ∀ n : ℕ, M ⊧/![a] (“x. ↑n < x” : ArithmeticSemisentence 1)
-
-end IOpenNonprovability
-
-end FFL.FirstOrder.Arithmetic

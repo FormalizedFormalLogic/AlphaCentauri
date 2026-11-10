@@ -16,6 +16,9 @@ hierarchy, and induction for bounded existential formulas.
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open _root_.FFL.Entailment
+
 section DeltaOnBroadHierarchy
 
 /-! ## The `Δ` induction scheme over the broad hierarchy
@@ -25,8 +28,6 @@ hierarchy `ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s` instead of the prenex one.
 
 - [Sla04, §1.2]
 -/
-
-open _root_.FFL.Entailment
 
 /-- The `Δ` induction scheme for the broad hierarchy `ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s`. -/
 abbrev IDeltaOnBroadHierarchy (s : ℕ) : ArithmeticTheory :=
@@ -60,10 +61,6 @@ defined by formulas of the broad hierarchy; whether `𝗜𝚫(n + 1)` proves `�
 
 - [Sla04, §2.1]
 -/
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-open _root_.FFL.Entailment
 
 /-- Every model of `𝗕𝚺(n + 1)` satisfies `𝗜𝚫⁺(n + 1)`.
 - [Sla04, §2.1] -/
@@ -107,8 +104,6 @@ that carry no free variable besides the induction variable `x`.
 
 - [Bek99, §1]
 -/
-
-open _root_.FFL.Entailment
 
 section axioms
 

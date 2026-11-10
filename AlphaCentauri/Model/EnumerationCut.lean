@@ -333,6 +333,8 @@ lemma enumCode.exists_le {a I b z t B : V} {G : V → V → Prop}
   rw [tsub_tsub_cancel_of_le hc] at h'
   exact ⟨z', hz', h'⟩
 
+section
+
 variable (a I : V)
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] in
@@ -372,9 +374,7 @@ lemma lt_of_mem_enumerationCut (f : V → V) (hI : ‖I‖ = a + 1) (hunb : ∀ 
   obtain ⟨z, hz, t, h⟩ := hi
   exact enumCode.lt_of_enumCode hgraph (fun x y y' h h' ↦ h.2.symm.trans h'.2) h
 
-end EnumerationCut
-
-noncomputable section CodedLimit
+end
 
 /-! ## The coded limit of an enumeration cut
 
@@ -382,12 +382,6 @@ Over a model of $\mathsf{EA}$, two codes of initial segments of an enumeration c
 entries of the shorter one, and the longer code lies less than one block-bound above the shorter.
 Under $\mathsf{I}\Delta_1$, a single code agrees with every code of the cut on its entries.
 -/
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
-
-attribute [local instance] ElementaryArithmetic.models_ISigma0_union_Omega1
 
 lemma enumCode.ext_eq_of_le {a I i i' z z' t t' : V} {G : V → V → Prop}
     (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y')
@@ -583,6 +577,6 @@ theorem exists_coded_limit [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] {a I : V} {f : V �
     have hM : a - i ≤ a - j := tsub_le_tsub_left hj a
     exact enumCode.ext_eq_of_le_lt hI h hq h₁ h₂ (a - j) hM (sub_le_self a j)
 
-end CodedLimit
+end EnumerationCut
 
 end FFL.FirstOrder.Arithmetic

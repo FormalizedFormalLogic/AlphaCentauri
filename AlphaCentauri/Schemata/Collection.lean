@@ -21,6 +21,8 @@ $\mathsf{I}\Delta_1$ over $\mathsf{EA}$.
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
 section StrongCollection
 
 /-! ## Pieces and strong collection in `𝗜𝚺 (n + 1)`
@@ -31,8 +33,6 @@ where it has none.
 
 - [HP98, Definition I.2.6, Lemma I.2.13(a), Lemma I.2.27]
 -/
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] {n : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(n + 1)]
 
@@ -75,8 +75,6 @@ end StrongCollection
 section InjectiveEnumeration
 
 /-! ## An injective enumeration from a failure of collection -/
-
-open scoped FFL.FirstOrder.Bounding FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 
@@ -172,8 +170,6 @@ noncomputable section CollectionFromDeltaInduction
 Over a model of $\mathsf{EA}$, $\mathsf{I}\Delta_1$ yields collection for $\Delta_0$-definable
 relations, and hence the collection scheme $\mathsf{B}\Sigma_1$.
 -/
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 

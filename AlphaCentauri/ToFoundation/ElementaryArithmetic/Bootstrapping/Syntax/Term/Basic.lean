@@ -708,6 +708,107 @@ lemma courseOfValuesResult_func {k f v : V} (hk : k = len v) :
   rw [← e] at hle
   exact ⟨w, hw, hwv, by rw [courseOfValuesResult, c.courseOfValues.result_eq_val hle, e]⟩
 
+private lemma limSeq_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
+    LocallyDelta0Function fun w : Fin n → V ↦ (c.construction L).limSeq param (f w) := by
+  simpa using (c.construction L).limSeq_locallyDelta0.comp_cons hf fun j ↦
+    LocallyDelta0Function.const (param j)
+
+private lemma courseOfValuesResult_comp {n : ℕ} {f : (Fin n → V) → V}
+    (hf : LocallyDelta0Function f) :
+    LocallyDelta0Function fun w : Fin n → V ↦ c.courseOfValuesResult param (f w) := by
+  simpa using c.courseOfValuesResult_locallyDelta0.comp_cons hf fun j ↦
+    LocallyDelta0Function.const (param j)
+
+lemma isUTerm_and_eq_of_mem_limSeq {s z : V} (h : z ∈ (c.construction L).limSeq param s) :
+    IsUTerm L (π₁ z) ∧ π₂ z = c.courseOfValuesResult param (π₁ z) := by
+  have hR : LocallyDelta0 fun y : Fin 2 → V ↦ y 0 ∈ (c.construction L).limSeq param (y 1) →
+      IsUTerm L (π₁ (y 0)) ∧ π₂ (y 0) = c.courseOfValuesResult param (π₁ (y 0)) :=
+    (LocallyDelta0.mem (LocallyDelta0Function.var 0)
+      (c.limSeq_comp L param (LocallyDelta0Function.var 1))).imp
+      ((pred_comp isUTerm_locallyDelta0 (pi₁_comp (LocallyDelta0Function.var 0))).and
+        (LocallyDelta0.eq (pi₂_comp (LocallyDelta0Function.var 0))
+          (c.courseOfValuesResult_comp param (pi₁_comp (LocallyDelta0Function.var 0)))))
+  have hP : LocallyDelta0Pred fun s ↦ ∀ z < (c.construction L).limSeq param s,
+      z ∈ (c.construction L).limSeq param s →
+        IsUTerm L (π₁ z) ∧ π₂ z = c.courseOfValuesResult param (π₁ z) :=
+    (LocallyDelta0.ball_lt_function
+      (c.limSeq_comp L param (LocallyDelta0Function.var (V := V) (0 : Fin 1))) hR).of_iff
+        fun w ↦ by simp
+  have : ∀ s, ∀ z < (c.construction L).limSeq param s,
+      z ∈ (c.construction L).limSeq param s →
+        IsUTerm L (π₁ z) ∧ π₂ z = c.courseOfValuesResult param (π₁ z) := by
+    apply LocallyDelta0Pred.succ_induction hP
+    · intro z _ hz
+      simp at hz
+    · intro s ih z _ hz
+      have hΦ : c.Phi L param {z | z ∈ (c.construction L).limSeq param s} z :=
+        ((c.construction L).mem_limSeq_succ_iff.mp hz).2
+      obtain ⟨ht, H⟩ := hΦ
+      refine ⟨ht, ?_⟩
+      rcases H with (⟨z', rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, w, ⟨hk, hw⟩, rfl⟩)
+      · simp [courseOfValuesResult_bvar]
+      · simp [courseOfValuesResult_fvar]
+      · have hkv : k = len v := (IsUTerm.func_iff.mp (by simpa using ht)).2.lh
+        obtain ⟨w', hw', hw'v, he⟩ := c.courseOfValuesResult_func param (f := f) hkv
+        have : w = w' := by
+          apply nth_ext (by rw [← hk, hw'])
+          intro i hi
+          have hi' : i < k := by simpa [← hk] using hi
+          have hmem : ⟪v.[i], w.[i]⟫ ∈ (c.construction L).limSeq param s := hw i hi'
+          have := (ih _ (lt_of_mem hmem) hmem).2
+          simp only [pi₂_pair, pi₁_pair] at this
+          rw [this, hw'v i hi']
+        simp [he, this]
+  exact this s z (lt_of_mem h) h
+
+lemma mem_limSeq_of_isUTerm {t : V} (ht : IsUTerm L t) :
+    ⟪t, c.courseOfValuesResult param t⟫ ∈
+      (c.construction L).limSeq param (⟪t, c.bound param t⟫ + t + 1) := by
+  set K := ⟪t, c.bound param t⟫
+  have hP : LocallyDelta0Pred fun t' ↦ t' ≤ t → IsUTerm L t' →
+      ⟪t', c.courseOfValuesResult param t'⟫ ∈ (c.construction L).limSeq param (K + t' + 1) := by
+    have hmem := LocallyDelta0.mem
+      (LocallyDelta0Function.pairing.comp₂ (LocallyDelta0Function.var (V := V) (0 : Fin 1))
+        (c.courseOfValuesResult_comp param (LocallyDelta0Function.var (V := V) (0 : Fin 1))))
+      (c.limSeq_comp L param <| LocallyDelta0Function.add_one <|
+        LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const K)
+          (LocallyDelta0Function.var (V := V) (0 : Fin 1)))
+    exact (LocallyDelta0.le (LocallyDelta0Function.var 0) (LocallyDelta0Function.const t)).imp
+      ((pred_comp isUTerm_locallyDelta0 (LocallyDelta0Function.var 0)).imp hmem)
+  have : ∀ t', t' ≤ t → IsUTerm L t' →
+      ⟪t', c.courseOfValuesResult param t'⟫ ∈ (c.construction L).limSeq param (K + t' + 1) := by
+    apply LocallyDelta0Pred.order_induction hP
+    intro t' ih ht' hu
+    have hle : ⟪t', c.courseOfValuesResult param t'⟫ ≤ K :=
+      pair_le_pair ht' (le_trans (c.courseOfValuesResult_le_bound param t')
+        (c.bound_monotone param ht'))
+    apply (c.construction L).mem_limSeq_succ_iff.mpr
+    refine ⟨le_trans hle le_self_add, ?_⟩
+    change c.Phi L param _ _
+    refine ⟨by simpa using hu, ?_⟩
+    rcases IsUTerm.case hu with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, _, hv, rfl⟩)
+    · disj 1; exact ⟨z, by rw [courseOfValuesResult_bvar]⟩
+    · disj 2; exact ⟨x, by rw [courseOfValuesResult_fvar]⟩
+    · disj 3
+      obtain ⟨w, hw, hwv, he⟩ := c.courseOfValuesResult_func param (f := f) hv.lh
+      refine ⟨k, f, v, w, ⟨hw.symm, fun i hi ↦ ?_⟩, by rw [he]⟩
+      have hvi : v.[i] < ^func k f v := nth_lt_qqFunc_of_lt (by simpa [← hv.lh] using hi)
+      rw [hwv i hi]
+      exact (c.construction L).limSeq_cumulative
+        (by rw [add_assoc]; exact add_le_add_right (succ_le_iff_lt.mpr hvi) K)
+        (ih _ hvi (le_trans hvi.le ht') (hv.nth hi))
+  exact this t le_rfl ht
+
+variable {param}
+
+lemma graph_iff {t y : V} :
+    c.Graph L param t y ↔ IsUTerm L t ∧ y = c.courseOfValuesResult param t := by
+  constructor
+  · rintro ⟨s, h⟩
+    simpa using c.isUTerm_and_eq_of_mem_limSeq L param h
+  · rintro ⟨ht, rfl⟩
+    exact ⟨_, c.mem_limSeq_of_isUTerm L param ht⟩
+
 end Construction
 
 end Language.TermRec

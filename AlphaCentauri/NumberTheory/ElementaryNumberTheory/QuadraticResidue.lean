@@ -4,7 +4,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Mathlib.Data.Nat.Prime.Defs
-public import AlphaCentauri.Schemata.DeltaInduction
+public import AlphaCentauri.Schemata.BoundedInduction
 
 /-!
 # Quadratic residues in weak arithmetic

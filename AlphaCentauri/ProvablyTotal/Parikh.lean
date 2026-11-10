@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Model.EndExtension
+public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ConstantExtension
 public import AlphaCentauri.ToFoundation.Logic.Compact

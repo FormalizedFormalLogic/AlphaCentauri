@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
-public import AlphaCentauri.Schemata.DeltaInduction
+public import AlphaCentauri.Schemata.BoundedInduction
 
 /-!
 # Statements of Fermat's Last Theorem and its cases

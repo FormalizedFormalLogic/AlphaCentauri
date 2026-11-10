@@ -1069,6 +1069,36 @@ theorem derivable_comp_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L 
     rw [hv] at h
     exact h
 
+include h₁ hT₂ hc in
+/-- Along the composite table and along the composite of the translations, every formula code
+fixed by the shift has provably equivalent translations. -/
+theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
+    (hL : L.SymbolsStandard V) {p : V} (hp : IsFormula L p) (hps : shift L p = p) :
+    Provable S (iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) p)
+      (translate L L tbl₁ (translate L L tbl₂ p))) := by
+  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain
+  have hds : shift L tbl₁.[0] = tbl₁.[0] := h₁.domain_shift
+  have ha := IsSemiformula.translate hc hp
+  have hb := IsSemiformula.translate h₁.toIsTable (IsSemiformula.translate hT₂ hp)
+  have h₀ := derivable_comp_translate h₁ hT₂ hc hS hL hp
+  set X := iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) p)
+    (translate L L tbl₁ (translate L L tbl₂ p)) with hXdef
+  have hX : IsFormula L X := by simp [hXdef, ha, hb]
+  have hXs : shift L X = X := by
+    rw [hXdef, shift_iff_code ha hb, ← translate_shift hc hp,
+      ← translate_shift h₁.toIsTable (IsSemiformula.translate hT₂ hp), ← translate_shift hT₂ hp,
+      hps]
+  have h₂ : Derivable S (insert X ∅ ∪ negDomSet L tbl₁.[0] p) :=
+    Derivable.ofSetEq (fun x ↦ by simp) h₀
+  have hfresh : ∀ j, 0 ≤ j → j < p →
+      fvSubstImage (L := L) (freshVec j) (insert X ∅) = setShift L (insert X ∅) := by
+    intro j _ _
+    rw [fvSubstImage_insert, fvSubstImage_empty, mem_setShift_insert, setShift_empty,
+      fvSubst_eq_self_of_shift hX hXs, hXs]
+  have h₃ := Derivable.elim_negDomSet hS hdom hds h₁.exs_domain (by simp [hX]) zero_le hfresh h₂
+  rw [negDomSet_zero] at h₃
+  exact internal_provable_iff_internal_derivable.mpr (Derivable.ofSetEq (fun x ↦ by simp) h₃)
+
 end compFormula
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

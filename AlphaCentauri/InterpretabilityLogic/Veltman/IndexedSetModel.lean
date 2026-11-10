@@ -259,55 +259,6 @@ lemma not_models_countermodel [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] [ILMinusJ5 
 
 end Logic.ofAxiomsMinus
 
-namespace Logic
-
-open Veltman Veltman.Model
-
-variable {α : Type} {A : Formula α}
-
-/-- - [KO21, Theorem 5.4] -/
-theorem ILMinusJ2PlusJ5.complete
-    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ2] → [M.IsJ5] → M ⊧ A) :
-    ILMinusJ2PlusJ5 ⊢ A := by
-  classical
-  by_contra hA;
-  have : Entailment.Consistent (ILMinusJ2PlusJ5 : Logic α) := .of_unprovable hA;
-  exact ofAxiomsMinus.not_models_countermodel hA <|
-    h (countermodel ILMinusJ2PlusJ5 (ilMinusAdequateClosure {A}))
-
-/-- - [KO21, Theorem 5.4] -/
-theorem IL.complete_ILMinus
-    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → [M.IsJ5] → M ⊧ A) :
-    𝐈𝐋 ⊢ A := by
-  classical
-  let 𝔸 : Set (Formula α) :=
-    {Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}
-  rw [IL.eq_ofAxiomsMinus];
-  by_contra hA;
-  have : Entailment.Consistent (ofAxiomsMinus 𝔸) := .of_unprovable hA;
-  have : (ILMinusJ1 : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
-    weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_subset <|
-      Set.subset_union_left.trans Set.subset_union_left;
-  have : (ILMinusJ5 : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
-    weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_subset Set.subset_union_right;
-  have : (ILMinusJ2Plus : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
-    weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_provable <| by
-      rintro _ ⟨A, B, C, rfl⟩;
-      exact ofAxiomsMinus.subset_of_subset Set.subset_union_left CL.axiomJ2Plus;
-  exact ofAxiomsMinus.not_models_countermodel hA <| h (countermodel _ (ilMinusAdequateClosure {A}))
-
-/-- - [dJV90, Theorem 4.1] -/
-theorem IL.complete
-    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A) :
-    𝐈𝐋 ⊢ A := by
-  apply IL.complete_ILMinus;
-  intro κ _ _ M _ _ _ _;
-  have : M.IsIL := .of_isILMinus
-  exact h M
-
-end Logic
 
 end
 

@@ -1,18 +1,19 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 
 /-!
-# Sublogics of $\mathbf{IL}$ extending $\mathbf{IL}^-$
+# Extensions of $\mathbf{IL}^-$
 
-The logic $\mathbf{IL}^-$, its extensions by the schemata $\mathbf{J1}$, $\mathbf{J2}$,
-$\mathbf{J2}^+$, $\mathbf{J4}$, $\mathbf{J4}^+$ and $\mathbf{J5}$, the principles derivable in
-them, the inclusions between them, and $\mathbf{IL}$ as
-$\mathbf{IL}^-(\mathbf{J1}, \mathbf{J2}, \mathbf{J5})$.
+This file keeps the framework `ofAxiomsMinus`, the logic $\mathbf{IL}^-$, the named sublogics of
+$\mathbf{IL}^-$ with their derived principles and inclusions, and $\mathbf{CL}$ in one place. The
+completeness constructions in `Veltman` and `Verbrugge` refer to these names and to their derived
+principles, so the definitions cannot move into the files that state soundness and completeness
+without creating an import cycle. Those files are `Logic/ILMinus/<sublogic>.lean`.
 -/
 
 @[expose] public section
+
 
 namespace FFL.InterpretabilityLogic
 
@@ -653,109 +654,6 @@ theorem ILMinusJ2Plus.eq_ofAxiomsMinus_J2Plus' :
 
 end Logic
 
-/-! ### $\mathbf{IL}$ as an extension of $\mathbf{IL}^-$ -/
-
-namespace Logic.ofAxioms
-
-variable {𝔸 : Set (Formula α)} {A : Formula α}
-
-/-- - [KO21, Proposition 3.20.1] -/
-lemma axiomJ6 : ofAxioms 𝔸 ⊢ Axioms.J6 A := by
-  have h₁ : ofAxioms 𝔸 ⊢ □A 🡒 □(∼A 🡒 ⊥) := box_mono (by cl_prover);
-  have h₂ : ofAxioms 𝔸 ⊢ □(∼A 🡒 ⊥) 🡒 ∼A ▷ ⊥ := axiomJ1;
-  have h₃ : ofAxioms 𝔸 ⊢ ∼A ▷ ⊥ 🡒 ∼□(∼∼A) 🡒 ∼□(∼⊥) := axiomJ4;
-  have h₄ : ofAxioms 𝔸 ⊢ ∼⊥ := by cl_prover;
-  have h₄ : ofAxioms 𝔸 ⊢ □(∼⊥) := nec h₄;
-  have h₅ : ofAxioms 𝔸 ⊢ □(∼∼A) 🡒 □A := box_mono (by cl_prover);
-  cl_prover [h₁, h₂, h₃, h₄, h₅];
-
-/-- The extension of $\mathbf{IL}$ by `𝔸` is $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J2}, \mathbf{J5})$
-extended by `𝔸`.
-
-- [KO21, Corollary 3.22]
--/
-theorem eq_ofAxiomsMinus :
-    ofAxioms 𝔸 = ofAxiomsMinus
-      ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A} ∪ 𝔸) := by
-  apply Set.Subset.antisymm;
-  · intro A h;
-    induction h with
-    | axm h => exact ofAxiomsMinus.axm (by simp [h]);
-    | mdp _ _ ih₁ ih₂ => exact ofAxiomsMinus.mdp ih₁ ih₂;
-    | nec _ ih => exact ofAxiomsMinus.nec ih;
-    | verum => exact ofAxiomsMinus.verum;
-    | implyK => exact ofAxiomsMinus.implyK;
-    | implyS => exact ofAxiomsMinus.implyS;
-    | andElimL => exact ofAxiomsMinus.andElimL;
-    | andElimR => exact ofAxiomsMinus.andElimR;
-    | andIntro => exact ofAxiomsMinus.andIntro;
-    | orIntroL => exact ofAxiomsMinus.orIntroL;
-    | orIntroR => exact ofAxiomsMinus.orIntroR;
-    | orElim => exact ofAxiomsMinus.orElim;
-    | dne => exact ofAxiomsMinus.dne;
-    | axiomK => exact ofAxiomsMinus.axiomK;
-    | axiomL => exact ofAxiomsMinus.axiomL;
-    | axiomJ1 => exact ofAxiomsMinus.axm (by simp);
-    | axiomJ2 => exact ofAxiomsMinus.axm (by simp);
-    | axiomJ3 => exact ofAxiomsMinus.axiomJ3;
-    | axiomJ4 => exact ofAxiomsMinus.subset_of_subset (by tauto_set) ILMinusJ2.axiomJ4;
-    | axiomJ5 => exact ofAxiomsMinus.axm (by simp);
-  · intro A h;
-    induction h with
-    | axm h =>
-      rcases h with (((⟨A, B, rfl⟩ | ⟨A, B, C, rfl⟩) | ⟨A, rfl⟩) | h);
-      · exact axiomJ1;
-      · exact axiomJ2;
-      · exact axiomJ5;
-      · exact axm h;
-    | mdp _ _ ih₁ ih₂ => exact mdp ih₁ ih₂;
-    | nec _ ih => exact nec ih;
-    | rule1 _ ih => exact rhd_mono_right ih;
-    | rule2 _ ih => exact rhd_anti_left ih;
-    | verum => exact verum;
-    | implyK => exact implyK;
-    | implyS => exact implyS;
-    | andElimL => exact andElimL;
-    | andElimR => exact andElimR;
-    | andIntro => exact andIntro;
-    | orIntroL => exact orIntroL;
-    | orIntroR => exact orIntroR;
-    | orElim => exact orElim;
-    | dne => exact dne;
-    | axiomK => exact axiomK;
-    | axiomL => exact axiomL;
-    | axiomJ3 => exact axiomJ3;
-    | axiomJ6 => exact axiomJ6;
-
-end Logic.ofAxioms
-
-namespace Logic
-
-open ofAxiomsMinus
-
-/-- - [KO21, Corollary 3.22] -/
-theorem IL.eq_ofAxiomsMinus :
-    (𝐈𝐋 : Logic α) = ofAxiomsMinus
-      ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}) := by
-  simpa using ofAxioms.eq_ofAxiomsMinus (𝔸 := (∅ : Set (Formula α)));
-
-instance : (𝐂𝐋 : Logic α) ⪯ 𝐈𝐋 :=
-  weakerThan_iff.mpr <| IL.eq_ofAxiomsMinus ▸ subset_of_subset Set.subset_union_left
-
-instance : (ILMinusJ2PlusJ5 : Logic α) ⪯ 𝐈𝐋 :=
-  weakerThan_iff.mpr <| IL.eq_ofAxiomsMinus ▸ subset_of_provable (by
-    rintro _ (⟨A, B, C, rfl⟩ | ⟨A, rfl⟩);
-    · exact subset_of_subset Set.subset_union_left CL.axiomJ2Plus;
-    · exact axm (by simp);)
-
-instance : (ILMinusJ1J4PlusJ5 : Logic α) ⪯ 𝐈𝐋 :=
-  weakerThan_iff.mpr <| IL.eq_ofAxiomsMinus ▸ subset_of_provable (by
-    rintro _ ((⟨A, B, rfl⟩ | ⟨A, B, C, rfl⟩) | ⟨A, rfl⟩);
-    · exact axm (by simp);
-    · exact subset_of_subset Set.subset_union_left CL.axiomJ4Plus;
-    · exact axm (by simp);)
-
-end Logic
 
 end FFL.InterpretabilityLogic
 

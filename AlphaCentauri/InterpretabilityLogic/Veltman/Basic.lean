@@ -244,36 +244,6 @@ end Model.World
 
 end Veltman
 
-/-! ### Soundness of $\mathbf{IL}$ -/
-
-namespace Logic.ofAxioms
-
-open Veltman Veltman.Model Veltman.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : Set (Formula α)} {A : Formula α}
-
-theorem sound [M.IsIL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxioms 𝔸 ⊢ A) : M ⊧ A := by
-  intro x
-  induction h generalizing x with
-  | axm hA => exact h𝔸 _ hA x
-  | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x)
-  | nec _ ih =>
-    intro y _
-    exact ih y
-  | axiomL => exact forces_axiomL
-  | axiomJ1 => exact forces_axiomJ1
-  | axiomJ2 => exact forces_axiomJ2
-  | axiomJ3 => exact forces_axiomJ3
-  | axiomJ4 => exact forces_axiomJ4
-  | axiomJ5 => exact forces_axiomJ5
-  | _ => grind
-
-end Logic.ofAxioms
-
-instance {α : Type*} : Entailment.Consistent (𝐈𝐋 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦
-    Logic.ofAxioms.sound (M := Veltman.Model.pointModel fun _ ↦ False) (by simp) h 0
-
 /-! ### Soundness of the sublogics of $\mathbf{IL}$ -/
 
 namespace Logic.ofAxiomsMinus
@@ -311,37 +281,12 @@ open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILMinus.sound [M.IsILMinus] : 𝐈𝐋⁻ ⊢ A → M ⊧ A := ofAxiomsMinus.sound (by simp)
 
-theorem ILMinusJ1.sound [M.IsILMinus] [M.IsJ1] : ILMinusJ1 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound <| by
-    rintro _ ⟨A, B, rfl⟩ x;
-    exact forces_axiomJ1
 
-theorem ILMinusJ2.sound [M.IsILMinus] [M.IsJ2] : ILMinusJ2 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound <| by
-    rintro _ ⟨A, B, C, rfl⟩ x;
-    exact forces_axiomJ2
 
-theorem ILMinusJ2Plus.sound [M.IsILMinus] [M.IsJ2] : ILMinusJ2Plus ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound <| by
-    rintro _ ⟨A, B, C, rfl⟩ x;
-    exact forces_axiomJ2Plus
 
-theorem ILMinusJ4.sound [M.IsILMinus] [M.IsJ4] : ILMinusJ4 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound <| by
-    rintro _ ⟨A, B, rfl⟩ x;
-    exact forces_axiomJ4
 
-theorem ILMinusJ4Plus.sound [M.IsILMinus] [M.IsJ4] : ILMinusJ4Plus ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound <| by
-    rintro _ ⟨A, B, C, rfl⟩ x;
-    exact forces_axiomJ4Plus
 
-theorem ILMinusJ5.sound [M.IsILMinus] [M.IsJ5] : ILMinusJ5 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound <| by
-    rintro _ ⟨A, rfl⟩ x;
-    exact forces_axiomJ5
 
 theorem ILMinusJ1J5.sound [M.IsILMinus] [M.IsJ1] [M.IsJ5] : ILMinusJ1J5 ⊢ A → M ⊧ A :=
   ofAxiomsMinus.sound <| by
@@ -349,17 +294,7 @@ theorem ILMinusJ1J5.sound [M.IsILMinus] [M.IsJ1] [M.IsJ5] : ILMinusJ1J5 ⊢ A �
     · exact forces_axiomJ1;
     · exact forces_axiomJ5;
 
-theorem ILMinusJ4PlusJ5.sound [M.IsILMinus] [M.IsJ4] [M.IsJ5] : ILMinusJ4PlusJ5 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound <| by
-    rintro _ (⟨A, B, C, rfl⟩ | ⟨A, rfl⟩) x;
-    · exact forces_axiomJ4Plus;
-    · exact forces_axiomJ5;
 
-theorem ILMinusJ1J4Plus.sound [M.IsILMinus] [M.IsJ1] [M.IsJ4] : ILMinusJ1J4Plus ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound <| by
-    rintro _ (⟨A, B, rfl⟩ | ⟨A, B, C, rfl⟩) x;
-    · exact forces_axiomJ1;
-    · exact forces_axiomJ4Plus;
 
 theorem ILMinusJ1J4PlusJ5.sound [M.IsILMinus] [M.IsJ1] [M.IsJ4] [M.IsJ5] :
     ILMinusJ1J4PlusJ5 ⊢ A → M ⊧ A :=
@@ -383,52 +318,6 @@ theorem CL.sound [M.IsILMinus] [M.IsJ1] [M.IsJ2] : 𝐂𝐋 ⊢ A → M ⊧ A :=
 
 end Logic
 
-section Consistency
-
-open Veltman.Model Logic
-
-variable {α : Type*}
-
-instance : Entailment.Consistent (𝐈𝐋⁻ : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinus.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (ILMinusJ1 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ1.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (ILMinusJ2 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ2.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (ILMinusJ2Plus : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ2Plus.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (ILMinusJ4 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ4.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (ILMinusJ4Plus : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ4Plus.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (ILMinusJ5 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ5.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (ILMinusJ1J5 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ1J5.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (ILMinusJ4PlusJ5 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ4PlusJ5.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (ILMinusJ1J4Plus : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ1J4Plus.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (ILMinusJ1J4PlusJ5 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ1J4PlusJ5.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (ILMinusJ2PlusJ5 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ2PlusJ5.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Entailment.Consistent (𝐂𝐋 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ CL.sound (M := pointModel fun _ ↦ False) h 0
-
-end Consistency
 
 /-! ### Strict inclusions -/
 
@@ -452,7 +341,7 @@ private instance : (counterJ1 α).IsJ2 where
 
 private instance : (counterJ1 α).IsJ5 := ⟨by omega⟩
 
-private lemma unprovable_J1 [L ⪯ ILMinusJ2PlusJ5] : L ⊬ Axioms.J1 ⊤ ⊤ := by
+lemma unprovable_J1 [L ⪯ ILMinusJ2PlusJ5] : L ⊬ Axioms.J1 ⊤ ⊤ := by
   intro h;
   replace h := WeakerThan.pbl (𝓣 := ILMinusJ2PlusJ5) h;
   obtain ⟨z, h, -⟩ :=
@@ -473,7 +362,7 @@ private instance : (counterJ5 α).IsJ2 where
   rel_of_s_right := by omega
   s_trans := by omega
 
-private lemma unprovable_J5 [L ⪯ 𝐂𝐋] : L ⊬ Axioms.J5 (□⊥) := by
+lemma unprovable_J5 [L ⪯ 𝐂𝐋] : L ⊬ Axioms.J5 (□⊥) := by
   intro h;
   replace h := WeakerThan.pbl (𝓣 := 𝐂𝐋) h;
   have h₁ : (1 : Fin 3) ⊩[counterJ5 α] ◇□⊥ :=
@@ -521,7 +410,7 @@ private instance : (counterJ2 α).IsJ4 := ⟨by omega⟩
 
 private instance : (counterJ2 α).IsJ5 := ⟨by omega⟩
 
-private lemma unprovable_J2 [L ⪯ ILMinusJ1J4PlusJ5] : L ⊬ Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤) := by
+lemma unprovable_J2 [L ⪯ ILMinusJ1J4PlusJ5] : L ⊬ Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤) := by
   intro h;
   replace h := WeakerThan.pbl (𝓣 := ILMinusJ1J4PlusJ5) h;
   have h₁ : (0 : Fin 4) ⊩[counterJ2 α] □⊥ ▷ (◇⊤ ⋏ □□⊥) ⋏ (◇⊤ ⋏ □□⊥) ▷ ◇◇⊤ := by
@@ -559,8 +448,6 @@ instance : (ILMinusJ4PlusJ5 : Logic α) ⪱ ILMinusJ1J4PlusJ5 :=
 
 instance : (ILMinusJ2Plus : Logic α) ⪱ 𝐂𝐋 := .of_unprovable_provable unprovable_J1 (by simp)
 
-instance : (ILMinusJ2PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
-  .of_unprovable_provable unprovable_J1 ofAxioms.axiomJ1
 
 instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ5 := .of_unprovable_provable unprovable_J5 (by simp)
 
@@ -576,7 +463,6 @@ instance : (ILMinusJ1 : Logic α) ⪱ ILMinusJ1J5 :=
 instance : (ILMinusJ1J4Plus : Logic α) ⪱ ILMinusJ1J4PlusJ5 :=
   .of_unprovable_provable unprovable_J5 (axm (by simp))
 
-instance : (𝐂𝐋 : Logic α) ⪱ 𝐈𝐋 := .of_unprovable_provable unprovable_J5 ofAxioms.axiomJ5
 
 instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ4Plus := .of_unprovable_provable unprovable_J4Plus (by simp)
 
@@ -597,8 +483,6 @@ instance : (ILMinusJ1J4Plus : Logic α) ⪱ 𝐂𝐋 := .of_unprovable_provable 
 instance : (ILMinusJ4PlusJ5 : Logic α) ⪱ ILMinusJ2PlusJ5 :=
   .of_unprovable_provable unprovable_J2 (WeakerThan.pbl (𝓢 := ILMinusJ2Plus) (by simp))
 
-instance : (ILMinusJ1J4PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
-  .of_unprovable_provable unprovable_J2 ofAxioms.axiomJ2
 
 end Logic
 

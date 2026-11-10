@@ -177,6 +177,7 @@ public import AlphaCentauri.ToMathlib.ONote.Hardy
 public import AlphaCentauri.ToMathlib.OpenPredicate
 public import AlphaCentauri.ToMathlib.Ordinal.Bounds
 public import AlphaCentauri.ToMathlib.Ordinal.Rank
+public import AlphaCentauri.ToMathlib.PadicIntegralPolynomial
 public import AlphaCentauri.ToMathlib.Primrec
 public import AlphaCentauri.ToMathlib.RealClosedField
 public import AlphaCentauri.ToMathlib.RingOfDifferences

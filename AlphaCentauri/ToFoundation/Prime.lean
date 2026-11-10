@@ -1,5 +1,6 @@
 module
 
+public import Mathlib.Data.Nat.Prime.Defs
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
@@ -106,6 +107,11 @@ lemma IsPrime.eq_of_sub_one_div_two_eq (hp : IsPrime p) (hp' : IsPrime p')
   · exact (htwo hp' (h.symm.trans hzero)).symm
   · exact htwo hp (h.trans hzero)
   · rw [← tsub_add_cancel_of_le (hle hp), ← tsub_add_cancel_of_le (hle hp'), hp2, hp2', h]
+
+lemma isPrime_natCast {p : ℕ} (hp : p.Prime) : IsPrime (p : V) := by
+  have h : IsPrime p := ⟨hp.one_lt, fun b hb hd ↦ (Nat.prime_def.mp hp).2 b hd⟩
+  simpa using (Defined.sigmaZero_absolute (V := V) (isPrime_defined (V := ℕ))
+    (isPrime_defined (V := V)) ![p]).mp h
 
 namespace IsPrimePower
 

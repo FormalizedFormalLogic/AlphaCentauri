@@ -130,10 +130,13 @@ instance : (countermodel L Φ).IsJ5 where
 
 instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsJ1 where
   s_refl {w x} h := by
-    refine ⟨⟨h, h⟩, fun C h₁ h₂ h₃ ↦ ⟨h₁, h₂, h₂.not_mem ?_, h₃⟩⟩;
-    have hC : IsRhdOperand Φ C := x.isRhdOperand_of_mem_seq C <| h₁.subset (by simp);
-    exact (mem_iff_provable (Adequate.rhd_mem hC hC)).mpr <|
-      Context.of <| WeakerThan.pbl (𝓢 := ILMinusJ1) ILMinusJ1.axiomJ1'
+    constructor;
+    · exact ⟨h, h⟩;
+    · intro C h₁ h₂ h₃;
+      have hC : IsRhdOperand Φ C := x.isRhdOperand_of_mem_seq C <| h₁.subset (by simp);
+      have hCC : C ▷ C ∈ w.set := (mem_iff_provable (Adequate.rhd_mem hC hC)).mpr <|
+        Context.of <| WeakerThan.pbl (𝓢 := ILMinusJ1) ILMinusJ1.axiomJ1';
+      exact ⟨h₁, h₂, h₂.not_mem hCC, h₃⟩;
 
 instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsIL where
   rel_of_s_left := IsILMinus.rel_of_s_left

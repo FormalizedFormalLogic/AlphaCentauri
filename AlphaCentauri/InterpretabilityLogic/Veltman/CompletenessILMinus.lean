@@ -310,10 +310,13 @@ instance [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] :
     (labelledModel (J2Plus (𝔸 := 𝔸) (Φ := Φ))).IsJ2 where
   rel_of_s_right h := h.2.1
   s_trans h₁ h₂ := by
-    refine ⟨h₁.1, h₂.2.1, fun h ↦ ?_⟩;
-    obtain ⟨h₃, h₄, -⟩ := h₁.2.2 h;
-    obtain ⟨h₅, h₆, h₇⟩ := h₂.2.2 (h₃ ▸ h₄);
-    exact ⟨h₅.trans h₃, h₃ ▸ h₆, h₃ ▸ h₇⟩;
+    and_intros;
+    · exact h₁.1;
+    · exact h₂.2.1;
+    · intro h;
+      obtain ⟨h₃, h₄, -⟩ := h₁.2.2 h;
+      obtain ⟨h₅, h₆, h₇⟩ := h₂.2.2 (h₃ ▸ h₄);
+      exact ⟨h₅.trans h₃, h₃ ▸ h₆, h₃ ▸ h₇⟩;
 
 /-- - [KO21, Lemma 5.2] -/
 instance [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] [ILMinusJ1 ⪯ ofAxiomsMinus 𝔸] :

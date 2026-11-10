@@ -166,7 +166,6 @@ lemma Rel.rel (h : w.Rel u) : w.head.Rel u.head := by
 
 variable [Entailment.Cl L]
 
-/-- - [dJV90, Theorem 5.2] -/
 lemma not_mem_of_prefix {C : Formula α} (h₁ : w.head :: w.tail <:+ v.head :: v.tail)
     (h₂ : w.head.seq ++ [C] <+: v.head.seq) (hC : ∀ {Γ : MaximalConsistentSet L Φ}, C ▷ C ∈ Γ) :
     □(∼C) ∈ v.head.set ∧ C ∉ v.head.set := by

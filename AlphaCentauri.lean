@@ -51,6 +51,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
+public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILP
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.Model.Basic

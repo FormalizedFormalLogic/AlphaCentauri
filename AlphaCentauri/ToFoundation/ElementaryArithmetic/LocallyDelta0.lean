@@ -262,6 +262,18 @@ lemma comp₃ {R : (Fin 3 → V) → Prop} {f f' f'' : (Fin k → V) → V} (h :
     fun _ ↦ iff_of_eq <| congrArg R <|
       funext (Fin.cases rfl (Fin.cases rfl (Fin.cases rfl finZeroElim)))
 
+lemma eq {f' : (Fin k → V) → V} (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+    LocallyDelta0 fun v ↦ f v = f' v :=
+  (of_definable (R := fun w : Fin 2 → V ↦ w 0 = w 1) (by definability)).comp₂ hf hf'
+
+lemma le {f' : (Fin k → V) → V} (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+    LocallyDelta0 fun v ↦ f v ≤ f' v :=
+  (of_definable (R := fun w : Fin 2 → V ↦ w 0 ≤ w 1) (by definability)).comp₂ hf hf'
+
+lemma lt {f' : (Fin k → V) → V} (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+    LocallyDelta0 fun v ↦ f v < f' v :=
+  (of_definable (R := fun w : Fin 2 → V ↦ w 0 < w 1) (by definability)).comp₂ hf hf'
+
 /-- Substitution of locally $\Delta_0$ functions for the variables of a locally $\Delta_0$
 relation, one of them for the first variable. -/
 lemma comp_cons {R : (Fin (l + 1) → V) → Prop} {u : Fin l → (Fin k → V) → V}
@@ -329,6 +341,23 @@ lemma ball_lt_function (hf : LocallyDelta0Function f) (h : LocallyDelta0 P) :
   (bexs_lt_function hf h.not).not.of_iff fun _ ↦ by simp
 
 end LocallyDelta0
+
+/-- A case distinction on a locally $\Delta_0$ condition. -/
+lemma LocallyDelta0Function.ite [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {Q : (Fin k → V) → Prop} [DecidablePred Q]
+    {f g : (Fin k → V) → V} (hQ : LocallyDelta0 Q) (hf : LocallyDelta0Function f)
+    (hg : LocallyDelta0Function g) : LocallyDelta0Function fun v ↦ if Q v then f v else g v where
+  graph := by
+    have hQ' : LocallyDelta0 fun w : Fin (k + 1) → V ↦ Q (w ·.succ) := hQ.retraction Fin.succ
+    exact ((hQ'.and hf.graph).or (hQ'.not.and hg.graph)).of_iff fun w ↦ by
+      by_cases h : Q (w ·.succ) <;> simp [h]
+  bounded X := by
+    obtain ⟨Y, hY⟩ := hf.bounded X
+    obtain ⟨Z, hZ⟩ := hg.bounded X
+    use Y + Z
+    intro v hv
+    by_cases h : Q v
+    · simpa [h] using le_trans (hY v hv) le_self_add
+    · simpa [h] using le_trans (hZ v hv) le_add_self
 
 section exponential
 

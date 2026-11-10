@@ -136,6 +136,21 @@ private lemma pair_le_of {a b m : V} (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp
     ⟪a, b⟫ ≤ Exp.exp (Exp.exp (m + 2)) :=
   le_trans (by rw [adjoin_def]; exact le_self_add) (adjoin_le_of hn ha hb hnm)
 
+private lemma set3_le_exp_exp {N a b c : V} (ha : a ≤ N) (hb : b ≤ N) (hc : c ≤ N) :
+    (insert a (insert b {c}) : V) ≤ Exp.exp (Exp.exp N) :=
+  set_le_exp_exp fun x hx ↦ by
+    rcases (by simpa using hx : x = a ∨ x = b ∨ x = c) with rfl | rfl | rfl <;> assumption
+
+private lemma set2_le_exp_exp {N a b : V} (ha : a ≤ N) (hb : b ≤ N) :
+    (insert a {b} : V) ≤ Exp.exp (Exp.exp N) :=
+  set_le_exp_exp fun x hx ↦ by
+    rcases (by simpa using hx : x = a ∨ x = b) with rfl | rfl <;> assumption
+
+private lemma set1_le_exp_exp {N a : V} (ha : a ≤ N) : ({a} : V) ≤ Exp.exp (Exp.exp N) :=
+  set_le_exp_exp fun x hx ↦ by rw [(by simpa using hx : x = a)]; exact ha
+
+section rules
+
 variable (hn : 2 ≤ n)
 include hn
 
@@ -167,6 +182,55 @@ lemma cutRule_le_exp_exp {s p d₁ d₂ : V} (hs : s ≤ Exp.exp (Exp.exp n))
     cutRule s p d₁ d₂ ≤ Exp.exp (Exp.exp (n + 2 + 2 + 2 + 2)) :=
   adjoin_le_of hn hs <| pair_le_of hn (tag_le_exp_exp hn (k := 8) (by simp)) <|
     pair_le_of hn hp <| pair_le_of hn hd₁ hd₂
+
+end rules
+
+variable (L) in
+/-- The largest code of a formula or term occurring in `specializeCode L d p t`. -/
+noncomputable def specializeSize (p t : V) : V :=
+  max (substs1 L t p) (max (^∀ p) (max (^∃ neg L p) (max (neg L p)
+    (max (neg L (substs1 L t p)) t))))
+
+lemma specializeCode_le_exp_exp {n d p t : V} (hn : 2 ≤ n) (hN : specializeSize L p t ≤ n)
+    (hd : d ≤ Exp.exp (Exp.exp n)) :
+    specializeCode L d p t ≤ Exp.exp (Exp.exp (n + 20)) := by
+  simp only [specializeSize, max_le_iff] at hN
+  obtain ⟨hA, hall, hex, hnp, hnA, ht⟩ := hN
+  have hD1 := axL_le_exp_exp hn (set3_le_exp_exp hnA hex hA) (le_exp_exp hA)
+  have l4 {a : V} (h : a ≤ Exp.exp (Exp.exp n)) : a ≤ Exp.exp (Exp.exp (n + 2 + 2)) := by
+    simpa [add_assoc] using le_exp_exp_add (2 + 2) h
+  have hD2 := exsIntro_le_exp_exp (n := n + 2 + 2) (le_trans hn (by simp [add_assoc]))
+    (l4 (set2_le_exp_exp hex hA)) (l4 (le_exp_exp hnp)) (l4 (le_exp_exp ht)) hD1
+  have hD0 := wkRule_le_exp_exp hn (set2_le_exp_exp hall hA) hd
+  have := cutRule_le_exp_exp (n := n + 2 + 2 + 2 + 2 + 2 + 2) (le_trans hn (by simp [add_assoc]))
+    (le_trans (set1_le_exp_exp hA) (exp_exp_le_of_le (by simp [add_assoc])))
+    (le_trans (le_exp_exp hall) (exp_exp_le_of_le (by simp [add_assoc])))
+    (le_trans hD0 (exp_exp_le_of_le (by simp [add_assoc]))) hD2
+  exact le_trans this (exp_exp_le_of_le (le_of_eq (by norm_num [add_assoc])))
+
+variable (L) in
+/-- The largest code of a formula occurring in `modusPonensCode L d₁ d₂ a b`. -/
+noncomputable def modusPonensSize (a b : V) : V :=
+  max (imp L a b) (max a (max b (max (a ^⋏ neg L b) (neg L b))))
+
+lemma modusPonensCode_le_exp_exp {n d₁ d₂ a b : V} (hn : 2 ≤ n) (hN : modusPonensSize L a b ≤ n)
+    (hd₁ : d₁ ≤ Exp.exp (Exp.exp n)) (hd₂ : d₂ ≤ Exp.exp (Exp.exp n)) :
+    modusPonensCode L d₁ d₂ a b ≤ Exp.exp (Exp.exp (n + 22)) := by
+  simp only [modusPonensSize, max_le_iff] at hN
+  obtain ⟨himp, ha, hb, hand, hnb⟩ := hN
+  have hwk := wkRule_le_exp_exp hn (set3_le_exp_exp ha hand hb) hd₂
+  have hax := axL_le_exp_exp hn (set3_le_exp_exp hnb hand hb) (le_exp_exp hb)
+  have l4 {a : V} (h : a ≤ Exp.exp (Exp.exp n)) : a ≤ Exp.exp (Exp.exp (n + 2 + 2)) := by
+    simpa [add_assoc] using le_exp_exp_add (2 + 2) h
+  have hand' := andIntro_le_exp_exp (n := n + 2 + 2) (le_trans hn (by simp [add_assoc]))
+    (l4 (set2_le_exp_exp hand hb)) (l4 (le_exp_exp ha)) (l4 (le_exp_exp hnb)) hwk hax
+  have hwk₁ := wkRule_le_exp_exp hn (set2_le_exp_exp himp hb) hd₁
+  have := cutRule_le_exp_exp (n := n + 2 + 2 + 2 + 2 + 2 + 2 + 2)
+    (le_trans hn (by simp [add_assoc]))
+    (le_trans (set1_le_exp_exp hb) (exp_exp_le_of_le (by simp [add_assoc])))
+    (le_trans (le_exp_exp himp) (exp_exp_le_of_le (by simp [add_assoc])))
+    (le_trans hwk₁ (exp_exp_le_of_le (by simp [add_assoc]))) hand'
+  exact le_trans this (exp_exp_le_of_le (le_of_eq (by norm_num [add_assoc])))
 
 end size
 

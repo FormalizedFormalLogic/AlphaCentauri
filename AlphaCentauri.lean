@@ -90,7 +90,6 @@ public import AlphaCentauri.NumberTheory.Primes
 public import AlphaCentauri.OmegaLogic.Basic
 public import AlphaCentauri.OmegaLogic.CutElimination
 public import AlphaCentauri.OmegaLogic.Embedding
-public import AlphaCentauri.OpenProblems.ISigma0
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Growth
 public import AlphaCentauri.ProvablyTotal.Parsons

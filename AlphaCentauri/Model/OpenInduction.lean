@@ -6,6 +6,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenPredicate
 public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree
 public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial
 
 /-! # Models of open induction extending $\mathbb{Z}$-rings
 

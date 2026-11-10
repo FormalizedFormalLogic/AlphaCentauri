@@ -1,11 +1,14 @@
 module
 
 public import AlphaCentauri.Schemata.ZRing
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenFormula
-public import AlphaCentauri.ToMathlib.OpenPredicate.PolynomialRing
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Mathlib.Algebra.Order.Group.MinMax
 public import Mathlib.Algebra.Order.Nonneg.Ring
+public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial
+public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
+public import AlphaCentauri.ToMathlib.Algebra.Polynomial.LeadingCoeffOrder
+public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenPredicate
 
 /-! # The non-negative part of a discretely ordered ring
 

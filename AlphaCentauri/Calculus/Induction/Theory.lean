@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Calculus.Induction.Basic
+public import AlphaCentauri.Schemata.DeltaInduction
 
 /-! # What `LKI[C]` proves
 

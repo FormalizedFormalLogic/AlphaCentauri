@@ -7,6 +7,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Rew
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import AlphaCentauri.ToMathlib.OpenPredicate
 public import AlphaCentauri.ToMathlib.Algebra.Order.Ring.RingOfDifferences
+public import AlphaCentauri.Schemata.DeltaInduction
 
 /-!
 # The least number principle in the ring of differences of a model of $\mathsf{I}\mathsf{E}_1$

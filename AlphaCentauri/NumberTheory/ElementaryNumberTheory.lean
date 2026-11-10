@@ -15,6 +15,7 @@ public import Mathlib.Analysis.Real.Sqrt
 public import Mathlib.Data.Nat.Prime.Defs
 public import Mathlib.Tactic.LinearCombination
 public import Mathlib.Tactic.Ring
+public import AlphaCentauri.Schemata.DeltaInduction
 
 /-!
 # Elementary number theory in weak arithmetic

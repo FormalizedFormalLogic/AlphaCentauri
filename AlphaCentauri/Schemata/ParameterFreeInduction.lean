@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata
+public import AlphaCentauri.Schemata.DeltaInduction
 
 /-! # Parameter-free induction `𝗜ᶠ` over the prenex hierarchy
 

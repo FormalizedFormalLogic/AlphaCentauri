@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Model.EndExtension
 public import Foundation.FirstOrder.Arithmetic.Schemata
+public import AlphaCentauri.Model.Absolute
 
 /-! # Overspill
 

@@ -1,7 +1,9 @@
 module
 
 public import AlphaCentauri.Model.NonnegativePart
-public import AlphaCentauri.ToMathlib.OpenPredicate.PolynomialRing
+public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial
+public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
+public import AlphaCentauri.ToMathlib.Algebra.Polynomial.LeadingCoeffOrder
 
 /-! # The non-negative part of the $\mathbb{Z}$-ring of polynomials with integer constant term
 

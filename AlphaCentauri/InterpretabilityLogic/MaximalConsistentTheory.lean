@@ -4,6 +4,10 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import Mathlib.Data.Set.Finite.Lattice
 public import Mathlib.Order.Zorn
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILF.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILKWOneZero.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILKW2.Basic
 
 /-!
 # Maximal consistent sets of all formulas

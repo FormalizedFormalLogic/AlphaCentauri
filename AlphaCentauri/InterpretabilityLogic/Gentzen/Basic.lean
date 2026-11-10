@@ -5,6 +5,7 @@ public import Mathlib.Data.Finset.Powerset
 public import Mathlib.Data.Finset.Max
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
 
 /-!
 # A sequent calculus for $\mathbf{IL}$

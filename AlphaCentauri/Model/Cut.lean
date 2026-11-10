@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Model.EndExtension
+public import AlphaCentauri.Model.Absolute
 
 /-! # Cuts
 

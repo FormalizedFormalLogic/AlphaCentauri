@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Model.EndExtension
 public import Foundation.FirstOrder.Arithmetic.Collection.Basic
+public import AlphaCentauri.Model.Absolute
 
 /-! # End extensions of models of $\mathsf{B}\Sigma_1$
 

@@ -2,6 +2,8 @@ module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILKW2.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILP.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILRW.Basic
 
 /-!
 # The logic $\mathbf{ILF}$

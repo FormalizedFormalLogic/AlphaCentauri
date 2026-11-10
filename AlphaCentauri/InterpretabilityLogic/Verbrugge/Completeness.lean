@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentTheory
-public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Extension
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 
 /-!
 # Completeness with respect to generalised Veltman models

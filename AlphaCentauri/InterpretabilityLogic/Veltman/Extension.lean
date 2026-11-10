@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Extension
+public import AlphaCentauri.InterpretabilityLogic.Logic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 
 /-!

@@ -370,6 +370,226 @@ end ILMinus
 
 end LabelledSet
 
+
+/-! ### Indexed maximal consistent sets -/
+
+namespace IndexedModel
+
+open Veltman (IndexedSet)
+
+variable {L : Logic α} {Φ : Finset (Formula α)}
+
+/-- `y` is a `C`-critical successor of `x` containing `□∼C`, indexed by `C` after the sequence of
+`x`. -/
+def IsCriticalAfter (x y : IndexedSet L Φ) (C : Formula α) : Prop :=
+  x.seq ++ [C] <+: y.seq ∧ CriticalSuccessor C x.set y.set ∧ □(∼C) ∈ y.set
+
+lemma IsCriticalAfter.rel {x y : IndexedSet L Φ} {C : Formula α} (h : IsCriticalAfter x y C) :
+    x.Rel y :=
+  ⟨h.2.1.toSuccessor, (List.prefix_append _ _).trans h.1⟩
+
+/-- The $\mathbf{IL}^-_{\mathrm{set}}$-model on indexed sets in which `y ≺[x] V` holds when `y`
+and some element of `V` extend `x` and `P x C V` holds whenever `y` is critical for `C` after
+`x`.
+
+- [KO21, Theorem 7.4]
+-/
+def model (P : IndexedSet L Φ → Formula α → Set (IndexedSet L Φ) → Prop)
+    [Nonempty (IndexedSet L Φ)] : Model (IndexedSet L Φ) α where
+  Rel' := IndexedSet.Rel
+  S' x y V := x.Rel y ∧ (∃ z ∈ V, x.Rel z) ∧ ∀ C, IsCriticalAfter x y C → P x C V
+  Val' x a := #a ∈ x.set
+
+/-- - [KO21, Theorem 7.4] -/
+def condJ2J5 (x : IndexedSet L Φ) (C : Formula α) (V : Set (IndexedSet L Φ)) : Prop :=
+  (∃ z ∈ V, C ∉ z.set) ∧ ∃ z ∈ V, IsCriticalAfter x z C
+
+/-- - [KO21, Theorem 7.4] -/
+def condJ2J4PlusJ5 (x : IndexedSet L Φ) (C : Formula α) (V : Set (IndexedSet L Φ)) : Prop :=
+  (∃ z ∈ V, x.Rel z ∧ C ∉ z.set) ∧ ∃ z ∈ V, IsCriticalAfter x z C
+
+lemma condJ2J5_mono {x : IndexedSet L Φ} {C : Formula α} {V Z : Set (IndexedSet L Φ)}
+    (h : condJ2J5 x C V) (hVZ : V ⊆ Z) : condJ2J5 x C Z := by
+  obtain ⟨⟨z, hz, h₁⟩, ⟨w, hw, h₂⟩⟩ := h;
+  exact ⟨⟨z, hVZ hz, h₁⟩, ⟨w, hVZ hw, h₂⟩⟩
+
+lemma condJ2J4PlusJ5_mono {x : IndexedSet L Φ} {C : Formula α} {V Z : Set (IndexedSet L Φ)}
+    (h : condJ2J4PlusJ5 x C V) (hVZ : V ⊆ Z) : condJ2J4PlusJ5 x C Z := by
+  obtain ⟨⟨z, hz, h₁⟩, ⟨w, hw, h₂⟩⟩ := h;
+  exact ⟨⟨z, hVZ hz, h₁⟩, ⟨w, hVZ hw, h₂⟩⟩
+
+private lemma subset_biUnion {x v : IndexedSet L Φ} {V : Set (IndexedSet L Φ)}
+    {Z : IndexedSet L Φ → Set (IndexedSet L Φ)} (hv : v ∈ V) (Rxv : x.Rel v) :
+    Z v ⊆ ⋃ v ∈ {v ∈ V | x.Rel v}, Z v :=
+  fun _ hw ↦ Set.mem_biUnion (x := v) ⟨hv, Rxv⟩ hw
+
+section Frame
+
+open Model
+
+variable [Adequate Φ] [Nonempty (IndexedSet L Φ)]
+  {P : IndexedSet L Φ → Formula α → Set (IndexedSet L Φ) → Prop}
+
+lemma isILMinus (hP : ∀ {x C V Z}, P x C V → V ⊆ Z → P x C Z) : (model P).IsILMinus where
+  trans _ _ _ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
+  cwf := by
+    have : IsTrans _ (flip (model P).Rel) :=
+      ⟨fun _ _ _ h₁ h₂ ↦ ⟨h₂.1.trans h₁.1, h₂.2.trans h₁.2⟩⟩;
+    have : Std.Irrefl (flip (model P).Rel) := ⟨fun _ h ↦ h.1.irrefl⟩;
+    exact Finite.wellFounded_of_trans_of_irrefl _;
+  rel_of_s h := h.1
+  nonempty_of_s := by
+    rintro _ _ _ ⟨-, ⟨z, hz, -⟩, -⟩;
+    exact ⟨z, hz⟩;
+  s_mono := by
+    rintro _ _ _ _ ⟨h₁, ⟨z, hz, h₂⟩, h₃⟩ hVZ;
+    exact ⟨h₁, ⟨z, hVZ hz, h₂⟩, fun C hC ↦ hP (h₃ C hC) hVZ⟩
+
+instance : (model P).IsJ4 := ⟨fun h ↦ h.2.1⟩
+
+instance : (model (condJ2J5 (L := L) (Φ := Φ))).IsILMinus := isILMinus condJ2J5_mono
+
+instance : (model (condJ2J4PlusJ5 (L := L) (Φ := Φ))).IsILMinus :=
+  isILMinus condJ2J4PlusJ5_mono
+
+instance : (model (condJ2J5 (L := L) (Φ := Φ))).IsJ2 where
+  s_trans {x y V} Z hS hZ := by
+    obtain ⟨Rxy, ⟨z, hz, Rxz⟩, hP⟩ := hS;
+    obtain ⟨-, ⟨w, hw, Rxw⟩, -⟩ := hZ z hz Rxz;
+    have hP' (C : Formula α) (hC : IsCriticalAfter x y C) :
+        condJ2J5 x C (⋃ v ∈ {v ∈ V | x.Rel v}, Z v) := by
+      obtain ⟨-, ⟨v, hv, hvC⟩⟩ := hP C hC;
+      obtain ⟨-, -, hPv⟩ := hZ v hv hvC.rel;
+      exact condJ2J5_mono (hPv C hvC) (subset_biUnion (Z := Z) hv hvC.rel);
+    exact ⟨Rxy, ⟨w, subset_biUnion (Z := Z) hz Rxz hw, Rxw⟩, hP'⟩
+
+instance : (model (condJ2J4PlusJ5 (L := L) (Φ := Φ))).IsJ2 where
+  s_trans {x y V} Z hS hZ := by
+    obtain ⟨Rxy, ⟨z, hz, Rxz⟩, hP⟩ := hS;
+    obtain ⟨-, ⟨w, hw, Rxw⟩, -⟩ := hZ z hz Rxz;
+    have hP' (C : Formula α) (hC : IsCriticalAfter x y C) :
+        condJ2J4PlusJ5 x C (⋃ v ∈ {v ∈ V | x.Rel v}, Z v) := by
+      obtain ⟨-, ⟨v, hv, hvC⟩⟩ := hP C hC;
+      obtain ⟨-, -, hPv⟩ := hZ v hv hvC.rel;
+      exact condJ2J4PlusJ5_mono (hPv C hvC) (subset_biUnion (Z := Z) hv hvC.rel);
+    exact ⟨Rxy, ⟨w, subset_biUnion (Z := Z) hz Rxz hw, Rxw⟩, hP'⟩
+
+instance : (model (condJ2J4PlusJ5 (L := L) (Φ := Φ))).IsJ4Plus where
+  s_inter {x y V} hS := by
+    obtain ⟨Rxy, ⟨z, hz, Rxz⟩, hP⟩ := hS;
+    have hP' (C : Formula α) (hC : IsCriticalAfter x y C) :
+        condJ2J4PlusJ5 x C {v ∈ V | x.Rel v} := by
+      obtain ⟨⟨u, hu, Rxu, hu'⟩, ⟨v, hv, hvC⟩⟩ := hP C hC;
+      exact ⟨⟨u, ⟨hu, Rxu⟩, Rxu, hu'⟩, ⟨v, ⟨hv, hvC.rel⟩, hvC⟩⟩;
+    exact ⟨Rxy, ⟨z, ⟨hz, Rxz⟩, Rxz⟩, hP'⟩
+
+variable [Entailment.Cl L]
+
+omit [Adequate Φ] [Nonempty (IndexedSet L Φ)] in
+private lemma isCriticalAfter_of_rel {x y z : IndexedSet L Φ} {C : Formula α}
+    (hC : IsCriticalAfter x y C) (h : y.Rel z) : IsCriticalAfter x z C :=
+  ⟨hC.1.trans h.2, hC.2.1.trans_successor h.1, h.1.box_mem_of_box_mem hC.2.2⟩
+
+instance : (model (condJ2J5 (L := L) (Φ := Φ))).IsJ5 where
+  s_of_rel {_ _ z} h₁ h₂ := ⟨h₁, ⟨z, rfl, h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩,
+    fun _ hC ↦ ⟨⟨z, rfl, h₂.1.not_mem_of_box_neg_mem hC.2.2⟩,
+      ⟨z, rfl, isCriticalAfter_of_rel hC h₂⟩⟩⟩
+
+instance : (model (condJ2J4PlusJ5 (L := L) (Φ := Φ))).IsJ5 where
+  s_of_rel {_ _ z} h₁ h₂ := ⟨h₁, ⟨z, rfl, h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩,
+    fun _ hC ↦ ⟨⟨z, rfl, ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩,
+      h₂.1.not_mem_of_box_neg_mem hC.2.2⟩, ⟨z, rfl, isCriticalAfter_of_rel hC h₂⟩⟩⟩
+
+end Frame
+
+section ILMinus
+
+open Model Model.World Logic
+
+variable {𝔸 : Set (Formula α)} [ILMinusAdequate Φ] [Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ)]
+
+private lemma exists_successor_not_mem {P : IndexedSet (ofAxiomsMinus 𝔸) Φ → Formula α →
+      Set (IndexedSet (ofAxiomsMinus 𝔸) Φ) → Prop}
+    {x : (model P).World} {A : Formula α} (h₁ : □A ∈ Φ) (h₂ : □A ∉ x.set) :
+    ∃ y, x ≺ y ∧ A ∉ y.set := by
+  obtain ⟨Δ, hΔ, hA⟩ := exists_box_not_mem h₁ h₂;
+  exact ⟨x.successor Δ hΔ, ⟨hΔ, List.prefix_refl _⟩, hA⟩
+
+omit [ILMinusAdequate Φ] [Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ)] in
+private lemma eq_of_isCriticalAfter {x y : IndexedSet (ofAxiomsMinus 𝔸) Φ} {C F : Formula α}
+    (hC : IsCriticalAfter x y C) (hF : IsCriticalAfter x y F) : C = F := by
+  have h := (List.prefix_of_prefix_length_le hC.1 hF.1 (by simp)).eq_of_length (by simp);
+  simpa using h
+
+variable [(ILMinusJ2 : Logic α) ⪯ ofAxiomsMinus 𝔸] [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸]
+  [(ILMinusJ5 : Logic α) ⪯ ofAxiomsMinus 𝔸]
+
+omit [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸] in
+private lemma exists_rhd_not_mem {P : IndexedSet (ofAxiomsMinus 𝔸) Φ → Formula α →
+      Set (IndexedSet (ofAxiomsMinus 𝔸) Φ) → Prop}
+    (hP : ∀ {x C V}, P x C V → ∃ z ∈ V, C ∉ z.set)
+    {x : (model P).World} {D E : Formula α} (h₁ : D ▷ E ∈ Φ) (h₂ : D ▷ E ∉ x.set) :
+    ∃ y, x ≺ y ∧ D ∈ y.set ∧ ∀ V, y ≺[x] V → ∃ z ∈ V, E ∉ z.set := by
+  obtain ⟨Δ, hΔ, hD, hb⟩ := exists_criticalSuccessor_box_neg_of_rhd_not_mem h₁ h₂;
+  exact ⟨x.criticalSuccessor E (.of_rhd_right h₁) Δ hΔ.toSuccessor,
+    ⟨hΔ.toSuccessor, List.prefix_append _ _⟩, hD,
+    fun _ hS ↦ hP <| hS.2.2 E ⟨List.prefix_refl _, hΔ, hb⟩⟩
+
+/-- - [KO21, Lemma 7.6] -/
+lemma truthlemma_condJ2J5
+    {x : (model (condJ2J5 (L := ofAxiomsMinus 𝔸) (Φ := Φ))).World} {A : Formula α}
+    (hA : A ∈ Φ) : x ⊩ A ↔ A ∈ x.set := by
+  apply forces_iff_mem_of (f := Veltman.IndexedSet.set) Iff.rfl
+    (fun h₁ h₂ ↦ Successor.mem_of_box_mem (And.left h₁) h₂) exists_successor_not_mem _
+    (exists_rhd_not_mem fun h ↦ h.1) hA;
+  intro x y D E hDE Rxy hD;
+  by_cases hc : ∃ F, IsCriticalAfter x y F;
+  · obtain ⟨F, hF⟩ := hc;
+    have hFo : IsRhdOperand Φ F := y.isRhdOperand_of_mem_seq F <| hF.1.subset (by simp);
+    obtain ⟨Θ, hΘ, hEΘ, hbΘ⟩ :=
+      hF.2.1.weakCriticalSuccessor.exists_criticalSuccessor_box_neg_of_rhd_mem hFo hDE hD;
+    obtain ⟨Λ, hEΛ, hFΛ⟩ := hF.2.1.weakCriticalSuccessor.exists_mem_not_mem hFo hDE hD;
+    have hz₂ : IsCriticalAfter x (x.criticalSuccessor F hFo Θ hΘ.toSuccessor) F :=
+      ⟨List.prefix_refl _, hΘ, hbΘ⟩;
+    exact ⟨{⟨Λ, [], by simp, by simp⟩, x.criticalSuccessor F hFo Θ hΘ.toSuccessor},
+      ⟨Rxy, ⟨_, .inr rfl, hz₂.rel⟩, fun C hC ↦ by
+        obtain rfl := eq_of_isCriticalAfter hC hF;
+        exact ⟨⟨_, .inl rfl, hFΛ⟩, ⟨_, .inr rfl, hz₂⟩⟩⟩,
+      by rintro z (rfl | rfl) <;> assumption⟩;
+  · obtain ⟨Θ, hΘ, hEΘ⟩ := Successor.exists_successor_of_rhd_mem hDE Rxy.1 hD;
+    exact ⟨{x.successor Θ hΘ}, ⟨Rxy, ⟨_, rfl, hΘ, List.prefix_refl _⟩,
+      fun C hC ↦ absurd ⟨C, hC⟩ hc⟩, by rintro z rfl; exact hEΘ⟩;
+
+/-- - [KO21, Lemma 7.6] -/
+lemma truthlemma_condJ2J4PlusJ5 [(ILMinusJ4Plus : Logic α) ⪯ ofAxiomsMinus 𝔸]
+    {x : (model (condJ2J4PlusJ5 (L := ofAxiomsMinus 𝔸) (Φ := Φ))).World} {A : Formula α}
+    (hA : A ∈ Φ) : x ⊩ A ↔ A ∈ x.set := by
+  apply forces_iff_mem_of (f := Veltman.IndexedSet.set) Iff.rfl
+    (fun h₁ h₂ ↦ Successor.mem_of_box_mem (And.left h₁) h₂) exists_successor_not_mem _
+    (exists_rhd_not_mem fun h ↦ by obtain ⟨z, hz, -, h⟩ := h.1; exact ⟨z, hz, h⟩) hA;
+  intro x y D E hDE Rxy hD;
+  by_cases hc : ∃ F, IsCriticalAfter x y F;
+  · obtain ⟨F, hF⟩ := hc;
+    have hFo : IsRhdOperand Φ F := y.isRhdOperand_of_mem_seq F <| hF.1.subset (by simp);
+    obtain ⟨Θ, hΘ, hEΘ, hbΘ⟩ :=
+      hF.2.1.weakCriticalSuccessor.exists_criticalSuccessor_box_neg_of_rhd_mem hFo hDE hD;
+    obtain ⟨Λ, hΛ, hEΛ, hFΛ⟩ :=
+      hF.2.1.weakCriticalSuccessor.exists_successor_mem_not_mem hFo hDE hD;
+    have hz₂ : IsCriticalAfter x (x.criticalSuccessor F hFo Θ hΘ.toSuccessor) F :=
+      ⟨List.prefix_refl _, hΘ, hbΘ⟩;
+    exact ⟨{x.successor Λ hΛ, x.criticalSuccessor F hFo Θ hΘ.toSuccessor},
+      ⟨Rxy, ⟨_, .inr rfl, hz₂.rel⟩, fun C hC ↦ by
+        obtain rfl := eq_of_isCriticalAfter hC hF;
+        exact ⟨⟨_, .inl rfl, ⟨hΛ, List.prefix_refl _⟩, hFΛ⟩, ⟨_, .inr rfl, hz₂⟩⟩⟩,
+      by rintro z (rfl | rfl) <;> assumption⟩;
+  · obtain ⟨Θ, hΘ, hEΘ⟩ := Successor.exists_successor_of_rhd_mem hDE Rxy.1 hD;
+    exact ⟨{x.successor Θ hΘ}, ⟨Rxy, ⟨_, rfl, hΘ, List.prefix_refl _⟩,
+      fun C hC ↦ absurd ⟨C, hC⟩ hc⟩, by rintro z rfl; exact hEΘ⟩;
+
+end ILMinus
+
+end IndexedModel
+
 end Verbrugge
 
 end FFL.InterpretabilityLogic

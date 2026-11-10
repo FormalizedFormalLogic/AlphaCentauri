@@ -1,9 +1,13 @@
 module
 
 public import AlphaCentauri.Model.EndExtension
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Absoluteness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.CodedPigeonhole
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Injection
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Definability
 
 /-!
 # Enumeration cuts and their coded limits

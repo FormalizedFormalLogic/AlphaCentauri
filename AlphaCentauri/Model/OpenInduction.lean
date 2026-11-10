@@ -1,7 +1,8 @@
 module
 
 public import AlphaCentauri.Axiomatizability.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenFormula
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenPredicate
+public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree
 public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Mathlib.Algebra.Order.Group.MinMax

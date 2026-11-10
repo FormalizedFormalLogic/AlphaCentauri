@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.HFS.CourseOfValues
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.HFS.PRF
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.HFS.Fixpoint
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec

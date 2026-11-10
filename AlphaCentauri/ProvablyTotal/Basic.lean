@@ -3,7 +3,9 @@ module
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.LK.Completeness
+public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.PrenexNormalForm
 public import AlphaCentauri.ToFoundation.FirstOrder.Theory
 public import AlphaCentauri.Calculus.Induction.Basic
 

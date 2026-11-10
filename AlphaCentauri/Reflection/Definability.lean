@@ -6,6 +6,9 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Cod
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
+public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
+public import AlphaCentauri.ToFoundation.FirstOrder.Rew
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 

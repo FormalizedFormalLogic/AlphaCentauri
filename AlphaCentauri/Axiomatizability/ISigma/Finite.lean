@@ -3,7 +3,13 @@ module
 public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastWitness
+public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
+public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
+public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.PrenexNormalForm
+public import AlphaCentauri.ToFoundation.FirstOrder.Rew
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import AlphaCentauri.Calculus.Induction.Basic

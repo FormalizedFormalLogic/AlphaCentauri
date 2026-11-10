@@ -3,6 +3,9 @@ module
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.NumberTheory.FermatLastTheorem
 public import AlphaCentauri.Schemata.Induction
+public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
+public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
+public import AlphaCentauri.ToFoundation.FirstOrder.Rew
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastNumberPrinciple
 public import AlphaCentauri.ToMathlib.OpenPredicate.AddMonoidHomToInt

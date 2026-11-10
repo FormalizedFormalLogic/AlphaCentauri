@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastWitness
 
 /-!
 # Cut elimination for the internal calculus

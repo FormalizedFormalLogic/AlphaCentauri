@@ -11,11 +11,8 @@ In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation 
 $a^2$ into $a$, for $a > 1$. An injection folds a binary tree of depth $\|a\|$ whose leaves can be
 any $2^{\|a\|}$ values below $a$; diagonalizing against the roots gives a contradiction.
 
-Nor is any an injection of $(n + 1)a$ into $na$, for a standard $n$ and $a > 0$. Composing $n$
-blockwise copies of one gives an injection of $2b$ into $b$, and following an injection of $2b$
-into $b$ for $\|b\|$ steps from each root gives an injection of $b^2$ into $b$. The ratio may even
-be $(K + 1) / K$ for $K \le \|I\|$: extended by the shift down by $b$, an injection of $(K + 1)b$
-into $Kb$ followed for $K$ steps is one of $2Kb$ into $Kb$.
+Nor is any an injection of $2b$ into $b$, for $b > 0$, nor of $(K + 1)b$ into $Kb$, for $b > 0$ and
+$0 < K \le \|I\|$ for some $I$. The ratio $(n + 1) / n$ for a standard $n$ is the case $K = n$.
 
 - [PWW88, Theorem 1, Corollary 2]
 -/
@@ -289,91 +286,9 @@ theorem weakPigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {
   · exact one_ne_zero (hl.unique hinj hc h)
   · exact h hl
 
-
 namespace WeakPigeonhole
 
-/-- `R` sends every `x < A` to some `y < B`, and no `y < B` is a value of two such `x`. -/
-def IsInjection (R : V → V → Prop) (A B : V) : Prop :=
-  (∀ x < A, ∃ y < B, R x y) ∧ ∀ x < A, ∀ x' < A, ∀ y < B, R x y → R x' y → x = x'
-
-variable {R S : V → V → Prop} {a : V}
-
-lemma definable_comp {B : V} (hR : 𝚺ᴬ₀.DefinableRel R) (hS : 𝚺ᴬ₀.DefinableRel S) :
-    𝚺ᴬ₀.DefinableRel fun x z ↦ ∃ y < B, R x y ∧ S y z := by
-  definability
-
-lemma definable_blockwise {A B M : V} (hR : 𝚺ᴬ₀.DefinableRel R) :
-    𝚺ᴬ₀.DefinableRel fun x y ↦
-      ∃ q < M, ∃ c < A, x = c + A * q ∧ ∃ f < B, R c f ∧ y = f + B * q := by
-  definability
-
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] in
-lemma IsInjection.comp {A B C : V} (h : IsInjection R A B) (h' : IsInjection S B C) :
-    IsInjection (fun x z ↦ ∃ y < B, R x y ∧ S y z) A C := by
-  constructor
-  · intro x hx
-    obtain ⟨y, hy, hxy⟩ := h.1 x hx
-    obtain ⟨z, hz, hyz⟩ := h'.1 y hy
-    use z
-    constructor
-    · exact hz
-    · use y
-  · rintro x hx x' hx' z hz ⟨y, hy, hxy, hyz⟩ ⟨y', hy', hxy', hyz'⟩
-    obtain rfl := h'.2 y hy y' hy' z hz hyz hyz'
-    exact h.2 x hx x' hx' y hy hxy hxy'
-
-lemma IsInjection.blockwise {A B : V} (h : IsInjection R A B) (M : V) :
-    IsInjection (fun x y ↦ ∃ q < M, ∃ c < A, x = c + A * q ∧ ∃ f < B, R c f ∧ y = f + B * q)
-      (A * M) (B * M) := by
-  constructor
-  · intro x hx
-    rcases (Arithmetic.zero_le A).eq_or_lt with rfl | hA
-    · simp at hx
-    have hq : x / A < M := div_lt_of_lt_mul (by rwa [mul_comm])
-    obtain ⟨f, hf, hR⟩ := h.1 (x % A) (mod_lt x hA)
-    use f + B * (x / A)
-    and_intros
-    · exact add_mul_lt_mul_of_lt hf hq
-    · use x / A
-      and_intros
-      · exact hq
-      · use x % A
-        and_intros
-        · exact mod_lt x hA
-        · rw [add_comm, div_add_mod]
-        · use f
-  · rintro x hx x' hx' y hy ⟨q, hq, c, hc, rfl, f, hf, hRf, rfl⟩
-      ⟨q', hq', c', hc', rfl, f', hf', hRf', heq⟩
-    obtain ⟨rfl, rfl⟩ := (add_mul_eq_add_mul_iff hf' hf).mp heq.symm
-    rw [h.2 c hc c' hc' f' hf hRf hRf']
-
-lemma exists_injection_pow {n : ℕ} (hR : 𝚺ᴬ₀.DefinableRel R)
-    (h : IsInjection R ((n + 1) * a) (n * a)) (j : ℕ) (m : V) :
-    ∃ S : V → V → Prop, 𝚺ᴬ₀.DefinableRel S ∧
-      IsInjection S ((n + 1) ^ j * m * a) (n ^ j * m * a) := by
-  induction j generalizing m with
-  | zero =>
-    use (· = ·)
-    and_intros
-    · definability
-    · intro x hx
-      use x
-      constructor
-      · simpa using hx
-      · rfl
-    · intro x _ x' _ y _ h h'
-      rw [h, h']
-  | succ j IH =>
-    obtain ⟨S, hS, hSinj⟩ := IH ((n + 1) * m)
-    rw [show (n : V) ^ j * ((n + 1) * m) * a = (n + 1) * a * (n ^ j * m) by grind] at hSinj
-    use fun x z ↦ ∃ y < (n + 1) * a * (n ^ j * m), S x y ∧
-      ∃ q < n ^ j * m, ∃ c < (n + 1) * a, y = c + (n + 1) * a * q ∧
-        ∃ f < n * a, R c f ∧ z = f + n * a * q
-    constructor
-    · exact definable_comp hS (definable_blockwise hR)
-    · rw [show ((n : V) + 1) ^ (j + 1) * m * a = (n + 1) ^ j * ((n + 1) * m) * a by grind,
-        show (n : V) ^ (j + 1) * m * a = n * a * (n ^ j * m) by grind]
-      exact hSinj.comp (h.blockwise _)
+variable {R : V → V → Prop} {a : V}
 
 /-- `R` sends `x + a * β` to `e`: in the tree of an injection of `2 * a` into `a`, `x` is the child
 of `e` along the bit `β`. -/
@@ -477,47 +392,6 @@ theorem weakPigeonhole_two_mul {R : V → V → Prop} (hR : 𝚺ᴬ₀.Definable
     · rw [fbit_eq_zero_of_le ((length_monotone hτ.le).trans hi),
         fbit_eq_zero_of_le ((length_monotone hτ'.le).trans hi)]
   exact hxx (by rw [hext ‖a‖ le_rfl, fbit_ext hbit])
-
-open WeakPigeonhole in
-/-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
-of $(n + 1)a$ into $na$, for a standard $n$ and $a > 0$.
-- [PWW88, Corollary 2] -/
-theorem weakPigeonhole_succ_mul (n : ℕ) {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {a : V}
-    (ha : 0 < a) (total : ∀ x < (n + 1) * a, ∃ y < n * a, R x y) :
-    ∃ x < (n + 1) * a, ∃ x' < (n + 1) * a, ∃ y < n * a, x ≠ x' ∧ R x y ∧ R x' y := by
-  by_contra! hne
-  rcases Nat.eq_zero_or_pos n with rfl | hn
-  · obtain ⟨y, hy, -⟩ := total 0 (by simpa using ha)
-    simp at hy
-  have hinj : IsInjection R ((n + 1) * a) (n * a) := by
-    constructor
-    · exact total
-    · intro x hx x' hx' y hy h h'
-      by_contra hxx
-      exact hne x hx x' hx' y hy hxx h h'
-  obtain ⟨S, hS, hSinj⟩ := exists_injection_pow hR hinj n 1
-  have hbernoulli : ∀ k : ℕ, n ^ k * (n + k) ≤ (n + 1) ^ k * n := by
-    intro k
-    induction k with
-    | zero => simp
-    | succ k ih =>
-      calc n ^ (k + 1) * (n + (k + 1)) = n * (n ^ k * (n + k)) + n * n ^ k := by grind
-        _ ≤ n * ((n + 1) ^ k * n) + n * (n + 1) ^ k :=
-          Nat.add_le_add (Nat.mul_le_mul_left n ih)
-            (Nat.mul_le_mul_left n (Nat.pow_le_pow_left (Nat.le_succ n) k))
-        _ = (n + 1) ^ (k + 1) * n := by grind
-  have hpow : 2 * n ^ n ≤ (n + 1) ^ n :=
-    Nat.le_of_mul_le_mul_right (by
-      have := hbernoulli n
-      rwa [← two_mul, ← mul_assoc, mul_comm (n ^ n) 2] at this) hn
-  have hle : 2 * ((n : V) ^ n * 1 * a) ≤ ((n : V) + 1) ^ n * 1 * a := by
-    rw [← mul_assoc, ← mul_assoc]
-    exact mul_le_mul_right <| mul_le_mul_right (by exact_mod_cast hpow)
-  have hb : 0 < (n : V) ^ n * 1 * a := by
-    simpa using mul_pos (pow_pos (show (0 : V) < n by exact_mod_cast hn) n) ha
-  obtain ⟨x, hx, x', hx', y, hy, hxx, h, h'⟩ :=
-    weakPigeonhole_two_mul hS hb fun x hx ↦ hSinj.1 x (hx.trans_le hle)
-  exact hxx (hSinj.2 x (hx.trans_le hle) x' (hx'.trans_le hle) y hy h h')
 
 namespace WeakPigeonhole
 
@@ -678,8 +552,17 @@ lemma IsPath.eq_of_shiftStep (hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, 
 
 end shift
 
-end WeakPigeonhole
+lemma exists_le_length (n : ℕ) : ∃ I : V, (n : V) ≤ ‖I‖ := by
+  induction n with
+  | zero => simp
+  | succ n IH =>
+    obtain ⟨I, hI⟩ := IH
+    use 2 * I + 1
+    rw [length_two_mul_add_one]
+    push_cast
+    gcongr
 
+end WeakPigeonhole
 open WeakPigeonhole in
 /-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
 of $(K + 1)b$ into $Kb$, for $b > 0$ and $0 < K \le \|I\|$. -/
@@ -705,6 +588,19 @@ theorem weakPigeonhole_succ_mul_of_le_length {R : V → V → Prop} (hR : 𝚺�
   obtain ⟨x, -, x', -, y, -, hxx, ⟨s, -, hs, hsy⟩, ⟨s', -, hs', hsy'⟩⟩ :=
     weakPigeonhole_two_mul (definable_shiftReach hR I) (mul_pos hK hb) htot
   exact hxx (hs.eq_of_shiftStep hinj hs' (hsy.trans hsy'.symm))
+
+open WeakPigeonhole in
+/-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
+of $(n + 1)a$ into $na$, for a standard $n$ and $a > 0$.
+- [PWW88, Corollary 2] -/
+theorem weakPigeonhole_succ_mul (n : ℕ) {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {a : V}
+    (ha : 0 < a) (total : ∀ x < (n + 1) * a, ∃ y < n * a, R x y) :
+    ∃ x < (n + 1) * a, ∃ x' < (n + 1) * a, ∃ y < n * a, x ≠ x' ∧ R x y ∧ R x' y := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · obtain ⟨y, hy, -⟩ := total 0 (by simpa using ha)
+    simp at hy
+  obtain ⟨I, hI⟩ := WeakPigeonhole.exists_le_length (V := V) n
+  exact weakPigeonhole_succ_mul_of_le_length hR ha (by exact_mod_cast hn) hI total
 
 end
 

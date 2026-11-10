@@ -373,9 +373,12 @@ private instance : counterJ4Plus.IsJ1 where
 private instance : counterJ4Plus.IsJ4 where
   exists_rel_of_s := by
     rintro w u V ⟨rfl, ⟨-, h | ⟨h, -⟩⟩ | ⟨-, h⟩⟩;
-    · exact ⟨1, h, rfl, .inl rfl⟩;
-    · exact ⟨2, h, rfl, .inr rfl⟩;
-    · exact ⟨2, h, rfl, .inr rfl⟩;
+    · use 1
+      exact ⟨h, rfl, .inl rfl⟩;
+    · use 2
+      exact ⟨h, rfl, .inr rfl⟩;
+    · use 2
+      exact ⟨h, rfl, .inr rfl⟩;
 
 private instance : counterJ4Plus.IsJ5 where
   s_of_rel := by

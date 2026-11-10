@@ -81,7 +81,8 @@ lemma exists_box_not_mem {α : Type*} [DecidableEq α] {L : Logic α} [Entailmen
     [L.ExtendsGL] {Φ : Finset (Formula α)} [Adequate Φ] {Γ : MaximalConsistentSet L Φ}
     {A : Formula α} (h₁ : □A ∈ Φ) (h₂ : □A ∉ Γ) : ∃ Δ, Successor Γ Δ ∧ A ∉ Δ := by
   obtain ⟨Δ, hΔ, hc⟩ := exists_successor_of_box_not_mem h₁ h₂;
-  exact ⟨Δ, hΔ, not_mem_of_provable_neg hc (Context.by_axm rfl)⟩
+  use Δ
+  exact ⟨hΔ, not_mem_of_provable_neg hc (Context.by_axm rfl)⟩
 
 lemma exists_neg_consistent {α : Type*} [DecidableEq α] {L : Logic α} [Entailment.Cl L]
     {Φ : Finset (Formula α)} {A : Formula α} (h : L ⊬ A) :
@@ -277,7 +278,8 @@ private lemma exists_successor_not_mem {P : LabelledSet (ofAxiomsMinus 𝔸) Φ 
     {x : (model P).World} {A : Formula α} (h₁ : □A ∈ Φ) (h₂ : □A ∉ x.set) :
     ∃ y, x ≺ y ∧ A ∉ y.set := by
   obtain ⟨Δ, hΔ, hA⟩ := exists_box_not_mem h₁ h₂;
-  exact ⟨⟨Δ, ⊥, .bot⟩, hΔ, hA⟩
+  use ⟨Δ, ⊥, .bot⟩
+  exact ⟨hΔ, hA⟩
 
 /-- - [KO21, Lemma 7.3] -/
 lemma truthlemma_condJ4 [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸]
@@ -289,14 +291,18 @@ lemma truthlemma_condJ4 [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸]
     obtain ⟨Θ, hΘ, hEΘ⟩ := Successor.exists_successor_of_rhd_mem hDE Rxy hD;
     by_cases hc : x.IsWeakCritical y;
     · obtain ⟨Λ, hEΛ, hFΛ⟩ := hc.exists_mem_not_mem y.isRhdOperand_label hDE hD;
-      exact ⟨{⟨Θ, _, y.isRhdOperand_label⟩, ⟨Λ, _, y.isRhdOperand_label⟩},
-        ⟨Rxy, ⟨_, .inl rfl, hΘ⟩, fun _ ↦ ⟨_, .inr rfl, hFΛ⟩⟩,
-        by rintro z (rfl | rfl) <;> assumption⟩;
-    · exact ⟨{⟨Θ, _, y.isRhdOperand_label⟩}, ⟨Rxy, ⟨_, rfl, hΘ⟩, fun h ↦ absurd h hc⟩,
-        by rintro z rfl; exact hEΘ⟩;
+      use {⟨Θ, _, y.isRhdOperand_label⟩, ⟨Λ, _, y.isRhdOperand_label⟩}
+      constructor
+      · exact ⟨Rxy, ⟨_, .inl rfl, hΘ⟩, fun _ ↦ ⟨_, .inr rfl, hFΛ⟩⟩
+      · rintro z (rfl | rfl) <;> assumption
+    · use {⟨Θ, _, y.isRhdOperand_label⟩}
+      constructor
+      · exact ⟨Rxy, ⟨_, rfl, hΘ⟩, fun h ↦ absurd h hc⟩
+      · rintro z rfl; exact hEΘ
   · intro x D E h₁ h₂;
     obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem h₁ h₂;
-    exact ⟨⟨Δ, E, .of_rhd_right h₁⟩, hΔ.toSuccessor, hD, fun _ hS ↦ hS.2.2 hΔ⟩;
+    use ⟨Δ, E, .of_rhd_right h₁⟩
+    exact ⟨hΔ.toSuccessor, hD, fun _ hS ↦ hS.2.2 hΔ⟩
 
 /-- - [KO21, Lemma 7.3] -/
 lemma truthlemma_condJ4J5 [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸]
@@ -309,14 +315,18 @@ lemma truthlemma_condJ4J5 [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸]
     obtain ⟨Θ, hΘ, hEΘ⟩ := Successor.exists_successor_of_rhd_mem hDE Rxy hD;
     by_cases hc : x.IsWeakCritical y;
     · obtain ⟨Λ, hEΛ, hFΛ⟩ := hc.exists_mem_not_mem y.isRhdOperand_label hDE hD;
-      exact ⟨{⟨Θ, _, y.isRhdOperand_label⟩, ⟨Λ, _, y.isRhdOperand_label⟩},
-        ⟨Rxy, ⟨_, .inl rfl, hΘ⟩, fun _ _ ↦ ⟨_, .inr rfl, hFΛ⟩⟩,
-        by rintro z (rfl | rfl) <;> assumption⟩;
-    · exact ⟨{⟨Θ, _, y.isRhdOperand_label⟩}, ⟨Rxy, ⟨_, rfl, hΘ⟩, fun h ↦ absurd h hc⟩,
-        by rintro z rfl; exact hEΘ⟩;
+      use {⟨Θ, _, y.isRhdOperand_label⟩, ⟨Λ, _, y.isRhdOperand_label⟩}
+      constructor
+      · exact ⟨Rxy, ⟨_, .inl rfl, hΘ⟩, fun _ _ ↦ ⟨_, .inr rfl, hFΛ⟩⟩
+      · rintro z (rfl | rfl) <;> assumption
+    · use {⟨Θ, _, y.isRhdOperand_label⟩}
+      constructor
+      · exact ⟨Rxy, ⟨_, rfl, hΘ⟩, fun h ↦ absurd h hc⟩
+      · rintro z rfl; exact hEΘ
   · intro x D E h₁ h₂;
     obtain ⟨Δ, hΔ, hD, hb⟩ := exists_weakCriticalSuccessor_box_neg_of_rhd_not_mem h₁ h₂;
-    exact ⟨⟨Δ, E, .of_rhd_right h₁⟩, hΔ.toSuccessor, hD, fun _ hS ↦ hS.2.2 hΔ hb⟩;
+    use ⟨Δ, E, .of_rhd_right h₁⟩
+    exact ⟨hΔ.toSuccessor, hD, fun _ hS ↦ hS.2.2 hΔ hb⟩
 
 /-- - [KO21, Lemma 7.3] -/
 lemma truthlemma_condJ2 [(ILMinusJ2 : Logic α) ⪯ ofAxiomsMinus 𝔸]
@@ -330,16 +340,20 @@ lemma truthlemma_condJ2 [(ILMinusJ2 : Logic α) ⪯ ofAxiomsMinus 𝔸]
     · obtain ⟨Θ, hΘ, hEΘ⟩ :=
         hc.exists_weakCriticalSuccessor_of_rhd_mem y.isRhdOperand_label hDE hD;
       obtain ⟨Λ, hEΛ, hFΛ⟩ := hc.exists_mem_not_mem y.isRhdOperand_label hDE hD;
-      exact ⟨{⟨Θ, _, y.isRhdOperand_label⟩, ⟨Λ, _, y.isRhdOperand_label⟩},
-        ⟨Rxy, ⟨_, .inl rfl, hΘ.toSuccessor⟩,
-          fun _ ↦ ⟨⟨_, .inr rfl, hFΛ⟩, ⟨_, .inl rfl, rfl, hΘ⟩⟩⟩,
-        by rintro z (rfl | rfl) <;> assumption⟩;
+      use {⟨Θ, _, y.isRhdOperand_label⟩, ⟨Λ, _, y.isRhdOperand_label⟩}
+      constructor
+      · exact ⟨Rxy, ⟨_, .inl rfl, hΘ.toSuccessor⟩,
+          fun _ ↦ ⟨⟨_, .inr rfl, hFΛ⟩, ⟨_, .inl rfl, rfl, hΘ⟩⟩⟩
+      · rintro z (rfl | rfl) <;> assumption
     · obtain ⟨Θ, hΘ, hEΘ⟩ := Successor.exists_successor_of_rhd_mem hDE Rxy hD;
-      exact ⟨{⟨Θ, _, y.isRhdOperand_label⟩}, ⟨Rxy, ⟨_, rfl, hΘ⟩, fun h ↦ absurd h hc⟩,
-        by rintro z rfl; exact hEΘ⟩;
+      use {⟨Θ, _, y.isRhdOperand_label⟩}
+      constructor
+      · exact ⟨Rxy, ⟨_, rfl, hΘ⟩, fun h ↦ absurd h hc⟩
+      · rintro z rfl; exact hEΘ
   · intro x D E h₁ h₂;
     obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem h₁ h₂;
-    exact ⟨⟨Δ, E, .of_rhd_right h₁⟩, hΔ.toSuccessor, hD, fun _ hS ↦ (hS.2.2 hΔ).1⟩;
+    use ⟨Δ, E, .of_rhd_right h₁⟩
+    exact ⟨hΔ.toSuccessor, hD, fun _ hS ↦ (hS.2.2 hΔ).1⟩
 
 /-- - [KO21, Lemma 7.3] -/
 lemma truthlemma_condJ2J4Plus [(ILMinusJ2 : Logic α) ⪯ ofAxiomsMinus 𝔸]
@@ -353,18 +367,22 @@ lemma truthlemma_condJ2J4Plus [(ILMinusJ2 : Logic α) ⪯ ofAxiomsMinus 𝔸]
     · obtain ⟨Θ, hΘ, hEΘ⟩ :=
         hc.exists_weakCriticalSuccessor_of_rhd_mem y.isRhdOperand_label hDE hD;
       obtain ⟨Λ, hΛ, hEΛ, hFΛ⟩ := hc.exists_successor_mem_not_mem y.isRhdOperand_label hDE hD;
-      exact ⟨{⟨Θ, _, y.isRhdOperand_label⟩, ⟨Λ, _, y.isRhdOperand_label⟩},
-        ⟨Rxy, ⟨_, .inl rfl, hΘ.toSuccessor⟩,
-          fun _ ↦ ⟨⟨_, .inr rfl, hΛ, hFΛ⟩, ⟨_, .inl rfl, rfl, hΘ⟩⟩⟩,
-        by rintro z (rfl | rfl) <;> assumption⟩;
+      use {⟨Θ, _, y.isRhdOperand_label⟩, ⟨Λ, _, y.isRhdOperand_label⟩}
+      constructor
+      · exact ⟨Rxy, ⟨_, .inl rfl, hΘ.toSuccessor⟩,
+          fun _ ↦ ⟨⟨_, .inr rfl, hΛ, hFΛ⟩, ⟨_, .inl rfl, rfl, hΘ⟩⟩⟩
+      · rintro z (rfl | rfl) <;> assumption
     · obtain ⟨Θ, hΘ, hEΘ⟩ := Successor.exists_successor_of_rhd_mem hDE Rxy hD;
-      exact ⟨{⟨Θ, _, y.isRhdOperand_label⟩}, ⟨Rxy, ⟨_, rfl, hΘ⟩, fun h ↦ absurd h hc⟩,
-        by rintro z rfl; exact hEΘ⟩;
+      use {⟨Θ, _, y.isRhdOperand_label⟩}
+      constructor
+      · exact ⟨Rxy, ⟨_, rfl, hΘ⟩, fun h ↦ absurd h hc⟩
+      · rintro z rfl; exact hEΘ
   · intro x D E h₁ h₂;
     obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem h₁ h₂;
-    refine ⟨⟨Δ, E, .of_rhd_right h₁⟩, hΔ.toSuccessor, hD, fun _ hS ↦ ?_⟩;
-    obtain ⟨z, hz, -, hE⟩ := (hS.2.2 hΔ).1;
-    exact ⟨z, hz, hE⟩;
+    use ⟨Δ, E, .of_rhd_right h₁⟩
+    exact ⟨hΔ.toSuccessor, hD, fun _ hS ↦ by
+      obtain ⟨z, hz, -, hE⟩ := (hS.2.2 hΔ).1
+      exact ⟨z, hz, hE⟩⟩
 
 end ILMinus
 
@@ -513,7 +531,8 @@ private lemma exists_successor_not_mem {P : IndexedSet (ofAxiomsMinus 𝔸) Φ �
     {x : (model P).World} {A : Formula α} (h₁ : □A ∈ Φ) (h₂ : □A ∉ x.set) :
     ∃ y, x ≺ y ∧ A ∉ y.set := by
   obtain ⟨Δ, hΔ, hA⟩ := exists_box_not_mem h₁ h₂;
-  exact ⟨x.successor Δ hΔ, ⟨hΔ, List.prefix_refl _⟩, hA⟩
+  use x.successor Δ hΔ
+  exact ⟨⟨hΔ, List.prefix_refl _⟩, hA⟩
 
 omit [ILMinusAdequate Φ] [Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ)] in
 private lemma eq_of_isCriticalAfter {x y : IndexedSet (ofAxiomsMinus 𝔸) Φ} {C F : Formula α}
@@ -531,8 +550,8 @@ private lemma exists_rhd_not_mem {P : IndexedSet (ofAxiomsMinus 𝔸) Φ → For
     {x : (model P).World} {D E : Formula α} (h₁ : D ▷ E ∈ Φ) (h₂ : D ▷ E ∉ x.set) :
     ∃ y, x ≺ y ∧ D ∈ y.set ∧ ∀ V, y ≺[x] V → ∃ z ∈ V, E ∉ z.set := by
   obtain ⟨Δ, hΔ, hD, hb⟩ := exists_criticalSuccessor_box_neg_of_rhd_not_mem h₁ h₂;
-  exact ⟨x.criticalSuccessor E (.of_rhd_right h₁) Δ hΔ.toSuccessor,
-    ⟨hΔ.toSuccessor, List.prefix_append _ _⟩, hD,
+  use x.criticalSuccessor E (.of_rhd_right h₁) Δ hΔ.toSuccessor
+  exact ⟨⟨hΔ.toSuccessor, List.prefix_append _ _⟩, hD,
     fun _ hS ↦ hP <| hS.2.2 E ⟨List.prefix_refl _, hΔ, hb⟩⟩
 
 /-- - [KO21, Lemma 7.6] -/
@@ -551,14 +570,17 @@ lemma truthlemma_condJ2J5
     obtain ⟨Λ, hEΛ, hFΛ⟩ := hF.2.1.weakCriticalSuccessor.exists_mem_not_mem hFo hDE hD;
     have hz₂ : IsCriticalAfter x (x.criticalSuccessor F hFo Θ hΘ.toSuccessor) F :=
       ⟨List.prefix_refl _, hΘ, hbΘ⟩;
-    exact ⟨{⟨Λ, [], by simp, by simp⟩, x.criticalSuccessor F hFo Θ hΘ.toSuccessor},
-      ⟨Rxy, ⟨_, .inr rfl, hz₂.rel⟩, fun C hC ↦ by
-        obtain rfl := eq_of_isCriticalAfter hC hF;
-        exact ⟨⟨_, .inl rfl, hFΛ⟩, ⟨_, .inr rfl, hz₂⟩⟩⟩,
-      by rintro z (rfl | rfl) <;> assumption⟩;
+    use {⟨Λ, [], by simp, by simp⟩, x.criticalSuccessor F hFo Θ hΘ.toSuccessor}
+    constructor
+    · exact ⟨Rxy, ⟨_, .inr rfl, hz₂.rel⟩, fun C hC ↦ by
+        obtain rfl := eq_of_isCriticalAfter hC hF
+        exact ⟨⟨_, .inl rfl, hFΛ⟩, ⟨_, .inr rfl, hz₂⟩⟩⟩
+    · rintro z (rfl | rfl) <;> assumption
   · obtain ⟨Θ, hΘ, hEΘ⟩ := Successor.exists_successor_of_rhd_mem hDE Rxy.1 hD;
-    exact ⟨{x.successor Θ hΘ}, ⟨Rxy, ⟨_, rfl, hΘ, List.prefix_refl _⟩,
-      fun C hC ↦ absurd ⟨C, hC⟩ hc⟩, by rintro z rfl; exact hEΘ⟩;
+    use {x.successor Θ hΘ}
+    constructor
+    · exact ⟨Rxy, ⟨_, rfl, hΘ, List.prefix_refl _⟩, fun C hC ↦ absurd ⟨C, hC⟩ hc⟩
+    · rintro z rfl; exact hEΘ
 
 /-- - [KO21, Lemma 7.6] -/
 lemma truthlemma_condJ2J4PlusJ5 [(ILMinusJ4Plus : Logic α) ⪯ ofAxiomsMinus 𝔸]
@@ -577,14 +599,17 @@ lemma truthlemma_condJ2J4PlusJ5 [(ILMinusJ4Plus : Logic α) ⪯ ofAxiomsMinus �
       hF.2.1.weakCriticalSuccessor.exists_successor_mem_not_mem hFo hDE hD;
     have hz₂ : IsCriticalAfter x (x.criticalSuccessor F hFo Θ hΘ.toSuccessor) F :=
       ⟨List.prefix_refl _, hΘ, hbΘ⟩;
-    exact ⟨{x.successor Λ hΛ, x.criticalSuccessor F hFo Θ hΘ.toSuccessor},
-      ⟨Rxy, ⟨_, .inr rfl, hz₂.rel⟩, fun C hC ↦ by
-        obtain rfl := eq_of_isCriticalAfter hC hF;
-        exact ⟨⟨_, .inl rfl, ⟨hΛ, List.prefix_refl _⟩, hFΛ⟩, ⟨_, .inr rfl, hz₂⟩⟩⟩,
-      by rintro z (rfl | rfl) <;> assumption⟩;
+    use {x.successor Λ hΛ, x.criticalSuccessor F hFo Θ hΘ.toSuccessor}
+    constructor
+    · exact ⟨Rxy, ⟨_, .inr rfl, hz₂.rel⟩, fun C hC ↦ by
+        obtain rfl := eq_of_isCriticalAfter hC hF
+        exact ⟨⟨_, .inl rfl, ⟨hΛ, List.prefix_refl _⟩, hFΛ⟩, ⟨_, .inr rfl, hz₂⟩⟩⟩
+    · rintro z (rfl | rfl) <;> assumption
   · obtain ⟨Θ, hΘ, hEΘ⟩ := Successor.exists_successor_of_rhd_mem hDE Rxy.1 hD;
-    exact ⟨{x.successor Θ hΘ}, ⟨Rxy, ⟨_, rfl, hΘ, List.prefix_refl _⟩,
-      fun C hC ↦ absurd ⟨C, hC⟩ hc⟩, by rintro z rfl; exact hEΘ⟩;
+    use {x.successor Θ hΘ}
+    constructor
+    · exact ⟨Rxy, ⟨_, rfl, hΘ, List.prefix_refl _⟩, fun C hC ↦ absurd ⟨C, hC⟩ hc⟩
+    · rintro z rfl; exact hEΘ
 
 end ILMinus
 

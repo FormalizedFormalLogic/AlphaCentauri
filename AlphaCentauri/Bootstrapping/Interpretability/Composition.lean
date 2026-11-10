@@ -1183,6 +1183,19 @@ lemma tprovable_exs_and_assoc (A B G : Semiformula V L 1) :
     cl_prover
   exact K_left (tprovable_all_iff_exs _ _ ⨀ h)
 
+lemma tprovable_conj_succ_succ {k : ℕ} (f : Fin (k + 2) → Formula V L) :
+    S.internalize V ⊢ Matrix.conj (fun i : Fin k ↦ f i.succ.succ) ⋏ f 0 ⋏ f 1 🡒 Matrix.conj f := by
+  apply matrixConj_intro
+  intro i
+  cases i using Fin.cases with
+  | zero => cl_prover
+  | succ i =>
+    cases i using Fin.cases with
+    | zero => cl_prover
+    | succ i =>
+      have := matrixConj_elim (𝓢 := S.internalize V) (fun i : Fin k ↦ f i.succ.succ) i
+      cl_prover [this]
+
 end generalizeFvar
 
 section leibniz
@@ -1378,6 +1391,44 @@ lemma comp_func_congr {k : ℕ} (F : (ℒₒᵣ).Func k) :
         (fun j ↦ w (Fin.natAdd (k + 1) j))
   rw [funcCongrBody_val _ rfl] at h
   simpa using h
+
+omit [S.Δ₁] [U.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] in
+lemma IsVarVec.bvar_cons_succ_succ {k : ℕ} (a : Fin (k + 2)) :
+    IsVarVec (Semiterm.bvar a :>
+      fun i : Fin k ↦ (Semiterm.bvar i.succ.succ : Semiterm V ℒₒᵣ (k + 2))) := by
+  intro j
+  cases j using Fin.cases with
+  | zero => exact Or.inl ⟨a, rfl⟩
+  | succ j => exact Or.inl ⟨_, rfl⟩
+
+omit [U.Δ₁] in
+include h₁ in
+lemma tprovable_comp_funcUniqueBody {k : ℕ} (d : Semiformula V ℒₒᵣ 1)
+    (γ : Semiformula V ℒₒᵣ (k + 1))
+    (hb : S.internalize V ⊢ relAlls h₁.domT (h₁.transT (funcUniqueBody d γ))) :
+    S.internalize V ⊢ (funcUniqueBody (h₁.domT ⋏ h₁.transT d) (h₁.transT γ)).subst
+      (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) := by
+  have hs := relAlls_specialize (T := S) h₁.domT _ (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) ⨀ hb
+  have hcj := tprovable_conj_succ_succ (S := S)
+    (fun i : Fin (k + 2) ↦ h₁.domT.subst ![Semiterm.fvar ((i : ℕ) : V)])
+  simp only [funcUniqueBody, IsTable.transT_imp, IsTable.transT_and, IsTable.transT_conj,
+    h₁.toIsTable.transT_subst _ (IsVarVec.single_bvar _),
+    h₁.toIsTable.transT_subst _ (IsVarVec.bvar_cons_succ_succ _)] at hs ⊢
+  simp only [Semiformula.substs_imp, Semiformula.substs_and, Semiformula.substs_conj,
+    Semiformula.substs_substs, Semiformula.substs_equal, Matrix.vecMap_cons', Matrix.vecMap_nil,
+    Matrix.head_cons, Semiterm.substs_bvar] at hs ⊢
+  rw [← h₁.toIsTable.transT_subst _ (IsVarVec.fvar _), Semiformula.substs_equal,
+    Semiterm.substs_bvar, Semiterm.substs_bvar] at hs
+  have hp := h₁.tprovable_transT_equal_iff (((0 : Fin (k + 2)) : ℕ) : V)
+    (((1 : Fin (k + 2)) : ℕ) : V)
+  have key {CK CD CE CDE D0 D1 E0 E1 G0 G1 T Q : Formula V ℒₒᵣ}
+      (hs : S.internalize V ⊢ CK 🡒 CE ⋏ E0 ⋏ E1 ⋏ G0 ⋏ G1 🡒 T)
+      (hcj : S.internalize V ⊢ CD ⋏ D0 ⋏ D1 🡒 CK) (hsp : S.internalize V ⊢ CDE 🡒 CD ⋏ CE)
+      (hp : S.internalize V ⊢ D0 🡒 D1 🡒 (T 🡘 Q)) :
+      S.internalize V ⊢ CDE ⋏ (D0 ⋏ E0) ⋏ (D1 ⋏ E1) ⋏ G0 ⋏ G1 🡒 Q := by
+    have h₄ := C_trans hcj hs
+    cl_prover 100 [h₄, hsp, hp]
+  exact key hs hcj (tprovable_conj_and_split _ _) hp
 
 end compConditions
 

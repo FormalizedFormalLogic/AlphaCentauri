@@ -431,12 +431,12 @@ lemma provable_rhd_of_inconsistent (h : Γ.criticalSet F C *⊢[ofAxioms 𝔸] �
 
 variable [Adequate Φ]
 
-lemma exists_criticalSuccessor_of_consistent (hC : IsRhdOperand Φ C)
-    (h : Γ.criticalSet F C *⊬[ofAxioms 𝔸] ⊥) (hs : □(∼C) ∉ Γ) :
-    ∃ Δ, CriticalSuccessor F Γ Δ ∧ C ∈ Δ := by
+lemma exists_criticalSuccessor_of_consistent_union (hC : IsRhdOperand Φ C)
+    (h : (Γ.criticalSet F C ∪ X) *⊬[ofAxioms 𝔸] ⊥) (hs : □(∼C) ∉ Γ) :
+    ∃ Δ, CriticalSuccessor F Γ Δ ∧ C ∈ Δ ∧ (X ∪ Δ.literals) *⊬[ofAxioms 𝔸] ⊥ := by
   obtain ⟨Δ, hΔ⟩ := exists_consistent_union (Φ := Φ) h;
   have hm {A} (hA : A ∈ Φ) (h : A ∈ Γ.criticalSet F C) : A ∈ Δ :=
-    mem_of_provable hΔ hA <| Context.by_axm h;
+    mem_of_provable hΔ hA <| Context.by_axm <| .inl h;
   have hb {A} (hA : □A ∈ Γ) : A ∈ Δ ∧ □A ∈ Δ :=
     ⟨hm (Adequate.box (mem_of_mem hA)) <| by simp [criticalSet, hA],
       hm (mem_of_mem hA) <| by simp [criticalSet, hA]⟩;
@@ -445,13 +445,13 @@ lemma exists_criticalSuccessor_of_consistent (hC : IsRhdOperand Φ C)
       Finset.mem_filter.mpr ⟨Adequate.rhd_left (mem_of_mem hG), hG⟩;
     have h₂ : ofAxioms 𝔸 ⊢ G 🡒 Γ.rhdDisj F := right_Fdisj_intro _ h₁;
     have h₃ : ofAxioms 𝔸 ⊢ □(∼Γ.rhdDisj F) 🡒 □(∼G) := box_mono <| by cl_prover [h₂];
-    have h₄ : Γ.criticalSet F C *⊢[ofAxioms 𝔸] ∼Γ.rhdDisj F :=
-      Context.by_axm <| by simp [criticalSet];
-    have h₅ : Γ.criticalSet F C *⊢[ofAxioms 𝔸] □(∼Γ.rhdDisj F) :=
-      Context.by_axm <| by simp [criticalSet];
+    have h₄ : (Γ.criticalSet F C ∪ X) *⊢[ofAxioms 𝔸] ∼Γ.rhdDisj F :=
+      Context.by_axm <| .inl <| by simp [criticalSet];
+    have h₅ : (Γ.criticalSet F C ∪ X) *⊢[ofAxioms 𝔸] □(∼Γ.rhdDisj F) :=
+      Context.by_axm <| .inl <| by simp [criticalSet];
     constructor;
     · apply not_mem_of_provable_neg hΔ;
-      have h₆ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.criticalSet F C) h₂;
+      have h₆ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.criticalSet F C ∪ X) h₂;
       cl_prover [h₄, h₆];
     · exact mem_of_provable hΔ (Adequate.box_neg_mem <| .of_rhd_left (mem_of_mem hG)) <|
         Context.of h₃ ⨀ h₅;
@@ -461,6 +461,18 @@ lemma exists_criticalSuccessor_of_consistent (hC : IsRhdOperand Φ C)
       ∼C, hm (Adequate.box_neg_mem hC) (by simp [criticalSet]), hs⟩,
       fun h ↦ (hG h).1, fun h ↦ (hG h).2⟩;
   · exact hm hC.mem (by simp [criticalSet]);
+  · intro h₁;
+    apply hΔ <| Context.weakening _ h₁;
+    intro A;
+    simp only [Set.mem_union];
+    tauto;
+
+lemma exists_criticalSuccessor_of_consistent (hC : IsRhdOperand Φ C)
+    (h : Γ.criticalSet F C *⊬[ofAxioms 𝔸] ⊥) (hs : □(∼C) ∉ Γ) :
+    ∃ Δ, CriticalSuccessor F Γ Δ ∧ C ∈ Δ := by
+  obtain ⟨Δ, hΔ, hCΔ, -⟩ :=
+    exists_criticalSuccessor_of_consistent_union (X := ∅) hC (by simpa using h) hs;
+  use Δ;
 
 /-- - [dJV90, Lemma 3.6] -/
 lemma exists_criticalSuccessor_of_rhd_not_mem (h₁ : B ▷ C ∈ Φ) (h₂ : B ▷ C ∉ Γ) :

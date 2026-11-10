@@ -387,6 +387,24 @@ lemma funcCongrBody_val (g : Semiformula V L (k + 1)) (hg : g.val = tableFunc tb
     funext j
     simp
 
+omit [L.Eq] in
+lemma funcExistsBody_shift {d : Semiformula V L 1} {g : Semiformula V L (k + 1)}
+    (hd : d.shift = d) (hg : g.shift = g) : (funcExistsBody d g).shift = funcExistsBody d g := by
+  simp only [funcExistsBody, Semiformula.shift_imp, Semiformula.shift_conj, Semiformula.shift_exs,
+    Semiformula.shift_and, Semiformula.shift_substs, Semiterm.shift_vecMap_bvar,
+    Matrix.vecMap_cons', Matrix.head_cons, Matrix.tail_cons, Matrix.vecMap_nil, Semiterm.shift_bvar,
+    hd, hg]
+
+lemma funcUniqueBody_shift {d : Semiformula V L 1} {g : Semiformula V L (k + 1)}
+    (hd : d.shift = d) (hg : g.shift = g) : (funcUniqueBody d g).shift = funcUniqueBody d g := by
+  simp [funcUniqueBody, Semiformula.shift_substs, hd, hg]
+
+lemma funcCongrBody_shift {g : Semiformula V L (k + 1)} (hg : g.shift = g) :
+    (funcCongrBody g).shift = funcCongrBody g := by
+  simp only [funcCongrBody, Semiformula.shift_imp, Semiformula.shift_conj,
+    Semiformula.shift_substs, Semiterm.shift_vecMap_bvar, hg]
+  simp
+
 end bodies
 
 end typed
@@ -426,6 +444,21 @@ lemma tprovable_subst_of_provable_qqAlls :
     have h₂ := TProof.specialize! h₁ (w 0)
     rwa [Semiformula.substs_q_substs_single,
       show (w 0 :> Matrix.vecTail w) = w from Matrix.cons_head_tail w] at h₂
+
+lemma provable_qqAlls_of_forall_tprovable : ∀ {n : ℕ} (φ : Semiformula V L n), φ.shift = φ →
+    (∀ w : SemitermVec V L n 0, S.internalize V ⊢ φ.subst w) → Provable S (qqAlls φ.val n)
+  | 0, φ, _, h => by
+    have h₁ := h ![]
+    rw [Semiformula.subst_nil_eq_self] at h₁
+    simpa using tprovable_iff_provable.mp h₁
+  | n + 1, φ, hφ, h => by
+    have h₁ := provable_qqAlls_of_forall_tprovable (∀¹ φ) (by rw [Semiformula.shift_all, hφ])
+      fun w ↦ by
+        rw [Semiformula.substs_all]
+        apply TProof.all!
+        simp only [Semiformula.free, Semiformula.shift_substs, hφ, Semiformula.substs_substs]
+        exact h _
+    simpa [qqAlls_all] using h₁
 
 end
 

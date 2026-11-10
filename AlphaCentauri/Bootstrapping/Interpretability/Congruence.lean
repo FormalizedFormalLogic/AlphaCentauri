@@ -213,6 +213,106 @@ theorem provable_iff_translate_of_equiv (hL : L₂.SymbolsStandard V) {p : V}
     exact provable_exs_and_iff_exs_and hT.domain hT'.domain hdd (IsSemiformula.translate hT hp)
       (IsSemiformula.translate hT' hp) ih
 
+include hd in
+lemma tprovable_conj_domT_imp {m : ℕ} (u : Fin m → Term V L₁) :
+    S.internalize V ⊢ Matrix.conj (fun i ↦ hT'.domT.subst ![u i]) 🡒
+      Matrix.conj (fun i ↦ hT.domT.subst ![u i]) := by
+  have h₁ := matrixConj_imp_matrixConj (𝓢 := S.internalize V) (φ := ⊤)
+    (v := fun i ↦ hT'.domT.subst ![u i]) (u := fun i ↦ hT.domT.subst ![u i]) fun i ↦ by
+      have := hd (u i)
+      cl_prover [this]
+  cl_prover [h₁]
+
+include hd hf in
+lemma tprovable_funcUniqueBody_imp {k : ℕ} (F : L₂.Func k) (w : Fin (k + 2) → Term V L₁) :
+    S.internalize V ⊢ (funcUniqueBody hT.domT (hT.funcT F)).subst w 🡒
+      (funcUniqueBody hT'.domT (hT'.funcT F)).subst w := by
+  simp only [funcUniqueBody, Semiformula.substs_imp, Semiformula.substs_and,
+    Semiformula.substs_conj, Semiformula.substs_substs, Semiformula.substs_equal,
+    Matrix.vecMap_cons', Matrix.head_cons, Matrix.vecMap_nil, Semiterm.substs_bvar]
+  have key {C C' D₀ D₀' D₁ D₁' G₀ G₀' G₁ G₁' E : Formula V L₁}
+      (h₁ : S.internalize V ⊢ C' 🡒 C) (h₂ : S.internalize V ⊢ D₀ 🡘 D₀')
+      (h₃ : S.internalize V ⊢ D₁ 🡘 D₁') (h₄ : S.internalize V ⊢ G₀ 🡘 G₀')
+      (h₅ : S.internalize V ⊢ G₁ 🡘 G₁') :
+      S.internalize V ⊢ (C ⋏ D₀ ⋏ D₁ ⋏ G₀ ⋏ G₁ 🡒 E) 🡒 (C' ⋏ D₀' ⋏ D₁' ⋏ G₀' ⋏ G₁' 🡒 E) := by
+    have h₆ : S.internalize V ⊢ C' ⋏ D₀' ⋏ D₁' ⋏ G₀' ⋏ G₁' 🡒 C ⋏ D₀ ⋏ D₁ ⋏ G₀ ⋏ G₁ := by
+      cl_prover 100 [h₁, h₂, h₃, h₄, h₅]
+    cl_prover [h₆]
+  exact key (tprovable_conj_domT_imp hd _) (hd _) (hd _) (hf F _) (hf F _)
+
+include hf in
+lemma tprovable_funcCongrBody_imp {k : ℕ} (F : L₂.Func k)
+    (w : Fin (k + 1 + (k + 1)) → Term V L₁) :
+    S.internalize V ⊢ (funcCongrBody (hT.funcT F)).subst w 🡒
+      (funcCongrBody (hT'.funcT F)).subst w := by
+  simp only [funcCongrBody, Semiformula.substs_imp, Semiformula.substs_substs]
+  have key {E G₀ G₀' G₁ G₁' : Formula V L₁} (h₁ : S.internalize V ⊢ G₀ 🡘 G₀')
+      (h₂ : S.internalize V ⊢ G₁ 🡘 G₁') :
+      S.internalize V ⊢ (E 🡒 G₀ 🡒 G₁) 🡒 (E 🡒 G₀' 🡒 G₁') := by
+    cl_prover [h₁, h₂]
+  exact key (hf F _) (hf F _)
+
+include hd hf in
+lemma tprovable_funcExistsBody_imp {k : ℕ} (F : L₂.Func k) (w : Fin k → Term V L₁) :
+    S.internalize V ⊢ (funcExistsBody hT.domT (hT.funcT F)).subst w 🡒
+      (funcExistsBody hT'.domT (hT'.funcT F)).subst w := by
+  have key {C C' : Formula V L₁} {X X' : Semiformula V L₁ 1} (h₁ : S.internalize V ⊢ C' 🡒 C)
+      (h₂ : S.internalize V ⊢ ∀¹ (X 🡘 X')) :
+      S.internalize V ⊢ (C 🡒 ∃¹ X) 🡒 (C' 🡒 ∃¹ X') := by
+    have h₃ := tprovable_all_iff_exs X X' ⨀ h₂
+    cl_prover [h₁, h₃]
+  have key₂ {D D' G G' : Formula V L₁} (h₁ : S.internalize V ⊢ D 🡘 D')
+      (h₂ : S.internalize V ⊢ G 🡘 G') : S.internalize V ⊢ D ⋏ G 🡘 D' ⋏ G' := by
+    cl_prover [h₁, h₂]
+  simp only [funcExistsBody, Semiformula.substs_imp, Semiformula.substs_conj,
+    Semiformula.substs_substs, Semiformula.substs_ex, Matrix.vecMap_cons', Matrix.head_cons,
+    Matrix.vecMap_nil, Semiterm.substs_bvar]
+  apply key (tprovable_conj_domT_imp hd _)
+  apply TProof.all!
+  simp only [Semiformula.free, Semiformula.shift_iff, Semiformula.shift_and,
+    Semiformula.shift_substs, Semiformula.substs_imply, Semiformula.substs_and,
+    Semiformula.substs_substs, hT.domT_shift, hT'.domT_shift, hT.funcT_shift, hT'.funcT_shift,
+    Matrix.vecMap_cons', Matrix.head_cons, Matrix.vecMap_nil]
+  exact key₂ (hd _) (hf F _)
+
+include hd hf in
+/-- A table whose domain formula and graphs of function symbols are provably equivalent in `S` to
+those of a table of a translation in `S` is itself a table of a translation in `S`. -/
+theorem IsTranslationTable.of_provable_iff (h : IsTranslationTable L₂ S tbl)
+    (hL : L₂.SymbolsStandard V) : IsTranslationTable L₂ S tbl' where
+  toIsTable := hT'
+  exs_domain := by
+    have h₁ : S.internalize V ⊢ ∃¹ hT.domT := tprovable_iff_provable.mpr h.exs_domain
+    exact tprovable_iff_provable.mp <| K_left (tprovable_all_iff_exs _ _ ⨀
+      tprovable_all_domT_iff hd) ⨀ h₁
+  func_exists {k f} hf' := by
+    obtain ⟨k, F, rfl, rfl⟩ := hL.2 _ _ hf'
+    rw [← funcExistsBody_val hT'.domT rfl (hT'.funcT F) rfl]
+    apply provable_qqAlls_of_forall_tprovable _ (funcExistsBody_shift hT'.domT_shift
+      (hT'.funcT_shift F))
+    intro w
+    apply tprovable_funcExistsBody_imp hd hf F w ⨀ tprovable_subst_of_provable_qqAlls _ w _
+    rw [funcExistsBody_val _ rfl _ rfl]
+    exact h.func_exists hf'
+  func_unique {k f} hf' := by
+    obtain ⟨k, F, rfl, rfl⟩ := hL.2 _ _ hf'
+    have h₁ := provable_qqAlls_of_forall_tprovable (S := S) _ (funcUniqueBody_shift
+      hT'.domT_shift (hT'.funcT_shift F)) fun w ↦
+        tprovable_funcUniqueBody_imp hd hf F w ⨀ tprovable_subst_of_provable_qqAlls _ w (by
+          rw [funcUniqueBody_val _ rfl _ rfl]
+          simpa [add_assoc, one_add_one_eq_two] using h.func_unique hf')
+    rw [funcUniqueBody_val _ rfl _ rfl] at h₁
+    simpa [add_assoc, one_add_one_eq_two] using h₁
+  func_congr {k f} hf' := by
+    obtain ⟨k, F, rfl, rfl⟩ := hL.2 _ _ hf'
+    have h₁ := provable_qqAlls_of_forall_tprovable (S := S) _ (funcCongrBody_shift
+      (hT'.funcT_shift F)) fun w ↦
+        tprovable_funcCongrBody_imp hf F w ⨀ tprovable_subst_of_provable_qqAlls _ w (by
+          rw [funcCongrBody_val _ rfl]
+          simpa using h.func_congr hf')
+    rw [funcCongrBody_val _ rfl] at h₁
+    simpa using h₁
+
 end congruence
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

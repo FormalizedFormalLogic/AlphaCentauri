@@ -34,6 +34,9 @@ lemma one_lt_sq_smash (hB : 0 < B) : (1 : V) < (B ⨳ B) ^ 2 := by
     _ ≤ (B ⨳ B) * (B ⨳ B) := le_mul_of_one_le_left (Arithmetic.zero_le _) h₁.le
     _ = (B ⨳ B) ^ 2 := (sq _).symm
 
+lemma ext_one_zero (hB : 0 < B) : (1 : V){B}[0] = 1 :=
+  Nuon.ext_zero_eq_self_of_le (by simpa using pos_iff_one_le.mp (length_pos_iff.mpr hB))
+
 /-- The blocks of `S` of width `‖L‖` list the powers $x^0, \dots, x^k$. -/
 def IsSeq (L S x k : V) : Prop := S{L}[0] = 1 ∧ ∀ i < k, S{L}[i + 1] = S{L}[i] * x
 
@@ -73,14 +76,12 @@ lemma exists_isSeq (hB : 0 < B) (hx : 0 < x) (hk : k * ‖x‖ < ‖B‖) :
       definability
     case zero =>
       intro _
-      have h1 : (1 : V){B}[0] = 1 :=
-        Nuon.ext_zero_eq_self_of_le (by simpa using pos_iff_one_le.mp (length_pos_iff.mpr hB))
       use 1
       and_intros
       · exact hone
-      · exact h1
+      · exact ext_one_zero hB
       · simp
-      · simp [h1]
+      · simp [ext_one_zero hB]
     case succ i IH =>
       intro hi
       obtain ⟨S, -, H, hlen⟩ := IH (le_trans (by simp) hi)
@@ -180,27 +181,19 @@ lemma bpow_lt (B x k : V) : bpow B x k < B ⨳ 1 := by
 
 instance (B : V) : Bounded₂ (bpow B) := ⟨&(B ⨳ 1), fun _ ↦ by simpa using (bpow_lt B _ _).le⟩
 
-lemma isPow_bpow (hB : 0 < B) (hx : 0 < x) (hk : k * ‖x‖ < ‖B‖) :
-    IsPow B x k (bpow B x k) ∧ ‖bpow B x k‖ ≤ k * ‖x‖ + 1 := by
-  obtain ⟨S, hS, H, hlen⟩ := exists_isSeq hB hx hk
-  have h : IsPow B x k (S{B}[k]) := ⟨S, hS, H, rfl⟩
-  rw [h.bpow_eq]
-  exact ⟨h, hlen⟩
-
 lemma length_bpow_le (hB : 0 < B) (hx : 0 < x) (hk : k * ‖x‖ < ‖B‖) :
-    ‖bpow B x k‖ ≤ k * ‖x‖ + 1 :=
-  (isPow_bpow hB hx hk).2
+    ‖bpow B x k‖ ≤ k * ‖x‖ + 1 := by
+  obtain ⟨S, hS, H, hlen⟩ := exists_isSeq hB hx hk
+  rwa [Power.IsPow.bpow_eq (⟨S, hS, H, rfl⟩ : IsPow B x k (S{B}[k]))]
 
 @[simp] lemma bpow_zero (hB : 0 < B) (x : V) : bpow B x 0 = 1 := by
-  have h1 : (1 : V){B}[0] = 1 :=
-    Nuon.ext_zero_eq_self_of_le (by simpa using pos_iff_one_le.mp (length_pos_iff.mpr hB))
   apply Power.IsPow.bpow_eq
   use 1
   and_intros
   · exact one_lt_sq_smash hB
-  · exact h1
+  · exact ext_one_zero hB
   · simp
-  · exact h1
+  · exact ext_one_zero hB
 
 lemma bpow_succ (hB : 0 < B) (hx : 0 < x) (hk : (k + 1) * ‖x‖ < ‖B‖) :
     bpow B x (k + 1) = bpow B x k * x := by

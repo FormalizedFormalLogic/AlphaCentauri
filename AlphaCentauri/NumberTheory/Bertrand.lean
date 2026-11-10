@@ -52,18 +52,18 @@ def BandCodomain (m u : V) : Prop :=
 def bandLevelMap (m : V) : V → V → Prop :=
   UnionMap (Tagged 2 (Kummer B s m)) IdMap
     (fun u ↦ Tagged 0 (Bits B s m) u ∨ Tagged 1 (Bits B s m) u)
-    (UnionMap (Tagged 0 (Bits B s m)) (UntagMap 0 (BitsToLev B s 6 4))
-      (Tagged 1 (Bits B s m)) (UntagMap 1 (BitsToLev B s 7 5)))
+    (UnionMap (Tagged 0 (Bits B s m)) (UntagMap 0 (BitsToLevel B s 6 4))
+      (Tagged 1 (Bits B s m)) (UntagMap 1 (BitsToLevel B s 7 5)))
 
-/-- Legendre's matching backwards: two copies of $\mathrm{Lev}(m)$ and $\mathrm{K}(m)$ into
-$\mathrm{Lev}(2m)$. -/
+/-- Legendre's matching backwards: two copies of $\mathrm{Level}(m)$ and $\mathrm{K}(m)$ into
+$\mathrm{Level}(2m)$. -/
 def bandLegendreMap (m : V) : V → V → Prop :=
-  UnionMap (fun u ↦ Tagged 6 (Lev B s m) u ∨ Tagged 7 (Lev B s m) u ∨ Tagged 2 (Kummer B s m) u)
+  UnionMap (fun u ↦ Tagged 6 (Level B s m) u ∨ Tagged 7 (Level B s m) u ∨ Tagged 2 (Kummer B s m) u)
     (TagOutMap 8 (LegendreUp m 6 7 2)) (fun u ↦ Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u) IdMap
 
 /-- Levels of $1, \dots, 2m$ into positions. -/
 def bandBitsMap (m : V) : V → V → Prop :=
-  UnionMap (Tagged 8 (Lev B s (2 * m))) (TagMap 8 9 (LevToBits B s))
+  UnionMap (Tagged 8 (Level B s (2 * m))) (TagMap 8 9 (LevelToBits B s))
     (fun u ↦ Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u) IdMap
 
 /-- Halve the positions of $1, \dots, 2m$. -/
@@ -93,13 +93,13 @@ lemma definable_doubleUp_uniform (t₀ t₁ t₂ : V) :
 lemma definable_bandLevelMap : 𝚺ᴬ₀.DefinableRel₃ (bandLevelMap B s) := by
   have := definable_bits B s
   have := definable_kummer B s
-  have := definable_bitsToLev B s 6 4
-  have := definable_bitsToLev B s 7 5
+  have := definable_bitsToLevel B s 6 4
+  have := definable_bitsToLevel B s 7 5
   unfold bandLevelMap UnionMap IdMap UntagMap Tagged
   definability
 
 lemma definable_bandLegendreMap : 𝚺ᴬ₀.DefinableRel₃ (bandLegendreMap B s) := by
-  have := definable_lev B s
+  have := definable_level B s
   have := definable_kummer B s
   have := definable_top (V := V)
   have := definable_legendreUp_uniform (V := V) 6 7 2
@@ -107,9 +107,9 @@ lemma definable_bandLegendreMap : 𝚺ᴬ₀.DefinableRel₃ (bandLegendreMap B 
   definability
 
 lemma definable_bandBitsMap : 𝚺ᴬ₀.DefinableRel₃ (bandBitsMap B s) := by
-  have := definable_lev B s
+  have := definable_level B s
   have := definable_top (V := V)
-  have := definable_levToBits B s
+  have := definable_levelToBits B s
   unfold bandBitsMap UnionMap IdMap TagMap Tagged
   definability
 
@@ -141,7 +141,7 @@ lemma Bits.le_payloadBound (h : Bits B s m' w) (hm : m' ≤ 2 * m) : w ≤ paylo
     _ ≤ B ⨳ 1 + 2 * m * s := le_self_add
     _ ≤ _ := le_pair_right _ _
 
-lemma Lev.le_payloadBound (h : Lev B s m' w) (hm : m' ≤ 2 * m) : w ≤ payloadBound B s m := by
+lemma Level.le_payloadBound (h : Level B s m' w) (hm : m' ≤ 2 * m) : w ≤ payloadBound B s m := by
   obtain ⟨k, -, P, -, o, -, rfl, hk0, hk, hP, p, -, -, ho⟩ := h
   apply pair_le_pair (hk.trans hm)
   apply pair_le_pair ((le_of_dvd hk0 hP).trans (hk.trans hm))
@@ -201,21 +201,21 @@ include hB hm₄
 lemma isInj_bandStep : IsInj (BandStep B s m) (BandDomain B s m) (BandCodomain B s m) := by
   have hm : s * ‖2 * m‖ < ‖B‖ := lt_of_le_of_lt (mul_le_mul_left (length_monotone (by simp))) hm₄
   have h₁ : IsInj (bandLevelMap B s m) (BandDomain B s m) fun u ↦
-      Tagged 2 (Kummer B s m) u ∨ ((Tagged 6 (Lev B s m) u ∨ Tagged 4 (Top m) u) ∨
-        (Tagged 7 (Lev B s m) u ∨ Tagged 5 (Top m) u)) :=
-    IsInj.id.union (((isInj_bitsToLev hB hm (by norm_num)).untag).union
-      ((isInj_bitsToLev hB hm (by norm_num)).untag) (by tagged_disjoint)) (by tagged_disjoint)
+      Tagged 2 (Kummer B s m) u ∨ ((Tagged 6 (Level B s m) u ∨ Tagged 4 (Top m) u) ∨
+        (Tagged 7 (Level B s m) u ∨ Tagged 5 (Top m) u)) :=
+    IsInj.id.union (((isInj_bitsToLevel hB hm (by norm_num)).untag).union
+      ((isInj_bitsToLevel hB hm (by norm_num)).untag) (by tagged_disjoint)) (by tagged_disjoint)
   have h₂ : IsInj (bandLegendreMap B s m) (fun u ↦
-      Tagged 2 (Kummer B s m) u ∨ ((Tagged 6 (Lev B s m) u ∨ Tagged 4 (Top m) u) ∨
-        (Tagged 7 (Lev B s m) u ∨ Tagged 5 (Top m) u)))
-      (fun u ↦ Tagged 8 (Lev B s (2 * m)) u ∨ (Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u)) :=
+      Tagged 2 (Kummer B s m) u ∨ ((Tagged 6 (Level B s m) u ∨ Tagged 4 (Top m) u) ∨
+        (Tagged 7 (Level B s m) u ∨ Tagged 5 (Top m) u)))
+      (fun u ↦ Tagged 8 (Level B s (2 * m)) u ∨ (Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u)) :=
     (((isInj_legendreUp (B := B) (s := s) (m := m) (t₀ := 6) (t₁ := 7) (t₂ := 2)
       (by norm_num) (by norm_num) (by norm_num)).tagOut).union IsInj.id
         (by tagged_disjoint)).congr (fun _ ↦ by tauto) (fun _ ↦ Iff.rfl)
   have h₃ : IsInj (bandBitsMap B s m)
-      (fun u ↦ Tagged 8 (Lev B s (2 * m)) u ∨ (Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u))
+      (fun u ↦ Tagged 8 (Level B s (2 * m)) u ∨ (Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u))
       (fun u ↦ Tagged 9 (Bits B s (2 * m)) u ∨ (Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u)) :=
-    (isInj_levToBits hB hm₄).tag.union IsInj.id (by tagged_disjoint)
+    (isInj_levelToBits hB hm₄).tag.union IsInj.id (by tagged_disjoint)
   have h₄ : IsInj (bandDoubleMap B s m)
       (fun u ↦ Tagged 9 (Bits B s (2 * m)) u ∨ (Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u))
       (BandCodomain B s m) :=
@@ -226,7 +226,7 @@ lemma isInj_bandStep : IsInj (BandStep B s m) (BandDomain B s m) (BandCodomain B
     Tagged.lt_of_le hu ht hX
   have hbits : ∀ {m'}, m' ≤ 2 * m → ∀ x, Bits B s m' x → x ≤ payloadBound B s m :=
     fun hm' x hx ↦ hx.le_payloadBound hm'
-  have hlev : ∀ {m'}, m' ≤ 2 * m → ∀ x, Lev B s m' x → x ≤ payloadBound B s m :=
+  have hlevel : ∀ {m'}, m' ≤ 2 * m → ∀ x, Level B s m' x → x ≤ payloadBound B s m :=
     fun hm' x hx ↦ hx.le_payloadBound hm'
   have htop : ∀ x, Top m x → x ≤ payloadBound B s m :=
     fun x hx ↦ hx.le_payloadBound (by simp)
@@ -236,12 +236,12 @@ lemma isInj_bandStep : IsInj (BandStep B s m) (BandDomain B s m) (BandCodomain B
   refine ((h₁.comp h₂ ?_).comp h₃ ?_).comp h₄ ?_
   · rintro u (hu | (hu | hu) | (hu | hu))
     · exact hb (by numeral_le) hkum u hu
-    · exact hb (by numeral_le) (hlev hle2) u hu
+    · exact hb (by numeral_le) (hlevel hle2) u hu
     · exact hb (by numeral_le) htop u hu
-    · exact hb (by numeral_le) (hlev hle2) u hu
+    · exact hb (by numeral_le) (hlevel hle2) u hu
     · exact hb (by numeral_le) htop u hu
   · rintro u (hu | hu | hu)
-    · exact hb (by numeral_le) (hlev le_rfl) u hu
+    · exact hb (by numeral_le) (hlevel le_rfl) u hu
     · exact hb (by numeral_le) htop u hu
     · exact hb (by numeral_le) htop u hu
   · rintro u (hu | hu | hu)
@@ -271,8 +271,8 @@ lemma definable_tagged_bits (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Bits
   apply definable_tagged
   definability
 
-lemma definable_tagged_lev (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Lev B s m)) := by
-  have := definable_lev B s
+lemma definable_tagged_level (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Level B s m)) := by
+  have := definable_level B s
   apply definable_tagged
   definability
 
@@ -306,10 +306,10 @@ lemma embeds_lower : Embeds (LowerDomain B s n) (LowerCodomain B s n) := by
       (isInj_doubleDown hB hs hn (by norm_num) (by norm_num) (by norm_num) (by norm_num))
   have e₂ : Embeds
       (fun u ↦ Tagged 7 (Bits B s (2 * n)) u ∨ Tagged 4 (Below (scaledLength B s n)) u)
-      (fun u ↦ Tagged 8 (Lev B s (2 * n)) u ∨
+      (fun u ↦ Tagged 8 (Level B s (2 * n)) u ∨
         (Tagged 3 (Top (2 * n)) u ∨ Tagged 4 (Below (scaledLength B s n)) u)) :=
-    (((Embeds.of_isInj (definable_bitsToLev B s 8 3)
-      (isInj_bitsToLev hB hn₄ (by norm_num))).untag (t := 7)).union (definable_tagged_bits 7 _)
+    (((Embeds.of_isInj (definable_bitsToLevel B s 8 3)
+      (isInj_bitsToLevel hB hn₄ (by norm_num))).untag (t := 7)).union (definable_tagged_bits 7 _)
         (definable_tagged_below 4 _) Embeds.refl (by tagged_disjoint)).congr
       (fun _ ↦ Iff.rfl) (fun _ ↦ by tauto)
   have hrest : 𝚺ᴬ₀.DefinablePred fun u : V ↦
@@ -318,29 +318,30 @@ lemma embeds_lower : Embeds (LowerDomain B s n) (LowerCodomain B s n) := by
     have := definable_tagged_below (V := V) 4 (scaledLength B s n)
     definability
   have e₃ : Embeds
-      (fun u ↦ Tagged 8 (Lev B s (2 * n)) u ∨
+      (fun u ↦ Tagged 8 (Level B s (2 * n)) u ∨
         (Tagged 3 (Top (2 * n)) u ∨ Tagged 4 (Below (scaledLength B s n)) u))
-      (fun u ↦ (Tagged 9 (Lev B s n) u ∨ Tagged 10 (Lev B s n) u ∨ Tagged 6 (Kummer B s n) u) ∨
+      (fun u ↦ (Tagged 9 (Level B s n) u ∨ Tagged 10 (Level B s n) u ∨ Tagged 6 (Kummer B s n) u) ∨
         (Tagged 3 (Top (2 * n)) u ∨ Tagged 4 (Below (scaledLength B s n)) u)) :=
     ((Embeds.of_isInj (definable_legendreDown n 9 10 6)
       (isInj_legendreDown (B := B) (s := s) (by norm_num) (by norm_num) (by norm_num))).untag
-        (t := 8)).union (definable_tagged_lev 8 _) hrest Embeds.refl (by tagged_disjoint)
-  have hbits : Embeds (Lev B s n) (Bits B s n) :=
-    Embeds.of_isInj (definable_levToBits B s) (isInj_levToBits hB hn)
-  have h₉₁₀ : 𝚺ᴬ₀.DefinablePred fun u : V ↦ Tagged 9 (Lev B s n) u ∨ Tagged 10 (Lev B s n) u := by
-    have := definable_tagged_lev (B := B) (s := s) 9 n
-    have := definable_tagged_lev (B := B) (s := s) 10 n
+        (t := 8)).union (definable_tagged_level 8 _) hrest Embeds.refl (by tagged_disjoint)
+  have hbits : Embeds (Level B s n) (Bits B s n) :=
+    Embeds.of_isInj (definable_levelToBits B s) (isInj_levelToBits hB hn)
+  have h₉₁₀ :
+      𝚺ᴬ₀.DefinablePred fun u : V ↦ Tagged 9 (Level B s n) u ∨ Tagged 10 (Level B s n) u := by
+    have := definable_tagged_level (B := B) (s := s) 9 n
+    have := definable_tagged_level (B := B) (s := s) 10 n
     definability
   have hrest' : 𝚺ᴬ₀.DefinablePred fun u : V ↦ Tagged 6 (Kummer B s n) u ∨
       Tagged 3 (Top (2 * n)) u ∨ Tagged 4 (Below (scaledLength B s n)) u := by
     have := definable_tagged_kummer (B := B) (s := s) 6 n
     definability
   have e₄ : Embeds
-      (fun u ↦ (Tagged 9 (Lev B s n) u ∨ Tagged 10 (Lev B s n) u ∨ Tagged 6 (Kummer B s n) u) ∨
+      (fun u ↦ (Tagged 9 (Level B s n) u ∨ Tagged 10 (Level B s n) u ∨ Tagged 6 (Kummer B s n) u) ∨
         (Tagged 3 (Top (2 * n)) u ∨ Tagged 4 (Below (scaledLength B s n)) u))
       (LowerCodomain B s n) :=
-    ((((hbits.tag (t := 9) (t' := 0)).union (definable_tagged_lev 9 _)
-      (definable_tagged_lev 10 _) (hbits.tag (t := 10) (t' := 1)) (by tagged_disjoint)).union
+    ((((hbits.tag (t := 9) (t' := 0)).union (definable_tagged_level 9 _)
+      (definable_tagged_level 10 _) (hbits.tag (t := 10) (t' := 1)) (by tagged_disjoint)).union
         h₉₁₀ hrest' Embeds.refl (by tagged_disjoint))).congr (fun _ ↦ by tauto) (fun _ ↦ Iff.rfl)
   have hb : ∀ {t : V} {X : V → Prop}, t ≤ 10 → (∀ x, X x → x ≤ payloadBound B s n) →
       ∀ u, Tagged t X u → u < ⟪10, payloadBound B s n⟫ + 1 := fun ht hX u hu ↦
@@ -352,12 +353,12 @@ lemma embeds_lower : Embeds (LowerDomain B s n) (LowerCodomain B s n) := by
     · exact hb (by numeral_le) (fun x hx ↦ Bits.le_payloadBound hx le_rfl) u hu
     · exact hb (by numeral_le) (fun x hx ↦ Below.le_payloadBound_of_scaledLength hx) u hu
   · rintro u (hu | hu | hu)
-    · exact hb (by numeral_le) (fun x hx ↦ Lev.le_payloadBound hx le_rfl) u hu
+    · exact hb (by numeral_le) (fun x hx ↦ Level.le_payloadBound hx le_rfl) u hu
     · exact hb (by numeral_le) (fun x hx ↦ Top.le_payloadBound hx le_rfl) u hu
     · exact hb (by numeral_le) (fun x hx ↦ Below.le_payloadBound_of_scaledLength hx) u hu
   · rintro u ((hu | hu | hu) | hu | hu)
-    · exact hb (by numeral_le) (fun x hx ↦ Lev.le_payloadBound hx hle) u hu
-    · exact hb (by numeral_le) (fun x hx ↦ Lev.le_payloadBound hx hle) u hu
+    · exact hb (by numeral_le) (fun x hx ↦ Level.le_payloadBound hx hle) u hu
+    · exact hb (by numeral_le) (fun x hx ↦ Level.le_payloadBound hx hle) u hu
     · exact hb (by numeral_le) (fun x hx ↦ Kummer.le_payloadBound hx le_rfl) u hu
     · exact hb (by numeral_le) (fun x hx ↦ Top.le_payloadBound hx le_rfl) u hu
     · exact hb (by numeral_le) (fun x hx ↦ Below.le_payloadBound_of_scaledLength hx) u hu

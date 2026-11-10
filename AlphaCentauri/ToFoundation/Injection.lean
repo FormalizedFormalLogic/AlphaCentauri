@@ -43,12 +43,14 @@ variable {R S : V → V → Prop} {X X' Y Y' W : V → Prop}
 
 lemma union (h : IsInj R X Y) (h' : IsInj S X' Y') (hY : ∀ y, Y y → Y' y → False) :
     IsInj (UnionMap X R X' S) (fun x ↦ X x ∨ X' x) (fun y ↦ Y y ∨ Y' y) := by
-  refine ⟨?_, ?_, ?_⟩
+  and_intros
   · rintro x (hx | hx)
     · obtain ⟨y, hy⟩ := h.1 x hx
-      exact ⟨y, Or.inl ⟨hx, hy⟩⟩
+      use y
+      exact Or.inl ⟨hx, hy⟩
     · obtain ⟨y, hy⟩ := h'.1 x hx
-      exact ⟨y, Or.inr ⟨hx, hy⟩⟩
+      use y
+      exact Or.inr ⟨hx, hy⟩
   · rintro x y - (⟨hx, hy⟩ | ⟨hx, hy⟩)
     · exact Or.inl (h.2.1 x y hx hy)
     · exact Or.inr (h'.2.1 x y hx hy)
@@ -76,10 +78,12 @@ lemma congr_rel {R' : V → V → Prop} (h : IsInj R X Y) (hR : ∀ x y, X x →
 
 lemma comp [LT V] {c : V} (h : IsInj R X Y) (h' : IsInj S Y W) (hY : ∀ y, Y y → y < c) :
     IsInj (CompMap c R S) X W := by
-  refine ⟨fun x hx ↦ ?_, ?_, ?_⟩
-  · obtain ⟨y, hy⟩ := h.1 x hx
+  and_intros
+  · intro x hx
+    obtain ⟨y, hy⟩ := h.1 x hx
     obtain ⟨z, hz⟩ := h'.1 y (h.2.1 x y hx hy)
-    exact ⟨z, y, hY y (h.2.1 x y hx hy), hy, hz⟩
+    use z, y
+    exact ⟨hY y (h.2.1 x y hx hy), hy, hz⟩
   · rintro x z hx ⟨y, -, hy, hz⟩
     exact h'.2.1 y z (h.2.1 x y hx hy) hz
   · rintro x x' z hx hx' ⟨y, -, hy, hz⟩ ⟨y', -, hy', hz'⟩
@@ -117,10 +121,14 @@ namespace IsInj
 variable {R : V → V → Prop} {X Y : V → Prop}
 
 lemma tag {t t' : V} (h : IsInj R X Y) : IsInj (TagMap t t' R) (Tagged t X) (Tagged t' Y) := by
-  refine ⟨?_, ?_, ?_⟩
+  and_intros
   · rintro u ⟨rfl, hu⟩
     obtain ⟨y, hy⟩ := h.1 _ hu
-    exact ⟨⟪t', y⟫, rfl, by simp, by simpa using hy⟩
+    use ⟪t', y⟫
+    and_intros
+    · rfl
+    · simp
+    · simpa using hy
   · rintro u v ⟨-, hu⟩ ⟨-, hv, huv⟩
     exact ⟨hv, h.2.1 _ _ hu huv⟩
   · rintro u u' v ⟨hu₁, hu⟩ ⟨hu₁', hu'⟩ ⟨-, -, huv⟩ ⟨-, -, huv'⟩
@@ -129,10 +137,13 @@ lemma tag {t t' : V} (h : IsInj R X Y) : IsInj (TagMap t t' R) (Tagged t X) (Tag
 lemma family {N : V} {F : V → V → V → Prop} {X Y : V → V → Prop}
     (h : ∀ r < N, IsInj (F r) (X r) (Y r)) :
     IsInj (FamilyMap F) (Family N X) (Family N Y) := by
-  refine ⟨?_, ?_, ?_⟩
+  and_intros
   · rintro u ⟨hr, hu⟩
     obtain ⟨y, hy⟩ := (h _ hr).1 _ hu
-    exact ⟨⟪π₁ u, y⟫, by simp, by simpa using hy⟩
+    use ⟪π₁ u, y⟫
+    and_intros
+    · simp
+    · simpa using hy
   · rintro u v ⟨hr, hu⟩ ⟨hv, huv⟩
     exact ⟨hv ▸ hr, hv ▸ (h _ hr).2.1 _ _ hu huv⟩
   · rintro u u' v ⟨hr, hu⟩ ⟨hr', hu'⟩ ⟨hv, huv⟩ ⟨hv', huv'⟩
@@ -141,20 +152,22 @@ lemma family {N : V} {F : V → V → V → Prop} {X Y : V → V → Prop}
     rw [← pair_unpair u, ← pair_unpair u', h₁, (h _ hr').2.2 _ _ _ hu hu' huv huv']
 
 lemma untag {t : V} (h : IsInj R X Y) : IsInj (UntagMap t R) (Tagged t X) Y := by
-  refine ⟨?_, ?_, ?_⟩
+  and_intros
   · rintro u ⟨hu₁, hu⟩
     obtain ⟨y, hy⟩ := h.1 _ hu
-    exact ⟨y, hu₁, hy⟩
+    use y
+    exact ⟨hu₁, hy⟩
   · rintro u v ⟨-, hu⟩ ⟨-, huv⟩
     exact h.2.1 _ _ hu huv
   · rintro u u' v ⟨hu₁, hu⟩ ⟨hu₁', hu'⟩ ⟨-, huv⟩ ⟨-, huv'⟩
     rw [← pair_unpair u, ← pair_unpair u', hu₁, hu₁', h.2.2 _ _ _ hu hu' huv huv']
 
 lemma tagOut {t : V} (h : IsInj R X Y) : IsInj (TagOutMap t R) X (Tagged t Y) := by
-  refine ⟨?_, ?_, ?_⟩
+  and_intros
   · intro u hu
     obtain ⟨y, hy⟩ := h.1 _ hu
-    exact ⟨⟪t, y⟫, by simpa [TagOutMap] using hy⟩
+    use ⟪t, y⟫
+    simpa [TagOutMap] using hy
   · rintro u v hu ⟨hv, huv⟩
     exact ⟨hv, h.2.1 _ _ hu huv⟩
   · rintro u u' v hu hu' ⟨-, huv⟩ ⟨-, huv'⟩
@@ -170,8 +183,8 @@ namespace Embeds
 variable {X X' Y Y' W : V → Prop}
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] in
-lemma of_isInj {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) (h : IsInj R X Y) : Embeds X Y :=
-  ⟨R, hR, h⟩
+lemma of_isInj {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) (h : IsInj R X Y) : Embeds X Y := by
+  use R
 
 lemma refl : Embeds X X := ⟨_, by unfold IdMap; definability, IsInj.id⟩
 
@@ -190,7 +203,8 @@ lemma union (hX : 𝚺ᴬ₀.DefinablePred X) (hX' : 𝚺ᴬ₀.DefinablePred X'
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] in
 lemma mono (h : Embeds X Y) (hX : ∀ x, X' x → X x) (hY : ∀ y, Y y → Y' y) : Embeds X' Y' := by
   obtain ⟨R, hR, h⟩ := h
-  exact ⟨R, hR, h.mono hX hY⟩
+  use R
+  exact ⟨hR, h.mono hX hY⟩
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] in
 lemma congr (h : Embeds X Y) (hX : ∀ x, X x ↔ X' x) (hY : ∀ y, Y y ↔ Y' y) : Embeds X' Y' :=
@@ -222,17 +236,21 @@ lemma extend {D T : V → Prop} {E E' : V → V → Prop} {N N' c c' : V}
     (hcover : ∀ v < N, (∀ u, D u → ¬E u v) → v < N' ∧ ∀ t, T t → ¬E' t v) :
     Embeds (· < N) (· < N') := by
   obtain ⟨F, hF, hFinj⟩ := h
-  refine ⟨fun v w ↦ ((∀ u < c, D u → ¬E u v) ∧ w = v) ∨
-    ∃ u < c, D u ∧ E u v ∧ ∃ t < c', F u t ∧ E' t w, by definability, ?_, ?_, ?_⟩
+  use fun v w ↦ ((∀ u < c, D u → ¬E u v) ∧ w = v) ∨
+    ∃ u < c, D u ∧ E u v ∧ ∃ t < c', F u t ∧ E' t w
+  and_intros
+  · definability
   · intro v hv
     by_cases hex : ∃ u, D u ∧ E u v
     · obtain ⟨u, hu, huv⟩ := hex
       obtain ⟨t, ht⟩ := hFinj.1 u hu
       have hT' := hFinj.2.1 u t hu ht
       obtain ⟨w, hw⟩ := henc'.1 t hT'
-      exact ⟨w, Or.inr ⟨u, hc u hu, hu, huv, t, hc' t hT', ht, hw⟩⟩
+      use w
+      exact Or.inr ⟨u, hc u hu, hu, huv, t, hc' t hT', ht, hw⟩
     · push Not at hex
-      exact ⟨v, Or.inl ⟨fun u _ hu ↦ hex u hu, rfl⟩⟩
+      use v
+      exact Or.inl ⟨fun u _ hu ↦ hex u hu, rfl⟩
   · rintro v w hv (⟨hnot, rfl⟩ | ⟨u, -, hu, -, t, -, ht, hw⟩)
     · exact (hcover w hv fun u hu ↦ hnot u (hc u hu) hu).1
     · exact henc'.2.1 t w (hFinj.2.1 u t hu ht) hw

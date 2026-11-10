@@ -573,6 +573,31 @@ lemma definable_shiftPaths (hR : 𝚺ᴬ₀.DefinableRel R) (I : V) :
   unfold ShiftPaths IsPath
   definability
 
+lemma exists_shiftStep {j e : V} (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y)
+    (hj : j + 1 ≤ K) (he : e + j * b < 2 * K * b) :
+    ∃ z < 2 * K * b, ShiftStep R K b e z ∧ z + (j + 1) * b < 2 * K * b := by
+  have hjb : (j + 1) * b ≤ K * b := mul_le_mul_right hj
+  rcases lt_or_ge e ((K + 1) * b) with heK | heK
+  · obtain ⟨z, hz, hR⟩ := total _ heK
+    have : z + (j + 1) * b < 2 * K * b := calc
+      z + (j + 1) * b < K * b + K * b := add_lt_add_of_lt_of_le hz hjb
+      _ = 2 * K * b := by grind
+    use z
+    and_intros
+    · exact lt_of_le_of_lt le_self_add this
+    · exact Or.inl ⟨heK, hz, hR⟩
+    · exact this
+  · have hb1 : b ≤ (K + 1) * b := le_mul_of_one_le_left (Arithmetic.zero_le _) (by simp)
+    have hzv : e - b + b = e := tsub_add_cancel_of_le (le_trans hb1 heK)
+    have : e - b + (j + 1) * b < 2 * K * b := by
+      rw [add_mul, one_mul, ← add_assoc, add_right_comm, hzv]
+      exact he
+    use e - b
+    and_intros
+    · exact lt_of_le_of_lt le_self_add this
+    · exact Or.inr ⟨heK, hzv⟩
+    · exact this
+
 lemma shiftPaths (hR : 𝚺ᴬ₀.DefinableRel R) {I : V} (hb : 0 < b) (hK : 0 < K) (hKI : K ≤ ‖I‖)
     (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y) : ∀ j ≤ K, ShiftPaths R K b I j := by
   have ha : 0 < 2 * K * b := mul_pos (mul_pos two_pos hK) hb
@@ -595,37 +620,13 @@ lemma shiftPaths (hR : 𝚺ᴬ₀.DefinableRel R) {I : V} (hb : 0 < b) (hK : 0 <
           rw [sq]
           exact le_mul_of_one_le_left (Arithmetic.zero_le _) (pos_iff_one_le.mp (smash_pos _ _))
     · exact hext
-    · intro i hi
-      exact absurd hi (by simp)
+    · simp
     · simpa [hext] using hx
   case succ j IH =>
     intro hj x hx
     obtain ⟨s, -, hs, hv⟩ := IH (le_trans (by simp) hj) x hx
     have hjb : (j + 1) * b ≤ K * b := mul_le_mul_right hj
-    have hz : ∃ z < 2 * K * b, ShiftStep R K b (Nuon.ext (2 * K * b) s j) z ∧
-        z + (j + 1) * b < 2 * K * b := by
-      rcases lt_or_ge (Nuon.ext (2 * K * b) s j) ((K + 1) * b) with hvK | hvK
-      · obtain ⟨z, hz, hR⟩ := total _ hvK
-        have : z + (j + 1) * b < 2 * K * b := calc
-          z + (j + 1) * b < K * b + K * b := add_lt_add_of_lt_of_le hz hjb
-          _ = 2 * K * b := by grind
-        use z
-        and_intros
-        · exact lt_of_le_of_lt le_self_add this
-        · exact Or.inl ⟨hvK, hz, hR⟩
-        · exact this
-      · have hb1 : b ≤ (K + 1) * b := le_mul_of_one_le_left (Arithmetic.zero_le _) (by simp)
-        have hzv : Nuon.ext (2 * K * b) s j - b + b = Nuon.ext (2 * K * b) s j :=
-          tsub_add_cancel_of_le (le_trans hb1 hvK)
-        have : Nuon.ext (2 * K * b) s j - b + (j + 1) * b < 2 * K * b := by
-          rw [add_mul, one_mul, ← add_assoc, add_right_comm, hzv]
-          exact hv
-        use Nuon.ext (2 * K * b) s j - b
-        and_intros
-        · exact lt_of_le_of_lt le_self_add this
-        · exact Or.inr ⟨hvK, hzv⟩
-        · exact this
-    obtain ⟨z, hza, hzstep, hzb⟩ := hz
+    obtain ⟨z, hza, hzstep, hzb⟩ := exists_shiftStep total hj hv
     have hjI : j + 1 ≤ ‖I‖ := le_trans hj hKI
     have hzL : ‖z‖ ≤ ‖2 * K * b‖ := length_monotone hza.le
     have hlast := Nuon.ext_append_last I (2 * K * b) s hjI hzL
@@ -700,7 +701,7 @@ theorem weakPigeonhole_succ_mul_of_le_length {R : V → V → Prop} (hR : 𝚺�
     constructor
     · have h2 : 2 * K * b = K * b + K * b := by rw [hab, two_mul]
       exact (add_lt_add_iff_right _).mp (lt_of_lt_of_eq hv h2)
-    · exact ⟨s, hs, hp, rfl⟩
+    · use s
   obtain ⟨x, -, x', -, y, -, hxx, ⟨s, -, hs, hsy⟩, ⟨s', -, hs', hsy'⟩⟩ :=
     weakPigeonhole_two_mul (definable_shiftReach hR I) (mul_pos hK hb) htot
   exact hxx (hs.eq_of_shiftStep hinj hs' (hsy.trans hsy'.symm))

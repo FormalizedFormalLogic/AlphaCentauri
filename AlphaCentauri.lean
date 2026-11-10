@@ -59,6 +59,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
 public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILM
 public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILP
+public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILW
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Extension

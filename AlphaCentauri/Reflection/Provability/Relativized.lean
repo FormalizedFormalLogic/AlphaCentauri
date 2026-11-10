@@ -5,10 +5,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Pro
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 
 /-!
-# Iterated consistency and relativized provability
-
-The tower of iterated-consistency extensions `T₀ = T`, `Tₙ₊₁ = Tₙ ∪ Tₙ.Con` of an arithmetic
-theory, and its relation to iterated provability of `⊥`.
+# Relativized provability
 
 The provability predicate `Prov^n_T(x)` of `T` extended by the true $\Pi_n$ sentences is a
 $\Sigma_{n + 1}$ formula packaged as a `Provability 𝗜𝚺₁ T` satisfying the Hilbert–Bernays–Löb
@@ -17,8 +14,6 @@ definitionally the standard provability predicate. For `n + 1`, the true $\Pi_{n
 enter as a finite set `c` of tagged satisfied prenex formulas `⟪k + 1, θ, e⟫`, `k ≤ n`, and
 `Prov^{n + 1}_T(x)` says that `T` proves `x` from the formula stating this of `c`.
 
-- [Lin97, §4]
-- [AB05, §4.1]
 - [Bek99, §3]
 -/
 
@@ -29,35 +24,6 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic
 
 open FFL.Entailment ProvabilityAbstraction
-
-/-- The pair of the iterated-consistency theory `T₀ = T`, `Tₙ₊₁ = Tₙ ∪ Tₙ.Con` and its
-$\Delta_1$-definability witness.
-- [Lin97, §4, p. 55, the `Con(n, S)` tower]
-- [AB05, §4.1, the `Tₙ` tower] -/
-noncomputable def _root_.FFL.FirstOrder.Theory.iterConSigma
-    (T : ArithmeticTheory) [T.Δ₁] : ℕ → Σ' S : ArithmeticTheory, S.Δ₁
-  | 0 => ⟨T, ‹_›⟩
-  | n + 1 =>
-    match T.iterConSigma n with
-    | ⟨S, hS⟩ => letI := hS; ⟨S ∪ S.Con, inferInstance⟩
-
-/-- The `n`-times iterated-consistency extension of `T`: `T₀ = T`, `Tₙ₊₁ = Tₙ ∪ Tₙ.Con`.
-- [Lin97, §4, p. 55]
-- [AB05, §4.1] -/
-noncomputable def _root_.FFL.FirstOrder.Theory.iterCon (T : ArithmeticTheory) [T.Δ₁] (n : ℕ) :
-    ArithmeticTheory := (T.iterConSigma n).1
-
-noncomputable instance (T : ArithmeticTheory) [T.Δ₁] (n : ℕ) : (T.iterCon n).Δ₁ :=
-  (T.iterConSigma n).2
-
-/-- Iterated consistency reduces to iterated provability of `⊥`: over `𝗜𝚺₁`, the formalized
-consistency statement of the `n`-times iterated-consistency extension of `T` is equivalent to
-`T`'s own provability predicate not proving `⊥` after `n + 1` applications.
-- [Lin97, Lemma 4.2]
-- [AB05, Lemma 21] -/
-axiom provable_iterCon_iff_not_iterate_standardProvability_bot {T : ArithmeticTheory} [T.Δ₁]
-    (n : ℕ) :
-    𝗜𝚺₁ ⊢ (T.iterCon n).consistent.val 🡘 ∼(T.standardProvability^[n + 1] ⊥)
 
 open Bootstrapping Bootstrapping.Arithmetic
 

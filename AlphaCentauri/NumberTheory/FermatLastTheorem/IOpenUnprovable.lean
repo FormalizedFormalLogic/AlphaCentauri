@@ -1,9 +1,9 @@
 module
 
-
 public import AlphaCentauri.Model.IntegerConstantPolynomial
 public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
+public import AlphaCentauri.NumberTheory.FermatLastTheorem.Basic
 public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
 public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
@@ -11,188 +11,26 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
 public import Mathlib.FieldTheory.KummerPolynomial
 public import Mathlib.NumberTheory.Padics.Hensel
-public import AlphaCentauri.ToMathlib.NumberTheory.FLT.Three
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastNumberPrinciple
 
 /-!
-# Fermat's Last Theorem in $\mathsf{I}\mathsf{E}_1$ and $\mathsf{IOpen}$
+# Non-provability of Fermat's Last Theorem in $\mathsf{IOpen}$
 
-$\mathsf{I}\mathsf{E}_1$ is induction for bounded existential formulas over $\mathsf{PA}^-$.
-Over a model $V$ of $\mathsf{I}\mathsf{E}_1$, the ring of differences of $V$ satisfies the least
-number principle `LeastNumberPrinciple` for bounded existential open predicates, and
-`FermatThree.flt3_of_leastNumberPrinciple` applies to it. Smith proved the statement over
-$\mathsf{I}\mathsf{E}_2$ and asked whether $\mathsf{I}\mathsf{E}_1$ suffices, and whether
-$\mathsf{I}\mathsf{E}_2$ proves the other odd exponents, which is open.
+$\mathsf{IOpen}$ does not prove Fermat's Last Theorem for any exponent $n \ge 3$, and does not
+prove Case I of it for some exponent. A nonzero solution of $x^n + y^n = z^n$ in a discretely
+ordered ring is a counterexample to Fermat's Last Theorem in its non-negative part, and
+$\mathsf{IOpen}$ proves only the universal sentences true in every model of $\mathsf{ZR}$.
 
-A nonzero solution of $x^n + y^n = z^n$ in a discretely ordered ring is a counterexample to
-Fermat's Last Theorem in its non-negative part. In the $\mathbb{Z}$-ring of real polynomials with
-integer constant term, $x = y = X$ and $z = 2^{1/n} X$ is such a solution, and $\mathsf{IOpen}$
-proves only the universal sentences true in every model of $\mathsf{ZR}$.
-
-In a model of $\mathsf{IOpen}$ every element is a standard remainder modulo $n^2$ plus a multiple of
-$n^2$, so a solution of $x^n + y^n = z^n$ reduces to a solution of the congruence
-$a^n + b^n \equiv c^n \pmod{n^2}$ in the standard remainders, which is decided by computation; this
-proves Case I for the exponents $3$ and $5$.
-
-For the exponent $7$, let $\sigma > 0$ be the real $7$th root of $5^7 - 1$, and let $\chi$ map
-$\mathbb{Q}(\sigma)$ into $\mathbb{Q}_7$, sending $\sigma$ to the $7$-adic root congruent to $4$.
-In the $\mathbb{Z}$-ring `PadicIntegralPolynomial χ`, the elements $x = X$, $y = \sigma X$ and
-$z = 5 X$ satisfy $x^7 + y^7 = z^7$ and $x y z \equiv 6 \pmod 7$. By Wilkie's extension theorem,
-this ring embeds into a model of $\mathsf{IOpen}$ in which Case I fails.
-
-- [Wil85]
-- [Smi93, Question 5.5, Question 5.6]
-- [Smi92b, Introduction, Lemma 3.6, Question 5.1, Question 5.3, Question 5.5, Question 5.6]
 - [She64]
-- [DAq05, §2]
-- [Wil78, Lemma 3.2]
+- [Smi92b]
+- [DAq05]
+- [Wil78]
 -/
 
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
 
-open RingOfDifferences OpenPredicate
-
-/-- Fermat's Last Theorem for exponent `n`. -/
-def fermatLastTheorem (n : ℕ) : ArithmeticSentence :=
-  “∀ x y z, x ^' n + y ^' n = z ^' n → x = 0 ∨ y = 0 ∨ z = 0”
-
-/-- $\mathsf{I}\mathsf{E}_1$ proves Fermat's Last Theorem for exponent $3$.
-- [Wil85]
-- [Smi93, Question 5.5] -/
-theorem provable_fermatLastTheorem_three_IE1 : 𝗜𝗘₁ ⊢ fermatLastTheorem 3 := by
-  apply complete
-  intro V _ hV
-  have hL := leastNumberPrinciple_of_models_induction (V := V)
-  suffices ∀ a b c : V, a ^ 3 + b ^ 3 = c ^ 3 → a = 0 ∨ b = 0 ∨ c = 0 by
-    simpa [models_iff, fermatLastTheorem]
-  intro a b c h
-  have e : of a ^ 3 + of b ^ 3 = of c ^ 3 := by simpa [map_add (of : V →+* _)] using congrArg of h
-  simpa [map_eq_zero_iff _ of_injective] using FermatThree.flt3_of_leastNumberPrinciple hL _ _ _ e
-
-/-- $\mathsf{I}\mathsf{E}_2$ proves Fermat's Last Theorem for every odd exponent $n \ge 5$. An
-open problem.
-- [Smi93, Question 5.6] -/
-def ProvableFermatLastTheoremIE2 : Prop := ∀ n : ℕ, Odd n → 5 ≤ n → 𝗜𝗘₂ ⊢ fermatLastTheorem n
-
-/-- Bézout's theorem: any `x` and nonzero `y` have a common divisor `z` with `s y = t x + z`.
-Smith prints it without the hypothesis `y ≠ 0`, which `x = 1`, `y = 0` violates.
-- [Smi92b, Definition 3.5] -/
-def bezout : ArithmeticSentence := “∀ x y, y ≠ 0 → ∃ z s t, s * y = t * x + z ∧ z ∣ x ∧ z ∣ y”
-
-/-- Case I of Fermat's Last Theorem for exponent `n`: every solution of `xⁿ + yⁿ = zⁿ` has
-`n ∣ x y z`.
-- [Smi92b, §2] -/
-def fermatLastTheoremCaseOne (n : ℕ) : ArithmeticSentence :=
-  “∀ x y z, x ^' n + y ^' n = z ^' n → ↑n ∣ x * y * z”
-
-/-- Case II of Fermat's Last Theorem for exponent `n`: every solution of `xⁿ + yⁿ = zⁿ` with
-`n ∣ x y z` is trivial.
-- [Smi92b, §2] -/
-def fermatLastTheoremCaseTwo (n : ℕ) : ArithmeticSentence :=
-  “∀ x y z, x ^' n + y ^' n = z ^' n → ↑n ∣ x * y * z → x = 0 ∨ y = 0 ∨ z = 0”
-
-/-- `xⁿ ± yⁿ = z²` has only trivial solutions.
-- [Smi92b, Question 5.6] -/
-def powerAddPowerNeSquare (n : ℕ) : ArithmeticSentence :=
-  “∀ x y z, x ^' n + y ^' n = z * z ∨ x ^' n = y ^' n + z * z →
-    x = 0 ∨ y = 0 ∨ z = 0”
-
-/-- $\mathsf{IOpen} + \mathrm{Bez}$ proves Case II of Fermat's Last Theorem for some exponent
-$n \ge 3$. An open problem.
-- [Smi92b, Question 5.3] -/
-def ExistsProvableFermatLastTheoremCaseTwoIOpenBezout : Prop :=
-  ∃ n : ℕ, 3 ≤ n ∧ insert bezout 𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseTwo n
-
-/-- $\mathsf{IE}_1$ proves Case I of Fermat's Last Theorem for each standard $n \ge 3$. An open
-problem; since $\mathsf{IE}_1$ proves $\mathsf{IOpen} + \mathrm{Bez}$, which proves
-$\mathsf{IOpen} + \mathrm{GCD}$, it is equivalent to asking whether Case I is provable in any of
-the three.
-- [Smi92b, Question 5.5]
-- [Smi92b, Lemma 3.11] -/
-def ProvableFermatLastTheoremCaseOneIE1 : Prop :=
-  ∀ n : ℕ, 3 ≤ n → 𝗜𝗘₁ ⊢ fermatLastTheoremCaseOne n
-
-/-- $\mathsf{IE}_1$ proves Fermat's Last Theorem for each even standard $n > 2$. An open problem.
-- [Smi92b, Question 5.6] -/
-def ProvableFermatLastTheoremIE1OfEven : Prop :=
-  ∀ n : ℕ, Even n → 2 < n → 𝗜𝗘₁ ⊢ fermatLastTheorem n
-
-/-- $\mathsf{IE}_1$ proves that $x^n \pm y^n = z^2$ has no nontrivial solutions for each even
-standard $n \ge 4$. An open problem.
-- [Smi92b, Question 5.6] -/
-def ProvablePowerAddPowerNeSquareIE1 : Prop :=
-  ∀ n : ℕ, Even n → 4 ≤ n → 𝗜𝗘₁ ⊢ powerAddPowerNeSquare n
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] {N n : ℕ}
-
-lemma exists_pow_add_mul_eq {R : Type*} [CommSemiring R] (a m k : R) (e : ℕ) :
-    ∃ u, (a + m * k) ^ e = a ^ e + m * u := by
-  induction e with
-  | zero => use 0; simp
-  | succ e ih =>
-    obtain ⟨u, hu⟩ := ih
-    use a ^ e * k + u * a + m * u * k
-    rw [pow_succ, hu]
-    ring
-
-lemma exists_nat_lt_add_mul (hN : 0 < N) (x : V) : ∃ a < N, ∃ q, x = a + N * q := by
-  have hN' : (0 : V) < N := by exact_mod_cast hN
-  obtain ⟨r, hr, hx⟩ := eq_mul_div_add_of_pos x hN'
-  obtain ⟨a, rfl⟩ := eq_nat_of_lt_nat hr
-  use a
-  and_intros
-  · exact_mod_cast hr
-  · exact ⟨_, hx.trans (add_comm _ _)⟩
-
-lemma provable_fermatLastTheoremCaseOne_IOpen_of_forall (hn : 0 < n)
-    (H : ∀ a < n ^ 2, ∀ b < n ^ 2, ∀ c < n ^ 2, (a ^ n + b ^ n) % n ^ 2 = c ^ n % n ^ 2 →
-      n ∣ a * b * c) :
-    𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseOne n := by
-  apply complete
-  intro (V : Type) _ hV
-  suffices ∀ x y z : V, x ^ n + y ^ n = z ^ n → (n : V) ∣ x * y * z by
-    simpa [models_iff, fermatLastTheoremCaseOne, numeral_eq_natCast]
-  intro x y z h
-  have hN : 0 < n ^ 2 := by positivity
-  have hnN : n ∣ n ^ 2 := dvd_pow_self n two_ne_zero
-  generalize n ^ 2 = N at hN hnN H
-  have hN' : (0 : V) < N := by exact_mod_cast hN
-  have hmod (m : ℕ) (u : V) : ((m : V) + N * u) % N = ((m % N : ℕ) : V) := by
-    have : (m : V) = N * ↑(m / N) + ↑(m % N) := by exact_mod_cast (Nat.div_add_mod m N).symm
-    rw [mod_add_mul' _ _ hN', this, mod_mul_add' _ _ hN',
-      mod_eq_self_of_lt (by exact_mod_cast Nat.mod_lt _ hN)]
-  obtain ⟨a, ha, qx, rfl⟩ := exists_nat_lt_add_mul hN x
-  obtain ⟨b, hb, qy, rfl⟩ := exists_nat_lt_add_mul hN y
-  obtain ⟨c, hc, qz, rfl⟩ := exists_nat_lt_add_mul hN z
-  obtain ⟨ux, hux⟩ := exists_pow_add_mul_eq (a : V) N qx n
-  obtain ⟨uy, huy⟩ := exists_pow_add_mul_eq (b : V) N qy n
-  obtain ⟨uz, huz⟩ := exists_pow_add_mul_eq (c : V) N qz n
-  have h₁ : ((a ^ n + b ^ n : ℕ) : V) + N * (ux + uy) = ((c ^ n : ℕ) : V) + N * uz := by
-    push_cast
-    calc
-      _ = (a ^ n + N * ux) + (b ^ n + N * uy) := by ring
-      _ = _ := by rw [← hux, ← huy, ← huz, h]
-  have h₂ := (hmod _ _).symm.trans <| (congrArg (· % (N : V)) h₁).trans (hmod _ _)
-  have h₃ : (n : V) ∣ a * b * c := by
-    exact_mod_cast Nat.cast_dvd_cast (H a ha b hb c hc (by exact_mod_cast h₂))
-  have h₄ : (n : V) ∣ N := Nat.cast_dvd_cast hnN
-  calc
-    _ ∣ (a : V) * b * c + N * (qx * b * c + a * qy * c + a * b * qz +
-        N * (qx * qy * c + qx * b * qz + a * qy * qz) + N * N * qx * qy * qz) :=
-      h₃.add <| h₄.mul_right _
-    _ = _ := by ring
-
-/-- $\mathsf{IOpen}$ proves Case I of Fermat's Last Theorem for exponent $3$.
-- [Smi92b, Lemma 3.6] -/
-theorem provable_fermatLastTheoremCaseOne_three_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseOne 3 :=
-  provable_fermatLastTheoremCaseOne_IOpen_of_forall (by norm_num) (by decide +kernel)
-
-/-- $\mathsf{IOpen}$ proves Case I of Fermat's Last Theorem for exponent $5$.
-- [Smi92b, Lemma 3.6] -/
-theorem provable_fermatLastTheoremCaseOne_five_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseOne 5 :=
-  provable_fermatLastTheoremCaseOne_IOpen_of_forall (by norm_num) (by decide +kernel)
+variable {n : ℕ}
 
 open Tarski.Structure in
 /-- A model of $\mathsf{ZR}$ with a solution of $x^n + y^n = z^n$ for which $x y z$ leaves a

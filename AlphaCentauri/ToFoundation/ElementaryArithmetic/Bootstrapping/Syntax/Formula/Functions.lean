@@ -1765,4 +1765,118 @@ end complexity
 
 @[simp] lemma lt_max_succ_right (a b : V) : b < max a b + 1 := lt_succ_iff_le.mpr <| by simp
 
+namespace Arithmetic
+
+-- `Arithmetic` is intentionally re-opened here even though the ambient namespace
+-- already contains it, keeping the names of Foundation's `Bootstrapping.Arithmetic.*`.
+set_option linter.dupNamespace false
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic (eqIndex ltIndex)
+
+noncomputable def qqEQ (x y : V) : V := ^rel 2 (eqIndex : V) ?[x, y]
+
+noncomputable def qqNEQ (x y : V) : V := ^nrel 2 (eqIndex : V) ?[x, y]
+
+noncomputable def qqLT (x y : V) : V := ^rel 2 (ltIndex : V) ?[x, y]
+
+noncomputable def qqNLT (x y : V) : V := ^nrel 2 (ltIndex : V) ?[x, y]
+
+notation:75 x:75 " ^= " y:76 => qqEQ x y
+
+notation:75 x:75 " ^≠ " y:76 => qqNEQ x y
+
+notation:78 x:78 " ^< " y:79 => qqLT x y
+
+notation:78 x:78 " ^≮ " y:79 => qqNLT x y
+
+@[simp] lemma lt_qqEQ_left (x y : V) : x < x ^= y := by
+  simpa using! nth_lt_qqRel_of_lt (i := 0) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqEQ_right (x y : V) : y < x ^= y := by
+  simpa using! nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqLT_left (x y : V) : x < x ^< y := by
+  simpa using! nth_lt_qqRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqLT_right (x y : V) : y < x ^< y := by
+  simpa using! nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqNEQ_left (x y : V) : x < x ^≠ y := by
+  simpa using! nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqNEQ_right (x y : V) : y < x ^≠ y := by
+  simpa using! nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqNLT_left (x y : V) : x < x ^≮ y := by
+  simpa using! nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+
+@[simp] lemma lt_qqNLT_right (x y : V) : y < x ^≮ y := by
+  simpa using! nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
+
+instance qqEQ_defined : 𝚺ᴬ₁-Function₂ (qqEQ : V → V → V) via qqEQDef :=
+  .mk fun v ↦ by simp [qqEQDef, numeral_eq_natCast, qqEQ]
+
+instance qqNEQ_defined : 𝚺ᴬ₁-Function₂ (qqNEQ : V → V → V) via qqNEQDef :=
+  .mk fun v ↦ by simp [qqNEQDef, numeral_eq_natCast, qqNEQ]
+
+instance qqLT_defined : 𝚺ᴬ₁-Function₂ (qqLT : V → V → V) via qqLTDef :=
+  .mk fun v ↦ by simp [qqLTDef, numeral_eq_natCast, qqLT]
+
+instance qqNLT_defined : 𝚺ᴬ₁-Function₂ (qqNLT : V → V → V) via qqNLTDef :=
+  .mk fun v ↦ by simp [qqNLTDef, numeral_eq_natCast, qqNLT]
+
+instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqEQ : V → V → V) := .of_sigmaOne qqEQ_defined.to_definable
+
+instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqNEQ : V → V → V) := .of_sigmaOne qqNEQ_defined.to_definable
+
+instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqLT : V → V → V) := .of_sigmaOne qqLT_defined.to_definable
+
+instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqNLT : V → V → V) := .of_sigmaOne qqNLT_defined.to_definable
+
+lemma neg_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^= u) = t ^≠ u := by
+  simp only [qqEQ, qqNEQ]
+  rw [neg_rel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
+
+lemma neg_neq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^≠ u) = t ^= u := by
+  simp only [qqNEQ, qqEQ]
+  rw [neg_nrel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
+
+lemma neg_lt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^< u) = t ^≮ u := by
+  simp only [qqLT, qqNLT]
+  rw [neg_rel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
+
+lemma neg_nlt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^≮ u) = t ^< u := by
+  simp only [qqNLT, qqLT]
+  rw [neg_nrel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
+
+lemma substs_eq {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
+    subst ℒₒᵣ w (t ^= u) = (termSubst ℒₒᵣ w t) ^= (termSubst ℒₒᵣ w u) := by
+  simp only [qqEQ]
+  rw [substs_rel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
+  simp [termSubstVec_cons₂ ht hu]
+
+end Arithmetic
+
+/-! ### Bounded universal quantifier -/
+
+section qqBall
+
+/-- `qqBall u q = ^∀ ((^#0 ^≮ u) ^⋎ q)`, the code of `∀¹[“#0 < u”] q`. -/
+noncomputable def qqBall (u q : V) : V := qqAll (qqOr (Arithmetic.qqNLT (qqBvar 0) u) q)
+
+@[simp] lemma lt_q_qqBall (u q : V) : q < qqBall u q :=
+  lt_trans (lt_or_right _ _) (lt_forall _)
+
+@[simp] lemma lt_u_qqBall (u q : V) : u < qqBall u q :=
+  lt_trans (Arithmetic.lt_qqNLT_right _ _) (lt_trans (lt_or_left _ _) (lt_forall _))
+
+instance qqBall_defined :
+    𝚺ᴬ₁-Function₂ (qqBall : V → V → V) via qqBallDef := .mk fun v ↦ by
+  simp [qqBallDef, qqBall, (Arithmetic.qqNLT_defined (V := V)).df]
+
+instance qqBall_definable (Γ m) : Γᴬ_[m + 1]-Function₂ (qqBall : V → V → V) :=
+  .of_sigmaOne qqBall_defined.to_definable
+
+end qqBall
+
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

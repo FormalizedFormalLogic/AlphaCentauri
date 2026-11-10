@@ -7,10 +7,10 @@ public import AlphaCentauri.Bootstrapping.Proof.RankedDerivation
 # Free-variable substitution on internal derivations
 
 Foundation's internal one-sided calculus has no rule renaming free variables, and its
-`allIntro` rule fixes `^&0` as the eigenvariable.  This module closes internal derivability
-under the free-variable substitutions of `AlphaCentauri.Bootstrapping.Proof.FvSubst` and
-derives from it the internal quantifier rules whose eigenvariable is an arbitrary fresh free
-variable.
+`allIntro` rule fixes `^&0` as the eigenvariable.  This module closes internal derivability,
+also with a bound on the cut rank, under the free-variable substitutions of
+`AlphaCentauri.Bootstrapping.Proof.FvSubst` and derives from it the internal quantifier rules
+whose eigenvariable is an arbitrary fresh free variable.
 -/
 
 @[expose] public section
@@ -521,8 +521,8 @@ private def RewritesBelow (d w : V) : Prop :=
 
 /-- The rewritten premise of a node, of the cut rank of the node. -/
 private lemma RewritesBelow.premise {d d₀ w' : V} (ih : RewritesBelow T d w) (hd₀ : d₀ < d)
-    (hw' : w' ≤ rewriteBound (L := L) d w) (hr : cutRank L d₀ ≤ cutRank L d)
-    (h : Derivation T d₀) (hw : IsSemitermVec L (len w') 0 w') :
+    (hw' : w' ≤ rewriteBound (L := L) d w) (h : Derivation T d₀)
+    (hw : IsSemitermVec L (len w') 0 w') (hr : cutRank L d₀ ≤ cutRank L d := by simp) :
     RankedDerivable T (cutRank L d) (fvSubstImage (L := L) w' (fstIdx d₀)) :=
   (ih d₀ hd₀ w' hw' h hw).of_le hr
 
@@ -530,10 +530,8 @@ private lemma rewrite_and {p q dp dq : V} (ih : RewritesBelow T (andIntro s p q 
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hpq : p ^⋏ q ∈ s)
     (hdp : DerivationOf T dp (insert p s)) (hdq : DerivationOf T dq (insert q s)) :
     RankedDerivable T (cutRank L (andIntro s p q dp dq)) (fvSubstImage (L := L) w s) := by
-  have hep := ih.premise (dp_lt_andIntro _ _ _ _ _) (le_rewriteBound_self _ w)
-    (by simp) hdp.2 hw
-  have heq := ih.premise (dq_lt_andIntro _ _ _ _ _) (le_rewriteBound_self _ w)
-    (by simp) hdq.2 hw
+  have hep := ih.premise (dp_lt_andIntro _ _ _ _ _) (le_rewriteBound_self _ w) hdp.2 hw
+  have heq := ih.premise (dq_lt_andIntro _ _ _ _ _) (le_rewriteBound_self _ w) hdq.2 hw
   rw [hdp.1] at hep
   rw [hdq.1] at heq
   exact RankedDerivable.sequentRules.image_and hsF hpq hep heq
@@ -542,7 +540,7 @@ private lemma rewrite_or {p q d₀ : V} (ih : RewritesBelow T (orIntro s p q d�
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hpq : p ^⋎ q ∈ s)
     (hd₀ : DerivationOf T d₀ (insert p (insert q s))) :
     RankedDerivable T (cutRank L (orIntro s p q d₀)) (fvSubstImage (L := L) w s) := by
-  have he := ih.premise (d_lt_orIntro _ _ _ _) (le_rewriteBound_self _ w) (by simp) hd₀.2 hw
+  have he := ih.premise (d_lt_orIntro _ _ _ _) (le_rewriteBound_self _ w) hd₀.2 hw
   rw [hd₀.1] at he
   exact RankedDerivable.sequentRules.image_or hsF hpq he
 
@@ -550,7 +548,7 @@ private lemma rewrite_all {p d₀ : V} (ih : RewritesBelow T (allIntro s p d₀)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hp : ^∀ p ∈ s)
     (hd₀ : DerivationOf T d₀ (insert (free L p) (setShift L s))) :
     RankedDerivable T (cutRank L (allIntro s p d₀)) (fvSubstImage (L := L) w s) := by
-  have he := ih.premise (s_lt_allIntro _ _ _) (le_rewriteBound_cons _ w) (by simp) hd₀.2
+  have he := ih.premise (s_lt_allIntro _ _ _) (le_rewriteBound_cons _ w) hd₀.2
     hw.fvar_cons_termShiftVec
   rw [hd₀.1] at he
   exact RankedDerivable.sequentRules.image_all hw hsF hp he
@@ -559,7 +557,7 @@ private lemma rewrite_exs {p t d₀ : V} (ih : RewritesBelow T (exsIntro s p t d
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hp : ^∃ p ∈ s) (ht : IsTerm L t)
     (hd₀ : DerivationOf T d₀ (insert (substs1 L t p) s)) :
     RankedDerivable T (cutRank L (exsIntro s p t d₀)) (fvSubstImage (L := L) w s) := by
-  have he := ih.premise (d_lt_exsIntro _ _ _ _) (le_rewriteBound_self _ w) (by simp) hd₀.2 hw
+  have he := ih.premise (d_lt_exsIntro _ _ _ _) (le_rewriteBound_self _ w) hd₀.2 hw
   rw [hd₀.1] at he
   exact RankedDerivable.sequentRules.image_exs hw hsF hp ht he
 
@@ -568,7 +566,7 @@ private lemma rewrite_wk {d₀ : V} (ih : RewritesBelow T (wkRule s d₀) w)
     (hd₀ : Derivation T d₀) :
     RankedDerivable T (cutRank L (wkRule s d₀)) (fvSubstImage (L := L) w s) :=
   RankedDerivable.sequentRules.image_wk hw hsF hsub
-    (ih.premise (d_lt_wkRule _ _) (le_rewriteBound_self _ w) (by simp) hd₀ hw)
+    (ih.premise (d_lt_wkRule _ _) (le_rewriteBound_self _ w) hd₀ hw)
 
 private lemma rewrite_shift {d₀ : V}
     (ih : RewritesBelow T (shiftRule (setShift L (fstIdx d₀)) d₀) w)
@@ -584,7 +582,7 @@ private lemma rewrite_shift {d₀ : V}
       (termFvSubstVec L d w (termShiftVec L d (fvarVec d))) := by
     rw [hvl]
     exact hw.termFvSubstVec hfv
-  have he := ih.premise (d_lt_shiftRule _ _) (le_rewriteBound_shift d w) (by simp [d]) hd₀ hvc
+  have he := ih.premise (d_lt_shiftRule _ _) (le_rewriteBound_shift d w) hd₀ hvc (by simp [d])
   rwa [← fvSubstImage_setShift ?_ hd₀.isFormulaSet (fstIdx_le_self d₀)] at he
   intro x hx
   have hxd : x < d := lt_trans hx (d_lt_shiftRule _ _)
@@ -597,8 +595,8 @@ private lemma rewrite_cut {p d₁ d₂ : V} (ih : RewritesBelow T (cutRule s p d
     (h₂ : DerivationOf T d₂ (insert (neg L p) s)) :
     RankedDerivable T (cutRank L (cutRule s p d₁ d₂)) (fvSubstImage (L := L) w s) := by
   have hpF : IsFormula L p := (IsFormulaSet.insert_iff.mp h₁.isFormulaSet).1
-  have he₁ := ih.premise (d₁_lt_cutRule _ _ _ _) (le_rewriteBound_self _ w) (by simp) h₁.2 hw
-  have he₂ := ih.premise (d₂_lt_cutRule _ _ _ _) (le_rewriteBound_self _ w) (by simp) h₂.2 hw
+  have he₁ := ih.premise (d₁_lt_cutRule _ _ _ _) (le_rewriteBound_self _ w) h₁.2 hw
+  have he₂ := ih.premise (d₂_lt_cutRule _ _ _ _) (le_rewriteBound_self _ w) h₂.2 hw
   rw [h₁.1, fvSubstImage_insert] at he₁
   rw [h₂.1, fvSubstImage_insert, fvSubst_neg hw hpF] at he₂
   exact .cut (by rw [formulaComplexity_fvSubst hw hpF]; simp) he₁ he₂

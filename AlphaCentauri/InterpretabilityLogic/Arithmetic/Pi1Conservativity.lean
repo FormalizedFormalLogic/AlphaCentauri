@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 # Arithmetical soundness of $\mathbf{ILM}$ for $\Pi_1$-conservativity
 
 For a $\Delta_1$-axiomatized arithmetical theory $T$, `T.pi1Conservativity` reads
-$\varphi \rhd \psi$ as "every $\Pi_1$ sentence provable in $T + \psi$ is provable in
+$\varphi \rhd \psi$ as "every prenex $\Pi_1$ sentence provable in $T + \psi$ is provable in
 $T + \varphi$". Together with the standard provability predicate of $T$, it satisfies the
 arithmetical forms of $\mathbf{J1}$–$\mathbf{J5}$ and $\mathbf{M}$ over $\mathsf{I}\Sigma_1$ once
 $T$ contains $\mathsf{I}\Sigma_1$, so every theorem of $\mathbf{ILM}$ is provable in $T$ under
@@ -154,8 +154,8 @@ open Arithmetic
 
 variable (T : ArithmeticTheory) [T.Δ₁]
 
-/-- $\varphi \rhd \psi$ read as: every $\Pi_1$ sentence provable in $T + \psi$ is provable in
-$T + \varphi$.
+/-- $\varphi \rhd \psi$ read as: every prenex $\Pi_1$ sentence provable in $T + \psi$ is provable
+in $T + \varphi$.
 
 - [HM90, Definition 3.1]
 -/

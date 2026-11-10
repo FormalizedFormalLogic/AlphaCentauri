@@ -11,8 +11,10 @@ public import AlphaCentauri.ToFoundation.PartialTruth
 For an element `x` of a model of `𝗜𝚺₁`, `provabilityFormula T x` is the internal sentence
 obtained by substituting the numeral of `x` into the provability formula of `T`. Its internal
 provability follows from the provability of `x`, it satisfies the internal form of the
-derivability condition $\mathbf{D2}$, and every internal $\Sigma_1$ sentence internally implies
-its own `provabilityFormula`.
+derivability condition $\mathbf{D2}$, and every standard $\Sigma_1$ formula with one parameter
+internally implies its own `provabilityFormula` at every numeral. Together with the internal
+equivalence of an internal prenex $\Sigma_1$ sentence with its partial truth, every internal prenex
+$\Sigma_1$ sentence internally implies its own `provabilityFormula`.
 -/
 
 @[expose] public section

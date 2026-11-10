@@ -32,12 +32,12 @@ lemma not_models_fermatLastTheorem_of_pow_add_pow {R : Type*} [CommRing R] [Line
     (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) (ha₀ : a ≠ 0) (hb₀ : b ≠ 0) (hc₀ : c ≠ 0)
     (h : a ^ n + b ^ n = c ^ n) : ¬ (Nonneg R)↓[ℒₒᵣ] ⊧ Arithmetic.fermatLastTheorem n := by
   simp [Arithmetic.fermatLastTheorem, models_iff]
-  refine ⟨a, ha, b, hb, c, ⟨hc, ?_⟩, ha₀, hb₀, hc₀⟩
-  apply Subtype.ext
   let F : CommSemiring (Nonneg R) := Arithmetic.instCommSemiring_foundation
   have hpow (p : Nonneg R) :=
     @map_pow_of_map_mul (Nonneg R) R F _ Subtype.val rfl (fun _ _ ↦ rfl) p n
-  exact (congrArg₂ (· + ·) (hpow ⟨a, ha⟩) (hpow ⟨b, hb⟩)).trans (h.trans (hpow ⟨c, hc⟩).symm)
+  have h₁ := congrArg₂ (· + ·) (hpow ⟨a, ha⟩) (hpow ⟨b, hb⟩)
+  exact ⟨a, ha, b, hb, c, ⟨hc, Subtype.ext <| h₁.trans (h.trans (hpow ⟨c, hc⟩).symm)⟩,
+    ha₀, hb₀, hc₀⟩
 
 /-- $\mathsf{IOpen}$ does not prove Fermat's Last Theorem for any exponent $n \ge 3$.
 - [She64]
@@ -50,8 +50,7 @@ theorem _root_.FFL.FirstOrder.Arithmetic.not_provable_fermatLastTheorem_IOpen {n
     rfl
   have := IntegerConstantPolynomial.models_ZRing ℝ
   rw [hF]
-  refine Arithmetic.not_provable_IOpen_allClosure (by simp) (Nonneg (IntegerConstantPolynomial ℝ))
-    ?_
+  apply Arithmetic.not_provable_IOpen_allClosure (by simp) (Nonneg (IntegerConstantPolynomial ℝ))
   rw [← hF]
   obtain ⟨c, hc₀, hc⟩ : ∃ c : ℝ, 0 < c ∧ c ^ n = 2 :=
     ⟨(2 : ℝ) ^ (n : ℝ)⁻¹, Real.rpow_pos_of_pos (by norm_num) _,

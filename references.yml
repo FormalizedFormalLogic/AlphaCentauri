@@ -262,6 +262,18 @@ EW12:
     type: Repository
     title: arXiv
 
+GBJM20:
+  type: Article
+  title: Assuring and critical labels for relations between maximal consistent sets for interpretability logics
+  author: ["Goris, Evan", "Bílková, Marta", "Joosten, Joost J.", "Mikec, Luka"]
+  date: 2020
+  serial-number:
+    arxiv: "2003.04623"
+  url: https://arxiv.org/abs/2003.04623
+  parent:
+    type: Repository
+    title: arXiv
+
 GG17:
   type: Article
   title: Shepherdson's theorems for fragments of open induction

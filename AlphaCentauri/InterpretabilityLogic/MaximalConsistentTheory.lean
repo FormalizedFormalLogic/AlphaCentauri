@@ -340,6 +340,44 @@ lemma AssuringSuccessor.boxLabel_of_axiomP₀ (hP₀ : ∀ {A B : Formula α}, o
   have h₃ : □(A ▷ B) ∈ Γ := mem_of_imp hP₀ <| mem_of_imp (rhd_mono_right hUB) hA;
   exact h₂ A <| antecedents_of_rhd_mem (h₁.box_mem_of_box_mem h₃).1 hB
 
+/-- - [GBJM20, Lemma 6.4] -/
+lemma AssuringSuccessor.union_boxLabel_of_axiomM₀
+    (hM₀ : ∀ {A B C : Formula α}, ofAxioms 𝔸 ⊢ Axioms.M₀ A B C)
+    (h₁ : AssuringSuccessor S Γ Δ) (h₂ : AssuringSuccessor ∅ Δ Θ) :
+    AssuringSuccessor (S ∪ Δ.boxLabel ∅) Γ Θ := by
+  classical
+  rintro A ⟨U, hU, hA⟩;
+  have hU₂ : ↑(U.filter (· ∉ S)) ⊆ Δ.boxLabel ∅ := by
+    intro G hG;
+    rw [Finset.mem_coe, Finset.mem_filter] at hG;
+    exact (hU hG.1).resolve_left hG.2;
+  obtain ⟨B, hB, hUB⟩ := exists_of_subset_boxLabel hU₂;
+  have e₁ : ofAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒
+      ((U.filter (· ∈ S)).image (∼·)).disj ⋎ ((U.filter (· ∉ S)).image (∼·)).disj := by
+    have hU' : U.image (∼·) = (U.filter (· ∈ S)).image (∼·) ∪ (U.filter (· ∉ S)).image (∼·) := by
+      rw [← Finset.image_union, Finset.filter_union_filter_not_eq];
+    rw [hU'];
+    exact CFdisjUnionAFdisj;
+  have e₂ : ofAxioms 𝔸 ⊢ Axioms.M₀ A (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) (∼B) := hM₀;
+  have e₃ := rhd_mono_right (𝔸 := 𝔸) (C := ◇A ⋏ □(∼B))
+    (show ofAxioms 𝔸 ⊢ (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ∼□(∼B)) ⋏ □(∼B) 🡒
+      ((U.filter (· ∈ S)).image (∼·)).disj by cl_prover);
+  have e₄ := rhd_mono_right (𝔸 := 𝔸) (C := A)
+    (show ofAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B by
+      cl_prover [e₁, hUB]);
+  have h₃ : ◇A ⋏ □(∼B) ∈ Γ.antecedents S := by
+    use U.filter (· ∈ S);
+    and_intros;
+    · intro G hG;
+      rw [Finset.mem_coe, Finset.mem_filter] at hG;
+      exact hG.2;
+    · exact mem_of_imp (by cl_prover [e₂, e₃, e₄]) hA;
+  have h₄ : □(∼B) ∈ Δ := mem_antecedents_empty_iff.mp hB;
+  have h₅ : □(∼A) ∈ Δ :=
+    mem_of_imp₂ (show ofAxioms 𝔸 ⊢ ∼(∼□(∼A) ⋏ □(∼B)) 🡒 □(∼B) 🡒 □(∼A) by cl_prover)
+      (h₁ _ h₃).1 h₄;
+  exact h₂ A (mem_antecedents_empty_iff.mpr h₅)
+
 /-- - [MV20, Lemma 24] -/
 lemma AssuringSuccessor.union_boxLabel_of_axiomR
     (hR : ∀ {A B C : Formula α}, ofAxioms 𝔸 ⊢ Axioms.R A B C)

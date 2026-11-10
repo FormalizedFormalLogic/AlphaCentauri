@@ -23,19 +23,19 @@ namespace Logic.ofAxioms
 
 variable {𝔸 : Set (Formula α)} {A B : Formula α}
 
+lemma provable_box (h : ofAxioms 𝔸 ⊢ A) : ofAxioms 𝔸 ⊢ □A := nec h
+
 lemma box_and : ofAxioms 𝔸 ⊢ □A ⋏ □B 🡒 □(A ⋏ B) := by
   have h₁ : ofAxioms 𝔸 ⊢ □A 🡒 □(B 🡒 A ⋏ B) := box_mono and₃;
   have h₂ : ofAxioms 𝔸 ⊢ □(B 🡒 A ⋏ B) 🡒 □B 🡒 □(A ⋏ B) := axiomK;
   cl_prover [h₁, h₂];
 
-lemma axiomFour : ofAxioms 𝔸 ⊢ □A 🡒 □□A := by
+lemma axiom4 : ofAxioms 𝔸 ⊢ □A 🡒 □□A := by
   have h₁ : ofAxioms 𝔸 ⊢ □(□A ⋏ A) 🡒 □A := box_mono and₂;
   have h₂ : ofAxioms 𝔸 ⊢ □A 🡒 □(□(□A ⋏ A) 🡒 □A ⋏ A) := box_mono <| by cl_prover [h₁];
   have h₃ : ofAxioms 𝔸 ⊢ □(□(□A ⋏ A) 🡒 □A ⋏ A) 🡒 □(□A ⋏ A) := axiomL;
   have h₄ : ofAxioms 𝔸 ⊢ □(□A ⋏ A) 🡒 □□A := box_mono and₁;
   cl_prover [h₂, h₃, h₄];
-
-lemma provable_box (h : ofAxioms 𝔸 ⊢ A) : ofAxioms 𝔸 ⊢ □A := nec h
 
 lemma rhd_refl : ofAxioms 𝔸 ⊢ A ▷ A := axiomJ1 ⨀ provable_box (by cl_prover)
 
@@ -76,7 +76,8 @@ lemma box_conj_of_forall {X : Set (Formula α)} :
     Context.of box_and ⨀
       K_intro (h B (by simp)) (box_conj_of_forall Δ fun C hC ↦ h C (by simp [hC]))
 
-/-- If `A` follows from some formulas `B` and `□B`, then `□A` follows from the formulas `□B`. -/
+/-- If `A` follows from `T` together with the formulas `□B` for `B ∈ T`, then `□A` follows from the
+latter. -/
 lemma box_of_provable {T : Set (Formula α)} (h : (T ∪ (□·) '' T) *⊢[ofAxioms 𝔸] A) :
     ((□·) '' T) *⊢[ofAxioms 𝔸] □A := by
   obtain ⟨Δ, hΔ, hb⟩ := Context.provable_iff.mp h;
@@ -86,7 +87,7 @@ lemma box_of_provable {T : Set (Formula α)} (h : (T ∪ (□·) '' T) *⊢[ofAx
   intro B hB;
   rcases hΔ B hB with hB | ⟨C, hC, rfl⟩;
   · exact Context.by_axm ⟨B, hB, rfl⟩;
-  · exact Context.of axiomFour ⨀ Context.by_axm ⟨C, hC, rfl⟩;
+  · exact Context.of axiom4 ⨀ Context.by_axm ⟨C, hC, rfl⟩;
 
 variable [DecidableEq α] {F : Formula α}
 
@@ -396,11 +397,14 @@ private lemma exists_consistent_aux (h : X *⊬[Logic.ofAxioms 𝔸] ⊥) (S : F
 lemma exists_consistent_union (h : X *⊬[Logic.ofAxioms 𝔸] ⊥) :
     ∃ Γ : MaximalConsistentSet 𝔸 Φ, (X ∪ Γ.literals) *⊬[Logic.ofAxioms 𝔸] ⊥ := by
   obtain ⟨T, hT, hY⟩ := exists_consistent_aux h Φ;
-  refine ⟨⟨T, hT, fun h₁ ↦ hY <| Context.weakening ?_ h₁⟩, ?_⟩;
-  · intro φ;
+  have hc : (↑T ∪ (∼·) '' ↑(Φ \ T)) *⊬[Logic.ofAxioms 𝔸] ⊥ := by
+    intro h₁;
+    apply hY <| Context.weakening _ h₁;
+    intro φ;
     simp only [Set.mem_union, Set.mem_image];
     tauto;
-  · simpa [literals, Set.union_assoc] using hY;
+  use ⟨T, hT, hc⟩;
+  simpa [literals, Set.union_assoc] using hY;
 
 end
 
@@ -433,10 +437,12 @@ lemma irrefl : ¬Successor Γ Γ := fun h ↦
 
 lemma prebox_ssubset (h : Successor Γ Δ) : Γ.prebox ⊂ Δ.prebox := by
   obtain ⟨A, hA, hA'⟩ := h.exists_box;
-  apply Finset.ssubset_iff_of_subset (fun B hB ↦ ?_) |>.mpr ⟨A, by simpa, by simpa⟩;
-  simpa using h.box_mem_of_box_mem (mem_prebox.mp hB);
+  have h₁ : Γ.prebox ⊆ Δ.prebox := by
+    intro B hB;
+    simpa using h.box_mem_of_box_mem (mem_prebox.mp hB);
+  exact (Finset.ssubset_iff_of_subset h₁).mpr ⟨A, by simpa, by simpa⟩;
 
-lemma not_mem_of_box_neg_mem [Adequate Φ] (h : Successor Γ Δ) (hA : □(∼A) ∈ Γ) : A ∉ Δ :=
+lemma not_mem_of_box_neg_mem (h : Successor Γ Δ) (hA : □(∼A) ∈ Γ) : A ∉ Δ :=
   not_mem_of_neg_mem <| h.mem_of_box_mem hA
 
 end Successor
@@ -458,9 +464,11 @@ lemma exists_successor_of_box_not_mem [Adequate Φ] (h₁ : □A ∈ Φ) (h₂ :
     exact Context.of axiomL ⨀ h₄;
   obtain ⟨Δ, hΔ⟩ := exists_consistent_union (Φ := Φ) hX;
   have hm {B} (hB : B ∈ Φ) (h : B ∈ X) : B ∈ Δ := mem_of_provable hΔ hB <| Context.by_axm h;
-  exact ⟨Δ, ⟨fun h ↦ hm (Adequate.box (mem_of_mem h)) (by simp [X, h]),
-    fun h ↦ hm (mem_of_mem h) (by simp [X, h]), A, hm h₁ (by simp [X]), h₂⟩,
-    not_mem_of_provable_neg hΔ (Context.by_axm <| by simp [X])⟩
+  use Δ;
+  and_intros;
+  · exact ⟨fun h ↦ hm (Adequate.box (mem_of_mem h)) (by simp [X, h]),
+      fun h ↦ hm (mem_of_mem h) (by simp [X, h]), A, hm h₁ (by simp [X]), h₂⟩;
+  · exact not_mem_of_provable_neg hΔ (Context.by_axm <| by simp [X]);
 
 /-- `Δ` is a `C`-critical successor of `Γ`.
 
@@ -491,7 +499,8 @@ lemma CriticalSuccessor.trans_successor (h₁ : CriticalSuccessor C Γ Δ) (h₂
 noncomputable def rhdDisj (Γ : MaximalConsistentSet 𝔸 Φ) (F : Formula α) : Formula α :=
   (Φ.filter (· ▷ F ∈ Γ)).disj
 
-/-- The set extended to a `F`-critical successor of `Γ` containing `C`. -/
+/-- The formulas `B` and `□B` with `□B ∈ Γ`, together with `C`, `□∼C`, `∼H` and `□∼H`, where `H` is
+`Γ.rhdDisj F`. -/
 noncomputable def criticalSet (Γ : MaximalConsistentSet 𝔸 Φ) (F C : Formula α) :
     Set (Formula α) :=
   insert (∼Γ.rhdDisj F) <| insert (□(∼Γ.rhdDisj F)) <| insert C <| insert (□(∼C)) <|
@@ -550,15 +559,19 @@ lemma exists_criticalSuccessor_of_consistent (hC : IsRhdOperand Φ C)
       cl_prover [h₄, h₆];
     · exact mem_of_provable hΔ (Adequate.box_neg_mem <| .of_rhd_left (mem_of_mem hG)) <|
         Context.of h₃ ⨀ h₅;
-  exact ⟨Δ, ⟨⟨fun h ↦ (hb h).1, fun h ↦ (hb h).2,
-    ∼C, hm (Adequate.box_neg_mem hC) (by simp [criticalSet]), hs⟩,
-    fun h ↦ (hG h).1, fun h ↦ (hG h).2⟩, hm hC.mem (by simp [criticalSet])⟩
+  use Δ;
+  and_intros;
+  · exact ⟨⟨fun h ↦ (hb h).1, fun h ↦ (hb h).2,
+      ∼C, hm (Adequate.box_neg_mem hC) (by simp [criticalSet]), hs⟩,
+      fun h ↦ (hG h).1, fun h ↦ (hG h).2⟩;
+  · exact hm hC.mem (by simp [criticalSet]);
 
 /-- - [dJV90, Lemma 3.6] -/
 lemma exists_criticalSuccessor_of_rhd_not_mem (h₁ : B ▷ C ∈ Φ) (h₂ : B ▷ C ∉ Γ) :
     ∃ Δ, CriticalSuccessor C Γ Δ ∧ B ∈ Δ := by
   apply exists_criticalSuccessor_of_consistent (.of_rhd_left h₁);
-  · exact fun h ↦ h₂ <| (mem_iff_provable h₁).mpr <| provable_rhd_of_inconsistent h;
+  · intro h;
+    exact h₂ <| (mem_iff_provable h₁).mpr <| provable_rhd_of_inconsistent h;
   · intro h;
     apply h₂ <| (mem_iff_provable h₁).mpr _;
     have h₃ : Logic.ofAxioms 𝔸 ⊢ □(∼B) 🡒 B ▷ C := C_trans (box_mono <| by cl_prover) axiomJ1;

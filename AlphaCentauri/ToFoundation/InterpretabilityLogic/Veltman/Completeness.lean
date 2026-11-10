@@ -103,7 +103,8 @@ variable [Nonempty (IndexedSet 𝔸 Φ)]
 instance [Adequate Φ] : (countermodel 𝔸 Φ).IsIL where
   trans _ _ _ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
   cwf := by
-    have : IsTrans _ (flip (countermodel 𝔸 Φ).Rel) := ⟨fun _ _ _ h₁ h₂ ↦ ⟨h₂.1.trans h₁.1, h₂.2.trans h₁.2⟩⟩;
+    have : IsTrans _ (flip (countermodel 𝔸 Φ).Rel) :=
+      ⟨fun _ _ _ h₁ h₂ ↦ ⟨h₂.1.trans h₁.1, h₂.2.trans h₁.2⟩⟩;
     have : Std.Irrefl (flip (countermodel 𝔸 Φ).Rel) := ⟨fun _ h ↦ h.1.irrefl⟩;
     exact Finite.wellFounded_of_trans_of_irrefl _;
   rel_of_s_left h := h.1.1
@@ -120,7 +121,7 @@ variable [Adequate Φ]
 /-- - [dJV90, Theorem 4.1]
 - [KO21, Lemma 5.6]
 -/
-lemma truthLemma {x : (countermodel 𝔸 Φ).World} {A : Formula α} (hA : A ∈ Φ) :
+lemma truthlemma {x : (countermodel 𝔸 Φ).World} {A : Formula α} (hA : A ∈ Φ) :
     x ⊩ A ↔ A ∈ x.set := by
   induction A generalizing x with
   | atom a => rfl;
@@ -218,7 +219,7 @@ lemma not_models_countermodel [Entailment.Consistent (ofAxioms 𝔸)] (h : ofAxi
   obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := adequateClosure {A}) hX;
   have hA : A ∈ adequateClosure {A} := adequateClosure.subset (by simp);
   exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
-    (countermodel.truthLemma hA).mp <| hM ⟨Γ, [], by simp, by simp⟩
+    (countermodel.truthlemma hA).mp <| hM ⟨Γ, [], by simp, by simp⟩
 
 end Logic.ofAxioms
 

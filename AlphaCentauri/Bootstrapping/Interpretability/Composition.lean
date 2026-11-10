@@ -986,6 +986,89 @@ lemma derivable_comp_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (
     h₁.toIsTable.transT_subst _ (IsVarVec.single_bvar _)]
   exact h₃
 
+include h₁ hT₂ hc in
+/-- Along the composite table and along the composite of the translations, every formula code
+has equivalent translations, given the domain of `tbl₁` at its free variables. -/
+theorem derivable_comp_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
+    (hL : L.SymbolsStandard V) {p : V} (hp : IsFormula L p) :
+    Derivable S (insert (iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) p)
+      (translate L L tbl₁ (translate L L tbl₂ p))) (negDomSet L tbl₁.[0] p)) := by
+  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain
+  have hs (M : V) := IsFormulaSet.negDomSet (L := L) hdom M
+  have hv := IsTable.comp_iff_val h₁ hT₂ hc
+  apply IsFormula.sigma1_structural_induction (by definability) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · intro k r v hR hv'
+    obtain ⟨k, R, rfl, rfl⟩ := hL.1 _ _ hR
+    obtain ⟨u, rfl⟩ := exists_termVec hv'
+    have h := derivable_comp_rel h₁ hT₂ hc hL R u (M := (Semiformula.rel R u : Formula V L).val)
+      (fun i ↦ by
+        rw [Semiformula.rel_val, ← SemitermVec.val_nth_eq]
+        exact lt_trans (nth_lt_self (by simp)) (v_lt_rel _ _ _))
+    rw [hv, Semiformula.rel_val] at h
+    exact h
+  · intro k r v hR hv'
+    obtain ⟨k, R, rfl, rfl⟩ := hL.1 _ _ hR
+    obtain ⟨u, rfl⟩ := exists_termVec hv'
+    have h := derivable_comp_rel h₁ hT₂ hc hL R u (M := (Semiformula.nrel R u : Formula V L).val)
+      (fun i ↦ by
+        rw [Semiformula.nrel_val, ← SemitermVec.val_nth_eq]
+        exact lt_trans (nth_lt_self (by simp)) (v_lt_nrel _ _ _))
+    have key {A B : Formula V L} : S.internalize V ⊢ (A 🡘 B) 🡒 (∼A 🡘 ∼B) := by cl_prover
+    have h' := Derivable.of_tprovable_imp key h
+    rw [← IsTable.transT_neg, ← IsTable.transT_neg, ← IsTable.transT_neg, hv,
+      Semiformula.neg_rel, Semiformula.nrel_val] at h'
+    exact h'
+  · have h := Derivable.of_tprovable (hs ^⊤) (show S.internalize V ⊢
+      hc.transT (⊤ : Formula V L) 🡘 h₁.transT (hT₂.transT ⊤) by
+        simp only [IsTable.transT_verum]; cl_prover)
+    rw [hv] at h
+    simpa using h
+  · have h := Derivable.of_tprovable (hs ^⊥) (show S.internalize V ⊢
+      hc.transT (⊥ : Formula V L) 🡘 h₁.transT (hT₂.transT ⊥) by
+        simp only [IsTable.transT_falsum]; cl_prover)
+    rw [hv] at h
+    simpa using h
+  · intro p q hp hq ihp ihq
+    let P : Formula V L := ⟨p, by simpa using hp⟩
+    let Q : Formula V L := ⟨q, by simpa using hq⟩
+    have hP := derivable_insert_negDomSet_mono hdom _ (le_of_lt (lt_K!_left p q))
+      (show Derivable S (insert (hc.transT P 🡘 h₁.transT (hT₂.transT P)).val _) by
+        rw [hv]; exact ihp)
+    have hQ := derivable_insert_negDomSet_mono hdom _ (le_of_lt (lt_K!_right p q))
+      (show Derivable S (insert (hc.transT Q 🡘 h₁.transT (hT₂.transT Q)).val _) by
+        rw [hv]; exact ihq)
+    have h := Derivable.of_tprovable_imp₂ (show S.internalize V ⊢
+      (hc.transT P 🡘 h₁.transT (hT₂.transT P)) 🡒 (hc.transT Q 🡘 h₁.transT (hT₂.transT Q)) 🡒
+        (hc.transT (P ⋏ Q) 🡘 h₁.transT (hT₂.transT (P ⋏ Q))) by
+          simp only [IsTable.transT_and]; cl_prover) hP hQ
+    rw [hv] at h
+    exact h
+  · intro p q hp hq ihp ihq
+    let P : Formula V L := ⟨p, by simpa using hp⟩
+    let Q : Formula V L := ⟨q, by simpa using hq⟩
+    have hP := derivable_insert_negDomSet_mono hdom _ (le_of_lt (lt_or_left p q))
+      (show Derivable S (insert (hc.transT P 🡘 h₁.transT (hT₂.transT P)).val _) by
+        rw [hv]; exact ihp)
+    have hQ := derivable_insert_negDomSet_mono hdom _ (le_of_lt (lt_or_right p q))
+      (show Derivable S (insert (hc.transT Q 🡘 h₁.transT (hT₂.transT Q)).val _) by
+        rw [hv]; exact ihq)
+    have h := Derivable.of_tprovable_imp₂ (show S.internalize V ⊢
+      (hc.transT P 🡘 h₁.transT (hT₂.transT P)) 🡒 (hc.transT Q 🡘 h₁.transT (hT₂.transT Q)) 🡒
+        (hc.transT (P ⋎ Q) 🡘 h₁.transT (hT₂.transT (P ⋎ Q))) by
+          simp only [IsTable.transT_or]; cl_prover) hP hQ
+    rw [hv] at h
+    exact h
+  · intro p hp ih
+    let P : Semiformula V L 1 := ⟨p, by simpa using hp⟩
+    have h := derivable_comp_all h₁ hT₂ hc hS P (by rw [hv, Semiformula.free_val]; exact ih)
+    rw [hv] at h
+    exact h
+  · intro p hp ih
+    let P : Semiformula V L 1 := ⟨p, by simpa using hp⟩
+    have h := derivable_comp_exs h₁ hT₂ hc hS P (by rw [hv, Semiformula.free_val]; exact ih)
+    rw [hv] at h
+    exact h
+
 end compFormula
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

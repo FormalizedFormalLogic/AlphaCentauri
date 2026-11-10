@@ -71,7 +71,8 @@ lemma eventually_evalTwoPow_rel {k : ℕ} (r : Language.Rel ℒₒᵣ k) (v : Fi
   · change ∀ᶠ n in atTop, (v 0 < v 1 ↔ evalTwoPow n (v 0) < evalTwoPow n (v 1))
     filter_upwards [eventually_evalTwoPow (v 0), eventually_evalTwoPow (v 1),
       (((v 1 : 𝔻) : ℚ[X]) - ((v 0 : 𝔻) : ℚ[X])).eventually_pos_eval_two_pow_iff] with n h₀ h₁ hpos
-    rw [← Subtype.coe_lt_coe, lt_iff, ← hpos, eval_sub, ← h₀, ← h₁, sub_pos, Nat.cast_lt]
+    rw [← Subtype.coe_lt_coe, ← sub_pos, LeadingCoeffOrder.pos_iff, AddSubgroupClass.coe_sub,
+      ← hpos, eval_sub, ← h₀, ← h₁, sub_pos, Nat.cast_lt]
 
 /-- Every universal sentence true in `ℕ` is true in the non-negative part of
 `IntegerConstantDyadicPolynomial`.

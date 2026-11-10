@@ -12,8 +12,8 @@ public import Mathlib.RingTheory.Polynomial.Basic
 `DyadicRational` is the ring $\mathbb{Z}[1/2]$ of dyadic rationals, and
 `IntegerConstantDyadicPolynomial` is the ring $\mathbb{Z} + X \mathbb{Z}[1/2][X]$ of polynomials
 over the dyadic rationals with integer constant term, ordered by the sign of the leading
-coefficient as a subring of `IntegerConstantPolynomial ℚ`. Along the powers of two, each of its
-elements eventually takes integer values, of the sign of its leading coefficient.
+coefficient. Along the powers of two, each of its elements eventually takes integer values, of the
+sign of its leading coefficient.
 
 In its non-negative part, the elements all of whose divisors are `1` or even are exactly the
 monomials $2^e X^h$; each `x` lies between such a monomial `u` and `2 * u` in the sense
@@ -193,31 +193,19 @@ lemma C_two_zpow_mul_X_pow_mem {e : ℤ} {h : ℕ} (he : 0 < h ∨ 0 ≤ e) :
       ← pow_zero X] at this
   · exact C_mul_X_pow_mem (DyadicRational.two_zpow_mem e) hh
 
-/-- The inclusion into the ring of rational polynomials with integer constant term. -/
-def inclusion : 𝔻 →+* IntegerConstantPolynomial ℚ := Subring.inclusion inf_le_left
+open scoped LeadingCoeffOrder
 
-instance : LinearOrder 𝔻 := LinearOrder.lift' inclusion (Subring.inclusion_injective _)
+instance : LinearOrder 𝔻 := inferInstance
 
-instance : IsStrictOrderedRing 𝔻 :=
-  Function.Injective.isStrictOrderedRing inclusion (map_zero _) (map_one _) (map_add _)
-    (map_mul _) Iff.rfl Iff.rfl
+instance : IsStrictOrderedRing 𝔻 := inferInstance
 
-instance : OpenPredicate.DiscretelyOrdered 𝔻 where
-  one_le_of_pos p hp := by
-    change inclusion 1 ≤ inclusion p
-    rw [map_one]
-    apply OpenPredicate.DiscretelyOrdered.one_le_of_pos
-    simpa using (show inclusion 0 < inclusion p from hp)
+instance : OpenPredicate.DiscretelyOrdered 𝔻 :=
+  LeadingCoeffOrder.discretelyOrdered fun p hp hd ↦ by
+    obtain ⟨n, hn⟩ := (mem_iff.mp hp).1
+    use n
+    rw [eq_C_of_natDegree_eq_zero hd, hn, C_eq_intCast]
 
 variable {p q : 𝔻}
-
-lemma le_iff : p ≤ q ↔ 0 ≤ ((q : ℚ[X]) - p).leadingCoeff := Iff.rfl
-
-lemma lt_iff : p < q ↔ 0 < ((q : ℚ[X]) - p).leadingCoeff := by
-  rw [← sub_pos]
-  exact IntegerConstantPolynomial.pos_iff
-
-lemma nonneg_iff : 0 ≤ p ↔ 0 ≤ (p : ℚ[X]).leadingCoeff := by simp [le_iff]
 
 /-- Along the powers of two, each element eventually takes integer values. -/
 lemma eventually_eval_two_pow_mem_range (p : 𝔻) :
@@ -247,7 +235,7 @@ lemma eventually_eval_two_pow_eq_natCast (hp : 0 ≤ p) :
     (p : ℚ[X]).eventually_pos_eval_two_pow_iff] with n ⟨m, hm⟩ hpos
   rw [eq_intCast] at hm
   have : 0 ≤ m := by
-    rcases (nonneg_iff.mp hp).lt_or_eq with hl | hl
+    rcases (LeadingCoeffOrder.nonneg_iff.mp hp).lt_or_eq with hl | hl
     · exact_mod_cast (hm ▸ hpos.mpr hl).le
     · rw [eq_comm, leadingCoeff_eq_zero] at hl
       rw [hl, eval_zero] at hm
@@ -292,7 +280,7 @@ lemma exists_eq_C_two_zpow_mul_X_pow
     rwa [hq, mul_comm, coeff_mul_X_pow] at this
   obtain ⟨e, m, hm, hqm⟩ := DyadicRational.exists_eq_two_zpow_mul_odd (hqc 0) hqX
   have hlc : 0 ≤ q.leadingCoeff := by
-    simpa [hq, leadingCoeff_mul] using nonneg_iff.mp x.2
+    simpa [hq, leadingCoeff_mul] using LeadingCoeffOrder.nonneg_iff.mp x.2
   have ho : C (2 ^ (-e)) * q ∈ 𝔻 := by
     rw [mem_iff]
     and_intros
@@ -315,11 +303,11 @@ lemma exists_eq_C_two_zpow_mul_X_pow
       have : m = 2 ^ (k + 1) * n := by exact_mod_cast this
       exact Int.not_even_iff_odd.mpr hm ⟨2 ^ k * n, by rw [this, pow_succ]; ring⟩
     · exact Or.inl hr
-  let o : Nonneg 𝔻 := ⟨⟨_, ho⟩, nonneg_iff.mpr <| by
+  let o : Nonneg 𝔻 := ⟨⟨_, ho⟩, LeadingCoeffOrder.nonneg_iff.mpr <| by
     rw [leadingCoeff_mul, leadingCoeff_C]
     exact mul_nonneg (by positivity) hlc⟩
   let z : Nonneg 𝔻 := ⟨⟨_, C_two_zpow_mul_X_pow_mem he⟩,
-    nonneg_iff.mpr (by rw [leadingCoeff_C_mul_X_pow]; positivity)⟩
+    LeadingCoeffOrder.nonneg_iff.mpr (by rw [leadingCoeff_C_mul_X_pow]; positivity)⟩
   have hzo : z * o = x := by
     apply Subtype.ext
     apply Subtype.ext
@@ -355,7 +343,7 @@ lemma eq_one_or_exists_mul_two_eq {e : ℤ} {h : ℕ} (hx : ((x : 𝔻) : ℚ[X]
   have hy : ((y : 𝔻) : ℚ[X]) = C c * X ^ i := by
     rw [hcu, ← hu, mul_comm, mul_assoc, Units.mul_inv, mul_one]
   have hc₀ : 0 < c := by
-    have := nonneg_iff.mp y.2
+    have := LeadingCoeffOrder.nonneg_iff.mp y.2
     rw [hy, leadingCoeff_C_mul_X_pow] at this
     exact this.lt_of_ne hc.ne_zero.symm
   rcases Nat.eq_zero_or_pos i with rfl | hi
@@ -387,7 +375,7 @@ lemma eq_one_or_exists_mul_two_eq {e : ℤ} {h : ℕ} (hx : ((x : 𝔻) : ℚ[X]
       rw [hy, coeff_C_mul_X_pow] at this
       simpa using this
     use ⟨⟨_, C_mul_X_pow_mem (DyadicRational.div_two_mem hcD) hi⟩,
-      nonneg_iff.mpr (by rw [leadingCoeff_C_mul_X_pow]; positivity)⟩
+      LeadingCoeffOrder.nonneg_iff.mpr (by rw [leadingCoeff_C_mul_X_pow]; positivity)⟩
     apply Subtype.ext
     apply Subtype.ext
     simp only [Nonneg.coe_mul, Subring.coe_mul, coe_ofNat, hy]
@@ -418,11 +406,10 @@ lemma exists_le_add_one_lt_two_mul (x : Nonneg 𝔻) :
       exact Nat.lt_pow_succ_log_self one_lt_two n
   set b := A.leadingCoeff
   have hb : 0 < b := by
-    have := lt_iff.mp (zero_lt_one.trans_le hA₁)
-    rwa [ZeroMemClass.coe_zero, sub_zero] at this
+    exact LeadingCoeffOrder.pos_iff.mp (zero_lt_one.trans_le hA₁)
   set a := Int.log 2 b
   have hmem (t : ℤ) : C (2 ^ t) * X ^ A.natDegree ∈ 𝔻 := C_two_zpow_mul_X_pow_mem (Or.inl hd)
-  let m (t : ℤ) : Nonneg 𝔻 := ⟨⟨_, hmem t⟩, nonneg_iff.mpr (by
+  let m (t : ℤ) : Nonneg 𝔻 := ⟨⟨_, hmem t⟩, LeadingCoeffOrder.nonneg_iff.mpr (by
     rw [leadingCoeff_C_mul_X_pow]
     positivity)⟩
   have hsub {c : ℚ} (hc : c ≠ b) : (C c * X ^ A.natDegree - A).leadingCoeff = c - b := by
@@ -435,7 +422,7 @@ lemma exists_le_add_one_lt_two_mul (x : Nonneg 𝔻) :
     · rwa [leadingCoeff_C_mul_X_pow]
   have hlt : x + 1 < m (a + 1) := by
     change ((x + 1 : Nonneg 𝔻) : 𝔻) < ⟨_, hmem (a + 1)⟩
-    rw [lt_iff]
+    rw [← sub_pos, LeadingCoeffOrder.pos_iff, AddSubgroupClass.coe_sub]
     have : b < 2 ^ (a + 1) := by exact_mod_cast Int.lt_zpow_succ_log_self one_lt_two b
     rw [hsub this.ne', sub_pos]
     exact this
@@ -452,7 +439,7 @@ lemma exists_le_add_one_lt_two_mul (x : Nonneg 𝔻) :
   · use m (a - 1), a - 1, A.natDegree
     refine ⟨rfl, ?_, ?_⟩
     · change (⟨_, hmem (a - 1)⟩ : 𝔻) ≤ ((x + 1 : Nonneg 𝔻) : 𝔻)
-      rw [le_iff]
+      rw [LeadingCoeffOrder.le_iff]
       have h₁ : (2 : ℚ) ^ a ≤ b := by exact_mod_cast Int.zpow_log_le_self one_lt_two hb
       have h₂ : (2 : ℚ) ^ (a - 1) < 2 ^ a := zpow_lt_zpow_right₀ one_lt_two (by omega)
       have := hsub (h₂.trans_le h₁).ne
@@ -468,7 +455,7 @@ lemma exists_mul_eq_of_le {a b : ℤ} {h k : ℕ} (hx : ((x : 𝔻) : ℚ[X]) = 
     (hy : ((y : 𝔻) : ℚ[X]) = C (2 ^ b) * X ^ k) (hxy : x ≤ y) : ∃ z, z * x = y := by
   have hxy : 0 ≤ (C ((2 : ℚ) ^ b) * X ^ k - C (2 ^ a) * X ^ h).leadingCoeff := by
     rw [← hx, ← hy]
-    exact le_iff.mp hxy
+    exact LeadingCoeffOrder.le_iff.mp hxy
   have hhk : h ≤ k := by
     by_contra hkh
     rw [leadingCoeff_sub_of_degree_lt', leadingCoeff_C_mul_X_pow] at hxy
@@ -483,7 +470,7 @@ lemma exists_mul_eq_of_le {a b : ℤ} {h k : ℕ} (hx : ((x : 𝔻) : ℚ[X]) = 
       rw [← sub_mul, ← C_sub, leadingCoeff_C_mul_X_pow, sub_nonneg] at hxy
       have := (zpow_le_zpow_iff_right₀ one_lt_two).mp hxy
       omega
-  use ⟨⟨_, C_two_zpow_mul_X_pow_mem hz⟩, nonneg_iff.mpr (by
+  use ⟨⟨_, C_two_zpow_mul_X_pow_mem hz⟩, LeadingCoeffOrder.nonneg_iff.mpr (by
     rw [leadingCoeff_C_mul_X_pow]
     positivity)⟩
   apply Subtype.ext
@@ -498,7 +485,7 @@ end Nonneg
 def X : 𝔻 := ⟨Polynomial.X, by simpa using C_mul_X_pow_mem (one_mem DyadicRational) one_pos⟩
 
 lemma X_nonneg : 0 ≤ IntegerConstantDyadicPolynomial.X := by
-  rw [nonneg_iff]
+  rw [LeadingCoeffOrder.nonneg_iff]
   exact leadingCoeff_X (R := ℚ) ▸ zero_le_one
 
 /-- `X` cannot be divided by `3` with remainder. -/

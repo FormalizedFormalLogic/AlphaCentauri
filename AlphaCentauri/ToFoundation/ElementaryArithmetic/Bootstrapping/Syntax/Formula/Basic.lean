@@ -579,6 +579,13 @@ lemma rangeList_locallyDelta0 : LocallyDelta0Function₁ (rangeList : V → V) w
 
 end rangeList
 
+private lemma add_add_le_of_lt {d e p₁ p' p : V} (he : e ≤ 1) (hp₁ : p₁ < p') (hdp : d + p' ≤ p) :
+    d + e + p₁ ≤ p := by
+  refine le_trans ?_ hdp
+  calc d + e + p₁ ≤ d + (1 + p₁) := by rw [add_assoc]; gcongr
+    _ = d + (p₁ + 1) := by rw [add_comm 1 p₁]
+    _ ≤ d + p' := by gcongr; exact lt_iff_succ_le.mp hp₁
+
 namespace UformulaRec1
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1 (Blueprint)
@@ -1532,6 +1539,20 @@ lemma courseOfValuesResult_exs (P p₁ : V) :
   rw [courseOfValuesResult_eq_depthValue, depthValue_exs, zero_add,
     c.znth_table_eq (by simp) le_rfl, ← c.change_eq_iter, c.iter_zero]
 
+lemma all_eq_courseOfValuesResult {P p₁ ys : V} (hl : len ys = c.allSize P p₁)
+    (h₀ : ys.[0] = c.courseOfValuesResult (c.change P) p₁) :
+    c.all P p₁ ys = c.courseOfValuesResult P (^∀ p₁) := by
+  obtain ⟨x, rfl⟩ := eq_singleton_iff_len_eq_one.mp (by rwa [c.allSize_eq_one] at hl)
+  rw [c.courseOfValuesResult_all, ← h₀]
+  simp
+
+lemma exs_eq_courseOfValuesResult {P p₁ ys : V} (hl : len ys = c.exsSize P p₁)
+    (h₀ : ys.[0] = c.courseOfValuesResult (c.change P) p₁) :
+    c.exs P p₁ ys = c.courseOfValuesResult P (^∃ p₁) := by
+  obtain ⟨x, rfl⟩ := eq_singleton_iff_len_eq_one.mp (by rwa [c.exsSize_eq_one] at hl)
+  rw [c.courseOfValuesResult_exs, ← h₀]
+  simp
+
 private lemma limSeq_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
     LocallyDelta0Function fun w : Fin n → V ↦ (c.construction L).limSeq ![] (f w) := by
   have := (c.construction L).limSeq_locallyDelta0.comp_cons hf (u := fun j ↦ j.elim0)
@@ -1582,18 +1603,10 @@ lemma isUFormula_and_eq_of_mem_limSeq {s z : V} (h : z ∈ (c.construction L).li
       · rw [c.courseOfValuesResult_or, ← ih' h₁, ← ih' h₂]
       · have h₀ := hys 0 (by simp [c.allSize_eq_one])
         rw [c.allChanges_eq_change] at h₀
-        have hys₁ : ys = ?[ys.[0]] := nth_ext (by simp [hl, c.allSize_eq_one]) fun i hi ↦ by
-          rw [hl, c.allSize_eq_one] at hi
-          rcases lt_one_iff_eq_zero.mp hi
-          simp
-        rw [c.courseOfValuesResult_all, ← ih' h₀, ← hys₁]
+        exact c.all_eq_courseOfValuesResult hl (ih' h₀)
       · have h₀ := hys 0 (by simp [c.exsSize_eq_one])
         rw [c.exsChanges_eq_change] at h₀
-        have hys₁ : ys = ?[ys.[0]] := nth_ext (by simp [hl, c.exsSize_eq_one]) fun i hi ↦ by
-          rw [hl, c.exsSize_eq_one] at hi
-          rcases lt_one_iff_eq_zero.mp hi
-          simp
-        rw [c.courseOfValuesResult_exs, ← ih' h₀, ← hys₁]
+        exact c.exs_eq_courseOfValuesResult hl (ih' h₀)
   exact this s z (lt_of_mem h) h
 
 lemma mem_limSeq_of_isUFormula {P p : V} (hp : IsUFormula L p) :
@@ -1630,11 +1643,7 @@ lemma mem_limSeq_of_isUFormula {P p : V} (hp : IsUFormula L p) :
     have hsub {p₁ e : V} (hp₁ : p₁ < p') (he : e ≤ 1) (hu₁ : IsUFormula L p₁) :
         ⟪c.iter P (d + e), p₁, c.courseOfValuesResult (c.iter P (d + e)) p₁⟫ ∈
           (c.construction L).limSeq ![] (K + p') := by
-      have h₁ : d + e + p₁ ≤ p := by
-        refine le_trans ?_ hdp
-        calc d + e + p₁ ≤ d + (1 + p₁) := by rw [add_assoc]; gcongr
-          _ = d + (p₁ + 1) := by rw [add_comm 1 p₁]
-          _ ≤ d + p' := by gcongr; exact lt_iff_succ_le.mp hp₁
+      have h₁ : d + e + p₁ ≤ p := add_add_le_of_lt he hp₁ hdp
       exact (c.construction L).limSeq_cumulative
         (by rw [add_assoc]; exact add_le_add_right (succ_le_iff_lt.mpr hp₁) K)
         (ih p₁ hp₁ (d + e) (le_trans le_self_add h₁) h₁ hu₁)
@@ -1745,18 +1754,10 @@ lemma Graph.case_iff {p y : V} :
     · rw [c.courseOfValuesResult_or, ((c.graph_iff L).mp h₁).2, ((c.graph_iff L).mp h₂).2]
     · have h₀ := ((c.graph_iff L).mp (hys 0 (by simp [c.allSize_eq_one]))).2
       rw [c.allChanges_eq_change] at h₀
-      have hys₁ : ys = ?[ys.[0]] := nth_ext (by simp [hl, c.allSize_eq_one]) fun i hi ↦ by
-        rw [hl, c.allSize_eq_one] at hi
-        rcases lt_one_iff_eq_zero.mp hi
-        simp
-      rw [c.courseOfValuesResult_all, ← h₀, ← hys₁]
+      exact c.all_eq_courseOfValuesResult hl h₀
     · have h₀ := ((c.graph_iff L).mp (hys 0 (by simp [c.exsSize_eq_one]))).2
       rw [c.exsChanges_eq_change] at h₀
-      have hys₁ : ys = ?[ys.[0]] := nth_ext (by simp [hl, c.exsSize_eq_one]) fun i hi ↦ by
-        rw [hl, c.exsSize_eq_one] at hi
-        rcases lt_one_iff_eq_zero.mp hi
-        simp
-      rw [c.courseOfValuesResult_exs, ← h₀, ← hys₁]
+      exact c.exs_eq_courseOfValuesResult hl h₀
 
 variable (c β)
 
@@ -2078,11 +2079,7 @@ lemma uformula_result_induction {P : V → V → V → Prop}
     intro p' ih d hd hdp hu
     have hsub {p₁ e : V} (hp₁ : p₁ < p') (he : e ≤ 1) (hu₁ : IsUFormula L p₁) :
         P (c.iter param (d + e)) p₁ (c.result L (c.iter param (d + e)) p₁) := by
-      have h₁ : d + e + p₁ ≤ p := by
-        refine le_trans ?_ hdp
-        calc d + e + p₁ ≤ d + (1 + p₁) := by rw [add_assoc]; gcongr
-          _ = d + (p₁ + 1) := by rw [add_comm 1 p₁]
-          _ ≤ d + p' := by gcongr; exact lt_iff_succ_le.mp hp₁
+      have h₁ : d + e + p₁ ≤ p := add_add_le_of_lt he hp₁ hdp
       exact ih p₁ hp₁ (d + e) (le_trans le_self_add h₁) h₁ hu₁
     rcases IsUFormula.case hu with
       (⟨k, R, v, hkR, hv, rfl⟩ | ⟨k, R, v, hkR, hv, rfl⟩ | rfl | rfl |
@@ -2533,16 +2530,8 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop}
     intro p' ih d hd m hm hdp hmp h
     have hsub {p₁ e : V} (hp₁ : p₁ < p') (he : e ≤ 1) (h₁ : IsSemiformula L (m + e) p₁) :
         P (c.iter param (d + e)) (m + e) p₁ (c.result L (c.iter param (d + e)) p₁) := by
-      have hle : e + p₁ ≤ p' := by
-        calc e + p₁ ≤ 1 + p₁ := by gcongr
-          _ = p₁ + 1 := add_comm 1 p₁
-          _ ≤ p' := lt_iff_succ_le.mp hp₁
-      have h₂ : d + e + p₁ ≤ p := by
-        refine le_trans ?_ hdp
-        rw [add_assoc]; gcongr
-      have h₃ : m + e + p₁ ≤ n + p := by
-        refine le_trans ?_ hmp
-        rw [add_assoc]; gcongr
+      have h₂ : d + e + p₁ ≤ p := add_add_le_of_lt he hp₁ hdp
+      have h₃ : m + e + p₁ ≤ n + p := add_add_le_of_lt he hp₁ hmp
       exact ih p₁ hp₁ (d + e) (le_trans le_self_add h₂) (m + e) (le_trans le_self_add h₃) h₂ h₃ h₁
     rcases IsSemiformula.case_iff.mp h with
       (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, h₁, h₂, rfl⟩ |

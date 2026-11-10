@@ -331,7 +331,7 @@ instance : Finite (SaturatedSequent BS) :=
 lemma lindenbaum {S₀ : Sequent α} (h₀ : ⊬ᴳ[𝐈𝐋] S₀) (hant : S₀.ant ⊆ closure BS)
     (hsuc : S₀.suc ⊆ closure BS) : ∃ x : SaturatedSequent BS, S₀ ⊆ x.toSequent := by
   obtain ⟨S, h₁, h₂, h₃, h₄, h₅⟩ :=
-    Sequent.exists_saturated Gentzen.isImpClosed mem_closure_imp h₀ hant hsuc;
+    Gentzen.exists_saturated mem_closure_imp h₀ hant hsuc;
   use ⟨S, h₃, h₄, h₅, h₂⟩;
 
 lemma prebox_subset : x.ant.prebox ⊆ closure BS := by

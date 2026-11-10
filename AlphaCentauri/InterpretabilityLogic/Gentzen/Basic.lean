@@ -88,67 +88,6 @@ variable [DecidableEq α]
 
 def subformulas (S : Sequent α) : FormulaFinset α := (S.ant ∪ S.suc).subformulas
 
-/-- `D` holds of every sequent sharing a formula between its two sides and is closed under the
-implication rules; typically `D` is derivability in a sequent calculus. -/
-structure IsImpClosed (D : Sequent α → Prop) : Prop where
-  union {S : Sequent α} {A : Formula α} : A ∈ S.ant → A ∈ S.suc → D S
-  impL {Γ Δ : FormulaFinset α} {A B : Formula α} :
-    D (Γ ⟹ insert A Δ) → D (insert B Γ ⟹ Δ) → D (insert (A 🡒 B) Γ ⟹ Δ)
-  impR {Γ Δ : FormulaFinset α} {A B : Formula α} :
-    D (insert A Γ ⟹ insert B Δ) → D (Γ ⟹ insert (A 🡒 B) Δ)
-
-/-- Every sequent within `P` on which `D` fails extends to a saturated one within `P` on which `D`
-fails, provided `P` contains the components of its implications. -/
-theorem exists_saturated {D : Sequent α → Prop} (hD : IsImpClosed D) {P : FormulaFinset α}
-    (hP : ∀ {A B}, A 🡒 B ∈ P → A ∈ P ∧ B ∈ P) {S₀ : Sequent α} (h₀ : ¬D S₀)
-    (hant : S₀.ant ⊆ P) (hsuc : S₀.suc ⊆ P) :
-    ∃ S, S₀ ⊆ S ∧ ¬D S ∧ S.Saturated ∧ S.ant ⊆ P ∧ S.suc ⊆ P := by
-  classical
-  let C := (P.powerset ×ˢ P.powerset).filter
-    fun p ↦ S₀.ant ⊆ p.1 ∧ S₀.suc ⊆ p.2 ∧ ¬D (p.1 ⟹ p.2);
-  have hC : (S₀.ant, S₀.suc) ∈ C := by simp [C, hant, hsuc, h₀];
-  obtain ⟨⟨Γ, Δ⟩, hp, hmax⟩ := C.exists_max_image (fun p ↦ p.1.card + p.2.card) ⟨_, hC⟩;
-  simp only [C, Finset.mem_filter, Finset.mem_product, Finset.mem_powerset] at hp;
-  obtain ⟨⟨hΓ, hΔ⟩, h₁, h₂, hD'⟩ := hp;
-  have grow : ∀ {Γ' Δ'}, Γ ⊆ Γ' → Δ ⊆ Δ' → Γ' ⊆ P → Δ' ⊆ P → ¬D (Γ' ⟹ Δ') →
-      Γ' = Γ ∧ Δ' = Δ := by
-    intro Γ' Δ' hΓ' hΔ' hΓP hΔP hn;
-    have hle := hmax (Γ', Δ') (by simp [C, hΓP, hΔP, h₁.trans hΓ', h₂.trans hΔ', hn]);
-    have := Finset.card_le_card hΓ';
-    have := Finset.card_le_card hΔ';
-    exact ⟨Finset.eq_of_subset_of_card_le hΓ' (by simp at hle; omega) |>.symm,
-      Finset.eq_of_subset_of_card_le hΔ' (by simp at hle; omega) |>.symm⟩;
-  use Γ ⟹ Δ;
-  and_intros;
-  · exact ⟨h₁, h₂⟩;
-  · exact hD';
-  · constructor;
-    · intro A B hAB;
-      have hA := (hP (hΓ hAB)).1;
-      have hB := (hP (hΓ hAB)).2;
-      by_cases hl : D (Γ ⟹ insert A Δ);
-      · by_cases hr : D (insert B Γ ⟹ Δ);
-        · exact absurd (by simpa [Finset.insert_eq_of_mem hAB] using hD.impL hl hr) hD';
-        · right;
-          rw [← (grow (Finset.subset_insert B Γ) subset_rfl
-            (Finset.insert_subset hB hΓ) hΔ hr).1];
-          exact Finset.mem_insert_self B Γ;
-      · left;
-        rw [← (grow subset_rfl (Finset.subset_insert A Δ) hΓ
-          (Finset.insert_subset hA hΔ) hl).2];
-        exact Finset.mem_insert_self A Δ;
-    · intro A B hAB;
-      have hA := (hP (hΔ hAB)).1;
-      have hB := (hP (hΔ hAB)).2;
-      have hn : ¬D (insert A Γ ⟹ insert B Δ) := fun h ↦
-        hD' (by simpa [Finset.insert_eq_of_mem hAB] using hD.impR h);
-      obtain ⟨e₁, e₂⟩ := grow (Finset.subset_insert A Γ) (Finset.subset_insert B Δ)
-        (Finset.insert_subset hA hΓ) (Finset.insert_subset hB hΔ) hn;
-      rw [← e₁, ← e₂];
-      exact ⟨Finset.mem_insert_self A Γ, Finset.mem_insert_self B Δ⟩;
-  · exact hΓ;
-  · exact hΔ;
-
 end Sequent
 
 namespace IL
@@ -223,8 +162,57 @@ lemma botL_mem (h : ⊥ ∈ Γ := by grind) : ⊢ᴳ[𝐈𝐋] Γ ⟹ Δ := wkR 
 
 lemma wk (h : ⊢ᴳ[𝐈𝐋] Γ ⟹ Δ) (hΓ : Γ ⊆ Γ') (hΔ : Δ ⊆ Δ') : ⊢ᴳ[𝐈𝐋] Γ' ⟹ Δ' := wkR (wkL h hΓ) hΔ
 
-lemma isImpClosed : Sequent.IsImpClosed (Gentzen (α := α)) :=
-  ⟨fun h₁ h₂ ↦ union' _ h₁ h₂, impL, impR⟩
+/-- Every sequent within `P` not derivable extends to a saturated one within `P` on which `D`
+fails, provided `P` contains the components of its implications. -/
+lemma exists_saturated {P : FormulaFinset α}
+    (hP : ∀ {A B}, A 🡒 B ∈ P → A ∈ P ∧ B ∈ P) {S₀ : Sequent α} (h₀ : ⊬ᴳ[𝐈𝐋] S₀)
+    (hant : S₀.ant ⊆ P) (hsuc : S₀.suc ⊆ P) :
+    ∃ S, S₀ ⊆ S ∧ ⊬ᴳ[𝐈𝐋] S ∧ S.Saturated ∧ S.ant ⊆ P ∧ S.suc ⊆ P := by
+  classical
+  let C := (P.powerset ×ˢ P.powerset).filter
+    fun p ↦ S₀.ant ⊆ p.1 ∧ S₀.suc ⊆ p.2 ∧ ¬Gentzen (p.1 ⟹ p.2);
+  have hC : (S₀.ant, S₀.suc) ∈ C := by simp [C, hant, hsuc, h₀];
+  obtain ⟨⟨Γ, Δ⟩, hp, hmax⟩ := C.exists_max_image (fun p ↦ p.1.card + p.2.card) ⟨_, hC⟩;
+  simp only [C, Finset.mem_filter, Finset.mem_product, Finset.mem_powerset] at hp;
+  obtain ⟨⟨hΓ, hΔ⟩, h₁, h₂, hD'⟩ := hp;
+  have grow : ∀ {Γ' Δ'}, Γ ⊆ Γ' → Δ ⊆ Δ' → Γ' ⊆ P → Δ' ⊆ P → ¬Gentzen (Γ' ⟹ Δ') →
+      Γ' = Γ ∧ Δ' = Δ := by
+    intro Γ' Δ' hΓ' hΔ' hΓP hΔP hn;
+    have hle := hmax (Γ', Δ') (by simp [C, hΓP, hΔP, h₁.trans hΓ', h₂.trans hΔ', hn]);
+    have := Finset.card_le_card hΓ';
+    have := Finset.card_le_card hΔ';
+    exact ⟨Finset.eq_of_subset_of_card_le hΓ' (by simp at hle; omega) |>.symm,
+      Finset.eq_of_subset_of_card_le hΔ' (by simp at hle; omega) |>.symm⟩;
+  use Γ ⟹ Δ;
+  and_intros;
+  · exact ⟨h₁, h₂⟩;
+  · exact hD';
+  · constructor;
+    · intro A B hAB;
+      have hA := (hP (hΓ hAB)).1;
+      have hB := (hP (hΓ hAB)).2;
+      by_cases hl : Gentzen (Γ ⟹ insert A Δ);
+      · by_cases hr : Gentzen (insert B Γ ⟹ Δ);
+        · exact absurd (by simpa [Finset.insert_eq_of_mem hAB] using impL hl hr) hD';
+        · right;
+          rw [← (grow (Finset.subset_insert B Γ) subset_rfl
+            (Finset.insert_subset hB hΓ) hΔ hr).1];
+          exact Finset.mem_insert_self B Γ;
+      · left;
+        rw [← (grow subset_rfl (Finset.subset_insert A Δ) hΓ
+          (Finset.insert_subset hA hΔ) hl).2];
+        exact Finset.mem_insert_self A Δ;
+    · intro A B hAB;
+      have hA := (hP (hΔ hAB)).1;
+      have hB := (hP (hΔ hAB)).2;
+      have hn : ¬Gentzen (insert A Γ ⟹ insert B Δ) := fun h ↦
+        hD' (by simpa [Finset.insert_eq_of_mem hAB] using impR h);
+      obtain ⟨e₁, e₂⟩ := grow (Finset.subset_insert A Γ) (Finset.subset_insert B Δ)
+        (Finset.insert_subset hA hΓ) (Finset.insert_subset hB hΔ) hn;
+      rw [← e₁, ← e₂];
+      exact ⟨Finset.mem_insert_self A Γ, Finset.mem_insert_self B Δ⟩;
+  · exact hΓ;
+  · exact hΔ;
 
 end Gentzen
 

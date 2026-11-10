@@ -385,6 +385,20 @@ lemma CriticalSuccessor.trans_successor (h₁ : CriticalSuccessor C Γ Δ) (h₂
   ⟨h₁.toSuccessor.trans h₂, fun hA ↦ not_mem_of_neg_mem <| h₂.mem_of_box_mem (h₁.box_neg_mem hA),
     fun hA ↦ h₂.box_mem_of_box_mem (h₁.box_neg_mem hA)⟩
 
+lemma exists_box_not_mem [L.ExtendsGL] [Adequate Φ] (h₁ : □A ∈ Φ) (h₂ : □A ∉ Γ) :
+    ∃ Δ, Successor Γ Δ ∧ A ∉ Δ := by
+  obtain ⟨Δ, hΔ, hc⟩ := exists_successor_of_box_not_mem h₁ h₂;
+  use Δ;
+  exact ⟨hΔ, not_mem_of_provable_neg hc (Context.by_axm rfl)⟩
+
+lemma exists_neg_consistent (h : L ⊬ A) :
+    ∃ Γ : MaximalConsistentSet L Φ, ({∼A} ∪ Γ.literals) *⊬[L] ⊥ := by
+  apply exists_consistent_union;
+  intro h₁;
+  apply h;
+  have h₂ : L ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+  cl_prover [h₂];
+
 /-! ### Existence of critical successors -/
 
 /-- The disjunction of the formulas `A` in `Φ` with `A ▷ F ∈ Γ`. -/
@@ -821,7 +835,7 @@ lemma exists_criticalSuccessor_box_neg_of_rhd_not_mem [(ILMinusJ2 : Logic α) �
 namespace WeakCriticalSuccessor
 
 private lemma rhd_not_mem (hF : IsRhdOperand Φ F) (hΔ : WeakCriticalSuccessor F Γ Δ)
-    (hDE : D ▷ E ∈ Γ) (hD : D ∈ Δ) : ¬Γ.literals *⊢[ofAxiomsMinus 𝔸] D ▷ F := fun h ↦
+    (hDE : D ▷ E ∈ Γ) (hD : D ∈ Δ) : Γ.literals *⊬[ofAxiomsMinus 𝔸] D ▷ F := fun h ↦
   hΔ.not_mem ((mem_iff_provable <| Adequate.rhd_mem (.of_rhd_left (mem_of_mem hDE)) hF).mpr h) hD
 
 /-- - [KO21, Lemma 4.7] -/

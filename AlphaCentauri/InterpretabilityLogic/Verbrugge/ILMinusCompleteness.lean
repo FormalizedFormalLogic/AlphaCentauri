@@ -77,22 +77,6 @@ lemma forces_iff_mem_of (hval : ∀ {x : M.World} {a}, M x a ↔ #a ∈ f x)
 
 end TruthLemma
 
-lemma exists_box_not_mem {α : Type*} [DecidableEq α] {L : Logic α} [Entailment.Cl L]
-    [L.ExtendsGL] {Φ : Finset (Formula α)} [Adequate Φ] {Γ : MaximalConsistentSet L Φ}
-    {A : Formula α} (h₁ : □A ∈ Φ) (h₂ : □A ∉ Γ) : ∃ Δ, Successor Γ Δ ∧ A ∉ Δ := by
-  obtain ⟨Δ, hΔ, hc⟩ := exists_successor_of_box_not_mem h₁ h₂;
-  use Δ
-  exact ⟨hΔ, not_mem_of_provable_neg hc (Context.by_axm rfl)⟩
-
-lemma exists_neg_consistent {α : Type*} [DecidableEq α] {L : Logic α} [Entailment.Cl L]
-    {Φ : Finset (Formula α)} {A : Formula α} (h : L ⊬ A) :
-    ∃ Γ : MaximalConsistentSet L Φ, ({∼A} ∪ Γ.literals) *⊬[L] ⊥ := by
-  apply exists_consistent_union;
-  intro h₁;
-  apply h;
-  have h₂ : L ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
-  cl_prover [h₂];
-
 /-! ### Labelled maximal consistent sets -/
 
 variable {α : Type*} [DecidableEq α]

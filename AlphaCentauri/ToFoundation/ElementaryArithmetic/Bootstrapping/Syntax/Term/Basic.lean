@@ -809,6 +809,251 @@ lemma graph_iff {t y : V} :
   · rintro ⟨ht, rfl⟩
     exact ⟨_, c.mem_limSeq_of_isUTerm L param ht⟩
 
+variable {L c} {y : V}
+
+lemma Graph.case_iff {t y : V} :
+    c.Graph L param t y ↔
+    IsUTerm L t ∧
+    ( (∃ z, t = ^#z ∧ y = c.bvar param z) ∨
+      (∃ x, t = ^&x ∧ y = c.fvar param x) ∨
+      (∃ k f v w, (k = len w ∧ ∀ i < k, c.Graph L param v.[i] w.[i]) ∧
+      t = ^func k f v ∧ y = c.func param k f v w) ) := by
+  rw [c.graph_iff L]
+  constructor
+  · rintro ⟨ht, rfl⟩
+    refine ⟨ht, ?_⟩
+    rcases IsUTerm.case ht with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, _, hv, rfl⟩)
+    · disj 1; exact ⟨z, rfl, by rw [courseOfValuesResult_bvar]⟩
+    · disj 2; exact ⟨x, rfl, by rw [courseOfValuesResult_fvar]⟩
+    · disj 3
+      obtain ⟨w, hw, hwv, he⟩ := c.courseOfValuesResult_func param (f := f) hv.lh
+      exact ⟨k, f, v, w, ⟨hw.symm, fun i hi ↦
+        (c.graph_iff L).mpr ⟨hv.nth hi, hwv i hi⟩⟩, rfl, he⟩
+  · rintro ⟨ht, H⟩
+    refine ⟨ht, ?_⟩
+    rcases H with (⟨z, rfl, rfl⟩ | ⟨x, rfl, rfl⟩ | ⟨k, f, v, w, ⟨hk, hw⟩, rfl, rfl⟩)
+    · rw [courseOfValuesResult_bvar]
+    · rw [courseOfValuesResult_fvar]
+    · have hv := (IsUTerm.func_iff.mp ht).2
+      obtain ⟨w', hw', hw'v, he⟩ := c.courseOfValuesResult_func param (f := f) hv.lh
+      have : w = w' := by
+        apply nth_ext (by rw [← hk, hw'])
+        intro i hi
+        have hi' : i < k := by simpa [← hk] using hi
+        rw [((c.graph_iff L).mp (hw i hi')).2, hw'v i hi']
+      rw [he, this]
+
+variable (c)
+
+lemma graph_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1)) (β.graph L) :=
+  .mk fun v ↦ by
+  simp [Blueprint.graph, (c.construction L).fixpoint_defined.iff, Graph]
+
+@[simp] lemma eval_graphDef (v : Fin (arity + 2) → V) :
+    (β.graph L).val.Evalb v ↔ c.Graph L (v ·.succ.succ) (v 0) (v 1) := (graph_defined c).iff
+
+instance graph_definable : 𝚺ᴬ₁.Definable fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1) :=
+  (graph_defined c).to_definable
+
+instance graph_definable₂ (param) : 𝚺ᴬ_[0 + 1]-Relation (c.Graph L param) := by
+  simpa using Bounding.HierarchySymbol.Definable.retractiont (n := 2) (graph_definable
+    c) (#0 :> #1 :> fun i ↦ &(param i))
+
+lemma graph_dom_isUTerm {t y} :
+    c.Graph L param t y → IsUTerm L t := fun h ↦ Graph.case_iff.mp h |>.1
+
+lemma graph_bvar_iff {z} :
+    c.Graph L param ^#z y ↔ y = c.bvar param z := by
+  constructor
+  · intro H
+    rcases Graph.case_iff.mp H with ⟨_, (⟨_, h, rfl⟩ | ⟨_, h, _⟩ | ⟨_, _, _, _, _, h, _⟩)⟩
+    · rcases (by simpa using h); rfl
+    · simp [qqBvar, qqFvar] at h
+    · simp [qqBvar, qqFunc] at h
+  · rintro rfl; exact Graph.case_iff.mpr ⟨by simp, by disj 1; exact ⟨z, by simp⟩⟩
+
+lemma graph_fvar_iff (x) :
+    c.Graph L param ^&x y ↔ y = c.fvar param x := by
+  constructor
+  · intro H
+    rcases Graph.case_iff.mp H with ⟨_, (⟨_, h, _⟩ | ⟨_, h, rfl⟩ | ⟨_, _, _, _, _, h, _⟩)⟩
+    · simp [qqFvar, qqBvar] at h
+    · rcases (by simpa using h); rfl
+    · simp [qqFvar, qqFunc] at h
+  · rintro rfl; exact Graph.case_iff.mpr ⟨by simp, by disj 2; exact ⟨x, by simp⟩⟩
+
+lemma graph_func {k f v w} (hkr : L.IsFunc k f) (hv : IsUTermVec L k v)
+    (hkw : k = len w) (hw : ∀ i < k, c.Graph L param v.[i] w.[i]) :
+    c.Graph L param (^func k f v) (c.func param k f v w) := by
+  exact Graph.case_iff.mpr
+    ⟨by simp [hkr, hv], by disj 3; exact ⟨k, f, v, w, ⟨hkw, hw⟩, by simp⟩⟩
+
+lemma graph_func_inv {k f v y} :
+    c.Graph L param (^func k f v) y → ∃ w,
+      (k = len w ∧ ∀ i < k, c.Graph L param v.[i] w.[i]) ∧
+      y = c.func param k f v w := by
+  intro H
+  rcases Graph.case_iff.mp H with ⟨_, (⟨_, h, _⟩ | ⟨_, h, rfl⟩ | ⟨k', f', v', w, hw, h, rfl⟩)⟩
+  · simp [qqFunc, qqBvar] at h
+  · simp [qqFunc, qqFvar] at h
+  · rcases show k = k' ∧ f = f' ∧ v = v' by simpa [qqFunc, qqFunc] using h with ⟨rfl, rfl, rfl⟩
+    exact ⟨w, hw, by rfl⟩
+
+variable {c} (param n)
+
+lemma graph_exists {t : V} : IsUTerm L t → ∃ y, c.Graph L param t y := fun ht ↦
+  ⟨_, (c.graph_iff L).mpr ⟨ht, rfl⟩⟩
+
+lemma graph_unique {t y₁ y₂ : V} : c.Graph L param t y₁ → c.Graph L param t y₂ → y₁ = y₂ := by
+  intro h₁ h₂
+  rw [((c.graph_iff L).mp h₁).2, ((c.graph_iff L).mp h₂).2]
+
+variable (L c)
+
+lemma graph_existsUnique {t : V} (ht : IsUTerm L t) : ∃! y, c.Graph L param t y := by
+  rcases graph_exists param ht with ⟨y, hy⟩
+  exact ExistsUnique.intro y hy (fun y' h' ↦ graph_unique param h' hy)
+
+lemma graph_existsUnique_total (t : V) : ∃! y,
+    (IsUTerm L t → c.Graph L param t y) ∧ (¬IsUTerm L t → y = 0) := by
+  by_cases ht : IsUTerm L t <;> simp [ht, c.graph_existsUnique L param]
+
+noncomputable def result (t : V) : V := Classical.choose! (c.graph_existsUnique_total L param t)
+
+theorem result_prop {t : V} (ht : IsUTerm L t) : c.Graph L param t (c.result L param t) :=
+  Classical.choose!_spec (c.graph_existsUnique_total L param t) |>.1 ht
+
+theorem result_prop_not {t : V} (ht : ¬IsUTerm L t) : c.result L param t = 0 :=
+  Classical.choose!_spec (c.graph_existsUnique_total L param t) |>.2 ht
+
+variable {L c param}
+
+lemma result_eq_of_graph {t y} (ht : IsUTerm L t) (h : c.Graph L param t y) :
+    c.result L param t = y :=
+  Eq.symm <| Classical.choose_uniq (c.graph_existsUnique_total L param t) (by simp [h, ht])
+
+@[simp] lemma result_bvar (z) : c.result L param (^#z) = c.bvar param z :=
+  c.result_eq_of_graph (by simp) (by simp [c.graph_bvar_iff])
+
+@[simp] lemma result_fvar (x) : c.result L param (^&x) = c.fvar param x :=
+  c.result_eq_of_graph (by simp) (by simp [c.graph_fvar_iff])
+
+lemma result_func {k f v w} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v)
+    (hkw : k = len w) (hw : ∀ i < k, c.result L param v.[i] = w.[i]) :
+    c.result L param (^func k f v) = c.func param k f v w :=
+  c.result_eq_of_graph (by simp [hkf, hv]) (c.graph_func hkf hv hkw (fun i hi ↦ by
+    simpa [hw i hi] using c.result_prop L param (hv.nth hi)))
+
+open Classical in
+lemma result_eq_ite (t : V) :
+    c.result L param t = if IsUTerm L t then c.courseOfValuesResult param t else 0 := by
+  by_cases ht : IsUTerm L t
+  · simp [ht, ((c.graph_iff L).mp (c.result_prop L param ht)).2]
+  · simp [ht, c.result_prop_not L param ht]
+
+open Classical in
+variable (L c) in
+lemma result_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin (arity + 1) → V ↦ c.result L (w ·.succ) (w 0) := by
+  have : (fun w : Fin (arity + 1) → V ↦ c.result L (w ·.succ) (w 0)) = fun w ↦
+      if IsUTerm L (w 0) then c.courseOfValuesResult (w ·.succ) (w 0) else 0 :=
+    funext fun w ↦ c.result_eq_ite _
+  rw [this]
+  exact LocallyDelta0Function.ite (pred_comp isUTerm_locallyDelta0 (LocallyDelta0Function.var 0))
+    c.courseOfValuesResult_locallyDelta0 (LocallyDelta0Function.const 0)
+
+section vec
+
+lemma graph_existsUnique_vec {k w : V} (hw : IsUTermVec L k w) :
+    ∃! w' : V, k = len w' ∧ ∀ i < k, c.Graph L param w.[i] w'.[i] := by
+  have hres := c.result_locallyDelta0 (L := L)
+  apply ExistsUnique.intro (listMap (fun p x ↦ c.result L p x) param w)
+  · refine ⟨by rw [len_listMap hres, hw.lh], fun i hi ↦ ?_⟩
+    rw [nth_listMap hres _ _ (by simpa [← hw.lh] using hi)]
+    exact c.result_prop L param (hw.nth hi)
+  · rintro w'' ⟨hkw'', hw''⟩
+    apply nth_ext (by rw [len_listMap hres, ← hkw'', hw.lh])
+    intro i hi
+    have hi' : i < k := by simpa [hkw''] using hi
+    rw [nth_listMap hres _ _ (by simpa [← hw.lh] using hi')]
+    exact (c.result_eq_of_graph (hw.nth hi') (hw'' i hi')).symm
+
+variable (L c param)
+
+lemma graph_existsUnique_vec_total (k w : V) : ∃! w',
+    (IsUTermVec L k w → k = len w' ∧ ∀ i < k, c.Graph L param w.[i] w'.[i]) ∧
+    (¬IsUTermVec L k w → w' = 0) := by
+  by_cases h : IsUTermVec L k w <;> simp [h, c.graph_existsUnique_vec]
+
+noncomputable def resultVec (k w : V) : V :=
+  Classical.choose! (c.graph_existsUnique_vec_total L param k w)
+
+@[simp] lemma resultVec_lh {k w : V} (hw : IsUTermVec L k w) : len (c.resultVec L param k w) = k :=
+  Eq.symm <| Classical.choose!_spec (c.graph_existsUnique_vec_total L param k w) |>.1 hw |>.1
+
+lemma graph_of_mem_resultVec {k w : V} (hw : IsUTermVec L k w) {i : V} (hi : i < k) :
+    c.Graph L param w.[i] (c.resultVec L param k w).[i] :=
+  Classical.choose!_spec (c.graph_existsUnique_vec_total L param k w) |>.1 hw |>.2 i hi
+
+lemma nth_resultVec {k w i : V} (hw : IsUTermVec L k w) (hi : i < k) :
+    (c.resultVec L param k w).[i] = c.result L param w.[i] :=
+  c.result_eq_of_graph (hw.nth hi) (c.graph_of_mem_resultVec L param hw hi) |>.symm
+
+@[simp] theorem resultVec_of_not {k w : V} (hw : ¬IsUTermVec L k w) : c.resultVec L param k w = 0 :=
+  Classical.choose!_spec (c.graph_existsUnique_vec_total L param k w) |>.2 hw
+
+@[simp] lemma resultVec_nil :
+    c.resultVec L param 0 0 = 0 := len_zero_iff_eq_nil.mp (by simp)
+
+lemma resultVec_cons {k w t : V} (hw : IsUTermVec L k w) (ht : IsUTerm L t) :
+    c.resultVec L param (k + 1) (t ∷ w) = c.result L param t ∷ c.resultVec L param k w :=
+  nth_ext (by simp [hw, hw.adjoin ht]) (by
+    intro i hi
+    have hi : i < k + 1 := by simpa [hw.adjoin ht, resultVec_lh] using hi
+    rw [c.nth_resultVec L param (hw.adjoin ht) hi]
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp
+    · simp [c.nth_resultVec L param hw (by simpa using hi)])
+
+end vec
+
+variable (c)
+
+@[simp] lemma result_func' {k f v} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+    c.result L param (^func k f v) = c.func param k f v (c.resultVec L param k v) :=
+  c.result_func hkf hv (by simp [hv]) (fun i hi ↦ c.nth_resultVec L param hv hi |>.symm)
+
+section
+
+lemma result_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ c.result L (v ·.succ) (v 0))
+  (β.result L) := .mk fun v ↦ by
+  simp [Blueprint.result, Bounding.HierarchySymbol.Semiformula.val_sigma,
+    IsUTerm.defined.proper.iff',
+    c.eval_graphDef, result, Classical.choose!_eq_iff_right]
+
+@[simp] lemma result_graphDef (v : Fin (arity + 2) → V) :
+    (β.result L).val.Evalb v ↔ v 0 = c.result L (v ·.succ.succ) (v 1) := (result_defined c).iff
+
+private lemma resultVec_graph {w' k w} :
+    w' = c.resultVec L param k w ↔
+    ( (IsUTermVec L k w → k = len w' ∧ ∀ i < k, c.Graph L param w.[i] w'.[i]) ∧
+      (¬IsUTermVec L k w → w' = 0) ) :=
+  Classical.choose!_eq_iff_right (c.graph_existsUnique_vec_total L param k w)
+
+lemma resultVec_defined :
+    𝚺ᴬ₁.DefinedFunction (fun v ↦ c.resultVec L (v ·.succ.succ) (v 0) (v 1)) (β.resultVec L) :=
+  .mk fun v ↦ by
+  symm
+  simpa [Blueprint.resultVec, Bounding.HierarchySymbol.Semiformula.val_sigma,
+    IsUTermVec.defined.proper.iff',
+    c.eval_graphDef] using c.resultVec_graph
+
+lemma eval_resultVec (v : Fin (arity + 3) → V) :
+    (β.resultVec L).val.Evalb v ↔ v 0 = c.resultVec L (v ·.succ.succ.succ) (v 1) (v 2) :=
+  c.resultVec_defined.iff
+
+end
+
 end Construction
 
 end Language.TermRec

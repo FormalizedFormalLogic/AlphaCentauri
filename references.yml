@@ -327,6 +327,20 @@ HP98:
     type: Anthology
     title: Perspectives in Mathematical Logic
 
+HPV23:
+  type: Article
+  title: Bisimulations and bisimulation games between {Verbrugge} models
+  author: ["Horvat, Sebastijan", "Perkov, Tin", "Vuković, Mladen"]
+  date: 2023
+  page-range: 231-243
+  serial-number:
+    doi: "10.1002/malq.202200042"
+  parent:
+    type: Periodical
+    title: Mathematical Logic Quarterly
+    volume: 69
+    issue: 2
+
 HSS25a:
   type: Article
   title: Uniform interpolation for interpretability logic

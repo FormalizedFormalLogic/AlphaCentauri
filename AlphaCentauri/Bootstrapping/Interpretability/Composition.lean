@@ -1,6 +1,8 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.CompositeTable
+public import AlphaCentauri.Bootstrapping.Interpretability.RelativizedBlocks
+public import AlphaCentauri.Bootstrapping.Interpretability.TypedTranslation
 
 /-!
 # Composition of translations

@@ -2,7 +2,8 @@ module
 
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
 public import AlphaCentauri.Bootstrapping.Proof.Deduction
-public import AlphaCentauri.Bootstrapping.Proof.Soundness
+public import AlphaCentauri.Bootstrapping.Proof.UniversalClosure
+public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration

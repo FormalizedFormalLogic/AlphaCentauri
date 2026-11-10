@@ -2,7 +2,6 @@ module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILM.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILWStar.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 
 /-!

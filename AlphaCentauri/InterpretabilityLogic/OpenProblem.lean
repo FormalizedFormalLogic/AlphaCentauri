@@ -4,12 +4,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILRW.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILF.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILPZero.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILRStar.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILKWOneZero.Basic
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILP.Basic
 
 /-!
 # Open problems on extensions of $\mathbf{IL}$

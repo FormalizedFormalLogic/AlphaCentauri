@@ -8,16 +8,6 @@ public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILM.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILF.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILPZero.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILRW.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZeroW.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILP.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILWStar.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILRStar.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILKWOneZero.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILKW2.Basic
 
 /-!
 # Arithmetical soundness of interpretability logics

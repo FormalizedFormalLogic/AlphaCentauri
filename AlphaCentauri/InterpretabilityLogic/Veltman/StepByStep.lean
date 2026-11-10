@@ -43,7 +43,7 @@ structure Node (𝔸 : Set (Formula α)) where
   anc : Finset ℕ
   mu : ℕ → WithBot ℕ
   cr : ℕ → Set (Formula α)
-  wp : ℕ → Set (Formula α)
+  extra : ℕ → Set (Formula α)
 
 /-- A step either witnesses `¬(A ▷ B)` at `x` or removes the deficiency of `A ▷ B` at `x` on `y`. -/
 inductive Job (α : Type*)
@@ -62,7 +62,7 @@ def boxes (r : WithBot ℕ) : Set (Formula α) :=
   WithBot.recBotCoe ∅ (fun r ↦ (get r).set.boxLabel ∅) r
 
 /-- The promises a `≺[x]`-successor of `y` must keep. -/
-def label (x y : ℕ) : Set (Formula α) := (get y).cr x ∪ (get y).wp x ∪ boxes get ((get y).mu x)
+def label (x y : ℕ) : Set (Formula α) := (get y).cr x ∪ (get y).extra x ∪ boxes get ((get y).mu x)
 
 /-- The isolated world `n` labelled by `Δ`. -/
 def isolatedNode (n : ℕ) (Δ : MaximalConsistentTheory (ofAxioms 𝔸)) : Node 𝔸 :=
@@ -82,7 +82,7 @@ noncomputable def mk (ε : Formula α → Set (Formula α)) (n : ℕ) (k : Kind 
     ⟨.deficiency a s A, Δ, (get a).anc, insert n (get (((get s).mu a).unbotD a)).anc,
       fun u ↦ if u = a then (get s).mu a else (above get (get a).anc u).max,
       fun u ↦ if u = a then (get s).cr a else ⋃ t ∈ above get (get a).anc u, (get t).cr u,
-      fun u ↦ if u = a then (get s).wp a ∪ ε A else ∅⟩
+      fun u ↦ if u = a then (get s).extra a ∪ ε A else ∅⟩
 
 end
 
@@ -262,7 +262,7 @@ lemma unbotD_mu_lt {n a s : ℕ} (ha : a < n) (hs : s < n) : ((𝒩 s).mu a).unb
 
 lemma fields_isolated {n : ℕ} (h : (𝒩 n).kind = .isolated) :
     (𝒩 n).pre = ∅ ∧ (𝒩 n).anc = {n} ∧ (∀ u, (𝒩 n).mu u = ⊥) ∧ (∀ u, (𝒩 n).cr u = ∅) ∧
-      (∀ u, (𝒩 n).wp u = ∅) := by
+      (∀ u, (𝒩 n).extra u = ∅) := by
   rw [node_eq_mk n, h];
   simp [mk, isolatedNode];
 
@@ -270,7 +270,7 @@ lemma fields_problem {n a : ℕ} {B : Formula α} (h : (𝒩 n).kind = .problem 
     (𝒩 n).pre = (𝒩 a).anc ∧ (𝒩 n).anc = insert n (𝒩 a).anc ∧
       (∀ u, (𝒩 n).mu u = if u = a then ⊥ else (above 𝒩 (𝒩 a).anc u).max) ∧
       (∀ u, (𝒩 n).cr u = if u = a then {∼B} else ⋃ t ∈ above 𝒩 (𝒩 a).anc u, (𝒩 t).cr u) ∧
-      (∀ u, (𝒩 n).wp u = ∅) := by
+      (∀ u, (𝒩 n).extra u = ∅) := by
   have ha : a < n := by simpa [h] using kind_lt (Γ₀ := Γ₀) (ε := ε) (τ := τ) n;
   rw [node_eq_mk n, h];
   refine ⟨?_, ?_, fun u ↦ ?_, fun u ↦ ?_, fun u ↦ ?_⟩;
@@ -284,7 +284,7 @@ lemma fields_deficiency {n a s : ℕ} {A : Formula α} (h : (𝒩 n).kind = .def
     (𝒩 n).pre = (𝒩 a).anc ∧ (𝒩 n).anc = insert n (𝒩 (((𝒩 s).mu a).unbotD a)).anc ∧
       (∀ u, (𝒩 n).mu u = if u = a then (𝒩 s).mu a else (above 𝒩 (𝒩 a).anc u).max) ∧
       (∀ u, (𝒩 n).cr u = if u = a then (𝒩 s).cr a else ⋃ t ∈ above 𝒩 (𝒩 a).anc u, (𝒩 t).cr u) ∧
-      (∀ u, (𝒩 n).wp u = if u = a then (𝒩 s).wp a ∪ ε A else ∅) := by
+      (∀ u, (𝒩 n).extra u = if u = a then (𝒩 s).extra a ∪ ε A else ∅) := by
   obtain ⟨ha, hs, -⟩ : a < n ∧ s < n ∧ _ := by
     simpa [h] using kind_lt (Γ₀ := Γ₀) (ε := ε) (τ := τ) n;
   have hρ := unbotD_mu_lt (Γ₀ := Γ₀) (ε := ε) (τ := τ) ha hs;
@@ -444,7 +444,7 @@ lemma cr_of_anchor_ne {x w : ℕ} (h : (𝒩 x).kind.anchor ≠ w) :
     rw [(fields_deficiency hk).2.2.2.1, (fields_deficiency hk).1];
     simp [hwa];
 
-lemma wp_of_anchor_ne {x w : ℕ} (h : (𝒩 x).kind.anchor ≠ w) : (𝒩 x).wp w = ∅ := by
+lemma extra_of_anchor_ne {x w : ℕ} (h : (𝒩 x).kind.anchor ≠ w) : (𝒩 x).extra w = ∅ := by
   rcases hk : (𝒩 x).kind with _ | ⟨a, B⟩ | ⟨a, s, A⟩;
   · exact (fields_isolated hk).2.2.2.2 w;
   · exact (fields_problem hk).2.2.2.2 w;
@@ -878,7 +878,7 @@ lemma assuring_label {x u : ℕ} (hu : u ∈ (𝒩 x).pre) :
       simp only [label, Set.mem_union, ite_true] at h ⊢;
       tauto;
   · unfold label;
-    rw [wp_of_anchor_ne hau, Set.union_empty];
+    rw [extra_of_anchor_ne hau, Set.union_empty];
     induction hr : (𝒩 x).mu u using WithBot.recBotCoe with
     | bot => simpa [boxes] using assuring_cr hu;
     | coe r =>

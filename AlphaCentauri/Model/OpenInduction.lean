@@ -1,10 +1,10 @@
 module
 
 public import AlphaCentauri.Axiomatizability.Basic
-public import AlphaCentauri.NumberTheory.FLT3
+public import AlphaCentauri.NumberTheory.FermatLastTheorem
 public import AlphaCentauri.NumberTheory.Primes
-public import AlphaCentauri.ToFoundation.OpenPredicate
-public import AlphaCentauri.ToMathlib.IntegerConstantPolynomial
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenFormula
+public import AlphaCentauri.ToMathlib.OpenPredicate.PolynomialRing
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Mathlib.Algebra.Order.Group.MinMax
 public import Mathlib.Algebra.Order.Nonneg.Ring

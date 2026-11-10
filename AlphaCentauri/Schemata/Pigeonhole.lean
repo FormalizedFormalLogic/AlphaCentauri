@@ -1,7 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.BlockSequence
-public import AlphaCentauri.ToFoundation.Exponential
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata
 

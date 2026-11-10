@@ -2,7 +2,6 @@ module
 
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
 public import AlphaCentauri.Axiomatizability.Basic
-public import AlphaCentauri.Hierarchy.Bounded
 public import Foundation.FirstOrder.Arithmetic.Collection.Basic
 public import Foundation.FirstOrder.Arithmetic.Definability.PrenexDefinable
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic

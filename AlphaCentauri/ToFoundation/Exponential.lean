@@ -112,6 +112,38 @@ lemma length_add_length_le (hu : 0 < u) (hv : 0 < v) : ‖u‖ + ‖v‖ ≤ ‖
   rw [length_of_pos hu, length_of_pos hv, length_of_pos (mul_pos hu hv)]
   simpa [add_assoc, add_left_comm, add_comm] using this
 
+lemma exists_natCast_of_length_le (j : ℕ) {x : V} (h : ‖x‖ ≤ j) : ∃ k : ℕ, x = k := by
+  induction j generalizing x with
+  | zero =>
+    use 0
+    simpa using h
+  | succ j ih =>
+    rcases (Arithmetic.zero_le x).eq_or_lt with rfl | hx
+    · use 0
+      simp
+    have hx₂ : 2 * (x / 2) + x % 2 = x := div_add_mod x 2
+    rcases (Arithmetic.zero_le (x / 2)).eq_or_lt with h₀ | h₀
+    · rw [← h₀, mul_zero, zero_add] at hx₂
+      have : x ≤ 1 := lt_two_iff_le_one.mp (hx₂ ▸ mod_lt x two_pos)
+      use 1
+      simpa using le_antisymm this (pos_iff_one_le.mp hx)
+    have hlen : ‖x‖ = ‖x / 2‖ + 1 := by
+      rcases mod_two x with h₁ | h₁
+      · rw [h₁, add_zero] at hx₂
+        rw [← length_two_mul_of_pos h₀, hx₂]
+      · rw [h₁] at hx₂
+        rw [← length_two_mul_add_one (x / 2), hx₂]
+    obtain ⟨k, hk⟩ := ih (x := x / 2) (by
+      rw [hlen, Nat.cast_succ] at h
+      exact (add_le_add_iff_right 1).mp h)
+    rcases mod_two x with h₁ | h₁
+    · use 2 * k
+      rw [h₁, add_zero, hk] at hx₂
+      simpa using hx₂.symm
+    · use 2 * k + 1
+      rw [h₁, hk] at hx₂
+      simpa using hx₂.symm
+
 end Length
 
 end ISigma0

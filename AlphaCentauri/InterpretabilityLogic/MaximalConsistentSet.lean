@@ -359,7 +359,7 @@ lemma Successor.criticalSuccessor_bot [Adequate Φ] (h : Successor Γ Δ) :
     CriticalSuccessor ⊥ Γ Δ := by
   have hb {A} (hA : A ▷ ⊥ ∈ Γ) : □(∼A) ∈ Γ :=
     (mem_iff_provable <| Adequate.box_neg_mem <| .of_rhd_left (mem_of_mem hA)).mpr <|
-      Context.of box_neg_of_rhd_bot ⨀ Context.by_axm (mem_literals hA);
+      Context.of rhd_bot ⨀ Context.by_axm (mem_literals hA);
   exact ⟨h, fun hA ↦ h.not_mem_of_box_neg_mem (hb hA), fun hA ↦ h.box_mem_of_box_mem (hb hA)⟩
 
 /-- - [KO21, Lemma 4.5] -/

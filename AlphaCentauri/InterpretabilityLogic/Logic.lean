@@ -182,13 +182,16 @@ lemma axiom4 : ofAxioms 𝔸 ⊢ □A 🡒 □□A := by
   have h₄ : ofAxioms 𝔸 ⊢ □(□A ⋏ A) 🡒 □□A := box_mono and₁;
   cl_prover [h₂, h₃, h₄];
 
-lemma rhd_refl : ofAxioms 𝔸 ⊢ A ▷ A := axiomJ1 ⨀ provable_box (by cl_prover)
+lemma rhd_of_provable (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h
+
+lemma rhd_refl : ofAxioms 𝔸 ⊢ A ▷ A := rhd_of_provable C_id
 
 lemma box_neg_of_rhd : ofAxioms 𝔸 ⊢ A ▷ B 🡒 □(∼B) 🡒 □(∼A) := by
   have h : ofAxioms 𝔸 ⊢ A ▷ B 🡒 ∼□(∼A) 🡒 ∼□(∼B) := axiomJ4;
   cl_prover [h];
 
-lemma box_neg_of_rhd_bot : ofAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 □(∼A) := by
+/-- - [Vis90, §6.1.1] -/
+lemma rhd_bot : ofAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 □(∼A) := by
   have h₁ : ofAxioms 𝔸 ⊢ □(∼⊥) := provable_box verum;
   have h₂ : ofAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 □(∼⊥) 🡒 □(∼A) := box_neg_of_rhd;
   cl_prover [h₁, h₂];
@@ -199,6 +202,7 @@ lemma or_dia_rhd : ofAxioms 𝔸 ⊢ (A ⋎ ◇A) ▷ A := by
   have h₃ : ofAxioms 𝔸 ⊢ A ▷ A ⋏ ◇A ▷ A 🡒 (A ⋎ ◇A) ▷ A := axiomJ3;
   cl_prover [h₁, h₂, h₃];
 
+/-- - [Vis90, §6.1.1] -/
 lemma rhd_and_box_neg : ofAxioms 𝔸 ⊢ A ▷ (A ⋏ □(∼A)) := by
   have h₁ : ofAxioms 𝔸 ⊢ □(□(∼A) 🡒 ∼A) 🡒 □(∼A) := axiomL;
   have h₂ : ofAxioms 𝔸 ⊢ □(∼(A ⋏ □(∼A))) 🡒 □(□(∼A) 🡒 ∼A) := box_mono <| by cl_prover;

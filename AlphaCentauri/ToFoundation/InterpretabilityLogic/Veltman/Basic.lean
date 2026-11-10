@@ -53,12 +53,24 @@ class IsIL (M : Model κ α) extends IsTrans _ M.Rel, IsConverseWellFounded _ M.
 
 export IsIL (rel_of_s_left rel_of_s_right s_refl s_trans s_of_rel)
 
-instance [M.IsIL] : Std.Irrefl M.Rel := ConverseWellFounded.irrefl
-
 noncomputable def terminalOf (M : Model κ α) [IsConverseWellFounded _ M.Rel] (X : Set M.World)
     (hX : X.Nonempty) : { t // t ∈ X ∧ ∀ x ∈ X, ¬t ≺ x } :=
   have h := ConverseWellFounded.iff_has_max.mp IsConverseWellFounded.cwf X hX;
   ⟨h.choose, h.choose_spec⟩
+
+abbrev pointModel (v : α → Prop) : Model (Fin 1) α where
+  Rel' _ _ := False
+  S' _ _ _ := False
+  Val' _ := v
+
+instance (v : α → Prop) : (pointModel v).IsIL where
+  trans := by tauto;
+  cwf := ⟨fun x ↦ ⟨x, fun _ h ↦ h.elim⟩⟩
+  rel_of_s_left := by tauto;
+  rel_of_s_right := by tauto;
+  s_refl := by tauto;
+  s_trans := by tauto;
+  s_of_rel := by tauto;
 
 /-- The model on the frame of `M` with valuation `V`. -/
 def overwrite (M : Model κ α) (V : M.World → α → Prop) : Model κ α := ⟨M.Rel', M.S', V⟩
@@ -195,6 +207,10 @@ theorem sound [M.IsIL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxioms 𝔸 ⊢ 
   | _ => grind;
 
 end Logic.ofAxioms
+
+instance {α : Type*} : Entailment.Consistent (𝐈𝐋 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦
+    Logic.ofAxioms.sound (M := Veltman.Model.pointModel fun _ ↦ False) (by simp) h 0
 
 end FFL.InterpretabilityLogic
 

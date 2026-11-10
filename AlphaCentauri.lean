@@ -109,6 +109,9 @@ public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.InternalEquality
+public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Formula
+public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Logic
+public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
 public import AlphaCentauri.ToFoundation.OpenFormulaDegree
 public import AlphaCentauri.ToFoundation.OpenPredicate

@@ -261,6 +261,47 @@ abbrev ILMinusJ1J4PlusJ5 : Logic α :=
 abbrev ILMinusJ2PlusJ5 : Logic α :=
   ofAxiomsMinus ({Axioms.J2Plus A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A})
 
+/-- $\mathbf{IL}^-(\mathbf{J2}, \mathbf{J4}^+)$.
+
+- [KO21, §6]
+-/
+abbrev ILMinusJ2J4Plus : Logic α :=
+  ofAxiomsMinus ({Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J4Plus A B C | (A) (B) (C)})
+
+/-- $\mathbf{IL}^-(\mathbf{J2}, \mathbf{J5})$.
+
+- [KO21, §6]
+-/
+abbrev ILMinusJ2J5 : Logic α := ofAxiomsMinus ({Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A})
+
+/-- $\mathbf{IL}^-(\mathbf{J2}, \mathbf{J4}^+, \mathbf{J5})$.
+
+- [KO21, §6]
+-/
+abbrev ILMinusJ2J4PlusJ5 : Logic α :=
+  ofAxiomsMinus
+    ({Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J4Plus A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A})
+
+/-- $\mathbf{IL}^-(\mathbf{J4}, \mathbf{J5})$.
+
+- [KO21, §6]
+-/
+abbrev ILMinusJ4J5 : Logic α := ofAxiomsMinus ({Axioms.J4 A B | (A) (B)} ∪ {Axioms.J5 A | A})
+
+/-- $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J4})$.
+
+- [KO21, §6]
+-/
+abbrev ILMinusJ1J4 : Logic α :=
+  ofAxiomsMinus ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J4 A B | (A) (B)})
+
+/-- $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J4}, \mathbf{J5})$.
+
+- [KO21, §6]
+-/
+abbrev ILMinusJ1J4J5 : Logic α :=
+  ofAxiomsMinus ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J4 A B | (A) (B)} ∪ {Axioms.J5 A | A})
+
 /-- $\mathbf{CL}$, presented as $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J2})$.
 
 - [KO21, Proposition 3.21]
@@ -313,6 +354,60 @@ instance : (ILMinusJ1J5 : Logic α) ⪯ ILMinusJ1J4PlusJ5 :=
   weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
 
 instance : (ILMinusJ4PlusJ5 : Logic α) ⪯ ILMinusJ1J4PlusJ5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ2 : Logic α) ⪯ ILMinusJ2J4Plus :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ2 : Logic α) ⪯ ILMinusJ2J5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ2 : Logic α) ⪯ ILMinusJ2J4PlusJ5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ4Plus : Logic α) ⪯ ILMinusJ2J4Plus :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ4Plus : Logic α) ⪯ ILMinusJ2J4PlusJ5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ5 : Logic α) ⪯ ILMinusJ2J5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ5 : Logic α) ⪯ ILMinusJ2J4PlusJ5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ5 : Logic α) ⪯ ILMinusJ4J5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ5 : Logic α) ⪯ ILMinusJ1J4J5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ4 : Logic α) ⪯ ILMinusJ4J5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ4 : Logic α) ⪯ ILMinusJ1J4 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ4 : Logic α) ⪯ ILMinusJ1J4J5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ1 : Logic α) ⪯ ILMinusJ1J4 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ1 : Logic α) ⪯ ILMinusJ1J4J5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ2J4Plus : Logic α) ⪯ ILMinusJ2J4PlusJ5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ2J5 : Logic α) ⪯ ILMinusJ2J4PlusJ5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ4J5 : Logic α) ⪯ ILMinusJ1J4J5 :=
+  weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
+
+instance : (ILMinusJ1J4 : Logic α) ⪯ ILMinusJ1J4J5 :=
   weakerThan_iff.mpr <| subset_of_subset (by tauto_set)
 
 end Logic
@@ -446,6 +541,15 @@ instance : (ILMinusJ4PlusJ5 : Logic α) ⪯ ILMinusJ2PlusJ5 :=
     rintro _ (⟨A, B, C, rfl⟩ | ⟨A, rfl⟩);
     · exact WeakerThan.pbl (𝓢 := ILMinusJ2Plus) (by simp);
     · exact axm (by simp);
+
+instance : (ILMinusJ4 : Logic α) ⪯ ILMinusJ2J4Plus :=
+  WeakerThan.trans (𝓣 := ILMinusJ2) inferInstance inferInstance
+
+instance : (ILMinusJ4 : Logic α) ⪯ ILMinusJ2J5 :=
+  WeakerThan.trans (𝓣 := ILMinusJ2) inferInstance inferInstance
+
+instance : (ILMinusJ4 : Logic α) ⪯ ILMinusJ2J4PlusJ5 :=
+  WeakerThan.trans (𝓣 := ILMinusJ2) inferInstance inferInstance
 
 /-! ### Equivalent axiomatizations -/
 

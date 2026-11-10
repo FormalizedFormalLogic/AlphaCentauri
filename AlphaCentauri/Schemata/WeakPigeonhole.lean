@@ -11,7 +11,11 @@ In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation 
 $a^2$ into $a$, for $a > 1$. An injection folds a binary tree of depth $\|a\|$ whose leaves can be
 any $2^{\|a\|}$ values below $a$; diagonalizing against the roots gives a contradiction.
 
-- [PWW88, Theorem 1]
+Nor is any an injection of $(n + 1)a$ into $na$, for a standard $n$ and $a > 0$. Composing $n$
+blockwise copies of one gives an injection of $2b$ into $b$, and following an injection of $2b$
+into $b$ for $\|b\|$ steps from each root gives an injection of $b^2$ into $b$.
+
+- [PWW88, Theorem 1, Corollary 2]
 -/
 
 @[expose] public section
@@ -27,67 +31,39 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ �
 
 namespace WeakPigeonhole
 
-variable (R : V → V → Prop) (a : V)
+section tree
 
-/-- `x` is the left (`β = 0`) or right (`β = 1`) child of `e` in the tree of `R`: `R` sends a pair
-with `x` in that coordinate to `e`. -/
-def IsChild (β e x : V) : Prop :=
-  (β = 0 ∧ ∃ w < a, R (x + a * w) e) ∨ (β = 1 ∧ ∃ w < a, R (w + a * x) e)
+variable (C : V → V → V → Prop) (a : V)
 
 /-- The blocks of `s` of width `‖a‖` trace a path of length `d` from `c` along the bits of `τ`,
-lowest bit first.
+lowest bit first, each step going from a node `e` to a node `x` with `C β e x` for the current bit
+`β`.
 - [PWW88, proof of Theorem 1] -/
 def IsPath (d s c τ : V) : Prop :=
   Nuon.ext a s 0 = c ∧
-    ∀ i < d, Nuon.ext a s (i + 1) < a ∧
-      IsChild R a (fbit τ i) (Nuon.ext a s i) (Nuon.ext a s (i + 1))
+    ∀ i < d, Nuon.ext a s (i + 1) < a ∧ C (fbit τ i) (Nuon.ext a s i) (Nuon.ext a s (i + 1))
 
 /-- The path of length `d` from `c` along `τ` ends at `e`: $H^d_c(\tau) = e$.
 - [PWW88, proof of Theorem 1] -/
 def IsLeaf (d c τ e : V) : Prop :=
-  ∃ s < (2 * a) ⨳ a, IsPath R a d s c τ ∧ Nuon.ext a s d = e
+  ∃ s < (2 * a) ⨳ a, IsPath C a d s c τ ∧ Nuon.ext a s d = e
 
-variable {R a}
+variable {C a}
 
-lemma definable_isChild (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel₃ (IsChild R a) := by
-  unfold IsChild
-  definability
-
-lemma definable_isLeaf (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel₄ (IsLeaf R a) := by
-  have := definable_isChild (a := a) hR
+lemma definable_isLeaf (hC : 𝚺ᴬ₀.DefinableRel₃ C) : 𝚺ᴬ₀.DefinableRel₄ (IsLeaf C a) := by
   unfold IsLeaf IsPath
   definability
 
-lemma IsPath.ext_lt {d s c τ i : V} (hc : c < a) (h : IsPath R a d s c τ) (hi : i ≤ d) :
+lemma IsPath.ext_lt {d s c τ i : V} (hc : c < a) (h : IsPath C a d s c τ) (hi : i ≤ d) :
     Nuon.ext a s i < a := by
   rcases zero_or_succ i with rfl | ⟨j, rfl⟩
   · rwa [h.1]
   · exact (h.2 j (succ_le_iff_lt.mp hi)).1
 
-section injective
-
-variable (hinj : ∀ x < a * a, ∀ x' < a * a, ∀ y < a, R x y → R x' y → x = x')
-include hinj
-
-lemma IsChild.unique {β e x x' : V} (he : e < a) (hx : x < a) (hx' : x' < a)
-    (h : IsChild R a β e x) (h' : IsChild R a β e x') : x = x' := by
-  have hmod : ∀ {u v : V}, u < a → (u + a * v) % a = u := by
-    intro u v hu
-    rw [add_comm, mul_comm, mod_mul_add_of_lt _ _ hu]
-  have hdiv : ∀ {u v : V}, u < a → (u + a * v) / a = v := by
-    intro u v hu
-    rw [add_comm, mul_comm, div_mul_add _ _ hu]
-  rcases h with ⟨rfl, w, hw, hR⟩ | ⟨rfl, w, hw, hR⟩ <;>
-    rcases h' with ⟨h0, w', hw', hR'⟩ | ⟨h1, w', hw', hR'⟩
-  · have := hinj _ (add_mul_lt_mul_self hx hw) _ (add_mul_lt_mul_self hx' hw') e he hR hR'
-    rw [← hmod (v := w) hx, ← hmod (v := w') hx', this]
-  · simp at h1
-  · simp at h0
-  · have := hinj _ (add_mul_lt_mul_self hw hx) _ (add_mul_lt_mul_self hw' hx') e he hR hR'
-    rw [← hdiv (v := x) hw, ← hdiv (v := x') hw', this]
-
-lemma IsPath.ext_eq {d s s' c τ : V} (hc : c < a) (h : IsPath R a d s c τ)
-    (h' : IsPath R a d s' c τ) : ∀ i ≤ d, Nuon.ext a s i = Nuon.ext a s' i := by
+lemma IsPath.ext_eq {d s s' c τ τ' : V} (hc : c < a)
+    (hC : ∀ i < d, ∀ e < a, ∀ x < a, ∀ x' < a, C (fbit τ i) e x → C (fbit τ' i) e x' → x = x')
+    (h : IsPath C a d s c τ) (h' : IsPath C a d s' c τ') :
+    ∀ i ≤ d, Nuon.ext a s i = Nuon.ext a s' i := by
   intro i
   induction i using ISigma0.succ_induction
   · definability
@@ -98,19 +74,23 @@ lemma IsPath.ext_eq {d s s' c τ : V} (hc : c < a) (h : IsPath R a d s c τ)
     obtain ⟨hlt, hch⟩ := h.2 i hid
     obtain ⟨hlt', hch'⟩ := h'.2 i hid
     rw [← IH hid.le] at hch'
-    exact IsChild.unique hinj (h.ext_lt hc hid.le) hlt hlt' hch hch'
+    exact hC i hid _ (h.ext_lt hc hid.le) _ hlt _ hlt' hch hch'
 
-lemma IsLeaf.unique {d c τ e e' : V} (hc : c < a) (h : IsLeaf R a d c τ e)
-    (h' : IsLeaf R a d c τ e') : e = e' := by
-  obtain ⟨s, -, hs, rfl⟩ := h
-  obtain ⟨s', -, hs', rfl⟩ := h'
-  exact hs.ext_eq hinj hc hs' d le_rfl
-
-end injective
+lemma isLeaf_zero {e : V} (he : e < a) (τ : V) : IsLeaf C a 0 e τ e := by
+  have hext : Nuon.ext a e 0 = e := Nuon.ext_zero_eq_self_of_le (length_monotone he.le)
+  use e
+  and_intros
+  · calc e < a := he
+      _ < a ⨳ 1 := lt_smash_one_right a
+      _ ≤ (2 * a) ⨳ a := smash_monotone (by simp) (pos_iff_one_le.mp (pos_of_gt he))
+  · exact hext
+  · intro i hi
+    simp at hi
+  · exact hext
 
 lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c < a) (hc' : c' < a)
-    (hβ : β < 2) (hch : IsChild R a β c c') (h : IsLeaf R a d c' τ e) :
-    IsLeaf R a (d + 1) c (2 * τ + β) e := by
+    (hβ : β < 2) (hch : C β c c') (h : IsLeaf C a d c' τ e) :
+    IsLeaf C a (d + 1) c (2 * τ + β) e := by
   obtain ⟨s', -, hs', rfl⟩ := h
   have hI : ‖2 * a‖ = ‖a‖ + 1 := length_two_mul_of_pos ha
   have hK : Exponential (1 * ‖a‖) (a ⨳ 1) := by simpa using exponential_smash_one a
@@ -153,6 +133,47 @@ lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c <
       exact hs'.2 j hj
   · exact hext d le_rfl
 
+end tree
+
+section square
+
+variable (R : V → V → Prop) (a : V)
+
+/-- `x` is the left (`β = 0`) or right (`β = 1`) child of `e` in the tree of `R`: `R` sends a pair
+with `x` in that coordinate to `e`. -/
+def IsChild (β e x : V) : Prop :=
+  (β = 0 ∧ ∃ w < a, R (x + a * w) e) ∨ (β = 1 ∧ ∃ w < a, R (w + a * x) e)
+
+variable {R a}
+
+lemma definable_isChild (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel₃ (IsChild R a) := by
+  unfold IsChild
+  definability
+
+section injective
+
+variable (hinj : ∀ x < a * a, ∀ x' < a * a, ∀ y < a, R x y → R x' y → x = x')
+include hinj
+
+lemma IsChild.unique {β e x x' : V} (he : e < a) (hx : x < a) (hx' : x' < a)
+    (h : IsChild R a β e x) (h' : IsChild R a β e x') : x = x' := by
+  rcases h with ⟨rfl, w, hw, hR⟩ | ⟨rfl, w, hw, hR⟩ <;>
+    rcases h' with ⟨h0, w', hw', hR'⟩ | ⟨h1, w', hw', hR'⟩
+  · exact ((add_mul_eq_add_mul_iff hx hx').mp <|
+      hinj _ (add_mul_lt_mul_of_lt hx hw) _ (add_mul_lt_mul_of_lt hx' hw') e he hR hR').1
+  · simp at h1
+  · simp at h0
+  · exact ((add_mul_eq_add_mul_iff hw hw').mp <|
+      hinj _ (add_mul_lt_mul_of_lt hw hx) _ (add_mul_lt_mul_of_lt hw' hx') e he hR hR').2
+
+lemma IsLeaf.unique {d c τ e e' : V} (hc : c < a) (h : IsLeaf (IsChild R a) a d c τ e)
+    (h' : IsLeaf (IsChild R a) a d c τ e') : e = e' := by
+  obtain ⟨s, -, hs, rfl⟩ := h
+  obtain ⟨s', -, hs', rfl⟩ := h'
+  exact hs.ext_eq hc (fun _ _ _ he _ hx _ hx' ↦ IsChild.unique hinj he hx hx') hs' d le_rfl
+
+end injective
+
 /-- For a $\Delta_0$-definable relation `T` with a value below `a` everywhere, every
 $\rho < 2^{\|a\| - d}$ has a root `c < a` whose leaf along each $\tau < 2^d$ is a value of `T`
 at $\rho + 2^{\|a\| - d} \tau$.
@@ -160,16 +181,15 @@ at $\rho + 2^{\|a\| - d} \tau$.
 lemma exists_root (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a) (htot : ∀ x < a * a, ∃ y < a, R x y)
     {T : V → V → Prop} (hT : 𝚺ᴬ₀.DefinableRel T) (hTa : ∀ σ, ∃ e < a, T σ e) :
     ∀ d ≤ ‖a‖, ∀ ρ < bexp (2 * a) (‖a‖ - d), ∃ c < a, ∀ τ < bexp (2 * a) d,
-      ∃ e < a, T (ρ + bexp (2 * a) (‖a‖ - d) * τ) e ∧ IsLeaf R a d c τ e := by
+      ∃ e < a, T (ρ + bexp (2 * a) (‖a‖ - d) * τ) e ∧ IsLeaf (IsChild R a) a d c τ e := by
   have hI : ‖2 * a‖ = ‖a‖ + 1 := length_two_mul_of_pos ha
   intro d
   induction d using ISigma0.succ_induction
-  · have := definable_isLeaf (a := a) hR
+  · have := definable_isLeaf (a := a) (definable_isChild (a := a) hR)
     definability
   case zero =>
     intro _ ρ _
     obtain ⟨e, he, hTe⟩ := hTa ρ
-    have hext : Nuon.ext a e 0 = e := Nuon.ext_zero_eq_self_of_le (length_monotone he.le)
     use e
     constructor
     · exact he
@@ -180,15 +200,7 @@ lemma exists_root (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a) (htot : ∀ x < 
       and_intros
       · exact he
       · simpa using hTe
-      use e
-      and_intros
-      · calc e < a := he
-          _ < a ⨳ 1 := lt_smash_one_right a
-          _ ≤ (2 * a) ⨳ a := smash_monotone (by simp) (pos_iff_one_le.mp ha)
-      · exact hext
-      · intro i hi
-        simp at hi
-      · exact hext
+      · exact isLeaf_zero he 0
   case succ d IH =>
     intro hd ρ hρ
     have hd' : d < ‖a‖ := succ_le_iff_lt.mp hd
@@ -201,17 +213,12 @@ lemma exists_root (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a) (htot : ∀ x < 
     set p := bexp (2 * a) (‖a‖ - (d + 1))
     obtain ⟨c₀, hc₀, H₀⟩ := IH hd'.le ρ (by rw [hP, two_mul]; exact lt_of_lt_of_le hρ le_self_add)
     obtain ⟨c₁, hc₁, H₁⟩ := IH hd'.le (ρ + p) (by rw [hP, two_mul]; simpa using hρ)
-    obtain ⟨c, hc, hRc⟩ := htot (c₀ + a * c₁) (add_mul_lt_mul_self hc₀ hc₁)
+    obtain ⟨c, hc, hRc⟩ := htot (c₀ + a * c₁) (add_mul_lt_mul_of_lt hc₀ hc₁)
     use c
     constructor
     · exact hc
     · intro τ' hτ'
-      have hτ : τ' / 2 < bexp (2 * a) d := by
-        by_contra! h
-        have : 2 * bexp (2 * a) d ≤ τ' := calc
-          2 * bexp (2 * a) d ≤ 2 * (τ' / 2) := mul_le_mul_left h
-          _ ≤ τ' := le_self_add.trans_eq (div_add_mod τ' 2)
-        exact absurd hτ' (not_lt.mpr (hQ ▸ this))
+      have hτ : τ' / 2 < bexp (2 * a) d := div_lt_of_lt_mul (by rwa [hQ, mul_comm] at hτ')
       rw [← div_add_mod τ' 2]
       rcases mod_two τ' with h | h <;> rw [h]
       · obtain ⟨e, he, hTe, hl⟩ := H₀ (τ' / 2) hτ
@@ -235,9 +242,11 @@ lemma exists_root (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a) (htot : ∀ x < 
 
 lemma definable_diagonal (hR : 𝚺ᴬ₀.DefinableRel R) :
     𝚺ᴬ₀.DefinableRel fun σ e ↦
-      (IsLeaf R a ‖a‖ σ σ 0 ∧ e = 1) ∨ (¬IsLeaf R a ‖a‖ σ σ 0 ∧ e = 0) := by
-  have := definable_isLeaf (a := a) hR
+      (IsLeaf (IsChild R a) a ‖a‖ σ σ 0 ∧ e = 1) ∨ (¬IsLeaf (IsChild R a) a ‖a‖ σ σ 0 ∧ e = 0) := by
+  have := definable_isLeaf (a := a) (definable_isChild (a := a) hR)
   definability
+
+end square
 
 end WeakPigeonhole
 
@@ -256,9 +265,10 @@ theorem weakPigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {
   have ha0 : 0 < a := lt_trans zero_lt_one ha
   have hT := definable_diagonal (a := a) hR
   have hTa : ∀ σ, ∃ e < a,
-      (IsLeaf R a ‖a‖ σ σ 0 ∧ e = 1) ∨ (¬IsLeaf R a ‖a‖ σ σ 0 ∧ e = 0) := by
+      (IsLeaf (IsChild R a) a ‖a‖ σ σ 0 ∧ e = 1) ∨
+        (¬IsLeaf (IsChild R a) a ‖a‖ σ σ 0 ∧ e = 0) := by
     intro σ
-    by_cases h : IsLeaf R a ‖a‖ σ σ 0
+    by_cases h : IsLeaf (IsChild R a) a ‖a‖ σ σ 0
     · use 1
       constructor
       · exact ha
@@ -276,6 +286,236 @@ theorem weakPigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {
   rcases hTe with ⟨h, rfl⟩ | ⟨h, rfl⟩
   · exact one_ne_zero (hl.unique hinj hc h)
   · exact h hl
+
+
+namespace WeakPigeonhole
+
+/-- `R` sends every `x < A` to some `y < B`, and no `y < B` is a value of two such `x`. -/
+def IsInjection (R : V → V → Prop) (A B : V) : Prop :=
+  (∀ x < A, ∃ y < B, R x y) ∧ ∀ x < A, ∀ x' < A, ∀ y < B, R x y → R x' y → x = x'
+
+variable {R S : V → V → Prop} {a : V}
+
+lemma definable_comp {B : V} (hR : 𝚺ᴬ₀.DefinableRel R) (hS : 𝚺ᴬ₀.DefinableRel S) :
+    𝚺ᴬ₀.DefinableRel fun x z ↦ ∃ y < B, R x y ∧ S y z := by
+  definability
+
+lemma definable_blockwise {A B M : V} (hR : 𝚺ᴬ₀.DefinableRel R) :
+    𝚺ᴬ₀.DefinableRel fun x y ↦
+      ∃ q < M, ∃ c < A, x = c + A * q ∧ ∃ f < B, R c f ∧ y = f + B * q := by
+  definability
+
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] in
+lemma IsInjection.comp {A B C : V} (h : IsInjection R A B) (h' : IsInjection S B C) :
+    IsInjection (fun x z ↦ ∃ y < B, R x y ∧ S y z) A C := by
+  constructor
+  · intro x hx
+    obtain ⟨y, hy, hxy⟩ := h.1 x hx
+    obtain ⟨z, hz, hyz⟩ := h'.1 y hy
+    use z
+    constructor
+    · exact hz
+    · use y
+  · rintro x hx x' hx' z hz ⟨y, hy, hxy, hyz⟩ ⟨y', hy', hxy', hyz'⟩
+    obtain rfl := h'.2 y hy y' hy' z hz hyz hyz'
+    exact h.2 x hx x' hx' y hy hxy hxy'
+
+lemma IsInjection.blockwise {A B : V} (h : IsInjection R A B) (M : V) :
+    IsInjection (fun x y ↦ ∃ q < M, ∃ c < A, x = c + A * q ∧ ∃ f < B, R c f ∧ y = f + B * q)
+      (A * M) (B * M) := by
+  constructor
+  · intro x hx
+    rcases (Arithmetic.zero_le A).eq_or_lt with rfl | hA
+    · simp at hx
+    have hq : x / A < M := div_lt_of_lt_mul (by rwa [mul_comm])
+    obtain ⟨f, hf, hR⟩ := h.1 (x % A) (mod_lt x hA)
+    use f + B * (x / A)
+    and_intros
+    · exact add_mul_lt_mul_of_lt hf hq
+    · use x / A
+      and_intros
+      · exact hq
+      · use x % A
+        and_intros
+        · exact mod_lt x hA
+        · rw [add_comm, div_add_mod]
+        · use f
+  · rintro x hx x' hx' y hy ⟨q, hq, c, hc, rfl, f, hf, hRf, rfl⟩
+      ⟨q', hq', c', hc', rfl, f', hf', hRf', heq⟩
+    obtain ⟨rfl, rfl⟩ := (add_mul_eq_add_mul_iff hf' hf).mp heq.symm
+    rw [h.2 c hc c' hc' f' hf hRf hRf']
+
+lemma exists_injection_pow {n : ℕ} (hR : 𝚺ᴬ₀.DefinableRel R)
+    (h : IsInjection R ((n + 1) * a) (n * a)) (j : ℕ) (m : V) :
+    ∃ S : V → V → Prop, 𝚺ᴬ₀.DefinableRel S ∧
+      IsInjection S ((n + 1) ^ j * m * a) (n ^ j * m * a) := by
+  induction j generalizing m with
+  | zero =>
+    use (· = ·)
+    and_intros
+    · definability
+    · intro x hx
+      use x
+      constructor
+      · simpa using hx
+      · rfl
+    · intro x _ x' _ y _ h h'
+      rw [h, h']
+  | succ j IH =>
+    obtain ⟨S, hS, hSinj⟩ := IH ((n + 1) * m)
+    rw [show (n : V) ^ j * ((n + 1) * m) * a = (n + 1) * a * (n ^ j * m) by grind] at hSinj
+    use fun x z ↦ ∃ y < (n + 1) * a * (n ^ j * m), S x y ∧
+      ∃ q < n ^ j * m, ∃ c < (n + 1) * a, y = c + (n + 1) * a * q ∧
+        ∃ f < n * a, R c f ∧ z = f + n * a * q
+    constructor
+    · exact definable_comp hS (definable_blockwise hR)
+    · rw [show ((n : V) + 1) ^ (j + 1) * m * a = (n + 1) ^ j * ((n + 1) * m) * a by grind,
+        show (n : V) ^ (j + 1) * m * a = n * a * (n ^ j * m) by grind]
+      exact hSinj.comp (h.blockwise _)
+
+/-- `R` sends `x + a * β` to `e`: in the tree of an injection of `2 * a` into `a`, `x` is the child
+of `e` along the bit `β`. -/
+def IsPreimage (R : V → V → Prop) (a β e x : V) : Prop := R (x + a * β) e
+
+lemma definable_isPreimage (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel₃ (IsPreimage R a) := by
+  unfold IsPreimage
+  definability
+
+/-- A $\Delta_0$-definable injection of `2 * a` into `a` makes every pair `e + a * τ` below `a * a`
+a leaf at depth `‖a‖`: `τ` gives the bits, read upwards from `e`. -/
+lemma exists_root_of_two_mul (ha : 0 < a) (hR : 𝚺ᴬ₀.DefinableRel R)
+    (htot : ∀ x < 2 * a, ∃ y < a, R x y) {e : V} (he : e < a) :
+    ∀ d ≤ ‖a‖, ∀ τ < bexp (2 * a) d, ∃ c < a, IsLeaf (IsPreimage R a) a d c τ e := by
+  have hI : ‖2 * a‖ = ‖a‖ + 1 := length_two_mul_of_pos ha
+  intro d
+  induction d using ISigma0.succ_induction
+  · have := definable_isLeaf (a := a) (definable_isPreimage (a := a) hR)
+    definability
+  case zero =>
+    intro _ τ _
+    use e
+    constructor
+    · exact he
+    · exact isLeaf_zero he τ
+  case succ d IH =>
+    intro hd τ' hτ'
+    have hd' : d < ‖a‖ := succ_le_iff_lt.mp hd
+    have hQ : bexp (2 * a) (d + 1) = 2 * bexp (2 * a) d := bexp_succ (by simpa [hI] using hd')
+    obtain ⟨c', hc', hl⟩ := IH hd'.le (τ' / 2) (div_lt_of_lt_mul (by rwa [hQ, mul_comm] at hτ'))
+    obtain ⟨c, hc, hRc⟩ := htot (c' + a * (τ' % 2)) <| by
+      rw [mul_comm 2 a]
+      exact add_mul_lt_mul_of_lt hc' (mod_lt _ two_pos)
+    use c
+    constructor
+    · exact hc
+    · rw [← div_add_mod τ' 2]
+      exact hl.cons ha hd' hc hc' (mod_lt _ two_pos) hRc
+
+lemma definable_isLeafPair (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel fun x c ↦
+    ∃ e < a, ∃ τ < a, x = e + a * τ ∧ IsLeaf (IsPreimage R a) a ‖a‖ c τ e := by
+  have := definable_isLeaf (a := a) (definable_isPreimage (a := a) hR)
+  definability
+
+end WeakPigeonhole
+
+open WeakPigeonhole in
+/-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
+of $2a$ into $a$, for $a > 0$.
+- [PWW88, Corollary 2] -/
+theorem weakPigeonhole_two_mul {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {a : V} (ha : 0 < a)
+    (total : ∀ x < 2 * a, ∃ y < a, R x y) :
+    ∃ x < 2 * a, ∃ x' < 2 * a, ∃ y < a, x ≠ x' ∧ R x y ∧ R x' y := by
+  by_contra! hne
+  have hinj : ∀ x < 2 * a, ∀ x' < 2 * a, ∀ y < a, R x y → R x' y → x = x' := by
+    intro x hx x' hx' y hy h h'
+    by_contra hxx
+    exact hne x hx x' hx' y hy hxx h h'
+  rcases (pos_iff_one_le.mp ha).eq_or_lt with rfl | ha1
+  · obtain ⟨y, hy, h0⟩ := total 0 (by simp)
+    obtain ⟨y', hy', h1⟩ := total 1 (by simp)
+    rw [lt_one_iff_eq_zero.mp hy] at h0
+    rw [lt_one_iff_eq_zero.mp hy'] at h1
+    exact zero_ne_one (hinj 0 (by simp) 1 (by simp) 0 zero_lt_one h0 h1)
+  have hlt : ∀ {x β : V}, x < a → β < 2 → x + a * β < 2 * a := fun hx hβ ↦ by
+    rw [mul_comm 2 a]
+    exact add_mul_lt_mul_of_lt hx hβ
+  have hC : ∀ {β β' e x x' : V}, β < 2 → β' < 2 → e < a → x < a → x' < a →
+      R (x + a * β) e → R (x' + a * β') e → x = x' ∧ β = β' := fun hβ hβ' he hx hx' h h' ↦
+    (add_mul_eq_add_mul_iff hx hx').mp (hinj _ (hlt hx hβ) _ (hlt hx' hβ') _ he h h')
+  have hQtot : ∀ x < a * a, ∃ c < a,
+      ∃ e < a, ∃ τ < a, x = e + a * τ ∧ IsLeaf (IsPreimage R a) a ‖a‖ c τ e := by
+    intro x hx
+    have hτ : x / a < a := div_lt_of_lt_mul hx
+    have ha2 : a < bexp (2 * a) ‖a‖ :=
+      lt_bexp_len (by rw [length_two_mul_of_pos ha]; exact lt_add_one _)
+    obtain ⟨c, hc, hl⟩ := exists_root_of_two_mul ha hR total (mod_lt x ha) ‖a‖ le_rfl (x / a)
+      (hτ.trans ha2)
+    use c
+    constructor
+    · exact hc
+    · use x % a
+      constructor
+      · exact mod_lt x ha
+      · use x / a
+        and_intros
+        · exact hτ
+        · rw [add_comm, div_add_mod]
+        · exact hl
+  obtain ⟨x, -, x', -, c, hc, hxx, ⟨e, he, τ, hτ, rfl, s, -, hs, rfl⟩,
+    ⟨e', he', τ', hτ', rfl, s', -, hs', rfl⟩⟩ := weakPigeonhole (definable_isLeafPair hR) ha1 hQtot
+  have hext := hs.ext_eq hc (fun _ _ _ he _ hx _ hx' h h' ↦
+    (hC (fbit_lt_two _ _) (fbit_lt_two _ _) he hx hx' h h').1) hs'
+  have hbit : ∀ i, fbit τ i = fbit τ' i := by
+    intro i
+    rcases lt_or_ge i ‖a‖ with hi | hi
+    · obtain ⟨hlt, hch⟩ := hs.2 i hi
+      obtain ⟨-, hch'⟩ := hs'.2 i hi
+      rw [← hext i hi.le, ← hext (i + 1) (succ_le_iff_lt.mpr hi)] at hch'
+      exact (hC (fbit_lt_two _ _) (fbit_lt_two _ _) (hs.ext_lt hc hi.le) hlt hlt hch hch').2
+    · rw [fbit_eq_zero_of_le ((length_monotone hτ.le).trans hi),
+        fbit_eq_zero_of_le ((length_monotone hτ'.le).trans hi)]
+  exact hxx (by rw [hext ‖a‖ le_rfl, fbit_ext hbit])
+
+open WeakPigeonhole in
+/-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
+of $(n + 1)a$ into $na$, for a standard $n$ and $a > 0$.
+- [PWW88, Corollary 2] -/
+theorem weakPigeonhole_succ_mul (n : ℕ) {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {a : V}
+    (ha : 0 < a) (total : ∀ x < (n + 1) * a, ∃ y < n * a, R x y) :
+    ∃ x < (n + 1) * a, ∃ x' < (n + 1) * a, ∃ y < n * a, x ≠ x' ∧ R x y ∧ R x' y := by
+  by_contra! hne
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · obtain ⟨y, hy, -⟩ := total 0 (by simpa using ha)
+    simp at hy
+  have hinj : IsInjection R ((n + 1) * a) (n * a) := by
+    constructor
+    · exact total
+    · intro x hx x' hx' y hy h h'
+      by_contra hxx
+      exact hne x hx x' hx' y hy hxx h h'
+  obtain ⟨S, hS, hSinj⟩ := exists_injection_pow hR hinj n 1
+  have hbernoulli : ∀ k : ℕ, n ^ k * (n + k) ≤ (n + 1) ^ k * n := by
+    intro k
+    induction k with
+    | zero => simp
+    | succ k ih =>
+      calc n ^ (k + 1) * (n + (k + 1)) = n * (n ^ k * (n + k)) + n * n ^ k := by grind
+        _ ≤ n * ((n + 1) ^ k * n) + n * (n + 1) ^ k :=
+          Nat.add_le_add (Nat.mul_le_mul_left n ih)
+            (Nat.mul_le_mul_left n (Nat.pow_le_pow_left (Nat.le_succ n) k))
+        _ = (n + 1) ^ (k + 1) * n := by grind
+  have hpow : 2 * n ^ n ≤ (n + 1) ^ n :=
+    Nat.le_of_mul_le_mul_right (by
+      have := hbernoulli n
+      rwa [← two_mul, ← mul_assoc, mul_comm (n ^ n) 2] at this) hn
+  have hle : 2 * ((n : V) ^ n * 1 * a) ≤ ((n : V) + 1) ^ n * 1 * a := by
+    rw [← mul_assoc, ← mul_assoc]
+    exact mul_le_mul_right <| mul_le_mul_right (by exact_mod_cast hpow)
+  have hb : 0 < (n : V) ^ n * 1 * a := by
+    simpa using mul_pos (pow_pos (show (0 : V) < n by exact_mod_cast hn) n) ha
+  obtain ⟨x, hx, x', hx', y, hy, hxx, h, h'⟩ :=
+    weakPigeonhole_two_mul hS hb fun x hx ↦ hSinj.1 x (hx.trans_le hle)
+  exact hxx (hSinj.2 x (hx.trans_le hle) x' (hx'.trans_le hle) y hy h h')
 
 end
 

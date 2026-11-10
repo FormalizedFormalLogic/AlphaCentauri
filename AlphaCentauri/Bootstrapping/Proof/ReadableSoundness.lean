@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutElimination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
-public import AlphaCentauri.ToFoundation.Set
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 
 /-!
 # Soundness of pure logic for the readable truth

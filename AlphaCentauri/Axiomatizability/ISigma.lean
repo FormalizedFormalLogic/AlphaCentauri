@@ -4,7 +4,7 @@ public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Bootstrapping.PartialTruth.Disquotation
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
-public import AlphaCentauri.ToFoundation.Schemata
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-!

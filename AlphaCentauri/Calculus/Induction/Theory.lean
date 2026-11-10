@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.Schemata.Induction
-public import AlphaCentauri.ToFoundation.Schemata
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 
 /-!
 # What `LKI[C]` proves

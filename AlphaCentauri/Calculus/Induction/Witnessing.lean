@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.Calculus.Induction.Basic
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
-public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Definability
 public import Foundation.FirstOrder.Tarski.Basic
 
 /-!

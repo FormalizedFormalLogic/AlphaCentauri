@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.ProvablyTotal.Basic
-public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Definability
 public import AlphaCentauri.ToMathlib.Vector
 public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 public import Mathlib.Computability.Ackermann

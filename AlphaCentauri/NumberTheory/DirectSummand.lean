@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastNumberPrinciple
 public import AlphaCentauri.ToMathlib.AddMonoidHomToInt
 
 /-!

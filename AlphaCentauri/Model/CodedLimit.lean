@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.ProperCut
-public import AlphaCentauri.ToFoundation.PrenexDefinable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Definability
 
 /-!
 # The coded limit of an enumeration cut

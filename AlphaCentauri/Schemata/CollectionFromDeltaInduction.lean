@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.Model.CodedLimit
 public import AlphaCentauri.Model.InjectiveEnumeration
 public import AlphaCentauri.Model.ProperCut
-public import AlphaCentauri.ToFoundation.PrenexDefinable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Definability
 
 /-!
 # Collection for $\Delta_0$ formulas from $\Delta_1$ induction

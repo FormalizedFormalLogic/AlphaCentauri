@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Model.Elementary
 public import AlphaCentauri.ToFoundation.Fvar
-public import AlphaCentauri.ToFoundation.Pigeonhole
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 public import Foundation.FirstOrder.Incompleteness.Second
 

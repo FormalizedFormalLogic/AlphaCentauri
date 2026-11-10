@@ -1,8 +1,8 @@
 module
 
-public import AlphaCentauri.ToFoundation.Power
-public import AlphaCentauri.ToFoundation.Prime
-public import AlphaCentauri.ToFoundation.Injection
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
 
 /-!
 # Positions in the factorizations of $1, \dots, m$

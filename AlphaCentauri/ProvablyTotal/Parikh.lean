@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.ToFoundation.Compact
-public import AlphaCentauri.ToFoundation.Completeness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Metatheory
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import Foundation.FirstOrder.Tarski.Ultraproduct
 

@@ -6,7 +6,7 @@ public import Mathlib.Logic.Encodable.Basic
 public import Mathlib.Data.Nat.Pairing
 
 /-!
-# Completeness of $\mathbf{ILM}_0$ and $\mathbf{ILW}^*$ with respect to Veltman models
+# The step-by-step models of $\mathbf{ILM}_0$ and $\mathbf{ILW}^*$
 
 A step-by-step construction of a Veltman model satisfying the frame condition of $\mathsf{M}_0$, for
 any extension of $\mathbf{IL}$ by axioms proving $\mathsf{M}_0$. One world is added at each step,

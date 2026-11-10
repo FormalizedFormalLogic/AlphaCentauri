@@ -1,10 +1,11 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
+public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
+public import Mathlib.Data.Set.Finite.List
 
 /-!
-# Completeness of $\mathbf{ILW}$ with respect to finite Veltman models
+# The model on ranked sets
 
 Critical solutions and their ranks, a finite Veltman model satisfying the frame condition of
 $\mathsf{W}$ whose worlds are maximal consistent subsets of an adequate set indexed by finite
@@ -356,15 +357,6 @@ structure RelWith (x y : RankedSet L Φ) (E : Formula α) (k : ℕ) : Prop where
 /-- `y` extends `x` by some label. -/
 def Rel (x y : RankedSet L Φ) : Prop := ∃ E k, x.RelWith y E k
 
-/-- `x` and `y` extend `w`, and either `x = y`, `y` extends `x`, or `x` and `y` extend `w` by labels
-`(E, i)` and `(E, j)` with `j < i`, or with `j = i` and `x` extending `w` by exactly one label.
-
-- [dJV99, Theorem 13]
--/
-def S (w x y : RankedSet L Φ) : Prop :=
-  w.Rel x ∧ w.Rel y ∧ (x = y ∨ x.Rel y ∨ ∃ E i j, w.seq ++ [(E, i)] <+: x.seq ∧
-    w.seq ++ [(E, j)] <+: y.seq ∧ (j < i ∨ j = i ∧ x.seq.length = w.seq.length + 1))
-
 lemma Rel.isPrefix (h : x.Rel y) : x.seq <+: y.seq := by
   obtain ⟨E, k, h⟩ := h;
   exact (List.prefix_append _ _).trans h.append_prefix
@@ -424,12 +416,18 @@ end RankedSet
 
 open RankedSet
 
-/-- - [dJV99, Theorem 13] -/
+/-- The model on ranked sets in which `S w x y` holds if `x` and `y` extend `w`, and either `x = y`,
+`y` extends `x`, or `x` and `y` extend `w` by labels `(E, i)` and `(E, j)` with `j < i`, or with
+`j = i` and `x` extending `w` by exactly one label.
+
+- [dJV99, Theorem 13]
+-/
 def rankedCountermodel (𝔸 : Set (Formula α)) (Φ : Finset (Formula α))
     [Nonempty (RankedSet (Logic.ofAxioms 𝔸) Φ)] :
     Model (RankedSet (Logic.ofAxioms 𝔸) Φ) α where
   Rel' := RankedSet.Rel
-  S' := RankedSet.S
+  S' w x y := w.Rel x ∧ w.Rel y ∧ (x = y ∨ x.Rel y ∨ ∃ E i j, w.seq ++ [(E, i)] <+: x.seq ∧
+    w.seq ++ [(E, j)] <+: y.seq ∧ (j < i ∨ j = i ∧ x.seq.length = w.seq.length + 1))
   Val' x a := #a ∈ x.set
 
 namespace rankedCountermodel

@@ -1,15 +1,16 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
+public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 
 /-!
-# Completeness of $\mathbf{ILM}$ with respect to finite Veltman models
+# The model on indexed sets for $\mathbf{ILM}$
 
 Finite adequate sets closed under conjoining an antecedent or consequent of a `▷`-formula with
 `□`-formulas, up to the relation that each of the two formulas implies the other or its
 possibility; a finite Veltman model satisfying the frame condition of $\mathbf{M}$ whose worlds are
-maximal consistent subsets of such a set, and the completeness of $\mathbf{ILM}$.
+indexed maximal consistent subsets of such a set, and its truth lemma. This is the construction
+behind the completeness of $\mathbf{ILM}$ with respect to finite Veltman models.
 -/
 
 @[expose] public section
@@ -532,14 +533,6 @@ namespace IndexedSet
 
 variable {L : Logic α} {Φ : Finset (Formula α)}
 
-/-- `S w x y`, the sequence of `x` is an initial segment of the sequence of `y`, and every
-`□`-formula in the set of `x` is in the set of `y`.
-
-- [dJV90, Theorem 6.3]
--/
-def SM (w x y : IndexedSet L Φ) : Prop :=
-  S w x y ∧ x.seq <+: y.seq ∧ ∀ {A}, □A ∈ x.set → □A ∈ y.set
-
 /-- The set `Δ` indexed by the sequence of `x`. -/
 def withSet (x : IndexedSet L Φ) (Δ : MaximalConsistentSet L Φ) (h : ∀ {A}, □A ∈ x.set → □A ∈ Δ) :
     IndexedSet L Φ :=
@@ -552,11 +545,16 @@ open IndexedSet
 
 variable {Φ : Finset (Formula α)}
 
-/-- - [dJV90, Theorem 6.3] -/
+/-- The model on indexed sets of `𝐈𝐋𝐌` in which `S w x y` holds if it holds in `countermodel`, the
+sequence of `x` is an initial segment of the sequence of `y`, and every `□`-formula in the set of
+`x` is in the set of `y`.
+
+- [dJV90, Theorem 6.3]
+-/
 def countermodelM (Φ : Finset (Formula α)) [Nonempty (IndexedSet 𝐈𝐋𝐌 Φ)] :
     Model (IndexedSet 𝐈𝐋𝐌 Φ) α where
   Rel' := IndexedSet.Rel
-  S' := IndexedSet.SM
+  S' w x y := (countermodel 𝐈𝐋𝐌 Φ).S w x y ∧ x.seq <+: y.seq ∧ ∀ {A}, □A ∈ x.set → □A ∈ y.set
   Val' x a := #a ∈ x.set
 
 namespace countermodelM
@@ -573,9 +571,9 @@ instance : Std.Irrefl (countermodelM Φ).Rel := ⟨fun _ h ↦ h.1.irrefl⟩
 instance [Adequate Φ] : (countermodelM Φ).IsIL where
   rel_of_s_left h := h.1.1.1
   rel_of_s_right h := h.1.1.2
-  s_refl h := ⟨S.refl Logic.ofAxioms.rhd_refl h, List.prefix_refl _, fun h ↦ h⟩
-  s_trans h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.1.trans h₂.2.1, fun h ↦ h₂.2.2 (h₁.2.2 h)⟩
-  s_of_rel h₁ h₂ := ⟨S.of_rel h₁ h₂, h₂.2, fun h ↦ h₂.1.box_mem_of_box_mem h⟩
+  s_refl h := ⟨countermodel.s_refl Logic.ofAxioms.rhd_refl h, List.prefix_refl _, fun h ↦ h⟩
+  s_trans h₁ h₂ := ⟨countermodel.s_trans h₁.1 h₂.1, h₁.2.1.trans h₂.2.1, fun h ↦ h₂.2.2 (h₁.2.2 h)⟩
+  s_of_rel h₁ h₂ := ⟨countermodel.s_of_rel h₁ h₂, h₂.2, fun h ↦ h₂.1.box_mem_of_box_mem h⟩
 
 instance : (countermodelM Φ).HasM where
   rel_of_s_rel h₁ h₂ := by
@@ -637,7 +635,7 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
       obtain ⟨F, hF, hcrit, huniq⟩ := hF;
       obtain ⟨Θ, hΘ, hCΘ, hbox⟩ := hcrit.exists_criticalSuccessor_box_subset hF h hu;
       refine ⟨u.withSet Θ hbox, ⟨?_, List.prefix_refl _, hbox⟩, (ihC hC).mpr hCΘ⟩;
-      apply S.of_rhd_refl (y := u.withSet Θ hbox) Logic.ofAxioms.rhd_refl Rxu
+      apply countermodel.s_of_rhd_refl (y := u.withSet Θ hbox) Logic.ofAxioms.rhd_refl Rxu
         ⟨hΘ.toSuccessor, Rxu.2⟩;
       intro F' hpre' hcrit';
       obtain rfl := huniq F' hpre' hcrit';

@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Basic
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
+public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 public import Mathlib.Data.Set.Finite.List
 
 /-!
@@ -674,7 +674,7 @@ universe u
 variable {α : Type u} [DecidableEq α] {A : Formula α}
 
 /-- - [dJV90, Theorem 4.1] -/
-theorem provability_TFAE : [
+theorem gentzen_TFAE : [
     𝐈𝐋 ⊢ A,
     ⊢ᴳ[𝐈𝐋] ∅ ⟹ {A},
     ∀ {κ : Type u} [Nonempty κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A,

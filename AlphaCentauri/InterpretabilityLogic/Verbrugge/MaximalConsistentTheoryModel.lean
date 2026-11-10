@@ -4,7 +4,7 @@ public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentTheory
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 
 /-!
-# Completeness with respect to generalised Veltman models
+# The model on maximal consistent theories
 
 A generalised Veltman model whose worlds are maximal consistent sets of all formulas, and the truth
 lemma for it, for every extension of $\mathbf{IL}$ by axioms. The model satisfies the frame

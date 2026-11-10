@@ -1,15 +1,15 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
+public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 
 /-!
-# Completeness of $\mathbf{ILP}$ with respect to finite Veltman models
+# The model on branches of indexed sets
 
 $\mathbf{ILP}$-adequate sets, a finite tree-shaped Veltman model whose worlds are branches of
 indexed sets, and its truth lemma for every extension of $\mathbf{IL}$ by axioms proving
 $\mathbf{P}$. For $\mathbf{ILP}$ itself this gives completeness with respect to finite Veltman
-models satisfying the frame condition of $\mathbf{P}$.
+models satisfying the frame condition of $\mathbf{P}$ (de Jongh–Veltman).
 -/
 
 @[expose] public section
@@ -144,14 +144,6 @@ instance [Nonempty (IndexedSet L Φ)] : Nonempty (IndexedBranch L Φ) :=
 /-- `w` is a proper initial segment of `u`. -/
 def Rel (w u : IndexedBranch L Φ) : Prop := w.head :: w.tail <:+ u.tail
 
-/-- `w` is a proper initial segment of `u`, the branch `u` without its last element is a proper
-initial segment of `v`, and the sequence of `u` is an initial segment of the sequence of `v`.
-
-- [dJV90, Theorem 5.2]
--/
-def S (w u v : IndexedBranch L Φ) : Prop :=
-  w.Rel u ∧ u.tail <:+ v.tail ∧ u.head.seq <+: v.head.seq
-
 lemma Rel.rel (h : w.Rel u) : w.head.Rel u.head := by
   obtain ⟨a, l, hc⟩ := u;
   induction l generalizing a with
@@ -193,11 +185,16 @@ end IndexedBranch
 
 open IndexedBranch
 
-/-- - [dJV90, Theorem 5.2] -/
+/-- The model on branches of indexed sets in which `w` is related to `u` if `w` is a proper initial
+segment of `u`, and `S w u v` holds if moreover the branch `u` without its last element is a proper
+initial segment of `v` and the sequence of `u` is an initial segment of the sequence of `v`.
+
+- [dJV90, Theorem 5.2]
+-/
 def treeCountermodel (L : Logic α) (Φ : Finset (Formula α)) [Nonempty (IndexedSet L Φ)] :
     Model (IndexedBranch L Φ) α where
   Rel' := IndexedBranch.Rel
-  S' := IndexedBranch.S
+  S' w u v := w.Rel u ∧ u.tail <:+ v.tail ∧ u.head.seq <+: v.head.seq
   Val' w a := #a ∈ w.head.set
 
 namespace treeCountermodel

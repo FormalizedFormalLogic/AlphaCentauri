@@ -1,11 +1,11 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
+public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
 
 /-!
-# Completeness of sublogics of $\mathbf{IL}$ with respect to $\mathbf{IL}^-_{\mathrm{set}}$-frames
+# The $\mathbf{IL}^-_{\mathrm{set}}$-models on labelled and indexed sets
 
 Finite $\mathbf{IL}^-_{\mathrm{set}}$-models whose worlds are maximal consistent subsets of an
 adequate set, labelled by a formula or indexed by a finite sequence of formulas, their truth

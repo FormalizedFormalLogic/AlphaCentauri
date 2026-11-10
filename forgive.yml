@@ -91,6 +91,9 @@ declaration:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma1.provable_uniformReflectionOn_Pi3_ElementaryArithmetic
       - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
+  FFL.FirstOrder.Arithmetic.provable_univCl_IOpen_iff:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
   FFL.FirstOrder.Arithmetic.exists_prime_gt:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1

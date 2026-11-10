@@ -17,7 +17,6 @@ standard $n \ge 1$. $\mathsf{IOpen}$ proves it.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section ZRing
 
 /-- Division with remainder by the numeral `n`. -/
 def standardEuclideanDivisionBy (n : ℕ) : ArithmeticSentence :=
@@ -60,6 +59,5 @@ instance ZRing_weakerThan_IOpen : ZRing ⪯ 𝗜𝗢𝗽𝗲𝗻 :=
     obtain ⟨r, hr, e⟩ := eq_mul_div_add_of_pos b (b := ((n + 1 : ℕ) : V)) (by simp)
     use b / ((n + 1 : ℕ) : V), r
 
-end ZRing
 
 end FFL.FirstOrder.Arithmetic

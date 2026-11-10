@@ -16,7 +16,6 @@ prenex $\Sigma_n$ formulas with parameters.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section ProperCuts
 
 open Semiformula Tarski.Structure
 
@@ -72,6 +71,5 @@ lemma not_models_IDelta_of_proper_cut (I : Cut M) (n : ℕ) (hI : I.Proper)
     ((h₁ 0).mpr h0) (fun x hx ↦ (h₁ (x + 1)).mpr (I.succ_mem ((h₁ x).mp hx)))
   exact hc ((h₁ c).mp (hind c))
 
-end ProperCuts
 
 end FFL.FirstOrder.Arithmetic

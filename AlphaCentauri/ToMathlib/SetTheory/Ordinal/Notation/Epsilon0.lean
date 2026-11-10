@@ -89,7 +89,6 @@ theorem range_NONote_repr : Set.range NONote.repr = Set.Iio ε₀ := by
 
 /-! ## Transfer to an `ℕ`-order: `ε₀ ≤ orderType` of any pullback of the `NONote` order -/
 
-section Pullback
 
 variable (e : ℕ ≃ NONote)
 
@@ -128,6 +127,5 @@ theorem epsilon0_le_orderType_ltPull : ε₀ ≤ orderType (ltPull e) := by
   rw [he] at hle
   exact (Order.lt_succ _).not_ge hle
 
-end Pullback
 
 end ONote

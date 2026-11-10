@@ -19,7 +19,6 @@ the same universal sentences.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section WilkieExtension
 
 /-- Every model of $\mathsf{ZR}$ embeds into a model of $\mathsf{IOpen}$.
 - [Wil78, Lemma 3.2]
@@ -62,6 +61,5 @@ lemma not_provable_IOpen_allClosure {n : ℕ} {φ : ArithmeticSemisentence n} (h
   rw [Subsingleton.elim (Θ ∘ Empty.elim) Empty.elim]
   exact this _
 
-end WilkieExtension
 
 end FFL.FirstOrder.Arithmetic

@@ -137,11 +137,9 @@ lemma exists_inductionImplication (ψ : ℬ[<, ℒₒᵣ].Prenex 𝚺 n ξ (m + 
 
 end inductionImplication
 
-section uniformReflection
 
 variable {m : ℕ} {ψ θ : ArithmeticSemisentence (m + 1)}
 
-section
 
 variable (hθ : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] (f : Empty → V) (x : V)
   (p : Fin m → V), Semiformula.Eval (x :> p) f θ ↔
@@ -181,8 +179,6 @@ lemma provable_inductionImplication_succ :
   intro hx h₀ hs
   exact hs _ (hx h₀ hs)
 
-end
 
-end uniformReflection
 
 end FFL.FirstOrder.Arithmetic

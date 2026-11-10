@@ -148,13 +148,13 @@ lemma not_finiteAxiomatizable_iff :
   · rintro h ⟨F, hsub, hfin, heq⟩
     exact (h F hsub hfin).notWT (Equiv.antisymm_iff.mp heq).1
 
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic
+namespace Arithmetic
 
 /-- `𝗣𝗔⁻` is finitely axiomatizable.
 - [Lin97, Ch. 4 §1] -/
 lemma PeanoMinus.finiteAxiomatizable : FiniteAxiomatizable 𝗣𝗔⁻ :=
   FiniteAxiomatizable.of_finite PeanoMinus.finite
 
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

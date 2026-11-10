@@ -46,9 +46,8 @@ functions reachable from `K` by `Nat.ElementaryClosure`.
 def elementaryClosure (K : ∀ k, Set ((Fin k → ℕ) → ℕ)) (k : ℕ) : Set ((Fin k → ℕ) → ℕ) :=
   {f | ElementaryClosure K f}
 
-namespace ElementaryClosure
 
-lemma mono {K K' : ∀ k, Set ((Fin k → ℕ) → ℕ)} (h : ∀ k, K k ⊆ K' k) {k : ℕ}
+lemma ElementaryClosure.mono {K K' : ∀ k, Set ((Fin k → ℕ) → ℕ)} (h : ∀ k, K k ⊆ K' k) {k : ℕ}
     {f : (Fin k → ℕ) → ℕ} (hf : ElementaryClosure K f) : ElementaryClosure K' f := by
   induction hf with
   | base hf => exact .base (h _ hf)
@@ -62,7 +61,6 @@ lemma mono {K K' : ∀ k, Set ((Fin k → ℕ) → ℕ)} (h : ∀ k, K k ⊆ K' 
   | comp _ _ ihg ihh => exact .comp ihg ihh
   | boundedRec _ _ _ hbound ihf ihg ihb => exact .boundedRec ihf ihg ihb hbound
 
-end ElementaryClosure
 
 lemma elementaryClosure_mono {K K' : ∀ k, Set ((Fin k → ℕ) → ℕ)} (h : ∀ k, K k ⊆ K' k) (k : ℕ) :
     elementaryClosure K k ⊆ elementaryClosure K' k := fun _ hf ↦ hf.mono h

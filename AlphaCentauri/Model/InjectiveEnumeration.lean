@@ -14,7 +14,6 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 open _root_.FFL.Entailment
 
-section InjectiveEnumeration
 
 variable {V : Type*} [ORingStructure V]
 
@@ -101,6 +100,5 @@ theorem exists_injective_unbounded_of_not_collection [V↓[ℒₒᵣ] ⊧* 𝗜�
       · rw [hyz, h]
       · exact absurd (hs _ hx).1 (hmin _ h)
 
-end InjectiveEnumeration
 
 end FFL.FirstOrder.Arithmetic

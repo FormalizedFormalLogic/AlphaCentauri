@@ -14,7 +14,6 @@ which holds at every element of the base model holds below some element outside 
 
 namespace FFL.FirstOrder.Arithmetic
 
-section Overspill
 
 open Semiformula
 
@@ -45,6 +44,5 @@ theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗�
       (by simp) h₂
   exact hMN.not_surjective fun x ↦ h₁ x (h₃ x)
 
-end Overspill
 
 end FFL.FirstOrder.Arithmetic

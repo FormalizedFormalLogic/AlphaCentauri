@@ -331,7 +331,6 @@ lemma Anchored.mono (h : ∀ φ, D φ → D' φ) {Γ} : {d : ⊢ᴸᴷᴵ[C]! Γ
 
 /-! ## Rewriting -/
 
-section rewrite
 
 variable [RewriteClosed C]
 
@@ -435,7 +434,6 @@ lemma anchored_generalizeByNewVar {m} {hξ : ¬ξ.FVar? m} {hΓ : ∀ ψ ∈ Γ,
     Anchored D (generalizeByNewVar hξ hΓ d) := by
   simpa [generalizeByNewVar] using anchored_map d _ h
 
-end rewrite
 
 end Derivation
 

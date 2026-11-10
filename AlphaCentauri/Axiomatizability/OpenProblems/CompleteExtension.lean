@@ -22,15 +22,13 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder
 
-namespace Arithmetic
 
 /-- $\mathsf{I}\Delta_0$ has a consistent complete extension axiomatized by $\Sigma_n$ sentences
 for some $n$. An open problem.
 - [ELV25, Question 1.2] -/
-def ExistsCompleteExtensionISigma0OfRestrictedComplexity : Prop :=
+def Arithmetic.ExistsCompleteExtensionISigma0OfRestrictedComplexity : Prop :=
   ∃ (n : ℕ) (U : ArithmeticTheory), (∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 n σ) ∧
     𝗜𝚺₀ ⪯ U ∧ Entailment.Consistent U ∧ Entailment.Complete U
 
-end Arithmetic
 
 end FFL.FirstOrder

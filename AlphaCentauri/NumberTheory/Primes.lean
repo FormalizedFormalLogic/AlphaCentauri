@@ -102,7 +102,6 @@ lemma IsFirst.unique {P t t' : V} (h : IsFirst a A P t) (h' : IsFirst a A P t') 
   · exact heq
   · exact absurd h'.2.1 (h.2.2 t' hgt)
 
-section image
 
 variable {i x z D p o T : V}
 
@@ -246,7 +245,6 @@ lemma image_injective (hA : 0 < A) {i' x' : V} (hi : i < a) (hi' : i' < a) (hx :
       · exact hlone' i hi hne (h.trans hdvd)
     · rfl
 
-end image
 
 end
 

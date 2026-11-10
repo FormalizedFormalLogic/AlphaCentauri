@@ -30,7 +30,6 @@ satisfies $\mathsf{B}\Sigma_{j+1}$ and refutes $\mathsf{I}\Sigma_{j+1}$.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section DefinableElements
 
 open Semiformula
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -362,6 +361,5 @@ theorem exists_model_nonstandard_definableElement :
   have h₅ : Entailment.Inconsistent 𝗣𝗔 := by simpa using h₄
   exact Entailment.Consistent.not_inconsistent h₅
 
-end DefinableElements
 
 end FFL.FirstOrder.Arithmetic

@@ -16,11 +16,11 @@ Equal-valued closed substitutions into a formula and its negation are derivable 
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic
+namespace OmegaLogic
 
 variable {n : ℕ} {Γ : Sequent}
 
-section ExcludedMiddle
 
 /-! ### Value-congruent excluded middle
 
@@ -160,6 +160,6 @@ lemma em_cong (s s' : ArithmeticTerm ℕ)
 
 end Provable
 
-end ExcludedMiddle
 
-end FFL.FirstOrder.Arithmetic.OmegaLogic
+end OmegaLogic
+end FFL.FirstOrder.Arithmetic

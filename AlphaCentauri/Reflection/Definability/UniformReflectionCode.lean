@@ -29,7 +29,6 @@ open FFL.FirstOrder.Theory Bootstrapping Bootstrapping.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-section uniformReflectionCode
 
 lemma quote_bShift {k : ℕ} (φ : ArithmeticSemisentence k) :
     (⌜(Rew.bShift ▹ φ : ArithmeticSemisentence (k + 1))⌝ : V) =
@@ -180,6 +179,5 @@ noncomputable instance _root_.FFL.FirstOrder.Theory.uniformReflectionOn.delta1_p
   Theory.uniformReflectionOn.delta1_of T (fun _ _ _ ↦ IsPrenexHierarchy.defined Γ n)
     fun _ ↦ isPrenexHierarchy_quote_iff
 
-end uniformReflectionCode
 
 end FFL.FirstOrder.Arithmetic

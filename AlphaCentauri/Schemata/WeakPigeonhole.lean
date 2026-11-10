@@ -138,7 +138,6 @@ lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c <
 
 end tree
 
-section square
 
 variable (R : V → V → Prop) (a : V)
 
@@ -249,7 +248,6 @@ lemma definable_diagonal (hR : 𝚺ᴬ₀.DefinableRel R) :
   have := definable_isLeaf (a := a) (definable_isChild (a := a) hR)
   definability
 
-end square
 
 end WeakPigeonhole
 
@@ -399,7 +397,6 @@ theorem weakPigeonhole_two_mul {R : V → V → Prop} (hR : 𝚺ᴬ₀.Definable
 
 namespace WeakPigeonhole
 
-section shift
 
 variable (R : V → V → Prop) (K b : V)
 
@@ -554,7 +551,6 @@ lemma IsPath.eq_of_shiftStep (hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, 
   have := key K le_rfl
   rwa [sub_self, hs.1, hs'.1] at this
 
-end shift
 
 lemma exists_le_length (n : ℕ) : ∃ I : V, (n : V) ≤ ‖I‖ := by
   induction n with

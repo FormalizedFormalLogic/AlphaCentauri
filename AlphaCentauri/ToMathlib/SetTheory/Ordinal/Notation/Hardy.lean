@@ -21,7 +21,6 @@ open ONote Ordinal
 
 /-! ### Definition and values -/
 
-section Basic
 
 /-- The **Hardy hierarchy** `H_α : ℕ → ℕ` for ordinal notations `< ε₀`:
 `H₀ = id`, `H_{α+1}(n) = H_α(n+1)`, `H_λ(n) = H_{λ[n]}(n)` (limit `λ`, via
@@ -148,11 +147,9 @@ lemma hardy_omega (n : ℕ) : hardy (oadd 1 1 0) n = 2 * n + 1 := by
   rw [h1, hardy_ofNat (n + 1) n]
   omega
 
-end Basic
 
 /-! ### The Hardy step -/
 
-section Structure
 
 /-- The fundamental sequence of a limit notation is everywhere nonzero. -/
 private lemma fundamentalSequence_ne_zero_of_limit {o : ONote} {f : ℕ → ONote}
@@ -358,14 +355,12 @@ theorem hardy_add_comp (c : ONote) (hc : c.NF) (d : ONote) (hd : d.NF)
         · rwa [lastExp_oadd_ne ha0] at hlt
       rw [iha ha d hd ihcond x, hardy_oadd_tail e n a (hardy d x)]
 
-end Structure
 
 /-! ### Comparison with the fast-growing hierarchy
 
 Two-sided comparison of `hardy` at `ω`-powers against `fastGrowing`, up to the `ε₀`-tower
 diagonal. Throughout, `oadd a 1 0` is the notation for `ω ^ a`. -/
 
-section Comparison
 
 instance : WellFoundedLT ONote := InvImage.wf repr Ordinal.lt_wf
 
@@ -549,6 +544,5 @@ theorem hardy_tower_succ_lt_fastGrowing (i : ℕ) :
   rw [← tower_succ] at h
   exact h
 
-end Comparison
 
 end ONote

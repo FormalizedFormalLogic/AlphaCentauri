@@ -19,7 +19,6 @@ $\mathsf{IOpen}$ exactly when `R` satisfies open induction.
 
 @[expose] public section
 
-section NonnegativePart
 
 open FFL FirstOrder OpenPredicate
 
@@ -143,4 +142,3 @@ theorem models_ZRing [DiscretelyOrdered R]
 
 end Nonneg
 
-end NonnegativePart

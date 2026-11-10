@@ -12,11 +12,11 @@ A true formula in a sequent is derivable cut-free at height bounded by its compl
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic
+namespace OmegaLogic
 
 namespace Provable
 
-section OmegaCompleteness
 
 variable {k : ℕ} {φ : ArithmeticFormula ℕ} {Γ : Sequent}
 
@@ -71,8 +71,8 @@ private lemma of_trueAux (hk : φ.complexity ≤ k) (ht : LitTrue φ) (hmem : φ
 theorem of_true (ht : LitTrue φ) (hmem : φ ∈ Γ) :
     Z∞ ⊢[(φ.complexity : Ordinal.{0}), 0] Γ := of_trueAux le_rfl ht hmem
 
-end OmegaCompleteness
 
 end Provable
 
-end FFL.FirstOrder.Arithmetic.OmegaLogic
+end OmegaLogic
+end FFL.FirstOrder.Arithmetic

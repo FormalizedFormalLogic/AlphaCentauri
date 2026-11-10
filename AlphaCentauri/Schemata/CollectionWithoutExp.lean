@@ -15,12 +15,10 @@ $\mathsf{B}\Sigma_1$ is open.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section CollectionWithoutExp
 
 /-- $\mathsf{I}\Delta_0 + \neg\mathrm{Exp}$ proves $\mathsf{B}\Sigma_1$. An open problem.
 - [WP89] -/
 def BSigma1WeakerThanISigma0AddNotExp : Prop := 𝗕𝚺 1 ⪯ 𝗜𝚺₀ ∪ {∼expAxiom}
 
-end CollectionWithoutExp
 
 end FFL.FirstOrder.Arithmetic

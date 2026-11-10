@@ -23,7 +23,6 @@ open FFL.FirstOrder.Theory Bootstrapping Bootstrapping.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-section ssnums
 
 /-- `ssnumsConjunct i` is the code of the `i`-th conjunct of `ssnums`. -/
 noncomputable def ssnumsConjunct (i : V) : V :=
@@ -135,6 +134,5 @@ lemma ssnumsCode_quote (k : ℕ) : ssnumsCode (k : V) = ⌜(ssnums (k := k)).val
     Semiterm.empty_quote_numeral, ssnumsCode]
   simp [Nat.mod_eq_of_lt (show 2 < k + 2 + 1 by omega)]
 
-end ssnums
 
 end FFL.FirstOrder.Arithmetic

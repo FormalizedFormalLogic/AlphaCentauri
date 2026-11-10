@@ -248,7 +248,6 @@ end bounds
 macro "tagged_disjoint" : tactic =>
   `(tactic| (intro y hy hy'; simp only [Tagged, Family] at hy hy'; aesop))
 
-section definability
 
 lemma definable_tagged_bits (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Bits B s m)) := by
   have := definable_bits B s
@@ -373,7 +372,6 @@ lemma definable_pieces (n : V) :
   · unfold ChebyshevMap bandBound bandSize bandCount
     definability
 
-end definability
 
 section chebyshev
 

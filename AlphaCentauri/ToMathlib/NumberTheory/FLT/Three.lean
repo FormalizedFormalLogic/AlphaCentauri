@@ -392,11 +392,10 @@ lemma no_solution (h : Solution K a b c u) : False := by
 
 end EisensteinInteger
 
-namespace FermatThree
 
 /-- Fermat's Last Theorem for exponent `3` in a discretely ordered ring satisfying
 `LeastNumberPrinciple`. -/
-theorem flt3_of_leastNumberPrinciple {R : Type*} [CommRing R] [LinearOrder R]
+theorem FermatThree.flt3_of_leastNumberPrinciple {R : Type*} [CommRing R] [LinearOrder R]
     [IsStrictOrderedRing R] [DiscretelyOrdered R] (hL : LeastNumberPrinciple R) (x y z : R)
     (h : x ^ 3 + y ^ 3 = z ^ 3) : x = 0 ∨ y = 0 ∨ z = 0 := by
   by_contra hne
@@ -408,4 +407,3 @@ theorem flt3_of_leastNumberPrinciple {R : Type*} [CommRing R] [LinearOrder R]
     ((map_ne_zero_iff _ hf).mpr hz) (by rw [← map_pow, ← map_pow, ← map_add, h, map_pow])
   exact EisensteinInteger.no_solution hL hs
 
-end FermatThree

@@ -15,7 +15,8 @@ rank, and soundness.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic
+namespace OmegaLogic
 
 /-- A `Z_∞` sequent: a finite set of arithmetic formulas, read disjunctively.
 
@@ -126,4 +127,5 @@ theorem sound {Γ : Sequent} (D : Derivation Γ) : ∃ φ ∈ Γ, LitTrue φ := 
 
 end Derivation
 
-end FFL.FirstOrder.Arithmetic.OmegaLogic
+end OmegaLogic
+end FFL.FirstOrder.Arithmetic

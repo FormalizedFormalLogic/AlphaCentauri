@@ -338,7 +338,6 @@ lemma enumCode.exists_le {a I b z t B : V} {G : V → V → Prop}
   rw [tsub_tsub_cancel_of_le hc] at h'
   exact ⟨z', hz', h'⟩
 
-section
 
 variable (a I : V)
 
@@ -379,7 +378,6 @@ lemma lt_of_mem_enumerationCut (f : V → V) (hI : ‖I‖ = a + 1) (hunb : ∀ 
   obtain ⟨z, hz, t, h⟩ := hi
   exact enumCode.lt_of_enumCode hgraph (fun x y y' h h' ↦ h.2.symm.trans h'.2) h
 
-end
 end EnumerationCut
 
 end FFL.FirstOrder.Arithmetic

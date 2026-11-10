@@ -18,7 +18,6 @@ such an extension. Whether the hypothesis $\mathrm{Exp}$ can be dropped is open.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section ProperEndExtensionOfBSigma1
 
 /-- Every countable model of $\mathsf{B}\Sigma_1$ has a proper end extension to a model of
 $\mathsf{I}\Delta_0$. An open problem.
@@ -28,6 +27,5 @@ def ExistsProperEndExtensionOfBSigma1 : Prop :=
   ∀ (M : Type) [Countable M] [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗕𝚺1],
     ∃ (N : Type) (_ : M ⊂ₑ N), N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀
 
-end ProperEndExtensionOfBSigma1
 
 end FFL.FirstOrder.Arithmetic

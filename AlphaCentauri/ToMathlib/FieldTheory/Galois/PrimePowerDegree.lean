@@ -14,7 +14,6 @@ Quadratic extensions and intermediate fields of Galois extensions of prime-power
 
 @[expose] public section
 
-section
 
 open Module
 
@@ -63,4 +62,3 @@ lemma IsGalois.exists_intermediateField_finrank_eq_prime [FiniteDimensional K M]
   rw [h₁, h, pow_succ, mul_comm] at h₂
   exact ⟨_, Nat.eq_of_mul_eq_mul_left (pow_pos (Fact.out : p.Prime).pos k) h₂, h₁⟩
 
-end

@@ -18,7 +18,6 @@ coefficient, and every element can be divided with remainder by every positive n
 
 open Polynomial OpenPredicate
 
-section
 
 variable {K : Type*} [Field K] {p : ℕ} [hp : Fact p.Prime]
 

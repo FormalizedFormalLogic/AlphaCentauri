@@ -19,7 +19,6 @@ extension of `M`.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section EndExtensions
 
 open Semiformula Tarski.Structure
 
@@ -220,6 +219,5 @@ theorem models_of_Pi1Axiomatizable {T : ArithmeticTheory}
   exact models_of_subtheory (hMN.models_of_Pi1 hU)
 
 end EndExtension
-end EndExtensions
 
 end FFL.FirstOrder.Arithmetic

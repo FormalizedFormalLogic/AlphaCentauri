@@ -1,13 +1,16 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZero.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZeroW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
+public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStepModel
 
 /-!
-# The logics $\mathbf{ILW}^*$ and $\mathbf{ILM}_0\mathbf{W}$
+# The logic $\mathbf{ILW}^*$
 
-The extensions of $\mathbf{IL}$ by the principle $\mathsf{W}^*$, and by $\mathsf{M}_0$ and
-$\mathsf{W}$, which coincide.
+The extension of $\mathbf{IL}$ by the principle $\mathsf{W}^*$, which coincides with
+$\mathbf{ILM}_0\mathbf{W}$. It proves exactly the formulas valid in the Veltman models satisfying
+the frame conditions of $\mathsf{W}$ and $\mathsf{M}_0$.
 -/
 
 @[expose] public section
@@ -23,11 +26,6 @@ abbrev Logic.ILWStar : Logic α := Logic.ofAxioms {Axioms.Wstar A B C | (A) (B) 
 
 notation "𝐈𝐋𝐖*" => Logic.ILWStar
 
-abbrev Logic.ILM₀W : Logic α :=
-  Logic.ofAxioms ({Axioms.M₀ A B C | (A) (B) (C)} ∪ {Axioms.W A B | (A) (B)})
-
-notation "𝐈𝐋𝐌₀𝐖" => Logic.ILM₀W
-
 namespace Logic
 
 open ofAxioms
@@ -35,10 +33,6 @@ open ofAxioms
 variable {A B C : Formula α}
 
 @[simp] lemma ILWStar.axiomWstar : 𝐈𝐋𝐖* ⊢ Axioms.Wstar A B C := axm ⟨A, B, C, rfl⟩
-
-@[simp] lemma ILM₀W.axiomM₀ : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.M₀ A B C := axm <| .inl ⟨A, B, C, rfl⟩
-
-@[simp] lemma ILM₀W.axiomW : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.W A B := axm <| .inr ⟨A, B, rfl⟩
 
 lemma ILWStar.axiomW : 𝐈𝐋𝐖* ⊢ Axioms.W A B := by
   have h₁ : (𝐈𝐋𝐖* : Logic α) ⊢ □⊤ := nec verum;
@@ -57,21 +51,6 @@ lemma ILWStar.axiomM₀ : 𝐈𝐋𝐖* ⊢ Axioms.M₀ A B C := by
     rhd_anti_left (by cl_prover);
   cl_prover [axiomWstar (A := A) (B := B ⋎ ◇A) (C := C), h₁, h₃, h₄];
 
-lemma ILM₀W.axiomWstar : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.Wstar A B C := by
-  have h₁ : 𝐈𝐋𝐌₀𝐖 ⊢ B ⋏ □C 🡒 B ⋏ □C ⋏ ∼□(∼A) ⋎ B ⋏ □C ⋏ □(∼A) := by cl_prover;
-  have h₂ : 𝐈𝐋𝐌₀𝐖 ⊢ (B ⋏ □C) ▷ (B ⋏ □C ⋏ ◇A ⋎ B ⋏ □C ⋏ □(∼A)) := rhd_of_provable h₁;
-  have h₃ : 𝐈𝐋𝐌₀𝐖 ⊢ (◇A ⋏ □C) ▷ ((B ⋏ □(∼A)) ⋏ □C) 🡒 (B ⋏ □C ⋏ ◇A) ▷ ((B ⋏ □(∼A)) ⋏ □C) :=
-    rhd_anti_left (by cl_prover);
-  have h₄ : 𝐈𝐋𝐌₀𝐖 ⊢
-      (B ⋏ □C ⋏ ◇A) ▷ ((B ⋏ □(∼A)) ⋏ □C) 🡒 (B ⋏ □C ⋏ ◇A) ▷ (B ⋏ □C ⋏ □(∼A)) :=
-    rhd_mono_right (by cl_prover);
-  have h₅ : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.J3 (B ⋏ □C ⋏ ◇A) (B ⋏ □C ⋏ □(∼A)) (B ⋏ □C ⋏ □(∼A)) := axiomJ3;
-  have h₆ : 𝐈𝐋𝐌₀𝐖 ⊢
-      Axioms.J2 (B ⋏ □C) (B ⋏ □C ⋏ ◇A ⋎ B ⋏ □C ⋏ □(∼A)) (B ⋏ □C ⋏ □(∼A)) := axiomJ2;
-  have h₇ : 𝐈𝐋𝐌₀𝐖 ⊢ (B ⋏ □C ⋏ □(∼A)) ▷ (B ⋏ □C ⋏ □(∼A)) := rhd_refl;
-  cl_prover [axiomW (A := A) (B := B), axiomM₀ (A := A) (B := B ⋏ □(∼A)) (C := C), h₂, h₃, h₄,
-    h₅, h₆, h₇];
-
 instance : (𝐈𝐋𝐖 : Logic α) ⪯ 𝐈𝐋𝐖* :=
   weakerThan_iff.mpr <| subset_of_provable <| by rintro _ ⟨A, B, rfl⟩; exact ILWStar.axiomW
 
@@ -82,7 +61,63 @@ instance : (𝐈𝐋𝐖* : Logic α) ≊ 𝐈𝐋𝐌₀𝐖 := equiv_iff.mpr <
     · exact ILWStar.axiomM₀
     · exact ILWStar.axiomW)
 
-instance : (𝐈𝐋𝐌₀ : Logic α) ⪯ 𝐈𝐋𝐌₀𝐖 := weakerThan_iff.mpr <| subset_of_subset Set.subset_union_left
+end Logic
+
+namespace Logic
+
+open Veltman Veltman.Model Veltman.Model.World
+
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
+
+theorem ILWStar.sound [M.IsIL] [M.HasM₀] [M.HasW] (h : 𝐈𝐋𝐖* ⊢ A) : M ⊧ A :=
+  ILM₀W.sound <| (equiv_iff.mp inferInstance : (𝐈𝐋𝐖* : Logic α) = 𝐈𝐋𝐌₀𝐖).subset h
+
+instance : Consistent (𝐈𝐋𝐖* : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ ILWStar.sound (M := pointModel fun _ ↦ False) h 0
+
+end Logic
+
+section
+
+open Entailment Formula Logic Logic.ofAxioms MaximalConsistentTheory
+
+namespace Logic.ILWStar
+
+open Veltman Veltman.StepByStep
+
+variable {α : Type*} {A : Formula α}
+
+/-- - [GJ08, Theorem 7.1] -/
+theorem complete
+    (h : ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
+      [M.IsIL] → [M.HasW] → [M.HasM₀] → M ⊧ A) :
+    𝐈𝐋𝐖* ⊢ A := by
+  classical
+  by_contra hA;
+  obtain ⟨Γ₀, hΓ₀⟩ := exists_not_forces (ε := fun A ↦ {□(∼A)}) axiomM₀
+    (fun h hAB hA ↦ h.exists_of_rhd_mem_of_axiomW axiomW hAB hA) hA;
+  have hτ := enumJob_mem (bot_mem_jobFormulas (A := A));
+  have := model_isIL (Γ₀ := Γ₀) (ε := fun A ↦ {□(∼A)}) hτ;
+  have := model_hasW (Γ₀ := Γ₀) (ε := fun A ↦ {□(∼A)}) hτ fun _ ↦ Set.mem_singleton _;
+  exact hΓ₀ (h _ 0)
+
+end Logic.ILWStar
+
+end
+
+namespace Logic
+
+variable {α : Type*} {A : Formula α}
+
+/-- - [GJ08, Theorem 7.1] -/
+theorem ILWStar.iff_valid :
+    𝐈𝐋𝐖* ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
+      [M.IsIL] → [M.HasW] → [M.HasM₀] → M ⊧ A := by
+  constructor;
+  · intro h _ _ M;
+    intros;
+    exact ILWStar.sound h;
+  · exact ILWStar.complete;
 
 end Logic
 

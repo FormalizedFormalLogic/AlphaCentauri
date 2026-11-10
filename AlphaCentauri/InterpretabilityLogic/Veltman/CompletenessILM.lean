@@ -615,7 +615,9 @@ lemma CriticalSuccessor.exists_criticalSuccessor_box_subset (hE : IsRhdOperand �
       (IsRhdOperand.of_rhd_left (mem_of_mem hBC)) (X := Δ.prebox.image (□·)) <| by
         intro D hD;
         obtain ⟨D, hD', rfl⟩ := Finset.mem_image.mp hD;
-        exact ⟨mem_of_mem (mem_prebox.mp hD'), D, rfl⟩;
+        and_intros;
+        · exact mem_of_mem (mem_prebox.mp hD');
+        · use D;
     replace i₁ : 𝐈𝐋𝐌 ⊢ B ⋏ P 🡒 B' ⋎ ◇B' := IL_subset i₁;
     replace i₂ : 𝐈𝐋𝐌 ⊢ B' 🡒 (B ⋏ P) ⋎ ◇(B ⋏ P) := IL_subset i₂;
     have h₁₃ : Γ.literals *⊢[𝐈𝐋𝐌] B' ▷ E := by
@@ -649,8 +651,11 @@ lemma CriticalSuccessor.exists_criticalSuccessor_box_subset (hE : IsRhdOperand �
   have hPY : Y *⊢[𝐈𝐋𝐌] P := Context.by_axm <| by simp [Y];
   have hb {D} (hD : □D ∈ Δ) : □D ∈ Θ := hm (mem_of_mem hD) <| Context.of (hP hD) ⨀ hPY;
   have hG {G} (hG : G ▷ E ∈ Γ) : G ∉ Θ ∧ □(∼G) ∈ Θ := by
-    have h₁ : G ∈ Φ.filter (· ▷ E ∈ Γ) :=
-      Finset.mem_filter.mpr ⟨Adequate.rhd_left (mem_of_mem hG), hG⟩;
+    have h₁ : G ∈ Φ.filter (· ▷ E ∈ Γ) := by
+      apply Finset.mem_filter.mpr;
+      and_intros;
+      · exact Adequate.rhd_left (mem_of_mem hG);
+      · exact hG;
     have h₂ : 𝐈𝐋𝐌 ⊢ G 🡒 H := right_Fdisj_intro _ h₁;
     have h₃ : 𝐈𝐋𝐌 ⊢ □(∼H) 🡒 □(∼G) := Logic.box_mono <| by cl_prover [h₂];
     have h₄ : Y *⊢[𝐈𝐋𝐌] ∼H := Context.by_axm <| by simp [Y];
@@ -663,9 +668,20 @@ lemma CriticalSuccessor.exists_criticalSuccessor_box_subset (hE : IsRhdOperand �
   obtain ⟨A, hA, hA'⟩ := hΔ.exists_box;
   use Θ;
   and_intros;
-  · exact ⟨⟨fun h ↦ hm (Adequate.box (mem_of_mem h)) (Context.by_axm <| by simp [Y, h]),
-      fun h ↦ hm (mem_of_mem h) (Context.by_axm <| by simp [Y, h]), A, hb hA, hA'⟩,
-      fun h ↦ (hG h).1, fun h ↦ (hG h).2⟩;
+  · constructor;
+    · constructor;
+      · intro D h;
+        exact hm (Adequate.box (mem_of_mem h)) (Context.by_axm <| by simp [Y, h]);
+      · intro D h;
+        exact hm (mem_of_mem h) (Context.by_axm <| by simp [Y, h]);
+      · use A;
+        and_intros;
+        · exact hb hA;
+        · exact hA';
+    · intro G h;
+      exact (hG h).1;
+    · intro G h;
+      exact (hG h).2;
   · exact hm (Adequate.rhd_right (mem_of_mem hBC)) (Context.by_axm <| by simp [Y]);
   · exact hb;
 
@@ -715,26 +731,83 @@ open Model Model.World
 variable [Nonempty (IndexedSet 𝐈𝐋𝐌 Φ)]
 
 instance [Adequate Φ] : (countermodelM Φ).IsIL where
-  trans _ _ _ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
+  trans _ _ _ h₁ h₂ := by
+    constructor;
+    · exact h₁.1.trans h₂.1;
+    · exact h₁.2.trans h₂.2;
   cwf := by
-    have : IsTrans _ (flip (countermodelM Φ).Rel) :=
-      ⟨fun _ _ _ h₁ h₂ ↦ ⟨h₂.1.trans h₁.1, h₂.2.trans h₁.2⟩⟩;
-    have : Std.Irrefl (flip (countermodelM Φ).Rel) := ⟨fun _ h ↦ h.1.irrefl⟩;
+    have : IsTrans _ (flip (countermodelM Φ).Rel) := by
+      constructor;
+      intro _ _ _ h₁ h₂;
+      constructor;
+      · exact h₂.1.trans h₁.1;
+      · exact h₂.2.trans h₁.2;
+    have : Std.Irrefl (flip (countermodelM Φ).Rel) := by
+      constructor;
+      intro _ h;
+      exact h.1.irrefl;
     exact Finite.wellFounded_of_trans_of_irrefl _;
   rel_of_s_left h := h.1.1.1
   rel_of_s_right h := h.1.1.2
-  s_refl h := ⟨⟨⟨h, h⟩, fun _ h₁ h₂ ↦ ⟨h₁, h₂⟩⟩, List.prefix_refl _, id⟩
-  s_trans h₁ h₂ := ⟨⟨⟨h₁.1.1.1, h₂.1.1.2⟩, fun C h₃ h₄ ↦
-    have h := h₁.1.2 C h₃ h₄;
-    h₂.1.2 C h.1 h.2⟩, h₁.2.1.trans h₂.2.1, fun h ↦ h₂.2.2 (h₁.2.2 h)⟩
-  s_of_rel h₁ h₂ := ⟨⟨⟨h₁, h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩,
-    fun _ h₃ h₄ ↦ ⟨h₃.trans h₂.2, h₄.trans_successor h₂.1⟩⟩, h₂.2, h₂.1.box_mem_of_box_mem⟩
+  s_refl h := by
+    constructor;
+    · constructor;
+      · constructor;
+        · exact h;
+        · exact h;
+      · intro _ h₁ h₂;
+        constructor;
+        · exact h₁;
+        · exact h₂;
+    · constructor;
+      · exact List.prefix_refl _;
+      · intro _ h;
+        exact h;
+  s_trans h₁ h₂ := by
+    constructor;
+    · constructor;
+      · constructor;
+        · exact h₁.1.1.1;
+        · exact h₂.1.1.2;
+      · intro C h₃ h₄;
+        have h := h₁.1.2 C h₃ h₄;
+        exact h₂.1.2 C h.1 h.2;
+    · constructor;
+      · exact h₁.2.1.trans h₂.2.1;
+      · intro _ h;
+        exact h₂.2.2 (h₁.2.2 h);
+  s_of_rel h₁ h₂ := by
+    constructor;
+    · constructor;
+      · constructor;
+        · exact h₁;
+        · constructor;
+          · exact h₁.1.trans h₂.1;
+          · exact h₁.2.trans h₂.2;
+      · intro _ h₃ h₄;
+        constructor;
+        · exact h₃.trans h₂.2;
+        · exact h₄.trans_successor h₂.1;
+    · constructor;
+      · exact h₂.2;
+      · intro _ h;
+        exact h₂.1.box_mem_of_box_mem h;
 
 instance : (countermodelM Φ).HasM where
-  rel_of_s_rel h₁ h₂ :=
-    have ⟨A, hA, hA'⟩ := h₂.1.exists_box;
-    ⟨⟨fun h ↦ h₂.1.mem_of_box_mem (h₁.2.2 h), fun h ↦ h₂.1.box_mem_of_box_mem (h₁.2.2 h),
-      A, hA, fun h ↦ hA' (h₁.2.2 h)⟩, h₁.2.1.trans h₂.2⟩
+  rel_of_s_rel h₁ h₂ := by
+    obtain ⟨A, hA, hA'⟩ := h₂.1.exists_box;
+    constructor;
+    · constructor;
+      · intro _ h;
+        exact h₂.1.mem_of_box_mem (h₁.2.2 h);
+      · intro _ h;
+        exact h₂.1.box_mem_of_box_mem (h₁.2.2 h);
+      · use A;
+        and_intros;
+        · exact hA;
+        · intro h;
+          exact hA' (h₁.2.2 h);
+    · exact h₁.2.1.trans h₂.2;
 
 variable [MAdequate Φ]
 
@@ -743,7 +816,12 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
     x ⊩ A ↔ A ∈ x.set := by
   induction A generalizing x with
   | atom a => rfl;
-  | falsum => exact ⟨False.elim, fun h ↦ bot_not_mem h⟩;
+  | falsum =>
+    constructor;
+    · intro h;
+      exact h.elim;
+    · intro h;
+      exact (bot_not_mem h).elim;
   | imp A B ihA ihB =>
     have hA' := Adequate.imp_left hA;
     have hB' := Adequate.imp_right hA;
@@ -755,8 +833,11 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
     · intro h;
       by_contra hn;
       obtain ⟨Δ, hΔ, hA⟩ := exists_successor_of_box_not_mem hA hn;
-      exact not_mem_of_provable_neg hA (Context.by_axm rfl) <|
-        (ih hA').mp <| h (x.successor Δ hΔ) ⟨hΔ, List.prefix_refl _⟩;
+      have hR : x ≺ x.successor Δ hΔ := by
+        constructor;
+        · exact hΔ;
+        · exact List.prefix_refl _;
+      exact not_mem_of_provable_neg hA (Context.by_axm rfl) <| (ih hA').mp <| h _ hR;
     · intro h y Rxy;
       exact (ih hA').mpr <| Rxy.1.mem_of_box_mem h;
   | rhd B C ihB ihC =>
@@ -767,8 +848,11 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
       by_contra hn;
       obtain ⟨Δ, hΔ, hBΔ⟩ := exists_criticalSuccessor_of_rhd_not_mem hA hn;
       have hC' : IsRhdOperand Φ C := .of_rhd_right hA;
-      obtain ⟨v, hS, hv⟩ := h (x.criticalSuccessor C hC' Δ hΔ.toSuccessor)
-        ⟨hΔ.toSuccessor, List.prefix_append _ _⟩ ((ihB hB).mpr hBΔ);
+      have hR : x ≺ x.criticalSuccessor C hC' Δ hΔ.toSuccessor := by
+        constructor;
+        · exact hΔ.toSuccessor;
+        · exact List.prefix_append _ _;
+      obtain ⟨v, hS, hv⟩ := h _ hR ((ihB hB).mpr hBΔ);
       have hCC : C ▷ C ∈ x.set :=
         (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofAxioms.rhd_refl;
       exact (hS.1.2 C (List.prefix_refl _) hΔ).2.not_mem hCC <| (ihC hC).mp hv;
@@ -791,14 +875,28 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
           · exact .bot;
           · exact Rxu.1.criticalSuccessor_bot Logic.ofAxioms.rhd_bot;
           · intro F' hpre' hcrit';
-            exact (hc ⟨F', hpre', hcrit'⟩).elim;
+            exfalso;
+            apply hc;
+            use F';
       obtain ⟨F, hF, hcrit, huniq⟩ := hF;
       obtain ⟨Θ, hΘ, hCΘ, hbox⟩ := hcrit.exists_criticalSuccessor_box_subset hF h hu;
       use u.withSet Θ hbox;
       constructor;
-      · exact ⟨⟨⟨Rxu, hΘ.toSuccessor, Rxu.2⟩, fun F' hpre' hcrit' ↦ by
-          obtain rfl := huniq F' hpre' hcrit';
-          exact ⟨hpre', hΘ⟩⟩, List.prefix_refl _, hbox⟩;
+      · constructor;
+        · constructor;
+          · constructor;
+            · exact Rxu;
+            · constructor;
+              · exact hΘ.toSuccessor;
+              · exact Rxu.2;
+          · intro F' hpre' hcrit';
+            obtain rfl := huniq F' hpre' hcrit';
+            constructor;
+            · exact hpre';
+            · exact hΘ;
+        · constructor;
+          · exact List.prefix_refl _;
+          · exact hbox;
       · exact (ihC hC).mpr hCΘ;
 
 end countermodelM

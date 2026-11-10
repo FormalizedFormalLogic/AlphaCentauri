@@ -20,32 +20,32 @@ open Entailment Formula MaximalConsistentSet
 
 namespace Veltman
 
-variable {α : Type*} [DecidableEq α] {𝔸 : Set (Formula α)} {Φ : Finset (Formula α)}
+variable {α : Type*} [DecidableEq α] {L : Logic α} {Φ : Finset (Formula α)}
 
 /-- A maximal consistent subset of `Φ` together with a finite sequence of antecedents and
 consequents of `▷`-formulas in `Φ`, no longer than the number of `□`-formulas in the set.
 
 - [dJV90, Theorem 4.1]
 -/
-structure IndexedSet (𝔸 : Set (Formula α)) (Φ : Finset (Formula α)) where
-  set : MaximalConsistentSet 𝔸 Φ
+structure IndexedSet (L : Logic α) (Φ : Finset (Formula α)) where
+  set : MaximalConsistentSet L Φ
   seq : List (Formula α)
   isRhdOperand_of_mem_seq : ∀ A ∈ seq, IsRhdOperand Φ A
   length_seq_le : seq.length ≤ set.prebox.card
 
 namespace IndexedSet
 
-variable {x y z w : IndexedSet 𝔸 Φ}
+variable {x y z w : IndexedSet L Φ}
 
-lemma ext {x y : IndexedSet 𝔸 Φ} (h₁ : x.set = y.set) (h₂ : x.seq = y.seq) : x = y := by
+lemma ext {x y : IndexedSet L Φ} (h₁ : x.set = y.set) (h₂ : x.seq = y.seq) : x = y := by
   cases x; cases y; simp_all;
 
-instance [Adequate Φ] : Finite (IndexedSet 𝔸 Φ) := by
+instance [Adequate Φ] : Finite (IndexedSet L Φ) := by
   have : Finite {l : List Φ // l.length ≤ Φ.card} := (List.finite_length_le _ _).to_subtype;
-  have hc (Γ : MaximalConsistentSet 𝔸 Φ) : Γ.prebox.card ≤ Φ.card :=
+  have hc (Γ : MaximalConsistentSet L Φ) : Γ.prebox.card ≤ Φ.card :=
     Finset.card_le_card_of_injOn (□·) (fun _ hA ↦ mem_of_mem (mem_prebox.mp hA))
       fun _ _ _ _ h ↦ box_inj.mp h;
-  apply Finite.of_injective (β := MaximalConsistentSet 𝔸 Φ × {l : List Φ // l.length ≤ Φ.card})
+  apply Finite.of_injective (β := MaximalConsistentSet L Φ × {l : List Φ // l.length ≤ Φ.card})
     fun x ↦ (x.set, ⟨x.seq.pmap Subtype.mk fun A hA ↦ (x.isRhdOperand_of_mem_seq A hA).mem,
       by simpa using x.length_seq_le.trans (hc x.set)⟩);
   intro x y h;
@@ -55,26 +55,26 @@ instance [Adequate Φ] : Finite (IndexedSet 𝔸 Φ) := by
 
 /-- `y` extends `x`: the set of `y` is a successor of the set of `x`, and the sequence of `x` is an
 initial segment of the sequence of `y`. -/
-def Rel (x y : IndexedSet 𝔸 Φ) : Prop := Successor x.set y.set ∧ x.seq <+: y.seq
+def Rel (x y : IndexedSet L Φ) : Prop := Successor x.set y.set ∧ x.seq <+: y.seq
 
 /-- `x` and `y` extend `w`, and whenever `x` is a `C`-critical successor of `w` indexed by
 `C` after the sequence of `w`, so is `y`.
 
 - [KO21, Theorem 5.4]
 -/
-def S (w x y : IndexedSet 𝔸 Φ) : Prop :=
+def S (w x y : IndexedSet L Φ) : Prop :=
   (w.Rel x ∧ w.Rel y) ∧ ∀ C, w.seq ++ [C] <+: x.seq → CriticalSuccessor C w.set x.set →
     w.seq ++ [C] <+: y.seq ∧ CriticalSuccessor C w.set y.set
 
 /-- The set `Δ` indexed by the sequence of `x`. -/
-def successor (x : IndexedSet 𝔸 Φ) (Δ : MaximalConsistentSet 𝔸 Φ) (h : Successor x.set Δ) :
-    IndexedSet 𝔸 Φ :=
+def successor (x : IndexedSet L Φ) (Δ : MaximalConsistentSet L Φ) (h : Successor x.set Δ) :
+    IndexedSet L Φ :=
   ⟨Δ, x.seq, x.isRhdOperand_of_mem_seq,
     x.length_seq_le.trans (Finset.card_le_card h.prebox_ssubset.subset)⟩
 
 /-- The set `Δ` indexed by the sequence of `x` followed by `F`. -/
-def criticalSuccessor (x : IndexedSet 𝔸 Φ) (F : Formula α) (hF : IsRhdOperand Φ F)
-    (Δ : MaximalConsistentSet 𝔸 Φ) (h : Successor x.set Δ) : IndexedSet 𝔸 Φ :=
+def criticalSuccessor (x : IndexedSet L Φ) (F : Formula α) (hF : IsRhdOperand Φ F)
+    (Δ : MaximalConsistentSet L Φ) (h : Successor x.set Δ) : IndexedSet L Φ :=
   ⟨Δ, x.seq ++ [F], fun A hA ↦ by
       rcases List.mem_append.mp hA with hA | hA;
       · exact x.isRhdOperand_of_mem_seq A hA;
@@ -87,9 +87,12 @@ end IndexedSet
 
 open IndexedSet
 
+variable {𝔸 : Set (Formula α)}
+
 /-- - [dJV90, Theorem 4.1] -/
-def countermodel (𝔸 : Set (Formula α)) (Φ : Finset (Formula α)) [Nonempty (IndexedSet 𝔸 Φ)] :
-    Model (IndexedSet 𝔸 Φ) α where
+def countermodel (𝔸 : Set (Formula α)) (Φ : Finset (Formula α))
+    [Nonempty (IndexedSet (Logic.ofAxioms 𝔸) Φ)] :
+    Model (IndexedSet (Logic.ofAxioms 𝔸) Φ) α where
   Rel' := IndexedSet.Rel
   S' := IndexedSet.S
   Val' x a := #a ∈ x.set
@@ -98,7 +101,7 @@ namespace countermodel
 
 open Model Model.World
 
-variable [Nonempty (IndexedSet 𝔸 Φ)]
+variable [Nonempty (IndexedSet (Logic.ofAxioms 𝔸) Φ)]
 
 instance [Adequate Φ] : (countermodel 𝔸 Φ).IsIL where
   trans _ _ _ h₁ h₂ := ⟨h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩
@@ -137,7 +140,8 @@ lemma truthlemma {x : (countermodel 𝔸 Φ).World} {A : Formula α} (hA : A ∈
     · intro h;
       by_contra hn;
       obtain ⟨Δ, hΔ, hA⟩ := exists_successor_of_box_not_mem hA hn;
-      exact hA <| (ih hA').mp <| h (x.successor Δ hΔ) ⟨hΔ, List.prefix_refl _⟩;
+      exact not_mem_of_provable_neg hA (Context.by_axm rfl) <|
+        (ih hA').mp <| h (x.successor Δ hΔ) ⟨hΔ, List.prefix_refl _⟩;
     · intro h y Rxy;
       exact (ih hA').mpr <| Rxy.1.mem_of_box_mem h;
   | rhd B C ihB ihC =>
@@ -171,7 +175,7 @@ lemma truthlemma {x : (countermodel 𝔸 Φ).World} {A : Formula α} (hA : A ∈
           obtain rfl : C' = F := by simpa using h₁;
           exact ⟨List.prefix_refl _, hΘ⟩;
         · exact (ihC hC).mpr hCΘ;
-      · have hbot := Rxu.1.criticalSuccessor_bot;
+      · have hbot := Rxu.1.criticalSuccessor_bot Logic.ofAxioms.rhd_bot;
         obtain ⟨Θ, hΘ, hCΘ⟩ := hbot.exists_criticalSuccessor .bot h hu;
         use x.successor Θ hΘ.toSuccessor;
         and_intros;
@@ -196,8 +200,8 @@ open Veltman Veltman.Model.World
 variable {α : Type*} [DecidableEq α] {𝔸 : Set (Formula α)} {Φ : Finset (Formula α)}
   {A : Formula α}
 
-instance [Entailment.Consistent (ofAxioms 𝔸)] : Nonempty (IndexedSet 𝔸 Φ) := by
-  obtain ⟨Γ, -⟩ := exists_consistent_union (Φ := Φ) (𝔸 := 𝔸) (X := ∅) <| by
+instance [Entailment.Consistent (ofAxioms 𝔸)] : Nonempty (IndexedSet (Logic.ofAxioms 𝔸) Φ) := by
+  obtain ⟨Γ, -⟩ := exists_consistent_union (Φ := Φ) (L := ofAxioms 𝔸) (X := ∅) <| by
     intro h;
     exact Entailment.Consistent.not_inconsistent (𝓢 := ofAxioms 𝔸) fun _ ↦
       efq ⨀ Context.emptyPrf h;
@@ -239,17 +243,6 @@ theorem complete
   by_contra hA;
   have : Entailment.Consistent (𝐈𝐋 : Logic α) := .of_unprovable hA;
   exact Logic.ofAxioms.not_models_countermodel hA <| h (countermodel ∅ (adequateClosure {A}))
-
-/-- - [dJV90, Theorem 4.1] -/
-theorem provable_TFAE : [
-    𝐈𝐋 ⊢ A,
-    ∀ {κ : Type u} [Nonempty κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A,
-    ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A
-  ].TFAE := by
-  tfae_have 1 → 2 := fun h _ _ _ _ ↦ Logic.ofAxioms.sound (by simp) h;
-  tfae_have 2 → 3 := fun h _ _ _ M _ ↦ h M;
-  tfae_have 3 → 1 := complete;
-  tfae_finish;
 
 end Logic.IL
 

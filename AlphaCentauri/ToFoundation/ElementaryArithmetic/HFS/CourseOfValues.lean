@@ -184,16 +184,14 @@ lemma znth_table {m n : V} (hm : m < n) : znth (c.table v n) m = c.result v m :=
   have hP : LocallyDelta0Pred fun n ↦ ∀ m < n, znth (c.table v n) m = c.result v m := by
     have hR : LocallyDelta0 fun y : Fin 2 → V ↦ znth (c.table v (y 1)) (y 0) =
         znth (c.table v (y 0 + 1)) (y 0) := by
-      have := (LocallyDelta0.of_definable (R := fun y : Fin 2 → V ↦ y 0 = y 1)
-        (by definability)).comp₂
-          (LocallyDelta0Function.znth.comp₂
-            (c.table_comp (v := v) (LocallyDelta0Function.var (V := V) (1 : Fin 2)))
-            (LocallyDelta0Function.var (V := V) (0 : Fin 2)))
-          (LocallyDelta0Function.znth.comp₂
-            (c.table_comp (v := v) <| LocallyDelta0Function.add_one <|
-              LocallyDelta0Function.var (V := V) (0 : Fin 2))
-            (LocallyDelta0Function.var (V := V) (0 : Fin 2)))
-      simpa using this
+      simpa using LocallyDelta0.eq
+        (LocallyDelta0Function.znth.comp₂
+          (c.table_comp (v := v) (LocallyDelta0Function.var (V := V) (1 : Fin 2)))
+          (LocallyDelta0Function.var (V := V) (0 : Fin 2)))
+        (LocallyDelta0Function.znth.comp₂
+          (c.table_comp (v := v) <| LocallyDelta0Function.add_one <|
+            LocallyDelta0Function.var (V := V) (0 : Fin 2))
+          (LocallyDelta0Function.var (V := V) (0 : Fin 2)))
     exact (LocallyDelta0.ball_lt_function (LocallyDelta0Function.var (V := V) (0 : Fin 1))
       hR).of_iff fun w ↦ by simp [result]
   have : ∀ n, ∀ m < n, znth (c.table v n) m = c.result v m := by

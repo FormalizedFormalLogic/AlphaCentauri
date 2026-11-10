@@ -29,6 +29,11 @@ open Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
+lemma LocallyDelta0.mem {k : ℕ} {f f' : (Fin k → V) → V} (hf : LocallyDelta0Function f)
+    (hf' : LocallyDelta0Function f') : LocallyDelta0 fun v ↦ f v ∈ f' v :=
+  (LocallyDelta0.of_definable (R := fun w : Fin 2 → V ↦ w 0 ∈ w 1)
+    (by definability)).comp₂ hf hf'
+
 section adjoin
 
 noncomputable scoped instance : Adjoin V V := ⟨(⟪·, ·⟫ + 1)⟩
@@ -310,10 +315,7 @@ lemma nth_locallyDelta0 : LocallyDelta0Function₂ (nth : V → V → V) where
     intro w hw
     exact le_trans (nth_le _ _) (hw 0)
 
-lemma adjoin_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
-  rcases zero_or_succ x with (rfl | ⟨z, rfl⟩)
-  · simp
-  · right; exact ⟨π₁ z, π₂ z, by simp [adjoin]⟩
+lemma adjoin_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := nil_or_adjoin x
 
 lemma adjoin_induction {P : V → Prop} (hP : LocallyDelta0Pred P)
     (nil : P 0) (adjoin : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
@@ -407,9 +409,8 @@ private lemma phi_iff (param : Fin arity → V) (C pr : V) :
 lemma phi_locallyDelta0 :
     LocallyDelta0 fun w : Fin (arity + 2) → V ↦ c.Phi (w ·.succ.succ) {x | x ∈ w 1} (w 0) := by
   have hnil : LocallyDelta0 fun w : Fin (arity + 2) → V ↦ w 0 = ⟪0, c.nil (w ·.succ.succ)⟫ :=
-    (LocallyDelta0.of_definable (R := fun t : Fin 2 → V ↦ t 0 = ⟪0, t 1⟫)
-      (by definability)).comp₂ (LocallyDelta0Function.var 0)
-        (c.nil_locallyDelta0.retraction fun j ↦ j.succ.succ)
+    LocallyDelta0.eq (LocallyDelta0Function.var 0) <| LocallyDelta0Function.pairing.comp₂
+      (LocallyDelta0Function.const 0) (c.nil_locallyDelta0.retraction fun j ↦ j.succ.succ)
   have hadjoin : LocallyDelta0Function fun y : Fin (arity + 5) → V ↦
       c.adjoin (fun j ↦ y j.succ.succ.succ.succ.succ) (y 2) (y 1) (y 0) := by
     simpa using c.adjoin_locallyDelta0.retraction
@@ -417,18 +418,11 @@ lemma phi_locallyDelta0 :
   have hbody : LocallyDelta0 fun y : Fin (arity + 5) → V ↦
       y 3 = ⟪y 2 ∷ y 1, c.adjoin (fun j ↦ y j.succ.succ.succ.succ.succ) (y 2) (y 1) (y 0)⟫ ∧
         ⟪y 1, y 0⟫ ∈ y 4 := by
-    have := (LocallyDelta0.of_definable (R := fun t : Fin 6 → V ↦
-        t 0 = ⟪t 1 ∷ t 2, t 3⟫ ∧ ⟪t 2, t 4⟫ ∈ t 5) (by definability)).comp
-      (f := ![fun y ↦ y 3, fun y ↦ y 2, fun y ↦ y 1,
-        fun y ↦ c.adjoin (fun j ↦ y j.succ.succ.succ.succ.succ) (y 2) (y 1) (y 0),
-        fun y ↦ y 0, fun y ↦ y 4]) <|
-      Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 3,
-        Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 2,
-          Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 1,
-            Fin.forall_fin_succ.mpr ⟨hadjoin,
-              Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 0,
-                Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 4, finZeroElim⟩⟩⟩⟩⟩⟩
-    simpa using this
+    exact (LocallyDelta0.eq (LocallyDelta0Function.var 3) <| LocallyDelta0Function.pairing.comp₂
+      (LocallyDelta0Function.adjoin.comp₂ (LocallyDelta0Function.var 2)
+        (LocallyDelta0Function.var 1)) hadjoin).and <|
+      LocallyDelta0.mem (LocallyDelta0Function.pairing.comp₂ (LocallyDelta0Function.var 1)
+        (LocallyDelta0Function.var 0)) (LocallyDelta0Function.var 4)
   have hex := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 0) <|
     LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
       LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 3) hbody
@@ -476,13 +470,9 @@ noncomputable def courseOfValues : CourseOfValues.Construction V arity where
       LocallyDelta0Function.znth.comp₂ (LocallyDelta0Function.var 0) hpi₂
     have hadjoin := c.adjoin_locallyDelta0.comp_cons hpi₁
       (u := (fun w : Fin (arity + 2) → V ↦ π₂ (w 1 - 1)) :>
-        (fun w ↦ znth (w 0) (π₂ (w 1 - 1))) :> fun j w ↦ w j.succ.succ) fun j ↦ by
-          cases j using Fin.cases with
-          | zero => exact hpi₂
-          | succ j =>
-            cases j using Fin.cases with
-            | zero => exact hznth
-            | succ j => simpa using LocallyDelta0Function.var j.succ.succ
+        (fun w ↦ znth (w 0) (π₂ (w 1 - 1))) :> fun j w ↦ w j.succ.succ) <|
+        Fin.forall_fin_succ.mpr ⟨hpi₂, Fin.forall_fin_succ.mpr ⟨hznth, fun j ↦ by
+          simpa using LocallyDelta0Function.var j.succ.succ⟩⟩
     exact LocallyDelta0Function.ite (LocallyDelta0.of_definable (by definability))
       (c.nil_locallyDelta0.retraction fun j ↦ j.succ.succ) (by simpa using hadjoin)
   bound := c.bound
@@ -534,13 +524,11 @@ lemma eq_of_mem_limSeq {s z : V} (h : z ∈ c.adjointruction.limSeq param s) :
   have hR : LocallyDelta0 fun y : Fin 2 → V ↦
       y 0 ∈ c.adjointruction.limSeq param (y 1) →
         y 0 = ⟪π₁ (y 0), c.result param (π₁ (y 0))⟫ := by
-    have := (LocallyDelta0.of_definable
-      (R := fun t : Fin 3 → V ↦ t 0 ∈ t 1 → t 0 = ⟪π₁ (t 0), t 2⟫) (by definability)).comp₃
-        (LocallyDelta0Function.var (V := V) (0 : Fin 2))
-        (c.limSeq_comp param (LocallyDelta0Function.var (V := V) (1 : Fin 2)))
-        (c.result_comp param <| LocallyDelta0Function.pi₁.comp₁ <|
-          LocallyDelta0Function.var (V := V) (0 : Fin 2))
-    simpa using this
+    exact (LocallyDelta0.mem (LocallyDelta0Function.var (0 : Fin 2))
+      (c.limSeq_comp param (LocallyDelta0Function.var 1))).imp <|
+      LocallyDelta0.eq (LocallyDelta0Function.var 0) <| LocallyDelta0Function.pairing.comp₂
+        (LocallyDelta0Function.pi₁.comp₁ (LocallyDelta0Function.var 0))
+        (c.result_comp param <| LocallyDelta0Function.pi₁.comp₁ (LocallyDelta0Function.var 0))
   have hP : LocallyDelta0Pred fun s ↦ ∀ z < c.adjointruction.limSeq param s,
       z ∈ c.adjointruction.limSeq param s → z = ⟪π₁ z, c.result param (π₁ z)⟫ :=
     (LocallyDelta0.ball_lt_function
@@ -568,15 +556,13 @@ lemma mem_limSeq_result (xs : V) :
   set K := ⟪xs, c.bound param xs⟫
   have hP : LocallyDelta0Pred fun ys ↦
       ys ≤ xs → ⟪ys, c.result param ys⟫ ∈ c.adjointruction.limSeq param (K + ys + 1) := by
-    have hmem := (LocallyDelta0.of_definable (R := fun t : Fin 2 → V ↦ t 0 ∈ t 1)
-      (by definability)).comp₂
-        (LocallyDelta0Function.pairing.comp₂ (LocallyDelta0Function.var (V := V) (0 : Fin 1))
-          (c.result_comp param (LocallyDelta0Function.var (V := V) (0 : Fin 1))))
+    exact (LocallyDelta0.le (LocallyDelta0Function.var (0 : Fin 1))
+      (LocallyDelta0Function.const xs)).imp <|
+      LocallyDelta0.mem (LocallyDelta0Function.pairing.comp₂ (LocallyDelta0Function.var 0)
+        (c.result_comp param (LocallyDelta0Function.var 0)))
         (c.limSeq_comp param <| LocallyDelta0Function.add_one <|
           LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const K)
-            (LocallyDelta0Function.var (V := V) (0 : Fin 1)))
-    exact (LocallyDelta0.of_definable (R := fun t : Fin 1 → V ↦ t 0 ≤ xs)
-      (by definability)).imp (by simpa using hmem)
+            (LocallyDelta0Function.var 0))
   have : ∀ ys, ys ≤ xs →
       ⟪ys, c.result param ys⟫ ∈ c.adjointruction.limSeq param (K + ys + 1) := by
     apply LocallyDelta0Pred.order_induction hP
@@ -584,7 +570,7 @@ lemma mem_limSeq_result (xs : V) :
     have hle : ⟪ys, c.result param ys⟫ ≤ K :=
       pair_le_pair hys (le_trans (c.result_le_bound param ys) (c.bound_monotone param hys))
     apply c.adjointruction.mem_limSeq_succ_iff.mpr
-    refine ⟨le_trans hle le_self_add, ?_⟩
+    apply And.intro (le_trans hle le_self_add)
     change c.Phi param _ _
     rcases nil_or_adjoin ys with (rfl | ⟨x, ys', rfl⟩)
     · left; simp
@@ -1429,9 +1415,8 @@ lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i]
         (LocallyDelta0Function.var (1 : Fin 2)) (LocallyDelta0Function.var 0)))).of_iff
           fun w ↦ by simp
   have hP : LocallyDelta0Pred fun u : V ↦ x ∈ vecToSet u ↔ ∃ i < len u, x = u.[i] :=
-    ((LocallyDelta0.of_definable (R := fun t : Fin 2 → V ↦ t 0 ∈ t 1) (by definability)).comp₂
-      (LocallyDelta0Function.const x) (vecToSet_locallyDelta0.comp₁
-        (LocallyDelta0Function.var (0 : Fin 1)))).iff hex |>.of_iff fun w ↦ by simp
+    ((LocallyDelta0.mem (LocallyDelta0Function.const x) (vecToSet_locallyDelta0.comp₁
+      (LocallyDelta0Function.var (0 : Fin 1)))).iff hex).of_iff fun w ↦ by simp
   apply adjoin_induction hP
   · simp
   · intro y v ih

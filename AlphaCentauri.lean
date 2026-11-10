@@ -8,8 +8,12 @@ public import AlphaCentauri.Axiomatizability.ISigma0
 public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Axiomatizability.RestrictedComplexity
 public import AlphaCentauri.Bootstrapping.Completeness.Henkin
+public import AlphaCentauri.Bootstrapping.Interpretability.CaseSplit
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
+public import AlphaCentauri.Bootstrapping.Interpretability.Composition
+public import AlphaCentauri.Bootstrapping.Interpretability.Congruence
 public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
+public import AlphaCentauri.Bootstrapping.Interpretability.Identity
 public import AlphaCentauri.Bootstrapping.Interpretability.Interpretable
 public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
@@ -32,6 +36,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.PeanoMinusAxiom
+public import AlphaCentauri.Bootstrapping.Proof.ProofByCases
 public import AlphaCentauri.Bootstrapping.Proof.RankedDerivation
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
@@ -48,8 +53,10 @@ public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Formalized
 public import AlphaCentauri.Interpretability.Henkin
+public import AlphaCentauri.Interpretability.InterpretationExistence
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Pi1Conservativity
+public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Standard
 public import AlphaCentauri.InterpretabilityLogic.Extension
 public import AlphaCentauri.InterpretabilityLogic.Formula
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Basic
@@ -65,6 +72,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
 public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILM
 public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILP
 public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILW
+public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILWStar
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStep
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic

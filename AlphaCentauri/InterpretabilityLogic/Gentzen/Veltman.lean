@@ -24,6 +24,30 @@ variable {κ α : Type*} [Nonempty κ]
 def Model.World.ForcesSequent (M : Model κ α) (x : M.World) (S : Sequent α) : Prop :=
   (∀ A ∈ S.ant, Model.World.Forces M x A) → ∃ B ∈ S.suc, Model.World.Forces M x B
 
+namespace Model.World
+
+variable {M : Model κ α} {x : M.World}
+
+lemma forces_conj₂ : {l : List (Formula α)} → (x ⊩ ⋀l ↔ ∀ B ∈ l, x ⊩ B)
+  | [] => by simp
+  | [B] => by simp
+  | B :: C :: l => by simp [forces_and, forces_conj₂ (l := C :: l)]
+
+@[simp]
+lemma forces_conj {Γ : FormulaFinset α} : x ⊩ Γ.conj ↔ ∀ B ∈ Γ, x ⊩ B := by
+  simp [Finset.conj, forces_conj₂];
+
+lemma forces_disj₂ : {l : List (Formula α)} → (x ⊩ ⋁l ↔ ∃ B ∈ l, x ⊩ B)
+  | [] => by simp
+  | [B] => by simp
+  | B :: C :: l => by simp [forces_or, forces_disj₂ (l := C :: l)]
+
+@[simp]
+lemma forces_disj {Γ : FormulaFinset α} : x ⊩ Γ.disj ↔ ∃ B ∈ Γ, x ⊩ B := by
+  simp [Finset.disj, forces_disj₂];
+
+end Model.World
+
 /-- Every world of `M` forces `S`. -/
 def Model.ValidatesSequent (M : Model κ α) (S : Sequent α) : Prop :=
   ∀ x : M.World, Model.World.ForcesSequent M x S
@@ -47,13 +71,17 @@ lemma mem_rhdComponents : C ∈ Γ.rhdComponents ↔ ∃ D, C ▷ D ∈ Γ ∨ D
     cases E with
     | rhd A B =>
       rcases Finset.mem_insert.mp hC with rfl | hC;
-      · exact ⟨_, Or.inl hE⟩;
+      · use B;
+        exact Or.inl hE;
       · obtain rfl := Finset.mem_singleton.mp hC;
-        exact ⟨_, Or.inr hE⟩;
+        use A;
+        exact Or.inr hE;
     | _ => simp at hC;
   · rintro ⟨D, h | h⟩;
-    · exact ⟨_, h, by simp⟩;
-    · exact ⟨_, h, by simp⟩;
+    · use C ▷ D;
+      simpa using h;
+    · use D ▷ C;
+      simpa using h;
 
 end FormulaFinset
 
@@ -105,11 +133,9 @@ end Gentzen
 
 /-! ### Avoiding sets -/
 
-/-- A set `N` of formulas refuted along the `≺[w]`-successors of a child refuting `R`: every formula
-`C ▷ D` on the left of `x` with `C ∉ N` has a witness avoiding `N`.
-
-- [HSS25a, Definition 3.1]
--/
+/-- `N` consists of `avoid R` and antecedents of formulas `C ▷ D` on the left of `x`, the premise
+`principal x.ant.prebox N R` is not derivable, and neither is `witness x.ant.prebox N D` for any
+`C ▷ D` on the left of `x` with `C ∉ N`. -/
 structure IsAvoiding (x : Sequent α) (R : Formula α) (N : FormulaFinset α) : Prop where
   avoid_subset : avoid R ⊆ N
   mem : ∀ C ∈ N, C ∈ avoid R ∨ ∃ D, C ▷ D ∈ x.ant
@@ -310,7 +336,7 @@ lemma lindenbaum {S₀ : Sequent α} (h₀ : ⊬ᴳ[𝐈𝐋] S₀) (hant : S₀
     (hsuc : S₀.suc ⊆ closure BS) : ∃ x : SaturatedSequent BS, S₀ ⊆ x.toSequent := by
   obtain ⟨S, h₁, h₂, h₃, h₄, h₅⟩ :=
     Sequent.exists_saturated Gentzen.isImpClosed mem_closure_imp h₀ hant hsuc;
-  exact ⟨⟨S, h₃, h₄, h₅, h₂⟩, h₁⟩
+  use ⟨S, h₃, h₄, h₅, h₂⟩;
 
 lemma prebox_subset : x.ant.prebox ⊆ closure BS := by
   intro C hC;
@@ -482,12 +508,11 @@ instance : (countermodel x₀).IsIL where
     rintro w u v z ⟨R, c, c', h₁, h₂⟩ ⟨R', d, d', h₃, h₄⟩;
     have := (List.suffix_of_suffix_length_le h₂ h₃ (by simp)).eq_of_length (by simp);
     obtain ⟨rfl, -⟩ := Prod.mk.inj (List.cons_eq_cons.mp this).1;
-    exact ⟨R, c, d', h₁, h₄⟩;
+    use R, c, d';
   s_of_rel := fun ⟨p, h₁⟩ ⟨q, h₂⟩ ↦ ⟨p.1, p.2, p.2, h₁, h₁.trans ((List.suffix_cons q _).trans h₂)⟩
 
 variable {w : (countermodel x₀).World} {A : Formula α}
 
-/-- - [HSS25a, Definition 3.1] -/
 lemma truthlemma :
     (A ∈ (current x₀ w.1).ant → w ⊩ A) ∧ (A ∈ (current x₀ w.1).suc → w ⊮ A) := by
   induction A generalizing w with
@@ -537,7 +562,7 @@ lemma truthlemma :
             exact not_mem_both ⟨hB', h⟩);
       use ⟨(□B, y) :: w.1, hchild, w.2⟩;
       and_intros;
-      · exact ⟨(□B, y), List.suffix_refl _⟩;
+      · use (□B, y);
       · exact ih.2 (hy.suc (by simp [principal]));
   | rhd A B ihA ihB =>
     constructor;
@@ -572,7 +597,7 @@ lemma truthlemma :
             exact not_mem_both ⟨hy.ant (by simp [witness]), mem_suc_of_neg_mem_ant h₁⟩);
       use ⟨(R, y) :: w.1, hchild, w.2⟩;
       and_intros;
-      · exact ⟨R, c, y, hp, List.suffix_refl _⟩;
+      · use R, c, y;
       · exact ihB.1 (hy.ant (by simp [witness]));
     · intro h;
       apply not_forces_rhd.mpr;
@@ -606,7 +631,7 @@ lemma truthlemma :
               ⟨hy.ant (by simp [principal, witness]), mem_suc_of_neg_mem_ant h₁⟩);
       use ⟨(A ▷ B, y) :: w.1, hchild, w.2⟩;
       and_intros;
-      · exact ⟨(A ▷ B, y), List.suffix_refl _⟩;
+      · use (A ▷ B, y);
       · exact ihA.1 (hy.ant (by simp [principal, witness]));
       · rintro v ⟨R, c, c', h₁, h₂⟩;
         obtain ⟨rfl, -⟩ := Prod.mk.inj (List.cons_eq_cons.mp (h₁.eq_of_length (by simp))).1;

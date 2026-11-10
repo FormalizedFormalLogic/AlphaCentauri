@@ -157,28 +157,36 @@ theorem exists_saturated {D : Sequent α → Prop} (hD : IsImpClosed D) {P : For
     have := Finset.card_le_card hΔ';
     exact ⟨Finset.eq_of_subset_of_card_le hΓ' (by simp at hle; omega) |>.symm,
       Finset.eq_of_subset_of_card_le hΔ' (by simp at hle; omega) |>.symm⟩;
-  refine ⟨Γ ⟹ Δ, ⟨h₁, h₂⟩, hD', ⟨?_, ?_⟩, hΓ, hΔ⟩;
-  · intro A B hAB;
-    have hA := (hP (hΓ hAB)).1;
-    have hB := (hP (hΓ hAB)).2;
-    by_cases hl : D (Γ ⟹ insert A Δ);
-    · by_cases hr : D (insert B Γ ⟹ Δ);
-      · exact absurd (by simpa [Finset.insert_eq_of_mem hAB] using hD.impL hl hr) hD';
-      · right;
-        rw [← (grow (Finset.subset_insert B Γ) subset_rfl (Finset.insert_subset hB hΓ) hΔ hr).1];
-        exact Finset.mem_insert_self B Γ;
-    · left;
-      rw [← (grow subset_rfl (Finset.subset_insert A Δ) hΓ (Finset.insert_subset hA hΔ) hl).2];
-      exact Finset.mem_insert_self A Δ;
-  · intro A B hAB;
-    have hA := (hP (hΔ hAB)).1;
-    have hB := (hP (hΔ hAB)).2;
-    have hn : ¬D (insert A Γ ⟹ insert B Δ) := fun h ↦
-      hD' (by simpa [Finset.insert_eq_of_mem hAB] using hD.impR h);
-    obtain ⟨e₁, e₂⟩ := grow (Finset.subset_insert A Γ) (Finset.subset_insert B Δ)
-      (Finset.insert_subset hA hΓ) (Finset.insert_subset hB hΔ) hn;
-    rw [← e₁, ← e₂];
-    exact ⟨Finset.mem_insert_self A Γ, Finset.mem_insert_self B Δ⟩;
+  use Γ ⟹ Δ;
+  and_intros;
+  · exact ⟨h₁, h₂⟩;
+  · exact hD';
+  · constructor;
+    · intro A B hAB;
+      have hA := (hP (hΓ hAB)).1;
+      have hB := (hP (hΓ hAB)).2;
+      by_cases hl : D (Γ ⟹ insert A Δ);
+      · by_cases hr : D (insert B Γ ⟹ Δ);
+        · exact absurd (by simpa [Finset.insert_eq_of_mem hAB] using hD.impL hl hr) hD';
+        · right;
+          rw [← (grow (Finset.subset_insert B Γ) subset_rfl
+            (Finset.insert_subset hB hΓ) hΔ hr).1];
+          exact Finset.mem_insert_self B Γ;
+      · left;
+        rw [← (grow subset_rfl (Finset.subset_insert A Δ) hΓ
+          (Finset.insert_subset hA hΔ) hl).2];
+        exact Finset.mem_insert_self A Δ;
+    · intro A B hAB;
+      have hA := (hP (hΔ hAB)).1;
+      have hB := (hP (hΔ hAB)).2;
+      have hn : ¬D (insert A Γ ⟹ insert B Δ) := fun h ↦
+        hD' (by simpa [Finset.insert_eq_of_mem hAB] using hD.impR h);
+      obtain ⟨e₁, e₂⟩ := grow (Finset.subset_insert A Γ) (Finset.subset_insert B Δ)
+        (Finset.insert_subset hA hΓ) (Finset.insert_subset hB hΔ) hn;
+      rw [← e₁, ← e₂];
+      exact ⟨Finset.mem_insert_self A Γ, Finset.mem_insert_self B Δ⟩;
+  · exact hΓ;
+  · exact hΔ;
 
 end Sequent
 

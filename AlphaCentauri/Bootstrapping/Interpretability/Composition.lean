@@ -781,4 +781,89 @@ lemma derivable_comp_varEqual (hL : L.SymbolsStandard V) (t : Term V L) :
 
 end compValue
 
+/-! ## Translations of formulas along the composite table -/
+
+section compFormula
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {S : Theory L} [S.Δ₁] [𝗘𝗤 L ⪯ S]
+  {tbl₁ tbl₂ : V} (h₁ : IsTranslationTable L S tbl₁) (hT₂ : IsTable L L tbl₂)
+  (hc : IsTable L L (Bootstrapping.compTable L L tbl₁ tbl₂))
+
+omit [L.Eq] [S.Δ₁] [𝗘𝗤 L ⪯ S] in
+lemma IsVarVec.addCast_bvar {k : ℕ} :
+    IsVarVec (fun i : Fin k ↦ (Semiterm.bvar (i.addCast 0) : Semiterm V L (0 + k))) :=
+  fun _ ↦ Or.inl ⟨_, rfl⟩
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma tprovable_comp_rel {k : ℕ} (R : L.Rel k) (u : Fin k → Term V L) :
+    S.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (h₁.domT 🡒 (varEqualT hc (u i) 🡘
+        h₁.transT (varEqualT hT₂ (u i))))) 🡒
+      (hc.transT (Semiformula.rel R u) 🡘 h₁.transT (hT₂.transT (Semiformula.rel R u))) := by
+  have e₁ : hc.transT (Semiformula.rel R u) = relativizedImp hc.domT (fun i ↦ varEqualT hc (u i))
+      ((hc.relT R).subst fun i ↦ Semiterm.bvar (i.addCast 0)) := by
+    ext; exact translate_rel_typed hc R u
+  have e₂ : hT₂.transT (Semiformula.rel R u) = relativizedImp hT₂.domT
+      (fun i ↦ varEqualT hT₂ (u i)) ((hT₂.relT R).subst fun i ↦ Semiterm.bvar (i.addCast 0)) := by
+    ext; exact translate_rel_typed hT₂ R u
+  rw [e₁, e₂, IsTable.transT_relativizedImp h₁.toIsTable,
+    h₁.toIsTable.transT_subst _ IsVarVec.addCast_bvar, IsTable.compTable_domT h₁.toIsTable hT₂ hc,
+    IsTable.compTable_relT h₁.toIsTable hT₂ hc]
+  exact relativizedImp_iff_relAllItr h₁.domT_shift (h₁.transT hT₂.domT) _ _ _
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma IsTable.comp_iff_val (φ : Formula V L) :
+    (hc.transT φ 🡘 h₁.transT (hT₂.transT φ)).val =
+      iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) φ.val)
+        (translate L L tbl₁ (translate L L tbl₂ φ.val)) := by
+  simp only [Semiformula.val_iff, IsTable.transT_val]
+
+lemma derivable_comp_rel (hL : L.SymbolsStandard V) {k : ℕ} (R : L.Rel k) (u : Fin k → Term V L)
+    {M : V} (hM : ∀ i, (u i).val < M) :
+    Derivable S (insert (hc.transT (Semiformula.rel R u) 🡘
+      h₁.transT (hT₂.transT (Semiformula.rel R u))).val (negDomSet L tbl₁.[0] M)) := by
+  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain
+  have ih' (i : Fin k) := derivable_insert_negDomSet_mono hdom _ (le_of_lt (hM i))
+    (derivable_comp_varEqual h₁ hT₂ hc hL (u i))
+  exact Derivable.of_tprovable_imp (tprovable_comp_rel h₁ hT₂ hc R u)
+    (Derivable.conj_typed (IsFormulaSet.negDomSet hdom M) ih')
+
+omit [L.Eq] [S.Δ₁] [𝗘𝗤 L ⪯ S] in
+lemma freshVec_fvar (j : V) : ∀ i < len (freshVec j : V), ∃ x, (freshVec j : V).[i] = ^&x := by
+  intro i hi
+  rw [len_freshVec] at hi
+  rcases lt_or_eq_of_le (lt_succ_iff_le.mp hi) with h' | rfl
+  · exact ⟨i + 1, nth_freshVec_of_lt h'⟩
+  · exact ⟨0, by simp⟩
+
+omit [S.Δ₁] [𝗘𝗤 L ⪯ S] in
+lemma fvSubst_freshVec_translate_free {tbl p j : V} (hT : IsTable L L tbl)
+    (hp : IsSemiformula L 1 p) (hj : ^∀ p < j) :
+    fvSubst L (freshVec j) (translate L L tbl (free L p)) =
+      shift L (translate L L tbl (free L p)) := by
+  rw [← translate_fvSubst hT (freshVec_fvar j) (IsSemiformula.free hp),
+    fvSubst_freshVec_free hp (le_qqAll p) hj, translate_shift hT (IsSemiformula.free hp)]
+
+omit [S.Δ₁] [𝗘𝗤 L ⪯ S] in
+lemma fvSubst_freshVec_translate_translate_free {tbl tbl' p j : V} (hT : IsTable L L tbl)
+    (hT' : IsTable L L tbl') (hp : IsSemiformula L 1 p) (hj : ^∀ p < j) :
+    fvSubst L (freshVec j) (translate L L tbl (translate L L tbl' (free L p))) =
+      shift L (translate L L tbl (translate L L tbl' (free L p))) := by
+  have h₁ := IsSemiformula.translate hT' (IsSemiformula.free hp)
+  rw [← translate_fvSubst hT (freshVec_fvar j) h₁, fvSubst_freshVec_translate_free hT' hp hj,
+    translate_shift hT h₁]
+
+omit [L.Eq] [S.Δ₁] [𝗘𝗤 L ⪯ S] in
+lemma fvSubst_iff_code {w p q : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsFormula L p)
+    (hq : IsFormula L q) : fvSubst L w (iff L p q) = iff L (fvSubst L w p) (fvSubst L w q) := by
+  rw [Bootstrapping.iff, fvSubst_and (by simp [hp.isUFormula, hq.isUFormula])
+    (by simp [hp.isUFormula, hq.isUFormula]), fvSubst_imp hw hp hq, fvSubst_imp hw hq hp]
+  rfl
+
+omit [L.Eq] [S.Δ₁] [𝗘𝗤 L ⪯ S] in
+lemma free_subst_bvar_zero {d : Semiformula V L 1} (hd : d.shift = d) :
+    (d.subst ![Semiterm.bvar 0]).free = d.subst ![Semiterm.fvar 0] := by
+  simp [Semiformula.free, hd]
+
+end compFormula
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

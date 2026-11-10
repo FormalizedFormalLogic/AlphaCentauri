@@ -175,6 +175,15 @@ lemma J2_of_J2Plus : ofAxiomsMinus 𝔸 ⊢ Axioms.J2Plus A B C 🡒 Axioms.J2 A
   have : ofAxiomsMinus 𝔸 ⊢ A ▷ B 🡒 A ▷ (B ⋎ C) := rhd_mono_right or₁;
   cl_prover [this];
 
+lemma fdisj_rhd [DecidableEq α] {X : Set (Formula α)} {𝒢 : Finset (Formula α)}
+    (h : ∀ G ∈ 𝒢, X *⊢[ofAxiomsMinus 𝔸] G ▷ C) : X *⊢[ofAxiomsMinus 𝔸] 𝒢.disj ▷ C := by
+  induction 𝒢 using Finset.induction_on with
+  | empty => simpa using Context.of (rhd_of_box_neg (A := ⊥) (B := C) ⨀ provable_box verum);
+  | insert G 𝒢 _ ih =>
+    have h₁ : X *⊢[ofAxiomsMinus 𝔸] (G ⋎ 𝒢.disj) ▷ C :=
+      Context.of axiomJ3 ⨀ K_intro (h G (by simp)) (ih fun H hH ↦ h H (by simp [hH]));
+    exact Context.of (rhd_anti_left CinsertFDisjAFDisj) ⨀ h₁;
+
 end Logic.ofAxiomsMinus
 
 /-! ### Named logics -/

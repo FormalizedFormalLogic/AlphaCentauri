@@ -1,6 +1,7 @@
 module
 
 public import Foundation.Logic.LogicSymbol
+public import Mathlib.Data.Finset.Basic
 
 /-!
 # Formulas of interpretability logic
@@ -117,6 +118,52 @@ def depth : Formula α → ℕ
 @[simp, grind =] lemma depth_rhd : (A ▷ B).depth = max A.depth B.depth + 1 := rfl
 
 end Formula
+
+/-! ### Subformulas -/
+
+section
+
+variable {α : Type*} [DecidableEq α]
+
+namespace Formula
+
+def subformulas : Formula α → Finset (Formula α)
+  | #a    => {#a}
+  | ⊥     => {⊥}
+  | A 🡒 B => insert (A 🡒 B) (A.subformulas ∪ B.subformulas)
+  | □A    => insert (□A) A.subformulas
+  | A ▷ B => insert (A ▷ B) (A.subformulas ∪ B.subformulas)
+
+variable {A B : Formula α}
+
+@[simp] lemma mem_subformulas_self : A ∈ A.subformulas := by
+  cases A <;> simp [subformulas];
+
+lemma subformulas_subset_of_mem (h : B ∈ A.subformulas) : B.subformulas ⊆ A.subformulas := by
+  induction A with
+  | atom a => simp_all [subformulas];
+  | falsum => simp_all [subformulas];
+  | imp A₁ A₂ ih₁ ih₂ =>
+    simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h;
+    rcases h with rfl | h | h;
+    · rfl;
+    · exact (ih₁ h).trans <| fun x hx ↦ by simp [subformulas, hx];
+    · exact (ih₂ h).trans <| fun x hx ↦ by simp [subformulas, hx];
+  | box A ih =>
+    simp only [subformulas, Finset.mem_insert] at h;
+    rcases h with rfl | h;
+    · rfl;
+    · exact (ih h).trans <| fun x hx ↦ by simp [subformulas, hx];
+  | rhd A₁ A₂ ih₁ ih₂ =>
+    simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h;
+    rcases h with rfl | h | h;
+    · rfl;
+    · exact (ih₁ h).trans <| fun x hx ↦ by simp [subformulas, hx];
+    · exact (ih₂ h).trans <| fun x hx ↦ by simp [subformulas, hx];
+
+end Formula
+
+end
 
 end FFL.InterpretabilityLogic
 

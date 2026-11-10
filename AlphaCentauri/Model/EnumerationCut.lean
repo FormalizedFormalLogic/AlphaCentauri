@@ -3,6 +3,7 @@ module
 public import AlphaCentauri.Model.EndExtension
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Definability
 
 /-!
 # Enumeration cuts and their coded limits

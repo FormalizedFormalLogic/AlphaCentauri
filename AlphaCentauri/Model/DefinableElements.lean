@@ -6,6 +6,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Incompleteness.Second
+public import AlphaCentauri.Calculus.Induction.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 
 /-!
 # Elementary substructures and definable elements

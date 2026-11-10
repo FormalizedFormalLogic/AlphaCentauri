@@ -8,6 +8,8 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
 public import Mathlib.FieldTheory.KummerPolynomial
 public import Mathlib.NumberTheory.Padics.Hensel
+public import AlphaCentauri.ToMathlib.NumberTheory.FLT.Three
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastNumberPrinciple
 
 /-!
 # Fermat's Last Theorem in $\mathsf{I}\mathsf{E}_1$ and $\mathsf{IOpen}$

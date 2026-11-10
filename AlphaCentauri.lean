@@ -104,6 +104,7 @@ public import AlphaCentauri.Reflection.StandardProvability
 public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.Collection
 public import AlphaCentauri.Schemata.Induction
+public import AlphaCentauri.Schemata.OpenInduction
 public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.InternalTSchema

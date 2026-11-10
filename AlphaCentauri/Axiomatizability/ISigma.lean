@@ -6,6 +6,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
+public import AlphaCentauri.Calculus.Induction.Basic
 
 /-!
 # Finite axiomatizability of `𝗜𝚺 n`

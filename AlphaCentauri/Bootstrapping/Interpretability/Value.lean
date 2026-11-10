@@ -5,6 +5,7 @@ public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.Meta.ClProver
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 
 /-!
 # Values of closed terms along the internal translation

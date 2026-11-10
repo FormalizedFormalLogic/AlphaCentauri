@@ -5,6 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.LK.Completeness
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.Theory
+public import AlphaCentauri.Calculus.Induction.Basic
 
 /-!
 # Provably total functions

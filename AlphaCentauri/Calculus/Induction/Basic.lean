@@ -6,6 +6,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.LK.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 
 /-!
 # A one-sided sequent calculus with an induction rule

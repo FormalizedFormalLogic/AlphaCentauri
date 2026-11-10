@@ -5,6 +5,7 @@ public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Incompleteness.Second
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.ProvabilityAbstraction
 
 /-!
 # Henkin interpretations and Feferman's theorem

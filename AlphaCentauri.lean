@@ -119,6 +119,7 @@ public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Formula
 public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Logic
 public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
 public import AlphaCentauri.ToFoundation.OpenFormulaDegree
 public import AlphaCentauri.ToFoundation.OpenPredicate

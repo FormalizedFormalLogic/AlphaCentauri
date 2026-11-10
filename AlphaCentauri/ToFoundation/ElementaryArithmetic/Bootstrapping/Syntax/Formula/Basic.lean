@@ -1110,6 +1110,46 @@ lemma depthValue_locallyDelta0 :
     LocallyDelta0Function.ite (htag 6) hall <|
     LocallyDelta0Function.ite (htag 7) hexs (LocallyDelta0Function.const 0)
 
+private lemma boundAt_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 3 → V ↦
+      (fun (r : Fin 2 → V) d ↦ c.bound (c.iter (r 0) d) (r 1)) (w ·.succ) (w 0) :=
+  c.bound_locallyDelta0.comp₂ (c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+    (LocallyDelta0Function.var 0)) (LocallyDelta0Function.var 2)
+
+/-- The largest of the bounds at `n` over the depths `d ≤ J`. -/
+noncomputable def boundMax (P J n : V) : V :=
+  listMax (listMap (fun r d ↦ c.bound (c.iter (r 0) d) (r 1)) ![P, n] (rangeList (J + 1)))
+
+lemma le_boundMax {P J n d : V} (hd : d ≤ J) : c.bound (c.iter P d) n ≤ c.boundMax P J n := by
+  have hd' : d < len (rangeList (J + 1)) := by simpa [lt_succ_iff_le] using hd
+  have := nth_le_listMax (v := listMap (fun r d ↦ c.bound (c.iter (r 0) d) (r 1)) ![P, n]
+    (rangeList (J + 1))) (i := d) (by rwa [len_listMap c.boundAt_locallyDelta0])
+  rw [nth_listMap c.boundAt_locallyDelta0 _ _ hd', nth_rangeList (by simpa using hd')] at this
+  exact this
+
+lemma boundMax_monotone {P J n m : V} (h : n ≤ m) : c.boundMax P J n ≤ c.boundMax P J m := by
+  apply listMaxss_le
+  intro i hi
+  rw [len_listMap c.boundAt_locallyDelta0] at hi
+  rw [nth_listMap c.boundAt_locallyDelta0 _ _ hi, nth_rangeList (by simpa using hi)]
+  exact le_trans (c.bound_monotone _ h) (c.le_boundMax (lt_succ_iff_le.mp (by simpa using hi)))
+
+lemma boundMax_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 3 → V ↦ c.boundMax (w 0) (w 1) (w 2) := by
+  have := (listMap_locallyDelta0 (g := fun (r : Fin 2 → V) d ↦ c.bound (c.iter (r 0) d) (r 1))
+    c.boundAt_locallyDelta0).comp_cons
+    (rangeList_locallyDelta0.comp₁ (LocallyDelta0Function.add_one (LocallyDelta0Function.var 1)))
+    (u := ![fun w : Fin 3 → V ↦ w 0, fun w ↦ w 2]) <| Fin.forall_fin_succ.mpr
+      ⟨LocallyDelta0Function.var 0, Fin.forall_fin_succ.mpr
+        ⟨LocallyDelta0Function.var 2, finZeroElim⟩⟩
+  convert listMax_locallyDelta0.comp₁ this using 2 with w
+  simp only [boundMax]
+  congr 2
+  funext j
+  cases j using Fin.cases with
+  | zero => rfl
+  | succ j => simp [Fin.fin_one_eq_zero j]
+
 end Construction
 
 end UformulaRec1

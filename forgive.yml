@@ -77,9 +77,6 @@ declaration:
   OpenPredicate.openInduction_iff_integerPart:
     forgive:
       - OpenPredicate.openInduction_iff_integerPart
-  FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_imp_provabilityFormula_of_sigma1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_imp_provabilityFormula_of_sigma1
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:
@@ -106,12 +103,3 @@ declaration:
   FFL.FirstOrder.Arithmetic.IOpen.not_finiteAxiomatizable:
     forgive:
       - HahnSeries.isRealClosed_lex
-  FFL.FirstOrder.Arithmetic.Bootstrapping.pi1Conservative_dia:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_imp_provabilityFormula_of_sigma1
-  FFL.FirstOrder.ArithmeticTheory.instPi1ConservativityIL:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_imp_provabilityFormula_of_sigma1
-  FFL.InterpretabilityLogic.Logic.ILM.arithmetical_soundness_pi1Conservativity:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_imp_provabilityFormula_of_sigma1

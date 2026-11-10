@@ -149,10 +149,12 @@ public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.Injection
 public import AlphaCentauri.ToFoundation.InternalEquality
+public import AlphaCentauri.ToFoundation.InternalTSchema
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
 public import AlphaCentauri.ToFoundation.LeastWitness
 public import AlphaCentauri.ToFoundation.OpenFormulaDegree
 public import AlphaCentauri.ToFoundation.OpenPredicate
+public import AlphaCentauri.ToFoundation.PairingAssignment
 public import AlphaCentauri.ToFoundation.PartialTruth
 public import AlphaCentauri.ToFoundation.Pigeonhole
 public import AlphaCentauri.ToFoundation.Power

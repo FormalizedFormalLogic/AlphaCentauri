@@ -324,6 +324,145 @@ lemma mem_of_mem_tree (hO : O ⊆ rhdOperands Φ) (hA : A ∈ tree Φ O) (hB : B
 
 end mAdequateClosure
 
+open mAdequateClosure in
+/-- The antecedents and consequents of `▷`-formulas in `Φ` together with the trees over them. -/
+noncomputable def mAdequateClosure.operands (Φ : Finset (Formula α)) : Finset (Formula α) :=
+  rhdOperands Φ ∪ tree Φ (rhdOperands Φ)
+
+open mAdequateClosure in
+/-- The subformulas of the formulas in `Φ`, of `□∼A` for the trees `A` over `Φ`, and of `A ▷ B` for
+`A` and `B` in `operands Φ`. -/
+noncomputable def mAdequateClosure (Φ : Finset (Formula α)) : Finset (Formula α) :=
+  (Φ ∪ (tree Φ (rhdOperands Φ)).image (fun A ↦ □(∼A)) ∪
+    (operands Φ ×ˢ operands Φ).image (fun p ↦ p.1 ▷ p.2)).biUnion subformulas
+
+namespace mAdequateClosure
+
+variable {Φ : Finset (Formula α)} {A B C D : Formula α}
+
+private lemma mem_iff : A ∈ mAdequateClosure Φ ↔
+    (∃ B ∈ Φ, A ∈ B.subformulas) ∨ (∃ B ∈ tree Φ (rhdOperands Φ), A ∈ (□(∼B)).subformulas) ∨
+      ∃ B ∈ operands Φ, ∃ C ∈ operands Φ, A ∈ (B ▷ C).subformulas := by
+  simp only [mAdequateClosure, Finset.mem_biUnion, Finset.mem_union, Finset.mem_image,
+    Finset.mem_product, Prod.exists];
+  grind;
+
+lemma subset : Φ ⊆ mAdequateClosure Φ := fun A hA ↦ mem_iff.mpr <| .inl ⟨A, hA, by simp⟩
+
+lemma mem_of_mem_subformulas (hA : A ∈ mAdequateClosure Φ) (hB : B ∈ A.subformulas) :
+    B ∈ mAdequateClosure Φ := by
+  rcases mem_iff.mp hA with ⟨C, hC, h⟩ | ⟨C, hC, h⟩ | ⟨C, hC, D, hD, h⟩;
+  · exact mem_iff.mpr <| .inl ⟨C, hC, subformulas_subset_of_mem h hB⟩;
+  · exact mem_iff.mpr <| .inr <| .inl ⟨C, hC, subformulas_subset_of_mem h hB⟩;
+  · exact mem_iff.mpr <| .inr <| .inr ⟨C, hC, D, hD, subformulas_subset_of_mem h hB⟩;
+
+lemma rhd_mem (hA : A ∈ operands Φ) (hB : B ∈ operands Φ) : A ▷ B ∈ mAdequateClosure Φ :=
+  mem_iff.mpr <| .inr <| .inr ⟨A, hA, B, hB, by simp⟩
+
+variable [Adequate Φ]
+
+private lemma mem_of_mem_operands (hA : A ∈ operands Φ) (hB : B ∈ A.subformulas)
+    (hB' : (∃ C D, B = C ▷ D) ∨ ∃ C, B = □C) :
+    B ∈ Φ ∨ ∃ D ∈ tree Φ (rhdOperands Φ), B = □(∼D) := by
+  rcases Finset.mem_union.mp hA with hA | hA;
+  · exact .inl <| Adequate.subformulas_subset (mem_rhdOperands.mp hA).1 hB;
+  · exact mem_of_mem_tree (subset_refl _) hA hB hB';
+
+lemma operands_of_rhd_mem (h : A ▷ B ∈ mAdequateClosure Φ) : A ∈ operands Φ ∧ B ∈ operands Φ := by
+  have hΦ (h : A ▷ B ∈ Φ) : A ∈ operands Φ ∧ B ∈ operands Φ :=
+    ⟨Finset.mem_union_left _ <| mem_rhdOperands.mpr ⟨Adequate.rhd_left h, .of_rhd_left h⟩,
+      Finset.mem_union_left _ <| mem_rhdOperands.mpr ⟨Adequate.rhd_right h, .of_rhd_right h⟩⟩;
+  have hΦ' (h : A ▷ B ∈ Φ ∨ ∃ D ∈ tree Φ (rhdOperands Φ), A ▷ B = □(∼D)) :
+      A ∈ operands Φ ∧ B ∈ operands Φ := by
+    rcases h with h | ⟨_, _, h⟩;
+    · exact hΦ h;
+    · simp at h;
+  rcases mem_iff.mp h with ⟨C, hC, h⟩ | ⟨C, hC, h⟩ | ⟨C, hC, D, hD, h⟩;
+  · exact hΦ <| Adequate.subformulas_subset hC h;
+  · simp only [subformulas, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton] at h;
+    rcases h with h | h | h | h;
+    · simp at h;
+    · simp at h;
+    · exact hΦ' <| mem_of_mem_tree (subset_refl _) hC h (.inl ⟨A, B, rfl⟩);
+    · simp at h;
+  · simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h;
+    rcases h with h | h | h;
+    · obtain ⟨rfl, rfl⟩ := rhd_inj.mp h;
+      exact ⟨hC, hD⟩;
+    · exact hΦ' <| mem_of_mem_operands hC h (.inl ⟨A, B, rfl⟩);
+    · exact hΦ' <| mem_of_mem_operands hD h (.inl ⟨A, B, rfl⟩);
+
+lemma isRhdOperand_iff : IsRhdOperand (mAdequateClosure Φ) A ↔ A ∈ operands Φ := by
+  constructor;
+  · rintro ⟨B, h | h⟩;
+    · exact (operands_of_rhd_mem h).1;
+    · exact (operands_of_rhd_mem h).2;
+  · intro h;
+    exact .of_rhd_left <| rhd_mem h h;
+
+lemma box_mem (h : □A ∈ mAdequateClosure Φ) :
+    □A ∈ boxes Φ ∨ ∃ D ∈ tree Φ (rhdOperands Φ), □A = □(∼D) := by
+  have hΦ' (h : □A ∈ Φ ∨ ∃ D ∈ tree Φ (rhdOperands Φ), □A = □(∼D)) :
+      □A ∈ boxes Φ ∨ ∃ D ∈ tree Φ (rhdOperands Φ), □A = □(∼D) := by
+    rcases h with h | h;
+    · exact .inl <| mem_boxes.mpr ⟨h, A, rfl⟩;
+    · exact .inr h;
+  rcases mem_iff.mp h with ⟨C, hC, h⟩ | ⟨C, hC, h⟩ | ⟨C, hC, D, hD, h⟩;
+  · exact hΦ' <| .inl <| Adequate.subformulas_subset hC h;
+  · simp only [subformulas, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton] at h;
+    rcases h with h | h | h | h;
+    · exact .inr ⟨C, hC, h⟩;
+    · simp at h;
+    · exact hΦ' <| mem_of_mem_tree (subset_refl _) hC h (.inr ⟨A, rfl⟩);
+    · simp at h;
+  · simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h;
+    rcases h with h | h | h;
+    · simp at h;
+    · exact hΦ' <| mem_of_mem_operands hC h (.inr ⟨A, rfl⟩);
+    · exact hΦ' <| mem_of_mem_operands hD h (.inr ⟨A, rfl⟩);
+
+instance : Adequate (mAdequateClosure Φ) where
+  imp_left h := mem_of_mem_subformulas h <| by simp [subformulas]
+  imp_right h := mem_of_mem_subformulas h <| by simp [subformulas]
+  box h := mem_of_mem_subformulas h <| by simp [subformulas]
+  rhd_left h := mem_of_mem_subformulas h <| by simp [subformulas]
+  rhd_right h := mem_of_mem_subformulas h <| by simp [subformulas]
+  bot_rhd_bot := subset Adequate.bot_rhd_bot
+  rhd_mem hA hB := rhd_mem (isRhdOperand_iff.mp hA) (isRhdOperand_iff.mp hB)
+  box_neg_mem {A} hA := by
+    rcases Finset.mem_union.mp (isRhdOperand_iff.mp hA) with hA | hA;
+    · exact subset <| Adequate.box_neg_mem (mem_rhdOperands.mp hA).2;
+    · exact mem_iff.mpr <| .inr <| .inl ⟨A, hA, by simp⟩;
+
+instance : MAdequate (mAdequateClosure Φ) where
+  exists_isRhdOperand {B X} hB hX := by
+    have hX' : X ⊆ boxes Φ ∪ (tree Φ (rhdOperands Φ)).image fun C ↦ □(∼C) := by
+      intro C hC;
+      obtain ⟨hC, D, rfl⟩ := hX C hC;
+      rcases box_mem hC with h | h;
+      · exact Finset.mem_union_left _ h;
+      · obtain ⟨E, hE, h⟩ := h;
+        exact Finset.mem_union_right _ <| Finset.mem_image.mpr ⟨E, hE, h.symm⟩;
+    rcases Finset.mem_union.mp (isRhdOperand_iff.mp hB) with hB | hB;
+    · obtain ⟨A, hA, h⟩ := exists_tree_of_conj hB hX';
+      exact ⟨A, isRhdOperand_iff.mpr <| Finset.mem_union_right _ hA, h⟩;
+    · obtain ⟨b, hb, Y, hY, rfl⟩ := mem_tree.mp hB;
+      have hY' : Y ∪ X ⊆ boxes Φ ∪ (tree Φ (rhdOperands Φ)).image fun C ↦ □(∼C) := by
+        apply Finset.union_subset _ hX';
+        apply hY.trans;
+        apply Finset.union_subset_union (subset_refl _);
+        exact Finset.image_subset_image <| tree_mono <| Finset.erase_subset _ _;
+      obtain ⟨A, hA, h₁, h₂⟩ := exists_tree_of_conj hb hY';
+      have c₁ : 𝐈𝐋 ⊢ (Y ∪ X).conj 🡒 Y.conj ⋏ X.conj := CFconjUnionKFconj;
+      have c₂ : 𝐈𝐋 ⊢ Y.conj ⋏ X.conj 🡒 (Y ∪ X).conj := CKFconjFconjUnion;
+      have c₃ : 𝐈𝐋 ⊢ ◇(b ⋏ (Y ∪ X).conj) 🡒 ◇((b ⋏ Y.conj) ⋏ X.conj) :=
+        Logic.dia_mono <| by cl_prover [c₁];
+      refine ⟨A, isRhdOperand_iff.mpr <| Finset.mem_union_right _ hA, ?_, ?_⟩;
+      · cl_prover [c₂, h₁];
+      · cl_prover [c₁, h₂, c₃];
+
+end mAdequateClosure
+
 end FFL.InterpretabilityLogic
 
 end

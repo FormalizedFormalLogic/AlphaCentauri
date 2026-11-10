@@ -27,10 +27,9 @@ def Arithmetic.irrationalSqrtTwo : ArithmeticSentence := “∀ x y, x * x = 2 *
 - [DAq05, §2]
 - [Wil78] -/
 theorem not_provable_irrationalSqrtTwo_IOpen : ¬ 𝗜𝗢𝗽𝗲𝗻 ⊢ Arithmetic.irrationalSqrtTwo := by
-  have : Arithmetic.irrationalSqrtTwo =
-      ∀¹* (“y x. x * x = 2 * (y * y) → y = 0” : ArithmeticSemisentence 2) := by
-    simp [Arithmetic.irrationalSqrtTwo, allClosure_succ]
-  rw [this]
+  rw [show Arithmetic.irrationalSqrtTwo =
+      ∀¹* (“y x. x * x = 2 * (y * y) → y = 0” : ArithmeticSemisentence 2) by
+    simp [Arithmetic.irrationalSqrtTwo, allClosure_succ]]
   have := IntegerConstantPolynomial.models_ZRing ℝ
   have hy : 0 ≤ IntegerConstantPolynomial.X ℝ := by
     rw [IntegerConstantPolynomial.nonneg_iff]
@@ -49,21 +48,17 @@ theorem not_provable_irrationalSqrtTwo_IOpen : ¬ 𝗜𝗢𝗽𝗲𝗻 ⊢ Arith
     Arithmetic.numeral_two_eq_two, Matrix.cons_val_zero, Tarski.Structure.eq_iff_eq,
     ORingStructure.zero_eq_zero, Nonneg.mk_eq_zero, LogicalConnective.Prop.arrow_eq, not_imp]
   and_intros
-  · apply Subtype.ext
-    apply Subtype.ext
-    have h : C (Real.sqrt 2) * C (Real.sqrt 2) = (C 2 : ℝ[X]) := by
+  · have h₁ : C (Real.sqrt 2) * C (Real.sqrt 2) = (2 : ℝ[X]) := by
       rw [← C_mul, Real.mul_self_sqrt (by norm_num)]
-    have key : C (Real.sqrt 2) * Polynomial.X * (C (Real.sqrt 2) * Polynomial.X) =
-        C 2 * (Polynomial.X * Polynomial.X) := by
-      linear_combination (Polynomial.X * Polynomial.X) * h
-    simp only [x, IntegerConstantPolynomial.X, MulMemClass.coe_mul, Nonneg.coe_mul]
-    convert key using 3
-    change (((@Nat.cast (Nonneg (IntegerConstantPolynomial ℝ))
-      Arithmetic.instCommSemiring_foundation.toNatCast 2 : Nonneg _) :
-        IntegerConstantPolynomial ℝ) : ℝ[X]) = C 2
-    rw [Nonneg.natCast_foundation]
-    exact coeff_inj.mp rfl
-  · exact (by simpa using IntegerConstantPolynomial.natCast_lt_X (K := ℝ) 0 :
-      (0 : IntegerConstantPolynomial ℝ) < _).ne'
+      exact map_ofNat C 2
+    have h₂ : ((2 : IntegerConstantPolynomial ℝ) : ℝ[X]) = 2 :=
+      map_ofNat (IntegerConstantPolynomial ℝ).subtype 2
+    apply Subtype.ext
+    apply Subtype.ext
+    simp only [x, IntegerConstantPolynomial.X, Subring.coe_mul, Nonneg.coe_mul]
+    rw [Nonneg.coe_ofNat_foundation, h₂]
+    linear_combination (Polynomial.X * Polynomial.X) * h₁
+  · apply ne_of_gt
+    simpa using IntegerConstantPolynomial.natCast_lt_X (K := ℝ) 0
 
 end FFL.FirstOrder

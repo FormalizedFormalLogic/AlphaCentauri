@@ -941,6 +941,60 @@ lemma phi_locallyDelta0 :
     ((htag_eq 7).and (hquant c.exs c.exs_locallyDelta0))
   exact this.of_iff fun w ↦ by simpa using c.phi_iff_decode L (w 1) (w 0)
 
+
+/-- The construction of the graph of the recursion. -/
+def construction : Fixpoint.Construction V (β.blueprint L) where
+  Φ := fun _ ↦ c.Phi L
+  defined := .mk <| by
+    constructor
+    · intro v
+      simp [_root_.FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1.Blueprint.blueprint,
+        c.rel_defined.iff, c.rel_defined.graph_delta.proper.iff',
+        c.nrel_defined.iff, c.nrel_defined.graph_delta.proper.iff',
+        c.verum_defined.iff, c.verum_defined.graph_delta.proper.iff',
+        c.falsum_defined.iff, c.falsum_defined.graph_delta.proper.iff',
+        c.and_defined.iff, c.and_defined.graph_delta.proper.iff',
+        c.or_defined.iff, c.or_defined.graph_delta.proper.iff',
+        c.all_defined.iff, c.all_defined.graph_delta.proper.iff',
+        c.exs_defined.iff, c.exs_defined.graph_delta.proper.iff',
+        c.allSize_defined.iff, c.exsSize_defined.iff,
+        c.allChanges_defined.iff,
+        c.exChanges_defined.iff]
+    · intro v
+      symm
+      simpa [_root_.FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1.Blueprint.blueprint,
+        c.rel_defined.iff,
+        c.nrel_defined.iff,
+        c.verum_defined.iff,
+        c.falsum_defined.iff,
+        c.and_defined.iff,
+        c.or_defined.iff,
+        c.all_defined.iff,
+        c.exs_defined.iff,
+        c.allSize_defined.iff,
+        c.exsSize_defined.iff,
+        c.allChanges_defined.iff,
+        c.exChanges_defined.iff] using c.phi_iff L _ _
+  monotone := by
+    unfold Phi
+    rintro C C' hC _ _ ⟨param, p, y, rfl, hp, H⟩
+    refine ⟨param, p, y, rfl, hp, ?_⟩
+    rcases H with (h | h | h | h | ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩ |
+      ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ |
+      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩)
+    · disj 1; exact h
+    · disj 2; exact h
+    · disj 3; exact h
+    · disj 4; exact h
+    · disj 5; exact ⟨p₁, p₂, r₁, r₂, hC h₁, hC h₂, rfl, rfl⟩
+    · disj 6; exact ⟨p₁, p₂, r₁, r₂, hC h₁, hC h₂, rfl, rfl⟩
+    · disj 7; exact ⟨p₁, ys, ⟨hl, fun i hi ↦ hC (hys i hi)⟩, rfl, rfl⟩
+    · disj 8; exact ⟨p₁, ys, ⟨hl, fun i hi ↦ hC (hys i hi)⟩, rfl, rfl⟩
+  Φ_locallyDelta0 := c.phi_locallyDelta0 L
+
+/-- `c.Graph L param p y` states that the recursion takes the value `y` at `p` with `param`. -/
+def Graph (param : V) (x y : V) : Prop := (c.construction L).Fixpoint ![] ⟪param, x, y⟫
+
 end Construction
 
 end UformulaRec1

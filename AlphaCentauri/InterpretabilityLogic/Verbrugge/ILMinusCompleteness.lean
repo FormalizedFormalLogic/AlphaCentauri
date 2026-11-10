@@ -592,6 +592,133 @@ end IndexedModel
 
 end Verbrugge
 
+
+/-! ### Completeness -/
+
+namespace Logic
+
+open Verbrugge Verbrugge.Model
+
+universe u
+
+variable {α : Type u} {A : Formula α}
+
+/-- - [KO21, Theorem 7.1] -/
+theorem ILMinusJ4.complete_verbrugge
+    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ4] → M ⊧ A) :
+    ILMinusJ4 ⊢ A := by
+  classical
+  by_contra hA;
+  obtain ⟨Γ, hΓ⟩ := exists_neg_consistent (Φ := ilMinusAdequateClosure {A}) hA;
+  have : Nonempty (LabelledSet ILMinusJ4 (ilMinusAdequateClosure {A})) := ⟨⟨Γ, ⊥, .bot⟩⟩;
+  exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+    (LabelledSet.truthlemma_condJ4 (x := ⟨Γ, ⊥, .bot⟩)
+      (ilMinusAdequateClosure.subset (by simp))).mp <|
+        h (LabelledSet.model LabelledSet.condJ4) ⟨Γ, ⊥, .bot⟩
+
+/-- - [KO21, Theorem 7.1] -/
+theorem ILMinusJ1J4.complete_verbrugge
+    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → M ⊧ A) :
+    ILMinusJ1J4 ⊢ A := by
+  classical
+  by_contra hA;
+  obtain ⟨Γ, hΓ⟩ := exists_neg_consistent (Φ := ilMinusAdequateClosure {A}) hA;
+  have : Nonempty (LabelledSet ILMinusJ1J4 (ilMinusAdequateClosure {A})) := ⟨⟨Γ, ⊥, .bot⟩⟩;
+  exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+    (LabelledSet.truthlemma_condJ4 (x := ⟨Γ, ⊥, .bot⟩)
+      (ilMinusAdequateClosure.subset (by simp))).mp <|
+        h (LabelledSet.model LabelledSet.condJ4) ⟨Γ, ⊥, .bot⟩
+
+/-- - [KO21, Theorem 7.1] -/
+theorem ILMinusJ4J5.complete_verbrugge
+    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ4] → [M.IsJ5] → M ⊧ A) :
+    ILMinusJ4J5 ⊢ A := by
+  classical
+  by_contra hA;
+  obtain ⟨Γ, hΓ⟩ := exists_neg_consistent (Φ := ilMinusAdequateClosure {A}) hA;
+  have : Nonempty (LabelledSet ILMinusJ4J5 (ilMinusAdequateClosure {A})) := ⟨⟨Γ, ⊥, .bot⟩⟩;
+  exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+    (LabelledSet.truthlemma_condJ4J5 (x := ⟨Γ, ⊥, .bot⟩)
+      (ilMinusAdequateClosure.subset (by simp))).mp <|
+        h (LabelledSet.model LabelledSet.condJ4J5) ⟨Γ, ⊥, .bot⟩
+
+/-- - [KO21, Theorem 7.1] -/
+theorem ILMinusJ1J4J5.complete_verbrugge
+    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → [M.IsJ5] → M ⊧ A) :
+    ILMinusJ1J4J5 ⊢ A := by
+  classical
+  by_contra hA;
+  obtain ⟨Γ, hΓ⟩ := exists_neg_consistent (Φ := ilMinusAdequateClosure {A}) hA;
+  have : Nonempty (LabelledSet ILMinusJ1J4J5 (ilMinusAdequateClosure {A})) := ⟨⟨Γ, ⊥, .bot⟩⟩;
+  exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+    (LabelledSet.truthlemma_condJ4J5 (x := ⟨Γ, ⊥, .bot⟩)
+      (ilMinusAdequateClosure.subset (by simp))).mp <|
+        h (LabelledSet.model LabelledSet.condJ4J5) ⟨Γ, ⊥, .bot⟩
+
+/-- - [KO21, Theorem 7.1] -/
+theorem ILMinusJ2.complete_verbrugge
+    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ2] → M ⊧ A) :
+    ILMinusJ2 ⊢ A := by
+  classical
+  by_contra hA;
+  obtain ⟨Γ, hΓ⟩ := exists_neg_consistent (Φ := ilMinusAdequateClosure {A}) hA;
+  have : Nonempty (LabelledSet ILMinusJ2 (ilMinusAdequateClosure {A})) := ⟨⟨Γ, ⊥, .bot⟩⟩;
+  exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+    (LabelledSet.truthlemma_condJ2 (x := ⟨Γ, ⊥, .bot⟩)
+      (ilMinusAdequateClosure.subset (by simp))).mp <|
+        h (LabelledSet.model LabelledSet.condJ2) ⟨Γ, ⊥, .bot⟩
+
+/-- - [KO21, Theorem 7.1] -/
+theorem ILMinusJ2J4Plus.complete_verbrugge
+    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ2] → [M.IsJ4Plus] → M ⊧ A) :
+    ILMinusJ2J4Plus ⊢ A := by
+  classical
+  by_contra hA;
+  obtain ⟨Γ, hΓ⟩ := exists_neg_consistent (Φ := ilMinusAdequateClosure {A}) hA;
+  have : Nonempty (LabelledSet ILMinusJ2J4Plus (ilMinusAdequateClosure {A})) := ⟨⟨Γ, ⊥, .bot⟩⟩;
+  exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+    (LabelledSet.truthlemma_condJ2J4Plus (x := ⟨Γ, ⊥, .bot⟩)
+      (ilMinusAdequateClosure.subset (by simp))).mp <|
+        h (LabelledSet.model LabelledSet.condJ2J4Plus) ⟨Γ, ⊥, .bot⟩
+
+/-- - [KO21, Theorem 7.4] -/
+theorem ILMinusJ2J5.complete_verbrugge
+    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ2] → [M.IsJ5] → M ⊧ A) :
+    ILMinusJ2J5 ⊢ A := by
+  classical
+  by_contra hA;
+  obtain ⟨Γ, hΓ⟩ := exists_neg_consistent (Φ := ilMinusAdequateClosure {A}) hA;
+  have : Nonempty (Veltman.IndexedSet ILMinusJ2J5 (ilMinusAdequateClosure {A})) :=
+    ⟨⟨Γ, [], by simp, by simp⟩⟩;
+  exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+    (IndexedModel.truthlemma_condJ2J5 (x := ⟨Γ, [], by simp, by simp⟩)
+      (ilMinusAdequateClosure.subset (by simp))).mp <|
+        h (IndexedModel.model IndexedModel.condJ2J5) ⟨Γ, [], by simp, by simp⟩
+
+/-- - [KO21, Theorem 7.4] -/
+theorem ILMinusJ2J4PlusJ5.complete_verbrugge
+    (h : ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
+      [M.IsILMinus] → [M.IsJ2] → [M.IsJ4Plus] → [M.IsJ5] → M ⊧ A) :
+    ILMinusJ2J4PlusJ5 ⊢ A := by
+  classical
+  by_contra hA;
+  obtain ⟨Γ, hΓ⟩ := exists_neg_consistent (Φ := ilMinusAdequateClosure {A}) hA;
+  have : Nonempty (Veltman.IndexedSet ILMinusJ2J4PlusJ5 (ilMinusAdequateClosure {A})) :=
+    ⟨⟨Γ, [], by simp, by simp⟩⟩;
+  exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+    (IndexedModel.truthlemma_condJ2J4PlusJ5 (x := ⟨Γ, [], by simp, by simp⟩)
+      (ilMinusAdequateClosure.subset (by simp))).mp <|
+        h (IndexedModel.model IndexedModel.condJ2J4PlusJ5) ⟨Γ, [], by simp, by simp⟩
+
+end Logic
+
 end FFL.InterpretabilityLogic
 
 end

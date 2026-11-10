@@ -60,6 +60,8 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 public import AlphaCentauri.InterpretabilityLogic.Veltman.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinusCompleteness
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.CodedLimit
 public import AlphaCentauri.Model.Cut

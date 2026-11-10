@@ -509,5 +509,98 @@ lemma relativizedImp_equal_generalize {k : ℕ} {d : Semiformula V L 1} (hd : d.
 
 end equalBlock
 
+section equation
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {S : Theory L} [S.Δ₁] [𝗘𝗤 L ⪯ S]
+  {tbl : V} (h : IsTranslationTable L S tbl)
+
+omit [L.Eq] in
+lemma eq_vec_two {α : Type*} (s : Fin 2 → α) : s = ![s 0, s 1] := by
+  funext i
+  match i with
+  | 0 => rfl
+  | 1 => rfl
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma IsTranslationTable.transT_equal_fvar {x y : V} {u : Fin 2 → Term V L}
+    (hu : u = ![Semiterm.fvar x, Semiterm.fvar y]) :
+    h.transT (Semiformula.equal (Semiterm.fvar x) (Semiterm.fvar y)) =
+      relativizedImp h.domT (fun i ↦ Semiformula.equal (Semiterm.bvar 0) (u i).bShift)
+        ((h.relT (Language.Eq.eq : L.Rel 2)).subst fun i ↦ Semiterm.bvar (i.addCast 0)) := by
+  subst hu
+  ext
+  rw [IsTable.transT_val, Semiformula.equal, translate_rel_typed h.toIsTable]
+  congr 3
+  funext i
+  match i with
+  | 0 => simpa [Semiformula.equal] using varEqualT_fvar h.toIsTable x
+  | 1 => simpa [Semiformula.equal] using varEqualT_fvar h.toIsTable y
+
+lemma IsTranslationTable.tprovable_relT_equal_transport (j : ℕ) (s w : Fin 2 → Term V L) :
+    S.internalize V ⊢ Matrix.conj (fun i ↦ h.domT.subst ![s i]) 🡒
+      Matrix.conj (fun i ↦ h.domT.subst ![w i]) 🡒
+        Matrix.conj (fun i ↦ Semiformula.equal (s i) (w i)) 🡒
+          (Semiformula.shift^[j] (h.relT (Language.Eq.eq : L.Rel 2))).subst w 🡒
+            (Semiformula.shift^[j] (h.relT (Language.Eq.eq : L.Rel 2))).subst s := by
+  rw [Function.iterate_fixed (h.relT_shift _) j]
+  have hs := h.tprovable_preserve_eq (s 0) (s 1)
+  have hw := h.tprovable_preserve_eq (w 0) (w 1)
+  rw [← eq_vec_two s] at hs
+  rw [← eq_vec_two w] at hw
+  have a₀ := matrixConj_elim (𝓢 := S.internalize V) (fun i ↦ h.domT.subst ![s i]) 0
+  have a₁ := matrixConj_elim (𝓢 := S.internalize V) (fun i ↦ h.domT.subst ![s i]) 1
+  have b₀ := matrixConj_elim (𝓢 := S.internalize V) (fun i ↦ h.domT.subst ![w i]) 0
+  have b₁ := matrixConj_elim (𝓢 := S.internalize V) (fun i ↦ h.domT.subst ![w i]) 1
+  have c₀ := matrixConj_elim (𝓢 := S.internalize V)
+    (fun i ↦ Semiformula.equal (s i) (w i)) 0
+  have c₁ := matrixConj_elim (𝓢 := S.internalize V)
+    (fun i ↦ Semiformula.equal (s i) (w i)) 1
+  have t₁ := tprovable_equal_trans_imp S (s 0) (w 0) (w 1)
+  have t₂ := tprovable_equal_symm_imp S (s 1) (w 1)
+  have t₃ := tprovable_equal_trans_imp S (s 0) (w 1) (s 1)
+  have t₄ : S.internalize V ⊢ Semiformula.equal (s 0) (w 0) 🡒 Semiformula.equal (s 1) (w 1) 🡒
+      Semiformula.equal (w 0) (w 1) 🡒 Semiformula.equal (s 0) (s 1) := by
+    cl_prover [t₁, t₂, t₃]
+  have key {Cs Cw Ce Ew Es D0s D1s D0w D1w e0 e1 Qs Qw : Formula V L}
+      (hs : S.internalize V ⊢ D0s 🡒 D1s 🡒 (Es 🡘 Qs))
+      (hw : S.internalize V ⊢ D0w 🡒 D1w 🡒 (Ew 🡘 Qw))
+      (a₀ : S.internalize V ⊢ Cs 🡒 D0s) (a₁ : S.internalize V ⊢ Cs 🡒 D1s)
+      (b₀ : S.internalize V ⊢ Cw 🡒 D0w) (b₁ : S.internalize V ⊢ Cw 🡒 D1w)
+      (c₀ : S.internalize V ⊢ Ce 🡒 e0) (c₁ : S.internalize V ⊢ Ce 🡒 e1)
+      (t₄ : S.internalize V ⊢ e0 🡒 e1 🡒 Qw 🡒 Qs) :
+      S.internalize V ⊢ Cs 🡒 Cw 🡒 Ce 🡒 Ew 🡒 Es := by
+    cl_prover 100 [hs, hw, a₀, a₁, b₀, b₁, c₀, c₁, t₄]
+  exact key hs hw a₀ a₁ b₀ b₁ c₀ c₁ t₄
+
+/-- On the domain, the translation of an equation between free variables is equivalent to the
+equation. -/
+lemma IsTranslationTable.tprovable_transT_equal_iff (x y : V) :
+    S.internalize V ⊢ h.domT.subst ![Semiterm.fvar x] 🡒 h.domT.subst ![Semiterm.fvar y] 🡒
+      (h.transT (Semiformula.equal (Semiterm.fvar x) (Semiterm.fvar y)) 🡘
+        Semiformula.equal (Semiterm.fvar x) (Semiterm.fvar y)) := by
+  rw [h.transT_equal_fvar rfl]
+  have hp := h.tprovable_preserve_eq (Semiterm.fvar x) (Semiterm.fvar y)
+  have h₁ := relativizedImp_equal_specialize (T := S) (k := 2) h.domT
+    ![(Semiterm.fvar x : Term V L), Semiterm.fvar y] (h.relT (Language.Eq.eq : L.Rel 2))
+  have h₂ := relativizedImp_equal_generalize (T := S) (k := 2) h.domT_shift
+    ![(Semiterm.fvar x : Term V L), Semiterm.fvar y] (h.relT (Language.Eq.eq : L.Rel 2))
+    (h.tprovable_relT_equal_transport)
+  have h₃ : S.internalize V ⊢ h.domT.subst ![Semiterm.fvar x] 🡒 h.domT.subst ![Semiterm.fvar y] 🡒
+      Matrix.conj (fun i : Fin 2 ↦
+        h.domT.subst ![(![(Semiterm.fvar x : Term V L), Semiterm.fvar y] i)]) := by
+    apply CC_of_CK
+    apply matrixConj_intro
+    intro i
+    match i with
+    | 0 => exact and₁
+    | 1 => exact and₂
+  have key {Dx Dy RI E Q C : Formula V L} (hp : S.internalize V ⊢ Dx 🡒 Dy 🡒 (E 🡘 Q))
+      (h₁ : S.internalize V ⊢ RI 🡒 C 🡒 E) (h₂ : S.internalize V ⊢ C ⋏ E 🡒 RI)
+      (h₃ : S.internalize V ⊢ Dx 🡒 Dy 🡒 C) : S.internalize V ⊢ Dx 🡒 Dy 🡒 (RI 🡘 Q) := by
+    cl_prover 100 [hp, h₁, h₂, h₃]
+  exact key hp h₁ h₂ h₃
+
+end equation
+
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

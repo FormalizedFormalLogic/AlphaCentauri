@@ -59,8 +59,7 @@ end defs
 section value
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
-  {π : DirectTranslation S L₂} {tbl : V}
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] {tbl : V}
 
 omit [L₂.Eq] in
 lemma translate_substs1_all {t q : V} (ht : IsSemiterm L₂ 0 t)
@@ -170,25 +169,26 @@ lemma substs_rel_val {k : ℕ} (R : L₂.Rel k) {c v : V} (hc : IsSemiterm L₂ 
   · rw [substs_rel (codeIn_rel_quote R) hv.isUTerm, Semiformula.rel_val, hu]
 
 lemma derivable_iff_translate_rel (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {t b : V} (ht : IsSemiterm L₂ 0 t)
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t b : V}
+    (ht : IsSemiterm L₂ 0 t)
     {k : ℕ} (R : L₂.Rel k) {v : V} (hv : IsSemitermVec L₂ (k : V) 1 v) :
     Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b (^rel (k : V) ⌜R⌝ v))
       (substHyp L₁ L₂ tbl t b)) := by
-  have hT := h.isTable hL₂
+  have hT := h.toIsTable
   have hH := isFormulaSet_substHyp hT ht b
   obtain ⟨u₁, hu₁, hf₁⟩ := substs_rel_val R ht hv
   obtain ⟨u₂, hu₂, hf₂⟩ := substs_rel_val R (c := ^&b) (by simp) hv
   unfold translateSubstEquiv substs1
-  rw [hf₁, hf₂, translate_rel_typed h hT R u₁, translate_rel_typed h hT R u₂]
-  have hΦ (i : Fin k) : Derivable S (insert (∀¹ (domT π 🡒
+  rw [hf₁, hf₂, translate_rel_typed hT R u₁, translate_rel_typed hT R u₂]
+  have hΦ (i : Fin k) : Derivable S (insert (∀¹ (h.domT 🡒
       (varEqualT hT (u₁ i) 🡘 varEqualT hT (u₂ i)))).val (substHyp L₁ L₂ tbl t b)) := by
-    rw [← termSubstEquiv_eq_typed h hT (hu₁ i) (hu₂ i)]
+    rw [← termSubstEquiv_eq_typed h (hu₁ i) (hu₂ i)]
     exact derivable_termSubstEquiv hS h hL₂ ht (hv.nth (by simp))
   have hc := Derivable.conj_typed hH hΦ
   let C : Semiformula V L₁ (0 + k) :=
-    (⌜(π.rel R).sentence⌝ : Semiformula V L₁ k).subst (fun i ↦ Semiterm.bvar (i.addCast 0))
+    (h.relT R).subst (fun i ↦ Semiterm.bvar (i.addCast 0))
   have hg := Derivable.of_tprovable_imp
-    (relativizedImp_congr (T := S) (domT π) (fun i ↦ varEqualT hT (u₁ i))
+    (relativizedImp_congr (T := S) h.domT (fun i ↦ varEqualT hT (u₁ i))
       (fun i ↦ varEqualT hT (u₂ i)) C) hc
   simpa only [Semiformula.val_iff] using hg
 
@@ -199,7 +199,7 @@ lemma isSemiformula_translate_subst (hT : IsTable L₁ L₂ tbl) {t q : V} (ht :
   have h : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [IsSemiterm.of_zero ht]
   IsSemiformula.translate hT (hq.subst h)
 
-omit [L₂.Eq] [𝗘𝗤 _ ⪯ S] in
+omit [𝗘𝗤 _ ⪯ S] [L₂.Eq] in
 lemma derivable_all_of_quantFresh (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
     (hT : IsTable L₁ L₂ tbl) {t b q x : V} (ht : IsSemiterm L₂ 0 t) (hq : IsSemiformula L₂ 2 q)
     (hx : π₂(x - 1) = q)
@@ -236,10 +236,10 @@ lemma derivable_all_of_quantFresh (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstr
 
 theorem derivable_translateSubstEquiv
     (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {t b p : V} (ht : IsSemiterm L₂ 0 t)
-    (hp : IsSemiformula L₂ 1 p) :
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t b p : V}
+    (ht : IsSemiterm L₂ 0 t) (hp : IsSemiformula L₂ 1 p) :
     Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b p) (substHyp L₁ L₂ tbl t b)) := by
-  have hT := h.isTable hL₂
+  have hT := h.toIsTable
   have hH := isFormulaSet_substHyp hT ht b
   have hb : IsSemiterm L₂ 0 (^&b) := by simp
   have hδ : IsSemiformula L₁ 1 (domainAt L₁ tbl 0) := hT.isSemiformula_domainAt (by simp)
@@ -347,10 +347,9 @@ open PeanoMinus ISigma0 ISigma1
 section rules
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
-  {π : DirectTranslation S L₂} {tbl : V}
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] {tbl : V}
 
-omit [L₂.Eq] [𝗘𝗤 _ ⪯ S] in
+omit [𝗘𝗤 _ ⪯ S] [L₂.Eq] in
 lemma derivable_insert_translate_substs (hT : IsTable L₁ L₂ tbl) {t b p Θ : V}
     (ht : IsSemiterm L₂ 0 t) (hp : IsSemiformula L₂ 1 p) (hΘ : IsFormulaSet L₁ Θ)
     (hD : negDomSet L₁ tbl.[0] t ⊆ Θ)
@@ -386,7 +385,7 @@ lemma derivable_insert_translate_substs (hT : IsTable L₁ L₂ tbl) {t b p Θ :
     grind) hI
   exact derivable_of_iff_mp (⟨_, hX'⟩ : Formula V L₁) ⟨_, hY'⟩ hIs hXs
 
-omit [L₂.Eq] [𝗘𝗤 _ ⪯ S] in
+omit [𝗘𝗤 _ ⪯ S] [L₂.Eq] in
 lemma derivable_exs_body (hT : IsTable L₁ L₂ tbl) {p b s : V} (hs : IsFormulaSet L₁ s)
     (hp : IsSemiformula L₂ 1 p) (hm : ^∃ (tbl.[0] ^⋏ translate L₁ L₂ tbl p) ∈ s)
     (hn : neg L₁ (substs1 L₁ (^&b) tbl.[0]) ∈ s)
@@ -420,7 +419,7 @@ lemma derivable_exs_body (hT : IsTable L₁ L₂ tbl) {p b s : V} (hs : IsFormul
     exact Derivable.and_m (mem_bitInsert_iff.mpr (Or.inl rfl)) d₁ d₂
   exact Derivable.ex_m hm (by simp) h₁
 
-omit [L₂.Eq] [𝗘𝗤 _ ⪯ S] in
+omit [𝗘𝗤 _ ⪯ S] [L₂.Eq] in
 lemma derivable_neg_exs_definesElement
     (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p) (hT : IsTable L₁ L₂ tbl)
     {t b Θ : V} (ht : IsSemiterm L₂ 0 t) (hΘ : IsFormulaSet L₁ Θ) (hsu : Θ ≤ b)
@@ -452,18 +451,19 @@ lemma derivable_neg_exs_definesElement
 
 lemma derivable_exs_definesElement
     (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {t Θ : V} (ht : IsSemiterm L₂ 0 t)
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t Θ : V}
+    (ht : IsSemiterm L₂ 0 t)
     (hΘ : IsFormulaSet L₁ Θ) (hD : negDomSet L₁ tbl.[0] t ⊆ Θ) :
     Derivable S (insert (^∃ (tbl.[0] ^⋏ varEqual L₁ L₂ tbl t)) Θ) := by
-  have hT := h.isTable hL₂
-  have hd : tbl.[0] = (domT π).val := h.domain
-  have hDef : Derivable S (insert (definesElement (domT π)
+  have hT := h.toIsTable
+  have hd : tbl.[0] = h.domT.val := rfl
+  have hDef : Derivable S (insert (definesElement h.domT
       (varEqualT hT (⟨t, ht⟩ : Term V L₂))).val (negDomSet L₁ tbl.[0] t)) := by
-    rw [definesElement_domT_val h hT]
+    rw [definesElement_domT_val h]
     exact derivable_definesElement hS h hL₂ ht
   have h₁ := Derivable.of_tprovable_imp
-    (definesElement_exists (T := S) (domT π) (varEqualT hT (⟨t, ht⟩ : Term V L₂))) hDef
-  have hval : (∃¹ (domT π ⋏ varEqualT hT (⟨t, ht⟩ : Term V L₂))).val =
+    (definesElement_exists (T := S) h.domT (varEqualT hT (⟨t, ht⟩ : Term V L₂))) hDef
+  have hval : (∃¹ (h.domT ⋏ varEqualT hT (⟨t, ht⟩ : Term V L₂))).val =
       ^∃ (tbl.[0] ^⋏ varEqual L₁ L₂ tbl t) := by
     simp only [Semiformula.val_exs, Semiformula.val_and, varEqualT_val, ← hd]
   rw [hval] at h₁
@@ -481,11 +481,12 @@ lemma derivable_exs_definesElement
     grind) h₁
 
 lemma translated_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {Γ p t : V} (hΓ : IsFormulaSet L₂ Γ)
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {Γ p t : V}
+    (hΓ : IsFormulaSet L₂ Γ)
     (hp : ^∃ p ∈ Γ) (ht : IsTerm L₂ t)
     (hd : TranslatedDerivable S L₂ tbl (insert (substs1 L₂ t p) Γ)) :
     TranslatedDerivable S L₂ tbl Γ := by
-  have hT := h.isTable hL₂
+  have hT := h.toIsTable
   have hp1 : IsSemiformula L₂ 1 p := by simpa using IsSemiformula.exs.mp (hΓ _ hp)
   have hpt : IsFormula L₂ (substs1 L₂ t p) := IsSemiformula.substs1 (n := 0) ht hp1
   set M := insert (substs1 L₂ t p) Γ + t
@@ -517,7 +518,7 @@ lemma translated_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
     (mem_bitInsert_iff.mpr (Or.inl rfl)) hK
   have hS3 := derivable_neg_exs_definesElement hS hT ht hΘf hb₁ hb₂ hS2
   have hS4 := derivable_exs_definesElement hS h hL₂ ht hΘf hD
-  exact translated_of_le hS hT (provable_exs_domain π h) hΓ hΓM (Derivable.cut _ hS4 hS3)
+  exact translated_of_le hS hT h.exs_domain hΓ hΓM (Derivable.cut _ hS4 hS3)
 
 end rules
 
@@ -534,16 +535,16 @@ open PeanoMinus ISigma0 ISigma1
 section rules
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
-  {π : DirectTranslation S L₂} {tbl : V}
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] {tbl : V}
 
 theorem TranslatedDerivable.of_derivable
     (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
-    (hax : ∀ p ∈ S'.Δ₁Class (V := V), Provable S (Bootstrapping.translate L₁ L₂ tbl p)) {s : V}
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
+    (hax : ∀ p ∈ S'.Δ₁Class (V := V), IsFormula L₂ p →
+      Provable S (Bootstrapping.translate L₁ L₂ tbl p)) {s : V}
     (hs : Derivable S' s) : TranslatedDerivable S L₂ tbl s := by
-  have hT := h.isTable hL₂
-  have hdom := provable_exs_domain π h
+  have hT := h.toIsTable
+  have hdom := h.exs_domain
   obtain ⟨d, hds, hd⟩ := hs
   subst hds
   apply Derivation.induction1 𝚺 (P := fun d ↦ TranslatedDerivable S L₂ tbl (fstIdx d)) ?_ hd
@@ -585,7 +586,7 @@ theorem TranslatedDerivable.of_derivable
     exact translated_cut hS hT hdom hs hp ih₁ ih₂
   · intro s hs p hps hpT
     simp only [fstIdx_axm]
-    exact translated_axm hT hs hps (hax p hpT)
+    exact translated_axm hT hs hps (hax p hpT (hs p hps))
   · definability
 
 end rules
@@ -603,16 +604,16 @@ open PeanoMinus ISigma0 ISigma1
 section translation
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
-  {π : DirectTranslation S L₂} {tbl : V}
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] {tbl : V}
 
 /-- A formula code fixed by the shift of free variables and provable in `S'` has its translation
 provable in `S`.
 - [Lin97, Corollary 6.1]
 - [HP98, Lemma III.2.42] -/
 theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
-    (hax : ∀ p ∈ S'.Δ₁Class (V := V), Provable S (Bootstrapping.translate L₁ L₂ tbl p)) {φ : V}
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
+    (hax : ∀ p ∈ S'.Δ₁Class (V := V), IsFormula L₂ p →
+      Provable S (Bootstrapping.translate L₁ L₂ tbl p)) {φ : V}
     (hφ : Bootstrapping.shift L₂ φ = φ) (hpr : Provable S' φ) :
     Provable S (Bootstrapping.translate L₁ L₂ tbl φ) := by
   have hΓ : IsFormulaSet L₂ (insert φ ∅ : V) := hpr.toDerivable.isFormulaSet
@@ -625,7 +626,7 @@ theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.
   have hd : Derivable S (translateSet L₁ L₂ tbl (insert φ ∅) ∪
       negDomSet L₁ tbl.[0] (insert φ ∅)) :=
     TranslatedDerivable.of_derivable hS h hL₂ hax hpr.toDerivable
-  have h₀ := elim_translateSet hS (h.isTable hL₂) (provable_exs_domain π h) hΓ zero_le hfresh hd
+  have h₀ := elim_translateSet hS h.toIsTable h.exs_domain hΓ zero_le hfresh hd
   rw [negDomSet_zero, translateSet_insert, translateSet_empty] at h₀
   exact internal_provable_iff_internal_derivable.mpr (Derivable.ofSetEq (fun x ↦ by simp) h₀)
 
@@ -633,8 +634,9 @@ theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.
 - [Lin97, Corollary 6.1]
 - [HP98, Lemma III.2.42] -/
 theorem consistent_of_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
-    (hax : ∀ p ∈ S'.Δ₁Class (V := V), Provable S (Bootstrapping.translate L₁ L₂ tbl p))
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
+    (hax : ∀ p ∈ S'.Δ₁Class (V := V), IsFormula L₂ p →
+      Provable S (Bootstrapping.translate L₁ L₂ tbl p))
     (hcon : S.Consistent V) : S'.Consistent V := by
   intro hp
   apply hcon
@@ -671,7 +673,7 @@ theorem provable_translate_of_finite (hS : ∀ p ∈ S.Δ₁Class (V := V), Boot
     obtain ⟨σ, hσ, rfl⟩ := (Derivation.mem_deltaClass_ofList_iff l p).mp hp
     rw [h.translate_quote_sentence σ]
     exact internalize_provability (π.interpret_theory σ hσ)
-  exact provable_translate hS h hL₂ hax hφ hpr
+  exact provable_translate hS (h.isTranslationTable hL₂) hL₂ (fun p hp _ ↦ hax p hp) hφ hpr
 
 end finite
 

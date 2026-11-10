@@ -28,9 +28,6 @@ accept:
 
 declaration:
   # The unproved statements themselves.
-  FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
@@ -65,12 +62,12 @@ declaration:
   FFL.FirstOrder.not_provable_irrationalSqrtTwo_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.Arithmetic.IOpen_strictlyWeakerThan_IOpen_bezout:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
   HahnSeries.isRealClosed_lex:
     forgive:
       - HahnSeries.isRealClosed_lex
-  IsRealClosed.exists_mem_Ioo_isRoot:
-    forgive:
-      - IsRealClosed.exists_mem_Ioo_isRoot
   FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen
@@ -80,6 +77,9 @@ declaration:
   OpenPredicate.openInduction_iff_integerPart:
     forgive:
       - OpenPredicate.openInduction_iff_integerPart
+  FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:
@@ -94,18 +94,36 @@ declaration:
   FFL.FirstOrder.not_provable_fermatLastTheorem_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.Arithmetic.not_provable_fermatLastTheoremCaseOne_IOpen_of_models_ZRing:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.not_provable_fermatLastTheoremCaseOne_seven_IOpen:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.exists_not_provable_fermatLastTheoremCaseOne_IOpen:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
   FFL.FirstOrder.Arithmetic.provable_univCl_IOpen_iff:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
   HahnSeries.factorialIntegerPartSubring.induction:
     forgive:
       - HahnSeries.isRealClosed_lex
-      - IsRealClosed.exists_mem_Ioo_isRoot
   HahnSeries.factorialIntegerPartSubring.models:
     forgive:
       - HahnSeries.isRealClosed_lex
-      - IsRealClosed.exists_mem_Ioo_isRoot
   FFL.FirstOrder.Arithmetic.IOpen.not_finiteAxiomatizable:
     forgive:
       - HahnSeries.isRealClosed_lex
-      - IsRealClosed.exists_mem_Ioo_isRoot
+  FFL.FirstOrder.Arithmetic.interpretable_union_singleton_neg_standardProvability_neg:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.FirstOrder.ArithmeticTheory.interpretability_consistency:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.InterpretabilityLogic.instILInterpretabilityAbstraction:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.InterpretabilityLogic.Logic.IL.arithmetical_soundness_interpretability:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation

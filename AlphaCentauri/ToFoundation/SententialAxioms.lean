@@ -55,6 +55,22 @@ lemma Theory.Δ₁.Sentential.forall_shift_eq (T : Theory L) [T.Δ₁] [Theory.�
     ∀ p ∈ T.Δ₁Class (V := V), Arithmetic.Bootstrapping.shift L p = p :=
   fun _ h ↦ shift_eq h
 
+instance Theory.Δ₁.Sentential.union (T U : Theory L) [T.Δ₁] [U.Δ₁] [Theory.Δ₁.Sentential T]
+    [Theory.Δ₁.Sentential U] : Theory.Δ₁.Sentential (T ∪ U) where
+  shift_eq h := by
+    rcases Theory.Δ₁Class.mem_union.mp h with h | h
+    · exact Theory.Δ₁.Sentential.shift_eq h
+    · exact Theory.Δ₁.Sentential.shift_eq h
+
+instance Theory.Δ₁.Sentential.singleton (σ : Sentence L) : Theory.Δ₁.Sentential {σ} where
+  shift_eq {V} _ _ p h := by
+    have hp : p = ⌜σ⌝ := by
+      change V ⊧/![p] ({σ} : Theory L).Δ₁ch.val at h
+      rw [Theory.Δ₁.singleton_toTDef_ch_val] at h
+      simpa [Sentence.quote_eq_encode, Arithmetic.numeral_eq_natCast] using h
+    rw [hp]
+    exact Semisentence.shift_quote σ
+
 /-- The numeration of `T` restricted to the codes fixed by the shift of free variables. -/
 noncomputable abbrev Theory.Δ₁.sentential (T : Theory L) (d : T.Δ₁) : T.Δ₁ where
   ch := T.Δ₁ch ⋏ Arithmetic.Bootstrapping.shiftFixed L

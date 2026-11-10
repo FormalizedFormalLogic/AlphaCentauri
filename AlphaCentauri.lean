@@ -156,6 +156,7 @@ public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.FixedPoint
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Provable
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Basic
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Bounded
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Functions
@@ -174,6 +175,7 @@ public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.PRF
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Seq
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Vec
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Incompleteness.Definability
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Incompleteness.UniformReflection
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.LocallyDelta0
 public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval

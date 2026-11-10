@@ -128,7 +128,7 @@ variable (hθ : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢
         Semiformula.Eval (x :> p) f ψ))
 include hθ
 
-private lemma provable_inductionImplication_zero :
+lemma provable_inductionImplication_zero :
     𝗘𝗔 ⊢ ∀¹* (Rew.subst (‘0’ :> fun i ↦ #i) ▹ θ) := by
   apply Arithmetic.complete.{0}
   intro V _ _
@@ -142,7 +142,7 @@ private lemma provable_inductionImplication_zero :
   intro h₀ _
   exact h₀
 
-private lemma provable_inductionImplication_succ :
+lemma provable_inductionImplication_succ :
     𝗘𝗔 ⊢ ∀¹* (θ 🡒 Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ) ▹ θ) := by
   apply Arithmetic.complete.{0}
   intro V _ _

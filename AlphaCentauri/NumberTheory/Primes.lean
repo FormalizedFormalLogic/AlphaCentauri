@@ -11,13 +11,10 @@ Euclid's argument needs a bound on the next prime: $x!$ over $\mathsf{E}\mathsf{
 \mathsf{I}\Delta_0 + \mathrm{Exp}$, from which $\mathsf{I}\Sigma_1$ inherits it; over
 $\mathsf{I}\Delta_0$ no term bounds it, and with $\Omega_1$ adjoined the sentence is instead a
 theorem of Paris, Wilkie and Woods, obtained from a weak $\Delta_0$ pigeonhole principle, while
-over $\mathsf{I}\Delta_0$ alone it is an open problem. $\mathsf{I}\Delta_0 + \Omega_1$ and
-$\mathsf{I}\Delta_0$ each have the sentence as an axiom of its own, so that neither carries the
-debt of the other.
+over $\mathsf{I}\Delta_0$ alone it is an open problem.
 
-Bertrand's postulate is a $\Pi_1$ sentence, and is likewise an axiom of its own over
-$\mathsf{I}\Delta_0 + \Omega_1$, where it is a theorem, and over $\mathsf{I}\Delta_0$, where it is
-open.
+Bertrand's postulate is a $\Pi_1$ sentence; it is likewise a theorem over
+$\mathsf{I}\Delta_0 + \Omega_1$ and open over $\mathsf{I}\Delta_0$.
 
 - [HP98, Theorem I.1.58(2), Remark I.1.59(3)]
 - [PWW88, Problem 1, Corollary 8]
@@ -77,8 +74,9 @@ theorem provable_infinitudeOfPrimes_ISigma1 : 𝗜𝚺₁ ⊢ infinitudeOfPrimes
 /-- - [PWW88, Corollary 8] -/
 axiom provable_infinitudeOfPrimes_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮₁ ⊢ infinitudeOfPrimes
 
-/-- - [PWW88, Problem 1] -/
-axiom provable_infinitudeOfPrimes_ISigma0 : 𝗜𝚺₀ ⊢ infinitudeOfPrimes
+/-- $\mathsf{I}\Delta_0$ proves the infinitude of primes. An open problem.
+- [PWW88, Problem 1] -/
+def ProvableInfinitudeOfPrimesISigma0 : Prop := 𝗜𝚺₀ ⊢ infinitudeOfPrimes
 
 noncomputable section
 
@@ -100,8 +98,8 @@ def bertrandPostulate : ArithmeticSentence :=
 - [PWW88] -/
 axiom provable_bertrandPostulate_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮₁ ⊢ bertrandPostulate
 
-/-- An open problem.
+/-- $\mathsf{I}\Delta_0$ proves Bertrand's postulate. An open problem.
 - [HP98, §V.5(f), p. 393] -/
-axiom provable_bertrandPostulate_ISigma0 : 𝗜𝚺₀ ⊢ bertrandPostulate
+def ProvableBertrandPostulateISigma0 : Prop := 𝗜𝚺₀ ⊢ bertrandPostulate
 
 end FFL.FirstOrder.Arithmetic

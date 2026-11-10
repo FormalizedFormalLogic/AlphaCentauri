@@ -16,7 +16,8 @@ is finitely axiomatizable is open.
 
 namespace FFL.FirstOrder.Arithmetic
 
-/-- The finite axiomatizability of $\mathsf{B}\Sigma_1$, an open problem. -/
-axiom BSigma1.finiteAxiomatizable : FiniteAxiomatizable (𝗕𝚺 1)
+/-- $\mathsf{B}\Sigma_1$ is finitely axiomatizable. An open problem.
+- [Kay91, Exercise 10.4] -/
+def BSigma1FiniteAxiomatizable : Prop := FiniteAxiomatizable (𝗕𝚺 1)
 
 end FFL.FirstOrder.Arithmetic

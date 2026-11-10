@@ -1,6 +1,10 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ4Plus.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 
@@ -11,6 +15,21 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
+
+namespace Logic
+
+open Entailment Formula
+
+variable {α : Type*}
+
+/-- $\mathbf{IL}^-(\mathbf{J4}^+, \mathbf{J5})$.
+
+- [KO21, §3]
+-/
+abbrev ILMinusJ4PlusJ5 : Logic α :=
+  ofAxiomsMinus ({Axioms.J4Plus A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A})
+
+end Logic
 
 section Soundness
 
@@ -67,6 +86,24 @@ end Logic
 end Completeness
 
 
+
+section Relations
+
+namespace Logic
+
+open Entailment
+
+variable {α : Type*}
+
+instance : (ILMinusJ4Plus : Logic α) ⪱ ILMinusJ4PlusJ5 :=
+  .of_unprovable_provable unprovable_J5 (HasAxiomJ5.J5 _)
+
+instance : (ILMinusJ5 : Logic α) ⪱ ILMinusJ4PlusJ5 :=
+  .of_unprovable_provable ILMinusJ1J5.unprovable_J4Plus (HasAxiomJ4Plus.J4Plus _ _ _)
+
+end Logic
+
+end Relations
 
 end FFL.InterpretabilityLogic
 

@@ -1,9 +1,9 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2Plus.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4PlusJ5.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2PlusJ5.Basic
 
 /-!
@@ -13,6 +13,43 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2PlusJ5.Basic
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
+
+namespace Logic
+
+open Entailment Formula
+
+variable {α : Type*}
+
+/-- $\mathbf{CL}$, presented as $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J2})$.
+
+- [KO21, Proposition 3.21]
+-/
+abbrev CL : Logic α :=
+  ofAxiomsMinus ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)})
+
+notation "𝐂𝐋" => Logic.CL
+
+end Logic
+
+section J2Plus
+
+namespace Logic
+
+open ofAxiomsMinus
+
+variable {α : Type*}
+
+/-- - [KO21, Proposition 3.12.2] -/
+instance : HasAxiomJ2Plus (𝐂𝐋 : Logic α) where
+  J2Plus A B C := by
+    have h₁ : 𝐂𝐋 ⊢ B ▷ C ⋏ C ▷ C 🡒 (B ⋎ C) ▷ C := axiomJ3;
+    have h₂ : 𝐂𝐋 ⊢ C ▷ C := axiomJ1';
+    have h₃ : 𝐂𝐋 ⊢ A ▷ (B ⋎ C) ⋏ (B ⋎ C) ▷ C 🡒 A ▷ C := HasAxiomJ2.J2 _ _ _;
+    cl_prover [h₁, h₂, h₃];
+
+end Logic
+
+end J2Plus
 
 section SoundnessVeltman
 
@@ -112,27 +149,20 @@ end IncompletenessVeltman
 
 
 
+
 section Relations
 
 namespace Logic
 
-open Entailment Logic Logic.ofAxiomsMinus
+open Entailment
 
 variable {α : Type*}
 
-instance : (ILMinusJ1J4Plus : Logic α) ⪱ ILMinusJ1J4PlusJ5 :=
-  .of_unprovable_provable unprovable_J5 (axm (by simp))
-
-instance : (ILMinusJ1 : Logic α) ⪱ ILMinusJ1J5 :=
-  .of_unprovable_provable unprovable_J5 (axm (by simp))
-
 instance : (ILMinusJ2Plus : Logic α) ⪱ ILMinusJ2PlusJ5 :=
-  .of_unprovable_provable unprovable_J5 (axm (by simp))
+  .of_unprovable_provable unprovable_J5 (HasAxiomJ5.J5 _)
 
-instance : (ILMinusJ4Plus : Logic α) ⪱ ILMinusJ4PlusJ5 :=
-  .of_unprovable_provable unprovable_J5 (axm (by simp))
-
-instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ5 := .of_unprovable_provable unprovable_J5 (by simp)
+instance : (ILMinusJ2Plus : Logic α) ⪱ 𝐂𝐋 :=
+  .of_unprovable_provable unprovable_J1 (HasAxiomJ1.J1 _ _)
 
 end Logic
 

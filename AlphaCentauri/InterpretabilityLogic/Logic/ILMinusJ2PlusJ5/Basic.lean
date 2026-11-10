@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 
@@ -11,6 +11,21 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
+
+namespace Logic
+
+open Entailment Formula
+
+variable {α : Type*}
+
+/-- $\mathbf{IL}^-(\mathbf{J2}^+, \mathbf{J5})$.
+
+- [KO21, §3]
+-/
+abbrev ILMinusJ2PlusJ5 : Logic α :=
+  ofAxiomsMinus ({Axioms.J2Plus A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A})
+
+end Logic
 
 section SoundnessVeltman
 
@@ -122,30 +137,6 @@ end IncompletenessVeltman
 
 
 
-section Relations
-
-namespace Logic
-
-open Entailment Logic Logic.ofAxiomsMinus
-
-variable {α : Type*}
-
-instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ1 := .of_unprovable_provable unprovable_J1 (by simp)
-
-instance : (ILMinusJ4Plus : Logic α) ⪱ ILMinusJ1J4Plus :=
-  .of_unprovable_provable unprovable_J1 (axm (by simp))
-
-instance : (ILMinusJ4PlusJ5 : Logic α) ⪱ ILMinusJ1J4PlusJ5 :=
-  .of_unprovable_provable unprovable_J1 (axm (by simp))
-
-instance : (ILMinusJ5 : Logic α) ⪱ ILMinusJ1J5 :=
-  .of_unprovable_provable unprovable_J1 (axm (by simp))
-
-instance : (ILMinusJ2Plus : Logic α) ⪱ 𝐂𝐋 := .of_unprovable_provable unprovable_J1 (by simp)
-
-end Logic
-
-end Relations
 
 end FFL.InterpretabilityLogic
 

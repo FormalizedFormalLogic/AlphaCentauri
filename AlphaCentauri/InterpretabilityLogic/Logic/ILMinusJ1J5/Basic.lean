@@ -1,6 +1,10 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2PlusJ5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 
@@ -11,6 +15,20 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
+
+namespace Logic
+
+open Entailment Formula
+
+variable {α : Type*}
+
+/-- $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J5})$.
+
+- [KO21, §3]
+-/
+abbrev ILMinusJ1J5 : Logic α := ofAxiomsMinus ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J5 A | A})
+
+end Logic
 
 section SoundnessVeltman
 
@@ -88,7 +106,7 @@ private instance : (counterJ4 α).IsJ1 := ⟨by tauto⟩
 
 private instance : (counterJ4 α).IsJ5 := ⟨by tauto⟩
 
-private lemma unprovable_J4Plus [L ⪯ ILMinusJ1J5] : L ⊬ Axioms.J4Plus (◇⊤) ⊥ ⊤ := by
+lemma ILMinusJ1J5.unprovable_J4Plus [L ⪯ ILMinusJ1J5] : L ⊬ Axioms.J4Plus (◇⊤) ⊥ ⊤ := by
   intro h;
   replace h := WeakerThan.pbl (𝓣 := ILMinusJ1J5) h;
   have h₁ : (1 : Fin 3) ⊩[counterJ4 α] □(◇⊤ 🡒 ⊥) := by
@@ -120,24 +138,20 @@ end IncompletenessVeltman
 
 
 
+
 section Relations
 
 namespace Logic
 
-open Entailment Logic Logic.ofAxiomsMinus
+open Entailment
 
 variable {α : Type*}
 
-instance : (ILMinusJ1 : Logic α) ⪱ ILMinusJ1J4Plus :=
-  .of_unprovable_provable unprovable_J4Plus (axm (by simp))
+instance : (ILMinusJ1 : Logic α) ⪱ ILMinusJ1J5 :=
+  .of_unprovable_provable unprovable_J5 (HasAxiomJ5.J5 _)
 
-instance : (ILMinusJ1J5 : Logic α) ⪱ ILMinusJ1J4PlusJ5 :=
-  .of_unprovable_provable unprovable_J4Plus (axm (by simp))
-
-instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ4Plus := .of_unprovable_provable unprovable_J4Plus (by simp)
-
-instance : (ILMinusJ5 : Logic α) ⪱ ILMinusJ4PlusJ5 :=
-  .of_unprovable_provable unprovable_J4Plus (axm (by simp))
+instance : (ILMinusJ5 : Logic α) ⪱ ILMinusJ1J5 :=
+  .of_unprovable_provable unprovable_J1 (HasAxiomJ1.J1 _ _)
 
 end Logic
 

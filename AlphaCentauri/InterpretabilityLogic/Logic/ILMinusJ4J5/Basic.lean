@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinusModel
@@ -13,6 +13,20 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4J5.Basic
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
+
+namespace Logic
+
+open Entailment Formula
+
+variable {α : Type*}
+
+/-- $\mathbf{IL}^-(\mathbf{J4}, \mathbf{J5})$.
+
+- [KO21, §6]
+-/
+abbrev ILMinusJ4J5 : Logic α := ofAxiomsMinus ({Axioms.J4 A B | (A) (B)} ∪ {Axioms.J5 A | A})
+
+end Logic
 
 section SoundnessVerbrugge
 

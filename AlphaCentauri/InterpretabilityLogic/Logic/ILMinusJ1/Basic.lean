@@ -1,6 +1,8 @@
 module
 
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2PlusJ5.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 
@@ -11,6 +13,20 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
+
+namespace Logic
+
+open Entailment Formula
+
+variable {α : Type*}
+
+/-- $\mathbf{IL}^-(\mathbf{J1})$.
+
+- [KO21, §3.1]
+-/
+abbrev ILMinusJ1 : Logic α := ofAxiomsMinus {Axioms.J1 A B | (A) (B)}
+
+end Logic
 
 section Soundness
 
@@ -66,6 +82,47 @@ end Logic
 end Completeness
 
 
+
+section EquivalentAxiomatizations
+
+namespace Logic
+
+open Entailment ofAxiomsMinus
+
+variable {α : Type*}
+
+/-- - [KO21, Proposition 3.1] -/
+theorem ILMinusJ1.eq_ofAxiomsMinus_J1' :
+    (ILMinusJ1 : Logic α) = ofAxiomsMinus {Axioms.J1' A | A} := by
+  apply Set.Subset.antisymm;
+  · apply subset_of_provable;
+    rintro _ ⟨A, B, rfl⟩;
+    have h₁ : ofAxiomsMinus {Axioms.J1' A | A} ⊢ □(A 🡒 B) 🡒 B ▷ B 🡒 A ▷ B :=
+      rhd_anti_left_of_box;
+    have h₂ : ofAxiomsMinus {Axioms.J1' A | A} ⊢ B ▷ B := axm (by simp);
+    cl_prover [h₁, h₂];
+  · apply subset_of_provable;
+    rintro _ ⟨A, rfl⟩;
+    exact axiomJ1';
+
+end Logic
+
+end EquivalentAxiomatizations
+
+section Relations
+
+namespace Logic
+
+open Entailment
+
+variable {α : Type*}
+
+instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ1 :=
+  .of_unprovable_provable unprovable_J1 (HasAxiomJ1.J1 _ _)
+
+end Logic
+
+end Relations
 
 end FFL.InterpretabilityLogic
 

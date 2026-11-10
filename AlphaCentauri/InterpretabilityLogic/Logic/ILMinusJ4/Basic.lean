@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinusModel
@@ -13,6 +13,20 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4J5.Basic
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
+
+namespace Logic
+
+open Entailment Formula
+
+variable {α : Type*}
+
+/-- $\mathbf{IL}^-(\mathbf{J4})$.
+
+- [KO21, §3.2]
+-/
+abbrev ILMinusJ4 : Logic α := ofAxiomsMinus {Axioms.J4 A B | (A) (B)}
+
+end Logic
 
 section Soundness
 
@@ -111,6 +125,34 @@ end Logic
 
 end IncompletenessVerbrugge
 
+
+section EquivalentAxiomatizations
+
+namespace Logic
+
+open Entailment ofAxiomsMinus
+
+variable {α : Type*}
+
+/-- - [KO21, Proposition 3.4] -/
+theorem ILMinusJ4.eq_ofAxiomsMinus_J4' :
+    (ILMinusJ4 : Logic α) = ofAxiomsMinus {Axioms.J4' A B | (A) (B)} := by
+  apply Set.Subset.antisymm;
+  · apply subset_of_provable;
+    rintro _ ⟨A, B, rfl⟩;
+    have h₁ : ofAxiomsMinus {Axioms.J4' A B | (A) (B)} ⊢ A ▷ B 🡒 B ▷ ⊥ 🡒 A ▷ ⊥ := axm (by simp);
+    have h₂ : ofAxiomsMinus {Axioms.J4' A B | (A) (B)} ⊢ (◇A 🡒 ◇B) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥) :=
+      dia_imp_dia_iff;
+    cl_prover [h₁, h₂];
+  · apply subset_of_provable;
+    rintro _ ⟨A, B, rfl⟩;
+    have h₁ : ILMinusJ4 ⊢ A ▷ B 🡒 ◇A 🡒 ◇B := HasAxiomJ4.J4 _ _;
+    have h₂ : ILMinusJ4 ⊢ (◇A 🡒 ◇B) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥) := dia_imp_dia_iff;
+    cl_prover [h₁, h₂];
+
+end Logic
+
+end EquivalentAxiomatizations
 
 end FFL.InterpretabilityLogic
 

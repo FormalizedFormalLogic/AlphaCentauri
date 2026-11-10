@@ -76,7 +76,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILM.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZero.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZeroW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Core
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4J5.Basic

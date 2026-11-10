@@ -196,17 +196,17 @@ variable {𝔸 : FormulaSet α} [ILMinusAdequate Φ]
   [Nonempty (LabelledSet (ofAxiomsMinus 𝔸) Φ)]
 
 omit [Nonempty (LabelledSet (ofAxiomsMinus 𝔸) Φ)] in
-private lemma not_mem_label [(ILMinusJ1 : Logic α) ⪯ ofAxiomsMinus 𝔸]
+private lemma not_mem_label [(ofAxiomsMinus 𝔸).HasAxiomJ1]
     {x y : LabelledSet (ofAxiomsMinus 𝔸) Φ} (h : x.IsWeakCritical y) : y.label ∉ y.set :=
   h.not_mem <| (mem_iff_provable <|
     Adequate.rhd_mem y.isRhdOperand_label y.isRhdOperand_label).mpr <|
-      Context.of <| WeakerThan.pbl (𝓢 := ILMinusJ1) ILMinusJ1.axiomJ1'
+      Context.of axiomJ1'
 
-instance [(ILMinusJ1 : Logic α) ⪯ ofAxiomsMinus 𝔸] :
+instance [(ofAxiomsMinus 𝔸).HasAxiomJ1] :
     (model (condJ4 (L := ofAxiomsMinus 𝔸) (Φ := Φ))).IsJ1 where
   s_refl {_ y} h := ⟨h, ⟨y, rfl, h⟩, fun hc ↦ ⟨y, rfl, not_mem_label hc⟩⟩
 
-instance [(ILMinusJ1 : Logic α) ⪯ ofAxiomsMinus 𝔸] :
+instance [(ofAxiomsMinus 𝔸).HasAxiomJ1] :
     (model (condJ4J5 (L := ofAxiomsMinus 𝔸) (Φ := Φ))).IsJ1 where
   s_refl {_ y} h := ⟨h, ⟨y, rfl, h⟩, fun hc _ ↦ ⟨y, rfl, not_mem_label hc⟩⟩
 
@@ -266,7 +266,7 @@ private lemma exists_successor_not_mem {P : LabelledSet (ofAxiomsMinus 𝔸) Φ 
   exact ⟨hΔ, hA⟩
 
 /-- - [KO21, Lemma 7.3] -/
-lemma truthlemma_condJ4 [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸]
+lemma truthlemma_condJ4 [(ofAxiomsMinus 𝔸).HasAxiomJ4]
     {x : (model (condJ4 (L := ofAxiomsMinus 𝔸) (Φ := Φ))).World} {A : Formula α} (hA : A ∈ Φ) :
     x ⊩ A ↔ A ∈ x.set := by
   apply forces_iff_mem_of (f := LabelledSet.set) Iff.rfl
@@ -289,8 +289,8 @@ lemma truthlemma_condJ4 [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸]
     exact ⟨hΔ.toSuccessor, hD, fun _ hS ↦ hS.2.2 hΔ⟩
 
 /-- - [KO21, Lemma 7.3] -/
-lemma truthlemma_condJ4J5 [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸]
-    [(ILMinusJ5 : Logic α) ⪯ ofAxiomsMinus 𝔸]
+lemma truthlemma_condJ4J5 [(ofAxiomsMinus 𝔸).HasAxiomJ4]
+    [(ofAxiomsMinus 𝔸).HasAxiomJ5]
     {x : (model (condJ4J5 (L := ofAxiomsMinus 𝔸) (Φ := Φ))).World} {A : Formula α}
     (hA : A ∈ Φ) : x ⊩ A ↔ A ∈ x.set := by
   apply forces_iff_mem_of (f := LabelledSet.set) Iff.rfl
@@ -313,8 +313,8 @@ lemma truthlemma_condJ4J5 [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸]
     exact ⟨hΔ.toSuccessor, hD, fun _ hS ↦ hS.2.2 hΔ hb⟩
 
 /-- - [KO21, Lemma 7.3] -/
-lemma truthlemma_condJ2 [(ILMinusJ2 : Logic α) ⪯ ofAxiomsMinus 𝔸]
-    [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸]
+lemma truthlemma_condJ2 [(ofAxiomsMinus 𝔸).HasAxiomJ2]
+    [(ofAxiomsMinus 𝔸).HasAxiomJ4]
     {x : (model (condJ2 (L := ofAxiomsMinus 𝔸) (Φ := Φ))).World} {A : Formula α} (hA : A ∈ Φ) :
     x ⊩ A ↔ A ∈ x.set := by
   apply forces_iff_mem_of (f := LabelledSet.set) Iff.rfl
@@ -340,8 +340,8 @@ lemma truthlemma_condJ2 [(ILMinusJ2 : Logic α) ⪯ ofAxiomsMinus 𝔸]
     exact ⟨hΔ.toSuccessor, hD, fun _ hS ↦ (hS.2.2 hΔ).1⟩
 
 /-- - [KO21, Lemma 7.3] -/
-lemma truthlemma_condJ2J4Plus [(ILMinusJ2 : Logic α) ⪯ ofAxiomsMinus 𝔸]
-    [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸] [(ILMinusJ4Plus : Logic α) ⪯ ofAxiomsMinus 𝔸]
+lemma truthlemma_condJ2J4Plus [(ofAxiomsMinus 𝔸).HasAxiomJ2]
+    [(ofAxiomsMinus 𝔸).HasAxiomJ4] [(ofAxiomsMinus 𝔸).HasAxiomJ4Plus]
     {x : (model (condJ2J4Plus (L := ofAxiomsMinus 𝔸) (Φ := Φ))).World} {A : Formula α}
     (hA : A ∈ Φ) : x ⊩ A ↔ A ∈ x.set := by
   apply forces_iff_mem_of (f := LabelledSet.set) Iff.rfl
@@ -523,10 +523,10 @@ private lemma eq_of_isCriticalAfter {x y : IndexedSet (ofAxiomsMinus 𝔸) Φ} {
   have h := (List.prefix_of_prefix_length_le hC.1 hF.1 (by simp)).eq_of_length (by simp);
   simpa using h
 
-variable [(ILMinusJ2 : Logic α) ⪯ ofAxiomsMinus 𝔸] [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸]
-  [(ILMinusJ5 : Logic α) ⪯ ofAxiomsMinus 𝔸]
+variable [(ofAxiomsMinus 𝔸).HasAxiomJ2] [(ofAxiomsMinus 𝔸).HasAxiomJ4]
+  [(ofAxiomsMinus 𝔸).HasAxiomJ5]
 
-omit [(ILMinusJ4 : Logic α) ⪯ ofAxiomsMinus 𝔸] in
+omit [(ofAxiomsMinus 𝔸).HasAxiomJ4] in
 private lemma exists_rhd_not_mem {P : IndexedSet (ofAxiomsMinus 𝔸) Φ → Formula α →
       Set (IndexedSet (ofAxiomsMinus 𝔸) Φ) → Prop}
     (hP : ∀ {x C V}, P x C V → ∃ z ∈ V, C ∉ z.set)
@@ -566,7 +566,7 @@ lemma truthlemma_condJ2J5
     · rintro z rfl; exact hEΘ
 
 /-- - [KO21, Lemma 7.6] -/
-lemma truthlemma_condJ2J4PlusJ5 [(ILMinusJ4Plus : Logic α) ⪯ ofAxiomsMinus 𝔸]
+lemma truthlemma_condJ2J4PlusJ5 [(ofAxiomsMinus 𝔸).HasAxiomJ4Plus]
     {x : (model (condJ2J4PlusJ5 (L := ofAxiomsMinus 𝔸) (Φ := Φ))).World} {A : Formula α}
     (hA : A ∈ Φ) : x ⊩ A ↔ A ∈ x.set := by
   apply forces_iff_mem_of (f := Veltman.IndexedSet.set) Iff.rfl

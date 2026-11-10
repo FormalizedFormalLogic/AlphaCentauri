@@ -1,7 +1,6 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
@@ -138,7 +137,7 @@ theorem eq_ofAxiomsMinus :
     | axiomJ1 => exact ofAxiomsMinus.axm (by simp);
     | axiomJ2 => exact ofAxiomsMinus.axm (by simp);
     | axiomJ3 => exact ofAxiomsMinus.axiomJ3;
-    | axiomJ4 => exact ofAxiomsMinus.subset_of_subset (by tauto_set) ILMinusJ2.axiomJ4;
+    | axiomJ4 => exact HasAxiomJ4.J4 _ _;
     | axiomJ5 => exact ofAxiomsMinus.axm (by simp);
   · intro A h;
     induction h with
@@ -179,21 +178,11 @@ theorem IL.eq_ofAxiomsMinus :
       ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}) := by
   simpa using ofAxioms.eq_ofAxiomsMinus (𝔸 := (∅ : FormulaSet α));
 
-instance : (𝐂𝐋 : Logic α) ⪯ 𝐈𝐋 :=
-  weakerThan_iff.mpr <| IL.eq_ofAxiomsMinus ▸ subset_of_subset Set.subset_union_left
-
-instance : (ILMinusJ2PlusJ5 : Logic α) ⪯ 𝐈𝐋 :=
-  weakerThan_iff.mpr <| IL.eq_ofAxiomsMinus ▸ subset_of_provable (by
-    rintro _ (⟨A, B, C, rfl⟩ | ⟨A, rfl⟩);
-    · exact subset_of_subset Set.subset_union_left CL.axiomJ2Plus;
-    · exact axm (by simp);)
-
-instance : (ILMinusJ1J4PlusJ5 : Logic α) ⪯ 𝐈𝐋 :=
-  weakerThan_iff.mpr <| IL.eq_ofAxiomsMinus ▸ subset_of_provable (by
-    rintro _ ((⟨A, B, rfl⟩ | ⟨A, B, C, rfl⟩) | ⟨A, rfl⟩);
-    · exact axm (by simp);
-    · exact subset_of_subset Set.subset_union_left CL.axiomJ4Plus;
-    · exact axm (by simp);)
+instance {𝔸 : FormulaSet α}
+    [(ofAxiomsMinus 𝔸 : Logic α) ⪯ ofAxiomsMinus
+      ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A})] :
+    (ofAxiomsMinus 𝔸 : Logic α) ⪯ 𝐈𝐋 :=
+  IL.eq_ofAxiomsMinus ▸ ‹_›
 
 end Logic
 
@@ -254,15 +243,6 @@ theorem IL.semantics_TFAE : [
     rw [IL.eq_ofAxiomsMinus];
     by_contra hA;
     have : Entailment.Consistent (ofAxiomsMinus 𝔸) := .of_unprovable hA;
-    have : (ILMinusJ1 : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
-      weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_subset <|
-        Set.subset_union_left.trans Set.subset_union_left;
-    have : (ILMinusJ5 : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
-      weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_subset Set.subset_union_right;
-    have : (ILMinusJ2Plus : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
-      weakerThan_iff.mpr <| ofAxiomsMinus.subset_of_provable <| by
-        rintro _ ⟨A, B, C, rfl⟩;
-        exact ofAxiomsMinus.subset_of_subset Set.subset_union_left CL.axiomJ2Plus;
     exact ofAxiomsMinus.not_models_countermodel hA <|
       h (countermodel _ (ilMinusAdequateClosure {A}));
   tfae_finish;

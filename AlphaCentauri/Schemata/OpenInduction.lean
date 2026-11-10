@@ -29,18 +29,18 @@ def greatestCommonDivisor : ArithmeticSentence :=
 - [DAq05, §2, §3]
 - [MM89]
 - [Ada87] -/
-axiom not_provable_infinitudeOfPrimes_IOpen : ¬𝗜𝗢𝗽𝗲𝗻 ⊢ infinitudeOfPrimes
+axiom not_provable_infinitudeOfPrimes_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊬ infinitudeOfPrimes
 
 /-- - [MM89]
 - [DAq05, §2] -/
-axiom not_provable_primeDvdMul_IOpen : ¬𝗜𝗢𝗽𝗲𝗻 ⊢ primeDvdMul
+axiom not_provable_primeDvdMul_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊬ primeDvdMul
 
 /-- $\mathsf{IOpen}$ with greatest common divisors does not prove Bézout's theorem.
 - [Smi93a]
 - [Smi92b, §3]
 - [Moh11, §2] -/
 axiom not_provable_bezout_IOpen_greatestCommonDivisor :
-    ¬insert greatestCommonDivisor 𝗜𝗢𝗽𝗲𝗻 ⊢ bezout
+    insert greatestCommonDivisor 𝗜𝗢𝗽𝗲𝗻 ⊬ bezout
 
 /-- $\mathsf{IOpen}$ has a nonstandard model, on the type $\mathbb{N}$ up to a bijection, whose
 addition, multiplication and order are computable.

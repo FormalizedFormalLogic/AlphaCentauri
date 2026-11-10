@@ -15,7 +15,7 @@ $\mathsf{I}\mathsf{E}_2$ proves the other odd exponents, which is open.
 
 - [Wil85]
 - [Smi93, Question 5.5, Question 5.6]
-- [Smi92b, Question 5.1, Question 5.3, Question 5.5, Question 5.6]
+- [Smi92b, Question 5.3, Question 5.5, Question 5.6]
 -/
 
 @[expose] public section
@@ -68,12 +68,6 @@ def fermatLastTheoremCaseTwo (n : ℕ) : ArithmeticSentence :=
 def powerAddPowerNeSquare (n : ℕ) : ArithmeticSentence :=
   “∀ x y z, x ^' n + y ^' n = z * z ∨ x ^' n = y ^' n + z * z →
     x = 0 ∨ y = 0 ∨ z = 0”
-
-/-- Some model of $\mathsf{IOpen}$ contains a counterexample to Case I of Fermat's Last Theorem
-for some exponent $n \ge 3$. An open problem.
-- [Smi92b, Question 5.1] -/
-def ExistsNotProvableFermatLastTheoremCaseOneIOpen : Prop :=
-  ∃ n : ℕ, 3 ≤ n ∧ ¬𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseOne n
 
 /-- $\mathsf{IOpen} + \mathrm{Bez}$ proves Case II of Fermat's Last Theorem for some exponent
 $n \ge 3$. An open problem.

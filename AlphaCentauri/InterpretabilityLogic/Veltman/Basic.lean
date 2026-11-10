@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.Logic
 public import Foundation.Logic.Semantics
 public import Foundation.Vorspiel.Rel.CWF
 
@@ -71,18 +71,6 @@ instance (v : α → Prop) : (pointModel v).IsIL where
   s_refl := by tauto;
   s_trans := by tauto;
   s_of_rel := by tauto;
-
-/-- The model on the frame of `M` with valuation `V`. -/
-def overwrite (M : Model κ α) (V : M.World → α → Prop) : Model κ α := ⟨M.Rel', M.S', V⟩
-
-instance {V : M.World → α → Prop} [M.IsIL] : (M.overwrite V).IsIL where
-  toIsTrans := inferInstanceAs (IsTrans _ M.Rel)
-  toIsConverseWellFounded := inferInstanceAs (IsConverseWellFounded _ M.Rel)
-  rel_of_s_left := rel_of_s_left (M := M)
-  rel_of_s_right := rel_of_s_right (M := M)
-  s_refl := s_refl (M := M)
-  s_trans := s_trans (M := M)
-  s_of_rel := s_of_rel (M := M)
 
 end Model
 

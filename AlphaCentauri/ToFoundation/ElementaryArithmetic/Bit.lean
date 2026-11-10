@@ -125,8 +125,71 @@ lemma lt_of_mem {i a : V} (h : i ∈ a) : i < a := lt_of_lt_of_le (lt_exp i) (ex
 lemma not_mem_of_lt_exp {i a : V} (h : a < Exp.exp i) : i ∉ a := fun H ↦ by
   have := lt_of_le_of_lt (exp_le_of_mem H) h; simp at this
 
+@[definability]
+lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_ball_mem_zero
+    {Γ} {k : ℕ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+    (hf : DefinableBoundedFunction f) (h : Γᴬ_[0].Definable (fun w ↦ P (w ·.succ) (w 0))) :
+    Γᴬ_[0].Definable (fun v ↦ ∀ x ∈ f v, P v x) := by
+  have : Γᴬ_[0].Definable (fun v ↦ ∀ x < f v, x ∈ f v → P v x) := by
+    apply Bounding.HierarchySymbol.Definable.arithmetic_ball_blt hf
+    apply Bounding.HierarchySymbol.Definable.imp
+    · exact Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₂_zero
+        (R := (· ∈ ·)) (.var 0) (hf.retraction Fin.succ)
+    · exact h
+  exact this.of_iff <| by
+    intro v; exact ⟨fun h x _ hxv ↦ h x hxv, fun h x hx ↦ h x (lt_of_mem hx) hx⟩
+
+@[definability]
+lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_bexs_mem_zero
+    {Γ} {k : ℕ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+    (hf : DefinableBoundedFunction f) (h : Γᴬ_[0].Definable (fun w ↦ P (w ·.succ) (w 0))) :
+    Γᴬ_[0].Definable (fun v ↦ ∃ x ∈ f v, P v x) := by
+  have : Γᴬ_[0].Definable (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) := by
+    apply Bounding.HierarchySymbol.Definable.arithmetic_bexs_blt hf
+    apply Bounding.HierarchySymbol.Definable.and
+    · exact Bounding.HierarchySymbol.Definable.arithmetic_bounded_comp₂_zero
+        (R := (· ∈ ·)) (.var 0) (hf.retraction Fin.succ)
+    · exact h
+  exact this.of_iff <| by
+    intro v; exact ⟨by rintro ⟨x, hx, hxv⟩; exact ⟨x, lt_of_mem hx, hx, hxv⟩,
+      by rintro ⟨x, _, hx, hxv⟩; exact ⟨x, hx, hxv⟩⟩
+
 scoped instance : Tarski.Structure.Mem ℒₒᵣ V :=
   ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def, bit_defined.iff]⟩
+
+@[simp] lemma eval_ballIn {ξ : Type*} {n : ℕ} {t : ArithmeticSemiterm ξ n}
+    {φ : ArithmeticSemiformula ξ (n + 1)} {bv : Fin n → V} {fv : ξ → V} :
+    (ballIn t φ).Eval (M := V) bv fv ↔ ∀ x ∈ t.val bv fv, φ.Eval (x :> bv) fv := by
+  suffices
+    (∀ x < t.val bv fv, x ∈ t.val bv fv → φ.Eval (x :> bv) fv) ↔
+    ∀ x ∈ t.val bv fv, φ.Eval (x :> bv) fv by simpa [ballIn]
+  constructor
+  · intro h x hx; exact h x (lt_of_mem hx) hx
+  · intro h x _ hx; exact h x hx
+
+@[simp] lemma eval_bexsIn {ξ : Type*} {n : ℕ} {t : ArithmeticSemiterm ξ n}
+    {φ : ArithmeticSemiformula ξ (n + 1)} {bv : Fin n → V} {fv : ξ → V} :
+    (bexsIn t φ).Eval (M := V) bv fv ↔ ∃ x ∈ t.val bv fv, φ.Eval (x :> bv) fv := by
+  suffices
+    (∃ x < t.val bv fv, x ∈ t.val bv fv ∧ φ.Eval (x :> bv) fv) ↔
+    ∃ x ∈ t.val bv fv, φ.Eval (x :> bv) fv by simpa [bexsIn]
+  constructor
+  · rintro ⟨x, _, hx, h⟩; exact ⟨x, hx, h⟩
+  · rintro ⟨x, hx, h⟩; exact ⟨x, lt_of_mem hx, hx, h⟩
+
+instance memRel_defined : 𝚺ᴬ₀-Relation₃ (fun r x y : V ↦ ⟪x, y⟫ ∈ r) via memRel :=
+  .mk fun v ↦ by simp [memRel]
+
+instance memRel₃_defined : 𝚺ᴬ₀-Relation₄ (fun r x y z : V ↦ ⟪x, y, z⟫ ∈ r) via memRel₃ :=
+  .mk fun v ↦ by simp [memRel₃]
+
+@[simp] lemma eval_memRel {x y r : V} : memRelOpr.val ![r, x, y] ↔ ⟪x, y⟫ ∈ r := by
+  unfold Semiformula.Operator.val
+  simp [memRelOpr]
+
+@[simp] lemma eval_memRel₃ {x y z r : V} : memRel₃Opr.val ![r, x, y, z] ↔ ⟪x, y, z⟫ ∈ r := by
+  unfold Semiformula.Operator.val
+  simp [memRel₃Opr]
 
 lemma mem_iff_mul_exp_add_exp_add {i a : V} :
     i ∈ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + Exp.exp i + r := by

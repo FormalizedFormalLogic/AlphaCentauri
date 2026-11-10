@@ -14,6 +14,32 @@ namespace FFL.FirstOrder.Rew
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
 
+lemma qpow_map {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) (k : ℕ) :
+    (Rew.map (L := L) b e).qpow k = Rew.map (fun x : Fin (n₁ + k) ↦
+      if h : (x : ℕ) < k then (⟨x, by omega⟩ : Fin (n₂ + k)) else
+        (b ⟨x - k, by omega⟩).addNat k) e := by
+  induction k with
+  | zero => congr 1
+  | succ k ih =>
+    rw [Rew.qpow_succ, ih, Rew.q_map]
+    congr 1; funext x
+    cases x using Fin.cases with
+    | zero => simp
+    | succ x =>
+      ext
+      by_cases h : (x : ℕ) < k <;> simp [h]
+      omega
+
+@[simp] lemma emb_subst_app {m : ℕ} (w : Fin n → Semiterm L Empty m) (φ : Semiformula L Empty n) :
+    Rewriting.emb (Rew.subst w ▹ φ : Semiformula L Empty m) =
+      Rew.subst (fun i ↦ Rew.emb (w i)) ▹ (Rewriting.emb φ : Semiformula L ℕ n) := by
+  unfold Rewriting.emb
+  rw [← TransitiveRewriting.comp_app, ← TransitiveRewriting.comp_app]
+  apply Rewriting.smul_ext'
+  ext x
+  · simp [Rew.comp_app]
+  · exact x.elim
+
 lemma app_substs (ω : Rew L ξ 0 ξ 0) (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) :
     ω ▹ (φ/[t]) = (ω.q ▹ φ)/[ω t] := by
   change ω ▹ (Rew.subst ![t] ▹ φ) = Rew.subst ![ω t] ▹ (ω.q ▹ φ)
@@ -82,6 +108,9 @@ lemma shift_subst_eq (φ : Semiformula L ℕ 1) (t : SyntacticSemiterm L n) :
       | zero => simp [Rew.comp_app]
       | succ i => exact i.elim0
     · simp [Rew.comp_app]
+
+lemma bShift_eq_subst : (Rew.bShift : Rew L ξ n ξ (n + 1)) = Rew.subst fun i ↦ #i.succ := by
+  ext x <;> rfl
 
 end FFL.FirstOrder.Rew
 

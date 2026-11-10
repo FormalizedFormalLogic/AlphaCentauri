@@ -74,6 +74,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  OpenPredicate.openInduction_iff_integerPart:
+    forgive:
+      - OpenPredicate.openInduction_iff_integerPart
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:

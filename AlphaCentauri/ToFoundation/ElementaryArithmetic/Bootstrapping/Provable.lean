@@ -21,6 +21,41 @@ namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
   {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁] [LocallyDelta0Axioms T V]
 
+section transfer
+
+open Bounding
+
+/-- A function on `V` and a function on `ℕ` defined by the same $\Sigma_1$ formula agree on
+standard arguments. -/
+lemma natCast_apply_of_defined {k : ℕ} {F : 𝚺ᴬ₁.Semisentence (k + 1)}
+    {f : (Fin k → V) → V} {g : (Fin k → ℕ) → ℕ} (hf : 𝚺ᴬ₁.DefinedFunction f F)
+    (hg : 𝚺ᴬ₁.DefinedFunction g F) (a : Fin k → ℕ) :
+    f (fun i ↦ (a i : V)) = (g a : V) := by
+  have hℕ : F.val.Evalb (g a :> a) := (hg.df (g a :> a)).mpr (by simp)
+  have hV := bold_sigma_one_completeness (M := V) F.sigma_prop hℕ
+  have e : (ORingStructure.numeral ∘ (g a :> a) : Fin (k + 1) → V) =
+      ((g a : V) :> fun i ↦ (a i : V)) := by
+    funext i; cases i using Fin.cases <;> simp [numeral_eq_natCast]
+  have e' : (ORingStructure.numeral ∘ (Empty.elim : Empty → ℕ) : Empty → V) = Empty.elim :=
+    funext fun x ↦ x.elim
+  rw [e, e'] at hV
+  simpa [hf.iff, eq_comm] using hV
+
+/-- A predicate on `V` and a predicate on `ℕ` defined by the same $\Sigma_1$ formula: the second
+at standard arguments implies the first. -/
+lemma of_natCast_of_defined {k : ℕ} {F : 𝚺ᴬ₁.Semisentence k}
+    {P : (Fin k → V) → Prop} {Q : (Fin k → ℕ) → Prop} (hP : 𝚺ᴬ₁.Defined P F)
+    (hQ : 𝚺ᴬ₁.Defined Q F) {a : Fin k → ℕ} (h : Q a) : P (fun i ↦ (a i : V)) := by
+  have hV := bold_sigma_one_completeness (M := V) F.sigma_prop ((hQ.df a).mpr h)
+  have e : (ORingStructure.numeral ∘ a : Fin k → V) = fun i ↦ (a i : V) := by
+    funext i; simp [numeral_eq_natCast]
+  have e' : (ORingStructure.numeral ∘ (Empty.elim : Empty → ℕ) : Empty → V) = Empty.elim :=
+    funext fun x ↦ x.elim
+  rw [e, e'] at hV
+  simpa [hP.iff] using hV
+
+end transfer
+
 /-- A theorem of `T` is internally provable. -/
 theorem provable_natCast_quote_of_provable {σ : Sentence L} (h : T ⊢ σ) :
     Provable T (((⌜σ⌝ : ℕ) : ℕ) : V) := by

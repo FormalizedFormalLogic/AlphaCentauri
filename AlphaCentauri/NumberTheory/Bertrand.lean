@@ -732,9 +732,9 @@ lemma exists_prime_lt_le_two_mul (n : V) (hn : 1 ≤ n) : ∃ p, n < p ∧ p ≤
   use p
   constructor
   · exact_mod_cast hkp
-  constructor
-  · exact_mod_cast hpk
-  · exact isPrime_natCast hp
+  · constructor
+    · exact_mod_cast hpk
+    · exact isPrime_natCast hp
 
 end
 

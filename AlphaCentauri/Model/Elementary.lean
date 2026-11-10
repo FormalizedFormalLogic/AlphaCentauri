@@ -160,10 +160,10 @@ private lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
     use y
     and_intros
     · exact hlt y.2 hc
-    use z
-    and_intros
-    · exact hlt z.2 hc
-    exact (hψ' _ y z).mpr h₂
+    · use z
+      and_intros
+      · exact hlt z.2 hc
+      · exact (hψ' _ y z).mpr h₂
   obtain ⟨b, hb, h₂⟩ : ∃ b ∈ I.carrier, Θ.Eval ![b] g := by
     by_contra! h₂
     obtain ⟨c, hc, h₃⟩ := overspill (M := I.carrier) 𝚺 j (φ := ∼Θ)
@@ -177,8 +177,8 @@ private lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
   use ⟨y, I.mem_of_lt hy hb⟩
   and_intros
   · exact hy
-  use ⟨z, I.mem_of_lt hz hb⟩
-  exact (hψ' x ⟨y, _⟩ ⟨z, _⟩).mp h₃
+  · use ⟨z, I.mem_of_lt hz hb⟩
+    exact (hψ' x ⟨y, _⟩ ⟨z, _⟩).mp h₃
 
 /-- A proper cut of a model of $\mathsf{I}\Sigma_j$ which is closed under the operations and
 $\Sigma_j$-elementary satisfies $\mathsf{B}\Sigma_{j+1}$.

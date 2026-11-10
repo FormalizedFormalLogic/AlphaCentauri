@@ -108,9 +108,8 @@ formalized in $\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
 - [Jer21, Chapter 0, §2.2] -/
 def ProvableQuadraticReciprocityIE1 : Prop := 𝗜𝗘₁ ⊢ quadraticReciprocity
 
-/-- If $m - 1 = 2^r s$ with $s$ odd, then $-1$ has no $2^r$-th root modulo $m$. Smith prints the
-hypothesis as $m = 2^r s$; the case $r = 2$ is $m \equiv 5 \pmod 8$, and the case $r = 1$ is
-[Smi93, Lemma 3.2].
+/-- If $m - 1 = 2^r s$ with $s$ odd, then $-1$ has no $2^r$-th root modulo $m$.
+The case $r = 2$ is $m \equiv 5 \pmod 8$, and the case $r = 1$ is [Smi93, Lemma 3.2].
 - [Smi93, Lemma 3.2, Question 5.3] -/
 def noRootNegOne (r : ℕ) : ArithmeticSentence :=
   “∀ m, (∃ k, m = ↑(2 ^ (r + 1)) * k + ↑(2 ^ r + 1)) → ¬!(negOneHasRoot (2 ^ r)) m”

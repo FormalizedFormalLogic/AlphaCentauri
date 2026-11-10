@@ -182,31 +182,31 @@ private lemma exists_e1 {n : ℕ} {Φ : (Fin (n + 1) → RingOfDifferences V) �
   use fun k ↦ l.getD k b, bexsBlock (l.idxOf b) (n + n) (Rew.rewriteMap l.idxOf ▹ θ)
   constructor
   · exact bexsBlock_boundedExistential _ _ (.of_open (by simpa using hθ))
-  intro x
-  have hε : Function.funEqOn θ.FVar? (fun y ↦ l.getD (l.idxOf y) b) id := fun y hy ↦
-    hl (List.mem_cons_of_mem _ (Finset.mem_toList.2 hy))
-  have hv (xs : Fin (n + n) → V) : (fun i ↦ of ((pv i).val (Matrix.appendr xs ![x]) id) -
-      of ((nv i).val (Matrix.appendr xs ![x]) id)) =
-      Fin.cons (of x) fun j ↦ of (xs (j.castAdd n)) - of (xs (j.natAdd n)) := by
-    funext i
-    cases i using Fin.cases <;> simp [pv, nv]
-  simp only [eval_bexsBlock, Semiformula.eval_rewriteMap, Semiformula.eval_iff_of_funEqOn θ hε,
-    hl List.mem_cons_self, h, hv]
-  constructor
-  · rintro ⟨ys, hys, h⟩
-    choose p q hpq hp hq using fun j ↦ hb (ys j) (hys j)
-    have hq' (j : Fin n) : Fin.append p q (j.addNat n) = q j := by
-      simpa using Fin.append_right p q j
-    use Fin.append p q
-    and_intros
-    · intro i
-      cases i using Fin.addCases <;> simp [hp, hq, hq']
-    · simpa [hq', hpq] using h
-    · intro j
-      simpa [pv, nv, hq', hpq] using hys j
-  · rintro ⟨xs, -, h, h'⟩
-    use fun j ↦ of (xs (j.castAdd n)) - of (xs (j.natAdd n))
-    exact ⟨fun j ↦ by simpa [pv, nv] using h' j, h⟩
+  · intro x
+    have hε : Function.funEqOn θ.FVar? (fun y ↦ l.getD (l.idxOf y) b) id := fun y hy ↦
+      hl (List.mem_cons_of_mem _ (Finset.mem_toList.2 hy))
+    have hv (xs : Fin (n + n) → V) : (fun i ↦ of ((pv i).val (Matrix.appendr xs ![x]) id) -
+        of ((nv i).val (Matrix.appendr xs ![x]) id)) =
+        Fin.cons (of x) fun j ↦ of (xs (j.castAdd n)) - of (xs (j.natAdd n)) := by
+      funext i
+      cases i using Fin.cases <;> simp [pv, nv]
+    simp only [eval_bexsBlock, Semiformula.eval_rewriteMap, Semiformula.eval_iff_of_funEqOn θ hε,
+      hl List.mem_cons_self, h, hv]
+    constructor
+    · rintro ⟨ys, hys, h⟩
+      choose p q hpq hp hq using fun j ↦ hb (ys j) (hys j)
+      have hq' (j : Fin n) : Fin.append p q (j.addNat n) = q j := by
+        simpa using Fin.append_right p q j
+      use Fin.append p q
+      and_intros
+      · intro i
+        cases i using Fin.addCases <;> simp [hp, hq, hq']
+      · simpa [hq', hpq] using h
+      · intro j
+        simpa [pv, nv, hq', hpq] using hys j
+    · rintro ⟨xs, -, h, h'⟩
+      use fun j ↦ of (xs (j.castAdd n)) - of (xs (j.natAdd n))
+      exact ⟨fun j ↦ by simpa [pv, nv] using h' j, h⟩
 
 end
 

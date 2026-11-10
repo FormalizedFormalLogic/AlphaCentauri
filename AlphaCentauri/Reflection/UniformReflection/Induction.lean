@@ -118,22 +118,22 @@ lemma exists_inductionImplication (ψ : ℬ[<, ℒₒᵣ].Prenex 𝚺 n ξ (m + 
   use θ.val
   and_intros
   · exact θ.val_prenexHierarchy
-  intro V _ _ f x p
-  have h₀ : (fun i ↦ Semiterm.val (x :> p) f
-      ((‘0’ :> fun i ↦ #i.succ : Fin (m + 1) → ArithmeticSemiterm ξ (m + 1)) i)) = 0 :> p :=
-    funext <| Fin.cases (by simp) (by simp)
-  have h₁ (y : V) : (fun i ↦ Semiterm.val (y :> x :> p) f
-      ((#0 :> fun i ↦ #i.succ.succ : Fin (m + 1) → ArithmeticSemiterm ξ (m + 2)) i)) = y :> p :=
-    funext <| Fin.cases (by simp) (by simp)
-  have h₂ (y : V) : (fun i ↦ Semiterm.val (y :> x :> p) f
-      ((‘#0 + 1’ :> fun i ↦ #i.succ.succ : Fin (m + 1) → ArithmeticSemiterm ξ (m + 2)) i)) =
-      (y + 1) :> p :=
-    funext <| Fin.cases (by simp) (by simp)
-  simp only [← hθ, Prenex.eval_pairOr, Prenex.eval_pairExs, Prenex.eval_pairAnd,
-    Prenex.models_succ, ← hA, ← hB, LogicalConnective.HomClass.map_neg, Prenex.val_rew,
-    Semiformula.eval_rew, Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar,
-    h₀, h₁, h₂, LogicalConnective.Prop.neg_eq]
-  grind
+  · intro V _ _ f x p
+    have h₀ : (fun i ↦ Semiterm.val (x :> p) f
+        ((‘0’ :> fun i ↦ #i.succ : Fin (m + 1) → ArithmeticSemiterm ξ (m + 1)) i)) = 0 :> p :=
+      funext <| Fin.cases (by simp) (by simp)
+    have h₁ (y : V) : (fun i ↦ Semiterm.val (y :> x :> p) f
+        ((#0 :> fun i ↦ #i.succ.succ : Fin (m + 1) → ArithmeticSemiterm ξ (m + 2)) i)) = y :> p :=
+      funext <| Fin.cases (by simp) (by simp)
+    have h₂ (y : V) : (fun i ↦ Semiterm.val (y :> x :> p) f
+        ((‘#0 + 1’ :> fun i ↦ #i.succ.succ : Fin (m + 1) → ArithmeticSemiterm ξ (m + 2)) i)) =
+        (y + 1) :> p :=
+      funext <| Fin.cases (by simp) (by simp)
+    simp only [← hθ, Prenex.eval_pairOr, Prenex.eval_pairExs, Prenex.eval_pairAnd,
+      Prenex.models_succ, ← hA, ← hB, LogicalConnective.HomClass.map_neg, Prenex.val_rew,
+      Semiformula.eval_rew, Function.comp_def, Rew.subst_bvar, Rew.subst_fvar, Semiterm.val_fvar,
+      h₀, h₁, h₂, LogicalConnective.Prop.neg_eq]
+    grind
 
 end inductionImplication
 

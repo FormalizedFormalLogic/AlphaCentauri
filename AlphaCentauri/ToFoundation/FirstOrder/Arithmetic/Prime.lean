@@ -303,23 +303,24 @@ lemma exists_isPrimePower_of_divisorUpTo_lt (hy : 0 < y)
     use p
     constructor
     · exact hp
-    constructor
-    · exact hdvd.trans (divisorUpTo_dvd y _)
-    · rw [he']
-      apply mul_le_mul_left
-      apply le_divisorUpTo hy he'y
-      intro q hq ⟨r, hrq, hr⟩ hqe'
-      have hqe : q ∣ divisorUpTo y (T + 1) := he' ▸ Dvd.dvd.mul_left hqe' p
-      have hq1 : q < T + 1 := by
-        by_cases hrp : r = p
-        · subst hrp
-          have hqr : q * r ∣ divisorUpTo y (T + 1) := he' ▸ mul_comm r e' ▸ mul_dvd_mul_right hqe' r
-          have := hle (q * r) (le_of_dvd hepos hqr)
-            ⟨r, le_mul_self_of_pos_left hr.pos, hr.mul_prime⟩ hqr
-          exact lt_of_lt_of_le (lt_mul_of_one_lt_right hr.pos hr.1.1) this
-        · exact lt_of_le_of_ne (hle q (le_of_dvd hepos hqe) ⟨r, hrq, hr⟩ hqe)
-            fun hq ↦ hrp (hr.unique (hq ▸ hp))
-      exact lt_succ_iff_le.mp hq1
+    · constructor
+      · exact hdvd.trans (divisorUpTo_dvd y _)
+      · rw [he']
+        apply mul_le_mul_left
+        apply le_divisorUpTo hy he'y
+        intro q hq ⟨r, hrq, hr⟩ hqe'
+        have hqe : q ∣ divisorUpTo y (T + 1) := he' ▸ Dvd.dvd.mul_left hqe' p
+        have hq1 : q < T + 1 := by
+          by_cases hrp : r = p
+          · subst hrp
+            have hqr : q * r ∣ divisorUpTo y (T + 1) :=
+              he' ▸ mul_comm r e' ▸ mul_dvd_mul_right hqe' r
+            have := hle (q * r) (le_of_dvd hepos hqr)
+              ⟨r, le_mul_self_of_pos_left hr.pos, hr.mul_prime⟩ hqr
+            exact lt_of_lt_of_le (lt_mul_of_one_lt_right hr.pos hr.1.1) this
+          · exact lt_of_le_of_ne (hle q (le_of_dvd hepos hqe) ⟨r, hrq, hr⟩ hqe)
+              fun hq ↦ hrp (hr.unique (hq ▸ hp))
+        exact lt_succ_iff_le.mp hq1
   · exfalso
     refine h.not_ge <| le_divisorUpTo hy (divisorUpTo_dvd y _) fun q hq ⟨r, hrq, hr⟩ hqd ↦ ?_
     refine lt_succ_iff_le.mp <| lt_of_le_of_ne (hle q hq ⟨r, hrq, hr⟩ hqd) ?_
@@ -385,11 +386,11 @@ lemma IsSegment.exists_isPrimePower (hy : 0 < y) (h : IsSegment y x T) :
   use p
   constructor
   · exact hP
-  constructor
-  · exact hdvd
-  · apply (tsub_lt_iff_left h.1).mpr
-    rw [add_comm (‖divisorUpTo y T‖)]
-    exact h.2.trans_le <| (length_monotone hle).trans (length_mul_le _ _)
+  · constructor
+    · exact hdvd
+    · apply (tsub_lt_iff_left h.1).mpr
+      rw [add_comm (‖divisorUpTo y T‖)]
+      exact h.2.trans_le <| (length_monotone hle).trans (length_mul_le _ _)
 
 lemma two_mul_length_add_lt (hD : 0 < d) (hP : IsPrimePower p (T + 1)) (hdvd : T + 1 ∣ d)
     (ho : o < ‖p‖) : 2 * ‖divisorUpTo d T‖ + o < 2 * ‖divisorUpTo d (T + 1)‖ := by

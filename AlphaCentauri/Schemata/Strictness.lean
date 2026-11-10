@@ -20,9 +20,9 @@ theorem ISigma_strictlyWeakerThan_BSigma_succ (n : ℕ) : 𝗜𝚺 n ⪱ 𝗕�
   have : (definableElements (n + 1) M)↓[ℒₒᵣ] ⊧* 𝗜𝚺 n := definableElements.models_ISigma n
   constructor
   · exact ISigma_weakerThan_BSigma_succ
-  intro h
-  exact definableElements.not_models_BSigma (definableElements_mono (by omega) ha) hns
-    (models_of_subtheory (T := 𝗕𝚺 (n + 1)) (U := 𝗜𝚺 n) this)
+  · intro h
+    exact definableElements.not_models_BSigma (definableElements_mono (by omega) ha) hns
+      (models_of_subtheory (T := 𝗕𝚺 (n + 1)) (U := 𝗜𝚺 n) this)
 
 /-- $\mathsf{B}\Sigma_{n + 1}$ is strictly weaker than $\mathsf{I}\Sigma_{n + 1}$.
 

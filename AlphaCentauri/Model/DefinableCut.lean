@@ -191,26 +191,26 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
     use φ'.val
     and_intros
     · exact Bounding.Prenex.val_hierarchy
-    intro z
-    have h₁ (y : M) : M ⊧/![y] φ ↔ ∃ w, M ⊧/![w, y] φ'.sigmaInv.val :=
-      (hφ' M ![y] Empty.elim).trans <| φ'.models_sigmaInv ![y]
-    rw [Bounding.Prenex.models_sigmaInv]
-    constructor
-    · rintro ⟨w, hw⟩
-      apply Subtype.ext
-      apply (hφx z.1).mp
-      apply (h₁ z.1).mpr
-      use w.1
-      simpa [Matrix.comp_vecCons''] using (transfer ![w, z]).mpr hw
-    · rintro rfl
-      obtain ⟨w, hw, hχ, -⟩ := exists_least_mem_definableElements
-        (φ := (φ'.sigmaInv.rew Rew.emb).val) (e := ![x]) (f := fun _ ↦ 0)
-        Bounding.Prenex.val_hierarchy (Fin.forall_fin_one.mpr hx)
-        (fun _ ↦ (0 : definableElements (j + 1) M).2) <| by
-          simpa [eval_emb] using (h₁ x).mp ((hφx x).mpr rfl)
-      use ⟨w, w + 1, ((⟨w, hw⟩ : definableElements (j + 1) M) + 1).2, lt_add_one w⟩
-      apply (transfer _).mp
-      simpa [Matrix.comp_vecCons'', eval_emb] using hχ
+    · intro z
+      have h₁ (y : M) : M ⊧/![y] φ ↔ ∃ w, M ⊧/![w, y] φ'.sigmaInv.val :=
+        (hφ' M ![y] Empty.elim).trans <| φ'.models_sigmaInv ![y]
+      rw [Bounding.Prenex.models_sigmaInv]
+      constructor
+      · rintro ⟨w, hw⟩
+        apply Subtype.ext
+        apply (hφx z.1).mp
+        apply (h₁ z.1).mpr
+        use w.1
+        simpa [Matrix.comp_vecCons''] using (transfer ![w, z]).mpr hw
+      · rintro rfl
+        obtain ⟨w, hw, hχ, -⟩ := exists_least_mem_definableElements
+          (φ := (φ'.sigmaInv.rew Rew.emb).val) (e := ![x]) (f := fun _ ↦ 0)
+          Bounding.Prenex.val_hierarchy (Fin.forall_fin_one.mpr hx)
+          (fun _ ↦ (0 : definableElements (j + 1) M).2) <| by
+            simpa [eval_emb] using (h₁ x).mp ((hφx x).mpr rfl)
+        use ⟨w, w + 1, ((⟨w, hw⟩ : definableElements (j + 1) M) + 1).2, lt_add_one w⟩
+        apply (transfer _).mp
+        simpa [Matrix.comp_vecCons'', eval_emb] using hχ
   have : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (Nat.le_add_left 1 j)
   have hcast (c : ℕ) : ((c : (definableCut j M).carrier) : M) = c := by
     induction c with

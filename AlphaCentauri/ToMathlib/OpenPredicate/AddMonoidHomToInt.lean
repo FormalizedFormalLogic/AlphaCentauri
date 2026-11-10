@@ -62,21 +62,21 @@ lemma exists_eq_mul_not_three_dvd {d : R} (hd : 0 < d) :
   and_intros
   · exact e
   · exact ha
-  rintro ⟨b₁, rfl⟩
-  have hb₁ : 0 < b₁ := by
-    rcases hb₀.eq_or_lt with h | h
-    · simp [← h] at e; linarith
+  · rintro ⟨b₁, rfl⟩
+    have hb₁ : 0 < b₁ := by
+      rcases hb₀.eq_or_lt with h | h
+      · simp [← h] at e; linarith
+      · linarith
+    have := DiscretelyOrdered.one_le_of_pos _ hb₁
+    apply hmin b₁ hb₁.le (by linarith)
+    rw [hB]
+    use 3 * a, 3 * j + 1
+    and_intros
+    · rw [abs_of_nonneg (by linarith)]; nlinarith
+    · rw [abs_of_nonneg (by linarith)]; nlinarith
+    · rw [e]; ring
+    · rw [ha]; ring
     · linarith
-  have := DiscretelyOrdered.one_le_of_pos _ hb₁
-  apply hmin b₁ hb₁.le (by linarith)
-  rw [hB]
-  use 3 * a, 3 * j + 1
-  and_intros
-  · rw [abs_of_nonneg (by linarith)]; nlinarith
-  · rw [abs_of_nonneg (by linarith)]; nlinarith
-  · rw [e]; ring
-  · rw [ha]; ring
-  · linarith
 
 /-- Every additive homomorphism to `ℤ` from a nonstandard discretely ordered ring with the least
 number principle is zero.

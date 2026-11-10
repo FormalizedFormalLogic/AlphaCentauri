@@ -11,9 +11,8 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 The pigeonhole axiom for `φ` says that `φ` defines no injection of $a + 1$ into $a$. Whether
 $\mathsf{I}\Delta_0$ proves the pigeonhole principle for $\Delta_0$ formulas is open.
 
-A formula is read here as a multivalued function, as in [PWW88, Problem 2]: the hypothesis asks
-only that every element of the domain has a value, not that it has exactly one. [HP98, I.2.20]
-states the principle instead for a map of $a$ onto $a + 1$.
+A formula is read here as a multivalued function: the hypothesis asks only that every element of
+the domain has a value, not that it has exactly one.
 
 - [HP98, §I.2(b)]
 - [PWW88, Problems 1 and 2]

@@ -54,8 +54,10 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZero.Semantics
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Semantics
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILP.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILP.Semantics
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILPZero.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILRStar.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILRW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Semantics
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILWStar.Basic
@@ -65,7 +67,6 @@ public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentTheory
 public import AlphaCentauri.InterpretabilityLogic.OpenProblem
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
-public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedBranchModel
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModelM
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel

@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 
 /-!
 # The logic $\mathbf{ILM}$
@@ -44,11 +44,6 @@ lemma ILM.axiomR : 𝐈𝐋𝐌 ⊢ Axioms.R A B C := by
   have h₅ : 𝐈𝐋𝐌 ⊢ Axioms.J2 (∼(A ▷ ∼C)) (◇(A ⋏ □C)) (A ⋏ □C) := axiomJ2;
   have h₆ : 𝐈𝐋𝐌 ⊢ Axioms.J2 (∼(A ▷ ∼C)) (A ⋏ □C) (B ⋏ □C) := axiomJ2;
   cl_prover [rhd_of_provable h₃, h₄, h₅, h₆, axiomM (A := A) (B := B) (C := C)];
-
-instance : (𝐈𝐋𝐑𝐖 : Logic α) ⪯ 𝐈𝐋𝐌 := weakerThan_iff.mpr <| subset_of_provable <| by
-  rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩)
-  · exact ILM.axiomR
-  · exact ILM.axiomW
 
 end Logic
 

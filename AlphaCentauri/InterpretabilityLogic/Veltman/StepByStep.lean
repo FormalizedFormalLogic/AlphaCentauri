@@ -43,7 +43,7 @@ structure Node (𝔸 : Set (Formula α)) where
   cr : ℕ → Set (Formula α)
 
 /-- A step either witnesses `¬(A ▷ B)` at `x` or removes the deficiency of `A ▷ B` at `x` on `y`. -/
-inductive Task (α : Type*)
+inductive Job (α : Type*)
   | problem (x : ℕ) (A B : Formula α)
   | deficiency (x y : ℕ) (A B : Formula α)
 
@@ -79,7 +79,7 @@ noncomputable def mk (n : ℕ) (k : Kind α) (Δ : MaximalConsistentTheory (ofAx
 
 end
 
-variable (Γ₀ : MaximalConsistentTheory (ofAxioms 𝔸)) (τ : ℕ → Task α)
+variable (Γ₀ : MaximalConsistentTheory (ofAxioms 𝔸)) (τ : ℕ → Job α)
 
 open Classical in
 /-- The world `n`, given the earlier worlds. -/
@@ -749,6 +749,253 @@ lemma successor_of_mem_pre {n u : ℕ} (hu : u ∈ (𝒩 n).pre) :
   intro A hA;
   exact (assuring_anchor ha).box_mem_of_box_mem
     (box_mem_of_mem_anc hu (mem_antecedents_empty_iff.mp hA))
+
+lemma assuring_cr {n u : ℕ} (hu : u ∈ (𝒩 n).pre) :
+    AssuringSuccessor ((𝒩 n).cr u) (𝒩 u).set (𝒩 n).set := by
+  induction n using Nat.strong_induction_on generalizing u with
+  | _ n ih =>
+  by_cases hau : (𝒩 n).kind.anchor = u;
+  · rcases hk : (𝒩 n).kind with _ | ⟨b, B⟩ | ⟨b, s⟩ <;> rw [hk] at hau <;>
+      simp only [Kind.anchor] at hau;
+    · simp at hau;
+    · obtain rfl : u = b := (WithBot.coe_injective hau).symm;
+      rw [(fields_problem hk).2.2.2];
+      simpa using assuring_anchor_problem hk;
+    · obtain rfl : u = b := (WithBot.coe_injective hau).symm;
+      rw [(fields_deficiency hk).2.2.2];
+      simpa using (assuring_anchor_deficiency hk).mono Set.subset_union_left;
+  · rw [cr_of_anchor_ne hau];
+    by_cases hne : (above 𝒩 (𝒩 n).pre u).Nonempty;
+    · obtain ⟨t₀, h₀⟩ := hne;
+      rw [biUnion_cr_eq h₀];
+      obtain ⟨h₀₁, h₀₂⟩ := Finset.mem_filter.mp h₀;
+      exact (ih t₀ (pre_lt h₀₁) h₀₂).trans_successor (successor_of_mem_pre h₀₁);
+    · rw [Finset.not_nonempty_iff_eq_empty.mp hne];
+      simpa using successor_of_mem_pre hu;
+
+variable (hM₀ : ∀ {A B C : Formula α}, ofAxioms 𝔸 ⊢ Axioms.M₀ A B C)
+
+include hM₀ in
+lemma assuring_label {x u : ℕ} (hu : u ∈ (𝒩 x).pre) :
+    AssuringSuccessor (label 𝒩 u x) (𝒩 u).set (𝒩 x).set := by
+  by_cases hau : (𝒩 x).kind.anchor = u;
+  · rcases hk : (𝒩 x).kind with _ | ⟨b, B⟩ | ⟨b, s⟩ <;> rw [hk] at hau <;>
+      simp only [Kind.anchor] at hau;
+    · simp at hau;
+    · obtain rfl : u = b := (WithBot.coe_injective hau).symm;
+      unfold label;
+      rw [(fields_problem hk).2.2.2, (fields_problem hk).2.2.1];
+      simpa [boxes] using assuring_anchor_problem hk;
+    · obtain rfl : u = b := (WithBot.coe_injective hau).symm;
+      unfold label;
+      rw [(fields_deficiency hk).2.2.2, (fields_deficiency hk).2.2.1];
+      simpa [label] using assuring_anchor_deficiency hk;
+  · unfold label;
+    induction hr : (𝒩 x).mu u using WithBot.recBotCoe with
+    | bot => simpa [boxes] using assuring_cr hu;
+    | coe r =>
+      have hm := Finset.mem_of_max ((mu_of_anchor_ne hau).symm.trans hr);
+      obtain ⟨hr₁, hr₂⟩ := Finset.mem_filter.mp hm;
+      simp only [boxes, WithBot.recBotCoe_coe];
+      rw [cr_eq_of_mu hu hr];
+      exact AssuringSuccessor.union_boxLabel_of_axiomM₀ hM₀ (assuring_cr hr₂)
+        (successor_of_mem_pre hr₁)
+
+omit hM₀
+
+/-! ### Depth -/
+
+/-- The formulas of a task belong to `Ω`. -/
+def Job.Mem (Ω : Finset (Formula α)) : Job α → Prop
+  | .problem _ A B => A ∈ Ω ∧ B ∈ Ω
+  | .deficiency _ _ A B => A ∈ Ω ∧ B ∈ Ω
+
+open Classical in
+/-- The formulas `C` of `Ω` with `□∼C` at `n`. -/
+noncomputable def boxedNeg (Ω : Finset (Formula α)) (n : ℕ) : Finset (Formula α) :=
+  Ω.filter (fun C ↦ □(∼C) ∈ (𝒩 n).set)
+
+lemma boxedNeg_ssubset {Ω : Finset (Formula α)} (hτ : ∀ n, (τ n).Mem Ω) {n u : ℕ}
+    (hu : u ∈ (𝒩 n).pre) : boxedNeg (Γ₀ := Γ₀) (τ := τ) Ω u ⊂ boxedNeg (Γ₀ := Γ₀) (τ := τ) Ω n := by
+  classical
+  obtain ⟨a, ha, he⟩ := pre_eq_anc_anchor hu;
+  rw [he] at hu;
+  have h₁ : boxedNeg (Γ₀ := Γ₀) (τ := τ) Ω u ⊆ boxedNeg (Γ₀ := Γ₀) (τ := τ) Ω a := by
+    intro C hC;
+    obtain ⟨hC₁, hC₂⟩ := Finset.mem_filter.mp hC;
+    exact Finset.mem_filter.mpr ⟨hC₁, box_mem_of_mem_anc hu hC₂⟩;
+  have h₂ : boxedNeg (Γ₀ := Γ₀) (τ := τ) Ω a ⊆ boxedNeg (Γ₀ := Γ₀) (τ := τ) Ω n := by
+    intro C hC;
+    obtain ⟨hC₁, hC₂⟩ := Finset.mem_filter.mp hC;
+    exact Finset.mem_filter.mpr ⟨hC₁, ((assuring_anchor ha).box_mem_of_box_mem hC₂).2⟩;
+  refine (Finset.ssubset_iff_of_subset (h₁.trans h₂)).mpr ?_;
+  have := kind_spec (Γ₀ := Γ₀) (τ := τ) n;
+  rcases hk : (𝒩 n).kind with _ | ⟨b, B⟩ | ⟨b, s⟩ <;> rw [hk] at this ha <;>
+    simp only [Kind.anchor] at ha;
+  · simp at ha;
+  · obtain rfl : b = a := WithBot.coe_injective ha;
+    obtain ⟨-, A, hτn, hAB, -, -, hA⟩ := this;
+    have hΩ : A ∈ Ω := by
+      have := hτ n;
+      rw [hτn] at this;
+      exact this.1;
+    refine ⟨A, Finset.mem_filter.mpr ⟨hΩ, hA⟩, fun hm ↦ ?_⟩;
+    apply hAB;
+    exact mem_of_imp (C_trans (box_mono (show ofAxioms 𝔸 ⊢ ∼A 🡒 A 🡒 B by cl_prover)) axiomJ1)
+      (Finset.mem_filter.mp (h₁ hm)).2;
+  · obtain rfl : b = a := WithBot.coe_injective ha;
+    obtain ⟨-, -, hbs, A, B, hτn, hAB, hA, -, -, hB⟩ := this;
+    have hΩ : B ∈ Ω := by
+      have := hτ n;
+      rw [hτn] at this;
+      exact this.2;
+    refine ⟨B, Finset.mem_filter.mpr ⟨hΩ, hB⟩, fun hm ↦ ?_⟩;
+    have h₃ : □(∼B) ∈ (𝒩 b).set := (Finset.mem_filter.mp (h₁ hm)).2;
+    have h₄ : □(∼A) ∈ (𝒩 b).set := mem_of_imp₂ box_neg_of_rhd hAB h₃;
+    exact not_mem_of_neg_mem ((successor_of_mem_pre hbs).box_mem_of_box_mem h₄).1 hA;
+
+/-! ### The model -/
+
+variable (Γ₀ τ) in
+/-- The model of the construction. -/
+noncomputable def model : Model ℕ α where
+  Rel' x y := x ∈ (node Γ₀ τ y).pre
+  S' w x y := w ∈ (node Γ₀ τ x).pre ∧ w ∈ (node Γ₀ τ y).pre ∧
+    Relation.ReflTransGen (Step (Γ₀ := Γ₀) (τ := τ) w) x y
+  Val' x a := #a ∈ (node Γ₀ τ x).set
+
+lemma model_isIL {Ω : Finset (Formula α)} (hτ : ∀ n, (τ n).Mem Ω) : (model Γ₀ τ).IsIL where
+  trans _ _ _ h₁ h₂ := pre_trans h₁ h₂
+  cwf := by
+    classical
+    refine Subrelation.wf ?_ (InvImage.wf
+      (fun x ↦ Ω.card - (boxedNeg (Γ₀ := Γ₀) (τ := τ) Ω x).card) wellFounded_lt);
+    intro x y h;
+    have h₁ := Finset.card_lt_card (boxedNeg_ssubset hτ h);
+    have h₂ : (boxedNeg (Γ₀ := Γ₀) (τ := τ) Ω x).card ≤ Ω.card :=
+      Finset.card_le_card (Finset.filter_subset _ Ω);
+    simp only [InvImage];
+    omega
+  rel_of_s_left h := h.1
+  rel_of_s_right h := h.2.1
+  s_refl h := ⟨h, h, .refl⟩
+  s_trans h₁ h₂ := ⟨h₁.1, h₂.2.1, h₁.2.2.trans h₂.2.2⟩
+  s_of_rel h₁ h₂ := ⟨h₁, pre_trans h₁ h₂, .single (.inl ⟨h₁, h₂⟩)⟩
+
+instance model_hasM₀ : (model Γ₀ τ).HasM₀ where
+  rel_of_rel_rel_s_rel {w x y z u} hwx hxy hyz hzu := by
+    obtain ⟨r, hr, hxr⟩ := exists_mu_of_reflTransGen hwx hxy hyz.2.2;
+    exact anc_subset_pre hzu (anc_subset (mu_spec hyz.2.1 hr).2 hxr)
+
+/-! ### The truth lemma -/
+
+lemma node_zero : (𝒩 0).set = Γ₀ := by
+  have := kind_spec (Γ₀ := Γ₀) (τ := τ) 0;
+  rcases hk : (𝒩 0).kind with _ | ⟨a, B⟩ | ⟨a, s⟩ <;> rw [hk] at this;
+  · exact this;
+  · exact absurd this.1 (Nat.not_lt_zero _);
+  · exact absurd this.1 (Nat.not_lt_zero _);
+
+lemma kind_of_problem {n x : ℕ} {A B : Formula α} (hτn : τ n = .problem x A B) (hx : x < n)
+    (h : A ▷ B ∉ (𝒩 x).set) : (𝒩 n).kind = .problem x B := by
+  rw [node_eq n];
+  unfold step;
+  rw [hτn];
+  simp only;
+  split_ifs with hc;
+  · simp;
+  · exact absurd ⟨hx, by rwa [restr_of_lt hx]⟩ hc;
+
+include hM₀ in
+lemma kind_of_deficiency {n x y : ℕ} {A B : Formula α} (hτn : τ n = .deficiency x y A B)
+    (hx : x < n) (hy : y < n) (hxy : x ∈ (𝒩 y).pre) (hAB : A ▷ B ∈ (𝒩 x).set)
+    (hA : A ∈ (𝒩 y).set) : (𝒩 n).kind = .deficiency x y := by
+  rw [node_eq n];
+  unfold step;
+  rw [hτn];
+  simp only;
+  split_ifs with hc;
+  · simp;
+  · apply absurd _ hc;
+    rw [restr_of_lt hx, restr_of_lt hy, label_restr_of_lt hy];
+    exact ⟨hx, hy, hxy, hAB, hA, (assuring_label hM₀ hxy).exists_of_rhd_mem hAB hA⟩;
+
+include hM₀ in
+lemma truthlemma {Ω : Finset (Formula α)}
+    (hfair : ∀ t : Job α, t.Mem Ω → ∀ N, ∃ n, N < n ∧ τ n = t) (hbot : ⊥ ∈ Ω)
+    {C : Formula α} (hC : ∀ D ∈ C.subformulas, D ∈ Ω ∧ ∼D ∈ Ω) (x : ℕ) :
+    Model.World.Forces (model Γ₀ τ) x C ↔ C ∈ (𝒩 x).set := by
+  induction C generalizing x with
+  | atom a => rfl;
+  | falsum => exact ⟨False.elim, fun h ↦ (bot_not_mem h).elim⟩;
+  | imp A B ihA ihB =>
+    have hA := ihA (fun D hD ↦ hC D (by simp [subformulas, hD]));
+    have hB := ihB (fun D hD ↦ hC D (by simp [subformulas, hD]));
+    rw [imp_mem_iff, ← hA, ← hB];
+    rfl;
+  | box A ih =>
+    have hA := ih (fun D hD ↦ hC D (by simp [subformulas, hD]));
+    constructor;
+    · intro h;
+      by_contra hn;
+      have hn' : ∼A ▷ ⊥ ∉ (𝒩 x).set := fun h₁ ↦
+        hn <| mem_of_imp (C_trans rhd_bot (box_mono Entailment.dne)) h₁;
+      obtain ⟨n, hxn, hτn⟩ := hfair (.problem x (∼A) ⊥)
+        ⟨(hC A (by simp [subformulas])).2, hbot⟩ x;
+      have hk := kind_of_problem hτn hxn hn';
+      have hs := kind_spec (Γ₀ := Γ₀) (τ := τ) n;
+      rw [hk] at hs;
+      obtain ⟨-, A', hτ', -, -, hA', -⟩ := hs;
+      obtain rfl : A' = ∼A := by
+        rw [hτn] at hτ';
+        injection hτ' with _ h;
+        exact h.symm;
+      have hxn' : x ∈ (𝒩 n).pre := by
+        rw [(fields_problem hk).1];
+        exact mem_anc_self x;
+      exact not_mem_of_neg_mem hA' <| (hA n).mp (h n hxn');
+    · intro h y hxy;
+      exact (hA y).mpr ((successor_of_mem_pre hxy).box_mem_of_box_mem h).1;
+  | rhd A B ihA ihB =>
+    have hA := ihA (fun D hD ↦ hC D (by simp [subformulas, hD]));
+    have hB := ihB (fun D hD ↦ hC D (by simp [subformulas, hD]));
+    have hΩ : A ∈ Ω ∧ B ∈ Ω :=
+      ⟨(hC A (by simp [subformulas])).1, (hC B (by simp [subformulas])).1⟩;
+    constructor;
+    · intro h;
+      by_contra hn;
+      obtain ⟨n, hxn, hτn⟩ := hfair (.problem x A B) hΩ x;
+      have hk := kind_of_problem hτn hxn hn;
+      have hs := kind_spec (Γ₀ := Γ₀) (τ := τ) n;
+      rw [hk] at hs;
+      obtain ⟨-, A', hτ', -, -, hA', -⟩ := hs;
+      obtain rfl : A' = A := by
+        rw [hτn] at hτ';
+        injection hτ' with _ h;
+        exact h.symm;
+      have hxn' : x ∈ (𝒩 n).pre := by
+        rw [(fields_problem hk).1];
+        exact mem_anc_self x;
+      obtain ⟨z, ⟨-, hxz, hnz⟩, hz⟩ := h n hxn' ((hA n).mpr hA');
+      have h₁ : ∼B ∈ (𝒩 z).cr x := by
+        apply cr_subset_of_reflTransGen hnz;
+        rw [(fields_problem hk).2.2.2];
+        simp;
+      exact not_mem_of_neg_mem ((assuring_cr hxz).subset h₁) ((hB z).mp hz);
+    · intro h y hxy hy;
+      obtain ⟨n, hn, hτn⟩ := hfair (.deficiency x y A B) hΩ (max x y);
+      have hk := kind_of_deficiency hM₀ hτn (by omega) (by omega) hxy h ((hA y).mp hy);
+      have hs := kind_spec (Γ₀ := Γ₀) (τ := τ) n;
+      rw [hk] at hs;
+      obtain ⟨-, -, -, A', B', hτ', -, -, -, hB', -⟩ := hs;
+      obtain rfl : B' = B := by
+        rw [hτn] at hτ';
+        injection hτ' with _ _ _ h;
+        exact h.symm;
+      have hxn' : x ∈ (𝒩 n).pre := by
+        rw [(fields_deficiency hk).1];
+        exact mem_anc_self x;
+      exact ⟨n, ⟨hxy, hxn', .single (.inr hk)⟩, (hB n).mpr hB'⟩;
 
 end
 

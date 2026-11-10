@@ -29,7 +29,11 @@ lemma Formula.exists_mem_subformulas_of_mem_conj₂ {A : Formula α} :
     simp only [List.conj₂_nil] at h;
     change A ∈ insert (⊥ 🡒 ⊥) _ at h;
     simp_all [subformulas];
-  | [B], h, _, _ => ⟨B, by simp, h⟩
+  | [B], h, _, _ => by
+    use B;
+    and_intros;
+    · simp;
+    · exact h;
   | B :: C :: l, h, himp, hbot => by
     change A ∈ insert _ _ at h;
     simp only [subformulas, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton] at h;
@@ -37,9 +41,15 @@ lemma Formula.exists_mem_subformulas_of_mem_conj₂ {A : Formula α} :
     all_goals first
       | exact (himp _ _ h).elim
       | exact (hbot h).elim
-      | exact ⟨B, by simp, h⟩
+      | (use B;
+         and_intros;
+         · simp;
+         · exact h)
       | obtain ⟨D, hD, h⟩ := exists_mem_subformulas_of_mem_conj₂ (l := C :: l) h himp hbot;
-        exact ⟨D, by simp_all, h⟩
+        use D;
+        and_intros;
+        · simp_all;
+        · exact h
 
 /-! ### Lemmas of $\mathbf{GL}$ -/
 
@@ -148,13 +158,21 @@ lemma Adequate.subformulas_subset {Φ : Finset (Formula α)} [Adequate Φ] {A : 
   | falsum => simpa [subformulas] using h;
   | imp A B ihA ihB =>
     simp only [subformulas, Finset.insert_subset_iff, Finset.union_subset_iff];
-    exact ⟨h, ihA (Adequate.imp_left h), ihB (Adequate.imp_right h)⟩;
+    and_intros;
+    · exact h;
+    · exact ihA (Adequate.imp_left h);
+    · exact ihB (Adequate.imp_right h);
   | box A ih =>
     simp only [subformulas, Finset.insert_subset_iff];
-    exact ⟨h, ih (Adequate.box h)⟩;
+    and_intros;
+    · exact h;
+    · exact ih (Adequate.box h);
   | rhd A B ihA ihB =>
     simp only [subformulas, Finset.insert_subset_iff, Finset.union_subset_iff];
-    exact ⟨h, ihA (Adequate.rhd_left h), ihB (Adequate.rhd_right h)⟩;
+    and_intros;
+    · exact h;
+    · exact ihA (Adequate.rhd_left h);
+    · exact ihB (Adequate.rhd_right h);
 
 /-- `Φ` is adequate, and for every antecedent or consequent `B` of a `▷`-formula in `Φ` and every
 finite set `X` of `□`-formulas in `Φ`, some antecedent or consequent `B'` of a `▷`-formula in `Φ`
@@ -234,19 +252,29 @@ lemma exists_tree_erase (hA : A ∈ tree Φ O) :
         (tree Φ ((O.erase B').erase B)).image (fun C ↦ □(∼C)), 𝐈𝐋 ⊢ □(∼B) 🡒 (C 🡘 C') := by
       intro C hC;
       rcases Finset.mem_union.mp (hX hC) with hC | hC;
-      · exact .inr ⟨C, Finset.mem_union_left _ hC, by cl_prover⟩;
+      · right;
+        use C;
+        and_intros;
+        · exact Finset.mem_union_left _ hC;
+        · cl_prover;
       · obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hC;
         rcases ih _ (hn ▸ Finset.card_erase_lt_of_mem hB') hD rfl with h | ⟨D', hD', h⟩;
         · exact .inl <| Logic.box_mono <| by cl_prover [h];
-        · exact .inr ⟨□(∼D'), Finset.mem_union_right _ (Finset.mem_image_of_mem _ hD'),
-            Logic.box_neg_iff_of_box h⟩;
+        · right;
+          use □(∼D');
+          and_intros;
+          · exact Finset.mem_union_right _ (Finset.mem_image_of_mem _ hD');
+          · exact Logic.box_neg_iff_of_box h;
     obtain ⟨X', hX', h⟩ := Logic.exists_conj_iff h;
     use B' ⋏ X'.conj;
     and_intros;
     · apply mem_tree.mpr;
       use B';
       and_intros;
-      · exact Finset.mem_erase.mpr ⟨hB, hB'⟩;
+      · apply Finset.mem_erase.mpr;
+        and_intros;
+        · exact hB;
+        · exact hB';
       · use X';
         and_intros;
         · simpa [Finset.erase_right_comm] using hX';
@@ -259,7 +287,7 @@ private lemma exists_box_of_subset {Y : Finset (Formula α)}
   rcases Finset.mem_union.mp (hY hC) with hC | hC;
   · exact (mem_boxes.mp hC).2;
   · obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hC;
-    exact ⟨_, rfl⟩;
+    use ∼D;
 
 lemma exists_tree_of_conj {X : Finset (Formula α)} (hB : B ∈ O)
     (hX : X ⊆ boxes Φ ∪ (tree Φ O).image fun C ↦ □(∼C)) :
@@ -268,12 +296,19 @@ lemma exists_tree_of_conj {X : Finset (Formula α)} (hB : B ∈ O)
       (tree Φ (O.erase B)).image (fun C ↦ □(∼C)), 𝐈𝐋 ⊢ □(∼B) 🡒 (C 🡘 C') := by
     intro C hC;
     rcases Finset.mem_union.mp (hX hC) with hC | hC;
-    · exact .inr ⟨C, Finset.mem_union_left _ hC, by cl_prover⟩;
+    · right;
+      use C;
+      and_intros;
+      · exact Finset.mem_union_left _ hC;
+      · cl_prover;
     · obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hC;
       rcases exists_tree_erase (B := B) hD with h | ⟨D', hD', h⟩;
       · exact .inl <| Logic.box_mono <| by cl_prover [h];
-      · exact .inr ⟨□(∼D'), Finset.mem_union_right _ (Finset.mem_image_of_mem _ hD'),
-          Logic.box_neg_iff_of_box h⟩;
+      · right;
+        use □(∼D');
+        and_intros;
+        · exact Finset.mem_union_right _ (Finset.mem_image_of_mem _ hD');
+        · exact Logic.box_neg_iff_of_box h;
   obtain ⟨X', hX', h⟩ := Logic.exists_conj_iff h;
   use B ⋏ X'.conj;
   and_intros;
@@ -295,7 +330,11 @@ private lemma mem_subformulas_and_conj {X : Finset (Formula α)}
   rcases hC with rfl | rfl;
   · exact .inl hBC;
   · obtain ⟨D, hD, hBD⟩ := exists_mem_subformulas_of_mem_conj₂ hBC himp hbot;
-    exact .inr ⟨D, by simpa using hD, hBD⟩;
+    right;
+    use D;
+    and_intros;
+    · simpa using hD;
+    · exact hBD;
 
 lemma mem_of_mem_tree (hO : O ⊆ rhdOperands Φ) (hA : A ∈ tree Φ O) (hB : B ∈ A.subformulas)
     (hB' : (∃ C D, B = C ▷ D) ∨ ∃ C, B = □C) :
@@ -316,7 +355,11 @@ lemma mem_of_mem_tree (hO : O ⊆ rhdOperands Φ) (hA : A ∈ tree Φ O) (hB : B
       · obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hC;
         simp only [subformulas, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton] at hB;
         rcases hB with rfl | rfl | hB | rfl;
-        · exact .inr ⟨D, tree_mono ((Finset.erase_subset _ _).trans hO) hD, rfl⟩;
+        · right;
+          use D;
+          and_intros;
+          · exact tree_mono ((Finset.erase_subset _ _).trans hO) hD;
+          · rfl;
         · exact (himp _ _ rfl).elim;
         · exact ih _ (hn ▸ Finset.card_erase_lt_of_mem hb) ((Finset.erase_subset _ _).trans hO) hD
             hB rfl;

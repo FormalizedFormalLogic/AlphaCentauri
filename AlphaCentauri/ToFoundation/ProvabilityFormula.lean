@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.ToFoundation.Provable
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
+public import AlphaCentauri.ToFoundation.PartialTruth
 
 /-!
 # The provability formula at a numeral
@@ -9,8 +10,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hier
 For an element `x` of a model of `𝗜𝚺₁`, `provabilityFormula T x` is the internal sentence
 obtained by substituting the numeral of `x` into the provability formula of `T`. Its internal
 provability follows from the provability of `x`, it satisfies the internal form of the
-derivability condition $\mathbf{D2}$, and every internal $\Sigma_1$ sentence internally implies
-its own `provabilityFormula`.
+derivability condition $\mathbf{D2}$, and every internal prenex $\Sigma_1$ sentence internally
+implies its own `provabilityFormula`. A formula of the form
+`∀¹ (∀u < #0 + 1, A u ⋎ ∀x < #0 + 1, B x)` with $\Delta_0$ formulas `A` and `B` is prenex $\Pi_1$.
 -/
 
 @[expose] public section
@@ -22,6 +24,26 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 open FirstOrder Bootstrapping.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {T : ArithmeticTheory} [T.Δ₁]
+
+lemma isPrenexHierarchy_allBallOrBall {A B : Semiformula V ℒₒᵣ 1} (hA : IsBounded A.val)
+    (hB : IsBounded B.val) : IsPrenexHierarchy 𝚷 1 (allBallOrBall A B).val := by
+  have hw := SemitermVec.isSemitermVec (V := V) (L := ℒₒᵣ) (k := 1) (n := 2) ![Semiterm.bvar 0]
+  have hA' : IsBounded (A.subst ![Semiterm.bvar 0] : Semiformula V ℒₒᵣ 2).val := by
+    rw [Semiformula.val_substs]; exact IsBounded.subst hw A.isSemiformula hA
+  have hB' : IsBounded (B.subst ![Semiterm.bvar 0] : Semiformula V ℒₒᵣ 2).val := by
+    rw [Semiformula.val_substs]; exact IsBounded.subst hw B.isSemiformula hB
+  have ht := (Semiterm.bvar 0 + 𝕹 1 : Semiterm V ℒₒᵣ 1).isSemiterm.isUTerm
+  change IsPrenexHierarchy 𝚷 (0 + 1) (qqQuant 𝚷 _)
+  rw [IsPrenexHierarchy.quant_iff]
+  simpa [IsPrenexHierarchy, qqBall] using And.intro (IsBounded.ball ht hA') (IsBounded.ball ht hB')
+
+lemma typed_quote_shift {n : ℕ} (σ : ArithmeticSemisentence n) :
+    (⌜σ⌝ : Semiformula V ℒₒᵣ n).shift = ⌜σ⌝ := by
+  ext;
+  change shift ℒₒᵣ (⌜σ⌝ : V) = ⌜σ⌝;
+  rw [Sentence.quote_def, ← Semiformula.quote_shift];
+  simp [Rewriting.shift, Rewriting.emb, ← TransitiveRewriting.comp_app]
+
 
 @[simp] lemma models_provabilityPred_iff (σ : ArithmeticSentence) :
     V↓[ℒₒᵣ] ⊧ provabilityPred T σ ↔ Provable T (⌜σ⌝ : V) := by
@@ -60,9 +82,9 @@ lemma tprovable_provabilityFormula_imp [𝗜𝚺₁ ⪯ T] (φ ψ : Formula V �
   simp [provableImpFormula, typed_quote_rew_subst, Semiformula.substs_substs] at h₁;
   simpa [provabilityFormula, Matrix.constant_eq_singleton] using h₁ ⨀ h₂
 
-/-- Every internal $\Sigma_1$ sentence internally implies its own provability. -/
+/-- Every internal prenex $\Sigma_1$ sentence internally implies its own provability. -/
 axiom tprovable_imp_provabilityFormula_of_sigma1 [𝗜𝚺₁ ⪯ T] (φ : Formula V ℒₒᵣ)
-    (hφ : IsSigma 1 φ.val) (hs : φ.shift = φ) :
+    (hφ : IsPrenexHierarchy 𝚺 1 φ.val) (hs : φ.shift = φ) :
     T.internalize V ⊢ φ 🡒 provabilityFormula T φ.val
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

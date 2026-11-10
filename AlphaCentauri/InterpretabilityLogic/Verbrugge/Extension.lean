@@ -23,8 +23,8 @@ def choiceSets (x u : M.World) : Set (Set M.World) :=
 /-- If $w ≺ x ≺ u ≺[w] V$, then every choice set $C$ has $U \subseteq V$ with $x \mathrel{≺[w]} U$
 and $\mathrm{R}[U] \subseteq C$.
 
-- [MV20, Section 2.5]
-- [JMMV20, Section 5.6.5]
+- [MV20, §2.5]
+- [JMMV20, §4.2]
 -/
 class HasR : Prop where
   exists_subset_of_rel_rel_s {w x u : M.World} {V : Set M.World} :
@@ -34,8 +34,8 @@ class HasR : Prop where
 /-- If $u \mathrel{≺[w]} V$, then there is $V' \subseteq V$ with $u \mathrel{≺[w]} V'$ such that no
 $≺$-successor of an element of $V'$ has $y \mathrel{≺[w]} V$.
 
-- [MV20, Section 2.5]
-- [JMMV20, Section 5.6.5]
+- [MV20, §3]
+- [JMMV20, §6.4]
 -/
 class HasW : Prop where
   exists_subset_of_s {w u : M.World} {V : Set M.World} :

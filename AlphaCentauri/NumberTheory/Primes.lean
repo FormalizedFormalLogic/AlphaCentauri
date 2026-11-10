@@ -6,7 +6,7 @@ public import AlphaCentauri.ToFoundation.Prime
 public import AlphaCentauri.Schemata.WeakPigeonhole
 
 /-!
-# The infinitude of primes and Bertrand's postulate
+# The infinitude of primes
 
 Euclid's argument needs a bound on the next prime: $x!$ over $\mathsf{E}\mathsf{A} =
 \mathsf{I}\Delta_0 + \mathrm{Exp}$, from which $\mathsf{I}\Sigma_1$ inherits it; over
@@ -16,12 +16,8 @@ $a^{20} + i$, $i < a$, have no prime factor above $a$, and their factorizations 
 $\Delta_0$ injection of $18a\|a\|$ into $16a\|a\|$, against the weak pigeonhole principle
 with ratio $9/8$. Over $\mathsf{I}\Delta_0$ alone it is an open problem.
 
-Bertrand's postulate is a $\Pi_1$ sentence; it is likewise a theorem over
-$\mathsf{I}\Delta_0 + \Omega_1$ and open over $\mathsf{I}\Delta_0$.
-
 - [HP98, Theorem I.1.58(2), Remark I.1.59(3)]
 - [PWW88, Problem 1, Theorem 11, Corollary 8]
-- [HP98, §V.5(f)]
 -/
 
 @[expose] public section
@@ -383,17 +379,5 @@ theorem provable_infinitudeOfPrimes_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮�
   complete (𝗜𝚺₀ ∪ 𝝮₁) infinitudeOfPrimes fun (M : Type) _ _ ↦ by
     have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
     exact models_infinitudeOfPrimes_iff.mpr exists_prime_gt
-
-/-- Between $n$ and $2n$ there is a prime, for every $n \ge 1$. -/
-def bertrandPostulate : ArithmeticSentence :=
-  “∀ n, 1 ≤ n → ∃ p, n < p ∧ p ≤ 2 * n ∧ !isPrime p”
-
-/-- - [HP98, §V.5(f), p. 392]
-- [PWW88] -/
-axiom provable_bertrandPostulate_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮₁ ⊢ bertrandPostulate
-
-/-- $\mathsf{I}\Delta_0$ proves Bertrand's postulate. An open problem.
-- [HP98, §V.5(f), p. 393] -/
-def ProvableBertrandPostulateISigma0 : Prop := 𝗜𝚺₀ ⊢ bertrandPostulate
 
 end FFL.FirstOrder.Arithmetic

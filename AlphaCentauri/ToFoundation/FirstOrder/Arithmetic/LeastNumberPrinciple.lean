@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Schemata.Induction
+public import AlphaCentauri.Schemata.BoundedInduction
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import AlphaCentauri.ToMathlib.OpenPredicate
 public import AlphaCentauri.ToMathlib.Algebra.Order.Ring.RingOfDifferences

@@ -6,7 +6,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prenex
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.UniformReflection
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.Definability
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Provable
-public import AlphaCentauri.Schemata.Induction
+public import AlphaCentauri.Schemata.DeltaInduction
+public import AlphaCentauri.Schemata.ParameterFreeInduction
 
 /-!
 # Induction and uniform reflection

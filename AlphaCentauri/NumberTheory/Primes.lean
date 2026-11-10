@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import AlphaCentauri.Schemata.Pigeonhole
+public import AlphaCentauri.Schemata.WeakPigeonhole
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
 
 /-!

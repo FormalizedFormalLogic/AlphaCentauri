@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Schemata.Induction
+public import AlphaCentauri.Calculus.Instantiation
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
@@ -26,47 +26,6 @@ $\mathsf{I}\Sigma_1$, and the same calculus serves the other induction schemes.
 
 @[expose] public section
 
-namespace FFL.FirstOrder
-
-open Rewriting
-
-namespace LK.Derivation
-
-variable {L : Language} {Γ : LK.Sequent L}
-
-/-! ## Instantiating a block of universal quantifiers
-
-Provability is defined for sentences, so a universally quantified sentence is instantiated at
-terms with free variables at the level of derivations: the existential closure of a formula is
-derivable from any instance of it, and dually the universal closure of a sentence entails every
-instance of it.
-
-- [Bus98A, Section 3.1.3] -/
-
-/-- The existential closure is derivable from any instance of it. -/
-def exsClosure : {k : ℕ} → (χ : Semiproposition L k) → (v : Fin k → SyntacticTerm L) →
-    ⊢ᴸᴷ¹ Γ + ⦃χ ⇜ v⦄ → ⊢ᴸᴷ¹ Γ + ⦃∃¹* χ⦄
-  | 0, _, _, d => d.cast (by simp)
-  | _ + 1, χ, v, d =>
-    exsClosure (∃¹ χ) (Matrix.vecTail v) <|
-      (exs (Γ := Γ) (t := Matrix.vecHead v) (φ := (Rew.subst (Matrix.vecTail v)).q ▹ χ)
-        (d.cast (by simp only [Rew.subst_q_app, Matrix.cons_head_tail]))).cast (by simp)
-
-/-- The universal closure of a sentence entails every instance of it at terms with free
-variables. -/
-def specializeMany {k : ℕ} (χ : Semisentence L k) (v : Fin k → SyntacticTerm L) :
-    ⊢ᴸᴷ¹ ⦃∼((∀¹* χ : Sentence L) : Proposition L), Rew.embSubsts v ▹ χ⦄ :=
-  have e : (Rew.subst v).comp (Rew.emb : Rew L Empty k ℕ k) = Rew.embSubsts v := by
-    ext x
-    · simp [Rew.comp_app]
-    · exact x.elim
-  let d : ⊢ᴸᴷ¹ ⦃Rew.embSubsts v ▹ χ⦄ + ⦃(∼(emb χ : Semiproposition L k)) ⇜ v⦄ :=
-    (eta (Rew.embSubsts v ▹ χ)).cast (by simp [← TransitiveRewriting.comp_app, e])
-  (exsClosure _ v d).cast (by simp [add_comm])
-
-end LK.Derivation
-
-end FFL.FirstOrder
 
 namespace FFL.FirstOrder.Arithmetic
 
@@ -585,78 +544,3 @@ end LKI
 end FFL.FirstOrder.Arithmetic
 
 end
-
-/-! ## What `LKI[C]` proves
-
-The induction rule derives the induction axiom for every formula of `C` — which is what its side
-formulas are for — so the whole `C`-induction scheme is derivable. A theory whose axioms are all
-`LKI[C]`-derivable proves only `LKI[C]`-derivable sentences.
-
-- [Bus98A, Section 1.4.2]
--/
-
-namespace FFL.FirstOrder.Arithmetic.LKI
-
-open Rewriting LawfulSyntacticRewriting
-
-variable {C : ArithmeticSemiformula ℕ 1 → Prop}
-         {φ : ArithmeticProposition} {ξ : ArithmeticSemiformula ℕ 1}
-         {T : ArithmeticTheory} {σ : ArithmeticSentence}
-         {Γ Δ : LK.Sequent ℒₒᵣ}
-
-/-- A theory whose axioms are all derivable in `LKI[C]` proves only `LKI[C]`-derivable sentences. -/
-theorem derivable_of_provable (hT : ∀ σ ∈ T, ⊢ᴸᴷᴵ[C] ⦃σ⦄) (h : T ⊢ σ) : ⊢ᴸᴷᴵ[C] ⦃σ⦄ := by
-  obtain ⟨Δ, hΔ, hd⟩ := Theory.Proof.provable_iff.mp h
-  apply Derivable.cutAll ?_ (Derivable.ofLK hd)
-  · rintro δ hδ;
-    obtain ⟨ψ, hψ, rfl⟩ := Multiset.mem_map.mp (by simpa [LK.Sequent.embed] using hδ)
-    exact hT ψ (hΔ ψ hψ)
-
-variable [RewriteClosed C]
-
-/-- The induction axiom for a formula of `C` is derivable: the induction rule, with its side
-formulas, is as strong as the induction scheme for `C`.
-
-- [Bus98A, Section 1.4.2] -/
-theorem derivable_succInd (hξ : C ξ) : ⊢ᴸᴷᴵ[C] ⦃succInd ξ⦄ := by
-  have step : ∀ η : ArithmeticSemiformula ℕ 1,
-      ⊢ᴸᴷᴵ[C] ⦃∼(η/[&0]), η/[‘(&0 + 1)’]⦄ + ⦃∃¹ (η ⋏ ∼(η/[‘(#0 + 1)’]))⦄ := by
-    intro η
-    apply Derivable.exs &0
-    rw [show (η ⋏ ∼(η/[‘(#0 + 1)’]))/[&0] = η/[&0] ⋏ ∼(η/[‘(&0 + 1)’])
-        from by simp [Rew.subst_subst_eq]]
-    apply Derivable.and
-    · exact (Derivable.weakening (η/[‘(&0 + 1)’]) (Derivable.lem (η/[&0]))).cast (by abel)
-    · exact (Derivable.weakening (∼(η/[&0])) (Derivable.lem (η/[‘(&0 + 1)’]))).cast (by abel)
-  have key : ⊢ᴸᴷᴵ[C] ⦃∼(ξ/[‘0’]), ∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])), ∀¹ ξ⦄ := by
-    apply Derivable.all
-    have h := Derivable.ind (ξ := shift ξ) (RewriteClosed.shift hξ) &0
-      (Γ := ⦃shift (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])))⦄)
-      ((step (shift (shift ξ))).cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; try abel))
-    exact h.cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; try abel)
-  rw [show (succInd ξ : ArithmeticProposition)
-      = ∼(ξ/[‘0’]) ⋎ ((∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’]))) ⋎ (∀¹ ξ))
-      from by simp [succInd, Semiformula.imp_eq]]
-  have h₁ : ⊢ᴸᴷᴵ[C] ⦃∼(ξ/[‘0’])⦄ + ⦃∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])), ∀¹ ξ⦄ := key.cast (by abel)
-  have h₂ : ⊢ᴸᴷᴵ[C] (0 : LK.Sequent ℒₒᵣ)
-      + ⦃∼(ξ/[‘0’]), (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’]))) ⋎ (∀¹ ξ)⦄ := (Derivable.or h₁).cast (by abel)
-  exact (Derivable.or h₂).cast (by simp)
-
-/-- `LKI[C]` derives everything that `𝗣𝗔⁻` with `C`-induction proves.
-
-- [Bus98A, Section 1.4.2] -/
-theorem derivable_of_provable_induction (h : 𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ C ⊢ σ) : ⊢ᴸᴷᴵ[C] ⦃σ⦄ := by
-  refine derivable_of_provable ?_ h
-  rintro σ (hσ | hσ)
-  · exact ⟨.axm hσ⟩
-  · obtain ⟨ξ, hξ, rfl⟩ := by simpa [InductionScheme] using hσ
-    simpa using (derivable_succInd hξ).univCl'
-
-/-- `LKI` over the prenex $\Sigma_1$ formulas derives everything `𝗜𝚺₁` proves: the induction
-scheme of `𝗜𝚺₁` is the one its induction rule is as strong as.
-
-- [Bus98A, Section 1.4.2] -/
-theorem derivable_of_provable_inductionOnHierarchy {b : Polarity} {s : ℕ}
-    (h : 𝗜𝗡𝗗 b s ⊢ σ) : ⊢ᴸᴷᴵ[ℬ[<, ℒₒᵣ].PrenexHierarchy b s] ⦃σ⦄ := derivable_of_provable_induction h
-
-end FFL.FirstOrder.Arithmetic.LKI

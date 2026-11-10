@@ -160,12 +160,6 @@ variable {ρ : V → V} {p s e : V}
 private lemma le_formulaBound (d p : V) : p ≤ formulaBound L d p :=
   le_trans le_self_add le_self_add
 
-private lemma le_formulaBound_shift (d p : V) : shift L p ≤ formulaBound L d p :=
-  le_trans le_add_self le_self_add
-
-private lemma le_formulaBound_of_le {d q : V} (h : q ≤ d) (p : V) : q ≤ formulaBound L d p :=
-  le_trans h le_add_self
-
 private lemma le_contextBound_insert {a d : V} (ha : a ≤ d) : insert a s ≤ contextBound L d s :=
   le_trans (le_of_subset (insert_subset_widen ha)) (le_trans le_self_add le_self_add)
 
@@ -178,27 +172,15 @@ private lemma le_partnerBound_insert {a d : V} (ha : a ≤ d) :
   le_trans (wkRule_le_wkRule (insert_subset_insert_of_subset _ (insert_subset_widen ha)))
     (le_trans le_self_add le_self_add)
 
-private lemma le_contextBound_self (d s : V) : s ≤ contextBound L d s :=
-  le_trans (le_of_subset (subset_widen d s)) (le_trans le_self_add le_self_add)
-
 private lemma le_contextBound_insert_setShift {a d : V} (ha : a ≤ d) :
     insert a (setShift L s) ≤ contextBound L d s :=
   le_trans (le_of_subset (insert_subset_widen ha)) (le_trans le_add_self le_self_add)
-
-private lemma le_contextBound_image (d s : V) :
-    fvSubstImage (L := L) (freshVecInverse (s + d)) s ≤ contextBound L d s := le_add_self
-
-private lemma le_partnerBound_self (d : V) : e ≤ partnerBound L ρ d p s e :=
-  le_trans (le_of_lt (d_lt_wkRule _ _)) (le_trans le_self_add le_self_add)
 
 private lemma le_partnerBound_shift {a d : V} (ha : a ≤ d) :
     wkRule (insert (neg L (shift L p)) (insert a (setShift L s)))
       (shiftRule (setShift L (fstIdx e)) e) ≤ partnerBound L ρ d p s e :=
   le_trans (wkRule_le_wkRule (insert_subset_insert_of_subset _ (insert_subset_widen ha)))
     (le_trans le_add_self le_self_add)
-
-private lemma le_partnerBound_image (d : V) :
-    ρ ⟪freshVecInverse (s + d), e⟫ ≤ partnerBound L ρ d p s e := le_add_self
 
 private lemma le_partnerBound_insert_insert {a b d : V} (ha : a ≤ d) (hb : b ≤ d) :
     wkRule (insert (neg L p) (insert a (insert b s))) e ≤ partnerBound L ρ d p s e :=
@@ -303,7 +285,7 @@ private lemma cut_aux_all {Γ a d₀ : V}
       (insert (neg L (shift L p)) (setShift L s)) :=
     ⟨by rw [fstIdx_shiftRule, he.1, mem_setShift_insert, shift_neg hpF],
       Derivation.shiftRule ⟨rfl, he.2.1⟩, by simp [he.2.2]⟩
-  exact .all_m ha' <| ih d₀ (s_lt_allIntro _ _ _) (shift L p) (le_formulaBound_shift _ p) _
+  exact .all_m ha' <| ih d₀ (s_lt_allIntro _ _ _) (shift L p) (le_trans le_add_self le_self_add) _
     (le_contextBound_insert_setShift hfa) _ (le_partnerBound_shift hfa)
     (by rwa [formulaComplexity_shift hpF.isUFormula])
     ((isZeroOrExs_shift_iff hpF.isUFormula).mpr hpg) hd₀.2
@@ -374,9 +356,8 @@ private lemma cut_aux_shift {d₀ : V} (hρ : ∀ x, IsRewriting L r x (ρ x))
       · exact mem_bitInsert_iff.mpr <| Or.inr <|
           mem_fvSubstImage_iff.mpr ⟨_, h, (hback x (hΔ x hx) hxN).symm⟩
     have h := ih d₀ (d_lt_shiftRule _ _) p₀
-      (le_formulaBound_of_le (le_trans (le_of_lt (lt_of_mem hp₀))
-        (le_trans (fstIdx_le_self d₀) (le_of_lt (d_lt_shiftRule _ _)))) _) _
-      (le_contextBound_image d s) _ (le_partnerBound_image d)
+      (le_trans (le_of_mem_fstIdx hp₀ (d_lt_shiftRule _ _)) le_add_self) _
+      le_add_self _ le_add_self
       (by rwa [formulaComplexity_shift hp₀F.isUFormula] at hpc)
       ((isZeroOrExs_shift_iff hp₀F.isUFormula).mp hpg) hd₀ h₂ he'
     have h₃ := RankedDerivable.rewrite (fun q hq ↦ absurd hq (not_mem_empty_Δ₁Class q))
@@ -453,8 +434,10 @@ private lemma cut_aux (r : V) :
   · rw [fstIdx_exsIntro] at hsub hΓF
     exact cut_aux_exs ih' hpc hpg hΓF ha ht hd₀ hsub he
   · rw [fstIdx_wkRule] at hsub
-    exact ih' d₀ (d_lt_wkRule _ _) p (le_formulaBound _ p) s (le_contextBound_self _ s) e
-      (le_partnerBound_self _) hpc hpg hd₀ (fun x hx ↦ hsub (hΓ hx)) he
+    exact ih' d₀ (d_lt_wkRule _ _) p (le_formulaBound _ p) s
+      (le_trans (le_of_subset (subset_widen _ s)) (le_trans le_self_add le_self_add)) e
+      (le_trans (le_of_lt (d_lt_wkRule _ _)) (le_trans le_self_add le_self_add)) hpc hpg hd₀
+      (fun x hx ↦ hsub (hΓ hx)) he
   · rw [fstIdx_shiftRule] at hsub
     exact cut_aux_shift hρR ih' hpc hpg hsF hd₀ hsub he
   · rw [fstIdx_cutRule] at hsub
@@ -484,6 +467,14 @@ private lemma cut_and {q q' s : V} (hc : formulaComplexity L (q ^⋏ q') ≤ r)
   exact .cut (lt_of_lt_of_le (lt_max_succ_left _ _) hc)
     (RankedDerivation.inversion_and (Or.inl rfl) hd₁) h₃
 
+private lemma cut_of_isZeroOrExs {p s : V} (hp : formulaComplexity L p ≤ r) (hpg : IsZeroOrExs L p)
+    (h₁ : RankedDerivable (∅ : Theory L) r (insert p s))
+    (h₂ : RankedDerivable (∅ : Theory L) r (insert (neg L p) s)) :
+    RankedDerivable (∅ : Theory L) r s := by
+  obtain ⟨d₁, hd₁⟩ := h₁
+  obtain ⟨d₂, hd₂⟩ := h₂
+  exact cut_aux r d₁ p s d₂ hp hpg hd₁.2 (by rw [hd₁.1]) hd₂
+
 /-- A cut on a formula of complexity at most `r` between derivations of cut rank at most `r` over
 the empty theory is replaced by a derivation of cut rank at most `r`.
 - [Bus98, Lemma 2.4.2.1] -/
@@ -494,31 +485,19 @@ theorem RankedDerivable.cut_of_le {p s : V} (hp : formulaComplexity L p ≤ r)
   have hpF : IsUFormula L p := (IsFormulaSet.insert_iff.mp h₁.isFormulaSet).1.isUFormula
   rcases hpF.case with (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
     ⟨q, q', hq, hq', rfl⟩ | ⟨q, q', hq, hq', rfl⟩ | ⟨q, hq, rfl⟩ | ⟨q, hq, rfl⟩)
-  · obtain ⟨d₁, hd₁⟩ := h₁
-    obtain ⟨d₂, hd₂⟩ := h₂
-    exact cut_aux r d₁ _ s d₂ hp (.inl (by simp [hR, hv])) hd₁.2 (by rw [hd₁.1]) hd₂
-  · obtain ⟨d₁, hd₁⟩ := h₁
-    obtain ⟨d₂, hd₂⟩ := h₂
-    exact cut_aux r d₁ _ s d₂ hp (.inl (by simp [hR, hv])) hd₁.2 (by rw [hd₁.1]) hd₂
-  · obtain ⟨d₁, hd₁⟩ := h₁
-    obtain ⟨d₂, hd₂⟩ := h₂
-    exact cut_aux r d₁ _ s d₂ hp (.inl (by simp)) hd₁.2 (by rw [hd₁.1]) hd₂
-  · obtain ⟨d₁, hd₁⟩ := h₁
-    obtain ⟨d₂, hd₂⟩ := h₂
-    exact cut_aux r d₁ _ s d₂ hp (.inl (by simp)) hd₁.2 (by rw [hd₁.1]) hd₂
+  · exact cut_of_isZeroOrExs hp (.inl (by simp [hR, hv])) h₁ h₂
+  · exact cut_of_isZeroOrExs hp (.inl (by simp [hR, hv])) h₁ h₂
+  · exact cut_of_isZeroOrExs hp (.inl (by simp)) h₁ h₂
+  · exact cut_of_isZeroOrExs hp (.inl (by simp)) h₁ h₂
   · exact cut_and hp h₁ h₂
   · rw [neg_or hq hq'] at h₂
     apply cut_and (by simpa [hq, hq', hq.neg, hq'.neg] using hp) h₂
     rw [neg_and hq.neg hq'.neg, hq.neg_neg, hq'.neg_neg]
     exact h₁
   · rw [neg_all hq] at h₂
-    obtain ⟨d₁, hd₁⟩ := h₁
-    obtain ⟨d₂, hd₂⟩ := h₂
-    exact cut_aux r d₂ _ s d₁ (by simpa [hq, hq.neg] using hp) (.inr ⟨neg L q, by simp, rfl⟩)
-      hd₂.2 (by rw [hd₂.1]) (by rwa [neg_ex hq.neg, hq.neg_neg])
-  · obtain ⟨d₁, hd₁⟩ := h₁
-    obtain ⟨d₂, hd₂⟩ := h₂
-    exact cut_aux r d₁ _ s d₂ hp (.inr ⟨q, by simp, rfl⟩) hd₁.2 (by rw [hd₁.1]) hd₂
+    exact cut_of_isZeroOrExs (by simpa [hq, hq.neg] using hp) (.inr ⟨neg L q, by simp, rfl⟩) h₂
+      (by rwa [neg_ex hq.neg, hq.neg_neg])
+  · exact cut_of_isZeroOrExs hp (.inr ⟨q, by simp, rfl⟩) h₁ h₂
 
 /-- A derivation of cut rank at most `r + 1` over the empty theory has a counterpart of cut rank
 at most `r` with the same end-sequent.

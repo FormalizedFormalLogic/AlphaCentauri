@@ -30,8 +30,7 @@ namespace Bootstrapping
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable (T) in
-/-- Every internal $\Pi_1$ sentence `x` such that `b 🡒 x` is provable in `T` makes `a 🡒 x`
-provable in `T`. -/
+/-- For every internal $\Pi_1$ sentence `x`, if `T` proves `b 🡒 x` then `T` proves `a 🡒 x`. -/
 def Pi1Conservative (a b : V) : Prop :=
   ∀ x, IsSemiformula ℒₒᵣ 0 x → shift ℒₒᵣ x = x → IsPi 1 x →
     Provable T (imp ℒₒᵣ b x) → Provable T (imp ℒₒᵣ a x)
@@ -118,7 +117,6 @@ lemma Pi1Conservative.and_provabilityPred (h : Pi1Conservative T (⌜σ⌝ : V) 
 end Bootstrapping
 
 variable (T) in
-/-- The formula defining `Pi1Conservative T`. -/
 noncomputable def pi1ConservativeDef : ArithmeticSemisentence 2 :=
   “a b. ∀ x, !(isSemiformula ℒₒᵣ).sigma 0 x → !(shiftGraph ℒₒᵣ) x x →
     !(isHierarchy 𝚷 1).sigma x → ∀ y, !(impGraph ℒₒᵣ) y b x → ∀ z, !(impGraph ℒₒᵣ) z a x →

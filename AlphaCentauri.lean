@@ -45,10 +45,12 @@ public import AlphaCentauri.Hierarchy.Diophantine
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Henkin
+public import AlphaCentauri.InterpretabilityLogic.Extension
 public import AlphaCentauri.InterpretabilityLogic.Formula
 public import AlphaCentauri.InterpretabilityLogic.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Logic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 public import AlphaCentauri.InterpretabilityLogic.Veltman.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.Model.Basic
@@ -59,6 +61,7 @@ public import AlphaCentauri.Model.Elementary
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.InjectiveEnumeration
+public import AlphaCentauri.Model.IntegerConstantPolynomial
 public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.Model.Overspill
@@ -157,6 +160,7 @@ public import AlphaCentauri.ToMathlib.FLT3.Descent
 public import AlphaCentauri.ToMathlib.FLT3.Eisenstein
 public import AlphaCentauri.ToMathlib.Goodstein
 public import AlphaCentauri.ToMathlib.HahnSeries
+public import AlphaCentauri.ToMathlib.IntegerConstantPolynomial
 public import AlphaCentauri.ToMathlib.IntegerPart
 public import AlphaCentauri.ToMathlib.ONote.Computability
 public import AlphaCentauri.ToMathlib.ONote.Epsilon0

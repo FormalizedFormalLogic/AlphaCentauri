@@ -238,6 +238,34 @@ GG17:
   serial-number:
     arxiv: "1701.02001"
 
+GJ08:
+  type: Article
+  title: Modal matters for interpretability logics
+  author: ["Goris, Evan", "Joosten, Joost J."]
+  date: 2008
+  page-range: 371-412
+  parent:
+    type: Periodical
+    title: Logic Journal of the IGPL
+    volume: 16
+    issue: 4
+  serial-number:
+    doi: "10.1093/jigpal/jzn013"
+
+GJ11:
+  type: Article
+  title: A new principle in the interpretability logic of all reasonable arithmetical theories
+  author: ["Goris, Evan", "Joosten, Joost J."]
+  date: 2011
+  page-range: 1-17
+  parent:
+    type: Periodical
+    title: Logic Journal of the IGPL
+    volume: 19
+    issue: 1
+  serial-number:
+    doi: "10.1093/jigpal/jzp082"
+
 HP98:
   type: Book
   title: Metamathematics of First-Order Arithmetic
@@ -539,6 +567,20 @@ Smi93a:
     volume: 159
     issue: 1
 
+Sve91:
+  type: Article
+  title: Some independence results in interpretability logic
+  author: "Švejdar, Vítězslav"
+  date: 1991
+  page-range: 29-38
+  parent:
+    type: Periodical
+    title: Studia Logica
+    volume: 50
+    issue: 1
+  serial-number:
+    doi: "10.1007/BF00370385"
+
 Tha05:
   type: Article
   title: "A note on Δ₁ induction and Σ₁ collection"
@@ -578,6 +620,14 @@ Vis26:
   serial-number:
     arxiv: "2411.15873"
 
+Vis88:
+  type: Report
+  title: Preliminary notes on interpretability logic
+  author: "Visser, Albert"
+  date: 1988
+  note: Logic Group Preprint Series 29
+  organization: Department of Philosophy, Utrecht University
+
 Vis90:
   type: Chapter
   title: Interpretability Logic
@@ -594,6 +644,14 @@ Vis90:
     publisher:
       name: Plenum Press
       location: New York
+
+Vis97:
+  type: Report
+  title: An overview of interpretability logic
+  author: "Visser, Albert"
+  date: 1997
+  note: Logic Group Preprint Series 174
+  organization: Department of Philosophy, Utrecht University
 
 vO99:
   type: Misc
@@ -651,15 +709,3 @@ WP89:
       type: Anthology
       title: Studies in Logic and the Foundations of Mathematics
       volume: 126
-
-Wil78:
-  type: Article
-  title: Some results and problems on weak systems of arithmetic
-  author: Wilkie, Alex
-  date: 1978
-  page-range: 285-296
-  parent:
-    type: Anthology
-    title: Logic Colloquium '77
-    editor: Macintyre, Angus
-    publisher: North-Holland

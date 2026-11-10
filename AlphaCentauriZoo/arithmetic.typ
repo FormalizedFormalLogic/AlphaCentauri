@@ -29,6 +29,7 @@
       "𝗣𝗛𝗣": ISigma0Scheme("PHP"),
       "𝗪𝗣𝗛𝗣": ISigma0Scheme("WPHP"),
       "ZRing": $sans("ZR")$,
+      "PeanoMinusSmu": $sans("PA")^-_sans("smu")$,
     ),
     // Labels of whole theories the rule above draws badly, keyed by the pretty-printed theory.
     labels: (:),

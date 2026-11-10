@@ -244,17 +244,6 @@ theorem complete
   have : Entailment.Consistent (𝐈𝐋 : Logic α) := .of_unprovable hA;
   exact Logic.ofAxioms.not_models_countermodel hA <| h (countermodel ∅ (adequateClosure {A}))
 
-/-- - [dJV90, Theorem 4.1] -/
-theorem provable_TFAE : [
-    𝐈𝐋 ⊢ A,
-    ∀ {κ : Type u} [Nonempty κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A,
-    ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A
-  ].TFAE := by
-  tfae_have 1 → 2 := fun h _ _ _ _ ↦ Logic.ofAxioms.sound (by simp) h;
-  tfae_have 2 → 3 := fun h _ _ _ M _ ↦ h M;
-  tfae_have 3 → 1 := complete;
-  tfae_finish;
-
 end Logic.IL
 
 end FFL.InterpretabilityLogic

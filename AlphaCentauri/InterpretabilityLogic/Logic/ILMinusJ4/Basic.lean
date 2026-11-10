@@ -26,11 +26,8 @@ variable {α : Type*}
 -/
 abbrev ILMinusJ4 : Logic α := ofAxiomsMinus {Axioms.J4 A B | (A) (B)}
 
-end Logic
+/-! ## Soundness -/
 
-section Soundness
-
-namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World
 
@@ -43,8 +40,6 @@ theorem ILMinusJ4.sound [M.IsILMinus] [M.IsJ4] : ILMinusJ4 ⊢ A → M ⊧ A :=
 
 end Logic
 
-end Soundness
-
 section Consistency
 
 open Veltman.Model Logic
@@ -56,7 +51,7 @@ instance : Entailment.Consistent (ILMinusJ4 : Logic α) :=
 
 end Consistency
 
-section CompletenessVerbrugge
+/-! ## Completeness for Verbrugge models -/
 
 namespace Logic
 
@@ -107,15 +102,9 @@ theorem ILMinusJ4.iff_valid_finite_verbrugge :
       [M.IsILMinus] → [M.IsJ4] → M ⊧ A :=
   ILMinusJ4.semantics_TFAE.out 1 3
 
-end Logic
 
-end CompletenessVerbrugge
+/-! ## Incompleteness for Verbrugge models -/
 
-
-
-section IncompletenessVerbrugge
-
-namespace Logic
 
 open Entailment
 
@@ -129,14 +118,9 @@ theorem ILMinusJ4.incomplete : ∃ A : Formula ℕ,
     exact valid_J4Plus M;
   · exact unprovable_J4Plus;
 
-end Logic
 
-end IncompletenessVerbrugge
+/-! ## Equivalent axiomatizations -/
 
-
-section EquivalentAxiomatizations
-
-namespace Logic
 
 open Entailment ofAxiomsMinus
 
@@ -159,8 +143,6 @@ theorem ILMinusJ4.eq_ofAxiomsMinus_J4' :
     cl_prover [h₁, h₂];
 
 end Logic
-
-end EquivalentAxiomatizations
 
 end FFL.InterpretabilityLogic
 

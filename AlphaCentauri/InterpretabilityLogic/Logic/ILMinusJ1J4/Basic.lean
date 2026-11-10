@@ -27,11 +27,8 @@ variable {α : Type*}
 abbrev ILMinusJ1J4 : Logic α :=
   ofAxiomsMinus ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J4 A B | (A) (B)})
 
-end Logic
+/-! ## Completeness for Verbrugge models -/
 
-section CompletenessVerbrugge
-
-namespace Logic
 
 open Entailment Formula MaximalConsistentSet Verbrugge Verbrugge.Model Verbrugge.Model.World
 
@@ -50,7 +47,7 @@ theorem ILMinusJ1J4.semantics_TFAE : [
     apply ofAxiomsMinus.sound_verbrugge _ h;
     rintro _ (⟨A, B, rfl⟩ | ⟨A, B, rfl⟩) x;
     · exact forces_axiomJ1;
-    · exact forces_axiomJ4;;
+    · exact forces_axiomJ4;
   tfae_have 2 → 3 := by
     intro h _ _ _ M _ _ _;
     exact h M;
@@ -81,15 +78,9 @@ theorem ILMinusJ1J4.iff_valid_finite_verbrugge :
       [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → M ⊧ A :=
   ILMinusJ1J4.semantics_TFAE.out 1 3
 
-end Logic
 
-end CompletenessVerbrugge
+/-! ## Incompleteness for Verbrugge models -/
 
-
-
-section IncompletenessVerbrugge
-
-namespace Logic
 
 open Entailment
 
@@ -104,9 +95,6 @@ theorem ILMinusJ1J4.incomplete : ∃ A : Formula ℕ,
   · exact unprovable_J4Plus;
 
 end Logic
-
-end IncompletenessVerbrugge
-
 
 
 end FFL.InterpretabilityLogic

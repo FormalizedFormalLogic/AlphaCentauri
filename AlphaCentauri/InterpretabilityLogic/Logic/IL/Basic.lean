@@ -21,8 +21,6 @@ conditions of $\mathbf{J1}$, $\mathbf{J2}$ and $\mathbf{J5}$.
 
 namespace FFL.InterpretabilityLogic
 
-section Basic
-
 open Entailment Formula
 
 variable {α : Type*}
@@ -50,12 +48,7 @@ instance {𝔸 : FormulaSet α} : (𝐈𝐋 : Logic α) ⪯ ofAxioms 𝔸 := wea
 
 end Logic
 
-
-end Basic
-
-section Soundness
-
-/-! ### Soundness of $\mathbf{IL}$ -/
+/-! ## Soundness -/
 
 namespace Logic.ofAxioms
 
@@ -85,14 +78,7 @@ instance {α : Type*} : Entailment.Consistent (𝐈𝐋 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦
     Logic.ofAxioms.sound (M := Veltman.Model.pointModel fun _ ↦ False) (by simp) h 0
 
-
-end Soundness
-
-section Extension
-
-variable {α : Type*}
-
-/-! ### $\mathbf{IL}$ as an extension of $\mathbf{IL}^-$ -/
+/-! ## $\mathbf{IL}$ as an extension of $\mathbf{IL}^-$ -/
 
 namespace Logic.ofAxioms
 
@@ -186,7 +172,7 @@ instance {𝔸 : FormulaSet α}
 
 end Logic
 
-section Strict
+/-! ## Strict -/
 
 namespace Logic
 
@@ -204,11 +190,7 @@ instance : (ILMinusJ1J4PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
 
 end Logic
 
-end Strict
-
-end Extension
-
-section Completeness
+/-! ## Completeness -/
 
 namespace Logic
 
@@ -256,9 +238,6 @@ theorem IL.iff_valid_finite_ILMinus :
   IL.semantics_TFAE.out 1 4
 
 end Logic
-
-end Completeness
-
 
 end FFL.InterpretabilityLogic
 

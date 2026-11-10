@@ -694,17 +694,9 @@ end countermodelM
 
 end Veltman
 
-/-! ### Completeness -/
-
-namespace Logic.ILM
-
-open Veltman Veltman.Model.World MaximalConsistentSet
-
-variable {α : Type} {A : Formula α}
-
-end Logic.ILM
-
 end
+
+/-! ### Completeness -/
 
 namespace Logic
 

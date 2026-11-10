@@ -25,12 +25,9 @@ abbrev ILMinus : Logic α := ofAxiomsMinus ∅
 
 notation "𝐈𝐋⁻" => Logic.ILMinus
 
-end Logic
 
+/-! ## Semantics -/
 
-section Semantics
-
-namespace Logic
 
 open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model.World
 open LabelledSet.Condition ofAxiomsMinus
@@ -73,8 +70,6 @@ theorem ILMinus.iff_valid_finite :
   ILMinus.semantics_TFAE.out 1 3
 
 end Logic
-
-end Semantics
 
 
 end FFL.InterpretabilityLogic

@@ -25,12 +25,9 @@ variable {α : Type*}
 abbrev ILMinusJ2PlusJ5 : Logic α :=
   ofAxiomsMinus ({Axioms.J2Plus A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A})
 
-end Logic
 
+/-! ## Completeness -/
 
-section Completeness
-
-namespace Logic
 
 open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model.World
 
@@ -49,7 +46,7 @@ theorem ILMinusJ2PlusJ5.semantics_TFAE : [
     apply ofAxiomsMinus.sound _ h;
     rintro _ (⟨A, B, C, rfl⟩ | ⟨A, rfl⟩) x;
     · exact forces_axiomJ2Plus;
-    · exact forces_axiomJ5;;
+    · exact forces_axiomJ5;
   tfae_have 2 → 3 := by
     intro h _ _ _ M _ _ _;
     exact h M;
@@ -80,15 +77,9 @@ theorem ILMinusJ2PlusJ5.iff_valid_finite :
       [M.IsILMinus] → [M.IsJ2] → [M.IsJ5] → M ⊧ A :=
   ILMinusJ2PlusJ5.semantics_TFAE.out 1 3
 
-end Logic
 
-end Completeness
+/-! ## Incompleteness for Veltman models -/
 
-
-
-section IncompletenessVeltman
-
-namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World Entailment ofAxiomsMinus
 
@@ -117,26 +108,6 @@ lemma unprovable_J1 [L ⪯ ILMinusJ2PlusJ5] : L ⊬ Axioms.J1 ⊤ ⊤ := by
 
 
 end Logic
-
-end IncompletenessVeltman
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 end FFL.InterpretabilityLogic

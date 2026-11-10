@@ -33,12 +33,9 @@ abbrev ILMinusJ1J4PlusJ5 : Logic α :=
   ofAxiomsMinus
     ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J4Plus A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A})
 
-end Logic
 
+/-! ## Completeness -/
 
-section Completeness
-
-namespace Logic
 
 open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model.World
 open LabelledSet.Condition ofAxiomsMinus
@@ -59,7 +56,7 @@ theorem ILMinusJ1J4PlusJ5.semantics_TFAE : [
     rintro _ ((⟨A, B, rfl⟩ | ⟨A, B, C, rfl⟩) | ⟨A, rfl⟩) x;
     · exact forces_axiomJ1;
     · exact forces_axiomJ4Plus;
-    · exact forces_axiomJ5;;
+    · exact forces_axiomJ5;
   tfae_have 2 → 3 := by
     intro h _ _ _ M _ _ _ _;
     exact h M;
@@ -87,15 +84,9 @@ theorem ILMinusJ1J4PlusJ5.iff_valid_finite :
       [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → [M.IsJ5] → M ⊧ A :=
   ILMinusJ1J4PlusJ5.semantics_TFAE.out 1 3
 
-end Logic
 
-end Completeness
+/-! ## Incompleteness for Veltman models -/
 
-
-
-section IncompletenessVeltman
-
-namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World Entailment ofAxiomsMinus
 
@@ -142,24 +133,8 @@ lemma unprovable_J2 [L ⪯ ILMinusJ1J4PlusJ5] : L ⊬ Axioms.J2 (□⊥) (◇⊤
   omega;
 
 
-end Logic
+/-! ## Relations -/
 
-end IncompletenessVeltman
-
-
-
-
-
-
-
-
-
-
-
-
-section Relations
-
-namespace Logic
 
 open Entailment
 
@@ -184,8 +159,6 @@ instance : (ILMinusJ1J4Plus : Logic α) ⪱ 𝐂𝐋 :=
   .of_unprovable_provable unprovable_J2 (HasAxiomJ2.J2 _ _ _)
 
 end Logic
-
-end Relations
 
 end FFL.InterpretabilityLogic
 

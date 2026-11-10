@@ -59,10 +59,6 @@ instance : (𝐈𝐋𝐑𝐖 : Logic α) ⪯ 𝐈𝐋𝐏 := weakerThan_iff.mpr 
 
 end Logic
 
-end FFL.InterpretabilityLogic
-
-namespace FFL.InterpretabilityLogic
-
 namespace Veltman.Model
 
 variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
@@ -107,10 +103,6 @@ instance : (𝐈𝐋𝐑𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐏 :=
     exact absurd hSt (by decide)) ILP.axiomP
 
 end Logic
-
-end FFL.InterpretabilityLogic
-
-namespace FFL.InterpretabilityLogic
 
 open Entailment Formula MaximalConsistentSet
 
@@ -385,18 +377,6 @@ end treeCountermodel
 end Veltman
 
 /-! ### Completeness -/
-
-namespace Logic.ILP
-
-open Veltman Veltman.Model.World
-
-variable {α : Type} {A : Formula α}
-
-end Logic.ILP
-
-end FFL.InterpretabilityLogic
-
-namespace FFL.InterpretabilityLogic
 
 namespace Logic
 

@@ -26,12 +26,9 @@ variable {α : Type*}
 -/
 abbrev ILMinusJ5 : Logic α := ofAxiomsMinus {Axioms.J5 A | A}
 
-end Logic
 
+/-! ## Completeness -/
 
-section Completeness
-
-namespace Logic
 
 open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model.World
 open LabelledSet.Condition ofAxiomsMinus
@@ -78,15 +75,9 @@ theorem ILMinusJ5.iff_valid_finite :
       [M.IsILMinus] → [M.IsJ5] → M ⊧ A :=
   ILMinusJ5.semantics_TFAE.out 1 3
 
-end Logic
 
-end Completeness
+/-! ## Relations -/
 
-
-
-section Relations
-
-namespace Logic
 
 open Entailment
 
@@ -96,8 +87,6 @@ instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ5 :=
   .of_unprovable_provable unprovable_J5 (HasAxiomJ5.J5 _)
 
 end Logic
-
-end Relations
 
 end FFL.InterpretabilityLogic
 

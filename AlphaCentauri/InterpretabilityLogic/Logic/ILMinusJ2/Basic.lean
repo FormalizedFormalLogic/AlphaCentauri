@@ -26,11 +26,8 @@ variable {α : Type*}
 -/
 abbrev ILMinusJ2 : Logic α := ofAxiomsMinus {Axioms.J2 A B C | (A) (B) (C)}
 
-end Logic
+/-! ## Soundness -/
 
-section Soundness
-
-namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World
 
@@ -43,8 +40,6 @@ theorem ILMinusJ2.sound [M.IsILMinus] [M.IsJ2] : ILMinusJ2 ⊢ A → M ⊧ A :=
 
 end Logic
 
-end Soundness
-
 section Consistency
 
 open Veltman.Model Logic
@@ -56,7 +51,7 @@ instance : Entailment.Consistent (ILMinusJ2 : Logic α) :=
 
 end Consistency
 
-section CompletenessVerbrugge
+/-! ## Completeness for Verbrugge models -/
 
 namespace Logic
 
@@ -107,15 +102,9 @@ theorem ILMinusJ2.iff_valid_finite_verbrugge :
       [M.IsILMinus] → [M.IsJ2] → M ⊧ A :=
   ILMinusJ2.semantics_TFAE.out 1 3
 
-end Logic
 
-end CompletenessVerbrugge
+/-! ## Incompleteness for Verbrugge models -/
 
-
-
-section IncompletenessVerbrugge
-
-namespace Logic
 
 open Entailment
 
@@ -130,9 +119,6 @@ theorem ILMinusJ2.incomplete : ∃ A : Formula ℕ,
   · exact unprovable_J2Plus;
 
 end Logic
-
-end IncompletenessVerbrugge
-
 
 
 end FFL.InterpretabilityLogic

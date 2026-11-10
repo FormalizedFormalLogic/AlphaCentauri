@@ -59,20 +59,6 @@ instance : Consistent (𝐈𝐋𝐌₀ : Logic α) :=
 
 end Logic
 
-section
-
-open Entailment Formula Logic Logic.ofAxioms MaximalConsistentTheory
-
-namespace Logic.ILM₀
-
-open Veltman Veltman.StepByStep
-
-variable {α : Type*} {A : Formula α}
-
-end Logic.ILM₀
-
-end
-
 namespace Logic
 
 open Veltman Veltman.StepByStep MaximalConsistentTheory

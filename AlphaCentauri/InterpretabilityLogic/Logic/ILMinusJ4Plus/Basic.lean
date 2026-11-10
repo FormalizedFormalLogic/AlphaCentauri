@@ -26,12 +26,9 @@ variable {α : Type*}
 -/
 abbrev ILMinusJ4Plus : Logic α := ofAxiomsMinus {Axioms.J4Plus A B C | (A) (B) (C)}
 
-end Logic
 
+/-! ## Completeness -/
 
-section Completeness
-
-namespace Logic
 
 open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model.World
 open LabelledSet.Condition ofAxiomsMinus
@@ -78,15 +75,9 @@ theorem ILMinusJ4Plus.iff_valid_finite :
       [M.IsILMinus] → [M.IsJ4] → M ⊧ A :=
   ILMinusJ4Plus.semantics_TFAE.out 1 3
 
-end Logic
 
-end Completeness
+/-! ## Equivalent axiomatizations -/
 
-
-
-section EquivalentAxiomatizations
-
-namespace Logic
 
 open Entailment ofAxiomsMinus
 
@@ -135,13 +126,8 @@ theorem ILMinusJ4Plus.eq_ofAxiomsMinus_J4Plus'' :
 
 end J4Plus
 
-end Logic
+/-! ## Relations -/
 
-end EquivalentAxiomatizations
-
-section Relations
-
-namespace Logic
 
 open Entailment
 
@@ -151,8 +137,6 @@ instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ4Plus :=
   .of_unprovable_provable ILMinusJ1J5.unprovable_J4Plus (HasAxiomJ4Plus.J4Plus _ _ _)
 
 end Logic
-
-end Relations
 
 end FFL.InterpretabilityLogic
 

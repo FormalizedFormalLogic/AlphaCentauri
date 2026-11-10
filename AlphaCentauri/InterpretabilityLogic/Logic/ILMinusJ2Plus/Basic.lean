@@ -24,12 +24,9 @@ variable {α : Type*}
 -/
 abbrev ILMinusJ2Plus : Logic α := ofAxiomsMinus {Axioms.J2Plus A B C | (A) (B) (C)}
 
-end Logic
 
+/-! ## Completeness -/
 
-section Completeness
-
-namespace Logic
 
 open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model.World
 open LabelledSet.Condition ofAxiomsMinus
@@ -76,15 +73,9 @@ theorem ILMinusJ2Plus.iff_valid_finite :
       [M.IsILMinus] → [M.IsJ2] → M ⊧ A :=
   ILMinusJ2Plus.semantics_TFAE.out 1 3
 
-end Logic
 
-end Completeness
+/-! ## Equivalent axiomatizations -/
 
-
-
-section EquivalentAxiomatizations
-
-namespace Logic
 
 open Entailment ofAxiomsMinus
 
@@ -109,8 +100,6 @@ theorem ILMinusJ2Plus.eq_ofAxiomsMinus_J2Plus' :
     cl_prover [h₁, h₂];
 
 end Logic
-
-end EquivalentAxiomatizations
 
 end FFL.InterpretabilityLogic
 

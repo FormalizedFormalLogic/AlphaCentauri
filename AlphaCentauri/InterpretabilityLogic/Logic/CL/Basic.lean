@@ -29,11 +29,8 @@ abbrev CL : Logic α :=
 
 notation "𝐂𝐋" => Logic.CL
 
-end Logic
+/-! ## The principle $\mathsf{J2}^+$ -/
 
-section J2Plus
-
-namespace Logic
 
 open ofAxiomsMinus
 
@@ -47,14 +44,9 @@ instance : HasAxiomJ2Plus (𝐂𝐋 : Logic α) where
     have h₃ : 𝐂𝐋 ⊢ A ▷ (B ⋎ C) ⋏ (B ⋎ C) ▷ C 🡒 A ▷ C := HasAxiomJ2.J2 _ _ _;
     cl_prover [h₁, h₂, h₃];
 
-end Logic
 
-end J2Plus
+/-! ## Completeness -/
 
-
-section Completeness
-
-namespace Logic
 
 open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model.World
 open LabelledSet.Condition ofAxiomsMinus
@@ -74,7 +66,7 @@ theorem CL.semantics_TFAE : [
     apply ofAxiomsMinus.sound _ h;
     rintro _ (⟨A, B, rfl⟩ | ⟨A, B, C, rfl⟩) x;
     · exact forces_axiomJ1;
-    · exact forces_axiomJ2;;
+    · exact forces_axiomJ2;
   tfae_have 2 → 3 := by
     intro h _ _ _ M _ _ _;
     exact h M;
@@ -102,15 +94,9 @@ theorem CL.iff_valid_finite :
       [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → M ⊧ A :=
   CL.semantics_TFAE.out 1 3
 
-end Logic
 
-end Completeness
+/-! ## Incompleteness for Veltman models -/
 
-
-
-section IncompletenessVeltman
-
-namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World Entailment ofAxiomsMinus
 
@@ -139,21 +125,8 @@ lemma unprovable_J5 [L ⪯ 𝐂𝐋] : L ⊬ Axioms.J5 (□⊥) := by
   exact hz 2 (by omega);
 
 
-end Logic
+/-! ## Relations -/
 
-end IncompletenessVeltman
-
-
-
-
-
-
-
-
-
-section Relations
-
-namespace Logic
 
 open Entailment
 
@@ -166,8 +139,6 @@ instance : (ILMinusJ2Plus : Logic α) ⪱ 𝐂𝐋 :=
   .of_unprovable_provable unprovable_J1 (HasAxiomJ1.J1 _ _)
 
 end Logic
-
-end Relations
 
 end FFL.InterpretabilityLogic
 

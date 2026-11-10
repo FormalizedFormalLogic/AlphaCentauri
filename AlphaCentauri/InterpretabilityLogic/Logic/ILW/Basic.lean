@@ -651,14 +651,6 @@ lemma not_models_rankedCountermodel [Entailment.Consistent (ofAxioms 𝔸)]
 
 end Logic.ofAxioms
 
-namespace Logic.ILW
-
-open Veltman
-
-variable {α : Type} {A : Formula α}
-
-end Logic.ILW
-
 end
 
 namespace Logic

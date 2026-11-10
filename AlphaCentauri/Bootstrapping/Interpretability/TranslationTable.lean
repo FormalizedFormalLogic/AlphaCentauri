@@ -129,7 +129,8 @@ omit [L.Eq] in
   case succ k ih => simp [ih]
 
 omit [L.Eq] in
-lemma nth_domainVec (tbl s k : V) : ∀ j < k, (domainVec L tbl s k).[j] = domainAt L tbl (s + j) := by
+lemma nth_domainVec (tbl s k : V) :
+    ∀ j < k, (domainVec L tbl s k).[j] = domainAt L tbl (s + j) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -280,7 +281,7 @@ end IsTable
 
 section bodies
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {k : ℕ}
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {k : ℕ} {f : V}
 
 /-- `⋀ i, d(#i) → ∃ y, d(y) ∧ g(y, #0, …, #(k - 1))`. -/
 noncomputable def funcExistsBody (d : Semiformula V L 1) (g : Semiformula V L (k + 1)) :
@@ -298,9 +299,11 @@ noncomputable def funcUniqueBody (d : Semiformula V L 1) (g : Semiformula V L (k
       Semiformula.equal (Semiterm.bvar 0) (Semiterm.bvar 1)
 
 /-- `⋀ j, #j = #(k + 1 + j) → (g(#0, …, #k) → g(#(k + 1), …, #(2k + 1)))`. -/
-noncomputable def funcCongrBody (g : Semiformula V L (k + 1)) : Semiformula V L ((k + 1) + (k + 1)) :=
+noncomputable def funcCongrBody (g : Semiformula V L (k + 1)) :
+    Semiformula V L ((k + 1) + (k + 1)) :=
   Matrix.conj (fun j : Fin (k + 1) ↦
-      Semiformula.equal (Semiterm.bvar (Fin.castAdd (k + 1) j)) (Semiterm.bvar (Fin.natAdd (k + 1) j))) 🡒
+      Semiformula.equal (Semiterm.bvar (Fin.castAdd (k + 1) j))
+        (Semiterm.bvar (Fin.natAdd (k + 1) j))) 🡒
     (g.subst (fun j ↦ Semiterm.bvar (Fin.castAdd (k + 1) j)) 🡒
       g.subst (fun j ↦ Semiterm.bvar (Fin.natAdd (k + 1) j)))
 
@@ -321,7 +324,8 @@ lemma val_conj_domainAt (d : Semiformula V L 1) (hd : d.val = tableDomain tbl) {
 lemma val_conj_equation {n : ℕ} (a b : ℕ) (f g : Fin k → Fin n) (hf : ∀ i, (f i : ℕ) = a + i)
     (hg : ∀ i, (g i : ℕ) = b + i) :
     (Matrix.conj fun i ↦ Semiformula.equal (L := L) (Semiterm.bvar (f i))
-      (Semiterm.bvar (g i)) : Semiformula V L n).val = ^⋀ equationVec L (a : V) (b : V) (k : V) := by
+      (Semiterm.bvar (g i)) : Semiformula V L n).val =
+        ^⋀ equationVec L (a : V) (b : V) (k : V) := by
   rw [val_conj_typed]
   congr 1
   symm
@@ -430,7 +434,7 @@ include h
 lemma tprovable_func_exists (F : L₂.Func k) (w : Fin k → Term V L₁) :
     S.internalize V ⊢ Matrix.conj (fun i ↦ h.domT.subst ![w i]) 🡒
       ∃¹ (h.domT ⋏ (h.funcT F).subst (Semiterm.bvar 0 :> fun i ↦ (w i).bShift)) := by
-  have h₁ := tprovable_subst_of_provable_qqAlls (funcExistsBody h.domT (h.funcT F)) w
+  have h₁ := tprovable_subst_of_provable_qqAlls (S := S) (funcExistsBody h.domT (h.funcT F)) w
     (by rw [funcExistsBody_val _ rfl _ rfl]; exact h.func_exists (codeIn_func_quote F))
   simpa [funcExistsBody, SemitermVec.q_eq_cons] using h₁
 
@@ -438,7 +442,8 @@ lemma tprovable_func_unique (F : L₂.Func k) (y z : Term V L₁) (w : Fin k →
     S.internalize V ⊢ Matrix.conj (fun i ↦ h.domT.subst ![w i]) ⋏ h.domT.subst ![y] ⋏
       h.domT.subst ![z] ⋏ (h.funcT F).subst (y :> w) ⋏ (h.funcT F).subst (z :> w) 🡒
         Semiformula.equal y z := by
-  have h₁ := tprovable_subst_of_provable_qqAlls (funcUniqueBody h.domT (h.funcT F)) (y :> z :> w)
+  have h₁ := tprovable_subst_of_provable_qqAlls (S := S) (funcUniqueBody h.domT (h.funcT F))
+    (y :> z :> w)
     (by
       rw [funcUniqueBody_val _ rfl _ rfl]
       simpa [add_assoc, one_add_one_eq_two] using h.func_unique (codeIn_func_quote F))
@@ -448,7 +453,7 @@ lemma tprovable_func_congr (F : L₂.Func k) (y z : Term V L₁) (w w' : Fin k �
     S.internalize V ⊢ Semiformula.equal y z ⋏
       Matrix.conj (fun i ↦ Semiformula.equal (w i) (w' i)) 🡒
         (h.funcT F).subst (y :> w) 🡒 (h.funcT F).subst (z :> w') := by
-  have h₁ := tprovable_subst_of_provable_qqAlls (funcCongrBody (h.funcT F))
+  have h₁ := tprovable_subst_of_provable_qqAlls (S := S) (funcCongrBody (h.funcT F))
     (Fin.append (y :> w) (z :> w'))
     (by
       rw [funcCongrBody_val _ rfl]
@@ -541,7 +546,8 @@ lemma funcExists_external (F : L₂.Func k) : S ⊢ ∀¹* (funcExistsSent π F)
 
 omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
 lemma quote_funcExistsSent (F : L₂.Func k) :
-    (⌜funcExistsSent π F⌝ : Semiformula V L₁ k) = funcExistsBody (⌜π.domain.sentence⌝ : Semiformula V L₁ 1) (⌜(π.func F).sentence⌝ : Semiformula V L₁ (k + 1)) := by
+    (⌜funcExistsSent π F⌝ : Semiformula V L₁ k) =
+      funcExistsBody ⌜π.domain.sentence⌝ (⌜(π.func F).sentence⌝ : Semiformula V L₁ (k + 1)) := by
   unfold funcExistsBody
   simp only [funcExistsSent, LCWQIsoGödelQuote.imply, LCWQIsoGödelQuote.exs,
     LCWQIsoGödelQuote.and, quote_conj, quote_domain_bvar, quote_operator_cons]
@@ -553,7 +559,8 @@ noncomputable abbrev uniqSent (F : L₂.Func k) : Semisentence L₁ (k + 2) :=
 
 omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
 lemma quote_uniqSent (F : L₂.Func k) :
-    (⌜uniqSent π F⌝ : Semiformula V L₁ (k + 2)) = funcUniqueBody (⌜π.domain.sentence⌝ : Semiformula V L₁ 1) (⌜(π.func F).sentence⌝ : Semiformula V L₁ (k + 1)) := by
+    (⌜uniqSent π F⌝ : Semiformula V L₁ (k + 2)) =
+      funcUniqueBody ⌜π.domain.sentence⌝ (⌜(π.func F).sentence⌝ : Semiformula V L₁ (k + 1)) := by
   unfold funcUniqueBody
   simp only [uniqSent, LCWQIsoGödelQuote.imply, LCWQIsoGödelQuote.and, quote_conj,
     quote_domain_bvar, quote_operator_cons, quote_eq_bvar]
@@ -607,7 +614,8 @@ lemma congrSent_external (F : L₂.Func k) : S ⊢ ∀¹* (congrSent π F) := by
 
 omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
 lemma quote_congrSent (F : L₂.Func k) :
-    (⌜congrSent π F⌝ : Semiformula V L₁ ((k + 1) + (k + 1))) = funcCongrBody (⌜(π.func F).sentence⌝ : Semiformula V L₁ (k + 1)) := by
+    (⌜congrSent π F⌝ : Semiformula V L₁ ((k + 1) + (k + 1))) =
+      funcCongrBody (⌜(π.func F).sentence⌝ : Semiformula V L₁ (k + 1)) := by
   unfold funcCongrBody
   simp only [congrSent, LCWQIsoGödelQuote.imply, LCWQIsoGödelQuote.and, quote_conj,
     quote_eq_bvar, quote_operator_bvar]

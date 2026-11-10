@@ -509,12 +509,7 @@ lemma isUTermVec_matrixToVec_quote {n k : ℕ} (v : Fin k → SyntacticSemiterm 
 lemma bvarVec_zero_eq_matrixToVec (l k : ℕ) :
     bvarVec (0 : V) k =
       matrixToVec fun i : Fin k ↦ (⌜(#(i.addCast l) : SyntacticSemiterm L (l + k))⌝ : V) := by
-  rw [eq_matrixToVec_iff]
-  constructor
-  · simp
-  · intro i
-    rw [nth_bvarVec _ _ _ (by simp)]
-    simp
+  simp [bvarVec_eq_matrixToVec]
 
 end relocateQuote
 

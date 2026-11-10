@@ -1,16 +1,19 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
+public import AlphaCentauri.Model.IntegerConstantDyadicPolynomial
 public import Mathlib.Tactic.Ring
 
 /-!
-# Euclidean division for co-prime pairs
+# Euclidean division
 
 Over $\mathsf{PA}^-$, division with remainder for co-prime pairs is equivalent to division with
-remainder for all pairs with a non-zero divisor.
+remainder for all pairs with a non-zero divisor. $\mathsf{PA}^-_{\mathrm{smu}}$ does not prove
+either: it has a model in which every universal sentence true in `ℕ` holds and in which some
+element cannot be divided by `3` with remainder.
 
 - [Kat26b, Theorem 2, Corollary 4]
-- [Vis26, Open Question 8.29]
+- [Kat26a, Theorem 10, Corollaries 11, 12]
+- [Vis26, Open Questions 3.2, 8.29]
 -/
 
 @[expose] public section
@@ -93,4 +96,45 @@ theorem coprimeEuclideanDivision_iff_euclideanDivision :
   complete.{0} _ _ fun (V : Type) _ _ ↦ by
     simpa using models_coprimeEuclideanDivision_iff_models_euclideanDivision (V := V)
 
+lemma models_standardEuclideanDivisionBy_of_models_euclideanDivision {V : Type*}
+    [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (h : V↓[ℒₒᵣ] ⊧ euclideanDivision) {n : ℕ} (hn : n ≠ 0) :
+    V↓[ℒₒᵣ] ⊧ standardEuclideanDivisionBy n := by
+  have h : ∀ a b : V, a ≠ 0 → ∃ q r, r < a ∧ b = a * q + r := by
+    simpa [models_iff, euclideanDivision] using h
+  rw [models_standardEuclideanDivisionBy_iff]
+  intro b
+  exact h n b (Nat.cast_ne_zero.mpr hn)
+
 end FFL.FirstOrder.Arithmetic
+
+namespace FFL.FirstOrder
+
+/-- There is a model of $\mathsf{PA}^-_{\mathrm{smu}}$ in which every universal sentence true in
+`ℕ` holds and in which some element cannot be divided by `3` with remainder.
+- [Kat26a, Theorem 10] -/
+theorem exists_model_PeanoMinusSmu_not_standardEuclideanDivisionBy_three :
+    ∃ (M : Type) (_ : ORingStructure M), M↓[ℒₒᵣ] ⊧* Arithmetic.PeanoMinusSmu ∧
+      (∀ φ : ArithmeticSemiformula ℕ 0, φ.Open → ℕ↓[ℒₒᵣ] ⊧ φ.univCl → M↓[ℒₒᵣ] ⊧ φ.univCl) ∧
+      ¬M↓[ℒₒᵣ] ⊧ Arithmetic.standardEuclideanDivisionBy 3 := by
+  use Nonneg IntegerConstantDyadicPolynomial, inferInstance
+  exact ⟨IntegerConstantDyadicPolynomial.models_PeanoMinusSmu,
+    fun _ ↦ IntegerConstantDyadicPolynomial.models_univCl_of_open,
+    IntegerConstantDyadicPolynomial.not_models_standardEuclideanDivisionBy_three⟩
+
+/-- $\mathsf{PA}^-_{\mathrm{smu}}$ does not prove division with remainder by `3`.
+- [Kat26a, Corollary 11] -/
+theorem not_provable_standardEuclideanDivisionBy_three_PeanoMinusSmu :
+    Arithmetic.PeanoMinusSmu ⊬ Arithmetic.standardEuclideanDivisionBy 3 := fun h ↦
+  IntegerConstantDyadicPolynomial.not_models_standardEuclideanDivisionBy_three <|
+    models_of_provable IntegerConstantDyadicPolynomial.models_PeanoMinusSmu h
+
+/-- $\mathsf{PA}^-_{\mathrm{smu}}$ does not prove the Euclidean Division Principle.
+- [Kat26a, Corollary 12]
+- [Vis26, Open Question 3.2] -/
+theorem not_provable_euclideanDivision_PeanoMinusSmu :
+    Arithmetic.PeanoMinusSmu ⊬ Arithmetic.euclideanDivision :=
+  fun h ↦ IntegerConstantDyadicPolynomial.not_models_standardEuclideanDivisionBy_three <|
+    Arithmetic.models_standardEuclideanDivisionBy_of_models_euclideanDivision
+      (models_of_provable IntegerConstantDyadicPolynomial.models_PeanoMinusSmu h) three_ne_zero
+
+end FFL.FirstOrder

@@ -347,6 +347,14 @@ JMMV20:
     type: Repository
     title: arXiv
 
+Kat26a:
+  type: Article
+  title: Non-derivability of Euclidean division in PA⁻ₛₘᵤ
+  author: Kato, Naoya
+  date: 2026
+  serial-number:
+    arxiv: "2608.12891"
+
 Kat26b:
   type: Article
   title: Equivalence of restricted and full division

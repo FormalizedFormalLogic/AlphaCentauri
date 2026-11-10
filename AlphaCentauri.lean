@@ -65,6 +65,7 @@ public import AlphaCentauri.Model.Elementary
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.InjectiveEnumeration
+public import AlphaCentauri.Model.IntegerConstantDyadicPolynomial
 public import AlphaCentauri.Model.IntegerConstantPolynomial
 public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
@@ -106,6 +107,7 @@ public import AlphaCentauri.Schemata.DeltaInduction
 public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.Schemata.OpenInduction
 public import AlphaCentauri.Schemata.ParameterFreeInduction
+public import AlphaCentauri.Schemata.PeanoMinusSmu
 public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.Schemata.Strictness
 public import AlphaCentauri.Schemata.StrongCollection
@@ -129,6 +131,7 @@ public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Seq
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.LocallyDelta0
 public import AlphaCentauri.ToFoundation.Entailment
 public import AlphaCentauri.ToFoundation.Eval
+public import AlphaCentauri.ToFoundation.EventualAgreement
 public import AlphaCentauri.ToFoundation.Exponential
 public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
@@ -166,6 +169,7 @@ public import AlphaCentauri.ToMathlib.FLT3.Descent
 public import AlphaCentauri.ToMathlib.FLT3.Eisenstein
 public import AlphaCentauri.ToMathlib.Goodstein
 public import AlphaCentauri.ToMathlib.HahnSeries
+public import AlphaCentauri.ToMathlib.IntegerConstantDyadicPolynomial
 public import AlphaCentauri.ToMathlib.IntegerConstantPolynomial
 public import AlphaCentauri.ToMathlib.IntegerPart
 public import AlphaCentauri.ToMathlib.ONote.Computability

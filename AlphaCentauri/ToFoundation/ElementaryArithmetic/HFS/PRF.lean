@@ -341,6 +341,46 @@ lemma result_definable_delta₁ : 𝚫ᴬ₁.DefinableFunction
     (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined_delta.to_definable
 
+lemma result_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin (k + 1) → V ↦ c.result (w ·.succ) (w 0) where
+  graph := by
+    have hpair : LocallyDelta0Function fun x : Fin 2 → V ↦ ⟪x 0, x 1⟫ :=
+      LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
+    have hadd : LocallyDelta0Function fun x : Fin 2 → V ↦ x 0 + x 1 :=
+      LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
+    have hsucc : LocallyDelta0Function fun w : Fin (k + 2) → V ↦ w 1 + 1 :=
+      hadd.comp (f := ![fun w ↦ w 1, fun _ ↦ 1]) <| Fin.forall_fin_succ.mpr
+        ⟨LocallyDelta0Function.var 1, Fin.forall_fin_succ.mpr
+          ⟨LocallyDelta0Function.const 1, finZeroElim⟩⟩
+    have hbound : LocallyDelta0Function fun w : Fin (k + 2) → V ↦
+        c.bound (fun j ↦ w j.succ.succ) (w 1) := by
+      simpa using c.bound_locallyDelta0.retraction Fin.succ
+    have hE : LocallyDelta0Function fun w : Fin (k + 2) → V ↦
+        Exp.exp ⟪w 1 + 1, c.bound (fun j ↦ w j.succ.succ) (w 1)⟫ := by
+      have := hpair.comp (f := ![fun w ↦ w 1 + 1, fun w ↦ c.bound (fun j ↦ w j.succ.succ) (w 1)])
+        <| Fin.forall_fin_succ.mpr ⟨hsucc, Fin.forall_fin_succ.mpr ⟨hbound, finZeroElim⟩⟩
+      have := LocallyDelta0Function.exp.comp (f := ![fun w ↦
+        ⟪w 1 + 1, c.bound (fun j ↦ w j.succ.succ) (w 1)⟫]) <|
+          Fin.forall_fin_succ.mpr ⟨by simpa using this, finZeroElim⟩
+      simpa using this
+    have hcseq : LocallyDelta0 fun x : Fin (k + 3) → V ↦ c.CSeq (fun j ↦ x j.succ.succ.succ) (x 0) := by
+      have := c.cseq_locallyDelta0.comp
+        (f := (fun x : Fin (k + 3) → V ↦ x 0) :> fun j x ↦ x j.succ.succ.succ) fun j ↦ by
+          cases j using Fin.cases with
+          | zero => simpa using LocallyDelta0Function.var 0
+          | succ j => simpa using LocallyDelta0Function.var j.succ.succ.succ
+      simpa using this
+    have hbody : LocallyDelta0 fun x : Fin (k + 3) → V ↦
+        c.CSeq (fun j ↦ x j.succ.succ.succ) (x 0) ∧ x 2 + 1 = lh (x 0) ∧ ⟪x 2, x 1⟫ ∈ x 0 :=
+      hcseq.and <| LocallyDelta0.of_definable (by definability)
+    exact (LocallyDelta0.bexs_lt_function hE hbody).of_iff fun w ↦ by
+      simpa using c.result_graph_bounded (fun j ↦ w j.succ.succ) (w 0) (w 1)
+  bounded X := by
+    obtain ⟨Y, hY⟩ := c.bound_locallyDelta0.bounded X
+    use Y
+    intro w hw
+    exact le_trans (c.result_lt_bound _ _).le (hY w hw)
+
 end Construction
 
 end PR

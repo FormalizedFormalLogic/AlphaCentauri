@@ -1094,6 +1094,10 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop}
     simpa [hp.isUFormula, construction] using!
       hexs n param p hp (by simpa [construction] using! this)
 
+lemma IsSemitermVec.qVecIter {k m w d : V} (h : IsSemitermVec L k (m + d) (qVecIter L w d)) :
+    IsSemitermVec L (k + 1) (m + (d + 1)) (qVecIter L w (d + 1)) := by
+  rw [← qVec_qVecIter, ← add_assoc]; exact h.qVec
+
 /-- Structural induction on semiformulas with a counter `d ≤ n` of the quantifiers passed. -/
 lemma IsSemiformula.depth_induction {Q : V → V → V → Prop}
     (hQ : LocallyDelta0 fun w : Fin 3 → V ↦ Q (w 0) (w 1) (w 2))
@@ -1136,7 +1140,8 @@ lemma IsSemiformula.depth_induction {Q : V → V → V → Prop}
     LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (v3 0)
   refine IsSemiformula.depth_induction
     (Q := fun d n p ↦ IsSemitermVec L n (m + d) (qVecIter L w d) →
-      IsSemiformula L (m + d) (Bootstrapping.subst L (qVecIter L w d) p)) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+      IsSemiformula L (m + d) (Bootstrapping.subst L (qVecIter L w d) p)) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    hp
   · exact (isSemitermVec_locallyDelta0.comp₃ (v3 1) hmd hwd).imp
       (isSemiformula_locallyDelta0.rel_comp₂ hmd (subst_locallyDelta0.comp₂ hwd (v3 2)))
   · intro d n k R v hR hv hw'; simp [hR, hv.isUTerm, hw'.termSubstVec hv]
@@ -1148,14 +1153,146 @@ lemma IsSemiformula.depth_induction {Q : V → V → V → Prop}
   · intro d n p q hp hq ihp ihq hw'
     simp [hp.isUFormula, hq.isUFormula, ihp hw', ihq hw']
   · intro d n p hp ih hw'
-    have := ih (by rw [← qVec_qVecIter, ← add_assoc]; exact hw'.qVec)
-    simpa [hp.isUFormula, qVec_qVecIter, add_assoc] using this
+    simpa [hp.isUFormula, qVec_qVecIter, add_assoc] using ih hw'.qVecIter
   · intro d n p hp ih hw'
-    have := ih (by rw [← qVec_qVecIter, ← add_assoc]; exact hw'.qVec)
-    simpa [hp.isUFormula, qVec_qVecIter, add_assoc] using this
+    simpa [hp.isUFormula, qVec_qVecIter, add_assoc] using ih hw'.qVecIter
 
 lemma substs_not_uformula {w x : V} (h : ¬IsUFormula L x) :
     subst L w x = 0 := (construction L).result_prop_not _ h
+
+lemma substs_neg {n m w p : V} (hp : IsSemiformula L n p) :
+    IsSemitermVec L n m w → subst L w (neg L p) = neg L (subst L w p) := by
+  intro hw
+  suffices H : ∀ d ≤ n, IsSemitermVec L n (m + d) (qVecIter L w d) →
+      subst L (qVecIter L w d) (neg L p) = neg L (subst L (qVecIter L w d) p) by
+    simpa using H 0 zero_le (by simpa using hw)
+  have v3 : ∀ i : Fin 3, LocallyDelta0Function fun u : Fin 3 → V ↦ u i :=
+    LocallyDelta0Function.var
+  have hwd : LocallyDelta0Function fun u : Fin 3 → V ↦ qVecIter L w (u 0) :=
+    qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (v3 0)
+  have hmd : LocallyDelta0Function fun u : Fin 3 → V ↦ m + u 0 :=
+    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (v3 0)
+  refine IsSemiformula.depth_induction
+    (Q := fun d n p ↦ IsSemitermVec L n (m + d) (qVecIter L w d) →
+      subst L (qVecIter L w d) (neg L p) = neg L (subst L (qVecIter L w d) p)) ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    ?_ ?_ hp
+  · exact (isSemitermVec_locallyDelta0.comp₃ (v3 1) hmd hwd).imp <| LocallyDelta0.eq
+      (subst_locallyDelta0.comp₂ hwd (neg_locallyDelta0.comp₁ (v3 2)))
+      (neg_locallyDelta0.comp₁ (subst_locallyDelta0.comp₂ hwd (v3 2)))
+  · intro d n k R v hR hv hw'
+    rw [neg_rel hR hv.isUTerm, substs_nrel hR hv.isUTerm, substs_rel hR hv.isUTerm,
+      neg_rel hR (hw'.termSubstVec hv).isUTerm]
+  · intro d n k R v hR hv hw'
+    rw [neg_nrel hR hv.isUTerm, substs_rel hR hv.isUTerm, substs_nrel hR hv.isUTerm,
+      neg_nrel hR (hw'.termSubstVec hv).isUTerm]
+  · intros; simp [*]
+  · intros; simp [*]
+  · intro d n p q hp hq ihp ihq hw'
+    rw [neg_and hp.isUFormula hq.isUFormula,
+      substs_or hp.neg.isUFormula hq.neg.isUFormula,
+      substs_and hp.isUFormula hq.isUFormula,
+      neg_and (hp.subst hw').isUFormula (hq.subst hw').isUFormula,
+      ihp hw', ihq hw']
+  · intro d n p q hp hq ihp ihq hw'
+    rw [neg_or hp.isUFormula hq.isUFormula,
+      substs_and hp.neg.isUFormula hq.neg.isUFormula,
+      substs_or hp.isUFormula hq.isUFormula,
+      neg_or (hp.subst hw').isUFormula (hq.subst hw').isUFormula,
+      ihp hw', ihq hw']
+  · intro d n p hp ih hw'
+    have ih := ih hw'.qVecIter
+    rw [← qVec_qVecIter] at ih
+    rw [neg_all hp.isUFormula, substs_ex hp.neg.isUFormula,
+      substs_all hp.isUFormula, neg_all (hp.subst hw'.qVec).isUFormula, ih]
+  · intro d n p hp ih hw'
+    have ih := ih hw'.qVecIter
+    rw [← qVec_qVecIter] at ih
+    rw [neg_ex hp.isUFormula, substs_all hp.neg.isUFormula,
+      substs_ex hp.isUFormula, neg_ex (hp.subst hw'.qVec).isUFormula, ih]
+
+lemma shift_substs {n m w p : V} (hp : IsSemiformula L n p) :
+    IsSemitermVec L n m w → shift L (subst L w p) = subst L (termShiftVec L n w) (shift L p) := by
+  intro hw
+  suffices H : ∀ d ≤ n, IsSemitermVec L n (m + d) (qVecIter L w d) →
+      shift L (subst L (qVecIter L w d) p) =
+        subst L (termShiftVec L n (qVecIter L w d)) (shift L p) by
+    simpa using H 0 zero_le (by simpa using hw)
+  have v3 : ∀ i : Fin 3, LocallyDelta0Function fun u : Fin 3 → V ↦ u i :=
+    LocallyDelta0Function.var
+  have hwd : LocallyDelta0Function fun u : Fin 3 → V ↦ qVecIter L w (u 0) :=
+    qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (v3 0)
+  have hmd : LocallyDelta0Function fun u : Fin 3 → V ↦ m + u 0 :=
+    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (v3 0)
+  refine IsSemiformula.depth_induction
+    (Q := fun d n p ↦ IsSemitermVec L n (m + d) (qVecIter L w d) →
+      shift L (subst L (qVecIter L w d) p) =
+        subst L (termShiftVec L n (qVecIter L w d)) (shift L p)) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · exact (isSemitermVec_locallyDelta0.comp₃ (v3 1) hmd hwd).imp <| LocallyDelta0.eq
+      (shift_locallyDelta0.comp₁ (subst_locallyDelta0.comp₂ hwd (v3 2)))
+      (subst_locallyDelta0.comp₂ (termShiftVec_locallyDelta0.comp₂ (v3 1) hwd)
+        (shift_locallyDelta0.comp₁ (v3 2)))
+  · intro d n k R v hR hv hw'
+    rw [substs_rel hR hv.isUTerm,
+      shift_rel hR (hw'.termSubstVec hv).isUTerm,
+      shift_rel hR hv.isUTerm,
+      substs_rel hR hv.termShiftVec.isUTerm]
+    simp only [qqRel_inj, true_and]
+    apply nth_ext' k
+      (by rw [len_termShiftVec (hw'.termSubstVec hv).isUTerm])
+      (by rw [len_termSubstVec hv.termShiftVec.isUTerm])
+    intro i hi
+    rw [nth_termShiftVec (hw'.termSubstVec hv).isUTerm hi,
+      nth_termSubstVec hv.isUTerm hi,
+      nth_termSubstVec hv.termShiftVec.isUTerm hi,
+      nth_termShiftVec hv.isUTerm hi,
+      termShift_termSubsts (hv.nth hi) hw']
+  · intro d n k R v hR hv hw'
+    rw [substs_nrel hR hv.isUTerm,
+      shift_nrel hR (hw'.termSubstVec hv).isUTerm,
+      shift_nrel hR hv.isUTerm,
+      substs_nrel hR hv.termShiftVec.isUTerm]
+    simp only [qqNRel_inj, true_and]
+    apply nth_ext' k
+      (by rw [len_termShiftVec (hw'.termSubstVec hv).isUTerm])
+      (by rw [len_termSubstVec hv.termShiftVec.isUTerm])
+    intro i hi
+    rw [nth_termShiftVec (hw'.termSubstVec hv).isUTerm hi,
+      nth_termSubstVec hv.isUTerm hi,
+      nth_termSubstVec hv.termShiftVec.isUTerm hi,
+      nth_termShiftVec hv.isUTerm hi,
+      termShift_termSubsts (hv.nth hi) hw']
+  · intro d n hw'; simp
+  · intro d n hw'; simp
+  · intro d n p q hp hq ihp ihq hw'
+    rw [substs_and hp.isUFormula hq.isUFormula,
+      shift_and (hp.subst hw').isUFormula (hq.subst hw').isUFormula,
+      shift_and hp.isUFormula hq.isUFormula,
+      substs_and hp.shift.isUFormula hq.shift.isUFormula,
+      ihp hw', ihq hw']
+  · intro d n p q hp hq ihp ihq hw'
+    rw [substs_or hp.isUFormula hq.isUFormula,
+      shift_or (hp.subst hw').isUFormula (hq.subst hw').isUFormula,
+      shift_or hp.isUFormula hq.isUFormula,
+      substs_or hp.shift.isUFormula hq.shift.isUFormula,
+      ihp hw', ihq hw']
+  · intro d n p hp ih hw'
+    have ih := ih hw'.qVecIter
+    rw [← qVec_qVecIter] at ih
+    rw [substs_all hp.isUFormula,
+      shift_all (hp.subst hw'.qVec).isUFormula,
+      shift_all hp.isUFormula,
+      substs_all hp.shift.isUFormula,
+      ih,
+      termShift_qVec hw']
+  · intro d n p hp ih hw'
+    have ih := ih hw'.qVecIter
+    rw [← qVec_qVecIter] at ih
+    rw [substs_ex hp.isUFormula,
+      shift_exs (hp.subst hw'.qVec).isUFormula,
+      shift_exs hp.isUFormula,
+      substs_ex hp.shift.isUFormula,
+      ih,
+      termShift_qVec hw']
 
 end subst
 

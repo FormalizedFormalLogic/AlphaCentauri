@@ -224,7 +224,122 @@ lemma lt_bound (H : c.CSeq v s) {i z : V} (h : ⟪i, z⟫ ∈ s) : z < c.bound v
       exact c.succ_lt_bound v i _ (ih _ (lt_of_mem_rng hmem) hmem)
   exact this i z (lt_of_mem_rng h) h
 
+/-- A computation sequence of length at most `l + 1` lies below `Exp.exp ⟪l + 1, c.bound v l⟫`. -/
+lemma lt_exp_of_lh_le (H : c.CSeq v s) {l : V} (hl : lh s ≤ l + 1) :
+    s < Exp.exp ⟪l + 1, c.bound v l⟫ := by
+  apply lt_exp_iff.mpr
+  intro q hq
+  have hq' : ⟪π₁ q, π₂ q⟫ ∈ s := by simpa using hq
+  have hi : π₁ q < l + 1 := lt_of_lt_of_le (H.seq.lt_lh_of_mem hq') hl
+  have hz : π₂ q < c.bound v l :=
+    lt_of_lt_of_le (H.lt_bound hq') (c.bound_monotone v (lt_succ_iff_le.mp hi))
+  simpa using pair_lt_pair hi hz
+
 end CSeq
+
+/-! ## Result of primitive recursion -/
+
+variable (c v)
+
+private lemma cseq_lh_locallyDelta0 :
+    LocallyDelta0 fun x : Fin 2 → V ↦ c.CSeq v (x 0) ∧ x 1 + 1 = lh (x 0) := by
+  have hcseq : LocallyDelta0 fun x : Fin 2 → V ↦ c.CSeq v (x 0) := by
+    have := c.cseq_locallyDelta0.comp (f := (fun x : Fin 2 → V ↦ x 0) :> fun j _ ↦ v j)
+      fun j ↦ by
+        cases j using Fin.cases with
+        | zero => simpa using LocallyDelta0Function.var 0
+        | succ j => simpa using LocallyDelta0Function.const (v j)
+    simpa using this
+  exact hcseq.and <| LocallyDelta0.of_definable (by definability)
+
+lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
+  set E := Exp.exp ⟪l + 1, c.bound v l⟫
+  have hP : LocallyDelta0Pred fun m ↦ m ≤ l → ∃ s < E, c.CSeq v s ∧ m + 1 = lh s := by
+    have := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.const (k := 1) E)
+      (c.cseq_lh_locallyDelta0 v)
+    exact (LocallyDelta0.of_definable (R := fun x : Fin 1 → V ↦ x 0 ≤ l) (by definability)).imp
+      this |>.of_iff fun x ↦ by simp
+  have : ∀ m, m ≤ l → ∃ s < E, c.CSeq v s ∧ m + 1 = lh s := by
+    apply LocallyDelta0Pred.succ_induction hP
+    · intro _
+      use !⟦c.zero v⟧
+      exact ⟨CSeq.initial.lt_exp_of_lh_le (by simp), CSeq.initial, by simp⟩
+    · intro m ih hm
+      obtain ⟨s, _, Hs, hls⟩ := ih (le_trans le_self_add hm)
+      obtain ⟨z, hz⟩ := Hs.seq.exists (show m < lh s by simp [← hls])
+      have H' := Hs.successor hls hz
+      have hlh : lh (s ⁀' c.succ v m z) = m + 1 + 1 := by simp [Hs.seq, hls]
+      use s ⁀' c.succ v m z
+      exact ⟨H'.lt_exp_of_lh_le (by simpa [hlh] using hm), H', hlh.symm⟩
+  obtain ⟨s, -, H⟩ := this l le_rfl
+  exact ⟨s, H⟩
+
+lemma cSeq_result_existsUnique (l : V) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = lh s ∧ ⟪l, z⟫ ∈ s := by
+  obtain ⟨s, Hs, h⟩ := CSeq.exists c v l
+  obtain ⟨z, hz⟩ := Hs.seq.exists (show l < lh s by simp [← h])
+  apply ExistsUnique.intro z ⟨s, Hs, h, hz⟩
+  rintro z' ⟨s', Hs', h', hz'⟩
+  exact Eq.symm <| Hs.unique Hs' (by simp [← h, ← h']) (show l < lh s by simp [← h]) hz hz'
+
+/-- The value of the recursion at `u`. -/
+noncomputable def result (u : V) : V := Classical.choose! (c.cSeq_result_existsUnique v u)
+
+lemma result_spec (u : V) : ∃ s, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, c.result v u⟫ ∈ s :=
+  Classical.choose!_spec (c.cSeq_result_existsUnique v u)
+
+@[simp] theorem result_zero : c.result v 0 = c.zero v := by
+  obtain ⟨s, Hs, _, h0⟩ := c.result_spec v 0
+  exact Hs.seq.isMapping.uniq h0 Hs.zero
+
+@[simp] theorem result_succ (u : V) : c.result v (u + 1) = c.succ v u (c.result v u) := by
+  obtain ⟨s, Hs, hk, h⟩ := c.result_spec v u
+  have : CSeq c v (s ⁀' c.succ v u (result c v u)) := Hs.successor hk h
+  exact Eq.symm <| Classical.choose_uniq (c.cSeq_result_existsUnique v (u + 1))
+    ⟨_, this, by simp [Hs.seq, hk], by simp [hk]⟩
+
+lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, z⟫ ∈ s :=
+  ⟨by rintro rfl
+      obtain ⟨s, Hs, _, h⟩ := c.result_spec v u
+      exact ⟨s, Hs, h⟩,
+   by rintro ⟨s, Hs, h⟩
+      obtain ⟨s', Hs', hu, h'⟩ := c.result_spec v u
+      exact Eq.symm <| Hs'.unique Hs
+        (by simpa [← hu, succ_le_iff_lt] using Hs.seq.lt_lh_iff.mpr (mem_domain_of_pair_mem h))
+        (by simp [← hu]) h' h⟩
+
+lemma result_lt_bound (u : V) : c.result v u < c.bound v u := by
+  obtain ⟨s, Hs, _, h⟩ := c.result_spec v u
+  exact Hs.lt_bound h
+
+private lemma result_graph_bounded (z u : V) : z = c.result v u ↔
+    ∃ s < Exp.exp ⟪u + 1, c.bound v u⟫, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, z⟫ ∈ s := by
+  constructor
+  · rintro rfl
+    obtain ⟨s, Hs, hu, h⟩ := c.result_spec v u
+    exact ⟨s, Hs.lt_exp_of_lh_le hu.symm.le, Hs, hu, h⟩
+  · rintro ⟨s, _, Hs, _, h⟩
+    exact (c.result_graph v z u).mpr ⟨s, Hs, h⟩
+
+set_option linter.flexible false in
+lemma result_defined : 𝚺ᴬ₁.DefinedFunction
+    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
+  simp [Arithmetic.PR.Blueprint.resultDef, result_graph, c.cseq_defined_iff]
+
+lemma result_defined_delta : 𝚫ᴬ₁.DefinedFunction
+    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDeltaDef :=
+  c.result_defined.graph_delta
+
+@[simp] lemma result_defined_iff (v : Fin (k + 2) → V) :
+    p.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) :=
+  c.result_defined.iff
+
+lemma result_definable : 𝚺ᴬ₁.DefinableFunction
+    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+  c.result_defined.to_definable
+
+lemma result_definable_delta₁ : 𝚫ᴬ₁.DefinableFunction
+    (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+  c.result_defined_delta.to_definable
 
 end Construction
 

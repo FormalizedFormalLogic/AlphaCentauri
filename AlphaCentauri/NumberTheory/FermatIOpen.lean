@@ -55,7 +55,7 @@ namespace FFL.FirstOrder
 - [Smi92b, Introduction]
 - [DAq05, §2] -/
 theorem not_provable_fermatLastTheorem_IOpen {n : ℕ} (hn : 3 ≤ n) :
-    ¬ 𝗜𝗢𝗽𝗲𝗻 ⊢ Arithmetic.fermatLastTheorem n := by
+    𝗜𝗢𝗽𝗲𝗻 ⊬ Arithmetic.fermatLastTheorem n := by
   have hF : Arithmetic.fermatLastTheorem n = ∀¹*
       (“#2 ^' n + #1 ^' n = #0 ^' n → #2 = 0 ∨ #1 = 0 ∨ #0 = 0” : ArithmeticSemisentence 3) :=
     rfl

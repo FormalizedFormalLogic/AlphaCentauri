@@ -745,13 +745,15 @@ private lemma phi_iff_decode (C pr : V) :
       have h0 := hys 0 (by simp [c.allSize_eq_one])
       rw [c.allChanges_eq_change] at h0
       simp only [pi₁_pair, pi₂_pair, qqAll, add_tsub_cancel_right, true_and]
-      exact ⟨ys.[0], lt_of_le_of_lt (le_pair_pair_right _ _ _) (lt_of_mem h0), h0, by rw [← hone ys hl]⟩
+      exact ⟨ys.[0], lt_of_le_of_lt (le_pair_pair_right _ _ _) (lt_of_mem h0), h0,
+        by rw [← hone ys hl]⟩
     · disj 8
       have hl : len ys = 1 := by rw [hl, c.exsSize_eq_one]
       have h0 := hys 0 (by simp [c.exsSize_eq_one])
       rw [c.exsChanges_eq_change] at h0
       simp only [pi₁_pair, pi₂_pair, qqExs, add_tsub_cancel_right, true_and]
-      exact ⟨ys.[0], lt_of_le_of_lt (le_pair_pair_right _ _ _) (lt_of_mem h0), h0, by rw [← hone ys hl]⟩
+      exact ⟨ys.[0], lt_of_le_of_lt (le_pair_pair_right _ _ _) (lt_of_mem h0), h0,
+        by rw [← hone ys hl]⟩
   · rintro ⟨hp, H⟩
     have hpr : pr = ⟪π₁ pr, π₁ (π₂ pr), π₂ (π₂ pr)⟫ := by simp
     refine ⟨π₁ pr, π₁ (π₂ pr), π₂ (π₂ pr), hpr, hp, ?_⟩

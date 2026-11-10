@@ -17,13 +17,12 @@ variables.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 /-! ## Internal free-variable vector `fvarVec` -/
-
-section fvarVec
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.fvarVec (blueprint)
 
@@ -155,6 +154,5 @@ lemma nth_fvarVec (k : V) : ∀ i < k, (fvarVec k).[i] = ^&i := by
     · rw [fvarVec_succ, concat_nth_lt _ _ (by simpa using hlt)]; exact ih i hlt
     · rw [fvarVec_succ, concat_nth_len' _ _ (by simp)]
 
-end fvarVec
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+end ElementaryArithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic

@@ -49,8 +49,6 @@ lemma isOpen_eval (ε : ξ → R) {φ : ArithmeticSemiformula ξ n} (hφ : φ.Op
   | hall => simp at hφ
   | hexs => simp at hφ
 
-section
-
 variable {M : Type*} {ι : M → R} (hι : ∀ x : R, ∃ a b, ι a - ι b = x)
 include hι
 
@@ -114,7 +112,5 @@ lemma exists_open_eval_iff [IsStrictOrderedRing R] {P : (Fin n → R) → Prop} 
     obtain ⟨θ₂, hθ₂, h₂⟩ := ih₂
     use θ₁ ⋎ θ₂
     simp [hθ₁, hθ₂, h₁, h₂]
-
-end
 
 end OpenPredicate

@@ -14,7 +14,8 @@ term.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -137,8 +138,6 @@ lemma qVec_congr {m k k' w w' : V} (hw : IsUTermVec L k w) (hw' : IsUTermVec L k
 
 /-! ## Vectors of bound variables -/
 
-section bvarVec
-
 /-- The recursion defining `bvarVec`. -/
 def bvarVec.blueprint : PR.Blueprint 1 where
   zero := .mkSigma “y j. y = 0”
@@ -190,7 +189,6 @@ lemma nth_bvarVec (j k : V) : ∀ i < k, (bvarVec j k).[i] = ^#(j + i) := by
       exact ih i hlt
     · rw [bvarVec_succ, concat_nth_len' _ _ (by simp)]
 
-
 lemma IsSemitermVec.bvarVec {j k n : V} (h : j + k ≤ n) : IsSemitermVec L k n (bvarVec j k) :=
   IsSemitermVec.iff.mpr ⟨by simp, fun i hi ↦ by
     rw [nth_bvarVec j k i hi, IsSemiterm.bvar]
@@ -202,8 +200,6 @@ lemma bvarVec_eq_matrixToVec (j : V) (k : ℕ) :
   intro i hi
   obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi
   simp [nth_bvarVec _ _ _ hi, add_comm]
-
-end bvarVec
 
 lemma exists_vec_bvar_append (w k : V) :
     ∃ v : V, len v = k + len w ∧ (∀ i < k, v.[i] = ^#i) ∧ ∀ j < len w, v.[k + j] = w.[j] := by
@@ -357,7 +353,6 @@ lemma qVec_closed {t : V} (ht : IsSemiterm L 0 t) :
 
 /-! ## Terms that are bound-shifted -/
 
-
 lemma termBShift_ne_bvar_zero {t : V} (ht : IsUTerm L t) : termBShift L t ≠ ^#0 := by
   rcases ht.case with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, hv, rfl⟩) <;> simp_all
   all_goals simp_all [qqBvar, qqFvar, qqFunc]
@@ -413,4 +408,5 @@ lemma exists_eq_termBShift_of_termSubst_qVec_eq {n w t u : V} (ht : IsSemiterm L
     apply ih i hi v'.[i] (hv'.nth hi)
     simpa [nth_termSubstVec hv.isUTerm hi, nth_termBShiftVec hv' hi] using congrArg (·.[i]) hvv
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

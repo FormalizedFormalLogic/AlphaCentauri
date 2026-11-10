@@ -16,7 +16,8 @@ of that polarity and level. Unlike `Bounding.Prenex.and`, this needs no collecti
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Semiterm
+namespace FFL.FirstOrder
+namespace Semiterm
 
 lemma val_comp_vecCons {L : Language} {M : Type*} [Tarski.Structure L M] {ξ : Type*}
     {k n : ℕ} (e : Fin n → M) (f : ξ → M) (t : Semiterm L ξ n) (w : Fin k → Semiterm L ξ n) :
@@ -24,9 +25,11 @@ lemma val_comp_vecCons {L : Language} {M : Type*} [Tarski.Structure L M] {ξ : T
       Semiterm.val e f t :> fun i ↦ Semiterm.val e f (w i) :=
   funext <| Fin.cases rfl fun _ ↦ rfl
 
-end FFL.FirstOrder.Semiterm
+end Semiterm
+end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Bounding.Prenex
+namespace FFL.FirstOrder
+namespace Bounding.Prenex
 
 open Arithmetic
 
@@ -72,8 +75,6 @@ def pairOr : {Γ : Polarity} → {s n : ℕ} →
 existential quantifiers merged by pairing. -/
 def pairExs {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n + 1)) : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ n :=
   (contract φ.sigmaInv).sigma
-
-section eval
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] {f : ξ → V}
 
@@ -169,6 +170,5 @@ lemma eval_pairExs {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n
     use ⟪y, x⟫
     simpa using h
 
-end eval
-
-end FFL.FirstOrder.Bounding.Prenex
+end Bounding.Prenex
+end FFL.FirstOrder

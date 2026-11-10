@@ -16,8 +16,6 @@ number whose blocks list the partial products $0!, 1!, \dots, x!$.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section Factorial
-
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 noncomputable section
@@ -229,7 +227,5 @@ lemma dvd_factorial {d x : V} (pos : 0 < d) (h : d ≤ x) : d ∣ factorial x :=
   exact H.ext_dvd pos x le_rfl h
 
 end
-
-end Factorial
 
 end FFL.FirstOrder.Arithmetic

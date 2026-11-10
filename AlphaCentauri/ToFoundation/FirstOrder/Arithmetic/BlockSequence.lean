@@ -17,8 +17,6 @@ file collects the facts about appending an entry and about determining a code by
 
 namespace FFL.FirstOrder.Arithmetic
 
-section BlockSequence
-
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 noncomputable section
@@ -83,8 +81,6 @@ private lemma add_div_mul_lt {B Q S T : V} (hQ : Q ∣ B) (hS : S < B) (hT : T <
 
 namespace Nuon
 
-section
-
 variable {a i j : V}
 
 lemma ext_ext {S S' b : V} (hb : Exponential (i * ‖a‖) b) (hS : S < b) (hS' : S' < b)
@@ -108,11 +104,7 @@ lemma ext_ext {S S' b : V} (hb : Exponential (i * ‖a‖) b) (hS : S < b) (hS' 
   have := key i le_rfl
   rwa [bexp_eq_of_exp hib hb, mod_eq_self_of_lt hS, mod_eq_self_of_lt hS'] at this
 
-end
-
 end Nuon
-
-section Blocks
 
 variable {a : V}
 
@@ -194,10 +186,6 @@ lemma ext_mod_pow2 {I S q k m : V} (hk : k ≤ ‖I‖) (hm : m < k) (hq : Expon
   rw [hqb, mod_add_div_mul_eq] at h
   exact h.symm
 
-end Blocks
-
 end
-
-end BlockSequence
 
 end FFL.FirstOrder.Arithmetic

@@ -11,7 +11,8 @@ prove fails in some model of that theory.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 /-- A sentence unprovable in `T` fails in some model of `T`. -/
 lemma exists_countermodel_of_unprovable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T]
@@ -20,4 +21,5 @@ lemma exists_countermodel_of_unprovable {T : ArithmeticTheory} [𝗘𝗤 ℒₒ�
   by_contra! hc
   exact h (complete T σ fun M _ _ ↦ hc M ‹_› ‹_›)
 
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

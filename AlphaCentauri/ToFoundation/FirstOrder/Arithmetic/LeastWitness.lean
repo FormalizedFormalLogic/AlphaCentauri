@@ -16,9 +16,8 @@ $\Delta_1$ relation `R`, gives a $\Sigma_1$-definable function.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
-
-section LeastWitness
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -48,6 +47,5 @@ lemma ISigma1.exists_sigma1Function_of_forall_exists {R : V → V → Prop} (hR 
   · intro x
     exact (hf x).1
 
-end LeastWitness
-
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

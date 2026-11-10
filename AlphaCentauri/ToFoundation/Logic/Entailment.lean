@@ -22,8 +22,6 @@ variable {F : Type*} {S : Type*} [Entailment S F]
 @[simp] lemma consistent_eq_true (𝓢 : S) [h : Consistent 𝓢] : Consistent 𝓢 = True :=
   eq_true h
 
-section matrixConj
-
 variable [LogicalConnective F] [LogicalNeutral F] {𝓢 : S}
 
 lemma matrixConj_elim [Entailment.Minimal 𝓢] :
@@ -44,7 +42,5 @@ lemma matrixConj_imp_matrixConj [Entailment.Cl 𝓢] {φ : F} {k : ℕ} {v u : F
     have := matrixConj_elim (𝓢 := 𝓢) v i
     cl_prover [this, h i]
   cl_prover [this]
-
-end matrixConj
 
 end FFL.Entailment

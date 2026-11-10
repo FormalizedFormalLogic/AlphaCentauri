@@ -19,7 +19,8 @@ and relation symbols of $\mathcal{L}_{\mathrm{OR}}$ are the ones given by `zeroI
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Arithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic.Bootstrapping.Arithmetic
 
 -- `Arithmetic` is intentionally re-opened here, as in Foundation.
 set_option linter.dupNamespace false
@@ -86,5 +87,6 @@ lemma isRel_iff_LOR {k R : V} :
   congr
   · calc (1 : V) = (1 : ℕ) := by simp
 
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Arithmetic
+end ElementaryArithmetic.Bootstrapping.Arithmetic
+end FFL.FirstOrder.Arithmetic
 

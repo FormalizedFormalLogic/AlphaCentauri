@@ -55,7 +55,8 @@ end BooleanCombination
 
 end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 open FFL.FirstOrder (BooleanCombination)
 open scoped FFL.FirstOrder.Bounding
@@ -93,4 +94,5 @@ theorem prenexHierarchy_alt_iff :
 
 end BooleanCombination
 
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

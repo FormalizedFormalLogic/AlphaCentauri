@@ -18,20 +18,16 @@ are on locally $\Delta_0$ predicates.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic.Bootstrapping
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isBounded)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
-section iterated
-
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-
 /-! ### Iterated universal quantifier -/
-
-section qqAlls
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.qqAlls (blueprint)
 
@@ -169,8 +165,5 @@ lemma IsSemiformula.qqAlls {n k p : V} (h : IsSemiformula L (n + k) p) :
   obtain ⟨hu, hbv⟩ := h
   exact ⟨isUFormula_qqAlls.mpr hu, by rwa [bv_qqAlls hu, tsub_le_iff_right]⟩
 
-end qqAlls
-
-end iterated
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+end ElementaryArithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic

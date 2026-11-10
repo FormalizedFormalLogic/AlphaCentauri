@@ -23,7 +23,8 @@ true $\Sigma_1$ formula, and the internal equivalence of `(∀¹ A) ⋎ (∀¹ B
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open FirstOrder
 
@@ -189,8 +190,6 @@ theorem provable_substNumerals_of_provable_zero_of_provable_succ {m : ℕ}
 
 end induction
 
-section allBallOrBall
-
 open FFL.Entailment Bootstrapping.Arithmetic
 
 variable {T : ArithmeticTheory} [T.Δ₁]
@@ -286,6 +285,5 @@ lemma tprovable_allBallOrBall_imp {A B : Semiformula V ℒₒᵣ 1} (hA : A.shif
   have key' : T.internalize V ⊢ ∼(∀¹ A) 🡒 allBallOrBall A B 🡒 ∀¹ B := by simpa using key;
   cl_prover [key']
 
-end allBallOrBall
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

@@ -18,7 +18,8 @@ quantifiers.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -79,8 +80,6 @@ lemma Semiterm.shift_iterate_subst_nil (t : Term V L) (j : ℕ) :
 end vecBvar
 
 /-! ## Blocks of universal quantifiers -/
-
-section quantifierBlock
 
 open scoped FFL.FirstOrder.Arithmetic
 
@@ -174,8 +173,6 @@ namespace Semiformula
   simp [free]
 
 end Semiformula
-
-section allItr
 
 open _root_.FFL.Entailment
 
@@ -379,8 +376,5 @@ lemma tprovable_exs_iff_exs_of_domain {d : Semiformula V L 1} (hd : T.internaliz
     cl_prover [h₁, h₂]
   cl_prover [hd, h₃, tprovable_all_iff_exs (T := T) A (d ⋏ B)]
 
-end allItr
-
-end quantifierBlock
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

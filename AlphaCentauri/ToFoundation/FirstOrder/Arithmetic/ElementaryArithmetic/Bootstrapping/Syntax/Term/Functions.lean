@@ -20,11 +20,10 @@ predicates.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
-
-section
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -84,8 +83,6 @@ variable {n m w : V}
     termSubst L w (^func k f v) = ^func k f (termSubstVec L k w v) := by
   simp [termSubst, construction, hkf, hv]; rfl
 
-section
-
 instance termSubst.defined : 𝚺ᴬ₁-Function₂ termSubst (V := V) L via termSubstGraph L :=
   .mk fun v ↦ by
     simpa [termSubstGraph, termSubst, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
@@ -106,8 +103,6 @@ instance termSubstVec.definable : 𝚺ᴬ₁-Function₃ termSubstVec (V := V) L
 
 instance termSubstVec.definable' (Γ i) : Γᴬ_[i + 1]-Function₃ termSubstVec (V := V) L :=
   termSubstVec.definable.of_sigmaOne
-
-end
 
 lemma termSubst_locallyDelta0 : LocallyDelta0Function₂ (termSubst L : V → V → V) := by
   convert (construction.result_locallyDelta0 (V := V) L).retraction (![1, 0] : Fin 2 → Fin 2)
@@ -292,8 +287,6 @@ variable {n : V}
     termShift L (^func k f v) = ^func k f (termShiftVec L k v) := by
   simp [termShift, construction, hkf, hv]; rfl
 
-section
-
 instance termShift.defined : 𝚺ᴬ₁-Function₁ termShift (V := V) L via termShiftGraph L :=
   .mk fun v ↦ by simpa [termShiftGraph, termShift] using! construction.result_defined.defined v
 
@@ -311,8 +304,6 @@ instance termShiftVec.definable : 𝚺ᴬ₁-Function₂ termShiftVec (V := V) L
 
 instance termShiftVec.definable' (Γ i) : Γᴬ_[i + 1]-Function₂ termShiftVec (V := V) L :=
   termShiftVec.definable.of_sigmaOne
-
-end
 
 lemma termShift_locallyDelta0 : LocallyDelta0Function₁ (termShift L : V → V) := by
   convert construction.result_locallyDelta0 (V := V) L using 3
@@ -461,8 +452,6 @@ variable {L}
     termBShift L (^func k f v) = ^func k f (termBShiftVec L k v) := by
   simp [termBShift, construction, hkf, hv]; rfl
 
-section
-
 instance termBShift.defined : 𝚺ᴬ₁-Function₁ termBShift (V := V) L via termBShiftGraph L :=
   .mk fun v ↦ by simpa using! construction.result_defined.defined v
 
@@ -480,8 +469,6 @@ instance termBShiftVec.definable : 𝚺ᴬ₁-Function₂ termBShiftVec (V := V)
 
 instance termBShiftVec.definable' (Γ i) : Γᴬ_[i + 1]-Function₂ termBShiftVec (V := V) L :=
   termBShiftVec.definable.of_sigmaOne
-
-end
 
 lemma termBShift_locallyDelta0 : LocallyDelta0Function₁ (termBShift L : V → V) := by
   convert construction.result_locallyDelta0 (V := V) L using 3
@@ -624,8 +611,6 @@ noncomputable def qVec (w : V) : V := ^#0 ∷ termBShiftVec L (len w) w
 
 variable {L}
 
-section
-
 instance qVec.defined : 𝚺ᴬ₁-Function₁ (qVec (V := V) L) via qVecGraph L :=
   .mk fun v ↦ by simp [qVecGraph]; rfl
 
@@ -633,8 +618,6 @@ instance qVec.definable : 𝚺ᴬ₁-Function₁ (qVec (V := V) L) := qVec.defin
 
 instance qVec.definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (qVec (V := V) L) :=
   qVec.definable.of_sigmaOne
-
-end
 
 @[simp] lemma len_qVec {k w : V} (h : IsUTermVec L k w) : len (qVec L w) = k + 1 := by
   rcases h.lh; simp [qVec, h]
@@ -804,8 +787,6 @@ scoped infixl:80 " ^+ " => qqAdd
 
 scoped infixl:82 " ^* " => qqMul
 
-section
-
 instance qqAdd_defined : 𝚺ᴬ₁-Function₂ (qqAdd : V → V → V) via qqAddGraph := .mk fun v ↦ by
   simp [qqAddGraph, numeral_eq_natCast, qqAdd]
 
@@ -815,8 +796,6 @@ instance qqMul_defined : 𝚺ᴬ₁-Function₂ (qqMul : V → V → V) via qqMu
 instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqAdd : V → V → V) := .of_sigmaOne qqAdd_defined.to_definable
 
 instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqMul : V → V → V) := .of_sigmaOne qqMul_defined.to_definable
-
-end
 
 @[simp] lemma lt_qqAdd_left (x y : V) : x < x ^+ y := by
   simpa using! nth_lt_qqFunc_of_lt (i := 0) (k := 2) (f := (addIndex : V)) (v := ?[x, y]) (by simp)
@@ -943,15 +922,11 @@ noncomputable def numeralAux (x : V) : V := construction.result ![] x
 @[simp] lemma numeralAux_succ (x : V) : numeralAux (x + 1) = numeralAux x ^+ 𝟏 := by
   simp [numeralAux, construction]
 
-section
-
 instance numeralAux.defined : 𝚺ᴬ₁-Function₁ (numeralAux : V → V) via numeralAuxGraph := .mk
   fun v ↦ by simp [construction.result_defined_iff, numeralAuxGraph]; rfl
 
 instance numeralAux.definable : 𝚺ᴬ₁-Function₁ (numeralAux : V → V) :=
   numeralAux.defined.to_definable
-
-end
 
 lemma numeralAux_locallyDelta0 : LocallyDelta0Function₁ (numeralAux : V → V) := by
   convert construction.result_locallyDelta0 (V := V) using 3
@@ -974,8 +949,6 @@ lemma numeralAux_locallyDelta0 : LocallyDelta0Function₁ (numeralAux : V → V)
   · intro x ih; simp [qqAdd, ih]
 
 end Numeral
-
-section numeral
 
 open Numeral
 
@@ -1006,8 +979,6 @@ lemma numeral_succ_pos {n : V} (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^
   · simp
   · simp [numeral, succ_le_iff_lt]
 
-section
-
 instance numeral_defined : 𝚺ᴬ₁-Function₁ (numeral : V → V) via numeralGraph := .mk fun v ↦ by
   simp [numeralGraph, numeral_eq_natCast]
   by_cases hv1 : v 1 = 0 <;> simp [hv1, numeral]
@@ -1016,8 +987,6 @@ instance numeral_definable : 𝚺ᴬ₁-Function₁ (numeral : V → V) := numer
 
 instance numeral_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (numeral : V → V) :=
   .of_sigmaOne numeral_definable
-
-end
 
 lemma numeral_locallyDelta0 : LocallyDelta0Function₁ (numeral : V → V) :=
   LocallyDelta0Function.ite (Q := fun v : Fin 1 → V ↦ v 0 = 0)
@@ -1069,10 +1038,7 @@ lemma numeral_locallyDelta0 : LocallyDelta0Function₁ (numeral : V → V) :=
     · simp [qqOne_eq_qqFunc]
     · simp [qqAdd, ih, qqOne_eq_qqFunc]
 
-end numeral
-
 end Arithmetic
 
-end
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+end ElementaryArithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic

@@ -22,14 +22,13 @@ $\Delta_0$ set (`LocallyDelta0Axioms`).
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
 
 open _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping Bounding
 open _root_.FFL.FirstOrder.Arithmetic (substCode indBodyValGraph chInd)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
-
-section succInd
 
 /-- The code of the induction instance `φ(0) → (∀ x, φ(x) → φ(x + 1)) → ∀ x, φ(x)` of the code
 `k` of a formula `φ(x)`. -/
@@ -48,10 +47,6 @@ lemma indBodyVal_locallyDelta0 : LocallyDelta0Function₁ (indBodyVal : V → V)
   exact himp.comp₂ (hsubst.comp₂ (LocallyDelta0Function.const _) v1)
     (himp.comp₂ (qqAll_locallyDelta0.comp₁ (himp.comp₂ v1
       (hsubst.comp₂ (LocallyDelta0Function.const _) v1))) (qqAll_locallyDelta0.comp₁ v1))
-
-end succInd
-
-section InductionR
 
 /-- `InductionR S p` holds when `p` codes `∀¹* β` for a formula `β` without free variables such
 that `β`, with its bound variables replaced by free ones, is the induction instance of a formula
@@ -105,10 +100,6 @@ lemma inductionR_locallyDelta0 {S : V → Prop} (hS : LocallyDelta0Pred S) :
     (LocallyDelta0.bexs_le_function (LocallyDelta0Function.var 1) hbody)).of_iff
       fun w ↦ by simp [InductionR]
 
-end InductionR
-
-section presentation
-
 /-- A theory whose $\Delta_1$ formula is `chInd cond`, for a formula `cond` defining a locally
 $\Delta_0$ predicate `S`, has locally $\Delta_0$ axioms. -/
 lemma locallyDelta0Axioms_of_chInd {T : ArithmeticTheory} [T.Δ₁] {cond : 𝚫ᴬ₁.Semisentence 1}
@@ -132,6 +123,5 @@ example (Γ : Polarity) (s : ℕ) : LocallyDelta0Axioms (𝗜𝗡𝗗 Γ s) V :=
 
 example : LocallyDelta0Axioms 𝗘𝗔 V := inferInstance
 
-end presentation
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

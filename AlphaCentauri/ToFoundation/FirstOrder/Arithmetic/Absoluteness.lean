@@ -14,9 +14,8 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
-
-section Absoluteness
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
@@ -79,6 +78,5 @@ lemma Delta1_cast₁ (σ : 𝚫ᴬ₁.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a
   simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
     using Delta1_cast (V := V) σ h
 
-end Absoluteness
-
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

@@ -11,7 +11,8 @@ coded set.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -47,4 +48,5 @@ lemma insert_subset_insert_insert {a p Γ s : V} (h : Γ ⊆ insert p s) :
     · simp
     · simp [hx]
 
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

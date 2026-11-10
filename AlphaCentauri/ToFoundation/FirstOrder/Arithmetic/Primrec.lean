@@ -17,9 +17,8 @@ a primitive recursive predicate.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
-
-section Primrec
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 variable {ξ : Type*} (ε : ξ → ℕ)
 
@@ -82,6 +81,5 @@ lemma primrec_termVal {α : Type*} [Primcodable α] {l : α → List ℕ} (hl : 
     simpa [Semiterm.val_func] using
       Primrec.nat_mul.comp (primrec_termVal hl (v 0)) (primrec_termVal hl (v 1))
 
-end Primrec
-
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

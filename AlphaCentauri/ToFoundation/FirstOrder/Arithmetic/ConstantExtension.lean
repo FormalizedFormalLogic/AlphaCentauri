@@ -15,12 +15,8 @@ of it by choosing a `k`-tuple.
 
 namespace FFL.FirstOrder
 
-namespace Language
-
 /-- `ℒₒᵣ` extended by `k` new constant symbols. -/
-abbrev oringConst (k : ℕ) : Language := Language.add ℒₒᵣ (Language.constant (Fin k))
-
-end Language
+abbrev Language.oringConst (k : ℕ) : Language := Language.add ℒₒᵣ (Language.constant (Fin k))
 
 namespace Arithmetic
 
@@ -99,8 +95,6 @@ lemma valb_le_valb_dominatingTerm {n : ℕ} {t : ClosedSemiterm ℒₒᵣ k}
 
 end
 
-section
-
 variable {T : Theory (Language.oringConst k)} [𝗘𝗤 (Language.oringConst k) ⪯ T]
   (sat : Semantics.Satisfiable (Tarski.Struc (Language.oringConst k)) T)
 
@@ -133,8 +127,6 @@ lemma models_of_lMap_image_subset {U : ArithmeticTheory}
     (ModelOfSatEq sat)↓[ℒₒᵣ] ⊧* U := ⟨fun _ hσ ↦
   reduct_eq sat ▸ Semiformula.models_lMap.mp
     ((ModelOfSatEq.models sat).models _ (h (Set.mem_image_of_mem _ hσ)))⟩
-
-end
 
 end Arithmetic
 

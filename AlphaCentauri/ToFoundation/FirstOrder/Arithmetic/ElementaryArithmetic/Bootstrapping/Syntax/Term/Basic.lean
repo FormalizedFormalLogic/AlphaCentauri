@@ -24,9 +24,8 @@ variables and the predicates `IsSemiterm` and `IsSemitermVec` follow, with the f
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-
-
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic.Bootstrapping
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isUTerm isUTermVec)
 
@@ -301,8 +300,6 @@ lemma two_iff {v : V} :
   · rintro ⟨h₁, h₂⟩
     simpa [one_add_one_eq_two] using (adjoin₁_iff.mpr h₂).adjoin h₁
 
-section
-
 instance defined : 𝚫ᴬ₁-Relation (IsUTermVec (V := V) L) via (isUTermVec L) :=
   ⟨by intro v; simp [isUTermVec, Bounding.HierarchySymbol.Semiformula.val_sigma,
     IsUTerm.defined.proper.iff'],
@@ -312,8 +309,6 @@ instance definable : 𝚫ᴬ₁-Relation (IsUTermVec (V := V) L) := defined.to_d
 
 instance definable' (Γ) {m : ℕ} : Γᴬ_[m + 1]-Relation (IsUTermVec (V := V) L) :=
   definable.of_deltaOne
-
-end
 
 end IsUTermVec
 
@@ -358,8 +353,6 @@ lemma induction {P : V → Prop} (hP : LocallyDelta0Pred P)
     · exact hfunc k f v hkf ⟨hk, fun i hi ↦ hC _ (h i hi) |>.1⟩ (fun i hi ↦ hC _ (h i hi) |>.2))
 
 end IsUTerm
-
-section structuralBound
 
 variable {c : V}
 
@@ -476,8 +469,6 @@ lemma qqFunc_le_exp_exp_of_nth_le (hc : 1 ≤ c) {k f v w : V} (hv : k = len v) 
 
 lemma le_exp_exp_eight_mul_add (a c : V) : a ≤ Exp.exp (Exp.exp (8 * a + c)) :=
   le_exp_exp <| le_trans (le_mul_of_one_le_left (by simp) (by norm_num)) le_self_add
-
-end structuralBound
 
 end term
 
@@ -1161,8 +1152,6 @@ variable (c)
     c.result L param (^func k f v) = c.func param k f v (c.resultVec L param k v) :=
   c.result_func hkf hv (by simp [hv]) (fun i hi ↦ c.nth_resultVec L param hv hi |>.symm)
 
-section
-
 lemma result_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ c.result L (v ·.succ) (v 0))
   (β.result L) := .mk fun v ↦ by
   simp [Blueprint.result, Bounding.HierarchySymbol.Semiformula.val_sigma,
@@ -1185,8 +1174,6 @@ lemma resultVec_defined :
   simpa [Blueprint.resultVec, Bounding.HierarchySymbol.Semiformula.val_sigma,
     IsUTermVec.defined.proper.iff',
     c.eval_graphDef] using c.resultVec_graph
-
-end
 
 end Construction
 
@@ -1252,8 +1239,6 @@ variable {k : V}
 
 @[simp] lemma termBVVec_nil : termBVVec L 0 0 = 0 := construction.resultVec_nil L _
 
-section
-
 instance termBV.defined : 𝚺ᴬ₁-Function₁ (termBV (V := V) L) via (termBVGraph L) :=
   construction.result_defined
 
@@ -1271,8 +1256,6 @@ instance termBVVec.definable : 𝚺ᴬ₁-Function₂ (termBVVec (V := V) L) :=
 instance termBVVec.definable' {i : ℕ} (Γ) : Γᴬ_[i + 1]-Function₂ (termBVVec (V := V) L) :=
   termBVVec.definable.of_sigmaOne
 
-end
-
 lemma termBV_locallyDelta0 : LocallyDelta0Function₁ (termBV L : V → V) := by
   convert construction.result_locallyDelta0 (V := V) L using 3
   simp [termBV, Matrix.empty_eq]
@@ -1288,8 +1271,6 @@ lemma termBVVec_locallyDelta0 : LocallyDelta0Function₂ (termBVVec (V := V) L) 
   simp [termBVVec, Matrix.empty_eq]
 
 end bv
-
-section isSemiterm
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isSemiterm isSemitermVec)
 
@@ -1413,8 +1394,6 @@ lemma SemitermVec.adjoin {n m w t : V} (h : IsSemitermVec L n m w) (ht : IsSemit
     IsSemitermVec L 2 n ?[t₁, t₂] ↔ IsSemiterm L n t₁ ∧ IsSemiterm L n t₂ := by
   rw [show (2 : V) = 1 + 1 by simp [one_add_one_eq_two], IsSemitermVec.cons_iff]; simp
 
-section
-
 instance IsSemiterm.defined : 𝚫ᴬ₁-Relation (IsSemiterm (V := V) L) via (isSemiterm L) := .mk <| by
   constructor
   · intro v
@@ -1441,8 +1420,6 @@ instance IsSemitermVec.definable : 𝚫ᴬ₁-Relation₃ (IsSemitermVec (V := V
 
 instance IsSemitermVec.definable' (Γ : Polarity) (m : ℕ) :
     Γᴬ_[m + 1]-Relation₃ (IsSemitermVec (V := V) L) := IsSemitermVec.definable.of_deltaOne
-
-end
 
 lemma IsSemiterm.case_iff {n t : V} :
     IsSemiterm L n t ↔
@@ -1487,6 +1464,5 @@ lemma IsSemiterm.induction {P : V → Prop} (hP : LocallyDelta0Pred P)
     · simp [ht.bv]
     · simp [h.bv (by simpa using hi)]⟩
 
-end isSemiterm
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+end ElementaryArithmetic.Bootstrapping
+end FFL.FirstOrder.Arithmetic

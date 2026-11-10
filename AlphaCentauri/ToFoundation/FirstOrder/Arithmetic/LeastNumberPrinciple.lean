@@ -74,7 +74,8 @@ private lemma leastNumberPrinciple_of_boundedExists_induction
 
 end RingOfDifferences
 
-namespace FFL.FirstOrder.Arithmetic
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 open RingOfDifferences OpenPredicate
 
@@ -227,4 +228,5 @@ lemma leastNumberPrinciple_of_models_induction
     InductionScheme.succ_induction (C := IsBoundedExistential 1)
       (P := fun t ↦ BoundedExists B _ (of t)) (exists_e1 hΦ B) h0 hs t
 
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

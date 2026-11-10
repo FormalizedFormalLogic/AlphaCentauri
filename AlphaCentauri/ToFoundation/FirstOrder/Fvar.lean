@@ -12,11 +12,10 @@ a caller-supplied substitution `b`.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Semiformula
+namespace FFL.FirstOrder
+namespace Semiformula
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
-
-section Fvar
 
 variable {k : ℕ}
 
@@ -70,6 +69,5 @@ lemma eval_toSemisentence_two (φ : Semiformula L ℕ 2) (x y : M)
         | succ i => exact i.elim0)
     (fun _ ↦ by simp)
 
-end Fvar
-
-end FFL.FirstOrder.Semiformula
+end Semiformula
+end FFL.FirstOrder

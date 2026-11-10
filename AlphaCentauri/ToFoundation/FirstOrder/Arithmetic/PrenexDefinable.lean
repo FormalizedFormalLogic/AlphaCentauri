@@ -14,9 +14,8 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic
-
-section PrenexDefinable
+namespace FFL.FirstOrder
+namespace Arithmetic
 
 open scoped FFL.FirstOrder.Bounding FFL.FirstOrder.Arithmetic
 
@@ -72,6 +71,5 @@ lemma PrenexDefinable.exists_exists_exists_of_sigmaZero [V↓[ℒₒᵣ] ⊧* �
     fun v ↦ ⟨fun ⟨x, y, z, h⟩ ↦ ⟨⟪x, y⟫, z, y, le_pair_right x y, x, le_pair_left x y, rfl, h⟩,
       fun ⟨_, t, y, _, x, _, _, h⟩ ↦ ⟨x, y, t, h⟩⟩
 
-end PrenexDefinable
-
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

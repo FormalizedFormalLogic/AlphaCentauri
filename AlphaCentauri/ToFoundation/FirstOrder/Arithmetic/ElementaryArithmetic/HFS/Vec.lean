@@ -22,7 +22,8 @@ locally $\Delta_0$ relation with bounded witnesses is `sigmaZero_skolem_vec`.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -34,8 +35,6 @@ lemma LocallyDelta0.mem {k : ℕ} {f f' : (Fin k → V) → V} (hf : LocallyDelt
     (hf' : LocallyDelta0Function f') : LocallyDelta0 fun v ↦ f v ∈ f' v :=
   (LocallyDelta0.of_definable (R := fun w : Fin 2 → V ↦ w 0 ∈ w 1)
     (by definability)).comp₂ hf hf'
-
-section adjoin
 
 noncomputable scoped instance : Adjoin V V := ⟨(⟪·, ·⟫ + 1)⟩
 
@@ -143,8 +142,6 @@ lemma adjoin_le_exp_exp {a b n : V} (hn : 1 ≤ n) (ha : a ≤ Exp.exp (Exp.exp 
 
 lemma le_exp_exp {a n : V} (h : a ≤ n) : a ≤ Exp.exp (Exp.exp n) :=
   le_trans h (lt_trans (lt_exp n) (exp_monotone.mpr (lt_exp n))).le
-
-end adjoin
 
 /-! ### The `i`-th element of a list -/
 
@@ -273,8 +270,6 @@ lemma graph_existsUnique (v i : V) : ∃! x, Graph ⟪v, i, x⟫ := by
 
 end Nth
 
-section nth
-
 /-- The `i`-th element of the list `v`. -/
 noncomputable def nth (v i : V) : V := Classical.choose! (Nth.graph_existsUnique v i)
 
@@ -343,8 +338,6 @@ instance nth_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (nth : V → V → V)
 
 @[simp] lemma nth_zero_idx (i : V) : (0 : V).[i] = 0 :=
   nonpos_iff_eq_zero.mp (nth_le 0 i)
-
-end nth
 
 /-! ### Recursion on lists -/
 
@@ -641,8 +634,6 @@ noncomputable def construction : VecRec.Construction V Arithmetic.Len.blueprint 
 
 end Len
 
-section len
-
 /-- The length of the list `v`. -/
 noncomputable def len (v : V) : V := Len.construction.result ![] v
 
@@ -673,8 +664,6 @@ lemma len_locallyDelta0 : LocallyDelta0Function₁ (len : V → V) := by
   · intro x v ih
     rw [len_adjoin]
     exact succ_le_iff_lt.mpr (lt_of_le_of_lt ih (lt_adjoin' x v))
-
-end len
 
 lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
   have hR : LocallyDelta0 fun w : Fin 2 → V ↦ len (w 1) ≤ w 0 → (w 1).[w 0] = 0 :=
@@ -866,8 +855,6 @@ noncomputable def construction : VecRec.Construction V Arithmetic.ListMax.bluepr
 
 end ListMax
 
-section listMax
-
 /-- The maximum of the elements of the list `v`. -/
 noncomputable def listMax (v : V) : V := ListMax.construction.result ![] v
 
@@ -931,8 +918,6 @@ lemma listMaxss_le_iff {v z : V} : listMax v ≤ z ↔ ∀ i < len v, v.[i] ≤ 
   · intro h i hi; exact le_trans (nth_le_listMax hi) h
   · exact listMaxss_le
 
-end listMax
-
 /-! ### The last `k` elements of a list -/
 
 namespace TakeLast
@@ -966,8 +951,6 @@ noncomputable def construction : VecRec.Construction V Arithmetic.TakeLast.bluep
   bound_locallyDelta0 := LocallyDelta0Function.var 0
 
 end TakeLast
-
-section takeLast
 
 /-- The last `k` elements of the list `v`. -/
 noncomputable def takeLast (v k : V) : V := TakeLast.construction.result ![k] v
@@ -1004,8 +987,6 @@ lemma takeLast_locallyDelta0 : LocallyDelta0Function₂ (takeLast : V → V → 
   · simp
   · intro x v ih
     simp [takeLast_adjoin, ih]
-
-end takeLast
 
 /-! ### Concatenation -/
 
@@ -1049,8 +1030,6 @@ noncomputable def construction : VecRec.Construction V Arithmetic.Concat.bluepri
       (LocallyDelta0Function.const 3)
 
 end Concat
-
-section concat
 
 /-- The list `v` followed by `z`. -/
 noncomputable def concat (v z : V) : V := Concat.construction.result ![z] v
@@ -1120,11 +1099,7 @@ lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] :=
 lemma concat_nth_len' (v z : V) {i} (hi : len v = i) : (concat v z).[i] = z := by
   rcases hi; simp
 
-end concat
-
 /-! ### Membership -/
-
-section vecMembership
 
 /-- `x ∈ᵥ v` states that `x` is an element of the list `v`. -/
 def MemVec (x v : V) : Prop := ∃ i < len v, x = v.[i]
@@ -1159,11 +1134,7 @@ instance memVec_definable : 𝚫ᴬ₁-Relation (MemVec : V → V → Prop) := m
 instance memVec_definable' (Γ m) : Γᴬ_[m + 1]-Relation (MemVec : V → V → Prop) :=
   memVec_definable.of_deltaOne
 
-end vecMembership
-
 /-! ### Subset -/
-
-section vecSubset
 
 /-- `v ⊆ᵥ w` states that every element of the list `v` is an element of the list `w`. -/
 def SubsetVec (v w : V) : Prop := ∀ x, x ∈ᵥ v → x ∈ᵥ w
@@ -1191,11 +1162,7 @@ instance subsetVec_definable : 𝚫ᴬ₁-Relation (SubsetVec : V → V → Prop
 instance subsetVec_definable' (Γ m) : Γᴬ_[m + 1]-Relation (SubsetVec : V → V → Prop) :=
   subsetVec_definable.of_deltaOne
 
-end vecSubset
-
 /-! ### Repetition -/
-
-section repeatVec
 
 lemma repeatVec.bound_locallyDelta0 : LocallyDelta0Function fun v : Fin (1 + 1) → V ↦
     Exp.exp (Exp.exp (v 0 + v 0 + v 1 + 3)) + 1 :=
@@ -1292,8 +1259,6 @@ lemma len_repeatVec_of_nth_le {v m : V} (H : ∀ i < len v, v.[i] ≤ m) :
     v ≤ repeatVec m (len v) :=
   le_of_nth_le_nth (by simp) (fun i hi ↦ by simp [nth_repeatVec m (len v) hi, H i hi])
 
-end repeatVec
-
 /-! ### Conversion to a set -/
 
 namespace VecToSet
@@ -1320,8 +1285,6 @@ noncomputable def construction : VecRec.Construction V Arithmetic.VecToSet.bluep
     (LocallyDelta0Function.var 0))
 
 end VecToSet
-
-section vecToSet
 
 /-- The set of the elements of the list `v`. -/
 noncomputable def vecToSet (v : V) : V := VecToSet.construction.result ![] v
@@ -1369,11 +1332,7 @@ lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i]
 @[simp] lemma nth_mem_vecToSet {v i : V} (h : i < len v) : v.[i] ∈ vecToSet v :=
   mem_vecToSet_iff.mpr ⟨i, h, rfl⟩
 
-end vecToSet
-
 /-! ### Mapping a function over a list -/
-
-section listMap
 
 /-- A list of length `l` whose elements are at most `B` lies below
 `Exp.exp (Exp.exp (l + l + B + 3))`. -/
@@ -1508,6 +1467,5 @@ lemma listMap_locallyDelta0 :
     exact le_trans (le_exp_exp_of_nth_le _ hentries)
       (exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr)))
 
-end listMap
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

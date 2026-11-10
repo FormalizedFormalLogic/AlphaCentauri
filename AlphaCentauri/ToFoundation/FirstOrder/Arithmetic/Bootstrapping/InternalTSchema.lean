@@ -24,7 +24,8 @@ and hence that every internal prenex $\Sigma_1$ sentence is equivalent to its pa
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open FirstOrder FFL.Entailment Bootstrapping.Arithmetic
 
@@ -728,7 +729,6 @@ lemma free_subst_qVec_fvarVec {n q : V} (hq : IsSemiformula ℒₒᵣ (n + 1) q)
   rw [free, shift_substs hq hw.qVec, hs, termShift_qVec hw,
     substs1_subst_qVec hw.termShiftVec hq (by simp), adjoin_termShiftVec_fvarVec]
 
-
 /-- The formula obtained from `p` by replacing each bound variable `#i` by `&i`. -/
 noncomputable def instFormula (n p : V) (hp : IsSemiformula ℒₒᵣ n p) : Formula V ℒₒᵣ :=
   ⟨subst ℒₒᵣ (fvarVec n) p, hp.subst (isSemitermVec_fvarVec n 0)⟩
@@ -1040,8 +1040,6 @@ end formulaDisquotation
 
 /-! ### The internal T-schema for prenex $\Sigma_1$ partial truth -/
 
-section tSchema
-
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 private noncomputable def exsCond : 𝚺ᴬ₁.Semisentence 2 := .mkSigma “z θ. !qqExsDef z θ”
@@ -1119,6 +1117,5 @@ theorem tprovable_iff_partialTrue (φ : Formula V ℒₒᵣ) (hφ : IsPrenexHier
   rw [e₃];
   cl_prover [h₁, h₂, h₃]
 
-end tSchema
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

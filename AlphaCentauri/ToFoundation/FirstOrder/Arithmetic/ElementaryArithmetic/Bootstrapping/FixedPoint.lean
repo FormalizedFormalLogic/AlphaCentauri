@@ -16,7 +16,8 @@ Foundation's `ssnum` and `ssnums`.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
 
 open _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping Bounding
 
@@ -112,4 +113,5 @@ instance substNumerals.defined :
 
 end Bootstrapping.Arithmetic
 
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

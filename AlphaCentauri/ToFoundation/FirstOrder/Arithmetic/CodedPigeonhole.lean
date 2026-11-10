@@ -17,8 +17,6 @@ injection of $\{0, \dots, x\}$ into $\{0, \dots, x - 1\}$ for $x \le a$.
 
 namespace FFL.FirstOrder.Arithmetic
 
-section CodedPigeonhole
-
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 noncomputable section
@@ -26,8 +24,6 @@ noncomputable section
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 attribute [local instance] ElementaryArithmetic.models_ISigma0_union_Omega1
-
-section
 
 variable {a : V}
 
@@ -103,9 +99,5 @@ theorem no_coded_injection (a x S : V) (hx : x ≤ a)
      fun j hj j' hj' heq => hinj j hj j' hj' ((htr j hj).symm.trans (heq.trans (htr j' hj')))⟩
 
 end
-
-end
-
-end CodedPigeonhole
 
 end FFL.FirstOrder.Arithmetic

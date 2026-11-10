@@ -13,7 +13,8 @@ bound variable.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -224,4 +225,5 @@ lemma subst_qqAlls_vec {k n m w v p : V} (hw : IsSemitermVec L n m w) (hp : IsUF
     rw [qqAlls_succ' p k, qqAlls_succ' (subst L v p) k,
       ih (IsUFormula.all.mpr hp) hv' hv'₁ hv'₂, substs_all hp, hqv]
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

@@ -18,7 +18,8 @@ of $\Sigma_1$ definability in $\mathsf{I}\Sigma_1$.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -453,8 +454,6 @@ lemma LocallyDelta0Pred.least_number (hP : LocallyDelta0Pred P) {x : V} (h : P x
 
 end induction
 
-section comprehension
-
 variable [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {P : V → Prop}
 
 /-- Comprehension for a locally $\Delta_0$ predicate on `{0, …, a - 1}`. -/
@@ -477,6 +476,5 @@ theorem LocallyDelta0Pred.finite_comprehension! (hP : LocallyDelta0Pred P)
       fun h ↦ (Hs i (hm i h)).mpr h⟩
   exact ExistsUnique.intro s H fun s' H' ↦ mem_ext fun i ↦ by simp [H, H']
 
-end comprehension
-
-end FFL.FirstOrder.Arithmetic.ElementaryArithmetic
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

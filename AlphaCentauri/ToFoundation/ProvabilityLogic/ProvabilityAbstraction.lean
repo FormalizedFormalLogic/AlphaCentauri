@@ -8,7 +8,8 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 
 @[expose] public section
 
-namespace FFL.FirstOrder.ProvabilityAbstraction
+namespace FFL.FirstOrder
+namespace ProvabilityAbstraction
 
 open FFL.Entailment Diagonalization Provability
 
@@ -33,4 +34,5 @@ theorem formalized_not_con_unrefutable : T₀ ⊢ 𝔅.con 🡒 ∼𝔅 (∼𝔅
   have h₁ : T₀ ⊢ 𝔅 (∼𝔅.con 🡒 ⊥) 🡒 𝔅 𝔅.con := mono' <| by cl_prover
   exact C_trans (formalized_con_unprovable 𝔅) (contra h₁)
 
-end FFL.FirstOrder.ProvabilityAbstraction
+end ProvabilityAbstraction
+end FFL.FirstOrder

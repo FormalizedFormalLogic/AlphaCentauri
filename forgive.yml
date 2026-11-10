@@ -28,9 +28,6 @@ accept:
 
 declaration:
   # The unproved statements themselves.
-  FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
@@ -65,12 +62,12 @@ declaration:
   FFL.FirstOrder.not_provable_irrationalSqrtTwo_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.Arithmetic.IOpen_strictlyWeakerThan_IOpen_bezout:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
   HahnSeries.isRealClosed_lex:
     forgive:
       - HahnSeries.isRealClosed_lex
-  IsRealClosed.exists_mem_Ioo_isRoot:
-    forgive:
-      - IsRealClosed.exists_mem_Ioo_isRoot
   FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen
@@ -80,6 +77,9 @@ declaration:
   OpenPredicate.openInduction_iff_integerPart:
     forgive:
       - OpenPredicate.openInduction_iff_integerPart
+  FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_imp_provabilityFormula_of_sigma1:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_imp_provabilityFormula_of_sigma1
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:
@@ -100,12 +100,18 @@ declaration:
   HahnSeries.factorialIntegerPartSubring.induction:
     forgive:
       - HahnSeries.isRealClosed_lex
-      - IsRealClosed.exists_mem_Ioo_isRoot
   HahnSeries.factorialIntegerPartSubring.models:
     forgive:
       - HahnSeries.isRealClosed_lex
-      - IsRealClosed.exists_mem_Ioo_isRoot
   FFL.FirstOrder.Arithmetic.IOpen.not_finiteAxiomatizable:
     forgive:
       - HahnSeries.isRealClosed_lex
-      - IsRealClosed.exists_mem_Ioo_isRoot
+  FFL.FirstOrder.Arithmetic.Bootstrapping.pi1Conservative_dia:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_imp_provabilityFormula_of_sigma1
+  FFL.FirstOrder.ArithmeticTheory.instPi1ConservativityIL:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_imp_provabilityFormula_of_sigma1
+  FFL.InterpretabilityLogic.Logic.ILM.arithmetical_soundness_pi1Conservativity:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_imp_provabilityFormula_of_sigma1

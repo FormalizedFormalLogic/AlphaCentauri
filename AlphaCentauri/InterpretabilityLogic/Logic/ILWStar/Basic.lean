@@ -63,13 +63,25 @@ instance : (𝐈𝐋𝐖* : Logic α) ≊ 𝐈𝐋𝐌₀𝐖 := equiv_iff.mpr <
 
 end Logic
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILWStar : Prop extends M.IsILMZeroW
+
+instance (v : α → Prop) : (pointModel v).IsILWStar := {}
+
+instance (priority := low) [M.IsIL] [M.HasM₀] [M.HasW] : M.IsILWStar := {}
+
+end Veltman.Model
+
 namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILWStar.sound [M.IsIL] [M.HasM₀] [M.HasW] (h : 𝐈𝐋𝐖* ⊢ A) : M ⊧ A :=
+theorem ILWStar.sound [M.IsILWStar] (h : 𝐈𝐋𝐖* ⊢ A) : M ⊧ A :=
   ILM₀W.sound <| (equiv_iff.mp inferInstance : (𝐈𝐋𝐖* : Logic α) = 𝐈𝐋𝐌₀𝐖).subset h
 
 instance : Consistent (𝐈𝐋𝐖* : Logic α) :=
@@ -77,50 +89,31 @@ instance : Consistent (𝐈𝐋𝐖* : Logic α) :=
 
 end Logic
 
-section
-
-open Entailment Formula Logic Logic.ofAxioms MaximalConsistentTheory
-
-namespace Logic.ILWStar
-
-open Veltman Veltman.StepByStep
-
-variable {α : Type*} {A : Formula α}
-
-/-- - [GJ08, Theorem 7.1] -/
-theorem complete
-    (h : ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasW] → [M.HasM₀] → M ⊧ A) :
-    𝐈𝐋𝐖* ⊢ A := by
-  classical
-  by_contra hA;
-  obtain ⟨Γ₀, hΓ₀⟩ := exists_not_forces (ε := fun A ↦ {□(∼A)}) axiomM₀
-    (fun h hAB hA ↦ h.exists_of_rhd_mem_of_axiomW axiomW hAB hA) hA;
-  have hτ := enumJob_mem (bot_mem_jobFormulas (A := A));
-  have := model_isIL (Γ₀ := Γ₀) (ε := fun A ↦ {□(∼A)}) hτ;
-  have := model_hasW (Γ₀ := Γ₀) (ε := fun A ↦ {□(∼A)}) hτ fun _ ↦ Set.mem_singleton _;
-  exact hΓ₀ (h _ 0)
-
-end Logic.ILWStar
-
-end
-
 namespace Logic
+
+open Veltman Veltman.StepByStep MaximalConsistentTheory
 
 variable {α : Type*} {A : Formula α}
 
 /-- - [GJ08, Theorem 7.1] -/
 theorem ILWStar.iff_valid :
     𝐈𝐋𝐖* ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasW] → [M.HasM₀] → M ⊧ A := by
+      [M.IsILWStar] → M ⊧ A := by
   constructor;
   · intro h _ _ M;
     intros;
     exact ILWStar.sound h;
-  · exact ILWStar.complete;
+  · intro h;
+    classical
+    by_contra hA;
+    obtain ⟨Γ₀, hΓ₀⟩ := exists_not_forces (ε := fun A ↦ {□(∼A)}) axiomM₀
+      (fun h hAB hA ↦ h.exists_of_rhd_mem_of_axiomW axiomW hAB hA) hA;
+    have hτ := enumJob_mem (bot_mem_jobFormulas (A := A));
+    have := model_isIL (Γ₀ := Γ₀) (ε := fun A ↦ {□(∼A)}) hτ;
+    have := model_hasW (Γ₀ := Γ₀) (ε := fun A ↦ {□(∼A)}) hτ fun _ ↦ Set.mem_singleton _;
+    exact hΓ₀ (h _ 0)
 
 end Logic
 
 end FFL.InterpretabilityLogic
 
-end

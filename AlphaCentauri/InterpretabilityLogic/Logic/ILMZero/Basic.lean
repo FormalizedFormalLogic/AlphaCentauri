@@ -33,13 +33,25 @@ variable {A B C : Formula α}
 
 end Logic
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILMZero : Prop extends M.IsIL, M.HasM₀
+
+instance (v : α → Prop) : (pointModel v).IsILMZero := {}
+
+instance (priority := low) [M.IsIL] [M.HasM₀] : M.IsILMZero := {}
+
+end Veltman.Model
+
 namespace Logic
 
 open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILM₀.sound [M.IsIL] [M.HasM₀] (h : 𝐈𝐋𝐌₀ ⊢ A) : M ⊧ A :=
+theorem ILM₀.sound [M.IsILMZero] (h : 𝐈𝐋𝐌₀ ⊢ A) : M ⊧ A :=
   ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM₀) h
 
 instance : Consistent (𝐈𝐋𝐌₀ : Logic α) :=
@@ -47,45 +59,28 @@ instance : Consistent (𝐈𝐋𝐌₀ : Logic α) :=
 
 end Logic
 
-section
-
-open Entailment Formula Logic Logic.ofAxioms MaximalConsistentTheory
-
-namespace Logic.ILM₀
-
-open Veltman Veltman.StepByStep
-
-variable {α : Type*} {A : Formula α}
-
-/-- - [GJ08, Theorem 6.1] -/
-theorem complete
-    (h : ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsIL] → [M.HasM₀] → M ⊧ A) :
-    𝐈𝐋𝐌₀ ⊢ A := by
-  classical
-  by_contra hA;
-  obtain ⟨Γ₀, hΓ₀⟩ := exists_not_forces (ε := fun _ ↦ ∅) axiomM₀
-    (fun h hAB hA ↦ by simpa using h.exists_of_rhd_mem hAB hA) hA;
-  have := model_isIL (Γ₀ := Γ₀) (ε := fun _ ↦ ∅)
-    (enumJob_mem (bot_mem_jobFormulas (A := A)));
-  exact hΓ₀ (h _ 0)
-
-end Logic.ILM₀
-
-end
-
 namespace Logic
+
+open Veltman Veltman.StepByStep MaximalConsistentTheory
 
 variable {α : Type*} {A : Formula α}
 
 /-- - [GJ08, Theorem 6.1] -/
 theorem ILM₀.iff_valid :
     𝐈𝐋𝐌₀ ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasM₀] → M ⊧ A := by
+      [M.IsILMZero] → M ⊧ A := by
   constructor;
   · intro h _ _ M;
     intros;
     exact ILM₀.sound h;
-  · exact ILM₀.complete;
+  · intro h;
+    classical
+    by_contra hA;
+    obtain ⟨Γ₀, hΓ₀⟩ := exists_not_forces (ε := fun _ ↦ ∅) axiomM₀
+      (fun h hAB hA ↦ by simpa using h.exists_of_rhd_mem hAB hA) hA;
+    have := model_isIL (Γ₀ := Γ₀) (ε := fun _ ↦ ∅)
+      (enumJob_mem (bot_mem_jobFormulas (A := A)));
+    exact hΓ₀ (h _ 0)
 
 end Logic
 
@@ -112,4 +107,3 @@ end Logic
 
 end FFL.InterpretabilityLogic
 
-end

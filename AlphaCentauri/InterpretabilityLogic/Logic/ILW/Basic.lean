@@ -53,25 +53,15 @@ instance : (𝐈𝐋𝐊𝐖𝟐 : Logic α) ⪯ 𝐈𝐋𝐖 :=
 
 end Logic
 
-namespace Logic
+namespace Veltman.Model
 
-open Veltman Veltman.Model Veltman.Model.World
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
+class IsILW : Prop extends M.IsIL, M.HasW
 
-theorem ILW.sound [M.IsIL] [M.HasW] (h : 𝐈𝐋𝐖 ⊢ A) : M ⊧ A :=
-  ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomW) h
+instance (v : α → Prop) : (pointModel v).IsILW := {}
 
-theorem ILKW2.sound [M.IsIL] [M.HasW] (h : 𝐈𝐋𝐊𝐖𝟐 ⊢ A) : M ⊧ A :=
-  ILW.sound <| weakerThan_iff.mp inferInstance h
-
-instance : Consistent (𝐈𝐋𝐖 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILW.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Consistent (𝐈𝐋𝐊𝐖𝟐 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILKW2.sound (M := pointModel fun _ ↦ False) h 0
-
-end Logic
+end Veltman.Model
 
 section
 
@@ -540,6 +530,8 @@ instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).HasW := HasW.of_finite <| 
     simp only [List.length_append, List.length_singleton] at h₁;
     omega;
 
+instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).IsILW := {}
+
 variable [Adequate Φ] (hW : ∀ {A B : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.W A B)
 include hW
 
@@ -659,42 +651,60 @@ lemma not_models_rankedCountermodel [Entailment.Consistent (ofAxioms 𝔸)]
 
 end Logic.ofAxioms
 
-namespace Logic.ILW
-
-open Veltman
-
-variable {α : Type} {A : Formula α}
-
-/-- - [dJV99, Theorem 13] -/
-theorem complete
-    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasW] → M ⊧ A) :
-    𝐈𝐋𝐖 ⊢ A := by
-  classical
-  by_contra hA;
-  exact Logic.ofAxioms.not_models_rankedCountermodel (fun {_ _} ↦ ILW.axiomW) hA <|
-    h (rankedCountermodel _ (adequateClosure {A}))
-
-end Logic.ILW
-
 end
 
 namespace Logic
 
+open Veltman Veltman.Model Veltman.Model.World
+
 variable {α : Type} {A : Formula α}
 
 /-- - [dJV99, Theorem 13] -/
+theorem ILW.semantics_TFAE : [
+    𝐈𝐋𝐖 ⊢ A,
+    ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsILW] → M ⊧ A,
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsILW] → M ⊧ A
+  ].TFAE := by
+  tfae_have 1 → 2 := by
+    intro h _ _ M _;
+    exact ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomW) h;
+  tfae_have 2 → 3 := by
+    intro h _ _ _ M _;
+    exact h M;
+  tfae_have 3 → 1 := by
+    intro h;
+    classical
+    by_contra hA;
+    have : Entailment.Consistent (𝐈𝐋𝐖 : Logic α) := .of_unprovable hA;
+    exact Logic.ofAxioms.not_models_rankedCountermodel (fun {_ _} ↦ ILW.axiomW) hA <|
+      h (Veltman.rankedCountermodel _ (adequateClosure {A}));
+  tfae_finish;
+
+theorem ILW.iff_valid :
+    𝐈𝐋𝐖 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsILW] → M ⊧ A :=
+  ILW.semantics_TFAE.out 1 2
+
+theorem ILW.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α} [M.IsILW] (h : 𝐈𝐋𝐖 ⊢ A) :
+    M ⊧ A :=
+  ILW.iff_valid.mp h M
+
+theorem ILKW2.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α} [M.IsILKW2] (h : 𝐈𝐋𝐊𝐖𝟐 ⊢ A) :
+    M ⊧ A :=
+  have : M.IsILW := {}
+  ILW.sound <| weakerThan_iff.mp inferInstance h
+
+instance : Consistent (𝐈𝐋𝐖 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ ILW.sound (M := pointModel fun _ ↦ False) h 0
+
+instance : Consistent (𝐈𝐋𝐊𝐖𝟐 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ ILKW2.sound (M := pointModel fun _ ↦ False) h 0
+
+/-- - [dJV99, Theorem 13] -/
 theorem ILW.iff_valid_finite :
-    𝐈𝐋𝐖 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasW] → M ⊧ A := by
-  constructor;
-  · intro h _ _ _ M;
-    intros;
-    exact ILW.sound h;
-  · exact ILW.complete;
+    𝐈𝐋𝐖 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsILW] → M ⊧ A :=
+  ILW.semantics_TFAE.out 1 3
 
 end Logic
 
 end FFL.InterpretabilityLogic
 
-end

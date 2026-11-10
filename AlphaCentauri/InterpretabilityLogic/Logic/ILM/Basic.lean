@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILRW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 
@@ -51,23 +52,15 @@ lemma ILM.axiomR : 𝐈𝐋𝐌 ⊢ Axioms.R A B C := by
 
 end Logic
 
-namespace Logic
+namespace Veltman.Model
 
-section
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
 
-open Veltman Veltman.Model Veltman.Model.World
+class IsILM : Prop extends M.IsIL, M.HasM
 
-variable {κ : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
+instance (v : α → Prop) : (pointModel v).IsILM := {}
 
-theorem ILM.sound [M.IsIL] [M.HasM] (h : 𝐈𝐋𝐌 ⊢ A) : M ⊧ A :=
-  ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM) h
-
-instance : Consistent (𝐈𝐋𝐌 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILM.sound (M := pointModel fun _ ↦ False) h 0
-
-end
-
-end Logic
+end Veltman.Model
 
 section
 
@@ -555,7 +548,7 @@ lemma CriticalSuccessor.exists_criticalSuccessor_box_subset (hE : IsRhdOperand �
       change Δ.literals *⊢[𝐈𝐋𝐌] ⊥;
       change Δ.literals *⊢[𝐈𝐋𝐌] B ⋏ P 🡒 B' ⋎ ∼□(∼B') at h₁₈;
       cl_prover [h₁₅, h₁₆, h₁₇, h₁₈];
-  obtain ⟨Θ, hΘ⟩ := exists_consistent_union (Φ := Φ) hY;
+  obtain ⟨Θ, hΘ⟩ := MaximalConsistentSet.exists_consistent_union (Φ := Φ) hY;
   have hm {A} (hA : A ∈ Φ) (h : Y *⊢[𝐈𝐋𝐌] A) : A ∈ Θ := mem_of_provable hΘ hA h;
   have hPY : Y *⊢[𝐈𝐋𝐌] P := Context.by_axm <| by simp [Y];
   have hb {D} (hD : □D ∈ Δ) : □D ∈ Θ := hm (mem_of_mem hD) <| Context.of (hP hD) ⨀ hPY;
@@ -635,6 +628,8 @@ instance : (countermodelM Φ).HasM where
     exact ⟨⟨fun h ↦ h₂.1.mem_of_box_mem (h₁.2.2 h), fun h ↦ h₂.1.box_mem_of_box_mem (h₁.2.2 h),
       A, hA, fun h ↦ hA' (h₁.2.2 h)⟩, h₁.2.1.trans h₂.2⟩
 
+instance [Adequate Φ] : (countermodelM Φ).IsILM := {}
+
 variable [MAdequate Φ]
 
 /-- - [dJV90, Theorem 6.3] -/
@@ -699,50 +694,62 @@ end countermodelM
 
 end Veltman
 
-/-! ### Completeness -/
-
-namespace Logic.ILM
-
-open Veltman Veltman.Model.World MaximalConsistentSet
-
-variable {α : Type} {A : Formula α}
-
-/-- - [dJV90, Theorem 6.3] -/
-theorem complete (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] →
-    [M.HasM] → M ⊧ A) : 𝐈𝐋𝐌 ⊢ A := by
-  classical
-  by_contra hA;
-  have : Entailment.Consistent (𝐈𝐋𝐌 : Logic α) := .of_unprovable hA;
-  let Φ := mAdequateClosure (adequateClosure {A});
-  have hX : ({∼A} : FormulaSet α) *⊬[𝐈𝐋𝐌] ⊥ := by
-    intro h₁;
-    apply hA;
-    have h₂ : 𝐈𝐋𝐌 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
-    cl_prover [h₂];
-  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := Φ) hX;
-  have hAΦ : A ∈ Φ := mAdequateClosure.subset <| adequateClosure.subset (by simp);
-  exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
-    (countermodelM.truthlemma hAΦ).mp <| h (countermodelM Φ) ⟨Γ, [], by simp, by simp⟩
-
-end Logic.ILM
-
 end
+
+/-! ### Completeness -/
 
 namespace Logic
 
 section
 
+open Veltman Veltman.Model Veltman.Model.World
+
 variable {α : Type} {A : Formula α}
 
 /-- - [dJV90, Theorem 6.3] -/
+theorem ILM.semantics_TFAE : [
+    𝐈𝐋𝐌 ⊢ A,
+    ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsILM] → M ⊧ A,
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsILM] → M ⊧ A
+  ].TFAE := by
+  tfae_have 1 → 2 := by
+    intro h _ _ M _;
+    exact ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM) h;
+  tfae_have 2 → 3 := by
+    intro h _ _ _ M _;
+    exact h M;
+  tfae_have 3 → 1 := by
+    intro h;
+    classical
+    by_contra hA;
+    have : Entailment.Consistent (𝐈𝐋𝐌 : Logic α) := .of_unprovable hA;
+    let Φ := mAdequateClosure (adequateClosure {A});
+    have hX : ({∼A} : FormulaSet α) *⊬[𝐈𝐋𝐌] ⊥ := by
+      intro h₁;
+      apply hA;
+      have h₂ : 𝐈𝐋𝐌 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+      cl_prover [h₂];
+    obtain ⟨Γ, hΓ⟩ := MaximalConsistentSet.exists_consistent_union (Φ := Φ) hX;
+    have hAΦ : A ∈ Φ := mAdequateClosure.subset <| adequateClosure.subset (by simp);
+    exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+      (countermodelM.truthlemma hAΦ).mp <| h (countermodelM Φ) ⟨Γ, [], by simp, by simp⟩;
+  tfae_finish;
+
+theorem ILM.iff_valid :
+    𝐈𝐋𝐌 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsILM] → M ⊧ A :=
+  ILM.semantics_TFAE.out 1 2
+
+theorem ILM.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α} [M.IsILM] (h : 𝐈𝐋𝐌 ⊢ A) :
+    M ⊧ A :=
+  ILM.iff_valid.mp h M
+
+instance : Consistent (𝐈𝐋𝐌 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ ILM.sound (M := pointModel fun _ ↦ False) h 0
+
+/-- - [dJV90, Theorem 6.3] -/
 theorem ILM.iff_valid_finite :
-    𝐈𝐋𝐌 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasM] → M ⊧ A := by
-  constructor;
-  · intro h _ _ _ M;
-    intros;
-    exact ILM.sound h;
-  · exact ILM.complete;
+    𝐈𝐋𝐌 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsILM] → M ⊧ A :=
+  ILM.semantics_TFAE.out 1 3
 
 end
 
@@ -751,7 +758,9 @@ end Logic
 namespace Logic
 
 open scoped Veltman
-open Veltman.Model Veltman.Model.World
+open Entailment Veltman.Model Veltman.Model.World ofAxioms
+
+variable {α : Type*}
 
 private abbrev countermodelM : Veltman.Model (Fin 4) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 2 ∧ y = 3
@@ -771,8 +780,25 @@ private instance : countermodelM.IsIL where
 private instance : countermodelM.HasR := ⟨by decide⟩
 private instance : countermodelM.HasW := HasW.of_finite (by decide)
 
+instance : (𝐈𝐋𝐑𝐖 : Logic α) ⪯ 𝐈𝐋𝐌 := weakerThan_iff.mpr <| subset_of_provable <| by
+  rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩)
+  · exact ILM.axiomR
+  · exact ILM.axiomW
+
+instance : (𝐈𝐋𝐑𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐌 :=
+  .of_unprovable_provable (φ := Axioms.M (#0) (#1) (#2)) (fun h ↦ by
+    have H := ILRW.sound (M := countermodelM) h 0;
+    have h₁ : (0 : countermodelM.World) ⊩[countermodelM] #0 ▷ #1 := by
+      intro v _ hv;
+      obtain rfl : v = 1 := hv;
+      exact ⟨2, by decide, rfl⟩;
+    obtain ⟨t, _, ht⟩ := H h₁ 1 (by decide) (forces_and.mpr ⟨rfl, fun y hy ↦
+      ((by decide : ∀ y, ¬countermodelM.Rel 1 y) y hy).elim⟩);
+    obtain ⟨htz, ht⟩ := forces_and.mp ht;
+    obtain rfl : t = 2 := htz;
+    exact ht 3 (by decide)) ILM.axiomM
+
 end Logic
 
 end FFL.InterpretabilityLogic
 
-end

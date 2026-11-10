@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 
 /-!
 # The logic $\mathbf{ILKW2}$
@@ -20,6 +21,16 @@ variable {α : Type*}
 abbrev Logic.ILKW2 : Logic α := Logic.ofAxioms {Axioms.KW2 A B | (A) (B)}
 
 notation "𝐈𝐋𝐊𝐖𝟐" => Logic.ILKW2
+
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILKW2 : Prop extends M.IsIL, M.HasW
+
+instance (v : α → Prop) : (pointModel v).IsILKW2 := {}
+
+end Veltman.Model
 
 namespace Logic
 
@@ -42,4 +53,3 @@ end Logic
 
 end FFL.InterpretabilityLogic
 
-end

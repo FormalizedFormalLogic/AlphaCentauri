@@ -59,21 +59,19 @@ instance : (𝐈𝐋𝐑𝐖 : Logic α) ⪯ 𝐈𝐋𝐏 := weakerThan_iff.mpr 
 
 end Logic
 
-end FFL.InterpretabilityLogic
+namespace Veltman.Model
 
-namespace FFL.InterpretabilityLogic
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILP : Prop extends M.IsIL, M.HasP
+
+instance (v : α → Prop) : (pointModel v).IsILP := {}
+
+end Veltman.Model
 
 namespace Logic
 
 open Entailment Veltman Veltman.Model Veltman.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
-
-theorem ILP.sound [M.IsIL] [M.HasP] (h : 𝐈𝐋𝐏 ⊢ A) : M ⊧ A :=
-  ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomP) h
-
-instance : Consistent (𝐈𝐋𝐏 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILP.sound (M := pointModel fun _ ↦ False) h 0
 
 private abbrev countermodelP : Model (Fin 4) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 1 ∧ y = 2
@@ -105,10 +103,6 @@ instance : (𝐈𝐋𝐑𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐏 :=
     exact absurd hSt (by decide)) ILP.axiomP
 
 end Logic
-
-end FFL.InterpretabilityLogic
-
-namespace FFL.InterpretabilityLogic
 
 open Entailment Formula MaximalConsistentSet
 
@@ -311,6 +305,8 @@ instance [Adequate Φ] : (treeCountermodel L Φ).IsIL where
 
 instance : (treeCountermodel L Φ).HasP := ⟨fun _ h₁ h₂ ↦ ⟨h₁, h₂.2⟩⟩
 
+instance [Adequate Φ] : (treeCountermodel L Φ).IsILP := {}
+
 variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (Logic.ofAxioms 𝔸) Φ)] [ILPAdequate Φ]
 
 /-- - [dJV90, Theorem 5.2] -/
@@ -382,53 +378,59 @@ end Veltman
 
 /-! ### Completeness -/
 
-namespace Logic.ILP
+namespace Logic
 
-open Veltman Veltman.Model.World
+open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model.World
 
 variable {α : Type} {A : Formula α}
 
 /-- - [dJV90, Theorem 5.2] -/
-theorem complete
-    (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → [M.HasP] →
-      M ⊧ A) :
-    𝐈𝐋𝐏 ⊢ A := by
-  classical
-  by_contra hA;
-  let Φ := boxClosure (adequateClosure {A});
-  have hX : ({∼A} : FormulaSet α) *⊬[𝐈𝐋𝐏] ⊥ := by
-    intro h₁;
-    apply hA;
-    have h₂ : 𝐈𝐋𝐏 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
-    cl_prover [h₂];
-  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := Φ) hX;
-  have hAΦ : A ∈ Φ := boxClosure.subset <| adequateClosure.subset (by simp);
-  exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
-    (treeCountermodel.truthlemma axiomP hAΦ).mp <|
-      h (treeCountermodel _ Φ) ⟨⟨Γ, [], by simp, by simp⟩, [], .singleton _⟩
+theorem ILP.semantics_TFAE : [
+    𝐈𝐋𝐏 ⊢ A,
+    ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsILP] → M ⊧ A,
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsILP] → M ⊧ A
+  ].TFAE := by
+  tfae_have 1 → 2 := by
+    intro h _ _ M _;
+    exact ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomP) h;
+  tfae_have 2 → 3 := by
+    intro h _ _ _ M _;
+    exact h M;
+  tfae_have 3 → 1 := by
+    intro h;
+    classical
+    by_contra hA;
+    have : Entailment.Consistent (𝐈𝐋𝐏 : Logic α) := .of_unprovable hA;
+    let Φ := boxClosure (adequateClosure {A});
+    have hX : ({∼A} : FormulaSet α) *⊬[𝐈𝐋𝐏] ⊥ := by
+      intro h₁;
+      apply hA;
+      have h₂ : 𝐈𝐋𝐏 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+      cl_prover [h₂];
+    obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := Φ) hX;
+    have hAΦ : A ∈ Φ := boxClosure.subset <| adequateClosure.subset (by simp);
+    exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+      (treeCountermodel.truthlemma axiomP hAΦ).mp <|
+        h (treeCountermodel _ Φ) ⟨⟨Γ, [], by simp, by simp⟩, [], .singleton _⟩;
+  tfae_finish;
 
-end Logic.ILP
+theorem ILP.iff_valid :
+    𝐈𝐋𝐏 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsILP] → M ⊧ A :=
+  ILP.semantics_TFAE.out 1 2
 
-end FFL.InterpretabilityLogic
+theorem ILP.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α} [M.IsILP] (h : 𝐈𝐋𝐏 ⊢ A) :
+    M ⊧ A :=
+  ILP.iff_valid.mp h M
 
-namespace FFL.InterpretabilityLogic
-
-namespace Logic
-
-variable {α : Type} {A : Formula α}
+instance : Consistent (𝐈𝐋𝐏 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ ILP.sound (M := pointModel fun _ ↦ False) h 0
 
 /-- - [dJV90, Theorem 5.2] -/
 theorem ILP.iff_valid_finite :
-    𝐈𝐋𝐏 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsIL] → [M.HasP] → M ⊧ A := by
-  constructor;
-  · intro h _ _ _ M;
-    intros;
-    exact ILP.sound h;
-  · exact ILP.complete;
+    𝐈𝐋𝐏 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsILP] → M ⊧ A :=
+  ILP.semantics_TFAE.out 1 3
 
 end Logic
 
 end FFL.InterpretabilityLogic
 
-end

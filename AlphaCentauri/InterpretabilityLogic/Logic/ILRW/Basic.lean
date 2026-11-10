@@ -1,6 +1,5 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILM.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZeroW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
@@ -48,12 +47,19 @@ instance : (𝐈𝐋𝐌₀𝐖 : Logic α) ⪯ 𝐈𝐋𝐑𝐖 := weakerThan_i
   · exact subset_of_subset Set.subset_union_left ILR.axiomM₀
   · exact ILRW.axiomW
 
-instance : (𝐈𝐋𝐑𝐖 : Logic α) ⪯ 𝐈𝐋𝐌 := weakerThan_iff.mpr <| subset_of_provable <| by
-  rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩)
-  · exact ILM.axiomR
-  · exact ILM.axiomW
-
 end Logic
+
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILRW : Prop extends M.IsIL, M.HasR, M.HasW
+
+instance (v : α → Prop) : (pointModel v).IsILRW := {}
+
+instance (priority := low) [M.IsIL] [M.HasR] [M.HasW] : M.IsILRW := {}
+
+end Veltman.Model
 
 namespace Logic
 
@@ -61,7 +67,7 @@ open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILRW.sound [M.IsIL] [M.HasR] [M.HasW] (h : 𝐈𝐋𝐑𝐖 ⊢ A) : M ⊧ A := by
+theorem ILRW.sound [M.IsILRW] (h : 𝐈𝐋𝐑𝐖 ⊢ A) : M ⊧ A := by
   apply ofAxioms.sound _ h;
   rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩) x;
   · exact forces_axiomR;
@@ -112,24 +118,6 @@ private instance : countermodelR.IsIL where
 private instance : countermodelR.HasM₀ := ⟨by decide⟩
 private instance : countermodelR.HasW := HasW.of_finite (by decide)
 
-private abbrev countermodelM : Model (Fin 4) ℕ where
-  Rel' x y := x = 0 ∧ 0 < y ∨ x = 2 ∧ y = 3
-  S' w x y := w = 0 ∧ 1 ≤ x ∧ x ≤ y ∨ w = 2 ∧ x = 3 ∧ y = 3
-  Val' t a := match a with | 0 => t = 1 | 1 => t = 2 | _ => False
-
-private instance : IsTrans _ countermodelM.Rel := ⟨by decide⟩
-private instance : Std.Irrefl countermodelM.Rel := ⟨by decide⟩
-
-private instance : countermodelM.IsIL where
-  rel_of_s_left := by decide
-  rel_of_s_right := by decide
-  s_refl := by decide
-  s_trans := by decide
-  s_of_rel := by decide
-
-private instance : countermodelM.HasR := ⟨by decide⟩
-private instance : countermodelM.HasW := HasW.of_finite (by decide)
-
 instance : (𝐈𝐋𝐑 : Logic ℕ) ⪱ 𝐈𝐋𝐑𝐖 :=
   .of_unprovable_provable (φ := Axioms.W (#0) (#1)) (fun h ↦ by
     have H := ILR.sound (M := countermodelRW) h 0;
@@ -158,35 +146,31 @@ instance : (𝐈𝐋𝐌₀𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐑𝐖 :=
     obtain rfl : t = 3 := htz;
     exact (show (4 : Fin 5) ≠ 2 by decide) (ht 4 (by decide))) ILRW.axiomR
 
-instance : (𝐈𝐋𝐑𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐌 :=
-  .of_unprovable_provable (φ := Axioms.M (#0) (#1) (#2)) (fun h ↦ by
-    have H := ILRW.sound (M := countermodelM) h 0;
-    have h₁ : (0 : countermodelM.World) ⊩[countermodelM] #0 ▷ #1 := by
-      intro v _ hv;
-      obtain rfl : v = 1 := hv;
-      exact ⟨2, by decide, rfl⟩;
-    obtain ⟨t, _, ht⟩ := H h₁ 1 (by decide) (forces_and.mpr ⟨rfl, fun y hy ↦
-      ((by decide : ∀ y, ¬countermodelM.Rel 1 y) y hy).elim⟩);
-    obtain ⟨htz, ht⟩ := forces_and.mp ht;
-    obtain rfl : t = 2 := htz;
-    exact ht 3 (by decide)) ILM.axiomM
-
 end Logic
+
+namespace Verbrugge.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILRW : Prop extends M.IsIL, M.HasR, M.HasW
+
+instance (priority := low) [M.IsIL] [M.HasR] [M.HasW] : M.IsILRW := {}
+
+end Verbrugge.Model
 
 /-- $\mathbf{ILRW}$ is complete with respect to Veltman frames. An open problem.
 - [JMMV20, §6.5] -/
 def ILRWVeltmanCompletenessProblem : Prop :=
   ∀ A : Formula ℕ,
-    (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsIL] [M.HasR] [M.HasW], M ⊧ A) →
+    (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsILRW], M ⊧ A) →
       𝐈𝐋𝐑𝐖 ⊢ A
 
 /-- $\mathbf{ILRW}$ is complete with respect to generalised Veltman frames. An open problem.
 - [JMMV20, §6.5] -/
 def ILRWVerbruggeCompletenessProblem : Prop :=
   ∀ A : Formula ℕ,
-    (∀ (κ : Type) [Nonempty κ] (M : Verbrugge.Model κ ℕ) [M.IsIL] [M.HasR] [M.HasW], M ⊧ A) →
+    (∀ (κ : Type) [Nonempty κ] (M : Verbrugge.Model κ ℕ) [M.IsILRW], M ⊧ A) →
       𝐈𝐋𝐑𝐖 ⊢ A
 
 end FFL.InterpretabilityLogic
 
-end

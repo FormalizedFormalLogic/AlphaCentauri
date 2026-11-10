@@ -1,8 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentTheory
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILPZero.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 
 /-!
@@ -291,28 +290,6 @@ lemma not_models_verbrugge_countermodel [Nonempty (CountermodelWorld 𝔸 A)] (h
       hM ⟨Γ, ∼A, neg_mem_markers_of_mem mem_subformulas_self, hΓ, hΓ'⟩
 
 end Logic.ofAxioms
-
-variable {α : Type} {A : Formula α}
-
-/-- - [MV20, Theorem 23] -/
-theorem Logic.ILP₀.complete_verbrugge
-    (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsIL] → [M.HasP₀] → M ⊧ A) :
-    𝐈𝐋𝐏₀ ⊢ A := by
-  classical
-  by_contra hA;
-  have := Logic.ofAxioms.nonempty_countermodelWorld hA;
-  have := Verbrugge.countermodel.hasP₀ (A₀ := A) fun {_ _} ↦ Logic.ILP₀.axiomP₀;
-  exact Logic.ofAxioms.not_models_verbrugge_countermodel hA (h _)
-
-/-- - [MV20, Theorem 25] -/
-theorem Logic.ILR.complete_verbrugge
-    (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsIL] → [M.HasR] → M ⊧ A) :
-    𝐈𝐋𝐑 ⊢ A := by
-  classical
-  by_contra hA;
-  have := Logic.ofAxioms.nonempty_countermodelWorld hA;
-  have := Verbrugge.countermodel.hasR (A₀ := A) fun {_ _ _} ↦ Logic.ILR.axiomR;
-  exact Logic.ofAxioms.not_models_verbrugge_countermodel hA (h _)
 
 end FFL.InterpretabilityLogic
 

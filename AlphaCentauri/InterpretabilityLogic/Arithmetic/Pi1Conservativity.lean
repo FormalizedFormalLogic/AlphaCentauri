@@ -6,16 +6,14 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Pro
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
-public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
 
 /-!
-# Arithmetical soundness of $\mathbf{ILM}$ via $\Pi_1$-conservativity
+# $\Pi_1$-conservativity as an interpretability abstraction
 
 Reading `φ ▷ ψ` as "every prenex $\Pi_1$ sentence provable in $T + \psi$ is provable in
 $T + \varphi$" satisfies the arithmetical forms of $\mathbf{J1}$–$\mathbf{J5}$ together with the
-arithmetical form of $\mathbf{M}$ over $\mathsf{I}\Sigma_1$ once $T$ contains $\mathsf{I}\Sigma_1$,
-so every theorem of $\mathbf{ILM}$ is provable in $T$ under every realization.
+arithmetical form of $\mathbf{M}$ over $\mathsf{I}\Sigma_1$ once $T$ contains $\mathsf{I}\Sigma_1$.
 
 ## References
 
@@ -200,18 +198,5 @@ instance instPi1ConservativityM [𝗜𝚺₁ ⪯ T] : T.pi1Conservativity.M wher
 
 end FFL.FirstOrder.ArithmeticTheory
 
-namespace FFL.InterpretabilityLogic
-
-open FirstOrder Arithmetic
-
-variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
-  {f : ProvabilityLogic.Realization α ℒₒᵣ} {A : Formula α}
-
-/-- - [HM90, Definition 3.1] -/
-theorem Logic.ILM.arithmetical_soundness_pi1Conservativity (h : 𝐈𝐋𝐌 ⊢ A) :
-    T ⊢ A.interpret f T.standardProvability T.pi1Conservativity :=
-  Entailment.WeakerThan.pbl <| Logic.ILM.arithmetical_soundness h
-
-end FFL.InterpretabilityLogic
 
 end

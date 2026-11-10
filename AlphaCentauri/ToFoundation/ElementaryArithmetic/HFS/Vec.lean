@@ -169,7 +169,7 @@ lemma phi_definable : 𝚺ᴬ₀.Definable fun w : Fin 2 → V ↦ Phi {x | x �
   HierarchySymbol.Definable.of_iff (by definability) fun w ↦ phi_iff (w 1) (w 0)
 
 /-- The construction of the graph of `nth`. -/
-def adjointruction : Fixpoint.Construction V Arithmetic.Nth.blueprint where
+def construction : Fixpoint.Construction V Arithmetic.Nth.blueprint where
   Φ := fun _ ↦ Phi
   defined := .of_zero <| .mk fun v ↦ by simp [phi_iff]
   monotone := by
@@ -178,7 +178,7 @@ def adjointruction : Fixpoint.Construction V Arithmetic.Nth.blueprint where
     · right; exact ⟨v, i, x, rfl, hC h⟩
   Φ_locallyDelta0 := LocallyDelta0.of_definable phi_definable
 
-instance : adjointruction.StrongFinite V where
+instance : construction.StrongFinite V where
   strong_finite := by
     rintro C v x (h | ⟨v, i, x, rfl, h⟩)
     · exact Or.inl h
@@ -186,18 +186,18 @@ instance : adjointruction.StrongFinite V where
         (pair_lt_pair_right _ (pair_lt_pair_left (by simp) _))⟩
 
 /-- `Graph ⟪v, i, x⟫` states that `v.[i] = x`. -/
-def Graph : V → Prop := adjointruction.Fixpoint ![]
+def Graph : V → Prop := construction.Fixpoint ![]
 
 instance graph_defined : 𝚺ᴬ₁-Predicate (Graph : V → Prop) via Arithmetic.Nth.graphDef :=
-  adjointruction.fixpoint_defined
+  construction.fixpoint_defined
 
 lemma graph_case {pr : V} :
     Graph pr ↔
     (∃ v, pr = ⟪v, 0, fstIdx v⟫) ∨ (∃ v i x, pr = ⟪v, i + 1, x⟫ ∧ Graph ⟪sndIdx v, i, x⟫) :=
-  adjointruction.case
+  construction.case
 
 lemma graph_locallyDelta0 : LocallyDelta0 fun w : Fin 3 → V ↦ Graph ⟪w 0, w 1, w 2⟫ := by
-  have := adjointruction.fixpoint_locallyDelta0.comp_cons (u := Fin.elim0)
+  have := construction.fixpoint_locallyDelta0.comp_cons (u := Fin.elim0)
     (LocallyDelta0Function.pairing.comp₂ (LocallyDelta0Function.var (V := V) (0 : Fin 3))
       (LocallyDelta0Function.pairing.comp₂ (LocallyDelta0Function.var (V := V) (1 : Fin 3))
         (LocallyDelta0Function.var (V := V) (2 : Fin 3)))) (fun j ↦ j.elim0)
@@ -429,7 +429,7 @@ lemma phi_locallyDelta0 :
   exact (hnil.or hex).of_iff fun w ↦ by simpa using c.phi_iff (w ·.succ.succ) (w 1) (w 0)
 
 /-- The construction of the graph of the recursion. -/
-def adjointruction : Fixpoint.Construction V β.blueprint where
+def construction : Fixpoint.Construction V β.blueprint where
   Φ := c.Phi
   defined := .mk ⟨by
     intro v; simp [Arithmetic.VecRec.Blueprint.blueprint, c.nil_defined.iff,
@@ -447,10 +447,10 @@ def adjointruction : Fixpoint.Construction V β.blueprint where
 variable (param : Fin arity → V)
 
 /-- `c.Graph param ⟪xs, y⟫` states that the recursion takes the value `y` at `xs`. -/
-def Graph : V → Prop := c.adjointruction.Fixpoint param
+def Graph : V → Prop := c.construction.Fixpoint param
 
 lemma graph_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.graphDef :=
-  c.adjointruction.fixpoint_defined
+  c.construction.fixpoint_defined
 
 variable {param}
 
@@ -511,40 +511,40 @@ lemma result_locallyDelta0 :
   c.courseOfValues.result_locallyDelta0
 
 private lemma limSeq_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
-    LocallyDelta0Function fun w : Fin n → V ↦ c.adjointruction.limSeq param (f w) := by
-  simpa using c.adjointruction.limSeq_locallyDelta0.comp_cons hf fun j ↦
+    LocallyDelta0Function fun w : Fin n → V ↦ c.construction.limSeq param (f w) := by
+  simpa using c.construction.limSeq_locallyDelta0.comp_cons hf fun j ↦
     LocallyDelta0Function.const (param j)
 
 private lemma result_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
     LocallyDelta0Function fun w : Fin n → V ↦ c.result param (f w) := by
   simpa using c.result_locallyDelta0.comp_cons hf fun j ↦ LocallyDelta0Function.const (param j)
 
-lemma eq_of_mem_limSeq {s z : V} (h : z ∈ c.adjointruction.limSeq param s) :
+lemma eq_of_mem_limSeq {s z : V} (h : z ∈ c.construction.limSeq param s) :
     z = ⟪π₁ z, c.result param (π₁ z)⟫ := by
   have hR : LocallyDelta0 fun y : Fin 2 → V ↦
-      y 0 ∈ c.adjointruction.limSeq param (y 1) →
+      y 0 ∈ c.construction.limSeq param (y 1) →
         y 0 = ⟪π₁ (y 0), c.result param (π₁ (y 0))⟫ := by
     exact (LocallyDelta0.mem (LocallyDelta0Function.var (0 : Fin 2))
       (c.limSeq_comp param (LocallyDelta0Function.var 1))).imp <|
       LocallyDelta0.eq (LocallyDelta0Function.var 0) <| LocallyDelta0Function.pairing.comp₂
         (LocallyDelta0Function.pi₁.comp₁ (LocallyDelta0Function.var 0))
         (c.result_comp param <| LocallyDelta0Function.pi₁.comp₁ (LocallyDelta0Function.var 0))
-  have hP : LocallyDelta0Pred fun s ↦ ∀ z < c.adjointruction.limSeq param s,
-      z ∈ c.adjointruction.limSeq param s → z = ⟪π₁ z, c.result param (π₁ z)⟫ :=
+  have hP : LocallyDelta0Pred fun s ↦ ∀ z < c.construction.limSeq param s,
+      z ∈ c.construction.limSeq param s → z = ⟪π₁ z, c.result param (π₁ z)⟫ :=
     (LocallyDelta0.ball_lt_function
       (c.limSeq_comp param (LocallyDelta0Function.var (V := V) (0 : Fin 1))) hR).of_iff
         fun w ↦ by simp
-  have : ∀ s, ∀ z < c.adjointruction.limSeq param s,
-      z ∈ c.adjointruction.limSeq param s → z = ⟪π₁ z, c.result param (π₁ z)⟫ := by
+  have : ∀ s, ∀ z < c.construction.limSeq param s,
+      z ∈ c.construction.limSeq param s → z = ⟪π₁ z, c.result param (π₁ z)⟫ := by
     apply LocallyDelta0Pred.succ_induction hP
     · intro z _ hz
       simp at hz
     · intro s ih z _ hz
-      have hΦ : c.Phi param {z | z ∈ c.adjointruction.limSeq param s} z :=
-        (c.adjointruction.mem_limSeq_succ_iff.mp hz).2
+      have hΦ : c.Phi param {z | z ∈ c.construction.limSeq param s} z :=
+        (c.construction.mem_limSeq_succ_iff.mp hz).2
       rcases hΦ with (rfl | ⟨x, xs, y, rfl, hC⟩)
       · simp
-      · have hC : ⟪xs, y⟫ ∈ c.adjointruction.limSeq param s := hC
+      · have hC : ⟪xs, y⟫ ∈ c.construction.limSeq param s := hC
         have := ih _ (lt_of_mem hC) hC
         have hy : y = c.result param xs := by simpa using congrArg (fun p ↦ π₂ p) this
         simp [hy]
@@ -552,10 +552,10 @@ lemma eq_of_mem_limSeq {s z : V} (h : z ∈ c.adjointruction.limSeq param s) :
 
 lemma mem_limSeq_result (xs : V) :
     ⟪xs, c.result param xs⟫ ∈
-      c.adjointruction.limSeq param (⟪xs, c.bound param xs⟫ + xs + 1) := by
+      c.construction.limSeq param (⟪xs, c.bound param xs⟫ + xs + 1) := by
   set K := ⟪xs, c.bound param xs⟫
   have hP : LocallyDelta0Pred fun ys ↦
-      ys ≤ xs → ⟪ys, c.result param ys⟫ ∈ c.adjointruction.limSeq param (K + ys + 1) := by
+      ys ≤ xs → ⟪ys, c.result param ys⟫ ∈ c.construction.limSeq param (K + ys + 1) := by
     exact (LocallyDelta0.le (LocallyDelta0Function.var (0 : Fin 1))
       (LocallyDelta0Function.const xs)).imp <|
       LocallyDelta0.mem (LocallyDelta0Function.pairing.comp₂ (LocallyDelta0Function.var 0)
@@ -564,12 +564,12 @@ lemma mem_limSeq_result (xs : V) :
           LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const K)
             (LocallyDelta0Function.var 0))
   have : ∀ ys, ys ≤ xs →
-      ⟪ys, c.result param ys⟫ ∈ c.adjointruction.limSeq param (K + ys + 1) := by
+      ⟪ys, c.result param ys⟫ ∈ c.construction.limSeq param (K + ys + 1) := by
     apply LocallyDelta0Pred.order_induction hP
     intro ys ih hys
     have hle : ⟪ys, c.result param ys⟫ ≤ K :=
       pair_le_pair hys (le_trans (c.result_le_bound param ys) (c.bound_monotone param hys))
-    apply c.adjointruction.mem_limSeq_succ_iff.mpr
+    apply c.construction.mem_limSeq_succ_iff.mpr
     apply And.intro (le_trans hle le_self_add)
     change c.Phi param _ _
     rcases nil_or_adjoin ys with (rfl | ⟨x, ys', rfl⟩)
@@ -579,7 +579,7 @@ lemma mem_limSeq_result (xs : V) :
       constructor
       · simp
       · have hys' : ys' < x ∷ ys' := by simp
-        exact c.adjointruction.limSeq_cumulative
+        exact c.construction.limSeq_cumulative
           (by rw [add_assoc]; exact add_le_add_right (succ_le_iff_lt.mpr hys') K)
           (ih ys' hys' (le_trans hys'.le hys))
   exact this xs le_rfl
@@ -644,7 +644,7 @@ end VecRec
 
 namespace Len
 
-noncomputable def adjointruction : VecRec.Construction V Arithmetic.Len.blueprint where
+noncomputable def construction : VecRec.Construction V Arithmetic.Len.blueprint where
   nil _ := 0
   adjoin _ _ _ ih := ih + 1
   nil_defined := .mk fun v ↦ by simp [Arithmetic.Len.blueprint]
@@ -662,21 +662,21 @@ end Len
 section len
 
 /-- The length of the list `v`. -/
-noncomputable def len (v : V) : V := Len.adjointruction.result ![] v
+noncomputable def len (v : V) : V := Len.construction.result ![] v
 
-@[simp] lemma len_nil : len (0 : V) = 0 := by simp [len, Len.adjointruction]
+@[simp] lemma len_nil : len (0 : V) = 0 := by simp [len, Len.construction]
 
-@[simp] lemma len_adjoin (x v : V) : len (x ∷ v) = len v + 1 := by simp [len, Len.adjointruction]
+@[simp] lemma len_adjoin (x v : V) : len (x ∷ v) = len v + 1 := by simp [len, Len.construction]
 
 instance len_defined : 𝚺ᴬ₁-Function₁ (len : V → V) via lenDef :=
-  Len.adjointruction.result_defined
+  Len.construction.result_defined
 
 instance len_definable : 𝚺ᴬ₁-Function₁ (len : V → V) := len_defined.to_definable
 
 instance len_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (len : V → V) := len_definable.of_sigmaOne
 
 lemma len_locallyDelta0 : LocallyDelta0Function₁ (len : V → V) := by
-  convert Len.adjointruction.result_locallyDelta0 (V := V) using 3
+  convert Len.construction.result_locallyDelta0 (V := V) using 3
   simp [len, Matrix.empty_eq]
 
 @[simp] lemma len_zero_iff_eq_nil {v : V} : len v = 0 ↔ v = 0 := by
@@ -868,7 +868,7 @@ lemma LocallyDelta0Function.max : LocallyDelta0Function₂ (Max.max : V → V �
 
 namespace ListMax
 
-noncomputable def adjointruction : VecRec.Construction V Arithmetic.ListMax.blueprint where
+noncomputable def construction : VecRec.Construction V Arithmetic.ListMax.blueprint where
   nil _ := 0
   adjoin _ x _ ih := max x ih
   nil_defined := .mk fun v ↦ by simp [Arithmetic.ListMax.blueprint]
@@ -887,15 +887,15 @@ end ListMax
 section listMax
 
 /-- The maximum of the elements of the list `v`. -/
-noncomputable def listMax (v : V) : V := ListMax.adjointruction.result ![] v
+noncomputable def listMax (v : V) : V := ListMax.construction.result ![] v
 
-@[simp] lemma listMax_nil : listMax (0 : V) = 0 := by simp [listMax, ListMax.adjointruction]
+@[simp] lemma listMax_nil : listMax (0 : V) = 0 := by simp [listMax, ListMax.construction]
 
 @[simp] lemma listMax_adjoin (x v : V) : listMax (x ∷ v) = max x (listMax v) := by
-  simp [listMax, ListMax.adjointruction]
+  simp [listMax, ListMax.construction]
 
 instance listMax_defined : 𝚺ᴬ₁-Function₁ (listMax : V → V) via listMaxDef :=
-  ListMax.adjointruction.result_defined
+  ListMax.construction.result_defined
 
 instance listMax_definable : 𝚺ᴬ₁-Function₁ (listMax : V → V) := listMax_defined.to_definable
 
@@ -903,7 +903,7 @@ instance listMax_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (listMax : V → 
   listMax_definable.of_sigmaOne
 
 lemma listMax_locallyDelta0 : LocallyDelta0Function₁ (listMax : V → V) := by
-  convert ListMax.adjointruction.result_locallyDelta0 (V := V) using 3
+  convert ListMax.construction.result_locallyDelta0 (V := V) using 3
   simp [listMax, Matrix.empty_eq]
 
 lemma nth_le_listMax {i v : V} (h : i < len v) : v.[i] ≤ listMax v := by
@@ -956,7 +956,7 @@ end listMax
 namespace TakeLast
 
 open Classical in
-noncomputable def adjointruction : VecRec.Construction V Arithmetic.TakeLast.blueprint where
+noncomputable def construction : VecRec.Construction V Arithmetic.TakeLast.blueprint where
   nil _ := 0
   adjoin param x xs ih := if len xs < param 0 then x ∷ xs else ih
   nil_defined := .mk fun v ↦ by simp [Arithmetic.TakeLast.blueprint]
@@ -988,18 +988,18 @@ end TakeLast
 section takeLast
 
 /-- The last `k` elements of the list `v`. -/
-noncomputable def takeLast (v k : V) : V := TakeLast.adjointruction.result ![k] v
+noncomputable def takeLast (v k : V) : V := TakeLast.construction.result ![k] v
 
 @[simp] lemma takeLast_nil (k : V) : takeLast (0 : V) k = 0 := by
-  simp [takeLast, TakeLast.adjointruction]
+  simp [takeLast, TakeLast.construction]
 
 open Classical in
 lemma takeLast_adjoin (x v k : V) :
     takeLast (x ∷ v) k = if len v < k then x ∷ v else takeLast v k := by
-  simp [takeLast, TakeLast.adjointruction]
+  simp [takeLast, TakeLast.construction]
 
 instance takeLast_defined : 𝚺ᴬ₁-Function₂ (takeLast : V → V → V) via takeLastDef :=
-  TakeLast.adjointruction.result_defined
+  TakeLast.construction.result_defined
 
 instance takeLast_definable : 𝚺ᴬ₁-Function₂ (takeLast : V → V → V) := takeLast_defined.to_definable
 
@@ -1007,7 +1007,7 @@ instance takeLast_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (takeLast : V �
   takeLast_definable.of_sigmaOne
 
 lemma takeLast_locallyDelta0 : LocallyDelta0Function₂ (takeLast : V → V → V) := by
-  convert TakeLast.adjointruction.result_locallyDelta0 (V := V) using 3
+  convert TakeLast.construction.result_locallyDelta0 (V := V) using 3
   simp [takeLast]
   rfl
 
@@ -1082,7 +1082,7 @@ end takeLast
 
 namespace Concat
 
-noncomputable def adjointruction : VecRec.Construction V Arithmetic.Concat.blueprint where
+noncomputable def construction : VecRec.Construction V Arithmetic.Concat.blueprint where
   nil param := ?[param 0]
   adjoin _ x _ ih := x ∷ ih
   nil_defined := .mk fun v ↦ by simp [Arithmetic.Concat.blueprint]
@@ -1124,16 +1124,16 @@ end Concat
 section concat
 
 /-- The list `v` followed by `z`. -/
-noncomputable def concat (v z : V) : V := Concat.adjointruction.result ![z] v
+noncomputable def concat (v z : V) : V := Concat.construction.result ![z] v
 
 @[simp] lemma concat_nil (z : V) : concat 0 z = ?[z] := by
-  simp [concat, Concat.adjointruction]
+  simp [concat, Concat.construction]
 
 @[simp] lemma concat_adjoin (x v z : V) : concat (x ∷ v) z = x ∷ concat v z := by
-  simp [concat, Concat.adjointruction]
+  simp [concat, Concat.construction]
 
 instance concat_defined : 𝚺ᴬ₁-Function₂ (concat : V → V → V) via concatDef :=
-  Concat.adjointruction.result_defined
+  Concat.construction.result_defined
 
 instance concat_definable : 𝚺ᴬ₁-Function₂ (concat : V → V → V) := concat_defined.to_definable
 
@@ -1141,7 +1141,7 @@ instance concat_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (concat : V → V 
   concat_definable.of_sigmaOne
 
 lemma concat_locallyDelta0 : LocallyDelta0Function₂ (concat : V → V → V) := by
-  convert Concat.adjointruction.result_locallyDelta0 (V := V) using 3
+  convert Concat.construction.result_locallyDelta0 (V := V) using 3
   simp [concat]
   rfl
 
@@ -1268,7 +1268,7 @@ end vecSubset
 
 section repeatVec
 
-noncomputable def repeatVec.adjointruction :
+noncomputable def repeatVec.construction :
     PR.Construction V Arithmetic.repeatVec.blueprint where
   zero := fun _ ↦ 0
   succ := fun p _ ih ↦ p 0 ∷ ih
@@ -1297,16 +1297,16 @@ noncomputable def repeatVec.adjointruction :
         (LocallyDelta0Function.const 3)
 
 /-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0` -/
-noncomputable def repeatVec (x k : V) : V := repeatVec.adjointruction.result ![x] k
+noncomputable def repeatVec (x k : V) : V := repeatVec.construction.result ![x] k
 
 @[simp] lemma repeatVec_zero (x : V) : repeatVec x 0 = 0 := by
-  simp [repeatVec, repeatVec.adjointruction]
+  simp [repeatVec, repeatVec.construction]
 
 @[simp] lemma repeatVec_succ (x k : V) : repeatVec x (k + 1) = x ∷ repeatVec x k := by
-  simp [repeatVec, repeatVec.adjointruction]
+  simp [repeatVec, repeatVec.construction]
 
 instance repeatVec_defined : 𝚺ᴬ₁-Function₂ (repeatVec : V → V → V) via repeatVecDef := .mk
-  fun v ↦ by simp [repeatVec.adjointruction.result_defined_iff, repeatVecDef]; rfl
+  fun v ↦ by simp [repeatVec.construction.result_defined_iff, repeatVecDef]; rfl
 
 instance repeatVec_definable : 𝚺ᴬ₁-Function₂ (repeatVec : V → V → V) :=
   repeatVec_defined.to_definable
@@ -1315,7 +1315,7 @@ instance repeatVec_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (repeatVec : V 
   repeatVec_definable.of_sigmaOne
 
 lemma repeatVec_locallyDelta0 : LocallyDelta0Function₂ (repeatVec : V → V → V) := by
-  have := (repeatVec.adjointruction (V := V)).result_locallyDelta0.retraction
+  have := (repeatVec.construction (V := V)).result_locallyDelta0.retraction
     (![1, 0] : Fin 2 → Fin 2)
   convert this using 3
   simp [repeatVec]
@@ -1362,7 +1362,7 @@ end repeatVec
 
 namespace VecToSet
 
-noncomputable def adjointruction : VecRec.Construction V Arithmetic.VecToSet.blueprint where
+noncomputable def construction : VecRec.Construction V Arithmetic.VecToSet.blueprint where
   nil _ := ∅
   adjoin _ x _ ih := insert x ih
   nil_defined := .mk fun v ↦ by simp [Arithmetic.VecToSet.blueprint, emptyset_def]
@@ -1388,15 +1388,15 @@ end VecToSet
 section vecToSet
 
 /-- The set of the elements of the list `v`. -/
-noncomputable def vecToSet (v : V) : V := VecToSet.adjointruction.result ![] v
+noncomputable def vecToSet (v : V) : V := VecToSet.construction.result ![] v
 
-@[simp] lemma vecToSet_nil : vecToSet (0 : V) = ∅ := by simp [vecToSet, VecToSet.adjointruction]
+@[simp] lemma vecToSet_nil : vecToSet (0 : V) = ∅ := by simp [vecToSet, VecToSet.construction]
 
 @[simp] lemma vecToSet_adjoin (x v : V) :
-    vecToSet (x ∷ v) = insert x (vecToSet v) := by simp [vecToSet, VecToSet.adjointruction]
+    vecToSet (x ∷ v) = insert x (vecToSet v) := by simp [vecToSet, VecToSet.construction]
 
 instance vecToSet_defined : 𝚺ᴬ₁-Function₁ (vecToSet : V → V) via vecToSetDef :=
-  VecToSet.adjointruction.result_defined
+  VecToSet.construction.result_defined
 
 instance vecToSet_definable : 𝚺ᴬ₁-Function₁ (vecToSet : V → V) := vecToSet_defined.to_definable
 
@@ -1404,7 +1404,7 @@ instance vecToSet_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (vecToSet : V �
   vecToSet_definable.of_sigmaOne
 
 lemma vecToSet_locallyDelta0 : LocallyDelta0Function₁ (vecToSet : V → V) := by
-  convert VecToSet.adjointruction.result_locallyDelta0 (V := V) using 3
+  convert VecToSet.construction.result_locallyDelta0 (V := V) using 3
   simp [vecToSet, Matrix.empty_eq]
 
 lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i] := by

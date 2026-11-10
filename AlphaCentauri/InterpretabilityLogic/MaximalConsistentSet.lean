@@ -149,70 +149,72 @@ end adequateClosure
 /-! ### Maximal consistent sets -/
 
 /-- A subset `Γ` of `Φ` such that `Γ`, together with the negations of the formulas in `Φ` outside
-`Γ`, is consistent in `ofAxioms 𝔸`. -/
-structure MaximalConsistentSet (𝔸 : Set (Formula α)) (Φ : Finset (Formula α)) where
+`Γ`, is consistent in `L`. -/
+structure MaximalConsistentSet (L : Logic α) (Φ : Finset (Formula α)) where
   set : Finset (Formula α)
   subset : set ⊆ Φ
-  consistent : (↑set ∪ (∼·) '' ↑(Φ \ set)) *⊬[Logic.ofAxioms 𝔸] ⊥
+  consistent : (↑set ∪ (∼·) '' ↑(Φ \ set)) *⊬[L] ⊥
 
 namespace MaximalConsistentSet
 
-open Logic.ofAxioms
+open Logic
 
-variable {𝔸 : Set (Formula α)} {Φ : Finset (Formula α)} {X : Set (Formula α)}
+variable {L : Logic α} {Φ : Finset (Formula α)} {X : Set (Formula α)}
   {A B C D E F : Formula α}
 
 section
 
-variable {Γ : MaximalConsistentSet 𝔸 Φ}
+variable {Γ : MaximalConsistentSet L Φ}
 
-instance : Membership (Formula α) (MaximalConsistentSet 𝔸 Φ) := ⟨fun Γ A ↦ A ∈ Γ.set⟩
+instance : Membership (Formula α) (MaximalConsistentSet L Φ) := ⟨fun Γ A ↦ A ∈ Γ.set⟩
 
 lemma mem_def : A ∈ Γ ↔ A ∈ Γ.set := Iff.rfl
 
 instance : DecidablePred (· ∈ Γ) := fun A ↦ inferInstanceAs (Decidable (A ∈ Γ.set))
 
-lemma ext {Γ Δ : MaximalConsistentSet 𝔸 Φ} (h : Γ.set = Δ.set) : Γ = Δ := by
+lemma ext {Γ Δ : MaximalConsistentSet L Φ} (h : Γ.set = Δ.set) : Γ = Δ := by
   cases Γ; cases Δ; simp_all;
 
-instance : Finite (MaximalConsistentSet 𝔸 Φ) :=
+instance : Finite (MaximalConsistentSet L Φ) :=
   Finite.of_injective (β := Φ.powerset) (fun Γ ↦ ⟨Γ.set, Finset.mem_powerset.mpr Γ.subset⟩)
     fun _ _ h ↦ ext <| by simpa using h
 
 lemma mem_of_mem (h : A ∈ Γ) : A ∈ Φ := Γ.subset h
 
 /-- The formulas of `Γ` together with the negations of the formulas in `Φ` outside `Γ`. -/
-def literals (Γ : MaximalConsistentSet 𝔸 Φ) : Set (Formula α) := ↑Γ.set ∪ (∼·) '' ↑(Φ \ Γ.set)
+def literals (Γ : MaximalConsistentSet L Φ) : Set (Formula α) := ↑Γ.set ∪ (∼·) '' ↑(Φ \ Γ.set)
 
 lemma mem_literals (h : A ∈ Γ) : A ∈ Γ.literals := .inl h
 
 lemma neg_mem_literals (hA : A ∈ Φ) (h : A ∉ Γ) : ∼A ∈ Γ.literals :=
   .inr ⟨A, by simpa using ⟨hA, h⟩, rfl⟩
 
-lemma consistent_literals : Γ.literals *⊬[Logic.ofAxioms 𝔸] ⊥ := Γ.consistent
+lemma consistent_literals : Γ.literals *⊬[L] ⊥ := Γ.consistent
 
-lemma mem_of_provable (hX : (X ∪ Γ.literals) *⊬[Logic.ofAxioms 𝔸] ⊥) (hA : A ∈ Φ)
-    (h : X *⊢[Logic.ofAxioms 𝔸] A) : A ∈ Γ := by
+variable [Entailment.Cl L]
+
+lemma mem_of_provable (hX : (X ∪ Γ.literals) *⊬[L] ⊥) (hA : A ∈ Φ)
+    (h : X *⊢[L] A) : A ∈ Γ := by
   by_contra hn;
   apply hX;
-  have h₁ : (X ∪ Γ.literals) *⊢[Logic.ofAxioms 𝔸] A := Context.weakening Set.subset_union_left h;
-  have h₂ : (X ∪ Γ.literals) *⊢[Logic.ofAxioms 𝔸] ∼A :=
+  have h₁ : (X ∪ Γ.literals) *⊢[L] A := Context.weakening Set.subset_union_left h;
+  have h₂ : (X ∪ Γ.literals) *⊢[L] ∼A :=
     Context.by_axm <| .inr <| neg_mem_literals hA hn;
   cl_prover [h₁, h₂];
 
-lemma not_mem_of_provable_neg (hX : (X ∪ Γ.literals) *⊬[Logic.ofAxioms 𝔸] ⊥)
-    (h : X *⊢[Logic.ofAxioms 𝔸] ∼A) : A ∉ Γ := by
+lemma not_mem_of_provable_neg (hX : (X ∪ Γ.literals) *⊬[L] ⊥)
+    (h : X *⊢[L] ∼A) : A ∉ Γ := by
   intro hm;
   apply hX;
-  have h₁ : (X ∪ Γ.literals) *⊢[Logic.ofAxioms 𝔸] ∼A := Context.weakening Set.subset_union_left h;
-  have h₂ : (X ∪ Γ.literals) *⊢[Logic.ofAxioms 𝔸] A := Context.by_axm <| .inr <| mem_literals hm;
+  have h₁ : (X ∪ Γ.literals) *⊢[L] ∼A := Context.weakening Set.subset_union_left h;
+  have h₂ : (X ∪ Γ.literals) *⊢[L] A := Context.by_axm <| .inr <| mem_literals hm;
   cl_prover [h₁, h₂];
 
-lemma mem_iff_provable (hA : A ∈ Φ) : A ∈ Γ ↔ Γ.literals *⊢[Logic.ofAxioms 𝔸] A :=
+lemma mem_iff_provable (hA : A ∈ Φ) : A ∈ Γ ↔ Γ.literals *⊢[L] A :=
   ⟨fun h ↦ Context.by_axm <| mem_literals h,
     mem_of_provable (by simpa using consistent_literals) hA⟩
 
-lemma provable_neg_of_not_mem (hA : A ∈ Φ) (h : A ∉ Γ) : Γ.literals *⊢[Logic.ofAxioms 𝔸] ∼A :=
+lemma provable_neg_of_not_mem (hA : A ∈ Φ) (h : A ∉ Γ) : Γ.literals *⊢[L] ∼A :=
   Context.by_axm <| neg_mem_literals hA h
 
 lemma bot_not_mem : ⊥ ∉ Γ := fun h ↦ consistent_literals <| Context.by_axm <| mem_literals h
@@ -235,20 +237,20 @@ lemma not_mem_of_neg_mem (h : ∼A ∈ Γ) : A ∉ Γ := fun h₁ ↦
 
 /-! ### Lindenbaum's lemma -/
 
-private lemma exists_consistent_aux (h : X *⊬[Logic.ofAxioms 𝔸] ⊥) (S : Finset (Formula α)) :
-    ∃ T ⊆ S, (X ∪ ↑T ∪ (∼·) '' ↑(S \ T)) *⊬[Logic.ofAxioms 𝔸] ⊥ := by
+private lemma exists_consistent_aux (h : X *⊬[L] ⊥) (S : Finset (Formula α)) :
+    ∃ T ⊆ S, (X ∪ ↑T ∪ (∼·) '' ↑(S \ T)) *⊬[L] ⊥ := by
   induction S using Finset.induction_on with
   | empty => exact ⟨∅, by simpa using h⟩;
   | @insert a S ha ih =>
     obtain ⟨T, hT, hY⟩ := ih;
-    by_cases h₁ : insert a (X ∪ ↑T ∪ (∼·) '' ↑(S \ T)) *⊢[Logic.ofAxioms 𝔸] ⊥;
+    by_cases h₁ : insert a (X ∪ ↑T ∪ (∼·) '' ↑(S \ T)) *⊢[L] ⊥;
     · use T;
       and_intros;
       · exact hT.trans (Finset.subset_insert _ _);
       · intro h₂;
         apply hY;
-        have h₃ : (X ∪ ↑T ∪ (∼·) '' ↑(S \ T)) *⊢[Logic.ofAxioms 𝔸] ∼a := Context.deduct h₁;
-        have h₄ : (X ∪ ↑T ∪ (∼·) '' ↑(S \ T)) *⊢[Logic.ofAxioms 𝔸] ∼∼a := by
+        have h₃ : (X ∪ ↑T ∪ (∼·) '' ↑(S \ T)) *⊢[L] ∼a := Context.deduct h₁;
+        have h₄ : (X ∪ ↑T ∪ (∼·) '' ↑(S \ T)) *⊢[L] ∼∼a := by
           apply Context.deduct;
           apply Context.weakening _ h₂;
           intro φ;
@@ -269,10 +271,10 @@ private lemma exists_consistent_aux (h : X *⊬[Logic.ofAxioms 𝔸] ⊥) (S : F
         grind;
 
 /-- Every consistent set is consistent with some maximal consistent subset of `Φ`. -/
-lemma exists_consistent_union (h : X *⊬[Logic.ofAxioms 𝔸] ⊥) :
-    ∃ Γ : MaximalConsistentSet 𝔸 Φ, (X ∪ Γ.literals) *⊬[Logic.ofAxioms 𝔸] ⊥ := by
+lemma exists_consistent_union (h : X *⊬[L] ⊥) :
+    ∃ Γ : MaximalConsistentSet L Φ, (X ∪ Γ.literals) *⊬[L] ⊥ := by
   obtain ⟨T, hT, hY⟩ := exists_consistent_aux h Φ;
-  have hc : (↑T ∪ (∼·) '' ↑(Φ \ T)) *⊬[Logic.ofAxioms 𝔸] ⊥ := by
+  have hc : (↑T ∪ (∼·) '' ↑(Φ \ T)) *⊬[L] ⊥ := by
     intro h₁;
     apply hY <| Context.weakening _ h₁;
     intro φ;
@@ -286,16 +288,16 @@ end
 /-! ### Successors -/
 
 /-- - [dJV90, Definition 3.2] -/
-structure Successor (Γ Δ : MaximalConsistentSet 𝔸 Φ) : Prop where
+structure Successor (Γ Δ : MaximalConsistentSet L Φ) : Prop where
   mem_of_box_mem : ∀ {A}, □A ∈ Γ → A ∈ Δ
   box_mem_of_box_mem : ∀ {A}, □A ∈ Γ → □A ∈ Δ
   exists_box : ∃ A, □A ∈ Δ ∧ □A ∉ Γ
 
 /-- The formulas `A` with `□A ∈ Γ`. -/
-noncomputable def prebox (Γ : MaximalConsistentSet 𝔸 Φ) : Finset (Formula α) :=
+noncomputable def prebox (Γ : MaximalConsistentSet L Φ) : Finset (Formula α) :=
   Γ.set.preimage (□·) fun _ _ _ _ h ↦ box_inj.mp h
 
-variable {Γ Δ Θ : MaximalConsistentSet 𝔸 Φ}
+variable {Γ Δ Θ : MaximalConsistentSet L Φ}
 
 @[simp] lemma mem_prebox : A ∈ Γ.prebox ↔ □A ∈ Γ := Finset.mem_preimage
 
@@ -317,49 +319,61 @@ lemma prebox_ssubset (h : Successor Γ Δ) : Γ.prebox ⊂ Δ.prebox := by
     simpa using h.box_mem_of_box_mem (mem_prebox.mp hB);
   exact (Finset.ssubset_iff_of_subset h₁).mpr ⟨A, by simpa, by simpa⟩;
 
-lemma not_mem_of_box_neg_mem (h : Successor Γ Δ) (hA : □(∼A) ∈ Γ) : A ∉ Δ :=
+lemma not_mem_of_box_neg_mem [Entailment.Cl L] (h : Successor Γ Δ) (hA : □(∼A) ∈ Γ) : A ∉ Δ :=
   not_mem_of_neg_mem <| h.mem_of_box_mem hA
 
 end Successor
 
-/-- - [dJV90, Lemma 3.3] -/
-lemma exists_successor_of_box_not_mem [Adequate Φ] (h₁ : □A ∈ Φ) (h₂ : □A ∉ Γ) :
-    ∃ Δ, Successor Γ Δ ∧ A ∉ Δ := by
+variable [Entailment.Cl L]
+
+/-- If `□A ∈ Φ` is not in `Γ`, then `Γ` has a successor consistent with `∼A`.
+
+- [dJV90, Lemma 3.3]
+- [KO21, Lemma 4.6]
+-/
+lemma exists_successor_of_box_not_mem [L.ExtendsGL] [Adequate Φ] (h₁ : □A ∈ Φ) (h₂ : □A ∉ Γ) :
+    ∃ Δ, Successor Γ Δ ∧ ({∼A} ∪ Δ.literals) *⊬[L] ⊥ := by
   let X : Set (Formula α) := insert (∼A) <| insert (□A) <| {B | □B ∈ Γ} ∪ (□·) '' {B | □B ∈ Γ};
-  have hX : X *⊬[Logic.ofAxioms 𝔸] ⊥ := by
+  have hX : X *⊬[L] ⊥ := by
     intro h;
     apply h₂ <| (mem_iff_provable h₁).mpr _;
-    have h₃ : ({B | □B ∈ Γ} ∪ (□·) '' {B | □B ∈ Γ}) *⊢[Logic.ofAxioms 𝔸] □A 🡒 A := by
+    have h₃ : ({B | □B ∈ Γ} ∪ (□·) '' {B | □B ∈ Γ}) *⊢[L] □A 🡒 A := by
       have := Context.deduct <| Context.deduct h;
       cl_prover [this];
-    have h₄ : Γ.literals *⊢[Logic.ofAxioms 𝔸] □(□A 🡒 A) := by
+    have h₄ : Γ.literals *⊢[L] □(□A 🡒 A) := by
       apply Context.weakening _ (box_of_provable h₃);
       rintro _ ⟨B, hB, rfl⟩;
       exact mem_literals hB;
-    exact Context.of axiomL ⨀ h₄;
+    exact Context.of ExtendsGL.axiomL ⨀ h₄;
   obtain ⟨Δ, hΔ⟩ := exists_consistent_union (Φ := Φ) hX;
   have hm {B} (hB : B ∈ Φ) (h : B ∈ X) : B ∈ Δ := mem_of_provable hΔ hB <| Context.by_axm h;
   use Δ;
   and_intros;
   · exact ⟨fun h ↦ hm (Adequate.box (mem_of_mem h)) (by simp [X, h]),
       fun h ↦ hm (mem_of_mem h) (by simp [X, h]), A, hm h₁ (by simp [X]), h₂⟩;
-  · exact not_mem_of_provable_neg hΔ (Context.by_axm <| by simp [X]);
+  · intro h;
+    apply hΔ <| Context.weakening _ h;
+    intro B;
+    simp only [Set.mem_union, Set.mem_singleton_iff];
+    rintro (rfl | hB);
+    · exact .inl <| Set.mem_insert _ _;
+    · exact .inr hB;
 
 /-- `Δ` is a `C`-critical successor of `Γ`.
 
 - [dJV90, Definition 3.5]
 -/
-structure CriticalSuccessor (C : Formula α) (Γ Δ : MaximalConsistentSet 𝔸 Φ) : Prop
+structure CriticalSuccessor (C : Formula α) (Γ Δ : MaximalConsistentSet L Φ) : Prop
     extends Successor Γ Δ where
   not_mem : ∀ {A}, A ▷ C ∈ Γ → A ∉ Δ
   box_neg_mem : ∀ {A}, A ▷ C ∈ Γ → □(∼A) ∈ Δ
 
 /-- - [KO21, Lemma 4.4] -/
-lemma Successor.criticalSuccessor_bot [Adequate Φ] (h : Successor Γ Δ) :
-    CriticalSuccessor ⊥ Γ Δ := by
+lemma Successor.criticalSuccessor_bot [Adequate Φ] (hL : ∀ {A}, L ⊢ A ▷ ⊥ 🡒 □(∼A))
+    (h : Successor Γ Δ) : CriticalSuccessor ⊥ Γ Δ := by
   have hb {A} (hA : A ▷ ⊥ ∈ Γ) : □(∼A) ∈ Γ :=
     (mem_iff_provable <| Adequate.box_neg_mem <| .of_rhd_left (mem_of_mem hA)).mpr <|
-      Context.of rhd_bot ⨀ Context.by_axm (mem_literals hA);
+      Context.of hL ⨀ Context.by_axm (mem_literals hA);
   exact ⟨h, fun hA ↦ h.not_mem_of_box_neg_mem (hb hA), fun hA ↦ h.box_mem_of_box_mem (hb hA)⟩
 
 /-- - [KO21, Lemma 4.5] -/
@@ -371,47 +385,54 @@ lemma CriticalSuccessor.trans_successor (h₁ : CriticalSuccessor C Γ Δ) (h₂
 /-! ### Existence of critical successors -/
 
 /-- The disjunction of the formulas `A` in `Φ` with `A ▷ F ∈ Γ`. -/
-noncomputable def rhdDisj (Γ : MaximalConsistentSet 𝔸 Φ) (F : Formula α) : Formula α :=
+noncomputable def rhdDisj (Γ : MaximalConsistentSet L Φ) (F : Formula α) : Formula α :=
   (Φ.filter (· ▷ F ∈ Γ)).disj
 
 /-- The formulas `B` and `□B` with `□B ∈ Γ`, together with `C`, `□∼C`, `∼H` and `□∼H`, where `H` is
 `Γ.rhdDisj F`. -/
-noncomputable def criticalSet (Γ : MaximalConsistentSet 𝔸 Φ) (F C : Formula α) :
+noncomputable def criticalSet (Γ : MaximalConsistentSet L Φ) (F C : Formula α) :
     Set (Formula α) :=
   insert (∼Γ.rhdDisj F) <| insert (□(∼Γ.rhdDisj F)) <| insert C <| insert (□(∼C)) <|
     {A | □A ∈ Γ} ∪ (□·) '' {A | □A ∈ Γ}
 
-lemma provable_rhd_of_inconsistent (h : Γ.criticalSet F C *⊢[Logic.ofAxioms 𝔸] ⊥) :
-    Γ.literals *⊢[Logic.ofAxioms 𝔸] C ▷ F := by
-  have h₁ : ({A | □A ∈ Γ} ∪ (□·) '' {A | □A ∈ Γ}) *⊢[Logic.ofAxioms 𝔸]
+section
+
+open Logic.ofAxioms
+
+variable {𝔸 : Set (Formula α)} {Γ Δ : MaximalConsistentSet (ofAxioms 𝔸) Φ}
+
+
+lemma provable_rhd_of_inconsistent (h : Γ.criticalSet F C *⊢[ofAxioms 𝔸] ⊥) :
+    Γ.literals *⊢[ofAxioms 𝔸] C ▷ F := by
+  have h₁ : ({A | □A ∈ Γ} ∪ (□·) '' {A | □A ∈ Γ}) *⊢[ofAxioms 𝔸]
       C ⋏ □(∼C) 🡒 Γ.rhdDisj F ⋎ ∼□(∼Γ.rhdDisj F) := by
     have := Context.deduct <| Context.deduct <| Context.deduct <| Context.deduct h;
     cl_prover [this];
-  have h₂ : Γ.literals *⊢[Logic.ofAxioms 𝔸] □(C ⋏ □(∼C) 🡒 Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) := by
+  have h₂ : Γ.literals *⊢[ofAxioms 𝔸] □(C ⋏ □(∼C) 🡒 Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) := by
     apply Context.weakening _ (box_of_provable h₁);
     rintro _ ⟨A, hA, rfl⟩;
     exact mem_literals hA;
-  have h₃ : Γ.literals *⊢[Logic.ofAxioms 𝔸] Γ.rhdDisj F ▷ F := by
+  have h₃ : Γ.literals *⊢[ofAxioms 𝔸] Γ.rhdDisj F ▷ F := by
     apply fdisj_rhd;
     intro G hG;
     exact Context.by_axm <| mem_literals (Finset.mem_filter.mp hG).2;
-  have h₄ : Γ.literals *⊢[Logic.ofAxioms 𝔸] C ▷ (C ⋏ □(∼C)) := Context.of rhd_and_box_neg;
-  have h₅ : Γ.literals *⊢[Logic.ofAxioms 𝔸] (Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) ▷ Γ.rhdDisj F :=
+  have h₄ : Γ.literals *⊢[ofAxioms 𝔸] C ▷ (C ⋏ □(∼C)) := Context.of rhd_and_box_neg;
+  have h₅ : Γ.literals *⊢[ofAxioms 𝔸] (Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) ▷ Γ.rhdDisj F :=
     Context.of or_dia_rhd;
-  have h₆ := Context.of (𝓢 := Logic.ofAxioms 𝔸) (Γ := Γ.literals) <|
+  have h₆ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.literals) <|
     axiomJ1 (A := C ⋏ □(∼C)) (B := Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F);
-  have h₇ := Context.of (𝓢 := Logic.ofAxioms 𝔸) (Γ := Γ.literals) <|
+  have h₇ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.literals) <|
     axiomJ2 (A := C ⋏ □(∼C)) (B := Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) (C := Γ.rhdDisj F);
-  have h₈ := Context.of (𝓢 := Logic.ofAxioms 𝔸) (Γ := Γ.literals) <|
+  have h₈ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.literals) <|
     axiomJ2 (A := C) (B := C ⋏ □(∼C)) (C := Γ.rhdDisj F);
-  have h₉ := Context.of (𝓢 := Logic.ofAxioms 𝔸) (Γ := Γ.literals) <|
+  have h₉ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.literals) <|
     axiomJ2 (A := C) (B := Γ.rhdDisj F) (C := F);
   cl_prover [h₂, h₃, h₄, h₅, h₆, h₇, h₈, h₉];
 
 variable [Adequate Φ]
 
 lemma exists_criticalSuccessor_of_consistent (hC : IsRhdOperand Φ C)
-    (h : Γ.criticalSet F C *⊬[Logic.ofAxioms 𝔸] ⊥) (hs : □(∼C) ∉ Γ) :
+    (h : Γ.criticalSet F C *⊬[ofAxioms 𝔸] ⊥) (hs : □(∼C) ∉ Γ) :
     ∃ Δ, CriticalSuccessor F Γ Δ ∧ C ∈ Δ := by
   obtain ⟨Δ, hΔ⟩ := exists_consistent_union (Φ := Φ) h;
   have hm {A} (hA : A ∈ Φ) (h : A ∈ Γ.criticalSet F C) : A ∈ Δ :=
@@ -422,15 +443,15 @@ lemma exists_criticalSuccessor_of_consistent (hC : IsRhdOperand Φ C)
   have hG {G} (hG : G ▷ F ∈ Γ) : G ∉ Δ ∧ □(∼G) ∈ Δ := by
     have h₁ : G ∈ Φ.filter (· ▷ F ∈ Γ) :=
       Finset.mem_filter.mpr ⟨Adequate.rhd_left (mem_of_mem hG), hG⟩;
-    have h₂ : Logic.ofAxioms 𝔸 ⊢ G 🡒 Γ.rhdDisj F := right_Fdisj_intro _ h₁;
-    have h₃ : Logic.ofAxioms 𝔸 ⊢ □(∼Γ.rhdDisj F) 🡒 □(∼G) := box_mono <| by cl_prover [h₂];
-    have h₄ : Γ.criticalSet F C *⊢[Logic.ofAxioms 𝔸] ∼Γ.rhdDisj F :=
+    have h₂ : ofAxioms 𝔸 ⊢ G 🡒 Γ.rhdDisj F := right_Fdisj_intro _ h₁;
+    have h₃ : ofAxioms 𝔸 ⊢ □(∼Γ.rhdDisj F) 🡒 □(∼G) := box_mono <| by cl_prover [h₂];
+    have h₄ : Γ.criticalSet F C *⊢[ofAxioms 𝔸] ∼Γ.rhdDisj F :=
       Context.by_axm <| by simp [criticalSet];
-    have h₅ : Γ.criticalSet F C *⊢[Logic.ofAxioms 𝔸] □(∼Γ.rhdDisj F) :=
+    have h₅ : Γ.criticalSet F C *⊢[ofAxioms 𝔸] □(∼Γ.rhdDisj F) :=
       Context.by_axm <| by simp [criticalSet];
     constructor;
     · apply not_mem_of_provable_neg hΔ;
-      have h₆ := Context.of (𝓢 := Logic.ofAxioms 𝔸) (Γ := Γ.criticalSet F C) h₂;
+      have h₆ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.criticalSet F C) h₂;
       cl_prover [h₄, h₆];
     · exact mem_of_provable hΔ (Adequate.box_neg_mem <| .of_rhd_left (mem_of_mem hG)) <|
         Context.of h₃ ⨀ h₅;
@@ -449,7 +470,7 @@ lemma exists_criticalSuccessor_of_rhd_not_mem (h₁ : B ▷ C ∈ Φ) (h₂ : B 
     exact h₂ <| (mem_iff_provable h₁).mpr <| provable_rhd_of_inconsistent h;
   · intro h;
     apply h₂ <| (mem_iff_provable h₁).mpr _;
-    have h₃ : Logic.ofAxioms 𝔸 ⊢ □(∼B) 🡒 B ▷ C := C_trans (box_mono <| by cl_prover) axiomJ1;
+    have h₃ : ofAxioms 𝔸 ⊢ □(∼B) 🡒 B ▷ C := C_trans (box_mono <| by cl_prover) axiomJ1;
     exact Context.of h₃ ⨀ Context.by_axm (mem_literals h);
 
 /-- - [dJV90, Lemma 3.7] -/
@@ -462,15 +483,17 @@ lemma CriticalSuccessor.exists_criticalSuccessor (hF : IsRhdOperand Φ F) (hDE :
     apply hΔ.not_mem _ hD;
     apply (mem_iff_provable <| Adequate.rhd_mem hD' hF).mpr;
     have h₁ := provable_rhd_of_inconsistent h;
-    have h₂ := Context.of (𝓢 := Logic.ofAxioms 𝔸) (Γ := Γ.literals) <|
+    have h₂ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.literals) <|
       axiomJ2 (A := D) (B := E) (C := F);
-    have h₃ : Γ.literals *⊢[Logic.ofAxioms 𝔸] D ▷ E := Context.by_axm (mem_literals hDE);
+    have h₃ : Γ.literals *⊢[ofAxioms 𝔸] D ▷ E := Context.by_axm (mem_literals hDE);
     cl_prover [h₁, h₂, h₃];
   · intro h;
     apply hΔ.toSuccessor.not_mem_of_box_neg_mem _ hD;
     apply (mem_iff_provable <| Adequate.box_neg_mem hD').mpr;
     exact Context.of box_neg_of_rhd ⨀ Context.by_axm (mem_literals hDE) ⨀
       Context.by_axm (mem_literals h);
+
+end
 
 end MaximalConsistentSet
 

@@ -369,7 +369,7 @@ section structuralBound
 
 variable {c : V}
 
-private lemma exp_exp_le_of_le {m n : V} (h : m ≤ n) :
+lemma exp_exp_le_of_le {m n : V} (h : m ≤ n) :
     Exp.exp (Exp.exp m) ≤ Exp.exp (Exp.exp n) :=
   exp_monotone_le.mpr (exp_monotone_le.mpr h)
 
@@ -1067,6 +1067,13 @@ lemma result_eq_ite (t : V) :
   · simp [ht, ((c.graph_iff L).mp (c.result_prop L param ht)).2]
   · simp [ht, c.result_prop_not L param ht]
 
+variable (L c param) in
+lemma result_le_bound (t : V) : c.result L param t ≤ c.bound param t := by
+  rw [c.result_eq_ite]
+  split_ifs
+  · exact c.courseOfValuesResult_le_bound param t
+  · exact zero_le
+
 open Classical in
 variable (L c) in
 lemma result_locallyDelta0 :
@@ -1130,6 +1137,41 @@ lemma resultVec_cons {k w t : V} (hw : IsUTermVec L k w) (ht : IsUTerm L t) :
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp
     · simp [c.nth_resultVec L param hw (by simpa using hi)])
+
+open Classical in
+lemma resultVec_eq_ite (k w : V) : c.resultVec L param k w =
+    if IsUTermVec L k w then listMap (fun p x ↦ c.result L p x) param w else 0 := by
+  have hres := c.result_locallyDelta0 (L := L)
+  by_cases hw : IsUTermVec L k w
+  · simp only [hw, ↓reduceIte]
+    apply nth_ext (by rw [len_listMap hres, c.resultVec_lh L param hw, hw.lh])
+    intro i hi
+    rw [c.resultVec_lh L param hw] at hi
+    rw [c.nth_resultVec L param hw hi, nth_listMap hres _ _ (by simpa [← hw.lh] using hi)]
+  · simp [hw]
+
+open Classical in
+lemma resultVec_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin (arity + 2) → V ↦
+      c.resultVec L (w ·.succ.succ) (w 0) (w 1) := by
+  have hmap := (listMap_locallyDelta0 (g := fun p x ↦ c.result L p x)
+    (c.result_locallyDelta0 (L := L))).retraction (1 :> fun i ↦ i.succ.succ)
+  have := LocallyDelta0Function.ite
+    ((isUTermVec_locallyDelta0 (L := L)).rel_comp₂ (LocallyDelta0Function.var 0)
+      (LocallyDelta0Function.var 1)) hmap (LocallyDelta0Function.const 0)
+  convert this using 2 with w
+  rw [c.resultVec_eq_ite (L := L)]
+  simp
+
+lemma resultVec_le_exp_exp {C : V} (hC : 1 ≤ C)
+    (hb : ∀ t, c.bound param t ≤ Exp.exp (Exp.exp (8 * t + C))) (k w : V) :
+    c.resultVec L param k w ≤ Exp.exp (Exp.exp (8 * w + C)) := by
+  by_cases hw : IsUTermVec L k w
+  · refine le_exp_exp_of_nth_le_exp_exp hC (by rw [c.resultVec_lh L param hw, hw.lh]) ?_
+    intro i hi
+    rw [c.nth_resultVec L param hw (by simpa [hw.lh] using hi)]
+    exact le_trans (c.result_le_bound L param _) (hb _)
+  · simp [hw]
 
 end vec
 
@@ -1262,6 +1304,16 @@ end
 lemma termBV_locallyDelta0 : LocallyDelta0Function₁ (termBV L : V → V) := by
   convert construction.result_locallyDelta0 (V := V) L using 3
   simp [termBV, Matrix.empty_eq]
+
+lemma termBVVec_of_not {k v : V} (h : ¬IsUTermVec L k v) : termBVVec L k v = 0 :=
+  IsUTerm.BV.construction.resultVec_of_not L _ h
+
+lemma termBV_le {t : V} : termBV L t ≤ t := IsUTerm.BV.construction.result_le_bound L ![] t
+
+lemma termBVVec_locallyDelta0 : LocallyDelta0Function₂ (termBVVec (V := V) L) := by
+  have := (IsUTerm.BV.construction (V := V)).resultVec_locallyDelta0 L
+  convert this using 2 with w
+  simp [termBVVec, Matrix.empty_eq]
 
 end bv
 

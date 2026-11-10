@@ -80,6 +80,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 public import AlphaCentauri.InterpretabilityLogic.Veltman.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStep
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Bisimulation
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Completeness
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Extension
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
@@ -154,6 +155,8 @@ public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Basic
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Functions
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Language
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Term.Basic
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Term.Functions

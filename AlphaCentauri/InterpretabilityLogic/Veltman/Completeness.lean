@@ -56,6 +56,12 @@ instance [Adequate Φ] : Finite (IndexedSet L Φ) := by
   apply ext h.1;
   simpa [List.map_pmap] using congrArg (List.map Subtype.val) h.2;
 
+instance [Entailment.Cl L] [Entailment.Consistent L] : Nonempty (IndexedSet L Φ) := by
+  obtain ⟨Γ, -⟩ := exists_consistent_union (Φ := Φ) (L := L) (X := ∅) <| by
+    intro h;
+    exact Entailment.Consistent.not_inconsistent (𝓢 := L) fun _ ↦ efq ⨀ Context.emptyPrf h;
+  exact ⟨⟨Γ, [], by simp, by simp⟩⟩
+
 /-- `y` extends `x`: the set of `y` is a successor of the set of `x`, and the sequence of `x` is an
 initial segment of the sequence of `y`. -/
 def Rel (x y : IndexedSet L Φ) : Prop := Successor x.set y.set ∧ x.seq <+: y.seq
@@ -228,14 +234,6 @@ open Veltman Veltman.Model.World
 
 variable {α : Type*} [DecidableEq α] {𝔸 : Set (Formula α)} {Φ : Finset (Formula α)}
   {A : Formula α}
-
-instance [Entailment.Consistent (ofAxiomsMinus 𝔸)] :
-    Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ) := by
-  obtain ⟨Γ, -⟩ := exists_consistent_union (Φ := Φ) (L := ofAxiomsMinus 𝔸) (X := ∅) <| by
-    intro h;
-    exact Entailment.Consistent.not_inconsistent (𝓢 := ofAxiomsMinus 𝔸) fun _ ↦
-      efq ⨀ Context.emptyPrf h;
-  exact ⟨⟨Γ, [], by simp, by simp⟩⟩
 
 /-- If an extension of $\mathbf{IL}^-(\mathbf{J2}^+, \mathbf{J5})$ does not prove `A`, then `A`
 fails at some world of the countermodel over an adequate set containing `A`.

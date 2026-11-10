@@ -315,6 +315,18 @@ HP98:
     type: Anthology
     title: Perspectives in Mathematical Logic
 
+HSS25a:
+  type: Article
+  title: Uniform interpolation for interpretability logic
+  author: ["Horvat, Sebastijan", "Sierra Miranda, Borja", "Studer, Thomas"]
+  date: 2025
+  serial-number:
+    arxiv: "2511.01428"
+  url: https://arxiv.org/abs/2511.01428
+  parent:
+    type: Repository
+    title: arXiv
+
 Jer10:
   type: Article
   title: Abelian groups and quadratic residues in weak arithmetic

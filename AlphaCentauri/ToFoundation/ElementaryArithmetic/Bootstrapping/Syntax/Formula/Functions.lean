@@ -240,7 +240,145 @@ lemma neg_locallyDelta0 : LocallyDelta0Function₁ (neg (V := V) L) :=
 lemma neg_not_uformula {x : V} (h : ¬IsUFormula L x) :
     neg L x = 0 := construction.result_prop_not _ h
 
+lemma IsUFormula.neg {p : V} : IsUFormula L p → IsUFormula L (Bootstrapping.neg L p) := by
+  intro hp
+  refine IsUFormula.induction (P := fun p ↦ IsUFormula L (Bootstrapping.neg L p)) ?_ ?_ ?_ ?_ ?_
+    ?_ ?_ ?_ ?_ p hp
+  · exact isUFormula_locallyDelta0.pred_comp
+      (neg_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p hp ihp; simp [hp, ihp]
+  · intro p hp ihp; simp [hp, ihp]
+
+@[simp] lemma IsUFormula.bv_neg {p : V} :
+    IsUFormula L p → bv L (Bootstrapping.neg L p) = bv L p := by
+  intro hp
+  refine IsUFormula.induction (P := fun p ↦ bv L (Bootstrapping.neg L p) = bv L p) ?_ ?_ ?_ ?_ ?_
+    ?_ ?_ ?_ ?_ p hp
+  · exact LocallyDelta0.eq
+      (bv_locallyDelta0.comp₁ (neg_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1))))
+      (bv_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
+  · intro k R v hR hv; simp [*]
+  · intro k R v hR hv; simp [*]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
+  · intro p hp ihp; simp [hp, hp.neg, ihp]
+  · intro p hp ihp; simp [hp, hp.neg, ihp]
+
+@[simp] lemma IsUFormula.neg_neg {p : V} :
+    IsUFormula L p → Bootstrapping.neg L (Bootstrapping.neg L p) = p := by
+  intro hp
+  refine IsUFormula.induction
+    (P := fun p ↦ Bootstrapping.neg L (Bootstrapping.neg L p) = p) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
+  · exact LocallyDelta0.eq
+      (neg_locallyDelta0.comp₁ (neg_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1))))
+      (LocallyDelta0Function.var (0 : Fin 1))
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.neg, hq.neg, ihp, ihq]
+  · intro p hp ihp; simp [hp, hp.neg, ihp]
+  · intro p hp ihp; simp [hp, hp.neg, ihp]
+
+@[simp] lemma IsUFormula.neg_iff {p : V} :
+    IsUFormula L (Bootstrapping.neg L p) ↔ IsUFormula L p := by
+  constructor
+  · intro h; by_contra hp
+    have Hp : IsUFormula L p := by by_contra hp; simp [neg_not_uformula hp] at h
+    contradiction
+  · exact IsUFormula.neg
+
+@[simp] lemma IsSemiformula.neg_iff {n p : V} :
+    IsSemiformula L n (neg L p) ↔ IsSemiformula L n p := by
+  constructor
+  · intro h; by_contra hp
+    have Hp : IsUFormula L p := by by_contra hp; simp [neg_not_uformula hp] at h
+    have : IsSemiformula L n p := ⟨Hp, by simpa [Hp.bv_neg] using h.bv_le⟩
+    contradiction
+  · intro h; exact ⟨by simp [h.isUFormula], by simpa [h.isUFormula] using h.bv_le⟩
+
+alias ⟨IsSemiformula.elim_neg, IsSemiformula.neg⟩ := IsSemiformula.neg_iff
+
+@[simp] lemma neg_inj_iff {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+    neg L p = neg L q ↔ p = q := by
+  constructor
+  · intro h; simpa [hp.neg_neg, hq.neg_neg] using congrArg (neg L) h
+  · rintro rfl; rfl
+
 end negation
+
+variable (L)
+
+noncomputable def imp (p q : V) : V := neg L p ^⋎ q
+
+noncomputable def iff (p q : V) : V := (imp L p q) ^⋏ (imp L q p)
+
+variable {L}
+
+section imp
+
+@[simp] lemma IsUFormula.imp {p q : V} :
+    IsUFormula L (imp L p q) ↔ IsUFormula L p ∧ IsUFormula L q := by
+  simp [Bootstrapping.imp]
+
+@[simp] lemma IsSemiformula.imp {n p q : V} :
+    IsSemiformula L n (imp L p q) ↔ IsSemiformula L n p ∧ IsSemiformula L n q := by
+  simp [Bootstrapping.imp]
+
+section
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (impGraph)
+
+instance imp.defined : 𝚺ᴬ₁-Function₂ imp (V := V) L via impGraph L :=
+  .mk fun v ↦ by simp [impGraph]; rfl
+
+instance imp.definable : 𝚺ᴬ₁-Function₂ imp (V := V) L := imp.defined.to_definable
+
+instance imp.definable' (Γ m) : Γᴬ_[m + 1]-Function₂ imp (V := V) L := imp.definable.of_sigmaOne
+
+end
+
+end imp
+
+section iff
+
+@[simp] lemma IsUFormula.iff {p q : V} :
+    IsUFormula L (iff L p q) ↔ IsUFormula L p ∧ IsUFormula L q := by
+  simp only [Bootstrapping.iff, and, imp, and_iff_left_iff_imp, and_imp]
+  intros; simp_all
+
+@[simp] lemma IsSemiformula.iff {n p q : V} :
+    IsSemiformula L n (iff L p q) ↔ IsSemiformula L n p ∧ IsSemiformula L n q := by
+  simp only [Bootstrapping.iff, and, imp, and_iff_left_iff_imp, and_imp]
+  intros; simp_all
+
+@[simp] lemma lt_iff_left (p q : V) : p < iff L p q := lt_trans (lt_or_right _ _) (lt_K!_right _ _)
+
+@[simp] lemma lt_iff_right (p q : V) : q < iff L p q := lt_trans (lt_or_right _ _) (lt_K!_left _ _)
+
+section
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (iffGraph)
+
+instance iff.defined : 𝚺ᴬ₁-Function₂ iff (V := V) L via iffGraph L :=
+  .mk fun v ↦ by simp [iffGraph]; rfl
+
+instance iff.definable : 𝚺ᴬ₁-Function₂ iff (V := V) L := iff.defined.to_definable
+
+instance iff_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ iff (V := V) L := iff.definable.of_sigmaOne
+
+end
+
+end iff
 
 section shift
 
@@ -359,6 +497,87 @@ lemma shift_locallyDelta0 : LocallyDelta0Function₁ (shift (V := V) L) :=
 
 lemma shift_not_uformula {x : V} (h : ¬IsUFormula L x) :
     shift L x = 0 := (construction L).result_prop_not _ h
+
+lemma IsUFormula.shift {p : V} : IsUFormula L p → IsUFormula L (Bootstrapping.shift L p) := by
+  intro hp
+  refine IsUFormula.induction (P := fun p ↦ IsUFormula L (Bootstrapping.shift L p)) ?_ ?_ ?_ ?_
+    ?_ ?_ ?_ ?_ ?_ p hp
+  · exact isUFormula_locallyDelta0.pred_comp
+      (shift_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p hp ihp; simp [hp, ihp]
+  · intro p hp ihp; simp [hp, ihp]
+
+lemma IsUFormula.bv_shift {p : V} :
+    IsUFormula L p → bv L (Bootstrapping.shift L p) = bv L p := by
+  intro hp
+  refine IsUFormula.induction (P := fun p ↦ bv L (Bootstrapping.shift L p) = bv L p) ?_ ?_ ?_ ?_
+    ?_ ?_ ?_ ?_ ?_ p hp
+  · exact LocallyDelta0.eq
+      (bv_locallyDelta0.comp₁ (shift_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1))))
+      (bv_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq, hp.shift, hq.shift]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq, hp.shift, hq.shift]
+  · intro p hp ihp; simp [hp, ihp, hp.shift]
+  · intro p hp ihp; simp [hp, ihp, hp.shift]
+
+lemma IsSemiformula.shift {n p : V} :
+    IsSemiformula L n p → IsSemiformula L n (Bootstrapping.shift L p) := by
+  intro hp
+  refine IsSemiformula.induction
+    (P := fun n p ↦ IsSemiformula L n (Bootstrapping.shift L p)) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · exact isSemiformula_locallyDelta0.rel_comp₂ (LocallyDelta0Function.var (0 : Fin 2))
+      (shift_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))
+  · intro n k r v hr hv; simp [hr, hv.isUTerm]
+  · intro n k r v hr hv; simp [hr, hv.isUTerm]
+  · simp
+  · simp
+  · intro n p q hp hq ihp ihq; simp [hp.isUFormula, hq.isUFormula, ihp, ihq]
+  · intro n p q hp hq ihp ihq; simp [hp.isUFormula, hq.isUFormula, ihp, ihq]
+  · intro n p hp ihp; simp [hp.isUFormula, ihp]
+  · intro n p hp ihp; simp [hp.isUFormula, ihp]
+
+@[simp] lemma IsUFormula.shift_iff {p : V} :
+    IsUFormula L (Bootstrapping.shift L p) ↔ IsUFormula L p := by
+  constructor
+  · intro h; by_contra hp
+    have Hp : IsUFormula L p := by by_contra hp; simp [shift_not_uformula hp] at h
+    contradiction
+  · exact IsUFormula.shift
+
+@[simp] lemma IsSemiformula.shift_iff {n p : V} :
+    IsSemiformula L n (Bootstrapping.shift L p) ↔ IsSemiformula L n p :=
+  ⟨fun h ↦ by
+    have : IsUFormula L p := by by_contra hp; simp [shift_not_uformula hp] at h
+    exact ⟨this, by simpa [this.bv_shift] using h.bv_le⟩,
+    IsSemiformula.shift⟩
+
+lemma shift_neg {n p : V} (hp : IsSemiformula L n p) :
+    shift L (neg L p) = neg L (shift L p) := by
+  refine IsSemiformula.induction
+    (P := fun _ p ↦ shift L (neg L p) = neg L (shift L p)) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · exact LocallyDelta0.eq
+      (shift_locallyDelta0.comp₁ (neg_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2))))
+      (neg_locallyDelta0.comp₁ (shift_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2))))
+  · intro n k R v hR hv; simp [hR, hv.isUTerm, hv.termShiftVec.isUTerm]
+  · intro n k R v hR hv; simp [hR, hv.isUTerm, hv.termShiftVec.isUTerm]
+  · simp
+  · simp
+  · intro n p q hp hq ihp ihq
+    simp [hp.isUFormula, hq.isUFormula, hp.shift.isUFormula, hq.shift.isUFormula, ihp, ihq]
+  · intro n p q hp hq ihp ihq
+    simp [hp.isUFormula, hq.isUFormula, hp.shift.isUFormula, hq.shift.isUFormula, ihp, ihq]
+  · intro n p hp ih; simp [hp.isUFormula, hp.shift.isUFormula, ih]
+  · intro n p hp ih; simp [hp.isUFormula, hp.shift.isUFormula, ih]
 
 end shift
 

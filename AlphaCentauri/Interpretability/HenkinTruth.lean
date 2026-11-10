@@ -47,54 +47,215 @@ lemma provable_imp_of_models_henkin {k m : ℕ} (c : 𝚺ᴬ₁.Semisentence k)
     intro e hc
     exact H W hS hcons e hc
 
-omit [L.Eq] in
-variable (L) in
+/-! ### Conditions on the numeral arguments -/
+
+section conditions
+
+variable (L)
+
+noncomputable def verumCond : 𝚺ᴬ₁.Semisentence 2 := .mkSigma “c n. !qqVerumDef c”
+
+noncomputable def falsumCond : 𝚺ᴬ₁.Semisentence 2 := .mkSigma “c n. !qqFalsumDef c”
+
 noncomputable def andCond : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
   “a b c n. !(isSemiformula L).sigma n a ∧ !(isSemiformula L).sigma n b ∧ !qqAndDef c a b”
 
-omit [L.Eq] in
+noncomputable def orCond : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
+  “a b c n. !(isSemiformula L).sigma n a ∧ !(isSemiformula L).sigma n b ∧ !qqOrDef c a b”
+
+noncomputable def negCond : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
+  “c d n. !(isSemiformula L).sigma n c ∧ !(negGraph L) d c”
+
+noncomputable def allCond : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
+  “a b n m. !(isSemiformula L).sigma m a ∧ m = n + 1 ∧ !qqAllDef b a”
+
+noncomputable def exsCond : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
+  “a b n m. !(isSemiformula L).sigma m a ∧ m = n + 1 ∧ !qqExsDef b a”
+
+noncomputable def trueCond : 𝚺ᴬ₁.Semisentence 0 := .mkSigma “⊤”
+
+noncomputable def zeroCond : 𝚺ᴬ₁.Semisentence 1 := .mkSigma “i. i = 0”
+
+noncomputable def succCond : 𝚺ᴬ₁.Semisentence 2 := .mkSigma “k m. m = k + 1”
+
+noncomputable def bvarCond : 𝚺ᴬ₁.Semisentence 3 := .mkSigma “t i n. !qqBvarDef t i ∧ i < n”
+
+end conditions
+
+noncomputable def axiomCond : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
+  “a. !(S.Δ₁ch).sigma a ∧ !(isSemiformula L).sigma 0 a”
+
+/-! ### Clauses of satisfaction -/
+
+section clauses
+
+omit [L.Eq]
+
+noncomputable def satisfiesVerum : ArithmeticSemisentence 3 :=
+  “c n s. !(henkinSatisfiesDef S).val c n s”
+
+noncomputable def satisfiesFalsum : ArithmeticSemisentence 3 :=
+  “c n s. ¬!(henkinSatisfiesDef S).val c n s”
+
 noncomputable def satisfiesAnd : ArithmeticSemisentence 5 :=
   “a b c n s. !(henkinSatisfiesDef S).val c n s ↔
     (!(henkinSatisfiesDef S).val a n s ∧ !(henkinSatisfiesDef S).val b n s)”
 
-omit [L.Eq] [𝗘𝗤 L ⪯ S] in
+noncomputable def satisfiesOr : ArithmeticSemisentence 5 :=
+  “a b c n s. !(henkinSatisfiesDef S).val c n s ↔
+    (!(henkinSatisfiesDef S).val a n s ∨ !(henkinSatisfiesDef S).val b n s)”
+
+noncomputable def satisfiesNeg : ArithmeticSemisentence 4 :=
+  “c d n s. !(henkinSatisfiesDef S).val d n s ↔ ¬!(henkinSatisfiesDef S).val c n s”
+
+noncomputable def satisfiesAll : ArithmeticSemisentence 5 :=
+  “a b n m s. !(henkinSatisfiesDef S).val b n s ↔
+    ∀ v, !(henkinSatisfiesDef S).val a m ((v + s) * (v + s) + v + 1)”
+
+noncomputable def satisfiesExs : ArithmeticSemisentence 5 :=
+  “a b n m s. !(henkinSatisfiesDef S).val b n s ↔
+    ∃ v, !(henkinSatisfiesDef S).val a m ((v + s) * (v + s) + v + 1)”
+
+noncomputable def satisfiesAxiom : ArithmeticSemisentence 2 :=
+  “a s. !(henkinSatisfiesDef S).val a 0 s”
+
+variable [𝗘𝗤 L ⪯ S]
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma provable_satisfiesVerum :
+    T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd 1)) ▹ verumCond.val) 🡒 satisfiesVerum S) :=
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ _ _ e hc ↦ by
+    have hc' : e 0 = ^⊤ := by simpa [verumCond] using hc
+    simp [satisfiesVerum, hc', henkinSatisfies_verum]
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma provable_satisfiesFalsum :
+    T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd 1)) ▹ falsumCond.val) 🡒 satisfiesFalsum S) :=
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ hS hcons e hc ↦ by
+    have hc' : e 0 = ^⊥ := by simpa [falsumCond] using hc
+    simp [satisfiesFalsum, hc', not_henkinSatisfies_falsum hS hcons]
+
+omit [𝗘𝗤 L ⪯ S] in
 lemma provable_satisfiesAnd :
     T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd 1)) ▹ (andCond L).val) 🡒 satisfiesAnd S) :=
-  provable_imp_of_models_henkin S T _ _ fun W _ _ hS hcons e hc ↦ by
-    simp [andCond] at hc
-    simp [satisfiesAnd]
-    sorry
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ hS hcons e hc ↦ by
+    have hc' : IsSemiformula L (e 3) (e 0) ∧ IsSemiformula L (e 3) (e 1) ∧ e 2 = e 0 ^⋏ e 1 := by
+      simpa [andCond] using hc
+    have h := henkinSatisfies_and_iff hS hcons hc'.1 hc'.2.1 (e 4)
+    rw [← hc'.2.2] at h
+    simpa [satisfiesAnd] using h
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma provable_satisfiesOr :
+    T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd 1)) ▹ (orCond L).val) 🡒 satisfiesOr S) :=
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ hS hcons e hc ↦ by
+    have hc' : IsSemiformula L (e 3) (e 0) ∧ IsSemiformula L (e 3) (e 1) ∧ e 2 = e 0 ^⋎ e 1 := by
+      simpa [orCond] using hc
+    have h := henkinSatisfies_or_iff hS hcons hc'.1 hc'.2.1 (e 4)
+    rw [← hc'.2.2] at h
+    simpa [satisfiesOr] using h
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma provable_satisfiesNeg :
+    T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd 1)) ▹ (negCond L).val) 🡒 satisfiesNeg S) :=
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ hS hcons e hc ↦ by
+    have hc' : IsSemiformula L (e 2) (e 0) ∧ e 1 = neg L (e 0) := by simpa [negCond] using hc
+    have h := henkinSatisfies_neg_iff hS hcons hc'.1 (e 3)
+    rw [← hc'.2] at h
+    simpa [satisfiesNeg] using h
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma provable_satisfiesAll :
+    T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd 1)) ▹ (allCond L).val) 🡒 satisfiesAll S) :=
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ hS hcons e hc ↦ by
+    have hc' : IsSemiformula L (e 3) (e 0) ∧ e 3 = e 2 + 1 ∧ e 1 = ^∀ e 0 := by
+      simpa [allCond] using hc
+    have h := henkinSatisfies_all_iff hS hcons (hc'.2.1 ▸ hc'.1) (e 4)
+    rw [← hc'.2.2, ← hc'.2.1] at h
+    simpa [satisfiesAll, squarePair] using h
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma provable_satisfiesExs :
+    T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd 1)) ▹ (exsCond L).val) 🡒 satisfiesExs S) :=
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ hS hcons e hc ↦ by
+    have hc' : IsSemiformula L (e 3) (e 0) ∧ e 3 = e 2 + 1 ∧ e 1 = ^∃ e 0 := by
+      simpa [exsCond] using hc
+    have h := henkinSatisfies_exs_iff hS hcons (hc'.2.1 ▸ hc'.1) (e 4)
+    rw [← hc'.2.2, ← hc'.2.1] at h
+    simpa [satisfiesExs, squarePair] using h
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma provable_satisfiesAxiom :
+    T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd 1)) ▹ (axiomCond S).val) 🡒
+      satisfiesAxiom S) :=
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ _ _ e hc ↦ by
+    have hc' : e 0 ∈ S.Δ₁Class ∧ IsSemiformula L 0 (e 0) := by simpa [axiomCond] using hc
+    have h : HenkinSatisfies S (e 0) 0 (e 1) :=
+      (henkinSatisfies_zero_iff hc'.2 (e 1)).mpr (HenkinSet.of_provable S hc'.2
+        (Derivable.by_axm (by simp [hc'.2]) _ (by simp) hc'.1).toProvable)
+    simpa [satisfiesAxiom] using h
+
+end clauses
+
+/-! ### Representatives, lists and variables -/
+
+section representatives
+
+noncomputable def representativeExists : ArithmeticSentence :=
+  “∀ v, ∃ y, !(henkinDomainDef S).val y ∧ !(henkinEqDef S).val y v”
+
+noncomputable def henkinEqRefl : ArithmeticSentence := “∀ y, !(henkinEqDef S).val y y”
+
+noncomputable def squarePairNthZero : ArithmeticSemisentence 3 :=
+  “i a s. !squarePairNthGraph.val a ((a + s) * (a + s) + a + 1) i”
+
+noncomputable def squarePairNthSucc : ArithmeticSemisentence 5 :=
+  “k m a s y. !squarePairNthGraph.val y s k →
+    !squarePairNthGraph.val y ((a + s) * (a + s) + a + 1) m”
+
+noncomputable def equatesBvar : ArithmeticSemisentence 6 :=
+  “t i n s y x. !squarePairNthGraph.val y s i → !(henkinEqDef S).val x y →
+    ∀ z, !(henkinDomainDef S).val z → z = x → !(henkinEquatesDef S).val t n s z”
+
+lemma provable_representativeExists : T ∪ S.Con ⊢ representativeExists S :=
+  provable_of_models_henkin S T _ fun _ _ _ hS hcons ↦ by
+    simpa [models_iff, representativeExists] using exists_isRepresentative S hS hcons
+
+lemma provable_henkinEqRefl : T ∪ S.Con ⊢ henkinEqRefl S :=
+  provable_of_models_henkin S T _ fun _ _ _ _ _ ↦ by
+    simpa [models_iff, henkinEqRefl] using HenkinEq.refl S
+
+omit [L.Eq] [𝗘𝗤 L ⪯ S] in
+lemma provable_squarePairNthZero :
+    T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd 2)) ▹ zeroCond.val) 🡒 squarePairNthZero) :=
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ _ _ e hc ↦ by
+    have hc' : e 0 = 0 := by simpa [zeroCond] using hc
+    simpa [squarePairNthZero, hc', squarePair] using
+      (squarePairNth_squarePair_zero (e 1) (e 2)).symm
+
+omit [L.Eq] [𝗘𝗤 L ⪯ S] in
+lemma provable_squarePairNthSucc :
+    T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd 3)) ▹ succCond.val) 🡒 squarePairNthSucc) :=
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ _ _ e hc ↦ by
+    have hc' : e 1 = e 0 + 1 := by simpa [succCond] using hc
+    have h := squarePairNth_squarePair_succ (e 2) (e 3) (e 0)
+    simp only [squarePair] at h
+    simp [squarePairNthSucc, hc', h]
+
+lemma provable_equatesBvar :
+    T ∪ S.Con ⊢ ∀¹* ((Rew.subst (fun i ↦ #(i.castAdd 3)) ▹ bvarCond.val) 🡒 equatesBvar S) :=
+  provable_imp_of_models_henkin S T _ _ fun _ _ _ hS hcons e hc ↦ by
+    have hc' : e 0 = ^#(e 1) ∧ e 1 < e 2 := by simpa [bvarCond] using hc
+    suffices e 4 = squarePairNth (e 3) (e 1) → HenkinEq S (e 5) (e 4) →
+        ∀ z, IsRepresentative S z → z = e 5 → HenkinEquates S (e 0) (e 2) (e 3) z by
+      simpa [equatesBvar] using this
+    rintro hy hx z - rfl
+    rw [hc'.1, henkinEquates_bvar_iff hc'.2, ← hy]
+    exact HenkinEq.symm S hS hcons hx
+
+end representatives
 
 end facts
 
-section internal
-
-variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] (S : Theory L) [S.Δ₁]
-  [Theory.Δ₁.Sentential S] [𝗘𝗤 L ⪯ S] (T : ArithmeticTheory) [T.Δ₁] [𝗣𝗔 ⪯ T]
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
-open Bootstrapping.Arithmetic
-
-/-- The satisfaction of the coded formula `a` with `n` bound variables at the list `s`, as an
-internal formula. -/
-noncomputable def satisfiesT (a n : V) (s : Bootstrapping.Term V ℒₒᵣ) :
-    Bootstrapping.Formula V ℒₒᵣ :=
-  (⌜(henkinSatisfiesDef S).val⌝ : Bootstrapping.Semiformula V ℒₒᵣ 3).subst ![𝕹 a, 𝕹 n, s]
-
-omit [L.Eq] [𝗘𝗤 L ⪯ S] in
-lemma tprovable_satisfies_and {n p q : V} (hp : IsSemiformula L n p) (hq : IsSemiformula L n q)
-    (s : Bootstrapping.Term V ℒₒᵣ) :
-    (T ∪ S.Con).internalize V ⊢
-      satisfiesT S (p ^⋏ q) n s 🡘 satisfiesT S p n s ⋏ satisfiesT S q n s := by
-  have h := tprovable_subst_of_provable_imp (m := 1) (andCond L) (satisfiesAnd S)
-    (provable_satisfiesAnd S T)
-    (w := ![p, q, p ^⋏ q, n]) (by simp [andCond, hp, hq]) ![𝕹 p, 𝕹 q, 𝕹 (p ^⋏ q), 𝕹 n, s]
-    (by simp [Fin.forall_fin_succ])
-  rw [satisfiesAnd] at h
-  simpa [typed_quote_rew_subst, Bootstrapping.Semiformula.substs_substs, satisfiesT,
-    Matrix.vecHead, Matrix.vecTail] using h
-
-end internal
 
 end FFL.FirstOrder.Arithmetic

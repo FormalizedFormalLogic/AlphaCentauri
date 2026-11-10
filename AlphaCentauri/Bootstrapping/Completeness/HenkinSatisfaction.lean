@@ -147,6 +147,11 @@ noncomputable def henkinEqDef : 𝚺ᴬ_[2].Semisentence 2 := .mkSigma
 instance HenkinEq.defined : 𝚺ᴬ_[2]-Relation[V] (HenkinEq S) via henkinEqDef S := .mk fun v ↦ by
   simp [henkinEqDef, HenkinEq, Semiformula.equal, numeral_eq_natCast, quote_rel_def]
 
+instance IsRepresentative.defined :
+    𝚷ᴬ_[2]-Predicate[V] (IsRepresentative S) via henkinDomainDef S := .mk fun v ↦ by
+  simp [henkinDomainDef, IsRepresentative, HenkinEq, Semiformula.equal, numeral_eq_natCast,
+    quote_rel_def]
+
 end equality
 
 section closure
@@ -180,12 +185,11 @@ lemma henkinSatisfies_or_iff {n p q : V} (hp : IsSemiformula L n p) (hq : IsSemi
   rw [henkinSet_subst_iff hp, henkinSet_subst_iff hq, ← henkinSet_or_iff S hS hcons]
   simp [HenkinSatisfies, hp.isUFormula, hq.isUFormula]
 
-lemma henkinSatisfies_nrel_iff {n k R v : V} (hR : L.IsRel k R) (hv : IsSemitermVec L k n v)
-    (s : V) : HenkinSatisfies S (^nrel k R v) n s ↔ ¬HenkinSatisfies S (^rel k R v) n s := by
-  have hp : IsSemiformula L n (^rel k R v) := IsSemiformula.rel.mpr ⟨hR, hv⟩
-  rw [henkinSet_subst_iff hp, ← henkinSet_neg_iff S hS hcons]
-  have hw := isSemitermVec_squarePairFvarVec L n s
-  simp [HenkinSatisfies, hR, hv.isUTerm, (hw.termSubstVec hv).isUTerm]
+lemma henkinSatisfies_neg_iff {n p : V} (hp : IsSemiformula L n p) (s : V) :
+    HenkinSatisfies S (neg L p) n s ↔ ¬HenkinSatisfies S p n s := by
+  rw [henkinSet_subst_iff hp, ← henkinSet_neg_iff S hS hcons, HenkinSatisfies,
+    substs_neg hp (isSemitermVec_squarePairFvarVec L n s)]
+  rfl
 
 lemma henkinSatisfies_all_iff {n p : V} (hp : IsSemiformula L (n + 1) p) (s : V) :
     HenkinSatisfies S (^∀ p) n s ↔ ∀ u, HenkinSatisfies S p (n + 1) (squarePair u s) := by

@@ -22,6 +22,8 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
+attribute [local simp] Semiformula.substs_substs
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Vectors of domain formulas and of equations -/
@@ -138,12 +140,14 @@ lemma nth_domainVec (tbl s k : V) : ∀ j < k, (domainVec L tbl s k).[j] = domai
       exact ih j hlt
     · rw [domainVec_succ, concat_nth_len' _ _ (by simp)]
 
+omit [L.LORDefinable] in
 @[simp] lemma len_equationVec (a b k : V) : len (equationVec L a b k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih => simp [ih]
 
+omit [L.LORDefinable] in
 lemma nth_equationVec (a b k : V) : ∀ j < k, (equationVec L a b k).[j] =
     ^rel 2 (Encodable.encode (Language.Eq.eq : L.Rel 2) : V) ?[^#(a + j), ^#(b + j)] := by
   induction k using ISigma1.sigma1_succ_induction
@@ -378,5 +382,284 @@ lemma funcCongrBody_val (g : Semiformula V L (k + 1)) (hg : g.val = tableFunc tb
 end bodies
 
 end typed
+
+/-! ## Tables of translations -/
+
+section translationTable
+
+variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
+  [L₂.Encodable] [L₂.LORDefinable] {tbl : V}
+
+variable (L₂) in
+/-- `tbl` is a table of a translation of `L₂` in `S`: its entries are formulas of the right
+arities without free variables, and `S` proves that the domain formula is nonempty and that the
+graph of each function symbol defines a unique value on the domain and respects equality. -/
+structure IsTranslationTable (S : Theory L₁) [S.Δ₁] (tbl : V) : Prop extends IsTable L₁ L₂ tbl where
+  exs_domain : Provable S (^∃ tableDomain tbl)
+  func_exists {k f : V} : L₂.IsFunc k f → Provable S (qqAlls (funcExistsCode L₁ tbl k f) k)
+  func_unique {k f : V} : L₂.IsFunc k f → Provable S (qqAlls (funcUniqueCode L₁ tbl k f) (k + 2))
+  func_congr {k f : V} : L₂.IsFunc k f →
+    Provable S (qqAlls (funcCongrCode L₁ tbl k f) (k + 1 + (k + 1)))
+
+section
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] {S : Theory L} [S.Δ₁]
+
+lemma tprovable_subst_of_provable_qqAlls :
+    ∀ {n : ℕ} (φ : Semiformula V L n) (w : SemitermVec V L n 0),
+      Provable S (qqAlls φ.val n) → S.internalize V ⊢ φ.subst w
+  | 0, φ, w, h => by
+    rw [Semiformula.subst_nil_eq_self]
+    exact tprovable_iff_provable.mpr (by simpa using h)
+  | n + 1, φ, w, h => by
+    have h₁ := tprovable_subst_of_provable_qqAlls (∀¹ φ) (Matrix.vecTail w)
+      (by simpa [qqAlls_all] using h)
+    rw [Semiformula.substs_all] at h₁
+    have h₂ := TProof.specialize! h₁ (w 0)
+    rwa [Semiformula.substs_q_substs_single,
+      show (w 0 :> Matrix.vecTail w) = w from Matrix.cons_head_tail w] at h₂
+
+end
+
+namespace IsTranslationTable
+
+variable {S : Theory L₁} [S.Δ₁] (h : IsTranslationTable L₂ S tbl) {k : ℕ}
+
+include h
+
+lemma tprovable_func_exists (F : L₂.Func k) (w : Fin k → Term V L₁) :
+    S.internalize V ⊢ Matrix.conj (fun i ↦ h.domT.subst ![w i]) 🡒
+      ∃¹ (h.domT ⋏ (h.funcT F).subst (Semiterm.bvar 0 :> fun i ↦ (w i).bShift)) := by
+  have h₁ := tprovable_subst_of_provable_qqAlls (funcExistsBody h.domT (h.funcT F)) w
+    (by rw [funcExistsBody_val _ rfl _ rfl]; exact h.func_exists (codeIn_func_quote F))
+  simpa [funcExistsBody, SemitermVec.q_eq_cons] using h₁
+
+lemma tprovable_func_unique (F : L₂.Func k) (y z : Term V L₁) (w : Fin k → Term V L₁) :
+    S.internalize V ⊢ Matrix.conj (fun i ↦ h.domT.subst ![w i]) ⋏ h.domT.subst ![y] ⋏
+      h.domT.subst ![z] ⋏ (h.funcT F).subst (y :> w) ⋏ (h.funcT F).subst (z :> w) 🡒
+        Semiformula.equal y z := by
+  have h₁ := tprovable_subst_of_provable_qqAlls (funcUniqueBody h.domT (h.funcT F)) (y :> z :> w)
+    (by
+      rw [funcUniqueBody_val _ rfl _ rfl]
+      simpa [add_assoc, one_add_one_eq_two] using h.func_unique (codeIn_func_quote F))
+  simpa [funcUniqueBody] using h₁
+
+lemma tprovable_func_congr (F : L₂.Func k) (y z : Term V L₁) (w w' : Fin k → Term V L₁) :
+    S.internalize V ⊢ Semiformula.equal y z ⋏
+      Matrix.conj (fun i ↦ Semiformula.equal (w i) (w' i)) 🡒
+        (h.funcT F).subst (y :> w) 🡒 (h.funcT F).subst (z :> w') := by
+  have h₁ := tprovable_subst_of_provable_qqAlls (funcCongrBody (h.funcT F))
+    (Fin.append (y :> w) (z :> w'))
+    (by
+      rw [funcCongrBody_val _ rfl]
+      simpa using h.func_congr (codeIn_func_quote F))
+  simpa [funcCongrBody, Matrix.conj, Matrix.vecTail, Function.comp_def, Fin.append_addNat] using h₁
+
+end IsTranslationTable
+
+/-! ## Tables of direct translations -/
+
+section directTranslation
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+variable [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] (π : DirectTranslation S L₂) {k : ℕ}
+
+omit [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq] in
+lemma operator_bvar_eq_sentence (o : Semiformula.Operator L₁ 1) :
+    (o.operator ![#0] : Semisentence L₁ 1) = o.sentence := by
+  simp [Semiformula.Operator.operator, Rewriting.emb]
+
+
+section quote
+
+omit [L₁.Eq] in
+lemma quote_operator_bvar {m n : ℕ} (o : Semiformula.Operator L₁ m) (f : Fin m → Fin n) :
+    (⌜(o.operator (fun i ↦ #(f i)) : Semisentence L₁ n)⌝ : Semiformula V L₁ n) =
+      (⌜o.sentence⌝ : Semiformula V L₁ m).subst (fun i ↦ Semiterm.bvar (f i)) := by
+  rw [Sentence.typed_quote_def, Sentence.typed_quote_def]
+  simp [Semiformula.Operator.operator, Rewriting.emb]
+
+omit [L₁.Eq] in
+lemma quote_operator_cons {m n : ℕ} (o : Semiformula.Operator L₁ (m + 1)) (a : Fin n)
+    (f : Fin m → Fin n) :
+    (⌜(o.operator (#a :> fun i ↦ #(f i)) : Semisentence L₁ n)⌝ : Semiformula V L₁ n) =
+      (⌜o.sentence⌝ : Semiformula V L₁ (m + 1)).subst
+        (Semiterm.bvar a :> fun i ↦ Semiterm.bvar (f i)) := by
+  have h : (#a :> fun i : Fin m ↦ (#(f i) : FirstOrder.Semiterm L₁ Empty n)) =
+      fun j ↦ #((a :> f : Fin (m + 1) → Fin n) j) := by
+    funext j
+    cases j using Fin.cases <;> rfl
+  rw [h, quote_operator_bvar]
+  congr 1
+  funext j
+  cases j using Fin.cases <;> rfl
+
+omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
+lemma quote_domain_bvar {n : ℕ} (i : Fin n) :
+    (⌜(π.domain.operator ![#i] : Semisentence L₁ n)⌝ : Semiformula V L₁ n) =
+      (⌜π.domain.sentence⌝ : Semiformula V L₁ 1).subst ![Semiterm.bvar i] := by
+  have h : (![#i] : Fin 1 → FirstOrder.Semiterm L₁ Empty n) = fun j ↦ #((fun _ ↦ i) j) := by
+    funext j
+    obtain rfl : j = 0 := Subsingleton.elim _ _
+    rfl
+  rw [h, quote_operator_bvar]
+  congr 1
+  funext j
+  obtain rfl : j = 0 := Subsingleton.elim _ _
+  rfl
+
+lemma quote_eq_bvar {n : ℕ} (i j : Fin n) :
+    (⌜(op(=).operator ![#i, #j] : Semisentence L₁ n)⌝ : Semiformula V L₁ n) =
+      Semiformula.equal (Semiterm.bvar i) (Semiterm.bvar j) := by
+  rw [Sentence.typed_quote_def]
+  simp only [Semiformula.Operator.operator, Semiformula.Operator.Eq.sentence_eq,
+    Semiformula.rew_rel_eq_comp, Rew.emb_eq_id, Semiformula.typed_quote_rel, Function.comp_apply,
+    Rew.id_app, Rew.subst_bvar, Semiformula.equal]
+  congr 1
+  funext t
+  match t with
+  | 0 => rfl
+  | 1 => rfl
+
+end quote
+
+section external
+
+noncomputable abbrev funcExistsSent (F : L₂.Func k) : Semisentence L₁ k :=
+  (Matrix.conj fun i : Fin k ↦ π.domain.operator ![#i]) 🡒
+    ∃¹ (π.domain.operator ![#0] ⋏ (π.func F).operator (#0 :> fun i ↦ #i.succ))
+
+omit [L₁.Encodable] [L₁.LORDefinable] [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
+lemma funcExists_external (F : L₂.Func k) : S ⊢ ∀¹* (funcExistsSent π F) := by
+  apply Theory.Proof.complete_on_eq_models.{_, 0}
+  intro M _ _ _ hT
+  have h := (DirectTranslation.models_funcDefined_iff _ _).mp
+    (models_of_provable hT (π.func_defined F))
+  simpa [models_iff, funcExistsSent, Function.comp_def, Matrix.constant_eq_singleton] using
+    fun e' hD ↦ (h e' hD).exists
+
+omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
+lemma quote_funcExistsSent (F : L₂.Func k) :
+    (⌜funcExistsSent π F⌝ : Semiformula V L₁ k) = funcExistsBody (⌜π.domain.sentence⌝ : Semiformula V L₁ 1) (⌜(π.func F).sentence⌝ : Semiformula V L₁ (k + 1)) := by
+  unfold funcExistsBody
+  simp only [funcExistsSent, LCWQIsoGödelQuote.imply, LCWQIsoGödelQuote.exs,
+    LCWQIsoGödelQuote.and, quote_conj, quote_domain_bvar, quote_operator_cons]
+
+noncomputable abbrev uniqSent (F : L₂.Func k) : Semisentence L₁ (k + 2) :=
+  (Matrix.conj (fun i : Fin k ↦ π.domain.operator ![#i.succ.succ]) ⋏ π.domain.operator ![#0] ⋏
+    π.domain.operator ![#1] ⋏ (π.func F).operator (#0 :> fun i ↦ #i.succ.succ) ⋏
+    (π.func F).operator (#1 :> fun i ↦ #i.succ.succ)) 🡒 op(=).operator ![#0, #1]
+
+omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
+lemma quote_uniqSent (F : L₂.Func k) :
+    (⌜uniqSent π F⌝ : Semiformula V L₁ (k + 2)) = funcUniqueBody (⌜π.domain.sentence⌝ : Semiformula V L₁ 1) (⌜(π.func F).sentence⌝ : Semiformula V L₁ (k + 1)) := by
+  unfold funcUniqueBody
+  simp only [uniqSent, LCWQIsoGödelQuote.imply, LCWQIsoGödelQuote.and, quote_conj,
+    quote_domain_bvar, quote_operator_cons, quote_eq_bvar]
+
+omit [L₁.Encodable] [L₁.LORDefinable] [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
+lemma uniqSent_external (F : L₂.Func k) : S ⊢ ∀¹* (uniqSent π F) := by
+  apply Theory.Proof.complete_on_eq_models.{_, 0}
+  intro M _ _ _ hT
+  have h := (DirectTranslation.models_funcDefined_iff _ _).mp
+    (models_of_provable hT (π.func_defined F))
+  have key (e' : Fin (k + 2) → M) (a : Fin (k + 2)) :
+      (FirstOrder.Semiterm.val (L := L₁) (M := M) e' Empty.elim ∘
+        (#a :> fun i : Fin k ↦ #i.succ.succ) : Fin (k + 1) → M) =
+          (e' a :> fun i ↦ e' i.succ.succ) := by
+    funext j
+    cases j using Fin.cases <;> simp
+  suffices H : ∀ e' : Fin (k + 2) → M, (∀ i : Fin k, π.domain.val ![e' i.succ.succ]) →
+      π.domain.val ![e' 0] → π.domain.val ![e' 1] →
+      (π.func F).val (e' 0 :> fun i ↦ e' i.succ.succ) →
+      (π.func F).val (e' 1 :> fun i ↦ e' i.succ.succ) → e' 0 = e' 1 by
+    simpa [models_iff, uniqSent, key] using H
+  intro e' hW hD0 hD1 hG0 hG1
+  obtain ⟨x, -, hu⟩ := h (fun i ↦ e' i.succ.succ) hW
+  exact (hu _ ⟨hD0, hG0⟩).trans (hu _ ⟨hD1, hG1⟩).symm
+
+noncomputable abbrev congrSent (F : L₂.Func k) : Semisentence L₁ ((k + 1) + (k + 1)) :=
+  (op(=).operator ![#(Fin.castAdd (k + 1) 0), #(Fin.natAdd (k + 1) 0)] ⋏
+    Matrix.conj (fun i : Fin k ↦
+      op(=).operator ![#(Fin.castAdd (k + 1) i.succ), #(Fin.natAdd (k + 1) i.succ)])) 🡒
+    ((π.func F).operator (fun j ↦ #(Fin.castAdd (k + 1) j)) 🡒
+      (π.func F).operator (fun j ↦ #(Fin.natAdd (k + 1) j)))
+
+omit [L₁.Encodable] [L₁.LORDefinable] [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
+lemma congrSent_external (F : L₂.Func k) : S ⊢ ∀¹* (congrSent π F) := by
+  apply Theory.Proof.complete_on_eq_models.{_, 0}
+  intro M _ _ _ hT
+  simp only [congrSent, Fin.natAdd_eq_addNat, models_iff, Semiformula.eval_allClosure,
+    LogicalConnective.HomClass.map_imply, LogicalConnective.HomClass.map_and,
+    Semiformula.eval_operator, Matrix.comp₂, Nat.succ_eq_add_one, Nat.reduceAdd,
+    Semiterm.val_bvar, Tarski.Structure.eq_iff_eq, Fin.isValue, Matrix.cons_val_zero,
+    Matrix.cons_val_one, Fin.Fin1.eq_one, Matrix.cons_val_fin_one, Matrix.conj_hom_prop,
+    LogicalConnective.Prop.and_eq, LogicalConnective.Prop.arrow_eq, and_imp]
+  intro e' h0 hconj hG
+  have hv : (fun j : Fin (k + 1) ↦ e' (j.addNat (k + 1))) =
+      (fun j ↦ e' (Fin.castAdd (k + 1) j)) := by
+    funext j
+    cases j using Fin.cases with
+    | zero => exact h0.symm
+    | succ i => exact (hconj i).symm
+  simpa [Function.comp_def, hv] using hG
+
+omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
+lemma quote_congrSent (F : L₂.Func k) :
+    (⌜congrSent π F⌝ : Semiformula V L₁ ((k + 1) + (k + 1))) = funcCongrBody (⌜(π.func F).sentence⌝ : Semiformula V L₁ (k + 1)) := by
+  unfold funcCongrBody
+  simp only [congrSent, LCWQIsoGödelQuote.imply, LCWQIsoGödelQuote.and, quote_conj,
+    quote_eq_bvar, quote_operator_bvar]
+  rfl
+
+end external
+
+omit [L₁.LORDefinable] [L₁.Eq] in
+lemma quote_allClosure_semisentence {L : Language} [L.Encodable] [L.LORDefinable] {m : ℕ}
+    (θ : Semisentence L m) : (⌜∀¹* θ⌝ : V) = qqAlls (⌜θ⌝ : V) (m : V) := by
+  induction m with
+  | zero => simp
+  | succ m ih =>
+    rw [show (∀¹* θ : Sentence L) = ∀¹* (∀¹ θ) from rfl]
+    simpa [Sentence.quote_all, qqAlls_all] using ih (∀¹ θ)
+
+/-- A table of a direct translation `π` is a table of a translation. -/
+theorem IsTableOf.isTranslationTable (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) :
+    IsTranslationTable L₂ S tbl where
+  toIsTable := h.isTable hL₂
+  exs_domain := by
+    have h₁ := internalize_provability (V := V) π.domain_nonempty
+    rw [Sentence.quote_ex, operator_bvar_eq_sentence] at h₁
+    rw [h.domain]
+    exact h₁
+  func_exists hf := by
+    obtain ⟨k, F, rfl, rfl⟩ := hL₂.2 _ _ hf
+    have hd : (h.isTable hL₂).domT = ⌜π.domain.sentence⌝ := Semiformula.ext h.domain
+    have hg : (h.isTable hL₂).funcT F = ⌜(π.func F).sentence⌝ := Semiformula.ext (h.func F)
+    rw [← funcExistsBody_val (h.isTable hL₂).domT rfl ((h.isTable hL₂).funcT F) rfl, hd, hg,
+      ← quote_funcExistsSent]
+    have h₁ := internalize_provability (V := V) (funcExists_external π F)
+    rwa [quote_allClosure_semisentence] at h₁
+  func_unique hf := by
+    obtain ⟨k, F, rfl, rfl⟩ := hL₂.2 _ _ hf
+    have hd : (h.isTable hL₂).domT = ⌜π.domain.sentence⌝ := Semiformula.ext h.domain
+    have hg : (h.isTable hL₂).funcT F = ⌜(π.func F).sentence⌝ := Semiformula.ext (h.func F)
+    rw [← funcUniqueBody_val (h.isTable hL₂).domT rfl ((h.isTable hL₂).funcT F) rfl, hd, hg,
+      ← quote_uniqSent]
+    have h₁ := internalize_provability (V := V) (uniqSent_external π F)
+    rw [quote_allClosure_semisentence, Nat.cast_add, Nat.cast_ofNat] at h₁
+    exact h₁
+  func_congr hf := by
+    obtain ⟨k, F, rfl, rfl⟩ := hL₂.2 _ _ hf
+    have hg : (h.isTable hL₂).funcT F = ⌜(π.func F).sentence⌝ := Semiformula.ext (h.func F)
+    rw [← funcCongrBody_val ((h.isTable hL₂).funcT F) rfl, hg, ← quote_congrSent]
+    have h₁ := internalize_provability (V := V) (congrSent_external π F)
+    rw [quote_allClosure_semisentence, Nat.cast_add, Nat.cast_succ] at h₁
+    exact h₁
+
+end directTranslation
+
+end translationTable
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

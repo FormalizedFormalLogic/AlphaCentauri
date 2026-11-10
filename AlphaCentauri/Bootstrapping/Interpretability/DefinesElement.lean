@@ -67,6 +67,40 @@ lemma relativizedImp_imp_relativizedImp {k : ℕ} {H : Formula V L} (d : Semifor
     cl_prover [this]
   cl_prover [h₂]
 
+lemma relativizedImp_imp_relativizedImp_of_imp {k : ℕ} (d d' : Semiformula V L 1)
+    (A B : Fin k → Semiformula V L 1) (C C' : Semiformula V L (0 + k))
+    (hA : ∀ i, T.internalize V ⊢ ∀¹ (d' ⋏ B i 🡒 d ⋏ A i))
+    (hC : T.internalize V ⊢ (Semiformula.shift^[k] C).subst (fun i ↦ Semiterm.fvar (i : V)) 🡒
+      (Semiformula.shift^[k] C').subst fun i ↦ Semiterm.fvar (i : V)) :
+    T.internalize V ⊢ relativizedImp d A C 🡒 relativizedImp d' B C' := by
+  have h₁ (i : Fin k) : T.internalize V ⊢
+      (Semiformula.shift^[k] d').subst ![Semiterm.fvar (i : V)] ⋏
+        (Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar (i : V)] 🡒
+      (Semiformula.shift^[k] d).subst ![Semiterm.fvar (i : V)] ⋏
+        (Semiformula.shift^[k] (A i)).subst ![Semiterm.fvar (i : V)] := by
+    have := TProof.shift_iterate! (hA i) k
+    simp only [Semiformula.shift_iterate_imp, Semiformula.shift_iterate_all,
+      Semiformula.shift_iterate_and] at this
+    have h₂ := TProof.all_imp_subst (T := T)
+      (Semiformula.shift^[k] d' ⋏ Semiformula.shift^[k] (B i) 🡒
+        Semiformula.shift^[k] d ⋏ Semiformula.shift^[k] (A i)) (Semiterm.fvar (i : V))
+    simp only [Semiformula.substs_imp, Semiformula.substs_and] at h₂
+    exact h₂ ⨀ this
+  apply TProof.allItr_generalize_imp
+  simp only [relativizedImp, Semiformula.shift_iterate_allItr]
+  apply C_trans (TProof.allItr_specialize _ fun i ↦ Semiterm.fvar (i : V))
+  simp only [Semiformula.shift_iterate_imp, Semiformula.substs_imp, Semiformula.shift_iterate_conj,
+    Semiformula.substs_conj, Semiformula.shift_iterate_and, Semiformula.substs_and,
+    Semiformula.subst_shift_iterate_subst_bvar, Fin.addCast_val]
+  have h₂ := matrixConj_imp_matrixConj (𝓢 := T.internalize V) (φ := ⊤)
+    (v := fun i : Fin k ↦ (Semiformula.shift^[k] d').subst ![Semiterm.fvar (i : V)] ⋏
+      (Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar (i : V)])
+    (u := fun i : Fin k ↦ (Semiformula.shift^[k] d).subst ![Semiterm.fvar (i : V)] ⋏
+      (Semiformula.shift^[k] (A i)).subst ![Semiterm.fvar (i : V)]) fun i ↦ by
+    have := h₁ i
+    cl_prover [this]
+  cl_prover [h₂, hC]
+
 /-- Replacement of domain-equivalent hypotheses in `relativizedImp`. -/
 theorem relativizedImp_congr {k : ℕ} (d : Semiformula V L 1) (A B : Fin k → Semiformula V L 1)
     (C : Semiformula V L (0 + k)) :

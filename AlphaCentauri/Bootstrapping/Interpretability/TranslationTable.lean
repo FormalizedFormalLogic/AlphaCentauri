@@ -277,6 +277,10 @@ lemma funcT_shift {k : ℕ} (F : L₂.Func k) : (hT.funcT F).shift = hT.funcT F 
   ext
   simp [hT.func_shift (codeIn_func_quote F)]
 
+lemma relT_shift {k : ℕ} (R : L₂.Rel k) : (hT.relT R).shift = hT.relT R := by
+  ext
+  simp [hT.rel_shift (codeIn_rel_quote R)]
+
 end IsTable
 
 section bodies

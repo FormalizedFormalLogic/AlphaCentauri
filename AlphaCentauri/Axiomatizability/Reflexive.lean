@@ -50,10 +50,9 @@ theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T] 
   by_contra! hfa
   obtain ⟨F, hFT, hfin, hequiv⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp hfa
   let : F.Δ₁ := Theory.Δ₁.ofFinite F hfin
-  have hcon : T ⊢ F.consistent.val := h F hFT hfin
   have : 𝗜𝚺₁ ⪯ F := WeakerThan.trans inferInstance hequiv.le
   have : Consistent F := Consistent.of_le inferInstance hequiv.symm.le
-  exact consistent_unprovable F (hequiv.le.wk hcon)
+  exact consistent_unprovable F (hequiv.le.wk <| h F hFT hfin)
 
 /-- `𝗜𝚺₂` proves the consistency of `𝗜𝚺₁`.
 - [HP98, Corollary I.4.34(1)] -/

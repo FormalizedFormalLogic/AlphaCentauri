@@ -62,8 +62,10 @@ public import AlphaCentauri.InterpretabilityLogic.Formula
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Basic
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Hilbert
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Veltman
+public import AlphaCentauri.InterpretabilityLogic.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Logic
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
+public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentTheory
 public import AlphaCentauri.InterpretabilityLogic.OpenProblem
 public import AlphaCentauri.InterpretabilityLogic.Sequent
@@ -74,10 +76,14 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILP
 public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILW
 public import AlphaCentauri.InterpretabilityLogic.Veltman.CompletenessILWStar
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
+public import AlphaCentauri.InterpretabilityLogic.Veltman.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStep
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Bisimulation
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Completeness
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Extension
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinusCompleteness
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Veltman
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.CodedLimit

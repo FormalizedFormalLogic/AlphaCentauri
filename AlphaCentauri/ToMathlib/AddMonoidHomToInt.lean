@@ -34,20 +34,9 @@ lemma DiscretelyOrdered.exists_eq_natCast {r : R} (h₀ : 0 ≤ r) {q : ℕ} (h 
 
 namespace LeastNumberPrinciple
 
-omit [LinearOrder R] [IsStrictOrderedRing R] [DiscretelyOrdered R] in
-lemma map_intCast_mul (f : R →+ ℤ) (c : ℤ) (a : R) : f (c * a) = c * f a := by
-  simp [← zsmul_eq_mul, map_zsmul]
-
 variable (hL : LeastNumberPrinciple R) (f : R →+ ℤ)
 
 include hL
-
-lemma exists_eq_natCast_mul_add_natCast (a : R) {q : ℕ} (hq : 0 < q) :
-    ∃ (b : R) (k : ℕ), k < q ∧ a = q * b + k := by
-  obtain ⟨b, r, e, hr₀, hr⟩ := exists_ediv hL a q (by exact_mod_cast hq)
-  obtain ⟨k, hk, rfl⟩ := DiscretelyOrdered.exists_eq_natCast hr₀ hr
-  use b, k
-  exact ⟨hk, by rw [e, mul_comm]⟩
 
 /-- Every positive element is `a * b` with `a` odd and `b` not divisible by `3`. -/
 lemma exists_eq_mul_not_three_dvd {d : R} (hd : 0 < d) :
@@ -93,15 +82,19 @@ lemma exists_eq_mul_not_three_dvd {d : R} (hd : 0 < d) :
 number principle is zero.
 - [Car16, Lemma 5] -/
 theorem addMonoidHom_eq_zero (hx : ∃ x : R, ∀ n : ℕ, (n : R) < x) : f = 0 := by
+  have hmul (c : ℤ) (a : R) : f (c * a) = c * f a := by
+    simp [← zsmul_eq_mul, map_zsmul]
   have hdiv (a : R) {q : ℕ} (hq : 0 < q) :
       ∃ (b : R) (k : ℕ), k < q ∧ a = q * b + k ∧ f a = q * f b + k * f 1 := by
-    obtain ⟨b, k, hk, e⟩ := exists_eq_natCast_mul_add_natCast hL a hq
+    obtain ⟨b, r, e, hr₀, hr⟩ := exists_ediv hL a q (by exact_mod_cast hq)
+    obtain ⟨k, hk, rfl⟩ := DiscretelyOrdered.exists_eq_natCast hr₀ hr
+    rw [mul_comm] at e
     use b, k
     and_intros
     · exact hk
     · exact e
-    · have h₁ : f (q * b) = q * f b := by simpa using map_intCast_mul f q b
-      have h₂ : f k = k * f 1 := by simpa using map_intCast_mul f k 1
+    · have h₁ : f (q * b) = q * f b := by simpa using hmul q b
+      have h₂ : f k = k * f 1 := by simpa using hmul k 1
       rw [e, map_add, h₁, h₂]
   have hpow {m : ℤ} (h : ∀ n : ℕ, (2 : ℤ) ^ n ∣ m) : m = 0 :=
     Int.eq_zero_of_dvd_of_natAbs_lt_natAbs (h m.natAbs) (by simpa using Nat.lt_two_pow_self)
@@ -124,8 +117,8 @@ theorem addMonoidHom_eq_zero (hx : ∃ x : R, ∀ n : ℕ, (n : R) < x) : f = 0 
   obtain ⟨x, hx⟩ := hx
   set h := (f 1 : R) * x - (f x : R)
   have hfh : f h = 0 := by
-    have : f (f x : R) = f x * f 1 := by simpa using map_intCast_mul f (f x) 1
-    rw [map_sub, map_intCast_mul, this, mul_comm, sub_self]
+    have : f (f x : R) = f x * f 1 := by simpa using hmul (f x) 1
+    rw [map_sub, hmul, this, mul_comm, sub_self]
   have hh : h ≠ 0 := by
     intro h0
     have hx₀ : 0 < x := by simpa using hx 0
@@ -148,7 +141,7 @@ theorem addMonoidHom_eq_zero (hx : ∃ x : R, ∀ n : ℕ, (n : R) < x) : f = 0 
     obtain ⟨c, rfl⟩ := hcop.pow_left.dvd_of_dvd_mul_left
       (e ▸ (by simpa using hker hfd (q := 2 ^ n) (by positivity)) : (2 : R) ^ n ∣ a * b)
     use f c
-    simpa using map_intCast_mul f (2 ^ n) c
+    simpa using hmul (2 ^ n) c
   exact (hb <| by simpa using hker hfb (q := 3) (by norm_num)).elim
 
 end LeastNumberPrinciple

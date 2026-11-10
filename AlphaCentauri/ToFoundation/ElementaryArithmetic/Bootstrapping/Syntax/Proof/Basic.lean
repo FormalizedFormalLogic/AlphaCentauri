@@ -377,4 +377,208 @@ instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 
 end code
 
+lemma fstIdx_locallyDelta0 : LocallyDelta0Function₁ (fstIdx : V → V) where
+  graph := LocallyDelta0.of_definable fstIdx_definable
+  bounded X := by
+    use X
+    intro v hv
+    exact le_trans (fstIdx_le_self _) (hv 0)
+
+variable {T U : Theory L} [T.Δ₁] [U.Δ₁]
+
+namespace Derivation
+
+noncomputable abbrev conseq (x : V) : V := π₁ x
+
+variable (T) in
+/-- The operator generating the codes of derivations from the axioms of `T`. -/
+def Phi (C : Set V) (d : V) : Prop :=
+  IsFormulaSet L (fstIdx d) ∧
+  ( (∃ s p, d = axL s p ∧ p ∈ s ∧ neg L p ∈ s) ∨
+    (∃ s, d = verumIntro s ∧ ^⊤ ∈ s) ∨
+    (∃ s p q dp dq, d = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧
+      (fstIdx dp = insert p s ∧ dp ∈ C) ∧ (fstIdx dq = insert q s ∧ dq ∈ C)) ∨
+    (∃ s p q dpq, d = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧
+      fstIdx dpq = insert p (insert q s) ∧ dpq ∈ C) ∨
+    (∃ s p dp, d = allIntro s p dp ∧ ^∀ p ∈ s ∧
+      fstIdx dp = insert (free L p) (setShift L s) ∧ dp ∈ C) ∨
+    (∃ s p t dp, d = exsIntro s p t dp ∧ ^∃ p ∈ s ∧ IsTerm L t ∧
+      fstIdx dp = insert (substs1 L t p) s ∧ dp ∈ C) ∨
+    (∃ s d', d = wkRule s d' ∧ fstIdx d' ⊆ s ∧ d' ∈ C) ∨
+    (∃ s d', d = shiftRule s d' ∧ s = setShift L (fstIdx d') ∧ d' ∈ C) ∨
+    (∃ s p d₁ d₂, d = cutRule s p d₁ d₂ ∧
+      (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (neg L p) s ∧ d₂ ∈ C)) ∨
+    (∃ s p, d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) )
+
+variable (T) in
+private lemma phi_iff (C d : V) :
+    Phi T {x | x ∈ C} d ↔
+    IsFormulaSet L (fstIdx d) ∧
+    ( (∃ s < d, ∃ p < d, d = axL s p ∧ p ∈ s ∧ neg L p ∈ s) ∨
+      (∃ s < d, d = verumIntro s ∧ ^⊤ ∈ s) ∨
+      (∃ s < d, ∃ p < d, ∃ q < d, ∃ dp < d, ∃ dq < d,
+        d = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧
+          (fstIdx dp = insert p s ∧ dp ∈ C) ∧ (fstIdx dq = insert q s ∧ dq ∈ C)) ∨
+      (∃ s < d, ∃ p < d, ∃ q < d, ∃ dpq < d,
+        d = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ fstIdx dpq = insert p (insert q s) ∧ dpq ∈ C) ∨
+      (∃ s < d, ∃ p < d, ∃ dp < d,
+        d = allIntro s p dp ∧ ^∀ p ∈ s ∧ fstIdx dp = insert (free L p) (setShift L s) ∧ dp ∈ C) ∨
+      (∃ s < d, ∃ p < d, ∃ t < d, ∃ dp < d,
+        d = exsIntro s p t dp ∧ ^∃ p ∈ s ∧ IsTerm L t ∧
+          fstIdx dp = insert (substs1 L t p) s ∧ dp ∈ C) ∨
+      (∃ s < d, ∃ d' < d,
+        d = wkRule s d' ∧ fstIdx d' ⊆ s ∧ d' ∈ C) ∨
+      (∃ s < d, ∃ d' < d,
+        d = shiftRule s d' ∧ s = setShift L (fstIdx d') ∧ d' ∈ C) ∨
+      (∃ s < d, ∃ p < d, ∃ d₁ < d, ∃ d₂ < d,
+        d = cutRule s p d₁ d₂ ∧
+          (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (neg L p) s ∧ d₂ ∈ C)) ∨
+      (∃ s < d, ∃ p < d,
+        d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) ) := by
+  constructor
+  · rintro ⟨hs, H⟩
+    refine ⟨hs, ?_⟩
+    rcases H with (⟨s, p, rfl, h⟩ | ⟨s, rfl, h⟩ | ⟨s, p, q, dp, dq, rfl, h⟩ |
+      ⟨s, p, q, dpq, rfl, h⟩ |
+      ⟨s, p, dp, rfl, h⟩ | ⟨s, p, t, dp, rfl, h⟩ | ⟨s, d', rfl, h⟩ | ⟨s, d', rfl, h⟩ |
+      ⟨s, p, d₁, d₂, rfl, h⟩ | ⟨s, p, rfl, h⟩)
+    · disj 1; exact ⟨s, by simp, p, by simp, rfl, h⟩
+    · disj 2; exact ⟨s, by simp, rfl, h⟩
+    · disj 3; exact ⟨s, by simp, p, by simp, q, by simp, dp, by simp, dq, by simp, rfl, h⟩
+    · disj 4; exact ⟨s, by simp, p, by simp, q, by simp, dpq, by simp, rfl, h⟩
+    · disj 5; exact ⟨s, by simp, p, by simp, dp, by simp, rfl, h⟩
+    · disj 6; exact ⟨s, by simp, p, by simp, t, by simp, dp, by simp, rfl, h⟩
+    · disj 7; exact ⟨s, by simp, d', by simp, rfl, h⟩
+    · disj 8; exact ⟨s, by simp, d', by simp, rfl, h⟩
+    · disj 9; exact ⟨s, by simp, p, by simp, d₁, by simp, d₂, by simp, rfl, h⟩
+    · disj 10; exact ⟨s, by simp, p, by simp, rfl, h⟩
+  · rintro ⟨hs, H⟩
+    refine ⟨hs, ?_⟩
+    rcases H with (⟨s, _, p, _, rfl, h⟩ | ⟨s, _, rfl, h⟩ |
+      ⟨s, _, p, _, q, _, dp, _, dq, _, rfl, h⟩ |
+      ⟨s, _, p, _, q, _, dpq, _, rfl, h⟩ |
+      ⟨s, _, p, _, dp, _, rfl, h⟩ | ⟨s, _, p, _, t, _, dp, _, rfl, h⟩ | ⟨s, _, d', _, rfl, h⟩ |
+      ⟨s, _, d', _, rfl, h⟩ | ⟨s, _, p, _, d₁, _, d₂, _, rfl, h⟩ | ⟨s, _, p, _, h⟩)
+    · disj 1; exact ⟨s, p, rfl, h⟩
+    · disj 2; exact ⟨s, rfl, h⟩
+    · disj 3; exact ⟨s, p, q, dp, dq, rfl, h⟩
+    · disj 4; exact ⟨s, p, q, dpq, rfl, h⟩
+    · disj 5; exact ⟨s, p, dp, rfl, h⟩
+    · disj 6; exact ⟨s, p, t, dp, rfl, h⟩
+    · disj 7; exact ⟨s, d', rfl, h⟩
+    · disj 8; exact ⟨s, d', rfl, h⟩
+    · disj 9; exact ⟨s, p, d₁, d₂, rfl, h⟩
+    · disj 10; exact ⟨s, p, h⟩
+
+open LocallyDelta0 LocallyDelta0Function in
+lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
+    LocallyDelta0 fun w : Fin 2 → V ↦ Phi T {x | x ∈ w 1} (w 0) := by
+  have hv₀ := var (V := V) (0 : Fin 2)
+  have hfs : LocallyDelta0 fun w : Fin 2 → V ↦ IsFormulaSet L (fstIdx (w 0)) :=
+    isFormulaSet_locallyDelta0.pred_comp (fstIdx_locallyDelta0.comp₁ hv₀)
+  have h₁ : LocallyDelta0 fun w : Fin 2 → V ↦
+      ∃ s < w 0, ∃ p < w 0, w 0 = axL s p ∧ p ∈ s ∧ neg L p ∈ s := by
+    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <|
+      (eq (var 2) (pairing.comp₂ (var 1) (pairing.comp₂ (const 0) (var 0))).add_one).and <|
+      (mem (var 0) (var 1)).and <| mem ((neg_locallyDelta0 (L := L)).comp₁ (var 0)) (var 1)
+    exact this
+  have h₂ : LocallyDelta0 fun w : Fin 2 → V ↦ ∃ s < w 0, w 0 = verumIntro s ∧ ^⊤ ∈ s := by
+    have := bexs_lt_function hv₀ <|
+      (eq (var 1) (pairing.comp₂ (var 0) (pairing.comp₂ (const 1) (const 0))).add_one).and <|
+      mem (const (^⊤ : V)) (var 0)
+    exact this
+  have h₃ : LocallyDelta0 fun w : Fin 2 → V ↦
+      ∃ s < w 0, ∃ p < w 0, ∃ q < w 0, ∃ dp < w 0, ∃ dq < w 0,
+        w 0 = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧
+          (fstIdx dp = insert p s ∧ dp ∈ w 1) ∧ (fstIdx dq = insert q s ∧ dq ∈ w 1) := by
+    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
+      bexs_lt_function (var 3) <| bexs_lt_function (var 4) <|
+      (eq (var 5) (pairing.comp₂ (var 4) <| pairing.comp₂ (const 2) <| pairing.comp₂ (var 3) <|
+        pairing.comp₂ (var 2) <| pairing.comp₂ (var 1) (var 0)).add_one).and <|
+      (mem (qqAnd_locallyDelta0.comp₂ (var 3) (var 2)) (var 4)).and <|
+      ((eq (fstIdx_locallyDelta0.comp₁ (var 1)) (insert.comp₂ (var 3) (var 4))).and
+        (mem (var 1) (var 6))).and <|
+      (eq (fstIdx_locallyDelta0.comp₁ (var 0)) (insert.comp₂ (var 2) (var 4))).and
+        (mem (var 0) (var 6))
+    exact this
+  have h₄ : LocallyDelta0 fun w : Fin 2 → V ↦
+      ∃ s < w 0, ∃ p < w 0, ∃ q < w 0, ∃ dpq < w 0,
+        w 0 = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ fstIdx dpq = insert p (insert q s) ∧
+          dpq ∈ w 1 := by
+    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
+      bexs_lt_function (var 3) <|
+      (eq (var 4) (pairing.comp₂ (var 3) <| pairing.comp₂ (const 3) <| pairing.comp₂ (var 2) <|
+        pairing.comp₂ (var 1) (var 0)).add_one).and <|
+      (mem (qqOr_locallyDelta0.comp₂ (var 2) (var 1)) (var 3)).and <|
+      (eq (fstIdx_locallyDelta0.comp₁ (var 0))
+        (insert.comp₂ (var 2) (insert.comp₂ (var 1) (var 3)))).and (mem (var 0) (var 5))
+    exact this
+  have h₅ : LocallyDelta0 fun w : Fin 2 → V ↦
+      ∃ s < w 0, ∃ p < w 0, ∃ dp < w 0,
+        w 0 = allIntro s p dp ∧ ^∀ p ∈ s ∧ fstIdx dp = insert (free L p) (setShift L s) ∧
+          dp ∈ w 1 := by
+    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
+      (eq (var 3) (pairing.comp₂ (var 2) <| pairing.comp₂ (const 4) <|
+        pairing.comp₂ (var 1) (var 0)).add_one).and <|
+      (mem (qqAll_locallyDelta0.comp₁ (var 1)) (var 2)).and <|
+      (eq (fstIdx_locallyDelta0.comp₁ (var 0)) <|
+        insert.comp₂ ((free_locallyDelta0 (L := L)).comp₁ (var 1))
+          ((setShift_locallyDelta0 (L := L)).comp₁ (var 2))).and <|
+      mem (var 0) (var 4)
+    exact this
+  have h₆ : LocallyDelta0 fun w : Fin 2 → V ↦
+      ∃ s < w 0, ∃ p < w 0, ∃ t < w 0, ∃ dp < w 0,
+        w 0 = exsIntro s p t dp ∧ ^∃ p ∈ s ∧ IsTerm L t ∧
+          fstIdx dp = insert (substs1 L t p) s ∧ dp ∈ w 1 := by
+    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
+      bexs_lt_function (var 3) <|
+      (eq (var 4) (pairing.comp₂ (var 3) <| pairing.comp₂ (const 5) <| pairing.comp₂ (var 2) <|
+        pairing.comp₂ (var 1) (var 0)).add_one).and <|
+      (mem (qqExs_locallyDelta0.comp₁ (var 2)) (var 3)).and <|
+      ((isSemiterm_locallyDelta0 (L := L)).rel_comp₂ (const 0) (var 1)).and <|
+      (eq (fstIdx_locallyDelta0.comp₁ (var 0)) <|
+        insert.comp₂ ((substs1_locallyDelta0 (L := L)).comp₂ (var 1) (var 2)) (var 3)).and <|
+      mem (var 0) (var 5)
+    exact this
+  have h₇ : LocallyDelta0 fun w : Fin 2 → V ↦
+      ∃ s < w 0, ∃ d' < w 0, w 0 = wkRule s d' ∧ fstIdx d' ⊆ s ∧ d' ∈ w 1 := by
+    have hsub := of_definable (R := fun w : Fin 2 → V ↦ w 0 ⊆ w 1) (by definability)
+    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <|
+      (eq (var 2) (pairing.comp₂ (var 1) (pairing.comp₂ (const 6) (var 0))).add_one).and <|
+      (hsub.comp₂ (fstIdx_locallyDelta0.comp₁ (var 0)) (var 1)).and (mem (var 0) (var 3))
+    exact this
+  have h₈ : LocallyDelta0 fun w : Fin 2 → V ↦
+      ∃ s < w 0, ∃ d' < w 0, w 0 = shiftRule s d' ∧ s = setShift L (fstIdx d') ∧ d' ∈ w 1 := by
+    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <|
+      (eq (var 2) (pairing.comp₂ (var 1) (pairing.comp₂ (const 7) (var 0))).add_one).and <|
+      (eq (var 1) ((setShift_locallyDelta0 (L := L)).comp₁ <|
+        fstIdx_locallyDelta0.comp₁ (var 0))).and <|
+      mem (var 0) (var 3)
+    exact this
+  have h₉ : LocallyDelta0 fun w : Fin 2 → V ↦
+      ∃ s < w 0, ∃ p < w 0, ∃ d₁ < w 0, ∃ d₂ < w 0,
+        w 0 = cutRule s p d₁ d₂ ∧ (fstIdx d₁ = insert p s ∧ d₁ ∈ w 1) ∧
+          (fstIdx d₂ = insert (neg L p) s ∧ d₂ ∈ w 1) := by
+    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
+      bexs_lt_function (var 3) <|
+      (eq (var 4) (pairing.comp₂ (var 3) <| pairing.comp₂ (const 8) <| pairing.comp₂ (var 2) <|
+        pairing.comp₂ (var 1) (var 0)).add_one).and <|
+      ((eq (fstIdx_locallyDelta0.comp₁ (var 1)) (insert.comp₂ (var 2) (var 3))).and
+        (mem (var 1) (var 5))).and <|
+      (eq (fstIdx_locallyDelta0.comp₁ (var 0)) <|
+        insert.comp₂ ((neg_locallyDelta0 (L := L)).comp₁ (var 2)) (var 3)).and <|
+      mem (var 0) (var 5)
+    exact this
+  have h₁₀ : LocallyDelta0 fun w : Fin 2 → V ↦
+      ∃ s < w 0, ∃ p < w 0, w 0 = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class := by
+    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <|
+      (eq (var 2) (pairing.comp₂ (var 1) (pairing.comp₂ (const 9) (var 0))).add_one).and <|
+      (mem (var 0) (var 1)).and <|
+      (LocallyDelta0Axioms.locallyDelta0 (T := T) (V := V)).pred_comp (var 0)
+    exact this
+  exact (hfs.and <| h₁.or <| h₂.or <| h₃.or <| h₄.or <| h₅.or <| h₆.or <| h₇.or <| h₈.or <|
+    h₉.or h₁₀).of_iff fun w ↦ phi_iff T (w 1) (w 0)
+
+end Derivation
+
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

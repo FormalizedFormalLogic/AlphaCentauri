@@ -7,8 +7,7 @@ public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Veltman.Basic
 # Veltman semantics of the extensions of $\mathbf{IL}$
 
 Frame conditions for the principles beyond $\mathbf{IL}$, the validity of the principles under
-them and the converses, soundness and consistency of the extensions, and strict inclusions among
-the extensions.
+them, soundness and consistency of the extensions, and strict inclusions among the extensions.
 -/
 
 @[expose] public section
@@ -50,14 +49,7 @@ export HasP (s_of_rel_rel_s)
 export HasR (s_of_rel_rel_s_rel)
 export HasW (cwf_rel_comp_s)
 
-variable {M} {V : M.World → α → Prop}
-
-instance [M.HasM] : (M.overwrite V).HasM := ⟨rel_of_s_rel (M := M)⟩
-instance [M.HasM₀] : (M.overwrite V).HasM₀ := ⟨rel_of_rel_rel_s_rel (M := M)⟩
-instance [M.HasP] : (M.overwrite V).HasP := ⟨s_of_rel_rel_s (M := M)⟩
-instance [M.HasR] : (M.overwrite V).HasR := ⟨s_of_rel_rel_s_rel (M := M)⟩
-instance [M.HasW] : (M.overwrite V).HasW := ⟨cwf_rel_comp_s (M := M)⟩
-
+variable {M}
 lemma HasW.of_finite [Finite M.World] [M.IsIL] (h : ∀ {w x y : M.World}, x ≺ y → ¬y ≺[w] x) :
     M.HasW where
   cwf_rel_comp_s w :=
@@ -215,170 +207,16 @@ instance : Consistent (𝐈𝐋𝐑* : Logic α) :=
 
 end Logic
 
-/-! ### Correspondence -/
-
-namespace Veltman.Model
-
-open World
-
-variable {κ : Type*} [Nonempty κ] {M : Model κ ℕ}
-
-lemma HasM.of_valid_axiomM [M.IsIL] (h : ∀ V, M.overwrite V ⊧ Axioms.M (#0) (#1) (#2)) :
-    M.HasM where
-  rel_of_s_rel {w x y z} Sxy Ryz := by
-    let V : M.World → ℕ → Prop := fun u a ↦ match a with | 0 => u = x | 1 => u = y | _ => x ≺ u;
-    have h₁ : w ⊩[M.overwrite V] #0 ▷ #1 := by
-      intro v _ hv;
-      use y;
-      and_intros;
-      · exact (show v = x from hv) ▸ Sxy;
-      · rfl;
-    obtain ⟨t, -, ht⟩ := h V w h₁ x (rel_of_s_left Sxy) (forces_and.mpr ⟨rfl, fun _ ↦ id⟩);
-    obtain ⟨hty, ht⟩ := forces_and.mp ht;
-    exact ht z <| (show t = y from hty) ▸ Ryz;
-
-lemma HasM₀.of_valid_axiomM₀ (h : ∀ V, M.overwrite V ⊧ Axioms.M₀ (#0) (#1) (#2)) :
-    M.HasM₀ where
-  rel_of_rel_rel_s_rel {w x y z u} Rwx Rxy Swyz Rzu := by
-    let V : M.World → ℕ → Prop := fun t a ↦ match a with | 0 => t = y | 1 => t = z | _ => x ≺ t;
-    have h₁ : w ⊩[M.overwrite V] #0 ▷ #1 := by
-      intro v _ hv;
-      use z;
-      and_intros;
-      · exact (show v = y from hv) ▸ Swyz;
-      · rfl;
-    have h₂ : x ⊩[M.overwrite V] ◇(#0) ⋏ □(#2) :=
-      forces_and.mpr ⟨forces_dia.mpr ⟨y, Rxy, rfl⟩, fun _ ↦ id⟩;
-    obtain ⟨t, -, ht⟩ := h V w h₁ x Rwx h₂;
-    obtain ⟨htz, ht⟩ := forces_and.mp ht;
-    exact ht u <| (show t = z from htz) ▸ Rzu;
-
-lemma HasP.of_valid_axiomP (h : ∀ V, M.overwrite V ⊧ Axioms.P (#0) (#1)) : M.HasP where
-  s_of_rel_rel_s {w x y z} Rwx Rxy Swyz := by
-    let V : M.World → ℕ → Prop := fun t a ↦ match a with | 0 => t = y | _ => t = z;
-    have h₁ : w ⊩[M.overwrite V] #0 ▷ #1 := by
-      intro v _ hv;
-      use z;
-      and_intros;
-      · exact (show v = y from hv) ▸ Swyz;
-      · rfl;
-    obtain ⟨t, Sxyt, ht⟩ := h V w h₁ x Rwx y Rxy rfl;
-    exact (show t = _ from ht) ▸ Sxyt;
-
-lemma HasR.of_valid_axiomR [M.IsIL] (h : ∀ V, M.overwrite V ⊧ Axioms.R (#0) (#1) (#2)) :
-    M.HasR where
-  s_of_rel_rel_s_rel {w x y z u} Rwx Rxy Swyz Rzu := by
-    let V : M.World → ℕ → Prop := fun t a ↦ match a with | 0 => t = y | 1 => t = z | _ => y ≺[x] t;
-    have h₁ : w ⊩[M.overwrite V] #0 ▷ #1 := by
-      intro v _ hv;
-      use z;
-      and_intros;
-      · exact (show v = y from hv) ▸ Swyz;
-      · rfl;
-    have h₂ : x ⊩[M.overwrite V] ∼(#0 ▷ ∼(#2)) := by
-      apply not_forces_rhd.mpr;
-      use y;
-      and_intros;
-      · exact Rxy;
-      · rfl;
-      · exact fun _ Sxyt ht ↦ ht Sxyt;
-    obtain ⟨t, -, ht⟩ := h V w h₁ x Rwx h₂;
-    obtain ⟨htz, ht⟩ := forces_and.mp ht;
-    exact ht u <| (show t = z from htz) ▸ Rzu;
-
-lemma HasR.of_valid_axiomP₀ [M.IsIL] (h : ∀ V, M.overwrite V ⊧ Axioms.P₀ (#0) (#1)) :
-    M.HasR where
-  s_of_rel_rel_s_rel {w x y z u} Rwx Rxy Swyz Rzu := by
-    let V : M.World → ℕ → Prop := fun t a ↦ match a with | 0 => t = y | _ => t = u;
-    have h₁ : w ⊩[M.overwrite V] #0 ▷ ◇(#1) := by
-      intro v _ hv;
-      use z;
-      and_intros;
-      · exact (show v = y from hv) ▸ Swyz;
-      · exact forces_dia.mpr ⟨u, Rzu, rfl⟩;
-    obtain ⟨t, Sxyt, ht⟩ := h V w h₁ x Rwx y Rxy rfl;
-    exact (show t = _ from ht) ▸ Sxyt;
-
-lemma HasW.of_valid_axiomF [M.IsIL] (h : ∀ V, M.overwrite V ⊧ Axioms.F (#0)) : M.HasW where
-  cwf_rel_comp_s w := by
-    apply ConverseWellFounded.iff_has_max.mpr;
-    intro X hX;
-    by_contra! hmax;
-    let V : M.World → ℕ → Prop := fun u _ ↦ ∃ x ∈ X, u ≺[w] x;
-    have h₁ : w ⊩[M.overwrite V] #0 ▷ ◇(#0) := by
-      rintro u - ⟨x, hx, Sux⟩;
-      obtain ⟨x', hx', v, Rxv, Svx'⟩ := hmax x hx;
-      use x;
-      and_intros;
-      · exact Sux;
-      · exact forces_dia.mpr ⟨v, Rxv, x', hx', Svx'⟩;
-    obtain ⟨m, hm⟩ := hX;
-    obtain ⟨x, hx, u, -, Sux⟩ := hmax m hm;
-    exact h V w h₁ u (rel_of_s_left Sux) ⟨x, hx, Sux⟩;
-
-lemma HasW.of_valid_axiomW [M.IsIL] (h : ∀ V, M.overwrite V ⊧ Axioms.W (#0) (#1)) : M.HasW where
-  cwf_rel_comp_s w := by
-    apply ConverseWellFounded.iff_has_max.mpr;
-    intro X hX;
-    by_contra! hmax;
-    let V : M.World → ℕ → Prop := fun u a ↦ match a with | 0 => ∃ x ∈ X, u ≺[w] x | _ => u ∈ X;
-    have h₁ : w ⊩[M.overwrite V] #0 ▷ #1 := by
-      rintro u - ⟨x, hx, Sux⟩;
-      use x;
-      and_intros;
-      · exact Sux;
-      · exact hx;
-    obtain ⟨m, hm⟩ := hX;
-    obtain ⟨x, hx, u, -, Sux⟩ := hmax m hm;
-    obtain ⟨z, -, hz⟩ := h V w h₁ u (rel_of_s_left Sux) ⟨x, hx, Sux⟩;
-    obtain ⟨hzX, hz⟩ := forces_and.mp hz;
-    obtain ⟨x', hx', v, Rzv, Svx'⟩ := hmax z hzX;
-    exact hz v Rzv ⟨x', hx', Svx'⟩;
-
-theorem HasM.iff_valid_axiomM [M.IsIL] :
-    M.HasM ↔ ∀ V, M.overwrite V ⊧ Axioms.M (#0) (#1) (#2) :=
-  ⟨fun _ _ _ ↦ forces_axiomM, of_valid_axiomM⟩
-
-theorem HasM₀.iff_valid_axiomM₀ [M.IsIL] :
-    M.HasM₀ ↔ ∀ V, M.overwrite V ⊧ Axioms.M₀ (#0) (#1) (#2) :=
-  ⟨fun _ _ _ ↦ forces_axiomM₀, of_valid_axiomM₀⟩
-
-theorem HasP.iff_valid_axiomP [M.IsIL] : M.HasP ↔ ∀ V, M.overwrite V ⊧ Axioms.P (#0) (#1) :=
-  ⟨fun _ _ _ ↦ forces_axiomP, of_valid_axiomP⟩
-
-theorem HasR.TFAE [M.IsIL] : [
-    M.HasR,
-    ∀ V, M.overwrite V ⊧ Axioms.R (#0) (#1) (#2),
-    ∀ V, M.overwrite V ⊧ Axioms.P₀ (#0) (#1)
-  ].TFAE := by
-  tfae_have 1 → 2 := fun _ _ _ ↦ forces_axiomR;
-  tfae_have 2 → 1 := of_valid_axiomR;
-  tfae_have 1 → 3 := fun _ _ ↦ Logic.ILP₀.sound (by simp);
-  tfae_have 3 → 1 := of_valid_axiomP₀;
-  tfae_finish;
-
-/-- - [Vis90, §6.2.1] -/
-theorem HasW.TFAE [M.IsIL] : [
-    M.HasW,
-    ∀ V, M.overwrite V ⊧ Axioms.W (#0) (#1),
-    ∀ V, M.overwrite V ⊧ Axioms.F (#0)
-  ].TFAE := by
-  tfae_have 1 → 2 := fun _ _ _ ↦ forces_axiomW;
-  tfae_have 2 → 1 := of_valid_axiomW;
-  tfae_have 1 → 3 := fun _ _ ↦ Logic.ILF.sound (by simp);
-  tfae_have 3 → 1 := of_valid_axiomF;
-  tfae_finish;
-
-end Veltman.Model
-
 /-! ### Strict inclusions -/
 
 namespace Logic
 
-open Veltman Veltman.Model
+open Veltman Veltman.Model Veltman.Model.World
 
-private abbrev countermodelW : Model (Fin 3) ℕ :=
-  ⟨(· < ·), fun w x y ↦ w = 0 ∧ x ≠ 0 ∧ y ≠ 0 ∨ w = 1 ∧ x = 2 ∧ y = 2, fun _ _ ↦ False⟩
+private abbrev countermodelW : Model (Fin 3) ℕ where
+  Rel' := (· < ·)
+  S' w x y := w = 0 ∧ x ≠ 0 ∧ y ≠ 0 ∨ w = 1 ∧ x = 2 ∧ y = 2
+  Val' u a := match a with | 1 => u = 1 | _ => u ≠ 0
 
 private instance : IsTrans _ countermodelW.Rel := ⟨by decide⟩
 private instance : Std.Irrefl countermodelW.Rel := ⟨by decide⟩
@@ -401,7 +239,7 @@ private lemma countermodelW.not_hasW : ¬countermodelW.HasW := fun _ ↦ by
 private abbrev countermodelM₀ : Model (Fin 5) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 1 ∧ y = 2 ∨ x = 3 ∧ y = 4
   S' w x y := w = 0 ∧ 1 ≤ x ∧ x ≤ y ∨ w = 1 ∧ x = 2 ∧ y = 2 ∨ w = 3 ∧ x = 4 ∧ y = 4
-  Val' _ _ := False
+  Val' t a := match a with | 0 => t = 2 | 1 => t = 3 | 2 => t = 2 | _ => t = 4
 
 private instance : IsTrans _ countermodelM₀.Rel := ⟨by decide⟩
 private instance : Std.Irrefl countermodelM₀.Rel := ⟨by decide⟩
@@ -417,7 +255,7 @@ private abbrev countermodelR : Model (Fin 5) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 1 ∧ (y = 2 ∨ y = 4) ∨ x = 3 ∧ y = 4
   S' w x y :=
     w = 0 ∧ 1 ≤ x ∧ x ≤ y ∨ w = 1 ∧ (x = 2 ∧ y = 2 ∨ x = 4 ∧ y = 4) ∨ w = 3 ∧ x = 4 ∧ y = 4
-  Val' _ _ := False
+  Val' t a := match a with | 0 => t = 2 | 1 => t = 3 | _ => t = 2
 
 private instance : IsTrans _ countermodelR.Rel := ⟨by decide⟩
 private instance : Std.Irrefl countermodelR.Rel := ⟨by decide⟩
@@ -435,7 +273,7 @@ private instance : countermodelR.HasW := HasW.of_finite (by decide)
 private abbrev countermodelM : Model (Fin 4) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 2 ∧ y = 3
   S' w x y := w = 0 ∧ 1 ≤ x ∧ x ≤ y ∨ w = 2 ∧ x = 3 ∧ y = 3
-  Val' _ _ := False
+  Val' t a := match a with | 0 => t = 1 | 1 => t = 2 | _ => False
 
 private instance : IsTrans _ countermodelM.Rel := ⟨by decide⟩
 private instance : Std.Irrefl countermodelM.Rel := ⟨by decide⟩
@@ -453,7 +291,7 @@ private instance : countermodelM.HasW := HasW.of_finite (by decide)
 private abbrev countermodelP : Model (Fin 4) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 1 ∧ y = 2
   S' w x y := w = 0 ∧ 1 ≤ x ∧ x ≤ y ∨ w = 1 ∧ x = 2 ∧ y = 2
-  Val' _ _ := False
+  Val' t a := match a with | 0 => t = 2 | _ => t = 3
 
 private instance : IsTrans _ countermodelP.Rel := ⟨by decide⟩
 private instance : Std.Irrefl countermodelP.Rel := ⟨by decide⟩
@@ -469,48 +307,102 @@ private instance : countermodelP.HasR := ⟨by decide⟩
 private instance : countermodelP.HasW := HasW.of_finite (by decide)
 
 instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐅 :=
-  .of_unprovable_provable (fun h ↦ countermodelW.not_hasW <|
-    HasW.of_valid_axiomF fun _ ↦ ofAxioms.sound (by simp) h) ILF.axiomF
+  .of_unprovable_provable (φ := Axioms.F (#0)) (fun h ↦ by
+    have H := ofAxioms.sound (M := countermodelW) (𝔸 := ∅) (by simp) h 0;
+    have h₁ : (0 : countermodelW.World) ⊩[countermodelW] #0 ▷ ◇(#0) := by
+      intro u _ hu;
+      exact ⟨1, Or.inl ⟨rfl, hu, by decide⟩,
+        forces_dia.mpr ⟨2, by decide, show (2 : Fin 3) ≠ 0 by decide⟩⟩;
+    exact H h₁ 1 (by decide) (show (1 : Fin 3) ≠ 0 by decide)) ILF.axiomF
 
 instance : (𝐈𝐋𝐌₀ : Logic ℕ) ⪱ 𝐈𝐋𝐌₀𝐖 :=
-  .of_unprovable_provable (fun h ↦ countermodelW.not_hasW <|
-    HasW.of_valid_axiomW fun _ ↦ ILM₀.sound h) ILM₀W.axiomW
+  .of_unprovable_provable (φ := Axioms.W (#0) (#1)) (fun h ↦ by
+    have H := ILM₀.sound (M := countermodelW) h 0;
+    have h₁ : (0 : countermodelW.World) ⊩[countermodelW] #0 ▷ #1 := by
+      intro u _ hu;
+      exact ⟨1, Or.inl ⟨rfl, hu, by decide⟩, rfl⟩;
+    obtain ⟨z, _, hz⟩ := H h₁ 1 (by decide) (show (1 : Fin 3) ≠ 0 by decide);
+    obtain ⟨hz₁, hz₂⟩ := forces_and.mp hz;
+    obtain rfl : z = 1 := hz₁;
+    exact hz₂ 2 (by decide) (show (2 : Fin 3) ≠ 0 by decide)) ILM₀W.axiomW
 
 instance : (𝐈𝐋𝐑 : Logic ℕ) ⪱ 𝐈𝐋𝐑𝐖 :=
-  .of_unprovable_provable (fun h ↦ countermodelW.not_hasW <|
-    HasW.of_valid_axiomW fun _ ↦ ILR.sound h) ILRW.axiomW
+  .of_unprovable_provable (φ := Axioms.W (#0) (#1)) (fun h ↦ by
+    have H := ILR.sound (M := countermodelW) h 0;
+    have h₁ : (0 : countermodelW.World) ⊩[countermodelW] #0 ▷ #1 := by
+      intro u _ hu;
+      exact ⟨1, Or.inl ⟨rfl, hu, by decide⟩, rfl⟩;
+    obtain ⟨z, _, hz⟩ := H h₁ 1 (by decide) (show (1 : Fin 3) ≠ 0 by decide);
+    obtain ⟨hz₁, hz₂⟩ := forces_and.mp hz;
+    obtain rfl : z = 1 := hz₁;
+    exact hz₂ 2 (by decide) (show (2 : Fin 3) ≠ 0 by decide)) ILRW.axiomW
 
 instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐌₀ :=
-  .of_unprovable_provable (fun h ↦ by
-    have := HasM₀.of_valid_axiomM₀ fun _ ↦ ofAxioms.sound (M := countermodelM₀.overwrite _)
-      (by simp) h;
-    exact absurd (rel_of_rel_rel_s_rel (M := countermodelM₀) (w := 0) (x := 1) (y := 2) (z := 3)
-      (u := 4) (by decide) (by decide) (by decide) (by decide)) (by decide)) ILM₀.axiomM₀
+  .of_unprovable_provable (φ := Axioms.M₀ (#0) (#1) (#2)) (fun h ↦ by
+    have H := ofAxioms.sound (M := countermodelM₀) (𝔸 := ∅) (by simp) h 0;
+    have h₁ : (0 : countermodelM₀.World) ⊩[countermodelM₀] #0 ▷ #1 := by
+      intro v _ hv;
+      obtain rfl : v = 2 := hv;
+      exact ⟨3, by decide, rfl⟩;
+    have h₂ : (1 : countermodelM₀.World) ⊩[countermodelM₀] ◇(#0) ⋏ □(#2) :=
+      forces_and.mpr ⟨forces_dia.mpr ⟨2, by decide, rfl⟩, fun y hy ↦
+        (by decide : ∀ y, countermodelM₀.Rel 1 y → y = 2) y hy⟩;
+    obtain ⟨t, _, ht⟩ := H h₁ 1 (by decide) h₂;
+    obtain ⟨htz, ht⟩ := forces_and.mp ht;
+    obtain rfl : t = 3 := htz;
+    exact (show (4 : Fin 5) ≠ 2 by decide) (ht 4 (by decide))) ILM₀.axiomM₀
 
 instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐏₀ :=
-  .of_unprovable_provable (fun h ↦ by
-    have := HasR.of_valid_axiomP₀ fun _ ↦ ofAxioms.sound (M := countermodelM₀.overwrite _)
-      (by simp) h;
-    exact absurd (s_of_rel_rel_s_rel (M := countermodelM₀) (w := 0) (x := 1) (y := 2) (z := 3)
-      (u := 4) (by decide) (by decide) (by decide) (by decide)) (by decide)) ILP₀.axiomP₀
+  .of_unprovable_provable (φ := Axioms.P₀ (#0) (#3)) (fun h ↦ by
+    have H := ofAxioms.sound (M := countermodelM₀) (𝔸 := ∅) (by simp) h 0;
+    have h₁ : (0 : countermodelM₀.World) ⊩[countermodelM₀] #0 ▷ ◇(#3) := by
+      intro v _ hv;
+      obtain rfl : v = 2 := hv;
+      exact ⟨3, by decide, forces_dia.mpr ⟨4, by decide, rfl⟩⟩;
+    obtain ⟨t, hSt, ht⟩ := H h₁ 1 (by decide) 2 (by decide) rfl;
+    obtain rfl : t = 4 := ht;
+    exact absurd hSt (by decide)) ILP₀.axiomP₀
 
 instance : (𝐈𝐋𝐌₀𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐑𝐖 :=
-  .of_unprovable_provable (fun h ↦ by
-    have := HasR.of_valid_axiomR fun _ ↦ ILM₀W.sound (M := countermodelR.overwrite _) h;
-    exact absurd (s_of_rel_rel_s_rel (M := countermodelR) (w := 0) (x := 1) (y := 2) (z := 3)
-      (u := 4) (by decide) (by decide) (by decide) (by decide)) (by decide)) ILRW.axiomR
+  .of_unprovable_provable (φ := Axioms.R (#0) (#1) (#2)) (fun h ↦ by
+    have H := ILM₀W.sound (M := countermodelR) h 0;
+    have h₁ : (0 : countermodelR.World) ⊩[countermodelR] #0 ▷ #1 := by
+      intro v _ hv;
+      obtain rfl : v = 2 := hv;
+      exact ⟨3, by decide, rfl⟩;
+    have h₂ : (1 : countermodelR.World) ⊩[countermodelR] ∼(#0 ▷ ∼(#2)) := by
+      apply not_forces_rhd.mpr;
+      refine ⟨2, by decide, rfl, ?_⟩;
+      intro z hz hz';
+      exact hz' ((by decide : ∀ z, countermodelR.S 1 2 z → z = 2) z hz);
+    obtain ⟨t, _, ht⟩ := H h₁ 1 (by decide) h₂;
+    obtain ⟨htz, ht⟩ := forces_and.mp ht;
+    obtain rfl : t = 3 := htz;
+    exact (show (4 : Fin 5) ≠ 2 by decide) (ht 4 (by decide))) ILRW.axiomR
 
 instance : (𝐈𝐋𝐑𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐌 :=
-  .of_unprovable_provable (fun h ↦ by
-    have := HasM.of_valid_axiomM fun _ ↦ ILRW.sound (M := countermodelM.overwrite _) h;
-    exact absurd (rel_of_s_rel (M := countermodelM) (w := 0) (x := 1) (y := 2) (z := 3)
-      (by decide) (by decide)) (by decide)) ILM.axiomM
+  .of_unprovable_provable (φ := Axioms.M (#0) (#1) (#2)) (fun h ↦ by
+    have H := ILRW.sound (M := countermodelM) h 0;
+    have h₁ : (0 : countermodelM.World) ⊩[countermodelM] #0 ▷ #1 := by
+      intro v _ hv;
+      obtain rfl : v = 1 := hv;
+      exact ⟨2, by decide, rfl⟩;
+    obtain ⟨t, _, ht⟩ := H h₁ 1 (by decide) (forces_and.mpr ⟨rfl, fun y hy ↦
+      ((by decide : ∀ y, ¬countermodelM.Rel 1 y) y hy).elim⟩);
+    obtain ⟨htz, ht⟩ := forces_and.mp ht;
+    obtain rfl : t = 2 := htz;
+    exact ht 3 (by decide)) ILM.axiomM
 
 instance : (𝐈𝐋𝐑𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐏 :=
-  .of_unprovable_provable (fun h ↦ by
-    have := HasP.of_valid_axiomP fun _ ↦ ILRW.sound (M := countermodelP.overwrite _) h;
-    exact absurd (s_of_rel_rel_s (M := countermodelP) (w := 0) (x := 1) (y := 2) (z := 3)
-      (by decide) (by decide) (by decide)) (by decide)) ILP.axiomP
+  .of_unprovable_provable (φ := Axioms.P (#0) (#1)) (fun h ↦ by
+    have H := ILRW.sound (M := countermodelP) h 0;
+    have h₁ : (0 : countermodelP.World) ⊩[countermodelP] #0 ▷ #1 := by
+      intro v _ hv;
+      obtain rfl : v = 2 := hv;
+      exact ⟨3, by decide, rfl⟩;
+    obtain ⟨t, hSt, ht⟩ := H h₁ 1 (by decide) 2 (by decide) rfl;
+    obtain rfl : t = 3 := ht;
+    exact absurd hSt (by decide)) ILP.axiomP
 
 end Logic
 

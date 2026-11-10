@@ -90,13 +90,13 @@ public import AlphaCentauri.NumberTheory.Primes
 public import AlphaCentauri.OmegaLogic.Basic
 public import AlphaCentauri.OmegaLogic.CutElimination
 public import AlphaCentauri.OmegaLogic.Embedding
+public import AlphaCentauri.ProvabilityLogic.Fragments
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Growth
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.Reflection.Definability
 public import AlphaCentauri.Reflection.ISigma
 public import AlphaCentauri.Reflection.Provability
-public import AlphaCentauri.Reflection.ProvabilityLogic
 public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.Collection
 public import AlphaCentauri.Schemata.Induction

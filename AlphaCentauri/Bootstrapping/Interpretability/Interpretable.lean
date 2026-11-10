@@ -78,7 +78,8 @@ translates to a formula provable in `S`.
 - [Vis90, §5.5] -/
 structure IsInterpretationTable (S : Theory L₁) [S.Δ₁] (U : Theory L₂) [U.Δ₁] (tbl : V) : Prop
     extends IsTranslationTable L₂ S tbl where
-  translate_axiom {p : V} : p ∈ U.Δ₁Class → Provable S (translate L₁ L₂ tbl p)
+  translate_axiom {p : V} :
+    p ∈ U.Δ₁Class → IsFormula L₂ p → Provable S (translate L₁ L₂ tbl p)
 
 variable (V) in
 /-- `U` is interpretable in `S` in the model `V`: some table interprets `U` in `S`.
@@ -91,10 +92,40 @@ theorem Interpretable.consistent {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] 
     (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p) (hL₂ : L₂.SymbolsStandard V)
     (h : Interpretable V S U) (hcon : S.Consistent V) : U.Consistent V := by
   obtain ⟨tbl, h⟩ := h
-  exact consistent_of_translate hS h.toIsTranslationTable hL₂ (fun _ hp ↦ h.translate_axiom hp)
-    hcon
+  exact consistent_of_translate hS h.toIsTranslationTable hL₂
+    (fun _ hp hf ↦ h.translate_axiom hp hf) hcon
 
 end interpretable
+
+section arithmetic
+
+/-- Every theory of arithmetic has, in every model of $\mathsf{I}\Sigma_1$, a table of a
+translation of arithmetic along which every provable formula translates to a provable formula.
+- [Vis90, §5.5] -/
+axiom exists_isTranslationTable_provable_translate (V : Type*) [ORingStructure V]
+    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (S : ArithmeticTheory) [S.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] :
+    ∃ tbl : V, IsTranslationTable ℒₒᵣ S tbl ∧
+      ∀ p : V, Provable S p → Provable S (translate ℒₒᵣ ℒₒᵣ tbl p)
+
+/-- Interpretability is transitive.
+- [Vis90, §6.1] -/
+axiom Interpretable.trans {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+    {S U W : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [W.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] [𝗘𝗤 ℒₒᵣ ⪯ U]
+    (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift ℒₒᵣ p = p)
+    (hU : ∀ p ∈ U.Δ₁Class (V := V), Bootstrapping.shift ℒₒᵣ p = p)
+    (h₁ : Interpretable V S U) (h₂ : Interpretable V U W) : Interpretable V S W
+
+/-- If `W` is interpretable both in `T + φ` and in `T + ψ`, it is interpretable in
+`T + (φ ∨ ψ)`.
+- [Vis90, §6.1] -/
+axiom Interpretable.union_or {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+    {T W : ArithmeticTheory} [T.Δ₁] [W.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ T]
+    (hT : ∀ p ∈ T.Δ₁Class (V := V), Bootstrapping.shift ℒₒᵣ p = p) {φ ψ : ArithmeticSentence}
+    (h₁ : Interpretable V (T ∪ {φ}) W) (h₂ : Interpretable V (T ∪ {ψ}) W) :
+    Interpretable V (T ∪ {φ ⋎ ψ}) W
+
+end arithmetic
+
 
 /-! ## The sentence of interpretability -/
 
@@ -144,7 +175,8 @@ noncomputable def interpretableDef : ArithmeticSentence :=
         !(provable S).val a) ∧
       (∃ c, !(funcCongrCodeGraph L₁).val c tbl k f ∧ ∃ a, !qqAllsDef.val a c (k + 1 + (k + 1)) ∧
         !(provable S).val a)) ∧
-    ∀ p, !U.Δ₁ch.val p → ∃ q, !(translateGraph L₁ L₂).val q tbl p ∧ !(provable S).val q”
+    ∀ p, !U.Δ₁ch.val p → !(isSemiformula L₂).val 0 p →
+      ∃ q, !(translateGraph L₁ L₂).val q tbl p ∧ !(provable S).val q”
 
 variable {L₁ L₂ S U}
 
@@ -153,16 +185,16 @@ lemma isInterpretationTable_iff {tbl : V} : IsInterpretationTable S U tbl ↔
       (∀ k f : V, L₂.IsFunc k f → Provable S (qqAlls (funcExistsCode L₁ tbl k f) k) ∧
         Provable S (qqAlls (funcUniqueCode L₁ tbl k f) (k + 2)) ∧
         Provable S (qqAlls (funcCongrCode L₁ tbl k f) (k + 1 + (k + 1)))) ∧
-      ∀ p ∈ U.Δ₁Class, Provable S (translate L₁ L₂ tbl p) := by
+      ∀ p ∈ U.Δ₁Class, IsFormula L₂ p → Provable S (translate L₁ L₂ tbl p) := by
   constructor
   · intro h
     exact ⟨h.toIsTable, h.exs_domain,
       fun _ _ hf ↦ ⟨h.func_exists hf, h.func_unique hf, h.func_congr hf⟩,
-      fun _ hp ↦ h.translate_axiom hp⟩
+      fun _ hp hf ↦ h.translate_axiom hp hf⟩
   · rintro ⟨hT, hd, hf, ha⟩
     exact { toIsTable := hT, exs_domain := hd, func_exists := fun h ↦ (hf _ _ h).1
             func_unique := fun h ↦ (hf _ _ h).2.1, func_congr := fun h ↦ (hf _ _ h).2.2
-            translate_axiom := fun hp ↦ ha _ hp }
+            translate_axiom := fun hp hf ↦ ha _ hp hf }
 
 lemma models_interpretableDef_iff [Nonempty V] :
     V↓[ℒₒᵣ] ⊧ interpretableDef L₁ L₂ S U ↔ Interpretable V S U := by

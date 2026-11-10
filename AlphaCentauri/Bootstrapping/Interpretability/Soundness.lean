@@ -535,7 +535,8 @@ variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
 theorem TranslatedDerivable.of_derivable
     (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
-    (hax : ∀ p ∈ S'.Δ₁Class (V := V), Provable S (Bootstrapping.translate L₁ L₂ tbl p)) {s : V}
+    (hax : ∀ p ∈ S'.Δ₁Class (V := V), IsFormula L₂ p →
+      Provable S (Bootstrapping.translate L₁ L₂ tbl p)) {s : V}
     (hs : Derivable S' s) : TranslatedDerivable S L₂ tbl s := by
   have hT := h.toIsTable
   have hdom := h.exs_domain
@@ -580,7 +581,7 @@ theorem TranslatedDerivable.of_derivable
     exact translated_cut hS hT hdom hs hp ih₁ ih₂
   · intro s hs p hps hpT
     simp only [fstIdx_axm]
-    exact translated_axm hT hs hps (hax p hpT)
+    exact translated_axm hT hs hps (hax p hpT (hs p hps))
   · definability
 
 end rules
@@ -606,7 +607,8 @@ provable in `S`.
 - [HP98, Lemma III.2.42] -/
 theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
-    (hax : ∀ p ∈ S'.Δ₁Class (V := V), Provable S (Bootstrapping.translate L₁ L₂ tbl p)) {φ : V}
+    (hax : ∀ p ∈ S'.Δ₁Class (V := V), IsFormula L₂ p →
+      Provable S (Bootstrapping.translate L₁ L₂ tbl p)) {φ : V}
     (hφ : Bootstrapping.shift L₂ φ = φ) (hpr : Provable S' φ) :
     Provable S (Bootstrapping.translate L₁ L₂ tbl φ) := by
   have hΓ : IsFormulaSet L₂ (insert φ ∅ : V) := hpr.toDerivable.isFormulaSet
@@ -628,7 +630,8 @@ theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.
 - [HP98, Lemma III.2.42] -/
 theorem consistent_of_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
-    (hax : ∀ p ∈ S'.Δ₁Class (V := V), Provable S (Bootstrapping.translate L₁ L₂ tbl p))
+    (hax : ∀ p ∈ S'.Δ₁Class (V := V), IsFormula L₂ p →
+      Provable S (Bootstrapping.translate L₁ L₂ tbl p))
     (hcon : S.Consistent V) : S'.Consistent V := by
   intro hp
   apply hcon
@@ -665,7 +668,7 @@ theorem provable_translate_of_finite (hS : ∀ p ∈ S.Δ₁Class (V := V), Boot
     obtain ⟨σ, hσ, rfl⟩ := (Derivation.mem_deltaClass_ofList_iff l p).mp hp
     rw [h.translate_quote_sentence σ]
     exact internalize_provability (π.interpret_theory σ hσ)
-  exact provable_translate hS (h.isTranslationTable hL₂) hL₂ hax hφ hpr
+  exact provable_translate hS (h.isTranslationTable hL₂) hL₂ (fun p hp _ ↦ hax p hp) hφ hpr
 
 end finite
 

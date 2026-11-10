@@ -58,7 +58,6 @@ public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
 public import AlphaCentauri.NumberTheory.Bertrand
-public import AlphaCentauri.NumberTheory.Bertrand.Injection
 public import AlphaCentauri.NumberTheory.Bertrand.Positions
 public import AlphaCentauri.NumberTheory.Bertrand.Sizes
 public import AlphaCentauri.NumberTheory.DirectSummand
@@ -119,6 +118,7 @@ public import AlphaCentauri.ToFoundation.Exponential
 public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
+public import AlphaCentauri.ToFoundation.Injection
 public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Formula
 public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Logic

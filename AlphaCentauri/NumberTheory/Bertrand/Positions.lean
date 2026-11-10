@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.ToFoundation.Power
 public import AlphaCentauri.ToFoundation.Prime
-public import AlphaCentauri.NumberTheory.Bertrand.Injection
+public import AlphaCentauri.ToFoundation.Injection
 
 /-!
 # Positions in the factorizations of $1, \dots, m$

@@ -1,17 +1,19 @@
 module
 
-public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.Model.EndExtension
+public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ConstantExtension
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Metatheory
 public import AlphaCentauri.ToFoundation.Logic.Compact
 public import Foundation.FirstOrder.Tarski.Ultraproduct
 
 /-!
-# Parikh's theorem
+# Growth of provably total functions
 
 An `𝗜𝚺₀`-provably total function with a $\Delta_0$ graph is bounded by a term, hence grows at
-most polynomially.
+most polynomially (Parikh's theorem). The provably total functions of $\mathsf{I}\Pi_{n+1}^-$ and
+of $\mathsf{I}\Sigma_n + \mathsf{I}\Pi_{n+1}^-$ are described in terms of the extended
+Grzegorczyk hierarchy `ONote.extendedGrzegorczyk`.
 -/
 
 @[expose] public section
@@ -134,5 +136,18 @@ theorem exists_term_bound_of_provablyTotal {f φ}
   intro v;
   obtain ⟨y, hy, hy'⟩ := h₁ v;
   exact le_of_lt (h.graph_iff.mp hy' ▸ hy)
+
+/-- The provably total functions of $\mathsf{I}\Pi_{n+1}^-$, for `n ≥ 1`, are the extended
+Grzegorczyk class at `ω_n := ω_n(1)`.
+- [Bek99, Theorem 8] -/
+axiom provablyTotalFunctions_IParameterFree_Pi (n k : ℕ) (hn : 1 ≤ n) :
+    (𝗜ᶠ 𝚷 (n + 1)).provablyTotalFunctions k = ONote.extendedGrzegorczyk (ONote.omegaTower n 1) k
+
+/-- The provably total functions of $\mathsf{I}\Sigma_n + \mathsf{I}\Pi_{n+1}^-$, for `n ≥ 1`, are
+the extended Grzegorczyk class at `ω_{n+1}(2)`.
+- [Bek99, Theorem 9] -/
+axiom provablyTotalFunctions_ISigma_union_IParameterFree_Pi (n k : ℕ) (hn : 1 ≤ n) :
+    (𝗜𝚺 n ∪ 𝗜ᶠ 𝚷 (n + 1)).provablyTotalFunctions k =
+      ONote.extendedGrzegorczyk (ONote.omegaTower (n + 1) 2) k
 
 end FFL.FirstOrder.Arithmetic

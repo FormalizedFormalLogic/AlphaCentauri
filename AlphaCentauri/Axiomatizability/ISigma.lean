@@ -351,12 +351,6 @@ lemma hierarchy_of_mem_finiteAxiomatization {σ : ArithmeticSentence}
 
 end Hierarchy
 
-/-- Every member of a finset of arithmetic sentences bounds the hierarchy level of its
-conjunction. -/
-private lemma hierarchy_finsetConj_iff {Γ : Polarity} {s : ℕ} {F : Finset ArithmeticSentence} :
-    ℬ[<, ℒₒᵣ].Hierarchy Γ s F.conj ↔ ∀ σ ∈ F, ℬ[<, ℒₒᵣ].Hierarchy Γ s σ := by
-  simp [Finset.conj]
-
 /-- For `n ≥ 1`, `𝗜𝚺 n` is axiomatized by a single $\Pi_{n + 2}$ sentence.
 - [HP98, Corollary I.4.34(1)]
 - [HP98, Remark I.4.35(1)] -/
@@ -365,9 +359,8 @@ theorem exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   have h := finiteAxiomatizableBy m
   have hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1 + 2) h.conj := by
-    rw [show m + 1 + 2 = m + 3 by omega]
-    exact hierarchy_finsetConj_iff.mpr fun σ hσ ↦
-      hierarchy_of_mem_finiteAxiomatization (by simpa using hσ)
+    rw [show m + 1 + 2 = m + 3 by omega, FiniteAxiomatizableBy.conj, Finset.conj]
+    simpa using fun σ hσ ↦ hierarchy_of_mem_finiteAxiomatization (by simpa using hσ)
   exact ⟨.mkPi h.conj hσ, h.equiv_singleton.symm⟩
 
 /-- For `n ≥ 1` and `m ≤ n`, `𝗜𝚺 n` is axiomatized by `𝗜𝚺 m` together with a single

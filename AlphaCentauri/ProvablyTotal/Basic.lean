@@ -367,18 +367,19 @@ lemma provablyFunctionalVia_minimalGraph [𝗕𝚺₁ ⪯ T] (h : T.ProvablyTota
     T.ProvablyFunctionalVia f (minimalGraph φ) := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := 1)
   have hforce : ∀ {y z} {x : Fin k → ℕ}, (minimalGraphMatrix φ).val.Evalb (z :> y :> x) →
-      y = f x := fun {y z x} hz ↦ by
+      y = f x := by
+    intro y z x hz
     simpa using h.graph_iff.mp ((evalb_iff_exists_minimalGraphMatrix φ (y :> x)).mpr ⟨z, hz⟩)
-  have hforce' : ∀ {y} {x : Fin k → ℕ}, (minimalGraph φ).val.Evalb (y :> x) → y = f x :=
-    fun {y x} hy ↦ by
-      obtain ⟨_, ⟨z, _, _, hθ⟩, _, _⟩ := (eval_minimalPairGraph _ _).mp hy
-      exact hforce hθ
+  have hforce' : ∀ {y} {x : Fin k → ℕ}, (minimalGraph φ).val.Evalb (y :> x) → y = f x := by
+    intro y x hy
+    obtain ⟨_, ⟨z, _, _, hθ⟩, _, _⟩ := (eval_minimalPairGraph _ _).mp hy
+    exact hforce hθ
   have hdef : HierarchySymbol.DefinedFunction (V := ℕ) f (minimalGraph φ) := .mk fun v ↦ by
     obtain ⟨y₀, x, rfl⟩ : ∃ y x, v = y :> x := ⟨v 0, _, (Fin.cons_self_tail v).symm⟩
     obtain ⟨⟨y₁, hy₁⟩, -⟩ := models_existsUnique_minimalGraph (V := ℕ) (φ := φ) (v := x)
       ⟨f x, h.graph_iff.mpr (by simp)⟩
     constructor
-    · exact fun hv ↦ hforce' hv
+    · exact hforce'
     · intro e
       obtain rfl : y₀ = f x := e
       rwa [hforce' hy₁] at hy₁
@@ -463,9 +464,6 @@ lemma exists_unique [𝗟𝚺1 ⪯ T] (h : T.ProvablyTotal f) :
   have ⟨_, h⟩ := h; ⟨_, h, h.exists_unique⟩
 
 end ProvablyTotal
-
-lemma provablyTotalFunctions_subset (h : T ⪯ U) :
-    T.provablyTotalFunctions k ⊆ U.provablyTotalFunctions k := fun _ hf ↦ hf.mono h
 
 /-- The class of provably total functions depends only on the $\Pi_2$ consequences of the theory.
 - [AB05, §10.2] -/

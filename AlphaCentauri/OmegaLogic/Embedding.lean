@@ -1,15 +1,17 @@
 module
 
-public import AlphaCentauri.OmegaLogic.Elimination
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.LK.Simplified
+public import AlphaCentauri.OmegaLogic.CutElimination
+public import AlphaCentauri.ToFoundation.Rew
 
 /-!
 # Embedding `𝗣𝗔` into `Z_∞`
 
 This file embeds Foundation `LK2.Derivation` derivations from `𝗣𝗔` into `Z_∞` under numeral
-assignments, first with bounded cut rank and then cut-free.
+assignments, first with bounded cut rank and then cut-free, and states the consistency of `𝗣𝗔` as
+a consequence of the `Z_∞` development.
 
 Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20] and [Buc03].
 -/
@@ -25,8 +27,6 @@ variable {n : ℕ} {Γ : Sequent}
 - [Tow20, Section 16] -/
 noncomputable def asg (e : ℕ → ℕ) : Rew ℒₒᵣ ℕ 0 ℕ 0 :=
   Rew.rewrite fun x => (↑(e x) : ArithmeticTerm ℕ)
-
-@[simp] lemma asg_fvar (e : ℕ → ℕ) (x : ℕ) : asg e &x = (↑(e x) : ArithmeticTerm ℕ) := rfl
 
 /-- Closing after a shift re-indexes the assignment.
 
@@ -323,5 +323,14 @@ theorem of_derivation2_cutFree (d : 𝗣𝗔 ⟹₂ Γ) (e : ℕ → ℕ) :
 end Embedding
 
 end Provable
+
+/-- Peano arithmetic does not prove falsity.
+
+- [Tow20, Section 16] -/
+theorem consistent_PA : 𝗣𝗔 ⊬ ⊥ := by
+  intro h
+  obtain ⟨d⟩ := (provable_iff_derivable2 (L := ℒₒᵣ) (T := 𝗣𝗔) (φ := ⊥)).mp h
+  obtain ⟨α, hα⟩ := Provable.of_derivation2_cutFree d fun _ => 0
+  exact Provable.not_empty (Provable.remove_falsum (by simpa using hα))
 
 end FFL.FirstOrder.Arithmetic.OmegaLogic

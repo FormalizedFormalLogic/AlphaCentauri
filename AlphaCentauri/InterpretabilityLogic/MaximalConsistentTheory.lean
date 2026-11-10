@@ -419,6 +419,39 @@ lemma AssuringSuccessor.union_boxLabel_of_axiomR
     · exact mem_of_imp (by cl_prover [e₂, e₄, e₅]) hA;
   exact h₂ A <| antecedents_of_rhd_mem (mem_of_imp Entailment.dne (h₁ _ h₃).1) hB
 
+/-- - [MV20, Lemma 27] -/
+lemma AssuringSuccessor.exists_of_rhd_mem_of_axiomW
+    (hW : ∀ {A B : Formula α}, ofAxioms 𝔸 ⊢ Axioms.W A B)
+    (hBC : B ▷ C ∈ Γ) (h : AssuringSuccessor S Γ Δ) (hB : B ∈ Δ) :
+    ∃ Θ, AssuringSuccessor (S ∪ {□(∼B)}) Γ Θ ∧ C ∈ Θ ∧ □(∼C) ∈ Θ := by
+  classical
+  apply exists_assuringSuccessor;
+  rintro ⟨U, hU, hC⟩;
+  have e₁ : ofAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B := by
+    apply left_Fdisj_intro;
+    intro ψ hψ;
+    obtain ⟨G, hG, rfl⟩ := Finset.mem_image.mp hψ;
+    by_cases hGS : G ∈ S;
+    · have : ofAxioms 𝔸 ⊢ ∼G 🡒 ((U.filter (· ∈ S)).image (∼·)).disj :=
+        right_Fdisj_intro _ (Finset.mem_image_of_mem _ (Finset.mem_filter.mpr ⟨hG, hGS⟩));
+      cl_prover [this];
+    · obtain rfl : G = □(∼B) := by simpa [hGS] using hU hG;
+      exact or₂;
+  have e₂ : ofAxioms 𝔸 ⊢ Axioms.W B (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) := hW;
+  have e₃ := rhd_mono_right (𝔸 := 𝔸) (C := B)
+    (show ofAxioms 𝔸 ⊢ (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ∼□(∼B)) ⋏ □(∼B) 🡒
+      ((U.filter (· ∈ S)).image (∼·)).disj by cl_prover);
+  have e₄ : ofAxioms 𝔸 ⊢ Axioms.J2 B C (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) := axiomJ2;
+  have e₅ := rhd_mono_right (𝔸 := 𝔸) (C := C) e₁;
+  have h₁ : B ∈ Γ.antecedents S := by
+    use U.filter (· ∈ S);
+    and_intros;
+    · intro G hG;
+      rw [Finset.mem_coe, Finset.mem_filter] at hG;
+      exact hG.2;
+    · exact mem_of_imp₂ (by cl_prover [e₂, e₃, e₄, e₅]) hBC hC;
+  exact not_mem_of_neg_mem (h B h₁).1 hB
+
 end
 
 end MaximalConsistentTheory

@@ -644,6 +644,13 @@ lemma IsTable.transT_relativizedImp {k : ℕ} (d : Semiformula V L 1) (A : Fin k
   rw [IsTable.transT_and, hT₁.transT_subst _ (IsVarVec.single_bvar _),
     hT₁.transT_subst _ (IsVarVec.single_bvar _)]
 
+lemma IsTable.comp_varEqual_val (t : Term V L) :
+    (∀¹ (hT₁.domT 🡒 (varEqualT hc t 🡘 hT₁.transT (varEqualT hT₂ t)))).val =
+      ^∀ imp L tbl₁.[0] (iff L (varEqual L L (Bootstrapping.compTable L L tbl₁ tbl₂) t.val)
+        (translate L L tbl₁ (varEqual L L tbl₂ t.val))) := by
+  simp only [Semiformula.val_all, Semiformula.val_imp, Semiformula.val_iff, varEqualT_val,
+    IsTable.transT_val, IsTable.domT_val, tableDomain]
+
 end compShapes
 
 /-! ## Values of terms along the composite table -/
@@ -710,6 +717,67 @@ lemma tprovable_comp_varEqualT_func {k : ℕ} (F : L.Func k) (u : Fin k → Term
       S.internalize V ⊢ H 🡒 D 🡒 (X 🡘 Y) := by
     cl_prover [hr]
   exact key hr
+
+omit [L.Eq] [𝗘𝗤 L ⪯ S] in
+lemma derivable_insert_negDomSet_mono {d a b : V} (hd : IsSemiformula L 1 d) (φ : Formula V L)
+    (hab : a ≤ b) (h : Derivable S (insert φ.val (negDomSet L d a))) :
+    Derivable S (insert φ.val (negDomSet L d b)) := by
+  have hφ : IsFormula L φ.val := by simp
+  apply Derivable.wk (IsFormulaSet.insert_iff.mpr ⟨hφ, IsFormulaSet.negDomSet hd b⟩) _ h
+  intro x hx
+  rcases mem_bitInsert_iff.mp hx with rfl | hx
+  · exact mem_bitInsert_iff.mpr (Or.inl rfl)
+  · exact mem_bitInsert_iff.mpr (Or.inr (negDomSet_mono hab hx))
+
+/-- Along the composite table and along the composite of the translations, the formulas saying
+that a variable is the value of a term are equivalent on the domain of `tbl₁`, given the domain
+of `tbl₁` at the free variables. -/
+lemma derivable_comp_varEqual (hL : L.SymbolsStandard V) (t : Term V L) :
+    Derivable S (insert (∀¹ (h₁.domT 🡒 (varEqualT hc t 🡘 h₁.transT (varEqualT hT₂ t)))).val
+      (negDomSet L tbl₁.[0] t.val)) := by
+  have hP : 𝚺ᴬ₁-Predicate fun t : V ↦ Derivable S (insert (^∀ imp L tbl₁.[0]
+      (iff L (varEqual L L (Bootstrapping.compTable L L tbl₁ tbl₂) t)
+        (translate L L tbl₁ (varEqual L L tbl₂ t)))) (negDomSet L tbl₁.[0] t)) := by
+    definability
+  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain
+  have key := IsSemiterm.sigma1_induction hP (n := 0) (fun z hz ↦ by simp at hz) ?_ ?_ t.val
+    t.isSemiterm
+  · rw [IsTable.comp_varEqual_val h₁.toIsTable hT₂ hc]
+    exact key
+  · intro x
+    have h₀ := Derivable.insert_neg_of_imp <| Derivable.of_tprovable (T := S)
+      (IsFormulaSet.negDomSet (L := L) hdom (^&x)) (tprovable_comp_varEqualT_fvar h₁ hT₂ hc x)
+    have hmem : (∼(h₁.domT.subst ![Semiterm.fvar x]) : Formula V L).val ∈
+        negDomSet L tbl₁.[0] (^&x) := by
+      rw [Semiformula.val_neg, Semiformula.val_subst_fvar]
+      exact mem_negDomSet_iff.mpr ⟨x, var_lt_qqFvar x, rfl⟩
+    have h₂ : Derivable S (insert (∀¹ (h₁.domT 🡒 (varEqualT hc (Semiterm.fvar x) 🡘
+        h₁.transT (varEqualT hT₂ (Semiterm.fvar x))))).val (negDomSet L tbl₁.[0] (^&x))) :=
+      Derivable.ofSetEq (fun y ↦ by
+        simp only [mem_bitInsert_iff]
+        constructor
+        · rintro (rfl | h)
+          · exact Or.inr hmem
+          · exact h
+        · intro h; exact Or.inr h) h₀
+    rw [IsTable.comp_varEqual_val h₁.toIsTable hT₂ hc] at h₂
+    simpa using h₂
+  · intro k f v hf' hv ih
+    obtain ⟨k, F, u, rfl, rfl, rfl⟩ := exists_func_termVec hL (IsSemiterm.func.mpr ⟨hf', hv⟩)
+    have hs := IsFormulaSet.negDomSet (L := L) hdom (Semiterm.func F u).val
+    have ih' (i : Fin k) : Derivable S
+        (insert (∀¹ (h₁.domT 🡒 (varEqualT hc (u i) 🡘 h₁.transT (varEqualT hT₂ (u i))))).val
+          (negDomSet L tbl₁.[0] (Semiterm.func F u).val)) := by
+      apply derivable_insert_negDomSet_mono hdom _ (le_of_lt ?_)
+      · rw [IsTable.comp_varEqual_val h₁.toIsTable hT₂ hc]
+        simpa using ih ((i : ℕ) : V) (by simp)
+      · rw [Semiterm.func_val]
+        simpa using nth_lt_qqFunc_of_lt (i := ((i : ℕ) : V)) (k := (k : V)) (f := (⌜F⌝ : V))
+          (v := SemitermVec.val u) (by simp)
+    have h₂ := Derivable.of_tprovable_imp (tprovable_comp_varEqualT_func h₁ hT₂ hc F u)
+      (Derivable.conj_typed hs ih')
+    rw [IsTable.comp_varEqual_val h₁.toIsTable hT₂ hc, Semiterm.func_val] at h₂
+    exact h₂
 
 end compValue
 

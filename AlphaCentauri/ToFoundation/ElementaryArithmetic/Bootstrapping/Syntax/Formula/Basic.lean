@@ -1271,25 +1271,31 @@ private lemma depthValueList_locallyDelta0 (P J : V) :
     | zero => rfl
     | succ j => simp
 
-lemma depthList_locallyDelta0 (P J : V) :
-    LocallyDelta0Function fun w : Fin 1 → V ↦ c.depthList P J (w 0) := by
-  have := c.courseOfValues.result_locallyDelta0.comp_cons (LocallyDelta0Function.var 0)
-    (u := ![fun _ : Fin 1 → V ↦ P, fun _ ↦ J]) <| Fin.forall_fin_succ.mpr
-      ⟨LocallyDelta0Function.const P, Fin.forall_fin_succ.mpr
-        ⟨LocallyDelta0Function.const J, finZeroElim⟩⟩
+lemma depthList_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 3 → V ↦ c.depthList (w 0) (w 1) (w 2) := by
+  have := c.courseOfValues.result_locallyDelta0.comp_cons
+    (LocallyDelta0Function.var (V := V) (2 : Fin 3))
+    (u := ![fun w : Fin 3 → V ↦ w 0, fun w ↦ w 1]) <| Fin.forall_fin_succ.mpr
+      ⟨LocallyDelta0Function.var 0, Fin.forall_fin_succ.mpr
+        ⟨LocallyDelta0Function.var 1, finZeroElim⟩⟩
   convert this using 2 with w
   simp only [depthList]
   congr 1
   funext j
   cases j using Fin.cases with
   | zero => rfl
-  | succ j => simp
+  | succ j =>
+    cases j using Fin.cases with
+    | zero => rfl
+    | succ j => exact j.elim0
 
 lemma depthList_spec (P J q : V) :
     c.depthList P J q = listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d)
         ![P, q, c.courseOfValues.table ![P, J] q] (rangeList (J + 1)) ∧
       ∀ e < len (c.depthList P J q), (c.depthList P J q).[e] ≤ c.bound (c.iter P e) q := by
-  have hdl := c.depthList_locallyDelta0 P J
+  have hdl : LocallyDelta0Function fun w : Fin 1 → V ↦ c.depthList P J (w 0) :=
+    c.depthList_locallyDelta0.comp₃ (LocallyDelta0Function.const P)
+      (LocallyDelta0Function.const J) (LocallyDelta0Function.var 0)
   have hP : LocallyDelta0Pred fun q ↦ c.depthList P J q =
         listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d)
           ![P, q, c.courseOfValues.table ![P, J] q] (rangeList (J + 1)) ∧
@@ -1335,6 +1341,87 @@ lemma depthList_spec (P J q : V) :
   rw [len_listMap hg] at he
   rw [nth_listMap hg _ _ he, nth_rangeList (by simpa using he)]
   exact c.depthValue_le hT
+
+lemma iter_add (P a d : V) : c.iter (c.iter P a) d = c.iter P (a + d) := by
+  have hP : LocallyDelta0Pred fun d ↦ c.iter (c.iter P a) d = c.iter P (a + d) :=
+    LocallyDelta0.eq (c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.const _)
+        (LocallyDelta0Function.var 0))
+      (c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.const P)
+        (LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const a)
+          (LocallyDelta0Function.var 0)))
+  revert d
+  apply LocallyDelta0Pred.succ_induction hP
+  · simp [c.iter_zero]
+  · intro d ih
+    rw [c.iter_succ, ih, ← add_assoc, c.iter_succ]
+
+lemma nth_depthList {P J q d : V} (hd : d ≤ J) :
+    (c.depthList P J q).[d] = c.depthValue P q (c.courseOfValues.table ![P, J] q) d := by
+  have hg : LocallyDelta0Function fun w : Fin 4 → V ↦
+      (fun (r : Fin 3 → V) d ↦ c.depthValue (r 0) (r 1) (r 2) d) (w ·.succ) (w 0) :=
+    c.depthValueAt_locallyDelta0
+  have hd' : d < len (rangeList (J + 1)) := by simpa using lt_succ_iff_le.mpr hd
+  rw [(c.depthList_spec P J q).1, nth_listMap hg _ _ hd', nth_rangeList (by simpa using hd')]
+  simp
+
+lemma depthValue_congr {P P' q T T' d e : V} (hP : c.iter P d = c.iter P' e)
+    (hT : ∀ q' < q, (znth T q').[d] = (znth T' q').[e] ∧
+      (znth T q').[d + 1] = (znth T' q').[e + 1]) :
+    c.depthValue P q T d = c.depthValue P' q T' e := by
+  by_cases h0 : q = 0
+  · simp [depthValue, h0]
+  have hb : π₂ (q - 1) < q :=
+    lt_of_le_of_lt (pi₂_le_self _) (pred_lt_self_of_pos (pos_iff_ne_zero.mpr h0))
+  have hb₁ : π₁ (π₂ (q - 1)) < q := lt_of_le_of_lt (pi₁_le_self _) hb
+  have hb₂ : π₂ (π₂ (q - 1)) < q := lt_of_le_of_lt (pi₂_le_self _) hb
+  have hP' : c.iter P (d + 1) = c.iter P' (e + 1) := by rw [c.iter_succ, c.iter_succ, hP]
+  unfold depthValue
+  simp only [h0, ↓reduceIte]
+  split_ifs <;> simp only [hP, (hT _ hb₁).1, (hT _ hb₂).1, (hT _ hb).2]
+
+/-- The entries of the lists of values do not depend on the depth bound, and an entry at a
+depth depends only on the parameter at that depth. -/
+lemma nth_depthList_eq (P M J J' : V) (hJ : J ≤ M) (hJ' : J' ≤ M) :
+    ∀ q, ∀ a ≤ M, ∀ d ≤ M, ∀ b ≤ M, ∀ e ≤ M, a + d = b + e → d + q ≤ J → e + q ≤ J' →
+      (c.depthList (c.iter P a) J q).[d] = (c.depthList (c.iter P b) J' q).[e] := by
+  have hP : LocallyDelta0Pred fun q ↦ ∀ a ≤ M, ∀ d ≤ M, ∀ b ≤ M, ∀ e ≤ M,
+      a + d = b + e → d + q ≤ J → e + q ≤ J' →
+        (c.depthList (c.iter P a) J q).[d] = (c.depthList (c.iter P b) J' q).[e] := by
+    have v5 : ∀ i : Fin 5, LocallyDelta0Function fun w : Fin 5 → V ↦ w i :=
+      LocallyDelta0Function.var
+    have hX : ∀ (i j : Fin 5) (K : V), LocallyDelta0Function fun w : Fin 5 → V ↦
+        (c.depthList (c.iter P (w i)) K (w 4)).[w j] := fun i j K ↦
+      nth_locallyDelta0.comp₂ (c.depthList_locallyDelta0.comp₃
+        (c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.const P) (v5 i))
+        (LocallyDelta0Function.const K) (v5 4)) (v5 j)
+    have hR : LocallyDelta0 fun w : Fin 5 → V ↦ w 3 + w 2 = w 1 + w 0 → w 2 + w 4 ≤ J →
+        w 0 + w 4 ≤ J' → (c.depthList (c.iter P (w 3)) J (w 4)).[w 2] =
+          (c.depthList (c.iter P (w 1)) J' (w 4)).[w 0] :=
+      (LocallyDelta0.eq (LocallyDelta0Function.add.comp₂ (v5 3) (v5 2))
+          (LocallyDelta0Function.add.comp₂ (v5 1) (v5 0))).imp <|
+        (LocallyDelta0.le (LocallyDelta0Function.add.comp₂ (v5 2) (v5 4))
+          (LocallyDelta0Function.const J)).imp <|
+        (LocallyDelta0.le (LocallyDelta0Function.add.comp₂ (v5 0) (v5 4))
+          (LocallyDelta0Function.const J')).imp <|
+        LocallyDelta0.eq (hX 3 2 J) (hX 1 0 J')
+    have := LocallyDelta0.ball_le_function (LocallyDelta0Function.const M) <|
+      LocallyDelta0.ball_le_function (LocallyDelta0Function.const M) <|
+      LocallyDelta0.ball_le_function (LocallyDelta0Function.const M) <|
+      LocallyDelta0.ball_le_function (LocallyDelta0Function.const M) hR
+    exact this.of_iff fun v ↦ by simp
+  apply LocallyDelta0Pred.order_induction hP
+  intro q ih a ha d hd b hb e he hsum hdJ heJ
+  rw [c.nth_depthList (le_trans le_self_add hdJ), c.nth_depthList (le_trans le_self_add heJ)]
+  apply c.depthValue_congr (by rw [c.iter_add, c.iter_add, hsum])
+  intro q' hq'
+  have hq1 : q' + 1 ≤ q := lt_iff_succ_le.mp hq'
+  have hd1 : d + 1 + q' ≤ J := le_trans (by rw [add_assoc, add_comm 1 q']; gcongr) hdJ
+  have he1 : e + 1 + q' ≤ J' := le_trans (by rw [add_assoc, add_comm 1 q']; gcongr) heJ
+  rw [c.courseOfValues.znth_table hq', c.courseOfValues.znth_table hq']
+  exact ⟨ih q' hq' a ha d hd b hb e he hsum (le_trans (by gcongr; exact le_self_add) hd1)
+      (le_trans (by gcongr; exact le_self_add) he1),
+    ih q' hq' a ha (d + 1) (le_trans (le_trans le_self_add hd1) hJ) b hb (e + 1)
+      (le_trans (le_trans le_self_add he1) hJ') (by rw [← add_assoc, ← add_assoc, hsum]) hd1 he1⟩
 
 end Construction
 

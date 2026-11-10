@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.Logic
 
 /-!
 # Extensions of $\mathbf{IL}$

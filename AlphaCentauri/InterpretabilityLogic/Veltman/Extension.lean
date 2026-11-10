@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Extension
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.Extension
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 
 /-!
 # Veltman semantics of the extensions of $\mathbf{IL}$

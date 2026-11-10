@@ -363,6 +363,28 @@ lemma fvSubst_neg {n w p : V} (hw : IsSemitermVec L (len w) n w)
       fvSubst_exs hp.isUFormula,
       neg_ex (hp.fvSubst hw.succ).isUFormula]
 
+@[simp] lemma formulaComplexity_fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)
+    (hp : IsSemiformula L n p) : formulaComplexity L (fvSubst L w p) = formulaComplexity L p := by
+  revert w
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R v hR hv w hw
+    simp [hR, hv.isUTerm, (hw.termFvSubstVec hv).isUTerm]
+  · intro n k R v hR hv w hw
+    simp [hR, hv.isUTerm, (hw.termFvSubstVec hv).isUTerm]
+  · simp
+  · simp
+  · intro n p q hp hq ihp ihq w hw
+    simp [hp.isUFormula, hq.isUFormula, (hp.fvSubst hw).isUFormula, (hq.fvSubst hw).isUFormula,
+      ihp hw, ihq hw]
+  · intro n p q hp hq ihp ihq w hw
+    simp [hp.isUFormula, hq.isUFormula, (hp.fvSubst hw).isUFormula, (hq.fvSubst hw).isUFormula,
+      ihp hw, ihq hw]
+  · intro n p hp ihp w hw
+    simp [hp.isUFormula, (hp.fvSubst hw.succ).isUFormula, ihp hw.succ]
+  · intro n p hp ihp w hw
+    simp [hp.isUFormula, (hp.fvSubst hw.succ).isUFormula, ihp hw.succ]
+
 /-- The external-variable shift after free-variable substitution equals free-variable substitution
 by the shifted substitution vector with a fresh variable `&0` prepended, applied after the shift. -/
 lemma termShift_termFvSubst {n w t : V}

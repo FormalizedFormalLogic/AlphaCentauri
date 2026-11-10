@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
-public import AlphaCentauri.ToMathlib.AddMonoidHomToInt
+public import AlphaCentauri.ToMathlib.OpenPredicate.AddMonoidHomToInt
 
 /-!
 # $\mathbb{Z}$ is not a direct summand of a nonstandard model of $\mathsf{I}\mathsf{E}_1$

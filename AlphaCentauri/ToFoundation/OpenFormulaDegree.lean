@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.ToFoundation.OpenPredicate
-public import AlphaCentauri.ToMathlib.BoundedDegreeOpenInduction
+public import AlphaCentauri.ToMathlib.OpenPredicate.Induction
 
 /-!
 # The degree of an open formula

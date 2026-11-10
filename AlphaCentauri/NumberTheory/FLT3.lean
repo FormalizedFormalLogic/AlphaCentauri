@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
-public import AlphaCentauri.ToMathlib.FLT3.Descent
+public import AlphaCentauri.ToMathlib.NumberTheory.FLT.Three
 
 /-!
 # Fermat's Last Theorem for exponent 3 in $\mathsf{I}\mathsf{E}_1$

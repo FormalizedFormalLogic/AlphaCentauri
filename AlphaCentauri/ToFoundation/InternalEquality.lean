@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToMathlib.Vector
+public import AlphaCentauri.ToMathlib.Data.Vector.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 
 /-!

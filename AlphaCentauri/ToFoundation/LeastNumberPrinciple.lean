@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.Schemata.BoundedInduction
 public import AlphaCentauri.ToFoundation.BinderNotation
 public import AlphaCentauri.ToMathlib.OpenPredicate
-public import AlphaCentauri.ToMathlib.RingOfDifferences
+public import AlphaCentauri.ToMathlib.Algebra.Order.Ring.RingOfDifferences
 
 /-!
 # The least number principle in the ring of differences of a model of $\mathsf{I}\mathsf{E}_1$

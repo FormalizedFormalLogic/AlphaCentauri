@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Model.NonnegativePart
-public import AlphaCentauri.ToMathlib.IntegerConstantPolynomial
+public import AlphaCentauri.ToMathlib.OpenPredicate.PolynomialRing
 
 /-!
 # The non-negative part of the $\mathbb{Z}$-ring of polynomials with integer constant term

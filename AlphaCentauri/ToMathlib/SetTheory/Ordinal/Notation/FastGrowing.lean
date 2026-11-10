@@ -204,19 +204,6 @@ lemma fundamentalSequence_ofNat_succ (k : ℕ) :
   | zero => rfl
   | succ k' => rfl
 
-private lemma fastGrowing_succ_chain_mono
-    (hchain : ∀ k, fundamentalSequence (g (k + 1)) = Sum.inl (some (g k)))
-    (hmn : m ≤ n) (hx : 1 ≤ x) :
-    fastGrowing (g m) x ≤ fastGrowing (g n) x := by
-  induction n, hmn using Nat.le_induction with
-  | base => exact le_rfl
-  | succ n _ ih => exact le_trans ih (fastGrowing_le_succ_index (hchain n) hx)
-
-/-- The `ofNat` instance of `fastGrowing_succ_chain_mono`. -/
-private lemma fastGrowing_ofNat_mono (hmn : m ≤ n) (hx : 1 ≤ x) :
-    fastGrowing (ofNat m) x ≤ fastGrowing (ofNat n) x :=
-  fastGrowing_succ_chain_mono fundamentalSequence_ofNat_succ hmn hx
-
 /-- **Bachmann reachability**: for a limit `o` with fundamental sequence `f`, `f (n + 1)`
 reaches `f n` with budget `n + 1`. -/
 theorem fastGrowing_bachmann_reach {o : ONote} {f : ℕ → ONote}
@@ -519,10 +506,6 @@ theorem reaches_of_lt (o : ONote) (ho : o.NF) (d : ONote) (hd : d.NF) (hdo : d <
     exact Reaches.limit e (reaches_of_lt (g x) hgxNF d hd hdgx hnorm)
 termination_by o
 decreasing_by all_goals assumption
-
-theorem fastGrowing_le_of_lt (hx : 1 ≤ x) (hd : d.NF) (ho : o.NF) (hdo : d < o)
-    (hnorm : norm d ≤ x) : fastGrowing d x ≤ fastGrowing o x :=
-  fastGrowing_le_of_reaches hx (reaches_of_lt o ho d hd hdo hnorm)
 
 /-! ### The notation successor `osucc`
 

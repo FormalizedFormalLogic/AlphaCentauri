@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.ToMathlib.BoundedDegreeOpenInduction
-public import AlphaCentauri.ToMathlib.RealClosedField
+public import AlphaCentauri.ToMathlib.OpenPredicate.Induction
+public import AlphaCentauri.ToMathlib.FieldTheory.IsRealClosed.Basic
 public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 public import Mathlib.Algebra.Polynomial.Lifts
 public import Mathlib.Algebra.Polynomial.Roots

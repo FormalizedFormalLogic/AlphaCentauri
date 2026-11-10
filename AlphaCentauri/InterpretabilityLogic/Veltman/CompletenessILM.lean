@@ -221,6 +221,75 @@ lemma tree_mono (h : O ⊆ O') : tree Φ O ⊆ tree Φ O' := by
         exact ih _ (hn ▸ Finset.card_erase_lt_of_mem hB) (Finset.erase_subset_erase B h) rfl;
       · rfl;
 
+lemma exists_tree_erase (hA : A ∈ tree Φ O) :
+    𝐈𝐋 ⊢ A 🡒 B ∨ ∃ A' ∈ tree Φ (O.erase B), 𝐈𝐋 ⊢ □(∼B) 🡒 (A 🡘 A') := by
+  induction hn : O.card using Nat.strong_induction_on generalizing O A with
+  | _ n ih =>
+    obtain ⟨B', hB', X, hX, rfl⟩ := mem_tree.mp hA;
+    by_cases hB : B' = B;
+    · subst hB;
+      exact .inl and₁;
+    right;
+    have h : ∀ C ∈ X, 𝐈𝐋 ⊢ □(∼B) 🡒 C ∨ ∃ C' ∈ boxes Φ ∪
+        (tree Φ ((O.erase B').erase B)).image (fun C ↦ □(∼C)), 𝐈𝐋 ⊢ □(∼B) 🡒 (C 🡘 C') := by
+      intro C hC;
+      rcases Finset.mem_union.mp (hX hC) with hC | hC;
+      · exact .inr ⟨C, Finset.mem_union_left _ hC, by cl_prover⟩;
+      · obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hC;
+        rcases ih _ (hn ▸ Finset.card_erase_lt_of_mem hB') hD rfl with h | ⟨D', hD', h⟩;
+        · exact .inl <| Logic.box_mono <| by cl_prover [h];
+        · exact .inr ⟨□(∼D'), Finset.mem_union_right _ (Finset.mem_image_of_mem _ hD'),
+            Logic.box_neg_iff_of_box h⟩;
+    obtain ⟨X', hX', h⟩ := Logic.exists_conj_iff h;
+    use B' ⋏ X'.conj;
+    and_intros;
+    · apply mem_tree.mpr;
+      use B';
+      and_intros;
+      · exact Finset.mem_erase.mpr ⟨hB, hB'⟩;
+      · use X';
+        and_intros;
+        · simpa [Finset.erase_right_comm] using hX';
+        · rfl;
+    · cl_prover [h];
+
+variable [Adequate Φ]
+
+private lemma mem_subformulas_and_conj {X : Finset (Formula α)}
+    (h : B ∈ (A ⋏ X.conj).subformulas) (himp : ∀ C D, B ≠ C 🡒 D) (hbot : B ≠ ⊥) :
+    B ∈ A.subformulas ∨ ∃ C ∈ X, B ∈ C.subformulas := by
+  obtain ⟨C, hC, hBC⟩ := exists_mem_subformulas_of_mem_conj₂ (l := [A, X.conj]) h himp hbot;
+  simp only [List.mem_cons, List.not_mem_nil, or_false] at hC;
+  rcases hC with rfl | rfl;
+  · exact .inl hBC;
+  · obtain ⟨D, hD, hBD⟩ := exists_mem_subformulas_of_mem_conj₂ hBC himp hbot;
+    exact .inr ⟨D, by simpa using hD, hBD⟩;
+
+lemma mem_of_mem_tree (hO : O ⊆ rhdOperands Φ) (hA : A ∈ tree Φ O) (hB : B ∈ A.subformulas)
+    (hB' : (∃ C D, B = C ▷ D) ∨ ∃ C, B = □C) :
+    B ∈ Φ ∨ ∃ D ∈ tree Φ (rhdOperands Φ), B = □(∼D) := by
+  induction hn : O.card using Nat.strong_induction_on generalizing O A with
+  | _ n ih =>
+    obtain ⟨b, hb, X, hX, rfl⟩ := mem_tree.mp hA;
+    have himp : ∀ C D, B ≠ C 🡒 D := by
+      rintro C D rfl;
+      simp at hB';
+    have hbot : B ≠ ⊥ := by
+      rintro rfl;
+      simp at hB';
+    rcases mem_subformulas_and_conj hB himp hbot with hB | ⟨C, hC, hB⟩;
+    · exact .inl <| Adequate.subformulas_subset (mem_rhdOperands.mp (hO hb)).1 hB;
+    · rcases Finset.mem_union.mp (hX hC) with hC | hC;
+      · exact .inl <| Adequate.subformulas_subset (mem_boxes.mp hC).1 hB;
+      · obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hC;
+        simp only [subformulas, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton] at hB;
+        rcases hB with rfl | rfl | hB | rfl;
+        · exact .inr ⟨D, tree_mono ((Finset.erase_subset _ _).trans hO) hD, rfl⟩;
+        · exact (himp _ _ rfl).elim;
+        · exact ih _ (hn ▸ Finset.card_erase_lt_of_mem hb) ((Finset.erase_subset _ _).trans hO) hD
+            hB rfl;
+        · exact (hbot rfl).elim;
+
 end mAdequateClosure
 
 end FFL.InterpretabilityLogic

@@ -45,7 +45,7 @@ provable in $\mathsf{IOpen}$.
 - [Wil78, §1] -/
 lemma not_provable_IOpen_allClosure {n : ℕ} {φ : ArithmeticSemisentence n} (hφ : φ.Open)
     {M : Type} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* ZRing] {e : Fin n → M} (h : ¬ Evalb e φ) :
-    ¬ 𝗜𝗢𝗽𝗲𝗻 ⊢ ∀¹* φ := by
+    𝗜𝗢𝗽𝗲𝗻 ⊬ ∀¹* φ := by
   intro hp
   obtain ⟨N, _, hN, ⟨Θ⟩⟩ := exists_embedding_models_IOpen M
   have := models_of_provable hN hp

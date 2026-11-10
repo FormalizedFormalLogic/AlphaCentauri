@@ -26,7 +26,7 @@ def Arithmetic.irrationalSqrtTwo : ArithmeticSentence := “∀ x y, x * x = 2 *
 - [She64]
 - [DAq05, §2]
 - [Wil78] -/
-theorem not_provable_irrationalSqrtTwo_IOpen : ¬ 𝗜𝗢𝗽𝗲𝗻 ⊢ Arithmetic.irrationalSqrtTwo := by
+theorem not_provable_irrationalSqrtTwo_IOpen : 𝗜𝗢𝗽𝗲𝗻 ⊬ Arithmetic.irrationalSqrtTwo := by
   rw [show Arithmetic.irrationalSqrtTwo =
       ∀¹* (“y x. x * x = 2 * (y * y) → y = 0” : ArithmeticSemisentence 2) by
     simp [Arithmetic.irrationalSqrtTwo, allClosure_succ]]

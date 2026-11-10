@@ -6,7 +6,8 @@ public import AlphaCentauri.Schemata.ZRing
 # Models of open induction extending $\mathbb{Z}$-rings
 
 Wilkie's extension theorem: every discretely ordered $\mathbb{Z}$-ring embeds into a discretely
-ordered ring satisfying open induction.
+ordered ring satisfying open induction. As a consequence, $\mathsf{IOpen}$ and $\mathsf{ZR}$ prove
+the same universal sentences.
 -/
 
 @[expose] public section
@@ -19,5 +20,23 @@ namespace FFL.FirstOrder.Arithmetic
 - [Raf10, Wilkie's Extension Theorem] -/
 axiom exists_embedding_models_IOpen (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* ZRing] :
     ∃ (N : Type) (_ : ORingStructure N), N↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 ∧ Nonempty (M ↪ₛ[ℒₒᵣ] N)
+
+open Semiformula in
+/-- $\mathsf{IOpen}$ and $\mathsf{ZR}$ prove the same universal closures of open formulas.
+- [Wil78, §1]
+- [Moh11, §1] -/
+theorem provable_univCl_IOpen_iff {φ : ArithmeticSemiformula ℕ 0} (hφ : φ.Open) :
+    𝗜𝗢𝗽𝗲𝗻 ⊢ φ.univCl ↔ ZRing ⊢ φ.univCl := by
+  constructor
+  · intro h
+    apply complete.{0}
+    intro M _ _
+    obtain ⟨N, _, hN, ⟨Θ⟩⟩ := exists_embedding_models_IOpen M
+    have hN := models_iff_proposition.mp <| models_of_provable hN h
+    apply models_iff_proposition.mpr
+    intro f
+    apply (eval_hom_iff_of_open Θ hφ).mpr
+    simpa [Matrix.empty_eq] using hN (Θ ∘ f)
+  · exact ZRing_weakerThan_IOpen.pbl
 
 end FFL.FirstOrder.Arithmetic

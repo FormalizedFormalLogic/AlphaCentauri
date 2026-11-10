@@ -34,8 +34,6 @@ def fermatLastTheorem (n : ℕ) : ArithmeticSentence :=
 theorem provable_fermatLastTheorem_three_IE1 : 𝗜𝗘₁ ⊢ fermatLastTheorem 3 := by
   apply complete
   intro V _ hV
-  have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := Semantics.ModelsSet.of_subset hV Set.subset_union_left
-  have := Semantics.ModelsSet.of_subset hV Set.subset_union_right
   have hL := leastNumberPrinciple_of_models_induction (V := V)
   suffices ∀ a b c : V, a ^ 3 + b ^ 3 = c ^ 3 → a = 0 ∨ b = 0 ∨ c = 0 by
     simpa [models_iff, fermatLastTheorem]

@@ -2,7 +2,8 @@ module
 
 
 public import AlphaCentauri.Model.OpenInduction
-public import AlphaCentauri.ToMathlib.OpenPredicate.PolynomialRing
+public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
+public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic

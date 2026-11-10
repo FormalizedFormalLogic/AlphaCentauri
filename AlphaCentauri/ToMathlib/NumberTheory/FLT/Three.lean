@@ -1,6 +1,8 @@
 module
 
-public import AlphaCentauri.ToMathlib.NumberTheory.EisensteinInteger
+public import AlphaCentauri.ToMathlib.NumberTheory.EisensteinInteger.CubicResidue
+public import AlphaCentauri.ToMathlib.NumberTheory.EisensteinInteger.Lambda
+public import AlphaCentauri.ToMathlib.NumberTheory.EisensteinInteger.Polynomial
 public import Mathlib.Algebra.GCDMonoid.IntegrallyClosed
 public import Mathlib.RingTheory.PrincipalIdealDomain
 

@@ -1,7 +1,6 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.CompositeTable
-public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 
 /-!
 # Composition of translations

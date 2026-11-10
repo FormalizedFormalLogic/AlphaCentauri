@@ -150,6 +150,12 @@ noncomputable def relAllItr {n : ℕ} (d : Semiformula V L 1) :
 lemma relAllItr_succ {n k : ℕ} (d : Semiformula V L 1) (φ : Semiformula V L (n + (k + 1))) :
     relAllItr d (k + 1) φ = relAllItr d k (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ)) := rfl
 
+/-- `∀ x₁ (d(x₁) → ∀ x₂ (d(x₂) → … φ))`, the block of universal quantifiers relativized to `d`
+closing all the bound variables of `φ`. -/
+noncomputable def relAlls (d : Semiformula V L 1) : {n : ℕ} → Semiformula V L n → Formula V L
+  | 0, φ => φ
+  | _ + 1, φ => relAlls d (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ))
+
 end relAllItr
 
 section typed
@@ -216,6 +222,15 @@ lemma transT_allItr {n : ℕ} : ∀ (k : ℕ) (φ : Semiformula V L₂ (n + k)),
   | 0, φ => rfl
   | k + 1, φ => by
     rw [allItr_succ, transT_allItr k, transT_all, relAllItr_succ]
+
+lemma translate_qqAlls : ∀ {n : ℕ} (φ : Semiformula V L₂ n),
+    translate L₁ L₂ tbl (qqAlls φ.val n) = (relAlls hT.domT (hT.transT φ)).val
+  | 0, φ => by simp [relAlls]
+  | n + 1, φ => by
+    have h := translate_qqAlls (∀¹ φ)
+    rw [Semiformula.val_all, ← qqAlls_succ', transT_all] at h
+    rw [show ((n + 1 : ℕ) : V) = (n : V) + 1 by simp, h]
+    rfl
 
 lemma transT_shift {n : ℕ} (φ : Semiformula V L₂ n) :
     hT.transT φ.shift = (hT.transT φ).shift := by
@@ -285,6 +300,26 @@ lemma relAllItr_specialize (d : Semiformula V L 1) :
       Matrix.head_cons, Matrix.vecMap_nil, Semiterm.substs_bvar] at h₁ h₂
     rw [relAllItr_succ]
     simp only [Matrix.conj]
+    cl_prover [h₁, h₂]
+
+/-- Specialisation of a relativized block of universal quantifiers. -/
+lemma relAlls_specialize (d : Semiformula V L 1) :
+    ∀ {n : ℕ} (φ : Semiformula V L n) (w : SemitermVec V L n 0),
+      T.internalize V ⊢ relAlls d φ 🡒 Matrix.conj (fun i ↦ d.subst ![w i]) 🡒 φ.subst w
+  | 0, φ, w => by
+    rw [Semiformula.subst_nil_eq_self]
+    simp only [relAlls]
+    cl_prover
+  | n + 1, φ, w => by
+    have h₁ := relAlls_specialize d (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ)) (Matrix.vecTail w)
+    rw [Semiformula.substs_all] at h₁
+    have h₂ := TProof.all_imp_subst (T := T)
+      ((d.subst ![Semiterm.bvar 0] 🡒 φ).subst (SemitermVec.q (Matrix.vecTail w))) (w 0)
+    rw [Semiformula.substs_q_substs_single,
+      show (w 0 :> Matrix.vecTail w) = w from Matrix.cons_head_tail w] at h₂
+    simp only [Semiformula.substs_imp, Semiformula.substs_substs, Matrix.vecMap_cons',
+      Matrix.head_cons, Matrix.vecMap_nil, Semiterm.substs_bvar] at h₁ h₂
+    simp only [relAlls, Matrix.conj]
     cl_prover [h₁, h₂]
 
 omit [T.Δ₁] in
@@ -1131,6 +1166,23 @@ lemma provable_qqAlls_of_tprovable_fvar : ∀ {n : ℕ} (φ : Semiformula V L n)
       exact h)
     simpa [qqAlls_all] using h₁
 
+lemma tprovable_conj_and_split {k : ℕ} (a b : Fin k → Formula V L) :
+    S.internalize V ⊢ Matrix.conj (fun i ↦ a i ⋏ b i) 🡒 Matrix.conj a ⋏ Matrix.conj b := by
+  have h₁ := matrixConj_imp_matrixConj (𝓢 := S.internalize V) (φ := ⊤)
+    (v := fun i ↦ a i ⋏ b i) (u := a) fun i ↦ by cl_prover
+  have h₂ := matrixConj_imp_matrixConj (𝓢 := S.internalize V) (φ := ⊤)
+    (v := fun i ↦ a i ⋏ b i) (u := b) fun i ↦ by cl_prover
+  cl_prover [h₁, h₂]
+
+lemma tprovable_exs_and_assoc (A B G : Semiformula V L 1) :
+    S.internalize V ⊢ ∃¹ (A ⋏ (B ⋏ G)) 🡒 ∃¹ ((A ⋏ B) ⋏ G) := by
+  have h : S.internalize V ⊢ ∀¹ ((A ⋏ (B ⋏ G)) 🡘 ((A ⋏ B) ⋏ G)) := by
+    apply TProof.all!
+    rw [Semiformula.free_iff, Semiformula.free_and, Semiformula.free_and, Semiformula.free_and,
+      Semiformula.free_and]
+    cl_prover
+  exact K_left (tprovable_all_iff_exs _ _ ⨀ h)
+
 end generalizeFvar
 
 section leibniz
@@ -1265,6 +1317,52 @@ lemma comp_preserve_eq :
   rw [IsTable.compTable_domT h₁.toIsTable h₂.toIsTable hc,
     IsTable.compTable_relT h₁.toIsTable h₂.toIsTable hc]
   exact tprovable_comp_preserveEqBody h₁ _ _ hb
+
+omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
+include h₁ hsound in
+lemma tprovable_relAlls_of_provable {n : ℕ} (φ : Semiformula V ℒₒᵣ n) (hφ : φ.shift = φ)
+    (h : Provable U (qqAlls φ.val n)) : S.internalize V ⊢ relAlls h₁.domT (h₁.transT φ) := by
+  have hs : shift ℒₒᵣ (qqAlls φ.val n) = qqAlls φ.val n := by
+    rw [shift_qqAlls φ.isSemiformula.isUFormula, ← Semiformula.val_shift, hφ]
+  have h' := hsound _ hs h
+  rw [IsTable.translate_qqAlls h₁.toIsTable] at h'
+  exact tprovable_iff_provable.mpr h'
+
+omit [S.Δ₁] [U.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] in
+lemma IsVarVec.bvar_cons_succ {k : ℕ} :
+    IsVarVec (Semiterm.bvar 0 :>
+      fun i : Fin k ↦ (Semiterm.bvar i.succ : Semiterm V ℒₒᵣ (k + 1))) := by
+  intro j
+  cases j using Fin.cases with
+  | zero => exact Or.inl ⟨0, rfl⟩
+  | succ j => exact Or.inl ⟨_, rfl⟩
+
+omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
+include h₁ h₂ hc hsound in
+lemma comp_func_exists {k : ℕ} (F : (ℒₒᵣ).Func k) :
+    Provable S (qqAlls (funcExistsCode ℒₒᵣ (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂) k ⌜F⌝)
+      k) := by
+  have hb := tprovable_relAlls_of_provable h₁ hsound (funcExistsBody h₂.domT (h₂.funcT F))
+    (funcExistsBody_shift h₂.domT_shift (h₂.funcT_shift F))
+    (by rw [funcExistsBody_val _ rfl _ rfl]; exact h₂.func_exists (codeIn_func_quote F))
+  rw [← funcExistsBody_val hc.domT rfl (hc.funcT F) rfl]
+  apply provable_qqAlls_of_forall_tprovable _
+    (funcExistsBody_shift hc.domT_shift (hc.funcT_shift F))
+  intro w
+  have hs := relAlls_specialize (T := S) h₁.domT _ w ⨀ hb
+  rw [IsTable.compTable_domT h₁.toIsTable h₂.toIsTable hc,
+    IsTable.compTable_funcT h₁.toIsTable h₂.toIsTable hc]
+  simp only [funcExistsBody, IsTable.transT_imp, IsTable.transT_conj, IsTable.transT_exs,
+    IsTable.transT_and, h₁.toIsTable.transT_subst _ (IsVarVec.single_bvar _),
+    h₁.toIsTable.transT_subst _ IsVarVec.bvar_cons_succ] at hs ⊢
+  simp only [Semiformula.substs_imp, Semiformula.substs_conj, Semiformula.substs_and,
+    Semiformula.substs_ex, Semiformula.substs_substs, Matrix.vecMap_cons', Matrix.head_cons,
+    Matrix.vecMap_nil, Semiterm.substs_bvar] at hs ⊢
+  have key {CA CB CAB EX EY : Formula V ℒₒᵣ} (hs : S.internalize V ⊢ CA 🡒 CB 🡒 EX)
+      (hsp : S.internalize V ⊢ CAB 🡒 CA ⋏ CB) (h₃ : S.internalize V ⊢ EX 🡒 EY) :
+      S.internalize V ⊢ CAB 🡒 EY := by
+    cl_prover [hs, hsp, h₃]
+  exact key hs (tprovable_conj_and_split _ _) (tprovable_exs_and_assoc _ _ _)
 
 end compConditions
 

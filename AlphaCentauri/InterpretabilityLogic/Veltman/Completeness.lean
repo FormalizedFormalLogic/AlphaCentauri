@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet.ILMinus
+public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
 public import AlphaCentauri.InterpretabilityLogic.Veltman.ILMinus
 public import Mathlib.Data.Set.Finite.List
 

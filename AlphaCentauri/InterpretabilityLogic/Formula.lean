@@ -136,8 +136,18 @@ def subformulas : Formula α → Finset (Formula α)
 
 variable {A B : Formula α}
 
-@[simp] lemma mem_subformulas_self : A ∈ A.subformulas := by
-  cases A <;> simp [subformulas];
+@[simp, grind .] lemma mem_subformulas_self : A ∈ A.subformulas := by
+  cases A <;> simp [subformulas]
+
+@[simp, grind .] lemma mem_subformulas_imp_left : A ∈ (A 🡒 B).subformulas := by simp [subformulas]
+
+@[simp, grind .] lemma mem_subformulas_imp_right : B ∈ (A 🡒 B).subformulas := by simp [subformulas]
+
+@[simp, grind .] lemma mem_subformulas_box : A ∈ (□A).subformulas := by simp [subformulas]
+
+@[simp, grind .] lemma mem_subformulas_rhd_left : A ∈ (A ▷ B).subformulas := by simp [subformulas]
+
+@[simp, grind .] lemma mem_subformulas_rhd_right : B ∈ (A ▷ B).subformulas := by simp [subformulas]
 
 lemma subformulas_subset_of_mem (h : B ∈ A.subformulas) : B.subformulas ⊆ A.subformulas := by
   induction A with

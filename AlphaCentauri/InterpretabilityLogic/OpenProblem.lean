@@ -1,8 +1,8 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Extension
+public import AlphaCentauri.InterpretabilityLogic.Logic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
-public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Extension
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 
 /-!
 # Open problems on extensions of $\mathbf{IL}$

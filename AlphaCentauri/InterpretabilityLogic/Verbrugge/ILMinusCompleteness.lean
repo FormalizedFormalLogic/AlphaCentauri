@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet.ILMinus
+public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
 

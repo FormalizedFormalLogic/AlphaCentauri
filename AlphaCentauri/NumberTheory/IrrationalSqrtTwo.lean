@@ -69,9 +69,10 @@ namespace Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻]
 
-lemma false_of_mul_self_eq_two_mul_of_bezout {x y : V} (hy : y ≠ 0)
-    (hbez : ∀ x y : V, y ≠ 0 → ∃ z s t, s * y = t * x + z ∧ z ∣ x ∧ z ∣ y)
+lemma false_of_mul_self_eq_two_mul_of_bezout {x y : V} (hbez : V↓[ℒₒᵣ] ⊧ bezout) (hy : y ≠ 0)
     (h : x * x = 2 * (y * y)) : False := by
+  replace hbez : ∀ x y : V, y ≠ 0 → ∃ z s t, s * y = t * x + z ∧ z ∣ x ∧ z ∣ y := by
+    simpa [models_iff, bezout] using hbez
   obtain ⟨z, s, t, e, ⟨x', rfl⟩, ⟨y', rfl⟩⟩ := hbez x y hy
   have hz : z ≠ 0 := by rintro rfl; simp at hy
   have h₁ : x' * x' = 2 * (y' * y') := by
@@ -100,12 +101,12 @@ theorem provable_irrationalSqrtTwo_IOpen_bezout :
   apply complete
   intro (V : Type) _ hV
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 := models_of_subtheory (U := insert bezout 𝗜𝗢𝗽𝗲𝗻) hV
-  have hbez : V↓[ℒₒᵣ] ⊧ bezout := models_of_mem (T := insert bezout 𝗜𝗢𝗽𝗲𝗻) (Set.mem_insert _ _)
   suffices ∀ x y : V, x * x = 2 * (y * y) → y = 0 by
     simpa [models_iff, irrationalSqrtTwo]
   intro x y h
   by_contra hy
-  exact false_of_mul_self_eq_two_mul_of_bezout hy (by simpa [models_iff, bezout] using hbez) h
+  exact false_of_mul_self_eq_two_mul_of_bezout
+    (models_of_mem (T := insert bezout 𝗜𝗢𝗽𝗲𝗻) (Set.mem_insert _ _)) hy h
 
 /-- $\mathsf{IOpen}$ is strictly weaker than $\mathsf{IOpen} + \mathrm{Bez}$.
 - [DAq05, §2]

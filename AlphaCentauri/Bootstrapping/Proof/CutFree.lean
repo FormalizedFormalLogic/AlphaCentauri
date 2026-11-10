@@ -74,21 +74,21 @@ private lemma phi_iff (C d : V) :
     rcases H with (⟨s, p, rfl, h⟩ | ⟨s, rfl, h⟩ | ⟨s, p, q, dp, dq, rfl, h⟩ |
       ⟨s, p, q, dpq, rfl, h⟩ | ⟨s, p, dp, rfl, h⟩ | ⟨s, p, t, dp, rfl, h⟩ |
       ⟨s, d', rfl, h⟩ | ⟨s, d', rfl, h⟩ | ⟨s, p, rfl, h⟩)
-    · left; exact ⟨s, by simp, p, by simp, rfl, h⟩
-    · right; left; exact ⟨s, by simp, rfl, h⟩
-    · right; right; left
+    · disj 1; exact ⟨s, by simp, p, by simp, rfl, h⟩
+    · disj 2; exact ⟨s, by simp, rfl, h⟩
+    · disj 3
       exact ⟨s, by simp, p, by simp, q, by simp, dp, by simp, dq, by simp, rfl, h⟩
-    · right; right; right; left
+    · disj 4
       exact ⟨s, by simp, p, by simp, q, by simp, dpq, by simp, rfl, h⟩
-    · right; right; right; right; left
+    · disj 5
       exact ⟨s, by simp, p, by simp, dp, by simp, rfl, h⟩
-    · right; right; right; right; right; left
+    · disj 6
       exact ⟨s, by simp, p, by simp, t, by simp, dp, by simp, rfl, h⟩
-    · right; right; right; right; right; right; left
+    · disj 7
       exact ⟨s, by simp, d', by simp, rfl, h⟩
-    · right; right; right; right; right; right; right; left
+    · disj 8
       exact ⟨s, by simp, d', by simp, rfl, h⟩
-    · right; right; right; right; right; right; right; right
+    · disj 9
       exact ⟨s, by simp, p, by simp, rfl, h⟩
   · rintro ⟨hs, H⟩
     refine ⟨hs, ?_⟩
@@ -96,15 +96,15 @@ private lemma phi_iff (C d : V) :
       ⟨s, _, p, _, q, _, dp, _, dq, _, rfl, h⟩ | ⟨s, _, p, _, q, _, dpq, _, rfl, h⟩ |
       ⟨s, _, p, _, dp, _, rfl, h⟩ | ⟨s, _, p, _, t, _, dp, _, rfl, h⟩ |
       ⟨s, _, d', _, rfl, h⟩ | ⟨s, _, d', _, rfl, h⟩ | ⟨s, _, p, _, h⟩)
-    · left; exact ⟨s, p, rfl, h⟩
-    · right; left; exact ⟨s, rfl, h⟩
-    · right; right; left; exact ⟨s, p, q, dp, dq, rfl, h⟩
-    · right; right; right; left; exact ⟨s, p, q, dpq, rfl, h⟩
-    · right; right; right; right; left; exact ⟨s, p, dp, rfl, h⟩
-    · right; right; right; right; right; left; exact ⟨s, p, t, dp, rfl, h⟩
-    · right; right; right; right; right; right; left; exact ⟨s, d', rfl, h⟩
-    · right; right; right; right; right; right; right; left; exact ⟨s, d', rfl, h⟩
-    · right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
+    · disj 1; exact ⟨s, p, rfl, h⟩
+    · disj 2; exact ⟨s, rfl, h⟩
+    · disj 3; exact ⟨s, p, q, dp, dq, rfl, h⟩
+    · disj 4; exact ⟨s, p, q, dpq, rfl, h⟩
+    · disj 5; exact ⟨s, p, dp, rfl, h⟩
+    · disj 6; exact ⟨s, p, t, dp, rfl, h⟩
+    · disj 7; exact ⟨s, d', rfl, h⟩
+    · disj 8; exact ⟨s, d', rfl, h⟩
+    · disj 9; exact ⟨s, p, h⟩
 
 /-- The $\Delta_1$ fixpoint blueprint of `Phi`. -/
 noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
@@ -176,16 +176,16 @@ def construction : Fixpoint.Construction V (blueprint T) where
       ⟨s, p, q, dpq, rfl, hpq, h, hdC⟩ | ⟨s, p, dp, rfl, hp, h, hdC⟩ |
       ⟨s, p, t, dp, rfl, hp, ht, h, hdC⟩ | ⟨s, d', rfl, ss, hdC⟩ |
       ⟨s, d', rfl, ss, hdC⟩ | ⟨s, p, h⟩)
-    · left; exact h
-    · right; left; exact h
-    · right; right; left
+    · disj 1; exact h
+    · disj 2; exact h
+    · disj 3
       exact ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hC hpC⟩, ⟨hq, hC hqC⟩⟩
-    · right; right; right; left; exact ⟨s, p, q, dpq, rfl, hpq, h, hC hdC⟩
-    · right; right; right; right; left; exact ⟨s, p, dp, rfl, hp, h, hC hdC⟩
-    · right; right; right; right; right; left; exact ⟨s, p, t, dp, rfl, hp, ht, h, hC hdC⟩
-    · right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hC hdC⟩
-    · right; right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hC hdC⟩
-    · right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
+    · disj 4; exact ⟨s, p, q, dpq, rfl, hpq, h, hC hdC⟩
+    · disj 5; exact ⟨s, p, dp, rfl, hp, h, hC hdC⟩
+    · disj 6; exact ⟨s, p, t, dp, rfl, hp, ht, h, hC hdC⟩
+    · disj 7; exact ⟨s, d', rfl, ss, hC hdC⟩
+    · disj 8; exact ⟨s, d', rfl, ss, hC hdC⟩
+    · disj 9; exact ⟨s, p, h⟩
 
 instance : (construction T).StrongFinite V where
   strong_finite := by
@@ -195,18 +195,18 @@ instance : (construction T).StrongFinite V where
       ⟨s, p, q, dpq, rfl, hpq, h, hdC⟩ | ⟨s, p, dp, rfl, hp, h, hdC⟩ |
       ⟨s, p, t, dp, rfl, hp, ht, h, hdC⟩ | ⟨s, d', rfl, ss, hdC⟩ |
       ⟨s, d', rfl, ss, hdC⟩ | ⟨s, p, h⟩)
-    · left; exact h
-    · right; left; exact h
-    · right; right; left
+    · disj 1; exact h
+    · disj 2; exact h
+    · disj 3
       exact ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC, by simp⟩, ⟨hq, hqC, by simp⟩⟩
-    · right; right; right; left; exact ⟨s, p, q, dpq, rfl, hpq, h, hdC, by simp⟩
-    · right; right; right; right; left; exact ⟨s, p, dp, rfl, hp, h, hdC, by simp⟩
-    · right; right; right; right; right; left
+    · disj 4; exact ⟨s, p, q, dpq, rfl, hpq, h, hdC, by simp⟩
+    · disj 5; exact ⟨s, p, dp, rfl, hp, h, hdC, by simp⟩
+    · disj 6
       exact ⟨s, p, t, dp, rfl, hp, ht, h, hdC, by simp⟩
-    · right; right; right; right; right; right; left; exact ⟨s, d', rfl, ss, hdC, by simp⟩
-    · right; right; right; right; right; right; right; left
+    · disj 7; exact ⟨s, d', rfl, ss, hdC, by simp⟩
+    · disj 8
       exact ⟨s, d', rfl, ss, hdC, by simp⟩
-    · right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
+    · disj 9; exact ⟨s, p, h⟩
 
 end CutFreeDerivation
 

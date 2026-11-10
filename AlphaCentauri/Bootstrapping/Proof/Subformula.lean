@@ -19,7 +19,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
-section Subformula
+section Subformulas
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* ISigma 1]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
@@ -136,10 +136,6 @@ end
     subformulas L (^∃ p) = insert (^∃ p) (subformulas L p) := by
   simp [subformulas, hp, Subformula.construction]
 
-/-- `subformulas` is not defined (returns `0`) on codes that are not formula codes. -/
-lemma subformulas_not_uformula {p : V} (hp : ¬IsUFormula L p) : subformulas L p = 0 :=
-  (Subformula.construction L).result_prop_not _ hp
-
 /-- Every formula code is a subformula of itself.
 
 - [HP98, §V.3(g)]
@@ -188,15 +184,6 @@ lemma subformulas_subset (h : IsImmediateSub L r p) : subformulas L r ⊆ subfor
     exact susbset_insert _ _
   · rw [subformulas_exs hr]
     exact susbset_insert _ _
-
-lemma shift_eq (h : IsImmediateSub L r p) (hp : shift L p = p) : shift L r = r := by
-  rcases h with ⟨hr, ⟨s, hs, rfl | rfl | rfl | rfl⟩ | rfl | rfl⟩
-  · exact (by simpa [shift_and hr hs] using hp : shift L r = r ∧ shift L s = s).1
-  · exact (by simpa [shift_and hs hr] using hp : shift L s = s ∧ shift L r = r).2
-  · exact (by simpa [shift_or hr hs] using hp : shift L r = r ∧ shift L s = s).1
-  · exact (by simpa [shift_or hs hr] using hp : shift L s = s ∧ shift L r = r).2
-  · simpa [shift_all hr] using hp
-  · simpa [shift_exs hr] using hp
 
 end IsImmediateSub
 
@@ -284,25 +271,7 @@ lemma subformulas_subset_of_mem {p q : V} (hp : IsUFormula L p) (hq : q ∈ subf
   subformulas_induction (P := fun p q ↦ subformulas L q ⊆ subformulas L p) (by definability)
     (fun _ _ ↦ subset_refl _) (fun _ _ _ h ih ↦ subset_trans ih h.subformulas_subset) hp hq
 
-variable (L)
-
-/-- The union, over all codes in the coded set `s`, of their subformula sets. -/
-noncomputable def subformulasSet (s : V) : V := ⋃ʰᶠ (hfsImage (subformulas L) s)
-
-variable {L}
-
-/-- Membership in `subformulasSet L s`: `q` is a subformula of some code in `s`. -/
-lemma mem_subformulasSet_iff {s q : V} : q ∈ subformulasSet L s ↔ ∃ p ∈ s, q ∈ subformulas L p := by
-  have := (subformulas.definable : 𝚺ᴬ₁-Function₁ subformulas (V := V) L)
-  constructor
-  · intro h
-    rcases mem_sUnion_iff.mp h with ⟨c, hc, hqc⟩
-    rcases mem_hfsImage_iff.mp hc with ⟨p, hp, rfl⟩
-    exact ⟨p, hp, hqc⟩
-  · rintro ⟨p, hp, hq⟩
-    exact mem_sUnion_iff.mpr ⟨subformulas L p, app_mem_hfsImage hp, hq⟩
-
-end Subformula
+end Subformulas
 
 section Instance
 
@@ -450,12 +419,6 @@ lemma insert {x s : V} (hx : Instance L X x) (hs : ∀ y ∈ s, Instance L X y) 
   · exact hs y hy
 
 end Instance
-
-/-- The subformulas of a formula code without free variables have no free variables. -/
-lemma shift_eq_self_of_mem_subformulas {p q : V} (hp : IsUFormula L p) (hps : shift L p = p)
-    (hq : q ∈ subformulas L p) : shift L q = q :=
-  subformulas_induction (P := fun p q ↦ shift L p = p → shift L q = q) (by definability)
-    (fun _ _ h ↦ h) (fun _ _ _ h ih hp ↦ ih (h.shift_eq hp)) hp hq hps
 
 namespace CutFreeDerivation
 

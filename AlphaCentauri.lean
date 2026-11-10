@@ -52,6 +52,7 @@ public import AlphaCentauri.Model.Elementary
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.InjectiveEnumeration
+public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
 public import AlphaCentauri.NumberTheory.FLT3
@@ -80,8 +81,8 @@ public import AlphaCentauri.Schemata.BoundedInduction
 public import AlphaCentauri.Schemata.CollectionFromDeltaInduction
 public import AlphaCentauri.Schemata.CollectionWithoutExp
 public import AlphaCentauri.Schemata.DeltaInduction
-public import AlphaCentauri.Schemata.Example
 public import AlphaCentauri.Schemata.Induction
+public import AlphaCentauri.Schemata.OpenInduction
 public import AlphaCentauri.Schemata.ParameterFreeInduction
 public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.Schemata.Strictness

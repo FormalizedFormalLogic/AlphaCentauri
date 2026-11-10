@@ -3,45 +3,26 @@
 #set page(width: auto, height: auto, margin: 24pt)
 
 #let Con(T) = $sans("Con")(#T)$
-#let Incon(T) = $not#Con(T)$
-#let PA = $Theory("PA")$
-#let ISigma0 = $Theory(I)Sigma_0$
-#let ISigma1 = $Theory(I)Sigma_1$
 
-// Keys are the theories as pretty-printed by `lake exe zoo_arithmetic`; a theory with no entry
-// here is drawn under its pretty-printed name.
-#figure(caption: [Arithmetic Theory Zoo], numbering: none)[
+#figure(
+  caption: [
+    Arithmetic Theory Zoo. An arrow points from a theory to a weaker one: solid if strictly weaker,
+    dashed if weaker or equivalent. Red marks an open problem. A vertex lists equivalent theories.
+  ],
+  numbering: none,
+)[
   #zoo(
     "./arithmetic.json",
-    labels: (
-      "𝗘𝗤 ℒₒᵣ": $Theory("EQ")$,
-      "𝗥₀": $Theory("R"_0)$,
-      "𝗤": $Theory("Q")$,
-      "𝗣𝗔⁻": $PA^-$,
-      "𝗜𝗢𝗽𝗲𝗻": $Theory("IOpen")$,
-      "𝗜𝚺₀": $ISigma0$,
-      "𝗜𝚺₀ ∪ 𝝮₁": $ISigma0 + Omega_1$,
-      "𝗜𝚺₁": $ISigma1$,
-      "𝗜𝚺₁ ∪ FFL.FirstOrder.Theory.Con 𝗜𝚺₁": $ISigma1 + Con(ISigma1)$,
-      "𝗜𝚺₁ ∪ FFL.FirstOrder.Theory.Incon 𝗜𝚺₁": $ISigma1 + Incon(ISigma1)$,
-      "𝗣𝗔": $PA$,
-      "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Con 𝗣𝗔": $PA + Con(PA)$,
-      "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Incon 𝗣𝗔": $PA + Incon(PA)$,
-      "𝗣𝗔 ∪ FFL.FirstOrder.Theory.Con 𝗣𝗔 ∪ FFL.FirstOrder.Theory.Incon (𝗣𝗔 ∪ FFL.FirstOrder.Theory.Con 𝗣𝗔)":
-        $PA + Con(PA) + Incon(PA + Con(PA))$,
-      "𝗜𝚺2": $Theory(I)Sigma_2$,
-      "𝗜𝚷₁": $Theory(I)Pi_1$,
-      "𝗜𝚷2": $Theory(I)Pi_2$,
-      "𝗕𝚺₁": $Theory(B)Sigma_1$,
-      "𝗕𝚺 2": $Theory(B)Sigma_2$,
-      "𝗕𝚷 0": $Theory(B)Pi_0$,
-      "𝗕𝚷 1": $Theory(B)Pi_1$,
-      "𝗟𝚺1": $Theory(L)Sigma_1$,
-      "𝗟𝚺2": $Theory(L)Sigma_2$,
-      "𝗟𝚷1": $Theory(L)Pi_1$,
-      "𝗧𝗔": $Theory("TA")$,
+    // The functions and sentences occurring in the theories, by the last component of their Lean
+    // names. Theories in Lean's notation, such as `𝗜𝚺₁` or `𝗕𝚺 2`, need no entry.
+    names: (
+      "Con": T => Con(T),
+      "Incon": T => $not#Con(T)$,
+      "expAxiom": $sans("Exp")$,
+      "LeastNumberScheme": Γ => $Theory(L)#Γ$,
+      "BoundedUniversal": n => $U_#n$,
     ),
-    // `𝗣𝗔⁻` is finitely axiomatizable; its single axiom does not deserve a vertex of its own.
-    omit: ("{FFL.FirstOrder.Arithmetic.PeanoMinus.finite.toFinset.conj}",),
+    // Labels of whole theories the rule above draws badly, keyed by the pretty-printed theory.
+    labels: (:),
   )
 ]

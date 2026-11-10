@@ -49,15 +49,16 @@ open problem.
 axiom provable_fermatLastTheorem_IE2 {n : ℕ} (hn : Odd n) (h5 : 5 ≤ n) :
     𝗜𝗘₂ ⊢ fermatLastTheorem n
 
-/-- Bézout's theorem: any two numbers have a common divisor `z` with `s y = t x + z`.
+/-- Bézout's theorem: any `x` and nonzero `y` have a common divisor `z` with `s y = t x + z`.
+Smith prints it without the hypothesis `y ≠ 0`, which `x = 1`, `y = 0` violates.
 - [Smi92b, Definition 3.5] -/
-def bezout : ArithmeticSentence := “∀ x y, ∃ z s t, s * y = t * x + z ∧ z ∣ x ∧ z ∣ y”
+def bezout : ArithmeticSentence := “∀ x y, y ≠ 0 → ∃ z s t, s * y = t * x + z ∧ z ∣ x ∧ z ∣ y”
 
-/-- Case I of Fermat's Last Theorem for exponent `n`: there is no solution of `xⁿ + yⁿ = zⁿ` with
-`n ∤ x y z`.
+/-- Case I of Fermat's Last Theorem for exponent `n`: every solution of `xⁿ + yⁿ = zⁿ` has
+`n ∣ x y z`.
 - [Smi92b, §2] -/
 def fermatLastTheoremCaseOne (n : ℕ) : ArithmeticSentence :=
-  “∀ x y z, x ^' n + y ^' n = z ^' n → ¬↑n ∣ x * y * z”
+  “∀ x y z, x ^' n + y ^' n = z ^' n → ↑n ∣ x * y * z”
 
 /-- Case II of Fermat's Last Theorem for exponent `n`: every solution of `xⁿ + yⁿ = zⁿ` with
 `n ∣ x y z` is trivial.

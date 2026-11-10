@@ -525,6 +525,59 @@ end IsUFormula
 
 end formula
 
+section rangeList
+
+lemma rangeList_exists (n : V) : ∃ w, len w = n ∧ ∀ i < n, w.[i] = i :=
+  sigmaZero_skolem_vec (R := fun i y ↦ y = i) (B := n)
+    (LocallyDelta0.eq (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0))
+    fun i hi ↦ ⟨i, hi, rfl⟩
+
+/-- The list `[0, 1, …, n - 1]`. -/
+noncomputable def rangeList (n : V) : V := Classical.choose (rangeList_exists n)
+
+@[simp] lemma len_rangeList (n : V) : len (rangeList n) = n :=
+  (Classical.choose_spec (rangeList_exists n)).1
+
+@[simp] lemma nth_rangeList {n i : V} (hi : i < n) : (rangeList n).[i] = i :=
+  (Classical.choose_spec (rangeList_exists n)).2 i hi
+
+lemma rangeList_eq_iff {n w : V} : w = rangeList n ↔ len w = n ∧ ∀ i < n, w.[i] = i := by
+  constructor
+  · rintro rfl; exact ⟨len_rangeList n, fun i hi ↦ nth_rangeList hi⟩
+  · rintro ⟨hl, hw⟩
+    apply nth_ext (by simp [hl])
+    intro i hi
+    rw [hw i (by simpa [hl] using hi), nth_rangeList (by simpa [hl] using hi)]
+
+lemma rangeList_locallyDelta0 : LocallyDelta0Function₁ (rangeList : V → V) where
+  graph := by
+    have hentry : LocallyDelta0 fun u : Fin 3 → V ↦ u 0 < u 2 → (u 1).[u 0] = u 0 :=
+      (LocallyDelta0.lt (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 2)).imp
+        (LocallyDelta0.eq (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+          (LocallyDelta0Function.var 0)) (LocallyDelta0Function.var 0))
+    have hall := LocallyDelta0.ball_le_function (LocallyDelta0Function.var (V := V) (1 : Fin 2))
+      hentry
+    exact ((LocallyDelta0.eq (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
+      (LocallyDelta0Function.var 1)).and hall).of_iff fun w ↦ by
+        rw [rangeList_eq_iff]
+        simp only [Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one]
+        apply and_congr Iff.rfl
+        constructor
+        · intro h i _ hi; exact h i hi
+        · intro h i hi; exact h i hi.le hi
+  bounded X := by
+    use Exp.exp (Exp.exp (X + X + X + 3))
+    intro w hw
+    have := le_exp_exp_of_nth_le (B := w 0) (rangeList (w 0)) fun i hi ↦ by
+      rw [len_rangeList] at hi
+      rw [nth_rangeList hi]; exact hi.le
+    refine le_trans (by simpa using this) ?_
+    apply exp_monotone_le.mpr
+    apply exp_monotone_le.mpr
+    gcongr <;> exact hw 0
+
+end rangeList
+
 namespace UformulaRec1
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1 (Blueprint)

@@ -14,7 +14,7 @@ ordered ring satisfying open induction.
 namespace FFL.FirstOrder.Arithmetic
 
 /-- Every model of $\mathsf{ZR}$ embeds into a model of $\mathsf{IOpen}$.
-- [Wil78]
+- [Wil78, Lemma 3.2]
 - [BO96, Theorem 1.2]
 - [Raf10, Wilkie's Extension Theorem] -/
 axiom exists_embedding_models_IOpen (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* ZRing] :

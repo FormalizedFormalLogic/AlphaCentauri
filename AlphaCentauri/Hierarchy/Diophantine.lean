@@ -26,18 +26,18 @@ inductive Semiformula.Diophantine {L : Language} {ξ : Type*} :
 
 namespace Arithmetic
 
-/-- An open problem: $\mathsf{I}\Delta_0$ proves that every $\Delta_0$ formula is equivalent to a
-Diophantine formula.
+/-- $\mathsf{I}\Delta_0$ proves that every $\Delta_0$ formula is equivalent to a Diophantine
+formula. An open problem.
 - [DAq05, Question 8.1] -/
-axiom exists_diophantine_equiv_ISigma0 {φ : ArithmeticFormula ℕ}
-    (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ) :
+def ExistsDiophantineEquivISigma0 : Prop :=
+  ∀ φ : ArithmeticFormula ℕ, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ →
     ∃ ψ : ArithmeticFormula ℕ, Semiformula.Diophantine ψ ∧ 𝗜𝚺₀ ⊢ (φ 🡘 ψ).univCl
 
-/-- An open problem: $\mathsf{I}\Delta_0 + \Omega_1$ proves that every $\Delta_0$ formula is
-equivalent to a Diophantine formula.
+/-- $\mathsf{I}\Delta_0 + \Omega_1$ proves that every $\Delta_0$ formula is equivalent to a
+Diophantine formula. An open problem.
 - [DAq05, §8] -/
-axiom exists_diophantine_equiv_ISigma0_union_Omega1 {φ : ArithmeticFormula ℕ}
-    (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ) :
+def ExistsDiophantineEquivISigma0UnionOmega1 : Prop :=
+  ∀ φ : ArithmeticFormula ℕ, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ →
     ∃ ψ : ArithmeticFormula ℕ, Semiformula.Diophantine ψ ∧ 𝗜𝚺₀ ∪ 𝝮₁ ⊢ (φ 🡘 ψ).univCl
 
 end Arithmetic

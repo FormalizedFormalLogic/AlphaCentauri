@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Absoluteness
 public import Foundation.FirstOrder.Arithmetic.Definability.PrenexDefinable
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Foundation.Vorspiel.Computability.Primrec
-public import AlphaCentauri.ToMathlib.Primrec
+public import AlphaCentauri.ToMathlib.Computability.Primrec.Basic
 public import AlphaCentauri.Hierarchy.Bounded
 public import Foundation.FirstOrder.Arithmetic.R0.Representation
 

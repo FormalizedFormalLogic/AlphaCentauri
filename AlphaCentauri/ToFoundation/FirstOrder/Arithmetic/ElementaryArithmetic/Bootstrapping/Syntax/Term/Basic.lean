@@ -1,18 +1,22 @@
 module
 
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Language
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Vec
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
 
 /-!
-# Codes of terms in models of $\mathsf{EA}$
+# Codes of the language and of terms in models of $\mathsf{EA}$
 
-The part of `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Term/Basic.lean` on codes of
-terms, ported to models of $\mathsf{EA}$: the codes `qqBvar`, `qqFvar` and `qqFunc` of bound
-variables, free variables and function applications, the predicate `IsUTerm L` of codes of
-terms with induction on locally $\Delta_0$ predicates, and the predicate `IsUTermVec L` of
-lists of terms. The formulas are Foundation's `qqBvarDef`, `qqFvarDef`, `qqFuncDef`,
-`isUTerm` and `isUTermVec`. The recursion `termBV` computing the least bound of the bound
-variables and the predicates `IsSemiterm` and `IsSemitermVec` follow, with the formulas
+The parts of `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Language.lean` and
+`Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Term/Basic.lean` on the codes of symbols
+and of terms, ported to models of $\mathsf{EA}$. The codes of the function and relation symbols
+of $\mathcal{L}_{\mathrm{OR}}$ are the ones given by `zeroIndex`, ..., `ltIndex`, and
+`isFunc_iff_LOR` and `isRel_iff_LOR` describe them. Then come the codes `qqBvar`, `qqFvar` and
+`qqFunc` of bound variables, free variables and function applications, the predicate `IsUTerm L`
+of codes of terms with induction on locally $\Delta_0$ predicates, and the predicate
+`IsUTermVec L` of lists of terms. The formulas are Foundation's `qqBvarDef`, `qqFvarDef`,
+`qqFuncDef`, `isUTerm` and `isUTermVec`. The recursion `termBV` computing the least bound of the
+bound variables and the predicates `IsSemiterm` and `IsSemitermVec` follow, with the formulas
 `termBVGraph`, `isSemiterm` and `isSemitermVec`.
 
 - [HP98, §V.3]
@@ -21,6 +25,75 @@ variables and the predicates `IsSemiterm` and `IsSemitermVec` follow, with the f
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Arithmetic
+
+-- `Arithmetic` is intentionally re-opened here, as in Foundation.
+set_option linter.dupNamespace false
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping
+  _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+
+@[simp] lemma LOR_func_zeroIndex : (ℒₒᵣ).IsFunc 0 (zeroIndex : V) := by
+  simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Zero.zero
+
+@[simp] lemma LOR_func_oneIndex : (ℒₒᵣ).IsFunc 0 (oneIndex : V) := by
+  simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.One.one
+
+@[simp] lemma LOR_func_addIndex : (ℒₒᵣ).IsFunc 2 (addIndex : V) := by
+  simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Add.add
+
+@[simp] lemma LOR_func_mulIndex : (ℒₒᵣ).IsFunc 2 (mulIndex : V) := by
+  simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Mul.mul
+
+@[simp] lemma LOR_rel_eqIndex : (ℒₒᵣ).IsRel 2 (eqIndex : V) := by
+  simpa using! codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.Eq.eq
+
+@[simp] lemma LOR_rel_ltIndex : (ℒₒᵣ).IsRel 2 (ltIndex : V) := by
+  simpa using! codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.LT.lt
+
+private lemma func_def_LOR :
+    (ℒₒᵣ).isFunc =
+      .mkSigma “k f. (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” := rfl
+
+private lemma rel_def_LOR : (ℒₒᵣ).isRel = .mkSigma “k r. (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1)” := rfl
+
+@[reducible] instance gödelQuoteFuncLOR (k) : GödelQuote ((ℒₒᵣ).Func k) V := gödelQuoteFunc k
+
+@[reducible] instance gödelQuoteRelLOR (k) : GödelQuote ((ℒₒᵣ).Rel k) V := gödelQuoteRel k
+
+lemma isFunc_iff_LOR {k f : V} :
+    (ℒₒᵣ).IsFunc k f ↔
+    (k = 0 ∧ f = ⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝) ∨
+    (k = 0 ∧ f = ⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝) ∨
+    (k = 2 ∧ f = ⌜(Language.Add.add : (ℒₒᵣ).Func 2)⌝) ∨
+    (k = 2 ∧ f = ⌜(Language.Mul.mul : (ℒₒᵣ).Func 2)⌝) := by
+  rw [isFunc_def (L := ℒₒᵣ), func_def_LOR]
+  suffices
+    k = 0 ∧ f = 0 ∨ k = 0 ∧ f = 1 ∨ k = 2 ∧ f = 0 ∨ k = 2 ∧ f = 1 ↔ _ by simpa
+  apply iff_of_eq
+  congr
+  · calc
+      (1 : V) = (1 : ℕ) := by simp
+      _       = ⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ := by rfl
+  · calc
+      (1 : V) = (1 : ℕ) := by simp
+      _       = ⌜(Language.Mul.mul : (ℒₒᵣ).Func 2)⌝ := by rfl
+
+lemma isRel_iff_LOR {k R : V} :
+    (ℒₒᵣ).IsRel k R ↔
+    (k = 2 ∧ R = ⌜(Language.Eq.eq : (ℒₒᵣ).Rel 2)⌝) ∨
+    (k = 2 ∧ R = ⌜(Language.LT.lt : (ℒₒᵣ).Rel 2)⌝) := by
+  rw [isRel_def (L := ℒₒᵣ), rel_def_LOR]
+  suffices
+    k = 2 ∧ R = 0 ∨ k = 2 ∧ R = 1 ↔ _ by simpa
+  apply iff_of_eq
+  congr
+  · calc (1 : V) = (1 : ℕ) := by simp
+
+end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Arithmetic
 
 namespace FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
 
@@ -51,20 +124,18 @@ scoped prefix:max "^func " => qqFunc
 lemma qqFuncN_eq_qqFunc (k f v : ℕ) : qqFuncN k f v = qqFunc k f v := by
   simp [qqFunc, qqFuncN, nat_pair_eq]
 
-@[simp] lemma var_lt_qqBvar (z : V) : z < ^#z := lt_succ_iff_le.mpr <| le_pair_right 0 z
+@[simp] lemma var_lt_qqBvar (z : V) : z < ^#z := by simp [qqBvar, lt_succ_iff_le]
 
-@[simp] lemma var_lt_qqFvar (x : V) : x < ^&x := lt_succ_iff_le.mpr <| le_pair_right 1 x
+@[simp] lemma var_lt_qqFvar (x : V) : x < ^&x := by simp [qqFvar, lt_succ_iff_le]
 
-@[simp] lemma arity_lt_qqFunc (k f v : V) : k < ^func k f v :=
-  le_iff_lt_succ.mp <| le_trans (le_pair_right 2 k) <| pair_le_pair_right 2 <| le_pair_left k ⟪f, v⟫
+@[simp] lemma arity_lt_qqFunc (k f v : V) : k < ^func k f v := by
+  grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma func_lt_qqFunc (k f v : V) : f < ^func k f v :=
-  le_iff_lt_succ.mp <| le_trans (le_pair_left f v) <|
-    le_trans (le_pair_right k ⟪f, v⟫) <| le_pair_right 2 ⟪k, ⟪f, v⟫⟫
+@[simp] lemma func_lt_qqFunc (k f v : V) : f < ^func k f v := by
+  grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma terms_lt_qqFunc (k f v : V) : v < ^func k f v :=
-  le_iff_lt_succ.mp <| le_trans (le_pair_right f v) <|
-    le_trans (le_pair_right k ⟪f, v⟫) <| le_pair_right 2 ⟪k, ⟪f, v⟫⟫
+@[simp] lemma terms_lt_qqFunc (k f v : V) : v < ^func k f v := by
+  grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 lemma nth_lt_qqFunc_of_lt {i k f v : V} (hi : i < len v) : v.[i] < ^func k f v :=
   lt_trans (nth_lt_self hi) (terms_lt_qqFunc _ _ _)
@@ -267,11 +338,7 @@ lemma nth {n w : V} (h : IsUTermVec L n w) {i} : i < n → IsUTerm L w.[i] := h.
 @[simp] lemma empty : IsUTermVec (V := V) L 0 0 := ⟨by simp, by simp⟩
 
 @[simp] lemma empty_iff : IsUTermVec L 0 v ↔ v = 0 := by
-  constructor
-  · intro h
-    exact len_zero_iff_eq_nil.mp h.lh.symm
-  · rintro rfl
-    simp
+  simp [IsUTermVec, ← len_zero_iff_eq_nil, eq_comm]
 
 lemma two_iff {v : V} :
     IsUTermVec L 2 v ↔ ∃ t₁ t₂, IsUTerm L t₁ ∧ IsUTerm L t₂ ∧ v = ?[t₁, t₂] := by
@@ -293,11 +360,7 @@ lemma two_iff {v : V} :
 
 @[simp] lemma adjoin₁_iff {t : V} :
     IsUTermVec L 1 (?[t] : V) ↔ IsUTerm L t := by
-  constructor
-  · intro h
-    simpa using h.nth (i := 0) (by simp)
-  · intro h
-    simpa using empty.adjoin h
+  simp [IsUTermVec]
 
 @[simp] lemma mkSeq₂_iff {t₁ t₂ : V} :
     IsUTermVec L 2 (?[t₁, t₂] : V) ↔ IsUTerm L t₁ ∧ IsUTerm L t₂ := by
@@ -975,9 +1038,6 @@ instance graph_definable₂ (param) : 𝚺ᴬ_[0 + 1]-Relation (c.Graph L param)
   simpa using Bounding.HierarchySymbol.Definable.retractiont (n := 2) (graph_definable
     c) (#0 :> #1 :> fun i ↦ &(param i))
 
-lemma graph_dom_isUTerm {t y} :
-    c.Graph L param t y → IsUTerm L t := fun h ↦ Graph.case_iff.mp h |>.1
-
 lemma graph_bvar_iff {z} :
     c.Graph L param ^#z y ↔ y = c.bvar param z := by
   constructor
@@ -1003,17 +1063,6 @@ lemma graph_func {k f v w} (hkr : L.IsFunc k f) (hv : IsUTermVec L k v)
     c.Graph L param (^func k f v) (c.func param k f v w) := by
   exact Graph.case_iff.mpr
     ⟨by simp [hkr, hv], by disj 3; exact ⟨k, f, v, w, ⟨hkw, hw⟩, by simp⟩⟩
-
-lemma graph_func_inv {k f v y} :
-    c.Graph L param (^func k f v) y → ∃ w,
-      (k = len w ∧ ∀ i < k, c.Graph L param v.[i] w.[i]) ∧
-      y = c.func param k f v w := by
-  intro H
-  rcases Graph.case_iff.mp H with ⟨_, (⟨_, h, _⟩ | ⟨_, h, rfl⟩ | ⟨k', f', v', w, hw, h, rfl⟩)⟩
-  · simp [qqFunc, qqBvar] at h
-  · simp [qqFunc, qqFvar] at h
-  · rcases show k = k' ∧ f = f' ∧ v = v' by simpa [qqFunc, qqFunc] using h with ⟨rfl, rfl, rfl⟩
-    exact ⟨w, hw, by rfl⟩
 
 variable {c} (param n)
 
@@ -1206,10 +1255,6 @@ lemma resultVec_defined :
     IsUTermVec.defined.proper.iff',
     c.eval_graphDef] using c.resultVec_graph
 
-lemma eval_resultVec (v : Fin (arity + 3) → V) :
-    (β.resultVec L).val.Evalb v ↔ v 0 = c.resultVec L (v ·.succ.succ.succ) (v 1) (v 2) :=
-  c.resultVec_defined.iff
-
 end
 
 end Construction
@@ -1275,10 +1320,6 @@ variable {k : V}
     (termBVVec L k v).[i] = termBV L v.[i] := construction.nth_resultVec L _ hv hi
 
 @[simp] lemma termBVVec_nil : termBVVec L 0 0 = 0 := construction.resultVec_nil L _
-
-lemma termBVVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts) :
-    termBVVec L (k + 1) (t ∷ ts) = termBV L t ∷ termBVVec L k ts :=
-  construction.resultVec_cons L ![] hts ht
 
 section
 

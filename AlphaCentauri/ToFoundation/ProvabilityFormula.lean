@@ -39,13 +39,6 @@ lemma isPrenexHierarchy_allBallOrBall {A B : Semiformula V ℒₒᵣ 1} (hA : Is
   rw [IsPrenexHierarchy.quant_iff]
   simpa [IsPrenexHierarchy, qqBall] using And.intro (IsBounded.ball ht hA') (IsBounded.ball ht hB')
 
-lemma typed_quote_shift {n : ℕ} (σ : ArithmeticSemisentence n) :
-    (⌜σ⌝ : Semiformula V ℒₒᵣ n).shift = ⌜σ⌝ := by
-  ext;
-  change shift ℒₒᵣ (⌜σ⌝ : V) = ⌜σ⌝;
-  rw [Sentence.quote_def, ← Semiformula.quote_shift];
-  simp [Rewriting.shift, Rewriting.emb, ← TransitiveRewriting.comp_app]
-
 
 @[simp] lemma models_provabilityPred_iff (σ : ArithmeticSentence) :
     V↓[ℒₒᵣ] ⊧ provabilityPred T σ ↔ Provable T (⌜σ⌝ : V) := by

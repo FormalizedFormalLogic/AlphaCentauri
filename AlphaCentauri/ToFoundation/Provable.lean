@@ -113,6 +113,13 @@ lemma substNumerals_eq_subst {k : ℕ} (φ : ArithmeticSemisentence k) (v : Fin 
   simp [substNumerals, Sentence.quote_eq]
   rfl
 
+lemma typed_quote_shift {n : ℕ} (σ : ArithmeticSemisentence n) :
+    (⌜σ⌝ : Semiformula V ℒₒᵣ n).shift = ⌜σ⌝ := by
+  ext;
+  change shift ℒₒᵣ (⌜σ⌝ : V) = ⌜σ⌝;
+  rw [Sentence.quote_def, ← Semiformula.quote_shift];
+  simp [Rewriting.shift, Rewriting.emb, ← TransitiveRewriting.comp_app]
+
 lemma typed_quote_rew_subst {k j : ℕ} (φ : ArithmeticSemisentence k)
     (w : Fin k → ArithmeticSemiterm Empty j) :
     (⌜Rew.subst w ▹ φ⌝ : Semiformula V ℒₒᵣ j) =

@@ -450,6 +450,213 @@ instance : Entailment.Consistent (𝐂𝐋 : Logic α) :=
 
 end Consistency
 
+/-! ### Strict inclusions -/
+
+namespace Logic
+
+open Veltman Veltman.Model Veltman.Model.World Entailment ofAxiomsMinus
+
+variable {α : Type*}
+
+private abbrev counterJ1 (α : Type*) : Model (Fin 2) α :=
+  ⟨(· < ·), fun _ _ _ ↦ False, fun _ _ ↦ False⟩
+
+private instance : (counterJ1 α).IsILMinus where
+  trans := by omega
+  cwf := Finite.converseWellFounded_of_trans_of_irrefl
+  rel_of_s_left := by tauto
+
+private instance : (counterJ1 α).IsJ2 where
+  rel_of_s_right := by tauto
+  s_trans := by tauto
+
+private instance : (counterJ1 α).IsJ5 := ⟨by omega⟩
+
+private lemma unprovable_J1 : (ILMinusJ2PlusJ5 : Logic α) ⊬ Axioms.J1 ⊤ ⊤ := by
+  intro h;
+  obtain ⟨z, h, -⟩ :=
+    ILMinusJ2PlusJ5.sound (M := counterJ1 α) h 0 (fun _ _ ↦ id) 1 (by omega) forces_top;
+  exact h;
+
+private abbrev counterJ5 (α : Type*) : Model (Fin 3) α :=
+  ⟨(· < ·), fun w x y ↦ w < x ∧ x = y, fun _ _ ↦ False⟩
+
+private instance : (counterJ5 α).IsILMinus where
+  trans := by omega
+  cwf := Finite.converseWellFounded_of_trans_of_irrefl
+  rel_of_s_left := by tauto
+
+private instance : (counterJ5 α).IsJ1 := ⟨by tauto⟩
+
+private instance : (counterJ5 α).IsJ2 where
+  rel_of_s_right := by omega
+  s_trans := by omega
+
+private lemma unprovable_J5 : (𝐂𝐋 : Logic α) ⊬ Axioms.J5 (□⊥) := by
+  intro h;
+  have h₁ : (1 : Fin 3) ⊩[counterJ5 α] ◇□⊥ := by
+    apply forces_dia.mpr;
+    use 2;
+    and_intros;
+    · omega;
+    · intro y hy;
+      omega;
+  obtain ⟨z, ⟨-, rfl⟩, hz⟩ := CL.sound (M := counterJ5 α) h 0 1 (by omega) h₁;
+  exact hz 2 (by omega);
+
+private abbrev counterJ4 (α : Type*) : Model (Fin 3) α :=
+  ⟨(· < ·), fun w x _ ↦ w < x, fun _ _ ↦ False⟩
+
+private instance : (counterJ4 α).IsILMinus where
+  trans := by omega
+  cwf := Finite.converseWellFounded_of_trans_of_irrefl
+  rel_of_s_left := by tauto
+
+private instance : (counterJ4 α).IsJ1 := ⟨by tauto⟩
+
+private instance : (counterJ4 α).IsJ5 := ⟨by tauto⟩
+
+private lemma unprovable_J4Plus : (ILMinusJ1J5 : Logic α) ⊬ Axioms.J4Plus (◇⊤) ⊥ ⊤ := by
+  intro h;
+  have h₁ : (1 : Fin 3) ⊩[counterJ4 α] □(◇⊤ 🡒 ⊥) := by
+    intro y Rxy hy;
+    obtain ⟨z, Ryz, -⟩ := forces_dia.mp hy;
+    omega;
+  have h₂ : (1 : Fin 3) ⊩[counterJ4 α] ⊤ ▷ ◇⊤ := by
+    intro y Rxy _;
+    use 0;
+    and_intros;
+    · exact Rxy;
+    · exact forces_dia.mpr ⟨1, by omega, forces_top⟩;
+  obtain ⟨z, -, hz⟩ := ILMinusJ1J5.sound (M := counterJ4 α) h 1 h₁ h₂ 2 (by omega) forces_top;
+  exact hz;
+
+private abbrev counterJ2 (α : Type*) : Model (Fin 4) α :=
+  ⟨(· < ·), fun w x y ↦ w < x ∧ w < y ∧ (x ≤ y ∨ w = 0 ∧ (x = 3 ∧ y = 2 ∨ x = 2 ∧ y = 1)),
+    fun _ _ ↦ False⟩
+
+private instance : (counterJ2 α).IsILMinus where
+  trans := by omega
+  cwf := Finite.converseWellFounded_of_trans_of_irrefl
+  rel_of_s_left := by tauto
+
+private instance : (counterJ2 α).IsJ1 := ⟨by omega⟩
+
+private instance : (counterJ2 α).IsJ4 := ⟨by omega⟩
+
+private instance : (counterJ2 α).IsJ5 := ⟨by omega⟩
+
+private lemma unprovable_J2 :
+    (ILMinusJ1J4PlusJ5 : Logic α) ⊬ Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤) := by
+  intro h;
+  have h₁ : (0 : Fin 4) ⊩[counterJ2 α] □⊥ ▷ (◇⊤ ⋏ □□⊥) ⋏ (◇⊤ ⋏ □□⊥) ▷ ◇◇⊤ := by
+    apply forces_and.mpr;
+    constructor;
+    · intro y _ hy;
+      have : ¬y < 3 := hy 3;
+      use 2;
+      constructor;
+      · omega;
+      · apply forces_and.mpr;
+        constructor;
+        · exact forces_dia.mpr ⟨3, by omega, forces_top⟩;
+        · intro z hz u hu;
+          omega;
+    · intro y _ hy;
+      obtain ⟨hy₁, hy₂⟩ := forces_and.mp hy;
+      obtain ⟨z, hz, -⟩ := forces_dia.mp hy₁;
+      have : ¬y < 2 := fun h ↦ hy₂ 2 h 3 (by omega);
+      use 1;
+      constructor;
+      · omega;
+      · exact forces_dia.mpr ⟨2, by omega, forces_dia.mpr ⟨3, by omega, forces_top⟩⟩;
+  obtain ⟨z, hz, hz'⟩ :=
+    ILMinusJ1J4PlusJ5.sound (M := counterJ2 α) h 0 h₁ 3 (by omega) (fun _ h ↦ by omega);
+  obtain ⟨u, hu, hu'⟩ := forces_dia.mp hz';
+  obtain ⟨v, hv, -⟩ := forces_dia.mp hu';
+  omega;
+
+instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ1 :=
+  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤) (fun h ↦ unprovable_J1 <| WeakerThan.pbl h)
+    (by simp)
+
+instance : (ILMinusJ4Plus : Logic α) ⪱ ILMinusJ1J4Plus :=
+  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤)
+    (fun h ↦ unprovable_J1 <| WeakerThan.pbl <| WeakerThan.pbl (𝓣 := ILMinusJ2Plus) h)
+    (axm (by simp))
+
+instance : (ILMinusJ5 : Logic α) ⪱ ILMinusJ1J5 :=
+  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤) (fun h ↦ unprovable_J1 <| WeakerThan.pbl h)
+    (axm (by simp))
+
+instance : (ILMinusJ4PlusJ5 : Logic α) ⪱ ILMinusJ1J4PlusJ5 :=
+  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤) (fun h ↦ unprovable_J1 <| WeakerThan.pbl h)
+    (axm (by simp))
+
+instance : (ILMinusJ2Plus : Logic α) ⪱ 𝐂𝐋 :=
+  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤) (fun h ↦ unprovable_J1 <| WeakerThan.pbl h)
+    (by simp)
+
+instance : (ILMinusJ2PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
+  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤) unprovable_J1 ofAxioms.axiomJ1
+
+instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ5 :=
+  .of_unprovable_provable (φ := Axioms.J5 (□⊥)) (fun h ↦ unprovable_J5 <| WeakerThan.pbl h)
+    (by simp)
+
+instance : (ILMinusJ4Plus : Logic α) ⪱ ILMinusJ4PlusJ5 :=
+  .of_unprovable_provable (φ := Axioms.J5 (□⊥))
+    (fun h ↦ unprovable_J5 <| WeakerThan.pbl <| WeakerThan.pbl (𝓣 := ILMinusJ2Plus) h)
+    (axm (by simp))
+
+instance : (ILMinusJ2Plus : Logic α) ⪱ ILMinusJ2PlusJ5 :=
+  .of_unprovable_provable (φ := Axioms.J5 (□⊥)) (fun h ↦ unprovable_J5 <| WeakerThan.pbl h)
+    (axm (by simp))
+
+instance : (ILMinusJ1 : Logic α) ⪱ ILMinusJ1J5 :=
+  .of_unprovable_provable (φ := Axioms.J5 (□⊥)) (fun h ↦ unprovable_J5 <| WeakerThan.pbl h)
+    (axm (by simp))
+
+instance : (ILMinusJ1J4Plus : Logic α) ⪱ ILMinusJ1J4PlusJ5 :=
+  .of_unprovable_provable (φ := Axioms.J5 (□⊥)) (fun h ↦ unprovable_J5 <| WeakerThan.pbl h)
+    (axm (by simp))
+
+instance : (𝐂𝐋 : Logic α) ⪱ 𝐈𝐋 :=
+  .of_unprovable_provable (φ := Axioms.J5 (□⊥)) unprovable_J5 ofAxioms.axiomJ5
+
+instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ4Plus :=
+  .of_unprovable_provable (φ := Axioms.J4Plus (◇⊤) ⊥ ⊤)
+    (fun h ↦ unprovable_J4Plus <| WeakerThan.pbl h) (by simp)
+
+instance : (ILMinusJ1 : Logic α) ⪱ ILMinusJ1J4Plus :=
+  .of_unprovable_provable (φ := Axioms.J4Plus (◇⊤) ⊥ ⊤)
+    (fun h ↦ unprovable_J4Plus <| WeakerThan.pbl h) (axm (by simp))
+
+instance : (ILMinusJ5 : Logic α) ⪱ ILMinusJ4PlusJ5 :=
+  .of_unprovable_provable (φ := Axioms.J4Plus (◇⊤) ⊥ ⊤)
+    (fun h ↦ unprovable_J4Plus <| WeakerThan.pbl h) (axm (by simp))
+
+instance : (ILMinusJ1J5 : Logic α) ⪱ ILMinusJ1J4PlusJ5 :=
+  .of_unprovable_provable (φ := Axioms.J4Plus (◇⊤) ⊥ ⊤) unprovable_J4Plus (axm (by simp))
+
+instance : (ILMinusJ4Plus : Logic α) ⪱ ILMinusJ2Plus :=
+  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
+    (fun h ↦ unprovable_J2 <| WeakerThan.pbl <| WeakerThan.pbl (𝓣 := ILMinusJ1J4Plus) h)
+    (by simp)
+
+instance : (ILMinusJ1J4Plus : Logic α) ⪱ 𝐂𝐋 :=
+  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
+    (fun h ↦ unprovable_J2 <| WeakerThan.pbl h) (by simp)
+
+instance : (ILMinusJ4PlusJ5 : Logic α) ⪱ ILMinusJ2PlusJ5 :=
+  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
+    (fun h ↦ unprovable_J2 <| WeakerThan.pbl h) (WeakerThan.pbl (𝓢 := ILMinusJ2Plus) (by simp))
+
+instance : (ILMinusJ1J4PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
+  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤)) unprovable_J2 ofAxioms.axiomJ2
+
+end Logic
+
 end FFL.InterpretabilityLogic
 
 end

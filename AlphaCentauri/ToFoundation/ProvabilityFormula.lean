@@ -4,6 +4,7 @@ public import AlphaCentauri.ToFoundation.Provable
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 public import AlphaCentauri.ToFoundation.PartialTruth
+public import AlphaCentauri.ToFoundation.InternalTSchema
 
 /-!
 # The provability formula at a numeral
@@ -110,11 +111,6 @@ lemma tprovable_imp_provabilityFormula_subst [𝗜𝚺₁ ⪯ T] {ψ : Arithmeti
       (⌜(provable T).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 (substNumeral ⌜ψ⌝ z)] := by
     cl_prover [h₂, h₃];
   simpa [provabilityFormula, val_subst_numeral, substNumeral, Sentence.quote_eq] using h₄
-
-/-- Every internal prenex $\Sigma_1$ sentence is internally equivalent to its partial truth. -/
-axiom tprovable_iff_partialTrue [𝗜𝚺₁ ⪯ T] (φ : Formula V ℒₒᵣ)
-    (hφ : IsPrenexHierarchy 𝚺 1 φ.val) (hs : φ.shift = φ) :
-    T.internalize V ⊢ φ 🡘 (⌜(partialTrue 𝚺 1).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 φ.val]
 
 /-- Every internal prenex $\Sigma_1$ sentence internally implies its own provability. -/
 theorem tprovable_imp_provabilityFormula_of_sigma1 [𝗜𝚺₁ ⪯ T] (φ : Formula V ℒₒᵣ)

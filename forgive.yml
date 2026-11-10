@@ -80,9 +80,6 @@ declaration:
   OpenPredicate.openInduction_iff_integerPart:
     forgive:
       - OpenPredicate.openInduction_iff_integerPart
-  FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_iff_partialTrue:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_iff_partialTrue
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.Arithmetic.ISigma_equiv_uniformReflection_ElementaryArithmetic:
@@ -109,15 +106,3 @@ declaration:
     forgive:
       - HahnSeries.isRealClosed_lex
       - IsRealClosed.exists_mem_Ioo_isRoot
-  FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_imp_provabilityFormula_of_sigma1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_iff_partialTrue
-  FFL.FirstOrder.Arithmetic.Bootstrapping.pi1Conservative_dia:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_iff_partialTrue
-  FFL.FirstOrder.ArithmeticTheory.instPi1ConservativityIL:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_iff_partialTrue
-  FFL.InterpretabilityLogic.Logic.ILM.arithmetical_soundness_pi1Conservativity:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.tprovable_iff_partialTrue

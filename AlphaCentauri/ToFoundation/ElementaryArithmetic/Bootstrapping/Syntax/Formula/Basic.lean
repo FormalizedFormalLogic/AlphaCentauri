@@ -1150,6 +1150,97 @@ lemma boundMax_locallyDelta0 :
   | zero => rfl
   | succ j => simp [Fin.fin_one_eq_zero j]
 
+private lemma depthValueAt_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 4 → V ↦
+      (fun (r : Fin 3 → V) d ↦ c.depthValue (r 0) (r 1) (r 2) d) (w ·.succ) (w 0) := by
+  simpa using c.depthValue_locallyDelta0.retraction ![1, 2, 3, 0]
+
+/-- The course-of-values recursion computing, for each code, the list of its values at the depths
+`d ≤ J`, with the parameter `c.iter P d` at depth `d`. -/
+noncomputable def courseOfValues : CourseOfValues.Construction V 2 where
+  val q n T := listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d) ![q 0, n, T]
+    (rangeList (q 1 + 1))
+  val_locallyDelta0 := by
+    have := (listMap_locallyDelta0 (g := fun (r : Fin 3 → V) d ↦ c.depthValue (r 0) (r 1) (r 2) d)
+      c.depthValueAt_locallyDelta0).comp_cons
+      (rangeList_locallyDelta0.comp₁ (LocallyDelta0Function.add_one (LocallyDelta0Function.var 3)))
+      (u := ![fun w : Fin 4 → V ↦ w 2, fun w ↦ w 1, fun w ↦ w 0]) <| Fin.forall_fin_succ.mpr
+        ⟨LocallyDelta0Function.var 2, Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 1,
+          Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 0, finZeroElim⟩⟩⟩
+    convert this using 2 with w
+    congr 1
+    funext j
+    cases j using Fin.cases with
+    | zero => rfl
+    | succ j =>
+      cases j using Fin.cases with
+      | zero => rfl
+      | succ j => simp [Fin.fin_one_eq_zero j]
+  bound q n := Exp.exp (Exp.exp ((q 1 + 1) + (q 1 + 1) + c.boundMax (q 0) (q 1) n + 3))
+  bound_monotone q {_ _} h :=
+    exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr; exact c.boundMax_monotone h))
+  bound_locallyDelta0 := by
+    have hJ : LocallyDelta0Function fun w : Fin 3 → V ↦ w 2 + 1 :=
+      LocallyDelta0Function.add_one (LocallyDelta0Function.var 2)
+    exact LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
+      LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.add.comp₂
+        (LocallyDelta0Function.add.comp₂ hJ hJ)
+        (LocallyDelta0Function.comp₃ c.boundMax_locallyDelta0 (LocallyDelta0Function.var 1)
+          (LocallyDelta0Function.var 2) (LocallyDelta0Function.var 0)))
+        (LocallyDelta0Function.const 3)
+
+/-- The list of the values of the code `q` at the depths `d ≤ J`. -/
+noncomputable def depthList (P J q : V) : V := c.courseOfValues.result ![P, J] q
+
+private lemma qqDecode {q : V} (hq : q ≠ 0) : q = ⟪π₁ (q - 1), π₂ (q - 1)⟫ + 1 := by
+  rw [pair_unpair]
+  exact (tsub_add_cancel_of_le (pos_iff_one_le.mp (pos_iff_ne_zero.mpr hq))).symm
+
+lemma depthValue_le {P q T d : V}
+    (hT : ∀ q' < q, ∀ e, (znth T q').[e] ≤ c.bound (c.iter P e) q') :
+    c.depthValue P q T d ≤ c.bound (c.iter P d) q := by
+  by_cases h0 : q = 0
+  · simp [depthValue, h0]
+  have hq := qqDecode h0
+  have hb : π₂ (q - 1) < q :=
+    lt_of_le_of_lt (pi₂_le_self _) (pred_lt_self_of_pos (pos_iff_ne_zero.mpr h0))
+  have hb₁ : π₁ (π₂ (q - 1)) < q := lt_of_le_of_lt (pi₁_le_self _) hb
+  have hb₂ : π₂ (π₂ (q - 1)) < q := lt_of_le_of_lt (pi₂_le_self _) hb
+  unfold depthValue
+  simp only [h0, ↓reduceIte]
+  split_ifs with h1 h2 h3 h4 h5 h6 h7 h8
+  · have e : ^rel (π₁ (π₂ (q - 1))) (π₁ (π₂ (π₂ (q - 1)))) (π₂ (π₂ (π₂ (q - 1)))) = q := by
+      rw [hq]; simp [qqRel, h1]
+    have h := c.rel_le_bound (c.iter P d) (π₁ (π₂ (q - 1))) (π₁ (π₂ (π₂ (q - 1))))
+      (π₂ (π₂ (π₂ (q - 1))))
+    rwa [e] at h
+  · have e : ^nrel (π₁ (π₂ (q - 1))) (π₁ (π₂ (π₂ (q - 1)))) (π₂ (π₂ (π₂ (q - 1)))) = q := by
+      rw [hq]; simp [qqNRel, h2]
+    have h := c.nrel_le_bound (c.iter P d) (π₁ (π₂ (q - 1))) (π₁ (π₂ (π₂ (q - 1))))
+      (π₂ (π₂ (π₂ (q - 1))))
+    rwa [e] at h
+  · have : ^⊤ ≤ q := by
+      rw [hq, qqVerum, h3]; exact add_le_add_left (pair_le_pair_right 2 zero_le) 1
+    exact le_trans (c.verum_le_bound _) (c.bound_monotone _ this)
+  · have : ^⊥ ≤ q := by
+      rw [hq, qqFalsum, h4]; exact add_le_add_left (pair_le_pair_right 3 zero_le) 1
+    exact le_trans (c.falsum_le_bound _) (c.bound_monotone _ this)
+  · have e : (π₁ (π₂ (q - 1))) ^⋏ (π₂ (π₂ (q - 1))) = q := by rw [hq]; simp [qqAnd, h5]
+    have h := c.and_le_bound _ _ _ _ _ (hT _ hb₁ d) (hT _ hb₂ d)
+    rwa [e] at h
+  · have e : (π₁ (π₂ (q - 1))) ^⋎ (π₂ (π₂ (q - 1))) = q := by rw [hq]; simp [qqOr, h6]
+    have h := c.or_le_bound _ _ _ _ _ (hT _ hb₁ d) (hT _ hb₂ d)
+    rwa [e] at h
+  · have e : ^∀ π₂ (q - 1) = q := by rw [hq]; simp [qqAll, h7]
+    have h := c.all_le_bound (c.iter P d) (π₂ (q - 1)) (znth T (π₂ (q - 1))).[d + 1]
+      (by rw [← c.iter_succ]; exact hT _ hb _)
+    rwa [e] at h
+  · have e : ^∃ π₂ (q - 1) = q := by rw [hq]; simp [qqExs, h8]
+    have h := c.exs_le_bound (c.iter P d) (π₂ (q - 1)) (znth T (π₂ (q - 1))).[d + 1]
+      (by rw [← c.iter_succ]; exact hT _ hb _)
+    rwa [e] at h
+  · exact zero_le
+
 end Construction
 
 end UformulaRec1

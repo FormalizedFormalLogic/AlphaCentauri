@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.InductionAxiom
 public import AlphaCentauri.Bootstrapping.Proof.PeanoMinusAxiom
-public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 
 /-!

@@ -1,6 +1,7 @@
 module
 
-public import AlphaCentauri.ToFoundation.Syntax
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 
 /-!

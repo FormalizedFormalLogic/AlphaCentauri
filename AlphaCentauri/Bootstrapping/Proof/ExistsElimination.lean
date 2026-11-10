@@ -1,7 +1,8 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.Meta.ClProver
 
 /-!

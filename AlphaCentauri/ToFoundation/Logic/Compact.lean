@@ -3,7 +3,7 @@ module
 public import Foundation.Logic.Semantics
 
 /-!
-# Compactness along a cumulative sequence
+# Gaps in Foundation's `Logic.Semantics`: compactness along a cumulative sequence
 
 The two directions of `FFL.Compact.compact_cumulative`.
 -/

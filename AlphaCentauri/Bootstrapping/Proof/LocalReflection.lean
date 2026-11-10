@@ -2,8 +2,8 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.AxiomReplacement
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
-public import AlphaCentauri.ToFoundation.Provable
-public import AlphaCentauri.ToFoundation.Syntax
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!

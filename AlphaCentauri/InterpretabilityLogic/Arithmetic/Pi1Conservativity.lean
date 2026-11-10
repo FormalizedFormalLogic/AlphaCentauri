@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
-public import AlphaCentauri.ToFoundation.ProvabilityFormula
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.ProvabilityFormula
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 /-!

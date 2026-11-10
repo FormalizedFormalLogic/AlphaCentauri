@@ -1,7 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.InternalEquality
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.Meta.ClProver
 
 /-!

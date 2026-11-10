@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 
 /-!
-# Abstract provability: formalized consistency statements
+# Gaps in Foundation's `ProvabilityAbstraction.Basic`: formalized consistency statements
 -/
 
 @[expose] public section

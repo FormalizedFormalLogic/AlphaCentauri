@@ -4,7 +4,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Cod
 public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!
-# $\Delta_1$ numerations whose elements are sentences
+# Gaps in Foundation's `Syntax/Theory`: $\Delta_1$ numerations whose elements are sentences
 
 A $\Delta_1$ numeration of a theory in a nonstandard model may contain codes of formulas with free
 variables. Restricting the numeration to the codes fixed by the shift of free variables gives a
@@ -80,7 +80,8 @@ noncomputable abbrev Theory.Δ₁.sentential (T : Theory L) (d : T.Δ₁) : T.Δ
       LogicalConnective.Prop.and_eq]
     rw [d.mem_iff φ]
     constructor
-    · exact fun h ↦ h.1
+    · intro h
+      exact h.1
     · rintro ⟨σ, hσ, rfl⟩
       apply And.intro ⟨σ, hσ, rfl⟩
       change ℕ ⊧/![_] (Arithmetic.Bootstrapping.shiftFixed L).sigma.val

@@ -3,9 +3,8 @@ module
 public import AlphaCentauri.Bootstrapping.Interpretability.TranslationTable
 public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
 public import AlphaCentauri.Interpretability.Basic
-public import AlphaCentauri.ToFoundation.InternalEquality
-public import AlphaCentauri.ToFoundation.Provable
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 
 /-!
 # Values of closed terms along the internal translation

@@ -2,14 +2,13 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D3
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
-public import AlphaCentauri.ToFoundation.Syntax
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.PeanoMinus
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.EquationalTheory
 
-@[expose] public section
 /-!
-# Internal provability: universal instantiation, modus ponens and induction
+# Gaps in Foundation's `DerivabilityCondition`
 
 Generic facts about `Bootstrapping.Provable`: instantiating an internally-provable instance by
 numerals of a universal formula at one more numeral, modus ponens for arbitrary (not necessarily
@@ -18,6 +17,8 @@ provable, the internal provability of the numeral instances of a theorem of `�
 true $\Sigma_1$ formula, and the internal equivalence of `(∀¹ A) ⋎ (∀¹ B)` with
 `∀¹ (∀u < #0 + 1, A u ⋎ ∀x < #0 + 1, B x)` for formulas without free variables.
 -/
+
+@[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 
@@ -31,7 +32,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
 
 /-- Modus ponens for internal provability of arbitrary codes, not necessarily quotes of standard
 propositions. -/
-theorem provable_of_provable_imp_of_provable {a b : V}
+lemma provable_of_provable_imp_of_provable {a b : V}
     (hab : Provable T (imp L a b)) (ha : Provable T a) : Provable T b := by
   have hab' : IsFormula L (imp L a b) := by simpa using hab.toDerivable.isFormulaSet
   have ha' : IsFormula L a := by simpa using ha.toDerivable.isFormulaSet
@@ -55,7 +56,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
   simpa [Matrix.empty_eq] using substNumerals_app_quote (V := V) σ ![]
 
 /-- Instantiating an internally-provable instance by numerals of `∀¹ φ` at one more numeral. -/
-theorem provable_substNumerals_of_provable_substNumerals_all {m : ℕ}
+lemma provable_substNumerals_of_provable_substNumerals_all {m : ℕ}
     (φ : ArithmeticSemisentence (m + 1)) {v : Fin m → V}
     (h : Provable T (substNumerals (⌜∀¹ φ⌝ : V) v)) (x : V) :
     Provable T (substNumerals (⌜φ⌝ : V) (x :> v)) := by

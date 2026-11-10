@@ -5,7 +5,7 @@ public import Foundation.Propositional.Entailment.Cl
 public import Foundation.Meta.ClProver
 
 /-!
-# Consistency as a simp lemma, and conjunctions of vectors
+# Gaps in Foundation's `Logic.Entailment`: consistency as a simp lemma, and conjunctions of vectors
 
 `simp` cannot close a goal `Consistent 𝓢` on its own, even when an instance is available; this
 records `Consistent 𝓢` as a simp lemma whenever such an instance can be synthesized.

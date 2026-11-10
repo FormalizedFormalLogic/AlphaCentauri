@@ -2,9 +2,9 @@ module
 
 public import AlphaCentauri.Reflection.UniformReflection
 public import AlphaCentauri.Schemata.ParameterFreeInduction
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prenex
-public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 
 @[expose] public section
 /-!

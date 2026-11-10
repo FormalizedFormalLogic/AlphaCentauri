@@ -5,8 +5,11 @@ public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
 public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
 public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
-public import AlphaCentauri.ToFoundation.Syntax
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!

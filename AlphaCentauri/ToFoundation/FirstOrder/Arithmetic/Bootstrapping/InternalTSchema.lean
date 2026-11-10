@@ -1,13 +1,16 @@
 module
 
-public import AlphaCentauri.ToFoundation.PairingAssignment
-public import AlphaCentauri.ToFoundation.Provable
-public import AlphaCentauri.ToFoundation.PartialTruth
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PairingAssignment
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounded
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
 /-!
-# The internal T-schema for prenex $\Sigma_1$ partial truth
+# Gaps in Foundation's `PartialTruth.Bounded`: the internal T-schema
+
+The internal T-schema for prenex $\Sigma_1$ partial truth.
 
 `psatDef` and `tvDef` express $\Delta_0$ satisfaction and the values of terms under an assignment
 coded by iterated `ppair`s. Their Tarski conditions are theorems of `𝗜𝚺₁`, so every internal
@@ -906,7 +909,9 @@ lemma tprovable_instFormula_bex {n t q : V} (ht : IsSemiterm ℒₒᵣ n t)
 omit [𝗜𝚺₁ ⪯ T] in
 lemma termBShift_inj {n t t' : V} (ht : IsSemiterm ℒₒᵣ n t) (ht' : IsSemiterm ℒₒᵣ n t')
     (h : termBShift ℒₒᵣ t = termBShift ℒₒᵣ t') : t = t' := by
-  have H : ∀ i < n, (bvarVec 0 n).[i] = ^#i := fun i hi ↦ by simp [nth_bvarVec _ _ _ hi]
+  have H : ∀ i < n, (bvarVec 0 n).[i] = ^#i := by
+    intro i hi
+    simp [nth_bvarVec _ _ _ hi]
   have := congrArg (termSubst ℒₒᵣ (0 ∷ bvarVec 0 n)) h
   rwa [substs_cons_bShift ht, substs_cons_bShift ht', termSubst_eq_self ht H,
     termSubst_eq_self ht' H] at this

@@ -506,14 +506,6 @@ private instance : 𝚺ᴬ₁-Function₂ (rewriteBound (L := L) : V → V → V
 private lemma le_rewriteBound_self (d w : V) : w ≤ rewriteBound (L := L) d w :=
   le_trans le_self_add le_self_add
 
-private lemma le_rewriteBound_cons (d w : V) :
-    ^&0 ∷ termShiftVec L (len w) w ≤ rewriteBound (L := L) d w :=
-  le_trans le_add_self le_self_add
-
-private lemma le_rewriteBound_shift (d w : V) :
-    termFvSubstVec L d w (termShiftVec L d (fvarVec d)) ≤ rewriteBound (L := L) d w :=
-  le_add_self
-
 variable (T) in
 private def RewritesBelow (d w : V) : Prop :=
   ∀ d₀ < d, ∀ w' ≤ rewriteBound (L := L) d w, Derivation T d₀ → IsSemitermVec L (len w') 0 w' →
@@ -548,7 +540,7 @@ private lemma rewrite_all {p d₀ : V} (ih : RewritesBelow T (allIntro s p d₀)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hp : ^∀ p ∈ s)
     (hd₀ : DerivationOf T d₀ (insert (free L p) (setShift L s))) :
     RankedDerivable T (cutRank L (allIntro s p d₀)) (fvSubstImage (L := L) w s) := by
-  have he := ih.premise (s_lt_allIntro _ _ _) (le_rewriteBound_cons _ w) hd₀.2
+  have he := ih.premise (s_lt_allIntro _ _ _) (le_trans le_add_self le_self_add) hd₀.2
     hw.fvar_cons_termShiftVec
   rw [hd₀.1] at he
   exact RankedDerivable.sequentRules.image_all hw hsF hp he
@@ -582,7 +574,7 @@ private lemma rewrite_shift {d₀ : V}
       (termFvSubstVec L d w (termShiftVec L d (fvarVec d))) := by
     rw [hvl]
     exact hw.termFvSubstVec hfv
-  have he := ih.premise (d_lt_shiftRule _ _) (le_rewriteBound_shift d w) hd₀ hvc (by simp [d])
+  have he := ih.premise (d_lt_shiftRule _ _) le_add_self hd₀ hvc (by simp [d])
   rwa [← fvSubstImage_setShift ?_ hd₀.isFormulaSet (fstIdx_le_self d₀)] at he
   intro x hx
   have hxd : x < d := lt_trans hx (d_lt_shiftRule _ _)

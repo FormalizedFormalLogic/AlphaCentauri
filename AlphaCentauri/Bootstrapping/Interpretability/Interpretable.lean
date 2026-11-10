@@ -4,7 +4,7 @@ public import AlphaCentauri.Bootstrapping.Interpretability.Composition
 public import AlphaCentauri.Bootstrapping.Interpretability.Equivalence
 public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 public import AlphaCentauri.Bootstrapping.Interpretability.TranslationTable
-public import AlphaCentauri.Bootstrapping.Proof.ProofByCases
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 
 /-!
 # Formalized relative interpretability

@@ -295,10 +295,6 @@ argument vector and keeping the relation symbol. -/
     fvSubst L w (^∃ p) = ^∃ (fvSubst L w p) := by
   simp [fvSubst, hp, FvSubst.construction]
 
-/-- Non-formula codes substitute to zero under the total internal substitution. -/
-lemma fvSubst_not_uformula {w p : V} (hp : ¬IsUFormula L p) : fvSubst L w p = 0 :=
-  (FvSubst.construction L).result_prop_not _ hp
-
 /-- Free-variable substitution by a vector of `n`-ary semiterms preserves being an `n`-ary
 semiformula. -/
 @[simp] lemma IsSemiformula.fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)

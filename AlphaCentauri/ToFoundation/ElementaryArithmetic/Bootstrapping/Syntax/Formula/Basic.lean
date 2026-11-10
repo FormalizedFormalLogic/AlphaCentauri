@@ -2116,47 +2116,6 @@ section bv
 
 variable {Γ : Polarity} {m : ℕ}
 
-lemma termBVVec_of_not {k v : V} (h : ¬IsUTermVec L k v) : termBVVec L k v = 0 :=
-  IsUTerm.BV.construction.resultVec_of_not L _ h
-
-lemma termBV_le {t : V} : termBV L t ≤ t := by
-  by_cases ht : IsUTerm L t
-  · have h : IsUTerm.BV.construction.courseOfValuesResult ![] t ≤ t :=
-      IsUTerm.BV.construction.courseOfValuesResult_le_bound ![] t
-    simpa [termBV, IsUTerm.BV.construction.result_eq_ite (L := L) (param := ![]) t, ht] using h
-  · simp [termBV, IsUTerm.BV.construction.result_prop_not L _ ht]
-
-lemma termBVVec_eq_listMap {k v : V} (hv : IsUTermVec L k v) :
-    termBVVec L k v = listMap (fun (_ : Fin 0 → V) t ↦ termBV L t) ![] v := by
-  have hg : LocallyDelta0Function fun w : Fin (0 + 1) → V ↦ termBV L (w 0) :=
-    termBV_locallyDelta0.comp₁ (LocallyDelta0Function.var 0)
-  rw [listMap_eq_iff hg]
-  refine ⟨by rw [len_termBVVec hv, hv.lh], fun i hi ↦ ?_⟩
-  rw [nth_termBVVec hv (by simpa [hv.lh] using hi)]
-
-open Classical in
-lemma termBVVec_locallyDelta0 : LocallyDelta0Function₂ (termBVVec (V := V) L) := by
-  have hg : LocallyDelta0Function fun w : Fin (0 + 1) → V ↦ termBV L (w 0) :=
-    termBV_locallyDelta0.comp₁ (LocallyDelta0Function.var 0)
-  have : (fun w : Fin 2 → V ↦ termBVVec L (w 0) (w 1)) = fun w ↦
-      if IsUTermVec L (w 0) (w 1) then
-        listMap (fun (_ : Fin 0 → V) t ↦ termBV L t) ![] (w 1) else 0 := by
-    funext w
-    by_cases h : IsUTermVec L (w 0) (w 1)
-    · simp only [h, ↓reduceIte, termBVVec_eq_listMap h]
-    · simp [h, termBVVec_of_not h]
-  change LocallyDelta0Function fun w : Fin 2 → V ↦ termBVVec L (w 0) (w 1)
-  have hlm : LocallyDelta0Function fun w : Fin 2 → V ↦
-      listMap (fun (_ : Fin 0 → V) t ↦ termBV L t) ![] (w 1) := by
-    have := (listMap_locallyDelta0 (g := fun (_ : Fin 0 → V) t ↦ termBV L t) hg).comp_cons
-      (LocallyDelta0Function.var (1 : Fin 2)) (u := fun j : Fin 0 ↦ j.elim0)
-    simpa [Matrix.empty_eq] using this
-  rw [this]
-  exact LocallyDelta0Function.ite
-    (isUTermVec_locallyDelta0.rel_comp₂ (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 1))
-    hlm (LocallyDelta0Function.const 0)
-
-
 namespace BV
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.BV (blueprint) in

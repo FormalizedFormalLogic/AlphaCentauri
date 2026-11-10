@@ -91,6 +91,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.ISigma2_equiv_uniformReflection_ElementaryArithmetic:
     forgive:
       - FFL.FirstOrder.Arithmetic.ISigma1_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi
+  FFL.FirstOrder.not_provable_fermatLastTheorem_IOpen:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
   FFL.FirstOrder.Arithmetic.provable_univCl_IOpen_iff:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen

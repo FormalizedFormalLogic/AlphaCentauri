@@ -1,8 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentTheory
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILPZero.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 
 /-!

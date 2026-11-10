@@ -145,9 +145,7 @@ lemma exists_criticalSolution_or_provable (hE : IsRhdOperand Φ E) (hp : p ∈ �
   have hD : ({∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj)} : Set (Formula α))
       *⊢[ofAxioms 𝔸] ∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj) :=
     Context.by_axm rfl;
-  left;
-  use Δ;
-  apply CriticalSolution.mk hΔ hCΔ;
+  refine .inl ⟨Δ, .mk hΔ hCΔ ?_ ?_⟩
   · intro q hq;
     have hqΓ := rhd_mem_of_mem_rhdPairs (hZ₁ hq);
     apply mem_of_provable hX (Adequate.box_neg_mem <| .of_rhd_left <| mem_of_mem hqΓ);
@@ -256,39 +254,29 @@ lemma exists_isRank (hE : IsRhdOperand Φ E) :
     · exact ⟨fun _ ↦ 0, by simp [IsRank]⟩
     obtain ⟨X, hXY, hX, hsol⟩ := exists_criticalSolution hW hE hY hne;
     obtain ⟨r, hr⟩ := ih (Y \ X) (Finset.sdiff_ssubset hXY hX) (Finset.sdiff_subset.trans hY);
-    use fun q ↦ if q ∈ X then 0 else r q + 1;
-    intro p hp;
-    by_cases hpX : p ∈ X;
-    · obtain ⟨Δ, hΔ⟩ := hsol p hpX;
-      simp only [hpX, ite_true];
-      constructor;
-      · exact hne.card_pos;
-      · use Δ;
-        apply hΔ.mono (Finset.filter_subset _ _);
-        intro q hq;
-        simp only [Finset.mem_filter, Finset.mem_sdiff] at hq ⊢;
-        split_ifs at hq with h;
-        · omega;
-        · exact ⟨hq.1, h⟩;
-    · have hp' : p ∈ Y \ X := Finset.mem_sdiff.mpr ⟨hp, hpX⟩;
-      obtain ⟨hlt, Δ, hΔ⟩ := hr p hp';
-      simp only [hpX, ite_false];
-      constructor;
-      · have := Finset.card_sdiff_add_card_eq_card hXY;
-        have := hX.card_pos;
-        omega;
-      · use Δ;
-        apply hΔ.mono;
-        · intro q hq;
-          simp only [Finset.mem_filter, Finset.mem_sdiff] at hq ⊢;
-          split_ifs at hq with h;
-          · omega;
-          · exact ⟨⟨hq.1, h⟩, by omega⟩;
-        · intro q hq;
-          simp only [Finset.mem_filter, Finset.mem_sdiff] at hq ⊢;
-          split_ifs at hq with h;
-          · omega;
-          · exact ⟨⟨hq.1, h⟩, by omega⟩;
+    refine ⟨fun q ↦ if q ∈ X then 0 else r q + 1, ?_⟩
+    intro p hp
+    by_cases hpX : p ∈ X
+    · obtain ⟨Δ, hΔ⟩ := hsol p hpX
+      simp only [hpX, ite_true]
+      refine ⟨hne.card_pos, Δ, hΔ.mono (Finset.filter_subset _ _) ?_⟩
+      intro q hq
+      simp only [Finset.mem_filter, Finset.mem_sdiff] at hq ⊢
+      split_ifs at hq with h
+      · omega
+      · exact ⟨hq.1, h⟩
+    · obtain ⟨hlt, Δ, hΔ⟩ := hr p (Finset.mem_sdiff.mpr ⟨hp, hpX⟩)
+      simp only [hpX, ite_false]
+      refine ⟨?_, Δ, hΔ.mono ?_ ?_⟩
+      · have := Finset.card_sdiff_add_card_eq_card hXY
+        have := hX.card_pos
+        omega
+      all_goals
+        intro q hq
+        simp only [Finset.mem_filter, Finset.mem_sdiff] at hq ⊢
+        split_ifs at hq with h
+        · omega
+        · exact ⟨⟨hq.1, h⟩, by omega⟩
 
 lemma isRank_rank (hE : IsRhdOperand Φ E) : Γ.IsRank E (Γ.rhdPairs E) (Γ.rank E) :=
   Classical.epsilon_spec <| exists_isRank hW hE _ subset_rfl
@@ -424,16 +412,13 @@ lemma rel_extend {hE : IsRhdOperand Φ E} {hk : k ≤ (Φ ×ˢ Φ).card} {Δ : M
 
 variable [Entailment.Cl L]
 
-lemma RelWith.trans_rel (h₁ : w.RelWith x E k) (h₂ : x.Rel y) : w.RelWith y E k where
-  append_prefix := h₁.append_prefix.trans h₂.isPrefix
-  criticalSuccessor := h₁.criticalSuccessor.trans_successor h₂.successor
-  box_neg_mem p hp hk := h₂.successor.box_mem_of_box_mem (h₁.box_neg_mem p hp hk)
-  not_mem p hp hk := h₂.successor.not_mem_of_box_neg_mem (h₁.box_neg_mem p hp hk.le)
-  not_mem_of_length_lt _ p hp hk := h₂.successor.not_mem_of_box_neg_mem (h₁.box_neg_mem p hp hk)
-
 lemma Rel.trans (h₁ : x.Rel y) (h₂ : y.Rel z) : x.Rel z := by
-  obtain ⟨E, k, h₁⟩ := h₁;
-  exact ⟨E, k, h₁.trans_rel h₂⟩
+  obtain ⟨E, k, h₁⟩ := h₁
+  exact ⟨E, k, h₁.append_prefix.trans h₂.isPrefix,
+    h₁.criticalSuccessor.trans_successor h₂.successor,
+    fun p hp hk ↦ h₂.successor.box_mem_of_box_mem (h₁.box_neg_mem p hp hk),
+    fun p hp hk ↦ h₂.successor.not_mem_of_box_neg_mem (h₁.box_neg_mem p hp hk.le),
+    fun _ p hp hk ↦ h₂.successor.not_mem_of_box_neg_mem (h₁.box_neg_mem p hp hk)⟩
 
 end RankedSet
 

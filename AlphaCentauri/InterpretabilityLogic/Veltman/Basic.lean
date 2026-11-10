@@ -257,7 +257,9 @@ theorem sound [M.IsIL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxioms 𝔸 ⊢ 
   induction h generalizing x with
   | axm hA => exact h𝔸 _ hA x
   | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x)
-  | nec _ ih => exact fun y _ ↦ ih y
+  | nec _ ih =>
+    intro y _
+    exact ih y
   | axiomL => exact forces_axiomL
   | axiomJ1 => exact forces_axiomJ1
   | axiomJ2 => exact forces_axiomJ2
@@ -286,12 +288,16 @@ theorem sound [M.IsILMinus] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxiomsMinus
   induction h generalizing x with
   | axm hA => exact h𝔸 _ hA x
   | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x)
-  | nec _ ih => exact fun y _ ↦ ih y
+  | nec _ ih =>
+    intro y _
+    exact ih y
   | rule1 _ ih =>
     intro hx y Rxy hy
     obtain ⟨z, Sxyz, hz⟩ := hx y Rxy hy
     exact ⟨z, Sxyz, ih z hz⟩
-  | rule2 _ ih => exact fun hx y Rxy hy ↦ hx y Rxy (ih y hy)
+  | rule2 _ ih =>
+    intro hx y Rxy hy
+    exact hx y Rxy (ih y hy)
   | axiomL => exact forces_axiomL
   | axiomJ3 => exact forces_axiomJ3
   | axiomJ6 => exact forces_axiomJ6
@@ -470,13 +476,8 @@ private instance : (counterJ5 α).IsJ2 where
 private lemma unprovable_J5 [L ⪯ 𝐂𝐋] : L ⊬ Axioms.J5 (□⊥) := by
   intro h;
   replace h := WeakerThan.pbl (𝓣 := 𝐂𝐋) h;
-  have h₁ : (1 : Fin 3) ⊩[counterJ5 α] ◇□⊥ := by
-    apply forces_dia.mpr;
-    use 2;
-    and_intros;
-    · omega;
-    · intro y hy;
-      omega;
+  have h₁ : (1 : Fin 3) ⊩[counterJ5 α] ◇□⊥ :=
+    forces_dia.mpr ⟨2, by omega, fun y hy ↦ by omega⟩
   obtain ⟨z, ⟨-, rfl⟩, hz⟩ := CL.sound (M := counterJ5 α) h 0 1 (by omega) h₁;
   exact hz 2 (by omega);
 
@@ -500,11 +501,8 @@ private lemma unprovable_J4Plus [L ⪯ ILMinusJ1J5] : L ⊬ Axioms.J4Plus (◇�
     obtain ⟨z, Ryz, -⟩ := forces_dia.mp hy;
     omega;
   have h₂ : (1 : Fin 3) ⊩[counterJ4 α] ⊤ ▷ ◇⊤ := by
-    intro y Rxy _;
-    use 0;
-    and_intros;
-    · exact Rxy;
-    · exact forces_dia.mpr ⟨1, by omega, forces_top⟩;
+    intro y Rxy _
+    exact ⟨0, Rxy, forces_dia.mpr ⟨1, by omega, forces_top⟩⟩
   obtain ⟨z, -, hz⟩ := ILMinusJ1J5.sound (M := counterJ4 α) h 1 h₁ h₂ 2 (by omega) forces_top;
   exact hz;
 
@@ -527,28 +525,19 @@ private lemma unprovable_J2 [L ⪯ ILMinusJ1J4PlusJ5] : L ⊬ Axioms.J2 (□⊥)
   intro h;
   replace h := WeakerThan.pbl (𝓣 := ILMinusJ1J4PlusJ5) h;
   have h₁ : (0 : Fin 4) ⊩[counterJ2 α] □⊥ ▷ (◇⊤ ⋏ □□⊥) ⋏ (◇⊤ ⋏ □□⊥) ▷ ◇◇⊤ := by
-    apply forces_and.mpr;
-    constructor;
-    · intro y _ hy;
-      have : ¬y < 3 := hy 3;
-      use 2;
-      constructor;
-      · omega;
-      · apply forces_and.mpr;
-        constructor;
-        · exact forces_dia.mpr ⟨3, by omega, forces_top⟩;
-        · intro z hz u hu;
-          omega;
-    · intro y _ hy;
-      obtain ⟨hy₁, hy₂⟩ := forces_and.mp hy;
-      obtain ⟨z, hz, -⟩ := forces_dia.mp hy₁;
+    refine forces_and.mpr ⟨?_, ?_⟩
+    · intro y _ hy
+      have : ¬y < 3 := hy 3
+      refine ⟨2, by omega, forces_and.mpr ⟨forces_dia.mpr ⟨3, by omega, forces_top⟩, ?_⟩⟩
+      intro z hz u hu
+      omega
+    · intro y _ hy
+      obtain ⟨hy₁, hy₂⟩ := forces_and.mp hy
+      obtain ⟨z, hz, -⟩ := forces_dia.mp hy₁
       have : ¬y < 2 := by
-        intro h;
-        exact hy₂ 2 h 3 (by omega);
-      use 1;
-      constructor;
-      · omega;
-      · exact forces_dia.mpr ⟨2, by omega, forces_dia.mpr ⟨3, by omega, forces_top⟩⟩;
+        intro h
+        exact hy₂ 2 h 3 (by omega)
+      exact ⟨1, by omega, forces_dia.mpr ⟨2, by omega, forces_dia.mpr ⟨3, by omega, forces_top⟩⟩⟩
   have h₂ : (3 : Fin 4) ⊩[counterJ2 α] □⊥ := by
     intro y hy;
     omega;

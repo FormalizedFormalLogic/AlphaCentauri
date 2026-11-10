@@ -209,7 +209,7 @@ end fvar
 section value
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
   {tbl : V}
 
 omit [𝗘𝗤 L₁ ⪯ S] in
@@ -245,6 +245,7 @@ lemma derivable_definesElement_fvar (h : IsTranslationTable L₂ S tbl) (x : V) 
   rw [definesElement_domT_val h] at h₁
   exact h₁
 
+omit [L₂.Eq] in
 lemma exists_func_termVec (hL₂ : L₂.SymbolsStandard V) {k f v : V}
     (ht : IsSemiterm L₂ 0 (^func k f v)) :
     ∃ (k' : ℕ) (F : L₂.Func k') (u : Fin k' → Term V L₂),
@@ -368,9 +369,10 @@ end defs
 section value
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
   {tbl : V}
 
+omit [L₂.Eq] in
 lemma isFormulaSet_substHyp (hT : IsTable L₁ L₂ tbl) {t : V} (ht : IsSemiterm L₂ 0 t) (b : V) :
     IsFormulaSet L₁ (substHyp L₁ L₂ tbl t b) := by
   have h₁ : IsSemiformula L₁ 1 (varEqual L₁ L₂ tbl t) := by
@@ -409,6 +411,7 @@ lemma termSubstEquiv_eq_typed (h : IsTranslationTable L₂ S tbl) {t b s : V}
   simp only [termSubstEquiv, Semiformula.val_all, Semiformula.val_imp, Semiformula.val_iff,
     varEqualT_val, hu, hu', hd]
 
+omit [L₂.Eq] in
 lemma termSubst_func_val {k : ℕ} (F : L₂.Func k) {c v : V} (hc : IsSemiterm L₂ 0 c)
     (hv : IsSemitermVec L₂ (k : V) 1 v) :
     ∃ u : Fin k → Term V L₂, (∀ i : Fin k, (u i).val = termSubst L₂ ?[c] v.[(i : ℕ)]) ∧

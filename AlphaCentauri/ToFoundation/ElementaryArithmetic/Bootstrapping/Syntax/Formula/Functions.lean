@@ -8,8 +8,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Func
 # Functions on codes of formulas in models of $\mathsf{EA}$
 
 The part of `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Formula/Functions.lean` on
-operations on codes of formulas, ported to models of $\mathsf{EA}$: negation `neg`, the shift
-`shift` of free variables, substitution `subst` for the bound variables and the complexity
+operations on codes of formulas, ported to models of $\mathsf{EA}$: negation `neg`, implication
+`imp`, equivalence `iff`, the shift `shift` of free variables, substitution `subst` for the bound
+variables, the instantiation `free` of a bound variable by a free one and the complexity
 `formulaComplexity`. The blueprints and formulas are Foundation's; the recursions on formulas
 carry a bound on their values, and inductions are on locally $\Delta_0$ predicates.
 
@@ -347,6 +348,10 @@ instance imp.definable' (Γ m) : Γᴬ_[m + 1]-Function₂ imp (V := V) L := imp
 
 end
 
+lemma imp_locallyDelta0 : LocallyDelta0Function₂ (imp (V := V) L) :=
+  qqOr_locallyDelta0.comp₂ (neg_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
+    (LocallyDelta0Function.var 1)
+
 end imp
 
 section iff
@@ -377,6 +382,11 @@ instance iff.definable : 𝚺ᴬ₁-Function₂ iff (V := V) L := iff.defined.to
 instance iff_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ iff (V := V) L := iff.definable.of_sigmaOne
 
 end
+
+lemma iff_locallyDelta0 : LocallyDelta0Function₂ (iff (V := V) L) :=
+  qqAnd_locallyDelta0.comp₂ (imp_locallyDelta0.comp₂ (LocallyDelta0Function.var 0)
+    (LocallyDelta0Function.var 1)) (imp_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+    (LocallyDelta0Function.var 0))
 
 end iff
 

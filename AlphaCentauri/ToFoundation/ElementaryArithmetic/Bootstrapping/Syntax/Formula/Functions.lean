@@ -1013,6 +1013,147 @@ variable {m w : V}
 @[simp] lemma substs_ex {p} (hp : IsUFormula L p) :
     subst L w (^∃ p) = ^∃ (subst L (qVec L w) p) := by simp [subst, hp, construction]
 
+lemma isUFormula_subst_induction {P : V → V → V → Prop}
+    (hP : LocallyDelta0 fun w : Fin 3 → V ↦ P (w 0) (w 1) (w 2))
+    (hRel : ∀ w k R v, L.IsRel k R → IsUTermVec L k v →
+        P w (^rel k R v) (^rel k R (termSubstVec L k w v)))
+    (hNRel : ∀ w k R v, L.IsRel k R → IsUTermVec L k v →
+        P w (^nrel k R v) (^nrel k R (termSubstVec L k w v)))
+    (hverum : ∀ w, P w ^⊤ ^⊤)
+    (hfalsum : ∀ w, P w ^⊥ ^⊥)
+    (hand : ∀ w p q, IsUFormula L p → IsUFormula L q →
+      P w p (subst L w p) → P w q (subst L w q) → P w (p ^⋏ q) (subst L w p ^⋏ subst L w q))
+    (hor : ∀ w p q, IsUFormula L p → IsUFormula L q →
+      P w p (subst L w p) → P w q (subst L w q) → P w (p ^⋎ q) (subst L w p ^⋎ subst L w q))
+    (hall : ∀ w p, IsUFormula L p → P (qVec L w) p (subst L (qVec L w) p) →
+        P w (^∀ p) (^∀ (subst L (qVec L w) p)))
+    (hexs : ∀ w p, IsUFormula L p → P (qVec L w) p (subst L (qVec L w) p) →
+        P w (^∃ p) (^∃ (subst L (qVec L w) p))) :
+    ∀ {w p}, IsUFormula L p → P w p (subst L w p) := by
+  suffices ∀ param p, IsUFormula L p → P param p ((construction L).result L param p) by
+    intro w p hp; simpa using! this w p hp
+  intro param p
+  refine (construction L).uformula_result_induction (L := L) (P := fun param p y ↦ P param p y) hP
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+  · intro param k R v hkR hv; simpa using! hRel param k R v hkR hv
+  · intro param k R v hkR hv; simpa using! hNRel param k R v hkR hv
+  · intro param; simpa using! hverum param
+  · intro param; simpa using! hfalsum param
+  · intro param p q hp hq ihp ihq
+    simpa [subst] using!
+      hand param p q hp hq (by simpa [subst] using ihp) (by simpa [subst] using ihq)
+  · intro param p q hp hq ihp ihq
+    simpa [subst] using!
+      hor param p q hp hq (by simpa [subst] using ihp) (by simpa [subst] using ihq)
+  · intro param p hp ihp
+    have := ihp 0 (by simp [(construction L).allSize_eq_one])
+    simpa [hp, construction] using! hall param p hp (by simpa [construction] using! this)
+  · intro param p hp ihp
+    have := ihp 0 (by simp [(construction L).exsSize_eq_one])
+    simpa [hp, construction] using! hexs param p hp (by simpa [construction] using! this)
+
+lemma semiformula_subst_induction {P : V → V → V → V → Prop}
+    (hP : LocallyDelta0 fun w : Fin 4 → V ↦ P (w 0) (w 1) (w 2) (w 3))
+    (hRel : ∀ n w k R v, L.IsRel k R → IsSemitermVec L k n v →
+        P n w (^rel k R v) (^rel k R (termSubstVec L k w v)))
+    (hNRel : ∀ n w k R v, L.IsRel k R → IsSemitermVec L k n v →
+        P n w (^nrel k R v) (^nrel k R (termSubstVec L k w v)))
+    (hverum : ∀ n w, P n w ^⊤ ^⊤)
+    (hfalsum : ∀ n w, P n w ^⊥ ^⊥)
+    (hand : ∀ n w p q, IsSemiformula L n p → IsSemiformula L n q →
+      P n w p (subst L w p) → P n w q (subst L w q) → P n w (p ^⋏ q) (subst L w p ^⋏ subst L w q))
+    (hor : ∀ n w p q, IsSemiformula L n p → IsSemiformula L n q →
+      P n w p (subst L w p) → P n w q (subst L w q) → P n w (p ^⋎ q) (subst L w p ^⋎ subst L w q))
+    (hall : ∀ n w p, IsSemiformula L (n + 1) p →
+      P (n + 1) (qVec L w) p (subst L (qVec L w) p) → P n w (^∀ p) (^∀ (subst L (qVec L w) p)))
+    (hexs : ∀ n w p, IsSemiformula L (n + 1) p →
+      P (n + 1) (qVec L w) p (subst L (qVec L w) p) → P n w (^∃ p) (^∃ (subst L (qVec L w) p))) :
+    ∀ {n p w}, IsSemiformula L n p → P n w p (subst L w p) := by
+  suffices ∀ param n p, IsSemiformula L n p → P n param p ((construction L).result L param p) by
+    intro n p w hp; simpa using! this w n p hp
+  intro param n p
+  refine (construction L).semiformula_result_induction (L := L)
+    (P := fun param n p y ↦ P n param p y)
+    (hP.retraction ![1, 0, 2, 3] |>.of_iff fun v ↦ by simp) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+  · intro n param k R v hkR hv; simpa using! hRel n param k R v hkR hv
+  · intro n param k R v hkR hv; simpa using! hNRel n param k R v hkR hv
+  · intro n param; simpa using! hverum n param
+  · intro n param; simpa using! hfalsum n param
+  · intro n param p q hp hq ihp ihq
+    simpa [subst] using!
+      hand n param p q hp hq (by simpa [subst] using ihp) (by simpa [subst] using ihq)
+  · intro n param p q hp hq ihp ihq
+    simpa [subst] using!
+      hor n param p q hp hq (by simpa [subst] using ihp) (by simpa [subst] using ihq)
+  · intro n param p hp ihp
+    have := ihp 0 (by simp [(construction L).allSize_eq_one])
+    simpa [hp.isUFormula, construction] using!
+      hall n param p hp (by simpa [construction] using! this)
+  · intro n param p hp ihp
+    have := ihp 0 (by simp [(construction L).exsSize_eq_one])
+    simpa [hp.isUFormula, construction] using!
+      hexs n param p hp (by simpa [construction] using! this)
+
+/-- Structural induction on semiformulas with a counter `d ≤ n` of the quantifiers passed. -/
+lemma IsSemiformula.depth_induction {Q : V → V → V → Prop}
+    (hQ : LocallyDelta0 fun w : Fin 3 → V ↦ Q (w 0) (w 1) (w 2))
+    (hrel : ∀ d n k r v, L.IsRel k r → IsSemitermVec L k n v → Q d n (^rel k r v))
+    (hnrel : ∀ d n k r v, L.IsRel k r → IsSemitermVec L k n v → Q d n (^nrel k r v))
+    (hverum : ∀ d n, Q d n ^⊤)
+    (hfalsum : ∀ d n, Q d n ^⊥)
+    (hand : ∀ d n p q, IsSemiformula L n p → IsSemiformula L n q →
+      Q d n p → Q d n q → Q d n (p ^⋏ q))
+    (hor : ∀ d n p q, IsSemiformula L n p → IsSemiformula L n q →
+      Q d n p → Q d n q → Q d n (p ^⋎ q))
+    (hall : ∀ d n p, IsSemiformula L (n + 1) p → Q (d + 1) (n + 1) p → Q d n (^∀ p))
+    (hexs : ∀ d n p, IsSemiformula L (n + 1) p → Q (d + 1) (n + 1) p → Q d n (^∃ p)) {n p} :
+    IsSemiformula L n p → ∀ d ≤ n, Q d n p := by
+  intro hp
+  refine IsSemiformula.induction (P := fun n p ↦ ∀ d ≤ n, Q d n p) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    hp
+  · exact (LocallyDelta0.ball_le_function (LocallyDelta0Function.var (0 : Fin 2)) hQ).of_iff
+      fun w ↦ by simp
+  · intro n k r v hr hv d _; exact hrel d n k r v hr hv
+  · intro n k r v hr hv d _; exact hnrel d n k r v hr hv
+  · intro n d _; exact hverum d n
+  · intro n d _; exact hfalsum d n
+  · intro n p q hp hq ihp ihq d hd; exact hand d n p q hp hq (ihp d hd) (ihq d hd)
+  · intro n p q hp hq ihp ihq d hd; exact hor d n p q hp hq (ihp d hd) (ihq d hd)
+  · intro n p hp ih d hd; exact hall d n p hp (ih (d + 1) (by simpa using hd))
+  · intro n p hp ih d hd; exact hexs d n p hp (ih (d + 1) (by simpa using hd))
+
+@[simp] lemma IsSemiformula.subst {n p m w : V} :
+    IsSemiformula L n p → IsSemitermVec L n m w → IsSemiformula L m (subst L w p) := by
+  intro hp hw
+  suffices H : ∀ d ≤ n, IsSemitermVec L n (m + d) (qVecIter L w d) →
+      IsSemiformula L (m + d) (Bootstrapping.subst L (qVecIter L w d) p) by
+    simpa using H 0 zero_le (by simpa using hw)
+  have v3 : ∀ i : Fin 3, LocallyDelta0Function fun u : Fin 3 → V ↦ u i :=
+    LocallyDelta0Function.var
+  have hwd : LocallyDelta0Function fun u : Fin 3 → V ↦ qVecIter L w (u 0) :=
+    qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (v3 0)
+  have hmd : LocallyDelta0Function fun u : Fin 3 → V ↦ m + u 0 :=
+    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (v3 0)
+  refine IsSemiformula.depth_induction
+    (Q := fun d n p ↦ IsSemitermVec L n (m + d) (qVecIter L w d) →
+      IsSemiformula L (m + d) (Bootstrapping.subst L (qVecIter L w d) p)) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · exact (isSemitermVec_locallyDelta0.comp₃ (v3 1) hmd hwd).imp
+      (isSemiformula_locallyDelta0.rel_comp₂ hmd (subst_locallyDelta0.comp₂ hwd (v3 2)))
+  · intro d n k R v hR hv hw'; simp [hR, hv.isUTerm, hw'.termSubstVec hv]
+  · intro d n k R v hR hv hw'; simp [hR, hv.isUTerm, hw'.termSubstVec hv]
+  · intro d n _; simp
+  · intro d n _; simp
+  · intro d n p q hp hq ihp ihq hw'
+    simp [hp.isUFormula, hq.isUFormula, ihp hw', ihq hw']
+  · intro d n p q hp hq ihp ihq hw'
+    simp [hp.isUFormula, hq.isUFormula, ihp hw', ihq hw']
+  · intro d n p hp ih hw'
+    have := ih (by rw [← qVec_qVecIter, ← add_assoc]; exact hw'.qVec)
+    simpa [hp.isUFormula, qVec_qVecIter, add_assoc] using this
+  · intro d n p hp ih hw'
+    have := ih (by rw [← qVec_qVecIter, ← add_assoc]; exact hw'.qVec)
+    simpa [hp.isUFormula, qVec_qVecIter, add_assoc] using this
+
 lemma substs_not_uformula {w x : V} (h : ¬IsUFormula L x) :
     subst L w x = 0 := (construction L).result_prop_not _ h
 

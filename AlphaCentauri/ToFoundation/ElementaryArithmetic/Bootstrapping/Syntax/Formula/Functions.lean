@@ -94,7 +94,7 @@ lemma adjoin_pair_pair_le_exp_exp_of_le (hc : 1 ≤ c) {a a' k R v w : V} (ha' :
   have hpa (a b : V) : ⟪a, b⟫ ≤ a ∷ b := by rw [adjoin_def]; exact le_self_add
   have hn : (1 : V) ≤ 8 * m + c := le_trans hc le_add_self
   have hmle : m ≤ 8 * m + c :=
-    le_trans (le_mul_of_one_le_left (by simp) (by norm_num)) le_self_add
+    le_trans (le_mul_of_one_le_left (by simp) (by exact_mod_cast (by norm_num))) le_self_add
   have hk : k ≤ E := le_exp_exp (le_trans (le_max_left _ _) hmle)
   have hR : R ≤ E := le_exp_exp (le_trans (le_trans (le_max_left R v) (le_max_right _ _)) hmle)
   have hw' : w ≤ E :=
@@ -164,23 +164,23 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
     (LocallyDelta0Function.var 2) (LocallyDelta0Function.const 0)
   bound _ p := Exp.exp (Exp.exp (8 * p + 1))
   rel_le_bound _ _ _ v := adjoin_pair_pair_le_exp_exp_of_le le_rfl
-    (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 7)) (le_exp_exp_eight_mul_add v 1)
+    (by exact_mod_cast (by norm_num)) (le_exp_exp_eight_mul_add v 1)
   nrel_le_bound _ _ _ v := adjoin_pair_pair_le_exp_exp_of_le le_rfl zero_le
     (le_exp_exp_eight_mul_add v 1)
   verum_le_bound _ := adjoin_le_exp_exp_of_le le_rfl
-    (by exact_mod_cast (by norm_num : (3 : ℕ) ≤ 7)) zero_le
+    (by exact_mod_cast (by norm_num)) zero_le
   falsum_le_bound _ := adjoin_le_exp_exp_of_le le_rfl
-    (by exact_mod_cast (by norm_num : (2 : ℕ) ≤ 7)) zero_le
+    (by exact_mod_cast (by norm_num)) zero_le
   and_le_bound _ _ _ _ _ h₁ h₂ := adjoin_pair_le_exp_exp_of_le le_rfl
-    (by exact_mod_cast (by norm_num : (5 : ℕ) ≤ 7)) h₁ h₂
+    (by exact_mod_cast (by norm_num)) h₁ h₂
   or_le_bound _ _ _ _ _ h₁ h₂ := adjoin_pair_le_exp_exp_of_le le_rfl
-    (by exact_mod_cast (by norm_num : (4 : ℕ) ≤ 7)) h₁ h₂
+    (by exact_mod_cast (by norm_num)) h₁ h₂
   all_le_bound _ _ _ h := by
     simp only [nth_adjoin_zero]
-    exact adjoin_le_exp_exp_of_le le_rfl (by exact_mod_cast (by norm_num : (7 : ℕ) ≤ 7)) h
+    exact adjoin_le_exp_exp_of_le le_rfl (by exact_mod_cast (by norm_num)) h
   exs_le_bound _ _ _ h := by
     simp only [nth_adjoin_zero]
-    exact adjoin_le_exp_exp_of_le le_rfl (by exact_mod_cast (by norm_num : (6 : ℕ) ≤ 7)) h
+    exact adjoin_le_exp_exp_of_le le_rfl (by exact_mod_cast (by norm_num)) h
   bound_monotone _ _ _ h := exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr))
   bound_locallyDelta0 := LocallyDelta0Function.exp_exp_mul_add 8 (LocallyDelta0Function.var 1)
     (LocallyDelta0Function.const 1)
@@ -434,21 +434,21 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   rel_le_bound _ k _ v := adjoin_pair_pair_le_exp_exp_of_le one_le_two zero_le
     (termShiftVec_le_exp_exp k v)
   nrel_le_bound _ k _ v := adjoin_pair_pair_le_exp_exp_of_le one_le_two
-    (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 7)) (termShiftVec_le_exp_exp k v)
+    (by exact_mod_cast (by norm_num)) (termShiftVec_le_exp_exp k v)
   verum_le_bound _ := adjoin_le_exp_exp_of_le one_le_two
-    (by exact_mod_cast (by norm_num : (2 : ℕ) ≤ 7)) zero_le
+    (by exact_mod_cast (by norm_num)) zero_le
   falsum_le_bound _ := adjoin_le_exp_exp_of_le one_le_two
-    (by exact_mod_cast (by norm_num : (3 : ℕ) ≤ 7)) zero_le
+    (by exact_mod_cast (by norm_num)) zero_le
   and_le_bound _ _ _ _ _ h₁ h₂ := adjoin_pair_le_exp_exp_of_le one_le_two
-    (by exact_mod_cast (by norm_num : (4 : ℕ) ≤ 7)) h₁ h₂
+    (by exact_mod_cast (by norm_num)) h₁ h₂
   or_le_bound _ _ _ _ _ h₁ h₂ := adjoin_pair_le_exp_exp_of_le one_le_two
-    (by exact_mod_cast (by norm_num : (5 : ℕ) ≤ 7)) h₁ h₂
+    (by exact_mod_cast (by norm_num)) h₁ h₂
   all_le_bound _ _ _ h := by
     simp only [nth_adjoin_zero]
-    exact adjoin_le_exp_exp_of_le one_le_two (by exact_mod_cast (by norm_num : (6 : ℕ) ≤ 7)) h
+    exact adjoin_le_exp_exp_of_le one_le_two (by exact_mod_cast (by norm_num)) h
   exs_le_bound _ _ _ h := by
     simp only [nth_adjoin_zero]
-    exact adjoin_le_exp_exp_of_le one_le_two (by exact_mod_cast (by norm_num : (7 : ℕ) ≤ 7)) h
+    exact adjoin_le_exp_exp_of_le one_le_two (by exact_mod_cast (by norm_num)) h
   bound_monotone _ _ _ h := exp_monotone_le.mpr (exp_monotone_le.mpr (by gcongr))
   bound_locallyDelta0 := LocallyDelta0Function.exp_exp_mul_add 8 (LocallyDelta0Function.var 1)
     (LocallyDelta0Function.const 2)
@@ -667,8 +667,7 @@ private lemma qVecIterAt_locallyDelta0 :
     LocallyDelta0Function fun w : Fin 3 → V ↦
       (fun (r : Fin 2 → V) i ↦ if i < r 1 then ^#i else termBShiftIter L (r 1) (r 0).[i - r 1])
         (w ·.succ) (w 0) := by
-  have v3 : ∀ i : Fin 3, LocallyDelta0Function fun w : Fin 3 → V ↦ w i :=
-    LocallyDelta0Function.var
+  have v3 := fun i : Fin 3 ↦ LocallyDelta0Function.var (V := V) i
   have := LocallyDelta0Function.ite (LocallyDelta0.lt (v3 0) (v3 2))
     (qqBvar_locallyDelta0.comp₁ (v3 0))
     ((termBShiftIter_locallyDelta0 (L := L)).comp₂ (v3 2) (nth_locallyDelta0.comp₂ (v3 1)
@@ -775,8 +774,7 @@ lemma qVec_qVecIter (w d : V) : qVec L (qVecIter L w d) = qVecIter L w (d + 1) :
 open Classical in
 lemma qVecIter_locallyDelta0 :
     LocallyDelta0Function fun v : Fin 2 → V ↦ qVecIter L (v 0) (v 1) := by
-  have v2 : ∀ i : Fin 2, LocallyDelta0Function fun w : Fin 2 → V ↦ w i :=
-    LocallyDelta0Function.var
+  have v2 := fun i : Fin 2 ↦ LocallyDelta0Function.var (V := V) i
   have hℓ : LocallyDelta0Function fun v : Fin 2 → V ↦
       if IsUTermVec L (len (v 0)) (v 0) then len (v 0) else 0 :=
     LocallyDelta0Function.ite (isUTermVec_locallyDelta0.rel_comp₂
@@ -804,6 +802,14 @@ lemma qVecIter_locallyDelta0 :
       | zero => rfl
       | succ j => exact j.elim0
 
+
+private lemma qVecIter_var_locallyDelta0 {n : ℕ} (w : V) (i : Fin n) :
+    LocallyDelta0Function fun u : Fin n → V ↦ qVecIter L w (u i) :=
+  qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (LocallyDelta0Function.var i)
+
+private lemma add_var_locallyDelta0 {n : ℕ} (m : V) (i : Fin n) :
+    LocallyDelta0Function fun u : Fin n → V ↦ m + u i :=
+  LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (LocallyDelta0Function.var i)
 
 private lemma qVecIterAt'_locallyDelta0 :
     LocallyDelta0Function fun u : Fin 2 → V ↦
@@ -931,21 +937,21 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
     le_trans (termSubstVec_le_exp_exp k w v)
       (exp_exp_le_of_le (by gcongr; exact le_qVecIterMax_self w _))
   nrel_le_bound w k _ v := adjoin_pair_pair_le_exp_exp_of_le (one_le_add_four _)
-    (by exact_mod_cast (by norm_num : (1 : ℕ) ≤ 7)) <|
+    (by exact_mod_cast (by norm_num)) <|
     le_trans (termSubstVec_le_exp_exp k w v)
       (exp_exp_le_of_le (by gcongr; exact le_qVecIterMax_self w _))
   verum_le_bound _ := adjoin_le_exp_exp_of_le (one_le_add_four _)
-    (by exact_mod_cast (by norm_num : (2 : ℕ) ≤ 7)) zero_le
+    (by exact_mod_cast (by norm_num)) zero_le
   falsum_le_bound _ := adjoin_le_exp_exp_of_le (one_le_add_four _)
-    (by exact_mod_cast (by norm_num : (3 : ℕ) ≤ 7)) zero_le
+    (by exact_mod_cast (by norm_num)) zero_le
   and_le_bound w p₁ p₂ _ _ h₁ h₂ := adjoin_pair_le_exp_exp_of_le (one_le_add_four _)
-    (by exact_mod_cast (by norm_num : (4 : ℕ) ≤ 7))
+    (by exact_mod_cast (by norm_num))
     (le_trans h₁ <| exp_exp_le_of_le <| by
       gcongr; exact qVecIterMax_monotone (lt_K!_left _ _).le)
     (le_trans h₂ <| exp_exp_le_of_le <| by
       gcongr; exact qVecIterMax_monotone (lt_K!_right _ _).le)
   or_le_bound w p₁ p₂ _ _ h₁ h₂ := adjoin_pair_le_exp_exp_of_le (one_le_add_four _)
-    (by exact_mod_cast (by norm_num : (5 : ℕ) ≤ 7))
+    (by exact_mod_cast (by norm_num))
     (le_trans h₁ <| exp_exp_le_of_le <| by
       gcongr; exact qVecIterMax_monotone (lt_or_left _ _).le)
     (le_trans h₂ <| exp_exp_le_of_le <| by
@@ -953,14 +959,14 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   all_le_bound w p₁ _ h := by
     simp only [nth_adjoin_zero]
     refine adjoin_le_exp_exp_of_le (one_le_add_four _)
-      (by exact_mod_cast (by norm_num : (6 : ℕ) ≤ 7)) (le_trans h (exp_exp_le_of_le ?_))
+      (by exact_mod_cast (by norm_num)) (le_trans h (exp_exp_le_of_le ?_))
     gcongr
     exact le_trans (qVecIterMax_qVec_le w p₁)
       (qVecIterMax_monotone (succ_le_iff_lt.mpr (lt_forall p₁)))
   exs_le_bound w p₁ _ h := by
     simp only [nth_adjoin_zero]
     refine adjoin_le_exp_exp_of_le (one_le_add_four _)
-      (by exact_mod_cast (by norm_num : (7 : ℕ) ≤ 7)) (le_trans h (exp_exp_le_of_le ?_))
+      (by exact_mod_cast (by norm_num)) (le_trans h (exp_exp_le_of_le ?_))
     gcongr
     exact le_trans (qVecIterMax_qVec_le w p₁)
       (qVecIterMax_monotone (succ_le_iff_lt.mpr (lt_exists p₁)))
@@ -1142,12 +1148,9 @@ lemma IsSemiformula.depth_induction {Q : V → V → V → Prop}
   suffices H : ∀ d ≤ n, IsSemitermVec L n (m + d) (qVecIter L w d) →
       IsSemiformula L (m + d) (Bootstrapping.subst L (qVecIter L w d) p) by
     simpa using H 0 zero_le (by simpa using hw)
-  have v3 : ∀ i : Fin 3, LocallyDelta0Function fun u : Fin 3 → V ↦ u i :=
-    LocallyDelta0Function.var
-  have hwd : LocallyDelta0Function fun u : Fin 3 → V ↦ qVecIter L w (u 0) :=
-    qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (v3 0)
-  have hmd : LocallyDelta0Function fun u : Fin 3 → V ↦ m + u 0 :=
-    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (v3 0)
+  have v3 := fun i : Fin 3 ↦ LocallyDelta0Function.var (V := V) i
+  have hwd := qVecIter_var_locallyDelta0 (L := L) w (0 : Fin 3)
+  have hmd := add_var_locallyDelta0 m (0 : Fin 3)
   refine IsSemiformula.depth_induction
     (Q := fun d n p ↦ IsSemitermVec L n (m + d) (qVecIter L w d) →
       IsSemiformula L (m + d) (Bootstrapping.subst L (qVecIter L w d) p)) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
@@ -1176,12 +1179,9 @@ lemma substs_neg {n m w p : V} (hp : IsSemiformula L n p) :
   suffices H : ∀ d ≤ n, IsSemitermVec L n (m + d) (qVecIter L w d) →
       subst L (qVecIter L w d) (neg L p) = neg L (subst L (qVecIter L w d) p) by
     simpa using H 0 zero_le (by simpa using hw)
-  have v3 : ∀ i : Fin 3, LocallyDelta0Function fun u : Fin 3 → V ↦ u i :=
-    LocallyDelta0Function.var
-  have hwd : LocallyDelta0Function fun u : Fin 3 → V ↦ qVecIter L w (u 0) :=
-    qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (v3 0)
-  have hmd : LocallyDelta0Function fun u : Fin 3 → V ↦ m + u 0 :=
-    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (v3 0)
+  have v3 := fun i : Fin 3 ↦ LocallyDelta0Function.var (V := V) i
+  have hwd := qVecIter_var_locallyDelta0 (L := L) w (0 : Fin 3)
+  have hmd := add_var_locallyDelta0 m (0 : Fin 3)
   refine IsSemiformula.depth_induction
     (Q := fun d n p ↦ IsSemitermVec L n (m + d) (qVecIter L w d) →
       subst L (qVecIter L w d) (neg L p) = neg L (subst L (qVecIter L w d) p)) ?_ ?_ ?_ ?_ ?_ ?_ ?_
@@ -1227,12 +1227,9 @@ lemma shift_substs {n m w p : V} (hp : IsSemiformula L n p) :
       shift L (subst L (qVecIter L w d) p) =
         subst L (termShiftVec L n (qVecIter L w d)) (shift L p) by
     simpa using H 0 zero_le (by simpa using hw)
-  have v3 : ∀ i : Fin 3, LocallyDelta0Function fun u : Fin 3 → V ↦ u i :=
-    LocallyDelta0Function.var
-  have hwd : LocallyDelta0Function fun u : Fin 3 → V ↦ qVecIter L w (u 0) :=
-    qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (v3 0)
-  have hmd : LocallyDelta0Function fun u : Fin 3 → V ↦ m + u 0 :=
-    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (v3 0)
+  have v3 := fun i : Fin 3 ↦ LocallyDelta0Function.var (V := V) i
+  have hwd := qVecIter_var_locallyDelta0 (L := L) w (0 : Fin 3)
+  have hmd := add_var_locallyDelta0 m (0 : Fin 3)
   refine IsSemiformula.depth_induction
     (Q := fun d n p ↦ IsSemitermVec L n (m + d) (qVecIter L w d) →
       shift L (subst L (qVecIter L w d) p) =
@@ -1313,16 +1310,11 @@ lemma substs_substs {l n m w v p : V} (hp : IsSemiformula L l p) :
       subst L (qVecIter L w d) (subst L (qVecIter L v d) p) =
         subst L (termSubstVec L l (qVecIter L w d) (qVecIter L v d)) p by
     simpa using H 0 zero_le (by simpa using hw) (by simpa using hv)
-  have v3 : ∀ i : Fin 3, LocallyDelta0Function fun u : Fin 3 → V ↦ u i :=
-    LocallyDelta0Function.var
-  have hwd : LocallyDelta0Function fun u : Fin 3 → V ↦ qVecIter L w (u 0) :=
-    qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (v3 0)
-  have hvd : LocallyDelta0Function fun u : Fin 3 → V ↦ qVecIter L v (u 0) :=
-    qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const v) (v3 0)
-  have hnd : LocallyDelta0Function fun u : Fin 3 → V ↦ n + u 0 :=
-    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const n) (v3 0)
-  have hmd : LocallyDelta0Function fun u : Fin 3 → V ↦ m + u 0 :=
-    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (v3 0)
+  have v3 := fun i : Fin 3 ↦ LocallyDelta0Function.var (V := V) i
+  have hwd := qVecIter_var_locallyDelta0 (L := L) w (0 : Fin 3)
+  have hvd := qVecIter_var_locallyDelta0 (L := L) v (0 : Fin 3)
+  have hnd := add_var_locallyDelta0 n (0 : Fin 3)
+  have hmd := add_var_locallyDelta0 m (0 : Fin 3)
   refine IsSemiformula.depth_induction
     (Q := fun d l p ↦ IsSemitermVec L (n + d) (m + d) (qVecIter L w d) →
       IsSemitermVec L l (n + d) (qVecIter L v d) →
@@ -1402,12 +1394,9 @@ lemma subst_eq_self {n w p : V} (hp : IsSemiformula L n p) (hw : IsSemitermVec L
   suffices H' : ∀ d ≤ n, IsSemitermVec L n n (qVecIter L w d) →
       (∀ i < n, (qVecIter L w d).[i] = ^#i) → subst L (qVecIter L w d) p = p by
     simpa using H' 0 zero_le (by simpa using hw) (by simpa using H)
-  have v3 : ∀ i : Fin 3, LocallyDelta0Function fun u : Fin 3 → V ↦ u i :=
-    LocallyDelta0Function.var
-  have v4 : ∀ i : Fin 4, LocallyDelta0Function fun u : Fin 4 → V ↦ u i :=
-    LocallyDelta0Function.var
-  have hwd : LocallyDelta0Function fun u : Fin 3 → V ↦ qVecIter L w (u 0) :=
-    qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (v3 0)
+  have v3 := fun i : Fin 3 ↦ LocallyDelta0Function.var (V := V) i
+  have v4 := fun i : Fin 4 ↦ LocallyDelta0Function.var (V := V) i
+  have hwd := qVecIter_var_locallyDelta0 (L := L) w (0 : Fin 3)
   have hwd' : LocallyDelta0Function fun u : Fin 4 → V ↦ qVecIter L w (u 1) :=
     qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (v4 1)
   refine IsSemiformula.depth_induction
@@ -1698,12 +1687,9 @@ lemma fomulaComplexity_substs {n p : V} (hp : IsSemiformula L n p) {m w : V} :
   suffices H : ∀ d ≤ n, IsSemitermVec L n (m + d) (qVecIter L w d) →
       formulaComplexity L (subst L (qVecIter L w d) p) = formulaComplexity L p by
     simpa using H 0 zero_le (by simpa using hw)
-  have v3 : ∀ i : Fin 3, LocallyDelta0Function fun u : Fin 3 → V ↦ u i :=
-    LocallyDelta0Function.var
-  have hwd : LocallyDelta0Function fun u : Fin 3 → V ↦ qVecIter L w (u 0) :=
-    qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (v3 0)
-  have hmd : LocallyDelta0Function fun u : Fin 3 → V ↦ m + u 0 :=
-    LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (v3 0)
+  have v3 := fun i : Fin 3 ↦ LocallyDelta0Function.var (V := V) i
+  have hwd := qVecIter_var_locallyDelta0 (L := L) w (0 : Fin 3)
+  have hmd := add_var_locallyDelta0 m (0 : Fin 3)
   refine IsSemiformula.depth_induction
     (Q := fun d n p ↦ IsSemitermVec L n (m + d) (qVecIter L w d) →
       formulaComplexity L (subst L (qVecIter L w d) p) = formulaComplexity L p)

@@ -758,7 +758,6 @@ private lemma phi_iff (C pr : V) :
 private lemma le_pair_pair_right (a b d : V) : d ≤ ⟪a, b, d⟫ :=
   le_trans (le_pair_right _ _) (le_pair_right _ _)
 
-/-- The rules in a form that reads the formula off its code by projections. -/
 private lemma phi_iff_decode (C pr : V) :
     c.Phi L {x | x ∈ C} pr ↔ IsUFormula L (π₁ (π₂ pr)) ∧
     ( (π₁ (π₁ (π₂ pr) - 1) = 0 ∧ π₂ (π₂ pr) = c.rel (π₁ pr) (π₁ (π₂ (π₁ (π₂ pr) - 1)))

@@ -277,7 +277,7 @@ lemma nonempty_countermodelWorld (h : ofAxioms 𝔸 ⊬ A) : Nonempty (Countermo
 
 - [MV20, Theorem 12]
 -/
-lemma not_models_countermodel [Nonempty (CountermodelWorld 𝔸 A)] (h : ofAxioms 𝔸 ⊬ A) :
+lemma not_models_verbrugge_countermodel [Nonempty (CountermodelWorld 𝔸 A)] (h : ofAxioms 𝔸 ⊬ A) :
     ¬countermodel 𝔸 A ⊧ A := by
   intro hM;
   obtain ⟨Γ, hΓ, hΓ'⟩ := exists_neg_mem h;
@@ -299,7 +299,7 @@ theorem Logic.ILP₀.complete_verbrugge
   by_contra hA;
   have := Logic.ofAxioms.nonempty_countermodelWorld hA;
   have := Verbrugge.countermodel.hasP₀ (A₀ := A) fun {_ _} ↦ Logic.ILP₀.axiomP₀;
-  exact Logic.ofAxioms.not_models_countermodel hA (h _)
+  exact Logic.ofAxioms.not_models_verbrugge_countermodel hA (h _)
 
 /-- - [MV20, Theorem 25] -/
 theorem Logic.ILR.complete_verbrugge
@@ -309,7 +309,7 @@ theorem Logic.ILR.complete_verbrugge
   by_contra hA;
   have := Logic.ofAxioms.nonempty_countermodelWorld hA;
   have := Verbrugge.countermodel.hasR (A₀ := A) fun {_ _ _} ↦ Logic.ILR.axiomR;
-  exact Logic.ofAxioms.not_models_countermodel hA (h _)
+  exact Logic.ofAxioms.not_models_verbrugge_countermodel hA (h _)
 
 end FFL.InterpretabilityLogic
 

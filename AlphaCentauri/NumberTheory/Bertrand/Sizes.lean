@@ -89,10 +89,203 @@ lemma ratio_le_length (hn : (1024 : V) ≤ ‖n‖) : ratio n ≤ ‖lengthBound
         apply mul_le_mul <;> simp
     _ ≤ ((‖n‖ + 1) * (‖n‖ + 1) + 1) * ((‖n‖ + 1) * (‖n‖ + 1) + 1) + 1 := le_self_add
 
+lemma sqrt_growth (hn : (1024 : V) ≤ ‖n‖) :
+    28 ≤ √(2 * n) ∧ 7 * (‖n‖ + 1) * (√(2 * n) + 2) ≤ n := by
+  set g := √(2 * n)
+  set m := ‖g‖
+  have hgg : g * g ≤ 2 * n := sqrt_spec_le _
+  have hlt : 2 * n < (g + 1) * (g + 1) := sqrt_spec_lt _
+  have hg1 : ‖g + 1‖ ≤ m + 1 := by
+    rw [← length_two_mul_add_one]
+    apply length_monotone
+    gcongr
+    exact le_mul_of_one_le_left (Arithmetic.zero_le _) one_le_two
+  have hℓm : ‖n‖ ≤ 2 * m + 2 := calc
+    ‖n‖ ≤ ‖(g + 1) * (g + 1)‖ := length_monotone (le_trans (by simp) hlt.le)
+    _ ≤ ‖g + 1‖ + ‖g + 1‖ := length_mul_le _ _
+    _ ≤ (m + 1) + (m + 1) := add_le_add hg1 hg1
+    _ = 2 * m + 2 := by grind
+  have hm : (511 : V) ≤ m := by
+    have : (2 : V) * 511 + 2 ≤ 2 * m + 2 := le_trans (le_of_eq (by norm_num)) (hn.trans hℓm)
+    exact le_of_mul_le_mul_left ((add_le_add_iff_right 2).mp this) two_pos
+  have hmm : m * m ≤ 3 * g := by simpa [sq] using sq_len_le_three_mul g
+  have h84 : 84 * m ≤ g := by
+    have : 3 * (84 * m) ≤ 3 * g := calc
+      3 * (84 * m) = 252 * m := by grind
+      _ ≤ m * m := mul_le_mul_of_nonneg_right (le_trans (by norm_cast) hm) (Arithmetic.zero_le _)
+      _ ≤ 3 * g := hmm
+    exact le_of_mul_le_mul_left this (by exact_mod_cast (show (0 : ℕ) < 3 by decide))
+  have hm1 : (1 : V) ≤ m := le_trans (by norm_cast) hm
+  have hg28 : (28 : V) ≤ g := calc
+    (28 : V) ≤ 84 * 1 := by norm_cast
+    _ ≤ 84 * m := by gcongr
+    _ ≤ g := h84
+  have hg2 : g + 2 ≤ 2 * g := calc
+    g + 2 ≤ g + g := by gcongr; exact le_trans (by norm_cast) hg28
+    _ = 2 * g := by grind
+  have hL : ‖n‖ + 1 ≤ 3 * m := calc
+    ‖n‖ + 1 ≤ 2 * m + 2 + 1 := by gcongr
+    _ ≤ 2 * m + m := by rw [add_assoc]; gcongr; exact le_trans (by norm_cast) hm
+    _ = 3 * m := by grind
+  constructor
+  · exact hg28
+  · have : 2 * (7 * (‖n‖ + 1) * (g + 2)) ≤ 2 * n := calc
+      2 * (7 * (‖n‖ + 1) * (g + 2)) ≤ 2 * (7 * (3 * m) * (2 * g)) := by gcongr
+      _ = 84 * m * g := by grind
+      _ ≤ g * g := mul_le_mul_of_nonneg_right h84 (Arithmetic.zero_le _)
+      _ ≤ 2 * n := hgg
+    exact le_of_mul_le_mul_left this two_pos
+
 lemma size_inequality (hn : (1024 : V) ≤ ‖n‖) :
     (ratio n + 1) * targetExcess n + ratio n * (ratio n + 1) + lowerSize n ≤
       ratio n * upperExcess n := by
-  sorry
+  obtain ⟨hg28, hG⟩ := sqrt_growth hn
+  have hℓ1 : (1 : V) ≤ ‖n‖ := le_trans (by norm_cast) hn
+  have hℓ408 : (408 : V) ≤ ‖n‖ := le_trans (by norm_cast) hn
+  have hn0 : 0 < n := length_pos_iff.mp (lt_of_lt_of_le zero_lt_one hℓ1)
+  have h3x : 3 * cutoff n ≤ 2 * n := mul_div_le _ _
+  have hxn : cutoff n ≤ n := le_of_mul_le_mul_left (calc
+      3 * cutoff n ≤ 2 * n := h3x
+      _ ≤ 3 * n := by gcongr; norm_cast)
+    (by exact_mod_cast (show (0 : ℕ) < 3 by decide))
+  have hz : lowerSize n = (2 * bandCount n + 2) * n * (‖n‖ * ‖n‖ * (‖n‖ + 1) + 1) := rfl
+  have hb : targetExcess n = (‖n‖ * ‖n‖ * (‖n‖ + 1) + 1) + 2 * n * (‖n‖ + 1) +
+      (√(2 * n) + 1) * (‖n‖ * ‖n‖ * (‖n‖ + 1) + 1) +
+      2 * cutoff n * (‖n‖ * ‖n‖ + (‖n‖ + 1)) +
+      2 * bandCount n * (‖n‖ * ‖n‖ + (‖n‖ + 1)) := by
+    simp only [targetExcess, blockWidth, bandUnit, exponent, add_assoc]
+  have ha : upperExcess n + ‖n‖ * ‖n‖ = 2 * n * (‖n‖ * ‖n‖) := by
+    have h1 : 2 * n - 1 + 1 = 2 * n := sub_add_self_of_le (le_trans (pos_iff_one_le.mp hn0)
+      (le_mul_of_one_le_left (Arithmetic.zero_le _) one_le_two))
+    calc upperExcess n + ‖n‖ * ‖n‖ = (2 * n - 1 + 1) * (‖n‖ * ‖n‖) := by
+          simp only [upperExcess, exponent]; grind
+      _ = 2 * n * (‖n‖ * ‖n‖) := by rw [h1]
+  have hRL' : bandCount n + 1 ≤ ‖n‖ + 1 := (add_le_add_iff_right 1).mpr (length_monotone hxn)
+  rw [hz, hb, ratio]
+  generalize √(2 * n) = g at hG hg28 ⊢
+  generalize cutoff n = x at h3x ⊢
+  generalize bandCount n = R at hRL' ⊢
+  generalize ‖n‖ = ℓ at *
+  generalize hLdef : ℓ + 1 = L at *
+  have hRL : R + 1 ≤ L := hRL'
+  have hR : R ≤ L := le_trans le_self_add hRL
+  have hL1 : (1 : V) ≤ L := by rw [← hLdef]; exact le_add_self
+  have hLℓ : L ≤ 2 * ℓ := calc
+    L = ℓ + 1 := hLdef.symm
+    _ ≤ ℓ + ℓ := by gcongr
+    _ = 2 * ℓ := by grind
+  have hL409 : (409 : V) ≤ L := calc
+    (409 : V) = 408 + 1 := by norm_num
+    _ ≤ ℓ + 1 := by gcongr
+    _ = L := hLdef
+  have hLL : L * L ≤ 2 * (ℓ * ℓ) := calc
+    L * L = ℓ * ℓ + (2 * ℓ + 1) := by rw [← hLdef]; grind
+    _ ≤ ℓ * ℓ + ℓ * ℓ := by
+      gcongr
+      calc 2 * ℓ + 1 ≤ 2 * ℓ + ℓ := by gcongr
+        _ = 3 * ℓ := by grind
+        _ ≤ ℓ * ℓ := mul_le_mul_of_nonneg_right (le_trans (by norm_cast) hℓ408)
+          (Arithmetic.zero_le _)
+    _ = 2 * (ℓ * ℓ) := by grind
+  have hLs : 204 * L ≤ ℓ * ℓ := calc
+    204 * L ≤ 204 * (2 * ℓ) := by gcongr
+    _ = 408 * ℓ := by grind
+    _ ≤ ℓ * ℓ := mul_le_mul_of_nonneg_right hℓ408 (Arithmetic.zero_le _)
+  have hΛ : ℓ * ℓ * L + 1 ≤ 2 * (ℓ * ℓ) * L := calc
+    ℓ * ℓ * L + 1 ≤ ℓ * ℓ * L + ℓ * ℓ * L := by
+      gcongr
+      exact one_le_mul (one_le_mul hℓ1 hℓ1) hL1
+    _ = 2 * (ℓ * ℓ) * L := by grind
+  have hℓℓ : (1 : V) ≤ ℓ * ℓ := one_le_mul hℓ1 hℓ1
+  generalize hsdef : ℓ * ℓ = s at *
+  have hLsle : L ≤ s := le_trans (le_mul_of_one_le_left (Arithmetic.zero_le _)
+    (by norm_cast)) hLs
+  have hLn : 204 * L ≤ n := calc
+    204 * L ≤ 210 * L := by gcongr; norm_cast
+    _ = 7 * L * (28 + 2) := by grind
+    _ ≤ 7 * L * (g + 2) := by gcongr
+    _ ≤ n := hG
+  have hn1632 : (1632 : V) ≤ n := calc
+    (1632 : V) ≤ 204 * 8 := le_of_eq (by norm_num)
+    _ ≤ 204 * L := by gcongr; exact le_trans (by norm_cast) hL409
+    _ ≤ n := hLn
+  generalize hKdef : 16 * L * L = K at *
+  generalize hUdef : L * L * n * s = U
+  have hK1 : K + 1 ≤ 17 * L * L := calc
+    K + 1 ≤ 16 * L * L + L * L := by rw [← hKdef]; gcongr; exact one_le_mul hL1 hL1
+    _ = 17 * L * L := by grind
+  have hw : s + L ≤ 2 * s := calc
+    s + L ≤ s + s := by gcongr
+    _ = 2 * s := by grind
+  have hb1 : 3 * ((2 * R + 2) * n * (s * L + 1)) ≤ 7 * U := calc
+    3 * ((2 * R + 2) * n * (s * L + 1)) = 6 * (R + 1) * n * (s * L + 1) := by grind
+    _ ≤ 6 * L * n * (s * L + 1) := by gcongr
+    _ = 6 * U + 6 * (L * n) := by grind
+    _ ≤ 6 * U + (L * s) * (L * n) := by
+      gcongr
+      calc (6 : V) ≤ 204 * 1 := by norm_cast
+        _ ≤ 204 * L := by gcongr
+        _ ≤ s := hLs
+        _ ≤ L * s := le_mul_of_one_le_left (Arithmetic.zero_le _) hL1
+    _ = 7 * U := by grind
+  have hb2 : 3 * (K + 1) * ((g + 2) * (s * L + 1)) ≤ 15 * U := calc
+    3 * (K + 1) * ((g + 2) * (s * L + 1)) ≤ 3 * (17 * L * L) * ((g + 2) * (2 * s * L)) := by
+      gcongr
+    _ = 102 * (L * L * s) * (L * (g + 2)) := by grind
+    _ ≤ 105 * (L * L * s) * (L * (g + 2)) := by gcongr; norm_cast
+    _ = 15 * (L * L * s) * (7 * L * (g + 2)) := by grind
+    _ ≤ 15 * (L * L * s) * n := by gcongr
+    _ = 15 * U := by grind
+  have hb3 : 6 * (K + 1) * (n * L) ≤ U := calc
+    6 * (K + 1) * (n * L) ≤ 6 * (17 * L * L) * (n * L) := by gcongr
+    _ = L * L * n * (102 * L) := by grind
+    _ ≤ L * L * n * (204 * L) := by gcongr; norm_cast
+    _ ≤ U := by rw [← hUdef]; gcongr
+  have hb4 : (K + 1) * (3 * x) * (2 * (s + L)) ≤ 4 * K * n * s + 2 * U := calc
+    (K + 1) * (3 * x) * (2 * (s + L)) ≤ (K + 1) * (2 * n) * (2 * (s + L)) := by gcongr
+    _ = 4 * K * n * s + 4 * n * s + 4 * (K + 1) * (n * L) := by grind
+    _ ≤ 4 * K * n * s + U + U := by
+      gcongr
+      · calc 4 * n * s = 4 * 1 * n * s := by grind
+          _ ≤ L * L * n * s := by
+            gcongr
+            exact le_trans (by norm_cast) hL409
+          _ = U := hUdef
+      · calc 4 * (K + 1) * (n * L) ≤ 6 * (K + 1) * (n * L) := by gcongr; norm_cast
+          _ ≤ U := hb3
+    _ = 4 * K * n * s + 2 * U := by grind
+  have hb5 : 6 * (K + 1) * (R * (s + L)) ≤ U := calc
+    6 * (K + 1) * (R * (s + L)) ≤ 6 * (17 * L * L) * (L * (2 * s)) := by gcongr
+    _ = L * L * s * (204 * L) := by grind
+    _ ≤ L * L * s * n := by gcongr
+    _ = U := by grind
+  have hb6 : 3 * (K * (K + 1)) ≤ U := calc
+    3 * (K * (K + 1)) ≤ 3 * (16 * L * L * (17 * L * L)) := by
+      gcongr
+      exact hKdef.ge
+    _ = 816 * (L * L) * (L * L) := by grind
+    _ ≤ 816 * (L * L) * (2 * s) := by gcongr
+    _ = L * L * s * 1632 := by grind
+    _ ≤ L * L * s * n := by gcongr
+    _ = U := by grind
+  have hb7 : 3 * (K * s) ≤ U := calc
+    3 * (K * s) = L * L * s * 48 := by grind
+    _ ≤ L * L * s * n := by gcongr; exact le_trans (by norm_cast) hn1632
+    _ = U := by grind
+  have key : 3 * ((K + 1) * ((s * L + 1) + 2 * n * L + (g + 1) * (s * L + 1) +
+      2 * x * (s + L) + 2 * R * (s + L)) + K * (K + 1) + (2 * R + 2) * n * (s * L + 1) +
+      K * s) ≤ 3 * (K * (upperExcess n) + K * s) := calc
+    _ = 3 * ((2 * R + 2) * n * (s * L + 1)) + 3 * (K + 1) * ((g + 2) * (s * L + 1)) +
+        6 * (K + 1) * (n * L) + (K + 1) * (3 * x) * (2 * (s + L)) +
+        6 * (K + 1) * (R * (s + L)) + 3 * (K * (K + 1)) + 3 * (K * s) := by grind
+    _ ≤ 7 * U + 15 * U + U + (4 * K * n * s + 2 * U) + U + U + U := by gcongr
+    _ = 4 * K * n * s + 28 * U := by grind
+    _ ≤ 4 * K * n * s + 32 * U := by gcongr; norm_cast
+    _ = 6 * K * n * s := by rw [← hUdef, ← hKdef]; grind
+    _ = 3 * (K * (upperExcess n + s)) := by rw [ha]; grind
+    _ = 3 * (K * (upperExcess n) + K * s) := by grind
+  have key' := le_of_mul_le_mul_left key (by exact_mod_cast (show (0 : ℕ) < 3 by decide))
+  exact (add_le_add_iff_right _).mp key'
 
 lemma bandSize_zero : bandSize n 0 = cutoff n := by
   simp [bandSize]

@@ -884,7 +884,8 @@ lemma doubleUp_decode {w v : V} (hw : Bits B s (2 * m) w)
     obtain ⟨i, rfl⟩ := eq_succ_of_pos hj₀
     have hjm : i + 1 ≤ m := le_of_mul_le_mul_left hk₂ two_pos
     have hlam := scaledLength_two_mul hB hj₀ (mul_length_lt_of_le hBm hk₂)
-    simp [div_mul_right _ (two_pos : (0 : V) < 2)] at H
+    simp only [mod_mul_self_right, div_mul_right _ (two_pos : (0 : V) < 2), true_and,
+      add_tsub_cancel_right, zero_ne_one, false_and, or_self, or_false] at H
     rcases H with ⟨hy', rfl⟩ | ⟨hy', rfl⟩
     · refine ⟨Or.inl ⟨by simp, ?_⟩, Or.inl ⟨i + 1, y, rfl, rfl⟩⟩
       rw [pi₂_pair, bits_pair_iff]
@@ -913,7 +914,8 @@ lemma doubleUp_decode {w v : V} (hw : Bits B s (2 * m) w)
     have hy₂ : y < scaledLength B s (i + 1) + s := by
       rw [← hlam]
       exact hy.trans_le hmono
-    simp [two_mul_add_one_div_two] at H
+    simp only [zero_lt_two, mod_mul_add', Nat.one_lt_ofNat, mod_eq_self_of_lt, _root_.one_ne_zero,
+      two_mul_add_one_div_two, false_and, true_and, false_or] at H
     rcases H with ⟨hy', rfl⟩ | ⟨hy', rfl⟩
     · refine ⟨Or.inr (Or.inl ⟨by simp, ?_⟩), Or.inr (Or.inl ⟨i, y, rfl, rfl⟩)⟩
       rw [pi₂_pair, bits_pair_iff]

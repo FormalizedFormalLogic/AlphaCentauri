@@ -41,6 +41,11 @@ def witness (Γ N : FormulaFinset α) (D : Formula α) : Sequent α :=
 @[simp, grind =] lemma mem_antecedents {l : List (Formula α × Formula α)} {A : Formula α} :
     A ∈ antecedents l ↔ ∃ B, (A, B) ∈ l := by simp [antecedents]
 
+@[simp, grind =] lemma rhdFormulas_nil : rhdFormulas ([] : List (Formula α × Formula α)) = ∅ := rfl
+
+@[simp, grind =] lemma rhdFormulas_cons {p : Formula α × Formula α} {l} :
+    rhdFormulas (p :: l) = insert (p.1 ▷ p.2) (rhdFormulas l) := by simp [rhdFormulas]
+
 @[simp, grind =] lemma mem_rhdFormulas {l : List (Formula α × Formula α)} {C : Formula α} :
     C ∈ rhdFormulas l ↔ ∃ A B, (A, B) ∈ l ∧ C = A ▷ B := by
   simp [rhdFormulas, eq_comm]

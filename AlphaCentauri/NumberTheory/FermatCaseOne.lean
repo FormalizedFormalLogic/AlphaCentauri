@@ -188,7 +188,6 @@ lemma exists_padicInt_pow_seven_eq [Fact (Nat.Prime 7)] :
   · simpa [sub_eq_zero] using hy
   · exact (PadicInt.norm_lt_one_iff_dvd _).mp (hy₄.trans (by norm_num))
 
-
 namespace FFL.FirstOrder
 
 open IntermediateField OpenPredicate

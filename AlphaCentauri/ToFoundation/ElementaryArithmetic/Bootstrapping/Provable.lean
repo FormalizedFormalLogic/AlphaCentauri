@@ -510,6 +510,70 @@ lemma provable_substNumerals_of_provable_allClosure {k : ℕ} (φ : ArithmeticSe
     rw [← Matrix.cons_head_tail v]
     exact provable_substNumerals_of_provable_substNumerals_all φ (ih (∀¹ φ) h _) _
 
+section prefixMax
+
+variable {f : V → V}
+
+/-- The largest of the values of `f` at the elements at most `x`. -/
+noncomputable def prefixMax (f : V → V) (x : V) : V :=
+  listMax (listMap (fun _ i ↦ f i) ![] (rangeList (x + 1)))
+
+variable (hf : LocallyDelta0Function₁ f)
+include hf
+
+lemma le_prefixMax {i x : V} (h : i ≤ x) : f i ≤ prefixMax f x := by
+  have hi : i < len (rangeList (x + 1)) := by simpa [lt_succ_iff_le] using h
+  have := nth_le_listMax (v := listMap (fun (_ : Fin 0 → V) i ↦ f i) ![] (rangeList (x + 1)))
+    (i := i) (by rwa [len_listMap hf])
+  rwa [nth_listMap hf _ _ hi, nth_rangeList (by simpa using hi)] at this
+
+lemma prefixMax_monotone {x y : V} (h : x ≤ y) : prefixMax f x ≤ prefixMax f y := by
+  apply listMaxss_le
+  intro i hi
+  rw [len_listMap hf] at hi
+  rw [nth_listMap hf _ _ hi, nth_rangeList (by simpa using hi)]
+  exact le_prefixMax hf (le_trans (lt_succ_iff_le.mp (by simpa using hi)) h)
+
+lemma prefixMax_locallyDelta0 : LocallyDelta0Function₁ (prefixMax f) := by
+  have := (listMap_locallyDelta0 (g := fun (_ : Fin 0 → V) i ↦ f i) hf).comp_cons
+    (rangeList_locallyDelta0.comp₁
+      (LocallyDelta0Function.add_one (LocallyDelta0Function.var (V := V) (0 : Fin 1))))
+    (u := ![]) finZeroElim
+  convert listMax_locallyDelta0.comp₁ this using 2 with u
+  simp only [prefixMax]
+  congr 2
+  funext j
+  exact j.elim0
+
+end prefixMax
+
+private lemma max_specializeSize_modusPonensSize_locallyDelta0 {S : V} {A : V → V}
+    (hA : LocallyDelta0Function₁ A) :
+    LocallyDelta0Function₁ fun y ↦
+      max (specializeSize ℒₒᵣ S (numeral y)) (modusPonensSize ℒₒᵣ (A y) (A (y + 1))) := by
+  have hn := numeral_locallyDelta0.comp₁ (LocallyDelta0Function.var (V := V) (0 : Fin 1))
+  have hs := (substs1_locallyDelta0 (L := ℒₒᵣ)).comp₂ hn (LocallyDelta0Function.const S)
+  have ha : LocallyDelta0Function fun v : Fin 1 → V ↦ A (v 0) := hA
+  have hb := hA.comp₁
+    (LocallyDelta0Function.add_one (LocallyDelta0Function.var (V := V) (0 : Fin 1)))
+  have hnb := (neg_locallyDelta0 (L := ℒₒᵣ)).comp₁ hb
+  have hmax := LocallyDelta0Function.max (V := V)
+  exact hmax.comp₂
+    (hmax.comp₂ hs <| hmax.comp₂ (.const _) <| hmax.comp₂ (.const _) <| hmax.comp₂ (.const _) <|
+      hmax.comp₂ ((neg_locallyDelta0 (L := ℒₒᵣ)).comp₁ hs) hn)
+    (hmax.comp₂ ((imp_locallyDelta0 (L := ℒₒᵣ)).comp₂ ha hb) <| hmax.comp₂ ha <| hmax.comp₂ hb <|
+      hmax.comp₂ (qqAnd_locallyDelta0.comp₂ ha hnb) hnb)
+
+lemma modusPonensCode_specializeCode_le_exp_exp {n e d S t a b : V} (hn : 2 ≤ n)
+    (hN : max (specializeSize ℒₒᵣ S t) (modusPonensSize ℒₒᵣ a b) ≤ n)
+    (he : e ≤ Exp.exp (Exp.exp n)) (hd : d ≤ Exp.exp (Exp.exp n)) :
+    modusPonensCode ℒₒᵣ (specializeCode ℒₒᵣ e S t) d a b ≤ Exp.exp (Exp.exp (n + 42)) := by
+  rw [max_le_iff] at hN
+  have := modusPonensCode_le_exp_exp (n := n + 20) (le_trans hn le_self_add)
+    (le_trans hN.2 le_self_add) (specializeCode_le_exp_exp hn hN.1 he)
+    (le_trans hd (exp_exp_le_of_le le_self_add))
+  exact le_trans this (exp_exp_le_of_le (le_of_eq (by norm_num [add_assoc])))
+
 end numerals
 
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

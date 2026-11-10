@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.ToFoundation.PairingAssignment
 public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.ToFoundation.PartialTruth
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounded
 
 /-!
@@ -694,6 +695,88 @@ lemma provable_tvF_termSubst (n : V) :
       simpa [a', b', qqMul, ha, hb] using
         (tprovable_tvF_iff _ _ _).mp (tprovable_tvF_mul (T := T) a' b' (assignment n) ha hb ⨀ h₁ ⨀ h₂)
 
+/-- The term obtained from `t` by replacing each bound variable `#i` by `&i`. -/
+noncomputable def instTerm (n t : V) (ht : IsSemiterm ℒₒᵣ n t) : Term V ℒₒᵣ :=
+  ⟨termSubst ℒₒᵣ (fvarVec n) t, (isSemitermVec_fvarVec n 0).termSubst ht⟩
+
+lemma tprovable_tvF_instTerm {n t : V} (ht : IsSemiterm ℒₒᵣ n t) (hs : termShift ℒₒᵣ t = t) :
+    T.internalize V ⊢ tvF (instTerm n t ht) (assignment n) t :=
+  (tprovable_tvF_iff _ _ _).mpr <| by simpa [instTerm] using provable_tvF_termSubst n t ht hs
+
 end termDisquotation
+
+/-! ### Disquotation for $\Delta_0$ formulas -/
+
+section formulaDisquotation
+
+lemma adjoin_termShiftVec_fvarVec (n : V) :
+    ^&0 ∷ termShiftVec ℒₒᵣ n (fvarVec n) = fvarVec (n + 1) := by
+  have hv := (isSemitermVec_fvarVec (L := ℒₒᵣ) n 0).isUTerm
+  apply nth_ext' (n + 1) (by simp [hv]) (by simp)
+  intro i hi
+  rcases zero_or_succ i with rfl | ⟨i, rfl⟩
+  · rw [nth_fvarVec (n + 1) 0 (by simp)]; simp
+  · have hi' : i < n := by simpa using hi
+    rw [nth_fvarVec (n + 1) (i + 1) hi]; simp [nth_termShiftVec hv hi', nth_fvarVec n i hi']
+
+lemma free_subst_qVec_fvarVec {n q : V} (hq : IsSemiformula ℒₒᵣ (n + 1) q)
+    (hs : shift ℒₒᵣ q = q) :
+    free ℒₒᵣ (subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) q) = subst ℒₒᵣ (fvarVec (n + 1)) q := by
+  have hw := isSemitermVec_fvarVec (L := ℒₒᵣ) n 0
+  rw [free, shift_substs hq hw.qVec, hs, termShift_qVec hw,
+    substs1_subst_qVec hw.termShiftVec hq (by simp), adjoin_termShiftVec_fvarVec]
+
+
+/-- The formula obtained from `p` by replacing each bound variable `#i` by `&i`. -/
+noncomputable def instFormula (n p : V) (hp : IsSemiformula ℒₒᵣ n p) : Formula V ℒₒᵣ :=
+  ⟨subst ℒₒᵣ (fvarVec n) p, hp.subst (isSemitermVec_fvarVec n 0)⟩
+
+lemma equal_eq_equals (t u : Term V ℒₒᵣ) : Semiformula.equal t u = Semiterm.equals t u := by
+  ext; simp [Semiformula.equal, Arithmetic.qqEQ]
+
+lemma neg_equals (t u : Term V ℒₒᵣ) : ∼Semiterm.equals t u = Semiterm.notEquals t u := by
+  ext; simp [Arithmetic.qqEQ, Arithmetic.qqNEQ]
+
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+
+lemma tprovable_instTerm_eq_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
+    (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
+    T.internalize V ⊢ Semiterm.equals (instTerm n t ht) (instTerm n u hu) 🡘 psatF (assignment n) (t ^= u) := by
+  have h₁ := tprovable_tvF_instTerm (T := T) ht hts;
+  have h₂ := tprovable_tvF_instTerm (T := T) hu hus;
+  have h₃ := tprovable_psatF_eq (T := T) (instTerm n t ht) (instTerm n u hu) (assignment n)
+    ht.isUTerm hu.isUTerm;
+  rw [equal_eq_equals] at h₃;
+  exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
+
+lemma tprovable_instTerm_neq_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
+    (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
+    T.internalize V ⊢ Semiterm.notEquals (instTerm n t ht) (instTerm n u hu) 🡘 psatF (assignment n) (t ^≠ u) := by
+  have h₁ := tprovable_tvF_instTerm (T := T) ht hts;
+  have h₂ := tprovable_tvF_instTerm (T := T) hu hus;
+  have h₃ := tprovable_psatF_neq (T := T) (instTerm n t ht) (instTerm n u hu) (assignment n)
+    ht.isUTerm hu.isUTerm;
+  rw [equal_eq_equals, neg_equals] at h₃;
+  exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
+
+lemma tprovable_instTerm_lt_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
+    (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
+    T.internalize V ⊢ Semiterm.lessThan (instTerm n t ht) (instTerm n u hu) 🡘 psatF (assignment n) (t ^< u) := by
+  have h₁ := tprovable_tvF_instTerm (T := T) ht hts;
+  have h₂ := tprovable_tvF_instTerm (T := T) hu hus;
+  have h₃ := tprovable_psatF_lt (T := T) (instTerm n t ht) (instTerm n u hu) (assignment n)
+    ht.isUTerm hu.isUTerm;
+  exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
+
+lemma tprovable_instTerm_nlt_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
+    (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
+    T.internalize V ⊢ Semiterm.notLessThan (instTerm n t ht) (instTerm n u hu) 🡘 psatF (assignment n) (Arithmetic.qqNLT t u) := by
+  have h₁ := tprovable_tvF_instTerm (T := T) ht hts;
+  have h₂ := tprovable_tvF_instTerm (T := T) hu hus;
+  have h₃ := tprovable_psatF_nlt (T := T) (instTerm n t ht) (instTerm n u hu) (assignment n)
+    ht.isUTerm hu.isUTerm;
+  exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
+
+end formulaDisquotation
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

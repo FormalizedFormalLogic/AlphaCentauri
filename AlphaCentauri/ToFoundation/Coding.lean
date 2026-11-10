@@ -60,6 +60,14 @@ lemma shift_typed_quote {n : ℕ} (σ : Semisentence L n) :
     simpa [Rewriting.shifts] using Rewriting.shifts_emb ({σ} : Multiset (Semisentence L n))
   rw [Sentence.typed_quote_def, ← Semiformula.typed_quote_shift, h]
 
+lemma quote_conj {n k : ℕ} (φ : Fin k → Semisentence L n) :
+    (⌜Matrix.conj φ⌝ : V) = ^⋀ matrixToVec fun i ↦ (⌜φ i⌝ : V) := by
+  induction k with
+  | zero => simp [Sentence.quote_verum]
+  | succ k ih =>
+    simpa [Matrix.conj, Matrix.vecHead, Matrix.vecTail, Function.comp_def] using
+      ih (Matrix.vecTail φ)
+
 end FFL.FirstOrder.Semisentence
 
 namespace FFL.FirstOrder.Semiterm
@@ -95,6 +103,10 @@ variable (w : Fin 2 → ClosedSemiterm ℒₒᵣ n)
   rfl
 
 end
+
+@[simp] lemma empty_quote_numeral (k : ℕ) :
+    (⌜(↑k : ClosedSemiterm ℒₒᵣ n)⌝ : V) = Bootstrapping.Arithmetic.numeral (k : V) := by
+  simp [empty_quote_eq]
 
 end FFL.FirstOrder.Semiterm
 
@@ -183,6 +195,18 @@ lemma quote_substs {n m : ℕ} (w : Fin n → SyntacticSemiterm L m) (φ : Semip
   rfl
 
 end Semiformula
+
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+lemma Semisentence.quote_substs {n m : ℕ} (w : Fin n → ClosedSemiterm L m)
+    (σ : Semisentence L n) :
+    (⌜σ ⇜ w⌝ : V) = Bootstrapping.subst L (matrixToVec fun i ↦ (⌜w i⌝ : V)) ⌜σ⌝ := by
+  simp [Sentence.quote_def, Rewriting.emb_subst_eq_subst_emb, Semiformula.quote_substs,
+    Semiterm.empty_quote_def]
+
+lemma Semisentence.quote_imp {n : ℕ} (σ τ : Semisentence L n) :
+    (⌜σ 🡒 τ⌝ : V) = Bootstrapping.imp L ⌜σ⌝ ⌜τ⌝ := by
+  simp [Sentence.quote_def]
 
 end FFL.FirstOrder
 

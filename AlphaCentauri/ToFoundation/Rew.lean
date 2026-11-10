@@ -83,6 +83,9 @@ lemma shift_subst_eq (φ : Semiformula L ℕ 1) (t : SyntacticSemiterm L n) :
       | succ i => exact i.elim0
     · simp [Rew.comp_app]
 
+lemma bShift_eq_subst : (Rew.bShift : Rew L ξ n ξ (n + 1)) = Rew.subst fun i ↦ #i.succ := by
+  ext x <;> rfl
+
 end FFL.FirstOrder.Rew
 
 namespace FFL.FirstOrder.Semiformula

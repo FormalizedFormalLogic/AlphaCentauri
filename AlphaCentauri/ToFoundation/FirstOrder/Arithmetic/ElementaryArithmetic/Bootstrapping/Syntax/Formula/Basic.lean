@@ -748,13 +748,13 @@ private lemma phi_iff (C pr : V) :
     (∃ p₁ < p, ∃ ys ≤ repeatVec C (c.exsSize param p₁), (c.exsSize param p₁ = len ys ∧
         ∀ i < c.exsSize param p₁, ⟪c.exsChanges param i, p₁, ys.[i]⟫ ∈ C) ∧
       p = ^∃ p₁ ∧ y = c.exs param p₁ ys)) := by
-  have hrv {g : V → V} {p₁ ys n : V} (hl : len ys = n) (hys : ∀ i < n, ⟪g i, p₁, ys.[i]⟫ ∈ C) :
-      ys ≤ repeatVec C n := by
-    subst hl
-    exact len_repeatVec_of_nth_le fun i hi ↦ le_of_lt <|
-      lt_of_le_of_lt ((le_pair_right _ _).trans (le_pair_right _ _)) (lt_of_mem (hys i hi))
   constructor
   · rintro ⟨param, p, y, rfl, hp, H⟩
+    have hrv {g : V → V} {p₁ ys n : V} (hl : len ys = n) (hys : ∀ i < n, ⟪g i, p₁, ys.[i]⟫ ∈ C) :
+        ys ≤ repeatVec C n := by
+      subst hl
+      exact len_repeatVec_of_nth_le fun i hi ↦ le_of_lt <|
+        lt_of_le_of_lt ((le_pair_right _ _).trans (le_pair_right _ _)) (lt_of_mem (hys i hi))
     refine ⟨param, by simp,
       p, le_trans (le_pair_left p y) (le_pair_right _ _),
       y, le_trans (le_pair_right p y) (le_pair_right _ _), rfl, hp, ?_⟩
@@ -815,11 +815,11 @@ private lemma phi_iff_decode (C pr : V) :
       (π₁ (π₁ (π₂ pr) - 1) = 7 ∧ ∃ y < C,
         ⟪c.change (π₁ pr), π₂ (π₁ (π₂ pr) - 1), y⟫ ∈ C ∧
         π₂ (π₂ pr) = c.exs (π₁ pr) (π₂ (π₁ (π₂ pr) - 1)) ?[y]) ) := by
-  have hone (ys : V) (hl : len ys = 1) : ys = ?[ys.[0]] := by
-    obtain ⟨x, rfl⟩ := eq_singleton_iff_len_eq_one.mp hl
-    simp
   constructor
   · rintro ⟨param, p, y, rfl, hp, H⟩
+    have hone (ys : V) (hl : len ys = 1) : ys = ?[ys.[0]] := by
+      obtain ⟨x, rfl⟩ := eq_singleton_iff_len_eq_one.mp hl
+      simp
     refine ⟨by simpa using hp, ?_⟩
     rcases H with (⟨k, r, v, rfl, rfl⟩ | ⟨k, r, v, rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
       ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ |
@@ -1810,70 +1810,6 @@ variable {β}
 lemma graph_dom_uformula {p r} :
     c.Graph L param p r → IsUFormula L p := fun h ↦ Graph.case_iff.mp h |>.1
 
-lemma graph_rel_iff {k r v y} (hkr : L.IsRel k r) (hv : IsUTermVec L k v) :
-    c.Graph L param (^rel k r v) y ↔ y = c.rel param k r v := by
-  constructor
-  · intro h
-    rcases Graph.case_iff.mp h with ⟨_, (⟨k, r, v, H, rfl⟩ | ⟨_, _, _, H, _⟩ | ⟨H, _⟩ | ⟨H, _⟩ |
-      ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩)⟩
-    · rcases (by simpa [qqRel] using H) with ⟨rfl, rfl, rfl, rfl⟩; rfl
-    · simp [qqRel, qqNRel] at H
-    · simp [qqRel, qqVerum] at H
-    · simp [qqRel, qqFalsum] at H
-    · simp [qqRel, qqAnd] at H
-    · simp [qqRel, qqOr] at H
-    · simp [qqRel, qqAll] at H
-    · simp [qqRel, qqExs] at H
-  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp [hkr, hv], by disj 1; exact ⟨k, r, v, rfl, rfl⟩⟩
-
-lemma graph_nrel_iff {k r v y} (hkr : L.IsRel k r) (hv : IsUTermVec L k v) :
-    c.Graph L param (^nrel k r v) y ↔ y = c.nrel param k r v := by
-  constructor
-  · intro h
-    rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, H, _⟩ | ⟨_, _, _, H, rfl⟩ | ⟨H, _⟩ | ⟨H, _⟩ |
-      ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩)⟩
-    · simp [qqNRel, qqRel] at H
-    · rcases (by simpa [qqNRel] using H) with ⟨rfl, rfl, rfl, rfl⟩; rfl
-    · simp [qqNRel, qqVerum] at H
-    · simp [qqNRel, qqFalsum] at H
-    · simp [qqNRel, qqAnd] at H
-    · simp [qqNRel, qqOr] at H
-    · simp [qqNRel, qqAll] at H
-    · simp [qqNRel, qqExs] at H
-  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp [hkr, hv], by disj 2; exact ⟨k, r, v, rfl, rfl⟩⟩
-
-lemma graph_verum_iff {y} :
-    c.Graph L param ^⊤ y ↔ y = c.verum param := by
-  constructor
-  · intro h
-    rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨H, rfl⟩ | ⟨H, _⟩ |
-      ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩)⟩
-    · simp [qqVerum, qqRel] at H
-    · simp [qqVerum, qqNRel] at H
-    · rcases (by simpa [qqVerum] using H); rfl
-    · simp [qqVerum, qqFalsum] at H
-    · simp [qqVerum, qqAnd] at H
-    · simp [qqVerum, qqOr] at H
-    · simp [qqVerum, qqAll] at H
-    · simp [qqVerum, qqExs] at H
-  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp, by disj 3; exact ⟨rfl, rfl⟩⟩
-
-lemma graph_falsum_iff {y} :
-    c.Graph L param ^⊥ y ↔ y = c.falsum param := by
-  constructor
-  · intro h
-    rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨H, _⟩ | ⟨H, rfl⟩ |
-      ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩)⟩
-    · simp [qqFalsum, qqRel] at H
-    · simp [qqFalsum, qqNRel] at H
-    · simp [qqFalsum, qqVerum] at H
-    · rcases (by simpa [qqFalsum] using H); rfl
-    · simp [qqFalsum, qqAnd] at H
-    · simp [qqFalsum, qqOr] at H
-    · simp [qqFalsum, qqAll] at H
-    · simp [qqFalsum, qqExs] at H
-  · rintro rfl; exact (Graph.case_iff).mpr ⟨by simp, by disj 4; exact ⟨rfl, rfl⟩⟩
-
 lemma graph_rel {k r v} (hkr : L.IsRel k r) (hv : IsUTermVec L k v) :
     c.Graph L param (^rel k r v) (c.rel param k r v) :=
   (Graph.case_iff).mpr ⟨by simp [hkr, hv], by disj 1; exact ⟨k, r, v, rfl, rfl⟩⟩
@@ -1895,86 +1831,20 @@ lemma graph_and {p₁ p₂ r₁ r₂ : V} (hp₁ : IsUFormula L p₁) (hp₂ : I
     c.Graph L param (p₁ ^⋏ p₂) (c.and param p₁ p₂ r₁ r₂) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁, hp₂], by disj 5; exact ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩⟩
 
-lemma graph_and_inv {p₁ p₂ r : V} :
-    c.Graph L param (p₁ ^⋏ p₂) r → ∃ r₁ r₂, c.Graph L param p₁ r₁ ∧ c.Graph L param p₂ r₂ ∧ r =
-      c.and param p₁ p₂ r₁ r₂ := by
-  intro h
-  rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨H, _⟩ | ⟨H, _⟩ |
-    ⟨_, _, _, _, _, _, H, rfl⟩ | ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩)⟩
-  · simp [qqAnd, qqRel] at H
-  · simp [qqAnd, qqNRel] at H
-  · simp [qqAnd, qqVerum] at H
-  · simp [qqAnd, qqFalsum] at H
-  · rcases (by simpa [qqAnd] using H) with ⟨rfl, rfl, rfl⟩
-    exact ⟨_, _, by assumption, by assumption, rfl⟩
-  · simp [qqAnd, qqOr] at H
-  · simp [qqAnd, qqAll] at H
-  · simp [qqAnd, qqExs] at H
-
 lemma graph_or {p₁ p₂ r₁ r₂ : V} (hp₁ : IsUFormula L p₁) (hp₂ : IsUFormula L p₂)
     (h₁ : c.Graph L param p₁ r₁) (h₂ : c.Graph L param p₂ r₂) :
     c.Graph L param (p₁ ^⋎ p₂) (c.or param p₁ p₂ r₁ r₂) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁, hp₂], by disj 6; exact ⟨p₁, p₂, r₁, r₂, h₁, h₂, rfl, rfl⟩⟩
-
-lemma graph_or_inv {p₁ p₂ r : V} :
-    c.Graph L param (p₁ ^⋎ p₂) r → ∃ r₁ r₂, c.Graph L param p₁ r₁ ∧ c.Graph L param p₂ r₂ ∧ r =
-      c.or param p₁ p₂ r₁ r₂ := by
-  intro h
-  rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨H, _⟩ | ⟨H, _⟩ |
-    ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, H, rfl⟩ | ⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩)⟩
-  · simp [qqOr, qqRel] at H
-  · simp [qqOr, qqNRel] at H
-  · simp [qqOr, qqVerum] at H
-  · simp [qqOr, qqFalsum] at H
-  · simp [qqOr, qqAnd] at H
-  · rcases (by simpa [qqOr] using H) with ⟨rfl, rfl, rfl⟩
-    exact ⟨_, _, by assumption, by assumption, rfl⟩
-  · simp [qqOr, qqAll] at H
-  · simp [qqOr, qqExs] at H
 
 lemma graph_all {p₁ ys : V} (hp₁ : IsUFormula L p₁) (hl : len ys = c.allSize param p₁)
     (h₁ : ∀ i < c.allSize param p₁, c.Graph L (c.allChanges param i) p₁ ys.[i]) :
     c.Graph L param (^∀ p₁) (c.all param p₁ ys) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁], by disj 7; exact ⟨p₁, ys, ⟨hl, h₁⟩, rfl, rfl⟩⟩
 
-lemma graph_all_inv {p₁ r : V} :
-    c.Graph L param (^∀ p₁) r → ∃ ys, (len ys = c.allSize param p₁ ∧
-      ∀ i < c.allSize param p₁, c.Graph L (c.allChanges param i) p₁ ys.[i]) ∧ r = c.all param p₁ ys
-      := by
-  intro h
-  rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨H, _⟩ | ⟨H, _⟩ |
-    ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, H, rfl⟩ | ⟨_, _, _, H, _⟩)⟩
-  · simp [qqAll, qqRel] at H
-  · simp [qqAll, qqNRel] at H
-  · simp [qqAll, qqVerum] at H
-  · simp [qqAll, qqFalsum] at H
-  · simp [qqAll, qqAnd] at H
-  · simp [qqAll, qqOr] at H
-  · rcases (by simpa [qqAll] using H) with ⟨rfl, rfl⟩
-    exact ⟨_, by assumption, rfl⟩
-  · simp [qqAll, qqExs] at H
-
 lemma graph_ex {p₁ ys : V} (hp₁ : IsUFormula L p₁) (hl : len ys = c.exsSize param p₁)
     (h₁ : ∀ i < c.exsSize param p₁, c.Graph L (c.exsChanges param i) p₁ ys.[i]) :
     c.Graph L param (^∃ p₁) (c.exs param p₁ ys) :=
   (Graph.case_iff).mpr ⟨by simp [hp₁], by disj 8; exact ⟨p₁, ys, ⟨hl, h₁⟩, rfl, rfl⟩⟩
-
-lemma graph_ex_inv {p₁ r : V} :
-    c.Graph L param (^∃ p₁) r → ∃ ys, (len ys = c.exsSize param p₁ ∧
-      ∀ i < c.exsSize param p₁, c.Graph L (c.exsChanges param i) p₁ ys.[i]) ∧ r = c.exs param p₁ ys
-      := by
-  intro h
-  rcases Graph.case_iff.mp h with ⟨_, (⟨_, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨H, _⟩ | ⟨H, _⟩ |
-    ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, _, _, _, H, _⟩ | ⟨_, _, _, H, _⟩ | ⟨_, _, _, H, rfl⟩)⟩
-  · simp [qqExs, qqRel] at H
-  · simp [qqExs, qqNRel] at H
-  · simp [qqExs, qqVerum] at H
-  · simp [qqExs, qqFalsum] at H
-  · simp [qqExs, qqAnd] at H
-  · simp [qqExs, qqOr] at H
-  · simp [qqExs, qqAll] at H
-  · rcases (by simpa [qqExs] using H) with ⟨rfl, rfl⟩
-    exact ⟨_, by assumption, rfl⟩
 
 variable (param)
 
@@ -2072,74 +1942,6 @@ lemma result_defined : 𝚺ᴬ₁-Function₂ c.result L via β.result L := .mk 
 instance result_definable : 𝚺ᴬ_[0 + 1]-Function₂ c.result L := c.result_defined.to_definable
 
 end
-
-lemma uformula_result_induction {P : V → V → V → Prop}
-    (hP : LocallyDelta0 fun w : Fin 3 → V ↦ P (w 0) (w 1) (w 2))
-    (hRel : ∀ param k R v, L.IsRel k R → IsUTermVec L k v → P param (^rel k R v) (c.rel param k R
-      v))
-    (hNRel : ∀ param k R v, L.IsRel k R → IsUTermVec L k v → P param (^nrel k R v) (c.nrel param k
-      R v))
-    (hverum : ∀ param, P param ^⊤ (c.verum param))
-    (hfalsum : ∀ param, P param ^⊥ (c.falsum param))
-    (hand : ∀ param p q, IsUFormula L p → IsUFormula L q →
-      P param p (c.result L param p) → P param q (c.result L param q) → P param (p ^⋏ q) (c.and
-        param p q (c.result L param p) (c.result L param q)))
-    (hor : ∀ param p q, IsUFormula L p → IsUFormula L q →
-      P param p (c.result L param p) → P param q (c.result L param q) → P param (p ^⋎ q) (c.or
-        param p q (c.result L param p) (c.result L param q)))
-    (hall : ∀ param p, IsUFormula L p →
-      (∀ i < c.allSize param p,
-        P (c.allChanges param i) p (c.result L (c.allChanges param i) p)) →
-      P param (^∀ p) (c.result L param (^∀ p)))
-    (hexs : ∀ param p, IsUFormula L p →
-      (∀ i < c.exsSize param p,
-        P (c.exsChanges param i) p (c.result L (c.exsChanges param i) p)) →
-      P param (^∃ p) (c.result L param (^∃ p))) :
-    ∀ {param p : V}, IsUFormula L p → P param p (c.result L param p) := by
-  intro param p hp
-  have hQ : LocallyDelta0Pred fun p' ↦ ∀ d ≤ p, d + p' ≤ p → IsUFormula L p' →
-      P (c.iter param d) p' (c.result L (c.iter param d) p') := by
-    have v2 : ∀ i : Fin 2, LocallyDelta0Function fun w : Fin 2 → V ↦ w i :=
-      LocallyDelta0Function.var
-    have hi : LocallyDelta0Function fun w : Fin 2 → V ↦ c.iter param (w 0) :=
-      c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.const param) (v2 0)
-    have hR := hP.comp₃ hi (v2 1) ((c.result_locallyDelta0 L).comp₂ hi (v2 1))
-    have := LocallyDelta0.ball_le_function (LocallyDelta0Function.const p) <|
-      (LocallyDelta0.le (LocallyDelta0Function.add.comp₂ (v2 0) (v2 1))
-        (LocallyDelta0Function.const p)).imp <|
-      ((isUFormula_locallyDelta0 (L := L)).pred_comp (v2 1)).imp hR
-    exact this.of_iff fun w ↦ by simp
-  have : ∀ p', ∀ d ≤ p, d + p' ≤ p → IsUFormula L p' →
-      P (c.iter param d) p' (c.result L (c.iter param d) p') := by
-    apply LocallyDelta0Pred.order_induction hQ
-    intro p' ih d hd hdp hu
-    have hsub {p₁ e : V} (hp₁ : p₁ < p') (he : e ≤ 1) (hu₁ : IsUFormula L p₁) :
-        P (c.iter param (d + e)) p₁ (c.result L (c.iter param (d + e)) p₁) := by
-      have h₁ : d + e + p₁ ≤ p := add_add_le_of_lt he hp₁ hdp
-      exact ih p₁ hp₁ (d + e) (le_trans le_self_add h₁) h₁ hu₁
-    rcases IsUFormula.case hu with
-      (⟨k, R, v, hkR, hv, rfl⟩ | ⟨k, R, v, hkR, hv, rfl⟩ | rfl | rfl |
-        ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩)
-    · simpa [hkR, hv] using hRel (c.iter param d) k R v hkR hv
-    · simpa [hkR, hv] using hNRel (c.iter param d) k R v hkR hv
-    · simpa using hverum (c.iter param d)
-    · simpa using hfalsum (c.iter param d)
-    · simpa [c.result_and hp₁ hp₂] using hand (c.iter param d) p₁ p₂ hp₁ hp₂
-        (by simpa using hsub (by simp) zero_le hp₁) (by simpa using hsub (by simp) zero_le hp₂)
-    · simpa [c.result_or hp₁ hp₂] using hor (c.iter param d) p₁ p₂ hp₁ hp₂
-        (by simpa using hsub (by simp) zero_le hp₁) (by simpa using hsub (by simp) zero_le hp₂)
-    · refine hall (c.iter param d) p₁ hp₁ fun i hi ↦ ?_
-      rw [c.allSize_eq_one] at hi
-      rcases lt_one_iff_eq_zero.mp hi
-      have := hsub (by simp) le_rfl hp₁
-      rwa [c.iter_succ, ← c.allChanges_eq_change _ 0] at this
-    · refine hexs (c.iter param d) p₁ hp₁ fun i hi ↦ ?_
-      rw [c.exsSize_eq_one] at hi
-      rcases lt_one_iff_eq_zero.mp hi
-      have := hsub (by simp) le_rfl hp₁
-      rwa [c.iter_succ, ← c.exsChanges_eq_change _ 0] at this
-  have := this p 0 zero_le (by simp) hp
-  rwa [c.iter_zero] at this
 
 end Construction
 
@@ -2264,9 +2066,6 @@ lemma bv_locallyDelta0 : LocallyDelta0Function₁ (bv (V := V) L) :=
 
 @[simp] lemma bv_ex {p : V} (hp : IsUFormula L p) : bv L (^∃ p) = bv L p - 1 := by
   simp [bv, hp, construction]
-
-lemma bv_eq_of_not_isUFormula {p : V} (h : ¬IsUFormula L p) : bv L p = 0 :=
-  (construction L).result_prop_not _ h
 
 end bv
 
@@ -2510,90 +2309,6 @@ namespace UformulaRec1.Construction
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1 (Blueprint)
 
 variable {β : Blueprint} {c : Construction V β} {param : V}
-
-lemma semiformula_result_induction {P : V → V → V → V → Prop}
-    (hP : LocallyDelta0 fun w : Fin 4 → V ↦ P (w 0) (w 1) (w 2) (w 3))
-    (hRel : ∀ n param k R v, L.IsRel k R → IsSemitermVec L k n v → P param n (^rel k R v) (c.rel
-      param k R v))
-    (hNRel : ∀ n param k R v, L.IsRel k R → IsSemitermVec L k n v → P param n (^nrel k R v) (c.nrel
-      param k R v))
-    (hverum : ∀ n param, P param n ^⊤ (c.verum param))
-    (hfalsum : ∀ n param, P param n ^⊥ (c.falsum param))
-    (hand : ∀ n param p q, IsSemiformula L n p → IsSemiformula L n q →
-      P param n p (c.result L param p) → P param n q (c.result L param q) → P param n (p ^⋏ q)
-        (c.and param p q (c.result L param p) (c.result L param q)))
-    (hor : ∀ n param p q, IsSemiformula L n p → IsSemiformula L n q →
-      P param n p (c.result L param p) → P param n q (c.result L param q) → P param n (p ^⋎ q)
-        (c.or param p q (c.result L param p) (c.result L param q)))
-    (hall : ∀ n param p, IsSemiformula L (n + 1) p →
-      (∀ i < c.allSize param p,
-        P (c.allChanges param i) (n + 1) p (c.result L (c.allChanges param i) p)) →
-      P param n (^∀ p) (c.result L param (^∀ p)))
-    (hexs : ∀ n param p, IsSemiformula L (n + 1) p →
-      (∀ i < c.exsSize param p,
-        P (c.exsChanges param i) (n + 1) p (c.result L (c.exsChanges param i) p)) →
-      P param n (^∃ p) (c.result L param (^∃ p))) :
-    ∀ {param n p : V}, IsSemiformula L n p → P param n p (c.result L param p) := by
-  intro param n p hnp
-  have hQ : LocallyDelta0Pred fun p' ↦ ∀ d ≤ p, ∀ m ≤ n + p, d + p' ≤ p → m + p' ≤ n + p →
-      IsSemiformula L m p' → P (c.iter param d) m p' (c.result L (c.iter param d) p') := by
-    have v3 : ∀ i : Fin 3, LocallyDelta0Function fun w : Fin 3 → V ↦ w i :=
-      LocallyDelta0Function.var
-    have hi : LocallyDelta0Function fun w : Fin 3 → V ↦ c.iter param (w 1) :=
-      c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.const param) (v3 1)
-    have hR : LocallyDelta0 fun w : Fin 3 → V ↦
-        P (c.iter param (w 1)) (w 0) (w 2) (c.result L (c.iter param (w 1)) (w 2)) :=
-      (hP.comp (f := ![fun w : Fin 3 → V ↦ c.iter param (w 1), fun w ↦ w 0, fun w ↦ w 2,
-        fun w ↦ c.result L (c.iter param (w 1)) (w 2)])
-        (Fin.forall_fin_succ.mpr ⟨hi, Fin.forall_fin_succ.mpr ⟨v3 0, Fin.forall_fin_succ.mpr
-          ⟨v3 2, Fin.forall_fin_succ.mpr ⟨(c.result_locallyDelta0 L).comp₂ hi (v3 2),
-            finZeroElim⟩⟩⟩⟩)).of_iff fun w ↦ by simp
-    have h1 : LocallyDelta0 fun w : Fin 3 → V ↦ w 1 + w 2 ≤ p :=
-      LocallyDelta0.le (LocallyDelta0Function.add.comp₂ (v3 1) (v3 2))
-        (LocallyDelta0Function.const p)
-    have h2 : LocallyDelta0 fun w : Fin 3 → V ↦ w 0 + w 2 ≤ n + p :=
-      LocallyDelta0.le (LocallyDelta0Function.add.comp₂ (v3 0) (v3 2))
-        (LocallyDelta0Function.const (n + p))
-    have h3 : LocallyDelta0 fun w : Fin 3 → V ↦ IsSemiformula L (w 0) (w 2) :=
-      (isSemiformula_locallyDelta0 (L := L)).rel_comp₂ (v3 0) (v3 2)
-    have := LocallyDelta0.ball_le_function (LocallyDelta0Function.const p) <|
-      LocallyDelta0.ball_le_function (LocallyDelta0Function.const (n + p)) <|
-      h1.imp <| h2.imp <| h3.imp hR
-    exact this.of_iff fun w ↦ by simp
-  have : ∀ p', ∀ d ≤ p, ∀ m ≤ n + p, d + p' ≤ p → m + p' ≤ n + p →
-      IsSemiformula L m p' → P (c.iter param d) m p' (c.result L (c.iter param d) p') := by
-    apply LocallyDelta0Pred.order_induction hQ
-    intro p' ih d hd m hm hdp hmp h
-    have hsub {p₁ e : V} (hp₁ : p₁ < p') (he : e ≤ 1) (h₁ : IsSemiformula L (m + e) p₁) :
-        P (c.iter param (d + e)) (m + e) p₁ (c.result L (c.iter param (d + e)) p₁) := by
-      have h₂ : d + e + p₁ ≤ p := add_add_le_of_lt he hp₁ hdp
-      have h₃ : m + e + p₁ ≤ n + p := add_add_le_of_lt he hp₁ hmp
-      exact ih p₁ hp₁ (d + e) (le_trans le_self_add h₂) (m + e) (le_trans le_self_add h₃) h₂ h₃ h₁
-    rcases IsSemiformula.case_iff.mp h with
-      (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, h₁, h₂, rfl⟩ |
-        ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩)
-    · simpa [hR, hv.isUTerm] using hRel m (c.iter param d) k R v hR hv
-    · simpa [hR, hv.isUTerm] using hNRel m (c.iter param d) k R v hR hv
-    · simpa using hverum m (c.iter param d)
-    · simpa using hfalsum m (c.iter param d)
-    · simpa [h₁.isUFormula, h₂.isUFormula] using hand m (c.iter param d) p₁ p₂ h₁ h₂
-        (by simpa using hsub (by simp) zero_le (by simpa using h₁))
-        (by simpa using hsub (by simp) zero_le (by simpa using h₂))
-    · simpa [h₁.isUFormula, h₂.isUFormula] using hor m (c.iter param d) p₁ p₂ h₁ h₂
-        (by simpa using hsub (by simp) zero_le (by simpa using h₁))
-        (by simpa using hsub (by simp) zero_le (by simpa using h₂))
-    · refine hall m (c.iter param d) p₁ h₁ fun i hi ↦ ?_
-      rw [c.allSize_eq_one] at hi
-      rcases lt_one_iff_eq_zero.mp hi
-      have := hsub (by simp) le_rfl h₁
-      rwa [c.iter_succ, ← c.allChanges_eq_change _ 0] at this
-    · refine hexs m (c.iter param d) p₁ h₁ fun i hi ↦ ?_
-      rw [c.exsSize_eq_one] at hi
-      rcases lt_one_iff_eq_zero.mp hi
-      have := hsub (by simp) le_rfl h₁
-      rwa [c.iter_succ, ← c.exsChanges_eq_change _ 0] at this
-  have := this p 0 zero_le n le_self_add (by simp) le_rfl hnp
-  rwa [c.iter_zero] at this
 
 end UformulaRec1.Construction
 

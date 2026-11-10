@@ -7,11 +7,14 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounde
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
 /-!
-# Internal Tarski conditions for $\Delta_0$ satisfaction
+# The internal T-schema for prenex $\Sigma_1$ partial truth
 
 `psatDef` and `tvDef` express $\Delta_0$ satisfaction and the values of terms under an assignment
 coded by iterated `ppair`s. Their Tarski conditions are theorems of `𝗜𝚺₁`, so every internal
-theory containing `𝗜𝚺₁` proves their instances at arbitrary internal terms.
+theory containing `𝗜𝚺₁` proves their instances at arbitrary internal terms. Under the assignment
+term `assignment n`, which gives each bound variable `#i` the value `&i`, the internal theory proves
+that every internal $\Delta_0$ formula without free variables is equivalent to its satisfaction,
+and hence that every internal prenex $\Sigma_1$ sentence is equivalent to its partial truth.
 -/
 
 @[expose] public section
@@ -89,13 +92,6 @@ variable {n m : ℕ}
 end
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
-
-lemma tprovable_subst_of_models {k : ℕ} {φ : ArithmeticSemisentence k}
-    (h : ∀ (W : Type) [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin k → W), W ⊧/e φ)
-    (w : SemitermVec V ℒₒᵣ k 0) :
-    T.internalize V ⊢ (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst w :=
-  tprovable_subst_of_allClosure T w <| internal_provable_of_outer_provable <|
-    Entailment.WeakerThan.pbl <| complete 𝗜𝚺₁ _ fun W _ _ ↦ by simpa [models_iff] using h W
 
 lemma numeral_vec_two (a b : V) :
     (fun i ↦ (𝕹 (![a, b] i) : Term V ℒₒᵣ)) = ![𝕹 a, 𝕹 b] := by

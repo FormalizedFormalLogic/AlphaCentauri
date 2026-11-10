@@ -85,6 +85,15 @@ lemma provable_substNumerals_of_provable_allClosure {k : ℕ} (φ : ArithmeticSe
 
 variable [𝗜𝚺₁ ⪯ T]
 
+/-- A theorem of `𝗜𝚺₁`, given by its truth in every model, is internally provable at every
+vector of terms. -/
+lemma tprovable_subst_of_models {k : ℕ} {φ : ArithmeticSemisentence k}
+    (h : ∀ (W : Type) [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin k → W), W ⊧/e φ)
+    (w : SemitermVec V ℒₒᵣ k 0) :
+    T.internalize V ⊢ (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst w :=
+  tprovable_subst_of_allClosure T w <| internal_provable_of_outer_provable <|
+    Entailment.WeakerThan.pbl <| complete 𝗜𝚺₁ _ fun W _ _ ↦ by simpa [models_iff] using h W
+
 /-- A theorem of `𝗜𝚺₁`, given by its truth in every model, is internally provable at numerals. -/
 lemma tprovable_subst_numeral_of_models {k : ℕ} {φ : ArithmeticSemisentence k}
     (h : ∀ (W : Type) [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin k → W), W ⊧/e φ)

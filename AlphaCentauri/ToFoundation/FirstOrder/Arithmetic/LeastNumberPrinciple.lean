@@ -86,7 +86,7 @@ private def bexsBlock {ξ : Type} (k : ξ) {m : ℕ} :
 
 private lemma bexsBlock_boundedExistential {ξ : Type} (k : ξ) {m : ℕ} :
     ∀ (n : ℕ) {φ : ArithmeticSemiformula ξ (m + n)},
-      Semiformula.BoundedExistential 1 φ → Semiformula.BoundedExistential 1 (bexsBlock k n φ)
+      IsBoundedExistential 1 φ → IsBoundedExistential 1 (bexsBlock k n φ)
   | 0, _, h => h
   | n + 1, _, h => bexsBlock_boundedExistential k n (.bexsLT _ h)
 
@@ -162,7 +162,7 @@ private lemma open_translate {P : (W → RingOfDifferences V) → Prop} (hP : Is
 
 private lemma exists_e1 {n : ℕ} {Φ : (Fin (n + 1) → RingOfDifferences V) → Prop}
     (hΦ : IsOpen Φ) (B : RingOfDifferences V) :
-    ∃ (ε : ℕ → V) (φ : ArithmeticSemiformula ℕ 1), Semiformula.BoundedExistential 1 φ ∧
+    ∃ (ε : ℕ → V) (φ : ArithmeticSemiformula ℕ 1), IsBoundedExistential 1 φ ∧
       ∀ x : V, BoundedExists B Φ (of x) ↔ φ.Eval ![x] ε := by
   classical
   obtain ⟨b, hb⟩ := exists_forall_abs_lt_exists_sub B
@@ -217,10 +217,10 @@ predicates.
 - [Wil85]
 - [Smi93, Theorem 2.3] -/
 lemma leastNumberPrinciple_of_models_induction
-    [V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (Semiformula.BoundedExistential 1)] :
+    [V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (IsBoundedExistential 1)] :
     LeastNumberPrinciple (RingOfDifferences V) :=
   leastNumberPrinciple_of_boundedExists_induction fun hΦ B h0 hs t ↦
-    InductionScheme.succ_induction (C := Semiformula.BoundedExistential 1)
+    InductionScheme.succ_induction (C := IsBoundedExistential 1)
       (P := fun t ↦ BoundedExists B _ (of t)) (exists_e1 hΦ B) h0 hs t
 
 end FFL.FirstOrder.Arithmetic

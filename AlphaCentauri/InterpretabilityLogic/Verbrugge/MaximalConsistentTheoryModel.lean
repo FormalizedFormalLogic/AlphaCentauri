@@ -22,7 +22,7 @@ open Entailment Formula MaximalConsistentTheory
 
 namespace Verbrugge
 
-variable {α : Type*} [DecidableEq α] {𝔸 : Set (Formula α)} {A₀ : Formula α}
+variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α} {A₀ : Formula α}
 
 /-- The subformulas of `A₀` and their negations. -/
 def markers (A₀ : Formula α) : Finset (Formula α) :=
@@ -39,7 +39,7 @@ negation of one.
 
 - [MV20, Definition 9]
 -/
-def CountermodelWorld (𝔸 : Set (Formula α)) (A₀ : Formula α) : Type _ :=
+def CountermodelWorld (𝔸 : FormulaSet α) (A₀ : Formula α) : Type _ :=
   {Γ : MaximalConsistentTheory (Logic.ofAxioms 𝔸) // ∃ G ∈ markers A₀, G ∈ Γ ∧ □(∼G) ∈ Γ}
 
 /-- The generalised Veltman model on `CountermodelWorld 𝔸 A₀` in which `u ≺[w] V` holds when `u`
@@ -48,7 +48,7 @@ and the elements of `V` are successors of `w` and every `S`-assuring successor `
 
 - [MV20, Definition 9]
 -/
-def countermodel (𝔸 : Set (Formula α)) (A₀ : Formula α) [Nonempty (CountermodelWorld 𝔸 A₀)] :
+def countermodel (𝔸 : FormulaSet α) (A₀ : Formula α) [Nonempty (CountermodelWorld 𝔸 A₀)] :
     Model (CountermodelWorld 𝔸 A₀) α where
   Rel' w u := AssuringSuccessor ∅ w.1 u.1
   S' w u V := AssuringSuccessor ∅ w.1 u.1 ∧ (∀ v ∈ V, AssuringSuccessor ∅ w.1 v.1) ∧
@@ -256,12 +256,12 @@ namespace Logic.ofAxioms
 
 open Verbrugge Verbrugge.Model.World
 
-variable {α : Type*} [DecidableEq α] {𝔸 : Set (Formula α)} {A : Formula α}
+variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α} {A : Formula α}
 
 omit [DecidableEq α] in
 private lemma exists_neg_mem (h : ofAxioms 𝔸 ⊬ A) :
     ∃ Γ : MaximalConsistentTheory (ofAxioms 𝔸), ∼A ∈ Γ ∧ □(∼∼A) ∈ Γ := by
-  have hX : (insert (∼A) (insert (□(∼∼A)) ∅) : Set (Formula α)) *⊬[ofAxioms 𝔸] ⊥ := by
+  have hX : (insert (∼A) (insert (□(∼∼A)) ∅) : FormulaSet α) *⊬[ofAxioms 𝔸] ⊥ := by
     intro h₁;
     apply h;
     have h₂ : ofAxioms 𝔸 ⊢ □(∼∼A) 🡒 ∼∼A :=

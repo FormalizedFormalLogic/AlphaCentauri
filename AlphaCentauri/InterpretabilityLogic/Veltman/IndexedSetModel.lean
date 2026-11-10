@@ -164,7 +164,7 @@ instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsJ1 :=
 
 instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsIL := .of_isILMinus
 
-variable {𝔸 : Set (Formula α)} [Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ)] [ILMinusAdequate Φ]
+variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ)] [ILMinusAdequate Φ]
   [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] [ILMinusJ5 ⪯ ofAxiomsMinus 𝔸]
 
 /-- - [dJV90, Theorem 4.1]
@@ -235,7 +235,7 @@ namespace Logic.ofAxiomsMinus
 
 open Veltman Veltman.Model.World
 
-variable {α : Type*} [DecidableEq α] {𝔸 : Set (Formula α)} {Φ : Finset (Formula α)}
+variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α} {Φ : Finset (Formula α)}
   {A : Formula α}
 
 /-- If an extension of $\mathbf{IL}^-(\mathbf{J2}^+, \mathbf{J5})$ does not prove `A`, then `A`
@@ -247,7 +247,7 @@ lemma not_models_countermodel [ILMinusJ2Plus ⪯ ofAxiomsMinus 𝔸] [ILMinusJ5 
     [Entailment.Consistent (ofAxiomsMinus 𝔸)] (h : ofAxiomsMinus 𝔸 ⊬ A) :
     ¬countermodel (ofAxiomsMinus 𝔸) (ilMinusAdequateClosure {A}) ⊧ A := by
   intro hM;
-  have hX : ({∼A} : Set (Formula α)) *⊬[ofAxiomsMinus 𝔸] ⊥ := by
+  have hX : ({∼A} : FormulaSet α) *⊬[ofAxiomsMinus 𝔸] ⊥ := by
     intro h₁;
     apply h;
     have h₂ : ofAxiomsMinus 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;

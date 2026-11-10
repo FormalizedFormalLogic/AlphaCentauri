@@ -132,7 +132,7 @@ namespace Logic.ofAxiomsMinus
 
 open Verbrugge Verbrugge.Model Verbrugge.Model.World
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : Set (Formula α)} {A : Formula α}
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : FormulaSet α} {A : Formula α}
 
 /-- - [KO21, Proposition 2.7] -/
 theorem sound_verbrugge [M.IsILMinus] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxiomsMinus 𝔸 ⊢ A) :

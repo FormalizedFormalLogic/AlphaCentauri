@@ -227,7 +227,7 @@ namespace IL.Gentzen
 
 open Logic Logic.ofAxioms
 
-variable {𝔸 : Set (Formula α)} {A B C D X Y : Formula α}
+variable {𝔸 : FormulaSet α} {A B C D X Y : Formula α}
 
 private lemma rhd_trans_left (h : ofAxioms 𝔸 ⊢ A ▷ B) : ofAxioms 𝔸 ⊢ B ▷ C 🡒 A ▷ C := by
   have : ofAxioms 𝔸 ⊢ A ▷ B ⋏ B ▷ C 🡒 A ▷ C := axiomJ2;

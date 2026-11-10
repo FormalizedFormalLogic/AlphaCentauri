@@ -162,7 +162,7 @@ namespace MaximalConsistentSet
 
 open Logic
 
-variable {L : Logic α} {Φ : Finset (Formula α)} {X : Set (Formula α)}
+variable {L : Logic α} {Φ : Finset (Formula α)} {X : FormulaSet α}
   {A B C D E F : Formula α}
 
 section
@@ -185,7 +185,7 @@ instance : Finite (MaximalConsistentSet L Φ) :=
 lemma mem_of_mem (h : A ∈ Γ) : A ∈ Φ := Γ.subset h
 
 /-- The formulas of `Γ` together with the negations of the formulas in `Φ` outside `Γ`. -/
-def literals (Γ : MaximalConsistentSet L Φ) : Set (Formula α) := ↑Γ.set ∪ (∼·) '' ↑(Φ \ Γ.set)
+def literals (Γ : MaximalConsistentSet L Φ) : FormulaSet α := ↑Γ.set ∪ (∼·) '' ↑(Φ \ Γ.set)
 
 lemma mem_literals (h : A ∈ Γ) : A ∈ Γ.literals := .inl h
 
@@ -336,7 +336,7 @@ variable [Entailment.Cl L]
 -/
 lemma exists_successor_of_box_not_mem [L.ExtendsGL] [Adequate Φ] (h₁ : □A ∈ Φ) (h₂ : □A ∉ Γ) :
     ∃ Δ, Successor Γ Δ ∧ ({∼A} ∪ Δ.literals) *⊬[L] ⊥ := by
-  let X : Set (Formula α) := insert (∼A) <| insert (□A) <| {B | □B ∈ Γ} ∪ (□·) '' {B | □B ∈ Γ};
+  let X : FormulaSet α := insert (∼A) <| insert (□A) <| {B | □B ∈ Γ} ∪ (□·) '' {B | □B ∈ Γ};
   have hX : X *⊬[L] ⊥ := by
     intro h;
     apply h₂ <| (mem_iff_provable h₁).mpr _;
@@ -408,7 +408,7 @@ noncomputable def rhdDisj (Γ : MaximalConsistentSet L Φ) (F : Formula α) : Fo
 /-- The formulas `B` and `□B` with `□B ∈ Γ`, together with `C`, `□∼C`, `∼H` and `□∼H`, where `H` is
 `Γ.rhdDisj F`. -/
 noncomputable def criticalSet (Γ : MaximalConsistentSet L Φ) (F C : Formula α) :
-    Set (Formula α) :=
+    FormulaSet α :=
   insert (∼Γ.rhdDisj F) <| insert (□(∼Γ.rhdDisj F)) <| insert C <| insert (□(∼C)) <|
     {A | □A ∈ Γ} ∪ (□·) '' {A | □A ∈ Γ}
 
@@ -416,7 +416,7 @@ section
 
 open Logic.ofAxioms
 
-variable {𝔸 : Set (Formula α)} {Γ Δ : MaximalConsistentSet (ofAxioms 𝔸) Φ}
+variable {𝔸 : FormulaSet α} {Γ Δ : MaximalConsistentSet (ofAxioms 𝔸) Φ}
 
 
 lemma provable_rhd_of_inconsistent (h : Γ.criticalSet F C *⊢[ofAxioms 𝔸] ⊥) :
@@ -688,7 +688,7 @@ lemma CriticalSuccessor.weakCriticalSuccessor {L : Logic α} {Φ : Finset (Formu
     WeakCriticalSuccessor C Γ Δ :=
   ⟨h.toSuccessor, h.not_mem⟩
 
-variable {𝔸 : Set (Formula α)} {Φ : Finset (Formula α)} [ILMinusAdequate Φ]
+variable {𝔸 : FormulaSet α} {Φ : Finset (Formula α)} [ILMinusAdequate Φ]
   {Γ Δ : MaximalConsistentSet (ofAxiomsMinus 𝔸) Φ} {B D E F : Formula α} {S : Finset (Formula α)}
 
 private lemma exists_successor_of_box_imp_disj_not_mem (hB : IsRhdOperand Φ B)
@@ -698,10 +698,10 @@ private lemma exists_successor_of_box_imp_disj_not_mem (hB : IsRhdOperand Φ B)
       (∀ {P}, P ∈ Φ → ofAxiomsMinus 𝔸 ⊢ ∼S.disj 🡒 P → P ∈ Δ) ∧
       ∀ {P}, ofAxiomsMinus 𝔸 ⊢ ∼S.disj 🡒 ∼P → P ∉ Δ := by
   obtain ⟨Δ, hΔ, hc⟩ := exists_successor_of_box_not_mem (ILMinusAdequate.box_imp_disj_mem hB hS) h;
-  have hH : ({∼(B 🡒 S.disj)} : Set (Formula α)) *⊢[ofAxiomsMinus 𝔸] ∼(B 🡒 S.disj) :=
+  have hH : ({∼(B 🡒 S.disj)} : FormulaSet α) *⊢[ofAxiomsMinus 𝔸] ∼(B 🡒 S.disj) :=
     Context.by_axm rfl;
   have h₁ {P} (hP : ofAxiomsMinus 𝔸 ⊢ ∼S.disj 🡒 P) :
-      ({∼(B 🡒 S.disj)} : Set (Formula α)) *⊢[ofAxiomsMinus 𝔸] P := by
+      ({∼(B 🡒 S.disj)} : FormulaSet α) *⊢[ofAxiomsMinus 𝔸] P := by
     have := Context.of (Γ := {∼(B 🡒 S.disj)}) hP;
     cl_prover [hH, this];
   use Δ;
@@ -842,7 +842,7 @@ private lemma rhd_not_mem (hF : IsRhdOperand Φ F) (hΔ : WeakCriticalSuccessor 
 lemma exists_mem_not_mem (hF : IsRhdOperand Φ F) (hDE : D ▷ E ∈ Γ)
     (hΔ : WeakCriticalSuccessor F Γ Δ) (hD : D ∈ Δ) :
     ∃ Θ : MaximalConsistentSet (ofAxiomsMinus 𝔸) Φ, E ∈ Θ ∧ F ∉ Θ := by
-  have hX : (insert E {∼F} : Set (Formula α)) *⊬[ofAxiomsMinus 𝔸] ⊥ := by
+  have hX : (insert E {∼F} : FormulaSet α) *⊬[ofAxiomsMinus 𝔸] ⊥ := by
     intro h;
     apply rhd_not_mem hF hΔ hDE hD;
     have h₁ : ofAxiomsMinus 𝔸 ⊢ ∼F 🡒 E 🡒 ⊥ :=
@@ -1004,7 +1004,7 @@ lemma Successor.exists_successor_of_rhd_mem [Adequate Φ] [(ILMinusJ4 : Logic α
   use Θ;
   and_intros;
   · exact hΘ;
-  · have : ({∼∼E} : Set (Formula α)) *⊢[ofAxiomsMinus 𝔸] ∼∼E := Context.by_axm rfl;
+  · have : ({∼∼E} : FormulaSet α) *⊢[ofAxiomsMinus 𝔸] ∼∼E := Context.by_axm rfl;
     exact mem_of_provable hc hE.mem <| by cl_prover [this];
 
 end MaximalConsistentSet

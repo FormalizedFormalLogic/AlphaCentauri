@@ -250,7 +250,7 @@ namespace Logic.ofAxiomsMinus
 
 open Veltman Veltman.Model Veltman.Model.World
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : Set (Formula α)} {A : Formula α}
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : FormulaSet α} {A : Formula α}
 
 /-- - [KO21, Proposition 2.3] -/
 theorem sound [M.IsILMinus] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxiomsMinus 𝔸 ⊢ A) : M ⊧ A := by

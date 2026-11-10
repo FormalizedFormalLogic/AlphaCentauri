@@ -123,7 +123,7 @@ lemma box_iff_conj_image_box : L ⊢ □X.conj 🡘 (X.image (□·)).conj := by
     obtain ⟨B, hB, rfl⟩ := Finset.mem_image.mp h;
     exact box_mono <| left_Fconj_intro hB;
   · apply FConj_DT.mpr;
-    have h : ((X.image (□·) : Finset (Formula α)) : Set (Formula α)) *⊢[L] □X.toList.conj := by
+    have h : ((X.image (□·) : Finset (Formula α)) : FormulaSet α) *⊢[L] □X.toList.conj := by
       apply box_conj_of_forall;
       intro B hB;
       exact Context.by_axm <| by simpa using hB;
@@ -487,7 +487,7 @@ lemma CriticalSuccessor.exists_criticalSuccessor_box_subset (hE : IsRhdOperand �
     ∃ Θ, CriticalSuccessor E Γ Θ ∧ C ∈ Θ ∧ ∀ {D}, □D ∈ Δ → □D ∈ Θ := by
   let H := Γ.rhdDisj E;
   let P := (Δ.prebox.image (□·)).conj;
-  let Y : Set (Formula α) := insert (∼H) <| insert (□(∼H)) <| insert C <| insert P <|
+  let Y : FormulaSet α := insert (∼H) <| insert (□(∼H)) <| insert C <| insert P <|
     {A | □A ∈ Γ} ∪ (□·) '' {A | □A ∈ Γ};
   have hP {D} (hD : □D ∈ Δ) : 𝐈𝐋𝐌 ⊢ P 🡒 □D :=
     left_Fconj_intro <| Finset.mem_image_of_mem _ <| mem_prebox.mpr hD;
@@ -714,7 +714,7 @@ theorem complete (h : ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Mod
   by_contra hA;
   have : Entailment.Consistent (𝐈𝐋𝐌 : Logic α) := .of_unprovable hA;
   let Φ := mAdequateClosure (adequateClosure {A});
-  have hX : ({∼A} : Set (Formula α)) *⊬[𝐈𝐋𝐌] ⊥ := by
+  have hX : ({∼A} : FormulaSet α) *⊬[𝐈𝐋𝐌] ⊥ := by
     intro h₁;
     apply hA;
     have h₂ : 𝐈𝐋𝐌 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;

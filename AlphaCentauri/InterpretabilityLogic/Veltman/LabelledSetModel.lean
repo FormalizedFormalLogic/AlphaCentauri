@@ -130,7 +130,7 @@ end labelledModel
 
 namespace LabelledSet.Condition
 
-variable {𝔸 : Set (Formula α)} [ILMinusAdequate Φ]
+variable {𝔸 : FormulaSet α} [ILMinusAdequate Φ]
   {Γ Δ Θ : MaximalConsistentSet (ofAxiomsMinus 𝔸) Φ} {C F : Formula α}
 
 /-- Every successor of `Γ` is a weak `F'`-critical successor for some label `F'`, which is `F` if it
@@ -296,7 +296,7 @@ namespace Logic.ofAxiomsMinus
 
 open Veltman Veltman.Model.World
 
-variable {α : Type*} [DecidableEq α] {𝔸 : Set (Formula α)} {A : Formula α}
+variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α} {A : Formula α}
 
 /-- If `A` holds in the labelled model over the adequate closure of `{A}` for a condition `c`,
 then `ofAxiomsMinus 𝔸` proves `A`.
@@ -309,7 +309,7 @@ lemma provable_of_models_labelledModel
       labelledModel c ⊧ A) :
     ofAxiomsMinus 𝔸 ⊢ A := by
   by_contra hA;
-  have hX : ({∼A} : Set (Formula α)) *⊬[ofAxiomsMinus 𝔸] ⊥ := by
+  have hX : ({∼A} : FormulaSet α) *⊬[ofAxiomsMinus 𝔸] ⊥ := by
     intro h₁;
     apply hA;
     have h₂ : ofAxiomsMinus 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;

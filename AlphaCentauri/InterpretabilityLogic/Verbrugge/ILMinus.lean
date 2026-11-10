@@ -168,24 +168,8 @@ open Verbrugge Verbrugge.Model Verbrugge.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILMinusJ2.sound_verbrugge [M.IsILMinus] [M.IsJ2] : ILMinusJ2 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound_verbrugge <| by
-    rintro _ ⟨A, B, C, rfl⟩ x;
-    exact forces_axiomJ2
 
-theorem ILMinusJ2J4Plus.sound_verbrugge [M.IsILMinus] [M.IsJ2] [M.IsJ4Plus] :
-    ILMinusJ2J4Plus ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound_verbrugge <| by
-    rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, C, rfl⟩) x;
-    · exact forces_axiomJ2;
-    · exact forces_axiomJ4Plus;
 
-theorem ILMinusJ2J5.sound_verbrugge [M.IsILMinus] [M.IsJ2] [M.IsJ5] :
-    ILMinusJ2J5 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound_verbrugge <| by
-    rintro _ (⟨A, B, C, rfl⟩ | ⟨A, rfl⟩) x;
-    · exact forces_axiomJ2;
-    · exact forces_axiomJ5;
 
 theorem ILMinusJ2J4PlusJ5.sound_verbrugge [M.IsILMinus] [M.IsJ2] [M.IsJ4Plus] [M.IsJ5] :
     ILMinusJ2J4PlusJ5 ⊢ A → M ⊧ A :=
@@ -195,24 +179,8 @@ theorem ILMinusJ2J4PlusJ5.sound_verbrugge [M.IsILMinus] [M.IsJ2] [M.IsJ4Plus] [M
     · exact forces_axiomJ4Plus;
     · exact forces_axiomJ5;
 
-theorem ILMinusJ4.sound_verbrugge [M.IsILMinus] [M.IsJ4] : ILMinusJ4 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound_verbrugge <| by
-    rintro _ ⟨A, B, rfl⟩ x;
-    exact forces_axiomJ4
 
-theorem ILMinusJ4J5.sound_verbrugge [M.IsILMinus] [M.IsJ4] [M.IsJ5] :
-    ILMinusJ4J5 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound_verbrugge <| by
-    rintro _ (⟨A, B, rfl⟩ | ⟨A, rfl⟩) x;
-    · exact forces_axiomJ4;
-    · exact forces_axiomJ5;
 
-theorem ILMinusJ1J4.sound_verbrugge [M.IsILMinus] [M.IsJ1] [M.IsJ4] :
-    ILMinusJ1J4 ⊢ A → M ⊧ A :=
-  ofAxiomsMinus.sound_verbrugge <| by
-    rintro _ (⟨A, B, rfl⟩ | ⟨A, B, rfl⟩) x;
-    · exact forces_axiomJ1;
-    · exact forces_axiomJ4;
 
 theorem ILMinusJ1J4J5.sound_verbrugge [M.IsILMinus] [M.IsJ1] [M.IsJ4] [M.IsJ5] :
     ILMinusJ1J4J5 ⊢ A → M ⊧ A :=

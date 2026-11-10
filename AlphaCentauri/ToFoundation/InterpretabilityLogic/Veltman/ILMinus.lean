@@ -17,7 +17,7 @@ namespace FFL.InterpretabilityLogic
 
 namespace Veltman.Model
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {V : M.World → α → Prop}
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
 
 /-- `≺` is transitive and conversely well-founded, and `x ≺[w] y` implies `w ≺ x`.
 
@@ -52,21 +52,6 @@ instance [M.IsIL] : M.IsJ2 where
   s_trans := s_trans
 
 instance [M.IsIL] : M.IsJ5 := ⟨s_of_rel⟩
-
-instance [M.IsILMinus] : (M.overwrite V).IsILMinus where
-  toIsTrans := inferInstanceAs (IsTrans _ M.Rel)
-  toIsConverseWellFounded := inferInstanceAs (IsConverseWellFounded _ M.Rel)
-  rel_of_s_left := IsILMinus.rel_of_s_left (M := M)
-
-instance [M.IsJ1] : (M.overwrite V).IsJ1 := ⟨IsJ1.s_refl (M := M)⟩
-
-instance [M.IsJ4] : (M.overwrite V).IsJ4 := ⟨IsJ4.rel_of_s_right (M := M)⟩
-
-instance [M.IsJ2] : (M.overwrite V).IsJ2 where
-  rel_of_s_right := IsJ4.rel_of_s_right (M := M)
-  s_trans := IsJ2.s_trans (M := M)
-
-instance [M.IsJ5] : (M.overwrite V).IsJ5 := ⟨IsJ5.s_of_rel (M := M)⟩
 
 end Veltman.Model
 
@@ -257,150 +242,6 @@ theorem CL.sound [M.IsILMinus] [M.IsJ1] [M.IsJ2] : 𝐂𝐋 ⊢ A → M ⊧ A :=
     · exact forces_axiomJ2;
 
 end Logic
-
-/-! ### Frame correspondence -/
-
-namespace Veltman.Model
-
-open World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {a b c : α}
-
-/-- - [KO21, Proposition 3.2] -/
-theorem isJ1_iff_J1 : M.IsJ1 ↔ ∀ V, M.overwrite V ⊧ Axioms.J1 (#a) (#b) := by
-  constructor;
-  · intro _ V x;
-    exact forces_axiomJ1;
-  · intro h;
-    constructor;
-    intro w x Rwx;
-    obtain ⟨z, Swxz, hz⟩ := h (fun u _ ↦ u = x) w (fun _ _ ↦ id) x Rwx rfl;
-    rwa [show z = x from hz] at Swxz;
-
-/-- - [KO21, Proposition 3.18] -/
-theorem isJ5_iff_J5 : M.IsJ5 ↔ ∀ V, M.overwrite V ⊧ Axioms.J5 (#a) := by
-  constructor;
-  · intro _ V x;
-    exact forces_axiomJ5;
-  · intro h;
-    constructor;
-    intro w x y Rwx Rxy;
-    obtain ⟨z, Sxz, hz⟩ := h (fun u _ ↦ u = y) w x Rwx (forces_dia.mpr ⟨y, Rxy, rfl⟩);
-    rwa [show z = y from hz] at Sxz;
-
-variable [M.IsILMinus]
-
-/-- - [KO21, Proposition 3.8] -/
-theorem isJ4_iff_J4 (hab : a ≠ b) : M.IsJ4 ↔ ∀ V, M.overwrite V ⊧ Axioms.J4 (#a) (#b) := by
-  constructor;
-  · intro _ V x;
-    exact forces_axiomJ4;
-  · intro h;
-    constructor;
-    intro w x y Swxy;
-    obtain ⟨V, hV⟩ : ∃ V : M.World → α → Prop, ∀ u d, V u d ↔ d = a ∧ u = x ∨ d = b ∧ u = y :=
-      ⟨_, fun _ _ ↦ Iff.rfl⟩;
-    have h₁ : w ⊩[M.overwrite V] #a ▷ #b := by
-      intro u _ hu;
-      obtain rfl : u = x := by grind [(hV u a).mp hu];
-      use y;
-      and_intros;
-      · exact Swxy;
-      · exact (hV y b).mpr (by simp);
-    have h₂ : w ⊩[M.overwrite V] ◇#a :=
-      forces_dia.mpr ⟨x, IsILMinus.rel_of_s_left Swxy, (hV x a).mpr (by simp)⟩;
-    obtain ⟨u, Rwu, hu⟩ := forces_dia.mp <| h V w h₁ h₂;
-    obtain rfl : u = y := by grind [(hV u b).mp hu];
-    exact Rwu;
-
-/-- - [KO21, Proposition 3.8] -/
-theorem isJ4_iff_J4Plus (hab : a ≠ b) (hbc : b ≠ c) (hca : c ≠ a) :
-    M.IsJ4 ↔ ∀ V, M.overwrite V ⊧ Axioms.J4Plus (#a) (#b) (#c) := by
-  constructor;
-  · intro _ V x;
-    exact forces_axiomJ4Plus;
-  · intro h;
-    constructor;
-    intro w x y Swxy;
-    by_contra hwy;
-    obtain ⟨V, hV⟩ : ∃ V : M.World → α → Prop, ∀ u d, V u d ↔ d = a ∧ u = y ∨ d = c ∧ u = x :=
-      ⟨_, fun _ _ ↦ Iff.rfl⟩;
-    have h₁ : w ⊩[M.overwrite V] □(#a 🡒 #b) := by
-      intro u Rwu hu;
-      obtain rfl : u = y := by grind [(hV u a).mp hu];
-      exact absurd Rwu hwy;
-    have h₂ : w ⊩[M.overwrite V] #c ▷ #a := by
-      intro u _ hu;
-      obtain rfl : u = x := by grind [(hV u c).mp hu];
-      use y;
-      and_intros;
-      · exact Swxy;
-      · exact (hV y a).mpr (by simp);
-    obtain ⟨z, -, hz⟩ :=
-      h V w h₁ h₂ x (IsILMinus.rel_of_s_left Swxy) ((hV x c).mpr (by simp));
-    grind [(hV z b).mp hz];
-
-/-- - [KO21, Proposition 3.15] -/
-theorem isJ2_iff_J2 (hab : a ≠ b) (hbc : b ≠ c) (hca : c ≠ a) :
-    M.IsJ2 ↔ ∀ V, M.overwrite V ⊧ Axioms.J2 (#a) (#b) (#c) := by
-  constructor;
-  · intro _ V x;
-    exact forces_axiomJ2;
-  · intro h;
-    have rel_of_s_right {w x y : M.World} (Swxy : x ≺[w] y) : w ≺ y := by
-      by_contra hwy;
-      obtain ⟨V, hV⟩ : ∃ V : M.World → α → Prop, ∀ u d, V u d ↔ d = a ∧ u = x ∨ d = b ∧ u = y :=
-        ⟨_, fun _ _ ↦ Iff.rfl⟩;
-      have h₁ : w ⊩[M.overwrite V] #a ▷ #b ⋏ #b ▷ #c := by
-        apply forces_and.mpr;
-        and_intros;
-        · intro u _ hu;
-          obtain rfl : u = x := by grind [(hV u a).mp hu];
-          use y;
-          and_intros;
-          · exact Swxy;
-          · exact (hV y b).mpr (by simp);
-        · intro u Rwu hu;
-          obtain rfl : u = y := by grind [(hV u b).mp hu];
-          exact absurd Rwu hwy;
-      obtain ⟨z, -, hz⟩ := h V w h₁ x (IsILMinus.rel_of_s_left Swxy) ((hV x a).mpr (by simp));
-      grind [(hV z c).mp hz];
-    have s_trans {w x y z : M.World} (Swxy : x ≺[w] y) (Swyz : y ≺[w] z) : x ≺[w] z := by
-      obtain ⟨V, hV⟩ : ∃ V : M.World → α → Prop,
-          ∀ u d, V u d ↔ d = a ∧ u = x ∨ d = b ∧ u = y ∨ d = c ∧ u = z :=
-        ⟨_, fun _ _ ↦ Iff.rfl⟩;
-      have h₁ : w ⊩[M.overwrite V] #a ▷ #b ⋏ #b ▷ #c := by
-        apply forces_and.mpr;
-        and_intros;
-        · intro u _ hu;
-          obtain rfl : u = x := by grind [(hV u a).mp hu];
-          use y;
-          and_intros;
-          · exact Swxy;
-          · exact (hV y b).mpr (by simp);
-        · intro u _ hu;
-          obtain rfl : u = y := by grind [(hV u b).mp hu];
-          use z;
-          and_intros;
-          · exact Swyz;
-          · exact (hV z c).mpr (by simp);
-      obtain ⟨u, Swxu, hu⟩ := h V w h₁ x (IsILMinus.rel_of_s_left Swxy) ((hV x a).mpr (by simp));
-      obtain rfl : u = z := by grind [(hV u c).mp hu];
-      exact Swxu;
-    exact { rel_of_s_right, s_trans }
-
-/-- - [KO21, Proposition 3.15] -/
-theorem isJ2_iff_J2Plus (hab : a ≠ b) (hbc : b ≠ c) (hca : c ≠ a) :
-    M.IsJ2 ↔ ∀ V, M.overwrite V ⊧ Axioms.J2Plus (#a) (#b) (#c) := by
-  constructor;
-  · intro _ V x;
-    exact forces_axiomJ2Plus;
-  · intro h;
-    apply (isJ2_iff_J2 hab hbc hca).mpr;
-    intro V x;
-    exact Logic.ILMinus.sound (M := M.overwrite V) Logic.ofAxiomsMinus.J2_of_J2Plus x (h V x);
-
-end Veltman.Model
 
 section Consistency
 

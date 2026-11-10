@@ -122,9 +122,6 @@ lemma exp_le_of_mem {i a : V} (h : i ∈ a) : Exp.exp i ≤ a := LenBit.le h
 
 lemma lt_of_mem {i a : V} (h : i ∈ a) : i < a := lt_of_lt_of_le (lt_exp i) (exp_le_of_mem h)
 
-lemma not_mem_of_lt_exp {i a : V} (h : a < Exp.exp i) : i ∉ a := fun H ↦ by
-  have := lt_of_le_of_lt (exp_le_of_mem H) h; simp at this
-
 @[definability]
 lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_ball_mem_zero
     {Γ} {k : ℕ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
@@ -195,10 +192,6 @@ lemma mem_iff_mul_exp_add_exp_add {i a : V} :
     i ∈ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + Exp.exp i + r := by
   simpa [mem_iff_bit, exp_succ] using! lenbit_iff_add_mul (exp_pow2 i) (a := a)
 
-lemma not_mem_iff_mul_exp_add {i a : V} :
-    i ∉ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + r := by
-  simpa [mem_iff_bit, exp_succ] using! not_lenbit_iff_add_mul (exp_pow2 i) (a := a)
-
 end mem
 
 section finiteSet
@@ -250,8 +243,6 @@ scoped instance : LawfulSingleton V V where
   · simp only [bitRemove, h, ↓reduceIte, ne_eq, iff_and_self]
     rintro _ rfl; contradiction
 
-lemma not_mem_bitRemove_self (i a : V) : i ∉ bitRemove i a := by simp
-
 lemma insert_graph (b i a : V) :
     b = insert i a ↔ (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e ≤ b, e = Exp.exp i ∧ b = a + e) :=
   ⟨by rintro rfl; by_cases hi : i ∈ a <;> simp [hi, insert, bitInsert],
@@ -275,9 +266,6 @@ lemma insert_le_of_le_of_le {i j a b : V} (hij : i ≤ j) (hab : a ≤ b) :
   by_cases hi : i ∈ a
   · simpa [hi] using le_trans hab (by simp)
   · simpa [hi] using add_le_add hab (exp_monotone_le.mpr hij)
-
-lemma one_eq_singleton : (1 : V) = {∅} := by
-  simp [singleton_eq_insert, insert, bitInsert, emptyset_def]
 
 @[simp] lemma mem_singleton_iff {i j : V} : i ∈ ({j} : V) ↔ i = j := by
   simp [singleton_eq_insert, -insert_empty_eq]
@@ -307,9 +295,6 @@ lemma le_log_of_mem {i a : V} (h : i ∈ a) : i ≤ log a :=
 
 lemma succ_mem_iff_mem_div_two {i a : V} : i + 1 ∈ a ↔ i ∈ a / 2 := by
   simp [mem_iff_bit, Bit, LenBit.iff_rem, exp_succ, Arithmetic.div_mul]
-
-lemma lt_length_of_mem {i a : V} (h : i ∈ a) : i < ‖a‖ := by
-  simpa [length_of_pos (pos_of_nonempty h), ← le_iff_lt_succ] using le_log_of_mem h
 
 lemma lt_exp_iff {a i : V} : a < Exp.exp i ↔ ∀ j ∈ a, j < i :=
   ⟨fun h j hj ↦ exp_monotone.mp <| lt_of_le_of_lt (exp_le_of_mem hj) h,
@@ -375,8 +360,6 @@ noncomputable def under (a : V) : V := Exp.exp a - 1
       _ = i + (j - (i + 1)) + 1 := by simp [add_assoc, ← Arithmetic.sub_sub]
     rw [this]; exact mem_exp_add_succ_sub_one i _
 
-lemma not_mem_under_self (i : V) : i ∉ under i := by simp
-
 private lemma under_graph (x y : V) : y = under x ↔ y + 1 = Exp.exp x := by
   constructor
   · rintro rfl; simp [under, sub_add_self_of_le]
@@ -439,14 +422,10 @@ lemma le_of_subset {a b : V} (h : a ⊆ b) : a ≤ b := le_of_subset_of_le (c :=
 lemma mem_ext {a b : V} (h : ∀ i, i ∈ a ↔ i ∈ b) : a = b :=
   le_antisymm (le_of_subset fun i hi ↦ (h i).mp hi) (le_of_subset fun i hi ↦ (h i).mpr hi)
 
-lemma mem_ext_iff {a b : V} : a = b ↔ ∀ i, i ∈ a ↔ i ∈ b := ⟨by rintro rfl; simp, mem_ext⟩
-
-lemma nonempty_of_pos {a : V} (h : 0 < a) : ∃ i, i ∈ a := ⟨log a, log_mem_of_pos h⟩
-
 lemma eq_empty_or_nonempty (a : V) : a = ∅ ∨ ∃ i, i ∈ a := by
   rcases Arithmetic.zero_le a with (rfl | pos)
   · simp [emptyset_def]
-  · exact Or.inr <| nonempty_of_pos pos
+  · exact Or.inr ⟨log a, log_mem_of_pos pos⟩
 
 lemma nonempty_iff {s : V} : s ≠ ∅ ↔ ∃ x, x ∈ s := by
   rcases eq_empty_or_nonempty s with (rfl | hy)
@@ -494,7 +473,9 @@ variable {P : V → Prop}
 - [HP98, Theorem I.1.36] -/
 theorem finset_comprehension (hP : 𝚺ᴬ₀.DefinablePred P) (a : V) :
     ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i := by
-  have hs : ∀ i < a, P i → i ∈ under a := fun i hi _ ↦ by simpa [mem_under_iff] using hi
+  have hs : ∀ i < a, P i → i ∈ under a := by
+    intro i hi _
+    simpa [mem_under_iff] using hi
   have : 𝚺ᴬ₀.DefinablePred (fun s : V ↦ ∀ i < a, P i → i ∈ s) := by
     apply Bounding.HierarchySymbol.Definable.arithmetic_ball_blt
     · simp
@@ -515,21 +496,6 @@ theorem finset_comprehension (hP : 𝚺ᴬ₀.DefinablePred P) (a : V) :
   · intro i hi
     exact ⟨this i hi, ht i hi⟩
 
-theorem finset_comprehension! (hP : 𝚺ᴬ₀.DefinablePred P) (a : V) :
-    ∃! s, s < Exp.exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
-  obtain ⟨s, hs, Hs⟩ := finset_comprehension hP a
-  apply ExistsUnique.intro s ⟨hs, Hs⟩
-  rintro t ⟨ht, Ht⟩
-  apply mem_ext
-  intro i
-  constructor
-  · intro hi
-    have hin : i < a := exp_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) ht)
-    exact (Hs i hin).mpr ((Ht i hin).mp hi)
-  · intro hi
-    have hin : i < a := exp_monotone.mp (lt_of_le_of_lt (exp_le_of_mem hi) hs)
-    exact (Ht i hin).mpr ((Hs i hin).mp hi)
-
 theorem finite_comprehension! (hP : 𝚺ᴬ₀.DefinablePred P) (fin : ∃ m, ∀ i, P i → i < m) :
     ∃! s : V, ∀ i, i ∈ s ↔ P i := by
   obtain ⟨m, hm⟩ := fin
@@ -542,13 +508,6 @@ theorem finite_comprehension! (hP : 𝚺ᴬ₀.DefinablePred P) (fin : ∃ m, �
   apply mem_ext
   intro i
   simp [H, H']
-
-/-- The set given by `finite_comprehension!` lies below `Exp.exp m` for a bound `m` of `P`. -/
-theorem finite_comprehension!_bound {m : V} (hP : 𝚺ᴬ₀.DefinablePred P)
-    (hm : ∀ i, P i → i < m) :
-    Classical.choose! (finite_comprehension! hP ⟨m, hm⟩) < Exp.exp m :=
-  lt_of_lt_log (exp_pos m) fun i himem ↦ (log_exponential m).symm ▸
-    hm i ((Classical.choose!_spec (finite_comprehension! hP ⟨m, hm⟩) i).mp himem)
 
 end comprehension
 

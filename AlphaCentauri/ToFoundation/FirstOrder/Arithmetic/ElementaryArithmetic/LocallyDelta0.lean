@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bit
 
 /-!
 # Relations that are $\Delta_0$ below every bound

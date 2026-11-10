@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.HFS.Basic
 
 /-!
 # Sequences in models of $\mathsf{EA}$
@@ -98,9 +98,6 @@ noncomputable def Seq.nth {s : V} (h : Seq s) {x : V} (hx : x < lh s) : V :=
 @[simp] lemma Seq.nth_mem {s : V} (h : Seq s) {x : V} (hx : x < lh s) :
     ⟪x, h.nth hx⟫ ∈ s := Classical.choose!_spec (h.nth_exists_uniq hx)
 
-lemma Seq.nth_uniq {s : V} (h : Seq s) {x y : V} (hx : x < lh s) (hy : ⟪x, y⟫ ∈ s) : y = h.nth hx :=
-    (h.nth_exists_uniq hx).unique hy (by simp)
-
 @[simp] lemma Seq.nth_lt {s : V} (h : Seq s) {x} (hx : x < lh s) : h.nth hx < s :=
     lt_of_mem_rng (h.nth_mem hx)
 
@@ -158,9 +155,6 @@ scoped macro_rules
     simpa using Eq.symm <| Seq.domain_eq (V := V) (s := ∅) (by simp)
   exact under_inj.mp this
 
-lemma Seq.isempty_of_lh_eq_zero {s : V} (Hs : Seq s) (h : lh s = 0) : s = ∅ := by
-  simpa [h] using Hs.domain_eq
-
 @[simp] lemma Seq.subset_seqCons (s x : V) : s ⊆ s ⁀' x := by simp [seqCons]
 
 lemma Seq.lt_seqCons {s} (hs : Seq s) (x : V) : s < s ⁀' x :=
@@ -192,7 +186,8 @@ lemma Seq.mem_seqCons_iff_of_lt {s x z i : V} (hi : i < lh s) : ⟪i, x⟫ ∈ s
   suffices i = lh s → x = z → ⟪i, x⟫ ∈ s by simpa [seqCons, hi]
   rintro rfl; simp at hi
 
-@[simp] lemma lh_not_mem {s} (Ss : Seq s) (x : V) : ⟪lh s, x⟫ ∉ s := fun h ↦ by
+@[simp] lemma lh_not_mem {s} (Ss : Seq s) (x : V) : ⟪lh s, x⟫ ∉ s := by
+  intro h
   have := Ss.lt_lh_of_mem h; simp at this
 
 section
@@ -213,9 +208,6 @@ instance seqCons_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₂ (seqCons : V → V → V) := seqCons_definable.of_zero
 
 @[simp] lemma natCast_empty : ((∅ : ℕ) : V) = ∅ := by simp [emptyset_def]
-
-lemma seqCons_absolute (s a : ℕ) : ((s ⁀' a : ℕ) : V) = (s : V) ⁀' (a : V) := by
-  simpa using DefinedFunction.sigmaZero_absolute_func V seqCons_defined seqCons_defined ![s, a]
 
 end
 
@@ -253,14 +245,6 @@ lemma Seq.eq_of_eq_of_subset {s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂)
 lemma subset_pair {s t : V} (h : ∀ i x, ⟪i, x⟫ ∈ s → ⟪i, x⟫ ∈ t) : s ⊆ t := by
   intro u hu
   simpa using h (π₁ u) (π₂ u) (by simpa using hu)
-
-lemma Seq.lh_ext {s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂) (h : lh s₁ = lh s₂)
-    (H : ∀ i x₁ x₂, ⟪i, x₁⟫ ∈ s₁ → ⟪i, x₂⟫ ∈ s₂ → x₁ = x₂) : s₁ = s₂ :=
-  H₁.eq_of_eq_of_subset H₂ h <| subset_pair <| by
-      intro i x hx
-      have hi : i < lh s₂ := by simpa [← h] using H₁.lt_lh_of_mem hx
-      rcases H i _ _ hx (H₂.nth_mem hi)
-      simp
 
 @[simp] lemma Seq.seqCons_ext {a₁ a₂ s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂) :
     s₁ ⁀' a₁ = s₂ ⁀' a₂ ↔ a₁ = a₂ ∧ s₁ = s₂ :=
@@ -359,24 +343,6 @@ instance mkSeq₂_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (fun x y : V ↦
 
 end
 
-theorem sigmaZero_skolem_seq {R : V → V → Prop} (hR : 𝚺ᴬ₀-Relation R) {l B : V}
-    (H : ∀ x < l, ∃ y < B, R x y) :
-    ∃ s, Seq s ∧ lh s = l ∧ ∀ i x, ⟪i, x⟫ ∈ s → R i x := by
-  obtain ⟨s, ms, sdom, h⟩ := sigmaZero_skolem hR (B := B) (s := under l)
-    (by simpa using H)
-  have : Seq s := ⟨ms, l, sdom⟩
-  exact ⟨s, this, by simpa [this.domain_eq] using sdom, h⟩
-
-theorem sigmaZero_skolem_seq! {R : V → V → Prop} (hR : 𝚺ᴬ₀-Relation R) {l B : V}
-    (H : ∀ x < l, ∃! y, R x y) (hB : ∀ x < l, ∀ y, R x y → y < B) :
-    ∃! s, Seq s ∧ lh s = l ∧ ∀ i x, ⟪i, x⟫ ∈ s → R i x := by
-  obtain ⟨s, Ss, rfl, hs⟩ := sigmaZero_skolem_seq hR (B := B)
-    fun x hx ↦ (H x hx).exists.elim fun y hy ↦ ⟨y, hB x hx y hy, hy⟩
-  apply ExistsUnique.intro s ⟨Ss, rfl, hs⟩
-  rintro s' ⟨Ss', hss', hs'⟩
-  exact Seq.lh_ext Ss' Ss hss'
-    (fun i x₁ x₂ h₁ h₂ ↦ H i (Ss.lt_lh_of_mem h₂) |>.unique (hs' i x₁ h₁) (hs i x₂ h₂))
-
 section seqToVec
 
 noncomputable def vecToSeq : {n : ℕ} → (Fin n → V) → V
@@ -397,14 +363,6 @@ noncomputable def vecToSeq : {n : ℕ} → (Fin n → V) → V
   induction n with
   | zero => simp [vecToSeq]
   | succ n ih => simp [vecToSeq, *]
-
-lemma mem_vectoSeq {n : ℕ} (v : Fin n → V) (i : Fin n) : ⟪(i : V), v i⟫ ∈ vecToSeq v := by
-  induction n with
-  | zero => exact i.elim0
-  | succ n ih =>
-    cases i using Fin.lastCases with
-    | last => simp [vecToSeq, mem_seqCons_iff]
-    | cast i => simpa [vecToSeq, mem_seqCons_iff] using Or.inr <| ih (v ·.castSucc) i
 
 end seqToVec
 

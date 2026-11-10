@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bit
 public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 
 /-!
@@ -150,8 +150,6 @@ lemma insert_eq_union_singleton (a s : V) : insert a s = {a} ∪ s := mem_ext (f
 
 instance : Bounded₂ ((· ∪ ·) : V → V → V) := ⟨‘x y. 2 * (x + y)’, fun _ ↦ by simp⟩
 
-lemma union_comm (a b : V) : a ∪ b = b ∪ a := mem_ext (by simp [or_comm])
-
 @[simp] lemma union_succ_union_left (a b : V) : a ⊆ a ∪ b := by intro x hx; simp [hx]
 
 @[simp] lemma union_succ_union_right (a b : V) : b ⊆ a ∪ b := by intro x hx; simp [hx]
@@ -236,9 +234,6 @@ lemma mem_product_iff' {x a b : V} : x ∈ a ×ʰᶠ b ↔ π₁ x ∈ a ∧ π�
 @[simp] lemma pair_mem_product_iff {x y a b : V} : ⟪x, y⟫ ∈ a ×ʰᶠ b ↔ x ∈ a ∧ y ∈ b := by
   simp [mem_product_iff']
 
-lemma pair_mem_product {x y a b : V} (hx : x ∈ a) (hy : y ∈ b) : ⟪x, y⟫ ∈ a ×ʰᶠ b := by
-  simpa [mem_product_iff] using ⟨hx, hy⟩
-
 private lemma product_graph {u a b : V} : u = a ×ʰᶠ b ↔
     ∀ x < u + (a + b + 1) ^ 2, (x ∈ u ↔ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫) :=
   ⟨by rintro rfl x _; simp [mem_product_iff], by
@@ -265,32 +260,6 @@ instance product_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 
 @[simp] lemma product_zero {a : V} : a ×ʰᶠ ∅ = ∅ := by
   refine mem_ext (fun i ↦ ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩) <;> simp_all [mem_product_iff]
-
-lemma product_bound {a b : V} : a ×ʰᶠ b < Exp.exp ((log a + log b + 1) ^ 2 + 1) := by
-  unfold product
-  have : 𝚺ᴬ₀-Predicate fun x ↦ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫ := by definability
-  apply finite_comprehension!_bound (m := (log a + log b + 1) ^ 2 + 1) this
-  rintro i ⟨y, hymem, z, hzmem, rfl⟩
-  apply le_log_of_mem at hymem
-  apply le_log_of_mem at hzmem
-  calc
-    ⟪y, z⟫ ≤ (y + z + 1) ^ 2 := pair_polybound y z
-    _ ≤ (log a + log b + 1) ^ 2 := sq_le_sq.mpr (add_le_add (add_le_add hymem hzmem) (le_refl 1))
-    _ < (log a + log b + 1) ^ 2 + 1 := by aesop
-
-/-- A weaker upper bound than `product_bound`. -/
-lemma product_bound' {a b : V} : a ×ʰᶠ b < Exp.exp ((a + b + 1) ^ 2) := by
-  by_cases hpos : 0 < a ∧ 0 < b
-  · have : (log a + log b + 1) ^ 2 + 1 ≤ (a + b + 1) ^ 2 :=
-      lt_iff_succ_le.mp (sq_lt_sq.mpr (add_lt_add_left (add_lt_add_of_lt_of_lt
-        (log_lt_self_of_pos hpos.1) (log_lt_self_of_pos hpos.2)) 1))
-    exact lt_of_lt_of_le (product_bound) (exp_monotone_le.mpr this)
-  · apply not_and_or.mp at hpos
-    rcases hpos with (ha | hb)
-    · simp only [(by aesop : a = 0), ← emptyset_def, zero_product]
-      exact exp_pos ((∅ + b + 1) ^ 2)
-    · simp only [(by aesop : b = 0), ← emptyset_def, product_zero]
-      exact exp_pos ((a + ∅ + 1) ^ 2)
 
 end product
 
@@ -534,7 +503,8 @@ lemma IsMapping.insert {x y m : V}
   simpa [insert_eq_union_singleton]
   using IsMapping.union_of_disjoint_domain (by simp) h (by simpa)
 
-lemma IsMapping.of_subset {m m' : V} (h : IsMapping m) (ss : m' ⊆ m) : IsMapping m' := fun x hx ↦ by
+lemma IsMapping.of_subset {m m' : V} (h : IsMapping m) (ss : m' ⊆ m) : IsMapping m' := by
+  intro x hx
   rcases mem_domain_iff.mp hx with ⟨y, hy⟩
   have : ∃! y, ⟪x, y⟫ ∈ m := h x (domain_subset_domain_of_subset ss hx)
   exact ExistsUnique.intro y hy (fun y' hy' ↦ this.unique (ss hy') (ss hy))
@@ -687,83 +657,6 @@ theorem insert_induction {P : V → Prop} (hP : 𝚺ᴬ₀-Predicate P)
     · exact hempty
     · simpa [insert_remove hx] using
         hinsert x (bitRemove x s) (by simp) (IH _ (bitRemove_lt_of_mem hx))
-
-theorem sigmaZero_skolem {R : V → V → Prop} (hR : 𝚺ᴬ₀-Relation R) {s B : V}
-    (H : ∀ x ∈ s, ∃ y < B, R x y) :
-    ∃ f, IsMapping f ∧ domain f = s ∧ ∀ x y, ⟪x, y⟫ ∈ f → R x y := by
-  have : ∀ u, u ⊆ s → ∃ f < Exp.exp ⟪s, B⟫, IsMapping f ∧ domain f = u ∧
-      ∀ x < f, ∀ y < f, ⟪x, y⟫ ∈ f → R x y := by
-    intro u
-    induction u using insert_induction
-    · definability
-    case hempty =>
-      intro _
-      use ∅
-      and_intros
-      · simp [emptyset_def]
-      · simp
-      · simp
-      · intro x hx
-        simp [emptyset_def] at hx
-    case hinsert a u ha ih =>
-      intro hu
-      obtain ⟨f, hf, mf, rfl, hRf⟩ := ih (subset_trans (susbset_insert a u) hu)
-      obtain ⟨b, hb, hab⟩ := H a (hu (by simp))
-      have hlt : ⟪a, b⟫ < ⟪s, B⟫ :=
-        pair_lt_pair (lt_of_mem (hu (by simp))) hb
-      use insert ⟪a, b⟫ f
-      and_intros
-      · apply lt_exp_iff.mpr
-        intro j hj
-        rcases mem_bitInsert_iff.mp hj with (rfl | hj)
-        · exact hlt
-        · exact lt_exp_iff.mp hf j hj
-      · exact mf.insert (by simpa using ha)
-      · simp
-      · intro x _ y _ hxy
-        rcases (show x = a ∧ y = b ∨ ⟪x, y⟫ ∈ f by simpa using hxy) with (⟨rfl, rfl⟩ | h)
-        · exact hab
-        · exact hRf x (lt_of_mem_dom h) y (lt_of_mem_rng h) h
-  obtain ⟨f, _, mf, hdom, hf⟩ := this s (subset_refl s)
-  use f
-  exact ⟨mf, hdom, fun x y hxy ↦ hf x (lt_of_mem_dom hxy) y (lt_of_mem_rng hxy) hxy⟩
-
-theorem sigmaZero_replacement {f : V → V} (hf : 𝚺ᴬ₀-Function₁ f) {s B : V}
-    (hB : ∀ x ∈ s, f x < B) : ∃! t : V, ∀ y, y ∈ t ↔ ∃ x ∈ s, y = f x := by
-  have hR : 𝚺ᴬ₀-Relation fun x y : V ↦ y = f x := by
-    simpa using Bounding.HierarchySymbol.Definable.retraction hf (![1, 0] : Fin 2 → Fin 2)
-  obtain ⟨F, _, rfl, hF⟩ : ∃ F, IsMapping F ∧ domain F = s ∧ ∀ (x y : V), ⟪x, y⟫ ∈ F → y = f x :=
-    sigmaZero_skolem hR fun x hx ↦ ⟨f x, hB x hx, rfl⟩
-  apply ExistsUnique.intro (range F)
-  · intro y
-    simp only [mem_range_iff]
-    constructor
-    · rintro ⟨x, hx⟩; exact ⟨x, by simpa [mem_domain_iff] using ⟨y, hx⟩, hF _ _ hx⟩
-    · simp only [mem_domain_iff, forall_exists_index, and_imp]
-      rintro x y hxy rfl; exact ⟨x, by rcases hF _ _ hxy; exact hxy⟩
-  · intro s' hs'
-    apply mem_ext; intro y
-    suffices (∃ x, (∃ y, ⟪x, y⟫ ∈ F) ∧ y = f x) ↔ ∃ x, ⟪x, y⟫ ∈ F by
-      simpa [hs', mem_domain_iff, mem_range_iff]
-    constructor
-    · rintro ⟨x, ⟨y, hxy⟩, rfl⟩; exact ⟨x, by rcases hF _ _ hxy; exact hxy⟩
-    · rintro ⟨x, hxy⟩; exact ⟨x, ⟨y, hxy⟩, hF _ _ hxy⟩
-
-theorem sigmaZero_replacement₂ {f : V → V → V} (hf : 𝚺ᴬ₀-Function₂ f) {s₁ s₂ B : V}
-    (hB : ∀ x₁ ∈ s₁, ∀ x₂ ∈ s₂, f x₁ x₂ < B) :
-    ∃! t : V, ∀ y, y ∈ t ↔ ∃ x₁ ∈ s₁, ∃ x₂ ∈ s₂, y = f x₁ x₂ := by
-  have : 𝚺ᴬ₀-Function₁ (fun x ↦ f (π₁ x) (π₂ x)) :=
-    Bounding.HierarchySymbol.DefinableFunction₂.arithmetic_bounded_comp
-      (f₁ := fun v : Fin 1 → V ↦ π₁ (v 0)) (f₂ := fun v ↦ π₂ (v 0)) hf
-      (by definability) (by definability)
-  apply (existsUnique_congr (by
-      intro t; apply forall_congr'; intro y; apply iff_congr (by rfl)
-      simp only [mem_product_iff']
-      constructor
-      · rintro ⟨x, ⟨h₁, h₂⟩, rfl⟩; exact ⟨π₁ x, h₁, π₂ x, h₂, by rfl⟩
-      · rintro ⟨x₁, h₁, x₂, h₂, rfl⟩; exact ⟨⟪x₁, x₂⟫, by simp [h₁, h₂]⟩)).mp
-    (sigmaZero_replacement this (s := s₁ ×ʰᶠ s₂) (B := B) fun x hx ↦
-      hB _ (mem_product_iff'.mp hx).1 _ (mem_product_iff'.mp hx).2)
 
 section fstIdx
 

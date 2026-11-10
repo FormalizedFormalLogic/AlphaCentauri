@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.CourseOfValues
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Fixpoint
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.HFS.PRF
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.HFS.Fixpoint
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 
 /-!
@@ -340,23 +340,8 @@ instance nth_definable : 𝚺ᴬ₁-Function₂ (nth : V → V → V) := nth_def
 instance nth_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (nth : V → V → V) :=
   nth_definable.of_sigmaOne
 
-lemma adjoin_absolute (a v : ℕ) : ((a ∷ v : ℕ) : V) = (a : V) ∷ (v : V) := by
-  simpa using DefinedFunction.sigmaZero_absolute_func V adjoin_defined adjoin_defined ![a, v]
-
-lemma pi₁_zero : π₁ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₁_le_self 0)
-
-lemma pi₂_zero : π₂ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₂_le_self 0)
-
 @[simp] lemma nth_zero_idx (i : V) : (0 : V).[i] = 0 :=
   nonpos_iff_eq_zero.mp (nth_le 0 i)
-
-lemma nth_lt_of_pos {v} (hv : 0 < v) (i : V) : v.[i] < v := by
-  rcases zero_or_succ v with (rfl | ⟨v, rfl⟩)
-  · simp at hv
-  rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
-  · simp [succ_eq_adjoin v]
-  · simp only [succ_eq_adjoin v, nth_adjoin_succ]
-    exact lt_of_le_of_lt (nth_le _ _) (by simp)
 
 end nth
 
@@ -595,13 +580,6 @@ lemma graph_iff {xs y : V} : c.Graph param ⟪xs, y⟫ ↔ y = c.result param xs
     simpa using c.eq_of_mem_limSeq param h
   · rintro rfl
     exact ⟨_, c.mem_limSeq_result param xs⟩
-
-lemma graph_nil {l : V} : c.Graph param ⟪0, l⟫ ↔ l = c.nil param := by
-  simp [graph_iff]
-
-lemma graph_adjoin {x xs y : V} :
-    c.Graph param ⟪x ∷ xs, y⟫ ↔ ∃ y', y = c.adjoin param x xs y' ∧ c.Graph param ⟪xs, y'⟫ := by
-  simp [graph_iff]
 
 variable (param)
 
@@ -1014,27 +992,6 @@ lemma takeLast_locallyDelta0 : LocallyDelta0Function₂ (takeLast : V → V → 
   simp [takeLast]
   rfl
 
-lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
-  have hP : LocallyDelta0Pred fun u ↦ k ≤ len u → len (takeLast u k) = k :=
-    ((LocallyDelta0.le (LocallyDelta0Function.const k)
-      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))).imp
-      (LocallyDelta0.eq (len_locallyDelta0.comp₁ (takeLast_locallyDelta0.comp₂
-        (LocallyDelta0Function.var (0 : Fin 1)) (LocallyDelta0Function.const k)))
-        (LocallyDelta0Function.const k))).of_iff fun w ↦ by simp
-  have : k ≤ len v → len (takeLast v k) = k := by
-    apply adjoin_induction hP
-    · intro h
-      simp_all
-    · intro x v ih h
-      have : k = len v + 1 ∨ k ≤ len v := by
-        rcases eq_or_lt_of_le h with (h | h)
-        · left; simpa using h
-        · right; simpa [lt_succ_iff_le] using h
-      rcases this with (rfl | hkv)
-      · simp [takeLast_adjoin]
-      · simp [takeLast_adjoin, not_lt_of_ge hkv, ih hkv]
-  exact this h
-
 @[simp] lemma takeLast_len_self (v : V) : takeLast v (len v) = v := by
   rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩) <;> simp [takeLast_adjoin]
 
@@ -1046,38 +1003,6 @@ lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
   · simp
   · intro x v ih
     simp [takeLast_adjoin, ih]
-
-lemma takeLast_succ_of_lt {i v : V} (h : i < len v) :
-    takeLast v (i + 1) = v.[len v - (i + 1)] ∷ takeLast v i := by
-  have hR : LocallyDelta0 fun w : Fin 2 → V ↦ w 0 < len (w 1) →
-      takeLast (w 1) (w 0 + 1) = (w 1).[len (w 1) - (w 0 + 1)] ∷ takeLast (w 1) (w 0) :=
-    (LocallyDelta0.lt (LocallyDelta0Function.var (0 : Fin 2))
-      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))).imp <|
-      LocallyDelta0.eq (takeLast_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
-        (LocallyDelta0Function.add_one (LocallyDelta0Function.var 0)))
-        (LocallyDelta0Function.adjoin.comp₂
-          (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
-            (LocallyDelta0Function.sub.comp₂ (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 1))
-              (LocallyDelta0Function.add_one (LocallyDelta0Function.var 0))))
-          (takeLast_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
-            (LocallyDelta0Function.var 0)))
-  have hP : LocallyDelta0Pred fun u ↦ ∀ j ≤ i, j < len u →
-      takeLast u (j + 1) = u.[len u - (j + 1)] ∷ takeLast u j :=
-    (LocallyDelta0.ball_le_function (LocallyDelta0Function.const i) hR).of_iff fun w ↦ by simp
-  have : ∀ j ≤ i, j < len v → takeLast v (j + 1) = v.[len v - (j + 1)] ∷ takeLast v j := by
-    apply adjoin_induction hP
-    · intro j _ h
-      simp at h
-    · intro x v ih j hj hl
-      rcases show j = len v ∨ j < len v from
-        eq_or_lt_of_le (by simpa [lt_succ_iff_le] using hl) with (rfl | hi)
-      · simp [takeLast_adjoin]
-      · have : len v - j = len v - (j + 1) + 1 := by
-          rw [← Arithmetic.sub_sub, sub_add_self_of_le
-            (le_tsub_of_add_le_left (lt_iff_succ_le.mp hi))]
-        simpa [takeLast_adjoin, lt_succ_iff_le, not_le_of_gt hi, this, not_lt_of_gt hi,
-          add_tsub_add_eq_tsub_right] using ih j hj hi
-  exact this i le_rfl h
 
 end takeLast
 

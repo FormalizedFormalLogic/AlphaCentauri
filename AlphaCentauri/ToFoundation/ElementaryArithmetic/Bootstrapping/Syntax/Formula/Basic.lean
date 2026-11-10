@@ -1048,6 +1048,68 @@ def construction : Fixpoint.Construction V (β.blueprint L) where
 /-- `c.Graph L param p y` states that the recursion takes the value `y` at `p` with `param`. -/
 def Graph (param : V) (x y : V) : Prop := (c.construction L).Fixpoint ![] ⟪param, x, y⟫
 
+open Classical in
+/-- The value at depth `d` of the code `n`, read off the table `T` of the lists of values of the
+smaller codes; the parameter at depth `d` is `c.iter P d`. -/
+noncomputable def depthValue (P n T d : V) : V :=
+  if n = 0 then 0
+  else if π₁ (n - 1) = 0 then c.rel (c.iter P d) (π₁ (π₂ (n - 1))) (π₁ (π₂ (π₂ (n - 1))))
+    (π₂ (π₂ (π₂ (n - 1))))
+  else if π₁ (n - 1) = 1 then c.nrel (c.iter P d) (π₁ (π₂ (n - 1))) (π₁ (π₂ (π₂ (n - 1))))
+    (π₂ (π₂ (π₂ (n - 1))))
+  else if π₁ (n - 1) = 2 then c.verum (c.iter P d)
+  else if π₁ (n - 1) = 3 then c.falsum (c.iter P d)
+  else if π₁ (n - 1) = 4 then c.and (c.iter P d) (π₁ (π₂ (n - 1))) (π₂ (π₂ (n - 1)))
+    (znth T (π₁ (π₂ (n - 1)))).[d] (znth T (π₂ (π₂ (n - 1)))).[d]
+  else if π₁ (n - 1) = 5 then c.or (c.iter P d) (π₁ (π₂ (n - 1))) (π₂ (π₂ (n - 1)))
+    (znth T (π₁ (π₂ (n - 1)))).[d] (znth T (π₂ (π₂ (n - 1)))).[d]
+  else if π₁ (n - 1) = 6 then c.all (c.iter P d) (π₂ (n - 1)) ?[(znth T (π₂ (n - 1))).[d + 1]]
+  else if π₁ (n - 1) = 7 then c.exs (c.iter P d) (π₂ (n - 1)) ?[(znth T (π₂ (n - 1))).[d + 1]]
+  else 0
+
+lemma depthValue_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 4 → V ↦ c.depthValue (w 0) (w 1) (w 2) (w 3) := by
+  have p₁ {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
+      LocallyDelta0Function fun u ↦ π₁ (g u) := LocallyDelta0Function.pi₁.comp₁ hg
+  have p₂ {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
+      LocallyDelta0Function fun u ↦ π₂ (g u) := LocallyDelta0Function.pi₂.comp₁ hg
+  have hm : LocallyDelta0Function fun w : Fin 4 → V ↦ w 1 - 1 :=
+    LocallyDelta0Function.sub.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.const 1)
+  have hb := p₂ hm
+  have hpar : LocallyDelta0Function fun w : Fin 4 → V ↦ c.iter (w 0) (w 3) :=
+    c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 3)
+  have htag (t : V) : LocallyDelta0 fun w : Fin 4 → V ↦ π₁ (w 1 - 1) = t :=
+    LocallyDelta0.eq (p₁ hm) (LocallyDelta0Function.const t)
+  have hlook {g : (Fin 4 → V) → V} (hg : LocallyDelta0Function g)
+      {e : (Fin 4 → V) → V} (he : LocallyDelta0Function e) :
+      LocallyDelta0Function fun w : Fin 4 → V ↦ (znth (w 2) (g w)).[e w] :=
+    nth_locallyDelta0.comp₂ (LocallyDelta0Function.znth.comp₂ (LocallyDelta0Function.var 2) hg)
+      he
+  have hsingle {g : (Fin 4 → V) → V} (hg : LocallyDelta0Function g) :
+      LocallyDelta0Function fun w : Fin 4 → V ↦ ?[g w] :=
+    LocallyDelta0Function.adjoin.comp₂ hg (LocallyDelta0Function.const 0)
+  have hrel := fun4 c.rel_locallyDelta0 hpar (p₁ hb) (p₁ (p₂ hb)) (p₂ (p₂ hb))
+  have hnrel := fun4 c.nrel_locallyDelta0 hpar (p₁ hb) (p₁ (p₂ hb)) (p₂ (p₂ hb))
+  have hverum := c.verum_locallyDelta0.comp₁ (f := fun w : Fin 4 → V ↦ c.iter (w 0) (w 3)) hpar
+  have hfalsum := c.falsum_locallyDelta0.comp₁ (f := fun w : Fin 4 → V ↦ c.iter (w 0) (w 3)) hpar
+  have hand := fun5 c.and_locallyDelta0 hpar (p₁ hb) (p₂ hb)
+    (hlook (p₁ hb) (LocallyDelta0Function.var 3)) (hlook (p₂ hb) (LocallyDelta0Function.var 3))
+  have hor := fun5 c.or_locallyDelta0 hpar (p₁ hb) (p₂ hb)
+    (hlook (p₁ hb) (LocallyDelta0Function.var 3)) (hlook (p₂ hb) (LocallyDelta0Function.var 3))
+  have hall := LocallyDelta0Function.comp₃ c.all_locallyDelta0 hpar hb
+    (hsingle (hlook hb (LocallyDelta0Function.add_one (LocallyDelta0Function.var 3))))
+  have hexs := LocallyDelta0Function.comp₃ c.exs_locallyDelta0 hpar hb
+    (hsingle (hlook hb (LocallyDelta0Function.add_one (LocallyDelta0Function.var 3))))
+  unfold depthValue
+  exact LocallyDelta0Function.ite
+    (LocallyDelta0.eq (LocallyDelta0Function.var 1) (LocallyDelta0Function.const 0))
+    (LocallyDelta0Function.const 0) <|
+    LocallyDelta0Function.ite (htag 0) hrel <| LocallyDelta0Function.ite (htag 1) hnrel <|
+    LocallyDelta0Function.ite (htag 2) hverum <| LocallyDelta0Function.ite (htag 3) hfalsum <|
+    LocallyDelta0Function.ite (htag 4) hand <| LocallyDelta0Function.ite (htag 5) hor <|
+    LocallyDelta0Function.ite (htag 6) hall <|
+    LocallyDelta0Function.ite (htag 7) hexs (LocallyDelta0Function.const 0)
+
 end Construction
 
 end UformulaRec1

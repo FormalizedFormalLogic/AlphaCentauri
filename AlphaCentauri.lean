@@ -107,6 +107,7 @@ public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension
 public import AlphaCentauri.ToFoundation.Definable
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bit
+public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Basic
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Language
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Term.Basic
 public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Syntax.Term.Functions

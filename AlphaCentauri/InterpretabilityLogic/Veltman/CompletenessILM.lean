@@ -390,17 +390,45 @@ private lemma mem_iff : A ∈ mAdequateClosure Φ ↔
     Finset.mem_product, Prod.exists];
   grind;
 
-lemma subset : Φ ⊆ mAdequateClosure Φ := fun A hA ↦ mem_iff.mpr <| .inl ⟨A, hA, by simp⟩
+lemma subset : Φ ⊆ mAdequateClosure Φ := by
+  intro A hA;
+  apply mem_iff.mpr <| .inl _;
+  use A;
+  and_intros;
+  · exact hA;
+  · simp;
 
 lemma mem_of_mem_subformulas (hA : A ∈ mAdequateClosure Φ) (hB : B ∈ A.subformulas) :
     B ∈ mAdequateClosure Φ := by
   rcases mem_iff.mp hA with ⟨C, hC, h⟩ | ⟨C, hC, h⟩ | ⟨C, hC, D, hD, h⟩;
-  · exact mem_iff.mpr <| .inl ⟨C, hC, subformulas_subset_of_mem h hB⟩;
-  · exact mem_iff.mpr <| .inr <| .inl ⟨C, hC, subformulas_subset_of_mem h hB⟩;
-  · exact mem_iff.mpr <| .inr <| .inr ⟨C, hC, D, hD, subformulas_subset_of_mem h hB⟩;
+  · apply mem_iff.mpr <| .inl _;
+    use C;
+    and_intros;
+    · exact hC;
+    · exact subformulas_subset_of_mem h hB;
+  · apply mem_iff.mpr <| .inr <| .inl _;
+    use C;
+    and_intros;
+    · exact hC;
+    · exact subformulas_subset_of_mem h hB;
+  · apply mem_iff.mpr <| .inr <| .inr _;
+    use C;
+    and_intros;
+    · exact hC;
+    · use D;
+      and_intros;
+      · exact hD;
+      · exact subformulas_subset_of_mem h hB;
 
-lemma rhd_mem (hA : A ∈ operands Φ) (hB : B ∈ operands Φ) : A ▷ B ∈ mAdequateClosure Φ :=
-  mem_iff.mpr <| .inr <| .inr ⟨A, hA, B, hB, by simp⟩
+lemma rhd_mem (hA : A ∈ operands Φ) (hB : B ∈ operands Φ) : A ▷ B ∈ mAdequateClosure Φ := by
+  apply mem_iff.mpr <| .inr <| .inr _;
+  use A;
+  and_intros;
+  · exact hA;
+  · use B;
+    and_intros;
+    · exact hB;
+    · simp;
 
 variable [Adequate Φ]
 
@@ -412,9 +440,16 @@ private lemma mem_of_mem_operands (hA : A ∈ operands Φ) (hB : B ∈ A.subform
   · exact mem_of_mem_tree (subset_refl _) hA hB hB';
 
 lemma operands_of_rhd_mem (h : A ▷ B ∈ mAdequateClosure Φ) : A ∈ operands Φ ∧ B ∈ operands Φ := by
-  have hΦ (h : A ▷ B ∈ Φ) : A ∈ operands Φ ∧ B ∈ operands Φ :=
-    ⟨Finset.mem_union_left _ <| mem_rhdOperands.mpr ⟨Adequate.rhd_left h, .of_rhd_left h⟩,
-      Finset.mem_union_left _ <| mem_rhdOperands.mpr ⟨Adequate.rhd_right h, .of_rhd_right h⟩⟩;
+  have hΦ (h : A ▷ B ∈ Φ) : A ∈ operands Φ ∧ B ∈ operands Φ := by
+    and_intros;
+    · apply Finset.mem_union_left _ <| mem_rhdOperands.mpr _;
+      and_intros;
+      · exact Adequate.rhd_left h;
+      · exact .of_rhd_left h;
+    · apply Finset.mem_union_left _ <| mem_rhdOperands.mpr _;
+      and_intros;
+      · exact Adequate.rhd_right h;
+      · exact .of_rhd_right h;
   have hΦ' (h : A ▷ B ∈ Φ ∨ ∃ D ∈ tree Φ (rhdOperands Φ), A ▷ B = □(∼D)) :
       A ∈ operands Φ ∧ B ∈ operands Φ := by
     rcases h with h | ⟨_, _, h⟩;
@@ -426,14 +461,16 @@ lemma operands_of_rhd_mem (h : A ▷ B ∈ mAdequateClosure Φ) : A ∈ operands
     rcases h with h | h | h | h;
     · simp at h;
     · simp at h;
-    · exact hΦ' <| mem_of_mem_tree (subset_refl _) hC h (.inl ⟨A, B, rfl⟩);
+    · exact hΦ' <| mem_of_mem_tree (subset_refl _) hC h (.inl <| by use A, B);
     · simp at h;
   · simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h;
     rcases h with h | h | h;
     · obtain ⟨rfl, rfl⟩ := rhd_inj.mp h;
-      exact ⟨hC, hD⟩;
-    · exact hΦ' <| mem_of_mem_operands hC h (.inl ⟨A, B, rfl⟩);
-    · exact hΦ' <| mem_of_mem_operands hD h (.inl ⟨A, B, rfl⟩);
+      and_intros;
+      · exact hC;
+      · exact hD;
+    · exact hΦ' <| mem_of_mem_operands hC h (.inl <| by use A, B);
+    · exact hΦ' <| mem_of_mem_operands hD h (.inl <| by use A, B);
 
 lemma isRhdOperand_iff : IsRhdOperand (mAdequateClosure Φ) A ↔ A ∈ operands Φ := by
   constructor;
@@ -448,21 +485,25 @@ lemma box_mem (h : □A ∈ mAdequateClosure Φ) :
   have hΦ' (h : □A ∈ Φ ∨ ∃ D ∈ tree Φ (rhdOperands Φ), □A = □(∼D)) :
       □A ∈ boxes Φ ∨ ∃ D ∈ tree Φ (rhdOperands Φ), □A = □(∼D) := by
     rcases h with h | h;
-    · exact .inl <| mem_boxes.mpr ⟨h, A, rfl⟩;
+    · apply Or.inl <| mem_boxes.mpr _;
+      and_intros;
+      · exact h;
+      · use A;
     · exact .inr h;
   rcases mem_iff.mp h with ⟨C, hC, h⟩ | ⟨C, hC, h⟩ | ⟨C, hC, D, hD, h⟩;
   · exact hΦ' <| .inl <| Adequate.subformulas_subset hC h;
   · simp only [subformulas, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton] at h;
     rcases h with h | h | h | h;
-    · exact .inr ⟨C, hC, h⟩;
+    · right;
+      use C;
     · simp at h;
-    · exact hΦ' <| mem_of_mem_tree (subset_refl _) hC h (.inr ⟨A, rfl⟩);
+    · exact hΦ' <| mem_of_mem_tree (subset_refl _) hC h (.inr <| by use A);
     · simp at h;
   · simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h;
     rcases h with h | h | h;
     · simp at h;
-    · exact hΦ' <| mem_of_mem_operands hC h (.inr ⟨A, rfl⟩);
-    · exact hΦ' <| mem_of_mem_operands hD h (.inr ⟨A, rfl⟩);
+    · exact hΦ' <| mem_of_mem_operands hC h (.inr <| by use A);
+    · exact hΦ' <| mem_of_mem_operands hD h (.inr <| by use A);
 
 instance : Adequate (mAdequateClosure Φ) where
   imp_left h := mem_of_mem_subformulas h <| by simp [subformulas]
@@ -475,7 +516,11 @@ instance : Adequate (mAdequateClosure Φ) where
   box_neg_mem {A} hA := by
     rcases Finset.mem_union.mp (isRhdOperand_iff.mp hA) with hA | hA;
     · exact subset <| Adequate.box_neg_mem (mem_rhdOperands.mp hA).2;
-    · exact mem_iff.mpr <| .inr <| .inl ⟨A, hA, by simp⟩;
+    · apply mem_iff.mpr <| .inr <| .inl _;
+      use A;
+      and_intros;
+      · exact hA;
+      · simp;
 
 instance : MAdequate (mAdequateClosure Φ) where
   exists_isRhdOperand {B X} hB hX := by
@@ -485,10 +530,18 @@ instance : MAdequate (mAdequateClosure Φ) where
       rcases box_mem hC with h | h;
       · exact Finset.mem_union_left _ h;
       · obtain ⟨E, hE, h⟩ := h;
-        exact Finset.mem_union_right _ <| Finset.mem_image.mpr ⟨E, hE, h.symm⟩;
+        apply Finset.mem_union_right _ <| Finset.mem_image.mpr _;
+        use E;
+        and_intros;
+        · exact hE;
+        · exact h.symm;
     rcases Finset.mem_union.mp (isRhdOperand_iff.mp hB) with hB | hB;
     · obtain ⟨A, hA, h⟩ := exists_tree_of_conj hB hX';
-      exact ⟨A, isRhdOperand_iff.mpr <| Finset.mem_union_right _ hA, h⟩;
+      use A;
+      and_intros;
+      · exact isRhdOperand_iff.mpr <| Finset.mem_union_right _ hA;
+      · exact h.1;
+      · exact h.2;
     · obtain ⟨b, hb, Y, hY, rfl⟩ := mem_tree.mp hB;
       have hY' : Y ∪ X ⊆ boxes Φ ∪ (tree Φ (rhdOperands Φ)).image fun C ↦ □(∼C) := by
         apply Finset.union_subset _ hX';

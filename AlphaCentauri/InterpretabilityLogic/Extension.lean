@@ -81,29 +81,6 @@ namespace Logic.ofAxioms
 
 variable {𝔸 : Set (Formula α)} {A B C : Formula α}
 
-lemma rhd_of_provable (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h
-
-lemma rhd_refl : ofAxioms 𝔸 ⊢ A ▷ A := rhd_of_provable C_id
-
-/-- - [Vis90, §6.1.1] -/
-lemma rhd_and_box_neg : ofAxioms 𝔸 ⊢ A ▷ (A ⋏ □(∼A)) := by
-  have h₁ : ofAxioms 𝔸 ⊢ ∼(A ⋏ □(∼A)) 🡒 □(∼A) 🡒 ∼A := by cl_prover;
-  have h₂ : ofAxioms 𝔸 ⊢ □(□(∼A) 🡒 ∼A) 🡒 □(∼A) := axiomL;
-  have h₃ : ofAxioms 𝔸 ⊢ A 🡒 A ⋏ □(∼A) ⋎ ∼□(∼(A ⋏ □(∼A))) := by
-    cl_prover [box_mono h₁, h₂];
-  have h₄ : ofAxioms 𝔸 ⊢ ∼□(∼(A ⋏ □(∼A))) ▷ (A ⋏ □(∼A)) := axiomJ5;
-  have h₅ : ofAxioms 𝔸 ⊢ Axioms.J3 (A ⋏ □(∼A)) (∼□(∼(A ⋏ □(∼A)))) (A ⋏ □(∼A)) := axiomJ3;
-  have h₆ : ofAxioms 𝔸 ⊢ Axioms.J2 A (A ⋏ □(∼A) ⋎ ∼□(∼(A ⋏ □(∼A)))) (A ⋏ □(∼A)) := axiomJ2;
-  cl_prover [rhd_of_provable h₃, rhd_refl (𝔸 := 𝔸) (A := A ⋏ □(∼A)), h₄, h₅, h₆];
-
-/-- - [Vis90, §6.1.1] -/
-lemma rhd_bot : ofAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 □(∼A) := by
-  have h₁ : ofAxioms 𝔸 ⊢ ∼⊥ := by cl_prover;
-  have h₂ : ofAxioms 𝔸 ⊢ □(∼⊥) := nec h₁;
-  have h₃ : ofAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 ∼□(∼A) 🡒 ∼□(∼⊥) := axiomJ4;
-  cl_prover [h₂, h₃];
-
-
 lemma rhd_and_not_rhd_neg : ofAxioms 𝔸 ⊢ A ▷ B ⋏ ∼(A ▷ ∼C) 🡒 ◇(B ⋏ □C) := by
   have h₀ : ofAxioms 𝔸 ⊢ □(∼∼C) 🡒 □C := box_mono dne;
   have h₁ : ofAxioms 𝔸 ⊢ ∼(B ⋏ □C) 🡒 B 🡒 ∼□(∼∼C) := by cl_prover [h₀];

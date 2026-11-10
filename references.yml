@@ -206,6 +206,23 @@ DAq05:
       title: Lecture Notes in Logic
       volume: 18
 
+dJV90:
+  type: Chapter
+  title: Provability Logics for Relative Interpretability
+  author: ["de Jongh, Dick", "Veltman, Frank"]
+  page-range: 31-42
+  date: 1990
+  serial-number:
+    doi: "10.1007/978-1-4613-0609-2_3"
+  parent:
+    type: Anthology
+    title: Mathematical Logic
+    editor: "Petkov, Petio P."
+    date: 1990
+    publisher:
+      name: Plenum Press
+      location: New York
+
 ELV25:
   type: Article
   title: Completions of restricted complexity I, weak arithmetical theories
@@ -282,6 +299,18 @@ HP98:
   parent:
     type: Anthology
     title: Perspectives in Mathematical Logic
+
+HSS25a:
+  type: Article
+  title: Uniform interpolation for interpretability logic
+  author: ["Horvat, Sebastijan", "Sierra Miranda, Borja", "Studer, Thomas"]
+  date: 2025
+  serial-number:
+    arxiv: "2511.01428"
+  url: https://arxiv.org/abs/2511.01428
+  parent:
+    type: Repository
+    title: arXiv
 
 Jer10:
   type: Article
@@ -451,6 +480,18 @@ Moh11:
     publisher:
       name: Cambridge University Press
       location: Cambridge
+
+MV20:
+  type: Article
+  title: Interpretability logics and generalized {Veltman} semantics
+  author: ["Mikec, Luka", "Vuković, Mladen"]
+  date: 2020
+  serial-number:
+    arxiv: "1907.03849"
+  url: https://arxiv.org/abs/1907.03849
+  parent:
+    type: Repository
+    title: arXiv
 
 PWW88:
   type: Article

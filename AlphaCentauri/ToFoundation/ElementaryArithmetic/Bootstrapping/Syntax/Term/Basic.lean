@@ -369,7 +369,7 @@ section structuralBound
 
 variable {c : V}
 
-private lemma exp_exp_le_of_le {m n : V} (h : m ≤ n) :
+lemma exp_exp_le_of_le {m n : V} (h : m ≤ n) :
     Exp.exp (Exp.exp m) ≤ Exp.exp (Exp.exp n) :=
   exp_monotone_le.mpr (exp_monotone_le.mpr h)
 

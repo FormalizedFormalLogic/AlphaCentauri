@@ -468,6 +468,200 @@ lemma exists_mu_of_reflTransGen {w u y y' : ℕ} (hw : w ∈ (𝒩 u).pre) (hu :
       rw [(fields_deficiency hd).2.2.1];
       simpa using hr;
 
+lemma anchor_ne_of_mem_pre {x t w : ℕ} (ht : t ∈ (𝒩 x).pre) (hwt : w < t) :
+    (𝒩 x).kind.anchor ≠ w := by
+  intro ha;
+  have := lt_of_mem_pre_of_anchor ht ha;
+  omega
+
+lemma cr_subset_of_step {w t t' : ℕ} (h : Step (Γ₀ := Γ₀) (τ := τ) w t t') :
+    (𝒩 t).cr w ⊆ (𝒩 t').cr w := by
+  rcases h with ⟨hwt, htt'⟩ | hd;
+  · rw [cr_of_anchor_ne (anchor_ne_of_mem_pre htt' (pre_lt hwt))];
+    exact Set.subset_biUnion_of_mem (u := fun t ↦ (𝒩 t).cr w)
+      (Finset.mem_coe.mpr (Finset.mem_filter.mpr ⟨htt', hwt⟩));
+  · rw [(fields_deficiency hd).2.2.2];
+    simp
+
+lemma cr_subset_of_reflTransGen {w t t' : ℕ}
+    (h : Relation.ReflTransGen (Step (Γ₀ := Γ₀) (τ := τ) w) t t') : (𝒩 t).cr w ⊆ (𝒩 t').cr w := by
+  induction h with
+  | refl => rfl;
+  | tail _ hs ih => exact ih.trans (cr_subset_of_step hs);
+
+omit [DecidableEq α] in
+private lemma biUnion_eq_of_forall {P : Finset ℕ} {f : ℕ → Set (Formula α)} {t₀ : ℕ} (h₀ : t₀ ∈ P)
+    (h : ∀ t ∈ P, f t = f t₀) : ⋃ t ∈ P, f t = f t₀ := by
+  apply subset_antisymm;
+  · exact Set.iUnion₂_subset fun t ht ↦ (h t ht).le;
+  · exact Set.subset_biUnion_of_mem (u := f) (Finset.mem_coe.mpr h₀);
+
+/-- The criticality promises are constant along the ancestors above a world. -/
+lemma cr_aux (n : ℕ) :
+    (∀ t u, u ∈ (𝒩 t).pre → u ∈ (𝒩 n).pre → t ∈ (𝒩 n).anc → (𝒩 t).cr u = (𝒩 n).cr u) ∧
+    (∀ u (r : ℕ), u ∈ (𝒩 n).pre → (𝒩 n).mu u = r → (𝒩 n).cr u = (𝒩 r).cr u) ∧
+    (∀ u a, u ∈ (𝒩 a).anc → u ≠ a → (∀ t ∈ (𝒩 a).anc, u ∉ (𝒩 t).pre) → a ∈ (𝒩 n).anc →
+      u ∈ (𝒩 n).pre → (𝒩 n).cr u = ∅) := by
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+  have hom {a u t₀ : ℕ} (ha : a < n) (h₀ : t₀ ∈ above 𝒩 (𝒩 a).anc u) :
+      ⋃ t ∈ above 𝒩 (𝒩 a).anc u, (𝒩 t).cr u = (𝒩 t₀).cr u := by
+    apply biUnion_eq_of_forall h₀;
+    intro t ht;
+    obtain ⟨ht₁, ht₂⟩ := Finset.mem_filter.mp ht;
+    obtain ⟨h₀₁, h₀₂⟩ := Finset.mem_filter.mp h₀;
+    rcases le_total t t₀ with hle | hle;
+    · exact (ih t₀ ((anc_le h₀₁).trans_lt ha)).1 t u ht₂ h₀₂ (mem_anc_of_le ht₁ h₀₁ hle);
+    · exact ((ih t ((anc_le ht₁).trans_lt ha)).1 t₀ u h₀₂ ht₂ (mem_anc_of_le h₀₁ ht₁ hle)).symm;
+  refine ⟨?_, ?_, ?_⟩;
+  · intro t u hut hun htn;
+    by_cases htn' : t = n;
+    · rw [htn'];
+    have hk : (𝒩 n).kind ≠ .isolated := by
+      intro hk;
+      simp [(fields_isolated hk).1] at hun;
+    obtain ⟨he, hlt⟩ := anc_eq_insert hk;
+    rw [he] at htn;
+    have htρ := (Finset.mem_insert.mp htn).resolve_left htn';
+    rcases hk' : (𝒩 n).kind with _ | ⟨a, B⟩ | ⟨a, s⟩;
+    · exact absurd hk' hk;
+    · obtain ⟨hp, -, -, hc⟩ := fields_problem hk';
+      have ha : a < n := by simpa [hk'] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
+      have htρ' : t ∈ (𝒩 a).anc := by simpa [parent, hk'] using htρ;
+      have hua : u ≠ a := by
+        rintro rfl;
+        have := anc_le htρ';
+        have := pre_lt hut;
+        omega;
+      rw [hc, if_neg hua, hom ha (Finset.mem_filter.mpr ⟨htρ', hut⟩)];
+    · obtain ⟨hp, -, -, hc⟩ := fields_deficiency hk';
+      obtain ⟨ha, hs, has⟩ : a < n ∧ s < n ∧ a ∈ (𝒩 s).pre := by
+        simpa [hk'] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
+      have htρ' : t ∈ (𝒩 (((𝒩 s).mu a).unbotD a)).anc := by simpa [parent, hk'] using htρ;
+      rw [hc];
+      induction hr : (𝒩 s).mu a using WithBot.recBotCoe with
+      | bot =>
+        rw [hr] at htρ';
+        simp only [WithBot.unbotD_bot] at htρ';
+        have hua : u ≠ a := by
+          rintro rfl;
+          have := anc_le htρ';
+          have := pre_lt hut;
+          omega;
+        rw [if_neg hua, hom ha (Finset.mem_filter.mpr ⟨htρ', hut⟩)];
+      | coe r =>
+        rw [hr] at htρ';
+        simp only [WithBot.unbotD_coe] at htρ';
+        have hrs := mu_lt hr;
+        obtain ⟨har, -⟩ := mu_spec has hr;
+        by_cases hua : u = a;
+        · subst u;
+          rw [if_pos rfl, (ih s hs).2.1 a r has hr];
+          exact (ih r (hrs.trans hs)).1 t a hut har htρ';
+        · rw [if_neg hua];
+          have haρ : a ∈ (𝒩 r).anc := pre_subset_anc har;
+          rcases le_or_gt t a with hta | hta;
+          · rw [hom ha (Finset.mem_filter.mpr ⟨mem_anc_of_le htρ' haρ hta, hut⟩)];
+          · have hat : a ∈ (𝒩 t).anc := mem_anc_of_le haρ htρ' hta.le;
+            have htn₁ : t < n := ((anc_le htρ').trans_lt (hrs.trans hs));
+            by_cases hne : (above 𝒩 (𝒩 a).anc u).Nonempty;
+            · obtain ⟨t'', ht''⟩ := hne;
+              rw [hom ha ht''];
+              obtain ⟨ht''₁, ht''₂⟩ := Finset.mem_filter.mp ht'';
+              exact ((ih t htn₁).1 t'' u ht''₂ hut (anc_subset hat ht''₁)).symm;
+            · rw [Finset.not_nonempty_iff_eq_empty.mp hne];
+              simp only [Finset.notMem_empty, Set.iUnion_of_empty, Set.iUnion_empty];
+              have hua' : u ∈ (𝒩 a).anc := by rwa [hp] at hun;
+              refine (ih t htn₁).2.2 u a hua' hua ?_ hat hut;
+              intro t' ht' hut';
+              exact hne ⟨t', Finset.mem_filter.mpr ⟨ht', hut'⟩⟩;
+  · intro u r hun hr;
+    by_cases hau : (𝒩 n).kind.anchor = u;
+    · rcases hk : (𝒩 n).kind with _ | ⟨a, B⟩ | ⟨a, s⟩ <;> rw [hk] at hau <;>
+        simp only [Kind.anchor] at hau;
+      · simp at hau;
+      · obtain rfl : u = a := (WithBot.coe_injective hau).symm;
+        rw [(fields_problem hk).2.2.1] at hr;
+        simp at hr;
+      · obtain rfl : u = a := (WithBot.coe_injective hau).symm;
+        obtain ⟨-, hs, hus⟩ : u < n ∧ s < n ∧ u ∈ (𝒩 s).pre := by
+          simpa [hk] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
+        rw [(fields_deficiency hk).2.2.1] at hr;
+        simp only at hr;
+        rw [(fields_deficiency hk).2.2.2];
+        simp only;
+        exact (ih s hs).2.1 u r hus hr;
+    · rw [mu_of_anchor_ne hau] at hr;
+      have hrm := Finset.mem_of_max hr;
+      obtain ⟨hr₁, hr₂⟩ := Finset.mem_filter.mp hrm;
+      rw [cr_of_anchor_ne hau];
+      apply biUnion_eq_of_forall hrm;
+      intro t ht;
+      obtain ⟨ht₁, ht₂⟩ := Finset.mem_filter.mp ht;
+      have htr : t ≤ r := by
+        have := Finset.le_max ht;
+        rw [hr] at this;
+        exact WithBot.coe_le_coe.mp this;
+      obtain ⟨a, -, he⟩ := pre_eq_anc_anchor hun;
+      rw [he] at ht₁ hr₁;
+      exact (ih r (pre_lt (he ▸ hr₁))).1 t u ht₂ hr₂ (mem_anc_of_le ht₁ hr₁ htr);
+  · intro u a hua hne hgap han hun;
+    have hka : a ≠ n := by
+      rintro rfl;
+      exact hgap _ han hun;
+    have hk : (𝒩 n).kind ≠ .isolated := by
+      intro hk;
+      simp [(fields_isolated hk).1] at hun;
+    obtain ⟨he, hlt⟩ := anc_eq_insert hk;
+    have haρ : a ∈ (𝒩 (parent (Γ₀ := Γ₀) (τ := τ) n)).anc := by
+      rw [he] at han;
+      exact (Finset.mem_insert.mp han).resolve_left hka;
+    have hlt_ua : u < a := lt_of_le_of_ne (anc_le hua) hne;
+    by_cases hau : (𝒩 n).kind.anchor = u;
+    · rcases hk' : (𝒩 n).kind with _ | ⟨b, B⟩ | ⟨b, s⟩ <;> rw [hk'] at hau <;>
+        simp only [Kind.anchor] at hau;
+      · simp at hau;
+      · obtain rfl : u = b := (WithBot.coe_injective hau).symm;
+        have := anc_le (by simpa [parent, hk'] using haρ);
+        omega;
+      · obtain rfl : u = b := (WithBot.coe_injective hau).symm;
+        obtain ⟨-, hs, hus⟩ : u < n ∧ s < n ∧ u ∈ (𝒩 s).pre := by
+          simpa [hk'] using kind_lt (Γ₀ := Γ₀) (τ := τ) n;
+        rw [(fields_deficiency hk').2.2.2];
+        simp only;
+        have haρ' : a ∈ (𝒩 (((𝒩 s).mu u).unbotD u)).anc := by simpa [parent, hk'] using haρ;
+        induction hr : (𝒩 s).mu u using WithBot.recBotCoe with
+        | bot =>
+          rw [hr] at haρ';
+          have := anc_le (by simpa using haρ');
+          omega;
+        | coe r =>
+          rw [hr] at haρ';
+          simp only [WithBot.unbotD_coe] at haρ';
+          obtain ⟨hur, -⟩ := mu_spec hus hr;
+          have hra : a ≠ r := by
+            rintro rfl;
+            exact hgap a (mem_anc_self a) hur;
+          rw [(ih s hs).2.1 u r hus hr];
+          exact (ih r ((mu_lt hr).trans hs)).2.2 u a hua hne hgap haρ' hur;
+    · rw [cr_of_anchor_ne hau];
+      apply Set.subset_empty_iff.mp;
+      refine Set.iUnion₂_subset fun t ht ↦ ?_;
+      obtain ⟨ht₁, ht₂⟩ := Finset.mem_filter.mp ht;
+      have hta : a < t := by
+        rcases lt_trichotomy t a with h | rfl | h;
+        · exact absurd ht₂ (hgap t (mem_anc_of_le (pre_subset_anc ht₁) han h.le));
+        · exact absurd ht₂ (hgap t (mem_anc_self t));
+        · exact h;
+      exact ((ih t (pre_lt ht₁)).2.2 u a hua hne hgap
+        (mem_anc_of_le han (pre_subset_anc ht₁) hta.le) ht₂).le;
+
+lemma cr_eq_of_mem_anc {t m u : ℕ} (hut : u ∈ (𝒩 t).pre) (hum : u ∈ (𝒩 m).pre)
+    (htm : t ∈ (𝒩 m).anc) : (𝒩 t).cr u = (𝒩 m).cr u := (cr_aux m).1 t u hut hum htm
+
+lemma cr_eq_of_mu {x u r : ℕ} (hux : u ∈ (𝒩 x).pre) (hr : (𝒩 x).mu u = r) :
+    (𝒩 x).cr u = (𝒩 r).cr u := (cr_aux x).2.1 u r hux hr
+
 end
 
 end Veltman.StepByStep

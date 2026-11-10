@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.Vec
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.HFS.Vec
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
 

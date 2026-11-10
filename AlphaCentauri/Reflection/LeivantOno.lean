@@ -2,9 +2,9 @@ module
 
 public import AlphaCentauri.Reflection.InductionFromReflection
 public import AlphaCentauri.Reflection.ISigma
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Bootstrapping.Provable
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Incompleteness.Definability
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.Incompleteness.UniformReflection
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.Definability
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.UniformReflection
 
 /-!
 # The Leivant–Ono theorem

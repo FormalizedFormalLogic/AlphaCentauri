@@ -33,8 +33,7 @@ lemma Semiterm.eventually_val {ξ : Type*} {n : ℕ} (t : Semiterm L ξ n) (b : 
   | fvar x => simp
   | func F v ih =>
     filter_upwards [hfunc F (fun j ↦ (v j).val b f), eventually_all.mpr ih] with i h₁ h₂
-    simp only [Semiterm.val_func', h₁]
-    exact congrArg _ (funext h₂)
+    simp [h₁, Function.comp_def, h₂]
 
 include hfunc hrel in
 lemma Semiformula.eventually_eval_iff_of_open {ξ : Type*} {n : ℕ} {φ : Semiformula L ξ n}
@@ -45,9 +44,7 @@ lemma Semiformula.eventually_eval_iff_of_open {ξ : Type*} {n : ℕ} {φ : Semif
   | .rel r v | .nrel r v => by
     filter_upwards [hrel r (fun j ↦ (v j).val b f),
       eventually_all.mpr fun j ↦ Semiterm.eventually_val hfunc (v j) b f] with i h₁ h₂
-    simp only [Semiformula.eval_rel', Semiformula.eval_nrel', h₁]
-    rw [show (π i ∘ fun j ↦ (v j).val b f) = fun j ↦ (v j).val (π i ∘ b) (π i ∘ f) from
-      funext h₂]
+    simp [h₁, Function.comp_def, h₂]
   | φ ⋏ ψ | φ ⋎ ψ => by
     simp only [Semiformula.open_and, Semiformula.open_or] at hφ
     filter_upwards [eventually_eval_iff_of_open hφ.1 b f,

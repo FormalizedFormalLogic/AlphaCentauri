@@ -135,6 +135,7 @@ public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
 public import AlphaCentauri.ToFoundation.LeastWitness
 public import AlphaCentauri.ToFoundation.OpenFormulaDegree
 public import AlphaCentauri.ToFoundation.OpenPredicate
+public import AlphaCentauri.ToFoundation.PairingAssignment
 public import AlphaCentauri.ToFoundation.PartialTruth
 public import AlphaCentauri.ToFoundation.Pigeonhole
 public import AlphaCentauri.ToFoundation.PrenexCombination

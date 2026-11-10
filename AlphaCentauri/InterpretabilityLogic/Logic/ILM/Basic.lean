@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
+public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 
 /-!

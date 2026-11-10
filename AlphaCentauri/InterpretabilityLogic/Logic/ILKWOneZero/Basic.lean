@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILKW2.Basic
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
+public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 
 /-!
 # The logic $\mathbf{ILKW1}^0$

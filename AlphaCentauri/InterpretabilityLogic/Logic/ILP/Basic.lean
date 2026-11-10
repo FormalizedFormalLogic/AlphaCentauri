@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILRW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
+public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 
 /-!
 # The logic $\mathbf{ILP}$

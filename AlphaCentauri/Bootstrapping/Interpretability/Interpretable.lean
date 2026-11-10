@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Bootstrapping.Interpretability.Identity
 public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 
 /-!
@@ -102,10 +103,16 @@ section arithmetic
 /-- Every theory of arithmetic has, in every model of $\mathsf{I}\Sigma_1$, a table of a
 translation of arithmetic along which every provable formula translates to a provable formula.
 - [Vis90, §5.5] -/
-axiom exists_isTranslationTable_provable_translate (V : Type*) [ORingStructure V]
+theorem exists_isTranslationTable_provable_translate (V : Type*) [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (S : ArithmeticTheory) [S.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] :
     ∃ tbl : V, IsTranslationTable ℒₒᵣ S tbl ∧
-      ∀ p : V, Provable S p → Provable S (translate ℒₒᵣ ℒₒᵣ tbl p)
+      ∀ p : V, Provable S p → Provable S (translate ℒₒᵣ ℒₒᵣ tbl p) := by
+  have h := isTableOf_arithmeticTable (V := V) (DirectTranslation.id S)
+  use arithmeticTable (DirectTranslation.id S)
+  and_intros
+  · exact h.isTranslationTable Language.SymbolsStandard.oRing
+  · intro p hp
+    exact h.id_provable_translate Language.SymbolsStandard.oRing hp
 
 /-- Interpretability is transitive.
 - [Vis90, §6.1] -/

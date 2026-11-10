@@ -80,9 +80,6 @@ declaration:
   OpenPredicate.openInduction_iff_integerPart:
     forgive:
       - OpenPredicate.openInduction_iff_integerPart
-  FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isTranslationTable_provable_translate:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isTranslationTable_provable_translate
   FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans
@@ -118,12 +115,6 @@ declaration:
     forgive:
       - HahnSeries.isRealClosed_lex
       - IsRealClosed.exists_mem_Ioo_isRoot
-  FFL.FirstOrder.ArithmeticTheory.interpretability_of_provable:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isTranslationTable_provable_translate
-  FFL.FirstOrder.Arithmetic.interpretable_of_provable_imp:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isTranslationTable_provable_translate
   FFL.FirstOrder.ArithmeticTheory.interpretability_trans:
     forgive:
       - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans

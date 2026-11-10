@@ -2,6 +2,8 @@ module
 
 public import AlphaCentauri.ToFoundation.Provable
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
+public import AlphaCentauri.ToFoundation.PartialTruth
 
 /-!
 # The provability formula at a numeral
@@ -22,6 +24,26 @@ namespace FFL.FirstOrder.Arithmetic.Bootstrapping
 open FirstOrder Bootstrapping.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {T : ArithmeticTheory} [T.Δ₁]
+
+lemma isPrenexHierarchy_allBallOrBall {A B : Semiformula V ℒₒᵣ 1} (hA : IsBounded A.val)
+    (hB : IsBounded B.val) : IsPrenexHierarchy 𝚷 1 (allBallOrBall A B).val := by
+  have hw := SemitermVec.isSemitermVec (V := V) (L := ℒₒᵣ) (k := 1) (n := 2) ![Semiterm.bvar 0]
+  have hA' : IsBounded (A.subst ![Semiterm.bvar 0] : Semiformula V ℒₒᵣ 2).val := by
+    rw [Semiformula.val_substs]; exact IsBounded.subst hw A.isSemiformula hA
+  have hB' : IsBounded (B.subst ![Semiterm.bvar 0] : Semiformula V ℒₒᵣ 2).val := by
+    rw [Semiformula.val_substs]; exact IsBounded.subst hw B.isSemiformula hB
+  have ht := (Semiterm.bvar 0 + 𝕹 1 : Semiterm V ℒₒᵣ 1).isSemiterm.isUTerm
+  change IsPrenexHierarchy 𝚷 (0 + 1) (qqQuant 𝚷 _)
+  rw [IsPrenexHierarchy.quant_iff]
+  simpa [IsPrenexHierarchy, qqBall] using And.intro (IsBounded.ball ht hA') (IsBounded.ball ht hB')
+
+lemma typed_quote_shift {n : ℕ} (σ : ArithmeticSemisentence n) :
+    (⌜σ⌝ : Semiformula V ℒₒᵣ n).shift = ⌜σ⌝ := by
+  ext;
+  change shift ℒₒᵣ (⌜σ⌝ : V) = ⌜σ⌝;
+  rw [Sentence.quote_def, ← Semiformula.quote_shift];
+  simp [Rewriting.shift, Rewriting.emb, ← TransitiveRewriting.comp_app]
+
 
 @[simp] lemma models_provabilityPred_iff (σ : ArithmeticSentence) :
     V↓[ℒₒᵣ] ⊧ provabilityPred T σ ↔ Provable T (⌜σ⌝ : V) := by
@@ -60,9 +82,55 @@ lemma tprovable_provabilityFormula_imp [𝗜𝚺₁ ⪯ T] (φ ψ : Formula V �
   simp [provableImpFormula, typed_quote_rew_subst, Semiformula.substs_substs] at h₁;
   simpa [provabilityFormula, Matrix.constant_eq_singleton] using h₁ ⨀ h₂
 
-/-- Every internal $\Sigma_1$ sentence internally implies its own provability. -/
-axiom tprovable_imp_provabilityFormula_of_sigma1 [𝗜𝚺₁ ⪯ T] (φ : Formula V ℒₒᵣ)
-    (hφ : IsSigma 1 φ.val) (hs : φ.shift = φ) :
-    T.internalize V ⊢ φ 🡒 provabilityFormula T φ.val
+private noncomputable def provableSubstNumeralFormula (ψ : ArithmeticSemisentence 1) :
+    ArithmeticSemisentence 2 :=
+  (Rew.subst ![#0] ▹ ψ) 🡒 ssnum.val/[#1, ⌜ψ⌝, #0] 🡒 (Rew.subst ![#1] ▹ (provable T).val)
+
+lemma val_subst_numeral (φ : Semiformula V ℒₒᵣ 1) (z : V) :
+    (φ.subst ![𝕹 z] : Formula V ℒₒᵣ).val = substNumeral φ.val z := by
+  simp [substNumeral]
+
+/-- A standard $\Sigma_1$ formula with one parameter internally implies its own provability at
+every numeral. -/
+lemma tprovable_imp_provabilityFormula_subst [𝗜𝚺₁ ⪯ T] {ψ : ArithmeticSemisentence 1}
+    (hψ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ) (z : V) :
+    T.internalize V ⊢ (⌜ψ⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] 🡒
+      provabilityFormula T ((⌜ψ⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] : Formula V ℒₒᵣ).val := by
+  have h₁ := tprovable_subst_numeral_of_models (T := T)
+    (φ := provableSubstNumeralFormula (T := T) ψ)
+    (fun W _ _ e ↦ by
+      have key : W ⊧/![e 0] ψ → Provable T (substNumeral (⌜ψ⌝ : W) (e 0)) := fun hz ↦ by
+        simpa [substNumeral, Matrix.constant_eq_singleton, Sentence.quote_eq] using
+          tprovable_iff_provable.mp (bold_sigma_one_complete (V := W) T hψ (w := ![e 0]) hz);
+      simpa [provableSubstNumeralFormula] using fun hz (he : e 1 = _) ↦ he ▸ key hz)
+    ![z, substNumeral ⌜ψ⌝ z];
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := ssnum.val) (by simp)
+    (w := ![substNumeral ⌜ψ⌝ z, ⌜ψ⌝, z]) (by simp);
+  have h₃ : T.internalize V ⊢ (⌜ψ⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] 🡒
+      (⌜ssnum.val⌝ : Semiformula V ℒₒᵣ 3).subst ![𝕹 (substNumeral ⌜ψ⌝ z), 𝕹 ⌜ψ⌝, 𝕹 z] 🡒
+      (⌜(provable T).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 (substNumeral ⌜ψ⌝ z)] := by
+    simpa [provableSubstNumeralFormula, typed_quote_rew_subst, Semiformula.substs_substs,
+      Matrix.vecHead, Matrix.vecTail, Matrix.constant_eq_singleton] using h₁;
+  have h₄ : T.internalize V ⊢ (⌜ψ⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] 🡒
+      (⌜(provable T).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 (substNumeral ⌜ψ⌝ z)] := by
+    cl_prover [h₂, h₃];
+  simpa [provabilityFormula, val_subst_numeral, substNumeral, Sentence.quote_eq] using h₄
+
+/-- Every internal prenex $\Sigma_1$ sentence is internally equivalent to its partial truth. -/
+axiom tprovable_iff_partialTrue [𝗜𝚺₁ ⪯ T] (φ : Formula V ℒₒᵣ)
+    (hφ : IsPrenexHierarchy 𝚺 1 φ.val) (hs : φ.shift = φ) :
+    T.internalize V ⊢ φ 🡘 (⌜(partialTrue 𝚺 1).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 φ.val]
+
+/-- Every internal prenex $\Sigma_1$ sentence internally implies its own provability. -/
+theorem tprovable_imp_provabilityFormula_of_sigma1 [𝗜𝚺₁ ⪯ T] (φ : Formula V ℒₒᵣ)
+    (hφ : IsPrenexHierarchy 𝚺 1 φ.val) (hs : φ.shift = φ) :
+    T.internalize V ⊢ φ 🡒 provabilityFormula T φ.val := by
+  have h₁ := tprovable_iff_partialTrue (T := T) φ hφ hs;
+  have h₂ := tprovable_imp_provabilityFormula_subst (T := T) (ψ := (partialTrue 𝚺 1).val)
+    (Bounding.HierarchySymbol.Semiformula.hierarchy_sigma (partialTrue 𝚺 1)) φ.val;
+  have h₃ := tprovable_provabilityFormula <| tprovable_iff_provable.mp <| Entailment.K_right h₁;
+  have h₄ := tprovable_provabilityFormula_imp (T := T)
+    ((⌜(partialTrue 𝚺 1).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 φ.val]) φ;
+  cl_prover [h₁, h₂, h₃, h₄]
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -30,15 +30,17 @@ namespace Bootstrapping
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 variable (T) in
-/-- For every internal $\Pi_1$ sentence `x`, if `T` proves `b 🡒 x` then `T` proves `a 🡒 x`. -/
+/-- For every internal prenex $\Pi_1$ sentence `x`, if `T` proves `b 🡒 x` then `T` proves
+`a 🡒 x`. -/
 def Pi1Conservative (a b : V) : Prop :=
-  ∀ x, IsSemiformula ℒₒᵣ 0 x → shift ℒₒᵣ x = x → IsPi 1 x →
+  ∀ x, IsSemiformula ℒₒᵣ 0 x → shift ℒₒᵣ x = x → IsPrenexHierarchy 𝚷 1 x →
     Provable T (imp ℒₒᵣ b x) → Provable T (imp ℒₒᵣ a x)
 
 variable {σ τ χ : ArithmeticSentence}
 
 lemma pi1Conservative_quote_iff :
-    Pi1Conservative T (⌜σ⌝ : V) ⌜τ⌝ ↔ ∀ π : Formula V ℒₒᵣ, π.shift = π → IsPi 1 π.val →
+    Pi1Conservative T (⌜σ⌝ : V) ⌜τ⌝ ↔
+      ∀ π : Formula V ℒₒᵣ, π.shift = π → IsPrenexHierarchy 𝚷 1 π.val →
       T.internalize V ⊢ ⌜τ⌝ 🡒 π → T.internalize V ⊢ ⌜σ⌝ 🡒 π := by
   constructor;
   · intro h π hs hπ hτ;
@@ -77,9 +79,14 @@ lemma Pi1Conservative.consistent (h : Pi1Conservative T (⌜σ⌝ : V) ⌜τ⌝)
   rw [pi1Conservative_quote_iff] at h;
   have h₁ : T.internalize V ⊢ ∼⌜τ⌝ := by
     simpa using (tprovable_tquote_iff_provable_quote_sentence (σ := ∼τ)).mpr hτ;
-  have h₂ := h ⊥ (by simp) (by simp) (by cl_prover [h₁]);
-  have h₃ : T.internalize V ⊢ ∼⌜σ⌝ := by cl_prover [h₂];
-  simpa using (tprovable_tquote_iff_provable_quote_sentence (σ := ∼σ)).mp (by simpa using h₃)
+  have hbot : T.internalize V ⊢ (∀¹ (⊥ : Semiformula V ℒₒᵣ 1)) 🡒 ⊥ := by
+    simpa using TProof.all_imp_subst (T := T) (⊥ : Semiformula V ℒₒᵣ 1) (Semiterm.fvar 0);
+  have h₂ : T.internalize V ⊢ ⌜τ⌝ 🡒 ⊥ := by cl_prover [h₁];
+  have h₃ := h (∀¹ ⊥) (by simp) (by simp [IsPrenexHierarchy]) (by
+    apply TProof.generalize_imp;
+    simpa [typed_quote_shift, Semiformula.free] using h₂);
+  have h₄ : T.internalize V ⊢ ∼⌜σ⌝ := by cl_prover [h₃, hbot];
+  simpa using (tprovable_tquote_iff_provable_quote_sentence (σ := ∼σ)).mp (by simpa using h₄)
 
 lemma pi1Conservative_dia [𝗜𝚺₁ ⪯ T] :
     Pi1Conservative T (⌜∼provabilityPred T (∼σ)⌝ : V) ⌜σ⌝ := by
@@ -95,31 +102,44 @@ lemma pi1Conservative_dia [𝗜𝚺₁ ⪯ T] :
     cl_prover [h₂, h₃, h₄];
   simpa [Sentence.quote_eq] using h₅
 
-lemma Pi1Conservative.and_provabilityPred (h : Pi1Conservative T (⌜σ⌝ : V) ⌜τ⌝) :
+lemma Pi1Conservative.and_provabilityPred [𝗜𝚺₁ ⪯ T] (h : Pi1Conservative T (⌜σ⌝ : V) ⌜τ⌝) :
     Pi1Conservative T (⌜σ ⋏ provabilityPred T χ⌝ : V) ⌜τ ⋏ provabilityPred T χ⌝ := by
   rw [pi1Conservative_quote_iff] at h ⊢;
   intro π hs hπ hτ;
-  have hP : (⌜provabilityPred T χ⌝ : Formula V ℒₒᵣ) = provabilityFormula T ⌜χ⌝ := by simp;
-  have hPs : (provabilityFormula T (⌜χ⌝ : V)).shift = provabilityFormula T ⌜χ⌝ := by
-    rw [← hP];
-    ext;
-    simpa [Sentence.quote_eq] using Sentence.shift_quote (V := V) (provabilityPred T χ);
-  have hPσ : IsSigma 1 (provabilityFormula T (⌜χ⌝ : V)).val := by
-    rw [← hP]; exact (isSigma_quote_iff (provabilityPred T χ)).mpr (by simp);
-  have h₁ := h (provabilityFormula T ⌜χ⌝ 🡒 π) (by simp [hPs, hs]) (by
-    simp only [Semiformula.val_imp, imp, IsHierarchy.or_iff];
-    exact ⟨by simpa using hPσ.neg (by simp), hπ⟩) (by
-      have hτ' : T.internalize V ⊢ ⌜τ⌝ ⋏ provabilityFormula T ⌜χ⌝ 🡒 π := by simpa using hτ;
-      cl_prover [hτ']);
-  have h₂ : T.internalize V ⊢ ⌜σ⌝ ⋏ provabilityFormula T ⌜χ⌝ 🡒 π := by cl_prover [h₁];
-  simpa using h₂
+  obtain ⟨θ, hθ, hθb⟩ := isPrenexHierarchy_iff_exists_qqToPrenex.mp hπ;
+  have hθs : IsSemiformula ℒₒᵣ ((1 : ℕ) : V) θ := by simpa [hθ] using π.isSemiformula;
+  let B : Semiformula V ℒₒᵣ 1 := ⟨θ, hθs⟩;
+  have hπB : π = ∀¹ B := by ext; simp [B, hθ];
+  have hB : B.shift = B := by
+    rw [hπB, Semiformula.shift_all] at hs;
+    ext; simpa using congrArg (·.val) hs;
+  obtain ⟨δ, hδ⟩ := ISigma1.exists_matrix_provable_of_sentence (σ := provabilityPred T χ) (by simp);
+  let A : Semiformula V ℒₒᵣ 1 := ∼⌜δ.val⌝;
+  have hA : A.shift = A := by simp [A, typed_quote_shift];
+  have hAb : IsBounded A.val := by
+    simpa [A, Sentence.quote_eq] using
+      IsBounded.neg (by simp) <| (isBounded_quote_iff (V := V) δ.val).mpr δ.bounded;
+  have hP : T.internalize V ⊢ provabilityFormula T ⌜χ⌝ 🡘 ∃¹ ⌜δ.val⌝ := by
+    simpa using internal_provable_of_outer_provable (V := V) (Entailment.WeakerThan.pbl hδ :
+      T ⊢ provabilityPred T χ 🡘 ∃¹ δ.val);
+  have hnA : T.internalize V ⊢ ∼(∃¹ ⌜δ.val⌝) 🡒 ∀¹ A := by simp [A];
+  have hAn : T.internalize V ⊢ ∀¹ A 🡒 ∼(∃¹ ⌜δ.val⌝) := by simp [A];
+  have h₁ := tprovable_all_or_all_imp_allBallOrBall (T := T) A B;
+  have h₂ := tprovable_allBallOrBall_imp (T := T) hA hB;
+  have hτ' : T.internalize V ⊢ ⌜τ⌝ ⋏ provabilityFormula T ⌜χ⌝ 🡒 ∀¹ B := by
+    simpa [hπB] using hτ;
+  have h₃ := h (allBallOrBall A B) (shift_allBallOrBall hA hB)
+    (isPrenexHierarchy_allBallOrBall hAb hθb) (by cl_prover [hP, hnA, h₁, hτ']);
+  have h₄ : T.internalize V ⊢ ⌜σ⌝ ⋏ provabilityFormula T ⌜χ⌝ 🡒 ∀¹ B := by
+    cl_prover [hP, hAn, h₂, h₃];
+  simpa [hπB] using h₄
 
 end Bootstrapping
 
 variable (T) in
 noncomputable def pi1ConservativeDef : ArithmeticSemisentence 2 :=
   “a b. ∀ x, !(isSemiformula ℒₒᵣ).sigma 0 x → !(shiftGraph ℒₒᵣ) x x →
-    !(isHierarchy 𝚷 1).sigma x → ∀ y, !(impGraph ℒₒᵣ) y b x → ∀ z, !(impGraph ℒₒᵣ) z a x →
+    !(isPrenexHierarchy 𝚷 1).sigma x → ∀ y, !(impGraph ℒₒᵣ) y b x → ∀ z, !(impGraph ℒₒᵣ) z a x →
       !(provable T) y → !(provable T) z”
 
 lemma eval_pi1ConservativeDef {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (a b : V) :
@@ -166,7 +186,7 @@ instance instPi1ConservativityIL [𝗜𝚺₁ ⪯ T] : T.pi1Conservativity.IL wh
     simpa [ProvabilityAbstraction.Provability.dia, standardProvability_def] using h
 
 open Bootstrapping in
-instance instPi1ConservativityM : T.pi1Conservativity.M where
+instance instPi1ConservativityM [𝗜𝚺₁ ⪯ T] : T.pi1Conservativity.M where
   axiomM {σ τ χ} := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     have h := Pi1Conservative.and_provabilityPred (T := T) (V := V) (σ := σ) (τ := τ) (χ := χ);
     simpa [standardProvability_def] using h

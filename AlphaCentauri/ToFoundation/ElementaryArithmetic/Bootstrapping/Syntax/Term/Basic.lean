@@ -571,6 +571,99 @@ lemma phi_locallyDelta0 :
   exact (hterm.and (hbvar.or (hfvar.or hfunc))).of_iff fun w ↦ by
     simpa using c.phi_iff_decode L (w ·.succ.succ) (w 1) (w 0)
 
+/-- The construction of the graph of the recursion. -/
+def construction : Fixpoint.Construction V (β.blueprint L) where
+  Φ := c.Phi L
+  defined := .mk <| by
+    constructor
+    · intro v
+      simp [Blueprint.blueprint,
+        c.bvar_defined.iff,
+        c.bvar_defined.graph_delta.iff_delta_pi,
+        c.fvar_defined.iff,
+        c.fvar_defined.graph_delta.iff_delta_pi,
+        c.func_defined.iff,
+        c.func_defined.graph_delta.iff_delta_pi]
+    · intro v
+      symm
+      simpa [Blueprint.blueprint, c.bvar_defined.iff, c.fvar_defined.iff, c.func_defined.iff]
+        using c.phi_iff L _ _ _
+  monotone := by
+    unfold Phi
+    rintro C C' hC v pr ⟨ht, H⟩
+    refine ⟨ht, ?_⟩
+    rcases H with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, w, ⟨hk, hw⟩, rfl⟩)
+    · disj 1; exact ⟨z, rfl⟩
+    · disj 2; exact ⟨x, rfl⟩
+    · disj 3; exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hC (hw i hi)⟩, rfl⟩
+  Φ_locallyDelta0 := c.phi_locallyDelta0 L
+
+/-- `c.Graph L param t y` states that the recursion takes the value `y` at the term `t`. -/
+def Graph (param : Fin arity → V) (x y : V) : Prop := (c.construction L).Fixpoint param ⟪x, y⟫
+
+/-- The lookup of the values of the elements of `v` in the table `q 0`. -/
+noncomputable def tableLookup (q : Fin 1 → V) (x : V) : V := znth (q 0) x
+
+lemma tableLookup_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 2 → V ↦ tableLookup (V := V) (w ·.succ) (w 0) :=
+  LocallyDelta0Function.znth.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
+
+open Classical in
+/-- The course-of-values recursion computing the values. -/
+noncomputable def courseOfValues : CourseOfValues.Construction V arity where
+  val param n T :=
+    if n = 0 then 0
+    else if π₁ (n - 1) = 0 then c.bvar param (π₂ (n - 1))
+    else if π₁ (n - 1) = 1 then c.fvar param (π₂ (n - 1))
+    else c.func param (π₁ (π₂ (n - 1))) (π₁ (π₂ (π₂ (n - 1)))) (π₂ (π₂ (π₂ (n - 1))))
+      (listMap tableLookup (fun _ ↦ T) (π₂ (π₂ (π₂ (n - 1)))))
+  val_locallyDelta0 := by
+    have hm : LocallyDelta0Function fun w : Fin (arity + 2) → V ↦ w 1 - 1 :=
+      pred_sub_comp (LocallyDelta0Function.var 1)
+    have hb := pi₂_comp hm
+    have hk := pi₁_comp hb
+    have hf := pi₁_comp (pi₂_comp hb)
+    have hv := pi₂_comp (pi₂_comp hb)
+    have hlist : LocallyDelta0Function fun w : Fin (arity + 2) → V ↦
+        listMap tableLookup (fun _ ↦ w 0) (π₂ (π₂ (π₂ (w 1 - 1)))) := by
+      have := (listMap_locallyDelta0 tableLookup_locallyDelta0).comp_cons hv
+        fun _ ↦ LocallyDelta0Function.var 0
+      simpa using this
+    have hfunc : LocallyDelta0Function fun w : Fin (arity + 2) → V ↦
+        c.func (w ·.succ.succ) (π₁ (π₂ (w 1 - 1))) (π₁ (π₂ (π₂ (w 1 - 1))))
+          (π₂ (π₂ (π₂ (w 1 - 1))))
+          (listMap tableLookup (fun _ ↦ w 0) (π₂ (π₂ (π₂ (w 1 - 1))))) := by
+      have := c.func_locallyDelta0.comp
+        (f := (fun w : Fin (arity + 2) → V ↦ π₁ (π₂ (w 1 - 1))) :>
+          (fun w ↦ π₁ (π₂ (π₂ (w 1 - 1)))) :> (fun w ↦ π₂ (π₂ (π₂ (w 1 - 1)))) :>
+            (fun w ↦ listMap tableLookup (fun _ ↦ w 0) (π₂ (π₂ (π₂ (w 1 - 1))))) :>
+              fun j w ↦ w j.succ.succ) fun i ↦ by
+          cases i using Fin.cases with
+          | zero => exact hk
+          | succ i =>
+            cases i using Fin.cases with
+            | zero => exact hf
+            | succ i =>
+              cases i using Fin.cases with
+              | zero => exact hv
+              | succ i =>
+                cases i using Fin.cases with
+                | zero => exact hlist
+                | succ i => exact LocallyDelta0Function.var i.succ.succ
+      simpa using this
+    exact LocallyDelta0Function.ite
+      (LocallyDelta0.eq (LocallyDelta0Function.var 1) (LocallyDelta0Function.const 0))
+      (LocallyDelta0Function.const 0) <|
+      LocallyDelta0Function.ite (LocallyDelta0.eq (pi₁_comp hm) (LocallyDelta0Function.const 0))
+        (by simpa using c.bvar_locallyDelta0.comp_cons hb fun j ↦
+          LocallyDelta0Function.var j.succ.succ) <|
+        LocallyDelta0Function.ite (LocallyDelta0.eq (pi₁_comp hm) (LocallyDelta0Function.const 1))
+          (by simpa using c.fvar_locallyDelta0.comp_cons hb fun j ↦
+            LocallyDelta0Function.var j.succ.succ) hfunc
+  bound := c.bound
+  bound_monotone := c.bound_monotone
+  bound_locallyDelta0 := c.bound_locallyDelta0
+
 end Construction
 
 end Language.TermRec

@@ -78,6 +78,7 @@ public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ProvablyTotal.Parsons
 public import AlphaCentauri.Reflection.ISigma
 public import AlphaCentauri.Reflection.InductionFromReflection
+public import AlphaCentauri.Reflection.LeivantOno
 public import AlphaCentauri.Reflection.Peano
 public import AlphaCentauri.Reflection.RelativizedProvability
 public import AlphaCentauri.Reflection.StandardProvability

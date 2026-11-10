@@ -384,9 +384,6 @@ theorem provable_infinitudeOfPrimes_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮�
     have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
     exact models_infinitudeOfPrimes_iff.mpr exists_prime_gt
 
-/-- - [PWW88, Problem 1] -/
-axiom provable_infinitudeOfPrimes_ISigma0 : 𝗜𝚺₀ ⊢ infinitudeOfPrimes
-
 /-- Between $n$ and $2n$ there is a prime, for every $n \ge 1$. -/
 def bertrandPostulate : ArithmeticSentence :=
   “∀ n, 1 ≤ n → ∃ p, n < p ∧ p ≤ 2 * n ∧ !isPrime p”

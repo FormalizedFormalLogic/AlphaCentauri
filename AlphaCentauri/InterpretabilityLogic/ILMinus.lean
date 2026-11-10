@@ -104,6 +104,8 @@ instance : Entailment.Minimal (ofAxiomsMinus 𝔸) where
 instance : Entailment.Cl (ofAxiomsMinus 𝔸) where
   dne := dne
 
+instance : (ofAxiomsMinus 𝔸).ExtendsGL := ⟨nec, axiomK, axiomL⟩
+
 /-- `ofAxiomsMinus 𝔸` is contained in every extension of $\mathbf{IL}^-$ that proves `𝔸`. -/
 lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofAxiomsMinus 𝔹 ⊢ A) :
     ofAxiomsMinus 𝔸 ⊆ ofAxiomsMinus 𝔹 := by
@@ -136,8 +138,6 @@ instance : (𝐈𝐋⁻ : Logic α) ⪯ ofAxiomsMinus 𝔸 :=
   weakerThan_iff.mpr <| subset_of_subset (Set.empty_subset _)
 
 variable {A B C : Formula α}
-
-lemma box_mono (h : ofAxiomsMinus 𝔸 ⊢ A 🡒 B) : ofAxiomsMinus 𝔸 ⊢ □A 🡒 □B := axiomK ⨀ nec h
 
 lemma rhd_mono_right (h : ofAxiomsMinus 𝔸 ⊢ A 🡒 B) : ofAxiomsMinus 𝔸 ⊢ C ▷ A 🡒 C ▷ B := rule1 h
 

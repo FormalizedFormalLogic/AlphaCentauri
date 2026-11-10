@@ -4,9 +4,9 @@ public import AlphaCentauri.Model.IntegerConstantPolynomial
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.NumberTheory.FermatLastTheorem
 public import AlphaCentauri.Schemata.BoundedInduction
-public import AlphaCentauri.ToFoundation.BinderNotation
-public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
-public import AlphaCentauri.ToMathlib.AddMonoidHomToInt
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastNumberPrinciple
+public import AlphaCentauri.ToMathlib.OpenPredicate.AddMonoidHomToInt
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 public import Mathlib.Analysis.Real.Sqrt

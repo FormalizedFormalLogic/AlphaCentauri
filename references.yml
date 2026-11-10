@@ -293,6 +293,21 @@ KKS97:
     doi: "10.1090/S0002-9939-97-03964-6"
     arxiv: "math/9608214"
 
+KO21:
+  type: Article
+  title: Modal completeness of sublogics of the interpretability logic IL
+  author: ["Kurahashi, Taishi", "Okawa, Yuya"]
+  date: 2021
+  page-range: 164-185
+  parent:
+    type: Periodical
+    title: Mathematical Logic Quarterly
+    volume: 67
+    issue: 2
+  serial-number:
+    doi: "10.1002/malq.202000037"
+    arxiv: "2004.03813"
+
 Kay91:
   type: Book
   title: Models of Peano Arithmetic

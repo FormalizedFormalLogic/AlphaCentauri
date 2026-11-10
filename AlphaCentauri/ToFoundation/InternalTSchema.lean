@@ -777,6 +777,125 @@ lemma tprovable_instTerm_nlt_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu
     ht.isUTerm hu.isUTerm;
   exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
 
+omit [𝗜𝚺₁ ⪯ T] in
+lemma tprovable_instFormula_iff {n p : V} (hp : IsSemiformula ℒₒᵣ n p) :
+    T.internalize V ⊢ instFormula n p hp 🡘 psatF (assignment n) p ↔
+      Provable T (iff ℒₒᵣ (subst ℒₒᵣ (fvarVec n) p)
+        (subst ℒₒᵣ ?[assignmentCode n, numeral p] (⌜psatDef.val⌝ : V))) := by
+  rw [tprovable_iff_provable];
+  simp [instFormula, psatF, Sentence.quote_eq]
+
+lemma tprovable_instFormula_and {n p q : V} (hp : IsSemiformula ℒₒᵣ n p)
+    (hq : IsSemiformula ℒₒᵣ n q)
+    (h₁ : T.internalize V ⊢ instFormula n p hp 🡘 psatF (assignment n) p)
+    (h₂ : T.internalize V ⊢ instFormula n q hq 🡘 psatF (assignment n) q) :
+    T.internalize V ⊢ instFormula n (p ^⋏ q) (by simp [hp, hq]) 🡘
+      psatF (assignment n) (p ^⋏ q) := by
+  have e : instFormula n (p ^⋏ q) (by simp [hp, hq]) = instFormula n p hp ⋏ instFormula n q hq := by
+    ext; simp [instFormula, hp.isUFormula, hq.isUFormula];
+  have h₃ := tprovable_psatF_and (T := T) (assignment n) p q;
+  rw [e];
+  generalize instFormula n p hp = A at h₁ ⊢;
+  generalize instFormula n q hq = B at h₂ ⊢;
+  generalize psatF (assignment n) p = X at h₁ h₃;
+  generalize psatF (assignment n) q = Y at h₂ h₃;
+  generalize psatF (assignment n) (p ^⋏ q) = Z at h₃ ⊢;
+  cl_prover [h₁, h₂, h₃]
+
+lemma tprovable_instFormula_or {n p q : V} (hp : IsSemiformula ℒₒᵣ n p)
+    (hq : IsSemiformula ℒₒᵣ n q) (hpb : IsBounded p) (hqb : IsBounded q)
+    (h₁ : T.internalize V ⊢ instFormula n p hp 🡘 psatF (assignment n) p)
+    (h₂ : T.internalize V ⊢ instFormula n q hq 🡘 psatF (assignment n) q) :
+    T.internalize V ⊢ instFormula n (p ^⋎ q) (by simp [hp, hq]) 🡘
+      psatF (assignment n) (p ^⋎ q) := by
+  have e : instFormula n (p ^⋎ q) (by simp [hp, hq]) = instFormula n p hp ⋎ instFormula n q hq := by
+    ext; simp [instFormula, hp.isUFormula, hq.isUFormula];
+  have h₃ := tprovable_psatF_or (T := T) (assignment n) hpb hp.isUFormula hqb hq.isUFormula;
+  rw [e];
+  generalize instFormula n p hp = A at h₁ ⊢;
+  generalize instFormula n q hq = B at h₂ ⊢;
+  generalize psatF (assignment n) p = X at h₁ h₃;
+  generalize psatF (assignment n) q = Y at h₂ h₃;
+  generalize psatF (assignment n) (p ^⋎ q) = Z at h₃ ⊢;
+  cl_prover [h₁, h₂, h₃]
+
+lemma tprovable_instFormula_ball {n t q : V} (ht : IsSemiterm ℒₒᵣ n t)
+    (hts : termShift ℒₒᵣ t = t) (hq : IsSemiformula ℒₒᵣ (n + 1) q) (hqs : shift ℒₒᵣ q = q)
+    (hqb : IsBounded q)
+    (ih : T.internalize V ⊢ instFormula (n + 1) q hq 🡘 psatF (assignment (n + 1)) q)
+    (hp : IsSemiformula ℒₒᵣ n (qqBall (termBShift ℒₒᵣ t) q)) :
+    T.internalize V ⊢ instFormula n (qqBall (termBShift ℒₒᵣ t) q) hp 🡘
+      psatF (assignment n) (qqBall (termBShift ℒₒᵣ t) q) := by
+  have hw := isSemitermVec_fvarVec (L := ℒₒᵣ) n 0;
+  let B : Semiformula V ℒₒᵣ 1 := ⟨subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) q, by simpa using hq.subst hw.qVec⟩;
+  have e₁ : instFormula n (qqBall (termBShift ℒₒᵣ t) q) hp = ∀¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift 🡒 B) := by
+    have e : instFormula n (qqBall (termBShift ℒₒᵣ t) q) hp = B.ball (instTerm n t ht) := by
+      ext;
+      simp only [instFormula, instTerm, B, Arithmetic.val_ball];
+      rw [subst_qqBall hw ht hq.isUFormula];
+      rfl;
+    rw [e, Semiformula.ball_eqss_imp];
+  have hB : B.free = instFormula (n + 1) q hq := by
+    ext; simp [B, instFormula, free_subst_qVec_fvarVec hq hqs];
+  have hF : (psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q).free =
+      psatF (assignment (n + 1)) q := by
+    rw [assignment_succ]; simp [Semiformula.free, ← Semiterm.bShift_shift_comm];
+  have h₁ : T.internalize V ⊢ ∀¹ (B 🡘 psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q) :=
+    TProof.all! <| by simpa [hB, hF] using ih;
+  have h₂ := tprovable_all_iff_all_domain (T := T)
+    (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift) B
+    (psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q);
+  have h₃ := tprovable_psatF_ball (T := T) (instTerm n t ht) (assignment n) ht.isUTerm hqb
+    hq.isUFormula;
+  have h₄ := tprovable_tvF_instTerm (T := T) ht hts;
+  rw [e₁];
+  generalize ∀¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift 🡒 B) = X at h₂ ⊢;
+  generalize ∀¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift 🡒
+    psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q) = Y at h₂ h₃;
+  generalize ∀¹ (B 🡘 psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q) = H at h₁ h₂;
+  generalize tvF (instTerm n t ht) (assignment n) t = S at h₃ h₄;
+  generalize psatF (assignment n) (qqBall (termBShift ℒₒᵣ t) q) = P at h₃ ⊢;
+  cl_prover [h₁, h₂, h₃, h₄]
+
+lemma tprovable_instFormula_bex {n t q : V} (ht : IsSemiterm ℒₒᵣ n t)
+    (hts : termShift ℒₒᵣ t = t) (hq : IsSemiformula ℒₒᵣ (n + 1) q) (hqs : shift ℒₒᵣ q = q)
+    (hqb : IsBounded q)
+    (ih : T.internalize V ⊢ instFormula (n + 1) q hq 🡘 psatF (assignment (n + 1)) q)
+    (hp : IsSemiformula ℒₒᵣ n (qqBex (termBShift ℒₒᵣ t) q)) :
+    T.internalize V ⊢ instFormula n (qqBex (termBShift ℒₒᵣ t) q) hp 🡘
+      psatF (assignment n) (qqBex (termBShift ℒₒᵣ t) q) := by
+  have hw := isSemitermVec_fvarVec (L := ℒₒᵣ) n 0;
+  let B : Semiformula V ℒₒᵣ 1 := ⟨subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) q, by simpa using hq.subst hw.qVec⟩;
+  have e₁ : instFormula n (qqBex (termBShift ℒₒᵣ t) q) hp = ∃¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift ⋏ B) := by
+    have e : instFormula n (qqBex (termBShift ℒₒᵣ t) q) hp = B.bexs (instTerm n t ht) := by
+      ext;
+      simp only [instFormula, instTerm, B, Arithmetic.val_bexs];
+      rw [subst_qqBex hw ht hq.isUFormula];
+      rfl;
+    rw [e];
+    rfl;
+  have hB : B.free = instFormula (n + 1) q hq := by
+    ext; simp [B, instFormula, free_subst_qVec_fvarVec hq hqs];
+  have hF : (psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q).free =
+      psatF (assignment (n + 1)) q := by
+    rw [assignment_succ]; simp [Semiformula.free, ← Semiterm.bShift_shift_comm];
+  have h₁ : T.internalize V ⊢ ∀¹ (B 🡘 psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q) :=
+    TProof.all! <| by simpa [hB, hF] using ih;
+  have h₂ := tprovable_all_iff_exs_domain (T := T)
+    (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift) B
+    (psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q);
+  have h₃ := tprovable_psatF_bex (T := T) (instTerm n t ht) (assignment n) ht.isUTerm hqb
+    hq.isUFormula;
+  have h₄ := tprovable_tvF_instTerm (T := T) ht hts;
+  rw [e₁];
+  generalize ∃¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift ⋏ B) = X at h₂ ⊢;
+  generalize ∃¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift ⋏
+    psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q) = Y at h₂ h₃;
+  generalize ∀¹ (B 🡘 psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q) = H at h₁ h₂;
+  generalize tvF (instTerm n t ht) (assignment n) t = S at h₃ h₄;
+  generalize psatF (assignment n) (qqBex (termBShift ℒₒᵣ t) q) = P at h₃ ⊢;
+  cl_prover [h₁, h₂, h₃, h₄]
+
 end formulaDisquotation
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

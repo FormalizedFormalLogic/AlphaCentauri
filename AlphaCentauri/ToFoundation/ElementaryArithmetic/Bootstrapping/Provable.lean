@@ -621,6 +621,7 @@ lemma provable_succ_of_derivationOf_all {S e d : V} {A : V → V} (hA : LocallyD
   obtain ⟨d', -, hd'⟩ := key y
   exact ⟨d', hd'⟩
 
+omit [T.Δ₁] in
 private lemma provable_one_of_provable_zero_of_provable_succ [𝗣𝗔⁻ ⪯ T]
     (φ : ArithmeticSemisentence (m + 1)) (h₀ : T ⊢ ∀¹* (Rew.subst (‘0’ :> fun i ↦ #i) ▹ φ))
     (hs : T ⊢ ∀¹* (φ 🡒 Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ) ▹ φ)) :
@@ -667,6 +668,51 @@ private lemma provable_subst_cons_numerals {p : Fin m → V} (φ : ArithmeticSem
   · intro i
     cases i using Fin.cases
     · simpa using ht'
+    · simp
+
+/-- If `T` proves the base case `∀ p⃗, φ(0, p⃗)` and the induction step
+`∀ x p⃗, φ(x, p⃗) 🡒 φ(x + 1, p⃗)`, then every instance of `φ` by numerals is internally provable. -/
+theorem provable_substNumerals_of_provable_zero_of_provable_succ [𝗣𝗔⁻ ⪯ T]
+    (φ : ArithmeticSemisentence (m + 1)) (h₀ : T ⊢ ∀¹* (Rew.subst (‘0’ :> fun i ↦ #i) ▹ φ))
+    (hs : T ⊢ ∀¹* (φ 🡒 Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ) ▹ φ)) (x : V) (p : Fin m → V) :
+    Provable T (Arithmetic.substNumerals (((⌜φ⌝ : ℕ) : ℕ) : V) (x :> p)) := by
+  set w : V := matrixToVec fun i ↦ numeral (p i)
+  have hw := isSemitermVec_numerals p (0 : V)
+  have hW (y : V) : IsSemitermVec ℒₒᵣ ((m + 1 : ℕ) : V) 0 (numeral y ∷ w) := by
+    simpa using hw.adjoin (numeral_semiterm 0 y)
+  have hφ := isSemiformula_natCast_quote (V := V) φ
+  obtain ⟨d₀, hd₀⟩ := provable_subst_cons_numerals (p := p) φ _ (natCast_quote_numeral 0)
+    (numeral_semiterm _ _) h₀
+  obtain ⟨d₁, hd₁⟩ := provable_subst_cons_numerals (p := p) φ _ (natCast_quote_numeral 1)
+    (numeral_semiterm _ _) (provable_one_of_provable_zero_of_provable_succ φ h₀ hs)
+  obtain ⟨e, he⟩ := provable_substNumerals_of_provable_allClosure
+    (∀¹ (φ 🡒 Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ) ▹ φ)) (provable_natCast_quote_of_provable hs) p
+  rw [substNumerals_natCast_quote_all] at he
+  rw [Nat.cast_zero, numeral_substs hw] at hd₀
+  rw [Nat.cast_one, numeral_substs hw] at hd₁
+  rcases zero_or_succ x with rfl | ⟨y, rfl⟩
+  · exact ⟨d₀, hd₀⟩
+  refine provable_succ_of_derivationOf_all (A := fun y ↦ subst ℒₒᵣ (numeral y ∷ w) ((⌜φ⌝ : ℕ) : V))
+    (subst_locallyDelta0.comp₂ (LocallyDelta0Function.adjoin.comp₂
+      (numeral_locallyDelta0.comp₁ (LocallyDelta0Function.var 0)) (LocallyDelta0Function.const w))
+      (LocallyDelta0Function.const _))
+    (isSemiformula_subst_qVec_numerals _ p) (fun y ↦ hφ.subst (hW y)) he hd₁ ?_ y
+  intro y hy
+  rw [substs1_subst_qVec_numerals, substNumerals_cons, natCast_quote_imply,
+    subst_imp hφ (isSemiformula_natCast_quote _) (hW y),
+    subst_natCast_quote_rew_subst φ _ (u' := (^#0 ^+ 𝟏 : V) :> fun i ↦ (^#((i : V) + 1) : V))
+      ?_ ?_ (hW y),
+    matrixToVec_succ, numeral_succ_pos hy]
+  · have h₁ : IsUTerm ℒₒᵣ (𝟏 : V) := by simpa using numeral_uterm (1 : V)
+    have h₂ : termSubst ℒₒᵣ (numeral y ∷ w) 𝟏 = 𝟏 := by simpa using numeral_substs (hW y) 1
+    simp [Matrix.vecHead, Matrix.vecTail, Function.comp_def, termSubst_qqAdd, h₁, h₂, w]
+  · intro i
+    cases i using Fin.cases with
+    | zero => simpa using natCast_quote_bvar_add_one (V := V) (n := m)
+    | succ i => simpa using natCast_quote_bvar (V := V) i.succ
+  · intro i
+    cases i using Fin.cases
+    · simp [qqAdd, qqOne_eq_qqFunc]
     · simp
 
 end numerals

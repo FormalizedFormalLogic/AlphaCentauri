@@ -1,13 +1,15 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Gentzen.Basic
+public import AlphaCentauri.InterpretabilityLogic.Gentzen.Hilbert
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import Mathlib.Data.Set.Finite.List
 
 /-!
-# Veltman completeness of the sequent calculus for $\mathbf{IL}$
+# Veltman semantics of the sequent calculus for $\mathbf{IL}$
 
-A sequent not derivable in the sequent calculus fails at a world of a finite Veltman model.
+The sequent calculus is sound for Veltman models, and a sequent not derivable in it fails at a
+world of a finite Veltman model; hence $\mathbf{IL}$, the sequent calculus and finite Veltman
+models agree.
 -/
 
 @[expose] public section
@@ -330,7 +332,10 @@ instance : Finite (SaturatedSequent BS) :=
     (β := (closure BS).powerset × (closure BS).powerset)
     (fun x ↦ (⟨x.ant, Finset.mem_powerset.mpr x.ant_subset⟩,
               ⟨x.suc, Finset.mem_powerset.mpr x.suc_subset⟩))
-    (fun x y h ↦ by simp only [Prod.mk.injEq, Subtype.mk.injEq] at h; exact ext h.1 h.2)
+    (by
+      intro x y h;
+      simp only [Prod.mk.injEq, Subtype.mk.injEq] at h;
+      exact ext h.1 h.2)
 
 lemma lindenbaum {S₀ : Sequent α} (h₀ : ⊬ᴳ[𝐈𝐋] S₀) (hant : S₀.ant ⊆ closure BS)
     (hsuc : S₀.suc ⊆ closure BS) : ∃ x : SaturatedSequent BS, S₀ ⊆ x.toSequent := by
@@ -498,7 +503,9 @@ instance : IsTrans _ (countermodel x₀).Rel :=
   ⟨fun _ _ _ ⟨p, h₁⟩ ⟨q, h₂⟩ ↦ ⟨p, h₁.trans ((List.suffix_cons q _).trans h₂)⟩⟩
 
 instance : Std.Irrefl (countermodel x₀).Rel :=
-  ⟨fun _ ⟨_, h⟩ ↦ by simpa using h.length_le⟩
+  ⟨by
+    rintro _ ⟨_, h⟩;
+    simpa using h.length_le⟩
 
 instance : (countermodel x₀).IsIL where
   rel_of_s_left := fun ⟨R, c, _, h, _⟩ ↦ ⟨(R, c), h⟩
@@ -647,6 +654,12 @@ namespace Gentzen
 
 variable {α : Type u} [DecidableEq α] {S : Sequent α}
 
+theorem sound {κ : Type*} [Nonempty κ] (M : Veltman.Model κ α) [M.IsIL] (h : ⊢ᴳ[𝐈𝐋] S) :
+    M.ValidatesSequent S := by
+  intro x hx;
+  exact forces_disj.mp <|
+    Logic.ofAxioms.sound (by simp) (Logic.IL.of_gentzen h) x (forces_conj.mpr hx);
+
 theorem complete
     (h : ∀ {κ : Type u} [Nonempty κ] (M : Veltman.Model κ α), [Finite κ] → [M.IsIL] →
       M.ValidatesSequent S) :
@@ -662,6 +675,44 @@ theorem complete
 end Gentzen
 
 end IL
+
+namespace Logic.IL
+
+universe u
+
+variable {α : Type u} [DecidableEq α] {A : Formula α}
+
+theorem provability_TFAE : [
+    𝐈𝐋 ⊢ A,
+    ⊢ᴳ[𝐈𝐋] ∅ ⟹ {A},
+    ∀ {κ : Type u} [Nonempty κ] (M : Veltman.Model κ α), [Finite κ] → [M.IsIL] → M ⊧ A
+  ].TFAE := by
+  tfae_have 1 → 3 := by
+    intro h _ _ M _ _;
+    exact Logic.ofAxioms.sound (by simp) h;
+  tfae_have 3 → 2 := by
+    intro h;
+    apply IL.Gentzen.complete;
+    intro _ _ M _ _ x _;
+    use A;
+    and_intros;
+    · simp;
+    · exact h M x;
+  tfae_have 2 → 1 := by
+    intro h;
+    simpa using of_gentzen h ⨀ (by simp [Finset.conj]);
+  tfae_finish;
+
+lemma iff_provable_gentzen : 𝐈𝐋 ⊢ A ↔ ⊢ᴳ[𝐈𝐋] ∅ ⟹ {A} := provability_TFAE.out 1 2
+
+omit [DecidableEq α] in
+lemma iff_valid_finite :
+    𝐈𝐋 ⊢ A ↔ ∀ {κ : Type u} [Nonempty κ] (M : Veltman.Model κ α), [Finite κ] → [M.IsIL] →
+      M ⊧ A := by
+  classical
+  exact provability_TFAE.out 1 3
+
+end Logic.IL
 
 end FFL.InterpretabilityLogic
 

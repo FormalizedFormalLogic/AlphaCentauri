@@ -81,11 +81,12 @@ lemma box_conj : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 □Γ.conj := by
     cl_prover [ih, h₁, h₂, h₃];
 
 lemma box_conj_box : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 □Γ.box.conj := by
-  have h₁ : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 Γ.box.box.conj :=
-    right_Fconj_intro _ _ fun B hB ↦ by
-      obtain ⟨C, hC, rfl⟩ := Finset.mem_image.mp hB;
-      obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hC;
-      exact C_trans (left_Fconj_intro hC) axiom4;
+  have h₁ : ofAxioms 𝔸 ⊢ Γ.box.conj 🡒 Γ.box.box.conj := by
+    apply right_Fconj_intro;
+    intro B hB;
+    obtain ⟨C, hC, rfl⟩ := Finset.mem_image.mp hB;
+    obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hC;
+    exact C_trans (left_Fconj_intro hC) axiom4;
   have h₂ : ofAxioms 𝔸 ⊢ Γ.box.box.conj 🡒 □Γ.box.conj := box_conj;
   cl_prover [h₁, h₂];
 

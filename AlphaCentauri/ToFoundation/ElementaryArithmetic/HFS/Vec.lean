@@ -111,6 +111,9 @@ instance fstIdx_bounded : Bounded₁ (fstIdx : V → V) := ⟨‘x. x’, fun _ 
 
 instance sndIdx_bounded : Bounded₁ (sndIdx : V → V) := ⟨‘x. x’, fun _ ↦ by simp⟩
 
+lemma fstIdx_locallyDelta0 : LocallyDelta0Function₁ (fstIdx : V → V) :=
+  LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, fstIdx_definable⟩
+
 lemma exp_exp_add_two (n : V) :
     Exp.exp (Exp.exp (n + 2)) = (Exp.exp (Exp.exp n) * Exp.exp (Exp.exp n)) ^ 2 := by
   have : Exp.exp (n + 2) = 2 * (2 * Exp.exp n) := by

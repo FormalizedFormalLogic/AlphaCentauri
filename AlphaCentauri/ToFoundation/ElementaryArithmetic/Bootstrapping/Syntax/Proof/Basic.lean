@@ -357,13 +357,6 @@ instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 
 end code
 
-lemma fstIdx_locallyDelta0 : LocallyDelta0Function₁ (fstIdx : V → V) where
-  graph := LocallyDelta0.of_definable fstIdx_definable
-  bounded X := by
-    use X
-    intro v hv
-    exact le_trans (fstIdx_le_self _) (hv 0)
-
 variable {T U : Theory L} [T.Δ₁] [U.Δ₁]
 
 namespace Derivation

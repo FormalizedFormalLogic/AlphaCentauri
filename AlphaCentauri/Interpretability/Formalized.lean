@@ -1,0 +1,158 @@
+module
+
+public import AlphaCentauri.Bootstrapping.Interpretability.Interpretable
+public import AlphaCentauri.Bootstrapping.Proof.CutFree
+public import AlphaCentauri.ToFoundation.SententialAxioms
+public import Foundation.FirstOrder.Incompleteness.StandardProvability
+
+/-!
+# Formalized relative interpretability
+
+For an arithmetical theory $T$ with $\Delta_1$ axioms and sentences $\varphi, \psi$, the sentence
+`T.interpretability φ ψ` says that $T + \psi$ is interpretable in $T + \varphi$. The theory
+$\mathsf{I}\Sigma_1$ proves the arithmetical forms of the principles $\mathbf{J1}$–$\mathbf{J4}$ of
+interpretability logic for it.
+
+## References
+
+- [Vis90, §5.5, §6.1]
+-/
+
+@[expose] public section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+namespace FFL.FirstOrder.Arithmetic
+
+open Bootstrapping
+
+variable (T : ArithmeticTheory) [T.Δ₁]
+
+/-- The sentence saying that $T + \psi$ is interpretable in $T + \varphi$.
+- [Vis90, §5.5] -/
+noncomputable def _root_.FFL.FirstOrder.ArithmeticTheory.interpretability
+    (φ ψ : ArithmeticSentence) : ArithmeticSentence :=
+  interpretableDef ℒₒᵣ ℒₒᵣ (T ∪ {φ}) (T ∪ {ψ})
+
+variable {T}
+
+instance [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : ArithmeticSentence) : 𝗘𝗤 ℒₒᵣ ⪯ T ∪ {φ} :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ T) (inferInstance : T ⪯ T ∪ {φ})
+
+section model
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+lemma models_interpretability_iff {φ ψ : ArithmeticSentence} :
+    V↓[ℒₒᵣ] ⊧ T.interpretability φ ψ ↔ Interpretable V (T ∪ {φ}) (T ∪ {ψ}) := by
+  have : Nonempty V := ⟨0⟩
+  exact models_interpretableDef_iff
+
+lemma models_standardProvability_iff_provable {σ : ArithmeticSentence} :
+    V↓[ℒₒᵣ] ⊧ T.standardProvability σ ↔ Provable T (⌜σ⌝ : V) := by
+  simp [Arithmetic.standardProvability_def, models_iff]
+
+lemma consistent_union_singleton_iff {φ : ArithmeticSentence} :
+    (T ∪ {φ}).Consistent V ↔ ¬Provable T (⌜∼φ⌝ : V) := by
+  have h : Provable T (imp ℒₒᵣ (⌜φ⌝ : V) ⌜(⊥ : ArithmeticSentence)⌝) ↔ Provable T (⌜∼φ⌝ : V) := by
+    have e₁ : imp ℒₒᵣ (⌜φ⌝ : V) ⌜(⊥ : ArithmeticSentence)⌝ =
+        ((⌜φ⌝ : Bootstrapping.Formula V ℒₒᵣ) 🡒 ⊥).val := by
+      simp [Sentence.typed_quote_def, Sentence.quote_def]
+      rfl
+    have e₂ : (⌜∼φ⌝ : V) = (∼(⌜φ⌝ : Bootstrapping.Formula V ℒₒᵣ)).val := by
+      simp [Sentence.typed_quote_def, Sentence.quote_def]
+      rfl
+    rw [e₁, e₂, ← tprovable_iff_provable, ← tprovable_iff_provable]
+    constructor
+    · intro h
+      cl_prover [h]
+    · intro h
+      cl_prover [h]
+  rw [Theory.Consistent, Derivation.provable_union_singleton_iff, h]
+
+lemma union_singleton_shift_eq [Theory.Δ₁.Sentential T] {V : Type} [ORingStructure V]
+    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (φ : ArithmeticSentence) :
+    ∀ p ∈ (T ∪ {φ}).Δ₁Class (V := V), Bootstrapping.shift ℒₒᵣ p = p :=
+  Theory.Δ₁.Sentential.forall_shift_eq (T ∪ {φ})
+
+lemma quote_imp_sentence (φ ψ : ArithmeticSentence) :
+    (⌜φ 🡒 ψ⌝ : V) = imp ℒₒᵣ (⌜φ⌝ : V) ⌜ψ⌝ := by
+  rw [Semiformula.imp_eq, Sentence.quote_or, quote_neg_sentence]
+  rfl
+
+lemma provable_union_singleton_of_mem [𝗘𝗤 ℒₒᵣ ⪯ T] {φ : ArithmeticSentence} {p : V}
+    (hp : p ∈ T.Δ₁Class) (hf : IsFormula ℒₒᵣ p) : Provable (T ∪ {φ}) p :=
+  Derivable.toProvable <| Derivable.by_axm (by simp [hf]) p (by simp)
+    (Theory.Δ₁Class.mem_union.mpr (Or.inl hp))
+
+lemma interpretable_of_provable_imp [𝗘𝗤 ℒₒᵣ ⪯ T] {φ ψ : ArithmeticSentence}
+    (h : Provable T (⌜φ 🡒 ψ⌝ : V)) : Interpretable V (T ∪ {φ}) (T ∪ {ψ}) := by
+  obtain ⟨tbl, hT, htr⟩ := exists_isTranslationTable_provable_translate V (T ∪ {φ})
+  use tbl
+  refine { toIsTranslationTable := hT, translate_axiom := fun {p} hp hf ↦ htr p ?_ }
+  rcases Theory.Δ₁Class.mem_union.mp hp with hp | hp
+  · exact provable_union_singleton_of_mem hp hf
+  · rw [(Derivation.mem_deltaClass_singleton_iff ψ p).mp hp,
+      Derivation.provable_union_singleton_iff, ← quote_imp_sentence]
+    exact h
+
+end model
+
+/-- The arithmetical form of $\mathbf{J4}$: interpretability transfers consistency.
+- [Vis90, §6.1] -/
+theorem _root_.FFL.FirstOrder.ArithmeticTheory.consistent_of_interpretability
+    [𝗘𝗤 ℒₒᵣ ⪯ T] [Theory.Δ₁.Sentential T] {φ ψ : ArithmeticSentence} :
+    𝗜𝚺₁ ⊢ T.interpretability φ ψ 🡒 ∼T.standardProvability (∼φ) 🡒
+      ∼T.standardProvability (∼ψ) := by
+  apply Arithmetic.complete.{0}
+  intro V _ _
+  simp only [models_iff, LogicalConnective.HomClass.map_imply, LogicalConnective.HomClass.map_neg,
+    LogicalConnective.Prop.arrow_eq, LogicalConnective.Prop.neg_eq]
+  intro hI hφ
+  have hI := models_interpretability_iff.mp hI
+  have hφ := consistent_union_singleton_iff.mpr (models_standardProvability_iff_provable.not.mp hφ)
+  exact models_standardProvability_iff_provable.not.mpr <| consistent_union_singleton_iff.mp <|
+    hI.consistent (union_singleton_shift_eq φ) Language.SymbolsStandard.oRing hφ
+
+/-- The arithmetical form of $\mathbf{J1}$: provable implication yields interpretability.
+- [Vis90, §6.1] -/
+theorem _root_.FFL.FirstOrder.ArithmeticTheory.interpretability_of_provable [𝗘𝗤 ℒₒᵣ ⪯ T]
+    {φ ψ : ArithmeticSentence} :
+    𝗜𝚺₁ ⊢ T.standardProvability (φ 🡒 ψ) 🡒 T.interpretability φ ψ := by
+  apply Arithmetic.complete.{0}
+  intro V _ _
+  simp only [models_iff, LogicalConnective.HomClass.map_imply, LogicalConnective.Prop.arrow_eq]
+  intro h
+  exact models_interpretability_iff.mpr <| interpretable_of_provable_imp <|
+    models_standardProvability_iff_provable.mp h
+
+/-- The arithmetical form of $\mathbf{J2}$: interpretability is transitive.
+- [Vis90, §6.1] -/
+theorem _root_.FFL.FirstOrder.ArithmeticTheory.interpretability_trans [𝗘𝗤 ℒₒᵣ ⪯ T]
+    [Theory.Δ₁.Sentential T] {φ ψ χ : ArithmeticSentence} :
+    𝗜𝚺₁ ⊢ T.interpretability φ ψ ⋏ T.interpretability ψ χ 🡒 T.interpretability φ χ := by
+  apply Arithmetic.complete.{0}
+  intro V _ _
+  simp only [models_iff, LogicalConnective.HomClass.map_imply, LogicalConnective.HomClass.map_and,
+    LogicalConnective.Prop.arrow_eq, LogicalConnective.Prop.and_eq]
+  rintro ⟨h₁, h₂⟩
+  exact models_interpretability_iff.mpr <|
+    (models_interpretability_iff.mp h₁).trans (union_singleton_shift_eq φ)
+      (union_singleton_shift_eq ψ) (models_interpretability_iff.mp h₂)
+
+/-- The arithmetical form of $\mathbf{J3}$: interpretability in each disjunct yields
+interpretability in the disjunction.
+- [Vis90, §6.1] -/
+theorem _root_.FFL.FirstOrder.ArithmeticTheory.interpretability_or [𝗘𝗤 ℒₒᵣ ⪯ T]
+    [Theory.Δ₁.Sentential T] {φ ψ χ : ArithmeticSentence} :
+    𝗜𝚺₁ ⊢ T.interpretability φ χ ⋏ T.interpretability ψ χ 🡒 T.interpretability (φ ⋎ ψ) χ := by
+  apply Arithmetic.complete.{0}
+  intro V _ _
+  simp only [models_iff, LogicalConnective.HomClass.map_imply, LogicalConnective.HomClass.map_and,
+    LogicalConnective.Prop.arrow_eq, LogicalConnective.Prop.and_eq]
+  rintro ⟨h₁, h₂⟩
+  exact models_interpretability_iff.mpr <|
+    (models_interpretability_iff.mp h₁).union_or (Theory.Δ₁.Sentential.forall_shift_eq T)
+      (models_interpretability_iff.mp h₂)
+
+end FFL.FirstOrder.Arithmetic

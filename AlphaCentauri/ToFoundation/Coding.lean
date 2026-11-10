@@ -28,6 +28,27 @@ def SymbolsStandard (L : Language) [L.Encodable] [L.LORDefinable] (V : Type*) [O
   (∀ k r : V, L.IsRel k r → ∃ (k' : ℕ) (R : L.Rel k'), k = k' ∧ r = (⌜R⌝ : V)) ∧
   (∀ k f : V, L.IsFunc k f → ∃ (k' : ℕ) (F : L.Func k'), k = k' ∧ f = (⌜F⌝ : V))
 
+/-- Every relation and function symbol of arithmetic in `V` is a standard one. -/
+lemma SymbolsStandard.oRing {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
+    (ℒₒᵣ).SymbolsStandard V := by
+  constructor
+  · intro k r h
+    rcases Arithmetic.isRel_iff_LOR.mp h with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+    · use 2, Language.Eq.eq
+      simp
+    · use 2, Language.LT.lt
+      simp
+  · intro k f h
+    rcases Arithmetic.isFunc_iff_LOR.mp h with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+    · use 0, Language.Zero.zero
+      simp
+    · use 0, Language.One.one
+      simp
+    · use 2, Language.Add.add
+      simp
+    · use 2, Language.Mul.mul
+      simp
+
 end FFL.FirstOrder.Language
 
 namespace FFL.FirstOrder.Semisentence

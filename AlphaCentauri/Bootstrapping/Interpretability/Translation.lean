@@ -646,4 +646,54 @@ lemma translate_quote_sentence (h : IsTableOf π tbl) {n : ℕ} (σ : Semisenten
 
 end IsTableOf
 
+/-! ## Tables of translations of arithmetic -/
+
+section arithmeticTable
+
+/-- The entries of `arithmeticTable π` for relation symbols, indexed by the codes `⟪k, r⟫`. -/
+noncomputable def arithmeticRelationTable (π : DirectTranslation T ℒₒᵣ) : Fin 8 → V
+  | 6 => ⌜(π.rel Language.ORing.Rel.eq).sentence⌝
+  | 7 => ⌜(π.rel Language.ORing.Rel.lt).sentence⌝
+  | _ => 0
+
+/-- The entries of `arithmeticTable π` for function symbols, indexed by the codes `⟪k, f⟫`. -/
+noncomputable def arithmeticFunctionTable (π : DirectTranslation T ℒₒᵣ) : Fin 8 → V
+  | 0 => ⌜(π.func Language.ORing.Func.zero).sentence⌝
+  | 1 => ⌜(π.func Language.ORing.Func.one).sentence⌝
+  | 6 => ⌜(π.func Language.ORing.Func.add).sentence⌝
+  | 7 => ⌜(π.func Language.ORing.Func.mul).sentence⌝
+  | _ => 0
+
+/-- A table of the direct translation `π` of the language of arithmetic. -/
+noncomputable def arithmeticTable (π : DirectTranslation T ℒₒᵣ) : V :=
+  ?[⌜π.domain.sentence⌝, matrixToVec (arithmeticRelationTable π),
+    matrixToVec (arithmeticFunctionTable π)]
+
+private lemma nth_matrixToVec_pair {N : ℕ} (v : Fin N → V) (k r : ℕ) (h : Nat.pair k r < N) :
+    (matrixToVec v).[⟪(k : V), (r : V)⟫] = v ⟨Nat.pair k r, h⟩ := by
+  rw [← coe_pair_eq_pair_coe]
+  exact matrixToVec_nth v ⟨Nat.pair k r, h⟩
+
+theorem isTableOf_arithmeticTable (π : DirectTranslation T ℒₒᵣ) :
+    IsTableOf π (arithmeticTable (V := V) π) where
+  domain := by simp [tableDomain, arithmeticTable]
+  rel R := by
+    have h : (arithmeticTable (V := V) π).[1] = matrixToVec (arithmeticRelationTable π) := by
+      simp [arithmeticTable]
+    rw [tableRel, h]
+    cases R
+    · exact nth_matrixToVec_pair (V := V) (arithmeticRelationTable π) 2 0 (by decide)
+    · exact nth_matrixToVec_pair (V := V) (arithmeticRelationTable π) 2 1 (by decide)
+  func f := by
+    have h : (arithmeticTable (V := V) π).[2] = matrixToVec (arithmeticFunctionTable π) := by
+      simp [arithmeticTable, ← one_add_one_eq_two]
+    rw [tableFunc, h]
+    cases f
+    · exact nth_matrixToVec_pair (V := V) (arithmeticFunctionTable π) 0 0 (by decide)
+    · exact nth_matrixToVec_pair (V := V) (arithmeticFunctionTable π) 0 1 (by decide)
+    · exact nth_matrixToVec_pair (V := V) (arithmeticFunctionTable π) 2 0 (by decide)
+    · exact nth_matrixToVec_pair (V := V) (arithmeticFunctionTable π) 2 1 (by decide)
+
+end arithmeticTable
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

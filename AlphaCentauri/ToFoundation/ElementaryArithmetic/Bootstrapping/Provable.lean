@@ -24,6 +24,11 @@ section transfer
 
 open Bounding
 
+omit [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] in
+private lemma numeral_comp_elim :
+    (ORingStructure.numeral ∘ (Empty.elim : Empty → ℕ) : Empty → V) = Empty.elim :=
+  funext fun x ↦ x.elim
+
 /-- A function on `V` and a function on `ℕ` defined by the same $\Sigma_1$ formula agree on
 standard arguments. -/
 lemma natCast_apply_of_defined {k : ℕ} {F : 𝚺ᴬ₁.Semisentence (k + 1)}
@@ -35,9 +40,7 @@ lemma natCast_apply_of_defined {k : ℕ} {F : 𝚺ᴬ₁.Semisentence (k + 1)}
   have e : (ORingStructure.numeral ∘ (g a :> a) : Fin (k + 1) → V) =
       ((g a : V) :> fun i ↦ (a i : V)) := by
     funext i; cases i using Fin.cases <;> simp [numeral_eq_natCast]
-  have e' : (ORingStructure.numeral ∘ (Empty.elim : Empty → ℕ) : Empty → V) = Empty.elim :=
-    funext fun x ↦ x.elim
-  rw [e, e'] at hV
+  rw [e, numeral_comp_elim] at hV
   simpa [hf.iff, eq_comm] using hV
 
 /-- A predicate on `V` and a predicate on `ℕ` defined by the same $\Sigma_1$ formula: the second
@@ -48,9 +51,7 @@ lemma of_natCast_of_defined {k : ℕ} {F : 𝚺ᴬ₁.Semisentence k}
   have hV := bold_sigma_one_completeness (M := V) F.sigma_prop ((hQ.df a).mpr h)
   have e : (ORingStructure.numeral ∘ a : Fin k → V) = fun i ↦ (a i : V) := by
     funext i; simp [numeral_eq_natCast]
-  have e' : (ORingStructure.numeral ∘ (Empty.elim : Empty → ℕ) : Empty → V) = Empty.elim :=
-    funext fun x ↦ x.elim
-  rw [e, e'] at hV
+  rw [e, numeral_comp_elim] at hV
   simpa [hP.iff] using hV
 
 lemma natCast_qqAll (a : ℕ) : ((Arithmetic.Bootstrapping.qqAll a : ℕ) : V) = ^∀ (a : V) :=
@@ -189,25 +190,21 @@ theorem provable_natCast_quote_of_provable {σ : Sentence L} (h : T ⊢ σ) :
     (Arithmetic.Bootstrapping.provable T).sigma_prop hℕ'
   have e : (ORingStructure.numeral ∘ ![(⌜σ⌝ : ℕ)] : Fin 1 → V) = ![((⌜σ⌝ : ℕ) : V)] := by
     funext i; rw [Fin.fin_one_eq_zero i]; simp [numeral_eq_natCast]
-  have e' : (ORingStructure.numeral ∘ (Empty.elim : Empty → ℕ) : Empty → V) = Empty.elim :=
-    funext fun x ↦ x.elim
-  rw [e, e'] at hV
+  rw [e, numeral_comp_elim] at hV
   exact ((Provable.defined (T := T) (V := V)).df ![_]).mp (by simpa using hV)
 
 section codes
 
 variable (L)
 
-/-- The derivation of `{p(t)}` from a derivation `d` of `{∀ p}`: a cut on `∀ p` against
-`∃ ¬p, p(t)`, which follows from the axiom `¬p(t), p(t)`. -/
+/-- A derivation of `{p(t)}` from a derivation `d` of `{∀ p}`. -/
 noncomputable def specializeCode (d p t : V) : V :=
   cutRule {substs1 L t p} (^∀ p) (wkRule (insert (^∀ p) {substs1 L t p}) d)
     (exsIntro (insert (^∃ neg L p) {substs1 L t p}) (neg L p) t
       (axL (insert (neg L (substs1 L t p)) (insert (^∃ neg L p) {substs1 L t p}))
         (substs1 L t p)))
 
-/-- The derivation of `{b}` from derivations `d₁` of `{a → b}` and `d₂` of `{a}`: a cut on
-`¬a ∨ b` against `a ∧ ¬b, b`. -/
+/-- A derivation of `{b}` from derivations `d₁` of `{a → b}` and `d₂` of `{a}`. -/
 noncomputable def modusPonensCode (d₁ d₂ a b : V) : V :=
   cutRule {b} (imp L a b) (wkRule (insert (imp L a b) {b}) d₁)
     (andIntro (insert (a ^⋏ neg L b) {b}) a (neg L b)
@@ -264,6 +261,10 @@ private lemma le_exp_exp_add {a : V} (k : V) (h : a ≤ Exp.exp (Exp.exp n)) :
     a ≤ Exp.exp (Exp.exp (n + k)) :=
   le_trans h (exp_exp_le_of_le le_self_add)
 
+private lemma le_exp_exp_add_four {a : V} (h : a ≤ Exp.exp (Exp.exp n)) :
+    a ≤ Exp.exp (Exp.exp (n + 2 + 2)) := by
+  simpa [add_assoc] using le_exp_exp_add (2 + 2) h
+
 private lemma nine_le_exp_exp (hn : 2 ≤ n) : (9 : V) ≤ Exp.exp (Exp.exp n) := by
   have h2 : Exp.exp (2 : V) = 4 := by
     rw [show (2 : V) = 1 + 1 from one_add_one_eq_two.symm, exp_succ, exp_one]; norm_num
@@ -295,16 +296,21 @@ private lemma pair_le_of {a b m : V} (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp
 
 private lemma set3_le_exp_exp {N a b c : V} (ha : a ≤ N) (hb : b ≤ N) (hc : c ≤ N) :
     (insert a (insert b {c}) : V) ≤ Exp.exp (Exp.exp N) :=
-  set_le_exp_exp fun x hx ↦ by
+  set_le_exp_exp <| by
+    intro x hx
     rcases (by simpa using hx : x = a ∨ x = b ∨ x = c) with rfl | rfl | rfl <;> assumption
 
 private lemma set2_le_exp_exp {N a b : V} (ha : a ≤ N) (hb : b ≤ N) :
     (insert a {b} : V) ≤ Exp.exp (Exp.exp N) :=
-  set_le_exp_exp fun x hx ↦ by
+  set_le_exp_exp <| by
+    intro x hx
     rcases (by simpa using hx : x = a ∨ x = b) with rfl | rfl <;> assumption
 
 private lemma set1_le_exp_exp {N a : V} (ha : a ≤ N) : ({a} : V) ≤ Exp.exp (Exp.exp N) :=
-  set_le_exp_exp fun x hx ↦ by rw [(by simpa using hx : x = a)]; exact ha
+  set_le_exp_exp <| by
+    intro x hx
+    rw [(by simpa using hx : x = a)]
+    exact ha
 
 section rules
 
@@ -354,10 +360,9 @@ lemma specializeCode_le_exp_exp {n d p t : V} (hn : 2 ≤ n) (hN : specializeSiz
   simp only [specializeSize, max_le_iff] at hN
   obtain ⟨hA, hall, hex, hnp, hnA, ht⟩ := hN
   have hD1 := axL_le_exp_exp hn (set3_le_exp_exp hnA hex hA) (le_exp_exp hA)
-  have l4 {a : V} (h : a ≤ Exp.exp (Exp.exp n)) : a ≤ Exp.exp (Exp.exp (n + 2 + 2)) := by
-    simpa [add_assoc] using le_exp_exp_add (2 + 2) h
   have hD2 := exsIntro_le_exp_exp (n := n + 2 + 2) (le_trans hn (by simp [add_assoc]))
-    (l4 (set2_le_exp_exp hex hA)) (l4 (le_exp_exp hnp)) (l4 (le_exp_exp ht)) hD1
+    (le_exp_exp_add_four (set2_le_exp_exp hex hA)) (le_exp_exp_add_four (le_exp_exp hnp))
+    (le_exp_exp_add_four (le_exp_exp ht)) hD1
   have hD0 := wkRule_le_exp_exp hn (set2_le_exp_exp hall hA) hd
   have := cutRule_le_exp_exp (n := n + 2 + 2 + 2 + 2 + 2 + 2) (le_trans hn (by simp [add_assoc]))
     (le_trans (set1_le_exp_exp hA) (exp_exp_le_of_le (by simp [add_assoc])))
@@ -377,10 +382,9 @@ lemma modusPonensCode_le_exp_exp {n d₁ d₂ a b : V} (hn : 2 ≤ n) (hN : modu
   obtain ⟨himp, ha, hb, hand, hnb⟩ := hN
   have hwk := wkRule_le_exp_exp hn (set3_le_exp_exp ha hand hb) hd₂
   have hax := axL_le_exp_exp hn (set3_le_exp_exp hnb hand hb) (le_exp_exp hb)
-  have l4 {a : V} (h : a ≤ Exp.exp (Exp.exp n)) : a ≤ Exp.exp (Exp.exp (n + 2 + 2)) := by
-    simpa [add_assoc] using le_exp_exp_add (2 + 2) h
   have hand' := andIntro_le_exp_exp (n := n + 2 + 2) (le_trans hn (by simp [add_assoc]))
-    (l4 (set2_le_exp_exp hand hb)) (l4 (le_exp_exp ha)) (l4 (le_exp_exp hnb)) hwk hax
+    (le_exp_exp_add_four (set2_le_exp_exp hand hb)) (le_exp_exp_add_four (le_exp_exp ha))
+    (le_exp_exp_add_four (le_exp_exp hnb)) hwk hax
   have hwk₁ := wkRule_le_exp_exp hn (set2_le_exp_exp himp hb) hd₁
   have := cutRule_le_exp_exp (n := n + 2 + 2 + 2 + 2 + 2 + 2 + 2)
     (le_trans hn (by simp [add_assoc]))
@@ -391,55 +395,6 @@ lemma modusPonensCode_le_exp_exp {n d₁ d₂ a b : V} (hn : 2 ≤ n) (hN : modu
 
 end size
 
-section substitution
-
-lemma subst_imp {n m w p q : V} (hp : IsSemiformula L n p) (hq : IsSemiformula L n q)
-    (hw : IsSemitermVec L n m w) : subst L w (imp L p q) = imp L (subst L w p) (subst L w q) := by
-  simp [imp, hp.isUFormula, hq.isUFormula, substs_neg hp hw]
-
-lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec L j 0 w)
-    (hq : IsSemiformula L (j + 1) q) (ht : IsSemiterm L 0 t) :
-    substs1 L t (subst L (qVec L w) q) = subst L (t ∷ w) q := by
-  have h₁ : IsSemitermVec L 1 0 (?[t] : V) := by simp [ht]
-  have h₂ : IsSemitermVec L (j + 1) 1 (qVec L w) := by simpa using hw.qVec
-  rw [substs1, substs_substs hq h₁ h₂]
-  congr 1
-  apply nth_ext' (j + 1) (by simp [(h₁.termSubstVec h₂).lh]) (by simp [hw.lh])
-  intro i hi
-  rw [nth_termSubstVec h₂.isUTerm hi]
-  rcases zero_or_succ i with rfl | ⟨i, rfl⟩
-  · simp [qVec]
-  · have hi : i < j := by simpa using hi
-    rw [qVec, nth_adjoin_succ, hw.lh, nth_termBShiftVec hw.isUTerm hi,
-      substs_cons_bShift (hw.nth hi), substs_nil (hw.nth hi)]
-    simp
-
-variable {k : ℕ} {v : Fin k → V}
-
-lemma isSemitermVec_matrixToVec {n : V} :
-    IsSemitermVec L (k : V) n (matrixToVec v) ↔ ∀ i, IsSemiterm L n (v i) := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-    rw [matrixToVec_succ, Nat.cast_succ, IsSemitermVec.cons_iff, ih, Fin.forall_fin_succ]
-    rfl
-
-lemma isUTermVec_matrixToVec (hv : ∀ i, IsUTerm L (v i)) : IsUTermVec L (k : V) (matrixToVec v) :=
-  ⟨by simp, fun i hi ↦ by obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi; simpa using hv i⟩
-
-lemma termSubstVec_matrixToVec {w : V} (hv : ∀ i, IsUTerm L (v i)) :
-    termSubstVec L (k : V) w (matrixToVec v) = matrixToVec fun i ↦ termSubst L w (v i) := by
-  induction k with
-  | zero => simp
-  | succ k ih =>
-    rw [matrixToVec_succ, matrixToVec_succ, Nat.cast_succ,
-      termSubstVec_cons (t := Matrix.vecHead v) (hv 0)
-        (isUTermVec_matrixToVec (v := Matrix.vecTail v) fun i ↦ hv i.succ),
-      ih (v := Matrix.vecTail v) fun i ↦ hv i.succ]
-    rfl
-
-end substitution
-
 end
 
 section numerals
@@ -447,11 +402,6 @@ section numerals
 open FFL.FirstOrder Arithmetic
 
 variable {T : ArithmeticTheory} [T.Δ₁] [LocallyDelta0Axioms T V] {m : ℕ}
-
-lemma termSubst_qqAdd {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
-    termSubst ℒₒᵣ w (t ^+ u) = termSubst ℒₒᵣ w t ^+ termSubst ℒₒᵣ w u := by
-  rw [qqAdd, termSubst_func (by simp) (by simp [ht, hu])]
-  simp [qqAdd, ht, hu]
 
 lemma substNumerals_cons (φ x : V) (v : Fin m → V) :
     substNumerals φ (x :> v) = subst ℒₒᵣ (numeral x ∷ matrixToVec fun i ↦ numeral (v i)) φ :=
@@ -509,43 +459,6 @@ lemma provable_substNumerals_of_provable_allClosure {k : ℕ} (φ : ArithmeticSe
   | succ k ih =>
     rw [← Matrix.cons_head_tail v]
     exact provable_substNumerals_of_provable_substNumerals_all φ (ih (∀¹ φ) h _) _
-
-section prefixMax
-
-variable {f : V → V}
-
-/-- The largest of the values of `f` at the elements at most `x`. -/
-noncomputable def prefixMax (f : V → V) (x : V) : V :=
-  listMax (listMap (fun _ i ↦ f i) ![] (rangeList (x + 1)))
-
-variable (hf : LocallyDelta0Function₁ f)
-include hf
-
-lemma le_prefixMax {i x : V} (h : i ≤ x) : f i ≤ prefixMax f x := by
-  have hi : i < len (rangeList (x + 1)) := by simpa [lt_succ_iff_le] using h
-  have := nth_le_listMax (v := listMap (fun (_ : Fin 0 → V) i ↦ f i) ![] (rangeList (x + 1)))
-    (i := i) (by rwa [len_listMap hf])
-  rwa [nth_listMap hf _ _ hi, nth_rangeList (by simpa using hi)] at this
-
-lemma prefixMax_monotone {x y : V} (h : x ≤ y) : prefixMax f x ≤ prefixMax f y := by
-  apply listMaxss_le
-  intro i hi
-  rw [len_listMap hf] at hi
-  rw [nth_listMap hf _ _ hi, nth_rangeList (by simpa using hi)]
-  exact le_prefixMax hf (le_trans (lt_succ_iff_le.mp (by simpa using hi)) h)
-
-lemma prefixMax_locallyDelta0 : LocallyDelta0Function₁ (prefixMax f) := by
-  have := (listMap_locallyDelta0 (g := fun (_ : Fin 0 → V) i ↦ f i) hf).comp_cons
-    (rangeList_locallyDelta0.comp₁
-      (LocallyDelta0Function.add_one (LocallyDelta0Function.var (V := V) (0 : Fin 1))))
-    (u := ![]) finZeroElim
-  convert listMax_locallyDelta0.comp₁ this using 2 with u
-  simp only [prefixMax]
-  congr 2
-  funext j
-  exact j.elim0
-
-end prefixMax
 
 private lemma max_specializeSize_modusPonensSize_locallyDelta0 {S : V} {A : V → V}
     (hA : LocallyDelta0Function₁ A) :

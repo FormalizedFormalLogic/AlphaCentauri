@@ -76,6 +76,43 @@ def S (w x y : IndexedSet L Φ) : Prop :=
     □(∼C) ∈ x.set → w.seq ++ [C] <+: y.seq ∧ CriticalSuccessor C w.set y.set ∧ C ∉ y.set ∧
       □(∼C) ∈ y.set
 
+namespace S
+
+variable {w x y z : IndexedSet L Φ}
+
+lemma trans (h₁ : S w x y) (h₂ : S w y z) : S w x z := by
+  constructor;
+  · exact ⟨h₁.1.1, h₂.1.2⟩;
+  · intro C h₃ h₄ h₅;
+    obtain ⟨h₆, h₇, -, h₈⟩ := h₁.2 C h₃ h₄ h₅;
+    exact h₂.2 C h₆ h₇ h₈;
+
+lemma of_rel [Entailment.Cl L] (h₁ : w.Rel x) (h₂ : x.Rel y) : S w x y := by
+  constructor;
+  · exact ⟨h₁, h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩;
+  · intro C h₃ h₄ h₅;
+    exact ⟨h₃.trans h₂.2, h₄.trans_successor h₂.1, h₂.1.not_mem_of_box_neg_mem h₅,
+      h₂.1.box_mem_of_box_mem h₅⟩;
+
+/-- If `L` proves `C ▷ C` for every `C`, then `S w x y` holds as soon as `x` and `y` extend `w` and
+`y` is a `C`-critical successor of `w` indexed by `C` after the sequence of `w` whenever `x` is. -/
+lemma of_rhd_refl [Entailment.Cl L] [Adequate Φ] (hL : ∀ {A}, L ⊢ A ▷ A) (hx : w.Rel x)
+    (hy : w.Rel y) (h : ∀ C, w.seq ++ [C] <+: x.seq → CriticalSuccessor C w.set x.set →
+      w.seq ++ [C] <+: y.seq ∧ CriticalSuccessor C w.set y.set) : S w x y := by
+  constructor;
+  · exact ⟨hx, hy⟩;
+  · intro C h₁ h₂ _;
+    have hC : IsRhdOperand Φ C := x.isRhdOperand_of_mem_seq C <| h₁.subset (by simp);
+    have hCC : C ▷ C ∈ w.set :=
+      (mem_iff_provable (Adequate.rhd_mem hC hC)).mpr <| Context.of hL;
+    obtain ⟨h₃, h₄⟩ := h C h₁ h₂;
+    exact ⟨h₃, h₄, h₄.not_mem hCC, h₄.box_neg_mem hCC⟩;
+
+lemma refl [Entailment.Cl L] [Adequate Φ] (hL : ∀ {A}, L ⊢ A ▷ A) (h : w.Rel x) : S w x x :=
+  of_rhd_refl hL h h fun _ h₁ h₂ ↦ ⟨h₁, h₂⟩
+
+end S
+
 /-- The set `Δ` indexed by the sequence of `x`. -/
 def successor (x : IndexedSet L Φ) (Δ : MaximalConsistentSet L Φ) (h : Successor x.set Δ) :
     IndexedSet L Φ :=
@@ -123,26 +160,14 @@ instance [Adequate Φ] : (countermodel L Φ).IsILMinus where
 
 instance : (countermodel L Φ).IsJ2 where
   rel_of_s_right h := h.1.2
-  s_trans h₁ h₂ := ⟨⟨h₁.1.1, h₂.1.2⟩, fun C h₃ h₄ h₅ ↦
-    have h := h₁.2 C h₃ h₄ h₅;
-    h₂.2 C h.1 h.2.1 h.2.2.2⟩
+  s_trans := S.trans
 
 variable [Entailment.Cl L]
 
-instance : (countermodel L Φ).IsJ5 where
-  s_of_rel h₁ h₂ := ⟨⟨h₁, h₁.1.trans h₂.1, h₁.2.trans h₂.2⟩, fun _ h₃ h₄ h₅ ↦
-    ⟨h₃.trans h₂.2, h₄.trans_successor h₂.1, h₂.1.not_mem_of_box_neg_mem h₅,
-      h₂.1.box_mem_of_box_mem h₅⟩⟩
+instance : (countermodel L Φ).IsJ5 := ⟨S.of_rel⟩
 
-instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsJ1 where
-  s_refl {w x} h := by
-    constructor;
-    · exact ⟨h, h⟩;
-    · intro C h₁ h₂ h₃;
-      have hC : IsRhdOperand Φ C := x.isRhdOperand_of_mem_seq C <| h₁.subset (by simp);
-      have hCC : C ▷ C ∈ w.set := (mem_iff_provable (Adequate.rhd_mem hC hC)).mpr <|
-        Context.of <| WeakerThan.pbl (𝓢 := ILMinusJ1) ILMinusJ1.axiomJ1';
-      exact ⟨h₁, h₂, h₂.not_mem hCC, h₃⟩;
+instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsJ1 :=
+  ⟨S.refl <| WeakerThan.pbl (𝓢 := ILMinusJ1) ILMinusJ1.axiomJ1'⟩
 
 instance [Adequate Φ] [ILMinusJ1 ⪯ L] : (countermodel L Φ).IsIL where
   rel_of_s_left := IsILMinus.rel_of_s_left

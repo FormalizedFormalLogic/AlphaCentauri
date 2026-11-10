@@ -206,6 +206,23 @@ DAq05:
       title: Lecture Notes in Logic
       volume: 18
 
+dJV90:
+  type: Chapter
+  title: Provability Logics for Relative Interpretability
+  author: ["de Jongh, Dick", "Veltman, Frank"]
+  page-range: 31-42
+  date: 1990
+  serial-number:
+    doi: "10.1007/978-1-4613-0609-2_3"
+  parent:
+    type: Anthology
+    title: Mathematical Logic
+    editor: "Petkov, Petio P."
+    date: 1990
+    publisher:
+      name: Plenum Press
+      location: New York
+
 ELV25:
   type: Article
   title: Completions of restricted complexity I, weak arithmetical theories

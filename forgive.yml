@@ -91,6 +91,15 @@ declaration:
   FFL.FirstOrder.not_provable_fermatLastTheorem_IOpen:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.Arithmetic.not_provable_fermatLastTheoremCaseOne_IOpen_of_models_ZRing:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.not_provable_fermatLastTheoremCaseOne_seven_IOpen:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.exists_not_provable_fermatLastTheoremCaseOne_IOpen:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
   FFL.FirstOrder.Arithmetic.provable_univCl_IOpen_iff:
     forgive:
       - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen

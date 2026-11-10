@@ -80,6 +80,44 @@ theorem relativizedImp_congr {k : ℕ} (d : Semiformula V L 1) (A B : Fin k → 
       (all_iff_imp_all_imp_imp_right d (A i) (B i))
   cl_prover [h₁, h₂]
 
+variable [L.Eq] [𝗘𝗤 L ⪯ T]
+
+/-- If every instance of the domain `d` is provable and `X` is preserved by equal arguments, then
+`∀ w⃗ (⋀ᵢ (d(wᵢ) ∧ wᵢ = uᵢ) → X(w⃗))` is provably equivalent to `X(u⃗)`. -/
+lemma tprovable_relativizedImp_equal_iff {k : ℕ} (d : Semiformula V L 1)
+    (hd : ∀ t : Term V L, T.internalize V ⊢ d.subst ![t]) (u : Fin k → Term V L)
+    (X : Semiformula V L k)
+    (hX : ∀ (j : ℕ) (s w : Fin k → Term V L), T.internalize V ⊢
+      Matrix.conj (fun i ↦ Semiformula.equal (s i) (w i)) 🡒
+        (Semiformula.shift^[j] X).subst w 🡒 (Semiformula.shift^[j] X).subst s) :
+    T.internalize V ⊢ relativizedImp d (fun i ↦ Semiformula.equal (Semiterm.bvar 0) (u i).bShift)
+      (X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) 🡘 X.subst u := by
+  have h₁ := TProof.allItr_specialize (T := T) (Matrix.conj (fun i : Fin k ↦
+      d.subst ![Semiterm.bvar (i.addCast 0)] ⋏
+        (Semiformula.equal (Semiterm.bvar 0) (u i).bShift).subst ![Semiterm.bvar (i.addCast 0)]) 🡒
+      X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) (fun j ↦ u (Fin.cast (zero_add k) j))
+  simp [Semiformula.substs_substs, Semiterm.bShift_substs_succ, Semiterm.substs_substs] at h₁
+  have hc : T.internalize V ⊢ Matrix.conj fun i ↦ d.subst ![u i] ⋏ Semiformula.equal (u i) (u i) :=
+    tprovable_conj T fun i ↦ K_intro (hd (u i)) (tprovable_equal_refl T (u i))
+  have h₂ : T.internalize V ⊢ X.subst u 🡒 relativizedImp d
+      (fun i ↦ Semiformula.equal (Semiterm.bvar 0) (u i).bShift)
+      (X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) := by
+    unfold relativizedImp
+    apply TProof.allItr_generalize_imp
+    simp [Semiformula.substs_substs, Semiterm.bShift_substs_succ,
+      Semiterm.shift_iterate_subst_nil, Semiterm.subst_nil_subst]
+    have h₃ := hX k (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) (fun i ↦ Semiterm.shift^[k] (u i))
+    have h₄ := matrixConj_imp_matrixConj (𝓢 := T.internalize V) (φ := ⊤)
+      (v := fun i : Fin k ↦ (Semiformula.shift^[k] d).subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+        Semiformula.equal (Semiterm.fvar ((i : ℕ) : V)) (Semiterm.shift^[k] (u i)))
+      (u := fun i : Fin k ↦
+        Semiformula.equal (Semiterm.fvar ((i : ℕ) : V)) (Semiterm.shift^[k] (u i)))
+      fun i ↦ by cl_prover
+    cl_prover [h₃, h₄]
+  unfold relativizedImp at h₂ ⊢
+  simp [Semiterm.bShift_substs_succ] at h₂ ⊢
+  cl_prover [h₁, h₂, hc]
+
 end relativizedImp
 
 section defines

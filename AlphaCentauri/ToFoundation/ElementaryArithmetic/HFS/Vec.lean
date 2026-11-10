@@ -102,6 +102,32 @@ instance fstIdx_bounded : Bounded₁ (fstIdx : V → V) := ⟨‘x. x’, fun _ 
 
 instance sndIdx_bounded : Bounded₁ (sndIdx : V → V) := ⟨‘x. x’, fun _ ↦ by simp⟩
 
+lemma exp_exp_add_two (n : V) :
+    Exp.exp (Exp.exp (n + 2)) = (Exp.exp (Exp.exp n) * Exp.exp (Exp.exp n)) ^ 2 := by
+  have : Exp.exp (n + 2) = 2 * (2 * Exp.exp n) := by
+    rw [← one_add_one_eq_two, ← add_assoc, exp_succ, exp_succ, one_add_one_eq_two]
+  rw [this, exp_even, exp_even, sq, mul_pow]
+
+/-- A pair of elements below `Exp.exp (Exp.exp n)` lies below `Exp.exp (Exp.exp (n + 2))`. -/
+lemma adjoin_le_exp_exp {a b n : V} (hn : 1 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
+    (hb : b ≤ Exp.exp (Exp.exp n)) : a ∷ b ≤ Exp.exp (Exp.exp (n + 2)) := by
+  set E := Exp.exp (Exp.exp n)
+  have hE : 2 * 2 ≤ E := by
+    have h2 : 2 ≤ Exp.exp n := by simpa using exp_monotone_le.mpr hn
+    have : Exp.exp (1 + 1 : V) = 2 * 2 := by rw [exp_succ, exp_one]
+    rw [← this, one_add_one_eq_two]
+    exact exp_monotone_le.mpr h2
+  have hE₁ : 1 ≤ E := one_le_exp _
+  have hlt : a + b + 1 < E * E := calc
+    a + b + 1 ≤ E + E + E := add_le_add (add_le_add ha hb) hE₁
+    _ < E + E + E + E := lt_add_of_pos_right _ (lt_of_lt_of_le (by simp) hE₁)
+    _ = (2 * 2) * E := by rw [two_mul, add_mul, two_mul]; simp [add_assoc]
+    _ ≤ E * E := mul_le_mul_of_nonneg_right hE (by simp)
+  have : ⟪a, b⟫ < (E * E) ^ 2 :=
+    lt_of_le_of_lt (pair_polybound a b) (pow_lt_pow_left₀ hlt (by simp) (by simp))
+  rw [exp_exp_add_two, adjoin_def]
+  exact lt_iff_succ_le.mp this
+
 end adjoin
 
 /-! ### The `i`-th element of a list -/

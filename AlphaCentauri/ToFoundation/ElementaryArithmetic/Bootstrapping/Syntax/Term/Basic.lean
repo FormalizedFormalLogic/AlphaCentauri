@@ -365,6 +365,121 @@ lemma induction {P : V → Prop} (hP : LocallyDelta0Pred P)
 
 end IsUTerm
 
+section structuralBound
+
+variable {c : V}
+
+private lemma exp_exp_le_of_le {m n : V} (h : m ≤ n) :
+    Exp.exp (Exp.exp m) ≤ Exp.exp (Exp.exp n) :=
+  exp_monotone_le.mpr (exp_monotone_le.mpr h)
+
+/-- A list whose elements are bounded by `Exp.exp (Exp.exp (8 * vᵢ + c))` for the elements `vᵢ`
+of a list `v` of the same length is bounded by `Exp.exp (Exp.exp (8 * v + c))`. -/
+lemma le_exp_exp_of_nth_le_exp_exp (hc : 1 ≤ c) {v w : V} (hl : len w = len v)
+    (h : ∀ i < len v, w.[i] ≤ Exp.exp (Exp.exp (8 * v.[i] + c))) :
+    w ≤ Exp.exp (Exp.exp (8 * v + c)) := by
+  have hmul : LocallyDelta0Function₂ ((· * ·) : V → V → V) :=
+    LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
+  have hG' {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
+      LocallyDelta0Function fun u ↦ Exp.exp (Exp.exp (8 * g u + c)) :=
+    LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
+      LocallyDelta0Function.add.comp₂ (hmul.comp₂ (LocallyDelta0Function.const 8) hg)
+        (LocallyDelta0Function.const c)
+  set W := w
+  have hP : LocallyDelta0Pred fun v ↦ ∀ w ≤ W, len w = len v →
+      (∀ i < len v, w.[i] ≤ Exp.exp (Exp.exp (8 * v.[i] + c))) →
+        w ≤ Exp.exp (Exp.exp (8 * v + c)) := by
+    have hentry : LocallyDelta0 fun x : Fin 3 → V ↦
+        x 0 < len (x 2) → (x 1).[x 0] ≤ Exp.exp (Exp.exp (8 * (x 2).[x 0] + c)) :=
+      (LocallyDelta0.lt (LocallyDelta0Function.var 0)
+        (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 2))).imp
+        (LocallyDelta0.le (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
+          (LocallyDelta0Function.var 0))
+          (hG' (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 2)
+            (LocallyDelta0Function.var 0))))
+    have hall := LocallyDelta0.ball_le_function
+      (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (V := V) (1 : Fin 2))) hentry
+    have hbody : LocallyDelta0 fun y : Fin 2 → V ↦ len (y 0) = len (y 1) →
+        (∀ i ≤ len (y 1), i < len (y 1) →
+          (y 0).[i] ≤ Exp.exp (Exp.exp (8 * (y 1).[i] + c))) →
+        y 0 ≤ Exp.exp (Exp.exp (8 * y 1 + c)) :=
+      (LocallyDelta0.eq (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
+        (len_locallyDelta0.comp₁ (LocallyDelta0Function.var 1))).imp
+        (hall.imp (LocallyDelta0.le (LocallyDelta0Function.var 0)
+          (hG' (LocallyDelta0Function.var 1))))
+    exact (LocallyDelta0.ball_le_function (LocallyDelta0Function.const W) hbody).of_iff
+      fun u ↦ by
+        simp only [Matrix.cons_val_zero]
+        constructor
+        · intro H w hw hl h; exact H w hw hl fun i hi ↦ h i hi.le hi
+        · intro H w hw hl h; exact H w hw hl fun i _ hi ↦ h i hi
+  have : ∀ v, ∀ w ≤ W, len w = len v →
+      (∀ i < len v, w.[i] ≤ Exp.exp (Exp.exp (8 * v.[i] + c))) →
+        w ≤ Exp.exp (Exp.exp (8 * v + c)) := by
+    apply adjoin_induction hP
+    · intro w _ hl _
+      simp [show w = 0 by simpa using hl]
+    · intro x v ih w hw hl h
+      rcases nil_or_adjoin w with (rfl | ⟨a, w', rfl⟩)
+      · exact zero_le
+      have hl' : len w' = len v := by simpa using hl
+      have ha : a ≤ Exp.exp (Exp.exp (8 * x + c)) := by simpa using h 0 (by simp)
+      have hw' : w' ≤ Exp.exp (Exp.exp (8 * v + c)) :=
+        ih w' (le_trans (lt_adjoin' a w').le hw) hl' fun i hi ↦ by
+          simpa using h (i + 1) (by simpa using hi)
+      set m := max x v
+      have hm : 8 * m + c + 2 ≤ 8 * (x ∷ v) + c := by
+        have : m + 1 ≤ x ∷ v := succ_le_iff_lt.mpr (max_lt (by simp) (by simp))
+        have h28 : (2 : V) ≤ 8 := by
+          have : ((2 : ℕ) : V) ≤ ((8 : ℕ) : V) := by exact_mod_cast (by norm_num : 2 ≤ 8)
+          simpa using this
+        calc 8 * m + c + 2 ≤ 8 * m + c + 8 := add_le_add_right h28 _
+          _ = 8 * (m + 1) + c := by grind
+          _ ≤ 8 * (x ∷ v) + c := by gcongr
+      apply le_trans _ (exp_exp_le_of_le hm)
+      apply adjoin_le_exp_exp (le_trans hc le_add_self)
+      · exact le_trans ha (exp_exp_le_of_le (by gcongr; exact le_max_left x v))
+      · exact le_trans hw' (exp_exp_le_of_le (by gcongr; exact le_max_right x v))
+  exact this v w le_rfl hl h
+
+/-- `^func k f w` is bounded by `Exp.exp (Exp.exp (8 * ^func k f v + c))` when `w` is bounded by
+`Exp.exp (Exp.exp (8 * v + c))`. -/
+lemma qqFunc_le_exp_exp (hc : 1 ≤ c) {k f v w : V} (hw : w ≤ Exp.exp (Exp.exp (8 * v + c))) :
+    ^func k f w ≤ Exp.exp (Exp.exp (8 * ^func k f v + c)) := by
+  set m := max k (max f v)
+  set E := Exp.exp (Exp.exp (8 * m + c))
+  have hpa (a b : V) : ⟪a, b⟫ ≤ a ∷ b := by rw [adjoin_def]; exact le_self_add
+  have hn : (1 : V) ≤ 8 * m + c := le_trans hc le_add_self
+  have hmle : m ≤ 8 * m + c :=
+    le_trans (le_mul_of_one_le_left (by simp) (by norm_num)) le_self_add
+  have hk : k ≤ E := le_exp_exp (le_trans (le_max_left _ _) hmle)
+  have hf : f ≤ E := le_exp_exp (le_trans (le_trans (le_max_left f v) (le_max_right _ _)) hmle)
+  have hw' : w ≤ E :=
+    le_trans hw (exp_exp_le_of_le (by gcongr; exact le_trans (le_max_right f v) (le_max_right _ _)))
+  have h₁ : ⟪f, w⟫ ≤ Exp.exp (Exp.exp (8 * m + c + 2)) :=
+    le_trans (hpa f w) (adjoin_le_exp_exp hn hf hw')
+  have h₂ : ⟪k, ⟪f, w⟫⟫ ≤ Exp.exp (Exp.exp (8 * m + c + 2 + 2)) :=
+    le_trans (hpa _ _) (adjoin_le_exp_exp (le_trans hn le_self_add)
+      (le_trans hk (exp_exp_le_of_le le_self_add)) h₁)
+  have h₃ : ^func k f w ≤ Exp.exp (Exp.exp (8 * m + c + 2 + 2 + 2)) := by
+    have : ^func k f w = 2 ∷ ⟪k, ⟪f, w⟫⟫ := rfl
+    rw [this]
+    apply adjoin_le_exp_exp (le_trans hn (le_trans le_self_add le_self_add))
+    · exact le_exp_exp le_add_self
+    · exact h₂
+  apply le_trans h₃ (exp_exp_le_of_le _)
+  have : m + 1 ≤ ^func k f v :=
+    succ_le_iff_lt.mpr (max_lt (by simp) (max_lt (by simp) (by simp)))
+  have h68 : (2 : V) + 2 + 2 ≤ 8 := by
+    rw [show (2 : V) + 2 + 2 = 6 by norm_num]
+    exact_mod_cast (by norm_num : (6 : ℕ) ≤ 8)
+  calc 8 * m + c + 2 + 2 + 2 = (8 * m + c) + (2 + 2 + 2) := by simp only [add_assoc]
+    _ ≤ (8 * m + c) + 8 := add_le_add_right h68 _
+    _ = 8 * (m + 1) + c := by grind
+    _ ≤ 8 * ^func k f v + c := by gcongr
+
+end structuralBound
+
 end term
 
 namespace Language.TermRec

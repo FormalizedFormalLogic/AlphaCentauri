@@ -329,14 +329,6 @@ variable {S}
 
 lemma HenkinSet.isFormula {x : V} (h : HenkinSet S x) : IsFormula L x := h.1
 
-private lemma neg_henkinFormula_mem_henkinContext (n : V) :
-    neg L (henkinFormula L n (n + henkinContext S n)) ∈ henkinContext S (n + 1) := by
-  simp [henkinContext_succ, henkinStep]
-
-private lemma mem_henkinContext_succ_of_mem {n x : V} (h : x ∈ henkinContext S n) :
-    x ∈ henkinContext S (n + 1) := by
-  simp [henkinContext_succ, henkinStep, h]
-
 private lemma mem_henkinContext_decision (n : V) :
     (open Classical in
       if Derivable S (insert (neg L (henkinFormula L n (n + henkinContext S n)))
@@ -380,7 +372,7 @@ private lemma mem_henkinContext_of_le {n m x : V} (hnm : n ≤ m) (h : x ∈ hen
   · simpa using h
   · intro k ih
     rw [← add_assoc]
-    exact mem_henkinContext_succ_of_mem ih
+    simp [henkinContext_succ, henkinStep, ih]
 
 private lemma exists_forall_mem_henkinContext {s : V}
     (h : ∀ p ∈ s, ∃ m : V, p ∈ henkinContext S m) :
@@ -494,7 +486,7 @@ theorem HenkinSet.henkinFormula_henkinContext (n : V) :
     HenkinSet S (henkinFormula L n (n + henkinContext S n)) := by
   have hH := isFormula_henkinFormula (L := L) n (n + henkinContext S n)
   exact henkinSet_of_forall_mem hS hcons (s := {neg L (henkinFormula L n (n + henkinContext S n))})
-    hH ⟨n + 1, by simpa using neg_henkinFormula_mem_henkinContext n⟩
+    hH ⟨n + 1, by simp [henkinContext_succ, henkinStep]⟩
     (.em (by simp [hH]) (henkinFormula L n (n + henkinContext S n)) (by simp) (by simp))
 
 /-- The Henkin set is closed under modus ponens. -/

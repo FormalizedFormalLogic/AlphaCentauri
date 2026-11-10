@@ -284,9 +284,6 @@ lemma translate_map (φ : Semiformula L₂ ξ₁ n₁) :
   | hall _ ih => simp [translate_all, fal, Rew.q_map, ih]
   | hexs _ ih => simp [translate_ex, exs, Rew.q_map, ih]
 
-lemma translate_bShift (φ : Semiformula L₂ ξ₁ n₁) :
-    Rew.bShift ▹ π.translate φ = π.translate (Rew.bShift ▹ φ) := translate_map π Fin.succ id φ
-
 lemma translate_shift (φ : Semiproposition L₂ n₁) :
     Rewriting.shift (π.translate φ) = π.translate (Rewriting.shift φ) :=
   translate_map π id Nat.succ φ
@@ -341,24 +338,6 @@ abbrev orCases (φ : Sentence L₁) [𝗘𝗤 _ ⪯ insert φ T] [𝗘𝗤 _ ⪯
         (models_of_provable hT' (π₀.interpret_theory σ hσ))
     · exact (DirectTranslation.ite_translate_iff' φ π₀.trln π₁.trln hφ' σ).mpr
         (models_of_provable hT' (π₁.interpret_theory σ hσ))
-
-/-- An interpretation is faithful when provability of a translated sentence in `T` implies
-provability of the sentence itself in `U`.
-- [Lin97, §6.2 p. 84]
-- [HP98, Definition III.1.9] -/
-def Faithful (π : T ⊳ U) : Prop := ∀ σ : Sentence L₂, T ⊢ π.translate σ → U ⊢ σ
-
-/-- An interpretation is faithful on `Γ` when the implication of `Faithful` holds for sentences
-in `Γ`.
-- [Lin97, §6.2 p. 84]
-- [HP98, Definition III.1.9] -/
-def FaithfulOn (π : T ⊳ U) (Γ : Set (Sentence L₂)) : Prop := ∀ σ ∈ Γ, T ⊢ π.translate σ → U ⊢ σ
-
-lemma Faithful.faithfulOn {π : T ⊳ U} (h : π.Faithful) (Γ : Set (Sentence L₂)) : π.FaithfulOn Γ :=
-  fun σ _ ↦ h σ
-
-lemma Faithful.of_faithfulOn_univ {π : T ⊳ U} (h : π.FaithfulOn Set.univ) : π.Faithful :=
-  fun σ ↦ h σ (Set.mem_univ σ)
 
 end DirectInterpretation
 

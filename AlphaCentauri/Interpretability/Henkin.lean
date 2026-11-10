@@ -1,23 +1,26 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Completeness.Henkin
+public import AlphaCentauri.Bootstrapping.Henkin
+public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
+public import Foundation.FirstOrder.Incompleteness.Second
 
 /-!
-# Interpretation of a theory in itself plus its consistency
+# Henkin interpretations and Feferman's theorem
 
 The translation of a language $L$ into arithmetic given by the Henkin set of a theory $S$, over
 any arithmetical theory containing $\mathsf{PA}$ and the consistency of $S$. In its model, a
 formula is true of representatives of free variables exactly when the formula with those free
 variables substituted is in the Henkin set. Hence a theory $S$ with a $\Delta_1$ numeration and
 the equality axioms is interpretable in $T + \mathrm{Con}_S$ for every arithmetical theory
-$T \supseteq \mathsf{PA}$.
+$T \supseteq \mathsf{PA}$. Feferman's theorem follows: $T + \neg\mathrm{Con}_T$ is interpretable
+in $T$.
 
 ## References
 
-- [Lin97, Theorem 6.4]
-- [HP98, Theorem I.4.27], [HP98, 2.43]
+- [Lin97, Theorem 6.4], [Lin97, Theorem 6.8]
+- [HP98, Theorem I.4.27], [HP98, 2.43], [HP98, Lemma III.4.9]
 -/
 
 @[expose] public section
@@ -51,11 +54,6 @@ lemma consistent_of_models_con {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] �
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔]
   (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (hcons : S.Consistent V)
-
-omit [Theory.Δ₁.Sentential S] [𝗘𝗤 L ⪯ S] [𝗣𝗔 ⪯ T] in
-/-- The domain of the Henkin translation is nonempty in every model of $\mathsf{PA}$. -/
-lemma henkinDomain_nonempty : ∃ x : V, (henkinDomain S).val ![x] :=
-  ⟨0, (henkinDomain_val S 0).mpr fun _ h ↦ absurd h (by simp)⟩
 
 omit [Theory.Δ₁.Sentential S] in
 include hS hcons in
@@ -103,7 +101,8 @@ noncomputable def henkinTranslation : DirectTranslation (T ∪ S.Con) L where
   rel := henkinRel S
   func := henkinFunc S
   domain_nonempty := provable_of_models_henkin S T _ fun _ _ _ _ _ ↦
-    (DirectTranslation.models_domainNonempty_iff _).mpr (henkinDomain_nonempty S)
+    (DirectTranslation.models_domainNonempty_iff _).mpr
+      ⟨0, (henkinDomain_val S 0).mpr fun _ h ↦ absurd h (by simp)⟩
   func_defined f := provable_of_models_henkin S T _ fun _ _ _ hS hcons ↦
     (DirectTranslation.models_funcDefined_iff _ _).mpr fun e _ ↦
       henkinFunc_existsUnique S hS hcons f e
@@ -285,5 +284,76 @@ noncomputable abbrev henkinInterpretation : T ∪ S.Con ⊳ S :=
     ).ofWeakerThanLeft
 
 end interpretation
+
+section feferman
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+open FFL.Entailment
+
+variable (T : ArithmeticTheory) [T.Δ₁]
+
+variable [𝗣𝗔 ⪯ T]
+
+open Bootstrapping ProvabilityAbstraction
+
+/-- $\mathsf{I}\Sigma_1$ proves that $\mathrm{Con}_T$ implies
+$\mathrm{Con}_{T + \neg\mathrm{Con}_T}$.
+- [HP98, Lemma III.4.9] -/
+private lemma provable_consistent_imp_consistent_union_incon [𝗜𝚺₁ ⪯ T] :
+    𝗜𝚺₁ ⊢ T.consistent.val 🡒 (T ∪ T.Incon).consistent.val := by
+  have h₁ : 𝗜𝚺₁ ⊢ T.standardProvability.con 🡒
+      ∼T.standardProvability (∼T.standardProvability.con 🡒 ⊥) :=
+    formalized_not_con_unrefutable T.standardProvability
+  apply complete.{0}
+  intro (V : Type) _ _
+  have e₁ := models_of_provable (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁) h₁
+  simp only [Provability.con, Provability.pr, Semantics.Imp.models_imply,
+    Semantics.Not.models_not, models_iff, Semiformula.eval_substs, Matrix.comp₁,
+    Sentence.val_quote, Bounding.HierarchySymbol.Defined.iff, Fin.Fin1.eq_one, Fin.isValue,
+    Matrix.cons_val_fin_one, consistent.defined] at e₁ ⊢
+  intro hc hU
+  have hq : (⌜∼T.consistent.val 🡒 ⊥⌝ : V) =
+      imp ℒₒᵣ ⌜∼T.consistent.val⌝ ⌜(⊥ : ArithmeticSentence)⌝ := by
+    simp [Sentence.quote_eq]
+  have hp : Provable T (⌜∼T.consistent.val 🡒 ⊥⌝ : V) := by
+    rw [hq, ← Derivation.provable_union_singleton_iff]
+    exact hU
+  exact e₁ hc hp
+
+private lemma provable_consistent_union_incon : T ∪ T.Con ⊢ (T ∪ T.Incon).consistent.val := by
+  have : 𝗜𝚺₁ ⪯ T := (inferInstance : 𝗜𝚺₁ ⪯ 𝗣𝗔).trans inferInstance
+  have : 𝗜𝚺₁ ⪯ T ∪ T.Con := (inferInstance : 𝗜𝚺₁ ⪯ T).trans inferInstance
+  exact WeakerThan.pbl (provable_consistent_imp_consistent_union_incon T) ⨀ by_axm (by simp)
+
+/-- Feferman's theorem: $T + \neg\mathrm{Con}_T$ is interpretable in $T$.
+
+- [Lin97, Theorem 6.8]
+- [HP98, Lemma III.4.9] -/
+noncomputable abbrev interpretation_incon : T ⊳ T ∪ T.Incon := by
+  have : 𝗣𝗔 ⪯ T ∪ T.Con :=
+    (inferInstance : 𝗣𝗔 ⪯ T).trans (WeakerThan.ofSubset Set.subset_union_left)
+  have : 𝗣𝗔 ⪯ T ∪ T.Incon :=
+    (inferInstance : 𝗣𝗔 ⪯ T).trans (WeakerThan.ofSubset Set.subset_union_left)
+  have hCon : T ∪ T.Con ⪯ insert T.consistent.val T :=
+    WeakerThan.ofSubset (by rintro σ (hσ | rfl) <;> simp [*])
+  have : 𝗣𝗔 ⪯ insert T.consistent.val T := (inferInstance : 𝗣𝗔 ⪯ T ∪ T.Con).trans hCon
+  have : 𝗣𝗔 ⪯ insert (∼T.consistent.val) T :=
+    (inferInstance : 𝗣𝗔 ⪯ T).trans (WeakerThan.ofSubset (Set.subset_insert _ _))
+  have hw : T ∪ T.Con ∪ (T ∪ T.Incon).Con ⪯ insert T.consistent.val T :=
+    WeakerThan.ofAxm! <| by
+      rintro σ ((hσ | rfl) | rfl)
+      · exact by_axm <| Set.mem_insert_of_mem _ hσ
+      · exact by_axm (by simp)
+      · exact WeakerThan.pbl (provable_consistent_union_incon T)
+  have hU : T ∪ T.Incon ⪯ insert (∼T.consistent.val) T :=
+    WeakerThan.ofSubset (by rintro σ (hσ | rfl) <;> simp [*])
+  have h₁ : insert T.consistent.val T ⊳ T ∪ T.Incon :=
+    (henkinInterpretation (T ∪ T.Incon) (T ∪ T.Con)).ofWeakerThanLeft
+  have h₂ : insert (∼T.consistent.val) T ⊳ T ∪ T.Incon :=
+    (DirectInterpretation.refl (T ∪ T.Incon)).ofWeakerThanLeft
+  exact h₁.orCases T.consistent.val h₂
+
+end feferman
 
 end FFL.FirstOrder.Arithmetic

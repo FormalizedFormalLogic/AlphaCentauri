@@ -262,6 +262,15 @@ lemma comp₃ {R : (Fin 3 → V) → Prop} {f f' f'' : (Fin k → V) → V} (h :
     fun _ ↦ iff_of_eq <| congrArg R <|
       funext (Fin.cases rfl (Fin.cases rfl (Fin.cases rfl finZeroElim)))
 
+lemma pred_comp {P : V → Prop} (h : LocallyDelta0Pred P) (hf : LocallyDelta0Function f) :
+    LocallyDelta0 fun v ↦ P (f v) :=
+  (h.comp (f := fun _ ↦ f) fun _ ↦ hf).of_iff fun _ ↦ Iff.rfl
+
+lemma rel_comp₂ {R : V → V → Prop} {f f' : (Fin k → V) → V} (h : LocallyDelta0Rel R)
+    (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+    LocallyDelta0 fun v ↦ R (f v) (f' v) :=
+  (h.comp₂ hf hf').of_iff fun _ ↦ Iff.rfl
+
 lemma eq {f' : (Fin k → V) → V} (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
     LocallyDelta0 fun v ↦ f v = f' v :=
   (of_definable (R := fun w : Fin 2 → V ↦ w 0 = w 1) (by definability)).comp₂ hf hf'

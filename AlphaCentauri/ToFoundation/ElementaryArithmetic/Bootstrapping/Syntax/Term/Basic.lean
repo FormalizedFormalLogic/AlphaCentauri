@@ -1173,4 +1173,295 @@ end Construction
 
 end Language.TermRec
 
+namespace IsUTerm.BV
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.IsUTerm.BV (blueprint) in
+/-- The recursion on terms computing the least bound for their bound variables. -/
+noncomputable def construction : Language.TermRec.Construction V blueprint where
+  bvar _ z := z + 1
+  fvar _ _ := 0
+  func _ _ _ _ v' := listMax v'
+  bvar_defined := .mk fun v ↦ by simp [blueprint]
+  fvar_defined := .mk fun v ↦ by simp [blueprint]
+  func_defined := .mk fun v ↦ by simp [blueprint]
+  bvar_locallyDelta0 := LocallyDelta0Function.add_one (LocallyDelta0Function.var 0)
+  fvar_locallyDelta0 := LocallyDelta0Function.const 0
+  func_locallyDelta0 := listMax_locallyDelta0.comp₁ (LocallyDelta0Function.var 3)
+  bound _ t := t
+  bvar_le_bound _ z := succ_le_iff_lt.mpr (var_lt_qqBvar z)
+  fvar_le_bound _ _ := zero_le
+  func_le_bound _ k f v w hk h :=
+    listMaxss_le fun i hi ↦ le_trans (le_trans (h i (hk ▸ hi)) (nth_le _ _))
+      (terms_lt_qqFunc k f v).le
+  bound_monotone _ _ _ h := h
+  bound_locallyDelta0 := LocallyDelta0Function.var 0
+
+end IsUTerm.BV
+
+section bv
+
+open IsUTerm.BV
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (termBVGraph termBVVecGraph)
+
+variable (L)
+
+/-- The least `n` such that all bound variables in the code `t` of a term are below `n`. -/
+noncomputable def termBV (t : V) : V := construction.result L ![] t
+
+/-- The list of the values of `termBV` on the list `v` of `k` terms. -/
+noncomputable def termBVVec (k v : V) : V := construction.resultVec L ![] k v
+
+variable {L}
+variable {k : V}
+
+@[simp] lemma termBV_bvar (z : V) :
+    termBV L ^#z = z + 1 := by simp [termBV, construction]
+
+@[simp] lemma termBV_fvar (x : V) :
+    termBV L ^&x = 0 := by simp [termBV, construction]
+
+@[simp] lemma termBV_func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+    termBV L (^func k f v) = listMax (termBVVec L k v) := by
+  simp [termBV, construction, hkf, hv]; rfl
+
+@[simp] lemma len_termBVVec {v : V} (hv : IsUTermVec L k v) :
+    len (termBVVec L k v) = k := construction.resultVec_lh L _ hv
+
+@[simp] lemma nth_termBVVec {v : V} (hv : IsUTermVec L k v) {i} (hi : i < k) :
+    (termBVVec L k v).[i] = termBV L v.[i] := construction.nth_resultVec L _ hv hi
+
+@[simp] lemma termBVVec_nil : termBVVec L 0 0 = 0 := construction.resultVec_nil L _
+
+lemma termBVVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts) :
+    termBVVec L (k + 1) (t ∷ ts) = termBV L t ∷ termBVVec L k ts :=
+  construction.resultVec_cons L ![] hts ht
+
+section
+
+instance termBV.defined : 𝚺ᴬ₁-Function₁ (termBV (V := V) L) via (termBVGraph L) :=
+  construction.result_defined
+
+instance termBV.definable : 𝚺ᴬ₁-Function₁ (termBV (V := V) L) := termBV.defined.to_definable
+
+instance termBV.definable' {k : ℕ} (Γ) : Γᴬ_[k + 1]-Function₁ (termBV (V := V) L) :=
+  termBV.definable.of_sigmaOne
+
+instance termBVVec.defined : 𝚺ᴬ₁-Function₂ (termBVVec (V := V) L) via (termBVVecGraph L) :=
+  construction.resultVec_defined
+
+instance termBVVec.definable : 𝚺ᴬ₁-Function₂ (termBVVec (V := V) L) :=
+  termBVVec.defined.to_definable
+
+instance termBVVec.definable' {i : ℕ} (Γ) : Γᴬ_[i + 1]-Function₂ (termBVVec (V := V) L) :=
+  termBVVec.definable.of_sigmaOne
+
+end
+
+lemma termBV_locallyDelta0 : LocallyDelta0Function₁ (termBV L : V → V) := by
+  convert construction.result_locallyDelta0 (V := V) L using 3
+  simp [termBV, Matrix.empty_eq]
+
+end bv
+
+section isSemiterm
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isSemiterm isSemitermVec)
+
+variable (L)
+variable {n k w t : V}
+
+/-- The code `t` is a term of the language `L` whose bound variables are all below `n`. -/
+class IsSemiterm (n t : V) : Prop where
+  isUTerm : IsUTerm L t
+  bv : termBV L t ≤ n
+
+/-- The list `v` of `k` semiterms with bound variables below `n`. -/
+class IsSemitermVec (k n v : V) : Prop where
+  isUTermVec : IsUTermVec L k v
+  bv : ∀  {i}, i < k → termBV L v.[i] ≤ n
+
+abbrev IsTerm (t : V) : Prop := IsSemiterm L 0 t
+
+abbrev IsTermVec (k v : V) : Prop := IsSemitermVec L k 0 v
+
+variable {L}
+
+lemma IsSemiterm.def {n} {t : V} : IsSemiterm L n t ↔ IsUTerm L t ∧ termBV L t ≤ n :=
+  ⟨by rintro ⟨h, bv⟩; exact ⟨h, bv⟩, by rintro ⟨h, bv⟩; exact ⟨h, bv⟩⟩
+
+lemma IsSemitermVec.def {v : V} :
+    IsSemitermVec L k n v ↔ IsUTermVec L k v ∧ ∀ i < k, termBV (V := V) L v.[i] ≤ n :=
+  ⟨by rintro ⟨h, bv⟩; exact ⟨h, fun _ ↦ bv⟩, by rintro ⟨h, bv⟩; exact ⟨h, bv _⟩⟩
+
+lemma isSemiterm_locallyDelta0 : LocallyDelta0Rel (IsSemiterm (V := V) L) := by
+  have h : LocallyDelta0 fun w : Fin 2 → V ↦ IsUTerm L (w 1) ∧ termBV L (w 1) ≤ w 0 :=
+    (isUTerm_locallyDelta0.pred_comp (LocallyDelta0Function.var 1)).and
+      (LocallyDelta0.le (termBV_locallyDelta0.comp₁ (LocallyDelta0Function.var 1))
+        (LocallyDelta0Function.var 0))
+  exact h.of_iff fun w ↦ IsSemiterm.def
+
+lemma isSemitermVec_locallyDelta0 :
+    LocallyDelta0 fun w : Fin 3 → V ↦ IsSemitermVec L (w 0) (w 1) (w 2) := by
+  have hbv : LocallyDelta0 fun w : Fin 4 → V ↦ termBV L (nth (w 3) (w 0)) ≤ w 2 :=
+    LocallyDelta0.le (termBV_locallyDelta0.comp₁ (nth_locallyDelta0.comp₂
+      (LocallyDelta0Function.var 3) (LocallyDelta0Function.var 0))) (LocallyDelta0Function.var 2)
+  have hvec : LocallyDelta0 fun w : Fin 3 → V ↦ IsUTermVec L (w 0) (w 2) :=
+    isUTermVec_locallyDelta0.rel_comp₂ (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 2)
+  exact (hvec.and (LocallyDelta0.ball_lt_function (LocallyDelta0Function.var 0)
+    (hbv.of_iff fun w ↦ Iff.rfl))).of_iff fun w ↦ IsSemitermVec.def
+
+@[simp] lemma IsSemitermVec.isUTerm {k n v : V} (h : IsSemitermVec L k n v) :
+    IsUTermVec L k v := h.1
+
+lemma IsSemitermVec.lh {k n v : V} (h : IsSemitermVec L k n v) : len v = k := h.isUTerm.lh.symm
+
+lemma IsSemitermVec.nth {k n v : V} (h : IsSemitermVec L k n v) {i} (hi : i < k) :
+    IsSemiterm L n v.[i] := ⟨h.isUTerm.nth hi, h.bv hi⟩
+
+lemma IsUTerm.isSemiterm {t : V} (h : IsUTerm L t) : IsSemiterm L (termBV L t) t := ⟨h, by simp⟩
+
+lemma IsUTermVec.isSemitermVec {k v : V} (h : IsUTermVec L k v) :
+    IsSemitermVec L k (listMax (termBVVec L k v)) v :=
+  ⟨h, fun {i} hi ↦
+    le_trans (by rw [nth_termBVVec h hi]) (nth_le_listMax (i := i) (by simp [h, hi]))⟩
+
+lemma IsSemitermVec.iff {k n v : V} :
+    IsSemitermVec L k n v ↔ (len v = k ∧ ∀ i < k, IsSemiterm L n v.[i]) := by
+  constructor
+  · intro h; exact ⟨h.lh, fun i hi ↦ h.nth hi⟩
+  · intro ⟨hk, h⟩; exact ⟨⟨hk.symm, fun i hi ↦ h i hi |>.isUTerm⟩, fun hi ↦ h _ hi |>.bv⟩
+
+@[simp] lemma IsSemiterm.bvar {n z : V} :
+    IsSemiterm L n ^#z ↔ z < n := by simp [IsSemiterm.def, succ_le_iff_lt]
+
+@[simp] lemma IsSemiterm.fvar (n x : V) :
+    IsSemiterm L n ^&x := by simp [IsSemiterm.def]
+
+@[simp] lemma IsSemiterm.func {n k f v : V} :
+    IsSemiterm L n (^func k f v) ↔ L.IsFunc k f ∧ IsSemitermVec L k n v := by
+  simp only [IsSemiterm.def, IsUTerm.func_iff]
+  constructor
+  · rintro ⟨⟨hf, hbv⟩, hv⟩
+    exact ⟨hf, hbv, by
+      intro i hi
+      have : listMax (termBVVec L k v) ≤ n := by simpa [termBV_func, hf, hbv] using hv
+      simpa [hbv, hi] using listMaxss_le_iff.mp this i (by simp [hbv, hi])⟩
+  · rintro ⟨hf, h⟩
+    exact ⟨⟨hf, h.isUTerm⟩, by
+      simp only [hf, h.isUTerm, termBV_func]
+      apply listMaxss_le_iff.mpr
+      intro i hi
+      have hi : i < k := by simpa [hf, h.isUTerm] using hi
+      simpa [hf, h.isUTerm, hi] using (h.nth hi).bv⟩
+
+@[simp] lemma IsSemitermVec.empty (n : V) : IsSemitermVec L 0 n 0 := ⟨by simp, by simp⟩
+
+@[simp] lemma IsSemitermVec.empty_iff {v : V} : IsSemitermVec L 0 n v ↔ v = 0 := by
+  constructor
+  · intro h; exact len_zero_iff_eq_nil.mp h.lh
+  · rintro rfl; simp
+
+@[simp] lemma IsSemitermVec.cons_iff :
+    IsSemitermVec L (k + 1) n (t ∷ w) ↔ IsSemiterm L n t ∧ IsSemitermVec L k n w := by
+  constructor
+  · intro h
+    exact ⟨by simpa using h.nth (i := 0) (by simp),
+      IsSemitermVec.iff.mpr
+        ⟨by simpa using h.lh, fun i hi ↦ by simpa using h.nth (show i + 1 < k + 1 by simp [hi])⟩⟩
+  · rintro ⟨ht, hw⟩
+    exact ⟨hw.isUTerm.adjoin ht.isUTerm, by
+    intro i hi
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp [ht.bv]
+    · simpa using hw.nth (by simpa using hi) |>.bv⟩
+
+lemma SemitermVec.adjoin {n m w t : V} (h : IsSemitermVec L n m w) (ht : IsSemiterm L m t) :
+    IsSemitermVec L (n + 1) m (t ∷ w) :=
+  IsSemitermVec.cons_iff.mpr ⟨ht, h⟩
+
+@[simp] lemma IsSemitermVec.singleton {n t : V} :
+    IsSemitermVec L 1 n ?[t] ↔ IsSemiterm L n t := by
+  rw [show (1 : V) = 0 + 1 by simp, IsSemitermVec.cons_iff]; simp
+
+@[simp] lemma IsSemitermVec.doubleton {n t₁ t₂ : V} :
+    IsSemitermVec L 2 n ?[t₁, t₂] ↔ IsSemiterm L n t₁ ∧ IsSemiterm L n t₂ := by
+  rw [show (2 : V) = 1 + 1 by simp [one_add_one_eq_two], IsSemitermVec.cons_iff]; simp
+
+section
+
+instance IsSemiterm.defined : 𝚫ᴬ₁-Relation (IsSemiterm (V := V) L) via (isSemiterm L) := .mk <| by
+  refine ⟨?_, ?_⟩
+  · intro v
+    simp [isSemiterm, Bounding.HierarchySymbol.Semiformula.val_sigma]
+  · intro v
+    simp [isSemiterm, IsSemiterm.def, Bounding.HierarchySymbol.Semiformula.val_sigma]
+
+instance IsSemiterm.definable : 𝚫ᴬ₁-Relation (IsSemiterm (V := V) L) :=
+  IsSemiterm.defined.to_definable
+
+instance IsSemiterm.definable' (Γ : Polarity) (m : ℕ) :
+    Γᴬ_[m + 1]-Relation (IsSemiterm (V := V) L) := IsSemiterm.definable.of_deltaOne
+
+instance IsSemitermVec.defined : 𝚫ᴬ₁-Relation₃ (IsSemitermVec (V := V) L) via (isSemitermVec L) :=
+  .mk <| by
+  refine ⟨?_, ?_⟩
+  · intro v
+    simp [isSemitermVec, Bounding.HierarchySymbol.Semiformula.val_sigma]
+  · intro v
+    simp [isSemitermVec, IsSemitermVec.def, Bounding.HierarchySymbol.Semiformula.val_sigma]
+
+instance IsSemitermVec.definable : 𝚫ᴬ₁-Relation₃ (IsSemitermVec (V := V) L) :=
+  IsSemitermVec.defined.to_definable
+
+instance IsSemitermVec.definable' (Γ : Polarity) (m : ℕ) :
+    Γᴬ_[m + 1]-Relation₃ (IsSemitermVec (V := V) L) := IsSemitermVec.definable.of_deltaOne
+
+end
+
+lemma IsSemiterm.case_iff {n t : V} :
+    IsSemiterm L n t ↔
+    (∃ z < n, t = ^#z) ∨
+    (∃ x, t = ^&x) ∨
+    (∃ k f v : V, L.IsFunc k f ∧ IsSemitermVec L k n v ∧ t = ^func k f v) := by
+  constructor
+  · intro h
+    rcases h.isUTerm.case with (⟨z, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, _, rfl⟩)
+    · disj 1; exact ⟨z, by simpa [succ_le_iff_lt] using h.bv, rfl⟩;
+    · disj 2; exact ⟨x, rfl⟩;
+    · disj 3; exact ⟨k, f, v, hf, by simp_all, rfl⟩;
+  · rintro (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, hv, rfl⟩)
+    · simp [hz]
+    · simp
+    · simp [hf, hv]
+
+alias ⟨IsSemiterm.case, IsSemiterm.mk'⟩ := IsSemiterm.case_iff
+
+lemma IsSemiterm.induction {P : V → Prop} (hP : LocallyDelta0Pred P)
+    (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
+    (hfunc : ∀ k f v, L.IsFunc k f → IsSemitermVec L k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
+    ∀ t, IsSemiterm L n t → P t := by
+  intro t ht
+  suffices IsSemiterm L n t → P t by exact this ht
+  apply IsUTerm.induction ?_ ?_ ?_ ?_ t ht.isUTerm
+  · exact (isSemiterm_locallyDelta0.rel_comp₂ (LocallyDelta0Function.const n)
+      (LocallyDelta0Function.var (0 : Fin 1))).imp hP
+  · intro z; simp only [bvar]; exact hbvar z
+  · intro x _; exact hfvar x
+  · intro k f v hf _ ih h
+    have hv : IsSemitermVec L k n v := by simp_all
+    exact hfunc k f v hf hv (fun i hi ↦ ih i hi (hv.nth hi))
+
+@[simp] lemma IsSemitermVec.nil (k : V) : IsSemitermVec L 0 k 0 := ⟨by simp, by simp⟩
+
+@[simp] lemma IsSemitermVec.adjoin {k n w t : V} (h : IsSemitermVec L n k w)
+    (ht : IsSemiterm L k t) : IsSemitermVec L (n + 1) k (t ∷ w) :=
+  ⟨h.isUTerm.adjoin ht.isUTerm, by
+    intro i hi
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp [ht.bv]
+    · simp [h.bv (by simpa using hi)]⟩
+
+end isSemiterm
+
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

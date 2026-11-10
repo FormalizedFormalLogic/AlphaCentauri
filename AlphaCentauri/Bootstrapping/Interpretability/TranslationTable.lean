@@ -1,7 +1,6 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
-public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.ToFoundation.InternalEquality
 public import AlphaCentauri.ToFoundation.TypedProof

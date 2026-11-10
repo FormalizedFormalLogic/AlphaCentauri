@@ -67,6 +67,20 @@ lemma IsTable.shift_domainAt {tbl : V} (hT : IsTable L₁ L₂ tbl) (i : V) :
     termShiftVec_cons₁ (show IsUTerm L₁ ^#i by simp),
     termShift_bvar]
 
+lemma IsTable.lt_len_rel {tbl : V} (hT : IsTable L₁ L₂ tbl) {k r : V} (h : L₂.IsRel k r) :
+    ⟪k, r⟫ < len tbl.[1] := by
+  by_contra hlt
+  have := (hT.rel h).isUFormula.pos
+  rw [tableRel, nth_lt_len (not_lt.mp hlt)] at this
+  simp at this
+
+lemma IsTable.lt_len_func {tbl : V} (hT : IsTable L₁ L₂ tbl) {k f : V} (h : L₂.IsFunc k f) :
+    ⟪k, f⟫ < len tbl.[2] := by
+  by_contra hlt
+  have := (hT.func h).isUFormula.pos
+  rw [tableFunc, nth_lt_len (not_lt.mp hlt)] at this
+  simp at this
+
 lemma IsTable.isSemiformula_domainAt {tbl : V} (hT : IsTable L₁ L₂ tbl) {m i : V} (hi : i < m) :
     IsSemiformula L₁ m (domainAt L₁ tbl i) :=
   hT.domain.subst (IsSemitermVec.singleton.mpr (IsSemiterm.bvar.mpr hi))
@@ -295,12 +309,6 @@ end table
 
 end negShift
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
-
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
 section isTable
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
@@ -472,9 +480,14 @@ lemma subst_translateRel {tbl n m k R v w : V} (hT : IsTable L₁ L₂ tbl)
       (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₃,
     subst_eq_self_of_le (hT.rel hR) hv'.isUTerm (by simp) h₆]
 
-lemma translate_subst_aux {tbl : V} (hT : IsTable L₁ L₂ tbl) {n p : V} (hp : IsSemiformula L₂ n p) :
-    ∀ m w : V, IsSemitermVec L₂ n m w → (∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) →
-      translate L₁ L₂ tbl (subst L₂ w p) = subst L₁ w (translate L₁ L₂ tbl p) := by
+lemma translate_subst {tbl : V} (hT : IsTable L₁ L₂ tbl) {n m w p : V} (hw : IsSemitermVec L₂ n m w)
+    (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) (hp : IsSemiformula L₂ n p) :
+    translate L₁ L₂ tbl (subst L₂ w p) = subst L₁ w (translate L₁ L₂ tbl p) := by
+  suffices H : ∀ m w : V, IsSemitermVec L₂ n m w →
+      (∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) →
+        translate L₁ L₂ tbl (subst L₂ w p) = subst L₁ w (translate L₁ L₂ tbl p) from
+    H m w hw hvar
+  clear hw hvar m w
   have hd := hT.isSemiformula_domainAt_zero
   have hdu := (hd 0).isUFormula
   apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
@@ -510,11 +523,6 @@ lemma translate_subst_aux {tbl : V} (hT : IsTable L₁ L₂ tbl) {n p : V} (hp :
     have ih' := ih (m + 1) (qVec L₁ w) hw' (by rw [← hq]; exact hvar_qVec hw hvar)
     simp [*, hp.isUFormula, IsUFormula.translate hT, (hp.subst hw').isUFormula,
       hT.subst_qVec_domainAt hw₁]
-
-lemma translate_subst {tbl : V} (hT : IsTable L₁ L₂ tbl) {n m w p : V} (hw : IsSemitermVec L₂ n m w)
-    (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) (hp : IsSemiformula L₂ n p) :
-    translate L₁ L₂ tbl (subst L₂ w p) = subst L₁ w (translate L₁ L₂ tbl p) :=
-  translate_subst_aux hT hp m w hw hvar
 
 lemma translate_substs1_fvar {tbl : V} (hT : IsTable L₁ L₂ tbl) {p : V} (x : V)
     (hp : IsSemiformula L₂ 1 p) :

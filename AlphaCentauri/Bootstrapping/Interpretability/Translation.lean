@@ -325,9 +325,6 @@ end
         (funcTail L₁ tbl k f)) k := by
   simp [varEqual, varEqualVec, construction, hf, hv]
 
-lemma varEqual_not_uterm {tbl t : V} (ht : ¬IsUTerm L₂ t) : varEqual L₁ L₂ tbl t = 0 :=
-  (construction L₁).result_prop_not _ _ ht
-
 @[simp] lemma len_varEqualVec {tbl k v : V} (hv : IsUTermVec L₂ k v) :
     len (varEqualVec L₁ L₂ tbl k v) = k := (construction L₁).resultVec_lh L₂ _ hv
 
@@ -337,10 +334,6 @@ lemma varEqual_not_uterm {tbl t : V} (ht : ¬IsUTerm L₂ t) : varEqual L₁ L�
 
 @[simp] lemma varEqualVec_nil (tbl : V) : varEqualVec L₁ L₂ tbl 0 0 = 0 :=
   (construction L₁).resultVec_nil L₂ _
-
-lemma varEqualVec_cons {tbl k t v : V} (ht : IsUTerm L₂ t) (hv : IsUTermVec L₂ k v) :
-    varEqualVec L₁ L₂ tbl (k + 1) (t ∷ v) = varEqual L₁ L₂ tbl t ∷ varEqualVec L₁ L₂ tbl k v :=
-  (construction L₁).resultVec_cons L₂ ![tbl] hv ht
 
 end varEqual
 
@@ -476,9 +469,6 @@ end
 @[simp] lemma translate_exs {tbl p : V} (hp : IsUFormula L₂ p) :
     translate L₁ L₂ tbl (^∃ p) = ^∃ (domainAt L₁ tbl 0 ^⋏ translate L₁ L₂ tbl p) := by
   simp [translate, hp, construction]
-
-lemma translate_not_uformula {tbl p : V} (hp : ¬IsUFormula L₂ p) : translate L₁ L₂ tbl p = 0 :=
-  (construction L₁ L₂).result_prop_not _ hp
 
 end translate
 

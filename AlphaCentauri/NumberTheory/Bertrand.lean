@@ -36,8 +36,8 @@ variable {B s : V}
 
 variable (n : V)
 
-/-- The positions $(k, y)$ of a copy `c` of $\mathrm{Bits}(n)$ or of $\mathrm{Bits}(M_r)$, carried
-along by the injection, are numbered in blocks of $n \Lambda$. -/
+/-- The positions $(k, y)$ of a copy `c` of $\mathrm{Bits}(n)$ or of $\mathrm{Bits}(M_r)$ are
+numbered in blocks of $n \Lambda$. -/
 def CarryEncode (u v : V) : Prop :=
   (∃ c ≤ u, ∃ k ≤ u, ∃ y ≤ u, c ≤ 1 ∧ u = ⟪0, c, k, y⟫ ∧
       v = c * (n * blockWidth n) + (k - 1) * blockWidth n + y) ∨
@@ -64,7 +64,6 @@ def BandPosition (r q v : V) : Prop :=
       v = 2 * cutoff n * bandUnit n + 2 * r * bandUnit n +
         (q - 2 * bandSize n (r + 1) * bandUnit n))
 
-/-- The offset of the Chebyshev bands. -/
 def bandOffset : V :=
   lowerSize n + blockWidth n + 2 * n * (‖n‖ + 1) + ((√(2 * n) : V) + 1) * blockWidth n
 
@@ -83,35 +82,27 @@ lemma definable_carryEncode : 𝚺ᴬ₀.DefinableRel (CarryEncode n) := by
   unfold CarryEncode
   definability
 
-lemma definable_domainEncode : 𝚺ᴬ₀.DefinableRel (DomainEncode n) := by
-  have := definable_carryEncode n
-  unfold DomainEncode
-  definability
-
-lemma definable_bandIndex : 𝚺ᴬ₀.DefinableRel₃ (BandIndex n) := by
-  unfold BandIndex bandBound bandSize
-  definability
-
-lemma definable_bandPosition : 𝚺ᴬ₀.DefinableRel₃ (BandPosition n) := by
-  unfold BandPosition bandSize
-  definability
-
 lemma definable_codomainEncode : 𝚺ᴬ₀.DefinableRel (CodomainEncode n) := by
   have := definable_carryEncode n
-  have := definable_bandIndex n
-  have := definable_bandPosition n
-  unfold CodomainEncode
+  unfold CodomainEncode BandIndex BandPosition bandBound bandSize
   definability
 
-variable {n}
+lemma definable_domain (B s : V) : 𝚺ᴬ₀.DefinablePred (Domain B s n) := by
+  have := definable_bits B s
+  unfold Domain LowerDomain BandCarry Family Tagged Below bandBound bandSize bandCount cutoff
+  definability
 
-lemma two_le_of_length_ge {n : V} (hℓ : (1024 : V) ≤ ‖n‖) : 2 ≤ n := by
+attribute [local simp] le_pair_of_le_right
+
+variable {n} {r r' c c' k k' x x' y y' q q' w : V}
+
+lemma two_le_of_length_ge (hℓ : (1024 : V) ≤ ‖n‖) : 2 ≤ n := by
   by_contra h
   have h₁ : n < 1 + 1 := by rwa [one_add_one_eq_two, ← not_le]
   have h₂ : ‖n‖ ≤ 1 := by simpa using length_monotone (lt_succ_iff_le.mp h₁)
   exact absurd (by exact_mod_cast hℓ.trans h₂ : (1024 : ℕ) ≤ 1) (by decide)
 
-lemma eq_of_mul_add_eq {a a' x x' m : V} (hx : x < m) (hx' : x' < m)
+lemma eq_of_mul_add_eq {a a' m : V} (hx : x < m) (hx' : x' < m)
     (h : a * m + x = a' * m + x') : a = a' ∧ x = x' := by
   have h₁ : a = a' := calc
     a = (a * m + x) / m := (div_mul_add a m hx).symm
@@ -120,19 +111,19 @@ lemma eq_of_mul_add_eq {a a' x x' m : V} (hx : x < m) (hx' : x' < m)
   subst h₁
   exact ⟨rfl, add_left_cancel h⟩
 
-lemma eq_of_sub_one_eq {k k' : V} (hk : 0 < k) (hk' : 0 < k') (h : k - 1 = k' - 1) : k = k' :=
+lemma eq_of_sub_one_eq (hk : 0 < k) (hk' : 0 < k') (h : k - 1 = k' - 1) : k = k' :=
   calc k = k - 1 + 1 := (tsub_add_cancel_of_le (pos_iff_one_le.mp hk)).symm
     _ = k' - 1 + 1 := by rw [h]
     _ = k' := tsub_add_cancel_of_le (pos_iff_one_le.mp hk')
 
-lemma mul_add_lt_mul {j y m n : V} (hj : 0 < j) (hjn : j ≤ n) (hy : y < m) :
-    (j - 1) * m + y < n * m :=
+lemma mul_add_lt_mul {j m b : V} (hj : 0 < j) (hjb : j ≤ b) (hy : y < m) :
+    (j - 1) * m + y < b * m :=
   calc (j - 1) * m + y < (j - 1) * m + m := (add_lt_add_iff_left _).mpr hy
     _ = (j - 1 + 1) * m := by rw [add_mul, one_mul]
     _ = j * m := by rw [tsub_add_cancel_of_le (pos_iff_one_le.mp hj)]
-    _ ≤ n * m := mul_le_mul_right hjn
+    _ ≤ b * m := mul_le_mul_right hjb
 
-lemma scaledLength_lt_blockWidth {y : V} (hn : 0 < n) (hy : 0 < y) (hyn : y ≤ 2 * n) :
+lemma scaledLength_lt_blockWidth (hn : 0 < n) (hy : 0 < y) (hyn : y ≤ 2 * n) :
     scaledLength (powerBound n) (exponent n) y < blockWidth n := by
   have h₁ : exponent n * ‖y‖ < ‖powerBound n‖ :=
     lt_of_le_of_lt (mul_le_mul_left (length_monotone (hyn.trans (by simp))))
@@ -143,40 +134,29 @@ lemma scaledLength_lt_blockWidth {y : V} (hn : 0 < n) (hy : 0 < y) (hyn : y ≤ 
         mul_le_mul_left ((length_monotone hyn).trans (length_two_mul_of_pos hn).le)
     _ < blockWidth n := lt_add_one _
 
-lemma carry_core_inj {j j' k k' y y' : V} (hk : 0 < k) (hk' : 0 < k') (hkn : k ≤ n)
-    (hkn' : k' ≤ n) (hy : y < blockWidth n) (hy' : y' < blockWidth n)
-    (h : j * (n * blockWidth n) + (k - 1) * blockWidth n + y =
-      j' * (n * blockWidth n) + (k' - 1) * blockWidth n + y') :
-    j = j' ∧ k = k' ∧ y = y' := by
-  obtain ⟨rfl, h₁⟩ := eq_of_mul_add_eq (mul_add_lt_mul hk hkn hy) (mul_add_lt_mul hk' hkn' hy')
-    (by simpa only [add_assoc] using h)
-  obtain ⟨h₂, rfl⟩ := eq_of_mul_add_eq hy hy' h₁
-  exact ⟨rfl, eq_of_sub_one_eq hk hk' h₂, rfl⟩
-
-lemma domain_zero_iff {c w : V} :
+lemma domain_zero_iff :
     Domain B s n ⟪0, c, w⟫ ↔ (c = 0 ∧ Bits B s n w) ∨ (c = 1 ∧ Bits B s n w) ∨
       (c = 2 ∧ Below ((2 * n - 1) * s) w) := by
   simp [Domain, LowerDomain, tagged_pair_iff, family_pair_iff]
 
-lemma domain_one_iff {r c w : V} :
-    Domain B s n ⟪1, r, c, w⟫ ↔ r < bandCount n ∧
-      ((c = 0 ∧ Bits B s (bandBound n r) w) ∨ (c = 1 ∧ Bits B s (bandBound n r) w)) := by
-  simp [Domain, BandCarry, tagged_pair_iff, family_pair_iff]
-
-lemma codomain_zero_iff {c w : V} :
+lemma codomain_zero_iff :
     Codomain B s n ⟪0, c, w⟫ ↔ ((c = 0 ∧ Bits B s n w) ∨ (c = 1 ∧ Bits B s n w)) ∨
       (c = 3 ∧ Top (2 * n) w) ∨ (c = 4 ∧ Below (scaledLength B s n) w) ∨
         (c = 5 ∧ Small B s n w) := by
   simp [Codomain, LowerResidue, tagged_pair_iff, family_pair_iff]
 
-lemma codomain_one_iff {r c w : V} :
+lemma codomain_one_iff :
     Codomain B s n ⟪1, r, c, w⟫ ↔ r < bandCount n ∧
       (((c = 0 ∧ Bits B s (bandBound n r) w) ∨ (c = 1 ∧ Bits B s (bandBound n r) w) ∨
         (c = 3 ∧ Below (2 * bandBound n r * s) w)) ∨
         ((c = 4 ∧ Top (bandBound n r) w) ∨ (c = 5 ∧ Top (bandBound n r) w))) := by
   simp [Codomain, BandCodomain, tagged_pair_iff, family_pair_iff]
 
-lemma bandIndex_cases {r x q : V} (hx : BandCodomain B (exponent n) (bandBound n r) x)
+lemma codomain_band_iff :
+    Codomain B s n ⟪1, r, x⟫ ↔ r < bandCount n ∧ BandCodomain B s (bandBound n r) x := by
+  simp [Codomain, tagged_pair_iff, family_pair_iff]
+
+lemma bandIndex_cases (hx : BandCodomain B (exponent n) (bandBound n r) x)
     (hq : BandIndex n r x q) :
     (∃ y, x = ⟪3, y⟫ ∧ y < 2 * bandBound n r * exponent n ∧ q = y) ∨
       ∃ c k i, (c = 4 ∨ c = 5) ∧ x = ⟪c, k, i⟫ ∧ 0 < k ∧ k ≤ bandBound n r ∧ i < ‖k‖ ∧
@@ -184,47 +164,22 @@ lemma bandIndex_cases {r x q : V} (hx : BandCodomain B (exponent n) (bandBound n
           (k - 1) * (‖n‖ + 1) + i := by
   rcases hq with ⟨y, -, rfl, hqy⟩ | ⟨c, -, k, -, i, -, h4, h5, rfl, hqc⟩
   · left
-    rcases hx with (h | h | h) | h | h
-    · exact absurd (tagged_pair_iff.mp h).1 (by norm_num)
-    · exact absurd (tagged_pair_iff.mp h).1 (by norm_num)
-    · use y
-      exact ⟨rfl, (tagged_pair_iff.mp h).2, hqy⟩
-    · exact absurd (tagged_pair_iff.mp h).1 (by norm_num)
-    · exact absurd (tagged_pair_iff.mp h).1 (by norm_num)
+    obtain hy : y < 2 * bandBound n r * exponent n := by
+      simp only [BandCodomain, tagged_pair_iff] at hx
+      rcases hx with (h | h | ⟨-, h⟩) | h | h <;> first | exact h | exact absurd h.1 (by norm_num)
+    use y
   · right
-    rcases hx with (h | h | h) | h | h
-    · exact absurd (h4.trans_eq (tagged_pair_iff.mp h).1) (by norm_num)
-    · exact absurd (h4.trans_eq (tagged_pair_iff.mp h).1) (by norm_num)
-    · exact absurd (h4.trans_eq (tagged_pair_iff.mp h).1) (by norm_num)
-    · obtain ⟨hc, ht⟩ := tagged_pair_iff.mp h
-      obtain ⟨hk0, hkM, hi⟩ := top_pair_iff.mp ht
-      use c, k, i
-      exact ⟨Or.inl hc, rfl, hk0, hkM, hi, hqc⟩
-    · obtain ⟨hc, ht⟩ := tagged_pair_iff.mp h
-      obtain ⟨hk0, hkM, hi⟩ := top_pair_iff.mp ht
-      use c, k, i
-      exact ⟨Or.inr hc, rfl, hk0, hkM, hi, hqc⟩
+    obtain ⟨hc, hk0, hkM, hi⟩ : (c = 4 ∨ c = 5) ∧ 0 < k ∧ k ≤ bandBound n r ∧ i < ‖k‖ := by
+      simp only [BandCodomain, tagged_pair_iff, top_pair_iff] at hx
+      rcases hx with ((⟨rfl, -⟩ | ⟨rfl, -⟩ | ⟨rfl, -⟩) | ⟨hc, ht⟩ | ⟨hc, ht⟩) <;>
+        first | exact ⟨Or.inl hc, ht⟩ | exact ⟨Or.inr hc, ht⟩ | exact absurd h4 (by norm_num)
+    use c, k, i
 
-lemma four_le_of_cases {c : V} (h : c = 4 ∨ c = 5) : 4 ≤ c := by
-  rcases h with rfl | rfl
-  · exact le_rfl
-  · norm_num
-
-lemma sub_four_cases {c : V} (h : c = 4 ∨ c = 5) : c - 4 = 0 ∨ c - 4 = 1 := by
-  rcases h with rfl | rfl
-  · exact Or.inl (tsub_self _)
-  · exact Or.inr (tsub_eq_of_eq_add (by norm_num))
-
-lemma eq_of_sub_four_eq {c c' : V} (h : c = 4 ∨ c = 5) (h' : c' = 4 ∨ c' = 5)
-    (e : c - 4 = c' - 4) : c = c' :=
-  calc c = c - 4 + 4 := (tsub_add_cancel_of_le (four_le_of_cases h)).symm
-    _ = c' - 4 + 4 := by rw [e]
-    _ = c' := tsub_add_cancel_of_le (four_le_of_cases h')
-
-lemma bandIndex_spec {r x q : V} (hr : bandBound n r ≤ n)
+lemma bandIndex_spec (hr : bandBound n r ≤ n)
     (hx : BandCodomain B (exponent n) (bandBound n r) x) (hq : BandIndex n r x q) :
     q < 2 * bandBound n r * bandUnit n ∧
       ∀ x', BandCodomain B (exponent n) (bandBound n r) x' → BandIndex n r x' q → x' = x := by
+  have h54 : (5 : V) - 4 = 1 := tsub_eq_of_eq_add (by norm_num)
   have hi_lt : ∀ {k i : V}, k ≤ bandBound n r → i < ‖k‖ → i < ‖n‖ + 1 := fun hk hi ↦
     hi.trans_le ((length_monotone (hk.trans hr)).trans le_self_add)
   have hrem : ∀ {k i : V}, 0 < k → k ≤ bandBound n r → i < ‖k‖ →
@@ -234,17 +189,17 @@ lemma bandIndex_spec {r x q : V} (hr : bandBound n r ≤ n)
     intro A B' C i q' h
     rw [h]
     exact le_self_add.trans (le_self_add.trans le_self_add)
-  refine ⟨?_, fun x' hx' hq' ↦ ?_⟩
+  and_intros
   · rcases bandIndex_cases hx hq with ⟨y, rfl, hy, hqy⟩ | ⟨c, k, i, hc, rfl, hk0, hkM, hi, hqc⟩
     · rw [hqy]
       calc y < 2 * bandBound n r * exponent n := hy
         _ ≤ 2 * bandBound n r * bandUnit n := mul_le_mul_left (le_self_add.trans le_self_add)
     · have h₁ : (c - 4) * (bandBound n r * (‖n‖ + 1)) + ((k - 1) * (‖n‖ + 1) + i) <
           2 * (bandBound n r * (‖n‖ + 1)) := by
-        rcases sub_four_cases hc with h | h <;> rw [h]
-        · rw [zero_mul, zero_add]
+        rcases hc with rfl | rfl
+        · simp only [tsub_self, zero_mul, zero_add]
           exact (hrem hk0 hkM hi).trans_le (le_mul_of_one_le_left (Arithmetic.zero_le _) one_le_two)
-        · rw [one_mul, two_mul]
+        · simp only [h54, one_mul, two_mul]
           exact (add_lt_add_iff_left _).mpr (hrem hk0 hkM hi)
       rw [hqc]
       calc _ = 2 * bandBound n r * exponent n +
@@ -253,7 +208,8 @@ lemma bandIndex_spec {r x q : V} (hr : bandBound n r ≤ n)
         _ < 2 * bandBound n r * exponent n + 2 * (bandBound n r * (‖n‖ + 1)) :=
             (add_lt_add_iff_left _).mpr h₁
         _ = 2 * bandBound n r * bandUnit n := by unfold bandUnit; grind
-  · rcases bandIndex_cases hx hq with ⟨y, rfl, hy, hqy⟩ | ⟨c, k, i, hc, rfl, hk0, hkM, hi, hqc⟩ <;>
+  · intro x' hx' hq'
+    rcases bandIndex_cases hx hq with ⟨y, rfl, hy, hqy⟩ | ⟨c, k, i, hc, rfl, hk0, hkM, hi, hqc⟩ <;>
       rcases bandIndex_cases hx' hq' with ⟨y', rfl, hy', hqy'⟩ |
         ⟨c', k', i', hc', rfl, hk0', hkM', hi', hqc'⟩
     · rw [← hqy', hqy]
@@ -265,16 +221,8 @@ lemma bandIndex_spec {r x q : V} (hr : bandBound n r ≤ n)
         simpa only [add_assoc] using hqc.symm.trans hqc'
       obtain ⟨h₂, h₃⟩ := eq_of_mul_add_eq (hrem hk0 hkM hi) (hrem hk0' hkM' hi') h₁
       obtain ⟨h₄, rfl⟩ := eq_of_mul_add_eq (hi_lt hkM hi) (hi_lt hkM' hi') h₃
-      rw [eq_of_sub_four_eq hc hc' h₂, eq_of_sub_one_eq hk0 hk0' h₄]
-
-section band
-
-variable {r r' q q' w : V}
-
-lemma bandPosition_exists (r q : V) : ∃ w, BandPosition n r q w := by
-  rcases lt_or_ge q (2 * bandSize n (r + 1) * bandUnit n) with h | h
-  · exact ⟨_, Or.inl ⟨h, rfl⟩⟩
-  · exact ⟨_, Or.inr ⟨h, rfl⟩⟩
+      rw [eq_of_sub_one_eq hk0 hk0' h₄]
+      rcases hc with rfl | rfl <;> rcases hc' with rfl | rfl <;> first | rfl | simp [h54] at h₂
 
 lemma bandSize_le_cutoff (hr : r ≤ bandCount n) : bandSize n r ≤ cutoff n :=
   bandSize_zero (n := n) ▸ bandSize_antitone (Arithmetic.zero_le r) hr
@@ -286,39 +234,12 @@ lemma bandStart_add (hr : r ≤ bandCount n) :
   calc _ = bandUnit n * (2 * cutoff n - 2 * bandSize n r + 2 * bandSize n r) := by grind
     _ = _ := by rw [tsub_add_cancel_of_le h, mul_comm]
 
-lemma le_of_add_eq_of_add_eq {A A' X X' Y T : V} (h : A + X = T) (h' : A' + Y = T)
-    (hX : X' + Y ≤ X) : A + X' ≤ A' := by
-  apply (add_le_add_iff_right Y).mp
-  calc A + X' + Y = A + (X' + Y) := add_assoc _ _ _
-    _ ≤ A + X := add_le_add le_rfl hX
-    _ = A' + Y := h.trans h'.symm
-
 lemma bandKind1_lt_end (hr : r < bandCount n) (hq : q < 2 * bandSize n (r + 1) * bandUnit n) :
     bandUnit n * (2 * cutoff n - 2 * bandSize n r) + q < 2 * cutoff n * bandUnit n := by
   rw [← bandStart_add hr.le]
   apply (add_lt_add_iff_left _).mpr
   exact hq.trans_le (mul_le_mul_right (mul_le_mul_left
     (bandSize_antitone le_self_add (succ_le_iff_lt.mpr hr))))
-
-lemma bandKind1_lt (hrr : r < r') (hr' : r' ≤ bandCount n)
-    (hq : q < 2 * bandSize n (r + 1) * bandUnit n) :
-    bandUnit n * (2 * cutoff n - 2 * bandSize n r) + q <
-      bandUnit n * (2 * cutoff n - 2 * bandSize n r') := by
-  have hs := (bandSize_succ (hrr.trans_le hr')).1
-  have hc : bandSize n r' ≤ bandSize n (r + 1) := bandSize_antitone (succ_le_iff_lt.mpr hrr) hr'
-  have h₁ : 2 * bandSize n (r + 1) * bandUnit n + 2 * bandSize n r' * bandUnit n ≤
-      2 * bandSize n r * bandUnit n := by
-    calc _ = (2 * (bandSize n (r + 1) + bandSize n r')) * bandUnit n := by grind
-      _ ≤ (2 * bandSize n r) * bandUnit n := by
-        apply mul_le_mul_right
-        calc 2 * (bandSize n (r + 1) + bandSize n r') ≤ 2 * (bandSize n (r + 1) +
-            bandSize n (r + 1)) := mul_le_mul_left (add_le_add le_rfl hc)
-          _ = 2 * (2 * bandSize n (r + 1)) := by grind
-          _ ≤ _ := mul_le_mul_left hs
-  calc _ < bandUnit n * (2 * cutoff n - 2 * bandSize n r) + 2 * bandSize n (r + 1) * bandUnit n :=
-        (add_lt_add_iff_left _).mpr hq
-    _ ≤ _ := le_of_add_eq_of_add_eq (bandStart_add (hrr.le.trans hr'))
-        (bandStart_add hr') h₁
 
 lemma bandKind2_sub_lt (hq : q < 2 * bandBound n r * bandUnit n)
     (h : 2 * bandSize n (r + 1) * bandUnit n ≤ q) :
@@ -353,7 +274,28 @@ lemma bandPosition_false_of_lt (hrr : r < r') (hr' : r' < bandCount n)
     (hq : q < 2 * bandBound n r * bandUnit n) (h : BandPosition n r q w)
     (h' : BandPosition n r' q' w) : False := by
   rcases h with ⟨h₁, rfl⟩ | ⟨h₁, rfl⟩ <;> rcases h' with ⟨h₂, h₂'⟩ | ⟨h₂, h₂'⟩
-  · exact absurd h₂' (ne_of_lt ((bandKind1_lt hrr hr'.le h₁).trans_le le_self_add))
+  · have hs := (bandSize_succ (hrr.trans hr')).1
+    have hc : bandSize n r' ≤ bandSize n (r + 1) :=
+      bandSize_antitone (succ_le_iff_lt.mpr hrr) hr'.le
+    have h₃ : 2 * bandSize n (r + 1) * bandUnit n + 2 * bandSize n r' * bandUnit n ≤
+        2 * bandSize n r * bandUnit n := by
+      calc _ = (2 * (bandSize n (r + 1) + bandSize n r')) * bandUnit n := by grind
+        _ ≤ (2 * bandSize n r) * bandUnit n := by
+          apply mul_le_mul_right
+          calc 2 * (bandSize n (r + 1) + bandSize n r') ≤ 2 * (bandSize n (r + 1) +
+              bandSize n (r + 1)) := mul_le_mul_left (add_le_add le_rfl hc)
+            _ = 2 * (2 * bandSize n (r + 1)) := by grind
+            _ ≤ _ := mul_le_mul_left hs
+    have h₄ : bandUnit n * (2 * cutoff n - 2 * bandSize n r) + q <
+        bandUnit n * (2 * cutoff n - 2 * bandSize n r') := by
+      apply lt_of_lt_of_le ((add_lt_add_iff_left _).mpr h₁)
+      apply le_of_add_le_add_right (a := 2 * bandSize n r' * bandUnit n)
+      calc _ = bandUnit n * (2 * cutoff n - 2 * bandSize n r) +
+            (2 * bandSize n (r + 1) * bandUnit n + 2 * bandSize n r' * bandUnit n) := by grind
+        _ ≤ bandUnit n * (2 * cutoff n - 2 * bandSize n r) + 2 * bandSize n r * bandUnit n :=
+          add_le_add le_rfl h₃
+        _ = _ := (bandStart_add (hrr.le.trans hr'.le)).trans (bandStart_add hr'.le).symm
+    exact absurd h₂' (ne_of_lt (h₄.trans_le le_self_add))
   · exact absurd h₂' (ne_of_lt ((bandKind1_lt_end (hrr.trans hr') h₁).trans_le
       (le_self_add.trans le_self_add)))
   · exact absurd h₂'.symm (ne_of_lt ((bandKind1_lt_end hr' h₂).trans_le
@@ -381,55 +323,17 @@ lemma bandPosition_inj (hr : r < bandCount n) (hr' : r' < bandCount n)
         _ = q' := add_tsub_cancel_of_le h₂
   · exact (bandPosition_false_of_lt hrr hr hq' h' h).elim
 
-end band
-
-attribute [local simp] le_pair_of_le_right
-
 lemma bits_of_codomain_zero {c k y : V} (h : Codomain B s n ⟪0, c, k, y⟫) (hc : c ≤ 1) :
     Bits B s n ⟪k, y⟫ := by
   rcases codomain_zero_iff.mp h with (⟨-, hb⟩ | ⟨-, hb⟩) | ⟨rfl, -⟩ | ⟨rfl, -⟩ | ⟨rfl, -⟩ <;>
     first | assumption | exact absurd hc (by norm_num)
 
-lemma bits_of_codomain_one {r c k y : V} (h : Codomain B s n ⟪1, r, c, k, y⟫) (hc : c ≤ 1) :
+lemma bits_of_codomain_one (h : Codomain B s n ⟪1, r, c, k, y⟫) (hc : c ≤ 1) :
     r < bandCount n ∧ Bits B s (bandBound n r) ⟪k, y⟫ := by
   obtain ⟨hr, h⟩ := codomain_one_iff.mp h
   refine ⟨hr, ?_⟩
   rcases h with (⟨-, hb⟩ | ⟨-, hb⟩ | ⟨rfl, -⟩) | ⟨rfl, -⟩ | ⟨rfl, -⟩ <;>
     first | assumption | exact absurd hc (by norm_num)
-
-lemma domain_of_bits_zero {c k y : V} (hb : Bits B s n ⟪k, y⟫) (hc : c ≤ 1) :
-    Domain B s n ⟪0, c, k, y⟫ := by
-  rcases le_one_iff_eq_zero_or_one.mp hc with rfl | rfl
-  · exact domain_zero_iff.mpr (Or.inl ⟨rfl, hb⟩)
-  · exact domain_zero_iff.mpr (Or.inr (Or.inl ⟨rfl, hb⟩))
-
-lemma domain_of_bits_one {r c k y : V} (hr : r < bandCount n)
-    (hb : Bits B s (bandBound n r) ⟪k, y⟫) (hc : c ≤ 1) : Domain B s n ⟪1, r, c, k, y⟫ := by
-  refine domain_one_iff.mpr ⟨hr, ?_⟩
-  rcases le_one_iff_eq_zero_or_one.mp hc with rfl | rfl
-  · exact Or.inl ⟨rfl, hb⟩
-  · exact Or.inr ⟨rfl, hb⟩
-
-lemma codomain_band_iff {r x : V} :
-    Codomain B s n ⟪1, r, x⟫ ↔ r < bandCount n ∧ BandCodomain B s (bandBound n r) x := by
-  simp [Codomain, tagged_pair_iff, family_pair_iff]
-
-lemma below_of_codomain_four {y : V} (h : Codomain B s n ⟪0, 4, y⟫) :
-    y < scaledLength B s n := by
-  rcases codomain_zero_iff.mp h with (⟨h0, -⟩ | ⟨h0, -⟩) | ⟨h0, -⟩ | ⟨-, hb⟩ | ⟨h0, -⟩ <;>
-    first | assumption | exact absurd h0 (by norm_num)
-
-lemma top_of_codomain_three {w : V} (h : Codomain B s n ⟪0, 3, w⟫) : Top (2 * n) w := by
-  rcases codomain_zero_iff.mp h with (⟨h0, -⟩ | ⟨h0, -⟩) | ⟨-, hb⟩ | ⟨h0, -⟩ | ⟨h0, -⟩ <;>
-    first | assumption | exact absurd h0 (by norm_num)
-
-lemma small_of_codomain_five {w : V} (h : Codomain B s n ⟪0, 5, w⟫) : Small B s n w := by
-  rcases codomain_zero_iff.mp h with (⟨h0, -⟩ | ⟨h0, -⟩) | ⟨h0, -⟩ | ⟨h0, -⟩ | ⟨-, hb⟩ <;>
-    first | assumption | exact absurd h0 (by norm_num)
-
-lemma lowerSize_eq : lowerSize n = (2 * bandCount n + 2) * (n * blockWidth n) := by
-  unfold lowerSize
-  rw [mul_assoc]
 
 lemma code_lt_lowerSize {j rem : V} (hrem : rem < n * blockWidth n)
     (hj : j + 1 ≤ 2 * bandCount n + 2) : j * (n * blockWidth n) + rem < lowerSize n :=
@@ -437,33 +341,29 @@ lemma code_lt_lowerSize {j rem : V} (hrem : rem < n * blockWidth n)
         (add_lt_add_iff_left _).mpr hrem
     _ = (j + 1) * (n * blockWidth n) := by rw [add_mul, one_mul]
     _ ≤ (2 * bandCount n + 2) * (n * blockWidth n) := mul_le_mul_right hj
-    _ = lowerSize n := lowerSize_eq.symm
-
-lemma small_pair_iff {p o : V} :
-    Small B s n ⟪p, o⟫ ↔ IsPrime p ∧ p * p ≤ 2 * n ∧ o < scaledLength B s p := by
-  constructor
-  · rintro ⟨p', -, o', -, h, hh⟩
-    obtain ⟨rfl, rfl⟩ := pair_ext_iff.mp h
-    exact hh
-  · intro h
-    exact ⟨p, le_pair_left _ _, o, le_pair_right _ _, rfl, h⟩
-
-lemma le_sqrt_of_mul_self_le {p a : V} (h : p * p ≤ a) : p ≤ √a := by
-  by_contra hlt
-  have h₁ : √a + 1 ≤ p := succ_le_iff_lt.mpr (not_le.mp hlt)
-  exact lt_irrefl a <| calc
-    a < (√a + 1) * (√a + 1) := sqrt_spec_lt a
-    _ ≤ p * p := mul_self_le_mul_self (Arithmetic.zero_le _) h₁
-    _ ≤ a := h
+    _ = lowerSize n := by unfold lowerSize; rw [mul_assoc]
 
 lemma targetExcess_eq : lowerSize n + targetExcess n =
     bandOffset n + 2 * cutoff n * bandUnit n + 2 * bandCount n * bandUnit n := by
   unfold targetExcess bandOffset
   grind
 
-section encoding
+lemma Domain.lt {B s u : V} (hn2 : 2 ≤ n) (h : Domain B s n u) :
+    u < ⟪1, n, 10, payloadBound B s n⟫ + 1 := by
+  rcases h with h | h
+  · exact Tagged.lt_of_tagged_zero h fun _ ↦ LowerDomain.le_bound
+  · exact Tagged.lt_of_family h bandCount_le fun r hr x hx ↦
+      BandCarry.le_bound (bandBound_le hr hn2) hx
 
-variable (hn2 : 2 ≤ n)
+lemma Codomain.lt {B s u : V} (hn2 : 2 ≤ n) (h : Codomain B s n u) :
+    u < ⟪1, n, 10, payloadBound B s n⟫ + 1 := by
+  rcases h with h | h
+  · exact Tagged.lt_of_tagged_zero h fun _ ↦ LowerResidue.le_bound
+  · exact Tagged.lt_of_family h bandCount_le fun r hr x hx ↦
+      BandCodomain.le_bound (bandBound_le hr hn2) hx
+
+variable (hn2 : 2 ≤ n) (hℓ : (1024 : V) ≤ ‖n‖)
+
 include hn2
 
 lemma carryEncode_cases {t v : V} (ht : Codomain (powerBound n) (exponent n) n t)
@@ -476,45 +376,39 @@ lemma carryEncode_cases {t v : V} (ht : Codomain (powerBound n) (exponent n) n t
   have hn0 : 0 < n := lt_of_lt_of_le two_pos hn2
   rcases h with ⟨c, -, k, -, y, -, hc, rfl, rfl⟩ | ⟨r, -, c, -, k, -, y, -, hc, rfl, rfl⟩
   · obtain ⟨hk0, hkn, hy⟩ := bits_pair_iff.mp (bits_of_codomain_zero ht hc)
-    exact Or.inl ⟨c, k, y, hc, hk0, hkn,
-      hy.trans (scaledLength_lt_blockWidth hn0 hk0 (hkn.trans (by simp))), rfl, rfl⟩
+    left
+    use c, k, y
+    exact ⟨hc, hk0, hkn, hy.trans (scaledLength_lt_blockWidth hn0 hk0 (hkn.trans (by simp))),
+      rfl, rfl⟩
   · obtain ⟨hr, hb⟩ := bits_of_codomain_one ht hc
     obtain ⟨hk0, hkM, hy⟩ := bits_pair_iff.mp hb
     have hkn : k ≤ n := hkM.trans (bandBound_le hr hn2)
-    exact Or.inr ⟨r, c, k, y, hc, hr, hk0, hkn,
-      hy.trans (scaledLength_lt_blockWidth hn0 hk0 (hkn.trans (by simp))), rfl, rfl⟩
-
-lemma carryEncode_lt {t v : V} (ht : Codomain (powerBound n) (exponent n) n t)
-    (h : CarryEncode n t v) : v < lowerSize n := by
-  have hc2 : ∀ {c : V}, c ≤ 1 → c + 1 ≤ 2 := fun hc ↦
-    (add_le_add hc le_rfl).trans_eq one_add_one_eq_two
-  rcases carryEncode_cases hn2 ht h with
-    ⟨c, k, y, hc, hk0, hkn, hy, rfl, rfl⟩ | ⟨r, c, k, y, hc, hr, hk0, hkn, hy, rfl, rfl⟩
-  · rw [add_assoc]
-    exact code_lt_lowerSize (mul_add_lt_mul hk0 hkn hy) ((hc2 hc).trans le_add_self)
-  · rw [add_assoc]
-    apply code_lt_lowerSize (mul_add_lt_mul hk0 hkn hy)
-    calc 2 + 2 * r + c + 1 = 2 + 2 * r + (c + 1) := add_assoc _ _ _
-      _ ≤ 2 + 2 * r + 2 := add_le_add le_rfl (hc2 hc)
-      _ = 2 * (r + 1) + 2 := by grind
-      _ ≤ 2 * bandCount n + 2 := add_le_add (mul_le_mul_left (succ_le_iff_lt.mpr hr)) le_rfl
+    right
+    use r, c, k, y
+    exact ⟨hc, hr, hk0, hkn, hy.trans (scaledLength_lt_blockWidth hn0 hk0 (hkn.trans (by simp))),
+      rfl, rfl⟩
 
 lemma carryEncode_inj {t t' v : V} (ht : Codomain (powerBound n) (exponent n) n t)
     (ht' : Codomain (powerBound n) (exponent n) n t') (h : CarryEncode n t v)
     (h' : CarryEncode n t' v) : t = t' := by
+  have core : ∀ {j j' k k' y y' : V}, 0 < k → 0 < k' → k ≤ n → k' ≤ n → y < blockWidth n →
+      y' < blockWidth n → j * (n * blockWidth n) + (k - 1) * blockWidth n + y =
+        j' * (n * blockWidth n) + (k' - 1) * blockWidth n + y' → j = j' ∧ k = k' ∧ y = y' := by
+    intro j j' k k' y y' hk hk' hkn hkn' hy hy' h
+    obtain ⟨rfl, h₁⟩ := eq_of_mul_add_eq (mul_add_lt_mul hk hkn hy) (mul_add_lt_mul hk' hkn' hy')
+      (by simpa only [add_assoc] using h)
+    obtain ⟨h₂, rfl⟩ := eq_of_mul_add_eq hy hy' h₁
+    exact ⟨rfl, eq_of_sub_one_eq hk hk' h₂, rfl⟩
   rcases carryEncode_cases hn2 ht h with
       ⟨c, k, y, hc, hk0, hkn, hy, rfl, hv⟩ | ⟨r, c, k, y, hc, hr, hk0, hkn, hy, rfl, hv⟩ <;>
     rcases carryEncode_cases hn2 ht' h' with
       ⟨c', k', y', hc', hk0', hkn', hy', rfl, hv'⟩ |
-        ⟨r', c', k', y', hc', hr', hk0', hkn', hy', rfl, hv'⟩
-  · obtain ⟨rfl, rfl, rfl⟩ := carry_core_inj hk0 hk0' hkn hkn' hy hy' (hv.symm.trans hv')
-    rfl
-  · obtain ⟨hj, -, -⟩ := carry_core_inj hk0 hk0' hkn hkn' hy hy' (hv.symm.trans hv')
-    exact absurd (((le_self_add.trans le_self_add).trans_eq hj.symm).trans hc) (by norm_num)
-  · obtain ⟨hj, -, -⟩ := carry_core_inj hk0 hk0' hkn hkn' hy hy' (hv.symm.trans hv')
-    exact absurd (((le_self_add.trans le_self_add).trans_eq hj).trans hc') (by norm_num)
-  · obtain ⟨hj, rfl, rfl⟩ := carry_core_inj hk0 hk0' hkn hkn' hy hy' (hv.symm.trans hv')
-    have h₂ : r * 2 + c = r' * 2 + c' := by
+        ⟨r', c', k', y', hc', hr', hk0', hkn', hy', rfl, hv'⟩ <;>
+    obtain ⟨hj, rfl, rfl⟩ := core hk0 hk0' hkn hkn' hy hy' (hv.symm.trans hv')
+  · rw [hj]
+  · exact absurd (((le_self_add.trans le_self_add).trans_eq hj.symm).trans hc) (by norm_num)
+  · exact absurd (((le_self_add.trans le_self_add).trans_eq hj).trans hc') (by norm_num)
+  · have h₂ : r * 2 + c = r' * 2 + c' := by
       rw [mul_comm r 2, mul_comm r' 2]
       apply add_left_cancel (a := 2)
       simpa only [add_assoc] using hj
@@ -538,49 +432,90 @@ lemma codomainEncode_cases {t v : V} (ht : Codomain (powerBound n) (exponent n) 
       BandPosition n r q w ∧ q < 2 * bandBound n r * bandUnit n ∧ v = bandOffset n + w ∧
       bandOffset n ≤ v ∧ v < lowerSize n + targetExcess n) := by
   have hn0 : 0 < n := lt_of_lt_of_le two_pos hn2
-  have hn2n : n ≤ 2 * n := by simp
   rcases h with hc | ⟨y, -, rfl, rfl⟩ | ⟨k, -, i, -, rfl, rfl⟩ | ⟨p, -, o, -, rfl, rfl⟩ |
     ⟨r, -, x, -, q, -, w, -, rfl, hq, hw, rfl⟩
-  · exact Or.inl ⟨hc, carryEncode_lt hn2 ht hc⟩
-  · have hy := (below_of_codomain_four ht).trans (scaledLength_lt_blockWidth hn0 hn0 hn2n)
-    exact Or.inr (Or.inl ⟨y, rfl, hy, rfl, le_self_add, (add_lt_add_iff_left _).mpr hy⟩)
-  · obtain ⟨hk0, hk2, hi⟩ := top_pair_iff.mp (top_of_codomain_three ht)
+  · left
+    use hc
+    have hc2 : ∀ c : V, c ≤ 1 → c + 1 ≤ 2 := fun c hc ↦
+      (add_le_add hc le_rfl).trans_eq one_add_one_eq_two
+    rcases carryEncode_cases hn2 ht hc with
+      ⟨c, k, y, h₁, hk0, hkn, hy, rfl, rfl⟩ | ⟨r, c, k, y, h₁, hr, hk0, hkn, hy, rfl, rfl⟩
+    · rw [add_assoc]
+      exact code_lt_lowerSize (mul_add_lt_mul hk0 hkn hy) ((hc2 c h₁).trans le_add_self)
+    · rw [add_assoc]
+      apply code_lt_lowerSize (mul_add_lt_mul hk0 hkn hy)
+      calc 2 + 2 * r + c + 1 = 2 + 2 * r + (c + 1) := add_assoc _ _ _
+        _ ≤ 2 + 2 * r + 2 := add_le_add le_rfl (hc2 c h₁)
+        _ = 2 * (r + 1) + 2 := by grind
+        _ ≤ 2 * bandCount n + 2 := add_le_add (mul_le_mul_left (succ_le_iff_lt.mpr hr)) le_rfl
+  · right; left
+    norm_num [codomain_zero_iff] at ht
+    have hy := ht.trans (scaledLength_lt_blockWidth hn0 hn0 (by simp))
+    use y
+    and_intros
+    exacts [rfl, hy, rfl, le_self_add, (add_lt_add_iff_left _).mpr hy]
+  · right; right; left
+    norm_num [codomain_zero_iff] at ht
+    obtain ⟨hk0, hk2, hi⟩ := top_pair_iff.mp ht
     have hi' : i < ‖n‖ + 1 :=
       hi.trans_le ((length_monotone hk2).trans (length_two_mul_of_pos hn0).le)
-    refine Or.inr (Or.inr (Or.inl ⟨k, i, rfl, hk0, hi', rfl, le_self_add.trans le_self_add, ?_⟩))
-    rw [add_assoc]
-    exact (add_lt_add_iff_left _).mpr (mul_add_lt_mul hk0 hk2 hi')
-  · obtain ⟨hp, hpp, ho⟩ := small_pair_iff.mp (small_of_codomain_five ht)
+    have hv : lowerSize n + blockWidth n + (k - 1) * (‖n‖ + 1) + i <
+        lowerSize n + blockWidth n + 2 * n * (‖n‖ + 1) := by
+      rw [add_assoc]
+      exact (add_lt_add_iff_left _).mpr (mul_add_lt_mul hk0 hk2 hi')
+    use k, i
+    and_intros
+    exacts [rfl, hk0, hi', rfl, le_self_add.trans le_self_add, hv]
+  · right; right; right; left
+    norm_num [codomain_zero_iff] at ht
+    obtain ⟨p', -, o', -, e, hp, hpp, ho⟩ := ht
+    obtain ⟨rfl, rfl⟩ := pair_ext_iff.mp e
     have hp2 : p ≤ 2 * n := (le_mul_of_one_le_right (Arithmetic.zero_le p) hp.1.le).trans hpp
     have ho' := ho.trans (scaledLength_lt_blockWidth hn0 (pos_of_gt hp.1) hp2)
-    refine Or.inr (Or.inr (Or.inr (Or.inl
-      ⟨p, o, rfl, ho', rfl, le_self_add.trans le_self_add, ?_⟩)))
-    unfold bandOffset
-    calc _ = lowerSize n + blockWidth n + 2 * n * (‖n‖ + 1) + (p * blockWidth n + o) :=
-          add_assoc _ _ _
-      _ < _ := (add_lt_add_iff_left _).mpr <| calc
-          p * blockWidth n + o < p * blockWidth n + blockWidth n := (add_lt_add_iff_left _).mpr ho'
-          _ = (p + 1) * blockWidth n := by rw [add_mul, one_mul]
-          _ ≤ ((√(2 * n) : V) + 1) * blockWidth n :=
-            mul_le_mul_right (add_le_add (le_sqrt_of_mul_self_le hpp) le_rfl)
-  · obtain ⟨hr, hx⟩ := codomain_band_iff.mp ht
+    have hps : p ≤ (√(2 * n) : V) := by
+      by_contra hlt
+      have := mul_self_le_mul_self (Arithmetic.zero_le _) (succ_le_iff_lt.mpr (not_le.mp hlt))
+      exact lt_irrefl _ ((sqrt_spec_lt (2 * n)).trans_le (this.trans hpp))
+    have hv : lowerSize n + blockWidth n + 2 * n * (‖n‖ + 1) + p * blockWidth n + o <
+        bandOffset n := by
+      unfold bandOffset
+      calc _ = lowerSize n + blockWidth n + 2 * n * (‖n‖ + 1) + (p * blockWidth n + o) :=
+            add_assoc _ _ _
+        _ < _ := (add_lt_add_iff_left _).mpr <| calc
+            p * blockWidth n + o < p * blockWidth n + blockWidth n :=
+              (add_lt_add_iff_left _).mpr ho'
+            _ = (p + 1) * blockWidth n := by rw [add_mul, one_mul]
+            _ ≤ ((√(2 * n) : V) + 1) * blockWidth n := mul_le_mul_right (add_le_add hps le_rfl)
+    use p, o
+    and_intros
+    exacts [rfl, ho', rfl, le_self_add.trans le_self_add, hv]
+  · right; right; right; right
+    obtain ⟨hr, hx⟩ := codomain_band_iff.mp ht
     obtain ⟨hq2, -⟩ := bandIndex_spec (bandBound_le hr hn2) hx hq
     obtain ⟨-, hw2⟩ := bandPosition_spec hr hq2 hw
-    refine Or.inr (Or.inr (Or.inr (Or.inr ⟨r, x, q, w, rfl, hr, hx, hq, hw, hq2, rfl,
-      le_self_add, ?_⟩)))
-    rw [targetExcess_eq, add_assoc]
-    exact (add_lt_add_iff_left _).mpr hw2
+    have hv : bandOffset n + w < lowerSize n + targetExcess n := by
+      rw [targetExcess_eq, add_assoc]
+      exact (add_lt_add_iff_left _).mpr hw2
+    use r, x, q, w
+    and_intros
+    exacts [rfl, hr, hx, hq, hw, hq2, rfl, le_self_add, hv]
 
-
-lemma codomainEncode_band_total {r x q : V} (hr : r < bandCount n)
-    (hx : BandCodomain (powerBound n) (exponent n) (bandBound n r) x) (hq : BandIndex n r x q) :
-    ∃ v, CodomainEncode n ⟪1, r, x⟫ v := by
+lemma codomainEncode_band_total (hr : r < bandCount n)
+    (hx : BandCodomain (powerBound n) (exponent n) (bandBound n r) x)
+    (hq : ∃ q, BandIndex n r x q) : ∃ v, CodomainEncode n ⟪1, r, x⟫ v := by
+  obtain ⟨q, hq⟩ := hq
   obtain ⟨hq₂, -⟩ := bandIndex_spec (bandBound_le hr hn2) hx hq
-  obtain ⟨w, hw⟩ := bandPosition_exists (n := n) r q
+  obtain ⟨w, hw⟩ : ∃ w, BandPosition n r q w := by
+    rcases lt_or_ge q (2 * bandSize n (r + 1) * bandUnit n) with h | h
+    · use bandUnit n * (2 * cutoff n - 2 * bandSize n r) + q
+      exact Or.inl ⟨h, rfl⟩
+    · use 2 * cutoff n * bandUnit n + 2 * r * bandUnit n +
+        (q - 2 * bandSize n (r + 1) * bandUnit n)
+      exact Or.inr ⟨h, rfl⟩
   obtain ⟨hqw, -⟩ := bandPosition_spec hr hq₂ hw
   use bandOffset n + w
-  exact Or.inr (Or.inr (Or.inr (Or.inr ⟨r, by simp, x, by simp, q,
-    hqw.trans le_add_self, w, le_add_self, rfl, hq, hw, rfl⟩)))
+  right; right; right; right
+  use r, by simp, x, by simp, q, hqw.trans le_add_self, w, le_add_self
 
 lemma codomainEncode_total {t : V} (ht : Codomain (powerBound n) (exponent n) n t) :
     ∃ v, CodomainEncode n t v := by
@@ -593,38 +528,53 @@ lemma codomainEncode_total {t : V} (ht : Codomain (powerBound n) (exponent n) n 
   · obtain ⟨c, w, rfl⟩ := exists_pair₂ b
     rcases codomain_zero_iff.mp ht with (⟨rfl, hb⟩ | ⟨rfl, hb⟩) | ⟨rfl, ht₃⟩ | ⟨rfl, hy⟩ | ⟨rfl, hs⟩
     · obtain ⟨k, -, y, -, rfl, -⟩ := hb
-      exact ⟨_, Or.inl (Or.inl ⟨0, by simp, k, by simp, y, by simp, zero_le_one, rfl, rfl⟩)⟩
+      use 0 * (n * blockWidth n) + (k - 1) * blockWidth n + y
+      left; left
+      use 0, by simp, k, by simp, y, by simp, zero_le_one
     · obtain ⟨k, -, y, -, rfl, -⟩ := hb
-      exact ⟨_, Or.inl (Or.inl ⟨1, by simp, k, by simp, y, by simp, le_rfl, rfl, rfl⟩)⟩
+      use 1 * (n * blockWidth n) + (k - 1) * blockWidth n + y
+      left; left
+      use 1, by simp, k, by simp, y, by simp, le_rfl
     · obtain ⟨k, -, i, -, rfl, -⟩ := ht₃
-      exact ⟨_, Or.inr (Or.inr (Or.inl ⟨k, by simp, i, by simp, rfl, rfl⟩))⟩
-    · exact ⟨_, Or.inr (Or.inl ⟨w, by simp, rfl, rfl⟩)⟩
+      use lowerSize n + blockWidth n + (k - 1) * (‖n‖ + 1) + i
+      right; right; left
+      use k, by simp, i, by simp
+    · use lowerSize n + w
+      right; left
+      use w, by simp
     · obtain ⟨p, -, o, -, rfl, -⟩ := hs
-      exact ⟨_, Or.inr (Or.inr (Or.inr (Or.inl ⟨p, by simp, o, by simp, rfl, rfl⟩)))⟩
+      use lowerSize n + blockWidth n + 2 * n * (‖n‖ + 1) + p * blockWidth n + o
+      right; right; right; left
+      use p, by simp, o, by simp
   · obtain ⟨r, b', rfl⟩ := exists_pair₂ b
     obtain ⟨c, w, rfl⟩ := exists_pair₂ b'
     obtain ⟨hr, hx⟩ := codomain_band_iff.mp ht
     rcases codomain_one_iff.mp ht with
-      ⟨-, (⟨rfl, hb⟩ | ⟨rfl, hb⟩ | ⟨rfl, hy⟩) | ⟨rfl, ht₄⟩ | ⟨rfl, ht₅⟩⟩
+      ⟨-, (⟨rfl, hb⟩ | ⟨rfl, hb⟩ | ⟨rfl, -⟩) | ⟨hc, ht'⟩ | ⟨hc, ht'⟩⟩
     · obtain ⟨k, -, y, -, rfl, -⟩ := hb
-      exact ⟨_, Or.inl (Or.inr ⟨r, by simp, 0, by simp, k, by simp (maxDischargeDepth := 8), y,
-        by simp (maxDischargeDepth := 8), zero_le_one, rfl, rfl⟩)⟩
+      use (2 + 2 * r + 0) * (n * blockWidth n) + (k - 1) * blockWidth n + y
+      left; right
+      use r, by simp, 0, by simp, k, by simp (maxDischargeDepth := 8), y,
+        by simp (maxDischargeDepth := 8), zero_le_one
     · obtain ⟨k, -, y, -, rfl, -⟩ := hb
-      exact ⟨_, Or.inl (Or.inr ⟨r, by simp, 1, by simp, k, by simp (maxDischargeDepth := 8), y,
-        by simp (maxDischargeDepth := 8), le_rfl, rfl, rfl⟩)⟩
-    · exact codomainEncode_band_total hn2 hr hx (Or.inl ⟨w, by simp, rfl, rfl⟩)
-    · obtain ⟨k, -, i, -, rfl, -⟩ := ht₄
-      exact codomainEncode_band_total hn2 hr hx
-        (Or.inr ⟨4, by simp, k, by simp, i, by simp, le_rfl, by norm_num, rfl, rfl⟩)
-    · obtain ⟨k, -, i, -, rfl, -⟩ := ht₅
-      exact codomainEncode_band_total hn2 hr hx
-        (Or.inr ⟨5, by simp, k, by simp, i, by simp, by norm_num, le_rfl, rfl, rfl⟩)
+      use (2 + 2 * r + 1) * (n * blockWidth n) + (k - 1) * blockWidth n + y
+      left; right
+      use r, by simp, 1, by simp, k, by simp (maxDischargeDepth := 8), y,
+        by simp (maxDischargeDepth := 8), le_rfl
+    · apply codomainEncode_band_total hn2 hr hx
+      use w
+      left
+      use w, by simp
+    all_goals
+      obtain ⟨k, -, i, -, rfl, -⟩ := ht'
+      have h45 : 4 ≤ c ∧ c ≤ 5 := by subst hc; norm_num
+      apply codomainEncode_band_total hn2 hr hx
+      use 2 * bandBound n r * exponent n + (c - 4) * (bandBound n r * (‖n‖ + 1)) +
+        (k - 1) * (‖n‖ + 1) + i
+      right
+      use c, by simp, k, by simp, i, by simp, h45.1, h45.2
 
-end encoding
-
-section encode
-
-variable (hℓ : (1024 : V) ≤ ‖n‖)
+omit hn2
 include hℓ
 
 lemma isInj_codomainEncode :
@@ -640,65 +590,37 @@ lemma isInj_codomainEncode :
   have h₄ : bandOffset n ≤ lowerSize n + targetExcess n := by
     rw [targetExcess_eq]
     exact le_self_add.trans le_self_add
-  refine ⟨?_, ?_, ?_⟩
+  and_intros
   · intro t ht
     exact codomainEncode_total hn2 ht
   · intro t v ht h
     rcases codomainEncode_cases hn2 ht h with ⟨-, hv⟩ | ⟨y, -, -, -, -, hv⟩ |
-      ⟨k, i, -, -, -, -, -, hv⟩ | ⟨p, o, -, -, -, -, hv⟩ | ⟨r, x, q, w, -, -, -, -, -, -, -, -, hv⟩
-    · exact hv.trans_le (h₁.trans (h₂.trans (h₃.trans h₄)))
-    · exact hv.trans_le (h₂.trans (h₃.trans h₄))
-    · exact hv.trans_le (h₃.trans h₄)
-    · exact hv.trans_le h₄
-    · exact hv
+      ⟨k, i, -, -, -, -, -, hv⟩ | ⟨p, o, -, -, -, -, hv⟩ |
+      ⟨r, x, q, w, -, -, -, -, -, -, -, -, hv⟩ <;> grind
   · intro t t' v ht ht' h h'
-    rcases codomainEncode_cases hn2 ht h with ⟨hc, hv⟩ | ⟨y, rfl, hy, hvy, hlo, hhi⟩ |
-      ⟨k, i, rfl, hk, hi, hvk, hlo, hhi⟩ | ⟨p, o, rfl, ho, hvp, hlo, hhi⟩ |
-      ⟨r, x, q, w, rfl, hr, hx, hq, hw, hqb, hvb, hlo, hhi⟩
-    · rcases codomainEncode_cases hn2 ht' h' with ⟨hc', hv'⟩ | ⟨y', rfl, hy', hvy', hlo', hhi'⟩ |
+    have H := codomainEncode_cases hn2 ht h
+    have H' := codomainEncode_cases hn2 ht' h'
+    rcases H with ⟨hc, hv⟩ | ⟨y, rfl, hy, hvy, hlo, hhi⟩ |
+        ⟨k, i, rfl, hk, hi, hvk, hlo, hhi⟩ | ⟨p, o, rfl, ho, hvp, hlo, hhi⟩ |
+        ⟨r, x, q, w, rfl, hr, hx, hq, hw, hqb, hvb, hlo, hhi⟩ <;>
+      rcases H' with ⟨hc', hv'⟩ | ⟨y', rfl, hy', hvy', hlo', hhi'⟩ |
         ⟨k', i', rfl, hk', hi', hvk', hlo', hhi'⟩ | ⟨p', o', rfl, ho', hvp', hlo', hhi'⟩ |
-        ⟨r', x', q', w', rfl, hr', hx', hq', hw', hqb', hvb', hlo', hhi'⟩
-      · exact carryEncode_inj hn2 ht ht' hc hc'
-      all_goals grind
-    · rcases codomainEncode_cases hn2 ht' h' with ⟨hc', hv'⟩ | ⟨y', rfl, hy', hvy', hlo', hhi'⟩ |
-        ⟨k', i', rfl, hk', hi', hvk', hlo', hhi'⟩ | ⟨p', o', rfl, ho', hvp', hlo', hhi'⟩ |
-        ⟨r', x', q', w', rfl, hr', hx', hq', hw', hqb', hvb', hlo', hhi'⟩
-      · grind
-      · rw [add_left_cancel (hvy.symm.trans hvy')]
-      all_goals grind
-    · rcases codomainEncode_cases hn2 ht' h' with ⟨hc', hv'⟩ | ⟨y', rfl, hy', hvy', hlo', hhi'⟩ |
-        ⟨k', i', rfl, hk', hi', hvk', hlo', hhi'⟩ | ⟨p', o', rfl, ho', hvp', hlo', hhi'⟩ |
-        ⟨r', x', q', w', rfl, hr', hx', hq', hw', hqb', hvb', hlo', hhi'⟩
-      · grind
-      · grind
-      · have e : (k - 1) * (‖n‖ + 1) + i = (k' - 1) * (‖n‖ + 1) + i' := by
-          apply add_left_cancel (a := lowerSize n + blockWidth n)
-          simpa only [add_assoc] using hvk.symm.trans hvk'
-        obtain ⟨e₁, rfl⟩ := eq_of_mul_add_eq hi hi' e
-        rw [eq_of_sub_one_eq hk hk' e₁]
-      all_goals grind
-    · rcases codomainEncode_cases hn2 ht' h' with ⟨hc', hv'⟩ | ⟨y', rfl, hy', hvy', hlo', hhi'⟩ |
-        ⟨k', i', rfl, hk', hi', hvk', hlo', hhi'⟩ | ⟨p', o', rfl, ho', hvp', hlo', hhi'⟩ |
-        ⟨r', x', q', w', rfl, hr', hx', hq', hw', hqb', hvb', hlo', hhi'⟩
-      · grind
-      · grind
-      · grind
-      · have e : p * blockWidth n + o = p' * blockWidth n + o' := by
-          apply add_left_cancel (a := lowerSize n + blockWidth n + 2 * n * (‖n‖ + 1))
-          simpa only [add_assoc] using hvp.symm.trans hvp'
-        obtain ⟨rfl, rfl⟩ := eq_of_mul_add_eq ho ho' e
-        rfl
-      all_goals grind
-    · rcases codomainEncode_cases hn2 ht' h' with ⟨hc', hv'⟩ | ⟨y', rfl, hy', hvy', hlo', hhi'⟩ |
-        ⟨k', i', rfl, hk', hi', hvk', hlo', hhi'⟩ | ⟨p', o', rfl, ho', hvp', hlo', hhi'⟩ |
-        ⟨r', x', q', w', rfl, hr', hx', hq', hw', hqb', hvb', hlo', hhi'⟩
-      · grind
-      · grind
-      · grind
-      · grind
-      · obtain rfl : w = w' := add_left_cancel (hvb.symm.trans hvb')
-        obtain ⟨rfl, rfl⟩ := bandPosition_inj hr hr' hqb hqb' hw hw'
-        rw [(bandIndex_spec (bandBound_le hr hn2) hx hq).2 x' hx' hq']
+        ⟨r', x', q', w', rfl, hr', hx', hq', hw', hqb', hvb', hlo', hhi'⟩ <;>
+      try grind
+    · exact carryEncode_inj hn2 ht ht' hc hc'
+    · have e : (k - 1) * (‖n‖ + 1) + i = (k' - 1) * (‖n‖ + 1) + i' := by
+        apply add_left_cancel (a := lowerSize n + blockWidth n)
+        simpa only [add_assoc] using hvk.symm.trans hvk'
+      obtain ⟨e₁, rfl⟩ := eq_of_mul_add_eq hi hi' e
+      rw [eq_of_sub_one_eq hk hk' e₁]
+    · have e : p * blockWidth n + o = p' * blockWidth n + o' := by
+        apply add_left_cancel (a := lowerSize n + blockWidth n + 2 * n * (‖n‖ + 1))
+        simpa only [add_assoc] using hvp.symm.trans hvp'
+      obtain ⟨rfl, rfl⟩ := eq_of_mul_add_eq ho ho' e
+      rfl
+    · obtain rfl : w = w' := add_left_cancel (hvb.symm.trans hvb')
+      obtain ⟨rfl, rfl⟩ := bandPosition_inj hr hr' hqb hqb' hw hw'
+      rw [(bandIndex_spec (bandBound_le hr hn2) hx hq).2 x' hx' hq']
 
 lemma domainEncode_cover :
     ∀ v < lowerSize n + upperExcess n,
@@ -710,16 +632,23 @@ lemma domainEncode_cover :
   have hvz : v < lowerSize n := by
     by_contra hge
     obtain ⟨y, rfl⟩ := le_iff_exists_add.mp (not_lt.mp hge)
-    exact hno ⟪0, 2, y⟫ (domain_zero_iff.mpr (Or.inr (Or.inr
-      ⟨rfl, (add_lt_add_iff_left _).mp hv⟩))) (Or.inr ⟨y, by simp, rfl, rfl⟩)
+    refine hno ⟪0, 2, y⟫ (domain_zero_iff.mpr (Or.inr (Or.inr
+      ⟨rfl, (add_lt_add_iff_left _).mp hv⟩))) ?_
+    right
+    use y, by simp
   refine ⟨hvz.trans_le le_self_add, ?_⟩
   intro t ht h
   rcases codomainEncode_cases hn2 ht h with ⟨hc, -⟩ | ⟨y, -, -, -, hlo, -⟩ |
     ⟨k, i, -, -, -, -, hlo, -⟩ | ⟨p, o, -, -, -, hlo, -⟩ | ⟨r, x, q, w, -, -, -, -, -, -, -, hlo, -⟩
   · rcases carryEncode_cases hn2 ht hc with ⟨c, k, y, hc₁, -, -, -, rfl, -⟩ |
       ⟨r, c, k, y, hc₁, hr, -, -, -, rfl, -⟩
-    · exact hno _ (domain_of_bits_zero (bits_of_codomain_zero ht hc₁) hc₁) (Or.inl hc)
-    · exact hno _ (domain_of_bits_one hr (bits_of_codomain_one ht hc₁).2 hc₁) (Or.inl hc)
+    · refine hno _ ?_ (Or.inl hc)
+      have := bits_of_codomain_zero ht hc₁
+      rcases le_one_iff_eq_zero_or_one.mp hc₁ with rfl | rfl <;> simp [domain_zero_iff, this]
+    · refine hno _ ?_ (Or.inl hc)
+      have := (bits_of_codomain_one ht hc₁).2
+      rcases le_one_iff_eq_zero_or_one.mp hc₁ with rfl | rfl <;>
+        simp [Domain, BandCarry, tagged_pair_iff, family_pair_iff, hr, this]
   · exact lt_irrefl _ (hvz.trans_le hlo)
   · exact lt_irrefl _ (hvz.trans_le (le_self_add.trans hlo))
   · exact lt_irrefl _ (hvz.trans_le ((le_self_add.trans le_self_add).trans hlo))
@@ -728,66 +657,33 @@ lemma domainEncode_cover :
       exact le_self_add.trans (le_self_add.trans le_self_add)
     exact lt_irrefl _ (hvz.trans_le (this.trans hlo))
 
-omit hℓ in
-lemma domainEncode_functional :
-    ∀ u v v', Domain (powerBound n) (exponent n) n u → DomainEncode n u v →
-      DomainEncode n u v' → v = v' := by
-  intro u v v' _ h h'
-  rcases h with (⟨c, -, k, -, y, -, hc, rfl, rfl⟩ | ⟨r, -, c, -, k, -, y, -, hc, rfl, rfl⟩) |
-    ⟨y, -, rfl, rfl⟩ <;>
-  rcases h' with (⟨c', -, k', -, y', -, hc', h₂, rfl⟩ |
-    ⟨r', -, c', -, k', -, y', -, hc', h₂, rfl⟩) | ⟨y', -, h₂, rfl⟩
-  · obtain ⟨-, rfl, rfl, rfl⟩ : 0 = 0 ∧ c = c' ∧ k = k' ∧ y = y' := by
-      simpa only [pair_ext_iff] using h₂
-    rfl
-  · exact absurd (pair_ext_iff.mp h₂).1 zero_ne_one
-  · obtain rfl := (pair_ext_iff.mp (pair_ext_iff.mp h₂).2).1
-    exact absurd hc (by norm_num)
-  · exact absurd (pair_ext_iff.mp h₂).1 one_ne_zero
-  · obtain ⟨-, rfl, rfl, rfl, rfl⟩ : 1 = 1 ∧ r = r' ∧ c = c' ∧ k = k' ∧ y = y' := by
-      simpa only [pair_ext_iff] using h₂
-    rfl
-  · exact absurd (pair_ext_iff.mp h₂).1 one_ne_zero
-  · obtain rfl := (pair_ext_iff.mp (pair_ext_iff.mp h₂).2).1
-    exact absurd hc' (by norm_num)
-  · exact absurd (pair_ext_iff.mp h₂).1 zero_ne_one
-  · obtain ⟨-, -, rfl⟩ : 0 = 0 ∧ 2 = 2 ∧ y = y' := by simpa only [pair_ext_iff] using h₂
-    rfl
-
-end encode
-
-lemma definable_domain (B s : V) : 𝚺ᴬ₀.DefinablePred (Domain B s n) := by
-  have := definable_bits B s
-  unfold Domain LowerDomain BandCarry Family Tagged Below bandBound bandSize bandCount cutoff
-  definability
-
-lemma Domain.lt {B s u : V} (hn2 : 2 ≤ n) (h : Domain B s n u) :
-    u < ⟪1, n, 10, payloadBound B s n⟫ + 1 := by
-  rcases h with h | h
-  · exact Tagged.lt_of_tagged_zero h fun _ ↦ LowerDomain.le_bound
-  · exact Tagged.lt_of_family h bandCount_le fun r hr x hx ↦
-      BandCarry.le_bound (bandBound_le hr hn2) hx
-
-lemma Codomain.lt {B s u : V} (hn2 : 2 ≤ n) (h : Codomain B s n u) :
-    u < ⟪1, n, 10, payloadBound B s n⟫ + 1 := by
-  rcases h with h | h
-  · exact Tagged.lt_of_tagged_zero h fun _ ↦ LowerResidue.le_bound
-  · exact Tagged.lt_of_family h bandCount_le fun r hr x hx ↦
-      BandCodomain.le_bound (bandBound_le hr hn2) hx
-
 /-- If $\|n\| \ge 1024$, there is a prime in $(n, 2n]$. -/
-lemma exists_prime_of_length (hℓ : (1024 : V) ≤ ‖n‖) : ∃ p, n < p ∧ p ≤ 2 * n ∧ IsPrime p := by
+lemma exists_prime_of_length : ∃ p, n < p ∧ p ≤ 2 * n ∧ IsPrime p := by
+  have hfunctional : ∀ u v v', Domain (powerBound n) (exponent n) n u → DomainEncode n u v →
+      DomainEncode n u v' → v = v' := by
+    intro u v v' _ h h'
+    rcases h with (⟨c, -, k, -, y, -, hc, rfl, rfl⟩ | ⟨r, -, c, -, k, -, y, -, hc, rfl, rfl⟩) |
+      ⟨y, -, rfl, rfl⟩ <;>
+    rcases h' with (⟨c', -, k', -, y', -, hc', h₂, rfl⟩ |
+      ⟨r', -, c', -, k', -, y', -, hc', h₂, rfl⟩) | ⟨y', -, h₂, rfl⟩ <;>
+    simp_all [pair_ext_iff]
+    obtain ⟨rfl, -⟩ := h₂
+    norm_num at hc'
+  have hdomainEncode : 𝚺ᴬ₀.DefinableRel (DomainEncode n) := by
+    have := definable_carryEncode n
+    unfold DomainEncode
+    definability
   by_contra! H
-  have hn0 : 0 < n :=
-    length_pos_iff.mp (lt_of_lt_of_le (by exact_mod_cast (show (0 : ℕ) < 1024 by decide)) hℓ)
-  have hn2 : 2 ≤ n := two_le_of_length_ge hℓ
+  have hn2 := two_le_of_length_ge hℓ
+  have hn0 : 0 < n := lt_of_lt_of_le two_pos hn2
   have hB : 0 < powerBound n := smash_pos _ _
   have hs : 0 < exponent n := mul_pos (length_pos_iff.mpr hn0) (length_pos_iff.mpr hn0)
   have hemb := embeds_domain_codomain hB hs exponent_mul_length_lt
     (fun p h₁ h₂ hp ↦ H p h₁ h₂ hp) hn2
-  obtain ⟨R, hR, hinj⟩ := Embeds.extend (definable_domain _ _) (definable_domainEncode n)
-    (definable_codomainEncode n) hemb (fun _ hu ↦ Domain.lt hn2 hu) (fun _ ht ↦ Codomain.lt hn2 ht)
-    domainEncode_functional (isInj_codomainEncode hℓ) (domainEncode_cover hℓ)
+  obtain ⟨R, hR, hinj⟩ := Embeds.extend (definable_domain n _ _) hdomainEncode
+    (definable_codomainEncode n) hemb
+    (fun _ hu ↦ Domain.lt hn2 hu) (fun _ ht ↦ Codomain.lt hn2 ht) hfunctional
+    (isInj_codomainEncode hℓ) (domainEncode_cover hℓ)
   have hsize := size_inequality hℓ
   have hK : 0 < ratio n := by
     have h1 : (0 : V) < ‖n‖ + 1 := lt_of_lt_of_le zero_lt_one le_add_self
@@ -806,12 +702,14 @@ lemma exists_prime_of_length (hℓ : (1024 : V) ≤ ‖n‖) : ∃ p, n < p ∧ 
       _ = ((K + 1) * targetExcess n + K * (K + 1) + lowerSize n) + K * lowerSize n := by grind
       _ ≤ K * upperExcess n + K * lowerSize n := add_le_add hsize le_rfl
       _ = K * (lowerSize n + upperExcess n) := by grind
-  obtain ⟨x, hx, x', hx', y, hy, hne, h, h'⟩ :=
-    weakPigeonhole_succ_mul_of_le_length hR (b := c) (I := lengthBound n) (by simp [c]) hK
-      (ratio_le_length hℓ) fun x hx ↦ by
-        obtain ⟨y, hy⟩ := hinj.1 x (lt_of_lt_of_le hx hc₂)
-        use y
-        exact ⟨lt_of_lt_of_le (hinj.2.1 x y (lt_of_lt_of_le hx hc₂) hy) hc₁, hy⟩
+  have htotal : ∀ x < (K + 1) * c, ∃ y < K * c, R x y := by
+    intro x hx
+    obtain ⟨y, hy⟩ := hinj.1 x (lt_of_lt_of_le hx hc₂)
+    use y
+    and_intros
+    exacts [lt_of_lt_of_le (hinj.2.1 x y (lt_of_lt_of_le hx hc₂) hy) hc₁, hy]
+  obtain ⟨x, hx, x', hx', y, hy, hne, h, h'⟩ := weakPigeonhole_succ_mul_of_le_length hR
+    (b := c) (I := lengthBound n) (by simp [c]) hK (ratio_le_length hℓ) htotal
   exact hne (hinj.2.2 x x' y (lt_of_lt_of_le hx hc₂) (lt_of_lt_of_le hx' hc₂) h h')
 
 end Bertrand
@@ -819,43 +717,6 @@ end Bertrand
 /-- Between $n$ and $2n$ there is a prime, for every $n \ge 1$. -/
 def bertrandPostulate : ArithmeticSentence :=
   “∀ n, 1 ≤ n → ∃ p, n < p ∧ p ≤ 2 * n ∧ !isPrime p”
-
-lemma exists_natCast_of_length_le (j : ℕ) {x : V} (h : ‖x‖ ≤ j) : ∃ k : ℕ, x = k := by
-  induction j generalizing x with
-  | zero =>
-    use 0
-    simpa using h
-  | succ j ih =>
-    rcases (Arithmetic.zero_le x).eq_or_lt with rfl | hx
-    · use 0
-      simp
-    have hx₂ : 2 * (x / 2) + x % 2 = x := div_add_mod x 2
-    rcases (Arithmetic.zero_le (x / 2)).eq_or_lt with h₀ | h₀
-    · rw [← h₀, mul_zero, zero_add] at hx₂
-      have : x ≤ 1 := lt_two_iff_le_one.mp (hx₂ ▸ mod_lt x two_pos)
-      use 1
-      simpa using le_antisymm this (pos_iff_one_le.mp hx)
-    have hlen : ‖x‖ = ‖x / 2‖ + 1 := by
-      rcases mod_two x with h₁ | h₁
-      · rw [h₁, add_zero] at hx₂
-        rw [← length_two_mul_of_pos h₀, hx₂]
-      · rw [h₁] at hx₂
-        rw [← length_two_mul_add_one (x / 2), hx₂]
-    obtain ⟨k, hk⟩ := ih (x := x / 2) (by
-      rw [hlen, Nat.cast_succ] at h
-      exact (add_le_add_iff_right 1).mp h)
-    rcases mod_two x with h₁ | h₁
-    · use 2 * k
-      rw [h₁, add_zero, hk] at hx₂
-      simpa using hx₂.symm
-    · use 2 * k + 1
-      rw [h₁, hk] at hx₂
-      simpa using hx₂.symm
-
-lemma isPrime_natCast {p : ℕ} (hp : p.Prime) : IsPrime (p : V) := by
-  have h : IsPrime p := ⟨hp.one_lt, fun b hb hd ↦ (Nat.prime_def.mp hp).2 b hd⟩
-  simpa using (Defined.sigmaZero_absolute (V := V) (isPrime_defined (V := ℕ))
-    (isPrime_defined (V := V)) ![p]).mp h
 
 lemma exists_prime_lt_le_two_mul (n : V) (hn : 1 ≤ n) : ∃ p, n < p ∧ p ≤ 2 * n ∧ IsPrime p := by
   by_cases hℓ : (1024 : V) ≤ ‖n‖
@@ -868,7 +729,12 @@ lemma exists_prime_lt_le_two_mul (n : V) (hn : 1 ≤ n) : ∃ p, n < p ∧ p ≤
   obtain ⟨p, hp, hkp, hpk⟩ := Nat.exists_prime_lt_and_le_two_mul k (by
     rintro rfl
     simp at hn)
-  exact ⟨p, by exact_mod_cast hkp, by exact_mod_cast hpk, isPrime_natCast hp⟩
+  use p
+  constructor
+  · exact_mod_cast hkp
+  constructor
+  · exact_mod_cast hpk
+  · exact isPrime_natCast hp
 
 @[simp] lemma models_bertrandPostulate_iff {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] :
     V↓[ℒₒᵣ] ⊧ bertrandPostulate ↔ ∀ n : V, 1 ≤ n → ∃ p, n < p ∧ p ≤ 2 * n ∧ IsPrime p := by

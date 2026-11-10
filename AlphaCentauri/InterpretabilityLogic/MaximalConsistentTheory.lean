@@ -210,7 +210,7 @@ end AssuringSuccessor
 
 /-! ### Existence of assuring successors -/
 
-private lemma exists_of_subset_insert_insert (h : B ∉ Γ.antecedents S) :
+private lemma consistent_of_not_mem_antecedents (h : B ∉ Γ.antecedents S) :
     (insert B <| insert (□(∼B)) {C | ∃ A ∈ Γ.antecedents S, C = ∼A ∨ C = □(∼A)}) *⊬[ofAxioms 𝔸]
       ⊥ := by
   intro hb;
@@ -267,7 +267,7 @@ private lemma exists_of_subset_insert_insert (h : B ∉ Γ.antecedents S) :
 `S`-assuring successor containing `B` and `□∼B`. -/
 lemma exists_assuringSuccessor (h : B ∉ Γ.antecedents S) :
     ∃ Δ, AssuringSuccessor S Γ Δ ∧ B ∈ Δ ∧ □(∼B) ∈ Δ := by
-  obtain ⟨Δ, hΔ⟩ := exists_superset (exists_of_subset_insert_insert h);
+  obtain ⟨Δ, hΔ⟩ := exists_superset (consistent_of_not_mem_antecedents h);
   use Δ;
   and_intros;
   · intro A hA;

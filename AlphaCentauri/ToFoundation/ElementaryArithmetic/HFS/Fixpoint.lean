@@ -208,10 +208,11 @@ lemma mem_limSeq_succ_iff {x s : V} :
 
 lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' := by
   have hR : LocallyDelta0 fun y : Fin 2 → V ↦ c.limSeq v (y 0) ⊆ c.limSeq v (y 1) := by
+    have h1 := c.limSeq_comp (v := v) (LocallyDelta0Function.var (1 : Fin 2))
     have := (LocallyDelta0.of_definable (R := fun y : Fin 2 → V ↦ y 0 ⊆ y 1)
       (by definability)).comp (f := ![fun y ↦ c.limSeq v (y 0), fun y ↦ c.limSeq v (y 1)]) <|
-        Fin.forall_fin_succ.mpr ⟨c.limSeq_comp (LocallyDelta0Function.var 0),
-          Fin.forall_fin_succ.mpr ⟨c.limSeq_comp (LocallyDelta0Function.var 1), finZeroElim⟩⟩
+        Fin.forall_fin_succ.mpr ⟨c.limSeq_comp (v := v) (LocallyDelta0Function.var 0),
+          Fin.forall_fin_succ.mpr ⟨h1, finZeroElim⟩⟩
     simpa using this
   have hP : LocallyDelta0Pred fun s' ↦ ∀ s ≤ s', c.limSeq v s ⊆ c.limSeq v s' :=
     (LocallyDelta0.ball_le_function (LocallyDelta0Function.var 0) hR).of_iff fun _ ↦ by simp
@@ -231,13 +232,14 @@ lemma mem_limSeq_self [c.StrongFinite] {u s : V} :
     u ∈ c.limSeq v s → u ∈ c.limSeq v (u + 1) := by
   have hR : LocallyDelta0 fun y : Fin 2 → V ↦
       y 1 ∈ c.limSeq v (y 0) → y 1 ∈ c.limSeq v (y 1 + 1) := by
+    have h2 := c.limSeq_comp (v := v) <|
+      add_one_locallyDelta0 (LocallyDelta0Function.var (1 : Fin 2))
     have := (LocallyDelta0.of_definable (R := fun y : Fin 3 → V ↦ y 0 ∈ y 1 → y 0 ∈ y 2)
       (by definability)).comp (f := ![fun y ↦ y 1, fun y ↦ c.limSeq v (y 0),
         fun y ↦ c.limSeq v (y 1 + 1)]) <|
         Fin.forall_fin_succ.mpr ⟨LocallyDelta0Function.var 1,
-          Fin.forall_fin_succ.mpr ⟨c.limSeq_comp (LocallyDelta0Function.var 0),
-            Fin.forall_fin_succ.mpr ⟨c.limSeq_comp
-              (add_one_locallyDelta0 (LocallyDelta0Function.var 1)), finZeroElim⟩⟩⟩
+          Fin.forall_fin_succ.mpr ⟨c.limSeq_comp (v := v) (LocallyDelta0Function.var 0),
+            Fin.forall_fin_succ.mpr ⟨h2, finZeroElim⟩⟩⟩
     simpa using this
   have hP : LocallyDelta0Pred fun u ↦
       ∀ t ≤ s, u ∈ c.limSeq v t → u ∈ c.limSeq v (u + 1) :=
@@ -261,6 +263,7 @@ lemma mem_limSeq_self [c.StrongFinite] {u s : V} :
 
 variable (v)
 
+set_option linter.dupNamespace false in
 /-- `c.Fixpoint v x` states that `x` belongs to the least fixed point of the operator. -/
 def Fixpoint (x : V) : Prop := ∃ s, x ∈ c.limSeq v s
 
@@ -280,15 +283,17 @@ lemma case_mp {x : V} : c.Fixpoint v x → c.Φ v {z | c.Fixpoint v z} x := by
   intro h
   obtain ⟨u, hu⟩ := c.fixpoint_iff_succ.mp h
   have : c.Φ v {z | z ∈ c.limSeq v u} x := (c.mem_limSeq_succ_iff.mp hu).2
-  exact c.monotone (fun z hx ↦ ⟨u, hx⟩) this
+  exact c.monotone (C' := {z | c.Fixpoint v z}) (fun _ hx ↦ ⟨u, hx⟩) this
 
 /-- A point whose premises below `m` all appear by the stage `S` belongs to the fixpoint. -/
 lemma case_mpr_of_stage {x m S : V} (hΦ : c.Φ v {z | c.Fixpoint v z ∧ z < m} x)
     (hS : ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v S) : c.Fixpoint v x := by
-  have : c.Φ v {z | z ∈ c.limSeq v S} x := c.monotone (fun z ⟨hz, hzm⟩ ↦ hS z hzm hz) hΦ
+  have : c.Φ v {z | z ∈ c.limSeq v S} x :=
+    c.monotone (C' := {z | z ∈ c.limSeq v S}) (fun z hz ↦ hS z hz.2 hz.1) hΦ
   use max S x + 1
   exact c.mem_limSeq_succ_iff.mpr
-    ⟨by simp, c.monotone (fun z hz ↦ c.limSeq_cumulative (by simp) hz) this⟩
+    ⟨by simp, c.monotone (C' := {z | z ∈ c.limSeq v (max S x)})
+      (fun _ hz ↦ c.limSeq_cumulative (by simp) hz) this⟩
 
 theorem case [c.StrongFinite] {x : V} : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x := by
   constructor

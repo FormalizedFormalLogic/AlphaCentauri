@@ -148,6 +148,7 @@ public import AlphaCentauri.ToMathlib.FLT3.Descent
 public import AlphaCentauri.ToMathlib.FLT3.Eisenstein
 public import AlphaCentauri.ToMathlib.Goodstein
 public import AlphaCentauri.ToMathlib.HahnSeries
+public import AlphaCentauri.ToMathlib.IntegerPart
 public import AlphaCentauri.ToMathlib.ONote.Computability
 public import AlphaCentauri.ToMathlib.ONote.Epsilon0
 public import AlphaCentauri.ToMathlib.ONote.FastGrowing

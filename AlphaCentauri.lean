@@ -8,8 +8,12 @@ public import AlphaCentauri.Axiomatizability.ISigma0
 public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Axiomatizability.RestrictedComplexity
 public import AlphaCentauri.Bootstrapping.Completeness.Henkin
+public import AlphaCentauri.Bootstrapping.Interpretability.CaseSplit
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
+public import AlphaCentauri.Bootstrapping.Interpretability.Composition
+public import AlphaCentauri.Bootstrapping.Interpretability.Congruence
 public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
+public import AlphaCentauri.Bootstrapping.Interpretability.Identity
 public import AlphaCentauri.Bootstrapping.Interpretability.Interpretable
 public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
@@ -32,6 +36,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.PeanoMinusAxiom
+public import AlphaCentauri.Bootstrapping.Proof.ProofByCases
 public import AlphaCentauri.Bootstrapping.Proof.RankedDerivation
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.Bootstrapping.Proof.Subformula

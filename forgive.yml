@@ -77,15 +77,6 @@ declaration:
   OpenPredicate.openInduction_iff_integerPart:
     forgive:
       - OpenPredicate.openInduction_iff_integerPart
-  FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isTranslationTable_provable_translate:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isTranslationTable_provable_translate
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans
-  FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.union_or:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.union_or
   FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
@@ -124,18 +115,6 @@ declaration:
   FFL.FirstOrder.Arithmetic.IOpen.not_finiteAxiomatizable:
     forgive:
       - HahnSeries.isRealClosed_lex
-  FFL.FirstOrder.ArithmeticTheory.interpretability_of_provable:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isTranslationTable_provable_translate
-  FFL.FirstOrder.Arithmetic.interpretable_of_provable_imp:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isTranslationTable_provable_translate
-  FFL.FirstOrder.ArithmeticTheory.interpretability_trans:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans
-  FFL.FirstOrder.ArithmeticTheory.interpretability_or:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.union_or
   FFL.FirstOrder.Arithmetic.interpretable_union_singleton_neg_standardProvability_neg:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
@@ -145,12 +124,6 @@ declaration:
   FFL.InterpretabilityLogic.instILInterpretabilityAbstraction:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isTranslationTable_provable_translate
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.union_or
   FFL.InterpretabilityLogic.Logic.IL.arithmetical_soundness_interpretability:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isTranslationTable_provable_translate
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.trans
-      - FFL.FirstOrder.Arithmetic.Bootstrapping.Interpretable.union_or

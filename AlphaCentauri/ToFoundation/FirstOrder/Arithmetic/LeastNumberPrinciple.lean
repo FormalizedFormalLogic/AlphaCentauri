@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Schemata.Induction
+public import AlphaCentauri.Schemata.BoundedInduction
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
 public import AlphaCentauri.ToFoundation.FirstOrder.Rew

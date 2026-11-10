@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.NumberTheory.FermatLastTheorem
-public import AlphaCentauri.Schemata.Induction
+public import AlphaCentauri.Schemata.BoundedInduction
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
 public import AlphaCentauri.ToFoundation.FirstOrder.Rew

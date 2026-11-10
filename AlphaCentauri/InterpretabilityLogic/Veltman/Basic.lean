@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.Logic
 public import Foundation.Logic.Semantics
 public import Foundation.Vorspiel.Rel.CWF
 

@@ -69,6 +69,15 @@ omit [L.Eq] in
   | 0 => rfl
   | 1 => rfl
 
+@[simp] lemma Semiformula.shift_iterate_equal {n : ℕ} (s t : Semiterm V L n) (j : ℕ) :
+    Semiformula.shift^[j] (Semiformula.equal s t) =
+      Semiformula.equal (Semiterm.shift^[j] s) (Semiterm.shift^[j] t) := by
+  induction j generalizing s t with
+  | zero => rfl
+  | succ j ih =>
+    rw [Function.iterate_succ_apply, Function.iterate_succ_apply, Function.iterate_succ_apply,
+      Semiformula.shift_equal, ih]
+
 lemma Matrix.conj_map {α β : Type*} [Top α] [Wedge α] [Top β] [Wedge β] (f : α → β)
     (htop : f ⊤ = ⊤) (hand : ∀ x y, f (x ⋏ y) = f x ⋏ f y) {m : ℕ} (v : Fin m → α) :
     f (Matrix.conj v) = Matrix.conj fun i ↦ f (v i) := by

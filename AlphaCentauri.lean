@@ -78,6 +78,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 public import AlphaCentauri.InterpretabilityLogic.Veltman.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStep
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Bisimulation
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Completeness
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Extension
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Veltman

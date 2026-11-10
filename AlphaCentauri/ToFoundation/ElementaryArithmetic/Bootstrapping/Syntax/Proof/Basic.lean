@@ -92,7 +92,10 @@ lemma setShift_existsUnique (s : V) :
   apply this.finite_comprehension!
   use Y + 1
   rintro _ ⟨x, hx, rfl⟩
-  exact lt_succ_iff_le.mpr <| hY ![x] fun _ ↦ by simpa using (lt_of_mem hx).le
+  have : ∀ i, ![x] i ≤ s := by
+    intro i
+    simpa using (lt_of_mem hx).le
+  exact lt_succ_iff_le.mpr <| hY ![x] this
 
 variable (L) in
 /-- The set of the shifts of the elements of `s`. -/
@@ -153,25 +156,23 @@ instance setShift.definable : 𝚺ᴬ₁-Function₁[V] setShift L := setShift.d
 
 lemma setShift_locallyDelta0 : LocallyDelta0Function₁ (setShift (V := V) L) where
   graph := by
-    have h₁ := LocallyDelta0.ball_lt_function (LocallyDelta0Function.var (V := V) (0 : Fin 2)) <|
-      (LocallyDelta0.mem (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 1)).imp <|
-        LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 2) <|
-          (LocallyDelta0.mem (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 3)).and <|
-            LocallyDelta0.eq (LocallyDelta0Function.var 1) <|
-              (shift_locallyDelta0 (L := L)).comp₁ (LocallyDelta0Function.var 0)
-    have h₂ := LocallyDelta0.ball_lt_function (LocallyDelta0Function.var (V := V) (1 : Fin 2)) <|
-      (LocallyDelta0.mem (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 2)).imp <|
-        LocallyDelta0.mem ((shift_locallyDelta0 (L := L)).comp₁ (LocallyDelta0Function.var 0))
-          (LocallyDelta0Function.var 1)
-    refine (h₁.and h₂).of_iff fun v ↦ (setShift_graph (v 0) (v 1)).trans ?_
-    simp only [Fin.isValue, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two]
-    constructor
-    · rintro ⟨h₁, h₂⟩
-      exact ⟨fun y _ hy ↦ by obtain ⟨x, hx, h⟩ := h₁ y hy; exact ⟨x, lt_of_mem hx, hx, h⟩,
-        fun x _ hx ↦ h₂ x hx⟩
-    · rintro ⟨h₁, h₂⟩
-      exact ⟨fun y hy ↦ by obtain ⟨x, _, hx, h⟩ := h₁ y (lt_of_mem hy) hy; exact ⟨x, hx, h⟩,
-        fun x hx ↦ h₂ x (lt_of_mem hx) hx⟩
+    have h₁ : LocallyDelta0 fun w : Fin 2 → V ↦
+        ∀ y < w 0, y ∈ w 0 → ∃ x < w 1, x ∈ w 1 ∧ y = shift L x :=
+      LocallyDelta0.ball_lt_function (LocallyDelta0Function.var (V := V) (0 : Fin 2)) <|
+        (LocallyDelta0.mem (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 1)).imp <|
+          LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 2) <|
+            (LocallyDelta0.mem (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 3)).and <|
+              LocallyDelta0.eq (LocallyDelta0Function.var 1) <|
+                (shift_locallyDelta0 (L := L)).comp₁ (LocallyDelta0Function.var 0)
+    have h₂ : LocallyDelta0 fun w : Fin 2 → V ↦ ∀ x < w 1, x ∈ w 1 → shift L x ∈ w 0 :=
+      LocallyDelta0.ball_lt_function (LocallyDelta0Function.var (V := V) (1 : Fin 2)) <|
+        (LocallyDelta0.mem (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 2)).imp <|
+          LocallyDelta0.mem ((shift_locallyDelta0 (L := L)).comp₁ (LocallyDelta0Function.var 0))
+            (LocallyDelta0Function.var 1)
+    apply (h₁.and h₂).of_iff
+    intro v
+    apply (setShift_graph (v 0) (v 1)).trans
+    grind [lt_of_mem]
   bounded X := by
     obtain ⟨Y, hY⟩ := (shift_locallyDelta0 (V := V) (L := L)).bounded X
     use Exp.exp (Y + 1)
@@ -180,8 +181,10 @@ lemma setShift_locallyDelta0 : LocallyDelta0Function₁ (setShift (V := V) L) wh
     apply lt_exp_iff.mpr
     intro y hy
     obtain ⟨x, hx, rfl⟩ := mem_setShift_iff.mp hy
-    exact lt_succ_iff_le.mpr <| hY ![x] fun _ ↦ by
+    have : ∀ i, ![x] i ≤ X := by
+      intro i
       simpa using le_trans (lt_of_mem hx).le (hv 0)
+    exact lt_succ_iff_le.mpr <| hY ![x] this
 
 end setShift
 
@@ -437,7 +440,7 @@ private lemma phi_iff (C d : V) :
         d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) ) := by
   constructor
   · rintro ⟨hs, H⟩
-    refine ⟨hs, ?_⟩
+    apply And.intro hs
     rcases H with (⟨s, p, rfl, h⟩ | ⟨s, rfl, h⟩ | ⟨s, p, q, dp, dq, rfl, h⟩ |
       ⟨s, p, q, dpq, rfl, h⟩ |
       ⟨s, p, dp, rfl, h⟩ | ⟨s, p, t, dp, rfl, h⟩ | ⟨s, d', rfl, h⟩ | ⟨s, d', rfl, h⟩ |
@@ -453,7 +456,7 @@ private lemma phi_iff (C d : V) :
     · disj 9; exact ⟨s, by simp, p, by simp, d₁, by simp, d₂, by simp, rfl, h⟩
     · disj 10; exact ⟨s, by simp, p, by simp, rfl, h⟩
   · rintro ⟨hs, H⟩
-    refine ⟨hs, ?_⟩
+    apply And.intro hs
     rcases H with (⟨s, _, p, _, rfl, h⟩ | ⟨s, _, rfl, h⟩ |
       ⟨s, _, p, _, q, _, dp, _, dq, _, rfl, h⟩ |
       ⟨s, _, p, _, q, _, dpq, _, rfl, h⟩ |
@@ -477,21 +480,19 @@ lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
   have hfs : LocallyDelta0 fun w : Fin 2 → V ↦ IsFormulaSet L (fstIdx (w 0)) :=
     isFormulaSet_locallyDelta0.pred_comp (fstIdx_locallyDelta0.comp₁ hv₀)
   have h₁ : LocallyDelta0 fun w : Fin 2 → V ↦
-      ∃ s < w 0, ∃ p < w 0, w 0 = axL s p ∧ p ∈ s ∧ neg L p ∈ s := by
-    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <|
+      ∃ s < w 0, ∃ p < w 0, w 0 = axL s p ∧ p ∈ s ∧ neg L p ∈ s :=
+    bexs_lt_function hv₀ <| bexs_lt_function (var 1) <|
       (eq (var 2) (pairing.comp₂ (var 1) (pairing.comp₂ (const 0) (var 0))).add_one).and <|
       (mem (var 0) (var 1)).and <| mem ((neg_locallyDelta0 (L := L)).comp₁ (var 0)) (var 1)
-    exact this
-  have h₂ : LocallyDelta0 fun w : Fin 2 → V ↦ ∃ s < w 0, w 0 = verumIntro s ∧ ^⊤ ∈ s := by
-    have := bexs_lt_function hv₀ <|
+  have h₂ : LocallyDelta0 fun w : Fin 2 → V ↦ ∃ s < w 0, w 0 = verumIntro s ∧ ^⊤ ∈ s :=
+    bexs_lt_function hv₀ <|
       (eq (var 1) (pairing.comp₂ (var 0) (pairing.comp₂ (const 1) (const 0))).add_one).and <|
       mem (const (^⊤ : V)) (var 0)
-    exact this
   have h₃ : LocallyDelta0 fun w : Fin 2 → V ↦
       ∃ s < w 0, ∃ p < w 0, ∃ q < w 0, ∃ dp < w 0, ∃ dq < w 0,
         w 0 = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧
-          (fstIdx dp = insert p s ∧ dp ∈ w 1) ∧ (fstIdx dq = insert q s ∧ dq ∈ w 1) := by
-    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
+          (fstIdx dp = insert p s ∧ dp ∈ w 1) ∧ (fstIdx dq = insert q s ∧ dq ∈ w 1) :=
+    bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
       bexs_lt_function (var 3) <| bexs_lt_function (var 4) <|
       (eq (var 5) (pairing.comp₂ (var 4) <| pairing.comp₂ (const 2) <| pairing.comp₂ (var 3) <|
         pairing.comp₂ (var 2) <| pairing.comp₂ (var 1) (var 0)).add_one).and <|
@@ -500,24 +501,22 @@ lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
         (mem (var 1) (var 6))).and <|
       (eq (fstIdx_locallyDelta0.comp₁ (var 0)) (insert.comp₂ (var 2) (var 4))).and
         (mem (var 0) (var 6))
-    exact this
   have h₄ : LocallyDelta0 fun w : Fin 2 → V ↦
       ∃ s < w 0, ∃ p < w 0, ∃ q < w 0, ∃ dpq < w 0,
         w 0 = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ fstIdx dpq = insert p (insert q s) ∧
-          dpq ∈ w 1 := by
-    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
+          dpq ∈ w 1 :=
+    bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
       bexs_lt_function (var 3) <|
       (eq (var 4) (pairing.comp₂ (var 3) <| pairing.comp₂ (const 3) <| pairing.comp₂ (var 2) <|
         pairing.comp₂ (var 1) (var 0)).add_one).and <|
       (mem (qqOr_locallyDelta0.comp₂ (var 2) (var 1)) (var 3)).and <|
       (eq (fstIdx_locallyDelta0.comp₁ (var 0))
         (insert.comp₂ (var 2) (insert.comp₂ (var 1) (var 3)))).and (mem (var 0) (var 5))
-    exact this
   have h₅ : LocallyDelta0 fun w : Fin 2 → V ↦
       ∃ s < w 0, ∃ p < w 0, ∃ dp < w 0,
         w 0 = allIntro s p dp ∧ ^∀ p ∈ s ∧ fstIdx dp = insert (free L p) (setShift L s) ∧
-          dp ∈ w 1 := by
-    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
+          dp ∈ w 1 :=
+    bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
       (eq (var 3) (pairing.comp₂ (var 2) <| pairing.comp₂ (const 4) <|
         pairing.comp₂ (var 1) (var 0)).add_one).and <|
       (mem (qqAll_locallyDelta0.comp₁ (var 1)) (var 2)).and <|
@@ -525,12 +524,11 @@ lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
         insert.comp₂ ((free_locallyDelta0 (L := L)).comp₁ (var 1))
           ((setShift_locallyDelta0 (L := L)).comp₁ (var 2))).and <|
       mem (var 0) (var 4)
-    exact this
   have h₆ : LocallyDelta0 fun w : Fin 2 → V ↦
       ∃ s < w 0, ∃ p < w 0, ∃ t < w 0, ∃ dp < w 0,
         w 0 = exsIntro s p t dp ∧ ^∃ p ∈ s ∧ IsTerm L t ∧
-          fstIdx dp = insert (substs1 L t p) s ∧ dp ∈ w 1 := by
-    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
+          fstIdx dp = insert (substs1 L t p) s ∧ dp ∈ w 1 :=
+    bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
       bexs_lt_function (var 3) <|
       (eq (var 4) (pairing.comp₂ (var 3) <| pairing.comp₂ (const 5) <| pairing.comp₂ (var 2) <|
         pairing.comp₂ (var 1) (var 0)).add_one).and <|
@@ -539,7 +537,6 @@ lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
       (eq (fstIdx_locallyDelta0.comp₁ (var 0)) <|
         insert.comp₂ ((substs1_locallyDelta0 (L := L)).comp₂ (var 1) (var 2)) (var 3)).and <|
       mem (var 0) (var 5)
-    exact this
   have h₇ : LocallyDelta0 fun w : Fin 2 → V ↦
       ∃ s < w 0, ∃ d' < w 0, w 0 = wkRule s d' ∧ fstIdx d' ⊆ s ∧ d' ∈ w 1 := by
     have hsub := of_definable (R := fun w : Fin 2 → V ↦ w 0 ⊆ w 1) (by definability)
@@ -548,18 +545,17 @@ lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
       (hsub.comp₂ (fstIdx_locallyDelta0.comp₁ (var 0)) (var 1)).and (mem (var 0) (var 3))
     exact this
   have h₈ : LocallyDelta0 fun w : Fin 2 → V ↦
-      ∃ s < w 0, ∃ d' < w 0, w 0 = shiftRule s d' ∧ s = setShift L (fstIdx d') ∧ d' ∈ w 1 := by
-    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <|
+      ∃ s < w 0, ∃ d' < w 0, w 0 = shiftRule s d' ∧ s = setShift L (fstIdx d') ∧ d' ∈ w 1 :=
+    bexs_lt_function hv₀ <| bexs_lt_function (var 1) <|
       (eq (var 2) (pairing.comp₂ (var 1) (pairing.comp₂ (const 7) (var 0))).add_one).and <|
       (eq (var 1) ((setShift_locallyDelta0 (L := L)).comp₁ <|
         fstIdx_locallyDelta0.comp₁ (var 0))).and <|
       mem (var 0) (var 3)
-    exact this
   have h₉ : LocallyDelta0 fun w : Fin 2 → V ↦
       ∃ s < w 0, ∃ p < w 0, ∃ d₁ < w 0, ∃ d₂ < w 0,
         w 0 = cutRule s p d₁ d₂ ∧ (fstIdx d₁ = insert p s ∧ d₁ ∈ w 1) ∧
-          (fstIdx d₂ = insert (neg L p) s ∧ d₂ ∈ w 1) := by
-    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
+          (fstIdx d₂ = insert (neg L p) s ∧ d₂ ∈ w 1) :=
+    bexs_lt_function hv₀ <| bexs_lt_function (var 1) <| bexs_lt_function (var 2) <|
       bexs_lt_function (var 3) <|
       (eq (var 4) (pairing.comp₂ (var 3) <| pairing.comp₂ (const 8) <| pairing.comp₂ (var 2) <|
         pairing.comp₂ (var 1) (var 0)).add_one).and <|
@@ -568,14 +564,12 @@ lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
       (eq (fstIdx_locallyDelta0.comp₁ (var 0)) <|
         insert.comp₂ ((neg_locallyDelta0 (L := L)).comp₁ (var 2)) (var 3)).and <|
       mem (var 0) (var 5)
-    exact this
   have h₁₀ : LocallyDelta0 fun w : Fin 2 → V ↦
-      ∃ s < w 0, ∃ p < w 0, w 0 = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class := by
-    have := bexs_lt_function hv₀ <| bexs_lt_function (var 1) <|
+      ∃ s < w 0, ∃ p < w 0, w 0 = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class :=
+    bexs_lt_function hv₀ <| bexs_lt_function (var 1) <|
       (eq (var 2) (pairing.comp₂ (var 1) (pairing.comp₂ (const 9) (var 0))).add_one).and <|
       (mem (var 0) (var 1)).and <|
       (LocallyDelta0Axioms.locallyDelta0 (T := T) (V := V)).pred_comp (var 0)
-    exact this
   exact (hfs.and <| h₁.or <| h₂.or <| h₃.or <| h₄.or <| h₅.or <| h₆.or <| h₇.or <| h₈.or <|
     h₉.or h₁₀).of_iff fun w ↦ phi_iff T (w 1) (w 0)
 
@@ -595,7 +589,7 @@ def construction : Fixpoint.Construction V (blueprint T) where
       simp [phi_iff, blueprint, Theory.Δ₁Class, Bounding.HierarchySymbol.Semiformula.val_sigma]
   monotone := by
     rintro C C' hC _ d ⟨hs, H⟩
-    refine ⟨hs, ?_⟩
+    apply And.intro hs
     rcases H with (h | h | ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC⟩, ⟨hq, hqC⟩⟩ |
       ⟨s, p, q, dpq, rfl, hpq, h, hdC⟩ |
       ⟨s, p, dp, rfl, hp, h, hdC⟩ | ⟨s, p, t, dp, rfl, hp, ht, h, hdC⟩ |
@@ -616,7 +610,7 @@ def construction : Fixpoint.Construction V (blueprint T) where
 instance : (construction T).StrongFinite V where
   strong_finite := by
     rintro C _ d ⟨hs, H⟩
-    refine ⟨hs, ?_⟩
+    apply And.intro hs
     rcases H with (h | h | ⟨s, p, q, dp, dq, rfl, hpq, ⟨hp, hpC⟩, ⟨hq, hqC⟩⟩ |
       ⟨s, p, q, dpq, rfl, hpq, h, hdC⟩ |
       ⟨s, p, dp, rfl, hp, h, hdC⟩ | ⟨s, p, t, dp, rfl, hp, ht, h, hdC⟩ |

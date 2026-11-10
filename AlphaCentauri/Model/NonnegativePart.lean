@@ -110,4 +110,10 @@ lemma coe_ofNat_foundation [DiscretelyOrdered R] (n : ℕ) [n.AtLeastTwo] :
     natCast_foundation]
   exact Nat.cast_ofNat
 
+/-- The numerals of the $\mathsf{PA}^-$ model structure on `Nonneg R` are those of `Nonneg R`. -/
+lemma ofNat_foundation [DiscretelyOrdered R] (n : ℕ) [n.AtLeastTwo] :
+    (@OfNat.ofNat (Nonneg R) n (@instOfNatAtLeastTwo _ n
+      Arithmetic.instCommSemiring_foundation.toNatCast _) : Nonneg R) = OfNat.ofNat n :=
+  (natCast_foundation n).trans Nat.cast_ofNat
+
 end Nonneg

@@ -211,6 +211,25 @@ end
 
 end codes
 
+section preserveEqCode
+
+variable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq]
+
+/-- The code of `δ(^#1) → δ(^#0) → (ε(^#1, ^#0) ↔ ^#1 = ^#0)` (with two free bound variables),
+where `δ` is the domain formula of `tbl` and `ε` the formula interpreting equality. -/
+noncomputable def preserveEqCode (tbl : V) : V :=
+  imp L₁ (domainAt L₁ tbl 1) (imp L₁ (domainAt L₁ tbl 0)
+    (iff L₁ (subst L₁ ?[^#1, ^#0]
+        (tableRel tbl 2 (Encodable.encode (Language.Eq.eq : L₂.Rel 2) : V)))
+      (^rel 2 (Encodable.encode (Language.Eq.eq : L₁.Rel 2) : V) ?[^#1, ^#0])))
+
+instance preserveEqCode.definable : 𝚺ᴬ₁-Function₁[V] preserveEqCode L₁ L₂ := by
+  unfold preserveEqCode
+  definability
+
+end preserveEqCode
+
 /-! ## Typed formulas of a table -/
 
 section typed
@@ -407,6 +426,29 @@ lemma funcCongrBody_shift {g : Semiformula V L (k + 1)} (hg : g.shift = g) :
 
 end bodies
 
+section preserveEqBody
+
+/-- `d(#1) → d(#0) → (e(#1, #0) ↔ #1 = #0)`. -/
+noncomputable def preserveEqBody (d : Semiformula V L₁ 1) (e : Semiformula V L₁ 2) :
+    Semiformula V L₁ 2 :=
+  d.subst ![Semiterm.bvar 1] 🡒 d.subst ![Semiterm.bvar 0] 🡒
+    (e.subst ![Semiterm.bvar 1, Semiterm.bvar 0] 🡘
+      Semiformula.equal (Semiterm.bvar 1) (Semiterm.bvar 0))
+
+omit [L₂.LORDefinable] in
+lemma preserveEqBody_val [L₂.Eq] (d : Semiformula V L₁ 1) (hd : d.val = tableDomain tbl)
+    (e : Semiformula V L₁ 2)
+    (he : e.val = tableRel tbl 2 (Encodable.encode (Language.Eq.eq : L₂.Rel 2) : V)) :
+    (preserveEqBody d e).val = preserveEqCode L₁ L₂ tbl := by
+  simp [preserveEqBody, preserveEqCode, Semiformula.val_substs, hd, he, domainAt,
+    Semiformula.equal, quote_rel_def]
+
+lemma preserveEqBody_shift {d : Semiformula V L₁ 1} {e : Semiformula V L₁ 2} (hd : d.shift = d)
+    (he : e.shift = e) : (preserveEqBody d e).shift = preserveEqBody d e := by
+  simp [preserveEqBody, Semiformula.shift_substs, hd, he]
+
+end preserveEqBody
+
 end typed
 
 /-! ## Tables of translations -/
@@ -414,18 +456,20 @@ end typed
 section translationTable
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable] {tbl : V}
+  [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {tbl : V}
 
 variable (L₂) in
 /-- `tbl` is a table of a translation of `L₂` in `S`: its entries are formulas of the right
-arities without free variables, and `S` proves that the domain formula is nonempty and that the
-graph of each function symbol defines a unique value on the domain and respects equality. -/
+arities without free variables, and `S` proves that the domain formula is nonempty, that the
+graph of each function symbol defines a unique value on the domain and respects equality, and
+that the formula interpreting equality agrees with equality on the domain. -/
 structure IsTranslationTable (S : Theory L₁) [S.Δ₁] (tbl : V) : Prop extends IsTable L₁ L₂ tbl where
   exs_domain : Provable S (^∃ tableDomain tbl)
   func_exists {k f : V} : L₂.IsFunc k f → Provable S (qqAlls (funcExistsCode L₁ tbl k f) k)
   func_unique {k f : V} : L₂.IsFunc k f → Provable S (qqAlls (funcUniqueCode L₁ tbl k f) (k + 2))
   func_congr {k f : V} : L₂.IsFunc k f →
     Provable S (qqAlls (funcCongrCode L₁ tbl k f) (k + 1 + (k + 1)))
+  preserve_eq : Provable S (qqAlls (preserveEqCode L₁ L₂ tbl) 2)
 
 section
 
@@ -497,6 +541,16 @@ lemma tprovable_func_congr (F : L₂.Func k) (y z : Term V L₁) (w w' : Fin k �
       simpa using h.func_congr (codeIn_func_quote F))
   simpa [funcCongrBody, Matrix.conj, Matrix.vecTail, Function.comp_def, Fin.append_addNat] using h₁
 
+lemma tprovable_preserve_eq (y z : Term V L₁) :
+    S.internalize V ⊢ h.domT.subst ![y] 🡒 h.domT.subst ![z] 🡒
+      ((h.relT (Language.Eq.eq : L₂.Rel 2)).subst ![y, z] 🡘 Semiformula.equal y z) := by
+  have h₁ := tprovable_subst_of_provable_qqAlls (S := S)
+    (preserveEqBody h.domT (h.relT (Language.Eq.eq : L₂.Rel 2))) ![z, y]
+    (by rw [preserveEqBody_val _ rfl _ rfl]; simpa using h.preserve_eq)
+  simp only [preserveEqBody, LogicalConnective.iff, Semiformula.substs_imp,
+    Semiformula.substs_and, Semiformula.substs_substs, Semiformula.substs_equal] at h₁
+  convert h₁ using 3 <;> simp [LogicalConnective.iff, Matrix.vecMap_cons']
+
 end IsTranslationTable
 
 /-! ## Tables of direct translations -/
@@ -505,7 +559,7 @@ section directTranslation
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-variable [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] (π : DirectTranslation S L₂) {k : ℕ}
+variable {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] (π : DirectTranslation S L₂) {k : ℕ}
 
 omit [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq] in
 lemma operator_bvar_eq_sentence (o : Semiformula.Operator L₁ 1) :
@@ -658,6 +712,43 @@ lemma quote_congrSent (F : L₂.Func k) :
     quote_eq_bvar, quote_operator_bvar]
   rfl
 
+noncomputable abbrev preserveEqSent : Semisentence L₁ 2 :=
+  π.domain.operator ![#1] 🡒 π.domain.operator ![#0] 🡒
+    ((π.rel Language.Eq.eq).operator ![#1, #0] 🡘 op(=).operator ![#1, #0])
+
+omit [L₁.Encodable] [L₁.LORDefinable] [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
+lemma preserveEq_external : S ⊢ ∀¹* (preserveEqSent π) := by
+  apply Theory.Proof.complete_on_eq_models.{_, 0}
+  intro M _ _ _ hT
+  have h : ∀ x y : M, π.domain.val ![x] → π.domain.val ![y] →
+      ((π.rel Language.Eq.eq).val ![x, y] ↔ x = y) := by
+    simpa [models_iff, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
+      models_of_provable hT π.preserve_eq
+  simpa [models_iff, preserveEqSent, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
+    fun e' : Fin 2 → M ↦ h (e' 1) (e' 0)
+
+omit [L₂.Encodable] [L₂.LORDefinable] [S.Δ₁] in
+lemma quote_preserveEqSent :
+    (⌜preserveEqSent π⌝ : Semiformula V L₁ 2) =
+      preserveEqBody ⌜π.domain.sentence⌝
+        (⌜(π.rel Language.Eq.eq).sentence⌝ : Semiformula V L₁ 2) := by
+  have h : (![#1, #0] : Fin 2 → FirstOrder.Semiterm L₁ Empty 2) =
+      fun i ↦ #((![1, 0] : Fin 2 → Fin 2) i) := by
+    funext i
+    match i with
+    | 0 => rfl
+    | 1 => rfl
+  have h' : (![Semiterm.bvar 1, Semiterm.bvar 0] : Fin 2 → Semiterm V L₁ 2) =
+      fun i ↦ Semiterm.bvar ((![1, 0] : Fin 2 → Fin 2) i) := by
+    funext i
+    match i with
+    | 0 => rfl
+    | 1 => rfl
+  unfold preserveEqBody
+  simp only [preserveEqSent, LCWQIsoGödelQuote.imply, LCWQIsoGödelQuote.iff, quote_domain_bvar,
+    quote_eq_bvar]
+  rw [h, quote_operator_bvar, h']
+
 end external
 
 omit [L₁.LORDefinable] [L₁.Eq] in
@@ -703,6 +794,14 @@ theorem IsTableOf.isTranslationTable (h : IsTableOf π tbl) (hL₂ : L₂.Symbol
     have h₁ := internalize_provability (V := V) (congrSent_external π F)
     rw [quote_allClosure_semisentence, Nat.cast_add, Nat.cast_succ] at h₁
     exact h₁
+  preserve_eq := by
+    have hd : (h.isTable hL₂).domT = ⌜π.domain.sentence⌝ := Semiformula.ext h.domain
+    have he : (h.isTable hL₂).relT (Language.Eq.eq : L₂.Rel 2) =
+        ⌜(π.rel Language.Eq.eq).sentence⌝ := Semiformula.ext (h.rel _)
+    rw [← preserveEqBody_val (h.isTable hL₂).domT rfl
+      ((h.isTable hL₂).relT (Language.Eq.eq : L₂.Rel 2)) rfl, hd, he, ← quote_preserveEqSent]
+    have h₁ := internalize_provability (V := V) (preserveEq_external π)
+    rwa [quote_allClosure_semisentence] at h₁
 
 end directTranslation
 

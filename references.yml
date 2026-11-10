@@ -651,15 +651,3 @@ WP89:
       type: Anthology
       title: Studies in Logic and the Foundations of Mathematics
       volume: 126
-
-Wil78:
-  type: Article
-  title: Some results and problems on weak systems of arithmetic
-  author: Wilkie, Alex
-  date: 1978
-  page-range: 285-296
-  parent:
-    type: Anthology
-    title: Logic Colloquium '77
-    editor: Macintyre, Angus
-    publisher: North-Holland

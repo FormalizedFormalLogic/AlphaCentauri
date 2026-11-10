@@ -755,7 +755,9 @@ variable {ξ : ArithmeticFormula ℕ}
 private lemma cutReducibleAux (hθ : 0 < θ) (m : ℕ) :
     ∀ ξ : ArithmeticFormula ℕ, ξ.complexity ≤ m → ξ.qr ≤ c → CutReducible θ c ξ := by
   induction m with
-  | zero => exact fun ξ hm _ => cutReducible_of_complexity_zero hθ (Nat.le_zero.mp hm)
+  | zero =>
+    intro ξ hm _
+    exact cutReducible_of_complexity_zero hθ (Nat.le_zero.mp hm)
   | succ m ih =>
     intro ξ hm hqr
     cases ξ using Semiformula.cases' with

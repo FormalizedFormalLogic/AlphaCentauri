@@ -232,7 +232,8 @@ lemma tprovable_hypothesisFormula_of_subset {c d : V} (h : c ⊆ d) :
     intro W _ _ e
     suffices e 0 ⊆ e 1 → RelativizedHypothesis n (e 1) → RelativizedHypothesis n (e 0) by
       simpa [(RelativizedHypothesis.defined (V := W) _).df] using this
-    exact fun hs h p hp ↦ h p (hs hp)) ![c, d]
+    intro hs h p hp
+    exact h p (hs hp)) ![c, d]
   simp only [Sentence.typed_quote_def, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue,
     LCWQIsoGödelQuote.imply, Rewriting.emb_subst_eq_subst_emb, Semiformula.typed_quote_substs,
     Fin.Fin1.eq_one, Matrix.cons_val_fin_one, Rew.emb_bvar, Semiterm.typed_quote_bvar,
@@ -292,7 +293,8 @@ lemma RelativizedProv.internalize {σ : ArithmeticSentence} :
             RelativizedProv T (n + 1) (⌜σ⌝ : W) by
         simpa [(RelativizedHypothesis.defined (V := W) _).df, eval_provableFromHypothesis,
           (RelativizedProv.defined T (n + 1)).df] using this
-      exact fun h₁ h₂ ↦ ⟨e 0, h₁, h₂⟩) ![c]
+      intro h₁ h₂
+      exact ⟨e 0, h₁, h₂⟩) ![c]
     simp only [Fin.Fin1.eq_one, Fin.isValue, Matrix.cons_val_fin_one, Matrix.constant_eq_singleton,
       Sentence.typed_quote_def, Nat.succ_eq_add_one, Nat.reduceAdd, Rewriting.subst1_bvar0_eq,
       LCWQIsoGödelQuote.imply, Rewriting.emb_subst_eq_subst_emb, rew_gödelNumber',

@@ -59,32 +59,17 @@ theorem ISigma.provable_uniformReflectionOn_Pi_ElementaryArithmetic (k : ℕ) :
   exact Bootstrapping.models_of_provable_substNumerals
     Bootstrapping.admitsFalseBlockReplacement_ElementaryArithmetic hφ v hv
 
-theorem ISigma.provable_localReflectionOn_prenexSigma1 (hk : 1 ≤ k) :
-    𝗜𝚺 (k + 1) ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1] (𝗜𝚺 k) :=
-  have : 𝗜𝚺₁ ⪯ 𝗜𝚺 k := ISigma_weakerThan_of_le hk
-  provable_localReflectionOn_prenexHierarchy_of_lt (ISigma_weakerThan_of_le (by omega))
-    (by omega) (ISigma.provable_localReflectionOn_Pi le_rfl)
-
 theorem ISigma.provable_localReflectionOn_Sigma1 (hk : 1 ≤ k) :
     𝗜𝚺 (k + 1) ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] (𝗜𝚺 k) := by
   have : 𝗜𝚺₁ ⪯ 𝗜𝚺 k := ISigma_weakerThan_of_le hk
   apply provable_localReflectionOn_hierarchy_of_prenexHierarchy
   · exact ISigma_weakerThan_of_le (by omega)
-  · exact ISigma.provable_localReflectionOn_prenexSigma1 hk
+  · exact provable_localReflectionOn_prenexHierarchy_of_lt (ISigma_weakerThan_of_le (by omega))
+      (by omega) (ISigma.provable_localReflectionOn_Pi le_rfl)
 
 theorem ISigma.provable_localReflectionOn_Sigma1_of_lt (hm : 1 ≤ m) (hmn : m < n) :
     𝗜𝚺 n ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] (𝗜𝚺 m) := fun hσ ↦
   (ISigma_weakerThan_of_le hmn).pbl (ISigma.provable_localReflectionOn_Sigma1 hm hσ)
-
-theorem ISigma.provable_localReflectionOn_prenexPi_of_le (hn : 1 ≤ n) (hm : m ≤ n + 3) :
-    𝗜𝚺 (n + 1) ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 m] (𝗜𝚺 n) :=
-  have : 𝗜𝚺₁ ⪯ 𝗜𝚺 n := ISigma_weakerThan_of_le hn
-  provable_localReflectionOn_prenexHierarchy_of_le (ISigma_weakerThan_of_le (by omega)) hm
-    (ISigma.provable_localReflectionOn_Pi le_rfl)
-
-theorem ISigma.provable_localReflectionOn_prenexPi (hn : 1 ≤ n) :
-    𝗜𝚺 (n + 1) ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 n] (𝗜𝚺 n) :=
-  ISigma.provable_localReflectionOn_prenexPi_of_le hn (by omega)
 
 /-- For every $n$, $\mathsf{PA}$ proves the local reflection principle of $\mathsf{I}\Sigma_n$.
 - [HP98, Corollary I.4.34(3)] -/

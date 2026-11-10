@@ -44,10 +44,10 @@ theorem IDeltaOnBroadHierarchy_weakerThan_BSigma (n : ℕ) : 𝗜𝚫⁺(n + 1) 
   weakerThan_of_models.{0} _ _ fun V _ _ ↦
     models_IDeltaOnBroadHierarchy_of_models_BSigma_succ n V
 
-/-- `𝗕𝚺(n + 1)` is at most as strong as `𝗜𝚫(n + 1)`. This is an open problem; it holds over
-`𝗜𝚺₀` extended by exponentiation.
+/-- $\mathsf{I}\Delta_{n + 1}$ proves $\mathsf{B}\Sigma_{n + 1}$ for every $n$. An open problem;
+it holds once exponentiation is adjoined to $\mathsf{I}\Delta_0$.
 - [HP98, Remark after Theorem I.2.5]
 - [Sla04] -/
-axiom BSigma_weakerThan_IDelta (n : ℕ) : 𝗕𝚺(n + 1) ⪯ 𝗜𝚫(n + 1)
+def BSigmaWeakerThanIDelta : Prop := ∀ n : ℕ, 𝗕𝚺(n + 1) ⪯ 𝗜𝚫(n + 1)
 
 end FFL.FirstOrder.Arithmetic

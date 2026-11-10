@@ -164,12 +164,43 @@ def openProblems (ledger : String) : Std.HashSet Name := Id.run do
       if let some n := entry then found := found.insert n
   return found
 
-/-- The theory as pretty-printed, on one line since it names a vertex. -/
-def render (e : Expr) : MetaM String := return (← ppExpr e).pretty (width := 1000)
+/-- The classes of prenex formulas. -/
+def prenexHierarchy : Name := `FFL.FirstOrder.Bounding.PrenexHierarchy
+
+/-- The bounding `ℬ[<, L]` of the prenex hierarchy of arithmetic. -/
+def boundingLt : Name := `FFL.FirstOrder.Bounding.lt
+
+/--
+The polarity and the level of `Γ`, if `Γ` is a class `ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 2` of prenex
+formulas of every arity: an implicit binder over the arity, as in the uniform reflection schema
+`𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 2] 𝗘𝗔`.
+-/
+def prenexClass? (Γ : Expr) : Option (Expr × Expr) := do
+  let .lam _ _ body .implicit := Γ | none
+  let body := body.eta
+  guard <| body.isAppOf prenexHierarchy
+  let args := body.getAppArgs
+  let #[ℬ, p, s] := args.extract (args.size - 3) | none
+  guard <| ℬ.isAppOf boundingLt && !p.hasLooseBVars && !s.hasLooseBVars
+  return (p, s)
+
+/--
+The theory as pretty-printed, on one line since it names a vertex. A class of prenex formulas of
+every arity, which Lean prints as `fun {k} => ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 2`, is named by its
+polarity and level, so that `𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 2] 𝗘𝗔` is named `𝗥𝗙𝗡[𝚷 2] 𝗘𝗔`.
+-/
+partial def render (e : Expr) (depth : Nat := 0) : MetaM String := do
+  let some Γ := e.find? (prenexClass? · |>.isSome) | return (← ppExpr e).pretty (width := 1000)
+  let some (p, s) := prenexClass? Γ | unreachable!
+  -- The class is printed as a local variable standing for it, whose name is then replaced.
+  let placeholder := s!"zooClass{depth}_"
+  withLocalDeclD (.mkSimple placeholder) (← inferType Γ) fun x => do
+    let name ← render (e.replace fun f => if f == Γ then some x else none) (depth + 1)
+    return name.replace placeholder s!"{(← ppExpr p).pretty} {(← ppExpr s).pretty}"
 
 /-- The zoo of the environment, given the axioms that are open problems. -/
 def diagram (openProblems : Std.HashSet Name) : MetaM Diagram := do
-  for c in omittedHeads do discard <| getConstInfo c
+  for c in omittedHeads.push prenexHierarchy |>.push boundingLt do discard <| getConstInfo c
   let rels ← relations
   let vs ← vertices rels
   let rels := rels ++ (← unionRelations vs)

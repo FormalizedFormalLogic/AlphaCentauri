@@ -15,7 +15,7 @@ the same universal sentences.
 namespace FFL.FirstOrder.Arithmetic
 
 /-- Every model of $\mathsf{ZR}$ embeds into a model of $\mathsf{IOpen}$.
-- [Wil78]
+- [Wil78, Lemma 3.2]
 - [BO96, Theorem 1.2]
 - [Raf10, Wilkie's Extension Theorem] -/
 axiom exists_embedding_models_IOpen (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* ZRing] :
@@ -23,7 +23,7 @@ axiom exists_embedding_models_IOpen (M : Type) [ORingStructure M] [M↓[ℒₒ�
 
 open Semiformula in
 /-- $\mathsf{IOpen}$ and $\mathsf{ZR}$ prove the same universal closures of open formulas.
-- [Wil78]
+- [Wil78, §1]
 - [Moh11, §1] -/
 theorem provable_univCl_IOpen_iff {φ : ArithmeticSemiformula ℕ 0} (hφ : φ.Open) :
     𝗜𝗢𝗽𝗲𝗻 ⊢ φ.univCl ↔ ZRing ⊢ φ.univCl := by

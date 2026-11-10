@@ -525,4 +525,309 @@ end IsUFormula
 
 end formula
 
+namespace UformulaRec1
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1 (Blueprint)
+
+variable (V)
+
+/-- A recursion on formulas in a model of $\mathsf{EA}$. Under a quantifier the parameter
+changes by `change`, whose iterates are `iter`, and the values are bounded by `bound`. -/
+structure Construction (φ : Blueprint) where
+  rel (param k R v : V) : V
+  nrel (param k R v : V) : V
+  verum (param : V) : V
+  falsum (param : V) : V
+  and (param p₁ p₂ y₁ y₂ : V) : V
+  or (param p₁ p₂ y₁ y₂ : V) : V
+  all (param p₁ ys : V) : V
+  exs (param p₁ ys : V) : V
+  allChanges (param i : V) : V := param
+  exsChanges (param i : V) : V := param
+  allSize (param p₁ : V) : V := 1
+  exsSize (param p₁ : V) : V := 1
+  rel_defined : 𝚺ᴬ₁-Function₄ rel via φ.rel
+  nrel_defined : 𝚺ᴬ₁-Function₄ nrel via φ.nrel
+  verum_defined : 𝚺ᴬ₁-Function₁ verum via φ.verum
+  falsum_defined : 𝚺ᴬ₁-Function₁ falsum via φ.falsum
+  and_defined : 𝚺ᴬ₁-Function₅ and via φ.and
+  or_defined : 𝚺ᴬ₁-Function₅ or via φ.or
+  all_defined : 𝚺ᴬ₁-Function₃ all via φ.all
+  exs_defined : 𝚺ᴬ₁-Function₃ exs via φ.exs
+  allChanges_defined : 𝚺ᴬ₁-Function₂ allChanges via φ.allChanges := by
+    exact FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1.param_defined
+  exChanges_defined : 𝚺ᴬ₁-Function₂ exsChanges via φ.exsChanges := by
+    exact FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1.param_defined
+  allSize_defined : 𝚺ᴬ₁-Function₂ allSize via φ.allSize := by
+    exact FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1.one_defined
+  exsSize_defined : 𝚺ᴬ₁-Function₂ exsSize via φ.exsSize := by
+    exact FFL.FirstOrder.Arithmetic.Bootstrapping.UformulaRec1.one_defined
+  allChanges_monotone {param i j : V} : i ≤ j → allChanges param i ≤ allChanges param j := by
+    intros; exact le_rfl
+  exsChanges_monotone {param i j : V} : i ≤ j → exsChanges param i ≤ exsChanges param j := by
+    intros; exact le_rfl
+  allSize_eq_one : ∀ param p₁, allSize param p₁ = 1 := by intros; rfl
+  exsSize_eq_one : ∀ param p₁, exsSize param p₁ = 1 := by intros; rfl
+  /-- The change of the parameter under a quantifier. -/
+  change (param : V) : V := param
+  allChanges_eq_change : ∀ param i, allChanges param i = change param := by intros; rfl
+  exsChanges_eq_change : ∀ param i, exsChanges param i = change param := by intros; rfl
+  /-- `iter param d` is the `d`-th iterate of `change` at `param`. -/
+  iter (param d : V) : V := param
+  iter_zero : ∀ param, iter param 0 = param := by intros; rfl
+  iter_succ : ∀ param d, iter param (d + 1) = change (iter param d) := by intros; rfl
+  iter_monotone : ∀ param {d e}, d ≤ e → iter param d ≤ iter param e := by intros; exact le_rfl
+  iter_locallyDelta0 : LocallyDelta0Function fun w : Fin 2 → V ↦ iter (w 0) (w 1) := by
+    exact LocallyDelta0Function.var 0
+  rel_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 4 → V ↦ rel (w 0) (w 1) (w 2) (w 3)
+  nrel_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 4 → V ↦ nrel (w 0) (w 1) (w 2) (w 3)
+  verum_locallyDelta0 : LocallyDelta0Function fun w : Fin 1 → V ↦ verum (w 0)
+  falsum_locallyDelta0 : LocallyDelta0Function fun w : Fin 1 → V ↦ falsum (w 0)
+  and_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 5 → V ↦ and (w 0) (w 1) (w 2) (w 3) (w 4)
+  or_locallyDelta0 :
+    LocallyDelta0Function fun w : Fin 5 → V ↦ or (w 0) (w 1) (w 2) (w 3) (w 4)
+  all_locallyDelta0 : LocallyDelta0Function fun w : Fin 3 → V ↦ all (w 0) (w 1) (w 2)
+  exs_locallyDelta0 : LocallyDelta0Function fun w : Fin 3 → V ↦ exs (w 0) (w 1) (w 2)
+  /-- `bound param p` bounds the value at the formula `p`. -/
+  bound (param p : V) : V
+  rel_le_bound : ∀ param k R v, rel param k R v ≤ bound param (^rel k R v)
+  nrel_le_bound : ∀ param k R v, nrel param k R v ≤ bound param (^nrel k R v)
+  verum_le_bound : ∀ param, verum param ≤ bound param ^⊤
+  falsum_le_bound : ∀ param, falsum param ≤ bound param ^⊥
+  and_le_bound : ∀ param p₁ p₂ y₁ y₂, y₁ ≤ bound param p₁ → y₂ ≤ bound param p₂ →
+    and param p₁ p₂ y₁ y₂ ≤ bound param (p₁ ^⋏ p₂)
+  or_le_bound : ∀ param p₁ p₂ y₁ y₂, y₁ ≤ bound param p₁ → y₂ ≤ bound param p₂ →
+    or param p₁ p₂ y₁ y₂ ≤ bound param (p₁ ^⋎ p₂)
+  all_le_bound : ∀ param p₁ y, y ≤ bound (change param) p₁ →
+    all param p₁ ?[y] ≤ bound param (^∀ p₁)
+  exs_le_bound : ∀ param p₁ y, y ≤ bound (change param) p₁ →
+    exs param p₁ ?[y] ≤ bound param (^∃ p₁)
+  bound_monotone : ∀ param {p q}, p ≤ q → bound param p ≤ bound param q
+  bound_locallyDelta0 : LocallyDelta0Function fun w : Fin 2 → V ↦ bound (w 0) (w 1)
+
+variable {V}
+
+namespace Construction
+
+variable (L) {β : Blueprint} (c : Construction V β)
+
+/-- The rules generating the graph `⟪param, p, y⟫` of the recursion. -/
+def Phi (C : Set V) (pr : V) : Prop :=
+  ∃ param p y, pr = ⟪param, p, y⟫ ∧
+  IsUFormula L p ∧ (
+  (∃ k r v, p = ^rel k r v ∧ y = c.rel param k r v) ∨
+  (∃ k r v, p = ^nrel k r v ∧ y = c.nrel param k r v) ∨
+  (p = ^⊤ ∧ y = c.verum param) ∨
+  (p = ^⊥ ∧ y = c.falsum param) ∨
+  (∃ p₁ p₂ y₁ y₂, ⟪param, p₁, y₁⟫ ∈ C ∧ ⟪param, p₂, y₂⟫ ∈ C ∧ p = p₁ ^⋏ p₂ ∧
+    y = c.and param p₁ p₂ y₁ y₂) ∨
+  (∃ p₁ p₂ y₁ y₂, ⟪param, p₁, y₁⟫ ∈ C ∧ ⟪param, p₂, y₂⟫ ∈ C ∧ p = p₁ ^⋎ p₂ ∧
+    y = c.or param p₁ p₂ y₁ y₂) ∨
+  (∃ p₁ ys : V, (len ys = c.allSize param p₁ ∧
+      ∀ i < c.allSize param p₁, ⟪c.allChanges param i, p₁, ys.[i]⟫ ∈ C) ∧
+    p = ^∀ p₁ ∧ y = c.all param p₁ ys) ∨
+  (∃ p₁ ys : V, (len ys = c.exsSize param p₁ ∧
+      ∀ i < c.exsSize param p₁, ⟪c.exsChanges param i, p₁, ys.[i]⟫ ∈ C) ∧
+    p = ^∃ p₁ ∧ y = c.exs param p₁ ys) )
+
+
+private lemma phi_iff (C pr : V) :
+    c.Phi L {x | x ∈ C} pr ↔
+    ∃ param ≤ pr, ∃ p ≤ pr, ∃ y ≤ pr, pr = ⟪param, p, y⟫ ∧ IsUFormula L p ∧
+    ((∃ k < p, ∃ R < p, ∃ v < p, p = ^rel k R v ∧ y = c.rel param k R v) ∨
+    (∃ k < p, ∃ R < p, ∃ v < p, p = ^nrel k R v ∧ y = c.nrel param k R v) ∨
+    (p = ^⊤ ∧ y = c.verum param) ∨
+    (p = ^⊥ ∧ y = c.falsum param) ∨
+    (∃ p₁ < p, ∃ p₂ < p, ∃ y₁ < C, ∃ y₂ < C,
+      ⟪param, p₁, y₁⟫ ∈ C ∧ ⟪param, p₂, y₂⟫ ∈ C ∧ p = p₁ ^⋏ p₂ ∧ y = c.and param p₁ p₂ y₁ y₂) ∨
+    (∃ p₁ < p, ∃ p₂ < p, ∃ y₁ < C, ∃ y₂ < C,
+      ⟪param, p₁, y₁⟫ ∈ C ∧ ⟪param, p₂, y₂⟫ ∈ C ∧ p = p₁ ^⋎ p₂ ∧ y = c.or param p₁ p₂ y₁ y₂) ∨
+    (∃ p₁ < p, ∃ ys ≤ repeatVec C (c.allSize param p₁), (c.allSize param p₁ = len ys ∧
+        ∀ i < c.allSize param p₁, ⟪c.allChanges param i, p₁, ys.[i]⟫ ∈ C) ∧
+      p = ^∀ p₁ ∧ y = c.all param p₁ ys) ∨
+    (∃ p₁ < p, ∃ ys ≤ repeatVec C (c.exsSize param p₁), (c.exsSize param p₁ = len ys ∧
+        ∀ i < c.exsSize param p₁, ⟪c.exsChanges param i, p₁, ys.[i]⟫ ∈ C) ∧
+      p = ^∃ p₁ ∧ y = c.exs param p₁ ys)) := by
+  have hrv {g : V → V} {p₁ ys n : V} (hl : len ys = n) (hys : ∀ i < n, ⟪g i, p₁, ys.[i]⟫ ∈ C) :
+      ys ≤ repeatVec C n := by
+    subst hl
+    exact len_repeatVec_of_nth_le fun i hi ↦ le_of_lt <|
+      lt_of_le_of_lt ((le_pair_right _ _).trans (le_pair_right _ _)) (lt_of_mem (hys i hi))
+  constructor
+  · rintro ⟨param, p, y, rfl, hp, H⟩
+    refine ⟨param, by simp,
+      p, le_trans (le_pair_left p y) (le_pair_right _ _),
+      y, le_trans (le_pair_right p y) (le_pair_right _ _), rfl, hp, ?_⟩
+    rcases H with (⟨k, r, v, rfl, rfl⟩ | ⟨k, r, v, rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
+      ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ |
+      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩)
+    · disj 1; exact ⟨k, by simp, r, by simp, v, by simp, rfl, rfl⟩;
+    · disj 2; exact ⟨k, by simp, r, by simp, v, by simp, rfl, rfl⟩;
+    · disj 3; exact ⟨rfl, rfl⟩;
+    · disj 4; exact ⟨rfl, rfl⟩;
+    · disj 5; exact ⟨p₁, by simp, p₂, by simp,
+        y₁, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₁), y₂, lt_of_le_of_lt (by simp)
+          (lt_of_mem_rng h₂),
+        h₁, h₂, rfl, rfl⟩;
+    · disj 6; exact ⟨p₁, by simp, p₂, by simp,
+        y₁, lt_of_le_of_lt (by simp) (lt_of_mem_rng h₁), y₂, lt_of_le_of_lt (by simp)
+          (lt_of_mem_rng h₂),
+        h₁, h₂, rfl, rfl⟩;
+    · disj 7; exact ⟨p₁, by simp, ys, hrv hl hys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
+    · disj 8; exact ⟨p₁, by simp, ys, hrv hl hys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
+  · rintro ⟨param, _, p, _, y, _, rfl, hp, H⟩
+    refine ⟨param, p, y, rfl, hp, ?_⟩
+    rcases H with (⟨k, _, r, _, v, _, rfl, rfl⟩ | ⟨k, _, r, _, v, _, rfl, rfl⟩ |
+      ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
+      ⟨p₁, _, p₂, _, y₁, _, y₂, _, h₁, h₂, rfl, rfl⟩ |
+      ⟨p₁, _, p₂, _, y₁, _, y₂, _, h₁, h₂, rfl, rfl⟩ |
+      ⟨p₁, _, ys, _, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, _, ys, _, ⟨hl, hys⟩, rfl, rfl⟩)
+    · disj 1; exact ⟨k, r, v, rfl, rfl⟩;
+    · disj 2; exact ⟨k, r, v, rfl, rfl⟩;
+    · disj 3; exact ⟨rfl, rfl⟩;
+    · disj 4; exact ⟨rfl, rfl⟩;
+    · disj 5; exact ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩;
+    · disj 6; exact ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩;
+    · disj 7; exact ⟨p₁, ys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
+    · disj 8; exact ⟨p₁, ys, ⟨hl.symm, hys⟩, rfl, rfl⟩;
+
+
+private lemma le_pair_pair_right (a b d : V) : d ≤ ⟪a, b, d⟫ :=
+  le_trans (le_pair_right _ _) (le_pair_right _ _)
+
+/-- The rules in a form that reads the formula off its code by projections. -/
+private lemma phi_iff_decode (C pr : V) :
+    c.Phi L {x | x ∈ C} pr ↔ IsUFormula L (π₁ (π₂ pr)) ∧
+    ( (π₁ (π₁ (π₂ pr) - 1) = 0 ∧ π₂ (π₂ pr) = c.rel (π₁ pr) (π₁ (π₂ (π₁ (π₂ pr) - 1)))
+        (π₁ (π₂ (π₂ (π₁ (π₂ pr) - 1)))) (π₂ (π₂ (π₂ (π₁ (π₂ pr) - 1))))) ∨
+      (π₁ (π₁ (π₂ pr) - 1) = 1 ∧ π₂ (π₂ pr) = c.nrel (π₁ pr) (π₁ (π₂ (π₁ (π₂ pr) - 1)))
+        (π₁ (π₂ (π₂ (π₁ (π₂ pr) - 1)))) (π₂ (π₂ (π₂ (π₁ (π₂ pr) - 1))))) ∨
+      (π₁ (π₁ (π₂ pr) - 1) = 2 ∧ π₂ (π₂ pr) = c.verum (π₁ pr)) ∨
+      (π₁ (π₁ (π₂ pr) - 1) = 3 ∧ π₂ (π₂ pr) = c.falsum (π₁ pr)) ∨
+      (π₁ (π₁ (π₂ pr) - 1) = 4 ∧ ∃ y₁ < C, ∃ y₂ < C,
+        ⟪π₁ pr, π₁ (π₂ (π₁ (π₂ pr) - 1)), y₁⟫ ∈ C ∧ ⟪π₁ pr, π₂ (π₂ (π₁ (π₂ pr) - 1)), y₂⟫ ∈ C ∧
+        π₂ (π₂ pr) = c.and (π₁ pr) (π₁ (π₂ (π₁ (π₂ pr) - 1))) (π₂ (π₂ (π₁ (π₂ pr) - 1))) y₁ y₂) ∨
+      (π₁ (π₁ (π₂ pr) - 1) = 5 ∧ ∃ y₁ < C, ∃ y₂ < C,
+        ⟪π₁ pr, π₁ (π₂ (π₁ (π₂ pr) - 1)), y₁⟫ ∈ C ∧ ⟪π₁ pr, π₂ (π₂ (π₁ (π₂ pr) - 1)), y₂⟫ ∈ C ∧
+        π₂ (π₂ pr) = c.or (π₁ pr) (π₁ (π₂ (π₁ (π₂ pr) - 1))) (π₂ (π₂ (π₁ (π₂ pr) - 1))) y₁ y₂) ∨
+      (π₁ (π₁ (π₂ pr) - 1) = 6 ∧ ∃ y < C,
+        ⟪c.change (π₁ pr), π₂ (π₁ (π₂ pr) - 1), y⟫ ∈ C ∧
+        π₂ (π₂ pr) = c.all (π₁ pr) (π₂ (π₁ (π₂ pr) - 1)) ?[y]) ∨
+      (π₁ (π₁ (π₂ pr) - 1) = 7 ∧ ∃ y < C,
+        ⟪c.change (π₁ pr), π₂ (π₁ (π₂ pr) - 1), y⟫ ∈ C ∧
+        π₂ (π₂ pr) = c.exs (π₁ pr) (π₂ (π₁ (π₂ pr) - 1)) ?[y]) ) := by
+  have hone (ys : V) (hl : len ys = 1) : ys = ?[ys.[0]] := by
+    obtain ⟨x, rfl⟩ := eq_singleton_iff_len_eq_one.mp hl
+    simp
+  constructor
+  · rintro ⟨param, p, y, rfl, hp, H⟩
+    refine ⟨by simpa using hp, ?_⟩
+    rcases H with (⟨k, r, v, rfl, rfl⟩ | ⟨k, r, v, rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ |
+      ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ | ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, rfl⟩ |
+      ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩ | ⟨p₁, ys, ⟨hl, hys⟩, rfl, rfl⟩)
+    · disj 1; simp [qqRel]
+    · disj 2; simp [qqNRel]
+    · disj 3; simp [qqVerum]
+    · disj 4; simp [qqFalsum]
+    · disj 5
+      simp only [pi₁_pair, pi₂_pair, qqAnd, add_tsub_cancel_right, true_and]
+      exact ⟨y₁, lt_of_le_of_lt (le_pair_pair_right _ _ _) (lt_of_mem h₁), y₂,
+        lt_of_le_of_lt (le_pair_pair_right _ _ _) (lt_of_mem h₂), h₁, h₂, rfl⟩
+    · disj 6
+      simp only [pi₁_pair, pi₂_pair, qqOr, add_tsub_cancel_right, true_and]
+      exact ⟨y₁, lt_of_le_of_lt (le_pair_pair_right _ _ _) (lt_of_mem h₁), y₂,
+        lt_of_le_of_lt (le_pair_pair_right _ _ _) (lt_of_mem h₂), h₁, h₂, rfl⟩
+    · disj 7
+      have hl : len ys = 1 := by rw [hl, c.allSize_eq_one]
+      have h0 := hys 0 (by simp [c.allSize_eq_one])
+      rw [c.allChanges_eq_change] at h0
+      simp only [pi₁_pair, pi₂_pair, qqAll, add_tsub_cancel_right, true_and]
+      exact ⟨ys.[0], lt_of_le_of_lt (le_pair_pair_right _ _ _) (lt_of_mem h0), h0, by rw [← hone ys hl]⟩
+    · disj 8
+      have hl : len ys = 1 := by rw [hl, c.exsSize_eq_one]
+      have h0 := hys 0 (by simp [c.exsSize_eq_one])
+      rw [c.exsChanges_eq_change] at h0
+      simp only [pi₁_pair, pi₂_pair, qqExs, add_tsub_cancel_right, true_and]
+      exact ⟨ys.[0], lt_of_le_of_lt (le_pair_pair_right _ _ _) (lt_of_mem h0), h0, by rw [← hone ys hl]⟩
+  · rintro ⟨hp, H⟩
+    have hpr : pr = ⟪π₁ pr, π₁ (π₂ pr), π₂ (π₂ pr)⟫ := by simp
+    refine ⟨π₁ pr, π₁ (π₂ pr), π₂ (π₂ pr), hpr, hp, ?_⟩
+    rcases IsUFormula.case hp with (⟨k, r, v, _, _, e⟩ | ⟨k, r, v, _, _, e⟩ | e | e |
+      ⟨p₁, p₂, _, _, e⟩ | ⟨p₁, p₂, _, _, e⟩ | ⟨p₁, _, e⟩ | ⟨p₁, _, e⟩) <;> rw [e] at H ⊢
+    · obtain h | h | h | h | h | h | h | h := H
+      · exact Or.inl ⟨k, r, v, rfl, by simpa [qqRel] using h.2⟩
+      all_goals exact absurd h.1 (by simp [qqRel])
+    · obtain h | h | h | h | h | h | h | h := H
+      · exact absurd h.1 (by simp [qqNRel])
+      · exact Or.inr <| Or.inl ⟨k, r, v, rfl, by simpa [qqNRel] using h.2⟩
+      all_goals exact absurd h.1 (by simp [qqNRel])
+    · obtain h | h | h | h | h | h | h | h := H
+      · exact absurd h.1 (by simp [qqVerum])
+      · exact absurd h.1 (by simp [qqVerum])
+      · exact Or.inr <| Or.inr <| Or.inl ⟨rfl, h.2⟩
+      all_goals exact absurd h.1 (by simp [qqVerum])
+    · obtain h | h | h | h | h | h | h | h := H
+      · exact absurd h.1 (by simp [qqFalsum])
+      · exact absurd h.1 (by simp [qqFalsum])
+      · exact absurd h.1 (by simp [qqFalsum])
+      · exact Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨rfl, h.2⟩
+      all_goals exact absurd h.1 (by simp [qqFalsum])
+    · obtain h | h | h | h | h | h | h | h := H
+      · exact absurd h.1 (by simp [qqAnd])
+      · exact absurd h.1 (by simp [qqAnd])
+      · exact absurd h.1 (by simp [qqAnd])
+      · exact absurd h.1 (by simp [qqAnd])
+      · obtain ⟨_, y₁, _, y₂, _, h₁, h₂, hy⟩ := h
+        simp only [qqAnd, add_tsub_cancel_right, pi₁_pair, pi₂_pair] at h₁ h₂ hy
+        exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, hy⟩
+      all_goals exact absurd h.1 (by simp [qqAnd])
+    · obtain h | h | h | h | h | h | h | h := H
+      · exact absurd h.1 (by simp [qqOr])
+      · exact absurd h.1 (by simp [qqOr])
+      · exact absurd h.1 (by simp [qqOr])
+      · exact absurd h.1 (by simp [qqOr])
+      · exact absurd h.1 (by simp [qqOr])
+      · obtain ⟨_, y₁, _, y₂, _, h₁, h₂, hy⟩ := h
+        simp only [qqOr, add_tsub_cancel_right, pi₁_pair, pi₂_pair] at h₁ h₂ hy
+        exact Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+          ⟨p₁, p₂, y₁, y₂, h₁, h₂, rfl, hy⟩
+      all_goals exact absurd h.1 (by simp [qqOr])
+    · obtain h | h | h | h | h | h | h | h := H
+      · exact absurd h.1 (by simp [qqAll])
+      · exact absurd h.1 (by simp [qqAll])
+      · exact absurd h.1 (by simp [qqAll])
+      · exact absurd h.1 (by simp [qqAll])
+      · exact absurd h.1 (by simp [qqAll])
+      · exact absurd h.1 (by simp [qqAll])
+      · obtain ⟨_, y, _, h₁, hy⟩ := h
+        simp only [qqAll, add_tsub_cancel_right, pi₂_pair] at h₁ hy
+        refine Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl
+          ⟨p₁, ?[y], ⟨by simp [c.allSize_eq_one], fun i hi ↦ ?_⟩, rfl, hy⟩
+        rw [c.allSize_eq_one] at hi
+        rcases lt_one_iff_eq_zero.mp hi
+        simpa [c.allChanges_eq_change] using h₁
+      · exact absurd h.1 (by simp [qqAll])
+    · obtain h | h | h | h | h | h | h | h := H
+      · exact absurd h.1 (by simp [qqExs])
+      · exact absurd h.1 (by simp [qqExs])
+      · exact absurd h.1 (by simp [qqExs])
+      · exact absurd h.1 (by simp [qqExs])
+      · exact absurd h.1 (by simp [qqExs])
+      · exact absurd h.1 (by simp [qqExs])
+      · exact absurd h.1 (by simp [qqExs])
+      · obtain ⟨_, y, _, h₁, hy⟩ := h
+        simp only [qqExs, add_tsub_cancel_right, pi₂_pair] at h₁ hy
+        refine Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr
+          ⟨p₁, ?[y], ⟨by simp [c.exsSize_eq_one], fun i hi ↦ ?_⟩, rfl, hy⟩
+        rw [c.exsSize_eq_one] at hi
+        rcases lt_one_iff_eq_zero.mp hi
+        simpa [c.exsChanges_eq_change] using h₁
+
+end Construction
+
+end UformulaRec1
+
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

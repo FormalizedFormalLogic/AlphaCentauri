@@ -36,6 +36,9 @@ noncomputable def _root_.FFL.FirstOrder.ArithmeticTheory.interpretability
 
 variable {T}
 
+instance [𝗘𝗤 ℒₒᵣ ⪯ T] (φ : ArithmeticSentence) : 𝗘𝗤 ℒₒᵣ ⪯ T ∪ {φ} :=
+  Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ T) (inferInstance : T ⪯ T ∪ {φ})
+
 section model
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
@@ -45,7 +48,7 @@ lemma models_interpretability_iff {φ ψ : ArithmeticSentence} :
   have : Nonempty V := ⟨0⟩
   exact models_interpretableDef_iff
 
-lemma models_standardProvability_iff {σ : ArithmeticSentence} :
+lemma models_standardProvability_iff_provable {σ : ArithmeticSentence} :
     V↓[ℒₒᵣ] ⊧ T.standardProvability σ ↔ Provable T (⌜σ⌝ : V) := by
   simp [Arithmetic.standardProvability_def, models_iff]
 
@@ -55,15 +58,17 @@ lemma consistent_union_singleton_iff {φ : ArithmeticSentence} :
     have e₁ : imp ℒₒᵣ (⌜φ⌝ : V) ⌜(⊥ : ArithmeticSentence)⌝ =
         ((⌜φ⌝ : Bootstrapping.Formula V ℒₒᵣ) 🡒 ⊥).val := by
       simp [Sentence.typed_quote_def, Sentence.quote_def]
+      rfl
     have e₂ : (⌜∼φ⌝ : V) = (∼(⌜φ⌝ : Bootstrapping.Formula V ℒₒᵣ)).val := by
       simp [Sentence.typed_quote_def, Sentence.quote_def]
+      rfl
     rw [e₁, e₂, ← tprovable_iff_provable, ← tprovable_iff_provable]
     constructor
     · intro h
       cl_prover [h]
     · intro h
       cl_prover [h]
-  rw [Theory.Consistent, provable_union_singleton_iff, h]
+  rw [Theory.Consistent, Derivation.provable_union_singleton_iff, h]
 
 lemma union_singleton_shift_eq [Theory.Δ₁.Sentential T] {V : Type} [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (φ : ArithmeticSentence) :
@@ -75,7 +80,7 @@ end model
 /-- The arithmetical form of $\mathbf{J4}$: interpretability transfers consistency.
 - [Vis90, §6.1] -/
 theorem _root_.FFL.FirstOrder.ArithmeticTheory.consistent_of_interpretability
-    [Theory.Δ₁.Sentential T] {φ ψ : ArithmeticSentence} :
+    [𝗘𝗤 ℒₒᵣ ⪯ T] [Theory.Δ₁.Sentential T] {φ ψ : ArithmeticSentence} :
     𝗜𝚺₁ ⊢ T.interpretability φ ψ 🡒 ∼T.standardProvability (∼φ) 🡒
       ∼T.standardProvability (∼ψ) := by
   apply Arithmetic.complete.{0}
@@ -84,8 +89,8 @@ theorem _root_.FFL.FirstOrder.ArithmeticTheory.consistent_of_interpretability
     LogicalConnective.Prop.arrow_eq, LogicalConnective.Prop.neg_eq]
   intro hI hφ
   have hI := models_interpretability_iff.mp hI
-  have hφ := consistent_union_singleton_iff.mpr (models_standardProvability_iff.not.mp hφ)
-  exact models_standardProvability_iff.not.mpr <| consistent_union_singleton_iff.mp <|
+  have hφ := consistent_union_singleton_iff.mpr (models_standardProvability_iff_provable.not.mp hφ)
+  exact models_standardProvability_iff_provable.not.mpr <| consistent_union_singleton_iff.mp <|
     hI.consistent (union_singleton_shift_eq φ) Language.SymbolsStandard.oRing hφ
 
 end FFL.FirstOrder.Arithmetic

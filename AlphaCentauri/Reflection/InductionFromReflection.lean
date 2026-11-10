@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.Reflection.UniformReflection
-public import AlphaCentauri.Schemata.ParameterFreeInduction
+public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.PrenexCombination
 public import AlphaCentauri.ToFoundation.Provable

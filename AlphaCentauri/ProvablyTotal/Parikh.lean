@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.ProvablyTotal.Basic
-public import AlphaCentauri.Model.Cut
+public import AlphaCentauri.Model.EndExtension
 public import AlphaCentauri.ToFoundation.Compact
 public import AlphaCentauri.ToFoundation.Completeness
 public import AlphaCentauri.ToFoundation.ConstantExtension

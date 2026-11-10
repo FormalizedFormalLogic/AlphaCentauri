@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Schemata.BoundedInduction
+public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.ToFoundation.BinderNotation
 public import AlphaCentauri.ToMathlib.OpenPredicate
 public import AlphaCentauri.ToMathlib.RingOfDifferences

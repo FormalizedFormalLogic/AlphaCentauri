@@ -1,7 +1,6 @@
 module
 
 public import AlphaCentauri.Calculus.Induction.Basic
-public import AlphaCentauri.Calculus.Induction.Theory
 public import Foundation.FirstOrder.LK.Hauptsatz
 
 /-!

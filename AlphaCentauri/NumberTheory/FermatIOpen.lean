@@ -1,6 +1,5 @@
 module
 
-public import AlphaCentauri.Model.IntegerConstantPolynomial
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.NumberTheory.FLT3
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real

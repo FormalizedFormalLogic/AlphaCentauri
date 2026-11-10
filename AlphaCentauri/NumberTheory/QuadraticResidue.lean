@@ -2,7 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
 public import Mathlib.Data.Nat.Prime.Defs
-public import AlphaCentauri.Schemata.BoundedInduction
+public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.ToFoundation.BinderNotation
 
 /-!

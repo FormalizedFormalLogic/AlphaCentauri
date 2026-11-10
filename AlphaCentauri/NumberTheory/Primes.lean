@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Prime
-public import AlphaCentauri.Schemata.WeakPigeonhole
+public import AlphaCentauri.Schemata.Pigeonhole
 
 /-!
 # The infinitude of primes

@@ -1,24 +1,182 @@
 module
 
-public import AlphaCentauri.Model.CodedLimit
-public import AlphaCentauri.Model.InjectiveEnumeration
-public import AlphaCentauri.Model.ProperCut
+public import AlphaCentauri.Model.EndExtension
+public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.ToFoundation.PrenexDefinable
+public import Foundation.FirstOrder.Arithmetic.Definability.Definable
+public import Foundation.FirstOrder.Arithmetic.EA.Basic
+public import Foundation.FirstOrder.Arithmetic.HFS.Seq
+public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
+public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-!
-# Collection for $\Delta_0$ formulas from $\Delta_1$ induction
+# Collection
+
+Strong $\Sigma_{n + 1}$ collection in $\mathsf{I}\Sigma_{n + 1}$, and $\mathsf{B}\Sigma_1$ from
+$\mathsf{I}\Delta_1$ over $\mathsf{EA}$.
+-/
+
+@[expose] public section
+
+namespace FFL.FirstOrder.Arithmetic
+
+section StrongCollection
+
+/-! ## Pieces and strong collection in `𝗜𝚺 (n + 1)`
+
+In a model of $\mathsf{I}\Sigma_{n + 1}$ every $\Sigma_{n + 1}$ predicate is piecewise coded, and
+the witnesses of a $\Sigma_{n + 1}$ relation are bounded on an interval even at the arguments
+where it has none.
+
+- [HP98, Definition I.2.6, Lemma I.2.13(a), Lemma I.2.27]
+-/
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+variable {V : Type*} [ORingStructure V] {n : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(n + 1)]
+
+/-- A $\Sigma_{n + 1}$ predicate has a piece of every length `z`: a sequence of length `z`
+whose `i`-th entry is `1` exactly when the predicate holds at `i`.
+- [HP98, Definition I.2.6, Lemma I.2.13(a)] -/
+theorem exists_piece [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {P : V → Prop} (hP : 𝚺ᴬ_[n + 1].DefinablePred P) (z : V) :
+    ∃ q, Seq q ∧ lh q = z ∧ ∀ i < z, (znth q i = 1 ↔ P i) := by
+  have : Fact (1 ≤ n + 1) := ⟨by omega⟩
+  obtain ⟨s, -, hs⟩ := finset_comprehension hP z
+  obtain ⟨q, hq, hlh, hmem⟩ := sigmaOne_skolem_seq
+    (R := fun i x ↦ (i ∈ s ∧ x = 1) ∨ (i ∉ s ∧ x = 0)) (by definability) (l := z)
+    (by intro i _; by_cases h : i ∈ s <;> simp [h])
+  have : ∀ i < z, (znth q i = 1 ↔ P i) := by
+    intro i hi
+    obtain ⟨x, hx⟩ := hq.exists (hlh ▸ hi)
+    rw [hq.znth_eq_of_mem hx, ← hs i hi]
+    rcases hmem i x hx with ⟨h, rfl⟩ | ⟨h, rfl⟩ <;> simp [h]
+  use q
+
+/-- Strong $\Sigma_{n + 1}$ collection: below every `u`, the witnesses of a $\Sigma_{n + 1}$
+relation are bounded at all arguments that have one.
+- [HP98, Lemma I.2.27] -/
+theorem strong_collection {R : V → V → Prop} (hR : 𝚺ᴬ_[n + 1].DefinableRel R) (u : V) :
+    ∃ v, ∀ x < u, (∃ y, R x y) → ∃ y < v, R x y := by
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ n + 1 by omega)
+  obtain ⟨q, -, -, hq⟩ := exists_piece (n := n) (P := fun x ↦ ∃ y, R x y) (by definability) u
+  obtain ⟨v, hv⟩ := IBroadSigma.collection (R := fun x y ↦ znth q x = 1 → R x y)
+    (by definability) u (by intro x hx; by_cases h : znth q x = 1 <;> simp_all)
+  use v
+  intro x hx h
+  obtain ⟨y, hy, hRy⟩ := hv x hx
+  use y
+  and_intros
+  · exact hy
+  · exact hRy <| (hq x hx).mpr h
+
+end StrongCollection
+
+section InjectiveEnumeration
+
+/-! ## An injective enumeration from a failure of collection
+
+
+-/
+
+open scoped FFL.FirstOrder.Bounding FFL.FirstOrder.Arithmetic
+
+variable {V : Type*} [ORingStructure V]
+
+lemma definable_exists_lt {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q) :
+    𝚺ᴬ₀.DefinableRel fun s x : V ↦ ∃ u < s, Q u x := by
+  have h : 𝚺ᴬ₀.Definable (k := 3) fun w : Fin 3 → V ↦ Q (w 0) (w 2) :=
+    (FFL.FirstOrder.Bounding.HierarchySymbol.Definable.retraction hQ ![0, 2]).of_iff
+      (by intro w; simp)
+  have hB := FFL.FirstOrder.Bounding.HierarchySymbol.Definable.bexs
+    (R := Semiformula.Operator.LT.lt) (by rfl)
+    (P := fun (v : Fin 2 → V) (u : V) ↦ Q u (v 1))
+    (h.of_iff (by intro w; simp)) (#0 : ArithmeticSemiterm V 2)
+  exact hB.of_iff (by intro v; simp)
+
+lemma definablePred_exists_lt {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q) (x : V) :
+    𝚺ᴬ₀.DefinablePred fun s : V ↦ ∃ u < s, Q u x := by
+  have := FFL.FirstOrder.Bounding.HierarchySymbol.Definable.retractiont
+    (definable_exists_lt hQ) (![#0, &x] : Fin 2 → ArithmeticSemiterm V 1)
+  exact this.of_iff fun v ↦ by simp
+
+lemma definableRel_graph [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q)
+    (a : V) :
+    𝚺ᴬ₀.DefinableRel fun x y : V ↦ x < a ∧
+      ∃ z, z < y + 1 ∧ y = ⟪x, z⟫ ∧ (∃ u < z, Q u x) ∧ ∀ z' < z, ¬∃ u < z', Q u x := by
+  have hσ := definable_exists_lt hQ
+  have hpair : 𝚺ᴬ₀.DefinableRel₃ fun x z y : V ↦ y = ⟪x, z⟫ := by definability
+  have hlt : 𝚺ᴬ₀.DefinableRel fun x _ : V ↦ x < a := by definability
+  have hP₁ : 𝚺ᴬ₀.Definable (k := 3) fun w : Fin 3 → V ↦ w 2 = ⟪w 1, w 0⟫ :=
+    (FFL.FirstOrder.Bounding.HierarchySymbol.Definable.retraction hpair ![1, 0, 2]).of_iff
+      (by intro w; simp)
+  have hP₂ : 𝚺ᴬ₀.Definable (k := 3) fun w : Fin 3 → V ↦ ∃ u < w 0, Q u (w 1) :=
+    (FFL.FirstOrder.Bounding.HierarchySymbol.Definable.retraction hσ ![0, 1]).of_iff
+      (by intro w; simp)
+  have hP₃ : 𝚺ᴬ₀.Definable (k := 3) fun w : Fin 3 → V ↦ ∀ z' < w 0, ¬∃ u < z', Q u (w 1) :=
+    FFL.FirstOrder.Bounding.HierarchySymbol.Definable.ball (R := Semiformula.Operator.LT.lt)
+      (P := fun (v : Fin 3 → V) (z' : V) ↦ ¬∃ u < z', Q u (v 1)) (by rfl)
+      ((FFL.FirstOrder.Bounding.HierarchySymbol.Definable.notSigma
+        (FFL.FirstOrder.Bounding.HierarchySymbol.Definable.retraction hσ ![0, 2])).of_zero
+          (ℌ := 𝚺ᴬ₀) |>.of_iff (by intro w; simp))
+      (#0)
+  have hB := FFL.FirstOrder.Bounding.HierarchySymbol.Definable.bexs
+    (R := Semiformula.Operator.LT.lt) (by rfl)
+    (P := fun (v : Fin 2 → V) (z : V) ↦ v 1 = ⟪v 0, z⟫ ∧ (∃ u < z, Q u (v 0)) ∧
+      ∀ z' < z, ¬∃ u < z', Q u (v 0))
+    ((hP₁.and (hP₂.and hP₃)).of_iff (by intro w; simp))
+    ‘#1 + 1’
+  exact (hlt.and hB).of_iff (by intro v; simp)
+
+/-- If a $\Delta_0$-definable relation `Q` has a witness `u` for every `x < a`, but no bound `w`
+bounds the witnesses of all `x < a`, then there is an injective unbounded map `f` on `a` whose
+graph restricted to `a` is $\Delta_0$-definable.
+- [Sla04, Lemma 2.2] -/
+theorem exists_injective_unbounded_of_not_collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
+    {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q) (a : V)
+    (hex : ∀ x < a, ∃ u, Q u x) (hnb : ∀ w, ∃ x < a, ∀ u ≤ w, ¬Q u x) :
+    ∃ f : V → V, (∀ x < a, ∀ y < a, f x = f y → x = y) ∧ (∀ s, ∃ x < a, s < f x) ∧
+      𝚺ᴬ₀-Relation fun x y ↦ x < a ∧ f x = y := by
+  have hleast : ∀ x < a, ∃ s, (∃ u < s, Q u x) ∧ ∀ z < s, ¬∃ u < z, Q u x := by
+    intro x hx
+    obtain ⟨u, hu⟩ := hex x hx
+    exact ISigma0.least_number (x := u + 1) (definablePred_exists_lt hQ x)
+      ⟨u, by simp, hu⟩
+  choose! s hs using hleast
+  refine ⟨fun x ↦ ⟪x, s x⟫, ?_, ?_, ?_⟩
+  · intro x _ y _ hxy
+    exact (pair_ext_iff.mp hxy).1
+  · intro t
+    obtain ⟨x, hx, hnbx⟩ := hnb t
+    obtain ⟨u, hu_lt, hu⟩ := (hs x hx).1
+    refine ⟨x, hx, ?_⟩
+    have htu : t < u := not_le.mp fun h ↦ hnbx u h hu
+    exact lt_of_lt_of_le (lt_trans htu hu_lt) (le_pair_right x (s x))
+  · refine (definableRel_graph hQ a).of_iff fun v ↦ ?_
+    change (v 0 < a ∧ ⟪v 0, s (v 0)⟫ = v 1) ↔ _
+    constructor
+    · rintro ⟨hx, hxy⟩
+      refine ⟨hx, s (v 0), ?_, hxy.symm, (hs _ hx).1, (hs _ hx).2⟩
+      rw [← hxy]
+      exact lt_of_le_of_lt (le_pair_right _ _) (lt_add_one _)
+    · rintro ⟨hx, z, -, hyz, hσz, hmin⟩
+      refine ⟨hx, ?_⟩
+      rcases lt_trichotomy z (s (v 0)) with h | h | h
+      · exact absurd hσz ((hs _ hx).2 z h)
+      · rw [hyz, h]
+      · exact absurd (hs _ hx).1 (hmin _ h)
+
+end InjectiveEnumeration
+
+noncomputable section CollectionFromDeltaInduction
+
+/-! ## Collection for $\Delta_0$ formulas from $\Delta_1$ induction
 
 Over a model of $\mathsf{EA}$, $\mathsf{I}\Delta_1$ yields collection for $\Delta_0$-definable
 relations, and hence the collection scheme $\mathsf{B}\Sigma_1$.
 -/
 
-@[expose] public section
-
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-namespace FFL.FirstOrder.Arithmetic
-
-noncomputable section
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
@@ -246,6 +404,22 @@ theorem BSigma_one_weakerThan_EA_IDelta_one : 𝗘𝗔 ∪ 𝗕𝚺 1 ⪯ 𝗘�
     Set.subset_union_right
   exact Semantics.ModelsSet.union_iff.mpr ⟨hEA, models_BSigma_one⟩
 
-end
+end CollectionFromDeltaInduction
+
+section CollectionWithoutExp
+
+/-! ## $\Sigma_1$ collection without exponentiation
+
+Whether $\mathsf{I}\Delta_0$ together with the failure of exponentiation proves
+$\mathsf{B}\Sigma_1$ is open.
+
+- [WP89]
+-/
+
+/-- $\mathsf{I}\Delta_0 + \neg\mathrm{Exp}$ proves $\mathsf{B}\Sigma_1$. An open problem.
+- [WP89] -/
+def BSigma1WeakerThanISigma0AddNotExp : Prop := 𝗕𝚺 1 ⪯ 𝗜𝚺₀ ∪ {∼expAxiom}
+
+end CollectionWithoutExp
 
 end FFL.FirstOrder.Arithmetic

@@ -1,7 +1,7 @@
 module
 
 public import AlphaCentauri.ProvablyTotal.Basic
-public import AlphaCentauri.Schemata.ParameterFreeInduction
+public import AlphaCentauri.Schemata.Induction
 public import AlphaCentauri.ToMathlib.ONote.Grzegorczyk
 
 /-!

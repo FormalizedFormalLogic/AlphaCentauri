@@ -2,10 +2,10 @@ module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILM.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILP.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILWStar.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILKW2.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZero.Basic
 
@@ -130,8 +130,6 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 theorem ILM₀.sound [M.IsIL] [M.HasM₀] (h : 𝐈𝐋𝐌₀ ⊢ A) : M ⊧ A :=
   ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM₀) h
 
-theorem ILP.sound [M.IsIL] [M.HasP] (h : 𝐈𝐋𝐏 ⊢ A) : M ⊧ A :=
-  ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomP) h
 
 theorem ILW.sound [M.IsIL] [M.HasW] (h : 𝐈𝐋𝐖 ⊢ A) : M ⊧ A :=
   ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomW) h
@@ -148,27 +146,8 @@ theorem ILWStar.sound [M.IsIL] [M.HasM₀] [M.HasW] (h : 𝐈𝐋𝐖* ⊢ A) : 
 theorem ILKW2.sound [M.IsIL] [M.HasW] (h : 𝐈𝐋𝐊𝐖𝟐 ⊢ A) : M ⊧ A :=
   ILW.sound <| weakerThan_iff.mp inferInstance h
 
-theorem ILR.sound [M.IsIL] [M.HasR] (h : 𝐈𝐋𝐑 ⊢ A) : M ⊧ A :=
-  ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomR) h
-
-theorem ILP₀.sound [M.IsIL] [M.HasR] (h : 𝐈𝐋𝐏₀ ⊢ A) : M ⊧ A :=
-  ILR.sound <| weakerThan_iff.mp inferInstance h
-
-theorem ILRW.sound [M.IsIL] [M.HasR] [M.HasW] (h : 𝐈𝐋𝐑𝐖 ⊢ A) : M ⊧ A := by
-  apply ofAxioms.sound _ h;
-  rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩) x;
-  · exact forces_axiomR;
-  · exact forces_axiomW;
-
-theorem ILRStar.sound [M.IsIL] [M.HasR] [M.HasW] (h : 𝐈𝐋𝐑* ⊢ A) : M ⊧ A :=
-  ILRW.sound <| (equiv_iff.mp inferInstance : (𝐈𝐋𝐑𝐖 : Logic α) = 𝐈𝐋𝐑*).symm.subset h
-
 instance : Consistent (𝐈𝐋𝐌₀ : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILM₀.sound (M := pointModel fun _ ↦ False) h 0
-instance : Consistent (𝐈𝐋𝐏 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILP.sound (M := pointModel fun _ ↦ False) h 0
-instance : Consistent (𝐈𝐋𝐏₀ : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILP₀.sound (M := pointModel fun _ ↦ False) h 0
 instance : Consistent (𝐈𝐋𝐖 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILW.sound (M := pointModel fun _ ↦ False) h 0
 instance : Consistent (𝐈𝐋𝐖* : Logic α) :=
@@ -177,12 +156,6 @@ instance : Consistent (𝐈𝐋𝐌₀𝐖 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILM₀W.sound (M := pointModel fun _ ↦ False) h 0
 instance : Consistent (𝐈𝐋𝐊𝐖𝟐 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILKW2.sound (M := pointModel fun _ ↦ False) h 0
-instance : Consistent (𝐈𝐋𝐑 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILR.sound (M := pointModel fun _ ↦ False) h 0
-instance : Consistent (𝐈𝐋𝐑𝐖 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILRW.sound (M := pointModel fun _ ↦ False) h 0
-instance : Consistent (𝐈𝐋𝐑* : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILRStar.sound (M := pointModel fun _ ↦ False) h 0
 
 end Logic
 
@@ -208,7 +181,6 @@ instance : countermodelW.IsIL where
   s_of_rel := by decide
 
 private instance : countermodelW.HasM₀ := ⟨by decide⟩
-private instance : countermodelW.HasR := ⟨by decide⟩
 
 private abbrev countermodelM₀ : Model (Fin 5) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 1 ∧ y = 2 ∨ x = 3 ∧ y = 4
@@ -225,42 +197,6 @@ private instance : countermodelM₀.IsIL where
   s_trans := by decide
   s_of_rel := by decide
 
-private abbrev countermodelR : Model (Fin 5) ℕ where
-  Rel' x y := x = 0 ∧ 0 < y ∨ x = 1 ∧ (y = 2 ∨ y = 4) ∨ x = 3 ∧ y = 4
-  S' w x y :=
-    w = 0 ∧ 1 ≤ x ∧ x ≤ y ∨ w = 1 ∧ (x = 2 ∧ y = 2 ∨ x = 4 ∧ y = 4) ∨ w = 3 ∧ x = 4 ∧ y = 4
-  Val' t a := match a with | 0 => t = 2 | 1 => t = 3 | _ => t = 2
-
-private instance : IsTrans _ countermodelR.Rel := ⟨by decide⟩
-private instance : Std.Irrefl countermodelR.Rel := ⟨by decide⟩
-
-private instance : countermodelR.IsIL where
-  rel_of_s_left := by decide
-  rel_of_s_right := by decide
-  s_refl := by decide
-  s_trans := by decide
-  s_of_rel := by decide
-
-private instance : countermodelR.HasM₀ := ⟨by decide⟩
-private instance : countermodelR.HasW := HasW.of_finite (by decide)
-
-private abbrev countermodelP : Model (Fin 4) ℕ where
-  Rel' x y := x = 0 ∧ 0 < y ∨ x = 1 ∧ y = 2
-  S' w x y := w = 0 ∧ 1 ≤ x ∧ x ≤ y ∨ w = 1 ∧ x = 2 ∧ y = 2
-  Val' t a := match a with | 0 => t = 2 | _ => t = 3
-
-private instance : IsTrans _ countermodelP.Rel := ⟨by decide⟩
-private instance : Std.Irrefl countermodelP.Rel := ⟨by decide⟩
-
-private instance : countermodelP.IsIL where
-  rel_of_s_left := by decide
-  rel_of_s_right := by decide
-  s_refl := by decide
-  s_trans := by decide
-  s_of_rel := by decide
-
-private instance : countermodelP.HasR := ⟨by decide⟩
-private instance : countermodelP.HasW := HasW.of_finite (by decide)
 
 instance : (𝐈𝐋𝐌₀ : Logic ℕ) ⪱ 𝐈𝐋𝐌₀𝐖 :=
   .of_unprovable_provable (φ := Axioms.W (#0) (#1)) (fun h ↦ by
@@ -272,17 +208,6 @@ instance : (𝐈𝐋𝐌₀ : Logic ℕ) ⪱ 𝐈𝐋𝐌₀𝐖 :=
     obtain ⟨hz₁, hz₂⟩ := forces_and.mp hz;
     obtain rfl : z = 1 := hz₁;
     exact hz₂ 2 (by decide) (show (2 : Fin 3) ≠ 0 by decide)) ILM₀W.axiomW
-
-instance : (𝐈𝐋𝐑 : Logic ℕ) ⪱ 𝐈𝐋𝐑𝐖 :=
-  .of_unprovable_provable (φ := Axioms.W (#0) (#1)) (fun h ↦ by
-    have H := ILR.sound (M := countermodelW) h 0;
-    have h₁ : (0 : countermodelW.World) ⊩[countermodelW] #0 ▷ #1 := by
-      intro u _ hu;
-      exact ⟨1, Or.inl ⟨rfl, hu, by decide⟩, rfl⟩;
-    obtain ⟨z, _, hz⟩ := H h₁ 1 (by decide) (show (1 : Fin 3) ≠ 0 by decide);
-    obtain ⟨hz₁, hz₂⟩ := forces_and.mp hz;
-    obtain rfl : z = 1 := hz₁;
-    exact hz₂ 2 (by decide) (show (2 : Fin 3) ≠ 0 by decide)) ILRW.axiomW
 
 instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐌₀ :=
   .of_unprovable_provable (φ := Axioms.M₀ (#0) (#1) (#2)) (fun h ↦ by
@@ -298,45 +223,6 @@ instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐌₀ :=
     obtain ⟨htz, ht⟩ := forces_and.mp ht;
     obtain rfl : t = 3 := htz;
     exact (show (4 : Fin 5) ≠ 2 by decide) (ht 4 (by decide))) ILM₀.axiomM₀
-
-instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐏₀ :=
-  .of_unprovable_provable (φ := Axioms.P₀ (#0) (#3)) (fun h ↦ by
-    have H := ofAxioms.sound (M := countermodelM₀) (𝔸 := ∅) (by simp) h 0;
-    have h₁ : (0 : countermodelM₀.World) ⊩[countermodelM₀] #0 ▷ ◇(#3) := by
-      intro v _ hv;
-      obtain rfl : v = 2 := hv;
-      exact ⟨3, by decide, forces_dia.mpr ⟨4, by decide, rfl⟩⟩;
-    obtain ⟨t, hSt, ht⟩ := H h₁ 1 (by decide) 2 (by decide) rfl;
-    obtain rfl : t = 4 := ht;
-    exact absurd hSt (by decide)) ILP₀.axiomP₀
-
-instance : (𝐈𝐋𝐌₀𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐑𝐖 :=
-  .of_unprovable_provable (φ := Axioms.R (#0) (#1) (#2)) (fun h ↦ by
-    have H := ILM₀W.sound (M := countermodelR) h 0;
-    have h₁ : (0 : countermodelR.World) ⊩[countermodelR] #0 ▷ #1 := by
-      intro v _ hv;
-      obtain rfl : v = 2 := hv;
-      exact ⟨3, by decide, rfl⟩;
-    have h₂ : (1 : countermodelR.World) ⊩[countermodelR] ∼(#0 ▷ ∼(#2)) := by
-      apply not_forces_rhd.mpr;
-      refine ⟨2, by decide, rfl, ?_⟩;
-      intro z hz hz';
-      exact hz' ((by decide : ∀ z, countermodelR.S 1 2 z → z = 2) z hz);
-    obtain ⟨t, _, ht⟩ := H h₁ 1 (by decide) h₂;
-    obtain ⟨htz, ht⟩ := forces_and.mp ht;
-    obtain rfl : t = 3 := htz;
-    exact (show (4 : Fin 5) ≠ 2 by decide) (ht 4 (by decide))) ILRW.axiomR
-
-instance : (𝐈𝐋𝐑𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐏 :=
-  .of_unprovable_provable (φ := Axioms.P (#0) (#1)) (fun h ↦ by
-    have H := ILRW.sound (M := countermodelP) h 0;
-    have h₁ : (0 : countermodelP.World) ⊩[countermodelP] #0 ▷ #1 := by
-      intro v _ hv;
-      obtain rfl : v = 2 := hv;
-      exact ⟨3, by decide, rfl⟩;
-    obtain ⟨t, hSt, ht⟩ := H h₁ 1 (by decide) 2 (by decide) rfl;
-    obtain rfl : t = 3 := ht;
-    exact absurd hSt (by decide)) ILP.axiomP
 
 end Logic
 

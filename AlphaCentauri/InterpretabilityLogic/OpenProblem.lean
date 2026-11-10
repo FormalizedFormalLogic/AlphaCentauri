@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Extension
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILRW.Basic
 
 /-!
 # Open problems on extensions of $\mathbf{IL}$

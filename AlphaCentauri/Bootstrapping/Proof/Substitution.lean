@@ -718,25 +718,31 @@ lemma isSemitermVec_freshVec (u : V) :
     · simp [nth_freshVec_of_lt h]
     · simp⟩
 
-/-- For every `u` there is a closed term vector `w` such that `w` and `freshVec u` undo each
-other on the free variables below `u`. -/
-lemma exists_inverse_freshVec (u : V) : ∃ w : V, IsSemitermVec L (len w) 0 w ∧
-    (∀ x < u, x < len (freshVec u : V) ∧ termFvSubst L w (freshVec u : V).[x] = ^&x) ∧
-    (∀ x < u, x < len w ∧ termFvSubst L (freshVec u) w.[x] = ^&x) := by
-  obtain ⟨ι, hιl, hι⟩ := sigmaOne_skolem_vec (R := fun x y : V ↦ y = ^&x) (by definability)
-    (l := u) (fun x _ ↦ ⟨_, rfl⟩)
-  have hιc : IsSemitermVec L (len ι) 0 ι := IsSemitermVec.iff.mpr ⟨rfl, fun i hi ↦ by
-    rw [hι i (by rwa [hιl] at hi)]
-    simp⟩
-  refine ⟨^&u ∷ ι, by simp [hιc], ?_, ?_⟩
+/-- `freshVecInverse u` is the term vector `^&u, ^&0, …, ^&(u - 1)`. -/
+noncomputable def freshVecInverse (u : V) : V := ^&u ∷ fvarVec u
+
+/-- `freshVecInverse u` is a vector of closed terms, and it and `freshVec u` undo each other on the
+free variables below `u`. -/
+lemma freshVecInverse_spec (u : V) :
+    IsSemitermVec L (len (freshVecInverse u)) 0 (freshVecInverse u) ∧
+    (∀ x < u, x < len (freshVec u : V) ∧
+      termFvSubst L (freshVecInverse u) (freshVec u : V).[x] = ^&x) ∧
+    (∀ x < u, x < len (freshVecInverse u) ∧
+      termFvSubst L (freshVec u) (freshVecInverse u).[x] = ^&x) := by
+  unfold freshVecInverse
+  refine ⟨by simp [isSemitermVec_fvarVec], ?_, ?_⟩
   · intro x hx
-    exact ⟨lt_trans hx (by simp), by simp [nth_freshVec_of_lt hx, hιl, hx, hι x hx]⟩
+    exact ⟨lt_trans hx (by simp), by simp [nth_freshVec_of_lt hx, hx, nth_fvarVec u x hx]⟩
   · intro x hx
     rcases zero_or_succ x with rfl | ⟨x, rfl⟩
     · simp
     · have hx' : x < u := lt_trans (by simp) hx
       have hx₁ : x < u + 1 := lt_trans hx' (by simp)
-      exact ⟨by simp [hιl, hx'], by simp [hι x hx', hx₁, nth_freshVec_of_lt hx']⟩
+      exact ⟨by simp [hx'], by simp [nth_fvarVec u x hx', hx₁, nth_freshVec_of_lt hx']⟩
+
+instance freshVecInverse.definable : 𝚺ᴬ₁-Function₁ (freshVecInverse : V → V) := by
+  unfold freshVecInverse
+  definability
 
 end freshVec
 

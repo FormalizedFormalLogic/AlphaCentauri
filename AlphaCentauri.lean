@@ -22,7 +22,6 @@ public import AlphaCentauri.Bootstrapping.Proof.AxiomReplacement
 public import AlphaCentauri.Bootstrapping.Proof.ComplexitySoundness
 public import AlphaCentauri.Bootstrapping.Proof.CutElimination
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
-public import AlphaCentauri.Bootstrapping.Proof.CutFreeRewrite
 public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
 public import AlphaCentauri.Bootstrapping.Proof.InductionAxiom
@@ -31,6 +30,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Inversion
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 public import AlphaCentauri.Bootstrapping.Proof.Measures
 public import AlphaCentauri.Bootstrapping.Proof.PeanoMinusAxiom
+public import AlphaCentauri.Bootstrapping.Proof.RankedDerivation
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
@@ -121,6 +121,7 @@ public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Logic
 public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
+public import AlphaCentauri.ToFoundation.LeastWitness
 public import AlphaCentauri.ToFoundation.OpenFormulaDegree
 public import AlphaCentauri.ToFoundation.OpenPredicate
 public import AlphaCentauri.ToFoundation.PartialTruth

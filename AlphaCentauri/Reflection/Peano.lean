@@ -27,7 +27,7 @@ theorem Peano.provable_localReflection_ISigma (n : ℕ) : 𝗣𝗔 ⊢* 𝗥𝗳
     simpa using provable_iff_of_models_iff.{0} (n := 0) fun V _ _ e ↦ by
       simpa [models_iff] using H V e Empty.elim
   have h₁ : 𝗣𝗔 ⊢ (𝗜𝚺 n).standardProvability.refl σ' := WeakerThan.pbl <|
-    ISigma.provable_localReflectionOn_Pi (k := s + n + 1) (by omega) (by omega) ⟨σ', hσ', rfl⟩
+    ISigma.provable_localReflectionOn_Pi (k := s + n + 1) (by omega) ⟨σ', hσ', rfl⟩
   have h₂ : 𝗣𝗔 ⊢ (𝗜𝚺 n).standardProvability σ 🡘 (𝗜𝚺 n).standardProvability σ' :=
     WeakerThan.pbl <| Provability.ext (𝔅 := (𝗜𝚺 n).standardProvability) he
   have h₃ : 𝗣𝗔 ⊢ σ 🡘 σ' := WeakerThan.pbl he

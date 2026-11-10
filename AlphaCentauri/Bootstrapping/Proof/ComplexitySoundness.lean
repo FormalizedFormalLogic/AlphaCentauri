@@ -7,9 +7,9 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.Complexity
 # Soundness of cut-free derivations for satisfaction by complexity
 
 In every model of `𝗜𝚺⁺(N + 1)`, a sequent of formulas of complexity at most `N` derivable without
-cuts in pure logic contains a formula satisfied under `ComplexitySatisfied N`. Consequently, in
-every model that also satisfies `𝗜𝚺⁺2`, a sequent of codes of sentences of complexity at most `N`
-derivable in pure logic contains the code of a true sentence.
+cuts in pure logic contains a formula satisfied under `ComplexitySatisfied N`. Consequently, a
+sequent of codes of sentences of complexity at most `N` derivable in pure logic contains the code
+of a true sentence.
 -/
 
 @[expose] public section
@@ -223,7 +223,7 @@ private lemma hasWitness_aux :
 /-- A sequent of codes of sentences of complexity at most `N` derivable in pure logic contains the
 code of a true sentence.
 - [HP98, Corollary I.4.34] -/
-theorem Derivable.exists_models [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2] (h : Derivable (∅ : Theory ℒₒᵣ) s)
+theorem Derivable.exists_models (h : Derivable (∅ : Theory ℒₒᵣ) s)
     (hs : ∀ r ∈ s, ∃ σ : ArithmeticSentence, σ.complexity ≤ N ∧ r = ⌜σ⌝) :
     ∃ σ : ArithmeticSentence, (⌜σ⌝ : V) ∈ s ∧ V↓[ℒₒᵣ] ⊧ σ := by
   obtain ⟨d, rfl, hd⟩ := h.cutFree

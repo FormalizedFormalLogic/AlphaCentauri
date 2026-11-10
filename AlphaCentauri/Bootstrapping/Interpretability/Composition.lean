@@ -330,7 +330,8 @@ lemma relAllItr_generalize_imp {d : Semiformula V L 1} (hd : d.shift = d) :
 omit [T.Δ₁] in
 lemma conj_fin_zero_add {α : Type*} [Top α] [Wedge α] (k : ℕ) (f : ℕ → α) :
     Matrix.conj (fun i : Fin (0 + k) ↦ f i) = Matrix.conj (fun i : Fin k ↦ f i) := by
-  have : ∀ m (_ : m = k), Matrix.conj (fun i : Fin m ↦ f i) = Matrix.conj (fun i : Fin k ↦ f i) := by
+  have : ∀ m (_ : m = k),
+      Matrix.conj (fun i : Fin m ↦ f i) = Matrix.conj (fun i : Fin k ↦ f i) := by
     rintro m rfl; rfl
   exact this _ (zero_add k)
 
@@ -373,7 +374,8 @@ lemma relativizedImp_iff_relAllItr {k : ℕ} {d : Semiformula V L 1} (hd : d.shi
     simp only [conj_fin_zero_add k (fun j ↦ d.subst ![Semiterm.fvar (j : V)])] at hs ⊢
     have hZ : T.internalize V ⊢ (Matrix.conj fun i ↦ Semiformula.shift^[k] (∀¹ (d 🡒 (B i 🡘 C i)))) ⋏
         (Matrix.conj fun i : Fin k ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
-        (Matrix.conj fun i : Fin k ↦ (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+        (Matrix.conj fun i : Fin k ↦
+          (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
           (Semiformula.shift^[k] (C i)).subst ![Semiterm.fvar ((i : ℕ) : V)]) 🡒
         Matrix.conj fun i : Fin k ↦ (d.subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
           (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
@@ -409,7 +411,8 @@ lemma relativizedImp_iff_relAllItr {k : ℕ} {d : Semiformula V L 1} (hd : d.shi
           (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
           (Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar ((i : ℕ) : V)]) 🡒
         (Matrix.conj fun i : Fin k ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)]) ⋏
-        (Matrix.conj fun i : Fin k ↦ (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+        (Matrix.conj fun i : Fin k ↦
+          (Semiformula.shift^[k] e).subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
           (Semiformula.shift^[k] (C i)).subst ![Semiterm.fvar ((i : ℕ) : V)]) := by
       have a := matrixConj_intro (𝓢 := T.internalize V)
         (φ := (Matrix.conj fun i ↦ Semiformula.shift^[k] (∀¹ (d 🡒 (B i 🡘 C i)))) ⋏
@@ -602,5 +605,45 @@ lemma IsTranslationTable.tprovable_transT_equal_iff (x y : V) :
 
 end equation
 
+
+/-! ## Translations along the composite table -/
+
+section compShapes
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {tbl₁ tbl₂ : V}
+  (hT₁ : IsTable L L tbl₁) (hT₂ : IsTable L L tbl₂)
+  (hc : IsTable L L (Bootstrapping.compTable L L tbl₁ tbl₂))
+
+include hT₁ in
+lemma IsTable.compTable_domT : hc.domT = hT₁.domT ⋏ hT₁.transT hT₂.domT := by
+  ext; simp [tableDomain_compTable]
+
+include hT₁ in
+lemma IsTable.compTable_relT {k : ℕ} (R : L.Rel k) : hc.relT R = hT₁.transT (hT₂.relT R) := by
+  ext; simp [tableRel_compTable (hT₂.lt_len_rel (codeIn_rel_quote R))]
+
+include hT₁ in
+lemma IsTable.compTable_funcT {k : ℕ} (F : L.Func k) : hc.funcT F = hT₁.transT (hT₂.funcT F) := by
+  ext; simp [tableFunc_compTable (hT₂.lt_len_func (codeIn_func_quote F))]
+
+omit [L.Eq] in
+lemma IsVarVec.single_bvar {m : ℕ} (a : Fin m) :
+    IsVarVec (![Semiterm.bvar a] : SemitermVec V L 1 m) := fun j ↦ Or.inl ⟨a, by
+  match j with
+  | 0 => rfl⟩
+
+lemma IsTable.transT_relativizedImp {k : ℕ} (d : Semiformula V L 1) (A : Fin k → Semiformula V L 1)
+    (G : Semiformula V L (0 + k)) :
+    hT₁.transT (relativizedImp d A G) = relAllItr hT₁.domT k (Matrix.conj (fun i : Fin k ↦
+      (hT₁.transT d).subst ![Semiterm.bvar (i.addCast 0)] ⋏
+        (hT₁.transT (A i)).subst ![Semiterm.bvar (i.addCast 0)]) 🡒 hT₁.transT G) := by
+  unfold relativizedImp
+  rw [IsTable.transT_allItr, IsTable.transT_imp, IsTable.transT_conj]
+  congr 3
+  funext i
+  rw [IsTable.transT_and, hT₁.transT_subst _ (IsVarVec.single_bvar _),
+    hT₁.transT_subst _ (IsVarVec.single_bvar _)]
+
+end compShapes
 
 end FFL.FirstOrder.Arithmetic.Bootstrapping

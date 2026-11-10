@@ -94,6 +94,28 @@ def cases' {C : Formula α → Sort*}
   | .box A => box A
   | .rhd A B => rhd A B
 
+/-- The modal depth: the maximal number of nested occurrences of `□` and `▷`.
+
+- [HPV23, §3]
+-/
+def depth : Formula α → ℕ
+  | .atom _ => 0
+  | .falsum => 0
+  | .imp A B => max A.depth B.depth
+  | .box A => A.depth + 1
+  | .rhd A B => max A.depth B.depth + 1
+
+@[simp, grind =] lemma depth_atom {a : α} : (#a).depth = 0 := rfl
+@[simp, grind =] lemma depth_bot : (⊥ : Formula α).depth = 0 := rfl
+@[simp, grind =] lemma depth_top : (⊤ : Formula α).depth = 0 := rfl
+@[simp, grind =] lemma depth_imp : (A 🡒 B).depth = max A.depth B.depth := rfl
+@[simp, grind =] lemma depth_neg : (∼A).depth = A.depth := by simp [Formula.depth]
+@[simp, grind =] lemma depth_and : (A ⋏ B).depth = max A.depth B.depth := by simp [Formula.depth]
+@[simp, grind =] lemma depth_or : (A ⋎ B).depth = max A.depth B.depth := by simp [Formula.depth]
+@[simp, grind =] lemma depth_box : (□A).depth = A.depth + 1 := rfl
+@[simp, grind =] lemma depth_dia : (◇A).depth = A.depth + 1 := by simp [Formula.depth]
+@[simp, grind =] lemma depth_rhd : (A ▷ B).depth = max A.depth B.depth + 1 := rfl
+
 end Formula
 
 end FFL.InterpretabilityLogic

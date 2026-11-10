@@ -45,6 +45,10 @@ public import AlphaCentauri.Hierarchy.Diophantine
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Henkin
+public import AlphaCentauri.InterpretabilityLogic.Formula
+public import AlphaCentauri.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.CodedLimit
 public import AlphaCentauri.Model.Cut
@@ -119,10 +123,6 @@ public import AlphaCentauri.ToFoundation.Factorial
 public import AlphaCentauri.ToFoundation.Fvar
 public import AlphaCentauri.ToFoundation.Hierarchy
 public import AlphaCentauri.ToFoundation.InternalEquality
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Formula
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Logic
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Veltman.Basic
-public import AlphaCentauri.ToFoundation.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.ToFoundation.LeastNumberPrinciple
 public import AlphaCentauri.ToFoundation.LeastWitness
 public import AlphaCentauri.ToFoundation.OpenFormulaDegree

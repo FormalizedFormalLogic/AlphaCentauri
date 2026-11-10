@@ -836,20 +836,20 @@ lemma freshVec_fvar (j : V) : ∀ i < len (freshVec j : V), ∃ x, (freshVec j :
   · exact ⟨0, by simp⟩
 
 omit [S.Δ₁] [𝗘𝗤 L ⪯ S] in
-lemma fvSubst_freshVec_translate_free {tbl p j : V} (hT : IsTable L L tbl)
-    (hp : IsSemiformula L 1 p) (hj : ^∀ p < j) :
+lemma fvSubst_freshVec_translate_free {tbl p u j : V} (hT : IsTable L L tbl)
+    (hp : IsSemiformula L 1 p) (hpu : p ≤ u) (hj : u < j) :
     fvSubst L (freshVec j) (translate L L tbl (free L p)) =
       shift L (translate L L tbl (free L p)) := by
   rw [← translate_fvSubst hT (freshVec_fvar j) (IsSemiformula.free hp),
-    fvSubst_freshVec_free hp (le_qqAll p) hj, translate_shift hT (IsSemiformula.free hp)]
+    fvSubst_freshVec_free hp hpu hj, translate_shift hT (IsSemiformula.free hp)]
 
 omit [S.Δ₁] [𝗘𝗤 L ⪯ S] in
-lemma fvSubst_freshVec_translate_translate_free {tbl tbl' p j : V} (hT : IsTable L L tbl)
-    (hT' : IsTable L L tbl') (hp : IsSemiformula L 1 p) (hj : ^∀ p < j) :
+lemma fvSubst_freshVec_translate_translate_free {tbl tbl' p u j : V} (hT : IsTable L L tbl)
+    (hT' : IsTable L L tbl') (hp : IsSemiformula L 1 p) (hpu : p ≤ u) (hj : u < j) :
     fvSubst L (freshVec j) (translate L L tbl (translate L L tbl' (free L p))) =
       shift L (translate L L tbl (translate L L tbl' (free L p))) := by
   have h₁ := IsSemiformula.translate hT' (IsSemiformula.free hp)
-  rw [← translate_fvSubst hT (freshVec_fvar j) h₁, fvSubst_freshVec_translate_free hT' hp hj,
+  rw [← translate_fvSubst hT (freshVec_fvar j) h₁, fvSubst_freshVec_translate_free hT' hp hpu hj,
     translate_shift hT h₁]
 
 omit [L.Eq] [S.Δ₁] [𝗘𝗤 L ⪯ S] in
@@ -875,26 +875,26 @@ omit [𝗘𝗤 L ⪯ S] in
 /-- The step of a quantifier: from the derivability for `free p`, the hypotheses for the fresh
 variables are discharged and the hypothesis for `&0` is put in a disjunction. -/
 lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
-    (P : Semiformula V L 1)
+    (P : Semiformula V L 1) {M : V} (hM : P.val ≤ M)
     (ih : Derivable S (insert (hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free)).val
       (negDomSet L tbl₁.[0] P.free.val))) :
     Derivable S (insert (∼(h₁.domT.subst ![Semiterm.fvar 0]) ⋎
       (hc.transT P 🡘 h₁.transT (hT₂.transT P)).free).val
-        (setShift L (negDomSet L tbl₁.[0] (∀¹ P).val))) := by
+        (setShift L (negDomSet L tbl₁.[0] M))) := by
   have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain
   have hds : shift L tbl₁.[0] = tbl₁.[0] := h₁.domain_shift
   have hp : IsSemiformula L 1 P.val := by simp
   set Xf : Formula V L := hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free) with hXf
   have hX : IsFormula L Xf.val := by simp
   have h₁' : Derivable S (insert Xf.val
-      (negDomSet L tbl₁.[0] (P.free.val + ((∀¹ P).val + 1)))) :=
+      (negDomSet L tbl₁.[0] (P.free.val + (M + 1)))) :=
     derivable_insert_negDomSet_mono hdom Xf (le_add_right le_rfl) ih
-  have h₂ : Derivable S (insert Xf.val ∅ ∪ negDomSet L tbl₁.[0] (P.free.val + ((∀¹ P).val + 1))) :=
+  have h₂ : Derivable S (insert Xf.val ∅ ∪ negDomSet L tbl₁.[0] (P.free.val + (M + 1))) :=
     Derivable.ofSetEq (fun x ↦ by simp) h₁'
-  have hfresh : ∀ j, (∀¹ P).val + 1 ≤ j → j < P.free.val + ((∀¹ P).val + 1) →
+  have hfresh : ∀ j, M + 1 ≤ j → j < P.free.val + (M + 1) →
       fvSubstImage (L := L) (freshVec j) (insert Xf.val ∅) = setShift L (insert Xf.val ∅) := by
     intro j hj _
-    have hj' : ^∀ P.val < j := by simpa using lt_of_lt_of_le (lt_add_one _) hj
+    have hj' : M < j := lt_of_lt_of_le (lt_add_one _) hj
     rw [fvSubstImage_insert, fvSubstImage_empty, mem_setShift_insert, setShift_empty]
     congr 1
     have ha := IsSemiformula.translate hc (IsSemiformula.free hp)
@@ -902,15 +902,15 @@ lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
       (IsSemiformula.translate hT₂ (IsSemiformula.free hp))
     rw [hXf, Semiformula.val_iff, IsTable.transT_val, IsTable.transT_val, IsTable.transT_val,
       Semiformula.free_val, fvSubst_iff_code (isSemitermVec_freshVec j) ha hb,
-      fvSubst_freshVec_translate_free hc hp hj',
-      fvSubst_freshVec_translate_translate_free h₁.toIsTable hT₂ hp hj', shift_iff_code ha hb]
+      fvSubst_freshVec_translate_free hc hp hM hj',
+      fvSubst_freshVec_translate_translate_free h₁.toIsTable hT₂ hp hM hj', shift_iff_code ha hb]
   have h₃ := Derivable.elim_negDomSet hS hdom hds h₁.exs_domain
     (by simp) (le_add_left le_rfl) hfresh h₂
   rw [negDomSet_succ_eq_insert_setShift hdom hds] at h₃
   have hnd : IsFormula L (neg L (substs1 L (^&0) tbl₁.[0])) :=
     (IsSemiformula.substs1 (n := 0) (by simp) hdom).neg
   have h₄ : Derivable S (insert (neg L (substs1 L (^&0) tbl₁.[0])) (insert Xf.val
-      (setShift L (negDomSet L tbl₁.[0] (∀¹ P).val)))) :=
+      (setShift L (negDomSet L tbl₁.[0] M)))) :=
     Derivable.ofSetEq (fun x ↦ by simp; tauto) h₃
   have h₅ := derivable_insert_or (IsFormulaSet.setShift (IsFormulaSet.negDomSet hdom _)) hnd hX h₄
   have e : (∼(h₁.domT.subst ![Semiterm.fvar 0]) ⋎
@@ -921,6 +921,70 @@ lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
     rfl
   rw [e]
   exact h₅
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma derivable_comp_all (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (P : Semiformula V L 1)
+    (ih : Derivable S (insert (hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free)).val
+      (negDomSet L tbl₁.[0] P.free.val))) :
+    Derivable S (insert (hc.transT (∀¹ P) 🡘 h₁.transT (hT₂.transT (∀¹ P))).val
+      (negDomSet L tbl₁.[0] (∀¹ P).val)) := by
+  have h₀ := derivable_comp_quant h₁ hT₂ hc hS P (M := (∀¹ P).val)
+    (by simpa using (lt_forall P.val).le) ih
+  have hd₂ : (h₁.transT hT₂.domT).shift = h₁.transT hT₂.domT := by
+    rw [← IsTable.transT_shift, hT₂.domT_shift]
+  have key : S.internalize V ⊢ ∼(h₁.domT.subst ![Semiterm.fvar 0]) ⋎
+      (hc.transT P 🡘 h₁.transT (hT₂.transT P)).free 🡒
+        ((hc.domT.subst ![Semiterm.bvar 0] 🡒 hc.transT P) 🡘
+          (h₁.domT.subst ![Semiterm.bvar 0] 🡒 ((h₁.transT hT₂.domT).subst ![Semiterm.bvar 0] 🡒
+            h₁.transT (hT₂.transT P)))).free := by
+    simp only [Semiformula.free_iff, Semiformula.free_imp]
+    rw [free_subst_bvar_zero hc.domT_shift, free_subst_bvar_zero h₁.domT_shift,
+      free_subst_bvar_zero hd₂, IsTable.compTable_domT h₁.toIsTable hT₂ hc, Semiformula.substs_and]
+    cl_prover
+  have h₁' := Derivable.of_tprovable_imp key h₀
+  rw [Semiformula.free_val] at h₁'
+  have hP1 : IsSemiformula L 1 P.val := by simp
+  have h₂ := Derivable.all (by
+    simp [hc.domain, h₁.domain, IsSemiformula.translate hc hP1,
+      IsSemiformula.translate h₁.toIsTable hT₂.domain,
+      IsSemiformula.translate h₁.toIsTable (IsSemiformula.translate hT₂ hP1)]) h₁'
+  rw [← Semiformula.val_all] at h₂
+  have h₃ := Derivable.of_tprovable_imp (tprovable_all_iff_all _ _) h₂
+  simp only [IsTable.transT_all, IsTable.transT_imp,
+    h₁.toIsTable.transT_subst _ (IsVarVec.single_bvar _)]
+  exact h₃
+
+omit [𝗘𝗤 L ⪯ S] in
+lemma derivable_comp_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (P : Semiformula V L 1)
+    (ih : Derivable S (insert (hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free)).val
+      (negDomSet L tbl₁.[0] P.free.val))) :
+    Derivable S (insert (hc.transT (∃¹ P) 🡘 h₁.transT (hT₂.transT (∃¹ P))).val
+      (negDomSet L tbl₁.[0] (∃¹ P).val)) := by
+  have h₀ := derivable_comp_quant h₁ hT₂ hc hS P (M := (∃¹ P).val)
+    (by simpa using (lt_exists P.val).le) ih
+  have hd₂ : (h₁.transT hT₂.domT).shift = h₁.transT hT₂.domT := by
+    rw [← IsTable.transT_shift, hT₂.domT_shift]
+  have key : S.internalize V ⊢ ∼(h₁.domT.subst ![Semiterm.fvar 0]) ⋎
+      (hc.transT P 🡘 h₁.transT (hT₂.transT P)).free 🡒
+        ((hc.domT.subst ![Semiterm.bvar 0] ⋏ hc.transT P) 🡘
+          (h₁.domT.subst ![Semiterm.bvar 0] ⋏ ((h₁.transT hT₂.domT).subst ![Semiterm.bvar 0] ⋏
+            h₁.transT (hT₂.transT P)))).free := by
+    simp only [Semiformula.free_iff, Semiformula.free_and]
+    rw [free_subst_bvar_zero hc.domT_shift, free_subst_bvar_zero h₁.domT_shift,
+      free_subst_bvar_zero hd₂, IsTable.compTable_domT h₁.toIsTable hT₂ hc, Semiformula.substs_and]
+    cl_prover
+  have h₁' := Derivable.of_tprovable_imp key h₀
+  rw [Semiformula.free_val] at h₁'
+  have hP1 : IsSemiformula L 1 P.val := by simp
+  have h₂ := Derivable.all (by
+    simp [hc.domain, h₁.domain, IsSemiformula.translate hc hP1,
+      IsSemiformula.translate h₁.toIsTable hT₂.domain,
+      IsSemiformula.translate h₁.toIsTable (IsSemiformula.translate hT₂ hP1)]) h₁'
+  rw [← Semiformula.val_all] at h₂
+  have h₃ := Derivable.of_tprovable_imp (tprovable_all_iff_exs _ _) h₂
+  simp only [IsTable.transT_exs, IsTable.transT_and,
+    h₁.toIsTable.transT_subst _ (IsVarVec.single_bvar _)]
+  exact h₃
 
 end compFormula
 

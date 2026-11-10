@@ -90,6 +90,7 @@ public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.Schemata.Strictness
 public import AlphaCentauri.Schemata.StrongCollection
 public import AlphaCentauri.Schemata.WeakPigeonhole
+public import AlphaCentauri.Schemata.ZRing
 public import AlphaCentauri.ToFoundation.Absoluteness
 public import AlphaCentauri.ToFoundation.BinderNotation
 public import AlphaCentauri.ToFoundation.BlockSequence

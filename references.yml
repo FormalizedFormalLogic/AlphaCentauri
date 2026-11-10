@@ -522,6 +522,18 @@ vO99:
     Notes of a course in the 1998-1999 Master Class Program in Mathematical
     Logic of the Mathematical Research Institute, Utrecht
 
+Wil78:
+  type: Article
+  title: Some results and problems on weak systems of arithmetic
+  author: Wilkie, Alex
+  date: 1978
+  page-range: 285-296
+  parent:
+    type: Anthology
+    title: Logic Colloquium '77
+    editor: Macintyre, Angus
+    publisher: North-Holland
+
 Wil85:
   type: Article
   title: Bounded existential induction

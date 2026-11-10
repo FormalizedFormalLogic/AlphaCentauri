@@ -22,7 +22,8 @@ whose instances are false.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 section AxiomReplacement
 
@@ -162,4 +163,5 @@ lemma admitsFalseBlockReplacement_ElementaryArithmetic [V↓[ℒₒᵣ] ⊧* �
 
 end AxiomReplacement
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

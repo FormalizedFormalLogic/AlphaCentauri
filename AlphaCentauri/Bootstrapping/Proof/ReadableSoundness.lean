@@ -19,7 +19,8 @@ in pure logic, nor any derivation in pure logic at all.
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 section ReadableSoundness
 
@@ -447,4 +448,5 @@ end falseBlock
 
 end ReadableSoundness
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

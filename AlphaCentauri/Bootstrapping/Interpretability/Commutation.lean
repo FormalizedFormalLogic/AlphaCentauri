@@ -20,13 +20,13 @@ the substitution of free variables by a vector of free variables.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Negation, shift and arity -/
-
-section negShift
 
 /-- `tbl` lists, for the languages `L₁` and `L₂`, shift-invariant formulas of the right arities. -/
 structure IsTable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq] [L₂.Encodable]
@@ -37,10 +37,6 @@ structure IsTable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L
   rel_shift {k r : V} : L₂.IsRel k r → shift L₁ (tableRel tbl k r) = tableRel tbl k r
   func {k f : V} : L₂.IsFunc k f → IsSemiformula L₁ (k + 1) (tableFunc tbl k f)
   func_shift {k f : V} : L₂.IsFunc k f → shift L₁ (tableFunc tbl k f) = tableFunc tbl k f
-
-section generic
-
-variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 lemma IsSemiformula.relocate {n m i s p : V} (hp : IsSemiformula L (n + 1) p) (hi : i < m)
     (hs : s + n ≤ m) : IsSemiformula L m (relocate L i s p) := by
@@ -53,8 +49,6 @@ lemma shift_relocate {n m i s p : V} (hp : IsSemiformula L (n + 1) p) (hi : i < 
     IsSemitermVec.adjoin (IsSemitermVec.bvarVec hs) (IsSemiterm.bvar.mpr hi)
   rw [relocate_eq_subst hp, relocate_eq_subst hp.shift, shift_substs hp h₁,
     termShiftVec_bvarVec_cons]
-
-end generic
 
 section table
 
@@ -305,8 +299,6 @@ lemma translate_shift {tbl n p : V} (hT : IsTable L₁ L₂ tbl) (hp : IsSemifor
 
 end table
 
-end negShift
-
 section isTable
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
@@ -341,12 +333,6 @@ end isTable
 
 /-! ## Substitution of variables -/
 
-section substVars
-
-section generic
-
-variable {L : Language} [L.Encodable] [L.LORDefinable]
-
 lemma subst_relocate_qVec {a b c j s v w E : V} (hw : IsSemitermVec L a c w)
     (hE : IsSemiformula L (a + 1) E) (hv : IsSemitermVec L (s + a) b v) (hj : j < s)
     (hvj : v.[j] = ^#j) (hvs : ∀ z < a, v.[s + z] = termSubst L (bvarVec s c) w.[z]) :
@@ -368,8 +354,6 @@ lemma subst_relocate_qVec {a b c j s v w E : V} (hw : IsSemitermVec L a c w)
     rw [nth_termSubstVec hσ.isUTerm hi, nth_adjoin_succ, nth_bvarVec _ _ _ hi', termSubst_bvar,
       hvs i hi', nth_termSubstVec hqw.isUTerm hi, nth_qVec_succ hw.isUTerm hi',
       substs_cons_bShift (hw.nth hi')]
-
-end generic
 
 section table
 
@@ -533,15 +517,7 @@ lemma translate_substs1_fvar {tbl : V} (hT : IsTable L₁ L₂ tbl) {p : V} (x :
 
 end table
 
-end substVars
-
 /-! ## Substitution of free variables -/
-
-section substFvars
-
-section generic
-
-variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 lemma fvSubst_relocate {w n i s p : V} (hw : IsSemitermVec L (len w) 0 w)
     (hp : IsSemiformula L (n + 1) p) :
@@ -552,8 +528,6 @@ lemma fvSubst_relocate {w n i s p : V} (hw : IsSemitermVec L (len w) 0 w)
       (IsSemiterm.bvar.mpr (lt_of_le_of_lt le_self_add (lt_add_one _)))
   rw [relocate_eq_subst hp, relocate_eq_subst (hp.fvSubst hw₁), fvSubst_subst hw hv hp,
     termFvSubstVec_bvar_cons]
-
-end generic
 
 section table
 
@@ -660,6 +634,5 @@ lemma translate_fvSubst {tbl w n p : V} (hT : IsTable L₁ L₂ tbl)
 
 end table
 
-end substFvars
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

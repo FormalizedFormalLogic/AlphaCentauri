@@ -18,7 +18,8 @@ when applied to the code of that formula.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -286,4 +287,5 @@ lemma quote_sentence_iff {σ : ArithmeticSentence} (h : σ.complexity ≤ N) :
 
 end ComplexitySatisfied
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

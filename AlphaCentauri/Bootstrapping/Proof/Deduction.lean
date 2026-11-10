@@ -23,7 +23,8 @@ The internal deduction theorem for finite sets of axioms, and the equivalence of
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 section DeductionTheorem
 
@@ -198,8 +199,6 @@ theorem derivable_union_of_replacement {a d : V} (ha : IsFormulaSet L a)
     · exact mem_cup_iff.mpr <| Or.inr hq
     · exact mem_cup_iff.mpr <| Or.inl <| (mem_singleton_iff.mp hx) ▸ hp
 
-section InsertAxiom
-
 /-- The $\Delta_1$-class of the singleton theory `{σ}` consists of the code of `σ` alone. -/
 lemma mem_deltaClass_singleton_iff (σ : Sentence L) (p : V) :
     p ∈ ({σ} : Theory L).Δ₁Class ↔ p = ⌜σ⌝ := by
@@ -283,8 +282,6 @@ theorem provable_union_singleton_iff (σ : Sentence L) {p : V} :
     simp [hq]
   · simp
 
-end InsertAxiom
-
 section Deduction
 
 variable [L.DecidableEq]
@@ -349,4 +346,5 @@ end Derivation
 
 end DeductionTheorem
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

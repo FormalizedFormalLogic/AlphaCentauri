@@ -12,7 +12,8 @@ of quantifiers is a block of quantifiers relativized to the domain.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -127,4 +128,5 @@ lemma IsTable.transT_subst {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] 
 
 end typed
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

@@ -22,7 +22,8 @@ on codes, which the shift rule needs.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1 InternalMeasures
 
@@ -931,4 +932,5 @@ theorem inversion_all {p s t d : V} (ht : IsTerm L t)
 
 end RankedDerivation
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

@@ -157,8 +157,6 @@ private lemma subst_fvar_cons (x : V) (u : Fin n → V) (φ : Bootstrapping.Semi
 
 end quote
 
-section model
-
 omit [V↓[ℒₒᵣ] ⊧* T ∪ S.Con] in
 private lemma exists_model_henkinEq (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
     (hcons : S.Consistent V) (x : V) :
@@ -171,8 +169,6 @@ private lemma henkinEq_cons {n : ℕ} {e : Fin n → (henkinTranslation S T).Mod
     {a : (henkinTranslation S T).Model V} {x : V} (ha : HenkinEq S (a : V) x)
     (h : ∀ i, HenkinEq S (e i : V) (u i)) : ∀ i, HenkinEq S ((a :> e) i : V) ((x :> u) i) :=
   Fin.cases ha h
-
-end model
 
 theorem henkinTranslation_truth {n : ℕ} (β : Semisentence L n)
     {e : Fin n → (henkinTranslation S T).Model V} {u : Fin n → V}

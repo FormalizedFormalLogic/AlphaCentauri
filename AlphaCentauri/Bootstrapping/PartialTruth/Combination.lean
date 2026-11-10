@@ -22,7 +22,8 @@ falls into several of the clauses above.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open Arithmetic (numeral)
 
@@ -1089,4 +1090,5 @@ theorem ReadableSatisfaction.subst_quote_iff (hs : IsAtomLevel k Γ s)
 
 end quote
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

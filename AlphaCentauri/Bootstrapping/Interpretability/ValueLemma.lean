@@ -20,7 +20,8 @@ term for a variable.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -61,8 +62,6 @@ lemma val_bvar_addCast_vec {k l : ℕ} :
   rw [bvarVec_zero_eq_matrixToVec (L := L₁) l k]
   rfl
 
-section guard
-
 lemma varEqualVec_typed (hT : IsTable L₁ L₂ tbl) {k : ℕ} (v : Fin k → Term V L₂) :
     varEqualVec L₁ L₂ tbl k (SemitermVec.val v) = matrixToVec fun i ↦ (varEqualT hT (v i)).val := by
   change varEqualVec L₁ L₂ tbl k (matrixToVec fun i ↦ (v i).val) = _
@@ -100,8 +99,6 @@ lemma guardVec_typed {n k : ℕ} (s : V) (d : Semiformula V L₁ 1) (hd : d.val 
   · intro i
     rw [nth_guardVec _ _ _ _ _ (by simp), matrixToVec_nth, Semiformula.val_and,
       domainAt_typed d hd, relocate_typed]
-
-end guard
 
 section table
 
@@ -151,7 +148,7 @@ end typedShapes
 
 /-! ## Derivability of the defining formulas -/
 
-section valueLemma
+section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -329,13 +326,7 @@ theorem derivable_definesElement (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstra
 
 end value
 
-end valueLemma
-
 /-! ## Substitution of a closed term -/
-
-section termSubst
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 section defs
 
@@ -531,8 +522,9 @@ theorem derivable_termSubstEquiv (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstra
 
 end value
 
-end termSubst
+end
 
 end
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

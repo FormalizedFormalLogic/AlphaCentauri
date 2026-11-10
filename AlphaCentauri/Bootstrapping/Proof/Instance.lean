@@ -17,7 +17,8 @@ consist of instances of `X`.
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 section Instance
 
@@ -166,13 +167,11 @@ lemma insert {x s : V} (hx : Instance L X x) (hs : ∀ y ∈ s, Instance L X y) 
 
 end Instance
 
-namespace CutFreeDerivation
-
 /-- A cut-free derivation over the empty theory whose end-sequent consists of instances of a set
 `X` closed under subformulas and without free variables unfolds one step as in `case_iff`, with
 the end-sequent of each immediate subderivation again consisting of instances of `X`; an axiom of
 the empty theory never occurs. -/
-theorem case_instance {X d : V} (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
+theorem CutFreeDerivation.case_instance {X d : V} (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
     (hshift : ∀ r ∈ X, shift L r = r) (hd : CutFreeDerivation (∅ : Theory L) d)
     (hX : ∀ p ∈ fstIdx d, Instance L X p) :
     IsFormulaSet L (fstIdx d) ∧
@@ -231,8 +230,8 @@ theorem case_instance {X d : V} (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, 
       exact ⟨_, d', rfl, rfl, hd', Instance.of_forall_mem_setShift hshift hd'.isFormulaSet hX⟩⟩
   · exact absurd hT (not_mem_empty_Δ₁Class p)
 
-end CutFreeDerivation
 
 end Instance
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

@@ -15,7 +15,8 @@ the code.
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 section Subformulas
 
@@ -271,4 +272,5 @@ lemma subformulas_subset_of_mem {p q : V} (hp : IsUFormula L p) (hq : q ∈ subf
 
 end Subformulas
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

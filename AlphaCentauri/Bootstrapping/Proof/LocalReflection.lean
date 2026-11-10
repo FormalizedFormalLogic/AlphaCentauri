@@ -26,7 +26,8 @@ proves it. In particular, the internal $\mathsf{I}\Sigma_n$ is consistent.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 section LocalReflection
 
@@ -120,4 +121,5 @@ lemma consistent_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hn : n ≤ k)
 
 end LocalReflection
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

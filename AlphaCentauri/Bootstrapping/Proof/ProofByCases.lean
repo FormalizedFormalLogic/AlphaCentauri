@@ -20,7 +20,8 @@ A formula code provable both from `T + φ` and from `T + ψ + ¬φ` is provable 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 section ProofByCases
 
@@ -64,4 +65,5 @@ end union_or
 
 end ProofByCases
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

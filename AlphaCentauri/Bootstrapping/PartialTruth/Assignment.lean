@@ -22,7 +22,9 @@ terms and `fvUnshift`, which lowers the indices of free variables and undoes `sh
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+variable {Γ : SigmaPiDelta} {m : ℕ}
 
 open Arithmetic (numeral numeralGraph numeral_uterm numeral_semiterm numeral_substs qqNLT qqLT)
 
@@ -62,10 +64,6 @@ noncomputable def termFvAssignGraph : 𝚺ᴬ₁.Semisentence 3 :=
 noncomputable def termFvAssignVecGraph : 𝚺ᴬ₁.Semisentence 4 :=
   (blueprint.resultVec ℒₒᵣ).rew <| Rew.subst ![#0, #1, #3, #2]
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 instance termFvAssign.defined :
     𝚺ᴬ₁-Function₂ (termFvAssign : V → V → V) via termFvAssignGraph := .mk fun v ↦ by
   simpa [termFvAssignGraph, termFvAssign, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
@@ -87,8 +85,6 @@ instance termFvAssignVec.definable : 𝚺ᴬ₁-Function₃ (termFvAssignVec : V
 
 instance termFvAssignVec.definable' : Γᴬ_[m + 1]-Function₃ (termFvAssignVec : V → V → V → V) :=
   termFvAssignVec.definable.of_sigmaOne
-
-end
 
 section
 
@@ -302,10 +298,6 @@ noncomputable def fvAssign (f p : V) : V := FvAssign.construction.result ℒₒ�
 
 noncomputable def fvAssignGraph : 𝚺ᴬ₁.Semisentence 3 := FvAssign.blueprint.result ℒₒᵣ
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 instance fvAssign.defined : 𝚺ᴬ₁-Function₂ (fvAssign : V → V → V) via fvAssignGraph :=
   FvAssign.construction.result_defined
 
@@ -314,8 +306,6 @@ instance fvAssign.definable : 𝚺ᴬ₁-Function₂ (fvAssign : V → V → V) 
 
 instance fvAssign.definable' : Γᴬ_[m + 1]-Function₂ (fvAssign : V → V → V) :=
   fvAssign.definable.of_sigmaOne
-
-end
 
 section
 
@@ -746,8 +736,6 @@ end fvSubst
 
 /-! ## Unshifting free variables -/
 
-section fvUnshift
-
 namespace TermFvUnshift
 
 def blueprint : Language.TermRec.Blueprint 0 where
@@ -1062,6 +1050,5 @@ lemma IsPrenexHierarchy.fvUnshift {Γ : Polarity} {s : ℕ} {p : V} (hp : IsUFor
   exact isPrenexHierarchy_iff_exists_qqToPrenex.mpr
     ⟨_, fvUnshift_qqToPrenex hθ', hθ.fvUnshift hθ'⟩
 
-end fvUnshift
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

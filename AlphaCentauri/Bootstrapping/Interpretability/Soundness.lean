@@ -30,7 +30,8 @@ along a translation, and so is consistency.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -346,7 +347,7 @@ end formSubst
 
 /-! ## The existential rule -/
 
-section existsRule
+section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -530,15 +531,7 @@ lemma translated_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
 
 end rules
 
-end existsRule
-
 /-! ## Translated derivability of derivable sets -/
-
-section soundness
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-open PeanoMinus ISigma0 ISigma1
 
 section rules
 
@@ -599,15 +592,7 @@ theorem TranslatedDerivable.of_derivable
 
 end rules
 
-end soundness
-
 /-! ## Corollaries -/
-
-section corollaries
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-open PeanoMinus ISigma0 ISigma1
 
 section translation
 
@@ -685,6 +670,7 @@ theorem provable_translate_of_finite (hS : ∀ p ∈ S.Δ₁Class (V := V), Boot
 
 end finite
 
-end corollaries
+end
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

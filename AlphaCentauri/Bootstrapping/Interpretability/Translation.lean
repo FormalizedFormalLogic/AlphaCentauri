@@ -27,13 +27,13 @@ such a table, `varEqual` sends the code of a term to the code of its translation
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+variable {Γ : SigmaPiDelta} {m : ℕ}
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Tables of operators -/
-
-section table
 
 /-- The code of the domain formula listed in the table `tbl`. -/
 noncomputable def tableDomain (tbl : V) : V := tbl.[0]
@@ -51,8 +51,6 @@ def tableRelGraph : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
 
 def tableFuncGraph : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
   “y tbl k f. ∃ fs, !nthDef fs tbl 2 ∧ ∃ i, !pairDef i k f ∧ !nthDef y fs i”
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
 
 instance tableDomain.defined : 𝚺ᴬ₁-Function₁ (tableDomain : V → V) via tableDomainGraph :=
   .mk fun v ↦ by simp [tableDomainGraph, tableDomain]
@@ -80,8 +78,6 @@ instance tableFunc.definable : 𝚺ᴬ₁-Function₃ (tableFunc : V → V → V
 
 instance tableFunc.definable' : Γᴬ_[m + 1]-Function₃ (tableFunc : V → V → V → V) :=
   tableFunc.definable.of_sigmaOne
-
-end table
 
 /-! ## Relocated formulas -/
 
@@ -113,8 +109,6 @@ noncomputable def funcTailGraph : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
     ∃ w, !adjoinDef w b bs ∧ !(substsGraph L) y w g”
 
 variable {L}
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
 
 instance relocate.defined : 𝚺ᴬ₁-Function₃[V] relocate L via relocateGraph L :=
   .mk fun v ↦ by simp [relocateGraph, relocate]
@@ -196,10 +190,6 @@ variable {L}
       concat (guardVec L tbl s w k) (domainAt L tbl k ^⋏ relocate L k s w.[k]) := by
   simp [guardVec, guardVec.construction]
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 instance guardVec.defined : 𝚺ᴬ₁-Function₄[V] guardVec L via guardVecGraph L := .mk fun v ↦ by
   simp [(guardVec.construction L).result_defined_iff, guardVecGraph]; rfl
 
@@ -207,8 +197,6 @@ instance guardVec.definable : 𝚺ᴬ₁-Function₄[V] guardVec L := guardVec.d
 
 instance guardVec.definable' : Γᴬ_[m + 1]-Function₄[V] guardVec L :=
   guardVec.definable.of_sigmaOne
-
-end
 
 @[simp] lemma len_guardVec (tbl s w k : V) : len (guardVec L tbl s w k) = k := by
   induction k using ISigma1.sigma1_succ_induction
@@ -285,10 +273,6 @@ noncomputable def varEqualVecGraph : 𝚺ᴬ₁.Semisentence 4 :=
 
 variable {L₁ L₂}
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 instance varEqual.defined : 𝚺ᴬ₁-Function₂[V] varEqual L₁ L₂ via varEqualGraph L₁ L₂ :=
   .mk fun v ↦ by
     simpa [varEqualGraph, varEqual, Matrix.constant_eq_singleton, Matrix.comp_vecCons'] using
@@ -309,8 +293,6 @@ instance varEqualVec.definable : 𝚺ᴬ₁-Function₃[V] varEqualVec L₁ L₂
 
 instance varEqualVec.definable' : Γᴬ_[m + 1]-Function₃[V] varEqualVec L₁ L₂ :=
   varEqualVec.definable.of_sigmaOne
-
-end
 
 @[simp] lemma varEqual_bvar (tbl z : V) :
     varEqual L₁ L₂ tbl ^#z =
@@ -362,10 +344,6 @@ noncomputable def translateRelGraph : 𝚺ᴬ₁.Semisentence 5 := .mkSigma
 
 variable {L₁ L₂}
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 instance translateRel.defined :
     𝚺ᴬ₁-Function₄[V] translateRel L₁ L₂ via translateRelGraph L₁ L₂ :=
   .mk fun v ↦ by simp [translateRelGraph, translateRel]
@@ -375,8 +353,6 @@ instance translateRel.definable : 𝚺ᴬ₁-Function₄[V] translateRel L₁ L�
 
 instance translateRel.definable' : Γᴬ_[m + 1]-Function₄[V] translateRel L₁ L₂ :=
   translateRel.definable.of_sigmaOne
-
-end
 
 namespace Translate
 
@@ -429,10 +405,6 @@ noncomputable def translateGraph : 𝚺ᴬ₁.Semisentence 3 := (blueprint L₁ 
 
 variable {L₁ L₂}
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 instance translate.defined : 𝚺ᴬ₁-Function₂[V] translate L₁ L₂ via translateGraph L₁ L₂ :=
   (construction L₁ L₂).result_defined
 
@@ -440,8 +412,6 @@ instance translate.definable : 𝚺ᴬ₁-Function₂[V] translate L₁ L₂ := 
 
 instance translate.definable' : Γᴬ_[m + 1]-Function₂[V] translate L₁ L₂ :=
   translate.definable.of_sigmaOne
-
-end
 
 @[simp] lemma translate_rel {tbl k R v : V} (hR : L₂.IsRel k R) (hv : IsUTermVec L₂ k v) :
     translate L₁ L₂ tbl (^rel k R v) = translateRel L₁ L₂ tbl k R v := by
@@ -648,8 +618,6 @@ end IsTableOf
 
 /-! ## Tables of translations of arithmetic -/
 
-section arithmeticTable
-
 /-- The entries of `arithmeticTable π` for relation symbols, indexed by the codes `⟪k, r⟫`. -/
 noncomputable def arithmeticRelationTable (π : DirectTranslation T ℒₒᵣ) : Fin 8 → V
   | 6 => ⌜(π.rel Language.ORing.Rel.eq).sentence⌝
@@ -694,6 +662,5 @@ theorem isTableOf_arithmeticTable (π : DirectTranslation T ℒₒᵣ) :
     · exact nth_matrixToVec_pair (V := V) (arithmeticFunctionTable π) 2 0 (by decide)
     · exact nth_matrixToVec_pair (V := V) (arithmeticFunctionTable π) 2 1 (by decide)
 
-end arithmeticTable
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

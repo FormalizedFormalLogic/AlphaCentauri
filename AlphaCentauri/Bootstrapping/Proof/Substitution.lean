@@ -17,7 +17,8 @@ whose eigenvariable is an arbitrary fresh free variable.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1 InternalMeasures
 
@@ -339,8 +340,6 @@ lemma fvSubstImage_fvSubstImage_eq_self (hw : IsSemitermVec L (len w) 0 w)
 
 end shiftComp
 
-section fvFree
-
 /-- A coded term fixed by the shift of free variables is fixed by every free-variable
 substitution. -/
 lemma termFvSubst_eq_self_of_termShift {w n t : V} (ht : IsSemiterm L n t)
@@ -401,10 +400,6 @@ lemma fvSubst_eq_self_of_shift {w n p : V} (hp : IsSemiformula L n p) (h : shift
   · intro n p hp ih h
     rw [shift_exs hp.isUFormula] at h
     rw [fvSubst_exs hp.isUFormula, ih (by simpa using h)]
-
-end fvFree
-
-section sequentRules
 
 variable (L) in
 /-- A predicate on sequents is closed under the rules of the one-sided calculus other than the
@@ -485,8 +480,6 @@ lemma image_wk {s' : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L
     exact fvSubst_mem_fvSubstImage (hsub hq)) h
 
 end SequentRules
-
-end sequentRules
 
 section rewrite
 
@@ -656,8 +649,6 @@ theorem Derivable.rewrite (hT : ∀ p ∈ T.Δ₁Class (V := V), Bootstrapping.s
   exact (rewrite_aux hT d w hd hw).toDerivable
 
 
-section freshVec
-
 lemma freshVec_exists_aux (u : V) : ∀ j, ∀ m ≤ u, j + m = u →
     ∃ w : V, len w = j + 1 ∧ (∀ x < j, w.[x] = ^&(m + x + 1)) ∧ w.[j] = ^&0 := by
   intro j
@@ -736,8 +727,6 @@ instance freshVecInverse.definable : 𝚺ᴬ₁-Function₁ (freshVecInverse : V
   unfold freshVecInverse
   definability
 
-end freshVec
-
 /-- The internal `∀`-introduction rule with an arbitrary free variable as eigenvariable: `w`
 carries the sequent to its shift and sends `^&u` to `^&0`. -/
 lemma Derivable.all_of_free (hT : ∀ p ∈ T.Δ₁Class (V := V), Bootstrapping.shift L p = p)
@@ -793,4 +782,5 @@ lemma Derivable.neg_exs_of_fresh (hT : ∀ p ∈ T.Δ₁Class (V := V), Bootstra
       (IsFormulaSet.insert_iff.mp h.isFormulaSet).2 hsu)
     (fvSubst_eq_shift (by simp) (fun _ hx ↦ nth_freshVec_of_lt hx) hp hpu) hp h
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

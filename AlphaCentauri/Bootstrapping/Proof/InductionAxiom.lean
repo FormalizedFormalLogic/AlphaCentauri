@@ -28,7 +28,8 @@ quantifiers over `∀y ¬B`, where `B` is the matrix above; for `n ≤ k`, this 
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1
 open Arithmetic (numeral numeral_semiterm)
@@ -60,8 +61,6 @@ induction variable and whose bound variables `1, …, m` are the parameters. -/
 def IsInductionMatrix (n : ℕ) (m Z : V) : Prop :=
   IsSemiformula ℒₒᵣ (m + 1) Z ∧ shift ℒₒᵣ Z = Z ∧ IsPrenexHierarchy 𝚺 n Z
 
-section definability
-
 instance prenexInductionAtom.definable :
     𝚺ᴬ₁-Function₃ (prenexInductionAtom : V → V → V → V) := by
   unfold prenexInductionAtom
@@ -80,8 +79,6 @@ instance IsInductionMatrix.definable (n : ℕ) :
     𝚫ᴬ₁-Relation (IsInductionMatrix n : V → V → Prop) := by
   unfold IsInductionMatrix
   definability
-
-end definability
 
 variable {n : ℕ} {m Z : V}
 
@@ -552,4 +549,5 @@ theorem IsInductionMatrix.isFalseBlock_neg_prenexInductionAxiom [V↓[ℒₒᵣ]
 
 end counterexample
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

@@ -16,7 +16,8 @@ separate least fixpoint so that cut-freeness remains a $\Delta_1$ property in ev
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1
 
@@ -521,4 +522,5 @@ lemma toDerivable {s : V} : CutFreeDerivable T s → Derivable T s := by
 
 end CutFreeDerivable
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

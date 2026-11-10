@@ -19,7 +19,8 @@ model of $\mathsf{I}\Sigma_1$. Consistency transfers along interpretability.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -212,8 +213,6 @@ lemma IsInterpretationTable.caseTable_right (h₂ : IsInterpretationTable S U tb
 
 end caseSplit
 
-section arithmetic
-
 /-- Every theory of arithmetic has, in every model of $\mathsf{I}\Sigma_1$, a table of a
 translation of arithmetic along which every provable formula translates to a provable formula.
 - [Vis90, §5.5] -/
@@ -281,8 +280,6 @@ theorem Interpretable.union_or {T W : ArithmeticTheory} [T.Δ₁] [W.Δ₁] {φ 
           preserve_eq := provable_union_or c₁.preserve_eq c₂.preserve_eq
           translate_axiom hp hp' :=
             provable_union_or (c₁.translate_axiom hp hp') (c₂.translate_axiom hp hp') }
-
-end arithmetic
 
 
 /-! ## The sentence of interpretability -/
@@ -366,4 +363,5 @@ end sentence
 
 end
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

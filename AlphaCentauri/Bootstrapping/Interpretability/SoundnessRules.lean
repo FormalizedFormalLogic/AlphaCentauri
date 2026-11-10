@@ -23,7 +23,8 @@ formula is derivable in `S`, and this property is preserved by each rule of the 
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -430,4 +431,5 @@ lemma translated_all (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
 
 end rules
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

@@ -20,7 +20,8 @@ quantifiers are replaced by free variables, then the block over `p` follows from
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 section UniversalClosure
 
@@ -128,4 +129,5 @@ theorem Derivable.neg_qqAlls_qqAlls {m p q : V} (hp : IsSemiformula L m p)
 end UniversalClosure
 
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

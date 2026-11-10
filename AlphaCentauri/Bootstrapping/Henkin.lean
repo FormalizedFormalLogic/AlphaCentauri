@@ -40,7 +40,8 @@ free variable.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open Bounding
 
@@ -156,7 +157,7 @@ private lemma not_derivable_insert_neg_henkinFormula (hS : ∀ p ∈ S.Δ₁Clas
 
 end derivable
 
-section sequence
+section
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] (S : Theory L) [S.Δ₁]
 
@@ -521,12 +522,6 @@ theorem HenkinSet.exists_substs1 {α : V} (hα : IsSemiformula L 1 α) (h : Henk
 
 end theorems
 
-end sequence
-
-section termModel
-
-variable {L : Language} [L.Encodable] [L.LORDefinable] (S : Theory L) [S.Δ₁]
-
 section closure
 
 theorem henkinSet_of_tprovable {φ : Formula V L} (h : S.internalize V ⊢ φ) :
@@ -765,6 +760,7 @@ omit [L.Eq] in
 
 end operators
 
-end termModel
+end
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

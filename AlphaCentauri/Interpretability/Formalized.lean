@@ -85,18 +85,14 @@ lemma quote_imp_sentence (φ ψ : ArithmeticSentence) :
   rw [Semiformula.imp_eq, Sentence.quote_or, quote_neg_sentence]
   rfl
 
-lemma provable_union_singleton_of_mem [𝗘𝗤 ℒₒᵣ ⪯ T] {φ : ArithmeticSentence} {p : V}
-    (hp : p ∈ T.Δ₁Class) (hf : IsFormula ℒₒᵣ p) : Provable (T ∪ {φ}) p :=
-  Derivable.toProvable <| Derivable.by_axm (by simp [hf]) p (by simp)
-    (Theory.Δ₁Class.mem_union.mpr (Or.inl hp))
-
 lemma interpretable_of_provable_imp [𝗘𝗤 ℒₒᵣ ⪯ T] {φ ψ : ArithmeticSentence}
     (h : Provable T (⌜φ 🡒 ψ⌝ : V)) : Interpretable V (T ∪ {φ}) (T ∪ {ψ}) := by
   obtain ⟨tbl, hT, htr⟩ := exists_isTranslationTable_provable_translate V (T ∪ {φ})
   use tbl
   refine { toIsTranslationTable := hT, translate_axiom := fun {p} hp hf ↦ htr p ?_ }
   rcases Theory.Δ₁Class.mem_union.mp hp with hp | hp
-  · exact provable_union_singleton_of_mem hp hf
+  · exact Derivable.toProvable <| Derivable.by_axm (by simp [hf]) p (by simp)
+      (Theory.Δ₁Class.mem_union.mpr (Or.inl hp))
   · rw [(Derivation.mem_deltaClass_singleton_iff ψ p).mp hp,
       Derivation.provable_union_singleton_iff, ← quote_imp_sentence]
     exact h

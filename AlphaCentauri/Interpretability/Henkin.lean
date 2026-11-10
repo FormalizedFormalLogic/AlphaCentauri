@@ -56,11 +56,6 @@ lemma consistent_of_models_con {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] �
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔]
   (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (hcons : S.Consistent V)
 
-omit [Theory.Δ₁.Sentential S] [𝗘𝗤 L ⪯ S] [𝗣𝗔 ⪯ T] in
-/-- The domain of the Henkin translation is nonempty in every model of $\mathsf{PA}$. -/
-lemma henkinDomain_nonempty : ∃ x : V, (henkinDomain S).val ![x] :=
-  ⟨0, (henkinDomain_val S 0).mpr fun _ h ↦ absurd h (by simp)⟩
-
 omit [Theory.Δ₁.Sentential S] in
 include hS hcons in
 /-- Every function symbol is interpreted by a total function on the domain of the Henkin
@@ -107,7 +102,8 @@ noncomputable def henkinTranslation : DirectTranslation (T ∪ S.Con) L where
   rel := henkinRel S
   func := henkinFunc S
   domain_nonempty := provable_of_models_henkin S T _ fun _ _ _ _ _ ↦
-    (DirectTranslation.models_domainNonempty_iff _).mpr (henkinDomain_nonempty S)
+    (DirectTranslation.models_domainNonempty_iff _).mpr
+      ⟨0, (henkinDomain_val S 0).mpr fun _ h ↦ absurd h (by simp)⟩
   func_defined f := provable_of_models_henkin S T _ fun _ _ _ hS hcons ↦
     (DirectTranslation.models_funcDefined_iff _ _).mpr fun e _ ↦
       henkinFunc_existsUnique S hS hcons f e

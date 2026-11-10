@@ -38,9 +38,6 @@ noncomputable def indBodyVal (k : V) : V :=
     (imp ℒₒᵣ (qqAll (imp ℒₒᵣ k (subst ℒₒᵣ ↑(substCode (‘#0 + 1’ : ArithmeticSemiterm ℕ 1)) k)))
       (qqAll k))
 
-lemma le_indBodyVal (k : V) : k ≤ indBodyVal k :=
-  (le_qqAll _).trans (lt_or_right _ _ |>.trans (lt_or_right _ _)).le
-
 instance indBodyVal.defined : 𝚺ᴬ₁-Function₁ (indBodyVal : V → V) via indBodyValGraph :=
   .mk fun v ↦ by simp [indBodyValGraph, numeral_eq_natCast, indBodyVal]
 

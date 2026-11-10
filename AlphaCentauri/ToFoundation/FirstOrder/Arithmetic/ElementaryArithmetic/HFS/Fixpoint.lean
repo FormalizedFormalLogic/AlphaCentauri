@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.HFS.PRF
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.HFS.PRF
 public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 
 /-!

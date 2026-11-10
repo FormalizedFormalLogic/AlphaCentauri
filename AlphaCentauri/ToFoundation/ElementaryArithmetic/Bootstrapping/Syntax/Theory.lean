@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.ElementaryArithmetic.LocallyDelta0
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.LocallyDelta0
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 
 /-!

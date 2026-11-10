@@ -574,6 +574,53 @@ lemma modusPonensCode_specializeCode_le_exp_exp {n e d S t a b : V} (hn : 2 ≤ 
     (le_trans hd (exp_exp_le_of_le le_self_add))
   exact le_trans this (exp_exp_le_of_le (le_of_eq (by norm_num [add_assoc])))
 
+/-- If `{∀ S}` and `{A 1}` are derivable and the instance of `S` at the numeral of each `y > 0` is
+`A y → A (y + 1)`, then every `A (y + 1)` is internally provable. -/
+lemma provable_succ_of_derivationOf_all {S e d : V} {A : V → V} (hA : LocallyDelta0Function₁ A)
+    (hS : IsSemiformula ℒₒᵣ 1 S) (hAf : ∀ y, IsFormula ℒₒᵣ (A y))
+    (he : DerivationOf T e {^∀ S}) (hd : DerivationOf T d {A 1})
+    (hstep : ∀ y, 0 < y → substs1 ℒₒᵣ (numeral y) S = imp ℒₒᵣ (A y) (A (y + 1))) (y : V) :
+    Provable T (A (y + 1)) := by
+  set c : V → V := fun y ↦
+    max (specializeSize ℒₒᵣ S (numeral y)) (modusPonensSize ℒₒᵣ (A y) (A (y + 1)))
+  have hc : LocallyDelta0Function₁ c := max_specializeSize_modusPonensSize_locallyDelta0 hA
+  set M := d + e + 2
+  set B : V → V := fun y ↦ Exp.exp (Exp.exp (42 * y + (prefixMax c y + M)))
+  have hB : LocallyDelta0Function₁ B := LocallyDelta0Function.exp_exp_mul_add 42
+    (LocallyDelta0Function.var 0)
+    (LocallyDelta0Function.add.comp₂ (prefixMax_locallyDelta0 hc) (LocallyDelta0Function.const M))
+  have hP : LocallyDelta0Pred fun y ↦ ∃ d ≤ B (y + 1), DerivationOf T d {A (y + 1)} := by
+    have := LocallyDelta0.bexs_le_function
+      (hB.comp₁ (LocallyDelta0Function.add_one (LocallyDelta0Function.var (V := V) (0 : Fin 1))))
+      (P := fun u : Fin 2 → V ↦ fstIdx (u 0) = Exp.exp (A (u 1 + 1)) ∧ Derivation T (u 0))
+      ((LocallyDelta0.eq (fstIdx_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
+        (LocallyDelta0Function.exp.comp₁
+          (hA.comp₁ (LocallyDelta0Function.add_one (LocallyDelta0Function.var 1))))).and
+        (derivation_locallyDelta0.pred_comp (LocallyDelta0Function.var 0)))
+    exact this.of_iff fun v ↦ by simp [DerivationOf, singleton_def]
+  have hM : ∀ x, M ≤ 42 * x + (prefixMax c x + M) := fun x ↦ le_trans le_add_self le_add_self
+  have key : ∀ y, ∃ d ≤ B (y + 1), DerivationOf T d {A (y + 1)} := by
+    apply LocallyDelta0Pred.succ_induction hP
+    · use d
+      exact ⟨le_exp_exp (le_trans (le_trans le_self_add le_self_add) (hM _)), by simpa using hd⟩
+    · rintro y ⟨d', hd'B, hd'⟩
+      have hspec := derivationOf_specializeCode hS (numeral_semiterm 0 (y + 1)) he
+      rw [hstep (y + 1) (by simp)] at hspec
+      use modusPonensCode ℒₒᵣ (specializeCode ℒₒᵣ e S (numeral (y + 1))) d'
+        (A (y + 1)) (A (y + 1 + 1))
+      refine ⟨le_trans (modusPonensCode_specializeCode_le_exp_exp
+        (le_trans (by simp [M]) (hM (y + 1)))
+        (le_trans (le_prefixMax hc le_rfl) (le_trans le_self_add le_add_self))
+        (le_exp_exp (le_trans (le_trans le_add_self le_self_add) (hM (y + 1)))) hd'B)
+        (exp_exp_le_of_le ?_), derivationOf_modusPonensCode (hAf _) (hAf _) hspec hd'⟩
+      have h₁ := prefixMax_monotone hc (le_self_add (a := y + 1) (b := 1))
+      calc 42 * (y + 1) + (prefixMax c (y + 1) + M) + 42
+          = 42 * (y + 1) + 42 + (prefixMax c (y + 1) + M) := by grind
+        _ ≤ 42 * (y + 1) + 42 + (prefixMax c (y + 1 + 1) + M) := by gcongr
+        _ = 42 * (y + 1 + 1) + (prefixMax c (y + 1 + 1) + M) := by grind
+  obtain ⟨d', -, hd'⟩ := key y
+  exact ⟨d', hd'⟩
+
 end numerals
 
 end FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping

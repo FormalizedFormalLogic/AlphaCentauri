@@ -251,4 +251,82 @@ end IsTable
 
 end typed
 
+/-! ## Relativized blocks of quantifiers -/
+
+section relAllItrProof
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
+
+lemma shift_iterate_relAllItr {n : ℕ} {d : Semiformula V L 1} (hd : d.shift = d) (j : ℕ) :
+    ∀ (k : ℕ) (φ : Semiformula V L (n + k)),
+      Semiformula.shift^[j] (relAllItr d k φ) = relAllItr d k (Semiformula.shift^[j] φ)
+  | 0, φ => rfl
+  | k + 1, φ => by
+    have hd' : Semiformula.shift^[j] d = d := Function.iterate_fixed hd j
+    rw [relAllItr_succ, relAllItr_succ, shift_iterate_relAllItr hd j k]
+    simp [Semiformula.shift_iterate_subst, hd']
+
+/-- Specialisation of a relativized block of `k` universal quantifiers. -/
+lemma relAllItr_specialize (d : Semiformula V L 1) :
+    ∀ {k : ℕ} (φ : Semiformula V L (0 + k)) (w : SemitermVec V L (0 + k) 0),
+      T.internalize V ⊢ relAllItr d k φ 🡒 Matrix.conj (fun i ↦ d.subst ![w i]) 🡒 φ.subst w
+  | 0, φ, w => by
+    rw [Semiformula.subst_nil_eq_self]
+    simp only [relAllItr_zero]
+    cl_prover
+  | k + 1, φ, w => by
+    have h₁ := relAllItr_specialize d (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ)) (Matrix.vecTail w)
+    rw [Semiformula.substs_all] at h₁
+    have h₂ := TProof.all_imp_subst (T := T)
+      ((d.subst ![Semiterm.bvar 0] 🡒 φ).subst (SemitermVec.q (Matrix.vecTail w))) (w 0)
+    rw [Semiformula.substs_q_substs_single,
+      show (w 0 :> Matrix.vecTail w) = w from Matrix.cons_head_tail w] at h₂
+    simp only [Semiformula.substs_imp, Semiformula.substs_substs, Matrix.vecMap_cons',
+      Matrix.head_cons, Matrix.vecMap_nil, Semiterm.substs_bvar] at h₁ h₂
+    rw [relAllItr_succ]
+    simp only [Matrix.conj]
+    cl_prover [h₁, h₂]
+
+omit [T.Δ₁] in
+lemma free_subst_q_fvar' {k : ℕ} (ψ : Semiformula V L (k + 1)) :
+    (ψ.subst (SemitermVec.q fun i : Fin k ↦ Semiterm.fvar (i : V))).free =
+      ψ.shift.subst fun i ↦ Semiterm.fvar (i : V) := by
+  rw [Semiformula.free, Semiformula.shift_substs, Semiformula.substs_substs]
+  congr 1
+  funext i
+  cases i using Fin.cases with
+  | zero => simp
+  | succ i => simp
+
+/-- Generalisation of a relativized block of `k` universal quantifiers over `k` fresh free
+variables under a hypothesis. -/
+lemma relAllItr_generalize_imp {d : Semiformula V L 1} (hd : d.shift = d) :
+    ∀ {k : ℕ} {C : Formula V L} {φ : Semiformula V L (0 + k)},
+      T.internalize V ⊢ Semiformula.shift^[k] C 🡒
+        Matrix.conj (fun i : Fin (0 + k) ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)]) 🡒
+          (Semiformula.shift^[k] φ).subst (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) →
+      T.internalize V ⊢ C 🡒 relAllItr d k φ
+  | 0, C, φ, h => by
+    rw [Semiformula.subst_nil_eq_self] at h
+    simp only [Function.iterate_zero, id_eq, relAllItr_zero, Matrix.conj] at h ⊢
+    cl_prover [h]
+  | k + 1, C, φ, h => by
+    rw [relAllItr_succ]
+    apply relAllItr_generalize_imp hd
+    rw [Semiformula.shift_iterate_all, Semiformula.substs_all]
+    apply CC_of_CK
+    apply TProof.generalize_imp
+    rw [free_subst_q_fvar' (k := 0 + k), ← Function.iterate_succ_apply' Semiformula.shift]
+    simp only [Semiformula.shift_and, Semiformula.shift_conj, Semiformula.shift_substs, hd,
+      Semiformula.shift_iterate_imp, Semiformula.substs_imp, Semiformula.shift_iterate_subst,
+      Function.iterate_fixed hd, Semiformula.substs_substs, Matrix.vecMap_cons', Matrix.vecMap_nil,
+      Semiterm.shift_fvar, Semiterm.shift_iterate_bvar, Matrix.head_cons, Semiterm.substs_bvar,
+      ← Function.iterate_succ_apply' Semiformula.shift] at h ⊢
+    simp only [Matrix.conj] at h
+    simp only [Nat.succ_eq_add_one, Function.iterate_succ, Function.comp_apply, Nat.reduceAdd,
+      Fin.coe_ofNat_eq_mod, zero_add, Nat.zero_mod, Nat.cast_zero] at h ⊢
+    cl_prover [h]
+
+end relAllItrProof
+
 end FFL.FirstOrder.Arithmetic.Bootstrapping

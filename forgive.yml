@@ -28,9 +28,6 @@ accept:
 
 declaration:
   # The unproved statements themselves.
-  FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot

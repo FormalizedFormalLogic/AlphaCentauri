@@ -96,7 +96,11 @@ lemma tprovable_relativizedImp_equal_iff {k : ℕ} (d : Semiformula V L 1)
       d.subst ![Semiterm.bvar (i.addCast 0)] ⋏
         (Semiformula.equal (Semiterm.bvar 0) (u i).bShift).subst ![Semiterm.bvar (i.addCast 0)]) 🡒
       X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) (fun j ↦ u (Fin.cast (zero_add k) j))
-  simp [Semiformula.substs_substs, Semiterm.bShift_substs_succ, Semiterm.substs_substs] at h₁
+  simp only [Semiformula.substs_equal, Semiterm.substs_bvar, Matrix.cons_val_fin_one,
+    Semiterm.bShift_substs_succ, Matrix.tail_cons, Semiformula.substs_imp, Semiformula.substs_conj,
+    Semiformula.substs_and, Semiformula.substs_substs, Matrix.vecMap_cons', Matrix.head_cons,
+    Matrix.vecMap_nil, Semiterm.substs_substs, Semiterm.bShift_substs_zero,
+    Semiterm.substs_vecMap_bvar] at h₁
   have hc : T.internalize V ⊢ Matrix.conj fun i ↦ d.subst ![u i] ⋏ Semiformula.equal (u i) (u i) :=
     tprovable_conj T fun i ↦ K_intro (hd (u i)) (tprovable_equal_refl T (u i))
   have h₂ : T.internalize V ⊢ X.subst u 🡒 relativizedImp d
@@ -104,8 +108,14 @@ lemma tprovable_relativizedImp_equal_iff {k : ℕ} (d : Semiformula V L 1)
       (X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) := by
     unfold relativizedImp
     apply TProof.allItr_generalize_imp
-    simp [Semiformula.substs_substs, Semiterm.bShift_substs_succ,
-      Semiterm.shift_iterate_subst_nil, Semiterm.subst_nil_subst]
+    simp only [Semiformula.shift_iterate_subst, Semiformula.substs_equal, Semiterm.substs_bvar,
+      Matrix.cons_val_fin_one, Semiterm.bShift_substs_succ, Matrix.tail_cons,
+      Semiformula.shift_iterate_imp, Semiformula.shift_iterate_conj, Semiformula.shift_iterate_and,
+      Matrix.vecMap_cons', Matrix.head_cons, Semiterm.shift_iterate_bvar, Matrix.vecMap_nil,
+      Semiformula.shift_iterate_equal, Semiterm.shift_iterate_subst_nil,
+      Semiterm.shift_iterate_vecMap_bvar, Semiformula.substs_imp, Semiformula.substs_conj,
+      Semiformula.substs_and, Semiformula.substs_substs, Fin.addCast_val, Semiterm.subst_nil_subst,
+      Semiterm.bShift_substs_zero, Semiterm.substs_vecMap_bvar]
     have h₃ := hX k (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) (fun i ↦ Semiterm.shift^[k] (u i))
     have h₄ := matrixConj_imp_matrixConj (𝓢 := T.internalize V) (φ := ⊤)
       (v := fun i : Fin k ↦ (Semiformula.shift^[k] d).subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
@@ -115,7 +125,8 @@ lemma tprovable_relativizedImp_equal_iff {k : ℕ} (d : Semiformula V L 1)
       fun i ↦ by cl_prover
     cl_prover [h₃, h₄]
   unfold relativizedImp at h₂ ⊢
-  simp [Semiterm.bShift_substs_succ] at h₂ ⊢
+  simp only [Semiformula.substs_equal, Semiterm.substs_bvar, Matrix.cons_val_fin_one,
+    Semiterm.bShift_substs_succ, Matrix.tail_cons] at h₂ ⊢
   cl_prover [h₁, h₂, hc]
 
 end relativizedImp

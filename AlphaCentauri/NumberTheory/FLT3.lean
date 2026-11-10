@@ -73,7 +73,7 @@ def powerAddPowerNeSquare (n : ℕ) : ArithmeticSentence :=
 for some exponent $n \ge 3$. An open problem.
 - [Smi92b, Question 5.1] -/
 def ExistsNotProvableFermatLastTheoremCaseOneIOpen : Prop :=
-  ∃ n : ℕ, 3 ≤ n ∧ ¬𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseOne n
+  ∃ n : ℕ, 3 ≤ n ∧ 𝗜𝗢𝗽𝗲𝗻 ⊬ fermatLastTheoremCaseOne n
 
 /-- $\mathsf{IOpen} + \mathrm{Bez}$ proves Case II of Fermat's Last Theorem for some exponent
 $n \ge 3$. An open problem.

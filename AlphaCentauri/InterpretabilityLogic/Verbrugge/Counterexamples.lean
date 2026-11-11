@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
 
 /-!
-# Countermodels for the incompleteness of $\mathbf{IL}^-$ extensions
+# Countermodels for the incompleteness of $\mathbf{IL}^-$ extensions for Veltman models
 
 Generalised Veltman models satisfying all the frame conditions of $\mathbf{IL}^-$ extensions
 by $\mathbf{J1}$, $\mathbf{J2}$, $\mathbf{J4}$, $\mathbf{J4}^+$, $\mathbf{J5}$ that are

@@ -101,13 +101,13 @@ theorem ILMinusJ4.iff_valid_finite_verbrugge :
   ILMinusJ4.semantics_TFAE.out 1 3
 
 
-/-! ## Incompleteness for Verbrugge models -/
+/-! ## Incompleteness for Veltman models -/
 
 
 open Entailment Verbrugge Veltman.Model.World
 
 /-- - [KO21, Corollary 6.4] -/
-theorem ILMinusJ4.incomplete : ∃ A : Formula ℕ,
+theorem ILMinusJ4.incomplete_veltman : ∃ A : Formula ℕ,
     (∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ ℕ), [M.IsILMinusJ4Plus] → M ⊧ A) ∧
       ILMinusJ4 ⊬ A := by
   use Axioms.J4Plus (#1) (#2) (#0);

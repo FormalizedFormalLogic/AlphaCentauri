@@ -24,7 +24,7 @@ variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T]
 
 
 theorem Logic.IL.arithmetical_soundness (h : 𝐈𝐋 ⊢ A) : T₀ ⊢ A.interpret f 𝔅 𝔍 :=
-  Logic.ofAxioms.arithmetical_soundness (by simp) h
+  Logic.ofILAxioms.arithmetical_soundness (by simp) h
 
 section
 

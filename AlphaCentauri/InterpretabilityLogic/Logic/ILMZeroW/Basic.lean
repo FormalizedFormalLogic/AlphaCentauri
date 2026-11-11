@@ -18,7 +18,7 @@ open Entailment Formula
 variable {α : Type*}
 
 abbrev Logic.ILM₀W : Logic α :=
-  Logic.ofAxioms ({Axioms.M₀ A B C | (A) (B) (C)} ∪ {Axioms.W A B | (A) (B)})
+  Logic.ofILAxioms ({Axioms.M₀ A B C | (A) (B) (C)} ∪ {Axioms.W A B | (A) (B)})
 
 notation "𝐈𝐋𝐌₀𝐖" => Logic.ILM₀W
 
@@ -36,7 +36,7 @@ end Veltman.Model
 
 namespace Logic
 
-open ofAxioms Veltman Veltman.Model Veltman.Model.World
+open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
@@ -62,7 +62,7 @@ lemma ILM₀W.axiomWstar : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.Wstar A B C := by
 instance : (𝐈𝐋𝐌₀ : Logic α) ⪯ 𝐈𝐋𝐌₀𝐖 := weakerThan_iff.mpr <| subset_of_subset Set.subset_union_left
 
 theorem ILM₀W.sound [M.IsILMZeroW] (h : 𝐈𝐋𝐌₀𝐖 ⊢ A) : M ⊧ A := by
-  apply ofAxioms.sound _ h;
+  apply ofILAxioms.sound _ h;
   rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩) x;
   · exact forces_axiomM₀;
   · exact forces_axiomW;

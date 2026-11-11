@@ -142,9 +142,9 @@ lemma AssuringSuccessor.mono (hST : S ⊆ T) (h : AssuringSuccessor T Γ Δ) :
 
 section
 
-open Logic.ofAxioms
+open Logic.ofILAxioms
 
-variable {𝔸 : FormulaSet α} {Γ Δ Θ Λ : MaximalConsistentTheory (ofAxioms 𝔸)}
+variable {𝔸 : FormulaSet α} {Γ Δ Θ Λ : MaximalConsistentTheory (ofILAxioms 𝔸)}
 
 lemma bot_mem_antecedents : ⊥ ∈ Γ.antecedents S := by
   use ∅;
@@ -159,19 +159,19 @@ lemma or_mem_antecedents (hA : A ∈ Γ.antecedents S) (hB : B ∈ Γ.antecedent
   use U₁ ∪ U₂;
   and_intros;
   · simpa using ⟨hU₁, hU₂⟩;
-  · have e₁ : ofAxioms 𝔸 ⊢ A ▷ (U₁.image (∼·)).disj 🡒 A ▷ ((U₁ ∪ U₂).image (∼·)).disj :=
+  · have e₁ : ofILAxioms 𝔸 ⊢ A ▷ (U₁.image (∼·)).disj 🡒 A ▷ ((U₁ ∪ U₂).image (∼·)).disj :=
       rhd_mono_right <| CFDisjFDisj_of_subset <|
         Finset.image_subset_image Finset.subset_union_left;
-    have e₂ : ofAxioms 𝔸 ⊢ B ▷ (U₂.image (∼·)).disj 🡒 B ▷ ((U₁ ∪ U₂).image (∼·)).disj :=
+    have e₂ : ofILAxioms 𝔸 ⊢ B ▷ (U₂.image (∼·)).disj 🡒 B ▷ ((U₁ ∪ U₂).image (∼·)).disj :=
       rhd_mono_right <| CFDisjFDisj_of_subset <|
         Finset.image_subset_image Finset.subset_union_right;
-    have e₃ : ofAxioms 𝔸 ⊢ Axioms.J3 A B ((U₁ ∪ U₂).image (∼·)).disj := axiomJ3;
+    have e₃ : ofILAxioms 𝔸 ⊢ Axioms.J3 A B ((U₁ ∪ U₂).image (∼·)).disj := axiomJ3;
     exact mem_of_imp₂ (by cl_prover [e₁, e₂, e₃]) h₁ h₂;
 
 lemma antecedents_of_rhd_mem (h : B ▷ A ∈ Γ) (hA : A ∈ Γ.antecedents S) :
     B ∈ Γ.antecedents S := by
   obtain ⟨U, hU, hA⟩ := hA;
-  have e : ofAxioms 𝔸 ⊢ Axioms.J2 B A (U.image (∼·)).disj := axiomJ2;
+  have e : ofILAxioms 𝔸 ⊢ Axioms.J2 B A (U.image (∼·)).disj := axiomJ2;
   use U;
   and_intros;
   · exact hU;
@@ -187,7 +187,7 @@ lemma mem_antecedents_empty_iff : A ∈ Γ.antecedents ∅ ↔ □(∼A) ∈ Γ 
   constructor;
   · rintro ⟨U, hU, hA⟩;
     obtain rfl : U = ∅ := by simpa using hU;
-    have e : ofAxioms 𝔸 ⊢ (Finset.image (∼·) (∅ : Finset (Formula α))).disj 🡒 ⊥ :=
+    have e : ofILAxioms 𝔸 ⊢ (Finset.image (∼·) (∅ : Finset (Formula α))).disj 🡒 ⊥ :=
       left_Fdisj_intro _ (by simp);
     exact mem_of_imp (C_trans (rhd_mono_right e) rhd_bot) hA;
   · intro h;
@@ -223,13 +223,13 @@ end AssuringSuccessor
 /-! ### Existence of assuring successors -/
 
 private lemma consistent_of_not_mem_antecedents (h : B ∉ Γ.antecedents S) :
-    (insert B <| insert (□(∼B)) {C | ∃ A ∈ Γ.antecedents S, C = ∼A ∨ C = □(∼A)}) *⊬[ofAxioms 𝔸]
+    (insert B <| insert (□(∼B)) {C | ∃ A ∈ Γ.antecedents S, C = ∼A ∨ C = □(∼A)}) *⊬[ofILAxioms 𝔸]
       ⊥ := by
   intro hb;
   obtain ⟨l, hl, hb⟩ := Context.provable_iff.mp hb;
   have key : ∀ l : List (Formula α),
       (∀ C ∈ l, C ∈ insert B (insert (□(∼B)) {C | ∃ A ∈ Γ.antecedents S, C = ∼A ∨ C = □(∼A)})) →
-        ∃ A ∈ Γ.antecedents S, ∀ C ∈ l, ofAxioms 𝔸 ⊢ (B ⋏ □(∼B)) ⋏ (∼A ⋏ □(∼A)) 🡒 C := by
+        ∃ A ∈ Γ.antecedents S, ∀ C ∈ l, ofILAxioms 𝔸 ⊢ (B ⋏ □(∼B)) ⋏ (∼A ⋏ □(∼A)) 🡒 C := by
     intro l;
     induction l with
     | nil =>
@@ -256,8 +256,8 @@ private lemma consistent_of_not_mem_antecedents (h : B ∉ Γ.antecedents S) :
         use A ⋎ A';
         and_intros;
         · exact or_mem_antecedents hA hA';
-        · have e₁ : ofAxioms 𝔸 ⊢ □(∼(A ⋎ A')) 🡒 □(∼A) := box_mono <| by cl_prover;
-          have e₂ : ofAxioms 𝔸 ⊢ □(∼(A ⋎ A')) 🡒 □(∼A') := box_mono <| by cl_prover;
+        · have e₁ : ofILAxioms 𝔸 ⊢ □(∼(A ⋎ A')) 🡒 □(∼A) := box_mono <| by cl_prover;
+          have e₂ : ofILAxioms 𝔸 ⊢ □(∼(A ⋎ A')) 🡒 □(∼A') := box_mono <| by cl_prover;
           simp only [List.mem_cons, forall_eq_or_imp];
           constructor;
           · cl_prover [e₂];
@@ -265,14 +265,14 @@ private lemma consistent_of_not_mem_antecedents (h : B ∉ Γ.antecedents S) :
             have := hlA D hD;
             cl_prover [this, e₁];
   obtain ⟨A, hA, hlA⟩ := key l hl;
-  have e₁ : ofAxioms 𝔸 ⊢ (B ⋏ □(∼B)) ⋏ (∼A ⋏ □(∼A)) 🡒 ⋀l := right_Conj₂_intro _ _ hlA;
-  have e₂ : ofAxioms 𝔸 ⊢ ⋀l 🡒 ⊥ := FiniteContext.provable_iff.mp hb;
-  have e₃ : ofAxioms 𝔸 ⊢ (B ⋏ □(∼B)) ▷ (A ⋎ ◇A) :=
-    rhd_of_provable (show ofAxioms 𝔸 ⊢ B ⋏ □(∼B) 🡒 A ⋎ ∼□(∼A) by cl_prover [e₁, e₂]);
-  have e₄ : ofAxioms 𝔸 ⊢ (A ⋎ ◇A) ▷ A := or_dia_rhd;
-  have e₅ : ofAxioms 𝔸 ⊢ B ▷ (B ⋏ □(∼B)) := rhd_and_box_neg;
-  have e₆ : ofAxioms 𝔸 ⊢ Axioms.J2 (B ⋏ □(∼B)) (A ⋎ ◇A) A := axiomJ2;
-  have e₇ : ofAxioms 𝔸 ⊢ Axioms.J2 B (B ⋏ □(∼B)) A := axiomJ2;
+  have e₁ : ofILAxioms 𝔸 ⊢ (B ⋏ □(∼B)) ⋏ (∼A ⋏ □(∼A)) 🡒 ⋀l := right_Conj₂_intro _ _ hlA;
+  have e₂ : ofILAxioms 𝔸 ⊢ ⋀l 🡒 ⊥ := FiniteContext.provable_iff.mp hb;
+  have e₃ : ofILAxioms 𝔸 ⊢ (B ⋏ □(∼B)) ▷ (A ⋎ ◇A) :=
+    rhd_of_provable (show ofILAxioms 𝔸 ⊢ B ⋏ □(∼B) 🡒 A ⋎ ∼□(∼A) by cl_prover [e₁, e₂]);
+  have e₄ : ofILAxioms 𝔸 ⊢ (A ⋎ ◇A) ▷ A := or_dia_rhd;
+  have e₅ : ofILAxioms 𝔸 ⊢ B ▷ (B ⋏ □(∼B)) := rhd_and_box_neg;
+  have e₆ : ofILAxioms 𝔸 ⊢ Axioms.J2 (B ⋏ □(∼B)) (A ⋎ ◇A) A := axiomJ2;
+  have e₇ : ofILAxioms 𝔸 ⊢ Axioms.J2 B (B ⋏ □(∼B)) A := axiomJ2;
   exact h <| antecedents_of_rhd_mem (mem_of_theorem (by cl_prover [e₃, e₄, e₅, e₆, e₇])) hA
 
 /-- If $B ▷ \bigvee_{G ∈ S'} ¬G \notin Γ$ for every finite $S' \subseteq S$, then `Γ` has an
@@ -308,7 +308,7 @@ lemma AssuringSuccessor.exists_of_rhd_mem (hBC : B ▷ C ∈ Γ) (h : AssuringSu
 /-! ### Labelling lemmas -/
 
 lemma exists_of_subset_boxLabel {U : Finset (Formula α)} (hU : ↑U ⊆ Γ.boxLabel S) :
-    ∃ B ∈ Γ.antecedents S, ofAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ◇B := by
+    ∃ B ∈ Γ.antecedents S, ofILAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ◇B := by
   induction U using Finset.induction_on with
   | empty =>
     use ⊥;
@@ -321,18 +321,19 @@ lemma exists_of_subset_boxLabel {U : Finset (Formula α)} (hU : ↑U ⊆ Γ.boxL
     use B ⋎ B';
     and_intros;
     · exact or_mem_antecedents hB hB';
-    · have e₁ : ofAxioms 𝔸 ⊢ □(∼(B ⋎ B')) 🡒 □(∼B) := box_mono <| by cl_prover;
-      have e₂ : ofAxioms 𝔸 ⊢ □(∼(B ⋎ B')) 🡒 □(∼B') := box_mono <| by cl_prover;
-      have e₃ : ofAxioms 𝔸 ⊢
+    · have e₁ : ofILAxioms 𝔸 ⊢ □(∼(B ⋎ B')) 🡒 □(∼B) := box_mono <| by cl_prover;
+      have e₂ : ofILAxioms 𝔸 ⊢ □(∼(B ⋎ B')) 🡒 □(∼B') := box_mono <| by cl_prover;
+      have e₃ : ofILAxioms 𝔸 ⊢
           (insert (∼□(∼B')) (U.image (∼·))).disj 🡒 ∼□(∼B') ⋎ (U.image (∼·)).disj :=
         CinsertFDisjAFDisj;
-      have e₄ : ofAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ∼□(∼B) := hUB;
+      have e₄ : ofILAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ∼□(∼B) := hUB;
       rw [Finset.image_insert];
-      change ofAxioms 𝔸 ⊢ _ 🡒 ∼□(∼(B ⋎ B'));
+      change ofILAxioms 𝔸 ⊢ _ 🡒 ∼□(∼(B ⋎ B'));
       cl_prover [e₁, e₂, e₃, e₄];
 
 /-- - [MV20, Lemma 21] -/
-lemma AssuringSuccessor.boxLabel_of_axiomP₀ (hP₀ : ∀ {A B : Formula α}, ofAxioms 𝔸 ⊢ Axioms.P₀ A B)
+lemma AssuringSuccessor.boxLabel_of_axiomP₀
+    (hP₀ : ∀ {A B : Formula α}, ofILAxioms 𝔸 ⊢ Axioms.P₀ A B)
     (h₁ : AssuringSuccessor ∅ Γ Δ) (h₂ : AssuringSuccessor S Δ Θ) :
     AssuringSuccessor (Δ.boxLabel S) Γ Θ := by
   rintro A ⟨U, hU, hA⟩;
@@ -342,7 +343,7 @@ lemma AssuringSuccessor.boxLabel_of_axiomP₀ (hP₀ : ∀ {A B : Formula α}, o
 
 /-- - [GBJM20, Lemma 6.4] -/
 lemma AssuringSuccessor.union_boxLabel_of_axiomM₀
-    (hM₀ : ∀ {A B C : Formula α}, ofAxioms 𝔸 ⊢ Axioms.M₀ A B C)
+    (hM₀ : ∀ {A B C : Formula α}, ofILAxioms 𝔸 ⊢ Axioms.M₀ A B C)
     (h₁ : AssuringSuccessor S Γ Δ) (h₂ : AssuringSuccessor ∅ Δ Θ) :
     AssuringSuccessor (S ∪ Δ.boxLabel ∅) Γ Θ := by
   classical
@@ -352,18 +353,18 @@ lemma AssuringSuccessor.union_boxLabel_of_axiomM₀
     rw [Finset.mem_coe, Finset.mem_filter] at hG;
     exact (hU hG.1).resolve_left hG.2;
   obtain ⟨B, hB, hUB⟩ := exists_of_subset_boxLabel hU₂;
-  have e₁ : ofAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒
+  have e₁ : ofILAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒
       ((U.filter (· ∈ S)).image (∼·)).disj ⋎ ((U.filter (· ∉ S)).image (∼·)).disj := by
     have hU' : U.image (∼·) = (U.filter (· ∈ S)).image (∼·) ∪ (U.filter (· ∉ S)).image (∼·) := by
       rw [← Finset.image_union, Finset.filter_union_filter_not_eq];
     rw [hU'];
     exact CFdisjUnionAFdisj;
-  have e₂ : ofAxioms 𝔸 ⊢ Axioms.M₀ A (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) (∼B) := hM₀;
+  have e₂ : ofILAxioms 𝔸 ⊢ Axioms.M₀ A (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) (∼B) := hM₀;
   have e₃ := rhd_mono_right (𝔸 := 𝔸) (C := ◇A ⋏ □(∼B))
-    (show ofAxioms 𝔸 ⊢ (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ∼□(∼B)) ⋏ □(∼B) 🡒
+    (show ofILAxioms 𝔸 ⊢ (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ∼□(∼B)) ⋏ □(∼B) 🡒
       ((U.filter (· ∈ S)).image (∼·)).disj by cl_prover);
   have e₄ := rhd_mono_right (𝔸 := 𝔸) (C := A)
-    (show ofAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B by
+    (show ofILAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B by
       cl_prover [e₁, hUB]);
   have h₃ : ◇A ⋏ □(∼B) ∈ Γ.antecedents S := by
     use U.filter (· ∈ S);
@@ -374,13 +375,13 @@ lemma AssuringSuccessor.union_boxLabel_of_axiomM₀
     · exact mem_of_imp (by cl_prover [e₂, e₃, e₄]) hA;
   have h₄ : □(∼B) ∈ Δ := mem_antecedents_empty_iff.mp hB;
   have h₅ : □(∼A) ∈ Δ :=
-    mem_of_imp₂ (show ofAxioms 𝔸 ⊢ ∼(∼□(∼A) ⋏ □(∼B)) 🡒 □(∼B) 🡒 □(∼A) by cl_prover)
+    mem_of_imp₂ (show ofILAxioms 𝔸 ⊢ ∼(∼□(∼A) ⋏ □(∼B)) 🡒 □(∼B) 🡒 □(∼A) by cl_prover)
       (h₁ _ h₃).1 h₄;
   exact h₂ A (mem_antecedents_empty_iff.mpr h₅)
 
 /-- - [MV20, Lemma 24] -/
 lemma AssuringSuccessor.union_boxLabel_of_axiomR
-    (hR : ∀ {A B C : Formula α}, ofAxioms 𝔸 ⊢ Axioms.R A B C)
+    (hR : ∀ {A B C : Formula α}, ofILAxioms 𝔸 ⊢ Axioms.R A B C)
     (h₁ : AssuringSuccessor S Γ Δ) (h₂ : AssuringSuccessor T Δ Θ) :
     AssuringSuccessor (S ∪ Δ.boxLabel T) Γ Θ := by
   classical
@@ -390,25 +391,25 @@ lemma AssuringSuccessor.union_boxLabel_of_axiomR
     rw [Finset.mem_coe, Finset.mem_filter] at hG;
     exact (hU hG.1).resolve_left hG.2;
   obtain ⟨B, hB, hUB⟩ := exists_of_subset_boxLabel hU₂;
-  have e₁ : ofAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒
+  have e₁ : ofILAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒
       ((U.filter (· ∈ S)).image (∼·)).disj ⋎ ((U.filter (· ∉ S)).image (∼·)).disj := by
     have hU' : U.image (∼·) = (U.filter (· ∈ S)).image (∼·) ∪ (U.filter (· ∉ S)).image (∼·) := by
       rw [← Finset.image_union, Finset.filter_union_filter_not_eq];
     rw [hU'];
     exact CFdisjUnionAFdisj;
-  have e₂ : ofAxioms 𝔸 ⊢ Axioms.R A (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) (∼B) := hR;
-  have e₃ : ofAxioms 𝔸 ⊢ ∼(A ▷ B) 🡒 ∼(A ▷ ∼∼B) := by
+  have e₂ : ofILAxioms 𝔸 ⊢ Axioms.R A (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) (∼B) := hR;
+  have e₃ : ofILAxioms 𝔸 ⊢ ∼(A ▷ B) 🡒 ∼(A ▷ ∼∼B) := by
     have := rhd_mono_right (𝔸 := 𝔸) (C := A) (Entailment.dne (φ := B));
     cl_prover [this];
-  have e₄ : ofAxioms 𝔸 ⊢ ∼(A ▷ ∼∼B) ▷ ((((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) ⋏ □(∼B)) 🡒
+  have e₄ : ofILAxioms 𝔸 ⊢ ∼(A ▷ ∼∼B) ▷ ((((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) ⋏ □(∼B)) 🡒
       ∼(A ▷ B) ▷ ((U.filter (· ∈ S)).image (∼·)).disj := by
     have h₅ := rhd_anti_left (C := (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) ⋏ □(∼B)) e₃;
     have h₆ := rhd_mono_right (𝔸 := 𝔸) (C := ∼(A ▷ B))
-      (show ofAxioms 𝔸 ⊢ (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ∼□(∼B)) ⋏ □(∼B) 🡒
+      (show ofILAxioms 𝔸 ⊢ (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ∼□(∼B)) ⋏ □(∼B) 🡒
         ((U.filter (· ∈ S)).image (∼·)).disj by cl_prover);
     cl_prover [h₅, h₆];
   have e₅ := rhd_mono_right (𝔸 := 𝔸) (C := A)
-    (show ofAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B by
+    (show ofILAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B by
       cl_prover [e₁, hUB]);
   have h₃ : ∼(A ▷ B) ∈ Γ.antecedents S := by
     use U.filter (· ∈ S);
@@ -421,27 +422,27 @@ lemma AssuringSuccessor.union_boxLabel_of_axiomR
 
 /-- - [MV20, Lemma 27] -/
 lemma AssuringSuccessor.exists_of_rhd_mem_of_axiomW
-    (hW : ∀ {A B : Formula α}, ofAxioms 𝔸 ⊢ Axioms.W A B)
+    (hW : ∀ {A B : Formula α}, ofILAxioms 𝔸 ⊢ Axioms.W A B)
     (hBC : B ▷ C ∈ Γ) (h : AssuringSuccessor S Γ Δ) (hB : B ∈ Δ) :
     ∃ Θ, AssuringSuccessor (S ∪ {□(∼B)}) Γ Θ ∧ C ∈ Θ ∧ □(∼C) ∈ Θ := by
   classical
   apply exists_assuringSuccessor;
   rintro ⟨U, hU, hC⟩;
-  have e₁ : ofAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B := by
+  have e₁ : ofILAxioms 𝔸 ⊢ (U.image (∼·)).disj 🡒 ((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B := by
     apply left_Fdisj_intro;
     intro ψ hψ;
     obtain ⟨G, hG, rfl⟩ := Finset.mem_image.mp hψ;
     by_cases hGS : G ∈ S;
-    · have : ofAxioms 𝔸 ⊢ ∼G 🡒 ((U.filter (· ∈ S)).image (∼·)).disj :=
+    · have : ofILAxioms 𝔸 ⊢ ∼G 🡒 ((U.filter (· ∈ S)).image (∼·)).disj :=
         right_Fdisj_intro _ (Finset.mem_image_of_mem _ (Finset.mem_filter.mpr ⟨hG, hGS⟩));
       cl_prover [this];
     · obtain rfl : G = □(∼B) := by simpa [hGS] using hU hG;
       exact or₂;
-  have e₂ : ofAxioms 𝔸 ⊢ Axioms.W B (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) := hW;
+  have e₂ : ofILAxioms 𝔸 ⊢ Axioms.W B (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) := hW;
   have e₃ := rhd_mono_right (𝔸 := 𝔸) (C := B)
-    (show ofAxioms 𝔸 ⊢ (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ∼□(∼B)) ⋏ □(∼B) 🡒
+    (show ofILAxioms 𝔸 ⊢ (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ∼□(∼B)) ⋏ □(∼B) 🡒
       ((U.filter (· ∈ S)).image (∼·)).disj by cl_prover);
-  have e₄ : ofAxioms 𝔸 ⊢ Axioms.J2 B C (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) := axiomJ2;
+  have e₄ : ofILAxioms 𝔸 ⊢ Axioms.J2 B C (((U.filter (· ∈ S)).image (∼·)).disj ⋎ ◇B) := axiomJ2;
   have e₅ := rhd_mono_right (𝔸 := 𝔸) (C := C) e₁;
   have h₁ : B ∈ Γ.antecedents S := by
     use U.filter (· ∈ S);

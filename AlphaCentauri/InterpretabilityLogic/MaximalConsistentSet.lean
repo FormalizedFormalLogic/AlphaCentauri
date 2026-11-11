@@ -6,7 +6,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 # Maximal consistent subsets of adequate sets
 
 Finite adequate sets of formulas, the maximal consistent subsets of such a set relative to an
-extension of $\mathbf{IL}$, and their (critical) successors. For extensions of $\mathbf{IL}^-$,
+extension of $\mathbf{IL}$, and their (critical) successors. For extensions of $\mathbf{CL}$,
 adequate sets in the sense of Kurahashi and Okawa, Ignatiev's successors, and the existence of
 successors containing prescribed formulas.
 -/
@@ -384,20 +384,6 @@ lemma CriticalSuccessor.trans_successor (h₁ : CriticalSuccessor C Γ Δ) (h₂
   ⟨h₁.toSuccessor.trans h₂, fun hA ↦ not_mem_of_neg_mem <| h₂.mem_of_box_mem (h₁.box_neg_mem hA),
     fun hA ↦ h₂.box_mem_of_box_mem (h₁.box_neg_mem hA)⟩
 
-lemma exists_box_not_mem [L.ExtendsGL] [Adequate Φ] (h₁ : □A ∈ Φ) (h₂ : □A ∉ Γ) :
-    ∃ Δ, Successor Γ Δ ∧ A ∉ Δ := by
-  obtain ⟨Δ, hΔ, hc⟩ := exists_successor_of_box_not_mem h₁ h₂;
-  use Δ;
-  exact ⟨hΔ, not_mem_of_provable_neg hc (Context.by_axm rfl)⟩
-
-lemma exists_neg_consistent (h : L ⊬ A) :
-    ∃ Γ : MaximalConsistentSet L Φ, ({∼A} ∪ Γ.literals) *⊬[L] ⊥ := by
-  apply exists_consistent_union;
-  intro h₁;
-  apply h;
-  have h₂ : L ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
-  cl_prover [h₂];
-
 /-! ### Existence of critical successors -/
 
 /-- The disjunction of the formulas `A` in `Φ` with `A ▷ F ∈ Γ`. -/
@@ -413,43 +399,43 @@ noncomputable def criticalSet (Γ : MaximalConsistentSet L Φ) (F C : Formula α
 
 section
 
-open Logic.ofAxioms
+open Logic.ofILAxioms
 
-variable {𝔸 : FormulaSet α} {Γ Δ : MaximalConsistentSet (ofAxioms 𝔸) Φ}
+variable {𝔸 : FormulaSet α} {Γ Δ : MaximalConsistentSet (ofILAxioms 𝔸) Φ}
 
 
-lemma provable_rhd_of_inconsistent (h : Γ.criticalSet F C *⊢[ofAxioms 𝔸] ⊥) :
-    Γ.literals *⊢[ofAxioms 𝔸] C ▷ F := by
-  have h₁ : ({A | □A ∈ Γ} ∪ (□·) '' {A | □A ∈ Γ}) *⊢[ofAxioms 𝔸]
+lemma provable_rhd_of_inconsistent (h : Γ.criticalSet F C *⊢[ofILAxioms 𝔸] ⊥) :
+    Γ.literals *⊢[ofILAxioms 𝔸] C ▷ F := by
+  have h₁ : ({A | □A ∈ Γ} ∪ (□·) '' {A | □A ∈ Γ}) *⊢[ofILAxioms 𝔸]
       C ⋏ □(∼C) 🡒 Γ.rhdDisj F ⋎ ∼□(∼Γ.rhdDisj F) := by
     have := Context.deduct <| Context.deduct <| Context.deduct <| Context.deduct h;
     cl_prover [this];
-  have h₂ : Γ.literals *⊢[ofAxioms 𝔸] □(C ⋏ □(∼C) 🡒 Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) := by
+  have h₂ : Γ.literals *⊢[ofILAxioms 𝔸] □(C ⋏ □(∼C) 🡒 Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) := by
     apply Context.weakening _ (box_of_provable h₁);
     rintro _ ⟨A, hA, rfl⟩;
     exact mem_literals hA;
-  have h₃ : Γ.literals *⊢[ofAxioms 𝔸] Γ.rhdDisj F ▷ F := by
+  have h₃ : Γ.literals *⊢[ofILAxioms 𝔸] Γ.rhdDisj F ▷ F := by
     apply fdisj_rhd;
     intro G hG;
     exact Context.by_axm <| mem_literals (Finset.mem_filter.mp hG).2;
-  have h₄ : Γ.literals *⊢[ofAxioms 𝔸] C ▷ (C ⋏ □(∼C)) := Context.of rhd_and_box_neg;
-  have h₅ : Γ.literals *⊢[ofAxioms 𝔸] (Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) ▷ Γ.rhdDisj F :=
+  have h₄ : Γ.literals *⊢[ofILAxioms 𝔸] C ▷ (C ⋏ □(∼C)) := Context.of rhd_and_box_neg;
+  have h₅ : Γ.literals *⊢[ofILAxioms 𝔸] (Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) ▷ Γ.rhdDisj F :=
     Context.of or_dia_rhd;
-  have h₆ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.literals) <|
+  have h₆ := Context.of (𝓢 := ofILAxioms 𝔸) (Γ := Γ.literals) <|
     axiomJ1 (A := C ⋏ □(∼C)) (B := Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F);
-  have h₇ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.literals) <|
+  have h₇ := Context.of (𝓢 := ofILAxioms 𝔸) (Γ := Γ.literals) <|
     axiomJ2 (A := C ⋏ □(∼C)) (B := Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) (C := Γ.rhdDisj F);
-  have h₈ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.literals) <|
+  have h₈ := Context.of (𝓢 := ofILAxioms 𝔸) (Γ := Γ.literals) <|
     axiomJ2 (A := C) (B := C ⋏ □(∼C)) (C := Γ.rhdDisj F);
-  have h₉ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.literals) <|
+  have h₉ := Context.of (𝓢 := ofILAxioms 𝔸) (Γ := Γ.literals) <|
     axiomJ2 (A := C) (B := Γ.rhdDisj F) (C := F);
   cl_prover [h₂, h₃, h₄, h₅, h₆, h₇, h₈, h₉];
 
 variable [Adequate Φ]
 
 lemma exists_criticalSuccessor_of_consistent_union (hC : IsRhdOperand Φ C)
-    (h : (Γ.criticalSet F C ∪ X) *⊬[ofAxioms 𝔸] ⊥) (hs : □(∼C) ∉ Γ) :
-    ∃ Δ, CriticalSuccessor F Γ Δ ∧ C ∈ Δ ∧ (X ∪ Δ.literals) *⊬[ofAxioms 𝔸] ⊥ := by
+    (h : (Γ.criticalSet F C ∪ X) *⊬[ofILAxioms 𝔸] ⊥) (hs : □(∼C) ∉ Γ) :
+    ∃ Δ, CriticalSuccessor F Γ Δ ∧ C ∈ Δ ∧ (X ∪ Δ.literals) *⊬[ofILAxioms 𝔸] ⊥ := by
   obtain ⟨Δ, hΔ⟩ := exists_consistent_union (Φ := Φ) h;
   have hm {A} (hA : A ∈ Φ) (h : A ∈ Γ.criticalSet F C) : A ∈ Δ :=
     mem_of_provable hΔ hA <| Context.by_axm <| .inl h;
@@ -459,15 +445,15 @@ lemma exists_criticalSuccessor_of_consistent_union (hC : IsRhdOperand Φ C)
   have hG {G} (hG : G ▷ F ∈ Γ) : G ∉ Δ ∧ □(∼G) ∈ Δ := by
     have h₁ : G ∈ Φ.filter (· ▷ F ∈ Γ) :=
       Finset.mem_filter.mpr ⟨Adequate.rhd_left (mem_of_mem hG), hG⟩;
-    have h₂ : ofAxioms 𝔸 ⊢ G 🡒 Γ.rhdDisj F := right_Fdisj_intro _ h₁;
-    have h₃ : ofAxioms 𝔸 ⊢ □(∼Γ.rhdDisj F) 🡒 □(∼G) := box_mono <| by cl_prover [h₂];
-    have h₄ : (Γ.criticalSet F C ∪ X) *⊢[ofAxioms 𝔸] ∼Γ.rhdDisj F :=
+    have h₂ : ofILAxioms 𝔸 ⊢ G 🡒 Γ.rhdDisj F := right_Fdisj_intro _ h₁;
+    have h₃ : ofILAxioms 𝔸 ⊢ □(∼Γ.rhdDisj F) 🡒 □(∼G) := box_mono <| by cl_prover [h₂];
+    have h₄ : (Γ.criticalSet F C ∪ X) *⊢[ofILAxioms 𝔸] ∼Γ.rhdDisj F :=
       Context.by_axm <| .inl <| by simp [criticalSet];
-    have h₅ : (Γ.criticalSet F C ∪ X) *⊢[ofAxioms 𝔸] □(∼Γ.rhdDisj F) :=
+    have h₅ : (Γ.criticalSet F C ∪ X) *⊢[ofILAxioms 𝔸] □(∼Γ.rhdDisj F) :=
       Context.by_axm <| .inl <| by simp [criticalSet];
     constructor;
     · apply not_mem_of_provable_neg hΔ;
-      have h₆ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.criticalSet F C ∪ X) h₂;
+      have h₆ := Context.of (𝓢 := ofILAxioms 𝔸) (Γ := Γ.criticalSet F C ∪ X) h₂;
       cl_prover [h₄, h₆];
     · exact mem_of_provable hΔ (Adequate.box_neg_mem <| .of_rhd_left (mem_of_mem hG)) <|
         Context.of h₃ ⨀ h₅;
@@ -484,7 +470,7 @@ lemma exists_criticalSuccessor_of_consistent_union (hC : IsRhdOperand Φ C)
     tauto;
 
 lemma exists_criticalSuccessor_of_consistent (hC : IsRhdOperand Φ C)
-    (h : Γ.criticalSet F C *⊬[ofAxioms 𝔸] ⊥) (hs : □(∼C) ∉ Γ) :
+    (h : Γ.criticalSet F C *⊬[ofILAxioms 𝔸] ⊥) (hs : □(∼C) ∉ Γ) :
     ∃ Δ, CriticalSuccessor F Γ Δ ∧ C ∈ Δ := by
   obtain ⟨Δ, hΔ, hCΔ, -⟩ :=
     exists_criticalSuccessor_of_consistent_union (X := ∅) hC (by simpa using h) hs;
@@ -498,7 +484,7 @@ lemma exists_criticalSuccessor_of_rhd_not_mem (h₁ : B ▷ C ∈ Φ) (h₂ : B 
     exact h₂ <| (mem_iff_provable h₁).mpr <| provable_rhd_of_inconsistent h;
   · intro h;
     apply h₂ <| (mem_iff_provable h₁).mpr _;
-    have h₃ : ofAxioms 𝔸 ⊢ □(∼B) 🡒 B ▷ C := C_trans (box_mono <| by cl_prover) axiomJ1;
+    have h₃ : ofILAxioms 𝔸 ⊢ □(∼B) 🡒 B ▷ C := C_trans (box_mono <| by cl_prover) axiomJ1;
     exact Context.of h₃ ⨀ Context.by_axm (mem_literals h);
 
 /-- - [dJV90, Lemma 3.7] -/
@@ -511,9 +497,9 @@ lemma CriticalSuccessor.exists_criticalSuccessor (hF : IsRhdOperand Φ F) (hDE :
     apply hΔ.not_mem _ hD;
     apply (mem_iff_provable <| Adequate.rhd_mem hD' hF).mpr;
     have h₁ := provable_rhd_of_inconsistent h;
-    have h₂ := Context.of (𝓢 := ofAxioms 𝔸) (Γ := Γ.literals) <|
+    have h₂ := Context.of (𝓢 := ofILAxioms 𝔸) (Γ := Γ.literals) <|
       axiomJ2 (A := D) (B := E) (C := F);
-    have h₃ : Γ.literals *⊢[ofAxioms 𝔸] D ▷ E := Context.by_axm (mem_literals hDE);
+    have h₃ : Γ.literals *⊢[ofILAxioms 𝔸] D ▷ E := Context.by_axm (mem_literals hDE);
     cl_prover [h₁, h₂, h₃];
   · intro h;
     apply hΔ.toSuccessor.not_mem_of_box_neg_mem _ hD;
@@ -532,17 +518,17 @@ end MaximalConsistentSet
 
 - [KO21, Definition 4.1]
 -/
-class ILMinusAdequate (Φ : Finset (Formula α)) : Prop extends Adequate Φ where
+class CLAdequate (Φ : Finset (Formula α)) : Prop extends Adequate Φ where
   box_imp_disj_mem {B : Formula α} {S : Finset (Formula α)} : IsRhdOperand Φ B →
     (∀ A ∈ S, IsRhdOperand Φ A ∨ ∃ G, IsRhdOperand Φ G ∧ A = ◇G) → □(B 🡒 S.disj) ∈ Φ
 
-/-- A finite set satisfying `ILMinusAdequate` and containing `S`. -/
-noncomputable def ilMinusAdequateClosure (S : Finset (Formula α)) : Finset (Formula α) :=
+/-- A finite set satisfying `CLAdequate` and containing `S`. -/
+noncomputable def clAdequateClosure (S : Finset (Formula α)) : Finset (Formula α) :=
   let T := insert ⊥ (S.biUnion subformulas);
   (T ∪ (T ×ˢ T).image (fun p ↦ p.1 ▷ p.2) ∪ T.image (fun A ↦ □(∼A)) ∪
     (T ×ˢ (T ∪ T.image (◇·)).powerset).image (fun p ↦ □(p.1 🡒 p.2.disj))).biUnion subformulas
 
-namespace ilMinusAdequateClosure
+namespace clAdequateClosure
 
 variable {S T : Finset (Formula α)} {A B C : Formula α}
 
@@ -617,8 +603,8 @@ private lemma rhdClosed_of_mem_gen {g : Formula α}
       exact rhdClosed_imp (rhdClosed_box <| rhdClosed_imp (rhdClosed_of_base hG) rhdClosed_bot)
         rhdClosed_bot;
 
-private lemma mem_sub (hA : A ∈ ilMinusAdequateClosure S) (hB : B ∈ A.subformulas) :
-    B ∈ ilMinusAdequateClosure S := by
+private lemma mem_sub (hA : A ∈ clAdequateClosure S) (hB : B ∈ A.subformulas) :
+    B ∈ clAdequateClosure S := by
   obtain ⟨g, hg, hA⟩ := Finset.mem_biUnion.mp hA;
   exact Finset.mem_biUnion.mpr ⟨g, hg, subformulas_subset_of_mem hA hB⟩
 
@@ -626,23 +612,23 @@ private lemma mem_of_gen {g : Formula α}
     (hg : g ∈ (let T := insert ⊥ (S.biUnion subformulas);
       T ∪ (T ×ˢ T).image (fun p ↦ p.1 ▷ p.2) ∪ T.image (fun A ↦ □(∼A)) ∪
         (T ×ˢ (T ∪ T.image (◇·)).powerset).image (fun p ↦ □(p.1 🡒 p.2.disj)))) :
-    g ∈ ilMinusAdequateClosure S :=
+    g ∈ clAdequateClosure S :=
   Finset.mem_biUnion.mpr ⟨g, hg, mem_subformulas_self⟩
 
-private lemma isRhdOperand (h : IsRhdOperand (ilMinusAdequateClosure S) A) :
+private lemma isRhdOperand (h : IsRhdOperand (clAdequateClosure S) A) :
     A ∈ insert ⊥ (S.biUnion subformulas) := by
   obtain ⟨B, h | h⟩ := h <;> obtain ⟨g, hg, h⟩ := Finset.mem_biUnion.mp h;
   · exact (rhdClosed_of_mem_gen hg _ _ h).1;
   · exact (rhdClosed_of_mem_gen hg _ _ h).2;
 
-lemma subset : S ⊆ ilMinusAdequateClosure S := by
+lemma subset : S ⊆ clAdequateClosure S := by
   intro A hA;
   apply mem_of_gen;
   simp only [Finset.mem_union];
   exact .inl <| .inl <| .inl <| Finset.mem_insert_of_mem <|
     Finset.mem_biUnion.mpr ⟨A, hA, mem_subformulas_self⟩
 
-instance : ILMinusAdequate (ilMinusAdequateClosure S) where
+instance : CLAdequate (clAdequateClosure S) where
   imp_left h := mem_sub h (by simp [subformulas])
   imp_right h := mem_sub h (by simp [subformulas])
   box h := mem_sub h (by simp [subformulas])
@@ -666,13 +652,13 @@ instance : ILMinusAdequate (ilMinusAdequateClosure S) where
       · exact Finset.mem_union_right _ (Finset.mem_image_of_mem _ (isRhdOperand hG));
     exact .inr ⟨B, U, ⟨isRhdOperand hB, hU'⟩, rfl⟩;
 
-end ilMinusAdequateClosure
+end clAdequateClosure
 
 /-! ### Successors -/
 
 namespace MaximalConsistentSet
 
-open Logic Logic.ofAxiomsMinus
+open Logic Logic.ofCLAxioms
 
 /-- `Δ` is a successor of `Γ` that contains no `A` with `A ▷ C ∈ Γ`.
 
@@ -687,20 +673,20 @@ lemma CriticalSuccessor.weakCriticalSuccessor {L : Logic α} {Φ : Finset (Formu
     WeakCriticalSuccessor C Γ Δ :=
   ⟨h.toSuccessor, h.not_mem⟩
 
-variable {𝔸 : FormulaSet α} {Φ : Finset (Formula α)} [ILMinusAdequate Φ]
-  {Γ Δ : MaximalConsistentSet (ofAxiomsMinus 𝔸) Φ} {B D E F : Formula α} {S : Finset (Formula α)}
+variable {𝔸 : FormulaSet α} {Φ : Finset (Formula α)} [CLAdequate Φ]
+  {Γ Δ : MaximalConsistentSet (ofCLAxioms 𝔸) Φ} {B D E F : Formula α} {S : Finset (Formula α)}
 
 private lemma exists_successor_of_box_imp_disj_not_mem (hB : IsRhdOperand Φ B)
     (hS : ∀ A ∈ S, IsRhdOperand Φ A ∨ ∃ G, IsRhdOperand Φ G ∧ A = ◇G)
     (h : □(B 🡒 S.disj) ∉ Γ) :
     ∃ Δ, Successor Γ Δ ∧ B ∈ Δ ∧
-      (∀ {P}, P ∈ Φ → ofAxiomsMinus 𝔸 ⊢ ∼S.disj 🡒 P → P ∈ Δ) ∧
-      ∀ {P}, ofAxiomsMinus 𝔸 ⊢ ∼S.disj 🡒 ∼P → P ∉ Δ := by
-  obtain ⟨Δ, hΔ, hc⟩ := exists_successor_of_box_not_mem (ILMinusAdequate.box_imp_disj_mem hB hS) h;
-  have hH : ({∼(B 🡒 S.disj)} : FormulaSet α) *⊢[ofAxiomsMinus 𝔸] ∼(B 🡒 S.disj) :=
+      (∀ {P}, P ∈ Φ → ofCLAxioms 𝔸 ⊢ ∼S.disj 🡒 P → P ∈ Δ) ∧
+      ∀ {P}, ofCLAxioms 𝔸 ⊢ ∼S.disj 🡒 ∼P → P ∉ Δ := by
+  obtain ⟨Δ, hΔ, hc⟩ := exists_successor_of_box_not_mem (CLAdequate.box_imp_disj_mem hB hS) h;
+  have hH : ({∼(B 🡒 S.disj)} : FormulaSet α) *⊢[ofCLAxioms 𝔸] ∼(B 🡒 S.disj) :=
     Context.by_axm rfl;
-  have h₁ {P} (hP : ofAxiomsMinus 𝔸 ⊢ ∼S.disj 🡒 P) :
-      ({∼(B 🡒 S.disj)} : FormulaSet α) *⊢[ofAxiomsMinus 𝔸] P := by
+  have h₁ {P} (hP : ofCLAxioms 𝔸 ⊢ ∼S.disj 🡒 P) :
+      ({∼(B 🡒 S.disj)} : FormulaSet α) *⊢[ofCLAxioms 𝔸] P := by
     have := Context.of (Γ := {∼(B 🡒 S.disj)}) hP;
     cl_prover [hH, this];
   use Δ;
@@ -712,10 +698,10 @@ private lemma exists_successor_of_box_imp_disj_not_mem (hB : IsRhdOperand Φ B)
   · intro P h;
     exact not_mem_of_provable_neg hc (h₁ h);
 
-omit [ILMinusAdequate Φ] in
+omit [CLAdequate Φ] in
 private lemma provable_rhd_of_box_imp_disj_mem
-    (hS : ∀ A ∈ S, Γ.literals *⊢[ofAxiomsMinus 𝔸] A ▷ F) (h : □(B 🡒 S.disj) ∈ Γ) :
-    Γ.literals *⊢[ofAxiomsMinus 𝔸] B ▷ F :=
+    (hS : ∀ A ∈ S, Γ.literals *⊢[ofCLAxioms 𝔸] A ▷ F) (h : □(B 🡒 S.disj) ∈ Γ) :
+    Γ.literals *⊢[ofCLAxioms 𝔸] B ▷ F :=
   Context.of rhd_anti_left_of_box ⨀ Context.by_axm (mem_literals h) ⨀ fdisj_rhd hS
 
 private lemma mem_rhdSet {G : Formula α} : G ∈ Φ.filter (· ▷ F ∈ Γ) ↔ G ▷ F ∈ Γ :=
@@ -723,29 +709,29 @@ private lemma mem_rhdSet {G : Formula α} : G ∈ Φ.filter (· ▷ F ∈ Γ) �
     fun h ↦ Finset.mem_filter.mpr ⟨Adequate.rhd_left (mem_of_mem h), h⟩⟩
 
 private lemma provable_neg_of_mem {G : Formula α} (h : G ∈ S) :
-    ofAxiomsMinus 𝔸 ⊢ ∼S.disj 🡒 ∼G := by
-  have := right_Fdisj_intro (𝓢 := ofAxiomsMinus 𝔸) S h;
+    ofCLAxioms 𝔸 ⊢ ∼S.disj 🡒 ∼G := by
+  have := right_Fdisj_intro (𝓢 := ofCLAxioms 𝔸) S h;
   cl_prover [this];
 
 private lemma provable_box_neg_of_mem {G : Formula α} (h : ◇G ∈ S) :
-    ofAxiomsMinus 𝔸 ⊢ ∼S.disj 🡒 □(∼G) := by
-  have : ofAxiomsMinus 𝔸 ⊢ ∼□(∼G) 🡒 S.disj := right_Fdisj_intro S h;
+    ofCLAxioms 𝔸 ⊢ ∼S.disj 🡒 □(∼G) := by
+  have : ofCLAxioms 𝔸 ⊢ ∼□(∼G) 🡒 S.disj := right_Fdisj_intro S h;
   cl_prover [this];
 
-private lemma rhd_of_mem_diaSet [(ofAxiomsMinus 𝔸).HasAxiomJ2]
-    [(ofAxiomsMinus 𝔸).HasAxiomJ5] {A : Formula α}
+private lemma rhd_of_mem_diaSet [(ofCLAxioms 𝔸).HasAxiomJ5] {A : Formula α}
     (h : A ∈ insert (◇F) (Φ.filter (· ▷ F ∈ Γ) ∪ (Φ.filter (· ▷ F ∈ Γ)).image (◇·))) :
-    Γ.literals *⊢[ofAxiomsMinus 𝔸] A ▷ F := by
-  have hJ5 {G : Formula α} : Γ.literals *⊢[ofAxiomsMinus 𝔸] ◇G ▷ G :=
+    Γ.literals *⊢[ofCLAxioms 𝔸] A ▷ F := by
+  have hJ5 {G : Formula α} : Γ.literals *⊢[ofCLAxioms 𝔸] ◇G ▷ G :=
     Context.of (HasAxiomJ5.J5 _);
   simp only [Finset.mem_insert, Finset.mem_union, Finset.mem_image] at h;
   rcases h with rfl | h | ⟨G, hG, rfl⟩;
   · exact hJ5;
   · exact Context.by_axm <| mem_literals <| mem_rhdSet.mp h;
-  · have h₁ := Context.of (Γ := Γ.literals) <| HasAxiomJ2.J2 (L := ofAxiomsMinus 𝔸) (◇G) G F;
-    have h₂ : Γ.literals *⊢[ofAxiomsMinus 𝔸] G ▷ F :=
+  · have h₀ : ofCLAxioms 𝔸 ⊢ ◇G ▷ G ⋏ G ▷ F 🡒 ◇G ▷ F := ofCLAxioms.axiomJ2;
+    have h₁ := Context.of (Γ := Γ.literals) h₀;
+    have h₂ : Γ.literals *⊢[ofCLAxioms 𝔸] G ▷ F :=
       Context.by_axm <| mem_literals <| mem_rhdSet.mp hG;
-    have h₃ : Γ.literals *⊢[ofAxiomsMinus 𝔸] ◇G ▷ G := hJ5;
+    have h₃ : Γ.literals *⊢[ofCLAxioms 𝔸] ◇G ▷ G := hJ5;
     cl_prover [h₁, h₂, h₃];
 
 private lemma diaSet_spec (hF : IsRhdOperand Φ F) {A : Formula α}
@@ -758,10 +744,10 @@ private lemma diaSet_spec (hF : IsRhdOperand Φ F) {A : Formula α}
   · exact .inr ⟨G, .of_rhd_left <| mem_of_mem <| mem_rhdSet.mp hG, rfl⟩;
 
 private lemma criticalSuccessor_of_diaSet (hΔ : Successor Γ Δ)
-    (hn : ∀ {P}, ofAxiomsMinus 𝔸 ⊢
+    (hn : ∀ {P}, ofCLAxioms 𝔸 ⊢
       ∼(insert (◇F) (Φ.filter (· ▷ F ∈ Γ) ∪ (Φ.filter (· ▷ F ∈ Γ)).image (◇·))).disj 🡒 ∼P →
         P ∉ Δ)
-    (hp : ∀ {P}, P ∈ Φ → ofAxiomsMinus 𝔸 ⊢
+    (hp : ∀ {P}, P ∈ Φ → ofCLAxioms 𝔸 ⊢
       ∼(insert (◇F) (Φ.filter (· ▷ F ∈ Γ) ∪ (Φ.filter (· ▷ F ∈ Γ)).image (◇·))).disj 🡒 P →
         P ∈ Δ) :
     CriticalSuccessor F Γ Δ := by
@@ -789,33 +775,9 @@ lemma exists_weakCriticalSuccessor_of_rhd_not_mem (h₁ : D ▷ E ∈ Φ) (h₂ 
   · exact ⟨hΔ, fun hG ↦ hn <| provable_neg_of_mem <| mem_rhdSet.mpr hG⟩;
   · exact hD;
 
-/-- - [KO21, Lemma 4.6.a] -/
-lemma exists_weakCriticalSuccessor_box_neg_of_rhd_not_mem
-    [(ofAxiomsMinus 𝔸).HasAxiomJ5] (h₁ : D ▷ E ∈ Φ) (h₂ : D ▷ E ∉ Γ) :
-    ∃ Δ, WeakCriticalSuccessor E Γ Δ ∧ D ∈ Δ ∧ □(∼E) ∈ Δ := by
-  have hE : IsRhdOperand Φ E := .of_rhd_right h₁;
-  obtain ⟨Δ, hΔ, hD, hp, hn⟩ := exists_successor_of_box_imp_disj_not_mem
-    (S := insert (◇E) (Φ.filter (· ▷ E ∈ Γ))) (.of_rhd_left h₁) (by
-      intro A hA;
-      rcases Finset.mem_insert.mp hA with rfl | hA;
-      · exact .inr ⟨E, hE, rfl⟩;
-      · exact .inl <| .of_rhd_left <| mem_of_mem <| mem_rhdSet.mp hA) <| by
-      intro h;
-      apply h₂ <| (mem_iff_provable h₁).mpr <| provable_rhd_of_box_imp_disj_mem _ h;
-      intro A hA;
-      rcases Finset.mem_insert.mp hA with rfl | hA;
-      · exact Context.of (HasAxiomJ5.J5 _);
-      · exact Context.by_axm <| mem_literals <| mem_rhdSet.mp hA;
-  use Δ;
-  and_intros;
-  · exact ⟨hΔ, fun hG ↦ hn <| provable_neg_of_mem <|
-      Finset.mem_insert_of_mem <| mem_rhdSet.mpr hG⟩;
-  · exact hD;
-  · exact hp (Adequate.box_neg_mem hE) <| provable_box_neg_of_mem <| Finset.mem_insert_self _ _;
-
 /-- - [KO21, Lemma 4.6.b] -/
-lemma exists_criticalSuccessor_box_neg_of_rhd_not_mem [(ofAxiomsMinus 𝔸).HasAxiomJ2]
-    [(ofAxiomsMinus 𝔸).HasAxiomJ5] (h₁ : D ▷ E ∈ Φ) (h₂ : D ▷ E ∉ Γ) :
+lemma exists_criticalSuccessor_box_neg_of_rhd_not_mem [(ofCLAxioms 𝔸).HasAxiomJ5]
+    (h₁ : D ▷ E ∈ Φ) (h₂ : D ▷ E ∉ Γ) :
     ∃ Δ, CriticalSuccessor E Γ Δ ∧ D ∈ Δ ∧ □(∼E) ∈ Δ := by
   have hE : IsRhdOperand Φ E := .of_rhd_right h₁;
   obtain ⟨Δ, hΔ, hD, hp, hn⟩ := exists_successor_of_box_imp_disj_not_mem
@@ -832,64 +794,28 @@ lemma exists_criticalSuccessor_box_neg_of_rhd_not_mem [(ofAxiomsMinus 𝔸).HasA
 namespace WeakCriticalSuccessor
 
 private lemma rhd_not_mem (hF : IsRhdOperand Φ F) (hΔ : WeakCriticalSuccessor F Γ Δ)
-    (hDE : D ▷ E ∈ Γ) (hD : D ∈ Δ) : Γ.literals *⊬[ofAxiomsMinus 𝔸] D ▷ F := fun h ↦
+    (hDE : D ▷ E ∈ Γ) (hD : D ∈ Δ) : Γ.literals *⊬[ofCLAxioms 𝔸] D ▷ F := fun h ↦
   hΔ.not_mem ((mem_iff_provable <| Adequate.rhd_mem (.of_rhd_left (mem_of_mem hDE)) hF).mpr h) hD
 
-/-- - [KO21, Lemma 4.7] -/
-lemma exists_mem_not_mem (hF : IsRhdOperand Φ F) (hDE : D ▷ E ∈ Γ)
-    (hΔ : WeakCriticalSuccessor F Γ Δ) (hD : D ∈ Δ) :
-    ∃ Θ : MaximalConsistentSet (ofAxiomsMinus 𝔸) Φ, E ∈ Θ ∧ F ∉ Θ := by
-  have hX : (insert E {∼F} : FormulaSet α) *⊬[ofAxiomsMinus 𝔸] ⊥ := by
-    intro h;
-    apply rhd_not_mem hF hΔ hDE hD;
-    have h₁ : ofAxiomsMinus 𝔸 ⊢ ∼F 🡒 E 🡒 ⊥ :=
-      Context.emptyPrf <| Context.deduct <| by simpa using Context.deduct h;
-    have h₂ : ofAxiomsMinus 𝔸 ⊢ D ▷ E 🡒 D ▷ F := rhd_mono_right <| by cl_prover [h₁];
-    exact Context.of h₂ ⨀ Context.by_axm (mem_literals hDE);
-  obtain ⟨Θ, hΘ⟩ := exists_consistent_union (Φ := Φ) hX;
-  use Θ;
-  and_intros;
-  · exact mem_of_provable hΘ (Adequate.rhd_right (mem_of_mem hDE)) (Context.by_axm (by simp));
-  · exact not_mem_of_provable_neg hΘ (Context.by_axm (by simp));
-
-/-- - [KO21, Lemma 4.7.a] -/
-lemma exists_successor_mem_not_mem [(ofAxiomsMinus 𝔸).HasAxiomJ4Plus]
-    (hF : IsRhdOperand Φ F) (hDE : D ▷ E ∈ Γ) (hΔ : WeakCriticalSuccessor F Γ Δ) (hD : D ∈ Δ) :
-    ∃ Θ, Successor Γ Θ ∧ E ∈ Θ ∧ F ∉ Θ := by
-  have hd : ({F} : Finset (Formula α)).disj = F := by simp [Finset.disj];
-  obtain ⟨Θ, hΘ, hE, -, hn⟩ := exists_successor_of_box_imp_disj_not_mem (S := {F})
-    (.of_rhd_right (mem_of_mem hDE)) (by simpa using .inl hF) <| by
-      intro h;
-      apply rhd_not_mem hF hΔ hDE hD;
-      rw [hd] at h;
-      have h₁ : ofAxiomsMinus 𝔸 ⊢ □(E 🡒 F) 🡒 D ▷ E 🡒 D ▷ F :=
-        HasAxiomJ4Plus.J4Plus _ _ _;
-      exact Context.of h₁ ⨀ Context.by_axm (mem_literals h) ⨀ Context.by_axm (mem_literals hDE);
-  use Θ;
-  and_intros;
-  · exact hΘ;
-  · exact hE;
-  · exact hn <| by rw [hd]; exact C_id;
-
-omit [ILMinusAdequate Φ] in
+omit [CLAdequate Φ] in
 /-- If `□(E 🡒 ⋁(insert F X))` is in `Γ`, where `Γ` proves `G ▷ F` for every `G ∈ X`, then `Γ` proves
 `D ▷ F` for every `D ▷ E ∈ Γ`. -/
-private lemma provable_rhd_of_box_imp_insert_disj_mem [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus]
-    (hS : ∀ A ∈ S, Γ.literals *⊢[ofAxiomsMinus 𝔸] A ▷ F) (hDE : D ▷ E ∈ Γ)
-    (h : □(E 🡒 (insert F S).disj) ∈ Γ) : Γ.literals *⊢[ofAxiomsMinus 𝔸] D ▷ F := by
-  have h₁ : ofAxiomsMinus 𝔸 ⊢ (insert F S).disj 🡒 F ⋎ S.disj := CinsertFDisjAFDisj;
-  have h₂ : Γ.literals *⊢[ofAxiomsMinus 𝔸] □(E ⋏ ∼F 🡒 S.disj) :=
+private lemma provable_rhd_of_box_imp_insert_disj_mem
+    (hS : ∀ A ∈ S, Γ.literals *⊢[ofCLAxioms 𝔸] A ▷ F) (hDE : D ▷ E ∈ Γ)
+    (h : □(E 🡒 (insert F S).disj) ∈ Γ) : Γ.literals *⊢[ofCLAxioms 𝔸] D ▷ F := by
+  have h₁ : ofCLAxioms 𝔸 ⊢ (insert F S).disj 🡒 F ⋎ S.disj := CinsertFDisjAFDisj;
+  have h₂ : Γ.literals *⊢[ofCLAxioms 𝔸] □(E ⋏ ∼F 🡒 S.disj) :=
     Context.of (box_mono <| by cl_prover [h₁]) ⨀ Context.by_axm (mem_literals h);
-  have h₃ : Γ.literals *⊢[ofAxiomsMinus 𝔸] (E ⋏ ∼F) ▷ F :=
+  have h₃ : Γ.literals *⊢[ofCLAxioms 𝔸] (E ⋏ ∼F) ▷ F :=
     Context.of rhd_anti_left_of_box ⨀ h₂ ⨀ fdisj_rhd hS;
-  have h₄ : Γ.literals *⊢[ofAxiomsMinus 𝔸] D ▷ ((E ⋏ ∼F) ⋎ F) :=
+  have h₄ : Γ.literals *⊢[ofCLAxioms 𝔸] D ▷ ((E ⋏ ∼F) ⋎ F) :=
     Context.of (rhd_mono_right <| by cl_prover) ⨀ Context.by_axm (mem_literals hDE);
-  have h₅ := Context.of (Γ := Γ.literals) <|
-    HasAxiomJ2Plus.J2Plus (L := ofAxiomsMinus 𝔸) D (E ⋏ ∼F) F;
+  have h₀ : ofCLAxioms 𝔸 ⊢ D ▷ ((E ⋏ ∼F) ⋎ F) ⋏ (E ⋏ ∼F) ▷ F 🡒 D ▷ F := ofCLAxioms.axiomJ2Plus;
+  have h₅ := Context.of (Γ := Γ.literals) h₀;
   cl_prover [h₃, h₄, h₅];
 
 /-- - [KO21, Lemma 4.7.b] -/
-lemma exists_weakCriticalSuccessor_mem_not_mem [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus]
+lemma exists_weakCriticalSuccessor_mem_not_mem
     (hF : IsRhdOperand Φ F) (hDE : D ▷ E ∈ Γ) (hΔ : WeakCriticalSuccessor F Γ Δ) (hD : D ∈ Δ) :
     ∃ Θ, WeakCriticalSuccessor F Γ Θ ∧ E ∈ Θ ∧ F ∉ Θ := by
   obtain ⟨Θ, hΘ, hE, -, hn⟩ := exists_successor_of_box_imp_disj_not_mem
@@ -909,8 +835,8 @@ lemma exists_weakCriticalSuccessor_mem_not_mem [(ofAxiomsMinus 𝔸).HasAxiomJ2P
   · exact hn <| provable_neg_of_mem <| Finset.mem_insert_self _ _;
 
 /-- - [KO21, Lemma 4.7.c] -/
-lemma exists_criticalSuccessor_box_neg_mem_not_mem [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus]
-    [(ofAxiomsMinus 𝔸).HasAxiomJ5] (hF : IsRhdOperand Φ F) (hDE : D ▷ E ∈ Γ)
+lemma exists_criticalSuccessor_box_neg_mem_not_mem [(ofCLAxioms 𝔸).HasAxiomJ5]
+    (hF : IsRhdOperand Φ F) (hDE : D ▷ E ∈ Γ)
     (hΔ : WeakCriticalSuccessor F Γ Δ) (hD : D ∈ Δ) :
     ∃ Θ, CriticalSuccessor F Γ Θ ∧ E ∈ Θ ∧ F ∉ Θ ∧ □(∼F) ∈ Θ := by
   let T := insert (◇F) (Φ.filter (· ▷ F ∈ Γ) ∪ (Φ.filter (· ▷ F ∈ Γ)).image (◇·));
@@ -923,8 +849,8 @@ lemma exists_criticalSuccessor_box_neg_mem_not_mem [(ofAxiomsMinus 𝔸).HasAxio
       intro h;
       exact rhd_not_mem hF hΔ hDE hD <| provable_rhd_of_box_imp_insert_disj_mem
         (fun _ h ↦ rhd_of_mem_diaSet (Γ := Γ) h) hDE h;
-  have hT : ofAxiomsMinus 𝔸 ⊢ ∼(insert F T).disj 🡒 ∼T.disj := by
-    have : ofAxiomsMinus 𝔸 ⊢ T.disj 🡒 (insert F T).disj :=
+  have hT : ofCLAxioms 𝔸 ⊢ ∼(insert F T).disj 🡒 ∼T.disj := by
+    have : ofCLAxioms 𝔸 ⊢ T.disj 🡒 (insert F T).disj :=
       CFDisjFDisj_of_subset (Finset.subset_insert _ _);
     cl_prover [this];
   use Θ;
@@ -936,65 +862,7 @@ lemma exists_criticalSuccessor_box_neg_mem_not_mem [(ofAxiomsMinus 𝔸).HasAxio
   · exact hp (Adequate.box_neg_mem hF) <| provable_box_neg_of_mem <|
       Finset.mem_insert_of_mem <| Finset.mem_insert_self _ _;
 
-/-- - [KO21, Lemma 4.9] -/
-lemma exists_weakCriticalSuccessor_of_rhd_mem [(ofAxiomsMinus 𝔸).HasAxiomJ2]
-    (hF : IsRhdOperand Φ F) (hDE : D ▷ E ∈ Γ) (hΔ : WeakCriticalSuccessor F Γ Δ) (hD : D ∈ Δ) :
-    ∃ Θ, WeakCriticalSuccessor F Γ Θ ∧ E ∈ Θ := by
-  obtain ⟨Θ, hΘ, hE, -, hn⟩ := exists_successor_of_box_imp_disj_not_mem
-    (S := Φ.filter (· ▷ F ∈ Γ)) (.of_rhd_right (mem_of_mem hDE))
-    (fun A hA ↦ .inl <| .of_rhd_left <| mem_of_mem <| mem_rhdSet.mp hA) <| by
-      intro h;
-      apply rhd_not_mem hF hΔ hDE hD;
-      have h₁ := provable_rhd_of_box_imp_disj_mem
-        (fun G hG ↦ Context.by_axm <| mem_literals <| mem_rhdSet.mp hG) h;
-      have h₂ := Context.of (Γ := Γ.literals) <| HasAxiomJ2.J2 (L := ofAxiomsMinus 𝔸) D E F;
-      have h₃ : Γ.literals *⊢[ofAxiomsMinus 𝔸] D ▷ E := Context.by_axm (mem_literals hDE);
-      cl_prover [h₁, h₂, h₃];
-  use Θ;
-  and_intros;
-  · exact ⟨hΘ, fun hG ↦ hn <| provable_neg_of_mem <| mem_rhdSet.mpr hG⟩;
-  · exact hE;
-
-/-- - [KO21, Lemma 4.9.a] -/
-lemma exists_criticalSuccessor_box_neg_of_rhd_mem [(ofAxiomsMinus 𝔸).HasAxiomJ2]
-    [(ofAxiomsMinus 𝔸).HasAxiomJ5] (hF : IsRhdOperand Φ F) (hDE : D ▷ E ∈ Γ)
-    (hΔ : WeakCriticalSuccessor F Γ Δ) (hD : D ∈ Δ) :
-    ∃ Θ, CriticalSuccessor F Γ Θ ∧ E ∈ Θ ∧ □(∼F) ∈ Θ := by
-  obtain ⟨Θ, hΘ, hE, hp, hn⟩ := exists_successor_of_box_imp_disj_not_mem
-    (.of_rhd_right (mem_of_mem hDE)) (fun _ ↦ diaSet_spec hF) <| by
-      intro h;
-      apply rhd_not_mem hF hΔ hDE hD;
-      have h₁ := provable_rhd_of_box_imp_disj_mem (fun _ h ↦ rhd_of_mem_diaSet (Γ := Γ) h) h;
-      have h₂ := Context.of (Γ := Γ.literals) <| HasAxiomJ2.J2 (L := ofAxiomsMinus 𝔸) D E F;
-      have h₃ : Γ.literals *⊢[ofAxiomsMinus 𝔸] D ▷ E := Context.by_axm (mem_literals hDE);
-      cl_prover [h₁, h₂, h₃];
-  use Θ;
-  and_intros;
-  · exact criticalSuccessor_of_diaSet hΘ hn hp;
-  · exact hE;
-  · exact hp (Adequate.box_neg_mem hF) <| provable_box_neg_of_mem <| Finset.mem_insert_self _ _;
-
 end WeakCriticalSuccessor
-
-omit [ILMinusAdequate Φ] in
-/-- - [KO21, Lemma 4.8] -/
-lemma Successor.exists_successor_of_rhd_mem [Adequate Φ] [(ofAxiomsMinus 𝔸).HasAxiomJ4]
-    (hDE : D ▷ E ∈ Γ) (hΔ : Successor Γ Δ) (hD : D ∈ Δ) : ∃ Θ, Successor Γ Θ ∧ E ∈ Θ := by
-  have hE : IsRhdOperand Φ E := .of_rhd_right (mem_of_mem hDE);
-  obtain ⟨Θ, hΘ, hc⟩ := exists_successor_of_box_not_mem (Adequate.box_neg_mem hE) <| by
-    intro h;
-    apply hΔ.not_mem_of_box_neg_mem _ hD;
-    apply (mem_iff_provable <| Adequate.box_neg_mem <| .of_rhd_left (mem_of_mem hDE)).mpr;
-    have h₁ := Context.of (Γ := Γ.literals) <| HasAxiomJ4.J4 (L := ofAxiomsMinus 𝔸) D E;
-    have h₂ : Γ.literals *⊢[ofAxiomsMinus 𝔸] D ▷ E := Context.by_axm (mem_literals hDE);
-    have h₃ : Γ.literals *⊢[ofAxiomsMinus 𝔸] □(∼E) := Context.by_axm (mem_literals h);
-    change Γ.literals *⊢[ofAxiomsMinus 𝔸] D ▷ E 🡒 ∼□(∼D) 🡒 ∼□(∼E) at h₁;
-    cl_prover [h₁, h₂, h₃];
-  use Θ;
-  and_intros;
-  · exact hΘ;
-  · have : ({∼∼E} : FormulaSet α) *⊢[ofAxiomsMinus 𝔸] ∼∼E := Context.by_axm rfl;
-    exact mem_of_provable hc hE.mem <| by cl_prover [this];
 
 end MaximalConsistentSet
 

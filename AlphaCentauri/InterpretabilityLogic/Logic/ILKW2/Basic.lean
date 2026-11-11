@@ -18,7 +18,7 @@ open Entailment Formula
 variable {α : Type*}
 
 /-- - [Vis97] -/
-abbrev Logic.ILKW2 : Logic α := Logic.ofAxioms {Axioms.KW2 A B | (A) (B)}
+abbrev Logic.ILKW2 : Logic α := Logic.ofILAxioms {Axioms.KW2 A B | (A) (B)}
 
 notation "𝐈𝐋𝐊𝐖𝟐" => Logic.ILKW2
 
@@ -34,7 +34,7 @@ end Veltman.Model
 
 namespace Logic
 
-open ofAxioms
+open ofILAxioms
 
 variable {A B C : Formula α}
 
@@ -59,7 +59,7 @@ open Veltman Veltman.Model Veltman.Model.World
 variable {κ α : Type} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
 theorem ILKW2.sound [M.IsILKW2] (h : 𝐈𝐋𝐊𝐖𝟐 ⊢ A) : M ⊧ A :=
-  ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomKW2) h
+  ofILAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomKW2) h
 
 instance : Consistent (𝐈𝐋𝐊𝐖𝟐 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILKW2.sound (M := pointModel fun _ ↦ False) h 0

@@ -20,7 +20,7 @@ open Entailment Formula
 variable {α : Type*}
 
 abbrev Logic.ILRW : Logic α :=
-  Logic.ofAxioms ({Axioms.R A B C | (A) (B) (C)} ∪ {Axioms.W A B | (A) (B)})
+  Logic.ofILAxioms ({Axioms.R A B C | (A) (B) (C)} ∪ {Axioms.W A B | (A) (B)})
 
 notation "𝐈𝐋𝐑𝐖" => Logic.ILRW
 
@@ -48,7 +48,7 @@ end Verbrugge.Model
 
 namespace Logic
 
-open ofAxioms Veltman Veltman.Model Veltman.Model.World
+open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
@@ -70,7 +70,7 @@ instance : (𝐈𝐋𝐌₀𝐖 : Logic α) ⪯ 𝐈𝐋𝐑𝐖 := weakerThan_i
   · exact ILRW.axiomW
 
 theorem ILRW.sound [M.IsILRW] (h : 𝐈𝐋𝐑𝐖 ⊢ A) : M ⊧ A := by
-  apply ofAxioms.sound _ h;
+  apply ofILAxioms.sound _ h;
   rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩) x;
   · exact forces_axiomR;
   · exact forces_axiomW;

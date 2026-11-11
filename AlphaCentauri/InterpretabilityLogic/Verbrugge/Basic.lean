@@ -142,7 +142,7 @@ end Verbrugge
 
 /-! ### Soundness -/
 
-namespace Logic.ofAxioms
+namespace Logic.ofILAxioms
 
 open Verbrugge Verbrugge.Model Verbrugge.Model.World
 
@@ -151,7 +151,7 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : FormulaSet α} 
 /-- - [JMMV20, Theorem 3.2]
 - [Mas20, §6.2]
 -/
-theorem sound_verbrugge [M.IsIL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxioms 𝔸 ⊢ A) : M ⊧ A := by
+theorem sound_verbrugge [M.IsIL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofILAxioms 𝔸 ⊢ A) : M ⊧ A := by
   intro x;
   induction h generalizing x with
   | axm hA => exact h𝔸 _ hA x;
@@ -202,7 +202,7 @@ theorem sound_verbrugge [M.IsIL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxioms
     · simpa;
   | _ => grind;
 
-end Logic.ofAxioms
+end Logic.ofILAxioms
 
 /-! ### Veltman models as generalised Veltman models -/
 

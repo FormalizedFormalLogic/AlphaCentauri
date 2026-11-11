@@ -7,9 +7,8 @@ public import Foundation.Vorspiel.Rel.CWF
 /-!
 # Veltman semantics
 
-Veltman models, forcing, the frame conditions of $\mathbf{J1}$, $\mathbf{J2}$, $\mathbf{J2}^+$,
-$\mathbf{J4}$, $\mathbf{J4}^+$ and $\mathbf{J5}$ on $\mathbf{IL}^-$-frames, and the soundness of
-$\mathbf{IL}^-$ with respect to them.
+Veltman models, forcing, the frame conditions of $\mathbf{J1}$, $\mathbf{J2}$, $\mathbf{J4}$ and
+$\mathbf{J5}$, and the soundness of $\mathbf{CL}$ and its extensions with respect to them.
 -/
 
 @[expose] public section
@@ -139,13 +138,6 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
 instance : Semantics (Model κ α) (Formula α) := ⟨fun M A ↦ ∀ x : M.World, World.Forces M x A⟩
 
 
-/-- `≺` is transitive and conversely well-founded, and `x ≺[w] y` implies `w ≺ x`.
-
-- [KO21, Definition 2.2]
--/
-class IsILMinus (M : Model κ α) extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel where
-  rel_of_s_left {w x y : M.World} : x ≺[w] y → w ≺ x
-
 /-- - [KO21, Proposition 3.2] -/
 class IsJ1 (M : Model κ α) : Prop where
   s_refl {w x : M.World} : w ≺ x → x ≺[w] x
@@ -162,9 +154,6 @@ class IsJ2 (M : Model κ α) : Prop extends M.IsJ4 where
 class IsJ5 (M : Model κ α) : Prop where
   s_of_rel {w x y : M.World} : w ≺ x → x ≺ y → x ≺[w] y
 
-instance [M.IsIL] : M.IsILMinus where
-  rel_of_s_left := rel_of_s_left
-
 instance [M.IsIL] : M.IsJ1 := ⟨s_refl⟩
 
 instance [M.IsIL] : M.IsJ2 where
@@ -173,8 +162,20 @@ instance [M.IsIL] : M.IsJ2 where
 
 instance [M.IsIL] : M.IsJ5 := ⟨s_of_rel⟩
 
-lemma IsIL.of_isILMinus [M.IsILMinus] [M.IsJ1] [M.IsJ2] [M.IsJ5] : M.IsIL where
-  rel_of_s_left := IsILMinus.rel_of_s_left
+/-- `≺` is transitive and conversely well-founded, `x ≺[w] y` implies `w ≺ x`, and the conditions of
+$\mathbf{J1}$ and $\mathbf{J2}$ hold.
+
+- [KO21, Definition 2.2]
+-/
+class IsCL (M : Model κ α) : Prop extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel,
+    M.IsJ1, M.IsJ2 where
+  rel_of_s_left {w x y : M.World} : x ≺[w] y → w ≺ x
+
+instance [M.IsIL] : M.IsCL where
+  rel_of_s_left := rel_of_s_left
+
+lemma IsIL.of_isCL [M.IsCL] [M.IsJ5] : M.IsIL where
+  rel_of_s_left := IsCL.rel_of_s_left
   rel_of_s_right := IsJ4.rel_of_s_right
   s_refl := IsJ1.s_refl
   s_trans := IsJ2.s_trans
@@ -206,25 +207,11 @@ lemma forces_axiomJ1 [M.IsJ1] : x ⊩ Axioms.J1 A B := by
   intro hx y Rxy hy
   exact ⟨y, IsJ1.s_refl Rxy, hx y Rxy hy⟩
 
-lemma forces_axiomJ4Plus [M.IsJ4] : x ⊩ Axioms.J4Plus A B C := by
-  intro hx hCA y Rxy hy
-  obtain ⟨z, Sxyz, hz⟩ := hCA y Rxy hy
-  exact ⟨z, Sxyz, hx z (IsJ4.rel_of_s_right Sxyz) hz⟩
-
 lemma forces_axiomJ4 [M.IsJ4] : x ⊩ Axioms.J4 A B := by
   intro hx hA
   obtain ⟨y, Rxy, hy⟩ := forces_dia.mp hA
   obtain ⟨z, Sxyz, hz⟩ := hx y Rxy hy
   exact forces_dia.mpr ⟨z, IsJ4.rel_of_s_right Sxyz, hz⟩
-
-lemma forces_axiomJ2Plus [M.IsJ2] : x ⊩ Axioms.J2Plus A B C := by
-  intro hx y Rxy hy
-  obtain ⟨hABC, hBC⟩ := forces_and.mp hx
-  obtain ⟨z, Sxyz, hz⟩ := hABC y Rxy hy
-  rcases forces_or.mp hz with hz | hz
-  · obtain ⟨u, Sxzu, hu⟩ := hBC z (IsJ4.rel_of_s_right Sxyz) hz
-    exact ⟨u, IsJ2.s_trans Sxyz Sxzu, hu⟩
-  · exact ⟨z, Sxyz, hz⟩
 
 lemma forces_axiomJ2 [M.IsJ2] : x ⊩ Axioms.J2 A B C := by
   intro hx y Rxy hy
@@ -242,16 +229,16 @@ end Model.World
 
 end Veltman
 
-/-! ### Soundness of the sublogics of $\mathbf{IL}$ -/
+/-! ### Soundness of $\mathbf{CL}$ and its extensions -/
 
-namespace Logic.ofAxiomsMinus
+namespace Logic.ofCLAxioms
 
 open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : FormulaSet α} {A : Formula α}
 
 /-- - [KO21, Proposition 2.3] -/
-theorem sound [M.IsILMinus] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxiomsMinus 𝔸 ⊢ A) : M ⊧ A := by
+theorem sound [M.IsCL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofCLAxioms 𝔸 ⊢ A) : M ⊧ A := by
   intro x
   induction h generalizing x with
   | axm hA => exact h𝔸 _ hA x
@@ -267,11 +254,13 @@ theorem sound [M.IsILMinus] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxiomsMinus
     intro hx y Rxy hy
     exact hx y Rxy (ih y hy)
   | axiomL => exact forces_axiomL
+  | axiomJ1 => exact forces_axiomJ1
+  | axiomJ2 => exact forces_axiomJ2
   | axiomJ3 => exact forces_axiomJ3
   | axiomJ6 => exact forces_axiomJ6
   | _ => grind
 
-end Logic.ofAxiomsMinus
+end Logic.ofCLAxioms
 
 
 end FFL.InterpretabilityLogic

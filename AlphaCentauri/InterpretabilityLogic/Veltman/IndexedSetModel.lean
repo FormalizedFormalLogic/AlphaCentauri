@@ -7,8 +7,8 @@ public import Mathlib.Data.Set.Finite.List
 /-!
 # The model on indexed sets
 
-The construction behind the completeness of $\mathbf{IL}^-(\mathbf{J2}^+, \mathbf{J5})$ and
-$\mathbf{IL}$ with respect to finite Veltman models (de Jongh–Veltman).
+The construction behind the completeness of $\mathbf{IL}$ with respect to finite Veltman models
+(de Jongh–Veltman).
 
 A finite Veltman model whose worlds are maximal consistent subsets of an adequate set indexed by
 finite sequences of formulas, and its truth lemma.
@@ -114,9 +114,6 @@ instance : IsTrans _ (countermodel L Φ).Rel :=
 
 instance : Std.Irrefl (countermodel L Φ).Rel := ⟨fun _ h ↦ h.1.irrefl⟩
 
-instance [Adequate Φ] : (countermodel L Φ).IsILMinus where
-  rel_of_s_left h := h.1.1
-
 variable {w x y z : IndexedSet L Φ}
 
 lemma s_trans (h₁ : (countermodel L Φ).S w x y) (h₂ : (countermodel L Φ).S w y z) :
@@ -159,18 +156,21 @@ lemma s_refl [Adequate Φ] (hL : ∀ {A}, L ⊢ A ▷ A) (h : w.Rel x) : (counte
 
 instance : (countermodel L Φ).IsJ5 := ⟨s_of_rel⟩
 
-instance [Adequate Φ] [L.ExtendsGL] [L.HasAxiomJ1] : (countermodel L Φ).IsJ1 :=
-  ⟨s_refl axiomJ1'⟩
+instance {𝔸 : FormulaSet α} [Adequate Φ] [Nonempty (IndexedSet (ofCLAxioms 𝔸) Φ)] :
+    (countermodel (ofCLAxioms 𝔸) Φ).IsJ1 :=
+  ⟨s_refl ofCLAxioms.rhd_refl⟩
 
-instance [Adequate Φ] [L.ExtendsGL] [L.HasAxiomJ1] : (countermodel L Φ).IsIL := .of_isILMinus
+instance {𝔸 : FormulaSet α} [Adequate Φ] [Nonempty (IndexedSet (ofCLAxioms 𝔸) Φ)] :
+    (countermodel (ofCLAxioms 𝔸) Φ).IsCL where
+  rel_of_s_left h := h.1.1
 
-variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (ofAxiomsMinus 𝔸) Φ)] [ILMinusAdequate Φ]
-  [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus] [(ofAxiomsMinus 𝔸).HasAxiomJ5]
+variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (ofCLAxioms 𝔸) Φ)] [CLAdequate Φ]
+  [(ofCLAxioms 𝔸).HasAxiomJ5]
 
 /-- - [dJV90, Theorem 4.1]
 - [KO21, Lemma 5.6]
 -/
-lemma truthlemma {x : (countermodel (ofAxiomsMinus 𝔸) Φ).World} {A : Formula α} (hA : A ∈ Φ) :
+lemma truthlemma {x : (countermodel (ofCLAxioms 𝔸) Φ).World} {A : Formula α} (hA : A ∈ Φ) :
     x ⊩ A ↔ A ∈ x.set := by
   induction A generalizing x with
   | atom a => rfl;
@@ -215,7 +215,7 @@ lemma truthlemma {x : (countermodel (ofAxiomsMinus 𝔸) Φ).World} {A : Formula
           (List.prefix_of_prefix_length_le hpre' hpre (by simp)).eq_of_length (by simp)
         obtain rfl : C' = F := by simpa using h₁
         exact ⟨List.prefix_refl _, hΘ, hFΘ, hbΘ⟩
-      · have hbot := Rxu.1.criticalSuccessor_bot <| K_right ofAxiomsMinus.box_neg_iff_rhd_bot;
+      · have hbot := Rxu.1.criticalSuccessor_bot <| K_right ofCLAxioms.box_neg_iff_rhd_bot;
         obtain ⟨Θ, hΘ, hCΘ, -⟩ :=
           hbot.weakCriticalSuccessor.exists_criticalSuccessor_box_neg_mem_not_mem .bot h hu;
         exact ⟨x.successor Θ hΘ.toSuccessor,
@@ -229,33 +229,33 @@ end Veltman
 
 /-! ### Completeness -/
 
-namespace Logic.ofAxiomsMinus
+namespace Logic.ofCLAxioms
 
 open Veltman Veltman.Model.World
 
 variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α} {Φ : Finset (Formula α)}
   {A : Formula α}
 
-/-- If an extension of $\mathbf{IL}^-(\mathbf{J2}^+, \mathbf{J5})$ does not prove `A`, then `A`
-fails at some world of the countermodel over an adequate set containing `A`.
+/-- If an extension of $\mathbf{CL}$ proving $\mathbf{J5}$ does not prove
+`A`, then `A` fails at some world of the countermodel over an adequate set containing `A`.
 
 - [KO21, Theorem 5.4]
 -/
-lemma not_models_countermodel [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus] [(ofAxiomsMinus 𝔸).HasAxiomJ5]
-    [Entailment.Consistent (ofAxiomsMinus 𝔸)] (h : ofAxiomsMinus 𝔸 ⊬ A) :
-    ¬countermodel (ofAxiomsMinus 𝔸) (ilMinusAdequateClosure {A}) ⊧ A := by
+lemma not_models_countermodel [(ofCLAxioms 𝔸).HasAxiomJ5]
+    [Entailment.Consistent (ofCLAxioms 𝔸)] (h : ofCLAxioms 𝔸 ⊬ A) :
+    ¬countermodel (ofCLAxioms 𝔸) (clAdequateClosure {A}) ⊧ A := by
   intro hM;
-  have hX : ({∼A} : FormulaSet α) *⊬[ofAxiomsMinus 𝔸] ⊥ := by
+  have hX : ({∼A} : FormulaSet α) *⊬[ofCLAxioms 𝔸] ⊥ := by
     intro h₁;
     apply h;
-    have h₂ : ofAxiomsMinus 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+    have h₂ : ofCLAxioms 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
     cl_prover [h₂];
-  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := ilMinusAdequateClosure {A}) hX;
-  have hA : A ∈ ilMinusAdequateClosure {A} := ilMinusAdequateClosure.subset (by simp);
+  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := clAdequateClosure {A}) hX;
+  have hA : A ∈ clAdequateClosure {A} := clAdequateClosure.subset (by simp);
   exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
     (countermodel.truthlemma hA).mp <| hM ⟨Γ, [], by simp, by simp⟩
 
-end Logic.ofAxiomsMinus
+end Logic.ofCLAxioms
 
 
 end

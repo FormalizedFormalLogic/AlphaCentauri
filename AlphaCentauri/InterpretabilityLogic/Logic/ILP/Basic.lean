@@ -20,7 +20,7 @@ open Entailment Formula
 variable {α : Type*}
 
 /-- - [Vis90, §6.3] -/
-abbrev Logic.ILP : Logic α := Logic.ofAxioms {Axioms.P A B | (A) (B)}
+abbrev Logic.ILP : Logic α := Logic.ofILAxioms {Axioms.P A B | (A) (B)}
 
 notation "𝐈𝐋𝐏" => Logic.ILP
 
@@ -36,7 +36,7 @@ end Veltman.Model
 
 namespace Logic
 
-open ofAxioms Veltman Veltman.Model Veltman.Model.World
+open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
@@ -303,11 +303,11 @@ instance : (treeCountermodel L Φ).HasP := ⟨fun _ h₁ h₂ ↦ ⟨h₁, h₂.
 
 instance [Adequate Φ] : (treeCountermodel L Φ).IsILP := {}
 
-variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (Logic.ofAxioms 𝔸) Φ)] [ILPAdequate Φ]
+variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (Logic.ofILAxioms 𝔸) Φ)] [ILPAdequate Φ]
 
 /-- - [dJV90, Theorem 5.2] -/
-lemma truthlemma (hP : ∀ {B C : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.P B C)
-    {w : (treeCountermodel (Logic.ofAxioms 𝔸) Φ).World} {A : Formula α} (hA : A ∈ Φ) :
+lemma truthlemma (hP : ∀ {B C : Formula α}, Logic.ofILAxioms 𝔸 ⊢ Axioms.P B C)
+    {w : (treeCountermodel (Logic.ofILAxioms 𝔸) Φ).World} {A : Formula α} (hA : A ∈ Φ) :
     w ⊩ A ↔ A ∈ w.head.set := by
   induction A generalizing w with
   | atom a => rfl;
@@ -337,8 +337,8 @@ lemma truthlemma (hP : ∀ {B C : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.P 
       obtain ⟨Δ, hΔ, hBΔ⟩ := exists_criticalSuccessor_of_rhd_not_mem hA hn;
       obtain ⟨v, hS, hv⟩ := h (w.cons (w.head.criticalSuccessor C hC' Δ hΔ.toSuccessor)
         (.inr ⟨C, hΔ, rfl⟩)) (List.suffix_refl _) ((ihB hB).mpr hBΔ);
-      have hCC {Γ : MaximalConsistentSet (Logic.ofAxioms 𝔸) Φ} : C ▷ C ∈ Γ :=
-        (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofAxioms.rhd_refl;
+      have hCC {Γ : MaximalConsistentSet (Logic.ofILAxioms 𝔸) Φ} : C ▷ C ∈ Γ :=
+        (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofILAxioms.rhd_refl;
       exact (not_mem_of_prefix (hS.2.1.trans (List.suffix_cons _ _)) hS.2.2 hCC).2 <|
         (ihC hC).mp hv;
     · intro h u Rwu hu;
@@ -347,7 +347,7 @@ lemma truthlemma (hP : ∀ {B C : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.P 
       · change _ <:+ [] at Rwu;
         simp at Rwu;
       obtain ⟨hs, hc⟩ := List.isChain_cons_cons.mp hc;
-      let p : IndexedBranch (Logic.ofAxioms 𝔸) Φ := ⟨y, l, hc⟩;
+      let p : IndexedBranch (Logic.ofILAxioms 𝔸) Φ := ⟨y, l, hc⟩;
       have hBC : B ▷ C ∈ y.set := by
         rcases List.suffix_cons_iff.mp Rwu with h₁ | h₁;
         · obtain ⟨rfl, -⟩ := List.cons_eq_cons.mp h₁;
@@ -358,7 +358,7 @@ lemma truthlemma (hP : ∀ {B C : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.P 
           exact (rel_rel (u := p) h₁).1.mem_of_box_mem h₂;
       rcases hs with ⟨hs, hseq⟩ | ⟨F, hF, hseq⟩;
       · obtain ⟨Θ, hΘ, hCΘ⟩ :=
-          (hs.criticalSuccessor_bot Logic.ofAxioms.rhd_bot).exists_criticalSuccessor .bot hBC hu;
+          (hs.criticalSuccessor_bot Logic.ofILAxioms.rhd_bot).exists_criticalSuccessor .bot hBC hu;
         exact ⟨p.cons (y.successor Θ hΘ.toSuccessor) (.inl ⟨hΘ.toSuccessor, rfl⟩),
           ⟨Rwu, List.suffix_refl _, hseq ▸ List.prefix_refl _⟩, (ihC hC).mpr hCΘ⟩
       · have hF' : IsRhdOperand Φ F := x.isRhdOperand_of_mem_seq F (by simp [hseq]);
@@ -388,7 +388,7 @@ theorem ILP.semantics_TFAE : [
   ].TFAE := by
   tfae_have 1 → 2 := by
     intro h _ _ M _;
-    exact ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomP) h;
+    exact ofILAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomP) h;
   tfae_have 2 → 3 := by
     intro h _ _ _ M _;
     exact h M;

@@ -42,8 +42,7 @@ rewrite, so it is written as if it were already there.
 - **Citations.** The bibliography is [`references.yml`](../references.yml) at the repository
   root, written in [Hayagriva](https://github.com/typst/hayagriva) YAML rather than
   Foundation's BibTeX `references.bib`; there is no `bibtool` step, the file is edited by
-  hand and kept sorted by key. Its keys are the citation keys (`HP98`, `Lin97`, `AB05`, see
-  `README.md`), cited at the end of the docstring in Foundation's form, one line per key:
+  hand and kept sorted by key. Its keys are the citation keys (`HP98`, `Lin97`, `AB05`, …), cited at the end of the docstring in Foundation's form, one line per key:
   ```
   - [HP98, Theorem I.2.4]
   - [Lin97, Lemma 5.2]

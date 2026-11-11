@@ -1,8 +1,9 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Proof.CutElimination
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
-public import AlphaCentauri.ToFoundation.Set
+public import AlphaCentauri.Bootstrapping.PartialTruth.Complexity
+public import AlphaCentauri.Bootstrapping.Proof.CutElimination
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 
 /-!
 # Soundness of pure logic for the readable truth
@@ -10,13 +11,7 @@ public import AlphaCentauri.ToFoundation.Set
 `IsFalseBlock k D e` says that `e` is a block of existential quantifiers over a closed matrix in
 the class `IsReadable k D` whose instances by closed terms are all false under `ReadableTruth k D`.
 In every model of `𝗜𝚺⁺(k + 1)`, a sequent consisting of such formulas has no cut-free derivation
-in pure logic, and in every model that also satisfies `𝗜𝚺⁺2` it has no derivation in pure logic at
-all.
-
-## References
-
-- [HP98, Theorem I.4.33]
-- [Kay91, Exercise 10.8]
+in pure logic, nor any derivation in pure logic at all.
 -/
 
 @[expose] public section
@@ -24,7 +19,10 @@ all.
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+
+section ReadableSoundness
 
 open PeanoMinus ISigma0 ISigma1
 open Arithmetic (numeral numeral_semiterm)
@@ -442,10 +440,13 @@ theorem not_cutFreeDerivable_of_isFalseBlock (hE : ∀ e ∈ E, IsFalseBlock k D
 instances has no derivation in pure logic.
 - [HP98, Theorem I.4.33]
 - [Kay91, Exercise 10.8] -/
-theorem not_derivable_of_isFalseBlock [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2] (hE : ∀ e ∈ E, IsFalseBlock k D e) :
+theorem not_derivable_of_isFalseBlock (hE : ∀ e ∈ E, IsFalseBlock k D e) :
     ¬Derivable (∅ : Theory ℒₒᵣ) E :=
   fun h ↦ not_cutFreeDerivable_of_isFalseBlock hE h.cutFree
 
 end falseBlock
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end ReadableSoundness
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

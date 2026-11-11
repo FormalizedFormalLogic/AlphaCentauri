@@ -2,10 +2,8 @@ module
 
 public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.ProperCut
-public import AlphaCentauri.ToFoundation.PrenexDefinable
 
-/-!
-# The coded limit of an enumeration cut
+/-! # The coded limit of an enumeration cut
 
 Over a model of $\mathsf{EA}$, two codes of initial segments of an enumeration cut agree on the
 entries of the shorter one, and the longer code lies less than one block-bound above the shorter.
@@ -14,15 +12,15 @@ Under $\mathsf{I}\Delta_1$, a single code agrees with every code of the cut on i
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
 namespace FFL.FirstOrder.Arithmetic
 
-noncomputable section
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 attribute [local instance] ElementaryArithmetic.models_ISigma0_union_Omega1
+
+noncomputable section
 
 lemma enumCode.ext_eq_of_le {a I i i' z z' t t' : V} {G : V → V → Prop}
     (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y')

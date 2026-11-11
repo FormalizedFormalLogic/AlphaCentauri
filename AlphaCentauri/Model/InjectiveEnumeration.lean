@@ -1,27 +1,28 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Schemata
-public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
+public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+public import Foundation.FirstOrder.Arithmetic.Schemata
 
-/-!
-# An injective enumeration from a failure of collection
--/
+/-! # An injective enumeration from a failure of collection -/
 
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
 
-open scoped FFL.FirstOrder.Bounding FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+open _root_.FFL.Entailment
+
 
 variable {V : Type*} [ORingStructure V]
 
 lemma definable_exists_lt {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q) :
     𝚺ᴬ₀.DefinableRel fun s x : V ↦ ∃ u < s, Q u x := by
   have h : 𝚺ᴬ₀.Definable (k := 3) fun w : Fin 3 → V ↦ Q (w 0) (w 2) :=
-    (FFL.FirstOrder.Bounding.HierarchySymbol.Definable.retraction hQ ![0, 2]).of_iff
+    (HierarchySymbol.Definable.retraction hQ ![0, 2]).of_iff
       (by intro w; simp)
-  have hB := FFL.FirstOrder.Bounding.HierarchySymbol.Definable.bexs
+  have hB := HierarchySymbol.Definable.bexs
     (R := Semiformula.Operator.LT.lt) (by rfl)
     (P := fun (v : Fin 2 → V) (u : V) ↦ Q u (v 1))
     (h.of_iff (by intro w; simp)) (#0 : ArithmeticSemiterm V 2)
@@ -29,7 +30,7 @@ lemma definable_exists_lt {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q
 
 lemma definablePred_exists_lt {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q) (x : V) :
     𝚺ᴬ₀.DefinablePred fun s : V ↦ ∃ u < s, Q u x := by
-  have := FFL.FirstOrder.Bounding.HierarchySymbol.Definable.retractiont
+  have := HierarchySymbol.Definable.retractiont
     (definable_exists_lt hQ) (![#0, &x] : Fin 2 → ArithmeticSemiterm V 1)
   exact this.of_iff fun v ↦ by simp
 
@@ -41,19 +42,19 @@ lemma definableRel_graph [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {Q : V → V → Pro
   have hpair : 𝚺ᴬ₀.DefinableRel₃ fun x z y : V ↦ y = ⟪x, z⟫ := by definability
   have hlt : 𝚺ᴬ₀.DefinableRel fun x _ : V ↦ x < a := by definability
   have hP₁ : 𝚺ᴬ₀.Definable (k := 3) fun w : Fin 3 → V ↦ w 2 = ⟪w 1, w 0⟫ :=
-    (FFL.FirstOrder.Bounding.HierarchySymbol.Definable.retraction hpair ![1, 0, 2]).of_iff
+    (HierarchySymbol.Definable.retraction hpair ![1, 0, 2]).of_iff
       (by intro w; simp)
   have hP₂ : 𝚺ᴬ₀.Definable (k := 3) fun w : Fin 3 → V ↦ ∃ u < w 0, Q u (w 1) :=
-    (FFL.FirstOrder.Bounding.HierarchySymbol.Definable.retraction hσ ![0, 1]).of_iff
+    (HierarchySymbol.Definable.retraction hσ ![0, 1]).of_iff
       (by intro w; simp)
   have hP₃ : 𝚺ᴬ₀.Definable (k := 3) fun w : Fin 3 → V ↦ ∀ z' < w 0, ¬∃ u < z', Q u (w 1) :=
-    FFL.FirstOrder.Bounding.HierarchySymbol.Definable.ball (R := Semiformula.Operator.LT.lt)
+    HierarchySymbol.Definable.ball (R := Semiformula.Operator.LT.lt)
       (P := fun (v : Fin 3 → V) (z' : V) ↦ ¬∃ u < z', Q u (v 1)) (by rfl)
-      ((FFL.FirstOrder.Bounding.HierarchySymbol.Definable.notSigma
-        (FFL.FirstOrder.Bounding.HierarchySymbol.Definable.retraction hσ ![0, 2])).of_zero
+      ((HierarchySymbol.Definable.notSigma
+        (HierarchySymbol.Definable.retraction hσ ![0, 2])).of_zero
           (ℌ := 𝚺ᴬ₀) |>.of_iff (by intro w; simp))
       (#0)
-  have hB := FFL.FirstOrder.Bounding.HierarchySymbol.Definable.bexs
+  have hB := HierarchySymbol.Definable.bexs
     (R := Semiformula.Operator.LT.lt) (by rfl)
     (P := fun (v : Fin 2 → V) (z : V) ↦ v 1 = ⟪v 0, z⟫ ∧ (∃ u < z, Q u (v 0)) ∧
       ∀ z' < z, ¬∃ u < z', Q u (v 0))
@@ -98,5 +99,6 @@ theorem exists_injective_unbounded_of_not_collection [V↓[ℒₒᵣ] ⊧* 𝗜�
       · exact absurd hσz ((hs _ hx).2 z h)
       · rw [hyz, h]
       · exact absurd (hs _ hx).1 (hmin _ h)
+
 
 end FFL.FirstOrder.Arithmetic

@@ -1,19 +1,14 @@
 # AlphaCentauri
 
-An experiment in **autonomous AI formalization of the metamathematics of first-order arithmetic**,
-built on [Foundation](https://github.com/FormalizedFormalLogic/Foundation), the Lean 4 library of
+AlphaCentauri aims to formalize results on arithmetic in first-order logic, built on
+[Foundation](https://github.com/FormalizedFormalLogic/Foundation), the Lean 4 library of
 mathematical logic of the [Formalized Formal Logic](https://github.com/FormalizedFormalLogic)
-organization.
+organization. It is also an experiment in autonomous AI formalization.
 
-Humans decide what to formalize, one GitHub issue at a time, from
-[HP98] and [Lin97]; AI agents write, review and maintain the Lean code. Every step happens on
-GitHub. The process is [`docs/workflow.md`](docs/workflow.md), the contract for agents is
-[`AGENTS.md`](AGENTS.md), and the code conventions are
+Humans decide what to formalize, one GitHub issue at a time; AI agents write, review and maintain
+the Lean code. Every step happens on GitHub. The process is [`docs/workflow.md`](docs/workflow.md),
+the contract for agents is [`AGENTS.md`](AGENTS.md), and the code conventions are
 [`docs/conventions.md`](docs/conventions.md).
-
-- **[HP98]** P. Hájek, P. Pudlák, *Metamathematics of First-Order Arithmetic*, Perspectives in
-  Logic, 1998.
-- **[Lin97]** P. Lindström, *Aspects of Incompleteness*, Lecture Notes in Logic 10, 1997.
 
 ## Building
 
@@ -59,4 +54,4 @@ The import graph of the modules of AlphaCentauri, regenerated on every push to `
 
 ## License
 
-Apache-2.0, like Foundation.
+[Apache-2.0](./LICENSE)

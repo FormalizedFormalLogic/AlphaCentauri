@@ -28,60 +28,6 @@ accept:
 
 declaration:
   # The unproved statements themselves.
-  FFL.FirstOrder.Arithmetic.BSigma1.finiteAxiomatizable:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [Kay91, Exercise 10.4].
-      - FFL.FirstOrder.Arithmetic.BSigma1.finiteAxiomatizable
-  FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1_weakerThanOn_Pi1_ISigma0:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [HP98, §V.1(a), p. 274].
-      - FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1_weakerThanOn_Pi1_ISigma0
-  FFL.FirstOrder.Arithmetic.ISigma0.finiteAxiomatizable:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [HP98, Corollary V.4.39], [Kay91, Exercise 10.4].
-      - FFL.FirstOrder.Arithmetic.ISigma0.finiteAxiomatizable
-  FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1.finiteAxiomatizable:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [HP98, Corollary V.4.39], [Kay91, Exercise 10.4].
-      - FFL.FirstOrder.Arithmetic.ISigma0_union_Omega1.finiteAxiomatizable
-  FFL.FirstOrder.Arithmetic.BSigma1_weakerThan_ISigma0_add_not_exp:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [WP89].
-      - FFL.FirstOrder.Arithmetic.BSigma1_weakerThan_ISigma0_add_not_exp
-  FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [HP98, §V.5(f), p. 393].
-      - FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0
-  FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.provable_bertrandPostulate_ISigma0_union_Omega1
-  FFL.FirstOrder.Arithmetic.exists_properEndExtension_of_BSigma1:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [Kay91, Chapter 16, p. 269], [WP89].
-      - FFL.FirstOrder.Arithmetic.exists_properEndExtension_of_BSigma1
-  FFL.FirstOrder.Arithmetic.BSigma_weakerThan_IDelta:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [HP98, Remark after Theorem I.2.5].
-      - FFL.FirstOrder.Arithmetic.BSigma_weakerThan_IDelta
-  FFL.FirstOrder.Arithmetic.PigeonholeOnPrenexHierarchy_weakerThan_ISigma0:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [PWW88, Problem 2].
-      - FFL.FirstOrder.Arithmetic.PigeonholeOnPrenexHierarchy_weakerThan_ISigma0
-  FFL.FirstOrder.Arithmetic.PigeonholeOnPrenexHierarchy_weakerThan_ISigma0_union_Omega1:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [HP98, §V.5(g)].
-      - FFL.FirstOrder.Arithmetic.PigeonholeOnPrenexHierarchy_weakerThan_ISigma0_union_Omega1
-  FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [PWW88, Problem 1].
-      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0
-  FFL.FirstOrder.Arithmetic.exists_complete_extension_ISigma0_of_restricted_complexity:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [ELV25, Question 1.2].
-      - FFL.FirstOrder.Arithmetic.exists_complete_extension_ISigma0_of_restricted_complexity
-  FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1:
-    forgive:
-      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
   FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_iterCon_iff_not_iterate_standardProvability_bot
@@ -98,72 +44,74 @@ declaration:
     forgive:
       # Quoted by Bek99 from Beklemishev 1997 without proof.
       - FFL.FirstOrder.Arithmetic.uniformReflection_of_parameterFreeInduction
-  FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_IE1:
+  FFL.FirstOrder.Arithmetic.not_provable_infinitudeOfPrimes_IOpen:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.1]; Jeřábek states that his proof can be formalized in IE₁ + Count₂(∇₁) [Jer21, Chapter 0, §2.2].
-      - FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_IE1
-  FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_ISigma0:
+      - FFL.FirstOrder.Arithmetic.not_provable_infinitudeOfPrimes_IOpen
+  FFL.FirstOrder.Arithmetic.not_provable_primeDvdMul_IOpen:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.1]; with Δ₀EQ adjoined it is [BI91, Theorem 3.5], with Count₂(Δ₀) adjoined [Jer10, Theorem 5.7].
-      - FFL.FirstOrder.Arithmetic.provable_quadraticResidueNegOne_ISigma0
-  FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_IE1:
+      - FFL.FirstOrder.Arithmetic.not_provable_primeDvdMul_IOpen
+  FFL.FirstOrder.Arithmetic.not_provable_bezout_IOpen_greatestCommonDivisor:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.2]; Jeřábek states that a proof of quadratic reciprocity can be formalized in IE₁ + Count₂(∇₁) [Jer21, Chapter 0, §2.2].
-      - FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_IE1
-  FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_ISigma0:
+      - FFL.FirstOrder.Arithmetic.not_provable_bezout_IOpen_greatestCommonDivisor
+  FFL.FirstOrder.Arithmetic.not_provable_IOpen_allClosure:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.2]; with Count₂(Δ₀) adjoined it is [Jer10, Theorem 5.7].
-      - FFL.FirstOrder.Arithmetic.provable_quadraticReciprocityConverse_ISigma0
-  FFL.FirstOrder.Arithmetic.provable_quadraticReciprocity_IE1:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.not_provable_irrationalSqrtTwo_IOpen:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.2]; Jeřábek states that his proof can be formalized in IE₁ + Count₂(∇₁) [Jer21, Chapter 0, §2.2].
-      - FFL.FirstOrder.Arithmetic.provable_quadraticReciprocity_IE1
-  FFL.FirstOrder.Arithmetic.provable_noRootNegOne_IE1:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.Arithmetic.IOpen_strictlyWeakerThan_IOpen_bezout:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.3].
-      - FFL.FirstOrder.Arithmetic.provable_noRootNegOne_IE1
-  FFL.FirstOrder.Arithmetic.provable_noRootNegOne_ISigma0:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  HahnSeries.isRealClosed_lex:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.3].
-      - FFL.FirstOrder.Arithmetic.provable_noRootNegOne_ISigma0
-  FFL.FirstOrder.Arithmetic.provable_squareAddMulSquareIff_IE1:
+      - HahnSeries.isRealClosed_lex
+  FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen:
     forgive:
-      # An open problem, not a theorem awaiting formalization: one reading of [Smi93, Question 5.4].
-      - FFL.FirstOrder.Arithmetic.provable_squareAddMulSquareIff_IE1
-  FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE2:
+      - FFL.FirstOrder.Arithmetic.exists_computable_nonstandard_model_IOpen
+  FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, Question 5.6].
-      - FFL.FirstOrder.Arithmetic.provable_fermatLastTheorem_IE2
-  FFL.FirstOrder.Arithmetic.exists_diophantine_equiv_ISigma0:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  OpenPredicate.openInduction_iff_integerPart:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [DAq05, Question 8.1].
-      - FFL.FirstOrder.Arithmetic.exists_diophantine_equiv_ISigma0
-  FFL.FirstOrder.Arithmetic.exists_diophantine_equiv_ISigma0_union_Omega1:
+      - OpenPredicate.openInduction_iff_integerPart
+  FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation:
     forgive:
-      # An open problem, not a theorem awaiting formalization: [DAq05, §8].
-      - FFL.FirstOrder.Arithmetic.exists_diophantine_equiv_ISigma0_union_Omega1
-  FFL.FirstOrder.Arithmetic.IE1_strictlyWeakerThan_ISigma0:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [DAq05, §8].
-      - FFL.FirstOrder.Arithmetic.IE1_strictlyWeakerThan_ISigma0
-  FFL.FirstOrder.Arithmetic.IE_strictlyWeakerThan_IE_succ:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (1)].
-      - FFL.FirstOrder.Arithmetic.IE_strictlyWeakerThan_IE_succ
-  FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [Wil85, §4.13, Problem (2)].
-      - FFL.FirstOrder.Arithmetic.leastNumberBoundedUniversal_weakerThan_IE1
-  FFL.FirstOrder.Arithmetic.provable_existsQuadraticNonresidue_IE1:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, §1].
-      - FFL.FirstOrder.Arithmetic.provable_existsQuadraticNonresidue_IE1
-  FFL.FirstOrder.Arithmetic.provable_existsQuadraticNonresidue_ISigma0:
-    forgive:
-      # An open problem, not a theorem awaiting formalization: [Smi93, §3]; with the Δ₀ pigeonhole principle adjoined it is provable [MM89].
-      - FFL.FirstOrder.Arithmetic.provable_existsQuadraticNonresidue_ISigma0
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
 
   # Declarations that inherit the debt of an unproved statement.
-  FFL.FirstOrder.Arithmetic.exists_prime_gt:
+  FFL.FirstOrder.not_provable_fermatLastTheorem_IOpen:
     forgive:
-      - FFL.FirstOrder.Arithmetic.provable_infinitudeOfPrimes_ISigma0_union_Omega1
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.Arithmetic.not_provable_fermatLastTheoremCaseOne_IOpen_of_models_ZRing:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.not_provable_fermatLastTheoremCaseOne_seven_IOpen:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.exists_not_provable_fermatLastTheoremCaseOne_IOpen:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  FFL.FirstOrder.Arithmetic.provable_univCl_IOpen_iff:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.exists_embedding_models_IOpen
+  HahnSeries.factorialIntegerPartSubring.induction:
+    forgive:
+      - HahnSeries.isRealClosed_lex
+  HahnSeries.factorialIntegerPartSubring.models:
+    forgive:
+      - HahnSeries.isRealClosed_lex
+  FFL.FirstOrder.Arithmetic.IOpen.not_finiteAxiomatizable:
+    forgive:
+      - HahnSeries.isRealClosed_lex
+  FFL.FirstOrder.Arithmetic.interpretable_union_singleton_neg_standardProvability_neg:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.FirstOrder.ArithmeticTheory.interpretability_consistency:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.InterpretabilityLogic.instILInterpretabilityAbstraction:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.InterpretabilityLogic.Logic.IL.arithmetical_soundness_interpretability:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation

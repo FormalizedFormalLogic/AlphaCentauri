@@ -1,7 +1,10 @@
 module
 
-public import AlphaCentauri.ToFoundation.Syntax
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 
 /-!
 # Internal substitution for free variables
@@ -16,7 +19,9 @@ free variables are left unchanged.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+variable {Γ : SigmaPiDelta} {m : ℕ}
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* ISigma 1]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
@@ -89,10 +94,6 @@ function symbol and recursing into the argument vector. -/
   simp [termFvSubst, construction, hf, hv]
   rfl
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 instance termFvSubst.defined : 𝚺ᴬ₁-Function₂ termFvSubst (V := V) L via termFvSubstGraph L :=
   .mk fun v ↦ by
     simpa [termFvSubstGraph, termFvSubst, Matrix.constant_eq_singleton,
@@ -114,8 +115,6 @@ instance termFvSubstVec.definable : 𝚺ᴬ₁-Function₃ termFvSubstVec (V := 
 
 instance termFvSubstVec.definable' : Γᴬ_[m + 1]-Function₃ termFvSubstVec (V := V) L :=
   termFvSubstVec.definable.of_sigmaOne
-
-end
 
 /-- Free-variable substitution on a coded term vector preserves its coded length. -/
 @[simp] lemma len_termFvSubstVec {k w v : V} (hv : IsUTermVec L k v) :
@@ -238,10 +237,6 @@ noncomputable def fvSubstGraph : 𝚺ᴬ₁.Semisentence 3 := (blueprint L).resu
 
 variable {L}
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 instance fvSubst.defined : 𝚺ᴬ₁-Function₂[V] fvSubst L via fvSubstGraph L :=
   (FvSubst.construction L).result_defined
 
@@ -249,8 +244,6 @@ instance fvSubst.definable : 𝚺ᴬ₁-Function₂[V] fvSubst L := fvSubst.defi
 
 instance fvSubst.definable' : Γᴬ_[m + 1]-Function₂[V] fvSubst L :=
   fvSubst.definable.of_sigmaOne
-
-end
 
 /-- Substitution of free variables commutes with a coded relation atom, substituting its argument
 vector and keeping the relation symbol. -/
@@ -291,10 +284,6 @@ argument vector and keeping the relation symbol. -/
 @[simp] lemma fvSubst_exs {w p : V} (hp : IsUFormula L p) :
     fvSubst L w (^∃ p) = ^∃ (fvSubst L w p) := by
   simp [fvSubst, hp, FvSubst.construction]
-
-/-- Non-formula codes substitute to zero under the total internal substitution. -/
-lemma fvSubst_not_uformula {w p : V} (hp : ¬IsUFormula L p) : fvSubst L w p = 0 :=
-  (FvSubst.construction L).result_prop_not _ hp
 
 /-- Free-variable substitution by a vector of `n`-ary semiterms preserves being an `n`-ary
 semiformula. -/
@@ -362,6 +351,28 @@ lemma fvSubst_neg {n w p : V} (hw : IsSemitermVec L (len w) n w)
       ihp (w := w) hw.succ,
       fvSubst_exs hp.isUFormula,
       neg_ex (hp.fvSubst hw.succ).isUFormula]
+
+@[simp] lemma formulaComplexity_fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)
+    (hp : IsSemiformula L n p) : formulaComplexity L (fvSubst L w p) = formulaComplexity L p := by
+  revert w
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R v hR hv w hw
+    simp [hR, hv.isUTerm, (hw.termFvSubstVec hv).isUTerm]
+  · intro n k R v hR hv w hw
+    simp [hR, hv.isUTerm, (hw.termFvSubstVec hv).isUTerm]
+  · simp
+  · simp
+  · intro n p q hp hq ihp ihq w hw
+    simp [hp.isUFormula, hq.isUFormula, (hp.fvSubst hw).isUFormula, (hq.fvSubst hw).isUFormula,
+      ihp hw, ihq hw]
+  · intro n p q hp hq ihp ihq w hw
+    simp [hp.isUFormula, hq.isUFormula, (hp.fvSubst hw).isUFormula, (hq.fvSubst hw).isUFormula,
+      ihp hw, ihq hw]
+  · intro n p hp ihp w hw
+    simp [hp.isUFormula, (hp.fvSubst hw.succ).isUFormula, ihp hw.succ]
+  · intro n p hp ihp w hw
+    simp [hp.isUFormula, (hp.fvSubst hw.succ).isUFormula, ihp hw.succ]
 
 /-- The external-variable shift after free-variable substitution equals free-variable substitution
 by the shifted substitution vector with a fresh variable `&0` prepended, applied after the shift. -/
@@ -591,10 +602,6 @@ noncomputable def fvSubstImageGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “t w s. (∀ y ∈' t, ∃ x ∈' s, !(fvSubstGraph L) y w x) ∧
     (∀ x ∈' s, ∃ y, !(fvSubstGraph L) y w x ∧ y ∈ t)”
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 private lemma fvSubstImage_graph (t w s : V) :
     t = fvSubstImage (L := L) w s ↔
       (∀ y ∈ t, ∃ x ∈ s, y = fvSubst L w x) ∧ (∀ x ∈ s, fvSubst L w x ∈ t) := by
@@ -617,8 +624,6 @@ instance fvSubstImage.definable : 𝚺ᴬ₁-Function₂[V] fvSubstImage (L := L
 
 instance fvSubstImage.definable' : Γᴬ_[m + 1]-Function₂[V] fvSubstImage (L := L) :=
   fvSubstImage.definable.of_sigmaOne
-
-end
 
 /-- Free-variable substitution by a vector of closed terms carries a coded formula set to a coded
 formula set. -/
@@ -786,4 +791,5 @@ lemma fvSubst_qqAlls {w p : V} (hp : IsUFormula L p) (k : V) :
   case succ k ih =>
     rw [qqAlls_succ, fvSubst_all (isUFormula_qqAlls.mpr hp), ih, qqAlls_succ]
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

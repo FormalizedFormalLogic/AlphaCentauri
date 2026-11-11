@@ -593,4 +593,86 @@ end clmAdequateClosure
 
 end
 
+/-! ## The countermodel -/
+
+section
+
+open Entailment MaximalConsistentSet clmAdequateClosure
+
+variable [DecidableEq α] {X : Finset (Formula α)}
+
+private lemma literals_provable_conj {L : Logic α} [Entailment.Cl L] {Φ : Finset (Formula α)}
+    {Γ : MaximalConsistentSet L Φ} {Y : Finset (Formula α)} (h : ∀ A ∈ Y, A ∈ Γ) :
+    Γ.literals *⊢[L] Y.conj :=
+  Context.weakening (fun A hA ↦ mem_literals (h A hA)) (FConj_DT.mp C_id)
+
+namespace Veltman
+
+/-- `y` contains the `□`-formulas of `boxes X` in `x` together with their bodies, and the sequence
+of `x` is a proper initial segment of that of `y`.
+
+- [Ign91, Definition 6.8]
+-/
+def CLMRel (X : Finset (Formula α)) (x y : IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X)) : Prop :=
+  (∀ {A}, □A ∈ boxes X → □A ∈ x.set → A ∈ y.set ∧ □A ∈ y.set) ∧ x.seq <+: y.seq ∧
+    x.seq.length < y.seq.length
+
+namespace CLMRel
+
+variable {x y z : IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X)}
+
+lemma trans (h₁ : CLMRel X x y) (h₂ : CLMRel X y z) : CLMRel X x z :=
+  ⟨fun hA hx ↦ h₂.1 hA (h₁.1 hA hx).2, h₁.2.1.trans h₂.2.1, h₁.2.2.trans h₂.2.2⟩
+
+lemma of_successor (h : Successor x.set y.set) (h₂ : x.seq <+: y.seq)
+    (h₃ : x.seq.length < y.seq.length) : CLMRel X x y :=
+  ⟨fun _ hx ↦ ⟨h.mem_of_box_mem hx, h.box_mem_of_box_mem hx⟩, h₂, h₃⟩
+
+end CLMRel
+
+/-- The model on indexed sets of `𝐂𝐋𝐌` over `clmAdequateClosure X` in which `y ≺[w] z` holds if `y`
+and `z` are above `w` and have the same sequence, `z` contains the `□`-formulas of `boxes X` in
+`y`, and `z` is a weak `C`-critical successor of `w` whenever `y` is one and its sequence is that
+of `w` followed by `C`.
+
+- [Ign91, Definition 6.8]
+-/
+def countermodelCLM (X : Finset (Formula α))
+    [Nonempty (IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X))] :
+    Model (IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X)) α where
+  Rel' := CLMRel X
+  S' w x y := CLMRel X w x ∧ CLMRel X w y ∧ x.seq = y.seq ∧
+    (∀ {A}, □A ∈ boxes X → □A ∈ x.set → □A ∈ y.set) ∧
+    ∀ C, x.seq = w.seq ++ [C] → WeakCriticalSuccessor C w.set x.set →
+      WeakCriticalSuccessor C w.set y.set
+  Val' x a := Formula.atom a ∈ x.set
+
+namespace countermodelCLM
+
+open Model Model.World
+
+variable [Nonempty (IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X))]
+
+instance : IsTrans _ (countermodelCLM X).Rel := ⟨fun _ _ _ ↦ CLMRel.trans⟩
+
+instance : Std.Irrefl (countermodelCLM X).Rel := ⟨fun _ h ↦ (lt_irrefl _) h.2.2⟩
+
+instance : (countermodelCLM X).IsCL where
+  rel_of_s_left h := h.1
+  rel_of_s_right h := h.2.1
+  s_refl h := ⟨h, h, rfl, fun _ hx ↦ hx, fun _ _ hx ↦ hx⟩
+  s_trans h₁ h₂ := ⟨h₁.1, h₂.2.1, h₁.2.2.1.trans h₂.2.2.1, fun hA hx ↦ h₂.2.2.2.1 hA (h₁.2.2.2.1 hA hx),
+    fun C hC hx ↦ h₂.2.2.2.2 C (h₁.2.2.1 ▸ hC) (h₁.2.2.2.2 C hC hx)⟩
+
+/-- - [Ign91, Proposition 6.9] -/
+instance : (countermodelCLM X).HasM where
+  rel_of_s_rel h₁ h₂ :=
+    ⟨fun hA hx ↦ h₂.1 hA (h₁.2.2.2.1 hA hx), h₁.2.2.1 ▸ h₂.2.1, h₁.2.2.1 ▸ h₂.2.2⟩
+
+end countermodelCLM
+
+end Veltman
+
+end
+
 end FFL.InterpretabilityLogic

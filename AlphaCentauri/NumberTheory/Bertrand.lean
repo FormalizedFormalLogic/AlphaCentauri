@@ -732,13 +732,9 @@ lemma exists_prime_lt_le_two_mul (n : V) (hn : 1 ≤ n) : ∃ p, n < p ∧ p ≤
   use p
   constructor
   · exact_mod_cast hkp
-  constructor
-  · exact_mod_cast hpk
-  · exact isPrime_natCast hp
-
-@[simp] lemma models_bertrandPostulate_iff {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] :
-    V↓[ℒₒᵣ] ⊧ bertrandPostulate ↔ ∀ n : V, 1 ≤ n → ∃ p, n < p ∧ p ≤ 2 * n ∧ IsPrime p := by
-  simp [models_iff, bertrandPostulate]
+  · constructor
+    · exact_mod_cast hpk
+    · exact isPrime_natCast hp
 
 end
 
@@ -749,7 +745,7 @@ theorem provable_bertrandPostulate_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮�
     Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) inferInstance
   complete (𝗜𝚺₀ ∪ 𝝮₁) bertrandPostulate fun (M : Type) _ _ ↦ by
     have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
-    exact models_bertrandPostulate_iff.mpr exists_prime_lt_le_two_mul
+    simpa [models_iff, bertrandPostulate] using fun n : M ↦ exists_prime_lt_le_two_mul (V := M) n
 
 /-- $\mathsf{I}\Delta_0$ proves Bertrand's postulate. An open problem.
 - [HP98, §V.5(f), p. 393] -/

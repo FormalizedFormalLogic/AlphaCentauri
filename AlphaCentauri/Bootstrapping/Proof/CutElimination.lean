@@ -1,7 +1,8 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
-public import AlphaCentauri.ToFoundation.LeastWitness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastWitness
 
 /-!
 # Cut elimination for the internal calculus
@@ -17,7 +18,8 @@ end-sequent.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1 InternalMeasures
 
@@ -559,4 +561,5 @@ theorem CutFreeDerivable.cut {p s : V} (h₁ : CutFreeDerivable (∅ : Theory L)
     CutFreeDerivable (∅ : Theory L) s :=
   Derivable.cutFree (.cut p h₁.toDerivable h₂.toDerivable)
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

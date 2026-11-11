@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import AlphaCentauri.Bootstrapping.Proof.Measures
 
 /-!
@@ -14,8 +15,12 @@ below `r`. At rank `0` these are the cut-free derivations.
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+
+section RankedDerivation
 
 open PeanoMinus ISigma0 ISigma1 InternalMeasures
 
@@ -117,27 +122,26 @@ lemma case (h : RankedDerivation T r d) :
   rcases hd.case.2 with (h | h | ⟨s, p, q, dp, dq, rfl, hpq, hdp, hdq⟩ |
     ⟨s, p, q, d₀, rfl, hpq, hd₀⟩ | ⟨s, p, d₀, rfl, hp, hd₀⟩ | ⟨s, p, t, d₀, rfl, hp, ht, hd₀⟩ |
     ⟨s, d₀, rfl, hsub, hd₀⟩ | ⟨s, d₀, rfl, hsh, hd₀⟩ | ⟨s, p, d₁, d₂, rfl, hd₁, hd₂⟩ | h)
-  · exact .inl h
-  · exact .inr <| .inl h
+  · disj 1; exact h
+  · disj 2; exact h
   · simp only [cutRank_andIntro, max_le_iff] at hr
-    exact .inr <| .inr <| .inl ⟨s, p, q, dp, dq, rfl, hpq, ⟨hdp.1, hdp.2, hr.1⟩,
-      ⟨hdq.1, hdq.2, hr.2⟩⟩
+    disj 3
+    exact ⟨s, p, q, dp, dq, rfl, hpq, ⟨hdp.1, hdp.2, hr.1⟩, ⟨hdq.1, hdq.2, hr.2⟩⟩
   · rw [cutRank_orIntro] at hr
-    exact .inr <| .inr <| .inr <| .inl ⟨s, p, q, d₀, rfl, hpq, ⟨hd₀.1, hd₀.2, hr⟩⟩
+    disj 4; exact ⟨s, p, q, d₀, rfl, hpq, ⟨hd₀.1, hd₀.2, hr⟩⟩
   · rw [cutRank_allIntro] at hr
-    exact .inr <| .inr <| .inr <| .inr <| .inl ⟨s, p, d₀, rfl, hp, ⟨hd₀.1, hd₀.2, hr⟩⟩
+    disj 5; exact ⟨s, p, d₀, rfl, hp, ⟨hd₀.1, hd₀.2, hr⟩⟩
   · rw [cutRank_exsIntro] at hr
-    exact .inr <| .inr <| .inr <| .inr <| .inr <| .inl ⟨s, p, t, d₀, rfl, hp, ht,
-      ⟨hd₀.1, hd₀.2, hr⟩⟩
+    disj 6; exact ⟨s, p, t, d₀, rfl, hp, ht, ⟨hd₀.1, hd₀.2, hr⟩⟩
   · rw [cutRank_wkRule] at hr
-    exact .inr <| .inr <| .inr <| .inr <| .inr <| .inr <| .inl ⟨s, d₀, rfl, hsub, hd₀, hr⟩
+    disj 7; exact ⟨s, d₀, rfl, hsub, hd₀, hr⟩
   · rw [cutRank_shiftRule] at hr
-    exact .inr <| .inr <| .inr <| .inr <| .inr <| .inr <| .inr <| .inl
-      ⟨s, d₀, rfl, hsh, hd₀, hr⟩
+    disj 8; exact ⟨s, d₀, rfl, hsh, hd₀, hr⟩
   · simp only [cutRank_cutRule, max_le_iff] at hr
-    exact .inr <| .inr <| .inr <| .inr <| .inr <| .inr <| .inr <| .inr <| .inl
-      ⟨s, p, d₁, d₂, rfl, succ_le_iff_lt.mp hr.2, ⟨hd₁.1, hd₁.2, hr.1.1⟩, ⟨hd₂.1, hd₂.2, hr.1.2⟩⟩
-  · exact .inr <| .inr <| .inr <| .inr <| .inr <| .inr <| .inr <| .inr <| .inr h
+    disj 9
+    exact ⟨s, p, d₁, d₂, rfl, succ_le_iff_lt.mp hr.2, ⟨hd₁.1, hd₁.2, hr.1.1⟩,
+      ⟨hd₂.1, hd₂.2, hr.1.2⟩⟩
+  · disj 10; exact h
 
 lemma of_cutFreeDerivation (h : CutFreeDerivation T d) : RankedDerivation T 0 d :=
   ⟨h.toDerivation, by rw [h.cutRank_eq_zero]⟩
@@ -179,11 +183,6 @@ end RankedDerivation
 
 lemma RankedDerivationOf.isFormulaSet (h : RankedDerivationOf T r d s) : IsFormulaSet L s :=
   h.1 ▸ h.2.isFormulaSet
-
-/-- Every derivation has the cut rank of its code. -/
-lemma DerivationOf.rankedDerivationOf (h : DerivationOf T d s) :
-    RankedDerivationOf T (cutRank L d) d s :=
-  ⟨h.1, h.2, le_rfl⟩
 
 namespace RankedDerivable
 
@@ -252,4 +251,7 @@ lemma iff_cutFreeDerivable : RankedDerivable T 0 s ↔ CutFreeDerivable T s :=
 
 end RankedDerivable
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end RankedDerivation
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

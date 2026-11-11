@@ -2,13 +2,14 @@ module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.CaseSplit
 public import AlphaCentauri.Bootstrapping.Interpretability.Composition
-public import AlphaCentauri.Bootstrapping.Interpretability.Congruence
 public import AlphaCentauri.Bootstrapping.Interpretability.Identity
 public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
+public import AlphaCentauri.Bootstrapping.Interpretability.TranslationTable
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 public import AlphaCentauri.Bootstrapping.Proof.ProofByCases
 
 /-!
-# Formalized relative interpretability
+# Interpretability in a model
 
 In a model `V` of $\mathsf{I}\Sigma_1$, a theory `U` of $L_2$ is interpretable in a theory `S` of
 $L_1$ when there is a table of a translation of $L_2$ in `S` along which every axiom of `U` in `V`
@@ -18,11 +19,17 @@ model of $\mathsf{I}\Sigma_1$. Consistency transfers along interpretability.
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+
+section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+
 
 /-! ## Graphs of the codes of the conditions on a table -/
 
@@ -206,8 +213,6 @@ lemma IsInterpretationTable.caseTable_right (h₂ : IsInterpretationTable S U tb
 
 end caseSplit
 
-section arithmetic
-
 /-- Every theory of arithmetic has, in every model of $\mathsf{I}\Sigma_1$, a table of a
 translation of arithmetic along which every provable formula translates to a provable formula.
 - [Vis90, §5.5] -/
@@ -275,8 +280,6 @@ theorem Interpretable.union_or {T W : ArithmeticTheory} [T.Δ₁] [W.Δ₁] {φ 
           preserve_eq := provable_union_or c₁.preserve_eq c₂.preserve_eq
           translate_axiom hp hp' :=
             provable_union_or (c₁.translate_axiom hp hp') (c₂.translate_axiom hp hp') }
-
-end arithmetic
 
 
 /-! ## The sentence of interpretability -/
@@ -358,4 +361,7 @@ lemma models_interpretableDef_iff [Nonempty V] :
 
 end sentence
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

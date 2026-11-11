@@ -1,21 +1,29 @@
 module
 
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
-public import AlphaCentauri.ToFoundation.Coding
-public import AlphaCentauri.ToFoundation.TypedProof
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 
 /-!
 # Proof by cases on an added axiom
 
-A sentence is provable from the theory it is added to, and a formula code provable both from
-`T + φ` and from `T + ψ + ¬φ` is provable from `T + (φ ∨ ψ)`.
+A formula code provable both from `T + φ` and from `T + ψ + ¬φ` is provable from `T + (φ ∨ ψ)`.
 -/
 
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+
+section ProofByCases
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -54,4 +62,8 @@ lemma provable_union_or {X : V} (h₁ : Provable (T ∪ {φ}) X) (h₂ : Provabl
 
 end union_or
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+
+end ProofByCases
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

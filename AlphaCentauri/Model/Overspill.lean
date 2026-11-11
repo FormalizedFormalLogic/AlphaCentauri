@@ -1,7 +1,8 @@
 module
 
-public import AlphaCentauri.Model.Basic
+public import AlphaCentauri.Model.EndExtension
 public import Foundation.FirstOrder.Arithmetic.Schemata
+public import AlphaCentauri.Model.Absolute
 
 /-! # Overspill
 
@@ -12,6 +13,7 @@ which holds at every element of the base model holds below some element outside 
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
+
 
 open Semiformula
 
@@ -41,5 +43,6 @@ theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗�
       ⟨e, (φ/[#0]).ballLT #0, by simp [hφ], fun x ↦ by simp [eval_ballLT]⟩
       (by simp) h₂
   exact hMN.not_surjective fun x ↦ h₁ x (h₃ x)
+
 
 end FFL.FirstOrder.Arithmetic

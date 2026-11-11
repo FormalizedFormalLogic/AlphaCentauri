@@ -1,10 +1,11 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
-public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
 public import AlphaCentauri.Interpretability.Basic
-public import AlphaCentauri.ToFoundation.InternalEquality
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Equality
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.ProvableIff
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.QuantifierBlock
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 
 /-!
 # Tables of translations
@@ -20,7 +21,9 @@ of a translation in this sense.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+variable {Γ : SigmaPiDelta} {m : ℕ}
 
 attribute [local simp] Semiformula.substs_substs
 
@@ -76,10 +79,6 @@ noncomputable def equationVecGraph : 𝚺ᴬ₁.Semisentence 4 :=
 
 variable {L}
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 omit [L.Eq] in
 instance domainVec.defined : 𝚺ᴬ₁-Function₃[V] domainVec L via domainVecGraph L := .mk fun v ↦ by
   simp [(domainVec.construction L).result_defined_iff, domainVecGraph]; rfl
@@ -99,8 +98,6 @@ instance equationVec.definable : 𝚺ᴬ₁-Function₃[V] equationVec L :=
 
 instance equationVec.definable' : Γᴬ_[m + 1]-Function₃[V] equationVec L :=
   equationVec.definable.of_sigmaOne
-
-end
 
 omit [L.Eq] in
 @[simp] lemma domainVec_zero (tbl s : V) : domainVec L tbl s 0 = 0 := by
@@ -191,10 +188,6 @@ noncomputable def funcCongrCode (tbl k f : V) : V :=
     (imp L (subst L (bvarVec 0 (k + 1)) (tableFunc tbl k f))
       (subst L (bvarVec (k + 1) (k + 1)) (tableFunc tbl k f)))
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 instance funcExistsCode.definable : 𝚺ᴬ₁-Function₃[V] funcExistsCode L := by
   unfold funcExistsCode
   definability
@@ -206,8 +199,6 @@ instance funcUniqueCode.definable : 𝚺ᴬ₁-Function₃[V] funcUniqueCode L :
 instance funcCongrCode.definable : 𝚺ᴬ₁-Function₃[V] funcCongrCode L := by
   unfold funcCongrCode
   definability
-
-end
 
 end codes
 
@@ -426,8 +417,6 @@ lemma funcCongrBody_shift {g : Semiformula V L (k + 1)} (hg : g.shift = g) :
 
 end bodies
 
-section preserveEqBody
-
 /-- `d(#1) → d(#0) → (e(#1, #0) ↔ #1 = #0)`. -/
 noncomputable def preserveEqBody (d : Semiformula V L₁ 1) (e : Semiformula V L₁ 2) :
     Semiformula V L₁ 2 :=
@@ -446,8 +435,6 @@ lemma preserveEqBody_val [L₂.Eq] (d : Semiformula V L₁ 1) (hd : d.val = tabl
 lemma preserveEqBody_shift {d : Semiformula V L₁ 1} {e : Semiformula V L₁ 2} (hd : d.shift = d)
     (he : e.shift = e) : (preserveEqBody d e).shift = preserveEqBody d e := by
   simp [preserveEqBody, Semiformula.shift_substs, hd, he]
-
-end preserveEqBody
 
 end typed
 
@@ -567,8 +554,6 @@ lemma operator_bvar_eq_sentence (o : Semiformula.Operator L₁ 1) :
   simp [Semiformula.Operator.operator, Rewriting.emb]
 
 
-section quote
-
 omit [L₁.Eq] in
 lemma quote_operator_bvar {m n : ℕ} (o : Semiformula.Operator L₁ m) (f : Fin m → Fin n) :
     (⌜(o.operator (fun i ↦ #(f i)) : Semisentence L₁ n)⌝ : Semiformula V L₁ n) =
@@ -617,10 +602,6 @@ lemma quote_eq_bvar {n : ℕ} (i j : Fin n) :
   match t with
   | 0 => rfl
   | 1 => rfl
-
-end quote
-
-section external
 
 noncomputable abbrev funcExistsSent (F : L₂.Func k) : Semisentence L₁ k :=
   (Matrix.conj fun i : Fin k ↦ π.domain.operator ![#i]) 🡒
@@ -749,8 +730,6 @@ lemma quote_preserveEqSent :
     quote_eq_bvar]
   rw [h, quote_operator_bvar, h']
 
-end external
-
 omit [L₁.LORDefinable] [L₁.Eq] in
 lemma quote_allClosure_semisentence {L : Language} [L.Encodable] [L.LORDefinable] {m : ℕ}
     (θ : Semisentence L m) : (⌜∀¹* θ⌝ : V) = qqAlls (⌜θ⌝ : V) (m : V) := by
@@ -807,4 +786,5 @@ end directTranslation
 
 end translationTable
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

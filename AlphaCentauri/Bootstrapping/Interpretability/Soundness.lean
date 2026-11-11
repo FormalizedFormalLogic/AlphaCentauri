@@ -1,12 +1,19 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
-public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
 public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
+public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
 public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
-public import AlphaCentauri.ToFoundation.Syntax
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
+public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Equality
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.ProvableIff
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.QuantifierBlock
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!
@@ -23,9 +30,11 @@ along a translation, and so is consistency.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
 
 /-! ## Substitution of a closed term into translated formulas -/
 
@@ -338,7 +347,7 @@ end formSubst
 
 /-! ## The existential rule -/
 
-section existsRule
+section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -522,15 +531,7 @@ lemma translated_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
 
 end rules
 
-end existsRule
-
 /-! ## Translated derivability of derivable sets -/
-
-section soundness
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-open PeanoMinus ISigma0 ISigma1
 
 section rules
 
@@ -591,15 +592,7 @@ theorem TranslatedDerivable.of_derivable
 
 end rules
 
-end soundness
-
 /-! ## Corollaries -/
-
-section corollaries
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-open PeanoMinus ISigma0 ISigma1
 
 section translation
 
@@ -677,6 +670,7 @@ theorem provable_translate_of_finite (hS : ∀ p ∈ S.Δ₁Class (V := V), Boot
 
 end finite
 
-end corollaries
+end
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

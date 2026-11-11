@@ -1,6 +1,7 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
+public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
+public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 
 /-!
@@ -13,11 +14,17 @@ translations along the two tables.
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+
+section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+
 
 open _root_.FFL.Entailment
 
@@ -336,4 +343,7 @@ theorem IsTranslationTable.of_provable_iff [L₂.Eq] (h : IsTranslationTable L�
 
 end congruence
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

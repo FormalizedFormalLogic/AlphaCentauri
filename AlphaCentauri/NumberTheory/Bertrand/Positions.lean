@@ -1,8 +1,13 @@
 module
 
-public import AlphaCentauri.ToFoundation.Power
-public import AlphaCentauri.ToFoundation.Prime
-public import AlphaCentauri.ToFoundation.Injection
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.BlockSequence
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.CodedPigeonhole
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Factorial
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Injection
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Power
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
 
 /-!
 # Positions in the factorizations of $1, \dots, m$
@@ -645,7 +650,6 @@ lemma legendreUp_shape (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) (h₁
 
 end legendre
 
-section injections
 
 variable {m t₀ t₁ t₂ t₃ t₄ : V} (hB : 0 < B) (hs : 0 < s) (hBm : s * ‖2 * m‖ < ‖B‖)
 include hB hs hBm
@@ -1099,7 +1103,6 @@ lemma isInj_doubleDown (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) (h₁
           | exact absurd (hy₁'.trans_le hy₁) (lt_irrefl _)
           | exact absurd (hp.symm.trans hp') (by simp)
 
-end injections
 
 end Bertrand
 

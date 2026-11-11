@@ -1,23 +1,34 @@
 module
 
-public import AlphaCentauri.ToFoundation.InternalEquality
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.Bootstrapping.Interpretability.TranslationTable
+public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
+public import AlphaCentauri.Interpretability.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Equality
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.ProvableIff
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.QuantifierBlock
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.Meta.ClProver
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 
 /-!
 # Defining an element by a formula
 
-The graph of a function symbol under equivalent hypotheses is congruent, and the internal formula
-`definesElement d A` states that a formula `A` defines a unique element of the domain `d`.
+The internal formula `definesElement d A` states that a formula `A` defines a unique element of the
+domain `d`, and the graph of a function symbol under equivalent hypotheses is congruent.
 -/
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+
+section
 
 attribute [local simp] Semiformula.shift_substs Semiformula.substs_substs
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open scoped FFL.FirstOrder.Arithmetic
 
@@ -571,4 +582,7 @@ end definesElement
 
 end defines
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

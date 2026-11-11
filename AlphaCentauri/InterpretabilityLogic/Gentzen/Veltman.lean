@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Gentzen.Hilbert
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Completeness
+public import AlphaCentauri.InterpretabilityLogic.Gentzen.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 public import Mathlib.Data.Set.Finite.List
 
 /-!
@@ -208,11 +208,12 @@ lemma exists_isAvoiding (hx : ⊬ᴳ[𝐈𝐋] x) (hR : R ∈ x.suc) (hRm : IsMo
       · have hC' : C ∉ antecedents l := fun h ↦ hC (Finset.mem_union_right _ h);
         rw [antecedents_cons, Finset.card_insert_of_notMem hC'];
         omega;
-  obtain ⟨l, hl, -, hcard⟩ := chain (x.ant.subfmls.card + 1);
-  have : antecedents l ⊆ x.ant.subfmls := by
+  obtain ⟨l, hl, -, hcard⟩ := chain (x.ant.subformulas.card + 1);
+  have : antecedents l ⊆ x.ant.subformulas := by
     intro C hC;
     obtain ⟨D, hD⟩ := mem_antecedents.mp hC;
-    exact FormulaFinset.mem_subfmls_subfmls (FormulaFinset.subset_subfmls (hl _ hD)) (by simp);
+    exact FormulaFinset.mem_subformulas_subformulas (FormulaFinset.subset_subformulas (hl _ hD))
+      (by simp);
   have := Finset.card_le_card this;
   omega;
 
@@ -231,42 +232,32 @@ lemma isAvoiding_avoidance (hx : ⊬ᴳ[𝐈𝐋] x) (hR : R ∈ x.suc) (hRm : I
 /-- The subformulas of `S`, `⊥`, and the formulas `∼A` and `□∼A` for the components `A` of the
 formulas `A ▷ B` among them. -/
 def closure (S : Sequent α) : FormulaFinset α :=
-  insert ⊥ (S.subfmls ∪ S.subfmls.rhdComponents.image (∼·) ∪ S.subfmls.rhdComponents.boxNeg)
+  insert ⊥ (S.subformulas ∪ S.subformulas.rhdComponents.image (∼·) ∪
+    S.subformulas.rhdComponents.boxNeg)
 
 section closure
 
 variable {S : Sequent α} {A B C D : Formula α}
 
-lemma mem_subfmls_of_mem_subfmls (hA : A ∈ S.subfmls) (hB : B ∈ A.subfmls) : B ∈ S.subfmls := by
-  rcases Finset.mem_union.mp hA with h | h;
-  · exact Finset.mem_union_left _ (FormulaFinset.mem_subfmls_subfmls h hB);
-  · exact Finset.mem_union_right _ (FormulaFinset.mem_subfmls_subfmls h hB);
+lemma mem_closure_of_mem_subformulas (h : A ∈ S.subformulas) : A ∈ closure S := by
+  simp [closure, h];
 
-lemma mem_subfmls_of_mem_rhdComponents (h : C ∈ S.subfmls.rhdComponents) : C ∈ S.subfmls := by
-  obtain ⟨D, h | h⟩ := FormulaFinset.mem_rhdComponents.mp h;
-  · exact mem_subfmls_of_mem_subfmls h (by simp);
-  · exact mem_subfmls_of_mem_subfmls h (by simp);
+lemma mem_subformulas_of_mem_rhdComponents (h : C ∈ S.subformulas.rhdComponents) :
+    C ∈ S.subformulas := by
+  obtain ⟨D, h | h⟩ := FormulaFinset.mem_rhdComponents.mp h <;>
+    exact FormulaFinset.mem_subformulas_subformulas h (by simp);
 
-lemma mem_closure_of_mem_subfmls (h : A ∈ S.subfmls) : A ∈ closure S := by simp [closure, h]
-
-lemma subset_closure : S.ant ∪ S.suc ⊆ closure S := by
-  intro A hA;
-  apply Finset.mem_insert_of_mem;
-  apply Finset.mem_union_left;
-  apply Finset.mem_union_left;
-  rcases Finset.mem_union.mp hA with h | h;
-  · exact Finset.mem_union_left _ (FormulaFinset.subset_subfmls h);
-  · exact Finset.mem_union_right _ (FormulaFinset.subset_subfmls h);
+lemma subset_closure : S.ant ∪ S.suc ⊆ closure S := fun _ hA ↦
+  mem_closure_of_mem_subformulas (FormulaFinset.subset_subformulas hA)
 
 lemma mem_closure_imp (h : A 🡒 B ∈ closure S) : A ∈ closure S ∧ B ∈ closure S := by
   simp only [closure, Finset.mem_insert, Finset.mem_union, Finset.mem_image] at h;
   rcases h with h | (h | ⟨C, hC, h⟩) | ⟨C, hC, h⟩;
   · simp at h;
-  · constructor;
-    · exact mem_closure_of_mem_subfmls (mem_subfmls_of_mem_subfmls h (by simp));
-    · exact mem_closure_of_mem_subfmls (mem_subfmls_of_mem_subfmls h (by simp));
+  · constructor <;>
+      exact mem_closure_of_mem_subformulas (FormulaFinset.mem_subformulas_subformulas h (by simp));
   · obtain ⟨rfl, rfl⟩ := Formula.imp_inj.mp h;
-    exact ⟨mem_closure_of_mem_subfmls (mem_subfmls_of_mem_rhdComponents hC),
+    exact ⟨mem_closure_of_mem_subformulas (mem_subformulas_of_mem_rhdComponents hC),
       Finset.mem_insert_self _ _⟩;
   · simp at h;
 
@@ -274,7 +265,7 @@ lemma mem_closure_box (h : □C ∈ closure S) : C ∈ closure S := by
   simp only [closure, Finset.mem_insert, Finset.mem_union, Finset.mem_image] at h;
   rcases h with h | (h | ⟨D, hD, h⟩) | ⟨D, hD, h⟩;
   · simp at h;
-  · exact mem_closure_of_mem_subfmls (mem_subfmls_of_mem_subfmls h (by simp));
+  · exact mem_closure_of_mem_subformulas (FormulaFinset.mem_subformulas_subformulas h (by simp));
   · simp at h;
   · obtain rfl := Formula.box_inj.mp h;
     simp only [closure, Finset.mem_insert, Finset.mem_union, Finset.mem_image];
@@ -283,17 +274,17 @@ lemma mem_closure_box (h : □C ∈ closure S) : C ∈ closure S := by
 
 lemma mem_closure_rhd (h : C ▷ D ∈ closure S) :
     C ∈ closure S ∧ □(∼C) ∈ closure S ∧ D ∈ closure S ∧ □(∼D) ∈ closure S := by
-  have h' : C ▷ D ∈ S.subfmls := by
+  have h' : C ▷ D ∈ S.subformulas := by
     simp only [closure, Finset.mem_insert, Finset.mem_union, Finset.mem_image] at h;
     rcases h with h | (h | ⟨E, -, h⟩) | ⟨E, -, h⟩ <;> simp_all;
-  have hC : C ∈ S.subfmls.rhdComponents := FormulaFinset.mem_rhdComponents.mpr ⟨D, Or.inl h'⟩;
-  have hD : D ∈ S.subfmls.rhdComponents := FormulaFinset.mem_rhdComponents.mpr ⟨C, Or.inr h'⟩;
+  have hC : C ∈ S.subformulas.rhdComponents := FormulaFinset.mem_rhdComponents.mpr ⟨D, Or.inl h'⟩;
+  have hD : D ∈ S.subformulas.rhdComponents := FormulaFinset.mem_rhdComponents.mpr ⟨C, Or.inr h'⟩;
   and_intros;
-  · exact mem_closure_of_mem_subfmls (mem_subfmls_of_mem_rhdComponents hC);
+  · exact mem_closure_of_mem_subformulas (mem_subformulas_of_mem_rhdComponents hC);
   · simp only [closure, Finset.mem_insert, Finset.mem_union, Finset.mem_image];
     right; right;
     use C;
-  · exact mem_closure_of_mem_subfmls (mem_subfmls_of_mem_rhdComponents hD);
+  · exact mem_closure_of_mem_subformulas (mem_subformulas_of_mem_rhdComponents hD);
   · simp only [closure, Finset.mem_insert, Finset.mem_union, Finset.mem_image];
     right; right;
     use D;
@@ -340,7 +331,7 @@ instance : Finite (SaturatedSequent BS) :=
 lemma lindenbaum {S₀ : Sequent α} (h₀ : ⊬ᴳ[𝐈𝐋] S₀) (hant : S₀.ant ⊆ closure BS)
     (hsuc : S₀.suc ⊆ closure BS) : ∃ x : SaturatedSequent BS, S₀ ⊆ x.toSequent := by
   obtain ⟨S, h₁, h₂, h₃, h₄, h₅⟩ :=
-    Sequent.exists_saturated Gentzen.isImpClosed mem_closure_imp h₀ hant hsuc;
+    Gentzen.exists_saturated mem_closure_imp h₀ hant hsuc;
   use ⟨S, h₃, h₄, h₅, h₂⟩;
 
 lemma prebox_subset : x.ant.prebox ⊆ closure BS := by
@@ -646,71 +637,8 @@ lemma truthlemma :
 
 end countermodel
 
-/-! ### Completeness -/
-
-universe u
-
-namespace Gentzen
-
-variable {α : Type u} [DecidableEq α] {S : Sequent α}
-
-theorem sound {κ : Type*} [Nonempty κ] (M : Veltman.Model κ α) [M.IsIL] (h : ⊢ᴳ[𝐈𝐋] S) :
-    M.ValidatesSequent S := by
-  intro x hx;
-  exact forces_disj.mp <|
-    Logic.ofAxioms.sound (by simp) (Logic.IL.of_gentzen h) x (forces_conj.mpr hx);
-
-theorem complete
-    (h : ∀ {κ : Type u} [Nonempty κ] (M : Veltman.Model κ α), [Finite κ] → [M.IsIL] →
-      M.ValidatesSequent S) :
-    ⊢ᴳ[𝐈𝐋] S := by
-  by_contra hS;
-  obtain ⟨x₀, hx₀⟩ := lindenbaum (BS := S) hS
-    (fun _ hA ↦ subset_closure (Finset.mem_union_left _ hA))
-    (fun _ hA ↦ subset_closure (Finset.mem_union_right _ hA));
-  obtain ⟨B, hB, hw⟩ := h (countermodel x₀) (⟨[], trivial⟩ : Path x₀)
-    (fun A hA ↦ countermodel.truthlemma.1 (hx₀.ant hA));
-  exact countermodel.truthlemma.2 (hx₀.suc hB) hw;
-
-end Gentzen
 
 end IL
-
-namespace Logic.IL
-
-universe u
-
-variable {α : Type u} [DecidableEq α] {A : Formula α}
-
-/-- - [dJV90, Theorem 4.1] -/
-theorem provability_TFAE : [
-    𝐈𝐋 ⊢ A,
-    ⊢ᴳ[𝐈𝐋] ∅ ⟹ {A},
-    ∀ {κ : Type u} [Nonempty κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A,
-    ∀ {κ : Type u} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A
-  ].TFAE := by
-  tfae_have 1 → 3 := by
-    intro h _ _ M _;
-    exact Logic.ofAxioms.sound (by simp) h;
-  tfae_have 3 → 4 := by
-    intro h _ _ _ M _;
-    exact h M;
-  tfae_have 4 → 2 := by
-    intro h;
-    apply IL.Gentzen.complete;
-    intro _ _ M _ _ x _;
-    use A;
-    and_intros;
-    · simp;
-    · exact h M x;
-  tfae_have 2 → 1 := by
-    intro h;
-    simpa using of_gentzen h ⨀ (by simp [Finset.conj]);
-  tfae_finish;
-
-lemma iff_provable_gentzen : 𝐈𝐋 ⊢ A ↔ ⊢ᴳ[𝐈𝐋] ∅ ⟹ {A} := provability_TFAE.out 1 2
-
-end Logic.IL
 
 end FFL.InterpretabilityLogic
 

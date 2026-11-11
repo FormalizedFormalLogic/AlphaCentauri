@@ -21,21 +21,11 @@ characterization of the negation, and the finite axiomatizability of `𝗣𝗔�
 
 @[expose] public section
 
-namespace AdjunctiveSet
-
-open FFL.FirstOrder
-
-variable {L : Language}
-
-@[simp] lemma finite_iff_set_finite {T : Theory L} : Finite T ↔ T.Finite := Iff.rfl
-
-end AdjunctiveSet
-
 namespace FFL.FirstOrder
 
 open _root_.FFL.Entailment
 
-variable {L : Language} {C D : Sentence L → Prop} {T U V : Theory L}
+variable {L : Language} {T U : Theory L}
 
 /-- `T` is axiomatized by `U` through sentences satisfying `C`: every member of `U` satisfies `C`,
 and `T` proves exactly the theorems of `U`.
@@ -59,34 +49,6 @@ structure FiniteAxiomatizableBy (T U : Theory L) : Prop where
 /-- `T` is finitely axiomatizable: some finite theory proves exactly the theorems of `T`.
 - [Lin97, Ch. 4 §1] -/
 def FiniteAxiomatizable (T : Theory L) : Prop := ∃ U : Theory L, FiniteAxiomatizableBy T U
-
-namespace AxiomatizableBy
-
-lemma refl (h : ∀ σ ∈ T, C σ) : AxiomatizableBy C T T := ⟨h, .refl T⟩
-
-lemma of_equiv (h : AxiomatizableBy C T U) (e : T ≊ V) : AxiomatizableBy C V U :=
-  ⟨h.forall_mem, e.symm.trans h.equiv⟩
-
-lemma mono (h : AxiomatizableBy C T U) (hCD : ∀ σ, C σ → D σ) : AxiomatizableBy D T U :=
-  ⟨fun σ hσ ↦ hCD σ (h.forall_mem σ hσ), h.equiv⟩
-
-lemma axiomatizable (h : AxiomatizableBy C T U) : Axiomatizable C T := ⟨U, h⟩
-
-end AxiomatizableBy
-
-namespace Axiomatizable
-
-lemma of_forall_mem (h : ∀ σ ∈ T, C σ) : Axiomatizable C T := (AxiomatizableBy.refl h).axiomatizable
-
-lemma of_equiv (h : Axiomatizable C T) (e : T ≊ U) : Axiomatizable C U := by
-  obtain ⟨V, hV⟩ := h
-  exact (hV.of_equiv e).axiomatizable
-
-lemma mono (h : Axiomatizable C T) (hCD : ∀ σ, C σ → D σ) : Axiomatizable D T := by
-  obtain ⟨U, hU⟩ := h
-  exact (hU.mono hCD).axiomatizable
-
-end Axiomatizable
 
 /-- Every finite theory is finitely axiomatizable.
 - [Lin97, Ch. 4 §1] -/
@@ -172,20 +134,6 @@ lemma FiniteAxiomatizableBy.equiv_singleton (h : FiniteAxiomatizableBy T U) :
     have e : (↑h.finite.toFinset : Theory L) = U := by simp
     exact (e ▸ equiv_singleton_Fconj h.finite.toFinset).symm
 
-/-- The single sentence that axiomatizes a finitely axiomatizable theory.
-- [Lin97, Ch. 4 §1] -/
-noncomputable def FiniteAxiomatizable.conj (h : FiniteAxiomatizable T) : Sentence L :=
-  h.choose_spec.conj
-
-lemma FiniteAxiomatizable.equiv_singleton (h : FiniteAxiomatizable T) :
-    T ≊ ({h.conj} : Theory L) := h.choose_spec.equiv_singleton
-
-lemma FiniteAxiomatizable.provable_conj (h : FiniteAxiomatizable T) : T ⊢ h.conj :=
-  h.equiv_singleton.symm.le.wk (Axiomatized.by_axm rfl)
-
-lemma FiniteAxiomatizable.provable_singleton_iff (h : FiniteAxiomatizable T) {σ : Sentence L} :
-    ({h.conj} : Theory L) ⊢ σ ↔ T ⊢ σ := (Equiv.iff.mp h.equiv_singleton σ).symm
-
 /-- A theory fails to be finitely axiomatizable exactly when every finite subtheory of it is
 strictly weaker.
 - [Lin97, Ch. 4 §1]
@@ -200,13 +148,13 @@ lemma not_finiteAxiomatizable_iff :
   · rintro h ⟨F, hsub, hfin, heq⟩
     exact (h F hsub hfin).notWT (Equiv.antisymm_iff.mp heq).1
 
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic
+namespace Arithmetic
 
 /-- `𝗣𝗔⁻` is finitely axiomatizable.
 - [Lin97, Ch. 4 §1] -/
 lemma PeanoMinus.finiteAxiomatizable : FiniteAxiomatizable 𝗣𝗔⁻ :=
   FiniteAxiomatizable.of_finite PeanoMinus.finite
 
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

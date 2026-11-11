@@ -1,21 +1,30 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Extension
-public import Foundation.ProvabilityLogic.Arithmetic.Interpret
+public import AlphaCentauri.Interpretability.InterpretationExistence
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.ProvabilityFormula
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
+public import Foundation.ProvabilityLogic.Arithmetic.Interpret
+public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 /-!
 # Arithmetical soundness of interpretability logics
 
 An interpretability abstraction over a provability abstraction `𝔅` is a binary operator on
-sentences. Interpreting `□` by `𝔅` and `▷` by the operator, every theorem of $\mathbf{IL}$ is
-provable under every realization once the arithmetical forms of $\mathbf{J1}$–$\mathbf{J5}$ are,
-and every theorem of $\mathbf{ILM}$ once the arithmetical form of $\mathbf{M}$ is as well.
+sentences. Interpreting `□` by `𝔅` and `▷` by the operator, the theorems of a logic extending
+$\mathbf{IL}^-$ are provable under every realization once the arithmetical forms of its axioms
+are.
+
+## References
+
+- [Vis90, §6.1, §6.2.2.1]
 -/
 
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
+
+section
 
 open Entailment FirstOrder FirstOrder.ProvabilityAbstraction
 
@@ -79,7 +88,7 @@ open Interpretability Formula
 
 variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T]
   {𝔅 : Provability T₀ T} [𝔅.HBL] {𝔍 : Interpretability 𝔅} [𝔍.IL]
-  {f : ProvabilityLogic.Realization α L} {𝔸 : Set (Formula α)} {A : Formula α}
+  {f : ProvabilityLogic.Realization α L} {𝔸 : FormulaSet α} {A : Formula α}
 
 theorem Logic.ofAxioms.arithmetical_soundness (h𝔸 : ∀ A ∈ 𝔸, T₀ ⊢ A.interpret f 𝔅 𝔍)
     (h : ofAxioms 𝔸 ⊢ A) : T₀ ⊢ A.interpret f 𝔅 𝔍 := by
@@ -118,20 +127,34 @@ theorem Logic.ofAxioms.arithmetical_soundness (h𝔸 : ∀ A ∈ 𝔸, T₀ ⊢ 
     exact h₂ ⨀ J5;
   | _ => dsimp [interpret]; cl_prover;
 
-theorem Logic.IL.arithmetical_soundness (h : 𝐈𝐋 ⊢ A) : T₀ ⊢ A.interpret f 𝔅 𝔍 :=
-  Logic.ofAxioms.arithmetical_soundness (by simp) h
+end
 
-theorem Logic.ILM.arithmetical_soundness [𝔍.M] (h : 𝐈𝐋𝐌 ⊢ A) : T₀ ⊢ A.interpret f 𝔅 𝔍 := by
-  apply Logic.ofAxioms.arithmetical_soundness _ h;
-  rintro _ ⟨A, B, C, rfl⟩;
-  dsimp only [interpret];
-  generalize A.interpret f 𝔅 𝔍 = σ, B.interpret f 𝔅 𝔍 = τ, C.interpret f 𝔅 𝔍 = χ;
-  have h₁ : T₀ ⊢ 𝔍 σ τ 🡒 𝔍 (σ ⋏ 𝔅 χ) (τ ⋏ 𝔅 χ) := M.axiomM;
-  have h₂ : T₀ ⊢ 𝔍 (σ ⋏ 𝔅 χ) (τ ⋏ 𝔅 χ) 🡒 𝔍 ((σ 🡒 𝔅 χ 🡒 ⊥) 🡒 ⊥) (τ ⋏ 𝔅 χ) :=
-    Interpretability.rhd_anti_left <| by cl_prover;
-  have h₃ : T₀ ⊢ 𝔍 ((σ 🡒 𝔅 χ 🡒 ⊥) 🡒 ⊥) (τ ⋏ 𝔅 χ) 🡒
-      𝔍 ((σ 🡒 𝔅 χ 🡒 ⊥) 🡒 ⊥) ((τ 🡒 𝔅 χ 🡒 ⊥) 🡒 ⊥) :=
-    Interpretability.rhd_mono_right <| by cl_prover;
-  cl_prover [h₁, h₂, h₃];
+section
+
+open FirstOrder FirstOrder.Arithmetic FirstOrder.ProvabilityAbstraction
+
+variable (T : ArithmeticTheory) [T.Δ₁]
+
+/-- Formalized relative interpretability over `T`, as an interpretability abstraction over the
+standard provability predicate of `T`.
+
+- [Vis90, §5.5]
+-/
+noncomputable def _root_.FFL.FirstOrder.ArithmeticTheory.interpretabilityAbstraction :
+    Interpretability T.standardProvability :=
+  ⟨T.interpretability⟩
+
+variable [𝗣𝗔 ⪯ T] [Theory.Δ₁.Sentential T]
+
+instance instILInterpretabilityAbstraction : T.interpretabilityAbstraction.IL where
+  J1 := ArithmeticTheory.interpretability_of_provable
+  J2 := ArithmeticTheory.interpretability_trans
+  J3 := ArithmeticTheory.interpretability_or
+  J4 := ArithmeticTheory.consistent_of_interpretability
+  J5 := ArithmeticTheory.interpretability_consistency _
+
+end
 
 end FFL.InterpretabilityLogic
+
+end

@@ -2,7 +2,9 @@ module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.Interpretable
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
-public import AlphaCentauri.ToFoundation.SententialAxioms
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
+public import AlphaCentauri.Interpretability.Henkin
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 /-!
@@ -11,11 +13,13 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 For an arithmetical theory $T$ with $\Delta_1$ axioms and sentences $\varphi, \psi$, the sentence
 `T.interpretability φ ψ` says that $T + \psi$ is interpretable in $T + \varphi$. The theory
 $\mathsf{I}\Sigma_1$ proves the arithmetical forms of the principles $\mathbf{J1}$–$\mathbf{J4}$ of
-interpretability logic for it.
+interpretability logic for it. For $T \supseteq \mathsf{PA}$, it also proves that
+$T + \neg\mathrm{Pr}_T(\neg\varphi)$ interprets $T + \varphi$, the arithmetical form of the
+principle $\mathbf{J5}$.
 
 ## References
 
-- [Vis90, §5.5, §6.1]
+- [Vis90, §5.5, §6.1, §6.2.2.1]
 -/
 
 @[expose] public section
@@ -25,6 +29,9 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
+
+
+section formalized
 
 variable (T : ArithmeticTheory) [T.Δ₁]
 
@@ -80,18 +87,14 @@ lemma quote_imp_sentence (φ ψ : ArithmeticSentence) :
   rw [Semiformula.imp_eq, Sentence.quote_or, quote_neg_sentence]
   rfl
 
-lemma provable_union_singleton_of_mem [𝗘𝗤 ℒₒᵣ ⪯ T] {φ : ArithmeticSentence} {p : V}
-    (hp : p ∈ T.Δ₁Class) (hf : IsFormula ℒₒᵣ p) : Provable (T ∪ {φ}) p :=
-  Derivable.toProvable <| Derivable.by_axm (by simp [hf]) p (by simp)
-    (Theory.Δ₁Class.mem_union.mpr (Or.inl hp))
-
 lemma interpretable_of_provable_imp [𝗘𝗤 ℒₒᵣ ⪯ T] {φ ψ : ArithmeticSentence}
     (h : Provable T (⌜φ 🡒 ψ⌝ : V)) : Interpretable V (T ∪ {φ}) (T ∪ {ψ}) := by
   obtain ⟨tbl, hT, htr⟩ := exists_isTranslationTable_provable_translate V (T ∪ {φ})
   use tbl
   refine { toIsTranslationTable := hT, translate_axiom := fun {p} hp hf ↦ htr p ?_ }
   rcases Theory.Δ₁Class.mem_union.mp hp with hp | hp
-  · exact provable_union_singleton_of_mem hp hf
+  · exact Derivable.toProvable <| Derivable.by_axm (by simp [hf]) p (by simp)
+      (Theory.Δ₁Class.mem_union.mpr (Or.inl hp))
   · rw [(Derivation.mem_deltaClass_singleton_iff ψ p).mp hp,
       Derivation.provable_union_singleton_iff, ← quote_imp_sentence]
     exact h
@@ -153,5 +156,7 @@ theorem _root_.FFL.FirstOrder.ArithmeticTheory.interpretability_or [𝗘𝗤 ℒ
   rintro ⟨h₁, h₂⟩
   exact models_interpretability_iff.mpr <|
     (models_interpretability_iff.mp h₁).union_or (models_interpretability_iff.mp h₂)
+
+end formalized
 
 end FFL.FirstOrder.Arithmetic

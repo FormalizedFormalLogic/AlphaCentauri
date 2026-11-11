@@ -1,6 +1,10 @@
 module
 
+public import AlphaCentauri.Bootstrapping.Interpretability.Composition
+public import AlphaCentauri.Bootstrapping.Interpretability.Identity
+public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 public import AlphaCentauri.Bootstrapping.Interpretability.TranslationTable
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 
 /-!
 # The case-split table
@@ -11,11 +15,17 @@ For a sentence `φ` and two tables, the case-split table has as each entry the f
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+
+section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+
 
 open _root_.FFL.Entailment
 
@@ -114,27 +124,6 @@ lemma tableFunc_caseTable {s tbl₁ tbl₂ k f : V} (h : ⟪k, f⟫ < len tbl₁
 
 end caseCode
 
-section caseTable
-
-variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable] {tbl : V}
-
-lemma IsTable.lt_len_rel (hT : IsTable L₁ L₂ tbl) {k r : V} (h : L₂.IsRel k r) :
-    ⟪k, r⟫ < len tbl.[1] := by
-  by_contra hlt
-  have := (hT.rel h).isUFormula.pos
-  rw [tableRel, nth_lt_len (not_lt.mp hlt)] at this
-  simp at this
-
-lemma IsTable.lt_len_func (hT : IsTable L₁ L₂ tbl) {k f : V} (h : L₂.IsFunc k f) :
-    ⟪k, f⟫ < len tbl.[2] := by
-  by_contra hlt
-  have := (hT.func h).isUFormula.pos
-  rw [tableFunc, nth_lt_len (not_lt.mp hlt)] at this
-  simp at this
-
-end caseTable
-
 section sentence
 
 variable (φ : ArithmeticSentence) {L₂ : Language} [L₂.Encodable] [L₂.LORDefinable] {tbl₁ tbl₂ : V}
@@ -205,4 +194,7 @@ lemma subst_eq_of_val_eq_caseCode {n : ℕ} {e e₁ e₂ : Semiformula V ℒₒ�
 
 end sentence
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

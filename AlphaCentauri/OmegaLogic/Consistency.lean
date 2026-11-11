@@ -1,18 +1,20 @@
 module
 
 public import AlphaCentauri.OmegaLogic.Embedding
+public import AlphaCentauri.OmegaLogic.CutElimination.Reduction
 
 /-!
-# The consistency of `𝗣𝗔`, read off `Z_∞`
+# Consistency of `𝗣𝗔` in `Z_∞`
 
-This file states the consistency of `𝗣𝗔` as a consequence of the `Z_∞` development.
+`𝗣𝗔` does not prove falsity.
 
-Neither [HP98] nor [Lin97] treats ω-logic; the presentation followed is [Tow20].
+- [Tow20, Section 16]
 -/
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.OmegaLogic
+namespace FFL.FirstOrder.Arithmetic
+namespace OmegaLogic
 
 /-- Peano arithmetic does not prove falsity.
 
@@ -23,4 +25,5 @@ theorem consistent_PA : 𝗣𝗔 ⊬ ⊥ := by
   obtain ⟨α, hα⟩ := Provable.of_derivation2_cutFree d fun _ => 0
   exact Provable.not_empty (Provable.remove_falsum (by simpa using hα))
 
-end FFL.FirstOrder.Arithmetic.OmegaLogic
+end OmegaLogic
+end FFL.FirstOrder.Arithmetic

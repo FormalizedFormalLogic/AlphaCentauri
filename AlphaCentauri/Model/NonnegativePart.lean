@@ -1,13 +1,16 @@
 module
 
 public import AlphaCentauri.Schemata.ZRing
-public import AlphaCentauri.ToFoundation.OpenPredicate
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Mathlib.Algebra.Order.Group.MinMax
 public import Mathlib.Algebra.Order.Nonneg.Ring
+public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial
+public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
+public import AlphaCentauri.ToMathlib.Algebra.Polynomial.LeadingCoeffOrder
+public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenPredicate
 
-/-!
-# The non-negative part of a discretely ordered ring
+/-! # The non-negative part of a discretely ordered ring
 
 The non-negative elements `Nonneg R` of an ordered commutative ring `R` form an
 `ℒₒᵣ`-structure, which is a model of $\mathsf{PA}^-$ when `R` is discretely ordered, and a model of
@@ -15,6 +18,7 @@ $\mathsf{IOpen}$ exactly when `R` satisfies open induction.
 -/
 
 @[expose] public section
+
 
 open FFL FirstOrder OpenPredicate
 
@@ -80,18 +84,18 @@ theorem models_IOpen_iff [DiscretelyOrdered R] :
     apply Semantics.ModelsSet.union_iff.mpr
     and_intros
     · infer_instance
-    apply Semantics.modelsSet_iff.mpr
-    rintro _ ⟨φ, hφ, rfl⟩
-    suffices ∀ f : ℕ → Nonneg R, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →
-        ∀ x, φ.Eval ![x] f by
-      simpa [models_iff, Semiformula.eval_univCl, Arithmetic.succInd, Semiformula.eval_substs,
-        Matrix.constant_eq_singleton] using this
-    intro f h0 hs x
-    have hφP (y : Nonneg R) : φ.Eval ![y] f ↔ φ.Eval ![(y : R)] fun i ↦ (f i : R) := by
-      simpa [Matrix.constant_eq_singleton, Function.comp_def] using
-        Semiformula.eval_hom_iff_of_open oRingEmbedding hφ (e₁ := ![y]) (ε₁ := f)
-    simp only [hφP] at h0 hs ⊢
-    exact h _ (isOpen_eval _ hφ) h0 (fun r hr ↦ hs ⟨r, hr⟩) x x.2
+    · apply Semantics.modelsSet_iff.mpr
+      rintro _ ⟨φ, hφ, rfl⟩
+      suffices ∀ f : ℕ → Nonneg R, φ.Eval ![0] f → (∀ x, φ.Eval ![x] f → φ.Eval ![x + 1] f) →
+          ∀ x, φ.Eval ![x] f by
+        simpa [models_iff, Semiformula.eval_univCl, Arithmetic.succInd, Semiformula.eval_substs,
+          Matrix.constant_eq_singleton] using this
+      intro f h0 hs x
+      have hφP (y : Nonneg R) : φ.Eval ![y] f ↔ φ.Eval ![(y : R)] fun i ↦ (f i : R) := by
+        simpa [Matrix.constant_eq_singleton, Function.comp_def] using
+          Semiformula.eval_hom_iff_of_open oRingEmbedding hφ (e₁ := ![y]) (ε₁ := f)
+      simp only [hφP] at h0 hs ⊢
+      exact h _ (isOpen_eval _ hφ) h0 (fun r hr ↦ hs ⟨r, hr⟩) x x.2
 
 /-- The natural number cast of the semiring structure that the $\mathsf{PA}^-$ model structure on
 `Nonneg R` induces agrees with the cast of `Nonneg R` itself. -/
@@ -137,3 +141,4 @@ theorem models_ZRing [DiscretelyOrdered R]
     exact ⟨h₁, h₂⟩
 
 end Nonneg
+

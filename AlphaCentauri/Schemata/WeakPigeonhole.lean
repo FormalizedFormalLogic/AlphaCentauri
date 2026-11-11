@@ -1,11 +1,11 @@
 module
 
 public import AlphaCentauri.Schemata.Pigeonhole
-public import AlphaCentauri.ToFoundation.BlockSequence
-public import AlphaCentauri.ToFoundation.Exponential
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
+public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
+public import Foundation.FirstOrder.Arithmetic.Schemata
 
-/-!
-# The weak pigeonhole principle over $\mathsf{I}\Delta_0 + \Omega_1$
+/-! # The weak pigeonhole principle over $\mathsf{I}\Delta_0 + \Omega_1$
 
 In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection of
 $a^2$ into $a$, for $a > 1$. An injection folds a binary tree of depth $\|a\|$ whose leaves can be
@@ -19,12 +19,16 @@ $0 < K \le \|I\|$ for some $I$. The ratio $(n + 1) / n$ for a standard $n$ is th
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-open FFL.FirstOrder.Bounding (HierarchySymbol)
-
 namespace FFL.FirstOrder.Arithmetic
 
-noncomputable section
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+open _root_.FFL.Entailment
+
+noncomputable section WeakPigeonhole
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
@@ -134,7 +138,6 @@ lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c <
 
 end tree
 
-section square
 
 variable (R : V → V → Prop) (a : V)
 
@@ -245,7 +248,6 @@ lemma definable_diagonal (hR : 𝚺ᴬ₀.DefinableRel R) :
   have := definable_isLeaf (a := a) (definable_isChild (a := a) hR)
   definability
 
-end square
 
 end WeakPigeonhole
 
@@ -395,7 +397,6 @@ theorem weakPigeonhole_two_mul {R : V → V → Prop} (hR : 𝚺ᴬ₀.Definable
 
 namespace WeakPigeonhole
 
-section shift
 
 variable (R : V → V → Prop) (K b : V)
 
@@ -550,7 +551,6 @@ lemma IsPath.eq_of_shiftStep (hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, 
   have := key K le_rfl
   rwa [sub_self, hs.1, hs'.1] at this
 
-end shift
 
 lemma exists_le_length (n : ℕ) : ∃ I : V, (n : V) ≤ ‖I‖ := by
   induction n with
@@ -602,8 +602,6 @@ theorem weakPigeonhole_succ_mul (n : ℕ) {R : V → V → Prop} (hR : 𝚺ᴬ�
   obtain ⟨I, hI⟩ := WeakPigeonhole.exists_le_length (V := V) n
   exact weakPigeonhole_succ_mul_of_le_length hR ha (by exact_mod_cast hn) hI total
 
-end
-
 /-- $\mathsf{I}\Delta_0 + \Omega_1$ proves the weak pigeonhole principle for $\Delta_0$ formulas.
 - [PWW88, Theorem 1] -/
 theorem WeakPigeonholeOnPrenexHierarchy_weakerThan_ISigma0_union_Omega1 :
@@ -620,5 +618,7 @@ theorem WeakPigeonholeOnPrenexHierarchy_weakerThan_ISigma0_union_Omega1 :
     exact HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 0) (Rew.rewriteMap f ▹ φ)
       (Bounding.Hierarchy.rew _ (Bounding.PrenexHierarchy.zero_iff.mp hφ))
       fun v ↦ by simp [Semiformula.eval_rewriteMap, ← Matrix.fun_eq_vec_two]
+
+end WeakPigeonhole
 
 end FFL.FirstOrder.Arithmetic

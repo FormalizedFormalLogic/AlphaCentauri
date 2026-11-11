@@ -1,9 +1,14 @@
 module
 
+public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Schemata.ZRing
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenPredicate
+public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree
+public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
+public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial
 
-/-!
-# Models of open induction extending $\mathbb{Z}$-rings
+/-! # Models of open induction extending $\mathbb{Z}$-rings
 
 Wilkie's extension theorem: every discretely ordered $\mathbb{Z}$-ring embeds into a discretely
 ordered ring satisfying open induction. As a consequence, $\mathsf{IOpen}$ and $\mathsf{ZR}$ prove
@@ -14,6 +19,7 @@ the same universal sentences.
 
 namespace FFL.FirstOrder.Arithmetic
 
+
 /-- Every model of $\mathsf{ZR}$ embeds into a model of $\mathsf{IOpen}$.
 - [Wil78, Lemma 3.2]
 - [BO96, Theorem 1.2]
@@ -21,7 +27,7 @@ namespace FFL.FirstOrder.Arithmetic
 axiom exists_embedding_models_IOpen (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* ZRing] :
     ∃ (N : Type) (_ : ORingStructure N), N↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 ∧ Nonempty (M ↪ₛ[ℒₒᵣ] N)
 
-open Semiformula in
+open _root_.FFL.FirstOrder.Semiformula in
 /-- $\mathsf{IOpen}$ and $\mathsf{ZR}$ prove the same universal closures of open formulas.
 - [Wil78, §1]
 - [Moh11, §1] -/
@@ -39,7 +45,7 @@ theorem provable_univCl_IOpen_iff {φ : ArithmeticSemiformula ℕ 0} (hφ : φ.O
     simpa [Matrix.empty_eq] using hN (Θ ∘ f)
   · exact ZRing_weakerThan_IOpen.pbl
 
-open Semiformula in
+open _root_.FFL.FirstOrder.Semiformula in
 /-- The universal closure of an open formula that fails in some model of $\mathsf{ZR}$ is not
 provable in $\mathsf{IOpen}$.
 - [Wil78, §1] -/
@@ -54,5 +60,6 @@ lemma not_provable_IOpen_allClosure {n : ℕ} {φ : ArithmeticSemisentence n} (h
   apply (eval_hom_iff_of_open Θ hφ (ε₁ := Empty.elim)).mpr
   rw [Subsingleton.elim (Θ ∘ Empty.elim) Empty.elim]
   exact this _
+
 
 end FFL.FirstOrder.Arithmetic

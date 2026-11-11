@@ -1,11 +1,15 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Completeness.Henkin
+public import AlphaCentauri.Bootstrapping.Henkin
+public import AlphaCentauri.Bootstrapping.Proof.CutFree
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 public import AlphaCentauri.Interpretability.Basic
-public import AlphaCentauri.ToFoundation.SententialAxioms
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
+public import Foundation.FirstOrder.Incompleteness.Second
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.ProvabilityAbstraction
 
 /-!
-# Interpretation of a theory in itself plus its consistency
+# Henkin interpretations
 
 The translation of a language $L$ into arithmetic given by the Henkin set of a theory $S$, over
 any arithmetical theory containing $\mathsf{PA}$ and the consistency of $S$. In its model, a
@@ -27,6 +31,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
+
 
 section translation
 
@@ -51,11 +56,6 @@ lemma consistent_of_models_con {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] �
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔]
   (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (hcons : S.Consistent V)
-
-omit [Theory.Δ₁.Sentential S] [𝗘𝗤 L ⪯ S] [𝗣𝗔 ⪯ T] in
-/-- The domain of the Henkin translation is nonempty in every model of $\mathsf{PA}$. -/
-lemma henkinDomain_nonempty : ∃ x : V, (henkinDomain S).val ![x] :=
-  ⟨0, (henkinDomain_val S 0).mpr fun _ h ↦ absurd h (by simp)⟩
 
 omit [Theory.Δ₁.Sentential S] in
 include hS hcons in
@@ -103,7 +103,8 @@ noncomputable def henkinTranslation : DirectTranslation (T ∪ S.Con) L where
   rel := henkinRel S
   func := henkinFunc S
   domain_nonempty := provable_of_models_henkin S T _ fun _ _ _ _ _ ↦
-    (DirectTranslation.models_domainNonempty_iff _).mpr (henkinDomain_nonempty S)
+    (DirectTranslation.models_domainNonempty_iff _).mpr
+      ⟨0, (henkinDomain_val S 0).mpr fun _ h ↦ absurd h (by simp)⟩
   func_defined f := provable_of_models_henkin S T _ fun _ _ _ hS hcons ↦
     (DirectTranslation.models_funcDefined_iff _ _).mpr fun e _ ↦
       henkinFunc_existsUnique S hS hcons f e
@@ -156,8 +157,6 @@ private lemma subst_fvar_cons (x : V) (u : Fin n → V) (φ : Bootstrapping.Semi
 
 end quote
 
-section model
-
 omit [V↓[ℒₒᵣ] ⊧* T ∪ S.Con] in
 private lemma exists_model_henkinEq (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
     (hcons : S.Consistent V) (x : V) :
@@ -170,8 +169,6 @@ private lemma henkinEq_cons {n : ℕ} {e : Fin n → (henkinTranslation S T).Mod
     {a : (henkinTranslation S T).Model V} {x : V} (ha : HenkinEq S (a : V) x)
     (h : ∀ i, HenkinEq S (e i : V) (u i)) : ∀ i, HenkinEq S ((a :> e) i : V) ((x :> u) i) :=
   Fin.cases ha h
-
-end model
 
 theorem henkinTranslation_truth {n : ℕ} (β : Semisentence L n)
     {e : Fin n → (henkinTranslation S T).Model V} {u : Fin n → V}

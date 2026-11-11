@@ -3,6 +3,7 @@ module
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.Definability
 public import AlphaCentauri.Axiomatizability.Basic
+public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.Bootstrapping.Proof.ComplexitySoundness
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 
@@ -36,9 +37,8 @@ lemma ArithmeticTheory.EssentiallyReflexive.reflexive {T : ArithmeticTheory}
     (h : T.EssentiallyReflexive) : T.Reflexive :=
   h T Set.Subset.rfl
 
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic
+namespace Arithmetic
 
 variable {T : ArithmeticTheory}
 
@@ -50,10 +50,9 @@ theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T] 
   by_contra! hfa
   obtain ⟨F, hFT, hfin, hequiv⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp hfa
   let : F.Δ₁ := Theory.Δ₁.ofFinite F hfin
-  have hcon : T ⊢ F.consistent.val := h F hFT hfin
   have : 𝗜𝚺₁ ⪯ F := WeakerThan.trans inferInstance hequiv.le
   have : Consistent F := Consistent.of_le inferInstance hequiv.symm.le
-  exact consistent_unprovable F (hequiv.le.wk hcon)
+  exact consistent_unprovable F (hequiv.le.wk <| h F hFT hfin)
 
 /-- `𝗜𝚺₂` proves the consistency of `𝗜𝚺₁`.
 - [HP98, Corollary I.4.34(1)] -/
@@ -135,4 +134,5 @@ theorem not_finiteAxiomatizable_of_Peano_le [𝗣𝗔 ⪯ T] [Consistent T] : ¬
   have : Consistent (𝗣𝗔 ∪ T) := Consistent.of_le ‹Consistent T› hUT
   exact mt (FiniteAxiomatizable.of_equiv hequiv) <| not_finiteAxiomatizable_of_reflexive hR
 
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

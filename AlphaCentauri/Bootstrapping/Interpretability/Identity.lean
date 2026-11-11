@@ -1,7 +1,8 @@
 module
 
+public import AlphaCentauri.Bootstrapping.Interpretability.Congruence
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
-public import AlphaCentauri.Bootstrapping.Interpretability.SoundnessRules
+public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 
 /-!
@@ -14,11 +15,17 @@ to its translation, and so the translation of every formula code provable in `S`
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+
+section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+
 
 open _root_.FFL.Entailment
 
@@ -238,4 +245,7 @@ theorem id_provable_translate {p : V} (hpr : Provable S p) : Provable S (transla
 
 end IsTableOf
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

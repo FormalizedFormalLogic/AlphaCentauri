@@ -1,11 +1,12 @@
 module
 
+public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
 public import AlphaCentauri.Bootstrapping.Interpretability.TranslationTable
 public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
 public import AlphaCentauri.Interpretability.Basic
-public import AlphaCentauri.ToFoundation.InternalEquality
-public import AlphaCentauri.ToFoundation.Provable
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
+public import Foundation.Meta.ClProver
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 
 /-!
 # Values of closed terms along the internal translation
@@ -19,11 +20,16 @@ term for a variable.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+
+section
 
 attribute [local simp] Semiformula.substs_substs
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 
 /-! ## Translation of typed formulas -/
@@ -55,8 +61,6 @@ lemma val_bvar_addCast_vec {k l : ℕ} :
       bvarVec 0 (k : V) := by
   rw [bvarVec_zero_eq_matrixToVec (L := L₁) l k]
   rfl
-
-section guard
 
 lemma varEqualVec_typed (hT : IsTable L₁ L₂ tbl) {k : ℕ} (v : Fin k → Term V L₂) :
     varEqualVec L₁ L₂ tbl k (SemitermVec.val v) = matrixToVec fun i ↦ (varEqualT hT (v i)).val := by
@@ -95,8 +99,6 @@ lemma guardVec_typed {n k : ℕ} (s : V) (d : Semiformula V L₁ 1) (hd : d.val 
   · intro i
     rw [nth_guardVec _ _ _ _ _ (by simp), matrixToVec_nth, Semiformula.val_and,
       domainAt_typed d hd, relocate_typed]
-
-end guard
 
 section table
 
@@ -146,7 +148,7 @@ end typedShapes
 
 /-! ## Derivability of the defining formulas -/
 
-section valueLemma
+section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -300,23 +302,6 @@ lemma derivable_definesElement_func (hS : ∀ p ∈ S.Δ₁Class (V := V), Boots
   rw [hYeq, definesElement_domT_val h] at hfin
   exact hfin
 
-lemma derivable_definesElement_func' (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
-    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {k f v : V}
-    (ht : IsSemiterm L₂ 0 (^func k f v))
-    (ih : ∀ i < k, Derivable S (insert (definesCode L₁ tbl.[0] (varEqual L₁ L₂ tbl v.[i]))
-      (negDomSet L₁ tbl.[0] v.[i]))) :
-    Derivable S (insert (definesCode L₁ tbl.[0] (varEqual L₁ L₂ tbl (^func k f v)))
-      (negDomSet L₁ tbl.[0] (^func k f v))) := by
-  obtain ⟨k', F, u, rfl, rfl, rfl⟩ := exists_func_termVec hL₂ ht
-  have ih' (i : Fin k') : Derivable S
-      (insert (definesCode L₁ tbl.[0] (varEqual L₁ L₂ tbl (u i).val))
-        (negDomSet L₁ tbl.[0] (u i).val)) := by
-    have h₁ := ih ((i : ℕ) : V) (by simp)
-    simpa using h₁
-  have h₂ := derivable_definesElement_func hS h F u ih'
-  rw [Semiterm.func_val] at h₂
-  exact h₂
-
 theorem derivable_definesElement (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t : V}
     (ht : IsSemiterm L₂ 0 t) :
@@ -328,19 +313,20 @@ theorem derivable_definesElement (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstra
     definability
   exact IsSemiterm.sigma1_induction hP (fun z hz ↦ absurd hz (by simp))
     (fun x ↦ derivable_definesElement_fvar h x)
-    (fun k f v hf hv ih ↦
-      derivable_definesElement_func' hS h hL₂ (IsSemiterm.func.mpr ⟨hf, hv⟩) ih)
+    (fun k f v hf hv ih ↦ by
+      obtain ⟨k', F, u, rfl, rfl, rfl⟩ := exists_func_termVec hL₂ (IsSemiterm.func.mpr ⟨hf, hv⟩)
+      have ih' (i : Fin k') : Derivable S
+          (insert (definesCode L₁ tbl.[0] (varEqual L₁ L₂ tbl (u i).val))
+            (negDomSet L₁ tbl.[0] (u i).val)) := by
+        simpa using ih ((i : ℕ) : V) (by simp)
+      have h₂ := derivable_definesElement_func hS h F u ih'
+      rw [Semiterm.func_val] at h₂
+      exact h₂)
     t ht
 
 end value
 
-end valueLemma
-
 /-! ## Substitution of a closed term -/
-
-section termSubst
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 section defs
 
@@ -536,6 +522,9 @@ theorem derivable_termSubstEquiv (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstra
 
 end value
 
-end termSubst
+end
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

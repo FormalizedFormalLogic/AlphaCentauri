@@ -1,15 +1,19 @@
 module
 
-public import AlphaCentauri.Interpretability.Formalized
+public import AlphaCentauri.Bootstrapping.Interpretability.Interpretable
+public import AlphaCentauri.Bootstrapping.Proof.CutFree
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 public import AlphaCentauri.Interpretability.Henkin
+public import AlphaCentauri.Interpretability.Formalized
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
+public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 /-!
 # The formalized interpretation existence lemma
 
-For an arithmetical theory $T \supseteq \mathsf{PA}$ with $\Delta_1$ axioms and a sentence
-$\varphi$, $\mathsf{I}\Sigma_1$ proves that $T + \neg\mathrm{Pr}_T(\neg\varphi)$ interprets
-$T + \varphi$: the Henkin translation of $T + \varphi$ interprets it. This is the arithmetical form
-of the principle $\mathbf{J5}$ of interpretability logic.
+Along a table of the Henkin translation of a theory $S$, every axiom of $S$ translates to a formula
+provable from $T$ and the consistency of $S$. The consistency of $T + \varphi$ follows from
+$T + \neg\mathrm{Pr}_T(\neg\varphi)$.
 
 ## References
 
@@ -23,6 +27,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
+
 
 section henkin
 

@@ -3,6 +3,7 @@ module
 public import AlphaCentauri.Model.Cut
 public import Foundation.FirstOrder.Arithmetic.Definability.PrenexDefinable
 public import Foundation.FirstOrder.Arithmetic.Schema.DeltaInduction
+public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-! # Proper cuts
 
@@ -14,6 +15,7 @@ prenex $\Sigma_n$ formulas with parameters.
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
+
 
 open Semiformula Tarski.Structure
 
@@ -68,5 +70,6 @@ lemma not_models_IDelta_of_proper_cut (I : Cut M) (n : ℕ) (hI : I.Proper)
     (fun x ↦ by rw [h₁ x, h₂ x, not_not])
     ((h₁ 0).mpr h0) (fun x hx ↦ (h₁ (x + 1)).mpr (I.succ_mem ((h₁ x).mp hx)))
   exact hc ((h₁ c).mp (hind c))
+
 
 end FFL.FirstOrder.Arithmetic

@@ -1,8 +1,11 @@
 module
 
-public import AlphaCentauri.ToFoundation.Absoluteness
-public import AlphaCentauri.ToFoundation.Coding
-public import AlphaCentauri.ToFoundation.Schemata
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Absoluteness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastWitness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
 /-!
@@ -21,7 +24,8 @@ of the code of a prenex formula with a $\Delta_0$ matrix exactly when the formul
 
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 /-! ## The Tarski conditions -/
 
@@ -140,8 +144,6 @@ noncomputable def tarski : ArithmeticTheory := {
 
 lemma tarski_finite : tarski.Finite := by simp [tarski]
 
-section hierarchy
-
 private lemma hierarchy_sigmaOne {k m : ℕ} (σ : 𝚺ᴬ₁.Semisentence k) (Γ : Polarity)
     (h : 1 < m) : ℬ[<, ℒₒᵣ].Hierarchy Γ m σ.val :=
   σ.sigma_prop.strict_mono Γ h
@@ -176,8 +178,6 @@ lemma hierarchy_of_tarski {s : ℕ} {σ : ArithmeticSentence} (hσ : σ ∈ tars
     Tarski.boundedSatisfiedProper, Tarski.termValBvar, Tarski.termValZero, Tarski.termValOne,
     Tarski.termValAdd, Tarski.termValMul, Tarski.adjoinTotal, Tarski.nthAdjoinZero,
     Tarski.nthAdjoinSucc, Tarski.lenNil, Tarski.lenAdjoin]
-
-end hierarchy
 
 /-! ## `𝗜𝚺₁` proves the Tarski conditions -/
 
@@ -659,4 +659,5 @@ lemma prenexSatisfied_quote_reading : ∀ {Γ : Polarity} {s k : ℕ}
 
 end disquotation
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

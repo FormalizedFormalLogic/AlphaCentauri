@@ -1,14 +1,15 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import Foundation.Logic.Semantics
 public import Foundation.Vorspiel.Rel.CWF
 
 /-!
 # Veltman semantics
 
-Veltman models, forcing, and the soundness of extensions of $\mathbf{IL}$ with respect to Veltman
-models validating their axioms.
+Veltman models, forcing, the frame conditions of $\mathbf{J1}$, $\mathbf{J2}$, $\mathbf{J2}^+$,
+$\mathbf{J4}$, $\mathbf{J4}^+$ and $\mathbf{J5}$ on $\mathbf{IL}^-$-frames, and the soundness of
+$\mathbf{IL}^-$ with respect to them.
 -/
 
 @[expose] public section
@@ -133,72 +134,145 @@ end Model.World
 
 namespace Model
 
-variable {κ α : Type*} [Nonempty κ]
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
 
 instance : Semantics (Model κ α) (Formula α) := ⟨fun M A ↦ ∀ x : M.World, World.Forces M x A⟩
 
-lemma models_iff {M : Model κ α} {A : Formula α} : M ⊧ A ↔ ∀ x : M.World, World.Forces M x A :=
-  Iff.rfl
+
+/-- `≺` is transitive and conversely well-founded, and `x ≺[w] y` implies `w ≺ x`.
+
+- [KO21, Definition 2.2]
+-/
+class IsILMinus (M : Model κ α) extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel where
+  rel_of_s_left {w x y : M.World} : x ≺[w] y → w ≺ x
+
+/-- - [KO21, Proposition 3.2] -/
+class IsJ1 (M : Model κ α) : Prop where
+  s_refl {w x : M.World} : w ≺ x → x ≺[w] x
+
+/-- - [KO21, Proposition 3.8] -/
+class IsJ4 (M : Model κ α) : Prop where
+  rel_of_s_right {w x y : M.World} : x ≺[w] y → w ≺ y
+
+/-- - [KO21, Proposition 3.15] -/
+class IsJ2 (M : Model κ α) : Prop extends M.IsJ4 where
+  s_trans {w x y z : M.World} : x ≺[w] y → y ≺[w] z → x ≺[w] z
+
+/-- - [KO21, Proposition 3.18] -/
+class IsJ5 (M : Model κ α) : Prop where
+  s_of_rel {w x y : M.World} : w ≺ x → x ≺ y → x ≺[w] y
+
+instance [M.IsIL] : M.IsILMinus where
+  rel_of_s_left := rel_of_s_left
+
+instance [M.IsIL] : M.IsJ1 := ⟨s_refl⟩
+
+instance [M.IsIL] : M.IsJ2 where
+  rel_of_s_right := rel_of_s_right
+  s_trans := s_trans
+
+instance [M.IsIL] : M.IsJ5 := ⟨s_of_rel⟩
+
+lemma IsIL.of_isILMinus [M.IsILMinus] [M.IsJ1] [M.IsJ2] [M.IsJ5] : M.IsIL where
+  rel_of_s_left := IsILMinus.rel_of_s_left
+  rel_of_s_right := IsJ4.rel_of_s_right
+  s_refl := IsJ1.s_refl
+  s_trans := IsJ2.s_trans
+  s_of_rel := IsJ5.s_of_rel
 
 end Model
 
+namespace Model.World
+
+open Model
+
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {x : M.World} {A B C : Formula α}
+
+lemma forces_axiomJ3 : x ⊩ Axioms.J3 A B C := by
+  intro hx y Rxy hy
+  grind
+
+lemma forces_axiomJ6 : x ⊩ Axioms.J6 A := by
+  apply forces_iff.mpr
+  constructor
+  · intro hx y Rxy hy
+    exact absurd (hx y Rxy) hy
+  · intro hx y Rxy
+    by_contra hy
+    obtain ⟨z, -, hz⟩ := hx y Rxy hy
+    exact hz
+
+lemma forces_axiomJ1 [M.IsJ1] : x ⊩ Axioms.J1 A B := by
+  intro hx y Rxy hy
+  exact ⟨y, IsJ1.s_refl Rxy, hx y Rxy hy⟩
+
+lemma forces_axiomJ4Plus [M.IsJ4] : x ⊩ Axioms.J4Plus A B C := by
+  intro hx hCA y Rxy hy
+  obtain ⟨z, Sxyz, hz⟩ := hCA y Rxy hy
+  exact ⟨z, Sxyz, hx z (IsJ4.rel_of_s_right Sxyz) hz⟩
+
+lemma forces_axiomJ4 [M.IsJ4] : x ⊩ Axioms.J4 A B := by
+  intro hx hA
+  obtain ⟨y, Rxy, hy⟩ := forces_dia.mp hA
+  obtain ⟨z, Sxyz, hz⟩ := hx y Rxy hy
+  exact forces_dia.mpr ⟨z, IsJ4.rel_of_s_right Sxyz, hz⟩
+
+lemma forces_axiomJ2Plus [M.IsJ2] : x ⊩ Axioms.J2Plus A B C := by
+  intro hx y Rxy hy
+  obtain ⟨hABC, hBC⟩ := forces_and.mp hx
+  obtain ⟨z, Sxyz, hz⟩ := hABC y Rxy hy
+  rcases forces_or.mp hz with hz | hz
+  · obtain ⟨u, Sxzu, hu⟩ := hBC z (IsJ4.rel_of_s_right Sxyz) hz
+    exact ⟨u, IsJ2.s_trans Sxyz Sxzu, hu⟩
+  · exact ⟨z, Sxyz, hz⟩
+
+lemma forces_axiomJ2 [M.IsJ2] : x ⊩ Axioms.J2 A B C := by
+  intro hx y Rxy hy
+  obtain ⟨hAB, hBC⟩ := forces_and.mp hx
+  obtain ⟨z, Sxyz, hz⟩ := hAB y Rxy hy
+  obtain ⟨u, Sxzu, hu⟩ := hBC z (IsJ4.rel_of_s_right Sxyz) hz
+  exact ⟨u, IsJ2.s_trans Sxyz Sxzu, hu⟩
+
+lemma forces_axiomJ5 [M.IsJ5] : x ⊩ Axioms.J5 A := by
+  intro y Rxy hy
+  obtain ⟨z, Ryz, hz⟩ := forces_dia.mp hy
+  exact ⟨z, IsJ5.s_of_rel Rxy Ryz, hz⟩
+
+end Model.World
+
 end Veltman
 
-/-! ### Soundness -/
+/-! ### Soundness of the sublogics of $\mathbf{IL}$ -/
 
-namespace Logic.ofAxioms
+namespace Logic.ofAxiomsMinus
 
 open Veltman Veltman.Model Veltman.Model.World
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : Set (Formula α)} {A : Formula α}
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : FormulaSet α} {A : Formula α}
 
-theorem sound [M.IsIL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxioms 𝔸 ⊢ A) : M ⊧ A := by
-  intro x;
+/-- - [KO21, Proposition 2.3] -/
+theorem sound [M.IsILMinus] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxiomsMinus 𝔸 ⊢ A) : M ⊧ A := by
+  intro x
   induction h generalizing x with
-  | axm hA => exact h𝔸 _ hA x;
-  | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x);
-  | nec _ ih => exact fun y _ ↦ ih y;
-  | axiomL => exact forces_axiomL;
-  | axiomJ1 =>
-    intro hx y Rxy hy;
-    use y;
-    and_intros;
-    · exact s_refl Rxy;
-    · exact hx y Rxy hy;
-  | axiomJ2 =>
-    intro hx y Rxy hy;
-    obtain ⟨hAB, hBC⟩ := forces_and.mp hx;
-    obtain ⟨z, Sxyz, hz⟩ := hAB y Rxy hy;
-    obtain ⟨u, Sxzu, hu⟩ := hBC z (rel_of_s_right Sxyz) hz;
-    use u;
-    and_intros;
-    · exact s_trans Sxyz Sxzu;
-    · exact hu;
-  | axiomJ3 =>
-    intro hx y Rxy hy;
-    obtain ⟨hAC, hBC⟩ := forces_and.mp hx;
-    rcases forces_or.mp hy with hy | hy;
-    · exact hAC y Rxy hy;
-    · exact hBC y Rxy hy;
-  | axiomJ4 =>
-    intro hx hA;
-    obtain ⟨y, Rxy, hy⟩ := forces_dia.mp hA;
-    obtain ⟨z, Sxyz, hz⟩ := hx y Rxy hy;
-    exact forces_dia.mpr ⟨z, rel_of_s_right Sxyz, hz⟩;
-  | axiomJ5 =>
-    intro y Rxy hy;
-    obtain ⟨z, Ryz, hz⟩ := forces_dia.mp hy;
-    use z;
-    and_intros;
-    · exact s_of_rel Rxy Ryz;
-    · exact hz;
-  | _ => grind;
+  | axm hA => exact h𝔸 _ hA x
+  | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x)
+  | nec _ ih =>
+    intro y _
+    exact ih y
+  | rule1 _ ih =>
+    intro hx y Rxy hy
+    obtain ⟨z, Sxyz, hz⟩ := hx y Rxy hy
+    exact ⟨z, Sxyz, ih z hz⟩
+  | rule2 _ ih =>
+    intro hx y Rxy hy
+    exact hx y Rxy (ih y hy)
+  | axiomL => exact forces_axiomL
+  | axiomJ3 => exact forces_axiomJ3
+  | axiomJ6 => exact forces_axiomJ6
+  | _ => grind
 
-end Logic.ofAxioms
+end Logic.ofAxiomsMinus
 
-instance {α : Type*} : Entailment.Consistent (𝐈𝐋 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦
-    Logic.ofAxioms.sound (M := Veltman.Model.pointModel fun _ ↦ False) (by simp) h 0
 
 end FFL.InterpretabilityLogic
 

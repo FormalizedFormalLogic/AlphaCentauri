@@ -3,8 +3,10 @@ module
 public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.ProvablyTotal.Basic
-public import AlphaCentauri.ToFoundation.Primrec
-public import AlphaCentauri.ToMathlib.Vector
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Absoluteness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
+public import AlphaCentauri.ToMathlib.Data.Vector.Basic
 public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 public import Mathlib.Computability.Ackermann
 
@@ -128,7 +130,6 @@ private lemma comp (hg : T.ProvablyFunctionalVia g ψ)
 
 end comp
 
-section prec
 variable {f : (Fin n → ℕ) → ℕ} {g : (Fin (n + 2) → ℕ) → ℕ}
   {ψ : 𝚺ᴬ₁.Semisentence (n + 1)} {χ : 𝚺ᴬ₁.Semisentence (n + 3)}
 
@@ -145,7 +146,6 @@ private lemma prec [𝗜𝚺₁ ⪯ T] (hf : T.ProvablyFunctionalVia f ψ)
   obtain ⟨G, hG⟩ := hg.models V
   exact ⟨_, (precConstruction hF hG).result_defined⟩
 
-end prec
 
 end
 

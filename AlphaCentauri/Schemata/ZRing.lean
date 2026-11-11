@@ -2,8 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 
-/-!
-# The theory $\mathsf{ZR}$ of discretely ordered $\mathbb{Z}$-rings
+/-! # The theory $\mathsf{ZR}$ of discretely ordered $\mathbb{Z}$-rings
 
 A discretely ordered $\mathbb{Z}$-ring is a discretely ordered ring in which every element can be
 divided with remainder by every standard positive integer. `ZRing` is the theory of the
@@ -17,6 +16,7 @@ standard $n \ge 1$. $\mathsf{IOpen}$ proves it.
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
+
 
 /-- Division with remainder by the numeral `n`. -/
 def standardEuclideanDivisionBy (n : ℕ) : ArithmeticSentence :=
@@ -46,11 +46,6 @@ variable [M↓[ℒₒᵣ] ⊧* ZRing]
 
 instance : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (U := ZRing) inferInstance
 
-lemma exists_lt_eq_mul_add {n : ℕ} (hn : 0 < n) (b : M) : ∃ q r : M, r < n ∧ b = n * q + r := by
-  obtain ⟨n, rfl⟩ := Nat.exists_eq_add_one_of_ne_zero hn.ne'
-  exact (models_standardEuclideanDivisionBy_iff (n + 1)).mp
-    (models_of_mem (T := ZRing) <| Or.inr ⟨n, rfl⟩) b
-
 end ZRing
 
 /-- $\mathsf{IOpen}$ proves $\mathsf{ZR}$.
@@ -63,5 +58,6 @@ instance ZRing_weakerThan_IOpen : ZRing ⪯ 𝗜𝗢𝗽𝗲𝗻 :=
     intro b
     obtain ⟨r, hr, e⟩ := eq_mul_div_add_of_pos b (b := ((n + 1 : ℕ) : V)) (by simp)
     use b / ((n + 1 : ℕ) : V), r
+
 
 end FFL.FirstOrder.Arithmetic

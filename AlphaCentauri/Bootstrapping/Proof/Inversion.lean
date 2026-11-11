@@ -1,9 +1,10 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
-public import AlphaCentauri.ToFoundation.SubstInversion
-public import AlphaCentauri.ToFoundation.Set
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 public import Foundation.Vorspiel.Tactic.Disj
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 
 /-!
 # Inversion for the internal calculus of bounded cut rank
@@ -21,7 +22,8 @@ on codes, which the shift rule needs.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1 InternalMeasures
 
@@ -930,4 +932,5 @@ theorem inversion_all {p s t d : V} (ht : IsTerm L t)
 
 end RankedDerivation
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

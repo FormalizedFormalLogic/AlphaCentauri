@@ -1,31 +1,34 @@
 module
 
 public import AlphaCentauri.Schemata.Pigeonhole
-public import AlphaCentauri.ToFoundation.BlockSequence
-public import AlphaCentauri.ToFoundation.Exponential
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
+public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
+public import Foundation.FirstOrder.Arithmetic.Schemata
 
-/-!
-# The weak pigeonhole principle over $\mathsf{I}\Delta_0 + \Omega_1$
+/-! # The weak pigeonhole principle over $\mathsf{I}\Delta_0 + \Omega_1$
 
 In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection of
 $a^2$ into $a$, for $a > 1$. An injection folds a binary tree of depth $\|a\|$ whose leaves can be
 any $2^{\|a\|}$ values below $a$; diagonalizing against the roots gives a contradiction.
 
-Nor is any an injection of $(n + 1)a$ into $na$, for a standard $n$ and $a > 0$. Composing $n$
-blockwise copies of one gives an injection of $2b$ into $b$, and following an injection of $2b$
-into $b$ for $\|b\|$ steps from each root gives an injection of $b^2$ into $b$.
+Nor is any an injection of $2b$ into $b$, for $b > 0$, nor of $(K + 1)b$ into $Kb$, for $b > 0$ and
+$0 < K \le \|I\|$ for some $I$. The ratio $(n + 1) / n$ for a standard $n$ is the case $K = n$.
 
 - [PWW88, Theorem 1, Corollary 2]
 -/
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-open FFL.FirstOrder.Bounding (HierarchySymbol)
-
 namespace FFL.FirstOrder.Arithmetic
 
-noncomputable section
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+open _root_.FFL.Entailment
+
+noncomputable section WeakPigeonhole
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
@@ -135,7 +138,6 @@ lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c <
 
 end tree
 
-section square
 
 variable (R : V → V → Prop) (a : V)
 
@@ -246,7 +248,6 @@ lemma definable_diagonal (hR : 𝚺ᴬ₀.DefinableRel R) :
   have := definable_isLeaf (a := a) (definable_isChild (a := a) hR)
   definability
 
-end square
 
 end WeakPigeonhole
 
@@ -287,91 +288,9 @@ theorem weakPigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {
   · exact one_ne_zero (hl.unique hinj hc h)
   · exact h hl
 
-
 namespace WeakPigeonhole
 
-/-- `R` sends every `x < A` to some `y < B`, and no `y < B` is a value of two such `x`. -/
-def IsInjection (R : V → V → Prop) (A B : V) : Prop :=
-  (∀ x < A, ∃ y < B, R x y) ∧ ∀ x < A, ∀ x' < A, ∀ y < B, R x y → R x' y → x = x'
-
-variable {R S : V → V → Prop} {a : V}
-
-lemma definable_comp {B : V} (hR : 𝚺ᴬ₀.DefinableRel R) (hS : 𝚺ᴬ₀.DefinableRel S) :
-    𝚺ᴬ₀.DefinableRel fun x z ↦ ∃ y < B, R x y ∧ S y z := by
-  definability
-
-lemma definable_blockwise {A B M : V} (hR : 𝚺ᴬ₀.DefinableRel R) :
-    𝚺ᴬ₀.DefinableRel fun x y ↦
-      ∃ q < M, ∃ c < A, x = c + A * q ∧ ∃ f < B, R c f ∧ y = f + B * q := by
-  definability
-
-omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁] in
-lemma IsInjection.comp {A B C : V} (h : IsInjection R A B) (h' : IsInjection S B C) :
-    IsInjection (fun x z ↦ ∃ y < B, R x y ∧ S y z) A C := by
-  constructor
-  · intro x hx
-    obtain ⟨y, hy, hxy⟩ := h.1 x hx
-    obtain ⟨z, hz, hyz⟩ := h'.1 y hy
-    use z
-    constructor
-    · exact hz
-    · use y
-  · rintro x hx x' hx' z hz ⟨y, hy, hxy, hyz⟩ ⟨y', hy', hxy', hyz'⟩
-    obtain rfl := h'.2 y hy y' hy' z hz hyz hyz'
-    exact h.2 x hx x' hx' y hy hxy hxy'
-
-lemma IsInjection.blockwise {A B : V} (h : IsInjection R A B) (M : V) :
-    IsInjection (fun x y ↦ ∃ q < M, ∃ c < A, x = c + A * q ∧ ∃ f < B, R c f ∧ y = f + B * q)
-      (A * M) (B * M) := by
-  constructor
-  · intro x hx
-    rcases (Arithmetic.zero_le A).eq_or_lt with rfl | hA
-    · simp at hx
-    have hq : x / A < M := div_lt_of_lt_mul (by rwa [mul_comm])
-    obtain ⟨f, hf, hR⟩ := h.1 (x % A) (mod_lt x hA)
-    use f + B * (x / A)
-    and_intros
-    · exact add_mul_lt_mul_of_lt hf hq
-    · use x / A
-      and_intros
-      · exact hq
-      · use x % A
-        and_intros
-        · exact mod_lt x hA
-        · rw [add_comm, div_add_mod]
-        · use f
-  · rintro x hx x' hx' y hy ⟨q, hq, c, hc, rfl, f, hf, hRf, rfl⟩
-      ⟨q', hq', c', hc', rfl, f', hf', hRf', heq⟩
-    obtain ⟨rfl, rfl⟩ := (add_mul_eq_add_mul_iff hf' hf).mp heq.symm
-    rw [h.2 c hc c' hc' f' hf hRf hRf']
-
-lemma exists_injection_pow {n : ℕ} (hR : 𝚺ᴬ₀.DefinableRel R)
-    (h : IsInjection R ((n + 1) * a) (n * a)) (j : ℕ) (m : V) :
-    ∃ S : V → V → Prop, 𝚺ᴬ₀.DefinableRel S ∧
-      IsInjection S ((n + 1) ^ j * m * a) (n ^ j * m * a) := by
-  induction j generalizing m with
-  | zero =>
-    use (· = ·)
-    and_intros
-    · definability
-    · intro x hx
-      use x
-      constructor
-      · simpa using hx
-      · rfl
-    · intro x _ x' _ y _ h h'
-      rw [h, h']
-  | succ j IH =>
-    obtain ⟨S, hS, hSinj⟩ := IH ((n + 1) * m)
-    rw [show (n : V) ^ j * ((n + 1) * m) * a = (n + 1) * a * (n ^ j * m) by grind] at hSinj
-    use fun x z ↦ ∃ y < (n + 1) * a * (n ^ j * m), S x y ∧
-      ∃ q < n ^ j * m, ∃ c < (n + 1) * a, y = c + (n + 1) * a * q ∧
-        ∃ f < n * a, R c f ∧ z = f + n * a * q
-    constructor
-    · exact definable_comp hS (definable_blockwise hR)
-    · rw [show ((n : V) + 1) ^ (j + 1) * m * a = (n + 1) ^ j * ((n + 1) * m) * a by grind,
-        show (n : V) ^ (j + 1) * m * a = n * a * (n ^ j * m) by grind]
-      exact hSinj.comp (h.blockwise _)
+variable {R : V → V → Prop} {a : V}
 
 /-- `R` sends `x + a * β` to `e`: in the tree of an injection of `2 * a` into `a`, `x` is the child
 of `e` along the bit `β`. -/
@@ -476,6 +395,200 @@ theorem weakPigeonhole_two_mul {R : V → V → Prop} (hR : 𝚺ᴬ₀.Definable
         fbit_eq_zero_of_le ((length_monotone hτ'.le).trans hi)]
   exact hxx (by rw [hext ‖a‖ le_rfl, fbit_ext hbit])
 
+namespace WeakPigeonhole
+
+
+variable (R : V → V → Prop) (K b : V)
+
+/-- `R` on the first `(K + 1) * b` numbers and the shift down by `b` above them: an injection of
+`(k + 1) * b` into `k * b` for every `k ≥ K` if `R` is one of `(K + 1) * b` into `K * b`. -/
+def ShiftStep (e z : V) : Prop :=
+  (e < (K + 1) * b ∧ z < K * b ∧ R e z) ∨ ((K + 1) * b ≤ e ∧ z + b = e)
+
+/-- `z` is reached from `x` by `K` steps of `ShiftStep`, recorded in a sequence with blocks of
+width `‖2 * K * b‖`. -/
+def ShiftReach (I x z : V) : Prop :=
+  ∃ s < (I ⨳ (2 * K * b)) ^ 2, IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) K s x 0 ∧
+    Nuon.ext (2 * K * b) s K = z
+
+variable {R K b}
+
+lemma definable_shiftStep (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel (ShiftStep R K b) := by
+  unfold ShiftStep
+  definability
+
+lemma definable_shiftReach (hR : 𝚺ᴬ₀.DefinableRel R) (I : V) :
+    𝚺ᴬ₀.DefinableRel (ShiftReach R K b I) := by
+  have := definable_shiftStep (K := K) (b := b) hR
+  unfold ShiftReach IsPath
+  definability
+
+lemma ShiftStep.unique (hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, ∀ y < K * b,
+      R x y → R x' y → x = x') {e e' z : V} (h : ShiftStep R K b e z)
+    (h' : ShiftStep R K b e' z) : e = e' := by
+  have hKb : (K + 1) * b = K * b + b := by rw [add_mul, one_mul]
+  have hge : ∀ {e z : V}, (K + 1) * b ≤ e → z + b = e → K * b ≤ z := fun he hz ↦
+    (add_le_add_iff_right b).mp (by rw [hz, ← hKb]; exact he)
+  rcases h with ⟨he, hz, h⟩ | ⟨he, hz⟩ <;> rcases h' with ⟨he', hz', h'⟩ | ⟨he', hz'⟩
+  · exact hinj e he e' he' z hz h h'
+  · exact absurd hz (not_lt.mpr (hge he' hz'))
+  · exact absurd hz' (not_lt.mpr (hge he hz))
+  · rw [← hz, ← hz']
+
+/-- Every `x < 2 * K * b` starts a path of `j` steps of `ShiftStep` ending below
+`2 * K * b - j * b`. -/
+def ShiftPaths (R : V → V → Prop) (K b I j : V) : Prop :=
+  ∀ x < 2 * K * b, ∃ s < (I ⨳ (2 * K * b)) ^ 2,
+    IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) j s x 0 ∧
+      Nuon.ext (2 * K * b) s j + j * b < 2 * K * b
+
+lemma definable_shiftPaths (hR : 𝚺ᴬ₀.DefinableRel R) (I : V) :
+    𝚺ᴬ₀.DefinablePred (ShiftPaths R K b I) := by
+  have := definable_shiftStep (K := K) (b := b) hR
+  unfold ShiftPaths IsPath
+  definability
+
+lemma exists_shiftStep {j e : V} (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y)
+    (hj : j + 1 ≤ K) (he : e + j * b < 2 * K * b) :
+    ∃ z < 2 * K * b, ShiftStep R K b e z ∧ z + (j + 1) * b < 2 * K * b := by
+  have hjb : (j + 1) * b ≤ K * b := mul_le_mul_right hj
+  rcases lt_or_ge e ((K + 1) * b) with heK | heK
+  · obtain ⟨z, hz, hR⟩ := total _ heK
+    have : z + (j + 1) * b < 2 * K * b := calc
+      z + (j + 1) * b < K * b + K * b := add_lt_add_of_lt_of_le hz hjb
+      _ = 2 * K * b := by grind
+    use z
+    and_intros
+    · exact lt_of_le_of_lt le_self_add this
+    · exact Or.inl ⟨heK, hz, hR⟩
+    · exact this
+  · have hb1 : b ≤ (K + 1) * b := le_mul_of_one_le_left (Arithmetic.zero_le _) (by simp)
+    have hzv : e - b + b = e := tsub_add_cancel_of_le (le_trans hb1 heK)
+    have : e - b + (j + 1) * b < 2 * K * b := by
+      rw [add_mul, one_mul, ← add_assoc, add_right_comm, hzv]
+      exact he
+    use e - b
+    and_intros
+    · exact lt_of_le_of_lt le_self_add this
+    · exact Or.inr ⟨heK, hzv⟩
+    · exact this
+
+lemma shiftPaths (hR : 𝚺ᴬ₀.DefinableRel R) {I : V} (hb : 0 < b) (hK : 0 < K) (hKI : K ≤ ‖I‖)
+    (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y) : ∀ j ≤ K, ShiftPaths R K b I j := by
+  have ha : 0 < 2 * K * b := mul_pos (mul_pos two_pos hK) hb
+  have hIpos : 0 < I := length_pos_iff.mp (lt_of_lt_of_le hK hKI)
+  intro j
+  induction j using ISigma0.succ_induction
+  · have := definable_shiftPaths (K := K) (b := b) hR I
+    definability
+  case zero =>
+    intro _ x hx
+    have hext : Nuon.ext (2 * K * b) x 0 = x := Nuon.ext_zero_eq_self_of_le (length_monotone hx.le)
+    use x
+    and_intros
+    · calc x < 2 * K * b := hx
+        _ < (2 * K * b) ⨳ 1 := lt_smash_one_right _
+        _ ≤ I ⨳ (2 * K * b) := by
+          rw [smash_comm]
+          exact smash_monotone (pos_iff_one_le.mp hIpos) le_rfl
+        _ ≤ (I ⨳ (2 * K * b)) ^ 2 := by
+          rw [sq]
+          exact le_mul_of_one_le_left (Arithmetic.zero_le _) (pos_iff_one_le.mp (smash_pos _ _))
+    · exact hext
+    · simp
+    · simpa [hext] using hx
+  case succ j IH =>
+    intro hj x hx
+    obtain ⟨s, -, hs, hv⟩ := IH (le_trans (by simp) hj) x hx
+    have hjb : (j + 1) * b ≤ K * b := mul_le_mul_right hj
+    obtain ⟨z, hza, hzstep, hzb⟩ := exists_shiftStep total hj hv
+    have hjI : j + 1 ≤ ‖I‖ := le_trans hj hKI
+    have hzL : ‖z‖ ≤ ‖2 * K * b‖ := length_monotone hza.le
+    have hlast := Nuon.ext_append_last I (2 * K * b) s hjI hzL
+    have hlt : ∀ i < j + 1,
+        Nuon.ext (2 * K * b) (Nuon.append I (2 * K * b) s (j + 1) z) i =
+          Nuon.ext (2 * K * b) s i :=
+      fun i hi ↦ Nuon.ext_append_lt I (2 * K * b) s hjI hi
+    use Nuon.append I (2 * K * b) s (j + 1) z
+    and_intros
+    · exact Nuon.append_lt_sq_smash I (2 * K * b) s hjI hzL hIpos
+    · rw [hlt 0 (by simp)]; exact hs.1
+    · intro i hi
+      rcases lt_succ_iff_le.mp hi with rfl | hi'
+      · rw [hlast, hlt i (by simp)]
+        exact ⟨hza, hzstep⟩
+      · rw [hlt (i + 1) (by simpa using hi'), hlt i (lt_trans hi' (by simp))]
+        exact hs.2 i hi'
+    · rwa [hlast]
+
+lemma IsPath.eq_of_shiftStep (hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, ∀ y < K * b,
+      R x y → R x' y → x = x') {x x' s s' : V}
+    (hs : IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) K s x 0)
+    (hs' : IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) K s' x' 0)
+    (h : Nuon.ext (2 * K * b) s K = Nuon.ext (2 * K * b) s' K) : x = x' := by
+  have key : ∀ i ≤ K, Nuon.ext (2 * K * b) s (K - i) = Nuon.ext (2 * K * b) s' (K - i) := by
+    intro i
+    induction i using ISigma0.succ_induction
+    · clear hinj hs hs' h
+      definability
+    case zero => intro _; simpa using h
+    case succ i IH =>
+      intro hi
+      have hiK : i < K := succ_le_iff_lt.mp hi
+      have hKi : K - (i + 1) + (i + 1) = K := sub_add_self_of_le hi
+      have hKi' : K - (i + 1) + 1 + i = K := by rw [add_assoc, add_comm 1 i, hKi]
+      have heq : K - i = K - (i + 1) + 1 := calc
+        K - i = K - (i + 1) + 1 + i - i := by rw [hKi']
+        _ = K - (i + 1) + 1 := add_sub_self
+      have hj : K - (i + 1) < K := by
+        conv_rhs => rw [← hKi]
+        exact lt_add_of_pos_right _ (by simp)
+      have h₁ := (hs.2 _ hj).2
+      have h₂ := (hs'.2 _ hj).2
+      rw [← heq, IH hiK.le] at h₁
+      rw [← heq] at h₂
+      exact ShiftStep.unique hinj h₁ h₂
+  have := key K le_rfl
+  rwa [sub_self, hs.1, hs'.1] at this
+
+
+lemma exists_le_length (n : ℕ) : ∃ I : V, (n : V) ≤ ‖I‖ := by
+  induction n with
+  | zero => simp
+  | succ n IH =>
+    obtain ⟨I, hI⟩ := IH
+    use 2 * I + 1
+    rw [length_two_mul_add_one]
+    push_cast
+    gcongr
+
+end WeakPigeonhole
+open WeakPigeonhole in
+/-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
+of $(K + 1)b$ into $Kb$, for $b > 0$ and $0 < K \le \|I\|$. -/
+theorem weakPigeonhole_succ_mul_of_le_length {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R)
+    {K b I : V} (hb : 0 < b) (hK : 0 < K) (hKI : K ≤ ‖I‖)
+    (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y) :
+    ∃ x < (K + 1) * b, ∃ x' < (K + 1) * b, ∃ y < K * b, x ≠ x' ∧ R x y ∧ R x' y := by
+  by_contra! hne
+  have hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, ∀ y < K * b, R x y → R x' y → x = x' := by
+    intro x hx x' hx' y hy h h'
+    by_contra hxx
+    exact hne x hx x' hx' y hy hxx h h'
+  have hab : 2 * K * b = 2 * (K * b) := mul_assoc _ _ _
+  have htot : ∀ x < 2 * (K * b), ∃ y < K * b, ShiftReach R K b I x y := by
+    intro x hx
+    rw [← hab] at hx
+    obtain ⟨s, hs, hp, hv⟩ := shiftPaths hR hb hK hKI total K le_rfl x hx
+    use Nuon.ext (2 * K * b) s K
+    constructor
+    · have h2 : 2 * K * b = K * b + K * b := by rw [hab, two_mul]
+      exact (add_lt_add_iff_right _).mp (lt_of_lt_of_eq hv h2)
+    · use s
+  obtain ⟨x, -, x', -, y, -, hxx, ⟨s, -, hs, hsy⟩, ⟨s', -, hs', hsy'⟩⟩ :=
+    weakPigeonhole_two_mul (definable_shiftReach hR I) (mul_pos hK hb) htot
+  exact hxx (hs.eq_of_shiftStep hinj hs' (hsy.trans hsy'.symm))
+
 open WeakPigeonhole in
 /-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
 of $(n + 1)a$ into $na$, for a standard $n$ and $a > 0$.
@@ -483,41 +596,11 @@ of $(n + 1)a$ into $na$, for a standard $n$ and $a > 0$.
 theorem weakPigeonhole_succ_mul (n : ℕ) {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {a : V}
     (ha : 0 < a) (total : ∀ x < (n + 1) * a, ∃ y < n * a, R x y) :
     ∃ x < (n + 1) * a, ∃ x' < (n + 1) * a, ∃ y < n * a, x ≠ x' ∧ R x y ∧ R x' y := by
-  by_contra! hne
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · obtain ⟨y, hy, -⟩ := total 0 (by simpa using ha)
     simp at hy
-  have hinj : IsInjection R ((n + 1) * a) (n * a) := by
-    constructor
-    · exact total
-    · intro x hx x' hx' y hy h h'
-      by_contra hxx
-      exact hne x hx x' hx' y hy hxx h h'
-  obtain ⟨S, hS, hSinj⟩ := exists_injection_pow hR hinj n 1
-  have hbernoulli : ∀ k : ℕ, n ^ k * (n + k) ≤ (n + 1) ^ k * n := by
-    intro k
-    induction k with
-    | zero => simp
-    | succ k ih =>
-      calc n ^ (k + 1) * (n + (k + 1)) = n * (n ^ k * (n + k)) + n * n ^ k := by grind
-        _ ≤ n * ((n + 1) ^ k * n) + n * (n + 1) ^ k :=
-          Nat.add_le_add (Nat.mul_le_mul_left n ih)
-            (Nat.mul_le_mul_left n (Nat.pow_le_pow_left (Nat.le_succ n) k))
-        _ = (n + 1) ^ (k + 1) * n := by grind
-  have hpow : 2 * n ^ n ≤ (n + 1) ^ n :=
-    Nat.le_of_mul_le_mul_right (by
-      have := hbernoulli n
-      rwa [← two_mul, ← mul_assoc, mul_comm (n ^ n) 2] at this) hn
-  have hle : 2 * ((n : V) ^ n * 1 * a) ≤ ((n : V) + 1) ^ n * 1 * a := by
-    rw [← mul_assoc, ← mul_assoc]
-    exact mul_le_mul_right <| mul_le_mul_right (by exact_mod_cast hpow)
-  have hb : 0 < (n : V) ^ n * 1 * a := by
-    simpa using mul_pos (pow_pos (show (0 : V) < n by exact_mod_cast hn) n) ha
-  obtain ⟨x, hx, x', hx', y, hy, hxx, h, h'⟩ :=
-    weakPigeonhole_two_mul hS hb fun x hx ↦ hSinj.1 x (hx.trans_le hle)
-  exact hxx (hSinj.2 x (hx.trans_le hle) x' (hx'.trans_le hle) y hy h h')
-
-end
+  obtain ⟨I, hI⟩ := WeakPigeonhole.exists_le_length (V := V) n
+  exact weakPigeonhole_succ_mul_of_le_length hR ha (by exact_mod_cast hn) hI total
 
 /-- $\mathsf{I}\Delta_0 + \Omega_1$ proves the weak pigeonhole principle for $\Delta_0$ formulas.
 - [PWW88, Theorem 1] -/
@@ -535,5 +618,7 @@ theorem WeakPigeonholeOnPrenexHierarchy_weakerThan_ISigma0_union_Omega1 :
     exact HierarchySymbol.Definable.mkPolarity (Γ := 𝚺) (m := 0) (Rew.rewriteMap f ▹ φ)
       (Bounding.Hierarchy.rew _ (Bounding.PrenexHierarchy.zero_iff.mp hφ))
       fun v ↦ by simp [Semiformula.eval_rewriteMap, ← Matrix.fun_eq_vec_two]
+
+end WeakPigeonhole
 
 end FFL.FirstOrder.Arithmetic

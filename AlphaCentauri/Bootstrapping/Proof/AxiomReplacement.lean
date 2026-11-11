@@ -2,23 +2,30 @@ module
 
 public import AlphaCentauri.Bootstrapping.Proof.InductionAxiom
 public import AlphaCentauri.Bootstrapping.Proof.PeanoMinusAxiom
-public import AlphaCentauri.ToFoundation.Provable
+public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
+public import Foundation.FirstOrder.Incompleteness.Consistency
+public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!
 # Replacing the axioms of $\mathsf{I}\Sigma_n$ and $\mathsf{EA}$ by false blocks
 
 Every axiom `p` of the internal $\mathsf{I}\Sigma_n$ or $\mathsf{EA}$ has a replacement `q` such
-that `p` follows in pure logic from the negation of `q`. For $n \le k$, in a model of
-$\mathsf{I}\Sigma^+_{k+1}$, the negation of a replacement is a block of existential quantifiers over
-a closed matrix in `IsReadable k 3` all of whose instances are false.
+that `p` follows in pure logic from the negation of `q`. For $n \le k$, the negation of a
+replacement is a block of existential quantifiers over a closed matrix in `IsReadable k 3` all of
+whose instances are false.
 -/
 
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+
+section AxiomReplacement
 
 open Arithmetic (numeral substNumerals)
 
@@ -154,4 +161,7 @@ lemma admitsFalseBlockReplacement_ElementaryArithmetic [V↓[ℒₒᵣ] ⊧* �
       exact ⟨Derivable.em (by simp [hf]) (⌜expAxiom⌝ : V) (by simp) (by simp),
         isFalseBlock_neg_quote_expAxiom⟩
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end AxiomReplacement
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

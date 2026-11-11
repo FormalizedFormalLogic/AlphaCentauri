@@ -1,17 +1,23 @@
 module
 
-public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.Model.Cut
-public import AlphaCentauri.ToFoundation.Compact
-public import AlphaCentauri.ToFoundation.Completeness
-public import AlphaCentauri.ToFoundation.ConstantExtension
+public import AlphaCentauri.ProvablyTotal.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ConstantExtension
+public import AlphaCentauri.ToFoundation.Logic.Compact
 public import Foundation.FirstOrder.Tarski.Ultraproduct
+public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.Grzegorczyk
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Completeness
 
 /-!
 # Parikh's theorem
 
-An `𝗜𝚺₀`-provably total function with a $\Delta_0$ graph is bounded by a term, hence grows at
-most polynomially.
+A $\Pi^0_2$ sentence provable by $\mathsf{I}\Sigma_0$ is provable with its unbounded existential
+quantifier bounded by a closed term. The statement covers formulas with any number of unbounded
+universal quantifiers followed by one unbounded existential quantifier.
+
+- [HP98, Theorem V.1.4]
+- [Bus98A, Theorem 1.2.7.1]
 -/
 
 @[expose] public section
@@ -119,20 +125,5 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Cl
   -- But `b` is below the value of `t + 1`, which contradicts that no witness lies
   -- below the closed term `t + 1`.
   exact hunbounded ‘!!t + 1’ b (by simpa using lt_succ_iff_le.mpr ht) hbM
-
-/-- An `𝗜𝚺₀`-provably total function with a $\Delta_0$ graph is bounded by a term, hence grows at
-most polynomially.
-- [HP98, Theorem V.1.4]
-- [Bus98A, Theorem 1.2.7.1] -/
-theorem exists_term_bound_of_provablyTotal {f φ}
-  (hφ : ℬ[<, ℒₒᵣ].Closure φ.val) (h : 𝗜𝚺₀.ProvablyTotalVia f φ) :
-  ∃ t : ClosedSemiterm ℒₒᵣ k, ∀ v, f v ≤ Semiterm.valb v t := by
-  obtain ⟨t, ht⟩ := parikh φ.val hφ h.total;
-  have h₁ : ∀ v : Fin k → ℕ, ∃ y < Semiterm.valb v t, φ.val.Evalb (y :> v) := by
-    simpa [models_iff, eval_allClosure] using models_of_provable (M := ℕ) inferInstance ht
-  use t;
-  intro v;
-  obtain ⟨y, hy, hy'⟩ := h₁ v;
-  exact le_of_lt (h.graph_iff.mp hy' ▸ hy)
 
 end FFL.FirstOrder.Arithmetic

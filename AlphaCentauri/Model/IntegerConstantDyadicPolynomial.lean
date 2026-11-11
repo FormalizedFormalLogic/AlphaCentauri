@@ -3,8 +3,8 @@ module
 public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Schemata.PeanoMinusSmu
 public import AlphaCentauri.Schemata.ZRing
-public import AlphaCentauri.ToFoundation.EventualAgreement
-public import AlphaCentauri.ToMathlib.IntegerConstantDyadicPolynomial
+public import AlphaCentauri.ToFoundation.FirstOrder.EventualAgreement
+public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantDyadicPolynomial
 
 /-!
 # The non-negative part of the $\mathbb{Z}$-ring of dyadic polynomials with integer constant term

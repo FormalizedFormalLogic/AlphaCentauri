@@ -1,10 +1,13 @@
 module
 
+public import AlphaCentauri.Bootstrapping.Proof.InductionAxiom
 public import AlphaCentauri.Bootstrapping.Proof.AxiomReplacement
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
-public import AlphaCentauri.ToFoundation.Provable
-public import AlphaCentauri.ToFoundation.Syntax
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
+public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Incompleteness.Consistency
+public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!
 # Uniform reflection in a model of $\mathsf{I}\Sigma_{k+1}$
@@ -23,7 +26,10 @@ proves it. In particular, the internal $\mathsf{I}\Sigma_n$ is consistent.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+
+section LocalReflection
 
 open Arithmetic (substNumerals)
 
@@ -113,4 +119,7 @@ lemma consistent_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hn : n ≤ k)
     ⟨_, rfl⟩ (![] : Fin 0 → V) (by rwa [substNumerals_quote_of_isEmpty])
   simpa using (Bounding.Prenex.models_falsum ![]).mp this
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end LocalReflection
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

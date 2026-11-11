@@ -21,6 +21,8 @@ inductive Formula (α : Type*) where
   | rhd    : Formula α → Formula α → Formula α
   deriving DecidableEq
 
+abbrev FormulaSet (α : Type*) := Set (Formula α)
+
 namespace Formula
 
 variable {α : Type*} {A B : Formula α}
@@ -95,6 +97,28 @@ def cases' {C : Formula α → Sort*}
   | .box A => box A
   | .rhd A B => rhd A B
 
+/-- The modal depth: the maximal number of nested occurrences of `□` and `▷`.
+
+- [HPV23, §3]
+-/
+def depth : Formula α → ℕ
+  | .atom _ => 0
+  | .falsum => 0
+  | .imp A B => max A.depth B.depth
+  | .box A => A.depth + 1
+  | .rhd A B => max A.depth B.depth + 1
+
+@[simp, grind =] lemma depth_atom {a : α} : (#a).depth = 0 := rfl
+@[simp, grind =] lemma depth_bot : (⊥ : Formula α).depth = 0 := rfl
+@[simp, grind =] lemma depth_top : (⊤ : Formula α).depth = 0 := rfl
+@[simp, grind =] lemma depth_imp : (A 🡒 B).depth = max A.depth B.depth := rfl
+@[simp, grind =] lemma depth_neg : (∼A).depth = A.depth := by simp [Formula.depth]
+@[simp, grind =] lemma depth_and : (A ⋏ B).depth = max A.depth B.depth := by simp [Formula.depth]
+@[simp, grind =] lemma depth_or : (A ⋎ B).depth = max A.depth B.depth := by simp [Formula.depth]
+@[simp, grind =] lemma depth_box : (□A).depth = A.depth + 1 := rfl
+@[simp, grind =] lemma depth_dia : (◇A).depth = A.depth + 1 := by simp [Formula.depth]
+@[simp, grind =] lemma depth_rhd : (A ▷ B).depth = max A.depth B.depth + 1 := rfl
+
 end Formula
 
 /-! ### Subformulas -/
@@ -114,8 +138,18 @@ def subformulas : Formula α → Finset (Formula α)
 
 variable {A B : Formula α}
 
-@[simp] lemma mem_subformulas_self : A ∈ A.subformulas := by
-  cases A <;> simp [subformulas];
+@[simp, grind .] lemma mem_subformulas_self : A ∈ A.subformulas := by
+  cases A <;> simp [subformulas]
+
+@[simp, grind .] lemma mem_subformulas_imp_left : A ∈ (A 🡒 B).subformulas := by simp [subformulas]
+
+@[simp, grind .] lemma mem_subformulas_imp_right : B ∈ (A 🡒 B).subformulas := by simp [subformulas]
+
+@[simp, grind .] lemma mem_subformulas_box : A ∈ (□A).subformulas := by simp [subformulas]
+
+@[simp, grind .] lemma mem_subformulas_rhd_left : A ∈ (A ▷ B).subformulas := by simp [subformulas]
+
+@[simp, grind .] lemma mem_subformulas_rhd_right : B ∈ (A ▷ B).subformulas := by simp [subformulas]
 
 lemma subformulas_subset_of_mem (h : B ∈ A.subformulas) : B.subformulas ⊆ A.subformulas := by
   induction A with

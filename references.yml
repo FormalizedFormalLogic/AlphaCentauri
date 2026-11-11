@@ -223,6 +223,21 @@ dJV90:
       name: Plenum Press
       location: New York
 
+dJV99:
+  type: Chapter
+  title: The Modal Completeness of ILW
+  author: ["de Jongh, Dick", "Veltman, Frank"]
+  date: 1999
+  url: https://festschriften.illc.uva.nl/j50/contribs/jongh/
+  parent:
+    type: Anthology
+    title: "JFAK: Essays Dedicated to Johan van Benthem on the Occasion of his 50th Birthday"
+    editor: ["Gerbrandy, Jelle", "Marx, Maarten", "de Rijke, Maarten", "Venema, Yde"]
+    date: 1999
+    publisher:
+      name: Amsterdam University Press
+      location: Amsterdam
+
 ELV25:
   type: Article
   title: Completions of restricted complexity I, weak arithmetical theories
@@ -243,6 +258,18 @@ EW12:
   serial-number:
     arxiv: "1205.2879"
   url: https://arxiv.org/abs/1205.2879
+  parent:
+    type: Repository
+    title: arXiv
+
+GBJM20:
+  type: Article
+  title: Assuring and critical labels for relations between maximal consistent sets for interpretability logics
+  author: ["Goris, Evan", "Bílková, Marta", "Joosten, Joost J.", "Mikec, Luka"]
+  date: 2020
+  serial-number:
+    arxiv: "2003.04623"
+  url: https://arxiv.org/abs/2003.04623
   parent:
     type: Repository
     title: arXiv
@@ -299,6 +326,20 @@ HP98:
   parent:
     type: Anthology
     title: Perspectives in Mathematical Logic
+
+HPV23:
+  type: Article
+  title: Bisimulations and bisimulation games between {Verbrugge} models
+  author: ["Horvat, Sebastijan", "Perkov, Tin", "Vuković, Mladen"]
+  date: 2023
+  page-range: 231-243
+  serial-number:
+    doi: "10.1002/malq.202200042"
+  parent:
+    type: Periodical
+    title: Mathematical Logic Quarterly
+    volume: 69
+    issue: 2
 
 HSS25a:
   type: Article
@@ -489,6 +530,18 @@ Moh11:
       name: Cambridge University Press
       location: Cambridge
 
+MV20:
+  type: Article
+  title: Interpretability logics and generalized {Veltman} semantics
+  author: ["Mikec, Luka", "Vuković, Mladen"]
+  date: 2020
+  serial-number:
+    arxiv: "1907.03849"
+  url: https://arxiv.org/abs/1907.03849
+  parent:
+    type: Repository
+    title: arXiv
+
 PWW88:
   type: Article
   title: Provability of the pigeonhole principle and the existence of infinitely many primes
@@ -502,6 +555,18 @@ PWW88:
     title: The Journal of Symbolic Logic
     volume: 53
     issue: 4
+
+Per25:
+  type: Article
+  title: Transformation of any {Verbrugge} model to a bisimilar {Veltman} model
+  author: Perkov, Tin
+  date: 2025
+  serial-number:
+    doi: "10.1017/S096012952500012X"
+  parent:
+    type: Periodical
+    title: Mathematical Structures in Computer Science
+    volume: 35
 
 Poh09:
   type: Book

@@ -22,11 +22,23 @@ abbrev Logic.ILM₀W : Logic α :=
 
 notation "𝐈𝐋𝐌₀𝐖" => Logic.ILM₀W
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILMZeroW : Prop extends M.IsIL, M.HasM₀, M.HasW
+
+instance (v : α → Prop) : (pointModel v).IsILMZeroW := {}
+
+instance (priority := low) [M.IsIL] [M.HasM₀] [M.HasW] : M.IsILMZeroW := {}
+
+end Veltman.Model
+
 namespace Logic
 
-open ofAxioms
+open ofAxioms Veltman Veltman.Model Veltman.Model.World
 
-variable {A B C : Formula α}
+variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 @[simp] lemma ILM₀W.axiomM₀ : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.M₀ A B C := axm <| .inl ⟨A, B, C, rfl⟩
 
@@ -49,26 +61,6 @@ lemma ILM₀W.axiomWstar : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.Wstar A B C := by
 
 instance : (𝐈𝐋𝐌₀ : Logic α) ⪯ 𝐈𝐋𝐌₀𝐖 := weakerThan_iff.mpr <| subset_of_subset Set.subset_union_left
 
-end Logic
-
-namespace Veltman.Model
-
-variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
-
-class IsILMZeroW : Prop extends M.IsIL, M.HasM₀, M.HasW
-
-instance (v : α → Prop) : (pointModel v).IsILMZeroW := {}
-
-instance (priority := low) [M.IsIL] [M.HasM₀] [M.HasW] : M.IsILMZeroW := {}
-
-end Veltman.Model
-
-namespace Logic
-
-open Veltman Veltman.Model Veltman.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
-
 theorem ILM₀W.sound [M.IsILMZeroW] (h : 𝐈𝐋𝐌₀𝐖 ⊢ A) : M ⊧ A := by
   apply ofAxioms.sound _ h;
   rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩) x;
@@ -77,12 +69,6 @@ theorem ILM₀W.sound [M.IsILMZeroW] (h : 𝐈𝐋𝐌₀𝐖 ⊢ A) : M ⊧ A :
 
 instance : Consistent (𝐈𝐋𝐌₀𝐖 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILM₀W.sound (M := pointModel fun _ ↦ False) h 0
-
-end Logic
-
-namespace Logic
-
-open Veltman Veltman.Model Veltman.Model.World
 
 instance : (𝐈𝐋𝐌₀ : Logic ℕ) ⪱ 𝐈𝐋𝐌₀𝐖 :=
   .of_unprovable_provable (φ := Axioms.W (#0) (#1)) (fun h ↦ by

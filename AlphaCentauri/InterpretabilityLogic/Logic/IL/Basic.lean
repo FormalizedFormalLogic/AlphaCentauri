@@ -194,15 +194,11 @@ instance : (ILMinusJ1J4PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
     (fun h ↦ counterJ2.not_models_J2 (ILMinusJ1J4PlusJ5.sound (M := counterJ2 α) h))
     ofAxioms.axiomJ2
 
-end Logic
-
 /-! ## Completeness -/
 
-namespace Logic
+open Formula MaximalConsistentSet Veltman.Model Veltman.Model.World
 
-open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model.World
-
-variable {α : Type} {A : Formula α}
+variable {A : Formula α}
 
 /-- - [dJV90, Theorem 4.1]
 - [JMMV20, Theorem 3.2]

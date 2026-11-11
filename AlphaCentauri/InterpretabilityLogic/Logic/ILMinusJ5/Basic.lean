@@ -14,8 +14,6 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 
 namespace FFL.InterpretabilityLogic
 
-namespace Logic
-
 open Entailment Formula
 
 variable {α : Type*}
@@ -24,9 +22,7 @@ variable {α : Type*}
 
 - [KO21, §3.4]
 -/
-abbrev ILMinusJ5 : Logic α := ofAxiomsMinus {Axioms.J5 A | A}
-
-end Logic
+abbrev Logic.ILMinusJ5 : Logic α := ofAxiomsMinus {Axioms.J5 A | A}
 
 namespace Veltman.Model
 

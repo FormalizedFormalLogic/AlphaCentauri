@@ -15,8 +15,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ4Plus.Basic
 
 namespace FFL.InterpretabilityLogic
 
-namespace Logic
-
 open Entailment Formula
 
 variable {α : Type*}
@@ -25,9 +23,7 @@ variable {α : Type*}
 
 - [KO21, §3.2]
 -/
-abbrev ILMinusJ4 : Logic α := ofAxiomsMinus {Axioms.J4 A B | (A) (B)}
-
-end Logic
+abbrev Logic.ILMinusJ4 : Logic α := ofAxiomsMinus {Axioms.J4 A B | (A) (B)}
 
 namespace Verbrugge.Model
 
@@ -44,31 +40,18 @@ namespace Logic
 /-! ## Soundness -/
 
 
-open Veltman Veltman.Model Veltman.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
-
-theorem ILMinusJ4.sound [M.IsILMinusJ4Plus] : ILMinusJ4 ⊢ A → M ⊧ A :=
+open Veltman Veltman.Model.World in
+theorem ILMinusJ4.sound {κ : Type*} [Nonempty κ] {M : Veltman.Model κ α} {A : Formula α}
+    [M.IsILMinusJ4Plus] : ILMinusJ4 ⊢ A → M ⊧ A :=
   ofAxiomsMinus.sound <| by
     rintro _ ⟨A, B, rfl⟩ x;
     exact forces_axiomJ4
 
-end Logic
-
-section Consistency
-
-open Veltman.Model Logic
-
-variable {α : Type*}
-
+open Veltman.Model in
 instance : Entailment.Consistent (ILMinusJ4 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILMinusJ4.sound (M := pointModel fun _ ↦ False) h 0
 
-end Consistency
-
 /-! ## Completeness for Verbrugge models -/
-
-namespace Logic
 
 open Entailment Formula MaximalConsistentSet Verbrugge Verbrugge.Model Verbrugge.Model.World
 

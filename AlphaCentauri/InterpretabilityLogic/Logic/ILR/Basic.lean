@@ -24,11 +24,33 @@ abbrev Logic.ILR : Logic α := Logic.ofAxioms {Axioms.R A B C | (A) (B) (C)}
 
 notation "𝐈𝐋𝐑" => Logic.ILR
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILR : Prop extends M.IsIL, M.HasR
+
+instance (v : α → Prop) : (pointModel v).IsILR := {}
+
+instance (priority := low) [M.IsIL] [M.HasR] : M.IsILR := {}
+
+end Veltman.Model
+
+namespace Verbrugge.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILR : Prop extends M.IsIL, M.HasR
+
+instance (priority := low) [M.IsIL] [M.HasR] : M.IsILR := {}
+
+end Verbrugge.Model
+
 namespace Logic
 
-open ofAxioms
+open ofAxioms Veltman Veltman.Model Veltman.Model.World
 
-variable {A B C : Formula α}
+variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 @[simp] lemma ILR.axiomR : 𝐈𝐋𝐑 ⊢ Axioms.R A B C := axm ⟨A, B, C, rfl⟩
 
@@ -55,59 +77,23 @@ instance : (𝐈𝐋𝐏₀ : Logic α) ⪯ 𝐈𝐋𝐑 :=
 instance : (𝐈𝐋𝐌₀ : Logic α) ⪯ 𝐈𝐋𝐑 :=
   weakerThan_iff.mpr <| subset_of_provable <| by rintro _ ⟨A, B, C, rfl⟩; exact ILR.axiomM₀
 
-end Logic
-
-namespace Veltman.Model
-
-variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
-
-class IsILR : Prop extends M.IsIL, M.HasR
-
-instance (v : α → Prop) : (pointModel v).IsILR := {}
-
-instance (priority := low) [M.IsIL] [M.HasR] : M.IsILR := {}
-
-end Veltman.Model
-
-namespace Verbrugge.Model
-
-variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
-
-class IsILR : Prop extends M.IsIL, M.HasR
-
-instance (priority := low) [M.IsIL] [M.HasR] : M.IsILR := {}
-
-end Verbrugge.Model
-
-namespace Logic
-
-open Veltman Veltman.Model Veltman.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
-
 theorem ILR.sound [M.IsILR] (h : 𝐈𝐋𝐑 ⊢ A) : M ⊧ A :=
   ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomR) h
 
 instance : Consistent (𝐈𝐋𝐑 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILR.sound (M := pointModel fun _ ↦ False) h 0
 
-end Logic
-
-section Verbrugge
-
-variable {α : Type} {A : Formula α}
-
 /-- - [MV20, Theorem 25] -/
-theorem Logic.ILR.complete_verbrugge
+theorem ILR.complete_verbrugge {α : Type} {A : Formula α}
     (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsILR] → M ⊧ A) :
     𝐈𝐋𝐑 ⊢ A := by
   classical
   by_contra hA;
-  have := Logic.ofAxioms.nonempty_countermodelWorld hA;
-  have := Verbrugge.countermodel.hasR (A₀ := A) fun {_ _ _} ↦ Logic.ILR.axiomR;
-  exact Logic.ofAxioms.not_models_verbrugge_countermodel hA (h _)
+  have := ofAxioms.nonempty_countermodelWorld hA;
+  have := Verbrugge.countermodel.hasR (A₀ := A) fun {_ _ _} ↦ ILR.axiomR;
+  exact ofAxioms.not_models_verbrugge_countermodel hA (h _)
 
-end Verbrugge
+end Logic
 
 /-- $\mathbf{ILR}$ is complete with respect to Veltman frames. An open problem.
 - [MV20, §2.5] -/

@@ -753,10 +753,6 @@ theorem ILM.iff_valid_finite :
 
 end
 
-end Logic
-
-namespace Logic
-
 open scoped Veltman
 open Entailment Veltman.Model Veltman.Model.World ofAxioms
 

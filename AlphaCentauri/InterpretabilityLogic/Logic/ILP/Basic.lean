@@ -24,11 +24,21 @@ abbrev Logic.ILP : Logic α := Logic.ofAxioms {Axioms.P A B | (A) (B)}
 
 notation "𝐈𝐋𝐏" => Logic.ILP
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILP : Prop extends M.IsIL, M.HasP
+
+instance (v : α → Prop) : (pointModel v).IsILP := {}
+
+end Veltman.Model
+
 namespace Logic
 
-open ofAxioms
+open ofAxioms Veltman Veltman.Model Veltman.Model.World
 
-variable {A B C : Formula α}
+variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 @[simp] lemma ILP.axiomP : 𝐈𝐋𝐏 ⊢ Axioms.P A B := axm ⟨A, B, rfl⟩
 
@@ -56,20 +66,6 @@ instance : (𝐈𝐋𝐑𝐖 : Logic α) ⪯ 𝐈𝐋𝐏 := weakerThan_iff.mpr 
   rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩)
   · exact ILP.axiomR
   · exact ILP.axiomW
-
-end Logic
-
-namespace Veltman.Model
-
-variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
-
-class IsILP : Prop extends M.IsIL, M.HasP
-
-instance (v : α → Prop) : (pointModel v).IsILP := {}
-
-end Veltman.Model
-
-namespace Logic
 
 open Entailment Veltman Veltman.Model Veltman.Model.World
 

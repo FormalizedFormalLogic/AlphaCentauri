@@ -23,16 +23,6 @@ abbrev Logic.ILM₀ : Logic α := Logic.ofAxioms {Axioms.M₀ A B C | (A) (B) (C
 
 notation "𝐈𝐋𝐌₀" => Logic.ILM₀
 
-namespace Logic
-
-open ofAxioms
-
-variable {A B C : Formula α}
-
-@[simp] lemma ILM₀.axiomM₀ : 𝐈𝐋𝐌₀ ⊢ Axioms.M₀ A B C := axm ⟨A, B, C, rfl⟩
-
-end Logic
-
 namespace Veltman.Model
 
 variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
@@ -47,9 +37,11 @@ end Veltman.Model
 
 namespace Logic
 
-open Veltman Veltman.Model Veltman.Model.World
+open ofAxioms Veltman Veltman.Model Veltman.Model.World
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
+variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
+
+@[simp] lemma ILM₀.axiomM₀ : 𝐈𝐋𝐌₀ ⊢ Axioms.M₀ A B C := axm ⟨A, B, C, rfl⟩
 
 theorem ILM₀.sound [M.IsILMZero] (h : 𝐈𝐋𝐌₀ ⊢ A) : M ⊧ A :=
   ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM₀) h
@@ -57,13 +49,7 @@ theorem ILM₀.sound [M.IsILMZero] (h : 𝐈𝐋𝐌₀ ⊢ A) : M ⊧ A :=
 instance : Consistent (𝐈𝐋𝐌₀ : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILM₀.sound (M := pointModel fun _ ↦ False) h 0
 
-end Logic
-
-namespace Logic
-
 open Veltman Veltman.StepByStep MaximalConsistentTheory
-
-variable {α : Type*} {A : Formula α}
 
 /-- - [GJ08, Theorem 6.1] -/
 theorem ILM₀.iff_valid :
@@ -81,12 +67,6 @@ theorem ILM₀.iff_valid :
     have := model_isIL (Γ₀ := Γ₀) (ε := fun _ ↦ ∅)
       (enumJob_mem (bot_mem_jobFormulas (A := A)));
     exact hΓ₀ (h _ 0)
-
-end Logic
-
-namespace Logic
-
-open Veltman Veltman.Model Veltman.Model.World
 
 instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐌₀ :=
   .of_unprovable_provable (φ := Axioms.M₀ (#0) (#1) (#2)) (fun h ↦ by

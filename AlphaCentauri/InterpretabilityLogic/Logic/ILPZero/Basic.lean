@@ -23,33 +23,29 @@ abbrev Logic.ILP₀ : Logic α := Logic.ofAxioms {Axioms.P₀ A B | (A) (B)}
 
 notation "𝐈𝐋𝐏₀" => Logic.ILP₀
 
+namespace Verbrugge.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILPZero : Prop extends M.IsIL, M.HasP₀
+
+instance (priority := low) [M.IsIL] [M.HasP₀] : M.IsILPZero := {}
+
+end Verbrugge.Model
+
 namespace Logic
 
-open ofAxioms
+open ofAxioms Veltman Veltman.Model Veltman.Model.World
 
-variable {A B C : Formula α}
+variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 @[simp] lemma ILP₀.axiomP₀ : 𝐈𝐋𝐏₀ ⊢ Axioms.P₀ A B := axm ⟨A, B, rfl⟩
-
-end Logic
-
-namespace Logic
-
-open Veltman Veltman.Model Veltman.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
 theorem ILP₀.sound [M.IsIL] [M.HasR] (h : 𝐈𝐋𝐏₀ ⊢ A) : M ⊧ A :=
   ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomP₀) h
 
 instance : Consistent (𝐈𝐋𝐏₀ : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILP₀.sound (M := pointModel fun _ ↦ False) h 0
-
-end Logic
-
-namespace Logic
-
-open Veltman Veltman.Model Veltman.Model.World
 
 private abbrev countermodelPZeroM₀ : Model (Fin 5) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 1 ∧ y = 2 ∨ x = 3 ∧ y = 4
@@ -77,33 +73,17 @@ instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐏₀ :=
     obtain rfl : t = 4 := ht;
     exact absurd hSt (by decide)) ILP₀.axiomP₀
 
-end Logic
-
-namespace Verbrugge.Model
-
-variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
-
-class IsILPZero : Prop extends M.IsIL, M.HasP₀
-
-instance (priority := low) [M.IsIL] [M.HasP₀] : M.IsILPZero := {}
-
-end Verbrugge.Model
-
-section Verbrugge
-
-variable {α : Type} {A : Formula α}
-
 /-- - [MV20, Theorem 23] -/
-theorem Logic.ILP₀.complete_verbrugge
+theorem ILP₀.complete_verbrugge {α : Type} {A : Formula α}
     (h : ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α), [M.IsILPZero] → M ⊧ A) :
     𝐈𝐋𝐏₀ ⊢ A := by
   classical
   by_contra hA;
-  have := Logic.ofAxioms.nonempty_countermodelWorld hA;
-  have := Verbrugge.countermodel.hasP₀ (A₀ := A) fun {_ _} ↦ Logic.ILP₀.axiomP₀;
-  exact Logic.ofAxioms.not_models_verbrugge_countermodel hA (h _)
+  have := ofAxioms.nonempty_countermodelWorld hA;
+  have := Verbrugge.countermodel.hasP₀ (A₀ := A) fun {_ _} ↦ ILP₀.axiomP₀;
+  exact ofAxioms.not_models_verbrugge_countermodel hA (h _)
 
-end Verbrugge
+end Logic
 
 end FFL.InterpretabilityLogic
 

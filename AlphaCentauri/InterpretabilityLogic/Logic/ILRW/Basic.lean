@@ -24,11 +24,33 @@ abbrev Logic.ILRW : Logic α :=
 
 notation "𝐈𝐋𝐑𝐖" => Logic.ILRW
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILRW : Prop extends M.IsIL, M.HasR, M.HasW
+
+instance (v : α → Prop) : (pointModel v).IsILRW := {}
+
+instance (priority := low) [M.IsIL] [M.HasR] [M.HasW] : M.IsILRW := {}
+
+end Veltman.Model
+
+namespace Verbrugge.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILRW : Prop extends M.IsIL, M.HasR, M.HasW
+
+instance (priority := low) [M.IsIL] [M.HasR] [M.HasW] : M.IsILRW := {}
+
+end Verbrugge.Model
+
 namespace Logic
 
-open ofAxioms
+open ofAxioms Veltman Veltman.Model Veltman.Model.World
 
-variable {A B C : Formula α}
+variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 @[simp] lemma ILRW.axiomR : 𝐈𝐋𝐑𝐖 ⊢ Axioms.R A B C := axm <| .inl ⟨A, B, C, rfl⟩
 
@@ -47,26 +69,6 @@ instance : (𝐈𝐋𝐌₀𝐖 : Logic α) ⪯ 𝐈𝐋𝐑𝐖 := weakerThan_i
   · exact subset_of_subset Set.subset_union_left ILR.axiomM₀
   · exact ILRW.axiomW
 
-end Logic
-
-namespace Veltman.Model
-
-variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
-
-class IsILRW : Prop extends M.IsIL, M.HasR, M.HasW
-
-instance (v : α → Prop) : (pointModel v).IsILRW := {}
-
-instance (priority := low) [M.IsIL] [M.HasR] [M.HasW] : M.IsILRW := {}
-
-end Veltman.Model
-
-namespace Logic
-
-open Veltman Veltman.Model Veltman.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
-
 theorem ILRW.sound [M.IsILRW] (h : 𝐈𝐋𝐑𝐖 ⊢ A) : M ⊧ A := by
   apply ofAxioms.sound _ h;
   rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩) x;
@@ -75,12 +77,6 @@ theorem ILRW.sound [M.IsILRW] (h : 𝐈𝐋𝐑𝐖 ⊢ A) : M ⊧ A := by
 
 instance : Consistent (𝐈𝐋𝐑𝐖 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILRW.sound (M := pointModel fun _ ↦ False) h 0
-
-end Logic
-
-namespace Logic
-
-open Veltman Veltman.Model Veltman.Model.World
 
 private abbrev countermodelRW : Model (Fin 3) ℕ where
   Rel' := (· < ·)
@@ -147,16 +143,6 @@ instance : (𝐈𝐋𝐌₀𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐑𝐖 :=
     exact (show (4 : Fin 5) ≠ 2 by decide) (ht 4 (by decide))) ILRW.axiomR
 
 end Logic
-
-namespace Verbrugge.Model
-
-variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
-
-class IsILRW : Prop extends M.IsIL, M.HasR, M.HasW
-
-instance (priority := low) [M.IsIL] [M.HasR] [M.HasW] : M.IsILRW := {}
-
-end Verbrugge.Model
 
 /-- $\mathbf{ILRW}$ is complete with respect to Veltman frames. An open problem.
 - [JMMV20, §6.5] -/

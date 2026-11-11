@@ -26,11 +26,23 @@ abbrev Logic.ILWStar : Logic α := Logic.ofAxioms {Axioms.Wstar A B C | (A) (B) 
 
 notation "𝐈𝐋𝐖*" => Logic.ILWStar
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILWStar : Prop extends M.IsILMZeroW
+
+instance (v : α → Prop) : (pointModel v).IsILWStar := {}
+
+instance (priority := low) [M.IsIL] [M.HasM₀] [M.HasW] : M.IsILWStar := {}
+
+end Veltman.Model
+
 namespace Logic
 
-open ofAxioms
+open ofAxioms Veltman Veltman.Model Veltman.Model.World
 
-variable {A B C : Formula α}
+variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 @[simp] lemma ILWStar.axiomWstar : 𝐈𝐋𝐖* ⊢ Axioms.Wstar A B C := axm ⟨A, B, C, rfl⟩
 
@@ -61,39 +73,13 @@ instance : (𝐈𝐋𝐖* : Logic α) ≊ 𝐈𝐋𝐌₀𝐖 := equiv_iff.mpr <
     · exact ILWStar.axiomM₀
     · exact ILWStar.axiomW)
 
-end Logic
-
-namespace Veltman.Model
-
-variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
-
-class IsILWStar : Prop extends M.IsILMZeroW
-
-instance (v : α → Prop) : (pointModel v).IsILWStar := {}
-
-instance (priority := low) [M.IsIL] [M.HasM₀] [M.HasW] : M.IsILWStar := {}
-
-end Veltman.Model
-
-namespace Logic
-
-open Veltman Veltman.Model Veltman.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
-
 theorem ILWStar.sound [M.IsILWStar] (h : 𝐈𝐋𝐖* ⊢ A) : M ⊧ A :=
   ILM₀W.sound <| (equiv_iff.mp inferInstance : (𝐈𝐋𝐖* : Logic α) = 𝐈𝐋𝐌₀𝐖).subset h
 
 instance : Consistent (𝐈𝐋𝐖* : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILWStar.sound (M := pointModel fun _ ↦ False) h 0
 
-end Logic
-
-namespace Logic
-
 open Veltman Veltman.StepByStep MaximalConsistentTheory
-
-variable {α : Type*} {A : Formula α}
 
 /-- - [GJ08, Theorem 7.1] -/
 theorem ILWStar.iff_valid :

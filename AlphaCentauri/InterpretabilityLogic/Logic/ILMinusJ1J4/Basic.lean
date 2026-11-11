@@ -15,8 +15,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4Plus.Basic
 
 namespace FFL.InterpretabilityLogic
 
-namespace Logic
-
 open Entailment Formula
 
 variable {α : Type*}
@@ -25,10 +23,8 @@ variable {α : Type*}
 
 - [KO21, §6]
 -/
-abbrev ILMinusJ1J4 : Logic α :=
+abbrev Logic.ILMinusJ1J4 : Logic α :=
   ofAxiomsMinus ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J4 A B | (A) (B)})
-
-end Logic
 
 namespace Verbrugge.Model
 

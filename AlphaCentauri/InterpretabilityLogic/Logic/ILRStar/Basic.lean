@@ -21,11 +21,23 @@ abbrev Logic.ILRStar : Logic α := Logic.ofAxioms {Axioms.Rstar A B C | (A) (B) 
 
 notation "𝐈𝐋𝐑*" => Logic.ILRStar
 
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILRStar : Prop extends M.IsILRW
+
+instance (v : α → Prop) : (pointModel v).IsILRStar := {}
+
+instance (priority := low) [M.IsIL] [M.HasR] [M.HasW] : M.IsILRStar := {}
+
+end Veltman.Model
+
 namespace Logic
 
-open ofAxioms
+open ofAxioms Veltman Veltman.Model Veltman.Model.World
 
-variable {A B C : Formula α}
+variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 @[simp] lemma ILRStar.axiomRstar : 𝐈𝐋𝐑* ⊢ Axioms.Rstar A B C := axm ⟨A, B, C, rfl⟩
 
@@ -57,26 +69,6 @@ instance : (𝐈𝐋𝐑𝐖 : Logic α) ≊ 𝐈𝐋𝐑* := equiv_iff.mpr <| s
     · exact ILRStar.axiomR
     · exact ILRStar.axiomW)
   (subset_of_provable <| by rintro _ ⟨A, B, C, rfl⟩; exact ILRW.axiomRstar)
-
-end Logic
-
-namespace Veltman.Model
-
-variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
-
-class IsILRStar : Prop extends M.IsILRW
-
-instance (v : α → Prop) : (pointModel v).IsILRStar := {}
-
-instance (priority := low) [M.IsIL] [M.HasR] [M.HasW] : M.IsILRStar := {}
-
-end Veltman.Model
-
-namespace Logic
-
-open Veltman Veltman.Model Veltman.Model.World
-
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
 theorem ILRStar.sound [M.IsILRStar] (h : 𝐈𝐋𝐑* ⊢ A) : M ⊧ A :=
   ILRW.sound <| (equiv_iff.mp inferInstance : (𝐈𝐋𝐑𝐖 : Logic α) = 𝐈𝐋𝐑*).symm.subset h

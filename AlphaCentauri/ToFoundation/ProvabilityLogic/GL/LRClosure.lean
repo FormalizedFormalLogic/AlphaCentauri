@@ -438,6 +438,162 @@ lemma exists_subst_bot (a : α) (h : LRClosure P b Z) :
       · rintro ⟨⟨C, hC⟩, -, z, Ryz, hz⟩
         exact ⟨C, hC, z, Ryz, (forces_iff_of (hg' C hC) z).mpr hz⟩
 
+lemma exists_subst_bot_of_mem_base (a : α) (h : A ∈ base P) :
+    ∃ A' ∈ base (P.erase a), 𝐆𝐋 ⊢ A⟦a ↦ ⊥⟧ 🡘 A' := by
+  rcases h with ⟨b, h⟩ | ⟨A, h, rfl⟩
+  · obtain ⟨A', hA', h⟩ := exists_subst_bot a h
+    exact ⟨A', .inl ⟨b, hA'⟩, h⟩
+  · obtain ⟨A', hA', h⟩ := exists_subst_bot a h
+    exact ⟨□(∼A'), .inr ⟨A', hA', rfl⟩, box_congr' (imp_congr' h iff_refl')⟩
+
+lemma exists_subst_bot_of_booleanCombination (a : α) {D : Formula α}
+    (h : BooleanCombination (base P) D) :
+    ∃ D', BooleanCombination (base (P.erase a)) D' ∧ 𝐆𝐋 ⊢ D⟦a ↦ ⊥⟧ 🡘 D' := by
+  induction h with
+  | mem hA =>
+    obtain ⟨A', hA', h⟩ := exists_subst_bot_of_mem_base a hA
+    exact ⟨A', mem hA', h⟩
+  | falsum => exact ⟨⊥, BooleanCombination.falsum, iff_refl'⟩
+  | imp _ _ ihA ihB =>
+    obtain ⟨A', hA', h₁⟩ := ihA
+    obtain ⟨B', hB', h₂⟩ := ihB
+    exact ⟨A' 🡒 B', imp hA' hB', imp_congr' h₁ h₂⟩
+
+/-- The formulas `□∼A` for `A` in the LR-closure are finitely many up to equivalence, provided the
+bases over `P.erase a` are. -/
+private lemma finiteUpToEquiv_box_neg
+    (ih : ∀ a ∈ P, FiniteUpToEquiv (base (P.erase a))) :
+    FiniteUpToEquiv ((fun A ↦ □(∼A)) '' {A | ∃ b, LRClosure P b A}) := by
+  have hfin : FiniteUpToEquiv ({□(∼⊥)} ∪ ⋃ a ∈ P,
+      (fun D ↦ □(∼(#a ⋏ □D))) '' {D | BooleanCombination (base (P.erase a)) D}) := by
+    refine FiniteUpToEquiv.union ⟨{□(∼⊥)}, fun A hA ↦ ⟨A, by simpa using hA, iff_refl'⟩⟩ ?_
+    refine FiniteUpToEquiv.iUnion_finset P fun a ha ↦ ?_
+    refine (BooleanCombination.finiteUpToEquiv (ih a ha)).image fun h ↦ ?_
+    exact box_congr' <| imp_congr' (iff_of_forces fun _ _ x ↦ by
+      simp only [forces_and, forces_box]
+      exact and_congr_right fun _ ↦ forall_congr' fun y ↦ imp_congr_right fun _ ↦
+        forces_iff_of h y) iff_refl'
+  refine hfin.of_forall_exists ?_
+  rintro _ ⟨Z, ⟨b, hZ⟩, rfl⟩
+  rcases exists_atom_and_box hZ with h | ⟨a, ha, D, hD, h⟩
+  · exact ⟨□(∼⊥), .inl rfl, box_congr' (imp_congr' h iff_refl')⟩
+  · obtain ⟨D', hD', h'⟩ := exists_subst_bot_of_booleanCombination a hD
+    refine ⟨□(∼(#a ⋏ □D')), .inr ?_, ?_⟩
+    · simp only [Set.mem_iUnion, Set.mem_image]
+      exact ⟨a, ha, D', hD', rfl⟩
+    refine iff_trans' (box_congr' (imp_congr' h iff_refl')) <|
+      iff_trans' box_neg_and_box_iff_subst_bot <| box_congr' <| imp_congr' ?_ iff_refl'
+    exact iff_of_forces fun _ _ x ↦ by
+      simp only [forces_and, forces_box]
+      exact and_congr_right fun _ ↦ forall_congr' fun y ↦ imp_congr_right fun _ ↦
+        forces_iff_of h' y
+
+/-- - [Ign91, Lemma 6.3] -/
+theorem finiteUpToEquiv_base (P : Finset α) : FiniteUpToEquiv (base P) := by
+  classical
+  induction P using Finset.strongInduction with
+  | H P ih =>
+  obtain ⟨F, hF⟩ := finiteUpToEquiv_box_neg fun a ha ↦ ih _ (Finset.erase_ssubset ha)
+  have hL : ∀ {b Z}, LRClosure P b Z → b = true →
+      ∃ B ∈ insert ⊥ (P.biUnion fun a ↦ F.powerset.image fun X ↦ #a ⋏ X.conj), 𝐆𝐋 ⊢ Z 🡘 B := by
+    intro b Z h
+    induction h with
+    | falsum => exact fun _ ↦ ⟨⊥, Finset.mem_insert_self _ _, iff_refl'⟩
+    | @atom a ha =>
+      refine fun _ ↦ ⟨#a ⋏ (∅ : Finset (Formula α)).conj, Finset.mem_insert_of_mem <|
+        Finset.mem_biUnion.mpr ⟨a, ha, Finset.mem_image.mpr ⟨∅, by simp, rfl⟩⟩,
+        iff_of_forces fun _ _ x ↦ ?_⟩
+      simp [forces_and]
+    | @and_box_neg A B b' _ hB ihA _ =>
+      intro _
+      obtain ⟨E, hE, hBE⟩ := hF _ ⟨B, ⟨b', hB⟩, rfl⟩
+      obtain ⟨A', hA', hAA'⟩ := ihA rfl
+      rcases Finset.mem_insert.mp hA' with rfl | hA'
+      · refine ⟨⊥, Finset.mem_insert_self _ _, iff_of_forces fun _ _ x ↦ ?_⟩
+        simp [forces_and, forces_iff_of hAA' x]
+      · obtain ⟨a, ha, hX⟩ := Finset.mem_biUnion.mp hA'
+        obtain ⟨X, hX', rfl⟩ := Finset.mem_image.mp hX
+        refine ⟨#a ⋏ (insert E X).conj, Finset.mem_insert_of_mem <| Finset.mem_biUnion.mpr
+          ⟨a, ha, Finset.mem_image.mpr ⟨insert E X, Finset.mem_powerset.mpr <|
+            Finset.insert_subset hE (Finset.mem_powerset.mp hX'), rfl⟩⟩,
+          iff_of_forces fun _ _ x ↦ ?_⟩
+        simp only [forces_and, forces_iff_of hAA' x, forces_conj, Finset.mem_insert,
+          forall_eq_or_imp, ← forces_iff_of hBE x]
+        tauto
+    | and_box_imp => exact fun h ↦ Bool.noConfusion h
+  obtain ⟨G, hGsub, hG⟩ := FiniteUpToEquiv.exists_finset_subset
+    (S := {Z | LRClosure P true Z}) ⟨_, fun Z hZ ↦ hL hZ rfl⟩
+  let H := (G ×ˢ (G.powerset ×ˢ G.powerset)).image fun p ↦
+    □(p.1 🡒 p.2.1.disj ⋎ (p.2.2.image (◇·)).disj)
+  have hR : ∀ {b Z}, LRClosure P b Z → b = false →
+      ∃ l ∈ G, ∃ Y ⊆ H, 𝐆𝐋 ⊢ Z 🡘 l ⋏ Y.conj := by
+    intro b Z h
+    induction h with
+    | falsum | atom | and_box_neg => exact fun h ↦ Bool.noConfusion h
+    | @and_box_imp A B b' S T hA hB hS hT ihA _ _ _ =>
+      intro _
+      obtain ⟨B', hB', hBB'⟩ := hG B hB
+      choose f hf hf' using fun C (hC : C ∈ S) ↦ hG C (hS C hC)
+      choose g hg hg' using fun C (hC : C ∈ T) ↦ hG C (hT C hC)
+      let S' := S.attach.image fun C ↦ f C.1 C.2
+      let T' := T.attach.image fun C ↦ g C.1 C.2
+      have hS' : S' ⊆ G := by
+        intro C hC
+        obtain ⟨⟨D, hD⟩, -, rfl⟩ := Finset.mem_image.mp hC
+        exact hf D hD
+      have hT' : T' ⊆ G := by
+        intro C hC
+        obtain ⟨⟨D, hD⟩, -, rfl⟩ := Finset.mem_image.mp hC
+        exact hg D hD
+      have hc : □(B' 🡒 S'.disj ⋎ (T'.image (◇·)).disj) ∈ H :=
+        Finset.mem_image.mpr ⟨(B', S', T'), Finset.mem_product.mpr ⟨hB',
+          Finset.mem_product.mpr ⟨Finset.mem_powerset.mpr hS', Finset.mem_powerset.mpr hT'⟩⟩, rfl⟩
+      have hbox : ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsFiniteGL] (x : M.World),
+          x ⊩ □(B 🡒 S.disj ⋎ (T.image (◇·)).disj) ↔
+            x ⊩ □(B' 🡒 S'.disj ⋎ (T'.image (◇·)).disj) := by
+        intro κ _ M _ x
+        simp only [forces_box, forces_imp, forces_or, forces_disj, Finset.mem_image,
+          exists_exists_and_eq_and, forces_dia, S', T']
+        refine forall_congr' fun y ↦ imp_congr_right fun _ ↦ ?_
+        rw [forces_iff_of hBB' y]
+        refine or_congr_right (or_congr ⟨?_, ?_⟩ ⟨?_, ?_⟩)
+        · rintro ⟨C, hC, hy⟩
+          exact ⟨⟨C, hC⟩, Finset.mem_attach _ _, (forces_iff_of (hf' C hC) y).mp hy⟩
+        · rintro ⟨⟨C, hC⟩, -, hy⟩
+          exact ⟨C, hC, (forces_iff_of (hf' C hC) y).mpr hy⟩
+        · rintro ⟨C, hC, z, Ryz, hz⟩
+          exact ⟨⟨C, hC⟩, Finset.mem_attach _ _, z, Ryz, (forces_iff_of (hg' C hC) z).mp hz⟩
+        · rintro ⟨⟨C, hC⟩, -, z, Ryz, hz⟩
+          exact ⟨C, hC, z, Ryz, (forces_iff_of (hg' C hC) z).mpr hz⟩
+      cases b' with
+      | true =>
+        obtain ⟨l, hl, hAl⟩ := hG A hA
+        refine ⟨l, hl, {_}, Finset.singleton_subset_iff.mpr hc, iff_of_forces fun M _ x ↦ ?_⟩
+        simp only [forces_and, forces_iff_of hAl x, Finset.conj_singleton, hbox M x]
+      | false =>
+        obtain ⟨l, hl, Y, hY, hAY⟩ := ihA rfl
+        refine ⟨l, hl, insert _ Y, Finset.insert_subset hc hY, iff_of_forces fun M _ x ↦ ?_⟩
+        simp only [forces_and, forces_iff_of hAY x, forces_conj, Finset.mem_insert,
+          forall_eq_or_imp, hbox M x]
+        tauto
+  refine ⟨G ∪ (G ×ˢ H.powerset).image (fun p ↦ p.1 ⋏ p.2.conj) ∪ F, ?_⟩
+  rintro Z (⟨b, hZ⟩ | ⟨A, hA, rfl⟩)
+  · cases b with
+    | true =>
+      obtain ⟨l, hl, h⟩ := hG Z hZ
+      exact ⟨l, Finset.mem_union_left _ (Finset.mem_union_left _ hl), h⟩
+    | false =>
+      obtain ⟨l, hl, Y, hY, h⟩ := hR hZ rfl
+      exact ⟨_, Finset.mem_union_left _ <| Finset.mem_union_right _ <| Finset.mem_image.mpr
+        ⟨(l, Y), Finset.mem_product.mpr ⟨hl, Finset.mem_powerset.mpr hY⟩, rfl⟩, h⟩
+  · obtain ⟨E, hE, h⟩ := hF _ ⟨A, ⟨true, hA⟩, rfl⟩
+    exact ⟨E, Finset.mem_union_right _ hE, h⟩
+
+/-- - [Ign91, Lemma 6.3] -/
+theorem finiteUpToEquiv (P : Finset α) (b : Bool) :
+    FiniteUpToEquiv {Z | LRClosure P b Z} :=
+  (finiteUpToEquiv_base P).of_subset fun _ hZ ↦ .inl ⟨b, hZ⟩
+
 end LRClosure
 
 end FFL.ProvabilityLogic

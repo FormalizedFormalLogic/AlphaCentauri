@@ -174,6 +174,7 @@ public import AlphaCentauri.Schemata.DeltaInduction
 public import AlphaCentauri.Schemata.OpenInduction
 public import AlphaCentauri.Schemata.ParameterFreeInduction
 public import AlphaCentauri.Schemata.Pigeonhole
+public import AlphaCentauri.Schemata.Regularity
 public import AlphaCentauri.Schemata.Strictness
 public import AlphaCentauri.Schemata.StrongCollection
 public import AlphaCentauri.Schemata.WeakPigeonhole

@@ -82,20 +82,10 @@ namespace Logic.ofILAxioms
 
 variable {𝔸 : FormulaSet α} {A : Formula α}
 
-/-- - [KO21, Proposition 3.20.1] -/
-lemma axiomJ6 : ofILAxioms 𝔸 ⊢ Axioms.J6 A := by
-  have h₁ : ofILAxioms 𝔸 ⊢ □A 🡒 □(∼A 🡒 ⊥) := box_mono (by cl_prover);
-  have h₂ : ofILAxioms 𝔸 ⊢ □(∼A 🡒 ⊥) 🡒 ∼A ▷ ⊥ := axiomJ1;
-  have h₃ : ofILAxioms 𝔸 ⊢ ∼A ▷ ⊥ 🡒 ∼□(∼∼A) 🡒 ∼□(∼⊥) := axiomJ4;
-  have h₄ : ofILAxioms 𝔸 ⊢ ∼⊥ := by cl_prover;
-  have h₄ : ofILAxioms 𝔸 ⊢ □(∼⊥) := nec h₄;
-  have h₅ : ofILAxioms 𝔸 ⊢ □(∼∼A) 🡒 □A := box_mono (by cl_prover);
-  cl_prover [h₁, h₂, h₃, h₄, h₅];
-
 /-- The extension of $\mathbf{IL}$ by `𝔸` is the extension of $\mathbf{CL}$ by $\mathbf{J5}$ and
 `𝔸`.
 
-- [KO21, Corollary 3.22]
+- [KO21, §3.5]
 -/
 theorem eq_ofCLAxioms :
     ofILAxioms 𝔸 = ofCLAxioms ({Axioms.J5 A | A} ∪ 𝔸) := by
@@ -130,8 +120,6 @@ theorem eq_ofCLAxioms :
       · exact axm h;
     | mdp _ _ ih₁ ih₂ => exact mdp ih₁ ih₂;
     | nec _ ih => exact nec ih;
-    | rule1 _ ih => exact rhd_mono_right ih;
-    | rule2 _ ih => exact rhd_anti_left ih;
     | verum => exact verum;
     | implyK => exact implyK;
     | implyS => exact implyS;
@@ -147,13 +135,13 @@ theorem eq_ofCLAxioms :
     | axiomJ1 => exact axiomJ1;
     | axiomJ2 => exact axiomJ2;
     | axiomJ3 => exact axiomJ3;
-    | axiomJ6 => exact axiomJ6;
+    | axiomJ4 => exact axiomJ4;
 
 end Logic.ofILAxioms
 
 namespace Logic
 
-/-- - [KO21, Corollary 3.22] -/
+/-- - [KO21, §3.5] -/
 theorem IL.eq_ofCLAxioms : (𝐈𝐋 : Logic α) = ofCLAxioms {Axioms.J5 A | A} := by
   simpa using ofILAxioms.eq_ofCLAxioms (𝔸 := (∅ : FormulaSet α));
 

@@ -477,6 +477,118 @@ lemma exists_isBoxBody_of_box_mem {E : Formula α} (h : □E ∈ clmAdequateClos
     cl_prover [h₂, h₃]
   cl_prover [h₄, h₅]
 
+omit [DecidableEq α] [Adequate X] in
+lemma provable_ofModal_iff {Z Z' : ProvabilityLogic.Formula (Formula α)} (h : 𝐆𝐋 ⊢ Z 🡘 Z') :
+    L ⊢ Formula.ofModal Z 🡘 Formula.ofModal Z' :=
+  Logic.provable_ofModal h
+
+omit [Adequate X] [L.ExtendsGL] in
+private lemma exists_and_box_neg {W₀ : ProvabilityLogic.Formula (Formula α)}
+    (hW₀ : LRClosure (atoms X) true W₀) {Y : Finset (Formula α)}
+    (hY : ∀ E ∈ Y, ∃ b Z, LRClosure (atoms X) b Z ∧ L ⊢ E 🡘 □(∼Formula.ofModal Z)) :
+    ∃ W, LRClosure (atoms X) true W ∧ L ⊢ Formula.ofModal W 🡘 Formula.ofModal W₀ ⋏ Y.conj := by
+  induction Y using Finset.induction_on with
+  | empty => exact ⟨W₀, hW₀, by simp only [Finset.conj_empty]; cl_prover⟩
+  | @insert E Y _ ih =>
+    obtain ⟨W, hW, h⟩ := ih fun E hE ↦ hY E (Finset.mem_insert_of_mem hE)
+    obtain ⟨b, Z, hZ, hE⟩ := hY E (Finset.mem_insert_self _ _)
+    refine ⟨W ⋏ □(∼Z), .and_box_neg hW hZ, ?_⟩
+    have c₁ : L ⊢ (insert E Y).conj 🡒 E ⋏ Y.conj := CinsertFConjKFConj
+    have c₂ : L ⊢ E ⋏ Y.conj 🡒 (insert E Y).conj := CKFConjinsertFConj
+    change L ⊢ Formula.ofModal W ⋏ □(∼Formula.ofModal Z) 🡘 _
+    cl_prover [h, hE, c₁, c₂]
+
+omit [Adequate X] [L.ExtendsGL] in
+private lemma exists_and_box_imp {b₀ : Bool} {W₀ : ProvabilityLogic.Formula (Formula α)}
+    (hW₀ : LRClosure (atoms X) b₀ W₀) {Y : Finset (Formula α)}
+    (hY : ∀ E ∈ Y, ∃ G, ∃ S T : Finset (ProvabilityLogic.Formula (Formula α)),
+      LRClosure (atoms X) true G ∧ (∀ C ∈ S, LRClosure (atoms X) true C) ∧
+        (∀ C ∈ T, LRClosure (atoms X) true C) ∧
+        L ⊢ E 🡘 □(Formula.ofModal (G 🡒 S.disj ⋎ (T.image (◇·)).disj))) :
+    ∃ b W, LRClosure (atoms X) b W ∧
+      L ⊢ Formula.ofModal W 🡘 Formula.ofModal W₀ ⋏ Y.conj := by
+  induction Y using Finset.induction_on with
+  | empty => exact ⟨b₀, W₀, hW₀, by simp only [Finset.conj_empty]; cl_prover⟩
+  | @insert E Y _ ih =>
+    obtain ⟨b, W, hW, h⟩ := ih fun E hE ↦ hY E (Finset.mem_insert_of_mem hE)
+    obtain ⟨G, S, T, hG, hS, hT, hE⟩ := hY E (Finset.mem_insert_self _ _)
+    refine ⟨false, W ⋏ □(G 🡒 S.disj ⋎ (T.image (◇·)).disj), .and_box_imp hW hG hS hT, ?_⟩
+    have c₁ : L ⊢ (insert E Y).conj 🡒 E ⋏ Y.conj := CinsertFConjKFConj
+    have c₂ : L ⊢ E ⋏ Y.conj 🡒 (insert E Y).conj := CKFConjinsertFConj
+    change L ⊢ Formula.ofModal W ⋏ □(Formula.ofModal (G 🡒 S.disj ⋎ (T.image (◇·)).disj)) 🡘 _
+    cl_prover [h, hE, c₁, c₂]
+
+lemma exists_box_neg_of_mem_boxes {E : Formula α} (h : E ∈ boxes X) :
+    ∃ b Z, LRClosure (atoms X) b Z ∧ L ⊢ E 🡘 □(∼Formula.ofModal Z) := by
+  classical
+  rcases Finset.mem_union.mp h with h | h
+  · obtain ⟨hE, D, rfl⟩ := Finset.mem_filter.mp h
+    refine ⟨true, .atom (∼D), .atom (neg_mem_atoms_of_mem (Adequate.box hE)), ?_⟩
+    have h₁ : L ⊢ □D 🡒 □(∼∼D) := Logic.box_mono (by cl_prover)
+    have h₂ : L ⊢ □(∼∼D) 🡒 □D := Logic.box_mono (by cl_prover)
+    change L ⊢ □D 🡘 □(∼∼D)
+    cl_prover [h₁, h₂]
+  · obtain ⟨Z, hZ, rfl⟩ := Finset.mem_image.mp h
+    rcases Finset.mem_union.mp hZ with hZ | hZ
+    · exact ⟨true, Z, lrClosure_of_mem_reps hZ, by cl_prover⟩
+    · exact ⟨false, Z, lrClosure_of_mem_reps hZ, by cl_prover⟩
+
+/-- A conjunction of an operand with `□`-formulas of `boxes X` is equivalent to an operand.
+
+- [Ign91, Definition 6.1]
+-/
+lemma exists_mem_operands_iff_and_conj (hB : B ∈ operands X) {Y : Finset (Formula α)}
+    (hY : Y ⊆ boxes X) : ∃ B' ∈ operands X, L ⊢ B' 🡘 B ⋏ Y.conj := by
+  classical
+  obtain ⟨W₀, hW₀, rfl⟩ := exists_of_mem_operands hB
+  obtain ⟨W, hW, h⟩ := exists_and_box_neg (L := L) hW₀ fun E hE ↦
+    exists_box_neg_of_mem_boxes (hY hE)
+  obtain ⟨W', hW', h'⟩ := exists_mem_reps hW
+  have h'' : L ⊢ Formula.ofModal W 🡘 Formula.ofModal W' := provable_ofModal_iff h'
+  exact ⟨_, Finset.mem_union_right _ (Finset.mem_image_of_mem _ hW'), by cl_prover [h, h'']⟩
+
+/-- A conjunction of an operand with `□`-formulas of `clmAdequateClosure X` is equivalent to a
+formula `B'` with `□∼B'` in `boxes X`.
+
+- [Ign91, Definition 6.1]
+-/
+lemma exists_box_neg_mem_boxes_iff_and_conj (hB : B ∈ operands X) {Y : Finset (Formula α)}
+    (hY : ∀ E ∈ Y, E ∈ clmAdequateClosure X ∧ ∃ D, E = □D) :
+    ∃ B', □(∼B') ∈ boxes X ∧ L ⊢ B' 🡘 B ⋏ Y.conj := by
+  classical
+  let P₁ : Formula α → Prop := fun E ↦
+    ∃ b Z, LRClosure (atoms X) b Z ∧ L ⊢ E 🡘 □(∼Formula.ofModal Z)
+  obtain ⟨W₀, hW₀, rfl⟩ := exists_of_mem_operands hB
+  obtain ⟨W₁, hW₁, h₁⟩ := exists_and_box_neg (L := L) (Y := Y.filter P₁) hW₀ fun E hE ↦
+    (Finset.mem_filter.mp hE).2
+  obtain ⟨b, W₂, hW₂, h₂⟩ := exists_and_box_imp (L := L) (Y := Y.filter (¬P₁ ·)) hW₁ <| by
+    intro E hE
+    obtain ⟨hE, hn⟩ := Finset.mem_filter.mp hE
+    obtain ⟨hE, D, rfl⟩ := hY E hE
+    obtain ⟨E', hE', h⟩ := exists_isBoxBody_of_box_mem (L := L) hE
+    rcases hE' with ⟨Z, b, hZ, rfl⟩ | ⟨G, S, T, hG, hS, hT, rfl⟩
+    · exact (hn ⟨b, Z, hZ, h⟩).elim
+    · exact ⟨G, S, T, hG, hS, hT, h⟩
+  obtain ⟨W', hW', h'⟩ := exists_mem_reps hW₂
+  have h₃ : L ⊢ Formula.ofModal W₂ 🡘 Formula.ofModal W' := provable_ofModal_iff h'
+  have c₁ : L ⊢ Y.conj 🡒 (Y.filter P₁).conj ⋏ (Y.filter (¬P₁ ·)).conj := by
+    have d₁ : L ⊢ Y.conj 🡒 (Y.filter P₁).conj := CFConjFConj_of_subset (Finset.filter_subset _ _)
+    have d₂ : L ⊢ Y.conj 🡒 (Y.filter (¬P₁ ·)).conj :=
+      CFConjFConj_of_subset (Finset.filter_subset _ _)
+    cl_prover [d₁, d₂]
+  have c₂ : L ⊢ (Y.filter P₁).conj ⋏ (Y.filter (¬P₁ ·)).conj 🡒 Y.conj := by
+    have d : L ⊢ (Y.filter P₁ ∪ Y.filter (¬P₁ ·)).conj 🡒 Y.conj := by
+      rw [Finset.filter_union_filter_not_eq]
+      cl_prover
+    have d' : L ⊢ (Y.filter P₁).conj ⋏ (Y.filter (¬P₁ ·)).conj 🡒
+        (Y.filter P₁ ∪ Y.filter (¬P₁ ·)).conj := CKFconjFconjUnion
+    cl_prover [d, d']
+  refine ⟨Formula.ofModal W', Finset.mem_union_right _ (Finset.mem_image_of_mem _ ?_),
+    by cl_prover [h₁, h₂, h₃, c₁, c₂]⟩
+  cases b
+  · exact Finset.mem_union_right _ hW'
+  · exact Finset.mem_union_left _ hW'
+
 end clmAdequateClosure
 
 end

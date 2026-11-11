@@ -9,6 +9,7 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prenex
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PrenexDisjunction
 
 /-!
 # $\Gamma$-conservativity as an interpretability abstraction

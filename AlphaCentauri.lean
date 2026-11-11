@@ -169,6 +169,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Cod
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.InternalTSchema
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PairingAssignment
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PrenexDisjunction
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.ProvabilityFormula
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions

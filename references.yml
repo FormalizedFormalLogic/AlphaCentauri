@@ -7,7 +7,9 @@
 AB05:
   type: Chapter
   title: Provability Logic
-  author: ["Artemov, Sergei N.", "Beklemishev, Lev D."]
+  author:
+  - Artemov, Sergei N.
+  - Beklemishev, Lev D.
   page-range: 189-360
   date: 2005
   serial-number:
@@ -15,7 +17,9 @@ AB05:
   parent:
     type: Anthology
     title: Handbook of Philosophical Logic
-    editor: ["Gabbay, Dov M.", "Guenthner, Franz"]
+    editor:
+    - Gabbay, Dov M.
+    - Guenthner, Franz
     volume: 13
     edition: 2
     date: 2005
@@ -36,7 +40,10 @@ Ada87:
 BCR98:
   type: Book
   title: Real Algebraic Geometry
-  author: ["Bochnak, Jacek", "Coste, Michel", "Roy, Marie-Françoise"]
+  author:
+  - Bochnak, Jacek
+  - Coste, Michel
+  - Roy, Marie-Françoise
   date: 1998
   publisher:
     name: Springer
@@ -47,7 +54,9 @@ BCR98:
 BI91:
   type: Article
   title: Combinatorial principles in elementary number theory
-  author: ["Berarducci, Alessandro", "Intrigila, Benedetto"]
+  author:
+  - Berarducci, Alessandro
+  - Intrigila, Benedetto
   date: 1991
   page-range: 35-50
   serial-number:
@@ -61,7 +70,9 @@ BI91:
 BO96:
   type: Article
   title: A recursive nonstandard model of normal open induction
-  author: ["Berarducci, Alessandro", "Otero, Margarita"]
+  author:
+  - Berarducci, Alessandro
+  - Otero, Margarita
   date: 1996
   page-range: 1228-1241
   parent:
@@ -75,7 +86,9 @@ BO96:
 BW87:
   type: Chapter
   title: Provably computable functions and the fast growing hierarchy
-  author: ["Buchholz, Wilfried", "Wainer, Stanley S."]
+  author:
+  - Buchholz, Wilfried
+  - Wainer, Stanley S.
   page-range: 179-198
   date: 1987
   serial-number:
@@ -152,7 +165,8 @@ Bus98:
   parent:
     type: Anthology
     title: Handbook of Proof Theory
-    editor: ["Buss, Samuel R."]
+    editor:
+    - Buss, Samuel R.
     date: 1998
     publisher:
       name: Elsevier
@@ -170,7 +184,8 @@ Bus98A:
   parent:
     type: Anthology
     title: Handbook of Proof Theory
-    editor: ["Buss, Samuel R."]
+    editor:
+    - Buss, Samuel R.
     date: 1998
     publisher:
       name: Elsevier
@@ -209,7 +224,9 @@ DAq05:
 dJV90:
   type: Chapter
   title: Provability Logics for Relative Interpretability
-  author: ["de Jongh, Dick", "Veltman, Frank"]
+  author:
+  - de Jongh, Dick
+  - Veltman, Frank
   page-range: 31-42
   date: 1990
   serial-number:
@@ -226,13 +243,19 @@ dJV90:
 dJV99:
   type: Chapter
   title: The Modal Completeness of ILW
-  author: ["de Jongh, Dick", "Veltman, Frank"]
+  author:
+  - de Jongh, Dick
+  - Veltman, Frank
   date: 1999
   url: https://festschriften.illc.uva.nl/j50/contribs/jongh/
   parent:
     type: Anthology
     title: "JFAK: Essays Dedicated to Johan van Benthem on the Occasion of his 50th Birthday"
-    editor: ["Gerbrandy, Jelle", "Marx, Maarten", "de Rijke, Maarten", "Venema, Yde"]
+    editor:
+    - Gerbrandy, Jelle
+    - Marx, Maarten
+    - de Rijke, Maarten
+    - Venema, Yde
     date: 1999
     publisher:
       name: Amsterdam University Press
@@ -241,7 +264,10 @@ dJV99:
 ELV25:
   type: Article
   title: Completions of restricted complexity I, weak arithmetical theories
-  author: ["Enayat, Ali", "Łełyk, Mateusz", "Visser, Albert"]
+  author:
+  - Enayat, Ali
+  - Łełyk, Mateusz
+  - Visser, Albert
   date: 2025
   serial-number:
     arxiv: "2508.14758"
@@ -253,7 +279,9 @@ ELV25:
 EW12:
   type: Article
   title: "A simplified characterisation of provably computable functions of the system {ID₁} of inductive definitions"
-  author: ["Eguchi, Naohi", "Weiermann, Andreas"]
+  author:
+  - Eguchi, Naohi
+  - Weiermann, Andreas
   date: 2012
   serial-number:
     arxiv: "1205.2879"
@@ -265,7 +293,11 @@ EW12:
 GBJM20:
   type: Article
   title: Assuring and critical labels for relations between maximal consistent sets for interpretability logics
-  author: ["Goris, Evan", "Bílková, Marta", "Joosten, Joost J.", "Mikec, Luka"]
+  author:
+  - Goris, Evan
+  - Bílková, Marta
+  - Joosten, Joost J.
+  - Mikec, Luka
   date: 2020
   serial-number:
     arxiv: "2003.04623"
@@ -277,7 +309,9 @@ GBJM20:
 GG17:
   type: Article
   title: Shepherdson's theorems for fragments of open induction
-  author: ["Glivická, Jana", "Glivický, Petr"]
+  author:
+  - Glivická, Jana
+  - Glivický, Petr
   date: 2017
   serial-number:
     arxiv: "1701.02001"
@@ -285,7 +319,9 @@ GG17:
 GJ08:
   type: Article
   title: Modal matters for interpretability logics
-  author: ["Goris, Evan", "Joosten, Joost J."]
+  author:
+  - Goris, Evan
+  - Joosten, Joost J.
   date: 2008
   page-range: 371-412
   parent:
@@ -299,7 +335,9 @@ GJ08:
 GJ11:
   type: Article
   title: A new principle in the interpretability logic of all reasonable arithmetical theories
-  author: ["Goris, Evan", "Joosten, Joost J."]
+  author:
+  - Goris, Evan
+  - Joosten, Joost J.
   date: 2011
   page-range: 1-17
   parent:
@@ -310,10 +348,25 @@ GJ11:
   serial-number:
     doi: "10.1093/jigpal/jzp082"
 
+HM90:
+  type: Article
+  title: The logic of Π₁-conservativity
+  author: ["Hájek, Petr", "Montagna, Franco"]
+  date: 1990
+  page-range: 113-123
+  parent:
+    type: Periodical
+    title: Archive for Mathematical Logic
+    volume: 30
+  serial-number:
+    doi: "10.1007/BF01634981"
+
 HP98:
   type: Book
   title: Metamathematics of First-Order Arithmetic
-  author: ["Hájek, Petr", "Pudlák, Pavel"]
+  author:
+  - Hájek, Petr
+  - Pudlák, Pavel
   date: 1998
   publisher:
     name: Springer
@@ -330,7 +383,10 @@ HP98:
 HPV23:
   type: Article
   title: Bisimulations and bisimulation games between {Verbrugge} models
-  author: ["Horvat, Sebastijan", "Perkov, Tin", "Vuković, Mladen"]
+  author:
+  - Horvat, Sebastijan
+  - Perkov, Tin
+  - Vuković, Mladen
   date: 2023
   page-range: 231-243
   serial-number:
@@ -344,7 +400,10 @@ HPV23:
 HSS25a:
   type: Article
   title: Uniform interpolation for interpretability logic
-  author: ["Horvat, Sebastijan", "Sierra Miranda, Borja", "Studer, Thomas"]
+  author:
+  - Horvat, Sebastijan
+  - Sierra Miranda, Borja
+  - Studer, Thomas
   date: 2025
   serial-number:
     arxiv: "2511.01428"
@@ -357,9 +416,34 @@ Ign91:
   type: Report
   title: Partial conservativity and modal logics
   author: "Ignatiev, Konstantin N."
+  author: Ignatiev, Konstantin N.
+
+  author: "Ignatiev, Konstantin N."
+
   date: 1991
   note: ITLI Prepublication Series X-91-04
   organization: Institute for Language, Logic and Information, University of Amsterdam
+
+Ign92:
+  type: Report
+  title: The closed fragment of Dzhaparidze's polymodal logic and the logic of Σ₁-conservativity
+  author: "Ignatiev, Konstantin N."
+  date: 1992
+  note: ILLC Technical Notes (X) Series X-1992-02
+  organization: Institute for Logic, Language and Computation, University of Amsterdam
+
+Ign93:
+  type: Article
+  title: On strong provability predicates and the associated modal logics
+  author: "Ignatiev, Konstantin N."
+  date: 1993
+  page-range: 249-290
+  parent:
+    type: Periodical
+    title: Journal of Symbolic Logic
+    volume: 58
+  serial-number:
+    doi: "10.2307/2275337"
 
 Jer10:
   type: Article
@@ -387,7 +471,11 @@ Jer21:
 JMMV20:
   type: Article
   title: An overview of Generalised {Veltman} Semantics
-  author: ["Joosten, Joost J.", "Mas Rovira, Jan", "Mikec, Luka", "Vuković, Mladen"]
+  author:
+  - Joosten, Joost J.
+  - Mas Rovira, Jan
+  - Mikec, Luka
+  - Vuković, Mladen
   date: 2020
   serial-number:
     arxiv: "2007.04722"
@@ -407,7 +495,10 @@ Kat26b:
 KKS97:
   type: Article
   title: Exponentiation in power series fields
-  author: ["Kuhlmann, Franz-Viktor", "Kuhlmann, Salma", "Shelah, Saharon"]
+  author:
+  - Kuhlmann, Franz-Viktor
+  - Kuhlmann, Salma
+  - Shelah, Saharon
   date: 1997
   page-range: 3177-3183
   parent:
@@ -422,7 +513,9 @@ KKS97:
 KO21:
   type: Article
   title: Modal completeness of sublogics of the interpretability logic IL
-  author: ["Kurahashi, Taishi", "Okawa, Yuya"]
+  author:
+  - Kurahashi, Taishi
+  - Okawa, Yuya
   date: 2021
   page-range: 164-185
   parent:
@@ -505,7 +598,9 @@ Mas20:
 MM89:
   type: Article
   title: Primes and their residue rings in models of open induction
-  author: ["Macintyre, Angus", "Marker, David"]
+  author:
+  - Macintyre, Angus
+  - Marker, David
   date: 1989
   page-range: 57-77
   parent:
@@ -525,7 +620,9 @@ Moh11:
   parent:
     type: Anthology
     title: Set Theory, Arithmetic, and Foundations of Mathematics
-    editor: ["Kennedy, Juliette", "Kossak, Roman"]
+    editor:
+    - Kennedy, Juliette
+    - Kossak, Roman
     publisher:
       name: Cambridge University Press
       location: Cambridge
@@ -533,7 +630,9 @@ Moh11:
 MV20:
   type: Article
   title: Interpretability logics and generalized {Veltman} semantics
-  author: ["Mikec, Luka", "Vuković, Mladen"]
+  author:
+  - Mikec, Luka
+  - Vuković, Mladen
   date: 2020
   serial-number:
     arxiv: "1907.03849"
@@ -545,7 +644,10 @@ MV20:
 PWW88:
   type: Article
   title: Provability of the pigeonhole principle and the existence of infinitely many primes
-  author: ["Paris, Jeff B.", "Wilkie, Alex J.", "Woods, Alan R."]
+  author:
+  - Paris, Jeff B.
+  - Wilkie, Alex J.
+  - Woods, Alan R.
   page-range: 1235-1244
   date: 1988
   serial-number:
@@ -618,7 +720,8 @@ She64:
 Sla04:
   type: Article
   title: "Σₙ-bounding and Δₙ-induction"
-  author: ["Slaman, Theodore A."]
+  author:
+  - Slaman, Theodore A.
   volume: 132
   issue: 8
   page-range: 2449-2456
@@ -686,7 +789,8 @@ Sve91:
 Tha05:
   type: Article
   title: "A note on Δ₁ induction and Σ₁ collection"
-  author: ["Thapen, Neil"]
+  author:
+  - Thapen, Neil
   volume: 186
   issue: 1
   page-range: 79-84
@@ -795,7 +899,9 @@ Wil85:
 WP89:
   type: Chapter
   title: On the existence of end extensions of models of bounded induction
-  author: ["Wilkie, Alex J.", "Paris, Jeff B."]
+  author:
+  - Wilkie, Alex J.
+  - Paris, Jeff B.
   date: 1989
   page-range: 143-161
   serial-number:
@@ -803,7 +909,10 @@ WP89:
   parent:
     type: Proceedings
     title: Logic, Methodology and Philosophy of Science VIII
-    editor: ["Fenstad, J. E.", "Frolov, I. T.", "Hilpinen, R."]
+    editor:
+    - Fenstad, J. E.
+    - Frolov, I. T.
+    - Hilpinen, R.
     publisher:
       name: North-Holland
       location: Amsterdam

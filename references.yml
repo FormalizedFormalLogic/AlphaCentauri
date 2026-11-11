@@ -369,10 +369,31 @@ HSS25a:
 Ign91:
   type: Report
   title: Partial conservativity and modal logics
-  author: Ignatiev, Konstantin N.
+  author: "Ignatiev, Konstantin N."
   date: 1991
   note: ITLI Prepublication Series X-91-04
   organization: Institute for Language, Logic and Information, University of Amsterdam
+
+Ign92:
+  type: Report
+  title: The closed fragment of Dzhaparidze's polymodal logic and the logic of Σ₁-conservativity
+  author: "Ignatiev, Konstantin N."
+  date: 1992
+  note: ILLC Technical Notes (X) Series X-1992-02
+  organization: Institute for Logic, Language and Computation, University of Amsterdam
+
+Ign93:
+  type: Article
+  title: On strong provability predicates and the associated modal logics
+  author: "Ignatiev, Konstantin N."
+  date: 1993
+  page-range: 249-290
+  parent:
+    type: Periodical
+    title: Journal of Symbolic Logic
+    volume: 58
+  serial-number:
+    doi: "10.2307/2275337"
 
 Jer10:
   type: Article

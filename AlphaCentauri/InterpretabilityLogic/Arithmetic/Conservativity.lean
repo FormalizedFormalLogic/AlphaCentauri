@@ -323,12 +323,12 @@ open FFL.Entailment InterpretabilityLogic InterpretabilityLogic.Formula Provabil
 
 variable {α : Type*} [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-lemma axiomJ5_not_mem_conservativityLogic (hn : Γ = 𝚺 ∧ 1 ≤ n ∨ 1 < n) :
-    Axioms.J5 (□⊥) ∉ T.conservativityLogic Γ n (α := α) := by
+lemma conservativityLogic_unprovable_axiomJ5 (hn : Γ = 𝚺 ∧ 1 ≤ n ∨ 1 < n) :
+    T.conservativityLogic Γ n (α := α) ⊬ Axioms.J5 (□⊥) := by
   obtain ⟨ψ, hψ, hP⟩ := exists_prenexHierarchy_provable_iff 𝗜𝚺₁ (Γ := Γ) (Γ' := 𝚺)
     (σ := T.standardProvability ⊥) (by simp [standardProvability_def]) hn;
   intro h;
-  have h₀ := h ⟨fun _ ↦ ⊥⟩;
+  have h₀ : T ⊢ _ := h ⟨fun _ ↦ ⊥⟩;
   simp only [interpret] at h₀;
   generalize hD : T.standardProvability (T.standardProvability ⊥ 🡒 ⊥) 🡒 ⊥ = D at h₀;
   have hψP : T ⊢ ψ 🡒 T.standardProvability ⊥ :=
@@ -354,23 +354,25 @@ lemma axiomJ5_not_mem_conservativityLogic (hn : Γ = 𝚺 ∧ 1 ≤ n ∨ 1 < n)
   apply iIncon_unprovable_of_sigma1_sound (𝔅 := T.standardProvability) 2;
   simpa using h₃ ⨀ (h₂ ⨀ K_intro h₀ h₁) ⨀ h₄
 
-/-- The instance $\Diamond\Box\bot \rhd \Box\bot$ of $\mathbf{J5}$ is not in the
-$\Sigma_{n + 1}$-conservativity logic of a $\Sigma_1$-sound theory containing $\mathsf{I}\Sigma_1$.
+/-- The instance $\Diamond\Box\bot \rhd \Box\bot$ of $\mathbf{J5}$ is not provable in
+the $\Sigma_{n + 1}$-conservativity logic of a $\Sigma_1$-sound theory containing
+$\mathsf{I}\Sigma_1$.
 
 - [Ign91, §1]
 -/
-theorem axiomJ5_not_mem_conservativityLogic_sigma :
-    Axioms.J5 (□⊥) ∉ T.conservativityLogic 𝚺 (n + 1) (α := α) :=
-  axiomJ5_not_mem_conservativityLogic <| .inl ⟨rfl, by omega⟩
+theorem conservativityLogic_sigma_unprovable_axiomJ5 :
+    T.conservativityLogic 𝚺 (n + 1) (α := α) ⊬ Axioms.J5 (□⊥) :=
+  conservativityLogic_unprovable_axiomJ5 <| .inl ⟨rfl, by omega⟩
 
-/-- The instance $\Diamond\Box\bot \rhd \Box\bot$ of $\mathbf{J5}$ is not in the
-$\Pi_{n + 2}$-conservativity logic of a $\Sigma_1$-sound theory containing $\mathsf{I}\Sigma_1$.
+/-- The instance $\Diamond\Box\bot \rhd \Box\bot$ of $\mathbf{J5}$ is not provable in
+the $\Pi_{n + 2}$-conservativity logic of a $\Sigma_1$-sound theory containing
+$\mathsf{I}\Sigma_1$.
 
 - [Ign91, §1]
 -/
-theorem axiomJ5_not_mem_conservativityLogic_pi :
-    Axioms.J5 (□⊥) ∉ T.conservativityLogic 𝚷 (n + 2) (α := α) :=
-  axiomJ5_not_mem_conservativityLogic <| .inr (by omega)
+theorem conservativityLogic_pi_unprovable_axiomJ5 :
+    T.conservativityLogic 𝚷 (n + 2) (α := α) ⊬ Axioms.J5 (□⊥) :=
+  conservativityLogic_unprovable_axiomJ5 <| .inr (by omega)
 
 end
 

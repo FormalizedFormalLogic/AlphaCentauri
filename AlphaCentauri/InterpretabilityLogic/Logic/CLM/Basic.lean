@@ -9,7 +9,7 @@ public import AlphaCentauri.ToFoundation.ProvabilityLogic.GL.LRClosure
 
 The extension of $\mathbf{CL}$ by the principle $\mathsf{M}$, its soundness with respect to the
 $\mathbf{CL}$-models satisfying the frame condition of $\mathsf{M}$, and its completeness with
-respect to the finite ones.
+respect to the finite ones. $\mathbf{CLM}$ lies strictly between $\mathbf{CL}$ and $\mathbf{ILM}$.
 
 The countermodel lives on maximal consistent subsets of a $\mathbf{CLM}$-adequate set, a finite set
 whose operands are closed up to $\mathbf{GL}$-equivalence under conjunction with `□`-formulas,
@@ -928,6 +928,21 @@ theorem CLM.iff_valid_finite :
     𝐂𝐋𝐌 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsCL] → [M.HasM] → M ⊧ A :=
   CLM.semantics_TFAE.out 1 3
+
+/-! ## Strict inclusions -/
+
+instance : (Veltman.countermodelJ5 α).HasM := ⟨by omega⟩
+
+open Veltman
+
+instance : (𝐂𝐋 : Logic ℕ) ⪱ 𝐂𝐋𝐌 :=
+  .of_unprovable_provable (φ := Axioms.M (#0) (#1) (#2))
+    (fun h ↦ countermodelM.not_models_axiomM (CL.sound h)) CLM.axiomM
+
+instance : (𝐂𝐋𝐌 : Logic ℕ) ⪱ 𝐈𝐋𝐌 :=
+  .of_unprovable_provable (φ := Axioms.J5 (□⊥))
+    (fun h ↦ countermodelJ5.not_models_axiomJ5 (CLM.sound (M := countermodelJ5 ℕ) h))
+    ofILAxioms.axiomJ5
 
 end Logic
 

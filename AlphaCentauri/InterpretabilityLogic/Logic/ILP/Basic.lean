@@ -229,21 +229,6 @@ instance [Adequate Φ] : Finite (IndexedBranch L Φ) := by
 instance [Nonempty (IndexedSet L Φ)] : Nonempty (IndexedBranch L Φ) :=
   ⟨⟨Classical.arbitrary _, [], .singleton _⟩⟩
 
-/-- `w` is a proper initial segment of `u`. -/
-def Rel (w u : IndexedBranch L Φ) : Prop := w.head :: w.tail <:+ u.tail
-
-lemma Rel.rel (h : w.Rel u) : w.head.Rel u.head := by
-  obtain ⟨a, l, hc⟩ := u;
-  induction l generalizing a with
-  | nil => simp [Rel] at h;
-  | cons y l ih =>
-    obtain ⟨hs, hc⟩ := List.isChain_cons_cons.mp hc;
-    rcases List.suffix_cons_iff.mp h with h | h;
-    · obtain ⟨rfl, -⟩ := List.cons_eq_cons.mp h;
-      exact hs.rel;
-    · have h₁ := ih y hc h;
-      exact ⟨h₁.1.trans hs.rel.1, h₁.2.trans hs.rel.2⟩;
-
 variable [Entailment.Cl L]
 
 lemma not_mem_of_prefix {C : Formula α} (h₁ : w.head :: w.tail <:+ v.head :: v.tail)
@@ -281,8 +266,8 @@ initial segment of `v` and the sequence of `u` is an initial segment of the sequ
 -/
 def treeCountermodel (L : Logic α) (Φ : Finset (Formula α)) [Nonempty (IndexedSet L Φ)] :
     Model (IndexedBranch L Φ) α where
-  Rel' := IndexedBranch.Rel
-  S' w u v := w.Rel u ∧ u.tail <:+ v.tail ∧ u.head.seq <+: v.head.seq
+  Rel' w u := w.head :: w.tail <:+ u.tail
+  S' w u v := w.head :: w.tail <:+ u.tail ∧ u.tail <:+ v.tail ∧ u.head.seq <+: v.head.seq
   Val' w a := #a ∈ w.head.set
 
 namespace treeCountermodel
@@ -290,6 +275,21 @@ namespace treeCountermodel
 open Model Model.World
 
 variable [Nonempty (IndexedSet L Φ)]
+
+lemma rel_rel {w u : IndexedBranch L Φ} (h : (treeCountermodel L Φ).Rel w u) :
+    w.head.Rel u.head := by
+  obtain ⟨a, l, hc⟩ := u;
+  change w.head :: w.tail <:+ l at h;
+  change w.head.Rel a;
+  induction l generalizing a with
+  | nil => simp at h;
+  | cons y l ih =>
+    obtain ⟨hs, hc⟩ := List.isChain_cons_cons.mp hc;
+    rcases List.suffix_cons_iff.mp h with h | h;
+    · obtain ⟨rfl, -⟩ := List.cons_eq_cons.mp h;
+      exact hs.rel;
+    · have h₁ := ih y hc h;
+      exact ⟨h₁.1.trans hs.rel.1, h₁.2.trans hs.rel.2⟩;
 
 instance : IsTrans _ (treeCountermodel L Φ).Rel :=
   ⟨fun _ _ _ h₁ h₂ ↦ h₁.trans <| (List.suffix_cons _ _).trans h₂⟩
@@ -301,7 +301,7 @@ instance [Adequate Φ] : (treeCountermodel L Φ).IsIL where
   rel_of_s_right h := h.1.trans h.2.1
   s_refl h := ⟨h, List.suffix_refl _, List.prefix_refl _⟩
   s_trans h₁ h₂ := ⟨h₁.1, h₁.2.1.trans h₂.2.1, h₁.2.2.trans h₂.2.2⟩
-  s_of_rel h₁ h₂ := ⟨h₁, (List.suffix_cons _ _).trans h₂, h₂.rel.2⟩
+  s_of_rel h₁ h₂ := ⟨h₁, (List.suffix_cons _ _).trans h₂, (rel_rel h₂).2⟩
 
 instance : (treeCountermodel L Φ).HasP := ⟨fun _ h₁ h₂ ↦ ⟨h₁, h₂.2⟩⟩
 
@@ -330,7 +330,7 @@ lemma truthlemma (hP : ∀ {B C : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.P 
       exact not_mem_of_provable_neg hA (Context.by_axm rfl) <| (ih hA').mp <|
         h (w.cons (w.head.successor Δ hΔ) (.inl ⟨hΔ, rfl⟩)) (List.suffix_refl _);
     · intro h u Rwu;
-      exact (ih hA').mpr <| Rwu.rel.1.mem_of_box_mem h;
+      exact (ih hA').mpr <| (rel_rel Rwu).1.mem_of_box_mem h;
   | rhd B C ihB ihC =>
     have hB := Adequate.rhd_left hA;
     have hC := Adequate.rhd_right hA;
@@ -359,7 +359,7 @@ lemma truthlemma (hP : ∀ {B C : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.P 
         · have h₂ : □(B ▷ C) ∈ w.head.set :=
             (mem_iff_provable (ILPAdequate.box_rhd_mem hA)).mpr <|
               Context.of hP ⨀ Context.by_axm (mem_literals h);
-          exact (Rel.rel (u := p) h₁).1.mem_of_box_mem h₂;
+          exact (rel_rel (u := p) h₁).1.mem_of_box_mem h₂;
       rcases hs with ⟨hs, hseq⟩ | ⟨F, hF, hseq⟩;
       · obtain ⟨Θ, hΘ, hCΘ⟩ :=
           (hs.criticalSuccessor_bot Logic.ofAxioms.rhd_bot).exists_criticalSuccessor .bot hBC hu;

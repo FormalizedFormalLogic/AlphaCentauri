@@ -401,30 +401,6 @@ structure RelWith (x y : RankedSet L Φ) (E : Formula α) (k : ℕ) : Prop where
   not_mem_of_length_lt : x.seq.length + 1 < y.seq.length →
     ∀ p ∈ x.set.rhdPairs E, k ≤ x.set.rank E p → p.1 ∉ y.set
 
-/-- `y` extends `x` by some label. -/
-def Rel (x y : RankedSet L Φ) : Prop := ∃ E k, x.RelWith y E k
-
-lemma Rel.isPrefix (h : x.Rel y) : x.seq <+: y.seq := by
-  obtain ⟨E, k, h⟩ := h;
-  exact (List.prefix_append _ _).trans h.append_prefix
-
-lemma Rel.length_lt (h : x.Rel y) : x.seq.length < y.seq.length := by
-  obtain ⟨E, k, h⟩ := h;
-  have := h.append_prefix.length_le;
-  simp only [List.length_append, List.length_singleton] at this;
-  omega
-
-lemma Rel.successor (h : x.Rel y) : Successor x.set y.set := by
-  obtain ⟨E, k, h⟩ := h;
-  exact h.criticalSuccessor.toSuccessor
-
-lemma Rel.irrefl : ¬x.Rel x := fun h ↦ h.successor.irrefl
-
-lemma Rel.relWith (h : x.Rel y) (hp : x.seq ++ [(E, k)] <+: y.seq) : x.RelWith y E k := by
-  obtain ⟨F, i, h⟩ := h;
-  obtain ⟨rfl, rfl⟩ := Prod.mk.inj <| eq_of_append_singleton_prefix hp h.append_prefix;
-  exact h
-
 /-- The set `Δ` indexed by the sequence of `x` followed by `(E, k)`. -/
 def extend (x : RankedSet L Φ) (E : Formula α) (k : ℕ) (hE : IsRhdOperand Φ E)
     (hk : k ≤ (Φ ×ˢ Φ).card) (Δ : MaximalConsistentSet L Φ) (h : Successor x.set Δ) :
@@ -442,23 +418,6 @@ def extend (x : RankedSet L Φ) (E : Formula α) (k : ℕ) (hE : IsRhdOperand Φ
     by simpa using Nat.succ_le_of_lt <| x.length_seq_le.trans_lt <|
       Finset.card_lt_card h.prebox_ssubset⟩
 
-lemma rel_extend {hE : IsRhdOperand Φ E} {hk : k ≤ (Φ ×ˢ Φ).card} {Δ : MaximalConsistentSet L Φ}
-    (h : CriticalSuccessor E x.set Δ)
-    (h₁ : ∀ p ∈ x.set.rhdPairs E, k ≤ x.set.rank E p → □(∼p.1) ∈ Δ)
-    (h₂ : ∀ p ∈ x.set.rhdPairs E, k < x.set.rank E p → p.1 ∉ Δ) :
-    x.Rel (x.extend E k hE hk Δ h.toSuccessor) :=
-  ⟨E, k, List.prefix_refl _, h, h₁, h₂, fun h ↦ by simp [extend] at h⟩
-
-variable [Entailment.Cl L]
-
-lemma Rel.trans (h₁ : x.Rel y) (h₂ : y.Rel z) : x.Rel z := by
-  obtain ⟨E, k, h₁⟩ := h₁
-  exact ⟨E, k, h₁.append_prefix.trans h₂.isPrefix,
-    h₁.criticalSuccessor.trans_successor h₂.successor,
-    fun p hp hk ↦ h₂.successor.box_mem_of_box_mem (h₁.box_neg_mem p hp hk),
-    fun p hp hk ↦ h₂.successor.not_mem_of_box_neg_mem (h₁.box_neg_mem p hp hk.le),
-    fun _ p hp hk ↦ h₂.successor.not_mem_of_box_neg_mem (h₁.box_neg_mem p hp hk)⟩
-
 end RankedSet
 
 open RankedSet
@@ -472,9 +431,10 @@ open RankedSet
 def rankedCountermodel (𝔸 : FormulaSet α) (Φ : Finset (Formula α))
     [Nonempty (RankedSet (Logic.ofAxioms 𝔸) Φ)] :
     Model (RankedSet (Logic.ofAxioms 𝔸) Φ) α where
-  Rel' := RankedSet.Rel
-  S' w x y := w.Rel x ∧ w.Rel y ∧ (x = y ∨ x.Rel y ∨ ∃ E i j, w.seq ++ [(E, i)] <+: x.seq ∧
-    w.seq ++ [(E, j)] <+: y.seq ∧ (j < i ∨ j = i ∧ x.seq.length = w.seq.length + 1))
+  Rel' x y := ∃ E k, x.RelWith y E k
+  S' w x y := (∃ E k, w.RelWith x E k) ∧ (∃ E k, w.RelWith y E k) ∧
+    (x = y ∨ (∃ E k, x.RelWith y E k) ∨ ∃ E i j, w.seq ++ [(E, i)] <+: x.seq ∧
+      w.seq ++ [(E, j)] <+: y.seq ∧ (j < i ∨ j = i ∧ x.seq.length = w.seq.length + 1))
   Val' x a := #a ∈ x.set
 
 namespace rankedCountermodel
@@ -483,11 +443,49 @@ open Model Model.World
 
 variable {𝔸 : FormulaSet α} [Nonempty (RankedSet (Logic.ofAxioms 𝔸) Φ)]
 
-instance : IsTrans _ (rankedCountermodel 𝔸 Φ).Rel :=
-  ⟨fun _ _ _ h₁ h₂ ↦ Rel.trans (L := Logic.ofAxioms 𝔸) h₁ h₂⟩
+variable {x y z : RankedSet (Logic.ofAxioms 𝔸) Φ} {E : Formula α} {k : ℕ}
 
-instance : Std.Irrefl (rankedCountermodel 𝔸 Φ).Rel :=
-  ⟨fun _ h ↦ Rel.irrefl (L := Logic.ofAxioms 𝔸) h⟩
+lemma rel_isPrefix (h : (rankedCountermodel 𝔸 Φ).Rel x y) : x.seq <+: y.seq := by
+  obtain ⟨E, k, h⟩ := h;
+  exact (List.prefix_append _ _).trans h.append_prefix
+
+lemma rel_length_lt (h : (rankedCountermodel 𝔸 Φ).Rel x y) : x.seq.length < y.seq.length := by
+  obtain ⟨E, k, h⟩ := h;
+  have := h.append_prefix.length_le;
+  simp only [List.length_append, List.length_singleton] at this;
+  omega
+
+lemma rel_successor (h : (rankedCountermodel 𝔸 Φ).Rel x y) : Successor x.set y.set := by
+  obtain ⟨E, k, h⟩ := h;
+  exact h.criticalSuccessor.toSuccessor
+
+lemma rel_irrefl : ¬(rankedCountermodel 𝔸 Φ).Rel x x := fun h ↦ (rel_successor h).irrefl
+
+lemma relWith_of_rel (h : (rankedCountermodel 𝔸 Φ).Rel x y) (hp : x.seq ++ [(E, k)] <+: y.seq) :
+    x.RelWith y E k := by
+  obtain ⟨F, i, h⟩ := h;
+  obtain ⟨rfl, rfl⟩ := Prod.mk.inj <| eq_of_append_singleton_prefix hp h.append_prefix;
+  exact h
+
+lemma rel_extend {hE : IsRhdOperand Φ E} {hk : k ≤ (Φ ×ˢ Φ).card}
+    {Δ : MaximalConsistentSet (Logic.ofAxioms 𝔸) Φ} (h : CriticalSuccessor E x.set Δ)
+    (h₁ : ∀ p ∈ x.set.rhdPairs E, k ≤ x.set.rank E p → □(∼p.1) ∈ Δ)
+    (h₂ : ∀ p ∈ x.set.rhdPairs E, k < x.set.rank E p → p.1 ∉ Δ) :
+    (rankedCountermodel 𝔸 Φ).Rel x (x.extend E k hE hk Δ h.toSuccessor) :=
+  ⟨E, k, List.prefix_refl _, h, h₁, h₂, fun h ↦ by simp [RankedSet.extend] at h⟩
+
+lemma rel_trans (h₁ : (rankedCountermodel 𝔸 Φ).Rel x y) (h₂ : (rankedCountermodel 𝔸 Φ).Rel y z) :
+    (rankedCountermodel 𝔸 Φ).Rel x z := by
+  obtain ⟨E, k, h₁'⟩ := h₁
+  exact ⟨E, k, h₁'.append_prefix.trans (rel_isPrefix h₂),
+    h₁'.criticalSuccessor.trans_successor (rel_successor h₂),
+    fun p hp hk ↦ (rel_successor h₂).box_mem_of_box_mem (h₁'.box_neg_mem p hp hk),
+    fun p hp hk ↦ (rel_successor h₂).not_mem_of_box_neg_mem (h₁'.box_neg_mem p hp hk.le),
+    fun _ p hp hk ↦ (rel_successor h₂).not_mem_of_box_neg_mem (h₁'.box_neg_mem p hp hk)⟩
+
+instance : IsTrans _ (rankedCountermodel 𝔸 Φ).Rel := ⟨fun _ _ _ ↦ rel_trans⟩
+
+instance : Std.Irrefl (rankedCountermodel 𝔸 Φ).Rel := ⟨fun _ ↦ rel_irrefl⟩
 
 instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).IsIL where
   rel_of_s_left h := h.1
@@ -501,32 +499,32 @@ instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).IsIL where
     · exact h₂
     · rcases h₂ with rfl | hyz | ⟨F, j', k, hy, hz, hjk⟩
       · exact .inr <| .inl hxy
-      · exact .inr <| .inl <| hxy.trans hyz
+      · exact .inr <| .inl <| rel_trans hxy hyz
       · obtain ⟨E, i, hx⟩ := hwx
         obtain ⟨rfl, rfl⟩ := Prod.mk.inj <|
-          eq_of_append_singleton_prefix (hx.append_prefix.trans hxy.isPrefix) hy
+          eq_of_append_singleton_prefix (hx.append_prefix.trans (rel_isPrefix hxy)) hy
         have h₁ := hx.append_prefix.length_le
-        have h₂ := hxy.length_lt
+        have h₂ := rel_length_lt hxy
         simp only [List.length_append, List.length_singleton] at h₁
         exact .inr <| .inr ⟨E, i, k, hx.append_prefix, hz, by omega⟩
     · refine .inr <| .inr ?_
       rcases h₂ with rfl | hyz | ⟨F, j', k, hy', hz, hjk⟩
       · exact ⟨E, i, j, hx, hy, hij⟩
-      · exact ⟨E, i, j, hx, hy.trans hyz.isPrefix, hij⟩
+      · exact ⟨E, i, j, hx, hy.trans (rel_isPrefix hyz), hij⟩
       · obtain ⟨rfl, rfl⟩ := Prod.mk.inj <| eq_of_append_singleton_prefix hy hy'
         exact ⟨E, i, k, hx, hz, by omega⟩
-  s_of_rel h₁ h₂ := ⟨h₁, h₁.trans h₂, .inr <| .inl h₂⟩
+  s_of_rel h₁ h₂ := ⟨h₁, rel_trans h₁ h₂, .inr <| .inl h₂⟩
 
 instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).HasW := HasW.of_finite <| by
   intro w x y hxy hyx;
   obtain ⟨-, hwx, h⟩ := hyx;
   rcases h with rfl | hyx | ⟨E, i, j, hy, hx, hij⟩;
-  · exact Rel.irrefl (L := Logic.ofAxioms 𝔸) hxy;
-  · exact Rel.irrefl (L := Logic.ofAxioms 𝔸) <| hxy.trans hyx;
+  · exact rel_irrefl hxy;
+  · exact rel_irrefl (rel_trans hxy hyx);
   · obtain ⟨-, rfl⟩ := Prod.mk.inj <|
-      eq_of_append_singleton_prefix hy (hx.trans (Rel.isPrefix (L := Logic.ofAxioms 𝔸) hxy));
+      eq_of_append_singleton_prefix hy (hx.trans (rel_isPrefix hxy));
     have h₁ := hx.length_le;
-    have h₂ := Rel.length_lt (L := Logic.ofAxioms 𝔸) hxy;
+    have h₂ := rel_length_lt hxy;
     simp only [List.length_append, List.length_singleton] at h₁;
     omega;
 
@@ -537,10 +535,11 @@ include hW
 
 lemma exists_rel_of_mem_rhdPairs {x : (rankedCountermodel 𝔸 Φ).World} {E : Formula α}
     {p : Formula α × Formula α} (hE : IsRhdOperand Φ E) (hp : p ∈ x.set.rhdPairs E) :
-    ∃ y, RankedSet.Rel x y ∧ y.seq = x.seq ++ [(E, x.set.rank E p)] ∧ p.2 ∈ y.set := by
+    ∃ y, (rankedCountermodel 𝔸 Φ).Rel x y ∧ y.seq = x.seq ++ [(E, x.set.rank E p)] ∧
+      p.2 ∈ y.set := by
   obtain ⟨-, Δ, hΔ⟩ := isRank_rank hW hE p hp;
   refine ⟨x.extend E (x.set.rank E p) hE (rank_lt hW hE hp).le Δ hΔ.toSuccessor, ?_, rfl, hΔ.mem⟩
-  exact x.rel_extend hΔ.toCriticalSuccessor
+  exact rel_extend (x := x) hΔ.toCriticalSuccessor
     (fun q hq hk ↦ hΔ.box_neg_mem_of_mem q (Finset.mem_filter.mpr ⟨hq, hk⟩))
     (fun q hq hk ↦ hΔ.not_mem_of_mem q (Finset.mem_filter.mpr ⟨hq, hk⟩))
 
@@ -564,11 +563,11 @@ lemma truthlemma {x : (rankedCountermodel 𝔸 Φ).World} {A : Formula α} (hA :
       have hcrit := hΔ.criticalSuccessor_bot Logic.ofAxioms.rhd_bot;
       have hr {p} (hp : p ∈ x.set.rhdPairs ⊥) : x.set.rank ⊥ p < (Φ ×ˢ Φ).card :=
         rank_lt hW .bot hp;
-      have hxy := x.rel_extend (k := (Φ ×ˢ Φ).card) (hE := .bot) (hk := le_rfl) hcrit
+      have hxy := rel_extend (x := x) (k := (Φ ×ˢ Φ).card) (hE := .bot) (hk := le_rfl) hcrit
         (fun p hp hk ↦ absurd (hr hp) (by omega)) (fun p hp hk ↦ absurd (hr hp) (by omega));
       exact not_mem_of_provable_neg hc (Context.by_axm rfl) <| (ih hA').mp <| h _ hxy;
     · intro h y Rxy;
-      exact (ih hA').mpr <| Rxy.successor.mem_of_box_mem h;
+      exact (ih hA').mpr <| (rel_successor Rxy).mem_of_box_mem h;
   | rhd B C ihB ihC =>
     have hB := Adequate.rhd_left hA;
     have hC := Adequate.rhd_right hA;
@@ -586,13 +585,13 @@ lemma truthlemma {x : (rankedCountermodel 𝔸 Φ).World} {A : Formula α} (hA :
       have hlabel : ∃ j, x.seq ++ [(C, j)] <+: v.seq := by
         rcases hS.2.2 with rfl | hyv | ⟨E, i, j, hyE, hv, -⟩
         · exact ⟨_, hy'⟩
-        · exact ⟨_, hy'.trans hyv.isPrefix⟩
+        · exact ⟨_, hy'.trans (rel_isPrefix hyv)⟩
         · obtain ⟨rfl, rfl⟩ := Prod.mk.inj <| eq_of_append_singleton_prefix hy' hyE
           exact ⟨j, hv⟩
       obtain ⟨j, hj⟩ := hlabel;
       have hCC : C ▷ C ∈ x.set :=
         (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofAxioms.rhd_refl;
-      exact (hS.2.1.relWith hj).criticalSuccessor.not_mem hCC <| (ihC hC).mp hv;
+      exact (relWith_of_rel hS.2.1 hj).criticalSuccessor.not_mem hCC <| (ihC hC).mp hv;
     · intro h u Rxu hu;
       replace hu := (ihB hB).mp hu;
       obtain ⟨E, k, hxu⟩ := Rxu;

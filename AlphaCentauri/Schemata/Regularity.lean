@@ -1,5 +1,6 @@
 module
 
+public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import AlphaCentauri.Schemata.BoundedInduction
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
@@ -18,6 +19,8 @@ $w > 1$. The third variable of $\varphi$ is the bound $u$ and the others are par
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
+
+open _root_.FFL.Entailment
 
 /-- The regularity principle for `φ`.
 - [Cor13, Definition 1.1] -/

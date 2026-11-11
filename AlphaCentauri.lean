@@ -233,6 +233,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import AlphaCentauri.ToFoundation.FirstOrder.Theory
 public import AlphaCentauri.ToFoundation.Logic.Compact
 public import AlphaCentauri.ToFoundation.Logic.Entailment
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.GL.LRClosure
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.ProvabilityAbstraction
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.Reflection
 public import AlphaCentauri.ToMathlib.Algebra.Order.Ring.RingOfDifferences

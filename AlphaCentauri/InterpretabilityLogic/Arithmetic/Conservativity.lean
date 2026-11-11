@@ -12,13 +12,17 @@ public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
 # $\Gamma$-conservativity as an interpretability abstraction
 
 Reading `φ ▷ ψ` as "every prenex $\Gamma_n$ sentence provable in $T + \psi$ is provable in
-$T + \varphi$" for $\Gamma \in \{\Sigma, \Pi\}$ and $n \in \mathbb{N}$. For $\Gamma_n = \Pi_1$
-it satisfies the arithmetical forms of $\mathbf{J1}$–$\mathbf{J5}$ together with the arithmetical
-form of $\mathbf{M}$ over $\mathsf{I}\Sigma_1$ once $T$ contains $\mathsf{I}\Sigma_1$.
+$T + \varphi$" for $\Gamma \in \{\Sigma, \Pi\}$ and $n \in \mathbb{N}$. Once $T$ contains
+$\mathsf{I}\Sigma_1$, it satisfies the arithmetical forms of $\mathbf{J1}$–$\mathbf{J4}$ over
+$\mathsf{I}\Sigma_1$, and for $\Gamma_n = \Pi_1$ also those of $\mathbf{J5}$ and $\mathbf{M}$.
+If $T$ is moreover $\Sigma_1$-sound, the instance $\Diamond\Box\bot \rhd \Box\bot$ of
+$\mathbf{J5}$ is not in the $\Gamma_n$-conservativity logic of $T$ for $\Sigma_{n + 1}$ and
+$\Pi_{n + 2}$.
 
 ## References
 
 - [HM90, Definition 3.1]
+- [Ign91, §1, Definition 2.8]
 -/
 
 @[expose] public section
@@ -118,7 +122,7 @@ lemma Conservative.and_provabilityPred_pi1 [𝗜𝚺₁ ⪯ T] (h : Conservative
     simpa [A, Sentence.quote_eq] using
       IsBounded.neg (by simp) <| (isBounded_quote_iff (V := V) δ.val).mpr δ.bounded;
   have hP : T.internalize V ⊢ provabilityFormula T ⌜χ⌝ 🡘 ∃¹ ⌜δ.val⌝ := by
-    simpa using internal_provable_of_outer_provable (V := V) (Entailment.WeakerThan.pbl hδ :
+    simpa using internal_provable_of_outer_provable (V := V) (WeakerThan.pbl hδ :
       T ⊢ provabilityPred T χ 🡘 ∃¹ δ.val);
   have hnA : T.internalize V ⊢ ∼(∃¹ ⌜δ.val⌝) 🡒 ∀¹ A := by simp [A];
   have hAn : T.internalize V ⊢ ∀¹ A 🡒 ∼(∃¹ ⌜δ.val⌝) := by simp [A];
@@ -224,7 +228,98 @@ instance instConservativityPi1M [𝗜𝚺₁ ⪯ T] : (T.conservativity 𝚷 1).
     have h := Conservative.and_provabilityPred_pi1 (T := T) (V := V) (σ := σ) (τ := τ) (χ := χ);
     simpa [standardProvability_def] using h
 
-end FFL.FirstOrder.ArithmeticTheory
+section
 
+variable (T Γ n) {α : Type*}
+
+/-- The $\Gamma_n$-conservativity logic of `T`: the formulas provable in `T` under every
+realization, reading `□` as provability in `T` and `▷` as $\Gamma_n$-conservativity over `T`.
+
+- [Ign91, Definition 2.8]
+-/
+def conservativityLogic : InterpretabilityLogic.Logic α :=
+  { A | ∀ f : ProvabilityLogic.Realization α ℒₒᵣ,
+    T ⊢ A.interpret f T.standardProvability (T.conservativity Γ n) }
+
+end
+
+section
+
+open FFL.Entailment InterpretabilityLogic InterpretabilityLogic.Formula ProvabilityAbstraction
+
+lemma exists_prenexHierarchy_provable_iff_standardProvability_bot
+    (h : ∀ φ : ArithmeticSentence, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1 φ →
+      ∃ ψ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ ∧
+        ∀ (M : Type) [Tarski.Structure ℒₒᵣ M] [Nonempty M] (e : Fin 0 → M) (f : Empty → M),
+          Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ) :
+    ∃ ψ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ ∧ 𝗜𝚺₁ ⊢ T.standardProvability ⊥ 🡘 ψ := by
+  obtain ⟨φ, hφ⟩ := ISigma1.hasPrenex (φ := T.standardProvability ⊥) <| by
+    simp [standardProvability_def];
+  obtain ⟨ψ, hψ, hφψ⟩ := h φ.val φ.val_prenexHierarchy;
+  use ψ;
+  and_intros;
+  · exact hψ;
+  · apply complete;
+    intro (V : Type) _ _;
+    have := models_of_provable (M := V) inferInstance hφ;
+    simpa [models_iff, hφψ, -Bounding.Prenex.val_sigmaInv] using this
+
+variable {α : Type*} [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
+
+lemma axiomJ5_not_mem_conservativityLogic_of_provable_iff {ψ : ArithmeticSentence}
+    (hψ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ) (hP : 𝗜𝚺₁ ⊢ T.standardProvability ⊥ 🡘 ψ) :
+    Axioms.J5 (□⊥) ∉ T.conservativityLogic Γ n (α := α) := by
+  intro h;
+  have h₀ := h ⟨fun _ ↦ ⊥⟩;
+  simp only [interpret] at h₀;
+  generalize hD : T.standardProvability (T.standardProvability ⊥ 🡒 ⊥) 🡒 ⊥ = D at h₀;
+  have hψP : T ⊢ ψ 🡒 T.standardProvability ⊥ :=
+    WeakerThan.pbl (𝓢 := 𝗜𝚺₁) <| by cl_prover [hP];
+  have h₁ : T ⊢ T.standardProvability (T.standardProvability ⊥ 🡒 ψ) :=
+    WeakerThan.pbl <| T.standardProvability.D1 <|
+      WeakerThan.pbl (𝓢 := 𝗜𝚺₁) <| by cl_prover [hP];
+  have h₂ : T ⊢ (T.conservativity Γ n) D (T.standardProvability ⊥) ⋏
+      T.standardProvability (T.standardProvability ⊥ 🡒 ψ) 🡒 T.standardProvability (D 🡒 ψ) :=
+    WeakerThan.pbl <| conservativity_imp_provable_imp hψ;
+  have h₃ : T ⊢ T.standardProvability (D 🡒 ψ) 🡒
+      T.standardProvability (T.standardProvability (T.standardProvability ⊥ 🡒 ⊥) 🡒
+        T.standardProvability ⊥) 🡒 T.standardProvability (T.standardProvability ⊥) := by
+    have : T ⊢ (D 🡒 ψ) 🡒 (T.standardProvability (T.standardProvability ⊥ 🡒 ⊥) 🡒
+        T.standardProvability ⊥) 🡒 T.standardProvability ⊥ := by
+      subst hD; cl_prover [hψP];
+    exact WeakerThan.pbl <|
+      C_trans (T.standardProvability.mono this) T.standardProvability.D2;
+  have h₄ : T ⊢ T.standardProvability (T.standardProvability (T.standardProvability ⊥ 🡒 ⊥) 🡒
+      T.standardProvability ⊥) :=
+    WeakerThan.pbl <| T.standardProvability.D1 <|
+      WeakerThan.pbl formalized_löb_theorem;
+  apply iIncon_unprovable_of_sigma1_sound (𝔅 := T.standardProvability) 2;
+  simpa using h₃ ⨀ (h₂ ⨀ K_intro h₀ h₁) ⨀ h₄
+
+/-- The instance $\Diamond\Box\bot \rhd \Box\bot$ of $\mathbf{J5}$ is not in the
+$\Sigma_{n + 1}$-conservativity logic of a $\Sigma_1$-sound theory containing $\mathsf{I}\Sigma_1$.
+
+- [Ign91, §1]
+-/
+theorem axiomJ5_not_mem_conservativityLogic_sigma :
+    Axioms.J5 (□⊥) ∉ T.conservativityLogic 𝚺 (n + 1) (α := α) := by
+  obtain ⟨ψ, hψ, hP⟩ := exists_prenexHierarchy_provable_iff_standardProvability_bot
+    (T := T) (Γ := 𝚺) (n := n + 1) fun _ hφ ↦ hφ.exists_eval_iff_of_le (by omega);
+  exact axiomJ5_not_mem_conservativityLogic_of_provable_iff hψ hP
+
+/-- The instance $\Diamond\Box\bot \rhd \Box\bot$ of $\mathbf{J5}$ is not in the
+$\Pi_{n + 2}$-conservativity logic of a $\Sigma_1$-sound theory containing $\mathsf{I}\Sigma_1$.
+
+- [Ign91, §1]
+-/
+theorem axiomJ5_not_mem_conservativityLogic_pi :
+    Axioms.J5 (□⊥) ∉ T.conservativityLogic 𝚷 (n + 2) (α := α) := by
+  obtain ⟨ψ, hψ, hP⟩ := exists_prenexHierarchy_provable_iff_standardProvability_bot
+    (T := T) (Γ := 𝚷) (n := n + 2) fun _ hφ ↦ hφ.exists_eval_iff_of_lt 𝚷 (by omega);
+  exact axiomJ5_not_mem_conservativityLogic_of_provable_iff hψ hP
+
+end
+
+end FFL.FirstOrder.ArithmeticTheory
 
 end

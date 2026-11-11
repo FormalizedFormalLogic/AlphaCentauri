@@ -1,9 +1,16 @@
 module
 
 public import AlphaCentauri.Calculus.Induction.Basic
-public import AlphaCentauri.ToFoundation.Fvar
-public import AlphaCentauri.ToFoundation.Hierarchy
-public import AlphaCentauri.ToFoundation.Primrec
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Absoluteness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
+public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
+public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
+public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
+public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.PrenexNormalForm
+public import AlphaCentauri.ToFoundation.FirstOrder.Rew
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Tarski.Basic
 
 /-!

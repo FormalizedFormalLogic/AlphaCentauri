@@ -1,21 +1,29 @@
 module
 
-public import AlphaCentauri.ToFoundation.Syntax
+public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 
 /-!
 # Derivations under a block of universal quantifiers
 
 If `p` follows from `q` in the internal calculus once the variables bound by a block of universal
-quantifiers are replaced by free variables, then the block over `p` follows from the block over
-`q`.
+quantifiers are replaced by free variables, then the block over `p` follows from the block over `q`.
 -/
 
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+
+section UniversalClosure
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
@@ -118,4 +126,8 @@ theorem Derivable.neg_qqAlls_qqAlls {m p q : V} (hp : IsSemiformula L m p)
     apply Derivable.neg_all_all (hs p hp) (hs q hq)
     rwa [free_qqAlls_subst hp hsp hvl hv hv'l hv', free_qqAlls_subst hq hsq hvl hv hv'l hv']
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end UniversalClosure
+
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

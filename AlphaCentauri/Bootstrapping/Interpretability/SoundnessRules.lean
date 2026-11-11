@@ -2,7 +2,15 @@ module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
 public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
+public import AlphaCentauri.Bootstrapping.Proof.CutFree
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
 public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
+public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!
 # Translated derivability is closed under the rules of derivations
@@ -10,23 +18,22 @@ public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
 The coded set of the translations of a set of formulas along a table, its definability, and its
 behaviour under shift and under free-variable substitution. For a set `Γ` of $L_2$-formulas,
 `TranslatedDerivable` states that $\Gamma^*$ together with the negated instances of the domain
-formula is derivable in `S`. The lemmas of this module show that this property is preserved by
-each rule of the derivation calculus.
+formula is derivable in `S`, and this property is preserved by each rule of the derivation calculus.
 -/
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
 
 /-! ## Translated sets -/
 
 section translateSets
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-/-! ## Translated sets -/
 
 section translateSet
 
@@ -116,20 +123,21 @@ lemma translateSet_setShift {tbl s : V} (hT : IsTable L₁ L₂ tbl) (hs : IsFor
   · rintro ⟨y, ⟨q, hq, rfl⟩, rfl⟩
     exact ⟨shift L₂ q, ⟨q, hq, rfl⟩, (translate_shift hT (hs q hq)).symm⟩
 
+lemma freshVec_fvar (j : V) : ∀ i < len (freshVec j : V), ∃ x, (freshVec j : V).[i] = ^&x := by
+  intro i hi
+  rw [len_freshVec] at hi
+  rcases lt_or_eq_of_le (lt_succ_iff_le.mp hi) with h' | rfl
+  · exact ⟨i + 1, nth_freshVec_of_lt h'⟩
+  · exact ⟨0, by simp⟩
+
 lemma fvSubstImage_freshVec_translateSet_of {tbl Γ j : V} (hT : IsTable L₁ L₂ tbl)
     (hΓ : IsFormulaSet L₂ Γ) (h : ∀ q ∈ Γ, fvSubst L₂ (freshVec j) q = shift L₂ q) :
     fvSubstImage (L := L₁) (freshVec j) (translateSet L₁ L₂ tbl Γ) =
       setShift L₁ (translateSet L₁ L₂ tbl Γ) := by
-  have hw : ∀ i < len (freshVec j : V), ∃ x, (freshVec j : V).[i] = ^&x := by
-    intro i hi
-    rw [len_freshVec] at hi
-    rcases lt_or_eq_of_le (lt_succ_iff_le.mp hi) with h' | rfl
-    · exact ⟨i + 1, nth_freshVec_of_lt h'⟩
-    · exact ⟨0, by simp⟩
   have key : ∀ p ∈ Γ, fvSubst L₁ (freshVec j) (translate L₁ L₂ tbl p) =
       shift L₁ (translate L₁ L₂ tbl p) := by
     intro p hp
-    rw [← translate_fvSubst hT hw (hΓ p hp), h p hp, translate_shift hT (hΓ p hp)]
+    rw [← translate_fvSubst hT (freshVec_fvar j) (hΓ p hp), h p hp, translate_shift hT (hΓ p hp)]
   refine mem_ext fun x ↦ ?_
   simp only [mem_fvSubstImage_iff, mem_translateSet_iff, mem_setShift_iff]
   constructor
@@ -182,8 +190,6 @@ lemma free_imp {δ q : V} (hδ : IsSemiformula L 1 δ) (hds : shift L δ = δ)
   rfl
 
 end generic
-
-section rules
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] {S : Theory L₁} [S.Δ₁] {tbl : V}
@@ -425,6 +431,5 @@ lemma translated_all (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
 
 end rules
 
-end rules
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

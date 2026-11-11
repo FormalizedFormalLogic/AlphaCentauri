@@ -2,8 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Schemata
 
-/-!
-# Induction for bounded existential formulas
+/-! # Induction for bounded existential formulas
 
 $\mathsf{I}\mathsf{E}_k$ is induction for $E_k$ formulas over $\mathsf{PA}^-$, where $E_k$ and
 $U_k$ count the alternations of blocks of bounded quantifiers over an open matrix.
@@ -18,6 +17,11 @@ $U_k$ count the alternations of blocks of bounded quantifiers over an open matri
 
 namespace FFL.FirstOrder.Arithmetic
 
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open _root_.FFL.Entailment
+
+section BoundedInduction
+
 variable {ξ : Type*}
 
 mutual
@@ -26,23 +30,23 @@ mutual
 for `k = 0`, where the bound `tᵢ` of `xᵢ` mentions only the earlier variables.
 - [Wil85]
 - [Smi93, Definition 2.1] -/
-inductive Semiformula.BoundedExistential : ℕ → {n : ℕ} → ArithmeticSemiformula ξ n → Prop
-  | of_open {k n : ℕ} {φ : ArithmeticSemiformula ξ n} : φ.Open → BoundedExistential k φ
+inductive IsBoundedExistential : ℕ → {n : ℕ} → ArithmeticSemiformula ξ n → Prop
+  | of_open {k n : ℕ} {φ : ArithmeticSemiformula ξ n} : φ.Open → IsBoundedExistential k φ
   | of_boundedUniversal {k n : ℕ} {φ : ArithmeticSemiformula ξ n} :
-      BoundedUniversal k φ → BoundedExistential (k + 1) φ
+      IsBoundedUniversal k φ → IsBoundedExistential (k + 1) φ
   | bexsLT {k n : ℕ} (t : ArithmeticSemiterm ξ n) {φ : ArithmeticSemiformula ξ (n + 1)} :
-      BoundedExistential (k + 1) φ → BoundedExistential (k + 1) (Semiformula.bexsLT t φ)
+      IsBoundedExistential (k + 1) φ → IsBoundedExistential (k + 1) (Semiformula.bexsLT t φ)
 
 /-- `Uₖ` formulas: a block `∀ x₁ < t₁, ⋯, ∀ xₘ < tₘ` over an `Eₖ₋₁` formula, or an open formula
 for `k = 0`, where the bound `tᵢ` of `xᵢ` mentions only the earlier variables.
 - [Wil85]
 - [Smi93, Definition 2.1] -/
-inductive Semiformula.BoundedUniversal : ℕ → {n : ℕ} → ArithmeticSemiformula ξ n → Prop
-  | of_open {k n : ℕ} {φ : ArithmeticSemiformula ξ n} : φ.Open → BoundedUniversal k φ
+inductive IsBoundedUniversal : ℕ → {n : ℕ} → ArithmeticSemiformula ξ n → Prop
+  | of_open {k n : ℕ} {φ : ArithmeticSemiformula ξ n} : φ.Open → IsBoundedUniversal k φ
   | of_boundedExistential {k n : ℕ} {φ : ArithmeticSemiformula ξ n} :
-      BoundedExistential k φ → BoundedUniversal (k + 1) φ
+      IsBoundedExistential k φ → IsBoundedUniversal (k + 1) φ
   | ballLT {k n : ℕ} (t : ArithmeticSemiterm ξ n) {φ : ArithmeticSemiformula ξ (n + 1)} :
-      BoundedUniversal (k + 1) φ → BoundedUniversal (k + 1) (Semiformula.ballLT t φ)
+      IsBoundedUniversal (k + 1) φ → IsBoundedUniversal (k + 1) (Semiformula.ballLT t φ)
 
 end
 
@@ -50,7 +54,7 @@ end
 - [Wil85]
 - [Smi93, Definition 2.2] -/
 abbrev IE (k : ℕ) : ArithmeticTheory :=
-  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (Semiformula.BoundedExistential k)
+  𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (IsBoundedExistential k)
 
 @[inherit_doc] notation "𝗜𝗘₁" => IE 1
 
@@ -60,19 +64,34 @@ instance (k : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ IE k :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻)
     (Entailment.WeakerThan.ofSubset Set.subset_union_left)
 
+section
+
+variable {V : Type*} [ORingStructure V]
+
+instance [V↓[ℒₒᵣ] ⊧* 𝗜𝗘₁] : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
+  Semantics.ModelsSet.of_subset (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝗘₁) Set.subset_union_left
+
+instance {k : ℕ} [V↓[ℒₒᵣ] ⊧* IE k] :
+    V↓[ℒₒᵣ] ⊧* InductionScheme ℒₒᵣ (IsBoundedExistential k) :=
+  Semantics.ModelsSet.of_subset (inferInstance : V↓[ℒₒᵣ] ⊧* IE k) Set.subset_union_right
+
+end
+
 /-- $\mathsf{I}\mathsf{E}_1$ is strictly weaker than $\mathsf{I}\Delta_0$. An open problem.
 - [DAq05, §8] -/
-axiom IE1_strictlyWeakerThan_ISigma0 : 𝗜𝗘₁ ⪱ 𝗜𝚺₀
+def IE1StrictlyWeakerThanISigma0 : Prop := 𝗜𝗘₁ ⪱ 𝗜𝚺₀
 
 /-- $\mathsf{I}\mathsf{E}_k$ is strictly weaker than $\mathsf{I}\mathsf{E}_{k + 1}$ for each
 $k \ge 1$. An open problem.
 - [Wil85, §4.13, Problem (1)]
 - [Car16] -/
-axiom IE_strictlyWeakerThan_IE_succ {k : ℕ} (hk : 1 ≤ k) : IE k ⪱ IE (k + 1)
+def IEStrictlyWeakerThanIESucc : Prop := ∀ k : ℕ, 1 ≤ k → IE k ⪱ IE (k + 1)
 
 /-- $\mathsf{I}\mathsf{E}_1$ proves the least number principle for $U_1$ formulas. An open problem.
 - [Wil85, §4.13, Problem (2)] -/
-axiom leastNumberBoundedUniversal_weakerThan_IE1 :
-    𝗣𝗔⁻ ∪ LeastNumberScheme (Semiformula.BoundedUniversal 1) ⪯ 𝗜𝗘₁
+def LeastNumberBoundedUniversalWeakerThanIE1 : Prop :=
+  𝗣𝗔⁻ ∪ LeastNumberScheme (IsBoundedUniversal 1) ⪯ 𝗜𝗘₁
+
+end BoundedInduction
 
 end FFL.FirstOrder.Arithmetic

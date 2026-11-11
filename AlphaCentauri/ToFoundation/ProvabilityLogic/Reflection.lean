@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 
 /-!
-# Full local reflection over a finite extension
+# Gaps in Foundation's `Reflection.Local`: full local reflection over a finite extension
 
 A consistent extension of `T` by a single sentence never proves the full local reflection schema
 of `T`.

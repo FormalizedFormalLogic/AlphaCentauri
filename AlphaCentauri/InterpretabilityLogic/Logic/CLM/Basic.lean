@@ -248,6 +248,125 @@ end Tame
 
 end clmAdequateClosure
 
+open clmAdequateClosure in
+/-- A finite set containing `X` whose operands are, up to $\mathbf{GL}$-equivalence, closed under
+conjunction with `□`-formulas.
+
+- [Ign91, Lemma 6.5]
+-/
+noncomputable def clmAdequateClosure (X : Finset (Formula α)) : Finset (Formula α) :=
+  (generators X).biUnion subformulas
+
+namespace clmAdequateClosure
+
+variable {X : Finset (Formula α)} {A B C : Formula α}
+
+lemma mem_iff : A ∈ clmAdequateClosure X ↔ ∃ g ∈ generators X, A ∈ g.subformulas :=
+  Finset.mem_biUnion
+
+lemma mem_of_mem_generators (h : A ∈ generators X) : A ∈ clmAdequateClosure X :=
+  mem_iff.mpr ⟨A, h, mem_subformulas_self⟩
+
+lemma subset : X ⊆ clmAdequateClosure X := fun _ h ↦
+  mem_of_mem_generators <| Finset.mem_union_left _ <| Finset.mem_union_left _ <|
+    Finset.mem_union_left _ <| Finset.mem_union_left _ h
+
+lemma mem_of_mem_subformulas (hA : A ∈ clmAdequateClosure X) (hB : B ∈ A.subformulas) :
+    B ∈ clmAdequateClosure X := by
+  obtain ⟨g, hg, hA⟩ := mem_iff.mp hA
+  exact mem_iff.mpr ⟨g, hg, subformulas_subset_of_mem hA hB⟩
+
+lemma rhd_mem_of_mem_operands (hA : A ∈ operands X) (hB : B ∈ operands X) :
+    A ▷ B ∈ clmAdequateClosure X :=
+  mem_of_mem_generators <| Finset.mem_union_left _ <| Finset.mem_union_left _ <|
+    Finset.mem_union_left _ <| Finset.mem_union_right _ <|
+      Finset.mem_image.mpr ⟨(A, B), Finset.mem_product.mpr ⟨hA, hB⟩, rfl⟩
+
+lemma box_neg_mem_of_mem_operands (hA : A ∈ operands X) : □(∼A) ∈ clmAdequateClosure X :=
+  mem_of_mem_generators <| Finset.mem_union_left _ <| Finset.mem_union_left _ <|
+    Finset.mem_union_right _ <| Finset.mem_image_of_mem _ hA
+
+lemma mem_of_mem_boxes (h : A ∈ boxes X) : A ∈ clmAdequateClosure X :=
+  mem_of_mem_generators <| Finset.mem_union_left _ <| Finset.mem_union_right _ h
+
+lemma box_imp_disj_mem_of_mem_operands {S : Finset (Formula α)} (hB : B ∈ operands X)
+    (hS : S ⊆ operands X ∪ (operands X).image (◇·)) :
+    □(B 🡒 S.disj) ∈ clmAdequateClosure X :=
+  mem_of_mem_generators <| Finset.mem_union_right _ <|
+    Finset.mem_image.mpr ⟨(B, S), Finset.mem_product.mpr ⟨hB, Finset.mem_powerset.mpr hS⟩, rfl⟩
+
+variable [Adequate X]
+
+/-- The members of `clmAdequateClosure X` are tame, `▷`-formulas of operands, or `□`-formulas
+`□(B 🡒 ⋁S)` of an operand `B` and operands or their `◇`-formulas `S`. -/
+lemma tame_or_of_mem (h : A ∈ clmAdequateClosure X) :
+    Tame X A ∨ (∃ B ∈ operands X, ∃ C ∈ operands X, A = B ▷ C) ∨
+      ∃ B ∈ operands X, ∃ S ⊆ operands X ∪ (operands X).image (◇·), A = □(B 🡒 S.disj) := by
+  classical
+  obtain ⟨g, hg, hA⟩ := mem_iff.mp h
+  simp only [generators, Finset.mem_union, Finset.mem_image, Finset.mem_product, Prod.exists,
+    Finset.mem_powerset] at hg
+  rcases hg with ((((hg | ⟨B, C, ⟨hB, hC⟩, rfl⟩) | ⟨B, hB, rfl⟩) | hg) | ⟨B, S, ⟨hB, hS⟩, rfl⟩)
+  · exact .inl <| (Tame.of_mem hg).of_mem_subformulas hA
+  · simp only [subformulas, Finset.mem_insert, Finset.mem_union] at hA
+    rcases hA with rfl | hA | hA
+    · exact .inr <| .inl ⟨B, hB, C, hC, rfl⟩
+    · exact .inl <| (Tame.of_mem_operands hB).of_mem_subformulas hA
+    · exact .inl <| (Tame.of_mem_operands hC).of_mem_subformulas hA
+  · obtain ⟨Z, hZ, rfl⟩ := exists_of_mem_operands hB
+    exact .inl <| (Tame.box_neg_ofModal hZ).of_mem_subformulas hA
+  · rcases Finset.mem_union.mp hg with hg | hg
+    · exact .inl <| (Tame.of_mem (Finset.mem_filter.mp hg).1).of_mem_subformulas hA
+    · obtain ⟨Z, hZ, rfl⟩ := Finset.mem_image.mp hg
+      rcases Finset.mem_union.mp hZ with hZ | hZ
+      · exact .inl <| (Tame.box_neg_ofModal (lrClosure_of_mem_reps hZ)).of_mem_subformulas hA
+      · exact .inl <| (Tame.box_neg_ofModal (lrClosure_of_mem_reps hZ)).of_mem_subformulas hA
+  · rcases Finset.mem_insert.mp hA with rfl | hA
+    · exact .inr <| .inr ⟨B, hB, S, hS, rfl⟩
+    refine .inl <| Tame.of_mem_subformulas
+      (Tame.imp (Tame.of_mem_operands hB) (Tame.disj fun C hC ↦ ?_)) hA
+    rcases Finset.mem_union.mp (hS hC) with hC | hC
+    · exact Tame.of_mem_operands hC
+    · obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hC
+      obtain ⟨Z, hZ, rfl⟩ := exists_of_mem_operands hD
+      exact Tame.dia_ofModal hZ
+
+lemma mem_operands_of_rhd_mem (h : A ▷ B ∈ clmAdequateClosure X) :
+    A ∈ operands X ∧ B ∈ operands X := by
+  classical
+  rcases tame_or_of_mem h with h | ⟨A', hA, B', hB, h⟩ | ⟨_, _, _, _, h⟩
+  · have h := (h _ mem_subformulas_self).1 A B rfl
+    exact ⟨Finset.mem_union_left _ <| Finset.mem_filter.mpr ⟨Adequate.rhd_left h, .of_rhd_left h⟩,
+      Finset.mem_union_left _ <| Finset.mem_filter.mpr ⟨Adequate.rhd_right h, .of_rhd_right h⟩⟩
+  · obtain ⟨rfl, rfl⟩ := rhd_inj.mp h
+    exact ⟨hA, hB⟩
+  · simp at h
+
+lemma mem_operands_iff : IsRhdOperand (clmAdequateClosure X) A ↔ A ∈ operands X := by
+  constructor
+  · rintro ⟨B, h | h⟩
+    · exact (mem_operands_of_rhd_mem h).1
+    · exact (mem_operands_of_rhd_mem h).2
+  · intro h
+    exact .of_rhd_left (rhd_mem_of_mem_operands h h)
+
+instance : CLAdequate (clmAdequateClosure X) where
+  imp_left h := mem_of_mem_subformulas h (by simp [subformulas])
+  imp_right h := mem_of_mem_subformulas h (by simp [subformulas])
+  box h := mem_of_mem_subformulas h (by simp [subformulas])
+  rhd_left h := mem_of_mem_subformulas h (by simp [subformulas])
+  rhd_right h := mem_of_mem_subformulas h (by simp [subformulas])
+  bot_rhd_bot := subset Adequate.bot_rhd_bot
+  rhd_mem hA hB := rhd_mem_of_mem_operands (mem_operands_iff.mp hA) (mem_operands_iff.mp hB)
+  box_neg_mem hA := box_neg_mem_of_mem_operands (mem_operands_iff.mp hA)
+  box_imp_disj_mem {B S} hB hS := by
+    refine box_imp_disj_mem_of_mem_operands (mem_operands_iff.mp hB) fun C hC ↦ ?_
+    rcases hS C hC with hC | ⟨G, hG, rfl⟩
+    · exact Finset.mem_union_left _ (mem_operands_iff.mp hC)
+    · exact Finset.mem_union_right _ (Finset.mem_image_of_mem _ (mem_operands_iff.mp hG))
+
+end clmAdequateClosure
+
 end
 
 end FFL.InterpretabilityLogic

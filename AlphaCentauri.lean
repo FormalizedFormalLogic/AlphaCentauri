@@ -240,6 +240,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.Counting
 public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree

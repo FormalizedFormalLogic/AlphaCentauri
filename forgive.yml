@@ -115,3 +115,7 @@ declaration:
   FFL.InterpretabilityLogic.Logic.IL.arithmetical_soundness_interpretability:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.FirstOrder.Arithmetic.definableFunction_card_of_definablePred:
+    forgive:
+      # An open problem, not a theorem awaiting formalization: [DAq05, Question 7.9], [HP98, Bibliographical Remarks to Chapter V].
+      - FFL.FirstOrder.Arithmetic.definableFunction_card_of_definablePred

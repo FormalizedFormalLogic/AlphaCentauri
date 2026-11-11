@@ -365,6 +365,118 @@ instance : CLAdequate (clmAdequateClosure X) where
     · exact Finset.mem_union_left _ (mem_operands_iff.mp hC)
     · exact Finset.mem_union_right _ (Finset.mem_image_of_mem _ (mem_operands_iff.mp hG))
 
+/-! ### Representatives of conjunctions with `□`-formulas -/
+
+open Entailment
+
+variable {L : Logic α} [L.ExtendsGL] [Entailment.Cl L]
+
+omit [DecidableEq α] [Adequate X] in
+lemma ofModal_disj₂ : (l : List (ProvabilityLogic.Formula (Formula α))) →
+    Formula.ofModal (⋁l) = ⋁(l.map Formula.ofModal)
+  | [] => rfl
+  | [_] => rfl
+  | A :: B :: l => by
+    change Formula.ofModal A ⋎ Formula.ofModal (⋁(B :: l)) = _
+    rw [ofModal_disj₂ (B :: l)]
+    rfl
+
+omit [Adequate X] [L.ExtendsGL] in
+lemma ofModal_disj_imp {U : Finset (ProvabilityLogic.Formula (Formula α))} {D : Formula α}
+    (h : ∀ Z ∈ U, L ⊢ Formula.ofModal Z 🡒 D) : L ⊢ Formula.ofModal U.disj 🡒 D := by
+  change L ⊢ Formula.ofModal (⋁U.toList) 🡒 D
+  rw [ofModal_disj₂]
+  apply left_Disj₂_intro
+  intro C hC
+  obtain ⟨Z, hZ, rfl⟩ := List.mem_map.mp hC
+  exact h Z (Finset.mem_toList.mp hZ)
+
+omit [Adequate X] [L.ExtendsGL] in
+lemma imp_ofModal_disj {U : Finset (ProvabilityLogic.Formula (Formula α))}
+    {Z : ProvabilityLogic.Formula (Formula α)} (h : Z ∈ U) :
+    L ⊢ Formula.ofModal Z 🡒 Formula.ofModal U.disj := by
+  change L ⊢ Formula.ofModal Z 🡒 Formula.ofModal (⋁U.toList)
+  rw [ofModal_disj₂]
+  exact right_Disj₂_intro _ (List.mem_map_of_mem (Finset.mem_toList.mpr h))
+
+/-- Every `□`-formula in `clmAdequateClosure X` is equivalent to the translation of a `□`-formula
+of the LR-closure of `atoms X`. -/
+lemma exists_isBoxBody_of_box_mem {E : Formula α} (h : □E ∈ clmAdequateClosure X) :
+    ∃ E', IsBoxBody (atoms X) E' ∧ L ⊢ □E 🡘 □(Formula.ofModal E') := by
+  classical
+  rcases tame_or_of_mem h with h | ⟨_, _, _, _, h⟩ | ⟨B, hB, S, hS, h⟩
+  · rcases (h _ mem_subformulas_self).2 E rfl with h | ⟨E', hE', rfl⟩
+    · refine ⟨∼(.atom (∼E)), .inl ⟨.atom (∼E), true, .atom (neg_mem_atoms_of_mem
+        (Adequate.box h)), rfl⟩, ?_⟩
+      have h₁ : L ⊢ □E 🡒 □(∼∼E) := Logic.box_mono (by cl_prover)
+      have h₂ : L ⊢ □(∼∼E) 🡒 □E := Logic.box_mono (by cl_prover)
+      change L ⊢ □E 🡘 □(∼∼E)
+      cl_prover [h₁, h₂]
+    · exact ⟨E', hE', by cl_prover⟩
+  · simp at h
+  obtain rfl := box_inj.mp h
+  have hpre : ∀ A ∈ operands X, ∃ Z, LRClosure (atoms X) true Z ∧ Formula.ofModal Z = A :=
+    fun _ h ↦ exists_of_mem_operands h
+  choose f hf hf' using hpre
+  let S₀ := S.filter (· ∈ operands X)
+  let T₀ := (operands X).filter (◇· ∈ S)
+  let S₁ := S₀.attach.image fun C ↦ f C.1 (Finset.mem_filter.mp C.2).2
+  let T₁ := T₀.attach.image fun C ↦ f C.1 (Finset.mem_filter.mp C.2).1
+  have hS₁ : ∀ C ∈ S₁, LRClosure (atoms X) true C := by
+    intro C hC
+    obtain ⟨⟨D, hD⟩, -, rfl⟩ := Finset.mem_image.mp hC
+    exact hf _ _
+  have hT₁ : ∀ C ∈ T₁, LRClosure (atoms X) true C := by
+    intro C hC
+    obtain ⟨⟨D, hD⟩, -, rfl⟩ := Finset.mem_image.mp hC
+    exact hf _ _
+  refine ⟨f B hB 🡒 S₁.disj ⋎ (T₁.image (◇·)).disj, .inr ⟨f B hB, S₁, T₁, hf B hB, hS₁, hT₁, rfl⟩,
+    ?_⟩
+  have h₁ : L ⊢ S.disj 🡒 Formula.ofModal S₁.disj ⋎ Formula.ofModal (T₁.image (◇·)).disj := by
+    apply left_Fdisj_intro
+    intro C hC
+    rcases Finset.mem_union.mp (hS hC) with hC' | hC'
+    · have hC₀ : C ∈ S₀ := Finset.mem_filter.mpr ⟨hC, hC'⟩
+      have : L ⊢ Formula.ofModal (f C hC') 🡒 Formula.ofModal S₁.disj :=
+        imp_ofModal_disj (Finset.mem_image.mpr ⟨⟨C, hC₀⟩, Finset.mem_attach _ _, rfl⟩)
+      rw [hf'] at this
+      cl_prover [this]
+    · obtain ⟨G, hG, rfl⟩ := Finset.mem_image.mp hC'
+      have hG₀ : G ∈ T₀ := Finset.mem_filter.mpr ⟨hG, hC⟩
+      have : L ⊢ Formula.ofModal (◇f G hG) 🡒 Formula.ofModal (T₁.image (◇·)).disj :=
+        imp_ofModal_disj (Finset.mem_image_of_mem _ <|
+          Finset.mem_image.mpr ⟨⟨G, hG₀⟩, Finset.mem_attach _ _, rfl⟩)
+      change L ⊢ ◇Formula.ofModal (f G hG) 🡒 _ at this
+      rw [hf'] at this
+      cl_prover [this]
+  have h₂ : L ⊢ Formula.ofModal S₁.disj 🡒 S.disj := by
+    apply ofModal_disj_imp
+    intro Z hZ
+    obtain ⟨⟨C, hC⟩, -, rfl⟩ := Finset.mem_image.mp hZ
+    rw [hf']
+    exact right_Fdisj_intro _ (Finset.mem_filter.mp hC).1
+  have h₃ : L ⊢ Formula.ofModal (T₁.image (◇·)).disj 🡒 S.disj := by
+    apply ofModal_disj_imp
+    intro Z hZ
+    obtain ⟨W, hW, rfl⟩ := Finset.mem_image.mp hZ
+    obtain ⟨⟨G, hG⟩, -, rfl⟩ := Finset.mem_image.mp hW
+    change L ⊢ ◇Formula.ofModal (f G _) 🡒 _
+    rw [hf']
+    exact right_Fdisj_intro _ (Finset.mem_filter.mp hG).2
+  have h₄ : L ⊢ □(B 🡒 S.disj) 🡒 □(Formula.ofModal (f B hB 🡒 S₁.disj ⋎ (T₁.image (◇·)).disj)) := by
+    apply Logic.box_mono
+    change L ⊢ (B 🡒 S.disj) 🡒 (Formula.ofModal (f B hB) 🡒
+      Formula.ofModal S₁.disj ⋎ Formula.ofModal (T₁.image (◇·)).disj)
+    rw [hf']
+    cl_prover [h₁]
+  have h₅ : L ⊢ □(Formula.ofModal (f B hB 🡒 S₁.disj ⋎ (T₁.image (◇·)).disj)) 🡒 □(B 🡒 S.disj) := by
+    apply Logic.box_mono
+    change L ⊢ (Formula.ofModal (f B hB) 🡒
+      Formula.ofModal S₁.disj ⋎ Formula.ofModal (T₁.image (◇·)).disj) 🡒 (B 🡒 S.disj)
+    rw [hf']
+    cl_prover [h₂, h₃]
+  cl_prover [h₄, h₅]
+
 end clmAdequateClosure
 
 end

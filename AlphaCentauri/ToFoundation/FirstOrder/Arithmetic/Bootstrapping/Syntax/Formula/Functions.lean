@@ -382,10 +382,6 @@ lemma shift_substs1_qqFvar {p j : V} (hp : IsSemiformula L 1 p) :
   rcases (show i = 0 by simpa using hi)
   simp
 
-lemma shift_neg_substs1_qqFvar {d j : V} (hd : IsSemiformula L 1 d) (hds : shift L d = d) :
-    shift L (neg L (substs1 L (^&j) d)) = neg L (substs1 L (^&(j + 1)) d) := by
-  rw [shift_neg (IsSemiformula.substs1 (n := 0) (by simp) hd), shift_substs1_qqFvar hd, hds]
-
 section fvfree
 
 variable (L)
@@ -456,6 +452,11 @@ lemma _root_.FFL.FirstOrder.Language.IsFVFree.exs {n p : V}
     exact ⟨by simp [h.isSemiformula], by rw [shift_neg h.isSemiformula, h.shift_eq]⟩
 
 end fvfree
+
+lemma shift_neg_substs1_qqFvar {d j : V} (hd : L.IsFVFree 1 d) :
+    shift L (neg L (substs1 L (^&j) d)) = neg L (substs1 L (^&(j + 1)) d) := by
+  rw [shift_neg (IsSemiformula.substs1 (n := 0) (by simp) hd.isSemiformula),
+    shift_substs1_qqFvar hd.isSemiformula, hd.shift_eq]
 
 end Bootstrapping
 end FFL.FirstOrder.Arithmetic

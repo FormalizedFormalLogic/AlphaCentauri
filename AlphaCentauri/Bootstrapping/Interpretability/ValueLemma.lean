@@ -227,7 +227,7 @@ lemma derivable_definesElement_fvar (h : IsTranslationTable L₂ S tbl) (x : V) 
   have hT := h.toIsTable
   have hd : tbl.[0] = h.domT.val := rfl
   have hs : IsFormulaSet L₁ (negDomSet L₁ tbl.[0] ^&x) :=
-    IsFormulaSet.negDomSet hT.domain _
+    IsFormulaSet.negDomSet hT.domain.isSemiformula _
   have hφv : (h.domT.subst ![Semiterm.fvar x] : Formula V L₁).val = substs1 L₁ ^&x tbl.[0] := by
     rw [Semiformula.val_subst_fvar, hd]
   have hm : neg L₁ (h.domT.subst ![Semiterm.fvar x] : Formula V L₁).val ∈
@@ -266,7 +266,7 @@ lemma derivable_definesElement_func (hS : ∀ p ∈ S.Δ₁Class (V := V), Boots
   have hT := h.toIsTable
   have hd : tbl.[0] = h.domT.val := rfl
   have hsF : IsFormulaSet L₁ (negDomSet L₁ tbl.[0] (Semiterm.func F u).val) :=
-    IsFormulaSet.negDomSet hT.domain _
+    IsFormulaSet.negDomSet hT.domain.isSemiformula _
   have hlt (i : Fin k) : (u i).val < (Semiterm.func F u).val := by
     have h₁ := nth_lt_qqFunc_of_lt (i := ((i : ℕ) : V)) (k := (k : V)) (f := (⌜F⌝ : V))
       (v := SemitermVec.val u) (by simp)
@@ -363,9 +363,10 @@ lemma isFormulaSet_substHyp (hT : IsTable L₁ L₂ tbl) {t : V} (ht : IsSemiter
     IsFormulaSet L₁ (substHyp L₁ L₂ tbl t b) := by
   have h₁ : IsSemiformula L₁ 1 (varEqual L₁ L₂ tbl t) := by
     simpa using IsSemiformula.varEqual hT ht
-  exact IsFormulaSet.insert_iff.mpr ⟨(IsSemiformula.substs1 (n := 0) (by simp) hT.domain).neg,
-    IsFormulaSet.insert_iff.mpr ⟨(IsSemiformula.substs1 (n := 0) (by simp) h₁).neg,
-      IsFormulaSet.negDomSet hT.domain t⟩⟩
+  exact IsFormulaSet.insert_iff.mpr
+    ⟨(IsSemiformula.substs1 (n := 0) (by simp) hT.domain.isSemiformula).neg,
+      IsFormulaSet.insert_iff.mpr ⟨(IsSemiformula.substs1 (n := 0) (by simp) h₁).neg,
+        IsFormulaSet.negDomSet hT.domain.isSemiformula t⟩⟩
 
 lemma derivable_definesElement_substHyp
     (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)

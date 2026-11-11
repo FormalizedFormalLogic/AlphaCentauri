@@ -263,15 +263,16 @@ namespace IsTable
 variable (hT : IsTable L₁ L₂ tbl)
 
 /-- The domain formula of the table, as a typed formula. -/
-noncomputable def domT : Semiformula V L₁ 1 := ⟨tableDomain tbl, by simpa using hT.domain⟩
+noncomputable def domT : Semiformula V L₁ 1 :=
+  ⟨tableDomain tbl, by simpa using hT.domain.isSemiformula⟩
 
 /-- The formula of the graph of the function symbol `F`, as a typed formula. -/
 noncomputable def funcT {k : ℕ} (F : L₂.Func k) : Semiformula V L₁ (k + 1) :=
-  ⟨tableFunc tbl k ⌜F⌝, by simpa using hT.func (codeIn_func_quote F)⟩
+  ⟨tableFunc tbl k ⌜F⌝, by simpa using (hT.func (codeIn_func_quote F)).isSemiformula⟩
 
 /-- The formula interpreting the relation symbol `R`, as a typed formula. -/
 noncomputable def relT {k : ℕ} (R : L₂.Rel k) : Semiformula V L₁ k :=
-  ⟨tableRel tbl k ⌜R⌝, hT.rel (codeIn_rel_quote R)⟩
+  ⟨tableRel tbl k ⌜R⌝, (hT.rel (codeIn_rel_quote R)).isSemiformula⟩
 
 @[simp] lemma domT_val : hT.domT.val = tableDomain tbl := rfl
 
@@ -281,15 +282,15 @@ noncomputable def relT {k : ℕ} (R : L₂.Rel k) : Semiformula V L₁ k :=
 
 lemma domT_shift : hT.domT.shift = hT.domT := by
   ext
-  simp [hT.domain_shift]
+  simp [hT.domain.shift_eq]
 
 lemma funcT_shift {k : ℕ} (F : L₂.Func k) : (hT.funcT F).shift = hT.funcT F := by
   ext
-  simp [hT.func_shift (codeIn_func_quote F)]
+  simp [(hT.func (codeIn_func_quote F)).shift_eq]
 
 lemma relT_shift {k : ℕ} (R : L₂.Rel k) : (hT.relT R).shift = hT.relT R := by
   ext
-  simp [hT.rel_shift (codeIn_rel_quote R)]
+  simp [(hT.rel (codeIn_rel_quote R)).shift_eq]
 
 end IsTable
 

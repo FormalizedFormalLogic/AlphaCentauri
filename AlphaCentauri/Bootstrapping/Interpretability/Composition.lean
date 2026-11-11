@@ -329,7 +329,7 @@ lemma derivable_comp_varEqual (hL : L.SymbolsStandard V) (t : Term V L) :
       (iff L (varEqual L L (Bootstrapping.compTable L L tbl₁ tbl₂) t)
         (translate L L tbl₁ (varEqual L L tbl₂ t)))) (negDomSet L tbl₁.[0] t)) := by
     definability
-  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain
+  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain.isSemiformula
   have key := IsSemiterm.sigma1_induction hP (n := 0) (fun z hz ↦ by simp at hz) ?_ ?_ t.val
     t.isSemiterm
   · rw [IsTable.comp_varEqual_val h₁.toIsTable hT₂ hc]
@@ -411,7 +411,7 @@ lemma derivable_comp_rel (hL : L.SymbolsStandard V) {k : ℕ} (R : L.Rel k) (u :
     {M : V} (hM : ∀ i, (u i).val < M) :
     Derivable S (insert (hc.transT (Semiformula.rel R u) 🡘
       h₁.transT (hT₂.transT (Semiformula.rel R u))).val (negDomSet L tbl₁.[0] M)) := by
-  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain
+  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain.isSemiformula
   have ih' (i : Fin k) := derivable_insert_negDomSet_mono hdom _ (le_of_lt (hM i))
     (derivable_comp_varEqual h₁ hT₂ hc hL (u i))
   exact Derivable.of_tprovable_imp (tprovable_comp_rel h₁ hT₂ hc R u)
@@ -461,14 +461,13 @@ lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
     Derivable S (insert (∼(h₁.domT.subst ![Semiterm.fvar 0]) ⋎
       (hc.transT P 🡘 h₁.transT (hT₂.transT P)).free).val
         (setShift L (negDomSet L tbl₁.[0] M))) := by
-  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain
-  have hds : shift L tbl₁.[0] = tbl₁.[0] := h₁.domain_shift
+  have hdom : L.IsFVFree 1 tbl₁.[0] := h₁.domain
   have hp : IsSemiformula L 1 P.val := by simp
   set Xf : Formula V L := hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free) with hXf
   have hX : IsFormula L Xf.val := by simp
   have h₁' : Derivable S (insert Xf.val
       (negDomSet L tbl₁.[0] (P.free.val + (M + 1)))) :=
-    derivable_insert_negDomSet_mono hdom Xf (le_add_right le_rfl) ih
+    derivable_insert_negDomSet_mono hdom.isSemiformula Xf (le_add_right le_rfl) ih
   have h₂ : Derivable S (insert Xf.val ∅ ∪ negDomSet L tbl₁.[0] (P.free.val + (M + 1))) :=
     Derivable.ofSetEq (fun x ↦ by simp) h₁'
   have hfresh : ∀ j, M + 1 ≤ j → j < P.free.val + (M + 1) →
@@ -484,15 +483,16 @@ lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
       Semiformula.free_val, fvSubst_iff_code (isSemitermVec_freshVec j) ha hb,
       fvSubst_freshVec_translate_free hc hp hM hj',
       fvSubst_freshVec_translate_translate_free h₁.toIsTable hT₂ hp hM hj', shift_iff_code ha hb]
-  have h₃ := Derivable.elim_negDomSet hS hdom hds h₁.exs_domain
+  have h₃ := Derivable.elim_negDomSet hS hdom h₁.exs_domain
     (by simp) (le_add_left le_rfl) hfresh h₂
-  rw [negDomSet_succ_eq_insert_setShift hdom hds] at h₃
+  rw [negDomSet_succ_eq_insert_setShift hdom] at h₃
   have hnd : IsFormula L (neg L (substs1 L (^&0) tbl₁.[0])) :=
-    (IsSemiformula.substs1 (n := 0) (by simp) hdom).neg
+    (IsSemiformula.substs1 (n := 0) (by simp) hdom.isSemiformula).neg
   have h₄ : Derivable S (insert (neg L (substs1 L (^&0) tbl₁.[0])) (insert Xf.val
       (setShift L (negDomSet L tbl₁.[0] M)))) :=
     Derivable.ofSetEq (fun x ↦ by simp; tauto) h₃
-  have h₅ := derivable_insert_or (IsFormulaSet.setShift (IsFormulaSet.negDomSet hdom _)) hnd hX h₄
+  have h₅ := derivable_insert_or
+    (IsFormulaSet.setShift (IsFormulaSet.negDomSet hdom.isSemiformula _)) hnd hX h₄
   have e : (∼(h₁.domT.subst ![Semiterm.fvar 0]) ⋎
       (hc.transT P 🡘 h₁.transT (hT₂.transT P)).free).val =
         neg L (substs1 L (^&0) tbl₁.[0]) ^⋎ Xf.val := by
@@ -525,8 +525,8 @@ lemma derivable_comp_all (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (
   rw [Semiformula.free_val] at h₁'
   have hP1 : IsSemiformula L 1 P.val := by simp
   have h₂ := Derivable.all (by
-    simp [hc.domain, h₁.domain, IsSemiformula.translate hc hP1,
-      IsSemiformula.translate h₁.toIsTable hT₂.domain,
+    simp [hc.domain.isSemiformula, h₁.domain.isSemiformula, IsSemiformula.translate hc hP1,
+      IsSemiformula.translate h₁.toIsTable hT₂.domain.isSemiformula,
       IsSemiformula.translate h₁.toIsTable (IsSemiformula.translate hT₂ hP1)]) h₁'
   rw [← Semiformula.val_all] at h₂
   have h₃ := Derivable.of_tprovable_imp (tprovable_all_iff_all _ _) h₂
@@ -557,8 +557,8 @@ lemma derivable_comp_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (
   rw [Semiformula.free_val] at h₁'
   have hP1 : IsSemiformula L 1 P.val := by simp
   have h₂ := Derivable.all (by
-    simp [hc.domain, h₁.domain, IsSemiformula.translate hc hP1,
-      IsSemiformula.translate h₁.toIsTable hT₂.domain,
+    simp [hc.domain.isSemiformula, h₁.domain.isSemiformula, IsSemiformula.translate hc hP1,
+      IsSemiformula.translate h₁.toIsTable hT₂.domain.isSemiformula,
       IsSemiformula.translate h₁.toIsTable (IsSemiformula.translate hT₂ hP1)]) h₁'
   rw [← Semiformula.val_all] at h₂
   have h₃ := Derivable.of_tprovable_imp (tprovable_all_iff_exs _ _) h₂
@@ -573,7 +573,7 @@ theorem derivable_comp_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L 
     (hL : L.SymbolsStandard V) {p : V} (hp : IsFormula L p) :
     Derivable S (insert (iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) p)
       (translate L L tbl₁ (translate L L tbl₂ p))) (negDomSet L tbl₁.[0] p)) := by
-  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain
+  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain.isSemiformula
   have hs (M : V) := IsFormulaSet.negDomSet (L := L) hdom M
   have hv := IsTable.comp_iff_val h₁ hT₂ hc
   apply IsFormula.sigma1_structural_induction (by definability) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
@@ -656,8 +656,7 @@ theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), shift
     (hL : L.SymbolsStandard V) {p : V} (hp : IsFormula L p) (hps : shift L p = p) :
     Provable S (iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) p)
       (translate L L tbl₁ (translate L L tbl₂ p))) := by
-  have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain
-  have hds : shift L tbl₁.[0] = tbl₁.[0] := h₁.domain_shift
+  have hdom : L.IsFVFree 1 tbl₁.[0] := h₁.domain
   have ha := IsSemiformula.translate hc hp
   have hb := IsSemiformula.translate h₁.toIsTable (IsSemiformula.translate hT₂ hp)
   have h₀ := derivable_comp_translate h₁ hT₂ hc hS hL hp
@@ -674,8 +673,8 @@ theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), shift
       fvSubstImage (L := L) (freshVec j) (insert X ∅) = setShift L (insert X ∅) := by
     intro j _ _
     rw [fvSubstImage_insert, fvSubstImage_empty, mem_setShift_insert, setShift_empty,
-      fvSubst_eq_self_of_shift hX hXs, hXs]
-  have h₃ := Derivable.elim_negDomSet hS hdom hds h₁.exs_domain (by simp [hX]) zero_le hfresh h₂
+      Language.IsFVFree.fvSubst_eq_self ⟨hX, hXs⟩, hXs]
+  have h₃ := Derivable.elim_negDomSet hS hdom h₁.exs_domain (by simp [hX]) zero_le hfresh h₂
   rw [negDomSet_zero] at h₃
   exact internal_provable_iff_internal_derivable.mpr (Derivable.ofSetEq (fun x ↦ by simp) h₃)
 
@@ -795,9 +794,9 @@ include h₁ h₂ hsound in
 lemma comp_exs_domain :
     Provable S (^∃ tableDomain (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂)) := by
   have hs : shift ℒₒᵣ (^∃ tableDomain tbl₂) = ^∃ tableDomain tbl₂ := by
-    simp [h₂.domain.isUFormula, h₂.domain_shift]
+    simp [h₂.domain.isSemiformula.isUFormula, h₂.domain.shift_eq]
   have h := hsound _ hs h₂.exs_domain
-  rwa [translate_exs h₂.domain.isUFormula, domainAt_zero h₁.toIsTable, ← tableDomain,
+  rwa [translate_exs h₂.domain.isSemiformula.isUFormula, domainAt_zero h₁.toIsTable, ← tableDomain,
     ← tableDomain_compTable] at h
 
 omit [𝗘𝗤 ℒₒᵣ ⪯ S] in

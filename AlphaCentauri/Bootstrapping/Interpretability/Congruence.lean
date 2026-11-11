@@ -211,14 +211,14 @@ theorem provable_iff_translate_of_equiv (hL : L₂.SymbolsStandard V) {p : V}
     rw [translate_free hT hp, translate_free hT' hp] at ih
     rw [translate_all hp.isUFormula, translate_all hp.isUFormula, domainAt_zero hT,
       domainAt_zero hT']
-    exact provable_all_imp_iff_all_imp hT.domain hT'.domain hdd (IsSemiformula.translate hT hp)
-      (IsSemiformula.translate hT' hp) ih
+    exact provable_all_imp_iff_all_imp hT.domain.isSemiformula hT'.domain.isSemiformula hdd
+      (IsSemiformula.translate hT hp) (IsSemiformula.translate hT' hp) ih
   · intro p hp ih
     rw [translate_free hT hp, translate_free hT' hp] at ih
     rw [translate_exs hp.isUFormula, translate_exs hp.isUFormula, domainAt_zero hT,
       domainAt_zero hT']
-    exact provable_exs_and_iff_exs_and hT.domain hT'.domain hdd (IsSemiformula.translate hT hp)
-      (IsSemiformula.translate hT' hp) ih
+    exact provable_exs_and_iff_exs_and hT.domain.isSemiformula hT'.domain.isSemiformula hdd
+      (IsSemiformula.translate hT hp) (IsSemiformula.translate hT' hp) ih
 
 include hd in
 lemma tprovable_conj_domT_imp {m : ℕ} (u : Fin m → Term V L₁) :

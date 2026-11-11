@@ -362,11 +362,12 @@ lemma termFvSubst_eq_self_of_termShift {w n t : V} (ht : IsSemiterm L n t)
 
 /-- A coded formula fixed by the shift of free variables is fixed by every free-variable
 substitution. -/
-lemma fvSubst_eq_self_of_shift {w n p : V} (hp : IsSemiformula L n p) (h : shift L p = p) :
+lemma _root_.FFL.FirstOrder.Language.IsFVFree.fvSubst_eq_self {w n p : V} (hp : L.IsFVFree n p) :
     fvSubst L w p = p := by
+  have h := hp.shift_eq
   revert h
   apply IsSemiformula.pi1_structural_induction (P := fun _ p ↦ shift L p = p → fvSubst L w p = p)
-    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+    ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp.isSemiformula
   · definability
   · intro n k R ts hR hts h
     rw [shift_rel hR hts.isUTerm] at h
@@ -590,7 +591,8 @@ private lemma rewrite_axm {p : V} (hT : ∀ p ∈ T.Δ₁Class (V := V), shift L
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hp : p ∈ s)
     (hpT : p ∈ T.Δ₁Class) :
     RankedDerivable T (cutRank L (axm s p)) (fvSubstImage (L := L) w s) := by
-  have h : fvSubst L w p = p := fvSubst_eq_self_of_shift (hsF p hp) (hT p hpT)
+  have h : fvSubst L w p = p :=
+    Language.IsFVFree.fvSubst_eq_self ⟨hsF p hp, hT p hpT⟩
   refine ⟨axm _ p, by simp, Derivation.axm (formulaSet_fvSubstImage hw hsF)
     (h ▸ fvSubst_mem_fvSubstImage hp) hpT, by simp⟩
 

@@ -1,7 +1,11 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Equality
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.ProvableIff
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.QuantifierBlock
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.Meta.ClProver
 
 /-!
@@ -16,7 +20,8 @@ elimination rule with the free variables of the instances as eigenvariables.
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -84,8 +89,6 @@ open PeanoMinus ISigma0 ISigma1
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-section shiftSubsts1
-
 lemma fvSubst_freshVec_neg_substs1_qqFvar {d i j : V} (hd : IsSemiformula L 1 d)
     (hds : shift L d = d) (hij : i < j) :
     fvSubst L (freshVec j) (neg L (substs1 L (^&i) d)) = neg L (substs1 L (^&(i + 1)) d) := by
@@ -96,10 +99,6 @@ lemma fvSubst_freshVec_neg_substs1_qqFvar {d i j : V} (hd : IsSemiformula L 1 d)
     exact lt_trans hij (by simp)
   rw [fvSubst_neg hw (IsSemiformula.substs1 ht hd), fvSubst_substs1 hw ht hd, termFvSubst_fvar,
     ite_eq_left hil, nth_freshVec_of_lt hij, fvSubst_eq_self_of_shift hd hds]
-
-end shiftSubsts1
-
-section negDomSet
 
 variable (L) in
 /-- `negDomSet L d m` is the coded set of the negations of the instances `substs1 L (^&i) d`
@@ -123,8 +122,6 @@ noncomputable def negDomSetGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
     (∀ i < m, ∃ fi, !qqFvarDef fi i ∧ ∃ s, !(substs1Graph L) s fi d ∧ ∃ z, !(negGraph L) z s ∧
       z ∈ y)”
 
-section graph
-
 private lemma negDomSet_graph (t d m : V) :
     t = negDomSet L d m ↔ (∀ z ∈ t, ∃ i < m, z = neg L (substs1 L (^&i) d)) ∧
       (∀ i < m, neg L (substs1 L (^&i) d) ∈ t) := by
@@ -146,8 +143,6 @@ instance negDomSet.definable : 𝚺ᴬ₁-Function₂[V] negDomSet L :=
 
 instance negDomSet.definable' {Γ : SigmaPiDelta} {m : ℕ} : Γᴬ_[m + 1]-Function₂[V] negDomSet L :=
   negDomSet.definable.of_sigmaOne
-
-end graph
 
 @[simp] lemma negDomSet_zero (d : V) : negDomSet L d 0 = ∅ := by
   apply mem_ext
@@ -201,8 +196,6 @@ lemma fvSubstImage_freshVec_negDomSet {d : V} (hd : IsSemiformula L 1 d)
   · rintro ⟨_, ⟨i, hi, rfl⟩, rfl⟩
     exact ⟨_, ⟨i, hi, rfl⟩, by rw [fvSubst_freshVec_neg_substs1_qqFvar hd hds hi, this]⟩
 
-section freshShift
-
 lemma fvSubst_freshVec_shift {n q u j : V} (hq : IsSemiformula L n q) (hqu : q ≤ u)
     (huj : u < j) :
     fvSubst L (freshVec j) (shift L q) = shift L (shift L q) := by
@@ -240,10 +233,6 @@ lemma fvSubst_freshVec_free {p u j : V} (hp : IsSemiformula L 1 p) (hpu : p ≤ 
   intro i hi
   rcases (show i = 0 by simpa using hi)
   simpa [termFvSubst_fvar, hj] using nth_freshVec_of_lt hj
-
-end freshShift
-
-end negDomSet
 
 section elim
 
@@ -298,4 +287,5 @@ end elim
 
 end negDomSet
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

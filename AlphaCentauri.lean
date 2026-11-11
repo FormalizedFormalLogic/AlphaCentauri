@@ -64,6 +64,7 @@ public import AlphaCentauri.InterpretabilityLogic.Formula
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Basic
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Veltman
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Arithmetic
 public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.CLM.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.CLMStar.Basic
@@ -207,6 +208,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Factorial
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Injection
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastNumberPrinciple

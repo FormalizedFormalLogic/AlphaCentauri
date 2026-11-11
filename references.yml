@@ -310,6 +310,19 @@ GJ11:
   serial-number:
     doi: "10.1093/jigpal/jzp082"
 
+HM90:
+  type: Article
+  title: The logic of Π₁-conservativity
+  author: ["Hájek, Petr", "Montagna, Franco"]
+  date: 1990
+  page-range: 113-123
+  parent:
+    type: Periodical
+    title: Archive for Mathematical Logic
+    volume: 30
+  serial-number:
+    doi: "10.1007/BF01634981"
+
 HP98:
   type: Book
   title: Metamathematics of First-Order Arithmetic
@@ -356,7 +369,10 @@ HSS25a:
 Ign91:
   type: Report
   title: Partial conservativity and modal logics
+  author: Ignatiev, Konstantin N.
+
   author: "Ignatiev, Konstantin N."
+
   date: 1991
   note: ITLI Prepublication Series X-91-04
   organization: Institute for Language, Logic and Information, University of Amsterdam

@@ -66,6 +66,7 @@ public import AlphaCentauri.InterpretabilityLogic.Gentzen.Veltman
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.CLM.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.CLMStar.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Arithmetic
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Gentzen

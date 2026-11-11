@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D3
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Equality
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.ProvableIff
@@ -18,7 +19,9 @@ numerals of a universal formula at one more numeral, modus ponens for arbitrary 
 quoted) codes, induction on a numeral of a formula whose base case and induction step are
 provable, the internal provability of the numeral instances of a theorem of `𝗜𝚺₁` and of a
 true $\Sigma_1$ formula, and the internal equivalence of `(∀¹ A) ⋎ (∀¹ B)` with
-`∀¹ (∀u < #0 + 1, A u ⋎ ∀x < #0 + 1, B x)` for formulas without free variables.
+`∀¹ (∀u < #0 + 1, A u ⋎ ∀x < #0 + 1, B x)` for formulas without free variables. More generally,
+the disjunction of two internal prenex $\Gamma_n$ sentences is internally equivalent to an internal
+prenex $\Gamma_n$ sentence; this is stated as an axiom.
 -/
 
 @[expose] public section
@@ -284,6 +287,15 @@ lemma tprovable_allBallOrBall_imp {A B : Semiformula V ℒₒᵣ 1} (hA : A.shif
     cl_prover [h₁, h₂, h₃, h₄, h₅];
   have key' : T.internalize V ⊢ ∼(∀¹ A) 🡒 allBallOrBall A B 🡒 ∀¹ B := by simpa using key;
   cl_prover [key']
+
+/-- The disjunction of two internal prenex $\Gamma_n$ sentences is internally equivalent to an
+internal prenex $\Gamma_n$ sentence. -/
+axiom exists_isPrenexHierarchy_tprovable_or_iff {V : Type*} [ORingStructure V]
+    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {Γ : Polarity} {n : ℕ}
+    {φ ψ : Formula V ℒₒᵣ} (hφs : φ.shift = φ) (hψs : ψ.shift = ψ)
+    (hφ : IsPrenexHierarchy Γ n φ.val) (hψ : IsPrenexHierarchy Γ n ψ.val) :
+    ∃ χ : Formula V ℒₒᵣ, χ.shift = χ ∧ IsPrenexHierarchy Γ n χ.val ∧
+      T.internalize V ⊢ φ ⋎ ψ 🡘 χ
 
 end Bootstrapping
 end FFL.FirstOrder.Arithmetic

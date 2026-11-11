@@ -77,6 +77,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.FirstOrder.Arithmetic.provable_diagonalRamseyTwoColours_PA:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.provable_diagonalRamseyTwoColours_PA
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.not_provable_fermatLastTheorem_IOpen:

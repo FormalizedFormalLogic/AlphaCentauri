@@ -20,7 +20,7 @@ open Entailment Formula
 variable {α : Type*}
 
 /-- - [GJ11] -/
-abbrev Logic.ILR : Logic α := Logic.ofAxioms {Axioms.R A B C | (A) (B) (C)}
+abbrev Logic.ILR : Logic α := Logic.ofILAxioms {Axioms.R A B C | (A) (B) (C)}
 
 notation "𝐈𝐋𝐑" => Logic.ILR
 
@@ -48,7 +48,7 @@ end Verbrugge.Model
 
 namespace Logic
 
-open ofAxioms Veltman Veltman.Model Veltman.Model.World
+open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
@@ -78,7 +78,7 @@ instance : (𝐈𝐋𝐌₀ : Logic α) ⪯ 𝐈𝐋𝐑 :=
   weakerThan_iff.mpr <| subset_of_provable <| by rintro _ ⟨A, B, C, rfl⟩; exact ILR.axiomM₀
 
 theorem ILR.sound [M.IsILR] (h : 𝐈𝐋𝐑 ⊢ A) : M ⊧ A :=
-  ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomR) h
+  ofILAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomR) h
 
 instance : Consistent (𝐈𝐋𝐑 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILR.sound (M := pointModel fun _ ↦ False) h 0
@@ -89,9 +89,9 @@ theorem ILR.complete_verbrugge {α : Type} {A : Formula α}
     𝐈𝐋𝐑 ⊢ A := by
   classical
   by_contra hA;
-  have := ofAxioms.nonempty_countermodelWorld hA;
+  have := ofILAxioms.nonempty_countermodelWorld hA;
   have := Verbrugge.countermodel.hasR (A₀ := A) fun {_ _ _} ↦ ILR.axiomR;
-  exact ofAxioms.not_models_verbrugge_countermodel hA (h _)
+  exact ofILAxioms.not_models_verbrugge_countermodel hA (h _)
 
 end Logic
 

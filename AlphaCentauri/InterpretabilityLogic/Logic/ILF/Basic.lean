@@ -18,13 +18,13 @@ open Entailment Formula
 variable {α : Type*}
 
 /-- - [Sve91] -/
-abbrev Logic.ILF : Logic α := Logic.ofAxioms {Axioms.F A | (A)}
+abbrev Logic.ILF : Logic α := Logic.ofILAxioms {Axioms.F A | (A)}
 
 notation "𝐈𝐋𝐅" => Logic.ILF
 
 namespace Logic
 
-open ofAxioms
+open ofILAxioms
 
 variable {A B C : Formula α}
 
@@ -37,14 +37,14 @@ open Veltman Veltman.Model Veltman.Model.World
 variable {κ α : Type} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
 theorem ILF.sound [M.IsIL] [M.HasW] (h : 𝐈𝐋𝐅 ⊢ A) : M ⊧ A :=
-  ofAxioms.sound (by rintro _ ⟨A, rfl⟩ x; exact forces_axiomF) h
+  ofILAxioms.sound (by rintro _ ⟨A, rfl⟩ x; exact forces_axiomF) h
 
 instance : Consistent (𝐈𝐋𝐅 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILF.sound (M := pointModel fun _ ↦ False) h 0
 
 instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐅 :=
   .of_unprovable_provable (φ := Axioms.F (#0)) (fun h ↦ by
-    have H := ofAxioms.sound (M := countermodelW) (𝔸 := ∅) (by simp) h 0;
+    have H := ofILAxioms.sound (M := countermodelW) (𝔸 := ∅) (by simp) h 0;
     have h₁ : (0 : countermodelW.World) ⊩[countermodelW] #0 ▷ ◇(#0) := by
       intro u _ hu;
       exact ⟨1, Or.inl ⟨rfl, hu, by decide⟩,

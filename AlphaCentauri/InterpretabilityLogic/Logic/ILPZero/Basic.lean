@@ -19,7 +19,7 @@ open Entailment Formula
 variable {α : Type*}
 
 /-- - [GJ08] -/
-abbrev Logic.ILP₀ : Logic α := Logic.ofAxioms {Axioms.P₀ A B | (A) (B)}
+abbrev Logic.ILP₀ : Logic α := Logic.ofILAxioms {Axioms.P₀ A B | (A) (B)}
 
 notation "𝐈𝐋𝐏₀" => Logic.ILP₀
 
@@ -35,14 +35,14 @@ end Verbrugge.Model
 
 namespace Logic
 
-open ofAxioms Veltman Veltman.Model Veltman.Model.World
+open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 @[simp] lemma ILP₀.axiomP₀ : 𝐈𝐋𝐏₀ ⊢ Axioms.P₀ A B := axm ⟨A, B, rfl⟩
 
 theorem ILP₀.sound [M.IsIL] [M.HasR] (h : 𝐈𝐋𝐏₀ ⊢ A) : M ⊧ A :=
-  ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomP₀) h
+  ofILAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomP₀) h
 
 instance : Consistent (𝐈𝐋𝐏₀ : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILP₀.sound (M := pointModel fun _ ↦ False) h 0
@@ -64,7 +64,7 @@ private instance : countermodelPZeroM₀.IsIL where
 
 instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐏₀ :=
   .of_unprovable_provable (φ := Axioms.P₀ (#0) (#3)) (fun h ↦ by
-    have H := ofAxioms.sound (M := countermodelPZeroM₀) (𝔸 := ∅) (by simp) h 0;
+    have H := ofILAxioms.sound (M := countermodelPZeroM₀) (𝔸 := ∅) (by simp) h 0;
     have h₁ : (0 : countermodelPZeroM₀.World) ⊩[countermodelPZeroM₀] #0 ▷ ◇(#3) := by
       intro v _ hv;
       obtain rfl : v = 2 := hv;
@@ -79,9 +79,9 @@ theorem ILP₀.complete_verbrugge {α : Type} {A : Formula α}
     𝐈𝐋𝐏₀ ⊢ A := by
   classical
   by_contra hA;
-  have := ofAxioms.nonempty_countermodelWorld hA;
+  have := ofILAxioms.nonempty_countermodelWorld hA;
   have := Verbrugge.countermodel.hasP₀ (A₀ := A) fun {_ _} ↦ ILP₀.axiomP₀;
-  exact ofAxioms.not_models_verbrugge_countermodel hA (h _)
+  exact ofILAxioms.not_models_verbrugge_countermodel hA (h _)
 
 end Logic
 

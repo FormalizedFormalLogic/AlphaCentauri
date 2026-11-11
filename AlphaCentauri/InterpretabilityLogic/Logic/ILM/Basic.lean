@@ -22,13 +22,13 @@ open Entailment Formula
 variable {α : Type*}
 
 /-- - [Vis90, §6.4] -/
-abbrev Logic.ILM : Logic α := Logic.ofAxioms {Axioms.M A B C | (A) (B) (C)}
+abbrev Logic.ILM : Logic α := Logic.ofILAxioms {Axioms.M A B C | (A) (B) (C)}
 
 notation "𝐈𝐋𝐌" => Logic.ILM
 
 namespace Logic
 
-open ofAxioms
+open ofILAxioms
 
 variable {A B C : Formula α}
 
@@ -469,7 +469,7 @@ end mAdequateClosure
 
 namespace MaximalConsistentSet
 
-open Logic.ofAxioms
+open Logic.ofILAxioms
 
 variable {Φ : Finset (Formula α)} [MAdequate Φ] {Γ Δ : MaximalConsistentSet 𝐈𝐋𝐌 Φ}
   {B C E : Formula α}
@@ -618,7 +618,7 @@ instance : Std.Irrefl (countermodelM Φ).Rel := ⟨fun _ h ↦ h.1.irrefl⟩
 instance [Adequate Φ] : (countermodelM Φ).IsIL where
   rel_of_s_left h := h.1.1.1
   rel_of_s_right h := h.1.1.2
-  s_refl h := ⟨countermodel.s_refl Logic.ofAxioms.rhd_refl h, List.prefix_refl _, fun h ↦ h⟩
+  s_refl h := ⟨countermodel.s_refl Logic.ofILAxioms.rhd_refl h, List.prefix_refl _, fun h ↦ h⟩
   s_trans h₁ h₂ := ⟨countermodel.s_trans h₁.1 h₂.1, h₁.2.1.trans h₂.2.1, fun h ↦ h₂.2.2 (h₁.2.2 h)⟩
   s_of_rel h₁ h₂ := ⟨countermodel.s_of_rel h₁ h₂, h₂.2, fun h ↦ h₂.1.box_mem_of_box_mem h⟩
 
@@ -665,7 +665,7 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
         ⟨hΔ.toSuccessor, List.prefix_append _ _⟩
       obtain ⟨v, hS, hv⟩ := h _ hR ((ihB hB).mpr hBΔ);
       have hCC : C ▷ C ∈ x.set :=
-        (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofAxioms.rhd_refl;
+        (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofILAxioms.rhd_refl;
       exact (hS.1.2 C (List.prefix_refl _) hΔ (hΔ.box_neg_mem hCC)).2.2.1 <| (ihC hC).mp hv;
     · intro h u Rxu hu;
       replace hu := (ihB hB).mp hu;
@@ -678,13 +678,13 @@ lemma truthlemma {x : (countermodelM Φ).World} {A : Formula α} (hA : A ∈ Φ)
           have h₁ : x.seq ++ [F'] = x.seq ++ [F] :=
             (List.prefix_of_prefix_length_le hpre' hpre (by simp)).eq_of_length (by simp);
           simpa using h₁;
-        · refine ⟨⊥, .bot, Rxu.1.criticalSuccessor_bot Logic.ofAxioms.rhd_bot, ?_⟩;
+        · refine ⟨⊥, .bot, Rxu.1.criticalSuccessor_bot Logic.ofILAxioms.rhd_bot, ?_⟩;
           intro F' hpre' hcrit';
           exact (hc ⟨F', hpre', hcrit'⟩).elim
       obtain ⟨F, hF, hcrit, huniq⟩ := hF;
       obtain ⟨Θ, hΘ, hCΘ, hbox⟩ := hcrit.exists_criticalSuccessor_box_subset hF h hu;
       refine ⟨u.withSet Θ hbox, ⟨?_, List.prefix_refl _, hbox⟩, (ihC hC).mpr hCΘ⟩;
-      apply countermodel.s_of_rhd_refl (y := u.withSet Θ hbox) Logic.ofAxioms.rhd_refl Rxu
+      apply countermodel.s_of_rhd_refl (y := u.withSet Θ hbox) Logic.ofILAxioms.rhd_refl Rxu
         ⟨hΘ.toSuccessor, Rxu.2⟩;
       intro F' hpre' hcrit';
       obtain rfl := huniq F' hpre' hcrit';
@@ -714,7 +714,7 @@ theorem ILM.semantics_TFAE : [
   ].TFAE := by
   tfae_have 1 → 2 := by
     intro h _ _ M _;
-    exact ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM) h;
+    exact ofILAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM) h;
   tfae_have 2 → 3 := by
     intro h _ _ _ M _;
     exact h M;
@@ -754,7 +754,7 @@ theorem ILM.iff_valid_finite :
 end
 
 open scoped Veltman
-open Entailment Veltman.Model Veltman.Model.World ofAxioms
+open Entailment Veltman.Model Veltman.Model.World ofILAxioms
 
 variable {α : Type*}
 

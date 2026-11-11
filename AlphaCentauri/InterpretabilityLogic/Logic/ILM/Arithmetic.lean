@@ -26,7 +26,7 @@ variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T]
 
 
 theorem Logic.ILM.arithmetical_soundness [𝔍.M] (h : 𝐈𝐋𝐌 ⊢ A) : T₀ ⊢ A.interpret f 𝔅 𝔍 := by
-  apply Logic.ofAxioms.arithmetical_soundness _ h;
+  apply Logic.ofILAxioms.arithmetical_soundness _ h;
   rintro _ ⟨A, B, C, rfl⟩;
   dsimp only [interpret];
   generalize A.interpret f 𝔅 𝔍 = σ, B.interpret f 𝔅 𝔍 = τ, C.interpret f 𝔅 𝔍 = χ;

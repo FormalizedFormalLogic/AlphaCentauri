@@ -22,7 +22,7 @@ open Entailment Formula
 variable {α : Type*}
 
 /-- - [Vis97] -/
-abbrev Logic.ILWStar : Logic α := Logic.ofAxioms {Axioms.Wstar A B C | (A) (B) (C)}
+abbrev Logic.ILWStar : Logic α := Logic.ofILAxioms {Axioms.Wstar A B C | (A) (B) (C)}
 
 notation "𝐈𝐋𝐖*" => Logic.ILWStar
 
@@ -40,7 +40,7 @@ end Veltman.Model
 
 namespace Logic
 
-open ofAxioms Veltman Veltman.Model Veltman.Model.World
+open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 

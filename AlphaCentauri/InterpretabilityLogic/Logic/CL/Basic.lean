@@ -16,48 +16,17 @@ open Entailment Formula
 
 variable {α : Type*}
 
-/-- $\mathbf{CL}$, presented as $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J2})$.
-
-- [KO21, Proposition 3.21]
--/
-abbrev Logic.CL : Logic α :=
-  ofAxiomsMinus ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)})
+/-- - [KO21, Proposition 3.21] -/
+abbrev Logic.CL : Logic α := Logic.ofCLAxioms ∅
 
 notation "𝐂𝐋" => Logic.CL
 
-namespace Veltman.Model
-
-variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
-
-class IsCL : Prop extends M.IsILMinus, M.IsJ1, M.IsJ2
-
-instance (priority := low) [M.IsILMinus] [M.IsJ1] [M.IsJ2] : M.IsCL := {}
-
-end Veltman.Model
-
 namespace Logic
-
-/-! ## The principle $\mathsf{J2}^+$ -/
-
-
-open ofAxiomsMinus
-
-variable {α : Type*}
-
-/-- - [KO21, Proposition 3.12.2] -/
-instance : HasAxiomJ2Plus (𝐂𝐋 : Logic α) where
-  J2Plus A B C := by
-    have h₁ : 𝐂𝐋 ⊢ B ▷ C ⋏ C ▷ C 🡒 (B ⋎ C) ▷ C := axiomJ3;
-    have h₂ : 𝐂𝐋 ⊢ C ▷ C := axiomJ1';
-    have h₃ : 𝐂𝐋 ⊢ A ▷ (B ⋎ C) ⋏ (B ⋎ C) ▷ C 🡒 A ▷ C := HasAxiomJ2.J2 _ _ _;
-    cl_prover [h₁, h₂, h₃];
-
 
 /-! ## Completeness -/
 
-
 open Entailment Formula MaximalConsistentSet Veltman Veltman.Model Veltman.Model.World
-open LabelledSet.Condition ofAxiomsMinus
+open LabelledSet.Condition
 
 variable {α : Type} {A : Formula α}
 
@@ -71,17 +40,14 @@ theorem CL.semantics_TFAE : [
   ].TFAE := by
   tfae_have 1 → 2 := by
     intro h _ _ M _;
-    apply ofAxiomsMinus.sound _ h;
-    rintro _ (⟨A, B, rfl⟩ | ⟨A, B, C, rfl⟩) x;
-    · exact forces_axiomJ1;
-    · exact forces_axiomJ2;
+    exact ofCLAxioms.sound (by simp) h;
   tfae_have 2 → 3 := by
     intro h _ _ _ M _;
     exact h M;
   tfae_have 3 → 1 := by
     intro h;
     classical
-    exact provable_of_models_labelledModel .J2Plus (h _);
+    exact ofCLAxioms.provable_of_models_labelledModel .J2Plus (h _);
   tfae_finish;
 
 theorem CL.iff_valid :

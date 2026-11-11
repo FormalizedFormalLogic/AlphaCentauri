@@ -19,7 +19,7 @@ open Entailment Formula
 variable {α : Type*}
 
 /-- - [Vis97] -/
-abbrev Logic.ILM₀ : Logic α := Logic.ofAxioms {Axioms.M₀ A B C | (A) (B) (C)}
+abbrev Logic.ILM₀ : Logic α := Logic.ofILAxioms {Axioms.M₀ A B C | (A) (B) (C)}
 
 notation "𝐈𝐋𝐌₀" => Logic.ILM₀
 
@@ -37,14 +37,14 @@ end Veltman.Model
 
 namespace Logic
 
-open ofAxioms Veltman Veltman.Model Veltman.Model.World
+open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 @[simp] lemma ILM₀.axiomM₀ : 𝐈𝐋𝐌₀ ⊢ Axioms.M₀ A B C := axm ⟨A, B, C, rfl⟩
 
 theorem ILM₀.sound [M.IsILMZero] (h : 𝐈𝐋𝐌₀ ⊢ A) : M ⊧ A :=
-  ofAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM₀) h
+  ofILAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM₀) h
 
 instance : Consistent (𝐈𝐋𝐌₀ : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILM₀.sound (M := pointModel fun _ ↦ False) h 0
@@ -70,7 +70,7 @@ theorem ILM₀.iff_valid :
 
 instance : (𝐈𝐋 : Logic ℕ) ⪱ 𝐈𝐋𝐌₀ :=
   .of_unprovable_provable (φ := Axioms.M₀ (#0) (#1) (#2)) (fun h ↦ by
-    have H := ofAxioms.sound (M := countermodelM₀) (𝔸 := ∅) (by simp) h 0;
+    have H := ofILAxioms.sound (M := countermodelM₀) (𝔸 := ∅) (by simp) h 0;
     have h₁ : (0 : countermodelM₀.World) ⊩[countermodelM₀] #0 ▷ #1 := by
       intro v _ hv;
       obtain rfl : v = 2 := hv;

@@ -23,13 +23,13 @@ open Entailment Formula
 variable {α : Type*}
 
 /-- - [Vis90, §6.2] -/
-abbrev Logic.ILW : Logic α := Logic.ofAxioms {Axioms.W A B | (A) (B)}
+abbrev Logic.ILW : Logic α := Logic.ofILAxioms {Axioms.W A B | (A) (B)}
 
 notation "𝐈𝐋𝐖" => Logic.ILW
 
 namespace Logic
 
-open ofAxioms
+open ofILAxioms
 
 variable {A B C : Formula α}
 
@@ -67,25 +67,25 @@ section
 
 open Entailment Formula
 
-namespace Logic.ofAxioms
+namespace Logic.ofILAxioms
 
 variable {α : Type*} {𝔸 : FormulaSet α} {X : FormulaSet α} {A B C : Formula α}
 
-lemma rhd_trans (h₁ : X *⊢[ofAxioms 𝔸] A ▷ B) (h₂ : X *⊢[ofAxioms 𝔸] B ▷ C) :
-    X *⊢[ofAxioms 𝔸] A ▷ C :=
+lemma rhd_trans (h₁ : X *⊢[ofILAxioms 𝔸] A ▷ B) (h₂ : X *⊢[ofILAxioms 𝔸] B ▷ C) :
+    X *⊢[ofILAxioms 𝔸] A ▷ C :=
   Context.of axiomJ2 ⨀ K_intro h₁ h₂
 
-lemma or_rhd (h₁ : X *⊢[ofAxioms 𝔸] A ▷ C) (h₂ : X *⊢[ofAxioms 𝔸] B ▷ C) :
-    X *⊢[ofAxioms 𝔸] (A ⋎ B) ▷ C :=
+lemma or_rhd (h₁ : X *⊢[ofILAxioms 𝔸] A ▷ C) (h₂ : X *⊢[ofILAxioms 𝔸] B ▷ C) :
+    X *⊢[ofILAxioms 𝔸] (A ⋎ B) ▷ C :=
   Context.of axiomJ3 ⨀ K_intro h₁ h₂
 
-end Logic.ofAxioms
+end Logic.ofILAxioms
 
 variable {α : Type*} [DecidableEq α]
 
 namespace MaximalConsistentSet
 
-open Logic Logic.ofAxioms
+open Logic Logic.ofILAxioms
 
 variable {L : Logic α} {Φ : Finset (Formula α)} {Γ Δ : MaximalConsistentSet L Φ}
   {Y Z₁ Z₂ Z₁' Z₂' : Finset (Formula α × Formula α)} {p : Formula α × Formula α}
@@ -136,21 +136,21 @@ noncomputable def rank (Γ : MaximalConsistentSet L Φ) (E : Formula α) :
 
 section
 
-variable {𝔸 : FormulaSet α} {Γ : MaximalConsistentSet (ofAxioms 𝔸) Φ}
+variable {𝔸 : FormulaSet α} {Γ : MaximalConsistentSet (ofILAxioms 𝔸) Φ}
 
-lemma provable_rhd_or_of_inconsistent (h : (Γ.criticalSet F C ∪ {∼D}) *⊢[ofAxioms 𝔸] ⊥) :
-    Γ.literals *⊢[ofAxioms 𝔸] C ▷ (D ⋎ F) := by
+lemma provable_rhd_or_of_inconsistent (h : (Γ.criticalSet F C ∪ {∼D}) *⊢[ofILAxioms 𝔸] ⊥) :
+    Γ.literals *⊢[ofILAxioms 𝔸] C ▷ (D ⋎ F) := by
   rw [Set.union_singleton] at h;
-  have h₁ : ({A | □A ∈ Γ} ∪ (□·) '' {A | □A ∈ Γ}) *⊢[ofAxioms 𝔸]
+  have h₁ : ({A | □A ∈ Γ} ∪ (□·) '' {A | □A ∈ Γ}) *⊢[ofILAxioms 𝔸]
       C ⋏ □(∼C) 🡒 (Γ.rhdDisj F ⋎ ∼□(∼Γ.rhdDisj F)) ⋎ D := by
-    have hD : Γ.criticalSet F C *⊢[ofAxioms 𝔸] D := Context.of Entailment.dne ⨀ Context.deduct h;
+    have hD : Γ.criticalSet F C *⊢[ofILAxioms 𝔸] D := Context.of Entailment.dne ⨀ Context.deduct h;
     have := Context.deduct <| Context.deduct <| Context.deduct <| Context.deduct hD;
     cl_prover [this];
-  have h₂ : Γ.literals *⊢[ofAxioms 𝔸] □(C ⋏ □(∼C) 🡒 (Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) ⋎ D) := by
+  have h₂ : Γ.literals *⊢[ofILAxioms 𝔸] □(C ⋏ □(∼C) 🡒 (Γ.rhdDisj F ⋎ ◇Γ.rhdDisj F) ⋎ D) := by
     apply Context.weakening _ (box_of_provable h₁);
     rintro _ ⟨A, hA, rfl⟩;
     exact mem_literals hA;
-  have h₃ : Γ.literals *⊢[ofAxioms 𝔸] Γ.rhdDisj F ▷ F := by
+  have h₃ : Γ.literals *⊢[ofILAxioms 𝔸] Γ.rhdDisj F ▷ F := by
     apply fdisj_rhd;
     intro G hG;
     exact Context.by_axm <| mem_literals (Finset.mem_filter.mp hG).2;
@@ -168,7 +168,7 @@ lemma box_neg_not_mem_of_mem_rhdPairs (hE : IsRhdOperand Φ E) (hp : p ∈ Γ.rh
   apply rhd_not_mem_of_mem_rhdPairs hp;
   apply (mem_iff_provable <| Adequate.rhd_mem
     (.of_rhd_left <| mem_of_mem <| rhd_mem_of_mem_rhdPairs hp) hE).mpr;
-  have h₁ : ofAxioms 𝔸 ⊢ □(∼p.1) 🡒 p.1 ▷ E := C_trans (box_mono <| by cl_prover) axiomJ1;
+  have h₁ : ofILAxioms 𝔸 ⊢ □(∼p.1) 🡒 p.1 ▷ E := C_trans (box_mono <| by cl_prover) axiomJ1;
   exact Context.of h₁ ⨀ Context.by_axm (mem_literals h);
 
 /-- Either `C` has an `E`-critical solution, or `Γ` proves that `C` interprets the disjunction of
@@ -176,10 +176,10 @@ the formulas `◇B` for `(B, _) ∈ Z₁`, the formulas `B` for `(B, _) ∈ Z₂
 lemma exists_criticalSolution_or_provable (hE : IsRhdOperand Φ E) (hp : p ∈ Γ.rhdPairs E)
     (hZ₁ : Z₁ ⊆ Γ.rhdPairs E) :
     (∃ Δ, CriticalSolution E p.2 Z₁ Z₂ Γ Δ) ∨
-      Γ.literals *⊢[ofAxioms 𝔸]
+      Γ.literals *⊢[ofILAxioms 𝔸]
         p.2 ▷ (((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj) ⋎ E) := by
   by_cases hc : (Γ.criticalSet E p.2 ∪
-      {∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj)}) *⊢[ofAxioms 𝔸] ⊥;
+      {∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj)}) *⊢[ofILAxioms 𝔸] ⊥;
   · exact .inr <| provable_rhd_or_of_inconsistent hc;
   have hpΓ := rhd_mem_of_mem_rhdPairs hp;
   have hs : □(∼p.2) ∉ Γ := by
@@ -191,26 +191,26 @@ lemma exists_criticalSolution_or_provable (hE : IsRhdOperand Φ E) (hp : p ∈ �
   obtain ⟨Δ, hΔ, hCΔ, hX⟩ :=
     exists_criticalSuccessor_of_consistent_union (.of_rhd_right <| mem_of_mem hpΓ) hc hs;
   have hD : ({∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj)} : FormulaSet α)
-      *⊢[ofAxioms 𝔸] ∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj) :=
+      *⊢[ofILAxioms 𝔸] ∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj) :=
     Context.by_axm rfl;
   refine .inl ⟨Δ, .mk hΔ hCΔ ?_ ?_⟩
   · intro q hq;
     have hqΓ := rhd_mem_of_mem_rhdPairs (hZ₁ hq);
     apply mem_of_provable hX (Adequate.box_neg_mem <| .of_rhd_left <| mem_of_mem hqΓ);
-    have h₁ : ofAxioms 𝔸 ⊢ ∼□(∼q.1) 🡒 (Z₁.image fun q ↦ ◇q.1).disj :=
+    have h₁ : ofILAxioms 𝔸 ⊢ ∼□(∼q.1) 🡒 (Z₁.image fun q ↦ ◇q.1).disj :=
       right_Fdisj_intro _ (Finset.mem_image_of_mem (fun q ↦ ◇q.1) hq);
     have h₂ := Context.of (Γ := {∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj)}) h₁;
     cl_prover [hD, h₂];
   · intro q hq;
     apply not_mem_of_provable_neg hX;
-    have h₁ : ofAxioms 𝔸 ⊢ q.1 🡒 (Z₂.image Prod.fst).disj :=
+    have h₁ : ofILAxioms 𝔸 ⊢ q.1 🡒 (Z₂.image Prod.fst).disj :=
       right_Fdisj_intro _ (Finset.mem_image_of_mem Prod.fst hq);
     have h₂ := Context.of (Γ := {∼((Z₁.image fun q ↦ ◇q.1).disj ⋎ (Z₂.image Prod.fst).disj)}) h₁;
     cl_prover [hD, h₂];
 
 omit [Adequate Φ] in
 lemma provable_dia_disj_erase {X : Finset (Formula α × Formula α)} :
-    ofAxioms 𝔸 ⊢ (X.image fun q ↦ ◇q.1).disj 🡒 ◇p.1 ⋎ ((X.erase p).image fun q ↦ ◇q.1).disj := by
+    ofILAxioms 𝔸 ⊢ (X.image fun q ↦ ◇q.1).disj 🡒 ◇p.1 ⋎ ((X.erase p).image fun q ↦ ◇q.1).disj := by
   apply left_Fdisj_intro;
   intro G hG;
   obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp hG;
@@ -220,7 +220,7 @@ lemma provable_dia_disj_erase {X : Finset (Formula α × Formula α)} :
   · exact C_trans (right_Fdisj_intro _ <|
       Finset.mem_image_of_mem (fun q ↦ ◇q.1) <| Finset.mem_erase.mpr ⟨hqp, hq⟩) or₂;
 
-variable (hW : ∀ {A B : Formula α}, ofAxioms 𝔸 ⊢ Axioms.W A B)
+variable (hW : ∀ {A B : Formula α}, ofILAxioms 𝔸 ⊢ Axioms.W A B)
 include hW
 
 /-- For a nonempty set `Y` of pairs in `Γ.rhdPairs E`, some nonempty `X ⊆ Y` consists of pairs
@@ -233,7 +233,7 @@ lemma exists_criticalSolution (hE : IsRhdOperand Φ E) (hY : Y ⊆ Γ.rhdPairs E
     (hne : Y.Nonempty) :
     ∃ X ⊆ Y, X.Nonempty ∧ ∀ p ∈ X, ∃ Δ, CriticalSolution E p.2 Y (Y \ X) Γ Δ := by
   by_contra! hc;
-  suffices h : ∀ X ⊆ Y, (∀ q ∈ Y \ X, Γ.literals *⊢[ofAxioms 𝔸]
+  suffices h : ∀ X ⊆ Y, (∀ q ∈ Y \ X, Γ.literals *⊢[ofILAxioms 𝔸]
       q.1 ▷ ((X.image fun q ↦ ◇q.1).disj ⋎ E)) → False from
     h Y subset_rfl (by simp);
   intro X;
@@ -246,12 +246,12 @@ lemma exists_criticalSolution (hE : IsRhdOperand Φ E) (hY : Y ⊆ Γ.rhdPairs E
       have h₁ := hP q (by simpa using hq);
       apply rhd_not_mem_of_mem_rhdPairs (hY hq);
       apply (mem_iff_provable <| Adequate.rhd_mem (.of_rhd_left <| mem_of_mem hqΓ) hE).mpr;
-      have h₂ : ofAxioms 𝔸 ⊢ ⊥ ⋎ E 🡒 E := by cl_prover;
+      have h₂ : ofILAxioms 𝔸 ⊢ ⊥ ⋎ E 🡒 E := by cl_prover;
       exact Context.of (rhd_mono_right <| by simpa using h₂) ⨀ h₁;
     obtain ⟨p, hp, hbad⟩ := hc X hXY hX;
     obtain ⟨Δ, hΔ⟩ | h₁ := exists_criticalSolution_or_provable (Z₂ := Y \ X) hE (hY (hXY hp)) hY;
     · exact hbad Δ hΔ;
-    have h₂ : Γ.literals *⊢[ofAxioms 𝔸]
+    have h₂ : Γ.literals *⊢[ofILAxioms 𝔸]
         (Y.image fun q ↦ ◇q.1).disj ▷ ((X.image fun q ↦ ◇q.1).disj ⋎ E) := by
       apply fdisj_rhd;
       intro G hG;
@@ -260,25 +260,25 @@ lemma exists_criticalSolution (hE : IsRhdOperand Φ E) (hY : Y ⊆ Γ.rhdPairs E
       · exact Context.of <| rhd_of_provable <|
           C_trans (right_Fdisj_intro _ <| Finset.mem_image_of_mem (fun q ↦ ◇q.1) hqX) or₁;
       · exact rhd_trans (Context.of axiomJ5) (hP q <| Finset.mem_sdiff.mpr ⟨hq, hqX⟩);
-    have h₃ : Γ.literals *⊢[ofAxioms 𝔸]
+    have h₃ : Γ.literals *⊢[ofILAxioms 𝔸]
         ((Y \ X).image Prod.fst).disj ▷ ((X.image fun q ↦ ◇q.1).disj ⋎ E) := by
       apply fdisj_rhd;
       intro G hG;
       obtain ⟨q, hq, rfl⟩ := Finset.mem_image.mp hG;
       exact hP q hq;
-    have h₄ : Γ.literals *⊢[ofAxioms 𝔸] p.1 ▷ ((X.image fun q ↦ ◇q.1).disj ⋎ E) :=
+    have h₄ : Γ.literals *⊢[ofILAxioms 𝔸] p.1 ▷ ((X.image fun q ↦ ◇q.1).disj ⋎ E) :=
       rhd_trans (Context.by_axm <| mem_literals <| rhd_mem_of_mem_rhdPairs (hY (hXY hp))) <|
         rhd_trans h₁ <| or_rhd (or_rhd h₂ h₃) (Context.of <| rhd_of_provable or₂);
-    have hd : ofAxioms 𝔸 ⊢ ◇p.1 🡒 ∼□(∼p.1) := C_id;
+    have hd : ofILAxioms 𝔸 ⊢ ◇p.1 🡒 ∼□(∼p.1) := C_id;
     have he := provable_dia_disj_erase (𝔸 := 𝔸) (X := X) (p := p);
-    have h₅ : Γ.literals *⊢[ofAxioms 𝔸] p.1 ▷ (((X.erase p).image fun q ↦ ◇q.1).disj ⋎ E) := by
-      have h₆ : ofAxioms 𝔸 ⊢ ((X.image fun q ↦ ◇q.1).disj ⋎ E) ⋏ □(∼p.1) 🡒
+    have h₅ : Γ.literals *⊢[ofILAxioms 𝔸] p.1 ▷ (((X.erase p).image fun q ↦ ◇q.1).disj ⋎ E) := by
+      have h₆ : ofILAxioms 𝔸 ⊢ ((X.image fun q ↦ ◇q.1).disj ⋎ E) ⋏ □(∼p.1) 🡒
           ((X.erase p).image fun q ↦ ◇q.1).disj ⋎ E := by
         cl_prover [hd, he];
       exact Context.of (rhd_mono_right h₆) ⨀ (Context.of hW ⨀ h₄);
-    have h₆ : Γ.literals *⊢[ofAxioms 𝔸] ((X.image fun q ↦ ◇q.1).disj ⋎ E) ▷
+    have h₆ : Γ.literals *⊢[ofILAxioms 𝔸] ((X.image fun q ↦ ◇q.1).disj ⋎ E) ▷
         (((X.erase p).image fun q ↦ ◇q.1).disj ⋎ E) := by
-      have h₇ : ofAxioms 𝔸 ⊢ (X.image fun q ↦ ◇q.1).disj ⋎ E 🡒
+      have h₇ : ofILAxioms 𝔸 ⊢ (X.image fun q ↦ ◇q.1).disj ⋎ E 🡒
           ◇p.1 ⋎ (((X.erase p).image fun q ↦ ◇q.1).disj ⋎ E) := by
         cl_prover [he];
       exact rhd_trans (Context.of <| rhd_of_provable h₇) <|
@@ -429,8 +429,8 @@ open RankedSet
 - [dJV99, Theorem 13]
 -/
 def rankedCountermodel (𝔸 : FormulaSet α) (Φ : Finset (Formula α))
-    [Nonempty (RankedSet (Logic.ofAxioms 𝔸) Φ)] :
-    Model (RankedSet (Logic.ofAxioms 𝔸) Φ) α where
+    [Nonempty (RankedSet (Logic.ofILAxioms 𝔸) Φ)] :
+    Model (RankedSet (Logic.ofILAxioms 𝔸) Φ) α where
   Rel' x y := ∃ E k, x.RelWith y E k
   S' w x y := (∃ E k, w.RelWith x E k) ∧ (∃ E k, w.RelWith y E k) ∧
     (x = y ∨ (∃ E k, x.RelWith y E k) ∨ ∃ E i j, w.seq ++ [(E, i)] <+: x.seq ∧
@@ -441,9 +441,9 @@ namespace rankedCountermodel
 
 open Model Model.World
 
-variable {𝔸 : FormulaSet α} [Nonempty (RankedSet (Logic.ofAxioms 𝔸) Φ)]
+variable {𝔸 : FormulaSet α} [Nonempty (RankedSet (Logic.ofILAxioms 𝔸) Φ)]
 
-variable {x y z : RankedSet (Logic.ofAxioms 𝔸) Φ} {E : Formula α} {k : ℕ}
+variable {x y z : RankedSet (Logic.ofILAxioms 𝔸) Φ} {E : Formula α} {k : ℕ}
 
 lemma rel_isPrefix (h : (rankedCountermodel 𝔸 Φ).Rel x y) : x.seq <+: y.seq := by
   obtain ⟨E, k, h⟩ := h;
@@ -468,7 +468,7 @@ lemma relWith_of_rel (h : (rankedCountermodel 𝔸 Φ).Rel x y) (hp : x.seq ++ [
   exact h
 
 lemma rel_extend {hE : IsRhdOperand Φ E} {hk : k ≤ (Φ ×ˢ Φ).card}
-    {Δ : MaximalConsistentSet (Logic.ofAxioms 𝔸) Φ} (h : CriticalSuccessor E x.set Δ)
+    {Δ : MaximalConsistentSet (Logic.ofILAxioms 𝔸) Φ} (h : CriticalSuccessor E x.set Δ)
     (h₁ : ∀ p ∈ x.set.rhdPairs E, k ≤ x.set.rank E p → □(∼p.1) ∈ Δ)
     (h₂ : ∀ p ∈ x.set.rhdPairs E, k < x.set.rank E p → p.1 ∉ Δ) :
     (rankedCountermodel 𝔸 Φ).Rel x (x.extend E k hE hk Δ h.toSuccessor) :=
@@ -530,7 +530,7 @@ instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).HasW := HasW.of_finite <| 
 
 instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).IsILW := {}
 
-variable [Adequate Φ] (hW : ∀ {A B : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.W A B)
+variable [Adequate Φ] (hW : ∀ {A B : Formula α}, Logic.ofILAxioms 𝔸 ⊢ Axioms.W A B)
 include hW
 
 lemma exists_rel_of_mem_rhdPairs {x : (rankedCountermodel 𝔸 Φ).World} {E : Formula α}
@@ -560,7 +560,7 @@ lemma truthlemma {x : (rankedCountermodel 𝔸 Φ).World} {A : Formula α} (hA :
     · intro h;
       by_contra hn;
       obtain ⟨Δ, hΔ, hc⟩ := exists_successor_of_box_not_mem hA hn;
-      have hcrit := hΔ.criticalSuccessor_bot Logic.ofAxioms.rhd_bot;
+      have hcrit := hΔ.criticalSuccessor_bot Logic.ofILAxioms.rhd_bot;
       have hr {p} (hp : p ∈ x.set.rhdPairs ⊥) : x.set.rank ⊥ p < (Φ ×ˢ Φ).card :=
         rank_lt hW .bot hp;
       have hxy := rel_extend (x := x) (k := (Φ ×ˢ Φ).card) (hE := .bot) (hk := le_rfl) hcrit
@@ -578,7 +578,7 @@ lemma truthlemma {x : (rankedCountermodel 𝔸 Φ).World} {A : Formula α} (hA :
       by_contra hn;
       have hp : (B, B) ∈ x.set.rhdPairs C := Finset.mem_filter.mpr ⟨by simp [hB],
         (mem_iff_provable (Adequate.rhd_mem hB' hB')).mpr <|
-          Context.of Logic.ofAxioms.rhd_refl, hn⟩;
+          Context.of Logic.ofILAxioms.rhd_refl, hn⟩;
       obtain ⟨y, hxy, hy, hBy⟩ := exists_rel_of_mem_rhdPairs hW hC' hp;
       obtain ⟨v, hS, hv⟩ := h y hxy <| (ihB hB).mpr hBy;
       have hy' : x.seq ++ [(C, x.set.rank C (B, B))] <+: y.seq := hy ▸ List.prefix_refl _;
@@ -590,7 +590,7 @@ lemma truthlemma {x : (rankedCountermodel 𝔸 Φ).World} {A : Formula α} (hA :
           exact ⟨j, hv⟩
       obtain ⟨j, hj⟩ := hlabel;
       have hCC : C ▷ C ∈ x.set :=
-        (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofAxioms.rhd_refl;
+        (mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr <| Context.of Logic.ofILAxioms.rhd_refl;
       exact (relWith_of_rel hS.2.1 hj).criticalSuccessor.not_mem hCC <| (ihC hC).mp hv;
     · intro h u Rxu hu;
       replace hu := (ihB hB).mp hu;
@@ -616,39 +616,39 @@ end Veltman
 
 /-! ### Completeness -/
 
-namespace Logic.ofAxioms
+namespace Logic.ofILAxioms
 
 open Veltman Veltman.Model.World MaximalConsistentSet
 
 variable {𝔸 : FormulaSet α} {Φ : Finset (Formula α)} {A : Formula α}
 
-instance [Entailment.Consistent (ofAxioms 𝔸)] : Nonempty (RankedSet (ofAxioms 𝔸) Φ) := by
-  obtain ⟨Γ, -⟩ := exists_consistent_union (Φ := Φ) (L := ofAxioms 𝔸) (X := ∅) <| by
+instance [Entailment.Consistent (ofILAxioms 𝔸)] : Nonempty (RankedSet (ofILAxioms 𝔸) Φ) := by
+  obtain ⟨Γ, -⟩ := exists_consistent_union (Φ := Φ) (L := ofILAxioms 𝔸) (X := ∅) <| by
     intro h;
-    exact Entailment.Consistent.not_inconsistent (𝓢 := ofAxioms 𝔸) fun _ ↦
+    exact Entailment.Consistent.not_inconsistent (𝓢 := ofILAxioms 𝔸) fun _ ↦
       efq ⨀ Context.emptyPrf h;
   exact ⟨⟨Γ, [], by simp, by simp, by simp⟩⟩
 
-/-- If an extension `ofAxioms 𝔸` of $\mathbf{IL}$ proving $\mathsf{W}$ does not prove `A`, then `A`
-fails at some world of the ranked countermodel over the adequate closure of `{A}`.
+/-- If an extension `ofILAxioms 𝔸` of $\mathbf{IL}$ proving $\mathsf{W}$ does not prove `A`, then
+`A` fails at some world of the ranked countermodel over the adequate closure of `{A}`.
 
 - [dJV99, Theorem 13]
 -/
-lemma not_models_rankedCountermodel [Entailment.Consistent (ofAxioms 𝔸)]
-    (hW : ∀ {A B : Formula α}, ofAxioms 𝔸 ⊢ Axioms.W A B) (h : ofAxioms 𝔸 ⊬ A) :
+lemma not_models_rankedCountermodel [Entailment.Consistent (ofILAxioms 𝔸)]
+    (hW : ∀ {A B : Formula α}, ofILAxioms 𝔸 ⊢ Axioms.W A B) (h : ofILAxioms 𝔸 ⊬ A) :
     ¬rankedCountermodel 𝔸 (adequateClosure {A}) ⊧ A := by
   intro hM;
-  have hX : ({∼A} : FormulaSet α) *⊬[ofAxioms 𝔸] ⊥ := by
+  have hX : ({∼A} : FormulaSet α) *⊬[ofILAxioms 𝔸] ⊥ := by
     intro h₁;
     apply h;
-    have h₂ : ofAxioms 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+    have h₂ : ofILAxioms 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
     cl_prover [h₂];
   obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := adequateClosure {A}) hX;
   have hA : A ∈ adequateClosure {A} := adequateClosure.subset (by simp);
   exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
     (rankedCountermodel.truthlemma hW hA).mp <| hM ⟨Γ, [], by simp, by simp, by simp⟩
 
-end Logic.ofAxioms
+end Logic.ofILAxioms
 
 end
 
@@ -666,7 +666,7 @@ theorem ILW.semantics_TFAE : [
   ].TFAE := by
   tfae_have 1 → 2 := by
     intro h _ _ M _;
-    exact ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomW) h;
+    exact ofILAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomW) h;
   tfae_have 2 → 3 := by
     intro h _ _ _ M _;
     exact h M;
@@ -675,7 +675,7 @@ theorem ILW.semantics_TFAE : [
     classical
     by_contra hA;
     have : Entailment.Consistent (𝐈𝐋𝐖 : Logic α) := .of_unprovable hA;
-    exact Logic.ofAxioms.not_models_rankedCountermodel (fun {_ _} ↦ ILW.axiomW) hA <|
+    exact Logic.ofILAxioms.not_models_rankedCountermodel (fun {_ _} ↦ ILW.axiomW) hA <|
       h (Veltman.rankedCountermodel _ (adequateClosure {A}));
   tfae_finish;
 

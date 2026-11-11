@@ -39,7 +39,7 @@ negation of one.
 - [MV20, Definition 9]
 -/
 def CountermodelWorld (𝔸 : FormulaSet α) (A₀ : Formula α) : Type _ :=
-  {Γ : MaximalConsistentTheory (Logic.ofAxioms 𝔸) // ∃ G ∈ markers A₀, G ∈ Γ ∧ □(∼G) ∈ Γ}
+  {Γ : MaximalConsistentTheory (Logic.ofILAxioms 𝔸) // ∃ G ∈ markers A₀, G ∈ Γ ∧ □(∼G) ∈ Γ}
 
 /-- The generalised Veltman model on `CountermodelWorld 𝔸 A₀` in which `u ≺[w] V` holds when `u`
 and the elements of `V` are successors of `w` and every `S`-assuring successor `u` of `w` has an
@@ -183,7 +183,7 @@ lemma truthlemma {w : (countermodel 𝔸 A₀).World} {A : Formula α} (hA : A �
         exact hv.2;
 
 /-- - [MV20, Theorem 23] -/
-lemma hasP₀ (hP₀ : ∀ {A B : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.P₀ A B) :
+lemma hasP₀ (hP₀ : ∀ {A B : Formula α}, Logic.ofILAxioms 𝔸 ⊢ Axioms.P₀ A B) :
     (countermodel 𝔸 A₀).HasP₀ where
   exists_subset_of_rel_rel_s {w x u V Z} hwx hxu h hZ := by
     use {z ∈ Z | x ≺ z};
@@ -203,7 +203,7 @@ lemma hasP₀ (hP₀ : ∀ {A B : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.P�
       · exact hxz;
 
 /-- - [MV20, Theorem 25] -/
-lemma hasR (hR : ∀ {A B C : Formula α}, Logic.ofAxioms 𝔸 ⊢ Axioms.R A B C) :
+lemma hasR (hR : ∀ {A B C : Formula α}, Logic.ofILAxioms 𝔸 ⊢ Axioms.R A B C) :
     (countermodel 𝔸 A₀).HasR where
   exists_subset_of_rel_rel_s {w x u V} hwx hxu h C hC := by
     have aux : ∀ S, AssuringSuccessor S w.1 x.1 →
@@ -251,21 +251,21 @@ end Verbrugge
 
 /-! ### Completeness -/
 
-namespace Logic.ofAxioms
+namespace Logic.ofILAxioms
 
 open Verbrugge Verbrugge.Model.World
 
 variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α} {A : Formula α}
 
 omit [DecidableEq α] in
-private lemma exists_neg_mem (h : ofAxioms 𝔸 ⊬ A) :
-    ∃ Γ : MaximalConsistentTheory (ofAxioms 𝔸), ∼A ∈ Γ ∧ □(∼∼A) ∈ Γ := by
-  have hX : (insert (∼A) (insert (□(∼∼A)) ∅) : FormulaSet α) *⊬[ofAxioms 𝔸] ⊥ := by
+private lemma exists_neg_mem (h : ofILAxioms 𝔸 ⊬ A) :
+    ∃ Γ : MaximalConsistentTheory (ofILAxioms 𝔸), ∼A ∈ Γ ∧ □(∼∼A) ∈ Γ := by
+  have hX : (insert (∼A) (insert (□(∼∼A)) ∅) : FormulaSet α) *⊬[ofILAxioms 𝔸] ⊥ := by
     intro h₁;
     apply h;
-    have h₂ : ofAxioms 𝔸 ⊢ □(∼∼A) 🡒 ∼∼A :=
+    have h₂ : ofILAxioms 𝔸 ⊢ □(∼∼A) 🡒 ∼∼A :=
       Context.emptyPrf <| Context.deduct <| Context.deduct h₁;
-    have h₃ : ofAxioms 𝔸 ⊢ □(∼∼A) := Logic.ExtendsGL.axiomL ⨀ Logic.provable_box h₂;
+    have h₃ : ofILAxioms 𝔸 ⊢ □(∼∼A) := Logic.ExtendsGL.axiomL ⨀ Logic.provable_box h₂;
     exact Entailment.dne ⨀ (h₂ ⨀ h₃);
   obtain ⟨Γ, hΓ⟩ := MaximalConsistentTheory.exists_superset hX;
   use Γ;
@@ -273,15 +273,15 @@ private lemma exists_neg_mem (h : ofAxioms 𝔸 ⊬ A) :
   · exact hΓ (by simp);
   · exact hΓ (by simp);
 
-lemma nonempty_countermodelWorld (h : ofAxioms 𝔸 ⊬ A) : Nonempty (CountermodelWorld 𝔸 A) := by
+lemma nonempty_countermodelWorld (h : ofILAxioms 𝔸 ⊬ A) : Nonempty (CountermodelWorld 𝔸 A) := by
   obtain ⟨Γ, hΓ, hΓ'⟩ := exists_neg_mem h;
   exact ⟨⟨Γ, ∼A, neg_mem_markers_of_mem mem_subformulas_self, hΓ, hΓ'⟩⟩
 
-/-- If `ofAxioms 𝔸` does not prove `A`, then `A` fails at some world of the countermodel.
+/-- If `ofILAxioms 𝔸` does not prove `A`, then `A` fails at some world of the countermodel.
 
 - [MV20, Theorem 12]
 -/
-lemma not_models_verbrugge_countermodel [Nonempty (CountermodelWorld 𝔸 A)] (h : ofAxioms 𝔸 ⊬ A) :
+lemma not_models_verbrugge_countermodel [Nonempty (CountermodelWorld 𝔸 A)] (h : ofILAxioms 𝔸 ⊬ A) :
     ¬countermodel 𝔸 A ⊧ A := by
   intro hM;
   obtain ⟨Γ, hΓ, hΓ'⟩ := exists_neg_mem h;
@@ -289,7 +289,7 @@ lemma not_models_verbrugge_countermodel [Nonempty (CountermodelWorld 𝔸 A)] (h
     (countermodel.truthlemma mem_subformulas_self).mp <|
       hM ⟨Γ, ∼A, neg_mem_markers_of_mem mem_subformulas_self, hΓ, hΓ'⟩
 
-end Logic.ofAxioms
+end Logic.ofILAxioms
 
 end FFL.InterpretabilityLogic
 

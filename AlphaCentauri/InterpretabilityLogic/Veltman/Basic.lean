@@ -8,8 +8,7 @@ public import Foundation.Vorspiel.Rel.CWF
 # Veltman semantics
 
 Veltman models, forcing, the frame conditions of $\mathbf{J1}$, $\mathbf{J2}$, $\mathbf{J4}$ and
-$\mathbf{J5}$ on $\mathbf{IL}^-$-frames, and the soundness of the extensions of $\mathbf{IL}^-$
-with respect to them.
+$\mathbf{J5}$, and the soundness of $\mathbf{CL}$ and its extensions with respect to them.
 -/
 
 @[expose] public section
@@ -173,6 +172,10 @@ instance [M.IsIL] : M.IsJ2 where
 
 instance [M.IsIL] : M.IsJ5 := ⟨s_of_rel⟩
 
+class IsCL (M : Model κ α) : Prop extends M.IsILMinus, M.IsJ1, M.IsJ2
+
+instance (priority := low) [M.IsILMinus] [M.IsJ1] [M.IsJ2] : M.IsCL := {}
+
 lemma IsIL.of_isILMinus [M.IsILMinus] [M.IsJ1] [M.IsJ2] [M.IsJ5] : M.IsIL where
   rel_of_s_left := IsILMinus.rel_of_s_left
   rel_of_s_right := IsJ4.rel_of_s_right
@@ -228,16 +231,16 @@ end Model.World
 
 end Veltman
 
-/-! ### Soundness of the sublogics of $\mathbf{IL}$ -/
+/-! ### Soundness of $\mathbf{CL}$ and its extensions -/
 
-namespace Logic.ofAxiomsMinus
+namespace Logic.ofCLAxioms
 
 open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : FormulaSet α} {A : Formula α}
 
 /-- - [KO21, Proposition 2.3] -/
-theorem sound [M.IsILMinus] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxiomsMinus 𝔸 ⊢ A) : M ⊧ A := by
+theorem sound [M.IsCL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofCLAxioms 𝔸 ⊢ A) : M ⊧ A := by
   intro x
   induction h generalizing x with
   | axm hA => exact h𝔸 _ hA x
@@ -253,11 +256,13 @@ theorem sound [M.IsILMinus] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxiomsMinus
     intro hx y Rxy hy
     exact hx y Rxy (ih y hy)
   | axiomL => exact forces_axiomL
+  | axiomJ1 => exact forces_axiomJ1
+  | axiomJ2 => exact forces_axiomJ2
   | axiomJ3 => exact forces_axiomJ3
   | axiomJ6 => exact forces_axiomJ6
   | _ => grind
 
-end Logic.ofAxiomsMinus
+end Logic.ofCLAxioms
 
 
 end FFL.InterpretabilityLogic

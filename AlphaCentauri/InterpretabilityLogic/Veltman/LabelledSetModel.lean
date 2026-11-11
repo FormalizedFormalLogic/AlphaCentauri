@@ -127,7 +127,7 @@ end labelledModel
 namespace LabelledSet.Condition
 
 variable {𝔸 : FormulaSet α} [ILMinusAdequate Φ]
-  {Γ Δ Θ : MaximalConsistentSet (ofAxiomsMinus 𝔸) Φ} {C F : Formula α}
+  {Γ Δ Θ : MaximalConsistentSet (ofCLAxioms 𝔸) Φ} {C F : Formula α}
 
 /-- Every successor of `Γ` is a weak `F'`-critical successor for some label `F'`, which is `F` if it
 is a weak `F`-critical successor. -/
@@ -137,19 +137,19 @@ private lemma exists_weakCriticalSuccessor (hΔ : Successor Γ Δ) (hF : IsRhdOp
   by_cases h : WeakCriticalSuccessor F Γ Δ
   · exact ⟨F, hF, h, fun _ ↦ rfl⟩
   · exact ⟨⊥, .bot, (hΔ.criticalSuccessor_bot <|
-      K_right ofAxiomsMinus.box_neg_iff_rhd_bot).weakCriticalSuccessor, by tauto⟩
+      K_right ofCLAxioms.box_neg_iff_rhd_bot).weakCriticalSuccessor, by tauto⟩
 
-/-- In the presence of $\mathbf{J1}$, a weak `C`-critical successor of `Γ` does not contain `C`. -/
-private lemma not_mem_of_weakCriticalSuccessor [(ofAxiomsMinus 𝔸).HasAxiomJ1]
+/-- A weak `C`-critical successor of `Γ` does not contain `C`. -/
+private lemma not_mem_of_weakCriticalSuccessor
     (hC : IsRhdOperand Φ C) (h : WeakCriticalSuccessor C Γ Δ) : C ∉ Δ :=
   h.not_mem <| (mem_iff_provable (Adequate.rhd_mem hC hC)).mpr <|
-    Context.of axiomJ1'
+    Context.of ofCLAxioms.rhd_refl
 
 /-- The condition for $\mathbf{CL}$.
 
 - [KO21, Theorem 5.1]
 -/
-def J2Plus [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus] : Condition (ofAxiomsMinus 𝔸) Φ where
+def J2Plus : Condition (ofCLAxioms 𝔸) Φ where
   toFun Γ Δ C Θ D := Successor Γ Θ ∧
     (WeakCriticalSuccessor C Γ Δ → D = C ∧ WeakCriticalSuccessor C Γ Θ ∧ C ∉ Θ)
   exists_of_rhd_mem hDE hΔ hD hF := by
@@ -166,10 +166,10 @@ def J2Plus [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus] : Condition (ofAxiomsMinus 𝔸
 
 open Model
 
-variable [Nonempty (LabelledSet (ofAxiomsMinus 𝔸) Φ)]
+variable [Nonempty (LabelledSet (ofCLAxioms 𝔸) Φ)]
 
 /-- - [KO21, Lemma 5.2] -/
-instance [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus] :
+instance :
     (labelledModel (J2Plus (𝔸 := 𝔸) (Φ := Φ))).IsJ2 where
   rel_of_s_right h := h.2.1
   s_trans h₁ h₂ := by
@@ -179,7 +179,7 @@ instance [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus] :
     exact ⟨h₅.trans h₃, h₃ ▸ h₆, h₃ ▸ h₇⟩
 
 /-- - [KO21, Lemma 5.2] -/
-instance [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus] [(ofAxiomsMinus 𝔸).HasAxiomJ1] :
+instance :
     (labelledModel (J2Plus (𝔸 := 𝔸) (Φ := Φ))).IsJ1 where
   s_refl {_ x} h :=
     ⟨h, h, fun hx ↦ ⟨rfl, hx, not_mem_of_weakCriticalSuccessor x.isRhdOperand_label hx⟩⟩
@@ -190,35 +190,35 @@ end Veltman
 
 /-! ### Completeness -/
 
-namespace Logic.ofAxiomsMinus
+namespace Logic.ofCLAxioms
 
 open Veltman Veltman.Model.World
 
 variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α} {A : Formula α}
 
 /-- If `A` holds in the labelled model over the adequate closure of `{A}` for a condition `c`,
-then `ofAxiomsMinus 𝔸` proves `A`.
+then `ofCLAxioms 𝔸` proves `A`.
 
 - [KO21, Theorem 5.1]
 -/
 lemma provable_of_models_labelledModel
-    (c : LabelledSet.Condition (ofAxiomsMinus 𝔸) (ilMinusAdequateClosure {A}))
-    (h : ∀ [Nonempty (LabelledSet (ofAxiomsMinus 𝔸) (ilMinusAdequateClosure {A}))],
+    (c : LabelledSet.Condition (ofCLAxioms 𝔸) (ilMinusAdequateClosure {A}))
+    (h : ∀ [Nonempty (LabelledSet (ofCLAxioms 𝔸) (ilMinusAdequateClosure {A}))],
       labelledModel c ⊧ A) :
-    ofAxiomsMinus 𝔸 ⊢ A := by
+    ofCLAxioms 𝔸 ⊢ A := by
   by_contra hA;
-  have hX : ({∼A} : FormulaSet α) *⊬[ofAxiomsMinus 𝔸] ⊥ := by
+  have hX : ({∼A} : FormulaSet α) *⊬[ofCLAxioms 𝔸] ⊥ := by
     intro h₁;
     apply hA;
-    have h₂ : ofAxiomsMinus 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+    have h₂ : ofCLAxioms 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
     cl_prover [h₂];
   obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := ilMinusAdequateClosure {A}) hX;
-  have : Nonempty (LabelledSet (ofAxiomsMinus 𝔸) (ilMinusAdequateClosure {A})) :=
+  have : Nonempty (LabelledSet (ofCLAxioms 𝔸) (ilMinusAdequateClosure {A})) :=
     ⟨⟨Γ, ⊥, .bot⟩⟩;
   exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
     (labelledModel.truthlemma (ilMinusAdequateClosure.subset (by simp))).mp <| h ⟨Γ, ⊥, .bot⟩
 
-end Logic.ofAxiomsMinus
+end Logic.ofCLAxioms
 
 
 end

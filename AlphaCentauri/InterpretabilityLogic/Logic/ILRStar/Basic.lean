@@ -17,7 +17,7 @@ open Entailment Formula
 variable {α : Type*}
 
 /-- - [GJ11] -/
-abbrev Logic.ILRStar : Logic α := Logic.ofAxioms {Axioms.Rstar A B C | (A) (B) (C)}
+abbrev Logic.ILRStar : Logic α := Logic.ofILAxioms {Axioms.Rstar A B C | (A) (B) (C)}
 
 notation "𝐈𝐋𝐑*" => Logic.ILRStar
 
@@ -35,7 +35,7 @@ end Veltman.Model
 
 namespace Logic
 
-open ofAxioms Veltman Veltman.Model Veltman.Model.World
+open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 

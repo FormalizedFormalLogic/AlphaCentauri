@@ -19,13 +19,13 @@ open Entailment Formula
 variable {α : Type*}
 
 /-- - [Sve91] -/
-abbrev Logic.ILKW1Zero : Logic α := Logic.ofAxioms {Axioms.KW1Zero A B | (A) (B)}
+abbrev Logic.ILKW1Zero : Logic α := Logic.ofILAxioms {Axioms.KW1Zero A B | (A) (B)}
 
 notation "𝐈𝐋𝐊𝐖𝟏⁰" => Logic.ILKW1Zero
 
 namespace Logic
 
-open ofAxioms
+open ofILAxioms
 
 variable {A B C : Formula α}
 

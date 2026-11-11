@@ -12,7 +12,7 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 
 An interpretability abstraction over a provability abstraction `𝔅` is a binary operator on
 sentences. Interpreting `□` by `𝔅` and `▷` by the operator, the theorems of a logic extending
-$\mathbf{IL}^-$ are provable under every realization once the arithmetical forms of its axioms
+$\mathbf{IL}$ are provable under every realization once the arithmetical forms of its axioms
 are.
 
 ## References
@@ -90,8 +90,8 @@ variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T]
   {𝔅 : Provability T₀ T} [𝔅.HBL] {𝔍 : Interpretability 𝔅} [𝔍.IL]
   {f : ProvabilityLogic.Realization α L} {𝔸 : FormulaSet α} {A : Formula α}
 
-theorem Logic.ofAxioms.arithmetical_soundness (h𝔸 : ∀ A ∈ 𝔸, T₀ ⊢ A.interpret f 𝔅 𝔍)
-    (h : ofAxioms 𝔸 ⊢ A) : T₀ ⊢ A.interpret f 𝔅 𝔍 := by
+theorem Logic.ofILAxioms.arithmetical_soundness (h𝔸 : ∀ A ∈ 𝔸, T₀ ⊢ A.interpret f 𝔅 𝔍)
+    (h : ofILAxioms 𝔸 ⊢ A) : T₀ ⊢ A.interpret f 𝔅 𝔍 := by
   induction h with
   | axm hA => exact h𝔸 _ hA;
   | mdp _ _ ih₁ ih₂ => exact ih₁ ⨀ ih₂;

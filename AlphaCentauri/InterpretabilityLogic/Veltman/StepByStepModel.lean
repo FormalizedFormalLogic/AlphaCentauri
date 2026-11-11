@@ -27,7 +27,7 @@ namespace FFL.InterpretabilityLogic
 
 section
 
-open Entailment Formula Logic Logic.ofAxioms MaximalConsistentTheory
+open Entailment Formula Logic Logic.ofILAxioms MaximalConsistentTheory
 
 namespace Veltman.StepByStep
 
@@ -45,7 +45,7 @@ map, and, for each `u`, the world supplying the boxed formulas, the criticality 
 further promises that its `≺[u]`-successors must satisfy. -/
 structure Node (𝔸 : FormulaSet α) where
   kind : Kind α
-  set : MaximalConsistentTheory (ofAxioms 𝔸)
+  set : MaximalConsistentTheory (ofILAxioms 𝔸)
   pre : Finset ℕ
   anc : Finset ℕ
   mu : ℕ → WithBot ℕ
@@ -72,13 +72,13 @@ def boxes (r : WithBot ℕ) : FormulaSet α :=
 def label (x y : ℕ) : FormulaSet α := (get y).cr x ∪ (get y).extra x ∪ boxes get ((get y).mu x)
 
 /-- The isolated world `n` labelled by `Δ`. -/
-def isolatedNode (n : ℕ) (Δ : MaximalConsistentTheory (ofAxioms 𝔸)) : Node 𝔸 :=
+def isolatedNode (n : ℕ) (Δ : MaximalConsistentTheory (ofILAxioms 𝔸)) : Node 𝔸 :=
   ⟨.isolated, Δ, ∅, {n}, fun _ ↦ ⊥, fun _ ↦ ∅, fun _ ↦ ∅⟩
 
 /-- The world `n` of kind `k` labelled by `Δ`, given the earlier worlds, where a world added to
 remove a deficiency of `A ▷ B` promises `ε A`. -/
 noncomputable def mk (ε : Formula α → FormulaSet α) (n : ℕ) (k : Kind α)
-    (Δ : MaximalConsistentTheory (ofAxioms 𝔸)) : Node 𝔸 :=
+    (Δ : MaximalConsistentTheory (ofILAxioms 𝔸)) : Node 𝔸 :=
   match k with
   | .isolated => isolatedNode n Δ
   | .problem a B =>
@@ -93,7 +93,7 @@ noncomputable def mk (ε : Formula α → FormulaSet α) (n : ℕ) (k : Kind α)
 
 end
 
-variable (Γ₀ : MaximalConsistentTheory (ofAxioms 𝔸)) (ε : Formula α → FormulaSet α)
+variable (Γ₀ : MaximalConsistentTheory (ofILAxioms 𝔸)) (ε : Formula α → FormulaSet α)
   (τ : ℕ → Job α)
 
 open Classical in
@@ -826,7 +826,7 @@ lemma assuring_cr {n u : ℕ} (hu : u ∈ (𝒩 n).pre) :
     · rw [Finset.not_nonempty_iff_eq_empty.mp hne];
       simpa using successor_of_mem_pre hu;
 
-variable (hM₀ : ∀ {A B C : Formula α}, ofAxioms 𝔸 ⊢ Axioms.M₀ A B C)
+variable (hM₀ : ∀ {A B C : Formula α}, ofILAxioms 𝔸 ⊢ Axioms.M₀ A B C)
 
 include hM₀ in
 lemma assuring_label {x u : ℕ} (hu : u ∈ (𝒩 x).pre) :
@@ -894,7 +894,7 @@ lemma boxedNeg_ssubset {Ω : Finset (Formula α)} (hτ : ∀ n, (τ n).Mem Ω) {
     obtain ⟨hΩ, -⟩ : (Job.problem a A B).Mem Ω := hτn ▸ hτ n
     refine ⟨A, Finset.mem_filter.mpr ⟨hΩ, hA⟩, fun hm ↦ ?_⟩;
     apply hAB;
-    exact mem_of_imp (C_trans (box_mono (show ofAxioms 𝔸 ⊢ ∼A 🡒 A 🡒 B by cl_prover)) axiomJ1)
+    exact mem_of_imp (C_trans (box_mono (show ofILAxioms 𝔸 ⊢ ∼A 🡒 A 🡒 B by cl_prover)) axiomJ1)
       (Finset.mem_filter.mp (h₁ hm)).2;
   · obtain ⟨-, -, has, B, hτn, hAB, hA, -, -, hB⟩ := this
     obtain ⟨-, hΩ⟩ : (Job.deficiency a s A B).Mem Ω := hτn ▸ hτ n
@@ -952,7 +952,7 @@ lemma kind_of_problem {n x : ℕ} {A B : Formula α} (hτn : τ n = .problem x A
   · simp;
   · exact absurd ⟨hx, by rwa [restr_of_lt hx]⟩ hc;
 
-variable (hε : ∀ {S : FormulaSet α} {Γ Δ : MaximalConsistentTheory (ofAxioms 𝔸)}
+variable (hε : ∀ {S : FormulaSet α} {Γ Δ : MaximalConsistentTheory (ofILAxioms 𝔸)}
   {A B : Formula α}, AssuringSuccessor S Γ Δ → A ▷ B ∈ Γ → A ∈ Δ →
     ∃ Θ, AssuringSuccessor (S ∪ ε A) Γ Θ ∧ B ∈ Θ ∧ □(∼B) ∈ Θ)
 
@@ -1092,23 +1092,23 @@ def jobFormulas (A : Formula α) : Finset (Formula α) :=
 
 lemma bot_mem_jobFormulas {A : Formula α} : ⊥ ∈ jobFormulas A := by simp [jobFormulas]
 
-variable (hM₀ : ∀ {A B C : Formula α}, ofAxioms 𝔸 ⊢ Axioms.M₀ A B C)
+variable (hM₀ : ∀ {A B C : Formula α}, ofILAxioms 𝔸 ⊢ Axioms.M₀ A B C)
   {ε : Formula α → FormulaSet α}
-  (hε : ∀ {S : FormulaSet α} {Γ Δ : MaximalConsistentTheory (ofAxioms 𝔸)} {A B : Formula α},
+  (hε : ∀ {S : FormulaSet α} {Γ Δ : MaximalConsistentTheory (ofILAxioms 𝔸)} {A B : Formula α},
     AssuringSuccessor S Γ Δ → A ▷ B ∈ Γ → A ∈ Δ →
       ∃ Θ, AssuringSuccessor (S ∪ ε A) Γ Θ ∧ B ∈ Θ ∧ □(∼B) ∈ Θ)
 
 include hM₀ hε in
-/-- A formula not provable in `ofAxioms 𝔸` fails at the world `0` of the model of the construction
+/-- A formula not provable in `ofILAxioms 𝔸` fails at the world `0` of the model of the construction
 for some initial maximal consistent set. -/
-lemma exists_not_forces {A : Formula α} (hA : ¬ofAxioms 𝔸 ⊢ A) :
-    ∃ Γ₀ : MaximalConsistentTheory (ofAxioms 𝔸),
+lemma exists_not_forces {A : Formula α} (hA : ¬ofILAxioms 𝔸 ⊢ A) :
+    ∃ Γ₀ : MaximalConsistentTheory (ofILAxioms 𝔸),
       ¬Model.World.Forces (model Γ₀ ε (enumJob (jobFormulas A).toList)) 0 A := by
   classical
-  have hX : ({∼A} : FormulaSet α) *⊬[ofAxioms 𝔸] ⊥ := by
+  have hX : ({∼A} : FormulaSet α) *⊬[ofILAxioms 𝔸] ⊥ := by
     intro h₁;
     apply hA;
-    have h₂ : ofAxioms 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
+    have h₂ : ofILAxioms 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
     cl_prover [h₂];
   obtain ⟨Γ₀, hΓ₀⟩ := MaximalConsistentTheory.exists_superset hX;
   use Γ₀;
@@ -1125,12 +1125,12 @@ end
 
 section
 
-open Entailment Formula Logic Logic.ofAxioms MaximalConsistentTheory
+open Entailment Formula Logic Logic.ofILAxioms MaximalConsistentTheory
 
 namespace Veltman.StepByStep
 
 variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α}
-  {Γ₀ : MaximalConsistentTheory (ofAxioms 𝔸)} {ε : Formula α → FormulaSet α} {τ : ℕ → Job α}
+  {Γ₀ : MaximalConsistentTheory (ofILAxioms 𝔸)} {ε : Formula α → FormulaSet α} {τ : ℕ → Job α}
   {Ω : Finset (Formula α)}
 
 local notation "𝒩" => node Γ₀ ε τ

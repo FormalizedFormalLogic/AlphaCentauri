@@ -121,38 +121,38 @@ and necessitation.
 
 - [Vis90, §6.1]
 -/
-inductive Logic.ofAxioms (𝔸 : FormulaSet α) : Logic α
-  | axm {A}          : A ∈ 𝔸 → ofAxioms 𝔸 A
-  | mdp {A B}        : ofAxioms 𝔸 (A 🡒 B) → ofAxioms 𝔸 A → ofAxioms 𝔸 B
-  | nec {A}          : ofAxioms 𝔸 A → ofAxioms 𝔸 (□A)
-  | verum            : ofAxioms 𝔸 Axioms.Verum
-  | implyK {A B}     : ofAxioms 𝔸 (Axioms.ImplyK A B)
-  | implyS {A B C}   : ofAxioms 𝔸 (Axioms.ImplyS A B C)
-  | andElimL {A B}   : ofAxioms 𝔸 (Axioms.AndElim₁ A B)
-  | andElimR {A B}   : ofAxioms 𝔸 (Axioms.AndElim₂ A B)
-  | andIntro {A B}   : ofAxioms 𝔸 (Axioms.AndInst A B)
-  | orIntroL {A B}   : ofAxioms 𝔸 (Axioms.OrInst₁ A B)
-  | orIntroR {A B}   : ofAxioms 𝔸 (Axioms.OrInst₂ A B)
-  | orElim {A B C}   : ofAxioms 𝔸 (Axioms.OrElim A B C)
-  | dne {A}          : ofAxioms 𝔸 (Axioms.DNE A)
-  | axiomK {A B}     : ofAxioms 𝔸 (□(A 🡒 B) 🡒 □A 🡒 □B)
-  | axiomL {A}       : ofAxioms 𝔸 (□(□A 🡒 A) 🡒 □A)
-  | axiomJ1 {A B}    : ofAxioms 𝔸 (Axioms.J1 A B)
-  | axiomJ2 {A B C}  : ofAxioms 𝔸 (Axioms.J2 A B C)
-  | axiomJ3 {A B C}  : ofAxioms 𝔸 (Axioms.J3 A B C)
-  | axiomJ4 {A B}    : ofAxioms 𝔸 (Axioms.J4 A B)
-  | axiomJ5 {A}      : ofAxioms 𝔸 (Axioms.J5 A)
+inductive Logic.ofILAxioms (𝔸 : FormulaSet α) : Logic α
+  | axm {A}          : A ∈ 𝔸 → ofILAxioms 𝔸 A
+  | mdp {A B}        : ofILAxioms 𝔸 (A 🡒 B) → ofILAxioms 𝔸 A → ofILAxioms 𝔸 B
+  | nec {A}          : ofILAxioms 𝔸 A → ofILAxioms 𝔸 (□A)
+  | verum            : ofILAxioms 𝔸 Axioms.Verum
+  | implyK {A B}     : ofILAxioms 𝔸 (Axioms.ImplyK A B)
+  | implyS {A B C}   : ofILAxioms 𝔸 (Axioms.ImplyS A B C)
+  | andElimL {A B}   : ofILAxioms 𝔸 (Axioms.AndElim₁ A B)
+  | andElimR {A B}   : ofILAxioms 𝔸 (Axioms.AndElim₂ A B)
+  | andIntro {A B}   : ofILAxioms 𝔸 (Axioms.AndInst A B)
+  | orIntroL {A B}   : ofILAxioms 𝔸 (Axioms.OrInst₁ A B)
+  | orIntroR {A B}   : ofILAxioms 𝔸 (Axioms.OrInst₂ A B)
+  | orElim {A B C}   : ofILAxioms 𝔸 (Axioms.OrElim A B C)
+  | dne {A}          : ofILAxioms 𝔸 (Axioms.DNE A)
+  | axiomK {A B}     : ofILAxioms 𝔸 (□(A 🡒 B) 🡒 □A 🡒 □B)
+  | axiomL {A}       : ofILAxioms 𝔸 (□(□A 🡒 A) 🡒 □A)
+  | axiomJ1 {A B}    : ofILAxioms 𝔸 (Axioms.J1 A B)
+  | axiomJ2 {A B C}  : ofILAxioms 𝔸 (Axioms.J2 A B C)
+  | axiomJ3 {A B C}  : ofILAxioms 𝔸 (Axioms.J3 A B C)
+  | axiomJ4 {A B}    : ofILAxioms 𝔸 (Axioms.J4 A B)
+  | axiomJ5 {A}      : ofILAxioms 𝔸 (Axioms.J5 A)
 
-namespace Logic.ofAxioms
+namespace Logic.ofILAxioms
 
 variable {𝔸 𝔹 : FormulaSet α}
 
-instance : ModusPonens (ofAxioms 𝔸) := ⟨mdp⟩
-instance : HasAxiomImplyK (ofAxioms 𝔸) := ⟨implyK⟩
-instance : HasAxiomImplyS (ofAxioms 𝔸) := ⟨implyS⟩
-instance : HasAxiomAndInst (ofAxioms 𝔸) := ⟨andIntro⟩
+instance : ModusPonens (ofILAxioms 𝔸) := ⟨mdp⟩
+instance : HasAxiomImplyK (ofILAxioms 𝔸) := ⟨implyK⟩
+instance : HasAxiomImplyS (ofILAxioms 𝔸) := ⟨implyS⟩
+instance : HasAxiomAndInst (ofILAxioms 𝔸) := ⟨andIntro⟩
 
-instance : Entailment.Minimal (ofAxioms 𝔸) where
+instance : Entailment.Minimal (ofILAxioms 𝔸) where
   verum := verum
   and₁ := andElimL
   and₂ := andElimR
@@ -160,25 +160,25 @@ instance : Entailment.Minimal (ofAxioms 𝔸) where
   or₂ := orIntroR
   or₃ := orElim
 
-instance : Entailment.Cl (ofAxioms 𝔸) where
+instance : Entailment.Cl (ofILAxioms 𝔸) where
   dne := dne
 
-instance : (ofAxioms 𝔸).ExtendsGL := ⟨nec, axiomK, axiomL⟩
+instance : (ofILAxioms 𝔸).ExtendsGL := ⟨nec, axiomK, axiomL⟩
 
 variable {A B C : Formula α}
 
-lemma rhd_mono_right (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ C ▷ A 🡒 C ▷ B := by
-  have h₁ : ofAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h;
-  have h₂ : ofAxioms 𝔸 ⊢ C ▷ A ⋏ A ▷ B 🡒 C ▷ B := axiomJ2;
+lemma rhd_mono_right (h : ofILAxioms 𝔸 ⊢ A 🡒 B) : ofILAxioms 𝔸 ⊢ C ▷ A 🡒 C ▷ B := by
+  have h₁ : ofILAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h;
+  have h₂ : ofILAxioms 𝔸 ⊢ C ▷ A ⋏ A ▷ B 🡒 C ▷ B := axiomJ2;
   cl_prover [h₁, h₂];
 
-lemma rhd_anti_left (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ B ▷ C 🡒 A ▷ C := by
-  have h₁ : ofAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h;
-  have h₂ : ofAxioms 𝔸 ⊢ A ▷ B ⋏ B ▷ C 🡒 A ▷ C := axiomJ2;
+lemma rhd_anti_left (h : ofILAxioms 𝔸 ⊢ A 🡒 B) : ofILAxioms 𝔸 ⊢ B ▷ C 🡒 A ▷ C := by
+  have h₁ : ofILAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h;
+  have h₂ : ofILAxioms 𝔸 ⊢ A ▷ B ⋏ B ▷ C 🡒 A ▷ C := axiomJ2;
   cl_prover [h₁, h₂];
 
-/-- `ofAxioms 𝔸` is contained in every extension of $\mathbf{IL}$ that proves `𝔸`. -/
-lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofAxioms 𝔹 ⊢ A) : ofAxioms 𝔸 ⊆ ofAxioms 𝔹 := by
+/-- `ofILAxioms 𝔸` is contained in every extension of $\mathbf{IL}$ that proves `𝔸`. -/
+lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofILAxioms 𝔹 ⊢ A) : ofILAxioms 𝔸 ⊆ ofILAxioms 𝔹 := by
   intro A hA;
   induction hA with
   | axm hA => exact h _ hA;
@@ -202,46 +202,46 @@ lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofAxioms 𝔹 ⊢ A) : ofAxioms �
   | axiomJ4 => exact axiomJ4;
   | axiomJ5 => exact axiomJ5;
 
-lemma subset_of_subset (h : 𝔸 ⊆ 𝔹) : ofAxioms 𝔸 ⊆ ofAxioms 𝔹 :=
+lemma subset_of_subset (h : 𝔸 ⊆ 𝔹) : ofILAxioms 𝔸 ⊆ ofILAxioms 𝔹 :=
   subset_of_provable fun _ hA ↦ axm (h hA)
 
-end Logic.ofAxioms
+end Logic.ofILAxioms
 
 /-! ### Theorems of extensions of $\mathbf{IL}$ -/
 
-namespace Logic.ofAxioms
+namespace Logic.ofILAxioms
 
 variable {𝔸 : FormulaSet α} {A B : Formula α}
 
-lemma rhd_of_provable (h : ofAxioms 𝔸 ⊢ A 🡒 B) : ofAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h
+lemma rhd_of_provable (h : ofILAxioms 𝔸 ⊢ A 🡒 B) : ofILAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h
 
-lemma rhd_refl : ofAxioms 𝔸 ⊢ A ▷ A := rhd_of_provable C_id
+lemma rhd_refl : ofILAxioms 𝔸 ⊢ A ▷ A := rhd_of_provable C_id
 
-lemma box_neg_of_rhd : ofAxioms 𝔸 ⊢ A ▷ B 🡒 □(∼B) 🡒 □(∼A) := by
-  have h : ofAxioms 𝔸 ⊢ A ▷ B 🡒 ∼□(∼A) 🡒 ∼□(∼B) := axiomJ4;
+lemma box_neg_of_rhd : ofILAxioms 𝔸 ⊢ A ▷ B 🡒 □(∼B) 🡒 □(∼A) := by
+  have h : ofILAxioms 𝔸 ⊢ A ▷ B 🡒 ∼□(∼A) 🡒 ∼□(∼B) := axiomJ4;
   cl_prover [h];
 
 /-- - [Vis90, §6.1.1] -/
-lemma rhd_bot : ofAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 □(∼A) := by
-  have h₁ : ofAxioms 𝔸 ⊢ □(∼⊥) := provable_box verum;
-  have h₂ : ofAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 □(∼⊥) 🡒 □(∼A) := box_neg_of_rhd;
+lemma rhd_bot : ofILAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 □(∼A) := by
+  have h₁ : ofILAxioms 𝔸 ⊢ □(∼⊥) := provable_box verum;
+  have h₂ : ofILAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 □(∼⊥) 🡒 □(∼A) := box_neg_of_rhd;
   cl_prover [h₁, h₂];
 
-lemma or_dia_rhd : ofAxioms 𝔸 ⊢ (A ⋎ ◇A) ▷ A := by
-  have h₁ : ofAxioms 𝔸 ⊢ A ▷ A := rhd_refl;
-  have h₂ : ofAxioms 𝔸 ⊢ ◇A ▷ A := axiomJ5;
-  have h₃ : ofAxioms 𝔸 ⊢ A ▷ A ⋏ ◇A ▷ A 🡒 (A ⋎ ◇A) ▷ A := axiomJ3;
+lemma or_dia_rhd : ofILAxioms 𝔸 ⊢ (A ⋎ ◇A) ▷ A := by
+  have h₁ : ofILAxioms 𝔸 ⊢ A ▷ A := rhd_refl;
+  have h₂ : ofILAxioms 𝔸 ⊢ ◇A ▷ A := axiomJ5;
+  have h₃ : ofILAxioms 𝔸 ⊢ A ▷ A ⋏ ◇A ▷ A 🡒 (A ⋎ ◇A) ▷ A := axiomJ3;
   cl_prover [h₁, h₂, h₃];
 
 /-- - [Vis90, §6.1.1] -/
-lemma rhd_and_box_neg : ofAxioms 𝔸 ⊢ A ▷ (A ⋏ □(∼A)) := by
-  have h₁ : ofAxioms 𝔸 ⊢ □(□(∼A) 🡒 ∼A) 🡒 □(∼A) := axiomL;
-  have h₂ : ofAxioms 𝔸 ⊢ □(∼(A ⋏ □(∼A))) 🡒 □(□(∼A) 🡒 ∼A) := box_mono <| by cl_prover;
-  have h₃ : ofAxioms 𝔸 ⊢ A ▷ ((A ⋏ □(∼A)) ⋎ ◇(A ⋏ □(∼A))) :=
+lemma rhd_and_box_neg : ofILAxioms 𝔸 ⊢ A ▷ (A ⋏ □(∼A)) := by
+  have h₁ : ofILAxioms 𝔸 ⊢ □(□(∼A) 🡒 ∼A) 🡒 □(∼A) := axiomL;
+  have h₂ : ofILAxioms 𝔸 ⊢ □(∼(A ⋏ □(∼A))) 🡒 □(□(∼A) 🡒 ∼A) := box_mono <| by cl_prover;
+  have h₃ : ofILAxioms 𝔸 ⊢ A ▷ ((A ⋏ □(∼A)) ⋎ ◇(A ⋏ □(∼A))) :=
     axiomJ1 ⨀ provable_box
-      (show ofAxioms 𝔸 ⊢ A 🡒 (A ⋏ □(∼A)) ⋎ ∼□(∼(A ⋏ □(∼A))) by cl_prover [h₁, h₂]);
-  have h₄ : ofAxioms 𝔸 ⊢ ((A ⋏ □(∼A)) ⋎ ◇(A ⋏ □(∼A))) ▷ (A ⋏ □(∼A)) := or_dia_rhd;
-  have h₅ : ofAxioms 𝔸 ⊢
+      (show ofILAxioms 𝔸 ⊢ A 🡒 (A ⋏ □(∼A)) ⋎ ∼□(∼(A ⋏ □(∼A))) by cl_prover [h₁, h₂]);
+  have h₄ : ofILAxioms 𝔸 ⊢ ((A ⋏ □(∼A)) ⋎ ◇(A ⋏ □(∼A))) ▷ (A ⋏ □(∼A)) := or_dia_rhd;
+  have h₅ : ofILAxioms 𝔸 ⊢
       A ▷ ((A ⋏ □(∼A)) ⋎ ◇(A ⋏ □(∼A))) ⋏ ((A ⋏ □(∼A)) ⋎ ◇(A ⋏ □(∼A))) ▷ (A ⋏ □(∼A)) 🡒
         A ▷ (A ⋏ □(∼A)) :=
     axiomJ2;
@@ -249,16 +249,16 @@ lemma rhd_and_box_neg : ofAxioms 𝔸 ⊢ A ▷ (A ⋏ □(∼A)) := by
 
 variable [DecidableEq α] {X : FormulaSet α} {F : Formula α}
 
-lemma fdisj_rhd {𝒢 : Finset (Formula α)} (h : ∀ G ∈ 𝒢, X *⊢[ofAxioms 𝔸] G ▷ F) :
-    X *⊢[ofAxioms 𝔸] 𝒢.disj ▷ F := by
+lemma fdisj_rhd {𝒢 : Finset (Formula α)} (h : ∀ G ∈ 𝒢, X *⊢[ofILAxioms 𝔸] G ▷ F) :
+    X *⊢[ofILAxioms 𝔸] 𝒢.disj ▷ F := by
   induction 𝒢 using Finset.induction_on with
   | empty => simpa using Context.of (axiomJ1 ⨀ provable_box efq);
   | insert G 𝒢 _ ih =>
-    have h₁ : X *⊢[ofAxioms 𝔸] (G ⋎ 𝒢.disj) ▷ F :=
+    have h₁ : X *⊢[ofILAxioms 𝔸] (G ⋎ 𝒢.disj) ▷ F :=
       Context.of axiomJ3 ⨀ K_intro (h G (by simp)) (ih fun H hH ↦ h H (by simp [hH]));
     exact Context.of (rhd_anti_left CinsertFDisjAFDisj) ⨀ h₁;
 
-end Logic.ofAxioms
+end Logic.ofILAxioms
 
 /-! ### Principles beyond $\mathbf{IL}$ -/
 
@@ -320,32 +320,30 @@ end Axioms
 
 /-! ### Theorems of $\mathbf{IL}$ -/
 
-namespace Logic.ofAxioms
+namespace Logic.ofILAxioms
 
 variable {𝔸 : FormulaSet α} {A B C : Formula α}
 
-lemma rhd_and_not_rhd_neg : ofAxioms 𝔸 ⊢ A ▷ B ⋏ ∼(A ▷ ∼C) 🡒 ◇(B ⋏ □C) := by
-  have h₀ : ofAxioms 𝔸 ⊢ □(∼∼C) 🡒 □C := box_mono dne;
-  have h₁ : ofAxioms 𝔸 ⊢ ∼(B ⋏ □C) 🡒 B 🡒 ∼□(∼∼C) := by cl_prover [h₀];
-  have h₂ : ofAxioms 𝔸 ⊢ □(B 🡒 ∼□(∼∼C)) 🡒 B ▷ ◇(∼C) := axiomJ1;
-  have h₃ : ofAxioms 𝔸 ⊢ ◇(∼C) ▷ ∼C := axiomJ5;
-  have h₄ : ofAxioms 𝔸 ⊢ Axioms.J2 B (◇(∼C)) (∼C) := axiomJ2;
-  have h₅ : ofAxioms 𝔸 ⊢ Axioms.J2 A B (∼C) := axiomJ2;
-  have : ofAxioms 𝔸 ⊢ A ▷ B ⋏ ∼(A ▷ ∼C) 🡒 ∼□(∼(B ⋏ □C)) := by
+lemma rhd_and_not_rhd_neg : ofILAxioms 𝔸 ⊢ A ▷ B ⋏ ∼(A ▷ ∼C) 🡒 ◇(B ⋏ □C) := by
+  have h₀ : ofILAxioms 𝔸 ⊢ □(∼∼C) 🡒 □C := box_mono dne;
+  have h₁ : ofILAxioms 𝔸 ⊢ ∼(B ⋏ □C) 🡒 B 🡒 ∼□(∼∼C) := by cl_prover [h₀];
+  have h₂ : ofILAxioms 𝔸 ⊢ □(B 🡒 ∼□(∼∼C)) 🡒 B ▷ ◇(∼C) := axiomJ1;
+  have h₃ : ofILAxioms 𝔸 ⊢ ◇(∼C) ▷ ∼C := axiomJ5;
+  have h₄ : ofILAxioms 𝔸 ⊢ Axioms.J2 B (◇(∼C)) (∼C) := axiomJ2;
+  have h₅ : ofILAxioms 𝔸 ⊢ Axioms.J2 A B (∼C) := axiomJ2;
+  have : ofILAxioms 𝔸 ⊢ A ▷ B ⋏ ∼(A ▷ ∼C) 🡒 ∼□(∼(B ⋏ □C)) := by
     cl_prover [box_mono h₁, h₂, h₃, h₄, h₅];
   exact this;
 
-end Logic.ofAxioms
+end Logic.ofILAxioms
 
 
-/-! ### Axioms -/
+
+/-! ### Axioms of $\mathbf{CL}$ -/
 
 namespace Axioms
 
 variable (A B C : Formula α)
-
-/-- - [KO21, §3.1] -/
-protected abbrev J1' : Formula α := A ▷ A
 
 /-- - [KO21, §3.3] -/
 protected abbrev J2Plus : Formula α := A ▷ (B ⋎ C) ⋏ B ▷ C 🡒 A ▷ C
@@ -355,44 +353,47 @@ protected abbrev J6 : Formula α := □A 🡘 ∼A ▷ ⊥
 
 end Axioms
 
-/-! ### Extensions of $\mathbf{IL}^-$ -/
+/-! ### Extensions of $\mathbf{CL}$ -/
 
-/-- The smallest logic containing `𝔸` and the axioms of $\mathbf{IL}^-$, closed under modus ponens,
+/-- The smallest logic containing `𝔸` and the axioms of $\mathbf{CL}$, closed under modus ponens,
 necessitation, $\mathbf{R1}$ and $\mathbf{R2}$.
 
 - [KO21, Definition 2.1]
+- [KO21, Proposition 3.21]
 -/
-inductive Logic.ofAxiomsMinus (𝔸 : FormulaSet α) : Logic α
-  | axm {A}          : A ∈ 𝔸 → ofAxiomsMinus 𝔸 A
-  | mdp {A B}        : ofAxiomsMinus 𝔸 (A 🡒 B) → ofAxiomsMinus 𝔸 A → ofAxiomsMinus 𝔸 B
-  | nec {A}          : ofAxiomsMinus 𝔸 A → ofAxiomsMinus 𝔸 (□A)
-  | rule1 {A B C}    : ofAxiomsMinus 𝔸 (A 🡒 B) → ofAxiomsMinus 𝔸 (C ▷ A 🡒 C ▷ B)
-  | rule2 {A B C}    : ofAxiomsMinus 𝔸 (A 🡒 B) → ofAxiomsMinus 𝔸 (B ▷ C 🡒 A ▷ C)
-  | verum            : ofAxiomsMinus 𝔸 Axioms.Verum
-  | implyK {A B}     : ofAxiomsMinus 𝔸 (Axioms.ImplyK A B)
-  | implyS {A B C}   : ofAxiomsMinus 𝔸 (Axioms.ImplyS A B C)
-  | andElimL {A B}   : ofAxiomsMinus 𝔸 (Axioms.AndElim₁ A B)
-  | andElimR {A B}   : ofAxiomsMinus 𝔸 (Axioms.AndElim₂ A B)
-  | andIntro {A B}   : ofAxiomsMinus 𝔸 (Axioms.AndInst A B)
-  | orIntroL {A B}   : ofAxiomsMinus 𝔸 (Axioms.OrInst₁ A B)
-  | orIntroR {A B}   : ofAxiomsMinus 𝔸 (Axioms.OrInst₂ A B)
-  | orElim {A B C}   : ofAxiomsMinus 𝔸 (Axioms.OrElim A B C)
-  | dne {A}          : ofAxiomsMinus 𝔸 (Axioms.DNE A)
-  | axiomK {A B}     : ofAxiomsMinus 𝔸 (□(A 🡒 B) 🡒 □A 🡒 □B)
-  | axiomL {A}       : ofAxiomsMinus 𝔸 (□(□A 🡒 A) 🡒 □A)
-  | axiomJ3 {A B C}  : ofAxiomsMinus 𝔸 (Axioms.J3 A B C)
-  | axiomJ6 {A}      : ofAxiomsMinus 𝔸 (Axioms.J6 A)
+inductive Logic.ofCLAxioms (𝔸 : FormulaSet α) : Logic α
+  | axm {A}          : A ∈ 𝔸 → ofCLAxioms 𝔸 A
+  | mdp {A B}        : ofCLAxioms 𝔸 (A 🡒 B) → ofCLAxioms 𝔸 A → ofCLAxioms 𝔸 B
+  | nec {A}          : ofCLAxioms 𝔸 A → ofCLAxioms 𝔸 (□A)
+  | rule1 {A B C}    : ofCLAxioms 𝔸 (A 🡒 B) → ofCLAxioms 𝔸 (C ▷ A 🡒 C ▷ B)
+  | rule2 {A B C}    : ofCLAxioms 𝔸 (A 🡒 B) → ofCLAxioms 𝔸 (B ▷ C 🡒 A ▷ C)
+  | verum            : ofCLAxioms 𝔸 Axioms.Verum
+  | implyK {A B}     : ofCLAxioms 𝔸 (Axioms.ImplyK A B)
+  | implyS {A B C}   : ofCLAxioms 𝔸 (Axioms.ImplyS A B C)
+  | andElimL {A B}   : ofCLAxioms 𝔸 (Axioms.AndElim₁ A B)
+  | andElimR {A B}   : ofCLAxioms 𝔸 (Axioms.AndElim₂ A B)
+  | andIntro {A B}   : ofCLAxioms 𝔸 (Axioms.AndInst A B)
+  | orIntroL {A B}   : ofCLAxioms 𝔸 (Axioms.OrInst₁ A B)
+  | orIntroR {A B}   : ofCLAxioms 𝔸 (Axioms.OrInst₂ A B)
+  | orElim {A B C}   : ofCLAxioms 𝔸 (Axioms.OrElim A B C)
+  | dne {A}          : ofCLAxioms 𝔸 (Axioms.DNE A)
+  | axiomK {A B}     : ofCLAxioms 𝔸 (□(A 🡒 B) 🡒 □A 🡒 □B)
+  | axiomL {A}       : ofCLAxioms 𝔸 (□(□A 🡒 A) 🡒 □A)
+  | axiomJ1 {A B}    : ofCLAxioms 𝔸 (Axioms.J1 A B)
+  | axiomJ2 {A B C}  : ofCLAxioms 𝔸 (Axioms.J2 A B C)
+  | axiomJ3 {A B C}  : ofCLAxioms 𝔸 (Axioms.J3 A B C)
+  | axiomJ6 {A}      : ofCLAxioms 𝔸 (Axioms.J6 A)
 
-namespace Logic.ofAxiomsMinus
+namespace Logic.ofCLAxioms
 
 variable {𝔸 𝔹 : FormulaSet α}
 
-instance : ModusPonens (ofAxiomsMinus 𝔸) := ⟨mdp⟩
-instance : HasAxiomImplyK (ofAxiomsMinus 𝔸) := ⟨implyK⟩
-instance : HasAxiomImplyS (ofAxiomsMinus 𝔸) := ⟨implyS⟩
-instance : HasAxiomAndInst (ofAxiomsMinus 𝔸) := ⟨andIntro⟩
+instance : ModusPonens (ofCLAxioms 𝔸) := ⟨mdp⟩
+instance : HasAxiomImplyK (ofCLAxioms 𝔸) := ⟨implyK⟩
+instance : HasAxiomImplyS (ofCLAxioms 𝔸) := ⟨implyS⟩
+instance : HasAxiomAndInst (ofCLAxioms 𝔸) := ⟨andIntro⟩
 
-instance : Entailment.Minimal (ofAxiomsMinus 𝔸) where
+instance : Entailment.Minimal (ofCLAxioms 𝔸) where
   verum := verum
   and₁ := andElimL
   and₂ := andElimR
@@ -400,14 +401,14 @@ instance : Entailment.Minimal (ofAxiomsMinus 𝔸) where
   or₂ := orIntroR
   or₃ := orElim
 
-instance : Entailment.Cl (ofAxiomsMinus 𝔸) where
+instance : Entailment.Cl (ofCLAxioms 𝔸) where
   dne := dne
 
-instance : (ofAxiomsMinus 𝔸).ExtendsGL := ⟨nec, axiomK, axiomL⟩
+instance : (ofCLAxioms 𝔸).ExtendsGL := ⟨nec, axiomK, axiomL⟩
 
-/-- `ofAxiomsMinus 𝔸` is contained in every extension of $\mathbf{IL}^-$ that proves `𝔸`. -/
-lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofAxiomsMinus 𝔹 ⊢ A) :
-    ofAxiomsMinus 𝔸 ⊆ ofAxiomsMinus 𝔹 := by
+/-- `ofCLAxioms 𝔸` is contained in every extension of $\mathbf{CL}$ that proves `𝔸`. -/
+lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofCLAxioms 𝔹 ⊢ A) :
+    ofCLAxioms 𝔸 ⊆ ofCLAxioms 𝔹 := by
   intro A hA;
   induction hA with
   | axm hA => exact h _ hA;
@@ -427,182 +428,80 @@ lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofAxiomsMinus 𝔹 ⊢ A) :
   | dne => exact dne;
   | axiomK => exact axiomK;
   | axiomL => exact axiomL;
+  | axiomJ1 => exact axiomJ1;
+  | axiomJ2 => exact axiomJ2;
   | axiomJ3 => exact axiomJ3;
   | axiomJ6 => exact axiomJ6;
 
-lemma subset_of_subset (h : 𝔸 ⊆ 𝔹) : ofAxiomsMinus 𝔸 ⊆ ofAxiomsMinus 𝔹 :=
+lemma subset_of_subset (h : 𝔸 ⊆ 𝔹) : ofCLAxioms 𝔸 ⊆ ofCLAxioms 𝔹 :=
   subset_of_provable fun _ hA ↦ axm (h hA)
-
 
 variable {A B C : Formula α}
 
-lemma rhd_mono_right (h : ofAxiomsMinus 𝔸 ⊢ A 🡒 B) : ofAxiomsMinus 𝔸 ⊢ C ▷ A 🡒 C ▷ B := rule1 h
+lemma rhd_mono_right (h : ofCLAxioms 𝔸 ⊢ A 🡒 B) : ofCLAxioms 𝔸 ⊢ C ▷ A 🡒 C ▷ B := rule1 h
 
-lemma rhd_anti_left (h : ofAxiomsMinus 𝔸 ⊢ A 🡒 B) : ofAxiomsMinus 𝔸 ⊢ B ▷ C 🡒 A ▷ C := rule2 h
+lemma rhd_anti_left (h : ofCLAxioms 𝔸 ⊢ A 🡒 B) : ofCLAxioms 𝔸 ⊢ B ▷ C 🡒 A ▷ C := rule2 h
 
-lemma box_neg_iff_rhd_bot : ofAxiomsMinus 𝔸 ⊢ □(∼A) 🡘 A ▷ ⊥ := by
-  have h₁ : ofAxiomsMinus 𝔸 ⊢ □(∼A) 🡘 ∼∼A ▷ ⊥ := axiomJ6;
-  have h₂ : ofAxiomsMinus 𝔸 ⊢ ∼∼A ▷ ⊥ 🡒 A ▷ ⊥ := rhd_anti_left dni;
-  have h₃ : ofAxiomsMinus 𝔸 ⊢ A ▷ ⊥ 🡒 ∼∼A ▷ ⊥ := rhd_anti_left dne;
+/-- - [KO21, Proposition 3.1] -/
+lemma rhd_refl : ofCLAxioms 𝔸 ⊢ A ▷ A := axiomJ1 ⨀ provable_box C_id
+
+lemma box_neg_iff_rhd_bot : ofCLAxioms 𝔸 ⊢ □(∼A) 🡘 A ▷ ⊥ := by
+  have h₁ : ofCLAxioms 𝔸 ⊢ □(∼A) 🡘 ∼∼A ▷ ⊥ := axiomJ6;
+  have h₂ : ofCLAxioms 𝔸 ⊢ ∼∼A ▷ ⊥ 🡒 A ▷ ⊥ := rhd_anti_left dni;
+  have h₃ : ofCLAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 ∼∼A ▷ ⊥ := rhd_anti_left dne;
   cl_prover [h₁, h₂, h₃];
 
 /-- - [KO21, Proposition 2.5.1] -/
-lemma rhd_of_box_neg : ofAxiomsMinus 𝔸 ⊢ □(∼A) 🡒 A ▷ B := by
-  have h₁ : ofAxiomsMinus 𝔸 ⊢ □(∼A) 🡘 A ▷ ⊥ := box_neg_iff_rhd_bot;
-  have h₂ : ofAxiomsMinus 𝔸 ⊢ A ▷ ⊥ 🡒 A ▷ B := rhd_mono_right efq;
+lemma rhd_of_box_neg : ofCLAxioms 𝔸 ⊢ □(∼A) 🡒 A ▷ B := by
+  have h₁ : ofCLAxioms 𝔸 ⊢ □(∼A) 🡘 A ▷ ⊥ := box_neg_iff_rhd_bot;
+  have h₂ : ofCLAxioms 𝔸 ⊢ A ▷ ⊥ 🡒 A ▷ B := rhd_mono_right efq;
   cl_prover [h₁, h₂];
 
 /-- - [KO21, Proposition 2.5.2] -/
-lemma rhd_anti_left_of_box : ofAxiomsMinus 𝔸 ⊢ □(A 🡒 B) 🡒 B ▷ C 🡒 A ▷ C := by
-  have h₁ : ofAxiomsMinus 𝔸 ⊢ □(A 🡒 B) 🡒 □(∼(A ⋏ ∼B)) := box_mono (by cl_prover);
-  have h₂ : ofAxiomsMinus 𝔸 ⊢ □(∼(A ⋏ ∼B)) 🡒 (A ⋏ ∼B) ▷ C := rhd_of_box_neg;
-  have h₃ : ofAxiomsMinus 𝔸 ⊢ (A ⋏ ∼B) ▷ C ⋏ B ▷ C 🡒 (A ⋏ ∼B ⋎ B) ▷ C := axiomJ3;
-  have h₄ : ofAxiomsMinus 𝔸 ⊢ (A ⋏ ∼B ⋎ B) ▷ C 🡒 A ▷ C := rhd_anti_left (by cl_prover);
+lemma rhd_anti_left_of_box : ofCLAxioms 𝔸 ⊢ □(A 🡒 B) 🡒 B ▷ C 🡒 A ▷ C := by
+  have h₁ : ofCLAxioms 𝔸 ⊢ □(A 🡒 B) 🡒 □(∼(A ⋏ ∼B)) := box_mono (by cl_prover);
+  have h₂ : ofCLAxioms 𝔸 ⊢ □(∼(A ⋏ ∼B)) 🡒 (A ⋏ ∼B) ▷ C := rhd_of_box_neg;
+  have h₃ : ofCLAxioms 𝔸 ⊢ (A ⋏ ∼B) ▷ C ⋏ B ▷ C 🡒 (A ⋏ ∼B ⋎ B) ▷ C := axiomJ3;
+  have h₄ : ofCLAxioms 𝔸 ⊢ (A ⋏ ∼B ⋎ B) ▷ C 🡒 A ▷ C := rhd_anti_left (by cl_prover);
   cl_prover [h₁, h₂, h₃, h₄];
 
 /-- - [KO21, Proposition 3.4] -/
-lemma dia_imp_dia_iff : ofAxiomsMinus 𝔸 ⊢ (◇A 🡒 ◇B) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥) := by
-  have h₁ : ofAxiomsMinus 𝔸 ⊢ □(∼A) 🡘 A ▷ ⊥ := box_neg_iff_rhd_bot;
-  have h₂ : ofAxiomsMinus 𝔸 ⊢ □(∼B) 🡘 B ▷ ⊥ := box_neg_iff_rhd_bot;
-  change ofAxiomsMinus 𝔸 ⊢ (∼□(∼A) 🡒 ∼□(∼B)) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥);
+lemma dia_imp_dia_iff : ofCLAxioms 𝔸 ⊢ (◇A 🡒 ◇B) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥) := by
+  have h₁ : ofCLAxioms 𝔸 ⊢ □(∼A) 🡘 A ▷ ⊥ := box_neg_iff_rhd_bot;
+  have h₂ : ofCLAxioms 𝔸 ⊢ □(∼B) 🡘 B ▷ ⊥ := box_neg_iff_rhd_bot;
+  change ofCLAxioms 𝔸 ⊢ (∼□(∼A) 🡒 ∼□(∼B)) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥);
   cl_prover [h₁, h₂];
 
-/-- - [KO21, Proposition 3.12.1] -/
-lemma J2_of_J2Plus : ofAxiomsMinus 𝔸 ⊢ Axioms.J2Plus A B C 🡒 Axioms.J2 A B C := by
-  have : ofAxiomsMinus 𝔸 ⊢ A ▷ B 🡒 A ▷ (B ⋎ C) := rhd_mono_right or₁;
-  cl_prover [this];
+/-- - [KO21, Corollary 3.5] -/
+lemma axiomJ4 : ofCLAxioms 𝔸 ⊢ Axioms.J4 A B := by
+  have h₁ : ofCLAxioms 𝔸 ⊢ A ▷ B ⋏ B ▷ ⊥ 🡒 A ▷ ⊥ := axiomJ2;
+  have h₂ : ofCLAxioms 𝔸 ⊢ (◇A 🡒 ◇B) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥) := dia_imp_dia_iff;
+  cl_prover [h₁, h₂]
+
+/-- - [KO21, Proposition 3.12.2] -/
+lemma axiomJ2Plus : ofCLAxioms 𝔸 ⊢ Axioms.J2Plus A B C := by
+  have h₁ : ofCLAxioms 𝔸 ⊢ B ▷ C ⋏ C ▷ C 🡒 (B ⋎ C) ▷ C := axiomJ3;
+  have h₂ : ofCLAxioms 𝔸 ⊢ C ▷ C := rhd_refl;
+  have h₃ : ofCLAxioms 𝔸 ⊢ A ▷ (B ⋎ C) ⋏ (B ⋎ C) ▷ C 🡒 A ▷ C := axiomJ2;
+  cl_prover [h₁, h₂, h₃]
 
 lemma fdisj_rhd [DecidableEq α] {X : FormulaSet α} {𝒢 : Finset (Formula α)}
-    (h : ∀ G ∈ 𝒢, X *⊢[ofAxiomsMinus 𝔸] G ▷ C) : X *⊢[ofAxiomsMinus 𝔸] 𝒢.disj ▷ C := by
+    (h : ∀ G ∈ 𝒢, X *⊢[ofCLAxioms 𝔸] G ▷ C) : X *⊢[ofCLAxioms 𝔸] 𝒢.disj ▷ C := by
   induction 𝒢 using Finset.induction_on with
   | empty => simpa using Context.of (rhd_of_box_neg (A := ⊥) (B := C) ⨀ provable_box verum);
   | insert G 𝒢 _ ih =>
-    have h₁ : X *⊢[ofAxiomsMinus 𝔸] (G ⋎ 𝒢.disj) ▷ C :=
+    have h₁ : X *⊢[ofCLAxioms 𝔸] (G ⋎ 𝒢.disj) ▷ C :=
       Context.of axiomJ3 ⨀ K_intro (h G (by simp)) (ih fun H hH ↦ h H (by simp [hH]));
     exact Context.of (rhd_anti_left CinsertFDisjAFDisj) ⨀ h₁;
 
-end Logic.ofAxiomsMinus
+end Logic.ofCLAxioms
 
-/-! ### Logics proving an axiom schema -/
+/-! ### Logics proving $\mathbf{J5}$ -/
 
-namespace Logic
-
-variable {L : Logic α}
-
-class HasAxiomJ1 (L : Logic α) : Prop where
-  J1 (A B : Formula α) : L ⊢ Axioms.J1 A B
-
-class HasAxiomJ2 (L : Logic α) : Prop where
-  J2 (A B C : Formula α) : L ⊢ Axioms.J2 A B C
-
-class HasAxiomJ2Plus (L : Logic α) : Prop where
-  J2Plus (A B C : Formula α) : L ⊢ Axioms.J2Plus A B C
-
-class HasAxiomJ4 (L : Logic α) : Prop where
-  J4 (A B : Formula α) : L ⊢ Axioms.J4 A B
-
-class HasAxiomJ5 (L : Logic α) : Prop where
+class Logic.HasAxiomJ5 (L : Logic α) : Prop where
   J5 (A : Formula α) : L ⊢ Axioms.J5 A
 
-variable {A B C : Formula α}
-
-/-- - [KO21, Proposition 3.1] -/
-lemma axiomJ1' [L.ExtendsGL] [Entailment.Cl L] [L.HasAxiomJ1] : L ⊢ Axioms.J1' A :=
-  HasAxiomJ1.J1 A A ⨀ provable_box C_id
-
-namespace ofAxioms
-
-variable {𝔸 : FormulaSet α}
-
-instance : HasAxiomJ1 (ofAxioms 𝔸) := ⟨fun _ _ ↦ axiomJ1⟩
-
-instance : HasAxiomJ2 (ofAxioms 𝔸) := ⟨fun _ _ _ ↦ axiomJ2⟩
-
-instance : HasAxiomJ4 (ofAxioms 𝔸) := ⟨fun _ _ ↦ axiomJ4⟩
-
-instance : HasAxiomJ5 (ofAxioms 𝔸) := ⟨fun _ ↦ axiomJ5⟩
-
-end ofAxioms
-
-namespace ofAxiomsMinus
-
-variable {𝔸 𝔹 𝔸' : FormulaSet α}
-
-/-- - [KO21, Proposition 3.12.1] -/
-instance [HasAxiomJ2Plus (ofAxiomsMinus 𝔸)] : HasAxiomJ2 (ofAxiomsMinus 𝔸) :=
-  ⟨fun _ _ _ ↦ J2_of_J2Plus ⨀ HasAxiomJ2Plus.J2Plus _ _ _⟩
-
-/-- - [KO21, Corollary 3.5] -/
-instance [HasAxiomJ2 (ofAxiomsMinus 𝔸)] : HasAxiomJ4 (ofAxiomsMinus 𝔸) where
-  J4 A B := by
-    have h₁ : ofAxiomsMinus 𝔸 ⊢ A ▷ B ⋏ B ▷ ⊥ 🡒 A ▷ ⊥ := HasAxiomJ2.J2 _ _ _;
-    have h₂ : ofAxiomsMinus 𝔸 ⊢ (◇A 🡒 ◇B) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥) := dia_imp_dia_iff;
-    cl_prover [h₁, h₂]
-
-/-- `ofAxiomsMinus 𝔸` proves the schema `J1` as soon as `𝔸` contains it. -/
-instance : HasAxiomJ1 (ofAxiomsMinus {Axioms.J1 A B | (A) (B)} : Logic α) :=
-  ⟨fun _ _ ↦ axm ⟨_, _, rfl⟩⟩
-
-instance : HasAxiomJ2 (ofAxiomsMinus {Axioms.J2 A B C | (A) (B) (C)} : Logic α) :=
-  ⟨fun _ _ _ ↦ axm ⟨_, _, _, rfl⟩⟩
-
-instance : HasAxiomJ5 (ofAxiomsMinus {Axioms.J5 A | A} : Logic α) := ⟨fun _ ↦ axm ⟨_, rfl⟩⟩
-
-instance [HasAxiomJ1 (ofAxiomsMinus 𝔸)] : HasAxiomJ1 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A B ↦ subset_of_subset Set.subset_union_left (HasAxiomJ1.J1 A B)⟩
-
-instance [HasAxiomJ1 (ofAxiomsMinus 𝔹)] : HasAxiomJ1 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A B ↦ subset_of_subset Set.subset_union_right (HasAxiomJ1.J1 A B)⟩
-
-instance [HasAxiomJ2 (ofAxiomsMinus 𝔸)] : HasAxiomJ2 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A B C ↦ subset_of_subset Set.subset_union_left (HasAxiomJ2.J2 A B C)⟩
-
-instance [HasAxiomJ2 (ofAxiomsMinus 𝔹)] : HasAxiomJ2 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A B C ↦ subset_of_subset Set.subset_union_right (HasAxiomJ2.J2 A B C)⟩
-
-instance [HasAxiomJ2Plus (ofAxiomsMinus 𝔸)] : HasAxiomJ2Plus (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A B C ↦ subset_of_subset Set.subset_union_left (HasAxiomJ2Plus.J2Plus A B C)⟩
-
-instance [HasAxiomJ4 (ofAxiomsMinus 𝔸)] : HasAxiomJ4 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A B ↦ subset_of_subset Set.subset_union_left (HasAxiomJ4.J4 A B)⟩
-
-instance [HasAxiomJ4 (ofAxiomsMinus 𝔹)] : HasAxiomJ4 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A B ↦ subset_of_subset Set.subset_union_right (HasAxiomJ4.J4 A B)⟩
-
-instance [HasAxiomJ5 (ofAxiomsMinus 𝔸)] : HasAxiomJ5 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A ↦ subset_of_subset Set.subset_union_left (HasAxiomJ5.J5 A)⟩
-
-instance [HasAxiomJ5 (ofAxiomsMinus 𝔹)] : HasAxiomJ5 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A ↦ subset_of_subset Set.subset_union_right (HasAxiomJ5.J5 A)⟩
-
-instance [HasAxiomJ1 (ofAxiomsMinus 𝔹)] :
-    (ofAxiomsMinus {Axioms.J1 A B | (A) (B)} : Logic α) ⪯ ofAxiomsMinus 𝔹 :=
-  weakerThan_iff.mpr <| subset_of_provable <| by
-    rintro _ ⟨A, B, rfl⟩
-    exact HasAxiomJ1.J1 A B
-
-instance [HasAxiomJ2 (ofAxiomsMinus 𝔹)] :
-    (ofAxiomsMinus {Axioms.J2 A B C | (A) (B) (C)} : Logic α) ⪯ ofAxiomsMinus 𝔹 :=
-  weakerThan_iff.mpr <| subset_of_provable <| by
-    rintro _ ⟨A, B, C, rfl⟩
-    exact HasAxiomJ2.J2 A B C
-
-instance [HasAxiomJ5 (ofAxiomsMinus 𝔹)] :
-    (ofAxiomsMinus {Axioms.J5 A | A} : Logic α) ⪯ ofAxiomsMinus 𝔹 :=
-  weakerThan_iff.mpr <| subset_of_provable <| by
-    rintro _ ⟨A, rfl⟩
-    exact HasAxiomJ5.J5 A
-
-instance [(ofAxiomsMinus 𝔸 : Logic α)
-    ⪯ ofAxiomsMinus 𝔹] [(ofAxiomsMinus 𝔸' : Logic α) ⪯ ofAxiomsMinus 𝔹] :
-    (ofAxiomsMinus (𝔸 ∪ 𝔸') : Logic α) ⪯ ofAxiomsMinus 𝔹 :=
-  weakerThan_iff.mpr <| subset_of_provable <| by
-    rintro A (hA | hA)
-    · exact WeakerThan.pbl (𝓢 := ofAxiomsMinus 𝔸) (axm hA)
-    · exact WeakerThan.pbl (𝓢 := ofAxiomsMinus 𝔸') (axm hA)
-
-end ofAxiomsMinus
-
-end Logic
+instance : Logic.HasAxiomJ5 (Logic.ofCLAxioms {Axioms.J5 A | A} : Logic α) :=
+  ⟨fun _ ↦ Logic.ofCLAxioms.axm ⟨_, rfl⟩⟩
 
 end FFL.InterpretabilityLogic

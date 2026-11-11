@@ -2,8 +2,8 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
-public import AlphaCentauri.ToFoundation.NatCoding
-public import AlphaCentauri.ToMathlib.List
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.NatCoding
+public import AlphaCentauri.ToMathlib.Data.List.Basic
 
 /-!
 # The two-colour diagonal Paris–Harrington sentence

@@ -1,15 +1,17 @@
 module
 
 public import Mathlib.Algebra.Order.Ring.Abs
+public import Mathlib.Data.Fin.VecNotation
 public import Mathlib.Tactic.Linarith
 public import Mathlib.Tactic.Positivity
 public import Mathlib.Tactic.Ring
 
 /-!
-# Open predicates and the least number principle
+# Open predicates, open induction and the least number principle
 
 `IsPolynomial` and `IsOpen` describe the polynomial functions and the open (quantifier-free)
-predicates on a commutative ring `R` with parameters in `R`. `LeastNumberPrinciple R` is the
+predicates on a commutative ring `R` with parameters in `R`. `OpenInduction R` is induction over
+the non-negative elements for open predicates. `LeastNumberPrinciple R` is the
 least number principle for the predicates `∃ ys : Fin n → R, (∀ j, |ys j| < B) ∧ Φ (x, ys)`
 with `Φ` open, over the non-negative `x`. In a discretely ordered ring satisfying
 `LeastNumberPrinciple`, division with remainder is available.
@@ -75,6 +77,15 @@ variable (R) in
 /-- A discretely ordered ring: there is nothing strictly between `0` and `1`. -/
 class DiscretelyOrdered : Prop where
   one_le_of_pos : ∀ x : R, 0 < x → 1 ≤ x
+
+variable (R) in
+/-- Open induction: induction over the non-negative elements for open predicates with parameters
+in `R`.
+- [BO96, §1]
+- [GG17, §2.1] -/
+def OpenInduction : Prop :=
+  ∀ P : (Fin 1 → R) → Prop, IsOpen P → P ![0] → (∀ x, 0 ≤ x → P ![x] → P ![x + 1]) →
+    ∀ x, 0 ≤ x → P ![x]
 
 namespace IsOpen
 

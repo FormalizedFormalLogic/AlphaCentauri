@@ -85,7 +85,9 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILRStar.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILRW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILWStar.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.SCL.Arithmetic
 public import AlphaCentauri.InterpretabilityLogic.Logic.SCL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.SbCLM.Arithmetic
 public import AlphaCentauri.InterpretabilityLogic.Logic.SbCLM.Basic
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentTheory

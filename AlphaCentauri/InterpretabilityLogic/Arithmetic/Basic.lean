@@ -61,7 +61,21 @@ export IL (J5)
 class M where
   axiomM {σ τ χ : Sentence L} : T₀ ⊢ 𝔍 σ τ 🡒 𝔍 (σ ⋏ 𝔅 χ) (τ ⋏ 𝔅 χ)
 
-variable {𝔍} [𝔍.CL] {σ σ' τ τ' χ : Sentence L}
+/-- $T_0$ proves the arithmetical form of the axiom $\mathsf{Sa}$.
+
+- [Ign91, Definition 2.4]
+-/
+class Sa where
+  axiomSa {σ τ χ ψ : Sentence L} : T₀ ⊢ 𝔍 σ τ 🡒 𝔍 (σ ⋏ 𝔍 χ ψ) (τ ⋏ 𝔍 χ ψ)
+
+/-- $T_0$ proves the arithmetical form of the axiom $\mathsf{Sb}$.
+
+- [Ign91, Definition 2.4]
+-/
+class Sb where
+  axiomSb {σ τ χ ψ : Sentence L} : T₀ ⊢ 𝔍 σ τ 🡒 𝔍 (σ ⋏ ∼𝔍 χ ψ) (τ ⋏ ∼𝔍 χ ψ)
+
+variable {𝔍} [𝔍.CL] {σ σ' τ τ' χ χ' : Sentence L}
 
 lemma rhd_anti_left (h : T ⊢ σ' 🡒 σ) : T₀ ⊢ 𝔍 σ χ 🡒 𝔍 σ' χ := by
   have h₁ : T₀ ⊢ 𝔍 σ' σ := J1 ⨀ 𝔅.D1 h;
@@ -72,6 +86,15 @@ lemma rhd_mono_right (h : T ⊢ τ 🡒 τ') : T₀ ⊢ 𝔍 σ τ 🡒 𝔍 σ 
   have h₁ : T₀ ⊢ 𝔍 τ τ' := J1 ⨀ 𝔅.D1 h;
   have h₂ : T₀ ⊢ 𝔍 σ τ ⋏ 𝔍 τ τ' 🡒 𝔍 σ τ' := J2;
   cl_prover [h₁, h₂];
+
+lemma rhd_and_of_iff (h : T₀ ⊢ 𝔍 σ τ 🡒 𝔍 (σ ⋏ χ) (τ ⋏ χ)) (hχ : T ⊢ χ 🡘 χ') :
+    T₀ ⊢ 𝔍 σ τ 🡒 𝔍 ((σ 🡒 χ' 🡒 ⊥) 🡒 ⊥) ((τ 🡒 χ' 🡒 ⊥) 🡒 ⊥) := by
+  have h₁ : T₀ ⊢ 𝔍 (σ ⋏ χ) (τ ⋏ χ) 🡒 𝔍 ((σ 🡒 χ' 🡒 ⊥) 🡒 ⊥) (τ ⋏ χ) :=
+    rhd_anti_left <| by cl_prover [hχ];
+  have h₂ : T₀ ⊢ 𝔍 ((σ 🡒 χ' 🡒 ⊥) 🡒 ⊥) (τ ⋏ χ) 🡒
+      𝔍 ((σ 🡒 χ' 🡒 ⊥) 🡒 ⊥) ((τ 🡒 χ' 🡒 ⊥) 🡒 ⊥) :=
+    rhd_mono_right <| by cl_prover [hχ];
+  cl_prover [h, h₁, h₂];
 
 end Interpretability
 

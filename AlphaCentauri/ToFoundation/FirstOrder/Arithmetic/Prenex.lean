@@ -4,7 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.Prenex
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 
 /-!
-# Boolean combinations of prenex formulas over open induction
+# Prenex normal forms of combinations and of lower levels
 
 Companion of Foundation's `Arithmetic/Prenex.lean`.
 
@@ -12,6 +12,9 @@ In models of `𝗜𝗢𝗽𝗲𝗻`, pairing merges two adjacent quantifiers of 
 conjunction or a disjunction of two prenex formulas of the same polarity and level, and the
 existential quantification of a prenex $\Sigma_{s + 1}$ formula, are equivalent to a prenex formula
 of that polarity and level. Unlike `Bounding.Prenex.and`, this needs no collection.
+
+Over $\mathsf{B}\Sigma_m$, every $\Gamma'_m$ sentence is equivalent to a prenex sentence of every
+level containing $\Gamma'_m$.
 -/
 
 @[expose] public section
@@ -172,3 +175,30 @@ lemma eval_pairExs {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n
 
 end Bounding.Prenex
 end FFL.FirstOrder
+
+namespace FFL.FirstOrder.Arithmetic
+
+variable {Γ Γ' : Polarity} {m n : ℕ} (T : ArithmeticTheory) [𝗕𝚺m ⪯ T]
+
+/-- Over $\mathsf{B}\Sigma_m$, every $\Gamma'_m$ sentence is equivalent to a prenex $\Gamma_n$
+sentence if $\Gamma = \Gamma'$ and $m \leq n$, or if $m < n$. -/
+lemma exists_prenexHierarchy_provable_iff {σ : ArithmeticSentence}
+    (hσ : ℬ[<, ℒₒᵣ].Hierarchy Γ' m σ) (hn : Γ = Γ' ∧ m ≤ n ∨ m < n) :
+    ∃ ψ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ ∧ T ⊢ σ 🡘 ψ := by
+  obtain ⟨φ, hφ⟩ := exists_prenex_of_hierarchy T hσ;
+  obtain ⟨ψ, hψ, hφψ⟩ : ∃ ψ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ ∧
+      ∀ (M : Type) [Tarski.Structure ℒₒᵣ M] [Nonempty M] (e : Fin 0 → M) (f : Empty → M),
+        Semiformula.Eval e f φ.val ↔ Semiformula.Eval e f ψ := by
+    rcases hn with ⟨rfl, hn⟩ | hn;
+    · exact φ.val_prenexHierarchy.exists_eval_iff_of_le hn;
+    · exact φ.val_prenexHierarchy.exists_eval_iff_of_lt Γ hn;
+  have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := m);
+  use ψ;
+  and_intros;
+  · exact hψ;
+  · apply complete;
+    intro (V : Type) _ _;
+    have := models_of_provable (M := V) inferInstance hφ;
+    simpa [models_iff, hφψ, -Bounding.Prenex.val_sigmaInv] using this
+
+end FFL.FirstOrder.Arithmetic

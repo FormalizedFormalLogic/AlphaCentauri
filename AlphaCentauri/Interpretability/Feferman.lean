@@ -1,14 +1,19 @@
 module
 
 public import AlphaCentauri.Interpretability.Henkin
+public import AlphaCentauri.Bootstrapping.Henkin
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
-public import AlphaCentauri.ToFoundation.ProvabilityAbstraction
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
+public import AlphaCentauri.Interpretability.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Incompleteness.Second
+public import AlphaCentauri.ToFoundation.ProvabilityLogic.ProvabilityAbstraction
 
 /-!
 # Feferman's theorem
 
-The theory $T + \neg\mathrm{Con}_T$ is interpretable in $T$.
+For every arithmetical theory $T \supseteq \mathsf{PA}$, $T + \neg\mathrm{Con}_T$ is interpretable
+in $T$.
 
 ## References
 
@@ -21,6 +26,13 @@ The theory $T + \neg\mathrm{Con}_T$ is interpretable in $T$.
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
+
+open Bootstrapping
+
+
+section feferman
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 open FFL.Entailment
 
@@ -86,5 +98,7 @@ noncomputable abbrev interpretation_incon : T ⊳ T ∪ T.Incon := by
   have h₂ : insert (∼T.consistent.val) T ⊳ T ∪ T.Incon :=
     (DirectInterpretation.refl (T ∪ T.Incon)).ofWeakerThanLeft
   exact h₁.orCases T.consistent.val h₂
+
+end feferman
 
 end FFL.FirstOrder.Arithmetic

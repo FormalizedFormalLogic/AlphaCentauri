@@ -3,7 +3,9 @@ module
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.Definability
 public import AlphaCentauri.Axiomatizability.Basic
+public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.Bootstrapping.Proof.ComplexitySoundness
+public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 
 /-!
 # Reflexive theories
@@ -35,9 +37,8 @@ lemma ArithmeticTheory.EssentiallyReflexive.reflexive {T : ArithmeticTheory}
     (h : T.EssentiallyReflexive) : T.Reflexive :=
   h T Set.Subset.rfl
 
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic
+namespace Arithmetic
 
 variable {T : ArithmeticTheory}
 
@@ -49,14 +50,18 @@ theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T] 
   by_contra! hfa
   obtain ⟨F, hFT, hfin, hequiv⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp hfa
   let : F.Δ₁ := Theory.Δ₁.ofFinite F hfin
-  have hcon : T ⊢ F.consistent.val := h F hFT hfin
   have : 𝗜𝚺₁ ⪯ F := WeakerThan.trans inferInstance hequiv.le
   have : Consistent F := Consistent.of_le inferInstance hequiv.symm.le
-  exact consistent_unprovable F (hequiv.le.wk hcon)
+  exact consistent_unprovable F (hequiv.le.wk <| h F hFT hfin)
 
 /-- `𝗜𝚺₂` proves the consistency of `𝗜𝚺₁`.
 - [HP98, Corollary I.4.34(1)] -/
-axiom ISigma.provable_con_ISigma1 : 𝗜𝚺 2 ⊢ 𝗜𝚺⁺₁.consistent.val
+theorem ISigma.provable_con_ISigma1 : 𝗜𝚺 2 ⊢ 𝗜𝚺₁.consistent.val := by
+  apply Arithmetic.complete.{0} (𝗜𝚺 2) _
+  intro V _ _
+  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺₁ := mod_IBroadSigma_of_le (s₂ := 2) (by simp)
+  exact (Bootstrapping.consistent.defined _).mpr <|
+    Bootstrapping.consistent_ISigma (k := 1) le_rfl
 
 open Bootstrapping in
 /-- In a model of `𝗣𝗔`, a finite set of true sentences is consistent.
@@ -73,7 +78,6 @@ private lemma Peano.consistent_of_models {V : Type*} [ORingStructure V] [V↓[�
   have hN : ∀ σ ∈ l, σ.complexity ≤ N := fun σ hσ ↦
     Finset.le_sup (f := fun σ : ArithmeticSentence ↦ σ.complexity) (by simpa [l] using hσ)
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(N + 1) := ModelsTheory.of_provably_subtheory V _ 𝗣𝗔 inferInstance
-  have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺2 := ModelsTheory.of_provably_subtheory V _ 𝗣𝗔 inferInstance
   obtain ⟨σ, hσ, hmodel⟩ := hd.exists_models (N := N) fun r hr ↦ by
     rcases mem_bitInsert_iff.mp hr with rfl | hr
     · exact ⟨⊥, by simp, rfl⟩
@@ -130,4 +134,5 @@ theorem not_finiteAxiomatizable_of_Peano_le [𝗣𝗔 ⪯ T] [Consistent T] : ¬
   have : Consistent (𝗣𝗔 ∪ T) := Consistent.of_le ‹Consistent T› hUT
   exact mt (FiniteAxiomatizable.of_equiv hequiv) <| not_finiteAxiomatizable_of_reflexive hR
 
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

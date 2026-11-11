@@ -1,10 +1,14 @@
 module
 
-public import AlphaCentauri.Bootstrapping.Proof.UniversalClosure
-public import AlphaCentauri.ToFoundation.SubstInversion
 public import AlphaCentauri.Bootstrapping.PartialTruth.Combination
+public import AlphaCentauri.Bootstrapping.Proof.Deduction
+public import AlphaCentauri.Bootstrapping.Proof.UniversalClosure
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
-public import AlphaCentauri.ToFoundation.Syntax
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!
@@ -24,7 +28,8 @@ quantifiers over `∀y ¬B`, where `B` is the matrix above; for `n ≤ k`, this 
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
 
 open PeanoMinus ISigma0 ISigma1
 open Arithmetic (numeral numeral_semiterm)
@@ -56,8 +61,6 @@ induction variable and whose bound variables `1, …, m` are the parameters. -/
 def IsInductionMatrix (n : ℕ) (m Z : V) : Prop :=
   IsSemiformula ℒₒᵣ (m + 1) Z ∧ shift ℒₒᵣ Z = Z ∧ IsPrenexHierarchy 𝚺 n Z
 
-section definability
-
 instance prenexInductionAtom.definable :
     𝚺ᴬ₁-Function₃ (prenexInductionAtom : V → V → V → V) := by
   unfold prenexInductionAtom
@@ -76,8 +79,6 @@ instance IsInductionMatrix.definable (n : ℕ) :
     𝚫ᴬ₁-Relation (IsInductionMatrix n : V → V → Prop) := by
   unfold IsInductionMatrix
   definability
-
-end definability
 
 variable {n : ℕ} {m Z : V}
 
@@ -143,18 +144,6 @@ lemma IsInductionMatrix.shift_prenexInductionMatrix (h : IsInductionMatrix n m Z
     (shift_prenexInductionAtom h.1 h.2.1 isSemiterm_bvar_zero (termShift_bvar 0))
     (shift_prenexInductionAtom h.1 h.2.1 isSemiterm_succ_bvar_zero termShift_succ_bvar_zero)
     (shift_prenexInductionAtom h.1 h.2.1 isSemiterm_bvar_one (termShift_bvar 1))
-
-lemma IsInductionMatrix.isFormula_prenexInductionAxiom (h : IsInductionMatrix n m Z) :
-    IsFormula ℒₒᵣ (prenexInductionAxiom m Z) := by
-  apply IsSemiformula.qqAlls
-  rw [zero_add, IsSemiformula.all, IsSemiformula.exs, add_assoc, one_add_one_eq_two]
-  exact h.isSemiformula_prenexInductionMatrix
-
-lemma IsInductionMatrix.shift_prenexInductionAxiom (h : IsInductionMatrix n m Z) :
-    shift ℒₒᵣ (prenexInductionAxiom m Z) = prenexInductionAxiom m Z := by
-  have hB := h.isSemiformula_prenexInductionMatrix.isUFormula
-  rw [prenexInductionAxiom, shift_qqAlls (by simpa using hB), shift_all (by simpa using hB),
-    shift_exs hB, h.shift_prenexInductionMatrix]
 
 end prenexInductionAxiom
 
@@ -560,4 +549,5 @@ theorem IsInductionMatrix.isFalseBlock_neg_prenexInductionAxiom [V↓[ℒₒᵣ]
 
 end counterexample
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

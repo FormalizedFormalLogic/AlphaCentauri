@@ -1,23 +1,34 @@
 module
 
-public import AlphaCentauri.ToFoundation.InternalEquality
-public import AlphaCentauri.ToFoundation.TypedProof
+public import AlphaCentauri.Bootstrapping.Interpretability.TranslationTable
+public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
+public import AlphaCentauri.Interpretability.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Equality
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.ProvableIff
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.QuantifierBlock
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.Meta.ClProver
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 
 /-!
 # Defining an element by a formula
 
-The graph of a function symbol under equivalent hypotheses is congruent, and the internal formula
-`definesElement d A` states that a formula `A` defines a unique element of the domain `d`.
+The internal formula `definesElement d A` states that a formula `A` defines a unique element of the
+domain `d`, and the graph of a function symbol under equivalent hypotheses is congruent.
 -/
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+
+section
 
 attribute [local simp] Semiformula.shift_substs Semiformula.substs_substs
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 open scoped FFL.FirstOrder.Arithmetic
 
@@ -67,6 +78,40 @@ lemma relativizedImp_imp_relativizedImp {k : ℕ} {H : Formula V L} (d : Semifor
     cl_prover [this]
   cl_prover [h₂]
 
+lemma relativizedImp_imp_relativizedImp_of_imp {k : ℕ} (d d' : Semiformula V L 1)
+    (A B : Fin k → Semiformula V L 1) (C C' : Semiformula V L (0 + k))
+    (hA : ∀ i, T.internalize V ⊢ ∀¹ (d' ⋏ B i 🡒 d ⋏ A i))
+    (hC : T.internalize V ⊢ (Semiformula.shift^[k] C).subst (fun i ↦ Semiterm.fvar (i : V)) 🡒
+      (Semiformula.shift^[k] C').subst fun i ↦ Semiterm.fvar (i : V)) :
+    T.internalize V ⊢ relativizedImp d A C 🡒 relativizedImp d' B C' := by
+  have h₁ (i : Fin k) : T.internalize V ⊢
+      (Semiformula.shift^[k] d').subst ![Semiterm.fvar (i : V)] ⋏
+        (Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar (i : V)] 🡒
+      (Semiformula.shift^[k] d).subst ![Semiterm.fvar (i : V)] ⋏
+        (Semiformula.shift^[k] (A i)).subst ![Semiterm.fvar (i : V)] := by
+    have := TProof.shift_iterate! (hA i) k
+    simp only [Semiformula.shift_iterate_imp, Semiformula.shift_iterate_all,
+      Semiformula.shift_iterate_and] at this
+    have h₂ := TProof.all_imp_subst (T := T)
+      (Semiformula.shift^[k] d' ⋏ Semiformula.shift^[k] (B i) 🡒
+        Semiformula.shift^[k] d ⋏ Semiformula.shift^[k] (A i)) (Semiterm.fvar (i : V))
+    simp only [Semiformula.substs_imp, Semiformula.substs_and] at h₂
+    exact h₂ ⨀ this
+  apply TProof.allItr_generalize_imp
+  simp only [relativizedImp, Semiformula.shift_iterate_allItr]
+  apply C_trans (TProof.allItr_specialize _ fun i ↦ Semiterm.fvar (i : V))
+  simp only [Semiformula.shift_iterate_imp, Semiformula.substs_imp, Semiformula.shift_iterate_conj,
+    Semiformula.substs_conj, Semiformula.shift_iterate_and, Semiformula.substs_and,
+    Semiformula.subst_shift_iterate_subst_bvar, Fin.addCast_val]
+  have h₂ := matrixConj_imp_matrixConj (𝓢 := T.internalize V) (φ := ⊤)
+    (v := fun i : Fin k ↦ (Semiformula.shift^[k] d').subst ![Semiterm.fvar (i : V)] ⋏
+      (Semiformula.shift^[k] (B i)).subst ![Semiterm.fvar (i : V)])
+    (u := fun i : Fin k ↦ (Semiformula.shift^[k] d).subst ![Semiterm.fvar (i : V)] ⋏
+      (Semiformula.shift^[k] (A i)).subst ![Semiterm.fvar (i : V)]) fun i ↦ by
+    have := h₁ i
+    cl_prover [this]
+  cl_prover [h₂, hC]
+
 /-- Replacement of domain-equivalent hypotheses in `relativizedImp`. -/
 theorem relativizedImp_congr {k : ℕ} (d : Semiformula V L 1) (A B : Fin k → Semiformula V L 1)
     (C : Semiformula V L (0 + k)) :
@@ -79,6 +124,55 @@ theorem relativizedImp_congr {k : ℕ} (d : Semiformula V L 1) (A B : Fin k → 
     C_trans (matrixConj_elim (fun i ↦ ∀¹ (d 🡒 (A i 🡘 B i))) i)
       (all_iff_imp_all_imp_imp_right d (A i) (B i))
   cl_prover [h₁, h₂]
+
+variable [L.Eq] [𝗘𝗤 L ⪯ T]
+
+/-- If every instance of the domain `d` is provable and `X` is preserved by equal arguments, then
+`∀ w⃗ (⋀ᵢ (d(wᵢ) ∧ wᵢ = uᵢ) → X(w⃗))` is provably equivalent to `X(u⃗)`. -/
+lemma tprovable_relativizedImp_equal_iff {k : ℕ} (d : Semiformula V L 1)
+    (hd : ∀ t : Term V L, T.internalize V ⊢ d.subst ![t]) (u : Fin k → Term V L)
+    (X : Semiformula V L k)
+    (hX : ∀ (j : ℕ) (s w : Fin k → Term V L), T.internalize V ⊢
+      Matrix.conj (fun i ↦ Semiformula.equal (s i) (w i)) 🡒
+        (Semiformula.shift^[j] X).subst w 🡒 (Semiformula.shift^[j] X).subst s) :
+    T.internalize V ⊢ relativizedImp d (fun i ↦ Semiformula.equal (Semiterm.bvar 0) (u i).bShift)
+      (X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) 🡘 X.subst u := by
+  have h₁ := TProof.allItr_specialize (T := T) (Matrix.conj (fun i : Fin k ↦
+      d.subst ![Semiterm.bvar (i.addCast 0)] ⋏
+        (Semiformula.equal (Semiterm.bvar 0) (u i).bShift).subst ![Semiterm.bvar (i.addCast 0)]) 🡒
+      X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) (fun j ↦ u (Fin.cast (zero_add k) j))
+  simp only [Semiformula.substs_equal, Semiterm.substs_bvar, Matrix.cons_val_fin_one,
+    Semiterm.bShift_substs_succ, Matrix.tail_cons, Semiformula.substs_imp, Semiformula.substs_conj,
+    Semiformula.substs_and, Semiformula.substs_substs, Matrix.vecMap_cons', Matrix.head_cons,
+    Matrix.vecMap_nil, Semiterm.substs_substs, Semiterm.bShift_substs_zero,
+    Semiterm.substs_vecMap_bvar] at h₁
+  have hc : T.internalize V ⊢ Matrix.conj fun i ↦ d.subst ![u i] ⋏ Semiformula.equal (u i) (u i) :=
+    tprovable_conj T fun i ↦ K_intro (hd (u i)) (tprovable_equal_refl T (u i))
+  have h₂ : T.internalize V ⊢ X.subst u 🡒 relativizedImp d
+      (fun i ↦ Semiformula.equal (Semiterm.bvar 0) (u i).bShift)
+      (X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) := by
+    unfold relativizedImp
+    apply TProof.allItr_generalize_imp
+    simp only [Semiformula.shift_iterate_subst, Semiformula.substs_equal, Semiterm.substs_bvar,
+      Matrix.cons_val_fin_one, Semiterm.bShift_substs_succ, Matrix.tail_cons,
+      Semiformula.shift_iterate_imp, Semiformula.shift_iterate_conj, Semiformula.shift_iterate_and,
+      Matrix.vecMap_cons', Matrix.head_cons, Semiterm.shift_iterate_bvar, Matrix.vecMap_nil,
+      Semiformula.shift_iterate_equal, Semiterm.shift_iterate_subst_nil,
+      Semiterm.shift_iterate_vecMap_bvar, Semiformula.substs_imp, Semiformula.substs_conj,
+      Semiformula.substs_and, Semiformula.substs_substs, Fin.addCast_val, Semiterm.subst_nil_subst,
+      Semiterm.bShift_substs_zero, Semiterm.substs_vecMap_bvar]
+    have h₃ := hX k (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) (fun i ↦ Semiterm.shift^[k] (u i))
+    have h₄ := matrixConj_imp_matrixConj (𝓢 := T.internalize V) (φ := ⊤)
+      (v := fun i : Fin k ↦ (Semiformula.shift^[k] d).subst ![Semiterm.fvar ((i : ℕ) : V)] ⋏
+        Semiformula.equal (Semiterm.fvar ((i : ℕ) : V)) (Semiterm.shift^[k] (u i)))
+      (u := fun i : Fin k ↦
+        Semiformula.equal (Semiterm.fvar ((i : ℕ) : V)) (Semiterm.shift^[k] (u i)))
+      fun i ↦ by cl_prover
+    cl_prover [h₃, h₄]
+  unfold relativizedImp at h₂ ⊢
+  simp only [Semiformula.substs_equal, Semiterm.substs_bvar, Matrix.cons_val_fin_one,
+    Semiterm.bShift_substs_succ, Matrix.tail_cons] at h₂ ⊢
+  cl_prover [h₁, h₂, hc]
 
 end relativizedImp
 
@@ -488,4 +582,7 @@ end definesElement
 
 end defines
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

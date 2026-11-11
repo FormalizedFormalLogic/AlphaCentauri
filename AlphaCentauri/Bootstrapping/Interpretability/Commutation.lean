@@ -2,8 +2,10 @@ module
 
 public import AlphaCentauri.Bootstrapping.Interpretability.Translation
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
-public import AlphaCentauri.ToFoundation.Syntax
-public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 
 /-!
 # Commutation of the internal translation
@@ -18,13 +20,13 @@ the substitution of free variables by a vector of free variables.
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Negation, shift and arity -/
-
-section negShift
 
 /-- `tbl` lists, for the languages `L₁` and `L₂`, shift-invariant formulas of the right arities. -/
 structure IsTable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq] [L₂.Encodable]
@@ -35,10 +37,6 @@ structure IsTable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L
   rel_shift {k r : V} : L₂.IsRel k r → shift L₁ (tableRel tbl k r) = tableRel tbl k r
   func {k f : V} : L₂.IsFunc k f → IsSemiformula L₁ (k + 1) (tableFunc tbl k f)
   func_shift {k f : V} : L₂.IsFunc k f → shift L₁ (tableFunc tbl k f) = tableFunc tbl k f
-
-section generic
-
-variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 lemma IsSemiformula.relocate {n m i s p : V} (hp : IsSemiformula L (n + 1) p) (hi : i < m)
     (hs : s + n ≤ m) : IsSemiformula L m (relocate L i s p) := by
@@ -52,8 +50,6 @@ lemma shift_relocate {n m i s p : V} (hp : IsSemiformula L (n + 1) p) (hi : i < 
   rw [relocate_eq_subst hp, relocate_eq_subst hp.shift, shift_substs hp h₁,
     termShiftVec_bvarVec_cons]
 
-end generic
-
 section table
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
@@ -66,6 +62,20 @@ lemma IsTable.shift_domainAt {tbl : V} (hT : IsTable L₁ L₂ tbl) (i : V) :
   rw [domainAt, shift_substs hT.domain h₁, hT.domain_shift,
     termShiftVec_cons₁ (show IsUTerm L₁ ^#i by simp),
     termShift_bvar]
+
+lemma IsTable.lt_len_rel {tbl : V} (hT : IsTable L₁ L₂ tbl) {k r : V} (h : L₂.IsRel k r) :
+    ⟪k, r⟫ < len tbl.[1] := by
+  by_contra hlt
+  have := (hT.rel h).isUFormula.pos
+  rw [tableRel, nth_lt_len (not_lt.mp hlt)] at this
+  simp at this
+
+lemma IsTable.lt_len_func {tbl : V} (hT : IsTable L₁ L₂ tbl) {k f : V} (h : L₂.IsFunc k f) :
+    ⟪k, f⟫ < len tbl.[2] := by
+  by_contra hlt
+  have := (hT.func h).isUFormula.pos
+  rw [tableFunc, nth_lt_len (not_lt.mp hlt)] at this
+  simp at this
 
 lemma IsTable.isSemiformula_domainAt {tbl : V} (hT : IsTable L₁ L₂ tbl) {m i : V} (hi : i < m) :
     IsSemiformula L₁ m (domainAt L₁ tbl i) :=
@@ -144,19 +154,17 @@ lemma IsTable.isSemiformula_funcBody {tbl n k f v : V} (hT : IsTable L₁ L₂ t
 
 lemma IsSemiformula.varEqual {tbl n t : V} (hT : IsTable L₁ L₂ tbl) (ht : IsSemiterm L₂ n t) :
     IsSemiformula L₁ (n + 1) (Bootstrapping.varEqual L₁ L₂ tbl t) := by
-  have h₁ : ∀ t, IsSemiterm L₂ n t →
-      IsSemiformula L₁ (n + 1) (Bootstrapping.varEqual L₁ L₂ tbl t) := by
-    apply IsSemiterm.sigma1_induction
-      (P := fun t ↦ IsSemiformula L₁ (n + 1) (Bootstrapping.varEqual L₁ L₂ tbl t))
-    · definability
-    · intro z hz
-      simp [hz]
-    · intro x
-      simp
-    · intro k f v hf hv ih
-      rw [varEqual_func hf hv.isUTerm]
-      exact IsSemiformula.qqAlls (hT.isSemiformula_funcBody hf hv ih)
-  exact h₁ t ht
+  refine IsSemiterm.sigma1_induction
+    (P := fun t ↦ IsSemiformula L₁ (n + 1) (Bootstrapping.varEqual L₁ L₂ tbl t))
+    ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz
+    simp [hz]
+  · intro x
+    simp
+  · intro k f v hf hv ih
+    rw [varEqual_func hf hv.isUTerm]
+    exact IsSemiformula.qqAlls (hT.isSemiformula_funcBody hf hv ih)
 
 lemma IsTable.isSemiformula_varEqualVec_nth {tbl n k v i : V} (hT : IsTable L₁ L₂ tbl)
     (hv : IsSemitermVec L₂ k n v) (hi : i < k) :
@@ -233,26 +241,24 @@ lemma nth_varEqualVec_map {tbl k v v' : V} {F : V → V} (hv : IsUTermVec L₂ k
 
 lemma varEqual_termShift {tbl n t : V} (hT : IsTable L₁ L₂ tbl) (ht : IsSemiterm L₂ n t) :
     varEqual L₁ L₂ tbl (termShift L₂ t) = shift L₁ (varEqual L₁ L₂ tbl t) := by
-  have h₁ : ∀ t, IsSemiterm L₂ n t →
-      varEqual L₁ L₂ tbl (termShift L₂ t) = shift L₁ (varEqual L₁ L₂ tbl t) := by
-    apply IsSemiterm.sigma1_induction
-      (P := fun t ↦ varEqual L₁ L₂ tbl (termShift L₂ t) = shift L₁ (varEqual L₁ L₂ tbl t))
-    · definability
-    · intro z hz
-      simp
-    · intro x
-      simp
-    · intro k f v hf hv ih
-      have h₂ :=
-        hT.isSemiformula_funcBody hf hv (fun i hi ↦ IsSemiformula.varEqual hT (hv.nth hi))
-      obtain ⟨h₃, h₄⟩ := IsSemiformula.imp.mp h₂
-      have h₅ := nth_varEqualVec_map (tbl := tbl) (F := shift L₁) hv.isUTerm
-        hv.termShiftVec.isUTerm fun i hi ↦ by rw [nth_termShiftVec hv.isUTerm hi]; exact ih i hi
-      rw [termShift_func hf hv.isUTerm, varEqual_func hf hv.termShiftVec.isUTerm,
-        varEqual_func hf hv.isUTerm, shift_qqAlls h₂.isUFormula k, shift_imp h₃ h₄,
-        hT.shift_qqConj_guardVec (by simp) (add_arity_comm k n).le
-          (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₅, hT.shift_funcTail hf]
-  exact h₁ t ht
+  refine IsSemiterm.sigma1_induction
+    (P := fun t ↦ varEqual L₁ L₂ tbl (termShift L₂ t) = shift L₁ (varEqual L₁ L₂ tbl t))
+    ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz
+    simp
+  · intro x
+    simp
+  · intro k f v hf hv ih
+    have h₂ :=
+      hT.isSemiformula_funcBody hf hv (fun i hi ↦ IsSemiformula.varEqual hT (hv.nth hi))
+    obtain ⟨h₃, h₄⟩ := IsSemiformula.imp.mp h₂
+    have h₅ := nth_varEqualVec_map (tbl := tbl) (F := shift L₁) hv.isUTerm
+      hv.termShiftVec.isUTerm fun i hi ↦ by rw [nth_termShiftVec hv.isUTerm hi]; exact ih i hi
+    rw [termShift_func hf hv.isUTerm, varEqual_func hf hv.termShiftVec.isUTerm,
+      varEqual_func hf hv.isUTerm, shift_qqAlls h₂.isUFormula k, shift_imp h₃ h₄,
+      hT.shift_qqConj_guardVec (by simp) (add_arity_comm k n).le
+        (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₅, hT.shift_funcTail hf]
 
 lemma shift_translateRel {tbl n k R v : V} (hT : IsTable L₁ L₂ tbl) (hR : L₂.IsRel k R)
     (hv : IsSemitermVec L₂ k n v) :
@@ -293,14 +299,6 @@ lemma translate_shift {tbl n p : V} (hT : IsTable L₁ L₂ tbl) (hp : IsSemifor
 
 end table
 
-end negShift
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
-
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
 section isTable
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
@@ -335,12 +333,6 @@ end isTable
 
 /-! ## Substitution of variables -/
 
-section substVars
-
-section generic
-
-variable {L : Language} [L.Encodable] [L.LORDefinable]
-
 lemma subst_relocate_qVec {a b c j s v w E : V} (hw : IsSemitermVec L a c w)
     (hE : IsSemiformula L (a + 1) E) (hv : IsSemitermVec L (s + a) b v) (hj : j < s)
     (hvj : v.[j] = ^#j) (hvs : ∀ z < a, v.[s + z] = termSubst L (bvarVec s c) w.[z]) :
@@ -362,8 +354,6 @@ lemma subst_relocate_qVec {a b c j s v w E : V} (hw : IsSemitermVec L a c w)
     rw [nth_termSubstVec hσ.isUTerm hi, nth_adjoin_succ, nth_bvarVec _ _ _ hi', termSubst_bvar,
       hvs i hi', nth_termSubstVec hqw.isUTerm hi, nth_qVec_succ hw.isUTerm hi',
       substs_cons_bShift (hw.nth hi')]
-
-end generic
 
 section table
 
@@ -407,49 +397,47 @@ lemma varEqual_termSubst {tbl : V} (hT : IsTable L₁ L₂ tbl) {n m w t : V}
     (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) (ht : IsSemiterm L₂ n t) :
     varEqual L₁ L₂ tbl (termSubst L₂ w t) = subst L₁ (qVec L₁ w) (varEqual L₁ L₂ tbl t) := by
   have hw₁ : IsSemitermVec L₁ n m w := hw.of_var hvar
-  have h₁ : ∀ t, IsSemiterm L₂ n t →
-      varEqual L₁ L₂ tbl (termSubst L₂ w t) = subst L₁ (qVec L₁ w) (varEqual L₁ L₂ tbl t) := by
-    apply IsSemiterm.sigma1_induction
-      (P := fun t ↦
-        varEqual L₁ L₂ tbl (termSubst L₂ w t) = subst L₁ (qVec L₁ w) (varEqual L₁ L₂ tbl t))
-    · definability
-    · intro z hz
-      rcases hvar z hz with ⟨y, hy⟩ | ⟨x, hx⟩
-      · simp [hy, nth_qVec_succ hw₁.isUTerm hz]
-      · simp [hx, nth_qVec_succ hw₁.isUTerm hz]
-    · intro x
-      simp
-    · intro k f v hf hv ih
-      have h₂ := hT.isSemiformula_funcBody hf hv (fun i hi ↦ IsSemiformula.varEqual hT (hv.nth hi))
-      obtain ⟨h₃, h₄⟩ := IsSemiformula.imp.mp h₂
-      have hvw : IsUTermVec L₂ k (termSubstVec L₂ k w v) :=
-        (IsSemitermVec.termSubstVec hw hv).isUTerm
-      have h₅ := nth_varEqualVec_map (tbl := tbl) (F := subst L₁ (qVec L₁ w)) hv.isUTerm hvw
-        fun i hi ↦ by rw [nth_termSubstVec hv.isUTerm hi]; exact ih i hi
-      obtain ⟨v', hv', h₆, h₇⟩ := exists_vec_shift hw₁.qVec k
-      have hk0 : v'.[k] = ^#k := by
-        have h₈ := h₇ 0 (by simp)
-        rw [nth_qVec_zero, termSubst_bvar, nth_bvarVec _ _ _ (by simp)] at h₈
-        simpa using h₈
-      have hvs : ∀ z < n, v'.[k + 1 + z] = termSubst L₁ (bvarVec (k + 1) m) w.[z] := by
-        intro z hz
-        have e : k + 1 + z = k + (z + 1) := by simp only [add_comm, add_left_comm]
-        rw [e, h₇ (z + 1) (by simpa using hz), nth_qVec_succ hw₁.isUTerm hz,
-          termSubst_bvarVec_termBShift k (hw₁.nth hz)]
-      have hv₁ : IsSemitermVec L₁ (k + 1 + n) (m + 1 + k) v' := by
-        rw [add_arity_comm k n]
-        exact hv'
-      rw [termSubst_func hf hv.isUTerm, varEqual_func hf hvw, varEqual_func hf hv.isUTerm,
-        subst_qqAlls_vec hw₁.qVec h₂.isUFormula hv' h₆ h₇, subst_imp hv' h₃ h₄,
-        hT.subst_qqConj_guardVec hw₁ hv₁ le_self_add le_add_self (add_arity_comm k n).le h₆ hvs
-          (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₅,
-        hT.subst_funcTail hf hv'.isUTerm (le_self_add.trans (add_arity_comm k n).le)
-          (fun x hx ↦ by
-          rcases lt_or_ge x k with hxk | hxk
-          · exact h₆ x hxk
-          · obtain rfl : x = k := le_antisymm (lt_succ_iff_le.mp hx) hxk
-            exact hk0)]
-  exact h₁ t ht
+  refine IsSemiterm.sigma1_induction
+    (P := fun t ↦
+      varEqual L₁ L₂ tbl (termSubst L₂ w t) = subst L₁ (qVec L₁ w) (varEqual L₁ L₂ tbl t))
+    ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z hz
+    rcases hvar z hz with ⟨y, hy⟩ | ⟨x, hx⟩
+    · simp [hy, nth_qVec_succ hw₁.isUTerm hz]
+    · simp [hx, nth_qVec_succ hw₁.isUTerm hz]
+  · intro x
+    simp
+  · intro k f v hf hv ih
+    have h₂ := hT.isSemiformula_funcBody hf hv (fun i hi ↦ IsSemiformula.varEqual hT (hv.nth hi))
+    obtain ⟨h₃, h₄⟩ := IsSemiformula.imp.mp h₂
+    have hvw : IsUTermVec L₂ k (termSubstVec L₂ k w v) :=
+      (IsSemitermVec.termSubstVec hw hv).isUTerm
+    have h₅ := nth_varEqualVec_map (tbl := tbl) (F := subst L₁ (qVec L₁ w)) hv.isUTerm hvw
+      fun i hi ↦ by rw [nth_termSubstVec hv.isUTerm hi]; exact ih i hi
+    obtain ⟨v', hv', h₆, h₇⟩ := exists_vec_shift hw₁.qVec k
+    have hk0 : v'.[k] = ^#k := by
+      have h₈ := h₇ 0 (by simp)
+      rw [nth_qVec_zero, termSubst_bvar, nth_bvarVec _ _ _ (by simp)] at h₈
+      simpa using h₈
+    have hvs : ∀ z < n, v'.[k + 1 + z] = termSubst L₁ (bvarVec (k + 1) m) w.[z] := by
+      intro z hz
+      have e : k + 1 + z = k + (z + 1) := by simp only [add_comm, add_left_comm]
+      rw [e, h₇ (z + 1) (by simpa using hz), nth_qVec_succ hw₁.isUTerm hz,
+        termSubst_bvarVec_termBShift k (hw₁.nth hz)]
+    have hv₁ : IsSemitermVec L₁ (k + 1 + n) (m + 1 + k) v' := by
+      rw [add_arity_comm k n]
+      exact hv'
+    rw [termSubst_func hf hv.isUTerm, varEqual_func hf hvw, varEqual_func hf hv.isUTerm,
+      subst_qqAlls_vec hw₁.qVec h₂.isUFormula hv' h₆ h₇, subst_imp hv' h₃ h₄,
+      hT.subst_qqConj_guardVec hw₁ hv₁ le_self_add le_add_self (add_arity_comm k n).le h₆ hvs
+        (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₅,
+      hT.subst_funcTail hf hv'.isUTerm (le_self_add.trans (add_arity_comm k n).le)
+        (fun x hx ↦ by
+        rcases lt_or_ge x k with hxk | hxk
+        · exact h₆ x hxk
+        · obtain rfl : x = k := le_antisymm (lt_succ_iff_le.mp hx) hxk
+          exact hk0)]
 
 lemma subst_translateRel {tbl n m k R v w : V} (hT : IsTable L₁ L₂ tbl)
     (hw : IsSemitermVec L₂ n m w) (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x))
@@ -472,9 +460,14 @@ lemma subst_translateRel {tbl n m k R v w : V} (hT : IsTable L₁ L₂ tbl)
       (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₃,
     subst_eq_self_of_le (hT.rel hR) hv'.isUTerm (by simp) h₆]
 
-lemma translate_subst_aux {tbl : V} (hT : IsTable L₁ L₂ tbl) {n p : V} (hp : IsSemiformula L₂ n p) :
-    ∀ m w : V, IsSemitermVec L₂ n m w → (∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) →
-      translate L₁ L₂ tbl (subst L₂ w p) = subst L₁ w (translate L₁ L₂ tbl p) := by
+lemma translate_subst {tbl : V} (hT : IsTable L₁ L₂ tbl) {n m w p : V} (hw : IsSemitermVec L₂ n m w)
+    (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) (hp : IsSemiformula L₂ n p) :
+    translate L₁ L₂ tbl (subst L₂ w p) = subst L₁ w (translate L₁ L₂ tbl p) := by
+  suffices H : ∀ m w : V, IsSemitermVec L₂ n m w →
+      (∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) →
+        translate L₁ L₂ tbl (subst L₂ w p) = subst L₁ w (translate L₁ L₂ tbl p) from
+    H m w hw hvar
+  clear hw hvar m w
   have hd := hT.isSemiformula_domainAt_zero
   have hdu := (hd 0).isUFormula
   apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
@@ -511,11 +504,6 @@ lemma translate_subst_aux {tbl : V} (hT : IsTable L₁ L₂ tbl) {n p : V} (hp :
     simp [*, hp.isUFormula, IsUFormula.translate hT, (hp.subst hw').isUFormula,
       hT.subst_qVec_domainAt hw₁]
 
-lemma translate_subst {tbl : V} (hT : IsTable L₁ L₂ tbl) {n m w p : V} (hw : IsSemitermVec L₂ n m w)
-    (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) (hp : IsSemiformula L₂ n p) :
-    translate L₁ L₂ tbl (subst L₂ w p) = subst L₁ w (translate L₁ L₂ tbl p) :=
-  translate_subst_aux hT hp m w hw hvar
-
 lemma translate_substs1_fvar {tbl : V} (hT : IsTable L₁ L₂ tbl) {p : V} (x : V)
     (hp : IsSemiformula L₂ 1 p) :
     translate L₁ L₂ tbl (substs1 L₂ (^&x) p) = substs1 L₁ (^&x) (translate L₁ L₂ tbl p) := by
@@ -529,15 +517,7 @@ lemma translate_substs1_fvar {tbl : V} (hT : IsTable L₁ L₂ tbl) {p : V} (x :
 
 end table
 
-end substVars
-
 /-! ## Substitution of free variables -/
-
-section substFvars
-
-section generic
-
-variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 lemma fvSubst_relocate {w n i s p : V} (hw : IsSemitermVec L (len w) 0 w)
     (hp : IsSemiformula L (n + 1) p) :
@@ -548,8 +528,6 @@ lemma fvSubst_relocate {w n i s p : V} (hw : IsSemitermVec L (len w) 0 w)
       (IsSemiterm.bvar.mpr (lt_of_le_of_lt le_self_add (lt_add_one _)))
   rw [relocate_eq_subst hp, relocate_eq_subst (hp.fvSubst hw₁), fvSubst_subst hw hv hp,
     termFvSubstVec_bvar_cons]
-
-end generic
 
 section table
 
@@ -577,32 +555,30 @@ lemma IsTable.fvSubst_qqConj_guardVec {tbl n m k s w u u' : V} (hT : IsTable L�
 lemma varEqual_termFvSubst {tbl w n t : V} (hT : IsTable L₁ L₂ tbl)
     (hw : ∀ i < len w, ∃ x, w.[i] = ^&x) (ht : IsSemiterm L₂ n t) :
     varEqual L₁ L₂ tbl (termFvSubst L₂ w t) = fvSubst L₁ w (varEqual L₁ L₂ tbl t) := by
-  have h₁ : ∀ t, IsSemiterm L₂ n t →
-      varEqual L₁ L₂ tbl (termFvSubst L₂ w t) = fvSubst L₁ w (varEqual L₁ L₂ tbl t) := by
-    apply IsSemiterm.sigma1_induction
-      (P := fun t ↦ varEqual L₁ L₂ tbl (termFvSubst L₂ w t) = fvSubst L₁ w (varEqual L₁ L₂ tbl t))
-    · definability
-    · intro z _
-      simp [termFvSubstVec_pair]
-    · intro x
-      by_cases hx : x < len w
-      · obtain ⟨y, hy⟩ := hw x hx
-        simp [termFvSubstVec_pair, hx, hy]
-      · simp [termFvSubstVec_pair, hx]
-    · intro k f v hf hv ih
-      have h₂ := hT.isSemiformula_funcBody hf hv (fun i hi ↦ IsSemiformula.varEqual hT (hv.nth hi))
-      obtain ⟨h₃, h₄⟩ := IsSemiformula.imp.mp h₂
-      have hvw : IsUTermVec L₂ k (termFvSubstVec L₂ k w v) :=
-        (IsSemitermVec.termFvSubstVec (isSemitermVec_of_fvar n hw) hv).isUTerm
-      have h₅ := nth_varEqualVec_map (tbl := tbl) (F := fvSubst L₁ w) hv.isUTerm hvw
-        fun i hi ↦ by rw [nth_termFvSubstVec hv.isUTerm hi]; exact ih i hi
-      rw [termFvSubst_func hf hv.isUTerm, varEqual_func hf hvw, varEqual_func hf hv.isUTerm,
-        fvSubst_qqAlls h₂.isUFormula k,
-        fvSubst_imp (isSemitermVec_of_fvar (L := L₁) (n + 1 + k) hw) h₃ h₄,
-        hT.fvSubst_funcTail hf (show k < n + 1 + k by simp),
-        hT.fvSubst_qqConj_guardVec hw (by simp) (add_arity_comm k n).le
-          (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₅]
-  exact h₁ t ht
+  refine IsSemiterm.sigma1_induction
+    (P := fun t ↦ varEqual L₁ L₂ tbl (termFvSubst L₂ w t) = fvSubst L₁ w (varEqual L₁ L₂ tbl t))
+    ?_ ?_ ?_ ?_ t ht
+  · definability
+  · intro z _
+    simp [termFvSubstVec_pair]
+  · intro x
+    by_cases hx : x < len w
+    · obtain ⟨y, hy⟩ := hw x hx
+      simp [termFvSubstVec_pair, hx, hy]
+    · simp [termFvSubstVec_pair, hx]
+  · intro k f v hf hv ih
+    have h₂ := hT.isSemiformula_funcBody hf hv (fun i hi ↦ IsSemiformula.varEqual hT (hv.nth hi))
+    obtain ⟨h₃, h₄⟩ := IsSemiformula.imp.mp h₂
+    have hvw : IsUTermVec L₂ k (termFvSubstVec L₂ k w v) :=
+      (IsSemitermVec.termFvSubstVec (isSemitermVec_of_fvar n hw) hv).isUTerm
+    have h₅ := nth_varEqualVec_map (tbl := tbl) (F := fvSubst L₁ w) hv.isUTerm hvw
+      fun i hi ↦ by rw [nth_termFvSubstVec hv.isUTerm hi]; exact ih i hi
+    rw [termFvSubst_func hf hv.isUTerm, varEqual_func hf hvw, varEqual_func hf hv.isUTerm,
+      fvSubst_qqAlls h₂.isUFormula k,
+      fvSubst_imp (isSemitermVec_of_fvar (L := L₁) (n + 1 + k) hw) h₃ h₄,
+      hT.fvSubst_funcTail hf (show k < n + 1 + k by simp),
+      hT.fvSubst_qqConj_guardVec hw (by simp) (add_arity_comm k n).le
+        (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₅]
 
 lemma fvSubst_translateRel {tbl n k R v w : V} (hT : IsTable L₁ L₂ tbl)
     (hw : ∀ i < len w, ∃ x, w.[i] = ^&x) (hR : L₂.IsRel k R) (hv : IsSemitermVec L₂ k n v) :
@@ -658,6 +634,5 @@ lemma translate_fvSubst {tbl w n p : V} (hT : IsTable L₁ L₂ tbl)
 
 end table
 
-end substFvars
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

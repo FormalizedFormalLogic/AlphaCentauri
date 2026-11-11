@@ -1,9 +1,12 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.FvSubst
-public import AlphaCentauri.ToFoundation.Syntax
-public import AlphaCentauri.ToFoundation.Coding
-public import AlphaCentauri.ToFoundation.PartialTruth
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 
 /-!
 # Numeral assignments to free variables
@@ -19,7 +22,9 @@ terms and `fvUnshift`, which lowers the indices of free variables and undoes `sh
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+variable {Γ : SigmaPiDelta} {m : ℕ}
 
 open Arithmetic (numeral numeralGraph numeral_uterm numeral_semiterm numeral_substs qqNLT qqLT)
 
@@ -59,10 +64,6 @@ noncomputable def termFvAssignGraph : 𝚺ᴬ₁.Semisentence 3 :=
 noncomputable def termFvAssignVecGraph : 𝚺ᴬ₁.Semisentence 4 :=
   (blueprint.resultVec ℒₒᵣ).rew <| Rew.subst ![#0, #1, #3, #2]
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 instance termFvAssign.defined :
     𝚺ᴬ₁-Function₂ (termFvAssign : V → V → V) via termFvAssignGraph := .mk fun v ↦ by
   simpa [termFvAssignGraph, termFvAssign, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
@@ -84,8 +85,6 @@ instance termFvAssignVec.definable : 𝚺ᴬ₁-Function₃ (termFvAssignVec : V
 
 instance termFvAssignVec.definable' : Γᴬ_[m + 1]-Function₃ (termFvAssignVec : V → V → V → V) :=
   termFvAssignVec.definable.of_sigmaOne
-
-end
 
 section
 
@@ -299,10 +298,6 @@ noncomputable def fvAssign (f p : V) : V := FvAssign.construction.result ℒₒ�
 
 noncomputable def fvAssignGraph : 𝚺ᴬ₁.Semisentence 3 := FvAssign.blueprint.result ℒₒᵣ
 
-section
-
-variable {Γ : SigmaPiDelta} {m : ℕ}
-
 instance fvAssign.defined : 𝚺ᴬ₁-Function₂ (fvAssign : V → V → V) via fvAssignGraph :=
   FvAssign.construction.result_defined
 
@@ -311,8 +306,6 @@ instance fvAssign.definable : 𝚺ᴬ₁-Function₂ (fvAssign : V → V → V) 
 
 instance fvAssign.definable' : Γᴬ_[m + 1]-Function₂ (fvAssign : V → V → V) :=
   fvAssign.definable.of_sigmaOne
-
-end
 
 section
 
@@ -393,6 +386,19 @@ lemma fvAssign_neg {p : V} (hp : IsUFormula ℒₒᵣ p) :
     rw [neg_all hp, fvAssign_exs hp.neg, fvAssign_all hp, neg_all hp.fvAssign, ih]
   · intro p hp ih
     rw [neg_ex hp, fvAssign_all hp.neg, fvAssign_exs hp, neg_ex hp.fvAssign, ih]
+
+@[simp] lemma formulaComplexity_fvAssign {p : V} :
+    IsUFormula ℒₒᵣ p → formulaComplexity ℒₒᵣ (fvAssign f p) = formulaComplexity ℒₒᵣ p := by
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+  · definability
+  · intro k r v hr hv; simp [hr, hv, hv.termFvAssignVec]
+  · intro k r v hr hv; simp [hr, hv, hv.termFvAssignVec]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.fvAssign, hq.fvAssign, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, hp.fvAssign, hq.fvAssign, ihp, ihq]
+  · intro p hp ihp; simp [hp, hp.fvAssign, ihp]
+  · intro p hp ihp; simp [hp, hp.fvAssign, ihp]
 
 lemma fvAssign_shift {b p : V} (hp : IsUFormula ℒₒᵣ p) :
     fvAssign (b ∷ f) (shift ℒₒᵣ p) = fvAssign f p := by
@@ -730,8 +736,6 @@ end fvSubst
 
 /-! ## Unshifting free variables -/
 
-section fvUnshift
-
 namespace TermFvUnshift
 
 def blueprint : Language.TermRec.Blueprint 0 where
@@ -1046,6 +1050,5 @@ lemma IsPrenexHierarchy.fvUnshift {Γ : Polarity} {s : ℕ} {p : V} (hp : IsUFor
   exact isPrenexHierarchy_iff_exists_qqToPrenex.mpr
     ⟨_, fvUnshift_qqToPrenex hθ', hθ.fvUnshift hθ'⟩
 
-end fvUnshift
-
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

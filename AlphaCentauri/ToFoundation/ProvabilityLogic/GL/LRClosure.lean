@@ -38,7 +38,8 @@ variable [DecidableEq α] {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 /-- A formula and its instance substituting `⊥` for `a` agree at a world where `a` fails at the
 world and above it. -/
-lemma forces_subst_bot_iff [IsTrans _ M.Rel] (h : ∀ y, x = y ∨ x ≺ y → ¬M y a) : x ⊩ D ↔ x ⊩ D⟦a ↦ ⊥⟧ := by
+lemma forces_subst_bot_iff [IsTrans _ M.Rel] (h : ∀ y, x = y ∨ x ≺ y → ¬M y a) :
+    x ⊩ D ↔ x ⊩ D⟦a ↦ ⊥⟧ := by
   induction D generalizing x with
   | atom b =>
     by_cases hb : b = a
@@ -88,7 +89,8 @@ lemma box_neg_and_box_iff_subst_bot : 𝐆𝐋 ⊢ □(∼(#a ⋏ □D)) 🡘 �
   intro κ _ M _ x
   have h (y : M.World) (hy : ∀ z, y = z ∨ y ≺ z → ¬M z a) : y ⊩ D ↔ y ⊩ D⟦a ↦ ⊥⟧ :=
     forces_subst_bot_iff hy
-  exact forces_iff.mpr ⟨forces_box_neg_and_box_of h, forces_box_neg_and_box_of fun y hy ↦ (h y hy).symm⟩
+  exact forces_iff.mpr
+    ⟨forces_box_neg_and_box_of h, forces_box_neg_and_box_of fun y hy ↦ (h y hy).symm⟩
 
 end Logic.GL
 

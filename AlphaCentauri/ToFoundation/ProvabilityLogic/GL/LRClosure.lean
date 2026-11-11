@@ -306,4 +306,138 @@ end BooleanCombination
 
 end Formula
 
+namespace Logic.GL.FiniteUpToEquiv
+
+variable {S : Set (Formula α)}
+
+lemma image {f : Formula α → Formula α} (hf : ∀ {A B}, 𝐆𝐋 ⊢ A 🡘 B → 𝐆𝐋 ⊢ f A 🡘 f B)
+    (h : FiniteUpToEquiv S) : FiniteUpToEquiv (f '' S) := by
+  classical
+  obtain ⟨F, hF⟩ := h
+  refine ⟨F.image f, ?_⟩
+  rintro _ ⟨A, hA, rfl⟩
+  obtain ⟨B, hB, h⟩ := hF A hA
+  exact ⟨f B, Finset.mem_image_of_mem _ hB, hf h⟩
+
+end Logic.GL.FiniteUpToEquiv
+
+/-! ### The LR-closure -/
+
+/-- The LR-closure of a finite set `P` of atoms. `LRClosure P true` contains `⊥` and the atoms in
+`P` and is closed under `A ↦ A ⋏ □∼B` for `B` in either part; `LRClosure P false` contains
+`A ⋏ □(B 🡒 ⋁S ⋎ ⋁◇T)` for `A` in either part and `B` and the members of `S` and `T` in
+`LRClosure P true`.
+
+- [Ign91, Definition 6.2]
+-/
+inductive LRClosure [DecidableEq α] (P : Finset α) : Bool → Formula α → Prop
+  | falsum : LRClosure P true ⊥
+  | atom {a : α} : a ∈ P → LRClosure P true #a
+  | and_box_neg {A B : Formula α} {b : Bool} :
+      LRClosure P true A → LRClosure P b B → LRClosure P true (A ⋏ □(∼B))
+  | and_box_imp {A B : Formula α} {b : Bool} {S T : Finset (Formula α)} :
+      LRClosure P b A → LRClosure P true B → (∀ C ∈ S, LRClosure P true C) →
+        (∀ C ∈ T, LRClosure P true C) →
+        LRClosure P false (A ⋏ □(B 🡒 S.disj ⋎ (T.image (◇·)).disj))
+
+namespace LRClosure
+
+open Logic.GL Formula.BooleanCombination
+
+variable [DecidableEq α] {P : Finset α} {b : Bool} {A B Z : Formula α}
+
+/-- The members of the LR-closure and the formulas `□∼A` for `A` in its first part. -/
+def base (P : Finset α) : Set (Formula α) :=
+  {A | ∃ b, LRClosure P b A} ∪ (fun A ↦ □(∼A)) '' {A | LRClosure P true A}
+
+/-- Every member of the LR-closure is equivalent to `⊥` or to `#a ⋏ □D` for an atom `a ∈ P` and a
+Boolean combination `D` of `base P`. -/
+lemma exists_atom_and_box (h : LRClosure P b Z) :
+    (𝐆𝐋 ⊢ Z 🡘 ⊥) ∨
+      ∃ a ∈ P, ∃ D, BooleanCombination (base P) D ∧ 𝐆𝐋 ⊢ Z 🡘 #a ⋏ □D := by
+  induction h with
+  | falsum => exact .inl iff_refl'
+  | @atom a ha =>
+    refine .inr ⟨a, ha, ⊤, top, iff_of_forces fun _ _ x ↦ ?_⟩
+    simp [forces_and, forces_box]
+  | @and_box_neg A B b' _ hB ih _ =>
+    rcases ih with h | ⟨a, ha, D, hD, h⟩
+    · refine .inl <| iff_of_forces fun _ _ x ↦ ?_
+      simp [forces_and, forces_iff_of h x]
+    · refine .inr ⟨a, ha, D ⋏ ∼B, and hD (neg (mem (.inl ⟨b', hB⟩))), iff_of_forces fun _ _ x ↦ ?_⟩
+      simp only [forces_and, forces_iff_of h x, forces_box]
+      grind
+  | @and_box_imp A B b' S T _ hB hS hT ih _ _ _ =>
+    have hE : BooleanCombination (base P) (B 🡒 S.disj ⋎ (T.image (◇·)).disj) := by
+      refine imp (mem (.inl ⟨true, hB⟩)) (or (disj fun C hC ↦ mem (.inl ⟨true, hS C hC⟩)) ?_)
+      refine disj fun C hC ↦ ?_
+      obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hC
+      exact neg (mem (.inr ⟨D, hT D hD, rfl⟩))
+    rcases ih with h | ⟨a, ha, D, hD, h⟩
+    · refine .inl <| iff_of_forces fun _ _ x ↦ ?_
+      simp [forces_and, forces_iff_of h x]
+    · refine .inr ⟨a, ha, _, and hD hE, iff_of_forces fun _ _ x ↦ ?_⟩
+      simp only [forces_and, forces_iff_of h x, forces_box]
+      grind
+
+private lemma forces_subst_disj {κ : Type*} [Nonempty κ] {M : Model κ α} {x : M.World}
+    {s : Substitution α α} {S : Finset (Formula α)} :
+    x ⊩[M] S.disj⟦s⟧ ↔ ∃ C ∈ S, x ⊩[M] C⟦s⟧ := by
+  rw [← Model.forces_subst, forces_disj]
+  simp only [Model.forces_subst]
+
+/-- Substituting `⊥` for an atom maps the LR-closure of `P` into that of `P.erase a`, up to
+equivalence. -/
+lemma exists_subst_bot (a : α) (h : LRClosure P b Z) :
+    ∃ Z', LRClosure (P.erase a) b Z' ∧ 𝐆𝐋 ⊢ Z⟦a ↦ ⊥⟧ 🡘 Z' := by
+  induction h with
+  | falsum => exact ⟨⊥, falsum, iff_refl'⟩
+  | @atom c hc =>
+    by_cases hca : c = a
+    · subst hca
+      exact ⟨⊥, falsum, by simp⟩
+    · exact ⟨#c, atom (Finset.mem_erase.mpr ⟨hca, hc⟩), by simp [hca]⟩
+  | and_box_neg _ _ ihA ihB =>
+    obtain ⟨A', hA', h₁⟩ := ihA
+    obtain ⟨B', hB', h₂⟩ := ihB
+    refine ⟨_, and_box_neg hA' hB', iff_of_forces fun _ _ x ↦ ?_⟩
+    simp only [subst_and, subst_box, subst_neg, forces_and, forces_iff_of h₁ x, forces_box,
+      forces_neg]
+    exact and_congr_right fun _ ↦ forall_congr' fun y ↦ imp_congr_right fun _ ↦
+      not_congr (forces_iff_of h₂ y)
+  | @and_box_imp A B b' S T _ _ _ _ ihA ihB ihS ihT =>
+    obtain ⟨A', hA', h₁⟩ := ihA
+    obtain ⟨B', hB', h₂⟩ := ihB
+    choose f hf hf' using ihS
+    choose g hg hg' using ihT
+    refine ⟨_, and_box_imp (S := S.attach.image fun C ↦ f C.1 C.2)
+      (T := T.attach.image fun C ↦ g C.1 C.2) hA' hB' ?_ ?_, iff_of_forces fun _ _ x ↦ ?_⟩
+    · intro C hC
+      obtain ⟨⟨D, hD⟩, -, rfl⟩ := Finset.mem_image.mp hC
+      exact hf D hD
+    · intro C hC
+      obtain ⟨⟨D, hD⟩, -, rfl⟩ := Finset.mem_image.mp hC
+      exact hg D hD
+    simp only [subst_and, subst_box, subst_imp, subst_or, forces_and, forces_iff_of h₁ x,
+      forces_box, forces_imp, forces_or, forces_subst_disj, forces_disj]
+    refine and_congr_right fun _ ↦ forall_congr' fun y ↦ imp_congr_right fun _ ↦ ?_
+    rw [forces_iff_of h₂ y]
+    apply or_congr_right
+    apply or_congr
+    · constructor
+      · rintro ⟨C, hC, hy⟩
+        exact ⟨f C hC, Finset.mem_image.mpr ⟨⟨C, hC⟩, Finset.mem_attach _ _, rfl⟩,
+          (forces_iff_of (hf' C hC) y).mp hy⟩
+      · rintro ⟨_, hC, hy⟩
+        obtain ⟨⟨D, hD⟩, -, rfl⟩ := Finset.mem_image.mp hC
+        exact ⟨D, hD, (forces_iff_of (hf' D hD) y).mpr hy⟩
+    · simp only [Finset.mem_image, exists_exists_and_eq_and, subst_dia, forces_dia]
+      constructor
+      · rintro ⟨C, hC, z, Ryz, hz⟩
+        exact ⟨⟨C, hC⟩, Finset.mem_attach _ _, z, Ryz, (forces_iff_of (hg' C hC) z).mp hz⟩
+      · rintro ⟨⟨C, hC⟩, -, z, Ryz, hz⟩
+        exact ⟨C, hC, z, Ryz, (forces_iff_of (hg' C hC) z).mpr hz⟩
+
+end LRClosure
+
 end FFL.ProvabilityLogic

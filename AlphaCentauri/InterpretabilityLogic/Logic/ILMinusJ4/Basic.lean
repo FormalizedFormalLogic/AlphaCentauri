@@ -4,7 +4,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinusModel
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4J5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ4Plus.Basic
 
 /-!
@@ -121,7 +121,7 @@ theorem ILMinusJ4.iff_valid_finite_verbrugge :
 /-! ## Incompleteness for Verbrugge models -/
 
 
-open Entailment
+open Entailment Verbrugge Veltman.Model.World
 
 /-- - [KO21, Corollary 6.4] -/
 theorem ILMinusJ4.incomplete : ∃ A : Formula ℕ,
@@ -129,10 +129,11 @@ theorem ILMinusJ4.incomplete : ∃ A : Formula ℕ,
       ILMinusJ4 ⊬ A := by
   use Axioms.J4Plus (#1) (#2) (#0);
   constructor;
-  · intro κ _ M _;
-    exact valid_J4Plus M;
-  · exact unprovable_J4Plus;
-
+  · intro κ _ M _ _;
+    exact forces_axiomJ4Plus;
+  · intro h;
+    exact counterJ4Plus.not_models_J4Plus
+      (ILMinusJ4.sound_verbrugge (M := counterJ4Plus) h);
 
 /-! ## Equivalent axiomatizations -/
 

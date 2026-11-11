@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 
 /-!
@@ -30,17 +30,14 @@ variable {A B C : Formula α}
 
 @[simp] lemma ILF.axiomF : 𝐈𝐋𝐅 ⊢ Axioms.F A := axm ⟨A, rfl⟩
 
-instance : (𝐈𝐋𝐅 : Logic α) ⪯ 𝐈𝐋𝐊𝐖𝟐 :=
-  weakerThan_iff.mpr <| subset_of_provable <| by rintro _ ⟨A, rfl⟩; exact ILKW2.axiomF
-
 section
 
 open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILF.sound [M.IsILKW2] (h : 𝐈𝐋𝐅 ⊢ A) : M ⊧ A :=
-  ILKW2.sound <| weakerThan_iff.mp inferInstance h
+theorem ILF.sound [M.IsIL] [M.HasW] (h : 𝐈𝐋𝐅 ⊢ A) : M ⊧ A :=
+  ofAxioms.sound (by rintro _ ⟨A, rfl⟩ x; exact forces_axiomF) h
 
 instance : Consistent (𝐈𝐋𝐅 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILF.sound (M := pointModel fun _ ↦ False) h 0

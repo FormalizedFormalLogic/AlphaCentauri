@@ -1,10 +1,9 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2PlusJ5.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J5.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ4Plus.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ4Plus.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 
@@ -96,15 +95,18 @@ theorem ILMinusJ1J4Plus.iff_valid_finite :
 /-! ## Relations -/
 
 
-open Entailment
+open Entailment Veltman
 
 variable {α : Type}
 
 instance : (ILMinusJ1 : Logic α) ⪱ ILMinusJ1J4Plus :=
-  .of_unprovable_provable ILMinusJ1J5.unprovable_J4Plus (HasAxiomJ4Plus.J4Plus _ _ _)
+  .of_unprovable_provable (φ := Axioms.J4Plus (◇⊤) ⊥ ⊤)
+    (fun h ↦ counterJ4.not_models_J4Plus (ILMinusJ1.sound (M := counterJ4 α) h))
+    (HasAxiomJ4Plus.J4Plus _ _ _)
 
 instance : (ILMinusJ4Plus : Logic α) ⪱ ILMinusJ1J4Plus :=
-  .of_unprovable_provable unprovable_J1 (HasAxiomJ1.J1 _ _)
+  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤)
+    (fun h ↦ counterJ1.not_models_J1 (ILMinusJ4Plus.sound (M := counterJ1 α) h)) (HasAxiomJ1.J1 _ _)
 
 end Logic
 

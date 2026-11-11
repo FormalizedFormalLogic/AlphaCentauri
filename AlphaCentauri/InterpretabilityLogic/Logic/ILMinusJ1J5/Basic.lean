@@ -1,10 +1,9 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2PlusJ5.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ5.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 
@@ -92,51 +91,20 @@ theorem ILMinusJ1J5.iff_valid_finite :
   ILMinusJ1J5.semantics_TFAE.out 1 3
 
 
-/-! ## Incompleteness for Veltman models -/
-
-
-open Veltman Veltman.Model Veltman.Model.World Entailment ofAxiomsMinus
-
-variable {α : Type} {L : Logic α}
-
-private abbrev counterJ4 (α : Type*) : Model (Fin 3) α :=
-  ⟨(· < ·), fun w x _ ↦ w < x, fun _ _ ↦ False⟩
-
-private instance : (counterJ4 α).IsILMinus where
-  trans := by omega
-  cwf := Finite.converseWellFounded_of_trans_of_irrefl
-  rel_of_s_left := by tauto
-
-private instance : (counterJ4 α).IsJ1 := ⟨by tauto⟩
-
-private instance : (counterJ4 α).IsJ5 := ⟨by tauto⟩
-
-lemma ILMinusJ1J5.unprovable_J4Plus [L ⪯ ILMinusJ1J5] : L ⊬ Axioms.J4Plus (◇⊤) ⊥ ⊤ := by
-  intro h;
-  replace h := WeakerThan.pbl (𝓣 := ILMinusJ1J5) h;
-  have h₁ : (1 : Fin 3) ⊩[counterJ4 α] □(◇⊤ 🡒 ⊥) := by
-    intro y Rxy hy;
-    obtain ⟨z, Ryz, -⟩ := forces_dia.mp hy;
-    omega;
-  have h₂ : (1 : Fin 3) ⊩[counterJ4 α] ⊤ ▷ ◇⊤ := by
-    intro y Rxy _
-    exact ⟨0, Rxy, forces_dia.mpr ⟨1, by omega, forces_top⟩⟩
-  obtain ⟨z, -, hz⟩ := ILMinusJ1J5.sound (M := counterJ4 α) h 1 h₁ h₂ 2 (by omega) forces_top;
-  exact hz;
-
-
 /-! ## Relations -/
 
 
-open Entailment
+open Entailment Veltman
 
 variable {α : Type}
 
 instance : (ILMinusJ1 : Logic α) ⪱ ILMinusJ1J5 :=
-  .of_unprovable_provable unprovable_J5 (HasAxiomJ5.J5 _)
+  .of_unprovable_provable (φ := Axioms.J5 (□⊥))
+    (fun h ↦ counterJ5.not_models_J5 (ILMinusJ1.sound (M := counterJ5 α) h)) (HasAxiomJ5.J5 _)
 
 instance : (ILMinusJ5 : Logic α) ⪱ ILMinusJ1J5 :=
-  .of_unprovable_provable unprovable_J1 (HasAxiomJ1.J1 _ _)
+  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤)
+    (fun h ↦ counterJ1.not_models_J1 (ILMinusJ5.sound (M := counterJ1 α) h)) (HasAxiomJ1.J1 _ _)
 
 end Logic
 

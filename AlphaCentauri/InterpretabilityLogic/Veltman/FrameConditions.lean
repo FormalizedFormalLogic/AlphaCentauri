@@ -87,6 +87,12 @@ lemma forces_axiomM₀ [M.IsIL] [M.HasM₀] : x ⊩ Axioms.M₀ A B C := by
   exact ⟨u, s_trans (s_of_rel Rxy Ryz) Sxzu,
     forces_and.mpr ⟨hu, fun v Ruv ↦ hC v (rel_of_rel_rel_s_rel Rxy Ryz Sxzu Ruv)⟩⟩
 
+lemma forces_axiomP₀ [M.IsIL] [M.HasR] : x ⊩ Axioms.P₀ A B := by
+  intro h y Rxy z Ryz hz
+  obtain ⟨v, Sxzv, hv⟩ := h z (IsTrans.trans _ _ _ Rxy Ryz) hz
+  obtain ⟨u, Rvu, hu⟩ := forces_dia.mp hv
+  exact ⟨u, s_of_rel_rel_s_rel Rxy Ryz Sxzv Rvu, hu⟩
+
 lemma forces_axiomP [M.IsIL] [M.HasP] : x ⊩ Axioms.P A B := by
   have := IsTrans.trans (r := M.Rel)
   grind [s_of_rel_rel_s]
@@ -108,6 +114,27 @@ lemma forces_axiomW [M.IsIL] [M.HasW] : x ⊩ Axioms.W A B := by
   have Rxt : x ≺ t := rel_of_s_right Sxyt
   obtain ⟨v, Sxuv, hv⟩ := h u (IsTrans.trans _ _ _ Rxt Rtu) hu
   exact tmax v ⟨s_trans Sxyt <| s_trans (s_of_rel Rxt Rtu) Sxuv, hv⟩ ⟨u, Rtu, Sxuv⟩
+
+lemma forces_axiomKW2 [M.IsIL] [M.HasW] : x ⊩ Axioms.KW2 A B := by
+  intro h y Rxy hy
+  by_contra! hn
+  have hA : ∀ z, y ≺[x] z → z ⊩ B → z ⊩ A := fun z Syz hz ↦ by
+    by_contra hz'
+    exact hn z Syz (forces_and.mpr ⟨hz, hz'⟩)
+  obtain ⟨s, Sys, hs⟩ := forces_axiomW (x := x) (A := A) (B := ◇B) h y Rxy (hA y (s_refl Rxy) hy)
+  obtain ⟨hsB, hsA⟩ := forces_and.mp hs
+  obtain ⟨u, Rsu, hu⟩ := forces_dia.mp hsB
+  exact hn u (s_trans Sys (s_of_rel (rel_of_s_right Sys) Rsu))
+    (forces_and.mpr ⟨hu, hsA u Rsu⟩)
+
+lemma forces_axiomF [M.IsIL] [M.HasW] : x ⊩ Axioms.F A := by
+  intro h y Rxy hy
+  obtain ⟨z, Syz, hz⟩ := h y Rxy hy
+  obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := ConverseWellFounded.iff_has_max.mp (cwf_rel_comp_s x)
+    {t | x ≺ t ∧ t ⊩ ◇A} ⟨z, rel_of_s_right Syz, hz⟩
+  obtain ⟨u, Rtu, hu⟩ := forces_dia.mp ht
+  obtain ⟨v, Suv, hv⟩ := h u (IsTrans.trans _ _ _ Rxt Rtu) hu
+  exact tmax v ⟨rel_of_s_right Suv, hv⟩ ⟨u, Rtu, Suv⟩
 
 end Model.World
 

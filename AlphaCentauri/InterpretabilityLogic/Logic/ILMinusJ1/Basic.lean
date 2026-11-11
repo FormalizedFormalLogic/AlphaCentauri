@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinus.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2PlusJ5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 
@@ -113,12 +113,13 @@ theorem ILMinusJ1.eq_ofAxiomsMinus_J1' :
 /-! ## Relations -/
 
 
-open Entailment
+open Entailment Veltman
 
 variable {α : Type}
 
 instance : (𝐈𝐋⁻ : Logic α) ⪱ ILMinusJ1 :=
-  .of_unprovable_provable unprovable_J1 (HasAxiomJ1.J1 _ _)
+  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤)
+    (fun h ↦ counterJ1.not_models_J1 (ILMinus.sound (M := counterJ1 α) h)) (HasAxiomJ1.J1 _ _)
 
 end Logic
 

@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
@@ -176,17 +177,22 @@ end Logic
 
 namespace Logic
 
-open Entailment ofAxiomsMinus
+open Entailment ofAxiomsMinus Veltman
 
 variable {α : Type}
 
 instance : (ILMinusJ2PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
-  .of_unprovable_provable unprovable_J1 ofAxioms.axiomJ1
+  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤)
+    (fun h ↦ counterJ1.not_models_J1 (ILMinusJ2PlusJ5.sound (M := counterJ1 α) h)) ofAxioms.axiomJ1
 
-instance : (𝐂𝐋 : Logic α) ⪱ 𝐈𝐋 := .of_unprovable_provable unprovable_J5 ofAxioms.axiomJ5
+instance : (𝐂𝐋 : Logic α) ⪱ 𝐈𝐋 :=
+  .of_unprovable_provable (φ := Axioms.J5 (□⊥))
+    (fun h ↦ counterJ5.not_models_J5 (CL.sound (M := counterJ5 α) h)) ofAxioms.axiomJ5
 
 instance : (ILMinusJ1J4PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
-  .of_unprovable_provable unprovable_J2 ofAxioms.axiomJ2
+  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
+    (fun h ↦ counterJ2.not_models_J2 (ILMinusJ1J4PlusJ5.sound (M := counterJ2 α) h))
+    ofAxioms.axiomJ2
 
 end Logic
 

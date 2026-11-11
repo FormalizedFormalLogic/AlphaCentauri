@@ -4,7 +4,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinusModel
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2J4PlusJ5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2PlusJ5.Basic
 
 /-!
@@ -97,17 +97,18 @@ theorem ILMinusJ2J5.iff_valid_finite_verbrugge :
 /-! ## Incompleteness for Verbrugge models -/
 
 
-open Entailment
+open Entailment Verbrugge Veltman.Model.World
 
 /-- - [KO21, Corollary 6.2] -/
 theorem ILMinusJ2J5.incomplete : ∃ A : Formula ℕ,
-    (∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ ℕ),
-      [M.IsILMinusJ2PlusJ5] → M ⊧ A) ∧ ILMinusJ2J5 ⊬ A := by
+    (∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ ℕ), [M.IsILMinusJ2PlusJ5] → M ⊧ A) ∧
+      ILMinusJ2J5 ⊬ A := by
   use Axioms.J2Plus (#0) (#1) (#2);
   constructor;
-  · intro κ _ M _;
-    exact valid_J2Plus M;
-  · exact unprovable_J2Plus;
+  · intro κ _ M _ _;
+    exact forces_axiomJ2Plus;
+  · intro h;
+    exact counterJ2Plus.not_models_J2Plus (ILMinusJ2J5.sound_verbrugge (M := counterJ2Plus) h);
 
 end Logic
 

@@ -103,12 +103,14 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILWStar.Basic
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentTheory
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStepModel
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Bisimulation
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinusModel
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.MaximalConsistentTheoryModel

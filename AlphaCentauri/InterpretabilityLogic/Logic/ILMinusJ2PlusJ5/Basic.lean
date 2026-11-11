@@ -1,6 +1,9 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2Plus.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ4PlusJ5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 
@@ -90,35 +93,21 @@ theorem ILMinusJ2PlusJ5.iff_valid_finite :
       [M.IsILMinusJ2PlusJ5] → M ⊧ A :=
   ILMinusJ2PlusJ5.semantics_TFAE.out 1 3
 
+/-! ## Relations -/
 
-/-! ## Incompleteness for Veltman models -/
 
+open Entailment Veltman
 
-open Veltman Veltman.Model Veltman.Model.World Entailment ofAxiomsMinus
+variable {α : Type}
 
-variable {α : Type} {L : Logic α}
+instance : (ILMinusJ2Plus : Logic α) ⪱ ILMinusJ2PlusJ5 :=
+  .of_unprovable_provable (φ := Axioms.J5 (□⊥))
+    (fun h ↦ counterJ5.not_models_J5 (ILMinusJ2Plus.sound (M := counterJ5 α) h)) (HasAxiomJ5.J5 _)
 
-private abbrev counterJ1 (α : Type*) : Model (Fin 2) α :=
-  ⟨(· < ·), fun _ _ _ ↦ False, fun _ _ ↦ False⟩
-
-private instance : (counterJ1 α).IsILMinus where
-  trans := by omega
-  cwf := Finite.converseWellFounded_of_trans_of_irrefl
-  rel_of_s_left := by tauto
-
-private instance : (counterJ1 α).IsJ2 where
-  rel_of_s_right := by tauto
-  s_trans := by tauto
-
-private instance : (counterJ1 α).IsJ5 := ⟨by omega⟩
-
-lemma unprovable_J1 [L ⪯ ILMinusJ2PlusJ5] : L ⊬ Axioms.J1 ⊤ ⊤ := by
-  intro h;
-  replace h := WeakerThan.pbl (𝓣 := ILMinusJ2PlusJ5) h;
-  obtain ⟨z, h, -⟩ :=
-    ILMinusJ2PlusJ5.sound (M := counterJ1 α) h 0 (fun _ _ ↦ id) 1 (by omega) forces_top;
-  exact h;
-
+instance : (ILMinusJ4PlusJ5 : Logic α) ⪱ ILMinusJ2PlusJ5 :=
+  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
+    (fun h ↦ counterJ2.not_models_J2 (ILMinusJ4PlusJ5.sound (M := counterJ2 α) h))
+    (HasAxiomJ2.J2 _ _ _)
 
 end Logic
 

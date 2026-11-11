@@ -1,6 +1,7 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZero.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILPZero.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.MaximalConsistentTheoryModel
 
@@ -47,6 +48,9 @@ lemma ILR.axiomP₀ : 𝐈𝐋𝐑 ⊢ Axioms.P₀ A B := by
   have h₄ : 𝐈𝐋𝐑 ⊢ A ▷ ∼∼B 🡒 A ▷ B := rhd_mono_right Entailment.dne;
   have h₅ : 𝐈𝐋𝐑 ⊢ ∼∼(A ▷ ∼∼B) 🡒 A ▷ B := by cl_prover [h₄];
   cl_prover [axiomR (A := A) (B := ◇B) (C := ∼B), h₂, h₃, box_mono h₅];
+
+instance : (𝐈𝐋𝐏₀ : Logic α) ⪯ 𝐈𝐋𝐑 :=
+  weakerThan_iff.mpr <| subset_of_provable <| by rintro _ ⟨A, B, rfl⟩; exact ILR.axiomP₀
 
 instance : (𝐈𝐋𝐌₀ : Logic α) ⪯ 𝐈𝐋𝐑 :=
   weakerThan_iff.mpr <| subset_of_provable <| by rintro _ ⟨A, B, C, rfl⟩; exact ILR.axiomM₀

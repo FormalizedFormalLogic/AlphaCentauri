@@ -688,16 +688,8 @@ theorem ILW.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α} [M.IsILW] 
     M ⊧ A :=
   ILW.iff_valid.mp h M
 
-theorem ILKW2.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α} [M.IsILKW2] (h : 𝐈𝐋𝐊𝐖𝟐 ⊢ A) :
-    M ⊧ A :=
-  have : M.IsILW := {}
-  ILW.sound <| weakerThan_iff.mp inferInstance h
-
 instance : Consistent (𝐈𝐋𝐖 : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILW.sound (M := pointModel fun _ ↦ False) h 0
-
-instance : Consistent (𝐈𝐋𝐊𝐖𝟐 : Logic α) :=
-  .of_unprovable (φ := ⊥) fun h ↦ ILKW2.sound (M := pointModel fun _ ↦ False) h 0
 
 /-- - [dJV99, Theorem 13] -/
 theorem ILW.iff_valid_finite :

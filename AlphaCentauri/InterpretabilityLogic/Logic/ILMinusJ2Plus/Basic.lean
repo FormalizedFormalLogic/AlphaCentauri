@@ -1,6 +1,8 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ4Plus.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 
@@ -111,6 +113,18 @@ theorem ILMinusJ2Plus.eq_ofAxiomsMinus_J2Plus' :
     have h₂ : ILMinusJ2Plus ⊢ A ▷ (B ⋏ ∼C ⋎ C) ⋏ (B ⋏ ∼C) ▷ C 🡒 A ▷ C :=
       HasAxiomJ2Plus.J2Plus _ _ _;
     cl_prover [h₁, h₂];
+
+/-! ## Relations -/
+
+
+open Entailment Veltman
+
+variable {α : Type}
+
+instance : (ILMinusJ4Plus : Logic α) ⪱ ILMinusJ2Plus :=
+  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
+    (fun h ↦ counterJ2.not_models_J2 (ILMinusJ4Plus.sound (M := counterJ2 α) h))
+    (HasAxiomJ2.J2 _ _ _)
 
 end Logic
 

@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILF.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 
 /-!
@@ -48,6 +48,23 @@ lemma ILKW2.axiomF : 𝐈𝐋𝐊𝐖𝟐 ⊢ Axioms.F A := by
   have h₁ : 𝐈𝐋𝐊𝐖𝟐 ⊢ A ▷ (A ⋏ ∼A) 🡒 A ▷ ⊥ := rhd_mono_right (by cl_prover);
   have h₂ : 𝐈𝐋𝐊𝐖𝟐 ⊢ A ▷ ⊥ 🡒 □(∼A) := rhd_bot;
   cl_prover [h₁, h₂, axiomKW2 (A := A) (B := A)];
+
+instance : (𝐈𝐋𝐅 : Logic α) ⪯ 𝐈𝐋𝐊𝐖𝟐 :=
+  weakerThan_iff.mpr <| subset_of_provable <| by rintro _ ⟨A, rfl⟩; exact ILKW2.axiomF
+
+section
+
+open Veltman Veltman.Model Veltman.Model.World
+
+variable {κ α : Type} [Nonempty κ] {M : Model κ α} {A : Formula α}
+
+theorem ILKW2.sound [M.IsILKW2] (h : 𝐈𝐋𝐊𝐖𝟐 ⊢ A) : M ⊧ A :=
+  ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomKW2) h
+
+instance : Consistent (𝐈𝐋𝐊𝐖𝟐 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦ ILKW2.sound (M := pointModel fun _ ↦ False) h 0
+
+end
 
 end Logic
 

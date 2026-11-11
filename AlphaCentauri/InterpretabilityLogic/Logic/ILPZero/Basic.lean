@@ -1,6 +1,8 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.MaximalConsistentTheoryModel
 
 /-!
 # The logic $\mathbf{ILP}_0$
@@ -29,9 +31,6 @@ variable {A B C : Formula α}
 
 @[simp] lemma ILP₀.axiomP₀ : 𝐈𝐋𝐏₀ ⊢ Axioms.P₀ A B := axm ⟨A, B, rfl⟩
 
-instance : (𝐈𝐋𝐏₀ : Logic α) ⪯ 𝐈𝐋𝐑 :=
-  weakerThan_iff.mpr <| subset_of_provable <| by rintro _ ⟨A, B, rfl⟩; exact ILR.axiomP₀
-
 end Logic
 
 namespace Logic
@@ -40,8 +39,8 @@ open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILP₀.sound [M.IsILR] (h : 𝐈𝐋𝐏₀ ⊢ A) : M ⊧ A :=
-  ILR.sound <| weakerThan_iff.mp inferInstance h
+theorem ILP₀.sound [M.IsIL] [M.HasR] (h : 𝐈𝐋𝐏₀ ⊢ A) : M ⊧ A :=
+  ofAxioms.sound (by rintro _ ⟨A, B, rfl⟩ x; exact forces_axiomP₀) h
 
 instance : Consistent (𝐈𝐋𝐏₀ : Logic α) :=
   .of_unprovable (φ := ⊥) fun h ↦ ILP₀.sound (M := pointModel fun _ ↦ False) h 0

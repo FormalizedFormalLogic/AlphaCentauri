@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Conservativity
+public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Arithmetic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILM.Basic
 
 /-!
@@ -22,8 +22,7 @@ variable {α : Type*} {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
 
 variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T]
   {𝔅 : Provability T₀ T} [𝔅.HBL] {𝔍 : Interpretability 𝔅} [𝔍.IL]
-  {f : ProvabilityLogic.Realization α L} {𝔸 : FormulaSet α} {A : Formula α}
-
+  {f : ProvabilityLogic.Realization α L} {A : Formula α}
 
 theorem Logic.ILM.arithmetical_soundness [𝔍.M] (h : 𝐈𝐋𝐌 ⊢ A) : T₀ ⊢ A.interpret f 𝔅 𝔍 := by
   apply Logic.ofILAxioms.arithmetical_soundness _ h;
@@ -37,7 +36,6 @@ theorem Logic.ILM.arithmetical_soundness [𝔍.M] (h : 𝐈𝐋𝐌 ⊢ A) : T�
       𝔍 ((σ 🡒 𝔅 χ 🡒 ⊥) 🡒 ⊥) ((τ 🡒 𝔅 χ 🡒 ⊥) 🡒 ⊥) :=
     Interpretability.rhd_mono_right <| by cl_prover;
   cl_prover [h₁, h₂, h₃];
-
 
 section
 

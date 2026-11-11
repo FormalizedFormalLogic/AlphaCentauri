@@ -59,7 +59,7 @@ public import AlphaCentauri.Interpretability.Formalized
 public import AlphaCentauri.Interpretability.Henkin
 public import AlphaCentauri.Interpretability.InterpretationExistence
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
-public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Pi1Conservativity
+public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Conservativity
 public import AlphaCentauri.InterpretabilityLogic.Formula
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Basic
 public import AlphaCentauri.InterpretabilityLogic.Gentzen.Veltman

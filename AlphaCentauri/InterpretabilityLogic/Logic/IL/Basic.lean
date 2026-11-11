@@ -166,10 +166,10 @@ namespace Veltman
 open Model Model.World
 
 /-- A model satisfying $\mathbf{J1}$ and $\mathbf{J2}$ but not $\mathbf{J5}$. -/
-private abbrev counterJ5 (α : Type*) : Model (Fin 3) α :=
+abbrev countermodelJ5 (α : Type*) : Model (Fin 3) α :=
   ⟨(· < ·), fun w x y ↦ w < x ∧ x = y, fun _ _ ↦ False⟩
 
-private instance {α : Type*} : (counterJ5 α).IsCL where
+instance {α : Type*} : (countermodelJ5 α).IsCL where
   trans := by omega
   cwf := Finite.converseWellFounded_of_trans_of_irrefl
   rel_of_s_left := by tauto
@@ -177,9 +177,9 @@ private instance {α : Type*} : (counterJ5 α).IsCL where
   rel_of_s_right := by omega
   s_trans := by omega
 
-private lemma counterJ5.not_models_J5 {α : Type*} : ¬counterJ5 α ⊧ Axioms.J5 (□⊥) := by
+lemma countermodelJ5.not_models_axiomJ5 {α : Type*} : ¬countermodelJ5 α ⊧ Axioms.J5 (□⊥) := by
   intro h
-  have h₁ : (1 : Fin 3) ⊩[counterJ5 α] ◇□⊥ :=
+  have h₁ : (1 : Fin 3) ⊩[countermodelJ5 α] ◇□⊥ :=
     forces_dia.mpr ⟨2, by omega, fun y hy ↦ by omega⟩
   obtain ⟨z, ⟨-, rfl⟩, hz⟩ := h 0 1 (by omega) h₁
   exact hz 2 (by omega)
@@ -197,7 +197,8 @@ instance : (𝐂𝐋 : Logic α) ⪯ 𝐈𝐋 :=
 
 instance : (𝐂𝐋 : Logic α) ⪱ 𝐈𝐋 :=
   .of_unprovable_provable (φ := Axioms.J5 (□⊥))
-    (fun h ↦ counterJ5.not_models_J5 (CL.sound (M := counterJ5 α) h)) ofILAxioms.axiomJ5
+    (fun h ↦ countermodelJ5.not_models_axiomJ5 (CL.sound (M := countermodelJ5 α) h))
+    ofILAxioms.axiomJ5
 
 /-! ## Completeness -/
 

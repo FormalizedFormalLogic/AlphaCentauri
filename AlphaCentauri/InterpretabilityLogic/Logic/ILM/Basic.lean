@@ -758,23 +758,37 @@ open Entailment Veltman.Model Veltman.Model.World ofILAxioms
 
 variable {α : Type*}
 
-private abbrev countermodelM : Veltman.Model (Fin 4) ℕ where
+/-- A model satisfying the frame conditions of $\mathbf{IL}$, $\mathsf{R}$ and $\mathsf{W}$ but not
+that of $\mathsf{M}$. -/
+abbrev countermodelM : Veltman.Model (Fin 4) ℕ where
   Rel' x y := x = 0 ∧ 0 < y ∨ x = 2 ∧ y = 3
   S' w x y := w = 0 ∧ 1 ≤ x ∧ x ≤ y ∨ w = 2 ∧ x = 3 ∧ y = 3
   Val' t a := match a with | 0 => t = 1 | 1 => t = 2 | _ => False
 
-private instance : IsTrans _ countermodelM.Rel := ⟨by decide⟩
-private instance : Std.Irrefl countermodelM.Rel := ⟨by decide⟩
+instance : IsTrans _ countermodelM.Rel := ⟨by decide⟩
+instance : Std.Irrefl countermodelM.Rel := ⟨by decide⟩
 
-private instance : countermodelM.IsIL where
+instance : countermodelM.IsIL where
   rel_of_s_left := by decide
   rel_of_s_right := by decide
   s_refl := by decide
   s_trans := by decide
   s_of_rel := by decide
 
-private instance : countermodelM.HasR := ⟨by decide⟩
-private instance : countermodelM.HasW := HasW.of_finite (by decide)
+instance : countermodelM.HasR := ⟨by decide⟩
+instance : countermodelM.HasW := HasW.of_finite (by decide)
+
+lemma countermodelM.not_models_axiomM : ¬countermodelM ⊧ Axioms.M (#0) (#1) (#2) := by
+  intro H;
+  have h₁ : (0 : countermodelM.World) ⊩[countermodelM] #0 ▷ #1 := by
+    intro v _ hv;
+    obtain rfl : v = 1 := hv;
+    exact ⟨2, by decide, rfl⟩;
+  obtain ⟨t, _, ht⟩ := H 0 h₁ 1 (by decide) (forces_and.mpr ⟨rfl, fun y hy ↦
+    ((by decide : ∀ y, ¬countermodelM.Rel 1 y) y hy).elim⟩);
+  obtain ⟨htz, ht⟩ := forces_and.mp ht;
+  obtain rfl : t = 2 := htz;
+  exact ht 3 (by decide);
 
 instance : (𝐈𝐋𝐑𝐖 : Logic α) ⪯ 𝐈𝐋𝐌 := weakerThan_iff.mpr <| subset_of_provable <| by
   rintro _ (⟨A, B, C, rfl⟩ | ⟨A, B, rfl⟩)
@@ -782,17 +796,8 @@ instance : (𝐈𝐋𝐑𝐖 : Logic α) ⪯ 𝐈𝐋𝐌 := weakerThan_iff.mpr 
   · exact ILM.axiomW
 
 instance : (𝐈𝐋𝐑𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐌 :=
-  .of_unprovable_provable (φ := Axioms.M (#0) (#1) (#2)) (fun h ↦ by
-    have H := ILRW.sound (M := countermodelM) h 0;
-    have h₁ : (0 : countermodelM.World) ⊩[countermodelM] #0 ▷ #1 := by
-      intro v _ hv;
-      obtain rfl : v = 1 := hv;
-      exact ⟨2, by decide, rfl⟩;
-    obtain ⟨t, _, ht⟩ := H h₁ 1 (by decide) (forces_and.mpr ⟨rfl, fun y hy ↦
-      ((by decide : ∀ y, ¬countermodelM.Rel 1 y) y hy).elim⟩);
-    obtain ⟨htz, ht⟩ := forces_and.mp ht;
-    obtain rfl : t = 2 := htz;
-    exact ht 3 (by decide)) ILM.axiomM
+  .of_unprovable_provable (φ := Axioms.M (#0) (#1) (#2))
+    (fun h ↦ countermodelM.not_models_axiomM (ILRW.sound h)) ILM.axiomM
 
 end Logic
 

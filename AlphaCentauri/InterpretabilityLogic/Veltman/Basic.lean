@@ -7,9 +7,9 @@ public import Foundation.Vorspiel.Rel.CWF
 /-!
 # Veltman semantics
 
-Veltman models, forcing, the frame conditions of $\mathbf{J1}$, $\mathbf{J2}$, $\mathbf{J2}^+$,
-$\mathbf{J4}$, $\mathbf{J4}^+$ and $\mathbf{J5}$ on $\mathbf{IL}^-$-frames, and the soundness of
-$\mathbf{IL}^-$ with respect to them.
+Veltman models, forcing, the frame conditions of $\mathbf{J1}$, $\mathbf{J2}$, $\mathbf{J4}$ and
+$\mathbf{J5}$ on $\mathbf{IL}^-$-frames, and the soundness of the extensions of $\mathbf{IL}^-$
+with respect to them.
 -/
 
 @[expose] public section
@@ -206,25 +206,11 @@ lemma forces_axiomJ1 [M.IsJ1] : x ⊩ Axioms.J1 A B := by
   intro hx y Rxy hy
   exact ⟨y, IsJ1.s_refl Rxy, hx y Rxy hy⟩
 
-lemma forces_axiomJ4Plus [M.IsJ4] : x ⊩ Axioms.J4Plus A B C := by
-  intro hx hCA y Rxy hy
-  obtain ⟨z, Sxyz, hz⟩ := hCA y Rxy hy
-  exact ⟨z, Sxyz, hx z (IsJ4.rel_of_s_right Sxyz) hz⟩
-
 lemma forces_axiomJ4 [M.IsJ4] : x ⊩ Axioms.J4 A B := by
   intro hx hA
   obtain ⟨y, Rxy, hy⟩ := forces_dia.mp hA
   obtain ⟨z, Sxyz, hz⟩ := hx y Rxy hy
   exact forces_dia.mpr ⟨z, IsJ4.rel_of_s_right Sxyz, hz⟩
-
-lemma forces_axiomJ2Plus [M.IsJ2] : x ⊩ Axioms.J2Plus A B C := by
-  intro hx y Rxy hy
-  obtain ⟨hABC, hBC⟩ := forces_and.mp hx
-  obtain ⟨z, Sxyz, hz⟩ := hABC y Rxy hy
-  rcases forces_or.mp hz with hz | hz
-  · obtain ⟨u, Sxzu, hu⟩ := hBC z (IsJ4.rel_of_s_right Sxyz) hz
-    exact ⟨u, IsJ2.s_trans Sxyz Sxzu, hu⟩
-  · exact ⟨z, Sxyz, hz⟩
 
 lemma forces_axiomJ2 [M.IsJ2] : x ⊩ Axioms.J2 A B C := by
   intro hx y Rxy hy

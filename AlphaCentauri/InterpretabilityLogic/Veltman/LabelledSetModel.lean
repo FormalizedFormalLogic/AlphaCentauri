@@ -7,11 +7,7 @@ public import Mathlib.Data.Set.Finite.List
 /-!
 # The model on labelled sets
 
-The construction behind the completeness of $\mathbf{IL}^-$, $\mathbf{IL}^-(\mathbf{J1})$,
-$\mathbf{IL}^-(\mathbf{J4}^+)$, $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J4}^+)$,
-$\mathbf{IL}^-(\mathbf{J2}^+)$, $\mathbf{CL}$, $\mathbf{IL}^-(\mathbf{J5})$,
-$\mathbf{IL}^-(\mathbf{J1}, \mathbf{J5})$, $\mathbf{IL}^-(\mathbf{J4}^+, \mathbf{J5})$ and
-$\mathbf{IL}^-(\mathbf{J1}, \mathbf{J4}^+, \mathbf{J5})$ with respect to finite Veltman models.
+The construction behind the completeness of $\mathbf{CL}$ with respect to finite Veltman models.
 
 Finite Veltman models whose worlds are maximal consistent subsets of an adequate set labelled by
 antecedents and consequents of `▷`-formulas in it, with `≺[w]` given by a condition on the labelled
@@ -149,36 +145,7 @@ private lemma not_mem_of_weakCriticalSuccessor [(ofAxiomsMinus 𝔸).HasAxiomJ1]
   h.not_mem <| (mem_iff_provable (Adequate.rhd_mem hC hC)).mpr <|
     Context.of axiomJ1'
 
-/-- The condition for $\mathbf{IL}^-$ and $\mathbf{IL}^-(\mathbf{J1})$.
-
-- [KO21, Theorem 5.1]
--/
-def ILMinus : Condition (ofAxiomsMinus 𝔸) Φ where
-  toFun Γ Δ C Θ _ := WeakCriticalSuccessor C Γ Δ → C ∉ Θ
-  exists_of_rhd_mem hDE hΔ hD hF := by
-    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF
-    obtain ⟨Θ, hEΘ, hFΘ⟩ := hΔF'.exists_mem_not_mem hF' hDE hD
-    exact ⟨Θ, ⊥, .bot, hEΘ, fun h ↦ hF'F h ▸ hFΘ⟩
-  exists_of_rhd_not_mem hDE hn := by
-    obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem hDE hn
-    exact ⟨Δ, hΔ.toSuccessor, hD, fun _ _ h ↦ h hΔ⟩
-
-/-- The condition for $\mathbf{IL}^-(\mathbf{J4}^+)$ and
-$\mathbf{IL}^-(\mathbf{J1}, \mathbf{J4}^+)$.
-
-- [KO21, Theorem 5.1]
--/
-def J4Plus [(ofAxiomsMinus 𝔸).HasAxiomJ4Plus] : Condition (ofAxiomsMinus 𝔸) Φ where
-  toFun Γ Δ C Θ _ := Successor Γ Θ ∧ (WeakCriticalSuccessor C Γ Δ → C ∉ Θ)
-  exists_of_rhd_mem hDE hΔ hD hF := by
-    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF
-    obtain ⟨Θ, hΘ, hEΘ, hFΘ⟩ := hΔF'.exists_successor_mem_not_mem hF' hDE hD
-    exact ⟨Θ, ⊥, .bot, hEΘ, hΘ, fun h ↦ hF'F h ▸ hFΘ⟩
-  exists_of_rhd_not_mem hDE hn := by
-    obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem hDE hn
-    exact ⟨Δ, hΔ.toSuccessor, hD, fun _ _ h ↦ h.2 hΔ⟩
-
-/-- The condition for $\mathbf{IL}^-(\mathbf{J2}^+)$ and $\mathbf{CL}$.
+/-- The condition for $\mathbf{CL}$.
 
 - [KO21, Theorem 5.1]
 -/
@@ -195,56 +162,11 @@ def J2Plus [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus] : Condition (ofAxiomsMinus 𝔸
     obtain ⟨Δ, hΔ, hD⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem hDE hn
     exact ⟨Δ, hΔ.toSuccessor, hD, fun _ _ h ↦ (h.2 hΔ).2.2⟩
 
-/-- The condition for $\mathbf{IL}^-(\mathbf{J5})$ and $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J5})$.
-
-- [KO21, Theorem 5.1]
--/
-def J5 [(ofAxiomsMinus 𝔸).HasAxiomJ5] : Condition (ofAxiomsMinus 𝔸) Φ where
-  toFun Γ Δ C Θ _ := WeakCriticalSuccessor C Γ Δ → □(∼C) ∈ Δ → C ∉ Θ
-  exists_of_rhd_mem hDE hΔ hD hF := by
-    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF
-    obtain ⟨Θ, hEΘ, hFΘ⟩ := hΔF'.exists_mem_not_mem hF' hDE hD
-    exact ⟨Θ, ⊥, .bot, hEΘ, fun h _ ↦ hF'F h ▸ hFΘ⟩
-  exists_of_rhd_not_mem hDE hn := by
-    obtain ⟨Δ, hΔ, hD, hEΔ⟩ := exists_weakCriticalSuccessor_box_neg_of_rhd_not_mem hDE hn
-    exact ⟨Δ, hΔ.toSuccessor, hD, fun _ _ h ↦ h hΔ hEΔ⟩
-
-/-- The condition for $\mathbf{IL}^-(\mathbf{J4}^+, \mathbf{J5})$ and
-$\mathbf{IL}^-(\mathbf{J1}, \mathbf{J4}^+, \mathbf{J5})$.
-
-- [KO21, Theorem 5.1]
--/
-def J4PlusJ5 [(ofAxiomsMinus 𝔸).HasAxiomJ4Plus] [(ofAxiomsMinus 𝔸).HasAxiomJ5] :
-    Condition (ofAxiomsMinus 𝔸) Φ where
-  toFun Γ Δ C Θ _ := Successor Γ Θ ∧ (WeakCriticalSuccessor C Γ Δ → □(∼C) ∈ Δ → C ∉ Θ)
-  exists_of_rhd_mem hDE hΔ hD hF := by
-    obtain ⟨F', hF', hΔF', hF'F⟩ := exists_weakCriticalSuccessor hΔ hF
-    obtain ⟨Θ, hΘ, hEΘ, hFΘ⟩ := hΔF'.exists_successor_mem_not_mem hF' hDE hD
-    exact ⟨Θ, ⊥, .bot, hEΘ, hΘ, fun h _ ↦ hF'F h ▸ hFΘ⟩
-  exists_of_rhd_not_mem hDE hn := by
-    obtain ⟨Δ, hΔ, hD, hEΔ⟩ := exists_weakCriticalSuccessor_box_neg_of_rhd_not_mem hDE hn
-    exact ⟨Δ, hΔ.toSuccessor, hD, fun _ _ h ↦ h.2 hΔ hEΔ⟩
-
 /-! ### Frame conditions -/
 
 open Model
 
 variable [Nonempty (LabelledSet (ofAxiomsMinus 𝔸) Φ)]
-
-/-- - [KO21, Lemma 5.2] -/
-instance [(ofAxiomsMinus 𝔸).HasAxiomJ1] :
-    (labelledModel (ILMinus (𝔸 := 𝔸) (Φ := Φ))).IsJ1 where
-  s_refl {_ x} h := ⟨h, not_mem_of_weakCriticalSuccessor x.isRhdOperand_label⟩
-
-/-- - [KO21, Lemma 5.2] -/
-instance [(ofAxiomsMinus 𝔸).HasAxiomJ4Plus] :
-    (labelledModel (J4Plus (𝔸 := 𝔸) (Φ := Φ))).IsJ4 where
-  rel_of_s_right h := h.2.1
-
-/-- - [KO21, Lemma 5.2] -/
-instance [(ofAxiomsMinus 𝔸).HasAxiomJ4Plus] [(ofAxiomsMinus 𝔸).HasAxiomJ1] :
-    (labelledModel (J4Plus (𝔸 := 𝔸) (Φ := Φ))).IsJ1 where
-  s_refl {_ x} h := ⟨h, h, not_mem_of_weakCriticalSuccessor x.isRhdOperand_label⟩
 
 /-- - [KO21, Lemma 5.2] -/
 instance [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus] :
@@ -261,30 +183,6 @@ instance [(ofAxiomsMinus 𝔸).HasAxiomJ2Plus] [(ofAxiomsMinus 𝔸).HasAxiomJ1]
     (labelledModel (J2Plus (𝔸 := 𝔸) (Φ := Φ))).IsJ1 where
   s_refl {_ x} h :=
     ⟨h, h, fun hx ↦ ⟨rfl, hx, not_mem_of_weakCriticalSuccessor x.isRhdOperand_label hx⟩⟩
-
-/-- - [KO21, Lemma 5.2] -/
-instance [(ofAxiomsMinus 𝔸).HasAxiomJ5] : (labelledModel (J5 (𝔸 := 𝔸) (Φ := Φ))).IsJ5 where
-  s_of_rel h₁ h₂ := ⟨h₁, fun _ h ↦ h₂.not_mem_of_box_neg_mem h⟩
-
-/-- - [KO21, Lemma 5.2] -/
-instance [(ofAxiomsMinus 𝔸).HasAxiomJ5] [(ofAxiomsMinus 𝔸).HasAxiomJ1] :
-    (labelledModel (J5 (𝔸 := 𝔸) (Φ := Φ))).IsJ1 where
-  s_refl {_ x} h := ⟨h, fun hx _ ↦ not_mem_of_weakCriticalSuccessor x.isRhdOperand_label hx⟩
-
-/-- - [KO21, Lemma 5.2] -/
-instance [(ofAxiomsMinus 𝔸).HasAxiomJ4Plus] [(ofAxiomsMinus 𝔸).HasAxiomJ5] :
-    (labelledModel (J4PlusJ5 (𝔸 := 𝔸) (Φ := Φ))).IsJ4 where
-  rel_of_s_right h := h.2.1
-
-/-- - [KO21, Lemma 5.2] -/
-instance [(ofAxiomsMinus 𝔸).HasAxiomJ4Plus] [(ofAxiomsMinus 𝔸).HasAxiomJ5] :
-    (labelledModel (J4PlusJ5 (𝔸 := 𝔸) (Φ := Φ))).IsJ5 where
-  s_of_rel h₁ h₂ := ⟨h₁, h₁.trans h₂, fun _ h ↦ h₂.not_mem_of_box_neg_mem h⟩
-
-/-- - [KO21, Lemma 5.2] -/
-instance [(ofAxiomsMinus 𝔸).HasAxiomJ4Plus] [(ofAxiomsMinus 𝔸).HasAxiomJ5]
-    [(ofAxiomsMinus 𝔸).HasAxiomJ1] : (labelledModel (J4PlusJ5 (𝔸 := 𝔸) (Φ := Φ))).IsJ1 where
-  s_refl {_ x} h := ⟨h, h, fun hx _ ↦ not_mem_of_weakCriticalSuccessor x.isRhdOperand_label hx⟩
 
 end LabelledSet.Condition
 

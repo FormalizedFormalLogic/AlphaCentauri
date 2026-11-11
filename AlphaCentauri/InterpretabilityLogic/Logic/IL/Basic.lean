@@ -2,12 +2,9 @@ module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2PlusJ5.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4PlusJ5.Basic
 
 /-!
 # Interpretability logic $\mathbf{IL}$
@@ -175,24 +172,43 @@ end Logic
 
 /-! ## Strict -/
 
+namespace Veltman
+
+open Model Model.World
+
+/-- A model satisfying $\mathbf{J1}$ and $\mathbf{J2}$ but not $\mathbf{J5}$. -/
+private abbrev counterJ5 (α : Type*) : Model (Fin 3) α :=
+  ⟨(· < ·), fun w x y ↦ w < x ∧ x = y, fun _ _ ↦ False⟩
+
+private instance {α : Type*} : (counterJ5 α).IsILMinus where
+  trans := by omega
+  cwf := Finite.converseWellFounded_of_trans_of_irrefl
+  rel_of_s_left := by tauto
+
+private instance {α : Type*} : (counterJ5 α).IsJ1 := ⟨by tauto⟩
+
+private instance {α : Type*} : (counterJ5 α).IsJ2 where
+  rel_of_s_right := by omega
+  s_trans := by omega
+
+private lemma counterJ5.not_models_J5 {α : Type*} : ¬counterJ5 α ⊧ Axioms.J5 (□⊥) := by
+  intro h
+  have h₁ : (1 : Fin 3) ⊩[counterJ5 α] ◇□⊥ :=
+    forces_dia.mpr ⟨2, by omega, fun y hy ↦ by omega⟩
+  obtain ⟨z, ⟨-, rfl⟩, hz⟩ := h 0 1 (by omega) h₁
+  exact hz 2 (by omega)
+
+end Veltman
+
 namespace Logic
 
 open Entailment ofAxiomsMinus Veltman
 
 variable {α : Type}
 
-instance : (ILMinusJ2PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
-  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤)
-    (fun h ↦ counterJ1.not_models_J1 (ILMinusJ2PlusJ5.sound (M := counterJ1 α) h)) ofAxioms.axiomJ1
-
 instance : (𝐂𝐋 : Logic α) ⪱ 𝐈𝐋 :=
   .of_unprovable_provable (φ := Axioms.J5 (□⊥))
     (fun h ↦ counterJ5.not_models_J5 (CL.sound (M := counterJ5 α) h)) ofAxioms.axiomJ5
-
-instance : (ILMinusJ1J4PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
-  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
-    (fun h ↦ counterJ2.not_models_J2 (ILMinusJ1J4PlusJ5.sound (M := counterJ2 α) h))
-    ofAxioms.axiomJ2
 
 /-! ## Completeness -/
 

@@ -1,9 +1,6 @@
 module
 
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2Plus.Basic
-public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4Plus.Basic
-public import AlphaCentauri.InterpretabilityLogic.Veltman.Counterexamples
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.LabelledSetModel
 
@@ -104,23 +101,6 @@ theorem CL.iff_valid_finite :
     𝐂𝐋 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
       [M.IsCL] → M ⊧ A :=
   CL.semantics_TFAE.out 1 3
-
-
-/-! ## Relations -/
-
-
-open Entailment Veltman
-
-variable {α : Type}
-
-instance : (ILMinusJ2Plus : Logic α) ⪱ 𝐂𝐋 :=
-  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤)
-    (fun h ↦ counterJ1.not_models_J1 (ILMinusJ2Plus.sound (M := counterJ1 α) h)) (HasAxiomJ1.J1 _ _)
-
-instance : (ILMinusJ1J4Plus : Logic α) ⪱ 𝐂𝐋 :=
-  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
-    (fun h ↦ counterJ2.not_models_J2 (ILMinusJ1J4Plus.sound (M := counterJ2 α) h))
-    (HasAxiomJ2.J2 _ _ _)
 
 end Logic
 

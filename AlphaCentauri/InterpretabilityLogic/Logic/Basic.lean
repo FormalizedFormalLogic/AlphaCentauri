@@ -350,21 +350,6 @@ protected abbrev J1' : Formula α := A ▷ A
 /-- - [KO21, §3.3] -/
 protected abbrev J2Plus : Formula α := A ▷ (B ⋎ C) ⋏ B ▷ C 🡒 A ▷ C
 
-/-- - [KO21, §3.3] -/
-protected abbrev J2Plus' : Formula α := A ▷ B ⋏ (B ⋏ ∼C) ▷ C 🡒 A ▷ C
-
-/-- - [KO21, §3.2] -/
-protected abbrev J4' : Formula α := A ▷ B 🡒 B ▷ ⊥ 🡒 A ▷ ⊥
-
-/-- - [KO21, §3.2] -/
-protected abbrev J4Plus : Formula α := □(A 🡒 B) 🡒 C ▷ A 🡒 C ▷ B
-
-/-- - [KO21, §3.2] -/
-protected abbrev J4Plus' : Formula α := □A 🡒 C ▷ (A 🡒 B) 🡒 C ▷ B
-
-/-- - [KO21, §3.2] -/
-protected abbrev J4Plus'' : Formula α := □A 🡒 C ▷ B 🡒 C ▷ (A ⋏ B)
-
 /-- - [KO21, Definition 2.1] -/
 protected abbrev J6 : Formula α := □A 🡘 ∼A ▷ ⊥
 
@@ -516,9 +501,6 @@ class HasAxiomJ2Plus (L : Logic α) : Prop where
 class HasAxiomJ4 (L : Logic α) : Prop where
   J4 (A B : Formula α) : L ⊢ Axioms.J4 A B
 
-class HasAxiomJ4Plus (L : Logic α) : Prop where
-  J4Plus (A B C : Formula α) : L ⊢ Axioms.J4Plus A B C
-
 class HasAxiomJ5 (L : Logic α) : Prop where
   J5 (A : Formula α) : L ⊢ Axioms.J5 A
 
@@ -550,16 +532,6 @@ variable {𝔸 𝔹 𝔸' : FormulaSet α}
 instance [HasAxiomJ2Plus (ofAxiomsMinus 𝔸)] : HasAxiomJ2 (ofAxiomsMinus 𝔸) :=
   ⟨fun _ _ _ ↦ J2_of_J2Plus ⨀ HasAxiomJ2Plus.J2Plus _ _ _⟩
 
-/-- - [KO21, Proposition 3.13] -/
-instance [HasAxiomJ2Plus (ofAxiomsMinus 𝔸)] : HasAxiomJ4Plus (ofAxiomsMinus 𝔸) where
-  J4Plus A B C := by
-    have h₁ : ofAxiomsMinus 𝔸 ⊢ □(A 🡒 B) 🡒 □(∼(A ⋏ ∼B)) := box_mono (by cl_prover);
-    have h₂ : ofAxiomsMinus 𝔸 ⊢ □(∼(A ⋏ ∼B)) 🡒 (A ⋏ ∼B) ▷ B := rhd_of_box_neg;
-    have h₃ : ofAxiomsMinus 𝔸 ⊢ C ▷ A 🡒 C ▷ (A ⋏ ∼B ⋎ B) := rhd_mono_right (by cl_prover);
-    have h₄ : ofAxiomsMinus 𝔸 ⊢ C ▷ (A ⋏ ∼B ⋎ B) ⋏ (A ⋏ ∼B) ▷ B 🡒 C ▷ B :=
-      HasAxiomJ2Plus.J2Plus _ _ _;
-    cl_prover [h₁, h₂, h₃, h₄]
-
 /-- - [KO21, Corollary 3.5] -/
 instance [HasAxiomJ2 (ofAxiomsMinus 𝔸)] : HasAxiomJ4 (ofAxiomsMinus 𝔸) where
   J4 A B := by
@@ -567,28 +539,11 @@ instance [HasAxiomJ2 (ofAxiomsMinus 𝔸)] : HasAxiomJ4 (ofAxiomsMinus 𝔸) whe
     have h₂ : ofAxiomsMinus 𝔸 ⊢ (◇A 🡒 ◇B) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥) := dia_imp_dia_iff;
     cl_prover [h₁, h₂]
 
-/-- - [KO21, Proposition 3.7] -/
-instance [HasAxiomJ4Plus (ofAxiomsMinus 𝔸)] : HasAxiomJ4 (ofAxiomsMinus 𝔸) where
-  J4 A B := by
-    have h₁ : ofAxiomsMinus 𝔸 ⊢ □(∼B) 🡘 B ▷ ⊥ := box_neg_iff_rhd_bot;
-    have h₂ : ofAxiomsMinus 𝔸 ⊢ □(B 🡒 ⊥) 🡒 A ▷ B 🡒 A ▷ ⊥ := HasAxiomJ4Plus.J4Plus _ _ _;
-    have h₃ : ofAxiomsMinus 𝔸 ⊢ (◇A 🡒 ◇B) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥) := dia_imp_dia_iff;
-    cl_prover [h₁, h₂, h₃]
-
 /-- `ofAxiomsMinus 𝔸` proves the schema `J1` as soon as `𝔸` contains it. -/
 instance : HasAxiomJ1 (ofAxiomsMinus {Axioms.J1 A B | (A) (B)} : Logic α) :=
   ⟨fun _ _ ↦ axm ⟨_, _, rfl⟩⟩
 
 instance : HasAxiomJ2 (ofAxiomsMinus {Axioms.J2 A B C | (A) (B) (C)} : Logic α) :=
-  ⟨fun _ _ _ ↦ axm ⟨_, _, _, rfl⟩⟩
-
-instance : HasAxiomJ2Plus (ofAxiomsMinus {Axioms.J2Plus A B C | (A) (B) (C)} : Logic α) :=
-  ⟨fun _ _ _ ↦ axm ⟨_, _, _, rfl⟩⟩
-
-instance : HasAxiomJ4 (ofAxiomsMinus {Axioms.J4 A B | (A) (B)} : Logic α) :=
-  ⟨fun _ _ ↦ axm ⟨_, _, rfl⟩⟩
-
-instance : HasAxiomJ4Plus (ofAxiomsMinus {Axioms.J4Plus A B C | (A) (B) (C)} : Logic α) :=
   ⟨fun _ _ _ ↦ axm ⟨_, _, _, rfl⟩⟩
 
 instance : HasAxiomJ5 (ofAxiomsMinus {Axioms.J5 A | A} : Logic α) := ⟨fun _ ↦ axm ⟨_, rfl⟩⟩
@@ -608,29 +563,17 @@ instance [HasAxiomJ2 (ofAxiomsMinus 𝔹)] : HasAxiomJ2 (ofAxiomsMinus (𝔸 ∪
 instance [HasAxiomJ2Plus (ofAxiomsMinus 𝔸)] : HasAxiomJ2Plus (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
   ⟨fun A B C ↦ subset_of_subset Set.subset_union_left (HasAxiomJ2Plus.J2Plus A B C)⟩
 
-instance [HasAxiomJ2Plus (ofAxiomsMinus 𝔹)] : HasAxiomJ2Plus (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A B C ↦ subset_of_subset Set.subset_union_right (HasAxiomJ2Plus.J2Plus A B C)⟩
-
 instance [HasAxiomJ4 (ofAxiomsMinus 𝔸)] : HasAxiomJ4 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
   ⟨fun A B ↦ subset_of_subset Set.subset_union_left (HasAxiomJ4.J4 A B)⟩
 
 instance [HasAxiomJ4 (ofAxiomsMinus 𝔹)] : HasAxiomJ4 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
   ⟨fun A B ↦ subset_of_subset Set.subset_union_right (HasAxiomJ4.J4 A B)⟩
 
-instance [HasAxiomJ4Plus (ofAxiomsMinus 𝔸)] : HasAxiomJ4Plus (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A B C ↦ subset_of_subset Set.subset_union_left (HasAxiomJ4Plus.J4Plus A B C)⟩
-
-instance [HasAxiomJ4Plus (ofAxiomsMinus 𝔹)] : HasAxiomJ4Plus (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
-  ⟨fun A B C ↦ subset_of_subset Set.subset_union_right (HasAxiomJ4Plus.J4Plus A B C)⟩
-
 instance [HasAxiomJ5 (ofAxiomsMinus 𝔸)] : HasAxiomJ5 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
   ⟨fun A ↦ subset_of_subset Set.subset_union_left (HasAxiomJ5.J5 A)⟩
 
 instance [HasAxiomJ5 (ofAxiomsMinus 𝔹)] : HasAxiomJ5 (ofAxiomsMinus (𝔸 ∪ 𝔹)) :=
   ⟨fun A ↦ subset_of_subset Set.subset_union_right (HasAxiomJ5.J5 A)⟩
-
-instance : (ofAxiomsMinus ∅ : Logic α) ⪯ ofAxiomsMinus 𝔹 :=
-  weakerThan_iff.mpr <| subset_of_subset (Set.empty_subset _)
 
 instance [HasAxiomJ1 (ofAxiomsMinus 𝔹)] :
     (ofAxiomsMinus {Axioms.J1 A B | (A) (B)} : Logic α) ⪯ ofAxiomsMinus 𝔹 :=
@@ -643,24 +586,6 @@ instance [HasAxiomJ2 (ofAxiomsMinus 𝔹)] :
   weakerThan_iff.mpr <| subset_of_provable <| by
     rintro _ ⟨A, B, C, rfl⟩
     exact HasAxiomJ2.J2 A B C
-
-instance [HasAxiomJ2Plus (ofAxiomsMinus 𝔹)] :
-    (ofAxiomsMinus {Axioms.J2Plus A B C | (A) (B) (C)} : Logic α) ⪯ ofAxiomsMinus 𝔹 :=
-  weakerThan_iff.mpr <| subset_of_provable <| by
-    rintro _ ⟨A, B, C, rfl⟩
-    exact HasAxiomJ2Plus.J2Plus A B C
-
-instance [HasAxiomJ4 (ofAxiomsMinus 𝔹)] :
-    (ofAxiomsMinus {Axioms.J4 A B | (A) (B)} : Logic α) ⪯ ofAxiomsMinus 𝔹 :=
-  weakerThan_iff.mpr <| subset_of_provable <| by
-    rintro _ ⟨A, B, rfl⟩
-    exact HasAxiomJ4.J4 A B
-
-instance [HasAxiomJ4Plus (ofAxiomsMinus 𝔹)] :
-    (ofAxiomsMinus {Axioms.J4Plus A B C | (A) (B) (C)} : Logic α) ⪯ ofAxiomsMinus 𝔹 :=
-  weakerThan_iff.mpr <| subset_of_provable <| by
-    rintro _ ⟨A, B, C, rfl⟩
-    exact HasAxiomJ4Plus.J4Plus A B C
 
 instance [HasAxiomJ5 (ofAxiomsMinus 𝔹)] :
     (ofAxiomsMinus {Axioms.J5 A | A} : Logic α) ⪯ ofAxiomsMinus 𝔹 :=

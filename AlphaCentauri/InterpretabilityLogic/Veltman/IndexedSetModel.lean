@@ -7,8 +7,8 @@ public import Mathlib.Data.Set.Finite.List
 /-!
 # The model on indexed sets
 
-The construction behind the completeness of $\mathbf{IL}^-(\mathbf{J2}^+, \mathbf{J5})$ and
-$\mathbf{IL}$ with respect to finite Veltman models (de Jongh–Veltman).
+The construction behind the completeness of $\mathbf{IL}$ with respect to finite Veltman models
+(de Jongh–Veltman).
 
 A finite Veltman model whose worlds are maximal consistent subsets of an adequate set indexed by
 finite sequences of formulas, and its truth lemma.
@@ -236,8 +236,8 @@ open Veltman Veltman.Model.World
 variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α} {Φ : Finset (Formula α)}
   {A : Formula α}
 
-/-- If an extension of $\mathbf{IL}^-(\mathbf{J2}^+, \mathbf{J5})$ does not prove `A`, then `A`
-fails at some world of the countermodel over an adequate set containing `A`.
+/-- If an extension of $\mathbf{IL}^-$ proving $\mathbf{J2}^+$ and $\mathbf{J5}$ does not prove
+`A`, then `A` fails at some world of the countermodel over an adequate set containing `A`.
 
 - [KO21, Theorem 5.4]
 -/

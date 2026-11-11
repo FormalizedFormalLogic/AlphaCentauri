@@ -165,6 +165,7 @@ public import AlphaCentauri.Reflection.Definability.UniformReflectionCode
 public import AlphaCentauri.Reflection.ISigma
 public import AlphaCentauri.Reflection.Provability.IteratedConsistency
 public import AlphaCentauri.Reflection.Provability.Relativized
+public import AlphaCentauri.Reflection.Provability.RelativizedLocalReflection
 public import AlphaCentauri.Reflection.UniformReflection.Induction
 public import AlphaCentauri.Reflection.UniformReflection.LeivantOno
 public import AlphaCentauri.Schemata.BoundedInduction
@@ -234,6 +235,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Power
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prenex
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexPairing
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection

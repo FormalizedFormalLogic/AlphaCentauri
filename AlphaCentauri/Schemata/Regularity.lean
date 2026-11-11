@@ -1,6 +1,8 @@
 module
 
+public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata
+public import AlphaCentauri.Schemata.BoundedInduction
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 
 /-!
@@ -17,6 +19,8 @@ $w > 1$. The third variable of $\varphi$ is the bound $u$ and the others are par
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
+
+open _root_.FFL.Entailment
 
 /-- The regularity principle for `φ`.
 - [Cor13, Definition 1.1] -/
@@ -37,5 +41,16 @@ def boundedRegularity (m : ℕ) (φ : ArithmeticSemiformula ℕ 3) : ArithmeticS
 def boundedRegularityOn (m : ℕ) (Γ : ArithmeticSemiformula ℕ 3 → Prop) :
     Set ArithmeticSentence :=
   boundedRegularity m '' {φ | Γ φ}
+
+/-- $\mathsf{EA}$ proves the regularity principle for $E_1$ formulas. An open problem.
+- [Cor13, Problem 1.5] -/
+def RegularityBoundedExistentialWeakerThanElementaryArithmetic : Prop :=
+  𝗣𝗔⁻ ∪ regularityOn (IsBoundedExistential 1) ⪯ 𝗘𝗔
+
+/-- $\mathsf{EA}$ proves the bounded regularity principle with exponent $3$ for $E_1$ formulas.
+An open problem.
+- [Cor13, Problem 1.7] -/
+def BoundedRegularityBoundedExistentialWeakerThanElementaryArithmetic : Prop :=
+  𝗣𝗔⁻ ∪ boundedRegularityOn 3 (IsBoundedExistential 1) ⪯ 𝗘𝗔
 
 end FFL.FirstOrder.Arithmetic

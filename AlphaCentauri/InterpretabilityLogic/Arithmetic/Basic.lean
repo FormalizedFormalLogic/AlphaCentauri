@@ -124,8 +124,6 @@ theorem Logic.ofCLAxioms.arithmetical_soundness (h𝔸 : ∀ A ∈ 𝔸, T₀ �
   | axm hA => exact h𝔸 _ hA;
   | mdp _ _ ih₁ ih₂ => exact ih₁ ⨀ ih₂;
   | nec _ ih => exact 𝔅.D1 <| WeakerThan.pbl ih;
-  | rule1 _ ih => exact Interpretability.rhd_mono_right <| WeakerThan.pbl ih;
-  | rule2 _ ih => exact Interpretability.rhd_anti_left <| WeakerThan.pbl ih;
   | axiomK => exact 𝔅.D2;
   | axiomL => exact formalized_löb_theorem;
   | axiomJ1 => exact J1;
@@ -141,18 +139,14 @@ theorem Logic.ofCLAxioms.arithmetical_soundness (h𝔸 : ∀ A ∈ 𝔸, T₀ �
     have h₂ : T₀ ⊢ 𝔍 (σ ⋎ τ) χ 🡒 𝔍 ((σ 🡒 ⊥) 🡒 τ) χ :=
       Interpretability.rhd_anti_left <| by cl_prover;
     cl_prover [h₁, h₂];
-  | @axiomJ6 A =>
+  | @axiomJ4 A B =>
     dsimp only [interpret];
-    generalize A.interpret f 𝔅 𝔍 = σ;
-    have h₁ : T₀ ⊢ 𝔅 ((σ 🡒 ⊥) 🡒 ⊥) 🡒 𝔍 (σ 🡒 ⊥) ⊥ := J1;
-    have h₂ : T₀ ⊢ 𝔅 σ 🡒 𝔅 ((σ 🡒 ⊥) 🡒 ⊥) := 𝔅.mono <| by cl_prover;
-    have h₃ : T₀ ⊢ 𝔍 (σ 🡒 ⊥) ⊥ 🡒 𝔅.dia (σ 🡒 ⊥) 🡒 𝔅.dia ⊥ := J4;
-    have h₄ : T₀ ⊢ 𝔅 (∼⊥) := 𝔅.D1 <| by cl_prover;
-    have h₅ : T₀ ⊢ 𝔅 (∼(σ 🡒 ⊥)) 🡒 𝔅 σ := 𝔅.mono <| by cl_prover;
-    simp only [Provability.dia] at h₃;
-    have h₆ : T₀ ⊢ 𝔍 (σ 🡒 ⊥) ⊥ 🡒 𝔅 σ := by cl_prover [h₃, h₄, h₅];
-    have h₇ : T₀ ⊢ 𝔅 σ 🡒 𝔍 (σ 🡒 ⊥) ⊥ := by cl_prover [h₁, h₂];
-    cl_prover [h₆, h₇];
+    generalize A.interpret f 𝔅 𝔍 = σ, B.interpret f 𝔅 𝔍 = τ;
+    have h₁ : T₀ ⊢ 𝔍 σ τ 🡒 𝔅.dia σ 🡒 𝔅.dia τ := J4;
+    have h₂ : T₀ ⊢ 𝔅 (∼σ) 🡒 𝔅 (σ 🡒 ⊥) := 𝔅.mono <| by cl_prover;
+    have h₃ : T₀ ⊢ 𝔅 (τ 🡒 ⊥) 🡒 𝔅 (∼τ) := 𝔅.mono <| by cl_prover;
+    simp only [Provability.dia] at h₁;
+    cl_prover [h₁, h₂, h₃];
   | _ => dsimp [interpret]; cl_prover;
 
 end

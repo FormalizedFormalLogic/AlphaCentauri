@@ -363,18 +363,16 @@ end Axioms
 
 /-! ### Extensions of $\mathbf{CL}$ -/
 
-/-- The smallest logic containing `𝔸` and the axioms of $\mathbf{CL}$, closed under modus ponens,
-necessitation, $\mathbf{R1}$ and $\mathbf{R2}$.
+/-- The smallest logic containing `𝔸` and the axioms of $\mathbf{CL}$, closed under modus ponens
+and necessitation.
 
-- [KO21, Definition 2.1]
-- [KO21, Proposition 3.21]
+- [Ign91, Definition 2.2]
+- [KO21, §3.5]
 -/
 inductive Logic.ofCLAxioms (𝔸 : FormulaSet α) : Logic α
   | axm {A}          : A ∈ 𝔸 → ofCLAxioms 𝔸 A
   | mdp {A B}        : ofCLAxioms 𝔸 (A 🡒 B) → ofCLAxioms 𝔸 A → ofCLAxioms 𝔸 B
   | nec {A}          : ofCLAxioms 𝔸 A → ofCLAxioms 𝔸 (□A)
-  | rule1 {A B C}    : ofCLAxioms 𝔸 (A 🡒 B) → ofCLAxioms 𝔸 (C ▷ A 🡒 C ▷ B)
-  | rule2 {A B C}    : ofCLAxioms 𝔸 (A 🡒 B) → ofCLAxioms 𝔸 (B ▷ C 🡒 A ▷ C)
   | verum            : ofCLAxioms 𝔸 Axioms.Verum
   | implyK {A B}     : ofCLAxioms 𝔸 (Axioms.ImplyK A B)
   | implyS {A B C}   : ofCLAxioms 𝔸 (Axioms.ImplyS A B C)
@@ -390,7 +388,7 @@ inductive Logic.ofCLAxioms (𝔸 : FormulaSet α) : Logic α
   | axiomJ1 {A B}    : ofCLAxioms 𝔸 (Axioms.J1 A B)
   | axiomJ2 {A B C}  : ofCLAxioms 𝔸 (Axioms.J2 A B C)
   | axiomJ3 {A B C}  : ofCLAxioms 𝔸 (Axioms.J3 A B C)
-  | axiomJ6 {A}      : ofCLAxioms 𝔸 (Axioms.J6 A)
+  | axiomJ4 {A B}    : ofCLAxioms 𝔸 (Axioms.J4 A B)
 
 namespace Logic.ofCLAxioms
 
@@ -422,8 +420,6 @@ lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofCLAxioms 𝔹 ⊢ A) :
   | axm hA => exact h _ hA;
   | mdp _ _ ihAB ihA => exact mdp ihAB ihA;
   | nec _ ih => exact nec ih;
-  | rule1 _ ih => exact rule1 ih;
-  | rule2 _ ih => exact rule2 ih;
   | verum => exact verum;
   | implyK => exact implyK;
   | implyS => exact implyS;
@@ -439,19 +435,36 @@ lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofCLAxioms 𝔹 ⊢ A) :
   | axiomJ1 => exact axiomJ1;
   | axiomJ2 => exact axiomJ2;
   | axiomJ3 => exact axiomJ3;
-  | axiomJ6 => exact axiomJ6;
+  | axiomJ4 => exact axiomJ4;
 
 lemma subset_of_subset (h : 𝔸 ⊆ 𝔹) : ofCLAxioms 𝔸 ⊆ ofCLAxioms 𝔹 :=
   subset_of_provable fun _ hA ↦ axm (h hA)
 
 variable {A B C : Formula α}
 
-lemma rhd_mono_right (h : ofCLAxioms 𝔸 ⊢ A 🡒 B) : ofCLAxioms 𝔸 ⊢ C ▷ A 🡒 C ▷ B := rule1 h
+/-- - [KO21, Proposition 3.20.2] -/
+lemma rhd_mono_right (h : ofCLAxioms 𝔸 ⊢ A 🡒 B) : ofCLAxioms 𝔸 ⊢ C ▷ A 🡒 C ▷ B := by
+  have h₁ : ofCLAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h;
+  have h₂ : ofCLAxioms 𝔸 ⊢ C ▷ A ⋏ A ▷ B 🡒 C ▷ B := axiomJ2;
+  cl_prover [h₁, h₂];
 
-lemma rhd_anti_left (h : ofCLAxioms 𝔸 ⊢ A 🡒 B) : ofCLAxioms 𝔸 ⊢ B ▷ C 🡒 A ▷ C := rule2 h
+/-- - [KO21, Proposition 3.20.3] -/
+lemma rhd_anti_left (h : ofCLAxioms 𝔸 ⊢ A 🡒 B) : ofCLAxioms 𝔸 ⊢ B ▷ C 🡒 A ▷ C := by
+  have h₁ : ofCLAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h;
+  have h₂ : ofCLAxioms 𝔸 ⊢ A ▷ B ⋏ B ▷ C 🡒 A ▷ C := axiomJ2;
+  cl_prover [h₁, h₂];
 
 /-- - [KO21, Proposition 3.1] -/
 lemma rhd_refl : ofCLAxioms 𝔸 ⊢ A ▷ A := axiomJ1 ⨀ provable_box C_id
+
+/-- - [KO21, Proposition 3.20.1] -/
+lemma axiomJ6 : ofCLAxioms 𝔸 ⊢ Axioms.J6 A := by
+  have h₁ : ofCLAxioms 𝔸 ⊢ □A 🡒 □(∼A 🡒 ⊥) := box_mono (by cl_prover);
+  have h₂ : ofCLAxioms 𝔸 ⊢ □(∼A 🡒 ⊥) 🡒 ∼A ▷ ⊥ := axiomJ1;
+  have h₃ : ofCLAxioms 𝔸 ⊢ ∼A ▷ ⊥ 🡒 ∼□(∼∼A) 🡒 ∼□(∼⊥) := axiomJ4;
+  have h₄ : ofCLAxioms 𝔸 ⊢ □(∼⊥) := provable_box (by cl_prover);
+  have h₅ : ofCLAxioms 𝔸 ⊢ □(∼∼A) 🡒 □A := box_mono (by cl_prover);
+  cl_prover [h₁, h₂, h₃, h₄, h₅];
 
 lemma box_neg_iff_rhd_bot : ofCLAxioms 𝔸 ⊢ □(∼A) 🡘 A ▷ ⊥ := by
   have h₁ : ofCLAxioms 𝔸 ⊢ □(∼A) 🡘 ∼∼A ▷ ⊥ := axiomJ6;
@@ -472,19 +485,6 @@ lemma rhd_anti_left_of_box : ofCLAxioms 𝔸 ⊢ □(A 🡒 B) 🡒 B ▷ C 🡒
   have h₃ : ofCLAxioms 𝔸 ⊢ (A ⋏ ∼B) ▷ C ⋏ B ▷ C 🡒 (A ⋏ ∼B ⋎ B) ▷ C := axiomJ3;
   have h₄ : ofCLAxioms 𝔸 ⊢ (A ⋏ ∼B ⋎ B) ▷ C 🡒 A ▷ C := rhd_anti_left (by cl_prover);
   cl_prover [h₁, h₂, h₃, h₄];
-
-/-- - [KO21, Proposition 3.4] -/
-lemma dia_imp_dia_iff : ofCLAxioms 𝔸 ⊢ (◇A 🡒 ◇B) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥) := by
-  have h₁ : ofCLAxioms 𝔸 ⊢ □(∼A) 🡘 A ▷ ⊥ := box_neg_iff_rhd_bot;
-  have h₂ : ofCLAxioms 𝔸 ⊢ □(∼B) 🡘 B ▷ ⊥ := box_neg_iff_rhd_bot;
-  change ofCLAxioms 𝔸 ⊢ (∼□(∼A) 🡒 ∼□(∼B)) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥);
-  cl_prover [h₁, h₂];
-
-/-- - [KO21, Corollary 3.5] -/
-lemma axiomJ4 : ofCLAxioms 𝔸 ⊢ Axioms.J4 A B := by
-  have h₁ : ofCLAxioms 𝔸 ⊢ A ▷ B ⋏ B ▷ ⊥ 🡒 A ▷ ⊥ := axiomJ2;
-  have h₂ : ofCLAxioms 𝔸 ⊢ (◇A 🡒 ◇B) 🡘 (B ▷ ⊥ 🡒 A ▷ ⊥) := dia_imp_dia_iff;
-  cl_prover [h₁, h₂]
 
 /-- - [KO21, Proposition 3.12.2] -/
 lemma axiomJ2Plus : ofCLAxioms 𝔸 ⊢ Axioms.J2Plus A B C := by

@@ -193,16 +193,6 @@ lemma forces_axiomJ3 : x ⊩ Axioms.J3 A B C := by
   intro hx y Rxy hy
   grind
 
-lemma forces_axiomJ6 : x ⊩ Axioms.J6 A := by
-  apply forces_iff.mpr
-  constructor
-  · intro hx y Rxy hy
-    exact absurd (hx y Rxy) hy
-  · intro hx y Rxy
-    by_contra hy
-    obtain ⟨z, -, hz⟩ := hx y Rxy hy
-    exact hz
-
 lemma forces_axiomJ1 [M.IsJ1] : x ⊩ Axioms.J1 A B := by
   intro hx y Rxy hy
   exact ⟨y, IsJ1.s_refl Rxy, hx y Rxy hy⟩
@@ -246,18 +236,11 @@ theorem sound [M.IsCL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofCLAxioms 𝔸 �
   | nec _ ih =>
     intro y _
     exact ih y
-  | rule1 _ ih =>
-    intro hx y Rxy hy
-    obtain ⟨z, Sxyz, hz⟩ := hx y Rxy hy
-    exact ⟨z, Sxyz, ih z hz⟩
-  | rule2 _ ih =>
-    intro hx y Rxy hy
-    exact hx y Rxy (ih y hy)
   | axiomL => exact forces_axiomL
   | axiomJ1 => exact forces_axiomJ1
   | axiomJ2 => exact forces_axiomJ2
   | axiomJ3 => exact forces_axiomJ3
-  | axiomJ6 => exact forces_axiomJ6
+  | axiomJ4 => exact forces_axiomJ4
   | _ => grind
 
 end Logic.ofCLAxioms

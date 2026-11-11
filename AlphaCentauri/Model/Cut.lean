@@ -1,7 +1,7 @@
 module
 
-public import AlphaCentauri.Model.Basic
-public import Foundation.FirstOrder.Arithmetic.Schemata
+public import AlphaCentauri.Model.EndExtension
+public import AlphaCentauri.Model.Absolute
 
 /-! # Cuts
 
@@ -13,6 +13,7 @@ extension of it.
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
+
 
 open Semiformula Tarski.Structure
 
@@ -63,44 +64,5 @@ def endExtension : I.carrier ⊆ₑ M where
 lemma endExtension_emb (x : I.carrier) : I.endExtension.emb x = x.val := rfl
 
 end Cut
-
-namespace EndExtension
-
-variable {N : Type v} [hMN : M ⊆ₑ N]
-
-private lemma eval_of_endExtension [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {φ : ArithmeticSemiformula ℕ 1}
-    (hφ : ℬ[<, ℒₒᵣ].Closure φ)
-    (v : ℕ → M) (h0 : φ.Eval ![0] v) (hs : ∀ x, φ.Eval ![x] v → φ.Eval ![x + 1] v) (a : M) :
-    φ.Eval ![a] v := by
-  have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := hMN.models_peanoMinus
-  have h₁ : ∀ x : M, φ.Eval ![x] v ↔ φ.Eval ![hMN.emb x] (hMN.emb ∘ v) := by
-    intro x;
-    simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using
-      absolute_of_bounded (T := 𝗣𝗔⁻) hφ M N ![x] v
-  have h₂ : ∀ y : N, y < hMN.emb a + 1 → φ.Eval ![y] (hMN.emb ∘ v) := by
-    refine InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0)
-      ⟨(hMN.emb a + 1) :>ₙ fun j ↦ hMN.emb (v j),
-        “#0 < &0” 🡒 (Rew.rewriteMap Nat.succ ▹ φ), by simp [hφ.hierarchy],
-        by intro x; simp [Semiformula.eval_rewriteMap, Function.comp_def]⟩
-      (by intro _; simpa using (h₁ 0).mp h0) ?_
-    intro y ih hy
-    have h₃ : y < hMN.emb a := lt_of_lt_of_le (lt_add_one y) (lt_succ_iff_le.mp hy)
-    obtain ⟨x, rfl⟩ := hMN.mem_range_of_lt h₃
-    simpa using (h₁ (x + 1)).mp (hs x ((h₁ x).mpr (ih (lt_trans h₃ (lt_add_one _)))))
-  exact (h₁ a).mpr (h₂ (hMN.emb a) (by simp))
-
-/-- A structure with an end extension modelling `𝗜𝚺₀` is itself a model of `𝗜𝚺₀`.
-- [HP98, Remark IV.1.21(2)] -/
-theorem models_ISigma0 [hN : N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := by
-  simp only [Semantics.ModelsSet.union_iff, InductionScheme];
-  and_intros;
-  · exact hMN.models_peanoMinus
-  · apply Semantics.ModelsSet.setOf_iff.mpr;
-    rintro _ ⟨φ, hφ, rfl⟩
-    simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
-      using hMN.eval_of_endExtension
-        (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
-
-end EndExtension
 
 end FFL.FirstOrder.Arithmetic

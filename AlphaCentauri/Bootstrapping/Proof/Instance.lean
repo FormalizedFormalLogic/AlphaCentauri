@@ -1,25 +1,26 @@
 module
 
 public import AlphaCentauri.Bootstrapping.Proof.Inversion
-public import AlphaCentauri.Bootstrapping.Proof.Subformula
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
-public import AlphaCentauri.ToFoundation.SubstInversion
+public import AlphaCentauri.Bootstrapping.Proof.Subformula
 
 /-!
 # Instances of a coded set of formulas in cut-free derivations
 
-This module defines when a formula code is an instance of a member of a coded set `X` of formula
-codes — the result of substituting terms for its bound variables — and shows that, for `X` closed
-under subformulas and free of free variables, the premises of every rule of a cut-free derivation
-over the empty theory whose end-sequent consists of instances of `X` again consist of instances of
-`X`.
+For a coded set `X` closed under subformulas and free of free variables, the premises of every rule
+of a cut-free derivation over the empty theory whose end-sequent consists of instances of `X` again
+consist of instances of `X`.
 -/
 
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+
+section Instance
 
 open PeanoMinus ISigma0 ISigma1
 
@@ -166,53 +167,11 @@ lemma insert {x s : V} (hx : Instance L X x) (hs : ∀ y ∈ s, Instance L X y) 
 
 end Instance
 
-/-- The subformulas of a formula code without free variables have no free variables. -/
-lemma shift_eq_self_of_mem_subformulas {p q : V} (hp : IsUFormula L p) (hps : shift L p = p)
-    (hq : q ∈ subformulas L p) : shift L q = q :=
-  subformulas_induction (P := fun p q ↦ shift L p = p → shift L q = q) (by definability)
-    (fun _ _ h ↦ h) (fun _ _ _ h ih hp ↦ ih (h.shift_eq hp)) hp hq hps
-
-/-- The members of a coded formula set fixed by the shift have no free variables. -/
-lemma shift_eq_self_of_setShift_eq_self {s p : V} (hs : IsFormulaSet L s)
-    (hss : setShift L s = s) (hp : p ∈ s) : shift L p = p := by
-  have H : ∀ k : V, ∀ p ∈ s, s ≤ p + k → shift L p = p := by
-    apply ISigma1.pi1_succ_induction (P := fun k ↦ ∀ p ∈ s, s ≤ p + k → shift L p = p)
-      (by definability)
-    · intro p hp hsp
-      exact absurd (lt_of_mem hp) (not_lt.mpr (by simpa using hsp))
-    · intro k ih p hp hsp
-      by_contra hne
-      have hq : shift L p ∈ s := hss ▸ shift_mem_setShift hp
-      have hlt : p < shift L p := lt_of_le_of_ne (le_shift (hs p hp)) (Ne.symm hne)
-      have h₂ : p + 1 + k ≤ shift L p + k := add_le_add_left (lt_iff_succ_le.mp hlt) k
-      have h₁ : s ≤ shift L p + k := le_trans hsp (by rwa [add_assoc, add_comm 1 k] at h₂)
-      exact hne <| shift_inj (hs _ hq).isUFormula (hs p hp).isUFormula <| ih _ hq h₁
-  exact H s p hp (by simp)
-
-/-- The subformulas of the members of a coded set form a set closed under subformulas. -/
-lemma mem_subformulasSet_of_mem_subformulas {s r q : V} (hr : r ∈ subformulasSet L s)
-    (hq : q ∈ subformulas L r) : q ∈ subformulasSet L s := by
-  obtain ⟨p, hp, hrp⟩ := mem_subformulasSet_iff.mp hr
-  by_cases hpU : IsUFormula L p
-  · exact mem_subformulasSet_iff.mpr ⟨p, hp, subformulas_subset_of_mem hpU hrp hq⟩
-  · simp [subformulas_not_uformula hpU] at hrp
-
-/-- The subformulas of the members of a coded set of formula codes without free variables have no
-free variables. -/
-lemma shift_eq_self_of_mem_subformulasSet {s r : V} (hs : ∀ p ∈ s, shift L p = p)
-    (hr : r ∈ subformulasSet L s) : shift L r = r := by
-  obtain ⟨p, hp, hrp⟩ := mem_subformulasSet_iff.mp hr
-  by_cases hpU : IsUFormula L p
-  · exact shift_eq_self_of_mem_subformulas hpU (hs p hp) hrp
-  · simp [subformulas_not_uformula hpU] at hrp
-
-namespace CutFreeDerivation
-
 /-- A cut-free derivation over the empty theory whose end-sequent consists of instances of a set
 `X` closed under subformulas and without free variables unfolds one step as in `case_iff`, with
 the end-sequent of each immediate subderivation again consisting of instances of `X`; an axiom of
 the empty theory never occurs. -/
-theorem case_instance {X d : V} (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
+theorem CutFreeDerivation.case_instance {X d : V} (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
     (hshift : ∀ r ∈ X, shift L r = r) (hd : CutFreeDerivation (∅ : Theory L) d)
     (hX : ∀ p ∈ fstIdx d, Instance L X p) :
     IsFormulaSet L (fstIdx d) ∧
@@ -271,6 +230,8 @@ theorem case_instance {X d : V} (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, 
       exact ⟨_, d', rfl, rfl, hd', Instance.of_forall_mem_setShift hshift hd'.isFormulaSet hX⟩⟩
   · exact absurd hT (not_mem_empty_Δ₁Class p)
 
-end CutFreeDerivation
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Instance
+
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

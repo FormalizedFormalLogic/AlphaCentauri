@@ -3,8 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
-/-!
-# Pieces and strong collection in `𝗜𝚺 (n + 1)`
+/-! # Pieces and strong collection in `𝗜𝚺 (n + 1)`
 
 In a model of $\mathsf{I}\Sigma_{n + 1}$ every $\Sigma_{n + 1}$ predicate is piecewise coded, and
 the witnesses of a $\Sigma_{n + 1}$ relation are bounded on an interval even at the arguments
@@ -15,9 +14,12 @@ where it has none.
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
 namespace FFL.FirstOrder.Arithmetic
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+open _root_.FFL.Entailment
+
 
 variable {V : Type*} [ORingStructure V] {n : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(n + 1)]
 
@@ -54,5 +56,6 @@ theorem strong_collection {R : V → V → Prop} (hR : 𝚺ᴬ_[n + 1].Definable
   and_intros
   · exact hy
   · exact hRy <| (hq x hx).mpr h
+
 
 end FFL.FirstOrder.Arithmetic

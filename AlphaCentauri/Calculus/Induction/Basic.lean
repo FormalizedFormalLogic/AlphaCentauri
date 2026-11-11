@@ -1,10 +1,19 @@
 module
 
-public import AlphaCentauri.ToFoundation.Rew
-public import AlphaCentauri.Hierarchy.Bounded
-public import AlphaCentauri.ToFoundation.Hierarchy
+public import AlphaCentauri.Calculus.Instantiation
+public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastWitness
+public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
+public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
+public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
+public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.PrenexNormalForm
+public import AlphaCentauri.ToFoundation.FirstOrder.Rew
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.LK.Basic
+public import AlphaCentauri.Schemata.DeltaInduction
 
 /-!
 # A one-sided sequent calculus with an induction rule
@@ -24,47 +33,6 @@ $\mathsf{I}\Sigma_1$, and the same calculus serves the other induction schemes.
 
 @[expose] public section
 
-namespace FFL.FirstOrder
-
-open Rewriting
-
-namespace LK.Derivation
-
-variable {L : Language} {Γ : LK.Sequent L}
-
-/-! ## Instantiating a block of universal quantifiers
-
-Provability is defined for sentences, so a universally quantified sentence is instantiated at
-terms with free variables at the level of derivations: the existential closure of a formula is
-derivable from any instance of it, and dually the universal closure of a sentence entails every
-instance of it.
-
-- [Bus98A, Section 3.1.3] -/
-
-/-- The existential closure is derivable from any instance of it. -/
-def exsClosure : {k : ℕ} → (χ : Semiproposition L k) → (v : Fin k → SyntacticTerm L) →
-    ⊢ᴸᴷ¹ Γ + ⦃χ ⇜ v⦄ → ⊢ᴸᴷ¹ Γ + ⦃∃¹* χ⦄
-  | 0, _, _, d => d.cast (by simp)
-  | _ + 1, χ, v, d =>
-    exsClosure (∃¹ χ) (Matrix.vecTail v) <|
-      (exs (Γ := Γ) (t := Matrix.vecHead v) (φ := (Rew.subst (Matrix.vecTail v)).q ▹ χ)
-        (d.cast (by simp only [Rew.subst_q_app, Matrix.cons_head_tail]))).cast (by simp)
-
-/-- The universal closure of a sentence entails every instance of it at terms with free
-variables. -/
-def specializeMany {k : ℕ} (χ : Semisentence L k) (v : Fin k → SyntacticTerm L) :
-    ⊢ᴸᴷ¹ ⦃∼((∀¹* χ : Sentence L) : Proposition L), Rew.embSubsts v ▹ χ⦄ :=
-  have e : (Rew.subst v).comp (Rew.emb : Rew L Empty k ℕ k) = Rew.embSubsts v := by
-    ext x
-    · simp [Rew.comp_app]
-    · exact x.elim
-  let d : ⊢ᴸᴷ¹ ⦃Rew.embSubsts v ▹ χ⦄ + ⦃(∼(emb χ : Semiproposition L k)) ⇜ v⦄ :=
-    (eta (Rew.embSubsts v ▹ χ)).cast (by simp [← TransitiveRewriting.comp_app, e])
-  (exsClosure _ v d).cast (by simp [add_comm])
-
-end LK.Derivation
-
-end FFL.FirstOrder
 
 namespace FFL.FirstOrder.Arithmetic
 
@@ -363,7 +331,6 @@ lemma Anchored.mono (h : ∀ φ, D φ → D' φ) {Γ} : {d : ⊢ᴸᴷᴵ[C]! Γ
 
 /-! ## Rewriting -/
 
-section rewrite
 
 variable [RewriteClosed C]
 
@@ -457,9 +424,6 @@ lemma anchored_rewrite {Γ} : ∀ (d : ⊢ᴸᴷᴵ[C]! Γ) (f), Anchored D d �
 lemma anchored_map (d : ⊢ᴸᴷᴵ[C]! Γ) (f) (h : Anchored D d) : Anchored D (Derivation.map d f) :=
   anchored_rewrite d _ h
 
-lemma anchored_shift (d : ⊢ᴸᴷᴵ[C]! Γ) (h : Anchored D d) : Anchored D d.shift :=
-  anchored_map d Nat.succ h
-
 lemma anchored_indByNewVar {m} {hξ : C ξ} {hξm : ¬ξ.FVar? m} {hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m}
     {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃∼(ξ/[&m]), ξ/[‘&m + 1’]⦄} (h : Anchored D d) :
     Anchored D (indByNewVar hξ t hξm hΓ d) := by
@@ -470,7 +434,6 @@ lemma anchored_generalizeByNewVar {m} {hξ : ¬ξ.FVar? m} {hΓ : ∀ ψ ∈ Γ,
     Anchored D (generalizeByNewVar hξ hΓ d) := by
   simpa [generalizeByNewVar] using anchored_map d _ h
 
-end rewrite
 
 end Derivation
 

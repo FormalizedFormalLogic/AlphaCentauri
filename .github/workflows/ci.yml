@@ -108,7 +108,8 @@ jobs:
     name: Generate zoo
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    # Runs on pull requests too, so that a theory the zoo cannot label, or relations making a
+    # theory strictly weaker than itself, fail before they reach `main`.
     steps:
       - uses: actions/checkout@v7
         with:

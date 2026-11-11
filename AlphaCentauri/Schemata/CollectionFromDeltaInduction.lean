@@ -1,12 +1,18 @@
 module
 
 public import AlphaCentauri.Model.CodedLimit
+public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.InjectiveEnumeration
 public import AlphaCentauri.Model.ProperCut
-public import AlphaCentauri.ToFoundation.PrenexDefinable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Absoluteness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
+public import Foundation.FirstOrder.Arithmetic.Definability.Definable
+public import Foundation.FirstOrder.Arithmetic.EA.Basic
+public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
+public import Foundation.FirstOrder.Arithmetic.Schemata
 
-/-!
-# Collection for $\Delta_0$ formulas from $\Delta_1$ induction
+/-! # Collection for $\Delta_0$ formulas from $\Delta_1$ induction
 
 Over a model of $\mathsf{EA}$, $\mathsf{I}\Delta_1$ yields collection for $\Delta_0$-definable
 relations, and hence the collection scheme $\mathsf{B}\Sigma_1$.
@@ -14,11 +20,13 @@ relations, and hence the collection scheme $\mathsf{B}\Sigma_1$.
 
 @[expose] public section
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
 namespace FFL.FirstOrder.Arithmetic
 
-noncomputable section
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+open FFL.FirstOrder.Bounding (HierarchySymbol)
+open _root_.FFL.Entailment
+
+noncomputable section CollectionFromDeltaInduction
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
@@ -237,8 +245,8 @@ lemma models_BSigma_one [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] : V↓[ℒₒᵣ] ⊧*
 - [Tha05, Theorem 2] -/
 theorem BSigma_one_weakerThan_EA_IDelta_one : 𝗘𝗔 ∪ 𝗕𝚺 1 ⪯ 𝗘𝗔 ∪ 𝗜𝚫 1 := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗘𝗔 ∪ 𝗜𝚫 1 :=
-    _root_.FFL.Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗘𝗔)
-      (_root_.FFL.Entailment.WeakerThan.ofSubset Set.subset_union_left)
+    WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗘𝗔)
+      (WeakerThan.ofSubset Set.subset_union_left)
   refine weakerThan_of_models.{0} _ _ fun M _ _ ↦ ?_
   have hEA : M↓[ℒₒᵣ] ⊧* 𝗘𝗔 := models_of_ss (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗘𝗔 ∪ 𝗜𝚫 1)
     Set.subset_union_left
@@ -246,6 +254,6 @@ theorem BSigma_one_weakerThan_EA_IDelta_one : 𝗘𝗔 ∪ 𝗕𝚺 1 ⪯ 𝗘�
     Set.subset_union_right
   exact Semantics.ModelsSet.union_iff.mpr ⟨hEA, models_BSigma_one⟩
 
-end
+end CollectionFromDeltaInduction
 
 end FFL.FirstOrder.Arithmetic

@@ -138,13 +138,6 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
 instance : Semantics (Model κ α) (Formula α) := ⟨fun M A ↦ ∀ x : M.World, World.Forces M x A⟩
 
 
-/-- `≺` is transitive and conversely well-founded, and `x ≺[w] y` implies `w ≺ x`.
-
-- [KO21, Definition 2.2]
--/
-class IsILMinus (M : Model κ α) extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel where
-  rel_of_s_left {w x y : M.World} : x ≺[w] y → w ≺ x
-
 /-- - [KO21, Proposition 3.2] -/
 class IsJ1 (M : Model κ α) : Prop where
   s_refl {w x : M.World} : w ≺ x → x ≺[w] x
@@ -161,9 +154,6 @@ class IsJ2 (M : Model κ α) : Prop extends M.IsJ4 where
 class IsJ5 (M : Model κ α) : Prop where
   s_of_rel {w x y : M.World} : w ≺ x → x ≺ y → x ≺[w] y
 
-instance [M.IsIL] : M.IsILMinus where
-  rel_of_s_left := rel_of_s_left
-
 instance [M.IsIL] : M.IsJ1 := ⟨s_refl⟩
 
 instance [M.IsIL] : M.IsJ2 where
@@ -172,12 +162,20 @@ instance [M.IsIL] : M.IsJ2 where
 
 instance [M.IsIL] : M.IsJ5 := ⟨s_of_rel⟩
 
-class IsCL (M : Model κ α) : Prop extends M.IsILMinus, M.IsJ1, M.IsJ2
+/-- `≺` is transitive and conversely well-founded, `x ≺[w] y` implies `w ≺ x`, and the conditions of
+$\mathbf{J1}$ and $\mathbf{J2}$ hold.
 
-instance (priority := low) [M.IsILMinus] [M.IsJ1] [M.IsJ2] : M.IsCL := {}
+- [KO21, Definition 2.2]
+-/
+class IsCL (M : Model κ α) : Prop extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel,
+    M.IsJ1, M.IsJ2 where
+  rel_of_s_left {w x y : M.World} : x ≺[w] y → w ≺ x
 
-lemma IsIL.of_isILMinus [M.IsILMinus] [M.IsJ1] [M.IsJ2] [M.IsJ5] : M.IsIL where
-  rel_of_s_left := IsILMinus.rel_of_s_left
+instance [M.IsIL] : M.IsCL where
+  rel_of_s_left := rel_of_s_left
+
+lemma IsIL.of_isCL [M.IsCL] [M.IsJ5] : M.IsIL where
+  rel_of_s_left := IsCL.rel_of_s_left
   rel_of_s_right := IsJ4.rel_of_s_right
   s_refl := IsJ1.s_refl
   s_trans := IsJ2.s_trans

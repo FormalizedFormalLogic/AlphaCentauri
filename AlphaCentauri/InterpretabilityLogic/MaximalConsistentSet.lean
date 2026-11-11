@@ -518,17 +518,17 @@ end MaximalConsistentSet
 
 - [KO21, Definition 4.1]
 -/
-class ILMinusAdequate (Φ : Finset (Formula α)) : Prop extends Adequate Φ where
+class CLAdequate (Φ : Finset (Formula α)) : Prop extends Adequate Φ where
   box_imp_disj_mem {B : Formula α} {S : Finset (Formula α)} : IsRhdOperand Φ B →
     (∀ A ∈ S, IsRhdOperand Φ A ∨ ∃ G, IsRhdOperand Φ G ∧ A = ◇G) → □(B 🡒 S.disj) ∈ Φ
 
-/-- A finite set satisfying `ILMinusAdequate` and containing `S`. -/
-noncomputable def ilMinusAdequateClosure (S : Finset (Formula α)) : Finset (Formula α) :=
+/-- A finite set satisfying `CLAdequate` and containing `S`. -/
+noncomputable def clAdequateClosure (S : Finset (Formula α)) : Finset (Formula α) :=
   let T := insert ⊥ (S.biUnion subformulas);
   (T ∪ (T ×ˢ T).image (fun p ↦ p.1 ▷ p.2) ∪ T.image (fun A ↦ □(∼A)) ∪
     (T ×ˢ (T ∪ T.image (◇·)).powerset).image (fun p ↦ □(p.1 🡒 p.2.disj))).biUnion subformulas
 
-namespace ilMinusAdequateClosure
+namespace clAdequateClosure
 
 variable {S T : Finset (Formula α)} {A B C : Formula α}
 
@@ -603,8 +603,8 @@ private lemma rhdClosed_of_mem_gen {g : Formula α}
       exact rhdClosed_imp (rhdClosed_box <| rhdClosed_imp (rhdClosed_of_base hG) rhdClosed_bot)
         rhdClosed_bot;
 
-private lemma mem_sub (hA : A ∈ ilMinusAdequateClosure S) (hB : B ∈ A.subformulas) :
-    B ∈ ilMinusAdequateClosure S := by
+private lemma mem_sub (hA : A ∈ clAdequateClosure S) (hB : B ∈ A.subformulas) :
+    B ∈ clAdequateClosure S := by
   obtain ⟨g, hg, hA⟩ := Finset.mem_biUnion.mp hA;
   exact Finset.mem_biUnion.mpr ⟨g, hg, subformulas_subset_of_mem hA hB⟩
 
@@ -612,23 +612,23 @@ private lemma mem_of_gen {g : Formula α}
     (hg : g ∈ (let T := insert ⊥ (S.biUnion subformulas);
       T ∪ (T ×ˢ T).image (fun p ↦ p.1 ▷ p.2) ∪ T.image (fun A ↦ □(∼A)) ∪
         (T ×ˢ (T ∪ T.image (◇·)).powerset).image (fun p ↦ □(p.1 🡒 p.2.disj)))) :
-    g ∈ ilMinusAdequateClosure S :=
+    g ∈ clAdequateClosure S :=
   Finset.mem_biUnion.mpr ⟨g, hg, mem_subformulas_self⟩
 
-private lemma isRhdOperand (h : IsRhdOperand (ilMinusAdequateClosure S) A) :
+private lemma isRhdOperand (h : IsRhdOperand (clAdequateClosure S) A) :
     A ∈ insert ⊥ (S.biUnion subformulas) := by
   obtain ⟨B, h | h⟩ := h <;> obtain ⟨g, hg, h⟩ := Finset.mem_biUnion.mp h;
   · exact (rhdClosed_of_mem_gen hg _ _ h).1;
   · exact (rhdClosed_of_mem_gen hg _ _ h).2;
 
-lemma subset : S ⊆ ilMinusAdequateClosure S := by
+lemma subset : S ⊆ clAdequateClosure S := by
   intro A hA;
   apply mem_of_gen;
   simp only [Finset.mem_union];
   exact .inl <| .inl <| .inl <| Finset.mem_insert_of_mem <|
     Finset.mem_biUnion.mpr ⟨A, hA, mem_subformulas_self⟩
 
-instance : ILMinusAdequate (ilMinusAdequateClosure S) where
+instance : CLAdequate (clAdequateClosure S) where
   imp_left h := mem_sub h (by simp [subformulas])
   imp_right h := mem_sub h (by simp [subformulas])
   box h := mem_sub h (by simp [subformulas])
@@ -652,7 +652,7 @@ instance : ILMinusAdequate (ilMinusAdequateClosure S) where
       · exact Finset.mem_union_right _ (Finset.mem_image_of_mem _ (isRhdOperand hG));
     exact .inr ⟨B, U, ⟨isRhdOperand hB, hU'⟩, rfl⟩;
 
-end ilMinusAdequateClosure
+end clAdequateClosure
 
 /-! ### Successors -/
 
@@ -673,7 +673,7 @@ lemma CriticalSuccessor.weakCriticalSuccessor {L : Logic α} {Φ : Finset (Formu
     WeakCriticalSuccessor C Γ Δ :=
   ⟨h.toSuccessor, h.not_mem⟩
 
-variable {𝔸 : FormulaSet α} {Φ : Finset (Formula α)} [ILMinusAdequate Φ]
+variable {𝔸 : FormulaSet α} {Φ : Finset (Formula α)} [CLAdequate Φ]
   {Γ Δ : MaximalConsistentSet (ofCLAxioms 𝔸) Φ} {B D E F : Formula α} {S : Finset (Formula α)}
 
 private lemma exists_successor_of_box_imp_disj_not_mem (hB : IsRhdOperand Φ B)
@@ -682,7 +682,7 @@ private lemma exists_successor_of_box_imp_disj_not_mem (hB : IsRhdOperand Φ B)
     ∃ Δ, Successor Γ Δ ∧ B ∈ Δ ∧
       (∀ {P}, P ∈ Φ → ofCLAxioms 𝔸 ⊢ ∼S.disj 🡒 P → P ∈ Δ) ∧
       ∀ {P}, ofCLAxioms 𝔸 ⊢ ∼S.disj 🡒 ∼P → P ∉ Δ := by
-  obtain ⟨Δ, hΔ, hc⟩ := exists_successor_of_box_not_mem (ILMinusAdequate.box_imp_disj_mem hB hS) h;
+  obtain ⟨Δ, hΔ, hc⟩ := exists_successor_of_box_not_mem (CLAdequate.box_imp_disj_mem hB hS) h;
   have hH : ({∼(B 🡒 S.disj)} : FormulaSet α) *⊢[ofCLAxioms 𝔸] ∼(B 🡒 S.disj) :=
     Context.by_axm rfl;
   have h₁ {P} (hP : ofCLAxioms 𝔸 ⊢ ∼S.disj 🡒 P) :
@@ -698,7 +698,7 @@ private lemma exists_successor_of_box_imp_disj_not_mem (hB : IsRhdOperand Φ B)
   · intro P h;
     exact not_mem_of_provable_neg hc (h₁ h);
 
-omit [ILMinusAdequate Φ] in
+omit [CLAdequate Φ] in
 private lemma provable_rhd_of_box_imp_disj_mem
     (hS : ∀ A ∈ S, Γ.literals *⊢[ofCLAxioms 𝔸] A ▷ F) (h : □(B 🡒 S.disj) ∈ Γ) :
     Γ.literals *⊢[ofCLAxioms 𝔸] B ▷ F :=
@@ -797,7 +797,7 @@ private lemma rhd_not_mem (hF : IsRhdOperand Φ F) (hΔ : WeakCriticalSuccessor 
     (hDE : D ▷ E ∈ Γ) (hD : D ∈ Δ) : Γ.literals *⊬[ofCLAxioms 𝔸] D ▷ F := fun h ↦
   hΔ.not_mem ((mem_iff_provable <| Adequate.rhd_mem (.of_rhd_left (mem_of_mem hDE)) hF).mpr h) hD
 
-omit [ILMinusAdequate Φ] in
+omit [CLAdequate Φ] in
 /-- If `□(E 🡒 ⋁(insert F X))` is in `Γ`, where `Γ` proves `G ▷ F` for every `G ∈ X`, then `Γ` proves
 `D ▷ F` for every `D ▷ E ∈ Γ`. -/
 private lemma provable_rhd_of_box_imp_insert_disj_mem

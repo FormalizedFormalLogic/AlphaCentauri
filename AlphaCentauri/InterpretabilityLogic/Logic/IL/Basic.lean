@@ -169,14 +169,11 @@ open Model Model.World
 private abbrev counterJ5 (α : Type*) : Model (Fin 3) α :=
   ⟨(· < ·), fun w x y ↦ w < x ∧ x = y, fun _ _ ↦ False⟩
 
-private instance {α : Type*} : (counterJ5 α).IsILMinus where
+private instance {α : Type*} : (counterJ5 α).IsCL where
   trans := by omega
   cwf := Finite.converseWellFounded_of_trans_of_irrefl
   rel_of_s_left := by tauto
-
-private instance {α : Type*} : (counterJ5 α).IsJ1 := ⟨by tauto⟩
-
-private instance {α : Type*} : (counterJ5 α).IsJ2 where
+  s_refl := by tauto
   rel_of_s_right := by omega
   s_trans := by omega
 
@@ -227,7 +224,7 @@ theorem IL.semantics_TFAE : [
     exact Veltman.Model.forces_toVerbrugge.mp (h M.toVerbrugge x);
   tfae_have 2 → 4 := by
     intro h κ _ _ M _ _;
-    have : M.IsIL := .of_isILMinus;
+    have : M.IsIL := .of_isCL;
     exact h M;
   tfae_have 4 → 1 := by
     intro h;
@@ -236,7 +233,7 @@ theorem IL.semantics_TFAE : [
     by_contra hA;
     have : Entailment.Consistent (ofCLAxioms {Axioms.J5 A | A}) := .of_unprovable hA;
     exact ofCLAxioms.not_models_countermodel hA <|
-      h (countermodel _ (ilMinusAdequateClosure {A}));
+      h (countermodel _ (clAdequateClosure {A}));
   tfae_finish;
 
 /-- - [KO21, Theorem 5.4] -/

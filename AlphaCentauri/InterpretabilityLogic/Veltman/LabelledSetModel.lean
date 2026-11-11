@@ -80,9 +80,6 @@ instance : IsTrans _ (labelledModel c).Rel := ⟨fun _ _ _ h₁ h₂ ↦ h₁.tr
 
 instance : Std.Irrefl (labelledModel c).Rel := ⟨fun _ h ↦ Successor.irrefl h⟩
 
-instance [Adequate Φ] : (labelledModel c).IsILMinus where
-  rel_of_s_left h := h.1
-
 variable [Entailment.Cl L] [L.ExtendsGL] [Adequate Φ]
 
 /-- - [KO21, Lemma 5.3] -/
@@ -126,7 +123,7 @@ end labelledModel
 
 namespace LabelledSet.Condition
 
-variable {𝔸 : FormulaSet α} [ILMinusAdequate Φ]
+variable {𝔸 : FormulaSet α} [CLAdequate Φ]
   {Γ Δ Θ : MaximalConsistentSet (ofCLAxioms 𝔸) Φ} {C F : Formula α}
 
 /-- Every successor of `Γ` is a weak `F'`-critical successor for some label `F'`, which is `F` if it
@@ -184,6 +181,9 @@ instance :
   s_refl {_ x} h :=
     ⟨h, h, fun hx ↦ ⟨rfl, hx, not_mem_of_weakCriticalSuccessor x.isRhdOperand_label hx⟩⟩
 
+instance : (labelledModel (J2Plus (𝔸 := 𝔸) (Φ := Φ))).IsCL where
+  rel_of_s_left h := h.1
+
 end LabelledSet.Condition
 
 end Veltman
@@ -202,8 +202,8 @@ then `ofCLAxioms 𝔸` proves `A`.
 - [KO21, Theorem 5.1]
 -/
 lemma provable_of_models_labelledModel
-    (c : LabelledSet.Condition (ofCLAxioms 𝔸) (ilMinusAdequateClosure {A}))
-    (h : ∀ [Nonempty (LabelledSet (ofCLAxioms 𝔸) (ilMinusAdequateClosure {A}))],
+    (c : LabelledSet.Condition (ofCLAxioms 𝔸) (clAdequateClosure {A}))
+    (h : ∀ [Nonempty (LabelledSet (ofCLAxioms 𝔸) (clAdequateClosure {A}))],
       labelledModel c ⊧ A) :
     ofCLAxioms 𝔸 ⊢ A := by
   by_contra hA;
@@ -212,11 +212,11 @@ lemma provable_of_models_labelledModel
     apply hA;
     have h₂ : ofCLAxioms 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
     cl_prover [h₂];
-  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := ilMinusAdequateClosure {A}) hX;
-  have : Nonempty (LabelledSet (ofCLAxioms 𝔸) (ilMinusAdequateClosure {A})) :=
+  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := clAdequateClosure {A}) hX;
+  have : Nonempty (LabelledSet (ofCLAxioms 𝔸) (clAdequateClosure {A})) :=
     ⟨⟨Γ, ⊥, .bot⟩⟩;
   exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
-    (labelledModel.truthlemma (ilMinusAdequateClosure.subset (by simp))).mp <| h ⟨Γ, ⊥, .bot⟩
+    (labelledModel.truthlemma (clAdequateClosure.subset (by simp))).mp <| h ⟨Γ, ⊥, .bot⟩
 
 end Logic.ofCLAxioms
 

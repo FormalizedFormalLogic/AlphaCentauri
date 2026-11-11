@@ -114,9 +114,6 @@ instance : IsTrans _ (countermodel L Φ).Rel :=
 
 instance : Std.Irrefl (countermodel L Φ).Rel := ⟨fun _ h ↦ h.1.irrefl⟩
 
-instance [Adequate Φ] : (countermodel L Φ).IsILMinus where
-  rel_of_s_left h := h.1.1
-
 variable {w x y z : IndexedSet L Φ}
 
 lemma s_trans (h₁ : (countermodel L Φ).S w x y) (h₂ : (countermodel L Φ).S w y z) :
@@ -163,7 +160,11 @@ instance {𝔸 : FormulaSet α} [Adequate Φ] [Nonempty (IndexedSet (ofCLAxioms 
     (countermodel (ofCLAxioms 𝔸) Φ).IsJ1 :=
   ⟨s_refl ofCLAxioms.rhd_refl⟩
 
-variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (ofCLAxioms 𝔸) Φ)] [ILMinusAdequate Φ]
+instance {𝔸 : FormulaSet α} [Adequate Φ] [Nonempty (IndexedSet (ofCLAxioms 𝔸) Φ)] :
+    (countermodel (ofCLAxioms 𝔸) Φ).IsCL where
+  rel_of_s_left h := h.1.1
+
+variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (ofCLAxioms 𝔸) Φ)] [CLAdequate Φ]
   [(ofCLAxioms 𝔸).HasAxiomJ5]
 
 /-- - [dJV90, Theorem 4.1]
@@ -242,15 +243,15 @@ variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α} {Φ : Finset (Form
 -/
 lemma not_models_countermodel [(ofCLAxioms 𝔸).HasAxiomJ5]
     [Entailment.Consistent (ofCLAxioms 𝔸)] (h : ofCLAxioms 𝔸 ⊬ A) :
-    ¬countermodel (ofCLAxioms 𝔸) (ilMinusAdequateClosure {A}) ⊧ A := by
+    ¬countermodel (ofCLAxioms 𝔸) (clAdequateClosure {A}) ⊧ A := by
   intro hM;
   have hX : ({∼A} : FormulaSet α) *⊬[ofCLAxioms 𝔸] ⊥ := by
     intro h₁;
     apply h;
     have h₂ : ofCLAxioms 𝔸 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁;
     cl_prover [h₂];
-  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := ilMinusAdequateClosure {A}) hX;
-  have hA : A ∈ ilMinusAdequateClosure {A} := ilMinusAdequateClosure.subset (by simp);
+  obtain ⟨Γ, hΓ⟩ := exists_consistent_union (Φ := clAdequateClosure {A}) hX;
+  have hA : A ∈ clAdequateClosure {A} := clAdequateClosure.subset (by simp);
   exact not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
     (countermodel.truthlemma hA).mp <| hM ⟨Γ, [], by simp, by simp⟩
 

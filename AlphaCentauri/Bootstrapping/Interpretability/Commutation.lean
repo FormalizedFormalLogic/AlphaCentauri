@@ -28,7 +28,8 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Negation, shift and arity -/
 
-/-- `tbl` lists, for the languages `L₁` and `L₂`, shift-invariant formulas of the right arities. -/
+/-- `tbl` lists, for the languages `L₁` and `L₂`, formulas without free variables of the right
+arities. -/
 structure IsTable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq] [L₂.Encodable]
     [L₂.LORDefinable] (tbl : V) : Prop where
   domain : L₁.IsFVFree 1 (tableDomain tbl)

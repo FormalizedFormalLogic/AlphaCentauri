@@ -651,7 +651,7 @@ theorem derivable_comp_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L 
 
 include h₁ hT₂ hc in
 /-- Along the composite table and along the composite of the translations, every formula code
-fixed by the shift has provably equivalent translations. -/
+without free variables has provably equivalent translations. -/
 theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
     (hL : L.SymbolsStandard V) {p : V} (hp : L.IsFVFree 0 p) :
     Provable S (iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) p)

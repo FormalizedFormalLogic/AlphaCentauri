@@ -360,8 +360,7 @@ lemma termFvSubst_eq_self_of_termShift {w n t : V} (ht : IsSemiterm L n t)
     apply ih i hi
     simpa [nth_termShiftVec hts.isUTerm hi] using congrArg (·.[i]) h'
 
-/-- A coded formula fixed by the shift of free variables is fixed by every free-variable
-substitution. -/
+/-- A coded formula without free variables is fixed by every free-variable substitution. -/
 lemma _root_.FFL.FirstOrder.Language.IsFVFree.fvSubst_eq_self {w n p : V} (hp : L.IsFVFree n p) :
     fvSubst L w p = p := by
   have h := hp.shift_eq

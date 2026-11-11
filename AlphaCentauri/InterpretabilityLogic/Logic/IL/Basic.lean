@@ -82,20 +82,10 @@ namespace Logic.ofILAxioms
 
 variable {𝔸 : FormulaSet α} {A : Formula α}
 
-/-- - [KO21, Proposition 3.20.1] -/
-lemma axiomJ6 : ofILAxioms 𝔸 ⊢ Axioms.J6 A := by
-  have h₁ : ofILAxioms 𝔸 ⊢ □A 🡒 □(∼A 🡒 ⊥) := box_mono (by cl_prover);
-  have h₂ : ofILAxioms 𝔸 ⊢ □(∼A 🡒 ⊥) 🡒 ∼A ▷ ⊥ := axiomJ1;
-  have h₃ : ofILAxioms 𝔸 ⊢ ∼A ▷ ⊥ 🡒 ∼□(∼∼A) 🡒 ∼□(∼⊥) := axiomJ4;
-  have h₄ : ofILAxioms 𝔸 ⊢ ∼⊥ := by cl_prover;
-  have h₄ : ofILAxioms 𝔸 ⊢ □(∼⊥) := nec h₄;
-  have h₅ : ofILAxioms 𝔸 ⊢ □(∼∼A) 🡒 □A := box_mono (by cl_prover);
-  cl_prover [h₁, h₂, h₃, h₄, h₅];
-
 /-- The extension of $\mathbf{IL}$ by `𝔸` is the extension of $\mathbf{CL}$ by $\mathbf{J5}$ and
 `𝔸`.
 
-- [KO21, Corollary 3.22]
+- [KO21, §3.5]
 -/
 theorem eq_ofCLAxioms :
     ofILAxioms 𝔸 = ofCLAxioms ({Axioms.J5 A | A} ∪ 𝔸) := by
@@ -130,8 +120,6 @@ theorem eq_ofCLAxioms :
       · exact axm h;
     | mdp _ _ ih₁ ih₂ => exact mdp ih₁ ih₂;
     | nec _ ih => exact nec ih;
-    | rule1 _ ih => exact rhd_mono_right ih;
-    | rule2 _ ih => exact rhd_anti_left ih;
     | verum => exact verum;
     | implyK => exact implyK;
     | implyS => exact implyS;
@@ -147,13 +135,13 @@ theorem eq_ofCLAxioms :
     | axiomJ1 => exact axiomJ1;
     | axiomJ2 => exact axiomJ2;
     | axiomJ3 => exact axiomJ3;
-    | axiomJ6 => exact axiomJ6;
+    | axiomJ4 => exact axiomJ4;
 
 end Logic.ofILAxioms
 
 namespace Logic
 
-/-- - [KO21, Corollary 3.22] -/
+/-- - [KO21, §3.5] -/
 theorem IL.eq_ofCLAxioms : (𝐈𝐋 : Logic α) = ofCLAxioms {Axioms.J5 A | A} := by
   simpa using ofILAxioms.eq_ofCLAxioms (𝔸 := (∅ : FormulaSet α));
 
@@ -166,10 +154,10 @@ namespace Veltman
 open Model Model.World
 
 /-- A model satisfying $\mathbf{J1}$ and $\mathbf{J2}$ but not $\mathbf{J5}$. -/
-private abbrev counterJ5 (α : Type*) : Model (Fin 3) α :=
+abbrev countermodelJ5 (α : Type*) : Model (Fin 3) α :=
   ⟨(· < ·), fun w x y ↦ w < x ∧ x = y, fun _ _ ↦ False⟩
 
-private instance {α : Type*} : (counterJ5 α).IsCL where
+instance {α : Type*} : (countermodelJ5 α).IsCL where
   trans := by omega
   cwf := Finite.converseWellFounded_of_trans_of_irrefl
   rel_of_s_left := by tauto
@@ -177,9 +165,9 @@ private instance {α : Type*} : (counterJ5 α).IsCL where
   rel_of_s_right := by omega
   s_trans := by omega
 
-private lemma counterJ5.not_models_J5 {α : Type*} : ¬counterJ5 α ⊧ Axioms.J5 (□⊥) := by
+lemma countermodelJ5.not_models_axiomJ5 {α : Type*} : ¬countermodelJ5 α ⊧ Axioms.J5 (□⊥) := by
   intro h
-  have h₁ : (1 : Fin 3) ⊩[counterJ5 α] ◇□⊥ :=
+  have h₁ : (1 : Fin 3) ⊩[countermodelJ5 α] ◇□⊥ :=
     forces_dia.mpr ⟨2, by omega, fun y hy ↦ by omega⟩
   obtain ⟨z, ⟨-, rfl⟩, hz⟩ := h 0 1 (by omega) h₁
   exact hz 2 (by omega)
@@ -197,7 +185,8 @@ instance : (𝐂𝐋 : Logic α) ⪯ 𝐈𝐋 :=
 
 instance : (𝐂𝐋 : Logic α) ⪱ 𝐈𝐋 :=
   .of_unprovable_provable (φ := Axioms.J5 (□⊥))
-    (fun h ↦ counterJ5.not_models_J5 (CL.sound (M := counterJ5 α) h)) ofILAxioms.axiomJ5
+    (fun h ↦ countermodelJ5.not_models_axiomJ5 (CL.sound (M := countermodelJ5 α) h))
+    ofILAxioms.axiomJ5
 
 /-! ## Completeness -/
 

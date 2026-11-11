@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Schemata
-public import AlphaCentauri.ToFoundation.BinderNotation
+public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 
 /-!
 # Regularity principle schemata

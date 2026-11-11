@@ -657,7 +657,7 @@ instance : IsTrans _ (countermodelCLM X).Rel := ⟨fun _ _ _ ↦ CLMRel.trans⟩
 
 instance : Std.Irrefl (countermodelCLM X).Rel := ⟨fun _ h ↦ (lt_irrefl _) h.2.2⟩
 
-instance : (countermodelCLM X).IsCL where
+instance [Adequate X] : (countermodelCLM X).IsCL where
   rel_of_s_left h := h.1
   rel_of_s_right h := h.2.1
   s_refl h := ⟨h, h, rfl, fun _ hx ↦ hx, fun _ _ hx ↦ hx⟩

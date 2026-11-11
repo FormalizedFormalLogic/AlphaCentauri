@@ -164,22 +164,23 @@ lemma TProof.exs_imp_exs_of_free {φ ψ : Semiformula V ℒₒᵣ 1}
 variable [𝗜𝚺₁ ⪯ T]
 
 lemma tprovable_instFormula_qqToPrenex_iff (Γ : Polarity) (n : ℕ) {θ : V} (hθ : IsBounded θ)
-    (hsh : shift ℒₒᵣ θ = θ) (k : V) (hk : IsSemiformula ℒₒᵣ (k + n) θ) :
-    T.internalize V ⊢ instFormula k (qqToPrenex Γ n θ) (isSemiformula_qqToPrenex.mpr hk) 🡘
+    (k : V) (hk : Language.IsFVFree ℒₒᵣ (k + n) θ) :
+    T.internalize V ⊢ instFormula k (qqToPrenex Γ n θ)
+        (isSemiformula_qqToPrenex.mpr hk.isSemiformula) 🡘
       (⌜prenexSatDef Γ n⌝ : Semiformula V ℒₒᵣ 2).subst ![assignment k, 𝕹 θ] := by
   induction n generalizing Γ k with
   | zero =>
-    have h := (tprovable_instFormula_iff (T := T) (by simpa using hk)).mpr <|
+    have h := (tprovable_instFormula_iff (T := T) (by simpa using hk.isSemiformula)).mpr <|
       provable_iff_psat_of_isBounded (T := T) (k + θ) θ hθ k le_self_add le_rfl
-        (by simpa using hk) hsh;
+        (by simpa using hk.isSemiformula) hk.shift_eq;
     simpa [prenexSatDef, psatF] using h
   | succ n ih =>
-    have hk' : IsSemiformula ℒₒᵣ ((k + 1 : V) + (n : V)) θ := by
+    have hk' : Language.IsFVFree ℒₒᵣ ((k + 1 : V) + (n : V)) θ := by
       simpa [add_assoc, add_comm (1 : V)] using hk;
     have hq : IsSemiformula ℒₒᵣ (k + 1) (qqToPrenex Γ.alt n θ) :=
-      isSemiformula_qqToPrenex.mpr hk';
+      isSemiformula_qqToPrenex.mpr hk'.isSemiformula;
     have hqs : shift ℒₒᵣ (qqToPrenex Γ.alt n θ) = qqToPrenex Γ.alt n θ := by
-      rw [shift_qqToPrenex hk'.isUFormula, hsh];
+      rw [shift_qqToPrenex hk'.isSemiformula.isUFormula, hk'.shift_eq];
     let L : Semiformula V ℒₒᵣ 1 :=
       ⟨subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec k)) (qqToPrenex Γ.alt n θ),
         hq.subst (isSemitermVec_fvarVec k 0).qVec⟩;
@@ -189,13 +190,13 @@ lemma tprovable_instFormula_qqToPrenex_iff (Γ : Polarity) (n : ℕ) {θ : V} (h
     rw [← hL, ← free_quote_prenexSatDef_subst] at ih';
     cases Γ
     · have e : ∀ h, instFormula k (qqToPrenex .sigma (n + 1) θ) h = ∃¹ L := by
-        intro h; ext; simp [L, instFormula, hk'.isUFormula];
+        intro h; ext; simp [L, instFormula, hk'.isSemiformula.isUFormula];
       rw [e, quote_prenexSatDef_sigma_subst];
       have h₁ := TProof.exs_imp_exs_of_free (T := T) (K_left ih');
       have h₂ := TProof.exs_imp_exs_of_free (T := T) (K_right ih');
       cl_prover [h₁, h₂]
     · have e : ∀ h, instFormula k (qqToPrenex .pi (n + 1) θ) h = ∀¹ L := by
-        intro h; ext; simp [L, instFormula, hk'.isUFormula];
+        intro h; ext; simp [L, instFormula, hk'.isSemiformula.isUFormula];
       rw [e, quote_prenexSatDef_pi_subst];
       have h₁ := TProof.all_imp_all_of_free (T := T) (K_left ih');
       have h₂ := TProof.all_imp_all_of_free (T := T) (K_right ih');
@@ -209,7 +210,7 @@ lemma tprovable_iff_prenexSatDef {Γ : Polarity} {n : ℕ} {φ : Formula V ℒ�
   have hsh : shift ℒₒᵣ θ = θ := by
     have := congrArg (·.val) hφs;
     simpa [hθ, shift_qqToPrenex hk.isUFormula] using this;
-  have h := tprovable_instFormula_qqToPrenex_iff (T := T) Γ n hθb hsh 0 hk;
+  have h := tprovable_instFormula_qqToPrenex_iff (T := T) Γ n hθb 0 ⟨hk, hsh⟩;
   have e : instFormula 0 (qqToPrenex Γ n θ) (isSemiformula_qqToPrenex.mpr hk) = φ := by
     have e₁ : instFormula 0 (qqToPrenex Γ n θ) (isSemiformula_qqToPrenex.mpr hk) =
         φ.subst (![] : SemitermVec V ℒₒᵣ 0 0) := by

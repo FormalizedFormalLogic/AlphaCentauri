@@ -251,7 +251,7 @@ theorem Interpretable.trans {S U W : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [W.Δ
             have hb := IsSemiformula.translate h₁.toIsTable
               (IsSemiformula.translate h₂.toIsTable hp')
             have h₄ := (provable_iff_iff_tprovable ha hb).mp
-              (provable_comp_translate_iff h₁.toIsTranslationTable h₂.toIsTable hc hS hL hp' hps)
+              (provable_comp_translate_iff h₁.toIsTranslationTable h₂.toIsTable hc hS hL ⟨hp', hps⟩)
             have h₅ : S.internalize V ⊢ (⟨_, hb⟩ : Formula V ℒₒᵣ) := tprovable_iff_provable.mpr h₃
             exact tprovable_iff_provable.mp (K_right h₄ ⨀ h₅) }
 

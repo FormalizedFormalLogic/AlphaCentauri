@@ -52,7 +52,7 @@ variable (T) in
 /-- For every internal prenex $\Gamma_n$ sentence `x`, if `T` proves `b 🡒 x` then `T` proves
 `a 🡒 x`. -/
 def Conservative (Γ : Polarity) (n : ℕ) (a b : V) : Prop :=
-  ∀ x, IsSemiformula ℒₒᵣ 0 x → shift ℒₒᵣ x = x → IsPrenexHierarchy Γ n x →
+  ∀ x, Language.IsFVFree ℒₒᵣ 0 x → IsPrenexHierarchy Γ n x →
     Provable T (imp ℒₒᵣ b x) → Provable T (imp ℒₒᵣ a x)
 
 variable {Γ : Polarity} {n : ℕ} {σ τ χ : ArithmeticSentence}
@@ -64,10 +64,11 @@ lemma conservative_quote_iff :
   constructor;
   · intro h π hs hπ hτ;
     apply tprovable_iff_provable.mpr;
-    simpa [Sentence.quote_eq] using h π.val π.isSemiformula (by simpa using congrArg (·.val) hs) hπ
-      (by simpa [Sentence.quote_eq] using tprovable_iff_provable.mp hτ);
-  · intro h x hx hs hπ hτ;
-    have := h ⟨x, hx⟩ (by ext; simpa using hs) hπ
+    simpa [Sentence.quote_eq] using
+      h π.val ⟨π.isSemiformula, by simpa using congrArg (·.val) hs⟩ hπ
+        (by simpa [Sentence.quote_eq] using tprovable_iff_provable.mp hτ);
+  · intro h x hx hπ hτ;
+    have := h ⟨x, hx.isSemiformula⟩ (by ext; simpa using hx.shift_eq) hπ
       (tprovable_iff_provable.mpr <| by simpa [Sentence.quote_eq] using hτ);
     simpa [Sentence.quote_eq] using tprovable_iff_provable.mp this
 
@@ -81,8 +82,8 @@ lemma conservative_of_provable (h : Provable T (⌜σ 🡒 τ⌝ : V)) :
 
 lemma Conservative.trans {a b c : V} (hab : Conservative T Γ n a b)
     (hbc : Conservative T Γ n b c) : Conservative T Γ n a c := by
-  intro x hx hs hπ h;
-  exact hab x hx hs hπ <| hbc x hx hs hπ h
+  intro x hx hπ h;
+  exact hab x hx hπ <| hbc x hx hπ h
 
 lemma Conservative.or (hσ : Conservative T Γ n (⌜σ⌝ : V) ⌜χ⌝)
     (hτ : Conservative T Γ n (⌜τ⌝ : V) ⌜χ⌝) : Conservative T Γ n (⌜σ ⋎ τ⌝ : V) ⌜χ⌝ := by
@@ -96,7 +97,7 @@ lemma Conservative.or (hσ : Conservative T Γ n (⌜σ⌝ : V) ⌜χ⌝)
 lemma Conservative.provable_imp (h : Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝)
     (hχ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ) (hτ : Provable T (⌜τ 🡒 χ⌝ : V)) :
     Provable T (⌜σ 🡒 χ⌝ : V) := by
-  simpa [Sentence.quote_eq] using h ⌜χ⌝ (by simp) (by simp)
+  simpa [Sentence.quote_eq] using h ⌜χ⌝ ⟨by simp, by simp⟩
     ((isPrenexHierarchy_quote_iff χ).mpr hχ) (by simpa [Sentence.quote_eq] using hτ)
 
 lemma conservative_dia_pi1 [𝗜𝚺₁ ⪯ T] :
@@ -166,14 +167,14 @@ end Bootstrapping
 
 variable (T Γ n) in
 noncomputable def conservativeDef : ArithmeticSemisentence 2 :=
-  “a b. ∀ x, !(isSemiformula ℒₒᵣ).sigma 0 x → !(shiftGraph ℒₒᵣ) x x →
-    !(isPrenexHierarchy Γ n).sigma x → ∀ y, !(impGraph ℒₒᵣ) y b x → ∀ z, !(impGraph ℒₒᵣ) z a x →
+  “a b. ∀ x, !(isFVFree ℒₒᵣ).sigma 0 x → !(isPrenexHierarchy Γ n).sigma x →
+    ∀ y, !(impGraph ℒₒᵣ) y b x → ∀ z, !(impGraph ℒₒᵣ) z a x →
       !(provable T) y → !(provable T) z”
 
 lemma eval_conservativeDef {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
     (Γ : Polarity) (n : ℕ) (a b : V) :
     V ⊧/![a, b] (conservativeDef T Γ n) ↔ Conservative T Γ n a b := by
-  simp [conservativeDef, Conservative, eq_comm]
+  simp [conservativeDef, Conservative]
 
 end FFL.FirstOrder.Arithmetic
 

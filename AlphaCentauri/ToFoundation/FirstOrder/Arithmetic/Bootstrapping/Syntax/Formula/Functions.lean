@@ -390,17 +390,27 @@ variable (L)
 def _root_.FFL.FirstOrder.Language.IsFVFree (n p : V) : Prop :=
   IsSemiformula L n p ∧ shift L p = p
 
-noncomputable def isFVFree : 𝚺ᴬ₁.Semisentence 2 :=
-  .mkSigma “n p. !(isSemiformula L).sigma n p ∧ !(shiftGraph L) p p”
+noncomputable def isFVFree : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
+  (.mkSigma “n p. !(isSemiformula L).sigma n p ∧ !(shiftGraph L) p p”)
+  (.mkPi “n p. !(isSemiformula L).pi n p ∧ ∀ y, !(shiftGraph L) y p → y = p”)
 
 instance _root_.FFL.FirstOrder.Language.IsFVFree.defined :
-    𝚺ᴬ₁-Relation (L.IsFVFree (V := V)) via isFVFree L := .mk fun v ↦ by
-  simp [isFVFree, Bounding.HierarchySymbol.Semiformula.val_sigma, IsSemiformula.defined.iff,
-    shift.defined.iff, Language.IsFVFree, eq_comm]
+    𝚫ᴬ₁-Relation (L.IsFVFree (V := V)) via isFVFree L := .mk <| by
+  constructor
+  · intro v
+    simp [isFVFree, Bounding.HierarchySymbol.Semiformula.val_sigma, IsSemiformula.defined.iff,
+      shift.defined.iff, eq_comm]
+  · intro v
+    simp [isFVFree, Bounding.HierarchySymbol.Semiformula.val_sigma, IsSemiformula.defined.iff,
+      shift.defined.iff, Language.IsFVFree, eq_comm]
 
 instance _root_.FFL.FirstOrder.Language.IsFVFree.definable :
-    𝚺ᴬ₁-Relation (L.IsFVFree (V := V)) :=
+    𝚫ᴬ₁-Relation (L.IsFVFree (V := V)) :=
   (Language.IsFVFree.defined (L := L) (V := V)).to_definable
+
+instance _root_.FFL.FirstOrder.Language.IsFVFree.definable' {m : ℕ} {Γ : SigmaPiDelta} :
+    Γᴬ_[m + 1]-Relation (L.IsFVFree (V := V)) :=
+  (Language.IsFVFree.definable (L := L) (V := V)).of_deltaOne
 
 variable {L}
 

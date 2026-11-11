@@ -80,19 +80,11 @@ lemma Conservative.or (hσ : Conservative T Γ n (⌜σ⌝ : V) ⌜χ⌝)
   have h₃ : T.internalize V ⊢ ⌜σ⌝ ⋎ ⌜τ⌝ 🡒 π := by cl_prover [h₁, h₂];
   simpa using h₃
 
-lemma Conservative.consistent_pi1 (h : Conservative T 𝚷 1 (⌜σ⌝ : V) ⌜τ⌝)
-    (hτ : Provable T (⌜∼τ⌝ : V)) : Provable T (⌜∼σ⌝ : V) := by
-  rw [conservative_quote_iff] at h;
-  have h₁ : T.internalize V ⊢ ∼⌜τ⌝ := by
-    simpa using (tprovable_tquote_iff_provable_quote_sentence (σ := ∼τ)).mpr hτ;
-  have hbot : T.internalize V ⊢ (∀¹ (⊥ : Semiformula V ℒₒᵣ 1)) 🡒 ⊥ := by
-    simpa using TProof.all_imp_subst (T := T) (⊥ : Semiformula V ℒₒᵣ 1) (Semiterm.fvar 0);
-  have h₂ : T.internalize V ⊢ ⌜τ⌝ 🡒 ⊥ := by cl_prover [h₁];
-  have h₃ := h (∀¹ ⊥) (by simp) (by simp [IsPrenexHierarchy]) (by
-    apply TProof.generalize_imp;
-    simpa [typed_quote_shift, Semiformula.free] using h₂);
-  have h₄ : T.internalize V ⊢ ∼⌜σ⌝ := by cl_prover [h₃, hbot];
-  simpa using (tprovable_tquote_iff_provable_quote_sentence (σ := ∼σ)).mp (by simpa using h₄)
+lemma Conservative.provable_imp (h : Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝)
+    (hχ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ) (hτ : Provable T (⌜τ 🡒 χ⌝ : V)) :
+    Provable T (⌜σ 🡒 χ⌝ : V) := by
+  simpa [Sentence.quote_eq] using h ⌜χ⌝ (by simp) (by simp)
+    ((isPrenexHierarchy_quote_iff χ).mpr hχ) (by simpa [Sentence.quote_eq] using hτ)
 
 lemma conservative_dia_pi1 [𝗜𝚺₁ ⪯ T] :
     Conservative T 𝚷 1 (⌜∼provabilityPred T (∼σ)⌝ : V) ⌜σ⌝ := by
@@ -177,17 +169,51 @@ variable {T Γ n}
     V↓[ℒₒᵣ] ⊧ (T.conservativity Γ n) σ τ ↔ Bootstrapping.Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝ := by
   simp [conservativity, models_iff, eval_conservativeDef]
 
+lemma conservativity_imp_provable_imp {σ τ χ : ArithmeticSentence}
+    (hχ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ) :
+    𝗜𝚺₁ ⊢ (T.conservativity Γ n) σ τ ⋏ T.standardProvability (τ 🡒 χ) 🡒
+      T.standardProvability (σ 🡒 χ) :=
+  complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
+    simpa [standardProvability_def] using fun h hτ ↦ Bootstrapping.Conservative.provable_imp h hχ hτ
+
+lemma exists_prenexHierarchy_refutable (Γ : Polarity) (n : ℕ) :
+    ∃ χ : ArithmeticSentence, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ ∧ 𝗜𝚺₁ ⊢ ∼χ := by
+  use (Bounding.Prenex.falsum : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0).val;
+  and_intros;
+  · exact Bounding.Prenex.val_prenexHierarchy;
+  · apply complete;
+    intro (V : Type) _ _;
+    simp [models_iff, Bounding.Prenex.models_falsum]
+
 open Bootstrapping in
-instance instConservativityPi1IL [𝗜𝚺₁ ⪯ T] : (T.conservativity 𝚷 1).IL where
+instance instConservativityCL [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ n).CL where
   J1 := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [standardProvability_def] using conservative_of_provable
   J2 := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa using Conservative.trans
   J3 {σ τ χ} := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
-    have h := Conservative.or (T := T) (Γ := 𝚷) (n := 1) (V := V) (σ := σ) (τ := τ) (χ := χ);
+    have h := Conservative.or (T := T) (Γ := Γ) (n := n) (V := V) (σ := σ) (τ := τ) (χ := χ);
     simpa using h
-  J4 := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
-    simpa [standardProvability_def] using fun h hσ hτ ↦ hσ <| Conservative.consistent_pi1 h hτ
+  J4 {σ τ} := by
+    obtain ⟨χ, hχp, hχ⟩ := exists_prenexHierarchy_refutable Γ n;
+    have h₁ := conservativity_imp_provable_imp (T := T) (σ := σ) (τ := τ) hχp;
+    have h₂ : 𝗜𝚺₁ ⊢ T.standardProvability (∼τ) 🡒 T.standardProvability (τ 🡒 χ) :=
+      T.standardProvability.mono <| by cl_prover;
+    have h₃ : 𝗜𝚺₁ ⊢ T.standardProvability (σ 🡒 χ) 🡒 T.standardProvability (∼σ) :=
+      T.standardProvability.mono <| by
+        have : T ⊢ ∼χ := Entailment.WeakerThan.pbl hχ;
+        cl_prover [this];
+    simp only [ProvabilityAbstraction.Provability.dia];
+    generalize (T.conservativity Γ n) σ τ = R at h₁ ⊢;
+    generalize T.standardProvability (∼σ) = A at h₃ ⊢;
+    generalize T.standardProvability (∼τ) = B at h₂ ⊢;
+    generalize T.standardProvability (σ 🡒 χ) = C at h₁ h₃;
+    generalize T.standardProvability (τ 🡒 χ) = D at h₁ h₂;
+    cl_prover [h₁, h₂, h₃]
+
+open Bootstrapping in
+instance instConservativityPi1IL [𝗜𝚺₁ ⪯ T] : (T.conservativity 𝚷 1).IL where
+  toCL := inferInstance
   J5 {σ} := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     have h := conservative_dia_pi1 (T := T) (V := V) (σ := σ);
     simpa [ProvabilityAbstraction.Provability.dia, standardProvability_def] using h

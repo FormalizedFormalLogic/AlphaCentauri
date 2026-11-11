@@ -26,6 +26,19 @@ variable {α : Type*}
 -/
 abbrev ILMinusJ1 : Logic α := ofAxiomsMinus {Axioms.J1 A B | (A) (B)}
 
+end Logic
+
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILMinusJ1 : Prop extends M.IsILMinus, M.IsJ1
+
+instance (priority := low) [M.IsILMinus] [M.IsJ1] : M.IsILMinusJ1 := {}
+
+end Veltman.Model
+
+namespace Logic
 
 /-! ## Completeness -/
 
@@ -39,17 +52,17 @@ variable {α : Type} {A : Formula α}
 theorem ILMinusJ1.semantics_TFAE : [
     ILMinusJ1 ⊢ A,
     ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → M ⊧ A,
+      [M.IsILMinusJ1] → M ⊧ A,
     ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → M ⊧ A
+      [M.IsILMinusJ1] → M ⊧ A
   ].TFAE := by
   tfae_have 1 → 2 := by
-    intro h _ _ M _ _;
+    intro h _ _ M _;
     apply ofAxiomsMinus.sound _ h;
     rintro _ ⟨A, B, rfl⟩ x;
     exact forces_axiomJ1;
   tfae_have 2 → 3 := by
-    intro h _ _ _ M _ _;
+    intro h _ _ _ M _;
     exact h M;
   tfae_have 3 → 1 := by
     intro h;
@@ -59,11 +72,11 @@ theorem ILMinusJ1.semantics_TFAE : [
 
 theorem ILMinusJ1.iff_valid :
     ILMinusJ1 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → M ⊧ A :=
+      [M.IsILMinusJ1] → M ⊧ A :=
   ILMinusJ1.semantics_TFAE.out 1 2
 
 theorem ILMinusJ1.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α}
-    [M.IsILMinus] [M.IsJ1] (h : ILMinusJ1 ⊢ A) : M ⊧ A :=
+    [M.IsILMinusJ1] (h : ILMinusJ1 ⊢ A) : M ⊧ A :=
   ILMinusJ1.iff_valid.mp h M
 
 instance : Entailment.Consistent (ILMinusJ1 : Logic α) :=
@@ -72,7 +85,7 @@ instance : Entailment.Consistent (ILMinusJ1 : Logic α) :=
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ1.iff_valid_finite :
     ILMinusJ1 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → M ⊧ A :=
+      [M.IsILMinusJ1] → M ⊧ A :=
   ILMinusJ1.semantics_TFAE.out 1 3
 
 

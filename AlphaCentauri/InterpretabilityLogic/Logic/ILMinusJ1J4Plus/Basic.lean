@@ -29,6 +29,19 @@ variable {α : Type*}
 abbrev ILMinusJ1J4Plus : Logic α :=
   ofAxiomsMinus ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J4Plus A B C | (A) (B) (C)})
 
+end Logic
+
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILMinusJ1J4Plus : Prop extends M.IsILMinus, M.IsJ1, M.IsJ4
+
+instance (priority := low) [M.IsILMinus] [M.IsJ1] [M.IsJ4] : M.IsILMinusJ1J4Plus := {}
+
+end Veltman.Model
+
+namespace Logic
 
 /-! ## Completeness -/
 
@@ -42,18 +55,18 @@ variable {α : Type} {A : Formula α}
 theorem ILMinusJ1J4Plus.semantics_TFAE : [
     ILMinusJ1J4Plus ⊢ A,
     ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → M ⊧ A,
+      [M.IsILMinusJ1J4Plus] → M ⊧ A,
     ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → M ⊧ A
+      [M.IsILMinusJ1J4Plus] → M ⊧ A
   ].TFAE := by
   tfae_have 1 → 2 := by
-    intro h _ _ M _ _ _;
+    intro h _ _ M _;
     apply ofAxiomsMinus.sound _ h;
     rintro _ (⟨A, B, rfl⟩ | ⟨A, B, C, rfl⟩) x;
     · exact forces_axiomJ1;
     · exact forces_axiomJ4Plus;
   tfae_have 2 → 3 := by
-    intro h _ _ _ M _ _ _;
+    intro h _ _ _ M _;
     exact h M;
   tfae_have 3 → 1 := by
     intro h;
@@ -63,11 +76,11 @@ theorem ILMinusJ1J4Plus.semantics_TFAE : [
 
 theorem ILMinusJ1J4Plus.iff_valid :
     ILMinusJ1J4Plus ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → M ⊧ A :=
+      [M.IsILMinusJ1J4Plus] → M ⊧ A :=
   ILMinusJ1J4Plus.semantics_TFAE.out 1 2
 
 theorem ILMinusJ1J4Plus.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α}
-    [M.IsILMinus] [M.IsJ1] [M.IsJ4] (h : ILMinusJ1J4Plus ⊢ A) : M ⊧ A :=
+    [M.IsILMinusJ1J4Plus] (h : ILMinusJ1J4Plus ⊢ A) : M ⊧ A :=
   ILMinusJ1J4Plus.iff_valid.mp h M
 
 instance : Entailment.Consistent (ILMinusJ1J4Plus : Logic α) :=
@@ -76,7 +89,7 @@ instance : Entailment.Consistent (ILMinusJ1J4Plus : Logic α) :=
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ1J4Plus.iff_valid_finite :
     ILMinusJ1J4Plus ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ4] → M ⊧ A :=
+      [M.IsILMinusJ1J4Plus] → M ⊧ A :=
   ILMinusJ1J4Plus.semantics_TFAE.out 1 3
 
 

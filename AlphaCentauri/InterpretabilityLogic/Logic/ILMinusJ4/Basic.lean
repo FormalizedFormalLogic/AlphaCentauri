@@ -5,6 +5,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinus
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.ILMinusModel
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4J5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ4Plus.Basic
 
 /-!
 # Soundness and completeness of $\mathbf{IL}^-(\mathbf{J4})$
@@ -26,6 +27,20 @@ variable {α : Type*}
 -/
 abbrev ILMinusJ4 : Logic α := ofAxiomsMinus {Axioms.J4 A B | (A) (B)}
 
+end Logic
+
+namespace Verbrugge.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILMinusJ4 : Prop extends M.IsILMinus, M.IsJ4
+
+instance (priority := low) [M.IsILMinus] [M.IsJ4] : M.IsILMinusJ4 := {}
+
+end Verbrugge.Model
+
+namespace Logic
+
 /-! ## Soundness -/
 
 
@@ -33,7 +48,7 @@ open Veltman Veltman.Model Veltman.Model.World
 
 variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {A : Formula α}
 
-theorem ILMinusJ4.sound [M.IsILMinus] [M.IsJ4] : ILMinusJ4 ⊢ A → M ⊧ A :=
+theorem ILMinusJ4.sound [M.IsILMinusJ4Plus] : ILMinusJ4 ⊢ A → M ⊧ A :=
   ofAxiomsMinus.sound <| by
     rintro _ ⟨A, B, rfl⟩ x;
     exact forces_axiomJ4
@@ -63,17 +78,17 @@ variable {α : Type} {A : Formula α}
 theorem ILMinusJ4.semantics_TFAE : [
     ILMinusJ4 ⊢ A,
     ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α),
-      [M.IsILMinus] → [M.IsJ4] → M ⊧ A,
+      [M.IsILMinusJ4] → M ⊧ A,
     ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
-      [M.IsILMinus] → [M.IsJ4] → M ⊧ A
+      [M.IsILMinusJ4] → M ⊧ A
   ].TFAE := by
   tfae_have 1 → 2 := by
-    intro h _ _ M _ _;
+    intro h _ _ M _;
     apply ofAxiomsMinus.sound_verbrugge _ h;
     rintro _ ⟨A, B, rfl⟩ x;
     exact forces_axiomJ4;
   tfae_have 2 → 3 := by
-    intro h _ _ _ M _ _;
+    intro h _ _ _ M _;
     exact h M;
   tfae_have 3 → 1 := by
     intro h;
@@ -89,17 +104,17 @@ theorem ILMinusJ4.semantics_TFAE : [
 
 theorem ILMinusJ4.iff_valid_verbrugge :
     ILMinusJ4 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Verbrugge.Model κ α),
-      [M.IsILMinus] → [M.IsJ4] → M ⊧ A :=
+      [M.IsILMinusJ4] → M ⊧ A :=
   ILMinusJ4.semantics_TFAE.out 1 2
 
 theorem ILMinusJ4.sound_verbrugge {κ : Type} [Nonempty κ] {M : Verbrugge.Model κ α}
-    [M.IsILMinus] [M.IsJ4] (h : ILMinusJ4 ⊢ A) : M ⊧ A :=
+    [M.IsILMinusJ4] (h : ILMinusJ4 ⊢ A) : M ⊧ A :=
   ILMinusJ4.iff_valid_verbrugge.mp h M
 
 /-- - [KO21, Theorem 7.1] -/
 theorem ILMinusJ4.iff_valid_finite_verbrugge :
     ILMinusJ4 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α),
-      [M.IsILMinus] → [M.IsJ4] → M ⊧ A :=
+      [M.IsILMinusJ4] → M ⊧ A :=
   ILMinusJ4.semantics_TFAE.out 1 3
 
 
@@ -110,11 +125,11 @@ open Entailment
 
 /-- - [KO21, Corollary 6.4] -/
 theorem ILMinusJ4.incomplete : ∃ A : Formula ℕ,
-    (∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ ℕ), [M.IsILMinus] → [M.IsJ4] → M ⊧ A) ∧
+    (∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ ℕ), [M.IsILMinusJ4Plus] → M ⊧ A) ∧
       ILMinusJ4 ⊬ A := by
   use Axioms.J4Plus (#1) (#2) (#0);
   constructor;
-  · intro κ _ M _ _;
+  · intro κ _ M _;
     exact valid_J4Plus M;
   · exact unprovable_J4Plus;
 

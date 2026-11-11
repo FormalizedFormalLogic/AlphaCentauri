@@ -24,6 +24,19 @@ variable {α : Type*}
 -/
 abbrev ILMinusJ2Plus : Logic α := ofAxiomsMinus {Axioms.J2Plus A B C | (A) (B) (C)}
 
+end Logic
+
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsILMinusJ2Plus : Prop extends M.IsILMinus, M.IsJ2
+
+instance (priority := low) [M.IsILMinus] [M.IsJ2] : M.IsILMinusJ2Plus := {}
+
+end Veltman.Model
+
+namespace Logic
 
 /-! ## Completeness -/
 
@@ -37,17 +50,17 @@ variable {α : Type} {A : Formula α}
 theorem ILMinusJ2Plus.semantics_TFAE : [
     ILMinusJ2Plus ⊢ A,
     ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ2] → M ⊧ A,
+      [M.IsILMinusJ2Plus] → M ⊧ A,
     ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ2] → M ⊧ A
+      [M.IsILMinusJ2Plus] → M ⊧ A
   ].TFAE := by
   tfae_have 1 → 2 := by
-    intro h _ _ M _ _;
+    intro h _ _ M _;
     apply ofAxiomsMinus.sound _ h;
     rintro _ ⟨A, B, C, rfl⟩ x;
     exact forces_axiomJ2Plus;
   tfae_have 2 → 3 := by
-    intro h _ _ _ M _ _;
+    intro h _ _ _ M _;
     exact h M;
   tfae_have 3 → 1 := by
     intro h;
@@ -57,11 +70,11 @@ theorem ILMinusJ2Plus.semantics_TFAE : [
 
 theorem ILMinusJ2Plus.iff_valid :
     ILMinusJ2Plus ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ2] → M ⊧ A :=
+      [M.IsILMinusJ2Plus] → M ⊧ A :=
   ILMinusJ2Plus.semantics_TFAE.out 1 2
 
 theorem ILMinusJ2Plus.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α}
-    [M.IsILMinus] [M.IsJ2] (h : ILMinusJ2Plus ⊢ A) : M ⊧ A :=
+    [M.IsILMinusJ2Plus] (h : ILMinusJ2Plus ⊢ A) : M ⊧ A :=
   ILMinusJ2Plus.iff_valid.mp h M
 
 instance : Entailment.Consistent (ILMinusJ2Plus : Logic α) :=
@@ -70,7 +83,7 @@ instance : Entailment.Consistent (ILMinusJ2Plus : Logic α) :=
 /-- - [KO21, Theorem 5.1] -/
 theorem ILMinusJ2Plus.iff_valid_finite :
     ILMinusJ2Plus ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ2] → M ⊧ A :=
+      [M.IsILMinusJ2Plus] → M ⊧ A :=
   ILMinusJ2Plus.semantics_TFAE.out 1 3
 
 

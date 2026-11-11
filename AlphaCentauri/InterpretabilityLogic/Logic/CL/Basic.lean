@@ -29,6 +29,20 @@ abbrev CL : Logic α :=
 
 notation "𝐂𝐋" => Logic.CL
 
+end Logic
+
+namespace Veltman.Model
+
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
+
+class IsCL : Prop extends M.IsILMinus, M.IsJ1, M.IsJ2
+
+instance (priority := low) [M.IsILMinus] [M.IsJ1] [M.IsJ2] : M.IsCL := {}
+
+end Veltman.Model
+
+namespace Logic
+
 /-! ## The principle $\mathsf{J2}^+$ -/
 
 
@@ -57,18 +71,18 @@ variable {α : Type} {A : Formula α}
 theorem CL.semantics_TFAE : [
     𝐂𝐋 ⊢ A,
     ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → M ⊧ A,
+      [M.IsCL] → M ⊧ A,
     ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → M ⊧ A
+      [M.IsCL] → M ⊧ A
   ].TFAE := by
   tfae_have 1 → 2 := by
-    intro h _ _ M _ _ _;
+    intro h _ _ M _;
     apply ofAxiomsMinus.sound _ h;
     rintro _ (⟨A, B, rfl⟩ | ⟨A, B, C, rfl⟩) x;
     · exact forces_axiomJ1;
     · exact forces_axiomJ2;
   tfae_have 2 → 3 := by
-    intro h _ _ _ M _ _ _;
+    intro h _ _ _ M _;
     exact h M;
   tfae_have 3 → 1 := by
     intro h;
@@ -78,11 +92,11 @@ theorem CL.semantics_TFAE : [
 
 theorem CL.iff_valid :
     𝐂𝐋 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → M ⊧ A :=
+      [M.IsCL] → M ⊧ A :=
   CL.semantics_TFAE.out 1 2
 
 theorem CL.sound {κ : Type} [Nonempty κ] {M : Veltman.Model κ α}
-    [M.IsILMinus] [M.IsJ1] [M.IsJ2] (h : 𝐂𝐋 ⊢ A) : M ⊧ A :=
+    [M.IsCL] (h : 𝐂𝐋 ⊢ A) : M ⊧ A :=
   CL.iff_valid.mp h M
 
 instance : Entailment.Consistent (𝐂𝐋 : Logic α) :=
@@ -91,7 +105,7 @@ instance : Entailment.Consistent (𝐂𝐋 : Logic α) :=
 /-- - [KO21, Theorem 5.1] -/
 theorem CL.iff_valid_finite :
     𝐂𝐋 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
-      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → M ⊧ A :=
+      [M.IsCL] → M ⊧ A :=
   CL.semantics_TFAE.out 1 3
 
 

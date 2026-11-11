@@ -1,23 +1,35 @@
 module
 
-public import AlphaCentauri.ToFoundation.CodedPigeonhole
 public import AlphaCentauri.Model.Cut
+public import AlphaCentauri.Model.EndExtension
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Absoluteness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.CodedPigeonhole
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Injection
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 
 /-!
-# The cut of an enumeration of the range of an injection
+# Enumeration cuts and their coded limits
+
+The cut of an enumeration of the range of an unbounded injection over a model of $\mathsf{EA}$, and
+the coded limit of such a cut.
+-/
+
+@[expose] public section
+
+namespace FFL.FirstOrder.Arithmetic
+
+noncomputable section EnumerationCut
+
+/-! ## The cut of an enumeration of the range of an injection
 
 Over a model of $\mathsf{EA}$, an unbounded injection on $[0, a)$ enumerates its range in increasing
 order by a block-coded sequence; the codes form a $\Sigma_1$ cut of $[0, a)$.
 -/
 
-@[expose] public section
-
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-namespace FFL.FirstOrder.Arithmetic
-
-noncomputable section
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
@@ -326,6 +338,7 @@ lemma enumCode.exists_le {a I b z t B : V} {G : V → V → Prop}
   rw [tsub_tsub_cancel_of_le hc] at h'
   exact ⟨z', hz', h'⟩
 
+
 variable (a I : V)
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] in
@@ -365,6 +378,6 @@ lemma lt_of_mem_enumerationCut (f : V → V) (hI : ‖I‖ = a + 1) (hunb : ∀ 
   obtain ⟨z, hz, t, h⟩ := hi
   exact enumCode.lt_of_enumCode hgraph (fun x y y' h h' ↦ h.2.symm.trans h'.2) h
 
-end
+end EnumerationCut
 
 end FFL.FirstOrder.Arithmetic

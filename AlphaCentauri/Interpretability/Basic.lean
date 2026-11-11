@@ -1,5 +1,9 @@
 module
 
+public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
+public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
+public import AlphaCentauri.ToFoundation.FirstOrder.Rew
+public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.LK.Interpretation
 
 /-!
@@ -7,7 +11,8 @@ public import Foundation.FirstOrder.LK.Interpretation
 
 Additional API for Foundation's `DirectTranslation` and `DirectInterpretation` (`T ⊳ U`):
 transport of a translation along a stronger base theory, consistency transfer, monotonicity in
-both arguments, the disjunction lemma, and faithful interpretations.
+both arguments, the disjunction lemma, faithful interpretations, and commutation of translation
+with the renaming of variables.
 -/
 
 @[expose] public section
@@ -223,6 +228,75 @@ private lemma ite_translate_iff' (hφ' : M↓[L₁] ⊧ ∼φ) {ξ n} (σ : Semi
 
 end ite
 
+section map
+
+variable (π : DirectTranslation T L₂) {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} (b : Fin n₁ → Fin n₂)
+  (e : ξ₁ → ξ₂)
+
+lemma varEqual_map (t : Semiterm L₂ ξ₁ n₁) :
+    (Rew.map (L := L₁) b e).q ▹ π.varEqual t = π.varEqual (Rew.map (L := L₂) b e t) := by
+  induction t with
+  | bvar x => simp [varEqual, Rew.q_map]
+  | fvar x => simp [varEqual, Rew.q_map]
+  | func f v ih =>
+    simp only [varEqual, Rew.func]
+    rw [Rewriting.smul_allItr, Rew.q_map, Rew.qpow_map]
+    congr 1
+    simp only [Matrix.vecCons_empty_eq_singleton, Nat.succ_eq_add_one,
+      LogicalConnective.HomClass.map_imply, Matrix.hom_conj, Semiformula.imp_inj,
+      Rew.hom_operator', Function.comp_def, LogicalConnective.HomClass.map_and]
+    and_intros
+    · congr 1; funext i; congr 1
+      · congr 1; funext x; obtain rfl := Fin.fin_one_eq_zero x; simp [Fin.ext_iff]
+      · rw [← ih i, ← TransitiveRewriting.comp_app, ← TransitiveRewriting.comp_app]
+        apply Rewriting.smul_ext'
+        ext x
+        · cases x using Fin.cases <;> simp [Rew.comp_app, Fin.ext_iff]
+        · simp [Rew.comp_app]
+    · congr 1; funext i
+      cases i using Fin.cases <;> simp [Fin.ext_iff]
+
+lemma translateRel_map {k} (r : L₂.Rel k) (v : Fin k → Semiterm L₂ ξ₁ n₁) :
+    Rew.map (L := L₁) b e ▹ π.translateRel r v =
+      π.translateRel r fun i ↦ Rew.map (L := L₂) b e (v i) := by
+  simp only [translateRel]
+  rw [Rewriting.smul_allItr, Rew.qpow_map]
+  congr 1
+  simp only [Matrix.vecCons_empty_eq_singleton, Nat.succ_eq_add_one,
+    LogicalConnective.HomClass.map_imply, Matrix.hom_conj, Semiformula.imp_inj,
+    Rew.hom_operator', Function.comp_def, LogicalConnective.HomClass.map_and]
+  and_intros
+  · congr 1; funext i; congr 1
+    · congr 1; funext x; obtain rfl := Fin.fin_one_eq_zero x; simp [Fin.ext_iff]
+    · rw [← varEqual_map, ← TransitiveRewriting.comp_app, ← TransitiveRewriting.comp_app]
+      apply Rewriting.smul_ext'
+      ext x
+      · cases x using Fin.cases <;> simp [Rew.comp_app, Fin.ext_iff]
+      · simp [Rew.comp_app]
+  · congr 1; funext i; simp [Fin.ext_iff]
+
+lemma translate_map (φ : Semiformula L₂ ξ₁ n₁) :
+    Rew.map (L := L₁) b e ▹ π.translate φ = π.translate (Rew.map (L := L₂) b e ▹ φ) := by
+  induction φ using Semiformula.rec' generalizing n₂ with
+  | hverum => simp
+  | hfalsum => simp
+  | hrel r v => simp [translate_rel, translateRel_map, Function.comp_def]
+  | hnrel r v => simp [translate_nrel, translateRel_map, Function.comp_def]
+  | hand _ _ ih₁ ih₂ => simp [ih₁, ih₂]
+  | hor _ _ ih₁ ih₂ => simp [ih₁, ih₂]
+  | hall _ ih => simp [translate_all, fal, Rew.q_map, ih]
+  | hexs _ ih => simp [translate_ex, exs, Rew.q_map, ih]
+
+lemma translate_shift (φ : Semiproposition L₂ n₁) :
+    Rewriting.shift (π.translate φ) = π.translate (Rewriting.shift φ) :=
+  translate_map π id Nat.succ φ
+
+lemma translate_emb (σ : Semisentence L₂ n₁) :
+    π.translate (Rewriting.emb σ : Semiproposition L₂ n₁) = Rewriting.emb (π.translate σ) :=
+  (translate_map π id (IsEmpty.elim inferInstance) σ).symm
+
+end map
+
 end DirectTranslation
 
 namespace DirectInterpretation
@@ -267,24 +341,6 @@ abbrev orCases (φ : Sentence L₁) [𝗘𝗤 _ ⪯ insert φ T] [𝗘𝗤 _ ⪯
         (models_of_provable hT' (π₀.interpret_theory σ hσ))
     · exact (DirectTranslation.ite_translate_iff' φ π₀.trln π₁.trln hφ' σ).mpr
         (models_of_provable hT' (π₁.interpret_theory σ hσ))
-
-/-- An interpretation is faithful when provability of a translated sentence in `T` implies
-provability of the sentence itself in `U`.
-- [Lin97, §6.2 p. 84]
-- [HP98, Definition III.1.9] -/
-def Faithful (π : T ⊳ U) : Prop := ∀ σ : Sentence L₂, T ⊢ π.translate σ → U ⊢ σ
-
-/-- An interpretation is faithful on `Γ` when the implication of `Faithful` holds for sentences
-in `Γ`.
-- [Lin97, §6.2 p. 84]
-- [HP98, Definition III.1.9] -/
-def FaithfulOn (π : T ⊳ U) (Γ : Set (Sentence L₂)) : Prop := ∀ σ ∈ Γ, T ⊢ π.translate σ → U ⊢ σ
-
-lemma Faithful.faithfulOn {π : T ⊳ U} (h : π.Faithful) (Γ : Set (Sentence L₂)) : π.FaithfulOn Γ :=
-  fun σ _ ↦ h σ
-
-lemma Faithful.of_faithfulOn_univ {π : T ⊳ U} (h : π.FaithfulOn Set.univ) : π.Faithful :=
-  fun σ ↦ h σ (Set.mem_univ σ)
 
 end DirectInterpretation
 

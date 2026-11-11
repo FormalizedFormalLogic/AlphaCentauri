@@ -1,0 +1,245 @@
+module
+
+public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
+public import AlphaCentauri.InterpretabilityLogic.Veltman.Counterexamples
+public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
+public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ2PlusJ5.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.ILMinusJ1J4PlusJ5.Basic
+
+/-!
+# Interpretability logic $\mathbf{IL}$
+
+$\mathbf{IL}$ is the logic `ofAxioms ∅`, contained in every extension by axioms.
+It proves exactly the formulas valid in the finite Veltman models, equivalently in the finite
+generalised Veltman models, equivalently in the finite $\mathbf{IL}^-$-models satisfying the frame
+conditions of $\mathbf{J1}$, $\mathbf{J2}$ and $\mathbf{J5}$.
+-/
+
+@[expose] public section
+
+namespace FFL.InterpretabilityLogic
+
+open Entailment Formula
+
+variable {α : Type*}
+
+/-- - [Vis90, §6.1] -/
+abbrev Logic.IL : Logic α := Logic.ofAxioms ∅
+
+notation "𝐈𝐋" => Logic.IL
+
+namespace Logic.ofAxioms
+
+variable {𝔸 : FormulaSet α}
+
+lemma IL_subset : (𝐈𝐋 : Logic α) ⊆ ofAxioms 𝔸 := subset_of_subset (Set.empty_subset _)
+
+end Logic.ofAxioms
+
+namespace Logic
+
+open ofAxioms
+
+variable {A B C : Formula α}
+
+instance {𝔸 : FormulaSet α} : (𝐈𝐋 : Logic α) ⪯ ofAxioms 𝔸 := weakerThan_iff.mpr IL_subset
+
+end Logic
+
+/-! ## Soundness -/
+
+namespace Logic.ofAxioms
+
+open Veltman Veltman.Model Veltman.Model.World
+
+variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {𝔸 : FormulaSet α} {A : Formula α}
+
+theorem sound [M.IsIL] (h𝔸 : ∀ A ∈ 𝔸, M ⊧ A) (h : ofAxioms 𝔸 ⊢ A) : M ⊧ A := by
+  intro x
+  induction h generalizing x with
+  | axm hA => exact h𝔸 _ hA x
+  | mdp _ _ ih₁ ih₂ => exact ih₁ x (ih₂ x)
+  | nec _ ih =>
+    intro y _
+    exact ih y
+  | axiomL => exact forces_axiomL
+  | axiomJ1 => exact forces_axiomJ1
+  | axiomJ2 => exact forces_axiomJ2
+  | axiomJ3 => exact forces_axiomJ3
+  | axiomJ4 => exact forces_axiomJ4
+  | axiomJ5 => exact forces_axiomJ5
+  | _ => grind
+
+end Logic.ofAxioms
+
+instance {α : Type*} : Entailment.Consistent (𝐈𝐋 : Logic α) :=
+  .of_unprovable (φ := ⊥) fun h ↦
+    Logic.ofAxioms.sound (M := Veltman.Model.pointModel fun _ ↦ False) (by simp) h 0
+
+/-! ## $\mathbf{IL}$ as an extension of $\mathbf{IL}^-$ -/
+
+namespace Logic.ofAxioms
+
+variable {𝔸 : FormulaSet α} {A : Formula α}
+
+/-- - [KO21, Proposition 3.20.1] -/
+lemma axiomJ6 : ofAxioms 𝔸 ⊢ Axioms.J6 A := by
+  have h₁ : ofAxioms 𝔸 ⊢ □A 🡒 □(∼A 🡒 ⊥) := box_mono (by cl_prover);
+  have h₂ : ofAxioms 𝔸 ⊢ □(∼A 🡒 ⊥) 🡒 ∼A ▷ ⊥ := axiomJ1;
+  have h₃ : ofAxioms 𝔸 ⊢ ∼A ▷ ⊥ 🡒 ∼□(∼∼A) 🡒 ∼□(∼⊥) := axiomJ4;
+  have h₄ : ofAxioms 𝔸 ⊢ ∼⊥ := by cl_prover;
+  have h₄ : ofAxioms 𝔸 ⊢ □(∼⊥) := nec h₄;
+  have h₅ : ofAxioms 𝔸 ⊢ □(∼∼A) 🡒 □A := box_mono (by cl_prover);
+  cl_prover [h₁, h₂, h₃, h₄, h₅];
+
+/-- The extension of $\mathbf{IL}$ by `𝔸` is $\mathbf{IL}^-(\mathbf{J1}, \mathbf{J2}, \mathbf{J5})$
+extended by `𝔸`.
+
+- [KO21, Corollary 3.22]
+-/
+theorem eq_ofAxiomsMinus :
+    ofAxioms 𝔸 = ofAxiomsMinus
+      ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A} ∪ 𝔸) := by
+  apply Set.Subset.antisymm;
+  · intro A h;
+    induction h with
+    | axm h => exact ofAxiomsMinus.axm (by simp [h]);
+    | mdp _ _ ih₁ ih₂ => exact ofAxiomsMinus.mdp ih₁ ih₂;
+    | nec _ ih => exact ofAxiomsMinus.nec ih;
+    | verum => exact ofAxiomsMinus.verum;
+    | implyK => exact ofAxiomsMinus.implyK;
+    | implyS => exact ofAxiomsMinus.implyS;
+    | andElimL => exact ofAxiomsMinus.andElimL;
+    | andElimR => exact ofAxiomsMinus.andElimR;
+    | andIntro => exact ofAxiomsMinus.andIntro;
+    | orIntroL => exact ofAxiomsMinus.orIntroL;
+    | orIntroR => exact ofAxiomsMinus.orIntroR;
+    | orElim => exact ofAxiomsMinus.orElim;
+    | dne => exact ofAxiomsMinus.dne;
+    | axiomK => exact ofAxiomsMinus.axiomK;
+    | axiomL => exact ofAxiomsMinus.axiomL;
+    | axiomJ1 => exact ofAxiomsMinus.axm (by simp);
+    | axiomJ2 => exact ofAxiomsMinus.axm (by simp);
+    | axiomJ3 => exact ofAxiomsMinus.axiomJ3;
+    | axiomJ4 => exact HasAxiomJ4.J4 _ _;
+    | axiomJ5 => exact ofAxiomsMinus.axm (by simp);
+  · intro A h;
+    induction h with
+    | axm h =>
+      rcases h with (((⟨A, B, rfl⟩ | ⟨A, B, C, rfl⟩) | ⟨A, rfl⟩) | h);
+      · exact axiomJ1;
+      · exact axiomJ2;
+      · exact axiomJ5;
+      · exact axm h;
+    | mdp _ _ ih₁ ih₂ => exact mdp ih₁ ih₂;
+    | nec _ ih => exact nec ih;
+    | rule1 _ ih => exact rhd_mono_right ih;
+    | rule2 _ ih => exact rhd_anti_left ih;
+    | verum => exact verum;
+    | implyK => exact implyK;
+    | implyS => exact implyS;
+    | andElimL => exact andElimL;
+    | andElimR => exact andElimR;
+    | andIntro => exact andIntro;
+    | orIntroL => exact orIntroL;
+    | orIntroR => exact orIntroR;
+    | orElim => exact orElim;
+    | dne => exact dne;
+    | axiomK => exact axiomK;
+    | axiomL => exact axiomL;
+    | axiomJ3 => exact axiomJ3;
+    | axiomJ6 => exact axiomJ6;
+
+end Logic.ofAxioms
+
+namespace Logic
+
+open ofAxiomsMinus
+
+/-- - [KO21, Corollary 3.22] -/
+theorem IL.eq_ofAxiomsMinus :
+    (𝐈𝐋 : Logic α) = ofAxiomsMinus
+      ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}) := by
+  simpa using ofAxioms.eq_ofAxiomsMinus (𝔸 := (∅ : FormulaSet α));
+
+instance {𝔸 : FormulaSet α}
+    [(ofAxiomsMinus 𝔸 : Logic α) ⪯ ofAxiomsMinus
+      ({Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A})] :
+    (ofAxiomsMinus 𝔸 : Logic α) ⪯ 𝐈𝐋 :=
+  IL.eq_ofAxiomsMinus ▸ ‹_›
+
+end Logic
+
+/-! ## Strict -/
+
+namespace Logic
+
+open Entailment ofAxiomsMinus Veltman
+
+variable {α : Type}
+
+instance : (ILMinusJ2PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
+  .of_unprovable_provable (φ := Axioms.J1 ⊤ ⊤)
+    (fun h ↦ counterJ1.not_models_J1 (ILMinusJ2PlusJ5.sound (M := counterJ1 α) h)) ofAxioms.axiomJ1
+
+instance : (𝐂𝐋 : Logic α) ⪱ 𝐈𝐋 :=
+  .of_unprovable_provable (φ := Axioms.J5 (□⊥))
+    (fun h ↦ counterJ5.not_models_J5 (CL.sound (M := counterJ5 α) h)) ofAxioms.axiomJ5
+
+instance : (ILMinusJ1J4PlusJ5 : Logic α) ⪱ 𝐈𝐋 :=
+  .of_unprovable_provable (φ := Axioms.J2 (□⊥) (◇⊤ ⋏ □□⊥) (◇◇⊤))
+    (fun h ↦ counterJ2.not_models_J2 (ILMinusJ1J4PlusJ5.sound (M := counterJ2 α) h))
+    ofAxioms.axiomJ2
+
+/-! ## Completeness -/
+
+open Formula MaximalConsistentSet Veltman.Model Veltman.Model.World
+
+variable {A : Formula α}
+
+/-- - [dJV90, Theorem 4.1]
+- [JMMV20, Theorem 3.2]
+- [KO21, Theorem 5.4]
+-/
+theorem IL.semantics_TFAE : [
+    𝐈𝐋 ⊢ A,
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsIL] → M ⊧ A,
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Verbrugge.Model κ α), [M.IsIL] → M ⊧ A,
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → [M.IsJ5] → M ⊧ A
+  ].TFAE := by
+  tfae_have 1 → 3 := by
+    intro h _ _ _ M _;
+    exact ofAxioms.sound_verbrugge (by simp) h;
+  tfae_have 3 → 2 := by
+    intro h _ _ _ M _ x;
+    exact Veltman.Model.forces_toVerbrugge.mp (h M.toVerbrugge x);
+  tfae_have 2 → 4 := by
+    intro h κ _ _ M _ _ _ _;
+    have : M.IsIL := .of_isILMinus;
+    exact h M;
+  tfae_have 4 → 1 := by
+    intro h;
+    classical
+    let 𝔸 : FormulaSet α :=
+      {Axioms.J1 A B | (A) (B)} ∪ {Axioms.J2 A B C | (A) (B) (C)} ∪ {Axioms.J5 A | A}
+    rw [IL.eq_ofAxiomsMinus];
+    by_contra hA;
+    have : Entailment.Consistent (ofAxiomsMinus 𝔸) := .of_unprovable hA;
+    exact ofAxiomsMinus.not_models_countermodel hA <|
+      h (countermodel _ (ilMinusAdequateClosure {A}));
+  tfae_finish;
+
+/-- - [KO21, Theorem 5.4] -/
+theorem IL.iff_valid_finite_ILMinus :
+    𝐈𝐋 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+      [M.IsILMinus] → [M.IsJ1] → [M.IsJ2] → [M.IsJ5] → M ⊧ A :=
+  IL.semantics_TFAE.out 1 4
+
+end Logic
+
+end FFL.InterpretabilityLogic
+

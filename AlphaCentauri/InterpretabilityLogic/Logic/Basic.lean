@@ -351,6 +351,14 @@ protected abbrev J2Plus : Formula α := A ▷ (B ⋎ C) ⋏ B ▷ C 🡒 A ▷ C
 /-- - [KO21, Definition 2.1] -/
 protected abbrev J6 : Formula α := □A 🡘 ∼A ▷ ⊥
 
+variable (D : Formula α)
+
+/-- - [Ign91, Definition 2.4] -/
+protected abbrev Sa : Formula α := A ▷ B 🡒 (A ⋏ (C ▷ D)) ▷ (B ⋏ (C ▷ D))
+
+/-- - [Ign91, Definition 2.4] -/
+protected abbrev Sb : Formula α := A ▷ B 🡒 (A ⋏ ∼(C ▷ D)) ▷ (B ⋏ ∼(C ▷ D))
+
 end Axioms
 
 /-! ### Extensions of $\mathbf{CL}$ -/

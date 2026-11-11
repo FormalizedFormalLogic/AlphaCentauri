@@ -7,6 +7,7 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ISigma1.Prenex
 
 /-!
 # $\Gamma$-conservativity as an interpretability abstraction
@@ -180,15 +181,6 @@ lemma conservativity_imp_provable_imp {σ τ χ : ArithmeticSentence}
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [standardProvability_def] using fun h hτ ↦ Bootstrapping.Conservative.provable_imp h hχ hτ
 
-lemma exists_prenexHierarchy_refutable (Γ : Polarity) (n : ℕ) :
-    ∃ χ : ArithmeticSentence, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ ∧ 𝗜𝚺₁ ⊢ ∼χ := by
-  use (Bounding.Prenex.falsum : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0).val;
-  and_intros;
-  · exact Bounding.Prenex.val_prenexHierarchy;
-  · apply complete;
-    intro (V : Type) _ _;
-    simp [models_iff, Bounding.Prenex.models_falsum]
-
 open Bootstrapping in
 instance instConservativityCL [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ n).CL where
   J1 := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
@@ -199,7 +191,7 @@ instance instConservativityCL [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ n).CL w
     have h := Conservative.or (T := T) (Γ := Γ) (n := n) (V := V) (σ := σ) (τ := τ) (χ := χ);
     simpa using h
   J4 {σ τ} := by
-    obtain ⟨χ, hχp, hχ⟩ := exists_prenexHierarchy_refutable Γ n;
+    obtain ⟨χ, hχp, hχ⟩ := ISigma1.exists_prenexHierarchy_refutable Γ n;
     have h₁ := conservativity_imp_provable_imp (T := T) (σ := σ) (τ := τ) hχp;
     have h₂ : 𝗜𝚺₁ ⊢ T.standardProvability (∼τ) 🡒 T.standardProvability (τ 🡒 χ) :=
       T.standardProvability.mono <| by cl_prover;
@@ -247,28 +239,12 @@ section
 
 open FFL.Entailment InterpretabilityLogic InterpretabilityLogic.Formula ProvabilityAbstraction
 
-lemma exists_prenexHierarchy_provable_iff_standardProvability_bot
-    (h : ∀ φ : ArithmeticSentence, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1 φ →
-      ∃ ψ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ ∧
-        ∀ (M : Type) [Tarski.Structure ℒₒᵣ M] [Nonempty M] (e : Fin 0 → M) (f : Empty → M),
-          Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ) :
-    ∃ ψ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ ∧ 𝗜𝚺₁ ⊢ T.standardProvability ⊥ 🡘 ψ := by
-  obtain ⟨φ, hφ⟩ := ISigma1.hasPrenex (φ := T.standardProvability ⊥) <| by
-    simp [standardProvability_def];
-  obtain ⟨ψ, hψ, hφψ⟩ := h φ.val φ.val_prenexHierarchy;
-  use ψ;
-  and_intros;
-  · exact hψ;
-  · apply complete;
-    intro (V : Type) _ _;
-    have := models_of_provable (M := V) inferInstance hφ;
-    simpa [models_iff, hφψ, -Bounding.Prenex.val_sigmaInv] using this
-
 variable {α : Type*} [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-lemma axiomJ5_not_mem_conservativityLogic_of_provable_iff {ψ : ArithmeticSentence}
-    (hψ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ) (hP : 𝗜𝚺₁ ⊢ T.standardProvability ⊥ 🡘 ψ) :
+lemma axiomJ5_not_mem_conservativityLogic (hn : Γ = 𝚺 ∧ 1 ≤ n ∨ 1 < n) :
     Axioms.J5 (□⊥) ∉ T.conservativityLogic Γ n (α := α) := by
+  obtain ⟨ψ, hψ, hP⟩ := ISigma1.exists_prenexHierarchy_provable_iff
+    (σ := T.standardProvability ⊥) (by simp [standardProvability_def]) hn;
   intro h;
   have h₀ := h ⟨fun _ ↦ ⊥⟩;
   simp only [interpret] at h₀;
@@ -302,10 +278,8 @@ $\Sigma_{n + 1}$-conservativity logic of a $\Sigma_1$-sound theory containing $\
 - [Ign91, §1]
 -/
 theorem axiomJ5_not_mem_conservativityLogic_sigma :
-    Axioms.J5 (□⊥) ∉ T.conservativityLogic 𝚺 (n + 1) (α := α) := by
-  obtain ⟨ψ, hψ, hP⟩ := exists_prenexHierarchy_provable_iff_standardProvability_bot
-    (T := T) (Γ := 𝚺) (n := n + 1) fun _ hφ ↦ hφ.exists_eval_iff_of_le (by omega);
-  exact axiomJ5_not_mem_conservativityLogic_of_provable_iff hψ hP
+    Axioms.J5 (□⊥) ∉ T.conservativityLogic 𝚺 (n + 1) (α := α) :=
+  axiomJ5_not_mem_conservativityLogic <| .inl ⟨rfl, by omega⟩
 
 /-- The instance $\Diamond\Box\bot \rhd \Box\bot$ of $\mathbf{J5}$ is not in the
 $\Pi_{n + 2}$-conservativity logic of a $\Sigma_1$-sound theory containing $\mathsf{I}\Sigma_1$.
@@ -313,10 +287,8 @@ $\Pi_{n + 2}$-conservativity logic of a $\Sigma_1$-sound theory containing $\mat
 - [Ign91, §1]
 -/
 theorem axiomJ5_not_mem_conservativityLogic_pi :
-    Axioms.J5 (□⊥) ∉ T.conservativityLogic 𝚷 (n + 2) (α := α) := by
-  obtain ⟨ψ, hψ, hP⟩ := exists_prenexHierarchy_provable_iff_standardProvability_bot
-    (T := T) (Γ := 𝚷) (n := n + 2) fun _ hφ ↦ hφ.exists_eval_iff_of_lt 𝚷 (by omega);
-  exact axiomJ5_not_mem_conservativityLogic_of_provable_iff hψ hP
+    Axioms.J5 (□⊥) ∉ T.conservativityLogic 𝚷 (n + 2) (α := α) :=
+  axiomJ5_not_mem_conservativityLogic <| .inr (by omega)
 
 end
 

@@ -594,6 +594,62 @@ theorem finiteUpToEquiv (P : Finset α) (b : Bool) :
     FiniteUpToEquiv {Z | LRClosure P b Z} :=
   (finiteUpToEquiv_base P).of_subset fun _ hZ ↦ .inl ⟨b, hZ⟩
 
+/-! ### The `□`-subformulas of the LR-closure -/
+
+private lemma box_mem_subfmls_disj₂ {E : Formula α} :
+    {l : List (Formula α)} → □E ∈ (⋁l).subfmls → ∃ C ∈ l, □E ∈ C.subfmls
+  | [], h => by simp [subfmls] at h
+  | [A], h => ⟨A, by simp, h⟩
+  | A :: B :: l, h => by
+    change □E ∈ (A ⋎ ⋁(B :: l)).subfmls at h
+    simp only [subfmls, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton,
+      reduceCtorEq, false_or, or_false] at h
+    rcases h with h | h
+    · exact ⟨A, by simp, h⟩
+    · obtain ⟨C, hC, h⟩ := box_mem_subfmls_disj₂ h
+      exact ⟨C, by simp_all, h⟩
+
+lemma box_mem_subfmls_disj {E : Formula α} {S : Finset (Formula α)} (h : □E ∈ S.disj.subfmls) :
+    ∃ C ∈ S, □E ∈ C.subfmls := by
+  obtain ⟨C, hC, h⟩ := box_mem_subfmls_disj₂ h
+  exact ⟨C, Finset.mem_toList.mp hC, h⟩
+
+/-- The bodies of the `□`-formulas occurring in the LR-closure: `∼B` for `B` in the closure, and
+`B 🡒 ⋁S ⋎ ⋁◇T` for `B` and the members of `S` and `T` in its first part. -/
+def IsBoxBody (P : Finset α) (E : Formula α) : Prop :=
+  (∃ B b, LRClosure P b B ∧ E = ∼B) ∨
+    ∃ B, ∃ S T : Finset (Formula α), LRClosure P true B ∧ (∀ C ∈ S, LRClosure P true C) ∧
+      (∀ C ∈ T, LRClosure P true C) ∧ E = B 🡒 S.disj ⋎ (T.image (◇·)).disj
+
+lemma isBoxBody_of_box_mem_subfmls {E : Formula α} (h : LRClosure P b Z)
+    (hE : □E ∈ Z.subfmls) : IsBoxBody P E := by
+  induction h with
+  | falsum => simp [subfmls] at hE
+  | atom => simp [subfmls] at hE
+  | @and_box_neg A B b' _ hB ihA ihB =>
+    simp only [subfmls, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton,
+      reduceCtorEq, false_or, or_false, box_inj] at hE
+    rcases hE with hE | rfl | hE
+    · exact ihA hE
+    · exact .inl ⟨B, b', hB, rfl⟩
+    · exact ihB hE
+  | @and_box_imp A B b' S T _ hB hS hT ihA ihB ihS ihT =>
+    simp only [subfmls, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton,
+      reduceCtorEq, false_or, or_false, box_inj] at hE
+    rcases hE with hE | rfl | hE | hE | hE
+    · exact ihA hE
+    · exact .inr ⟨B, S, T, hB, hS, hT, rfl⟩
+    · exact ihB hE
+    · obtain ⟨C, hC, h⟩ := box_mem_subfmls_disj hE
+      exact ihS C hC h
+    · obtain ⟨C, hC, h⟩ := box_mem_subfmls_disj hE
+      obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hC
+      simp only [subfmls, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton,
+        reduceCtorEq, false_or, or_false, box_inj] at h
+      rcases h with rfl | h
+      · exact .inl ⟨D, true, hT D hD, rfl⟩
+      · exact ihT D hD h
+
 end LRClosure
 
 end FFL.ProvabilityLogic

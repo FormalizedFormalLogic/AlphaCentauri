@@ -172,6 +172,15 @@ noncomputable def _root_.FFL.FirstOrder.ArithmeticTheory.interpretabilityAbstrac
     Interpretability T.standardProvability :=
   ⟨T.interpretability⟩
 
+/-- The interpretability logic of `T`: the formulas provable in `T` under every realization,
+reading `□` as provability in `T` and `▷` as formalized relative interpretability over `T`.
+
+- [Vis90, §6.1]
+-/
+def _root_.FFL.FirstOrder.ArithmeticTheory.interpretabilityLogic {α : Type*} : Logic α :=
+  { A | ∀ f : ProvabilityLogic.Realization α ℒₒᵣ,
+    T ⊢ A.interpret f T.standardProvability T.interpretabilityAbstraction }
+
 variable [𝗣𝗔 ⪯ T] [Theory.Δ₁.Sentential T]
 
 instance instILInterpretabilityAbstraction : T.interpretabilityAbstraction.IL where

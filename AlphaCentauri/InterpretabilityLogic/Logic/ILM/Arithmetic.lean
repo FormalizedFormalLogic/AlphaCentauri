@@ -37,19 +37,20 @@ theorem Logic.ILM.arithmetical_soundness [𝔍.M] (h : 𝐈𝐋𝐌 ⊢ A) : T�
     Interpretability.rhd_mono_right <| by cl_prover;
   cl_prover [h₁, h₂, h₃];
 
-end FFL.InterpretabilityLogic
+section
 
-namespace FFL.FirstOrder.ArithmeticTheory
-
-open InterpretabilityLogic
+open FirstOrder Arithmetic
 
 variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+  {f : ProvabilityLogic.Realization α ℒₒᵣ} {A : Formula α}
 
 /-- - [HM90, Definition 3.1] -/
-instance : (𝐈𝐋𝐌 : Logic α) ⪯ T.conservativityLogic 𝚷 1 :=
-  Logic.weakerThan_iff.mpr fun _ hA _ ↦
-    Entailment.WeakerThan.pbl <| Logic.ILM.arithmetical_soundness hA
+theorem Logic.ILM.arithmetical_soundness_pi1Conservativity (h : 𝐈𝐋𝐌 ⊢ A) :
+    T ⊢ A.interpret f T.standardProvability (T.conservativity 𝚷 1) :=
+  Entailment.WeakerThan.pbl <| Logic.ILM.arithmetical_soundness h
 
-end FFL.FirstOrder.ArithmeticTheory
+end
+
+end FFL.InterpretabilityLogic
 
 end

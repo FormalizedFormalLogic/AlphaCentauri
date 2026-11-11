@@ -1,7 +1,11 @@
 module
 
+public import AlphaCentauri.Bootstrapping.Proof.InductionAxiom
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
-public import AlphaCentauri.ToFoundation.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
+public import Foundation.FirstOrder.Arithmetic.EA.Basic
+public import Foundation.FirstOrder.Incompleteness.Consistency
 public import Foundation.FirstOrder.Incompleteness.Definability
 
 /-!
@@ -15,7 +19,10 @@ block of existential quantifiers over a $\Delta_0$ matrix all of whose instances
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-namespace FFL.FirstOrder.Arithmetic.Bootstrapping
+namespace FFL.FirstOrder.Arithmetic
+namespace Bootstrapping
+
+section PeanoMinusAxiom
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
@@ -24,8 +31,6 @@ lemma mem_peanoMinus_Δ₁Class_iff (p : V) :
   change V ⊧/![p] (Theory.Δ₁.ofList PeanoMinus.finite.toFinset.toList).ch.val ↔ _
   rw [satisfies_ofList_ch]
   simp
-
-section falseBlock
 
 /-- The negation of the code of a universal closure of a $\Delta_0$ formula that is true in `V`
 is a block of existential quantifiers whose instances are all false. -/
@@ -48,10 +53,6 @@ private lemma isFalseBlock_neg_quote_allClosure {k D m : ℕ} {θ : ArithmeticSe
     rw [this]
     simp only [models_iff, Semiformula.eval_allClosure] at hσ
     simpa using hσ _
-
-end falseBlock
-
-section classification
 
 private lemma exists_allClosure_closure_of_peanoMinus {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) :
     ∃ m, ∃ θ : ArithmeticSemisentence m, σ = ∀¹* θ ∧ ℬ[<, ℒₒᵣ].Closure θ ∧ ∀ ψ, θ ≠ ∀¹ ψ := by
@@ -79,10 +80,6 @@ private lemma exists_allClosure_closure_of_peanoMinus {σ : ArithmeticSentence} 
          Semiformula.Operator.LT.lt, Semiformula.Operator.LE.sentence_eq])
     | (intro ψ h; cases h)
 
-end classification
-
-section peanoMinus
-
 private lemma isFalseBlock_neg_quote_of_mem_peanoMinus {σ : ArithmeticSentence}
     (h : σ ∈ 𝗣𝗔⁻) (k D : ℕ) : IsFalseBlock k D (neg ℒₒᵣ (⌜σ⌝ : V)) := by
   obtain ⟨m, θ, rfl, hθ, hn⟩ := exists_allClosure_closure_of_peanoMinus h
@@ -100,6 +97,7 @@ lemma derivable_of_mem_peanoMinus_Δ₁Class {p : V} (hp : p ∈ (𝗣𝗔⁻ : 
   have hf : IsFormula ℒₒᵣ (⌜σ⌝ : V) := Sentence.quote_isSemiformula₀ σ
   exact Derivable.em (by simp [hf]) (⌜σ⌝ : V) (by simp) (by simp)
 
-end peanoMinus
+end PeanoMinusAxiom
 
-end FFL.FirstOrder.Arithmetic.Bootstrapping
+end Bootstrapping
+end FFL.FirstOrder.Arithmetic

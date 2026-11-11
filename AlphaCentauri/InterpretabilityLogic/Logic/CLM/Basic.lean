@@ -6,7 +6,8 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILM.Basic
 /-!
 # The logic $\mathbf{CLM}$
 
-The extension of $\mathbf{CL}$ by the principle $\mathsf{M}$.
+The extension of $\mathbf{CL}$ by the principle $\mathsf{M}$, and its soundness with respect to the
+$\mathbf{CL}$-models satisfying the frame condition of $\mathsf{M}$.
 -/
 
 @[expose] public section
@@ -35,6 +36,17 @@ instance : (𝐂𝐋 : Logic α) ⪯ 𝐂𝐋𝐌 := weakerThan_iff.mpr <| subse
 instance : (𝐂𝐋𝐌 : Logic α) ⪯ 𝐈𝐋𝐌 := by
   rw [weakerThan_iff, ILM, ofILAxioms.eq_ofCLAxioms];
   exact subset_of_subset Set.subset_union_right;
+
+/-! ## Soundness -/
+
+open Veltman Veltman.Model.World
+
+/-- - [Ign91, Definition 3.3]
+- [Ign91, Lemma 3.5]
+-/
+theorem CLM.sound {κ : Type*} [Nonempty κ] {M : Veltman.Model κ α} [M.IsCL] [M.HasM]
+    (h : 𝐂𝐋𝐌 ⊢ A) : M ⊧ A :=
+  ofCLAxioms.sound (by rintro _ ⟨A, B, C, rfl⟩ x; exact forces_axiomM) h
 
 end Logic
 

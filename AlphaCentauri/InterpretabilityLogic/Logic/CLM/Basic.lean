@@ -873,4 +873,54 @@ end Veltman
 
 end
 
+/-! ## Completeness -/
+
+namespace Logic
+
+open Entailment Veltman Veltman.Model Veltman.Model.World
+
+variable {α : Type} {A : Formula α}
+
+/-- - [Ign91, Lemma 3.5]
+- [Ign91, Theorem 4]
+-/
+theorem CLM.semantics_TFAE : [
+    𝐂𝐋𝐌 ⊢ A,
+    ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsCL] → [M.HasM] → M ⊧ A,
+    ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α), [M.IsCL] → [M.HasM] → M ⊧ A
+  ].TFAE := by
+  tfae_have 1 → 2 := fun h _ _ _ _ _ ↦ CLM.sound h
+  tfae_have 2 → 3 := fun h _ _ _ M _ _ ↦ h M
+  tfae_have 3 → 1 := by
+    intro h
+    classical
+    by_contra hA
+    have : Entailment.Consistent (𝐂𝐋𝐌 : Logic α) := .of_unprovable hA
+    let X := adequateClosure {A}
+    have hX : ({∼A} : FormulaSet α) *⊬[𝐂𝐋𝐌] ⊥ := by
+      intro h₁
+      apply hA
+      have h₂ : 𝐂𝐋𝐌 ⊢ ∼A 🡒 ⊥ := Context.emptyPrf <| Context.deduct <| by simpa using h₁
+      cl_prover [h₂]
+    obtain ⟨Γ, hΓ⟩ := MaximalConsistentSet.exists_consistent_union
+      (Φ := clmAdequateClosure X) hX
+    have hAX : A ∈ X := adequateClosure.subset (by simp)
+    exact MaximalConsistentSet.not_mem_of_provable_neg hΓ (Context.by_axm rfl) <|
+      (countermodelCLM.truthlemma hAX).mp <| h (countermodelCLM X) ⟨Γ, [], by simp, by simp⟩
+  tfae_finish
+
+theorem CLM.iff_valid :
+    𝐂𝐋𝐌 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] (M : Veltman.Model κ α), [M.IsCL] → [M.HasM] → M ⊧ A :=
+  CLM.semantics_TFAE.out 1 2
+
+/-- - [Ign91, Lemma 3.5]
+- [Ign91, Theorem 4]
+-/
+theorem CLM.iff_valid_finite :
+    𝐂𝐋𝐌 ⊢ A ↔ ∀ {κ : Type} [Nonempty κ] [Finite κ] (M : Veltman.Model κ α),
+      [M.IsCL] → [M.HasM] → M ⊧ A :=
+  CLM.semantics_TFAE.out 1 3
+
+end Logic
+
 end FFL.InterpretabilityLogic

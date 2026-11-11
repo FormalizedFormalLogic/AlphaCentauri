@@ -77,6 +77,9 @@ declaration:
   FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff
 
   # Declarations that inherit the debt of an unproved statement.
   FFL.FirstOrder.not_provable_fermatLastTheorem_IOpen:
@@ -115,3 +118,33 @@ declaration:
   FFL.InterpretabilityLogic.Logic.IL.arithmetical_soundness_interpretability:
     forgive:
       - FFL.FirstOrder.Arithmetic.provable_translate_henkinTranslation
+  FFL.FirstOrder.Arithmetic.Bootstrapping.Conservative.and:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff
+  FFL.FirstOrder.ArithmeticTheory.conservativity_and:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff
+  FFL.FirstOrder.ArithmeticTheory.instConservativityM:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff
+  FFL.FirstOrder.ArithmeticTheory.instConservativitySigmaSa:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff
+  FFL.FirstOrder.ArithmeticTheory.instConservativityPiSa:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff
+  FFL.FirstOrder.ArithmeticTheory.instConservativityPiSb:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff
+  FFL.FirstOrder.ArithmeticTheory.instConservativitySigmaSb:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff
+  FFL.FirstOrder.ArithmeticTheory.instSCLConservativityLogicPi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff
+  FFL.FirstOrder.ArithmeticTheory.instSCLConservativityLogicSigma:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff
+  FFL.FirstOrder.ArithmeticTheory.instSbCLMConservativityLogicPi:
+    forgive:
+      - FFL.FirstOrder.Arithmetic.Bootstrapping.exists_isPrenexHierarchy_tprovable_or_iff

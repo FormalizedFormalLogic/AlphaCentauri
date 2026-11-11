@@ -21,10 +21,16 @@ If $T$ is moreover $\Sigma_1$-sound, the instance $\Diamond\Box\bot \rhd \Box\bo
 $\mathbf{J5}$ is not in the $\Gamma_n$-conservativity logic of $T$ for $\Sigma_{n + 1}$ and
 $\Pi_{n + 2}$.
 
+Conjoining a sentence $\chi$ to both sides preserves $\Gamma_n$-conservativity whenever
+$\neg\chi$ is equivalent to a prenex $\Gamma_n$ sentence. Hence $T$ satisfies $\mathbf{M}$ for
+$n \geq 2$, and, once it contains $\mathsf{B}\Sigma_2$, $\mathsf{Sa}$ for $\Sigma_n$ with $n \geq 2$
+and $\Pi_n$ with $n \geq 3$, and $\mathsf{Sb}$ for $\Pi_n$ with $n \geq 2$ and $\Sigma_n$ with
+$n \geq 3$.
+
 ## References
 
 - [HM90, Definition 3.1]
-- [Ign91, §1, Definition 2.8]
+- [Ign91, §1, Definition 2.8, Theorem 1, Theorem A.2]
 -/
 
 @[expose] public section
@@ -138,6 +144,8 @@ lemma Conservative.and_provabilityPred_pi1 [𝗜𝚺₁ ⪯ T] (h : Conservative
     cl_prover [hP, hAn, h₂, h₃];
   simpa [hπB] using h₄
 
+/-- If $\neg\chi$ is equivalent in `T` to a prenex $\Gamma_n$ sentence, conjoining `χ` to both
+sides preserves $\Gamma_n$-conservativity. -/
 lemma Conservative.and [𝗜𝚺₁ ⪯ T] {ψ : ArithmeticSentence}
     (hψ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ) (hχψ : T ⊢ ∼χ 🡘 ψ)
     (h : Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝) : Conservative T Γ n (⌜σ ⋏ χ⌝ : V) ⌜τ ⋏ χ⌝ := by
@@ -244,6 +252,8 @@ lemma hierarchy_conservativity {σ τ : ArithmeticSentence} :
   simp [conservativity, conservativeDef, h]
 
 open Bootstrapping in
+/-- If $\neg\chi$ is a $\Gamma'_m$ sentence with $\Gamma'_m \subseteq \Gamma_n$, conjoining `χ` to
+both sides preserves $\Gamma_n$-conservativity. -/
 lemma conservativity_and [𝗜𝚺₁ ⪯ T] {Γ' : Polarity} {m : ℕ} [𝗕𝚺m ⪯ T]
     {σ τ χ : ArithmeticSentence} (hχ : ℬ[<, ℒₒᵣ].Hierarchy Γ' m (∼χ))
     (hn : Γ = Γ' ∧ m ≤ n ∨ m < n) :

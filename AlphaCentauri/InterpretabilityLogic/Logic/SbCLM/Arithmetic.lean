@@ -7,9 +7,8 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.SbCLM.Basic
 # Arithmetical soundness of $\mathbf{SbCLM}$
 
 The arithmetical interpretation of $\mathbf{SbCLM}$ is sound for every interpretability abstraction
-satisfying $\mathbf{J1}$–$\mathbf{J4}$, $\mathsf{M}$ and $\mathsf{Sb}$, in particular for
-$\Pi_n$-conservativity over a theory containing $\mathsf{I}\Sigma_1$ and $\mathsf{B}\Sigma_2$ for
-$n \geq 2$.
+satisfying $\mathbf{J1}$–$\mathbf{J4}$, $\mathbf{M}$ and $\mathsf{Sb}$, in particular for
+$\Pi_n$-conservativity over a theory containing $\mathsf{B}\Sigma_2$ for $n \geq 2$.
 -/
 
 @[expose] public section
@@ -42,7 +41,8 @@ open InterpretabilityLogic
 variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗕𝚺2 ⪯ T] {n : ℕ}
 
 /-- - [Ign91, Theorem A.2] -/
-instance : (𝐒𝐛𝐂𝐋𝐌 : Logic α) ⪯ T.conservativityLogic 𝚷 (n + 2) := by
+instance instSbCLMConservativityLogicPi :
+    (𝐒𝐛𝐂𝐋𝐌 : Logic α) ⪯ T.conservativityLogic 𝚷 (n + 2) := by
   have : 𝗜𝚺₁ ⪯ T := Arithmetic.ISigma_weakerThan_BSigma_succ.trans inferInstance;
   exact Logic.weakerThan_iff.mpr fun _ hA _ ↦
     Entailment.WeakerThan.pbl <| Logic.SbCLM.arithmetical_soundness hA

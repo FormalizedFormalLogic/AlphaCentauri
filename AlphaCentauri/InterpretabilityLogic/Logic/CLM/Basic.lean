@@ -669,6 +669,204 @@ instance : (countermodelCLM X).HasM where
   rel_of_s_rel h₁ h₂ :=
     ⟨fun hA hx ↦ h₂.1 hA (h₁.2.2.2.1 hA hx), h₁.2.2.1 ▸ h₂.2.1, h₁.2.2.1 ▸ h₂.2.2⟩
 
+variable [Adequate X] {x u : IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X)} {B C E : Formula α}
+
+omit [Nonempty (IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X))] in
+private lemma mem_operands_of_isRhdOperand (h : IsRhdOperand X B) : B ∈ operands X := by
+  classical
+  exact Finset.mem_union_left _ (Finset.mem_filter.mpr ⟨h.mem, h⟩)
+
+omit [Nonempty (IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X))] [Adequate X] in
+private lemma box_mem_boxes (h : □B ∈ X) : □B ∈ boxes X := by
+  classical
+  exact Finset.mem_union_left _ (Finset.mem_filter.mpr ⟨h, B, rfl⟩)
+
+/-- A `≺[x]`-successor of `u` containing `C` when `u` is a weak `E`-critical successor of `x`
+whose sequence is that of `x` followed by `E`.
+
+- [Ign91, Lemma 6.11]
+-/
+private lemma exists_s_of_weakCriticalSuccessor (hBC : B ▷ C ∈ X) (hx : B ▷ C ∈ x.set)
+    (hxu : CLMRel X x u) (hB : B ∈ u.set) (hseq : u.seq = x.seq ++ [E])
+    (hcrit : WeakCriticalSuccessor E x.set u.set) :
+    ∃ z, (countermodelCLM X).S x u z ∧ C ∈ z.set := by
+  classical
+  let Y₀ := u.set.prebox.filter (□· ∈ boxes X)
+  have hY : Y₀.image (□·) ⊆ boxes X := by
+    intro A hA
+    obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hA
+    exact (Finset.mem_filter.mp hD).2
+  obtain ⟨B', hB', hBB'⟩ := exists_mem_operands_iff_and_conj (L := 𝐂𝐋𝐌)
+    (mem_operands_of_isRhdOperand (.of_rhd_left hBC)) hY
+  obtain ⟨C', hC', hCC'⟩ := exists_mem_operands_iff_and_conj (L := 𝐂𝐋𝐌)
+    (mem_operands_of_isRhdOperand (.of_rhd_right hBC)) hY
+  have hbox : 𝐂𝐋𝐌 ⊢ □Y₀.conj 🡘 (Y₀.image (□·)).conj := Logic.box_iff_conj_image_box
+  have h₁ : 𝐂𝐋𝐌 ⊢ B ▷ C 🡒 (B ⋏ □Y₀.conj) ▷ (C ⋏ □Y₀.conj) := Logic.CLM.axiomM
+  have h₂ : 𝐂𝐋𝐌 ⊢ (B ⋏ □Y₀.conj) ▷ (C ⋏ □Y₀.conj) 🡒 B' ▷ (C ⋏ □Y₀.conj) :=
+    Logic.ofCLAxioms.rhd_anti_left (by cl_prover [hBB', hbox])
+  have h₃ : 𝐂𝐋𝐌 ⊢ B' ▷ (C ⋏ □Y₀.conj) 🡒 B' ▷ C' :=
+    Logic.ofCLAxioms.rhd_mono_right (by cl_prover [hCC', hbox])
+  have hx' : B' ▷ C' ∈ x.set :=
+    (mem_iff_provable (rhd_mem_of_mem_operands hB' hC')).mpr <|
+      Context.of (C_trans h₁ (C_trans h₂ h₃)) ⨀ Context.by_axm (mem_literals hx)
+  have hYu : ∀ A ∈ Y₀.image (□·), A ∈ u.set := by
+    intro A hA
+    obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hA
+    exact mem_prebox.mp (Finset.mem_filter.mp hD).1
+  have hB'u : B' ∈ u.set :=
+    (mem_iff_provable (mem_operands_iff.mpr hB').mem).mpr <| Context.of (K_right hBB') ⨀
+      K_intro (Context.by_axm (mem_literals hB)) (literals_provable_conj hYu)
+  have hE : IsRhdOperand (clmAdequateClosure X) E := u.isRhdOperand_of_mem_seq E (by simp [hseq])
+  obtain ⟨Θ, hΘ, hC'Θ, -⟩ := hcrit.exists_weakCriticalSuccessor_mem_not_mem hE hx' hB'u
+  have hlen : u.seq.length ≤ Θ.prebox.card := by
+    rw [hseq, List.length_append, List.length_singleton]
+    exact Nat.succ_le_of_lt <|
+      x.length_seq_le.trans_lt (Finset.card_lt_card hΘ.toSuccessor.prebox_ssubset)
+  have hC'C : 𝐂𝐋𝐌 ⊢ C' 🡒 C ⋏ (Y₀.image (□·)).conj := K_left hCC'
+  refine ⟨⟨Θ, u.seq, u.isRhdOperand_of_mem_seq, hlen⟩, ⟨hxu,
+    .of_successor hΘ.toSuccessor hxu.2.1 hxu.2.2, rfl, fun {A} hA hu ↦ ?_, fun E' hE' _ ↦ ?_⟩, ?_⟩
+  · have h : □A ∈ Y₀.image (□·) :=
+      Finset.mem_image_of_mem _ (Finset.mem_filter.mpr ⟨mem_prebox.mpr hu, hA⟩)
+    exact (mem_iff_provable (mem_of_mem_boxes hA)).mpr <|
+      Context.of (C_trans hC'C (C_trans and₂ (left_Fconj_intro h))) ⨀
+        Context.by_axm (mem_literals hC'Θ)
+  · obtain rfl : E = E' := by simpa [hseq] using hE'
+    exact hΘ
+  · exact (mem_iff_provable (subset (Adequate.rhd_right hBC))).mpr <|
+      Context.of (C_trans hC'C and₁) ⨀ Context.by_axm (mem_literals hC'Θ)
+
+/-- A `≺[x]`-successor of `u` containing `C` when `u` is not a weak `E`-critical successor of `x`
+whose sequence is that of `x` followed by `E`.
+
+- [Ign91, Lemma 6.11]
+-/
+private lemma exists_s_of_not_weakCriticalSuccessor (hBC : B ▷ C ∈ X) (hx : B ▷ C ∈ x.set)
+    (hxu : CLMRel X x u) (hB : B ∈ u.set)
+    (hn : ¬∃ E, u.seq = x.seq ++ [E] ∧ WeakCriticalSuccessor E x.set u.set) :
+    ∃ z, (countermodelCLM X).S x u z ∧ C ∈ z.set := by
+  classical
+  let Y₀ := u.set.prebox
+  have hYu : ∀ A ∈ Y₀.image (□·), A ∈ u.set := by
+    intro A hA
+    obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hA
+    exact mem_prebox.mp hD
+  obtain ⟨B'', hK, hB''⟩ := exists_box_neg_mem_boxes_iff_and_conj (L := 𝐂𝐋𝐌)
+    (mem_operands_of_isRhdOperand (.of_rhd_left hBC)) (Y := Y₀.image (□·)) fun E hE ↦ by
+      refine ⟨mem_of_mem (hYu E hE), ?_⟩
+      obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hE
+      exact ⟨D, rfl⟩
+  have hK' := mem_of_mem_boxes hK
+  have hnx : □(∼B'') ∉ x.set := by
+    intro h
+    apply not_mem_of_neg_mem (hxu.1 hK h).1
+    exact (mem_iff_provable (Adequate.imp_left (Adequate.box hK'))).mpr <|
+      Context.of (K_right hB'') ⨀
+        K_intro (Context.by_axm (mem_literals hB)) (literals_provable_conj hYu)
+  have hbox : 𝐂𝐋𝐌 ⊢ □Y₀.conj 🡘 (Y₀.image (□·)).conj := Logic.box_iff_conj_image_box
+  have h₁ : x.set.literals *⊢[𝐂𝐋𝐌] ∼□(∼B'') := provable_neg_of_not_mem hK' hnx
+  have h₂ : 𝐂𝐋𝐌 ⊢ □(∼(B ⋏ □Y₀.conj)) 🡒 □(∼B'') := Logic.box_mono (by cl_prover [hB'', hbox])
+  have h₃ : 𝐂𝐋𝐌 ⊢ B ▷ C 🡒 (B ⋏ □Y₀.conj) ▷ (C ⋏ □Y₀.conj) := Logic.CLM.axiomM
+  have h₄ : 𝐂𝐋𝐌 ⊢ (B ⋏ □Y₀.conj) ▷ (C ⋏ □Y₀.conj) 🡒 ◇(B ⋏ □Y₀.conj) 🡒 ◇(C ⋏ □Y₀.conj) :=
+    Logic.ofCLAxioms.axiomJ4
+  have hdia : x.set.literals *⊢[𝐂𝐋𝐌] ∼□(∼(C ⋏ □Y₀.conj)) := by
+    have h₅ := Context.of (Γ := x.set.literals) h₂
+    have h₆ := Context.of (Γ := x.set.literals) h₃
+    have h₇ := Context.of (Γ := x.set.literals) h₄
+    have h₈ : x.set.literals *⊢[𝐂𝐋𝐌] B ▷ C := Context.by_axm (mem_literals hx)
+    change x.set.literals *⊢[𝐂𝐋𝐌] (B ⋏ □Y₀.conj) ▷ (C ⋏ □Y₀.conj) 🡒
+      ∼□(∼(B ⋏ □Y₀.conj)) 🡒 ∼□(∼(C ⋏ □Y₀.conj)) at h₇
+    cl_prover [h₁, h₅, h₆, h₇, h₈]
+  let T : FormulaSet α := {A | □A ∈ x.set}
+  let Z₀ : FormulaSet α := insert (C ⋏ □Y₀.conj) (T ∪ (□·) '' T)
+  have hZ₀ : Z₀ *⊬[𝐂𝐋𝐌] ⊥ := by
+    intro h
+    have h₁ : (T ∪ (□·) '' T) *⊢[𝐂𝐋𝐌] ∼(C ⋏ □Y₀.conj) := Context.deduct h
+    have h₂ : x.set.literals *⊢[𝐂𝐋𝐌] □(∼(C ⋏ □Y₀.conj)) :=
+      Context.weakening (by rintro _ ⟨A, hA, rfl⟩; exact mem_literals hA)
+        (Logic.box_of_provable h₁)
+    exact consistent_literals <| by
+      change x.set.literals *⊢[𝐂𝐋𝐌] ⊥
+      cl_prover [h₂, hdia]
+  obtain ⟨Θ, hΘ⟩ := exists_consistent_union (Φ := clmAdequateClosure X) hZ₀
+  have hm {A} (hA : A ∈ clmAdequateClosure X) (h : Z₀ *⊢[𝐂𝐋𝐌] A) : A ∈ Θ :=
+    mem_of_provable hΘ hA h
+  have hCY : Z₀ *⊢[𝐂𝐋𝐌] C ⋏ □Y₀.conj := Context.by_axm (Set.mem_insert _ _)
+  have hboxΘ {A} (hA : A ∈ Y₀) : □A ∈ Θ :=
+    hm (mem_of_mem (mem_prebox.mp hA)) <|
+      Context.of (C_trans and₂ (Logic.box_mono (left_Fconj_intro hA))) ⨀ hCY
+  have hlen : u.seq.length ≤ Θ.prebox.card :=
+    u.length_seq_le.trans (Finset.card_le_card fun A hA ↦ mem_prebox.mpr (hboxΘ hA))
+  have hxz : CLMRel X x ⟨Θ, u.seq, u.isRhdOperand_of_mem_seq, hlen⟩ := by
+    refine ⟨fun {A} _ hA ↦ ⟨hm (Adequate.box (mem_of_mem hA)) (Context.by_axm ?_),
+      hm (mem_of_mem hA) (Context.by_axm ?_)⟩, hxu.2.1, hxu.2.2⟩
+    · exact Set.mem_insert_of_mem _ (.inl hA)
+    · exact Set.mem_insert_of_mem _ (.inr ⟨A, hA, rfl⟩)
+  exact ⟨⟨Θ, u.seq, u.isRhdOperand_of_mem_seq, hlen⟩,
+    ⟨hxu, hxz, rfl, fun {A} _ hu ↦ hboxΘ (mem_prebox.mpr hu), fun E hE hcrit ↦
+      (hn ⟨E, hE, hcrit⟩).elim⟩,
+    hm (subset (Adequate.rhd_right hBC)) (Context.of and₁ ⨀ hCY)⟩
+
+/-- - [Ign91, Lemma 6.11] -/
+lemma truthlemma {x : (countermodelCLM X).World} {A : Formula α} (hA : A ∈ X) :
+    x ⊩ A ↔ A ∈ x.set := by
+  induction A generalizing x with
+  | atom a => rfl
+  | falsum => exact ⟨False.elim, fun h ↦ bot_not_mem h⟩
+  | imp A B ihA ihB =>
+    have hA' := Adequate.imp_left hA
+    have hB' := Adequate.imp_right hA
+    rw [imp_mem_iff (subset hA) (subset hA') (subset hB'), ← ihA hA', ← ihB hB']
+    rfl
+  | box A ih =>
+    have hA' := Adequate.box hA
+    constructor
+    · intro h
+      by_contra hn
+      obtain ⟨Δ, hΔ, hAΔ⟩ := exists_successor_of_box_not_mem (subset hA) hn
+      have hlen : (x.seq ++ [⊥]).length ≤ Δ.prebox.card := by
+        simpa using Nat.succ_le_of_lt
+          (x.length_seq_le.trans_lt (Finset.card_lt_card hΔ.prebox_ssubset))
+      have hseq : ∀ C ∈ x.seq ++ [⊥], IsRhdOperand (clmAdequateClosure X) C := by
+        intro C hC
+        rcases List.mem_append.mp hC with hC | hC
+        · exact x.isRhdOperand_of_mem_seq C hC
+        · obtain rfl := List.mem_singleton.mp hC
+          exact .bot
+      exact not_mem_of_provable_neg hAΔ (Context.by_axm rfl) <| (ih hA').mp <|
+        h ⟨Δ, x.seq ++ [⊥], hseq, hlen⟩ (.of_successor hΔ (List.prefix_append _ _) (by simp))
+    · intro h y hxy
+      exact (ih hA').mpr (hxy.1 (box_mem_boxes hA) h).1
+  | rhd B C ihB ihC =>
+    have hB := Adequate.rhd_left hA
+    have hC := Adequate.rhd_right hA
+    constructor
+    · intro h
+      by_contra hn
+      obtain ⟨Δ, hΔ, hBΔ⟩ := exists_weakCriticalSuccessor_of_rhd_not_mem (subset hA) hn
+      have hC' : IsRhdOperand (clmAdequateClosure X) C := .of_rhd_right (subset hA)
+      have hlen : (x.seq ++ [C]).length ≤ Δ.prebox.card := by
+        simpa using Nat.succ_le_of_lt
+          (x.length_seq_le.trans_lt (Finset.card_lt_card hΔ.prebox_ssubset))
+      have hseq : ∀ D ∈ x.seq ++ [C], IsRhdOperand (clmAdequateClosure X) D := by
+        intro D hD
+        rcases List.mem_append.mp hD with hD | hD
+        · exact x.isRhdOperand_of_mem_seq D hD
+        · obtain rfl := List.mem_singleton.mp hD
+          exact hC'
+      obtain ⟨z, hS, hz⟩ := h ⟨Δ, x.seq ++ [C], hseq, hlen⟩
+        (.of_successor hΔ.toSuccessor (List.prefix_append _ _) (by simp)) ((ihB hB).mpr hBΔ)
+      exact (hS.2.2.2.2 C rfl hΔ).not_mem
+        ((mem_iff_provable (Adequate.rhd_mem hC' hC')).mpr
+          (Context.of Logic.ofCLAxioms.rhd_refl)) ((ihC hC).mp hz)
+    · intro h u hxu hu
+      by_cases hc : ∃ E, u.seq = x.seq ++ [E] ∧ WeakCriticalSuccessor E x.set u.set
+      · obtain ⟨E, hseq, hcrit⟩ := hc
+        obtain ⟨z, hS, hz⟩ :=
+          exists_s_of_weakCriticalSuccessor hA h hxu ((ihB hB).mp hu) hseq hcrit
+        exact ⟨z, hS, (ihC hC).mpr hz⟩
+      · obtain ⟨z, hS, hz⟩ := exists_s_of_not_weakCriticalSuccessor hA h hxu ((ihB hB).mp hu) hc
+        exact ⟨z, hS, (ihC hC).mpr hz⟩
+
 end countermodelCLM
 
 end Veltman

@@ -4,6 +4,12 @@ public import Foundation.ProvabilityLogic.GL.Basic
 
 /-!
 # The LR-closure is finite up to $\mathbf{GL}$-equivalence
+
+Boolean combinations of a set finite up to $\mathbf{GL}$-equivalence are finite up to
+$\mathbf{GL}$-equivalence, and so is the LR-closure of a finite set of atoms, the least sets closed
+under `A ↦ A ⋏ □∼B` and `A ↦ A ⋏ □(B 🡒 ⋁S ⋎ ⋁◇T)`.
+
+- [Ign91, Lemma 6.3]
 -/
 
 @[expose] public section
@@ -25,8 +31,8 @@ lemma of_forces
     𝐆𝐋 ⊢ A :=
   iff_valid_finite.mpr fun M _ x ↦ h M x
 
-lemma forces {κ : Type*} [Nonempty κ] {M : Model κ α} [M.IsGL] (h : 𝐆𝐋 ⊢ A) (x : M.World) :
-    x ⊩ A :=
+lemma forces_of_provable {κ : Type*} [Nonempty κ] {M : Model κ α} [M.IsGL] (h : 𝐆𝐋 ⊢ A)
+    (x : M.World) : x ⊩ A :=
   sound M h x
 
 end Logic.GL
@@ -83,7 +89,6 @@ namespace Logic.GL
 
 variable [DecidableEq α] {a : α} {D : Formula α}
 
-/-- - [Ign91, Lemma 6.3] -/
 lemma box_neg_and_box_iff_subst_bot : 𝐆𝐋 ⊢ □(∼(#a ⋏ □D)) 🡘 □(∼(#a ⋏ □D⟦a ↦ ⊥⟧)) := by
   apply of_forces
   intro κ _ M _ x
@@ -106,12 +111,9 @@ lemma iff_of_forces
 
 lemma forces_iff_of {κ : Type*} [Nonempty κ] {M : Model κ α} [M.IsGL] (h : 𝐆𝐋 ⊢ A 🡘 B)
     (x : M.World) : x ⊩ A ↔ x ⊩ B :=
-  forces_iff.mp (forces h x)
+  forces_iff.mp (forces_of_provable h x)
 
 lemma iff_refl' : 𝐆𝐋 ⊢ A 🡘 A := iff_of_forces fun _ _ _ ↦ Iff.rfl
-
-lemma iff_trans' (h₁ : 𝐆𝐋 ⊢ A 🡘 B) (h₂ : 𝐆𝐋 ⊢ B 🡘 C) : 𝐆𝐋 ⊢ A 🡘 C :=
-  iff_of_forces fun _ _ x ↦ (forces_iff_of h₁ x).trans (forces_iff_of h₂ x)
 
 lemma imp_congr' (h₁ : 𝐆𝐋 ⊢ A 🡘 B) (h₂ : 𝐆𝐋 ⊢ C 🡘 D) : 𝐆𝐋 ⊢ (A 🡒 C) 🡘 (B 🡒 D) :=
   iff_of_forces fun _ _ x ↦ imp_congr (forces_iff_of h₁ x) (forces_iff_of h₂ x)
@@ -134,7 +136,7 @@ lemma of_forall_exists (hT : FiniteUpToEquiv T) (h : ∀ A ∈ S, ∃ B ∈ T, �
   intro A hA
   obtain ⟨B, hB, hAB⟩ := h A hA
   obtain ⟨C, hC, hBC⟩ := hF B hB
-  exact ⟨C, hC, iff_trans' hAB hBC⟩
+  exact ⟨C, hC, E_trans hAB hBC⟩
 
 lemma of_subset (hT : FiniteUpToEquiv T) (h : S ⊆ T) : FiniteUpToEquiv S :=
   hT.of_forall_exists fun A hA ↦ ⟨A, h hA, iff_refl'⟩
@@ -177,7 +179,7 @@ lemma exists_finset_subset (h : FiniteUpToEquiv S) :
     obtain ⟨B, hB, hAB⟩ := hF A hA
     have hB' : B ∈ G := Finset.mem_filter.mpr ⟨hB, A, hA, hAB⟩
     refine ⟨(hG hB').choose, Finset.mem_image.mpr ⟨⟨B, hB'⟩, Finset.mem_attach _ _, rfl⟩, ?_⟩
-    exact iff_trans' hAB <| iff_of_forces fun _ _ x ↦
+    exact E_trans hAB <| iff_of_forces fun _ _ x ↦
       (forces_iff_of (hG hB').choose_spec.2 x).symm
 
 end FiniteUpToEquiv
@@ -302,7 +304,7 @@ lemma finiteUpToEquiv (h : FiniteUpToEquiv S) :
   obtain ⟨B, hB, hAB⟩ := exists_of_forall_exists (T := ↑F)
     (fun A hA ↦ (hF A hA).imp fun B hB ↦ ⟨mem hB.1, hB.2⟩) hA
   obtain ⟨𝒯, h𝒯, h⟩ := exists_finset_powerset_of_finset hB
-  exact ⟨_, Finset.mem_image.mpr ⟨𝒯, Finset.mem_powerset.mpr h𝒯, rfl⟩, iff_trans' hAB h⟩
+  exact ⟨_, Finset.mem_image.mpr ⟨𝒯, Finset.mem_powerset.mpr h𝒯, rfl⟩, E_trans hAB h⟩
 
 end BooleanCombination
 
@@ -483,8 +485,8 @@ private lemma finiteUpToEquiv_box_neg
     refine ⟨□(∼(#a ⋏ □D')), .inr ?_, ?_⟩
     · simp only [Set.mem_iUnion, Set.mem_image]
       exact ⟨a, ha, D', hD', rfl⟩
-    refine iff_trans' (box_congr' (imp_congr' h iff_refl')) <|
-      iff_trans' box_neg_and_box_iff_subst_bot <| box_congr' <| imp_congr' ?_ iff_refl'
+    refine E_trans (box_congr' (imp_congr' h iff_refl')) <|
+      E_trans box_neg_and_box_iff_subst_bot <| box_congr' <| imp_congr' ?_ iff_refl'
     exact iff_of_forces fun _ _ x ↦ by
       simp only [forces_and, forces_box]
       exact and_congr_right fun _ ↦ forall_congr' fun y ↦ imp_congr_right fun _ ↦

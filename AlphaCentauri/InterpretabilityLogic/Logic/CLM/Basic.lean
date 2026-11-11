@@ -7,8 +7,15 @@ public import AlphaCentauri.ToFoundation.ProvabilityLogic.GL.LRClosure
 /-!
 # The logic $\mathbf{CLM}$
 
-The extension of $\mathbf{CL}$ by the principle $\mathsf{M}$, and its soundness with respect to the
-$\mathbf{CL}$-models satisfying the frame condition of $\mathsf{M}$.
+The extension of $\mathbf{CL}$ by the principle $\mathsf{M}$, its soundness with respect to the
+$\mathbf{CL}$-models satisfying the frame condition of $\mathsf{M}$, and its completeness with
+respect to the finite ones.
+
+The countermodel lives on maximal consistent subsets of a $\mathbf{CLM}$-adequate set, a finite set
+whose operands are closed up to $\mathbf{GL}$-equivalence under conjunction with `□`-formulas,
+indexed by sequences of operands.
+
+- [Ign91, §6]
 -/
 
 @[expose] public section
@@ -661,7 +668,8 @@ instance [Adequate X] : (countermodelCLM X).IsCL where
   rel_of_s_left h := h.1
   rel_of_s_right h := h.2.1
   s_refl h := ⟨h, h, rfl, fun _ hx ↦ hx, fun _ _ hx ↦ hx⟩
-  s_trans h₁ h₂ := ⟨h₁.1, h₂.2.1, h₁.2.2.1.trans h₂.2.2.1, fun hA hx ↦ h₂.2.2.2.1 hA (h₁.2.2.2.1 hA hx),
+  s_trans h₁ h₂ := ⟨h₁.1, h₂.2.1, h₁.2.2.1.trans h₂.2.2.1,
+    fun hA hx ↦ h₂.2.2.2.1 hA (h₁.2.2.2.1 hA hx),
     fun C hC hx ↦ h₂.2.2.2.2 C (h₁.2.2.1 ▸ hC) (h₁.2.2.2.2 C hC hx)⟩
 
 /-- - [Ign91, Proposition 6.9] -/

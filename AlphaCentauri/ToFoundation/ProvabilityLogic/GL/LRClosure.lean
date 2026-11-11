@@ -652,6 +652,51 @@ lemma isBoxBody_of_box_mem_subfmls {E : Formula α} (h : LRClosure P b Z)
       · exact .inl ⟨D, true, hT D hD, rfl⟩
       · exact ihT D hD h
 
+private lemma atom_mem_subfmls_disj₂ {a : α} :
+    {l : List (Formula α)} → #a ∈ (⋁l).subfmls → ∃ C ∈ l, #a ∈ C.subfmls
+  | [], h => by simp [subfmls] at h
+  | [A], h => ⟨A, by simp, h⟩
+  | A :: B :: l, h => by
+    change #a ∈ (A ⋎ ⋁(B :: l)).subfmls at h
+    simp only [subfmls, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton,
+      reduceCtorEq, false_or, or_false] at h
+    rcases h with h | h
+    · exact ⟨A, by simp, h⟩
+    · obtain ⟨C, hC, h⟩ := atom_mem_subfmls_disj₂ h
+      exact ⟨C, by simp_all, h⟩
+
+lemma atom_mem_subfmls_disj {a : α} {S : Finset (Formula α)} (h : #a ∈ S.disj.subfmls) :
+    ∃ C ∈ S, #a ∈ C.subfmls := by
+  obtain ⟨C, hC, h⟩ := atom_mem_subfmls_disj₂ h
+  exact ⟨C, Finset.mem_toList.mp hC, h⟩
+
+lemma mem_of_atom_mem_subfmls {a : α} (h : LRClosure P b Z) (ha : #a ∈ Z.subfmls) : a ∈ P := by
+  induction h with
+  | falsum => simp [subfmls] at ha
+  | atom hc =>
+    simp only [subfmls, Finset.mem_singleton] at ha
+    cases ha
+    exact hc
+  | and_box_neg _ _ ihA ihB =>
+    simp only [subfmls, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton,
+      reduceCtorEq, false_or, or_false] at ha
+    rcases ha with ha | ha
+    · exact ihA ha
+    · exact ihB ha
+  | @and_box_imp A B b' S T _ _ _ _ ihA ihB ihS ihT =>
+    simp only [subfmls, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton,
+      reduceCtorEq, false_or, or_false] at ha
+    rcases ha with ha | ha | ha | ha
+    · exact ihA ha
+    · exact ihB ha
+    · obtain ⟨C, hC, h⟩ := atom_mem_subfmls_disj ha
+      exact ihS C hC h
+    · obtain ⟨C, hC, h⟩ := atom_mem_subfmls_disj ha
+      obtain ⟨D, hD, rfl⟩ := Finset.mem_image.mp hC
+      simp only [subfmls, Finset.mem_insert, Finset.mem_union, Finset.mem_singleton,
+        reduceCtorEq, false_or, or_false] at h
+      exact ihT D hD h
+
 end LRClosure
 
 end FFL.ProvabilityLogic

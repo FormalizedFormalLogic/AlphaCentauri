@@ -77,6 +77,27 @@ instance {k : ℕ} [V↓[ℒₒᵣ] ⊧* IE k] :
 
 end
 
+mutual
+
+lemma IsBoundedExistential.hierarchy {k n : ℕ} {φ : ArithmeticSemiformula ξ n} :
+    IsBoundedExistential k φ → ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ
+  | .of_open h => Bounding.Hierarchy.of_open h
+  | .of_boundedUniversal h => h.hierarchy
+  | .bexsLT _ h => Bounding.Hierarchy.arithmetic_bexsLT_iff.mpr h.hierarchy
+
+lemma IsBoundedUniversal.hierarchy {k n : ℕ} {φ : ArithmeticSemiformula ξ n} :
+    IsBoundedUniversal k φ → ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ
+  | .of_open h => Bounding.Hierarchy.of_open h
+  | .of_boundedExistential h => h.hierarchy
+  | .ballLT _ h => Bounding.Hierarchy.arithmetic_ballLT_iff.mpr h.hierarchy
+
+end
+
+lemma IE_weakerThan_ISigma0 (k : ℕ) : IE k ⪯ 𝗜𝚺₀ := by
+  rw [ISigmaZero_eq_IBroadSigmaZero]
+  exact Entailment.WeakerThan.ofSubset
+    (Set.union_subset_union_right _ (InductionScheme_subset (·.hierarchy)))
+
 /-- $\mathsf{I}\mathsf{E}_1$ is strictly weaker than $\mathsf{I}\Delta_0$. An open problem.
 - [DAq05, §8] -/
 def IE1StrictlyWeakerThanISigma0 : Prop := 𝗜𝗘₁ ⪱ 𝗜𝚺₀

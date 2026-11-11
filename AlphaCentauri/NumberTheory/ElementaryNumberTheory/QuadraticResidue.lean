@@ -5,6 +5,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Mathlib.Data.Nat.Prime.Defs
 public import AlphaCentauri.Schemata.BoundedInduction
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastNumberPrinciple
+public import AlphaCentauri.ToMathlib.OpenPredicate.TwoNonresidue
 
 /-!
 # Quadratic residues in weak arithmetic
@@ -26,6 +28,8 @@ supplementary laws.
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
+
+open RingOfDifferences
 
 /-- `a` is a quadratic residue modulo `m`: `a` is coprime to `m` and `x² ≡ a (mod m)` has a
 solution.
@@ -114,15 +118,52 @@ The case $r = 2$ is $m \equiv 5 \pmod 8$, and the case $r = 1$ is [Smi93, Lemma 
 def noRootNegOne (r : ℕ) : ArithmeticSentence :=
   “∀ m, (∃ k, m = ↑(2 ^ (r + 1)) * k + ↑(2 ^ r + 1)) → ¬!(negOneHasRoot (2 ^ r)) m”
 
+/-- $\mathsf{I}\mathsf{E}_1$ proves that $-1$ has no fourth root modulo any $m \equiv 5 \pmod 8$.
+- [Smi93, Lemma 3.5(i), Question 5.3] -/
+theorem provable_noRootNegOne_IE1_two : 𝗜𝗘₁ ⊢ noRootNegOne 2 := by
+  apply complete
+  intro V _ hV
+  have hL := leastNumberPrinciple_of_models_induction (V := V)
+  suffices ∀ m x c : V, (∃ k, m = 8 * k + 5) → x ^ 4 + 1 = m * c → False by
+    simp only [noRootNegOne, Nat.reduceAdd, Fin.isValue, Nat.reducePow, negOneHasRoot,
+      Fin.Fin1.eq_one, Rewriting.app_exs, Semiformula.neg_ex, models_iff, Semiformula.eval_all,
+      Nat.succ_eq_add_one, LogicalConnective.HomClass.map_imply, Semiformula.eval_ex,
+      Semiformula.eval_operator, Matrix.comp₂, Semiterm.val_bvar, Matrix.cons_val_one,
+      Matrix.cons_val_fin_one, Semiterm.val_operator, Matrix.comp₀,
+      Tarski.Structure.numeral_eq_numeral, Matrix.cons_val_zero, Tarski.Structure.Mul.mul,
+      Tarski.Structure.Add.add, Tarski.Structure.eq_iff_eq, LogicalConnective.HomClass.map_neg,
+      Semiformula.eval_rew_q, Semiformula.eval_substs, Function.comp_apply, Rew.subst_bvar,
+      Matrix.comp₁, val_npow, ORingStructure.one_eq_one, LogicalConnective.Prop.neg_eq,
+      LogicalConnective.Prop.arrow_eq, forall_exists_index, forall_eq_apply_imp_iff]
+    intro a x h
+    have h' := (dvd_defined (V := V)).df
+      ![ORingStructure.numeral 8 * a + ORingStructure.numeral 5, x ^ 4 + 1]
+    simp only [Semiformula.Evalb] at h'
+    obtain ⟨c, hc⟩ := h'.1 (by convert h)
+    exact this _ x c ⟨a, by simp [numeral_eq_natCast_app]⟩ hc
+  rintro m x c ⟨k, rfl⟩ hc
+  apply OpenPredicate.not_dvd_pow_four_add_one hL (m := of (8 * k + 5)) (x := of x)
+  · use of k
+    and_intros
+    · exact of_nonneg k
+    · simp [map_ofNat, map_add (of : V →+* _), map_mul (of : V →+* _)]
+  · use of c
+    simpa [map_add (of : V →+* _), map_mul (of : V →+* _)] using congrArg of hc
+
+/-- $\mathsf{I}\Delta_0$ proves that $-1$ has no fourth root modulo any $m \equiv 5 \pmod 8$.
+- [Smi93, Lemma 3.5(i), Question 5.3] -/
+theorem provable_noRootNegOne_ISigma0_two : 𝗜𝚺₀ ⊢ noRootNegOne 2 :=
+  (IE_weakerThan_ISigma0 1).pbl provable_noRootNegOne_IE1_two
+
 /-- $\mathsf{I}\mathsf{E}_1$ proves that $-1$ has no $2^r$-th root modulo any $m$ with
-$m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 2$. An open problem.
+$m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 3$. An open problem.
 - [Smi93, Question 5.3] -/
-def ProvableNoRootNegOneIE1 : Prop := ∀ r : ℕ, 2 ≤ r → 𝗜𝗘₁ ⊢ noRootNegOne r
+def ProvableNoRootNegOneIE1 : Prop := ∀ r : ℕ, 3 ≤ r → 𝗜𝗘₁ ⊢ noRootNegOne r
 
 /-- $\mathsf{I}\Delta_0$ proves that $-1$ has no $2^r$-th root modulo any $m$ with
-$m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 2$. An open problem.
+$m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 3$. An open problem.
 - [Smi93, Question 5.3] -/
-def ProvableNoRootNegOneISigma0 : Prop := ∀ r : ℕ, 2 ≤ r → 𝗜𝚺₀ ⊢ noRootNegOne r
+def ProvableNoRootNegOneISigma0 : Prop := ∀ r : ℕ, 3 ≤ r → 𝗜𝚺₀ ⊢ noRootNegOne r
 
 /-- A prime $q \nmid 4n$ is of the form $x^2 + ny^2$ if and only if $q \bmod 4n$ lies in `S`.
 - [Smi93, Question 5.4] -/

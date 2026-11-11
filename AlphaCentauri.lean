@@ -256,6 +256,7 @@ public import AlphaCentauri.ToMathlib.OpenPredicate.AddMonoidHomToInt
 public import AlphaCentauri.ToMathlib.OpenPredicate.Induction
 public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
 public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial
+public import AlphaCentauri.ToMathlib.OpenPredicate.TwoNonresidue
 public import AlphaCentauri.ToMathlib.RingTheory.HahnSeries.IntegerPart
 public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Bounds
 public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.Coding

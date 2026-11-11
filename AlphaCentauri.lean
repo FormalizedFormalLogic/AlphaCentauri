@@ -66,6 +66,7 @@ public import AlphaCentauri.InterpretabilityLogic.Gentzen.Veltman
 public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Arithmetic
 public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.CLM.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Arithmetic
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Gentzen
@@ -83,6 +84,8 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILRStar.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILRW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILWStar.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.SCL.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.SbCLM.Basic
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentSet
 public import AlphaCentauri.InterpretabilityLogic.MaximalConsistentTheory
 public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic

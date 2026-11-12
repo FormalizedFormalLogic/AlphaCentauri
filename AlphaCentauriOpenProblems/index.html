@@ -186,12 +186,11 @@ async function main() {
     areas.get(a).push(p);
   }
   const prefixes = new Map([...areas].map(([a, ps]) => [a, commonNamespace(ps.map((p) => p.name))]));
-  // The revision is worth showing only as a commit; `main` says nothing.
   const rev = data.revision;
-  const commit = /^[0-9a-f]{40}$/.test(rev)
-    ? ` Generated from <a href="https://github.com/${escapeHtml(data.repository)}/tree/${rev}"><code>${rev.slice(0, 7)}</code></a>.`
-    : "";
-  document.getElementById("summary").innerHTML = `${data.problems.length} problems.${commit}`;
+  document.getElementById("summary").innerHTML =
+    `${data.problems.length} problems. Last updated ${escapeHtml(data.updated)}, from
+     <a href="https://github.com/${escapeHtml(data.repository)}/tree/${escapeHtml(rev)}">
+     <code>${escapeHtml(rev.slice(0, 7))}</code></a>.`;
   const toc = document.getElementById("toc");
   toc.innerHTML = renderToc(areas, prefixes);
   const container = document.getElementById("problems");

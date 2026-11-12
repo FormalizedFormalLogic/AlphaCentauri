@@ -62,7 +62,10 @@ deriving ToJson
 /-- The list written by the executable. -/
 structure Output where
   repository : String
+  /-- The commit the list is generated from. -/
   revision : String
+  /-- The date of `revision`, as `YYYY-MM-DD`. -/
+  updated : String
   problems : Array Entry
 deriving ToJson
 
@@ -109,19 +112,28 @@ def collect (revision : String) : CoreM (Array Entry) := do
       entries := entries.push (← entry revision module name)
   return entries.qsort fun a b => a.path < b.path || (a.path == b.path && a.line < b.line)
 
+/-- The output of `git` with the arguments `args`, without its final newline. -/
+def git (args : Array String) : IO String := do
+  let out ← IO.Process.output { cmd := "git", args }
+  if out.exitCode != 0 then
+    throw <| IO.userError s!"`git {" ".intercalate args.toList}` failed: {out.stderr.trimAscii}"
+  return out.stdout.trimAscii.toString
+
 end AlphaCentauri.OpenProblems
 
 open AlphaCentauri.OpenProblems in
 /--
 `open_problems [output] [revision]` writes the open problems of `AlphaCentauri` to `output`, with
-source links to `revision`, which defaults to `$GITHUB_SHA` and then to `main`. Run from the root of
-the repository, after `lake build AlphaCentauri`.
+source links to `revision`, which defaults to `$GITHUB_SHA` and then to the commit checked out. The
+date of that commit is written as the date of the last update. Run from the root of the repository,
+after `lake build AlphaCentauri`.
 -/
 public def main (args : List String) : IO Unit := do
   let output : String := args[0]?.getD "pages/open-problems/open-problems.json"
-  let revision ← match args[1]? with
-    | some r => pure r
-    | none => pure <| (← IO.getEnv "GITHUB_SHA").getD "main"
+  let revision ← match args[1]?, ← IO.getEnv "GITHUB_SHA" with
+    | some r, _ | none, some r => git #["rev-parse", r]
+    | none, none => git #["rev-parse", "HEAD"]
+  let updated ← git #["show", "--no-patch", "--format=%cs", revision]
   initSearchPath (← findSysroot)
   unsafe enableInitializersExecution
   let env ← importModules (loadExts := true) #[{ module := `AlphaCentauri }] {}
@@ -130,5 +142,5 @@ public def main (args : List String) : IO Unit := do
   if problems.isEmpty then
     throw <| IO.userError "no open problem found; is the extension of `open_problem` loaded?"
   if let some dir := System.FilePath.parent output then IO.FS.createDirAll dir
-  IO.FS.writeFile output (toJson { repository, revision, problems : Output }).pretty
+  IO.FS.writeFile output (toJson { repository, revision, updated, problems : Output }).pretty
   IO.println s!"open_problems: wrote {problems.size} open problems to {output}"

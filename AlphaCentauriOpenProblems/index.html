@@ -2,7 +2,7 @@
 <!--
   The list of open problems of AlphaCentauri. `just open-problems` copies this page and its style
   `index.css` next to `open-problems.json`, written by `lake exe open_problems`, and
-  `references.json`, the entries of `references.yml` formatted by `bibliography/`; the page renders
+  `references.json`, the entries of `references.yml` formatted by `references.py`; the page renders
   the two at load time.
 -->
 <html lang="en">
@@ -84,13 +84,14 @@ function groupCitations(citations) {
   return groups;
 }
 
-function renderCitation(key, locators) {
+// A citation: its label, which links to the end of the list, and the reference formatted by
+// `references.py` from the repository's own bibliography.
+function renderCitation(key, locators, bib) {
   const label = escapeHtml(key) + (locators.length ? `, ${escapeHtml(locators.join("; "))}` : "");
-  return `<li><a class="key" href="#ref-${escapeHtml(key)}">[${label}]</a></li>`;
+  return `<li><a class="key" href="#ref-${escapeHtml(key)}">[${label}]</a> ${bib[key] ?? ""}</li>`;
 }
 
-// The references cited by some problem, with the entries formatted by Hayagriva from the
-// repository's own bibliography, in the order of the formatted text.
+// The references cited by some problem, in the order of the formatted text.
 function renderBibliography(problems, bib) {
   const text = (key) => (bib[key] || key).replace(/<[^>]*>/g, "");
   const keys = [...new Set(problems.flatMap((p) => p.citations.map((c) => c.key)))]
@@ -114,8 +115,8 @@ function commonNamespace(names) {
 // The name of `p` without the namespace `prefix` shared by the problems of its area.
 const displayName = (p, prefix) => p.name.split(".").slice(prefix.length).join(".");
 
-function renderProblem(p, prefix) {
-  const cites = [...groupCitations(p.citations)].map(([k, ls]) => renderCitation(k, ls)).join("");
+function renderProblem(p, bib, prefix) {
+  const cites = [...groupCitations(p.citations)].map(([k, ls]) => renderCitation(k, ls, bib)).join("");
   return `<article id="${escapeHtml(p.name)}"
       data-search="${escapeHtml([p.name, p.description, ...p.citations.map((c) => c.key)]
         .join(" ").toLowerCase())}">
@@ -217,7 +218,7 @@ async function main() {
   const container = document.getElementById("problems");
   container.innerHTML = [...areas].map(([a, ps]) =>
     `<section id="area-${escapeHtml(a)}"><h2>${escapeHtml(a)}</h2>
-       ${ps.map((p) => renderProblem(p, prefixes.get(a))).join("")}
+       ${ps.map((p) => renderProblem(p, bib, prefixes.get(a))).join("")}
      </section>`).join("");
   renderMathInElement(container, {
     delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }],

@@ -45,8 +45,8 @@ zoo:
 
 open-problems:
     lake exe open_problems pages/open-problems/open-problems.json
-    cargo run --quiet --release --manifest-path AlphaCentauriOpenProblems/bibliography/Cargo.toml \
-      -- references.yml pages/open-problems/references.json
+    yq --output-format=json . references.yml \
+      | python3 AlphaCentauriOpenProblems/references.py > pages/open-problems/references.json
     cp AlphaCentauriOpenProblems/index.html AlphaCentauriOpenProblems/index.css pages/open-problems/
 
 import-graph:

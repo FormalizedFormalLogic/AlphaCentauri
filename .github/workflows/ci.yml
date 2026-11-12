@@ -138,6 +138,10 @@ jobs:
         with:
           fetch-depth: 100
       - uses: ./.github/actions/setup-lean
+      # The bibliography is formatted by Hayagriva, through `AlphaCentauriOpenProblems/bibliography`.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: AlphaCentauriOpenProblems/bibliography
 
       - run: lake build AlphaCentauri
       - run: just open-problems

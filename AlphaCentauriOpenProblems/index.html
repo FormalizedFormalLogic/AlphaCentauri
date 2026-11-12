@@ -2,7 +2,7 @@
 <!--
   The list of open problems of AlphaCentauri. `just open-problems` copies this page and its style
   `index.css` next to `open-problems.json`, written by `lake exe open_problems`, and
-  `references.yml`, the bibliography the citation keys of the docstrings refer to; the page renders
+  `references.json`, the entries of `references.yml` formatted by `bibliography/`; the page renders
   the two at load time.
 -->
 <html lang="en">
@@ -13,7 +13,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
 <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -53,29 +52,10 @@ function renderMarkdown(text) {
   }).join("");
 }
 
-// One entry of the Hayagriva bibliography, as a line of text.
-function renderReference(ref) {
-  if (!ref) return "";
-  const names = (a) => (Array.isArray(a) ? a : a ? [a] : []).join("; ");
-  const year = ref.date ? String(ref.date).slice(0, 4) : "";
-  const parts = [];
-  const who = names(ref.author) || names(ref.editor);
-  if (who) parts.push(escapeHtml(who) + (year ? ` (${escapeHtml(year)})` : ""));
-  if (ref.title) parts.push(`<em>${escapeHtml(String(ref.title))}</em>`);
-  const parent = Array.isArray(ref.parent) ? ref.parent[0] : ref.parent;
-  if (parent && parent.title) {
-    parts.push(escapeHtml(String(parent.title)) + (parent.volume ? ` ${parent.volume}` : ""));
-  }
-  let html = parts.join(". ");
-  const doi = ref["serial-number"] && ref["serial-number"].doi;
-  const url = doi ? `https://doi.org/${doi}` : (ref.url && (ref.url.value || ref.url));
-  if (url) html += `. <a href="${escapeHtml(String(url))}">${escapeHtml(doi ? `doi:${doi}` : "link")}</a>`;
-  return html;
-}
-
 function renderCitation(c, bib) {
   const label = escapeHtml(c.key) + (c.locator ? `, ${escapeHtml(c.locator)}` : "");
-  const ref = renderReference(bib[c.key]);
+  // The entry is HTML formatted by Hayagriva from the repository's own bibliography.
+  const ref = bib[c.key];
   return `<li><strong>[${label}]</strong>${ref ? " " + ref : ""}</li>`;
 }
 
@@ -98,11 +78,10 @@ function renderProblem(p, bib) {
 }
 
 async function main() {
-  const [data, bibText] = await Promise.all([
+  const [data, bib] = await Promise.all([
     fetch("open-problems.json").then((r) => r.json()),
-    fetch("references.yml").then((r) => (r.ok ? r.text() : "")).catch(() => ""),
+    fetch("references.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({})),
   ]);
-  const bib = bibText ? jsyaml.load(bibText) || {} : {};
   const areas = new Map();
   for (const p of data.problems) {
     const a = areaOf(p.module);

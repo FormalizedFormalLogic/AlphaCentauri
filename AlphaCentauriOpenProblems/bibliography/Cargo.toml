@@ -1,0 +1,11 @@
+# Formats the bibliography `references.yml` for the list of open problems: every entry rendered by
+# Hayagriva, the bibliography engine of Typst, as HTML in the APA style. See `src/main.rs`.
+[package]
+name = "bibliography"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+hayagriva = { version = "0.10", default-features = false, features = ["archive"] }
+serde_json = "1"

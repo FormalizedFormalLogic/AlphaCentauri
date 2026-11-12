@@ -104,12 +104,12 @@ function renderBibliography(problems, bib, prefixes) {
   }
   const keys = [...citedBy.keys()].sort((a, b) => text(a).localeCompare(text(b)));
   const backlinks = (key) => citedBy.get(key).map((p) =>
-    `<a href="#${escapeHtml(p.name)}">${escapeHtml(displayName(p, prefixes.get(areaOf(p.module))))}</a>`)
-    .join(", ");
+    `<li><a href="#${escapeHtml(p.name)}">${escapeHtml(displayName(p, prefixes.get(areaOf(p.module))))}</a></li>`)
+    .join("");
   return `<h2>References</h2><ol class="bibliography">${keys.map((k) =>
     `<li id="ref-${escapeHtml(k)}"><span class="key">[${escapeHtml(k)}]</span>
        <span class="entry">${bib[k] ?? ""}
-         <span class="backlinks">Cited in ${backlinks(k)}</span></span></li>`).join("")}</ol>`;
+         <div class="backlinks">Cited in<ul>${backlinks(k)}</ul></div></span></li>`).join("")}</ol>`;
 }
 
 // The area of a module: the component after `AlphaCentauri`, e.g. `NumberTheory`.

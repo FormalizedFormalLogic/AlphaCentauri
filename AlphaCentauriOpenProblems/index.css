@@ -151,16 +151,18 @@ ol.bibliography {
   font-size: 1.05rem; line-height: 1.5;
   border-top: 1px solid var(--border);
 }
-ol.bibliography li {
+ol.bibliography > li {
   display: grid; grid-template-columns: 6rem minmax(0, 1fr); column-gap: 1rem;
   padding: .6rem .5rem; border-bottom: 1px solid var(--border);
   overflow-wrap: anywhere;
 }
-ol.bibliography li:target { background: var(--current); }
+ol.bibliography > li:target { background: var(--current); }
 .backlinks {
-  display: block; margin-top: .25rem;
+  margin-top: .4rem;
   font-family: var(--sans); font-size: .8rem; color: var(--muted);
 }
+.backlinks ul { margin: .15rem 0 0; padding-left: 1.1rem; }
+.backlinks li { margin: .05rem 0; }
 .backlinks a { font-family: var(--mono); font-size: .75rem; text-decoration: none; }
 .backlinks a:hover { text-decoration: underline; }
 pre.lean {

@@ -109,6 +109,7 @@ public import AlphaCentauri.Model.EndExtension
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.InjectiveEnumeration
+public import AlphaCentauri.Model.IntegerConstantDyadicPolynomial
 public import AlphaCentauri.Model.IntegerConstantPolynomial
 public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
@@ -160,6 +161,7 @@ public import AlphaCentauri.Schemata.CollectionWithoutExp
 public import AlphaCentauri.Schemata.DeltaInduction
 public import AlphaCentauri.Schemata.OpenInduction
 public import AlphaCentauri.Schemata.ParameterFreeInduction
+public import AlphaCentauri.Schemata.PeanoMinusSmu
 public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.Schemata.Strictness
 public import AlphaCentauri.Schemata.StrongCollection
@@ -229,6 +231,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.EventualAgreement
 public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree
@@ -257,6 +260,7 @@ public import AlphaCentauri.ToMathlib.NumberTheory.FLT.Three
 public import AlphaCentauri.ToMathlib.OpenPredicate
 public import AlphaCentauri.ToMathlib.OpenPredicate.AddMonoidHomToInt
 public import AlphaCentauri.ToMathlib.OpenPredicate.Induction
+public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantDyadicPolynomial
 public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
 public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial
 public import AlphaCentauri.ToMathlib.RingTheory.HahnSeries.IntegerPart

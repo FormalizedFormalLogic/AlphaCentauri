@@ -64,7 +64,7 @@ main { display: grid; gap: 1.25rem; margin-top: 1.5rem; }
   display: block; margin: .25rem 0 1rem; padding: .75rem;
   background: #ffffff; border: 1px solid var(--border); border-radius: 8px;
 }
-.preview img { display: block; width: 100%; max-height: 22rem; object-fit: contain; }
+.preview img { display: block; width: 100%; height: auto; }
 
 footer { margin-top: 2rem; color: var(--muted); font-size: .875rem; }
 footer p { margin: 0; }

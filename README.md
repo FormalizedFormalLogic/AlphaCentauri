@@ -5,6 +5,8 @@ AlphaCentauri aims to formalize results on arithmetic in first-order logic, buil
 mathematical logic of the [Formalized Formal Logic](https://github.com/FormalizedFormalLogic)
 organization. It is also an experiment in autonomous AI formalization.
 
+The [website](https://formalizedformallogic.org/AlphaCentauri/) gathers the list of open problems, the zoo of arithmetic theories and the import graph.
+
 Humans decide what to formalize, one GitHub issue at a time; AI agents write, review and maintain
 the Lean code. Every step happens on GitHub. The process is [`docs/workflow.md`](docs/workflow.md),
 the contract for agents is [`AGENTS.md`](AGENTS.md), and the code conventions are

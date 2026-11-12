@@ -1,0 +1,109 @@
+<!doctype html>
+<!--
+  The front page of the site of AlphaCentauri. The deploy job of `.github/workflows/ci.yml` puts the
+  generated pages next to it, all addressed relative to this page: `open-problems/`, `zoo/` and
+  `import_graph.*`.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlphaCentauri</title>
+<meta name="description" content="Formalization of results on arithmetic in first-order logic, in Lean 4.">
+<script>
+  // Applied before the page is drawn, so that a chosen theme never flashes the other one.
+  try {
+    const theme = localStorage.getItem("theme");
+    if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+  } catch (_) {}
+</script>
+<link rel="stylesheet" href="index.css">
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <select id="theme" aria-label="Theme">
+      <option value="auto">Auto</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+  </div>
+  <header>
+    <h1>AlphaCentauri</h1>
+    <p class="lead">
+      A formalization of results on arithmetic in first-order logic, in Lean 4, built on
+      <a href="https://github.com/FormalizedFormalLogic/Foundation">Foundation</a>. Humans decide
+      what to formalize, one GitHub issue at a time; AI agents write, review and maintain the
+      code.
+    </p>
+    <p class="links">
+      <a href="https://github.com/FormalizedFormalLogic/AlphaCentauri">Repository</a>
+      <a href="https://github.com/FormalizedFormalLogic/AlphaCentauri/issues">Issues</a>
+    </p>
+  </header>
+  <main>
+    <section class="card" id="open-problems">
+      <h2><a href="open-problems/">Open problems</a></h2>
+      <p>
+        The open problems stated in the library, each as a question with its sources and the Lean
+        proposition that states it. Every problem is a proposition whose truth is unknown, never
+        an axiom.
+      </p>
+      <p class="actions">
+        <a class="button" href="open-problems/">Open the list</a>
+        <a href="https://github.com/FormalizedFormalLogic/AlphaCentauri/issues/new?template=open-problem.yml">Suggest a problem</a>
+      </p>
+    </section>
+    <section class="card" id="import-graph">
+      <h2><a href="import_graph.html">Import graph</a></h2>
+      <p>
+        The graph of the imports between the modules of AlphaCentauri, to see how the library is
+        layered.
+      </p>
+      <p class="actions">
+        <a class="button" href="import_graph.html">HTML</a>
+        <a class="button" href="import_graph.pdf">PDF</a>
+        <a class="button" href="import_graph.png">PNG</a>
+      </p>
+    </section>
+    <section class="card" id="zoo">
+      <h2><a href="zoo/arithmetic.png">Arithmetic theory zoo</a></h2>
+      <p>
+        How the arithmetical theories compare in provability strength, as proved in the library:
+        solid arrows for strictly stronger, dashed arrows for stronger, and double lines for
+        equivalent theories. It is generated from the Lean environment.
+      </p>
+      <a class="preview" href="zoo/arithmetic.png">
+        <img src="zoo/arithmetic.png" alt="The diagram of the arithmetic theory zoo" loading="lazy">
+      </a>
+      <p class="actions">
+        <a class="button" href="zoo/arithmetic.png">PNG</a>
+        <a class="button" href="zoo/arithmetic.pdf">PDF</a>
+      </p>
+    </section>
+  </main>
+  <footer>
+    <p>
+      Generated on every push to <code>main</code>. Released under the
+      <a href="https://github.com/FormalizedFormalLogic/AlphaCentauri/blob/main/LICENSE">Apache-2.0</a>
+      license.
+    </p>
+  </footer>
+</div>
+<script>
+"use strict";
+// The theme selector: `auto` follows the system, and the choice is remembered, as on the other pages.
+const select = document.getElementById("theme");
+select.value = document.documentElement.dataset.theme || "auto";
+select.addEventListener("change", () => {
+  const theme = select.value;
+  if (theme === "auto") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme;
+  try {
+    if (theme === "auto") localStorage.removeItem("theme");
+    else localStorage.setItem("theme", theme);
+  } catch (_) {}
+});
+</script>
+</body>
+</html>

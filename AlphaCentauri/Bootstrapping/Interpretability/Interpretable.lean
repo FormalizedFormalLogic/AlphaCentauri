@@ -291,10 +291,10 @@ variable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
 
 /-- The formula defining `IsTable L₁ L₂`. -/
 noncomputable def isTableDef : ArithmeticSemisentence 1 :=
-  “tbl. ∃ d, !tableDomainGraph.val d tbl ∧ !(isFVFree L₁).val 1 d ∧
-    (∀ k r, !L₂.isRel.val k r → ∃ e, !tableRelGraph.val e tbl k r ∧ !(isFVFree L₁).val k e) ∧
+  “tbl. ∃ d, !tableDomainGraph.val d tbl ∧ !(isSentence L₁).val 1 d ∧
+    (∀ k r, !L₂.isRel.val k r → ∃ e, !tableRelGraph.val e tbl k r ∧ !(isSentence L₁).val k e) ∧
     (∀ k f, !L₂.isFunc.val k f →
-      ∃ e, !tableFuncGraph.val e tbl k f ∧ !(isFVFree L₁).val (k + 1) e)”
+      ∃ e, !tableFuncGraph.val e tbl k f ∧ !(isSentence L₁).val (k + 1) e)”
 
 omit [L₂.Eq] in
 variable {L₁ L₂} in

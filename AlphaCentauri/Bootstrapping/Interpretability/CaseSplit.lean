@@ -128,9 +128,9 @@ section sentence
 
 variable (φ : ArithmeticSentence) {L₂ : Language} [L₂.Encodable] [L₂.LORDefinable] {tbl₁ tbl₂ : V}
 
-lemma _root_.FFL.FirstOrder.Language.IsFVFree.caseCode {n p q : V}
-    (hp : Language.IsFVFree ℒₒᵣ n p) (hq : Language.IsFVFree ℒₒᵣ n q) :
-    Language.IsFVFree ℒₒᵣ n (caseCode ℒₒᵣ ⌜φ⌝ p q) := by
+lemma _root_.FFL.FirstOrder.Language.IsSentence.caseCode {n p q : V}
+    (hp : Language.IsSentence ℒₒᵣ n p) (hq : Language.IsSentence ℒₒᵣ n q) :
+    Language.IsSentence ℒₒᵣ n (caseCode ℒₒᵣ ⌜φ⌝ p q) := by
   have hφ : IsSemiformula ℒₒᵣ 0 (⌜φ⌝ : V) := Sentence.quote_isSemiformula₀ φ
   have hp' := hp.isSemiformula
   have hq' := hq.isSemiformula

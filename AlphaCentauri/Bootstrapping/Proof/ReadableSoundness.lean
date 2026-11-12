@@ -104,7 +104,7 @@ end partialInstance
 that has no free variables, is not existential, and belongs to `IsReadable k D`, such that every
 instance of `χ` by closed terms is false under `ReadableTruth k D`. -/
 def IsFalseBlock (k D : ℕ) (e : V) : Prop :=
-  ∃ m χ, e = qqExss χ m ∧ Language.IsFVFree ℒₒᵣ m χ ∧ (∀ p, χ ≠ ^∃ p) ∧
+  ∃ m χ, e = qqExss χ m ∧ Language.IsSentence ℒₒᵣ m χ ∧ (∀ p, χ ≠ ^∃ p) ∧
     IsReadable k D χ ∧ ∀ w, IsSemitermVec ℒₒᵣ m 0 w → ¬ReadableTruth k D (subst ℒₒᵣ w χ)
 
 lemma IsFalseBlock.isFormula {k D : ℕ} {e : V} (h : IsFalseBlock k D e) : IsFormula ℒₒᵣ e := by

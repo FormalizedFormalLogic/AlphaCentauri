@@ -182,7 +182,7 @@ section generic
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-lemma free_imp {δ q : V} (hδ : L.IsFVFree 1 δ) (hq : IsSemiformula L 1 q) :
+lemma free_imp {δ q : V} (hδ : L.IsSentence 1 δ) (hq : IsSemiformula L 1 q) :
     free L (imp L δ q) = neg L (substs1 L (^&0) δ) ^⋎ free L q := by
   have hw : IsSemitermVec L 1 0 (?[^&0] : V) := IsSemitermVec.singleton.mpr (IsSemiterm.fvar _ _)
   rw [free, shift_imp hδ.isSemiformula hq, hδ.shift_eq, substs1,

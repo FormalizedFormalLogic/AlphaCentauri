@@ -615,7 +615,7 @@ theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.
       fvSubst L₂ (freshVec j) q = shift L₂ q := by
     intro j _ _ q hq
     obtain rfl : q = φ := by simpa using hq
-    exact (Language.IsFVFree.fvSubst_eq_self (w := freshVec j) ⟨hφF, hφ⟩).trans hφ.symm
+    exact (Language.IsSentence.fvSubst_eq_self (w := freshVec j) ⟨hφF, hφ⟩).trans hφ.symm
   have hd : Derivable S (translateSet L₁ L₂ tbl (insert φ ∅) ∪
       negDomSet L₁ tbl.[0] (insert φ ∅)) :=
     TranslatedDerivable.of_derivable hS h hL₂ hax hpr.toDerivable

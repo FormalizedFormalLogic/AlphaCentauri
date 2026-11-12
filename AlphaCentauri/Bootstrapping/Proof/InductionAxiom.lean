@@ -59,7 +59,7 @@ noncomputable def prenexInductionAxiom (m Z : V) : V :=
 /-- `Z` is a prenex $\Sigma_n$ formula without free variables, whose bound variable `0` is the
 induction variable and whose bound variables `1, …, m` are the parameters. -/
 def IsInductionMatrix (n : ℕ) (m Z : V) : Prop :=
-  Language.IsFVFree ℒₒᵣ (m + 1) Z ∧ IsPrenexHierarchy 𝚺 n Z
+  Language.IsSentence ℒₒᵣ (m + 1) Z ∧ IsPrenexHierarchy 𝚺 n Z
 
 instance prenexInductionAtom.definable :
     𝚺ᴬ₁-Function₃ (prenexInductionAtom : V → V → V → V) := by
@@ -93,7 +93,7 @@ private lemma isSemiformula_prenexInductionAtom (hZ : IsSemiformula ℒₒᵣ (m
     (ht : IsSemiterm ℒₒᵣ (m + 2) t) : IsSemiformula ℒₒᵣ (m + 2) (prenexInductionAtom m Z t) :=
   hZ.subst (isSemitermVec_cons_bvarVec ht)
 
-private lemma shift_prenexInductionAtom (hZ : Language.IsFVFree ℒₒᵣ (m + 1) Z) {t : V}
+private lemma shift_prenexInductionAtom (hZ : Language.IsSentence ℒₒᵣ (m + 1) Z) {t : V}
     (ht : IsSemiterm ℒₒᵣ (m + 2) t) (hst : termShift ℒₒᵣ t = t) :
     shift ℒₒᵣ (prenexInductionAtom m Z t) = prenexInductionAtom m Z t := by
   have hw := isSemitermVec_cons_bvarVec ht
@@ -302,7 +302,7 @@ private lemma prenexIndFormula_val {n : ℕ} (h : IsInductionMatrix n m Z)
 end typed
 
 private lemma derivable_neg_prenexInductionAxiom {n : ℕ} {m b K Z : V}
-    (hM : IsInductionMatrix n m Z) (hb : Language.IsFVFree ℒₒᵣ m b)
+    (hM : IsInductionMatrix n m Z) (hb : Language.IsSentence ℒₒᵣ m b)
     (hKs : IsSemiformula ℒₒᵣ 1 K) (hZK : subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec m)) Z = K)
     (hsub : subst ℒₒᵣ (fvarVec m) b = indBodyVal K) :
     Derivable (∅ : Theory ℒₒᵣ)

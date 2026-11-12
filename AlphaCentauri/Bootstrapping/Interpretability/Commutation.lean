@@ -28,13 +28,13 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Negation, shift and arity -/
 
-/-- `tbl` lists, for the languages `L₁` and `L₂`, formulas without free variables of the right
-arities. -/
+/-- `tbl` lists, for the languages `L₁` and `L₂`, sentences with the right numbers of
+bound variables. -/
 structure IsTable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq] [L₂.Encodable]
     [L₂.LORDefinable] (tbl : V) : Prop where
-  domain : L₁.IsFVFree 1 (tableDomain tbl)
-  rel {k r : V} : L₂.IsRel k r → L₁.IsFVFree k (tableRel tbl k r)
-  func {k f : V} : L₂.IsFunc k f → L₁.IsFVFree (k + 1) (tableFunc tbl k f)
+  domain : L₁.IsSentence 1 (tableDomain tbl)
+  rel {k r : V} : L₂.IsRel k r → L₁.IsSentence k (tableRel tbl k r)
+  func {k f : V} : L₂.IsFunc k f → L₁.IsSentence (k + 1) (tableFunc tbl k f)
 
 lemma IsSemiformula.relocate {n m i s p : V} (hp : IsSemiformula L (n + 1) p) (hi : i < m)
     (hs : s + n ≤ m) : IsSemiformula L m (relocate L i s p) := by
@@ -525,11 +525,11 @@ variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
 
 lemma IsTable.fvSubst_domainAt {tbl w i m : V} (hT : IsTable L₁ L₂ tbl) (hi : i < m) :
     fvSubst L₁ w (domainAt L₁ tbl i) = domainAt L₁ tbl i :=
-  Language.IsFVFree.fvSubst_eq_self ⟨hT.isSemiformula_domainAt hi, hT.shift_domainAt i⟩
+  Language.IsSentence.fvSubst_eq_self ⟨hT.isSemiformula_domainAt hi, hT.shift_domainAt i⟩
 
 lemma IsTable.fvSubst_funcTail {tbl w k f m : V} (hT : IsTable L₁ L₂ tbl) (hf : L₂.IsFunc k f)
     (hk : k < m) : fvSubst L₁ w (funcTail L₁ tbl k f) = funcTail L₁ tbl k f :=
-  Language.IsFVFree.fvSubst_eq_self ⟨hT.isSemiformula_funcTail hf hk, hT.shift_funcTail hf⟩
+  Language.IsSentence.fvSubst_eq_self ⟨hT.isSemiformula_funcTail hf hk, hT.shift_funcTail hf⟩
 
 lemma IsTable.fvSubst_qqConj_guardVec {tbl n m k s w u u' : V} (hT : IsTable L₁ L₂ tbl)
     (hw : ∀ i < len w, ∃ x, w.[i] = ^&x) (hk : k ≤ m) (hs : s + n ≤ m)

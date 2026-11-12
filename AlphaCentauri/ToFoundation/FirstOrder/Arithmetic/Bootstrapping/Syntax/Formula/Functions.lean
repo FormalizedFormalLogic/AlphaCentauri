@@ -9,8 +9,9 @@ Negation has no fixed point on coded formulas, and the shift of free variables d
 the code of a formula. A substitution instance `subst w p` of a coded formula `p`, and likewise its
 shift `shift p`, has the same outermost connective as `p`. Substituting into a coded formula with
 `m` bound variables depends only on the first `m` entries of the vector. Structural induction on
-one-variable formulas instantiates the quantifier case by a free variable. A coded semiformula fixed
-by the shift has no free variables, and the class of such codes is closed under the connectives.
+one-variable formulas instantiates the quantifier case by a free variable. A coded sentence is a
+coded semiformula without free variables, and the class of coded sentences with `n` bound variables
+is closed under the connectives.
 -/
 
 @[expose] public section
@@ -382,76 +383,77 @@ lemma shift_substs1_qqFvar {p j : V} (hp : IsSemiformula L 1 p) :
   rcases (show i = 0 by simpa using hi)
   simp
 
-section fvfree
+section sentence
 
 variable (L)
 
-/-- The coded formula `p` is a semiformula with `n` bound variables and no free variables. -/
-def _root_.FFL.FirstOrder.Language.IsFVFree (n p : V) : Prop :=
+/-- The coded formula `p` is a sentence with `n` bound variables: a semiformula with `n` bound
+variables and no free variables. `IsSentence 0 p` is the usual notion of a sentence. -/
+def _root_.FFL.FirstOrder.Language.IsSentence (n p : V) : Prop :=
   IsSemiformula L n p ∧ shift L p = p
 
-noncomputable def isFVFree : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
+noncomputable def isSentence : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “n p. !(isSemiformula L).sigma n p ∧ !(shiftGraph L) p p”)
   (.mkPi “n p. !(isSemiformula L).pi n p ∧ ∀ y, !(shiftGraph L) y p → y = p”)
 
-instance _root_.FFL.FirstOrder.Language.IsFVFree.defined :
-    𝚫ᴬ₁-Relation (L.IsFVFree (V := V)) via isFVFree L := .mk <| by
+instance _root_.FFL.FirstOrder.Language.IsSentence.defined :
+    𝚫ᴬ₁-Relation (L.IsSentence (V := V)) via isSentence L := .mk <| by
   constructor
   · intro v
-    simp [isFVFree, Bounding.HierarchySymbol.Semiformula.val_sigma, IsSemiformula.defined.iff,
+    simp [isSentence, Bounding.HierarchySymbol.Semiformula.val_sigma, IsSemiformula.defined.iff,
       shift.defined.iff, eq_comm]
   · intro v
-    simp [isFVFree, Bounding.HierarchySymbol.Semiformula.val_sigma, IsSemiformula.defined.iff,
-      shift.defined.iff, Language.IsFVFree, eq_comm]
+    simp [isSentence, Bounding.HierarchySymbol.Semiformula.val_sigma, IsSemiformula.defined.iff,
+      shift.defined.iff, Language.IsSentence, eq_comm]
 
-instance _root_.FFL.FirstOrder.Language.IsFVFree.definable :
-    𝚫ᴬ₁-Relation (L.IsFVFree (V := V)) :=
-  (Language.IsFVFree.defined (L := L) (V := V)).to_definable
+instance _root_.FFL.FirstOrder.Language.IsSentence.definable :
+    𝚫ᴬ₁-Relation (L.IsSentence (V := V)) :=
+  (Language.IsSentence.defined (L := L) (V := V)).to_definable
 
-instance _root_.FFL.FirstOrder.Language.IsFVFree.definable' {m : ℕ} {Γ : SigmaPiDelta} :
-    Γᴬ_[m + 1]-Relation (L.IsFVFree (V := V)) :=
-  (Language.IsFVFree.definable (L := L) (V := V)).of_deltaOne
+instance _root_.FFL.FirstOrder.Language.IsSentence.definable' {m : ℕ} {Γ : SigmaPiDelta} :
+    Γᴬ_[m + 1]-Relation (L.IsSentence (V := V)) :=
+  (Language.IsSentence.definable (L := L) (V := V)).of_deltaOne
 
 variable {L}
 
-lemma _root_.FFL.FirstOrder.Language.IsFVFree.isSemiformula {n p : V}
-    (h : L.IsFVFree n p) : IsSemiformula L n p := h.1
+lemma _root_.FFL.FirstOrder.Language.IsSentence.isSemiformula {n p : V}
+    (h : L.IsSentence n p) : IsSemiformula L n p := h.1
 
-lemma _root_.FFL.FirstOrder.Language.IsFVFree.shift_eq {n p : V}
-    (h : L.IsFVFree n p) : shift L p = p := h.2
+lemma _root_.FFL.FirstOrder.Language.IsSentence.shift_eq {n p : V}
+    (h : L.IsSentence n p) : shift L p = p := h.2
 
-@[simp] lemma _root_.FFL.FirstOrder.Language.IsFVFree.verum (n : V) :
-    L.IsFVFree n ^⊤ := by
-  simp [Language.IsFVFree]
+@[simp] lemma _root_.FFL.FirstOrder.Language.IsSentence.verum (n : V) :
+    L.IsSentence n ^⊤ := by
+  simp [Language.IsSentence]
 
-@[simp] lemma _root_.FFL.FirstOrder.Language.IsFVFree.falsum (n : V) :
-    L.IsFVFree n ^⊥ := by
-  simp [Language.IsFVFree]
+@[simp] lemma _root_.FFL.FirstOrder.Language.IsSentence.falsum (n : V) :
+    L.IsSentence n ^⊥ := by
+  simp [Language.IsSentence]
 
-lemma _root_.FFL.FirstOrder.Language.IsFVFree.and {n p q : V}
-    (hp : L.IsFVFree n p) (hq : L.IsFVFree n q) : L.IsFVFree n (p ^⋏ q) := by
-  rw [Language.IsFVFree, shift_and hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
+lemma _root_.FFL.FirstOrder.Language.IsSentence.and {n p q : V}
+    (hp : L.IsSentence n p) (hq : L.IsSentence n q) : L.IsSentence n (p ^⋏ q) := by
+  rw [Language.IsSentence, shift_and hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
     hp.shift_eq, hq.shift_eq]
   simp [hp.isSemiformula, hq.isSemiformula]
 
-lemma _root_.FFL.FirstOrder.Language.IsFVFree.or {n p q : V}
-    (hp : L.IsFVFree n p) (hq : L.IsFVFree n q) : L.IsFVFree n (p ^⋎ q) := by
-  rw [Language.IsFVFree, shift_or hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
+lemma _root_.FFL.FirstOrder.Language.IsSentence.or {n p q : V}
+    (hp : L.IsSentence n p) (hq : L.IsSentence n q) : L.IsSentence n (p ^⋎ q) := by
+  rw [Language.IsSentence, shift_or hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
     hp.shift_eq, hq.shift_eq]
   simp [hp.isSemiformula, hq.isSemiformula]
 
-lemma _root_.FFL.FirstOrder.Language.IsFVFree.all {n p : V}
-    (hp : L.IsFVFree (n + 1) p) : L.IsFVFree n (^∀ p) := by
-  rw [Language.IsFVFree, shift_all hp.isSemiformula.isUFormula, hp.shift_eq]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.all {n p : V}
+    (hp : L.IsSentence (n + 1) p) : L.IsSentence n (^∀ p) := by
+  rw [Language.IsSentence, shift_all hp.isSemiformula.isUFormula, hp.shift_eq]
   simp [hp.isSemiformula]
 
-lemma _root_.FFL.FirstOrder.Language.IsFVFree.exs {n p : V}
-    (hp : L.IsFVFree (n + 1) p) : L.IsFVFree n (^∃ p) := by
-  rw [Language.IsFVFree, shift_exs hp.isSemiformula.isUFormula, hp.shift_eq]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.exs {n p : V}
+    (hp : L.IsSentence (n + 1) p) : L.IsSentence n (^∃ p) := by
+  rw [Language.IsSentence, shift_exs hp.isSemiformula.isUFormula, hp.shift_eq]
   simp [hp.isSemiformula]
 
-@[simp] lemma _root_.FFL.FirstOrder.Language.IsFVFree.neg_iff {n p : V} :
-    L.IsFVFree n (neg L p) ↔ L.IsFVFree n p := by
+@[simp] lemma _root_.FFL.FirstOrder.Language.IsSentence.neg_iff {n p : V} :
+    L.IsSentence n (neg L p) ↔ L.IsSentence n p := by
   constructor
   · intro h
     have hp : IsSemiformula L n p := IsSemiformula.neg_iff.mp h.isSemiformula
@@ -461,9 +463,9 @@ lemma _root_.FFL.FirstOrder.Language.IsFVFree.exs {n p : V}
   · intro h
     exact ⟨by simp [h.isSemiformula], by rw [shift_neg h.isSemiformula, h.shift_eq]⟩
 
-end fvfree
+end sentence
 
-lemma shift_neg_substs1_qqFvar {d j : V} (hd : L.IsFVFree 1 d) :
+lemma shift_neg_substs1_qqFvar {d j : V} (hd : L.IsSentence 1 d) :
     shift L (neg L (substs1 L (^&j) d)) = neg L (substs1 L (^&(j + 1)) d) := by
   rw [shift_neg (IsSemiformula.substs1 (n := 0) (by simp) hd.isSemiformula),
     shift_substs1_qqFvar hd.isSemiformula, hd.shift_eq]

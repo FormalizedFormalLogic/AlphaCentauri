@@ -52,7 +52,7 @@ variable (T) in
 /-- For every internal prenex $\Gamma_n$ sentence `x`, if `T` proves `b 🡒 x` then `T` proves
 `a 🡒 x`. -/
 def Conservative (Γ : Polarity) (n : ℕ) (a b : V) : Prop :=
-  ∀ x, Language.IsFVFree ℒₒᵣ 0 x → IsPrenexHierarchy Γ n x →
+  ∀ x, Language.IsSentence ℒₒᵣ 0 x → IsPrenexHierarchy Γ n x →
     Provable T (imp ℒₒᵣ b x) → Provable T (imp ℒₒᵣ a x)
 
 variable {Γ : Polarity} {n : ℕ} {σ τ χ : ArithmeticSentence}
@@ -167,7 +167,7 @@ end Bootstrapping
 
 variable (T Γ n) in
 noncomputable def conservativeDef : ArithmeticSemisentence 2 :=
-  “a b. ∀ x, !(isFVFree ℒₒᵣ).sigma 0 x → !(isPrenexHierarchy Γ n).sigma x →
+  “a b. ∀ x, !(isSentence ℒₒᵣ).sigma 0 x → !(isPrenexHierarchy Γ n).sigma x →
     ∀ y, !(impGraph ℒₒᵣ) y b x → ∀ z, !(impGraph ℒₒᵣ) z a x →
       !(provable T) y → !(provable T) z”
 

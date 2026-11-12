@@ -461,7 +461,7 @@ lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
     Derivable S (insert (∼(h₁.domT.subst ![Semiterm.fvar 0]) ⋎
       (hc.transT P 🡘 h₁.transT (hT₂.transT P)).free).val
         (setShift L (negDomSet L tbl₁.[0] M))) := by
-  have hdom : L.IsFVFree 1 tbl₁.[0] := h₁.domain
+  have hdom : L.IsSentence 1 tbl₁.[0] := h₁.domain
   have hp : IsSemiformula L 1 P.val := by simp
   set Xf : Formula V L := hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free) with hXf
   have hX : IsFormula L Xf.val := by simp
@@ -650,10 +650,10 @@ theorem derivable_comp_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L 
     exact h
 
 include h₁ hT₂ hc in
-/-- Along the composite table and along the composite of the translations, every formula code
-without free variables has provably equivalent translations. -/
+/-- Along the composite table and along the composite of the translations, every coded
+sentence has provably equivalent translations. -/
 theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
-    (hL : L.SymbolsStandard V) {p : V} (hp : L.IsFVFree 0 p) :
+    (hL : L.SymbolsStandard V) {p : V} (hp : L.IsSentence 0 p) :
     Provable S (iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) p)
       (translate L L tbl₁ (translate L L tbl₂ p))) := by
   have hp' := hp.isSemiformula
@@ -673,7 +673,7 @@ theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), shift
       fvSubstImage (L := L) (freshVec j) (insert X ∅) = setShift L (insert X ∅) := by
     intro j _ _
     rw [fvSubstImage_insert, fvSubstImage_empty, mem_setShift_insert, setShift_empty,
-      Language.IsFVFree.fvSubst_eq_self ⟨hX, hXs⟩, hXs]
+      Language.IsSentence.fvSubst_eq_self ⟨hX, hXs⟩, hXs]
   have h₃ := Derivable.elim_negDomSet hS h₁.domain h₁.exs_domain (by simp [hX]) zero_le hfresh h₂
   rw [negDomSet_zero] at h₃
   exact internal_provable_iff_internal_derivable.mpr (Derivable.ofSetEq (fun x ↦ by simp) h₃)

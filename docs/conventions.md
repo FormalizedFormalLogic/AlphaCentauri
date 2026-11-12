@@ -70,7 +70,9 @@ rewrite, so it is written as if it were already there.
   a known theorem together with another one. `open_problem Name := p` (from
   `AlphaCentauri/OpenProblem.lean`) declares `def Name : Prop := p` and records it, so that
   `just open-problems` lists it, with its docstring, on the project's pages; it is not listed in
-  `forgive.yml`. The docstring is mandatory and, like any other, states what `p` says and cites
+  `forgive.yml`. `Name` is the name the theorem would carry, following the naming of theorems
+  (`provable_infinitudeOfPrimes_ISigma0`, `IE1_strictlyWeakerThan_ISigma0`), so that proving it
+  keeps the name. The docstring is mandatory and, like any other, states what `p` says and cites
   the source; it does not repeat that the problem is open. A result that depends on an open
   problem takes it as a hypothesis `(h : Name)`.
 - **Reuse before restating.** Foundation's theories, notations, definability classes, and the

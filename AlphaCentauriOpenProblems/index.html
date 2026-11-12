@@ -61,14 +61,21 @@ function renderCitation(c, bib) {
 
 // The area of a module: the component after `AlphaCentauri`, e.g. `NumberTheory`.
 const areaOf = (module) => module.split(".")[1] || module;
-const shortName = (name) => name.split(".").pop();
+// The namespace shared by all of `names`, as a list of components.
+function commonNamespace(names) {
+  const parts = names.map((n) => n.split(".").slice(0, -1));
+  const common = [];
+  for (let i = 0; parts.every((p) => i < p.length && p[i] === parts[0][i]); i++) common.push(parts[0][i]);
+  return common;
+}
 
-function renderProblem(p, bib) {
+// `prefix` is the namespace shared by the problems of the area, left out of the heading.
+function renderProblem(p, bib, prefix) {
   const cites = p.citations.map((c) => renderCitation(c, bib)).join("");
   return `<article id="${escapeHtml(p.name)}"
       data-search="${escapeHtml([p.name, p.description, ...p.citations.map((c) => c.key)]
         .join(" ").toLowerCase())}">
-    <h3><a class="anchor" href="#${escapeHtml(p.name)}">${escapeHtml(shortName(p.name))}</a></h3>
+    <h3><a class="anchor" href="#${escapeHtml(p.name)}">${escapeHtml(p.name.split(".").slice(prefix.length).join("."))}</a></h3>
     ${renderMarkdown(p.description)}
     ${cites ? `<ul class="citations">${cites}</ul>` : ""}
     <pre><code>${escapeHtml(p.source)}</code></pre>
@@ -99,7 +106,8 @@ async function main() {
   const main = document.getElementById("problems");
   main.innerHTML = [...areas].map(([a, ps]) =>
     `<section id="area-${escapeHtml(a)}"><h2>${escapeHtml(a)}</h2>
-       ${ps.map((p) => renderProblem(p, bib)).join("")}</section>`).join("");
+       ${ps.map((p) => renderProblem(p, bib, commonNamespace(ps.map((q) => q.name)))).join("")}
+     </section>`).join("");
   renderMathInElement(main, {
     delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }],
     throwOnError: false,

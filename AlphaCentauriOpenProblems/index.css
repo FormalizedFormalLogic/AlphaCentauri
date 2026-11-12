@@ -145,8 +145,17 @@ article h3 a.anchor { color: inherit; text-decoration: none; }
 ul.citations { margin: .5rem 0 0; padding-left: 1.25rem; font-size: 1rem; line-height: 1.45; }
 .key { font-weight: 700; }
 a.key { text-decoration: none; }
-ol.bibliography { list-style: none; margin: 0; padding: 0; font-size: 1.05rem; line-height: 1.5; }
-ol.bibliography li { margin: .6rem 0; padding-left: 2rem; text-indent: -2rem; overflow-wrap: anywhere; }
+/* The references as a grid: the key on the left, the entry on the right. */
+ol.bibliography {
+  list-style: none; margin: 0; padding: 0;
+  font-size: 1.05rem; line-height: 1.5;
+  border-top: 1px solid var(--border);
+}
+ol.bibliography li {
+  display: grid; grid-template-columns: 6rem minmax(0, 1fr); column-gap: 1rem;
+  padding: .6rem .5rem; border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
 ol.bibliography li:target { background: var(--current); }
 pre.lean {
   margin: .75rem 0 0; padding: .75rem; overflow-x: auto; line-height: 1.5;

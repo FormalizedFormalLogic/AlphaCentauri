@@ -97,7 +97,7 @@ function renderBibliography(problems, bib) {
     .sort((a, b) => text(a).localeCompare(text(b)));
   return `<h2>References</h2><ol class="bibliography">${keys.map((k) =>
     `<li id="ref-${escapeHtml(k)}"><span class="key">[${escapeHtml(k)}]</span>
-       ${bib[k] ?? ""}</li>`).join("")}</ol>`;
+       <span class="entry">${bib[k] ?? ""}</span></li>`).join("")}</ol>`;
 }
 
 // The area of a module: the component after `AlphaCentauri`, e.g. `NumberTheory`.

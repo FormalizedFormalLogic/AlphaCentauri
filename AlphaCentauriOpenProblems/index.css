@@ -77,7 +77,6 @@
 
 * { box-sizing: border-box; }
 html { scroll-padding-top: 1rem; }
-@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 body {
   margin: 0;
   font: 16px/1.6 var(--sans);

@@ -169,8 +169,9 @@ function setUpTheme() {
   });
 }
 
-// Marks in the contents the problem being read: the last one whose top has passed the upper part
-// of the window. It follows the scroll position, so a click on the contents marks its target at once.
+// Marks in the contents the problem being read: the last one whose top has reached the top of the
+// window, where a click on the contents puts its target. It follows the scroll position, so a click
+// marks its target at once, however short the problems after it.
 function setUpScrollSpy(container, toc) {
   const sidebar = document.querySelector(".sidebar");
   const items = new Map([...toc.querySelectorAll("li[data-target]")]
@@ -186,7 +187,7 @@ function setUpScrollSpy(container, toc) {
     const shown = [...container.querySelectorAll("article")].filter((a) => !a.hidden);
     let spied = shown[0];
     for (const art of shown) {
-      if (art.getBoundingClientRect().top > window.innerHeight * 0.3) break;
+      if (art.getBoundingClientRect().top > 40) break;
       spied = art;
     }
     if (!spied || spied === current) return;

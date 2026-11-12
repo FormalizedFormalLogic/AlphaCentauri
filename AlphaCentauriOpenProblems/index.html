@@ -17,6 +17,7 @@
     if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
   } catch (_) {}
 </script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <link rel="stylesheet" href="index.css">
@@ -223,53 +224,6 @@ function setUpFilter(container, toc, update) {
   });
 }
 
-// Unicode's mathematical alphanumerics, which the browser draws in Libertinus Math: for each style
-// the code points of `A`, `a` and `0`. Chromium's MathML honours only `mathvariant="normal"`, so a
-// letter in another style, as in $\mathsf{I}$, is written as the character of that style.
-const ALPHANUMERICS = {
-  "bold": [0x1D400, 0x1D41A, 0x1D7CE],
-  "bold-italic": [0x1D468, 0x1D482, null],
-  "sans-serif": [0x1D5A0, 0x1D5BA, 0x1D7E2],
-  "monospace": [0x1D670, 0x1D68A, 0x1D7F6],
-  "double-struck": [0x1D538, 0x1D552, 0x1D7D8],
-  "script": [0x1D49C, 0x1D4B6, null],
-  "fraktur": [0x1D504, 0x1D51E, null],
-};
-// The letters of the styles that Unicode keeps in the block of letterlike symbols.
-const LETTERLIKE = {
-  "double-struck": { C: "ℂ", H: "ℍ", N: "ℕ", P: "ℙ", Q: "ℚ", R: "ℝ", Z: "ℤ" },
-  "script": { B: "ℬ", E: "ℰ", F: "ℱ", H: "ℋ", I: "ℐ", L: "ℒ", M: "ℳ", R: "ℛ", e: "ℯ", g: "ℊ", o: "ℴ" },
-  "fraktur": { C: "ℭ", H: "ℌ", I: "ℑ", R: "ℜ", Z: "ℨ" },
-};
-
-function styledCharacter(variant, ch) {
-  const [upper, lower, digit] = ALPHANUMERICS[variant];
-  const code = ch.charCodeAt(0);
-  if (LETTERLIKE[variant]?.[ch]) return LETTERLIKE[variant][ch];
-  if (code >= 65 && code <= 90) return String.fromCodePoint(upper + code - 65);
-  if (code >= 97 && code <= 122) return String.fromCodePoint(lower + code - 97);
-  if (digit !== null && code >= 48 && code <= 57) return String.fromCodePoint(digit + code - 48);
-  return ch;
-}
-
-function styleMathVariants(container) {
-  for (const el of container.querySelectorAll("math [mathvariant]")) {
-    const variant = el.getAttribute("mathvariant");
-    if (!(variant in ALPHANUMERICS) || el.children.length > 0) continue;
-    el.textContent = [...el.textContent].map((ch) => styledCharacter(variant, ch)).join("");
-    el.setAttribute("mathvariant", "normal");
-  }
-}
-
-// MathML takes the `−` of `(−1/q)` for a binary operator, as the `(` before it is a sibling, and
-// spaces it so; after another operator it is a sign, as in TeX.
-function markSigns(container) {
-  for (const mo of container.querySelectorAll("math mo")) {
-    if (!["+", "−", "±", "∓"].includes(mo.textContent)) continue;
-    if (mo.previousElementSibling?.localName === "mo") mo.setAttribute("form", "prefix");
-  }
-}
-
 // Goes to the problem named by the address, again once the fonts, which change the heights of the
 // problems above it, are loaded, unless the reader has scrolled away in the meantime.
 function goToHash() {
@@ -308,11 +262,8 @@ async function main() {
      </section>`).join("");
   renderMathInElement(container, {
     delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }],
-    output: "mathml",
     throwOnError: false,
   });
-  styleMathVariants(container);
-  markSigns(container);
   document.getElementById("references").innerHTML = renderBibliography(data.problems, bib, prefixes);
   const update = setUpScrollSpy(container, toc);
   setUpFilter(container, toc, update);

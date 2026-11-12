@@ -5,6 +5,8 @@ AlphaCentauri aims to formalize results on arithmetic in first-order logic, buil
 mathematical logic of the [Formalized Formal Logic](https://github.com/FormalizedFormalLogic)
 organization. It is also an experiment in autonomous AI formalization.
 
+The [website](https://formalizedformallogic.org/AlphaCentauri/) gathers the list of open problems, the zoo of arithmetic theories and the import graph.
+
 Humans decide what to formalize, one GitHub issue at a time; AI agents write, review and maintain
 the Lean code. Every step happens on GitHub. The process is [`docs/workflow.md`](docs/workflow.md),
 the contract for agents is [`AGENTS.md`](AGENTS.md), and the code conventions are
@@ -41,7 +43,7 @@ locally.
 
 ## Open problems
 
-The [list of open problems](https://formalizedformallogic.github.io/AlphaCentauri/open-problems/) stated in AlphaCentauri, each declared by `open_problem` with its docstring and references. It is generated from the environment by [`AlphaCentauriOpenProblems/`](./AlphaCentauriOpenProblems) on every push to `main`; run `just open-problems` to regenerate it locally. To add a problem, open an issue from the [Open problem template](https://github.com/FormalizedFormalLogic/AlphaCentauri/issues/new?template=open-problem.yml) with its statement and a source.
+The [list of open problems](https://formalizedformallogic.github.io/AlphaCentauri/open-problems/) stated in AlphaCentauri, each declared by `open_problem` with its docstring and references. Its data is generated from the environment by [`OpenProblems.lean`](./OpenProblems.lean) on every push to `main`, and the page is [`pages/open-problems/`](./pages/open-problems); run `just open-problems` to regenerate the data locally. To add a problem, open an issue from the [Open problem template](https://github.com/FormalizedFormalLogic/AlphaCentauri/issues/new?template=open-problem.yml) with its statement and a source.
 
 ## Import graph
 

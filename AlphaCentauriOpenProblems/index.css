@@ -137,13 +137,17 @@ article h3 {
   font-family: var(--mono); font-size: .95rem; font-weight: 400; overflow-wrap: anywhere;
 }
 article h3 a.anchor { color: inherit; text-decoration: none; }
-.statement, ul.citations { font-family: var(--serif); }
+.statement, ul.citations, ol.bibliography { font-family: var(--serif); }
 .statement { font-size: 1.15rem; line-height: 1.5; }
 .statement p { margin: .25rem 0 .5rem; }
 /* KaTeX and the text are both Computer Modern, so the mathematics keeps the size of the text. */
 .statement .katex, ul.citations .katex { font-size: 1em; }
 ul.citations { margin: .5rem 0 0; padding-left: 1.25rem; font-size: 1rem; line-height: 1.45; }
-ul.citations .key { font-weight: 700; }
+.key { font-weight: 700; }
+a.key { text-decoration: none; }
+ol.bibliography { list-style: none; margin: 0; padding: 0; font-size: 1.05rem; line-height: 1.5; }
+ol.bibliography li { margin: .6rem 0; padding-left: 2rem; text-indent: -2rem; overflow-wrap: anywhere; }
+ol.bibliography li:target { background: var(--current); }
 pre.lean {
   margin: .75rem 0 0; padding: .75rem; overflow-x: auto; line-height: 1.5;
   background: var(--code); border: 1px solid var(--border); border-radius: 6px;

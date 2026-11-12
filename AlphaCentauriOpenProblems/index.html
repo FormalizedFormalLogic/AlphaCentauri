@@ -48,6 +48,7 @@
       </p>
     </header>
     <div id="problems"><p>Loading…</p></div>
+    <section id="references"></section>
   </main>
 </div>
 <script>
@@ -73,11 +74,30 @@ function renderMarkdown(text) {
   }).join("");
 }
 
-function renderCitation(c, bib) {
-  const label = escapeHtml(c.key) + (c.locator ? `, ${escapeHtml(c.locator)}` : "");
-  // The entry is HTML formatted by Hayagriva from the repository's own bibliography.
-  const ref = bib[c.key];
-  return `<li><span class="key">[${label}]</span>${ref ? " " + ref : ""}</li>`;
+// The citations of a problem as one entry per key, with the locators of all of them.
+function groupCitations(citations) {
+  const groups = new Map();
+  for (const c of citations) {
+    if (!groups.has(c.key)) groups.set(c.key, []);
+    if (c.locator) groups.get(c.key).push(c.locator);
+  }
+  return groups;
+}
+
+function renderCitation(key, locators) {
+  const label = escapeHtml(key) + (locators.length ? `, ${escapeHtml(locators.join("; "))}` : "");
+  return `<li><a class="key" href="#ref-${escapeHtml(key)}">[${label}]</a></li>`;
+}
+
+// The references cited by some problem, with the entries formatted by Hayagriva from the
+// repository's own bibliography, in the order of the formatted text.
+function renderBibliography(problems, bib) {
+  const text = (key) => (bib[key] || key).replace(/<[^>]*>/g, "");
+  const keys = [...new Set(problems.flatMap((p) => p.citations.map((c) => c.key)))]
+    .sort((a, b) => text(a).localeCompare(text(b)));
+  return `<h2>References</h2><ol class="bibliography">${keys.map((k) =>
+    `<li id="ref-${escapeHtml(k)}"><span class="key">[${escapeHtml(k)}]</span>
+       ${bib[k] ?? ""}</li>`).join("")}</ol>`;
 }
 
 // The area of a module: the component after `AlphaCentauri`, e.g. `NumberTheory`.
@@ -94,8 +114,8 @@ function commonNamespace(names) {
 // The name of `p` without the namespace `prefix` shared by the problems of its area.
 const displayName = (p, prefix) => p.name.split(".").slice(prefix.length).join(".");
 
-function renderProblem(p, bib, prefix) {
-  const cites = p.citations.map((c) => renderCitation(c, bib)).join("");
+function renderProblem(p, prefix) {
+  const cites = [...groupCitations(p.citations)].map(([k, ls]) => renderCitation(k, ls)).join("");
   return `<article id="${escapeHtml(p.name)}"
       data-search="${escapeHtml([p.name, p.description, ...p.citations.map((c) => c.key)]
         .join(" ").toLowerCase())}">
@@ -114,7 +134,8 @@ function renderToc(areas, prefixes) {
        <span class="count">${ps.length}</span>
        <ol>${ps.map((p) => `<li data-target="${escapeHtml(p.name)}">
          <a href="#${escapeHtml(p.name)}">${escapeHtml(displayName(p, prefixes.get(a)))}</a></li>`)
-         .join("")}</ol></li>`).join("");
+         .join("")}</ol></li>`).join("") +
+    `<li class="area"><a href="#references">References</a></li>`;
 }
 
 // The theme selector: `auto` follows the system, and the choice is remembered.
@@ -196,12 +217,13 @@ async function main() {
   const container = document.getElementById("problems");
   container.innerHTML = [...areas].map(([a, ps]) =>
     `<section id="area-${escapeHtml(a)}"><h2>${escapeHtml(a)}</h2>
-       ${ps.map((p) => renderProblem(p, bib, prefixes.get(a))).join("")}
+       ${ps.map((p) => renderProblem(p, prefixes.get(a))).join("")}
      </section>`).join("");
   renderMathInElement(container, {
     delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }],
     throwOnError: false,
   });
+  document.getElementById("references").innerHTML = renderBibliography(data.problems, bib);
   setUpFilter(container, toc);
   setUpScrollSpy(container, toc);
   if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();

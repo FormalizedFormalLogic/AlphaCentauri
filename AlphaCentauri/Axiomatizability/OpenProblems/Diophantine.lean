@@ -6,6 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata
+import AlphaCentauri.OpenProblem
 
 /-!
 # Diophantine equivalents of $\Delta_0$ formulas
@@ -33,16 +34,16 @@ inductive Semiformula.Diophantine {L : Language} {ξ : Type*} :
 namespace Arithmetic
 
 /-- $\mathsf{I}\Delta_0$ proves that every $\Delta_0$ formula is equivalent to a Diophantine
-formula. An open problem.
+formula.
 - [DAq05, Question 8.1] -/
-def ExistsDiophantineEquivISigma0 : Prop :=
+open_problem ExistsDiophantineEquivISigma0 :=
   ∀ φ : ArithmeticFormula ℕ, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ →
     ∃ ψ : ArithmeticFormula ℕ, Semiformula.Diophantine ψ ∧ 𝗜𝚺₀ ⊢ (φ 🡘 ψ).univCl
 
 /-- $\mathsf{I}\Delta_0 + \Omega_1$ proves that every $\Delta_0$ formula is equivalent to a
-Diophantine formula. An open problem.
+Diophantine formula.
 - [DAq05, §8] -/
-def ExistsDiophantineEquivISigma0UnionOmega1 : Prop :=
+open_problem ExistsDiophantineEquivISigma0UnionOmega1 :=
   ∀ φ : ArithmeticFormula ℕ, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ →
     ∃ ψ : ArithmeticFormula ℕ, Semiformula.Diophantine ψ ∧ 𝗜𝚺₀ ∪ 𝝮₁ ⊢ (φ 🡘 ψ).univCl
 

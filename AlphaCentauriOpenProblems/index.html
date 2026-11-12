@@ -1,0 +1,186 @@
+<!doctype html>
+<!--
+  The list of open problems of AlphaCentauri. `just open-problems` copies this page next to
+  `open-problems.json`, written by `lake exe open_problems`, and `references.yml`, the bibliography
+  the citation keys of the docstrings refer to; the page renders the two at load time.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open problems — AlphaCentauri</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<style>
+  :root {
+    --fg: #1f2328; --muted: #59636e; --bg: #ffffff; --card: #f6f8fa; --border: #d1d9e0;
+    --accent: #0969da;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fg: #e6edf3; --muted: #9198a1; --bg: #0d1117; --card: #151b23; --border: #3d444d;
+      --accent: #4493f8;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0 auto; max-width: 56rem; padding: 2rem 1rem 4rem;
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--fg); background: var(--bg);
+  }
+  a { color: var(--accent); }
+  header p, .meta { color: var(--muted); }
+  input[type=search] {
+    width: 100%; padding: .5rem .75rem; font: inherit; color: inherit;
+    background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+  }
+  nav ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: .25rem 1rem; }
+  h2 { margin-top: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: .25rem; }
+  article {
+    margin: 1rem 0; padding: 1rem 1.25rem;
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  }
+  article h3 { margin: 0 0 .5rem; font-size: 1rem; }
+  article h3 a.anchor { color: inherit; text-decoration: none; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .875em; }
+  pre {
+    margin: .75rem 0 0; padding: .75rem; overflow-x: auto;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  }
+  ul.citations { margin: .5rem 0 0; padding-left: 1.25rem; }
+  .meta { font-size: .875rem; margin-top: .5rem; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Open problems</h1>
+  <p>
+    The open problems stated in
+    <a href="https://github.com/FormalizedFormalLogic/AlphaCentauri">AlphaCentauri</a>, each
+    declared in Lean by <code>open_problem</code> as a proposition whose truth is unknown.
+    <span id="summary"></span>
+  </p>
+  <input id="filter" type="search" placeholder="Filter by name, statement, or citation key"
+         aria-label="Filter the open problems">
+  <nav><ul id="toc"></ul></nav>
+</header>
+<main id="problems"><p>Loading…</p></main>
+<script>
+"use strict";
+
+const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+})[c]);
+
+// A docstring in Markdown with TeX: paragraphs, inline code and links. TeX is left to KaTeX, so
+// that `_` and `\` inside `$…$` are never read as Markdown.
+function renderMarkdown(text) {
+  return text.split(/\n\s*\n/).map((para) => {
+    const parts = para.split(/(`[^`]*`)/);
+    const html = parts.map((part) => {
+      if (part.startsWith("`") && part.endsWith("`") && part.length >= 2) {
+        return `<code>${escapeHtml(part.slice(1, -1))}</code>`;
+      }
+      return escapeHtml(part).replace(
+        /\[([^\]]+)\]\((https?:[^)\s]+)\)/g, (_, t, u) => `<a href="${u}">${t}</a>`);
+    }).join("");
+    return `<p>${html}</p>`;
+  }).join("");
+}
+
+// One entry of the Hayagriva bibliography, as a line of text.
+function renderReference(ref) {
+  if (!ref) return "";
+  const names = (a) => (Array.isArray(a) ? a : a ? [a] : []).join("; ");
+  const year = ref.date ? String(ref.date).slice(0, 4) : "";
+  const parts = [];
+  const who = names(ref.author) || names(ref.editor);
+  if (who) parts.push(escapeHtml(who) + (year ? ` (${escapeHtml(year)})` : ""));
+  if (ref.title) parts.push(`<em>${escapeHtml(String(ref.title))}</em>`);
+  const parent = Array.isArray(ref.parent) ? ref.parent[0] : ref.parent;
+  if (parent && parent.title) {
+    parts.push(escapeHtml(String(parent.title)) + (parent.volume ? ` ${parent.volume}` : ""));
+  }
+  let html = parts.join(". ");
+  const doi = ref["serial-number"] && ref["serial-number"].doi;
+  const url = doi ? `https://doi.org/${doi}` : (ref.url && (ref.url.value || ref.url));
+  if (url) html += `. <a href="${escapeHtml(String(url))}">${escapeHtml(doi ? `doi:${doi}` : "link")}</a>`;
+  return html;
+}
+
+function renderCitation(c, bib) {
+  const label = escapeHtml(c.key) + (c.locator ? `, ${escapeHtml(c.locator)}` : "");
+  const ref = renderReference(bib[c.key]);
+  return `<li><strong>[${label}]</strong>${ref ? " " + ref : ""}</li>`;
+}
+
+// The area of a module: the component after `AlphaCentauri`, e.g. `NumberTheory`.
+const areaOf = (module) => module.split(".")[1] || module;
+const shortName = (name) => name.split(".").pop();
+
+function renderProblem(p, bib) {
+  const cites = p.citations.map((c) => renderCitation(c, bib)).join("");
+  return `<article id="${escapeHtml(p.name)}"
+      data-search="${escapeHtml([p.name, p.description, ...p.citations.map((c) => c.key)]
+        .join(" ").toLowerCase())}">
+    <h3><a class="anchor" href="#${escapeHtml(p.name)}">${escapeHtml(shortName(p.name))}</a></h3>
+    ${renderMarkdown(p.description)}
+    ${cites ? `<ul class="citations">${cites}</ul>` : ""}
+    <pre><code>${escapeHtml(p.source)}</code></pre>
+    <div class="meta"><code>${escapeHtml(p.name)}</code> ·
+      <a href="${escapeHtml(p.url)}">${escapeHtml(p.path)}:${p.line}</a></div>
+  </article>`;
+}
+
+async function main() {
+  const [data, bibText] = await Promise.all([
+    fetch("open-problems.json").then((r) => r.json()),
+    fetch("references.yml").then((r) => (r.ok ? r.text() : "")).catch(() => ""),
+  ]);
+  const bib = bibText ? jsyaml.load(bibText) || {} : {};
+  const areas = new Map();
+  for (const p of data.problems) {
+    const a = areaOf(p.module);
+    if (!areas.has(a)) areas.set(a, []);
+    areas.get(a).push(p);
+  }
+  const rev = data.revision;
+  document.getElementById("summary").innerHTML =
+    `${data.problems.length} problems, generated from
+     <a href="https://github.com/${escapeHtml(data.repository)}/tree/${escapeHtml(rev)}">
+     <code>${escapeHtml(rev.length === 40 ? rev.slice(0, 7) : rev)}</code></a>.`;
+  document.getElementById("toc").innerHTML = [...areas.keys()]
+    .map((a) => `<li><a href="#area-${escapeHtml(a)}">${escapeHtml(a)}</a>
+                 (${areas.get(a).length})</li>`).join("");
+  const main = document.getElementById("problems");
+  main.innerHTML = [...areas].map(([a, ps]) =>
+    `<section id="area-${escapeHtml(a)}"><h2>${escapeHtml(a)}</h2>
+       ${ps.map((p) => renderProblem(p, bib)).join("")}</section>`).join("");
+  renderMathInElement(main, {
+    delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }],
+    throwOnError: false,
+  });
+  document.getElementById("filter").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    for (const section of main.querySelectorAll("section")) {
+      let shown = 0;
+      for (const art of section.querySelectorAll("article")) {
+        art.hidden = q !== "" && !art.dataset.search.includes(q);
+        if (!art.hidden) shown++;
+      }
+      section.hidden = shown === 0;
+    }
+  });
+  if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
+}
+
+window.addEventListener("DOMContentLoaded", () => main().catch((err) => {
+  document.getElementById("problems").innerHTML =
+    `<p>Could not load the open problems: ${escapeHtml(String(err))}</p>`;
+}));
+</script>
+</body>
+</html>

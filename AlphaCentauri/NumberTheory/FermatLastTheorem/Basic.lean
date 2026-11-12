@@ -4,6 +4,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import AlphaCentauri.Schemata.BoundedInduction
+import AlphaCentauri.OpenProblem
 
 /-!
 # Statements of Fermat's Last Theorem and its cases
@@ -25,10 +26,9 @@ open OpenPredicate
 def fermatLastTheorem (n : ℕ) : ArithmeticSentence :=
   “∀ x y z, x ^' n + y ^' n = z ^' n → x = 0 ∨ y = 0 ∨ z = 0”
 
-/-- $\mathsf{I}\mathsf{E}_2$ proves Fermat's Last Theorem for every odd exponent $n \ge 5$. An
-open problem.
+/-- $\mathsf{I}\mathsf{E}_2$ proves Fermat's Last Theorem for every odd exponent $n \ge 5$.
 - [Smi93, Question 5.6] -/
-def ProvableFermatLastTheoremIE2 : Prop := ∀ n : ℕ, Odd n → 5 ≤ n → 𝗜𝗘₂ ⊢ fermatLastTheorem n
+open_problem ProvableFermatLastTheoremIE2 := ∀ n : ℕ, Odd n → 5 ≤ n → 𝗜𝗘₂ ⊢ fermatLastTheorem n
 
 /-- Bézout's theorem: any `x` and nonzero `y` have a common divisor `z` with `s y = t x + z`.
 Smith prints it without the hypothesis `y ≠ 0`, which `x = 1`, `y = 0` violates.
@@ -54,29 +54,29 @@ def powerAddPowerNeSquare (n : ℕ) : ArithmeticSentence :=
     x = 0 ∨ y = 0 ∨ z = 0”
 
 /-- $\mathsf{IOpen} + \mathrm{Bez}$ proves Case II of Fermat's Last Theorem for some exponent
-$n \ge 3$. An open problem.
+$n \ge 3$.
 - [Smi92b, Question 5.3] -/
-def ExistsProvableFermatLastTheoremCaseTwoIOpenBezout : Prop :=
+open_problem ExistsProvableFermatLastTheoremCaseTwoIOpenBezout :=
   ∃ n : ℕ, 3 ≤ n ∧ insert bezout 𝗜𝗢𝗽𝗲𝗻 ⊢ fermatLastTheoremCaseTwo n
 
-/-- $\mathsf{IE}_1$ proves Case I of Fermat's Last Theorem for each standard $n \ge 3$. An open
-problem; since $\mathsf{IE}_1$ proves $\mathsf{IOpen} + \mathrm{Bez}$, which proves
-$\mathsf{IOpen} + \mathrm{GCD}$, it is equivalent to asking whether Case I is provable in any of
-the three.
+/-- $\mathsf{IE}_1$ proves Case I of Fermat's Last Theorem for each standard $n \ge 3$. Since
+$\mathsf{IE}_1$ proves $\mathsf{IOpen} + \mathrm{Bez}$, which proves
+$\mathsf{IOpen} + \mathrm{GCD}$, it is equivalent to asking whether Case I is provable in any of the
+three.
 - [Smi92b, Question 5.5]
 - [Smi92b, Lemma 3.11] -/
-def ProvableFermatLastTheoremCaseOneIE1 : Prop :=
+open_problem ProvableFermatLastTheoremCaseOneIE1 :=
   ∀ n : ℕ, 3 ≤ n → 𝗜𝗘₁ ⊢ fermatLastTheoremCaseOne n
 
-/-- $\mathsf{IE}_1$ proves Fermat's Last Theorem for each even standard $n > 2$. An open problem.
+/-- $\mathsf{IE}_1$ proves Fermat's Last Theorem for each even standard $n > 2$.
 - [Smi92b, Question 5.6] -/
-def ProvableFermatLastTheoremIE1OfEven : Prop :=
+open_problem ProvableFermatLastTheoremIE1OfEven :=
   ∀ n : ℕ, Even n → 2 < n → 𝗜𝗘₁ ⊢ fermatLastTheorem n
 
 /-- $\mathsf{IE}_1$ proves that $x^n \pm y^n = z^2$ has no nontrivial solutions for each even
-standard $n \ge 4$. An open problem.
+standard $n \ge 4$.
 - [Smi92b, Question 5.6] -/
-def ProvablePowerAddPowerNeSquareIE1 : Prop :=
+open_problem ProvablePowerAddPowerNeSquareIE1 :=
   ∀ n : ℕ, Even n → 4 ≤ n → 𝗜𝗘₁ ⊢ powerAddPowerNeSquare n
 
 end FFL.FirstOrder.Arithmetic

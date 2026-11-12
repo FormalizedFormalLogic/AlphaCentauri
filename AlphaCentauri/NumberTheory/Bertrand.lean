@@ -4,6 +4,7 @@ public import Mathlib.NumberTheory.Bertrand
 public import AlphaCentauri.NumberTheory.Primes
 public import AlphaCentauri.NumberTheory.Bertrand.Embedding
 public import AlphaCentauri.NumberTheory.Bertrand.Sizes
+import AlphaCentauri.OpenProblem
 
 /-!
 # Bertrand's postulate over $\mathsf{I}\Delta_0 + \Omega_1$
@@ -747,8 +748,8 @@ theorem provable_bertrandPostulate_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮�
     have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
     simpa [models_iff, bertrandPostulate] using fun n : M ↦ exists_prime_lt_le_two_mul (V := M) n
 
-/-- $\mathsf{I}\Delta_0$ proves Bertrand's postulate. An open problem.
+/-- $\mathsf{I}\Delta_0$ proves Bertrand's postulate.
 - [HP98, §V.5(f), p. 393] -/
-def ProvableBertrandPostulateISigma0 : Prop := 𝗜𝚺₀ ⊢ bertrandPostulate
+open_problem ProvableBertrandPostulateISigma0 := 𝗜𝚺₀ ⊢ bertrandPostulate
 
 end FFL.FirstOrder.Arithmetic

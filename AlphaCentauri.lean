@@ -138,6 +138,8 @@ public import AlphaCentauri.OmegaLogic.ExcludedMiddle.ValueCongruent
 public import AlphaCentauri.OmegaLogic.OmegaCompleteness
 public import AlphaCentauri.OmegaLogic.Provable
 public import AlphaCentauri.OmegaLogic.Truth
+public import AlphaCentauri.OpenProblem
+public import AlphaCentauri.OpenProblem.Attribute
 public import AlphaCentauri.ProvabilityLogic.Fragments.RelativeToConsistency
 public import AlphaCentauri.ProvabilityLogic.Fragments.RelativeToISigma
 public import AlphaCentauri.ProvabilityLogic.Fragments.RelativeToPeano

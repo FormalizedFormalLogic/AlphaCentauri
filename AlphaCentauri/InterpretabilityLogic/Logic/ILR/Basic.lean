@@ -4,6 +4,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZero.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILPZero.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.MaximalConsistentTheoryModel
+import AlphaCentauri.OpenProblem
 
 /-!
 # The logic $\mathbf{ILR}$
@@ -95,9 +96,9 @@ theorem ILR.complete_verbrugge {α : Type} {A : Formula α}
 
 end Logic
 
-/-- $\mathbf{ILR}$ is complete with respect to Veltman frames. An open problem.
+/-- $\mathbf{ILR}$ is complete with respect to Veltman frames.
 - [MV20, §2.5] -/
-def ILRVeltmanCompletenessProblem : Prop :=
+open_problem ILRVeltmanCompletenessProblem :=
   ∀ A : Formula ℕ,
     (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsILR], M ⊧ A) → 𝐈𝐋𝐑 ⊢ A
 

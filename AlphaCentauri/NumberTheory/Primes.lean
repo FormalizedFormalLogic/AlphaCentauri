@@ -253,7 +253,7 @@ end InfinitudeOfPrimes
 
 /-- $\mathsf{I}\Delta_0$ proves the infinitude of primes.
 - [PWW88, Problem 1] -/
-open_problem ProvableInfinitudeOfPrimesISigma0 := 𝗜𝚺₀ ⊢ infinitudeOfPrimes
+open_problem provable_infinitudeOfPrimes_ISigma0 := 𝗜𝚺₀ ⊢ infinitudeOfPrimes
 
 open InfinitudeOfPrimes in
 /-- - [PWW88, Theorem 11, Corollary 8] -/

@@ -81,7 +81,7 @@ theorem IDeltaOnBroadHierarchy_weakerThan_BSigma (n : ℕ) : 𝗜𝚫⁺(n + 1) 
 exponentiation is adjoined to $\mathsf{I}\Delta_0$.
 - [HP98, Remark after Theorem I.2.5]
 - [Sla04] -/
-open_problem BSigmaWeakerThanIDelta := ∀ n : ℕ, 𝗕𝚺(n + 1) ⪯ 𝗜𝚫(n + 1)
+open_problem BSigma_weakerThan_IDelta := ∀ n : ℕ, 𝗕𝚺(n + 1) ⪯ 𝗜𝚫(n + 1)
 
 
 end FFL.FirstOrder.Arithmetic

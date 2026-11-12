@@ -19,7 +19,7 @@ namespace FFL.FirstOrder.Arithmetic
 
 /-- $\mathsf{I}\Delta_0 + \neg\mathrm{Exp}$ proves $\mathsf{B}\Sigma_1$.
 - [WP89] -/
-open_problem BSigma1WeakerThanISigma0AddNotExp := 𝗕𝚺 1 ⪯ 𝗜𝚺₀ ∪ {∼expAxiom}
+open_problem BSigma1_weakerThan_ISigma0_union_not_exp := 𝗕𝚺 1 ⪯ 𝗜𝚺₀ ∪ {∼expAxiom}
 
 
 end FFL.FirstOrder.Arithmetic

@@ -53,7 +53,7 @@ states that his proof of the supplementary laws of quadratic reciprocity can be 
 $\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
 - [Smi93, Question 5.1]
 - [Jer21, Chapter 0, §2.2] -/
-open_problem ProvableQuadraticResidueNegOneIE1 := 𝗜𝗘₁ ⊢ quadraticResidueNegOne
+open_problem provable_quadraticResidueNegOne_IE1 := 𝗜𝗘₁ ⊢ quadraticResidueNegOne
 
 /-- $\mathsf{I}\Delta_0$ proves that $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$.
 $\mathsf{I}\Delta_0 + \Delta_0\mathrm{EQ}$ and $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$
@@ -61,7 +61,7 @@ prove it.
 - [Smi93, Question 5.1]
 - [BI91, Theorem 3.5]
 - [Jer10, Theorem 5.7] -/
-open_problem ProvableQuadraticResidueNegOneISigma0 := 𝗜𝚺₀ ⊢ quadraticResidueNegOne
+open_problem provable_quadraticResidueNegOne_ISigma0 := 𝗜𝚺₀ ⊢ quadraticResidueNegOne
 
 /-- The converse of [Smi93, Theorem 3.11] for the odd prime `p`: for every odd
 prime $q \ne p$, $(q/p) = 1$ implies $(p/q) = 1$ unless $p \equiv q \equiv 3 \pmod 4$, in which
@@ -80,14 +80,14 @@ reciprocity and its supplementary laws can be formalized in
 $\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
 - [Smi93, Theorem 3.11, Question 5.2]
 - [Jer21, Chapter 0, §2.2] -/
-open_problem ProvableQuadraticReciprocityConverseIE1 :=
+open_problem provable_quadraticReciprocityConverse_IE1 :=
   ∀ p : ℕ, p.Prime → p ≠ 2 → 𝗜𝗘₁ ⊢ quadraticReciprocityConverse p
 
 /-- $\mathsf{I}\Delta_0$ proves the converse of [Smi93, Theorem 3.11] for each standard odd prime
 `p`. $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ proves it.
 - [Smi93, Theorem 3.11, Question 5.2]
 - [Jer10, Theorem 5.7] -/
-open_problem ProvableQuadraticReciprocityConverseISigma0 :=
+open_problem provable_quadraticReciprocityConverse_ISigma0 :=
   ∀ p : ℕ, p.Prime → p ≠ 2 → 𝗜𝚺₀ ⊢ quadraticReciprocityConverse p
 
 /-- Quadratic reciprocity: for distinct odd primes $p$ and $q$, $(p/q) = (q/p)$ unless
@@ -107,7 +107,7 @@ $\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
 - [Smi93, Question 5.2]
 - [Jer10, Theorem 5.7]
 - [Jer21, Chapter 0, §2.2] -/
-open_problem ProvableQuadraticReciprocityIE1 := 𝗜𝗘₁ ⊢ quadraticReciprocity
+open_problem provable_quadraticReciprocity_IE1 := 𝗜𝗘₁ ⊢ quadraticReciprocity
 
 /-- If $m - 1 = 2^r s$ with $s$ odd, then $-1$ has no $2^r$-th root modulo $m$.
 The case $r = 2$ is $m \equiv 5 \pmod 8$, and the case $r = 1$ is [Smi93, Lemma 3.2].
@@ -118,12 +118,12 @@ def noRootNegOne (r : ℕ) : ArithmeticSentence :=
 /-- $\mathsf{I}\mathsf{E}_1$ proves that $-1$ has no $2^r$-th root modulo any $m$ with
 $m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 2$.
 - [Smi93, Question 5.3] -/
-open_problem ProvableNoRootNegOneIE1 := ∀ r : ℕ, 2 ≤ r → 𝗜𝗘₁ ⊢ noRootNegOne r
+open_problem provable_noRootNegOne_IE1 := ∀ r : ℕ, 2 ≤ r → 𝗜𝗘₁ ⊢ noRootNegOne r
 
 /-- $\mathsf{I}\Delta_0$ proves that $-1$ has no $2^r$-th root modulo any $m$ with $m - 1 = 2^r s$,
 $s$ odd, for each standard $r \ge 2$.
 - [Smi93, Question 5.3] -/
-open_problem ProvableNoRootNegOneISigma0 := ∀ r : ℕ, 2 ≤ r → 𝗜𝚺₀ ⊢ noRootNegOne r
+open_problem provable_noRootNegOne_ISigma0 := ∀ r : ℕ, 2 ≤ r → 𝗜𝚺₀ ⊢ noRootNegOne r
 
 /-- A prime $q \nmid 4n$ is of the form $x^2 + ny^2$ if and only if $q \bmod 4n$ lies in `S`.
 - [Smi93, Question 5.4] -/

@@ -148,11 +148,11 @@ instance (Γ : Polarity) (s : ℕ) : Consistent (𝗪𝗣𝗛𝗣 Γ s) :=
 /-- $\mathsf{I}\Delta_0$ proves the pigeonhole principle for $\Delta_0$ formulas.
 - [PWW88, Problem 2]
 - [HP98, §V.1(a), p. 276] -/
-open_problem PigeonholeOnPrenexHierarchyWeakerThanISigma0 := 𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀
+open_problem PigeonholeOnPrenexHierarchy_weakerThan_ISigma0 := 𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀
 
 /-- $\mathsf{I}\Delta_0 + \Omega_1$ proves the pigeonhole principle for $\Delta_0$ formulas.
 - [HP98, §V.5(g), p. 395] -/
-open_problem PigeonholeOnPrenexHierarchyWeakerThanISigma0UnionOmega1 := 𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀ ∪ 𝝮₁
+open_problem PigeonholeOnPrenexHierarchy_weakerThan_ISigma0_union_Omega1 := 𝗣𝗛𝗣 𝚺 0 ⪯ 𝗜𝚺₀ ∪ 𝝮₁
 
 
 

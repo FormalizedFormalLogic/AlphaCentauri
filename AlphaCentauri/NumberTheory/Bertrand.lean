@@ -750,6 +750,6 @@ theorem provable_bertrandPostulate_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮�
 
 /-- $\mathsf{I}\Delta_0$ proves Bertrand's postulate.
 - [HP98, §V.5(f), p. 393] -/
-open_problem ProvableBertrandPostulateISigma0 := 𝗜𝚺₀ ⊢ bertrandPostulate
+open_problem provable_bertrandPostulate_ISigma0 := 𝗜𝚺₀ ⊢ bertrandPostulate
 
 end FFL.FirstOrder.Arithmetic

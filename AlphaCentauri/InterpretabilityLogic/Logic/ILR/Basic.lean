@@ -98,7 +98,7 @@ end Logic
 
 /-- $\mathbf{ILR}$ is complete with respect to Veltman frames.
 - [MV20, §2.5] -/
-open_problem ILRVeltmanCompletenessProblem :=
+open_problem Logic.ILR.complete_veltman :=
   ∀ A : Formula ℕ,
     (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsILR], M ⊧ A) → 𝐈𝐋𝐑 ⊢ A
 

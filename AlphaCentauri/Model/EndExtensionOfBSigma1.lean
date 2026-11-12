@@ -24,7 +24,7 @@ namespace FFL.FirstOrder.Arithmetic
 $\mathsf{I}\Delta_0$.
 - [Kay91, Chapter 16, p. 269]
 - [WP89] -/
-open_problem ExistsProperEndExtensionOfBSigma1 :=
+open_problem exists_proper_endExtension_ISigma0_of_BSigma1 :=
   ∀ (M : Type) [Countable M] [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗕𝚺1],
     ∃ (N : Type) (_ : M ⊂ₑ N), N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀
 

@@ -27,7 +27,7 @@ namespace FFL.FirstOrder
 /-- $\mathsf{I}\Delta_0 + \Omega_1$ is $\Pi_1$-conservative over $\mathsf{I}\Delta_0$.
 - [HP98, §V.1(a), p. 274]
 - [HP98, §V.5(g), p. 395] -/
-open_problem Arithmetic.ISigma0UnionOmega1WeakerThanOnPi1ISigma0 :=
+open_problem Arithmetic.ISigma0_union_Omega1_weakerThanOn_Pi1_ISigma0 :=
   𝗜𝚺₀ ∪ 𝝮₁ ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 1 σ] 𝗜𝚺₀
 
 

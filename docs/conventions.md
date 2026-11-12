@@ -65,6 +65,17 @@ rewrite, so it is written as if it were already there.
   `lake build`, `just axiom-audit`, nor `just mk-all` catches it. This happened in PR #107 and was
   fixed in PR #112. A `statement-formalized` PR must run `#check @Name` on every `axiom` it adds
   and confirm the printed type keeps every intended hypothesis.
+- **Open problems are stated with `open_problem`, never as axioms.** An `axiom` is reserved for a
+  known theorem awaiting formalization: a statement of unknown truth may be false, or contradict
+  a known theorem together with another one. `open_problem Name := p` (from
+  `AlphaCentauri/OpenProblem.lean`) declares `def Name : Prop := p` and records it, so that
+  `just open-problems` lists it, with its docstring, on the project's pages; it is not listed in
+  `forgive.yml`. `Name` is the name the theorem would carry, following the naming of theorems
+  (`provable_infinitudeOfPrimes_ISigma0`, `IE1_strictlyWeakerThan_ISigma0`), so that proving it
+  keeps the name. The docstring is mandatory and asks `p` as a question (`Does
+  $\mathsf{I}\Delta_0$ prove the infinitude of primes?`), then cites the source; it does not say
+  that the problem is open. A result that depends on an open problem takes it as a hypothesis
+  `(h : Name)`.
 - **Reuse before restating.** Foundation's theories, notations, definability classes, and the
   hierarchy are the vocabulary. A definition that duplicates a Foundation definition under a
   new name is rejected in review. If Foundation's API is missing or awkward, say so in the

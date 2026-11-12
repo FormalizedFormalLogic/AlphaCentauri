@@ -6,6 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata
+import AlphaCentauri.OpenProblem
 
 /-!
 # Complete extensions of $\mathsf{I}\Delta_0$ by $\Sigma_n$ sentences
@@ -23,10 +24,10 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder
 
 
-/-- $\mathsf{I}\Delta_0$ has a consistent complete extension axiomatized by $\Sigma_n$ sentences
-for some $n$. An open problem.
+/-- Does $\mathsf{I}\Delta_0$ have a consistent complete extension axiomatized by $\Sigma_n$
+sentences for some $n$?
 - [ELV25, Question 1.2] -/
-def Arithmetic.ExistsCompleteExtensionISigma0OfRestrictedComplexity : Prop :=
+open_problem Arithmetic.exists_complete_extension_ISigma0_of_restricted_complexity :=
   ∃ (n : ℕ) (U : ArithmeticTheory), (∀ σ ∈ U, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 n σ) ∧
     𝗜𝚺₀ ⪯ U ∧ Entailment.Consistent U ∧ Entailment.Complete U
 

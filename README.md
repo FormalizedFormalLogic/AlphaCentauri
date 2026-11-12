@@ -39,6 +39,10 @@ locally.
 
 <a href="https://formalizedformallogic.github.io/AlphaCentauri/zoo/arithmetic.png"><img alt="Arithmetic Theory Zoo" src="https://formalizedformallogic.github.io/AlphaCentauri/zoo/arithmetic.png" height="600"></a>
 
+## Open problems
+
+The [list of open problems](https://formalizedformallogic.github.io/AlphaCentauri/open-problems/) stated in AlphaCentauri, each declared by `open_problem` with its docstring and references. It is generated from the environment by [`AlphaCentauriOpenProblems/`](./AlphaCentauriOpenProblems) on every push to `main`; run `just open-problems` to regenerate it locally. To add a problem, open an issue from the [Open problem template](https://github.com/FormalizedFormalLogic/AlphaCentauri/issues/new?template=open-problem.yml) with its statement and a source.
+
 ## Import graph
 
 The import graph of the modules of AlphaCentauri, regenerated on every push to `main`: [PNG](https://formalizedformallogic.github.io/AlphaCentauri/import_graph.png), [PDF](https://formalizedformallogic.github.io/AlphaCentauri/import_graph.pdf), [HTML](https://formalizedformallogic.github.io/AlphaCentauri/import_graph.html).

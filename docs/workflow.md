@@ -140,6 +140,7 @@ first — that is what the queue is for.
 | `proof-formalized` | Stage: the `axiom` proved in a follow-up PR; closes the issue. |
 | `infrastructure` | A PR with no mathematics; CI skips the audit comment. |
 | `refactor` | Reorganizes existing code without adding results; no mathematics. |
+| `open-problem` | An issue proposing an open problem, opened from the issue template of that name; it is stated with `open_problem` and listed on the page of open problems. |
 | `update-deps` | The automated dependency pin bump; at most one open PR carries it. |
 
 Nothing else is a label. Blocked, belongs upstream in Foundation, process questions — say it

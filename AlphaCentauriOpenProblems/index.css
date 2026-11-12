@@ -1,0 +1,183 @@
+/* The style of `index.html`, the list of open problems. */
+
+/*
+ * Fonts. The statements and their references are set in Computer Modern, the face of KaTeX's
+ * mathematics, and the Lean code in JuliaMono, which covers Lean's symbols; the interface keeps the
+ * system's sans serif. Both are served by jsDelivr at pinned versions: CMU Serif from the npm
+ * package `computer-modern`, JuliaMono from the release of its repository.
+ */
+@font-face {
+  font-family: "CMU Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/computer-modern@0.1.3/fonts/cmu-serif-500-roman.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "CMU Serif";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/computer-modern@0.1.3/fonts/cmu-serif-500-italic.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "CMU Serif";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/computer-modern@0.1.3/fonts/cmu-serif-700-roman.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "CMU Serif";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/npm/computer-modern@0.1.3/fonts/cmu-serif-700-italic.woff2")
+    format("woff2");
+}
+@font-face {
+  font-family: "JuliaMono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/cormullion/juliamono@0.63.2/webfonts/JuliaMono-Regular.woff2")
+    format("woff2");
+}
+
+/*
+ * Themes. Light by default; dark when chosen, or when the system prefers it and no theme is
+ * chosen. The two dark blocks must stay identical.
+ */
+:root {
+  color-scheme: light;
+  --fg: #1f2328; --muted: #59636e; --bg: #ffffff; --card: #f6f8fa; --code: #ffffff;
+  --border: #d1d9e0; --accent: #0969da; --current: #ddf4ff;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fg: #e6edf3; --muted: #9198a1; --bg: #0d1117; --card: #151b23; --code: #0d1117;
+  --border: #3d444d; --accent: #4493f8; --current: #1f3a5f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --fg: #e6edf3; --muted: #9198a1; --bg: #0d1117; --card: #151b23; --code: #0d1117;
+    --border: #3d444d; --accent: #4493f8; --current: #1f3a5f;
+  }
+}
+
+:root {
+  --serif: "CMU Serif", "Latin Modern Roman", "Computer Modern Serif", serif;
+  --mono: "JuliaMono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 1rem; }
+body {
+  margin: 0;
+  font: 16px/1.6 var(--sans);
+  color: var(--fg); background: var(--bg);
+}
+a { color: var(--accent); }
+code, pre { font-family: var(--mono); font-size: .875em; }
+[hidden] { display: none !important; }
+
+/* Layout: the contents stay on the left while the problems scroll. */
+.layout {
+  display: grid; grid-template-columns: 19rem minmax(0, 1fr);
+  max-width: 80rem; margin: 0 auto;
+}
+.sidebar {
+  position: sticky; top: 0; align-self: start;
+  height: 100vh; overflow-y: auto;
+  padding: 1.25rem 1rem 2rem;
+  border-right: 1px solid var(--border);
+}
+main { padding: 2rem 2rem 4rem; max-width: 52rem; }
+
+/* The sidebar. */
+.sidebar-head {
+  display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  margin-bottom: .75rem;
+}
+.home { font-weight: 600; color: inherit; text-decoration: none; }
+select, input[type=search] {
+  font: inherit; font-size: .875rem; color: inherit;
+  background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+}
+select { padding: .2rem .4rem; }
+input[type=search] { width: 100%; padding: .4rem .6rem; margin-bottom: 1rem; }
+#toc, #toc ol { list-style: none; margin: 0; padding: 0; }
+#toc li.area { margin-bottom: .75rem; }
+#toc li.area > a { font-weight: 600; color: inherit; text-decoration: none; }
+#toc .count { color: var(--muted); font-size: .8rem; margin-left: .25rem; }
+#toc ol { margin-top: .25rem; }
+#toc ol a {
+  display: block; padding: .1rem .5rem; border-radius: 4px;
+  font-family: var(--mono); font-size: .75rem; line-height: 1.4;
+  color: var(--muted); text-decoration: none; overflow-wrap: anywhere;
+}
+#toc ol a:hover { color: var(--fg); }
+#toc li.current > a { color: var(--fg); background: var(--current); }
+
+/* The problems. */
+header p, .meta { color: var(--muted); }
+h1 { margin-top: 0; }
+h2 { margin-top: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: .25rem; }
+article {
+  margin: 1rem 0; padding: 1rem 1.25rem;
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+}
+article h3 {
+  margin: 0 0 .5rem;
+  font-family: var(--mono); font-size: .95rem; font-weight: 400; overflow-wrap: anywhere;
+}
+article h3 a.anchor { color: inherit; text-decoration: none; }
+.statement, ul.citations, ol.bibliography { font-family: var(--serif); }
+.statement { font-size: 1.15rem; line-height: 1.5; }
+.statement p { margin: .25rem 0 .5rem; }
+/* KaTeX and the text are both Computer Modern, so the mathematics keeps the size of the text. */
+.statement .katex, ul.citations .katex { font-size: 1em; }
+ul.citations { margin: .5rem 0 0; padding-left: 1.25rem; font-size: 1rem; line-height: 1.45; }
+.key { font-weight: 700; }
+a.key { text-decoration: none; }
+/* The references as a grid: the key on the left, the entry on the right. */
+ol.bibliography {
+  list-style: none; margin: 0; padding: 0;
+  font-size: 1.05rem; line-height: 1.5;
+  border-top: 1px solid var(--border);
+}
+ol.bibliography > li {
+  display: grid; grid-template-columns: 6rem minmax(0, 1fr); column-gap: 1rem;
+  padding: .6rem .5rem; border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+ol.bibliography > li:target { background: var(--current); }
+.backlinks {
+  margin-top: .4rem;
+  font-family: var(--sans); font-size: .8rem; color: var(--muted);
+}
+.backlinks ul { margin: .15rem 0 0; padding-left: 1.1rem; }
+.backlinks li { margin: .05rem 0; }
+.backlinks a { font-family: var(--mono); font-size: .75rem; text-decoration: none; }
+.backlinks a:hover { text-decoration: underline; }
+pre.lean {
+  margin: .75rem 0 0; padding: .75rem; overflow-x: auto; line-height: 1.5;
+  background: var(--code); border: 1px solid var(--border); border-radius: 6px;
+}
+.meta { font-size: .875rem; margin-top: .5rem; overflow-wrap: anywhere; }
+
+/* Narrow windows: the contents go above the problems and no longer stick. */
+@media (max-width: 900px) {
+  .layout { display: block; }
+  .sidebar {
+    position: static; height: auto; overflow: visible;
+    border-right: none; border-bottom: 1px solid var(--border);
+  }
+  #toc ol { display: none; }
+  main { padding: 1.5rem 1rem 3rem; }
+}

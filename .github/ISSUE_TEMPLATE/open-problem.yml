@@ -1,0 +1,32 @@
+name: Open problem
+description: Propose an open problem for the list of open problems
+labels:
+  - open-problem
+body:
+  - type: markdown
+    attributes:
+      value: |
+        An open problem is stated in Lean as a proposition with `open_problem` and listed, with its statement and its sources, on the [list of open problems](https://formalizedformallogic.github.io/AlphaCentauri/open-problems/). Check that the problem is not on the list already.
+  - type: textarea
+    id: statement
+    attributes:
+      label: Statement
+      description: The problem as a question. Write mathematics in TeX, as `$\mathsf{I}\Delta_0$`, not as `𝗜𝚺₀`.
+      placeholder: Does $\mathsf{I}\Delta_0$ prove the infinitude of primes?
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: Where the problem is stated, one reference per line with its location. Use the key of `references.yml` when it has an entry for the reference, and give the full reference otherwise.
+      placeholder: "- [PWW88, Problem 1]"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Optional. Known partial results, and the definitions in AlphaCentauri or Foundation the statement could use.
+    validations:
+      required: false

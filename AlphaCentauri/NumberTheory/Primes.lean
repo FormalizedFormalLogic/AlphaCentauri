@@ -5,6 +5,7 @@ public import AlphaCentauri.Schemata.Pigeonhole
 public import AlphaCentauri.Schemata.WeakPigeonhole
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Factorial
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
+import AlphaCentauri.OpenProblem
 
 /-!
 # The infinitude of primes
@@ -250,9 +251,9 @@ end
 
 end InfinitudeOfPrimes
 
-/-- $\mathsf{I}\Delta_0$ proves the infinitude of primes. An open problem.
+/-- Does $\mathsf{I}\Delta_0$ prove the infinitude of primes?
 - [PWW88, Problem 1] -/
-def ProvableInfinitudeOfPrimesISigma0 : Prop := 𝗜𝚺₀ ⊢ infinitudeOfPrimes
+open_problem provable_infinitudeOfPrimes_ISigma0 := 𝗜𝚺₀ ⊢ infinitudeOfPrimes
 
 open InfinitudeOfPrimes in
 /-- - [PWW88, Theorem 11, Corollary 8] -/

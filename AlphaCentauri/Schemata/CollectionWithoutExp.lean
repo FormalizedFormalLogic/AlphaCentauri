@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
+import AlphaCentauri.OpenProblem
 
 /-! # $\Sigma_1$ collection without exponentiation
 
@@ -16,9 +17,9 @@ $\mathsf{B}\Sigma_1$ is open.
 namespace FFL.FirstOrder.Arithmetic
 
 
-/-- $\mathsf{I}\Delta_0 + \neg\mathrm{Exp}$ proves $\mathsf{B}\Sigma_1$. An open problem.
+/-- Does $\mathsf{I}\Delta_0 + \neg\mathrm{Exp}$ prove $\mathsf{B}\Sigma_1$?
 - [WP89] -/
-def BSigma1WeakerThanISigma0AddNotExp : Prop := 𝗕𝚺 1 ⪯ 𝗜𝚺₀ ∪ {∼expAxiom}
+open_problem BSigma1_weakerThan_ISigma0_union_not_exp := 𝗕𝚺 1 ⪯ 𝗜𝚺₀ ∪ {∼expAxiom}
 
 
 end FFL.FirstOrder.Arithmetic

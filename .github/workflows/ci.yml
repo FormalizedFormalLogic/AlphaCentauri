@@ -127,6 +127,27 @@ jobs:
           path: pages/zoo
           retention-days: 1
 
+  open-problems:
+    name: Generate the list of open problems
+    runs-on: ubuntu-latest
+    needs: build
+    # Runs on pull requests too, so that an open problem the generator cannot read fails before it
+    # reaches `main`.
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 100
+      - uses: ./.github/actions/setup-lean
+
+      - run: lake build AlphaCentauri
+      - run: just open-problems
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: open-problems
+          path: pages/open-problems
+          retention-days: 1
+
   no-sorry:
     name: Check no sorry
     runs-on: ubuntu-latest
@@ -162,6 +183,7 @@ jobs:
       - build
       - import-graph
       - zoo
+      - open-problems
       - no-sorry
       - mk-all-check
     permissions:
@@ -181,6 +203,11 @@ jobs:
         with:
           name: zoo
           path: pages/zoo
+      - name: Download the list of open problems
+        uses: actions/download-artifact@v8
+        with:
+          name: open-problems
+          path: pages/open-problems
       - uses: actions/upload-pages-artifact@v5
         with:
           path: pages

@@ -47,3 +47,14 @@ globs = ["AlphaCentauriZoo.+"]
 name = "zoo_arithmetic"
 root = "AlphaCentauriZoo.Arithmetic"
 supportInterpreter = true
+
+# Generator of the list of open problems, declared by `open_problem`. Kept out of `defaultTargets`:
+# it is built by `just open-problems`.
+[[lean_lib]]
+name = "AlphaCentauriOpenProblems"
+globs = ["AlphaCentauriOpenProblems.+"]
+
+[[lean_exe]]
+name = "open_problems"
+root = "AlphaCentauriOpenProblems.Main"
+supportInterpreter = true

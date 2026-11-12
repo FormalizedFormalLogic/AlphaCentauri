@@ -43,6 +43,12 @@ zoo:
     typst compile AlphaCentauriZoo/arithmetic.typ pages/zoo/arithmetic.png
     typst compile AlphaCentauriZoo/arithmetic.typ pages/zoo/arithmetic.pdf
 
+open-problems:
+    lake exe open_problems pages/open-problems/open-problems.json
+    yq --output-format=json . references.yml \
+      | python3 AlphaCentauriOpenProblems/references.py > pages/open-problems/references.json
+    cp AlphaCentauriOpenProblems/index.html AlphaCentauriOpenProblems/index.css pages/open-problems/
+
 import-graph:
     lake exe graph --to AlphaCentauri import_graph.png import_graph.pdf import_graph.html
 

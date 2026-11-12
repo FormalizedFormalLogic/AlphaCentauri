@@ -143,6 +143,7 @@ public import AlphaCentauri.OpenProblem.Attribute
 public import AlphaCentauri.ProvabilityLogic.Fragments.RelativeToConsistency
 public import AlphaCentauri.ProvabilityLogic.Fragments.RelativeToISigma
 public import AlphaCentauri.ProvabilityLogic.Fragments.RelativeToPeano
+public import AlphaCentauri.ProvabilityLogic.SelfReference
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Growth
 public import AlphaCentauri.ProvablyTotal.Parikh

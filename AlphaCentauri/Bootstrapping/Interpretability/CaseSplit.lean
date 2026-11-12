@@ -128,37 +128,28 @@ section sentence
 
 variable (φ : ArithmeticSentence) {L₂ : Language} [L₂.Encodable] [L₂.LORDefinable] {tbl₁ tbl₂ : V}
 
-lemma IsSemiformula.caseCode {n p q : V} (hp : IsSemiformula ℒₒᵣ n p)
-    (hq : IsSemiformula ℒₒᵣ n q) : IsSemiformula ℒₒᵣ n (caseCode ℒₒᵣ ⌜φ⌝ p q) := by
-  have hφ : IsSemiformula ℒₒᵣ n (⌜φ⌝ : V) := (Sentence.quote_isSemiformula₀ φ).weaken (by simp)
-  simp [Bootstrapping.caseCode, hφ, hp, hq]
-
-lemma shift_caseCode {n p q : V} (hp : IsSemiformula ℒₒᵣ n p) (hq : IsSemiformula ℒₒᵣ n q) :
-    shift ℒₒᵣ (caseCode ℒₒᵣ ⌜φ⌝ p q) = caseCode ℒₒᵣ ⌜φ⌝ (shift ℒₒᵣ p) (shift ℒₒᵣ q) := by
+lemma _root_.FFL.FirstOrder.Language.IsSentence.caseCode {n p q : V}
+    (hp : Language.IsSentence ℒₒᵣ n p) (hq : Language.IsSentence ℒₒᵣ n q) :
+    Language.IsSentence ℒₒᵣ n (caseCode ℒₒᵣ ⌜φ⌝ p q) := by
   have hφ : IsSemiformula ℒₒᵣ 0 (⌜φ⌝ : V) := Sentence.quote_isSemiformula₀ φ
-  simp [Bootstrapping.caseCode, hp.isUFormula, hq.isUFormula, hφ.isUFormula, shift_neg hφ]
+  have hp' := hp.isSemiformula
+  have hq' := hq.isSemiformula
+  refine ⟨by simp [Bootstrapping.caseCode, hφ.weaken (by simp), hp', hq'], ?_⟩
+  simp [Bootstrapping.caseCode, hp'.isUFormula, hq'.isUFormula, hφ.isUFormula, shift_neg hφ,
+    hp.shift_eq, hq.shift_eq]
 
 /-- The case-split table of two tables is a table. -/
 lemma IsTable.caseTable (hT₁ : IsTable ℒₒᵣ L₂ tbl₁) (hT₂ : IsTable ℒₒᵣ L₂ tbl₂) :
     IsTable ℒₒᵣ L₂ (caseTable ℒₒᵣ ⌜φ⌝ tbl₁ tbl₂) where
   domain := by
     rw [tableDomain_caseTable]
-    exact IsSemiformula.caseCode φ hT₁.domain hT₂.domain
-  domain_shift := by
-    rw [tableDomain_caseTable, shift_caseCode φ hT₁.domain hT₂.domain, hT₁.domain_shift,
-      hT₂.domain_shift]
+    exact .caseCode φ hT₁.domain hT₂.domain
   rel h := by
     rw [tableRel_caseTable (hT₁.lt_len_rel h)]
-    exact IsSemiformula.caseCode φ (hT₁.rel h) (hT₂.rel h)
-  rel_shift h := by
-    rw [tableRel_caseTable (hT₁.lt_len_rel h), shift_caseCode φ (hT₁.rel h) (hT₂.rel h),
-      hT₁.rel_shift h, hT₂.rel_shift h]
+    exact .caseCode φ (hT₁.rel h) (hT₂.rel h)
   func h := by
     rw [tableFunc_caseTable (hT₁.lt_len_func h)]
-    exact IsSemiformula.caseCode φ (hT₁.func h) (hT₂.func h)
-  func_shift h := by
-    rw [tableFunc_caseTable (hT₁.lt_len_func h), shift_caseCode φ (hT₁.func h) (hT₂.func h),
-      hT₁.func_shift h, hT₂.func_shift h]
+    exact .caseCode φ (hT₁.func h) (hT₂.func h)
 
 section
 

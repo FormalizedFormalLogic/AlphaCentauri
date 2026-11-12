@@ -369,7 +369,7 @@ lemma derivable_insert_translate_substs (hT : IsTable L₁ L₂ tbl) {t b p Θ :
       (insert (neg L₁ (substs1 L₁ (^&b) tbl.[0]))
         (insert (neg L₁ (substs1 L₁ (^&b) (varEqual L₁ L₂ tbl t))) Θ))) := by
   have hn₁ : IsFormula L₁ (neg L₁ (substs1 L₁ (^&b) tbl.[0])) :=
-    (IsSemiformula.substs1 (n := 0) (by simp) hT.domain).neg
+    (IsSemiformula.substs1 (n := 0) (by simp) hT.domain.isSemiformula).neg
   have hE : IsSemiformula L₁ 1 (varEqual L₁ L₂ tbl t) := by
     simpa using IsSemiformula.varEqual hT ht
   have hn₂ : IsFormula L₁ (neg L₁ (substs1 L₁ (^&b) (varEqual L₁ L₂ tbl t))) :=
@@ -400,7 +400,7 @@ lemma derivable_exs_body (hT : IsTable L₁ L₂ tbl) {p b s : V} (hs : IsFormul
     (hn : neg L₁ (substs1 L₁ (^&b) tbl.[0]) ∈ s)
     (hd : Derivable S (insert (translate L₁ L₂ tbl (substs1 L₂ (^&b) p)) s)) :
     Derivable S s := by
-  have hδ : IsSemiformula L₁ 1 tbl.[0] := hT.domain
+  have hδ : IsSemiformula L₁ 1 tbl.[0] := hT.domain.isSemiformula
   have hp' : IsSemiformula L₁ 1 (translate L₁ L₂ tbl p) := IsSemiformula.translate hT hp
   have hA : IsFormula L₁ (substs1 L₁ (^&b) tbl.[0]) := IsSemiformula.substs1 (n := 0) (by simp) hδ
   have hB : IsFormula L₁ (substs1 L₁ (^&b) (translate L₁ L₂ tbl p)) :=
@@ -436,7 +436,7 @@ lemma derivable_neg_exs_definesElement
     (hd : Derivable S (insert (neg L₁ (substs1 L₁ (^&b) tbl.[0]))
       (insert (neg L₁ (substs1 L₁ (^&b) (varEqual L₁ L₂ tbl t))) Θ))) :
     Derivable S (insert (neg L₁ (^∃ (tbl.[0] ^⋏ varEqual L₁ L₂ tbl t))) Θ) := by
-  have hδ : IsSemiformula L₁ 1 tbl.[0] := hT.domain
+  have hδ : IsSemiformula L₁ 1 tbl.[0] := hT.domain.isSemiformula
   have hE : IsSemiformula L₁ 1 (varEqual L₁ L₂ tbl t) := by
     simpa using IsSemiformula.varEqual hT ht
   have hn₁ : IsFormula L₁ (neg L₁ (substs1 L₁ (^&b) tbl.[0])) :=
@@ -476,7 +476,7 @@ lemma derivable_exs_definesElement
       ^∃ (tbl.[0] ^⋏ varEqual L₁ L₂ tbl t) := by
     simp only [Semiformula.val_exs, Semiformula.val_and, varEqualT_val, ← hd]
   rw [hval] at h₁
-  have hδ : IsSemiformula L₁ 1 tbl.[0] := hT.domain
+  have hδ : IsSemiformula L₁ 1 tbl.[0] := hT.domain.isSemiformula
   have hE : IsSemiformula L₁ 1 (varEqual L₁ L₂ tbl t) := by
     simpa using IsSemiformula.varEqual hT ht
   have hδE : IsSemiformula L₁ 1 (tbl.[0] ^⋏ varEqual L₁ L₂ tbl t) :=
@@ -615,7 +615,7 @@ theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.
       fvSubst L₂ (freshVec j) q = shift L₂ q := by
     intro j _ _ q hq
     obtain rfl : q = φ := by simpa using hq
-    exact (fvSubst_eq_self_of_shift hφF hφ).trans hφ.symm
+    exact (Language.IsSentence.fvSubst_eq_self (w := freshVec j) ⟨hφF, hφ⟩).trans hφ.symm
   have hd : Derivable S (translateSet L₁ L₂ tbl (insert φ ∅) ∪
       negDomSet L₁ tbl.[0] (insert φ ∅)) :=
     TranslatedDerivable.of_derivable hS h hL₂ hax hpr.toDerivable

@@ -182,11 +182,11 @@ section generic
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-lemma free_imp {δ q : V} (hδ : IsSemiformula L 1 δ) (hds : shift L δ = δ)
-    (hq : IsSemiformula L 1 q) :
+lemma free_imp {δ q : V} (hδ : L.IsSentence 1 δ) (hq : IsSemiformula L 1 q) :
     free L (imp L δ q) = neg L (substs1 L (^&0) δ) ^⋎ free L q := by
   have hw : IsSemitermVec L 1 0 (?[^&0] : V) := IsSemitermVec.singleton.mpr (IsSemiterm.fvar _ _)
-  rw [free, shift_imp hδ hq, hds, substs1, subst_imp hw hδ hq.shift]
+  rw [free, shift_imp hδ.isSemiformula hq, hδ.shift_eq, substs1,
+    subst_imp hw hδ.isSemiformula hq.shift]
   rfl
 
 end generic
@@ -196,7 +196,8 @@ variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
 
 lemma isFormulaSet_translated_union {Γ : V} (hT : IsTable L₁ L₂ tbl) (hΓ : IsFormulaSet L₂ Γ)
     (M : V) : IsFormulaSet L₁ (translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] M) :=
-  IsFormulaSet.union.mpr ⟨IsFormulaSet.translateSet hT hΓ, IsFormulaSet.negDomSet hT.domain M⟩
+  IsFormulaSet.union.mpr
+    ⟨IsFormulaSet.translateSet hT hΓ, IsFormulaSet.negDomSet hT.domain.isSemiformula M⟩
 
 lemma translateSet_insert_cup (p s t : V) :
     translateSet L₁ L₂ tbl (insert p s) ∪ t =
@@ -213,7 +214,7 @@ lemma domainAt_zero (hT : IsTable L₁ L₂ tbl) : domainAt L₁ tbl 0 = tbl.[0]
     intro i hi
     obtain rfl : i = 0 := by simpa using hi
     simp
-  exact subst_eq_self_of_le hT.domain hw (le_refl _) H
+  exact subst_eq_self_of_le hT.domain.isSemiformula hw (le_refl _) H
 
 lemma translate_free (hT : IsTable L₁ L₂ tbl) {p : V} (hp : IsSemiformula L₂ 1 p) :
     translate L₁ L₂ tbl (free L₂ p) = free L₁ (translate L₁ L₂ tbl p) := by
@@ -226,7 +227,7 @@ lemma elim_translateSet (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shi
     (hfresh : ∀ j, m ≤ j → j < M → ∀ q ∈ Γ₁, fvSubst L₂ (freshVec j) q = shift L₂ q)
     (hd : Derivable S (translateSet L₁ L₂ tbl Γ₁ ∪ negDomSet L₁ tbl.[0] M)) :
     Derivable S (translateSet L₁ L₂ tbl Γ₁ ∪ negDomSet L₁ tbl.[0] m) :=
-  Derivable.elim_negDomSet hS hT.domain hT.domain_shift hdom
+  Derivable.elim_negDomSet hS hT.domain hdom
     (IsFormulaSet.translateSet hT hΓ₁) hm
     (fun j hmj hjM ↦ fvSubstImage_freshVec_translateSet_of hT hΓ₁ (hfresh j hmj hjM)) hd
 
@@ -376,7 +377,7 @@ lemma translated_shift (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shif
       have hi' : i + 1 < Γ + setShift L₂ Γ + 1 :=
         lt_of_le_of_lt (le_trans (lt_iff_succ_le.mp hi) (le_add_right le_rfl)) (lt_add_one _)
       exact mem_cup_iff.mpr (Or.inr (mem_negDomSet_iff.mpr
-        ⟨i + 1, hi', shift_neg_substs1_qqFvar hT.domain hT.domain_shift⟩))
+        ⟨i + 1, hi', shift_neg_substs1_qqFvar hT.domain⟩))
   have hd' : Derivable S
       (translateSet L₁ L₂ tbl (setShift L₂ Γ) ∪ negDomSet L₁ tbl.[0] (Γ + setShift L₂ Γ + 1)) :=
     Derivable.wk (isFormulaSet_translated_union hT hΓs _) hU (Derivable.shift hd)
@@ -405,7 +406,7 @@ lemma translated_all (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
   have hd' := derivable_translated_bound hT hΓ₁ hM₁ hd
   have hd'' := elim_translateSet hS hT hdom hΓ₁ hΓM hfresh hd'
   rw [translateSet_insert, translate_free hT hp1, translateSet_setShift hT hΓ,
-    negDomSet_succ_eq_insert_setShift (d := tbl.[0]) hT.domain hT.domain_shift Γ] at hd''
+    negDomSet_succ_eq_insert_setShift (d := tbl.[0]) hT.domain Γ] at hd''
   have hd3 : Derivable S (insert (neg L₁ (substs1 L₁ (^&0) tbl.[0]))
       (insert (free L₁ (translate L₁ L₂ tbl p))
         (setShift L₁ (translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] Γ)))) :=
@@ -421,7 +422,7 @@ lemma translated_all (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
     exact h₁
   have hfree : free L₁ (imp L₁ tbl.[0] (translate L₁ L₂ tbl p)) =
       neg L₁ (substs1 L₁ (^&0) tbl.[0]) ^⋎ free L₁ (translate L₁ L₂ tbl p) :=
-    free_imp hT.domain hT.domain_shift (IsSemiformula.translate hT hp1)
+    free_imp hT.domain (IsSemiformula.translate hT hp1)
   have hp' : Derivable S (insert (free L₁ (imp L₁ tbl.[0] (translate L₁ L₂ tbl p)))
       (setShift L₁ (translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] Γ))) := by
     rw [hfree]

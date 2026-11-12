@@ -251,7 +251,7 @@ theorem Interpretable.trans {S U W : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [W.Δ
             have hb := IsSemiformula.translate h₁.toIsTable
               (IsSemiformula.translate h₂.toIsTable hp')
             have h₄ := (provable_iff_iff_tprovable ha hb).mp
-              (provable_comp_translate_iff h₁.toIsTranslationTable h₂.toIsTable hc hS hL hp' hps)
+              (provable_comp_translate_iff h₁.toIsTranslationTable h₂.toIsTable hc hS hL ⟨hp', hps⟩)
             have h₅ : S.internalize V ⊢ (⟨_, hb⟩ : Formula V ℒₒᵣ) := tprovable_iff_provable.mpr h₃
             exact tprovable_iff_provable.mp (K_right h₄ ⨀ h₅) }
 
@@ -291,12 +291,10 @@ variable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
 
 /-- The formula defining `IsTable L₁ L₂`. -/
 noncomputable def isTableDef : ArithmeticSemisentence 1 :=
-  “tbl. ∃ d, !tableDomainGraph.val d tbl ∧ !(isSemiformula L₁).val 1 d ∧
-    !(shiftGraph L₁).val d d ∧
-    (∀ k r, !L₂.isRel.val k r → ∃ e, !tableRelGraph.val e tbl k r ∧
-      !(isSemiformula L₁).val k e ∧ !(shiftGraph L₁).val e e) ∧
-    (∀ k f, !L₂.isFunc.val k f → ∃ e, !tableFuncGraph.val e tbl k f ∧
-      !(isSemiformula L₁).val (k + 1) e ∧ !(shiftGraph L₁).val e e)”
+  “tbl. ∃ d, !tableDomainGraph.val d tbl ∧ !(isSentence L₁).val 1 d ∧
+    (∀ k r, !L₂.isRel.val k r → ∃ e, !tableRelGraph.val e tbl k r ∧ !(isSentence L₁).val k e) ∧
+    (∀ k f, !L₂.isFunc.val k f →
+      ∃ e, !tableFuncGraph.val e tbl k f ∧ !(isSentence L₁).val (k + 1) e)”
 
 omit [L₂.Eq] in
 variable {L₁ L₂} in
@@ -310,12 +308,10 @@ lemma eval_isTableDef (tbl : V) : V ⊧/![tbl] (isTableDef L₁ L₂) ↔ IsTabl
     Matrix.cons_app_two, Fin.succ_one_eq_two, Fin.succ_two_eq_three, LogicalConnective.Prop.and_eq,
     exists_eq_left, LogicalConnective.Prop.arrow_eq, Tarski.Structure.Add.add]
   constructor
-  · rintro ⟨hd, hds, hr, hf⟩
-    exact ⟨hd, hds.symm, fun h ↦ (hr _ _ h).1, fun h ↦ (hr _ _ h).2.symm, fun h ↦ (hf _ _ h).1,
-      fun h ↦ (hf _ _ h).2.symm⟩
+  · rintro ⟨hd, hr, hf⟩
+    exact ⟨hd, fun h ↦ hr _ _ h, fun h ↦ hf _ _ h⟩
   · intro h
-    exact ⟨h.domain, h.domain_shift.symm, fun _ _ hr ↦ ⟨h.rel hr, (h.rel_shift hr).symm⟩,
-      fun _ _ hf ↦ ⟨h.func hf, (h.func_shift hf).symm⟩⟩
+    exact ⟨h.domain, fun _ _ hr ↦ h.rel hr, fun _ _ hf ↦ h.func hf⟩
 
 variable (S : Theory L₁) [S.Δ₁] (U : Theory L₂) [U.Δ₁]
 

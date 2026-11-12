@@ -89,16 +89,16 @@ open PeanoMinus ISigma0 ISigma1
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-lemma fvSubst_freshVec_neg_substs1_qqFvar {d i j : V} (hd : IsSemiformula L 1 d)
-    (hds : shift L d = d) (hij : i < j) :
+lemma fvSubst_freshVec_neg_substs1_qqFvar {d i j : V} (hd : L.IsSentence 1 d) (hij : i < j) :
     fvSubst L (freshVec j) (neg L (substs1 L (^&i) d)) = neg L (substs1 L (^&(i + 1)) d) := by
   have hw : IsSemitermVec L (len (freshVec j : V)) 0 (freshVec j) := isSemitermVec_freshVec j
   have ht : IsSemiterm L 0 (^&i) := by simp
   have hil : i < len (freshVec j : V) := by
     rw [len_freshVec]
     exact lt_trans hij (by simp)
-  rw [fvSubst_neg hw (IsSemiformula.substs1 ht hd), fvSubst_substs1 hw ht hd, termFvSubst_fvar,
-    ite_eq_left hil, nth_freshVec_of_lt hij, fvSubst_eq_self_of_shift hd hds]
+  rw [fvSubst_neg hw (IsSemiformula.substs1 ht hd.isSemiformula),
+    fvSubst_substs1 hw ht hd.isSemiformula, termFvSubst_fvar, ite_eq_left hil,
+    nth_freshVec_of_lt hij, hd.fvSubst_eq_self]
 
 variable (L) in
 /-- `negDomSet L d m` is the coded set of the negations of the instances `substs1 L (^&i) d`
@@ -167,12 +167,11 @@ lemma IsFormulaSet.negDomSet {d : V} (hd : IsSemiformula L 1 d) (m : V) :
   obtain ⟨i, _, rfl⟩ := mem_negDomSet_iff.mp hp
   exact (IsSemiformula.substs1 (n := 0) (by simp) hd).neg
 
-lemma negDomSet_succ_eq_insert_setShift {d : V} (hd : IsSemiformula L 1 d)
-    (hds : Bootstrapping.shift L d = d) (m : V) :
+lemma negDomSet_succ_eq_insert_setShift {d : V} (hd : L.IsSentence 1 d) (m : V) :
     negDomSet L d (m + 1) = insert (neg L (substs1 L (^&0) d)) (setShift L (negDomSet L d m)) := by
   apply mem_ext
   intro x
-  have := fun j : V ↦ shift_neg_substs1_qqFvar (j := j) hd hds
+  have := fun j : V ↦ shift_neg_substs1_qqFvar (j := j) hd
   simp only [mem_negDomSet_iff, mem_bitInsert_iff, mem_setShift_iff]
   constructor
   · rintro ⟨i, hi, rfl⟩
@@ -183,18 +182,17 @@ lemma negDomSet_succ_eq_insert_setShift {d : V} (hd : IsSemiformula L 1 d)
     · exact ⟨0, by simp, rfl⟩
     · exact ⟨j + 1, by simpa using hj, this j⟩
 
-lemma fvSubstImage_freshVec_negDomSet {d : V} (hd : IsSemiformula L 1 d)
-    (hds : Bootstrapping.shift L d = d) (j : V) :
+lemma fvSubstImage_freshVec_negDomSet {d : V} (hd : L.IsSentence 1 d) (j : V) :
     fvSubstImage (L := L) (freshVec j) (negDomSet L d j) = setShift L (negDomSet L d j) := by
   apply mem_ext
   intro x
-  have := fun i : V ↦ shift_neg_substs1_qqFvar (j := i) hd hds
+  have := fun i : V ↦ shift_neg_substs1_qqFvar (j := i) hd
   simp only [mem_fvSubstImage_iff, mem_negDomSet_iff, mem_setShift_iff]
   constructor
   · rintro ⟨_, ⟨i, hi, rfl⟩, rfl⟩
-    exact ⟨_, ⟨i, hi, rfl⟩, by rw [fvSubst_freshVec_neg_substs1_qqFvar hd hds hi, this]⟩
+    exact ⟨_, ⟨i, hi, rfl⟩, by rw [fvSubst_freshVec_neg_substs1_qqFvar hd hi, this]⟩
   · rintro ⟨_, ⟨i, hi, rfl⟩, rfl⟩
-    exact ⟨_, ⟨i, hi, rfl⟩, by rw [fvSubst_freshVec_neg_substs1_qqFvar hd hds hi, this]⟩
+    exact ⟨_, ⟨i, hi, rfl⟩, by rw [fvSubst_freshVec_neg_substs1_qqFvar hd hi, this]⟩
 
 lemma fvSubst_freshVec_shift {n q u j : V} (hq : IsSemiformula L n q) (hqu : q ≤ u)
     (huj : u < j) :
@@ -242,8 +240,8 @@ variable {T : Theory L} [T.Δ₁]
 together with the negated instances `negDomSet L d m'` yields that together with
 `negDomSet L d m`, provided `d` is provable as an existential formula. -/
 theorem Derivable.elim_negDomSet (hT : ∀ p ∈ T.Δ₁Class (V := V), Bootstrapping.shift L p = p)
-    {d : V} (hd : IsSemiformula L 1 d) (hds : Bootstrapping.shift L d = d)
-    (hne : Provable T (^∃ d)) {Δ m m' : V} (hΔ : IsFormulaSet L Δ) (hm : m ≤ m')
+    {d : V} (hd : L.IsSentence 1 d) (hne : Provable T (^∃ d)) {Δ m m' : V}
+    (hΔ : IsFormulaSet L Δ) (hm : m ≤ m')
     (hfresh : ∀ j, m ≤ j → j < m' →
       fvSubstImage (L := L) (freshVec j) Δ = Bootstrapping.setShift L Δ)
     (h : Derivable T (Δ ∪ negDomSet L d m')) : Derivable T (Δ ∪ negDomSet L d m) := by
@@ -268,16 +266,17 @@ theorem Derivable.elim_negDomSet (hT : ∀ p ∈ T.Δ₁Class (V := V), Bootstra
         Derivable.ofSetEq (fun x ↦ by simp only [mem_cup_iff, mem_bitInsert_iff]; tauto) h₄
       have h₆ : fvSubstImage (L := L) (freshVec j) (Δ ∪ negDomSet L d j) =
           setShift L (Δ ∪ negDomSet L d j) := by
-        rw [fvSubstImage_union, hfresh j hmj h₁, fvSubstImage_freshVec_negDomSet hd hds,
+        rw [fvSubstImage_union, hfresh j hmj h₁, fvSubstImage_freshVec_negDomSet hd,
           mem_setShift_union]
       have h₇ : fvSubst L (freshVec j) d = Bootstrapping.shift L d := by
-        rw [hds]
-        exact fvSubst_eq_self_of_shift hd hds
+        rw [hd.shift_eq]
+        exact hd.fvSubst_eq_self
       have h₈ : Derivable T (insert (neg L (^∃ d)) (Δ ∪ negDomSet L d j)) :=
-        Derivable.neg_exs_of_free hT (isSemitermVec_freshVec j) (by simp) (by simp) h₆ h₇ hd h₅
+        Derivable.neg_exs_of_free hT (isSemitermVec_freshVec j) (by simp) (by simp) h₆ h₇
+          hd.isSemiformula h₅
       have h₉ : IsFormulaSet L (insert (^∃ d) (Δ ∪ negDomSet L d j)) :=
         IsFormulaSet.insert_iff.mpr ⟨(IsFormulaSet.insert_iff.mp hne.toDerivable.isFormulaSet).1,
-          IsFormulaSet.union.mpr ⟨hΔ, IsFormulaSet.negDomSet hd j⟩⟩
+          IsFormulaSet.union.mpr ⟨hΔ, IsFormulaSet.negDomSet hd.isSemiformula j⟩⟩
       have h₁₀ : Derivable T (insert (^∃ d) (Δ ∪ negDomSet L d j)) :=
         Derivable.wk h₉ (by intro x hx; simp_all) hne.toDerivable
       exact Derivable.cut (^∃ d) h₁₀ h₈

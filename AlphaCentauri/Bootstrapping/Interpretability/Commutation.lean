@@ -28,15 +28,13 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Negation, shift and arity -/
 
-/-- `tbl` lists, for the languages `L₁` and `L₂`, shift-invariant formulas of the right arities. -/
+/-- `tbl` lists, for the languages `L₁` and `L₂`, sentences with the right numbers of
+bound variables. -/
 structure IsTable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq] [L₂.Encodable]
     [L₂.LORDefinable] (tbl : V) : Prop where
-  domain : IsSemiformula L₁ 1 (tableDomain tbl)
-  domain_shift : shift L₁ (tableDomain tbl) = tableDomain tbl
-  rel {k r : V} : L₂.IsRel k r → IsSemiformula L₁ k (tableRel tbl k r)
-  rel_shift {k r : V} : L₂.IsRel k r → shift L₁ (tableRel tbl k r) = tableRel tbl k r
-  func {k f : V} : L₂.IsFunc k f → IsSemiformula L₁ (k + 1) (tableFunc tbl k f)
-  func_shift {k f : V} : L₂.IsFunc k f → shift L₁ (tableFunc tbl k f) = tableFunc tbl k f
+  domain : L₁.IsSentence 1 (tableDomain tbl)
+  rel {k r : V} : L₂.IsRel k r → L₁.IsSentence k (tableRel tbl k r)
+  func {k f : V} : L₂.IsFunc k f → L₁.IsSentence (k + 1) (tableFunc tbl k f)
 
 lemma IsSemiformula.relocate {n m i s p : V} (hp : IsSemiformula L (n + 1) p) (hi : i < m)
     (hs : s + n ≤ m) : IsSemiformula L m (relocate L i s p) := by
@@ -59,27 +57,27 @@ lemma IsTable.shift_domainAt {tbl : V} (hT : IsTable L₁ L₂ tbl) (i : V) :
     shift L₁ (domainAt L₁ tbl i) = domainAt L₁ tbl i := by
   have h₁ : IsSemitermVec L₁ 1 (i + 1) ?[^#i] :=
     IsSemitermVec.singleton.mpr (IsSemiterm.bvar.mpr (by simp))
-  rw [domainAt, shift_substs hT.domain h₁, hT.domain_shift,
+  rw [domainAt, shift_substs hT.domain.isSemiformula h₁, hT.domain.shift_eq,
     termShiftVec_cons₁ (show IsUTerm L₁ ^#i by simp),
     termShift_bvar]
 
 lemma IsTable.lt_len_rel {tbl : V} (hT : IsTable L₁ L₂ tbl) {k r : V} (h : L₂.IsRel k r) :
     ⟪k, r⟫ < len tbl.[1] := by
   by_contra hlt
-  have := (hT.rel h).isUFormula.pos
+  have := (hT.rel h).isSemiformula.isUFormula.pos
   rw [tableRel, nth_lt_len (not_lt.mp hlt)] at this
   simp at this
 
 lemma IsTable.lt_len_func {tbl : V} (hT : IsTable L₁ L₂ tbl) {k f : V} (h : L₂.IsFunc k f) :
     ⟪k, f⟫ < len tbl.[2] := by
   by_contra hlt
-  have := (hT.func h).isUFormula.pos
+  have := (hT.func h).isSemiformula.isUFormula.pos
   rw [tableFunc, nth_lt_len (not_lt.mp hlt)] at this
   simp at this
 
 lemma IsTable.isSemiformula_domainAt {tbl : V} (hT : IsTable L₁ L₂ tbl) {m i : V} (hi : i < m) :
     IsSemiformula L₁ m (domainAt L₁ tbl i) :=
-  hT.domain.subst (IsSemitermVec.singleton.mpr (IsSemiterm.bvar.mpr hi))
+  hT.domain.isSemiformula.subst (IsSemitermVec.singleton.mpr (IsSemiterm.bvar.mpr hi))
 
 lemma IsTable.isSemiformula_domainAt_zero {tbl : V} (hT : IsTable L₁ L₂ tbl) (n : V) :
     IsSemiformula L₁ (n + 1) (domainAt L₁ tbl 0) := hT.isSemiformula_domainAt (by simp)
@@ -89,13 +87,14 @@ lemma IsTable.isSemiformula_funcTail {tbl k f m : V} (hT : IsTable L₁ L₂ tbl
   have h₁ : IsSemitermVec L₁ (k + 1) m (^#k ∷ bvarVec 0 k) :=
     IsSemitermVec.adjoin (IsSemitermVec.bvarVec (by simpa using hk.le)) (IsSemiterm.bvar.mpr hk)
   rw [funcTail]
-  exact (hT.func hf).subst h₁
+  exact (hT.func hf).isSemiformula.subst h₁
 
 lemma IsTable.shift_funcTail {tbl k f : V} (hT : IsTable L₁ L₂ tbl) (hf : L₂.IsFunc k f) :
     shift L₁ (funcTail L₁ tbl k f) = funcTail L₁ tbl k f := by
   have h₁ : IsSemitermVec L₁ (k + 1) (k + 1) (^#k ∷ bvarVec 0 k) :=
     IsSemitermVec.adjoin (IsSemitermVec.bvarVec (by simp)) (IsSemiterm.bvar.mpr (by simp))
-  rw [funcTail, shift_substs (hT.func hf) h₁, termShiftVec_bvarVec_cons, hT.func_shift hf]
+  rw [funcTail, shift_substs (hT.func hf).isSemiformula h₁, termShiftVec_bvarVec_cons,
+    (hT.func hf).shift_eq]
 
 lemma IsTable.isSemiformula_guardVec {tbl n m k s w j : V} (hT : IsTable L₁ L₂ tbl) (hk : k ≤ m)
     (hs : s + n ≤ m) (hw : ∀ i < k, IsSemiformula L₁ (n + 1) w.[i]) (hj : j < k) :
@@ -178,7 +177,7 @@ lemma IsTable.isSemiformula_relBody {tbl n k R v : V} (hT : IsTable L₁ L₂ tb
       (imp L₁ (^⋀ guardVec L₁ tbl k (varEqualVec L₁ L₂ tbl k v) k) (tableRel tbl k R)) :=
   IsSemiformula.imp.mpr
     ⟨IsSemiformula.qqConj_guardVec hT (by simp) (add_comm k n).le
-      fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi, (hT.rel hR).weaken (by simp)⟩
+      fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi, (hT.rel hR).isSemiformula.weaken (by simp)⟩
 
 lemma IsSemiformula.translateRel {tbl n k R v : V} (hT : IsTable L₁ L₂ tbl) (hR : L₂.IsRel k R)
     (hv : IsSemitermVec L₂ k n v) :
@@ -270,7 +269,7 @@ lemma shift_translateRel {tbl n k R v : V} (hT : IsTable L₁ L₂ tbl) (hR : L�
   unfold Bootstrapping.translateRel
   rw [shift_qqAlls (hT.isSemiformula_relBody hR hv).isUFormula k, shift_imp h₁ h₂,
     hT.shift_qqConj_guardVec (by simp) (add_comm k n).le
-      (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₃, hT.rel_shift hR]
+      (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₃, (hT.rel hR).shift_eq]
 
 lemma translate_shift {tbl n p : V} (hT : IsTable L₁ L₂ tbl) (hp : IsSemiformula L₂ n p) :
     translate L₁ L₂ tbl (shift L₂ p) = shift L₁ (translate L₁ L₂ tbl p) := by
@@ -308,26 +307,16 @@ lemma IsTableOf.isTable {T : Theory L₁} [𝗘𝗤 _ ⪯ T] {π : DirectTransla
     (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) : IsTable L₁ L₂ tbl where
   domain := by
     rw [h.domain]
-    simp
-  domain_shift := by
-    rw [h.domain]
-    exact Semisentence.shift_quote _
+    exact ⟨by simp, Semisentence.shift_quote _⟩
   rel hr := by
     obtain ⟨k', R, rfl, rfl⟩ := hL₂.1 _ _ hr
     rw [h.rel R]
-    exact Sentence.quote_isSemiformula _
-  rel_shift hr := by
-    obtain ⟨k', R, rfl, rfl⟩ := hL₂.1 _ _ hr
-    rw [h.rel R]
-    exact Semisentence.shift_quote _
+    exact ⟨Sentence.quote_isSemiformula _, Semisentence.shift_quote _⟩
   func hf := by
     obtain ⟨k', F, rfl, rfl⟩ := hL₂.2 _ _ hf
     rw [h.func F]
-    simpa using Sentence.quote_isSemiformula (π.func F).sentence
-  func_shift hf := by
-    obtain ⟨k', F, rfl, rfl⟩ := hL₂.2 _ _ hf
-    rw [h.func F]
-    exact Semisentence.shift_quote _
+    exact ⟨by simpa using Sentence.quote_isSemiformula (π.func F).sentence,
+      Semisentence.shift_quote _⟩
 
 end isTable
 
@@ -458,7 +447,7 @@ lemma subst_translateRel {tbl n m k R v w : V} (hT : IsTable L₁ L₂ tbl)
     subst_imp hv' h₁ h₂,
     hT.subst_qqConj_guardVec hw₁ hv'' le_rfl (by simp) (add_comm k n).le h₆ h₇
       (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₃,
-    subst_eq_self_of_le (hT.rel hR) hv'.isUTerm (by simp) h₆]
+    subst_eq_self_of_le (hT.rel hR).isSemiformula hv'.isUTerm (by simp) h₆]
 
 lemma translate_subst {tbl : V} (hT : IsTable L₁ L₂ tbl) {n m w p : V} (hw : IsSemitermVec L₂ n m w)
     (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) (hp : IsSemiformula L₂ n p) :
@@ -536,11 +525,11 @@ variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
 
 lemma IsTable.fvSubst_domainAt {tbl w i m : V} (hT : IsTable L₁ L₂ tbl) (hi : i < m) :
     fvSubst L₁ w (domainAt L₁ tbl i) = domainAt L₁ tbl i :=
-  fvSubst_eq_self_of_shift (hT.isSemiformula_domainAt hi) (hT.shift_domainAt i)
+  Language.IsSentence.fvSubst_eq_self ⟨hT.isSemiformula_domainAt hi, hT.shift_domainAt i⟩
 
 lemma IsTable.fvSubst_funcTail {tbl w k f m : V} (hT : IsTable L₁ L₂ tbl) (hf : L₂.IsFunc k f)
     (hk : k < m) : fvSubst L₁ w (funcTail L₁ tbl k f) = funcTail L₁ tbl k f :=
-  fvSubst_eq_self_of_shift (hT.isSemiformula_funcTail hf hk) (hT.shift_funcTail hf)
+  Language.IsSentence.fvSubst_eq_self ⟨hT.isSemiformula_funcTail hf hk, hT.shift_funcTail hf⟩
 
 lemma IsTable.fvSubst_qqConj_guardVec {tbl n m k s w u u' : V} (hT : IsTable L₁ L₂ tbl)
     (hw : ∀ i < len w, ∃ x, w.[i] = ^&x) (hk : k ≤ m) (hs : s + n ≤ m)
@@ -593,7 +582,7 @@ lemma fvSubst_translateRel {tbl n k R v w : V} (hT : IsTable L₁ L₂ tbl)
     fvSubst_imp (isSemitermVec_of_fvar (L := L₁) (n + k) hw) h₁ h₂,
     hT.fvSubst_qqConj_guardVec hw (by simp) (add_comm k n).le
       (fun i hi ↦ hT.isSemiformula_varEqualVec_nth hv hi) h₃,
-    fvSubst_eq_self_of_shift h₂ (hT.rel_shift hR)]
+    (hT.rel hR).fvSubst_eq_self]
 
 lemma translate_fvSubst {tbl w n p : V} (hT : IsTable L₁ L₂ tbl)
     (hw : ∀ i < len w, ∃ x, w.[i] = ^&x) (hp : IsSemiformula L₂ n p) :

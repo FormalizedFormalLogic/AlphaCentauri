@@ -104,16 +104,16 @@ end partialInstance
 that has no free variables, is not existential, and belongs to `IsReadable k D`, such that every
 instance of `χ` by closed terms is false under `ReadableTruth k D`. -/
 def IsFalseBlock (k D : ℕ) (e : V) : Prop :=
-  ∃ m χ, e = qqExss χ m ∧ IsSemiformula ℒₒᵣ m χ ∧ shift ℒₒᵣ χ = χ ∧ (∀ p, χ ≠ ^∃ p) ∧
+  ∃ m χ, e = qqExss χ m ∧ Language.IsSentence ℒₒᵣ m χ ∧ (∀ p, χ ≠ ^∃ p) ∧
     IsReadable k D χ ∧ ∀ w, IsSemitermVec ℒₒᵣ m 0 w → ¬ReadableTruth k D (subst ℒₒᵣ w χ)
 
 lemma IsFalseBlock.isFormula {k D : ℕ} {e : V} (h : IsFalseBlock k D e) : IsFormula ℒₒᵣ e := by
   obtain ⟨m, χ, rfl, hχ, -⟩ := h
-  exact IsSemiformula.qqExss (by simpa using hχ)
+  exact IsSemiformula.qqExss (by simpa using hχ.isSemiformula)
 
 lemma IsFalseBlock.shift_eq {k D : ℕ} {e : V} (h : IsFalseBlock k D e) : shift ℒₒᵣ e = e := by
-  obtain ⟨m, χ, rfl, hχ, hs, -⟩ := h
-  rw [shift_qqExss hχ.isUFormula, hs]
+  obtain ⟨m, χ, rfl, hχ, -⟩ := h
+  rw [shift_qqExss hχ.isSemiformula.isUFormula, hχ.shift_eq]
 
 /-- `φ` is readable or a partial instance of a block of `E`. -/
 private def Admissible (k D : ℕ) (E φ : V) : Prop :=
@@ -131,7 +131,7 @@ variable {k D : ℕ} {E : V}
 lemma IsPartialInstance.zero (hE : ∀ e ∈ E, IsFalseBlock k D e) {φ : V}
     (h : IsPartialInstance E 0 φ) : IsReadable k D φ ∧ ¬ReadableTruth k D φ := by
   obtain ⟨m, χ, hmem, hχ, hmax, -, w, hw, -, -, rfl⟩ := h
-  obtain ⟨m', χ', he, -, -, hmax', hr, hf⟩ := hE _ hmem
+  obtain ⟨m', χ', he, -, hmax', hr, hf⟩ := hE _ hmem
   obtain ⟨rfl, rfl⟩ := qqExss_inj (fun a ha ↦ hmax a (by simp [ha]) ha) hmax' he
   exact ⟨by simpa using hr.subst hw hχ, by simpa using hf w hw⟩
 
@@ -422,9 +422,11 @@ theorem not_cutFreeDerivable_of_isFalseBlock (hE : ∀ e ∈ E, IsFalseBlock k D
   intro h
   have key : ∀ e ∈ E, fvAssign 0 e = e ∧ ∃ m, IsPartialInstance E m e := by
     intro e he
-    obtain ⟨m, χ, rfl, hχ, hsh, hmax, -, -⟩ := hE e he
-    exact ⟨by rw [fvAssign_qqExss hχ.isUFormula, fvAssign_eq_self hχ.isUFormula hsh],
-      m, .of_mem hχ hmax he⟩
+    obtain ⟨m, χ, rfl, hχ, hmax, -, -⟩ := hE e he
+    exact ⟨by
+      rw [fvAssign_qqExss hχ.isSemiformula.isUFormula,
+        fvAssign_eq_self hχ.isSemiformula.isUFormula hχ.shift_eq],
+      m, .of_mem hχ.isSemiformula hmax he⟩
   obtain ⟨e, he, hN, hT⟩ := h.exists_readableSatisfaction hE (f := 0) (by
     intro e he
     rw [(key e he).1]

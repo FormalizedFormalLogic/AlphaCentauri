@@ -228,11 +228,13 @@ theorem id_provable_iff_translate {p : V} (hp : IsFormula L p) :
   · intro p hp ih
     rw [translate_free hT hp] at ih
     rw [translate_all hp.isUFormula, domainAt_zero hT]
-    exact provable_all_iff_all_of_domain hT.domain hd hp (IsSemiformula.translate hT hp) ih
+    exact provable_all_iff_all_of_domain hT.domain.isSemiformula hd hp
+      (IsSemiformula.translate hT hp) ih
   · intro p hp ih
     rw [translate_free hT hp] at ih
     rw [translate_exs hp.isUFormula, domainAt_zero hT]
-    exact provable_exs_iff_exs_of_domain hT.domain hd hp (IsSemiformula.translate hT hp) ih
+    exact provable_exs_iff_exs_of_domain hT.domain.isSemiformula hd hp
+      (IsSemiformula.translate hT hp) ih
 
 /-- Along a table of the identity translation, the translation of a provable formula code is
 provable. -/

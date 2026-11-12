@@ -67,8 +67,7 @@ private lemma exists_vec_bvar_fvar (m i : V) :
 /-- Opening the outermost quantifier of `qqAlls (subst L v' r) i`, where `v'` keeps the innermost
 `i + 1` bound variables of `r` and replaces the others by free variables, with the eigenvariable
 `^&0`. -/
-private lemma free_qqAlls_subst {m i v v' r : V} (hr : IsSemiformula L m r)
-    (hsr : Bootstrapping.shift L r = r) (hvl : len v = m)
+private lemma free_qqAlls_subst {m i v v' r : V} (hr : L.IsSentence m r) (hvl : len v = m)
     (hv : ∀ x < m, (x < i → v.[x] = ^#x) ∧ (i ≤ x → v.[x] = ^&(x - i))) (hv'l : len v' = m)
     (hv' : ∀ x < m, (x < i + 1 → v'.[x] = ^#x) ∧ (i + 1 ≤ x → v'.[x] = ^&(x - (i + 1)))) :
     free L (qqAlls (subst L v' r) i) = qqAlls (subst L v r) i := by
@@ -78,8 +77,9 @@ private lemma free_qqAlls_subst {m i v v' r : V} (hr : IsSemiformula L m r)
     rcases lt_or_eq_of_le (lt_succ_iff_le.mp hx) with h | rfl
     · simp [hu₁ x h, h]
     · simp [hu₂]⟩
-  rw [free_qqAlls (hr.subst hv's).isUFormula hul hu₁ hu₂, shift_substs hr hv's, hsr,
-    substs_substs hr hus hv's.termShiftVec]
+  rw [free_qqAlls (hr.isSemiformula.subst hv's).isUFormula hul hu₁ hu₂,
+    shift_substs hr.isSemiformula hv's, hr.shift_eq,
+    substs_substs hr.isSemiformula hus hv's.termShiftVec]
   congr 2
   apply nth_ext' m (by simp [hv's.termShiftVec.isUTerm]) hvl
   intro x hx
@@ -96,17 +96,15 @@ private lemma free_qqAlls_subst {m i v v' r : V} (hr : IsSemiformula L m r)
 
 /-- If `p` follows from `q` once their `m` bound variables are replaced by the free variables
 `^&0, …, ^&(m - 1)`, then `qqAlls p m` follows from `qqAlls q m`. -/
-theorem Derivable.neg_qqAlls_qqAlls {m p q : V} (hp : IsSemiformula L m p)
-    (hq : IsSemiformula L m q) (hsp : Bootstrapping.shift L p = p)
-    (hsq : Bootstrapping.shift L q = q)
+theorem Derivable.neg_qqAlls_qqAlls {m p q : V} (hp : L.IsSentence m p) (hq : L.IsSentence m q)
     (h : Derivable T (insert (neg L (subst L (fvarVec m) q)) ({subst L (fvarVec m) p} : V))) :
     Derivable T (insert (neg L (qqAlls q m)) ({qqAlls p m} : V)) := by
   suffices ∀ i ≤ m, ∃ v, (len v = m ∧ ∀ x < m, (x < i → v.[x] = ^#x) ∧ (i ≤ x → v.[x] = ^&(x - i)))
       ∧ Derivable T (insert (neg L (qqAlls (subst L v q) i)) ({qqAlls (subst L v p) i} : V)) by
     obtain ⟨v, ⟨hvl, hv⟩, hd⟩ := this m le_rfl
     have hvm : IsSemitermVec L m m v := isSemitermVec_of_bvar_fvar hvl hv
-    rwa [subst_eq_self hp hvm fun x hx ↦ (hv x hx).1 hx,
-      subst_eq_self hq hvm fun x hx ↦ (hv x hx).1 hx] at hd
+    rwa [subst_eq_self hp.isSemiformula hvm fun x hx ↦ (hv x hx).1 hx,
+      subst_eq_self hq.isSemiformula hvm fun x hx ↦ (hv x hx).1 hx] at hd
   intro i
   induction i using ISigma1.sigma1_succ_induction
   · definability
@@ -123,8 +121,8 @@ theorem Derivable.neg_qqAlls_qqAlls {m p q : V} (hp : IsSemiformula L m p)
       IsSemiformula.qqAlls (by simpa [add_comm] using hr.subst hv's)
     refine ⟨v', ⟨hv'l, hv'⟩, ?_⟩
     rw [qqAlls_succ, qqAlls_succ]
-    apply Derivable.neg_all_all (hs p hp) (hs q hq)
-    rwa [free_qqAlls_subst hp hsp hvl hv hv'l hv', free_qqAlls_subst hq hsq hvl hv hv'l hv']
+    apply Derivable.neg_all_all (hs p hp.isSemiformula) (hs q hq.isSemiformula)
+    rwa [free_qqAlls_subst hp hvl hv hv'l hv', free_qqAlls_subst hq hvl hv hv'l hv']
 
 end UniversalClosure
 

@@ -4,9 +4,9 @@
 Reads `references.yml`, converted to JSON by `yq`, on the standard input, and writes to the standard
 output a JSON object from every citation key to its entry formatted in the style of APA, as HTML:
 
-    yq --output-format=json . references.yml | python3 references.py > references.json
+    yq --output-format=json . references.yml | python3 pages/open-problems/references.py > pages/open-problems/references.json
 
-`../index.html` shows the entries of the keys cited by a docstring at the end of the list.
+`index.html` shows the entries of the keys cited by a docstring at the end of the list.
 """
 
 import json

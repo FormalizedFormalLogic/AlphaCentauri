@@ -69,7 +69,7 @@ main { display: grid; gap: 1.25rem; margin-top: 1.5rem; }
 footer { margin-top: 2rem; color: var(--muted); font-size: .875rem; }
 footer p { margin: 0; }
 
-@media (min-width: 52rem) {
+@media (min-width: 800px) {
   main { grid-template-columns: 1fr 1fr; }
   #zoo { grid-column: 1 / -1; }
 }

@@ -7,13 +7,13 @@ public import Lean
 # The list of open problems
 
 Executable collecting every open problem declared by `open_problem` in `AlphaCentauri` and writing
-it to a JSON file, which `index.html` in this directory renders as the page published on the
+it to a JSON file, which `pages/open-problems/index.html` renders as the page published on the
 project's GitHub Pages.
 
 `AlphaCentauri` is imported at run time rather than by this module, as for the zoo: linking an
 executable against it would force the whole of `Foundation` and `Mathlib` to be compiled to native
-code. Only `AlphaCentauri.OpenProblem.Attribute`, which depends on nothing but `Lean`, is linked, for the
-extension recording the open problems.
+code. Only `AlphaCentauri.OpenProblem.Attribute`, which depends on nothing but `Lean`, is linked,
+for the extension recording the open problems.
 -/
 
 @[expose] public section

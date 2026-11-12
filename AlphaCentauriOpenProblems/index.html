@@ -10,25 +10,46 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Open problems — AlphaCentauri</title>
+<script>
+  // Applied before the page is drawn, so that a chosen theme never flashes the other one.
+  try {
+    const theme = localStorage.getItem("theme");
+    if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+  } catch (_) {}
+</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <link rel="stylesheet" href="index.css">
 </head>
 <body>
-<header>
-  <h1>Open problems</h1>
-  <p>
-    The open problems stated in
-    <a href="https://github.com/FormalizedFormalLogic/AlphaCentauri">AlphaCentauri</a>, each
-    declared in Lean by <code>open_problem</code> as a proposition whose truth is unknown.
-    <span id="summary"></span>
-  </p>
-  <input id="filter" type="search" placeholder="Filter by name, statement, or citation key"
-         aria-label="Filter the open problems">
-  <nav><ul id="toc"></ul></nav>
-</header>
-<main id="problems"><p>Loading…</p></main>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <a class="home" href="#top">Open problems</a>
+      <select id="theme" aria-label="Theme">
+        <option value="auto">Auto</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </div>
+    <input id="filter" type="search" placeholder="Filter by name, statement, or key"
+           aria-label="Filter the open problems">
+    <nav aria-label="Contents"><ol id="toc"></ol></nav>
+  </aside>
+  <main id="top">
+    <header>
+      <h1>Open problems</h1>
+      <p>
+        The open problems stated in
+        <a href="https://github.com/FormalizedFormalLogic/AlphaCentauri">AlphaCentauri</a>, each
+        declared in Lean by <code>open_problem</code> as a proposition whose truth is unknown.
+        <span id="summary"></span>
+      </p>
+    </header>
+    <div id="problems"><p>Loading…</p></div>
+  </main>
+</div>
 <script>
 "use strict";
 
@@ -56,11 +77,12 @@ function renderCitation(c, bib) {
   const label = escapeHtml(c.key) + (c.locator ? `, ${escapeHtml(c.locator)}` : "");
   // The entry is HTML formatted by Hayagriva from the repository's own bibliography.
   const ref = bib[c.key];
-  return `<li><strong>[${label}]</strong>${ref ? " " + ref : ""}</li>`;
+  return `<li><span class="key">[${label}]</span>${ref ? " " + ref : ""}</li>`;
 }
 
 // The area of a module: the component after `AlphaCentauri`, e.g. `NumberTheory`.
 const areaOf = (module) => module.split(".")[1] || module;
+
 // The namespace shared by all of `names`, as a list of components.
 function commonNamespace(names) {
   const parts = names.map((n) => n.split(".").slice(0, -1));
@@ -69,22 +91,90 @@ function commonNamespace(names) {
   return common;
 }
 
-// `prefix` is the namespace shared by the problems of the area, left out of the heading.
+// The name of `p` without the namespace `prefix` shared by the problems of its area.
+const displayName = (p, prefix) => p.name.split(".").slice(prefix.length).join(".");
+
 function renderProblem(p, bib, prefix) {
   const cites = p.citations.map((c) => renderCitation(c, bib)).join("");
   return `<article id="${escapeHtml(p.name)}"
       data-search="${escapeHtml([p.name, p.description, ...p.citations.map((c) => c.key)]
         .join(" ").toLowerCase())}">
-    <h3><a class="anchor" href="#${escapeHtml(p.name)}">${escapeHtml(p.name.split(".").slice(prefix.length).join("."))}</a></h3>
-    ${renderMarkdown(p.description)}
+    <h3><a class="anchor" href="#${escapeHtml(p.name)}">${escapeHtml(displayName(p, prefix))}</a></h3>
+    <div class="statement">${renderMarkdown(p.description)}</div>
     ${cites ? `<ul class="citations">${cites}</ul>` : ""}
-    <pre><code>${escapeHtml(p.source)}</code></pre>
+    <pre class="lean"><code>${escapeHtml(p.source)}</code></pre>
     <div class="meta"><code>${escapeHtml(p.name)}</code> ·
       <a href="${escapeHtml(p.url)}">${escapeHtml(p.path)}:${p.line}</a></div>
   </article>`;
 }
 
+function renderToc(areas, prefixes) {
+  return [...areas].map(([a, ps]) =>
+    `<li class="area"><a href="#area-${escapeHtml(a)}">${escapeHtml(a)}</a>
+       <span class="count">${ps.length}</span>
+       <ol>${ps.map((p) => `<li data-target="${escapeHtml(p.name)}">
+         <a href="#${escapeHtml(p.name)}">${escapeHtml(displayName(p, prefixes.get(a)))}</a></li>`)
+         .join("")}</ol></li>`).join("");
+}
+
+// The theme selector: `auto` follows the system, and the choice is remembered.
+function setUpTheme() {
+  const select = document.getElementById("theme");
+  select.value = document.documentElement.dataset.theme || "auto";
+  select.addEventListener("change", () => {
+    const theme = select.value;
+    if (theme === "auto") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = theme;
+    try {
+      if (theme === "auto") localStorage.removeItem("theme");
+      else localStorage.setItem("theme", theme);
+    } catch (_) {}
+  });
+}
+
+// Marks in the contents the problem being read: the topmost one in the upper part of the window.
+function setUpScrollSpy(container, toc) {
+  const items = new Map([...toc.querySelectorAll("li[data-target]")]
+    .map((li) => [li.dataset.target, li]));
+  const visible = new Set();
+  const observer = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) visible.add(e.target);
+      else visible.delete(e.target);
+    }
+    const top = [...visible].sort((a, b) =>
+      a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
+    for (const li of items.values()) li.classList.remove("current");
+    const li = top && items.get(top.id);
+    if (li) {
+      li.classList.add("current");
+      li.scrollIntoView({ block: "nearest" });
+    }
+  }, { rootMargin: "0px 0px -60% 0px" });
+  for (const art of container.querySelectorAll("article")) observer.observe(art);
+}
+
+// The filter hides the problems that do not match, in the list and in the contents alike.
+function setUpFilter(container, toc) {
+  document.getElementById("filter").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    for (const section of container.querySelectorAll("section")) {
+      let shown = 0;
+      for (const art of section.querySelectorAll("article")) {
+        art.hidden = q !== "" && !art.dataset.search.includes(q);
+        const li = toc.querySelector(`li[data-target="${CSS.escape(art.id)}"]`);
+        if (li) li.hidden = art.hidden;
+        if (!art.hidden) shown++;
+      }
+      section.hidden = shown === 0;
+      const area = toc.querySelector(`a[href="#${CSS.escape(section.id)}"]`)?.closest("li.area");
+      if (area) area.hidden = shown === 0;
+    }
+  });
+}
+
 async function main() {
+  setUpTheme();
   const [data, bib] = await Promise.all([
     fetch("open-problems.json").then((r) => r.json()),
     fetch("references.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({})),
@@ -95,34 +185,25 @@ async function main() {
     if (!areas.has(a)) areas.set(a, []);
     areas.get(a).push(p);
   }
+  const prefixes = new Map([...areas].map(([a, ps]) => [a, commonNamespace(ps.map((p) => p.name))]));
   const rev = data.revision;
   document.getElementById("summary").innerHTML =
     `${data.problems.length} problems, generated from
      <a href="https://github.com/${escapeHtml(data.repository)}/tree/${escapeHtml(rev)}">
      <code>${escapeHtml(rev.length === 40 ? rev.slice(0, 7) : rev)}</code></a>.`;
-  document.getElementById("toc").innerHTML = [...areas.keys()]
-    .map((a) => `<li><a href="#area-${escapeHtml(a)}">${escapeHtml(a)}</a>
-                 (${areas.get(a).length})</li>`).join("");
-  const main = document.getElementById("problems");
-  main.innerHTML = [...areas].map(([a, ps]) =>
+  const toc = document.getElementById("toc");
+  toc.innerHTML = renderToc(areas, prefixes);
+  const container = document.getElementById("problems");
+  container.innerHTML = [...areas].map(([a, ps]) =>
     `<section id="area-${escapeHtml(a)}"><h2>${escapeHtml(a)}</h2>
-       ${ps.map((p) => renderProblem(p, bib, commonNamespace(ps.map((q) => q.name)))).join("")}
+       ${ps.map((p) => renderProblem(p, bib, prefixes.get(a))).join("")}
      </section>`).join("");
-  renderMathInElement(main, {
+  renderMathInElement(container, {
     delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }],
     throwOnError: false,
   });
-  document.getElementById("filter").addEventListener("input", (e) => {
-    const q = e.target.value.trim().toLowerCase();
-    for (const section of main.querySelectorAll("section")) {
-      let shown = 0;
-      for (const art of section.querySelectorAll("article")) {
-        art.hidden = q !== "" && !art.dataset.search.includes(q);
-        if (!art.hidden) shown++;
-      }
-      section.hidden = shown === 0;
-    }
-  });
+  setUpFilter(container, toc);
+  setUpScrollSpy(container, toc);
   if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
 }
 

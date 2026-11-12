@@ -43,11 +43,37 @@ zoo:
     typst compile AlphaCentauriZoo/arithmetic.typ pages/zoo/arithmetic.png
     typst compile AlphaCentauriZoo/arithmetic.typ pages/zoo/arithmetic.pdf
 
-open-problems:
+open-problems: libertinus
     lake exe open_problems pages/open-problems/open-problems.json
     yq --output-format=json . references.yml \
       | python3 AlphaCentauriOpenProblems/references.py > pages/open-problems/references.json
     cp AlphaCentauriOpenProblems/index.html AlphaCentauriOpenProblems/index.css pages/open-problems/
+
+# Libertinus, the fonts of the statements on the list of open problems, from its pinned release.
+libertinus_release := "https://github.com/alerque/libertinus/releases/download/v7.051/Libertinus-7.051.zip"
+libertinus_sha256 := "4d9be29b5cb380c35af8ba967abcc752ad1e07be1f738a9789c33e0dd7478c92"
+
+libertinus:
+    #!/usr/bin/env python3
+    import hashlib, pathlib, urllib.request, zipfile
+    archive = pathlib.Path(".lake/Libertinus.zip")
+    def valid():
+        return archive.exists() and hashlib.sha256(archive.read_bytes()).hexdigest() == "{{ libertinus_sha256 }}"
+    if not valid():
+        archive.parent.mkdir(exist_ok=True)
+        urllib.request.urlretrieve("{{ libertinus_release }}", archive)
+        assert valid(), "the downloaded Libertinus release does not match its checksum"
+    fonts = pathlib.Path("pages/open-problems/fonts")
+    fonts.mkdir(parents=True, exist_ok=True)
+    wanted = {"LibertinusSerif-Regular", "LibertinusSerif-Italic", "LibertinusSerif-Bold",
+              "LibertinusSerif-BoldItalic", "LibertinusMath-Regular"}
+    with zipfile.ZipFile(archive) as z:
+        for name in z.namelist():
+            path = pathlib.PurePosixPath(name)
+            if path.parent.name == "WOFF2" and path.stem in wanted:
+                (fonts / path.name).write_bytes(z.read(name))
+            elif path.name == "OFL.txt":
+                (fonts / "Libertinus-OFL.txt").write_bytes(z.read(name))
 
 import-graph:
     lake exe graph --to AlphaCentauri import_graph.png import_graph.pdf import_graph.html

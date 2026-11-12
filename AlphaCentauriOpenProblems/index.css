@@ -1,42 +1,35 @@
 /* The style of `index.html`, the list of open problems. */
 
 /*
- * Fonts. The statements and their references are set in Computer Modern, the face of KaTeX's
- * mathematics, and the Lean code in JuliaMono, which covers Lean's symbols; the interface keeps the
- * system's sans serif. Both are served by jsDelivr at pinned versions: CMU Serif from the npm
- * package `computer-modern`, JuliaMono from the release of its repository.
+ * Fonts. The statements and their references are set in Libertinus Serif, and their mathematics in
+ * Libertinus Math through the browser's own MathML; the Lean code is set in JuliaMono, which covers
+ * Lean's symbols; the interface keeps the system's sans serif. Libertinus is copied into `fonts/` by
+ * `just open-problems`, JuliaMono is served by jsDelivr at a pinned version.
  */
 @font-face {
-  font-family: "CMU Serif";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/computer-modern@0.1.3/fonts/cmu-serif-500-roman.woff2")
-    format("woff2");
+  font-family: "Libertinus Serif";
+  font-style: normal; font-weight: 400; font-display: swap;
+  src: url("fonts/LibertinusSerif-Regular.woff2") format("woff2");
 }
 @font-face {
-  font-family: "CMU Serif";
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/computer-modern@0.1.3/fonts/cmu-serif-500-italic.woff2")
-    format("woff2");
+  font-family: "Libertinus Serif";
+  font-style: italic; font-weight: 400; font-display: swap;
+  src: url("fonts/LibertinusSerif-Italic.woff2") format("woff2");
 }
 @font-face {
-  font-family: "CMU Serif";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/computer-modern@0.1.3/fonts/cmu-serif-700-roman.woff2")
-    format("woff2");
+  font-family: "Libertinus Serif";
+  font-style: normal; font-weight: 700; font-display: swap;
+  src: url("fonts/LibertinusSerif-Bold.woff2") format("woff2");
 }
 @font-face {
-  font-family: "CMU Serif";
-  font-style: italic;
-  font-weight: 700;
-  font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/computer-modern@0.1.3/fonts/cmu-serif-700-italic.woff2")
-    format("woff2");
+  font-family: "Libertinus Serif";
+  font-style: italic; font-weight: 700; font-display: swap;
+  src: url("fonts/LibertinusSerif-BoldItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Libertinus Math";
+  font-style: normal; font-weight: 400; font-display: swap;
+  src: url("fonts/LibertinusMath-Regular.woff2") format("woff2");
 }
 @font-face {
   font-family: "JuliaMono";
@@ -70,13 +63,14 @@
 }
 
 :root {
-  --serif: "CMU Serif", "Latin Modern Roman", "Computer Modern Serif", serif;
+  --serif: "Libertinus Serif", "Linux Libertine O", Georgia, serif;
   --mono: "JuliaMono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 * { box-sizing: border-box; }
 html { scroll-padding-top: 1rem; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 body {
   margin: 0;
   font: 16px/1.6 var(--sans);
@@ -140,8 +134,7 @@ article h3 a.anchor { color: inherit; text-decoration: none; }
 .statement, ul.citations, ol.bibliography { font-family: var(--serif); }
 .statement { font-size: 1.15rem; line-height: 1.5; }
 .statement p { margin: .25rem 0 .5rem; }
-/* KaTeX and the text are both Computer Modern, so the mathematics keeps the size of the text. */
-.statement .katex, ul.citations .katex { font-size: 1em; }
+math { font-family: "Libertinus Math", math; }
 ul.citations { margin: .5rem 0 0; padding-left: 1.25rem; font-size: 1rem; line-height: 1.45; }
 .key { font-weight: 700; }
 a.key { text-decoration: none; }

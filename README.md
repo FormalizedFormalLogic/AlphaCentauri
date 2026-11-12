@@ -41,7 +41,7 @@ locally.
 
 ## Open problems
 
-The [list of open problems](https://formalizedformallogic.github.io/AlphaCentauri/open-problems/) stated in AlphaCentauri, each declared by `open_problem` with its docstring and references. It is generated from the environment by [`AlphaCentauriOpenProblems/`](./AlphaCentauriOpenProblems) on every push to `main`; run `just open-problems` to regenerate it locally.
+The [list of open problems](https://formalizedformallogic.github.io/AlphaCentauri/open-problems/) stated in AlphaCentauri, each declared by `open_problem` with its docstring and references. It is generated from the environment by [`AlphaCentauriOpenProblems/`](./AlphaCentauriOpenProblems) on every push to `main`; run `just open-problems` to regenerate it locally. To add a problem, open an issue from the [Open problem template](https://github.com/FormalizedFormalLogic/AlphaCentauri/issues/new?template=open-problem.yml) with its statement and a source.
 
 ## Import graph
 

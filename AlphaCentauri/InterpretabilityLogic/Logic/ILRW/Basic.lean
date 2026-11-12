@@ -152,7 +152,7 @@ open_problem Logic.ILRW.complete_veltman :=
     (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsILRW], M ⊧ A) →
       𝐈𝐋𝐑𝐖 ⊢ A
 
-/-- Is $\mathbf{ILRW}$ complete with respect to generalised Veltman frames?
+/-- Is $\mathbf{ILRW}$ complete with respect to Verbrugge semantics?
 - [JMMV20, §6.5] -/
 open_problem Logic.ILRW.complete_verbrugge :=
   ∀ A : Formula ℕ,

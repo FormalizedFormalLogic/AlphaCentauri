@@ -208,7 +208,7 @@ lemma conservativity_imp_provable_imp {σ τ χ : ArithmeticSentence}
     simpa [standardProvability_def] using fun h hτ ↦ Bootstrapping.Conservative.provable_imp h hχ hτ
 
 open Bootstrapping in
-instance instConservativityCL [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ n).CL where
+instance [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ n).CL where
   J1 := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [standardProvability_def] using conservative_of_provable
   J2 := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
@@ -234,14 +234,14 @@ instance instConservativityCL [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ n).CL w
     cl_prover [h₁, h₂, h₃]
 
 open Bootstrapping in
-instance instConservativityPi1IL [𝗜𝚺₁ ⪯ T] : (T.conservativity 𝚷 1).IL where
+instance [𝗜𝚺₁ ⪯ T] : (T.conservativity 𝚷 1).IL where
   toCL := inferInstance
   J5 {σ} := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     have h := conservative_dia_pi1 (T := T) (V := V) (σ := σ);
     simpa [ProvabilityAbstraction.Provability.dia, standardProvability_def] using h
 
 open Bootstrapping in
-instance instConservativityPi1M [𝗜𝚺₁ ⪯ T] : (T.conservativity 𝚷 1).M where
+instance [𝗜𝚺₁ ⪯ T] : (T.conservativity 𝚷 1).M where
   axiomM {σ τ χ} := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     have h := Conservative.and_provabilityPred_pi1 (T := T) (V := V) (σ := σ) (τ := τ) (χ := χ);
     simpa [standardProvability_def] using h
@@ -264,7 +264,7 @@ lemma conservativity_and [𝗜𝚺₁ ⪯ T] {Γ' : Polarity} {m : ℕ} [𝗕�
   exact complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa using Conservative.and (V := V) (σ := σ) (τ := τ) hψ hχψ
 
-instance instConservativityM [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ (n + 2)).M where
+instance [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ (n + 2)).M where
   axiomM {σ τ χ} := by
     have : 𝗕𝚺 1 ⪯ T := BSigma_weakerThan_ISigma.trans inferInstance;
     exact conservativity_and (Γ' := 𝚷) (m := 1) (by simp [standardProvability_def])
@@ -274,28 +274,28 @@ section
 
 variable [𝗕𝚺2 ⪯ T]
 
-instance instConservativitySigmaSa : (T.conservativity 𝚺 (n + 2)).Sa where
+instance : (T.conservativity 𝚺 (n + 2)).Sa where
   axiomSa {_ _ χ ψ} := by
     have : 𝗜𝚺₁ ⪯ T := ISigma_weakerThan_BSigma_succ.trans inferInstance;
     have h : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 2 (∼(T.conservativity 𝚺 (n + 2)) χ ψ) := by
       simpa using hierarchy_conservativity;
     exact conservativity_and h (.inl ⟨rfl, by omega⟩)
 
-instance instConservativityPiSa : (T.conservativity 𝚷 (n + 3)).Sa where
+instance : (T.conservativity 𝚷 (n + 3)).Sa where
   axiomSa {_ _ χ ψ} := by
     have : 𝗜𝚺₁ ⪯ T := ISigma_weakerThan_BSigma_succ.trans inferInstance;
     have h : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 2 (∼(T.conservativity 𝚷 (n + 3)) χ ψ) := by
       simpa using hierarchy_conservativity;
     exact conservativity_and h (.inr (by omega))
 
-instance instConservativityPiSb : (T.conservativity 𝚷 (n + 2)).Sb where
+instance : (T.conservativity 𝚷 (n + 2)).Sb where
   axiomSb {_ _ χ ψ} := by
     have : 𝗜𝚺₁ ⪯ T := ISigma_weakerThan_BSigma_succ.trans inferInstance;
     have h : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 (∼∼(T.conservativity 𝚷 (n + 2)) χ ψ) := by
       simpa using hierarchy_conservativity;
     exact conservativity_and h (.inl ⟨rfl, by omega⟩)
 
-instance instConservativitySigmaSb : (T.conservativity 𝚺 (n + 3)).Sb where
+instance : (T.conservativity 𝚺 (n + 3)).Sb where
   axiomSb {_ _ χ ψ} := by
     have : 𝗜𝚺₁ ⪯ T := ISigma_weakerThan_BSigma_succ.trans inferInstance;
     have h : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 (∼∼(T.conservativity 𝚺 (n + 3)) χ ψ) := by

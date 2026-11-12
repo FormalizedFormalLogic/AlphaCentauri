@@ -41,7 +41,7 @@ open InterpretabilityLogic
 variable {α : Type*} {T : ArithmeticTheory} [T.Δ₁] [𝗕𝚺2 ⪯ T] {n : ℕ}
 
 /-- - [Ign91, Theorem A.2] -/
-instance instSbCLMConservativityLogicPi :
+instance :
     (𝐒𝐛𝐂𝐋𝐌 : Logic α) ⪯ T.conservativityLogic 𝚷 (n + 2) := by
   have : 𝗜𝚺₁ ⪯ T := Arithmetic.ISigma_weakerThan_BSigma_succ.trans inferInstance;
   exact Logic.weakerThan_iff.mpr fun _ hA _ ↦

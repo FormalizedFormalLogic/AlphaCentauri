@@ -28,16 +28,16 @@ namespace FFL.FirstOrder
 
 namespace Arithmetic
 
-/-- $\mathsf{B}\Sigma_1$ is finitely axiomatizable.
+/-- Is $\mathsf{B}\Sigma_1$ finitely axiomatizable?
 - [Kay91, Exercise 10.4] -/
 open_problem BSigma1_finiteAxiomatizable := FiniteAxiomatizable (𝗕𝚺 1)
 
-/-- $\mathsf{I}\Delta_0$ is finitely axiomatizable.
+/-- Is $\mathsf{I}\Delta_0$ finitely axiomatizable?
 - [HP98, Corollary V.4.39]
 - [Kay91, Exercise 10.4] -/
 open_problem ISigma0_finiteAxiomatizable := FiniteAxiomatizable 𝗜𝚺₀
 
-/-- $\mathsf{I}\Delta_0 + \Omega_1$ is finitely axiomatizable.
+/-- Is $\mathsf{I}\Delta_0 + \Omega_1$ finitely axiomatizable?
 - [HP98, Corollary V.4.39]
 - [Kay91, Exercise 10.4] -/
 open_problem ISigma0_union_Omega1_finiteAxiomatizable := FiniteAxiomatizable (𝗜𝚺₀ ∪ 𝝮₁)

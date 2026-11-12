@@ -145,14 +145,14 @@ instance : (𝐈𝐋𝐌₀𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐑𝐖 :=
 
 end Logic
 
-/-- $\mathbf{ILRW}$ is complete with respect to Veltman frames.
+/-- Is $\mathbf{ILRW}$ complete with respect to Veltman frames?
 - [JMMV20, §6.5] -/
 open_problem Logic.ILRW.complete_veltman :=
   ∀ A : Formula ℕ,
     (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsILRW], M ⊧ A) →
       𝐈𝐋𝐑𝐖 ⊢ A
 
-/-- $\mathbf{ILRW}$ is complete with respect to generalised Veltman frames.
+/-- Is $\mathbf{ILRW}$ complete with respect to generalised Veltman frames?
 - [JMMV20, §6.5] -/
 open_problem Logic.ILRW.complete_verbrugge :=
   ∀ A : Formula ℕ,

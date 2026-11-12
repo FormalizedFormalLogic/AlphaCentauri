@@ -48,14 +48,14 @@ def squareAddMulSquare (n : ℕ) : ArithmeticSemisentence 1 := “q. ∃ x y, q 
 def quadraticResidueNegOne : ArithmeticSentence :=
   “∀ q, !isPrime q → (∃ k, q = 4 * k + 1) → !(negOneHasRoot 2) q”
 
-/-- $\mathsf{I}\mathsf{E}_1$ proves that $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$. Jeřábek
-states that his proof of the supplementary laws of quadratic reciprocity can be formalized in
-$\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
+/-- Does $\mathsf{I}\mathsf{E}_1$ prove that $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$?
+Jeřábek states that his proof of the supplementary laws of quadratic reciprocity can be formalized
+in $\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
 - [Smi93, Question 5.1]
 - [Jer21, Chapter 0, §2.2] -/
 open_problem provable_quadraticResidueNegOne_IE1 := 𝗜𝗘₁ ⊢ quadraticResidueNegOne
 
-/-- $\mathsf{I}\Delta_0$ proves that $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$.
+/-- Does $\mathsf{I}\Delta_0$ prove that $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$?
 $\mathsf{I}\Delta_0 + \Delta_0\mathrm{EQ}$ and $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$
 prove it.
 - [Smi93, Question 5.1]
@@ -74,8 +74,8 @@ def quadraticReciprocityConverse (p : ℕ) : ArithmeticSentence :=
     (¬((∃ k, ↑p = 4 * k + 3) ∧ (∃ k, q = 4 * k + 3)) →
       !quadraticResidue q ↑p → !quadraticResidue ↑p q)”
 
-/-- $\mathsf{I}\mathsf{E}_1$ proves the converse of [Smi93, Theorem 3.11] for each standard odd
-prime `p`. It follows from quadratic reciprocity, and Jeřábek states that his proof of quadratic
+/-- Does $\mathsf{I}\mathsf{E}_1$ prove the converse of [Smi93, Theorem 3.11] for each standard odd
+prime `p`? It follows from quadratic reciprocity, and Jeřábek states that his proof of quadratic
 reciprocity and its supplementary laws can be formalized in
 $\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
 - [Smi93, Theorem 3.11, Question 5.2]
@@ -83,8 +83,8 @@ $\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
 open_problem provable_quadraticReciprocityConverse_IE1 :=
   ∀ p : ℕ, p.Prime → p ≠ 2 → 𝗜𝗘₁ ⊢ quadraticReciprocityConverse p
 
-/-- $\mathsf{I}\Delta_0$ proves the converse of [Smi93, Theorem 3.11] for each standard odd prime
-`p`. $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ proves it.
+/-- Does $\mathsf{I}\Delta_0$ prove the converse of [Smi93, Theorem 3.11] for each standard odd
+prime `p`? $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ proves it.
 - [Smi93, Theorem 3.11, Question 5.2]
 - [Jer10, Theorem 5.7] -/
 open_problem provable_quadraticReciprocityConverse_ISigma0 :=
@@ -100,8 +100,8 @@ def quadraticReciprocity : ArithmeticSentence :=
     (¬((∃ k, p = 4 * k + 3) ∧ (∃ k, q = 4 * k + 3)) →
       (!quadraticResidue p q ↔ !quadraticResidue q p))”
 
-/-- $\mathsf{I}\mathsf{E}_1$ proves quadratic reciprocity for arbitrary, possibly nonstandard,
-primes. $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ proves it, and Jeřábek states that his
+/-- Does $\mathsf{I}\mathsf{E}_1$ prove quadratic reciprocity for arbitrary, possibly nonstandard,
+primes? $\mathsf{I}\Delta_0 + \mathrm{Count}_2(\Delta_0)$ proves it, and Jeřábek states that his
 proof of quadratic reciprocity and its supplementary laws can be formalized in
 $\mathsf{I}\mathsf{E}_1 + \mathrm{Count}_2(\nabla_1)$.
 - [Smi93, Question 5.2]
@@ -115,13 +115,13 @@ The case $r = 2$ is $m \equiv 5 \pmod 8$, and the case $r = 1$ is [Smi93, Lemma 
 def noRootNegOne (r : ℕ) : ArithmeticSentence :=
   “∀ m, (∃ k, m = ↑(2 ^ (r + 1)) * k + ↑(2 ^ r + 1)) → ¬!(negOneHasRoot (2 ^ r)) m”
 
-/-- $\mathsf{I}\mathsf{E}_1$ proves that $-1$ has no $2^r$-th root modulo any $m$ with
-$m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 2$.
+/-- Does $\mathsf{I}\mathsf{E}_1$ prove that $-1$ has no $2^r$-th root modulo any $m$ with
+$m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 2$?
 - [Smi93, Question 5.3] -/
 open_problem provable_noRootNegOne_IE1 := ∀ r : ℕ, 2 ≤ r → 𝗜𝗘₁ ⊢ noRootNegOne r
 
-/-- $\mathsf{I}\Delta_0$ proves that $-1$ has no $2^r$-th root modulo any $m$ with $m - 1 = 2^r s$,
-$s$ odd, for each standard $r \ge 2$.
+/-- Does $\mathsf{I}\Delta_0$ prove that $-1$ has no $2^r$-th root modulo any $m$ with
+$m - 1 = 2^r s$, $s$ odd, for each standard $r \ge 2$?
 - [Smi93, Question 5.3] -/
 open_problem provable_noRootNegOne_ISigma0 := ∀ r : ℕ, 2 ≤ r → 𝗜𝚺₀ ⊢ noRootNegOne r
 

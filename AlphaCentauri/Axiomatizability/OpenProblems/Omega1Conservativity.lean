@@ -24,7 +24,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder
 
 
-/-- $\mathsf{I}\Delta_0 + \Omega_1$ is $\Pi_1$-conservative over $\mathsf{I}\Delta_0$.
+/-- Is $\mathsf{I}\Delta_0 + \Omega_1$ $\Pi_1$-conservative over $\mathsf{I}\Delta_0$?
 - [HP98, §V.1(a), p. 274]
 - [HP98, §V.5(g), p. 395] -/
 open_problem Arithmetic.ISigma0_union_Omega1_weakerThanOn_Pi1_ISigma0 :=

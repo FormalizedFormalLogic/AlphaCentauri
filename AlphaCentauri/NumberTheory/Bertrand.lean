@@ -748,7 +748,7 @@ theorem provable_bertrandPostulate_ISigma0_union_Omega1 : 𝗜𝚺₀ ∪ 𝝮�
     have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 0)
     simpa [models_iff, bertrandPostulate] using fun n : M ↦ exists_prime_lt_le_two_mul (V := M) n
 
-/-- $\mathsf{I}\Delta_0$ proves Bertrand's postulate.
+/-- Does $\mathsf{I}\Delta_0$ prove Bertrand's postulate?
 - [HP98, §V.5(f), p. 393] -/
 open_problem provable_bertrandPostulate_ISigma0 := 𝗜𝚺₀ ⊢ bertrandPostulate
 

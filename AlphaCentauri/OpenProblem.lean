@@ -25,7 +25,7 @@ namespace AlphaCentauri
 /--
 `open_problem Name binders := p` declares the proposition `p` as an open problem: it is
 `def Name binders : Prop := p`, recorded as an open problem of the library. The docstring is
-mandatory; it states the problem and cites its source, as any other declaration's does.
+mandatory; it asks the problem as a question and cites its source.
 -/
 syntax (name := openProblem) declModifiers
   group("open_problem " declId (ppSpace bracketedBinder)* " := " term) : command

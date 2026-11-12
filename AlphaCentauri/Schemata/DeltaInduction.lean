@@ -77,7 +77,7 @@ theorem IDeltaOnBroadHierarchy_weakerThan_BSigma (n : ℕ) : 𝗜𝚫⁺(n + 1) 
   weakerThan_of_models.{0} _ _ fun V _ _ ↦
     models_IDeltaOnBroadHierarchy_of_models_BSigma_succ n V
 
-/-- $\mathsf{I}\Delta_{n + 1}$ proves $\mathsf{B}\Sigma_{n + 1}$ for every $n$. It holds once
+/-- Does $\mathsf{I}\Delta_{n + 1}$ prove $\mathsf{B}\Sigma_{n + 1}$ for every $n$? It holds once
 exponentiation is adjoined to $\mathsf{I}\Delta_0$.
 - [HP98, Remark after Theorem I.2.5]
 - [Sla04] -/

@@ -96,7 +96,7 @@ theorem ILR.complete_verbrugge {α : Type} {A : Formula α}
 
 end Logic
 
-/-- $\mathbf{ILR}$ is complete with respect to Veltman frames.
+/-- Is $\mathbf{ILR}$ complete with respect to Veltman frames?
 - [MV20, §2.5] -/
 open_problem Logic.ILR.complete_veltman :=
   ∀ A : Formula ℕ,

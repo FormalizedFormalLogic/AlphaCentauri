@@ -78,17 +78,17 @@ instance {k : ℕ} [V↓[ℒₒᵣ] ⊧* IE k] :
 
 end
 
-/-- $\mathsf{I}\mathsf{E}_1$ is strictly weaker than $\mathsf{I}\Delta_0$.
+/-- Is $\mathsf{I}\mathsf{E}_1$ strictly weaker than $\mathsf{I}\Delta_0$?
 - [DAq05, §8] -/
 open_problem IE1_strictlyWeakerThan_ISigma0 := 𝗜𝗘₁ ⪱ 𝗜𝚺₀
 
-/-- $\mathsf{I}\mathsf{E}_k$ is strictly weaker than $\mathsf{I}\mathsf{E}_{k + 1}$ for each
-$k \ge 1$.
+/-- Is $\mathsf{I}\mathsf{E}_k$ strictly weaker than $\mathsf{I}\mathsf{E}_{k + 1}$ for each
+$k \ge 1$?
 - [Wil85, §4.13, Problem (1)]
 - [Car16] -/
 open_problem IE_strictlyWeakerThan_IE_succ := ∀ k : ℕ, 1 ≤ k → IE k ⪱ IE (k + 1)
 
-/-- $\mathsf{I}\mathsf{E}_1$ proves the least number principle for $U_1$ formulas.
+/-- Does $\mathsf{I}\mathsf{E}_1$ prove the least number principle for $U_1$ formulas?
 - [Wil85, §4.13, Problem (2)] -/
 open_problem LeastNumberScheme_boundedUniversal_weakerThan_IE1 :=
   𝗣𝗔⁻ ∪ LeastNumberScheme (IsBoundedUniversal 1) ⪯ 𝗜𝗘₁

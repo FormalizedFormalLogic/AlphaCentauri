@@ -91,14 +91,25 @@ function renderCitation(key, locators, bib) {
   return `<li><a class="key" href="#ref-${escapeHtml(key)}">[${label}]</a> ${bib[key] ?? ""}</li>`;
 }
 
-// The references cited by some problem, in the order of the formatted text.
-function renderBibliography(problems, bib) {
+// The references cited by some problem, in the order of the formatted text, each with links back
+// to the problems citing it.
+function renderBibliography(problems, bib, prefixes) {
   const text = (key) => (bib[key] || key).replace(/<[^>]*>/g, "");
-  const keys = [...new Set(problems.flatMap((p) => p.citations.map((c) => c.key)))]
-    .sort((a, b) => text(a).localeCompare(text(b)));
+  const citedBy = new Map();
+  for (const p of problems) {
+    for (const key of new Set(p.citations.map((c) => c.key))) {
+      if (!citedBy.has(key)) citedBy.set(key, []);
+      citedBy.get(key).push(p);
+    }
+  }
+  const keys = [...citedBy.keys()].sort((a, b) => text(a).localeCompare(text(b)));
+  const backlinks = (key) => citedBy.get(key).map((p) =>
+    `<a href="#${escapeHtml(p.name)}">${escapeHtml(displayName(p, prefixes.get(areaOf(p.module))))}</a>`)
+    .join(", ");
   return `<h2>References</h2><ol class="bibliography">${keys.map((k) =>
     `<li id="ref-${escapeHtml(k)}"><span class="key">[${escapeHtml(k)}]</span>
-       <span class="entry">${bib[k] ?? ""}</span></li>`).join("")}</ol>`;
+       <span class="entry">${bib[k] ?? ""}
+         <span class="backlinks">Cited in ${backlinks(k)}</span></span></li>`).join("")}</ol>`;
 }
 
 // The area of a module: the component after `AlphaCentauri`, e.g. `NumberTheory`.
@@ -224,7 +235,7 @@ async function main() {
     delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }],
     throwOnError: false,
   });
-  document.getElementById("references").innerHTML = renderBibliography(data.problems, bib);
+  document.getElementById("references").innerHTML = renderBibliography(data.problems, bib, prefixes);
   setUpFilter(container, toc);
   setUpScrollSpy(container, toc);
   if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();

@@ -72,9 +72,10 @@ rewrite, so it is written as if it were already there.
   `just open-problems` lists it, with its docstring, on the project's pages; it is not listed in
   `forgive.yml`. `Name` is the name the theorem would carry, following the naming of theorems
   (`provable_infinitudeOfPrimes_ISigma0`, `IE1_strictlyWeakerThan_ISigma0`), so that proving it
-  keeps the name. The docstring is mandatory and, like any other, states what `p` says and cites
-  the source; it does not repeat that the problem is open. A result that depends on an open
-  problem takes it as a hypothesis `(h : Name)`.
+  keeps the name. The docstring is mandatory and asks `p` as a question (`Does
+  $\mathsf{I}\Delta_0$ prove the infinitude of primes?`), then cites the source; it does not say
+  that the problem is open. A result that depends on an open problem takes it as a hypothesis
+  `(h : Name)`.
 - **Reuse before restating.** Foundation's theories, notations, definability classes, and the
   hierarchy are the vocabulary. A definition that duplicates a Foundation definition under a
   new name is rejected in review. If Foundation's API is missing or awkward, say so in the

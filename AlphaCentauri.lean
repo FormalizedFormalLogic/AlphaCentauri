@@ -153,6 +153,7 @@ public import AlphaCentauri.Reflection.ISigma
 public import AlphaCentauri.Reflection.Provability.IteratedConsistency
 public import AlphaCentauri.Reflection.Provability.Relativized
 public import AlphaCentauri.Reflection.UniformReflection.Induction
+public import AlphaCentauri.Reflection.UniformReflection.Iterated
 public import AlphaCentauri.Reflection.UniformReflection.LeivantOno
 public import AlphaCentauri.Schemata.BoundedInduction
 public import AlphaCentauri.Schemata.CollectionFromDeltaInduction

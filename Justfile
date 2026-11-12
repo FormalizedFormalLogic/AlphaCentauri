@@ -49,6 +49,9 @@ open-problems:
       | python3 AlphaCentauriOpenProblems/references.py > pages/open-problems/references.json
     cp AlphaCentauriOpenProblems/index.html AlphaCentauriOpenProblems/index.css pages/open-problems/
 
+ogp:
+    typst compile pages/ogp.typ pages/ogp.png --ppi 72
+
 import-graph:
     lake exe graph --to AlphaCentauri import_graph.png import_graph.pdf import_graph.html
 

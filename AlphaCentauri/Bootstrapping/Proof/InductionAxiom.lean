@@ -317,7 +317,7 @@ private lemma derivable_neg_prenexInductionAxiom {n : ℕ} {m b K Z : V}
   let Kt : Semiformula V ℒₒᵣ 1 := ⟨K, by simpa using hKs⟩
   have d := derivable_prenexIndFormula Kt
   rw [prenexIndFormula_val Kt hM hZK.symm, ← indBodyVal_val Kt, ← hsub] at d
-  exact Derivable.neg_qqAlls_qqAlls hb ⟨hq, hsq⟩ d
+  exact Derivable.neg_qqAlls_qqAlls hb (.of_shift_eq hq hsq) d
 
 /-- In pure logic, every induction axiom of `𝗜𝚺 n` follows from the prenex form of the induction
 axiom of a matrix `Z` coded below it.
@@ -343,10 +343,11 @@ theorem exists_derivable_prenexInductionAxiom {n : ℕ} {p : V}
     exact (by simpa [qqOr_inj, qqAll_inj] using hsh : _ ∧ _ ∧ _).2.2
   have hZp : IsPrenexHierarchy 𝚺 n Z :=
     IsPrenexHierarchy.of_subst hfv.qVec hZs (hZK ▸ hKS)
-  have hM : IsInductionMatrix n m Z := ⟨⟨hZs, hsZ⟩, hZp⟩
+  have hM : IsInductionMatrix n m Z := ⟨.of_shift_eq hZs hsZ, hZp⟩
   have hZle : Z ≤ qqAlls (b₁ ^⋎ b₃ ^⋎ ^∀ Z) m :=
     (le_qqAll Z).trans <| (lt_or_right b₃ _).le.trans <| (lt_or_right b₁ _).le.trans hb
-  exact ⟨m, hm, Z, hZle, hM, derivable_neg_prenexInductionAxiom hM ⟨hbs, hsh⟩ hKs hZK hsub₀⟩
+  exact ⟨m, hm, Z, hZle, hM,
+    derivable_neg_prenexInductionAxiom hM (.of_shift_eq hbs hsh) hKs hZK hsub₀⟩
 
 end derivation
 
@@ -550,8 +551,8 @@ theorem IsInductionMatrix.isFalseBlock_neg_prenexInductionAxiom [V↓[ℒₒᵣ]
     h.isReadable_all_neg_prenexInductionMatrix hn, fun w hw ↦ h.not_readableTruth_subst hn hw⟩
   · rw [prenexInductionAxiom, neg_qqAlls (IsUFormula.all.mpr (IsUFormula.ex.mpr hB.isUFormula)),
       neg_all (IsUFormula.ex.mpr hB.isUFormula), neg_ex hB.isUFormula, qqExss_succ']
-  · exact ⟨IsSemiformula.all.mpr hnB, by
-      rw [shift_all hB.neg.isUFormula, shift_neg hB, h.shift_prenexInductionMatrix]⟩
+  · exact .of_shift_eq (IsSemiformula.all.mpr hnB) (by
+      rw [shift_all hB.neg.isUFormula, shift_neg hB, h.shift_prenexInductionMatrix])
   · intro p
     simp [qqAll, qqExs]
 

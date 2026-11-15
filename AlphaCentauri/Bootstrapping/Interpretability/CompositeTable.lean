@@ -114,17 +114,17 @@ lemma IsTable.compTable (hT₁ : IsTable L₁ L₂ tbl₁) (hT₂ : IsTable L₂
     rw [tableDomain_compTable]
     have h₁ := hT₁.domain.isSemiformula
     have h₂ := hT₂.domain.isSemiformula
-    refine ⟨by simp [h₁, IsSemiformula.translate hT₁ h₂], ?_⟩
+    refine .of_shift_eq (by simp [h₁, IsSemiformula.translate hT₁ h₂]) ?_
     simp [h₁.isUFormula, (IsSemiformula.translate hT₁ h₂).isUFormula, ← translate_shift hT₁ h₂,
       hT₁.domain.shift_eq, hT₂.domain.shift_eq]
   rel h := by
     rw [tableRel_compTable (hT₂.lt_len_rel h)]
-    exact ⟨IsSemiformula.translate hT₁ (hT₂.rel h).isSemiformula,
-      by rw [← translate_shift hT₁ (hT₂.rel h).isSemiformula, (hT₂.rel h).shift_eq]⟩
+    exact .of_shift_eq (IsSemiformula.translate hT₁ (hT₂.rel h).isSemiformula)
+      (by rw [← translate_shift hT₁ (hT₂.rel h).isSemiformula, (hT₂.rel h).shift_eq])
   func h := by
     rw [tableFunc_compTable (hT₂.lt_len_func h)]
-    exact ⟨IsSemiformula.translate hT₁ (hT₂.func h).isSemiformula,
-      by rw [← translate_shift hT₁ (hT₂.func h).isSemiformula, (hT₂.func h).shift_eq]⟩
+    exact .of_shift_eq (IsSemiformula.translate hT₁ (hT₂.func h).isSemiformula)
+      (by rw [← translate_shift hT₁ (hT₂.func h).isSemiformula, (hT₂.func h).shift_eq])
 
 end compTable
 

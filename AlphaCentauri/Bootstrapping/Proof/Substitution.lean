@@ -591,7 +591,7 @@ private lemma rewrite_axm {p : V} (hT : ∀ p ∈ T.Δ₁Class (V := V), shift L
     (hpT : p ∈ T.Δ₁Class) :
     RankedDerivable T (cutRank L (axm s p)) (fvSubstImage (L := L) w s) := by
   have h : fvSubst L w p = p :=
-    Language.IsSentence.fvSubst_eq_self ⟨hsF p hp, hT p hpT⟩
+    (Language.IsSentence.of_shift_eq (hsF p hp) (hT p hpT)).fvSubst_eq_self
   refine ⟨axm _ p, by simp, Derivation.axm (formulaSet_fvSubstImage hw hsF)
     (h ▸ fvSubst_mem_fvSubstImage hp) hpT, by simp⟩
 

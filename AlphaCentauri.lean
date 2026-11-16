@@ -213,6 +213,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Factorial
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Card
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Injection

@@ -673,7 +673,7 @@ theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), shift
       fvSubstImage (L := L) (freshVec j) (insert X ∅) = setShift L (insert X ∅) := by
     intro j _ _
     rw [fvSubstImage_insert, fvSubstImage_empty, mem_setShift_insert, setShift_empty,
-      Language.IsSentence.fvSubst_eq_self ⟨hX, hXs⟩, hXs]
+      (Language.IsSentence.of_shift_eq hX hXs).fvSubst_eq_self, hXs]
   have h₃ := Derivable.elim_negDomSet hS h₁.domain h₁.exs_domain (by simp [hX]) zero_le hfresh h₂
   rw [negDomSet_zero] at h₃
   exact internal_provable_iff_internal_derivable.mpr (Derivable.ofSetEq (fun x ↦ by simp) h₃)

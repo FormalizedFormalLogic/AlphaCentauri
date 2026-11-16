@@ -177,6 +177,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Pro
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.FreeVariables
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Equality
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.ProvableIff
@@ -213,6 +214,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Factorial
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Vec
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Injection

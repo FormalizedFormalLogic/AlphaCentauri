@@ -60,7 +60,8 @@ lemma isFalseBlock_substNumerals_exs {s m : ℕ} (hs : s ≤ k)
   · rw [substNumerals, Sentence.quote_ex, substs_ex hr.isUFormula, ← zero_add (1 : V),
       qqExss_succ, qqExss_zero]
   · exact hr.subst hq
-  · rw [shift_substs hr hq, Semisentence.shift_quote, termShift_qVec hw, hshift]
+  · rw [← shift_eq_self_iff (hr.subst hq).isUFormula, shift_substs hr hq,
+      Semisentence.shift_quote, termShift_qVec hw, hshift]
   · intro p
     rw [ρ.val_piInv, Sentence.quote_all, substs_all (Sentence.quote_isUFormula _)]
     simp [qqAll, qqExs]

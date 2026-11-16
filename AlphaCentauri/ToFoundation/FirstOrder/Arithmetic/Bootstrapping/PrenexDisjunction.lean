@@ -210,7 +210,8 @@ lemma tprovable_iff_prenexSatDef {Γ : Polarity} {n : ℕ} {φ : Formula V ℒ�
   have hsh : shift ℒₒᵣ θ = θ := by
     have := congrArg (·.val) hφs;
     simpa [hθ, shift_qqToPrenex hk.isUFormula] using this;
-  have h := tprovable_instFormula_qqToPrenex_iff (T := T) Γ n hθb 0 ⟨hk, hsh⟩;
+  have h := tprovable_instFormula_qqToPrenex_iff (T := T) Γ n hθb 0
+    (.of_shift_eq hk hsh);
   have e : instFormula 0 (qqToPrenex Γ n θ) (isSemiformula_qqToPrenex.mpr hk) = φ := by
     have e₁ : instFormula 0 (qqToPrenex Γ n θ) (isSemiformula_qqToPrenex.mpr hk) =
         φ.subst (![] : SemitermVec V ℒₒᵣ 0 0) := by

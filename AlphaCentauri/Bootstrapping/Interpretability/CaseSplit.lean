@@ -134,7 +134,7 @@ lemma _root_.FFL.FirstOrder.Language.IsSentence.caseCode {n p q : V}
   have hφ : IsSemiformula ℒₒᵣ 0 (⌜φ⌝ : V) := Sentence.quote_isSemiformula₀ φ
   have hp' := hp.isSemiformula
   have hq' := hq.isSemiformula
-  refine ⟨by simp [Bootstrapping.caseCode, hφ.weaken (by simp), hp', hq'], ?_⟩
+  refine .of_shift_eq (by simp [Bootstrapping.caseCode, hφ.weaken (by simp), hp', hq']) ?_
   simp [Bootstrapping.caseCode, hp'.isUFormula, hq'.isUFormula, hφ.isUFormula, shift_neg hφ,
     hp.shift_eq, hq.shift_eq]
 

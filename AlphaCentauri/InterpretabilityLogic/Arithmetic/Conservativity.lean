@@ -65,7 +65,7 @@ lemma conservative_quote_iff :
   · intro h π hs hπ hτ;
     apply tprovable_iff_provable.mpr;
     simpa [Sentence.quote_eq] using
-      h π.val ⟨π.isSemiformula, by simpa using congrArg (·.val) hs⟩ hπ
+      h π.val (.of_shift_eq π.isSemiformula (by simpa using congrArg (·.val) hs)) hπ
         (by simpa [Sentence.quote_eq] using tprovable_iff_provable.mp hτ);
   · intro h x hx hπ hτ;
     have := h ⟨x, hx.isSemiformula⟩ (by ext; simpa using hx.shift_eq) hπ
@@ -97,7 +97,7 @@ lemma Conservative.or (hσ : Conservative T Γ n (⌜σ⌝ : V) ⌜χ⌝)
 lemma Conservative.provable_imp (h : Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝)
     (hχ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ) (hτ : Provable T (⌜τ 🡒 χ⌝ : V)) :
     Provable T (⌜σ 🡒 χ⌝ : V) := by
-  simpa [Sentence.quote_eq] using h ⌜χ⌝ ⟨by simp, by simp⟩
+  simpa [Sentence.quote_eq] using h ⌜χ⌝ (.of_shift_eq (by simp) (by simp))
     ((isPrenexHierarchy_quote_iff χ).mpr hχ) (by simpa [Sentence.quote_eq] using hτ)
 
 lemma conservative_dia_pi1 [𝗜𝚺₁ ⪯ T] :

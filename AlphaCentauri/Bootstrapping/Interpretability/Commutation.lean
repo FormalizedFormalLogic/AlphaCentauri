@@ -307,16 +307,16 @@ lemma IsTableOf.isTable {T : Theory L₁} [𝗘𝗤 _ ⪯ T] {π : DirectTransla
     (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) : IsTable L₁ L₂ tbl where
   domain := by
     rw [h.domain]
-    exact ⟨by simp, Semisentence.shift_quote _⟩
+    exact .of_shift_eq (by simp) (Semisentence.shift_quote _)
   rel hr := by
     obtain ⟨k', R, rfl, rfl⟩ := hL₂.1 _ _ hr
     rw [h.rel R]
-    exact ⟨Sentence.quote_isSemiformula _, Semisentence.shift_quote _⟩
+    exact .of_shift_eq (Sentence.quote_isSemiformula _) (Semisentence.shift_quote _)
   func hf := by
     obtain ⟨k', F, rfl, rfl⟩ := hL₂.2 _ _ hf
     rw [h.func F]
-    exact ⟨by simpa using Sentence.quote_isSemiformula (π.func F).sentence,
-      Semisentence.shift_quote _⟩
+    exact .of_shift_eq (by simpa using Sentence.quote_isSemiformula (π.func F).sentence)
+      (Semisentence.shift_quote _)
 
 end isTable
 
@@ -525,11 +525,13 @@ variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
 
 lemma IsTable.fvSubst_domainAt {tbl w i m : V} (hT : IsTable L₁ L₂ tbl) (hi : i < m) :
     fvSubst L₁ w (domainAt L₁ tbl i) = domainAt L₁ tbl i :=
-  Language.IsSentence.fvSubst_eq_self ⟨hT.isSemiformula_domainAt hi, hT.shift_domainAt i⟩
+  (Language.IsSentence.of_shift_eq (hT.isSemiformula_domainAt hi)
+    (hT.shift_domainAt i)).fvSubst_eq_self
 
 lemma IsTable.fvSubst_funcTail {tbl w k f m : V} (hT : IsTable L₁ L₂ tbl) (hf : L₂.IsFunc k f)
     (hk : k < m) : fvSubst L₁ w (funcTail L₁ tbl k f) = funcTail L₁ tbl k f :=
-  Language.IsSentence.fvSubst_eq_self ⟨hT.isSemiformula_funcTail hf hk, hT.shift_funcTail hf⟩
+  (Language.IsSentence.of_shift_eq (hT.isSemiformula_funcTail hf hk)
+    (hT.shift_funcTail hf)).fvSubst_eq_self
 
 lemma IsTable.fvSubst_qqConj_guardVec {tbl n m k s w u u' : V} (hT : IsTable L₁ L₂ tbl)
     (hw : ∀ i < len w, ∃ x, w.[i] = ^&x) (hk : k ≤ m) (hs : s + n ≤ m)

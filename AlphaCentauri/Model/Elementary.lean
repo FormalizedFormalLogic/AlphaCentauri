@@ -44,7 +44,7 @@ lemma EndExtension.sigmaElementary_zero {S M : Type} [ORingStructure S] [hSM : S
     SigmaElementary hSM.emb 0 := by
   rintro n φ ⟨Γ, m, hm, hφ⟩
   obtain rfl : m = 0 := by omega
-  exact hSM.cElementarySubstructure.isElementary (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
+  exact hSM.elementarySubstructureOn.isElementary (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
 
 lemma eval_ex_iff_of_witness {n : ℕ} {χ : ArithmeticSemiformula ℕ (n + 1)} {e : Fin n → S}
     {f : ℕ → S}

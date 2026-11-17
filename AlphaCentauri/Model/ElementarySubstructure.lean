@@ -34,7 +34,7 @@ def IsElementary (C : (n : ℕ) → ArithmeticSemiformula ℕ n → Prop)
     φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f
 
 /-- `M` is a `C`-elementary substructure of `N`. -/
-class CElementarySubstructure (C : (n : ℕ) → ArithmeticSemiformula ℕ n → Prop)
+class ElementarySubstructureOn (C : (n : ℕ) → ArithmeticSemiformula ℕ n → Prop)
     (M : outParam (Type u)) (N : Type v) [ORingStructure M] [ORingStructure N] where
   emb : M ↪ₛ[ℒₒᵣ] N
   isElementary : IsElementary C emb
@@ -42,29 +42,29 @@ class CElementarySubstructure (C : (n : ℕ) → ArithmeticSemiformula ℕ n →
 /-- `M` is an elementary substructure of `N`. -/
 abbrev ElementarySubstructure (M : outParam (Type u)) (N : Type v) [ORingStructure M]
     [ORingStructure N] :=
-  CElementarySubstructure (fun _ _ ↦ True) M N
+  ElementarySubstructureOn (fun _ _ ↦ True) M N
 
 /-- `M` is a proper `C`-elementary substructure of `N`: not every element of `N` comes from
 `M`. -/
-class ProperCElementarySubstructure (C : (n : ℕ) → ArithmeticSemiformula ℕ n → Prop)
+class ProperElementarySubstructureOn (C : (n : ℕ) → ArithmeticSemiformula ℕ n → Prop)
     (M : outParam (Type u)) (N : Type v) [ORingStructure M] [ORingStructure N]
-    extends CElementarySubstructure C M N where
+    extends ElementarySubstructureOn C M N where
   not_surjective : ¬Function.Surjective emb
 
 /-- `M` is a proper elementary substructure of `N`. -/
 abbrev ProperElementarySubstructure (M : outParam (Type u)) (N : Type v) [ORingStructure M]
     [ORingStructure N] :=
-  ProperCElementarySubstructure (fun _ _ ↦ True) M N
+  ProperElementarySubstructureOn (fun _ _ ↦ True) M N
 
-@[inherit_doc] notation:50 M " ≼ₑ[" C "] " N => CElementarySubstructure C M N
+@[inherit_doc] notation:50 M " ≼ₑ[" C "] " N => ElementarySubstructureOn C M N
 
-@[inherit_doc] notation:50 M " ≺ₑ[" C "] " N => ProperCElementarySubstructure C M N
+@[inherit_doc] notation:50 M " ≺ₑ[" C "] " N => ProperElementarySubstructureOn C M N
 
 @[inherit_doc] infix:50 " ≼ₑ " => ElementarySubstructure
 
 @[inherit_doc] infix:50 " ≺ₑ " => ProperElementarySubstructure
 
-namespace CElementarySubstructure
+namespace ElementarySubstructureOn
 
 variable {C : (n : ℕ) → ArithmeticSemiformula ℕ n → Prop} [hMN : M ≼ₑ[C] N]
 
@@ -78,32 +78,32 @@ lemma eval_iff {n : ℕ} {φ : ArithmeticSemiformula ℕ n} (hφ : C n φ) (e : 
   emb := hMN.emb
   isElementary hφ := hMN.isElementary (h hφ)
 
-end CElementarySubstructure
+end ElementarySubstructureOn
 
-namespace ProperCElementarySubstructure
+namespace ProperElementarySubstructureOn
 
 /-- A proper `C`-elementary substructure is proper `C'`-elementary for every `C'` contained in
 `C`. -/
 @[instance_reducible] def mono {C C' : (n : ℕ) → ArithmeticSemiformula ℕ n → Prop} [hMN : M ≺ₑ[C] N]
     (h : ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ n}, C' n φ → C n φ) : M ≺ₑ[C'] N where
-  toCElementarySubstructure := CElementarySubstructure.mono h
+  toElementarySubstructureOn := ElementarySubstructureOn.mono h
   not_surjective := hMN.not_surjective
 
-end ProperCElementarySubstructure
+end ProperElementarySubstructureOn
 
 end
 
 /-- An end extension is a $\Delta_0$-elementary substructure.
 - [HP98, Fact IV.1.3(4)] -/
-instance EndExtension.cElementarySubstructure [hMN : M ⊆ₑ N] :
+instance EndExtension.elementarySubstructureOn [hMN : M ⊆ₑ N] :
     M ≼ₑ[fun _ φ ↦ ℬ[<, ℒₒᵣ].Closure φ] N where
   emb := hMN.emb
   isElementary hφ e f := (absolute_of_bounded (T := ∅) hφ M N e f).symm
 
 /-- A proper end extension is a proper $\Delta_0$-elementary substructure. -/
-instance ProperEndExtension.properCElementarySubstructure [hMN : M ⊂ₑ N] :
+instance ProperEndExtension.properElementarySubstructureOn [hMN : M ⊂ₑ N] :
     M ≺ₑ[fun _ φ ↦ ℬ[<, ℒₒᵣ].Closure φ] N where
-  toCElementarySubstructure := EndExtension.cElementarySubstructure
+  toElementarySubstructureOn := EndExtension.elementarySubstructureOn
   not_surjective := hMN.not_surjective
 
 end FFL.FirstOrder.Arithmetic

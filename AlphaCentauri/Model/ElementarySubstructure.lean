@@ -27,19 +27,21 @@ variable [ORingStructure N]
 
 /-- `ι` is `C`-elementary: every formula of `C` takes the same truth value at elements of `M` as at
 their images.
-- [HP98, Definition IV.1.17] -/
+- [Kay91, §2.2] -/
 def IsElementary (C : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop)
     (ι : M ↪ₛ[ℒₒᵣ] N) : Prop :=
   ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ n}, C φ → ∀ (e : Fin n → M) (f : ℕ → M),
     φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f
 
-/-- `M` is a `C`-elementary substructure of `N`. -/
+/-- `M` is a `C`-elementary substructure of `N`.
+- [Kay91, §2.2] -/
 class ElementarySubstructureOn (C : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop)
     (M : outParam (Type u)) (N : Type v) [ORingStructure M] [ORingStructure N] where
   emb : M ↪ₛ[ℒₒᵣ] N
   isElementary : IsElementary C emb
 
-/-- `M` is an elementary substructure of `N`. -/
+/-- `M` is an elementary substructure of `N`.
+- [Kay91, §0.1] -/
 abbrev ElementarySubstructure (M : outParam (Type u)) (N : Type v) [ORingStructure M]
     [ORingStructure N] :=
   ElementarySubstructureOn (fun {_} _ ↦ True) M N
@@ -95,6 +97,7 @@ end ProperElementarySubstructureOn
 end
 
 /-- An end extension is a $\Delta_0$-elementary substructure.
+- [Kay91, Theorem 2.7]
 - [HP98, Fact IV.1.3(4)] -/
 instance EndExtension.elementarySubstructureOn [hMN : M ⊆ₑ N] :
     M ≼ₑ[fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ] N where

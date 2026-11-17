@@ -39,6 +39,7 @@ lemma SigmaElementary.mono {ι : S ↪ₛ[ℒₒᵣ] M} {s t : ℕ} (hst : s ≤
   exact hι ⟨Γ, m, hm.trans hst, hφ⟩
 
 /-- An end extension is $\Sigma_0$-elementary.
+- [Kay91, Theorem 2.7]
 - [HP98, Fact IV.1.3(4), Remark IV.1.18] -/
 lemma EndExtension.sigmaElementary_zero {S M : Type} [ORingStructure S] [hSM : S ⊆ₑ M] :
     SigmaElementary hSM.emb 0 := by

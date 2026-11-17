@@ -29,7 +29,7 @@ variable {S M : Type} [ORingStructure S] [ORingStructure M]
 truth value at elements of `S` as at their images.
 - [HP98, Definition IV.1.17] -/
 def SigmaElementary (ι : S ↪ₛ[ℒₒᵣ] M) (s : ℕ) : Prop :=
-  IsElementary (fun _ φ ↦ ∃ (Γ : Polarity) (m : ℕ), m ≤ s ∧ ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ) ι
+  IsElementary (fun {_} φ ↦ ∃ (Γ : Polarity) (m : ℕ), m ≤ s ∧ ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ) ι
 
 variable (ι : S ↪ₛ[ℒₒᵣ] M)
 

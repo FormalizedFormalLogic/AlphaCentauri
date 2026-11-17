@@ -2,17 +2,17 @@ module
 
 public import AlphaCentauri.Model.Absolute
 public import AlphaCentauri.Model.Cut
+public import AlphaCentauri.Model.ElementarySubstructure
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
-/-! # Elementary substructures
+/-! # $\Sigma_s$-elementary embeddings
 
-An embedding of `ℒₒᵣ`-structures is $\Sigma_s$-elementary when prenex $\Sigma_m$ and $\Pi_m$
-formulas, for `m ≤ s`, take the same truth value at elements of the substructure as at their images.
-The Tarski–Vaught test reduces this to the absoluteness of bounded formulas and to finding witnesses
-in the substructure. A proper cut $\Sigma_j$-elementary in a model of $\mathsf{I}\Sigma_j$ satisfies
-$\mathsf{B}\Sigma_{j+1}$.
+An embedding of `ℒₒᵣ`-structures is $\Sigma_s$-elementary when it is elementary for the prenex
+$\Sigma_m$ and $\Pi_m$ formulas with `m ≤ s`. The Tarski–Vaught test reduces this to the
+absoluteness of bounded formulas and to finding witnesses in the substructure. A proper cut
+$\Sigma_j$-elementary in a model of $\mathsf{I}\Sigma_j$ satisfies $\mathsf{B}\Sigma_{j+1}$.
 -/
 
 @[expose] public section
@@ -23,14 +23,6 @@ namespace FFL.FirstOrder.Arithmetic
 open Semiformula
 
 variable {S M : Type} [ORingStructure S] [ORingStructure M]
-
-/-- `ι` is $\Sigma_s$-elementary: for `m ≤ s`, prenex $\Sigma_m$ and $\Pi_m$ formulas take the same
-truth value at elements of `S` as at their images.
-- [HP98, Definition IV.1.17] -/
-def SigmaElementary (ι : S ↪ₛ[ℒₒᵣ] M) (s : ℕ) : Prop :=
-  ∀ {Γ : Polarity} {m n : ℕ} {φ : ArithmeticSemiformula ℕ n}, m ≤ s →
-    ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ → ∀ (e : Fin n → S) (f : ℕ → S),
-      φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f
 
 variable (ι : S ↪ₛ[ℒₒᵣ] M)
 
@@ -52,13 +44,17 @@ lemma eval_ex_iff_of_witness {n : ℕ} {χ : ArithmeticSemiformula ℕ (n + 1)} 
 /-- The Tarski–Vaught test: bounded formulas are absolute along `ι`, and every prenex $\Pi_m$
 formula, `m < s`, with parameters from `S` and a witness in `M` has a witness in `S`.
 - [HP98, Lemma IV.1.19] -/
-theorem sigmaElementary_of_tarskiVaught (s : ℕ)
-    (bounded : ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ n}, ℬ[<, ℒₒᵣ].Closure φ →
-      ∀ (e : Fin n → S) (f : ℕ → S), φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f)
+theorem isElementary_of_tarskiVaught (s : ℕ)
+    (bounded : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ) ι)
     (witness : ∀ m < s, ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)},
       ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 m φ → ∀ (e : Fin n → S) (f : ℕ → S),
         (∃ x : M, φ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, φ.Eval (ι x :> ι ∘ e) (ι ∘ f)) :
-    SigmaElementary ι s := by
+    IsElementary (fun {_} φ ↦ ∃ m ≤ s, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ) ι := by
+  suffices ∀ {Γ : Polarity} {m n : ℕ} {φ : ArithmeticSemiformula ℕ n}, m ≤ s →
+      ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ → ∀ (e : Fin n → S) (f : ℕ → S),
+        φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f by
+    rintro n φ ⟨m, hm, Γ, hφ⟩
+    exact this hm hφ
   intro Γ m n φ hm hφ
   induction m generalizing Γ n φ with
   | zero => exact bounded (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
@@ -96,16 +92,17 @@ lemma eval_iff_of_bounded_of_witness
         simp [ih (x :> e) f, ← eval_hom_iff_of_open ι (φ := “#0 < !!(Rew.bShift t)”)])
     n φ hφ e f
 
-/-- A $\Sigma_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
+/-- A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/
-theorem SigmaElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M} (hι : SigmaElementary ι 0)
+theorem IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M}
+    (hι : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ) ι)
     [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : S↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := by
   have h {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemiformula ℕ n}
       (hφ : ℬ[<, ℒₒᵣ].PrenexBlock Γ φ) (hΓ : Γ = 𝚷) (e : Fin n → S) (f : ℕ → S) :
       φ.Eval (ι ∘ e) (ι ∘ f) → φ.Eval e f := by
     induction hφ with
     | bounded h =>
-      exact (hι (Γ := 𝚷) le_rfl (Bounding.PrenexHierarchy.zero_iff_bounded.mpr h) e f).mp
+      exact (hι h e f).mp
     | exs => simp at hΓ
     | all _ ih =>
       simp only [eval_all]
@@ -119,20 +116,22 @@ theorem SigmaElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M} (hι : Si
 
 /-- A $\Sigma_s$-elementary embedding preserves the truth of $\Sigma_s$ and $\Pi_s$ sentences
 between models of $\mathsf{B}\Sigma_s$. -/
-lemma SigmaElementary.models_iff_of_hierarchy {ι : S ↪ₛ[ℒₒᵣ] M} {s : ℕ} (hι : SigmaElementary ι s)
+lemma IsElementary.models_iff_of_hierarchy {ι : S ↪ₛ[ℒₒᵣ] M} {s : ℕ}
+    (hι : IsElementary (fun {_} φ ↦ ∃ m ≤ s, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ) ι)
     [S↓[ℒₒᵣ] ⊧* 𝗕𝚺s] [M↓[ℒₒᵣ] ⊧* 𝗕𝚺s] {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemisentence n}
     (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) (v : Fin n → S) : M ⊧/(ι ∘ v) φ ↔ S ⊧/v φ := by
   obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
   rw [hφ' M, hφ' S]
-  have := hι le_rfl (φ'.rew Rew.emb).val_prenexHierarchy v (fun _ ↦ 0)
+  have := hι ⟨s, le_rfl, Γ, (φ'.rew Rew.emb).val_prenexHierarchy⟩ v (fun _ ↦ 0)
   rwa [Bounding.Prenex.val_rew, eval_emb, eval_emb] at this
 
 namespace Cut
 
 variable {j : ℕ} [M↓[ℒₒᵣ] ⊧* 𝗜𝚺j] (I : Cut M) [I.Closed]
 
-private lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
-    (hj : SigmaElementary I.endExtension.emb j) {ψ : ArithmeticSemiformula ℕ 3}
+private lemma exists_bound_of_isElementary (hI : ∃ c, c ∉ I.carrier)
+    (hj : IsElementary (fun {_} φ ↦ ∃ m ≤ j, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ)
+      I.endExtension.emb) {ψ : ArithmeticSemiformula ℕ 3}
     (hψ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 j ψ) (e : ℕ → I.carrier) (a : I.carrier)
     (h : ∀ x < a, ∃ y z, ψ.Eval ![z, x, y] e) :
     ∃ b, ∀ x < a, ∃ y < b, ∃ z, ψ.Eval ![z, x, y] e := by
@@ -142,7 +141,7 @@ private lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
     not_surjective h := hc₀ <| by obtain ⟨x, rfl⟩ := h c₀; exact x.2 }
   have hψ' (x y z : I.carrier) :
       ψ.Eval ![z.1, x.1, y.1] (I.endExtension.emb ∘ e) ↔ ψ.Eval ![z, x, y] e := by
-    simpa [Matrix.comp_vecCons''] using hj le_rfl hψ ![z, x, y] e
+    simpa [Matrix.comp_vecCons''] using hj ⟨j, le_rfl, 𝚷, hψ⟩ ![z, x, y] e
   have hlt {y c : M} (hy : y ∈ I.carrier) (hc : c ∉ I.carrier) : y < c := by
     by_contra! h₁
     exact hc <| h₁.lt_or_eq.elim (I.mem_of_lt · hy) (· ▸ hy)
@@ -182,7 +181,9 @@ private lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
 /-- A proper cut of a model of $\mathsf{I}\Sigma_j$ which is closed under the operations and
 $\Sigma_j$-elementary satisfies $\mathsf{B}\Sigma_{j+1}$.
 - [HP98, Lemma IV.1.22] -/
-theorem models_BSigma_succ (hI : ∃ c, c ∉ I.carrier) (hj : SigmaElementary I.endExtension.emb j) :
+theorem models_BSigma_succ (hI : ∃ c, c ∉ I.carrier)
+    (hj : IsElementary (fun {_} φ ↦ ∃ m ≤ j, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ)
+      I.endExtension.emb) :
     I.carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := by
   have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := mod_ISigma_of_le (Nat.zero_le j)
   apply Semantics.ModelsSet.union_iff.mpr
@@ -195,7 +196,7 @@ theorem models_BSigma_succ (hI : ∃ c, c ∉ I.carrier) (hj : SigmaElementary I
       simpa [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
         Semiformula.eval_bexsLT, Semiformula.eval_substs] using this
     obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hφ
-    simpa using I.exists_bound_of_sigmaElementary hI hj hψ
+    simpa using I.exists_bound_of_isElementary hI hj hψ
 
 end Cut
 

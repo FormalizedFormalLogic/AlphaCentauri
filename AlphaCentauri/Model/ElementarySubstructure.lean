@@ -25,14 +25,20 @@ section
 
 variable [ORingStructure N]
 
-/-- `M` is a $\Gamma$-elementary substructure of `N`: along the embedding, every formula of
-$\Gamma$ takes the same truth value at elements of `M` as at their images.
+/-- `ι` is $\Gamma$-elementary: every formula of $\Gamma$ takes the same truth value at elements of
+`M` as at their images.
+- [Kay91, §2.2]
+- [HP98, Definition IV.1.17] -/
+def IsElementary (Γ : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop) (ι : M ↪ₛ[ℒₒᵣ] N) : Prop :=
+  ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ n}, Γ φ → ∀ (e : Fin n → M) (f : ℕ → M),
+    φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f
+
+/-- `M` is a $\Gamma$-elementary substructure of `N`.
 - [Kay91, §2.2] -/
 class ElementarySubstructureOn (Γ : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop)
     (M : outParam (Type u)) (N : Type v) [ORingStructure M] [ORingStructure N] where
   emb : M ↪ₛ[ℒₒᵣ] N
-  eval_iff {n : ℕ} {φ : ArithmeticSemiformula ℕ n} : Γ φ → ∀ (e : Fin n → M) (f : ℕ → M),
-    φ.Eval (emb ∘ e) (emb ∘ f) ↔ φ.Eval e f
+  isElementary : IsElementary Γ emb
 
 /-- `M` is an elementary substructure of `N`.
 - [Kay91, §0.1] -/
@@ -69,7 +75,7 @@ $\Gamma$. -/
 @[instance_reducible] def mono {Γ' : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop}
     (h : ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ n}, Γ' φ → Γ φ) : M ≼ₑ[Γ'] N where
   emb := hMN.emb
-  eval_iff hφ := hMN.eval_iff (h hφ)
+  isElementary hφ := hMN.isElementary (h hφ)
 
 end ElementarySubstructureOn
 
@@ -93,7 +99,7 @@ end
 instance EndExtension.elementarySubstructureOn [hMN : M ⊆ₑ N] :
     M ≼ₑ[fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ] N where
   emb := hMN.emb
-  eval_iff hφ e f := (absolute_of_bounded (T := ∅) hφ M N e f).symm
+  isElementary hφ e f := (absolute_of_bounded (T := ∅) hφ M N e f).symm
 
 /-- A proper end extension is a proper $\Delta_0$-elementary substructure. -/
 instance ProperEndExtension.properElementarySubstructureOn [hMN : M ⊂ₑ N] :

@@ -29,22 +29,32 @@ def standardSystem : Set (Set ℕ) := Set.range (codedSet (V := V))
 
 lemma mem_standardSystem_of_finite {S : Set ℕ} (hS : S.Finite) : S ∈ standardSystem V := by
   induction S, hS using Set.Finite.induction_on with
-  | empty => exact ⟨∅, by ext; simp⟩
+  | empty =>
+    use ∅
+    ext
+    simp
   | @insert n S _ _ ih =>
     obtain ⟨a, rfl⟩ := ih
-    exact ⟨insert (n : V) a, by ext; simp⟩
+    use insert (n : V) a
+    ext
+    simp
 
 /-- The standard system of `ℕ` is the family of finite subsets of `ℕ`.
 - [Kay91, Exercise 11.1] -/
 lemma standardSystem_nat : standardSystem ℕ = {S | S.Finite} := by
   ext S
-  refine ⟨?_, mem_standardSystem_of_finite⟩
-  rintro ⟨a, rfl⟩
-  exact (Set.finite_lt_nat a).subset fun n hn ↦ lt_of_mem (by simpa using hn)
+  constructor
+  · rintro ⟨a, rfl⟩
+    apply (Set.finite_lt_nat a).subset
+    intro n hn
+    exact lt_of_mem (by simpa using hn)
+  · apply mem_standardSystem_of_finite
 
-namespace EndExtension
+section
 
 variable {M N : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [hMN : M ⊆ₑ N] [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+namespace EndExtension
 
 @[simp] lemma emb_natCast (n : ℕ) : hMN.emb n = n := by
   induction n with
@@ -69,10 +79,11 @@ end EndExtension
 /-- The standard system of a model of `𝗜𝚺₁` is contained in that of an end extension which
 again models `𝗜𝚺₁`.
 - [Kay91, Chapter 12, p. 159] -/
-lemma standardSystem_subset_of_endExtension {M N : Type*} [ORingStructure M]
-    [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [hMN : M ⊆ₑ N] [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
-    standardSystem M ⊆ standardSystem N := by
+lemma standardSystem_subset_of_endExtension : standardSystem M ⊆ standardSystem N := by
   rintro _ ⟨a, rfl⟩
-  exact ⟨hMN.emb a, EndExtension.codedSet_emb a⟩
+  use hMN.emb a
+  exact EndExtension.codedSet_emb a
+
+end
 
 end FFL.FirstOrder.Arithmetic

@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.Model.Absolute
 public import AlphaCentauri.Model.Cut
+public import AlphaCentauri.Model.ElementarySubstructure
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
@@ -28,11 +29,22 @@ variable {S M : Type} [ORingStructure S] [ORingStructure M]
 truth value at elements of `S` as at their images.
 - [HP98, Definition IV.1.17] -/
 def SigmaElementary (ι : S ↪ₛ[ℒₒᵣ] M) (s : ℕ) : Prop :=
-  ∀ {Γ : Polarity} {m n : ℕ} {φ : ArithmeticSemiformula ℕ n}, m ≤ s →
-    ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ → ∀ (e : Fin n → S) (f : ℕ → S),
-      φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f
+  IsElementary (fun _ φ ↦ ∃ (Γ : Polarity) (m : ℕ), m ≤ s ∧ ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ) ι
 
 variable (ι : S ↪ₛ[ℒₒᵣ] M)
+
+lemma SigmaElementary.mono {ι : S ↪ₛ[ℒₒᵣ] M} {s t : ℕ} (hst : s ≤ t) (hι : SigmaElementary ι t) :
+    SigmaElementary ι s := by
+  rintro n φ ⟨Γ, m, hm, hφ⟩
+  exact hι ⟨Γ, m, hm.trans hst, hφ⟩
+
+/-- An end extension is $\Sigma_0$-elementary.
+- [HP98, Fact IV.1.3(4), Remark IV.1.18] -/
+lemma EndExtension.sigmaElementary_zero {S M : Type} [ORingStructure S] [hSM : S ⊆ₑ M] :
+    SigmaElementary hSM.emb 0 := by
+  rintro n φ ⟨Γ, m, hm, hφ⟩
+  obtain rfl : m = 0 := by omega
+  exact hSM.cElementarySubstructure.isElementary (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
 
 lemma eval_ex_iff_of_witness {n : ℕ} {χ : ArithmeticSemiformula ℕ (n + 1)} {e : Fin n → S}
     {f : ℕ → S}
@@ -59,6 +71,11 @@ theorem sigmaElementary_of_tarskiVaught (s : ℕ)
       ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 m φ → ∀ (e : Fin n → S) (f : ℕ → S),
         (∃ x : M, φ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, φ.Eval (ι x :> ι ∘ e) (ι ∘ f)) :
     SigmaElementary ι s := by
+  suffices ∀ {Γ : Polarity} {m n : ℕ} {φ : ArithmeticSemiformula ℕ n}, m ≤ s →
+      ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ → ∀ (e : Fin n → S) (f : ℕ → S),
+        φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f by
+    rintro n φ ⟨Γ, m, hm, hφ⟩
+    exact this hm hφ
   intro Γ m n φ hm hφ
   induction m generalizing Γ n φ with
   | zero => exact bounded (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
@@ -105,7 +122,7 @@ theorem SigmaElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M} (hι : Si
       φ.Eval (ι ∘ e) (ι ∘ f) → φ.Eval e f := by
     induction hφ with
     | bounded h =>
-      exact (hι (Γ := 𝚷) le_rfl (Bounding.PrenexHierarchy.zero_iff_bounded.mpr h) e f).mp
+      exact (hι ⟨𝚷, 0, le_rfl, Bounding.PrenexHierarchy.zero_iff_bounded.mpr h⟩ e f).mp
     | exs => simp at hΓ
     | all _ ih =>
       simp only [eval_all]
@@ -124,7 +141,7 @@ lemma SigmaElementary.models_iff_of_hierarchy {ι : S ↪ₛ[ℒₒᵣ] M} {s : 
     (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) (v : Fin n → S) : M ⊧/(ι ∘ v) φ ↔ S ⊧/v φ := by
   obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
   rw [hφ' M, hφ' S]
-  have := hι le_rfl (φ'.rew Rew.emb).val_prenexHierarchy v (fun _ ↦ 0)
+  have := hι ⟨Γ, s, le_rfl, (φ'.rew Rew.emb).val_prenexHierarchy⟩ v (fun _ ↦ 0)
   rwa [Bounding.Prenex.val_rew, eval_emb, eval_emb] at this
 
 namespace Cut
@@ -142,7 +159,7 @@ private lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
     not_surjective h := hc₀ <| by obtain ⟨x, rfl⟩ := h c₀; exact x.2 }
   have hψ' (x y z : I.carrier) :
       ψ.Eval ![z.1, x.1, y.1] (I.endExtension.emb ∘ e) ↔ ψ.Eval ![z, x, y] e := by
-    simpa [Matrix.comp_vecCons''] using hj le_rfl hψ ![z, x, y] e
+    simpa [Matrix.comp_vecCons''] using hj ⟨𝚷, j, le_rfl, hψ⟩ ![z, x, y] e
   have hlt {y c : M} (hy : y ∈ I.carrier) (hc : c ∉ I.carrier) : y < c := by
     by_contra! h₁
     exact hc <| h₁.lt_or_eq.elim (I.mem_of_lt · hy) (· ▸ hy)

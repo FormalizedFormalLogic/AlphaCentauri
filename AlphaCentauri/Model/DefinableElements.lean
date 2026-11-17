@@ -173,7 +173,7 @@ variable (j) in
 theorem models_ISigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : (definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗜𝚺 j := by
   have hK : SigmaElementary (emb j M) (j + 1) := sigmaElementary j
   have : (definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
-    SigmaElementary.models_peanoMinus fun hm ↦ hK (hm.trans (Nat.zero_le _))
+    SigmaElementary.models_peanoMinus (hK.mono (Nat.zero_le _))
   apply Semantics.ModelsSet.union_iff.mpr
   and_intros
   · exact this
@@ -185,7 +185,7 @@ theorem models_ISigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : (definableElements (j + 
         Matrix.constant_eq_singleton] using this
     intro v h₀ hs a
     have hM (x : definableElements (j + 1) M) : φ.Eval ![x.1] (emb j M ∘ v) ↔ φ.Eval ![x] v := by
-      simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using hK (by omega) hφ ![x] v
+      simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using hK ⟨_, j, by omega, hφ⟩ ![x] v
     by_contra ha
     obtain ⟨x₀, hx₀, h₁, h₂⟩ := exists_least_mem_definableElements (φ := ∼φ) (e := ![])
       (f := emb j M ∘ v) (by simpa using hφ.hierarchy) (fun i ↦ i.elim0) (fun i ↦ (v i).2) <| by

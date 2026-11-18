@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Model.Absolute
+public import AlphaCentauri.Model.EndExtension
 
 /-! # Elementary substructures
 
@@ -19,11 +19,7 @@ open Semiformula
 
 universe u v
 
-variable {M : Type u} {N : Type v} [ORingStructure M]
-
-section
-
-variable [ORingStructure N]
+variable {M : Type u} {N : Type v} [ORingStructure M] [ORingStructure N]
 
 /-- `ι` is $\Gamma$-elementary: every formula of $\Gamma$ takes the same truth value at elements of
 `M` as at their images.
@@ -33,28 +29,27 @@ def IsElementary (Γ : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop) (ι 
   ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ n}, Γ φ → ∀ (e : Fin n → M) (f : ℕ → M),
     φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f
 
-/-- `M` is a $\Gamma$-elementary substructure of `N`.
+/-- A $\Gamma$-elementary substructure: an embedding of `M` into `N` which is $\Gamma$-elementary.
 - [Kay91, §2.2] -/
-class ElementarySubstructureOn (Γ : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop)
-    (M : outParam (Type u)) (N : Type v) [ORingStructure M] [ORingStructure N] where
+structure ElementarySubstructureOn (Γ : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop)
+    (M : Type u) (N : Type v) [ORingStructure M] [ORingStructure N] where
   emb : M ↪ₛ[ℒₒᵣ] N
   isElementary : IsElementary Γ emb
 
-/-- `M` is an elementary substructure of `N`.
+/-- An elementary substructure.
 - [Kay91, §0.1] -/
-abbrev ElementarySubstructure (M : outParam (Type u)) (N : Type v) [ORingStructure M]
-    [ORingStructure N] :=
+abbrev ElementarySubstructure (M : Type u) (N : Type v) [ORingStructure M] [ORingStructure N] :=
   ElementarySubstructureOn (fun {_} _ ↦ True) M N
 
-/-- `M` is a proper $\Gamma$-elementary substructure of `N`: not every element of `N` comes from
-`M`. -/
-class ProperElementarySubstructureOn (Γ : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop)
-    (M : outParam (Type u)) (N : Type v) [ORingStructure M] [ORingStructure N]
+/-- A proper $\Gamma$-elementary substructure: a $\Gamma$-elementary substructure which is not
+surjective. -/
+structure ProperElementarySubstructureOn (Γ : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop)
+    (M : Type u) (N : Type v) [ORingStructure M] [ORingStructure N]
     extends ElementarySubstructureOn Γ M N where
   not_surjective : ¬Function.Surjective emb
 
-/-- `M` is a proper elementary substructure of `N`. -/
-abbrev ProperElementarySubstructure (M : outParam (Type u)) (N : Type v) [ORingStructure M]
+/-- A proper elementary substructure. -/
+abbrev ProperElementarySubstructure (M : Type u) (N : Type v) [ORingStructure M]
     [ORingStructure N] :=
   ProperElementarySubstructureOn (fun {_} _ ↦ True) M N
 
@@ -66,45 +61,38 @@ abbrev ProperElementarySubstructure (M : outParam (Type u)) (N : Type v) [ORingS
 
 @[inherit_doc] infix:50 " ≺ₑ " => ProperElementarySubstructure
 
-namespace ElementarySubstructureOn
+variable {Γ Γ' : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop}
 
-variable {Γ : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop} [hMN : M ≼ₑ[Γ] N]
+instance : CoeFun (M ≼ₑ[Γ] N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
+
+instance : CoeFun (M ≺ₑ[Γ] N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
 
 /-- A $\Gamma$-elementary substructure is $\Gamma'$-elementary for every $\Gamma'$ contained in
 $\Gamma$. -/
-@[instance_reducible] def mono {Γ' : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop}
+def ElementarySubstructureOn.mono (e : M ≼ₑ[Γ] N)
     (h : ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ n}, Γ' φ → Γ φ) : M ≼ₑ[Γ'] N where
-  emb := hMN.emb
-  isElementary hφ := hMN.isElementary (h hφ)
-
-end ElementarySubstructureOn
-
-namespace ProperElementarySubstructureOn
+  emb := e.emb
+  isElementary hφ := e.isElementary (h hφ)
 
 /-- A proper $\Gamma$-elementary substructure is proper $\Gamma'$-elementary for every $\Gamma'$
 contained in $\Gamma$. -/
-@[instance_reducible] def mono {Γ Γ' : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop}
-    [hMN : M ≺ₑ[Γ] N]
+def ProperElementarySubstructureOn.mono (e : M ≺ₑ[Γ] N)
     (h : ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ n}, Γ' φ → Γ φ) : M ≺ₑ[Γ'] N where
-  toElementarySubstructureOn := ElementarySubstructureOn.mono h
-  not_surjective := hMN.not_surjective
-
-end ProperElementarySubstructureOn
-
-end
+  toElementarySubstructureOn := e.toElementarySubstructureOn.mono h
+  not_surjective := e.not_surjective
 
 /-- An end extension is a $\Delta_0$-elementary substructure.
 - [Kay91, Theorem 2.7]
 - [HP98, Fact IV.1.3(4)] -/
-instance EndExtension.elementarySubstructureOn [hMN : M ⊆ₑ N] :
+def EndExtension.toElementarySubstructureOn (e : M ⊆ₑ N) :
     M ≼ₑ[fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ] N where
-  emb := hMN.emb
-  isElementary hφ e f := (absolute_of_bounded (T := ∅) hφ M N e f).symm
+  emb := e.emb
+  isElementary hφ v f := (Bounding.bounded_absolute e.emb hφ v f).symm
 
 /-- A proper end extension is a proper $\Delta_0$-elementary substructure. -/
-instance ProperEndExtension.properElementarySubstructureOn [hMN : M ⊂ₑ N] :
+def ProperEndExtension.toProperElementarySubstructureOn (e : M ⊂ₑ N) :
     M ≺ₑ[fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ] N where
-  toElementarySubstructureOn := EndExtension.elementarySubstructureOn
-  not_surjective := hMN.not_surjective
+  toElementarySubstructureOn := e.toEndExtension.toElementarySubstructureOn
+  not_surjective := e.not_surjective
 
 end FFL.FirstOrder.Arithmetic

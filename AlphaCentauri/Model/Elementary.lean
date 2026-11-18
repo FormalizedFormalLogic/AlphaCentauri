@@ -1,6 +1,5 @@
 module
 
-public import AlphaCentauri.Model.Absolute
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.ElementarySubstructure
 public import AlphaCentauri.Model.Overspill
@@ -125,9 +124,9 @@ lemma IsElementary.models_iff_of_hierarchy {ι : S ↪ₛ[ℒₒᵣ] M} {s : ℕ
   have := hι ⟨s, le_rfl, Γ, (φ'.rew Rew.emb).val_prenexHierarchy⟩ v (fun _ ↦ 0)
   rwa [Bounding.Prenex.val_rew, eval_emb, eval_emb] at this
 
-namespace Cut
+namespace ClosedCut
 
-variable {j : ℕ} [M↓[ℒₒᵣ] ⊧* 𝗜𝚺j] (I : Cut M) [I.Closed]
+variable {j : ℕ} [M↓[ℒₒᵣ] ⊧* 𝗜𝚺j] (I : ClosedCut M)
 
 private lemma exists_bound_of_isElementary (hI : ∃ c, c ∉ I.carrier)
     (hj : IsElementary (fun {_} φ ↦ ∃ m ≤ j, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ)
@@ -137,7 +136,7 @@ private lemma exists_bound_of_isElementary (hI : ∃ c, c ∉ I.carrier)
     ∃ b, ∀ x < a, ∃ y < b, ∃ z, ψ.Eval ![z, x, y] e := by
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗜𝚺j)
   obtain ⟨c₀, hc₀⟩ := hI
-  let _ : I.carrier ⊂ₑ M := { I.endExtension with
+  let ι : I.carrier ⊂ₑ M := { I.endExtension with
     not_surjective h := hc₀ <| by obtain ⟨x, rfl⟩ := h c₀; exact x.2 }
   have hψ' (x y z : I.carrier) :
       ψ.Eval ![z.1, x.1, y.1] (I.endExtension.emb ∘ e) ↔ ψ.Eval ![z, x, y] e := by
@@ -164,10 +163,10 @@ private lemma exists_bound_of_isElementary (hI : ∃ c, c ∉ I.carrier)
       · exact (hψ' _ y z).mpr h₂
   obtain ⟨b, hb, h₂⟩ : ∃ b ∈ I.carrier, Θ.Eval ![b] g := by
     by_contra! h₂
-    obtain ⟨c, hc, h₃⟩ := overspill (M := I.carrier) 𝚺 j (φ := ∼Θ)
-      (by simp [Θ, hψ.hierarchy]) g fun b ↦ by simpa using h₂ b.1 b.2
+    obtain ⟨c, hc, h₃⟩ := overspill ι 𝚺 j (φ := ∼Θ)
+      (by simp [Θ, hψ.hierarchy]) g fun b ↦ by simpa [ι] using h₂ b.1 b.2
     have hc' : c ∉ I.carrier := fun h ↦ hc ⟨⟨c, h⟩, rfl⟩
-    obtain ⟨d, rfl⟩ := eq_succ_of_pos (hlt Closed.zero_mem hc')
+    obtain ⟨d, rfl⟩ := eq_succ_of_pos (hlt I.zero_mem hc')
     exact absurd (h₁ fun h ↦ hc' (I.succ_mem h)) (by simpa using h₃ d (lt_add_one d))
   use ⟨b, hb⟩
   intro x hx
@@ -198,7 +197,7 @@ theorem models_BSigma_succ (hI : ∃ c, c ∉ I.carrier)
     obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hφ
     simpa using I.exists_bound_of_isElementary hI hj hψ
 
-end Cut
+end ClosedCut
 
 
 end FFL.FirstOrder.Arithmetic

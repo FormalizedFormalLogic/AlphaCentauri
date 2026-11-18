@@ -99,7 +99,6 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStepModel
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Bisimulation
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.MaximalConsistentTheoryModel
-public import AlphaCentauri.Model.Absolute
 public import AlphaCentauri.Model.CodedLimit
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.DefinableCut

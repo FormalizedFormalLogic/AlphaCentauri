@@ -34,12 +34,10 @@ section termCut
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 /-- The elements of `M` bounded by the value at `c` of some closed term. -/
-private def termCut (c : Fin k → M) : Cut M where
+private def termCut (c : Fin k → M) : ClosedCut M where
   carrier := {x | ∃ t : ClosedSemiterm ℒₒᵣ k, x ≤ t.valb c}
   succ_mem := fun ⟨t, ht⟩ ↦ ⟨‘!!t + 1’, by simpa using add_le_add_right ht 1⟩
   mem_of_lt := fun hab ⟨t, ht⟩ ↦ ⟨t, le_trans hab.le ht⟩
-
-private instance termCut_closed (c : Fin k → M) : (termCut c).Closed where
   zero_mem := ⟨‘0’, by simp⟩
   one_mem := ⟨‘1’, by simp⟩
   add_mem := fun ⟨s, hs⟩ ⟨t, ht⟩ ↦ ⟨‘!!s + !!t’, by
@@ -106,8 +104,7 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Cl
       <| Set.mem_iUnion_of_mem (Encodable.encode t + 1)
       <| Set.mem_union_right _ ⟨t, Nat.lt_succ_self _, rfl⟩
   -- The elements bounded by the value of a closed term form a cut, which models `𝗜𝚺₀`.
-  set K : Cut (ModelOfSatEq sat) := termCut (cstVal sat);
-  let _ : K.Closed := termCut_closed _
+  set K : ClosedCut (ModelOfSatEq sat) := termCut (cstVal sat);
   have hK : (↥K.carrier)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := K.endExtension.models_ISigma0
   -- Soundness in the cut gives a witness `b ≤ t(c)`, and `φ` being $\Delta_0$ it holds in the
   -- model too.

@@ -126,9 +126,9 @@ lemma SigmaElementary.models_iff_of_hierarchy {ι : S ↪ₛ[ℒₒᵣ] M} {s : 
   have := hι le_rfl (φ'.rew Rew.emb).val_prenexHierarchy v (fun _ ↦ 0)
   rwa [Bounding.Prenex.val_rew, eval_emb, eval_emb] at this
 
-namespace Cut
+namespace ClosedCut
 
-variable {j : ℕ} [M↓[ℒₒᵣ] ⊧* 𝗜𝚺j] (I : Cut M) [I.Closed]
+variable {j : ℕ} [M↓[ℒₒᵣ] ⊧* 𝗜𝚺j] (I : ClosedCut M)
 
 private lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
     (hj : SigmaElementary I.endExtension.emb j) {ψ : ArithmeticSemiformula ℕ 3}
@@ -167,7 +167,7 @@ private lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
     obtain ⟨c, hc, h₃⟩ := overspill ι 𝚺 j (φ := ∼Θ)
       (by simp [Θ, hψ.hierarchy]) g fun b ↦ by simpa [ι] using h₂ b.1 b.2
     have hc' : c ∉ I.carrier := fun h ↦ hc ⟨⟨c, h⟩, rfl⟩
-    obtain ⟨d, rfl⟩ := eq_succ_of_pos (hlt Closed.zero_mem hc')
+    obtain ⟨d, rfl⟩ := eq_succ_of_pos (hlt I.zero_mem hc')
     exact absurd (h₁ fun h ↦ hc' (I.succ_mem h)) (by simpa using h₃ d (lt_add_one d))
   use ⟨b, hb⟩
   intro x hx
@@ -196,7 +196,7 @@ theorem models_BSigma_succ (hI : ∃ c, c ∉ I.carrier) (hj : SigmaElementary I
     obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hφ
     simpa using I.exists_bound_of_sigmaElementary hI hj hψ
 
-end Cut
+end ClosedCut
 
 
 end FFL.FirstOrder.Arithmetic

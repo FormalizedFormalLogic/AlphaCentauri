@@ -23,9 +23,10 @@ namespace FFL.FirstOrder.Arithmetic
 
 open Semiformula Tarski.Structure
 
-universe u v
+universe u v w
 
-variable {M : Type u} {N : Type v} [ORingStructure M] [ORingStructure N]
+variable {M : Type u} {N : Type v} {K : Type w} [ORingStructure M] [ORingStructure N]
+  [ORingStructure K]
 
 /-- An end extension of `M` to `N`: an embedding of `M` into `N` with nothing new below its image.
 - [HP98, Definition IV.1.3(2)]
@@ -81,6 +82,38 @@ instance : ℬ[<, ℒₒᵣ].IsInitial e.emb where
     intro R hR a b hb
     obtain rfl := Set.mem_singleton_iff.mp hR
     exact e.mem_range_of_lt (by simpa using hb)
+
+variable (M) in
+/-- The identity end extension. -/
+@[refl] protected def refl : M ⊆ₑ M where
+  emb := {
+    toFun := id
+    func' _ _ := rfl
+    rel' _ _ h := h
+    toFun_inj := Function.injective_id
+    rel_inv' _ _ h := h
+  }
+  mem_range_of_lt {_ b} _ := ⟨b, rfl⟩
+
+@[simp] lemma refl_apply (x : M) : EndExtension.refl M x = x := rfl
+
+/-- The composition of end extensions. -/
+@[trans] protected def trans (e₁ : M ⊆ₑ N) (e₂ : N ⊆ₑ K) : M ⊆ₑ K where
+  emb := {
+    toFun := e₂ ∘ e₁
+    func' f v := by simp [HomClass.func e₁.emb, HomClass.func e₂.emb, Function.comp_def]
+    rel' r v h := HomClass.rel e₂.emb r _ (HomClass.rel e₁.emb r v h)
+    toFun_inj := e₂.emb_injective.comp e₁.emb_injective
+    rel_inv' r v h :=
+      EmbeddingClass.map_rel_inv e₁.emb r v (EmbeddingClass.map_rel_inv e₂.emb r _ h)
+  }
+  mem_range_of_lt {a b} h := by
+    obtain ⟨c, rfl⟩ := e₂.mem_range_of_lt h
+    obtain ⟨x, rfl⟩ := e₁.mem_range_of_lt (e₂.emb_lt_emb.mp h)
+    use x
+    rfl
+
+@[simp] lemma trans_apply (e₁ : M ⊆ₑ N) (e₂ : N ⊆ₑ K) (x : M) : e₁.trans e₂ x = e₂ (e₁ x) := rfl
 
 include e
 
@@ -234,5 +267,32 @@ theorem models_ISigma0 [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] : M↓[ℒₒᵣ] ⊧*
       using hind (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
 
 end EndExtension
+
+namespace ProperEndExtension
+
+lemma exists_not_mem_range (e : M ⊂ₑ N) : ∃ c : N, c ∉ Set.range e.emb := by
+  simpa [Function.Surjective, Set.range, not_forall] using e.not_surjective
+
+/-- A proper end extension followed by an end extension is proper. -/
+protected def transLeft (e₁ : M ⊂ₑ N) (e₂ : N ⊆ₑ K) : M ⊂ₑ K where
+  toEndExtension := e₁.toEndExtension.trans e₂
+  not_surjective h := e₁.not_surjective fun y ↦ by
+    obtain ⟨x, hx⟩ := h (e₂ y)
+    use x
+    exact e₂.emb_injective hx
+
+/-- An end extension followed by a proper end extension is proper. -/
+protected def transRight (e₁ : M ⊆ₑ N) (e₂ : N ⊂ₑ K) : M ⊂ₑ K where
+  toEndExtension := e₁.trans e₂.toEndExtension
+  not_surjective h := e₂.not_surjective fun y ↦ by
+    obtain ⟨x, hx⟩ := h y
+    use e₁ x
+    exact hx
+
+/-- The composition of proper end extensions. -/
+@[trans] protected def trans (e₁ : M ⊂ₑ N) (e₂ : N ⊂ₑ K) : M ⊂ₑ K :=
+  e₁.transLeft e₂.toEndExtension
+
+end ProperEndExtension
 
 end FFL.FirstOrder.Arithmetic

@@ -146,11 +146,9 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
 
 /-- [HP98, Lemma IV.1.42] -/
 theorem sigmaElementary : SigmaElementary (definableCut j M).endExtension.emb j := by
-  let := (definableCut j M).endExtension
-  have : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := EndExtension.models_peanoMinus (N := M)
   apply sigmaElementary_of_tarskiVaught
   · intro n φ hφ e f
-    exact (absolute_of_bounded (T := 𝗣𝗔⁻) hφ _ M e f).symm
+    exact (Bounding.bounded_absolute (definableCut j M).endExtension.emb hφ e f).symm
   · intro m hm n φ hφ e f h
     obtain ⟨x, hx, hφx⟩ := exists_witness hm hφ e f h
     use ⟨x, hx⟩

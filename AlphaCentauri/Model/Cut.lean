@@ -1,7 +1,6 @@
 module
 
 public import AlphaCentauri.Model.EndExtension
-public import AlphaCentauri.Model.Absolute
 
 /-! # Cuts
 
@@ -49,7 +48,6 @@ instance oringStructure : ORingStructure I.carrier where
 
 /-- `M` is an end extension of each of its cuts closed under the operations.
 - [HP98, Definition IV.1.3(2)] -/
-@[instance_reducible]
 def endExtension : I.carrier ⊆ₑ M where
   emb := {
     toFun := Subtype.val,
@@ -61,7 +59,7 @@ def endExtension : I.carrier ⊆ₑ M where
   mem_range_of_lt {a b} h := ⟨⟨b, I.mem_of_lt h a.2⟩, rfl⟩
 
 @[simp]
-lemma endExtension_emb (x : I.carrier) : I.endExtension.emb x = x.val := rfl
+lemma endExtension_apply (x : I.carrier) : I.endExtension x = x.val := rfl
 
 end Cut
 

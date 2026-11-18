@@ -1,6 +1,5 @@
 module
 
-public import AlphaCentauri.Model.Absolute
 public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
@@ -138,7 +137,7 @@ private lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
     ∃ b, ∀ x < a, ∃ y < b, ∃ z, ψ.Eval ![z, x, y] e := by
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗜𝚺j)
   obtain ⟨c₀, hc₀⟩ := hI
-  let _ : I.carrier ⊂ₑ M := { I.endExtension with
+  let ι : I.carrier ⊂ₑ M := { I.endExtension with
     not_surjective h := hc₀ <| by obtain ⟨x, rfl⟩ := h c₀; exact x.2 }
   have hψ' (x y z : I.carrier) :
       ψ.Eval ![z.1, x.1, y.1] (I.endExtension.emb ∘ e) ↔ ψ.Eval ![z, x, y] e := by
@@ -165,8 +164,8 @@ private lemma exists_bound_of_sigmaElementary (hI : ∃ c, c ∉ I.carrier)
       · exact (hψ' _ y z).mpr h₂
   obtain ⟨b, hb, h₂⟩ : ∃ b ∈ I.carrier, Θ.Eval ![b] g := by
     by_contra! h₂
-    obtain ⟨c, hc, h₃⟩ := overspill (M := I.carrier) 𝚺 j (φ := ∼Θ)
-      (by simp [Θ, hψ.hierarchy]) g fun b ↦ by simpa using h₂ b.1 b.2
+    obtain ⟨c, hc, h₃⟩ := overspill ι 𝚺 j (φ := ∼Θ)
+      (by simp [Θ, hψ.hierarchy]) g fun b ↦ by simpa [ι] using h₂ b.1 b.2
     have hc' : c ∉ I.carrier := fun h ↦ hc ⟨⟨c, h⟩, rfl⟩
     obtain ⟨d, rfl⟩ := eq_succ_of_pos (hlt Closed.zero_mem hc')
     exact absurd (h₁ fun h ↦ hc' (I.succ_mem h)) (by simpa using h₃ d (lt_add_one d))

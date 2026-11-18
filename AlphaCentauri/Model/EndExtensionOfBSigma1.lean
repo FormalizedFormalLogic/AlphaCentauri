@@ -2,7 +2,6 @@ module
 
 public import AlphaCentauri.Model.EndExtension
 public import Foundation.FirstOrder.Arithmetic.Collection.Basic
-public import AlphaCentauri.Model.Absolute
 import AlphaCentauri.OpenProblem
 
 /-! # End extensions of models of $\mathsf{B}\Sigma_1$
@@ -26,7 +25,7 @@ $\mathsf{I}\Delta_0$?
 - [WP89] -/
 open_problem exists_proper_endExtension_ISigma0_of_BSigma1 :=
   ∀ (M : Type) [Countable M] [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗕𝚺1],
-    ∃ (N : Type) (_ : M ⊂ₑ N), N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀
+    ∃ (N : Type) (_ : ORingStructure N) (_ : M ⊂ₑ N), N↓[ℒₒᵣ] ⊧* 𝗜𝚺₀
 
 
 end FFL.FirstOrder.Arithmetic

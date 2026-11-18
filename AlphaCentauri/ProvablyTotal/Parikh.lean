@@ -108,9 +108,7 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Cl
   -- The elements bounded by the value of a closed term form a cut, which models `𝗜𝚺₀`.
   set K : Cut (ModelOfSatEq sat) := termCut (cstVal sat);
   let _ : K.Closed := termCut_closed _
-  let _ : ↥K.carrier ⊆ₑ ModelOfSatEq sat := K.endExtension
-  have hK : (↥K.carrier)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
-    EndExtension.models_ISigma0 (M := ↥K.carrier) (N := ModelOfSatEq sat)
+  have hK : (↥K.carrier)↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := K.endExtension.models_ISigma0
   -- Soundness in the cut gives a witness `b ≤ t(c)`, and `φ` being $\Delta_0$ it holds in the
   -- model too.
   have hwit : ∀ w : Fin k → ↥K.carrier, ∃ b, φ.Evalb (b :> w) := by
@@ -118,8 +116,7 @@ theorem parikh (φ : ArithmeticSemisentence (k + 1)) (hφ : ℬ[<, ℒₒᵣ].Cl
   obtain ⟨b, hb⟩ := hwit fun i ↦ ⟨cstVal sat i, Semiterm.bvar i, by simp⟩
   obtain ⟨t, ht⟩ : ∃ t : ClosedSemiterm ℒₒᵣ k, (b : ModelOfSatEq sat) ≤ t.valb (cstVal sat) := b.2
   have hbM : φ.Evalb ((b : ModelOfSatEq sat) :> cstVal sat) := by
-    have h₂ :=
-      (absolute_of_bounded (T := 𝗣𝗔⁻) hφ (↥K.carrier) (ModelOfSatEq sat) _ Empty.elim).mp hb
+    have h₂ := (Bounding.bounded_absolute K.endExtension.emb hφ _ Empty.elim).mp hb
     simp only [Matrix.comp_vecCons'', Empty.eq_elim] at h₂
     exact h₂
   -- But `b` is below the value of `t + 1`, which contradicts that no witness lies

@@ -107,13 +107,17 @@ lemma natCast_foundation [DiscretelyOrdered R] (m : ℕ) :
   | succ m ih => rw [@Nat.cast_succ _ Arithmetic.instCommSemiring_foundation.toAddMonoidWithOne,
       Nat.cast_succ, ih]
 
+/-- The numerals of the $\mathsf{PA}^-$ model structure on `Nonneg R` are those of `Nonneg R`. -/
+lemma ofNat_foundation [DiscretelyOrdered R] (n : ℕ) [n.AtLeastTwo] :
+    (@OfNat.ofNat (Nonneg R) n (@instOfNatAtLeastTwo _ n
+      Arithmetic.instCommSemiring_foundation.toNatCast _) : Nonneg R) = OfNat.ofNat n :=
+  (natCast_foundation n).trans Nat.cast_ofNat
+
 /-- The numerals of the $\mathsf{PA}^-$ model structure on `Nonneg R` are those of `R`. -/
 lemma coe_ofNat_foundation [DiscretelyOrdered R] (n : ℕ) [n.AtLeastTwo] :
     ((@OfNat.ofNat (Nonneg R) n (@instOfNatAtLeastTwo _ n
-      Arithmetic.instCommSemiring_foundation.toNatCast _) : Nonneg R) : R) = OfNat.ofNat n := by
-  rw [← @Nat.cast_ofNat (Nonneg R) n Arithmetic.instCommSemiring_foundation.toNatCast _,
-    natCast_foundation]
-  exact Nat.cast_ofNat
+      Arithmetic.instCommSemiring_foundation.toNatCast _) : Nonneg R) : R) = OfNat.ofNat n :=
+  congrArg Subtype.val (ofNat_foundation n)
 
 /-- The non-negative part of a discretely ordered ring in which every element can be divided with
 remainder by every positive natural number is a model of $\mathsf{ZR}$.

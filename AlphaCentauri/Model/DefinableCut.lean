@@ -18,7 +18,7 @@ variable {j : ℕ} {M : Type} [ORingStructure M]
 
 /-- The elements of `M` below a $\Sigma_{j+1}$-definable element.
 - [HP98, Definition IV.1.32] -/
-def definableCut (j : ℕ) (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : Cut M where
+def definableCut (j : ℕ) (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : ClosedCut M where
   carrier := {a | ∃ c ∈ definableElements (j + 1) M, a < c}
   succ_mem := by
     rintro a ⟨c, hc, hac⟩
@@ -32,16 +32,6 @@ def definableCut (j : ℕ) (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* �
     and_intros
     · exact hc
     · exact hab.trans hbc
-
-namespace definableCut
-
-variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
-
-@[simp]
-lemma mem_iff {a : M} :
-    a ∈ (definableCut j M).carrier ↔ ∃ c ∈ definableElements (j + 1) M, a < c := Iff.rfl
-
-instance closed : (definableCut j M).Closed where
   zero_mem := ⟨1, (1 : definableElements (j + 1) M).2, zero_lt_one⟩
   one_mem := ⟨1 + 1, (1 + 1 : definableElements (j + 1) M).2, lt_add_one 1⟩
   add_mem := by
@@ -56,6 +46,14 @@ instance closed : (definableCut j M).Closed where
     and_intros
     · exact ((⟨c, hc⟩ : definableElements (j + 1) M) * ⟨d, hd⟩).2
     · exact mul_lt_mul'' hac hbd _root_.zero_le _root_.zero_le
+
+namespace definableCut
+
+variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
+
+@[simp]
+lemma mem_iff {a : M} :
+    a ∈ (definableCut j M).carrier ↔ ∃ c ∈ definableElements (j + 1) M, a < c := Iff.rfl
 
 open Bootstrapping in
 /-- A prenex $\Pi_m$ formula, `m < j`, with parameters from the cut and a witness in `M` has a
@@ -82,14 +80,14 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
   have hcode {N : ℕ} (v : Fin N → (definableCut j M).carrier) :
       matrixToVec (Subtype.val ∘ v) ∈ (definableCut j M).carrier := by
     induction N with
-    | zero => exact Cut.Closed.zero_mem
+    | zero => exact (definableCut j M).zero_mem
     | succ N ih =>
       rw [matrixToVec_succ, adjoin_def]
       apply Cut.succ_mem
       have h₁ := (Matrix.vecHead v).2
       have h₂ := ih (Matrix.vecTail v)
       unfold pair
-      split_ifs <;> apply_rules [Cut.Closed.add_mem, Cut.Closed.mul_mem]
+      split_ifs <;> apply_rules [ClosedCut.add_mem, ClosedCut.mul_mem]
   obtain ⟨c, hc, hyc⟩ := hcode w
   obtain ⟨θ, hθ, hθP⟩ : ∃ θ : ArithmeticSemisentence 2, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) θ ∧
       ∀ e p : M, M ⊧/![e, p] θ ↔ PrenexSatisfied 𝚷 m e p := by
@@ -146,11 +144,9 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
 
 /-- [HP98, Lemma IV.1.42] -/
 theorem sigmaElementary : SigmaElementary (definableCut j M).endExtension.emb j := by
-  let := (definableCut j M).endExtension
-  have : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := EndExtension.models_peanoMinus (N := M)
   apply sigmaElementary_of_tarskiVaught
   · intro n φ hφ e f
-    exact (absolute_of_bounded (T := 𝗣𝗔⁻) hφ _ M e f).symm
+    exact (Bounding.bounded_absolute (definableCut j M).endExtension.emb hφ e f).symm
   · intro m hm n φ hφ e f h
     obtain ⟨x, hx, hφx⟩ := exists_witness hm hφ e f h
     use ⟨x, hx⟩

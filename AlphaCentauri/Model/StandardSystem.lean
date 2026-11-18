@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Model.Absolute
+public import AlphaCentauri.Model.EndExtension
 public import Foundation.FirstOrder.Arithmetic.Exponential.Bit
 
 /-! # The standard system
@@ -52,37 +52,34 @@ lemma standardSystem_nat : standardSystem ℕ = {S | S.Finite} := by
 
 section
 
-variable {M N : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [hMN : M ⊆ₑ N] [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {M N : Type*} [ORingStructure M] [ORingStructure N] [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+  (e : M ⊆ₑ N)
 
 namespace EndExtension
 
-@[simp] lemma emb_natCast (n : ℕ) : hMN.emb n = n := by
+@[simp] lemma emb_natCast (n : ℕ) : e n = n := by
   induction n with
   | zero => simp
   | succ n ih => simp [Nat.cast_succ, ih]
 
-@[simp] lemma emb_mem_emb_iff {i a : M} : hMN.emb i ∈ hMN.emb a ↔ i ∈ a := by
-  have h := absolute_of_bounded (T := 𝗜𝚺₁) (φ := bitDef.val)
-    (Bounding.Hierarchy.zero_iff_bounded.mp bitDef.sigma_prop) M N ![i, a] Empty.elim
-  have hM := (bit_defined (V := M)).df ![i, a]
-  have hN := (bit_defined (V := N)).df ![hMN.emb i, hMN.emb a]
-  have he : (hMN.emb ∘ Empty.elim : Empty → N) = Empty.elim := funext (·.elim)
-  simp only [Matrix.comp_vecCons'', Matrix.empty_eq, he] at h
-  simp_all
+@[simp] lemma emb_mem_emb_iff {i a : M} : e i ∈ e a ↔ i ∈ a := by
+  simpa using (Bounding.HierarchySymbol.Defined.sigmaZero_absolute e.emb
+    (bit_defined (V := M)) (bit_defined (V := N)) ![i, a]).symm
 
-@[simp] lemma codedSet_emb (a : M) : codedSet (hMN.emb a) = codedSet a := by
+@[simp] lemma codedSet_emb (a : M) : codedSet (e a) = codedSet a := by
   ext n
-  simpa using emb_mem_emb_iff (M := M) (N := N) (i := (n : M)) (a := a)
+  simpa using e.emb_mem_emb_iff (i := (n : M)) (a := a)
 
 end EndExtension
 
+include e in
 /-- The standard system of a model of `𝗜𝚺₁` is contained in that of an end extension which
 again models `𝗜𝚺₁`.
 - [Kay91, Chapter 12, p. 159] -/
 lemma standardSystem_subset_of_endExtension : standardSystem M ⊆ standardSystem N := by
   rintro _ ⟨a, rfl⟩
-  use hMN.emb a
-  exact EndExtension.codedSet_emb a
+  use e a
+  exact e.codedSet_emb a
 
 end
 

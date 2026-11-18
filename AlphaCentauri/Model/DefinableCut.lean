@@ -143,8 +143,10 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
   · exact (hP x).mp hPx
 
 /-- [HP98, Lemma IV.1.42] -/
-theorem sigmaElementary : SigmaElementary (definableCut j M).endExtension.emb j := by
-  apply sigmaElementary_of_tarskiVaught
+theorem sigmaElementary :
+    IsElementary (fun {_} φ ↦ ∃ m ≤ j, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ)
+      (definableCut j M).endExtension.emb := by
+  apply isElementary_of_tarskiVaught
   · intro n φ hφ e f
     exact (Bounding.bounded_absolute (definableCut j M).endExtension.emb hφ e f).symm
   · intro m hm n φ hφ e f h
@@ -183,7 +185,7 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
     have : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 j := mod_BSigma_of_le (Nat.le_succ j)
     have transfer (v : Fin 2 → (definableCut j M).carrier) :
         M ⊧/(Subtype.val ∘ v) φ'.sigmaInv.val ↔ _ ⊧/v φ'.sigmaInv.val :=
-      SigmaElementary.models_iff_of_hierarchy sigmaElementary Bounding.Prenex.val_hierarchy v
+      IsElementary.models_iff_of_hierarchy sigmaElementary Bounding.Prenex.val_hierarchy v
     use φ'.val
     and_intros
     · exact Bounding.Prenex.val_hierarchy

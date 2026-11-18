@@ -153,7 +153,8 @@ lemma emb_apply (x : definableElements (j + 1) M) : emb j M x = x.val := rfl
 
 variable (j) in
 /-- [HP98, Lemma IV.1.39] -/
-theorem sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : SigmaElementary (emb j M) (j + 1) := by
+theorem sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] :
+    IsElementary (fun {_} φ ↦ ∃ m ≤ j + 1, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ) (emb j M) := by
   have witness {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)} (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 j φ)
       (e : Fin n → definableElements (j + 1) M) (f : ℕ → definableElements (j + 1) M)
       (h : ∃ x : M, φ.Eval (x :> emb j M ∘ e) (emb j M ∘ f)) :
@@ -162,7 +163,7 @@ theorem sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : SigmaElementary (emb j
       exists_least_mem_definableElements hφ (fun i ↦ (e i).2) (fun i ↦ (f i).2) h
     use ⟨x, hx⟩
     exact h
-  apply sigmaElementary_of_tarskiVaught
+  apply isElementary_of_tarskiVaught
   · intro n φ hφ
     exact eval_iff_of_bounded_of_witness _ (fun hψ ↦ witness (.bounded 𝚷 j _ hψ)) hφ
   · intro m hm n φ hφ
@@ -171,9 +172,11 @@ theorem sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : SigmaElementary (emb j
 variable (j) in
 /-- [HP98, Corollary IV.1.40] -/
 theorem models_ISigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : (definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗜𝚺 j := by
-  have hK : SigmaElementary (emb j M) (j + 1) := sigmaElementary j
+  have hK : IsElementary (fun {_} φ ↦ ∃ m ≤ j + 1, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ)
+      (emb j M) := sigmaElementary j
   have : (definableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
-    SigmaElementary.models_peanoMinus fun hm ↦ hK (hm.trans (Nat.zero_le _))
+    IsElementary.models_peanoMinus fun hφ ↦
+      hK ⟨0, Nat.zero_le _, 𝚷, Bounding.PrenexHierarchy.zero_iff_bounded.mpr hφ⟩
   apply Semantics.ModelsSet.union_iff.mpr
   and_intros
   · exact this
@@ -185,7 +188,7 @@ theorem models_ISigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : (definableElements (j + 
         Matrix.constant_eq_singleton] using this
     intro v h₀ hs a
     have hM (x : definableElements (j + 1) M) : φ.Eval ![x.1] (emb j M ∘ v) ↔ φ.Eval ![x] v := by
-      simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using hK (by omega) hφ ![x] v
+      simpa [Matrix.comp_vecCons'', Matrix.empty_eq] using hK ⟨_, by omega, _, hφ⟩ ![x] v
     by_contra ha
     obtain ⟨x₀, hx₀, h₁, h₂⟩ := exists_least_mem_definableElements (φ := ∼φ) (e := ![])
       (f := emb j M ∘ v) (by simpa using hφ.hierarchy) (fun i ↦ i.elim0) (fun i ↦ (v i).2) <| by
@@ -310,7 +313,7 @@ theorem definableElements.not_models_BSigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {a :
     models_of_subtheory (definableElements.models_ISigma j (M := M))
   have transfer {n : ℕ} {φ : ArithmeticSemisentence n} (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (j + 1) φ)
       (v : Fin n → definableElements (j + 1) M) : M ⊧/(Subtype.val ∘ v) φ ↔ _ ⊧/v φ :=
-    SigmaElementary.models_iff_of_hierarchy (sigmaElementary j (M := M)) hφ v
+    IsElementary.models_iff_of_hierarchy (sigmaElementary j (M := M)) hφ v
   have hcast (c : ℕ) : ((c : definableElements (j + 1) M) : M) = c := by
     induction c with
     | zero => rfl

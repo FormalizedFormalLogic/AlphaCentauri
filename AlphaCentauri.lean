@@ -104,6 +104,7 @@ public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.DefinableCut
 public import AlphaCentauri.Model.DefinableElements
 public import AlphaCentauri.Model.Elementary
+public import AlphaCentauri.Model.ElementarySubstructure
 public import AlphaCentauri.Model.EndExtension
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut

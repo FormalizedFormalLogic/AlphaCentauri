@@ -164,7 +164,7 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
   case ltIrrefl =>
     suffices ∀ x : M, ¬x < x by simpa [models_iff] using this
     intro x h
-    exact lt_irrefl (e x) (e.emb_lt_emb.mpr h)
+    exact lt_irrefl (e x) (by grind)
   case ltTrans =>
     suffices ∀ x y z : M, x < y → y < z → x < z by simpa [models_iff] using this
     intro x y z hxy hyz

@@ -1,7 +1,6 @@
 module
 
 public import AlphaCentauri.Model.Cut
-public import AlphaCentauri.Model.ElementarySubstructure
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
@@ -93,7 +92,7 @@ lemma eval_iff_of_bounded_of_witness
 
 /-- A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/
-theorem IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M}
+theorem _root_.FFL.FirstOrder.IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M}
     (hι : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ) ι)
     [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : S↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := by
   have h {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemiformula ℕ n}
@@ -115,7 +114,7 @@ theorem IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M}
 
 /-- A $\Sigma_s$-elementary embedding preserves the truth of $\Sigma_s$ and $\Pi_s$ sentences
 between models of $\mathsf{B}\Sigma_s$. -/
-lemma IsElementary.models_iff_of_hierarchy {ι : S ↪ₛ[ℒₒᵣ] M} {s : ℕ}
+lemma _root_.FFL.FirstOrder.IsElementary.models_iff_of_hierarchy {ι : S ↪ₛ[ℒₒᵣ] M} {s : ℕ}
     (hι : IsElementary (fun {_} φ ↦ ∃ m ≤ s, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ) ι)
     [S↓[ℒₒᵣ] ⊧* 𝗕𝚺s] [M↓[ℒₒᵣ] ⊧* 𝗕𝚺s] {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemisentence n}
     (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) (v : Fin n → S) : M ⊧/(ι ∘ v) φ ↔ S ⊧/v φ := by

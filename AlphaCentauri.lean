@@ -104,8 +104,6 @@ public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.DefinableCut
 public import AlphaCentauri.Model.DefinableElements
 public import AlphaCentauri.Model.Elementary
-public import AlphaCentauri.Model.ElementaryChain
-public import AlphaCentauri.Model.ElementarySubstructure
 public import AlphaCentauri.Model.EndExtension
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut
@@ -234,6 +232,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.ElementaryChain
+public import AlphaCentauri.ToFoundation.FirstOrder.ElementarySubstructure
 public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree

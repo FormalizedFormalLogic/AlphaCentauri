@@ -2,6 +2,7 @@ module
 
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Embedding
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.ElementarySubstructure
 public import AlphaCentauri.Axiomatizability.Basic
 public import Foundation.FirstOrder.Arithmetic.Collection.Basic
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
@@ -14,7 +15,7 @@ An end extension of an `ℒₒᵣ`-structure `M` is a structure into which `M` e
 below the image of `M`. Bounded formulas take the same truth value in `M` and in an end extension
 of it, and $\Sigma_1$ formulas satisfied in `M` stay satisfied in an end extension of it. `𝗣𝗔⁻`,
 `𝗜𝚺₀` and any theory axiomatized by $\Pi_1$ sentences hold in `M` as soon as they hold in an end
-extension of `M`.
+extension of `M`. An end extension is a $\Delta_0$-elementary substructure.
 -/
 
 @[expose] public section
@@ -283,5 +284,19 @@ protected def transRight (e₁ : M ⊆ₑ N) (e₂ : N ⊂ₑ K) : M ⊂ₑ K wh
   e₁.transLeft e₂.toEndExtension
 
 end ProperEndExtension
+
+/-- An end extension is a $\Delta_0$-elementary substructure.
+- [Kay91, Theorem 2.7]
+- [HP98, Fact IV.1.3(4)] -/
+def EndExtension.toElementarySubstructureOn (e : M ⊆ₑ N) :
+    ElementarySubstructureOn (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ) M N where
+  emb := e.emb
+  isElementary hφ v f := (Bounding.bounded_absolute e.emb hφ v f).symm
+
+/-- A proper end extension is a proper $\Delta_0$-elementary substructure. -/
+def ProperEndExtension.toProperElementarySubstructureOn (e : M ⊂ₑ N) :
+    ProperElementarySubstructureOn (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ) M N where
+  toElementarySubstructureOn := e.toEndExtension.toElementarySubstructureOn
+  not_surjective := e.not_surjective
 
 end FFL.FirstOrder.Arithmetic

@@ -18,43 +18,62 @@ theory, and a type over `M` with parameters $\bar b$ is a type over the theory o
 
 namespace FFL.FirstOrder
 
+/-- A $k$-type of `L` with parameters indexed by `ξ`: a set of formulas in `k` variables, whose
+free variables are the parameters.
+- [Kay91, §8.1] -/
+abbrev _root_.FFL.FirstOrder.Type (L : Language) (ξ : Type*) (k : ℕ) := Set (Semiformula L ξ k)
+
+end FFL.FirstOrder
+
+namespace FFL.FirstOrder.«Type»
+
 open Semiformula
 
-variable {L : Language} {M : Type*} [Tarski.Structure L M] {ξ : Type*} {k : ℕ}
-  {Φ Ψ : Set (Semiformula L ξ k)} {b : ξ → M}
+variable {L : Language} {ξ : Type*} {k : ℕ}
 
 /-- The tuple `a` realizes `Φ` with the parameters read as `b`.
 - [Kay91, §8.1] -/
-def RealizedBy (Φ : Set (Semiformula L ξ k)) (b : ξ → M) (a : Fin k → M) : Prop :=
+def RealizedBy {M : Type*} [Tarski.Structure L M] (Φ : FirstOrder.Type L ξ k) (b : ξ → M)
+    (a : Fin k → M) : Prop :=
   ∀ φ ∈ Φ, φ.Eval a b
 
-variable (M) in
 /-- `Φ` is realized in `M` with the parameters read as `b`.
 - [Kay91, §8.1] -/
-def Realized (Φ : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
-  ∃ a : Fin k → M, RealizedBy Φ b a
+def Realized (Φ : FirstOrder.Type L ξ k) (M : Type*) [Tarski.Structure L M] (b : ξ → M) : Prop :=
+  ∃ a : Fin k → M, Φ.RealizedBy b a
 
-variable (M) in
+/-- `M` omits `Φ` with the parameters read as `b`: no tuple of `M` realizes `Φ`.
+- [Kay91, §8.1] -/
+def Omitted (Φ : FirstOrder.Type L ξ k) (M : Type*) [Tarski.Structure L M] (b : ξ → M) : Prop :=
+  ∀ a : Fin k → M, ¬Φ.RealizedBy b a
+
 /-- Every finite subset of `Φ` is realized in `M` with the parameters read as `b`.
 - [Kay91, §11.2] -/
-def FinitelySatisfied (Φ : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
-  ∀ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ → Realized M (↑s : Set (Semiformula L ξ k)) b
+def FinitelySatisfied (Φ : FirstOrder.Type L ξ k) (M : Type*) [Tarski.Structure L M]
+    (b : ξ → M) : Prop :=
+  ∀ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ → Realized (s : Set (Semiformula L ξ k)) M b
 
 /-- `Φ` decides every formula in `M` with the parameters read as `b`: some finite subset of `Φ`
 implies the formula or its negation.
 - [Kay91, §11.2] -/
-def IsCompleteType (Φ : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
+def IsComplete {M : Type*} [Tarski.Structure L M] (Φ : FirstOrder.Type L ξ k) (b : ξ → M) :
+    Prop :=
   ∀ φ : Semiformula L ξ k, ∃ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ ∧
-    ((∀ a, RealizedBy (↑s : Set (Semiformula L ξ k)) b a → φ.Eval a b) ∨
-      ∀ a, RealizedBy (↑s : Set (Semiformula L ξ k)) b a → ¬φ.Eval a b)
+    ((∀ a, RealizedBy (s : Set (Semiformula L ξ k)) b a → φ.Eval a b) ∨
+      ∀ a, RealizedBy (s : Set (Semiformula L ξ k)) b a → ¬φ.Eval a b)
 
-lemma RealizedBy.mono {a : Fin k → M} (h : RealizedBy Φ b a) (hΨΦ : Ψ ⊆ Φ) : RealizedBy Ψ b a :=
+variable {M : Type*} [Tarski.Structure L M] {Φ Ψ : FirstOrder.Type L ξ k} {b : ξ → M}
+
+lemma RealizedBy.mono {a : Fin k → M} (h : Φ.RealizedBy b a) (hΨΦ : Ψ ⊆ Φ) : Ψ.RealizedBy b a :=
   fun φ hφ ↦ h φ (hΨΦ hφ)
 
-lemma Realized.mono (h : Realized M Φ b) (hΨΦ : Ψ ⊆ Φ) : Realized M Ψ b :=
+lemma Realized.mono (h : Φ.Realized M b) (hΨΦ : Ψ ⊆ Φ) : Ψ.Realized M b :=
   h.imp fun _ ha ↦ ha.mono hΨΦ
 
-lemma Realized.finitelySatisfied (h : Realized M Φ b) : FinitelySatisfied M Φ b :=
+lemma omitted_iff_not_realized : Φ.Omitted M b ↔ ¬Φ.Realized M b := by
+  simp [Omitted, Realized]
+
+lemma Realized.finitelySatisfied (h : Φ.Realized M b) : Φ.FinitelySatisfied M b :=
   fun _ hs ↦ h.mono hs
 
 section theory
@@ -67,31 +86,31 @@ variable {L : Language.{u}} {k : ℕ}
 
 /-- `T + Φ(c̄)`: `T` together with the formulas of `Φ`, their variables filled by new constants.
 - [Kay91, §8.1] -/
-def Theory.addType (T : Theory L) (Φ : Set (Semisentence L k)) :
+def _root_.FFL.FirstOrder.Theory.addType (T : Theory L) (Φ : FirstOrder.Type L Empty k) :
     Theory (L.add (Language.constant (Fin k))) :=
   T.lMap (Language.Hom.add₁ L (Language.constant (Fin k))) ∪ lift '' Φ
 
 /-- `Φ` is a type over `T`: `T + Φ(c̄)` is consistent.
 - [Kay91, §8.1] -/
-def IsTypeOver (T : Theory L) (Φ : Set (Semisentence L k)) : Prop :=
+def IsTypeOver (Φ : FirstOrder.Type L Empty k) (T : Theory L) : Prop :=
   Consistent (T.addType Φ)
 
 /-- `Φ` is a complete type over `T`: `T + Φ(c̄)` is consistent and complete.
 - [Kay91, §8.1] -/
-def IsCompleteTypeOver (T : Theory L) (Φ : Set (Semisentence L k)) : Prop :=
-  IsTypeOver T Φ ∧ Entailment.Complete (T.addType Φ)
+def IsCompleteOver (Φ : FirstOrder.Type L Empty k) (T : Theory L) : Prop :=
+  Φ.IsTypeOver T ∧ Entailment.Complete (T.addType Φ)
 
 /-- `Φ` is a principal type over `T`: some `ψ` with `T + Φ(c̄) ⊢ ψ(c̄)` implies every formula of `Φ`
 over `T`.
 - [Kay91, §8.1] -/
-def IsPrincipalTypeOver (T : Theory L) (Φ : Set (Semisentence L k)) : Prop :=
+def IsPrincipalOver (Φ : FirstOrder.Type L Empty k) (T : Theory L) : Prop :=
   ∃ ψ : Semisentence L k, T.addType Φ ⊢ lift ψ ∧ ∀ φ ∈ Φ, T ⊢ ∀¹* (ψ 🡒 φ)
 
 /-- A type over `T` is realized in some model of `T`, and a set of formulas realized in a model of
 `T` is a type over `T`.
 - [Kay91, §8.1] -/
-theorem isTypeOver_iff_exists_realized {T : Theory L} {Φ : Set (Semisentence L k)} :
-    IsTypeOver T Φ ↔ ∃ N : Tarski.Struc.{u} L, N ⊧* T ∧ Realized N Φ Empty.elim := by
+theorem isTypeOver_iff_exists_realized {T : Theory L} {Φ : FirstOrder.Type L Empty k} :
+    Φ.IsTypeOver T ↔ ∃ N : Tarski.Struc.{u} L, N ⊧* T ∧ Φ.Realized N Empty.elim := by
   constructor
   · intro h
     obtain ⟨N, hN⟩ := Theory.satisfiable_iff_consistent.{u, u}.mpr h
@@ -115,9 +134,9 @@ theorem isTypeOver_iff_exists_realized {T : Theory L} {Φ : Set (Semisentence L 
 parameters read as constants, it is a type over the theory of `(M, b)`.
 - [Kay91, §11.2] -/
 theorem isTypeOver_theory_iff_finitelySatisfied {ι : Type*} {M : Type*} [Nonempty M]
-    [Tarski.Structure L M] {Φ : Set (Semiformula L ι k)} {b : ι → M} :
-    IsTypeOver (Semantics.theory (strucOfTuple M b)) (liftParameters '' Φ) ↔
-      FinitelySatisfied M Φ b := by
+    [Tarski.Structure L M] {Φ : FirstOrder.Type L ι k} {b : ι → M} :
+    IsTypeOver (liftParameters '' Φ) (Semantics.theory (strucOfTuple M b)) ↔
+      Φ.FinitelySatisfied M b := by
   constructor
   · intro h s hs
     obtain ⟨N, hN, a, ha⟩ := isTypeOver_iff_exists_realized.mp h
@@ -173,4 +192,4 @@ theorem isTypeOver_theory_iff_finitelySatisfied {ι : Type*} {M : Type*} [Nonemp
 
 end theory
 
-end FFL.FirstOrder
+end FFL.FirstOrder.«Type»

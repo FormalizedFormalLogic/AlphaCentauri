@@ -211,6 +211,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.Definability
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.UniformReflection
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.LocallyDelta0
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Embedding
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Factorial
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
@@ -232,6 +233,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.ElementaryChain
+public import AlphaCentauri.ToFoundation.FirstOrder.ElementarySubstructure
 public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree

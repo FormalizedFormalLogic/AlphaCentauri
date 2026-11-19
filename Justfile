@@ -14,7 +14,7 @@ build: cache
     lake build
 
 axiom-audit:
-    lake exe forgive AlphaCentauri --json .lake/audit.json
+    lake exe forgive AlphaCentauri
 
 no-sorry:
     #!/usr/bin/env bash

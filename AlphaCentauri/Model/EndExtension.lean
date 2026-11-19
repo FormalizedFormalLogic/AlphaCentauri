@@ -289,13 +289,13 @@ end ProperEndExtension
 - [Kay91, Theorem 2.7]
 - [HP98, Fact IV.1.3(4)] -/
 def EndExtension.toElementarySubstructureOn (e : M ⊆ₑ N) :
-    ElementarySubstructureOn (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ) M N where
+    M ≼ₑ[ℒₒᵣ; fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ] N where
   emb := e.emb
   isElementary hφ v f := (Bounding.bounded_absolute e.emb hφ v f).symm
 
 /-- A proper end extension is a proper $\Delta_0$-elementary substructure. -/
 def ProperEndExtension.toProperElementarySubstructureOn (e : M ⊂ₑ N) :
-    ProperElementarySubstructureOn (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ) M N where
+    M ≺ₑ[ℒₒᵣ; fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ] N where
   toElementarySubstructureOn := e.toEndExtension.toElementarySubstructureOn
   not_surjective := e.not_surjective
 

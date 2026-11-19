@@ -57,21 +57,27 @@ abbrev ProperElementarySubstructure (M : Type u) (N : Type v) [Tarski.Structure 
     [Tarski.Structure L N] :=
   ProperElementarySubstructureOn (L := L) (fun {_} _ ↦ True) M N
 
+@[inherit_doc ElementarySubstructureOn]
+notation:50 M " ≼ₑ[" L "; " Γ "] " N => @ElementarySubstructureOn L Γ M N _ _
+
+@[inherit_doc ProperElementarySubstructureOn]
+notation:50 M " ≺ₑ[" L "; " Γ "] " N => @ProperElementarySubstructureOn L Γ M N _ _
+
 @[inherit_doc] notation:50 M " ≼ₑ[" L "] " N => ElementarySubstructure L M N
 
 @[inherit_doc] notation:50 M " ≺ₑ[" L "] " N => ProperElementarySubstructure L M N
 
 variable {Γ Γ' : ∀ {n : ℕ}, Semiformula L ℕ n → Prop}
 
-instance : CoeFun (ElementarySubstructureOn Γ M N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
+instance : CoeFun (M ≼ₑ[L; Γ] N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
 
-instance : CoeFun (ProperElementarySubstructureOn Γ M N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
+instance : CoeFun (M ≺ₑ[L; Γ] N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
 
 namespace ElementarySubstructureOn
 
 variable (M Γ) in
 /-- The identity $\Gamma$-elementary substructure. -/
-@[refl] protected def refl : ElementarySubstructureOn Γ M M where
+@[refl] protected def refl : M ≼ₑ[L; Γ] M where
   emb := {
     toFun := id
     func' _ _ := rfl
@@ -84,8 +90,7 @@ variable (M Γ) in
 @[simp] lemma refl_apply (x : M) : ElementarySubstructureOn.refl M Γ x = x := rfl
 
 /-- The composition of $\Gamma$-elementary substructures. -/
-@[trans] protected def trans (e₁ : ElementarySubstructureOn Γ M N)
-    (e₂ : ElementarySubstructureOn Γ N K) : ElementarySubstructureOn Γ M K where
+@[trans] protected def trans (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) : M ≼ₑ[L; Γ] K where
   emb := {
     toFun := e₂ ∘ e₁
     func' f v := by simp [HomClass.func e₁.emb, HomClass.func e₂.emb, Function.comp_def]
@@ -96,13 +101,13 @@ variable (M Γ) in
   }
   isElementary hφ e f := (e₂.isElementary hφ (e₁ ∘ e) (e₁ ∘ f)).trans (e₁.isElementary hφ e f)
 
-@[simp] lemma trans_apply (e₁ : ElementarySubstructureOn Γ M N)
-    (e₂ : ElementarySubstructureOn Γ N K) (x : M) : e₁.trans e₂ x = e₂ (e₁ x) := rfl
+@[simp] lemma trans_apply (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) (x : M) :
+    e₁.trans e₂ x = e₂ (e₁ x) := rfl
 
 /-- A $\Gamma$-elementary substructure is $\Gamma'$-elementary for every $\Gamma'$ contained in
 $\Gamma$. -/
-def mono (e : ElementarySubstructureOn Γ M N)
-    (h : ∀ {n : ℕ} {φ : Semiformula L ℕ n}, Γ' φ → Γ φ) : ElementarySubstructureOn Γ' M N where
+def mono (e : M ≼ₑ[L; Γ] N) (h : ∀ {n : ℕ} {φ : Semiformula L ℕ n}, Γ' φ → Γ φ) :
+    M ≼ₑ[L; Γ'] N where
   emb := e.emb
   isElementary hφ := e.isElementary (h hφ)
 
@@ -110,9 +115,8 @@ end ElementarySubstructureOn
 
 /-- A proper $\Gamma$-elementary substructure is proper $\Gamma'$-elementary for every $\Gamma'$
 contained in $\Gamma$. -/
-def ProperElementarySubstructureOn.mono (e : ProperElementarySubstructureOn Γ M N)
-    (h : ∀ {n : ℕ} {φ : Semiformula L ℕ n}, Γ' φ → Γ φ) :
-    ProperElementarySubstructureOn Γ' M N where
+def ProperElementarySubstructureOn.mono (e : M ≺ₑ[L; Γ] N)
+    (h : ∀ {n : ℕ} {φ : Semiformula L ℕ n}, Γ' φ → Γ φ) : M ≺ₑ[L; Γ'] N where
   toElementarySubstructureOn := e.toElementarySubstructureOn.mono h
   not_surjective := e.not_surjective
 

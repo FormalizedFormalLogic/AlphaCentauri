@@ -26,9 +26,6 @@ jobs:
   build:
     name: Build project
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -46,20 +43,6 @@ jobs:
         id: audit
         continue-on-error: true
         run: just axiom-audit
-      - name: Prepare the audit comment
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && !contains(github.event.pull_request.labels.*.name, 'infrastructure')
-        run: |
-          {
-            python3 .github/scripts/audit-comment.py .lake/audit.json
-            echo
-            echo "Commit: ${{ github.event.pull_request.head.sha }} · [run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          } > .lake/audit-comment.md
-      - name: Comment the audit on the pull request
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && !contains(github.event.pull_request.labels.*.name, 'infrastructure')
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: axiom-audit
-          path: .lake/audit-comment.md
       - name: Fail if the audit failed
         if: steps.audit.outcome != 'success'
         run: |

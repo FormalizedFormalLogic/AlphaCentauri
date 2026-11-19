@@ -80,11 +80,9 @@ activity for 14 days may be released by anyone, with a comment.
 `.github/workflows/ci.yml` runs on every PR and push to `main`: `lake build`; the axiom audit
 (`just axiom-audit`, run by [Forgive](https://github.com/FormalizedFormalLogic/forgive): no
 `sorry`, no `native_decide`, no axiom outside `propext`, `Classical.choice`, `Quot.sound` except
-what `forgive.yml` forgives by name); `just no-sorry`; `just mk-all` leaves no diff. The audit
-writes `.lake/audit.json`, which `.github/scripts/audit-comment.py` renders into one PR comment,
-overwritten on each run, unless the PR is labelled `infrastructure`. The zoo and the import
-graph are generated in jobs of their own after the build, only on `main` (or `workflow_dispatch`),
-since they only feed the GitHub Pages deployment. `actionlint.yml`
+what `forgive.yml` forgives by name); `just no-sorry`; `just mk-all` leaves no diff. The zoo and the
+import graph are generated in jobs of their own after the build, only on `main` (or
+`workflow_dispatch`), since they only feed the GitHub Pages deployment. `actionlint.yml`
 lints the workflow files, and `update-deps.yml` moves the dependency pins (below).
 
 A red check is fixed in the PR, never worked around.
@@ -138,7 +136,7 @@ first — that is what the queue is for.
 | `definition only` | A definition and its minor lemmas; one PR, no stages. |
 | `statement-formalized` | Stage: the statement as an `axiom`, forgiven in `forgive.yml`, reviewed for faithfulness. |
 | `proof-formalized` | Stage: the `axiom` proved in a follow-up PR; closes the issue. |
-| `infrastructure` | A PR with no mathematics; CI skips the audit comment. |
+| `infrastructure` | A PR with no mathematics. |
 | `refactor` | Reorganizes existing code without adding results; no mathematics. |
 | `open-problem` | An issue proposing an open problem, opened from the issue template of that name; it is stated with `open_problem` and listed on the page of open problems. |
 | `update-deps` | The automated dependency pin bump; at most one open PR carries it. |

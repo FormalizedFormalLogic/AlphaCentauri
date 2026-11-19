@@ -74,6 +74,47 @@ lemma mem_definableElements_of_unique {k m : ℕ} (hk : 1 ≤ k)
         | succ i => cases i using Fin.cases <;> simp [Fin.tail]
       simp [← ha x, hv₀, hw]
 
+/-- The least witness of a formula with parameters is defined by a formula whose parameters are
+among those of the formula, and which is $\Sigma_{j+1}$ if the formula is $\Pi_j$. -/
+lemma exists_defining_formula_of_least [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)}
+    {e : Fin n → M} {f : ℕ → M} {x : M} (hx : φ.Eval (x :> e) f)
+    (hmin : ∀ y < x, ¬φ.Eval (y :> e) f) :
+    ∃ (m : ℕ) (ψ : ArithmeticSemisentence (m + 1)) (w : Fin m → M),
+      (∀ j, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 j φ → ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (j + 1) ψ) ∧
+      (∀ i, (∃ k, w i = e k) ∨ ∃ k, w i = f k) ∧ ∀ y, ψ.Eval (y :> w) Empty.elim ↔ y = x := by
+  let χ : ArithmeticSemiformula ℕ (n + 1) :=
+    φ ⋏ (∼(φ ⇜ (#0 :> fun i ↦ #i.succ.succ))).ballLT #0
+  let w : Fin (χ.fvSup + n) → M := fun i ↦ if h : (i : ℕ) < n then e ⟨i, h⟩ else f (i - n)
+  have hχ (y : M) :
+      M ⊧/(y :> w) (χ.toSemisentence fun i ↦ #(Fin.castLE (by omega) i)) ↔ χ.Eval (y :> e) f :=
+    eval_toSemisentence (φ := χ) (v := y :> w) _
+      (fun i ↦ by cases i using Fin.cases <;> simp [w]) fun i ↦ by
+        change (y :> w) (Fin.succ ⟨i + n, by omega⟩) = f i
+        simp [w]
+  use χ.fvSup + n, χ.toSemisentence fun i ↦ #(Fin.castLE (by omega) i), w
+  and_intros
+  · intro j hφ
+    exact Bounding.Hierarchy.rew _ (by simp [χ, hφ.accum 𝚺, hφ.strict_mono 𝚷 (lt_add_one j)])
+  · intro i
+    simp only [w]
+    split_ifs
+    exacts [.inl ⟨_, rfl⟩, .inr ⟨_, rfl⟩]
+  · intro y
+    have hv (z : M) : Semiterm.val (z :> y :> e) f ∘
+        (fun i : Fin n ↦ (#i.succ.succ : ArithmeticSemiterm ℕ (n + 2))) = e := by
+      ext
+      simp
+    suffices φ.Eval (y :> e) f ∧ (∀ z < y, ¬φ.Eval (z :> e) f) ↔ y = x by
+      simpa [hχ, χ, Matrix.comp_vecCons'', hv] using this
+    constructor
+    · rintro ⟨h₁, h₂⟩
+      rcases lt_trichotomy y x with h | h | h
+      · exact absurd h₁ (hmin y h)
+      · exact h
+      · exact absurd hx (h₂ x h)
+    · rintro rfl
+      exact ⟨hx, hmin⟩
+
 /-- A $\Pi_j$ formula with parameters among the $\Sigma_{j+1}$-definable elements and a witness
 has a least witness, and it is $\Sigma_{j+1}$-definable. -/
 lemma exists_least_mem_definableElements [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ}
@@ -89,39 +130,14 @@ lemma exists_least_mem_definableElements [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : �
         congr! 2
         ext i
         cases i using Fin.cases <;> simp) hx₀
-  let χ : ArithmeticSemiformula ℕ (n + 1) :=
-    φ ⋏ (∼(φ ⇜ (#0 :> fun i ↦ #i.succ.succ))).ballLT #0
-  let w : Fin (χ.fvSup + n) → M := fun i ↦ if h : (i : ℕ) < n then e ⟨i, h⟩ else f (i - n)
-  have hχ (y : M) :
-      M ⊧/(y :> w) (χ.toSemisentence fun i ↦ #(Fin.castLE (by omega) i)) ↔ χ.Eval (y :> e) f :=
-    eval_toSemisentence (φ := χ) (v := y :> w) _
-      (fun i ↦ by cases i using Fin.cases <;> simp [w]) fun i ↦ by
-        change (y :> w) (Fin.succ ⟨i + n, by omega⟩) = f i
-        simp [w]
+  obtain ⟨m, ψ, w, hψ, hw, hdef⟩ := exists_defining_formula_of_least hx hmin
   use x
   and_intros
-  · apply mem_definableElements_of_unique (Nat.le_add_left 1 j)
-      (ψ := χ.toSemisentence fun i ↦ #(Fin.castLE (by omega) i)) (v := w)
-    · exact Bounding.Hierarchy.rew _ (by simp [χ, hφ.accum 𝚺, hφ.strict_mono 𝚷 (lt_add_one j)])
+  · apply mem_definableElements_of_unique (Nat.le_add_left 1 j) (ψ := ψ) (v := w) (hψ j hφ)
     · intro i
-      simp only [w]
-      split_ifs
-      exacts [he _, hf _]
-    · intro y
-      have hv (z : M) : Semiterm.val (z :> y :> e) f ∘
-          (fun i : Fin n ↦ (#i.succ.succ : ArithmeticSemiterm ℕ (n + 2))) = e := by
-        ext
-        simp
-      suffices φ.Eval (y :> e) f ∧ (∀ z < y, ¬φ.Eval (z :> e) f) ↔ y = x by
-        simpa [hχ, χ, Matrix.comp_vecCons'', hv] using this
-      constructor
-      · rintro ⟨h₁, h₂⟩
-        rcases lt_trichotomy y x with h | h | h
-        · exact absurd h₁ (hmin y h)
-        · exact h
-        · exact absurd hx (h₂ x h)
-      · rintro rfl
-        exact ⟨hx, hmin⟩
+      rcases hw i with ⟨k, hk⟩ | ⟨k, hk⟩
+      exacts [hk ▸ he k, hk ▸ hf k]
+    · exact hdef
   · exact hx
   · exact hmin
 
@@ -364,5 +380,142 @@ theorem exists_model_nonstandard_definableElement :
   have h₅ : Entailment.Inconsistent 𝗣𝗔 := by simpa using h₄
   exact Entailment.Consistent.not_inconsistent h₅
 
+section over
+
+variable {A : Set M}
+
+/-- The elements of `M` definable over `A`: each is the unique element satisfying some formula
+with parameters from `A`.
+- [Kay91, §8.1] -/
+def definableElementsOver (A : Set M) : Set M :=
+  {b | ∃ (m : ℕ) (θ : ArithmeticSemiformula (Fin m) 1) (a : Fin m → A),
+    ∀ x : M, θ.Eval ![x] (Subtype.val ∘ a) ↔ x = b}
+
+lemma subset_definableElementsOver (A : Set M) : A ⊆ definableElementsOver A := by
+  intro b hb
+  use 1, “#0 = &0”, ![⟨b, hb⟩]
+  intro x
+  simp
+
+/-- An element defined uniquely by a formula with parameters from `A` and from
+`definableElementsOver A` is definable over `A`. -/
+lemma mem_definableElementsOver_of_unique {n m : ℕ} {ψ : ArithmeticSemiformula (Fin m) (n + 1)}
+    {c : Fin m → A} {v : Fin n → M} (hv : ∀ i, v i ∈ definableElementsOver A) {b : M}
+    (hb : ∀ x, ψ.Eval (x :> v) (Subtype.val ∘ c) ↔ x = b) : b ∈ definableElementsOver A := by
+  induction n generalizing m with
+  | zero =>
+    use m, ψ, c
+    simpa [Matrix.empty_eq] using hb
+  | succ n ih =>
+    obtain ⟨m₀, θ, a, hθ⟩ := hv 0
+    apply ih (m := m₀ + m) (c := Fin.append a c) (v := Fin.tail v)
+      (ψ := ∃¹ ((Rew.bind ![#0] (fun j ↦ &(Fin.castAdd m j)) ▹ θ) ⋏
+        (Rew.bind (#1 :> #0 :> fun i ↦ #i.succ.succ) (fun j ↦ &(Fin.natAdd m₀ j)) ▹ ψ)))
+    · intro i
+      exact hv i.succ
+    · intro x
+      have hw : (fun i ↦ Semiterm.val (v 0 :> x :> Fin.tail v)
+          (fun j ↦ ((Fin.append a c j : A) : M))
+          ((#1 :> #0 :> fun i ↦ #i.succ.succ :
+            Fin (n + 2) → ArithmeticSemiterm (Fin (m₀ + m)) (n + 2)) i)) = x :> v := by
+        ext i
+        cases i using Fin.cases with
+        | zero => simp
+        | succ i => cases i using Fin.cases <;> simp [Fin.tail]
+      rw [← hb x]
+      simp only [eval_ex, LogicalConnective.HomClass.map_and, eval_rew, Function.comp_def]
+      constructor
+      · rintro ⟨y, hy, hψ⟩
+        obtain rfl : y = v 0 := (hθ y).mp <| by
+          simpa [Matrix.constant_eq_singleton, Function.comp_def] using hy
+        simpa [hw] using hψ
+      · intro h
+        use v 0
+        and_intros
+        · simpa [Matrix.constant_eq_singleton, Function.comp_def] using (hθ (v 0)).mpr rfl
+        · simpa [hw] using h
+
+namespace definableElementsOver
+
+variable (A) in
+instance oringStructure : ORingStructure (definableElementsOver A) where
+  zero := ⟨0, mem_definableElementsOver_of_unique (ψ := “#0 = 0”) (c := Fin.elim0) (v := ![])
+    (fun i ↦ i.elim0) fun x ↦ by simp⟩
+  one := ⟨1, mem_definableElementsOver_of_unique (ψ := “#0 = 1”) (c := Fin.elim0) (v := ![])
+    (fun i ↦ i.elim0) fun x ↦ by simp⟩
+  add a b := ⟨a.1 + b.1, mem_definableElementsOver_of_unique (ψ := “#0 = #1 + #2”)
+    (c := Fin.elim0) (v := ![a.1, b.1]) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩) fun x ↦ by simp⟩
+  mul a b := ⟨a.1 * b.1, mem_definableElementsOver_of_unique (ψ := “#0 = #1 * #2”)
+    (c := Fin.elim0) (v := ![a.1, b.1]) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩) fun x ↦ by simp⟩
+  lt a b := a.1 < b.1
+
+variable (A) in
+/-- The inclusion of the elements definable over `A` into `M`. -/
+def emb : definableElementsOver A ↪ₛ[ℒₒᵣ] M where
+  toFun := Subtype.val
+  func' f v := by cases f <;> rfl
+  rel' r _ := by cases r; exacts [congrArg Subtype.val, id]
+  toFun_inj := Subtype.val_injective
+  rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
+
+@[simp]
+lemma emb_apply (x : definableElementsOver A) : emb A x = x.val := rfl
+
+/-- A formula with parameters definable over `A` and a witness in a model of `𝗣𝗔` has a witness
+definable over `A`. -/
+lemma exists_mem_of_exists [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ} (φ : ArithmeticSemiformula ℕ (n + 1))
+    {e : Fin n → M} {f : ℕ → M} (he : ∀ i, e i ∈ definableElementsOver A)
+    (hf : ∀ i, f i ∈ definableElementsOver A) (h : ∃ x, φ.Eval (x :> e) f) :
+    ∃ x ∈ definableElementsOver A, φ.Eval (x :> e) f := by
+  obtain ⟨x₀, hx₀⟩ := h
+  obtain ⟨s, hs⟩ := Bounding.exists_prenexHierarchy_eval_iff.{0} (ℬ := ℬ[<, ℒₒᵣ]) φ
+  obtain ⟨ψ, hψ, hφψ⟩ := hs 𝚺 s le_rfl
+  obtain ⟨x, hx, hmin⟩ := InductionOnHierarchy.least_number_sigma 𝚺 s
+    (P := fun x ↦ φ.Eval (x :> e) f)
+    (((Bounding.definable_of_hierarchy hψ.hierarchy f).retractiont
+      (#0 :> fun i ↦ &(e i))).of_iff fun v ↦ by
+        change φ.Eval (v 0 :> e) f ↔ _
+        rw [hφψ M]
+        congr! 2
+        ext i
+        cases i using Fin.cases <;> simp) hx₀
+  obtain ⟨m, ψ, w, -, hw, hdef⟩ := exists_defining_formula_of_least hx hmin
+  use x
+  and_intros
+  · apply mem_definableElementsOver_of_unique (c := Fin.elim0) (v := w) (ψ := Rewriting.emb ψ)
+    · intro i
+      rcases hw i with ⟨k, hk⟩ | ⟨k, hk⟩
+      exacts [hk ▸ he k, hk ▸ hf k]
+    · simpa using hdef
+  · exact hx
+
+variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
+
+variable (A) in
+/-- The elements definable over `A` form an elementary substructure of a model of `𝗣𝗔`.
+- [Kay91, Theorem 8.1] -/
+theorem isElementary : IsElementary (fun {_} _ ↦ True) (emb A) := by
+  apply IsElementary.of_tarskiVaught
+  intro n φ e f h
+  obtain ⟨x, hx, hφ⟩ := exists_mem_of_exists φ (fun i ↦ (e i).2) (fun i ↦ (f i).2) h
+  use ⟨x, hx⟩
+  exact hφ
+
+variable (A) in
+/-- The elements definable over `A` as an elementary substructure of a model of `𝗣𝗔`.
+- [Kay91, Theorem 8.1] -/
+def elementarySubstructure : definableElementsOver A ≼ₑ[ℒₒᵣ] M where
+  emb := emb A
+  isElementary := isElementary A
+
+variable (A) in
+/-- The elements definable over `A` in a model of `𝗣𝗔` form a model of `𝗣𝗔`.
+- [Kay91, Theorem 8.1] -/
+theorem models_PA : (definableElementsOver A)↓[ℒₒᵣ] ⊧* 𝗣𝗔 :=
+  IsElementary.modelsTheory (isElementary A)
+
+end definableElementsOver
+
+end over
 
 end FFL.FirstOrder.Arithmetic

@@ -53,8 +53,7 @@ pre-push:
         lake build AlphaCentauri --wfail
 
     # CI's `Audit axioms` step: no `sorry`, no `native_decide`, no axiom outside the allowlist,
-    # except what `forgive.yml` forgives. Writes `.lake/audit.json`, the report CI renders into
-    # the pull-request comment.
+    # except what `forgive.yml` forgives.
     3_axiom-audit:
       run: |
         set -e

@@ -113,6 +113,7 @@ public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.Model.Overspill
 public import AlphaCentauri.Model.ProperCut
+public import AlphaCentauri.Model.RecursiveSaturation
 public import AlphaCentauri.Model.StandardSystem
 public import AlphaCentauri.NumberTheory.Bertrand
 public import AlphaCentauri.NumberTheory.Bertrand.Embedding
@@ -233,6 +234,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.ConstantExtension
 public import AlphaCentauri.ToFoundation.FirstOrder.ElementaryChain
 public import AlphaCentauri.ToFoundation.FirstOrder.ElementarySubstructure
 public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
@@ -242,6 +244,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.PrenexNormalForm
 public import AlphaCentauri.ToFoundation.FirstOrder.Rew
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import AlphaCentauri.ToFoundation.FirstOrder.Theory
+public import AlphaCentauri.ToFoundation.FirstOrder.Type
 public import AlphaCentauri.ToFoundation.Logic.Compact
 public import AlphaCentauri.ToFoundation.Logic.Entailment
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.GL.LRClosure

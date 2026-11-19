@@ -51,14 +51,11 @@ def IsCompleteType (p : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
 lemma RealizedBy.mono {a : Fin k → M} (h : RealizedBy p b a) (hqp : q ⊆ p) : RealizedBy q b a :=
   fun φ hφ ↦ h φ (hqp hφ)
 
-lemma Realized.mono (h : Realized M p b) (hqp : q ⊆ p) : Realized M q b := by
-  obtain ⟨a, ha⟩ := h
-  use a
-  exact ha.mono hqp
+lemma Realized.mono (h : Realized M p b) (hqp : q ⊆ p) : Realized M q b :=
+  h.imp fun _ ha ↦ ha.mono hqp
 
-lemma Realized.finitelySatisfied (h : Realized M p b) : FinitelySatisfied M p b := by
-  intro s hs
-  exact h.mono hs
+lemma Realized.finitelySatisfied (h : Realized M p b) : FinitelySatisfied M p b :=
+  fun _ hs ↦ h.mono hs
 
 section theory
 

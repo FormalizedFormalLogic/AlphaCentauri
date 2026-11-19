@@ -30,6 +30,54 @@ def IsElementary (Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop) (ι : M ↪�
   ∀ {n : ℕ} {φ : Semiformula L ℕ n}, Γ φ → ∀ (e : Fin n → M) (f : ℕ → M),
     φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f
 
+/-- The Tarski–Vaught test: an embedding is elementary as soon as every formula with parameters
+from `M` and a witness in `N` has a witness in `M`.
+- [Kay91, Theorem 0.5] -/
+theorem IsElementary.of_tarskiVaught (ι : M ↪ₛ[L] N)
+    (witness : ∀ {n : ℕ} (φ : Semiformula L ℕ (n + 1)) (e : Fin n → M) (f : ℕ → M),
+      (∃ x : N, φ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : M, φ.Eval (ι x :> ι ∘ e) (ι ∘ f)) :
+    IsElementary (fun {_} _ ↦ True) ι := by
+  intro n φ _ e f
+  induction φ using Semiformula.rec' with
+  | hverum => simp
+  | hfalsum => simp
+  | hrel r v => exact (eval_hom_iff_of_open ι (φ := rel r v) (by simp)).symm
+  | hnrel r v => exact (eval_hom_iff_of_open ι (φ := nrel r v) (by simp)).symm
+  | hand φ ψ ihφ ihψ => simp [ihφ, ihψ]
+  | hor φ ψ ihφ ihψ => simp [ihφ, ihψ]
+  | hall φ ih =>
+    simp only [eval_all]
+    constructor
+    · intro h x
+      exact (ih (x :> e)).mp <| by simpa [Matrix.comp_vecCons''] using h (ι x)
+    · intro h
+      by_contra hn
+      push Not at hn
+      obtain ⟨x, hx⟩ := witness (∼φ) e f <| by simpa using hn
+      exact (by simpa using hx : ¬φ.Eval (ι x :> ι ∘ e) (ι ∘ f)) <| by
+        simpa [Matrix.comp_vecCons''] using (ih (x :> e)).mpr (h x)
+  | hexs φ ih =>
+    simp only [eval_ex]
+    constructor
+    · intro h
+      obtain ⟨x, hx⟩ := witness φ e f h
+      use x
+      exact (ih (x :> e)).mp <| by simpa [Matrix.comp_vecCons''] using hx
+    · rintro ⟨x, hx⟩
+      use ι x
+      simpa [Matrix.comp_vecCons''] using (ih (x :> e)).mpr hx
+
+/-- An elementary embedding preserves the truth of sentences. -/
+lemma IsElementary.models_iff [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
+    (h : IsElementary (fun {_} _ ↦ True) ι) (σ : Sentence L) : N↓[L] ⊧ σ ↔ M↓[L] ⊧ σ := by
+  rw [FFL.FirstOrder.models_iff, FFL.FirstOrder.models_iff]
+  simpa [Matrix.empty_eq] using h (φ := Rewriting.emb σ) trivial ![] fun _ ↦ Classical.ofNonempty
+
+/-- An elementary embedding into a model of `T` is from a model of `T`. -/
+lemma IsElementary.modelsTheory [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
+    (h : IsElementary (fun {_} _ ↦ True) ι) {T : Theory L} [N↓[L] ⊧* T] : M↓[L] ⊧* T :=
+  ⟨fun σ hσ ↦ (h.models_iff σ).mp <| Semantics.ModelsSet.models _ hσ⟩
+
 /-- A $\Gamma$-elementary substructure: an embedding of `M` into `N` which is $\Gamma$-elementary.
 - [Kay91, §2.2] -/
 structure ElementarySubstructureOn (Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop)

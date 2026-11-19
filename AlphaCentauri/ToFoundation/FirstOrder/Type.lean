@@ -9,9 +9,9 @@ A type over a structure `M` is a set of formulas in the free variables $\bar x$,
 from `M`, that is finitely satisfied in `M`. The variables $\bar x$ are the bound variables of the
 formulas, and the parameters are their free variables, read in `M` by a valuation.
 
-A type over a theory `T` is a set $p(\bar x)$ of formulas such that $T + p(\bar c)$ is consistent
-for new constants $\bar c$. A type over a theory is one realized in some model of the theory, and a
-type over `M` with parameters $\bar b$ is a type over the theory of $(M, \bar b)$.
+A type over a theory `T` is a set $\Phi(\bar x)$ of formulas such that $T + \Phi(\bar c)$ is
+consistent for new constants $\bar c$. A type over a theory is one realized in some model of the
+theory, and a type over `M` with parameters $\bar b$ is a type over the theory of $(M, \bar b)$.
 -/
 
 @[expose] public section
@@ -21,40 +21,40 @@ namespace FFL.FirstOrder
 open Semiformula
 
 variable {L : Language} {M : Type*} [Tarski.Structure L M] {ξ : Type*} {k : ℕ}
-  {p q : Set (Semiformula L ξ k)} {b : ξ → M}
+  {Φ Ψ : Set (Semiformula L ξ k)} {b : ξ → M}
 
-/-- The tuple `a` realizes `p` with the parameters read as `b`.
+/-- The tuple `a` realizes `Φ` with the parameters read as `b`.
 - [Kay91, §8.1] -/
-def RealizedBy (p : Set (Semiformula L ξ k)) (b : ξ → M) (a : Fin k → M) : Prop :=
-  ∀ φ ∈ p, φ.Eval a b
+def RealizedBy (Φ : Set (Semiformula L ξ k)) (b : ξ → M) (a : Fin k → M) : Prop :=
+  ∀ φ ∈ Φ, φ.Eval a b
 
 variable (M) in
-/-- `p` is realized in `M` with the parameters read as `b`.
+/-- `Φ` is realized in `M` with the parameters read as `b`.
 - [Kay91, §8.1] -/
-def Realized (p : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
-  ∃ a : Fin k → M, RealizedBy p b a
+def Realized (Φ : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
+  ∃ a : Fin k → M, RealizedBy Φ b a
 
 variable (M) in
-/-- Every finite subset of `p` is realized in `M` with the parameters read as `b`.
+/-- Every finite subset of `Φ` is realized in `M` with the parameters read as `b`.
 - [Kay91, §11.2] -/
-def FinitelySatisfied (p : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
-  ∀ s : Finset (Semiformula L ξ k), ↑s ⊆ p → Realized M (↑s : Set (Semiformula L ξ k)) b
+def FinitelySatisfied (Φ : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
+  ∀ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ → Realized M (↑s : Set (Semiformula L ξ k)) b
 
-/-- `p` decides every formula in `M` with the parameters read as `b`: some finite subset of `p`
+/-- `Φ` decides every formula in `M` with the parameters read as `b`: some finite subset of `Φ`
 implies the formula or its negation.
 - [Kay91, §11.2] -/
-def IsCompleteType (p : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
-  ∀ φ : Semiformula L ξ k, ∃ s : Finset (Semiformula L ξ k), ↑s ⊆ p ∧
+def IsCompleteType (Φ : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
+  ∀ φ : Semiformula L ξ k, ∃ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ ∧
     ((∀ a, RealizedBy (↑s : Set (Semiformula L ξ k)) b a → φ.Eval a b) ∨
       ∀ a, RealizedBy (↑s : Set (Semiformula L ξ k)) b a → ¬φ.Eval a b)
 
-lemma RealizedBy.mono {a : Fin k → M} (h : RealizedBy p b a) (hqp : q ⊆ p) : RealizedBy q b a :=
-  fun φ hφ ↦ h φ (hqp hφ)
+lemma RealizedBy.mono {a : Fin k → M} (h : RealizedBy Φ b a) (hΨΦ : Ψ ⊆ Φ) : RealizedBy Ψ b a :=
+  fun φ hφ ↦ h φ (hΨΦ hφ)
 
-lemma Realized.mono (h : Realized M p b) (hqp : q ⊆ p) : Realized M q b :=
-  h.imp fun _ ha ↦ ha.mono hqp
+lemma Realized.mono (h : Realized M Φ b) (hΨΦ : Ψ ⊆ Φ) : Realized M Ψ b :=
+  h.imp fun _ ha ↦ ha.mono hΨΦ
 
-lemma Realized.finitelySatisfied (h : Realized M p b) : FinitelySatisfied M p b :=
+lemma Realized.finitelySatisfied (h : Realized M Φ b) : FinitelySatisfied M Φ b :=
   fun _ hs ↦ h.mono hs
 
 section theory
@@ -65,33 +65,33 @@ universe u
 
 variable {L : Language.{u}} {k : ℕ}
 
-/-- `T + p(c̄)`: `T` together with the formulas of `p`, their variables filled by new constants.
+/-- `T + Φ(c̄)`: `T` together with the formulas of `Φ`, their variables filled by new constants.
 - [Kay91, §8.1] -/
-def Theory.addType (T : Theory L) (p : Set (Semisentence L k)) :
+def Theory.addType (T : Theory L) (Φ : Set (Semisentence L k)) :
     Theory (L.add (Language.constant (Fin k))) :=
-  T.lMap (Language.Hom.add₁ L (Language.constant (Fin k))) ∪ lift '' p
+  T.lMap (Language.Hom.add₁ L (Language.constant (Fin k))) ∪ lift '' Φ
 
-/-- `p` is a type over `T`: `T + p(c̄)` is consistent.
+/-- `Φ` is a type over `T`: `T + Φ(c̄)` is consistent.
 - [Kay91, §8.1] -/
-def IsTypeOver (T : Theory L) (p : Set (Semisentence L k)) : Prop :=
-  Consistent (T.addType p)
+def IsTypeOver (T : Theory L) (Φ : Set (Semisentence L k)) : Prop :=
+  Consistent (T.addType Φ)
 
-/-- `p` is a complete type over `T`: `T + p(c̄)` is consistent and complete.
+/-- `Φ` is a complete type over `T`: `T + Φ(c̄)` is consistent and complete.
 - [Kay91, §8.1] -/
-def IsCompleteTypeOver (T : Theory L) (p : Set (Semisentence L k)) : Prop :=
-  IsTypeOver T p ∧ Entailment.Complete (T.addType p)
+def IsCompleteTypeOver (T : Theory L) (Φ : Set (Semisentence L k)) : Prop :=
+  IsTypeOver T Φ ∧ Entailment.Complete (T.addType Φ)
 
-/-- `p` is a principal type over `T`: some `ψ` with `T + p(c̄) ⊢ ψ(c̄)` implies every formula of `p`
+/-- `Φ` is a principal type over `T`: some `ψ` with `T + Φ(c̄) ⊢ ψ(c̄)` implies every formula of `Φ`
 over `T`.
 - [Kay91, §8.1] -/
-def IsPrincipalTypeOver (T : Theory L) (p : Set (Semisentence L k)) : Prop :=
-  ∃ ψ : Semisentence L k, T.addType p ⊢ lift ψ ∧ ∀ φ ∈ p, T ⊢ ∀¹* (ψ 🡒 φ)
+def IsPrincipalTypeOver (T : Theory L) (Φ : Set (Semisentence L k)) : Prop :=
+  ∃ ψ : Semisentence L k, T.addType Φ ⊢ lift ψ ∧ ∀ φ ∈ Φ, T ⊢ ∀¹* (ψ 🡒 φ)
 
 /-- A type over `T` is realized in some model of `T`, and a set of formulas realized in a model of
 `T` is a type over `T`.
 - [Kay91, §8.1] -/
-theorem isTypeOver_iff_exists_realized {T : Theory L} {p : Set (Semisentence L k)} :
-    IsTypeOver T p ↔ ∃ N : Tarski.Struc.{u} L, N ⊧* T ∧ Realized N p Empty.elim := by
+theorem isTypeOver_iff_exists_realized {T : Theory L} {Φ : Set (Semisentence L k)} :
+    IsTypeOver T Φ ↔ ∃ N : Tarski.Struc.{u} L, N ⊧* T ∧ Realized N Φ Empty.elim := by
   constructor
   · intro h
     obtain ⟨N, hN⟩ := Theory.satisfiable_iff_consistent.{u, u}.mpr h
@@ -115,9 +115,9 @@ theorem isTypeOver_iff_exists_realized {T : Theory L} {p : Set (Semisentence L k
 parameters read as constants, it is a type over the theory of `(M, b)`.
 - [Kay91, §11.2] -/
 theorem isTypeOver_theory_iff_finitelySatisfied {ι : Type*} {M : Type*} [Nonempty M]
-    [Tarski.Structure L M] {p : Set (Semiformula L ι k)} {b : ι → M} :
-    IsTypeOver (Semantics.theory (strucOfTuple M b)) (liftParameters '' p) ↔
-      FinitelySatisfied M p b := by
+    [Tarski.Structure L M] {Φ : Set (Semiformula L ι k)} {b : ι → M} :
+    IsTypeOver (Semantics.theory (strucOfTuple M b)) (liftParameters '' Φ) ↔
+      FinitelySatisfied M Φ b := by
   constructor
   · intro h s hs
     obtain ⟨N, hN, a, ha⟩ := isTypeOver_iff_exists_realized.mp h
@@ -146,8 +146,8 @@ theorem isTypeOver_theory_iff_finitelySatisfied {ι : Type*} {M : Type*} [Nonemp
     let A : Theory ((L.add (Language.constant ι)).add (Language.constant (Fin k))) :=
       Theory.lMap (Language.Hom.add₁ (L.add (Language.constant ι)) (Language.constant (Fin k)))
         (Semantics.theory (strucOfTuple M b))
-    obtain ⟨t, htp, htfin, ht⟩ := Set.exists_subset_image_finite_and
-      (f := lift ∘ liftParameters) (s := p) (p := fun u ↦ F ⊆ A ∪ u) |>.mp <| by
+    obtain ⟨t, htΦ, htfin, ht⟩ := Set.exists_subset_image_finite_and
+      (f := lift ∘ liftParameters) (s := Φ) (p := fun u ↦ F ⊆ A ∪ u) |>.mp <| by
         use F \ A
         and_intros
         · intro σ ⟨hσF, hσA⟩
@@ -159,7 +159,7 @@ theorem isTypeOver_theory_iff_finitelySatisfied {ι : Type*} {M : Type*} [Nonemp
           by_cases hσA : σ ∈ A
           · exact Or.inl hσA
           · exact Or.inr ⟨hσ, hσA⟩
-    obtain ⟨a, ha⟩ := h htfin.toFinset (by simpa using htp)
+    obtain ⟨a, ha⟩ := h htfin.toFinset (by simpa using htΦ)
     let _ : Tarski.Structure (L.add (Language.constant ι)) M := structureOfTuple M b
     apply Theory.consistent_of_satisfiable
     use strucOfTuple M a

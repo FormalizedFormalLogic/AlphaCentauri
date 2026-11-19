@@ -18,29 +18,29 @@ namespace FFL.FirstOrder.Arithmetic
 
 open scoped FFL.FirstOrder.Bounding
 
-/-- The set of codes of the formulas of `p` is recursive.
+/-- The set of codes of the formulas of `Φ` is recursive.
 - [Kay91, §11.2] -/
-def IsRecursive {ξ : Type*} [Encodable ξ] {k : ℕ} (p : Set (ArithmeticSemiformula ξ k)) : Prop :=
-  ComputablePred (· ∈ Encodable.encode '' p)
+def IsRecursive {ξ : Type*} [Encodable ξ] {k : ℕ} (Φ : Set (ArithmeticSemiformula ξ k)) : Prop :=
+  ComputablePred (· ∈ Encodable.encode '' Φ)
 
 /-- Every finitely satisfied recursive $\Sigma_n$ type over `M` with finitely many parameters is
 realized in `M`.
 - [Kay91, §11.2] -/
 def SigmaRecursivelySaturated (n : ℕ) (M : Type*) [ORingStructure M] : Prop :=
-  ∀ (k m : ℕ) (p : Set (ArithmeticSemiformula (Fin m) k)) (b : Fin m → M),
-    (∀ φ ∈ p, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 n φ) → IsRecursive p → FinitelySatisfied M p b →
-      Realized M p b
+  ∀ (k m : ℕ) (Φ : Set (ArithmeticSemiformula (Fin m) k)) (b : Fin m → M),
+    (∀ φ ∈ Φ, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 n φ) → IsRecursive Φ → FinitelySatisfied M Φ b →
+      Realized M Φ b
 
 /-- Every finitely satisfied recursive type over `M` with finitely many parameters is realized in
 `M`.
 - [Kay91, §11.2] -/
 def RecursivelySaturated (M : Type*) [ORingStructure M] : Prop :=
-  ∀ (k m : ℕ) (p : Set (ArithmeticSemiformula (Fin m) k)) (b : Fin m → M),
-    IsRecursive p → FinitelySatisfied M p b → Realized M p b
+  ∀ (k m : ℕ) (Φ : Set (ArithmeticSemiformula (Fin m) k)) (b : Fin m → M),
+    IsRecursive Φ → FinitelySatisfied M Φ b → Realized M Φ b
 
 lemma RecursivelySaturated.sigmaRecursivelySaturated {M : Type*} [ORingStructure M]
     (h : RecursivelySaturated M) (n : ℕ) : SigmaRecursivelySaturated n M := by
-  intro k m p b _ hp hf
-  exact h k m p b hp hf
+  intro k m Φ b _ hp hf
+  exact h k m Φ b hp hf
 
 end FFL.FirstOrder.Arithmetic

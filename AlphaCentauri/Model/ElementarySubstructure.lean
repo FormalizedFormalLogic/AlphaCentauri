@@ -15,9 +15,9 @@ extension is a $\Delta_0$-elementary substructure.
 
 namespace FFL.FirstOrder.Arithmetic
 
-open Semiformula
+open Semiformula Tarski.Structure
 
-universe u v
+universe u v w
 
 variable {M : Type u} {N : Type v} [ORingStructure M] [ORingStructure N]
 
@@ -66,6 +66,41 @@ variable {Γ Γ' : ∀ {n : ℕ}, ArithmeticSemiformula ℕ n → Prop}
 instance : CoeFun (M ≼ₑ[Γ] N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
 
 instance : CoeFun (M ≺ₑ[Γ] N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
+
+namespace ElementarySubstructureOn
+
+variable {K : Type w} [ORingStructure K]
+
+variable (M Γ) in
+/-- The identity $\Gamma$-elementary substructure. -/
+@[refl] protected def refl : M ≼ₑ[Γ] M where
+  emb := {
+    toFun := id
+    func' _ _ := rfl
+    rel' _ _ h := h
+    toFun_inj := Function.injective_id
+    rel_inv' _ _ h := h
+  }
+  isElementary _ _ _ := Iff.rfl
+
+@[simp] lemma refl_apply (x : M) : ElementarySubstructureOn.refl M Γ x = x := rfl
+
+/-- The composition of $\Gamma$-elementary substructures. -/
+@[trans] protected def trans (e₁ : M ≼ₑ[Γ] N) (e₂ : N ≼ₑ[Γ] K) : M ≼ₑ[Γ] K where
+  emb := {
+    toFun := e₂ ∘ e₁
+    func' f v := by simp [HomClass.func e₁.emb, HomClass.func e₂.emb, Function.comp_def]
+    rel' r v h := HomClass.rel e₂.emb r _ (HomClass.rel e₁.emb r v h)
+    toFun_inj := (EmbeddingClass.map_inj e₂.emb).comp (EmbeddingClass.map_inj e₁.emb)
+    rel_inv' r v h :=
+      EmbeddingClass.map_rel_inv e₁.emb r v (EmbeddingClass.map_rel_inv e₂.emb r _ h)
+  }
+  isElementary hφ e f := (e₂.isElementary hφ (e₁ ∘ e) (e₁ ∘ f)).trans (e₁.isElementary hφ e f)
+
+@[simp] lemma trans_apply (e₁ : M ≼ₑ[Γ] N) (e₂ : N ≼ₑ[Γ] K) (x : M) :
+    e₁.trans e₂ x = e₂ (e₁ x) := rfl
+
+end ElementarySubstructureOn
 
 /-- A $\Gamma$-elementary substructure is $\Gamma'$-elementary for every $\Gamma'$ contained in
 $\Gamma$. -/

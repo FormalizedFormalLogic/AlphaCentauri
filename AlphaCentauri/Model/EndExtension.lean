@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Embedding
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
 public import AlphaCentauri.Axiomatizability.Basic
 public import Foundation.FirstOrder.Arithmetic.Collection.Basic
@@ -56,20 +57,8 @@ variable (e : M ⊆ₑ N)
 
 lemma emb_injective : Function.Injective e.emb := EmbeddingClass.map_inj e.emb
 
-@[simp, grind =] lemma emb_zero : e 0 = 0 := by
-  simpa [Function.comp_def] using HomClass.func e.emb Language.Zero.zero ![]
-
-@[simp, grind =] lemma emb_one : e 1 = 1 := by
-  simpa [Function.comp_def] using HomClass.func e.emb Language.One.one ![]
-
-@[simp, grind =] lemma emb_add (x y : M) : e (x + y) = e x + e y := by
-  simpa [Function.comp_def] using HomClass.func e.emb Language.Add.add ![x, y]
-
-@[simp, grind =] lemma emb_mul (x y : M) : e (x * y) = e x * e y := by
-  simpa [Function.comp_def] using HomClass.func e.emb Language.Mul.mul ![x, y]
-
-@[simp, grind =] lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y := by
-  simpa [Function.comp_def] using EmbeddingClass.rel e.emb Language.LT.lt ![x, y]
+@[simp, grind =] lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
+  EmbeddingClass.map_lt_map_iff e.emb
 
 @[grind =] lemma emb_eq_emb {x y : M} : e x = e y ↔ x = y := e.emb_injective.eq_iff
 

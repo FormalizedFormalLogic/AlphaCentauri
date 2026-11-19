@@ -104,6 +104,7 @@ public import AlphaCentauri.Model.Cut
 public import AlphaCentauri.Model.DefinableCut
 public import AlphaCentauri.Model.DefinableElements
 public import AlphaCentauri.Model.Elementary
+public import AlphaCentauri.Model.ElementaryChain
 public import AlphaCentauri.Model.ElementarySubstructure
 public import AlphaCentauri.Model.EndExtension
 public import AlphaCentauri.Model.EndExtensionOfBSigma1
@@ -211,6 +212,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.Definability
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.UniformReflection
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.LocallyDelta0
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Embedding
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Factorial
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic

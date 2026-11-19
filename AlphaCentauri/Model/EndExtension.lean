@@ -1,6 +1,8 @@
 module
 
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Embedding
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.ElementarySubstructure
 public import AlphaCentauri.Axiomatizability.Basic
 public import Foundation.FirstOrder.Arithmetic.Collection.Basic
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
@@ -13,7 +15,7 @@ An end extension of an `ℒₒᵣ`-structure `M` is a structure into which `M` e
 below the image of `M`. Bounded formulas take the same truth value in `M` and in an end extension
 of it, and $\Sigma_1$ formulas satisfied in `M` stay satisfied in an end extension of it. `𝗣𝗔⁻`,
 `𝗜𝚺₀` and any theory axiomatized by $\Pi_1$ sentences hold in `M` as soon as they hold in an end
-extension of `M`.
+extension of `M`. An end extension is a $\Delta_0$-elementary substructure.
 -/
 
 @[expose] public section
@@ -56,20 +58,8 @@ variable (e : M ⊆ₑ N)
 
 lemma emb_injective : Function.Injective e.emb := EmbeddingClass.map_inj e.emb
 
-@[simp, grind =] lemma emb_zero : e 0 = 0 := by
-  simpa [Function.comp_def] using HomClass.func e.emb Language.Zero.zero ![]
-
-@[simp, grind =] lemma emb_one : e 1 = 1 := by
-  simpa [Function.comp_def] using HomClass.func e.emb Language.One.one ![]
-
-@[simp, grind =] lemma emb_add (x y : M) : e (x + y) = e x + e y := by
-  simpa [Function.comp_def] using HomClass.func e.emb Language.Add.add ![x, y]
-
-@[simp, grind =] lemma emb_mul (x y : M) : e (x * y) = e x * e y := by
-  simpa [Function.comp_def] using HomClass.func e.emb Language.Mul.mul ![x, y]
-
-@[simp, grind =] lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y := by
-  simpa [Function.comp_def] using EmbeddingClass.rel e.emb Language.LT.lt ![x, y]
+@[simp, grind =] lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
+  EmbeddingClass.map_lt_map_iff e.emb
 
 @[grind =] lemma emb_eq_emb {x y : M} : e x = e y ↔ x = y := e.emb_injective.eq_iff
 
@@ -294,5 +284,19 @@ protected def transRight (e₁ : M ⊆ₑ N) (e₂ : N ⊂ₑ K) : M ⊂ₑ K wh
   e₁.transLeft e₂.toEndExtension
 
 end ProperEndExtension
+
+/-- An end extension is a $\Delta_0$-elementary substructure.
+- [Kay91, Theorem 2.7]
+- [HP98, Fact IV.1.3(4)] -/
+def EndExtension.toElementarySubstructureOn (e : M ⊆ₑ N) :
+    M ≼ₑ[ℒₒᵣ; fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ] N where
+  emb := e.emb
+  isElementary hφ v f := (Bounding.bounded_absolute e.emb hφ v f).symm
+
+/-- A proper end extension is a proper $\Delta_0$-elementary substructure. -/
+def ProperEndExtension.toProperElementarySubstructureOn (e : M ⊂ₑ N) :
+    M ≺ₑ[ℒₒᵣ; fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ] N where
+  toElementarySubstructureOn := e.toEndExtension.toElementarySubstructureOn
+  not_surjective := e.not_surjective
 
 end FFL.FirstOrder.Arithmetic

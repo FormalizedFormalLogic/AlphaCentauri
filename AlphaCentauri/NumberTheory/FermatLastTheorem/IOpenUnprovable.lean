@@ -4,6 +4,7 @@ public import AlphaCentauri.Model.IntegerConstantPolynomial
 public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.NumberTheory.FermatLastTheorem.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Embedding
 public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
 public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
@@ -49,10 +50,10 @@ lemma not_provable_fermatLastTheoremCaseOne_IOpen_of_models_ZRing {M : Type} [OR
       models_of_provable hW hp
   let f : M →+* W :=
     { toFun := Θ
-      map_zero' := by simpa [Function.comp_def] using HomClass.func Θ Language.Zero.zero ![]
-      map_one' := by simpa [Function.comp_def] using HomClass.func Θ Language.One.one ![]
-      map_add' a b := by simpa [Function.comp_def] using HomClass.func Θ Language.Add.add ![a, b]
-      map_mul' a b := by simpa [Function.comp_def] using HomClass.func Θ Language.Mul.mul ![a, b] }
+      map_zero' := HomClass.map_zero Θ
+      map_one' := HomClass.map_one Θ
+      map_add' := HomClass.map_add Θ
+      map_mul' := HomClass.map_mul Θ }
   have e₁ : f x ^ n + f y ^ n = f z ^ n := by simpa using congrArg f h
   have e₂ : f x * f y * f z = f w * n + r := by simpa using congrArg f hxyz
   have := hC _ _ _ e₁

@@ -20,38 +20,33 @@ namespace FFL.FirstOrder
 
 open Semiformula
 
-/-- A set of formulas of `L` in `k` variables with parameters indexed by `ξ`, the carrier of a
-$k$-type.
-- [Kay91, §8.1] -/
-abbrev Semiformula.Type (L : Language) (ξ : Type*) (k : ℕ) := Set (Semiformula L ξ k)
-
 variable {L : Language} {M : Type*} [Tarski.Structure L M] {ξ : Type*} {k : ℕ}
-  {Φ Ψ : Semiformula.Type L ξ k} {b : ξ → M}
+  {Φ Ψ : Set (Semiformula L ξ k)} {b : ξ → M}
 
 /-- The tuple `a` realizes `Φ` with the parameters read as `b`.
 - [Kay91, §8.1] -/
-def RealizedBy (Φ : Semiformula.Type L ξ k) (b : ξ → M) (a : Fin k → M) : Prop :=
+def RealizedBy (Φ : Set (Semiformula L ξ k)) (b : ξ → M) (a : Fin k → M) : Prop :=
   ∀ φ ∈ Φ, φ.Eval a b
 
 variable (M) in
 /-- `Φ` is realized in `M` with the parameters read as `b`.
 - [Kay91, §8.1] -/
-def Realized (Φ : Semiformula.Type L ξ k) (b : ξ → M) : Prop :=
+def Realized (Φ : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
   ∃ a : Fin k → M, RealizedBy Φ b a
 
 variable (M) in
 /-- Every finite subset of `Φ` is realized in `M` with the parameters read as `b`.
 - [Kay91, §11.2] -/
-def FinitelySatisfied (Φ : Semiformula.Type L ξ k) (b : ξ → M) : Prop :=
-  ∀ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ → Realized M (↑s : Semiformula.Type L ξ k) b
+def FinitelySatisfied (Φ : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
+  ∀ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ → Realized M (↑s : Set (Semiformula L ξ k)) b
 
 /-- `Φ` decides every formula in `M` with the parameters read as `b`: some finite subset of `Φ`
 implies the formula or its negation.
 - [Kay91, §11.2] -/
-def IsCompleteType (Φ : Semiformula.Type L ξ k) (b : ξ → M) : Prop :=
+def IsCompleteType (Φ : Set (Semiformula L ξ k)) (b : ξ → M) : Prop :=
   ∀ φ : Semiformula L ξ k, ∃ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ ∧
-    ((∀ a, RealizedBy (↑s : Semiformula.Type L ξ k) b a → φ.Eval a b) ∨
-      ∀ a, RealizedBy (↑s : Semiformula.Type L ξ k) b a → ¬φ.Eval a b)
+    ((∀ a, RealizedBy (↑s : Set (Semiformula L ξ k)) b a → φ.Eval a b) ∨
+      ∀ a, RealizedBy (↑s : Set (Semiformula L ξ k)) b a → ¬φ.Eval a b)
 
 lemma RealizedBy.mono {a : Fin k → M} (h : RealizedBy Φ b a) (hΨΦ : Ψ ⊆ Φ) : RealizedBy Ψ b a :=
   fun φ hφ ↦ h φ (hΨΦ hφ)
@@ -72,30 +67,30 @@ variable {L : Language.{u}} {k : ℕ}
 
 /-- `T + Φ(c̄)`: `T` together with the formulas of `Φ`, their variables filled by new constants.
 - [Kay91, §8.1] -/
-def Theory.addType (T : Theory L) (Φ : Semiformula.Type L Empty k) :
+def Theory.addType (T : Theory L) (Φ : Set (Semisentence L k)) :
     Theory (L.add (Language.constant (Fin k))) :=
   T.lMap (Language.Hom.add₁ L (Language.constant (Fin k))) ∪ lift '' Φ
 
 /-- `Φ` is a type over `T`: `T + Φ(c̄)` is consistent.
 - [Kay91, §8.1] -/
-def IsTypeOver (T : Theory L) (Φ : Semiformula.Type L Empty k) : Prop :=
+def IsTypeOver (T : Theory L) (Φ : Set (Semisentence L k)) : Prop :=
   Consistent (T.addType Φ)
 
 /-- `Φ` is a complete type over `T`: `T + Φ(c̄)` is consistent and complete.
 - [Kay91, §8.1] -/
-def IsCompleteTypeOver (T : Theory L) (Φ : Semiformula.Type L Empty k) : Prop :=
+def IsCompleteTypeOver (T : Theory L) (Φ : Set (Semisentence L k)) : Prop :=
   IsTypeOver T Φ ∧ Entailment.Complete (T.addType Φ)
 
 /-- `Φ` is a principal type over `T`: some `ψ` with `T + Φ(c̄) ⊢ ψ(c̄)` implies every formula of `Φ`
 over `T`.
 - [Kay91, §8.1] -/
-def IsPrincipalTypeOver (T : Theory L) (Φ : Semiformula.Type L Empty k) : Prop :=
+def IsPrincipalTypeOver (T : Theory L) (Φ : Set (Semisentence L k)) : Prop :=
   ∃ ψ : Semisentence L k, T.addType Φ ⊢ lift ψ ∧ ∀ φ ∈ Φ, T ⊢ ∀¹* (ψ 🡒 φ)
 
 /-- A type over `T` is realized in some model of `T`, and a set of formulas realized in a model of
 `T` is a type over `T`.
 - [Kay91, §8.1] -/
-theorem isTypeOver_iff_exists_realized {T : Theory L} {Φ : Semiformula.Type L Empty k} :
+theorem isTypeOver_iff_exists_realized {T : Theory L} {Φ : Set (Semisentence L k)} :
     IsTypeOver T Φ ↔ ∃ N : Tarski.Struc.{u} L, N ⊧* T ∧ Realized N Φ Empty.elim := by
   constructor
   · intro h
@@ -120,7 +115,7 @@ theorem isTypeOver_iff_exists_realized {T : Theory L} {Φ : Semiformula.Type L E
 parameters read as constants, it is a type over the theory of `(M, b)`.
 - [Kay91, §11.2] -/
 theorem isTypeOver_theory_iff_finitelySatisfied {ι : Type*} {M : Type*} [Nonempty M]
-    [Tarski.Structure L M] {Φ : Semiformula.Type L ι k} {b : ι → M} :
+    [Tarski.Structure L M] {Φ : Set (Semiformula L ι k)} {b : ι → M} :
     IsTypeOver (Semantics.theory (strucOfTuple M b)) (liftParameters '' Φ) ↔
       FinitelySatisfied M Φ b := by
   constructor

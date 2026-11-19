@@ -1,14 +1,14 @@
 module
 
+public import AlphaCentauri.ToFoundation.FirstOrder.ConstantExtension
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
-public import Foundation.FirstOrder.Tarski.Eq
 
 /-! # The language of ordered rings with finitely many extra constants
 
 Extension of Foundation's `ℒₒᵣ` (`Arithmetic/Basic.lean`). `Language.oringConst k` is `ℒₒᵣ`
-together with `k` new constant symbols. An `ℒₒᵣ`-formula in `k` free variables becomes a sentence
-of that language by filling its variables with the constants, and a model of `ℒₒᵣ` becomes a model
-of it by choosing a `k`-tuple.
+together with `k` new constant symbols. Closed terms of `ℒₒᵣ` in `k` variables are dominated by a
+single one below any code, and a model of a theory of that language is a model of `ℒₒᵣ` with a
+`k`-tuple named by the constants.
 -/
 
 @[expose] public section
@@ -25,52 +25,6 @@ open Semiformula
 universe u
 
 variable {k : ℕ}
-
-/-- The `i`-th of the `k` constants adjoined to `ℒₒᵣ`. -/
-def cst {ξ n} (i : Fin k) : Semiterm (Language.oringConst k) ξ n :=
-  Semiterm.func (arity := 0) (Sum.inr (Language.Constant.Func.const i)) ![]
-
-/-- An `ℒₒᵣ`-formula in `k` free variables, read as a sentence of `Language.oringConst k` with the
-variables filled by the adjoined constants. -/
-def lift (φ : ArithmeticSemisentence k) : Sentence (Language.oringConst k) :=
-  Rew.subst (fun i ↦ cst i) ▹ Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) φ
-
-section
-
-variable (M : Type u) [ORingStructure M] (a : Fin k → M)
-
-/-- `M` as a structure for `Language.oringConst k`, reading the `i`-th adjoined constant as
-`a i`. -/
-def strucOfTuple : Tarski.Struc (Language.oringConst k) where
-  Dom := M
-  nonempty := ⟨0⟩
-  struc :=
-    letI : Tarski.Structure (Language.constant (Fin k)) M :=
-      { func := fun _ c _ ↦ match c with | .const i => a i
-        rel := fun _ r _ ↦ r.elim }
-    Tarski.Structure.add ℒₒᵣ (Language.constant (Fin k)) M
-
-@[simp] lemma strucOfTuple_models_lift_iff (φ : ArithmeticSemisentence k) :
-    strucOfTuple M a ⊧ lift φ ↔ φ.Evalb a := by
-  simp only [lift, strucOfTuple, models_iff, Semiformula.Realize, eval_substs,
-    Tarski.Structure.eval_lMap_add₁]
-  exact Iff.rfl
-
-lemma strucOfTuple_models_eq : strucOfTuple M a ⊧* 𝗘𝗤 (Language.oringConst k) := by
-  let s : Tarski.Structure (Language.oringConst k) M := (strucOfTuple M a).struc
-  have : Nonempty M := ⟨0⟩
-  have : Tarski.Structure.Eq (Language.oringConst k) M := ⟨fun _ _ ↦ iff_of_eq rfl⟩
-  change M↓[Language.oringConst k] ⊧* 𝗘𝗤 (Language.oringConst k)
-  infer_instance
-
-lemma strucOfTuple_models_lMap_image {U : ArithmeticTheory} (h : M↓[ℒₒᵣ] ⊧* U) :
-    strucOfTuple M a ⊧*
-      Semiformula.lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) '' U := by
-  apply Semantics.modelsSet_iff.mpr
-  rintro _ ⟨σ, hσ, rfl⟩
-  simpa [strucOfTuple, models_iff, Semiformula.Realize] using Semantics.modelsSet_iff.mp h hσ
-
-end
 
 section
 
@@ -99,7 +53,7 @@ variable {T : Theory (Language.oringConst k)} [𝗘𝗤 (Language.oringConst k) 
   (sat : Semantics.Satisfiable (Tarski.Struc (Language.oringConst k)) T)
 
 /-- The tuple of elements of `ModelOfSatEq sat` named by the adjoined constants. -/
-noncomputable def cstVal (i : Fin k) : ModelOfSatEq sat := Semiterm.valb ![] (cst i)
+noncomputable def cstVal (i : Fin k) : ModelOfSatEq sat := Semiterm.valb ![] (cst (L := ℒₒᵣ) i)
 
 lemma reduct_eq :
     (ModelOfSatEq.struc sat).lMap (Language.Hom.add₁ ℒₒᵣ (Language.constant (Fin k))) =

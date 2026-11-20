@@ -1,6 +1,5 @@
 module
 
-public import Foundation.FirstOrder.LK.Soundness
 public import Foundation.FirstOrder.Tarski.Elementary
 public import Foundation.FirstOrder.Tarski.Eq
 
@@ -10,7 +9,7 @@ For a class $\Gamma$ of formulas of a language `L`, a $\Gamma$-elementary substr
 `L`-structure `N` is a structure `M` together with an embedding into `N` along which every formula
 of $\Gamma$ takes the same truth value at elements of `M` as at their images. An elementary
 substructure is a $\Gamma$-elementary substructure for every formula; a proper one is not
-surjective. Models of a complete theory are elementarily equivalent.
+surjective.
 -/
 
 @[expose] public section
@@ -170,7 +169,6 @@ def ProperElementarySubstructureOn.mono (e : M ≺ₑ[L; Γ] N)
   toElementarySubstructureOn := e.toElementarySubstructureOn.mono h
   not_surjective := e.not_surjective
 
-/-- An isomorphism is an elementary substructure. -/
 def Tarski.Structure.Iso.toElementarySubstructure (f : M ≃ₛ[L] N) : M ≼ₑ[L] N where
   emb := f.toEmbedding
   isElementary := by
@@ -183,18 +181,6 @@ def Tarski.Structure.Iso.toElementarySubstructure (f : M ≃ₛ[L] N) : M ≼ₑ
 lemma Tarski.Structure.ElementaryEquiv.of_elementarySubstructure [Nonempty M] [Nonempty N]
     (e : M ≼ₑ[L] N) : M ≡ₑ[L] N :=
   ⟨fun {σ} ↦ (IsElementary.models_iff e.isElementary σ).symm⟩
-
-lemma Tarski.Structure.ElementaryEquiv.of_complete (T : Theory L) [Entailment.Complete T]
-    (M : Type u) (N : Type v) [Nonempty M] [Nonempty N] [Tarski.Structure L M]
-    [Tarski.Structure L N] [M↓[L] ⊧* T] [N↓[L] ⊧* T] : M ≡ₑ[L] N := by
-  constructor
-  intro σ
-  rcases Entailment.Complete.con (𝓢 := T) σ with h | h
-  · exact iff_of_true (models_of_provable inferInstance h) (models_of_provable inferInstance h)
-  · have hM := models_of_provable (M := M) inferInstance h
-    have hN := models_of_provable (M := N) inferInstance h
-    simp only [models_iff, LogicalConnective.HomClass.map_neg] at hM hN ⊢
-    exact iff_of_false hM hN
 
 lemma Tarski.Structure.ElementaryEquiv.existsUnique_iff [Nonempty M] [Nonempty N] [L.Eq]
     [Tarski.Structure.Eq L M] [Tarski.Structure.Eq L N] [M ≡ₑ[L] N] (θ : Semisentence L 1) :

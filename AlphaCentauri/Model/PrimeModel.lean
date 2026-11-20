@@ -191,7 +191,8 @@ theorem surjective_of_elementarySubstructure [Nonempty N]
   intro b
   have := congrArg (fun e : definableElements M ≼ₑ[ℒₒᵣ] definableElements M ↦ e b)
     (Subsingleton.elim ((primeModelEmbedding M N).trans f) (ElementarySubstructureOn.refl _ _))
-  exact ⟨primeModelEmbedding M N b, this⟩
+  use primeModelEmbedding M N b
+  exact this
 
 /-- The elements of `M` definable without parameters have no non-trivial automorphisms.
 - [Kay91, Corollary 8.4] -/

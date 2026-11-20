@@ -21,11 +21,13 @@ open Semiformula Tarski.Structure
 variable {M N : Type} [ORingStructure M] [ORingStructure N]
   [M ≡ₑ[ℒₒᵣ] N]
 
-namespace definableElementsOver
+namespace definableElements
 
-lemma existsUnique_realize (a : definableElementsOver (∅ : Set M)) :
+open definableElementsOver
+
+lemma existsUnique_realize (a : definableElements M) :
     ∃! y : N, ∀ θ : ArithmeticSemisentence 1, M ⊧/![a.1] θ → N ⊧/![y] θ := by
-  obtain ⟨θa, ha⟩ := mem_definableElementsOver_empty_iff.mp a.2
+  obtain ⟨θa, ha⟩ := mem_definableElements_iff.mp a.2
   obtain ⟨y, hy, huniq⟩ := (ElementaryEquiv.existsUnique_iff (N := N) θa).mp
     ⟨a.1, (ha _).mpr rfl, fun x ↦ (ha x).mp⟩
   use y
@@ -41,21 +43,21 @@ lemma existsUnique_realize (a : definableElementsOver (∅ : Set M)) :
     exact huniq y' (hy' θa ((ha _).mpr rfl))
 
 /-- The element of `N` realizing the type of an element of `M` definable without parameters. -/
-noncomputable def primeModelMap (a : definableElementsOver (∅ : Set M)) : N :=
+noncomputable def primeModelMap (a : definableElements M) : N :=
   (existsUnique_realize a).exists.choose
 
-lemma realize_primeModelMap (a : definableElementsOver (∅ : Set M))
+lemma realize_primeModelMap (a : definableElements M)
     {θ : ArithmeticSemisentence 1} (h : M ⊧/![a.1] θ) : N ⊧/![primeModelMap a] θ :=
   (existsUnique_realize a).exists.choose_spec θ h
 
-lemma eq_primeModelMap {a : definableElementsOver (∅ : Set M)} {y : N}
+lemma eq_primeModelMap {a : definableElements M} {y : N}
     (h : ∀ θ : ArithmeticSemisentence 1, M ⊧/![a.1] θ → N ⊧/![y] θ) : y = primeModelMap a :=
   (existsUnique_realize a).unique h fun _ ↦ realize_primeModelMap a
 
 lemma evalb_primeModelMap {n : ℕ} (φ : ArithmeticSemisentence n)
-    (v : Fin n → definableElementsOver (∅ : Set M)) :
+    (v : Fin n → definableElements M) :
     N ⊧/(primeModelMap ∘ v) φ ↔ M ⊧/(Subtype.val ∘ v) φ := by
-  suffices h : ∀ {n : ℕ} (φ : ArithmeticSemisentence n) (v : Fin n → definableElementsOver ∅),
+  suffices h : ∀ {n : ℕ} (φ : ArithmeticSemisentence n) (v : Fin n → definableElements M),
       M ⊧/(Subtype.val ∘ v) φ → N ⊧/(primeModelMap ∘ v) φ by
     constructor
     · intro hN
@@ -71,7 +73,7 @@ lemma evalb_primeModelMap {n : ℕ} (φ : ArithmeticSemisentence n)
       (ElementaryEquiv.models (L := ℒₒᵣ) (M₁ := M) (M₂ := N) (φ := φ)).mp
   | succ n ih =>
     intro hφ
-    obtain ⟨θ, hθ⟩ := mem_definableElementsOver_empty_iff.mp (v 0).2
+    obtain ⟨θ, hθ⟩ := mem_definableElements_iff.mp (v 0).2
     have h₁ := ih (∀¹ ((θ ⇜ ![#0]) 🡒 φ)) (Fin.tail v) <| by
       simp only [eval_all, LogicalConnective.HomClass.map_imply, eval_substs]
       intro x hx
@@ -86,13 +88,13 @@ lemma evalb_primeModelMap {n : ℕ} (φ : ArithmeticSemisentence n)
     ext i
     cases i using Fin.cases <;> simp [Fin.tail]
 
-lemma primeModelMap_mem (a : definableElementsOver (∅ : Set M)) :
-    (primeModelMap a : N) ∈ definableElementsOver (∅ : Set N) := by
-  obtain ⟨θ, hθ⟩ := mem_definableElementsOver_empty_iff.mp a.2
+lemma primeModelMap_mem (a : definableElements M) :
+    (primeModelMap a : N) ∈ definableElements N := by
+  obtain ⟨θ, hθ⟩ := mem_definableElements_iff.mp a.2
   obtain ⟨y, -, huniq⟩ := (ElementaryEquiv.existsUnique_iff (N := N) θ).mp
     ⟨a.1, (hθ _).mpr rfl, fun x ↦ (hθ x).mp⟩
   have ha := realize_primeModelMap (N := N) a ((hθ _).mpr rfl)
-  apply mem_definableElementsOver_empty_iff.mpr
+  apply mem_definableElements_iff.mpr
   use θ
   intro x
   constructor
@@ -101,13 +103,13 @@ lemma primeModelMap_mem (a : definableElementsOver (∅ : Set M)) :
   · rintro rfl
     exact ha
 
-lemma exists_primeModelMap_eq {b : N} (hb : b ∈ definableElementsOver (∅ : Set N)) :
-    ∃ a : definableElementsOver (∅ : Set M), primeModelMap a = b := by
-  obtain ⟨θ, hθ⟩ := mem_definableElementsOver_empty_iff.mp hb
+lemma exists_primeModelMap_eq {b : N} (hb : b ∈ definableElements N) :
+    ∃ a : definableElements M, primeModelMap a = b := by
+  obtain ⟨θ, hθ⟩ := mem_definableElements_iff.mp hb
   obtain ⟨x, hx, huniq⟩ := (ElementaryEquiv.existsUnique_iff (M := M) (N := N) θ).mpr
     ⟨b, (hθ _).mpr rfl, fun y ↦ (hθ y).mp⟩
-  have hmem : x ∈ definableElementsOver (∅ : Set M) := by
-    apply mem_definableElementsOver_empty_iff.mpr
+  have hmem : x ∈ definableElements M := by
+    apply mem_definableElements_iff.mpr
     use θ
     intro y
     exact ⟨huniq y, by rintro rfl; exact hx⟩
@@ -120,7 +122,7 @@ variable (M N) in
 /-- The elementary embedding of the elements of `M` definable without parameters into `N`.
 - [Kay91, Theorem 8.2] -/
 noncomputable def primeModelEmbedding :
-    definableElementsOver (∅ : Set M) ≼ₑ[ℒₒᵣ] N where
+    definableElements M ≼ₑ[ℒₒᵣ] N where
   emb := {
     toFun := primeModelMap
     func' f v := by
@@ -153,7 +155,7 @@ noncomputable def primeModelEmbedding :
 /-- The image of `primeModelEmbedding` is the set of elements of `N` definable without parameters.
 - [Kay91, Theorem 8.2] -/
 theorem range_primeModelEmbedding :
-    Set.range (primeModelEmbedding M N) = definableElementsOver (∅ : Set N) := by
+    Set.range (primeModelEmbedding M N) = definableElements N := by
   ext b
   constructor
   · rintro ⟨a, rfl⟩
@@ -163,7 +165,7 @@ theorem range_primeModelEmbedding :
 /-- `primeModelEmbedding` is the only elementary embedding of the elements of `M` definable without
 parameters into `N`.
 - [Kay91, Theorem 8.2] -/
-noncomputable instance : Unique (definableElementsOver (∅ : Set M) ≼ₑ[ℒₒᵣ] N) where
+noncomputable instance : Unique (definableElements M ≼ₑ[ℒₒᵣ] N) where
   default := primeModelEmbedding M N
   uniq k := by
     obtain ⟨ι, hι⟩ := k
@@ -176,6 +178,6 @@ noncomputable instance : Unique (definableElementsOver (∅ : Set M) ≼ₑ[ℒ�
     simp only [eval_emb, Matrix.comp_vecCons'', Matrix.empty_eq, emb_apply] at h₁ h₂
     exact h₂.mpr (h₁.mp hθ)
 
-end definableElementsOver
+end definableElements
 
 end FFL.FirstOrder.Arithmetic

@@ -2,6 +2,7 @@ module
 
 public import Foundation.FirstOrder.LK.Soundness
 public import Foundation.FirstOrder.Tarski.Elementary
+public import Foundation.FirstOrder.Tarski.Eq
 
 /-! # Elementary substructures
 
@@ -180,5 +181,11 @@ lemma Tarski.Structure.ElementaryEquiv.of_complete (T : Theory L) [Entailment.Co
     have hN := models_of_provable (M := N) inferInstance h
     simp only [models_iff, LogicalConnective.HomClass.map_neg] at hM hN ⊢
     exact iff_of_false hM hN
+
+lemma Tarski.Structure.ElementaryEquiv.existsUnique_iff [Nonempty M] [Nonempty N] [L.Eq]
+    [Tarski.Structure.Eq L M] [Tarski.Structure.Eq L N] [M ≡ₑ[L] N] (θ : Semisentence L 1) :
+    (∃! x : M, M ⊧/![x] θ) ↔ ∃! y : N, N ⊧/![y] θ := by
+  simpa [existsUnique, models_iff, ExistsUnique, Matrix.constant_eq_singleton] using
+    ElementaryEquiv.models (L := L) (M₁ := M) (M₂ := N) (φ := ∃¹! θ)
 
 end FFL.FirstOrder

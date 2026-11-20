@@ -397,6 +397,20 @@ lemma subset_definableElementsOver (A : Set M) : A ⊆ definableElementsOver A :
   intro x
   simp
 
+lemma mem_definableElementsOver_empty_iff {b : M} :
+    b ∈ definableElementsOver (∅ : Set M) ↔
+      ∃ θ : ArithmeticSemisentence 1, ∀ x, M ⊧/![x] θ ↔ x = b := by
+  constructor
+  · rintro ⟨m, θ, a, h⟩
+    have : IsEmpty (Fin m) := ⟨fun i ↦ (a i).2⟩
+    use Rew.rewriteMap (fun i ↦ isEmptyElim i) ▹ θ
+    intro x
+    rw [← h x, eval_rewriteMap]
+    exact iff_of_eq (congrArg (fun f ↦ Eval ![x] f θ) (Subsingleton.elim _ _))
+  · rintro ⟨θ, h⟩
+    use 0, Rewriting.emb θ, Fin.elim0
+    simpa using h
+
 /-- An element defined uniquely by a formula with parameters from `A` and from
 `definableElementsOver A` is definable over `A`. -/
 lemma mem_definableElementsOver_of_unique {n m : ℕ} {ψ : ArithmeticSemiformula (Fin m) (n + 1)}

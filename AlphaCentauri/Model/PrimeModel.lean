@@ -19,48 +19,26 @@ namespace FFL.FirstOrder.Arithmetic
 open Semiformula Tarski.Structure
 
 variable {M N : Type} [ORingStructure M] [ORingStructure N]
-
-lemma mem_definableElementsOver_empty_iff {b : M} :
-    b ∈ definableElementsOver (∅ : Set M) ↔
-      ∃ θ : ArithmeticSemisentence 1, ∀ x, M ⊧/![x] θ ↔ x = b := by
-  constructor
-  · rintro ⟨m, θ, a, h⟩
-    have : IsEmpty (Fin m) := ⟨fun i ↦ (a i).2⟩
-    use Rew.rewriteMap (fun i ↦ isEmptyElim i) ▹ θ
-    intro x
-    rw [← h x, eval_rewriteMap]
-    exact iff_of_eq (congrArg (fun f ↦ Eval ![x] f θ) (Subsingleton.elim _ _))
-  · rintro ⟨θ, h⟩
-    use 0, Rewriting.emb θ, Fin.elim0
-    simpa using h
-
-variable [M ≡ₑ[ℒₒᵣ] N]
-
-lemma existsUnique_iff_of_elementaryEquiv (θ : ArithmeticSemisentence 1) :
-    (∃! x : M, M ⊧/![x] θ) ↔ ∃! y : N, N ⊧/![y] θ := by
-  simpa [models_iff, ExistsUnique, Matrix.constant_eq_singleton] using
-    (ElementaryEquiv.models (L := ℒₒᵣ) (M₁ := M) (M₂ := N)
-      (φ := “∃ x, !θ x ∧ ∀ y, !θ y → y = x”))
+  [M ≡ₑ[ℒₒᵣ] N]
 
 namespace definableElementsOver
 
 lemma existsUnique_realize (a : definableElementsOver (∅ : Set M)) :
     ∃! y : N, ∀ θ : ArithmeticSemisentence 1, M ⊧/![a.1] θ → N ⊧/![y] θ := by
   obtain ⟨θa, ha⟩ := mem_definableElementsOver_empty_iff.mp a.2
-  obtain ⟨y, hy, huniq⟩ := (existsUnique_iff_of_elementaryEquiv (N := N) θa).mp
-    ⟨a.1, (ha a).mpr rfl, fun x hx ↦ (ha x).mp hx⟩
+  obtain ⟨y, hy, huniq⟩ := (ElementaryEquiv.existsUnique_iff (N := N) θa).mp
+    ⟨a.1, (ha _).mpr rfl, fun x ↦ (ha x).mp⟩
   use y
-  constructor
+  and_intros
   · intro θ hθ
-    obtain ⟨z, hz, -⟩ := (existsUnique_iff_of_elementaryEquiv (N := N) (θa ⋏ θ)).mp
-      ⟨a.1, by simpa [(ha a).mpr rfl] using hθ, fun x hx ↦ (ha x).mp <| by
-        simp only [LogicalConnective.HomClass.map_and] at hx
-        exact hx.1⟩
+    obtain ⟨z, hz, -⟩ := (ElementaryEquiv.existsUnique_iff (N := N) (θa ⋏ θ)).mp
+      ⟨a.1, by simpa [(ha _).mpr rfl] using hθ, fun x hx ↦
+        (ha x).mp (show M ⊧/![x] θa ∧ M ⊧/![x] θ by simpa using hx).1⟩
     simp only [LogicalConnective.HomClass.map_and] at hz
-    rw [← huniq z hz.1]
+    obtain rfl := huniq z hz.1
     exact hz.2
   · intro y' hy'
-    exact huniq y' (hy' θa ((ha a).mpr rfl))
+    exact huniq y' (hy' θa ((ha _).mpr rfl))
 
 /-- The element of `N` realizing the type of an element of `M` definable without parameters. -/
 noncomputable def primeModelMap (a : definableElementsOver (∅ : Set M)) : N :=
@@ -111,9 +89,9 @@ lemma evalb_primeModelMap {n : ℕ} (φ : ArithmeticSemisentence n)
 lemma primeModelMap_mem (a : definableElementsOver (∅ : Set M)) :
     (primeModelMap a : N) ∈ definableElementsOver (∅ : Set N) := by
   obtain ⟨θ, hθ⟩ := mem_definableElementsOver_empty_iff.mp a.2
-  obtain ⟨y, -, huniq⟩ := (existsUnique_iff_of_elementaryEquiv (N := N) θ).mp
-    ⟨a.1, (hθ a).mpr rfl, fun x hx ↦ (hθ x).mp hx⟩
-  have ha : N ⊧/![primeModelMap a] θ := realize_primeModelMap a ((hθ a).mpr rfl)
+  obtain ⟨y, -, huniq⟩ := (ElementaryEquiv.existsUnique_iff (N := N) θ).mp
+    ⟨a.1, (hθ _).mpr rfl, fun x ↦ (hθ x).mp⟩
+  have ha := realize_primeModelMap (N := N) a ((hθ _).mpr rfl)
   apply mem_definableElementsOver_empty_iff.mpr
   use θ
   intro x
@@ -126,16 +104,13 @@ lemma primeModelMap_mem (a : definableElementsOver (∅ : Set M)) :
 lemma exists_primeModelMap_eq {b : N} (hb : b ∈ definableElementsOver (∅ : Set N)) :
     ∃ a : definableElementsOver (∅ : Set M), primeModelMap a = b := by
   obtain ⟨θ, hθ⟩ := mem_definableElementsOver_empty_iff.mp hb
-  obtain ⟨x, hx, huniq⟩ := (existsUnique_iff_of_elementaryEquiv (M := M) θ).mpr
-    ⟨b, (hθ b).mpr rfl, fun y hy ↦ (hθ y).mp hy⟩
+  obtain ⟨x, hx, huniq⟩ := (ElementaryEquiv.existsUnique_iff (M := M) (N := N) θ).mpr
+    ⟨b, (hθ _).mpr rfl, fun y ↦ (hθ y).mp⟩
   have hmem : x ∈ definableElementsOver (∅ : Set M) := by
     apply mem_definableElementsOver_empty_iff.mpr
     use θ
     intro y
-    constructor
-    · exact huniq y
-    · rintro rfl
-      exact hx
+    exact ⟨huniq y, by rintro rfl; exact hx⟩
   use ⟨x, hmem⟩
   exact (hθ _).mp (realize_primeModelMap ⟨x, hmem⟩ hx)
 

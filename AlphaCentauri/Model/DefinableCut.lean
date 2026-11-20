@@ -19,12 +19,12 @@ variable {j : ℕ} {M : Type} [ORingStructure M]
 /-- The elements of `M` below a $\Sigma_{j+1}$-definable element.
 - [HP98, Definition IV.1.32] -/
 def definableCut (j : ℕ) (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : ClosedCut M where
-  carrier := {a | ∃ c ∈ definableElements (j + 1) M, a < c}
+  carrier := {a | ∃ c ∈ sigmaDefinableElements (j + 1) M, a < c}
   succ_mem := by
     rintro a ⟨c, hc, hac⟩
     use c + 1
     and_intros
-    · exact ((⟨c, hc⟩ : definableElements (j + 1) M) + 1).2
+    · exact ((⟨c, hc⟩ : sigmaDefinableElements (j + 1) M) + 1).2
     · simpa using hac
   mem_of_lt := by
     rintro a b hab ⟨c, hc, hbc⟩
@@ -32,19 +32,19 @@ def definableCut (j : ℕ) (M : Type) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* �
     and_intros
     · exact hc
     · exact hab.trans hbc
-  zero_mem := ⟨1, (1 : definableElements (j + 1) M).2, zero_lt_one⟩
-  one_mem := ⟨1 + 1, (1 + 1 : definableElements (j + 1) M).2, lt_add_one 1⟩
+  zero_mem := ⟨1, (1 : sigmaDefinableElements (j + 1) M).2, zero_lt_one⟩
+  one_mem := ⟨1 + 1, (1 + 1 : sigmaDefinableElements (j + 1) M).2, lt_add_one 1⟩
   add_mem := by
     rintro a b ⟨c, hc, hac⟩ ⟨d, hd, hbd⟩
     use c + d
     and_intros
-    · exact ((⟨c, hc⟩ : definableElements (j + 1) M) + ⟨d, hd⟩).2
+    · exact ((⟨c, hc⟩ : sigmaDefinableElements (j + 1) M) + ⟨d, hd⟩).2
     · exact _root_.add_lt_add hac hbd
   mul_mem := by
     rintro a b ⟨c, hc, hac⟩ ⟨d, hd, hbd⟩
     use c * d
     and_intros
-    · exact ((⟨c, hc⟩ : definableElements (j + 1) M) * ⟨d, hd⟩).2
+    · exact ((⟨c, hc⟩ : sigmaDefinableElements (j + 1) M) * ⟨d, hd⟩).2
     · exact mul_lt_mul'' hac hbd _root_.zero_le _root_.zero_le
 
 namespace definableCut
@@ -53,7 +53,7 @@ variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
 
 @[simp]
 lemma mem_iff {a : M} :
-    a ∈ (definableCut j M).carrier ↔ ∃ c ∈ definableElements (j + 1) M, a < c := Iff.rfl
+    a ∈ (definableCut j M).carrier ↔ ∃ c ∈ sigmaDefinableElements (j + 1) M, a < c := Iff.rfl
 
 open Bootstrapping in
 /-- A prenex $\Pi_m$ formula, `m < j`, with parameters from the cut and a witness in `M` has a
@@ -122,9 +122,10 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
         exact (hρ y x).mpr fun _ ↦ hx
       · use 0
         simp [hρ, hy]
-  obtain ⟨d, hd, hCd, -⟩ := exists_least_mem_definableElements (φ := C)
+  obtain ⟨d, hd, hCd, -⟩ := exists_least_mem_sigmaDefinableElements (φ := C)
     ((by simp [C, hσ, hθ] : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) C).mono hm) (e := ![c])
-    (f := fun _ ↦ 0) (Fin.forall_fin_one.mpr hc) (fun _ ↦ (0 : definableElements (j + 1) M).2) <| by
+    (f := fun _ ↦ 0) (Fin.forall_fin_one.mpr hc)
+    (fun _ ↦ (0 : sigmaDefinableElements (j + 1) M).2) <| by
       use d₀
       apply (hC d₀).mpr
       intro y hy hS
@@ -154,14 +155,14 @@ theorem sigmaElementary :
     use ⟨x, hx⟩
     exact hφx
 
-variable {a : M} (ha : a ∈ definableElements (j + 1) M) (hns : ∀ m : ℕ, (m : M) < a)
+variable {a : M} (ha : a ∈ sigmaDefinableElements (j + 1) M) (hns : ∀ m : ℕ, (m : M) < a)
 include hns
 
 /-- The cut below the definable elements satisfies $\mathsf{B}\Sigma_{j+1}$ once `M` is
 nonstandard.
 - [HP98, Lemma IV.1.44(1)] -/
 theorem models_BSigma : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := by
-  obtain ⟨b, hb⟩ := exists_bound_definableElements (j := j) hns
+  obtain ⟨b, hb⟩ := exists_bound_sigmaDefinableElements (j := j) hns
   have hI : ∃ c, c ∉ (definableCut j M).carrier := by
     use b
     rintro ⟨c, hc, hbc⟩
@@ -174,8 +175,9 @@ nonstandard.
 - [HP98, Lemma IV.1.44(3)] -/
 theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜𝚺 (j + 1) := by
   intro hI
-  have hK {x : M} (hx : x ∈ definableElements (j + 1) M) (hxI : x ∈ (definableCut j M).carrier) :
-      ⟨x, hxI⟩ ∈ definableElements (j + 1) (definableCut j M).carrier := by
+  have hK {x : M} (hx : x ∈ sigmaDefinableElements (j + 1) M)
+      (hxI : x ∈ (definableCut j M).carrier) :
+      ⟨x, hxI⟩ ∈ sigmaDefinableElements (j + 1) (definableCut j M).carrier := by
     obtain ⟨φ, hφ, hφx⟩ := id hx
     obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
     have := models_BSigma (j := j) hns
@@ -201,12 +203,12 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
         use w.1
         simpa [Matrix.comp_vecCons''] using (transfer ![w, z]).mpr hw
       · rintro rfl
-        obtain ⟨w, hw, hχ, -⟩ := exists_least_mem_definableElements
+        obtain ⟨w, hw, hχ, -⟩ := exists_least_mem_sigmaDefinableElements
           (φ := (φ'.sigmaInv.rew Rew.emb).val) (e := ![x]) (f := fun _ ↦ 0)
           Bounding.Prenex.val_hierarchy (Fin.forall_fin_one.mpr hx)
-          (fun _ ↦ (0 : definableElements (j + 1) M).2) <| by
+          (fun _ ↦ (0 : sigmaDefinableElements (j + 1) M).2) <| by
             simpa [eval_emb] using (h₁ x).mp ((hφx x).mpr rfl)
-        use ⟨w, w + 1, ((⟨w, hw⟩ : definableElements (j + 1) M) + 1).2, lt_add_one w⟩
+        use ⟨w, w + 1, ((⟨w, hw⟩ : sigmaDefinableElements (j + 1) M) + 1).2, lt_add_one w⟩
         apply (transfer _).mp
         simpa [Matrix.comp_vecCons'', eval_emb] using hχ
   have : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (Nat.le_add_left 1 j)
@@ -214,9 +216,9 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
     induction c with
     | zero => rfl
     | succ c ih => simp [Nat.cast_succ, ← ih]; rfl
-  have hI' {c : M} (hc : c ∈ definableElements (j + 1) M) : c ∈ (definableCut j M).carrier :=
-    ⟨c + 1, ((⟨c, hc⟩ : definableElements (j + 1) M) + 1).2, lt_add_one c⟩
-  obtain ⟨b, hb⟩ := exists_bound_definableElements (V := (definableCut j M).carrier) (j := j)
+  have hI' {c : M} (hc : c ∈ sigmaDefinableElements (j + 1) M) : c ∈ (definableCut j M).carrier :=
+    ⟨c + 1, ((⟨c, hc⟩ : sigmaDefinableElements (j + 1) M) + 1).2, lt_add_one c⟩
+  obtain ⟨b, hb⟩ := exists_bound_sigmaDefinableElements (V := (definableCut j M).carrier) (j := j)
     (a := ⟨a, hI' ha⟩) fun m ↦ by
     change ((m : (definableCut j M).carrier) : M) < a
     rw [hcast]

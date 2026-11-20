@@ -1,5 +1,6 @@
 module
 
+public import Foundation.FirstOrder.LK.Soundness
 public import Foundation.FirstOrder.Tarski.Elementary
 
 /-! # Elementary substructures
@@ -8,7 +9,7 @@ For a class $\Gamma$ of formulas of a language `L`, a $\Gamma$-elementary substr
 `L`-structure `N` is a structure `M` together with an embedding into `N` along which every formula
 of $\Gamma$ takes the same truth value at elements of `M` as at their images. An elementary
 substructure is a $\Gamma$-elementary substructure for every formula; a proper one is not
-surjective.
+surjective. Models of a complete theory are elementarily equivalent.
 -/
 
 @[expose] public section
@@ -167,5 +168,17 @@ def ProperElementarySubstructureOn.mono (e : M ≺ₑ[L; Γ] N)
     (h : ∀ {n : ℕ} {φ : Semiformula L ℕ n}, Γ' φ → Γ φ) : M ≺ₑ[L; Γ'] N where
   toElementarySubstructureOn := e.toElementarySubstructureOn.mono h
   not_surjective := e.not_surjective
+
+lemma Tarski.Structure.ElementaryEquiv.of_complete (T : Theory L) [Entailment.Complete T]
+    (M : Type u) (N : Type v) [Nonempty M] [Nonempty N] [Tarski.Structure L M]
+    [Tarski.Structure L N] [M↓[L] ⊧* T] [N↓[L] ⊧* T] : M ≡ₑ[L] N := by
+  constructor
+  intro σ
+  rcases Entailment.Complete.con (𝓢 := T) σ with h | h
+  · exact iff_of_true (models_of_provable inferInstance h) (models_of_provable inferInstance h)
+  · have hM := models_of_provable (M := M) inferInstance h
+    have hN := models_of_provable (M := N) inferInstance h
+    simp only [models_iff, LogicalConnective.HomClass.map_neg] at hM hN ⊢
+    exact iff_of_false hM hN
 
 end FFL.FirstOrder

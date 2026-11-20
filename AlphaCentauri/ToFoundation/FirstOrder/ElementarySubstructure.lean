@@ -170,6 +170,20 @@ def ProperElementarySubstructureOn.mono (e : M ≺ₑ[L; Γ] N)
   toElementarySubstructureOn := e.toElementarySubstructureOn.mono h
   not_surjective := e.not_surjective
 
+/-- An isomorphism is an elementary substructure. -/
+def Tarski.Structure.Iso.toElementarySubstructure (f : M ≃ₛ[L] N) : M ≼ₑ[L] N where
+  emb := f.toEmbedding
+  isElementary := by
+    apply IsElementary.of_tarskiVaught
+    intro n φ e g ⟨x, hx⟩
+    obtain ⟨a, rfl⟩ := f.toFun_bij.2 x
+    use a
+    exact hx
+
+lemma Tarski.Structure.ElementaryEquiv.of_elementarySubstructure [Nonempty M] [Nonempty N]
+    (e : M ≼ₑ[L] N) : M ≡ₑ[L] N :=
+  ⟨fun {σ} ↦ (IsElementary.models_iff e.isElementary σ).symm⟩
+
 lemma Tarski.Structure.ElementaryEquiv.of_complete (T : Theory L) [Entailment.Complete T]
     (M : Type u) (N : Type v) [Nonempty M] [Nonempty N] [Tarski.Structure L M]
     [Tarski.Structure L N] [M↓[L] ⊧* T] [N↓[L] ⊧* T] : M ≡ₑ[L] N := by

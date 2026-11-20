@@ -7,7 +7,8 @@ public import AlphaCentauri.Model.DefinableElements
 The elements of a model `M` of `𝗣𝗔` definable without parameters embed elementarily into every
 model `N` elementarily equivalent to `M`, in exactly one way, and the image consists of the elements
 of `N` definable without parameters. For a complete extension `T` of `𝗣𝗔` these elements form the
-prime model $K_T$ of `T`.
+prime model $K_T$ of `T`. Consequently the prime model has no proper elementary substructures and no
+non-trivial automorphisms.
 
 - [Kay91, §8.1]
 -/
@@ -177,6 +178,29 @@ noncomputable instance : Unique (definableElements M ≼ₑ[ℒₒᵣ] N) where
     have h₂ := hι (φ := Rewriting.emb θ) trivial ![a] fun _ ↦ a
     simp only [eval_emb, Matrix.comp_vecCons'', Matrix.empty_eq, emb_apply] at h₁ h₂
     exact h₂.mpr (h₁.mp hθ)
+
+omit [M ≡ₑ[ℒₒᵣ] N] in
+/-- The elements of `M` definable without parameters have no proper elementary substructures.
+- [Kay91, Corollary 8.3] -/
+theorem surjective_of_elementarySubstructure [Nonempty N]
+    (f : N ≼ₑ[ℒₒᵣ] definableElements M) : Function.Surjective f := by
+  have : M ≡ₑ[ℒₒᵣ] definableElements M :=
+    (ElementaryEquiv.of_elementarySubstructure (elementarySubstructure (∅ : Set M))).symm
+  have : M ≡ₑ[ℒₒᵣ] N :=
+    this.trans (ElementaryEquiv.of_elementarySubstructure f).symm
+  intro b
+  have := congrArg (fun e : definableElements M ≼ₑ[ℒₒᵣ] definableElements M ↦ e b)
+    (Subsingleton.elim ((primeModelEmbedding M N).trans f) (ElementarySubstructureOn.refl _ _))
+  exact ⟨primeModelEmbedding M N b, this⟩
+
+/-- The elements of `M` definable without parameters have no non-trivial automorphisms.
+- [Kay91, Corollary 8.4] -/
+theorem eq_id_of_iso (f : definableElements M ≃ₛ[ℒₒᵣ] definableElements M) : ⇑f = id := by
+  have : M ≡ₑ[ℒₒᵣ] definableElements M :=
+    (ElementaryEquiv.of_elementarySubstructure (elementarySubstructure (∅ : Set M))).symm
+  funext b
+  exact congrArg (fun e : definableElements M ≼ₑ[ℒₒᵣ] definableElements M ↦ e b)
+    (Subsingleton.elim f.toElementarySubstructure (ElementarySubstructureOn.refl _ _))
 
 end definableElements
 

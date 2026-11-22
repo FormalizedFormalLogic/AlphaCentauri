@@ -546,7 +546,8 @@ namespace ProperEndExtension
 /-- A proper end extension followed by an end extension is proper. -/
 protected def transLeft (e₁ : M ⊂ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) : M ⊂ₑ[ℬ] K where
   toEndExtension := e₁.toEndExtension.trans e₂
-  not_surjective h := e₁.not_surjective fun y ↦ by
+  not_surjective h := e₁.not_surjective <| by
+    intro y
     obtain ⟨x, hx⟩ := h (e₂ y)
     use x
     exact e₂.emb_injective hx
@@ -709,9 +710,7 @@ theorem isTypeOver_theory_iff_finitelySatisfied {ι : Type*} {M : Type*} [Nonemp
         use F \ A
         and_intros
         · intro σ ⟨hσF, hσA⟩
-          rcases hF hσF with hσ | hσ
-          · exact absurd hσ hσA
-          · simpa [Set.image_image] using hσ
+          simpa [Set.image_image] using (hF hσF).resolve_left hσA
         · exact Set.Finite.sdiff hfin
         · intro σ hσ
           by_cases hσA : σ ∈ A

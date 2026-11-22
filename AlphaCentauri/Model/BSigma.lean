@@ -69,10 +69,13 @@ private lemma exists_bound_of_isElementary (hI : ∃ c, c ∉ I.carrier)
   obtain ⟨b, hb, h₂⟩ : ∃ b ∈ I.carrier, Θ.Eval ![b] g := by
     by_contra! h₂
     obtain ⟨c, hc, h₃⟩ := overspill ι 𝚺 j (φ := ∼Θ)
-      (by simp [Θ, hψ.hierarchy]) g fun b ↦ by simpa [ι] using h₂ b.1 b.2
-    have hc' : c ∉ I.carrier := fun h ↦ hc ⟨⟨c, h⟩, rfl⟩
+      (by simp [Θ, hψ.hierarchy]) g <| by intro b; simpa [ι] using h₂ b.1 b.2
+    have hc' : c ∉ I.carrier := by
+      intro h
+      exact hc ⟨⟨c, h⟩, rfl⟩
     obtain ⟨d, rfl⟩ := eq_succ_of_pos (hlt I.zero_mem hc')
-    exact absurd (h₁ fun h ↦ hc' (I.succ_mem h)) (by simpa using h₃ d (lt_add_one d))
+    have h₄ : ¬Θ.Eval ![d] g := by simpa using h₃ d (lt_add_one d)
+    exact h₄ <| h₁ <| by intro h; exact hc' (I.succ_mem h)
   use ⟨b, hb⟩
   intro x hx
   obtain ⟨y, hy, z, hz, h₃⟩ := (hΘ b).mp h₂ x.1 hx
@@ -170,10 +173,11 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
     rw [Sentence.coe_quote_eq_quote, show x ∷ matrixToVec (Subtype.val ∘ w) =
       matrixToVec (x :> Subtype.val ∘ w) by simp, prenexSatisfied_quote_iff,
       Bounding.Prenex.val_rew]
-    exact eval_toSemisentence (φ := φ.val) _ (fun i ↦ by cases i using Fin.cases <;> simp [w])
-      fun i ↦ by
-        change (x :> Subtype.val ∘ w) (Fin.succ ⟨i + n, by omega⟩) = (f i).1
-        simp [w]
+    apply eval_toSemisentence (φ := φ.val) _
+      (by intro i; cases i using Fin.cases <;> simp [w])
+    intro i
+    change (x :> Subtype.val ∘ w) (Fin.succ ⟨i + n, by omega⟩) = (f i).1
+    simp [w]
   have hcode {N : ℕ} (v : Fin N → (definableCut j M).carrier) :
       matrixToVec (Subtype.val ∘ v) ∈ (definableCut j M).carrier := by
     induction N with
@@ -316,7 +320,8 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
   have hI' {c : M} (hc : c ∈ sigmaDefinableElements (j + 1) M) : c ∈ (definableCut j M).carrier :=
     ⟨c + 1, ((⟨c, hc⟩ : sigmaDefinableElements (j + 1) M) + 1).2, lt_add_one c⟩
   obtain ⟨b, hb⟩ := exists_bound_sigmaDefinableElements (V := (definableCut j M).carrier) (j := j)
-    (a := ⟨a, hI' ha⟩) fun m ↦ by
+    (a := ⟨a, hI' ha⟩) <| by
+    intro m
     change ((m : (definableCut j M).carrier) : M) < a
     rw [hcast]
     exact hns m

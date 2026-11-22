@@ -4,7 +4,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZero.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILPZero.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.MaximalConsistentTheoryModel
-import AlphaCentauri.OpenProblem
 
 /-!
 # The logic $\mathbf{ILR}$
@@ -96,12 +95,6 @@ theorem ILR.complete_verbrugge {α : Type} {A : Formula α}
   exact ofILAxioms.not_models_verbrugge_countermodel hA (h _)
 
 end Logic
-
-/-- Is $\mathbf{ILR}$ complete with respect to Veltman semantics?
-- [MV20, §2.5] -/
-open_problem Logic.ILR.complete_veltman :=
-  ∀ A : Formula ℕ,
-    (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsILR], M ⊧ A) → 𝐈𝐋𝐑 ⊢ A
 
 end FFL.InterpretabilityLogic
 

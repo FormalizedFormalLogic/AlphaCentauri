@@ -81,6 +81,10 @@ rewrite, so it is written as if it were already there.
   $\mathsf{I}\Delta_0$ prove the infinitude of primes?`), then cites the source; it does not say
   that the problem is open. A result that depends on an open problem takes it as a hypothesis
   `(h : Name)`.
+- **No `axiom` or `open_problem` in a `Basic.lean`.** As a rule, a `Basic.lean` holds only the
+  definitions of its subject and the facts proved about them, which every other module of the
+  subject imports. An `axiom` or an `open_problem` goes in a module of its own, or in the module
+  of the results it is about, never in `Basic.lean`.
 - **Reuse before restating.** Foundation's theories, notations, definability classes, and the
   hierarchy are the vocabulary. A definition that duplicates a Foundation definition under a
   new name is rejected in review. If Foundation's API is missing or awkward, say so in the

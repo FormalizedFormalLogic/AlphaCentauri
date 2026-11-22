@@ -22,16 +22,18 @@ numerals for the bound variables of a code of a formula, ported to models of $\m
 Foundation's `ssnum` and `ssnums`.
 -/
 
-section
-
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
 namespace ElementaryArithmetic
 
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+
+section
+
 open _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {k : ℕ}
+variable {k : ℕ}
 
 /-- The list of the entries of the tuple `v`. -/
 noncomputable def matrixToVec {k : ℕ} (v : Fin k → V) : V := Matrix.foldr (fun t w ↦ t ∷ w) 0 v
@@ -123,9 +125,6 @@ instance substNumerals.defined :
 
 end Bootstrapping.Arithmetic
 
-end ElementaryArithmetic
-end FFL.FirstOrder.Arithmetic
-
 end
 
 /-! ## Internal provability in models of $\mathsf{EA}$: instantiation, modus ponens and induction
@@ -135,14 +134,7 @@ the derivations of an instance of a universal formula and of the conclusion of a
 the induction on a numeral of a formula whose base case and induction step are theorems.
 -/
 
-section
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-namespace FFL.FirstOrder.Arithmetic
-namespace ElementaryArithmetic.Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+namespace Bootstrapping
 
 section transfer
 
@@ -756,7 +748,7 @@ theorem provable_substNumerals_of_provable_zero_of_provable_succ [𝗣𝗔⁻ �
     (fun y ↦ (isSemiformula_natCast_quote φ).subst (hW y)) he hd₁
     (fun _ hy ↦ substs1_subst_qVec_numerals_imp φ p hy) y
 
-end ElementaryArithmetic.Bootstrapping
-end FFL.FirstOrder.Arithmetic
+end Bootstrapping
 
-end
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic

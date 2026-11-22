@@ -24,22 +24,22 @@ Foundation does not provide.
 
 namespace FFL.FirstOrder
 
-variable {L : Language} [L.LT] {ξ : Type*} {n : ℕ} {φ ψ : Semiformula L ξ n}
-
 open Arithmetic
+
+variable {L : Language} [L.LT] {ξ : Type*}
+
+namespace Bounding.Closure
+
+variable {n : ℕ} {φ ψ : Semiformula L ξ n}
 
 -- `witnesses_verum`/`witnesses_identity` build a bounded witness directly from its shape;
 -- these are intro rules for goals like `ℬ[<, L].Closure (.rel r v)`.
-attribute [grind .] Bounding.Closure.verum Bounding.Closure.falsum Bounding.Closure.rel
-  Bounding.Closure.nrel
+attribute [grind .] verum falsum rel nrel
 
 /-- A bounded formula sits at every zero level of the arithmetical hierarchy. -/
 @[grind ←]
-theorem Bounding.Closure.hierarchy {Γ : Polarity} (h : ℬ[<, L].Closure φ) :
-    ℬ[<, L].Hierarchy Γ 0 φ :=
+theorem hierarchy {Γ : Polarity} (h : ℬ[<, L].Closure φ) : ℬ[<, L].Hierarchy Γ 0 φ :=
   .bounded _ _ _ h
-
-namespace Bounding.Closure
 
 lemma arithmetic_ball {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} (ht : t.Positive)
     (h : ℬ[<, L].Closure φ) : ℬ[<, L].Closure (∀¹[“x. x < !!t”] φ) :=
@@ -62,10 +62,6 @@ lemma arithmetic_bexs {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)
 
 lemma of_open (h : φ.Open) : ℬ[<, L].Closure φ :=
   Bounding.Hierarchy.zero_iff_bounded.mp (Bounding.Hierarchy.of_open (Γ := 𝚺) (s := 0) h)
-
-end Bounding.Closure
-
-namespace Bounding.Closure
 
 /-- Recursion on `ℬ[<, L]`-bounded formulas, with the literals collected into a single case for open
 formulas. -/
@@ -91,8 +87,6 @@ lemma induction_open {P : (n : ℕ) → Semiformula L ξ n → Prop}
 
 end Bounding.Closure
 
-end FFL.FirstOrder
-
 /-! ## The arithmetical hierarchy of a universal closure
 
 `ℬ[<, L].Hierarchy 𝚷 (s + 1)` passes through `Semiformula.univCl`, and every axiom of `𝗣𝗔⁻` is
@@ -102,12 +96,9 @@ axiom of `𝗣𝗔⁻` is such a block of universal quantifiers. `ℬ.PrenexHier
 prenex $\Sigma_m$ and $\Pi_m$ formulas with `m ≤ s`.
 -/
 
-namespace FFL.FirstOrder
 namespace Bounding.Hierarchy
 
-open Arithmetic
-
-variable {L : Language} [L.LT] {ξ : Type*} {Γ : Polarity} {s n : ℕ}
+variable {Γ : Polarity} {s n : ℕ}
 
 @[simp] lemma toEmpty_iff [DecidableEq ξ] {φ : Semiformula L ξ n} (h : φ.freeVariables = ∅) :
     ℬ[<, L].Hierarchy Γ s (φ.toEmpty h) ↔ ℬ[<, L].Hierarchy Γ s φ := by
@@ -143,12 +134,10 @@ lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) : �
   | _ => simp
 
 end Bounding.Hierarchy
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder
 namespace Bounding
 
-variable {L : Language} [L.LT] {ξ : Type*} {n : ℕ}
+variable {n : ℕ}
 
 /-- The body of a bounded existential is bounded. -/
 @[grind →]
@@ -276,10 +265,8 @@ abbrev PrenexHierarchyLE (ℬ : Bounding L) (s : ℕ) (φ : Semiformula L ξ n) 
   ∃ m ≤ s, ∃ Γ, ℬ.PrenexHierarchy Γ m φ
 
 end Bounding
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic
-namespace PeanoMinus
+namespace Arithmetic.PeanoMinus
 
 open Bounding
 
@@ -311,8 +298,9 @@ theorem prenexBlock : ∀ φ ∈ 𝗣𝗔⁻, ℬ[<, ℒₒᵣ].PrenexBlock 𝚷
   case ltTrans => exact .all (.all (.all (.of_deltaZero (by simp))))
   case ltTri => exact .all (.all (.of_deltaZero (by simp)))
 
-end PeanoMinus
-end FFL.FirstOrder.Arithmetic
+end Arithmetic.PeanoMinus
+
+end FFL.FirstOrder
 
 namespace FFL.FirstOrder
 namespace Bounding.HierarchySymbol.Semiformula
@@ -323,7 +311,6 @@ variable {L : Language} {ℬ : Bounding L} {ξ : Type*} {n s : ℕ}
     (h : C.rank ≤ s + 1) : ℬ.Hierarchy Γ (s + 2) φ.val := hierarchy_of_lt φ (by omega)
 
 end Bounding.HierarchySymbol.Semiformula
-end FFL.FirstOrder
 
 /-! ## Boolean combinations of a class of formulas
 
@@ -333,7 +320,7 @@ of its members, under `⋏` and `⋎`.
 - [Bek99, §2]
 -/
 
-namespace FFL.FirstOrder
+section
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
 
@@ -370,9 +357,8 @@ lemma mono (h : ∀ {φ}, Γ' φ → BooleanCombination Γ φ) :
 
 end BooleanCombination
 
-end FFL.FirstOrder
+end
 
-namespace FFL.FirstOrder
 namespace Arithmetic
 
 open FFL.FirstOrder (BooleanCombination)
@@ -412,7 +398,6 @@ theorem prenexHierarchy_alt_iff :
 end BooleanCombination
 
 end Arithmetic
-end FFL.FirstOrder
 
 /-! ## Prenex normal form
 
@@ -420,7 +405,6 @@ Every formula is equivalent, in every nonempty structure, to a prenex formula of
 and of every large enough level.
 -/
 
-namespace FFL.FirstOrder
 namespace Bounding
 
 universe u

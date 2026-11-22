@@ -22,6 +22,8 @@ statement that witnesses below a bound admit a common bound.
 namespace FFL.FirstOrder
 namespace Arithmetic
 
+section
+
 open Rewriting LawfulSyntacticRewriting
 
 variable {L : Language} [L.ORing]
@@ -50,17 +52,13 @@ lemma models_collectionAxiom_iff {V : Type*} [ORingStructure V]
   simp [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
     Semiformula.eval_bexsLT, Semiformula.eval_substs]
 
-end Arithmetic
-end FFL.FirstOrder
+end
 
 /-! ## Least witnesses of total $\Delta_1$ relations
 
 In a model of $\mathsf{I}\Sigma_1$, choosing for each `x` the least `y` with `R x y`, for a total
 $\Delta_1$ relation `R`, gives a $\Sigma_1$-definable function.
 -/
-
-namespace FFL.FirstOrder
-namespace Arithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 

@@ -94,6 +94,8 @@ lemma comp [LT V] {c : V} (h : IsInj R X Y) (h' : IsInj S Y W) (hY : ∀ y, Y y 
 
 end IsInj
 
+section
+
 variable [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻]
 
 /-- `R` on the tag-`t` copy, forgetting the tag. -/
@@ -275,8 +277,7 @@ lemma definable_tagged {t : V} {X : V → Prop} (hX : 𝚺ᴬ₀.DefinablePred X
   unfold Tagged
   definability
 
-end Arithmetic
-end FFL.FirstOrder
+end
 
 /-! ## The pigeonhole principle in models of $\mathsf{I}\Sigma_m$
 
@@ -284,12 +285,11 @@ In a model of $\mathsf{I}\Sigma_m$, $m \ge 1$, no $\Sigma_m$-definable relation 
 $a + 1$ into $a$.
 -/
 
-namespace FFL.FirstOrder
-namespace Arithmetic
+variable [ORingStructure V]
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+section
 
-variable {V : Type*} [ORingStructure V] {m : ℕ} [Fact (1 ≤ m)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺m]
+variable {m : ℕ} [Fact (1 ≤ m)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺m]
 
 section
 
@@ -410,8 +410,7 @@ theorem pigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ_[m].DefinableRel R) (a :
         · exact (hw x hx y hy).1 h
         · exact (hw x' hx' y hy).1 h'
 
-end Arithmetic
-end FFL.FirstOrder
+end
 
 /-! ## The pigeonhole principle for coded injections
 
@@ -419,13 +418,9 @@ Over a model of $\mathsf{EA}$, a number coding a sequence of blocks of width $\|
 injection of $\{0, \dots, x\}$ into $\{0, \dots, x - 1\}$ for $x \le a$.
 -/
 
-namespace FFL.FirstOrder.Arithmetic
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
 noncomputable section
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 attribute [local instance] ElementaryArithmetic.models_ISigma0_union_Omega1
 
@@ -504,4 +499,5 @@ theorem no_coded_injection (a x S : V) (hx : x ≤ a)
 
 end
 
-end FFL.FirstOrder.Arithmetic
+end Arithmetic
+end FFL.FirstOrder

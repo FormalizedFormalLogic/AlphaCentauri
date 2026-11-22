@@ -21,20 +21,19 @@ Term vectors of bound variables, and the typed internal derivations of blocks of
 quantifiers.
 -/
 
-section
-
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
 namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 /-! ## Term vectors -/
 
 section vecBvar
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] {n m k : ℕ}
+variable {n m k : ℕ}
 
 @[simp high] lemma Semiterm.shift_vecMap_bvar (f : Fin k → Fin n) :
     (Semiterm.shift ⨟ fun i ↦ (Semiterm.bvar (f i) : Semiterm V L n)) =
@@ -87,10 +86,6 @@ lemma Semiterm.shift_iterate_subst_nil (t : Term V L) (j : ℕ) :
 end vecBvar
 
 /-! ## Blocks of universal quantifiers -/
-
-open scoped FFL.FirstOrder.Arithmetic
-
-variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 section shiftIterate
 
@@ -383,30 +378,10 @@ lemma tprovable_exs_iff_exs_of_domain {d : Semiformula V L 1} (hd : T.internaliz
     cl_prover [h₁, h₂]
   cl_prover [hd, h₃, tprovable_all_iff_exs (T := T) A (d ⋏ B)]
 
-end Bootstrapping
-end FFL.FirstOrder.Arithmetic
-
-end
-
 /-! ## Provable equivalences of formula codes
 
 Provable equivalences between formula codes in the typed internal calculus.
 -/
-
-section
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-namespace FFL.FirstOrder.Arithmetic
-namespace Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
-/-! ## Provable equivalences of formula codes -/
-
-open scoped FFL.FirstOrder.Arithmetic
-
-variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
 
 lemma provable_iff_iff_tprovable {p q : V} (hp : IsFormula L p) (hq : IsFormula L q) :
     Provable T (iff L p q) ↔ T.internalize V ⊢ (⟨p, hp⟩ : Formula V L) 🡘 ⟨q, hq⟩ := by
@@ -514,5 +489,3 @@ lemma provable_exs_and_iff_exs_and {d d' p q : V} (hd : IsSemiformula L 1 d)
 
 end Bootstrapping
 end FFL.FirstOrder.Arithmetic
-
-end

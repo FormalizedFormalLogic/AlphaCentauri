@@ -21,6 +21,8 @@ coded set.
 namespace FFL.FirstOrder
 namespace Arithmetic
 
+open scoped FFL.FirstOrder.Bounding
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 attribute [local grind =] mem_bitInsert_iff mem_bitRemove_iff
@@ -55,20 +57,10 @@ lemma insert_subset_insert_insert {a p Γ s : V} (h : Γ ⊆ insert p s) :
     · simp
     · simp [hx]
 
-end Arithmetic
-end FFL.FirstOrder
-
 /-! ## The union of a list of coded sets
 
 `listUnion v` is the union of the coded sets listed in the vector `v`.
 -/
-
-namespace FFL.FirstOrder
-namespace Arithmetic
-
-open scoped FFL.FirstOrder.Bounding
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 namespace ListUnion
 
@@ -83,6 +75,8 @@ noncomputable def construction : VecRec.Construction V blueprint where
   adjoin_defined := .mk fun v ↦ by simp [blueprint]
 
 end ListUnion
+
+section
 
 open ListUnion
 
@@ -128,21 +122,13 @@ lemma listUnion_eq_empty_iff {v : V} : listUnion v = ∅ ↔ ∀ i < len v, v.[i
   simp only [mem_ext_iff, mem_listUnion_iff, not_mem_empty, iff_false, not_exists, not_and]
   exact ⟨fun h i hi x hx ↦ h x i hi hx, fun h x i hi hx ↦ h i hi x hx⟩
 
-end Arithmetic
-end FFL.FirstOrder
+end
 
 /-! ## The number of elements of a coded set
 
 `cardBelow s n` is the number of elements of the coded set `s` below `n`, and `card s` is the number
 of elements of `s`.
 -/
-
-namespace FFL.FirstOrder
-namespace Arithmetic
-
-open scoped FFL.FirstOrder.Bounding
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 namespace CardBelow
 

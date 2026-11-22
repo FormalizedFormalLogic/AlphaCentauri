@@ -18,9 +18,10 @@ Quantifier-rank invariance, distinctness lemmas, and constructor equations for `
 -/
 
 namespace FFL.FirstOrder
-namespace Semiformula
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
+
+namespace Semiformula
 
 section
 variable {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ}
@@ -59,17 +60,13 @@ attribute [grind .] ne_or_left ne_or_right ex_ne_subst
 attribute [grind =] Multiset.mem_atom_iff
 
 end Semiformula
-end FFL.FirstOrder
 
 /-! ## Substitution against a rewriting
 
 Commutation and congruence lemmas for substitutions and rewritings.
 -/
 
-namespace FFL.FirstOrder
 namespace Rew
-
-variable {L : Language} {ξ : Type*} {n : ℕ}
 
 lemma qpow_map {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) (k : ℕ) :
     (Rew.map (L := L) b e).qpow k = Rew.map (fun x : Fin (n₁ + k) ↦
@@ -170,12 +167,8 @@ lemma bShift_eq_subst : (Rew.bShift : Rew L ξ n ξ (n + 1)) = Rew.subst fun i �
   ext x <;> rfl
 
 end Rew
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder
 namespace Semiformula
-
-variable {L : Language} {ξ : Type*} {n : ℕ}
 
 variable {m : ℕ}
 
@@ -204,20 +197,12 @@ lemma map_rewriteMap_eq_shifts (Γ : Multiset (Semiformula L ℕ 0))
     Γ.map (fun φ ↦ (@Rew.rewriteMap L ℕ ℕ 0 fun x ↦ if x = m then 0 else x + 1) ▹ φ) = Γ⁺ :=
   Multiset.map_congr rfl fun φ hφ ↦ rewriteMap_eq_shift φ (h φ hφ)
 
-end Semiformula
-end FFL.FirstOrder
-
 /-! ## Free variables of a formula as bound variables of a semisentence
 
 `Semiformula.toSemisentence` turns a formula with `ℕ`-indexed free variables into a semisentence
 whose extra bound variables are those free variables, with the original bound variables placed by
 a caller-supplied substitution `b`.
 -/
-
-namespace FFL.FirstOrder
-namespace Semiformula
-
-variable {L : Language} {ξ : Type*} {n : ℕ}
 
 variable {k : ℕ}
 
@@ -272,7 +257,6 @@ lemma eval_toSemisentence_two (φ : Semiformula L ℕ 2) (x y : M)
     (fun _ ↦ by simp)
 
 end Semiformula
-end FFL.FirstOrder
 
 /-! ## Notation for a power by a variable exponent
 
@@ -280,7 +264,6 @@ end FFL.FirstOrder
 the power of `t` by the numeral `n`, as `t ^' 3` is for a numeral literal.
 -/
 
-namespace FFL.FirstOrder
 namespace BinderNotation
 
 open Semiterm

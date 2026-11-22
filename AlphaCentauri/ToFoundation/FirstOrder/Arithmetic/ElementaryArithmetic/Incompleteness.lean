@@ -27,8 +27,6 @@ $\mathsf{EA}$ the axioms of `𝗣𝗔⁻`, of the induction schemata over `ℬ[<
 $\Delta_0$ set (`LocallyDelta0Axioms`).
 -/
 
-section
-
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
@@ -132,28 +130,12 @@ example (Γ : Polarity) (s : ℕ) : LocallyDelta0Axioms (𝗜𝗡𝗗 Γ s) V :=
 
 example : LocallyDelta0Axioms 𝗘𝗔 V := inferInstance
 
-end ElementaryArithmetic
-end FFL.FirstOrder.Arithmetic
-
-end
-
 /-! ## Uniform reflection in models of $\mathsf{EA}$
 
 A model of $\mathsf{EA}$ satisfies the uniform reflection schema of a theory `T` for `φ` iff every
 instance of `φ` by numerals whose code is internally provable in `T` holds in the model, for
 theories `T` whose axioms are locally $\Delta_0$ in the model.
 -/
-
-section
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-namespace FFL.FirstOrder.Arithmetic
-namespace ElementaryArithmetic
-
-open _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 lemma models_uniformReflectionSchema_iff (T : ArithmeticTheory) [T.Δ₁] [LocallyDelta0Axioms T V]
     {k : ℕ} (φ : ArithmeticSemisentence k) :
@@ -165,5 +147,3 @@ lemma models_uniformReflectionSchema_iff (T : ArithmeticTheory) [T.Δ₁] [Local
 
 end ElementaryArithmetic
 end FFL.FirstOrder.Arithmetic
-
-end

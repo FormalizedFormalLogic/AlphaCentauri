@@ -27,6 +27,8 @@ open Semiformula
 
 universe u
 
+section
+
 variable {L : Language} {ι : Type*} {k : ℕ}
 
 /-- The new constant symbol `i` of `L.add (Language.constant ι)`. -/
@@ -122,7 +124,7 @@ lemma Tarski.Struc.eval_liftParameters_iff (φ : Semiformula L ι k) (e : Fin k 
 
 end
 
-end FFL.FirstOrder
+end
 
 /-! ## The language of ordered rings with finitely many extra constants
 
@@ -132,16 +134,10 @@ single one below any code, and a model of a theory of that language is a model o
 `k`-tuple named by the constants.
 -/
 
-namespace FFL.FirstOrder
-
 /-- `ℒₒᵣ` extended by `k` new constant symbols. -/
 abbrev Language.oringConst (k : ℕ) : Language := Language.add ℒₒᵣ (Language.constant (Fin k))
 
 namespace Arithmetic
-
-open Semiformula
-
-universe u
 
 variable {k : ℕ}
 

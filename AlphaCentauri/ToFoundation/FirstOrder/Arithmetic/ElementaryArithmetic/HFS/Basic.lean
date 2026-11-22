@@ -637,9 +637,6 @@ instance sndIdx_definable : 𝚺ᴬ₀-Function₁[V] sndIdx := sndIdx_defined.t
 instance sndIdx_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     Γ-Function₁[V] sndIdx := sndIdx_definable.of_zero
 
-end ElementaryArithmetic
-end FFL.FirstOrder.Arithmetic
-
 /-! ## Sequences in models of $\mathsf{EA}$
 
 The file `Foundation/FirstOrder/Arithmetic/HFS/Seq.lean` on sequences coded as mappings with
@@ -649,13 +646,6 @@ on the values.
 
 - [HP98, §I.1(b)]
 -/
-
-namespace FFL.FirstOrder.Arithmetic
-namespace ElementaryArithmetic
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 def Seq (s : V) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 

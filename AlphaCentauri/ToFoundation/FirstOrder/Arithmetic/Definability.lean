@@ -27,6 +27,8 @@ namespace Arithmetic
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 
+section
+
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 /-- A $\Sigma_1$ fact about standard numbers is inherited by every model of `𝗣𝗔⁻`.
@@ -85,8 +87,7 @@ lemma Delta1_cast₁ (σ : 𝚫ᴬ₁.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a
   simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
     using Delta1_cast (V := V) σ h
 
-end Arithmetic
-end FFL.FirstOrder
+end
 
 /-! ## Primitive recursion for truth of $\Delta_0$ formulas
 
@@ -94,8 +95,7 @@ Truth of a $\Delta_0$ formula, evaluated in either `List.Vector` or `Fin k → �
 a primitive recursive predicate.
 -/
 
-namespace FFL.FirstOrder
-namespace Arithmetic
+section
 
 variable {ξ : Type*} (ε : ξ → ℕ)
 
@@ -158,15 +158,9 @@ lemma primrec_termVal {α : Type*} [Primcodable α] {l : α → List ℕ} (hl : 
     simpa [Semiterm.val_func] using
       Primrec.nat_mul.comp (primrec_termVal hl (v 0)) (primrec_termVal hl (v 1))
 
-end Arithmetic
-end FFL.FirstOrder
+end
 
 /-! ## Prenex $\Sigma_1$ definability of existentially quantified relations -/
-
-namespace FFL.FirstOrder
-namespace Arithmetic
-
-open scoped FFL.FirstOrder.Bounding FFL.FirstOrder.Arithmetic
 
 variable {V : Type*} [ORingStructure V]
 

@@ -29,7 +29,6 @@ lemma exists_countermodel_of_unprovable {T : ArithmeticTheory} [𝗘𝗤 ℒₒ�
   exact h (complete T σ fun M _ _ ↦ hc M ‹_› ‹_›)
 
 end Arithmetic
-end FFL.FirstOrder
 
 /-! ## Homomorphisms and embeddings of `ℒₒᵣ`-structures
 
@@ -37,7 +36,7 @@ A homomorphism of `ℒₒᵣ`-structures preserves `0`, `1`, `+` and `*`; an emb
 and reflects `<`.
 -/
 
-namespace FFL.FirstOrder.Tarski.Structure
+namespace Tarski.Structure
 
 open Arithmetic
 
@@ -65,4 +64,6 @@ end HomClass
     f x < f y ↔ x < y := by
   simpa [Function.comp_def] using EmbeddingClass.rel f Language.LT.lt ![x, y]
 
-end FFL.FirstOrder.Tarski.Structure
+end Tarski.Structure
+
+end FFL.FirstOrder

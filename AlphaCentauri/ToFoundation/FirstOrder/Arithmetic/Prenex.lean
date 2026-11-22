@@ -35,9 +35,7 @@ lemma val_comp_vecCons {L : Language} {M : Type*} [Tarski.Structure L M] {ξ : T
   funext <| Fin.cases rfl fun _ ↦ rfl
 
 end Semiterm
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder
 namespace Bounding.Prenex
 
 open Arithmetic
@@ -180,9 +178,8 @@ lemma eval_pairExs {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n
     simpa using h
 
 end Bounding.Prenex
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic
+namespace Arithmetic
 
 variable {Γ Γ' : Polarity} {m n : ℕ} (T : ArithmeticTheory) [𝗕𝚺m ⪯ T]
 
@@ -207,15 +204,13 @@ lemma exists_prenexHierarchy_provable_iff {σ : ArithmeticSentence}
     have := models_of_provable (M := V) inferInstance hφ;
     simpa [models_iff, hφψ, -Bounding.Prenex.val_sigmaInv] using this
 
-end FFL.FirstOrder.Arithmetic
-
 /-! ## Prenex sentences of a given level over $\mathsf{I}\Sigma_1$
 
 Companion of Foundation's `Arithmetic/ISigma1/Prenex.lean`. Every prenex class contains a sentence
 refutable in $\mathsf{I}\Sigma_1$.
 -/
 
-namespace FFL.FirstOrder.Arithmetic.ISigma1
+namespace ISigma1
 
 lemma exists_prenexHierarchy_refutable (Γ : Polarity) (n : ℕ) :
     ∃ χ : ArithmeticSentence, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ ∧ 𝗜𝚺₁ ⊢ ∼χ := by
@@ -226,6 +221,9 @@ lemma exists_prenexHierarchy_refutable (Γ : Polarity) (n : ℕ) :
     intro (V : Type) _ _;
     simp [models_iff, Bounding.Prenex.models_falsum]
 
-end FFL.FirstOrder.Arithmetic.ISigma1
+end ISigma1
+
+end Arithmetic
+end FFL.FirstOrder
 
 end

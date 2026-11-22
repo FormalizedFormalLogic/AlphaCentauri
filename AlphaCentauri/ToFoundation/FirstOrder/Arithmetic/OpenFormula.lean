@@ -122,8 +122,6 @@ lemma exists_open_eval_iff [IsStrictOrderedRing R] {P : (Fin n → R) → Prop} 
 
 end OpenPredicate
 
-end
-
 /-! ## The degree of an open formula
 
 `Semiterm.degree` bounds the degree of a term in its bound variables, and `Semiformula.degree` that
@@ -131,10 +129,6 @@ of the terms of a formula. Over a commutative ordered ring, an open `ℒₒᵣ`-
 `N` in one bound variable defines a predicate determined by the signs of polynomials of degree at
 most `N`.
 -/
-
-section
-
-open FFL FirstOrder Semiterm Polynomial
 
 namespace FFL.FirstOrder
 

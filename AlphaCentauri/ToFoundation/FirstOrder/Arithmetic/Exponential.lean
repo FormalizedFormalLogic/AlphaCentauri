@@ -16,7 +16,7 @@ The exponential in models of $\mathsf{EA}$, sequences coded in blocks, and power
 
 namespace FFL.FirstOrder.Arithmetic
 
-open scoped FFL.FirstOrder.Arithmetic
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 noncomputable section
 
@@ -27,6 +27,8 @@ lemma add_mul_lt_mul_of_lt [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {a b u v : V} (hu 
   u + a * v < a + a * v := by simpa using hu
   _ = a * (v + 1) := by rw [mul_add, mul_one, add_comm]
   _ ≤ a * b := mul_le_mul_left (succ_le_iff_lt.mpr hv)
+
+section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
 
@@ -148,8 +150,6 @@ lemma exists_natCast_of_length_le (j : ℕ) {x : V} (h : ‖x‖ ≤ j) : ∃ k 
 
 end
 
-end FFL.FirstOrder.Arithmetic
-
 /-! ## Block-coded sequences over $\mathsf{I}\Sigma_0 + \Omega_1$
 
 Over a model of $\mathsf{I}\Sigma_0 + \Omega_1$, a number $S$ codes a sequence of length $i$ whose
@@ -157,16 +157,10 @@ entries are the blocks of width $\|a\|$ of $S$ below $2^{i \|a\|}$, read off by 
 file collects the facts about appending an entry and about determining a code by its entries.
 -/
 
-namespace FFL.FirstOrder.Arithmetic
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-noncomputable section
-
-variable {V : Type*} [ORingStructure V]
-
 lemma exists_exponential_mul_length [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] (i a : V) : ∃ b, Exponential (i * ‖a‖) b :=
   ElementaryArithmetic.exponential_total _
+
+section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
@@ -328,24 +322,12 @@ lemma ext_mod_pow2 {I S q k m : V} (hk : k ≤ ‖I‖) (hm : m < k) (hq : Expon
   rw [hqb, mod_add_div_mul_eq] at h
   exact h.symm
 
-end
-
-end FFL.FirstOrder.Arithmetic
-
 /-! ## Bounded powers over $\mathsf{I}\Sigma_0 + \Omega_1$
 
 Over a model of $\mathsf{I}\Sigma_0 + \Omega_1$, `bpow B x k` is $x^k$ whenever $k \|x\| \le \|B\|$:
 the value is read off from a number below $(B \mathbin{\#} B)^2$ whose blocks of width $\|B\|$ list
 the partial powers $x^0, \dots, x^k$. The graph is $\Delta_0$ in the parameter `B`.
 -/
-
-namespace FFL.FirstOrder.Arithmetic
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-noncomputable section
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
 local notation S "{" L "}[" i "]" => Nuon.ext L S i
 
@@ -590,6 +572,8 @@ lemma length_bpow_two_mul {w : V} (hB : 0 < B) (hw : 0 < w) (hk : k * ‖(2 : V)
       length_two_mul_of_pos (mul_pos (bpow_pos hB two_pos
         (lt_of_le_of_lt (mul_le_mul_right (by simp)) hk)) hw),
       IH (lt_of_le_of_lt (mul_le_mul_right (by simp)) hk), add_assoc]
+
+end
 
 end
 

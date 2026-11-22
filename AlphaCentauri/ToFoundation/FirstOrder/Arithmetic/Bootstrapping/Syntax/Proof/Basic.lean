@@ -42,9 +42,6 @@ instance shiftRule.definable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) 
     ℌ-Function₂ (shiftRule : V → V → V) :=
   .of_zero shiftRule.defined.to_definable
 
-end Bootstrapping
-end FFL.FirstOrder.Arithmetic
-
 /-! ## Equality in the internal calculus
 
 The typed equality formula of a language with equality, and the internal proofs of reflexivity,
@@ -53,16 +50,9 @@ symmetry, transitivity and the congruence of function and relation symbols from 
 
 section
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-namespace FFL.FirstOrder.Arithmetic
-namespace Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
 /-! ## Equality -/
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq]
+variable [L.Eq]
 
 /-- The formula saying that two terms are equal. -/
 noncomputable def Semiformula.equal {n : ℕ} (s t : Semiterm V L n) : Semiformula V L n :=
@@ -238,9 +228,6 @@ lemma tprovable_rel_congr_imp [𝗘𝗤 L ⪯ S] {k : ℕ} (R : L.Rel k) (s u : 
   rw [subst_append_addCast, subst_append_addNat] at h₁
   exact h₁
 
-end Bootstrapping
-end FFL.FirstOrder.Arithmetic
-
 end
 
 /-! ## The typed internal calculus
@@ -252,18 +239,9 @@ system.
 
 section
 
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-namespace FFL.FirstOrder.Arithmetic
-namespace Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
 /-! ## From typed proofs to derivability -/
 
-open scoped FFL.FirstOrder.Arithmetic
-
-variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
+variable {T : Theory L} [T.Δ₁]
 
 lemma Derivable.of_tprovable {s : V} {φ : Formula V L} (hs : IsFormulaSet L s)
     (h : T.internalize V ⊢ φ) : Derivable T (insert φ.val s) := by
@@ -330,7 +308,7 @@ lemma Semiformula.val_subst_fvar {φ : Semiformula V L 1} {u : V} :
     (φ.subst ![(Semiterm.fvar u : Semiterm V L 0)]).val = substs1 L ^&u φ.val := by
   simp [substs1]
 
+end
+
 end Bootstrapping
 end FFL.FirstOrder.Arithmetic
-
-end

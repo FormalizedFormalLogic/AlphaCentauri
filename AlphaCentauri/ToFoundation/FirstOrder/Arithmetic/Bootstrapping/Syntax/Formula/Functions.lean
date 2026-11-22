@@ -483,9 +483,6 @@ lemma shift_neg_substs1_qqFvar {d j : V} (hd : L.IsSentence 1 d) :
   rw [shift_neg (IsSemiformula.substs1 (n := 0) (by simp) hd.isSemiformula),
     shift_substs1_qqFvar hd.isSemiformula, hd.shift_eq]
 
-end Bootstrapping
-end FFL.FirstOrder.Arithmetic
-
 /-! ## Gaps in Foundation's `Syntax/Formula/Iteration`
 
 The shift of free variables and the substitution of terms without bound variables pass through a
@@ -493,14 +490,6 @@ block `qqAlls p k` of universal quantifiers. `qqExss p k` is a block of `k` exis
 quantifiers; instantiating its outermost quantifier by a closed term instantiates the outermost
 bound variable.
 -/
-
-namespace FFL.FirstOrder.Arithmetic
-namespace Bootstrapping
-
-open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 /-! ## Blocks of universal quantifiers -/
 

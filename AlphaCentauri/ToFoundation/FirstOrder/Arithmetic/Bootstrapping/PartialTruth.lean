@@ -22,8 +22,6 @@ and give the same value to every decomposition `qqToPrenex Γ s θ` of the same 
 - [HP98, 1.64(5), Theorem I.1.75]
 -/
 
-section
-
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
@@ -312,5 +310,3 @@ end PrenexSatisfied
 
 end Bootstrapping
 end FFL.FirstOrder.Arithmetic
-
-end

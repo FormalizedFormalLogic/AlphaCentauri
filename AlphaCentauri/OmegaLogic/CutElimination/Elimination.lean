@@ -9,8 +9,7 @@ One level of cut elimination lowers the cut rank by one and raises the height to
 Consequently a sequent derivable at height `α` and cut rank `c` is derivable cut-free at height
 `ω_c(α)`.
 
-- [Tow20, Section 19.7]
-- [Tow20, Section 19.9]
+- [Tow20, Section 19.7, Section 19.9]
 -/
 
 @[expose] public section

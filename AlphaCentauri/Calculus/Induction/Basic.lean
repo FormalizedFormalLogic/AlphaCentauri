@@ -27,8 +27,7 @@ The induction class is a parameter: taking `C` to be the prenex $\Sigma_1$ formu
 blocks of existential and of universal quantifiers over a bounded matrix gives the calculus for
 $\mathsf{I}\Sigma_1$, and the same calculus serves the other induction schemes.
 
-- [Bus98A, Section 1.4.1]
-- [Bus98A, Section 1.4.2]
+- [Bus98A, Section 1.4.1, Section 1.4.2]
 -/
 
 @[expose] public section
@@ -72,8 +71,7 @@ namespace LKI
 /-- Derivations of `LKI[C]`: Foundation's one-sided calculus for `ℒₒᵣ`, together with a leaf for
 the axioms of `𝗣𝗔⁻` and an induction rule for the formulas of `C`.
 
-- [Bus98A, Section 1.4.1]
-- [Bus98A, Section 1.4.2] -/
+- [Bus98A, Section 1.4.1, Section 1.4.2] -/
 inductive Derivation (C : ArithmeticSemiformula ℕ 1 → Prop) : LK.Sequent ℒₒᵣ → Type
   | axm {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) : Derivation C ⦃σ⦄
   | ind {Γ} (φ) (hφ : C φ) (t) :

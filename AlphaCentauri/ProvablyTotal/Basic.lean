@@ -96,8 +96,7 @@ def leastGraph (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSemisentence (
 
 /-- A $\Delta_0$ matrix `θ` such that `∃ z, θ(z, y, x⃗)` is `𝗕𝚺₁`-provably equivalent to `φ(y, x⃗)`,
 fixed once and for all so that it does not depend on the ambient theory.
-- [HP98, Theorem I.2.5(3)]
-- [HP98, Lemma I.2.9] -/
+- [HP98, Theorem I.2.5(3), Lemma I.2.9] -/
 noncomputable def minimalGraphMatrix (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : 𝚺ᴬ₀.Semisentence (k + 2) :=
   .mkSigma (Classical.choose (Bounding.Prenex.models_exists_prenex.{0, 0} (Γ := 𝚺) (Γ' := 𝚺)
     (s := 1) φ.sigma_prop)).matrix.val (by simp)
@@ -231,8 +230,7 @@ private lemma models_existsUnique_minimalPairGraph {θ : 𝚺ᴬ₀.Semisentence
 
 /-- The unique-existence form of totality, `∀ x⃗, ∃! y, φ*(y, x⃗)`, where `φ*` is the least-witness
 refinement `leastGraph φ`.
-- [HP98, Definition I.1.51]
-- [HP98, Lemma IV.3.4] -/
+- [HP98, Definition I.1.51, Lemma IV.3.4] -/
 def uniqueTotalitySentence (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSentence :=
   ∀¹* ((∃¹ leastGraph φ) ⋏ (∀¹ ∀¹
     (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ) ⋏
@@ -256,8 +254,7 @@ variable {T U : ArithmeticTheory} {k : ℕ} {f : (Fin k → ℕ) → ℕ} {φ : 
 
 /-- `f` is `T`-provably total via `φ` iff `φ` defines the graph of `f` over `ℕ` and `T` proves its
 totality sentence.
-- [HP98, Definition I.1.51]
-- [HP98, Definition IV.3.1] -/
+- [HP98, Definition I.1.51, Definition IV.3.1] -/
 structure ProvablyTotalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ)
     (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : Prop where
   defined : HierarchySymbol.DefinedFunction (V := ℕ) f φ
@@ -271,8 +268,7 @@ structure ProvablyFunctionalVia (T : ArithmeticTheory) (f : (Fin k → ℕ) → 
   functional : T ⊢ functionalitySentence φ
 
 /-- `f` is `T`-provably total: some $\Sigma_1$ formula witnesses `T.ProvablyTotalVia f`.
-- [HP98, Definition I.1.51]
-- [HP98, Definition IV.3.1]
+- [HP98, Definition I.1.51, Definition IV.3.1]
 - [AB05, §10.2] -/
 def ProvablyTotal (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Prop :=
   ∃ φ, T.ProvablyTotalVia f φ

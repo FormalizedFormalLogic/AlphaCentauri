@@ -47,6 +47,11 @@ rewrite, so it is written as if it were already there.
   - [HP98, Theorem I.2.4]
   - [Lin97, Lemma 5.2]
   ```
+  A key appears at most once in a docstring: results from the same reference go on one line,
+  separated by commas, never on one line each:
+  ```
+  - [Bek99, §3, Lemma 4.3]
+  ```
   A key used in a docstring must have an entry in `references.yml`; add the entry in the same
   pull request.
 - **No `sorry`; unproved statements are axioms.** Foundation's guidelines forbid `sorry` in

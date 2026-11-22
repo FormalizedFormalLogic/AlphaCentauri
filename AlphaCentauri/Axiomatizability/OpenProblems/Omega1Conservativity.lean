@@ -13,8 +13,7 @@ import AlphaCentauri.OpenProblem
 
 Whether adjoining $\Omega_1$ to $\mathsf{I}\Delta_0$ adds any new $\Pi_1$ theorems is open.
 
-- [HP98, §V.1(a), p. 274]
-- [HP98, §V.5(g), p. 395]
+- [HP98, §V.1(a), p. 274, §V.5(g), p. 395]
 -/
 
 @[expose] public section
@@ -25,8 +24,7 @@ namespace FFL.FirstOrder
 
 
 /-- Is $\mathsf{I}\Delta_0 + \Omega_1$ $\Pi_1$-conservative over $\mathsf{I}\Delta_0$?
-- [HP98, §V.1(a), p. 274]
-- [HP98, §V.5(g), p. 395] -/
+- [HP98, §V.1(a), p. 274, §V.5(g), p. 395] -/
 open_problem Arithmetic.ISigma0_union_Omega1_weakerThanOn_Pi1_ISigma0 :=
   𝗜𝚺₀ ∪ 𝝮₁ ⪯[fun σ ↦ ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 1 σ] 𝗜𝚺₀
 

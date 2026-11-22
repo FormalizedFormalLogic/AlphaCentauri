@@ -74,7 +74,8 @@ descriptive slug and open the pull request directly; the PR is the record.
   without a rewrite.
 - **Cite the source.** Every non-trivial definition and theorem carries, at the end of its
   docstring, the reference it formalizes, one line per key: `- [HP98, Theorem I.1.5]`,
-  `- [Lin97, Theorem 2.3]`. If none exists, omit the docstring unless a concise
+  `- [Lin97, Theorem 2.3]`. A key appears once per docstring; several results from the same
+  reference share its line: `- [Bek99, §3, Lemma 4.3]`. If none exists, omit the docstring unless a concise
   statement-level explanation is useful; never add prose merely to say that a result is routine
   or has no source.
 - **Keep docstrings informative, not redundant.** A docstring may state only what its declaration

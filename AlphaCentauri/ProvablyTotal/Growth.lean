@@ -22,8 +22,7 @@ of the extended Grzegorczyk hierarchy `ONote.extendedGrzegorczyk`.
 
 - [HP98, Theorem V.1.4]
 - [Bus98A, Theorem 1.2.7.1]
-- [Bek99, Theorem 8]
-- [Bek99, Theorem 9]
+- [Bek99, Theorem 8, Theorem 9]
 -/
 
 @[expose] public section

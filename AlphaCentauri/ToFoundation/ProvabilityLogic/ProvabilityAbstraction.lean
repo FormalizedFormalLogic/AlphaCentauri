@@ -19,8 +19,7 @@ variable
 
 /-- $T_0$ proves that $\mathrm{Con}_{\mathfrak{B}}$ implies the unprovability of
 $\mathrm{Con}_{\mathfrak{B}}$ in $\mathfrak{B}$.
-- [HP98, Theorem III.2.21]
-- [HP98, Corollary III.2.22] -/
+- [HP98, Theorem III.2.21, Corollary III.2.22] -/
 theorem formalized_con_unprovable : T₀ ⊢ 𝔅.con 🡒 ∼𝔅 𝔅.con := by
   have h₁ : T₀ ⊢ gödel 𝔅 🡘 𝔅.con := gödel_iff_con
   have h₂ : T₀ ⊢ 𝔅.con 🡒 ∼𝔅 (gödel 𝔅) := formalized_unprovable_gödel

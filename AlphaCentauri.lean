@@ -212,6 +212,7 @@ public import AlphaCentauri.ToFoundation.ProvabilityLogic.GL.LRClosure
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.ProvabilityAbstraction
 public import AlphaCentauri.ToMathlib.Algebra.Order.Ring.RingOfDifferences
 public import AlphaCentauri.ToMathlib.Algebra.Polynomial.LeadingCoeffOrder
+public import AlphaCentauri.ToMathlib.Combinatorics.Ramsey
 public import AlphaCentauri.ToMathlib.Computability.ElementaryClosure
 public import AlphaCentauri.ToMathlib.Computability.Primrec.Basic
 public import AlphaCentauri.ToMathlib.Data.Vector.Basic

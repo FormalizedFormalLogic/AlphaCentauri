@@ -19,8 +19,7 @@ formulas one reads a primitive recursive bound on the witnesses: if every non-$\
 of the sequent is refuted below `b`, then some $\Sigma_1$ formula of the sequent holds below
 `h l b`. The induction rule contributes the primitive recursion, every other rule a `max`.
 
-- [Bus98A, Section 3.1.2]
-- [Bus98A, Section 3.1.3]
+- [Bus98A, Section 3.1.2, Section 3.1.3]
 -/
 
 @[expose] public section

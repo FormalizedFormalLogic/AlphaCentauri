@@ -19,8 +19,8 @@ For a class $\Gamma$ of formulas of a language `L`, a $\Gamma$-elementary substr
 of $\Gamma$ takes the same truth value at elements of `M` as at their images. An elementary
 substructure is a $\Gamma$-elementary substructure for every formula; a proper one is not
 surjective. Models of a complete theory are elementarily equivalent. The Tarski–Vaught test reduces
-elementarity for the prenex formulas up to a level to the absoluteness of bounded formulas and to
-finding witnesses in the substructure.
+elementarity for bounded formulas, and for the prenex formulas up to a level, to finding witnesses
+in the substructure.
 
 A countable elementary chain is a sequence of `L`-structures `M 0 ≼ₑ[L] M 1 ≼ₑ[L] M 2 ≼ₑ[L] ⋯`,
 each an elementary substructure of the next. Composing the steps gives an elementary substructure
@@ -304,6 +304,29 @@ theorem IsElementary.prenexHierarchyLE_of_tarskiVaught (s : ℕ)
     · obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.pi_succ_iff.mp hφ
       simpa using (eval_ex_iff_of_witness ι (witness m (by omega) hψ.neg e f)
         fun x ↦ ih (by omega) hψ.neg (x :> e) f).not
+
+/-- The Tarski–Vaught test for bounded formulas: bounded formulas are absolute along `ι` as soon as
+every bounded formula with parameters from `S` and a witness in `M` has a witness in `S`. -/
+theorem IsElementary.bounded_of_tarskiVaught [L.LT]
+    (witness : ∀ {n : ℕ} {φ : Semiformula L ℕ (n + 1)}, ℬ[<, L].Closure φ →
+      ∀ (e : Fin n → S) (f : ℕ → S),
+        (∃ x : M, φ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, φ.Eval (ι x :> ι ∘ e) (ι ∘ f)) :
+    IsElementary (fun {_} φ ↦ ℬ[<, L].Closure φ) ι := by
+  intro n φ hφ
+  exact Bounding.Closure.induction_open
+    (P := fun n φ ↦ ∀ (e : Fin n → S) (f : ℕ → S), φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f)
+    (fun _ _ hφ _ _ ↦ (eval_hom_iff_of_open ι hφ).symm)
+    (fun _ _ _ _ _ ihφ ihψ e f ↦ by simp [ihφ e f, ihψ e f])
+    (fun _ _ _ _ _ ihφ ihψ e f ↦ by simp [ihφ e f, ihψ e f])
+    (fun _ t θ hθ ih e f ↦ by
+      have hχ : ℬ[<, L].Closure (“#0 < !!(Rew.bShift t)” ⋏ ∼θ) := .and (.of_open (by simp)) hθ.neg
+      simpa [ball] using (eval_ex_iff_of_witness ι (witness hχ e f) fun x ↦ by
+        simp [ih (x :> e) f, ← eval_hom_iff_of_open ι (φ := “#0 < !!(Rew.bShift t)”)]).not)
+    (fun _ t θ hθ ih e f ↦ by
+      have hχ : ℬ[<, L].Closure (“#0 < !!(Rew.bShift t)” ⋏ θ) := .and (.of_open (by simp)) hθ
+      exact eval_ex_iff_of_witness ι (witness hχ e f) fun x ↦ by
+        simp [ih (x :> e) f, ← eval_hom_iff_of_open ι (φ := “#0 < !!(Rew.bShift t)”)])
+    hφ
 
 end
 

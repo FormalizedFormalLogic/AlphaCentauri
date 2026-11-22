@@ -27,10 +27,9 @@ of it. No proper cut is definable by a $\Sigma_0$ formula with parameters in a m
 no model of `𝗜𝚫 n` has a proper cut whose membership relation and complement are both definable by
 prenex $\Sigma_n$ formulas with parameters.
 
-Bounded formulas are absolute along an embedding of `ℒₒᵣ`-structures as soon as witnesses of
-bounded formulas can be found in the substructure. A $\Delta_0$-elementary substructure of a model
-of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`, and a $\Sigma_s$-elementary embedding between models of
-$\mathsf{B}\Sigma_s$ preserves the truth of $\Sigma_s$ and $\Pi_s$ sentences.
+A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`, and a
+$\Sigma_s$-elementary embedding between models of $\mathsf{B}\Sigma_s$ preserves the truth of
+$\Sigma_s$ and $\Pi_s$ sentences.
 
 The standard system of a model of `𝗜𝚺₁` is the family of subsets of `ℕ` coded by its elements
 under Ackermann's membership; it does not shrink along an end extension.
@@ -307,37 +306,11 @@ lemma not_models_IDelta_of_proper_cut (I : Cut M) (n : ℕ) (hI : I.Proper)
 
 end
 
-/-! ## $\Sigma_s$-elementary embeddings -/
+/-! ## Elementary embeddings of models of arithmetic -/
 
 section
 
 variable {S M : Type} [ORingStructure S] [ORingStructure M]
-
-variable (ι : S ↪ₛ[ℒₒᵣ] M)
-
-/-- Bounded formulas are absolute along `ι` as soon as every bounded formula with parameters from
-`S` and a witness in `M` has a witness in `S`. -/
-lemma eval_iff_of_bounded_of_witness
-    (witness : ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)}, ℬ[<, ℒₒᵣ].Closure φ →
-      ∀ (e : Fin n → S) (f : ℕ → S),
-        (∃ x : M, φ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, φ.Eval (ι x :> ι ∘ e) (ι ∘ f))
-    {n : ℕ} {φ : ArithmeticSemiformula ℕ n} (hφ : ℬ[<, ℒₒᵣ].Closure φ)
-    (e : Fin n → S) (f : ℕ → S) : φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f :=
-  bounded_induction_open
-    (P := fun n φ ↦ ∀ (e : Fin n → S) (f : ℕ → S), φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f)
-    (fun _ _ hφ _ _ ↦ (eval_hom_iff_of_open ι hφ).symm)
-    (fun _ _ _ _ _ ihφ ihψ e f ↦ by simp [ihφ e f, ihψ e f])
-    (fun _ _ _ _ _ ihφ ihψ e f ↦ by simp [ihφ e f, ihψ e f])
-    (fun _ t θ hθ ih e f ↦ by
-      have hχ : ℬ[<, ℒₒᵣ].Closure (“#0 < !!(Rew.bShift t)” ⋏ ∼θ) :=
-        .and (.of_open (by simp)) hθ.neg
-      simpa [ball] using (eval_ex_iff_of_witness ι (witness hχ e f) fun x ↦ by
-        simp [ih (x :> e) f, ← eval_hom_iff_of_open ι (φ := “#0 < !!(Rew.bShift t)”)]).not)
-    (fun _ t θ hθ ih e f ↦ by
-      have hχ : ℬ[<, ℒₒᵣ].Closure (“#0 < !!(Rew.bShift t)” ⋏ θ) := .and (.of_open (by simp)) hθ
-      exact eval_ex_iff_of_witness ι (witness hχ e f) fun x ↦ by
-        simp [ih (x :> e) f, ← eval_hom_iff_of_open ι (φ := “#0 < !!(Rew.bShift t)”)])
-    n φ hφ e f
 
 /-- A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/

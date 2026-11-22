@@ -185,8 +185,9 @@ theorem sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] :
     use ⟨x, hx⟩
     exact h
   apply IsElementary.prenexHierarchyLE_of_tarskiVaught
-  · intro n φ hφ
-    exact eval_iff_of_bounded_of_witness _ (fun hψ ↦ witness (.bounded 𝚷 j _ hψ)) hφ
+  · apply IsElementary.bounded_of_tarskiVaught
+    intro n φ hφ
+    exact witness (.bounded 𝚷 j _ hφ)
   · intro m hm n φ hφ
     exact witness (hφ.hierarchy.mono (by omega))
 

@@ -1,6 +1,5 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
-public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.Axiomatizability.IOpen
 public import AlphaCentauri.Axiomatizability.ISigma.Finite
 public import AlphaCentauri.Axiomatizability.ISigma.PiAxiomatization
@@ -220,6 +219,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection
+public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded

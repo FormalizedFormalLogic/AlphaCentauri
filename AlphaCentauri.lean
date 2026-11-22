@@ -85,6 +85,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILRStar.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILRW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILWStar.Basic
+public import AlphaCentauri.InterpretabilityLogic.Logic.OpenProblems
 public import AlphaCentauri.InterpretabilityLogic.Logic.SCL.Arithmetic
 public import AlphaCentauri.InterpretabilityLogic.Logic.SCL.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.SbCLM.Arithmetic
@@ -127,6 +128,7 @@ public import AlphaCentauri.NumberTheory.ElementaryNumberTheory.QuadraticResidue
 public import AlphaCentauri.NumberTheory.FermatLastTheorem.Basic
 public import AlphaCentauri.NumberTheory.FermatLastTheorem.CaseOne
 public import AlphaCentauri.NumberTheory.FermatLastTheorem.IOpenUnprovable
+public import AlphaCentauri.NumberTheory.FermatLastTheorem.OpenProblems
 public import AlphaCentauri.NumberTheory.FermatLastTheorem.Three
 public import AlphaCentauri.NumberTheory.Primes
 public import AlphaCentauri.OmegaLogic.Consistency

@@ -4,7 +4,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILMZeroW.Basic
 public import AlphaCentauri.InterpretabilityLogic.Logic.ILR.Basic
 public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
-import AlphaCentauri.OpenProblem
 
 /-!
 # The logic $\mathbf{ILRW}$
@@ -144,20 +143,6 @@ instance : (𝐈𝐋𝐌₀𝐖 : Logic ℕ) ⪱ 𝐈𝐋𝐑𝐖 :=
     exact (show (4 : Fin 5) ≠ 2 by decide) (ht 4 (by decide))) ILRW.axiomR
 
 end Logic
-
-/-- Is $\mathbf{ILRW}$ complete with respect to Veltman semantics?
-- [JMMV20, §6.5] -/
-open_problem Logic.ILRW.complete_veltman :=
-  ∀ A : Formula ℕ,
-    (∀ (κ : Type) [Nonempty κ] (M : Veltman.Model κ ℕ) [M.IsILRW], M ⊧ A) →
-      𝐈𝐋𝐑𝐖 ⊢ A
-
-/-- Is $\mathbf{ILRW}$ complete with respect to Verbrugge semantics?
-- [JMMV20, §6.5] -/
-open_problem Logic.ILRW.complete_verbrugge :=
-  ∀ A : Formula ℕ,
-    (∀ (κ : Type) [Nonempty κ] (M : Verbrugge.Model κ ℕ) [M.IsILRW], M ⊧ A) →
-      𝐈𝐋𝐑𝐖 ⊢ A
 
 end FFL.InterpretabilityLogic
 

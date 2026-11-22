@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.ToFoundation.FirstOrder.ConstantExtension
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import Foundation.FirstOrder.LK.Completeness.CounterModel
@@ -30,7 +31,7 @@ For a bounding `ℬ` of `L`, an end extension of `M` to `N` is an embedding of `
 image is an initial segment for every bounding operator of `ℬ`. For `ℬ[<, L]` these are the end
 extensions of models of arithmetic, and for `ℬ[∈, L]` those of models of set theory. Bounded
 formulas are absolute along an end extension, so an end extension is a $\Delta_0$-elementary
-substructure, and a theory of $\Pi_1$ sentences holds in `M` as soon as it holds in an end
+substructure, and a $\Pi_1$-axiomatizable theory holds in `M` as soon as it holds in an end
 extension of `M`.
 
 A type over a structure `M` is a set of formulas in the free variables $\bar x$, with parameters
@@ -51,6 +52,36 @@ namespace FFL.FirstOrder
 open Semiformula Tarski.Structure
 
 universe u v w
+
+/-! ## Embeddings -/
+
+namespace Tarski.Structure.Embedding
+
+variable {L : Language} {M : Type u} {N : Type v} {K : Type w} [Tarski.Structure L M]
+  [Tarski.Structure L N] [Tarski.Structure L K]
+
+variable (L M) in
+/-- The identity embedding. -/
+@[refl] protected def refl : M ↪ₛ[L] M where
+  toFun := id
+  func' _ _ := rfl
+  rel' _ _ h := h
+  toFun_inj := Function.injective_id
+  rel_inv' _ _ h := h
+
+@[simp] lemma refl_apply (x : M) : Embedding.refl L M x = x := rfl
+
+/-- The composition of embeddings. -/
+@[trans] protected def trans (ι : M ↪ₛ[L] N) (κ : N ↪ₛ[L] K) : M ↪ₛ[L] K where
+  toFun := κ ∘ ι
+  func' f v := by simp [HomClass.func ι, HomClass.func κ, Function.comp_def]
+  rel' r v h := HomClass.rel κ r _ (HomClass.rel ι r v h)
+  toFun_inj := (EmbeddingClass.map_inj κ).comp (EmbeddingClass.map_inj ι)
+  rel_inv' r v h := EmbeddingClass.map_rel_inv ι r v (EmbeddingClass.map_rel_inv κ r _ h)
+
+@[simp] lemma trans_apply (ι : M ↪ₛ[L] N) (κ : N ↪ₛ[L] K) (x : M) : ι.trans κ x = κ (ι x) := rfl
+
+end Tarski.Structure.Embedding
 
 /-! ## Elementary substructures -/
 
@@ -163,27 +194,14 @@ namespace ElementarySubstructureOn
 variable (M Γ) in
 /-- The identity $\Gamma$-elementary substructure. -/
 @[refl] protected def refl : M ≼ₑ[L; Γ] M where
-  emb := {
-    toFun := id
-    func' _ _ := rfl
-    rel' _ _ h := h
-    toFun_inj := Function.injective_id
-    rel_inv' _ _ h := h
-  }
+  emb := .refl L M
   isElementary _ _ _ := Iff.rfl
 
 @[simp] lemma refl_apply (x : M) : ElementarySubstructureOn.refl M Γ x = x := rfl
 
 /-- The composition of $\Gamma$-elementary substructures. -/
 @[trans] protected def trans (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) : M ≼ₑ[L; Γ] K where
-  emb := {
-    toFun := e₂ ∘ e₁
-    func' f v := by simp [HomClass.func e₁.emb, HomClass.func e₂.emb, Function.comp_def]
-    rel' r v h := HomClass.rel e₂.emb r _ (HomClass.rel e₁.emb r v h)
-    toFun_inj := (EmbeddingClass.map_inj e₂.emb).comp (EmbeddingClass.map_inj e₁.emb)
-    rel_inv' r v h :=
-      EmbeddingClass.map_rel_inv e₁.emb r v (EmbeddingClass.map_rel_inv e₂.emb r _ h)
-  }
+  emb := e₁.emb.trans e₂.emb
   isElementary hφ e f := (e₂.isElementary hφ (e₁ ∘ e) (e₁ ∘ f)).trans (e₁.isElementary hφ e f)
 
 @[simp] lemma trans_apply (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) (x : M) :
@@ -482,13 +500,7 @@ lemma emb_injective : Function.Injective e.emb := EmbeddingClass.map_inj e.emb
 variable (ℬ M) in
 /-- The identity end extension. -/
 @[refl] protected def refl : M ⊆ₑ[ℬ] M where
-  emb := {
-    toFun := id
-    func' _ _ := rfl
-    rel' _ _ h := h
-    toFun_inj := Function.injective_id
-    rel_inv' _ _ h := h
-  }
+  emb := .refl L M
   isInitial := {
     operator_iff _ _ _ := Iff.rfl
     initial _ _ b _ := ⟨b, rfl⟩
@@ -498,14 +510,7 @@ variable (ℬ M) in
 
 /-- The composition of end extensions. -/
 @[trans] protected def trans (e₁ : M ⊆ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) : M ⊆ₑ[ℬ] K where
-  emb := {
-    toFun := e₂ ∘ e₁
-    func' f v := by simp [HomClass.func e₁.emb, HomClass.func e₂.emb, Function.comp_def]
-    rel' r v h := HomClass.rel e₂.emb r _ (HomClass.rel e₁.emb r v h)
-    toFun_inj := e₂.emb_injective.comp e₁.emb_injective
-    rel_inv' r v h :=
-      EmbeddingClass.map_rel_inv e₁.emb r v (EmbeddingClass.map_rel_inv e₂.emb r _ h)
-  }
+  emb := e₁.emb.trans e₂.emb
   isInitial := {
     operator_iff hR a b :=
       (e₁.isInitial.operator_iff hR a b).trans (e₂.isInitial.operator_iff hR _ _)
@@ -538,6 +543,17 @@ theorem models_of_Pi1 [Nonempty M] [Nonempty N] {T : Theory L} (hT : ∀ σ ∈ 
   simp only [models_iff] at h ⊢
   exact Bounding.pi_one_downward e.emb (hT σ hσ) ![] Empty.elim <|
     Eval.of_eq h (funext (·.elim0)) (funext (·.elim))
+
+include e in
+/-- A $\Pi_1$-axiomatizable theory holds in `M` as soon as it holds in an end extension of `M`.
+- [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
+theorem models_of_Pi1Axiomatizable [Nonempty M] [Nonempty N] {T : Theory L}
+    (hT : Axiomatizable (ℬ.Hierarchy 𝚷 1) T) [N↓[L] ⊧* T] : M↓[L] ⊧* T := by
+  obtain ⟨U, hU, hTU⟩ := hT
+  have : U ⪯ T := hTU.symm.le
+  have : T ⪯ U := hTU.le
+  have : N↓[L] ⊧* U := models_of_subtheory ‹N↓[L] ⊧* T›
+  exact models_of_subtheory (e.models_of_Pi1 hU)
 
 end EndExtension
 

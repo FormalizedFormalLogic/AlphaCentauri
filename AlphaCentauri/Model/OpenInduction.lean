@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Axiomatizability.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.Schemata.ZRing
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenPredicate
 public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree

@@ -1,6 +1,6 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
-public import AlphaCentauri.Axiomatizability.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.Axiomatizability.IOpen
 public import AlphaCentauri.Axiomatizability.ISigma.Finite
 public import AlphaCentauri.Axiomatizability.ISigma.PiAxiomatization

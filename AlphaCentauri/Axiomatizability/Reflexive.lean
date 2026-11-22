@@ -2,7 +2,7 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Second
 public import Foundation.FirstOrder.Incompleteness.Definability
-public import AlphaCentauri.Axiomatizability.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.Bootstrapping.Proof.ReadableSoundness
 public import AlphaCentauri.Bootstrapping.Proof.ComplexitySoundness
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection

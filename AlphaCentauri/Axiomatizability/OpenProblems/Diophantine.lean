@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.Axiomatizability.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.ToFoundation.FirstOrder.Theory
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 public import Foundation.FirstOrder.Arithmetic.Omega1.Basic

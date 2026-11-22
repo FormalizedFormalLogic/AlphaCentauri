@@ -1,6 +1,5 @@
 module
 
-public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Embedding
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
@@ -58,24 +57,6 @@ notation:50 M " ⊆ₑ " N => EndExtension ℬ[<, ℒₒᵣ] M N
 notation:50 M " ⊂ₑ " N => ProperEndExtension ℬ[<, ℒₒᵣ] M N
 
 namespace EndExtension
-
-section
-
-variable {L : Language} {ℬ : Bounding L} {M : Type u} {N : Type v} [Tarski.Structure L M]
-  [Tarski.Structure L N] [Nonempty M] [Nonempty N] (e : M ⊆ₑ[ℬ] N)
-
-include e in
-/-- A $\Pi_1$-axiomatizable theory holds in `M` as soon as it holds in an end extension of `M`.
-- [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
-theorem models_of_Pi1Axiomatizable {T : Theory L} (hT : Axiomatizable (ℬ.Hierarchy 𝚷 1) T)
-    [N↓[L] ⊧* T] : M↓[L] ⊧* T := by
-  obtain ⟨U, hU, hTU⟩ := hT
-  have : U ⪯ T := hTU.symm.le
-  have : T ⪯ U := hTU.le
-  have : N↓[L] ⊧* U := models_of_subtheory ‹N↓[L] ⊧* T›
-  exact models_of_subtheory (e.models_of_Pi1 hU)
-
-end
 
 section
 

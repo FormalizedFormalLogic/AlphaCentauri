@@ -23,8 +23,7 @@ def codedSet (a : V) : Set ℕ := {n | (n : V) ∈ a}
 
 variable (V) in
 /-- The standard system: the subsets of `ℕ` coded by some element of `V`.
-- [Kay91, §11.1]
-- [Kay91, Exercise 11.4(a)] -/
+- [Kay91, §11.1, Exercise 11.4(a)] -/
 def standardSystem : Set (Set ℕ) := Set.range (codedSet (V := V))
 
 lemma mem_standardSystem_of_finite {S : Set ℕ} (hS : S.Finite) : S ∈ standardSystem V := by

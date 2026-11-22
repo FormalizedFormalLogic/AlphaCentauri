@@ -14,9 +14,7 @@ A cut formula is reducible below `ω ^ θ` at rank `c` when cutting two bounded 
 yields a derivation of smaller cut rank. Every formula of quantifier rank below `c` is
 cut-reducible at rank `c`.
 
-- [Tow20, Section 19.5]
-- [Tow20, Section 19.6]
-- [Tow20, Section 19.7]
+- [Tow20, Section 19.5, Section 19.6, Section 19.7]
 -/
 
 @[expose] public section

@@ -158,8 +158,7 @@ open ArithmeticTheory
 open ProvablyFunctionalVia in
 /-- Every primitive recursive function, in Mathlib's `List.Vector` form `Nat.Primrec'`, is
 `𝗜𝚺₁`-provably functional.
-- [HP98, Theorem I.1.54]
-- [HP98, Lemma I.1.55] -/
+- [HP98, Theorem I.1.54, Lemma I.1.55] -/
 theorem provablyFunctional_of_primrec' {f : List.Vector ℕ k → ℕ} (hf : Nat.Primrec' f) :
     𝗜𝚺₁.ProvablyFunctional (fun v ↦ f (.ofFn v)) := by
   induction hf with
@@ -177,24 +176,21 @@ theorem provablyFunctional_of_primrec' {f : List.Vector ℕ k → ℕ} (hf : Nat
 
 /-- Every primitive recursive function, in Mathlib's curried form `Primrec`, is `𝗜𝚺₁`-provably
 functional.
-- [HP98, Theorem I.1.54]
-- [HP98, Lemma I.1.55] -/
+- [HP98, Theorem I.1.54, Lemma I.1.55] -/
 theorem provablyFunctional_of_primrec {f : List.Vector ℕ k → ℕ} (hf : Primrec f) :
     𝗜𝚺₁.ProvablyFunctional (fun v ↦ f (.ofFn v)) :=
   provablyFunctional_of_primrec' (Nat.Primrec'.prim_iff.mpr hf)
 
 /-- Every primitive recursive function, in Mathlib's `List.Vector` form `Nat.Primrec'`, is
 `𝗜𝚺₁`-provably total.
-- [HP98, Theorem I.1.54]
-- [HP98, Lemma I.1.55] -/
+- [HP98, Theorem I.1.54, Lemma I.1.55] -/
 lemma provablyTotal_of_primrec' {f : List.Vector ℕ k → ℕ} (hf : Nat.Primrec' f) :
     𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
   (provablyFunctional_of_primrec' hf).toProvablyTotal
 
 /-- Every primitive recursive function, in Mathlib's curried form `Primrec`, is `𝗜𝚺₁`-provably
 total.
-- [HP98, Theorem I.1.54]
-- [HP98, Lemma I.1.55] -/
+- [HP98, Theorem I.1.54, Lemma I.1.55] -/
 lemma provablyTotal_of_primrec {f : List.Vector ℕ k → ℕ} (hf : Primrec f) :
     𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
   (provablyFunctional_of_primrec hf).toProvablyTotal
@@ -349,8 +345,7 @@ private lemma models_allClosure_iff_evalb {k : ℕ} {φ ψ : ArithmeticSemisente
   simp [models_iff]
 
 /-- An `𝗜𝚺₁`-provably total function has a strict $\Sigma_1$ graph whose totality `𝗜𝚺₁` proves.
-- [HP98, Theorem I.2.5(3)]
-- [HP98, Lemma I.2.9] -/
+- [HP98, Theorem I.2.5(3), Lemma I.2.9] -/
 theorem exists_prenexHierarchy_provablyTotalVia {k : ℕ} {f : (Fin k → ℕ) → ℕ}
     (h : 𝗜𝚺₁.ProvablyTotal f) :
     ∃ φ : 𝚺ᴬ₁.Semisentence (k + 1),

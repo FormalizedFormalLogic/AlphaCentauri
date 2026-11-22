@@ -11,7 +11,8 @@ public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
 `ℬ[<, L].Hierarchy 𝚷 (s + 1)` passes through `Semiformula.univCl`, and every axiom of `𝗣𝗔⁻` is
 $\Pi_2$. `ℬ.PrenexBlock Γ` collects the formulas that are a block of `Γ`-quantifiers over a
 `ℬ`-bounded matrix, which `ℬ.PrenexHierarchy Γ 1` does not, as it has exactly one quantifier; every
-axiom of `𝗣𝗔⁻` is such a block of universal quantifiers.
+axiom of `𝗣𝗔⁻` is such a block of universal quantifiers. `ℬ.PrenexHierarchyLE s` collects the
+prenex $\Sigma_m$ and $\Pi_m$ formulas with `m ≤ s`.
 -/
 
 @[expose] public section
@@ -188,6 +189,10 @@ lemma PrenexHierarchy.prenexBlock {Γ : Polarity} {φ : Semiformula L ξ n}
     exact .exs (.bounded (PrenexHierarchy.zero_iff_bounded.mp hψ))
   · obtain ⟨ψ, hψ, rfl⟩ := PrenexHierarchy.pi_succ_iff.mp h
     exact .all (.bounded (PrenexHierarchy.zero_iff_bounded.mp hψ))
+
+/-- `φ` is a prenex $\Sigma_m$ or $\Pi_m$ formula for some `m ≤ s`. -/
+abbrev PrenexHierarchyLE (ℬ : Bounding L) (s : ℕ) (φ : Semiformula L ξ n) : Prop :=
+  ∃ m ≤ s, ∃ Γ, ℬ.PrenexHierarchy Γ m φ
 
 end Bounding
 end FFL.FirstOrder

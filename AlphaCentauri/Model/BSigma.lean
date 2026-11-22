@@ -29,7 +29,7 @@ namespace ClosedCut
 variable {j : ℕ} [M↓[ℒₒᵣ] ⊧* 𝗜𝚺j] (I : ClosedCut M)
 
 private lemma exists_bound_of_isElementary (hI : ∃ c, c ∉ I.carrier)
-    (hj : IsElementary (fun {_} φ ↦ ∃ m ≤ j, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ)
+    (hj : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j)
       I.endExtension.emb) {ψ : ArithmeticSemiformula ℕ 3}
     (hψ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 j ψ) (e : ℕ → I.carrier) (a : I.carrier)
     (h : ∀ x < a, ∃ y z, ψ.Eval ![z, x, y] e) :
@@ -81,7 +81,7 @@ private lemma exists_bound_of_isElementary (hI : ∃ c, c ∉ I.carrier)
 $\Sigma_j$-elementary satisfies $\mathsf{B}\Sigma_{j+1}$.
 - [HP98, Lemma IV.1.22] -/
 theorem models_BSigma_succ (hI : ∃ c, c ∉ I.carrier)
-    (hj : IsElementary (fun {_} φ ↦ ∃ m ≤ j, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ)
+    (hj : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j)
       I.endExtension.emb) :
     I.carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := by
   have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := mod_ISigma_of_le (Nat.zero_le j)

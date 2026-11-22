@@ -466,7 +466,7 @@ theorem isElementary_of_tarskiVaught (s : ℕ)
     (witness : ∀ m < s, ∀ {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)},
       ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 m φ → ∀ (e : Fin n → S) (f : ℕ → S),
         (∃ x : M, φ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, φ.Eval (ι x :> ι ∘ e) (ι ∘ f)) :
-    IsElementary (fun {_} φ ↦ ∃ m ≤ s, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ) ι := by
+    IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE s) ι := by
   suffices ∀ {Γ : Polarity} {m n : ℕ} {φ : ArithmeticSemiformula ℕ n}, m ≤ s →
       ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ → ∀ (e : Fin n → S) (f : ℕ → S),
         φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f by
@@ -534,7 +534,7 @@ theorem _root_.FFL.FirstOrder.IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒ�
 /-- A $\Sigma_s$-elementary embedding preserves the truth of $\Sigma_s$ and $\Pi_s$ sentences
 between models of $\mathsf{B}\Sigma_s$. -/
 lemma _root_.FFL.FirstOrder.IsElementary.models_iff_of_hierarchy {ι : S ↪ₛ[ℒₒᵣ] M} {s : ℕ}
-    (hι : IsElementary (fun {_} φ ↦ ∃ m ≤ s, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ) ι)
+    (hι : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE s) ι)
     [S↓[ℒₒᵣ] ⊧* 𝗕𝚺s] [M↓[ℒₒᵣ] ⊧* 𝗕𝚺s] {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemisentence n}
     (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) (v : Fin n → S) : M ⊧/(ι ∘ v) φ ↔ S ⊧/v φ := by
   obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ

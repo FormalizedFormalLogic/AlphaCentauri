@@ -144,7 +144,7 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
 
 /-- [HP98, Lemma IV.1.42] -/
 theorem sigmaElementary :
-    IsElementary (fun {_} φ ↦ ∃ m ≤ j, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ)
+    IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j)
       (definableCut j M).endExtension.emb := by
   apply isElementary_of_tarskiVaught
   · intro n φ hφ e f
@@ -177,7 +177,7 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
   have hK {x : M} (hx : x ∈ sigmaDefinableElements (j + 1) M)
       (hxI : x ∈ (definableCut j M).carrier) :
       ⟨x, hxI⟩ ∈ sigmaDefinableElements (j + 1) (definableCut j M).carrier := by
-    obtain ⟨φ, hφ, hφx⟩ := id hx
+    obtain ⟨φ, hφ, hφx⟩ := mem_sigmaDefinableElements_iff.mp hx
     obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
     have := models_BSigma (j := j) hns
     have : M↓[ℒₒᵣ] ⊧* 𝗕𝚺 j :=
@@ -187,7 +187,9 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
     have transfer (v : Fin 2 → (definableCut j M).carrier) :
         M ⊧/(Subtype.val ∘ v) φ'.sigmaInv.val ↔ _ ⊧/v φ'.sigmaInv.val :=
       IsElementary.models_iff_of_hierarchy sigmaElementary Bounding.Prenex.val_hierarchy v
+    apply mem_sigmaDefinableElements_iff.mpr
     use φ'.val
+    and_intros
     · exact Bounding.Prenex.val_hierarchy
     · intro z
       have h₁ (y : M) : M ⊧/![y] φ ↔ ∃ w, M ⊧/![w, y] φ'.sigmaInv.val :=

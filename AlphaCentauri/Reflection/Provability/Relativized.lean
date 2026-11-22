@@ -113,7 +113,8 @@ noncomputable def _root_.FFL.FirstOrder.Theory.relativizedProvabilityPred :
           (provable T).sigma_prop.mono (by omega)
         simp [h0, h1, h2, h3])
 
-@[simp] lemma relativizedProvabilityPred_zero :
+@[simp]
+lemma relativizedProvabilityPred_zero :
     T.relativizedProvabilityPred 0 = provable T := rfl
 
 section

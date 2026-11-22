@@ -89,6 +89,15 @@ rewrite, so it is written as if it were already there.
   parentheses whenever the argument runs to the end of the term: `exact Or.inr <| Or.inl h`, not
   `exact Or.inr (Or.inl h)`. Foundation's guidelines do not choose between the two spellings;
   Mathlib's `style.dollarSyntax` linter does, and this repository follows it.
+- **Attributes on their own line.** An attribute goes on the line above the declaration it
+  marks, never in front of it on the same line, so that it does not lengthen the header:
+  ```
+  @[simp]
+  lemma card_empty : …
+  ```
+  not `@[simp] lemma card_empty : …`. The same holds for modifiers after the attribute
+  (`@[simp]` above `private lemma …`) and for `@[inherit_doc]` above a `notation`; only
+  `@[expose] public section` stays on one line.
 - **Avoid `?_`.** Prefer `apply f` to `refine f ?_`, and a direct term to a `refine` with holes;
   [`style.md`](style.md)'s preference for direct term construction is the same rule seen from the
   other side. `use` takes data only — a witness of a `Type`, never a proof of a hypothesis: split

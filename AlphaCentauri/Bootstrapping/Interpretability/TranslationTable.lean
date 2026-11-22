@@ -100,26 +100,31 @@ instance equationVec.definable' : Γᴬ_[m + 1]-Function₃[V] equationVec L :=
   equationVec.definable.of_sigmaOne
 
 omit [L.Eq] in
-@[simp] lemma domainVec_zero (tbl s : V) : domainVec L tbl s 0 = 0 := by
+@[simp]
+lemma domainVec_zero (tbl s : V) : domainVec L tbl s 0 = 0 := by
   simp [domainVec, domainVec.construction]
 
 omit [L.Eq] in
-@[simp] lemma domainVec_succ (tbl s k : V) :
+@[simp]
+lemma domainVec_succ (tbl s k : V) :
     domainVec L tbl s (k + 1) = concat (domainVec L tbl s k) (domainAt L tbl (s + k)) := by
   simp [domainVec, domainVec.construction]
 
 omit [L.LORDefinable] in
-@[simp] lemma equationVec_zero (a b : V) : equationVec L a b 0 = 0 := by
+@[simp]
+lemma equationVec_zero (a b : V) : equationVec L a b 0 = 0 := by
   simp [equationVec, equationVec.construction]
 
 omit [L.LORDefinable] in
-@[simp] lemma equationVec_succ (a b k : V) :
+@[simp]
+lemma equationVec_succ (a b k : V) :
     equationVec L a b (k + 1) = concat (equationVec L a b k)
       (^rel 2 (Encodable.encode (Language.Eq.eq : L.Rel 2) : V) ?[^#(a + k), ^#(b + k)]) := by
   simp [equationVec, equationVec.construction]
 
 omit [L.Eq] in
-@[simp] lemma len_domainVec (tbl s k : V) : len (domainVec L tbl s k) = k := by
+@[simp]
+lemma len_domainVec (tbl s k : V) : len (domainVec L tbl s k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -139,7 +144,8 @@ lemma nth_domainVec (tbl s k : V) :
     · rw [domainVec_succ, concat_nth_len' _ _ (by simp)]
 
 omit [L.LORDefinable] in
-@[simp] lemma len_equationVec (a b k : V) : len (equationVec L a b k) = k := by
+@[simp]
+lemma len_equationVec (a b k : V) : len (equationVec L a b k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -274,11 +280,14 @@ noncomputable def funcT {k : ℕ} (F : L₂.Func k) : Semiformula V L₁ (k + 1)
 noncomputable def relT {k : ℕ} (R : L₂.Rel k) : Semiformula V L₁ k :=
   ⟨tableRel tbl k ⌜R⌝, (hT.rel (codeIn_rel_quote R)).isSemiformula⟩
 
-@[simp] lemma domT_val : hT.domT.val = tableDomain tbl := rfl
+@[simp]
+lemma domT_val : hT.domT.val = tableDomain tbl := rfl
 
-@[simp] lemma funcT_val {k : ℕ} (F : L₂.Func k) : (hT.funcT F).val = tableFunc tbl k ⌜F⌝ := rfl
+@[simp]
+lemma funcT_val {k : ℕ} (F : L₂.Func k) : (hT.funcT F).val = tableFunc tbl k ⌜F⌝ := rfl
 
-@[simp] lemma relT_val {k : ℕ} (R : L₂.Rel k) : (hT.relT R).val = tableRel tbl k ⌜R⌝ := rfl
+@[simp]
+lemma relT_val {k : ℕ} (R : L₂.Rel k) : (hT.relT R).val = tableRel tbl k ⌜R⌝ := rfl
 
 lemma domT_shift : hT.domT.shift = hT.domT := by
   ext

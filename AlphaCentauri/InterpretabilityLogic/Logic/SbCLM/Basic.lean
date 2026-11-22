@@ -28,9 +28,11 @@ open ofCLAxioms
 
 variable {A B C D : Formula α}
 
-@[simp] lemma SbCLM.axiomM : 𝐒𝐛𝐂𝐋𝐌 ⊢ Axioms.M A B C := axm <| .inl ⟨A, B, C, rfl⟩
+@[simp]
+lemma SbCLM.axiomM : 𝐒𝐛𝐂𝐋𝐌 ⊢ Axioms.M A B C := axm <| .inl ⟨A, B, C, rfl⟩
 
-@[simp] lemma SbCLM.axiomSb : 𝐒𝐛𝐂𝐋𝐌 ⊢ Axioms.Sb A B C D := axm <| .inr ⟨A, B, C, D, rfl⟩
+@[simp]
+lemma SbCLM.axiomSb : 𝐒𝐛𝐂𝐋𝐌 ⊢ Axioms.Sb A B C D := axm <| .inr ⟨A, B, C, D, rfl⟩
 
 instance : (𝐂𝐋𝐌 : Logic α) ⪯ 𝐒𝐛𝐂𝐋𝐌 := weakerThan_iff.mpr <| subset_of_subset Set.subset_union_left
 

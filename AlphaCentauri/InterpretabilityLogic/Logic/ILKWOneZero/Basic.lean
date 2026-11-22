@@ -29,7 +29,8 @@ open ofILAxioms
 
 variable {A B C : Formula α}
 
-@[simp] lemma ILKW1Zero.axiomKW1Zero : 𝐈𝐋𝐊𝐖𝟏⁰ ⊢ Axioms.KW1Zero A B := axm ⟨A, B, rfl⟩
+@[simp]
+lemma ILKW1Zero.axiomKW1Zero : 𝐈𝐋𝐊𝐖𝟏⁰ ⊢ Axioms.KW1Zero A B := axm ⟨A, B, rfl⟩
 
 lemma ILKW1Zero.axiomKW2 : 𝐈𝐋𝐊𝐖𝟏⁰ ⊢ Axioms.KW2 A B := by
   have h : 𝐈𝐋𝐊𝐖𝟏⁰ ⊢ A ▷ ◇B 🡒 (B ⋏ A) ▷ ◇B := rhd_anti_left and₂;

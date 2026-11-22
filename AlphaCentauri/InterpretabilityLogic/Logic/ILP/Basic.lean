@@ -40,7 +40,8 @@ open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
-@[simp] lemma ILP.axiomP : 𝐈𝐋𝐏 ⊢ Axioms.P A B := axm ⟨A, B, rfl⟩
+@[simp]
+lemma ILP.axiomP : 𝐈𝐋𝐏 ⊢ Axioms.P A B := axm ⟨A, B, rfl⟩
 
 /-- - [Vis90, §6.3] -/
 lemma ILP.axiomW : 𝐈𝐋𝐏 ⊢ Axioms.W A B := by

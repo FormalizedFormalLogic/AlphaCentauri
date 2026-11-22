@@ -45,16 +45,19 @@ private lemma ppair_eq_imp {x b x' b' : V} (h : ppair x b = ppair x' b') : x = x
     exact ⟨by simpa using he, rfl⟩
   · exact absurd h (ppair_lt_ppair hg).ne'
 
-@[simp] lemma ppair_inj {x b x' b' : V} : ppair x b = ppair x' b' ↔ x = x' ∧ b = b' := by
+@[simp]
+lemma ppair_inj {x b x' b' : V} : ppair x b = ppair x' b' ↔ x = x' ∧ b = b' := by
   constructor
   · exact ppair_eq_imp
   · rintro ⟨rfl, rfl⟩; rfl
 
-@[simp] lemma lt_ppair_right (x b : V) : b < ppair x b := by
+@[simp]
+lemma lt_ppair_right (x b : V) : b < ppair x b := by
   unfold ppair
   exact lt_succ_iff_le.mpr le_add_self
 
-@[simp] lemma lt_ppair_left (x b : V) : x < ppair x b := by
+@[simp]
+lemma lt_ppair_left (x b : V) : x < ppair x b := by
   unfold ppair
   rcases eq_zero_or_pos (x + b) with (h | h)
   · have : x = 0 := (add_eq_zero_iff_of_nonneg zero_le zero_le |>.mp h).1
@@ -63,7 +66,8 @@ private lemma ppair_eq_imp {x b x' b' : V} (h : ppair x b = ppair x' b') : x = x
     have h2 : x ≤ x + b := le_self_add
     exact lt_succ_iff_le.mpr (le_add_right (h2.trans h1))
 
-@[simp] lemma ppair_ne_zero (x b : V) : ppair x b ≠ 0 := by simp [ppair]
+@[simp]
+lemma ppair_ne_zero (x b : V) : ppair x b ≠ 0 := by simp [ppair]
 
 def _root_.FFL.FirstOrder.Arithmetic.ppairDef : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “y x b. y = (x + b) * (x + b) + b + 1”
@@ -211,13 +215,15 @@ lemma dec_graph (a : V) : Graph ⟪a, dec a⟫ := Classical.choose!_spec (graph_
 lemma dec_eq_of_graph {a s : V} (h : Graph ⟪a, s⟫) : dec a = s :=
   graph_unique (dec_graph a) h
 
-@[simp] lemma dec_ppair (x b : V) : dec (ppair x b) = x ∷ dec b :=
+@[simp]
+lemma dec_ppair (x b : V) : dec (ppair x b) = x ∷ dec b :=
   dec_eq_of_graph (graph_ppair.mpr ⟨dec b, rfl, dec_graph b⟩)
 
 lemma dec_of_not_isPPair {a : V} (h : ¬IsPPair a) : dec a = 0 :=
   dec_eq_of_graph ((graph_of_not_isPPair h).mpr rfl)
 
-@[simp] lemma dec_zero : dec (0 : V) = 0 :=
+@[simp]
+lemma dec_zero : dec (0 : V) = 0 :=
   dec_of_not_isPPair fun h ↦ by
     rcases isPPair_iff.mp h with ⟨x, b, h⟩
     exact ppair_ne_zero x b h.symm

@@ -46,7 +46,8 @@ abbrev structureOfTuple : Tarski.Structure (L.add (Language.constant ι)) M :=
       rel := fun _ r _ ↦ r.elim }
   Tarski.Structure.add L (Language.constant ι) M
 
-@[simp] lemma eval_strucOfTuple_liftParameters (φ : Semiformula L ι k) (e : Fin k → M) :
+@[simp]
+lemma eval_strucOfTuple_liftParameters (φ : Semiformula L ι k) (e : Fin k → M) :
     (liftParameters φ).Eval (s := structureOfTuple M a) e Empty.elim ↔ φ.Eval e a := by
   rw [liftParameters, eval_rew]
   simp only [Function.comp_def, Rew.rewrite_bvar, Rew.rewrite_fvar,
@@ -58,7 +59,8 @@ variable [Nonempty M]
 /-- `M` as a structure for `L.add (Language.constant ι)`, reading the constant `i` as `a i`. -/
 abbrev strucOfTuple : Tarski.Struc (L.add (Language.constant ι)) := (structureOfTuple M a).toStruc
 
-@[simp] lemma strucOfTuple_models_lift_iff (a : Fin k → M) (φ : Semisentence L k) :
+@[simp]
+lemma strucOfTuple_models_lift_iff (a : Fin k → M) (φ : Semisentence L k) :
     strucOfTuple M a ⊧ lift φ ↔ φ.Evalb a := by
   simp only [lift, strucOfTuple, models_iff, Semiformula.Realize, eval_substs,
     Tarski.Structure.eval_lMap_add₁]

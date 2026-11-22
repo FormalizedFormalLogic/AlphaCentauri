@@ -37,7 +37,8 @@ structure EndExtension (M : Type u) (N : Type v) [ORingStructure M] [ORingStruct
   emb : M ↪ₛ[ℒₒᵣ] N
   mem_range_of_lt {a : M} {b : N} : b < emb a → b ∈ Set.range emb
 
-@[inherit_doc] infix:50 " ⊆ₑ " => EndExtension
+@[inherit_doc]
+infix:50 " ⊆ₑ " => EndExtension
 
 /-- A proper end extension: an end extension which is not surjective.
 - [HP98, Definition IV.1.14]
@@ -46,7 +47,8 @@ structure ProperEndExtension (M : Type u) (N : Type v) [ORingStructure M] [ORing
     extends EndExtension M N where
   not_surjective : ¬Function.Surjective emb
 
-@[inherit_doc] infix:50 " ⊂ₑ " => ProperEndExtension
+@[inherit_doc]
+infix:50 " ⊂ₑ " => ProperEndExtension
 
 instance : CoeFun (M ⊆ₑ N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
 
@@ -58,10 +60,12 @@ variable (e : M ⊆ₑ N)
 
 lemma emb_injective : Function.Injective e.emb := EmbeddingClass.map_inj e.emb
 
-@[simp, grind =] lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
+@[simp, grind =]
+lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
   EmbeddingClass.map_lt_map_iff e.emb
 
-@[grind =] lemma emb_eq_emb {x y : M} : e x = e y ↔ x = y := e.emb_injective.eq_iff
+@[grind =]
+lemma emb_eq_emb {x y : M} : e x = e y ↔ x = y := e.emb_injective.eq_iff
 
 instance : ℬ[<, ℒₒᵣ].IsInitial e.emb where
   operator_iff := by
@@ -75,7 +79,8 @@ instance : ℬ[<, ℒₒᵣ].IsInitial e.emb where
 
 variable (M) in
 /-- The identity end extension. -/
-@[refl] protected def refl : M ⊆ₑ M where
+@[refl]
+protected def refl : M ⊆ₑ M where
   emb := {
     toFun := id
     func' _ _ := rfl
@@ -85,10 +90,12 @@ variable (M) in
   }
   mem_range_of_lt {_ b} _ := ⟨b, rfl⟩
 
-@[simp] lemma refl_apply (x : M) : EndExtension.refl M x = x := rfl
+@[simp]
+lemma refl_apply (x : M) : EndExtension.refl M x = x := rfl
 
 /-- The composition of end extensions. -/
-@[trans] protected def trans (e₁ : M ⊆ₑ N) (e₂ : N ⊆ₑ K) : M ⊆ₑ K where
+@[trans]
+protected def trans (e₁ : M ⊆ₑ N) (e₂ : N ⊆ₑ K) : M ⊆ₑ K where
   emb := {
     toFun := e₂ ∘ e₁
     func' f v := by simp [HomClass.func e₁.emb, HomClass.func e₂.emb, Function.comp_def]
@@ -103,7 +110,8 @@ variable (M) in
     use x
     rfl
 
-@[simp] lemma trans_apply (e₁ : M ⊆ₑ N) (e₂ : N ⊆ₑ K) (x : M) : e₁.trans e₂ x = e₂ (e₁ x) := rfl
+@[simp]
+lemma trans_apply (e₁ : M ⊆ₑ N) (e₂ : N ⊆ₑ K) (x : M) : e₁.trans e₂ x = e₂ (e₁ x) := rfl
 
 include e
 
@@ -280,7 +288,8 @@ protected def transRight (e₁ : M ⊆ₑ N) (e₂ : N ⊂ₑ K) : M ⊂ₑ K wh
     exact hx
 
 /-- The composition of proper end extensions. -/
-@[trans] protected def trans (e₁ : M ⊂ₑ N) (e₂ : N ⊂ₑ K) : M ⊂ₑ K :=
+@[trans]
+protected def trans (e₁ : M ⊂ₑ N) (e₂ : N ⊂ₑ K) : M ⊂ₑ K :=
   e₁.transLeft e₂.toEndExtension
 
 end ProperEndExtension

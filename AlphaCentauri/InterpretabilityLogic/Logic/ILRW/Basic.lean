@@ -53,9 +53,11 @@ open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
-@[simp] lemma ILRW.axiomR : 𝐈𝐋𝐑𝐖 ⊢ Axioms.R A B C := axm <| .inl ⟨A, B, C, rfl⟩
+@[simp]
+lemma ILRW.axiomR : 𝐈𝐋𝐑𝐖 ⊢ Axioms.R A B C := axm <| .inl ⟨A, B, C, rfl⟩
 
-@[simp] lemma ILRW.axiomW : 𝐈𝐋𝐑𝐖 ⊢ Axioms.W A B := axm <| .inr ⟨A, B, rfl⟩
+@[simp]
+lemma ILRW.axiomW : 𝐈𝐋𝐑𝐖 ⊢ Axioms.W A B := axm <| .inr ⟨A, B, rfl⟩
 
 lemma ILRW.axiomRstar : 𝐈𝐋𝐑𝐖 ⊢ Axioms.Rstar A B C := by
   have h : 𝐈𝐋𝐑𝐖 ⊢

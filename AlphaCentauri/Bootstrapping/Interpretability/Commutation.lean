@@ -133,7 +133,8 @@ lemma IsTable.shift_qqConj_guardVec {tbl n m k s w w' : V} (hT : IsTable L₁ L�
   hT.map_qqConj_guardVec (fun _ _ ↦ shift_and) (by simp) hk hs hw (fun i _ ↦ hT.shift_domainAt i)
     fun i hi ↦ by rw [shift_relocate (hw i hi) (lt_of_lt_of_le hi hk) hs, hw' i hi]
 
-@[simp] lemma isRel_eq_quote : L₁.IsRel 2 (Encodable.encode (Language.Eq.eq : L₁.Rel 2) : V) :=
+@[simp]
+lemma isRel_eq_quote : L₁.IsRel 2 (Encodable.encode (Language.Eq.eq : L₁.Rel 2) : V) :=
   codeIn_rel_quote (V := V) Language.Eq.eq
 
 lemma IsTable.isSemiformula_funcBody {tbl n k f v : V} (hT : IsTable L₁ L₂ tbl) (hf : L₂.IsFunc k f)

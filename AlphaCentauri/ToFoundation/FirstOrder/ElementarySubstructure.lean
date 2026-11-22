@@ -113,9 +113,11 @@ notation:50 M " ≼ₑ[" L "; " Γ "] " N => @ElementarySubstructureOn L Γ M N 
 @[inherit_doc ProperElementarySubstructureOn]
 notation:50 M " ≺ₑ[" L "; " Γ "] " N => @ProperElementarySubstructureOn L Γ M N _ _
 
-@[inherit_doc] notation:50 M " ≼ₑ[" L "] " N => ElementarySubstructure L M N
+@[inherit_doc]
+notation:50 M " ≼ₑ[" L "] " N => ElementarySubstructure L M N
 
-@[inherit_doc] notation:50 M " ≺ₑ[" L "] " N => ProperElementarySubstructure L M N
+@[inherit_doc]
+notation:50 M " ≺ₑ[" L "] " N => ProperElementarySubstructure L M N
 
 variable {Γ Γ' : ∀ {n : ℕ}, Semiformula L ℕ n → Prop}
 
@@ -127,7 +129,8 @@ namespace ElementarySubstructureOn
 
 variable (M Γ) in
 /-- The identity $\Gamma$-elementary substructure. -/
-@[refl] protected def refl : M ≼ₑ[L; Γ] M where
+@[refl]
+protected def refl : M ≼ₑ[L; Γ] M where
   emb := {
     toFun := id
     func' _ _ := rfl
@@ -137,10 +140,12 @@ variable (M Γ) in
   }
   isElementary _ _ _ := Iff.rfl
 
-@[simp] lemma refl_apply (x : M) : ElementarySubstructureOn.refl M Γ x = x := rfl
+@[simp]
+lemma refl_apply (x : M) : ElementarySubstructureOn.refl M Γ x = x := rfl
 
 /-- The composition of $\Gamma$-elementary substructures. -/
-@[trans] protected def trans (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) : M ≼ₑ[L; Γ] K where
+@[trans]
+protected def trans (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) : M ≼ₑ[L; Γ] K where
   emb := {
     toFun := e₂ ∘ e₁
     func' f v := by simp [HomClass.func e₁.emb, HomClass.func e₂.emb, Function.comp_def]
@@ -151,7 +156,8 @@ variable (M Γ) in
   }
   isElementary hφ e f := (e₂.isElementary hφ (e₁ ∘ e) (e₁ ∘ f)).trans (e₁.isElementary hφ e f)
 
-@[simp] lemma trans_apply (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) (x : M) :
+@[simp]
+lemma trans_apply (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) (x : M) :
     e₁.trans e₂ x = e₂ (e₁ x) := rfl
 
 /-- A $\Gamma$-elementary substructure is $\Gamma'$-elementary for every $\Gamma'$ contained in

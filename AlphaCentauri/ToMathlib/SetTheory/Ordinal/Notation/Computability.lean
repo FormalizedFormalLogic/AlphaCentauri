@@ -30,11 +30,12 @@ private lemma encodeONote_decodeONote (n : ℕ) : encodeONote (decodeONote n) = 
     simp +arith +decide [encodeONote, ih _ (Nat.lt_succ_of_le (Nat.unpair_left_le _)),
       ih _ (Nat.lt_succ_of_le (Nat.unpair_right_le _ |> le_trans <| Nat.unpair_right_le _))]
 
-@[simp] private lemma decode_eq (n : ℕ) :
-    (Encodable.decode n : Option ONote) = some (decodeONote n) := by
+@[simp]
+private lemma decode_eq (n : ℕ) : (Encodable.decode n : Option ONote) = some (decodeONote n) := by
   rfl
 
-@[simp] private lemma encode_eq (x : ONote) : Encodable.encode x = encodeONote x := by
+@[simp]
+private lemma encode_eq (x : ONote) : Encodable.encode x = encodeONote x := by
   rfl
 
 private lemma encode_decode_eq (n : ℕ) :
@@ -60,16 +61,19 @@ lemma computable_decodeONote : Computable decodeONote := by
 
 /-! ### Ordering encoded as `ℕ` (lt = 0, eq = 1, gt = 2) -/
 
-@[grind =] private def ordCode : Ordering → ℕ
+@[grind =]
+private def ordCode : Ordering → ℕ
   | Ordering.lt => 0
   | Ordering.eq => 1
   | Ordering.gt => 2
 
 /-- `ℕ`-level version of `Ordering.then`. -/
-@[grind =] private def thenNat (a b : ℕ) : ℕ := if a = 1 then b else a
+@[grind =]
+private def thenNat (a b : ℕ) : ℕ := if a = 1 then b else a
 
 /-- `ℕ`-level version of `_root_.cmp` on `ℕ`, returning an `ordCode`. -/
-@[grind =] private def cmpNat (a b : ℕ) : ℕ := if a < b then 0 else if a = b then 1 else 2
+@[grind =]
+private def cmpNat (a b : ℕ) : ℕ := if a < b then 0 else if a = b then 1 else 2
 
 private lemma ordCode_then (o p : Ordering) :
     ordCode (o.then p) = thenNat (ordCode o) (ordCode p) := by
@@ -94,15 +98,20 @@ private def cmpNV (m : ℕ) : ℕ :=
   cmpNat ((Nat.unpair (Nat.unpair ((Nat.unpair m).1 - 1)).2).1 + 1)
          ((Nat.unpair (Nat.unpair ((Nat.unpair m).2 - 1)).2).1 + 1)
 
-@[primrec] private lemma primrec_cmpIdxE : Primrec cmpIdxE := by unfold cmpIdxE; primrec
+@[primrec]
+private lemma primrec_cmpIdxE : Primrec cmpIdxE := by unfold cmpIdxE; primrec
 
-@[primrec] private lemma primrec_cmpIdxA : Primrec cmpIdxA := by unfold cmpIdxA; primrec
+@[primrec]
+private lemma primrec_cmpIdxA : Primrec cmpIdxA := by unfold cmpIdxA; primrec
 
-@[primrec] private lemma primrec_thenNat : Primrec₂ thenNat := by unfold thenNat; primrec
+@[primrec]
+private lemma primrec_thenNat : Primrec₂ thenNat := by unfold thenNat; primrec
 
-@[primrec] private lemma primrec_cmpNat : Primrec₂ cmpNat := by unfold cmpNat; primrec
+@[primrec]
+private lemma primrec_cmpNat : Primrec₂ cmpNat := by unfold cmpNat; primrec
 
-@[primrec] private lemma primrec_cmpNV : Primrec cmpNV := by unfold cmpNV; primrec
+@[primrec]
+private lemma primrec_cmpNV : Primrec cmpNV := by unfold cmpNV; primrec
 
 /-- Step function for the strong recursion computing `ordCode ∘ cmp`. -/
 private def cmpStep (L : List ℕ) : Option ℕ :=
@@ -186,9 +195,11 @@ private def nfTB (c : ℕ) : Bool :=
   if nfIdxA c = 0 then true
   else decide (Cnat (Nat.pair (Nat.unpair (nfIdxA c - 1)).1 (nfIdxE c)) = 0)
 
-@[primrec] private lemma primrec_nfIdxE : Primrec nfIdxE := by unfold nfIdxE; primrec
+@[primrec]
+private lemma primrec_nfIdxE : Primrec nfIdxE := by unfold nfIdxE; primrec
 
-@[primrec] private lemma primrec_nfIdxA : Primrec nfIdxA := by unfold nfIdxA; primrec
+@[primrec]
+private lemma primrec_nfIdxA : Primrec nfIdxA := by unfold nfIdxA; primrec
 
 private lemma computable_nfTB : Computable nfTB := by
   have hidx : Primrec (fun c : ℕ => Nat.pair (Nat.unpair (nfIdxA c - 1)).1 (nfIdxE c)) := by
@@ -381,8 +392,8 @@ private lemma countNF_enc : countNF (enc a) = a := by
   rw [Finset.card_image_of_injective _ enc_injective] at h_card
   aesop
 
-@[grind =] private lemma countNF_succ (n : ℕ) :
-    countNF (n + 1) = countNF n + (if Nfb n then 1 else 0) := by
+@[grind =]
+private lemma countNF_succ (n : ℕ) : countNF (n + 1) = countNF n + (if Nfb n then 1 else 0) := by
   have h_filter : List.filter (fun k => Nfb k) (List.range (n + 1)) =
       List.filter (fun k => Nfb k) (List.range n) ++ if Nfb n then [n] else [] := by
     simp +decide [List.range_succ]

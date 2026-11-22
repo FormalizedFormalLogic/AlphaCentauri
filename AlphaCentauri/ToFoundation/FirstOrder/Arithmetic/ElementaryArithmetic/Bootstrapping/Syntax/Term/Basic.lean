@@ -54,27 +54,35 @@ scoped prefix:max "^func " => qqFunc
 lemma qqFuncN_eq_qqFunc (k f v : ℕ) : qqFuncN k f v = qqFunc k f v := by
   simp [qqFunc, qqFuncN, nat_pair_eq]
 
-@[simp] lemma var_lt_qqBvar (z : V) : z < ^#z := by simp [qqBvar, lt_succ_iff_le]
+@[simp]
+lemma var_lt_qqBvar (z : V) : z < ^#z := by simp [qqBvar, lt_succ_iff_le]
 
-@[simp] lemma var_lt_qqFvar (x : V) : x < ^&x := by simp [qqFvar, lt_succ_iff_le]
+@[simp]
+lemma var_lt_qqFvar (x : V) : x < ^&x := by simp [qqFvar, lt_succ_iff_le]
 
-@[simp] lemma arity_lt_qqFunc (k f v : V) : k < ^func k f v := by
+@[simp]
+lemma arity_lt_qqFunc (k f v : V) : k < ^func k f v := by
   grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma func_lt_qqFunc (k f v : V) : f < ^func k f v := by
+@[simp]
+lemma func_lt_qqFunc (k f v : V) : f < ^func k f v := by
   grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma terms_lt_qqFunc (k f v : V) : v < ^func k f v := by
+@[simp]
+lemma terms_lt_qqFunc (k f v : V) : v < ^func k f v := by
   grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 lemma nth_lt_qqFunc_of_lt {i k f v : V} (hi : i < len v) : v.[i] < ^func k f v :=
   lt_trans (nth_lt_self hi) (terms_lt_qqFunc _ _ _)
 
-@[simp] lemma qqBvar_inj {z z' : V} : ^#z = ^#z' ↔ z = z' := by simp [qqBvar]
+@[simp]
+lemma qqBvar_inj {z z' : V} : ^#z = ^#z' ↔ z = z' := by simp [qqBvar]
 
-@[simp] lemma qqFvar_inj {x x' : V} : ^&x = ^&x' ↔ x = x' := by simp [qqFvar]
+@[simp]
+lemma qqFvar_inj {x x' : V} : ^&x = ^&x' ↔ x = x' := by simp [qqFvar]
 
-@[simp] lemma qqFunc_inj {k f v k' f' w : V} :
+@[simp]
+lemma qqFunc_inj {k f v k' f' w : V} :
     ^func k f v = ^func k' f' w ↔ k = k' ∧ f = f' ∧ v = w := by simp [qqFunc]
 
 instance qqBvar_defined : 𝚺ᴬ₀-Function₁ (qqBvar : V → V) via qqBvarDef :=
@@ -265,9 +273,11 @@ protected lemma lh {n w : V} (h : IsUTermVec L n w) : n = len w := h.1
 
 lemma nth {n w : V} (h : IsUTermVec L n w) {i} : i < n → IsUTerm L w.[i] := h.2 i
 
-@[simp] lemma empty : IsUTermVec (V := V) L 0 0 := ⟨by simp, by simp⟩
+@[simp]
+lemma empty : IsUTermVec (V := V) L 0 0 := ⟨by simp, by simp⟩
 
-@[simp] lemma empty_iff : IsUTermVec L 0 v ↔ v = 0 := by
+@[simp]
+lemma empty_iff : IsUTermVec L 0 v ↔ v = 0 := by
   simp [IsUTermVec, ← len_zero_iff_eq_nil, eq_comm]
 
 lemma two_iff {v : V} :
@@ -281,19 +291,19 @@ lemma two_iff {v : V} :
     exact ⟨by simp [one_add_one_eq_two],
       by simp [lt_two_iff_le_one, le_one_iff_eq_zero_or_one, h₁, h₂]⟩
 
-@[simp] lemma adjoin {n w t : V} (h : IsUTermVec L n w) (ht : IsUTerm L t) :
-    IsUTermVec L (n + 1) (t ∷ w) :=
+@[simp]
+lemma adjoin {n w t : V} (h : IsUTermVec L n w) (ht : IsUTerm L t) : IsUTermVec L (n + 1) (t ∷ w) :=
   ⟨by simp [h.lh], fun i hi ↦ by
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simpa
     · simpa using h.nth (by simpa using hi)⟩
 
-@[simp] lemma adjoin₁_iff {t : V} :
-    IsUTermVec L 1 (?[t] : V) ↔ IsUTerm L t := by
+@[simp]
+lemma adjoin₁_iff {t : V} : IsUTermVec L 1 (?[t] : V) ↔ IsUTerm L t := by
   simp [IsUTermVec]
 
-@[simp] lemma mkSeq₂_iff {t₁ t₂ : V} :
-    IsUTermVec L 2 (?[t₁, t₂] : V) ↔ IsUTerm L t₁ ∧ IsUTerm L t₂ := by
+@[simp]
+lemma mkSeq₂_iff {t₁ t₂ : V} : IsUTermVec L 2 (?[t₁, t₂] : V) ↔ IsUTerm L t₁ ∧ IsUTerm L t₂ := by
   constructor
   · intro h
     exact ⟨by simpa using h.nth (i := 0) (by simp), by simpa using h.nth (i := 1) (by simp)⟩
@@ -323,14 +333,16 @@ lemma case_iff {t : V} :
 
 alias ⟨case, mk⟩ := case_iff
 
-@[simp] lemma bvar {z : V} : IsUTerm L ^#z :=
+@[simp]
+lemma bvar {z : V} : IsUTerm L ^#z :=
   mk (by disj 1; use z)
 
-@[simp] lemma fvar (x : V) : IsUTerm L ^&x :=
+@[simp]
+lemma fvar (x : V) : IsUTerm L ^&x :=
   mk (by disj 2; use x)
 
-@[simp] lemma func_iff {k f v : V} :
-    IsUTerm L (^func k f v) ↔ L.IsFunc k f ∧ IsUTermVec L k v :=
+@[simp]
+lemma func_iff {k f v : V} : IsUTerm L (^func k f v) ↔ L.IsFunc k f ∧ IsUTermVec L k v :=
   ⟨by intro h
       rcases h.case with (⟨_, h⟩ | ⟨x, h⟩ | ⟨k', f', w, hkf, ⟨hk, hv⟩, h⟩)
       · simp [qqFunc, qqBvar] at h
@@ -950,7 +962,8 @@ lemma graph_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.Graph L (v ·.succ.succ) (
   .mk fun v ↦ by
   simp [Blueprint.graph, (c.construction L).fixpoint_defined.iff, Graph]
 
-@[simp] lemma eval_graphDef (v : Fin (arity + 2) → V) :
+@[simp]
+lemma eval_graphDef (v : Fin (arity + 2) → V) :
     (β.graph L).val.Evalb v ↔ c.Graph L (v ·.succ.succ) (v 0) (v 1) := (graph_defined c).iff
 
 instance graph_definable : 𝚺ᴬ₁.Definable fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1) :=
@@ -1019,10 +1032,12 @@ lemma result_eq_of_graph {t y} (ht : IsUTerm L t) (h : c.Graph L param t y) :
     c.result L param t = y :=
   Eq.symm <| Classical.choose_uniq (c.graph_existsUnique_total L param t) (by simp [h, ht])
 
-@[simp] lemma result_bvar (z) : c.result L param (^#z) = c.bvar param z :=
+@[simp]
+lemma result_bvar (z) : c.result L param (^#z) = c.bvar param z :=
   c.result_eq_of_graph (by simp) (by simp [c.graph_bvar_iff])
 
-@[simp] lemma result_fvar (x) : c.result L param (^&x) = c.fvar param x :=
+@[simp]
+lemma result_fvar (x) : c.result L param (^&x) = c.fvar param x :=
   c.result_eq_of_graph (by simp) (by simp [c.graph_fvar_iff])
 
 lemma result_func {k f v w} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v)
@@ -1082,7 +1097,8 @@ lemma graph_existsUnique_vec_total (k w : V) : ∃! w',
 noncomputable def resultVec (k w : V) : V :=
   Classical.choose! (c.graph_existsUnique_vec_total L param k w)
 
-@[simp] lemma resultVec_lh {k w : V} (hw : IsUTermVec L k w) : len (c.resultVec L param k w) = k :=
+@[simp]
+lemma resultVec_lh {k w : V} (hw : IsUTermVec L k w) : len (c.resultVec L param k w) = k :=
   Eq.symm <| Classical.choose!_spec (c.graph_existsUnique_vec_total L param k w) |>.1 hw |>.1
 
 lemma graph_of_mem_resultVec {k w : V} (hw : IsUTermVec L k w) {i : V} (hi : i < k) :
@@ -1093,10 +1109,12 @@ lemma nth_resultVec {k w i : V} (hw : IsUTermVec L k w) (hi : i < k) :
     (c.resultVec L param k w).[i] = c.result L param w.[i] :=
   c.result_eq_of_graph (hw.nth hi) (c.graph_of_mem_resultVec L param hw hi) |>.symm
 
-@[simp] theorem resultVec_of_not {k w : V} (hw : ¬IsUTermVec L k w) : c.resultVec L param k w = 0 :=
+@[simp]
+theorem resultVec_of_not {k w : V} (hw : ¬IsUTermVec L k w) : c.resultVec L param k w = 0 :=
   Classical.choose!_spec (c.graph_existsUnique_vec_total L param k w) |>.2 hw
 
-@[simp] lemma resultVec_nil :
+@[simp]
+lemma resultVec_nil :
     c.resultVec L param 0 0 = 0 := len_zero_iff_eq_nil.mp (by simp)
 
 lemma resultVec_cons {k w t : V} (hw : IsUTermVec L k w) (ht : IsUTerm L t) :
@@ -1148,7 +1166,8 @@ end vec
 
 variable (c)
 
-@[simp] lemma result_func' {k f v} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+@[simp]
+lemma result_func' {k f v} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
     c.result L param (^func k f v) = c.func param k f v (c.resultVec L param k v) :=
   c.result_func hkf hv (by simp [hv]) (fun i hi ↦ c.nth_resultVec L param hv hi |>.symm)
 
@@ -1158,7 +1177,8 @@ lemma result_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ c.result L (v ·.su
     IsUTerm.defined.proper.iff',
     c.eval_graphDef, result, Classical.choose!_eq_iff_right]
 
-@[simp] lemma result_graphDef (v : Fin (arity + 2) → V) :
+@[simp]
+lemma result_graphDef (v : Fin (arity + 2) → V) :
     (β.result L).val.Evalb v ↔ v 0 = c.result L (v ·.succ.succ) (v 1) := (result_defined c).iff
 
 private lemma resultVec_graph {w' k w} :
@@ -1221,23 +1241,29 @@ noncomputable def termBVVec (k v : V) : V := construction.resultVec L ![] k v
 variable {L}
 variable {k : V}
 
-@[simp] lemma termBV_bvar (z : V) :
+@[simp]
+lemma termBV_bvar (z : V) :
     termBV L ^#z = z + 1 := by simp [termBV, construction]
 
-@[simp] lemma termBV_fvar (x : V) :
+@[simp]
+lemma termBV_fvar (x : V) :
     termBV L ^&x = 0 := by simp [termBV, construction]
 
-@[simp] lemma termBV_func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+@[simp]
+lemma termBV_func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
     termBV L (^func k f v) = listMax (termBVVec L k v) := by
   simp [termBV, construction, hkf, hv]; rfl
 
-@[simp] lemma len_termBVVec {v : V} (hv : IsUTermVec L k v) :
+@[simp]
+lemma len_termBVVec {v : V} (hv : IsUTermVec L k v) :
     len (termBVVec L k v) = k := construction.resultVec_lh L _ hv
 
-@[simp] lemma nth_termBVVec {v : V} (hv : IsUTermVec L k v) {i} (hi : i < k) :
+@[simp]
+lemma nth_termBVVec {v : V} (hv : IsUTermVec L k v) {i} (hi : i < k) :
     (termBVVec L k v).[i] = termBV L v.[i] := construction.nth_resultVec L _ hv hi
 
-@[simp] lemma termBVVec_nil : termBVVec L 0 0 = 0 := construction.resultVec_nil L _
+@[simp]
+lemma termBVVec_nil : termBVVec L 0 0 = 0 := construction.resultVec_nil L _
 
 instance termBV.defined : 𝚺ᴬ₁-Function₁ (termBV (V := V) L) via (termBVGraph L) :=
   construction.result_defined
@@ -1317,7 +1343,8 @@ lemma isSemitermVec_locallyDelta0 :
   exact (hvec.and (LocallyDelta0.ball_lt_function (LocallyDelta0Function.var 0)
     (hbv.of_iff fun w ↦ Iff.rfl))).of_iff fun w ↦ IsSemitermVec.def
 
-@[simp] lemma IsSemitermVec.isUTerm {k n v : V} (h : IsSemitermVec L k n v) :
+@[simp]
+lemma IsSemitermVec.isUTerm {k n v : V} (h : IsSemitermVec L k n v) :
     IsUTermVec L k v := h.1
 
 lemma IsSemitermVec.lh {k n v : V} (h : IsSemitermVec L k n v) : len v = k := h.isUTerm.lh.symm
@@ -1338,13 +1365,16 @@ lemma IsSemitermVec.iff {k n v : V} :
   · intro h; exact ⟨h.lh, fun i hi ↦ h.nth hi⟩
   · intro ⟨hk, h⟩; exact ⟨⟨hk.symm, fun i hi ↦ h i hi |>.isUTerm⟩, fun hi ↦ h _ hi |>.bv⟩
 
-@[simp] lemma IsSemiterm.bvar {n z : V} :
+@[simp]
+lemma IsSemiterm.bvar {n z : V} :
     IsSemiterm L n ^#z ↔ z < n := by simp [IsSemiterm.def, succ_le_iff_lt]
 
-@[simp] lemma IsSemiterm.fvar (n x : V) :
+@[simp]
+lemma IsSemiterm.fvar (n x : V) :
     IsSemiterm L n ^&x := by simp [IsSemiterm.def]
 
-@[simp] lemma IsSemiterm.func {n k f v : V} :
+@[simp]
+lemma IsSemiterm.func {n k f v : V} :
     IsSemiterm L n (^func k f v) ↔ L.IsFunc k f ∧ IsSemitermVec L k n v := by
   simp only [IsSemiterm.def, IsUTerm.func_iff]
   constructor
@@ -1361,14 +1391,17 @@ lemma IsSemitermVec.iff {k n v : V} :
       have hi : i < k := by simpa [hf, h.isUTerm] using hi
       simpa [hf, h.isUTerm, hi] using (h.nth hi).bv⟩
 
-@[simp] lemma IsSemitermVec.empty (n : V) : IsSemitermVec L 0 n 0 := ⟨by simp, by simp⟩
+@[simp]
+lemma IsSemitermVec.empty (n : V) : IsSemitermVec L 0 n 0 := ⟨by simp, by simp⟩
 
-@[simp] lemma IsSemitermVec.empty_iff {v : V} : IsSemitermVec L 0 n v ↔ v = 0 := by
+@[simp]
+lemma IsSemitermVec.empty_iff {v : V} : IsSemitermVec L 0 n v ↔ v = 0 := by
   constructor
   · intro h; exact len_zero_iff_eq_nil.mp h.lh
   · rintro rfl; simp
 
-@[simp] lemma IsSemitermVec.cons_iff :
+@[simp]
+lemma IsSemitermVec.cons_iff :
     IsSemitermVec L (k + 1) n (t ∷ w) ↔ IsSemiterm L n t ∧ IsSemitermVec L k n w := by
   constructor
   · intro h
@@ -1386,11 +1419,12 @@ lemma SemitermVec.adjoin {n m w t : V} (h : IsSemitermVec L n m w) (ht : IsSemit
     IsSemitermVec L (n + 1) m (t ∷ w) :=
   IsSemitermVec.cons_iff.mpr ⟨ht, h⟩
 
-@[simp] lemma IsSemitermVec.singleton {n t : V} :
-    IsSemitermVec L 1 n ?[t] ↔ IsSemiterm L n t := by
+@[simp]
+lemma IsSemitermVec.singleton {n t : V} : IsSemitermVec L 1 n ?[t] ↔ IsSemiterm L n t := by
   rw [show (1 : V) = 0 + 1 by simp, IsSemitermVec.cons_iff]; simp
 
-@[simp] lemma IsSemitermVec.doubleton {n t₁ t₂ : V} :
+@[simp]
+lemma IsSemitermVec.doubleton {n t₁ t₂ : V} :
     IsSemitermVec L 2 n ?[t₁, t₂] ↔ IsSemiterm L n t₁ ∧ IsSemiterm L n t₂ := by
   rw [show (2 : V) = 1 + 1 by simp [one_add_one_eq_two], IsSemitermVec.cons_iff]; simp
 
@@ -1454,9 +1488,11 @@ lemma IsSemiterm.induction {P : V → Prop} (hP : LocallyDelta0Pred P)
     have hv : IsSemitermVec L k n v := by simp_all
     exact hfunc k f v hf hv (fun i hi ↦ ih i hi (hv.nth hi))
 
-@[simp] lemma IsSemitermVec.nil (k : V) : IsSemitermVec L 0 k 0 := ⟨by simp, by simp⟩
+@[simp]
+lemma IsSemitermVec.nil (k : V) : IsSemitermVec L 0 k 0 := ⟨by simp, by simp⟩
 
-@[simp] lemma IsSemitermVec.adjoin {k n w t : V} (h : IsSemitermVec L n k w)
+@[simp]
+lemma IsSemitermVec.adjoin {k n w t : V} (h : IsSemitermVec L n k w)
     (ht : IsSemiterm L k t) : IsSemitermVec L (n + 1) k (t ∷ w) :=
   ⟨h.isUTerm.adjoin ht.isUTerm, by
     intro i hi

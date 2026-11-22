@@ -37,7 +37,8 @@ open ofCLAxioms
 
 variable {A B C : Formula α}
 
-@[simp] lemma CLM.axiomM : 𝐂𝐋𝐌 ⊢ Axioms.M A B C := axm ⟨A, B, C, rfl⟩
+@[simp]
+lemma CLM.axiomM : 𝐂𝐋𝐌 ⊢ Axioms.M A B C := axm ⟨A, B, C, rfl⟩
 
 instance : (𝐂𝐋 : Logic α) ⪯ 𝐂𝐋𝐌 := weakerThan_iff.mpr <| subset_of_subset (Set.empty_subset _)
 
@@ -70,11 +71,15 @@ def ofModal : ProvabilityLogic.Formula (Formula α) → Formula α
   | .imp A B => ofModal A 🡒 ofModal B
   | .box A => □(ofModal A)
 
-@[simp] lemma ofModal_atom {A : Formula α} : ofModal (.atom A) = A := rfl
-@[simp] lemma ofModal_falsum : ofModal (⊥ : ProvabilityLogic.Formula (Formula α)) = ⊥ := rfl
-@[simp] lemma ofModal_imp {A B : ProvabilityLogic.Formula (Formula α)} :
+@[simp]
+lemma ofModal_atom {A : Formula α} : ofModal (.atom A) = A := rfl
+@[simp]
+lemma ofModal_falsum : ofModal (⊥ : ProvabilityLogic.Formula (Formula α)) = ⊥ := rfl
+@[simp]
+lemma ofModal_imp {A B : ProvabilityLogic.Formula (Formula α)} :
     ofModal (A 🡒 B) = ofModal A 🡒 ofModal B := rfl
-@[simp] lemma ofModal_box {A : ProvabilityLogic.Formula (Formula α)} :
+@[simp]
+lemma ofModal_box {A : ProvabilityLogic.Formula (Formula α)} :
     ofModal (□A) = □(ofModal A) := rfl
 
 end Formula

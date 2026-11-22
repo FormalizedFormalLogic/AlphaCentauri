@@ -181,11 +181,13 @@ lemma exs_iff (hq : IsUFormula ℒₒᵣ q) (h : formulaComplexity ℒₒᵣ (^�
     rw [succ_exs hq]
     exact exists_congr fun x ↦ (succ_iff hq (by simpa [hq] using h)).symm
 
-@[simp] lemma verum : ComplexitySatisfied N e (^⊤ : V) := by
+@[simp]
+lemma verum : ComplexitySatisfied N e (^⊤ : V) := by
   rw [iff_boundedSatisfied (by simp)]
   simp
 
-@[simp] lemma not_falsum : ¬ComplexitySatisfied N e (^⊥ : V) := by
+@[simp]
+lemma not_falsum : ¬ComplexitySatisfied N e (^⊥ : V) := by
   rw [iff_boundedSatisfied (by simp)]
   simp
 

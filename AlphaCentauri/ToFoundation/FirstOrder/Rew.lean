@@ -32,7 +32,8 @@ lemma qpow_map {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} (b : Fin n₁ → Fin n�
       by_cases h : (x : ℕ) < k <;> simp [h]
       omega
 
-@[simp] lemma emb_subst_app {m : ℕ} (w : Fin n → Semiterm L Empty m) (φ : Semiformula L Empty n) :
+@[simp]
+lemma emb_subst_app {m : ℕ} (w : Fin n → Semiterm L Empty m) (φ : Semiformula L Empty n) :
     Rewriting.emb (Rew.subst w ▹ φ : Semiformula L Empty m) =
       Rew.subst (fun i ↦ Rew.emb (w i)) ▹ (Rewriting.emb φ : Semiformula L ℕ n) := by
   unfold Rewriting.emb
@@ -94,7 +95,8 @@ lemma subst_subst_eq {m : ℕ} (v : Fin n → Semiterm L ξ m) (φ : Semiformula
       | succ i => exact i.elim0
     · simp [Rew.comp_app]
 
-@[simp] lemma subst_bShift_eq (v : Fin 1 → Semiterm L ξ 1) (t : Semiterm L ξ 0) :
+@[simp]
+lemma subst_bShift_eq (v : Fin 1 → Semiterm L ξ 1) (t : Semiterm L ξ 0) :
     Rew.subst v (Rew.bShift t) = Rew.bShift t := by
   have e : (Rew.subst v).comp (Rew.bShift : Rew L ξ 0 ξ 1) = Rew.bShift := by
     ext x

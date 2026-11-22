@@ -39,9 +39,11 @@ noncomputable def qqQuant : Polarity → V → V
   | 𝚺, p => ^∃ p
   | 𝚷, p => ^∀ p
 
-@[simp] lemma qqQuant_sigma (p : V) : qqQuant 𝚺 p = ^∃ p := rfl
+@[simp]
+lemma qqQuant_sigma (p : V) : qqQuant 𝚺 p = ^∃ p := rfl
 
-@[simp] lemma qqQuant_pi (p : V) : qqQuant 𝚷 p = ^∀ p := rfl
+@[simp]
+lemma qqQuant_pi (p : V) : qqQuant 𝚷 p = ^∀ p := rfl
 
 instance qqQuant_defined (Γ : Polarity) :
     𝚺ᴬ₀-Function₁ (qqQuant Γ : V → V) via qqQuantDef Γ := by
@@ -54,15 +56,18 @@ lemma qqQuant_locallyDelta0 (Γ : Polarity) : LocallyDelta0Function₁ (qqQuant 
   · exact qqExs_locallyDelta0
   · exact qqAll_locallyDelta0
 
-@[simp] lemma lt_qqQuant (Γ : Polarity) (p : V) : p < qqQuant Γ p := by
+@[simp]
+lemma lt_qqQuant (Γ : Polarity) (p : V) : p < qqQuant Γ p := by
   cases Γ <;> simp [lt_exists, lt_forall]
 
 variable {Γ Γ' : Polarity} {p q : V}
 
-@[simp] lemma qqQuant_inj : qqQuant Γ p = qqQuant Γ' q ↔ Γ = Γ' ∧ p = q := by
+@[simp]
+lemma qqQuant_inj : qqQuant Γ p = qqQuant Γ' q ↔ Γ = Γ' ∧ p = q := by
   cases Γ <;> cases Γ' <;> simp [qqExs, qqAll]
 
-@[simp] lemma isUFormula_qqQuant {L : Language} [L.Encodable] [L.LORDefinable] :
+@[simp]
+lemma isUFormula_qqQuant {L : Language} [L.Encodable] [L.LORDefinable] :
     IsUFormula L (qqQuant Γ p) ↔ IsUFormula L p := by
   cases Γ <;> simp
 
@@ -82,14 +87,18 @@ noncomputable def qqToPrenex : Polarity → ℕ → V → V
 
 variable {Γ : Polarity} {s : ℕ} {θ θ' : V}
 
-@[simp] lemma qqToPrenex_zero : qqToPrenex Γ 0 θ = θ := rfl
+@[simp]
+lemma qqToPrenex_zero : qqToPrenex Γ 0 θ = θ := rfl
 
-@[simp] lemma qqToPrenex_succ : qqToPrenex Γ (s + 1) θ = qqQuant Γ (qqToPrenex Γ.alt s θ) := rfl
+@[simp]
+lemma qqToPrenex_succ : qqToPrenex Γ (s + 1) θ = qqQuant Γ (qqToPrenex Γ.alt s θ) := rfl
 
-@[simp] lemma qqToPrenex_inj : qqToPrenex Γ s θ = qqToPrenex Γ s θ' ↔ θ = θ' := by
+@[simp]
+lemma qqToPrenex_inj : qqToPrenex Γ s θ = qqToPrenex Γ s θ' ↔ θ = θ' := by
   induction s generalizing Γ <;> simp [*]
 
-@[simp] lemma le_qqToPrenex : θ ≤ qqToPrenex Γ s θ := by
+@[simp]
+lemma le_qqToPrenex : θ ≤ qqToPrenex Γ s θ := by
   induction s generalizing Γ with
   | zero => simp
   | succ s ih => exact ih.trans (lt_qqQuant _ _).le
@@ -284,20 +293,24 @@ lemma IsHierarchy.of_bounded (h : IsBounded p) : IsHierarchy Γ n p := by
   | zero => exact IsHierarchy.zero_iff.mpr h
   | succ n ih => exact IsHierarchy.of_alt ih
 
-@[simp] lemma IsHierarchy.verum : IsHierarchy Γ n (^⊤ : V) :=
+@[simp]
+lemma IsHierarchy.verum : IsHierarchy Γ n (^⊤ : V) :=
   IsHierarchy.of_bounded (by simp)
 
-@[simp] lemma IsHierarchy.falsum : IsHierarchy Γ n (^⊥ : V) :=
+@[simp]
+lemma IsHierarchy.falsum : IsHierarchy Γ n (^⊥ : V) :=
   IsHierarchy.of_bounded (by simp)
 
-@[simp] lemma IsHierarchy.rel {k r v : V} : IsHierarchy Γ n (^rel k r v) :=
+@[simp]
+lemma IsHierarchy.rel {k r v : V} : IsHierarchy Γ n (^rel k r v) :=
   IsHierarchy.of_bounded (by simp)
 
-@[simp] lemma IsHierarchy.nrel {k r v : V} : IsHierarchy Γ n (^nrel k r v) :=
+@[simp]
+lemma IsHierarchy.nrel {k r v : V} : IsHierarchy Γ n (^nrel k r v) :=
   IsHierarchy.of_bounded (by simp)
 
-@[simp] lemma IsHierarchy.and_iff :
-    IsHierarchy Γ n (p ^⋏ q) ↔ IsHierarchy Γ n p ∧ IsHierarchy Γ n q := by
+@[simp]
+lemma IsHierarchy.and_iff : IsHierarchy Γ n (p ^⋏ q) ↔ IsHierarchy Γ n p ∧ IsHierarchy Γ n q := by
   induction n generalizing Γ with
   | zero => exact IsBounded.and_iff
   | succ n ih =>
@@ -309,8 +322,8 @@ lemma IsHierarchy.of_bounded (h : IsBounded p) : IsHierarchy Γ n p := by
     · rintro ⟨hp, hq⟩
       exact IsHierarchy.succ_mk <| by disj 2; exact ⟨p, q, hp, hq, rfl⟩
 
-@[simp] lemma IsHierarchy.or_iff :
-    IsHierarchy Γ n (p ^⋎ q) ↔ IsHierarchy Γ n p ∧ IsHierarchy Γ n q := by
+@[simp]
+lemma IsHierarchy.or_iff : IsHierarchy Γ n (p ^⋎ q) ↔ IsHierarchy Γ n p ∧ IsHierarchy Γ n q := by
   induction n generalizing Γ with
   | zero => exact IsBounded.or_iff
   | succ n ih =>
@@ -484,7 +497,8 @@ lemma isPrenexHierarchy_locallyDelta0 (Γ : Polarity) (n : ℕ) :
 
 variable {Γ : Polarity} {n : ℕ} {p : V}
 
-@[simp] lemma IsPrenexHierarchy.quant_iff :
+@[simp]
+lemma IsPrenexHierarchy.quant_iff :
     IsPrenexHierarchy Γ (n + 1) (qqQuant Γ p) ↔ IsPrenexHierarchy Γ.alt n p := by
   simp [IsPrenexHierarchy]
 

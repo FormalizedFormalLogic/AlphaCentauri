@@ -19,7 +19,8 @@ namespace FFL.Entailment
 
 variable {F : Type*} {S : Type*} [Entailment S F]
 
-@[simp] lemma consistent_eq_true (𝓢 : S) [h : Consistent 𝓢] : Consistent 𝓢 = True :=
+@[simp]
+lemma consistent_eq_true (𝓢 : S) [h : Consistent 𝓢] : Consistent 𝓢 = True :=
   eq_true h
 
 variable [LogicalConnective F] [LogicalNeutral F] {𝓢 : S}

@@ -88,27 +88,40 @@ scoped notation:55 x:56 " ⊩ " A:56 => Forces _ x A
 
 scoped notation:55 x:56 " ⊮ " A:56 => ¬Forces _ x A
 
-@[simp, grind =] lemma forces_atom {a : α} : x ⊩ #a ↔ M x a := Iff.rfl
-@[simp, grind .] lemma not_forces_bot : x ⊮ ⊥ := id
-@[simp, grind .] lemma forces_top : x ⊩ ⊤ := id
-@[grind =] lemma forces_imp : x ⊩ A 🡒 B ↔ x ⊮ A ∨ x ⊩ B := imp_iff_not_or
-@[grind =] lemma forces_and : x ⊩ A ⋏ B ↔ x ⊩ A ∧ x ⊩ B := by
+@[simp, grind =]
+lemma forces_atom {a : α} : x ⊩ #a ↔ M x a := Iff.rfl
+@[simp, grind .]
+lemma not_forces_bot : x ⊮ ⊥ := id
+@[simp, grind .]
+lemma forces_top : x ⊩ ⊤ := id
+@[grind =]
+lemma forces_imp : x ⊩ A 🡒 B ↔ x ⊮ A ∨ x ⊩ B := imp_iff_not_or
+@[grind =]
+lemma forces_and : x ⊩ A ⋏ B ↔ x ⊩ A ∧ x ⊩ B := by
   change ((_ → _ → False) → False) ↔ _; tauto;
-@[grind =] lemma forces_or : x ⊩ A ⋎ B ↔ x ⊩ A ∨ x ⊩ B := by
+@[grind =]
+lemma forces_or : x ⊩ A ⋎ B ↔ x ⊩ A ∨ x ⊩ B := by
   change ((_ → False) → _) ↔ _; tauto;
-@[grind =] lemma forces_neg : x ⊩ ∼A ↔ x ⊮ A := Iff.rfl
-@[grind =] lemma forces_iff : x ⊩ A 🡘 B ↔ (x ⊩ A ↔ x ⊩ B) := by
+@[grind =]
+lemma forces_neg : x ⊩ ∼A ↔ x ⊮ A := Iff.rfl
+@[grind =]
+lemma forces_iff : x ⊩ A 🡘 B ↔ (x ⊩ A ↔ x ⊩ B) := by
   simp only [LogicalConnective.iff, forces_and]; grind;
-@[grind =] lemma forces_box : x ⊩ □A ↔ ∀ y, x ≺ y → y ⊩ A := Iff.rfl
-@[grind =] lemma forces_dia : x ⊩ ◇A ↔ ∃ y, x ≺ y ∧ y ⊩ A := by
+@[grind =]
+lemma forces_box : x ⊩ □A ↔ ∀ y, x ≺ y → y ⊩ A := Iff.rfl
+@[grind =]
+lemma forces_dia : x ⊩ ◇A ↔ ∃ y, x ≺ y ∧ y ⊩ A := by
   change ((∀ y, x ≺ y → y ⊩ A → False) → False) ↔ _; grind;
-@[grind =] lemma forces_rhd :
+@[grind =]
+lemma forces_rhd :
     x ⊩ A ▷ B ↔ ∀ y, x ≺ y → y ⊩ A → ∃ V, y ≺[x] V ∧ ∀ z ∈ V, z ⊩ B := Iff.rfl
 
-@[grind =] lemma not_forces_imp : x ⊮ A 🡒 B ↔ x ⊩ A ∧ x ⊮ B := by grind;
-@[grind =] lemma not_forces_box : x ⊮ □A ↔ ∃ y, x ≺ y ∧ y ⊮ A := by grind;
-@[grind =] lemma not_forces_rhd :
-    x ⊮ A ▷ B ↔ ∃ y, x ≺ y ∧ y ⊩ A ∧ ∀ V, y ≺[x] V → ∃ z ∈ V, z ⊮ B := by
+@[grind =]
+lemma not_forces_imp : x ⊮ A 🡒 B ↔ x ⊩ A ∧ x ⊮ B := by grind;
+@[grind =]
+lemma not_forces_box : x ⊮ □A ↔ ∃ y, x ≺ y ∧ y ⊮ A := by grind;
+@[grind =]
+lemma not_forces_rhd : x ⊮ A ▷ B ↔ ∃ y, x ≺ y ∧ y ⊩ A ∧ ∀ V, y ≺[x] V → ∃ z ∈ V, z ⊮ B := by
   grind;
 
 lemma forces_axiomL [IsTrans _ M.Rel] [IsConverseWellFounded _ M.Rel] :
@@ -350,13 +363,16 @@ variable {σ : M.Strategy} {H H₁ H₂ : List (Set M.World)}
 /-- The strategy `σ` continued after the history `H`. -/
 def shift (σ : M.Strategy) (H : List (Set M.World)) : M.Strategy := fun Y ↦ σ (Y ++ H)
 
-@[simp] lemma shift_apply {Y : List (Set M.World)} : σ.shift H Y = σ (Y ++ H) := rfl
+@[simp]
+lemma shift_apply {Y : List (Set M.World)} : σ.shift H Y = σ (Y ++ H) := rfl
 
-@[simp] lemma shift_nil : σ.shift [] = σ := by
+@[simp]
+lemma shift_nil : σ.shift [] = σ := by
   funext Y;
   simp;
 
-@[simp] lemma shift_shift : (σ.shift H₁).shift H₂ = σ.shift (H₂ ++ H₁) := by
+@[simp]
+lemma shift_shift : (σ.shift H₁).shift H₂ = σ.shift (H₂ ++ H₁) := by
   funext Y;
   simp;
 
@@ -388,9 +404,11 @@ section Strategy
 
 variable {x u w : M.World} {σ : M.Strategy} {H H₁ H₂ : List (Set M.World)} {G : Set M.World}
 
-@[simp] lemma isPlay_nil : M.IsPlay x σ [] := trivial
+@[simp]
+lemma isPlay_nil : M.IsPlay x σ [] := trivial
 
-@[simp] lemma isPlay_cons {Z : Set M.World} : M.IsPlay x σ (Z :: H) ↔ M.IsPlay x σ H ∧ σ H ≺[x] Z :=
+@[simp]
+lemma isPlay_cons {Z : Set M.World} : M.IsPlay x σ (Z :: H) ↔ M.IsPlay x σ H ∧ σ H ≺[x] Z :=
   Iff.rfl
 
 lemma isPlay_append : M.IsPlay x σ (H₂ ++ H₁) ↔ M.IsPlay x σ H₁ ∧ M.IsPlay x (σ.shift H₁) H₂ := by
@@ -479,9 +497,11 @@ noncomputable def successor (a : M.VeltmanWorld) (hu : a.world ≺ u)
 
 variable {a : M.VeltmanWorld} {hu : a.world ≺ u} {hτ : M.IsStrategy a.world u τ}
 
-@[simp] lemma successor_world : (a.successor hu hτ).world = u := rfl
+@[simp]
+lemma successor_world : (a.successor hu hτ).world = u := rfl
 
-@[simp] lemma successor_strategy_self : (a.successor hu hτ).strategy a.world = τ := by
+@[simp]
+lemma successor_strategy_self : (a.successor hu hτ).strategy a.world = τ := by
   simp [successor, (ConverseWellFounded.irrefl (r := M.Rel)).irrefl a.world];
 
 lemma rel_successor : Rel a (a.successor hu hτ) := by

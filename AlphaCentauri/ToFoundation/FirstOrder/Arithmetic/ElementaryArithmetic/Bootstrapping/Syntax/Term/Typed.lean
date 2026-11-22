@@ -111,9 +111,11 @@ noncomputable def fvarVec.construction : PR.Construction V blueprint where
 /-- `fvarVec k = ⟨^&0, …, ^&(k-1)⟩`. -/
 noncomputable def fvarVec (k : V) : V := fvarVec.construction.result ![] k
 
-@[simp] lemma fvarVec_zero : fvarVec (0 : V) = 0 := by simp [fvarVec, fvarVec.construction]
+@[simp]
+lemma fvarVec_zero : fvarVec (0 : V) = 0 := by simp [fvarVec, fvarVec.construction]
 
-@[simp] lemma fvarVec_succ (k : V) : fvarVec (k + 1) = concat (fvarVec k) (^&k) := by
+@[simp]
+lemma fvarVec_succ (k : V) : fvarVec (k + 1) = concat (fvarVec k) (^&k) := by
   simp [fvarVec, fvarVec.construction]
 
 instance fvarVec_defined : 𝚺ᴬ₁-Function₁ (fvarVec : V → V) via fvarVecDef := .mk
@@ -129,7 +131,8 @@ lemma fvarVec_locallyDelta0 : LocallyDelta0Function₁ (fvarVec : V → V) := by
   convert fvarVec.construction.result_locallyDelta0 (V := V) using 3
   simp [fvarVec, Matrix.empty_eq]
 
-@[simp] lemma len_fvarVec (k : V) : len (fvarVec k) = k := by
+@[simp]
+lemma len_fvarVec (k : V) : len (fvarVec k) = k := by
   have hP : LocallyDelta0Pred fun k : V ↦ len (fvarVec k) = k :=
     LocallyDelta0.eq (len_locallyDelta0.comp₁ (fvarVec_locallyDelta0.comp₁
       (LocallyDelta0Function.var (0 : Fin 1)))) (LocallyDelta0Function.var 0)

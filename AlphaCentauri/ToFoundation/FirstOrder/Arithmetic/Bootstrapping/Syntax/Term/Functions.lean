@@ -153,10 +153,12 @@ noncomputable def bvarVec.construction : PR.Construction V bvarVec.blueprint whe
 /-- `bvarVec j k = ⟨^#j, …, ^#(j + k - 1)⟩`. -/
 noncomputable def bvarVec (j k : V) : V := bvarVec.construction.result ![j] k
 
-@[simp] lemma bvarVec_zero (j : V) : bvarVec j 0 = 0 := by
+@[simp]
+lemma bvarVec_zero (j : V) : bvarVec j 0 = 0 := by
   simp [bvarVec, bvarVec.construction]
 
-@[simp] lemma bvarVec_succ (j k : V) : bvarVec j (k + 1) = concat (bvarVec j k) (^#(j + k)) := by
+@[simp]
+lemma bvarVec_succ (j k : V) : bvarVec j (k + 1) = concat (bvarVec j k) (^#(j + k)) := by
   simp [bvarVec, bvarVec.construction]
 
 /-- The $\Sigma_1$ graph of `bvarVec`, with argument order `(y, j, k)`. -/
@@ -172,7 +174,8 @@ instance bvarVec_definable : 𝚺ᴬ₁-Function₂ (bvarVec : V → V → V) :=
 instance bvarVec_definable' {Γ : Polarity} {m : ℕ} :
     Γᴬ_[m + 1]-Function₂ (bvarVec : V → V → V) := bvarVec_definable.of_sigmaOne
 
-@[simp] lemma len_bvarVec (j k : V) : len (bvarVec j k) = k := by
+@[simp]
+lemma len_bvarVec (j k : V) : len (bvarVec j k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -291,7 +294,8 @@ lemma termBShift_termSubst_bvarVec (k : V) {m t : V} (ht : IsSemiterm L m t) :
 lemma termSubst_bvarVec_zero {m t : V} (ht : IsSemiterm L m t) : termSubst L (bvarVec 0 m) t = t :=
   termSubst_eq_self ht fun i hi ↦ by rw [nth_bvarVec _ _ _ hi, zero_add]
 
-@[simp] lemma nth_qVec_zero (w : V) : (qVec L w).[0] = ^#0 := by simp [qVec]
+@[simp]
+lemma nth_qVec_zero (w : V) : (qVec L w).[0] = ^#0 := by simp [qVec]
 
 lemma qVec_eq_of_var {L' : Language} [L'.Encodable] [L'.LORDefinable] {n m w : V}
     (hw : IsSemitermVec L n m w) (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) :

@@ -41,7 +41,8 @@ def graft {Ξ Γ : LK.Sequent ℒₒᵣ} (b : ⊢ᴸᴷᴵ[C]! Ξ) : (Ξ ⟶⁺ 
   | .contraction d => (b.graft d).contraction
   | .refl => b
 
-@[simp] lemma anchored_graft_iff {Ξ : LK.Sequent ℒₒᵣ} {b : ⊢ᴸᴷᴵ[C]! Ξ} :
+@[simp]
+lemma anchored_graft_iff {Ξ : LK.Sequent ℒₒᵣ} {b : ⊢ᴸᴷᴵ[C]! Ξ} :
     ∀ {Γ} (d : Ξ ⟶⁺ Γ), Anchored D (b.graft d) ↔ Anchored D b
   | _, .or d => by simpa [graft] using anchored_graft_iff d
   | _, .exs d => by simpa [graft] using anchored_graft_iff d
@@ -70,7 +71,8 @@ def Forces (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition
   |     ∃¹ φ => (t : ArithmeticTerm ℕ) × Forces C D p (φ/[t])
   termination_by φ => φ.complexity
 
-@[inherit_doc] notation:45 p:45 " ⊩[" C ", " D "] " φ:45 => Forces C D p φ
+@[inherit_doc]
+notation:45 p:45 " ⊩[" C ", " D "] " φ:45 => Forces C D p φ
 
 namespace Forces
 

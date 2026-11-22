@@ -19,7 +19,8 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 - [Kay91, Exercise 11.4(a)] -/
 def codedSet (a : V) : Set ℕ := {n | (n : V) ∈ a}
 
-@[simp] lemma mem_codedSet {a : V} {n : ℕ} : n ∈ codedSet a ↔ (n : V) ∈ a := Iff.rfl
+@[simp]
+lemma mem_codedSet {a : V} {n : ℕ} : n ∈ codedSet a ↔ (n : V) ∈ a := Iff.rfl
 
 variable (V) in
 /-- The standard system: the subsets of `ℕ` coded by some element of `V`.
@@ -56,16 +57,19 @@ variable {M N : Type*} [ORingStructure M] [ORingStructure N] [M↓[ℒₒᵣ] �
 
 namespace EndExtension
 
-@[simp] lemma emb_natCast (n : ℕ) : e n = n := by
+@[simp]
+lemma emb_natCast (n : ℕ) : e n = n := by
   induction n with
   | zero => simp
   | succ n ih => simp [Nat.cast_succ, ih]
 
-@[simp] lemma emb_mem_emb_iff {i a : M} : e i ∈ e a ↔ i ∈ a := by
+@[simp]
+lemma emb_mem_emb_iff {i a : M} : e i ∈ e a ↔ i ∈ a := by
   simpa using (Bounding.HierarchySymbol.Defined.sigmaZero_absolute e.emb
     (bit_defined (V := M)) (bit_defined (V := N)) ![i, a]).symm
 
-@[simp] lemma codedSet_emb (a : M) : codedSet (e a) = codedSet a := by
+@[simp]
+lemma codedSet_emb (a : M) : codedSet (e a) = codedSet a := by
   ext n
   simpa using e.emb_mem_emb_iff (i := (n : M)) (a := a)
 

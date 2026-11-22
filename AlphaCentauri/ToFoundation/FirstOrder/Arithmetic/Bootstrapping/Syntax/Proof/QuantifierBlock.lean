@@ -29,25 +29,30 @@ section vecBvar
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] {n m k : ℕ}
 
-@[simp high] lemma Semiterm.shift_vecMap_bvar (f : Fin k → Fin n) :
+@[simp high]
+lemma Semiterm.shift_vecMap_bvar (f : Fin k → Fin n) :
     (Semiterm.shift ⨟ fun i ↦ (Semiterm.bvar (f i) : Semiterm V L n)) =
       fun i ↦ Semiterm.bvar (f i) := by
   funext i; simp
 
-@[simp high] lemma Semiterm.substs_vecMap_bvar (w : SemitermVec V L n m) (f : Fin k → Fin n) :
+@[simp high]
+lemma Semiterm.substs_vecMap_bvar (w : SemitermVec V L n m) (f : Fin k → Fin n) :
     ((Semiterm.subst w)⨟ fun i ↦ (Semiterm.bvar (f i) : Semiterm V L n)) = fun i ↦ w (f i) := by
   funext i; simp
 
-@[simp high] lemma Semiterm.shift_vecMap_fvar (f : Fin k → V) :
+@[simp high]
+lemma Semiterm.shift_vecMap_fvar (f : Fin k → V) :
     (Semiterm.shift ⨟ fun i ↦ (Semiterm.fvar (f i) : Semiterm V L n)) =
       fun i ↦ Semiterm.fvar (f i + 1) := by
   funext i; simp
 
-@[simp high] lemma Semiterm.substs_vecMap_bvar_id (w : SemitermVec V L n m) :
+@[simp high]
+lemma Semiterm.substs_vecMap_bvar_id (w : SemitermVec V L n m) :
     ((Semiterm.subst w)⨟ (Semiterm.bvar : Fin n → Semiterm V L n)) = w := by
   funext i; simp
 
-@[simp high] lemma Semiterm.substs_vecMap_fvar (w : SemitermVec V L n m) (f : Fin k → V) :
+@[simp high]
+lemma Semiterm.substs_vecMap_fvar (w : SemitermVec V L n m) (f : Fin k → V) :
     ((Semiterm.subst w)⨟ fun i ↦ (Semiterm.fvar (f i) : Semiterm V L n)) =
       fun i ↦ Semiterm.fvar (f i) := by
   funext i; simp
@@ -57,7 +62,8 @@ lemma SemitermVec.q_eq_cons (w : Fin k → Term V L) :
   funext j
   cases j using Fin.cases <;> simp [SemitermVec.q]
 
-@[simp] lemma SemitermVec.q_one {m : ℕ} (w : SemitermVec V L 1 m) : w.q 1 = (w 0).bShift :=
+@[simp]
+lemma SemitermVec.q_one {m : ℕ} (w : SemitermVec V L 1 m) : w.q 1 = (w 0).bShift :=
   SemitermVec.q_succ w 0
 
 lemma Semiterm.subst_nil_subst (t : Term V L) (w : SemitermVec V L n m) :
@@ -89,67 +95,76 @@ section shiftIterate
 
 variable {n k : ℕ}
 
-@[simp] lemma Semiterm.shift_iterate_bvar (z : Fin n) :
+@[simp]
+lemma Semiterm.shift_iterate_bvar (z : Fin n) :
     Semiterm.shift^[k] (Semiterm.bvar z : Semiterm V L n) = Semiterm.bvar z :=
   Function.iterate_fixed (by simp) k
 
-@[simp] lemma Semiterm.shift_iterate_fvar (x : V) :
+@[simp]
+lemma Semiterm.shift_iterate_fvar (x : V) :
     Semiterm.shift^[k] (Semiterm.fvar x : Semiterm V L n) = Semiterm.fvar (x + k) := by
   induction k with
   | zero => simp
   | succ k ih => simp [Function.iterate_succ_apply', ih, add_assoc]
 
-@[simp high] lemma Semiterm.shift_iterate_vecMap_bvar (f : Fin k → Fin n) (a : ℕ) :
+@[simp high]
+lemma Semiterm.shift_iterate_vecMap_bvar (f : Fin k → Fin n) (a : ℕ) :
     (Semiterm.shift^[a] ⨟ fun i ↦ (Semiterm.bvar (f i) : Semiterm V L n)) =
       fun i ↦ Semiterm.bvar (f i) := by
   funext i; simp
 
-@[simp high] lemma Semiterm.shift_iterate_vecMap_fvar (f : Fin k → V) (a : ℕ) :
+@[simp high]
+lemma Semiterm.shift_iterate_vecMap_fvar (f : Fin k → V) (a : ℕ) :
     (Semiterm.shift^[a] ⨟ fun i ↦ (Semiterm.fvar (f i) : Semiterm V L n)) =
       fun i ↦ Semiterm.fvar (f i + a) := by
   funext i; simp
 
 namespace Semiformula
 
-@[simp] lemma shift_iterate_verum : shift^[k] (⊤ : Semiformula V L n) = ⊤ :=
+@[simp]
+lemma shift_iterate_verum : shift^[k] (⊤ : Semiformula V L n) = ⊤ :=
   Function.iterate_fixed shift_verum k
 
-@[simp] lemma shift_iterate_and (φ ψ : Semiformula V L n) :
-    shift^[k] (φ ⋏ ψ) = shift^[k] φ ⋏ shift^[k] ψ :=
+@[simp]
+lemma shift_iterate_and (φ ψ : Semiformula V L n) : shift^[k] (φ ⋏ ψ) = shift^[k] φ ⋏ shift^[k] ψ :=
   Function.Semiconj₂.iterate (op := (· ⋏ ·)) shift_and k φ ψ
 
-@[simp] lemma shift_iterate_imp (φ ψ : Semiformula V L n) :
-    shift^[k] (φ 🡒 ψ) = shift^[k] φ 🡒 shift^[k] ψ :=
+@[simp]
+lemma shift_iterate_imp (φ ψ : Semiformula V L n) : shift^[k] (φ 🡒 ψ) = shift^[k] φ 🡒 shift^[k] ψ :=
   Function.Semiconj₂.iterate (op := (· 🡒 ·)) shift_imp k φ ψ
 
-@[simp] lemma shift_iterate_iff (φ ψ : Semiformula V L n) :
-    shift^[k] (φ 🡘 ψ) = shift^[k] φ 🡘 shift^[k] ψ :=
+@[simp]
+lemma shift_iterate_iff (φ ψ : Semiformula V L n) : shift^[k] (φ 🡘 ψ) = shift^[k] φ 🡘 shift^[k] ψ :=
   Function.Semiconj₂.iterate (op := (· 🡘 ·)) shift_iff k φ ψ
 
-@[simp] lemma shift_iterate_all (φ : Semiformula V L (n + 1)) :
-    shift^[k] (∀¹ φ) = ∀¹ shift^[k] φ :=
+@[simp]
+lemma shift_iterate_all (φ : Semiformula V L (n + 1)) : shift^[k] (∀¹ φ) = ∀¹ shift^[k] φ :=
   ((Function.Semiconj.iterate_right (f := (∀¹ ·)) (fun φ ↦ (shift_all φ).symm) k) φ).symm
 
-@[simp] lemma shift_conj {m : ℕ} (v : Fin m → Semiformula V L n) :
+@[simp]
+lemma shift_conj {m : ℕ} (v : Fin m → Semiformula V L n) :
     (Matrix.conj v).shift = Matrix.conj fun i ↦ (v i).shift :=
   Matrix.conj_map shift shift_verum shift_and v
 
-@[simp] lemma shift_iterate_conj {m : ℕ} (v : Fin m → Semiformula V L n) :
+@[simp]
+lemma shift_iterate_conj {m : ℕ} (v : Fin m → Semiformula V L n) :
     shift^[k] (Matrix.conj v) = Matrix.conj fun i ↦ shift^[k] (v i) :=
   Matrix.conj_map shift^[k] shift_iterate_verum shift_iterate_and v
 
-@[simp] lemma shift_iterate_allItr {m : ℕ} (φ : Semiformula V L (n + m)) :
+@[simp]
+lemma shift_iterate_allItr {m : ℕ} (φ : Semiformula V L (n + m)) :
     shift^[k] (∀¹^[m] φ) = ∀¹^[m] shift^[k] φ := by
   induction m with
   | zero => rfl
   | succ m ih => simp [allItr_succ, ih (∀¹ φ)]
 
-@[simp] lemma shift_allItr {m : ℕ} (φ : Semiformula V L (n + m)) :
-    (∀¹^[m] φ).shift = ∀¹^[m] φ.shift := by
+@[simp]
+lemma shift_allItr {m : ℕ} (φ : Semiformula V L (n + m)) : (∀¹^[m] φ).shift = ∀¹^[m] φ.shift := by
   simpa using shift_iterate_allItr (k := 1) φ
 
 attribute [local simp] shift_substs in
-@[simp] lemma shift_iterate_subst {m : ℕ} (w : SemitermVec V L n m) (φ : Semiformula V L n) :
+@[simp]
+lemma shift_iterate_subst {m : ℕ} (w : SemitermVec V L n m) (φ : Semiformula V L n) :
     shift^[k] (φ.subst w) = (shift^[k] φ).subst (Semiterm.shift^[k] ⨟ w) := by
   induction k generalizing φ w with
   | zero => rfl
@@ -161,15 +176,19 @@ end shiftIterate
 
 namespace Semiformula
 
-@[simp] lemma free_and (φ ψ : Semiformula V L 1) : (φ ⋏ ψ).free = φ.free ⋏ ψ.free := by
+@[simp]
+lemma free_and (φ ψ : Semiformula V L 1) : (φ ⋏ ψ).free = φ.free ⋏ ψ.free := by
   simp [free]
 
-@[simp] lemma free_neg (φ : Semiformula V L 1) : (∼φ).free = ∼φ.free := by simp [free]
+@[simp]
+lemma free_neg (φ : Semiformula V L 1) : (∼φ).free = ∼φ.free := by simp [free]
 
-@[simp] lemma free_imp (φ ψ : Semiformula V L 1) : (φ 🡒 ψ).free = φ.free 🡒 ψ.free := by
+@[simp]
+lemma free_imp (φ ψ : Semiformula V L 1) : (φ 🡒 ψ).free = φ.free 🡒 ψ.free := by
   simp [free]
 
-@[simp] lemma free_iff (φ ψ : Semiformula V L 1) : (φ 🡘 ψ).free = φ.free 🡘 ψ.free := by
+@[simp]
+lemma free_iff (φ ψ : Semiformula V L 1) : (φ 🡘 ψ).free = φ.free 🡘 ψ.free := by
   simp [free]
 
 end Semiformula

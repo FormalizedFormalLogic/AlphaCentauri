@@ -57,9 +57,11 @@ end
 abbrev IE (k : ℕ) : ArithmeticTheory :=
   𝗣𝗔⁻ ∪ InductionScheme ℒₒᵣ (IsBoundedExistential k)
 
-@[inherit_doc] notation "𝗜𝗘₁" => IE 1
+@[inherit_doc]
+notation "𝗜𝗘₁" => IE 1
 
-@[inherit_doc] notation "𝗜𝗘₂" => IE 2
+@[inherit_doc]
+notation "𝗜𝗘₂" => IE 2
 
 instance (k : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ IE k :=
   Entailment.WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗔⁻)

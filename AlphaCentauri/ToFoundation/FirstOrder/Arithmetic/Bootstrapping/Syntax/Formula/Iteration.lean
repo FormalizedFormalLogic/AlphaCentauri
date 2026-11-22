@@ -88,9 +88,11 @@ noncomputable def qqExss.construction : PR.Construction V qqExss.blueprint where
 /-- `qqExss p k = ^∃ ^∃ ⋯ ^∃ p`, with `k` existential quantifiers. -/
 noncomputable def qqExss (p k : V) : V := qqExss.construction.result ![p] k
 
-@[simp] lemma qqExss_zero (p : V) : qqExss p 0 = p := by simp [qqExss, qqExss.construction]
+@[simp]
+lemma qqExss_zero (p : V) : qqExss p 0 = p := by simp [qqExss, qqExss.construction]
 
-@[simp] lemma qqExss_succ (p k : V) : qqExss p (k + 1) = ^∃ (qqExss p k) := by
+@[simp]
+lemma qqExss_succ (p k : V) : qqExss p (k + 1) = ^∃ (qqExss p k) := by
   simp [qqExss, qqExss.construction]
 
 def _root_.FFL.FirstOrder.Arithmetic.qqExssDef : 𝚺ᴬ₁.Semisentence 3 :=
@@ -113,7 +115,8 @@ lemma qqExss_exs (p k : V) : qqExss (^∃ p) k = ^∃ (qqExss p k) := by
 lemma qqExss_succ' (p k : V) : qqExss p (k + 1) = qqExss (^∃ p) k := by
   rw [qqExss_succ, qqExss_exs]
 
-@[simp] lemma isUFormula_qqExss {p k : V} : IsUFormula L (qqExss p k) ↔ IsUFormula L p := by
+@[simp]
+lemma isUFormula_qqExss {p k : V} : IsUFormula L (qqExss p k) ↔ IsUFormula L p := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp

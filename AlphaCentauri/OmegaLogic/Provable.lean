@@ -22,7 +22,8 @@ namespace OmegaLogic
 def Provable (α : Ordinal.{0}) (c : ℕ) (Γ : Sequent) : Prop :=
   ∃ D : Derivation Γ, D.ordinalBound ≤ α ∧ D.cutRank ≤ (c : ℕ∞)
 
-@[inherit_doc] scoped notation:45 "Z∞" " ⊢[" α ", " c "] " Γ:46 => Provable α c Γ
+@[inherit_doc]
+scoped notation:45 "Z∞" " ⊢[" α ", " c "] " Γ:46 => Provable α c Γ
 
 namespace Provable
 

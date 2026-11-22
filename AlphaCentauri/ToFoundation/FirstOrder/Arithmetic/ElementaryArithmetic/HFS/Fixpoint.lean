@@ -155,7 +155,8 @@ noncomputable def limSeq (s : V) : V := c.prConstruction.result v s
 
 variable {v}
 
-@[simp] lemma limSeq_zero : c.limSeq v 0 = ∅ := by simp [limSeq, prConstruction]
+@[simp]
+lemma limSeq_zero : c.limSeq v 0 = ∅ := by simp [limSeq, prConstruction]
 
 lemma limSeq_succ (s : V) : c.limSeq v (s + 1) = c.succ v s (c.limSeq v s) := by
   simp [limSeq, prConstruction]
@@ -164,7 +165,8 @@ lemma termSet_defined :
     𝚺ᴬ₁.DefinedFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) φ.limSeqDef := .mk fun v ↦ by
   simp [c.prConstruction.result_defined_iff, Arithmetic.Fixpoint.Blueprint.limSeqDef]; rfl
 
-@[simp] lemma eval_limSeqDef (v : Fin (k + 2) → V) :
+@[simp]
+lemma eval_limSeqDef (v : Fin (k + 2) → V) :
     φ.limSeqDef.val.Evalb v ↔ v 0 = c.limSeq (v ·.succ.succ) (v 1) := c.termSet_defined.iff
 
 lemma limSeq_locallyDelta0 :
@@ -273,7 +275,8 @@ lemma fixpoint_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v
   .mk fun v ↦ by
   simp [Arithmetic.Fixpoint.Blueprint.fixpointDef, c.eval_limSeqDef]; rfl
 
-@[simp] lemma eval_fixpointDef (v : Fin (k + 1) → V) :
+@[simp]
+lemma eval_fixpointDef (v : Fin (k + 1) → V) :
     φ.fixpointDef.val.Evalb v ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_defined.iff
 
 lemma fixpoint_definedΔ₁ [c.StrongFinite] :
@@ -281,7 +284,8 @@ lemma fixpoint_definedΔ₁ [c.StrongFinite] :
   ⟨by intro v; simp [Arithmetic.Fixpoint.Blueprint.fixpointDefΔ₁, c.eval_limSeqDef],
    by intro v; simp [Arithmetic.Fixpoint.Blueprint.fixpointDefΔ₁, c.eval_limSeqDef, fixpoint_iff]⟩
 
-@[simp] lemma eval_fixpointDefΔ₁ [c.StrongFinite] (v : Fin (k + 1) → V) :
+@[simp]
+lemma eval_fixpointDefΔ₁ [c.StrongFinite] (v : Fin (k + 1) → V) :
     φ.fixpointDefΔ₁.val.Evalb v ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_definedΔ₁.iff
 
 lemma fixpoint_locallyDelta0 [c.StrongFinite] :

@@ -45,7 +45,8 @@ variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
 noncomputable def varEqualT (hT : IsTable L₁ L₂ tbl) (t : Term V L₂) : Semiformula V L₁ 1 :=
   ⟨varEqual L₁ L₂ tbl t.val, by simpa using IsSemiformula.varEqual hT t.isSemiterm⟩
 
-@[simp] lemma varEqualT_val (hT : IsTable L₁ L₂ tbl) (t : Term V L₂) :
+@[simp]
+lemma varEqualT_val (hT : IsTable L₁ L₂ tbl) (t : Term V L₂) :
     (varEqualT hT t).val = varEqual L₁ L₂ tbl t.val := rfl
 
 lemma varEqualT_fvar (hT : IsTable L₁ L₂ tbl) (x : V) :

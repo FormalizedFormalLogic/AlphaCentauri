@@ -47,7 +47,8 @@ private def bound {n : ℕ} (u : ArithmeticSemiterm ξ n) :
   | ∃¹ φ => ∃¹[“#0 < !!(Rew.bShift u)”] bound (Rew.bShift u) φ
   | φ => φ
 
-@[simp, grind =] private lemma bound_exs (u : ArithmeticSemiterm ξ n)
+@[simp, grind =]
+private lemma bound_exs (u : ArithmeticSemiterm ξ n)
     (φ : ArithmeticSemiformula ξ (n + 1)) :
     bound u (∃¹ φ) = ∃¹[“#0 < !!(Rew.bShift u)”] bound (Rew.bShift u) φ := rfl
 
@@ -70,7 +71,8 @@ def EvalBound {n : ℕ} (e : Fin n → ℕ) (ε : ξ → ℕ) (b : ℕ) :
   | ∃¹ φ => ∃ x < b, EvalBound (x :> e) ε b φ
   | φ => Semiformula.Eval e ε φ
 
-@[simp, grind =] lemma evalBound_exs {e : Fin n → ℕ} {ε : ξ → ℕ} {b}
+@[simp, grind =]
+lemma evalBound_exs {e : Fin n → ℕ} {ε : ξ → ℕ} {b}
     {φ : ArithmeticSemiformula ξ (n + 1)} :
     EvalBound e ε b (∃¹ φ) ↔ ∃ x < b, EvalBound (x :> e) ε b φ := Iff.rfl
 
@@ -78,23 +80,30 @@ section
 
 variable {e : Fin n → ℕ} {ε : ξ → ℕ} {b : ℕ} {k} {r : (ℒₒᵣ).Rel k}
 
-@[simp, grind =] lemma evalBound_rel {v} :
+@[simp, grind =]
+lemma evalBound_rel {v} :
     EvalBound e ε b (.rel r v) ↔ Semiformula.Eval e ε (.rel r v) := Iff.rfl
 
-@[simp, grind =] lemma evalBound_nrel {v} :
+@[simp, grind =]
+lemma evalBound_nrel {v} :
     EvalBound e ε b (.nrel r v) ↔ Semiformula.Eval e ε (.nrel r v) := Iff.rfl
 
-@[simp, grind ·] lemma evalBound_verum : EvalBound e ε b ⊤ := by tauto
+@[simp, grind ·]
+lemma evalBound_verum : EvalBound e ε b ⊤ := by tauto
 
-@[simp, grind .] lemma evalBound_falsum : ¬EvalBound e ε b ⊥ := by tauto
+@[simp, grind .]
+lemma evalBound_falsum : ¬EvalBound e ε b ⊥ := by tauto
 
-@[simp, grind =] lemma evalBound_and {φ ψ : ArithmeticSemiformula ξ n} :
+@[simp, grind =]
+lemma evalBound_and {φ ψ : ArithmeticSemiformula ξ n} :
     EvalBound e ε b (φ ⋏ ψ) ↔ Semiformula.Eval e ε (φ ⋏ ψ) := Iff.rfl
 
-@[simp, grind =] lemma evalBound_or {φ ψ : ArithmeticSemiformula ξ n} :
+@[simp, grind =]
+lemma evalBound_or {φ ψ : ArithmeticSemiformula ξ n} :
     EvalBound e ε b (φ ⋎ ψ) ↔ Semiformula.Eval e ε (φ ⋎ ψ) := Iff.rfl
 
-@[simp, grind =] lemma evalBound_all {φ : ArithmeticSemiformula ξ (n + 1)} :
+@[simp, grind =]
+lemma evalBound_all {φ : ArithmeticSemiformula ξ (n + 1)} :
     EvalBound e ε b (∀¹ φ) ↔ Semiformula.Eval e ε (∀¹ φ) := Iff.rfl
 
 end

@@ -686,13 +686,15 @@ lemma freshVec_existsUnique (u : V) :
 whose entry at `u` is `^&0`. -/
 noncomputable def freshVec (u : V) : V := Classical.choose! (freshVec_existsUnique u)
 
-@[simp] lemma len_freshVec (u : V) : len (freshVec u : V) = u + 1 :=
+@[simp]
+lemma len_freshVec (u : V) : len (freshVec u : V) = u + 1 :=
   (Classical.choose!_spec (freshVec_existsUnique u)).1
 
 lemma nth_freshVec_of_lt {u x : V} (h : x < u) : (freshVec u : V).[x] = ^&(x + 1) :=
   (Classical.choose!_spec (freshVec_existsUnique u)).2.1 x h
 
-@[simp] lemma nth_freshVec_self (u : V) : (freshVec u : V).[u] = ^&0 :=
+@[simp]
+lemma nth_freshVec_self (u : V) : (freshVec u : V).[u] = ^&0 :=
   (Classical.choose!_spec (freshVec_existsUnique u)).2.2
 
 lemma isSemitermVec_freshVec (u : V) :

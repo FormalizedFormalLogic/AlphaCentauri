@@ -28,9 +28,11 @@ open ofCLAxioms
 
 variable {A B C D : Formula α}
 
-@[simp] lemma SCL.axiomSa : 𝐒𝐂𝐋 ⊢ Axioms.Sa A B C D := axm <| .inl ⟨A, B, C, D, rfl⟩
+@[simp]
+lemma SCL.axiomSa : 𝐒𝐂𝐋 ⊢ Axioms.Sa A B C D := axm <| .inl ⟨A, B, C, D, rfl⟩
 
-@[simp] lemma SCL.axiomSb : 𝐒𝐂𝐋 ⊢ Axioms.Sb A B C D := axm <| .inr ⟨A, B, C, D, rfl⟩
+@[simp]
+lemma SCL.axiomSb : 𝐒𝐂𝐋 ⊢ Axioms.Sb A B C D := axm <| .inr ⟨A, B, C, D, rfl⟩
 
 /-- - [Ign91, Proposition 2.5] -/
 lemma SCL.axiomM : 𝐒𝐂𝐋 ⊢ Axioms.M A B C := by

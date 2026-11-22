@@ -252,7 +252,8 @@ lemma IsReadable.of_isPrenexAtom (h : IsPrenexAtom k p) : IsReadable k D p :=
 lemma IsReadable.all (h : IsCombination k D p) : IsReadable k D (^∀ p) :=
   Or.inr <| Or.inl ⟨p, by simp, rfl, h⟩
 
-@[simp] lemma IsReadable.verum : IsReadable k D (^⊤ : V) :=
+@[simp]
+lemma IsReadable.verum : IsReadable k D (^⊤ : V) :=
   .of_isCombination <| .of_isPrenexAtMost <| .of_isBounded <| by simp
 
 lemma IsReadable.isCombination_of_and (h : IsReadable k D (p ^⋏ q)) :
@@ -384,7 +385,8 @@ lemma IsReadable.fvUnshift (hp : IsUFormula ℒₒᵣ p) (h : IsReadable k D p) 
   IsReadable.map_uformula (fun _ _ _ hp h ↦ h.fvUnshift hp) (fun _ _ ↦ fvUnshift_and)
     (fun _ _ ↦ fvUnshift_or) (fun _ ↦ fvUnshift_all) hp h
 
-@[simp] lemma IsReadable.shift_iff (hp : IsUFormula ℒₒᵣ p) :
+@[simp]
+lemma IsReadable.shift_iff (hp : IsUFormula ℒₒᵣ p) :
     IsReadable k D (Bootstrapping.shift ℒₒᵣ p) ↔ IsReadable k D p := by
   constructor
   · intro h
@@ -725,7 +727,8 @@ lemma ReadableTruth.iff_combinationReading (h : IsCombination k D q) :
     rintro ha χ - rfl
     exact absurd h.isPrenexAtMost_of_all.isPrenexAtom ha
 
-@[simp] lemma ReadableTruth.verum : ReadableTruth k D (^⊤ : V) := by
+@[simp]
+lemma ReadableTruth.verum : ReadableTruth k D (^⊤ : V) := by
   have ha : IsPrenexAtom k (^⊤ : V) := (IsPrenexAtMost.of_isBounded (by simp)).isPrenexAtom
   rw [iff_atomReading ha, AtomReading.iff (Γ := 𝚺) (s := 0) (θ := ^⊤) ha rfl (by simp) (by simp)]
   simp
@@ -958,7 +961,8 @@ variable {k D : ℕ} {p q f : V}
 lemma ReadableSatisfaction.isReadable (h : ReadableSatisfaction k D p f) :
     IsReadable k D (fvAssign f p) := h.1
 
-@[simp] lemma ReadableSatisfaction.verum : ReadableSatisfaction k D (^⊤ : V) f := by
+@[simp]
+lemma ReadableSatisfaction.verum : ReadableSatisfaction k D (^⊤ : V) f := by
   simp [ReadableSatisfaction]
 
 lemma ReadableSatisfaction.and_iff (h : IsReadable k D (p ^⋏ q)) (hp : IsUFormula ℒₒᵣ p)
@@ -1002,7 +1006,8 @@ lemma ReadableSatisfaction.exs_of_substs1 {t : V} (h : IsReadable k D (^∃ p))
   rw [ReadableSatisfaction, fvAssign_exs hp.isUFormula]
   exact ReadableTruth.exs_of_substs1 h' hp.fvAssign ht.termFvAssign ht'
 
-@[simp] lemma ReadableSatisfaction.shift_iff {b : V} :
+@[simp]
+lemma ReadableSatisfaction.shift_iff {b : V} :
     ReadableSatisfaction k D (shift ℒₒᵣ p) (b ∷ f) ↔ ReadableSatisfaction k D p f := by
   by_cases hp : IsUFormula ℒₒᵣ p
   · rw [ReadableSatisfaction, fvAssign_shift hp, ReadableSatisfaction]

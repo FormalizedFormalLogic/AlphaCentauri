@@ -55,10 +55,12 @@ noncomputable def ssnumsConjuncts.construction : PR.Construction V ssnumsConjunc
 /-- `ssnumsConjuncts k = ⟨ssnumsConjunct 0, …, ssnumsConjunct (k - 1)⟩`. -/
 noncomputable def ssnumsConjuncts (k : V) : V := ssnumsConjuncts.construction.result ![] k
 
-@[simp] lemma ssnumsConjuncts_zero : ssnumsConjuncts (0 : V) = 0 := by
+@[simp]
+lemma ssnumsConjuncts_zero : ssnumsConjuncts (0 : V) = 0 := by
   simp [ssnumsConjuncts, ssnumsConjuncts.construction]
 
-@[simp] lemma ssnumsConjuncts_succ (k : V) :
+@[simp]
+lemma ssnumsConjuncts_succ (k : V) :
     ssnumsConjuncts (k + 1) = concat (ssnumsConjuncts k) (ssnumsConjunct k) := by
   simp [ssnumsConjuncts, ssnumsConjuncts.construction]
 
@@ -71,7 +73,8 @@ instance ssnumsConjuncts.defined :
 instance ssnumsConjuncts.definable : 𝚺ᴬ₁-Function₁ (ssnumsConjuncts : V → V) :=
   ssnumsConjuncts.defined.to_definable
 
-@[simp] lemma len_ssnumsConjuncts (k : V) : len (ssnumsConjuncts k) = k := by
+@[simp]
+lemma len_ssnumsConjuncts (k : V) : len (ssnumsConjuncts k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp

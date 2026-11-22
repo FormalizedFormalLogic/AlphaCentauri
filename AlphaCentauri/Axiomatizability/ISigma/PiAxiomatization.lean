@@ -12,8 +12,7 @@ a single $\Pi_{n + 2}$ sentence for `n ≥ 1`, and by `𝗜𝚺 m` together with
 
 ## References
 
-- [HP98, Corollary I.4.34(1)]
-- [HP98, Remark I.4.35(1)]
+- [HP98, Corollary I.4.34(1), Remark I.4.35(1)]
 -/
 
 @[expose] public section
@@ -71,8 +70,7 @@ lemma hierarchy_of_mem_finiteAxiomatization {σ : ArithmeticSentence}
 end Hierarchy
 
 /-- For `n ≥ 1`, `𝗜𝚺 n` is axiomatized by a single $\Pi_{n + 2}$ sentence.
-- [HP98, Corollary I.4.34(1)]
-- [HP98, Remark I.4.35(1)] -/
+- [HP98, Corollary I.4.34(1), Remark I.4.35(1)] -/
 theorem exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :
     ∃ σ : 𝚷ᴬ_[n + 2].Sentence, ({σ.val} : ArithmeticTheory) ≊ 𝗜𝚺 n := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
@@ -84,8 +82,7 @@ theorem exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :
 
 /-- For `n ≥ 1` and `m ≤ n`, `𝗜𝚺 n` is axiomatized by `𝗜𝚺 m` together with a single
 $\Pi_{n + 2}$ sentence.
-- [HP98, Corollary I.4.34(1)]
-- [HP98, Remark I.4.35(1)] -/
+- [HP98, Corollary I.4.34(1), Remark I.4.35(1)] -/
 theorem exists_pi_axiomatization_insert (n : ℕ) (hn : 1 ≤ n) (m : ℕ) (hmn : m ≤ n) :
     ∃ π : 𝚷ᴬ_[n + 2].Sentence, 𝗜𝚺 n ≊ insert π.val (𝗜𝚺 m) := by
   obtain ⟨π, hπ⟩ := exists_pi_axiomatization n hn

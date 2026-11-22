@@ -64,8 +64,7 @@ open_problem exists_provable_fermatLastTheoremCaseTwo_IOpen_bezout :=
 $\mathsf{IE}_1$ proves $\mathsf{IOpen} + \mathrm{Bez}$, which proves
 $\mathsf{IOpen} + \mathrm{GCD}$, it is equivalent to asking whether Case I is provable in any of the
 three.
-- [Smi92b, Question 5.5]
-- [Smi92b, Lemma 3.11] -/
+- [Smi92b, Question 5.5, Lemma 3.11] -/
 open_problem provable_fermatLastTheoremCaseOne_IE1 :=
   ∀ n : ℕ, 3 ≤ n → 𝗜𝗘₁ ⊢ fermatLastTheoremCaseOne n
 

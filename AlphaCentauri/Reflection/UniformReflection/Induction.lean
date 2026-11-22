@@ -19,11 +19,8 @@ uniform reflection for `T₀` together with that instance's induction hypothesis
 $\Pi_{n + 2}$ sentence has an induction instance proving that implication for every reflection
 instance.
 
-- [AB05, §4.2]
-- [AB05, Lemma 22]
-- [Bek99, Proposition 2.1]
-- [Bek99, Proposition 2.2]
-- [Bek99, Lemma 5.1]
+- [AB05, §4.2, Lemma 22]
+- [Bek99, Proposition 2.1, Proposition 2.2, Lemma 5.1]
 -/
 
 @[expose] public section
@@ -83,8 +80,7 @@ theorem provable_all_of_uniformReflection {T₀ : ArithmeticTheory} [T₀.Δ₁]
 /-- The converse of `provable_all_of_uniformReflection`, quoted by Bek99 from Beklemishev 1997
 without proof: every $\Pi_{n + 2}$ sentence `P` has a $\Pi_{n + 1}$ induction instance over `T₀`
 proving `P 🡒 σ`, for every uniform $\Pi_{n + 1}$ reflection instance `σ` for `T₀ ∪ {P}`.
-- [Bek99, Proposition 2.1]
-- [Bek99, Lemma 5.1] -/
+- [Bek99, Proposition 2.1, Lemma 5.1] -/
 axiom uniformReflection_of_parameterFreeInduction {n : ℕ} {T₀ : ArithmeticTheory} [T₀.Δ₁]
     (hT₀ : 𝗜𝚺₁ ⪯ T₀) (P : ArithmeticSentence) (hP : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2) P) :
     ∃ φ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1) φ ∧

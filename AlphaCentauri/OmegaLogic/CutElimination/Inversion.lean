@@ -9,9 +9,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 
 Bound-preserving inversion for disjunctions, conjunctions, and universal formulas in `Z_∞`.
 
-- [Tow20, Section 19.2]
-- [Tow20, Section 19.3]
-- [Tow20, Section 19.4]
+- [Tow20, Section 19.2, Section 19.3, Section 19.4]
 -/
 
 @[expose] public section

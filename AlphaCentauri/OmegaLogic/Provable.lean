@@ -8,9 +8,7 @@ public import AlphaCentauri.OmegaLogic.Derivation
 `Z∞ ⊢[α, c] Γ` for ordinal height at most `α` and cut rank at most `c`, with its structural rules,
 logical rules, and soundness.
 
-- [Tow20, Section 13]
-- [Tow20, Section 14]
-- [Tow20, Section 18]
+- [Tow20, Section 13, Section 14, Section 18]
 -/
 
 @[expose] public section

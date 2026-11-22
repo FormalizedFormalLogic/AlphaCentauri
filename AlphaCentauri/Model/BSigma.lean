@@ -86,8 +86,7 @@ private lemma exists_bound_of_isElementary (hI : ∃ c, c ∉ I.carrier)
 $\Sigma_j$-elementary satisfies $\mathsf{B}\Sigma_{j+1}$.
 - [HP98, Lemma IV.1.22] -/
 theorem models_BSigma_succ (hI : ∃ c, c ∉ I.carrier)
-    (hj : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j)
-      I.endExtension.emb) :
+    (hj : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j) I.endExtension.emb) :
     I.carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := by
   have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := mod_ISigma_of_le (Nat.zero_le j)
   apply Semantics.ModelsSet.union_iff.mpr
@@ -242,9 +241,8 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
   · exact (hP x).mp hPx
 
 /-- [HP98, Lemma IV.1.42] -/
-theorem sigmaElementary :
-    IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j)
-      (definableCut j M).endExtension.emb := by
+theorem sigmaElementary : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j)
+    (definableCut j M).endExtension.emb := by
   apply isElementary_of_tarskiVaught
   · intro n φ hφ e f
     exact (Bounding.bounded_absolute (definableCut j M).endExtension.emb hφ e f).symm

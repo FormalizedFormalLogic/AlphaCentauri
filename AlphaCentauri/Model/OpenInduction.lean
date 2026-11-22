@@ -79,8 +79,7 @@ def oRingEmbedding : Nonneg R ↪ₛ[ℒₒᵣ] R where
 if the ring satisfies open induction.
 - [BO96, §1]
 - [GG17, §2.3] -/
-theorem models_IOpen_iff [DiscretelyOrdered R] :
-    (Nonneg R)↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 ↔ OpenInduction R := by
+theorem models_IOpen_iff [DiscretelyOrdered R] : (Nonneg R)↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 ↔ OpenInduction R := by
   constructor
   · intro _ P hP h0 hs x hx
     obtain ⟨θ, hθ, h⟩ := exists_open_eval_iff (M := Nonneg R) (ι := Subtype.val)

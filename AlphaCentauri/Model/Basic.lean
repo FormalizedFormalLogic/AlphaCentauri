@@ -230,8 +230,7 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
 end extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
 theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 1 σ)
-    [N↓[ℒₒᵣ] ⊧* T] :
-    M↓[ℒₒᵣ] ⊧* T :=
+    [N↓[ℒₒᵣ] ⊧* T] : M↓[ℒₒᵣ] ⊧* T :=
   models_theory_iff.mpr <| by
     intro σ hσ
     by_contra! h
@@ -323,8 +322,7 @@ below some element outside it.
 - [vO99, Lemma 3.2, Corollary 3.3] -/
 theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m]
     {φ : ArithmeticSemiformula ℕ 1} (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ m φ) (f : ℕ → N)
-    (h : ∀ a : M, φ.Eval ![e a] f) :
-    ∃ c : N, c ∉ Set.range e.emb ∧ ∀ x < c, φ.Eval ![x] f := by
+    (h : ∀ a : M, φ.Eval ![e a] f) : ∃ c : N, c ∉ Set.range e.emb ∧ ∀ x < c, φ.Eval ![x] f := by
   have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m)
   by_contra! hc
   have h₁ : ∀ x : N, (∀ y < x, φ.Eval ![y] f) → x ∈ Set.range e.emb := by grind;
@@ -520,8 +518,7 @@ lemma eval_iff_of_bounded_of_witness
 /-- A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/
 theorem _root_.FFL.FirstOrder.IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M}
-    (hι : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ) ι)
-    [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : S↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := by
+    (hι : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ) ι) [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : S↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := by
   have h {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemiformula ℕ n}
       (hφ : ℬ[<, ℒₒᵣ].PrenexBlock Γ φ) (hΓ : Γ = 𝚷) (e : Fin n → S) (f : ℕ → S) :
       φ.Eval (ι ∘ e) (ι ∘ f) → φ.Eval e f := by

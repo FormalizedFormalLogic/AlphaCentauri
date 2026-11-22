@@ -17,10 +17,13 @@ public import Foundation.FirstOrder.Incompleteness.Second
 
 /-! # Definable elements
 
+An element of `M` is definable over a set `A` by a class of formulas when it is the only element
+satisfying some formula of the class with parameters from `A`; the elements definable without
+parameters, and the $\Sigma_k$-definable ones, are the cases with no parameters.
+
 The $\Sigma_{j+1}$-definable elements of a model `M` of `𝗣𝗔` form a $\Sigma_{j+1}$-elementary
 substructure, which satisfies $\mathsf{I}\Sigma_j$ and, when it contains a nonstandard element,
-refutes $\mathsf{B}\Sigma_{j+1}$. The elements of `M` below a definable element form a cut, which
-satisfies $\mathsf{B}\Sigma_{j+1}$ and refutes $\mathsf{I}\Sigma_{j+1}$.
+refutes $\mathsf{B}\Sigma_{j+1}$.
 
 The elements of a model `M` of `𝗣𝗔` definable over a set `A` of parameters form an elementary
 substructure. The elements of `M` definable without parameters embed elementarily into every model
@@ -75,9 +78,8 @@ lemma definableElementsOver_mono {A : Set M} {C D : ArithmeticSemiformula A 1 �
 same elements by formulas as by sentences. -/
 lemma mem_definableElementsOver_empty_iff {C : ∀ {ξ : Type}, ArithmeticSemiformula ξ 1 → Prop}
     (hC : ∀ {ξ ζ : Type} (f : ξ → ζ) {φ : ArithmeticSemiformula ξ 1}, C φ →
-      C (Rew.rewriteMap f ▹ φ)) {a : M} :
-    a ∈ definableElementsOver (∅ : Set M) C ↔
-      ∃ φ : ArithmeticSemisentence 1, C φ ∧ ∀ x, M ⊧/![x] φ ↔ x = a := by
+      C (Rew.rewriteMap f ▹ φ)) {a : M} : a ∈ definableElementsOver (∅ : Set M) C ↔
+    ∃ φ : ArithmeticSemisentence 1, C φ ∧ ∀ x, M ⊧/![x] φ ↔ x = a := by
   constructor
   · rintro ⟨θ, hθ, h⟩
     use Rew.rewriteMap (fun i ↦ isEmptyElim i) ▹ θ
@@ -97,9 +99,8 @@ lemma mem_definableElements_iff {a : M} :
     a ∈ definableElements M ↔ ∃ φ : ArithmeticSemisentence 1, ∀ x, M ⊧/![x] φ ↔ x = a :=
   (mem_definableElementsOver_empty_iff (C := fun _ ↦ True) fun _ _ h ↦ h).trans (by simp)
 
-lemma mem_sigmaDefinableElements_iff {k : ℕ} {a : M} :
-    a ∈ sigmaDefinableElements k M ↔
-      ∃ φ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k φ ∧ ∀ x, M ⊧/![x] φ ↔ x = a :=
+lemma mem_sigmaDefinableElements_iff {k : ℕ} {a : M} : a ∈ sigmaDefinableElements k M ↔
+    ∃ φ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k φ ∧ ∀ x, M ⊧/![x] φ ↔ x = a :=
   mem_definableElementsOver_empty_iff (C := fun φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k φ) fun _ _ h ↦ h.rew _
 
 /-- An element defined uniquely from definable elements by a $\Sigma_k$ formula is definable. -/
@@ -302,8 +303,7 @@ instance DefinesElement.defined : (j : ℕ) →
     simp [definesElementDef, DefinesElement, (PrenexSatisfied.pi_defined' j).df,
       eq_comm]
 
-instance DefinesElement.definable (j : ℕ) :
-    𝚺ᴬ_[j + 1]-Relation (DefinesElement j : V → V → Prop) :=
+instance DefinesElement.definable (j : ℕ) : 𝚺ᴬ_[j + 1]-Relation (DefinesElement j : V → V → Prop) :=
   (DefinesElement.defined j).to_definable
 
 lemma DefinesElement.unique {c x x' : V} (h : DefinesElement j c x)
@@ -589,8 +589,7 @@ lemma eq_primeModelMap {a : definableElements M} {y : N}
     (h : ∀ θ : ArithmeticSemisentence 1, M ⊧/![a.1] θ → N ⊧/![y] θ) : y = primeModelMap a :=
   (existsUnique_realize a).unique h fun _ ↦ realize_primeModelMap a
 
-lemma evalb_primeModelMap {n : ℕ} (φ : ArithmeticSemisentence n)
-    (v : Fin n → definableElements M) :
+lemma evalb_primeModelMap {n : ℕ} (φ : ArithmeticSemisentence n) (v : Fin n → definableElements M) :
     N ⊧/(primeModelMap ∘ v) φ ↔ M ⊧/(Subtype.val ∘ v) φ := by
   suffices h : ∀ {n : ℕ} (φ : ArithmeticSemisentence n) (v : Fin n → definableElements M),
       M ⊧/(Subtype.val ∘ v) φ → N ⊧/(primeModelMap ∘ v) φ by
@@ -656,8 +655,7 @@ variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
 variable (M N) in
 /-- The elementary embedding of the elements of `M` definable without parameters into `N`.
 - [Kay91, Theorem 8.2] -/
-noncomputable def primeModelEmbedding :
-    definableElements M ≼ₑ[ℒₒᵣ] N where
+noncomputable def primeModelEmbedding : definableElements M ≼ₑ[ℒₒᵣ] N where
   emb := {
     toFun := primeModelMap
     func' f v := by
@@ -689,8 +687,7 @@ noncomputable def primeModelEmbedding :
 
 /-- The image of `primeModelEmbedding` is the set of elements of `N` definable without parameters.
 - [Kay91, Theorem 8.2] -/
-theorem range_primeModelEmbedding :
-    Set.range (primeModelEmbedding M N) = definableElements N := by
+theorem range_primeModelEmbedding : Set.range (primeModelEmbedding M N) = definableElements N := by
   ext b
   constructor
   · rintro ⟨a, rfl⟩

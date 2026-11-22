@@ -243,7 +243,7 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
 /-- [HP98, Lemma IV.1.42] -/
 theorem sigmaElementary : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j)
     (definableCut j M).endExtension.emb := by
-  apply isElementary_of_tarskiVaught
+  apply IsElementary.prenexHierarchyLE_of_tarskiVaught
   · intro n φ hφ e f
     exact (Bounding.bounded_absolute (definableCut j M).endExtension.emb hφ e f).symm
   · intro m hm n φ hφ e f h

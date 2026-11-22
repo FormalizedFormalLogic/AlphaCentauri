@@ -224,16 +224,14 @@ public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
 public import AlphaCentauri.ToFoundation.FirstOrder.ConstantExtension
-public import AlphaCentauri.ToFoundation.FirstOrder.ElementaryChain
-public import AlphaCentauri.ToFoundation.FirstOrder.ElementarySubstructure
 public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.Model.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree
 public import AlphaCentauri.ToFoundation.FirstOrder.PrenexNormalForm
 public import AlphaCentauri.ToFoundation.FirstOrder.Rew
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import AlphaCentauri.ToFoundation.FirstOrder.Theory
-public import AlphaCentauri.ToFoundation.FirstOrder.Type
 public import AlphaCentauri.ToFoundation.Logic.Compact
 public import AlphaCentauri.ToFoundation.Logic.Entailment
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.GL.LRClosure

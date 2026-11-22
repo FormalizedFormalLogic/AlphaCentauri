@@ -1,6 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.HFS.Seq
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.HFS.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.LocallyDelta0
 public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 

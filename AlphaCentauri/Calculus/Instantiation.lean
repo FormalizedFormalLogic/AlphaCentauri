@@ -1,7 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.FirstOrder.Rew
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 public import Foundation.FirstOrder.LK.Basic
 
 /-! # Instantiating a block of universal quantifiers

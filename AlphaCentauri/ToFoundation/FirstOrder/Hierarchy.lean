@@ -1,12 +1,99 @@
 module
 
-public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
+public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
 
 /-!
-# The arithmetical hierarchy of a universal closure
+# Bounded formulas and the hierarchy of formulas
+
+Supplements Foundation's `Bounding`: bounded formulas, the hierarchy, Boolean combinations and
+prenex normal forms.
+-/
+
+@[expose] public section
+
+/-! ## $\Delta_0$ formulas
+
+In Foundation the class $\Delta_0$ of formulas all of whose quantifiers are bounded by `<` is
+`ℬ[<, L].Closure`; `Bounding.Hierarchy.zero_iff_bounded` identifies it with
+`ℬ[<, L].Hierarchy Γ 0`. `bounded_induction` is a recursor for it on arithmetical formulas that
+Foundation does not provide.
+-/
+
+namespace FFL.FirstOrder
+
+variable {L : Language} [L.LT] {ξ : Type*} {n : ℕ} {φ ψ : Semiformula L ξ n}
+
+open Arithmetic
+
+-- `witnesses_verum`/`witnesses_identity` build a bounded witness directly from its shape;
+-- these are intro rules for goals like `ℬ[<, L].Closure (.rel r v)`.
+attribute [grind .] Bounding.Closure.verum Bounding.Closure.falsum Bounding.Closure.rel
+  Bounding.Closure.nrel
+
+/-- A bounded formula sits at every zero level of the arithmetical hierarchy. -/
+@[grind ←]
+theorem Bounding.Closure.hierarchy {Γ : Polarity} (h : ℬ[<, L].Closure φ) :
+    ℬ[<, L].Hierarchy Γ 0 φ :=
+  .bounded _ _ _ h
+
+namespace Bounding.Closure
+
+lemma arithmetic_ball {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} (ht : t.Positive)
+    (h : ℬ[<, L].Closure φ) : ℬ[<, L].Closure (∀¹[“x. x < !!t”] φ) :=
+  ball (R := Semiformula.Operator.LT.lt) (by rfl) ht h
+
+lemma arithmetic_bexs {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} (ht : t.Positive)
+    (h : ℬ[<, L].Closure φ) : ℬ[<, L].Closure (∃¹[“x. x < !!t”] φ) :=
+  bexs (R := Semiformula.Operator.LT.lt) (by rfl) ht h
+
+@[simp] lemma imp_iff : ℬ[<, L].Closure (φ 🡒 ψ) ↔ ℬ[<, L].Closure φ ∧ ℬ[<, L].Closure ψ := by
+  simp [Semiformula.imp_eq]
+
+@[simp] lemma ballLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
+    ℬ[<, L].Closure (φ.ballLT t) ↔ ℬ[<, L].Closure φ := by
+  simp [← Bounding.Hierarchy.zero_iff_bounded (Γ := 𝚺)]
+
+@[simp] lemma bexsLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
+    ℬ[<, L].Closure (φ.bexsLT t) ↔ ℬ[<, L].Closure φ := by
+  simp [← Bounding.Hierarchy.zero_iff_bounded (Γ := 𝚺)]
+
+lemma of_open (h : φ.Open) : ℬ[<, L].Closure φ :=
+  Bounding.Hierarchy.zero_iff_bounded.mp (Bounding.Hierarchy.of_open (Γ := 𝚺) (s := 0) h)
+
+end Bounding.Closure
+
+namespace Bounding.Closure
+
+/-- Recursion on `ℬ[<, L]`-bounded formulas, with the literals collected into a single case for open
+formulas. -/
+lemma induction_open {P : (n : ℕ) → Semiformula L ξ n → Prop}
+    (hOpen : ∀ n φ, Semiformula.Open φ → P n φ)
+    (hAnd : ∀ n φ ψ, ℬ[<, L].Closure φ → ℬ[<, L].Closure ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hOr : ∀ n φ ψ, ℬ[<, L].Closure φ → ℬ[<, L].Closure ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
+    (hBall : ∀ n t φ, ℬ[<, L].Closure φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hBex : ∀ n t φ, ℬ[<, L].Closure φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
+    (h : ℬ[<, L].Closure φ) : P n φ := by
+  induction h with
+  | verum | falsum | rel | nrel => exact hOpen _ _ (by simp)
+  | and hp hq ihp ihq => exact hAnd _ _ _ hp hq ihp ihq
+  | or hp hq ihp ihq => exact hOr _ _ _ hp hq ihp ihq
+  | ball hR pt hp ih =>
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp pt
+    obtain rfl := Set.mem_singleton_iff.mp hR
+    simpa [Semiformula.Operator.lt_def] using hBall _ t _ hp ih
+  | bexs hR pt hp ih =>
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp pt
+    obtain rfl := Set.mem_singleton_iff.mp hR
+    simpa [Semiformula.Operator.lt_def] using hBex _ t _ hp ih
+
+end Bounding.Closure
+
+end FFL.FirstOrder
+
+/-! ## The arithmetical hierarchy of a universal closure
 
 `ℬ[<, L].Hierarchy 𝚷 (s + 1)` passes through `Semiformula.univCl`, and every axiom of `𝗣𝗔⁻` is
 $\Pi_2$. `ℬ.PrenexBlock Γ` collects the formulas that are a block of `Γ`-quantifiers over a
@@ -14,8 +101,6 @@ $\Pi_2$. `ℬ.PrenexBlock Γ` collects the formulas that are a block of `Γ`-qua
 axiom of `𝗣𝗔⁻` is such a block of universal quantifiers. `ℬ.PrenexHierarchyLE s` collects the
 prenex $\Sigma_m$ and $\Pi_m$ formulas with `m ≤ s`.
 -/
-
-@[expose] public section
 
 namespace FFL.FirstOrder
 namespace Bounding.Hierarchy
@@ -238,4 +323,207 @@ variable {L : Language} {ℬ : Bounding L} {ξ : Type*} {n s : ℕ}
     (h : C.rank ≤ s + 1) : ℬ.Hierarchy Γ (s + 2) φ.val := hierarchy_of_lt φ (by omega)
 
 end Bounding.HierarchySymbol.Semiformula
+end FFL.FirstOrder
+
+/-! ## Boolean combinations of a class of formulas
+
+`BooleanCombination Γ` is the closure of a predicate `Γ` on formulas, together with the negations
+of its members, under `⋏` and `⋎`.
+
+- [Bek99, §2]
+-/
+
+namespace FFL.FirstOrder
+
+variable {L : Language} {ξ : Type*} {n : ℕ}
+
+/-- The Boolean combinations of the formulas satisfying `Γ`.
+- [Bek99, §2] -/
+inductive BooleanCombination (Γ : Semiformula L ξ n → Prop) : Semiformula L ξ n → Prop
+  | pos {φ} : Γ φ → BooleanCombination Γ φ
+  | neg {φ} : Γ φ → BooleanCombination Γ (∼φ)
+  | and {φ ψ} : BooleanCombination Γ φ → BooleanCombination Γ ψ → BooleanCombination Γ (φ ⋏ ψ)
+  | or {φ ψ} : BooleanCombination Γ φ → BooleanCombination Γ ψ → BooleanCombination Γ (φ ⋎ ψ)
+
+namespace BooleanCombination
+
+variable {Γ Γ' : Semiformula L ξ n → Prop} {φ ψ : Semiformula L ξ n}
+
+@[simp, grind =] lemma neg_iff : BooleanCombination Γ (∼φ) ↔ BooleanCombination Γ φ := by
+  have H : ∀ {φ : Semiformula L ξ n}, BooleanCombination Γ φ → BooleanCombination Γ (∼φ) := by
+    intro φ h
+    induction h with
+    | pos hφ => exact neg hφ
+    | neg hφ => simpa using pos hφ
+    | and _ _ ih₁ ih₂ => simpa using ih₁.or ih₂
+    | or _ _ ih₁ ih₂ => simpa using ih₁.and ih₂
+  exact ⟨fun h ↦ by simpa using H h, H⟩
+
+lemma mono (h : ∀ {φ}, Γ' φ → BooleanCombination Γ φ) :
+    BooleanCombination Γ' φ → BooleanCombination Γ φ := by
+  intro hφ
+  induction hφ with
+  | pos hφ' => exact h hφ'
+  | neg hφ' => simpa using h hφ'
+  | and _ _ ih₁ ih₂ => exact ih₁.and ih₂
+  | or _ _ ih₁ ih₂ => exact ih₁.or ih₂
+
+end BooleanCombination
+
+end FFL.FirstOrder
+
+namespace FFL.FirstOrder
+namespace Arithmetic
+
+open FFL.FirstOrder (BooleanCombination)
+open scoped FFL.FirstOrder.Bounding
+
+variable {L : Language} [L.LT] {ξ : Type*} {Γ : Polarity} {s n : ℕ} {φ : Semiformula L ξ n}
+
+namespace BooleanCombination
+
+/-- Every Boolean combination of prenex formulas of level `s` lies at level `s + 1` of either
+polarity.
+- [Bek99, §2] -/
+theorem hierarchy_succ (h : BooleanCombination (ℬ[<, L].PrenexHierarchy Γ s) φ)
+    (Γ' : Polarity) : ℬ[<, L].Hierarchy Γ' (s + 1) φ := by
+  induction h with
+  | pos hφ => exact hφ.hierarchy.strict_mono Γ' (by omega)
+  | neg hφ => exact hφ.neg.hierarchy.strict_mono Γ' (by omega)
+  | and _ _ ih₁ ih₂ => exact ih₁.and ih₂
+  | or _ _ ih₁ ih₂ => exact ih₁.or ih₂
+
+theorem prenexHierarchy_alt (h : BooleanCombination (ℬ[<, L].PrenexHierarchy Γ s) φ) :
+    BooleanCombination (ℬ[<, L].PrenexHierarchy Γ.alt s) φ := by
+  induction h with
+  | pos hφ => simpa using (BooleanCombination.neg hφ.neg)
+  | neg hφ => exact .pos hφ.neg
+  | and _ _ ih₁ ih₂ => exact ih₁.and ih₂
+  | or _ _ ih₁ ih₂ => exact ih₁.or ih₂
+
+/-- $\mathcal{B}(\Sigma_s) = \mathcal{B}(\Pi_s)$: a Boolean combination of prenex formulas of
+level `s` and polarity `Γ` is one of polarity `Γ.alt`, and conversely.
+- [Bek99, §2] -/
+theorem prenexHierarchy_alt_iff :
+    BooleanCombination (ℬ[<, L].PrenexHierarchy Γ s) φ ↔
+      BooleanCombination (ℬ[<, L].PrenexHierarchy Γ.alt s) φ :=
+  ⟨prenexHierarchy_alt, fun h ↦ by simpa using prenexHierarchy_alt h⟩
+
+end BooleanCombination
+
+end Arithmetic
+end FFL.FirstOrder
+
+/-! ## Prenex normal form
+
+Every formula is equivalent, in every nonempty structure, to a prenex formula of either polarity
+and of every large enough level.
+-/
+
+namespace FFL.FirstOrder
+namespace Bounding
+
+universe u
+
+variable {L : Language} {ℬ : Bounding L} {ξ : Type*} {n : ℕ}
+
+variable (ℬ) in
+/-- `φ` is equivalent, in every nonempty structure, to a `ℬ`-prenex formula of either polarity and
+of every large enough level. -/
+private def HasPrenexNormalForm (φ : Semiformula L ξ n) : Prop :=
+  ∃ s, ∀ Γ s', s ≤ s' → ∃ ψ, ℬ.PrenexHierarchy Γ s' ψ ∧
+    ∀ (M : Type u) [Tarski.Structure L M] [Nonempty M] (e : Fin n → M) (f : ξ → M),
+      Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ
+
+namespace HasPrenexNormalForm
+
+private lemma of_iff {φ ψ : Semiformula L ξ n} (h : HasPrenexNormalForm.{u} ℬ ψ)
+    (H : ∀ (M : Type u) [Tarski.Structure L M] [Nonempty M] (e : Fin n → M) (f : ξ → M),
+      Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ) :
+    HasPrenexNormalForm.{u} ℬ φ := by
+  obtain ⟨s, hs⟩ := h
+  exact ⟨s, fun Γ s' hs' ↦ (hs Γ s' hs').imp fun _ hχ ↦
+    ⟨hχ.1, fun M _ _ e f ↦ (H M e f).trans (hχ.2 M e f)⟩⟩
+
+private lemma of_prenexHierarchy {Γ : Polarity} {s : ℕ} {φ : Semiformula L ξ n}
+    (h : ℬ.PrenexHierarchy Γ s φ) : HasPrenexNormalForm.{u} ℬ φ :=
+  ⟨s + 1, fun Γ' _ hs ↦ h.exists_eval_iff_of_lt Γ' hs⟩
+
+private lemma of_closure {φ : Semiformula L ξ n} (h : ℬ.Closure φ) : HasPrenexNormalForm.{u} ℬ φ :=
+  of_prenexHierarchy (Γ := 𝚺) (PrenexHierarchy.zero_iff_bounded.mpr h)
+
+private lemma neg {φ : Semiformula L ξ n} (h : HasPrenexNormalForm.{u} ℬ φ) :
+    HasPrenexNormalForm.{u} ℬ (∼φ) := by
+  obtain ⟨s, hs⟩ := h
+  use s
+  intro Γ s' hs'
+  obtain ⟨ψ, hψ, H⟩ := hs Γ.alt s' hs'
+  exact ⟨∼ψ, by simpa using hψ.neg, fun M _ _ e f ↦ by simp [H M e f]⟩
+
+private lemma all {φ : Semiformula L ξ (n + 1)} (h : HasPrenexNormalForm.{u} ℬ φ) :
+    HasPrenexNormalForm.{u} ℬ (∀¹ φ) := by
+  obtain ⟨s, hs⟩ := h
+  obtain ⟨ψ, hψ, H⟩ := hs 𝚺 s le_rfl
+  exact (of_prenexHierarchy hψ.all).of_iff fun M _ _ e f ↦ by simp [H M]
+
+private lemma exs {φ : Semiformula L ξ (n + 1)} (h : HasPrenexNormalForm.{u} ℬ φ) :
+    HasPrenexNormalForm.{u} ℬ (∃¹ φ) := by
+  obtain ⟨s, hs⟩ := h
+  obtain ⟨ψ, hψ, H⟩ := hs 𝚷 s le_rfl
+  exact (of_prenexHierarchy hψ.exs).of_iff fun M _ _ e f ↦ by simp [H M]
+
+private lemma and_of_prenexHierarchy : {Γ₁ Γ₂ : Polarity} → {s₁ s₂ n : ℕ} →
+    {ψ₁ ψ₂ : Semiformula L ξ n} → ℬ.PrenexHierarchy Γ₁ s₁ ψ₁ → ℬ.PrenexHierarchy Γ₂ s₂ ψ₂ →
+    HasPrenexNormalForm.{u} ℬ (ψ₁ ⋏ ψ₂)
+  | _, _, 0, 0, _, _, _, h₁, h₂ =>
+    of_closure <| .and (PrenexHierarchy.zero_iff_bounded.mp h₁)
+      (PrenexHierarchy.zero_iff_bounded.mp h₂)
+  | 𝚺, _, _ + 1, _, _, _, _, h₁, h₂ => by
+    obtain ⟨χ, hχ, rfl⟩ := PrenexHierarchy.sigma_succ_iff.mp h₁
+    exact (and_of_prenexHierarchy hχ (h₂.rew Rew.bShift)).exs.of_iff fun M _ _ e f ↦ by simp
+  | 𝚷, _, _ + 1, _, _, _, _, h₁, h₂ => by
+    obtain ⟨χ, hχ, rfl⟩ := PrenexHierarchy.pi_succ_iff.mp h₁
+    exact (and_of_prenexHierarchy hχ (h₂.rew Rew.bShift)).all.of_iff fun M _ _ e f ↦ by
+      simp [forall_and_right]
+  | _, 𝚺, 0, _ + 1, _, _, _, h₁, h₂ => by
+    obtain ⟨χ, hχ, rfl⟩ := PrenexHierarchy.sigma_succ_iff.mp h₂
+    exact (and_of_prenexHierarchy (h₁.rew Rew.bShift) hχ).exs.of_iff fun M _ _ e f ↦ by simp
+  | _, 𝚷, 0, _ + 1, _, _, _, h₁, h₂ => by
+    obtain ⟨χ, hχ, rfl⟩ := PrenexHierarchy.pi_succ_iff.mp h₂
+    exact (and_of_prenexHierarchy (h₁.rew Rew.bShift) hχ).all.of_iff fun M _ _ e f ↦ by
+      simp [forall_and_left]
+termination_by _ _ s₁ s₂ => s₁ + s₂
+
+private lemma and {φ₁ φ₂ : Semiformula L ξ n} (h₁ : HasPrenexNormalForm.{u} ℬ φ₁)
+    (h₂ : HasPrenexNormalForm.{u} ℬ φ₂) : HasPrenexNormalForm.{u} ℬ (φ₁ ⋏ φ₂) := by
+  obtain ⟨s₁, hs₁⟩ := h₁
+  obtain ⟨s₂, hs₂⟩ := h₂
+  obtain ⟨ψ₁, hψ₁, H₁⟩ := hs₁ 𝚺 s₁ le_rfl
+  obtain ⟨ψ₂, hψ₂, H₂⟩ := hs₂ 𝚺 s₂ le_rfl
+  exact (and_of_prenexHierarchy hψ₁ hψ₂).of_iff fun M _ _ e f ↦ by simp [H₁ M, H₂ M]
+
+end HasPrenexNormalForm
+
+private lemma hasPrenexNormalForm (φ : Semiformula L ξ n) : HasPrenexNormalForm.{u} ℬ φ := by
+  induction φ using Semiformula.rec' with
+  | hverum => exact .of_closure (.verum _)
+  | hfalsum => exact .of_closure (.falsum _)
+  | hrel r v => exact .of_closure (.rel r v)
+  | hnrel r v => exact .of_closure (.nrel r v)
+  | hand _ _ ih₁ ih₂ => exact ih₁.and ih₂
+  | hor _ _ ih₁ ih₂ => simpa using (ih₁.neg.and ih₂.neg).neg
+  | hall _ ih => exact ih.all
+  | hexs _ ih => exact ih.exs
+
+variable (ℬ) in
+/-- Every formula is equivalent, in every nonempty structure, to a `ℬ`-prenex formula of either
+polarity and of every large enough level.
+- [HP98, p. 8] -/
+theorem exists_prenexHierarchy_eval_iff (φ : Semiformula L ξ n) :
+    ∃ s, ∀ Γ s', s ≤ s' → ∃ ψ, ℬ.PrenexHierarchy Γ s' ψ ∧
+      ∀ (M : Type u) [Tarski.Structure L M] [Nonempty M] (e : Fin n → M) (f : ξ → M),
+        Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ :=
+  hasPrenexNormalForm φ
+
+end Bounding
 end FFL.FirstOrder

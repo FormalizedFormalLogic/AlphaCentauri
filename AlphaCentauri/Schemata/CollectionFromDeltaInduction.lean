@@ -1,9 +1,7 @@
 module
 
 public import AlphaCentauri.Model.EnumerationCut
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Absoluteness
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Definability
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv

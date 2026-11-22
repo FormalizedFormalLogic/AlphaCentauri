@@ -3,10 +3,8 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D3
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Equality
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.ProvableIff
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.QuantifierBlock
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.PeanoMinus
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.EquationalTheory
 

@@ -4,7 +4,14 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
 /-!
-# Gaps in Foundation's `PartialTruth/General`
+# Partial truth
+
+Supplements Foundation's `PartialTruth.General`.
+-/
+
+@[expose] public section
+
+/-! ## Gaps in Foundation's `PartialTruth/General`
 
 `BoundedSatisfied` and `PrenexSatisfied` read a formula with closed-off bound
 variables by putting the values of the substituted terms into the assignment, swap under negation,
@@ -15,7 +22,7 @@ and give the same value to every decomposition `qqToPrenex Γ s θ` of the same 
 - [HP98, 1.64(5), Theorem I.1.75]
 -/
 
-@[expose] public section
+section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -305,3 +312,5 @@ end PrenexSatisfied
 
 end Bootstrapping
 end FFL.FirstOrder.Arithmetic
+
+end

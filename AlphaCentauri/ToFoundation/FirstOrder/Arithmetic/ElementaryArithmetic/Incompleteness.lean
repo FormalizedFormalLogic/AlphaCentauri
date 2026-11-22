@@ -5,9 +5,18 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Theory
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Term.Typed
 public import Foundation.FirstOrder.Incompleteness.Definability
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Provable
+public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 
 /-!
-# The induction schemata recognised on codes in models of $\mathsf{EA}$
+# Incompleteness in models of $\mathsf{EA}$
+
+`Incompleteness`, ported to models of $\mathsf{EA}$: undefinability of truth and uniform reflection.
+-/
+
+@[expose] public section
+
+/-! ## The induction schemata recognised on codes in models of $\mathsf{EA}$
 
 The part of `Foundation/FirstOrder/Incompleteness/Definability.lean` on recognising the induction
 schema on codes, ported to models of $\mathsf{EA}$: the code `indBodyVal` of the induction
@@ -18,7 +27,7 @@ $\mathsf{EA}$ the axioms of `𝗣𝗔⁻`, of the induction schemata over `ℬ[<
 $\Delta_0$ set (`LocallyDelta0Axioms`).
 -/
 
-@[expose] public section
+section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -125,3 +134,36 @@ example : LocallyDelta0Axioms 𝗘𝗔 V := inferInstance
 
 end ElementaryArithmetic
 end FFL.FirstOrder.Arithmetic
+
+end
+
+/-! ## Uniform reflection in models of $\mathsf{EA}$
+
+A model of $\mathsf{EA}$ satisfies the uniform reflection schema of a theory `T` for `φ` iff every
+instance of `φ` by numerals whose code is internally provable in `T` holds in the model, for
+theories `T` whose axioms are locally $\Delta_0$ in the model.
+-/
+
+section
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+namespace FFL.FirstOrder.Arithmetic
+namespace ElementaryArithmetic
+
+open _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+
+lemma models_uniformReflectionSchema_iff (T : ArithmeticTheory) [T.Δ₁] [LocallyDelta0Axioms T V]
+    {k : ℕ} (φ : ArithmeticSemisentence k) :
+    V ⊧/![] (T.uniformReflectionSchema φ) ↔
+      ∀ v : Fin k → V,
+        Provable T (Bootstrapping.Arithmetic.substNumerals (((⌜φ⌝ : ℕ) : ℕ) : V) v) →
+          V ⊧/v φ := by
+  simp [Theory.uniformReflectionSchema, Sentence.quote_eq_encode, numeral_eq_natCast]
+
+end ElementaryArithmetic
+end FFL.FirstOrder.Arithmetic
+
+end

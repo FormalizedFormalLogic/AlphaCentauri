@@ -2,8 +2,7 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Power
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.BlockSequence
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 
 /-!
 # Factorial

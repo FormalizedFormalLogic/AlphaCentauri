@@ -4,10 +4,7 @@ public import AlphaCentauri.OmegaLogic.CutElimination.Elimination
 public import AlphaCentauri.OmegaLogic.ExcludedMiddle.Sequent
 public import AlphaCentauri.OmegaLogic.ExcludedMiddle.ValueCongruent
 public import AlphaCentauri.OmegaLogic.OmegaCompleteness
-public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
-public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
-public import AlphaCentauri.ToFoundation.FirstOrder.Rew
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.LK.Simplified
 

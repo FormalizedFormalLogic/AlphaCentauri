@@ -2,9 +2,17 @@ module
 
 public import Foundation.FirstOrder.Arithmetic.Prenex
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 
 /-!
-# Prenex normal forms of combinations and of lower levels
+# Prenex sentences of arithmetic
+
+Prenex sentences and their classes, including over $\mathsf{I}\Sigma_1$.
+-/
+
+@[expose] public section
+
+/-! ## Prenex normal forms of combinations and of lower levels
 
 Companion of Foundation's `Arithmetic/Prenex.lean`.
 
@@ -16,8 +24,6 @@ of that polarity and level. Unlike `Bounding.Prenex.and`, this needs no collecti
 Over $\mathsf{B}\Sigma_m$, every $\Gamma'_m$ sentence is equivalent to a prenex sentence of every
 level containing $\Gamma'_m$.
 -/
-
-@[expose] public section
 
 namespace FFL.FirstOrder
 namespace Semiterm
@@ -202,3 +208,24 @@ lemma exists_prenexHierarchy_provable_iff {σ : ArithmeticSentence}
     simpa [models_iff, hφψ, -Bounding.Prenex.val_sigmaInv] using this
 
 end FFL.FirstOrder.Arithmetic
+
+/-! ## Prenex sentences of a given level over $\mathsf{I}\Sigma_1$
+
+Companion of Foundation's `Arithmetic/ISigma1/Prenex.lean`. Every prenex class contains a sentence
+refutable in $\mathsf{I}\Sigma_1$.
+-/
+
+namespace FFL.FirstOrder.Arithmetic.ISigma1
+
+lemma exists_prenexHierarchy_refutable (Γ : Polarity) (n : ℕ) :
+    ∃ χ : ArithmeticSentence, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ ∧ 𝗜𝚺₁ ⊢ ∼χ := by
+  use (Bounding.Prenex.falsum : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0).val;
+  and_intros;
+  · exact Bounding.Prenex.val_prenexHierarchy;
+  · apply complete;
+    intro (V : Type) _ _;
+    simp [models_iff, Bounding.Prenex.models_falsum]
+
+end FFL.FirstOrder.Arithmetic.ISigma1
+
+end

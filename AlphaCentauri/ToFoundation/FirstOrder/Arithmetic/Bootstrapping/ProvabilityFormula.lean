@@ -4,7 +4,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Pro
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.InternalTSchema
 
 /-!

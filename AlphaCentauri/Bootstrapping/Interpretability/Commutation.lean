@@ -4,7 +4,6 @@ public import AlphaCentauri.Bootstrapping.Interpretability.Translation
 public import AlphaCentauri.Bootstrapping.Proof.Substitution
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 
 /-!

@@ -1,21 +1,23 @@
 module
 
-public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
-public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
-public import AlphaCentauri.ToFoundation.FirstOrder.Rew
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 
 /-!
-# Rewriting an induction axiom, and reading a collection axiom
+# Induction axioms and least witnesses
+
+Rewriting an induction axiom, collection axioms, and least witnesses.
+-/
+
+@[expose] public section
+
+/-! ## Rewriting an induction axiom, and reading a collection axiom
 
 The induction axiom of a formula is built from it by substitution and quantification, so a
 rewriting passes through it; the collection axiom of a formula reads in a model of `𝗣𝗔⁻` as the
 statement that witnesses below a bound admit a common bound.
 -/
-
-@[expose] public section
 
 namespace FFL.FirstOrder
 namespace Arithmetic
@@ -47,6 +49,46 @@ lemma models_collectionAxiom_iff {V : Type*} [ORingStructure V]
         ∃ b, ∀ x < a, ∃ y < b, φ.Eval ![x, y] f := by
   simp [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
     Semiformula.eval_bexsLT, Semiformula.eval_substs]
+
+end Arithmetic
+end FFL.FirstOrder
+
+/-! ## Least witnesses of total $\Delta_1$ relations
+
+In a model of $\mathsf{I}\Sigma_1$, choosing for each `x` the least `y` with `R x y`, for a total
+$\Delta_1$ relation `R`, gives a $\Sigma_1$-definable function.
+-/
+
+namespace FFL.FirstOrder
+namespace Arithmetic
+
+open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+lemma ISigma1.exists_sigma1Function_of_forall_exists {R : V → V → Prop} (hR : 𝚫ᴬ₁-Relation R)
+    (h : ∀ x, ∃ y, R x y) : ∃ f : V → V, (𝚺ᴬ₁-Function₁ f) ∧ ∀ x, R x (f x) := by
+  have hl (x : V) : ∃ y, R x y ∧ ∀ z < y, ¬R x z := by
+    obtain ⟨y, hy⟩ := h x
+    exact InductionOnHierarchy.least_number_sigma 𝚺 1 (P := R x) (by definability) hy
+  choose f hf using hl
+  use f
+  constructor
+  · have : 𝚺ᴬ₁-Relation fun y x : V ↦ R x y ∧ ∀ z < y, ¬R x z := by definability
+    apply this.of_iff
+    intro v
+    change v 0 = f (v 1) ↔ R (v 1) (v 0) ∧ ∀ z < v 0, ¬R (v 1) z
+    constructor
+    · intro e
+      rw [e]
+      exact hf (v 1)
+    · rintro ⟨hy, hmin⟩
+      rcases lt_trichotomy (v 0) (f (v 1)) with hlt | heq | hgt
+      · exact absurd hy ((hf (v 1)).2 _ hlt)
+      · exact heq
+      · exact absurd (hf (v 1)).1 (hmin _ hgt)
+  · intro x
+    exact (hf x).1
 
 end Arithmetic
 end FFL.FirstOrder

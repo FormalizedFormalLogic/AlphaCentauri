@@ -3,14 +3,19 @@ module
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 
 /-!
-# Local reflection over the prenex hierarchy
+# Local reflection
+
+Gaps in Foundation's `Reflection.Local`.
+-/
+
+@[expose] public section
+
+/-! ## Local reflection over the prenex hierarchy
 
 Local reflection for $\Sigma_{s'}$ or $\Pi_{s'}$ prenex sentences yields local reflection for prenex
 sentences of a lower or equal level, since a prenex sentence is provably equivalent to one of a
 higher level.
 -/
-
-@[expose] public section
 
 namespace FFL.FirstOrder
 namespace Arithmetic
@@ -52,3 +57,26 @@ lemma provable_localReflectionOn_prenexHierarchy_of_lt (hTS : T ⪯ S) (hs : s <
 
 end Arithmetic
 end FFL.FirstOrder
+
+/-! ## Gaps in Foundation's `Reflection.Local`: full local reflection over a finite extension
+
+A consistent extension of `T` by a single sentence never proves the full local reflection schema
+of `T`.
+-/
+
+namespace FFL.ProvabilityLogic
+
+open Entailment FirstOrder FirstOrder.Arithmetic
+
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+
+/-- A consistent extension of `T` by a single sentence does not prove the full local reflection
+schema of `T`.
+- [AB05, Theorem 23] -/
+theorem not_provable_localReflectionOn_univ_insert {π : ArithmeticSentence}
+    (hC : Consistent (insert π T)) :
+    ¬ insert π T ⊢* 𝗥𝗳𝗻[Set.univ] T := fun h ↦
+  (T.standardProvability.inconsistent_of_provable_localReflectionOn_insert
+    (Γ := fun _ ↦ True) (fun _ _ ↦ trivial) trivial h).not_con hC
+
+end FFL.ProvabilityLogic

@@ -1,12 +1,8 @@
 module
 
 public import AlphaCentauri.Model.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Absoluteness
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.CodedPigeonhole
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Injection
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Definability
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
 public import Foundation.FirstOrder.Arithmetic.Definability.Definable
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata

@@ -1,11 +1,9 @@
 module
 
 public import Foundation.FirstOrder.Incompleteness.Reflection.Local
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Completeness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Model
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection
-public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
-public import AlphaCentauri.ToFoundation.FirstOrder.PrenexNormalForm
 public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 

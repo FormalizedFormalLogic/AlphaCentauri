@@ -1,11 +1,8 @@
 module
 
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Absoluteness
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Definability
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastWitness
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
 /-!
@@ -144,19 +141,6 @@ noncomputable def tarski : ArithmeticTheory := {
 
 lemma tarski_finite : tarski.Finite := by simp [tarski]
 
-private lemma hierarchy_sigmaOne {k m : ℕ} (σ : 𝚺ᴬ₁.Semisentence k) (Γ : Polarity)
-    (h : 1 < m) : ℬ[<, ℒₒᵣ].Hierarchy Γ m σ.val :=
-  σ.sigma_prop.strict_mono Γ h
-
-private lemma hierarchy_deltaOne {k m : ℕ} (δ : 𝚫ᴬ₁.Semisentence k) (Γ : Polarity)
-    (h : 1 < m) : ℬ[<, ℒₒᵣ].Hierarchy Γ m δ.val :=
-  (by simpa [HierarchySymbol.Semiformula.val_sigma] using δ.sigma.sigma_prop :
-    ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 δ.val).strict_mono Γ h
-
-private lemma hierarchy_piOne {k m : ℕ} (π : 𝚷ᴬ₁.Semisentence k) (Γ : Polarity)
-    (h : 1 < m) : ℬ[<, ℒₒᵣ].Hierarchy Γ m π.val :=
-  π.pi_prop.strict_mono Γ h
-
 private lemma hierarchy_sigma_all {ξ : Type} {k m : ℕ} {φ : ArithmeticSemiformula ξ (k + 1)}
     (h : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) φ) :
     ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (m + 1 + 1) (∀¹ φ) :=
@@ -169,8 +153,7 @@ lemma hierarchy_of_tarski {s : ℕ} {σ : ArithmeticSentence} (hσ : σ ∈ tars
   simp only [tarski, Set.mem_insert_iff, Set.mem_singleton_iff] at hσ
   rcases hσ with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
     rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
-  simp [hierarchy_sigmaOne, hierarchy_deltaOne, hierarchy_piOne, hierarchy_sigma_all,
-    Bounding.Hierarchy.iff_iff, Bounding.Hierarchy.dummy_pi,
+  simp [hierarchy_sigma_all, Bounding.Hierarchy.iff_iff, Bounding.Hierarchy.dummy_pi,
     Tarski.boundedSatisfiedVerum, Tarski.boundedSatisfiedFalsum,
     Tarski.boundedSatisfiedEq, Tarski.boundedSatisfiedNeq, Tarski.boundedSatisfiedLt,
     Tarski.boundedSatisfiedNlt, Tarski.boundedSatisfiedAnd, Tarski.boundedSatisfiedOr,

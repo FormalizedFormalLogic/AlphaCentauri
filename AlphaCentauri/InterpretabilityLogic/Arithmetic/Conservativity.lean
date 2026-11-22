@@ -7,7 +7,6 @@ public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 public import Foundation.ProvabilityLogic.Arithmetic.Interpret
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ISigma1.Prenex
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prenex
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PrenexDisjunction
 

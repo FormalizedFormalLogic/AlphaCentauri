@@ -2,8 +2,7 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prenex
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.UniformReflection
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness.Definability
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Incompleteness
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Provable
 public import AlphaCentauri.Schemata.DeltaInduction

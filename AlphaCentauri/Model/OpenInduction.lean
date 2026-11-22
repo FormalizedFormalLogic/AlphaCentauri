@@ -2,8 +2,7 @@ module
 
 public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.Schemata.ZRing
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenPredicate
-public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenFormula
 public import AlphaCentauri.ToMathlib.Algebra.Polynomial.LeadingCoeffOrder
 public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
 public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial

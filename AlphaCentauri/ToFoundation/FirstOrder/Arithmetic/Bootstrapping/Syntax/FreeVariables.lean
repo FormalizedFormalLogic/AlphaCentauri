@@ -1,7 +1,7 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Vec
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 
 /-!
 # Free variables of coded terms and formulas

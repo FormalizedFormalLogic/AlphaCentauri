@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.NumberTheory.FermatLastTheorem.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Embedding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Model
 public import AlphaCentauri.ToMathlib.OpenPredicate.IntegerConstantPolynomial
 public import AlphaCentauri.ToMathlib.OpenPredicate.PadicIntegralPolynomial
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic

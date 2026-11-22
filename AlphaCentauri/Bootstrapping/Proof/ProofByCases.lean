@@ -3,9 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Proof.Deduction
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 

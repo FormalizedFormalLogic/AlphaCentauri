@@ -83,14 +83,17 @@ instance caseVec.defined : 𝚺ᴬ₁-Function₄[V] caseVec L via caseVecGraph 
 
 instance caseVec.definable : 𝚺ᴬ₁-Function₄[V] caseVec L := caseVec.defined.to_definable
 
-@[simp] lemma caseVec_zero (s u v : V) : caseVec L s u v 0 = 0 := by
+@[simp]
+lemma caseVec_zero (s u v : V) : caseVec L s u v 0 = 0 := by
   simp [caseVec, caseVec.construction]
 
-@[simp] lemma caseVec_succ (s u v k : V) :
+@[simp]
+lemma caseVec_succ (s u v k : V) :
     caseVec L s u v (k + 1) = concat (caseVec L s u v k) (caseCode L s u.[k] v.[k]) := by
   simp [caseVec, caseVec.construction]
 
-@[simp] lemma len_caseVec (s u v k : V) : len (caseVec L s u v k) = k := by
+@[simp]
+lemma len_caseVec (s u v k : V) : len (caseVec L s u v k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp

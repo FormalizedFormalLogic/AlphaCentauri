@@ -61,20 +61,25 @@ noncomputable def termFreeVariablesVecGraph : 𝚺ᴬ₁.Semisentence 3 := bluep
 
 variable {L}
 
-@[simp] lemma termFreeVariables_bvar (z : V) :
+@[simp]
+lemma termFreeVariables_bvar (z : V) :
     termFreeVariables L ^#z = ∅ := by simp [termFreeVariables, construction]
 
-@[simp] lemma termFreeVariables_fvar (x : V) :
+@[simp]
+lemma termFreeVariables_fvar (x : V) :
     termFreeVariables L ^&x = {x} := by simp [termFreeVariables, construction]
 
-@[simp] lemma termFreeVariables_func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+@[simp]
+lemma termFreeVariables_func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
     termFreeVariables L (^func k f v) = listUnion (termFreeVariablesVec L k v) := by
   simp [termFreeVariables, construction, hkf, hv]; rfl
 
-@[simp] lemma len_termFreeVariablesVec {k v : V} (hv : IsUTermVec L k v) :
+@[simp]
+lemma len_termFreeVariablesVec {k v : V} (hv : IsUTermVec L k v) :
     len (termFreeVariablesVec L k v) = k := construction.resultVec_lh L _ hv
 
-@[simp] lemma nth_termFreeVariablesVec {k v i : V} (hv : IsUTermVec L k v) (hi : i < k) :
+@[simp]
+lemma nth_termFreeVariablesVec {k v i : V} (hv : IsUTermVec L k v) (hi : i < k) :
     (termFreeVariablesVec L k v).[i] = termFreeVariables L v.[i] :=
   construction.nth_resultVec L _ hv hi
 
@@ -209,37 +214,46 @@ instance freeVariables.definable' : Γᴬ_[m + 1]-Function₁[V] freeVariables L
 
 end
 
-@[simp] lemma freeVariables_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+@[simp]
+lemma freeVariables_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     freeVariables L (^rel k R v) = listUnion (termFreeVariablesVec L k v) := by
   simp [freeVariables, hR, hv, construction]
 
-@[simp] lemma freeVariables_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+@[simp]
+lemma freeVariables_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     freeVariables L (^nrel k R v) = listUnion (termFreeVariablesVec L k v) := by
   simp [freeVariables, hR, hv, construction]
 
-@[simp] lemma freeVariables_verum : freeVariables L (^⊤ : V) = ∅ := by
+@[simp]
+lemma freeVariables_verum : freeVariables L (^⊤ : V) = ∅ := by
   simp [freeVariables, construction]
 
-@[simp] lemma freeVariables_falsum : freeVariables L (^⊥ : V) = ∅ := by
+@[simp]
+lemma freeVariables_falsum : freeVariables L (^⊥ : V) = ∅ := by
   simp [freeVariables, construction]
 
-@[simp] lemma freeVariables_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+@[simp]
+lemma freeVariables_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
     freeVariables L (p ^⋏ q) = freeVariables L p ∪ freeVariables L q := by
   simp [freeVariables, hp, hq, construction]
 
-@[simp] lemma freeVariables_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+@[simp]
+lemma freeVariables_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
     freeVariables L (p ^⋎ q) = freeVariables L p ∪ freeVariables L q := by
   simp [freeVariables, hp, hq, construction]
 
-@[simp] lemma freeVariables_all {p : V} (hp : IsUFormula L p) :
+@[simp]
+lemma freeVariables_all {p : V} (hp : IsUFormula L p) :
     freeVariables L (^∀ p) = freeVariables L p := by
   simp [freeVariables, hp, construction]
 
-@[simp] lemma freeVariables_exs {p : V} (hp : IsUFormula L p) :
+@[simp]
+lemma freeVariables_exs {p : V} (hp : IsUFormula L p) :
     freeVariables L (^∃ p) = freeVariables L p := by
   simp [freeVariables, hp, construction]
 
-@[simp] lemma freeVariables_neg {p : V} (hp : IsUFormula L p) :
+@[simp]
+lemma freeVariables_neg {p : V} (hp : IsUFormula L p) :
     freeVariables L (neg L p) = freeVariables L p := by
   apply IsUFormula.ISigma1.sigma1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
   · definability

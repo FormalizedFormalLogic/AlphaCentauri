@@ -39,14 +39,17 @@ lemma arithmetic_bexs {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)
     (h : ℬ[<, L].Closure φ) : ℬ[<, L].Closure (∃¹[“x. x < !!t”] φ) :=
   bexs (R := Semiformula.Operator.LT.lt) (by rfl) ht h
 
-@[simp] lemma imp_iff : ℬ[<, L].Closure (φ 🡒 ψ) ↔ ℬ[<, L].Closure φ ∧ ℬ[<, L].Closure ψ := by
+@[simp]
+lemma imp_iff : ℬ[<, L].Closure (φ 🡒 ψ) ↔ ℬ[<, L].Closure φ ∧ ℬ[<, L].Closure ψ := by
   simp [Semiformula.imp_eq]
 
-@[simp] lemma ballLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
+@[simp]
+lemma ballLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
     ℬ[<, L].Closure (φ.ballLT t) ↔ ℬ[<, L].Closure φ := by
   simp [← Bounding.Hierarchy.zero_iff_bounded (Γ := 𝚺)]
 
-@[simp] lemma bexsLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
+@[simp]
+lemma bexsLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
     ℬ[<, L].Closure (φ.bexsLT t) ↔ ℬ[<, L].Closure φ := by
   simp [← Bounding.Hierarchy.zero_iff_bounded (Γ := 𝚺)]
 

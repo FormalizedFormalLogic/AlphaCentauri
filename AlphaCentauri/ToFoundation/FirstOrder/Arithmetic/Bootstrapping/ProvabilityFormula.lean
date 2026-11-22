@@ -44,7 +44,8 @@ lemma isPrenexHierarchy_allBallOrBall {A B : Semiformula V ℒₒᵣ 1} (hA : Is
   simpa [IsPrenexHierarchy, qqBall] using And.intro (IsBounded.ball ht hA') (IsBounded.ball ht hB')
 
 
-@[simp] lemma models_provabilityPred_iff (σ : ArithmeticSentence) :
+@[simp]
+lemma models_provabilityPred_iff (σ : ArithmeticSentence) :
     V↓[ℒₒᵣ] ⊧ provabilityPred T σ ↔ Provable T (⌜σ⌝ : V) := by
   simp [models_iff]
 
@@ -52,7 +53,8 @@ variable (T) in
 noncomputable def provabilityFormula (x : V) : Formula V ℒₒᵣ :=
   (⌜(provable T).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 x]
 
-@[simp] lemma typed_quote_provabilityPred (σ : ArithmeticSentence) :
+@[simp]
+lemma typed_quote_provabilityPred (σ : ArithmeticSentence) :
     (⌜provabilityPred T σ⌝ : Formula V ℒₒᵣ) = provabilityFormula T ⌜σ⌝ := by
   simp [provabilityPred, typed_quote_rew_subst, provabilityFormula, Matrix.constant_eq_singleton]
 

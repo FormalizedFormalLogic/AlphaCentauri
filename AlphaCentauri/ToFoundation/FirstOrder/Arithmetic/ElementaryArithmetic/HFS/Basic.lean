@@ -24,9 +24,11 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
-@[simp] lemma susbset_insert (x a : V) : a ⊆ insert x a := by intro z hz; simp [hz]
+@[simp]
+lemma susbset_insert (x a : V) : a ⊆ insert x a := by intro z hz; simp [hz]
 
-@[simp] lemma bitRemove_susbset (x a : V) : bitRemove x a ⊆ a := by intro z; simp
+@[simp]
+lemma bitRemove_susbset (x a : V) : bitRemove x a ⊆ a := by intro z; simp
 
 lemma lt_of_mem_dom {x y m : V} (h : ⟪x, y⟫ ∈ m) : x < m := lt_of_le_of_lt (by simp) (lt_of_mem h)
 
@@ -38,7 +40,8 @@ lemma insert_subset_insert_of_subset {a b : V} (x : V) (h : a ⊆ b) : insert x 
   · simp
   · simp [h hz]
 
-@[simp] lemma under_subset_under_of_le {i j : V} : under i ⊆ under j ↔ i ≤ j :=
+@[simp]
+lemma under_subset_under_of_le {i j : V} : under i ⊆ under j ↔ i ≤ j :=
   ⟨by intro h; by_contra hij
       have : j < i := by simpa using hij
       simpa using h (mem_under_iff.mpr this),
@@ -59,10 +62,12 @@ noncomputable def sUnion (s : V) : V := Classical.choose! (sUnion_exists_unique 
 scoped macro_rules
   | `(⋃ʰᶠ $s) => `(sUnion $s)
 
-@[simp] lemma mem_sUnion_iff {a b : V} : a ∈ ⋃ʰᶠ b ↔ ∃ c ∈ b, a ∈ c :=
+@[simp]
+lemma mem_sUnion_iff {a b : V} : a ∈ ⋃ʰᶠ b ↔ ∃ c ∈ b, a ∈ c :=
   Classical.choose!_spec (sUnion_exists_unique b) a
 
-@[simp] lemma sUnion_empty : (⋃ʰᶠ ∅ : V) = ∅ := mem_ext (by simp)
+@[simp]
+lemma sUnion_empty : (⋃ʰᶠ ∅ : V) = ∅ := mem_ext (by simp)
 
 lemma sUnion_lt_of_pos {a : V} (ha : 0 < a) : ⋃ʰᶠ a < a :=
   lt_of_lt_log ha <| by
@@ -70,7 +75,8 @@ lemma sUnion_lt_of_pos {a : V} (ha : 0 < a) : ⋃ʰᶠ a < a :=
     intro i x hx hi
     exact lt_of_lt_of_le (lt_of_mem hi) (le_log_of_mem hx)
 
-@[simp] lemma sUnion_le (a : V) : ⋃ʰᶠ a ≤ a := by
+@[simp]
+lemma sUnion_le (a : V) : ⋃ʰᶠ a ≤ a := by
   rcases Arithmetic.zero_le a with (rfl | pos)
   · simp [←emptyset_def]
   · exact le_of_lt (sUnion_lt_of_pos pos)
@@ -100,7 +106,8 @@ noncomputable def union (a b : V) : V := ⋃ʰᶠ {a, b}
 
 noncomputable scoped instance : Union V := ⟨union⟩
 
-@[simp] lemma mem_cup_iff {a b c : V} : a ∈ b ∪ c ↔ a ∈ b ∨ a ∈ c := by simp [Union.union, union]
+@[simp]
+lemma mem_cup_iff {a b c : V} : a ∈ b ∪ c ↔ a ∈ b ∨ a ∈ c := by simp [Union.union, union]
 
 private lemma union_graph {u s t : V} : u = s ∪ t ↔ ∀ x < u + s + t, (x ∈ u ↔ x ∈ s ∨ x ∈ t) :=
   ⟨by rintro rfl; simp, by
@@ -124,7 +131,8 @@ instance union_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 
 lemma insert_eq_union_singleton (a s : V) : insert a s = {a} ∪ s := mem_ext (fun x ↦ by simp)
 
-@[simp] lemma union_polybound (a b : V) : a ∪ b ≤ 2 * (a + b) := by
+@[simp]
+lemma union_polybound (a b : V) : a ∪ b ≤ 2 * (a + b) := by
   suffices ∀ i, i ∈ a ∨ i ∈ b → i < log (2 * (a + b) + 1) from
     le_iff_lt_succ.mpr <| lt_of_lt_log (by simp) <| by simpa
   rintro i (hi | hi)
@@ -141,17 +149,23 @@ lemma insert_eq_union_singleton (a s : V) : insert a s = {a} ∪ s := mem_ext (f
 
 instance : Bounded₂ ((· ∪ ·) : V → V → V) := ⟨‘x y. 2 * (x + y)’, fun _ ↦ by simp⟩
 
-@[simp] lemma union_succ_union_left (a b : V) : a ⊆ a ∪ b := by intro x hx; simp [hx]
+@[simp]
+lemma union_succ_union_left (a b : V) : a ⊆ a ∪ b := by intro x hx; simp [hx]
 
-@[simp] lemma union_succ_union_right (a b : V) : b ⊆ a ∪ b := by intro x hx; simp [hx]
+@[simp]
+lemma union_succ_union_right (a b : V) : b ⊆ a ∪ b := by intro x hx; simp [hx]
 
-@[simp] lemma union_succ_union_union_left (a b c : V) : a ⊆ a ∪ b ∪ c := by intro x hx; simp [hx]
+@[simp]
+lemma union_succ_union_union_left (a b c : V) : a ⊆ a ∪ b ∪ c := by intro x hx; simp [hx]
 
-@[simp] lemma union_succ_union_union_right (a b c : V) : b ⊆ a ∪ b ∪ c := by intro x hx; simp [hx]
+@[simp]
+lemma union_succ_union_union_right (a b c : V) : b ⊆ a ∪ b ∪ c := by intro x hx; simp [hx]
 
-@[simp] lemma union_empty_eq_right (a : V) : a ∪ ∅ = a := mem_ext <| by simp
+@[simp]
+lemma union_empty_eq_right (a : V) : a ∪ ∅ = a := mem_ext <| by simp
 
-@[simp] lemma union_empty_eq_left (a : V) : ∅ ∪ a = a := mem_ext <| by simp
+@[simp]
+lemma union_empty_eq_left (a : V) : ∅ ∪ a = a := mem_ext <| by simp
 
 lemma sInter_exists_unique (s : V) :
     ∃! u : V, ∀ x, (x ∈ u ↔ s ≠ ∅ ∧ ∀ t ∈ s, x ∈ t) := by
@@ -170,7 +184,8 @@ scoped macro_rules
 lemma mem_sInter_iff {x s : V} : x ∈ ⋂ʰᶠ s ↔ s ≠ ∅ ∧ ∀ t ∈ s, x ∈ t :=
   Classical.choose!_spec (sInter_exists_unique s) x
 
-@[simp] lemma mem_sInter_iff_empty : ⋂ʰᶠ (∅ : V) = ∅ := mem_ext (by simp [mem_sInter_iff])
+@[simp]
+lemma mem_sInter_iff_empty : ⋂ʰᶠ (∅ : V) = ∅ := mem_ext (by simp [mem_sInter_iff])
 
 lemma mem_sInter_iff_of_pos {x s : V} (h : s ≠ ∅) : x ∈ ⋂ʰᶠ s ↔ ∀ t ∈ s, x ∈ t := by
   simp [mem_sInter_iff, h]
@@ -179,7 +194,8 @@ noncomputable def inter (a b : V) : V := ⋂ʰᶠ {a, b}
 
 noncomputable scoped instance : Inter V := ⟨inter⟩
 
-@[simp] lemma mem_inter_iff {a b c : V} : a ∈ b ∩ c ↔ a ∈ b ∧ a ∈ c := by
+@[simp]
+lemma mem_inter_iff {a b c : V} : a ∈ b ∩ c ↔ a ∈ b ∧ a ∈ c := by
   simp [Inter.inter, inter, mem_sInter_iff_of_pos (s := {b, c}) (nonempty_iff.mpr ⟨b, by simp⟩)]
 
 lemma inter_comm (a b : V) : a ∩ b = b ∩ a := mem_ext (by simp [and_comm])
@@ -210,7 +226,8 @@ lemma mem_product_iff' {x a b : V} : x ∈ a ×ʰᶠ b ↔ π₁ x ∈ a ∧ π�
   · rintro ⟨y, hy, z, hz, rfl⟩; simp [*]
   · rintro ⟨h₁, h₂⟩; exact ⟨π₁ x, h₁, π₂ x, h₂, by simp⟩
 
-@[simp] lemma pair_mem_product_iff {x y a b : V} : ⟪x, y⟫ ∈ a ×ʰᶠ b ↔ x ∈ a ∧ y ∈ b := by
+@[simp]
+lemma pair_mem_product_iff {x y a b : V} : ⟪x, y⟫ ∈ a ×ʰᶠ b ↔ x ∈ a ∧ y ∈ b := by
   simp [mem_product_iff']
 
 private lemma product_graph {u a b : V} : u = a ×ʰᶠ b ↔
@@ -234,10 +251,12 @@ instance product_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₂[V] (· ×ʰᶠ ·) :=
   product_definable.of_zero
 
-@[simp] lemma zero_product {b : V} : ∅ ×ʰᶠ b = ∅ := by
+@[simp]
+lemma zero_product {b : V} : ∅ ×ʰᶠ b = ∅ := by
   refine mem_ext (fun i ↦ ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩) <;> simp_all [mem_product_iff]
 
-@[simp] lemma product_zero {a : V} : a ×ʰᶠ ∅ = ∅ := by
+@[simp]
+lemma product_zero {a : V} : a ×ʰᶠ ∅ = ∅ := by
   refine mem_ext (fun i ↦ ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩) <;> simp_all [mem_product_iff]
 
 lemma domain_exists_unique (s : V) :
@@ -282,9 +301,11 @@ instance domain_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₁[V] domain :=
   domain_definable.of_zero
 
-@[simp] lemma domain_empty : domain (∅ : V) = ∅ := mem_ext (by simp [mem_domain_iff])
+@[simp]
+lemma domain_empty : domain (∅ : V) = ∅ := mem_ext (by simp [mem_domain_iff])
 
-@[simp] lemma domain_union (a b : V) : domain (a ∪ b) = domain a ∪ domain b := mem_ext (by
+@[simp]
+lemma domain_union (a b : V) : domain (a ∪ b) = domain a ∪ domain b := mem_ext (by
   suffices ∀ i, (∃ y, ⟪i, y⟫ ∈ a ∨ ⟪i, y⟫ ∈ b) ↔
       (∃ y, ⟪i, y⟫ ∈ a) ∨ ∃ y, ⟪i, y⟫ ∈ b by simpa [mem_domain_iff]
   intro x; constructor
@@ -295,13 +316,16 @@ instance domain_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     · exact ⟨y, Or.inl hy⟩
     · exact ⟨y, Or.inr hy⟩)
 
-@[simp] lemma domain_singleton (x y : V) : (domain {⟪x, y⟫} : V) = {x} :=
+@[simp]
+lemma domain_singleton (x y : V) : (domain {⟪x, y⟫} : V) = {x} :=
   mem_ext (by simp [mem_domain_iff])
 
-@[simp] lemma domain_insert (x y s : V) : domain (insert ⟪x, y⟫ s) = insert x (domain s) := by
+@[simp]
+lemma domain_insert (x y s : V) : domain (insert ⟪x, y⟫ s) = insert x (domain s) := by
   simp [insert_eq_union_singleton]
 
-@[simp] lemma domain_bound (s : V) : domain s ≤ 2 * s := le_iff_lt_succ.mpr
+@[simp]
+lemma domain_bound (s : V) : domain s ≤ 2 * s := le_iff_lt_succ.mpr
   <| lt_of_lt_log (by simp) (by
     simp only [mem_domain_iff, forall_exists_index]
     intro i x hix
@@ -318,7 +342,8 @@ lemma domain_subset_domain_of_subset {s t : V} (h : s ⊆ t) : domain s ⊆ doma
   rcases mem_domain_iff.mp hx with ⟨y, hy⟩
   exact mem_domain_iff.mpr ⟨y, h hy⟩
 
-@[simp] lemma domain_eq_empty_iff_eq_empty {s : V} : domain s = ∅ ↔ s = ∅ :=
+@[simp]
+lemma domain_eq_empty_iff_eq_empty {s : V} : domain s = ∅ ↔ s = ∅ :=
   ⟨by simp only [isempty_iff, mem_domain_iff, not_exists]
       intro h x hx
       exact h (π₁ x) (π₂ x) (by simpa using hx), by rintro rfl; simp⟩
@@ -368,9 +393,11 @@ instance range_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₁[V] range :=
   range_definable.of_zero
 
-@[simp] lemma range_empty : range (∅ : V) = ∅ := mem_ext (by simp [mem_range_iff])
+@[simp]
+lemma range_empty : range (∅ : V) = ∅ := mem_ext (by simp [mem_range_iff])
 
-@[simp] lemma range_bound (s : V) : range s ≤ 2 * s := le_iff_lt_succ.mpr
+@[simp]
+lemma range_bound (s : V) : range s ≤ 2 * s := le_iff_lt_succ.mpr
   <| lt_of_lt_log (by simp) (by
     simp only [mem_range_iff, forall_exists_index]
     intro i x hix
@@ -392,7 +419,8 @@ lemma Disjoint.not_of_mem {s t x : V} (hs : x ∈ s) (ht : x ∈ t) : ¬Disjoint
 lemma Disjoint.symm {s t : V} (h : Disjoint s t) : Disjoint t s := by
   simpa [Disjoint, inter_comm t s] using h
 
-@[simp] lemma Disjoint.singleton_iff {a s : V} : Disjoint ({a} : V) s ↔ a ∉ s := by
+@[simp]
+lemma Disjoint.singleton_iff {a s : V} : Disjoint ({a} : V) s ↔ a ∉ s := by
   simp [Disjoint, isempty_iff]
 
 /-! ### Mapping -/
@@ -426,14 +454,16 @@ lemma IsMapping.get_exists_uniq {m : V} (h : IsMapping m) {x : V} (hx : x ∈ do
 noncomputable def IsMapping.get {m : V} (h : IsMapping m) {x : V} (hx : x ∈ domain m) : V :=
   Classical.choose! (IsMapping.get_exists_uniq h hx)
 
-@[simp] lemma IsMapping.get_mem {m : V} (h : IsMapping m) {x : V} (hx : x ∈ domain m) :
+@[simp]
+lemma IsMapping.get_mem {m : V} (h : IsMapping m) {x : V} (hx : x ∈ domain m) :
     ⟪x, h.get hx⟫ ∈ m := Classical.choose!_spec (IsMapping.get_exists_uniq h hx)
 
 lemma IsMapping.get_uniq {m : V} (h : IsMapping m) {x y : V} (hx : x ∈ domain m)
     (hy : ⟪x, y⟫ ∈ m) : y = h.get hx :=
     (h x hx).unique hy (by simp)
 
-@[simp] lemma IsMapping.empty : IsMapping (∅ : V) := by intro x; simp
+@[simp]
+lemma IsMapping.empty : IsMapping (∅ : V) := by intro x; simp
 
 lemma IsMapping.union_of_disjoint_domain {m₁ m₂ : V}
     (h₁ : IsMapping m₁) (h₂ : IsMapping m₂)
@@ -452,7 +482,8 @@ lemma IsMapping.union_of_disjoint_domain {m₁ m₂ : V}
       · by_contra; exact Disjoint.not_of_mem hx (mem_domain_of_pair_mem hy) disjoint.symm
       · exact h₂.get_uniq hx hy)
 
-@[simp] lemma IsMapping.singleton (x y : V) : IsMapping ({⟪x, y⟫} : V) := by
+@[simp]
+lemma IsMapping.singleton (x y : V) : IsMapping ({⟪x, y⟫} : V) := by
   intro x; simp only [domain_singleton, mem_singleton_iff, pair_ext_iff]
   rintro rfl; exact ExistsUnique.intro y (by simp) (by rintro _ ⟨_, rfl⟩; simp)
 
@@ -498,7 +529,8 @@ instance IsMapping.injective_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, �
     ℌ-Predicate[V] IsMapping.Injective :=
   injective_definable.of_zero
 
-@[simp] lemma IsMapping.injective_empty : IsMapping.Injective (∅ : V) := by intro x x' y; simp
+@[simp]
+lemma IsMapping.injective_empty : IsMapping.Injective (∅ : V) := by intro x x' y; simp
 
 def IsMapping.Surjective (m : V) : Prop := ∀ y ∈ range m, ∃ x, ⟪x, y⟫ ∈ m
 
@@ -528,7 +560,8 @@ instance IsMapping.surjective_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, 
     ℌ-Predicate[V] IsMapping.Surjective :=
   IsMapping.surjective_definable.of_zero
 
-@[simp] lemma IsMapping.surjective_empty : IsMapping.Surjective (∅ : V) := by intro y; simp
+@[simp]
+lemma IsMapping.surjective_empty : IsMapping.Surjective (∅ : V) := by intro y; simp
 
 /-! ### Restriction of mapping -/
 
@@ -546,14 +579,18 @@ scoped macro_rules
 lemma mem_restr_iff {x f s : V} : x ∈ f ↾ s ↔ x ∈ f ∧ π₁ x ∈ s :=
   Classical.choose!_spec (restr_exists_unique f s) x
 
-@[simp] lemma pair_mem_restr_iff {x y f s : V} :
+@[simp]
+lemma pair_mem_restr_iff {x y f s : V} :
     ⟪x, y⟫ ∈ f ↾ s ↔ ⟪x, y⟫ ∈ f ∧ x ∈ s := by simp [mem_restr_iff]
 
-@[simp] lemma restr_empty (f : V) : f ↾ ∅ = ∅ := mem_ext (by simp [mem_restr_iff])
+@[simp]
+lemma restr_empty (f : V) : f ↾ ∅ = ∅ := mem_ext (by simp [mem_restr_iff])
 
-@[simp] lemma restr_subset_self (f s : V) : f ↾ s ⊆ f := fun _ hx ↦ (mem_restr_iff.mp hx).1
+@[simp]
+lemma restr_subset_self (f s : V) : f ↾ s ⊆ f := fun _ hx ↦ (mem_restr_iff.mp hx).1
 
-@[simp] lemma restr_le_self (f s : V) : f ↾ s ≤ f := le_of_subset (by simp)
+@[simp]
+lemma restr_le_self (f s : V) : f ↾ s ≤ f := le_of_subset (by simp)
 
 lemma IsMapping.restr {m : V} (h : IsMapping m) (s : V) : IsMapping (m ↾ s) := h.of_subset (by simp)
 
@@ -608,7 +645,8 @@ theorem insert_induction {P : V → Prop} (hP : 𝚺ᴬ₀-Predicate P)
 
 noncomputable def fstIdx (p : V) : V := π₁ (p - 1)
 
-@[simp] lemma fstIdx_le_self (p : V) : fstIdx p ≤ p :=
+@[simp]
+lemma fstIdx_le_self (p : V) : fstIdx p ≤ p :=
   le_trans (by simp [fstIdx]) (show p - 1 ≤ p by simp)
 
 instance fstIdx_defined : 𝚺ᴬ₀-Function₁[V] fstIdx via fstIdxDef := .mk <| by
@@ -621,7 +659,8 @@ instance fstIdx_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 
 noncomputable def sndIdx (p : V) : V := π₂ (p - 1)
 
-@[simp] lemma sndIdx_le_self (p : V) : sndIdx p ≤ p :=
+@[simp]
+lemma sndIdx_le_self (p : V) : sndIdx p ≤ p :=
   le_trans (by simp [sndIdx]) (show p - 1 ≤ p by simp)
 
 instance sndIdx_defined : 𝚺ᴬ₀-Function₁[V] sndIdx via sndIdxDef :=

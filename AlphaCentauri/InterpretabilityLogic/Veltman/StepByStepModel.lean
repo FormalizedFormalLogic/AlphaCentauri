@@ -129,11 +129,13 @@ lemma restr_of_lt {n m : ℕ} (h : m < n) : restr Γ₀ ε τ n m = node Γ₀ �
   simp [restr, h]
 
 omit [DecidableEq α] in
-@[simp] lemma mk_kind {get : ℕ → Node 𝔸} {n : ℕ} {k : Kind α} {Δ} : (mk get ε n k Δ).kind = k := by
+@[simp]
+lemma mk_kind {get : ℕ → Node 𝔸} {n : ℕ} {k : Kind α} {Δ} : (mk get ε n k Δ).kind = k := by
   cases k <;> rfl
 
 omit [DecidableEq α] in
-@[simp] lemma mk_set {get : ℕ → Node 𝔸} {n : ℕ} {k : Kind α} {Δ} : (mk get ε n k Δ).set = Δ := by
+@[simp]
+lemma mk_set {get : ℕ → Node 𝔸} {n : ℕ} {k : Kind α} {Δ} : (mk get ε n k Δ).set = Δ := by
   cases k <;> rfl
 
 lemma node_eq_mk (n : ℕ) :

@@ -32,7 +32,8 @@ variable {α : Type*} {Γ : FormulaFinset α} {A B : Formula α}
 noncomputable def prebox (Γ : FormulaFinset α) : FormulaFinset α :=
   Γ.preimage (□·) fun _ _ _ _ h ↦ Formula.box_inj.mp h
 
-@[simp, grind =] lemma mem_prebox : A ∈ Γ.prebox ↔ □A ∈ Γ := Finset.mem_preimage
+@[simp, grind =]
+lemma mem_prebox : A ∈ Γ.prebox ↔ □A ∈ Γ := Finset.mem_preimage
 
 variable [DecidableEq α]
 
@@ -41,14 +42,16 @@ abbrev box (Γ : FormulaFinset α) : FormulaFinset α := Γ.image (□·)
 /-- The formulas `□∼A` for `A ∈ Γ`. -/
 abbrev boxNeg (Γ : FormulaFinset α) : FormulaFinset α := Γ.image fun A ↦ □(∼A)
 
-@[grind .] lemma box_prebox_subset : Γ.prebox.box ⊆ Γ := by
+@[grind .]
+lemma box_prebox_subset : Γ.prebox.box ⊆ Γ := by
   intro A hA;
   obtain ⟨B, hB, rfl⟩ := Finset.mem_image.mp hA;
   exact mem_prebox.mp hB;
 
 def subformulas (Γ : FormulaFinset α) : FormulaFinset α := Γ.biUnion Formula.subformulas
 
-@[grind .] lemma subset_subformulas : Γ ⊆ Γ.subformulas :=
+@[grind .]
+lemma subset_subformulas : Γ ⊆ Γ.subformulas :=
   fun A hA ↦ Finset.mem_biUnion.mpr ⟨A, hA, Formula.mem_subformulas_self⟩
 
 @[grind →]
@@ -75,7 +78,8 @@ structure Subset (S T : Sequent α) : Prop where
 
 instance : HasSubset (Sequent α) := ⟨Subset⟩
 
-@[simp] lemma subset_iff : S ⊆ T ↔ S.ant ⊆ T.ant ∧ S.suc ⊆ T.suc :=
+@[simp]
+lemma subset_iff : S ⊆ T ↔ S.ant ⊆ T.ant ∧ S.suc ⊆ T.suc :=
   ⟨fun h ↦ ⟨h.1, h.2⟩, fun h ↦ ⟨h.1, h.2⟩⟩
 
 structure Saturated (S : Sequent α) : Prop where
@@ -103,20 +107,26 @@ def rhdFormulas (l : List (Formula α × Formula α)) : FormulaFinset α :=
 def witness (Γ N : FormulaFinset α) (D : Formula α) : Sequent α :=
   insert D (insert (□(∼D)) (Γ ∪ Γ.box ∪ N.boxNeg)) ⟹ N
 
-@[simp, grind =] lemma antecedents_nil : antecedents ([] : List (Formula α × Formula α)) = ∅ := rfl
+@[simp, grind =]
+lemma antecedents_nil : antecedents ([] : List (Formula α × Formula α)) = ∅ := rfl
 
-@[simp, grind =] lemma antecedents_cons {p : Formula α × Formula α} {l} :
+@[simp, grind =]
+lemma antecedents_cons {p : Formula α × Formula α} {l} :
     antecedents (p :: l) = insert p.1 (antecedents l) := by simp [antecedents]
 
-@[simp, grind =] lemma mem_antecedents {l : List (Formula α × Formula α)} {A : Formula α} :
+@[simp, grind =]
+lemma mem_antecedents {l : List (Formula α × Formula α)} {A : Formula α} :
     A ∈ antecedents l ↔ ∃ B, (A, B) ∈ l := by simp [antecedents]
 
-@[simp, grind =] lemma rhdFormulas_nil : rhdFormulas ([] : List (Formula α × Formula α)) = ∅ := rfl
+@[simp, grind =]
+lemma rhdFormulas_nil : rhdFormulas ([] : List (Formula α × Formula α)) = ∅ := rfl
 
-@[simp, grind =] lemma rhdFormulas_cons {p : Formula α × Formula α} {l} :
+@[simp, grind =]
+lemma rhdFormulas_cons {p : Formula α × Formula α} {l} :
     rhdFormulas (p :: l) = insert (p.1 ▷ p.2) (rhdFormulas l) := by simp [rhdFormulas]
 
-@[simp, grind =] lemma mem_rhdFormulas {l : List (Formula α × Formula α)} {C : Formula α} :
+@[simp, grind =]
+lemma mem_rhdFormulas {l : List (Formula α × Formula α)} {C : Formula α} :
     C ∈ rhdFormulas l ↔ ∃ A B, (A, B) ∈ l ∧ C = A ▷ B := by
   simp [rhdFormulas, eq_comm]
 
@@ -143,7 +153,8 @@ inductive Gentzen : Sequent α → Prop
     Gentzen (insert (□B) (Γ ∪ Γ.box ∪ (antecedents l).boxNeg) ⟹ insert B (antecedents l)) →
     Gentzen (Γ.box ∪ rhdFormulas l ⟹ {□B})
 
-@[inherit_doc] notation:45 "⊢ᴳ[𝐈𝐋] " S:50 => Gentzen S
+@[inherit_doc]
+notation:45 "⊢ᴳ[𝐈𝐋] " S:50 => Gentzen S
 
 notation:45 "⊬ᴳ[𝐈𝐋] " S:50 => ¬Gentzen S
 

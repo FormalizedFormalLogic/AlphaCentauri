@@ -49,7 +49,8 @@ decreasing_by
       · exact Nat.pow_pos (Nat.pos_of_ne_zero hbpos)
     exact lt_of_lt_of_le (Nat.mod_lt _ hb) (Nat.pow_log_le_self b h)
 
-@[simp] lemma bump_zero (b : ℕ) : bump b 0 = 0 := by rw [bump]; simp
+@[simp]
+lemma bump_zero (b : ℕ) : bump b 0 = 0 := by rw [bump]; simp
 
 /-- Unfolds `bump` at a nonzero argument by peeling its top power. -/
 lemma bump_pos (b : ℕ) {n : ℕ} (h : n ≠ 0) :
@@ -86,7 +87,8 @@ decreasing_by
       · exact Nat.pow_pos (Nat.pos_of_ne_zero hbpos)
     exact lt_of_lt_of_le (Nat.mod_lt _ hb) (Nat.pow_log_le_self b _h)
 
-@[simp] lemma toOrdinal_zero : toOrdinal b 0 = 0 := by rw [toOrdinal]; simp
+@[simp]
+lemma toOrdinal_zero : toOrdinal b 0 = 0 := by rw [toOrdinal]; simp
 
 /-- Unfolds `toOrdinal` at a nonzero argument by peeling its top power. -/
 lemma toOrdinal_pos {n : ℕ} (h : n ≠ 0) :

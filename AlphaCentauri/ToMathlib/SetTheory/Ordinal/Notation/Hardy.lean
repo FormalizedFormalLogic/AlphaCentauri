@@ -272,8 +272,10 @@ def lastExp : ONote → ONote
     | 0 => e
     | oadd _ _ _ => lastExp a
 
-@[simp] theorem lastExp_zero : lastExp 0 = 0 := rfl
-@[simp] theorem lastExp_oadd_zero (e n) : lastExp (oadd e n 0) = e := rfl
+@[simp]
+theorem lastExp_zero : lastExp 0 = 0 := rfl
+@[simp]
+theorem lastExp_oadd_zero (e n) : lastExp (oadd e n 0) = e := rfl
 
 @[grind =]
 lemma lastExp_oadd_ne {e : ONote} {n : ℕ+} {a : ONote} (h : a ≠ 0) :

@@ -36,9 +36,11 @@ open ListUnion
 /-- The union of the coded sets listed in the vector `v`. -/
 noncomputable def listUnion (v : V) : V := construction.result ![] v
 
-@[simp] lemma listUnion_nil : listUnion (0 : V) = ∅ := by simp [listUnion, construction]
+@[simp]
+lemma listUnion_nil : listUnion (0 : V) = ∅ := by simp [listUnion, construction]
 
-@[simp] lemma listUnion_adjoin (x v : V) : listUnion (x ∷ v) = x ∪ listUnion v := by
+@[simp]
+lemma listUnion_adjoin (x v : V) : listUnion (x ∷ v) = x ∪ listUnion v := by
   simp [listUnion, construction]
 
 section
@@ -56,7 +58,8 @@ instance listUnion_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (listUnion : V 
 
 end
 
-@[simp] lemma mem_listUnion_iff {x v : V} : x ∈ listUnion v ↔ ∃ i < len v, x ∈ v.[i] := by
+@[simp]
+lemma mem_listUnion_iff {x v : V} : x ∈ listUnion v ↔ ∃ i < len v, x ∈ v.[i] := by
   induction v using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp

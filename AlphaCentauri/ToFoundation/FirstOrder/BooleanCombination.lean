@@ -32,7 +32,8 @@ namespace BooleanCombination
 
 variable {Γ Γ' : Semiformula L ξ n → Prop} {φ ψ : Semiformula L ξ n}
 
-@[simp, grind =] lemma neg_iff : BooleanCombination Γ (∼φ) ↔ BooleanCombination Γ φ := by
+@[simp, grind =]
+lemma neg_iff : BooleanCombination Γ (∼φ) ↔ BooleanCombination Γ φ := by
   have H : ∀ {φ : Semiformula L ξ n}, BooleanCombination Γ φ → BooleanCombination Γ (∼φ) := by
     intro φ h
     induction h with

@@ -32,7 +32,8 @@ open ofILAxioms
 
 variable {A B C : Formula α}
 
-@[simp] lemma ILM.axiomM : 𝐈𝐋𝐌 ⊢ Axioms.M A B C := axm ⟨A, B, C, rfl⟩
+@[simp]
+lemma ILM.axiomM : 𝐈𝐋𝐌 ⊢ Axioms.M A B C := axm ⟨A, B, C, rfl⟩
 
 /-- - [Vis90, §6.4.1] -/
 lemma ILM.axiomW : 𝐈𝐋𝐌 ⊢ Axioms.W A B := by

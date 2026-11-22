@@ -431,12 +431,12 @@ lemma _root_.FFL.FirstOrder.Language.IsSentence.of_shift_eq {n p : V}
     (hp : IsSemiformula L n p) (h : shift L p = p) : L.IsSentence n p :=
   ⟨hp, (shift_eq_self_iff hp.isUFormula).mp h⟩
 
-@[simp] lemma _root_.FFL.FirstOrder.Language.IsSentence.verum (n : V) :
-    L.IsSentence n ^⊤ := by
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.verum (n : V) : L.IsSentence n ^⊤ := by
   simp [Language.IsSentence]
 
-@[simp] lemma _root_.FFL.FirstOrder.Language.IsSentence.falsum (n : V) :
-    L.IsSentence n ^⊥ := by
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.falsum (n : V) : L.IsSentence n ^⊥ := by
   simp [Language.IsSentence]
 
 lemma _root_.FFL.FirstOrder.Language.IsSentence.and {n p q : V}
@@ -461,7 +461,8 @@ lemma _root_.FFL.FirstOrder.Language.IsSentence.exs {n p : V}
   ⟨by simp [hp.isSemiformula],
     by rw [freeVariables_exs hp.isSemiformula.isUFormula, hp.freeVariables_eq]⟩
 
-@[simp] lemma _root_.FFL.FirstOrder.Language.IsSentence.neg_iff {n p : V} :
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.neg_iff {n p : V} :
     L.IsSentence n (neg L p) ↔ L.IsSentence n p := by
   constructor
   · intro h

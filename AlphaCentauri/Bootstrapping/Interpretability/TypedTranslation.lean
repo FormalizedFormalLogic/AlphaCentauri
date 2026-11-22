@@ -35,36 +35,44 @@ noncomputable def IsTable.transT {n : ℕ} (φ : Semiformula V L₂ n) : Semifor
 
 namespace IsTable
 
-@[simp] lemma transT_val {n : ℕ} (φ : Semiformula V L₂ n) :
+@[simp]
+lemma transT_val {n : ℕ} (φ : Semiformula V L₂ n) :
     (hT.transT φ).val = translate L₁ L₂ tbl φ.val := rfl
 
-@[simp] lemma transT_verum {n : ℕ} : hT.transT (⊤ : Semiformula V L₂ n) = ⊤ := by
+@[simp]
+lemma transT_verum {n : ℕ} : hT.transT (⊤ : Semiformula V L₂ n) = ⊤ := by
   ext; simp
 
-@[simp] lemma transT_falsum {n : ℕ} : hT.transT (⊥ : Semiformula V L₂ n) = ⊥ := by
+@[simp]
+lemma transT_falsum {n : ℕ} : hT.transT (⊥ : Semiformula V L₂ n) = ⊥ := by
   ext; simp
 
-@[simp] lemma transT_and {n : ℕ} (φ ψ : Semiformula V L₂ n) :
+@[simp]
+lemma transT_and {n : ℕ} (φ ψ : Semiformula V L₂ n) :
     hT.transT (φ ⋏ ψ) = hT.transT φ ⋏ hT.transT ψ := by
   ext; simp [φ.isSemiformula.isUFormula, ψ.isSemiformula.isUFormula]
 
-@[simp] lemma transT_or {n : ℕ} (φ ψ : Semiformula V L₂ n) :
+@[simp]
+lemma transT_or {n : ℕ} (φ ψ : Semiformula V L₂ n) :
     hT.transT (φ ⋎ ψ) = hT.transT φ ⋎ hT.transT ψ := by
   ext; simp [φ.isSemiformula.isUFormula, ψ.isSemiformula.isUFormula]
 
-@[simp] lemma transT_neg {n : ℕ} (φ : Semiformula V L₂ n) :
-    hT.transT (∼φ) = ∼hT.transT φ := by
+@[simp]
+lemma transT_neg {n : ℕ} (φ : Semiformula V L₂ n) : hT.transT (∼φ) = ∼hT.transT φ := by
   ext; simp [translate_neg hT φ.isSemiformula]
 
-@[simp] lemma transT_imp {n : ℕ} (φ ψ : Semiformula V L₂ n) :
+@[simp]
+lemma transT_imp {n : ℕ} (φ ψ : Semiformula V L₂ n) :
     hT.transT (φ 🡒 ψ) = hT.transT φ 🡒 hT.transT ψ := by
   simp [Semiformula.imp_def]
 
-@[simp] lemma transT_iff {n : ℕ} (φ ψ : Semiformula V L₂ n) :
+@[simp]
+lemma transT_iff {n : ℕ} (φ ψ : Semiformula V L₂ n) :
     hT.transT (φ 🡘 ψ) = hT.transT φ 🡘 hT.transT ψ := by
   simp [LogicalConnective.iff]
 
-@[simp] lemma transT_conj {n m : ℕ} (v : Fin m → Semiformula V L₂ n) :
+@[simp]
+lemma transT_conj {n m : ℕ} (v : Fin m → Semiformula V L₂ n) :
     hT.transT (Matrix.conj v) = Matrix.conj fun i ↦ hT.transT (v i) :=
   Matrix.conj_map hT.transT (transT_verum hT) (transT_and hT) v
 
@@ -73,12 +81,14 @@ lemma domainAt_zero_typed {n : ℕ} :
   rw [Semiformula.val_substs, domT_val, domainAt]
   simp
 
-@[simp] lemma transT_all {n : ℕ} (φ : Semiformula V L₂ (n + 1)) :
+@[simp]
+lemma transT_all {n : ℕ} (φ : Semiformula V L₂ (n + 1)) :
     hT.transT (∀¹ φ) = ∀¹ (hT.domT.subst ![Semiterm.bvar 0] 🡒 hT.transT φ) := by
   ext
   simp [φ.isSemiformula.isUFormula, domainAt_zero_typed hT (n := n)]
 
-@[simp] lemma transT_exs {n : ℕ} (φ : Semiformula V L₂ (n + 1)) :
+@[simp]
+lemma transT_exs {n : ℕ} (φ : Semiformula V L₂ (n + 1)) :
     hT.transT (∃¹ φ) = ∃¹ (hT.domT.subst ![Semiterm.bvar 0] ⋏ hT.transT φ) := by
   ext
   simp [φ.isSemiformula.isUFormula, domainAt_zero_typed hT (n := n)]

@@ -33,7 +33,8 @@ open ofILAxioms
 
 variable {A B C : Formula α}
 
-@[simp] lemma ILW.axiomW : 𝐈𝐋𝐖 ⊢ Axioms.W A B := axm ⟨A, B, rfl⟩
+@[simp]
+lemma ILW.axiomW : 𝐈𝐋𝐖 ⊢ Axioms.W A B := axm ⟨A, B, rfl⟩
 
 /-- - [Vis90, §6.2.1] -/
 lemma ILW.axiomKW2 : 𝐈𝐋𝐖 ⊢ Axioms.KW2 A B := by

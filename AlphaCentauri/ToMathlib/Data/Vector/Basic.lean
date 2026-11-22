@@ -15,7 +15,8 @@ namespace List.Vector
 
 variable {α : Type*} {n : ℕ}
 
-@[simp] lemma ofFn_cons (a : α) (f : Fin n → α) : ofFn (a :> f) = a ::ᵥ ofFn f := by simp [ofFn]
+@[simp]
+lemma ofFn_cons (a : α) (f : Fin n → α) : ofFn (a :> f) = a ::ᵥ ofFn f := by simp [ofFn]
 
 end List.Vector
 

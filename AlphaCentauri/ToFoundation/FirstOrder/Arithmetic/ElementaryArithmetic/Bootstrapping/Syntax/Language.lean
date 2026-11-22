@@ -30,22 +30,28 @@ open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
-@[simp] lemma LOR_func_zeroIndex : (ℒₒᵣ).IsFunc 0 (zeroIndex : V) := by
+@[simp]
+lemma LOR_func_zeroIndex : (ℒₒᵣ).IsFunc 0 (zeroIndex : V) := by
   simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Zero.zero
 
-@[simp] lemma LOR_func_oneIndex : (ℒₒᵣ).IsFunc 0 (oneIndex : V) := by
+@[simp]
+lemma LOR_func_oneIndex : (ℒₒᵣ).IsFunc 0 (oneIndex : V) := by
   simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.One.one
 
-@[simp] lemma LOR_func_addIndex : (ℒₒᵣ).IsFunc 2 (addIndex : V) := by
+@[simp]
+lemma LOR_func_addIndex : (ℒₒᵣ).IsFunc 2 (addIndex : V) := by
   simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Add.add
 
-@[simp] lemma LOR_func_mulIndex : (ℒₒᵣ).IsFunc 2 (mulIndex : V) := by
+@[simp]
+lemma LOR_func_mulIndex : (ℒₒᵣ).IsFunc 2 (mulIndex : V) := by
   simpa using! codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Mul.mul
 
-@[simp] lemma LOR_rel_eqIndex : (ℒₒᵣ).IsRel 2 (eqIndex : V) := by
+@[simp]
+lemma LOR_rel_eqIndex : (ℒₒᵣ).IsRel 2 (eqIndex : V) := by
   simpa using! codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.Eq.eq
 
-@[simp] lemma LOR_rel_ltIndex : (ℒₒᵣ).IsRel 2 (ltIndex : V) := by
+@[simp]
+lemma LOR_rel_ltIndex : (ℒₒᵣ).IsRel 2 (ltIndex : V) := by
   simpa using! codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.LT.lt
 
 private lemma func_def_LOR :
@@ -54,9 +60,11 @@ private lemma func_def_LOR :
 
 private lemma rel_def_LOR : (ℒₒᵣ).isRel = .mkSigma “k r. (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1)” := rfl
 
-@[reducible] instance gödelQuoteFuncLOR (k) : GödelQuote ((ℒₒᵣ).Func k) V := gödelQuoteFunc k
+@[reducible]
+instance gödelQuoteFuncLOR (k) : GödelQuote ((ℒₒᵣ).Func k) V := gödelQuoteFunc k
 
-@[reducible] instance gödelQuoteRelLOR (k) : GödelQuote ((ℒₒᵣ).Rel k) V := gödelQuoteRel k
+@[reducible]
+instance gödelQuoteRelLOR (k) : GödelQuote ((ℒₒᵣ).Rel k) V := gödelQuoteRel k
 
 lemma isFunc_iff_LOR {k f : V} :
     (ℒₒᵣ).IsFunc k f ↔

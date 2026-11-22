@@ -35,9 +35,11 @@ section qqBex
 /-- The code of the bounded existential quantifier `∃¹[“#0 < u”] q`. -/
 noncomputable def qqBex (u q : V) : V := ^∃ ((^#0 ^< u) ^⋏ q)
 
-@[simp] lemma lt_q_qqBex (u q : V) : q < qqBex u q := lt_trans (lt_K!_right _ _) (lt_exists _)
+@[simp]
+lemma lt_q_qqBex (u q : V) : q < qqBex u q := lt_trans (lt_K!_right _ _) (lt_exists _)
 
-@[simp] lemma lt_u_qqBex (u q : V) : u < qqBex u q :=
+@[simp]
+lemma lt_u_qqBex (u q : V) : u < qqBex u q :=
   lt_trans (Arithmetic.lt_qqLT_right _ _) (lt_trans (lt_K!_left _ _) (lt_exists _))
 
 instance qqBex_defined : 𝚺ᴬ₁-Function₂ (qqBex : V → V → V) via qqBexDef := .mk fun v ↦ by
@@ -245,16 +247,21 @@ lemma IsBounded.case_iff {p : V} :
 
 alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
 
-@[simp] lemma IsBounded.verum : IsBounded (V := V) (^⊤) := IsBounded.mk <| by disj 1; rfl
-@[simp] lemma IsBounded.falsum : IsBounded (V := V) (^⊥) := IsBounded.mk <| by disj 2; rfl
+@[simp]
+lemma IsBounded.verum : IsBounded (V := V) (^⊤) := IsBounded.mk <| by disj 1; rfl
+@[simp]
+lemma IsBounded.falsum : IsBounded (V := V) (^⊥) := IsBounded.mk <| by disj 2; rfl
 
-@[simp] lemma IsBounded.rel {k r v : V} : IsBounded (^rel k r v) :=
+@[simp]
+lemma IsBounded.rel {k r v : V} : IsBounded (^rel k r v) :=
   IsBounded.mk <| by disj 3; exact ⟨k, r, v, rfl⟩
 
-@[simp] lemma IsBounded.nrel {k r v : V} : IsBounded (^nrel k r v) :=
+@[simp]
+lemma IsBounded.nrel {k r v : V} : IsBounded (^nrel k r v) :=
   IsBounded.mk <| by disj 4; exact ⟨k, r, v, rfl⟩
 
-@[simp] lemma IsBounded.and_iff {p q : V} : IsBounded (p ^⋏ q) ↔ IsBounded p ∧ IsBounded q := by
+@[simp]
+lemma IsBounded.and_iff {p q : V} : IsBounded (p ^⋏ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
   · intro h
     rcases h.case with (h | h | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, _, h⟩ | ⟨_, _, _, _, h⟩
@@ -263,7 +270,8 @@ alias ⟨IsBounded.case, IsBounded.mk⟩ := IsBounded.case_iff
   · rintro ⟨hp, hq⟩
     exact IsBounded.mk <| by disj 5; exact ⟨p, q, hp, hq, rfl⟩
 
-@[simp] lemma IsBounded.or_iff {p q : V} : IsBounded (p ^⋎ q) ↔ IsBounded p ∧ IsBounded q := by
+@[simp]
+lemma IsBounded.or_iff {p q : V} : IsBounded (p ^⋎ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
   · intro h
     rcases h.case with (h | h | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, _, h⟩ | ⟨_, _, _, _, h⟩

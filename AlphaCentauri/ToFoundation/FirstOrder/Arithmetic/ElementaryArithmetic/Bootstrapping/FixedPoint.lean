@@ -26,16 +26,19 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {k : ℕ
 /-- The list of the entries of the tuple `v`. -/
 noncomputable def matrixToVec {k : ℕ} (v : Fin k → V) : V := Matrix.foldr (fun t w ↦ t ∷ w) 0 v
 
-@[simp] lemma matrixToVec_nil (v : Fin 0 → V) : matrixToVec v = 0 := rfl
+@[simp]
+lemma matrixToVec_nil (v : Fin 0 → V) : matrixToVec v = 0 := rfl
 
-@[simp] lemma matrixToVec_succ {k : ℕ} (v : Fin (k + 1) → V) :
+@[simp]
+lemma matrixToVec_succ {k : ℕ} (v : Fin (k + 1) → V) :
     matrixToVec v = Matrix.vecHead v ∷ matrixToVec (Matrix.vecTail v) := rfl
 
-@[simp] lemma matrixToVec_len {k : ℕ} (v : Fin k → V) : len (matrixToVec v) = k := by
+@[simp]
+lemma matrixToVec_len {k : ℕ} (v : Fin k → V) : len (matrixToVec v) = k := by
   induction k <;> simp [*]
 
-@[simp] lemma matrixToVec_nth {k : ℕ} (v : Fin k → V) (i : Fin k) :
-    (matrixToVec v).[↑i] = v i := by
+@[simp]
+lemma matrixToVec_nth {k : ℕ} (v : Fin k → V) (i : Fin k) : (matrixToVec v).[↑i] = v i := by
   induction k
   · exact i.elim0
   · cases i using Fin.cases

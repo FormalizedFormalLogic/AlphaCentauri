@@ -168,11 +168,12 @@ section qqToPrenex
 
 variable {Γ Γ' : Polarity} {s s' : ℕ} {θ θ' : V}
 
-@[simp] lemma isUFormula_qqToPrenex :
-    IsUFormula ℒₒᵣ (qqToPrenex Γ s θ) ↔ IsUFormula ℒₒᵣ θ := by
+@[simp]
+lemma isUFormula_qqToPrenex : IsUFormula ℒₒᵣ (qqToPrenex Γ s θ) ↔ IsUFormula ℒₒᵣ θ := by
   induction s generalizing Γ <;> simp [*]
 
-@[simp] lemma isSemiformula_qqToPrenex {n : V} :
+@[simp]
+lemma isSemiformula_qqToPrenex {n : V} :
     IsSemiformula ℒₒᵣ n (qqToPrenex Γ s θ) ↔ IsSemiformula ℒₒᵣ (n + s) θ := by
   induction s generalizing Γ n with
   | zero => simp

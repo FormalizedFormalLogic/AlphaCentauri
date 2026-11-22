@@ -36,16 +36,19 @@ open Bootstrapping
 
 variable {W : Type} [ORingStructure W]
 
-@[simp] lemma eval_prenexSatDef_zero [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (Γ : Polarity) (e : Fin 2 → W) :
+@[simp]
+lemma eval_prenexSatDef_zero [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (Γ : Polarity) (e : Fin 2 → W) :
     W ⊧/e (prenexSatDef Γ 0) ↔ BoundedSatisfied (dec (e 0)) (e 1) := by
   simp [prenexSatDef]
 
-@[simp] lemma eval_prenexSatDef_sigma (n : ℕ) (e : Fin 2 → W) :
+@[simp]
+lemma eval_prenexSatDef_sigma (n : ℕ) (e : Fin 2 → W) :
     W ⊧/e (prenexSatDef .sigma (n + 1)) ↔
       ∃ x, W ⊧/![(x + e 0) * (x + e 0) + e 0 + 1, e 1] (prenexSatDef .pi n) := by
   simp [prenexSatDef]
 
-@[simp] lemma eval_prenexSatDef_pi (n : ℕ) (e : Fin 2 → W) :
+@[simp]
+lemma eval_prenexSatDef_pi (n : ℕ) (e : Fin 2 → W) :
     W ⊧/e (prenexSatDef .pi (n + 1)) ↔
       ∀ x, W ⊧/![(x + e 0) * (x + e 0) + e 0 + 1, e 1] (prenexSatDef .sigma n) := by
   simp [prenexSatDef]

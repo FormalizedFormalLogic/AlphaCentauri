@@ -46,19 +46,21 @@ instance definable : 𝚫ᴬ₁-Predicate[V] IsFormulaSet L := defined.to_defina
 instance definable' {Γ : Polarity} {m : ℕ} : Γᴬ_[m + 1]-Predicate[V] IsFormulaSet L :=
   .of_deltaOne definable
 
-@[simp] lemma empty : IsFormulaSet L (∅ : V) := fun p ↦ by simp
+@[simp]
+lemma empty : IsFormulaSet L (∅ : V) := fun p ↦ by simp
 
-@[simp] lemma singleton {p : V} : IsFormulaSet L ({p} : V) ↔ IsFormula L p := by
+@[simp]
+lemma singleton {p : V} : IsFormulaSet L ({p} : V) ↔ IsFormula L p := by
   simp [IsFormulaSet]
 
-@[simp] lemma insert_iff {p s : V} :
-    IsFormulaSet L (insert p s) ↔ IsFormula L p ∧ IsFormulaSet L s := by
+@[simp]
+lemma insert_iff {p s : V} : IsFormulaSet L (insert p s) ↔ IsFormula L p ∧ IsFormulaSet L s := by
   simp [IsFormulaSet]
 
 alias ⟨insert, _⟩ := insert_iff
 
-@[simp] lemma union {s₁ s₂ : V} :
-    IsFormulaSet L (s₁ ∪ s₂) ↔ IsFormulaSet L s₁ ∧ IsFormulaSet L s₂ := by
+@[simp]
+lemma union {s₁ s₂ : V} : IsFormulaSet L (s₁ ∪ s₂) ↔ IsFormulaSet L s₁ ∧ IsFormulaSet L s₂ := by
   simp [IsFormulaSet, mem_cup_iff]; grind
 
 end IsFormulaSet
@@ -102,19 +104,23 @@ lemma IsFormulaSet.setShift {s : V} (h : IsFormulaSet L s) : IsFormulaSet L (set
 lemma shift_mem_setShift {p s : V} (h : p ∈ s) : shift L p ∈ setShift L s :=
   mem_setShift_iff.mpr ⟨p, h, rfl⟩
 
-@[simp] lemma IsFormulaSet.setShift_iff {s : V} :
+@[simp]
+lemma IsFormulaSet.setShift_iff {s : V} :
     IsFormulaSet L (Bootstrapping.setShift L s) ↔ IsFormulaSet L s :=
   ⟨by intro h p hp; simpa using h (shift L p) (shift_mem_setShift hp), IsFormulaSet.setShift⟩
 
-@[simp] lemma mem_setShift_union {s t : V} :
+@[simp]
+lemma mem_setShift_union {s t : V} :
     setShift L (s ∪ t) = setShift L s ∪ setShift L t := mem_ext <| by
   simp [mem_setShift_iff, mem_cup_iff]; grind
 
-@[simp] lemma mem_setShift_insert {x s : V} :
+@[simp]
+lemma mem_setShift_insert {x s : V} :
     setShift L (insert x s) = insert (shift L x) (setShift L s) := mem_ext <| by
   simp [mem_setShift_iff]
 
-@[simp] lemma setShift_empty : setShift L (∅ : V) = ∅ := mem_ext <| by simp [mem_setShift_iff]
+@[simp]
+lemma setShift_empty : setShift L (∅ : V) = ∅ := mem_ext <| by simp [mem_setShift_iff]
 
 private lemma setShift_graph (t s : V) :
     t = setShift L s ↔ (∀ y ∈ t, ∃ x ∈ s, y = shift L x) ∧ (∀ x ∈ s, shift L x ∈ t) := by
@@ -236,89 +242,128 @@ instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ-Function₂ (axm : V → V → V) :=
   .of_zero axm_defined.to_definable
 
-@[simp] lemma seq_lt_axL (s p : V) : s < axL s p := by
+@[simp]
+lemma seq_lt_axL (s p : V) : s < axL s p := by
   grind [axL, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma arity_lt_axL (s p : V) : p < axL s p := by
+@[simp]
+lemma arity_lt_axL (s p : V) : p < axL s p := by
   grind [axL, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma seq_lt_verumIntro (s : V) : s < verumIntro s := by
+@[simp]
+lemma seq_lt_verumIntro (s : V) : s < verumIntro s := by
   grind [verumIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma seq_lt_andIntro (s p q dp dq : V) : s < andIntro s p q dp dq := by
+@[simp]
+lemma seq_lt_andIntro (s p q dp dq : V) : s < andIntro s p q dp dq := by
   grind [andIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma p_lt_andIntro (s p q dp dq : V) : p < andIntro s p q dp dq := by
+@[simp]
+lemma p_lt_andIntro (s p q dp dq : V) : p < andIntro s p q dp dq := by
   grind [andIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma q_lt_andIntro (s p q dp dq : V) : q < andIntro s p q dp dq := by
+@[simp]
+lemma q_lt_andIntro (s p q dp dq : V) : q < andIntro s p q dp dq := by
   grind [andIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma dp_lt_andIntro (s p q dp dq : V) : dp < andIntro s p q dp dq := by
+@[simp]
+lemma dp_lt_andIntro (s p q dp dq : V) : dp < andIntro s p q dp dq := by
   grind [andIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma dq_lt_andIntro (s p q dp dq : V) : dq < andIntro s p q dp dq := by
+@[simp]
+lemma dq_lt_andIntro (s p q dp dq : V) : dq < andIntro s p q dp dq := by
   grind [andIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma seq_lt_orIntro (s p q d : V) : s < orIntro s p q d := by
+@[simp]
+lemma seq_lt_orIntro (s p q d : V) : s < orIntro s p q d := by
   grind [orIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma p_lt_orIntro (s p q d : V) : p < orIntro s p q d := by
+@[simp]
+lemma p_lt_orIntro (s p q d : V) : p < orIntro s p q d := by
   grind [orIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma q_lt_orIntro (s p q d : V) : q < orIntro s p q d := by
+@[simp]
+lemma q_lt_orIntro (s p q d : V) : q < orIntro s p q d := by
   grind [orIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma d_lt_orIntro (s p q d : V) : d < orIntro s p q d := by
+@[simp]
+lemma d_lt_orIntro (s p q d : V) : d < orIntro s p q d := by
   grind [orIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma seq_lt_allIntro (s p d : V) : s < allIntro s p d := by
+@[simp]
+lemma seq_lt_allIntro (s p d : V) : s < allIntro s p d := by
   grind [allIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma p_lt_allIntro (s p d : V) : p < allIntro s p d := by
+@[simp]
+lemma p_lt_allIntro (s p d : V) : p < allIntro s p d := by
   grind [allIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma s_lt_allIntro (s p d : V) : d < allIntro s p d := by
+@[simp]
+lemma s_lt_allIntro (s p d : V) : d < allIntro s p d := by
   grind [allIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma seq_lt_exsIntro (s p t d : V) : s < exsIntro s p t d := by
+@[simp]
+lemma seq_lt_exsIntro (s p t d : V) : s < exsIntro s p t d := by
   grind [exsIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma p_lt_exsIntro (s p t d : V) : p < exsIntro s p t d := by
+@[simp]
+lemma p_lt_exsIntro (s p t d : V) : p < exsIntro s p t d := by
   grind [exsIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma t_lt_exsIntro (s p t d : V) : t < exsIntro s p t d := by
+@[simp]
+lemma t_lt_exsIntro (s p t d : V) : t < exsIntro s p t d := by
   grind [exsIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma d_lt_exsIntro (s p t d : V) : d < exsIntro s p t d := by
+@[simp]
+lemma d_lt_exsIntro (s p t d : V) : d < exsIntro s p t d := by
   grind [exsIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma seq_lt_wkRule (s d : V) : s < wkRule s d := by
+@[simp]
+lemma seq_lt_wkRule (s d : V) : s < wkRule s d := by
   grind [wkRule, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma d_lt_wkRule (s d : V) : d < wkRule s d := by
+@[simp]
+lemma d_lt_wkRule (s d : V) : d < wkRule s d := by
   grind [wkRule, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma seq_lt_shiftRule (s d : V) : s < shiftRule s d := by
+@[simp]
+lemma seq_lt_shiftRule (s d : V) : s < shiftRule s d := by
   grind [shiftRule, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma d_lt_shiftRule (s d : V) : d < shiftRule s d := by
+@[simp]
+lemma d_lt_shiftRule (s d : V) : d < shiftRule s d := by
   grind [shiftRule, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma seq_lt_cutRule (s p d₁ d₂ : V) : s < cutRule s p d₁ d₂ := by
+@[simp]
+lemma seq_lt_cutRule (s p d₁ d₂ : V) : s < cutRule s p d₁ d₂ := by
   grind [cutRule, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma p_lt_cutRule (s p d₁ d₂ : V) : p < cutRule s p d₁ d₂ := by
+@[simp]
+lemma p_lt_cutRule (s p d₁ d₂ : V) : p < cutRule s p d₁ d₂ := by
   grind [cutRule, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma d₁_lt_cutRule (s p d₁ d₂ : V) : d₁ < cutRule s p d₁ d₂ := by
+@[simp]
+lemma d₁_lt_cutRule (s p d₁ d₂ : V) : d₁ < cutRule s p d₁ d₂ := by
   grind [cutRule, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma d₂_lt_cutRule (s p d₁ d₂ : V) : d₂ < cutRule s p d₁ d₂ := by
+@[simp]
+lemma d₂_lt_cutRule (s p d₁ d₂ : V) : d₂ < cutRule s p d₁ d₂ := by
   grind [cutRule, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma seq_lt_axm (s p : V) : s < axm s p := by
+@[simp]
+lemma seq_lt_axm (s p : V) : s < axm s p := by
   grind [axm, lt_succ_iff_le, le_pair_left, le_pair_right]
-@[simp] lemma p_lt_axm (s p : V) : p < axm s p := by
+@[simp]
+lemma p_lt_axm (s p : V) : p < axm s p := by
   grind [axm, lt_succ_iff_le, le_pair_left, le_pair_right]
 
-@[simp] lemma fstIdx_axL (s p : V) : fstIdx (axL s p) = s := by simp [fstIdx, axL]
-@[simp] lemma fstIdx_verumIntro (s : V) : fstIdx (verumIntro s) = s := by simp [fstIdx, verumIntro]
-@[simp] lemma fstIdx_andIntro (s p q dp dq : V) : fstIdx (andIntro s p q dp dq) = s := by
+@[simp]
+lemma fstIdx_axL (s p : V) : fstIdx (axL s p) = s := by simp [fstIdx, axL]
+@[simp]
+lemma fstIdx_verumIntro (s : V) : fstIdx (verumIntro s) = s := by simp [fstIdx, verumIntro]
+@[simp]
+lemma fstIdx_andIntro (s p q dp dq : V) : fstIdx (andIntro s p q dp dq) = s := by
   simp [fstIdx, andIntro]
-@[simp] lemma fstIdx_orIntro (s p q dpq : V) : fstIdx (orIntro s p q dpq) = s := by
+@[simp]
+lemma fstIdx_orIntro (s p q dpq : V) : fstIdx (orIntro s p q dpq) = s := by
   simp [fstIdx, orIntro]
-@[simp] lemma fstIdx_allIntro (s p d : V) : fstIdx (allIntro s p d) = s := by
+@[simp]
+lemma fstIdx_allIntro (s p d : V) : fstIdx (allIntro s p d) = s := by
   simp [fstIdx, allIntro]
-@[simp] lemma fstIdx_exsIntro (s p t d : V) : fstIdx (exsIntro s p t d) = s := by
+@[simp]
+lemma fstIdx_exsIntro (s p t d : V) : fstIdx (exsIntro s p t d) = s := by
   simp [fstIdx, exsIntro]
-@[simp] lemma fstIdx_wkRule (s d : V) : fstIdx (wkRule s d) = s := by simp [fstIdx, wkRule]
-@[simp] lemma fstIdx_shiftRule (s d : V) : fstIdx (shiftRule s d) = s := by simp [fstIdx, shiftRule]
-@[simp] lemma fstIdx_cutRule (s p d₁ d₂ : V) : fstIdx (cutRule s p d₁ d₂) = s := by
+@[simp]
+lemma fstIdx_wkRule (s d : V) : fstIdx (wkRule s d) = s := by simp [fstIdx, wkRule]
+@[simp]
+lemma fstIdx_shiftRule (s d : V) : fstIdx (shiftRule s d) = s := by simp [fstIdx, shiftRule]
+@[simp]
+lemma fstIdx_cutRule (s p d₁ d₂ : V) : fstIdx (cutRule s p d₁ d₂) = s := by
   simp [fstIdx, cutRule]
-@[simp] lemma fstIdx_axm (s p : V) : fstIdx (axm s p) = s := by simp [fstIdx, axm]
+@[simp]
+lemma fstIdx_axm (s p : V) : fstIdx (axm s p) = s := by simp [fstIdx, axm]
 
 end code
 

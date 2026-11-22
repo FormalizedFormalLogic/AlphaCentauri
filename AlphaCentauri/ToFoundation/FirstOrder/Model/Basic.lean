@@ -62,24 +62,28 @@ variable {L : Language} {M : Type u} {N : Type v} {K : Type w} [Tarski.Structure
 
 variable (L M) in
 /-- The identity embedding. -/
-@[refl] protected def refl : M ↪ₛ[L] M where
+@[refl]
+protected def refl : M ↪ₛ[L] M where
   toFun := id
   func' _ _ := rfl
   rel' _ _ h := h
   toFun_inj := Function.injective_id
   rel_inv' _ _ h := h
 
-@[simp] lemma refl_apply (x : M) : Embedding.refl L M x = x := rfl
+@[simp]
+lemma refl_apply (x : M) : Embedding.refl L M x = x := rfl
 
 /-- The composition of embeddings. -/
-@[trans] protected def trans (ι : M ↪ₛ[L] N) (κ : N ↪ₛ[L] K) : M ↪ₛ[L] K where
+@[trans]
+protected def trans (ι : M ↪ₛ[L] N) (κ : N ↪ₛ[L] K) : M ↪ₛ[L] K where
   toFun := κ ∘ ι
   func' f v := by simp [HomClass.func ι, HomClass.func κ, Function.comp_def]
   rel' r v h := HomClass.rel κ r _ (HomClass.rel ι r v h)
   toFun_inj := (EmbeddingClass.map_inj κ).comp (EmbeddingClass.map_inj ι)
   rel_inv' r v h := EmbeddingClass.map_rel_inv ι r v (EmbeddingClass.map_rel_inv κ r _ h)
 
-@[simp] lemma trans_apply (ι : M ↪ₛ[L] N) (κ : N ↪ₛ[L] K) (x : M) : ι.trans κ x = κ (ι x) := rfl
+@[simp]
+lemma trans_apply (ι : M ↪ₛ[L] N) (κ : N ↪ₛ[L] K) (x : M) : ι.trans κ x = κ (ι x) := rfl
 
 end Tarski.Structure.Embedding
 
@@ -179,9 +183,11 @@ notation:50 M " ≼ₑ[" L "; " Γ "] " N => @ElementarySubstructureOn L Γ M N 
 @[inherit_doc ProperElementarySubstructureOn]
 notation:50 M " ≺ₑ[" L "; " Γ "] " N => @ProperElementarySubstructureOn L Γ M N _ _
 
-@[inherit_doc] notation:50 M " ≼ₑ[" L "] " N => ElementarySubstructure L M N
+@[inherit_doc]
+notation:50 M " ≼ₑ[" L "] " N => ElementarySubstructure L M N
 
-@[inherit_doc] notation:50 M " ≺ₑ[" L "] " N => ProperElementarySubstructure L M N
+@[inherit_doc]
+notation:50 M " ≺ₑ[" L "] " N => ProperElementarySubstructure L M N
 
 variable {Γ Γ' : ∀ {n : ℕ}, Semiformula L ℕ n → Prop}
 
@@ -193,18 +199,22 @@ namespace ElementarySubstructureOn
 
 variable (M Γ) in
 /-- The identity $\Gamma$-elementary substructure. -/
-@[refl] protected def refl : M ≼ₑ[L; Γ] M where
+@[refl]
+protected def refl : M ≼ₑ[L; Γ] M where
   emb := .refl L M
   isElementary _ _ _ := Iff.rfl
 
-@[simp] lemma refl_apply (x : M) : ElementarySubstructureOn.refl M Γ x = x := rfl
+@[simp]
+lemma refl_apply (x : M) : ElementarySubstructureOn.refl M Γ x = x := rfl
 
 /-- The composition of $\Gamma$-elementary substructures. -/
-@[trans] protected def trans (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) : M ≼ₑ[L; Γ] K where
+@[trans]
+protected def trans (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) : M ≼ₑ[L; Γ] K where
   emb := e₁.emb.trans e₂.emb
   isElementary hφ e f := (e₂.isElementary hφ (e₁ ∘ e) (e₁ ∘ f)).trans (e₁.isElementary hφ e f)
 
-@[simp] lemma trans_apply (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) (x : M) :
+@[simp]
+lemma trans_apply (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) (x : M) :
     e₁.trans e₂ x = e₂ (e₁ x) := rfl
 
 /-- A $\Gamma$-elementary substructure is $\Gamma'$-elementary for every $\Gamma'$ contained in
@@ -349,13 +359,15 @@ variable {L : Language} {M : ℕ → Type u} [∀ n, Tarski.Structure L (M n)]
 /-- The elementary substructure `M m ≼ₑ[L] M n` composed of the steps from `m` to `n`. -/
 def map (h : m ≤ n) : M m ≼ₑ[L] M n := Nat.leRecOn h (fun e ↦ e.trans (c.step _)) (.refl _ _)
 
-@[simp] lemma map_self (x : M m) : c.map le_rfl x = x := by
+@[simp]
+lemma map_self (x : M m) : c.map le_rfl x = x := by
   simp [map, Nat.leRecOn_self]
 
 lemma map_succ (h : m ≤ n) (x : M m) : c.map (h.trans n.le_succ) x = c.step n (c.map h x) := by
   simp [map, Nat.leRecOn_succ h]
 
-@[simp] lemma map_map (h₁ : l ≤ m) (h₂ : m ≤ n) (x : M l) :
+@[simp]
+lemma map_map (h₁ : l ≤ m) (h₂ : m ≤ n) (x : M l) :
     c.map h₂ (c.map h₁ x) = c.map (h₁.trans h₂) x := by
   induction n, h₂ using Nat.le_induction with
   | base => simp
@@ -426,10 +438,12 @@ noncomputable def of (n : ℕ) : M n ↪ₛ[L] c.Union where
   toFun_inj := DirectLimit.mk_injective _ (fun _ _ _ ↦ EmbeddingClass.map_inj _) n
   rel_inv' r v h := (c.rel_mk r v).mp h
 
-@[simp] lemma of_map (h : m ≤ n) (x : M m) : c.of n (c.map h x) = c.of m x :=
+@[simp]
+lemma of_map (h : m ≤ n) (x : M m) : c.of n (c.map h x) = c.of m x :=
   DirectLimit.mk_apply ..
 
-@[simp] lemma of_comp_map (h : m ≤ n) : c.of n ∘ c.map h = c.of m := funext (c.of_map h)
+@[simp]
+lemma of_comp_map (h : m ≤ n) : c.of n ∘ c.map h = c.of m := funext (c.of_map h)
 
 lemma exists_eq_of_le (n : ℕ) (y : c.Union) : ∃ m, ∃ _ : n ≤ m, ∃ x, y = c.of m x := by
   obtain ⟨m, x, rfl⟩ := DirectLimit.exists_eq_mk _ y
@@ -502,9 +516,11 @@ structure ProperEndExtension (ℬ : Bounding L) (M : Type u) (N : Type v) [Tarsk
     [Tarski.Structure L N] extends EndExtension ℬ M N where
   not_surjective : ¬Function.Surjective emb
 
-@[inherit_doc] notation:50 M " ⊆ₑ[" ℬ "] " N => EndExtension ℬ M N
+@[inherit_doc]
+notation:50 M " ⊆ₑ[" ℬ "] " N => EndExtension ℬ M N
 
-@[inherit_doc] notation:50 M " ⊂ₑ[" ℬ "] " N => ProperEndExtension ℬ M N
+@[inherit_doc]
+notation:50 M " ⊂ₑ[" ℬ "] " N => ProperEndExtension ℬ M N
 
 instance : CoeFun (M ⊆ₑ[ℬ] N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
 
@@ -518,21 +534,25 @@ instance : ℬ.IsInitial e.emb := e.isInitial
 
 lemma emb_injective : Function.Injective e.emb := EmbeddingClass.map_inj e.emb
 
-@[grind =] lemma emb_eq_emb {x y : M} : e x = e y ↔ x = y := e.emb_injective.eq_iff
+@[grind =]
+lemma emb_eq_emb {x y : M} : e x = e y ↔ x = y := e.emb_injective.eq_iff
 
 variable (ℬ M) in
 /-- The identity end extension. -/
-@[refl] protected def refl : M ⊆ₑ[ℬ] M where
+@[refl]
+protected def refl : M ⊆ₑ[ℬ] M where
   emb := .refl L M
   isInitial := {
     operator_iff _ _ _ := Iff.rfl
     initial _ _ b _ := ⟨b, rfl⟩
   }
 
-@[simp] lemma refl_apply (x : M) : EndExtension.refl ℬ M x = x := rfl
+@[simp]
+lemma refl_apply (x : M) : EndExtension.refl ℬ M x = x := rfl
 
 /-- The composition of end extensions. -/
-@[trans] protected def trans (e₁ : M ⊆ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) : M ⊆ₑ[ℬ] K where
+@[trans]
+protected def trans (e₁ : M ⊆ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) : M ⊆ₑ[ℬ] K where
   emb := e₁.emb.trans e₂.emb
   isInitial := {
     operator_iff hR a b :=
@@ -544,7 +564,8 @@ variable (ℬ M) in
       rfl
   }
 
-@[simp] lemma trans_apply (e₁ : M ⊆ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) (x : M) : e₁.trans e₂ x = e₂ (e₁ x) :=
+@[simp]
+lemma trans_apply (e₁ : M ⊆ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) (x : M) : e₁.trans e₂ x = e₂ (e₁ x) :=
   rfl
 
 /-- An end extension is a $\Delta_0$-elementary substructure.
@@ -592,7 +613,8 @@ protected def transLeft (e₁ : M ⊂ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) : M �
     exact e₂.emb_injective hx
 
 /-- The composition of proper end extensions. -/
-@[trans] protected def trans (e₁ : M ⊂ₑ[ℬ] N) (e₂ : N ⊂ₑ[ℬ] K) : M ⊂ₑ[ℬ] K :=
+@[trans]
+protected def trans (e₁ : M ⊂ₑ[ℬ] N) (e₂ : N ⊂ₑ[ℬ] K) : M ⊂ₑ[ℬ] K :=
   e₁.transLeft e₂.toEndExtension
 
 end ProperEndExtension

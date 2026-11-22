@@ -94,11 +94,13 @@ instance henkinFormula.defined :
 instance henkinFormula.definable : 𝚺ᴬ₁-Function₂ (henkinFormula (V := V) L) :=
   henkinFormula.defined.to_definable
 
-@[simp] lemma isFormula_formulaOfCode (n : V) : IsFormula L (formulaOfCode L n) := by
+@[simp]
+lemma isFormula_formulaOfCode (n : V) : IsFormula L (formulaOfCode L n) := by
   unfold formulaOfCode
   split_ifs with h <;> simp [h]
 
-@[simp] lemma formulaOfCode_of_isFormula {n : V} (h : IsFormula L n) : formulaOfCode L n = n :=
+@[simp]
+lemma formulaOfCode_of_isFormula {n : V} (h : IsFormula L n) : formulaOfCode L n = n :=
   ite_eq_left h
 
 lemma henkinFormula_exs {α : V} (hα : IsSemiformula L 1 α) (u : V) :
@@ -107,7 +109,8 @@ lemma henkinFormula_exs {α : V} (hα : IsSemiformula L 1 α) (u : V) :
   rw [ite_eq_left ⟨by simpa using hα, α, by simp, rfl⟩]
   simp [qqExs]
 
-@[simp] lemma isFormula_henkinFormula (n u : V) : IsFormula L (henkinFormula L n u) := by
+@[simp]
+lemma isFormula_henkinFormula (n u : V) : IsFormula L (henkinFormula L n u) := by
   unfold henkinFormula
   split_ifs with h
   · obtain ⟨hn, α, -, rfl⟩ := h
@@ -256,7 +259,8 @@ private lemma IsHenkinSeq.znth_eq_henkinContext {n y : V} (hy : IsHenkinSeq S n 
     znth y n = henkinContext S n :=
   hy.znth_eq (Classical.choose_spec (exists_isHenkinSeq S n)) le_rfl le_rfl
 
-@[simp] lemma henkinContext_zero : henkinContext S (0 : V) = ∅ := by
+@[simp]
+lemma henkinContext_zero : henkinContext S (0 : V) = ∅ := by
   obtain ⟨y, hy⟩ := exists_isHenkinSeq S (0 : V)
   rw [← hy.znth_eq_henkinContext, hy.2.2.1]
 
@@ -356,7 +360,8 @@ private lemma mem_henkinContext_of_not_henkinSet {n : V} (hn : IsFormula L n) (h
   have := mem_henkinContext_decision (S := S) n
   rwa [ite_eq_right (mt (henkinSet_iff hn).mpr h), formulaOfCode_of_isFormula hn] at this
 
-@[simp] private lemma isFormulaSet_henkinContext (n : V) : IsFormulaSet L (henkinContext S n) := by
+@[simp]
+private lemma isFormulaSet_henkinContext (n : V) : IsFormulaSet L (henkinContext S n) := by
   have : 𝚫ᴬ_[2]-Predicate[V] IsFormulaSet L :=
     Bounding.HierarchySymbol.Definable.of_lt IsFormulaSet.definable (by simp)
   apply InductionOnHierarchy.succ_induction_sigma 𝚫 2
@@ -738,19 +743,22 @@ noncomputable def henkinRel {k : ℕ} (R : L.Rel k) : Semiformula.Operator ℒ�
 noncomputable def henkinFunc {k : ℕ} (f : L.Func k) : Semiformula.Operator ℒₒᵣ (k + 1) :=
   ⟨(henkinFuncDef S f).val⟩
 
-@[simp] theorem henkinDomain_val (a : V) : (henkinDomain S).val ![a] ↔ IsRepresentative S a := by
+@[simp]
+theorem henkinDomain_val (a : V) : (henkinDomain S).val ![a] ↔ IsRepresentative S a := by
   simp [henkinDomain, henkinDomainDef, Semiformula.Operator.val, IsRepresentative, HenkinEq,
     Semiformula.equal, numeral_eq_natCast, quote_rel_def]
 
 omit [L.Eq] in
-@[simp] theorem henkinRel_val {k : ℕ} (R : L.Rel k) (v : Fin k → V) :
+@[simp]
+theorem henkinRel_val {k : ℕ} (R : L.Rel k) (v : Fin k → V) :
     (henkinRel S R).val v ↔
       HenkinSet S (Semiformula.rel R (fun i ↦ Semiterm.fvar (v i)) : Formula V L).val := by
   simp [henkinRel, henkinRelDef, Semiformula.Operator.val]
   simp only [numeral_eq_natCast, ← and_assoc, ← eq_matrixToVec_iff, exists_eq_left]
   rfl
 
-@[simp] theorem henkinFunc_val {k : ℕ} (f : L.Func k) (z : V) (v : Fin k → V) :
+@[simp]
+theorem henkinFunc_val {k : ℕ} (f : L.Func k) (z : V) (v : Fin k → V) :
     (henkinFunc S f).val (z :> v) ↔
       HenkinSet S (Semiformula.equal (Semiterm.func f (fun i ↦ Semiterm.fvar (v i)))
         (Semiterm.fvar z) : Formula V L).val := by

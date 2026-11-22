@@ -63,12 +63,14 @@ open Arithmetic Bootstrapping
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {L : Language} [L.Encodable]
   [L.LORDefinable]
 
-@[simp] lemma shift_quote {n : ℕ} (σ : Semisentence L n) : shift L (⌜σ⌝ : V) = ⌜σ⌝ := by
+@[simp]
+lemma shift_quote {n : ℕ} (σ : Semisentence L n) : shift L (⌜σ⌝ : V) = ⌜σ⌝ := by
   have h : Rewriting.shift (Rewriting.emb σ : Semiproposition L n) = Rewriting.emb σ := by
     simpa [Rewriting.shifts] using Rewriting.shifts_emb ({σ} : Multiset (Semisentence L n))
   rw [Sentence.quote_def, ← Semiformula.quote_shift, h]
 
-@[simp] lemma formulaComplexity_quote {n : ℕ} (σ : Semisentence L n) :
+@[simp]
+lemma formulaComplexity_quote {n : ℕ} (σ : Semisentence L n) :
     formulaComplexity L (⌜σ⌝ : V) = σ.complexity := by
   induction σ using Semiformula.rec' with
   | hrel R v => simp [Sentence.quote_def]
@@ -102,12 +104,13 @@ section
 
 variable (w : Fin 0 → ClosedSemiterm ℒₒᵣ n)
 
-@[simp] lemma empty_quote_func_zero :
+@[simp]
+lemma empty_quote_func_zero :
     (⌜(func Language.ORing.Func.zero w : ClosedSemiterm ℒₒᵣ n)⌝ : V) = 𝟎 :=
   Arithmetic.coe_zero_eq.symm
 
-@[simp] lemma empty_quote_func_one :
-    (⌜(func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ n)⌝ : V) = 𝟏 :=
+@[simp]
+lemma empty_quote_func_one : (⌜(func Language.ORing.Func.one w : ClosedSemiterm ℒₒᵣ n)⌝ : V) = 𝟏 :=
   Arithmetic.coe_one_eq.symm
 
 end
@@ -116,17 +119,20 @@ section
 
 variable (w : Fin 2 → ClosedSemiterm ℒₒᵣ n)
 
-@[simp] lemma empty_quote_func_add :
+@[simp]
+lemma empty_quote_func_add :
     (⌜(func Language.ORing.Func.add w : ClosedSemiterm ℒₒᵣ n)⌝ : V) = ⌜w 0⌝ ^+ ⌜w 1⌝ :=
   rfl
 
-@[simp] lemma empty_quote_func_mul :
+@[simp]
+lemma empty_quote_func_mul :
     (⌜(func Language.ORing.Func.mul w : ClosedSemiterm ℒₒᵣ n)⌝ : V) = ⌜w 0⌝ ^* ⌜w 1⌝ :=
   rfl
 
 end
 
-@[simp] lemma empty_quote_numeral (k : ℕ) :
+@[simp]
+lemma empty_quote_numeral (k : ℕ) :
     (⌜(↑k : ClosedSemiterm ℒₒᵣ n)⌝ : V) = Bootstrapping.Arithmetic.numeral (k : V) := by
   simp [empty_quote_eq]
 
@@ -192,11 +198,12 @@ namespace Semiformula
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-@[simp] lemma quote_neg {n : ℕ} (φ : Semiproposition L n) :
-    (⌜∼φ⌝ : V) = Bootstrapping.neg L ⌜φ⌝ := by
+@[simp]
+lemma quote_neg {n : ℕ} (φ : Semiproposition L n) : (⌜∼φ⌝ : V) = Bootstrapping.neg L ⌜φ⌝ := by
   simp [quote_def]
 
-@[simp] lemma quote_imp {n : ℕ} (φ ψ : Semiproposition L n) :
+@[simp]
+lemma quote_imp {n : ℕ} (φ ψ : Semiproposition L n) :
     (⌜φ 🡒 ψ⌝ : V) = Bootstrapping.imp L ⌜φ⌝ ⌜ψ⌝ := by
   simp [quote_def, Bootstrapping.imp]
 

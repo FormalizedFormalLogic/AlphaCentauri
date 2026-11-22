@@ -38,7 +38,8 @@ open CardBelow
 /-- The number of elements of the coded set `s` below `n`. -/
 noncomputable def cardBelow (s n : V) : V := construction.result ![s] n
 
-@[simp] lemma cardBelow_zero (s : V) : cardBelow s 0 = 0 := by
+@[simp]
+lemma cardBelow_zero (s : V) : cardBelow s 0 = 0 := by
   simp [cardBelow, construction]
 
 open Classical in
@@ -95,7 +96,8 @@ lemma cardBelow_eq_zero_iff {s n : V} : cardBelow s n = 0 ↔ ∀ i < n, i ∉ s
       · intro H i hi
         exact H i (lt_trans hi (by simp))
 
-@[simp] lemma card_eq_zero_iff {s : V} : card s = 0 ↔ s = ∅ := by
+@[simp]
+lemma card_eq_zero_iff {s : V} : card s = 0 ↔ s = ∅ := by
   rw [card, cardBelow_eq_zero_iff]
   constructor
   · intro h
@@ -103,7 +105,8 @@ lemma cardBelow_eq_zero_iff {s n : V} : cardBelow s n = 0 ↔ ∀ i < n, i ∉ s
   · rintro rfl
     simp
 
-@[simp] lemma card_empty : card (∅ : V) = 0 := card_eq_zero_iff.mpr rfl
+@[simp]
+lemma card_empty : card (∅ : V) = 0 := card_eq_zero_iff.mpr rfl
 
 end Arithmetic
 end FFL.FirstOrder

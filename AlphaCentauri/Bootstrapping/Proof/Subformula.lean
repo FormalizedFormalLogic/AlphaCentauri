@@ -105,33 +105,41 @@ instance subformulas.definable' : Γᴬ_[m + 1]-Function₁ subformulas (V := V)
 
 end
 
-@[simp] lemma subformulas_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+@[simp]
+lemma subformulas_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     subformulas L (^rel k R v) = insert (^rel k R v) ∅ := by
   simp [subformulas, hR, hv, Subformula.construction]
 
-@[simp] lemma subformulas_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+@[simp]
+lemma subformulas_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     subformulas L (^nrel k R v) = insert (^nrel k R v) ∅ := by
   simp [subformulas, hR, hv, Subformula.construction]
 
-@[simp] lemma subformulas_verum : subformulas L (^⊤ : V) = insert (^⊤ : V) ∅ := by
+@[simp]
+lemma subformulas_verum : subformulas L (^⊤ : V) = insert (^⊤ : V) ∅ := by
   simp [subformulas, Subformula.construction]
 
-@[simp] lemma subformulas_falsum : subformulas L (^⊥ : V) = insert (^⊥ : V) ∅ := by
+@[simp]
+lemma subformulas_falsum : subformulas L (^⊥ : V) = insert (^⊥ : V) ∅ := by
   simp [subformulas, Subformula.construction]
 
-@[simp] lemma subformulas_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+@[simp]
+lemma subformulas_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
     subformulas L (p ^⋏ q) = insert (p ^⋏ q) (subformulas L p ∪ subformulas L q) := by
   simp [subformulas, hp, hq, Subformula.construction]
 
-@[simp] lemma subformulas_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+@[simp]
+lemma subformulas_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
     subformulas L (p ^⋎ q) = insert (p ^⋎ q) (subformulas L p ∪ subformulas L q) := by
   simp [subformulas, hp, hq, Subformula.construction]
 
-@[simp] lemma subformulas_all {p : V} (hp : IsUFormula L p) :
+@[simp]
+lemma subformulas_all {p : V} (hp : IsUFormula L p) :
     subformulas L (^∀ p) = insert (^∀ p) (subformulas L p) := by
   simp [subformulas, hp, Subformula.construction]
 
-@[simp] lemma subformulas_exs {p : V} (hp : IsUFormula L p) :
+@[simp]
+lemma subformulas_exs {p : V} (hp : IsUFormula L p) :
     subformulas L (^∃ p) = insert (^∃ p) (subformulas L p) := by
   simp [subformulas, hp, Subformula.construction]
 

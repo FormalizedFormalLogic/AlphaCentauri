@@ -301,7 +301,8 @@ noncomputable def prebox (Γ : MaximalConsistentSet L Φ) : Finset (Formula α) 
 
 variable {Γ Δ Θ : MaximalConsistentSet L Φ}
 
-@[simp] lemma mem_prebox : A ∈ Γ.prebox ↔ □A ∈ Γ := Finset.mem_preimage
+@[simp]
+lemma mem_prebox : A ∈ Γ.prebox ↔ □A ∈ Γ := Finset.mem_preimage
 
 namespace Successor
 

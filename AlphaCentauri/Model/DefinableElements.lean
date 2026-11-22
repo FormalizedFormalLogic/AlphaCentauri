@@ -161,10 +161,11 @@ lemma exists_defining_formula_of_least [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ}
       simpa [hχ, χ, Matrix.comp_vecCons'', hv] using this
     constructor
     · rintro ⟨h₁, h₂⟩
-      rcases lt_trichotomy y x with h | h | h
-      · exact absurd h₁ (hmin y h)
-      · exact h
-      · exact absurd hx (h₂ x h)
+      apply le_antisymm
+      · by_contra! h
+        exact h₂ x h hx
+      · by_contra! h
+        exact hmin y h h₁
     · rintro rfl
       exact ⟨hx, hmin⟩
 
@@ -310,10 +311,13 @@ lemma DefinesElement.unique {c x x' : V} (h : DefinesElement j c x)
     (h' : DefinesElement j c x') : x = x' := by
   obtain ⟨p, rfl, hp, hmin⟩ := h
   obtain ⟨p', rfl, hp', hmin'⟩ := h'
-  rcases lt_trichotomy p p' with h | rfl | h
-  · exact absurd hp (hmin' p h)
-  · rfl
-  · exact absurd hp' (hmin p' h)
+  obtain rfl : p = p' := by
+    apply le_antisymm
+    · by_contra! h
+      exact hmin p' h hp'
+    · by_contra! h
+      exact hmin' p h hp
+  rfl
 
 /-- Every $\Sigma_{j+1}$-definable element of a model of $\mathsf{I}\Sigma_{j+1}$ is defined by a
 standard code. -/
@@ -432,8 +436,7 @@ theorem exists_model_nonstandard_sigmaDefinableElement :
     apply (models_iff_of_Sigma0 (V := M) φ.sigmaInv.val_deltaZero (e := ![i])).mp
     simpa using h₂
   have h₄ := (hφ ℕ ![] Empty.elim).mpr <| (φ.models_sigmaInv ![]).mpr ⟨i, h₃⟩
-  have h₅ : Entailment.Inconsistent 𝗣𝗔 := by simpa using h₄
-  exact Entailment.Consistent.not_inconsistent h₅
+  exact Entailment.Consistent.not_inconsistent (by simpa using h₄)
 
 section over
 

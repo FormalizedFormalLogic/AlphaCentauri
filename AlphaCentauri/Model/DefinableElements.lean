@@ -1,7 +1,6 @@
 module
 
-public import AlphaCentauri.Model.Elementary
-public import AlphaCentauri.Model.EndExtension
+public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.CodedPigeonhole
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Injection
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
@@ -18,12 +17,22 @@ public import Foundation.FirstOrder.Incompleteness.Second
 
 /-! # Definable elements
 
+The $\Sigma_k$-definable elements of a model of arithmetic are the elements definable without
+parameters by a $\Sigma_k$ formula.
+
 The $\Sigma_{j+1}$-definable elements of a model `M` of `𝗣𝗔` form a $\Sigma_{j+1}$-elementary
 substructure, which satisfies $\mathsf{I}\Sigma_j$ and, when it contains a nonstandard element,
-refutes $\mathsf{B}\Sigma_{j+1}$. The elements of `M` below a definable element form a cut, which
-satisfies $\mathsf{B}\Sigma_{j+1}$ and refutes $\mathsf{I}\Sigma_{j+1}$.
+refutes $\mathsf{B}\Sigma_{j+1}$.
+
+The elements of a model `M` of `𝗣𝗔` definable over a set `A` of parameters form an elementary
+substructure. The elements of `M` definable without parameters embed elementarily into every model
+`N` elementarily equivalent to `M`, in exactly one way, and the image consists of the elements of
+`N` definable without parameters. For a complete extension `T` of `𝗣𝗔` these elements form the
+prime model $K_T$ of `T`. Consequently the prime model has no proper elementary substructures and no
+non-trivial automorphisms.
 
 - [HP98, §IV.1(d)]
+- [Kay91, §8.1]
 -/
 
 @[expose] public section
@@ -36,15 +45,14 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 /-- The elements of `M` defined by a $\Sigma_k$ formula without parameters.
 - [HP98, Definition IV.1.32] -/
-def sigmaDefinableElements (k : ℕ) (M : Type*) [ORingStructure M] : Set M :=
-  {a | ∃ φ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k φ ∧ ∀ x : M, M ⊧/![x] φ ↔ x = a}
+abbrev sigmaDefinableElements (k : ℕ) (M : Type*) [ORingStructure M] : Set M :=
+  definableElementsOver (∅ : Set M) (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k)
 
 variable {j : ℕ} {M : Type} [ORingStructure M]
 
-lemma sigmaDefinableElements_mono {k k' : ℕ} (h : k ≤ k') :
-    sigmaDefinableElements k M ⊆ sigmaDefinableElements k' M := by
-  rintro a ⟨φ, hφ, ha⟩
-  exact ⟨φ, hφ.mono h, ha⟩
+lemma mem_sigmaDefinableElements_iff {k : ℕ} {a : M} : a ∈ sigmaDefinableElements k M ↔
+    ∃ φ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k φ ∧ ∀ x, M ⊧/![x] φ ↔ x = a :=
+  mem_definableElementsOver_empty_iff (C := fun φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k φ) fun _ _ h ↦ h.rew _
 
 /-- An element defined uniquely from definable elements by a $\Sigma_k$ formula is definable. -/
 lemma mem_sigmaDefinableElements_of_unique {k m : ℕ} (hk : 1 ≤ k)
@@ -52,13 +60,9 @@ lemma mem_sigmaDefinableElements_of_unique {k m : ℕ} (hk : 1 ≤ k)
     (hv : ∀ i, v i ∈ sigmaDefinableElements k M) {a : M} (ha : ∀ x, M ⊧/(x :> v) ψ ↔ x = a) :
     a ∈ sigmaDefinableElements k M := by
   induction m with
-  | zero =>
-    use ψ
-    and_intros
-    · exact hψ
-    · simpa [Matrix.empty_eq] using ha
+  | zero => exact mem_sigmaDefinableElements_iff.mpr ⟨ψ, hψ, by simpa [Matrix.empty_eq] using ha⟩
   | succ m ih =>
-    obtain ⟨δ, hδ, hv₀⟩ := hv 0
+    obtain ⟨δ, hδ, hv₀⟩ := mem_sigmaDefinableElements_iff.mp (hv 0)
     obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le' hk
     apply ih (ψ := ∃¹ (δ ⇜ ![#0] ⋏ ψ ⇜ (#1 :> #0 :> fun i ↦ #i.succ.succ))) (v := Fin.tail v)
     · simp [hδ.rew, hψ.rew]
@@ -108,10 +112,11 @@ lemma exists_defining_formula_of_least [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ}
       simpa [hχ, χ, Matrix.comp_vecCons'', hv] using this
     constructor
     · rintro ⟨h₁, h₂⟩
-      rcases lt_trichotomy y x with h | h | h
-      · exact absurd h₁ (hmin y h)
-      · exact h
-      · exact absurd hx (h₂ x h)
+      apply le_antisymm
+      · by_contra! h
+        exact h₂ x h hx
+      · by_contra! h
+        exact hmin y h h₁
     · rintro rfl
       exact ⟨hx, hmin⟩
 
@@ -145,8 +150,8 @@ namespace sigmaDefinableElements
 
 variable (j M) in
 instance oringStructure : ORingStructure (sigmaDefinableElements (j + 1) M) where
-  zero := ⟨0, by use “#0 = 0”; simp⟩
-  one := ⟨1, by use “#0 = 1”; simp⟩
+  zero := ⟨0, mem_sigmaDefinableElements_iff.mpr ⟨“#0 = 0”, by simp, by simp⟩⟩
+  one := ⟨1, mem_sigmaDefinableElements_iff.mpr ⟨“#0 = 1”, by simp, by simp⟩⟩
   add a b := ⟨a.1 + b.1, mem_sigmaDefinableElements_of_unique (Nat.le_add_left 1 j)
     (ψ := “#0 = #1 + #2”) (v := ![a.1, b.1]) (by simp) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩)
     fun x ↦ by simp⟩
@@ -170,7 +175,7 @@ lemma emb_apply (x : sigmaDefinableElements (j + 1) M) : emb j M x = x.val := rf
 variable (j) in
 /-- [HP98, Lemma IV.1.39] -/
 theorem sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] :
-    IsElementary (fun {_} φ ↦ ∃ m ≤ j + 1, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ) (emb j M) := by
+    IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE (j + 1)) (emb j M) := by
   have witness {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)} (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 j φ)
       (e : Fin n → sigmaDefinableElements (j + 1) M) (f : ℕ → sigmaDefinableElements (j + 1) M)
       (h : ∃ x : M, φ.Eval (x :> emb j M ∘ e) (emb j M ∘ f)) :
@@ -179,16 +184,17 @@ theorem sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] :
       exists_least_mem_sigmaDefinableElements hφ (fun i ↦ (e i).2) (fun i ↦ (f i).2) h
     use ⟨x, hx⟩
     exact h
-  apply isElementary_of_tarskiVaught
-  · intro n φ hφ
-    exact eval_iff_of_bounded_of_witness _ (fun hψ ↦ witness (.bounded 𝚷 j _ hψ)) hφ
+  apply IsElementary.prenexHierarchyLE_of_tarskiVaught
+  · apply IsElementary.bounded_of_tarskiVaught
+    intro n φ hφ
+    exact witness (.bounded 𝚷 j _ hφ)
   · intro m hm n φ hφ
     exact witness (hφ.hierarchy.mono (by omega))
 
 variable (j) in
 /-- [HP98, Corollary IV.1.40] -/
 theorem models_ISigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : (sigmaDefinableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗜𝚺 j := by
-  have hK : IsElementary (fun {_} φ ↦ ∃ m ≤ j + 1, ∃ Γ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ m φ)
+  have hK : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE (j + 1))
       (emb j M) := sigmaElementary j
   have : (sigmaDefinableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
     IsElementary.models_peanoMinus fun hφ ↦
@@ -250,24 +256,26 @@ instance DefinesElement.defined : (j : ℕ) →
     simp [definesElementDef, DefinesElement, (PrenexSatisfied.pi_defined' j).df,
       eq_comm]
 
-instance DefinesElement.definable (j : ℕ) :
-    𝚺ᴬ_[j + 1]-Relation (DefinesElement j : V → V → Prop) :=
+instance DefinesElement.definable (j : ℕ) : 𝚺ᴬ_[j + 1]-Relation (DefinesElement j : V → V → Prop) :=
   (DefinesElement.defined j).to_definable
 
 lemma DefinesElement.unique {c x x' : V} (h : DefinesElement j c x)
     (h' : DefinesElement j c x') : x = x' := by
   obtain ⟨p, rfl, hp, hmin⟩ := h
   obtain ⟨p', rfl, hp', hmin'⟩ := h'
-  rcases lt_trichotomy p p' with h | rfl | h
-  · exact absurd hp (hmin' p h)
-  · rfl
-  · exact absurd hp' (hmin p' h)
+  obtain rfl : p = p' := by
+    apply le_antisymm
+    · by_contra! h
+      exact hmin p' h hp'
+    · by_contra! h
+      exact hmin' p h hp
+  rfl
 
 /-- Every $\Sigma_{j+1}$-definable element of a model of $\mathsf{I}\Sigma_{j+1}$ is defined by a
 standard code. -/
 lemma exists_definesElement [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {x : V}
     (hx : x ∈ sigmaDefinableElements (j + 1) V) : ∃ c : ℕ, DefinesElement j (c : V) x := by
-  obtain ⟨φ, hφ, hφx⟩ := hx
+  obtain ⟨φ, hφ, hφx⟩ := mem_sigmaDefinableElements_iff.mp hx
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1))
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 j := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1))
   obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
@@ -380,99 +388,55 @@ theorem exists_model_nonstandard_sigmaDefinableElement :
     apply (models_iff_of_Sigma0 (V := M) φ.sigmaInv.val_deltaZero (e := ![i])).mp
     simpa using h₂
   have h₄ := (hφ ℕ ![] Empty.elim).mpr <| (φ.models_sigmaInv ![]).mpr ⟨i, h₃⟩
-  have h₅ : Entailment.Inconsistent 𝗣𝗔 := by simpa using h₄
-  exact Entailment.Consistent.not_inconsistent h₅
+  exact Entailment.Consistent.not_inconsistent (by simpa using h₄)
 
 section over
 
 variable {A : Set M}
 
-/-- The elements of `M` definable over `A`: each is the unique element satisfying some formula
-with parameters from `A`.
-- [Kay91, §8.1] -/
-def definableElementsOver (A : Set M) : Set M :=
-  {b | ∃ (m : ℕ) (θ : ArithmeticSemiformula (Fin m) 1) (a : Fin m → A),
-    ∀ x : M, θ.Eval ![x] (Subtype.val ∘ a) ↔ x = b}
-
-variable (M) in
-/-- The elements of `M` definable without parameters. -/
-abbrev definableElements : Set M := definableElementsOver (∅ : Set M)
-
-lemma subset_definableElementsOver (A : Set M) : A ⊆ definableElementsOver A := by
+lemma subset_definableClosure (A : Set M) : A ⊆ definableClosure ℒₒᵣ A := by
   intro b hb
-  use 1, “#0 = &0”, ![⟨b, hb⟩]
-  intro x
-  simp
-
-lemma mem_definableElements_iff {b : M} :
-    b ∈ definableElements M ↔
-      ∃ θ : ArithmeticSemisentence 1, ∀ x, M ⊧/![x] θ ↔ x = b := by
-  constructor
-  · rintro ⟨m, θ, a, h⟩
-    have : IsEmpty (Fin m) := ⟨fun i ↦ (a i).2⟩
-    use Rew.rewriteMap (fun i ↦ isEmptyElim i) ▹ θ
-    intro x
-    rw [← h x, eval_rewriteMap]
-    exact iff_of_eq (congrArg (fun f ↦ Eval ![x] f θ) (Subsingleton.elim _ _))
-  · rintro ⟨θ, h⟩
-    use 0, Rewriting.emb θ, Fin.elim0
-    simpa using h
+  exact ⟨⟨“#0 = &(⟨b, hb⟩ : A)”, trivial, fun x ↦ by simp⟩⟩
 
 /-- An element defined uniquely by a formula with parameters from `A` and from
-`definableElementsOver A` is definable over `A`. -/
-lemma mem_definableElementsOver_of_unique {n m : ℕ} {ψ : ArithmeticSemiformula (Fin m) (n + 1)}
-    {c : Fin m → A} {v : Fin n → M} (hv : ∀ i, v i ∈ definableElementsOver A) {b : M}
-    (hb : ∀ x, ψ.Eval (x :> v) (Subtype.val ∘ c) ↔ x = b) : b ∈ definableElementsOver A := by
-  induction n generalizing m with
-  | zero =>
-    use m, ψ, c
-    simpa [Matrix.empty_eq] using hb
+`definableClosure ℒₒᵣ A` is definable over `A`. -/
+lemma mem_definableClosure_of_unique {n : ℕ} {ψ : ArithmeticSemiformula A (n + 1)}
+    {v : Fin n → M} (hv : ∀ i, v i ∈ definableClosure ℒₒᵣ A) {b : M}
+    (hb : ∀ x, ψ.Eval (x :> v) Subtype.val ↔ x = b) : b ∈ definableClosure ℒₒᵣ A := by
+  induction n with
+  | zero => exact ⟨⟨ψ, trivial, by simpa [Matrix.empty_eq] using hb⟩⟩
   | succ n ih =>
-    obtain ⟨m₀, θ, a, hθ⟩ := hv 0
-    apply ih (m := m₀ + m) (c := Fin.append a c) (v := Fin.tail v)
-      (ψ := ∃¹ ((Rew.bind ![#0] (fun j ↦ &(Fin.castAdd m j)) ▹ θ) ⋏
-        (Rew.bind (#1 :> #0 :> fun i ↦ #i.succ.succ) (fun j ↦ &(Fin.natAdd m₀ j)) ▹ ψ)))
+    obtain ⟨θ, -, hθ⟩ := hv 0
+    apply ih (ψ := ∃¹ (θ ⇜ ![#0] ⋏ ψ ⇜ (#1 :> #0 :> fun i ↦ #i.succ.succ))) (v := Fin.tail v)
     · intro i
       exact hv i.succ
     · intro x
-      have hw : (fun i ↦ Semiterm.val (v 0 :> x :> Fin.tail v)
-          (fun j ↦ ((Fin.append a c j : A) : M))
-          ((#1 :> #0 :> fun i ↦ #i.succ.succ :
-            Fin (n + 2) → ArithmeticSemiterm (Fin (m₀ + m)) (n + 2)) i)) = x :> v := by
+      have hw : Semiterm.val (v 0 :> x :> Fin.tail v) Subtype.val ∘
+          (#1 :> #0 :> fun i ↦ #i.succ.succ : Fin (n + 2) → ArithmeticSemiterm A (n + 2)) =
+            x :> v := by
         ext i
         cases i using Fin.cases with
         | zero => simp
         | succ i => cases i using Fin.cases <;> simp [Fin.tail]
-      rw [← hb x]
-      simp only [eval_ex, LogicalConnective.HomClass.map_and, eval_rew, Function.comp_def]
-      constructor
-      · rintro ⟨y, hy, hψ⟩
-        obtain rfl : y = v 0 := (hθ y).mp <| by
-          simpa [Matrix.constant_eq_singleton, Function.comp_def] using hy
-        simpa [hw] using hψ
-      · intro h
-        use v 0
-        and_intros
-        · simpa [Matrix.constant_eq_singleton, Function.comp_def] using (hθ (v 0)).mpr rfl
-        · simpa [hw] using h
+      simp [← hb x, hθ, hw]
 
-namespace definableElementsOver
+namespace definableClosure
 
 variable (A) in
-instance oringStructure : ORingStructure (definableElementsOver A) where
-  zero := ⟨0, mem_definableElementsOver_of_unique (ψ := “#0 = 0”) (c := Fin.elim0) (v := ![])
+instance oringStructure : ORingStructure (definableClosure ℒₒᵣ A) where
+  zero := ⟨0, mem_definableClosure_of_unique (ψ := “#0 = 0”) (v := ![])
     (fun i ↦ i.elim0) fun x ↦ by simp⟩
-  one := ⟨1, mem_definableElementsOver_of_unique (ψ := “#0 = 1”) (c := Fin.elim0) (v := ![])
+  one := ⟨1, mem_definableClosure_of_unique (ψ := “#0 = 1”) (v := ![])
     (fun i ↦ i.elim0) fun x ↦ by simp⟩
-  add a b := ⟨a.1 + b.1, mem_definableElementsOver_of_unique (ψ := “#0 = #1 + #2”)
-    (c := Fin.elim0) (v := ![a.1, b.1]) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩) fun x ↦ by simp⟩
-  mul a b := ⟨a.1 * b.1, mem_definableElementsOver_of_unique (ψ := “#0 = #1 * #2”)
-    (c := Fin.elim0) (v := ![a.1, b.1]) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩) fun x ↦ by simp⟩
+  add a b := ⟨a.1 + b.1, mem_definableClosure_of_unique (ψ := “#0 = #1 + #2”)
+    (v := ![a.1, b.1]) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩) fun x ↦ by simp⟩
+  mul a b := ⟨a.1 * b.1, mem_definableClosure_of_unique (ψ := “#0 = #1 * #2”)
+    (v := ![a.1, b.1]) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩) fun x ↦ by simp⟩
   lt a b := a.1 < b.1
 
 variable (A) in
 /-- The inclusion of the elements definable over `A` into `M`. -/
-def emb : definableElementsOver A ↪ₛ[ℒₒᵣ] M where
+def emb : definableClosure ℒₒᵣ A ↪ₛ[ℒₒᵣ] M where
   toFun := Subtype.val
   func' f v := by cases f <;> rfl
   rel' r _ := by cases r; exacts [congrArg Subtype.val, id]
@@ -480,14 +444,14 @@ def emb : definableElementsOver A ↪ₛ[ℒₒᵣ] M where
   rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
 
 @[simp]
-lemma emb_apply (x : definableElementsOver A) : emb A x = x.val := rfl
+lemma emb_apply (x : definableClosure ℒₒᵣ A) : emb A x = x.val := rfl
 
 /-- A formula with parameters definable over `A` and a witness in a model of `𝗣𝗔` has a witness
 definable over `A`. -/
 lemma exists_mem_of_exists [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ} (φ : ArithmeticSemiformula ℕ (n + 1))
-    {e : Fin n → M} {f : ℕ → M} (he : ∀ i, e i ∈ definableElementsOver A)
-    (hf : ∀ i, f i ∈ definableElementsOver A) (h : ∃ x, φ.Eval (x :> e) f) :
-    ∃ x ∈ definableElementsOver A, φ.Eval (x :> e) f := by
+    {e : Fin n → M} {f : ℕ → M} (he : ∀ i, e i ∈ definableClosure ℒₒᵣ A)
+    (hf : ∀ i, f i ∈ definableClosure ℒₒᵣ A) (h : ∃ x, φ.Eval (x :> e) f) :
+    ∃ x ∈ definableClosure ℒₒᵣ A, φ.Eval (x :> e) f := by
   obtain ⟨x₀, hx₀⟩ := h
   obtain ⟨s, hs⟩ := Bounding.exists_prenexHierarchy_eval_iff.{0} (ℬ := ℬ[<, ℒₒᵣ]) φ
   obtain ⟨ψ, hψ, hφψ⟩ := hs 𝚺 s le_rfl
@@ -503,7 +467,7 @@ lemma exists_mem_of_exists [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ} (φ : Arith
   obtain ⟨m, ψ, w, -, hw, hdef⟩ := exists_defining_formula_of_least hx hmin
   use x
   and_intros
-  · apply mem_definableElementsOver_of_unique (c := Fin.elim0) (v := w) (ψ := Rewriting.emb ψ)
+  · apply mem_definableClosure_of_unique (v := w) (ψ := Rewriting.emb ψ)
     · intro i
       rcases hw i with ⟨k, hk⟩ | ⟨k, hk⟩
       exacts [hk ▸ he k, hk ▸ hf k]
@@ -525,18 +489,209 @@ theorem isElementary : IsElementary (fun {_} _ ↦ True) (emb A) := by
 variable (A) in
 /-- The elements definable over `A` as an elementary substructure of a model of `𝗣𝗔`.
 - [Kay91, Theorem 8.1] -/
-def elementarySubstructure : definableElementsOver A ≼ₑ[ℒₒᵣ] M where
+def elementarySubstructure : definableClosure ℒₒᵣ A ≼ₑ[ℒₒᵣ] M where
   emb := emb A
   isElementary := isElementary A
 
 variable (A) in
 /-- The elements definable over `A` in a model of `𝗣𝗔` form a model of `𝗣𝗔`.
 - [Kay91, Theorem 8.1] -/
-theorem models_PA : (definableElementsOver A)↓[ℒₒᵣ] ⊧* 𝗣𝗔 :=
+theorem models_PA : (definableClosure ℒₒᵣ A)↓[ℒₒᵣ] ⊧* 𝗣𝗔 :=
   IsElementary.modelsTheory (isElementary A)
 
-end definableElementsOver
+end definableClosure
 
 end over
+
+/-! ## The prime model -/
+
+section
+
+open Tarski.Structure
+
+variable {N : Type} [ORingStructure N] [M ≡ₑ[ℒₒᵣ] N]
+
+namespace definableElements
+
+open definableClosure
+
+lemma existsUnique_realize (a : definableElements ℒₒᵣ M) :
+    ∃! y : N, ∀ θ : ArithmeticSemisentence 1, M ⊧/![a.1] θ → N ⊧/![y] θ := by
+  obtain ⟨θa, ha⟩ := mem_definableElements_iff.mp a.2
+  obtain ⟨y, hy, huniq⟩ := (ElementaryEquiv.existsUnique_iff (N := N) θa).mp
+    ⟨a.1, (ha _).mpr rfl, fun x ↦ (ha x).mp⟩
+  use y
+  and_intros
+  · intro θ hθ
+    obtain ⟨z, hz, -⟩ := (ElementaryEquiv.existsUnique_iff (N := N) (θa ⋏ θ)).mp
+      ⟨a.1, by simpa [(ha _).mpr rfl] using hθ, fun x hx ↦
+        (ha x).mp (show M ⊧/![x] θa ∧ M ⊧/![x] θ by simpa using hx).1⟩
+    simp only [LogicalConnective.HomClass.map_and] at hz
+    obtain rfl := huniq z hz.1
+    exact hz.2
+  · intro y' hy'
+    exact huniq y' (hy' θa ((ha _).mpr rfl))
+
+/-- The element of `N` realizing the type of an element of `M` definable without parameters. -/
+noncomputable def primeModelMap (a : definableElements ℒₒᵣ M) : N :=
+  (existsUnique_realize a).exists.choose
+
+lemma realize_primeModelMap (a : definableElements ℒₒᵣ M)
+    {θ : ArithmeticSemisentence 1} (h : M ⊧/![a.1] θ) : N ⊧/![primeModelMap a] θ :=
+  (existsUnique_realize a).exists.choose_spec θ h
+
+lemma eq_primeModelMap {a : definableElements ℒₒᵣ M} {y : N}
+    (h : ∀ θ : ArithmeticSemisentence 1, M ⊧/![a.1] θ → N ⊧/![y] θ) : y = primeModelMap a :=
+  (existsUnique_realize a).unique h fun _ ↦ realize_primeModelMap a
+
+lemma evalb_primeModelMap {n : ℕ} (φ : ArithmeticSemisentence n)
+    (v : Fin n → definableElements ℒₒᵣ M) :
+    N ⊧/(primeModelMap ∘ v) φ ↔ M ⊧/(Subtype.val ∘ v) φ := by
+  suffices h : ∀ {n : ℕ} (φ : ArithmeticSemisentence n) (v : Fin n → definableElements ℒₒᵣ M),
+      M ⊧/(Subtype.val ∘ v) φ → N ⊧/(primeModelMap ∘ v) φ by
+    constructor
+    · intro hN
+      by_contra hM
+      have := h (∼φ) v (by simpa using hM)
+      simp only [LogicalConnective.HomClass.map_neg] at this
+      exact this hN
+    · exact h φ v
+  intro n φ v
+  induction n with
+  | zero =>
+    simpa [models_iff, Matrix.empty_eq] using
+      (ElementaryEquiv.models (L := ℒₒᵣ) (M₁ := M) (M₂ := N) (φ := φ)).mp
+  | succ n ih =>
+    intro hφ
+    obtain ⟨θ, hθ⟩ := mem_definableElements_iff.mp (v 0).2
+    have h₁ := ih (∀¹ ((θ ⇜ ![#0]) 🡒 φ)) (Fin.tail v) <| by
+      simp only [eval_all, LogicalConnective.HomClass.map_imply, eval_substs]
+      intro x hx
+      obtain rfl := (hθ x).mp (by simpa [Matrix.constant_eq_singleton] using hx)
+      convert hφ using 2
+      ext i
+      cases i using Fin.cases <;> simp [Fin.tail]
+    simp only [eval_all, LogicalConnective.HomClass.map_imply, eval_substs] at h₁
+    have := h₁ (primeModelMap (v 0))
+      (by simpa [Matrix.constant_eq_singleton] using realize_primeModelMap (v 0) ((hθ _).mpr rfl))
+    convert this using 2
+    ext i
+    cases i using Fin.cases <;> simp [Fin.tail]
+
+lemma primeModelMap_mem (a : definableElements ℒₒᵣ M) :
+    (primeModelMap a : N) ∈ definableElements ℒₒᵣ N := by
+  obtain ⟨θ, hθ⟩ := mem_definableElements_iff.mp a.2
+  obtain ⟨y, -, huniq⟩ := (ElementaryEquiv.existsUnique_iff (N := N) θ).mp
+    ⟨a.1, (hθ _).mpr rfl, fun x ↦ (hθ x).mp⟩
+  have ha := realize_primeModelMap (N := N) a ((hθ _).mpr rfl)
+  apply mem_definableElements_iff.mpr
+  use θ
+  intro x
+  constructor
+  · intro hx
+    rw [huniq x hx, huniq _ ha]
+  · rintro rfl
+    exact ha
+
+lemma exists_primeModelMap_eq {b : N} (hb : b ∈ definableElements ℒₒᵣ N) :
+    ∃ a : definableElements ℒₒᵣ M, primeModelMap a = b := by
+  obtain ⟨θ, hθ⟩ := mem_definableElements_iff.mp hb
+  obtain ⟨x, hx, huniq⟩ := (ElementaryEquiv.existsUnique_iff (M := M) (N := N) θ).mpr
+    ⟨b, (hθ _).mpr rfl, fun y ↦ (hθ y).mp⟩
+  have hmem : x ∈ definableElements ℒₒᵣ M := by
+    apply mem_definableElements_iff.mpr
+    use θ
+    intro y
+    exact ⟨huniq y, by rintro rfl; exact hx⟩
+  use ⟨x, hmem⟩
+  exact (hθ _).mp (realize_primeModelMap ⟨x, hmem⟩ hx)
+
+variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
+
+variable (M N) in
+/-- The elementary embedding of the elements of `M` definable without parameters into `N`.
+- [Kay91, Theorem 8.2] -/
+noncomputable def primeModelEmbedding : definableElements ℒₒᵣ M ≼ₑ[ℒₒᵣ] N where
+  emb := {
+    toFun := primeModelMap
+    func' f v := by
+      have := (evalb_primeModelMap (N := N) “#0 = !!(Semiterm.func f fun i ↦ #i.succ)”
+        (Tarski.Structure.func f v :> v)).mpr <| by
+          simpa [Function.comp_def] using HomClass.map_func (emb (∅ : Set M)) f v
+      simpa [Matrix.comp_vecCons'', Function.comp_def] using this
+    rel' r v h := by
+      have := (evalb_primeModelMap (N := N) (Semiformula.rel r fun i ↦ #i) v).mpr <| by
+        simpa [Function.comp_def] using HomClass.map_rel (emb (∅ : Set M)) r v h
+      simpa [Function.comp_def] using this
+    toFun_inj a b h := by
+      have := (evalb_primeModelMap (N := N) “#0 = #1” ![a, b]).mp (by simpa using h)
+      exact Subtype.ext (by simpa using this)
+    rel_inv' r v h := by
+      apply EmbeddingClass.map_rel_inv (emb (∅ : Set M)) r v
+      have := (evalb_primeModelMap (N := N) (Semiformula.rel r fun i ↦ #i) v).mp <| by
+        simpa [Function.comp_def] using h
+      simpa [Function.comp_def] using this }
+  isElementary := by
+    have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔 := (ElementaryEquiv.modelsTheory (M₁ := M) (M₂ := N)).mp inferInstance
+    apply IsElementary.of_tarskiVaught
+    intro n φ e f h
+    obtain ⟨x, hx, hφ⟩ := exists_mem_of_exists (A := (∅ : Set N)) φ
+      (fun i ↦ primeModelMap_mem (e i)) (fun i ↦ primeModelMap_mem (f i)) h
+    obtain ⟨a, rfl⟩ := exists_primeModelMap_eq (M := M) hx
+    use a
+    exact hφ
+
+/-- The image of `primeModelEmbedding` is the set of elements of `N` definable without parameters.
+- [Kay91, Theorem 8.2] -/
+theorem range_primeModelEmbedding :
+    Set.range (primeModelEmbedding M N) = definableElements ℒₒᵣ N := by
+  ext b
+  constructor
+  · rintro ⟨a, rfl⟩
+    exact primeModelMap_mem a
+  · exact exists_primeModelMap_eq
+
+/-- `primeModelEmbedding` is the only elementary embedding of the elements of `M` definable without
+parameters into `N`.
+- [Kay91, Theorem 8.2] -/
+noncomputable instance : Unique (definableElements ℒₒᵣ M ≼ₑ[ℒₒᵣ] N) where
+  default := primeModelEmbedding M N
+  uniq k := by
+    obtain ⟨ι, hι⟩ := k
+    congr
+    ext a
+    apply eq_primeModelMap
+    intro θ hθ
+    have h₁ := isElementary (∅ : Set M) (φ := Rewriting.emb θ) trivial ![a] fun _ ↦ a
+    have h₂ := hι (φ := Rewriting.emb θ) trivial ![a] fun _ ↦ a
+    simp only [eval_emb, Matrix.comp_vecCons'', Matrix.empty_eq, emb_apply] at h₁ h₂
+    exact h₂.mpr (h₁.mp hθ)
+
+omit [M ≡ₑ[ℒₒᵣ] N] in
+/-- The elements of `M` definable without parameters have no proper elementary substructures.
+- [Kay91, Corollary 8.3] -/
+theorem surjective_of_elementarySubstructure [Nonempty N]
+    (f : N ≼ₑ[ℒₒᵣ] definableElements ℒₒᵣ M) : Function.Surjective f := by
+  have : M ≡ₑ[ℒₒᵣ] definableElements ℒₒᵣ M :=
+    (ElementaryEquiv.of_elementarySubstructure (elementarySubstructure (∅ : Set M))).symm
+  have : M ≡ₑ[ℒₒᵣ] N :=
+    this.trans (ElementaryEquiv.of_elementarySubstructure f).symm
+  intro b
+  use primeModelEmbedding M N b
+  exact congrArg (fun e : definableElements ℒₒᵣ M ≼ₑ[ℒₒᵣ] definableElements ℒₒᵣ M ↦ e b)
+    (Subsingleton.elim ((primeModelEmbedding M N).trans f) (ElementarySubstructureOn.refl _ _))
+
+/-- The elements of `M` definable without parameters have no non-trivial automorphisms.
+- [Kay91, Corollary 8.4] -/
+theorem eq_id_of_iso (f : definableElements ℒₒᵣ M ≃ₛ[ℒₒᵣ] definableElements ℒₒᵣ M) : ⇑f = id := by
+  have : M ≡ₑ[ℒₒᵣ] definableElements ℒₒᵣ M :=
+    (ElementaryEquiv.of_elementarySubstructure (elementarySubstructure (∅ : Set M))).symm
+  funext b
+  exact congrArg (fun e : definableElements ℒₒᵣ M ≼ₑ[ℒₒᵣ] definableElements ℒₒᵣ M ↦ e b)
+    (Subsingleton.elim f.toElementarySubstructure (ElementarySubstructureOn.refl _ _))
+
+end definableElements
+
+end
 
 end FFL.FirstOrder.Arithmetic

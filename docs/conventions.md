@@ -93,6 +93,11 @@ rewrite, so it is written as if it were already there.
   [`style.md`](style.md)'s preference for direct term construction is the same rule seen from the
   other side. `use` takes data only — a witness of a `Type`, never a proof of a hypothesis: split
   what remains with `and_intros` rather than passing the proof to `use`.
+- **A declaration header takes as few lines as fit.** A header that fits within the
+  100-character line limit is written on one line,
+  `noncomputable def primeModelEmbedding : definableElements M ≼ₑ[ℒₒᵣ] N where`, not with its type
+  broken onto a second line. A header too long for one line is broken as late as possible, each
+  line filled up to the limit, with continuation lines indented four spaces.
 - **AI disclosure.** As in Foundation: every commit carries a `Co-Authored-By` trailer for the
   model, and the PR body says an AI agent wrote it. Here that is the normal case, not the
   exception, so every PR body says so explicitly.

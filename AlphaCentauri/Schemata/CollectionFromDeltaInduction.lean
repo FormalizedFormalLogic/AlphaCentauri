@@ -1,9 +1,6 @@
 module
 
-public import AlphaCentauri.Model.CodedLimit
 public import AlphaCentauri.Model.EnumerationCut
-public import AlphaCentauri.Model.InjectiveEnumeration
-public import AlphaCentauri.Model.ProperCut
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Absoluteness
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec

@@ -1,8 +1,7 @@
 module
 
-public import AlphaCentauri.Model.Cut
+public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Schemata.ParameterFreeInduction
-public import AlphaCentauri.Model.EndExtension
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parikh
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Completeness

@@ -2143,8 +2143,7 @@ instance IsSemiformula.definable' : Γᴬ_[m + 1]-Relation IsSemiformula (V := V
   IsSemiformula.definable.of_deltaOne
 
 @[simp]
-lemma IsUFormula.isSemiformula {p : V} (h : IsUFormula L p) : IsSemiformula L (bv L p) p
-  where
+lemma IsUFormula.isSemiformula {p : V} (h : IsUFormula L p) : IsSemiformula L (bv L p) p where
   isUFormula := h
   bv_le := by rfl
 

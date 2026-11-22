@@ -101,11 +101,9 @@ public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Bisimulation
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.MaximalConsistentTheoryModel
 public import AlphaCentauri.Model.BSigma
 public import AlphaCentauri.Model.Basic
-public import AlphaCentauri.Model.DefinableCut
 public import AlphaCentauri.Model.DefinableElements
 public import AlphaCentauri.Model.EnumerationCut
 public import AlphaCentauri.Model.OpenInduction
-public import AlphaCentauri.Model.RecursiveSaturation
 public import AlphaCentauri.NumberTheory.Bertrand
 public import AlphaCentauri.NumberTheory.Bertrand.Embedding
 public import AlphaCentauri.NumberTheory.Bertrand.Positions

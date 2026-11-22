@@ -1,7 +1,6 @@
 module
 
-public import AlphaCentauri.Model.DefinableCut
-public import AlphaCentauri.Model.DefinableElements
+public import AlphaCentauri.Model.BSigma
 
 /-! # Strictness of the fragment hierarchy -/
 

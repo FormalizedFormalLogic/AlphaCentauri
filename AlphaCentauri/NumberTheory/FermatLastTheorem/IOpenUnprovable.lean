@@ -1,7 +1,5 @@
 module
 
-public import AlphaCentauri.Model.IntegerConstantPolynomial
-public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
 public import AlphaCentauri.NumberTheory.FermatLastTheorem.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Embedding

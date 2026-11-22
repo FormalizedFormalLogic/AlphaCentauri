@@ -11,7 +11,8 @@ public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
 `ℬ[<, L].Hierarchy 𝚷 (s + 1)` passes through `Semiformula.univCl`, and every axiom of `𝗣𝗔⁻` is
 $\Pi_2$. `ℬ.PrenexBlock Γ` collects the formulas that are a block of `Γ`-quantifiers over a
 `ℬ`-bounded matrix, which `ℬ.PrenexHierarchy Γ 1` does not, as it has exactly one quantifier; every
-axiom of `𝗣𝗔⁻` is such a block of universal quantifiers.
+axiom of `𝗣𝗔⁻` is such a block of universal quantifiers. `ℬ.PrenexHierarchyLE s` collects the
+prenex $\Sigma_m$ and $\Pi_m$ formulas with `m ≤ s`.
 -/
 
 @[expose] public section
@@ -44,16 +45,14 @@ lemma univCl_iff {φ : Proposition L} :
   simp [Semiformula.univCl, Semiformula.univCl']
 
 /-- Every axiom of `𝗘𝗤 ℒₒᵣ` is $\Pi_2$. -/
-lemma of_mem_eqAxiom {σ : ArithmeticSentence} (hσ : σ ∈ 𝗘𝗤 ℒₒᵣ) :
-    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ := by
+lemma of_mem_eqAxiom {σ : ArithmeticSentence} (hσ : σ ∈ 𝗘𝗤 ℒₒᵣ) : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ := by
   cases hσ with
   | funcExt f => simp [Theory.Eq.funcExt]
   | relExt r => simp [Theory.Eq.relExt]
   | _ => simp
 
 /-- Every axiom of `𝗣𝗔⁻` is $\Pi_2$. -/
-lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) :
-    ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ := by
+lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ := by
   cases hσ with
   | equal φ hφ => exact of_mem_eqAxiom hφ
   | addEqOfLt =>
@@ -125,8 +124,7 @@ lemma neg_iff : ℬ[<, L].PrenexBlock Γ.alt (∼φ) ↔ ℬ[<, L].PrenexBlock �
   ⟨fun h ↦ by simpa using h.neg, fun h ↦ by simpa using h.neg⟩
 
 lemma rew {Γ : Polarity} {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁}
-    (ω : Rew L ξ₁ n₁ ξ₂ n₂) (h : ℬ[<, L].PrenexBlock Γ φ) :
-    ℬ[<, L].PrenexBlock Γ (ω ▹ φ) := by
+    (ω : Rew L ξ₁ n₁ ξ₂ n₂) (h : ℬ[<, L].PrenexBlock Γ φ) : ℬ[<, L].PrenexBlock Γ (ω ▹ φ) := by
   induction h generalizing n₂ with
   | bounded h => exact bounded (h.rew ω)
   | exs h ih => simpa using (ih ω.q).exs
@@ -146,8 +144,7 @@ lemma of_rew {Γ : Polarity} {n₂ : ℕ} {ξ₂ : Type*} {ψ : Semiformula L ξ
 
 @[simp, grind =]
 lemma rew_iff {Γ : Polarity} {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {ω : Rew L ξ₁ n₁ ξ₂ n₂}
-    {φ : Semiformula L ξ₁ n₁} :
-    ℬ[<, L].PrenexBlock Γ (ω ▹ φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
+    {φ : Semiformula L ξ₁ n₁} : ℬ[<, L].PrenexBlock Γ (ω ▹ φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
   ⟨fun h ↦ h.of_rew rfl, rew ω⟩
 
 lemma of_deltaZero {Γ : Polarity} {φ : Semiformula L ξ n} (h : ℬ[<, L].Hierarchy 𝚺 0 φ) :
@@ -192,6 +189,10 @@ lemma PrenexHierarchy.prenexBlock {Γ : Polarity} {φ : Semiformula L ξ n}
     exact .exs (.bounded (PrenexHierarchy.zero_iff_bounded.mp hψ))
   · obtain ⟨ψ, hψ, rfl⟩ := PrenexHierarchy.pi_succ_iff.mp h
     exact .all (.bounded (PrenexHierarchy.zero_iff_bounded.mp hψ))
+
+/-- `φ` is a prenex $\Sigma_m$ or $\Pi_m$ formula for some `m ≤ s`. -/
+abbrev PrenexHierarchyLE (ℬ : Bounding L) (s : ℕ) (φ : Semiformula L ξ n) : Prop :=
+  ∃ m ≤ s, ∃ Γ, ℬ.PrenexHierarchy Γ m φ
 
 end Bounding
 end FFL.FirstOrder

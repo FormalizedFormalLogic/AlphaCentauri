@@ -1,7 +1,6 @@
 module
 
-public import AlphaCentauri.Model.DefinableCut
-public import AlphaCentauri.Model.DefinableElements
+public import AlphaCentauri.Model.BSigma
 
 /-! # Strictness of the fragment hierarchy -/
 
@@ -20,7 +19,8 @@ theorem ISigma_strictlyWeakerThan_BSigma_succ (n : ℕ) : 𝗜𝚺 n ⪱ 𝗕�
   constructor
   · exact ISigma_weakerThan_BSigma_succ
   · intro h
-    exact sigmaDefinableElements.not_models_BSigma (sigmaDefinableElements_mono (by omega) ha) hns
+    exact sigmaDefinableElements.not_models_BSigma
+      (definableElementsOver_mono (fun _ hφ ↦ hφ.mono (by omega)) ha) hns
       (models_of_subtheory (T := 𝗕𝚺 (n + 1)) (U := 𝗜𝚺 n) this)
 
 /-- $\mathsf{B}\Sigma_{n + 1}$ is strictly weaker than $\mathsf{I}\Sigma_{n + 1}$.
@@ -32,7 +32,8 @@ theorem BSigma_strictlyWeakerThan_ISigma (n : ℕ) : 𝗕𝚺 (n + 1) ⪱ 𝗜�
   obtain ⟨M, _, _, a, ha, hns⟩ := exists_model_nonstandard_sigmaDefinableElement
   constructor
   · exact BSigma_weakerThan_ISigma
-  · have ha' := sigmaDefinableElements_mono (k' := n + 1) (by omega) ha
+  · have ha' : a ∈ sigmaDefinableElements (n + 1) M :=
+      definableElementsOver_mono (fun _ hφ ↦ hφ.mono (by omega)) ha
     intro h
     exact definableCut.not_models_ISigma ha' hns
       (models_of_subtheory (T := 𝗜𝚺 (n + 1)) (U := 𝗕𝚺 (n + 1)) <|

@@ -1,6 +1,5 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
-public import AlphaCentauri.Axiomatizability.Basic
 public import AlphaCentauri.Axiomatizability.IOpen
 public import AlphaCentauri.Axiomatizability.ISigma.Finite
 public import AlphaCentauri.Axiomatizability.ISigma.PiAxiomatization
@@ -99,23 +98,11 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStepModel
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Bisimulation
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.MaximalConsistentTheoryModel
-public import AlphaCentauri.Model.CodedLimit
-public import AlphaCentauri.Model.Cut
-public import AlphaCentauri.Model.DefinableCut
+public import AlphaCentauri.Model.BSigma
+public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.DefinableElements
-public import AlphaCentauri.Model.Elementary
-public import AlphaCentauri.Model.EndExtension
-public import AlphaCentauri.Model.EndExtensionOfBSigma1
 public import AlphaCentauri.Model.EnumerationCut
-public import AlphaCentauri.Model.InjectiveEnumeration
-public import AlphaCentauri.Model.IntegerConstantPolynomial
-public import AlphaCentauri.Model.NonnegativePart
 public import AlphaCentauri.Model.OpenInduction
-public import AlphaCentauri.Model.Overspill
-public import AlphaCentauri.Model.PrimeModel
-public import AlphaCentauri.Model.ProperCut
-public import AlphaCentauri.Model.RecursiveSaturation
-public import AlphaCentauri.Model.StandardSystem
 public import AlphaCentauri.NumberTheory.Bertrand
 public import AlphaCentauri.NumberTheory.Bertrand.Embedding
 public import AlphaCentauri.NumberTheory.Bertrand.Positions
@@ -232,20 +219,19 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.PrenexDefinable
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Primrec
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection
+public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
 public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
 public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
 public import AlphaCentauri.ToFoundation.FirstOrder.ConstantExtension
-public import AlphaCentauri.ToFoundation.FirstOrder.ElementaryChain
-public import AlphaCentauri.ToFoundation.FirstOrder.ElementarySubstructure
 public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
+public import AlphaCentauri.ToFoundation.FirstOrder.Model.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree
 public import AlphaCentauri.ToFoundation.FirstOrder.PrenexNormalForm
 public import AlphaCentauri.ToFoundation.FirstOrder.Rew
 public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import AlphaCentauri.ToFoundation.FirstOrder.Theory
-public import AlphaCentauri.ToFoundation.FirstOrder.Type
 public import AlphaCentauri.ToFoundation.Logic.Compact
 public import AlphaCentauri.ToFoundation.Logic.Entailment
 public import AlphaCentauri.ToFoundation.ProvabilityLogic.GL.LRClosure

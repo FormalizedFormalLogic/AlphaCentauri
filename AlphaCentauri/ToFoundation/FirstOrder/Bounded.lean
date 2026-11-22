@@ -58,68 +58,30 @@ lemma of_open (h : φ.Open) : ℬ[<, L].Closure φ :=
 
 end Bounding.Closure
 
-namespace Arithmetic
+namespace Bounding.Closure
 
-/-- Recursion on bounded arithmetical formulas. -/
-lemma bounded_induction {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
-    (hVerum : ∀ n, P n ⊤)
-    (hFalsum : ∀ n, P n ⊥)
-    (hEQ : ∀ n t₁ t₂, P n (.rel Language.Eq.eq ![t₁, t₂]))
-    (hNEQ : ∀ n t₁ t₂, P n (.nrel Language.Eq.eq ![t₁, t₂]))
-    (hLT : ∀ n t₁ t₂, P n (.rel Language.LT.lt ![t₁, t₂]))
-    (hNLT : ∀ n t₁ t₂, P n (.nrel Language.LT.lt ![t₁, t₂]))
-    (hAnd : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
-    (hOr : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
-    (hBall : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
-    (hBex : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
-    (n φ) : ℬ[<, ℒₒᵣ].Closure φ → P n φ
-  |                Bounding.Closure.verum _ => hVerum _
-  |               Bounding.Closure.falsum _ => hFalsum _
-  |  Bounding.Closure.rel Language.Eq.eq v => by
-      simpa [←Matrix.fun_eq_vec_two] using hEQ _ (v 0) (v 1)
-  | Bounding.Closure.nrel Language.Eq.eq v => by
-      simpa [←Matrix.fun_eq_vec_two] using hNEQ _ (v 0) (v 1)
-  |  Bounding.Closure.rel Language.LT.lt v => by
-      simpa [←Matrix.fun_eq_vec_two] using hLT _ (v 0) (v 1)
-  | Bounding.Closure.nrel Language.LT.lt v => by
-      simpa [←Matrix.fun_eq_vec_two] using hNLT _ (v 0) (v 1)
-  |                Bounding.Closure.and hp hq =>
-    hAnd _ _ _ hp hq
-      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
-      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hq)
-  |                 Bounding.Closure.or hp hq =>
-    hOr _ _ _ hp hq
-      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
-      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hq)
-  |               Bounding.Closure.ball hR pt hp => by
-    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
-    obtain rfl := Set.mem_singleton_iff.mp hR
-    simpa [Semiformula.Operator.lt_def] using hBall _ t _ hp
-      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
-  |               Bounding.Closure.bexs hR pt hp => by
-    rcases Rew.positive_iff.mp pt with ⟨t, rfl⟩
-    obtain rfl := Set.mem_singleton_iff.mp hR
-    simpa [Semiformula.Operator.lt_def] using hBex _ t _ hp
-      (bounded_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hBex _ _ hp)
-
-/-- Recursion on bounded arithmetical formulas, with the literals collected into a single case for
-open formulas. -/
-lemma bounded_induction_open {P : (n : ℕ) → ArithmeticSemiformula ξ n → Prop}
+/-- Recursion on `ℬ[<, L]`-bounded formulas, with the literals collected into a single case for open
+formulas. -/
+lemma induction_open {P : (n : ℕ) → Semiformula L ξ n → Prop}
     (hOpen : ∀ n φ, Semiformula.Open φ → P n φ)
-    (hAnd : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
-    (hOr : ∀ n φ ψ, ℬ[<, ℒₒᵣ].Closure φ → ℬ[<, ℒₒᵣ].Closure ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
-    (hBall : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
-    (hBex : ∀ n t φ, ℬ[<, ℒₒᵣ].Closure φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
-    (n φ) : ℬ[<, ℒₒᵣ].Closure φ → P n φ :=
-  bounded_induction
-    (fun _ ↦ hOpen _ _ (by simp))
-    (fun _ ↦ hOpen _ _ (by simp))
-    (fun _ _ _ ↦ hOpen _ _ (by simp))
-    (fun _ _ _ ↦ hOpen _ _ (by simp))
-    (fun _ _ _ ↦ hOpen _ _ (by simp))
-    (fun _ _ _ ↦ hOpen _ _ (by simp))
-    hAnd hOr hBall hBex n φ
+    (hAnd : ∀ n φ ψ, ℬ[<, L].Closure φ → ℬ[<, L].Closure ψ → P n φ → P n ψ → P n (φ ⋏ ψ))
+    (hOr : ∀ n φ ψ, ℬ[<, L].Closure φ → ℬ[<, L].Closure ψ → P n φ → P n ψ → P n (φ ⋎ ψ))
+    (hBall : ∀ n t φ, ℬ[<, L].Closure φ → P (n + 1) φ → P n (∀¹[“#0 < !!(Rew.bShift t)”] φ))
+    (hBex : ∀ n t φ, ℬ[<, L].Closure φ → P (n + 1) φ → P n (∃¹[“#0 < !!(Rew.bShift t)”] φ))
+    (h : ℬ[<, L].Closure φ) : P n φ := by
+  induction h with
+  | verum | falsum | rel | nrel => exact hOpen _ _ (by simp)
+  | and hp hq ihp ihq => exact hAnd _ _ _ hp hq ihp ihq
+  | or hp hq ihp ihq => exact hOr _ _ _ hp hq ihp ihq
+  | ball hR pt hp ih =>
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp pt
+    obtain rfl := Set.mem_singleton_iff.mp hR
+    simpa [Semiformula.Operator.lt_def] using hBall _ t _ hp ih
+  | bexs hR pt hp ih =>
+    obtain ⟨t, rfl⟩ := Rew.positive_iff.mp pt
+    obtain rfl := Set.mem_singleton_iff.mp hR
+    simpa [Semiformula.Operator.lt_def] using hBex _ t _ hp ih
 
-end Arithmetic
+end Bounding.Closure
 
 end FFL.FirstOrder

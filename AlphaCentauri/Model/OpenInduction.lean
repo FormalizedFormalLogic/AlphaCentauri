@@ -45,7 +45,9 @@ instance [DiscretelyOrdered R] : (Nonneg R)↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mo
     intro x y h
     obtain ⟨z, rfl⟩ := exists_add_of_le h.le
     use z
-    exact ⟨le_add_self.trans_lt (lt_add_one _), rfl⟩
+    and_intros
+    · exact le_add_self.trans_lt (lt_add_one _)
+    · rfl
   case oneLeOfZeroLt =>
     suffices ∀ x : Nonneg R, 0 < x → 1 ≤ x by simpa [models_iff] using this
     intro x h
@@ -88,7 +90,7 @@ theorem models_IOpen_iff [DiscretelyOrdered R] : (Nonneg R)↓[ℒₒᵣ] ⊧* �
       simpa [← h, Matrix.constant_eq_singleton] using
         (Semiformula.eval_hom_iff_of_open oRingEmbedding hθ (e₁ := ![y]) (ε₁ := id)).symm
     exact Arithmetic.succ_induction (P := fun y : Nonneg R ↦ P ![(y : R)]) ⟨θ, hθ, hθP⟩ h0
-      (fun y ↦ hs y y.2) ⟨x, hx⟩
+      (by intro y; exact hs y y.2) ⟨x, hx⟩
   · intro h
     apply Semantics.ModelsSet.union_iff.mpr
     and_intros
@@ -138,8 +140,8 @@ theorem models_ZRing [DiscretelyOrdered R]
     intro b
     obtain ⟨q, r, hr₀, hr, e⟩ := h (b : R) n.succ_pos
     have hq : 0 ≤ q := by
-      by_contra hq
-      have := DiscretelyOrdered.one_le_of_pos (-q) (neg_pos.mpr (not_le.mp hq))
+      by_contra! hq
+      have := DiscretelyOrdered.one_le_of_pos (-q) (neg_pos.mpr hq)
       nlinarith [b.2]
     have h₁ : (⟨r, hr₀⟩ : Nonneg R) < ((n + 1 : ℕ) : Nonneg R) := by exact_mod_cast hr
     have h₂ : b = ((n + 1 : ℕ) : Nonneg R) * ⟨q, hq⟩ + ⟨r, hr₀⟩ := by
@@ -147,7 +149,9 @@ theorem models_ZRing [DiscretelyOrdered R]
       simpa using e
     use ⟨q, hq⟩, ⟨r, hr₀⟩
     rw [natCast_foundation]
-    exact ⟨h₁, h₂⟩
+    and_intros
+    · exact h₁
+    · exact h₂
 
 end Nonneg
 

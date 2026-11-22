@@ -137,24 +137,13 @@ include e
 /-- A structure with an end extension modelling `𝗣𝗔⁻` is itself a model of `𝗣𝗔⁻`.
 - [vO99, Exercise 40] -/
 theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_theory_iff.mpr <| by
-  have inj : Function.Injective e.emb := e.emb_injective
   intro σ hσ
   rcases hσ
   case equal hσ =>
     have h₁ : M↓[ℒₒᵣ] ⊧* (𝗘𝗤 ℒₒᵣ : ArithmeticTheory) := inferInstance
     exact models_theory_iff.mp h₁ _ hσ
-  case addZero =>
-    suffices ∀ x : M, x + 0 = x by simpa [models_iff] using this
-    intro x
-    exact inj (by simp)
-  case addAssoc =>
-    suffices ∀ x y z : M, x + y + z = x + (y + z) by simpa [models_iff] using this
-    intro x y z
-    exact inj (by simp [add_assoc])
-  case addComm =>
-    suffices ∀ x y : M, x + y = y + x by simpa [models_iff] using this
-    intro x y
-    exact inj (by simp [add_comm])
+  case addZero | addAssoc | addComm | mulZero | mulOne | mulAssoc | mulComm | distr =>
+    simp [models_iff, ← e.emb_eq_emb, add_comm, add_left_comm, mul_comm, mul_left_comm, mul_add]
   case addEqOfLt =>
     suffices ∀ x y : M, x < y → ∃ z < y + 1, x + z = y by
       simpa [models_iff, Semiformula.eval_bexsLTSucc] using this
@@ -164,12 +153,15 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     have h₁ : z ≤ e y := hzeq ▸ le_add_self
     obtain ⟨w, rfl⟩ : z ∈ Set.range e :=
       h₁.lt_or_eq.elim e.mem_range_of_lt fun h₂ ↦ ⟨y, h₂.symm⟩
-    exact ⟨w, e.emb_lt_emb.mp (by simpa using hz), inj (by simpa using hzeq)⟩
+    use w
+    and_intros
+    · exact e.emb_lt_emb.mp (by simpa using hz)
+    · exact e.emb_injective (by simpa using hzeq)
   case zeroLe =>
     suffices ∀ x : M, 0 ≤ x by simpa [models_iff, le_iff_of_eq_of_lt, le_def] using this
     intro x
     rcases le_def.mp (Arithmetic.zero_le (e x)) with h | h
-    · exact le_def.mpr <| Or.inl <| inj (by simpa using h)
+    · exact le_def.mpr <| Or.inl <| e.emb_injective (by simpa using h)
     · exact le_def.mpr <| Or.inr <| e.emb_lt_emb.mp (by simpa using h)
   case zeroLtOne =>
     suffices (0 : M) < 1 by simpa [models_iff] using this
@@ -180,51 +172,25 @@ theorem models_peanoMinus [N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : M↓[ℒₒᵣ] �
     intro x h
     have h₁ : (0 : N) < e x := by simpa using e.emb_lt_emb.mpr h
     rcases le_def.mp (one_le_of_zero_lt _ h₁) with h₂ | h₂
-    · exact le_def.mpr <| Or.inl <| inj (by simpa using h₂)
+    · exact le_def.mpr <| Or.inl <| e.emb_injective (by simpa using h₂)
     · exact le_def.mpr <| Or.inr <| e.emb_lt_emb.mp (by simpa using h₂)
   case addLtAdd =>
     suffices ∀ x y z : M, x < y → x + z < y + z by simpa [models_iff] using this
     intro x y z h
     exact e.emb_lt_emb.mp (by simpa using add_lt_add _ _ (e z) (e.emb_lt_emb.mpr h))
-  case mulZero =>
-    suffices ∀ x : M, x * 0 = 0 by simpa [models_iff] using this
-    intro x
-    exact inj (by simp)
-  case mulOne =>
-    suffices ∀ x : M, x * 1 = x by simpa [models_iff] using this
-    intro x
-    exact inj (by simp)
-  case mulAssoc =>
-    suffices ∀ x y z : M, x * y * z = x * (y * z) by simpa [models_iff] using this
-    intro x y z
-    exact inj (by simp [mul_assoc])
-  case mulComm =>
-    suffices ∀ x y : M, x * y = y * x by simpa [models_iff] using this
-    intro x y
-    exact inj (by simp [mul_comm])
   case mulLtMul =>
     suffices ∀ x y z : M, x < y → 0 < z → x * z < y * z by simpa [models_iff] using this
     intro x y z h hz
     have h₁ : (0 : N) < e z := by simpa using e.emb_lt_emb.mpr hz
     exact e.emb_lt_emb.mp (by simpa using mul_lt_mul _ _ (e z) (e.emb_lt_emb.mpr h) h₁)
-  case distr =>
-    suffices ∀ x y z : M, x * (y + z) = x * y + x * z by simpa [models_iff] using this
-    intro x y z
-    exact inj (by simp [mul_add])
   case ltIrrefl =>
     suffices ∀ x : M, ¬x < x by simpa [models_iff] using this
     intro x h
     exact lt_irrefl (e x) (by grind)
   case ltTrans =>
-    suffices ∀ x y z : M, x < y → y < z → x < z by simpa [models_iff] using this
-    intro x y z hxy hyz
-    exact e.emb_lt_emb.mp
-      (Arithmetic.lt_trans _ _ _ (e.emb_lt_emb.mpr hxy) (e.emb_lt_emb.mpr hyz))
+    simpa [models_iff] using fun x y z : M ↦ Arithmetic.lt_trans (e x) (e y) (e z)
   case ltTri =>
-    suffices ∀ x y : M, x < y ∨ x = y ∨ y < x by simpa [models_iff] using this
-    intro x y
-    exact (lt_tri (e x) (e y)).imp e.emb_lt_emb.mp
-      (Or.imp e.emb_eq_emb.mp e.emb_lt_emb.mp)
+    simpa [models_iff, e.emb_eq_emb] using fun x y : M ↦ lt_tri (e x) (e y)
 
 /-- A theory all of whose members are $\Pi_1$ sentences holds in `M` as soon as it holds in an
 end extension of `M`.
@@ -234,13 +200,10 @@ theorem models_of_Pi1 {T : ArithmeticTheory} (hT : ∀ σ ∈ T, ℬ[<, ℒₒ�
   models_theory_iff.mpr <| by
     intro σ hσ
     by_contra! h
-    apply notModels_iff.mpr ?_ <| models_theory_iff.mp (inferInstance : N↓[ℒₒᵣ] ⊧* T) σ hσ
-    · suffices (∼σ).Eval ![] Empty.elim by simpa
-      exact Eval.of_eq
-        (Bounding.sigma_one_upward e.emb (hT σ hσ).neg ![] Empty.elim
-          (by simpa [models_iff] using h))
-        (funext (·.elim0))
-        (funext (·.elim))
+    have h₁ : (∼σ).Eval ![] (Empty.elim : Empty → N) :=
+      Eval.of_eq (Bounding.sigma_one_upward e.emb (hT σ hσ).neg ![] Empty.elim
+        (by simpa [models_iff] using h)) (funext (·.elim0)) (funext (·.elim))
+    exact notModels_iff.mpr (by simpa using h₁) (models_theory_iff.mp inferInstance σ hσ)
 
 /-- A $\Pi_1$-axiomatizable theory holds in `M` as soon as it holds in an end extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
@@ -336,7 +299,9 @@ theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗�
     InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].Hierarchy Γ m)
       ⟨f, (φ/[#0]).ballLT #0, by simp [hφ], fun x ↦ by simp [eval_ballLT]⟩
       (by simp) h₂
-  exact e.not_surjective fun x ↦ h₁ x (h₃ x)
+  apply e.not_surjective
+  intro x
+  exact h₁ x (h₃ x)
 
 end
 
@@ -435,7 +400,7 @@ lemma not_models_IDelta_of_proper_cut (I : Cut M) (n : ℕ) (hI : I.Proper)
   have hind := (models_deltaInd_iff _ _).mp
     (Theory.models (T := DeltaInductionScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 n)) M
       (mem_DeltaInductionScheme_of_mem hφ' hψ')) e
-    (fun x ↦ by rw [h₁ x, h₂ x, not_not])
+    (by intro x; rw [h₁ x, h₂ x, not_not])
     ((h₁ 0).mpr h0) (fun x hx ↦ (h₁ (x + 1)).mpr (I.succ_mem ((h₁ x).mp hx)))
   exact hc ((h₁ c).mp (hind c))
 

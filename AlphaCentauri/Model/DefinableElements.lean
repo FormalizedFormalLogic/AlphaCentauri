@@ -41,17 +41,30 @@ namespace FFL.FirstOrder.Arithmetic
 open Semiformula
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
+/-- A formula satisfying `C` which defines `a` in `M` without parameters: `a` is the only element
+of `M` satisfying it. -/
+structure DefiningFormula (C : ArithmeticSemisentence 1 → Prop) (M : Type*) [ORingStructure M]
+    (a : M) where
+  formula : ArithmeticSemisentence 1
+  formula_mem : C formula
+  eval_iff : ∀ x : M, M ⊧/![x] formula ↔ x = a
+
+/-- The elements of `M` defined without parameters by a formula satisfying `C`. -/
+def definableElementsBy (C : ArithmeticSemisentence 1 → Prop) (M : Type*) [ORingStructure M] :
+    Set M :=
+  {a | Nonempty (DefiningFormula C M a)}
+
 /-- The elements of `M` defined by a $\Sigma_k$ formula without parameters.
 - [HP98, Definition IV.1.32] -/
-def sigmaDefinableElements (k : ℕ) (M : Type*) [ORingStructure M] : Set M :=
-  {a | ∃ φ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k φ ∧ ∀ x : M, M ⊧/![x] φ ↔ x = a}
+abbrev sigmaDefinableElements (k : ℕ) (M : Type*) [ORingStructure M] : Set M :=
+  definableElementsBy (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k) M
 
 variable {j : ℕ} {M : Type} [ORingStructure M]
 
-lemma sigmaDefinableElements_mono {k k' : ℕ} (h : k ≤ k') :
-    sigmaDefinableElements k M ⊆ sigmaDefinableElements k' M := by
+lemma definableElementsBy_mono {C D : ArithmeticSemisentence 1 → Prop} (h : ∀ φ, C φ → D φ) :
+    definableElementsBy C M ⊆ definableElementsBy D M := by
   rintro a ⟨φ, hφ, ha⟩
-  exact ⟨φ, hφ.mono h, ha⟩
+  exact ⟨φ, h φ hφ, ha⟩
 
 /-- An element defined uniquely from definable elements by a $\Sigma_k$ formula is definable. -/
 lemma mem_sigmaDefinableElements_of_unique {k m : ℕ} (hk : 1 ≤ k)
@@ -59,11 +72,7 @@ lemma mem_sigmaDefinableElements_of_unique {k m : ℕ} (hk : 1 ≤ k)
     (hv : ∀ i, v i ∈ sigmaDefinableElements k M) {a : M} (ha : ∀ x, M ⊧/(x :> v) ψ ↔ x = a) :
     a ∈ sigmaDefinableElements k M := by
   induction m with
-  | zero =>
-    use ψ
-    and_intros
-    · exact hψ
-    · simpa [Matrix.empty_eq] using ha
+  | zero => exact ⟨ψ, hψ, by simpa [Matrix.empty_eq] using ha⟩
   | succ m ih =>
     obtain ⟨δ, hδ, hv₀⟩ := hv 0
     obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le' hk
@@ -152,8 +161,8 @@ namespace sigmaDefinableElements
 
 variable (j M) in
 instance oringStructure : ORingStructure (sigmaDefinableElements (j + 1) M) where
-  zero := ⟨0, by use “#0 = 0”; simp⟩
-  one := ⟨1, by use “#0 = 1”; simp⟩
+  zero := ⟨0, ⟨“#0 = 0”, by simp, by simp⟩⟩
+  one := ⟨1, ⟨“#0 = 1”, by simp, by simp⟩⟩
   add a b := ⟨a.1 + b.1, mem_sigmaDefinableElements_of_unique (Nat.le_add_left 1 j)
     (ψ := “#0 = #1 + #2”) (v := ![a.1, b.1]) (by simp) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩)
     fun x ↦ by simp⟩

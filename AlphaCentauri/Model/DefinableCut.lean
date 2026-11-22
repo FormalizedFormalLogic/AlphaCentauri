@@ -188,7 +188,6 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
         M ⊧/(Subtype.val ∘ v) φ'.sigmaInv.val ↔ _ ⊧/v φ'.sigmaInv.val :=
       IsElementary.models_iff_of_hierarchy sigmaElementary Bounding.Prenex.val_hierarchy v
     use φ'.val
-    and_intros
     · exact Bounding.Prenex.val_hierarchy
     · intro z
       have h₁ (y : M) : M ⊧/![y] φ ↔ ∃ w, M ⊧/![w, y] φ'.sigmaInv.val :=

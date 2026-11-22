@@ -1,8 +1,7 @@
 module
 
-public import AlphaCentauri.Model.Cut
+public import AlphaCentauri.Model.BSigma
 public import AlphaCentauri.Model.DefinableElements
-public import AlphaCentauri.Model.Elementary
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
 /-! # The cut below definable elements -/

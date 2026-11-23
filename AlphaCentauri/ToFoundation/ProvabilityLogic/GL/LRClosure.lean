@@ -20,7 +20,7 @@ open Entailment Formula Kripke Kripke.Model Kripke.Model.World
 
 universe u
 
-variable {α : Type u}
+variable {α : Type u} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
 namespace Logic.GL
 
@@ -31,16 +31,14 @@ lemma of_forces
     𝐆𝐋 ⊢ A :=
   iff_valid_finite.mpr fun M _ x ↦ h M x
 
-lemma forces_of_provable {κ : Type*} [Nonempty κ] {M : Model κ α} [M.IsGL] (h : 𝐆𝐋 ⊢ A)
-    (x : M.World) : x ⊩ A :=
+lemma forces_of_provable [M.IsGL] (h : 𝐆𝐋 ⊢ A) (x : M.World) : x ⊩ A :=
   sound M h x
 
 end Logic.GL
 
 namespace Kripke.Model.World
 
-variable [DecidableEq α] {κ : Type*} [Nonempty κ] {M : Model κ α}
-  {a : α} {x : M.World} {D E : Formula α}
+variable [DecidableEq α] {a : α} {x : M.World} {D E : Formula α}
 
 /-- A formula and its instance substituting `⊥` for `a` agree at a world where `a` fails at the
 world and above it. -/
@@ -109,8 +107,7 @@ lemma iff_of_forces
     𝐆𝐋 ⊢ A 🡘 B :=
   of_forces fun M _ x ↦ forces_iff.mpr (h M x)
 
-lemma forces_iff_of {κ : Type*} [Nonempty κ] {M : Model κ α} [M.IsGL] (h : 𝐆𝐋 ⊢ A 🡘 B)
-    (x : M.World) : x ⊩ A ↔ x ⊩ B :=
+lemma forces_iff_of [M.IsGL] (h : 𝐆𝐋 ⊢ A 🡘 B) (x : M.World) : x ⊩ A ↔ x ⊩ B :=
   forces_iff.mp (forces_of_provable h x)
 
 lemma iff_refl' : 𝐆𝐋 ⊢ A 🡘 A := iff_of_forces fun _ _ _ ↦ Iff.rfl
@@ -384,8 +381,7 @@ lemma exists_atom_and_box (h : LRClosure P b Z) :
       simp only [forces_and, forces_iff_of h x, forces_box]
       grind
 
-private lemma forces_subst_disj {κ : Type*} [Nonempty κ] {M : Model κ α} {x : M.World}
-    {s : Substitution α α} {S : Finset (Formula α)} :
+private lemma forces_subst_disj {x : M.World} {s : Substitution α α} {S : Finset (Formula α)} :
     x ⊩[M] S.disj⟦s⟧ ↔ ∃ C ∈ S, x ⊩[M] C⟦s⟧ := by
   rw [← Model.forces_subst, forces_disj]
   simp only [Model.forces_subst]

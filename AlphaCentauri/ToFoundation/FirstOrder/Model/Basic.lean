@@ -499,7 +499,7 @@ end
 section
 
 variable {L : Language} {ℬ : Bounding L} {M : Type u} {N : Type v} {K : Type w}
-  [Tarski.Structure L M] [Tarski.Structure L N] [Tarski.Structure L K]
+  [Tarski.Structure L M] [Tarski.Structure L N] [Tarski.Structure L K] {T : Theory L}
 
 /-- An end extension of `M` to `N` for `ℬ`: an embedding of `M` into `N` whose image is an initial
 segment for every bounding operator of `ℬ`.
@@ -579,7 +579,7 @@ include e in
 /-- A theory all of whose members are $\Pi_1$ sentences holds in `M` as soon as it holds in an end
 extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
-theorem models_of_Pi1 [Nonempty M] [Nonempty N] {T : Theory L} (hT : ∀ σ ∈ T, ℬ.Hierarchy 𝚷 1 σ)
+theorem models_of_Pi1 [Nonempty M] [Nonempty N] (hT : ∀ σ ∈ T, ℬ.Hierarchy 𝚷 1 σ)
     [N↓[L] ⊧* T] : M↓[L] ⊧* T := by
   apply models_theory_iff.mpr
   intro σ hσ
@@ -591,7 +591,7 @@ theorem models_of_Pi1 [Nonempty M] [Nonempty N] {T : Theory L} (hT : ∀ σ ∈ 
 include e in
 /-- A $\Pi_1$-axiomatizable theory holds in `M` as soon as it holds in an end extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
-theorem models_of_Pi1Axiomatizable [Nonempty M] [Nonempty N] {T : Theory L}
+theorem models_of_Pi1Axiomatizable [Nonempty M] [Nonempty N]
     (hT : Axiomatizable (ℬ.Hierarchy 𝚷 1) T) [N↓[L] ⊧* T] : M↓[L] ⊧* T := by
   obtain ⟨U, hU, hTU⟩ := hT
   have : U ⪯ T := hTU.symm.le
@@ -632,12 +632,12 @@ namespace «Type»
 
 open Semiformula
 
-variable {L : Language} {ξ : Type*} {k : ℕ}
+variable {L : Language} {ξ : Type*} {k : ℕ} {M : Type*} [Tarski.Structure L M]
+  {Φ Ψ : FirstOrder.Type L ξ k} {b : ξ → M}
 
 /-- The tuple `a` realizes `Φ` with the parameters read as `b`.
 - [Kay91, §8.1] -/
-def RealizedBy {M : Type*} [Tarski.Structure L M] (Φ : FirstOrder.Type L ξ k) (b : ξ → M)
-    (a : Fin k → M) : Prop :=
+def RealizedBy (Φ : FirstOrder.Type L ξ k) (b : ξ → M) (a : Fin k → M) : Prop :=
   ∀ φ ∈ Φ, φ.Eval a b
 
 /-- `Φ` is realized in `M` with the parameters read as `b`.
@@ -659,12 +659,10 @@ def FinitelySatisfied (Φ : FirstOrder.Type L ξ k) (M : Type*) [Tarski.Structur
 /-- `Φ` decides every formula in `M` with the parameters read as `b`: some finite subset of `Φ`
 implies the formula or its negation.
 - [Kay91, §11.2] -/
-def IsComplete {M : Type*} [Tarski.Structure L M] (Φ : FirstOrder.Type L ξ k) (b : ξ → M) : Prop :=
+def IsComplete (Φ : FirstOrder.Type L ξ k) (b : ξ → M) : Prop :=
   ∀ φ : Semiformula L ξ k, ∃ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ ∧
     ((∀ a, RealizedBy (s : Set (Semiformula L ξ k)) b a → φ.Eval a b) ∨
       ∀ a, RealizedBy (s : Set (Semiformula L ξ k)) b a → ¬φ.Eval a b)
-
-variable {M : Type*} [Tarski.Structure L M] {Φ Ψ : FirstOrder.Type L ξ k} {b : ξ → M}
 
 lemma RealizedBy.mono {a : Fin k → M} (h : Φ.RealizedBy b a) (hΨΦ : Ψ ⊆ Φ) : Ψ.RealizedBy b a :=
   fun φ hφ ↦ h φ (hΨΦ hφ)

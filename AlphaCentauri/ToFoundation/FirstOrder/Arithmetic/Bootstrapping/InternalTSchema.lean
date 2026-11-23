@@ -29,7 +29,7 @@ namespace Bootstrapping
 
 open FirstOrder FFL.Entailment Bootstrapping.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {n m : ℕ}
 
 noncomputable def _root_.FFL.FirstOrder.Arithmetic.psatDef : 𝚺ᴬ₁.Semisentence 2 :=
   .mkSigma “a p. ∃ s, !decGraph s a ∧ !boundedSatisfied.sigma s p”
@@ -49,21 +49,17 @@ omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 private lemma add_mul_add_eq_ppair (x a : V) : (x + a) * (x + a) + a + 1 = ppair x a := rfl
 
 /-- The internal term `(t + u) * (t + u) + u + 1`. -/
-noncomputable def pTerm {n : ℕ} (t u : Semiterm V ℒₒᵣ n) : Semiterm V ℒₒᵣ n :=
+noncomputable def pTerm (t u : Semiterm V ℒₒᵣ n) : Semiterm V ℒₒᵣ n :=
   (t + u) * (t + u) + u + 𝕹 1
 
 /-- The internal sentence that the code `p` is satisfied under the assignment coded by `a`. -/
-noncomputable def psatF {n : ℕ} (a : Semiterm V ℒₒᵣ n) (p : V) : Semiformula V ℒₒᵣ n :=
+noncomputable def psatF (a : Semiterm V ℒₒᵣ n) (p : V) : Semiformula V ℒₒᵣ n :=
   (⌜psatDef.val⌝ : Semiformula V ℒₒᵣ 2).subst ![a, 𝕹 p]
 
 /-- The internal sentence that `y` is the value of the code `t` under the assignment coded by
 `a`. -/
-noncomputable def tvF {n : ℕ} (y a : Semiterm V ℒₒᵣ n) (t : V) : Semiformula V ℒₒᵣ n :=
+noncomputable def tvF (y a : Semiterm V ℒₒᵣ n) (t : V) : Semiformula V ℒₒᵣ n :=
   (⌜tvDef.val⌝ : Semiformula V ℒₒᵣ 3).subst ![y, a, 𝕹 t]
-
-section
-
-variable {n m : ℕ}
 
 @[simp]
 lemma subst_pTerm (w : SemitermVec V ℒₒᵣ n m) (t u : Semiterm V ℒₒᵣ n) :
@@ -96,9 +92,7 @@ lemma subst_tvF (w : SemitermVec V ℒₒᵣ n m) (y a : Semiterm V ℒₒᵣ n)
 lemma shift_tvF (y a : Semiterm V ℒₒᵣ n) (t : V) : (tvF y a t).shift = tvF y.shift a.shift t := by
   simp [tvF, Semiformula.shift_substs, typed_quote_shift]
 
-end
-
-variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {n p q t u : V}
 
 lemma numeral_vec_two (a b : V) :
     (fun i ↦ (𝕹 (![a, b] i) : Term V ℒₒᵣ)) = ![𝕹 a, 𝕹 b] := by
@@ -206,8 +200,7 @@ private noncomputable def tvMulClause : ArithmeticSemisentence 6 :=
   mulCond.val/[#5, #3, #4] 🡒 tvDef.val/[#0, #2, #3] 🡒 tvDef.val/[#1, #2, #4] 🡒
     tvDef.val/[‘#0 * #1’, #2, #5]
 
-lemma tprovable_tvF_add (y₁ y₂ a : Term V ℒₒᵣ) {t u : V} (ht : IsUTerm ℒₒᵣ t)
-    (hu : IsUTerm ℒₒᵣ u) :
+lemma tprovable_tvF_add (y₁ y₂ a : Term V ℒₒᵣ) (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     T.internalize V ⊢ tvF y₁ a t 🡒 tvF y₂ a u 🡒 tvF (y₁ + y₂) a (t ^+ u) := by
   have h₁ := tprovable_subst_of_models (T := T) (φ := tvAddClause) (by
     intro W _ _ e;
@@ -226,8 +219,7 @@ lemma tprovable_tvF_add (y₁ y₂ a : Term V ℒₒᵣ) {t u : V} (ht : IsUTerm
       Matrix.vecHead, Matrix.vecTail] using h₁;
   exact h₃ ⨀ h₂
 
-lemma tprovable_tvF_mul (y₁ y₂ a : Term V ℒₒᵣ) {t u : V} (ht : IsUTerm ℒₒᵣ t)
-    (hu : IsUTerm ℒₒᵣ u) :
+lemma tprovable_tvF_mul (y₁ y₂ a : Term V ℒₒᵣ) (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     T.internalize V ⊢ tvF y₁ a t 🡒 tvF y₂ a u 🡒 tvF (y₁ * y₂) a (t ^* u) := by
   have h₁ := tprovable_subst_of_models (T := T) (φ := tvMulClause) (by
     intro W _ _ e;
@@ -312,7 +304,7 @@ private noncomputable def psatOrClause : ArithmeticSemisentence 4 :=
   orCond.val/[#3, #1, #2] 🡒
     (psatDef.val/[#0, #3] 🡘 psatDef.val/[#0, #1] ⋎ psatDef.val/[#0, #2])
 
-lemma tprovable_psatF_or (a : Term V ℒₒᵣ) {p q : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p)
+lemma tprovable_psatF_or (a : Term V ℒₒᵣ) (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p)
     (hq : IsBounded q) (hq' : IsUFormula ℒₒᵣ q) :
     T.internalize V ⊢ psatF a (p ^⋎ q) 🡘 psatF a p ⋎ psatF a q := by
   have h₁ := tprovable_subst_of_models (T := T) (φ := psatOrClause) (by
@@ -338,8 +330,7 @@ private noncomputable def psatEqClause : ArithmeticSemisentence 6 :=
   eqCond.val/[#5, #3, #4] 🡒 tvDef.val/[#0, #2, #3] 🡒 tvDef.val/[#1, #2, #4] 🡒
     (psatDef.val/[#2, #5] 🡘 “#0 = #1”)
 
-lemma tprovable_psatF_eq (y z a : Term V ℒₒᵣ) {t u : V} (ht : IsUTerm ℒₒᵣ t)
-    (hu : IsUTerm ℒₒᵣ u) :
+lemma tprovable_psatF_eq (y z a : Term V ℒₒᵣ) (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     T.internalize V ⊢ tvF y a t 🡒 tvF z a u 🡒 (psatF a (t ^= u) 🡘 (Semiformula.equal y z)) := by
   have h₁ := tprovable_subst_of_models (T := T) (φ := psatEqClause) (by
     intro W _ _ e;
@@ -365,8 +356,7 @@ private noncomputable def psatNeqClause : ArithmeticSemisentence 6 :=
   neqCond.val/[#5, #3, #4] 🡒 tvDef.val/[#0, #2, #3] 🡒 tvDef.val/[#1, #2, #4] 🡒
     (psatDef.val/[#2, #5] 🡘 “#0 ≠ #1”)
 
-lemma tprovable_psatF_neq (y z a : Term V ℒₒᵣ) {t u : V} (ht : IsUTerm ℒₒᵣ t)
-    (hu : IsUTerm ℒₒᵣ u) :
+lemma tprovable_psatF_neq (y z a : Term V ℒₒᵣ) (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     T.internalize V ⊢ tvF y a t 🡒 tvF z a u 🡒 (psatF a (t ^≠ u) 🡘 (∼Semiformula.equal y z)) := by
   have h₁ := tprovable_subst_of_models (T := T) (φ := psatNeqClause) (by
     intro W _ _ e;
@@ -392,8 +382,7 @@ private noncomputable def psatLtClause : ArithmeticSemisentence 6 :=
   ltCond.val/[#5, #3, #4] 🡒 tvDef.val/[#0, #2, #3] 🡒 tvDef.val/[#1, #2, #4] 🡒
     (psatDef.val/[#2, #5] 🡘 “#0 < #1”)
 
-lemma tprovable_psatF_lt (y z a : Term V ℒₒᵣ) {t u : V} (ht : IsUTerm ℒₒᵣ t)
-    (hu : IsUTerm ℒₒᵣ u) :
+lemma tprovable_psatF_lt (y z a : Term V ℒₒᵣ) (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     T.internalize V ⊢ tvF y a t 🡒 tvF z a u 🡒 (psatF a (t ^< u) 🡘 (Semiterm.lessThan y z)) := by
   have h₁ := tprovable_subst_of_models (T := T) (φ := psatLtClause) (by
     intro W _ _ e;
@@ -419,8 +408,7 @@ private noncomputable def psatNltClause : ArithmeticSemisentence 6 :=
   nltCond.val/[#5, #3, #4] 🡒 tvDef.val/[#0, #2, #3] 🡒 tvDef.val/[#1, #2, #4] 🡒
     (psatDef.val/[#2, #5] 🡘 “¬#0 < #1”)
 
-lemma tprovable_psatF_nlt (y z a : Term V ℒₒᵣ) {t u : V} (ht : IsUTerm ℒₒᵣ t)
-    (hu : IsUTerm ℒₒᵣ u) :
+lemma tprovable_psatF_nlt (y z a : Term V ℒₒᵣ) (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     T.internalize V ⊢ tvF y a t 🡒 tvF z a u 🡒
       (psatF a (Arithmetic.qqNLT t u) 🡘 (Semiterm.notLessThan y z)) := by
   have h₁ := tprovable_subst_of_models (T := T) (φ := psatNltClause) (by
@@ -448,7 +436,7 @@ private noncomputable def psatBallClause : ArithmeticSemisentence 6 :=
   ballCond.val/[#4, #2, #3, #5] 🡒 tvDef.val/[#0, #1, #2] 🡒
     (psatDef.val/[#1, #4] 🡘 ∀¹ (“#0 < #1” 🡒 psatDef.val/[‘(#0 + #2) * (#0 + #2) + #2 + 1’, #4]))
 
-lemma tprovable_psatF_ball (y a : Term V ℒₒᵣ) {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q)
+lemma tprovable_psatF_ball (y a : Term V ℒₒᵣ) (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q)
     (hq' : IsUFormula ℒₒᵣ q) :
     T.internalize V ⊢ tvF y a t 🡒
       (psatF a (qqBall (termBShift ℒₒᵣ t) q) 🡘
@@ -484,7 +472,7 @@ private noncomputable def psatBexClause : ArithmeticSemisentence 6 :=
   bexCond.val/[#4, #2, #3, #5] 🡒 tvDef.val/[#0, #1, #2] 🡒
     (psatDef.val/[#1, #4] 🡘 ∃¹ (“#0 < #1” ⋏ psatDef.val/[‘(#0 + #2) * (#0 + #2) + #2 + 1’, #4]))
 
-lemma tprovable_psatF_bex (y a : Term V ℒₒᵣ) {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q)
+lemma tprovable_psatF_bex (y a : Term V ℒₒᵣ) (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q)
     (hq' : IsUFormula ℒₒᵣ q) :
     T.internalize V ⊢ tvF y a t 🡒
       (psatF a (qqBex (termBShift ℒₒᵣ t) q) 🡘
@@ -704,7 +692,7 @@ lemma provable_tvF_termSubst (n : V) :
 noncomputable def instTerm (n t : V) (ht : IsSemiterm ℒₒᵣ n t) : Term V ℒₒᵣ :=
   ⟨termSubst ℒₒᵣ (fvarVec n) t, (isSemitermVec_fvarVec n 0).termSubst ht⟩
 
-lemma tprovable_tvF_instTerm {n t : V} (ht : IsSemiterm ℒₒᵣ n t) (hs : termShift ℒₒᵣ t = t) :
+lemma tprovable_tvF_instTerm (ht : IsSemiterm ℒₒᵣ n t) (hs : termShift ℒₒᵣ t = t) :
     T.internalize V ⊢ tvF (instTerm n t ht) (assignment n) t :=
   (tprovable_tvF_iff _ _ _).mpr <| by simpa [instTerm] using provable_tvF_termSubst n t ht hs
 
@@ -724,8 +712,7 @@ lemma adjoin_termShiftVec_fvarVec (n : V) :
   · have hi' : i < n := by simpa using hi
     rw [nth_fvarVec (n + 1) (i + 1) hi]; simp [nth_termShiftVec hv hi', nth_fvarVec n i hi']
 
-lemma free_subst_qVec_fvarVec {n q : V} (hq : IsSemiformula ℒₒᵣ (n + 1) q)
-    (hs : shift ℒₒᵣ q = q) :
+lemma free_subst_qVec_fvarVec (hq : IsSemiformula ℒₒᵣ (n + 1) q) (hs : shift ℒₒᵣ q = q) :
     free ℒₒᵣ (subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) q) = subst ℒₒᵣ (fvarVec (n + 1)) q := by
   have hw := isSemitermVec_fvarVec (L := ℒₒᵣ) n 0
   rw [free, shift_substs hq hw.qVec, hs, termShift_qVec hw,
@@ -741,7 +728,7 @@ lemma equal_eq_equals (t u : Term V ℒₒᵣ) : Semiformula.equal t u = Semiter
 lemma neg_equals (t u : Term V ℒₒᵣ) : ∼Semiterm.equals t u = Semiterm.notEquals t u := by
   ext; simp [Arithmetic.qqNEQ]
 
-lemma tprovable_instTerm_eq_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
+lemma tprovable_instTerm_eq_iff (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
     (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
     T.internalize V ⊢ Semiterm.equals (instTerm n t ht) (instTerm n u hu) 🡘
       psatF (assignment n) (t ^= u) := by
@@ -752,7 +739,7 @@ lemma tprovable_instTerm_eq_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu 
   rw [equal_eq_equals] at h₃;
   exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
 
-lemma tprovable_instTerm_neq_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
+lemma tprovable_instTerm_neq_iff (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
     (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
     T.internalize V ⊢ Semiterm.notEquals (instTerm n t ht) (instTerm n u hu) 🡘
       psatF (assignment n) (t ^≠ u) := by
@@ -763,7 +750,7 @@ lemma tprovable_instTerm_neq_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu
   rw [equal_eq_equals, neg_equals] at h₃;
   exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
 
-lemma tprovable_instTerm_lt_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
+lemma tprovable_instTerm_lt_iff (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
     (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
     T.internalize V ⊢ Semiterm.lessThan (instTerm n t ht) (instTerm n u hu) 🡘
       psatF (assignment n) (t ^< u) := by
@@ -773,7 +760,7 @@ lemma tprovable_instTerm_lt_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu 
     ht.isUTerm hu.isUTerm;
   exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
 
-lemma tprovable_instTerm_nlt_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
+lemma tprovable_instTerm_nlt_iff (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
     (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
     T.internalize V ⊢ Semiterm.notLessThan (instTerm n t ht) (instTerm n u hu) 🡘
       psatF (assignment n) (Arithmetic.qqNLT t u) := by
@@ -784,15 +771,14 @@ lemma tprovable_instTerm_nlt_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu
   exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
 
 omit [𝗜𝚺₁ ⪯ T] in
-lemma tprovable_instFormula_iff {n p : V} (hp : IsSemiformula ℒₒᵣ n p) :
+lemma tprovable_instFormula_iff (hp : IsSemiformula ℒₒᵣ n p) :
     T.internalize V ⊢ instFormula n p hp 🡘 psatF (assignment n) p ↔
       Provable T (iff ℒₒᵣ (subst ℒₒᵣ (fvarVec n) p)
         (subst ℒₒᵣ ?[assignmentCode n, numeral p] (⌜psatDef.val⌝ : V))) := by
   rw [tprovable_iff_provable];
   simp [instFormula, psatF, Sentence.quote_eq]
 
-lemma tprovable_instFormula_and {n p q : V} (hp : IsSemiformula ℒₒᵣ n p)
-    (hq : IsSemiformula ℒₒᵣ n q)
+lemma tprovable_instFormula_and (hp : IsSemiformula ℒₒᵣ n p) (hq : IsSemiformula ℒₒᵣ n q)
     (h₁ : T.internalize V ⊢ instFormula n p hp 🡘 psatF (assignment n) p)
     (h₂ : T.internalize V ⊢ instFormula n q hq 🡘 psatF (assignment n) q) :
     T.internalize V ⊢ instFormula n (p ^⋏ q) (by simp [hp, hq]) 🡘
@@ -808,7 +794,7 @@ lemma tprovable_instFormula_and {n p q : V} (hp : IsSemiformula ℒₒᵣ n p)
   generalize psatF (assignment n) (p ^⋏ q) = Z at h₃ ⊢;
   cl_prover [h₁, h₂, h₃]
 
-lemma tprovable_instFormula_or {n p q : V} (hp : IsSemiformula ℒₒᵣ n p)
+lemma tprovable_instFormula_or (hp : IsSemiformula ℒₒᵣ n p)
     (hq : IsSemiformula ℒₒᵣ n q) (hpb : IsBounded p) (hqb : IsBounded q)
     (h₁ : T.internalize V ⊢ instFormula n p hp 🡘 psatF (assignment n) p)
     (h₂ : T.internalize V ⊢ instFormula n q hq 🡘 psatF (assignment n) q) :
@@ -825,7 +811,7 @@ lemma tprovable_instFormula_or {n p q : V} (hp : IsSemiformula ℒₒᵣ n p)
   generalize psatF (assignment n) (p ^⋎ q) = Z at h₃ ⊢;
   cl_prover [h₁, h₂, h₃]
 
-lemma tprovable_instFormula_ball {n t q : V} (ht : IsSemiterm ℒₒᵣ n t)
+lemma tprovable_instFormula_ball (ht : IsSemiterm ℒₒᵣ n t)
     (hts : termShift ℒₒᵣ t = t) (hq : IsSemiformula ℒₒᵣ (n + 1) q) (hqs : shift ℒₒᵣ q = q)
     (hqb : IsBounded q)
     (ih : T.internalize V ⊢ instFormula (n + 1) q hq 🡘 psatF (assignment (n + 1)) q)
@@ -865,7 +851,7 @@ lemma tprovable_instFormula_ball {n t q : V} (ht : IsSemiterm ℒₒᵣ n t)
   generalize psatF (assignment n) (qqBall (termBShift ℒₒᵣ t) q) = P at h₃ ⊢;
   cl_prover [h₁, h₂, h₃, h₄]
 
-lemma tprovable_instFormula_bex {n t q : V} (ht : IsSemiterm ℒₒᵣ n t)
+lemma tprovable_instFormula_bex (ht : IsSemiterm ℒₒᵣ n t)
     (hts : termShift ℒₒᵣ t = t) (hq : IsSemiformula ℒₒᵣ (n + 1) q) (hqs : shift ℒₒᵣ q = q)
     (hqb : IsBounded q)
     (ih : T.internalize V ⊢ instFormula (n + 1) q hq 🡘 psatF (assignment (n + 1)) q)
@@ -907,7 +893,7 @@ lemma tprovable_instFormula_bex {n t q : V} (ht : IsSemiterm ℒₒᵣ n t)
   cl_prover [h₁, h₂, h₃, h₄]
 
 omit [𝗜𝚺₁ ⪯ T] in
-lemma termBShift_inj {n t t' : V} (ht : IsSemiterm ℒₒᵣ n t) (ht' : IsSemiterm ℒₒᵣ n t')
+lemma termBShift_inj {t' : V} (ht : IsSemiterm ℒₒᵣ n t) (ht' : IsSemiterm ℒₒᵣ n t')
     (h : termBShift ℒₒᵣ t = termBShift ℒₒᵣ t') : t = t' := by
   have H : ∀ i < n, (bvarVec 0 n).[i] = ^#i := by
     intro i hi

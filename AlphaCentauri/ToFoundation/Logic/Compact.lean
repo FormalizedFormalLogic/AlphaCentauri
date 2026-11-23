@@ -3,9 +3,10 @@ module
 public import Foundation.Logic.Semantics
 
 /-!
-# Gaps in Foundation's `Logic.Semantics`: compactness along a cumulative sequence
+# Compactness along a cumulative sequence
 
-The two directions of `FFL.Compact.compact_cumulative`.
+The two directions of `FFL.Compact.compact_cumulative`: a cumulative union is satisfiable if and
+only if each member is.
 -/
 
 @[expose] public section

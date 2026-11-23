@@ -1,21 +1,17 @@
 module
 
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Theory
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Functions
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 
 /-!
 # Derivations in models of $\mathsf{EA}$
 
-The file `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Proof/Basic.lean` on codes of
-derivations, ported to models of $\mathsf{EA}$: sets of formulas `IsFormulaSet`, the shift
-`setShift` of a set of formulas, the codes `axL`, …, `axm` of the inference rules, and the
-predicates `Derivation T`, `DerivationOf T`, `Derivable T`, `Proof T` and `Provable T` for a
-theory `T` whose axioms are locally $\Delta_0$ in the model. The formulas are Foundation's
-`isFormulaSet`, `setShiftGraph`, `axLGraph`, …, `axmGraph`, `Derivation.blueprint`, `derivation`,
-`derivationOf`, `derivable`, `proof` and `provable`; derivations form a strongly finite fixpoint,
-with induction on locally $\Delta_0$ predicates.
+Sets of formulas `IsFormulaSet`, the shift `setShift` of a set of formulas, the codes `axL`, …,
+`axm` of the inference rules, and the predicates `Derivation T`, `DerivationOf T`, `Derivable T`,
+`Proof T` and `Provable T` for a theory `T` whose axioms are locally $\Delta_0$ in the model,
+defined by `isFormulaSet`, `setShiftGraph`, `axLGraph`, …, `axmGraph`, `Derivation.blueprint`,
+`derivation`, `derivationOf`, `derivable`, `proof` and `provable`. Derivations form a strongly
+finite fixpoint, with induction on locally $\Delta_0$ predicates.
 
 - [HP98, §V.3]
 -/
@@ -28,7 +24,7 @@ namespace FFL.FirstOrder.Arithmetic
 namespace ElementaryArithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
-  {L : Language} [L.Encodable] [L.LORDefinable]
+  {L : Language} [L.Encodable] [L.LORDefinable] {Γ : Polarity} {m : ℕ} {d dp p q s s' t : V}
 
 variable (L) in
 /-- The predicate that every element of `s` is the code of a formula. -/
@@ -43,18 +39,18 @@ instance defined : 𝚫ᴬ₁-Predicate[V] IsFormulaSet L via isFormulaSet L := 
 
 instance definable : 𝚫ᴬ₁-Predicate[V] IsFormulaSet L := defined.to_definable
 
-instance definable' {Γ : Polarity} {m : ℕ} : Γᴬ_[m + 1]-Predicate[V] IsFormulaSet L :=
+instance definable' : Γᴬ_[m + 1]-Predicate[V] IsFormulaSet L :=
   .of_deltaOne definable
 
 @[simp]
 lemma empty : IsFormulaSet L (∅ : V) := fun p ↦ by simp
 
 @[simp]
-lemma singleton {p : V} : IsFormulaSet L ({p} : V) ↔ IsFormula L p := by
+lemma singleton : IsFormulaSet L ({p} : V) ↔ IsFormula L p := by
   simp [IsFormulaSet]
 
 @[simp]
-lemma insert_iff {p s : V} : IsFormulaSet L (insert p s) ↔ IsFormula L p ∧ IsFormulaSet L s := by
+lemma insert_iff : IsFormulaSet L (insert p s) ↔ IsFormula L p ∧ IsFormulaSet L s := by
   simp [IsFormulaSet]
 
 alias ⟨insert, _⟩ := insert_iff
@@ -94,28 +90,26 @@ variable (L) in
 /-- The set of the shifts of the elements of `s`. -/
 noncomputable def setShift (s : V) : V := Classical.choose! (setShift_existsUnique L s)
 
-lemma mem_setShift_iff {s y : V} : y ∈ setShift L s ↔ ∃ x ∈ s, y = shift L x :=
+lemma mem_setShift_iff {y : V} : y ∈ setShift L s ↔ ∃ x ∈ s, y = shift L x :=
   Classical.choose!_spec (setShift_existsUnique L s) y
 
-lemma IsFormulaSet.setShift {s : V} (h : IsFormulaSet L s) : IsFormulaSet L (setShift L s) := by
+lemma IsFormulaSet.setShift (h : IsFormulaSet L s) : IsFormulaSet L (setShift L s) := by
   simp only [IsFormulaSet, mem_setShift_iff, forall_exists_index, and_imp]
   rintro _ p hp rfl; exact (h p hp).shift
 
-lemma shift_mem_setShift {p s : V} (h : p ∈ s) : shift L p ∈ setShift L s :=
+lemma shift_mem_setShift (h : p ∈ s) : shift L p ∈ setShift L s :=
   mem_setShift_iff.mpr ⟨p, h, rfl⟩
 
 @[simp]
-lemma IsFormulaSet.setShift_iff {s : V} :
-    IsFormulaSet L (Bootstrapping.setShift L s) ↔ IsFormulaSet L s :=
+lemma IsFormulaSet.setShift_iff : IsFormulaSet L (Bootstrapping.setShift L s) ↔ IsFormulaSet L s :=
   ⟨by intro h p hp; simpa using h (shift L p) (shift_mem_setShift hp), IsFormulaSet.setShift⟩
 
 @[simp]
-lemma mem_setShift_union {s t : V} :
-    setShift L (s ∪ t) = setShift L s ∪ setShift L t := mem_ext <| by
+lemma mem_setShift_union : setShift L (s ∪ t) = setShift L s ∪ setShift L t := mem_ext <| by
   simp [mem_setShift_iff, mem_cup_iff]; grind
 
 @[simp]
-lemma mem_setShift_insert {x s : V} :
+lemma mem_setShift_insert {x : V} :
     setShift L (insert x s) = insert (shift L x) (setShift L s) := mem_ext <| by
   simp [mem_setShift_iff]
 
@@ -640,7 +634,7 @@ instance Derivation.defined : 𝚫ᴬ₁-Predicate[V] Derivation T via derivatio
 
 instance Derivation.definable : 𝚫ᴬ₁-Predicate[V] Derivation T := Derivation.defined.to_definable
 
-instance Derivation.definable' {Γ : Polarity} {m : ℕ} : Γᴬ_[m + 1]-Predicate[V] Derivation T :=
+instance Derivation.definable' : Γᴬ_[m + 1]-Predicate[V] Derivation T :=
   Derivation.definable.of_deltaOne
 
 instance DerivationOf.defined : 𝚫ᴬ₁-Relation[V] DerivationOf T via derivationOf T := .mk
@@ -650,7 +644,7 @@ instance DerivationOf.defined : 𝚫ᴬ₁-Relation[V] DerivationOf T via deriva
 instance DerivationOf.definable : 𝚫ᴬ₁-Relation[V] DerivationOf T :=
   DerivationOf.defined.to_definable
 
-instance DerivationOf.definable' {Γ : Polarity} {m : ℕ} : Γᴬ_[m + 1]-Relation[V] DerivationOf T :=
+instance DerivationOf.definable' : Γᴬ_[m + 1]-Relation[V] DerivationOf T :=
   DerivationOf.definable.of_deltaOne
 
 instance Derivable.defined : 𝚺ᴬ₁-Predicate[V] Derivable T via derivable T :=
@@ -658,7 +652,6 @@ instance Derivable.defined : 𝚺ᴬ₁-Predicate[V] Derivable T via derivable T
 
 instance Derivable.definable : 𝚺ᴬ₁-Predicate[V] Derivable T := Derivable.defined.to_definable
 
-/-- instance for definability tactic -/
 instance Derivable.definable' : 𝚺ᴬ_[0 + 1]-Predicate[V] Derivable T := Derivable.definable
 
 instance Proof.defined : 𝚫ᴬ₁-Relation[V] Proof T via proof T := .mk
@@ -666,7 +659,7 @@ instance Proof.defined : 𝚫ᴬ₁-Relation[V] Proof T via proof T := .mk
 
 instance Proof.definable : 𝚫ᴬ₁-Relation[V] Proof T := Proof.defined.to_definable
 
-instance Proof.definable' {Γ : Polarity} {m : ℕ} : Γᴬ_[m + 1]-Relation[V] Proof T :=
+instance Proof.definable' : Γᴬ_[m + 1]-Relation[V] Proof T :=
   Proof.definable.of_deltaOne
 
 instance Provable.defined : 𝚺ᴬ₁-Predicate[V] Provable T via provable T :=
@@ -674,7 +667,6 @@ instance Provable.defined : 𝚺ᴬ₁-Predicate[V] Provable T via provable T :=
 
 instance Provable.definable : 𝚺ᴬ₁-Predicate[V] Provable T := Provable.defined.to_definable
 
-/-- instance for definability tactic -/
 instance Provable.definable' : 𝚺ᴬ_[0 + 1]-Predicate[V] Provable T := Provable.definable
 
 end
@@ -686,7 +678,7 @@ lemma derivation_locallyDelta0 : LocallyDelta0Pred (Derivation (V := V) T) :=
 
 namespace Derivation
 
-lemma case_iff {d : V} :
+lemma case_iff :
     Derivation T d ↔
     IsFormulaSet L (fstIdx d) ∧
     ( (∃ s p, d = Bootstrapping.axL s p ∧ p ∈ s ∧ neg L p ∈ s) ∨
@@ -752,77 +744,70 @@ lemma induction {P : V → Prop} (hP : LocallyDelta0Pred P)
         (ih d₁ hC₁).2 (ih d₂ hC₂).2
     · exact hRoot s (by simpa using hds) p hs hT) d hd
 
-lemma isFormulaSet {d : V} (h : Derivation T d) : IsFormulaSet L (fstIdx d) :=
+lemma isFormulaSet (h : Derivation T d) : IsFormulaSet L (fstIdx d) :=
   (h : Derivation T d).case.1
 
-lemma _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.DerivationOf.isFormulaSet
-    {d s : V} (h : DerivationOf T d s) : IsFormulaSet L s := by
+lemma
+    _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.DerivationOf.isFormulaSet
+    (h : DerivationOf T d s) : IsFormulaSet L s := by
   simpa [h.1] using h.2.case.1
 
-lemma axL {s p : V} (hs : IsFormulaSet L s) (h : p ∈ s) (hn : neg L p ∈ s) :
-    Derivation T (axL s p) :=
+lemma axL (hs : IsFormulaSet L s) (h : p ∈ s) (hn : neg L p ∈ s) : Derivation T (axL s p) :=
   Bootstrapping.Derivation.mk ⟨by simpa using hs, by disj 1; exact ⟨s, p, rfl, h, hn⟩⟩
 
-lemma verumIntro {s : V} (hs : IsFormulaSet L s) (h : ^⊤ ∈ s) :
-    Derivation T (verumIntro s) :=
+lemma verumIntro (hs : IsFormulaSet L s) (h : ^⊤ ∈ s) : Derivation T (verumIntro s) :=
   Bootstrapping.Derivation.mk ⟨by simpa using hs, by disj 2; exact ⟨s, rfl, h⟩⟩
 
-lemma andIntro {s p q dp dq : V} (h : p ^⋏ q ∈ s)
-    (hdp : DerivationOf T dp (insert p s)) (hdq : DerivationOf T dq (insert q s)) :
+lemma andIntro {dq : V} (h : p ^⋏ q ∈ s) (hdp : DerivationOf T dp (insert p s))
+    (hdq : DerivationOf T dq (insert q s)) :
     Derivation T (andIntro s p q dp dq) :=
   Bootstrapping.Derivation.mk
     ⟨by simp only [fstIdx_andIntro]; intro r hr; exact hdp.isFormulaSet r (by simp [hr]),
       by disj 3; exact ⟨s, p, q, dp, dq, rfl, h, hdp, hdq⟩⟩
 
-lemma orIntro {s p q dpq : V} (h : p ^⋎ q ∈ s)
-    (hdpq : DerivationOf T dpq (insert p (insert q s))) :
+lemma orIntro {dpq : V} (h : p ^⋎ q ∈ s) (hdpq : DerivationOf T dpq (insert p (insert q s))) :
     Derivation T (orIntro s p q dpq) :=
   Bootstrapping.Derivation.mk
     ⟨by simp only [fstIdx_orIntro]; intro r hr; exact hdpq.isFormulaSet r (by simp [hr]),
       by disj 4; exact ⟨s, p, q, dpq, rfl, h, hdpq⟩⟩
 
-lemma allIntro {s p dp : V} (h : ^∀ p ∈ s)
-    (hdp : DerivationOf T dp (insert (free L p) (setShift L s))) :
+lemma allIntro (h : ^∀ p ∈ s) (hdp : DerivationOf T dp (insert (free L p) (setShift L s))) :
     Derivation T (allIntro s p dp) :=
   Bootstrapping.Derivation.mk
     ⟨by simp only [fstIdx_allIntro]; intro q hq; simpa using
           hdp.isFormulaSet (shift L q) (by simp [shift_mem_setShift hq]),
       by disj 5; exact ⟨s, p, dp, rfl, h, hdp⟩⟩
 
-lemma exsIntro {s p t dp : V}
-    (h : ^∃ p ∈ s) (ht : IsTerm L t)
+lemma exsIntro (h : ^∃ p ∈ s) (ht : IsTerm L t)
     (hdp : DerivationOf T dp (insert (substs1 L t p) s)) :
     Derivation T (exsIntro s p t dp) :=
   Bootstrapping.Derivation.mk
     ⟨by simp only [fstIdx_exsIntro]; intro q hq; exact hdp.isFormulaSet q (by simp [hq]),
       by disj 6; exact ⟨s, p, t, dp, rfl, h, ht, hdp⟩⟩
 
-lemma wkRule {s s' d : V} (hs : IsFormulaSet L s)
-    (h : s' ⊆ s) (hd : DerivationOf T d s') : Derivation T (wkRule s d) :=
+lemma wkRule (hs : IsFormulaSet L s) (h : s' ⊆ s) (hd : DerivationOf T d s') :
+    Derivation T (wkRule s d) :=
   Bootstrapping.Derivation.mk
     ⟨by simpa using hs, by disj 7; exact ⟨s, d, rfl, by simp [hd.1, h], hd.2⟩⟩
 
-lemma shiftRule {s d : V}
-    (hd : DerivationOf T d s) : Derivation T (shiftRule (setShift L s) d) :=
+lemma shiftRule (hd : DerivationOf T d s) : Derivation T (shiftRule (setShift L s) d) :=
   Bootstrapping.Derivation.mk
     ⟨by simp [hd.isFormulaSet], by disj 8; exact ⟨setShift L s, d, rfl, by simp [hd.1], hd.2⟩⟩
 
-lemma cutRule {s p d₁ d₂ : V}
-    (hd₁ : DerivationOf T d₁ (insert p s))
+lemma cutRule {d₁ d₂ : V} (hd₁ : DerivationOf T d₁ (insert p s))
     (hd₂ : DerivationOf T d₂ (insert (neg L p) s)) :
     Derivation T (cutRule s p d₁ d₂) :=
   Bootstrapping.Derivation.mk
     ⟨by simp only [fstIdx_cutRule]; intro q hq; exact hd₁.isFormulaSet q (by simp [hq]),
       by disj 9; exact ⟨s, p, d₁, d₂, rfl, hd₁, hd₂⟩⟩
 
-lemma axm {s p : V} (hs : IsFormulaSet L s) (hp : p ∈ s) (hT : p ∈ T.Δ₁Class) :
-    Derivation T (axm s p) :=
+lemma axm (hs : IsFormulaSet L s) (hp : p ∈ s) (hT : p ∈ T.Δ₁Class) : Derivation T (axm s p) :=
   Bootstrapping.Derivation.mk
     ⟨by simpa using hs, by disj 10; exact ⟨s, p, rfl, hp, hT⟩⟩
 
 variable [LocallyDelta0Axioms U V]
 
-lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {d : V} : Derivation T d → Derivation U d := by
+lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) : Derivation T d → Derivation U d := by
   intro hd
   apply Bootstrapping.Derivation.induction derivation_locallyDelta0 hd
   · intro s hs p hp hn; apply Derivation.axL hs hp hn
@@ -848,69 +833,63 @@ end Derivation
 
 namespace Derivable
 
-lemma isFormulaSet {s : V} (h : Derivable T s) : IsFormulaSet L s := by
+lemma isFormulaSet (h : Derivable T s) : IsFormulaSet L s := by
   rcases h with ⟨d, hd⟩; exact hd.isFormulaSet
 
-lemma em {s : V} (hs : IsFormulaSet L s) (p) (h : p ∈ s) (hn : neg L p ∈ s) :
+lemma em (hs : IsFormulaSet L s) (p) (h : p ∈ s) (hn : neg L p ∈ s) :
     Derivable T s := ⟨axL s p, by simp, Derivation.axL hs h hn⟩
 
-lemma verum {s : V} (hs : IsFormulaSet L s) (h : ^⊤ ∈ s) :
+lemma verum (hs : IsFormulaSet L s) (h : ^⊤ ∈ s) :
     Derivable T s := ⟨verumIntro s, by simp, Derivation.verumIntro hs h⟩
 
-lemma and_m {s p q : V} (h : p ^⋏ q ∈ s) (hp : Derivable T (insert p s))
-    (hq : Derivable T (insert q s)) :
+lemma and_m (h : p ^⋏ q ∈ s) (hp : Derivable T (insert p s)) (hq : Derivable T (insert q s)) :
     Derivable T s := by
   rcases hp with ⟨dp, hdp⟩; rcases hq with ⟨dq, hdq⟩
   exact ⟨andIntro s p q dp dq, by simp, Derivation.andIntro h hdp hdq⟩
 
-lemma or_m {s p q : V} (h : p ^⋎ q ∈ s) (hpq : Derivable T (insert p (insert q s))) :
-    Derivable T s := by
+lemma or_m (h : p ^⋎ q ∈ s) (hpq : Derivable T (insert p (insert q s))) : Derivable T s := by
   rcases hpq with ⟨dpq, hdpq⟩
   exact ⟨orIntro s p q dpq, by simp, Derivation.orIntro h hdpq⟩
 
-lemma all_m {s p : V} (h : ^∀ p ∈ s) (hp : Derivable T (insert (free L p) (setShift L s))) :
+lemma all_m (h : ^∀ p ∈ s) (hp : Derivable T (insert (free L p) (setShift L s))) :
     Derivable T s := by
   rcases hp with ⟨dp, hdp⟩
   exact ⟨allIntro s p dp, by simp, Derivation.allIntro h hdp⟩
 
-lemma ex_m {s p t : V} (h : ^∃ p ∈ s) (ht : IsTerm L t)
-    (hp : Derivable T (insert (substs1 L t p) s)) :
+lemma ex_m (h : ^∃ p ∈ s) (ht : IsTerm L t) (hp : Derivable T (insert (substs1 L t p) s)) :
     Derivable T s := by
   rcases hp with ⟨dp, hdp⟩
   exact ⟨exsIntro s p t dp, by simp, Derivation.exsIntro h ht hdp⟩
 
-lemma wk {s s' : V} (hs : IsFormulaSet L s) (h : s' ⊆ s) (hd : Derivable T s') :
-    Derivable T s := by
+lemma wk (hs : IsFormulaSet L s) (h : s' ⊆ s) (hd : Derivable T s') : Derivable T s := by
   rcases hd with ⟨d, hd⟩
   exact ⟨wkRule s d, by simp, Derivation.wkRule hs h hd⟩
 
-lemma shift {s : V} (hd : Derivable T s) :
-    Derivable T (setShift L s) := by
+lemma shift (hd : Derivable T s) : Derivable T (setShift L s) := by
   rcases hd with ⟨d, hd⟩
   exact ⟨shiftRule (setShift L s) d, by simp, Derivation.shiftRule hd⟩
 
-lemma ofSetEq {s s' : V} (h : ∀ x, x ∈ s' ↔ x ∈ s) (hd : Derivable T s') :
-    Derivable T s := by
+lemma ofSetEq (h : ∀ x, x ∈ s' ↔ x ∈ s) (hd : Derivable T s') : Derivable T s := by
   rw [← mem_ext h]
   exact hd
 
-lemma exchange {s p q : V} (h : Derivable T (insert p <| insert q s)) :
+lemma exchange (h : Derivable T (insert p <| insert q s)) :
     Derivable T (insert q <| insert p s) := h.ofSetEq (fun x ↦ by simp; tauto)
 
-lemma cut {s : V} (p) (hd₁ : Derivable T (insert p s)) (hd₂ : Derivable T (insert (neg L p) s)) :
+lemma cut (p) (hd₁ : Derivable T (insert p s)) (hd₂ : Derivable T (insert (neg L p) s)) :
     Derivable T s := by
   rcases hd₁ with ⟨d₁, hd₁⟩; rcases hd₂ with ⟨d₂, hd₂⟩
   exact ⟨cutRule s p d₁ d₂, by simp, Derivation.cutRule hd₁ hd₂⟩
 
-lemma by_axm {s : V} (hs : IsFormulaSet L s) (p) (hp : p ∈ s) (hT : p ∈ T.Δ₁Class) :
+lemma by_axm (hs : IsFormulaSet L s) (p) (hp : p ∈ s) (hT : p ∈ T.Δ₁Class) :
     Derivable T s := ⟨Bootstrapping.axm s p, by simp, Derivation.axm hs hp hT⟩
 
 variable [LocallyDelta0Axioms U V]
 
-lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {s : V} : Derivable T s → Derivable U s := by
+lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) : Derivable T s → Derivable U s := by
   rintro ⟨d, hd⟩; exact ⟨d, hd.1, hd.2.of_ss h⟩
 
-lemma and {s p q : V} (hp : Derivable T (insert p s)) (hq : Derivable T (insert q s)) :
+lemma and (hp : Derivable T (insert p s)) (hq : Derivable T (insert q s)) :
     Derivable T (insert (p ^⋏ q) s) :=
   and_m (p := p) (q := q) (by simp)
     (wk (by simp [hp.isFormulaSet.insert, hq.isFormulaSet.insert])
@@ -918,18 +897,17 @@ lemma and {s p q : V} (hp : Derivable T (insert p s)) (hq : Derivable T (insert 
     (wk (by simp [hp.isFormulaSet.insert, hq.isFormulaSet.insert])
       (insert_subset_insert_of_subset _ <| by simp) hq)
 
-lemma or {s p q : V} (hpq : Derivable T (insert p (insert q s))) :
-    Derivable T (insert (p ^⋎ q) s) :=
+lemma or (hpq : Derivable T (insert p (insert q s))) : Derivable T (insert (p ^⋎ q) s) :=
   or_m (p := p) (q := q) (by simp)
     (wk (by simp [hpq.isFormulaSet.insert, hpq.isFormulaSet.insert.2.insert])
       (insert_subset_insert_of_subset _ <| insert_subset_insert_of_subset _ <| by simp) hpq)
 
-lemma all {p s : V} (hp : IsSemiformula L 1 p)
-    (dp : Derivable T (insert (free L p) (setShift L s))) : Derivable T (insert (^∀ p) s) :=
+lemma all (hp : IsSemiformula L 1 p) (dp : Derivable T (insert (free L p) (setShift L s))) :
+    Derivable T (insert (^∀ p) s) :=
   all_m (p := p) (by simp)
     (wk (by simp [hp, by simpa using dp.isFormulaSet]) (by intro x; simp; tauto) dp)
 
-lemma exs {p t s : V} (hp : IsSemiformula L 1 p) (ht : IsTerm L t)
+lemma exs (hp : IsSemiformula L 1 p) (ht : IsTerm L t)
     (dp : Derivable T (insert (substs1 L t p) s)) : Derivable T (insert (^∃ p) s) :=
   ex_m (p := p) (by simp) ht <|
     wk (by simp [hp, by simpa using dp.isFormulaSet]) (by intro x; simp; tauto) dp

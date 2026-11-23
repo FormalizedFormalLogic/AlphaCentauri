@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import Foundation.FirstOrder.Incompleteness.Definability
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 
 /-!

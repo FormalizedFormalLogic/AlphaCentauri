@@ -1,18 +1,14 @@
 module
 
 public import Mathlib.Data.Nat.Prime.Defs
-public import Foundation.FirstOrder.Arithmetic.Schemata
-public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
-public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
-public import Foundation.FirstOrder.Arithmetic.Exponential
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.BlockSequence
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Power
-public import Foundation.FirstOrder.Arithmetic.EA.Basic
-public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 
 /-!
 # Prime factors and prime powers
+
+In a model of $\mathsf{I}\Sigma_0$, every number above one has a prime divisor, a prime dividing a
+product divides a factor, and `IsPrimePower p q` says that `q` is a positive power of the prime `p`.
+`divisorUpTo y T` is the largest divisor of `y` whose prime-power divisors are all at most `T`.
 -/
 
 @[expose] public section
@@ -22,9 +18,10 @@ namespace Arithmetic
 
 open scoped FFL.FirstOrder.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {p p' q q' d u v : V}
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
+  {a b c d n o o' p p' q q' x y z T T' u v : V}
 
-lemma exists_isPrime_dvd {n : V} (h : 1 < n) : ∃ p, IsPrime p ∧ p ∣ n := by
+lemma exists_isPrime_dvd (h : 1 < n) : ∃ p, IsPrime p ∧ p ∣ n := by
   obtain ⟨p, ⟨hp1, hpn⟩, hmin⟩ :=
     ISigma0.least_number (P := fun d ↦ 1 < d ∧ d ∣ n) (by definability) ⟨h, dvd_refl n⟩
   refine ⟨p, ⟨hp1, ?_⟩, hpn⟩
@@ -39,7 +36,7 @@ lemma exists_isPrime_dvd {n : V} (h : 1 < n) : ∃ p, IsPrime p ∧ p ∣ n := b
   have hb1' : 1 < b := lt_of_le_of_ne (one_le_of_zero_lt b (pos_iff_ne_zero.mpr hb0)) (Ne.symm hb1)
   exact hmin b (lt_of_le_of_ne hbp hbp') ⟨hb1', hbd.trans hpn⟩
 
-lemma dvd_of_dvd_add {a b c : V} (h : a ∣ b) (h' : a ∣ b + c) : a ∣ c := by
+lemma dvd_of_dvd_add (h : a ∣ b) (h' : a ∣ b + c) : a ∣ c := by
   obtain ⟨s, rfl⟩ := h
   obtain ⟨t, ht⟩ := h'
   rcases (Arithmetic.zero_le a).eq_or_lt with rfl | ha
@@ -135,8 +132,7 @@ lemma mul_prime (h : IsPrimePower p q) : IsPrimePower p (q * p) := by
 lemma unique (h : IsPrimePower p q) (h' : IsPrimePower p' q) : p = p' :=
   h'.2.2 p (le_of_dvd h'.pos h.dvd) h.1 h.dvd
 
-lemma eq_one_or_isPrimePower (h : IsPrimePower p q) (hd : d ∣ q) :
-    d = 1 ∨ IsPrimePower p d := by
+lemma eq_one_or_isPrimePower (h : IsPrimePower p q) (hd : d ∣ q) : d = 1 ∨ IsPrimePower p d := by
   have hd0 : 0 < d := pos_of_ne_zero (by rintro rfl; exact h.pos.ne' (zero_dvd_iff.mp hd))
   rcases (one_le_of_zero_lt d hd0).eq_or_lt with rfl | hd1
   · exact Or.inl rfl
@@ -164,8 +160,7 @@ lemma dvd_or_dvd (h : IsPrimePower p q) (h' : IsPrimePower p q') : q ∣ q' ∨ 
       · exact Or.inl ⟨t', by ac_rfl⟩
     · exact Or.inr (hd.trans (dvd_mul_left s p))
 
-lemma mul_le_of_lt (h : IsPrimePower p q) (h' : IsPrimePower p q') (hlt : q < q') :
-    q * p ≤ q' := by
+lemma mul_le_of_lt (h : IsPrimePower p q) (h' : IsPrimePower p q') (hlt : q < q') : q * p ≤ q' := by
   rcases h.dvd_or_dvd h' with ⟨t, rfl⟩ | hd
   · rcases h'.eq_one_or_isPrimePower (dvd_mul_left t q) with rfl | ht
     · simp at hlt
@@ -235,8 +230,6 @@ lemma exists_greatest_primePowerDivisorsLE (y T : V) :
 noncomputable def divisorUpTo (y T : V) : V :=
   Classical.choose (exists_greatest_primePowerDivisorsLE y T)
 
-variable {x y T T' o o' : V}
-
 lemma divisorUpTo_le (y T : V) : divisorUpTo y T ≤ y :=
   (Classical.choose_spec (exists_greatest_primePowerDivisorsLE y T)).1
 
@@ -254,7 +247,7 @@ lemma le_divisorUpTo (hy : 0 < y) (hd : d ∣ y) (h : PrimePowerDivisorsLE T d) 
     d ≤ divisorUpTo y T :=
   le_divisorUpTo_of_le (le_of_dvd hy hd) hd h
 
-lemma divisorUpTo_eq_iff {z : V} : z = divisorUpTo y T ↔ z ≤ y ∧ z ∣ y ∧ PrimePowerDivisorsLE T z ∧
+lemma divisorUpTo_eq_iff : z = divisorUpTo y T ↔ z ≤ y ∧ z ∣ y ∧ PrimePowerDivisorsLE T z ∧
     ∀ d ≤ y, d ∣ y → PrimePowerDivisorsLE T d → d ≤ z := by
   constructor
   · rintro rfl
@@ -410,7 +403,7 @@ lemma two_mul_length_add_lt (hD : 0 < d) (hP : IsPrimePower p (T + 1)) (hdvd : T
     _ = 2 * ‖divisorUpTo d (T + 1)‖ + 2 := by grind
   exact lt_of_add_lt_add_right this
 
-lemma eq_of_two_mul_length_add_eq {T' p' o' : V} (hD : 0 < d) (hP : IsPrimePower p (T + 1))
+lemma eq_of_two_mul_length_add_eq (hD : 0 < d) (hP : IsPrimePower p (T + 1))
     (hdvd : T + 1 ∣ d) (ho : o < ‖p‖) (hP' : IsPrimePower p' (T' + 1)) (hdvd' : T' + 1 ∣ d)
     (ho' : o' < ‖p'‖) (h : 2 * ‖divisorUpTo d T‖ + o = 2 * ‖divisorUpTo d T'‖ + o') :
     T = T' ∧ o = o' := by

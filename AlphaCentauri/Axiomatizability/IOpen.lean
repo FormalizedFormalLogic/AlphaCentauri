@@ -2,8 +2,7 @@ module
 
 public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.Model.OpenInduction
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenPredicate
-public import AlphaCentauri.ToFoundation.FirstOrder.OpenFormulaDegree
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.OpenFormula
 public import AlphaCentauri.ToMathlib.RingTheory.HahnSeries.IntegerPart
 
 /-!

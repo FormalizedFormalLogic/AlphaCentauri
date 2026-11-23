@@ -1,12 +1,8 @@
 module
 
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.BlockSequence
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.CodedPigeonhole
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Factorial
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Injection
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Pigeonhole
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Power
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Factorial
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
 
 /-!

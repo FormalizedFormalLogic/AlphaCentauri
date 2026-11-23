@@ -2,14 +2,10 @@ module
 
 public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 public import AlphaCentauri.Reflection.Definability.SSNums
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
-public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
-public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
-public import AlphaCentauri.ToFoundation.FirstOrder.Rew
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 
 /-!
 # $\Delta_1$ presentation of the uniform reflection schema

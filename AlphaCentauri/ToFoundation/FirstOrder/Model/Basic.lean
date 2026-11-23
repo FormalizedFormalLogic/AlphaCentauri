@@ -3,10 +3,6 @@ module
 public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.ToFoundation.FirstOrder.ConstantExtension
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
-public import Foundation.FirstOrder.LK.Completeness.CounterModel
-public import Foundation.FirstOrder.LK.Soundness
-public import Foundation.FirstOrder.Tarski.Eq
-public import Foundation.FirstOrder.Tarski.Elementary
 public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Absoluteness
 public import Foundation.Vorspiel.Computability
 public import Mathlib.Data.Finset.Lattice.Fold
@@ -53,12 +49,12 @@ open Semiformula Tarski.Structure
 
 universe u v w
 
+variable {L : Language} {ℬ : Bounding L} {M : Type u} {N : Type v} {K : Type w}
+  [Tarski.Structure L M] [Tarski.Structure L N] [Tarski.Structure L K] {T : Theory L}
+
 /-! ## Embeddings -/
 
 namespace Tarski.Structure.Embedding
-
-variable {L : Language} {M : Type u} {N : Type v} {K : Type w} [Tarski.Structure L M]
-  [Tarski.Structure L N] [Tarski.Structure L K]
 
 variable (L M) in
 /-- The identity embedding. -/
@@ -90,9 +86,6 @@ end Tarski.Structure.Embedding
 /-! ## Elementary substructures -/
 
 section
-
-variable {L : Language} {M : Type u} {N : Type v} {K : Type w}
-  [Tarski.Structure L M] [Tarski.Structure L N] [Tarski.Structure L K]
 
 /-- `ι` is $\Gamma$-elementary: every formula of $\Gamma$ takes the same truth value at elements of
 `M` as at their images.
@@ -139,15 +132,13 @@ theorem IsElementary.of_tarskiVaught (ι : M ↪ₛ[L] N)
       use ι x
       simpa [Matrix.comp_vecCons''] using (ih (x :> e)).mpr hx
 
-/-- An elementary embedding preserves the truth of sentences. -/
 lemma IsElementary.models_iff [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
     (h : IsElementary (fun {_} _ ↦ True) ι) (σ : Sentence L) : N↓[L] ⊧ σ ↔ M↓[L] ⊧ σ := by
   rw [FFL.FirstOrder.models_iff, FFL.FirstOrder.models_iff]
   simpa [Matrix.empty_eq] using h (φ := Rewriting.emb σ) trivial ![] fun _ ↦ Classical.ofNonempty
 
-/-- An elementary embedding into a model of `T` is from a model of `T`. -/
 lemma IsElementary.modelsTheory [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
-    (h : IsElementary (fun {_} _ ↦ True) ι) {T : Theory L} [N↓[L] ⊧* T] : M↓[L] ⊧* T :=
+    (h : IsElementary (fun {_} _ ↦ True) ι) [N↓[L] ⊧* T] : M↓[L] ⊧* T :=
   ⟨fun σ hσ ↦ (h.models_iff σ).mp <| Semantics.ModelsSet.models _ hσ⟩
 
 /-- A $\Gamma$-elementary substructure: an embedding of `M` into `N` which is $\Gamma$-elementary.
@@ -270,8 +261,7 @@ end
 
 section
 
-variable {L : Language} {ℬ : Bounding L} {S : Type u} {M : Type v} [Tarski.Structure L S]
-  [Tarski.Structure L M] (ι : S ↪ₛ[L] M)
+variable {S : Type u} {M : Type v} [Tarski.Structure L S] [Tarski.Structure L M] (ι : S ↪ₛ[L] M)
 
 lemma eval_ex_iff_of_witness {n : ℕ} {χ : Semiformula L ℕ (n + 1)} {e : Fin n → S} {f : ℕ → S}
     (witness : (∃ x : M, χ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, χ.Eval (ι x :> ι ∘ e) (ι ∘ f))
@@ -353,7 +343,7 @@ structure ElementaryChain (M : ℕ → Type u) [∀ n, Tarski.Structure L (M n)]
 
 namespace ElementaryChain
 
-variable {L : Language} {M : ℕ → Type u} [∀ n, Tarski.Structure L (M n)]
+variable {M : ℕ → Type u} [∀ n, Tarski.Structure L (M n)]
   (c : ElementaryChain L M) {k l m n : ℕ}
 
 /-- The elementary substructure `M m ≼ₑ[L] M n` composed of the steps from `m` to `n`. -/
@@ -498,9 +488,6 @@ end
 
 section
 
-variable {L : Language} {ℬ : Bounding L} {M : Type u} {N : Type v} {K : Type w}
-  [Tarski.Structure L M] [Tarski.Structure L N] [Tarski.Structure L K]
-
 /-- An end extension of `M` to `N` for `ℬ`: an embedding of `M` into `N` whose image is an initial
 segment for every bounding operator of `ℬ`.
 - [Kay91, Definition 2.6]
@@ -579,7 +566,7 @@ include e in
 /-- A theory all of whose members are $\Pi_1$ sentences holds in `M` as soon as it holds in an end
 extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
-theorem models_of_Pi1 [Nonempty M] [Nonempty N] {T : Theory L} (hT : ∀ σ ∈ T, ℬ.Hierarchy 𝚷 1 σ)
+theorem models_of_Pi1 [Nonempty M] [Nonempty N] (hT : ∀ σ ∈ T, ℬ.Hierarchy 𝚷 1 σ)
     [N↓[L] ⊧* T] : M↓[L] ⊧* T := by
   apply models_theory_iff.mpr
   intro σ hσ
@@ -591,7 +578,7 @@ theorem models_of_Pi1 [Nonempty M] [Nonempty N] {T : Theory L} (hT : ∀ σ ∈ 
 include e in
 /-- A $\Pi_1$-axiomatizable theory holds in `M` as soon as it holds in an end extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
-theorem models_of_Pi1Axiomatizable [Nonempty M] [Nonempty N] {T : Theory L}
+theorem models_of_Pi1Axiomatizable [Nonempty M] [Nonempty N]
     (hT : Axiomatizable (ℬ.Hierarchy 𝚷 1) T) [N↓[L] ⊧* T] : M↓[L] ⊧* T := by
   obtain ⟨U, hU, hTU⟩ := hT
   have : U ⪯ T := hTU.symm.le
@@ -632,12 +619,12 @@ namespace «Type»
 
 open Semiformula
 
-variable {L : Language} {ξ : Type*} {k : ℕ}
+variable {ξ : Type*} {k : ℕ} {M : Type*} [Tarski.Structure L M]
+  {Φ Ψ : FirstOrder.Type L ξ k} {b : ξ → M}
 
 /-- The tuple `a` realizes `Φ` with the parameters read as `b`.
 - [Kay91, §8.1] -/
-def RealizedBy {M : Type*} [Tarski.Structure L M] (Φ : FirstOrder.Type L ξ k) (b : ξ → M)
-    (a : Fin k → M) : Prop :=
+def RealizedBy (Φ : FirstOrder.Type L ξ k) (b : ξ → M) (a : Fin k → M) : Prop :=
   ∀ φ ∈ Φ, φ.Eval a b
 
 /-- `Φ` is realized in `M` with the parameters read as `b`.
@@ -659,12 +646,10 @@ def FinitelySatisfied (Φ : FirstOrder.Type L ξ k) (M : Type*) [Tarski.Structur
 /-- `Φ` decides every formula in `M` with the parameters read as `b`: some finite subset of `Φ`
 implies the formula or its negation.
 - [Kay91, §11.2] -/
-def IsComplete {M : Type*} [Tarski.Structure L M] (Φ : FirstOrder.Type L ξ k) (b : ξ → M) : Prop :=
+def IsComplete (Φ : FirstOrder.Type L ξ k) (b : ξ → M) : Prop :=
   ∀ φ : Semiformula L ξ k, ∃ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ ∧
     ((∀ a, RealizedBy (s : Set (Semiformula L ξ k)) b a → φ.Eval a b) ∨
       ∀ a, RealizedBy (s : Set (Semiformula L ξ k)) b a → ¬φ.Eval a b)
-
-variable {M : Type*} [Tarski.Structure L M] {Φ Ψ : FirstOrder.Type L ξ k} {b : ξ → M}
 
 lemma RealizedBy.mono {a : Fin k → M} (h : Φ.RealizedBy b a) (hΨΦ : Ψ ⊆ Φ) : Ψ.RealizedBy b a :=
   fun φ hφ ↦ h φ (hΨΦ hφ)
@@ -797,7 +782,7 @@ end «Type»
 
 section
 
-variable {L : Language} [L.Encodable]
+variable [L.Encodable]
 
 /-- The set of codes of the formulas of `Φ` is recursive.
 - [Kay91, §11.2] -/
@@ -828,7 +813,7 @@ end
 
 section
 
-variable {L : Language} {M : Type*} [Tarski.Structure L M]
+variable {M : Type*} [Tarski.Structure L M]
 
 /-- A formula satisfying `C`, with parameters from `A`, which defines `a` in `M`: `a` is the only
 element of `M` satisfying it. -/
@@ -861,7 +846,7 @@ end
 
 section
 
-variable {L : Language} {M : Type} [Tarski.Structure L M]
+variable {M : Type} [Tarski.Structure L M]
 
 /-- Over no parameters, a class of formulas closed under renaming the free variables defines the
 same elements by formulas as by sentences. -/

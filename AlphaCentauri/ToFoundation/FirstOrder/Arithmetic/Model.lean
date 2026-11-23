@@ -1,17 +1,29 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.Tarski.Elementary
 
-/-! # Homomorphisms and embeddings of `ℒₒᵣ`-structures
+/-!
+# Models of arithmetic
 
-A homomorphism of `ℒₒᵣ`-structures preserves `0`, `1`, `+` and `*`; an embedding also preserves
-and reflects `<`.
+An arithmetic sentence a theory does not prove fails in some model of that theory. A homomorphism
+of `ℒₒᵣ`-structures preserves `0`, `1`, `+` and `*`; an embedding also preserves and reflects `<`.
 -/
 
 @[expose] public section
 
-namespace FFL.FirstOrder.Tarski.Structure
+namespace FFL.FirstOrder
+namespace Arithmetic
+
+/-- A sentence unprovable in `T` fails in some model of `T`. -/
+lemma exists_countermodel_of_unprovable {T : ArithmeticTheory} [𝗘𝗤 ℒₒᵣ ⪯ T]
+    {σ : ArithmeticSentence} (h : T ⊬ σ) :
+    ∃ (M : Type) (_ : ORingStructure M) (_ : M↓[ℒₒᵣ] ⊧* T), ¬M↓[ℒₒᵣ] ⊧ σ := by
+  by_contra! hc
+  exact h (complete T σ fun M _ _ ↦ hc M ‹_› ‹_›)
+
+end Arithmetic
+
+namespace Tarski.Structure
 
 open Arithmetic
 
@@ -44,4 +56,6 @@ lemma EmbeddingClass.map_lt_map_iff [EmbeddingClass F ℒₒᵣ M N] (f : F) {x 
     f x < f y ↔ x < y := by
   simpa [Function.comp_def] using EmbeddingClass.rel f Language.LT.lt ![x, y]
 
-end FFL.FirstOrder.Tarski.Structure
+end Tarski.Structure
+
+end FFL.FirstOrder

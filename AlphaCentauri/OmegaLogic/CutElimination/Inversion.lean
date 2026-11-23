@@ -2,7 +2,7 @@ module
 
 public import AlphaCentauri.OmegaLogic.Provable
 public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Bounds
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 
 /-!
 # Inversion of the connectives in `Z_∞`

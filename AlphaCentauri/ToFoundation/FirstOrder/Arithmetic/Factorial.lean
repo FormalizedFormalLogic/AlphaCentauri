@@ -1,9 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.EA.Basic
-public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Power
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.BlockSequence
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 
 /-!
 # Factorial
@@ -20,15 +17,13 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 noncomputable section
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {a d i k k' x y L L' I S S' U : V}
 
 attribute [local instance] ElementaryArithmetic.models_ISigma0_union_Omega1
 
 local notation S "{" L "}[" i "]" => Nuon.ext L S i
 
 namespace Factorial
-
-variable {a d x k k' L L' I S S' U : V}
 
 /-- The blocks of `S` of width `‖L‖` list the partial products up to `k!`. -/
 def IsSeq (L S k : V) : Prop := S{L}[0] = 1 ∧ ∀ i < k, S{L}[i + 1] = S{L}[i] * (i + 1)
@@ -78,8 +73,7 @@ lemma IsSeq.ext_eq (H : IsSeq L S k) (H' : IsSeq L' S' k) : ∀ i ≤ k, S{L}[i]
     intro hi
     rw [H.2 i (succ_le_iff_lt.mp hi), H'.2 i (succ_le_iff_lt.mp hi), IH (le_trans (by simp) hi)]
 
-private lemma mul_length_lt_length (hL : Exponential (x * ‖x‖) L) {i : V} (hi : i ≤ x) :
-    i * ‖x‖ < ‖L‖ := by
+private lemma mul_length_lt_length (hL : Exponential (x * ‖x‖) L) (hi : i ≤ x) : i * ‖x‖ < ‖L‖ := by
   rw [hL.length_eq]; exact lt_succ_iff_le.mpr (mul_le_mul_right hi)
 
 private lemma length_lt_length (hL : Exponential (x * ‖x‖) L) : ‖x‖ < ‖L‖ := by
@@ -192,10 +186,10 @@ def factorial (x : V) : V := Classical.choose! (Factorial.exists_unique x)
 lemma factorial_factorial (x : V) : Factorial x (factorial x) :=
   Classical.choose!_spec (Factorial.exists_unique x)
 
-lemma Factorial.factorial_eq {x y : V} (h : Factorial x y) : factorial x = y :=
+lemma Factorial.factorial_eq (h : Factorial x y) : factorial x = y :=
   (Factorial.exists_unique x).unique (factorial_factorial x) h
 
-lemma Factorial.eq_iff {x y : V} : y = factorial x ↔ Factorial x y :=
+lemma Factorial.eq_iff : y = factorial x ↔ Factorial x y :=
   Classical.choose!_eq_iff_right (Factorial.exists_unique x)
 
 @[simp]
@@ -225,7 +219,7 @@ lemma factorial_pos (x : V) : 0 < factorial x := by
   rw [Factorial.factorial_eq (⟨L, S, H, rfl⟩ : Factorial x _)]
   exact H.ext_pos x le_rfl
 
-lemma dvd_factorial {d x : V} (pos : 0 < d) (h : d ≤ x) : d ∣ factorial x := by
+lemma dvd_factorial (pos : 0 < d) (h : d ≤ x) : d ∣ factorial x := by
   obtain ⟨L, S, H⟩ := Factorial.exists_isSeq x
   rw [Factorial.factorial_eq (⟨L, S, H, rfl⟩ : Factorial x _)]
   exact H.ext_dvd pos x le_rfl h

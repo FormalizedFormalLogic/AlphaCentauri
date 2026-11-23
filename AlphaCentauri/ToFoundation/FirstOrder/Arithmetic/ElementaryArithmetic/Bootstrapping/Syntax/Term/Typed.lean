@@ -6,11 +6,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Typed
 /-!
 # Typed terms in models of $\mathsf{EA}$
 
-The part of `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Term/Typed.lean` on the
-internal free-variable vector `fvarVec`, ported to models of $\mathsf{EA}$. The blueprint and the
-formula `fvarVecDef` are Foundation's; the values of the recursion are not bounded below a
-fixed bound, so the recursion carries the invariant that the value is the list of the first free
-variables.
+The internal free-variable vector `fvarVec`, defined by the formula `fvarVecDef`. The values of the
+recursion are not bounded below a fixed bound, so the recursion carries the invariant that the
+value is the list of the first free variables.
 -/
 
 @[expose] public section
@@ -21,8 +19,6 @@ namespace FFL.FirstOrder.Arithmetic
 namespace ElementaryArithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
-
-/-! ## Internal free-variable vector `fvarVec` -/
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.fvarVec (blueprint)
 

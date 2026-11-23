@@ -1,24 +1,26 @@
 module
 
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Hierarchy
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Proof.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Theory
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Term.Typed
-public import Foundation.FirstOrder.Incompleteness.Definability
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Provable
+public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 
 /-!
-# The induction schemata recognised on codes in models of $\mathsf{EA}$
+# Incompleteness in models of $\mathsf{EA}$
 
-The part of `Foundation/FirstOrder/Incompleteness/Definability.lean` on recognising the induction
-schema on codes, ported to models of $\mathsf{EA}$: the code `indBodyVal` of the induction
-instance of a formula, and the predicate `InductionR S` of codes of the universal closures of
-induction instances of formulas satisfying `S`, defined by Foundation's `chInd`. In each model of
-$\mathsf{EA}$ the axioms of `𝗣𝗔⁻`, of the induction schemata over `ℬ[<, ℒₒᵣ].Hierarchy Γ s` and
-`ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`, and hence of `𝗜𝗡𝗗 Γ s`, `𝗜𝗡𝗗⁺ Γ s` and `𝗘𝗔`, form a locally
-$\Delta_0$ set (`LocallyDelta0Axioms`).
+The code `indBodyVal` of the induction instance of a formula, and the predicate `InductionR S` of
+codes of the universal closures of induction instances of formulas satisfying `S`, defined by
+`chInd`. In each model of $\mathsf{EA}$ the axioms of `𝗣𝗔⁻`, of the induction schemata over
+`ℬ[<, ℒₒᵣ].Hierarchy Γ s` and `ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`, and hence of `𝗜𝗡𝗗 Γ s`,
+`𝗜𝗡𝗗⁺ Γ s` and `𝗘𝗔`, form a locally $\Delta_0$ set (`LocallyDelta0Axioms`). A model of
+$\mathsf{EA}$ satisfies the uniform reflection schema of a theory `T` for `φ` iff every instance of
+`φ` by numerals whose code is internally provable in `T` holds in the model, for theories `T` whose
+axioms are locally $\Delta_0$ in the model.
 -/
 
 @[expose] public section
+
+/-! ## The induction schemata recognised on codes -/
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -28,7 +30,7 @@ namespace ElementaryArithmetic
 open _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping Bounding
 open _root_.FFL.FirstOrder.Arithmetic (substCode indBodyValGraph chInd)
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {S S' : V → Prop} {p : V}
 
 /-- The code of the induction instance `φ(0) → (∀ x, φ(x) → φ(x + 1)) → ∀ x, φ(x)` of the code
 `k` of a formula `φ(x)`. -/
@@ -57,21 +59,18 @@ def InductionR (S : V → Prop) (p : V) : Prop :=
     ∧ ∃ K ≤ subst ℒₒᵣ (fvarVec m) b,
         IsSemiformula ℒₒᵣ 1 K ∧ S K ∧ subst ℒₒᵣ (fvarVec m) b = indBodyVal K
 
-instance InductionR.defined {S : V → Prop} {cond : 𝚫ᴬ₁.Semisentence 1}
-    [hcond : 𝚫ᴬ₁-Predicate[V] S via cond] :
+instance InductionR.defined {cond : 𝚫ᴬ₁.Semisentence 1} [hcond : 𝚫ᴬ₁-Predicate[V] S via cond] :
     𝚫ᴬ₁-Predicate[V] (InductionR S : V → Prop) via chInd cond := .mk <| by
   constructor
   · intro v; simp [chInd, HierarchySymbol.Semiformula.val_sigma, eq_comm]
   · intro v
     simp [chInd, HierarchySymbol.Semiformula.val_sigma, InductionR, lt_succ_iff_le, eq_comm]
 
-lemma InductionR.mono {S S' : V → Prop} (hS : ∀ K, S K → S' K) {p : V} (h : InductionR S p) :
-    InductionR S' p := by
+lemma InductionR.mono (hS : ∀ K, S K → S' K) (h : InductionR S p) : InductionR S' p := by
   obtain ⟨m, hm, b, hb, hp, hU, hsh, hbv, K, hK, hKs, hKS, hsub⟩ := h
   exact ⟨m, hm, b, hb, hp, hU, hsh, hbv, K, hK, hKs, hS K hKS, hsub⟩
 
-lemma inductionR_locallyDelta0 {S : V → Prop} (hS : LocallyDelta0Pred S) :
-    LocallyDelta0Pred (InductionR S) := by
+lemma inductionR_locallyDelta0 (hS : LocallyDelta0Pred S) : LocallyDelta0Pred (InductionR S) := by
   have v4 : ∀ i : Fin 4, LocallyDelta0Function fun w : Fin 4 → V ↦ w i :=
     LocallyDelta0Function.var
   have hsb : LocallyDelta0Function fun w : Fin 4 → V ↦ subst ℒₒᵣ (fvarVec (w 2)) (w 1) :=
@@ -103,8 +102,8 @@ lemma inductionR_locallyDelta0 {S : V → Prop} (hS : LocallyDelta0Pred S) :
 /-- A theory whose $\Delta_1$ formula is `chInd cond`, for a formula `cond` defining a locally
 $\Delta_0$ predicate `S`, has locally $\Delta_0$ axioms. -/
 lemma locallyDelta0Axioms_of_chInd {T : ArithmeticTheory} [T.Δ₁] {cond : 𝚫ᴬ₁.Semisentence 1}
-    (hch : T.Δ₁ch = chInd cond) {S : V → Prop} [𝚫ᴬ₁-Predicate[V] S via cond]
-    (hS : LocallyDelta0Pred S) : LocallyDelta0Axioms T V where
+    (hch : T.Δ₁ch = chInd cond) [𝚫ᴬ₁-Predicate[V] S via cond] (hS : LocallyDelta0Pred S) :
+    LocallyDelta0Axioms T V where
   properOn := hch ▸ (InductionR.defined (S := S)).proper
   locallyDelta0 := (inductionR_locallyDelta0 hS).of_iff fun v ↦ by
     simp [Theory.Δ₁Class, hch]
@@ -122,6 +121,16 @@ instance : LocallyDelta0Axioms 𝗣𝗔⁻ V := LocallyDelta0Axioms.ofFinite _ _
 example (Γ : Polarity) (s : ℕ) : LocallyDelta0Axioms (𝗜𝗡𝗗 Γ s) V := inferInstance
 
 example : LocallyDelta0Axioms 𝗘𝗔 V := inferInstance
+
+/-! ## Uniform reflection -/
+
+lemma models_uniformReflectionSchema_iff (T : ArithmeticTheory) [T.Δ₁] [LocallyDelta0Axioms T V]
+    {k : ℕ} (φ : ArithmeticSemisentence k) :
+    V ⊧/![] (T.uniformReflectionSchema φ) ↔
+      ∀ v : Fin k → V,
+        Provable T (Bootstrapping.Arithmetic.substNumerals (((⌜φ⌝ : ℕ) : ℕ) : V) v) →
+          V ⊧/v φ := by
+  simp [Theory.uniformReflectionSchema, Sentence.quote_eq_encode, numeral_eq_natCast]
 
 end ElementaryArithmetic
 end FFL.FirstOrder.Arithmetic

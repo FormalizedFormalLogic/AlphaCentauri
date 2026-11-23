@@ -1,26 +1,133 @@
 module
 
+public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Proof.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Theory
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.FixedPoint
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 
 /-!
-# Internal provability in models of $\mathsf{EA}$: instantiation, modus ponens and induction
+# Provability in models of $\mathsf{EA}$
 
-The internal provability, in a model of $\mathsf{EA}$, of the codes of the theorems of a theory,
-the derivations of an instance of a universal formula and of the conclusion of an implication, and
-the induction on a numeral of a formula whose base case and induction step are theorems.
+Substitution of numerals for the bound variables of a code of a formula: the list `matrixToVec v`
+of the entries of a tuple, `substNumeral` and `substNumerals`, defined by `ssnum` and `ssnums`. The
+internal provability of the codes of the theorems of a theory, the derivations of an instance of a
+universal formula and of the conclusion of an implication, and the induction on a numeral of a
+formula whose base case and induction step are theorems.
 -/
 
 @[expose] public section
 
+/-! ## Substitution of numerals -/
+
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
-namespace ElementaryArithmetic.Bootstrapping
+namespace ElementaryArithmetic
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {k : ℕ} {a b d d₁ d₂ e n p s t N S : V}
+  {L : Language} [L.Encodable] [L.LORDefinable]
+
+section
+
+open _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping Bounding
+
+/-- The list of the entries of the tuple `v`. -/
+noncomputable def matrixToVec {k : ℕ} (v : Fin k → V) : V := Matrix.foldr (fun t w ↦ t ∷ w) 0 v
+
+@[simp]
+lemma matrixToVec_nil (v : Fin 0 → V) : matrixToVec v = 0 := rfl
+
+@[simp]
+lemma matrixToVec_succ (v : Fin (k + 1) → V) :
+    matrixToVec v = Matrix.vecHead v ∷ matrixToVec (Matrix.vecTail v) := rfl
+
+@[simp]
+lemma matrixToVec_len (v : Fin k → V) : len (matrixToVec v) = k := by
+  induction k <;> simp [*]
+
+@[simp]
+lemma matrixToVec_nth (v : Fin k → V) (i : Fin k) : (matrixToVec v).[↑i] = v i := by
+  induction k
+  · exact i.elim0
+  · cases i using Fin.cases
+    · simp; rfl
+    · simp [*]; rfl
+
+section matrixToVec
+
+variable {v : Fin k → V}
+
+lemma isSemitermVec_matrixToVec :
+    IsSemitermVec L (k : V) n (matrixToVec v) ↔ ∀ i, IsSemiterm L n (v i) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [matrixToVec_succ, Nat.cast_succ, IsSemitermVec.cons_iff, ih, Fin.forall_fin_succ]
+    rfl
+
+lemma isUTermVec_matrixToVec (hv : ∀ i, IsUTerm L (v i)) : IsUTermVec L (k : V) (matrixToVec v) :=
+  ⟨by simp, fun i hi ↦ by obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi; simpa using hv i⟩
+
+lemma termSubstVec_matrixToVec {w : V} (hv : ∀ i, IsUTerm L (v i)) :
+    termSubstVec L (k : V) w (matrixToVec v) = matrixToVec fun i ↦ termSubst L w (v i) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    rw [matrixToVec_succ, matrixToVec_succ, Nat.cast_succ,
+      termSubstVec_cons (t := Matrix.vecHead v) (hv 0)
+        (isUTermVec_matrixToVec (v := Matrix.vecTail v) fun i ↦ hv i.succ),
+      ih (v := Matrix.vecTail v) fun i ↦ hv i.succ]
+    rfl
+
+end matrixToVec
+
+namespace Bootstrapping.Arithmetic
+
+set_option linter.dupNamespace false
+
+open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic (ssnum ssnums)
+
+/-- The code of the formula obtained from the code `φ` by substituting the numeral of `x` for its
+bound variable. -/
+noncomputable def substNumeral (φ x : V) : V := subst ℒₒᵣ ?[numeral x] φ
+
+/-- The code of the formula obtained from the code `φ` by substituting the numerals of the entries
+of `v` for its bound variables. -/
+noncomputable def substNumerals (φ : V) (v : Fin k → V) : V :=
+  subst ℒₒᵣ (matrixToVec (fun i ↦ numeral (v i))) φ
+
+instance substNumeral.defined : 𝚺ᴬ₁-Function₂ (substNumeral : V → V → V) via ssnum :=
+  .mk fun v ↦ by simp [ssnum, substNumeral]
+
+instance substNumerals.defined :
+    HierarchySymbol.DefinedFunction
+      (fun v ↦ substNumerals (v 0) (v ·.succ) : (Fin (k + 1) → V) → V) ssnums := .mk fun v ↦ by
+  unfold ssnums
+  symm
+  suffices
+      v 0 = subst ℒₒᵣ (matrixToVec fun i ↦ numeral (v i.succ.succ)) (v 1) ↔
+      ∃ x, ↑k = len x ∧ (∀ i : Fin k, nth x ((i : ℕ) : V) = numeral (v i.succ.succ)) ∧
+        v 0 = subst ℒₒᵣ x (v 1) by
+    simpa [ssnums, substNumerals, numeral_eq_natCast]
+  constructor
+  · intro h
+    refine ⟨matrixToVec fun i ↦ numeral (v i.succ.succ), ?_⟩
+    simpa
+  · rintro ⟨x, hx, h, e⟩
+    suffices (matrixToVec fun i ↦ numeral (v i.succ.succ)) = x by simpa [this]
+    apply nth_ext' (k : V)
+    · simp
+    · simp [hx]
+    · intro i hi
+      rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
+      simp [h]
+
+end Bootstrapping.Arithmetic
+
+end
+
+/-! ## Internal provability: instantiation, modus ponens and induction -/
+
+namespace Bootstrapping
 
 section transfer
 
@@ -33,9 +140,9 @@ private lemma numeral_comp_elim :
 
 /-- A function on `V` and a function on `ℕ` defined by the same $\Sigma_1$ formula agree on
 standard arguments. -/
-lemma natCast_apply_of_defined {k : ℕ} {F : 𝚺ᴬ₁.Semisentence (k + 1)}
-    {f : (Fin k → V) → V} {g : (Fin k → ℕ) → ℕ} (hf : 𝚺ᴬ₁.DefinedFunction f F)
-    (hg : 𝚺ᴬ₁.DefinedFunction g F) (a : Fin k → ℕ) :
+lemma natCast_apply_of_defined {F : 𝚺ᴬ₁.Semisentence (k + 1)} {f : (Fin k → V) → V}
+    {g : (Fin k → ℕ) → ℕ} (hf : 𝚺ᴬ₁.DefinedFunction f F) (hg : 𝚺ᴬ₁.DefinedFunction g F)
+    (a : Fin k → ℕ) :
     f (fun i ↦ (a i : V)) = (g a : V) := by
   have hℕ : F.val.Evalb (g a :> a) := (hg.df (g a :> a)).mpr (by simp)
   have hV := bold_sigma_one_completeness (M := V) F.sigma_prop hℕ
@@ -47,9 +154,9 @@ lemma natCast_apply_of_defined {k : ℕ} {F : 𝚺ᴬ₁.Semisentence (k + 1)}
 
 /-- A predicate on `V` and a predicate on `ℕ` defined by the same $\Sigma_1$ formula: the second
 at standard arguments implies the first. -/
-lemma of_natCast_of_defined {k : ℕ} {F : 𝚺ᴬ₁.Semisentence k}
-    {P : (Fin k → V) → Prop} {Q : (Fin k → ℕ) → Prop} (hP : 𝚺ᴬ₁.Defined P F)
-    (hQ : 𝚺ᴬ₁.Defined Q F) {a : Fin k → ℕ} (h : Q a) : P (fun i ↦ (a i : V)) := by
+lemma of_natCast_of_defined {F : 𝚺ᴬ₁.Semisentence k} {P : (Fin k → V) → Prop}
+    {Q : (Fin k → ℕ) → Prop} (hP : 𝚺ᴬ₁.Defined P F) (hQ : 𝚺ᴬ₁.Defined Q F) {a : Fin k → ℕ}
+    (h : Q a) : P (fun i ↦ (a i : V)) := by
   have hV := bold_sigma_one_completeness (M := V) F.sigma_prop ((hQ.df a).mpr h)
   have e : (ORingStructure.numeral ∘ a : Fin k → V) = fun i ↦ (a i : V) := by
     funext i; simp [numeral_eq_natCast]
@@ -104,7 +211,7 @@ lemma isSemiformula_natCast {n a : ℕ} (h : Arithmetic.Bootstrapping.IsSemiform
     (.mk (Arithmetic.Bootstrapping.IsSemiformula.defined (L := ℒₒᵣ) (V := ℕ)).df)
     (a := ![n, a]) h
 
-lemma natCast_matrixToVec {k : ℕ} (v : Fin k → ℕ) :
+lemma natCast_matrixToVec (v : Fin k → ℕ) :
     ((FFL.FirstOrder.Arithmetic.matrixToVec v : ℕ) : V) = matrixToVec fun i ↦ (v i : V) := by
   induction k with
   | zero => simp
@@ -133,7 +240,7 @@ lemma isSemiformula_natCast_quote (φ : ArithmeticSemisentence n) :
     IsSemiformula ℒₒᵣ (n : V) ((⌜φ⌝ : ℕ) : V) := by
   simpa using isSemiformula_natCast (V := V) (Sentence.quote_isSemiformula (V := ℕ) φ)
 
-lemma natCast_quote_rew_subst {k : ℕ} (φ : ArithmeticSemisentence k)
+lemma natCast_quote_rew_subst (φ : ArithmeticSemisentence k)
     (w : Fin k → ArithmeticSemiterm Empty n) :
     ((⌜Rew.subst w ▹ φ⌝ : ℕ) : V) = subst ℒₒᵣ
       (matrixToVec fun i ↦ ((⌜(Rew.emb (w i) : SyntacticSemiterm ℒₒᵣ n)⌝ : ℕ) : V))
@@ -178,8 +285,7 @@ end quote
 
 section
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
-  [LocallyDelta0Axioms T V]
+variable {T : Theory L} [T.Δ₁] [LocallyDelta0Axioms T V]
 
 /-- A theorem of `T` is internally provable. -/
 theorem provable_natCast_quote_of_provable {σ : Sentence L} (h : T ⊢ σ) :
@@ -215,7 +321,7 @@ noncomputable def modusPonensCode (d₁ d₂ a b : V) : V :=
 
 variable {L}
 
-lemma derivationOf_specializeCode {d p t : V} (hp : IsSemiformula L 1 p) (ht : IsTerm L t)
+lemma derivationOf_specializeCode (hp : IsSemiformula L 1 p) (ht : IsTerm L t)
     (hd : DerivationOf T d {^∀ p}) : DerivationOf T (specializeCode L d p t) {substs1 L t p} := by
   have hA : IsFormula L (substs1 L t p) := hp.substs1 ht
   have hall : IsFormula L (^∀ p) := by simpa using hp
@@ -233,7 +339,7 @@ lemma derivationOf_specializeCode {d p t : V} (hp : IsSemiformula L 1 p) (ht : I
   · refine Derivation.exsIntro (by simp) ht ⟨by simp [hsn], ?_⟩
     exact Derivation.axL (by simp [hA, hex, hnA]) (by simp) (by simp)
 
-lemma derivationOf_modusPonensCode {d₁ d₂ a b : V} (ha : IsFormula L a) (hb : IsFormula L b)
+lemma derivationOf_modusPonensCode (ha : IsFormula L a) (hb : IsFormula L b)
     (hd₁ : DerivationOf T d₁ {imp L a b}) (hd₂ : DerivationOf T d₂ {a}) :
     DerivationOf T (modusPonensCode L d₁ d₂ a b) {b} := by
   have himp : IsFormula L (imp L a b) := by simp [ha, hb]
@@ -255,13 +361,11 @@ lemma derivationOf_modusPonensCode {d₁ d₂ a b : V} (ha : IsFormula L a) (hb 
 
 end codes
 
-variable {n : V}
-
-private lemma le_exp_exp_add {a : V} (k : V) (h : a ≤ Exp.exp (Exp.exp n)) :
+private lemma le_exp_exp_add (k : V) (h : a ≤ Exp.exp (Exp.exp n)) :
     a ≤ Exp.exp (Exp.exp (n + k)) :=
   le_trans h (exp_exp_le_of_le le_self_add)
 
-private lemma le_exp_exp_add_four {a : V} (h : a ≤ Exp.exp (Exp.exp n)) :
+private lemma le_exp_exp_add_four (h : a ≤ Exp.exp (Exp.exp n)) :
     a ≤ Exp.exp (Exp.exp (n + 2 + 2)) := by
   simpa [add_assoc] using le_exp_exp_add (2 + 2) h
 
@@ -274,39 +378,38 @@ private lemma nine_le_exp_exp (hn : 2 ≤ n) : (9 : V) ≤ Exp.exp (Exp.exp n) :
   rw [h2, h4]
   exact_mod_cast (by norm_num : (9 : ℕ) ≤ 16)
 
-private lemma tag_le_exp_exp (hn : 2 ≤ n) {k : ℕ} (hk : k ≤ 9) :
-    (k : V) ≤ Exp.exp (Exp.exp n) :=
+private lemma tag_le_exp_exp (hn : 2 ≤ n) (hk : k ≤ 9) : (k : V) ≤ Exp.exp (Exp.exp n) :=
   le_trans (by exact_mod_cast hk) (nine_le_exp_exp hn)
 
 /-- A set of elements at most `n` is at most `2 ^ 2 ^ n`. -/
-lemma set_le_exp_exp {s : V} (h : ∀ x ∈ s, x ≤ n) : s ≤ Exp.exp (Exp.exp n) :=
+lemma set_le_exp_exp (h : ∀ x ∈ s, x ≤ n) : s ≤ Exp.exp (Exp.exp n) :=
   le_trans (lt_exp_iff.mpr fun x hx ↦ lt_succ_iff_le.mpr (h x hx)).le
     (exp_monotone_le.mpr (succ_le_iff_lt.mpr (lt_exp n)))
 
-private lemma adjoin_le_of {a b m : V} (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
+private lemma adjoin_le_of {m : V} (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
     (hb : b ≤ Exp.exp (Exp.exp m)) (hnm : n ≤ m := by simp [add_assoc]) :
     a ∷ b ≤ Exp.exp (Exp.exp (m + 2)) :=
   adjoin_le_exp_exp (le_trans (le_trans one_le_two hn) hnm)
     (le_trans ha (exp_exp_le_of_le hnm)) hb
 
-private lemma pair_le_of {a b m : V} (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
+private lemma pair_le_of {m : V} (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
     (hb : b ≤ Exp.exp (Exp.exp m)) (hnm : n ≤ m := by simp [add_assoc]) :
     ⟪a, b⟫ ≤ Exp.exp (Exp.exp (m + 2)) :=
   le_trans (by rw [adjoin_def]; exact le_self_add) (adjoin_le_of hn ha hb hnm)
 
-private lemma set3_le_exp_exp {N a b c : V} (ha : a ≤ N) (hb : b ≤ N) (hc : c ≤ N) :
+private lemma set3_le_exp_exp {c : V} (ha : a ≤ N) (hb : b ≤ N) (hc : c ≤ N) :
     (insert a (insert b {c}) : V) ≤ Exp.exp (Exp.exp N) :=
   set_le_exp_exp <| by
     intro x hx
     rcases (by simpa using hx : x = a ∨ x = b ∨ x = c) with rfl | rfl | rfl <;> assumption
 
-private lemma set2_le_exp_exp {N a b : V} (ha : a ≤ N) (hb : b ≤ N) :
+private lemma set2_le_exp_exp (ha : a ≤ N) (hb : b ≤ N) :
     (insert a {b} : V) ≤ Exp.exp (Exp.exp N) :=
   set_le_exp_exp <| by
     intro x hx
     rcases (by simpa using hx : x = a ∨ x = b) with rfl | rfl <;> assumption
 
-private lemma set1_le_exp_exp {N a : V} (ha : a ≤ N) : ({a} : V) ≤ Exp.exp (Exp.exp N) :=
+private lemma set1_le_exp_exp (ha : a ≤ N) : ({a} : V) ≤ Exp.exp (Exp.exp N) :=
   set_le_exp_exp <| by
     intro x hx
     rw [(by simpa using hx : x = a)]
@@ -317,31 +420,29 @@ section rules
 variable (hn : 2 ≤ n)
 include hn
 
-lemma axL_le_exp_exp {s p : V} (hs : s ≤ Exp.exp (Exp.exp n)) (hp : p ≤ Exp.exp (Exp.exp n)) :
+lemma axL_le_exp_exp (hs : s ≤ Exp.exp (Exp.exp n)) (hp : p ≤ Exp.exp (Exp.exp n)) :
     axL s p ≤ Exp.exp (Exp.exp (n + 2 + 2)) :=
   adjoin_le_of hn hs (pair_le_of hn zero_le hp)
 
-lemma wkRule_le_exp_exp {s d : V} (hs : s ≤ Exp.exp (Exp.exp n))
-    (hd : d ≤ Exp.exp (Exp.exp n)) : wkRule s d ≤ Exp.exp (Exp.exp (n + 2 + 2)) :=
+lemma wkRule_le_exp_exp (hs : s ≤ Exp.exp (Exp.exp n)) (hd : d ≤ Exp.exp (Exp.exp n)) :
+    wkRule s d ≤ Exp.exp (Exp.exp (n + 2 + 2)) :=
   adjoin_le_of hn hs (pair_le_of hn (tag_le_exp_exp hn (k := 6) (by simp)) hd)
 
-lemma exsIntro_le_exp_exp {s p t d : V} (hs : s ≤ Exp.exp (Exp.exp n))
-    (hp : p ≤ Exp.exp (Exp.exp n)) (ht : t ≤ Exp.exp (Exp.exp n))
-    (hd : d ≤ Exp.exp (Exp.exp n)) :
+lemma exsIntro_le_exp_exp (hs : s ≤ Exp.exp (Exp.exp n)) (hp : p ≤ Exp.exp (Exp.exp n))
+    (ht : t ≤ Exp.exp (Exp.exp n)) (hd : d ≤ Exp.exp (Exp.exp n)) :
     exsIntro s p t d ≤ Exp.exp (Exp.exp (n + 2 + 2 + 2 + 2)) :=
   adjoin_le_of hn hs <| pair_le_of hn (tag_le_exp_exp hn (k := 5) (by simp)) <|
     pair_le_of hn hp <| pair_le_of hn ht hd
 
-lemma andIntro_le_exp_exp {s p q dp dq : V} (hs : s ≤ Exp.exp (Exp.exp n))
-    (hp : p ≤ Exp.exp (Exp.exp n)) (hq : q ≤ Exp.exp (Exp.exp n))
-    (hdp : dp ≤ Exp.exp (Exp.exp n)) (hdq : dq ≤ Exp.exp (Exp.exp n)) :
+lemma andIntro_le_exp_exp {q dp dq : V} (hs : s ≤ Exp.exp (Exp.exp n))
+    (hp : p ≤ Exp.exp (Exp.exp n)) (hq : q ≤ Exp.exp (Exp.exp n)) (hdp : dp ≤ Exp.exp (Exp.exp n))
+    (hdq : dq ≤ Exp.exp (Exp.exp n)) :
     andIntro s p q dp dq ≤ Exp.exp (Exp.exp (n + 2 + 2 + 2 + 2 + 2)) :=
   adjoin_le_of hn hs <| pair_le_of hn (tag_le_exp_exp hn (k := 2) (by simp)) <|
     pair_le_of hn hp <| pair_le_of hn hq <| pair_le_of hn hdp hdq
 
-lemma cutRule_le_exp_exp {s p d₁ d₂ : V} (hs : s ≤ Exp.exp (Exp.exp n))
-    (hp : p ≤ Exp.exp (Exp.exp n)) (hd₁ : d₁ ≤ Exp.exp (Exp.exp n))
-    (hd₂ : d₂ ≤ Exp.exp (Exp.exp n)) :
+lemma cutRule_le_exp_exp (hs : s ≤ Exp.exp (Exp.exp n)) (hp : p ≤ Exp.exp (Exp.exp n))
+    (hd₁ : d₁ ≤ Exp.exp (Exp.exp n)) (hd₂ : d₂ ≤ Exp.exp (Exp.exp n)) :
     cutRule s p d₁ d₂ ≤ Exp.exp (Exp.exp (n + 2 + 2 + 2 + 2)) :=
   adjoin_le_of hn hs <| pair_le_of hn (tag_le_exp_exp hn (k := 8) (by simp)) <|
     pair_le_of hn hp <| pair_le_of hn hd₁ hd₂
@@ -354,7 +455,7 @@ noncomputable def specializeSize (p t : V) : V :=
   max (substs1 L t p) (max (^∀ p) (max (^∃ neg L p) (max (neg L p)
     (max (neg L (substs1 L t p)) t))))
 
-lemma specializeCode_le_exp_exp {n d p t : V} (hn : 2 ≤ n) (hN : specializeSize L p t ≤ n)
+lemma specializeCode_le_exp_exp (hn : 2 ≤ n) (hN : specializeSize L p t ≤ n)
     (hd : d ≤ Exp.exp (Exp.exp n)) :
     specializeCode L d p t ≤ Exp.exp (Exp.exp (n + 20)) := by
   simp only [specializeSize, max_le_iff] at hN
@@ -375,7 +476,7 @@ variable (L) in
 noncomputable def modusPonensSize (a b : V) : V :=
   max (imp L a b) (max a (max b (max (a ^⋏ neg L b) (neg L b))))
 
-lemma modusPonensCode_le_exp_exp {n d₁ d₂ a b : V} (hn : 2 ≤ n) (hN : modusPonensSize L a b ≤ n)
+lemma modusPonensCode_le_exp_exp (hn : 2 ≤ n) (hN : modusPonensSize L a b ≤ n)
     (hd₁ : d₁ ≤ Exp.exp (Exp.exp n)) (hd₂ : d₂ ≤ Exp.exp (Exp.exp n)) :
     modusPonensCode L d₁ d₂ a b ≤ Exp.exp (Exp.exp (n + 22)) := by
   simp only [modusPonensSize, max_le_iff] at hN
@@ -407,10 +508,10 @@ lemma isSemitermVec_numerals (v : Fin m → V) (n : V) :
     IsSemitermVec ℒₒᵣ (m : V) n (matrixToVec fun i ↦ numeral (v i)) :=
   isSemitermVec_matrixToVec.mpr fun i ↦ numeral_semiterm n (v i)
 
-lemma subst_natCast_quote_rew_subst {k j : ℕ} (φ : ArithmeticSemisentence k)
+lemma subst_natCast_quote_rew_subst {j : ℕ} (φ : ArithmeticSemisentence k)
     (u : Fin k → ArithmeticSemiterm Empty j) {u' : Fin k → V}
     (hu : ∀ i, ((⌜(Rew.emb (u i) : SyntacticSemiterm ℒₒᵣ j)⌝ : ℕ) : V) = u' i)
-    (hu' : ∀ i, IsSemiterm ℒₒᵣ (j : V) (u' i)) {n W : V} (hW : IsSemitermVec ℒₒᵣ (j : V) n W) :
+    (hu' : ∀ i, IsSemiterm ℒₒᵣ (j : V) (u' i)) {W : V} (hW : IsSemitermVec ℒₒᵣ (j : V) n W) :
     subst ℒₒᵣ W ((⌜Rew.subst u ▹ φ⌝ : ℕ) : V) =
       subst ℒₒᵣ (matrixToVec fun i ↦ termSubst ℒₒᵣ W (u' i)) ((⌜φ⌝ : ℕ) : V) := by
   rw [natCast_quote_rew_subst, funext hu,
@@ -445,7 +546,7 @@ lemma provable_substNumerals_of_provable_substNumerals_all (φ : ArithmeticSemis
     (numeral_semiterm 0 x) hd⟩
 
 /-- Instantiating an internally provable universal closure at numerals. -/
-lemma provable_substNumerals_of_provable_allClosure {k : ℕ} (φ : ArithmeticSemisentence k)
+lemma provable_substNumerals_of_provable_allClosure (φ : ArithmeticSemisentence k)
     (h : Provable T ((⌜∀¹* φ⌝ : ℕ) : V)) (v : Fin k → V) :
     Provable T (substNumerals ((⌜φ⌝ : ℕ) : V) v) := by
   induction k with
@@ -456,7 +557,7 @@ lemma provable_substNumerals_of_provable_allClosure {k : ℕ} (φ : ArithmeticSe
     rw [← Matrix.cons_head_tail v]
     exact provable_substNumerals_of_provable_substNumerals_all φ (ih (∀¹ φ) h _) _
 
-private lemma max_specializeSize_modusPonensSize_locallyDelta0 {S : V} {A : V → V}
+private lemma max_specializeSize_modusPonensSize_locallyDelta0 {A : V → V}
     (hA : LocallyDelta0Function₁ A) :
     LocallyDelta0Function₁ fun y ↦
       max (specializeSize ℒₒᵣ S (numeral y)) (modusPonensSize ℒₒᵣ (A y) (A (y + 1))) := by
@@ -473,9 +574,9 @@ private lemma max_specializeSize_modusPonensSize_locallyDelta0 {S : V} {A : V �
     (hmax.comp₂ ((imp_locallyDelta0 (L := ℒₒᵣ)).comp₂ ha hb) <| hmax.comp₂ ha <| hmax.comp₂ hb <|
       hmax.comp₂ (qqAnd_locallyDelta0.comp₂ ha hnb) hnb)
 
-lemma modusPonensCode_specializeCode_le_exp_exp {n e d S t a b : V} (hn : 2 ≤ n)
-    (hN : max (specializeSize ℒₒᵣ S t) (modusPonensSize ℒₒᵣ a b) ≤ n)
-    (he : e ≤ Exp.exp (Exp.exp n)) (hd : d ≤ Exp.exp (Exp.exp n)) :
+lemma modusPonensCode_specializeCode_le_exp_exp (hn : 2 ≤ n)
+    (hN : max (specializeSize ℒₒᵣ S t) (modusPonensSize ℒₒᵣ a b) ≤ n) (he : e ≤ Exp.exp (Exp.exp n))
+    (hd : d ≤ Exp.exp (Exp.exp n)) :
     modusPonensCode ℒₒᵣ (specializeCode ℒₒᵣ e S t) d a b ≤ Exp.exp (Exp.exp (n + 42)) := by
   rw [max_le_iff] at hN
   have := modusPonensCode_le_exp_exp (n := n + 20) (le_trans hn le_self_add)
@@ -485,9 +586,9 @@ lemma modusPonensCode_specializeCode_le_exp_exp {n e d S t a b : V} (hn : 2 ≤ 
 
 /-- If `{∀ S}` and `{A 1}` are derivable and the instance of `S` at the numeral of each `y > 0` is
 `A y → A (y + 1)`, then every `A (y + 1)` is internally provable. -/
-lemma provable_succ_of_derivationOf_all {S e d : V} {A : V → V} (hA : LocallyDelta0Function₁ A)
-    (hS : IsSemiformula ℒₒᵣ 1 S) (hAf : ∀ y, IsFormula ℒₒᵣ (A y))
-    (he : DerivationOf T e {^∀ S}) (hd : DerivationOf T d {A 1})
+lemma provable_succ_of_derivationOf_all {A : V → V} (hA : LocallyDelta0Function₁ A)
+    (hS : IsSemiformula ℒₒᵣ 1 S) (hAf : ∀ y, IsFormula ℒₒᵣ (A y)) (he : DerivationOf T e {^∀ S})
+    (hd : DerivationOf T d {A 1})
     (hstep : ∀ y, 0 < y → substs1 ℒₒᵣ (numeral y) S = imp ℒₒᵣ (A y) (A (y + 1))) (y : V) :
     Provable T (A (y + 1)) := by
   set c : V → V := fun y ↦
@@ -563,7 +664,7 @@ private lemma provable_one_of_provable_zero_of_provable_succ [𝗣𝗔⁻ ⪯ T]
   exact h₁ h₂
 
 private lemma provable_substNumerals_cons_of_provable (φ : ArithmeticSemisentence (m + 1))
-    (t : ArithmeticSemiterm Empty m) {a : V}
+    (t : ArithmeticSemiterm Empty m)
     (ht : ((⌜(Rew.emb t : SyntacticSemiterm ℒₒᵣ m)⌝ : ℕ) : V) = numeral a)
     (h : T ⊢ ∀¹* (Rew.subst (t :> fun i ↦ #i) ▹ φ)) (p : Fin m → V) :
     Provable T (substNumerals ((⌜φ⌝ : ℕ) : V) (a :> p)) := by
@@ -634,5 +735,7 @@ theorem provable_substNumerals_of_provable_zero_of_provable_succ [𝗣𝗔⁻ �
     (fun y ↦ (isSemiformula_natCast_quote φ).subst (hW y)) he hd₁
     (fun _ hy ↦ substs1_subst_qVec_numerals_imp φ p hy) y
 
-end ElementaryArithmetic.Bootstrapping
+end Bootstrapping
+
+end ElementaryArithmetic
 end FFL.FirstOrder.Arithmetic

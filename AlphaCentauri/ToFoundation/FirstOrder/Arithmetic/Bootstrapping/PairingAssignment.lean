@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 
 /-!
-# Gaps in Foundation's `HFS.Vec`: polynomial pairing and decoding of lists
+# Polynomial pairing and decoding of lists
 
 A polynomial pairing `ppair x b = (x + b)² + b + 1` and the decoding `dec` of iterated `ppair`s
 into lists (`∷`).
@@ -16,11 +16,11 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic
 namespace Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {a b b' s s₁ s₂ x x' pr : V}
 
 def ppair (x b : V) : V := (x + b) * (x + b) + b + 1
 
-lemma ppair_lt_ppair {x b x' b' : V} (h : x + b < x' + b') : ppair x b < ppair x' b' := by
+lemma ppair_lt_ppair (h : x + b < x' + b') : ppair x b < ppair x' b' := by
   have h1 : x + b + 1 ≤ x' + b' := lt_iff_succ_le.mp h
   have h2 : (x + b + 1) * (x + b + 1) ≤ (x' + b') * (x' + b') := mul_self_le_mul_self (by simp) h1
   unfold ppair
@@ -34,7 +34,7 @@ lemma ppair_lt_ppair {x b x' b' : V} (h : x + b < x' + b') : ppair x b < ppair x
     rw [add_assoc]; exact lt_add_of_pos_right _ (by simp)
   exact lt_of_le_of_lt (h3.trans h2) this
 
-private lemma ppair_eq_imp {x b x' b' : V} (h : ppair x b = ppair x' b') : x = x' ∧ b = b' := by
+private lemma ppair_eq_imp (h : ppair x b = ppair x' b') : x = x' ∧ b = b' := by
   rcases lt_trichotomy (x + b) (x' + b') with (hl | he | hg)
   · exact absurd h (ppair_lt_ppair hl).ne
   · have : b = b' := by
@@ -46,7 +46,7 @@ private lemma ppair_eq_imp {x b x' b' : V} (h : ppair x b = ppair x' b') : x = x
   · exact absurd h (ppair_lt_ppair hg).ne'
 
 @[simp]
-lemma ppair_inj {x b x' b' : V} : ppair x b = ppair x' b' ↔ x = x' ∧ b = b' := by
+lemma ppair_inj : ppair x b = ppair x' b' ↔ x = x' ∧ b = b' := by
   constructor
   · exact ppair_eq_imp
   · rintro ⟨rfl, rfl⟩; rfl
@@ -85,7 +85,7 @@ def IsPPair (a : V) : Prop := ∃ x ≤ a, ∃ b ≤ a, a = ppair x b
 lemma isPPair_ppair (x b : V) : IsPPair (ppair x b) :=
   ⟨x, (lt_ppair_left x b).le, b, (lt_ppair_right x b).le, rfl⟩
 
-lemma isPPair_iff {a : V} : IsPPair a ↔ ∃ x b, a = ppair x b :=
+lemma isPPair_iff : IsPPair a ↔ ∃ x b, a = ppair x b :=
   ⟨fun ⟨x, _, b, _, h⟩ ↦ ⟨x, b, h⟩, fun ⟨x, b, h⟩ ↦ h ▸ isPPair_ppair x b⟩
 
 def _root_.FFL.FirstOrder.Arithmetic.isPPairDef : 𝚺ᴬ₀.Semisentence 1 :=
@@ -154,12 +154,12 @@ instance graph_defined : 𝚺ᴬ₁-Predicate (Graph : V → Prop) via graphDef 
 
 instance graph_definable : 𝚺ᴬ₁-Predicate (Graph : V → Prop) := graph_defined.to_definable
 
-lemma graph_case {pr : V} :
+lemma graph_case :
     Graph pr ↔
     (∃ a, pr = ⟪a, 0⟫ ∧ ¬IsPPair a) ∨ (∃ x b s, pr = ⟪ppair x b, x ∷ s⟫ ∧ Graph ⟪b, s⟫) :=
   construction.case
 
-lemma graph_of_not_isPPair {a s : V} (h : ¬IsPPair a) : Graph ⟪a, s⟫ ↔ s = 0 := by
+lemma graph_of_not_isPPair (h : ¬IsPPair a) : Graph ⟪a, s⟫ ↔ s = 0 := by
   constructor
   · intro hg
     rcases graph_case.mp hg with (⟨a', h', _⟩ | ⟨x, b, s', h', _⟩)
@@ -167,7 +167,7 @@ lemma graph_of_not_isPPair {a s : V} (h : ¬IsPPair a) : Graph ⟪a, s⟫ ↔ s 
     · exact absurd ((show a = ppair x b ∧ s = x ∷ s' by simpa using h').1 ▸ isPPair_ppair x b) h
   · rintro rfl; exact graph_case.mpr <| Or.inl ⟨a, rfl, h⟩
 
-lemma graph_ppair {x b s : V} : Graph ⟪ppair x b, s⟫ ↔ ∃ s', s = x ∷ s' ∧ Graph ⟪b, s'⟫ := by
+lemma graph_ppair : Graph ⟪ppair x b, s⟫ ↔ ∃ s', s = x ∷ s' ∧ Graph ⟪b, s'⟫ := by
   constructor
   · intro hg
     rcases graph_case.mp hg with (⟨a, h, hn⟩ | ⟨x', b', s', h, hs⟩)
@@ -188,7 +188,7 @@ lemma graph_exists (a : V) : ∃ s, Graph ⟪a, s⟫ := by
       exact ⟨x ∷ s, graph_ppair.mpr ⟨s, rfl, hs⟩⟩
     · exact ⟨0, (graph_of_not_isPPair ha).mpr rfl⟩
 
-lemma graph_unique {a s₁ s₂ : V} : Graph ⟪a, s₁⟫ → Graph ⟪a, s₂⟫ → s₁ = s₂ := by
+lemma graph_unique : Graph ⟪a, s₁⟫ → Graph ⟪a, s₂⟫ → s₁ = s₂ := by
   induction a using ISigma1.pi1_order_induction generalizing s₁ s₂
   · definability
   case ind a ih =>
@@ -212,14 +212,14 @@ noncomputable def dec (a : V) : V := Classical.choose! (graph_existsUnique a)
 
 lemma dec_graph (a : V) : Graph ⟪a, dec a⟫ := Classical.choose!_spec (graph_existsUnique a)
 
-lemma dec_eq_of_graph {a s : V} (h : Graph ⟪a, s⟫) : dec a = s :=
+lemma dec_eq_of_graph (h : Graph ⟪a, s⟫) : dec a = s :=
   graph_unique (dec_graph a) h
 
 @[simp]
 lemma dec_ppair (x b : V) : dec (ppair x b) = x ∷ dec b :=
   dec_eq_of_graph (graph_ppair.mpr ⟨dec b, rfl, dec_graph b⟩)
 
-lemma dec_of_not_isPPair {a : V} (h : ¬IsPPair a) : dec a = 0 :=
+lemma dec_of_not_isPPair (h : ¬IsPPair a) : dec a = 0 :=
   dec_eq_of_graph ((graph_of_not_isPPair h).mpr rfl)
 
 @[simp]

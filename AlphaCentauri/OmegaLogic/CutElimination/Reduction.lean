@@ -1,10 +1,7 @@
 module
 
 public import AlphaCentauri.OmegaLogic.CutElimination.Inversion
-public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
-public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
-public import AlphaCentauri.ToFoundation.FirstOrder.Rew
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Bounds
 
 /-!

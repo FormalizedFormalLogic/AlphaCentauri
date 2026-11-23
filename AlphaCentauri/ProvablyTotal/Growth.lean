@@ -4,8 +4,8 @@ public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Schemata.ParameterFreeInduction
 public import AlphaCentauri.ProvablyTotal.Basic
 public import AlphaCentauri.ProvablyTotal.Parikh
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Completeness
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ConstantExtension
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Model
+public import AlphaCentauri.ToFoundation.FirstOrder.ConstantExtension
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Reflection
 public import AlphaCentauri.ToFoundation.Logic.Compact
 public import Foundation.FirstOrder.Tarski.Ultraproduct

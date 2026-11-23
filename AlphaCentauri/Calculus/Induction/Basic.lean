@@ -1,16 +1,9 @@
 module
 
 public import AlphaCentauri.Calculus.Instantiation
-public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastWitness
-public import AlphaCentauri.ToFoundation.FirstOrder.BinderNotation
-public import AlphaCentauri.ToFoundation.FirstOrder.BooleanCombination
-public import AlphaCentauri.ToFoundation.FirstOrder.Fvar
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
-public import AlphaCentauri.ToFoundation.FirstOrder.PrenexNormalForm
-public import AlphaCentauri.ToFoundation.FirstOrder.Rew
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
+public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 public import Foundation.FirstOrder.LK.Basic
 public import AlphaCentauri.Schemata.DeltaInduction

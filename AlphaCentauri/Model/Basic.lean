@@ -1,7 +1,6 @@
 module
 
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Embedding
-public import AlphaCentauri.ToFoundation.FirstOrder.Bounded
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Model
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.Model.Basic
 public import Foundation.FirstOrder.Arithmetic.Collection.Basic

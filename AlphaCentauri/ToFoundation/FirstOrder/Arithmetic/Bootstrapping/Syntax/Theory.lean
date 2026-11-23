@@ -4,7 +4,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Cod
 public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!
-# Gaps in Foundation's `Syntax/Theory`: $\Delta_1$ numerations whose elements are sentences
+# $\Delta_1$ numerations whose elements are sentences
 
 A $\Delta_1$ numeration of a theory in a nonstandard model may contain codes of formulas with free
 variables. Restricting the numeration to the codes fixed by the shift of free variables gives a
@@ -20,6 +20,8 @@ namespace FFL.FirstOrder
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
 namespace Arithmetic.Bootstrapping
 
 variable (L) in
@@ -27,8 +29,6 @@ variable (L) in
 noncomputable def shiftFixed : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
   (.mkSigma “x. !(shiftGraph L) x x”)
   (.mkPi “x. ∀ y, !(shiftGraph L) y x → y = x”)
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 lemma shiftFixed_sigma_iff (x : V) :
     V ⊧/![x] (shiftFixed L).sigma.val ↔ shift L x = x := by
@@ -101,8 +101,6 @@ lemma Theory.Δ₁.sentential_shift_eq (T : Theory L) (d : T.Δ₁) {V : Type*} 
 instance (T : Theory L) (d : T.Δ₁) : @Theory.Δ₁.Sentential L _ _ T (Theory.Δ₁.sentential T d) :=
   @Theory.Δ₁.Sentential.mk L _ _ T (Theory.Δ₁.sentential T d) fun h ↦
     Theory.Δ₁.sentential_shift_eq T d h
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 lemma Theory.Δ₁.sentential_subset (T : Theory L) (d : T.Δ₁) :

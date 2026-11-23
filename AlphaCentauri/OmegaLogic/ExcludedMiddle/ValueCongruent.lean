@@ -1,8 +1,7 @@
 module
 
-public import AlphaCentauri.ToFoundation.FirstOrder.Rew
+public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 public import AlphaCentauri.OmegaLogic.Provable
-public import AlphaCentauri.ToFoundation.FirstOrder.Semiformula
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.LK.Simplified
 

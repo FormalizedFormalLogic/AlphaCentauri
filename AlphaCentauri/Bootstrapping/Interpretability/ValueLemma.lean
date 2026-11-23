@@ -4,7 +4,7 @@ public import AlphaCentauri.Bootstrapping.Interpretability.DefinesElement
 public import AlphaCentauri.Bootstrapping.Interpretability.TranslationTable
 public import AlphaCentauri.Bootstrapping.Proof.ExistsElimination
 public import AlphaCentauri.Interpretability.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 public import Foundation.Meta.ClProver
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
 

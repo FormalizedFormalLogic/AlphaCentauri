@@ -1,12 +1,10 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Prenex
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
+public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 
 /-!
-# Prenex normal forms of combinations and of lower levels
-
-Companion of Foundation's `Arithmetic/Prenex.lean`.
+# Prenex sentences of arithmetic
 
 In models of `𝗜𝗢𝗽𝗲𝗻`, pairing merges two adjacent quantifiers of the same kind into one. Hence a
 conjunction or a disjunction of two prenex formulas of the same polarity and level, and the
@@ -14,7 +12,8 @@ existential quantification of a prenex $\Sigma_{s + 1}$ formula, are equivalent 
 of that polarity and level. Unlike `Bounding.Prenex.and`, this needs no collection.
 
 Over $\mathsf{B}\Sigma_m$, every $\Gamma'_m$ sentence is equivalent to a prenex sentence of every
-level containing $\Gamma'_m$.
+level containing $\Gamma'_m$. Every prenex class contains a sentence refutable in
+$\mathsf{I}\Sigma_1$.
 -/
 
 @[expose] public section
@@ -29,9 +28,7 @@ lemma val_comp_vecCons {L : Language} {M : Type*} [Tarski.Structure L M] {ξ : T
   funext <| Fin.cases rfl fun _ ↦ rfl
 
 end Semiterm
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder
 namespace Bounding.Prenex
 
 open Arithmetic
@@ -79,10 +76,10 @@ existential quantifiers merged by pairing. -/
 def pairExs {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n + 1)) : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ n :=
   (contract φ.sigmaInv).sigma
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] {f : ξ → V}
+variable {Γ : Polarity} {s n : ℕ} {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻]
+  {f : ξ → V}
 
-lemma eval_contract {Γ : Polarity} {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ (n + 2)) (z : V)
-    (e : Fin n → V) :
+lemma eval_contract (φ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ (n + 2)) (z : V) (e : Fin n → V) :
     Semiformula.Eval (z :> e) f (contract φ).val ↔
       Semiformula.Eval (π₁ z :> π₂ z :> e) f φ.val := by
   induction s generalizing Γ n with
@@ -121,7 +118,7 @@ lemma eval_contract {Γ : Polarity} {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex �
         Semiterm.val_comp_vecCons,
         Semiterm.val_bvar, Matrix.cons_val, Matrix.cons_val_succ, ih, ← models_piInv]
 
-lemma eval_pairAnd {Γ : Polarity} {s n : ℕ} (φ ψ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n) (e : Fin n → V) :
+lemma eval_pairAnd (φ ψ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n) (e : Fin n → V) :
     Semiformula.Eval e f (pairAnd φ ψ).val ↔
       Semiformula.Eval e f φ.val ∧ Semiformula.Eval e f ψ.val := by
   induction s generalizing Γ n with
@@ -140,7 +137,7 @@ lemma eval_pairAnd {Γ : Polarity} {s n : ℕ} (φ ψ : ℬ[<, ℒₒᵣ].Prenex
         and_intros <;> simpa
     · simp only [pairAnd, models_pi, ih, models_piInv φ, models_piInv ψ, forall_and]
 
-lemma eval_pairOr {Γ : Polarity} {s n : ℕ} (φ ψ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n) (e : Fin n → V) :
+lemma eval_pairOr (φ ψ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n) (e : Fin n → V) :
     Semiformula.Eval e f (pairOr φ ψ).val ↔
       Semiformula.Eval e f φ.val ∨ Semiformula.Eval e f ψ.val := by
   induction s generalizing Γ n with
@@ -163,7 +160,7 @@ lemma eval_pairOr {Γ : Polarity} {s n : ℕ} (φ ψ : ℬ[<, ℒₒᵣ].Prenex 
         · exact Or.inl <| h _
         · exact Or.inr <| h _
 
-lemma eval_pairExs {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n + 1)) (e : Fin n → V) :
+lemma eval_pairExs (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n + 1)) (e : Fin n → V) :
     Semiformula.Eval e f (pairExs φ).val ↔ ∃ x, Semiformula.Eval (x :> e) f φ.val := by
   simp only [pairExs, models_sigma, eval_contract, models_sigmaInv φ]
   constructor
@@ -174,9 +171,8 @@ lemma eval_pairExs {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n
     simpa using h
 
 end Bounding.Prenex
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic
+namespace Arithmetic
 
 variable {Γ Γ' : Polarity} {m n : ℕ} (T : ArithmeticTheory) [𝗕𝚺m ⪯ T]
 
@@ -201,4 +197,18 @@ lemma exists_prenexHierarchy_provable_iff {σ : ArithmeticSentence}
     have := models_of_provable (M := V) inferInstance hφ;
     simpa [models_iff, hφψ, -Bounding.Prenex.val_sigmaInv] using this
 
-end FFL.FirstOrder.Arithmetic
+namespace ISigma1
+
+lemma exists_prenexHierarchy_refutable (Γ : Polarity) (n : ℕ) :
+    ∃ χ : ArithmeticSentence, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ ∧ 𝗜𝚺₁ ⊢ ∼χ := by
+  use (Bounding.Prenex.falsum : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0).val;
+  and_intros;
+  · exact Bounding.Prenex.val_prenexHierarchy;
+  · apply complete;
+    intro (V : Type) _ _;
+    simp [models_iff, Bounding.Prenex.models_falsum]
+
+end ISigma1
+
+end Arithmetic
+end FFL.FirstOrder

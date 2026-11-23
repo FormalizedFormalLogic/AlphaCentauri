@@ -4,13 +4,11 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
 /-!
-# Gaps in Foundation's `PartialTruth/General`
+# Partial truth
 
-`BoundedSatisfied` and `PrenexSatisfied` read a formula with closed-off bound
-variables by putting the values of the substituted terms into the assignment, swap under negation,
-and give the same value to every decomposition `qqToPrenex Γ s θ` of the same code.
-
-## References
+`BoundedSatisfied` and `PrenexSatisfied` read a formula with closed-off bound variables by putting
+the values of the substituted terms into the assignment, swap under negation, and give the same
+value to every decomposition `qqToPrenex Γ s θ` of the same code.
 
 - [HP98, 1.64(5), Theorem I.1.75]
 -/
@@ -23,13 +21,13 @@ namespace FFL.FirstOrder.Arithmetic
 namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+  {e k m n p q r t v w x θ θ' : V} {Γ Γ' : Polarity} {s s' : ℕ}
 
 open Arithmetic (numeral numeral_add_two qqNLT)
 
 /-! ## Values of substituted terms -/
 
-lemma termVal_termSubst {e n m w t : V} (hw : IsSemitermVec ℒₒᵣ n m w)
-    (ht : IsSemiterm ℒₒᵣ n t) :
+lemma termVal_termSubst (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t) :
     termVal e (termSubst ℒₒᵣ w t) = termVal (termValVec e n w) t := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -43,7 +41,7 @@ lemma termVal_termSubst {e n m w t : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     intro i hi
     rw [nth_termSubstVec hv.isUTerm hi, ih i hi]
 
-lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
+lemma termValVec_qVec (hw : IsSemitermVec ℒₒᵣ n m w) :
     termValVec (x ∷ e) (n + 1) (qVec ℒₒᵣ w) = x ∷ termValVec e n w := by
   have hq : IsUTermVec ℒₒᵣ (n + 1) (qVec ℒₒᵣ w) := hw.qVec.isUTerm
   apply nth_ext' (n + 1) (by simp [hq]) (by simp [len_termValVec hw.isUTerm])
@@ -59,12 +57,11 @@ lemma termValVec_qVec {n m w e x : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
     simp [nth_termValVec hw.isUTerm hj]
 
 @[simp]
-lemma termValVec_cons₁ {e t : V} (ht : IsUTerm ℒₒᵣ t) :
-    termValVec e 1 (?[t] : V) = ?[termVal e t] := by
+lemma termValVec_cons₁ (ht : IsUTerm ℒₒᵣ t) : termValVec e 1 (?[t] : V) = ?[termVal e t] := by
   simpa [termValVec, termVal] using
     TermVal.construction.resultVec_cons ℒₒᵣ ![e] (IsUTermVec.empty (L := ℒₒᵣ)) ht
 
-lemma termValVec_cons {e k t v : V} (ht : IsUTerm ℒₒᵣ t) (hv : IsUTermVec ℒₒᵣ k v) :
+lemma termValVec_cons (ht : IsUTerm ℒₒᵣ t) (hv : IsUTermVec ℒₒᵣ k v) :
     termValVec e (k + 1) (t ∷ v) = termVal e t ∷ termValVec e k v := by
   simpa [termValVec, termVal] using TermVal.construction.resultVec_cons ℒₒᵣ ![e] hv ht
 
@@ -83,7 +80,7 @@ lemma termVal_numeral (e x : V) : termVal e (numeral x) = x := by
 
 namespace BoundedSatisfied
 
-lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
+lemma neg_iff (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
     BoundedSatisfied e (neg ℒₒᵣ p) ↔ ¬BoundedSatisfied e p := by
   suffices ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p →
       ∀ e, (BoundedSatisfied e (neg ℒₒᵣ p) ↔ ¬BoundedSatisfied e p) from this p hp hp' e
@@ -119,8 +116,7 @@ lemma neg_iff {p e : V} (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p) :
     rw [neg_qqBex ht.termBShift hfq, ball_iff ht (hdq.neg hfq) hfq.neg, bex_iff ht]
     simp only [ih hfq, not_exists, not_and]
 
-private lemma subst_rel {n m w k r v e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
-    (hp : IsSemiformula ℒₒᵣ n (^rel k r v)) :
+private lemma subst_rel (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ n (^rel k r v)) :
     BoundedSatisfied e (Bootstrapping.subst ℒₒᵣ w (^rel k r v)) ↔
       BoundedSatisfied (termValVec e n w) (^rel k r v) := by
   rcases hp.isUFormula.rel_cases with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩ <;>
@@ -134,8 +130,7 @@ private lemma subst_rel {n m w k r v e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     rw [subst_qqLT ht hu, lt_iff (hw.termSubst hts).isUTerm (hw.termSubst hus).isUTerm,
       lt_iff ht hu, termVal_termSubst hw hts, termVal_termSubst hw hus]
 
-private lemma subst_nrel {n m w k r v e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
-    (hp : IsSemiformula ℒₒᵣ n (^nrel k r v)) :
+private lemma subst_nrel (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ n (^nrel k r v)) :
     BoundedSatisfied e (Bootstrapping.subst ℒₒᵣ w (^nrel k r v)) ↔
       BoundedSatisfied (termValVec e n w) (^nrel k r v) := by
   rcases hp.isUFormula.nrel_cases with ⟨t, u, ht, hu, heq⟩ | ⟨t, u, ht, hu, heq⟩ <;>
@@ -156,14 +151,13 @@ private def SubstReads (p : V) : Prop :=
     (BoundedSatisfied e (Bootstrapping.subst ℒₒᵣ w p) ↔
       BoundedSatisfied (termValVec e n w) p)
 
-private lemma substReads_and {p q : V} (ihp : SubstReads p) (ihq : SubstReads q) :
-    SubstReads (p ^⋏ q) := by
+private lemma substReads_and (ihp : SubstReads p) (ihq : SubstReads q) : SubstReads (p ^⋏ q) := by
   intro n m w e hw hpq
   obtain ⟨hp, hq⟩ := IsSemiformula.and.mp hpq
   rw [substs_and hp.isUFormula hq.isUFormula, and_iff, and_iff, ihp n m w e hw hp,
     ihq n m w e hw hq]
 
-private lemma substReads_or {p q : V} (hdp : IsBounded p) (hdq : IsBounded q)
+private lemma substReads_or (hdp : IsBounded p) (hdq : IsBounded q)
     (ihp : SubstReads p) (ihq : SubstReads q) : SubstReads (p ^⋎ q) := by
   intro n m w e hw hpq
   obtain ⟨hp, hq⟩ := IsSemiformula.or.mp hpq
@@ -171,7 +165,7 @@ private lemma substReads_or {p q : V} (hdp : IsBounded p) (hdq : IsBounded q)
     or_iff (hdp.subst hw hp) (hp.subst hw).isUFormula (hdq.subst hw hq) (hq.subst hw).isUFormula,
     or_iff hdp hp.isUFormula hdq hq.isUFormula, ihp n m w e hw hp, ihq n m w e hw hq]
 
-private lemma substReads_ball {t q : V} (ht : IsUTerm ℒₒᵣ t) (hdq : IsBounded q)
+private lemma substReads_ball (ht : IsUTerm ℒₒᵣ t) (hdq : IsBounded q)
     (ih : SubstReads q) : SubstReads (qqBall (termBShift ℒₒᵣ t) q) := by
   intro n m w e hw hpq
   obtain ⟨hts, hq⟩ := hpq.of_qqBall ht
@@ -182,7 +176,7 @@ private lemma substReads_ball {t q : V} (ht : IsUTerm ℒₒᵣ t) (hdq : IsBoun
   intro x _
   rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
 
-private lemma substReads_bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (ih : SubstReads q) :
+private lemma substReads_bex (ht : IsUTerm ℒₒᵣ t) (ih : SubstReads q) :
     SubstReads (qqBex (termBShift ℒₒᵣ t) q) := by
   intro n m w e hw hpq
   obtain ⟨hts, hq⟩ := hpq.of_qqBex ht
@@ -194,10 +188,8 @@ private lemma substReads_bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (ih : SubstRea
   intro _
   rw [ih (n + 1) (m + 1) (qVec ℒₒᵣ w) (x ∷ e) hw.qVec hq, termValVec_qVec hw]
 
-lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
-    (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsBounded p) :
-    BoundedSatisfied e (Bootstrapping.subst ℒₒᵣ w p) ↔
-      BoundedSatisfied (termValVec e n w) p := by
+lemma subst (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ n p) (hp' : IsBounded p) :
+    BoundedSatisfied e (Bootstrapping.subst ℒₒᵣ w p) ↔ BoundedSatisfied (termValVec e n w) p := by
   suffices SubstReads p from this n m w e hw hp
   unfold SubstReads
   apply IsBounded.induction 𝚷 (by definability) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp'
@@ -220,8 +212,7 @@ lemma subst {n m w p e : V} (hw : IsSemitermVec ℒₒᵣ n m w)
 
 /-- A $\Delta_0$ formula `qqQuant Γ θ` is satisfied exactly when `θ` is satisfied for all, or
 some, values of the quantified variable. -/
-lemma qqQuant_iff {Γ : Polarity} {θ e : V} (h : IsBounded (qqQuant Γ θ))
-    (hθ : IsUFormula ℒₒᵣ θ) :
+lemma qqQuant_iff {Γ : Polarity} (h : IsBounded (qqQuant Γ θ)) (hθ : IsUFormula ℒₒᵣ θ) :
     BoundedSatisfied e (qqQuant Γ θ) ↔ PrenexSatisfied Γ 1 e θ := by
   cases Γ
   · obtain ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩ := IsBounded.of_ex h
@@ -247,9 +238,7 @@ end BoundedSatisfied
 
 namespace PrenexSatisfied
 
-variable {Γ Γ' : Polarity} {s s' : ℕ} {θ θ' : V}
-
-lemma neg_iff (hθ : IsBounded θ) (hθ' : IsUFormula ℒₒᵣ θ) {e : V} :
+lemma neg_iff (hθ : IsBounded θ) (hθ' : IsUFormula ℒₒᵣ θ) :
     PrenexSatisfied Γ.alt s e (neg ℒₒᵣ θ) ↔ ¬PrenexSatisfied Γ s e θ := by
   induction s generalizing Γ e with
   | zero => simpa using BoundedSatisfied.neg_iff hθ hθ'
@@ -260,8 +249,7 @@ lemma neg_iff (hθ : IsBounded θ) (hθ' : IsUFormula ℒₒᵣ θ) {e : V} :
         ¬PrenexSatisfied 𝚷 s e θ := fun e ↦ ih (Γ := 𝚷)
     cases Γ <;> simp [hσ, hπ]
 
-lemma subst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hθ : IsSemiformula ℒₒᵣ (n + s) θ)
-    (hθ' : IsBounded θ) {e : V} :
+lemma subst (hw : IsSemitermVec ℒₒᵣ n m w) (hθ : IsSemiformula ℒₒᵣ (n + s) θ) (hθ' : IsBounded θ) :
     PrenexSatisfied Γ s e (Bootstrapping.subst ℒₒᵣ ((qVec ℒₒᵣ)^[s] w) θ) ↔
       PrenexSatisfied Γ s (termValVec e n w) θ := by
   induction s generalizing Γ n m w e with
@@ -273,8 +261,7 @@ lemma subst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hθ : IsSemiformul
 
 /-- A $\Delta_0$ formula `qqToPrenex Γ s θ` is read the same by `PrenexSatisfied Γ s`
 and by `BoundedSatisfied`. -/
-lemma iff_boundedSatisfied (h : IsBounded (qqToPrenex Γ s θ)) (hθ : IsUFormula ℒₒᵣ θ)
-    {e : V} :
+lemma iff_boundedSatisfied (h : IsBounded (qqToPrenex Γ s θ)) (hθ : IsUFormula ℒₒᵣ θ) :
     PrenexSatisfied Γ s e θ ↔ BoundedSatisfied e (qqToPrenex Γ s θ) := by
   match s, le_one_of_isBounded_qqToPrenex h with
   | 0, _ => simp
@@ -283,7 +270,7 @@ lemma iff_boundedSatisfied (h : IsBounded (qqToPrenex Γ s θ)) (hθ : IsUFormul
 /-- Two decompositions of the same code as a prenex formula with a $\Delta_0$ matrix are read the
 same. -/
 lemma iff_of_qqToPrenex_eq (heq : qqToPrenex Γ s θ = qqToPrenex Γ' s' θ') (hθ : IsBounded θ)
-    (hθ' : IsBounded θ') (hf : IsUFormula ℒₒᵣ θ) {e : V} :
+    (hθ' : IsBounded θ') (hf : IsUFormula ℒₒᵣ θ) :
     PrenexSatisfied Γ s e θ ↔ PrenexSatisfied Γ' s' e θ' := by
   have hf' : IsUFormula ℒₒᵣ θ' := isUFormula_qqToPrenex.mp (heq ▸ isUFormula_qqToPrenex.mpr hf)
   induction s generalizing Γ Γ' s' θ' e with

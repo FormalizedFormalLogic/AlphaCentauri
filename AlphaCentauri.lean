@@ -52,6 +52,7 @@ public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Theory
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.Calculus.Instantiation
+public import AlphaCentauri.Combinatorics.ParisHarrington
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Formalized
@@ -194,6 +195,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Factorial
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.NatCoding
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.LeastNumberPrinciple
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Model
@@ -217,6 +219,7 @@ public import AlphaCentauri.ToMathlib.Algebra.Polynomial.LeadingCoeffOrder
 public import AlphaCentauri.ToMathlib.Combinatorics.Ramsey
 public import AlphaCentauri.ToMathlib.Computability.ElementaryClosure
 public import AlphaCentauri.ToMathlib.Computability.Primrec.Basic
+public import AlphaCentauri.ToMathlib.Data.List.Basic
 public import AlphaCentauri.ToMathlib.Data.Vector.Basic
 public import AlphaCentauri.ToMathlib.FieldTheory.Galois.PrimePowerDegree
 public import AlphaCentauri.ToMathlib.FieldTheory.IsRealClosed.Basic

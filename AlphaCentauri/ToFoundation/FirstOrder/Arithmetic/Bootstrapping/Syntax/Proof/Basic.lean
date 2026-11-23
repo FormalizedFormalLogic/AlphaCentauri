@@ -239,34 +239,32 @@ section
 
 /-! ### From typed proofs to derivability -/
 
-variable {T : Theory L} [T.Δ₁]
+variable {T : Theory L} [T.Δ₁] {s : V} {φ ψ : Formula V L}
 
-lemma Derivable.of_tprovable {s : V} {φ : Formula V L} (hs : IsFormulaSet L s)
+lemma Derivable.of_tprovable (hs : IsFormulaSet L s)
     (h : T.internalize V ⊢ φ) : Derivable T (insert φ.val s) := by
   obtain ⟨b⟩ := h
   have := (TDerivation.wk (Γ := insert φ ⟨s, hs⟩) b (by intro x; simp; tauto)).toDerivable
   simpa using! this
 
-lemma Derivable.modusPonens_typed {s : V} {φ ψ : Formula V L}
-    (hφψ : Derivable T (insert (φ 🡒 ψ).val s)) (hφ : Derivable T (insert φ.val s)) :
-    Derivable T (insert ψ.val s) := by
+lemma Derivable.modusPonens_typed (hφψ : Derivable T (insert (φ 🡒 ψ).val s))
+    (hφ : Derivable T (insert φ.val s)) : Derivable T (insert ψ.val s) := by
   let Γ : Sequent V L := ⟨s, (IsFormulaSet.insert_iff.mp hφ.isFormulaSet).2⟩
   have d₁ : T.internalize V ⊢!ᵈᵉʳ insert (φ 🡒 ψ) Γ :=
     Derivable.toTDerivation _ (by simpa [Γ] using! hφψ)
   have d₂ : T.internalize V ⊢!ᵈᵉʳ insert φ Γ := Derivable.toTDerivation _ (by simpa [Γ] using! hφ)
   simpa [Γ] using! (TDerivation.modusPonens d₁ d₂).toDerivable
 
-lemma Derivable.of_tprovable_imp {s : V} {φ ψ : Formula V L}
-    (h : T.internalize V ⊢ φ 🡒 ψ) (hφ : Derivable T (insert φ.val s)) :
-    Derivable T (insert ψ.val s) :=
+lemma Derivable.of_tprovable_imp (h : T.internalize V ⊢ φ 🡒 ψ)
+    (hφ : Derivable T (insert φ.val s)) : Derivable T (insert ψ.val s) :=
   modusPonens_typed (of_tprovable (IsFormulaSet.insert_iff.mp hφ.isFormulaSet).2 h) hφ
 
-lemma Derivable.of_tprovable_imp₂ {s : V} {φ ψ χ : Formula V L}
+lemma Derivable.of_tprovable_imp₂ {χ : Formula V L}
     (h : T.internalize V ⊢ φ 🡒 ψ 🡒 χ) (hφ : Derivable T (insert φ.val s))
     (hψ : Derivable T (insert ψ.val s)) : Derivable T (insert χ.val s) :=
   modusPonens_typed (of_tprovable_imp h hφ) hψ
 
-lemma Derivable.conj_typed {s : V} (hs : IsFormulaSet L s) :
+lemma Derivable.conj_typed (hs : IsFormulaSet L s) :
     ∀ {k : ℕ} {φ : Fin k → Formula V L}, (∀ i, Derivable T (insert (φ i).val s)) →
       Derivable T (insert (Matrix.conj φ).val s)
   | 0, _, _ => Derivable.verum (by simpa using hs) (by simp)
@@ -274,8 +272,7 @@ lemma Derivable.conj_typed {s : V} (hs : IsFormulaSet L s) :
     have := conj_typed hs (φ := Matrix.vecTail φ) fun i ↦ h i.succ
     simpa [Matrix.conj] using Derivable.and (h 0) this
 
-lemma Derivable.insert_neg_of_imp {s : V} {φ ψ : Formula V L}
-    (h : Derivable T (insert (φ 🡒 ψ).val s)) :
+lemma Derivable.insert_neg_of_imp (h : Derivable T (insert (φ 🡒 ψ).val s)) :
     Derivable T (insert (∼φ).val (insert ψ.val s)) := by
   have hs : IsFormulaSet L s := (IsFormulaSet.insert_iff.mp h.isFormulaSet).2
   have d : T.internalize V ⊢!ᵈᵉʳ insert (φ 🡒 ψ) ⟨s, hs⟩ :=
@@ -284,12 +281,12 @@ lemma Derivable.insert_neg_of_imp {s : V} {φ ψ : Formula V L}
     TDerivation.orInv (by simpa [Semiformula.imp_def] using d)
   simpa using! d'.toDerivable
 
-lemma derivable_of_iff_mp {s : V} (X Y : Formula V L)
+lemma derivable_of_iff_mp (X Y : Formula V L)
     (hI : Derivable T (insert (X 🡘 Y).val s)) (hX : Derivable T (insert X.val s)) :
     Derivable T (insert Y.val s) :=
   Derivable.of_tprovable_imp₂ (by cl_prover) hI hX
 
-lemma derivable_insert_or {nd tf s : V} (hs : IsFormulaSet L s)
+lemma derivable_insert_or {nd tf : V} (hs : IsFormulaSet L s)
     (hnd : IsFormula L nd) (htf : IsFormula L tf) (h : Derivable T (insert nd (insert tf s))) :
     Derivable T (insert (nd ^⋎ tf) s) := by
   have hX : IsFormula L (nd ^⋎ tf) := IsSemiformula.or.mpr ⟨hnd, htf⟩

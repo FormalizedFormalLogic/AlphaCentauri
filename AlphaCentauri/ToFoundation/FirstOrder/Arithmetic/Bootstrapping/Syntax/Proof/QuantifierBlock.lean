@@ -90,7 +90,7 @@ end vecBvar
 
 section shiftIterate
 
-variable {n k : ℕ}
+variable {n k m : ℕ}
 
 @[simp]
 lemma Semiterm.shift_iterate_bvar (z : Fin n) :
@@ -139,29 +139,29 @@ lemma shift_iterate_all (φ : Semiformula V L (n + 1)) : shift^[k] (∀¹ φ) = 
   ((Function.Semiconj.iterate_right (f := (∀¹ ·)) (fun φ ↦ (shift_all φ).symm) k) φ).symm
 
 @[simp]
-lemma shift_conj {m : ℕ} (v : Fin m → Semiformula V L n) :
+lemma shift_conj (v : Fin m → Semiformula V L n) :
     (Matrix.conj v).shift = Matrix.conj fun i ↦ (v i).shift :=
   Matrix.conj_map shift shift_verum shift_and v
 
 @[simp]
-lemma shift_iterate_conj {m : ℕ} (v : Fin m → Semiformula V L n) :
+lemma shift_iterate_conj (v : Fin m → Semiformula V L n) :
     shift^[k] (Matrix.conj v) = Matrix.conj fun i ↦ shift^[k] (v i) :=
   Matrix.conj_map shift^[k] shift_iterate_verum shift_iterate_and v
 
 @[simp]
-lemma shift_iterate_allItr {m : ℕ} (φ : Semiformula V L (n + m)) :
+lemma shift_iterate_allItr (φ : Semiformula V L (n + m)) :
     shift^[k] (∀¹^[m] φ) = ∀¹^[m] shift^[k] φ := by
   induction m with
   | zero => rfl
   | succ m ih => simp [allItr_succ, ih (∀¹ φ)]
 
 @[simp]
-lemma shift_allItr {m : ℕ} (φ : Semiformula V L (n + m)) : (∀¹^[m] φ).shift = ∀¹^[m] φ.shift := by
+lemma shift_allItr (φ : Semiformula V L (n + m)) : (∀¹^[m] φ).shift = ∀¹^[m] φ.shift := by
   simpa using shift_iterate_allItr (k := 1) φ
 
 attribute [local simp] shift_substs in
 @[simp]
-lemma shift_iterate_subst {m : ℕ} (w : SemitermVec V L n m) (φ : Semiformula V L n) :
+lemma shift_iterate_subst (w : SemitermVec V L n m) (φ : Semiformula V L n) :
     shift^[k] (φ.subst w) = (shift^[k] φ).subst (Semiterm.shift^[k] ⨟ w) := by
   induction k generalizing φ w with
   | zero => rfl
@@ -390,35 +390,37 @@ lemma tprovable_exs_iff_exs_of_domain {d : Semiformula V L 1} (hd : T.internaliz
 
 /-! ## Provable equivalences of formula codes -/
 
-lemma provable_iff_iff_tprovable {p q : V} (hp : IsFormula L p) (hq : IsFormula L q) :
+variable {d d' p q X X' Y Y' : V}
+
+lemma provable_iff_iff_tprovable (hp : IsFormula L p) (hq : IsFormula L q) :
     Provable T (iff L p q) ↔ T.internalize V ⊢ (⟨p, hp⟩ : Formula V L) 🡘 ⟨q, hq⟩ := by
   rw [tprovable_iff_provable, Semiformula.val_iff]
 
-lemma provable_iff_and {X X' Y Y' : V} (hX : IsFormula L X) (hX' : IsFormula L X')
-    (hY : IsFormula L Y) (hY' : IsFormula L Y') (h₁ : Provable T (iff L X X'))
-    (h₂ : Provable T (iff L Y Y')) : Provable T (iff L (X ^⋏ Y) (X' ^⋏ Y')) := by
+lemma provable_iff_and (hX : IsFormula L X) (hX' : IsFormula L X') (hY : IsFormula L Y)
+    (hY' : IsFormula L Y') (h₁ : Provable T (iff L X X')) (h₂ : Provable T (iff L Y Y')) :
+    Provable T (iff L (X ^⋏ Y) (X' ^⋏ Y')) := by
   rw [provable_iff_iff_tprovable hX hX'] at h₁
   rw [provable_iff_iff_tprovable hY hY'] at h₂
   have h₃ : T.internalize V ⊢ ((⟨X, hX⟩ : Formula V L) ⋏ ⟨Y, hY⟩) 🡘
       ((⟨X', hX'⟩ : Formula V L) ⋏ ⟨Y', hY'⟩) := by cl_prover [h₁, h₂]
   simpa only [tprovable_iff_provable, Semiformula.val_iff, Semiformula.val_and] using h₃
 
-lemma provable_iff_or {X X' Y Y' : V} (hX : IsFormula L X) (hX' : IsFormula L X')
-    (hY : IsFormula L Y) (hY' : IsFormula L Y') (h₁ : Provable T (iff L X X'))
-    (h₂ : Provable T (iff L Y Y')) : Provable T (iff L (X ^⋎ Y) (X' ^⋎ Y')) := by
+lemma provable_iff_or (hX : IsFormula L X) (hX' : IsFormula L X') (hY : IsFormula L Y)
+    (hY' : IsFormula L Y') (h₁ : Provable T (iff L X X')) (h₂ : Provable T (iff L Y Y')) :
+    Provable T (iff L (X ^⋎ Y) (X' ^⋎ Y')) := by
   rw [provable_iff_iff_tprovable hX hX'] at h₁
   rw [provable_iff_iff_tprovable hY hY'] at h₂
   have h₃ : T.internalize V ⊢ ((⟨X, hX⟩ : Formula V L) ⋎ ⟨Y, hY⟩) 🡘
       ((⟨X', hX'⟩ : Formula V L) ⋎ ⟨Y', hY'⟩) := by cl_prover [h₁, h₂]
   simpa only [tprovable_iff_provable, Semiformula.val_iff, Semiformula.val_or] using h₃
 
-lemma provable_iff_neg {X X' : V} (hX : IsFormula L X) (hX' : IsFormula L X')
-    (h : Provable T (iff L X X')) : Provable T (iff L (neg L X) (neg L X')) := by
+lemma provable_iff_neg (hX : IsFormula L X) (hX' : IsFormula L X') (h : Provable T (iff L X X')) :
+    Provable T (iff L (neg L X) (neg L X')) := by
   rw [provable_iff_iff_tprovable hX hX'] at h
   have h₁ : T.internalize V ⊢ (∼(⟨X, hX⟩ : Formula V L)) 🡘 ∼⟨X', hX'⟩ := by cl_prover [h]
   simpa only [tprovable_iff_provable, Semiformula.val_iff, Semiformula.val_neg] using h₁
 
-lemma provable_all_iff_of_free {p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
+lemma provable_all_iff_of_free (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
     (h : Provable T (iff L (free L p) (free L q))) : Provable T (^∀ iff L p q) := by
   have h₁ : T.internalize V ⊢
       ((⟨p, by simpa using hp⟩ : Semiformula V L 1) 🡘 ⟨q, by simpa using hq⟩).free := by
@@ -427,10 +429,9 @@ lemma provable_all_iff_of_free {p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemi
   simpa only [tprovable_iff_provable, Semiformula.val_all, Semiformula.val_iff] using
     TProof.all! h₁
 
-lemma provable_all_iff_all_of_domain {d p q : V} (hd : IsSemiformula L 1 d)
-    (hdp : Provable T (^∀ d)) (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
-    (h : Provable T (iff L (free L p) (free L q))) :
-    Provable T (iff L (^∀ p) (^∀ imp L d q)) := by
+lemma provable_all_iff_all_of_domain (hd : IsSemiformula L 1 d) (hdp : Provable T (^∀ d))
+    (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
+    (h : Provable T (iff L (free L p) (free L q))) : Provable T (iff L (^∀ p) (^∀ imp L d q)) := by
   have h₁ : T.internalize V ⊢ ∀¹ ((⟨p, by simpa using hp⟩ : Semiformula V L 1) 🡘
       ⟨q, by simpa using hq⟩) := by
     simpa only [tprovable_iff_provable, Semiformula.val_all, Semiformula.val_iff] using
@@ -440,10 +441,9 @@ lemma provable_all_iff_all_of_domain {d p q : V} (hd : IsSemiformula L 1 d)
   simpa only [tprovable_iff_provable, Semiformula.val_iff, Semiformula.val_all,
     Semiformula.val_imp] using tprovable_all_iff_all_of_domain h₂ _ _ ⨀ h₁
 
-lemma provable_exs_iff_exs_of_domain {d p q : V} (hd : IsSemiformula L 1 d)
-    (hdp : Provable T (^∀ d)) (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
-    (h : Provable T (iff L (free L p) (free L q))) :
-    Provable T (iff L (^∃ p) (^∃ (d ^⋏ q))) := by
+lemma provable_exs_iff_exs_of_domain (hd : IsSemiformula L 1 d) (hdp : Provable T (^∀ d))
+    (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
+    (h : Provable T (iff L (free L p) (free L q))) : Provable T (iff L (^∃ p) (^∃ (d ^⋏ q))) := by
   have h₁ : T.internalize V ⊢ ∀¹ ((⟨p, by simpa using hp⟩ : Semiformula V L 1) 🡘
       ⟨q, by simpa using hq⟩) := by
     simpa only [tprovable_iff_provable, Semiformula.val_all, Semiformula.val_iff] using
@@ -453,9 +453,9 @@ lemma provable_exs_iff_exs_of_domain {d p q : V} (hd : IsSemiformula L 1 d)
   simpa only [tprovable_iff_provable, Semiformula.val_iff, Semiformula.val_exs,
     Semiformula.val_and] using tprovable_exs_iff_exs_of_domain h₂ _ _ ⨀ h₁
 
-lemma provable_all_imp_iff_all_imp {d d' p q : V} (hd : IsSemiformula L 1 d)
-    (hd' : IsSemiformula L 1 d') (hdd : Provable T (^∀ iff L d d')) (hp : IsSemiformula L 1 p)
-    (hq : IsSemiformula L 1 q) (h : Provable T (iff L (free L p) (free L q))) :
+lemma provable_all_imp_iff_all_imp (hd : IsSemiformula L 1 d) (hd' : IsSemiformula L 1 d')
+    (hdd : Provable T (^∀ iff L d d')) (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
+    (h : Provable T (iff L (free L p) (free L q))) :
     Provable T (iff L (^∀ imp L d p) (^∀ imp L d' q)) := by
   set P : Semiformula V L 1 := ⟨p, by simpa using hp⟩
   set Q : Semiformula V L 1 := ⟨q, by simpa using hq⟩
@@ -474,9 +474,9 @@ lemma provable_all_imp_iff_all_imp {d d' p q : V} (hd : IsSemiformula L 1 d)
     Semiformula.val_imp] using
       tprovable_all_iff_all _ _ ⨀ tprovable_all_of_all_imp_imp h₃ h₂ h₁
 
-lemma provable_exs_and_iff_exs_and {d d' p q : V} (hd : IsSemiformula L 1 d)
-    (hd' : IsSemiformula L 1 d') (hdd : Provable T (^∀ iff L d d')) (hp : IsSemiformula L 1 p)
-    (hq : IsSemiformula L 1 q) (h : Provable T (iff L (free L p) (free L q))) :
+lemma provable_exs_and_iff_exs_and (hd : IsSemiformula L 1 d) (hd' : IsSemiformula L 1 d')
+    (hdd : Provable T (^∀ iff L d d')) (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
+    (h : Provable T (iff L (free L p) (free L q))) :
     Provable T (iff L (^∃ (d ^⋏ p)) (^∃ (d' ^⋏ q))) := by
   set P : Semiformula V L 1 := ⟨p, by simpa using hp⟩
   set Q : Semiformula V L 1 := ⟨q, by simpa using hq⟩

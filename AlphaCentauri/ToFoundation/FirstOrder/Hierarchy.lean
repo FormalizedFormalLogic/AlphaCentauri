@@ -197,16 +197,16 @@ lemma neg : ∀ {Γ n} {φ : Semiformula L ξ n}, ℬ[<, L].PrenexBlock Γ φ �
 lemma neg_iff : ℬ[<, L].PrenexBlock Γ.alt (∼φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
   ⟨fun h ↦ by simpa using h.neg, fun h ↦ by simpa using h.neg⟩
 
-lemma rew {Γ : Polarity} {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁}
-    (ω : Rew L ξ₁ n₁ ξ₂ n₂) (h : ℬ[<, L].PrenexBlock Γ φ) : ℬ[<, L].PrenexBlock Γ (ω ▹ φ) := by
+lemma rew {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁} (ω : Rew L ξ₁ n₁ ξ₂ n₂)
+    (h : ℬ[<, L].PrenexBlock Γ φ) : ℬ[<, L].PrenexBlock Γ (ω ▹ φ) := by
   induction h generalizing n₂ with
   | bounded h => exact bounded (h.rew ω)
   | exs h ih => simpa using (ih ω.q).exs
   | all h ih => simpa using (ih ω.q).all
 
-lemma of_rew {Γ : Polarity} {n₂ : ℕ} {ξ₂ : Type*} {ψ : Semiformula L ξ₂ n₂}
-    (h : ℬ[<, L].PrenexBlock Γ ψ) {ξ₁ : Type*} {n₁ : ℕ} {ω : Rew L ξ₁ n₁ ξ₂ n₂}
-    {φ : Semiformula L ξ₁ n₁} (e : ω ▹ φ = ψ) : ℬ[<, L].PrenexBlock Γ φ := by
+lemma of_rew {n₂ : ℕ} {ξ₂ : Type*} {ψ : Semiformula L ξ₂ n₂} (h : ℬ[<, L].PrenexBlock Γ ψ)
+    {ξ₁ : Type*} {n₁ : ℕ} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} (e : ω ▹ φ = ψ) :
+    ℬ[<, L].PrenexBlock Γ φ := by
   induction h generalizing n₁ with
   | bounded h => exact bounded (by rw [← e] at h; simpa using h)
   | exs h ih =>
@@ -217,11 +217,11 @@ lemma of_rew {Γ : Polarity} {n₂ : ℕ} {ξ₂ : Type*} {ψ : Semiformula L ξ
     exact all (ih hφ')
 
 @[simp, grind =]
-lemma rew_iff {Γ : Polarity} {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {ω : Rew L ξ₁ n₁ ξ₂ n₂}
-    {φ : Semiformula L ξ₁ n₁} : ℬ[<, L].PrenexBlock Γ (ω ▹ φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
+lemma rew_iff {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
+    ℬ[<, L].PrenexBlock Γ (ω ▹ φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
   ⟨fun h ↦ h.of_rew rfl, rew ω⟩
 
-lemma of_deltaZero {Γ : Polarity} {φ : Semiformula L ξ n} (h : ℬ[<, L].Hierarchy 𝚺 0 φ) :
+lemma of_deltaZero (h : ℬ[<, L].Hierarchy 𝚺 0 φ) :
     ℬ[<, L].PrenexBlock Γ φ := bounded (Hierarchy.zero_iff_bounded.mp h)
 
 lemma allClosure : ∀ {n} {φ : Semiformula L ξ n},
@@ -424,7 +424,9 @@ private def HasPrenexNormalForm (φ : Semiformula L ξ n) : Prop :=
 
 namespace HasPrenexNormalForm
 
-private lemma of_iff {φ ψ : Semiformula L ξ n} (h : HasPrenexNormalForm.{u} ℬ ψ)
+variable {φ ψ : Semiformula L ξ n}
+
+private lemma of_iff (h : HasPrenexNormalForm.{u} ℬ ψ)
     (H : ∀ (M : Type u) [Tarski.Structure L M] [Nonempty M] (e : Fin n → M) (f : ξ → M),
       Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ) :
     HasPrenexNormalForm.{u} ℬ φ := by
@@ -432,15 +434,14 @@ private lemma of_iff {φ ψ : Semiformula L ξ n} (h : HasPrenexNormalForm.{u} �
   exact ⟨s, fun Γ s' hs' ↦ (hs Γ s' hs').imp fun _ hχ ↦
     ⟨hχ.1, fun M _ _ e f ↦ (H M e f).trans (hχ.2 M e f)⟩⟩
 
-private lemma of_prenexHierarchy {Γ : Polarity} {s : ℕ} {φ : Semiformula L ξ n}
-    (h : ℬ.PrenexHierarchy Γ s φ) : HasPrenexNormalForm.{u} ℬ φ :=
+private lemma of_prenexHierarchy {Γ : Polarity} {s : ℕ} (h : ℬ.PrenexHierarchy Γ s φ) :
+    HasPrenexNormalForm.{u} ℬ φ :=
   ⟨s + 1, fun Γ' _ hs ↦ h.exists_eval_iff_of_lt Γ' hs⟩
 
-private lemma of_closure {φ : Semiformula L ξ n} (h : ℬ.Closure φ) : HasPrenexNormalForm.{u} ℬ φ :=
+private lemma of_closure (h : ℬ.Closure φ) : HasPrenexNormalForm.{u} ℬ φ :=
   of_prenexHierarchy (Γ := 𝚺) (PrenexHierarchy.zero_iff_bounded.mpr h)
 
-private lemma neg {φ : Semiformula L ξ n} (h : HasPrenexNormalForm.{u} ℬ φ) :
-    HasPrenexNormalForm.{u} ℬ (∼φ) := by
+private lemma neg (h : HasPrenexNormalForm.{u} ℬ φ) : HasPrenexNormalForm.{u} ℬ (∼φ) := by
   obtain ⟨s, hs⟩ := h
   use s
   intro Γ s' hs'

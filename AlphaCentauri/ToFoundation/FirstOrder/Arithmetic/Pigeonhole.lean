@@ -27,7 +27,7 @@ namespace Arithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-variable {V : Type*}
+variable {V : Type*} {R S : V → V → Prop} {X X' Y Y' W : V → Prop} {t t' c N : V}
 
 /-- `R` is an injection of `X` into `Y`. -/
 def IsInj (R : V → V → Prop) (X Y : V → Prop) : Prop :=
@@ -46,8 +46,6 @@ def IdMap (x y : V) : Prop := y = x
 def CompMap [LT V] (c : V) (R S : V → V → Prop) (x z : V) : Prop := ∃ y < c, R x y ∧ S y z
 
 namespace IsInj
-
-variable {R S : V → V → Prop} {X X' Y Y' W : V → Prop}
 
 lemma union (h : IsInj R X Y) (h' : IsInj S X' Y') (hY : ∀ y, Y y → Y' y → False) :
     IsInj (UnionMap X R X' S) (fun x ↦ X x ∨ X' x) (fun y ↦ Y y ∨ Y' y) := by
@@ -78,7 +76,7 @@ lemma mono (h : IsInj R X Y) (hX : ∀ x, X' x → X x) (hY : ∀ y, Y y → Y' 
 lemma congr (h : IsInj R X Y) (hX : ∀ x, X x ↔ X' x) (hY : ∀ y, Y y ↔ Y' y) : IsInj R X' Y' :=
   h.mono (fun x hx ↦ (hX x).mpr hx) (fun y hy ↦ (hY y).mp hy)
 
-lemma comp [LT V] {c : V} (h : IsInj R X Y) (h' : IsInj S Y W) (hY : ∀ y, Y y → y < c) :
+lemma comp [LT V] (h : IsInj R X Y) (h' : IsInj S Y W) (hY : ∀ y, Y y → y < c) :
     IsInj (CompMap c R S) X W := by
   and_intros
   · intro x hx
@@ -116,15 +114,12 @@ def Family (N : V) (X : V → V → Prop) (u : V) : Prop := π₁ u < N ∧ X (�
 /-- `F r` acting on the `r`-th member of a family. -/
 def FamilyMap (F : V → V → V → Prop) (u v : V) : Prop := π₁ v = π₁ u ∧ F (π₁ u) (π₂ u) (π₂ v)
 
-lemma Tagged.disjoint {t t' u : V} {X Y : V → Prop} (htt : t ≠ t') (h : Tagged t X u)
-    (h' : Tagged t' Y u) : False :=
+lemma Tagged.disjoint {u : V} (htt : t ≠ t') (h : Tagged t X u) (h' : Tagged t' Y u) : False :=
   htt (h.1.symm.trans h'.1)
 
 namespace IsInj
 
-variable {R : V → V → Prop} {X Y : V → Prop}
-
-lemma tag {t t' : V} (h : IsInj R X Y) : IsInj (TagMap t t' R) (Tagged t X) (Tagged t' Y) := by
+lemma tag (h : IsInj R X Y) : IsInj (TagMap t t' R) (Tagged t X) (Tagged t' Y) := by
   and_intros
   · rintro u ⟨rfl, hu⟩
     obtain ⟨y, hy⟩ := h.1 _ hu
@@ -138,8 +133,7 @@ lemma tag {t t' : V} (h : IsInj R X Y) : IsInj (TagMap t t' R) (Tagged t X) (Tag
   · rintro u u' v ⟨hu₁, hu⟩ ⟨hu₁', hu'⟩ ⟨-, -, huv⟩ ⟨-, -, huv'⟩
     rw [← pair_unpair u, ← pair_unpair u', hu₁, hu₁', h.2.2 _ _ _ hu hu' huv huv']
 
-lemma family {N : V} {F : V → V → V → Prop} {X Y : V → V → Prop}
-    (h : ∀ r < N, IsInj (F r) (X r) (Y r)) :
+lemma family {F : V → V → V → Prop} {X Y : V → V → Prop} (h : ∀ r < N, IsInj (F r) (X r) (Y r)) :
     IsInj (FamilyMap F) (Family N X) (Family N Y) := by
   and_intros
   · rintro u ⟨hr, hu⟩
@@ -155,7 +149,7 @@ lemma family {N : V} {F : V → V → V → Prop} {X Y : V → V → Prop}
     rw [h₁] at hu huv
     rw [← pair_unpair u, ← pair_unpair u', h₁, (h _ hr').2.2 _ _ _ hu hu' huv huv']
 
-lemma untag {t : V} (h : IsInj R X Y) : IsInj (UntagMap t R) (Tagged t X) Y := by
+lemma untag (h : IsInj R X Y) : IsInj (UntagMap t R) (Tagged t X) Y := by
   and_intros
   · rintro u ⟨hu₁, hu⟩
     obtain ⟨y, hy⟩ := h.1 _ hu
@@ -166,7 +160,7 @@ lemma untag {t : V} (h : IsInj R X Y) : IsInj (UntagMap t R) (Tagged t X) Y := b
   · rintro u u' v ⟨hu₁, hu⟩ ⟨hu₁', hu'⟩ ⟨-, huv⟩ ⟨-, huv'⟩
     rw [← pair_unpair u, ← pair_unpair u', hu₁, hu₁', h.2.2 _ _ _ hu hu' huv huv']
 
-lemma tagOut {t : V} (h : IsInj R X Y) : IsInj (TagOutMap t R) X (Tagged t Y) := by
+lemma tagOut (h : IsInj R X Y) : IsInj (TagOutMap t R) X (Tagged t Y) := by
   and_intros
   · intro u hu
     obtain ⟨y, hy⟩ := h.1 _ hu
@@ -184,15 +178,13 @@ def Embeds (X Y : V → Prop) : Prop := ∃ R : V → V → Prop, 𝚺ᴬ₀.Def
 
 namespace Embeds
 
-variable {X X' Y Y' W : V → Prop}
-
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] in
-lemma of_isInj {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) (h : IsInj R X Y) : Embeds X Y := by
+lemma of_isInj (hR : 𝚺ᴬ₀.DefinableRel R) (h : IsInj R X Y) : Embeds X Y := by
   use R
 
 lemma refl : Embeds X X := ⟨_, by unfold IdMap; definability, IsInj.id⟩
 
-lemma comp {c : V} (h : Embeds X Y) (h' : Embeds Y W) (hY : ∀ y, Y y → y < c) : Embeds X W := by
+lemma comp (h : Embeds X Y) (h' : Embeds Y W) (hY : ∀ y, Y y → y < c) : Embeds X W := by
   obtain ⟨R, hR, h⟩ := h
   obtain ⟨S, hS, h'⟩ := h'
   exact ⟨_, by unfold CompMap; definability, h.comp h' hY⟩
@@ -214,26 +206,26 @@ omit [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻] in
 lemma congr (h : Embeds X Y) (hX : ∀ x, X x ↔ X' x) (hY : ∀ y, Y y ↔ Y' y) : Embeds X' Y' :=
   h.mono (fun x hx ↦ (hX x).mpr hx) (fun y hy ↦ (hY y).mp hy)
 
-lemma tag {t t' : V} (h : Embeds X Y) : Embeds (Tagged t X) (Tagged t' Y) := by
+lemma tag (h : Embeds X Y) : Embeds (Tagged t X) (Tagged t' Y) := by
   obtain ⟨R, hR, h⟩ := h
   exact ⟨_, by unfold TagMap; definability, h.tag⟩
 
-lemma untag {t : V} (h : Embeds X Y) : Embeds (Tagged t X) Y := by
+lemma untag (h : Embeds X Y) : Embeds (Tagged t X) Y := by
   obtain ⟨R, hR, h⟩ := h
   exact ⟨_, by unfold UntagMap; definability, h.untag⟩
 
-lemma tagOut {t : V} (h : Embeds X Y) : Embeds X (Tagged t Y) := by
+lemma tagOut (h : Embeds X Y) : Embeds X (Tagged t Y) := by
   obtain ⟨R, hR, h⟩ := h
   exact ⟨_, by unfold TagOutMap; definability, h.tagOut⟩
 
-lemma family {N : V} {F : V → V → V → Prop} (hF : 𝚺ᴬ₀.DefinableRel₃ F) {X Y : V → V → Prop}
+lemma family {F : V → V → V → Prop} (hF : 𝚺ᴬ₀.DefinableRel₃ F) {X Y : V → V → Prop}
     (h : ∀ r < N, IsInj (F r) (X r) (Y r)) : Embeds (Family N X) (Family N Y) :=
   ⟨_, by unfold FamilyMap; definability, IsInj.family h⟩
 
 /-- An injection of `D` into `T` gives one of $[0, N)$ into $[0, N')$, along a functional
 encoding `E` of `D` and an injective encoding `E'` of `T` in $[0, N')$, provided every number below
 `N` that encodes no element of `D` is below `N'` and encodes no element of `T`. -/
-lemma extend {D T : V → Prop} {E E' : V → V → Prop} {N N' c c' : V}
+lemma extend {D T : V → Prop} {E E' : V → V → Prop} {N' c' : V}
     (hD : 𝚺ᴬ₀.DefinablePred D) (hE : 𝚺ᴬ₀.DefinableRel E) (hE' : 𝚺ᴬ₀.DefinableRel E')
     (h : Embeds D T) (hc : ∀ u, D u → u < c) (hc' : ∀ t, T t → t < c')
     (hfun : ∀ u v v', D u → E u v → E u v' → v = v') (henc' : IsInj E' T (· < N'))
@@ -272,8 +264,7 @@ lemma extend {D T : V → Prop} {E E' : V → V → Prop} {N N' c c' : V}
 
 end Embeds
 
-lemma definable_tagged {t : V} {X : V → Prop} (hX : 𝚺ᴬ₀.DefinablePred X) :
-    𝚺ᴬ₀.DefinablePred (Tagged t X) := by
+lemma definable_tagged (hX : 𝚺ᴬ₀.DefinablePred X) : 𝚺ᴬ₀.DefinablePred (Tagged t X) := by
   unfold Tagged
   definability
 
@@ -295,7 +286,7 @@ section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-lemma exists_set_of_definableRel {R : V → V → Prop} (hR : 𝚺ᴬ_[m].DefinableRel R) (a b : V) :
+lemma exists_set_of_definableRel (hR : 𝚺ᴬ_[m].DefinableRel R) (a b : V) :
     ∃ w : V, ∀ x < a, ∀ y < b, ⟪x, y⟫ ∈ w ↔ R x y := by
   have hp : 𝚺ᴬ_[m].DefinableRel₃ fun z x y : V ↦ z = ⟪x, y⟫ :=
     (show 𝚺ᴬ₀.DefinableRel₃ fun z x y : V ↦ z = ⟪x, y⟫ by definability).of_zero
@@ -380,8 +371,7 @@ end
 /-- A $\Sigma_m$-definable relation giving every `x < a + 1` some value below `a` gives two of
 them a common value.
 - [HP98, Theorem I.1.41] -/
-theorem pigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ_[m].DefinableRel R) (a : V)
-    (total : ∀ x < a + 1, ∃ y < a, R x y) :
+theorem pigeonhole (hR : 𝚺ᴬ_[m].DefinableRel R) (a : V) (total : ∀ x < a + 1, ∃ y < a, R x y) :
     ∃ x < a + 1, ∃ x' < a + 1, ∃ y < a, x ≠ x' ∧ R x y ∧ R x' y := by
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   by_contra hne

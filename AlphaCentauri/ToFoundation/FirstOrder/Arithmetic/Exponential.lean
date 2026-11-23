@@ -21,8 +21,9 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 noncomputable section
 
 variable {V : Type*} [ORingStructure V]
+  {a b c i j k k' m p q u u' v v' x y z B I P Q S S' T L L' β : V}
 
-lemma add_mul_lt_mul_of_lt [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {a b u v : V} (hu : u < a) (hv : v < b) :
+lemma add_mul_lt_mul_of_lt [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hu : u < a) (hv : v < b) :
     u + a * v < a * b := calc
   u + a * v < a + a * v := by simpa using hu
   _ = a * (v + 1) := by rw [mul_add, mul_one, add_comm]
@@ -32,7 +33,7 @@ section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
 
-lemma add_mul_eq_add_mul_iff {a u u' v v' : V} (hu : u < a) (hu' : u' < a) :
+lemma add_mul_eq_add_mul_iff (hu : u < a) (hu' : u' < a) :
     u + a * v = u' + a * v' ↔ u = u' ∧ v = v' := by
   have hmod : ∀ {u v : V}, u < a → (u + a * v) % a = u := by
     intro u v hu
@@ -48,7 +49,7 @@ lemma add_mul_eq_add_mul_iff {a u u' v v' : V} (hu : u < a) (hu' : u' < a) :
   · rintro ⟨rfl, rfl⟩
     rfl
 
-lemma bexp_succ {b x : V} (h : x + 1 < ‖b‖) : bexp b (x + 1) = 2 * bexp b x :=
+lemma bexp_succ (h : x + 1 < ‖b‖) : bexp b (x + 1) = 2 * bexp b x :=
   bexp_eq_of_exp h (exp_bexp_of_lt (lt_of_le_of_lt le_self_add h)).succ
 
 lemma fbit_zero_eq_mod_two (x : V) : fbit x 0 = x % 2 := by
@@ -61,7 +62,7 @@ lemma fbit_succ_eq_fbit_div_two (x i : V) : fbit x (i + 1) = fbit (x / 2) i := b
   · conv_lhs => rw [← div_add_mod x 2, h]
     simp
 
-lemma fbit_ext {x y : V} (h : ∀ i, fbit x i = fbit y i) : x = y := by
+lemma fbit_ext (h : ∀ i, fbit x i = fbit y i) : x = y := by
   have key : ∀ z, z ≤ x + y → ∀ u ≤ z, ∀ w ≤ z, (∀ i ≤ x + y, fbit u i = fbit w i) → u = w := by
     intro z
     induction z using ISigma0.order_induction
@@ -86,8 +87,6 @@ lemma fbit_ext {x y : V} (h : ∀ i, fbit x i = fbit y i) : x = y := by
         exact hb 0 (Arithmetic.zero_le _)
       rw [← div_add_mod u 2, ← div_add_mod w 2, this, hmod]
   exact key (x + y) le_rfl x le_self_add y le_add_self fun i _ ↦ h i
-
-variable {u v : V}
 
 lemma length_mul_le (u v : V) : ‖u * v‖ ≤ ‖u‖ + ‖v‖ := by
   rcases (Arithmetic.zero_le u).eq_or_lt with rfl | hu
@@ -116,7 +115,7 @@ lemma length_add_length_le (hu : 0 < u) (hv : 0 < v) : ‖u‖ + ‖v‖ ≤ ‖
   rw [length_of_pos hu, length_of_pos hv, length_of_pos (mul_pos hu hv)]
   simpa [add_assoc, add_left_comm, add_comm] using this
 
-lemma exists_natCast_of_length_le (j : ℕ) {x : V} (h : ‖x‖ ≤ j) : ∃ k : ℕ, x = k := by
+lemma exists_natCast_of_length_le (j : ℕ) (h : ‖x‖ ≤ j) : ∃ k : ℕ, x = k := by
   induction j generalizing x with
   | zero =>
     use 0
@@ -164,7 +163,7 @@ section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
-private lemma mod_mul_eq_mod_add {p β : V} (S : V) (hp : 0 < p) (hβ : 0 < β) :
+private lemma mod_mul_eq_mod_add (S : V) (hp : 0 < p) (hβ : 0 < β) :
     S % (p * β) = S % p + (S / p % β) * p := by
   have e₁ : p * (S / p) + S % p = S := div_add_mod S p
   have e₂ : β * (S / p / β) + S / p % β = S / p := div_add_mod (S / p) β
@@ -188,22 +187,20 @@ private lemma mod_add_div_mul_eq (S q : V) : S % q + S / q * q = S := by
   rw [mul_comm (S / q) q, add_comm]
   exact div_add_mod S q
 
-private lemma bexp_succ_mul_length {a b k : V} (h : (k + 1) * ‖a‖ < ‖b‖) :
+private lemma bexp_succ_mul_length (h : (k + 1) * ‖a‖ < ‖b‖) :
     bexp b ((k + 1) * ‖a‖) = bexp b (k * ‖a‖) * (a ⨳ 1) := by
   have hsum : k * ‖a‖ + ‖a‖ < ‖b‖ := by simpa [add_mul] using h
   rw [show (k + 1) * ‖a‖ = k * ‖a‖ + ‖a‖ by simp [add_mul], bexp_add hsum]
   congr 1
   exact bexp_eq_of_exp (lt_of_le_of_lt le_add_self hsum) (exponential_smash_one a)
 
-private lemma mod_add_mul_lt {P Q S v c : V} (hP : 0 < P) (hv : v < c) (hQ : Q = P * c) :
-    S % P + v * P < Q := by
+private lemma mod_add_mul_lt (hP : 0 < P) (hv : v < c) (hQ : Q = P * c) : S % P + v * P < Q := by
   calc S % P + v * P < P + v * P := add_lt_add_left (mod_lt S hP) _
     _ = (v + 1) * P := by grind
     _ ≤ c * P := mul_le_mul_right (succ_le_iff_lt.mpr hv)
     _ = Q := by rw [hQ, mul_comm]
 
-private lemma add_div_mul_lt {B Q S T : V} (hQ : Q ∣ B) (hS : S < B) (hT : T < Q) :
-    T + S / Q * Q < B := by
+private lemma add_div_mul_lt (hQ : Q ∣ B) (hS : S < B) (hT : T < Q) : T + S / Q * Q < B := by
   obtain ⟨D, hD⟩ := hQ
   have hcD : S / Q < D := by
     by_contra h
@@ -217,9 +214,7 @@ private lemma add_div_mul_lt {B Q S T : V} (hQ : Q ∣ B) (hS : S < B) (hT : T <
 
 namespace Nuon
 
-variable {a i j : V}
-
-lemma ext_ext {S S' b : V} (hb : Exponential (i * ‖a‖) b) (hS : S < b) (hS' : S' < b)
+lemma ext_ext (hb : Exponential (i * ‖a‖) b) (hS : S < b) (hS' : S' < b)
     (h : ∀ j < i, Nuon.ext a S j = Nuon.ext a S' j) : S = S' := by
   have hib : i * ‖a‖ < ‖b‖ := by simp [hb.length_eq]
   have key : ∀ k ≤ i, S % bexp b (k * ‖a‖) = S' % bexp b (k * ‖a‖) := by
@@ -242,9 +237,7 @@ lemma ext_ext {S S' b : V} (hb : Exponential (i * ‖a‖) b) (hS : S < b) (hS' 
 
 end Nuon
 
-variable {a : V}
-
-lemma exists_update {I S j v : V} (hS : S < I ⨳ a) (hj : j < ‖I‖) (hv : v < a ⨳ 1) :
+lemma exists_update (hS : S < I ⨳ a) (hj : j < ‖I‖) (hv : v < a ⨳ 1) :
     ∃ S' < I ⨳ a, Nuon.ext a S' j = v ∧ ∀ l ≤ ‖I‖, l ≠ j → Nuon.ext a S' l = Nuon.ext a S l := by
   have hj1 : j + 1 ≤ ‖I‖ := succ_le_iff_lt.mpr hj
   have hjI : j ≤ ‖I‖ := le_of_lt hj
@@ -283,7 +276,7 @@ lemma exists_update {I S j v : V} (hS : S < I ⨳ a) (hj : j < ‖I‖) (hv : v 
       rw [h1]
       exact h2.symm
 
-lemma exists_swap {I S j k : V} (hS : S < I ⨳ a) (hj : j < ‖I‖) (hk : k < ‖I‖) :
+lemma exists_swap (hS : S < I ⨳ a) (hj : j < ‖I‖) (hk : k < ‖I‖) :
     ∃ S' < I ⨳ a, Nuon.ext a S' j = Nuon.ext a S k ∧ Nuon.ext a S' k = Nuon.ext a S j ∧
       ∀ l ≤ ‖I‖, l ≠ j → l ≠ k → Nuon.ext a S' l = Nuon.ext a S l := by
   have hv : ∀ l, Nuon.ext a S l < a ⨳ 1 := fun l => mod_lt _ (smash_pos a 1)
@@ -296,7 +289,7 @@ lemma exists_swap {I S j k : V} (hS : S < I ⨳ a) (hj : j < ‖I‖) (hk : k < 
   · intro l hl hlj hlk
     exact (h₂l l hl hlk).trans (h₁l l hl hlj)
 
-lemma ext_mod_smash {I S j : V} (hj : j < ‖I‖) : Nuon.ext a (S % (I ⨳ a)) j = Nuon.ext a S j := by
+lemma ext_mod_smash (hj : j < ‖I‖) : Nuon.ext a (S % (I ⨳ a)) j = Nuon.ext a S j := by
   have hS : S % (I ⨳ a) + S / (I ⨳ a) * (I ⨳ a) = S := by
     rw [mul_comm, add_comm, div_add_mod]
   have h := Nuon.ext_add₁_bexp (I := I) (L := a) (i := ‖I‖) (j := j)
@@ -304,7 +297,7 @@ lemma ext_mod_smash {I S j : V} (hj : j < ‖I‖) : Nuon.ext a (S % (I ⨳ a)) 
   rw [bexp_eq_smash, hS] at h
   exact h.symm
 
-lemma ext_div_pow2 {I S q k m : V} (hm : k + m ≤ ‖I‖) (hq : Exponential (k * ‖a‖) q) :
+lemma ext_div_pow2 (hm : k + m ≤ ‖I‖) (hq : Exponential (k * ‖a‖) q) :
     Nuon.ext a (S / q) m = Nuon.ext a S (k + m) := by
   have hk : k ≤ ‖I‖ := le_self_add.trans hm
   have hqb : bexp (I ⨳ a) (k * ‖a‖) = q := bexp_eq_of_exp (Nuon.mul_len_lt_len_smash hk) hq
@@ -314,7 +307,7 @@ lemma ext_div_pow2 {I S q k m : V} (hm : k + m ≤ ‖I‖) (hq : Exponential (k
   rw [hqb, mod_add_div_mul_eq] at h
   exact h.symm
 
-lemma ext_mod_pow2 {I S q k m : V} (hk : k ≤ ‖I‖) (hm : m < k) (hq : Exponential (k * ‖a‖) q) :
+lemma ext_mod_pow2 (hk : k ≤ ‖I‖) (hm : m < k) (hq : Exponential (k * ‖a‖) q) :
     Nuon.ext a (S % q) m = Nuon.ext a S m := by
   have hqb : bexp (I ⨳ a) (k * ‖a‖) = q := bexp_eq_of_exp (Nuon.mul_len_lt_len_smash hk) hq
   have h := Nuon.ext_add₁_bexp (I := I) (L := a) (i := k) (j := m) (S₁ := S % q)
@@ -332,8 +325,6 @@ the partial powers $x^0, \dots, x^k$. The graph is $\Delta_0$ in the parameter `
 local notation S "{" L "}[" i "]" => Nuon.ext L S i
 
 namespace Power
-
-variable {B x k k' S S' L L' : V}
 
 lemma one_lt_sq_smash (hB : 0 < B) : (1 : V) < (B ⨳ B) ^ 2 := by
   have hB1 : (1 : V) ≤ ‖B‖ := pos_iff_one_le.mp (length_pos_iff.mpr hB)
@@ -363,8 +354,7 @@ lemma definable_isSeq : 𝚺ᴬ₀.DefinableRel₄ (IsSeq : V → V → V → V 
 lemma IsSeq.of_le (H : IsSeq L S x k) (h : k' ≤ k) : IsSeq L S x k' :=
   ⟨H.1, fun i hi ↦ H.2 i (lt_of_lt_of_le hi h)⟩
 
-lemma IsSeq.ext_eq (H : IsSeq L S x k) (H' : IsSeq L' S' x k) :
-    ∀ i ≤ k, S{L}[i] = S'{L'}[i] := by
+lemma IsSeq.ext_eq (H : IsSeq L S x k) (H' : IsSeq L' S' x k) : ∀ i ≤ k, S{L}[i] = S'{L'}[i] := by
   intro i
   induction i using ISigma0.succ_induction
   · definability
@@ -418,7 +408,7 @@ lemma exists_isSeq (hB : 0 < B) (hx : 0 < x) (hk : k * ‖x‖ < ‖B‖) :
 /-- `y` is $x^k$, as listed by a sequence with blocks of width `‖B‖`. -/
 def IsPow (B x k y : V) : Prop := ∃ S < (B ⨳ B) ^ 2, IsSeq B S x k ∧ S{B}[k] = y
 
-lemma IsPow.unique {y y' : V} (h : IsPow B x k y) (h' : IsPow B x k y') : y = y' := by
+lemma IsPow.unique {y' : V} (h : IsPow B x k y) (h' : IsPow B x k y') : y = y' := by
   obtain ⟨S, -, H, rfl⟩ := h
   obtain ⟨S', -, H', rfl⟩ := h'
   exact H.ext_eq H' k le_rfl
@@ -428,7 +418,7 @@ lemma definable_isPow (B : V) : 𝚺ᴬ₀.DefinableRel₃ (IsPow B) := by
   unfold IsPow
   definability
 
-lemma IsPow.lt {y : V} (h : IsPow B x k y) : y < B ⨳ 1 := by
+lemma IsPow.lt (h : IsPow B x k y) : y < B ⨳ 1 := by
   obtain ⟨S, -, -, rfl⟩ := h
   exact mod_lt _ (smash_pos B 1)
 
@@ -439,8 +429,6 @@ open Power
 open Classical in
 /-- $x^k$, computed with blocks of width `‖B‖`; it is $0$ if no such sequence exists. -/
 def bpow (B x k : V) : V := if h : ∃ y, IsPow B x k y then h.choose else 0
-
-variable {B x y k : V}
 
 lemma Power.IsPow.bpow_eq (h : IsPow B x k y) : bpow B x k = y := by
   unfold bpow
@@ -518,7 +506,7 @@ lemma bpow_pos (hB : 0 < B) (hx : 0 < x) (hk : k * ‖x‖ < ‖B‖) : 0 < bpow
     rw [bpow_succ hB hx hk]
     exact mul_pos (IH (lt_of_le_of_lt (mul_le_mul_right (by simp)) hk)) hx
 
-lemma bpow_mul {y : V} (hB : 0 < B) (hx : 0 < x) (hy : 0 < y) (hk : k * ‖x * y‖ < ‖B‖) :
+lemma bpow_mul (hB : 0 < B) (hx : 0 < x) (hy : 0 < y) (hk : k * ‖x * y‖ < ‖B‖) :
     bpow B (x * y) k = bpow B x k * bpow B y k := by
   revert hk
   induction k using ISigma0.succ_induction
@@ -537,7 +525,7 @@ lemma bpow_mul {y : V} (hB : 0 < B) (hx : 0 < x) (hy : 0 < y) (hk : k * ‖x * y
       IH (lt_of_le_of_lt (mul_le_mul_right (by simp)) hk)]
     grind
 
-lemma bpow_monotone {y : V} (hB : 0 < B) (hx : 0 < x) (hxy : x ≤ y) (hk : k * ‖y‖ < ‖B‖) :
+lemma bpow_monotone (hB : 0 < B) (hx : 0 < x) (hxy : x ≤ y) (hk : k * ‖y‖ < ‖B‖) :
     bpow B x k ≤ bpow B y k := by
   have hy : 0 < y := lt_of_lt_of_le hx hxy
   revert hk

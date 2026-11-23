@@ -29,10 +29,11 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {d j k m n p q q₁ q₂ r t u v w R Z : V}
 
 /-! ## Connectives, substitution and shift -/
 
-lemma neg_ne_self {p : V} (hp : IsUFormula L p) : neg L p ≠ p := by
+lemma neg_ne_self (hp : IsUFormula L p) : neg L p ≠ p := by
   rcases hp.case with (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
     ⟨q, r, hq, hr, rfl⟩ | ⟨q, r, hq, hr, rfl⟩ | ⟨q, hq, rfl⟩ | ⟨q, hq, rfl⟩)
   · rw [neg_rel hR hv]; simp [qqRel, qqNRel]
@@ -45,7 +46,7 @@ lemma neg_ne_self {p : V} (hp : IsUFormula L p) : neg L p ≠ p := by
   · rw [neg_ex hq]; simp [qqAll, qqExs]
 
 /-- The shift of free variables does not decrease the code of a formula. -/
-lemma le_shift {n p : V} (hp : IsSemiformula L n p) : p ≤ shift L p := by
+lemma le_shift (hp : IsSemiformula L n p) : p ≤ shift L p := by
   apply IsSemiformula.pi1_structural_induction (P := fun _ p ↦ p ≤ shift L p)
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
@@ -74,8 +75,7 @@ lemma le_shift {n p : V} (hp : IsSemiformula L n p) : p ≤ shift L p := by
     rw [shift_exs hp.isUFormula]
     simpa [qqExs] using pair_le_pair_right 7 ih
 
-lemma subst_subst_qVec_fvarVec {m Z t : V} (hZ : IsSemiformula ℒₒᵣ (m + 1) Z)
-    (ht : IsSemiterm ℒₒᵣ 2 t) :
+lemma subst_subst_qVec_fvarVec (hZ : IsSemiformula ℒₒᵣ (m + 1) Z) (ht : IsSemiterm ℒₒᵣ 2 t) :
     subst ℒₒᵣ ?[t] (subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec m)) Z) = subst ℒₒᵣ (t ∷ fvarVec m) Z := by
   have h₁ : IsSemitermVec ℒₒᵣ 1 2 (?[t] : V) := by simp [ht]
   have h₂ : IsSemitermVec ℒₒᵣ (m + 1) 1 (qVec ℒₒᵣ (fvarVec m)) := by
@@ -92,7 +92,7 @@ lemma subst_subst_qVec_fvarVec {m Z t : V} (hZ : IsSemiformula ℒₒᵣ (m + 1)
   · have hi : i < m := by simpa using hi
     simp [nth_qVec_succ h₃ hi, nth_fvarVec m i hi]
 
-lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec L j 0 w)
+lemma substs1_subst_qVec (hw : IsSemitermVec L j 0 w)
     (hq : IsSemiformula L (j + 1) q) (ht : IsSemiterm L 0 t) :
     substs1 L t (subst L (qVec L w) q) = subst L (t ∷ w) q := by
   have h₁ : IsSemitermVec L 1 0 (?[t] : V) := by simp [ht]
@@ -109,7 +109,7 @@ lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec L j 0 w)
       termBShift_zero (hw.nth hi), termSubst_eq_self (hw.nth hi) (by simp)]
     simp
 
-lemma subst_congr {m p : V} (hp : IsSemiformula L m p) {k k' w w' : V}
+lemma subst_congr (hp : IsSemiformula L m p) {k' w' : V}
     (hw : IsUTermVec L k w) (hw' : IsUTermVec L k' w') (hk : m ≤ k) (hk' : m ≤ k')
     (H : ∀ i < m, w.[i] = w'.[i]) : subst L w p = subst L w' p := by
   revert k k' w w'
@@ -146,43 +146,38 @@ lemma subst_congr {m p : V} (hp : IsSemiformula L m p) {k k' w w' : V}
 
 section connective
 
-variable {w p : V}
-
 attribute [local simp] substs_rel substs_nrel substs_verum substs_falsum substs_and substs_or
   substs_all substs_ex
 
-lemma exists_eq_or_of_subst_eq (hp : IsUFormula L p) {q₁ q₂ : V}
-    (h : subst L w p = q₁ ^⋎ q₂) :
+lemma exists_eq_or_of_subst_eq (hp : IsUFormula L p) (h : subst L w p = q₁ ^⋎ q₂) :
     ∃ p₁ p₂, p = p₁ ^⋎ p₂ ∧ subst L w p₁ = q₁ ∧ subst L w p₂ = q₂ := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
     ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
     simp_all
   all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
-lemma exists_eq_and_of_subst_eq (hp : IsUFormula L p) {q₁ q₂ : V}
-    (h : subst L w p = q₁ ^⋏ q₂) :
+lemma exists_eq_and_of_subst_eq (hp : IsUFormula L p) (h : subst L w p = q₁ ^⋏ q₂) :
     ∃ p₁ p₂, p = p₁ ^⋏ p₂ ∧ subst L w p₁ = q₁ ∧ subst L w p₂ = q₂ := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
     ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
     simp_all
   all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
-lemma exists_eq_all_of_subst_eq (hp : IsUFormula L p) {q : V} (h : subst L w p = ^∀ q) :
+lemma exists_eq_all_of_subst_eq (hp : IsUFormula L p) (h : subst L w p = ^∀ q) :
     ∃ p₁, p = ^∀ p₁ ∧ subst L (qVec L w) p₁ = q := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
     ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
     simp_all
   all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
-lemma exists_eq_exs_of_subst_eq (hp : IsUFormula L p) {q : V} (h : subst L w p = ^∃ q) :
+lemma exists_eq_exs_of_subst_eq (hp : IsUFormula L p) (h : subst L w p = ^∃ q) :
     ∃ p₁, p = ^∃ p₁ ∧ subst L (qVec L w) p₁ = q := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
     ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
     simp_all
   all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
-lemma exists_eq_rel_of_subst_eq (hp : IsUFormula L p) {k R v : V}
-    (h : subst L w p = ^rel k R v) :
+lemma exists_eq_rel_of_subst_eq (hp : IsUFormula L p) (h : subst L w p = ^rel k R v) :
     ∃ v', IsUTermVec L k v' ∧ p = ^rel k R v' ∧ termSubstVec L k w v' = v := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
     ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩)
@@ -193,8 +188,7 @@ lemma exists_eq_rel_of_subst_eq (hp : IsUFormula L p) {k R v : V}
   all_goals simp_all
   all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
-lemma exists_eq_nrel_of_subst_eq (hp : IsUFormula L p) {k R v : V}
-    (h : subst L w p = ^nrel k R v) :
+lemma exists_eq_nrel_of_subst_eq (hp : IsUFormula L p) (h : subst L w p = ^nrel k R v) :
     ∃ v', IsUTermVec L k v' ∧ p = ^nrel k R v' ∧ termSubstVec L k w v' = v := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
     ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩)
@@ -205,30 +199,28 @@ lemma exists_eq_nrel_of_subst_eq (hp : IsUFormula L p) {k R v : V}
   all_goals simp_all
   all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
-lemma exists_eq_or_of_shift_eq (hp : IsUFormula L p) {q₁ q₂ : V}
-    (h : shift L p = q₁ ^⋎ q₂) :
+lemma exists_eq_or_of_shift_eq (hp : IsUFormula L p) (h : shift L p = q₁ ^⋎ q₂) :
     ∃ p₁ p₂, p = p₁ ^⋎ p₂ ∧ shift L p₁ = q₁ ∧ shift L p₂ = q₂ := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
     ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
     simp_all
   all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
-lemma exists_eq_and_of_shift_eq (hp : IsUFormula L p) {q₁ q₂ : V}
-    (h : shift L p = q₁ ^⋏ q₂) :
+lemma exists_eq_and_of_shift_eq (hp : IsUFormula L p) (h : shift L p = q₁ ^⋏ q₂) :
     ∃ p₁ p₂, p = p₁ ^⋏ p₂ ∧ shift L p₁ = q₁ ∧ shift L p₂ = q₂ := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
     ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
     simp_all
   all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
-lemma exists_eq_all_of_shift_eq (hp : IsUFormula L p) {q : V} (h : shift L p = ^∀ q) :
+lemma exists_eq_all_of_shift_eq (hp : IsUFormula L p) (h : shift L p = ^∀ q) :
     ∃ p₁, p = ^∀ p₁ ∧ shift L p₁ = q := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
     ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
     simp_all
   all_goals simp_all [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
-lemma exists_eq_exs_of_shift_eq (hp : IsUFormula L p) {q : V} (h : shift L p = ^∃ q) :
+lemma exists_eq_exs_of_shift_eq (hp : IsUFormula L p) (h : shift L p = ^∃ q) :
     ∃ p₁, p = ^∃ p₁ ∧ shift L p₁ = q := by
   rcases hp.case with (⟨k', R', v', hR, hv, rfl⟩ | ⟨k', R', v', hR, hv, rfl⟩ | rfl | rfl |
     ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
@@ -301,7 +293,7 @@ lemma IsSemiformula.sigma1_induction_fvar {P : V → Prop} (hP : 𝚺ᴬ₁-Pred
         (by simp [fomulaComplexity_substs h₁ hw, h₁.isUFormula]) h₂
     exact hexs _ h₁ this
 
-lemma exists_map_qqConj {n : V} {f : V → V} [𝚺ᴬ₁-Function₁ f]
+lemma exists_map_qqConj {f : V → V} [𝚺ᴬ₁-Function₁ f]
     (hand : ∀ p q, IsUFormula L p → IsUFormula L q → f (p ^⋏ q) = f p ^⋏ f q) (hverum : f ^⊤ = ^⊤)
     (ps : V) (hps : ∀ i < len ps, IsSemiformula L n ps.[i]) :
     ∃ qs, len qs = len ps ∧ (∀ i < len ps, qs.[i] = f ps.[i]) ∧ f (^⋀ ps) = ^⋀ qs := by
@@ -323,12 +315,12 @@ lemma exists_map_qqConj {n : V} {f : V → V} [𝚺ᴬ₁-Function₁ f]
     · rw [qqConj_cons, qqConj_cons, hand p _ h₁.isUFormula (qqConj_semiformula.mpr h₂).isUFormula,
         hsh]
 
-lemma shift_imp {n p q : V} (hp : IsSemiformula L n p) (hq : IsSemiformula L n q) :
+lemma shift_imp (hp : IsSemiformula L n p) (hq : IsSemiformula L n q) :
     shift L (imp L p q) = imp L (shift L p) (shift L q) := by
   unfold imp
   rw [shift_or hp.isUFormula.neg hq.isUFormula, shift_neg hp]
 
-lemma subst_eq_self_of_le {m k p w : V} (hp : IsSemiformula L m p) (hw : IsUTermVec L k w)
+lemma subst_eq_self_of_le (hp : IsSemiformula L m p) (hw : IsUTermVec L k w)
     (hk : m ≤ k) (H : ∀ i < m, w.[i] = ^#i) : subst L w p = p := by
   have h₁ : IsSemitermVec L m m (bvarVec 0 m) := IsSemitermVec.bvarVec (by simp)
   calc subst L w p = subst L (bvarVec 0 m) p := by
@@ -337,14 +329,13 @@ lemma subst_eq_self_of_le {m k p w : V} (hp : IsSemiformula L m p) (hw : IsUTerm
         rw [H i hi, nth_bvarVec _ _ _ hi, zero_add]
     _ = p := subst_eq_self hp h₁ fun i hi ↦ by rw [nth_bvarVec _ _ _ hi, zero_add]
 
-lemma subst_imp {n m w p q : V} (hw : IsSemitermVec L n m w) (hp : IsSemiformula L n p)
+lemma subst_imp (hw : IsSemitermVec L n m w) (hp : IsSemiformula L n p)
     (hq : IsSemiformula L n q) : subst L w (imp L p q) = imp L (subst L w p) (subst L w q) := by
   unfold imp
   rw [substs_or hp.isUFormula.neg hq.isUFormula, substs_neg hp hw]
 
-lemma substs1_subst_fvar_bvar {t u q : V} (ht : IsSemiterm L 0 t) (hq : IsSemiformula L 2 q) :
-    substs1 L t (subst L ?[^&u, ^#(0 : V)] q) =
-      substs1 L (^&u) (subst L ?[^#(0 : V), t] q) := by
+lemma substs1_subst_fvar_bvar (ht : IsSemiterm L 0 t) (hq : IsSemiformula L 2 q) :
+    substs1 L t (subst L ?[^&u, ^#(0 : V)] q) = substs1 L (^&u) (subst L ?[^#(0 : V), t] q) := by
   have h₁ : IsSemitermVec L 2 1 (?[^&u, ^#(0 : V)] : V) := isSemitermVec_fvar_bvar u
   have h₂ : IsSemitermVec L 1 0 (?[t] : V) := by simp [ht]
   have h₃ : IsSemitermVec L 2 1 (?[^#(0 : V), t] : V) := by
@@ -356,8 +347,7 @@ lemma substs1_subst_fvar_bvar {t u q : V} (ht : IsSemiterm L 0 t) (hq : IsSemifo
   unfold substs1
   rw [substs_substs hq h₂ h₁, substs_substs hq h₄ h₃, h₅]
 
-lemma subst_iff {m w p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
-    (hw : IsSemitermVec L 1 m w) :
+lemma subst_iff (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q) (hw : IsSemitermVec L 1 m w) :
     subst L w (iff L p q) = iff L (subst L w p) (subst L w q) := by
   have hpq : IsUFormula L (neg L p ^⋎ q) := (IsSemiformula.imp.mpr ⟨hp, hq⟩).isUFormula
   have hqp : IsUFormula L (neg L q ^⋎ p) := (IsSemiformula.imp.mpr ⟨hq, hp⟩).isUFormula
@@ -365,12 +355,12 @@ lemma subst_iff {m w p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1
   rw [substs_and hpq hqp, substs_or hp.isUFormula.neg hq.isUFormula,
     substs_or hq.isUFormula.neg hp.isUFormula, substs_neg hp hw, substs_neg hq hw]
 
-lemma substs1_and {t p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q) :
+lemma substs1_and (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q) :
     substs1 L t (p ^⋏ q) = substs1 L t p ^⋏ substs1 L t q := by
   unfold substs1
   exact substs_and hp.isUFormula hq.isUFormula
 
-lemma substs1_or {t p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q) :
+lemma substs1_or (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q) :
     substs1 L t (p ^⋎ q) = substs1 L t p ^⋎ substs1 L t q := by
   unfold substs1
   exact substs_or hp.isUFormula hq.isUFormula
@@ -381,7 +371,7 @@ lemma pi2_qqAll_sub_one (q : V) : π₂ ((^∀ q) - 1) = q := by
 lemma pi2_qqExs_sub_one (q : V) : π₂ ((^∃ q) - 1) = q := by
   simp [qqExs]
 
-lemma shift_substs1_qqFvar {p j : V} (hp : IsSemiformula L 1 p) :
+lemma shift_substs1_qqFvar (hp : IsSemiformula L 1 p) :
     shift L (substs1 L (^&j) p) = substs1 L (^&(j + 1)) (shift L p) := by
   have hv : IsSemitermVec L 1 (0 : V) ?[^&j] := by simp
   rw [substs1, shift_substs hp hv]
@@ -424,17 +414,16 @@ instance _root_.FFL.FirstOrder.Language.IsSentence.definable' {m : ℕ} {Γ : Si
 
 variable {L}
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.isSemiformula {n p : V}
+lemma _root_.FFL.FirstOrder.Language.IsSentence.isSemiformula
     (h : L.IsSentence n p) : IsSemiformula L n p := h.1
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.freeVariables_eq {n p : V}
+lemma _root_.FFL.FirstOrder.Language.IsSentence.freeVariables_eq
     (h : L.IsSentence n p) : freeVariables L p = ∅ := h.2
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.shift_eq {n p : V}
-    (h : L.IsSentence n p) : shift L p = p :=
+lemma _root_.FFL.FirstOrder.Language.IsSentence.shift_eq (h : L.IsSentence n p) : shift L p = p :=
   (shift_eq_self_iff h.isSemiformula.isUFormula).mpr h.freeVariables_eq
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.of_shift_eq {n p : V}
+lemma _root_.FFL.FirstOrder.Language.IsSentence.of_shift_eq
     (hp : IsSemiformula L n p) (h : shift L p = p) : L.IsSentence n p :=
   ⟨hp, (shift_eq_self_iff hp.isUFormula).mp h⟩
 
@@ -446,30 +435,30 @@ lemma _root_.FFL.FirstOrder.Language.IsSentence.verum (n : V) : L.IsSentence n ^
 lemma _root_.FFL.FirstOrder.Language.IsSentence.falsum (n : V) : L.IsSentence n ^⊥ := by
   simp [Language.IsSentence]
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.and {n p q : V}
+lemma _root_.FFL.FirstOrder.Language.IsSentence.and
     (hp : L.IsSentence n p) (hq : L.IsSentence n q) : L.IsSentence n (p ^⋏ q) := by
   refine ⟨by simp [hp.isSemiformula, hq.isSemiformula], ?_⟩
   rw [freeVariables_and hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
     hp.freeVariables_eq, hq.freeVariables_eq, union_empty_eq_left]
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.or {n p q : V}
+lemma _root_.FFL.FirstOrder.Language.IsSentence.or
     (hp : L.IsSentence n p) (hq : L.IsSentence n q) : L.IsSentence n (p ^⋎ q) := by
   refine ⟨by simp [hp.isSemiformula, hq.isSemiformula], ?_⟩
   rw [freeVariables_or hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
     hp.freeVariables_eq, hq.freeVariables_eq, union_empty_eq_left]
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.all {n p : V}
+lemma _root_.FFL.FirstOrder.Language.IsSentence.all
     (hp : L.IsSentence (n + 1) p) : L.IsSentence n (^∀ p) :=
   ⟨by simp [hp.isSemiformula],
     by rw [freeVariables_all hp.isSemiformula.isUFormula, hp.freeVariables_eq]⟩
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.exs {n p : V}
+lemma _root_.FFL.FirstOrder.Language.IsSentence.exs
     (hp : L.IsSentence (n + 1) p) : L.IsSentence n (^∃ p) :=
   ⟨by simp [hp.isSemiformula],
     by rw [freeVariables_exs hp.isSemiformula.isUFormula, hp.freeVariables_eq]⟩
 
 @[simp]
-lemma _root_.FFL.FirstOrder.Language.IsSentence.neg_iff {n p : V} :
+lemma _root_.FFL.FirstOrder.Language.IsSentence.neg_iff :
     L.IsSentence n (neg L p) ↔ L.IsSentence n p := by
   constructor
   · intro h
@@ -481,15 +470,14 @@ lemma _root_.FFL.FirstOrder.Language.IsSentence.neg_iff {n p : V} :
 
 end sentence
 
-lemma shift_neg_substs1_qqFvar {d j : V} (hd : L.IsSentence 1 d) :
+lemma shift_neg_substs1_qqFvar (hd : L.IsSentence 1 d) :
     shift L (neg L (substs1 L (^&j) d)) = neg L (substs1 L (^&(j + 1)) d) := by
   rw [shift_neg (IsSemiformula.substs1 (n := 0) (by simp) hd.isSemiformula),
     shift_substs1_qqFvar hd.isSemiformula, hd.shift_eq]
 
 /-! ## Blocks of universal quantifiers -/
 
-lemma shift_qqAlls {p : V} (hp : IsUFormula L p) (k : V) :
-    shift L (qqAlls p k) = qqAlls (shift L p) k := by
+lemma shift_qqAlls (hp : IsUFormula L p) (k : V) : shift L (qqAlls p k) = qqAlls (shift L p) k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -498,7 +486,7 @@ lemma shift_qqAlls {p : V} (hp : IsUFormula L p) (k : V) :
 /-- Substituting terms `w` without bound variables for the outermost bound variables of a block of
 `k` universal quantifiers: inside the block they become `w'`, which keeps the `k` variables bound
 by the block and continues with `w`. -/
-lemma subst_qqAlls {k w w' p : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsUFormula L p)
+lemma subst_qqAlls {w' : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsUFormula L p)
     (hl : len w' = k + len w) (h₁ : ∀ i < k, w'.[i] = ^#i) (h₂ : ∀ i < len w, w'.[k + i] = w.[i]) :
     subst L w (qqAlls p k) = qqAlls (subst L w' p) k := by
   induction k using ISigma1.pi1_succ_induction generalizing p w'
@@ -529,7 +517,7 @@ lemma subst_qqAlls {k w w' p : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsUFo
     rw [qqAlls_succ', ih (by simpa using hp) hvl (fun i hi ↦ hv₁ i hi) hvk, substs_all hp,
       ← qqAlls_succ', hqv]
 
-lemma free_qqAlls {k w p : V} (hp : IsUFormula L p) (hl : len w = k + 1)
+lemma free_qqAlls (hp : IsUFormula L p) (hl : len w = k + 1)
     (h₁ : ∀ i < k, w.[i] = ^#i) (h₂ : w.[k] = ^&0) :
     free L (qqAlls p k) = qqAlls (subst L w (shift L p)) k := by
   rw [free, substs1, shift_qqAlls hp]
@@ -581,29 +569,26 @@ lemma qqExss_succ' (p k : V) : qqExss p (k + 1) = qqExss (^∃ p) k := by
   rw [qqExss_succ, qqExss_exs]
 
 @[simp]
-lemma isUFormula_qqExss {p k : V} : IsUFormula L (qqExss p k) ↔ IsUFormula L p := by
+lemma isUFormula_qqExss : IsUFormula L (qqExss p k) ↔ IsUFormula L p := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih => rw [qqExss_succ, IsUFormula.ex, ih]
 
-lemma shift_qqExss {p : V} (hp : IsUFormula L p) (k : V) :
-    shift L (qqExss p k) = qqExss (shift L p) k := by
+lemma shift_qqExss (hp : IsUFormula L p) (k : V) : shift L (qqExss p k) = qqExss (shift L p) k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih => rw [qqExss_succ, shift_exs (isUFormula_qqExss.mpr hp), ih, qqExss_succ]
 
-lemma neg_qqAlls {p : V} (hp : IsUFormula L p) (k : V) :
-    neg L (qqAlls p k) = qqExss (neg L p) k := by
+lemma neg_qqAlls (hp : IsUFormula L p) (k : V) : neg L (qqAlls p k) = qqExss (neg L p) k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih =>
     rw [qqAlls_succ, neg_all (isUFormula_qqAlls.mpr hp), ih, qqExss_succ]
 
-lemma IsSemiformula.qqExss {n k p : V} (h : IsSemiformula L (n + k) p) :
-    IsSemiformula L n (qqExss p k) := by
+lemma IsSemiformula.qqExss (h : IsSemiformula L (n + k) p) : IsSemiformula L n (qqExss p k) := by
   induction k using ISigma1.pi1_succ_induction generalizing n
   · definability
   case zero => simpa using h
@@ -611,7 +596,7 @@ lemma IsSemiformula.qqExss {n k p : V} (h : IsSemiformula L (n + k) p) :
     rw [qqExss_succ, IsSemiformula.exs]
     exact ih (by rwa [add_right_comm, add_assoc])
 
-lemma qqExss_inj {p q m n : V} (hp : ∀ a, p ≠ ^∃ a) (hq : ∀ a, q ≠ ^∃ a)
+lemma qqExss_inj (hp : ∀ a, p ≠ ^∃ a) (hq : ∀ a, q ≠ ^∃ a)
     (h : qqExss p m = qqExss q n) : m = n ∧ p = q := by
   induction m using ISigma1.pi1_succ_induction generalizing n
   · definability
@@ -659,7 +644,7 @@ lemma substs1_qqExss {t q v r : V} (ht : IsSemiterm ℒₒᵣ 0 t) (hq : IsSemif
     rw [qqExss_succ', ih (by simpa using hq) hv'l hv'b hv'r, substs_ex hq.isUFormula, qqExss_exs,
       ← qqExss_succ, hqv]
 
-lemma subst_qqAlls_vec {k n m w v p : V} (hw : IsSemitermVec L n m w) (hp : IsUFormula L p)
+lemma subst_qqAlls_vec (hw : IsSemitermVec L n m w) (hp : IsUFormula L p)
     (hv : IsSemitermVec L (n + k) (m + k) v) (h₁ : ∀ i < k, v.[i] = ^#i)
     (h₂ : ∀ j < n, v.[k + j] = termSubst L (bvarVec k m) w.[j]) :
     subst L w (qqAlls p k) = qqAlls (subst L v p) k := by

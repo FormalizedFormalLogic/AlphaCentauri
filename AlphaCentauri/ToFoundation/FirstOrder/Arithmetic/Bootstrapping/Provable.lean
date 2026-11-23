@@ -26,7 +26,8 @@ namespace Bootstrapping
 
 open FirstOrder
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {T : ArithmeticTheory} [T.Δ₁]
+  {k m n : ℕ} {φ : ArithmeticSemisentence k}
 
 section modus_ponens
 
@@ -50,8 +51,6 @@ end modus_ponens
 section specialize
 
 open Bootstrapping.Arithmetic
-
-variable {T : ArithmeticTheory} [T.Δ₁]
 
 @[simp]
 lemma substNumerals_quote_of_isEmpty (σ : ArithmeticSentence) (v : Fin 0 → V) :
@@ -79,7 +78,7 @@ lemma provable_substNumerals_of_provable_substNumerals_all {m : ℕ}
   simpa [e, w, substNumerals, Matrix.vecHead, Matrix.vecTail, Function.comp_def] using h₂
 
 /-- Instantiating an internally-provable universal closure at numerals. -/
-lemma provable_substNumerals_of_provable_allClosure {k : ℕ} (φ : ArithmeticSemisentence k)
+lemma provable_substNumerals_of_provable_allClosure (φ : ArithmeticSemisentence k)
     (h : Provable T (⌜∀¹* φ⌝ : V)) (v : Fin k → V) : Provable T (substNumerals (⌜φ⌝ : V) v) := by
   induction k with
   | zero => simpa using h
@@ -91,7 +90,7 @@ variable [𝗜𝚺₁ ⪯ T]
 
 /-- A theorem of `𝗜𝚺₁`, given by its truth in every model, is internally provable at every
 vector of terms. -/
-lemma tprovable_subst_of_models {k : ℕ} {φ : ArithmeticSemisentence k}
+lemma tprovable_subst_of_models
     (h : ∀ (W : Type) [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin k → W), W ⊧/e φ)
     (w : SemitermVec V ℒₒᵣ k 0) :
     T.internalize V ⊢ (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst w :=
@@ -99,7 +98,7 @@ lemma tprovable_subst_of_models {k : ℕ} {φ : ArithmeticSemisentence k}
     Entailment.WeakerThan.pbl <| complete 𝗜𝚺₁ _ fun W _ _ ↦ by simpa [models_iff] using h W
 
 /-- A theorem of `𝗜𝚺₁`, given by its truth in every model, is internally provable at numerals. -/
-lemma tprovable_subst_numeral_of_models {k : ℕ} {φ : ArithmeticSemisentence k}
+lemma tprovable_subst_numeral_of_models
     (h : ∀ (W : Type) [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin k → W), W ⊧/e φ)
     (w : Fin k → V) :
     T.internalize V ⊢ (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst (fun i ↦ 𝕹 (w i)) :=
@@ -107,7 +106,7 @@ lemma tprovable_subst_numeral_of_models {k : ℕ} {φ : ArithmeticSemisentence k
     Entailment.WeakerThan.pbl <| complete 𝗜𝚺₁ _ fun W _ _ ↦ by simpa [models_iff] using h W
 
 /-- A $\Sigma_1$ formula true at `w` is internally provable at the numerals of `w`. -/
-lemma tprovable_subst_numeral_of_sigma1 {k : ℕ} {φ : ArithmeticSemisentence k}
+lemma tprovable_subst_numeral_of_sigma1
     (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ) {w : Fin k → V} (h : V ⊧/w φ) :
     T.internalize V ⊢ (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst (fun i ↦ 𝕹 (w i)) :=
   bold_sigma_one_complete T hφ h
@@ -118,22 +117,22 @@ section induction
 
 open Bootstrapping.Arithmetic
 
-variable {T : ArithmeticTheory} [T.Δ₁] [𝗣𝗔⁻ ⪯ T]
+variable [𝗣𝗔⁻ ⪯ T]
 
-lemma substNumerals_eq_subst {k : ℕ} (φ : ArithmeticSemisentence k) (v : Fin k → V) :
+lemma substNumerals_eq_subst (φ : ArithmeticSemisentence k) (v : Fin k → V) :
     substNumerals (⌜φ⌝ : V) v =
       ((⌜φ⌝ : Semiformula V ℒₒᵣ k).subst fun i ↦ (𝕹 (v i) : Term V ℒₒᵣ)).val := by
   simp [substNumerals, Sentence.quote_eq]
   rfl
 
-lemma typed_quote_shift {n : ℕ} (σ : ArithmeticSemisentence n) :
+lemma typed_quote_shift (σ : ArithmeticSemisentence n) :
     (⌜σ⌝ : Semiformula V ℒₒᵣ n).shift = ⌜σ⌝ := by
   ext;
   change shift ℒₒᵣ (⌜σ⌝ : V) = ⌜σ⌝;
   rw [Sentence.quote_def, ← Semiformula.quote_shift];
   simp [Rewriting.shift, Rewriting.emb, ← TransitiveRewriting.comp_app]
 
-lemma typed_quote_rew_subst {k j : ℕ} (φ : ArithmeticSemisentence k)
+lemma typed_quote_rew_subst {j : ℕ} (φ : ArithmeticSemisentence k)
     (w : Fin k → ArithmeticSemiterm Empty j) :
     (⌜Rew.subst w ▹ φ⌝ : Semiformula V ℒₒᵣ j) =
       (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst fun i ↦ ⌜(Rew.emb (w i) : SyntacticSemiterm ℒₒᵣ j)⌝ := by
@@ -190,8 +189,6 @@ theorem provable_substNumerals_of_provable_zero_of_provable_succ {m : ℕ}
 end induction
 
 open FFL.Entailment Bootstrapping.Arithmetic
-
-variable {T : ArithmeticTheory} [T.Δ₁]
 
 /-- `∀¹ (∀u < #0 + 1, A u ⋎ ∀x < #0 + 1, B x)`. -/
 noncomputable abbrev allBallOrBall (A B : Semiformula V ℒₒᵣ 1) : Formula V ℒₒᵣ :=

@@ -27,17 +27,17 @@ open FFL.FirstOrder.Bounding (HierarchySymbol)
 
 section
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {a b c m : ℕ}
 
 /-- A $\Sigma_1$ fact about standard numbers is inherited by every model of `𝗣𝗔⁻`.
 - [HP98, Theorem I.1.6] -/
-lemma Sigma1_cast {m : ℕ} (σ : 𝚺ᴬ₁.Semisentence m) {u : Fin m → ℕ}
+lemma Sigma1_cast (σ : 𝚺ᴬ₁.Semisentence m) {u : Fin m → ℕ}
     (h : ℕ ⊧/u σ.val) : V ⊧/(fun i ↦ (u i : V)) σ.val := by
   simpa [Function.comp_def] using sigmaOne_upward_absolute V σ u h
 
 /-- The $\Delta_1$ form of `Sigma1_cast`, reading the $\Sigma_1$ half of the definition.
 - [HP98, Theorem I.1.6] -/
-lemma Delta1_cast {m : ℕ} (σ : 𝚫ᴬ₁.Semisentence m) {u : Fin m → ℕ}
+lemma Delta1_cast (σ : 𝚫ᴬ₁.Semisentence m) {u : Fin m → ℕ}
     (h : ℕ ⊧/u σ.val) : V ⊧/(fun i ↦ (u i : V)) σ.val := by
   have h' : ℕ ⊧/u σ.sigma.val := by rwa [HierarchySymbol.Semiformula.val_sigma]
   have := Sigma1_cast (V := V) σ.sigma h'
@@ -45,43 +45,41 @@ lemma Delta1_cast {m : ℕ} (σ : 𝚫ᴬ₁.Semisentence m) {u : Fin m → ℕ}
 
 /-- `Sigma1_cast` at two arguments.
 - [HP98, Theorem I.1.6] -/
-lemma Sigma1_cast₂ (σ : 𝚺ᴬ₁.Semisentence 2) {a b : ℕ} (h : ℕ ⊧/![a, b] σ.val) :
+lemma Sigma1_cast₂ (σ : 𝚺ᴬ₁.Semisentence 2) (h : ℕ ⊧/![a, b] σ.val) :
     V ⊧/![(a : V), (b : V)] σ.val := by
   simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
     using Sigma1_cast (V := V) σ h
 
 /-- `Sigma1_cast` at three arguments.
 - [HP98, Theorem I.1.6] -/
-lemma Sigma1_cast₃ (σ : 𝚺ᴬ₁.Semisentence 3) {a b c : ℕ} (h : ℕ ⊧/![a, b, c] σ.val) :
+lemma Sigma1_cast₃ (σ : 𝚺ᴬ₁.Semisentence 3) (h : ℕ ⊧/![a, b, c] σ.val) :
     V ⊧/![(a : V), (b : V), (c : V)] σ.val := by
   simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
     using Sigma1_cast (V := V) σ h
 
 /-- $\Sigma_0$ cast at one argument.
 - [HP98, Theorem I.1.6] -/
-lemma Sigma0_cast₁ (σ : 𝚺ᴬ₀.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a] σ.val) :
-    V ⊧/![(a : V)] σ.val := by
+lemma Sigma0_cast₁ (σ : 𝚺ᴬ₀.Semisentence 1) (h : ℕ ⊧/![a] σ.val) : V ⊧/![(a : V)] σ.val := by
   simpa [Function.comp_def, Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
     using (sigmaZero_absolute V σ ![a]).mp h
 
 /-- $\Sigma_0$ cast at two arguments.
 - [HP98, Theorem I.1.6] -/
-lemma Sigma0_cast₂ (σ : 𝚺ᴬ₀.Semisentence 2) {a b : ℕ} (h : ℕ ⊧/![a, b] σ.val) :
+lemma Sigma0_cast₂ (σ : 𝚺ᴬ₀.Semisentence 2) (h : ℕ ⊧/![a, b] σ.val) :
     V ⊧/![(a : V), (b : V)] σ.val := by
   simpa [Function.comp_def, Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
     using (sigmaZero_absolute V σ ![a, b]).mp h
 
 /-- $\Sigma_0$ cast at three arguments.
 - [HP98, Theorem I.1.6] -/
-lemma Sigma0_cast₃ (σ : 𝚺ᴬ₀.Semisentence 3) {a b c : ℕ} (h : ℕ ⊧/![a, b, c] σ.val) :
+lemma Sigma0_cast₃ (σ : 𝚺ᴬ₀.Semisentence 3) (h : ℕ ⊧/![a, b, c] σ.val) :
     V ⊧/![(a : V), (b : V), (c : V)] σ.val := by
   simpa [Function.comp_def, Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
     using (sigmaZero_absolute V σ ![a, b, c]).mp h
 
 /-- `Delta1_cast` at one argument.
 - [HP98, Theorem I.1.6] -/
-lemma Delta1_cast₁ (σ : 𝚫ᴬ₁.Semisentence 1) {a : ℕ} (h : ℕ ⊧/![a] σ.val) :
-    V ⊧/![(a : V)] σ.val := by
+lemma Delta1_cast₁ (σ : 𝚫ᴬ₁.Semisentence 1) (h : ℕ ⊧/![a] σ.val) : V ⊧/![(a : V)] σ.val := by
   simpa [Matrix.comp_vecCons', Matrix.empty_eq, Matrix.constant_eq_singleton]
     using Delta1_cast (V := V) σ h
 
@@ -160,9 +158,9 @@ end
 
 /-! ## Prenex $\Sigma_1$ definability of existentially quantified relations -/
 
-variable {V : Type*} [ORingStructure V]
+variable {V : Type*} [ORingStructure V] {k : ℕ}
 
-lemma PrenexDefinable.exists_of_sigmaZero {k : ℕ} {R : (Fin k → V) → V → Prop}
+lemma PrenexDefinable.exists_of_sigmaZero {R : (Fin k → V) → V → Prop}
     (hR : 𝚺ᴬ₀.Definable fun v : Fin (k + 1) → V ↦ R (fun i ↦ v i.succ) (v 0)) :
     PrenexDefinable 𝚺 1 fun v ↦ ∃ x, R v x := by
   obtain ⟨φ, hφ⟩ := hR
@@ -170,7 +168,7 @@ lemma PrenexDefinable.exists_of_sigmaZero {k : ℕ} {R : (Fin k → V) → V →
     Bounding.PrenexHierarchy.zero_iff.mpr φ.sigma_prop
   exact ⟨∃¹ φ.val, Bounding.PrenexHierarchy.exs h₁, by intro v; simp [hφ.iff]⟩
 
-private lemma definable_exists_pair [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {k : ℕ} {R : (Fin k → V) → V → V → Prop}
+private lemma definable_exists_pair [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {R : (Fin k → V) → V → V → Prop}
     (hR : 𝚺ᴬ₀.Definable fun v : Fin (k + 2) → V ↦ R (fun i ↦ v i.succ.succ) (v 0) (v 1)) :
     𝚺ᴬ₀.Definable (k := k + 1) fun w ↦
       ∃ y ≤ w 0, ∃ x ≤ w 0, w 0 = ⟪x, y⟫ ∧ R (fun i ↦ w i.succ) x y := by
@@ -191,8 +189,7 @@ private lemma definable_exists_pair [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {k : ℕ}
         R (fun i ↦ (y :> w) i.succ.succ) x ((y :> w) 0))
     (hI.of_iff (by intro w; simp)) #0).of_iff (by intro w; simp)
 
-lemma PrenexDefinable.exists_exists_of_sigmaZero [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {k : ℕ}
-    {R : (Fin k → V) → V → V → Prop}
+lemma PrenexDefinable.exists_exists_of_sigmaZero [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {R : (Fin k → V) → V → V → Prop}
     (hR : 𝚺ᴬ₀.Definable fun v : Fin (k + 2) → V ↦ R (fun i ↦ v i.succ.succ) (v 0) (v 1)) :
     PrenexDefinable 𝚺 1 fun v ↦ ∃ x y, R v x y := by
   exact (PrenexDefinable.exists_of_sigmaZero
@@ -200,9 +197,8 @@ lemma PrenexDefinable.exists_exists_of_sigmaZero [V↓[ℒₒᵣ] ⊧* 𝗜𝚺�
     fun v ↦ ⟨fun ⟨x, y, h⟩ ↦ ⟨⟪x, y⟫, y, le_pair_right x y, x, le_pair_left x y, rfl, h⟩,
       fun ⟨_, y, _, x, _, _, h⟩ ↦ ⟨x, y, h⟩⟩
 
-lemma PrenexDefinable.exists_exists_exists_of_sigmaZero [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {k : ℕ}
-    {R : (Fin k → V) → V → V → V → Prop}
-    (hR : 𝚺ᴬ₀.Definable fun v : Fin (k + 3) → V ↦
+lemma PrenexDefinable.exists_exists_exists_of_sigmaZero [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
+    {R : (Fin k → V) → V → V → V → Prop} (hR : 𝚺ᴬ₀.Definable fun v : Fin (k + 3) → V ↦
       R (fun i ↦ v i.succ.succ.succ) (v 0) (v 1) (v 2)) :
     PrenexDefinable 𝚺 1 fun v ↦ ∃ x y z, R v x y z := by
   have hS := definable_exists_pair

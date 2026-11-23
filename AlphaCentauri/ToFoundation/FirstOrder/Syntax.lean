@@ -19,18 +19,13 @@ variable exponent.
 
 namespace FFL.FirstOrder
 
-variable {L : Language} {ξ : Type*} {n : ℕ}
+variable {L : Language} {ξ ξ₁ ξ₂ : Type*} {n n₁ n₂ m k : ℕ}
 
 namespace Semiformula
-
-section
-variable {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ}
 
 @[simp]
 lemma qr_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : (ω ▹ φ).qr = φ.qr := by
   induction φ using Semiformula.rec' generalizing n₂ <;> simp [*]
-
-end
 
 @[simp]
 lemma qr_substs (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) : (φ/[t]).qr = φ.qr :=
@@ -76,7 +71,7 @@ end Semiformula
 
 namespace Rew
 
-lemma qpow_map {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) (k : ℕ) :
+lemma qpow_map (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂) (k : ℕ) :
     (Rew.map (L := L) b e).qpow k = Rew.map (fun x : Fin (n₁ + k) ↦
       if h : (x : ℕ) < k then (⟨x, by omega⟩ : Fin (n₂ + k)) else
         (b ⟨x - k, by omega⟩).addNat k) e := by
@@ -93,7 +88,7 @@ lemma qpow_map {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} (b : Fin n₁ → Fin n�
       omega
 
 @[simp]
-lemma emb_subst_app {m : ℕ} (w : Fin n → Semiterm L Empty m) (φ : Semiformula L Empty n) :
+lemma emb_subst_app (w : Fin n → Semiterm L Empty m) (φ : Semiformula L Empty n) :
     Rewriting.emb (Rew.subst w ▹ φ : Semiformula L Empty m) =
       Rew.subst (fun i ↦ Rew.emb (w i)) ▹ (Rewriting.emb φ : Semiformula L ℕ n) := by
   unfold Rewriting.emb
@@ -146,7 +141,7 @@ lemma rewrite_subst_shift_eq (f : ℕ → SyntacticTerm L) (t : SyntacticTerm L)
         simpa using Rew.q_comp_bShift_app (ω := (Rew.shift : SyntacticRew L 0 0)) (f x)
       simp [Rew.comp_app, e]
 
-lemma subst_subst_eq {m : ℕ} (v : Fin n → Semiterm L ξ m) (φ : Semiformula L ξ 1)
+lemma subst_subst_eq (v : Fin n → Semiterm L ξ m) (φ : Semiformula L ξ 1)
     (t : Semiterm L ξ n) : Rew.subst v ▹ (φ/[t]) = φ/[Rew.subst v t] := by
   simpa [← TransitiveRewriting.comp_app] using Rewriting.smul_ext' <| by
     ext x
@@ -180,8 +175,6 @@ end Rew
 
 namespace Semiformula
 
-variable {m : ℕ}
-
 /-- Substituting a variable that the formula avoids, and then renaming it to the new bound
 variable, is `Rewriting.free`. -/
 lemma rewriteMap_subst_eq_free (φ : Semiformula L ℕ 1) (h : ¬φ.FVar? m) :
@@ -213,8 +206,6 @@ lemma map_rewriteMap_eq_shifts (Γ : Multiset (Semiformula L ℕ 0))
 whose extra bound variables are those free variables, with the original bound variables placed by
 a caller-supplied substitution `b`.
 -/
-
-variable {k : ℕ}
 
 /-- The substitution sending the bound variables of `φ` to `b` and the free variables below
 `φ.fvSup` to the remaining bound variables. -/

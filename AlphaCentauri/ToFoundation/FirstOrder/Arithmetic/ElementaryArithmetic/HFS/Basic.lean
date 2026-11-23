@@ -23,7 +23,7 @@ namespace ElementaryArithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {a b c f i m s s₁ s₂ t u x y z : V}
 
 /-! ## Union, intersection, product and domain -/
 
@@ -33,18 +33,18 @@ lemma susbset_insert (x a : V) : a ⊆ insert x a := by intro z hz; simp [hz]
 @[simp]
 lemma bitRemove_susbset (x a : V) : bitRemove x a ⊆ a := by intro z; simp
 
-lemma lt_of_mem_dom {x y m : V} (h : ⟪x, y⟫ ∈ m) : x < m := lt_of_le_of_lt (by simp) (lt_of_mem h)
+lemma lt_of_mem_dom (h : ⟪x, y⟫ ∈ m) : x < m := lt_of_le_of_lt (by simp) (lt_of_mem h)
 
-lemma lt_of_mem_rng {x y m : V} (h : ⟪x, y⟫ ∈ m) : y < m := lt_of_le_of_lt (by simp) (lt_of_mem h)
+lemma lt_of_mem_rng (h : ⟪x, y⟫ ∈ m) : y < m := lt_of_le_of_lt (by simp) (lt_of_mem h)
 
-lemma insert_subset_insert_of_subset {a b : V} (x : V) (h : a ⊆ b) : insert x a ⊆ insert x b := by
+lemma insert_subset_insert_of_subset (x : V) (h : a ⊆ b) : insert x a ⊆ insert x b := by
   intro z hz
   rcases mem_bitInsert_iff.mp hz with (rfl | hz)
   · simp
   · simp [h hz]
 
 @[simp]
-lemma under_subset_under_of_le {i j : V} : under i ⊆ under j ↔ i ≤ j :=
+lemma under_subset_under_of_le {j : V} : under i ⊆ under j ↔ i ≤ j :=
   ⟨by intro h; by_contra hij
       have : j < i := by simpa using hij
       simpa using h (mem_under_iff.mpr this),
@@ -66,13 +66,13 @@ scoped macro_rules
   | `(⋃ʰᶠ $s) => `(sUnion $s)
 
 @[simp]
-lemma mem_sUnion_iff {a b : V} : a ∈ ⋃ʰᶠ b ↔ ∃ c ∈ b, a ∈ c :=
+lemma mem_sUnion_iff : a ∈ ⋃ʰᶠ b ↔ ∃ c ∈ b, a ∈ c :=
   Classical.choose!_spec (sUnion_exists_unique b) a
 
 @[simp]
 lemma sUnion_empty : (⋃ʰᶠ ∅ : V) = ∅ := mem_ext (by simp)
 
-lemma sUnion_lt_of_pos {a : V} (ha : 0 < a) : ⋃ʰᶠ a < a :=
+lemma sUnion_lt_of_pos (ha : 0 < a) : ⋃ʰᶠ a < a :=
   lt_of_lt_log ha <| by
     suffices ∀ i x, x ∈ a → i ∈ x → i < log a by simpa
     intro i x hx hi
@@ -84,7 +84,7 @@ lemma sUnion_le (a : V) : ⋃ʰᶠ a ≤ a := by
   · simp [←emptyset_def]
   · exact le_of_lt (sUnion_lt_of_pos pos)
 
-lemma sUnion_graph {u s : V} : u = ⋃ʰᶠ s ↔ ∀ x < u + s, (x ∈ u ↔ ∃ t ∈ s, x ∈ t) :=
+lemma sUnion_graph : u = ⋃ʰᶠ s ↔ ∀ x < u + s, (x ∈ u ↔ ∃ t ∈ s, x ∈ t) :=
   ⟨by rintro rfl; simp, by
     intro h; apply mem_ext
     intro x
@@ -110,9 +110,9 @@ noncomputable def union (a b : V) : V := ⋃ʰᶠ {a, b}
 noncomputable scoped instance : Union V := ⟨union⟩
 
 @[simp]
-lemma mem_cup_iff {a b c : V} : a ∈ b ∪ c ↔ a ∈ b ∨ a ∈ c := by simp [Union.union, union]
+lemma mem_cup_iff : a ∈ b ∪ c ↔ a ∈ b ∨ a ∈ c := by simp [Union.union, union]
 
-private lemma union_graph {u s t : V} : u = s ∪ t ↔ ∀ x < u + s + t, (x ∈ u ↔ x ∈ s ∨ x ∈ t) :=
+private lemma union_graph : u = s ∪ t ↔ ∀ x < u + s + t, (x ∈ u ↔ x ∈ s ∨ x ∈ t) :=
   ⟨by rintro rfl; simp, by
     intro h; apply mem_ext
     intro x
@@ -184,13 +184,13 @@ noncomputable def sInter (s : V) : V := Classical.choose! (sInter_exists_unique 
 scoped macro_rules
   | `(⋂ʰᶠ $s) => `(sInter $s)
 
-lemma mem_sInter_iff {x s : V} : x ∈ ⋂ʰᶠ s ↔ s ≠ ∅ ∧ ∀ t ∈ s, x ∈ t :=
+lemma mem_sInter_iff : x ∈ ⋂ʰᶠ s ↔ s ≠ ∅ ∧ ∀ t ∈ s, x ∈ t :=
   Classical.choose!_spec (sInter_exists_unique s) x
 
 @[simp]
 lemma mem_sInter_iff_empty : ⋂ʰᶠ (∅ : V) = ∅ := mem_ext (by simp [mem_sInter_iff])
 
-lemma mem_sInter_iff_of_pos {x s : V} (h : s ≠ ∅) : x ∈ ⋂ʰᶠ s ↔ ∀ t ∈ s, x ∈ t := by
+lemma mem_sInter_iff_of_pos (h : s ≠ ∅) : x ∈ ⋂ʰᶠ s ↔ ∀ t ∈ s, x ∈ t := by
   simp [mem_sInter_iff, h]
 
 noncomputable def inter (a b : V) : V := ⋂ʰᶠ {a, b}
@@ -198,13 +198,12 @@ noncomputable def inter (a b : V) : V := ⋂ʰᶠ {a, b}
 noncomputable scoped instance : Inter V := ⟨inter⟩
 
 @[simp]
-lemma mem_inter_iff {a b c : V} : a ∈ b ∩ c ↔ a ∈ b ∧ a ∈ c := by
+lemma mem_inter_iff : a ∈ b ∩ c ↔ a ∈ b ∧ a ∈ c := by
   simp [Inter.inter, inter, mem_sInter_iff_of_pos (s := {b, c}) (nonempty_iff.mpr ⟨b, by simp⟩)]
 
 lemma inter_comm (a b : V) : a ∩ b = b ∩ a := mem_ext (by simp [and_comm])
 
-lemma inter_eq_self_of_subset {a b : V} (h : a ⊆ b) :
-  a ∩ b = a := mem_ext (by simpa using fun i hi↦ h hi)
+lemma inter_eq_self_of_subset (h : a ⊆ b) : a ∩ b = a := mem_ext (by simpa using fun i hi↦ h hi)
 
 lemma product_exists_unique (a b : V) :
     ∃! u : V, ∀ x, (x ∈ u ↔ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫) := by
@@ -220,20 +219,20 @@ noncomputable def product (a b : V) : V := Classical.choose! (product_exists_uni
 scoped macro_rules
   | `($a ×ʰᶠ $b) => `(product $a $b)
 
-lemma mem_product_iff {x a b : V} : x ∈ a ×ʰᶠ b ↔ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫ :=
+lemma mem_product_iff : x ∈ a ×ʰᶠ b ↔ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫ :=
   Classical.choose!_spec (product_exists_unique a b) x
 
-lemma mem_product_iff' {x a b : V} : x ∈ a ×ʰᶠ b ↔ π₁ x ∈ a ∧ π₂ x ∈ b := by
+lemma mem_product_iff' : x ∈ a ×ʰᶠ b ↔ π₁ x ∈ a ∧ π₂ x ∈ b := by
   suffices (∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫) ↔ π₁ x ∈ a ∧ π₂ x ∈ b by simpa [mem_product_iff]
   constructor
   · rintro ⟨y, hy, z, hz, rfl⟩; simp [*]
   · rintro ⟨h₁, h₂⟩; exact ⟨π₁ x, h₁, π₂ x, h₂, by simp⟩
 
 @[simp]
-lemma pair_mem_product_iff {x y a b : V} : ⟪x, y⟫ ∈ a ×ʰᶠ b ↔ x ∈ a ∧ y ∈ b := by
+lemma pair_mem_product_iff : ⟪x, y⟫ ∈ a ×ʰᶠ b ↔ x ∈ a ∧ y ∈ b := by
   simp [mem_product_iff']
 
-private lemma product_graph {u a b : V} : u = a ×ʰᶠ b ↔
+private lemma product_graph : u = a ×ʰᶠ b ↔
     ∀ x < u + (a + b + 1) ^ 2, (x ∈ u ↔ ∃ y ∈ a, ∃ z ∈ b, x = ⟪y, z⟫) :=
   ⟨by rintro rfl x _; simp [mem_product_iff], by
     intro h
@@ -255,11 +254,11 @@ instance product_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
   product_definable.of_zero
 
 @[simp]
-lemma zero_product {b : V} : ∅ ×ʰᶠ b = ∅ := by
+lemma zero_product : ∅ ×ʰᶠ b = ∅ := by
   refine mem_ext (fun i ↦ ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩) <;> simp_all [mem_product_iff]
 
 @[simp]
-lemma product_zero {a : V} : a ×ʰᶠ ∅ = ∅ := by
+lemma product_zero : a ×ʰᶠ ∅ = ∅ := by
   refine mem_ext (fun i ↦ ⟨fun hi ↦ ?_, fun hi ↦ ?_⟩) <;> simp_all [mem_product_iff]
 
 lemma domain_exists_unique (s : V) :
@@ -275,10 +274,10 @@ lemma domain_exists_unique (s : V) :
 
 noncomputable def domain (s : V) : V := Classical.choose! (domain_exists_unique s)
 
-lemma mem_domain_iff {x s : V} : x ∈ domain s ↔ ∃ y, ⟪x, y⟫ ∈ s :=
+lemma mem_domain_iff : x ∈ domain s ↔ ∃ y, ⟪x, y⟫ ∈ s :=
   Classical.choose!_spec (domain_exists_unique s) x
 
-private lemma domain_graph {u s : V} : u = domain s ↔
+private lemma domain_graph : u = domain s ↔
     ∀ x < u + s, (x ∈ u ↔ ∃ y < s, ∃ z ∈ s, z = ⟪x, y⟫) := by
   constructor
   · rintro rfl x _
@@ -337,16 +336,16 @@ lemma domain_bound (s : V) : domain s ≤ 2 * s := le_iff_lt_succ.mpr
 
 instance : Bounded₁ (domain : V → V) := ⟨‘x. 2 * x’, fun _ ↦ by simp⟩
 
-lemma mem_domain_of_pair_mem {x y s : V} (h : ⟪x, y⟫ ∈ s) : x ∈ domain s :=
+lemma mem_domain_of_pair_mem (h : ⟪x, y⟫ ∈ s) : x ∈ domain s :=
   mem_domain_iff.mpr ⟨y, h⟩
 
-lemma domain_subset_domain_of_subset {s t : V} (h : s ⊆ t) : domain s ⊆ domain t := by
+lemma domain_subset_domain_of_subset (h : s ⊆ t) : domain s ⊆ domain t := by
   intro x hx
   rcases mem_domain_iff.mp hx with ⟨y, hy⟩
   exact mem_domain_iff.mpr ⟨y, h hy⟩
 
 @[simp]
-lemma domain_eq_empty_iff_eq_empty {s : V} : domain s = ∅ ↔ s = ∅ :=
+lemma domain_eq_empty_iff_eq_empty : domain s = ∅ ↔ s = ∅ :=
   ⟨by simp only [isempty_iff, mem_domain_iff, not_exists]
       intro h x hx
       exact h (π₁ x) (π₂ x) (by simpa using hx), by rintro rfl; simp⟩
@@ -366,10 +365,10 @@ lemma range_exists_unique (s : V) :
 
 noncomputable def range (s : V) : V := Classical.choose! (range_exists_unique s)
 
-lemma mem_range_iff {y s : V} : y ∈ range s ↔ ∃ x, ⟪x, y⟫ ∈ s :=
+lemma mem_range_iff : y ∈ range s ↔ ∃ x, ⟪x, y⟫ ∈ s :=
   Classical.choose!_spec (range_exists_unique s) y
 
-private lemma range_graph {s' s : V} : s' = range s ↔
+private lemma range_graph {s' : V} : s' = range s ↔
     ∀ y < s' + s, (y ∈ s' ↔ ∃ x < s, ∃ z ∈ s, z = ⟪x, y⟫) :=
   ⟨by rintro rfl y _
       suffices (∃ x, ⟪x, y⟫ ∈ s) ↔ ∃ x < s, ⟪x, y⟫ ∈ s by simpa [mem_range_iff]
@@ -413,24 +412,24 @@ instance : Bounded₁ (range : V → V) := ⟨‘x. 2 * x’, fun _ ↦ by simp�
 
 def Disjoint (s t : V) : Prop := s ∩ t = ∅
 
-lemma Disjoint.iff {s t : V} : Disjoint s t ↔ ∀ x, x ∉ s ∨ x ∉ t := by
+lemma Disjoint.iff : Disjoint s t ↔ ∀ x, x ∉ s ∨ x ∉ t := by
   simp [Disjoint, isempty_iff, imp_iff_not_or]
 
-lemma Disjoint.not_of_mem {s t x : V} (hs : x ∈ s) (ht : x ∈ t) : ¬Disjoint s t := by
+lemma Disjoint.not_of_mem (hs : x ∈ s) (ht : x ∈ t) : ¬Disjoint s t := by
   simpa [Disjoint.iff, not_or] using ⟨x, hs, ht⟩
 
-lemma Disjoint.symm {s t : V} (h : Disjoint s t) : Disjoint t s := by
+lemma Disjoint.symm (h : Disjoint s t) : Disjoint t s := by
   simpa [Disjoint, inter_comm t s] using h
 
 @[simp]
-lemma Disjoint.singleton_iff {a s : V} : Disjoint ({a} : V) s ↔ a ∉ s := by
+lemma Disjoint.singleton_iff : Disjoint ({a} : V) s ↔ a ∉ s := by
   simp [Disjoint, isempty_iff]
 
 /-! ## Mapping -/
 
 def IsMapping (m : V) : Prop := ∀ x ∈ domain m, ∃! y, ⟪x, y⟫ ∈ m
 
-private lemma isMapping_iff {m : V} :
+private lemma isMapping_iff :
     IsMapping m ↔ ∃ d ≤ 2 * m, d = domain m ∧ ∀ x ∈ d, ∃ y < m,
       ⟪x, y⟫ ∈ m ∧ ∀ y' < m, ⟪x, y'⟫ ∈ m → y' = y :=
   ⟨by intro hm
@@ -451,18 +450,16 @@ instance isMapping_definable'
     (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) : ℌ-Predicate[V] IsMapping :=
   isMapping_definable.of_zero
 
-lemma IsMapping.get_exists_uniq {m : V} (h : IsMapping m) {x : V} (hx : x ∈ domain m) :
-    ∃! y, ⟪x, y⟫ ∈ m := h x hx
+lemma IsMapping.get_exists_uniq (h : IsMapping m) (hx : x ∈ domain m) : ∃! y, ⟪x, y⟫ ∈ m := h x hx
 
 noncomputable def IsMapping.get {m : V} (h : IsMapping m) {x : V} (hx : x ∈ domain m) : V :=
   Classical.choose! (IsMapping.get_exists_uniq h hx)
 
 @[simp]
-lemma IsMapping.get_mem {m : V} (h : IsMapping m) {x : V} (hx : x ∈ domain m) :
+lemma IsMapping.get_mem (h : IsMapping m) (hx : x ∈ domain m) :
     ⟪x, h.get hx⟫ ∈ m := Classical.choose!_spec (IsMapping.get_exists_uniq h hx)
 
-lemma IsMapping.get_uniq {m : V} (h : IsMapping m) {x y : V} (hx : x ∈ domain m)
-    (hy : ⟪x, y⟫ ∈ m) : y = h.get hx :=
+lemma IsMapping.get_uniq (h : IsMapping m) (hx : x ∈ domain m) (hy : ⟪x, y⟫ ∈ m) : y = h.get hx :=
     (h x hx).unique hy (by simp)
 
 @[simp]
@@ -490,18 +487,18 @@ lemma IsMapping.singleton (x y : V) : IsMapping ({⟪x, y⟫} : V) := by
   intro x; simp only [domain_singleton, mem_singleton_iff, pair_ext_iff]
   rintro rfl; exact ExistsUnique.intro y (by simp) (by rintro _ ⟨_, rfl⟩; simp)
 
-lemma IsMapping.insert {x y m : V}
-    (h : IsMapping m) (disjoint : x ∉ domain m) : IsMapping (insert ⟪x, y⟫ m) := by
+lemma IsMapping.insert (h : IsMapping m) (disjoint : x ∉ domain m)
+    : IsMapping (insert ⟪x, y⟫ m) := by
   simpa [insert_eq_union_singleton]
   using IsMapping.union_of_disjoint_domain (by simp) h (by simpa)
 
-lemma IsMapping.of_subset {m m' : V} (h : IsMapping m) (ss : m' ⊆ m) : IsMapping m' := by
+lemma IsMapping.of_subset {m' : V} (h : IsMapping m) (ss : m' ⊆ m) : IsMapping m' := by
   intro x hx
   rcases mem_domain_iff.mp hx with ⟨y, hy⟩
   have : ∃! y, ⟪x, y⟫ ∈ m := h x (domain_subset_domain_of_subset ss hx)
   exact ExistsUnique.intro y hy (fun y' hy' ↦ this.unique (ss hy') (ss hy))
 
-lemma IsMapping.uniq {m x y₁ y₂ : V} (h : IsMapping m) :
+lemma IsMapping.uniq {y₁ y₂ : V} (h : IsMapping m) :
     ⟪x, y₁⟫ ∈ m → ⟪x, y₂⟫ ∈ m → y₁ = y₂ := fun h₁ h₂ ↦
   h x (mem_domain_iff.mpr ⟨y₁, h₁⟩) |>.unique h₁ h₂
 
@@ -510,7 +507,7 @@ lemma IsMapping.uniq {m x y₁ y₂ : V} (h : IsMapping m) :
 def IsMapping.Injective (m : V) : Prop := ∀ x x' y, ⟪x, y⟫ ∈ m → ⟪x', y⟫ ∈ m → x = x'
 
 /-- An equivalent formulation of injectivity in which all quantifiers are bounded. -/
-lemma IsMapping.injective_iff_bounded {m : V} :
+lemma IsMapping.injective_iff_bounded :
     IsMapping.Injective m ↔
     ∀ x < m, ∀ x_1 < m, ∀ x_2 < m, ⟪x, x_2⟫ ∈ m → ⟪x_1, x_2⟫ ∈ m → x = x_1 := by
   constructor <;> intro h
@@ -538,7 +535,7 @@ lemma IsMapping.injective_empty : IsMapping.Injective (∅ : V) := by intro x x'
 def IsMapping.Surjective (m : V) : Prop := ∀ y ∈ range m, ∃ x, ⟪x, y⟫ ∈ m
 
 /-- An equivalent formulation of surjectivity in which all quantifiers are bounded. -/
-lemma IsMapping.surjective_iff_bounded {m : V} :
+lemma IsMapping.surjective_iff_bounded :
     IsMapping.Surjective m ↔
     ∀ y < m, y ∈ range m → ∃ x < m, ⟪x, y⟫ ∈ m := by
   constructor <;> intro h
@@ -579,12 +576,11 @@ noncomputable def restr (f s : V) : V := Classical.choose! (restr_exists_unique 
 scoped macro_rules
   | `($f ↾ $s) => `(restr $f $s)
 
-lemma mem_restr_iff {x f s : V} : x ∈ f ↾ s ↔ x ∈ f ∧ π₁ x ∈ s :=
+lemma mem_restr_iff : x ∈ f ↾ s ↔ x ∈ f ∧ π₁ x ∈ s :=
   Classical.choose!_spec (restr_exists_unique f s) x
 
 @[simp]
-lemma pair_mem_restr_iff {x y f s : V} :
-    ⟪x, y⟫ ∈ f ↾ s ↔ ⟪x, y⟫ ∈ f ∧ x ∈ s := by simp [mem_restr_iff]
+lemma pair_mem_restr_iff : ⟪x, y⟫ ∈ f ↾ s ↔ ⟪x, y⟫ ∈ f ∧ x ∈ s := by simp [mem_restr_iff]
 
 @[simp]
 lemma restr_empty (f : V) : f ↾ ∅ = ∅ := mem_ext (by simp [mem_restr_iff])
@@ -595,12 +591,12 @@ lemma restr_subset_self (f s : V) : f ↾ s ⊆ f := fun _ hx ↦ (mem_restr_iff
 @[simp]
 lemma restr_le_self (f s : V) : f ↾ s ≤ f := le_of_subset (by simp)
 
-lemma IsMapping.restr {m : V} (h : IsMapping m) (s : V) : IsMapping (m ↾ s) := h.of_subset (by simp)
+lemma IsMapping.restr (h : IsMapping m) (s : V) : IsMapping (m ↾ s) := h.of_subset (by simp)
 
 lemma domain_restr (f s : V) : domain (f ↾ s) = domain f ∩ s :=
   mem_ext (by simp [mem_domain_iff, pair_mem_restr_iff, exists_and_right, mem_inter_iff])
 
-lemma domain_restr_of_subset_domain {f s : V} (h : s ⊆ domain f) : domain (f ↾ s) = s := by
+lemma domain_restr_of_subset_domain (h : s ⊆ domain f) : domain (f ↾ s) = s := by
   simp [domain_restr, inter_comm, inter_eq_self_of_subset h]
 
 def IsMapping.IsFunction (f : V) : Prop := IsMapping f ∧ f ⊆ domain f ×ʰᶠ range f
@@ -678,7 +674,7 @@ instance sndIdx_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 
 def Seq (s : V) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 
-theorem Seq.isMapping {s : V} (h : Seq s) : IsMapping s := h.1
+theorem Seq.isMapping (h : Seq s) : IsMapping s := h.1
 
 private lemma seq_iff (s : V) :
     Seq s ↔ IsMapping s ∧ ∃ l ≤ 2 * s, ∃ d ≤ 2 * s, d = domain s ∧ d = under l :=
@@ -710,9 +706,9 @@ noncomputable def lh (s : V) : V := Classical.choose! (lh_exists_uniq s)
 lemma lh_prop (s : V) : (Seq s → domain s = under (lh s)) ∧ (¬Seq s → lh s = 0) :=
     Classical.choose!_spec (lh_exists_uniq s)
 
-lemma lh_prop_of_not_seq {s : V} (h : ¬Seq s) : lh s = 0 := (lh_prop s).2 h
+lemma lh_prop_of_not_seq (h : ¬Seq s) : lh s = 0 := (lh_prop s).2 h
 
-lemma Seq.domain_eq {s : V} (h : Seq s) : domain s = under (lh s) := (lh_prop s).1 h
+lemma Seq.domain_eq (h : Seq s) : domain s = under (lh s) := (lh_prop s).1 h
 
 @[simp]
 lemma lh_bound (s : V) : lh s ≤ 2 * s := by
@@ -742,29 +738,29 @@ instance lh_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 
 instance : Bounded₁ (lh : V → V) := ⟨‘x. 2 * x’, fun _ ↦ by simp⟩
 
-lemma Seq.exists {s : V} (h : Seq s) {x : V} (hx : x < lh s) : ∃ y, ⟪x, y⟫ ∈ s :=
+lemma Seq.exists (h : Seq s) (hx : x < lh s) : ∃ y, ⟪x, y⟫ ∈ s :=
     h.isMapping x (by simpa [h.domain_eq] using hx) |>.exists
 
-lemma Seq.nth_exists_uniq {s : V} (h : Seq s) {x : V} (hx : x < lh s) : ∃! y, ⟪x, y⟫ ∈ s :=
+lemma Seq.nth_exists_uniq (h : Seq s) (hx : x < lh s) : ∃! y, ⟪x, y⟫ ∈ s :=
     h.isMapping x (by simpa [h.domain_eq] using hx)
 
 noncomputable def Seq.nth {s : V} (h : Seq s) {x : V} (hx : x < lh s) : V :=
   Classical.choose! (h.nth_exists_uniq hx)
 
 @[simp]
-lemma Seq.nth_mem {s : V} (h : Seq s) {x : V} (hx : x < lh s) :
+lemma Seq.nth_mem (h : Seq s) (hx : x < lh s) :
     ⟪x, h.nth hx⟫ ∈ s := Classical.choose!_spec (h.nth_exists_uniq hx)
 
 @[simp]
-lemma Seq.nth_lt {s : V} (h : Seq s) {x} (hx : x < lh s) : h.nth hx < s :=
+lemma Seq.nth_lt (h : Seq s) {x} (hx : x < lh s) : h.nth hx < s :=
     lt_of_mem_rng (h.nth_mem hx)
 
-lemma Seq.lh_eq_of {s : V} (H : Seq s) {l} (h : domain s = under l) : lh s = l := by
+lemma Seq.lh_eq_of (H : Seq s) {l} (h : domain s = under l) : lh s = l := by
   simpa [H.domain_eq] using h
 
-lemma Seq.lt_lh_iff {s : V} (h : Seq s) {i} : i < lh s ↔ i ∈ domain s := by simp [h.domain_eq]
+lemma Seq.lt_lh_iff (h : Seq s) {i} : i < lh s ↔ i ∈ domain s := by simp [h.domain_eq]
 
-lemma Seq.lt_lh_of_mem {s : V} (h : Seq s) {i x} (hix : ⟪i, x⟫ ∈ s) : i < lh s := by
+lemma Seq.lt_lh_of_mem (h : Seq s) {i x} (hix : ⟪i, x⟫ ∈ s) : i < lh s := by
   simpa [h.lt_lh_iff, mem_domain_iff] using ⟨x, hix⟩
 
 noncomputable def seqCons (s x : V) : V := insert ⟪lh s, x⟫ s
@@ -777,16 +773,16 @@ theorem znth_existsUnique (s i : V) :
 
 noncomputable def znth (s i : V) : V := Classical.choose! (znth_existsUnique s i)
 
-protected lemma Seq.znth {s i : V} (h : Seq s) (hi : i < lh s) : ⟪i, znth s i⟫ ∈ s :=
+protected lemma Seq.znth (h : Seq s) (hi : i < lh s) : ⟪i, znth s i⟫ ∈ s :=
     Classical.choose!_spec (znth_existsUnique s i) |>.1 ⟨h, hi⟩
 
-lemma Seq.znth_eq_of_mem {s i x : V} (h : Seq s) (hi : ⟪i, x⟫ ∈ s) : znth s i = x :=
+lemma Seq.znth_eq_of_mem (h : Seq s) (hi : ⟪i, x⟫ ∈ s) : znth s i = x :=
   h.isMapping.uniq (h.znth (h.lt_lh_of_mem hi)) hi
 
-lemma znth_prop_not {s i : V} (h : ¬Seq s ∨ lh s ≤ i) : znth s i = 0 :=
+lemma znth_prop_not (h : ¬Seq s ∨ lh s ≤ i) : znth s i = 0 :=
   Classical.choose!_spec (znth_existsUnique s i) |>.2 (by simpa [-not_and, not_and_or] using h)
 
-private lemma znth_graph {x s i : V} :
+private lemma znth_graph :
     (∃ l ≤ 2 * s, l = lh s ∧ (Seq s ∧ i < l → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < l) → x = 0)) ↔
       x = znth s i := by
   simp [znth, Classical.choose!_eq_iff_right]
@@ -823,7 +819,7 @@ lemma Seq.lt_seqCons {s} (hs : Seq s) (x : V) : s < s ⁀' x :=
 @[simp]
 lemma Seq.mem_seqCons (s x : V) : ⟪lh s, x⟫ ∈ s ⁀' x := by simp [seqCons]
 
-protected lemma Seq.seqCons {s : V} (h : Seq s) (x : V) : Seq (s ⁀' x) :=
+protected lemma Seq.seqCons (h : Seq s) (x : V) : Seq (s ⁀' x) :=
   ⟨h.isMapping.insert (by simp [h.domain_eq]), lh s + 1, by simp [seqCons, h.domain_eq]⟩
 
 @[simp]
@@ -832,18 +828,18 @@ lemma Seq.lh_seqCons (x : V) {s} (h : Seq s) : lh (s ⁀' x) = lh s + 1 := by
     simpa [seqCons, h.domain_eq] using (h.seqCons x).domain_eq
   exact Eq.symm <| under_inj.mp this
 
-lemma mem_seqCons_iff {i x z s : V} : ⟪i, x⟫ ∈ s ⁀' z ↔ (i = lh s ∧ x = z) ∨ ⟪i, x⟫ ∈ s := by
+lemma mem_seqCons_iff : ⟪i, x⟫ ∈ s ⁀' z ↔ (i = lh s ∧ x = z) ∨ ⟪i, x⟫ ∈ s := by
   simp [seqCons]
 
 @[simp]
 lemma lh_mem_seqCons (s z : V) : ⟪lh s, z⟫ ∈ s ⁀' z := by simp [seqCons]
 
 @[simp]
-lemma lh_mem_seqCons_iff {s x z : V} (H : Seq s) : ⟪lh s, x⟫ ∈ s ⁀' z ↔ x = z := by
+lemma lh_mem_seqCons_iff (H : Seq s) : ⟪lh s, x⟫ ∈ s ⁀' z ↔ x = z := by
   suffices ⟪lh s, x⟫ ∈ s → x = z by simpa [seqCons]
   intro h; have := H.lt_lh_of_mem h; simp at this
 
-lemma Seq.mem_seqCons_iff_of_lt {s x z i : V} (hi : i < lh s) : ⟪i, x⟫ ∈ s ⁀' z ↔ ⟪i, x⟫ ∈ s := by
+lemma Seq.mem_seqCons_iff_of_lt (hi : i < lh s) : ⟪i, x⟫ ∈ s ⁀' z ↔ ⟪i, x⟫ ∈ s := by
   suffices i = lh s → x = z → ⟪i, x⟫ ∈ s by simpa [seqCons, hi]
   rintro rfl; simp at hi
 
@@ -870,16 +866,15 @@ instance seqCons_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
 @[simp]
 lemma natCast_empty : ((∅ : ℕ) : V) = ∅ := by simp [emptyset_def]
 
-lemma Seq.restr {s : V} (H : Seq s) {i : V} (hi : i ≤ lh s) : Seq (s ↾ under i) :=
+lemma Seq.restr (H : Seq s) (hi : i ≤ lh s) : Seq (s ↾ under i) :=
   ⟨H.isMapping.restr (under i), i, domain_restr_of_subset_domain (by simp [H.domain_eq, hi])⟩
 
 @[simp]
-lemma Seq.restr_lh {s : V} (H : Seq s) {i : V} (hi : i ≤ lh s) : lh (s ↾ under i) = i :=
+lemma Seq.restr_lh (H : Seq s) (hi : i ≤ lh s) : lh (s ↾ under i) = i :=
   (H.restr hi).lh_eq_of (domain_restr_of_subset_domain <| by simp [H.domain_eq, hi])
 
 @[simp]
-lemma domain_bitRemove_of_isMapping_of_mem {x y s : V}
-    (hs : IsMapping s) (hxy : ⟪x, y⟫ ∈ s) :
+lemma domain_bitRemove_of_isMapping_of_mem (hs : IsMapping s) (hxy : ⟪x, y⟫ ∈ s) :
     domain (bitRemove ⟪x, y⟫ s) = bitRemove x (domain s) := by
   suffices ∀ x₁, (∃ y₁, (x₁ = x → y₁ ≠ y) ∧ ⟪x₁, y₁⟫ ∈ s) ↔ x₁ ≠ x ∧ ∃ y, ⟪x₁, y⟫ ∈ s by
     apply mem_ext; simpa [mem_domain_iff]
@@ -889,8 +884,8 @@ lemma domain_bitRemove_of_isMapping_of_mem {x y s : V}
   · intro ⟨hx, y₁, hx₁y₁⟩
     exact ⟨y₁, by intro _; contradiction, hx₁y₁⟩
 
-lemma Seq.eq_of_eq_of_subset {s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂)
-    (hl : lh s₁ = lh s₂) (h : s₁ ⊆ s₂) : s₁ = s₂ := by
+lemma Seq.eq_of_eq_of_subset (H₁ : Seq s₁) (H₂ : Seq s₂) (hl : lh s₁ = lh s₂) (h : s₁ ⊆ s₂)
+    : s₁ = s₂ := by
   apply mem_ext; intro u
   constructor
   · intro hu; exact h hu
@@ -903,12 +898,12 @@ lemma Seq.eq_of_eq_of_subset {s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂)
     rcases this with rfl
     simpa using hy
 
-lemma subset_pair {s t : V} (h : ∀ i x, ⟪i, x⟫ ∈ s → ⟪i, x⟫ ∈ t) : s ⊆ t := by
+lemma subset_pair (h : ∀ i x, ⟪i, x⟫ ∈ s → ⟪i, x⟫ ∈ t) : s ⊆ t := by
   intro u hu
   simpa using h (π₁ u) (π₂ u) (by simpa using hu)
 
 @[simp]
-lemma Seq.seqCons_ext {a₁ a₂ s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂) :
+lemma Seq.seqCons_ext {a₁ a₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂) :
     s₁ ⁀' a₁ = s₂ ⁀' a₂ ↔ a₁ = a₂ ∧ s₁ = s₂ :=
   ⟨by intro h
       have hs₁s₂ : lh s₁ = lh s₂ := by simpa [H₁, H₂] using congr_arg lh h
@@ -925,10 +920,10 @@ lemma Seq.seqCons_ext {a₁ a₂ s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s�
       exact ⟨ha₁a₂, H₁.eq_of_eq_of_subset H₂ hs₁s₂ this⟩,
    by rintro ⟨rfl, rfl⟩; rfl⟩
 
-lemma ne_zero_iff_one_le {a : V} : a ≠ 0 ↔ 1 ≤ a :=
+lemma ne_zero_iff_one_le : a ≠ 0 ↔ 1 ≤ a :=
     Iff.trans pos_iff_ne_zero.symm (pos_iff_one_le (a := a))
 
-lemma Seq.cases_iff {s : V} : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = s' ⁀' x := ⟨fun h ↦ by
+lemma Seq.cases_iff : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = s' ⁀' x := ⟨fun h ↦ by
   by_cases hs : lh s = 0
   · left
     simpa [hs] using h.domain_eq

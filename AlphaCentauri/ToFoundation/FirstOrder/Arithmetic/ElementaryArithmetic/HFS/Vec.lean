@@ -28,7 +28,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 open Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {i v v₁ v₂ x xs y z : V}
 
 lemma LocallyDelta0.mem {k : ℕ} {f f' : (Fin k → V) → V} (hf : LocallyDelta0Function f)
     (hf' : LocallyDelta0Function f') : LocallyDelta0 fun v ↦ f v ∈ f' v :=
@@ -80,7 +80,7 @@ lemma LocallyDelta0Function.pi₂ : LocallyDelta0Function₁ (pi₂ : V → V) :
 lemma LocallyDelta0Function.sub : LocallyDelta0Function₂ ((· - ·) : V → V → V) :=
   LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
 
-lemma adjoin_le_adjoin {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤ v₂) :
+lemma adjoin_le_adjoin {x₁ x₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤ v₂) :
     x₁ ∷ v₁ ≤ x₂ ∷ v₂ := by simpa [adjoin_def] using pair_le_pair hx hv
 
 instance adjoin_defined : 𝚺ᴬ₀-Function₂ (adjoin : V → V → V) via adjoinDef := .mk fun v ↦ by
@@ -211,7 +211,7 @@ lemma graph_locallyDelta0 : LocallyDelta0 fun w : Fin 3 → V ↦ Graph ⟪w 0, 
         (LocallyDelta0Function.var (V := V) (2 : Fin 3)))) (fun j ↦ j.elim0)
   exact this.of_iff fun w ↦ by simp [Graph, Matrix.empty_eq]
 
-lemma graph_zero {v x : V} : Graph ⟪v, 0, x⟫ ↔ x = fstIdx v := by
+lemma graph_zero : Graph ⟪v, 0, x⟫ ↔ x = fstIdx v := by
   constructor
   · intro h
     rcases graph_case.mp h with (⟨w, h⟩ | ⟨w, i, x, h, _⟩)
@@ -219,7 +219,7 @@ lemma graph_zero {v x : V} : Graph ⟪v, 0, x⟫ ↔ x = fstIdx v := by
     · simp at h
   · rintro rfl; exact graph_case.mpr <| Or.inl ⟨v, rfl⟩
 
-lemma graph_succ {v i x : V} : Graph ⟪v, i + 1, x⟫ ↔ Graph ⟪sndIdx v, i, x⟫ := by
+lemma graph_succ : Graph ⟪v, i + 1, x⟫ ↔ Graph ⟪sndIdx v, i, x⟫ := by
   constructor
   · intro h
     rcases graph_case.mp h with (⟨w, h⟩ | ⟨w, j, y, h, hw⟩)
@@ -244,7 +244,7 @@ lemma exists_le_graph (v i : V) : ∃ x ≤ v, Graph ⟪v, i, x⟫ := by
       exact ⟨x, le_trans hx (by simp), graph_succ.mpr hg⟩
   exact this i v le_rfl
 
-lemma graph_unique {v i x₁ x₂ : V} : Graph ⟪v, i, x₁⟫ → Graph ⟪v, i, x₂⟫ → x₁ = x₂ := by
+lemma graph_unique {x₁ x₂ : V} : Graph ⟪v, i, x₁⟫ → Graph ⟪v, i, x₂⟫ → x₁ = x₂ := by
   set A := v + x₁ + x₂
   have hP : LocallyDelta0Pred fun i ↦
       ∀ v ≤ A, ∀ x₁ ≤ A, ∀ x₂ ≤ A, Graph ⟪v, i, x₁⟫ → Graph ⟪v, i, x₂⟫ → x₁ = x₂ := by
@@ -285,7 +285,7 @@ scoped notation:max v:max ".[" i "]" => nth v i
 lemma nth_graph (v i : V) : Nth.Graph ⟪v, i, v.[i]⟫ :=
   Classical.choose!_spec (Nth.graph_existsUnique v i)
 
-lemma nth_eq_of_graph {v i x : V} (h : Nth.Graph ⟪v, i, x⟫) : nth v i = x :=
+lemma nth_eq_of_graph (h : Nth.Graph ⟪v, i, x⟫) : nth v i = x :=
   Nth.graph_unique (nth_graph v i) h
 
 lemma nth_zero (v : V) : v.[0] = fstIdx v := nth_eq_of_graph (Nth.graph_zero.mpr rfl)
@@ -516,7 +516,7 @@ private lemma result_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta
     LocallyDelta0Function fun w : Fin n → V ↦ c.result param (f w) := by
   simpa using c.result_locallyDelta0.comp_cons hf fun j ↦ LocallyDelta0Function.const (param j)
 
-lemma eq_of_mem_limSeq {s z : V} (h : z ∈ c.construction.limSeq param s) :
+lemma eq_of_mem_limSeq {s : V} (h : z ∈ c.construction.limSeq param s) :
     z = ⟪π₁ z, c.result param (π₁ z)⟫ := by
   have hR : LocallyDelta0 fun y : Fin 2 → V ↦
       y 0 ∈ c.construction.limSeq param (y 1) →
@@ -583,7 +583,7 @@ lemma mem_limSeq_result (xs : V) :
 
 variable {param}
 
-lemma graph_iff {xs y : V} : c.Graph param ⟪xs, y⟫ ↔ y = c.result param xs := by
+lemma graph_iff : c.Graph param ⟪xs, y⟫ ↔ y = c.result param xs := by
   constructor
   · rintro ⟨s, h⟩
     simpa using c.eq_of_mem_limSeq param h
@@ -598,8 +598,7 @@ lemma graph_exists (xs : V) : ∃ y, c.Graph param ⟪xs, y⟫ := ⟨_, c.result
 
 variable {param}
 
-lemma graph_unique {xs y₁ y₂ : V} :
-    c.Graph param ⟪xs, y₁⟫ → c.Graph param ⟪xs, y₂⟫ → y₁ = y₂ := by
+lemma graph_unique {y₁ y₂ : V} : c.Graph param ⟪xs, y₁⟫ → c.Graph param ⟪xs, y₂⟫ → y₁ = y₂ := by
   simp only [graph_iff]
   rintro rfl rfl; rfl
 
@@ -609,7 +608,7 @@ lemma graph_existsUnique (xs : V) : ∃! y, c.Graph param ⟪xs, y⟫ :=
   ExistsUnique.intro _ (c.result_graph param xs) fun _ h ↦
     c.graph_unique h (c.result_graph param xs)
 
-lemma result_eq_of_graph {xs y : V} (h : c.Graph param ⟪xs, y⟫) : c.result param xs = y :=
+lemma result_eq_of_graph (h : c.Graph param ⟪xs, y⟫) : c.result param xs = y :=
   (c.graph_iff.mp h).symm
 
 set_option linter.flexible false in
@@ -671,7 +670,7 @@ lemma len_locallyDelta0 : LocallyDelta0Function₁ (len : V → V) := by
   simp [len, Matrix.empty_eq]
 
 @[simp]
-lemma len_zero_iff_eq_nil {v : V} : len v = 0 ↔ v = 0 := by
+lemma len_zero_iff_eq_nil : len v = 0 ↔ v = 0 := by
   rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩) <;> simp
 
 @[simp]
@@ -685,7 +684,7 @@ lemma len_le (v : V) : len v ≤ v := by
     rw [len_adjoin]
     exact succ_le_iff_lt.mpr (lt_of_le_of_lt ih (lt_adjoin' x v))
 
-lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
+lemma nth_lt_len (hl : len v ≤ i) : v.[i] = 0 := by
   have hR : LocallyDelta0 fun w : Fin 2 → V ↦ len (w 1) ≤ w 0 → (w 1).[w 0] = 0 :=
     (LocallyDelta0.le (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))
       (LocallyDelta0Function.var 0)).imp
@@ -703,8 +702,7 @@ lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
       · simpa using ih j (le_trans le_self_add hj) (by simpa using hl')
   exact this i le_rfl hl
 
-lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] = v₂.[i]) :
-    v₁ = v₂ := by
+lemma nth_ext (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] = v₂.[i]) : v₁ = v₂ := by
   have hR : LocallyDelta0 fun w : Fin 2 → V ↦
       len (w 1) = len (w 0) → (∀ i < len (w 1), (w 1).[i] = (w 0).[i]) → w 1 = w 0 := by
     apply LocallyDelta0.imp
@@ -736,12 +734,11 @@ lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, 
       simp [hx, hv]
   exact this v₂ le_rfl hl H
 
-lemma nth_ext' (l : V) {v₁ v₂ : V} (hl₁ : len v₁ = l) (hl₂ : len v₂ = l)
-    (H : ∀ i < l, v₁.[i] = v₂.[i]) : v₁ = v₂ := by
+lemma nth_ext' (l : V) (hl₁ : len v₁ = l) (hl₂ : len v₂ = l) (H : ∀ i < l, v₁.[i] = v₂.[i])
+    : v₁ = v₂ := by
   rcases hl₂; exact nth_ext hl₁ (by simpa [hl₁] using H)
 
-lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂)
-    (H : ∀ i < len v₁, v₁.[i] ≤ v₂.[i]) : v₁ ≤ v₂ := by
+lemma le_of_nth_le_nth (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] ≤ v₂.[i]) : v₁ ≤ v₂ := by
   have hR : LocallyDelta0 fun w : Fin 2 → V ↦
       len (w 1) = len (w 0) → (∀ i < len (w 1), (w 1).[i] ≤ (w 0).[i]) → w 1 ≤ w 0 := by
     apply LocallyDelta0.imp
@@ -773,7 +770,7 @@ lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂)
       exact adjoin_le_adjoin hx hv
   exact this v₂ le_rfl hl H
 
-lemma nth_lt_self {v i : V} (hi : i < len v) : v.[i] < v := by
+lemma nth_lt_self (hi : i < len v) : v.[i] < v := by
   have hR : LocallyDelta0 fun w : Fin 2 → V ↦ w 0 < len (w 1) → (w 1).[w 0] < w 1 :=
     (LocallyDelta0.lt (LocallyDelta0Function.var (0 : Fin 2))
       (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))).imp
@@ -840,12 +837,12 @@ theorem sigmaZero_skolem_vec {R : V → V → Prop} (hR : LocallyDelta0Rel R) {l
   use v
   simpa using hv
 
-lemma eq_singleton_iff_len_eq_one {v : V} : len v = 1 ↔ ∃ x, v = ?[x] := by
+lemma eq_singleton_iff_len_eq_one : len v = 1 ↔ ∃ x, v = ?[x] := by
   constructor
   · intro h; exact ⟨v.[0], nth_ext (by simp [h]) (by simp [h])⟩
   · rintro ⟨x, rfl⟩; simp
 
-lemma eq_doubleton_of_len_eq_two {v : V} : len v = 2 ↔ ∃ x y, v = ?[x, y] := by
+lemma eq_doubleton_of_len_eq_two : len v = 2 ↔ ∃ x y, v = ?[x, y] := by
   constructor
   · intro h; exact ⟨v.[0], v.[1],
       nth_ext (by simp [h, one_add_one_eq_two])
@@ -897,7 +894,7 @@ lemma listMax_locallyDelta0 : LocallyDelta0Function₁ (listMax : V → V) := by
   convert ListMax.construction.result_locallyDelta0 (V := V) using 3
   simp [listMax, Matrix.empty_eq]
 
-lemma nth_le_listMax {i v : V} (h : i < len v) : v.[i] ≤ listMax v := by
+lemma nth_le_listMax (h : i < len v) : v.[i] ≤ listMax v := by
   have hR : LocallyDelta0 fun w : Fin 2 → V ↦ w 0 < len (w 1) → (w 1).[w 0] ≤ listMax (w 1) :=
     (LocallyDelta0.lt (LocallyDelta0Function.var (0 : Fin 2))
       (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (1 : Fin 2)))).imp
@@ -915,7 +912,7 @@ lemma nth_le_listMax {i v : V} (h : i < len v) : v.[i] ≤ listMax v := by
       · simp [ih j (le_trans le_self_add hj) (by simpa using hl)]
   exact this i le_rfl h
 
-lemma listMaxss_le {v z : V} (h : ∀ i < len v, v.[i] ≤ z) : listMax v ≤ z := by
+lemma listMaxss_le (h : ∀ i < len v, v.[i] ≤ z) : listMax v ≤ z := by
   have hnth : LocallyDelta0 fun t : Fin 2 → V ↦ (t 1).[t 0] ≤ z :=
     LocallyDelta0.le (nth_locallyDelta0.comp₂ (LocallyDelta0Function.var 1)
       (LocallyDelta0Function.var 0)) (LocallyDelta0Function.const z)
@@ -935,7 +932,7 @@ lemma listMaxss_le {v z : V} (h : ∀ i < len v, v.[i] ≤ z) : listMax v ≤ z 
       · exact ih (fun i hi ↦ by simpa using h (i + 1) (by simp [hi]))
   exact this h
 
-lemma listMaxss_le_iff {v z : V} : listMax v ≤ z ↔ ∀ i < len v, v.[i] ≤ z := by
+lemma listMaxss_le_iff : listMax v ≤ z ↔ ∀ i < len v, v.[i] ≤ z := by
   constructor
   · intro h i hi; exact le_trans (nth_le_listMax hi) h
   · exact listMaxss_le
@@ -1138,13 +1135,13 @@ scoped infix:40 " ∈ᵥ " => MemVec
 @[simp]
 lemma not_memVec_empty (x : V) : ¬x ∈ᵥ 0 := by rintro ⟨i, h, _⟩; simp at h
 
-lemma nth_mem_memVec {i v : V} (h : i < len v) : v.[i] ∈ᵥ v := ⟨i, by simp [h]⟩
+lemma nth_mem_memVec (h : i < len v) : v.[i] ∈ᵥ v := ⟨i, by simp [h]⟩
 
 @[simp]
-lemma memVec_insert_fst {x v : V} : x ∈ᵥ x ∷ v := ⟨0, by simp⟩
+lemma memVec_insert_fst : x ∈ᵥ x ∷ v := ⟨0, by simp⟩
 
 @[simp]
-lemma memVec_adjoin_iff {x y v : V} : x ∈ᵥ y ∷ v ↔ x = y ∨ x ∈ᵥ v := by
+lemma memVec_adjoin_iff : x ∈ᵥ y ∷ v ↔ x = y ∨ x ∈ᵥ v := by
   constructor
   · rintro ⟨i, h, rfl⟩
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -1155,7 +1152,7 @@ lemma memVec_adjoin_iff {x y v : V} : x ∈ᵥ y ∷ v ↔ x = y ∨ x ∈ᵥ v 
     · rcases hx with ⟨i, hi, rfl⟩
       exact ⟨i + 1, by simp [hi]⟩
 
-lemma le_of_memVec {x v : V} (h : x ∈ᵥ v) : x ≤ v := by
+lemma le_of_memVec (h : x ∈ᵥ v) : x ≤ v := by
   rcases h with ⟨i, _, rfl⟩; simp
 
 instance memVec_defined : 𝚫ᴬ₁-Relation (MemVec : V → V → Prop) via memVecDef :=
@@ -1293,8 +1290,7 @@ lemma nth_repeatVec (x k : V) {i} (h : i < k) : (repeatVec x k).[i] = x := by
       · simpa using ih j (le_trans le_self_add hj) (by simpa using hl)
   exact this i le_rfl h
 
-lemma len_repeatVec_of_nth_le {v m : V} (H : ∀ i < len v, v.[i] ≤ m) :
-    v ≤ repeatVec m (len v) :=
+lemma len_repeatVec_of_nth_le {m : V} (H : ∀ i < len v, v.[i] ≤ m) : v ≤ repeatVec m (len v) :=
   le_of_nth_le_nth (by simp) (fun i hi ↦ by simp [nth_repeatVec m (len v) hi, H i hi])
 
 /-! ## Conversion to a set -/
@@ -1346,7 +1342,7 @@ lemma vecToSet_locallyDelta0 : LocallyDelta0Function₁ (vecToSet : V → V) := 
   convert VecToSet.construction.result_locallyDelta0 (V := V) using 3
   simp [vecToSet, Matrix.empty_eq]
 
-lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i] := by
+lemma mem_vecToSet_iff : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i] := by
   have hex : LocallyDelta0 fun w : Fin 1 → V ↦ ∃ i < len (w 0), x = (w 0).[i] :=
     (LocallyDelta0.bexs_lt_function (len_locallyDelta0.comp₁
       (LocallyDelta0Function.var (0 : Fin 1)))
@@ -1370,7 +1366,7 @@ lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i]
       · right; exact ⟨i, by simpa using hi, by simp⟩
 
 @[simp]
-lemma nth_mem_vecToSet {v i : V} (h : i < len v) : v.[i] ∈ vecToSet v :=
+lemma nth_mem_vecToSet (h : i < len v) : v.[i] ∈ vecToSet v :=
   mem_vecToSet_iff.mpr ⟨i, h, rfl⟩
 
 /-! ## Mapping a function over a list -/
@@ -1453,8 +1449,7 @@ lemma len_listMap (p : Fin k → V) (v : V) : len (listMap g p v) = len v := by
   simp only [listMap, h, ↓reduceDIte]
   exact (Classical.choose!_spec h).1
 
-lemma nth_listMap (p : Fin k → V) (v : V) {i : V} (hi : i < len v) :
-    (listMap g p v).[i] = g p v.[i] := by
+lemma nth_listMap (p : Fin k → V) (v : V) (hi : i < len v) : (listMap g p v).[i] = g p v.[i] := by
   have h := listMap_existsUnique hg p v
   simp only [listMap, h, ↓reduceDIte]
   exact (Classical.choose!_spec h).2 i hi

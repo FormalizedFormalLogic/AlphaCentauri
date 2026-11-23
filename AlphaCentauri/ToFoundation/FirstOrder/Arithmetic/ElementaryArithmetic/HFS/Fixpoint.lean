@@ -26,7 +26,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 open Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {ih m s u x S : V}
 
 namespace Fixpoint
 
@@ -78,13 +78,13 @@ noncomputable def succ (s ih : V) : V := Classical.choose! (c.succ_existsUnique 
 
 variable {v}
 
-lemma mem_succ_iff {s ih x : V} : x ∈ c.succ v s ih ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x :=
+lemma mem_succ_iff : x ∈ c.succ v s ih ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x :=
   Classical.choose!_spec (c.succ_existsUnique v s ih) x
 
 lemma succ_lt_exp (s ih : V) : c.succ v s ih < Exp.exp (s + 1) :=
   lt_exp_iff.mpr fun _ hj ↦ lt_succ_iff_le.mpr (c.mem_succ_iff.mp hj).1
 
-private lemma succ_graph {u s ih : V} :
+private lemma succ_graph :
     u = c.succ v s ih ↔ ∀ x < u + (s + 1), x ∈ u ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x :=
   ⟨by rintro rfl x _; simp [mem_succ_iff], by
     intro h; apply mem_ext
@@ -176,11 +176,10 @@ private lemma limSeq_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta
     LocallyDelta0Function fun w : Fin n → V ↦ c.limSeq v (f w) := by
   simpa using c.limSeq_locallyDelta0.comp_cons hf fun j ↦ LocallyDelta0Function.const (v j)
 
-lemma mem_limSeq_succ_iff {x s : V} :
-    x ∈ c.limSeq v (s + 1) ↔ x ≤ s ∧ c.Φ v {z | z ∈ c.limSeq v s} x := by
+lemma mem_limSeq_succ_iff : x ∈ c.limSeq v (s + 1) ↔ x ≤ s ∧ c.Φ v {z | z ∈ c.limSeq v s} x := by
   simp [limSeq_succ, mem_succ_iff]
 
-lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' := by
+lemma limSeq_cumulative {s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' := by
   have hR : LocallyDelta0 fun y : Fin 2 → V ↦ c.limSeq v (y 0) ⊆ c.limSeq v (y 1) := by
     exact ((LocallyDelta0.of_definable (R := fun y : Fin 2 → V ↦ y 0 ⊆ y 1)
       (by definability)).comp₂ (c.limSeq_comp (v := v) (LocallyDelta0Function.var 0))
@@ -199,8 +198,7 @@ lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s'
       exact c.mem_limSeq_succ_iff.mpr ⟨le_trans hu hs, c.monotone (fun z hz ↦ ih s hs hz) Hu⟩
   exact this s' s
 
-lemma mem_limSeq_self [c.StrongFinite] {u s : V} :
-    u ∈ c.limSeq v s → u ∈ c.limSeq v (u + 1) := by
+lemma mem_limSeq_self [c.StrongFinite] : u ∈ c.limSeq v s → u ∈ c.limSeq v (u + 1) := by
   have hR : LocallyDelta0 fun y : Fin 2 → V ↦
       y 1 ∈ c.limSeq v (y 0) → y 1 ∈ c.limSeq v (y 1 + 1) := by
     exact ((LocallyDelta0.of_definable (R := fun y : Fin 3 → V ↦ y 0 ∈ y 1 → y 0 ∈ y 2)
@@ -236,24 +234,24 @@ def Fixpoint (x : V) : Prop := ∃ s, x ∈ c.limSeq v s
 
 variable {v}
 
-lemma fixpoint_iff [c.StrongFinite] {x : V} : c.Fixpoint v x ↔ x ∈ c.limSeq v (x + 1) :=
+lemma fixpoint_iff [c.StrongFinite] : c.Fixpoint v x ↔ x ∈ c.limSeq v (x + 1) :=
   ⟨by rintro ⟨s, hs⟩; exact c.mem_limSeq_self hs, fun h ↦ ⟨x + 1, h⟩⟩
 
-lemma fixpoint_iff_succ {x : V} : c.Fixpoint v x ↔ ∃ u, x ∈ c.limSeq v (u + 1) :=
+lemma fixpoint_iff_succ : c.Fixpoint v x ↔ ∃ u, x ∈ c.limSeq v (u + 1) :=
   ⟨by
     rintro ⟨u, h⟩
     rcases zero_or_succ u with (rfl | ⟨u, rfl⟩)
     · simp at h
     · exact ⟨u, h⟩, by rintro ⟨u, h⟩; exact ⟨u + 1, h⟩⟩
 
-lemma case_mp {x : V} : c.Fixpoint v x → c.Φ v {z | c.Fixpoint v z} x := by
+lemma case_mp : c.Fixpoint v x → c.Φ v {z | c.Fixpoint v z} x := by
   intro h
   obtain ⟨u, hu⟩ := c.fixpoint_iff_succ.mp h
   have : c.Φ v {z | z ∈ c.limSeq v u} x := (c.mem_limSeq_succ_iff.mp hu).2
   exact c.monotone (C' := {z | c.Fixpoint v z}) (fun _ hx ↦ ⟨u, hx⟩) this
 
 /-- A point whose premises below `m` all appear by the stage `S` belongs to the fixpoint. -/
-lemma case_mpr_of_stage {x m S : V} (hΦ : c.Φ v {z | c.Fixpoint v z ∧ z < m} x)
+lemma case_mpr_of_stage (hΦ : c.Φ v {z | c.Fixpoint v z ∧ z < m} x)
     (hS : ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v S) : c.Fixpoint v x := by
   have : c.Φ v {z | z ∈ c.limSeq v S} x :=
     c.monotone (C' := {z | z ∈ c.limSeq v S}) (fun z hz ↦ hS z hz.2 hz.1) hΦ
@@ -262,7 +260,7 @@ lemma case_mpr_of_stage {x m S : V} (hΦ : c.Φ v {z | c.Fixpoint v z ∧ z < m}
     ⟨by simp, c.monotone (C' := {z | z ∈ c.limSeq v (max S x)})
       (fun _ hz ↦ c.limSeq_cumulative (by simp) hz) this⟩
 
-theorem case [c.StrongFinite] {x : V} : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x := by
+theorem case [c.StrongFinite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x := by
   constructor
   · exact c.case_mp
   · intro hx

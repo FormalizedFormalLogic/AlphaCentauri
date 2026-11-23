@@ -26,7 +26,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 open Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {i s z : V}
 
 namespace PR
 
@@ -120,8 +120,6 @@ variable {c v}
 
 namespace CSeq
 
-variable {s : V}
-
 lemma seq (h : c.CSeq v s) : Seq s := h.1
 
 lemma zero (h : c.CSeq v s) : ⟪0, c.zero v⟫ ∈ s := h.2.1
@@ -160,7 +158,7 @@ lemma unique {s₁ s₂ : V} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁
 lemma initial : c.CSeq v !⟦c.zero v⟧ :=
   ⟨by simp, by simp [seqCons], by simp⟩
 
-lemma successor {s l z : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
+lemma successor {l : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
     c.CSeq v (s ⁀' c.succ v l z) :=
   ⟨ Hs.seq.seqCons _, by simp [seqCons, Hs.zero], by
     simp only [Hs.seq.lh_seqCons, add_tsub_cancel_right]
@@ -178,7 +176,7 @@ lemma successor {s l z : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z�
       exact Hs.succ i (by simp [← hl, hil]) w hiws ⟩
 
 /-- Every value of a computation sequence satisfies the invariant. -/
-lemma inv_of_mem (H : c.CSeq v s) {i z : V} (h : ⟪i, z⟫ ∈ s) : c.inv v i z := by
+lemma inv_of_mem (H : c.CSeq v s) (h : ⟪i, z⟫ ∈ s) : c.inv v i z := by
   have hinv : LocallyDelta0 fun x : Fin 2 → V ↦ c.inv v (x 1) (x 0) := by
     have := c.inv_locallyDelta0.comp (f := (fun x : Fin 2 → V ↦ x 0) :> (fun x ↦ x 1) :>
       fun j _ ↦ v j) <| Fin.cases (LocallyDelta0Function.var 0) <|
@@ -204,7 +202,7 @@ lemma inv_of_mem (H : c.CSeq v s) {i z : V} (h : ⟪i, z⟫ ∈ s) : c.inv v i z
   exact this i z (lt_of_mem_rng h) h
 
 /-- Every value of a computation sequence lies below the bound. -/
-lemma lt_bound (H : c.CSeq v s) {i z : V} (h : ⟪i, z⟫ ∈ s) : z < c.bound v i :=
+lemma lt_bound (H : c.CSeq v s) (h : ⟪i, z⟫ ∈ s) : z < c.bound v i :=
   c.lt_bound_of_inv v i z (H.inv_of_mem h)
 
 /-- A computation sequence of length at most `l + 1` lies below `Exp.exp ⟪l + 1, c.bound v l⟫`. -/
@@ -408,15 +406,14 @@ lemma LocallyDelta0Function.znth : LocallyDelta0Function₂ (znth : V → V → 
     intro w hw
     exact le_trans (znth_le _ _) (hw 0)
 
-lemma Seq.znth_of_lt {s i : V} (h : Seq s) (hi : i < lh s) : ⟪i, znth s i⟫ ∈ s := by
+lemma Seq.znth_of_lt (h : Seq s) (hi : i < lh s) : ⟪i, znth s i⟫ ∈ s := by
   obtain ⟨y, hy⟩ := h.exists hi
   rwa [h.znth_eq_of_mem hy]
 
-lemma Seq.znth_seqCons_of_lt {s x i : V} (h : Seq s) (hi : i < lh s) :
-    znth (s ⁀' x) i = znth s i :=
+lemma Seq.znth_seqCons_of_lt {x : V} (h : Seq s) (hi : i < lh s) : znth (s ⁀' x) i = znth s i :=
   (h.seqCons x).znth_eq_of_mem <| (Seq.mem_seqCons_iff_of_lt hi).mpr (h.znth_of_lt hi)
 
-lemma Seq.znth_seqCons_lh {s x : V} (h : Seq s) : znth (s ⁀' x) (lh s) = x :=
+lemma Seq.znth_seqCons_lh {x : V} (h : Seq s) : znth (s ⁀' x) (lh s) = x :=
   (h.seqCons x).znth_eq_of_mem (Seq.mem_seqCons s x)
 
 end ElementaryArithmetic

@@ -25,7 +25,8 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 open Bounding
 
-variable {V : Type*} [ORingStructure V] {k l : ℕ}
+variable {V : Type*} [ORingStructure V] {k l : ℕ} {f f' f'' g : (Fin k → V) → V}
+  {u : Fin l → (Fin k → V) → V} {P : (Fin (k + 1) → V) → Prop}
 
 /-- `R` agrees, on the arguments below any given bound, with a $\Delta_0$ relation with
 parameters. -/
@@ -136,7 +137,7 @@ lemma comp {R : (Fin l → V) → Prop} {f : Fin l → (Fin k → V) → V} (h :
       exact (hRQ _ hw).mpr hwQ
 
 /-- Bounded universal quantification below a variable. -/
-lemma ball_le {P : (Fin (k + 1) → V) → Prop} (h : LocallyDelta0 P) :
+lemma ball_le (h : LocallyDelta0 P) :
     LocallyDelta0 fun v : Fin (k + 1) → V ↦ ∀ x ≤ v 0, P (x :> fun i ↦ v i.succ) := by
   intro X
   obtain ⟨Q, hQ, hPQ⟩ := h X
@@ -156,7 +157,7 @@ lemma ball_le {P : (Fin (k + 1) → V) → Prop} (h : LocallyDelta0 P) :
     | succ i => simpa using hv i.succ
 
 /-- Bounded existential quantification below a variable. -/
-lemma bexs_le {P : (Fin (k + 1) → V) → Prop} (h : LocallyDelta0 P) :
+lemma bexs_le (h : LocallyDelta0 P) :
     LocallyDelta0 fun v : Fin (k + 1) → V ↦ ∃ x ≤ v 0, P (x :> fun i ↦ v i.succ) :=
   (ball_le h.not).not.of_iff fun _ ↦ by simp
 
@@ -166,8 +167,8 @@ namespace LocallyDelta0Function
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
-lemma of_definableBoundedFunction {f : (Fin k → V) → V}
-    (hf : Arithmetic.DefinableBoundedFunction f) : LocallyDelta0Function f where
+lemma of_definableBoundedFunction (hf : Arithmetic.DefinableBoundedFunction f) :
+    LocallyDelta0Function f where
   graph := LocallyDelta0.of_definable hf.2
   bounded X := by
     obtain ⟨t, ht⟩ := hf.1.bounded
@@ -209,18 +210,17 @@ lemma comp {g : (Fin l → V) → V} {f : Fin l → (Fin k → V) → V} (hg : L
     exact hZ _ fun i ↦ le_trans (hY i v hv)
       (Finset.single_le_sum (fun j _ ↦ by simp) (by simp))
 
-lemma comp₁ {g : V → V} {f : (Fin k → V) → V} (hg : LocallyDelta0Function₁ g)
-    (hf : LocallyDelta0Function f) : LocallyDelta0Function fun v ↦ g (f v) :=
+lemma comp₁ {g : V → V} (hg : LocallyDelta0Function₁ g) (hf : LocallyDelta0Function f) :
+    LocallyDelta0Function fun v ↦ g (f v) :=
   hg.comp (f := fun _ ↦ f) fun _ ↦ hf
 
-lemma comp₂ {g : V → V → V} {f f' : (Fin k → V) → V} (hg : LocallyDelta0Function₂ g)
-    (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+lemma comp₂ {g : V → V → V} (hg : LocallyDelta0Function₂ g) (hf : LocallyDelta0Function f)
+    (hf' : LocallyDelta0Function f') :
     LocallyDelta0Function fun v ↦ g (f v) (f' v) :=
   hg.comp (f := ![f, f']) <|
     Fin.forall_fin_succ.mpr ⟨hf, Fin.forall_fin_succ.mpr ⟨hf', finZeroElim⟩⟩
 
-lemma comp₃ {g : V → V → V → V} {f f' f'' : (Fin k → V) → V}
-    (hg : LocallyDelta0Function (k := 3) fun v ↦ g (v 0) (v 1) (v 2))
+lemma comp₃ {g : V → V → V → V} (hg : LocallyDelta0Function (k := 3) fun v ↦ g (v 0) (v 1) (v 2))
     (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f')
     (hf'' : LocallyDelta0Function f'') : LocallyDelta0Function fun v ↦ g (f v) (f' v) (f'' v) :=
   hg.comp (f := ![f, f', f'']) <| Fin.forall_fin_succ.mpr ⟨hf, Fin.forall_fin_succ.mpr
@@ -228,9 +228,8 @@ lemma comp₃ {g : V → V → V → V} {f f' f'' : (Fin k → V) → V}
 
 /-- Substitution of locally $\Delta_0$ functions for the variables of a locally $\Delta_0$
 function, one of them for the first variable. -/
-lemma comp_cons {g : (Fin (l + 1) → V) → V} {f : (Fin k → V) → V}
-    {u : Fin l → (Fin k → V) → V} (hg : LocallyDelta0Function g) (hf : LocallyDelta0Function f)
-    (hu : ∀ j, LocallyDelta0Function (u j)) :
+lemma comp_cons {g : (Fin (l + 1) → V) → V} (hg : LocallyDelta0Function g)
+    (hf : LocallyDelta0Function f) (hu : ∀ j, LocallyDelta0Function (u j)) :
     LocallyDelta0Function fun v ↦ g (f v :> fun j ↦ u j v) := by
   have := hg.comp (f := f :> u) fun i ↦ by
     cases i using Fin.cases with
@@ -246,27 +245,26 @@ lemma add : LocallyDelta0Function₂ (· + · : V → V → V) :=
 lemma mul : LocallyDelta0Function₂ (· * · : V → V → V) :=
   of_definableBoundedFunction ⟨inferInstance, by definability⟩
 
-lemma add_one {f : (Fin k → V) → V} (hf : LocallyDelta0Function f) :
-    LocallyDelta0Function fun v ↦ f v + 1 :=
+lemma add_one (hf : LocallyDelta0Function f) : LocallyDelta0Function fun v ↦ f v + 1 :=
   add.comp₂ hf (const 1)
 
 end LocallyDelta0Function
 
 namespace LocallyDelta0
 
-variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {P : (Fin (k + 1) → V) → Prop} {f : (Fin k → V) → V}
+variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
-lemma comp₂ {R : (Fin 2 → V) → Prop} {f f' : (Fin k → V) → V} (h : LocallyDelta0 R)
-    (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+lemma comp₂ {R : (Fin 2 → V) → Prop} (h : LocallyDelta0 R) (hf : LocallyDelta0Function f)
+    (hf' : LocallyDelta0Function f') :
     LocallyDelta0 fun v ↦ R ![f v, f' v] :=
   (h.comp (f := ![f, f'])
     (Fin.forall_fin_succ.mpr ⟨hf, Fin.forall_fin_succ.mpr ⟨hf', finZeroElim⟩⟩)).of_iff
     fun _ ↦ iff_of_eq <| congrArg R <|
       funext (Fin.cases rfl (Fin.cases rfl finZeroElim))
 
-lemma comp₃ {R : (Fin 3 → V) → Prop} {f f' f'' : (Fin k → V) → V} (h : LocallyDelta0 R)
-    (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f')
-    (hf'' : LocallyDelta0Function f'') : LocallyDelta0 fun v ↦ R ![f v, f' v, f'' v] :=
+lemma comp₃ {R : (Fin 3 → V) → Prop} (h : LocallyDelta0 R) (hf : LocallyDelta0Function f)
+    (hf' : LocallyDelta0Function f') (hf'' : LocallyDelta0Function f'') :
+    LocallyDelta0 fun v ↦ R ![f v, f' v, f'' v] :=
   (h.comp (f := ![f, f', f''])
     (Fin.forall_fin_succ.mpr ⟨hf, Fin.forall_fin_succ.mpr
       ⟨hf', Fin.forall_fin_succ.mpr ⟨hf'', finZeroElim⟩⟩⟩)).of_iff
@@ -277,27 +275,26 @@ lemma pred_comp {P : V → Prop} (h : LocallyDelta0Pred P) (hf : LocallyDelta0Fu
     LocallyDelta0 fun v ↦ P (f v) :=
   (h.comp (f := fun _ ↦ f) fun _ ↦ hf).of_iff fun _ ↦ Iff.rfl
 
-lemma rel_comp₂ {R : V → V → Prop} {f f' : (Fin k → V) → V} (h : LocallyDelta0Rel R)
-    (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+lemma rel_comp₂ {R : V → V → Prop} (h : LocallyDelta0Rel R) (hf : LocallyDelta0Function f)
+    (hf' : LocallyDelta0Function f') :
     LocallyDelta0 fun v ↦ R (f v) (f' v) :=
   (h.comp₂ hf hf').of_iff fun _ ↦ Iff.rfl
 
-lemma eq {f' : (Fin k → V) → V} (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+lemma eq (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
     LocallyDelta0 fun v ↦ f v = f' v :=
   (of_definable (R := fun w : Fin 2 → V ↦ w 0 = w 1) (by definability)).comp₂ hf hf'
 
-lemma le {f' : (Fin k → V) → V} (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+lemma le (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
     LocallyDelta0 fun v ↦ f v ≤ f' v :=
   (of_definable (R := fun w : Fin 2 → V ↦ w 0 ≤ w 1) (by definability)).comp₂ hf hf'
 
-lemma lt {f' : (Fin k → V) → V} (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
+lemma lt (hf : LocallyDelta0Function f) (hf' : LocallyDelta0Function f') :
     LocallyDelta0 fun v ↦ f v < f' v :=
   (of_definable (R := fun w : Fin 2 → V ↦ w 0 < w 1) (by definability)).comp₂ hf hf'
 
 /-- Substitution of locally $\Delta_0$ functions for the variables of a locally $\Delta_0$
 relation, one of them for the first variable. -/
-lemma comp_cons {R : (Fin (l + 1) → V) → Prop} {u : Fin l → (Fin k → V) → V}
-    (h : LocallyDelta0 R) (hf : LocallyDelta0Function f)
+lemma comp_cons {R : (Fin (l + 1) → V) → Prop} (h : LocallyDelta0 R) (hf : LocallyDelta0Function f)
     (hu : ∀ j, LocallyDelta0Function (u j)) : LocallyDelta0 fun v ↦ R (f v :> fun j ↦ u j v) :=
   (h.comp (f := f :> u) fun i ↦ by
     cases i using Fin.cases with
@@ -307,8 +304,7 @@ lemma comp_cons {R : (Fin (l + 1) → V) → Prop} {u : Fin l → (Fin k → V) 
 
 /-- Substitution of locally $\Delta_0$ functions for the variables of a locally $\Delta_0$
 relation, two of them for the first two variables. -/
-lemma comp_cons₂ {R : (Fin (l + 2) → V) → Prop} {f' : (Fin k → V) → V}
-    {u : Fin l → (Fin k → V) → V} (h : LocallyDelta0 R) (hf : LocallyDelta0Function f)
+lemma comp_cons₂ {R : (Fin (l + 2) → V) → Prop} (h : LocallyDelta0 R) (hf : LocallyDelta0Function f)
     (hf' : LocallyDelta0Function f') (hu : ∀ j, LocallyDelta0Function (u j)) :
     LocallyDelta0 fun v ↦ R (f v :> f' v :> fun j ↦ u j v) :=
   (h.comp (f := f :> f' :> u) fun i ↦ by
@@ -364,8 +360,8 @@ end LocallyDelta0
 
 /-- A case distinction on a locally $\Delta_0$ condition. -/
 lemma LocallyDelta0Function.ite [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {Q : (Fin k → V) → Prop} [DecidablePred Q]
-    {f g : (Fin k → V) → V} (hQ : LocallyDelta0 Q) (hf : LocallyDelta0Function f)
-    (hg : LocallyDelta0Function g) : LocallyDelta0Function fun v ↦ if Q v then f v else g v where
+    (hQ : LocallyDelta0 Q) (hf : LocallyDelta0Function f) (hg : LocallyDelta0Function g) :
+    LocallyDelta0Function fun v ↦ if Q v then f v else g v where
   graph := by
     have hQ' : LocallyDelta0 fun w : Fin (k + 1) → V ↦ Q (w ·.succ) := hQ.retraction Fin.succ
     exact ((hQ'.and hf.graph).or (hQ'.not.and hg.graph)).of_iff fun w ↦ by
@@ -390,8 +386,8 @@ lemma LocallyDelta0Function.exp : LocallyDelta0Function₁ (Exp.exp : V → V) w
     intro v hv
     exact exp_monotone_le.mpr (hv 0)
 
-lemma LocallyDelta0Function.exp_exp_mul_add {f g : (Fin k → V) → V} (a : V)
-    (hf : LocallyDelta0Function f) (hg : LocallyDelta0Function g) :
+lemma LocallyDelta0Function.exp_exp_mul_add (a : V) (hf : LocallyDelta0Function f)
+    (hg : LocallyDelta0Function g) :
     LocallyDelta0Function fun v ↦ Exp.exp (Exp.exp (a * f v + g v)) :=
   exp.comp₁ <| exp.comp₁ <| add.comp₂ (mul.comp₂ (const a) hf) hg
 

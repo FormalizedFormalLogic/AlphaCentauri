@@ -33,7 +33,7 @@ namespace ElementaryArithmetic
 open _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping Bounding
 open _root_.FFL.FirstOrder.Arithmetic (substCode indBodyValGraph chInd)
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {S S' : V → Prop} {p : V}
 
 /-- The code of the induction instance `φ(0) → (∀ x, φ(x) → φ(x + 1)) → ∀ x, φ(x)` of the code
 `k` of a formula `φ(x)`. -/
@@ -62,21 +62,18 @@ def InductionR (S : V → Prop) (p : V) : Prop :=
     ∧ ∃ K ≤ subst ℒₒᵣ (fvarVec m) b,
         IsSemiformula ℒₒᵣ 1 K ∧ S K ∧ subst ℒₒᵣ (fvarVec m) b = indBodyVal K
 
-instance InductionR.defined {S : V → Prop} {cond : 𝚫ᴬ₁.Semisentence 1}
-    [hcond : 𝚫ᴬ₁-Predicate[V] S via cond] :
+instance InductionR.defined {cond : 𝚫ᴬ₁.Semisentence 1} [hcond : 𝚫ᴬ₁-Predicate[V] S via cond] :
     𝚫ᴬ₁-Predicate[V] (InductionR S : V → Prop) via chInd cond := .mk <| by
   constructor
   · intro v; simp [chInd, HierarchySymbol.Semiformula.val_sigma, eq_comm]
   · intro v
     simp [chInd, HierarchySymbol.Semiformula.val_sigma, InductionR, lt_succ_iff_le, eq_comm]
 
-lemma InductionR.mono {S S' : V → Prop} (hS : ∀ K, S K → S' K) {p : V} (h : InductionR S p) :
-    InductionR S' p := by
+lemma InductionR.mono (hS : ∀ K, S K → S' K) (h : InductionR S p) : InductionR S' p := by
   obtain ⟨m, hm, b, hb, hp, hU, hsh, hbv, K, hK, hKs, hKS, hsub⟩ := h
   exact ⟨m, hm, b, hb, hp, hU, hsh, hbv, K, hK, hKs, hS K hKS, hsub⟩
 
-lemma inductionR_locallyDelta0 {S : V → Prop} (hS : LocallyDelta0Pred S) :
-    LocallyDelta0Pred (InductionR S) := by
+lemma inductionR_locallyDelta0 (hS : LocallyDelta0Pred S) : LocallyDelta0Pred (InductionR S) := by
   have v4 : ∀ i : Fin 4, LocallyDelta0Function fun w : Fin 4 → V ↦ w i :=
     LocallyDelta0Function.var
   have hsb : LocallyDelta0Function fun w : Fin 4 → V ↦ subst ℒₒᵣ (fvarVec (w 2)) (w 1) :=
@@ -108,8 +105,8 @@ lemma inductionR_locallyDelta0 {S : V → Prop} (hS : LocallyDelta0Pred S) :
 /-- A theory whose $\Delta_1$ formula is `chInd cond`, for a formula `cond` defining a locally
 $\Delta_0$ predicate `S`, has locally $\Delta_0$ axioms. -/
 lemma locallyDelta0Axioms_of_chInd {T : ArithmeticTheory} [T.Δ₁] {cond : 𝚫ᴬ₁.Semisentence 1}
-    (hch : T.Δ₁ch = chInd cond) {S : V → Prop} [𝚫ᴬ₁-Predicate[V] S via cond]
-    (hS : LocallyDelta0Pred S) : LocallyDelta0Axioms T V where
+    (hch : T.Δ₁ch = chInd cond) [𝚫ᴬ₁-Predicate[V] S via cond] (hS : LocallyDelta0Pred S) :
+    LocallyDelta0Axioms T V where
   properOn := hch ▸ (InductionR.defined (S := S)).proper
   locallyDelta0 := (inductionR_locallyDelta0 hS).of_iff fun v ↦ by
     simp [Theory.Δ₁Class, hch]

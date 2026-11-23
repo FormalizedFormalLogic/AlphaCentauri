@@ -23,12 +23,9 @@ namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {n m k : ℕ} {T : Theory L} [T.Δ₁] {φ ψ : Semiformula V L 1}
 
 /-! ## Term vectors -/
-
-section vecBvar
-
-variable {n m k : ℕ}
 
 @[simp high]
 lemma Semiterm.shift_vecMap_bvar (f : Fin k → Fin n) :
@@ -64,7 +61,7 @@ lemma SemitermVec.q_eq_cons (w : Fin k → Term V L) :
   cases j using Fin.cases <;> simp [SemitermVec.q]
 
 @[simp]
-lemma SemitermVec.q_one {m : ℕ} (w : SemitermVec V L 1 m) : w.q 1 = (w 0).bShift :=
+lemma SemitermVec.q_one (w : SemitermVec V L 1 m) : w.q 1 = (w 0).bShift :=
   SemitermVec.q_succ w 0
 
 lemma Semiterm.subst_nil_subst (t : Term V L) (w : SemitermVec V L n m) :
@@ -84,13 +81,7 @@ lemma Semiterm.shift_iterate_subst_nil (t : Term V L) (j : ℕ) :
     funext i
     exact i.elim0
 
-end vecBvar
-
 /-! ## Blocks of universal quantifiers -/
-
-section shiftIterate
-
-variable {n k m : ℕ}
 
 @[simp]
 lemma Semiterm.shift_iterate_bvar (z : Fin n) :
@@ -184,11 +175,7 @@ lemma free_iff (φ ψ : Semiformula V L 1) : (φ 🡘 ψ).free = φ.free 🡘 ψ
 
 end Semiformula
 
-end shiftIterate
-
 open _root_.FFL.Entailment
-
-variable {T : Theory L} [T.Δ₁]
 
 lemma TProof.all_imp_subst (φ : Semiformula V L 1) (t : Term V L) :
     T.internalize V ⊢ ∀¹ φ 🡒 φ.subst ![t] := ⟨by
@@ -206,7 +193,7 @@ lemma TProof.subst_imp_exs (φ : Semiformula V L 1) (t : Term V L) :
   exact TDerivation.em (φ.subst ![t])⟩
 
 /-- Specialisation of `k` universal quantifiers. -/
-lemma TProof.allItr_specialize {k : ℕ} (φ : Semiformula V L (0 + k))
+lemma TProof.allItr_specialize (φ : Semiformula V L (0 + k))
     (w : SemitermVec V L (0 + k) 0) : T.internalize V ⊢ (∀¹^[k] φ) 🡒 φ.subst w := by
   induction k with
   | zero => simp
@@ -218,7 +205,7 @@ lemma TProof.allItr_specialize {k : ℕ} (φ : Semiformula V L (0 + k))
     rw [Semiformula.substs_all] at h₁
     exact C_trans h₁ h₂
 
-private lemma free_subst_q_fvar {k : ℕ} (ψ : Semiformula V L (k + 1)) :
+private lemma free_subst_q_fvar (ψ : Semiformula V L (k + 1)) :
     (ψ.subst (SemitermVec.q fun i : Fin k ↦ Semiterm.fvar (i : V))).free =
       ψ.shift.subst fun i ↦ Semiterm.fvar (i : V) := by
   rw [Semiformula.free, Semiformula.shift_substs, Semiformula.substs_substs]
@@ -229,7 +216,7 @@ private lemma free_subst_q_fvar {k : ℕ} (ψ : Semiformula V L (k + 1)) :
   | succ i => simp
 
 /-- Generalisation over `k` fresh free variables under a hypothesis. -/
-lemma TProof.allItr_generalize_imp {k : ℕ} {C : Formula V L} {φ : Semiformula V L (0 + k)}
+lemma TProof.allItr_generalize_imp {C : Formula V L} {φ : Semiformula V L (0 + k)}
     (h : T.internalize V ⊢ Semiformula.shift^[k] C 🡒
       (Semiformula.shift^[k] φ).subst fun i ↦ Semiterm.fvar (i : V)) :
     T.internalize V ⊢ C 🡒 ∀¹^[k] φ := by
@@ -243,8 +230,8 @@ lemma TProof.allItr_generalize_imp {k : ℕ} {C : Formula V L} {φ : Semiformula
       ← Function.iterate_succ_apply' Semiformula.shift]
     exact h
 
-lemma TProof.generalize_imp {C : Formula V L} {φ : Semiformula V L 1}
-    (h : T.internalize V ⊢ C.shift 🡒 φ.free) : T.internalize V ⊢ C 🡒 ∀¹ φ :=
+lemma TProof.generalize_imp {C : Formula V L} (h : T.internalize V ⊢ C.shift 🡒 φ.free) :
+    T.internalize V ⊢ C 🡒 ∀¹ φ :=
   Nonempty.map TProof.generalizeAux h
 
 lemma TProof.shift_iterate! {φ : Formula V L} (h : T.internalize V ⊢ φ) (k : ℕ) :
@@ -253,7 +240,7 @@ lemma TProof.shift_iterate! {φ : Formula V L} (h : T.internalize V ⊢ φ) (k :
   | zero => exact h
   | succ k ih => simpa [Function.iterate_succ_apply'] using TProof.shift! ih
 
-lemma Semiformula.subst_shift_iterate_subst_bvar {n k : ℕ} (χ : Semiformula V L 1) (j : Fin n)
+lemma Semiformula.subst_shift_iterate_subst_bvar (χ : Semiformula V L 1) (j : Fin n)
     (w : SemitermVec V L n 0) :
     (Semiformula.shift^[k] (χ.subst ![Semiterm.bvar j])).subst w =
       (Semiformula.shift^[k] χ).subst ![w j] := by
@@ -264,12 +251,12 @@ lemma Semiformula.subst_shift_iterate_subst_bvar {n k : ℕ} (χ : Semiformula V
   | zero => simp
   | succ i => exact i.elim0
 
-lemma TProof.all_imp_all_of_free {φ ψ : Semiformula V L 1}
-    (h : T.internalize V ⊢ φ.free 🡒 ψ.free) : T.internalize V ⊢ ∀¹ φ 🡒 ∀¹ ψ :=
+lemma TProof.all_imp_all_of_free (h : T.internalize V ⊢ φ.free 🡒 ψ.free) :
+    T.internalize V ⊢ ∀¹ φ 🡒 ∀¹ ψ :=
   FiniteContext.emptyPrf <| TProof.all_imp_all! (Γ := []) <| FiniteContext.of h
 
-lemma TProof.exs_imp_of_free {φ : Semiformula V L 1} {R : Formula V L}
-    (h : T.internalize V ⊢ φ.free 🡒 R.shift) : T.internalize V ⊢ ∃¹ φ 🡒 R := by
+lemma TProof.exs_imp_of_free {R : Formula V L} (h : T.internalize V ⊢ φ.free 🡒 R.shift) :
+    T.internalize V ⊢ ∃¹ φ 🡒 R := by
   have h₁ : [∼R] ⊢[T.internalize V] ∀¹ (∼φ) := by
     apply TProof.generalize!
     apply FiniteContext.provable_iff.mpr

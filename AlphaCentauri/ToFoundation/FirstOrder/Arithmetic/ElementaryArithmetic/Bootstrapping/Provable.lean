@@ -1,9 +1,7 @@
 module
 
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Functions
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.FixedPoint
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Proof.Basic
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
 
 /-!

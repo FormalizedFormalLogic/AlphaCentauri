@@ -22,7 +22,7 @@ namespace ElementaryArithmetic.Bootstrapping
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isBounded)
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {k p q r t u v : V}
 
 /-! ## Internal bounded existential quantifier `qqBex` -/
 
@@ -68,7 +68,7 @@ lemma qqBex_locallyDelta0 : LocallyDelta0Function₂ (qqBex : V → V → V) :=
       (LocallyDelta0Function.var 0))
     (LocallyDelta0Function.var 1)
 
-variable {u q : V} (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q)
+variable (hu : IsUTerm ℒₒᵣ u) (hq : IsUFormula ℒₒᵣ q)
 include hu hq
 
 lemma neg_qqBall : neg ℒₒᵣ (qqBall u q) = qqBex u (neg ℒₒᵣ q) := by
@@ -229,7 +229,7 @@ lemma isBounded_locallyDelta0 : LocallyDelta0Pred (IsBounded (V := V)) :=
   construction.fixpoint_locallyDelta0.of_iff fun w ↦
     iff_of_eq <| congrArg (fun u ↦ construction.Fixpoint u (w 0)) (Subsingleton.elim _ _)
 
-lemma IsBounded.case_iff {p : V} :
+lemma IsBounded.case_iff :
     IsBounded p ↔
     (p = ^⊤) ∨
     (p = ^⊥) ∨
@@ -249,15 +249,15 @@ lemma IsBounded.verum : IsBounded (V := V) (^⊤) := IsBounded.mk <| by disj 1; 
 lemma IsBounded.falsum : IsBounded (V := V) (^⊥) := IsBounded.mk <| by disj 2; rfl
 
 @[simp]
-lemma IsBounded.rel {k r v : V} : IsBounded (^rel k r v) :=
+lemma IsBounded.rel : IsBounded (^rel k r v) :=
   IsBounded.mk <| by disj 3; exact ⟨k, r, v, rfl⟩
 
 @[simp]
-lemma IsBounded.nrel {k r v : V} : IsBounded (^nrel k r v) :=
+lemma IsBounded.nrel : IsBounded (^nrel k r v) :=
   IsBounded.mk <| by disj 4; exact ⟨k, r, v, rfl⟩
 
 @[simp]
-lemma IsBounded.and_iff {p q : V} : IsBounded (p ^⋏ q) ↔ IsBounded p ∧ IsBounded q := by
+lemma IsBounded.and_iff : IsBounded (p ^⋏ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
   · intro h
     rcases h.case with (h | h | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, _, h⟩ | ⟨_, _, _, _, h⟩
@@ -267,7 +267,7 @@ lemma IsBounded.and_iff {p q : V} : IsBounded (p ^⋏ q) ↔ IsBounded p ∧ IsB
     exact IsBounded.mk <| by disj 5; exact ⟨p, q, hp, hq, rfl⟩
 
 @[simp]
-lemma IsBounded.or_iff {p q : V} : IsBounded (p ^⋎ q) ↔ IsBounded p ∧ IsBounded q := by
+lemma IsBounded.or_iff : IsBounded (p ^⋎ q) ↔ IsBounded p ∧ IsBounded q := by
   constructor
   · intro h
     rcases h.case with (h | h | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, _, h⟩ | ⟨_, _, _, _, h⟩
@@ -276,34 +276,34 @@ lemma IsBounded.or_iff {p q : V} : IsBounded (p ^⋎ q) ↔ IsBounded p ∧ IsBo
   · rintro ⟨hp, hq⟩
     exact IsBounded.mk <| by disj 6; exact ⟨p, q, hp, hq, rfl⟩
 
-lemma IsBounded.ball {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
+lemma IsBounded.ball (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
     IsBounded (qqBall (termBShift ℒₒᵣ t) q) :=
   IsBounded.mk <| by disj 7; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩
 
-lemma IsBounded.bex {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
+lemma IsBounded.bex (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) :
     IsBounded (qqBex (termBShift ℒₒᵣ t) q) :=
   IsBounded.mk <| by disj 8; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩
 
-lemma IsBounded.of_all {p : V} (h : IsBounded (^∀ p)) :
+lemma IsBounded.of_all (h : IsBounded (^∀ p)) :
     ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsBounded q ∧ p = (^#0 ^≮ u) ^⋎ q := by
   rcases h.case with (h | h | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, _, h⟩ | ⟨_, _, _, _, h⟩
     | ⟨_, _, ht, hq, h⟩ | ⟨_, _, _, _, h⟩) <;>
     simp_all [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs, qqBall, qqBex,
       Arithmetic.qqNLT]
 
-lemma IsBounded.of_ex {p : V} (h : IsBounded (^∃ p)) :
+lemma IsBounded.of_ex (h : IsBounded (^∃ p)) :
     ∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ IsBounded q ∧ p = (^#0 ^< u : V) ^⋏ q := by
   rcases h.case with (h | h | ⟨_, _, _, h⟩ | ⟨_, _, _, h⟩ | ⟨_, _, _, _, h⟩ | ⟨_, _, _, _, h⟩
     | ⟨_, _, _, _, h⟩ | ⟨_, _, ht, hq, h⟩) <;>
     simp_all [qqVerum, qqFalsum, qqRel, qqNRel, qqAnd, qqOr, qqAll, qqExs, qqBall, qqBex,
       Arithmetic.qqLT]
 
-lemma IsBounded.of_qqBall {u p : V} (h : IsBounded (qqBall u p)) : IsBounded p := by
+lemma IsBounded.of_qqBall (h : IsBounded (qqBall u p)) : IsBounded p := by
   obtain ⟨u', q', -, hq', heq⟩ := IsBounded.of_all (p := (Arithmetic.qqNLT (qqBvar 0) u) ^⋎ p) h
   obtain ⟨-, rfl⟩ := (qqOr_inj _ _ _ _).mp heq
   exact hq'
 
-lemma IsBounded.of_qqBex {u p : V} (h : IsBounded (qqBex u p)) : IsBounded p := by
+lemma IsBounded.of_qqBex (h : IsBounded (qqBex u p)) : IsBounded p := by
   obtain ⟨u', q', -, hq', heq⟩ := IsBounded.of_ex (p := (Arithmetic.qqLT (qqBvar 0) u) ^⋏ p) h
   obtain ⟨-, rfl⟩ := (qqAnd_inj _ _ _ _).mp heq
   exact hq'
@@ -328,7 +328,7 @@ lemma IsBounded.induction {P : V → Prop} (hP : LocallyDelta0Pred P)
     · exact hball t q ht (hC q hq).1 (hC q hq).2
     · exact hbex t q ht (hC q hq).1 (hC q hq).2)
 
-lemma IsBounded.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
+lemma IsBounded.neg (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     IsBounded (Bootstrapping.neg ℒₒᵣ p) := by
   suffices ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.neg ℒₒᵣ p) from
     this p h hp
@@ -345,7 +345,7 @@ lemma IsBounded.neg {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     have hq : IsUFormula ℒₒᵣ q := by simp_all [qqBex]
     simpa [neg_qqBex ht.termBShift hq] using IsBounded.ball ht (ih hq)
 
-lemma IsBounded.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
+lemma IsBounded.shift (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
     IsBounded (Bootstrapping.shift ℒₒᵣ p) := by
   suffices ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.shift ℒₒᵣ p) from
     this p h hp

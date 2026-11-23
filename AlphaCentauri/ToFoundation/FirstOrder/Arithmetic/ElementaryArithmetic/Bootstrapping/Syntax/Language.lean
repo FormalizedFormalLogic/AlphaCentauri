@@ -21,7 +21,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic
 namespace ElementaryArithmetic.Bootstrapping.Arithmetic
 
--- `Arithmetic` is intentionally re-opened here, as in Foundation.
+-- `Arithmetic` is intentionally re-opened here.
 set_option linter.dupNamespace false
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping

@@ -1,6 +1,5 @@
 module
 
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Bounded
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Iteration
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 
@@ -24,11 +23,10 @@ namespace ElementaryArithmetic.Bootstrapping
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isHierarchy isPrenexHierarchy)
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {Γ Γ' : Polarity} {m n s : ℕ}
+  {p q θ θ' k r t v : V}
 
 /-! ## Unbounded quantifier of a given polarity -/
-
-section qqQuant
 
 /-- The code of the unbounded quantifier of polarity `Γ`. -/
 noncomputable def qqQuant : Polarity → V → V
@@ -56,8 +54,6 @@ lemma qqQuant_locallyDelta0 (Γ : Polarity) : LocallyDelta0Function₁ (qqQuant 
 lemma lt_qqQuant (Γ : Polarity) (p : V) : p < qqQuant Γ p := by
   cases Γ <;> simp [lt_exists, lt_forall]
 
-variable {Γ Γ' : Polarity} {p q : V}
-
 @[simp]
 lemma qqQuant_inj : qqQuant Γ p = qqQuant Γ' q ↔ Γ = Γ' ∧ p = q := by
   cases Γ <;> cases Γ' <;> simp [qqExs, qqAll]
@@ -71,17 +67,11 @@ lemma neg_qqQuant (hp : IsUFormula ℒₒᵣ p) :
     neg ℒₒᵣ (qqQuant Γ p) = qqQuant Γ.alt (neg ℒₒᵣ p) := by
   cases Γ <;> simp [hp]
 
-end qqQuant
-
-section qqToPrenex
-
 /-- The code of the quantifier prefix of `s` alternating blocks of unbounded quantifiers starting
 with polarity `Γ`, followed by `θ`. -/
 noncomputable def qqToPrenex : Polarity → ℕ → V → V
   | _, 0, θ => θ
   | Γ, s + 1, θ => qqQuant Γ (qqToPrenex Γ.alt s θ)
-
-variable {Γ : Polarity} {s : ℕ} {θ θ' : V}
 
 @[simp]
 lemma qqToPrenex_zero : qqToPrenex Γ 0 θ = θ := rfl
@@ -104,8 +94,6 @@ instance qqToPrenex_defined : (Γ : Polarity) → (s : ℕ) →
   | _, 0 => .mk fun v ↦ by simp [qqToPrenexDef]
   | Γ, s + 1 => .mk fun v ↦ by
     simp +contextual [qqToPrenexDef, (qqToPrenex_defined Γ.alt s).df, (qqQuant_defined Γ).df]
-
-end qqToPrenex
 
 /-! ## Internal hierarchy predicate `IsHierarchy` -/
 
@@ -200,8 +188,6 @@ instance (Γ : Polarity) {P : V → Prop} {θ : 𝚫ᴬ₁.Semisentence 1}
       | ⟨u, q, ht, hq, rfl⟩ | ⟨q, hq, rfl⟩) <;>
       grind [lt_K!_left, lt_K!_right, lt_or_left, lt_or_right, lt_q_qqBall, lt_q_qqBex, lt_qqQuant]
 
--- The predicate of each level is bundled with its definability and local $\Delta_0$-ness, which
--- the construction of the next level depends on.
 /-- The predicate of the level `n` of the hierarchy of polarity `Γ`. -/
 noncomputable def pred :
     (Γ : Polarity) → (n : ℕ) →
@@ -236,8 +222,6 @@ instance IsHierarchy.definable (Γ : Polarity) (n : ℕ) :
 lemma isHierarchy_locallyDelta0 (Γ : Polarity) (n : ℕ) :
     LocallyDelta0Pred (IsHierarchy (V := V) Γ n) :=
   (IsHierarchyF.pred Γ n).2.2
-
-variable {Γ : Polarity} {n : ℕ} {p q : V}
 
 lemma IsHierarchy.zero_iff : IsHierarchy Γ 0 p ↔ IsBounded p := by rfl
 
@@ -298,11 +282,11 @@ lemma IsHierarchy.falsum : IsHierarchy Γ n (^⊥ : V) :=
   IsHierarchy.of_bounded (by simp)
 
 @[simp]
-lemma IsHierarchy.rel {k r v : V} : IsHierarchy Γ n (^rel k r v) :=
+lemma IsHierarchy.rel : IsHierarchy Γ n (^rel k r v) :=
   IsHierarchy.of_bounded (by simp)
 
 @[simp]
-lemma IsHierarchy.nrel {k r v : V} : IsHierarchy Γ n (^nrel k r v) :=
+lemma IsHierarchy.nrel : IsHierarchy Γ n (^nrel k r v) :=
   IsHierarchy.of_bounded (by simp)
 
 @[simp]
@@ -331,13 +315,13 @@ lemma IsHierarchy.or_iff : IsHierarchy Γ n (p ^⋎ q) ↔ IsHierarchy Γ n p �
     · rintro ⟨hp, hq⟩
       exact IsHierarchy.succ_mk <| by disj 3; exact ⟨p, q, hp, hq, rfl⟩
 
-lemma IsHierarchy.ball {t : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchy Γ n q) :
+lemma IsHierarchy.ball (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchy Γ n q) :
     IsHierarchy Γ n (qqBall (termBShift ℒₒᵣ t) q) := by
   cases n with
   | zero => exact IsBounded.ball ht hq
   | succ n => exact IsHierarchy.succ_mk <| by disj 4; exact ⟨_, q, ⟨t, ht, rfl⟩, hq, rfl⟩
 
-lemma IsHierarchy.bex {t : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchy Γ n q) :
+lemma IsHierarchy.bex (ht : IsUTerm ℒₒᵣ t) (hq : IsHierarchy Γ n q) :
     IsHierarchy Γ n (qqBex (termBShift ℒₒᵣ t) q) := by
   cases n with
   | zero => exact IsBounded.bex ht hq
@@ -374,7 +358,7 @@ lemma IsHierarchy.accum (Γ' : Polarity) (h : IsHierarchy Γ n p) : IsHierarchy 
   · exact IsHierarchy.of_alt (Γ := 𝚺) h
   · exact h.succ
 
-lemma IsHierarchy.mono {m : ℕ} (hmn : m ≤ n) (h : IsHierarchy Γ m p) : IsHierarchy Γ n p := by
+lemma IsHierarchy.mono (hmn : m ≤ n) (h : IsHierarchy Γ m p) : IsHierarchy Γ n p := by
   induction hmn with
   | refl => exact h
   | step _ ih => exact ih.succ
@@ -490,8 +474,6 @@ lemma isPrenexHierarchy_locallyDelta0 (Γ : Polarity) (n : ℕ) :
       exact ⟨q, hp ▸ lt_qqQuant Γ q, hp, h⟩
     · rintro ⟨q, -, hp, h⟩
       exact ⟨q, hp, h⟩
-
-variable {Γ : Polarity} {n : ℕ} {p : V}
 
 @[simp]
 lemma IsPrenexHierarchy.quant_iff :

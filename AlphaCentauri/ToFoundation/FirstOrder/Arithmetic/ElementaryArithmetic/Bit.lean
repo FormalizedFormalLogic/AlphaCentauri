@@ -1,7 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
-public import Foundation.FirstOrder.Arithmetic.Exponential.Bit
 
 /-!
 # Exponentiation and bit-coded finite sets in models of $\mathsf{EA}$

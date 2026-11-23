@@ -1,8 +1,5 @@
 module
 
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Functions
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Bounded
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Iteration
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping.Syntax.Formula.Bounded
 
 /-!
@@ -23,7 +20,7 @@ open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isBounded)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
-variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {L : Language} [L.Encodable] [L.LORDefinable] {Γ : Polarity} {m : ℕ} {k n p : V}
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.qqAlls (blueprint)
 
@@ -81,8 +78,8 @@ instance qqAlls_defined : 𝚺ᴬ₁-Function₂ (qqAlls : V → V → V) via qq
 instance qqAlls_definable : 𝚺ᴬ₁-Function₂ (qqAlls : V → V → V) :=
   qqAlls_defined.to_definable
 
-instance qqAlls_definable' {Γ : Polarity} {m : ℕ} :
-    Γᴬ_[m + 1]-Function₂ (qqAlls : V → V → V) := qqAlls_definable.of_sigmaOne
+instance qqAlls_definable' : Γᴬ_[m + 1]-Function₂ (qqAlls : V → V → V) :=
+  qqAlls_definable.of_sigmaOne
 
 lemma qqAlls_locallyDelta0 : LocallyDelta0Function₂ (qqAlls : V → V → V) := by
   have := (qqAlls.construction (V := V)).result_locallyDelta0.retraction (![1, 0] : Fin 2 → Fin 2)
@@ -134,7 +131,7 @@ lemma index_le_qqAlls (p k : V) : k ≤ qqAlls p k := by
     exact le_trans (add_le_add ih (le_refl 1)) (succ_le_qqAll _)
 
 @[simp]
-lemma isUFormula_qqAlls {p k : V} : IsUFormula L (qqAlls p k) ↔ IsUFormula L p := by
+lemma isUFormula_qqAlls : IsUFormula L (qqAlls p k) ↔ IsUFormula L p := by
   have hP : LocallyDelta0Pred fun k : V ↦ IsUFormula L (qqAlls p k) ↔ IsUFormula L p :=
     ((isUFormula_locallyDelta0 (L := L)).pred_comp (qqAlls_locallyDelta0.comp₂
       (LocallyDelta0Function.const p) (LocallyDelta0Function.var 0))).iff
@@ -145,7 +142,7 @@ lemma isUFormula_qqAlls {p k : V} : IsUFormula L (qqAlls p k) ↔ IsUFormula L p
   · intro k ih
     rw [qqAlls_succ, IsUFormula.all, ih]
 
-lemma bv_qqAlls {p k : V} (hp : IsUFormula L p) : bv L (qqAlls p k) = bv L p - k := by
+lemma bv_qqAlls (hp : IsUFormula L p) : bv L (qqAlls p k) = bv L p - k := by
   have hsub : LocallyDelta0 fun y : Fin 3 → V ↦ y 0 = y 1 - y 2 :=
     LocallyDelta0.of_definable (by definability)
   have hP : LocallyDelta0Pred fun k : V ↦ bv L (qqAlls p k) = bv L p - k :=
@@ -159,8 +156,7 @@ lemma bv_qqAlls {p k : V} (hp : IsUFormula L p) : bv L (qqAlls p k) = bv L p - k
   · intro k ih
     rw [qqAlls_succ, bv_all (isUFormula_qqAlls.mpr hp), ih, Arithmetic.sub_sub]
 
-lemma IsSemiformula.qqAlls {n k p : V} (h : IsSemiformula L (n + k) p) :
-    IsSemiformula L n (qqAlls p k) := by
+lemma IsSemiformula.qqAlls (h : IsSemiformula L (n + k) p) : IsSemiformula L n (qqAlls p k) := by
   rw [isSemiformula_iff] at h ⊢
   obtain ⟨hu, hbv⟩ := h
   exact ⟨isUFormula_qqAlls.mpr hu, by rwa [bv_qqAlls hu, tsub_le_iff_right]⟩

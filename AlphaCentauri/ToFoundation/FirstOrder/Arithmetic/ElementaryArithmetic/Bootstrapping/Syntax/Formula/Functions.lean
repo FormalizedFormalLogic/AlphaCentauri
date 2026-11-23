@@ -23,12 +23,13 @@ namespace FFL.FirstOrder.Arithmetic
 namespace ElementaryArithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+  {L : Language} [L.Encodable] [L.LORDefinable] {a a' d i k m n p q R t u v w x : V}
 
 section structuralBound
 
 variable {c : V}
 
-lemma seven_le_exp_exp {n : V} (hn : 2 ≤ n) : (7 : V) ≤ Exp.exp (Exp.exp n) := by
+lemma seven_le_exp_exp (hn : 2 ≤ n) : (7 : V) ≤ Exp.exp (Exp.exp n) := by
   have h2 : Exp.exp (2 : V) = 4 := by
     rw [show (2 : V) = 1 + 1 from one_add_one_eq_two.symm, exp_succ, exp_one]; norm_num
   have h4 : Exp.exp (4 : V) = 16 := by
@@ -39,7 +40,7 @@ lemma seven_le_exp_exp {n : V} (hn : 2 ≤ n) : (7 : V) ≤ Exp.exp (Exp.exp n) 
 
 /-- The code `a' ∷ y` with a tag `a' ≤ 7` is bounded by `Exp.exp (Exp.exp (8 * (a ∷ p) + c))`
 when `y` is bounded by `Exp.exp (Exp.exp (8 * p + c))`. -/
-lemma adjoin_le_exp_exp_of_le (hc : 1 ≤ c) {a a' p y : V} (ha' : a' ≤ 7)
+lemma adjoin_le_exp_exp_of_le (hc : 1 ≤ c) {y : V} (ha' : a' ≤ 7)
     (hy : y ≤ Exp.exp (Exp.exp (8 * p + c))) :
     a' ∷ y ≤ Exp.exp (Exp.exp (8 * (a ∷ p) + c)) := by
   have hn : (2 : V) ≤ 8 * p + c + 1 := by
@@ -57,7 +58,7 @@ lemma adjoin_le_exp_exp_of_le (hc : 1 ≤ c) {a a' p y : V} (ha' : a' ≤ 7)
 /-- The code `a' ∷ ⟪y₁, y₂⟫` with a tag `a' ≤ 7` is bounded by
 `Exp.exp (Exp.exp (8 * (a ∷ ⟪p₁, p₂⟫) + c))` when each `yᵢ` is bounded by
 `Exp.exp (Exp.exp (8 * pᵢ + c))`. -/
-lemma adjoin_pair_le_exp_exp_of_le (hc : 1 ≤ c) {a a' p₁ p₂ y₁ y₂ : V} (ha' : a' ≤ 7)
+lemma adjoin_pair_le_exp_exp_of_le (hc : 1 ≤ c) {p₁ p₂ y₁ y₂ : V} (ha' : a' ≤ 7)
     (hy₁ : y₁ ≤ Exp.exp (Exp.exp (8 * p₁ + c))) (hy₂ : y₂ ≤ Exp.exp (Exp.exp (8 * p₂ + c))) :
     a' ∷ ⟪y₁, y₂⟫ ≤ Exp.exp (Exp.exp (8 * (a ∷ ⟪p₁, p₂⟫) + c)) := by
   set m := max p₁ p₂
@@ -85,7 +86,7 @@ lemma adjoin_pair_le_exp_exp_of_le (hc : 1 ≤ c) {a a' p₁ p₂ y₁ y₂ : V}
 /-- The code `a' ∷ ⟪k, R, w⟫` with a tag `a' ≤ 7` is bounded by
 `Exp.exp (Exp.exp (8 * (a ∷ ⟪k, R, v⟫) + c))` when `w` is bounded by
 `Exp.exp (Exp.exp (8 * v + c))`. -/
-lemma adjoin_pair_pair_le_exp_exp_of_le (hc : 1 ≤ c) {a a' k R v w : V} (ha' : a' ≤ 7)
+lemma adjoin_pair_pair_le_exp_exp_of_le (hc : 1 ≤ c) (ha' : a' ≤ 7)
     (hw : w ≤ Exp.exp (Exp.exp (8 * v + c))) :
     a' ∷ ⟪k, R, w⟫ ≤ Exp.exp (Exp.exp (8 * (a ∷ ⟪k, R, v⟫) + c)) := by
   set m := max k (max R v)
@@ -121,8 +122,6 @@ lemma adjoin_pair_pair_le_exp_exp_of_le (hc : 1 ≤ c) {a a' k R v w : V} (ha' :
     _ ≤ 8 * (a ∷ ⟪k, R, v⟫) + c := by gcongr
 
 end structuralBound
-
-variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 section negation
 
@@ -214,11 +213,11 @@ lemma neg_locallyDelta0 : LocallyDelta0Function₁ (neg (V := V) L) :=
     (LocallyDelta0Function.var 0)
 
 @[simp]
-lemma neg_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma neg_rel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     neg L (^rel k R v) = ^nrel k R v := by simp [neg, hR, hv, construction]
 
 @[simp]
-lemma neg_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma neg_nrel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     neg L (^nrel k R v) = ^rel k R v := by simp [neg, hR, hv, construction]
 
 @[simp]
@@ -230,25 +229,22 @@ lemma neg_falsum :
     neg L (^⊥ : V) = ^⊤ := by simp [neg, construction]
 
 @[simp]
-lemma neg_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma neg_and (hp : IsUFormula L p) (hq : IsUFormula L q) :
     neg L (p ^⋏ q) = neg L p ^⋎ neg L q := by simp [neg, hp, hq, construction]
 
 @[simp]
-lemma neg_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma neg_or (hp : IsUFormula L p) (hq : IsUFormula L q) :
     neg L (p ^⋎ q) = neg L p ^⋏ neg L q := by simp [neg, hp, hq, construction]
 
 @[simp]
-lemma neg_all {p : V} (hp : IsUFormula L p) :
-    neg L (^∀ p) = ^∃ (neg L p) := by simp [neg, hp, construction]
+lemma neg_all (hp : IsUFormula L p) : neg L (^∀ p) = ^∃ (neg L p) := by simp [neg, hp, construction]
 
 @[simp]
-lemma neg_ex {p : V} (hp : IsUFormula L p) :
-    neg L (^∃ p) = ^∀ (neg L p) := by simp [neg, hp, construction]
+lemma neg_ex (hp : IsUFormula L p) : neg L (^∃ p) = ^∀ (neg L p) := by simp [neg, hp, construction]
 
-lemma neg_not_uformula {x : V} (h : ¬IsUFormula L x) :
-    neg L x = 0 := construction.result_prop_not _ h
+lemma neg_not_uformula (h : ¬IsUFormula L x) : neg L x = 0 := construction.result_prop_not _ h
 
-lemma IsUFormula.neg {p : V} : IsUFormula L p → IsUFormula L (Bootstrapping.neg L p) := by
+lemma IsUFormula.neg : IsUFormula L p → IsUFormula L (Bootstrapping.neg L p) := by
   intro hp
   refine IsUFormula.induction (P := fun p ↦ IsUFormula L (Bootstrapping.neg L p)) ?_ ?_ ?_ ?_ ?_
     ?_ ?_ ?_ ?_ p hp
@@ -264,7 +260,7 @@ lemma IsUFormula.neg {p : V} : IsUFormula L p → IsUFormula L (Bootstrapping.ne
   · intro p hp ihp; simp [hp, ihp]
 
 @[simp]
-lemma IsUFormula.bv_neg {p : V} : IsUFormula L p → bv L (Bootstrapping.neg L p) = bv L p := by
+lemma IsUFormula.bv_neg : IsUFormula L p → bv L (Bootstrapping.neg L p) = bv L p := by
   intro hp
   refine IsUFormula.induction (P := fun p ↦ bv L (Bootstrapping.neg L p) = bv L p) ?_ ?_ ?_ ?_ ?_
     ?_ ?_ ?_ ?_ p hp
@@ -281,8 +277,7 @@ lemma IsUFormula.bv_neg {p : V} : IsUFormula L p → bv L (Bootstrapping.neg L p
   · intro p hp ihp; simp [hp, hp.neg, ihp]
 
 @[simp]
-lemma IsUFormula.neg_neg {p : V} :
-    IsUFormula L p → Bootstrapping.neg L (Bootstrapping.neg L p) = p := by
+lemma IsUFormula.neg_neg : IsUFormula L p → Bootstrapping.neg L (Bootstrapping.neg L p) = p := by
   intro hp
   refine IsUFormula.induction
     (P := fun p ↦ Bootstrapping.neg L (Bootstrapping.neg L p) = p) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
@@ -299,7 +294,7 @@ lemma IsUFormula.neg_neg {p : V} :
   · intro p hp ihp; simp [hp, hp.neg, ihp]
 
 @[simp]
-lemma IsUFormula.neg_iff {p : V} : IsUFormula L (Bootstrapping.neg L p) ↔ IsUFormula L p := by
+lemma IsUFormula.neg_iff : IsUFormula L (Bootstrapping.neg L p) ↔ IsUFormula L p := by
   constructor
   · intro h; by_contra hp
     have Hp : IsUFormula L p := by by_contra hp; simp [neg_not_uformula hp] at h
@@ -307,7 +302,7 @@ lemma IsUFormula.neg_iff {p : V} : IsUFormula L (Bootstrapping.neg L p) ↔ IsUF
   · exact IsUFormula.neg
 
 @[simp]
-lemma IsSemiformula.neg_iff {n p : V} : IsSemiformula L n (neg L p) ↔ IsSemiformula L n p := by
+lemma IsSemiformula.neg_iff : IsSemiformula L n (neg L p) ↔ IsSemiformula L n p := by
   constructor
   · intro h; by_contra hp
     have Hp : IsUFormula L p := by by_contra hp; simp [neg_not_uformula hp] at h
@@ -318,8 +313,7 @@ lemma IsSemiformula.neg_iff {n p : V} : IsSemiformula L n (neg L p) ↔ IsSemifo
 alias ⟨IsSemiformula.elim_neg, IsSemiformula.neg⟩ := IsSemiformula.neg_iff
 
 @[simp]
-lemma neg_inj_iff {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
-    neg L p = neg L q ↔ p = q := by
+lemma neg_inj_iff (hp : IsUFormula L p) (hq : IsUFormula L q) : neg L p = neg L q ↔ p = q := by
   constructor
   · intro h; simpa [hp.neg_neg, hq.neg_neg] using congrArg (neg L) h
   · rintro rfl; rfl
@@ -335,11 +329,11 @@ noncomputable def iff (p q : V) : V := (imp L p q) ^⋏ (imp L q p)
 variable {L}
 
 @[simp]
-lemma IsUFormula.imp {p q : V} : IsUFormula L (imp L p q) ↔ IsUFormula L p ∧ IsUFormula L q := by
+lemma IsUFormula.imp : IsUFormula L (imp L p q) ↔ IsUFormula L p ∧ IsUFormula L q := by
   simp [Bootstrapping.imp]
 
 @[simp]
-lemma IsSemiformula.imp {n p q : V} :
+lemma IsSemiformula.imp :
     IsSemiformula L n (imp L p q) ↔ IsSemiformula L n p ∧ IsSemiformula L n q := by
   simp [Bootstrapping.imp]
 
@@ -363,12 +357,12 @@ lemma imp_locallyDelta0 : LocallyDelta0Function₂ (imp (V := V) L) :=
 section iff
 
 @[simp]
-lemma IsUFormula.iff {p q : V} : IsUFormula L (iff L p q) ↔ IsUFormula L p ∧ IsUFormula L q := by
+lemma IsUFormula.iff : IsUFormula L (iff L p q) ↔ IsUFormula L p ∧ IsUFormula L q := by
   simp only [Bootstrapping.iff, and, imp, and_iff_left_iff_imp, and_imp]
   intros; simp_all
 
 @[simp]
-lemma IsSemiformula.iff {n p q : V} :
+lemma IsSemiformula.iff :
     IsSemiformula L n (iff L p q) ↔ IsSemiformula L n p ∧ IsSemiformula L n q := by
   simp only [Bootstrapping.iff, and, imp, and_iff_left_iff_imp, and_imp]
   intros; simp_all
@@ -483,11 +477,11 @@ lemma shift_locallyDelta0 : LocallyDelta0Function₁ (shift (V := V) L) :=
     (LocallyDelta0Function.var 0)
 
 @[simp]
-lemma shift_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma shift_rel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     shift L (^rel k R v) = ^rel k R (termShiftVec L k v) := by simp [shift, hR, hv, construction]
 
 @[simp]
-lemma shift_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma shift_nrel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     shift L (^nrel k R v) = ^nrel k R (termShiftVec L k v) := by
   simp [shift, hR, hv, construction]
 
@@ -498,25 +492,25 @@ lemma shift_verum : shift L (^⊤ : V) = ^⊤ := by simp [shift, construction]
 lemma shift_falsum : shift L (^⊥ : V) = ^⊥ := by simp [shift, construction]
 
 @[simp]
-lemma shift_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma shift_and (hp : IsUFormula L p) (hq : IsUFormula L q) :
     shift L (p ^⋏ q) = shift L p ^⋏ shift L q := by simp [shift, hp, hq, construction]
 
 @[simp]
-lemma shift_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma shift_or (hp : IsUFormula L p) (hq : IsUFormula L q) :
     shift L (p ^⋎ q) = shift L p ^⋎ shift L q := by simp [shift, hp, hq, construction]
 
 @[simp]
-lemma shift_all {p : V} (hp : IsUFormula L p) :
+lemma shift_all (hp : IsUFormula L p) :
     shift L (^∀ p) = ^∀ (shift L p) := by simp [shift, hp, construction]
 
 @[simp]
-lemma shift_exs {p : V} (hp : IsUFormula L p) :
+lemma shift_exs (hp : IsUFormula L p) :
     shift L (^∃ p) = ^∃ (shift L p) := by simp [shift, hp, construction]
 
-lemma shift_not_uformula {x : V} (h : ¬IsUFormula L x) :
+lemma shift_not_uformula (h : ¬IsUFormula L x) :
     shift L x = 0 := (construction L).result_prop_not _ h
 
-lemma IsUFormula.shift {p : V} : IsUFormula L p → IsUFormula L (Bootstrapping.shift L p) := by
+lemma IsUFormula.shift : IsUFormula L p → IsUFormula L (Bootstrapping.shift L p) := by
   intro hp
   refine IsUFormula.induction (P := fun p ↦ IsUFormula L (Bootstrapping.shift L p)) ?_ ?_ ?_ ?_
     ?_ ?_ ?_ ?_ ?_ p hp
@@ -531,8 +525,7 @@ lemma IsUFormula.shift {p : V} : IsUFormula L p → IsUFormula L (Bootstrapping.
   · intro p hp ihp; simp [hp, ihp]
   · intro p hp ihp; simp [hp, ihp]
 
-lemma IsUFormula.bv_shift {p : V} :
-    IsUFormula L p → bv L (Bootstrapping.shift L p) = bv L p := by
+lemma IsUFormula.bv_shift : IsUFormula L p → bv L (Bootstrapping.shift L p) = bv L p := by
   intro hp
   refine IsUFormula.induction (P := fun p ↦ bv L (Bootstrapping.shift L p) = bv L p) ?_ ?_ ?_ ?_
     ?_ ?_ ?_ ?_ ?_ p hp
@@ -548,8 +541,7 @@ lemma IsUFormula.bv_shift {p : V} :
   · intro p hp ihp; simp [hp, ihp, hp.shift]
   · intro p hp ihp; simp [hp, ihp, hp.shift]
 
-lemma IsSemiformula.shift {n p : V} :
-    IsSemiformula L n p → IsSemiformula L n (Bootstrapping.shift L p) := by
+lemma IsSemiformula.shift : IsSemiformula L n p → IsSemiformula L n (Bootstrapping.shift L p) := by
   intro hp
   refine IsSemiformula.induction
     (P := fun n p ↦ IsSemiformula L n (Bootstrapping.shift L p)) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
@@ -565,7 +557,7 @@ lemma IsSemiformula.shift {n p : V} :
   · intro n p hp ihp; simp [hp.isUFormula, ihp]
 
 @[simp]
-lemma IsUFormula.shift_iff {p : V} : IsUFormula L (Bootstrapping.shift L p) ↔ IsUFormula L p := by
+lemma IsUFormula.shift_iff : IsUFormula L (Bootstrapping.shift L p) ↔ IsUFormula L p := by
   constructor
   · intro h; by_contra hp
     have Hp : IsUFormula L p := by by_contra hp; simp [shift_not_uformula hp] at h
@@ -573,15 +565,13 @@ lemma IsUFormula.shift_iff {p : V} : IsUFormula L (Bootstrapping.shift L p) ↔ 
   · exact IsUFormula.shift
 
 @[simp]
-lemma IsSemiformula.shift_iff {n p : V} :
-    IsSemiformula L n (Bootstrapping.shift L p) ↔ IsSemiformula L n p :=
+lemma IsSemiformula.shift_iff : IsSemiformula L n (Bootstrapping.shift L p) ↔ IsSemiformula L n p :=
   ⟨fun h ↦ by
     have : IsUFormula L p := by by_contra hp; simp [shift_not_uformula hp] at h
     exact ⟨this, by simpa [this.bv_shift] using h.bv_le⟩,
     IsSemiformula.shift⟩
 
-lemma shift_neg {n p : V} (hp : IsSemiformula L n p) :
-    shift L (neg L p) = neg L (shift L p) := by
+lemma shift_neg (hp : IsSemiformula L n p) : shift L (neg L p) = neg L (shift L p) := by
   refine IsSemiformula.induction
     (P := fun _ p ↦ shift L (neg L p) = neg L (shift L p)) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · exact LocallyDelta0.eq
@@ -618,7 +608,7 @@ lemma len_bvarRange (a n : V) : len (bvarRange a n) = n := by
   rw [bvarRange, len_listMap bvarAt_locallyDelta0, len_rangeList]
 
 @[simp]
-lemma nth_bvarRange {a n i : V} (hi : i < n) : (bvarRange a n).[i] = ^#(a + i) := by
+lemma nth_bvarRange (hi : i < n) : (bvarRange a n).[i] = ^#(a + i) := by
   rw [bvarRange, nth_listMap bvarAt_locallyDelta0 _ _ (by simpa using hi), nth_rangeList hi]
   simp
 
@@ -659,14 +649,13 @@ lemma termBShiftIter_locallyDelta0 : LocallyDelta0Function₂ (termBShiftIter L 
   termSubst_locallyDelta0.comp₂ (bvarRange_locallyDelta0.comp₂ (LocallyDelta0Function.var 0)
     (termBV_locallyDelta0.comp₁ (LocallyDelta0Function.var 1))) (LocallyDelta0Function.var 1)
 
-lemma termBShiftIter_zero {t : V} (ht : IsUTerm L t) : termBShiftIter L 0 t = t :=
+lemma termBShiftIter_zero (ht : IsUTerm L t) : termBShiftIter L 0 t = t :=
   termSubst_eq_self ht.isSemiterm fun i hi ↦ by simp [hi]
 
-lemma IsUTerm.termBShiftIter {t : V} (ht : IsUTerm L t) (d : V) :
-    IsUTerm L (termBShiftIter L d t) :=
+lemma IsUTerm.termBShiftIter (ht : IsUTerm L t) (d : V) : IsUTerm L (termBShiftIter L d t) :=
   ((IsSemitermVec.bvarRange d (termBV L t)).termSubst ht.isSemiterm).isUTerm
 
-lemma termBShift_termBShiftIter {t : V} (ht : IsUTerm L t) (d : V) :
+lemma termBShift_termBShiftIter (ht : IsUTerm L t) (d : V) :
     termBShift L (termBShiftIter L d t) = termBShiftIter L (d + 1) t := by
   rw [termBShiftIter, bShift_substs ht.isSemiterm (IsSemitermVec.bvarRange d (termBV L t)),
     termBShiftVec_bvarRange]
@@ -700,21 +689,20 @@ variable {L}
 lemma qVecIter_zero (w : V) : qVecIter L w 0 = w := by simp [qVecIter]
 
 open Classical in
-lemma len_qVecIter {w d : V} (hd : d ≠ 0) :
+lemma len_qVecIter (hd : d ≠ 0) :
     len (qVecIter L w d) = d + if IsUTermVec L (len w) w then len w else 0 := by
   simp only [qVecIter, hd, ↓reduceIte]
   rw [len_listMap qVecIterAt_locallyDelta0, len_rangeList]
 
 open Classical in
-lemma nth_qVecIter {w d i : V} (hd : d ≠ 0)
-    (hi : i < d + if IsUTermVec L (len w) w then len w else 0) :
+lemma nth_qVecIter (hd : d ≠ 0) (hi : i < d + if IsUTermVec L (len w) w then len w else 0) :
     (qVecIter L w d).[i] = if i < d then ^#i else termBShiftIter L d w.[i - d] := by
   simp only [qVecIter, hd, ↓reduceIte]
   rw [nth_listMap qVecIterAt_locallyDelta0 _ _ (by simpa using hi), nth_rangeList hi]
   simp
 
 open Classical in
-lemma isUTermVec_qVecIter {w d : V} (hd : d ≠ 0) :
+lemma isUTermVec_qVecIter (hd : d ≠ 0) :
     IsUTermVec L (d + if IsUTermVec L (len w) w then len w else 0) (qVecIter L w d) := by
   refine ⟨(len_qVecIter hd).symm, fun i hi ↦ ?_⟩
   rw [nth_qVecIter hd hi]
@@ -834,7 +822,7 @@ noncomputable def qVecIterMax (w p : V) : V :=
 
 variable {L}
 
-lemma le_qVecIterMax {w p d : V} (hd : d ≤ p) : qVecIter L w d ≤ qVecIterMax L w p := by
+lemma le_qVecIterMax (hd : d ≤ p) : qVecIter L w d ≤ qVecIterMax L w p := by
   have hd' : d < len (rangeList (p + 1)) := by simpa [lt_succ_iff_le] using hd
   have := nth_le_listMax (v := listMap (fun r d ↦ qVecIter L (r 0) d) ![w] (rangeList (p + 1)))
     (i := d) (by rwa [len_listMap qVecIterAt'_locallyDelta0])
@@ -844,14 +832,14 @@ lemma le_qVecIterMax {w p d : V} (hd : d ≤ p) : qVecIter L w d ≤ qVecIterMax
 lemma le_qVecIterMax_self (w p : V) : w ≤ qVecIterMax L w p := by
   simpa using le_qVecIterMax (L := L) (w := w) (zero_le (a := p))
 
-lemma qVecIterMax_le {w p B : V} (h : ∀ d ≤ p, qVecIter L w d ≤ B) : qVecIterMax L w p ≤ B := by
+lemma qVecIterMax_le {B : V} (h : ∀ d ≤ p, qVecIter L w d ≤ B) : qVecIterMax L w p ≤ B := by
   apply listMaxss_le
   intro i hi
   rw [len_listMap qVecIterAt'_locallyDelta0] at hi
   rw [nth_listMap qVecIterAt'_locallyDelta0 _ _ hi, nth_rangeList (by simpa using hi)]
   exact h i (lt_succ_iff_le.mp (by simpa using hi))
 
-lemma qVecIterMax_monotone {w p q : V} (h : p ≤ q) : qVecIterMax L w p ≤ qVecIterMax L w q :=
+lemma qVecIterMax_monotone (h : p ≤ q) : qVecIterMax L w p ≤ qVecIterMax L w q :=
   qVecIterMax_le fun _ hd ↦ le_qVecIterMax (le_trans hd h)
 
 lemma qVecIter_qVec (w d : V) : qVecIter L (qVec L w) d = qVecIter L w (d + 1) := by
@@ -1013,15 +1001,13 @@ end
 lemma subst_locallyDelta0 : LocallyDelta0Function₂ (subst (V := V) L) :=
   (construction L).result_locallyDelta0 L
 
-variable {m w : V}
-
 @[simp]
-lemma substs_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma substs_rel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     subst L w (^rel k R v) = ^rel k R (termSubstVec L k w v) := by
   simp [subst, hR, hv, construction]
 
 @[simp]
-lemma substs_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma substs_nrel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     subst L w (^nrel k R v) = ^nrel k R (termSubstVec L k w v) := by
   simp [subst, hR, hv, construction]
 
@@ -1032,11 +1018,11 @@ lemma substs_verum (w : V) : subst L w ^⊤ = ^⊤ := by simp [subst, constructi
 lemma substs_falsum (w : V) : subst L w ^⊥ = ^⊥ := by simp [subst, construction]
 
 @[simp]
-lemma substs_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma substs_and (hp : IsUFormula L p) (hq : IsUFormula L q) :
     subst L w (p ^⋏ q) = subst L w p ^⋏ subst L w q := by simp [subst, hp, hq, construction]
 
 @[simp]
-lemma substs_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma substs_or (hp : IsUFormula L p) (hq : IsUFormula L q) :
     subst L w (p ^⋎ q) = subst L w p ^⋎ subst L w q := by simp [subst, hp, hq, construction]
 
 @[simp]
@@ -1047,7 +1033,7 @@ lemma substs_all {p} (hp : IsUFormula L p) :
 lemma substs_ex {p} (hp : IsUFormula L p) :
     subst L w (^∃ p) = ^∃ (subst L (qVec L w) p) := by simp [subst, hp, construction]
 
-lemma IsSemitermVec.qVecIter {k m w d : V} (h : IsSemitermVec L k (m + d) (qVecIter L w d)) :
+lemma IsSemitermVec.qVecIter (h : IsSemitermVec L k (m + d) (qVecIter L w d)) :
     IsSemitermVec L (k + 1) (m + (d + 1)) (qVecIter L w (d + 1)) := by
   rw [← qVec_qVecIter, ← add_assoc]; exact h.qVec
 
@@ -1080,7 +1066,7 @@ lemma IsSemiformula.depth_induction {Q : V → V → V → Prop}
   · intro n p hp ih d hd; exact hexs d n p hp (ih (d + 1) (by simpa using hd))
 
 @[simp]
-lemma IsSemiformula.subst {n p m w : V} :
+lemma IsSemiformula.subst :
     IsSemiformula L n p → IsSemitermVec L n m w → IsSemiformula L m (subst L w p) := by
   intro hp hw
   suffices H : ∀ d ≤ n, IsSemitermVec L n (m + d) (qVecIter L w d) →
@@ -1108,7 +1094,7 @@ lemma IsSemiformula.subst {n p m w : V} :
   · intro d n p hp ih hw'
     simpa [hp.isUFormula, qVec_qVecIter, add_assoc] using ih hw'.qVecIter
 
-lemma substs_neg {n m w p : V} (hp : IsSemiformula L n p) :
+lemma substs_neg (hp : IsSemiformula L n p) :
     IsSemitermVec L n m w → subst L w (neg L p) = neg L (subst L w p) := by
   intro hw
   suffices H : ∀ d ≤ n, IsSemitermVec L n (m + d) (qVecIter L w d) →
@@ -1155,7 +1141,7 @@ lemma substs_neg {n m w p : V} (hp : IsSemiformula L n p) :
     rw [neg_ex hp.isUFormula, substs_all hp.neg.isUFormula,
       substs_ex hp.isUFormula, neg_ex (hp.subst hw'.qVec).isUFormula, ih]
 
-lemma shift_substs {n m w p : V} (hp : IsSemiformula L n p) :
+lemma shift_substs (hp : IsSemiformula L n p) :
     IsSemitermVec L n m w → shift L (subst L w p) = subst L (termShiftVec L n w) (shift L p) := by
   intro hw
   suffices H : ∀ d ≤ n, IsSemitermVec L n (m + d) (qVecIter L w d) →
@@ -1236,7 +1222,7 @@ lemma shift_substs {n m w p : V} (hp : IsSemiformula L n p) :
       ih,
       termShift_qVec hw']
 
-lemma substs_substs {l n m w v p : V} (hp : IsSemiformula L l p) :
+lemma substs_substs {l : V} (hp : IsSemiformula L l p) :
     IsSemitermVec L n m w → IsSemitermVec L l n v →
       subst L w (subst L v p) = subst L (termSubstVec L l w v) p := by
   intro hw hv
@@ -1313,7 +1299,7 @@ lemma substs_substs {l n m w v p : V} (hp : IsSemiformula L l p) :
       ih,
       termSubstVec_qVec_qVec hv' hw']
 
-lemma nth_qVec_eq_bvar {n w : V} (hw : IsSemitermVec L n n w) (H : ∀ i < n, w.[i] = ^#i) :
+lemma nth_qVec_eq_bvar (hw : IsSemitermVec L n n w) (H : ∀ i < n, w.[i] = ^#i) :
     ∀ i < n + 1, (qVec L w).[i] = ^#i := by
   intro i hi
   rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -1323,7 +1309,7 @@ lemma nth_qVec_eq_bvar {n w : V} (hw : IsSemitermVec L n n w) (H : ∀ i < n, w.
     rw [nth_termBShiftVec (by simpa [hw.lh] using hw.isUTerm) (by simp [hw.lh, hi])]
     simp [H i hi]
 
-lemma subst_eq_self {n w p : V} (hp : IsSemiformula L n p) (hw : IsSemitermVec L n n w)
+lemma subst_eq_self (hp : IsSemiformula L n p) (hw : IsSemitermVec L n n w)
     (H : ∀ i < n, w.[i] = ^#i) :
     subst L w p = p := by
   suffices H' : ∀ d ≤ n, IsSemitermVec L n n (qVecIter L w d) →
@@ -1398,16 +1384,16 @@ lemma substs1_locallyDelta0 : LocallyDelta0Function₂ (substs1 (V := V) L) :=
       (LocallyDelta0Function.const 0))
     (LocallyDelta0Function.var 1)
 
-lemma IsSemiformula.substs1 {n t p : V} (ht : IsSemiterm L n t) (hp : IsSemiformula L 1 p) :
+lemma IsSemiformula.substs1 (ht : IsSemiterm L n t) (hp : IsSemiformula L 1 p) :
     IsSemiformula L n (substs1 L t p) :=
   IsSemiformula.subst hp (by simp [ht])
 
-lemma subst_imp {n m w p q : V} (hp : IsSemiformula L n p) (hq : IsSemiformula L n q)
-    (hw : IsSemitermVec L n m w) : subst L w (imp L p q) = imp L (subst L w p) (subst L w q) := by
+lemma subst_imp (hp : IsSemiformula L n p) (hq : IsSemiformula L n q) (hw : IsSemitermVec L n m w) :
+    subst L w (imp L p q) = imp L (subst L w p) (subst L w q) := by
   simp [imp, hp.isUFormula, hq.isUFormula, substs_neg hp hw]
 
-lemma substs1_subst_qVec {j w q t : V} (hw : IsSemitermVec L j 0 w)
-    (hq : IsSemiformula L (j + 1) q) (ht : IsSemiterm L 0 t) :
+lemma substs1_subst_qVec {j : V} (hw : IsSemitermVec L j 0 w) (hq : IsSemiformula L (j + 1) q)
+    (ht : IsSemiterm L 0 t) :
     substs1 L t (subst L (qVec L w) q) = subst L (t ∷ w) q := by
   have h₁ : IsSemitermVec L 1 0 (?[t] : V) := by simp [ht]
   have h₂ : IsSemitermVec L (j + 1) 1 (qVec L w) := by simpa using hw.qVec
@@ -1449,7 +1435,7 @@ lemma free_locallyDelta0 : LocallyDelta0Function₁ (free (V := V) L) :=
     (shift_locallyDelta0.comp₁ (LocallyDelta0Function.var 0))
 
 @[simp]
-lemma IsSemiformula.free {p : V} (hp : IsSemiformula L 1 p) : IsFormula L (free L p) :=
+lemma IsSemiformula.free (hp : IsSemiformula L 1 p) : IsFormula L (free L p) :=
   IsSemiformula.substs1 (by simp) hp.shift
 
 section free1
@@ -1461,7 +1447,7 @@ noncomputable def free1 (p : V) : V := subst L ?[^&0, ^#0] (shift L p)
 variable {L}
 
 @[simp]
-lemma IsSemiformula.free1 {p : V} (hp : IsSemiformula L 2 p) : IsSemiformula L 1 (free1 L p) :=
+lemma IsSemiformula.free1 (hp : IsSemiformula L 2 p) : IsSemiformula L 1 (free1 L p) :=
   IsSemiformula.subst (m := 1) hp.shift
       (SemitermVec.adjoin (SemitermVec.adjoin (IsSemitermVec.empty _) (by simp)) (by simp))
 
@@ -1551,11 +1537,11 @@ lemma formulaComplexity_locallyDelta0 : LocallyDelta0Function₁ (formulaComplex
     (LocallyDelta0Function.var 0)
 
 @[simp]
-lemma formulaComplexity_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma formulaComplexity_rel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     formulaComplexity L (^rel k R v) = 0 := by simp [formulaComplexity, hR, hv, construction]
 
 @[simp]
-lemma formulaComplexity_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma formulaComplexity_nrel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     formulaComplexity L (^nrel k R v) = 0 := by simp [formulaComplexity, hR, hv, construction]
 
 @[simp]
@@ -1567,27 +1553,27 @@ lemma formulaComplexity_falsum :
     formulaComplexity L (^⊥ : V) = 0 := by simp [formulaComplexity, construction]
 
 @[simp]
-lemma formulaComplexity_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma formulaComplexity_and (hp : IsUFormula L p) (hq : IsUFormula L q) :
     formulaComplexity L (p ^⋏ q) = max (formulaComplexity L p) (formulaComplexity L q) + 1 := by
   simp [formulaComplexity, hp, hq, construction]
 
 @[simp]
-lemma formulaComplexity_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma formulaComplexity_or (hp : IsUFormula L p) (hq : IsUFormula L q) :
     formulaComplexity L (p ^⋎ q) = max (formulaComplexity L p) (formulaComplexity L q) + 1 := by
   simp [formulaComplexity, hp, hq, construction]
 
 @[simp]
-lemma formulaComplexity_all {p : V} (hp : IsUFormula L p) :
+lemma formulaComplexity_all (hp : IsUFormula L p) :
     formulaComplexity L (^∀ p) = formulaComplexity L p + 1 := by
   simp [formulaComplexity, hp, construction]
 
 @[simp]
-lemma formulaComplexity_ex {p : V} (hp : IsUFormula L p) :
+lemma formulaComplexity_ex (hp : IsUFormula L p) :
     formulaComplexity L (^∃ p) = formulaComplexity L p + 1 := by
   simp [formulaComplexity, hp, construction]
 
 @[simp]
-lemma formulaComplexity_neg {p : V} :
+lemma formulaComplexity_neg :
     IsUFormula L p → formulaComplexity L (neg L p) = formulaComplexity L p := by
   intro hp
   refine IsUFormula.induction
@@ -1607,7 +1593,7 @@ lemma formulaComplexity_neg {p : V} :
   · intro p hp ihp; simp [hp, ihp]
 
 @[simp]
-lemma formulaComplexity_shift {p : V} :
+lemma formulaComplexity_shift :
     IsUFormula L p → formulaComplexity L (shift L p) = formulaComplexity L p := by
   intro hp
   refine IsUFormula.induction
@@ -1627,7 +1613,7 @@ lemma formulaComplexity_shift {p : V} :
   · intro p hp ihp; simp [hp, ihp]
   · intro p hp ihp; simp [hp, ihp]
 
-lemma fomulaComplexity_substs {n p : V} (hp : IsSemiformula L n p) {m w : V} :
+lemma fomulaComplexity_substs (hp : IsSemiformula L n p) :
     IsSemitermVec L n m w → formulaComplexity L (subst L w p) = formulaComplexity L p := by
   intro hw
   suffices H : ∀ d ≤ n, IsSemitermVec L n (m + d) (qVecIter L w d) →
@@ -1678,13 +1664,12 @@ lemma fomulaComplexity_substs {n p : V} (hp : IsSemiformula L n p) {m w : V} :
      ih,
      formulaComplexity_ex hp.isUFormula]
 
-lemma fomulaComplexity_substs1 {p : V} (hp : IsSemiformula L 1 p) {m t : V}
-    (ht : IsSemiterm L m t) :
+lemma fomulaComplexity_substs1 (hp : IsSemiformula L 1 p) (ht : IsSemiterm L m t) :
     formulaComplexity L (substs1 L t p) = formulaComplexity L p := by
   unfold substs1
   rw [fomulaComplexity_substs hp (IsSemitermVec.singleton.mpr ht)]
 
-lemma fomulaComplexity_free {p : V} (hp : IsSemiformula L 1 p) :
+lemma fomulaComplexity_free (hp : IsSemiformula L 1 p) :
     formulaComplexity L (free L p) = formulaComplexity L p := by
   unfold free
   have : IsSemiterm (V := V) L 0 ^&0 := by simp
@@ -1702,7 +1687,7 @@ lemma lt_max_succ_right (a b : V) : b < max a b + 1 := lt_succ_iff_le.mpr <| by 
 namespace Arithmetic
 
 -- `Arithmetic` is intentionally re-opened here even though the ambient namespace
--- already contains it, keeping the names of Foundation's `Bootstrapping.Arithmetic.*`.
+-- already contains it.
 set_option linter.dupNamespace false
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic (eqIndex ltIndex)
@@ -1775,19 +1760,19 @@ instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqLT : V → V → V) := .of_sigmaO
 
 instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqNLT : V → V → V) := .of_sigmaOne qqNLT_defined.to_definable
 
-lemma neg_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^= u) = t ^≠ u := by
+lemma neg_eq (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^= u) = t ^≠ u := by
   simp only [qqEQ, qqNEQ]
   rw [neg_rel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
 
-lemma neg_neq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^≠ u) = t ^= u := by
+lemma neg_neq (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^≠ u) = t ^= u := by
   simp only [qqNEQ, qqEQ]
   rw [neg_nrel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
 
-lemma neg_lt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^< u) = t ^≮ u := by
+lemma neg_lt (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^< u) = t ^≮ u := by
   simp only [qqLT, qqNLT]
   rw [neg_rel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
 
-lemma neg_nlt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^≮ u) = t ^< u := by
+lemma neg_nlt (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^≮ u) = t ^< u := by
   simp only [qqNLT, qqLT]
   rw [neg_nrel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
 

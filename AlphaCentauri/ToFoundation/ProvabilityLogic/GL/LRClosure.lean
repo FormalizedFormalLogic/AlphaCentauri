@@ -20,11 +20,10 @@ open Entailment Formula Kripke Kripke.Model Kripke.Model.World
 
 universe u
 
-variable {α : Type u} {κ : Type*} [Nonempty κ] {M : Model κ α}
+variable {α : Type u} {κ : Type*} [Nonempty κ] {M : Model κ α} {a : α}
+  {A B C D E : Formula α} {S T : Set (Formula α)} {F : Finset (Formula α)}
 
 namespace Logic.GL
-
-variable {A B : Formula α}
 
 lemma of_forces
     (h : ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsFiniteGL] (x : M.World), x ⊩ A) :
@@ -38,7 +37,7 @@ end Logic.GL
 
 namespace Kripke.Model.World
 
-variable [DecidableEq α] {a : α} {x : M.World} {D E : Formula α}
+variable [DecidableEq α] {x : M.World}
 
 /-- A formula and its instance substituting `⊥` for `a` agree at a world where `a` fails at the
 world and above it. -/
@@ -85,7 +84,7 @@ end Kripke.Model.World
 
 namespace Logic.GL
 
-variable [DecidableEq α] {a : α} {D : Formula α}
+variable [DecidableEq α]
 
 lemma box_neg_and_box_iff_subst_bot : 𝐆𝐋 ⊢ □(∼(#a ⋏ □D)) 🡘 □(∼(#a ⋏ □D⟦a ↦ ⊥⟧)) := by
   apply of_forces
@@ -98,8 +97,6 @@ lemma box_neg_and_box_iff_subst_bot : 𝐆𝐋 ⊢ □(∼(#a ⋏ □D)) 🡘 �
 end Logic.GL
 
 namespace Logic.GL
-
-variable {A B C D : Formula α}
 
 lemma iff_of_forces
     (h : ∀ {κ : Type u} [Nonempty κ] (M : Model κ α) [M.IsFiniteGL] (x : M.World),
@@ -123,8 +120,6 @@ def FiniteUpToEquiv (S : Set (Formula α)) : Prop :=
   ∃ F : Finset (Formula α), ∀ A ∈ S, ∃ B ∈ F, 𝐆𝐋 ⊢ A 🡘 B
 
 namespace FiniteUpToEquiv
-
-variable {S T : Set (Formula α)}
 
 lemma of_forall_exists (hT : FiniteUpToEquiv T) (h : ∀ A ∈ S, ∃ B ∈ T, 𝐆𝐋 ⊢ A 🡘 B) :
     FiniteUpToEquiv S := by
@@ -189,13 +184,12 @@ namespace Formula
 
 /-- The closure of `S` under `⊥` and `🡒`. -/
 inductive BooleanCombination (S : Set (Formula α)) : Formula α → Prop
-  | mem {A} : A ∈ S → BooleanCombination S A
+  | mem {A : Formula α} : A ∈ S → BooleanCombination S A
   | falsum : BooleanCombination S ⊥
-  | imp {A B} : BooleanCombination S A → BooleanCombination S B → BooleanCombination S (A 🡒 B)
+  | imp {A B : Formula α} :
+      BooleanCombination S A → BooleanCombination S B → BooleanCombination S (A 🡒 B)
 
 namespace BooleanCombination
-
-variable {S T : Set (Formula α)} {A B : Formula α}
 
 lemma neg (h : BooleanCombination S A) : BooleanCombination S (∼A) := imp h falsum
 
@@ -215,8 +209,7 @@ lemma disj₂ : {l : List (Formula α)} → (∀ A ∈ l, BooleanCombination S A
   | [A], h => h A (by simp)
   | A :: B :: l, h => or (h A (by simp)) (disj₂ (l := B :: l) fun C hC ↦ h C (by simp_all))
 
-lemma disj {F : Finset (Formula α)} (h : ∀ A ∈ F, BooleanCombination S A) :
-    BooleanCombination S F.disj :=
+lemma disj (h : ∀ A ∈ F, BooleanCombination S A) : BooleanCombination S F.disj :=
   disj₂ fun A hA ↦ h A (Finset.mem_toList.mp hA)
 
 lemma conj₂ : {l : List (Formula α)} → (∀ A ∈ l, BooleanCombination S A) →
@@ -225,8 +218,7 @@ lemma conj₂ : {l : List (Formula α)} → (∀ A ∈ l, BooleanCombination S A
   | [A], h => h A (by simp)
   | A :: B :: l, h => and (h A (by simp)) (conj₂ (l := B :: l) fun C hC ↦ h C (by simp_all))
 
-lemma conj {F : Finset (Formula α)} (h : ∀ A ∈ F, BooleanCombination S A) :
-    BooleanCombination S F.conj :=
+lemma conj (h : ∀ A ∈ F, BooleanCombination S A) : BooleanCombination S F.conj :=
   conj₂ fun A hA ↦ h A (Finset.mem_toList.mp hA)
 
 open Logic.GL in
@@ -243,10 +235,8 @@ lemma exists_of_forall_exists (hST : ∀ A ∈ S, ∃ B, BooleanCombination T B 
 open Logic.GL in
 /-- A Boolean combination of a finite set of formulas is $\mathbf{GL}$-equivalent to a disjunction
 of the formulas fixing which members of the set hold. -/
-private lemma exists_finset_powerset_of_finset [DecidableEq α] {F : Finset (Formula α)}
-    (h : BooleanCombination ↑F A) :
-    ∃ 𝒯 ⊆ F.powerset, 𝐆𝐋 ⊢ A 🡘
-      (𝒯.image fun T ↦ T.conj ⋏ ((F \ T).image (∼·)).conj).disj := by
+private lemma exists_finset_powerset_of_finset [DecidableEq α] (h : BooleanCombination ↑F A) :
+    ∃ 𝒯 ⊆ F.powerset, 𝐆𝐋 ⊢ A 🡘 (𝒯.image fun T ↦ T.conj ⋏ ((F \ T).image (∼·)).conj).disj := by
   classical
   have key {κ : Type u} [Nonempty κ] {M : Model κ α} (x : M.World) {𝒯 : Finset (Finset (Formula α))}
       (h𝒯 : 𝒯 ⊆ F.powerset) :
@@ -309,8 +299,6 @@ end Formula
 
 namespace Logic.GL.FiniteUpToEquiv
 
-variable {S : Set (Formula α)}
-
 lemma image {f : Formula α → Formula α} (hf : ∀ {A B}, 𝐆𝐋 ⊢ A 🡘 B → 𝐆𝐋 ⊢ f A 🡘 f B)
     (h : FiniteUpToEquiv S) : FiniteUpToEquiv (f '' S) := by
   classical
@@ -345,7 +333,7 @@ namespace LRClosure
 
 open Logic.GL Formula.BooleanCombination
 
-variable [DecidableEq α] {P : Finset α} {b : Bool} {A B Z : Formula α}
+variable [DecidableEq α] {P : Finset α} {b : Bool} {Z : Formula α} {S : Finset (Formula α)}
 
 /-- The members of the LR-closure and the formulas `□∼A` for `A` in its first part. -/
 def base (P : Finset α) : Set (Formula α) :=
@@ -381,7 +369,7 @@ lemma exists_atom_and_box (h : LRClosure P b Z) :
       simp only [forces_and, forces_iff_of h x, forces_box]
       grind
 
-private lemma forces_subst_disj {x : M.World} {s : Substitution α α} {S : Finset (Formula α)} :
+private lemma forces_subst_disj {x : M.World} {s : Substitution α α} :
     x ⊩[M] S.disj⟦s⟧ ↔ ∃ C ∈ S, x ⊩[M] C⟦s⟧ := by
   rw [← Model.forces_subst, forces_disj]
   simp only [Model.forces_subst]
@@ -446,8 +434,7 @@ lemma exists_subst_bot_of_mem_base (a : α) (h : A ∈ base P) :
   · obtain ⟨A', hA', h⟩ := exists_subst_bot a h
     exact ⟨□(∼A'), .inr ⟨A', hA', rfl⟩, box_congr' (imp_congr' h iff_refl')⟩
 
-lemma exists_subst_bot_of_booleanCombination (a : α) {D : Formula α}
-    (h : BooleanCombination (base P) D) :
+lemma exists_subst_bot_of_booleanCombination (a : α) (h : BooleanCombination (base P) D) :
     ∃ D', BooleanCombination (base (P.erase a)) D' ∧ 𝐆𝐋 ⊢ D⟦a ↦ ⊥⟧ 🡘 D' := by
   induction h with
   | mem hA =>
@@ -596,7 +583,7 @@ theorem finiteUpToEquiv (P : Finset α) (b : Bool) :
 
 /-! ## The `□`-subformulas of the LR-closure -/
 
-private lemma box_mem_subfmls_disj₂ {E : Formula α} :
+private lemma box_mem_subfmls_disj₂ :
     {l : List (Formula α)} → □E ∈ (⋁l).subfmls → ∃ C ∈ l, □E ∈ C.subfmls
   | [], h => by simp [subfmls] at h
   | [A], h => ⟨A, by simp, h⟩
@@ -609,8 +596,7 @@ private lemma box_mem_subfmls_disj₂ {E : Formula α} :
     · obtain ⟨C, hC, h⟩ := box_mem_subfmls_disj₂ h
       exact ⟨C, by simp_all, h⟩
 
-lemma box_mem_subfmls_disj {E : Formula α} {S : Finset (Formula α)} (h : □E ∈ S.disj.subfmls) :
-    ∃ C ∈ S, □E ∈ C.subfmls := by
+lemma box_mem_subfmls_disj (h : □E ∈ S.disj.subfmls) : ∃ C ∈ S, □E ∈ C.subfmls := by
   obtain ⟨C, hC, h⟩ := box_mem_subfmls_disj₂ h
   exact ⟨C, Finset.mem_toList.mp hC, h⟩
 
@@ -621,8 +607,7 @@ def IsBoxBody (P : Finset α) (E : Formula α) : Prop :=
     ∃ B, ∃ S T : Finset (Formula α), LRClosure P true B ∧ (∀ C ∈ S, LRClosure P true C) ∧
       (∀ C ∈ T, LRClosure P true C) ∧ E = B 🡒 S.disj ⋎ (T.image (◇·)).disj
 
-lemma isBoxBody_of_box_mem_subfmls {E : Formula α} (h : LRClosure P b Z)
-    (hE : □E ∈ Z.subfmls) : IsBoxBody P E := by
+lemma isBoxBody_of_box_mem_subfmls (h : LRClosure P b Z) (hE : □E ∈ Z.subfmls) : IsBoxBody P E := by
   induction h with
   | falsum => simp [subfmls] at hE
   | atom => simp [subfmls] at hE
@@ -650,7 +635,7 @@ lemma isBoxBody_of_box_mem_subfmls {E : Formula α} (h : LRClosure P b Z)
       · exact .inl ⟨D, true, hT D hD, rfl⟩
       · exact ihT D hD h
 
-private lemma atom_mem_subfmls_disj₂ {a : α} :
+private lemma atom_mem_subfmls_disj₂ :
     {l : List (Formula α)} → #a ∈ (⋁l).subfmls → ∃ C ∈ l, #a ∈ C.subfmls
   | [], h => by simp [subfmls] at h
   | [A], h => ⟨A, by simp, h⟩
@@ -663,12 +648,11 @@ private lemma atom_mem_subfmls_disj₂ {a : α} :
     · obtain ⟨C, hC, h⟩ := atom_mem_subfmls_disj₂ h
       exact ⟨C, by simp_all, h⟩
 
-lemma atom_mem_subfmls_disj {a : α} {S : Finset (Formula α)} (h : #a ∈ S.disj.subfmls) :
-    ∃ C ∈ S, #a ∈ C.subfmls := by
+lemma atom_mem_subfmls_disj (h : #a ∈ S.disj.subfmls) : ∃ C ∈ S, #a ∈ C.subfmls := by
   obtain ⟨C, hC, h⟩ := atom_mem_subfmls_disj₂ h
   exact ⟨C, Finset.mem_toList.mp hC, h⟩
 
-lemma mem_of_atom_mem_subfmls {a : α} (h : LRClosure P b Z) (ha : #a ∈ Z.subfmls) : a ∈ P := by
+lemma mem_of_atom_mem_subfmls (h : LRClosure P b Z) (ha : #a ∈ Z.subfmls) : a ∈ P := by
   induction h with
   | falsum => simp [subfmls] at ha
   | atom hc =>

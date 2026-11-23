@@ -19,9 +19,33 @@ a predicate determined by the signs of polynomials of degree at most `N`.
 
 open FFL FirstOrder Semiterm Polynomial
 
+variable {L : Language} {ξ : Type*} {n : ℕ}
+
+namespace FFL.FirstOrder
+
+/-- An upper bound on the degree of a term in its bound variables: a bound variable counts `1`, a
+free variable `0`, and a function application the sum over its arguments. -/
+def Semiterm.degree {n : ℕ} : Semiterm L ξ n → ℕ
+  | #_ => 1
+  | &_ => 0
+  | func _ v => ∑ i, (v i).degree
+
+/-- The largest `Semiterm.degree` of a term in the formula. -/
+def Semiformula.degree {n : ℕ} : Semiformula L ξ n → ℕ
+  | ⊤ => 0
+  | ⊥ => 0
+  | rel _ v => ∑ i, (v i).degree
+  | nrel _ v => ∑ i, (v i).degree
+  | φ ⋏ ψ => max φ.degree ψ.degree
+  | φ ⋎ ψ => max φ.degree ψ.degree
+  | ∀¹ φ => φ.degree
+  | ∃¹ φ => φ.degree
+
+end FFL.FirstOrder
+
 namespace OpenPredicate
 
-variable {R : Type*} [CommRing R] [LinearOrder R] {ξ : Type*} {n : ℕ}
+variable {R : Type*} [CommRing R] [LinearOrder R]
 
 lemma isPolynomial_val (ε : ξ → R) (t : ArithmeticSemiterm ξ n) :
     IsPolynomial fun w : Fin n → R ↦ t.val w ε := by
@@ -51,6 +75,8 @@ lemma isOpen_eval (ε : ξ → R) {φ : ArithmeticSemiformula ξ n} (hφ : φ.Op
   | hor φ ψ ihφ ihψ => simp at hφ; simpa using (ihφ hφ.1).or (ihψ hφ.2)
   | hall => simp at hφ
   | hexs => simp at hφ
+
+section
 
 variable {M : Type*} {ι : M → R} (hι : ∀ x : R, ∃ a b, ι a - ι b = x)
 include hι
@@ -116,35 +142,7 @@ lemma exists_open_eval_iff [IsStrictOrderedRing R] {P : (Fin n → R) → Prop} 
     use θ₁ ⋎ θ₂
     simp [hθ₁, hθ₂, h₁, h₂]
 
-end OpenPredicate
-
-namespace FFL.FirstOrder
-
-variable {L : Language} {ξ : Type*}
-
-/-- An upper bound on the degree of a term in its bound variables: a bound variable counts `1`, a
-free variable `0`, and a function application the sum over its arguments. -/
-def Semiterm.degree {n : ℕ} : Semiterm L ξ n → ℕ
-  | #_ => 1
-  | &_ => 0
-  | func _ v => ∑ i, (v i).degree
-
-/-- The largest `Semiterm.degree` of a term in the formula. -/
-def Semiformula.degree {n : ℕ} : Semiformula L ξ n → ℕ
-  | ⊤ => 0
-  | ⊥ => 0
-  | rel _ v => ∑ i, (v i).degree
-  | nrel _ v => ∑ i, (v i).degree
-  | φ ⋏ ψ => max φ.degree ψ.degree
-  | φ ⋎ ψ => max φ.degree ψ.degree
-  | ∀¹ φ => φ.degree
-  | ∃¹ φ => φ.degree
-
-end FFL.FirstOrder
-
-namespace OpenPredicate
-
-variable {R : Type*} [CommRing R] [LinearOrder R] {ξ : Type*} {n : ℕ}
+end
 
 variable (b : Fin n → R[X]) (hb : ∀ i, (b i).natDegree ≤ 1) (ε : ξ → R)
 include hb

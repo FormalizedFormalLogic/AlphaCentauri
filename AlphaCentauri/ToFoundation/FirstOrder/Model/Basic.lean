@@ -49,12 +49,12 @@ open Semiformula Tarski.Structure
 
 universe u v w
 
+variable {L : Language} {ℬ : Bounding L} {M : Type u} {N : Type v} {K : Type w}
+  [Tarski.Structure L M] [Tarski.Structure L N] [Tarski.Structure L K] {T : Theory L}
+
 /-! ## Embeddings -/
 
 namespace Tarski.Structure.Embedding
-
-variable {L : Language} {M : Type u} {N : Type v} {K : Type w} [Tarski.Structure L M]
-  [Tarski.Structure L N] [Tarski.Structure L K]
 
 variable (L M) in
 /-- The identity embedding. -/
@@ -86,9 +86,6 @@ end Tarski.Structure.Embedding
 /-! ## Elementary substructures -/
 
 section
-
-variable {L : Language} {M : Type u} {N : Type v} {K : Type w}
-  [Tarski.Structure L M] [Tarski.Structure L N] [Tarski.Structure L K]
 
 /-- `ι` is $\Gamma$-elementary: every formula of $\Gamma$ takes the same truth value at elements of
 `M` as at their images.
@@ -141,7 +138,7 @@ lemma IsElementary.models_iff [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
   simpa [Matrix.empty_eq] using h (φ := Rewriting.emb σ) trivial ![] fun _ ↦ Classical.ofNonempty
 
 lemma IsElementary.modelsTheory [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
-    (h : IsElementary (fun {_} _ ↦ True) ι) {T : Theory L} [N↓[L] ⊧* T] : M↓[L] ⊧* T :=
+    (h : IsElementary (fun {_} _ ↦ True) ι) [N↓[L] ⊧* T] : M↓[L] ⊧* T :=
   ⟨fun σ hσ ↦ (h.models_iff σ).mp <| Semantics.ModelsSet.models _ hσ⟩
 
 /-- A $\Gamma$-elementary substructure: an embedding of `M` into `N` which is $\Gamma$-elementary.
@@ -264,8 +261,7 @@ end
 
 section
 
-variable {L : Language} {ℬ : Bounding L} {S : Type u} {M : Type v} [Tarski.Structure L S]
-  [Tarski.Structure L M] (ι : S ↪ₛ[L] M)
+variable {S : Type u} {M : Type v} [Tarski.Structure L S] [Tarski.Structure L M] (ι : S ↪ₛ[L] M)
 
 lemma eval_ex_iff_of_witness {n : ℕ} {χ : Semiformula L ℕ (n + 1)} {e : Fin n → S} {f : ℕ → S}
     (witness : (∃ x : M, χ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, χ.Eval (ι x :> ι ∘ e) (ι ∘ f))
@@ -347,7 +343,7 @@ structure ElementaryChain (M : ℕ → Type u) [∀ n, Tarski.Structure L (M n)]
 
 namespace ElementaryChain
 
-variable {L : Language} {M : ℕ → Type u} [∀ n, Tarski.Structure L (M n)]
+variable {M : ℕ → Type u} [∀ n, Tarski.Structure L (M n)]
   (c : ElementaryChain L M) {k l m n : ℕ}
 
 /-- The elementary substructure `M m ≼ₑ[L] M n` composed of the steps from `m` to `n`. -/
@@ -492,9 +488,6 @@ end
 
 section
 
-variable {L : Language} {ℬ : Bounding L} {M : Type u} {N : Type v} {K : Type w}
-  [Tarski.Structure L M] [Tarski.Structure L N] [Tarski.Structure L K] {T : Theory L}
-
 /-- An end extension of `M` to `N` for `ℬ`: an embedding of `M` into `N` whose image is an initial
 segment for every bounding operator of `ℬ`.
 - [Kay91, Definition 2.6]
@@ -626,7 +619,7 @@ namespace «Type»
 
 open Semiformula
 
-variable {L : Language} {ξ : Type*} {k : ℕ} {M : Type*} [Tarski.Structure L M]
+variable {ξ : Type*} {k : ℕ} {M : Type*} [Tarski.Structure L M]
   {Φ Ψ : FirstOrder.Type L ξ k} {b : ξ → M}
 
 /-- The tuple `a` realizes `Φ` with the parameters read as `b`.
@@ -789,7 +782,7 @@ end «Type»
 
 section
 
-variable {L : Language} [L.Encodable]
+variable [L.Encodable]
 
 /-- The set of codes of the formulas of `Φ` is recursive.
 - [Kay91, §11.2] -/
@@ -820,7 +813,7 @@ end
 
 section
 
-variable {L : Language} {M : Type*} [Tarski.Structure L M]
+variable {M : Type*} [Tarski.Structure L M]
 
 /-- A formula satisfying `C`, with parameters from `A`, which defines `a` in `M`: `a` is the only
 element of `M` satisfying it. -/
@@ -853,7 +846,7 @@ end
 
 section
 
-variable {L : Language} {M : Type} [Tarski.Structure L M]
+variable {M : Type} [Tarski.Structure L M]
 
 /-- Over no parameters, a class of formulas closed under renaming the free variables defines the
 same elements by formulas as by sentences. -/

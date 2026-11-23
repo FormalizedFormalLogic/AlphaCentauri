@@ -305,8 +305,7 @@ private lemma nf_decode_enc : (decodeONote (enc a)).NF := by
 private lemma enc_injective : Function.Injective enc := by
   intro a b hab
   apply_fun decodeONote at hab
-  have h_eq : (natCode a).1 = (natCode b).1 := by
-    grind +suggestions
+  have h_eq : (natCode a).1 = (natCode b).1 := by simpa [decodeONote_enc] using hab
   exact natCode.injective (Subtype.ext h_eq)
 
 private lemma enc_surjOn {n : ℕ} (h : (decodeONote n).NF) : ∃ a, enc a = n := by

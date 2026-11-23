@@ -127,22 +127,23 @@ lemma exists_eq_sub (x : RingOfDifferences M) : ∃ a b : M, x = of a - of b := 
     exact mk_eq_sub a b
 
 /-- The cone of non-negative elements: the image of `M`. -/
-def cone : RingCone (RingOfDifferences M) where
+def cone : Subsemiring (RingOfDifferences M) where
   carrier := Set.range of
   add_mem' := by rintro _ _ ⟨a, rfl⟩ ⟨b, rfl⟩; exact ⟨a + b, map_add of a b⟩
   zero_mem' := ⟨0, map_zero of⟩
   mul_mem' := by rintro _ _ ⟨a, rfl⟩ ⟨b, rfl⟩; exact ⟨a * b, map_mul of a b⟩
   one_mem' := ⟨1, map_one of⟩
-  eq_zero_of_mem_of_neg_mem' := by
-    rintro _ ⟨a, rfl⟩ ⟨b, hb⟩
-    simp only [of_def, mk_neg, mk_eq_mk, zero_add] at hb
-    obtain rfl := (add_eq_zero.1 hb).2
-    exact map_zero of
 
-instance : HasMemOrNegMem (cone (M := M)) where
-  mem_or_neg_mem x := by
-    induction x using ind with
-    | h a b =>
+lemma cone_isPointed : (cone (M := M)).IsPointed := by
+  rintro _ ⟨a, rfl⟩ ⟨b, hb⟩
+  simp only [of_def, mk_neg, mk_eq_mk, zero_add] at hb
+  obtain rfl := (add_eq_zero.1 hb).2
+  exact map_zero of
+
+lemma cone_isSpanning : (cone (M := M)).IsSpanning := by
+  intro x
+  induction x using ind with
+  | h a b =>
     rcases le_total a b with h | h
     · obtain ⟨c, rfl⟩ := exists_add_of_le h
       exact Or.inr ⟨c, by simp only [of_def, mk_neg, mk_eq_mk]; ring⟩
@@ -151,7 +152,7 @@ instance : HasMemOrNegMem (cone (M := M)) where
 
 noncomputable instance : LinearOrder (RingOfDifferences M) :=
   letI := Classical.decPred (· ∈ cone (M := M))
-  LinearOrder.mkOfAddGroupCone cone
+  LinearOrder.ofAddSubmonoid cone_isPointed cone_isSpanning
 
 lemma le_iff {x y : RingOfDifferences M} : x ≤ y ↔ y - x ∈ cone := Iff.rfl
 
@@ -172,7 +173,8 @@ lemma of_le_of {a b : M} : of a ≤ of b ↔ a ≤ b := by
 lemma of_lt_of {a b : M} : of a < of b ↔ a < b := by
   rw [lt_iff_le_not_ge, lt_iff_le_not_ge, of_le_of, of_le_of]
 
-instance : IsOrderedRing (RingOfDifferences M) := IsOrderedRing.mkOfCone cone
+instance : IsOrderedRing (RingOfDifferences M) :=
+  IsOrderedRing.ofSubsemiring cone_isPointed
 
 instance : Nontrivial (RingOfDifferences M) :=
   ⟨⟨0, 1, fun h ↦ zero_ne_one (α := M) <| of_injective <|

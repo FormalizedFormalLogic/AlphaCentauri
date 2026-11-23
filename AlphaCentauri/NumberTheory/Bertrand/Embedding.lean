@@ -326,6 +326,18 @@ lemma definable_bandStep_bandBound (n : V) :
   unfold bandBound bandSize cutoff
   definability
 
+lemma definable_tagged_family_bandDomain (n : V) : 𝚺ᴬ₀.DefinablePred
+    (Tagged 1 (Family (bandCount n) fun r ↦ BandDomain B s (bandBound n r))) := by
+  have := definable_bits B s
+  have := definable_kummer B s
+  apply definable_tagged
+  unfold Family BandDomain Tagged bandBound bandSize bandCount cutoff
+  definability
+
+lemma definable_chebyshevMap (n : V) : 𝚺ᴬ₀.DefinableRel (ChebyshevMap n : V → V → Prop) := by
+  unfold ChebyshevMap bandBound bandSize bandCount
+  definability
+
 lemma definable_pieces (n : V) :
     𝚺ᴬ₀.DefinablePred (Tagged 0 (LowerDomain B s n)) ∧
     𝚺ᴬ₀.DefinablePred (Tagged 0 (Tagged 6 (Kummer B s n))) ∧
@@ -364,13 +376,8 @@ lemma definable_pieces (n : V) :
     apply definable_tagged
     unfold LowerResidue
     definability
-  · have := definable_bits B s
-    have := definable_kummer B s
-    apply definable_tagged
-    unfold Family BandDomain Tagged bandBound bandSize bandCount cutoff
-    definability
-  · unfold ChebyshevMap bandBound bandSize bandCount
-    definability
+  · exact definable_tagged_family_bandDomain n
+  · exact definable_chebyshevMap n
 
 
 section chebyshev

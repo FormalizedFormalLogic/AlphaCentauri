@@ -24,6 +24,8 @@ namespace Arithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
+attribute [-simp] Semantics.ModelsSet.setOf_iff Semantics.ModelsSet.union_iff
+
 variable {V : Type*} {R S : V → V → Prop} {X X' Y Y' W : V → Prop} {t t' c N : V}
 
 /-- `R` is an injection of `X` into `Y`. -/

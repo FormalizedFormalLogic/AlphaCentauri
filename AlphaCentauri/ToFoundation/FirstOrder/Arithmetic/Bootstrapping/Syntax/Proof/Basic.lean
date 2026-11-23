@@ -175,7 +175,7 @@ lemma tprovable_subst_of_allClosure :
     rwa [Semiformula.substs_q_substs_single,
       show (w 0 :> Matrix.vecTail w) = w from Matrix.cons_head_tail w] at h₂
 
-lemma tprovable_quote_eqAxiom [𝗘𝗤 L ⪯ S] {σ : Sentence L} (h : 𝗘𝗤 L σ) :
+lemma tprovable_quote_eqAxiom [𝗘𝗤 L ⪯ S] {σ : Sentence L} (h : σ ∈ 𝗘𝗤 L) :
     S.internalize V ⊢ (⌜σ⌝ : Formula V L) := by
   have h₁ : S ⊢ σ :=
     _root_.FFL.Entailment.WeakerThan.pbl (𝓢 := 𝗘𝗤 L) (_root_.FFL.Entailment.by_axm h)
@@ -184,14 +184,14 @@ lemma tprovable_quote_eqAxiom [𝗘𝗤 L ⪯ S] {σ : Sentence L} (h : 𝗘𝗤
 lemma tprovable_equal_refl [𝗘𝗤 L ⪯ S] (t : Semiterm V L 0) :
     S.internalize V ⊢ Semiformula.equal t t := by
   have h₁ := tprovable_subst_of_allClosure S (σ := (op(=).operator ![#0, #0] : Semisentence L 1))
-    ![t] (tprovable_quote_eqAxiom S Theory.eqAxiom.refl)
+    ![t] (tprovable_quote_eqAxiom S Theory.IsEqAxiom.refl)
   simpa using h₁
 
 lemma tprovable_equal_symm_imp [𝗘𝗤 L ⪯ S] (s t : Semiterm V L 0) :
     S.internalize V ⊢ Semiformula.equal s t 🡒 Semiformula.equal t s := by
   have h₁ := tprovable_subst_of_allClosure S
     (σ := (op(=).operator ![#1, #0] 🡒 op(=).operator ![#0, #1] : Semisentence L 2))
-    ![t, s] (tprovable_quote_eqAxiom S Theory.eqAxiom.symm)
+    ![t, s] (tprovable_quote_eqAxiom S Theory.IsEqAxiom.symm)
   simpa using h₁
 
 lemma tprovable_equal_trans_imp [𝗘𝗤 L ⪯ S] (s t u : Semiterm V L 0) :
@@ -199,7 +199,7 @@ lemma tprovable_equal_trans_imp [𝗘𝗤 L ⪯ S] (s t u : Semiterm V L 0) :
   have h₁ := tprovable_subst_of_allClosure S
     (σ := (op(=).operator ![#2, #1] 🡒 op(=).operator ![#1, #0] 🡒 op(=).operator ![#2, #0] :
       Semisentence L 3))
-    ![u, t, s] (tprovable_quote_eqAxiom S Theory.eqAxiom.trans)
+    ![u, t, s] (tprovable_quote_eqAxiom S Theory.IsEqAxiom.trans)
   simp only [LCWQIsoGödelQuote.imply, quote_eqop, Semiformula.substs_imp,
     Semiformula.substs_equal] at h₁
   simpa using _root_.FFL.Entailment.CK_of_CC h₁
@@ -208,7 +208,7 @@ lemma tprovable_equal_func_imp [𝗘𝗤 L ⪯ S] (f : L.Func k) (s u : Semiterm
     S.internalize V ⊢ Matrix.conj (fun i ↦ Semiformula.equal (s i) (u i)) 🡒
       Semiformula.equal (Semiterm.func f s) (Semiterm.func f u) := by
   have h₁ := tprovable_subst_of_allClosure S (n := k + k) (w := Fin.append s u)
-    (tprovable_quote_eqAxiom S (Theory.eqAxiom.funcExt f))
+    (tprovable_quote_eqAxiom S (Theory.IsEqAxiom.funcExt f))
   simp only [LCWQIsoGödelQuote.imply, quote_conj, quote_eqop, Semiformula.substs_imp,
     Semiformula.substs_equal, Semiformula.substs_conj] at h₁
   simp only [Semiterm.empty_typed_quote_bvar, Semiterm.substs_bvar, Fin.append_addCast,
@@ -220,7 +220,7 @@ lemma tprovable_rel_congr_imp [𝗘𝗤 L ⪯ S] (R : L.Rel k) (s u : SemitermVe
     S.internalize V ⊢ Matrix.conj (fun i ↦ Semiformula.equal (s i) (u i)) 🡒
       (Semiformula.rel R s 🡒 Semiformula.rel R u) := by
   have h₁ := tprovable_subst_of_allClosure S (n := k + k) (w := Fin.append s u)
-    (tprovable_quote_eqAxiom S (Theory.eqAxiom.relExt R))
+    (tprovable_quote_eqAxiom S (Theory.IsEqAxiom.relExt R))
   simp only [LCWQIsoGödelQuote.imply, quote_conj, quote_eqop, quote_rel_sentence,
     Semiformula.substs_imp, Semiformula.substs_equal, Semiformula.substs_conj,
     Semiformula.substs_rel] at h₁

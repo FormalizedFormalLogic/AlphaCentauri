@@ -48,12 +48,12 @@ def weakPigeonholeAxiom {ξ} (φ : Semiformula L ξ 2) : Formula L ξ :=
 /-- The pigeonhole scheme for the class `Γ` of `ArithmeticSemiformula ℕ 2`.
 - [HP98, I.2.22] -/
 def PigeonholeScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : Set ArithmeticSentence :=
-  (fun φ ↦ .univCl (pigeonholeAxiom φ)) '' Γ
+  { ψ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ ψ = .univCl (pigeonholeAxiom φ) }
 
 /-- The weak pigeonhole scheme for the class `Γ` of `ArithmeticSemiformula ℕ 2`.
 - [PWW88, Theorem 1] -/
 def WeakPigeonholeScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : Set ArithmeticSentence :=
-  (fun φ ↦ .univCl (weakPigeonholeAxiom φ)) '' Γ
+  { ψ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ ψ = .univCl (weakPigeonholeAxiom φ) }
 
 /-- `𝗣𝗛𝗣 Γ s` is `𝗜𝚺₀` together with the pigeonhole scheme for `ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`.
 - [HP98, I.2.22] -/

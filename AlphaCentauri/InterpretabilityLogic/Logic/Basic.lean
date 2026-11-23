@@ -116,36 +116,80 @@ end Axioms
 
 /-! ### Extensions of $\mathbf{IL}$ -/
 
+/-- The derivability predicate of `Logic.ofILAxioms`. -/
+inductive Logic.OfILAxioms (𝔸 : FormulaSet α) : Formula α → Prop
+  | axm {A}          : A ∈ 𝔸 → OfILAxioms 𝔸 A
+  | mdp {A B}        : OfILAxioms 𝔸 (A 🡒 B) → OfILAxioms 𝔸 A → OfILAxioms 𝔸 B
+  | nec {A}          : OfILAxioms 𝔸 A → OfILAxioms 𝔸 (□A)
+  | verum            : OfILAxioms 𝔸 Axioms.Verum
+  | implyK {A B}     : OfILAxioms 𝔸 (Axioms.ImplyK A B)
+  | implyS {A B C}   : OfILAxioms 𝔸 (Axioms.ImplyS A B C)
+  | andElimL {A B}   : OfILAxioms 𝔸 (Axioms.AndElim₁ A B)
+  | andElimR {A B}   : OfILAxioms 𝔸 (Axioms.AndElim₂ A B)
+  | andIntro {A B}   : OfILAxioms 𝔸 (Axioms.AndInst A B)
+  | orIntroL {A B}   : OfILAxioms 𝔸 (Axioms.OrInst₁ A B)
+  | orIntroR {A B}   : OfILAxioms 𝔸 (Axioms.OrInst₂ A B)
+  | orElim {A B C}   : OfILAxioms 𝔸 (Axioms.OrElim A B C)
+  | dne {A}          : OfILAxioms 𝔸 (Axioms.DNE A)
+  | axiomK {A B}     : OfILAxioms 𝔸 (□(A 🡒 B) 🡒 □A 🡒 □B)
+  | axiomL {A}       : OfILAxioms 𝔸 (□(□A 🡒 A) 🡒 □A)
+  | axiomJ1 {A B}    : OfILAxioms 𝔸 (Axioms.J1 A B)
+  | axiomJ2 {A B C}  : OfILAxioms 𝔸 (Axioms.J2 A B C)
+  | axiomJ3 {A B C}  : OfILAxioms 𝔸 (Axioms.J3 A B C)
+  | axiomJ4 {A B}    : OfILAxioms 𝔸 (Axioms.J4 A B)
+  | axiomJ5 {A}      : OfILAxioms 𝔸 (Axioms.J5 A)
+
 /-- The smallest logic containing `𝔸` and the axioms of $\mathbf{IL}$, closed under modus ponens
 and necessitation.
 
 - [Vis90, §6.1]
 -/
-inductive Logic.ofILAxioms (𝔸 : FormulaSet α) : Logic α
-  | axm {A}          : A ∈ 𝔸 → ofILAxioms 𝔸 A
-  | mdp {A B}        : ofILAxioms 𝔸 (A 🡒 B) → ofILAxioms 𝔸 A → ofILAxioms 𝔸 B
-  | nec {A}          : ofILAxioms 𝔸 A → ofILAxioms 𝔸 (□A)
-  | verum            : ofILAxioms 𝔸 Axioms.Verum
-  | implyK {A B}     : ofILAxioms 𝔸 (Axioms.ImplyK A B)
-  | implyS {A B C}   : ofILAxioms 𝔸 (Axioms.ImplyS A B C)
-  | andElimL {A B}   : ofILAxioms 𝔸 (Axioms.AndElim₁ A B)
-  | andElimR {A B}   : ofILAxioms 𝔸 (Axioms.AndElim₂ A B)
-  | andIntro {A B}   : ofILAxioms 𝔸 (Axioms.AndInst A B)
-  | orIntroL {A B}   : ofILAxioms 𝔸 (Axioms.OrInst₁ A B)
-  | orIntroR {A B}   : ofILAxioms 𝔸 (Axioms.OrInst₂ A B)
-  | orElim {A B C}   : ofILAxioms 𝔸 (Axioms.OrElim A B C)
-  | dne {A}          : ofILAxioms 𝔸 (Axioms.DNE A)
-  | axiomK {A B}     : ofILAxioms 𝔸 (□(A 🡒 B) 🡒 □A 🡒 □B)
-  | axiomL {A}       : ofILAxioms 𝔸 (□(□A 🡒 A) 🡒 □A)
-  | axiomJ1 {A B}    : ofILAxioms 𝔸 (Axioms.J1 A B)
-  | axiomJ2 {A B C}  : ofILAxioms 𝔸 (Axioms.J2 A B C)
-  | axiomJ3 {A B C}  : ofILAxioms 𝔸 (Axioms.J3 A B C)
-  | axiomJ4 {A B}    : ofILAxioms 𝔸 (Axioms.J4 A B)
-  | axiomJ5 {A}      : ofILAxioms 𝔸 (Axioms.J5 A)
+def Logic.ofILAxioms (𝔸 : FormulaSet α) : Logic α := Set.ofPred (Logic.OfILAxioms 𝔸)
 
 namespace Logic.ofILAxioms
 
-variable {𝔸 𝔹 : FormulaSet α}
+variable {𝔸 𝔹 : FormulaSet α} {A B C : Formula α}
+
+lemma axm (h : A ∈ 𝔸) : ofILAxioms 𝔸 ⊢ A := OfILAxioms.axm h
+
+lemma mdp (h₁ : ofILAxioms 𝔸 ⊢ A 🡒 B) (h₂ : ofILAxioms 𝔸 ⊢ A) : ofILAxioms 𝔸 ⊢ B :=
+  OfILAxioms.mdp h₁ h₂
+
+lemma nec (h : ofILAxioms 𝔸 ⊢ A) : ofILAxioms 𝔸 ⊢ □A := OfILAxioms.nec h
+
+lemma verum : ofILAxioms 𝔸 ⊢ Axioms.Verum := OfILAxioms.verum
+
+lemma implyK : ofILAxioms 𝔸 ⊢ Axioms.ImplyK A B := OfILAxioms.implyK
+
+lemma implyS : ofILAxioms 𝔸 ⊢ Axioms.ImplyS A B C := OfILAxioms.implyS
+
+lemma andElimL : ofILAxioms 𝔸 ⊢ Axioms.AndElim₁ A B := OfILAxioms.andElimL
+
+lemma andElimR : ofILAxioms 𝔸 ⊢ Axioms.AndElim₂ A B := OfILAxioms.andElimR
+
+lemma andIntro : ofILAxioms 𝔸 ⊢ Axioms.AndInst A B := OfILAxioms.andIntro
+
+lemma orIntroL : ofILAxioms 𝔸 ⊢ Axioms.OrInst₁ A B := OfILAxioms.orIntroL
+
+lemma orIntroR : ofILAxioms 𝔸 ⊢ Axioms.OrInst₂ A B := OfILAxioms.orIntroR
+
+lemma orElim : ofILAxioms 𝔸 ⊢ Axioms.OrElim A B C := OfILAxioms.orElim
+
+lemma dne : ofILAxioms 𝔸 ⊢ Axioms.DNE A := OfILAxioms.dne
+
+lemma axiomK : ofILAxioms 𝔸 ⊢ □(A 🡒 B) 🡒 □A 🡒 □B := OfILAxioms.axiomK
+
+lemma axiomL : ofILAxioms 𝔸 ⊢ □(□A 🡒 A) 🡒 □A := OfILAxioms.axiomL
+
+lemma axiomJ1 : ofILAxioms 𝔸 ⊢ Axioms.J1 A B := OfILAxioms.axiomJ1
+
+lemma axiomJ2 : ofILAxioms 𝔸 ⊢ Axioms.J2 A B C := OfILAxioms.axiomJ2
+
+lemma axiomJ3 : ofILAxioms 𝔸 ⊢ Axioms.J3 A B C := OfILAxioms.axiomJ3
+
+lemma axiomJ4 : ofILAxioms 𝔸 ⊢ Axioms.J4 A B := OfILAxioms.axiomJ4
+
+lemma axiomJ5 : ofILAxioms 𝔸 ⊢ Axioms.J5 A := OfILAxioms.axiomJ5
 
 instance : ModusPonens (ofILAxioms 𝔸) := ⟨mdp⟩
 instance : HasAxiomImplyK (ofILAxioms 𝔸) := ⟨implyK⟩
@@ -165,8 +209,6 @@ instance : Entailment.Cl (ofILAxioms 𝔸) where
 
 instance : (ofILAxioms 𝔸).ExtendsGL := ⟨nec, axiomK, axiomL⟩
 
-variable {A B C : Formula α}
-
 lemma rhd_mono_right (h : ofILAxioms 𝔸 ⊢ A 🡒 B) : ofILAxioms 𝔸 ⊢ C ▷ A 🡒 C ▷ B := by
   have h₁ : ofILAxioms 𝔸 ⊢ A ▷ B := axiomJ1 ⨀ nec h;
   have h₂ : ofILAxioms 𝔸 ⊢ C ▷ A ⋏ A ▷ B 🡒 C ▷ B := axiomJ2;
@@ -180,7 +222,7 @@ lemma rhd_anti_left (h : ofILAxioms 𝔸 ⊢ A 🡒 B) : ofILAxioms 𝔸 ⊢ B �
 /-- `ofILAxioms 𝔸` is contained in every extension of $\mathbf{IL}$ that proves `𝔸`. -/
 lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofILAxioms 𝔹 ⊢ A) : ofILAxioms 𝔸 ⊆ ofILAxioms 𝔹 := by
   intro A hA;
-  induction hA with
+  induction (hA : OfILAxioms 𝔸 A) with
   | axm hA => exact h _ hA;
   | mdp _ _ ihAB ihA => exact mdp ihAB ihA;
   | nec _ ih => exact nec ih;
@@ -363,36 +405,78 @@ end Axioms
 
 /-! ### Extensions of $\mathbf{CL}$ -/
 
+/-- The derivability predicate of `Logic.ofCLAxioms`. -/
+inductive Logic.OfCLAxioms (𝔸 : FormulaSet α) : Formula α → Prop
+  | axm {A}          : A ∈ 𝔸 → OfCLAxioms 𝔸 A
+  | mdp {A B}        : OfCLAxioms 𝔸 (A 🡒 B) → OfCLAxioms 𝔸 A → OfCLAxioms 𝔸 B
+  | nec {A}          : OfCLAxioms 𝔸 A → OfCLAxioms 𝔸 (□A)
+  | verum            : OfCLAxioms 𝔸 Axioms.Verum
+  | implyK {A B}     : OfCLAxioms 𝔸 (Axioms.ImplyK A B)
+  | implyS {A B C}   : OfCLAxioms 𝔸 (Axioms.ImplyS A B C)
+  | andElimL {A B}   : OfCLAxioms 𝔸 (Axioms.AndElim₁ A B)
+  | andElimR {A B}   : OfCLAxioms 𝔸 (Axioms.AndElim₂ A B)
+  | andIntro {A B}   : OfCLAxioms 𝔸 (Axioms.AndInst A B)
+  | orIntroL {A B}   : OfCLAxioms 𝔸 (Axioms.OrInst₁ A B)
+  | orIntroR {A B}   : OfCLAxioms 𝔸 (Axioms.OrInst₂ A B)
+  | orElim {A B C}   : OfCLAxioms 𝔸 (Axioms.OrElim A B C)
+  | dne {A}          : OfCLAxioms 𝔸 (Axioms.DNE A)
+  | axiomK {A B}     : OfCLAxioms 𝔸 (□(A 🡒 B) 🡒 □A 🡒 □B)
+  | axiomL {A}       : OfCLAxioms 𝔸 (□(□A 🡒 A) 🡒 □A)
+  | axiomJ1 {A B}    : OfCLAxioms 𝔸 (Axioms.J1 A B)
+  | axiomJ2 {A B C}  : OfCLAxioms 𝔸 (Axioms.J2 A B C)
+  | axiomJ3 {A B C}  : OfCLAxioms 𝔸 (Axioms.J3 A B C)
+  | axiomJ4 {A B}    : OfCLAxioms 𝔸 (Axioms.J4 A B)
+
 /-- The smallest logic containing `𝔸` and the axioms of $\mathbf{CL}$, closed under modus ponens
 and necessitation.
 
 - [Ign91, Definition 2.2]
 - [KO21, §3.5]
 -/
-inductive Logic.ofCLAxioms (𝔸 : FormulaSet α) : Logic α
-  | axm {A}          : A ∈ 𝔸 → ofCLAxioms 𝔸 A
-  | mdp {A B}        : ofCLAxioms 𝔸 (A 🡒 B) → ofCLAxioms 𝔸 A → ofCLAxioms 𝔸 B
-  | nec {A}          : ofCLAxioms 𝔸 A → ofCLAxioms 𝔸 (□A)
-  | verum            : ofCLAxioms 𝔸 Axioms.Verum
-  | implyK {A B}     : ofCLAxioms 𝔸 (Axioms.ImplyK A B)
-  | implyS {A B C}   : ofCLAxioms 𝔸 (Axioms.ImplyS A B C)
-  | andElimL {A B}   : ofCLAxioms 𝔸 (Axioms.AndElim₁ A B)
-  | andElimR {A B}   : ofCLAxioms 𝔸 (Axioms.AndElim₂ A B)
-  | andIntro {A B}   : ofCLAxioms 𝔸 (Axioms.AndInst A B)
-  | orIntroL {A B}   : ofCLAxioms 𝔸 (Axioms.OrInst₁ A B)
-  | orIntroR {A B}   : ofCLAxioms 𝔸 (Axioms.OrInst₂ A B)
-  | orElim {A B C}   : ofCLAxioms 𝔸 (Axioms.OrElim A B C)
-  | dne {A}          : ofCLAxioms 𝔸 (Axioms.DNE A)
-  | axiomK {A B}     : ofCLAxioms 𝔸 (□(A 🡒 B) 🡒 □A 🡒 □B)
-  | axiomL {A}       : ofCLAxioms 𝔸 (□(□A 🡒 A) 🡒 □A)
-  | axiomJ1 {A B}    : ofCLAxioms 𝔸 (Axioms.J1 A B)
-  | axiomJ2 {A B C}  : ofCLAxioms 𝔸 (Axioms.J2 A B C)
-  | axiomJ3 {A B C}  : ofCLAxioms 𝔸 (Axioms.J3 A B C)
-  | axiomJ4 {A B}    : ofCLAxioms 𝔸 (Axioms.J4 A B)
+def Logic.ofCLAxioms (𝔸 : FormulaSet α) : Logic α := Set.ofPred (Logic.OfCLAxioms 𝔸)
 
 namespace Logic.ofCLAxioms
 
-variable {𝔸 𝔹 : FormulaSet α}
+variable {𝔸 𝔹 : FormulaSet α} {A B C : Formula α}
+
+lemma axm (h : A ∈ 𝔸) : ofCLAxioms 𝔸 ⊢ A := OfCLAxioms.axm h
+
+lemma mdp (h₁ : ofCLAxioms 𝔸 ⊢ A 🡒 B) (h₂ : ofCLAxioms 𝔸 ⊢ A) : ofCLAxioms 𝔸 ⊢ B :=
+  OfCLAxioms.mdp h₁ h₂
+
+lemma nec (h : ofCLAxioms 𝔸 ⊢ A) : ofCLAxioms 𝔸 ⊢ □A := OfCLAxioms.nec h
+
+lemma verum : ofCLAxioms 𝔸 ⊢ Axioms.Verum := OfCLAxioms.verum
+
+lemma implyK : ofCLAxioms 𝔸 ⊢ Axioms.ImplyK A B := OfCLAxioms.implyK
+
+lemma implyS : ofCLAxioms 𝔸 ⊢ Axioms.ImplyS A B C := OfCLAxioms.implyS
+
+lemma andElimL : ofCLAxioms 𝔸 ⊢ Axioms.AndElim₁ A B := OfCLAxioms.andElimL
+
+lemma andElimR : ofCLAxioms 𝔸 ⊢ Axioms.AndElim₂ A B := OfCLAxioms.andElimR
+
+lemma andIntro : ofCLAxioms 𝔸 ⊢ Axioms.AndInst A B := OfCLAxioms.andIntro
+
+lemma orIntroL : ofCLAxioms 𝔸 ⊢ Axioms.OrInst₁ A B := OfCLAxioms.orIntroL
+
+lemma orIntroR : ofCLAxioms 𝔸 ⊢ Axioms.OrInst₂ A B := OfCLAxioms.orIntroR
+
+lemma orElim : ofCLAxioms 𝔸 ⊢ Axioms.OrElim A B C := OfCLAxioms.orElim
+
+lemma dne : ofCLAxioms 𝔸 ⊢ Axioms.DNE A := OfCLAxioms.dne
+
+lemma axiomK : ofCLAxioms 𝔸 ⊢ □(A 🡒 B) 🡒 □A 🡒 □B := OfCLAxioms.axiomK
+
+lemma axiomL : ofCLAxioms 𝔸 ⊢ □(□A 🡒 A) 🡒 □A := OfCLAxioms.axiomL
+
+lemma axiomJ1 : ofCLAxioms 𝔸 ⊢ Axioms.J1 A B := OfCLAxioms.axiomJ1
+
+lemma axiomJ2 : ofCLAxioms 𝔸 ⊢ Axioms.J2 A B C := OfCLAxioms.axiomJ2
+
+lemma axiomJ3 : ofCLAxioms 𝔸 ⊢ Axioms.J3 A B C := OfCLAxioms.axiomJ3
+
+lemma axiomJ4 : ofCLAxioms 𝔸 ⊢ Axioms.J4 A B := OfCLAxioms.axiomJ4
 
 instance : ModusPonens (ofCLAxioms 𝔸) := ⟨mdp⟩
 instance : HasAxiomImplyK (ofCLAxioms 𝔸) := ⟨implyK⟩
@@ -416,7 +500,7 @@ instance : (ofCLAxioms 𝔸).ExtendsGL := ⟨nec, axiomK, axiomL⟩
 lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofCLAxioms 𝔹 ⊢ A) :
     ofCLAxioms 𝔸 ⊆ ofCLAxioms 𝔹 := by
   intro A hA;
-  induction hA with
+  induction (hA : OfCLAxioms 𝔸 A) with
   | axm hA => exact h _ hA;
   | mdp _ _ ihAB ihA => exact mdp ihAB ihA;
   | nec _ ih => exact nec ih;
@@ -439,8 +523,6 @@ lemma subset_of_provable (h : ∀ A ∈ 𝔸, ofCLAxioms 𝔹 ⊢ A) :
 
 lemma subset_of_subset (h : 𝔸 ⊆ 𝔹) : ofCLAxioms 𝔸 ⊆ ofCLAxioms 𝔹 :=
   subset_of_provable fun _ hA ↦ axm (h hA)
-
-variable {A B C : Formula α}
 
 /-- - [KO21, Proposition 3.20.2] -/
 lemma rhd_mono_right (h : ofCLAxioms 𝔸 ⊢ A 🡒 B) : ofCLAxioms 𝔸 ⊢ C ▷ A 🡒 C ▷ B := by

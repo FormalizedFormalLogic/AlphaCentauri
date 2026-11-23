@@ -818,7 +818,7 @@ lemma assuring_cr {n u : ℕ} (hu : u ∈ (𝒩 n).pre) :
     · rw [(fields_problem hk).2.2.2.1]
       simpa using assuring_anchor_problem hk
     · rw [(fields_deficiency hk).2.2.2.1]
-      simpa using (assuring_anchor_deficiency hk).mono fun _ h ↦ .inl (.inl (.inl h))
+      simpa using (assuring_anchor_deficiency hk).mono fun _ h ↦ Or.inl (Or.inl (Or.inl h))
   · rw [cr_of_anchor_ne hau];
     by_cases hne : (above 𝒩 (𝒩 n).pre u).Nonempty;
     · obtain ⟨t₀, h₀⟩ := hne;

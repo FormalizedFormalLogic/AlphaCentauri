@@ -159,7 +159,9 @@ abbrev countermodelJ5 (α : Type*) : Model (Fin 3) α :=
 
 instance {α : Type*} : (countermodelJ5 α).IsCL where
   trans := by omega
-  cwf := Finite.converseWellFounded_of_trans_of_irrefl
+  cwf := by
+    have : Std.Irrefl (countermodelJ5 α).Rel := ⟨fun _ ↦ lt_irrefl _⟩
+    exact Finite.converseWellFounded_of_trans_of_irrefl
   rel_of_s_left := by tauto
   s_refl := by tauto
   rel_of_s_right := by omega

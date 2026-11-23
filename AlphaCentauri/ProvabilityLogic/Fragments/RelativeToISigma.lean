@@ -52,7 +52,7 @@ theorem provabilityLogic_ISigma_ISigma_eq_D (hm : 1 ≤ m) (hmn : m < n) :
   apply Logic.weakerThan_antisymm;
   · -- (ii) a provability logic strictly above `𝐃` would give a consistent extension of `𝗜𝚺 m` by
     -- a single sentence that proves its full local reflection schema, contradiction.
-    by_contra! h;
+    by_contra h;
     obtain ⟨-, A, hAD, hA⟩ := strictlyWeakerThan_iff.mp (
       ⟨D_weakerThan_provabilityLogic_ISigma_ISigma hm hmn, ‹_›⟩ : 𝐃 ⪱ L
     );

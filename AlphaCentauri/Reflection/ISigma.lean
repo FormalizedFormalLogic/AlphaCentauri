@@ -74,7 +74,7 @@ theorem ISigma.provable_localReflectionOn_Sigma1_of_lt (hm : 1 ≤ m) (hmn : m <
 
 /-- For every $n$, $\mathsf{PA}$ proves the local reflection principle of $\mathsf{I}\Sigma_n$.
 - [HP98, Corollary I.4.34(3)] -/
-theorem Peano.provable_localReflection_ISigma (n : ℕ) : 𝗣𝗔 ⊢* 𝗥𝗳𝗻[Set.univ] (𝗜𝚺 n) := by
+theorem Peano.provable_localReflection_ISigma (n : ℕ) : 𝗣𝗔 ⊢* 𝗥𝗳𝗻[fun _ ↦ True] (𝗜𝚺 n) := by
   rintro _ ⟨σ, -, rfl⟩
   obtain ⟨s, hs⟩ := ℬ[<, ℒₒᵣ].exists_prenexHierarchy_eval_iff σ
   obtain ⟨σ', hσ', H⟩ := hs 𝚷 (s + n + 1 + 3) (by omega)

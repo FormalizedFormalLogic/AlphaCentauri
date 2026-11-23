@@ -123,13 +123,13 @@ theorem not_provable_fermatLastTheorem_IOpen {n : ℕ} (hn : 3 ≤ n) :
     ring
 
 private lemma irreducible_X_pow_seven_sub_C : Irreducible (X ^ 7 - C (5 ^ 7 - 1 : ℚ)) := by
-  apply X_pow_sub_C_irreducible_of_prime (by decide : Nat.Prime 7)
+  apply irreducible_X_pow_sub_C_of_prime (by decide : Nat.Prime 7)
   intro b hb
   have hden : b.den = 1 := by
     have := Rat.den_pow b 7
     rw [hb] at this
     simpa using this.symm
-  rw [← Rat.coe_int_num_of_den_eq_one hden] at hb
+  rw [← Rat.intCast_num_of_den_eq_one hden] at hb
   have hn : b.num ^ 7 = 5 ^ 7 - 1 := by exact_mod_cast hb
   have h₁ : b.num < 5 := by
     by_contra h
@@ -141,7 +141,9 @@ private lemma irreducible_X_pow_seven_sub_C : Irreducible (X ^ 7 - C (5 ^ 7 - 1 
     omega
   omega
 
-private lemma exists_padicInt_pow_seven_eq [Fact (Nat.Prime 7)] :
+local instance : Fact (Nat.Prime 7) := ⟨by decide⟩
+
+private lemma exists_padicInt_pow_seven_eq :
     ∃ y : ℤ_[7], y ^ 7 = 5 ^ 7 - 1 ∧ (7 : ℤ_[7]) ∣ y - 4 := by
   have h₇ : ‖(7 : ℤ_[7])‖ = 7⁻¹ := by exact_mod_cast PadicInt.norm_p (p := 7)
   have hu (k : ℤ) (hk : ¬(7 : ℤ) ∣ k) : ‖(k : ℤ_[7])‖ = 1 :=
@@ -173,7 +175,6 @@ $\mathsf{IOpen}$ has $x^7 + y^7 = z^7$ with $x y z \equiv 6 \pmod 7$.
 - [Wil78, Lemma 3.2] -/
 theorem not_provable_fermatLastTheoremCaseOne_seven_IOpen :
     𝗜𝗢𝗽𝗲𝗻 ⊬ Arithmetic.fermatLastTheoremCaseOne 7 := by
-  have : Fact (Nat.Prime 7) := ⟨by decide⟩
   obtain ⟨y₀, hy₀, t, ht⟩ := exists_padicInt_pow_seven_eq
   have hy₀' : (y₀ : ℚ_[7]) ^ 7 = 5 ^ 7 - 1 := by
     have := congrArg ((↑) : ℤ_[7] → ℚ_[7]) hy₀

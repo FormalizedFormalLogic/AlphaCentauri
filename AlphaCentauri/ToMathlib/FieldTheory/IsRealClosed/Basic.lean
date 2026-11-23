@@ -37,7 +37,7 @@ lemma finrank_eq_one_of_odd {F : Type*} [Field F] [Algebra R F] [FiniteDimension
 lemma exists_finrank_eq_two_pow {L : Type*} [Field L] [Algebra R L] [FiniteDimensional R L]
     [IsGalois R L] : ∃ k, finrank R L = 2 ^ k := by
   obtain ⟨P⟩ : Nonempty (Sylow 2 Gal(L/R)) := inferInstance
-  obtain ⟨k, hk⟩ := IsPGroup.iff_card.mp P.isPGroup'
+  obtain ⟨k, hk⟩ := IsPGroup.iff_card.mp P.isPGroup
   use k
   have h₁ := Module.finrank_mul_finrank R (IntermediateField.fixedField P.toSubgroup) L
   rw [IntermediateField.finrank_fixedField_eq_card, hk] at h₁

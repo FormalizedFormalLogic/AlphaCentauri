@@ -47,7 +47,7 @@ variable {T : ArithmeticTheory}
 - [HP98, Corollary III.2.24] -/
 theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T] (h : T.Reflexive) :
     ¬FiniteAxiomatizable T := by
-  by_contra! hfa
+  by_contra hfa
   obtain ⟨F, hFT, hfin, hequiv⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp hfa
   let : F.Δ₁ := Theory.Δ₁.ofFinite F hfin
   have : 𝗜𝚺₁ ⪯ F := WeakerThan.trans inferInstance hequiv.le

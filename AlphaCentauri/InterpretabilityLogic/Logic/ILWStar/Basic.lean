@@ -48,7 +48,7 @@ variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 lemma ILWStar.axiomWstar : 𝐈𝐋𝐖* ⊢ Axioms.Wstar A B C := axm ⟨A, B, C, rfl⟩
 
 lemma ILWStar.axiomW : 𝐈𝐋𝐖* ⊢ Axioms.W A B := by
-  have h₁ : (𝐈𝐋𝐖* : Logic α) ⊢ □⊤ := nec verum;
+  have h₁ : (𝐈𝐋𝐖* : Logic α) ⊢ □⊤ := nec ofILAxioms.verum;
   have h₂ : 𝐈𝐋𝐖* ⊢ A ▷ B 🡒 A ▷ (B ⋏ □⊤) := rhd_mono_right (by cl_prover [h₁]);
   have h₃ : 𝐈𝐋𝐖* ⊢ (B ⋏ □⊤) ▷ (B ⋏ □⊤ ⋏ □(∼A)) 🡒 (B ⋏ □⊤) ▷ (B ⋏ □(∼A)) :=
     rhd_mono_right (by cl_prover);

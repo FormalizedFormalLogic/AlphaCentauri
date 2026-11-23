@@ -52,8 +52,8 @@ theorem derivable_succInd (hξ : C ξ) : ⊢ᴸᴷᴵ[C] ⦃succInd ξ⦄ := by
     apply Derivable.all
     have h := Derivable.ind (ξ := shift ξ) (RewriteClosed.shift hξ) &0
       (Γ := ⦃shift (∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’])))⦄)
-      ((step (shift (shift ξ))).cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; try abel))
-    exact h.cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; try abel)
+      ((step (shift (shift ξ))).cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; abel))
+    exact h.cast (by simp [Rewriting.shifts, Rew.shift_subst_eq]; abel)
   rw [show (succInd ξ : ArithmeticProposition)
       = ∼(ξ/[‘0’]) ⋎ ((∃¹ (ξ ⋏ ∼(ξ/[‘(#0 + 1)’]))) ⋎ (∀¹ ξ))
       from by simp [succInd, Semiformula.imp_eq]]

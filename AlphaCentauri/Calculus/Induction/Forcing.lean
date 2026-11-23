@@ -235,8 +235,7 @@ def sound {Γ : LJ.Sequent ℒₒᵣ} {Ξ : LJ.Head ℒₒᵣ}
   decreasing_by
     all_goals simp [LJ.Derivation.height]
     all_goals try omega
-    all_goals
-      exact Nat.lt_succ_iff.mpr <| Nat.le_of_eq <|
+    exact Nat.lt_succ_iff.mpr <| Nat.le_of_eq <|
         (LJ.Derivation.height_cast _ _ _).trans (LJ.Derivation.height_rewrite (t :>ₙ fun x ↦ &x) d)
 
 /-! ## The reflexive forcing of a formula by itself -/

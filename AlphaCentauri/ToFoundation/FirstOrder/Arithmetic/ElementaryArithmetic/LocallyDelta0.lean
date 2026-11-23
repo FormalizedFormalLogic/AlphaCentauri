@@ -23,6 +23,8 @@ namespace ElementaryArithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
+attribute [-simp] Semantics.ModelsSet.setOf_iff Semantics.ModelsSet.union_iff
+
 open Bounding
 
 variable {V : Type*} [ORingStructure V] {k l : ℕ} {f f' f'' g : (Fin k → V) → V}

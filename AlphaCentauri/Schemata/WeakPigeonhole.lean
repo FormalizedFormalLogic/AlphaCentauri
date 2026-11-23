@@ -25,6 +25,8 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 open _root_.FFL.Entailment
 
+attribute [-simp] Semantics.ModelsSet.setOf_iff Semantics.ModelsSet.union_iff
+
 noncomputable section WeakPigeonhole
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

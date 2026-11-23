@@ -144,7 +144,7 @@ ways of writing a theory that stand for another one, such as a finite axiomatiza
 axiom of `𝗣𝗔⁻`. Relations through them still count.
 -/
 def omittedHeads : Array Name :=
-  #[`FFL.FirstOrder.Theory.eqAxiom,
+  #[`FFL.FirstOrder.Theory.Eq,
     `FFL.FirstOrder.Arithmetic.ISigma.finiteAxiomatization,
     ``Singleton.singleton,
     ``Insert.insert]

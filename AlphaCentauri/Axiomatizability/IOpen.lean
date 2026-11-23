@@ -64,7 +64,7 @@ theorem IOpen.not_finiteAxiomatizable : ¬FiniteAxiomatizable 𝗜𝗢𝗽𝗲�
   intro F hsub hfin
   constructor
   · exact Theory.Proof.weakerThan_of_le hsub
-  · by_contra! hle;
+  · by_contra hle;
     let deg (σ : ArithmeticSentence) : ℕ :=
       if h : ∃ φ : ArithmeticSemiformula ℕ 1, φ.Open ∧ σ = .univCl (succInd φ) then h.choose.degree
       else 0

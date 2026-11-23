@@ -157,10 +157,25 @@ def enumCode (a B : V) (G : V → V → Prop) (i z t : V) : Prop :=
   (∀ j < i, ∀ y ≤ t, ∀ y' ≤ t, G (entry a z j) y → G (entry a z (j + 1)) y' →
     y < y' ∧ ∀ x < a, ∀ w ≤ t, G x w → y < w → y' ≤ w)
 
-lemma definable_enumCode {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G) (a B : V) :
-    𝚺ᴬ₀.DefinableRel₃ (enumCode a B G) := by
-  unfold enumCode entry
+private lemma definable_enumCode_entries {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G) (a B : V) :
+    𝚺ᴬ₀.DefinableRel₃ fun i z t : V ↦ i ≤ a ∧ z < B ∧
+      (∀ j ≤ a, i < j → entry a z j = 0) ∧
+      (∀ j ≤ i, entry a z j < a ∧ ∃ y ≤ t, G (entry a z j) y) ∧
+      (∀ x < a, ∀ y ≤ t, G x y → ∀ y₀ ≤ t, G (entry a z 0) y₀ → y₀ ≤ y) := by
+  unfold entry
   definability
+
+private lemma definable_enumCode_step {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G) (a : V) :
+    𝚺ᴬ₀.DefinableRel₃ fun i z t : V ↦
+      ∀ j < i, ∀ y ≤ t, ∀ y' ≤ t, G (entry a z j) y → G (entry a z (j + 1)) y' →
+        y < y' ∧ ∀ x < a, ∀ w ≤ t, G x w → y < w → y' ≤ w := by
+  unfold entry
+  definability
+
+lemma definable_enumCode {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G) (a B : V) :
+    𝚺ᴬ₀.DefinableRel₃ (enumCode a B G) :=
+  ((definable_enumCode_entries hG a B).and (definable_enumCode_step hG a)).of_iff fun v ↦ by
+    simp only [enumCode, and_assoc]
 
 lemma entry_zero_left (a j : V) : entry a 0 j = 0 := by
   simp [entry]

@@ -29,6 +29,8 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
 
+attribute [-simp] Semantics.ModelsSet.setOf_iff Semantics.ModelsSet.union_iff
+
 noncomputable section
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]

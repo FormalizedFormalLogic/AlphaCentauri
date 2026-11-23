@@ -34,41 +34,45 @@ lemma leadingCoeff_add_nonneg {p q : K[X]} (hp : 0 ≤ p.leadingCoeff)
   · rwa [leadingCoeff_add_of_degree_lt' h]
 
 /-- The polynomials in `S` with non-negative leading coefficient. -/
-def leadingCoeffCone (S : Subring K[X]) : RingCone S where
+def leadingCoeffCone (S : Subring K[X]) : Subsemiring S where
   carrier := {p | 0 ≤ (p : K[X]).leadingCoeff}
   zero_mem' := by simp
   one_mem' := by simp
   add_mem' := leadingCoeff_add_nonneg
   mul_mem' hp hq := by simpa [leadingCoeff_mul] using mul_nonneg hp hq
-  eq_zero_of_mem_of_neg_mem' {p} hp hnp := by
-    have : (p : K[X]).leadingCoeff = 0 := le_antisymm (by simpa using hnp) hp
-    exact Subtype.ext (leadingCoeff_eq_zero.mp this)
 
-instance (S : Subring K[X]) : HasMemOrNegMem (leadingCoeffCone S) where
-  mem_or_neg_mem p := by
-    rcases le_total 0 (p : K[X]).leadingCoeff with h | h
-    · exact Or.inl h
-    · exact Or.inr (by simpa [leadingCoeffCone] using h)
+lemma leadingCoeffCone_isPointed (S : Subring K[X]) : (leadingCoeffCone S).IsPointed := by
+  intro p hp hnp
+  have : (p : K[X]).leadingCoeff = 0 := le_antisymm (by simpa [leadingCoeffCone] using hnp) hp
+  exact Subtype.ext (leadingCoeff_eq_zero.mp this)
+
+lemma leadingCoeffCone_isSpanning (S : Subring K[X]) : (leadingCoeffCone S).IsSpanning := by
+  intro p
+  rcases le_total 0 (p : K[X]).leadingCoeff with h | h
+  · exact Or.inl h
+  · exact Or.inr (by simpa [leadingCoeffCone] using h)
 
 namespace LeadingCoeffOrder
 
 variable {S : Subring K[X]}
 
 open Classical in
-scoped instance : LinearOrder S := LinearOrder.mkOfAddGroupCone (leadingCoeffCone S)
+scoped instance : LinearOrder S :=
+  LinearOrder.ofAddSubmonoid (leadingCoeffCone_isPointed S) (leadingCoeffCone_isSpanning S)
 
 scoped instance : IsStrictOrderedRing S :=
-  haveI : IsOrderedRing S := IsOrderedRing.mkOfCone (leadingCoeffCone S)
+  haveI : IsOrderedRing S := IsOrderedRing.ofSubsemiring (leadingCoeffCone_isPointed S)
   inferInstance
 
 variable {p q : S}
 
 lemma le_iff : p ≤ q ↔ 0 ≤ ((q - p : S) : K[X]).leadingCoeff := Iff.rfl
 
-lemma nonneg_iff : 0 ≤ p ↔ 0 ≤ (p : K[X]).leadingCoeff := by simp [le_iff]
+lemma nonneg_iff : 0 ≤ p ↔ 0 ≤ (p : K[X]).leadingCoeff := by rw [le_iff, sub_zero]
 
 lemma pos_iff : 0 < p ↔ 0 < (p : K[X]).leadingCoeff := by
-  simp [lt_iff_le_and_ne, nonneg_iff, eq_comm (a := (0 : K)), eq_comm (a := (0 : S))]
+  rw [lt_iff_le_and_ne, nonneg_iff]
+  simp [lt_iff_le_and_ne, eq_comm (a := (0 : K)), eq_comm (a := (0 : S))]
 
 /-- `S` is discretely ordered when each of its constant polynomials is an integer. -/
 lemma discretelyOrdered (h : ∀ p ∈ S, p.natDegree = 0 → ∃ n : ℤ, p = n) : DiscretelyOrdered S where

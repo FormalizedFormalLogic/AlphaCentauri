@@ -253,7 +253,8 @@ lemma case_mp : c.Fixpoint v x → c.Φ v {z | c.Fixpoint v z} x := by
 lemma case_mpr_of_stage (hΦ : c.Φ v {z | c.Fixpoint v z ∧ z < m} x)
     (hS : ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v S) : c.Fixpoint v x := by
   have : c.Φ v {z | z ∈ c.limSeq v S} x :=
-    c.monotone (C' := {z | z ∈ c.limSeq v S}) (fun z hz ↦ hS z hz.2 hz.1) hΦ
+    c.monotone (C := {z | c.Fixpoint v z ∧ z < m}) (C' := {z | z ∈ c.limSeq v S})
+      (fun z hz ↦ hS z hz.2 hz.1) hΦ
   use max S x + 1
   exact c.mem_limSeq_succ_iff.mpr
     ⟨by simp, c.monotone (C' := {z | z ∈ c.limSeq v (max S x)})

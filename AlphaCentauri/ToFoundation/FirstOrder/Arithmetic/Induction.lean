@@ -1,7 +1,6 @@
 module
 
 public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
-public import Foundation.FirstOrder.Arithmetic.Schemata
 public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 
 /-!

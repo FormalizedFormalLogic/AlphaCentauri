@@ -1,9 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.Basic.Hierarchy
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
-public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
-public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
 
 /-!
 # Bounded formulas and the hierarchy of formulas
@@ -113,14 +110,12 @@ lemma univCl_iff {φ : Proposition L} :
     ℬ[<, L].Hierarchy 𝚷 (s + 1) (Semiformula.univCl φ) ↔ ℬ[<, L].Hierarchy 𝚷 (s + 1) φ := by
   simp [Semiformula.univCl, Semiformula.univCl']
 
-/-- Every axiom of `𝗘𝗤 ℒₒᵣ` is $\Pi_2$. -/
 lemma of_mem_eqAxiom {σ : ArithmeticSentence} (hσ : σ ∈ 𝗘𝗤 ℒₒᵣ) : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ := by
   cases hσ with
   | funcExt f => simp [Theory.Eq.funcExt]
   | relExt r => simp [Theory.Eq.relExt]
   | _ => simp
 
-/-- Every axiom of `𝗣𝗔⁻` is $\Pi_2$. -/
 lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ := by
   cases hσ with
   | equal φ hφ => exact of_mem_eqAxiom hφ
@@ -135,7 +130,6 @@ namespace Bounding
 
 variable {φ : Semiformula L ξ (n + 1)}
 
-/-- The body of a bounded existential is bounded. -/
 @[grind →]
 lemma Closure.of_exs (h : ℬ[<, L].Closure (∃¹ φ)) : ℬ[<, L].Closure φ := by
   cases h with
@@ -143,7 +137,6 @@ lemma Closure.of_exs (h : ℬ[<, L].Closure (∃¹ φ)) : ℬ[<, L].Closure φ :
     obtain rfl := Set.mem_singleton_iff.mp hR
     exact .and (.rel _ _) hφ
 
-/-- The body of a bounded universal is bounded. -/
 @[grind →]
 lemma Closure.of_all (h : ℬ[<, L].Closure (∀¹ φ)) : ℬ[<, L].Closure φ := by
   cases h with
@@ -151,7 +144,6 @@ lemma Closure.of_all (h : ℬ[<, L].Closure (∀¹ φ)) : ℬ[<, L].Closure φ :
     obtain rfl := Set.mem_singleton_iff.mp hR
     exact Closure.imp_iff.mpr ⟨.rel _ _, hφ⟩
 
-/-- A bounded universal quantifies below a term. -/
 @[grind →]
 lemma Closure.exists_of_all (h : ℬ[<, L].Closure (∀¹ φ)) :
     ∃ (t : Semiterm L ξ n) (ψ : Semiformula L ξ (n + 1)),
@@ -222,7 +214,6 @@ lemma allClosure : ∀ {n} {φ : Semiformula L ξ n},
   | 0, _, h => h
   | _ + 1, _, h => by rw [allClosure_succ]; exact allClosure h.all
 
-/-- The body of a block of existential quantifiers is a block of existential quantifiers. -/
 @[grind →]
 lemma of_exs {φ : Semiformula L ξ (n + 1)} (h : ℬ[<, L].PrenexBlock 𝚺 (∃¹ φ)) :
     ℬ[<, L].PrenexBlock 𝚺 φ := by
@@ -267,7 +258,6 @@ namespace Arithmetic.PeanoMinus
 
 open Bounding
 
-/-- Every axiom of `𝗣𝗔⁻` is a block of universal quantifiers over a bounded formula. -/
 theorem prenexBlock : ∀ φ ∈ 𝗣𝗔⁻, ℬ[<, ℒₒᵣ].PrenexBlock 𝚷 φ := by
   rintro φ ⟨⟩
   case equal h =>
@@ -404,9 +394,7 @@ namespace Bounding
 
 universe u
 
-omit [L.LT]
-
-variable {ℬ : Bounding L}
+variable {L : Language} {ℬ : Bounding L} {ξ : Type*} {n : ℕ} {φ ψ : Semiformula L ξ n}
 
 variable (ℬ) in
 /-- `φ` is equivalent, in every nonempty structure, to a `ℬ`-prenex formula of either polarity and

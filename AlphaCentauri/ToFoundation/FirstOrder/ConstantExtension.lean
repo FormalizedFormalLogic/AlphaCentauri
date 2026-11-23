@@ -1,7 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Tarski.Eq
-public import Foundation.FirstOrder.Tarski.Model
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 /-!

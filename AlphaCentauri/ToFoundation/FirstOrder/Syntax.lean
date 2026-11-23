@@ -1,7 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Syntax.Classical.Rew
-public import Foundation.FirstOrder.Tarski.Basic
 public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
 
 /-!

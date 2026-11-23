@@ -1,7 +1,5 @@
 module
 
-public import Foundation.Logic.Entailment
-public import Foundation.Propositional.Entailment.Cl
 public import Foundation.Meta.ClProver
 
 /-!

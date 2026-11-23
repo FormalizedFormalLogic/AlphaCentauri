@@ -1,13 +1,7 @@
 module
 
 public import Mathlib.Data.Nat.Prime.Defs
-public import Foundation.FirstOrder.Arithmetic.Schemata
-public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Functions
-public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
-public import Foundation.FirstOrder.Arithmetic.Exponential
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
-public import Foundation.FirstOrder.Arithmetic.EA.Basic
-public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 
 /-!
 # Prime factors and prime powers

@@ -21,7 +21,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {Γ : Polarity} {m : ℕ}
+variable {Γ : Polarity} {m : ℕ} {f i k p q t v R : V}
 
 /-! ## Terms -/
 
@@ -70,16 +70,16 @@ lemma termFreeVariables_fvar (x : V) :
     termFreeVariables L ^&x = {x} := by simp [termFreeVariables, construction]
 
 @[simp]
-lemma termFreeVariables_func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+lemma termFreeVariables_func (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
     termFreeVariables L (^func k f v) = listUnion (termFreeVariablesVec L k v) := by
   simp [termFreeVariables, construction, hkf, hv]; rfl
 
 @[simp]
-lemma len_termFreeVariablesVec {k v : V} (hv : IsUTermVec L k v) :
+lemma len_termFreeVariablesVec (hv : IsUTermVec L k v) :
     len (termFreeVariablesVec L k v) = k := construction.resultVec_lh L _ hv
 
 @[simp]
-lemma nth_termFreeVariablesVec {k v i : V} (hv : IsUTermVec L k v) (hi : i < k) :
+lemma nth_termFreeVariablesVec (hv : IsUTermVec L k v) (hi : i < k) :
     (termFreeVariablesVec L k v).[i] = termFreeVariables L v.[i] :=
   construction.nth_resultVec L _ hv hi
 
@@ -108,12 +108,12 @@ instance termFreeVariablesVec.definable' :
 
 end
 
-lemma termFreeVariablesVec_eq_empty_iff {k v : V} (hv : IsUTermVec L k v) :
+lemma termFreeVariablesVec_eq_empty_iff (hv : IsUTermVec L k v) :
     listUnion (termFreeVariablesVec L k v) = ∅ ↔ ∀ i < k, termFreeVariables L v.[i] = ∅ := by
   rw [listUnion_eq_empty_iff, len_termFreeVariablesVec hv]
   exact forall₂_congr fun i hi ↦ by rw [nth_termFreeVariablesVec hv hi]
 
-lemma termShiftVec_eq_self_iff_forall {k v : V} (hv : IsUTermVec L k v) :
+lemma termShiftVec_eq_self_iff_forall (hv : IsUTermVec L k v) :
     termShiftVec L k v = v ↔ ∀ i < k, termShift L v.[i] = v.[i] := by
   constructor
   · intro h i hi
@@ -126,8 +126,7 @@ lemma termShiftVec_eq_self_iff_forall {k v : V} (hv : IsUTermVec L k v) :
 
 /-- A coded term has no free variables exactly when shifting its free variables leaves it
 unchanged. -/
-lemma termShift_eq_self_iff {t : V} (ht : IsUTerm L t) :
-    termShift L t = t ↔ termFreeVariables L t = ∅ := by
+lemma termShift_eq_self_iff (ht : IsUTerm L t) : termShift L t = t ↔ termFreeVariables L t = ∅ := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z
@@ -140,7 +139,7 @@ lemma termShift_eq_self_iff {t : V} (ht : IsUTerm L t) :
       termShiftVec_eq_self_iff_forall hv, termFreeVariablesVec_eq_empty_iff hv]
     simpa using forall₂_congr ih
 
-lemma termShiftVec_eq_self_iff {k v : V} (hv : IsUTermVec L k v) :
+lemma termShiftVec_eq_self_iff (hv : IsUTermVec L k v) :
     termShiftVec L k v = v ↔ listUnion (termFreeVariablesVec L k v) = ∅ := by
   rw [termShiftVec_eq_self_iff_forall hv, termFreeVariablesVec_eq_empty_iff hv]
   exact forall₂_congr fun i hi ↦ termShift_eq_self_iff (hv.nth hi)
@@ -215,12 +214,12 @@ instance freeVariables.definable' : Γᴬ_[m + 1]-Function₁[V] freeVariables L
 end
 
 @[simp]
-lemma freeVariables_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma freeVariables_rel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     freeVariables L (^rel k R v) = listUnion (termFreeVariablesVec L k v) := by
   simp [freeVariables, hR, hv, construction]
 
 @[simp]
-lemma freeVariables_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma freeVariables_nrel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     freeVariables L (^nrel k R v) = listUnion (termFreeVariablesVec L k v) := by
   simp [freeVariables, hR, hv, construction]
 
@@ -233,28 +232,25 @@ lemma freeVariables_falsum : freeVariables L (^⊥ : V) = ∅ := by
   simp [freeVariables, construction]
 
 @[simp]
-lemma freeVariables_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma freeVariables_and (hp : IsUFormula L p) (hq : IsUFormula L q) :
     freeVariables L (p ^⋏ q) = freeVariables L p ∪ freeVariables L q := by
   simp [freeVariables, hp, hq, construction]
 
 @[simp]
-lemma freeVariables_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma freeVariables_or (hp : IsUFormula L p) (hq : IsUFormula L q) :
     freeVariables L (p ^⋎ q) = freeVariables L p ∪ freeVariables L q := by
   simp [freeVariables, hp, hq, construction]
 
 @[simp]
-lemma freeVariables_all {p : V} (hp : IsUFormula L p) :
-    freeVariables L (^∀ p) = freeVariables L p := by
+lemma freeVariables_all (hp : IsUFormula L p) : freeVariables L (^∀ p) = freeVariables L p := by
   simp [freeVariables, hp, construction]
 
 @[simp]
-lemma freeVariables_exs {p : V} (hp : IsUFormula L p) :
-    freeVariables L (^∃ p) = freeVariables L p := by
+lemma freeVariables_exs (hp : IsUFormula L p) : freeVariables L (^∃ p) = freeVariables L p := by
   simp [freeVariables, hp, construction]
 
 @[simp]
-lemma freeVariables_neg {p : V} (hp : IsUFormula L p) :
-    freeVariables L (neg L p) = freeVariables L p := by
+lemma freeVariables_neg (hp : IsUFormula L p) : freeVariables L (neg L p) = freeVariables L p := by
   apply IsUFormula.ISigma1.sigma1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
   · definability
   · intro k R v hR hv
@@ -274,8 +270,7 @@ lemma freeVariables_neg {p : V} (hp : IsUFormula L p) :
 
 /-- A coded formula has no free variables exactly when shifting its free variables leaves it
 unchanged. -/
-lemma shift_eq_self_iff {p : V} (hp : IsUFormula L p) :
-    shift L p = p ↔ freeVariables L p = ∅ := by
+lemma shift_eq_self_iff (hp : IsUFormula L p) : shift L p = p ↔ freeVariables L p = ∅ := by
   apply IsUFormula.ISigma1.sigma1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
   · definability
   · intro k R v hR hv

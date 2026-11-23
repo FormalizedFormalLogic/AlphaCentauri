@@ -2,10 +2,7 @@ module
 
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PairingAssignment
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Provable
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounded
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
 /-!
 # The internal T-schema

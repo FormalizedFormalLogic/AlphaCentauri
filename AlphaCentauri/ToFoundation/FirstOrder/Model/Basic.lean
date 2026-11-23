@@ -3,10 +3,6 @@ module
 public import AlphaCentauri.ToFoundation.FirstOrder.Axiomatizability
 public import AlphaCentauri.ToFoundation.FirstOrder.ConstantExtension
 public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
-public import Foundation.FirstOrder.LK.Completeness.CounterModel
-public import Foundation.FirstOrder.LK.Soundness
-public import Foundation.FirstOrder.Tarski.Eq
-public import Foundation.FirstOrder.Tarski.Elementary
 public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Absoluteness
 public import Foundation.Vorspiel.Computability
 public import Mathlib.Data.Finset.Lattice.Fold
@@ -139,13 +135,11 @@ theorem IsElementary.of_tarskiVaught (ι : M ↪ₛ[L] N)
       use ι x
       simpa [Matrix.comp_vecCons''] using (ih (x :> e)).mpr hx
 
-/-- An elementary embedding preserves the truth of sentences. -/
 lemma IsElementary.models_iff [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
     (h : IsElementary (fun {_} _ ↦ True) ι) (σ : Sentence L) : N↓[L] ⊧ σ ↔ M↓[L] ⊧ σ := by
   rw [FFL.FirstOrder.models_iff, FFL.FirstOrder.models_iff]
   simpa [Matrix.empty_eq] using h (φ := Rewriting.emb σ) trivial ![] fun _ ↦ Classical.ofNonempty
 
-/-- An elementary embedding into a model of `T` is from a model of `T`. -/
 lemma IsElementary.modelsTheory [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
     (h : IsElementary (fun {_} _ ↦ True) ι) {T : Theory L} [N↓[L] ⊧* T] : M↓[L] ⊧* T :=
   ⟨fun σ hσ ↦ (h.models_iff σ).mp <| Semantics.ModelsSet.models _ hσ⟩

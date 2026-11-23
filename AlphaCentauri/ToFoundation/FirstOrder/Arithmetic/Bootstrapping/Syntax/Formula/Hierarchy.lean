@@ -19,7 +19,7 @@ namespace FFL.FirstOrder.Arithmetic
 namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-  {a c k m n p q r t u v w θ θ' : V} {Γ Γ' : Polarity} {s s' : ℕ}
+  {Γ Γ' : Polarity} {s s' : ℕ} {θ θ' : V} {a c k m n p q r t u v w : V}
 
 open Arithmetic (qqNLT)
 

@@ -1,11 +1,6 @@
 module
 
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
-public import AlphaCentauri.ToFoundation.Logic.Entailment
-public import AlphaCentauri.ToMathlib.Data.Vector.Basic
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.D1
-public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
-public import Foundation.Meta.ClProver
 
 /-!
 # Provability of formula codes with quantifier blocks

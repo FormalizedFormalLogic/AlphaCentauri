@@ -1,8 +1,6 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.HFS.Basic
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
-public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 
 /-!
 # Hereditarily finite sets in models of arithmetic

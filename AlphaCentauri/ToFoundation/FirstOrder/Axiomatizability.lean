@@ -64,7 +64,6 @@ lemma FiniteAxiomatizable.of_equiv (h : T ≊ U) :
 lemma finiteAxiomatizable_iff_exists_finite_subset :
     FiniteAxiomatizable T ↔ ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ T ≊ F := by
   constructor
-  -- Syntactic compactness (`Entailment.Compact`), not the completeness theorem, supplies F.
   · rintro ⟨𝓕, h𝓕fin, h𝓕⟩
     have H : ∀ σ : Sentence L, ∃ F : Theory L, F ⊆ T ∧ F.Finite ∧ (σ ∈ 𝓕 → F ⊢ σ) := by
       intro σ

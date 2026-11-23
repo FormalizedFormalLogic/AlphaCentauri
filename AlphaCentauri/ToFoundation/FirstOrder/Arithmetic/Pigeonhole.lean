@@ -1,8 +1,5 @@
 module
 
-public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
-public import Foundation.FirstOrder.Arithmetic.Definability
-public import Foundation.FirstOrder.Arithmetic.Exponential.Bit
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 
 /-!

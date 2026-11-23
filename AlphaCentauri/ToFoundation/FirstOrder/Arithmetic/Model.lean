@@ -1,8 +1,6 @@
 module
 
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
-public import Foundation.FirstOrder.LK.Completeness
-public import Foundation.FirstOrder.Tarski.Elementary
 
 /-!
 # Models of arithmetic

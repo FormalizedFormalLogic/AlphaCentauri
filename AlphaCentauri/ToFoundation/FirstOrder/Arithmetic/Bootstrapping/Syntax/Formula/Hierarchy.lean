@@ -19,12 +19,13 @@ namespace FFL.FirstOrder.Arithmetic
 namespace Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+  {a c k m n p q r t u v w θ θ' : V} {Γ Γ' : Polarity} {s s' : ℕ}
 
 open Arithmetic (qqNLT)
 
 /-! ## Substitution -/
 
-lemma IsUFormula.rel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^rel k r v)) :
+lemma IsUFormula.rel_cases (h : IsUFormula ℒₒᵣ (^rel k r v)) :
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r v = t ^= u) ∨
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^rel k r v = t ^< u) := by
   obtain ⟨hr, hv⟩ := IsUFormula.rel.mp h
@@ -33,7 +34,7 @@ lemma IsUFormula.rel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^rel k r v)) :
   · exact Or.inl ⟨a, b, ha, hb, rfl⟩
   · exact Or.inr ⟨a, b, ha, hb, rfl⟩
 
-lemma IsUFormula.nrel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^nrel k r v)) :
+lemma IsUFormula.nrel_cases (h : IsUFormula ℒₒᵣ (^nrel k r v)) :
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^nrel k r v = t ^≠ u) ∨
     (∃ t u, IsUTerm ℒₒᵣ t ∧ IsUTerm ℒₒᵣ u ∧ ^nrel k r v = qqNLT t u) := by
   obtain ⟨hr, hv⟩ := IsUFormula.nrel.mp h
@@ -42,18 +43,18 @@ lemma IsUFormula.nrel_cases {k r v : V} (h : IsUFormula ℒₒᵣ (^nrel k r v))
   · exact Or.inl ⟨a, b, ha, hb, rfl⟩
   · exact Or.inr ⟨a, b, ha, hb, rfl⟩
 
-lemma IsSemiterm.of_termBShift {n t : V} (ht : IsUTerm ℒₒᵣ t)
+lemma IsSemiterm.of_termBShift (ht : IsUTerm ℒₒᵣ t)
     (h : IsSemiterm ℒₒᵣ (n + 1) (Bootstrapping.termBShift ℒₒᵣ t)) : IsSemiterm ℒₒᵣ n t :=
   IsSemiterm.def.mpr ⟨ht, (termBV_termBShift_le ht n).mp (IsSemiterm.def.mp h).2⟩
 
-lemma IsSemiformula.of_qqBall {n t p : V} (ht : IsUTerm ℒₒᵣ t)
+lemma IsSemiformula.of_qqBall (ht : IsUTerm ℒₒᵣ t)
     (h : IsSemiformula ℒₒᵣ n (qqBall (termBShift ℒₒᵣ t) p)) :
     IsSemiterm ℒₒᵣ n t ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
   have h' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
     simpa [qqBall, Arithmetic.qqNLT] using h
   exact ⟨h'.1.of_termBShift ht, h'.2⟩
 
-lemma IsSemiformula.of_qqBex {n t p : V} (ht : IsUTerm ℒₒᵣ t)
+lemma IsSemiformula.of_qqBex (ht : IsUTerm ℒₒᵣ t)
     (h : IsSemiformula ℒₒᵣ n (qqBex (termBShift ℒₒᵣ t) p)) :
     IsSemiterm ℒₒᵣ n t ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
   have h' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) ∧ IsSemiformula ℒₒᵣ (n + 1) p := by
@@ -62,7 +63,7 @@ lemma IsSemiformula.of_qqBex {n t p : V} (ht : IsUTerm ℒₒᵣ t)
 
 section
 
-variable {w t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u)
+variable (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u)
 include ht hu
 
 lemma subst_qqEQ : subst ℒₒᵣ w (t ^= u) = termSubst ℒₒᵣ w t ^= termSubst ℒₒᵣ w u := by
@@ -82,7 +83,7 @@ end
 
 section
 
-variable {n m w t p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t)
+variable (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t)
   (hp : IsUFormula ℒₒᵣ p)
 include hw ht hp
 
@@ -106,7 +107,7 @@ lemma subst_qqBex :
 
 end
 
-lemma IsBounded.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+lemma IsBounded.subst (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (h : IsBounded p) : IsBounded (subst ℒₒᵣ w p) := by
   suffices ∀ p : V, IsBounded p → ∀ n m w, IsSemitermVec ℒₒᵣ n m w → IsSemiformula ℒₒᵣ n p →
       IsBounded (Bootstrapping.subst ℒₒᵣ w p) from this p h n m w hw hp
@@ -141,10 +142,6 @@ lemma IsBounded.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
 
 /-! ## Formulas of complexity zero -/
 
-section complexity
-
-variable {p : V}
-
 lemma IsUFormula.isBounded_of_formulaComplexity_eq_zero (hp : IsUFormula ℒₒᵣ p)
     (h : formulaComplexity ℒₒᵣ p = 0) : IsBounded p := by
   rcases hp.case with (⟨k, R, v, -, -, rfl⟩ | ⟨k, R, v, -, -, rfl⟩ | rfl | rfl |
@@ -160,20 +157,14 @@ lemma IsUFormula.cases_of_formulaComplexity_ne_zero (hp : IsUFormula ℒₒᵣ p
     ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, p₂, hp₁, hp₂, rfl⟩ | ⟨p₁, hp₁, rfl⟩ | ⟨p₁, hp₁, rfl⟩) <;>
     simp_all
 
-end complexity
-
 /-! ## Prenex decompositions -/
-
-section qqToPrenex
-
-variable {Γ Γ' : Polarity} {s s' : ℕ} {θ θ' : V}
 
 @[simp]
 lemma isUFormula_qqToPrenex : IsUFormula ℒₒᵣ (qqToPrenex Γ s θ) ↔ IsUFormula ℒₒᵣ θ := by
   induction s generalizing Γ <;> simp [*]
 
 @[simp]
-lemma isSemiformula_qqToPrenex {n : V} :
+lemma isSemiformula_qqToPrenex :
     IsSemiformula ℒₒᵣ n (qqToPrenex Γ s θ) ↔ IsSemiformula ℒₒᵣ (n + s) θ := by
   induction s generalizing Γ n with
   | zero => simp
@@ -185,21 +176,21 @@ lemma neg_qqToPrenex (hθ : IsUFormula ℒₒᵣ θ) :
   | zero => simp
   | succ s ih => simp [neg_qqQuant (isUFormula_qqToPrenex.mpr hθ), ih]
 
-lemma subst_qqToPrenex {w : V} (hθ : IsUFormula ℒₒᵣ θ) :
+lemma subst_qqToPrenex (hθ : IsUFormula ℒₒᵣ θ) :
     subst ℒₒᵣ w (qqToPrenex Γ s θ) = qqToPrenex Γ s (subst ℒₒᵣ ((qVec ℒₒᵣ)^[s] w) θ) := by
   induction s generalizing Γ w with
   | zero => simp
   | succ s ih =>
     cases Γ <;> simp [isUFormula_qqToPrenex.mpr hθ, ih, Function.iterate_succ_apply]
 
-lemma IsSemitermVec.iterate_qVec {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w) (s : ℕ) :
+lemma IsSemitermVec.iterate_qVec (hw : IsSemitermVec ℒₒᵣ n m w) (s : ℕ) :
     IsSemitermVec ℒₒᵣ (n + s) (m + s) ((Bootstrapping.qVec ℒₒᵣ)^[s] w) := by
   induction s generalizing n m w with
   | zero => simpa using hw
   | succ s ih =>
     simpa [Function.iterate_succ_apply, add_assoc, add_comm (1 : V)] using ih hw.qVec
 
-lemma IsPrenexHierarchy.subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+lemma IsPrenexHierarchy.subst (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (h : IsPrenexHierarchy Γ s p) :
     IsPrenexHierarchy Γ s (subst ℒₒᵣ w p) := by
   obtain ⟨θ, rfl, hθ⟩ := isPrenexHierarchy_iff_exists_qqToPrenex.mp h
@@ -213,7 +204,7 @@ lemma shift_qqToPrenex (hθ : IsUFormula ℒₒᵣ θ) :
   | zero => simp
   | succ s ih => cases Γ <;> simp [isUFormula_qqToPrenex.mpr hθ, ih]
 
-lemma IsPrenexHierarchy.shift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsPrenexHierarchy Γ s p) :
+lemma IsPrenexHierarchy.shift (hp : IsUFormula ℒₒᵣ p) (h : IsPrenexHierarchy Γ s p) :
     IsPrenexHierarchy Γ s (shift ℒₒᵣ p) := by
   obtain ⟨θ, rfl, hθ⟩ := isPrenexHierarchy_iff_exists_qqToPrenex.mp h
   have hθ' : IsUFormula ℒₒᵣ θ := isUFormula_qqToPrenex.mp hp
@@ -232,21 +223,19 @@ lemma le_one_of_isBounded_qqToPrenex (h : IsBounded (qqToPrenex Γ s θ)) : s �
     · obtain ⟨_, _, -, -, he⟩ := IsBounded.of_all h
       simp [qqExs, qqOr] at he
 
-lemma qqToPrenex_eq_and {p q : V} (h : qqToPrenex Γ s θ = p ^⋏ q) : s = 0 := by
+lemma qqToPrenex_eq_and (h : qqToPrenex Γ s θ = p ^⋏ q) : s = 0 := by
   rcases s with _ | s
   · rfl
   · cases Γ <;> simp [qqExs, qqAll, qqAnd] at h
 
-lemma qqToPrenex_eq_or {p q : V} (h : qqToPrenex Γ s θ = p ^⋎ q) : s = 0 := by
+lemma qqToPrenex_eq_or (h : qqToPrenex Γ s θ = p ^⋎ q) : s = 0 := by
   rcases s with _ | s
   · rfl
   · cases Γ <;> simp [qqExs, qqAll, qqOr] at h
 
-end qqToPrenex
-
 /-! ## The $\Delta_0$ and prenex classes -/
 
-private lemma eq_bvar_zero_and_exists_termBShift {n m w a c u : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+private lemma eq_bvar_zero_and_exists_termBShift (hw : IsSemitermVec ℒₒᵣ n m w)
     (ha : IsSemiterm ℒₒᵣ (n + 1) a) (hc : IsSemiterm ℒₒᵣ (n + 1) c) (hu : IsUTerm ℒₒᵣ u)
     (h : termSubstVec ℒₒᵣ 2 (qVec ℒₒᵣ w) (?[a, c] : V) = ?[^#0, termBShift ℒₒᵣ u]) :
     a = ^#0 ∧ ∃ t, IsUTerm ℒₒᵣ t ∧ c = termBShift ℒₒᵣ t := by
@@ -254,7 +243,7 @@ private lemma eq_bvar_zero_and_exists_termBShift {n m w a c u : V} (hw : IsSemit
   exact ⟨eq_bvar_zero_of_termSubst_qVec_eq hw ha h.1,
     exists_eq_termBShift_of_termSubst_qVec_eq hc hu h.2.1⟩
 
-lemma IsBounded.of_subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+lemma IsBounded.of_subst (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (h : IsBounded (Bootstrapping.subst ℒₒᵣ w p)) : IsBounded p := by
   apply IsSemiformula.pi1_structural_induction (P := fun n p ↦ ∀ m w, IsSemitermVec ℒₒᵣ n m w →
     IsBounded (Bootstrapping.subst ℒₒᵣ w p) → IsBounded p) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp m w hw h
@@ -294,7 +283,7 @@ lemma IsBounded.of_subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     obtain ⟨rfl, t, ht, rfl⟩ := eq_bvar_zero_and_exists_termBShift hw ha hc hu hvv
     exact IsBounded.bex ht (IsBounded.and_iff.mp hb).2
 
-lemma IsPrenexHierarchy.of_subst {Γ : Polarity} {s : ℕ} {n m w p : V}
+lemma IsPrenexHierarchy.of_subst
     (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ n p)
     (h : IsPrenexHierarchy Γ s (Bootstrapping.subst ℒₒᵣ w p)) : IsPrenexHierarchy Γ s p := by
   induction s generalizing Γ n m w p with

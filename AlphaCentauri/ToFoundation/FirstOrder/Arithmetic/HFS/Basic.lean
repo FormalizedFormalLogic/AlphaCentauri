@@ -21,7 +21,7 @@ namespace Arithmetic
 
 open scoped FFL.FirstOrder.Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {a n p s v x y Γ : V}
 
 attribute [local grind =] mem_bitInsert_iff mem_bitRemove_iff
 
@@ -43,11 +43,10 @@ lemma insert_pair_comm₂ (x y a b s : V) :
     insert x (insert y (insert a (insert b s))) = insert a (insert b (insert x (insert y s))) :=
   mem_ext fun _ ↦ by grind
 
-lemma mem_of_mem_insert_of_ne {x y s : V} (h : x ∈ insert y s) (hne : x ≠ y) : x ∈ s :=
+lemma mem_of_mem_insert_of_ne (h : x ∈ insert y s) (hne : x ≠ y) : x ∈ s :=
   (mem_bitInsert_iff.mp h).resolve_left hne
 
-lemma insert_subset_insert_insert {a p Γ s : V} (h : Γ ⊆ insert p s) :
-    insert a Γ ⊆ insert p (insert a s) := by
+lemma insert_subset_insert_insert (h : Γ ⊆ insert p s) : insert a Γ ⊆ insert p (insert a s) := by
   intro x hx
   rcases mem_bitInsert_iff.mp hx with rfl | hx
   · simp
@@ -101,7 +100,7 @@ instance listUnion_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (listUnion : V 
 end
 
 @[simp]
-lemma mem_listUnion_iff {x v : V} : x ∈ listUnion v ↔ ∃ i < len v, x ∈ v.[i] := by
+lemma mem_listUnion_iff : x ∈ listUnion v ↔ ∃ i < len v, x ∈ v.[i] := by
   induction v using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
@@ -116,7 +115,7 @@ lemma mem_listUnion_iff {x v : V} : x ∈ listUnion v ↔ ∃ i < len v, x ∈ v
       · left; simpa using h
       · right; exact ⟨i, by simpa using hi, by simpa using h⟩
 
-lemma listUnion_eq_empty_iff {v : V} : listUnion v = ∅ ↔ ∀ i < len v, v.[i] = ∅ := by
+lemma listUnion_eq_empty_iff : listUnion v = ∅ ↔ ∀ i < len v, v.[i] = ∅ := by
   simp only [mem_ext_iff, mem_listUnion_iff, not_mem_empty, iff_false, not_exists, not_and]
   exact ⟨fun h i hi x hx ↦ h x i hi hx, fun h x i hi hx ↦ h i hi x hx⟩
 
@@ -185,7 +184,7 @@ instance card_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (card : V → V) :=
 
 end
 
-lemma cardBelow_eq_zero_iff {s n : V} : cardBelow s n = 0 ↔ ∀ i < n, i ∉ s := by
+lemma cardBelow_eq_zero_iff : cardBelow s n = 0 ↔ ∀ i < n, i ∉ s := by
   induction n using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -203,7 +202,7 @@ lemma cardBelow_eq_zero_iff {s n : V} : cardBelow s n = 0 ↔ ∀ i < n, i ∉ s
         exact H i (lt_trans hi (by simp))
 
 @[simp]
-lemma card_eq_zero_iff {s : V} : card s = 0 ↔ s = ∅ := by
+lemma card_eq_zero_iff : card s = 0 ↔ s = ∅ := by
   rw [card, cardBelow_eq_zero_iff]
   constructor
   · intro h

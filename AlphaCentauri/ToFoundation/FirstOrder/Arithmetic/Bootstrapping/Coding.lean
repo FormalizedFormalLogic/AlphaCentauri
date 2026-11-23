@@ -23,7 +23,7 @@ namespace FFL.FirstOrder
 open Arithmetic Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {L : Language} [L.Encodable]
-  [L.LORDefinable]
+  [L.LORDefinable] {n m k : ℕ}
 
 namespace Language
 
@@ -59,13 +59,13 @@ end Language
 namespace Semisentence
 
 @[simp]
-lemma shift_quote {n : ℕ} (σ : Semisentence L n) : shift L (⌜σ⌝ : V) = ⌜σ⌝ := by
+lemma shift_quote (σ : Semisentence L n) : shift L (⌜σ⌝ : V) = ⌜σ⌝ := by
   have h : Rewriting.shift (Rewriting.emb σ : Semiproposition L n) = Rewriting.emb σ := by
     simpa [Rewriting.shifts] using Rewriting.shifts_emb ({σ} : Multiset (Semisentence L n))
   rw [Sentence.quote_def, ← Semiformula.quote_shift, h]
 
 @[simp]
-lemma formulaComplexity_quote {n : ℕ} (σ : Semisentence L n) :
+lemma formulaComplexity_quote (σ : Semisentence L n) :
     formulaComplexity L (⌜σ⌝ : V) = σ.complexity := by
   induction σ using Semiformula.rec' with
   | hrel R v => simp [Sentence.quote_def]
@@ -77,7 +77,7 @@ lemma formulaComplexity_quote {n : ℕ} (σ : Semisentence L n) :
   | hall φ ih => simp [ih]
   | hexs φ ih => simp [ih]
 
-lemma quote_conj {n k : ℕ} (φ : Fin k → Semisentence L n) :
+lemma quote_conj (φ : Fin k → Semisentence L n) :
     (⌜Matrix.conj φ⌝ : V) = ^⋀ matrixToVec fun i ↦ (⌜φ i⌝ : V) := by
   induction k with
   | zero => simp [Sentence.quote_verum]
@@ -88,8 +88,6 @@ lemma quote_conj {n k : ℕ} (φ : Fin k → Semisentence L n) :
 end Semisentence
 
 namespace Semiterm
-
-variable {n : ℕ}
 
 section
 
@@ -131,11 +129,10 @@ end Semiterm
 
 namespace Arithmetic.Bootstrapping
 
-lemma quote_neg_sentence {n : ℕ} (σ : ArithmeticSemisentence n) :
-    (⌜∼σ⌝ : V) = neg ℒₒᵣ (⌜σ⌝ : V) := by
+lemma quote_neg_sentence (σ : ArithmeticSemisentence n) : (⌜∼σ⌝ : V) = neg ℒₒᵣ (⌜σ⌝ : V) := by
   simp [Sentence.quote_eq, Sentence.typed_quote_def]
 
-lemma quote_allClosure_sentence {m : ℕ} (θ : ArithmeticSemisentence m) :
+lemma quote_allClosure_sentence (θ : ArithmeticSemisentence m) :
     (⌜∀¹* θ⌝ : V) = qqAlls (⌜θ⌝ : V) (m : V) := by
   induction m with
   | zero => simp
@@ -143,7 +140,7 @@ lemma quote_allClosure_sentence {m : ℕ} (θ : ArithmeticSemisentence m) :
     rw [show (∀¹* θ : ArithmeticSentence) = ∀¹* (∀¹ θ) from rfl]
     simpa [Sentence.quote_all, qqAlls_all] using ih (∀¹ θ)
 
-lemma quote_neg_ne_exs {m : ℕ} {θ : ArithmeticSemisentence m} (h : ∀ ψ, θ ≠ ∀¹ ψ) (p : V) :
+lemma quote_neg_ne_exs {θ : ArithmeticSemisentence m} (h : ∀ ψ, θ ≠ ∀¹ ψ) (p : V) :
     (⌜∼θ⌝ : V) ≠ ^∃ p := by
   induction θ using Semiformula.rec' <;> first
     | exact absurd rfl (h _)
@@ -161,7 +158,7 @@ lemma satisfies_ofList_ch (l : List ArithmeticSentence) (p : V) :
       Theory.Δ₁.singleton_toTDef_ch_val, ih]
     simp [Sentence.quote_eq_encode, numeral_eq_natCast]
 
-lemma eq_matrixToVec_iff {k : ℕ} {w : V} {u : Fin k → V} :
+lemma eq_matrixToVec_iff {w : V} {u : Fin k → V} :
     w = matrixToVec u ↔ (k : V) = len w ∧ ∀ i : Fin k, w.[((i : ℕ) : V)] = u i := by
   constructor
   · rintro rfl
@@ -172,7 +169,7 @@ lemma eq_matrixToVec_iff {k : ℕ} {w : V} {u : Fin k → V} :
     obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi
     simp [h₂]
 
-lemma exists_termVec {k : ℕ} {v : V} (hv : IsSemitermVec L (k : V) 0 v) :
+lemma exists_termVec {v : V} (hv : IsSemitermVec L (k : V) 0 v) :
     ∃ u : Fin k → Term V L, SemitermVec.val u = v := by
   have hu : ∀ i : Fin k, IsSemiterm L 0 v.[((i : ℕ) : V)] := fun i ↦ hv.nth (by simp)
   exact ⟨fun i ↦ ⟨v.[((i : ℕ) : V)], hu i⟩, by
@@ -186,21 +183,20 @@ end Arithmetic.Bootstrapping
 namespace Semiformula
 
 @[simp]
-lemma quote_neg {n : ℕ} (φ : Semiproposition L n) : (⌜∼φ⌝ : V) = Bootstrapping.neg L ⌜φ⌝ := by
+lemma quote_neg (φ : Semiproposition L n) : (⌜∼φ⌝ : V) = Bootstrapping.neg L ⌜φ⌝ := by
   simp [quote_def]
 
 @[simp]
-lemma quote_imp {n : ℕ} (φ ψ : Semiproposition L n) :
-    (⌜φ 🡒 ψ⌝ : V) = Bootstrapping.imp L ⌜φ⌝ ⌜ψ⌝ := by
+lemma quote_imp (φ ψ : Semiproposition L n) : (⌜φ 🡒 ψ⌝ : V) = Bootstrapping.imp L ⌜φ⌝ ⌜ψ⌝ := by
   simp [quote_def, Bootstrapping.imp]
 
-lemma quote_allItr {n k : ℕ} (φ : Semiproposition L (n + k)) :
+lemma quote_allItr (φ : Semiproposition L (n + k)) :
     (⌜∀¹^[k] φ⌝ : V) = qqAlls (⌜φ⌝ : V) (k : V) := by
   induction k with
   | zero => simp
   | succ k ih => simpa [allItr_succ, qqAlls_all] using ih (∀¹ φ)
 
-lemma quote_conj {n k : ℕ} (φ : Fin k → Semiproposition L n) :
+lemma quote_conj (φ : Fin k → Semiproposition L n) :
     (⌜Matrix.conj φ⌝ : V) = ^⋀ matrixToVec fun i ↦ (⌜φ i⌝ : V) := by
   induction k with
   | zero => simp
@@ -208,7 +204,7 @@ lemma quote_conj {n k : ℕ} (φ : Fin k → Semiproposition L n) :
     simpa [Matrix.conj, Matrix.vecHead, Matrix.vecTail, Function.comp_def] using
       ih (Matrix.vecTail φ)
 
-lemma quote_substs {n m : ℕ} (w : Fin n → SyntacticSemiterm L m) (φ : Semiproposition L n) :
+lemma quote_substs (w : Fin n → SyntacticSemiterm L m) (φ : Semiproposition L n) :
     (⌜φ ⇜ w⌝ : V) = Bootstrapping.subst L (matrixToVec fun i ↦ (⌜w i⌝ : V)) ⌜φ⌝ := by
   simp [quote_def, Semiterm.quote_def]
   rfl
@@ -216,13 +212,12 @@ lemma quote_substs {n m : ℕ} (w : Fin n → SyntacticSemiterm L m) (φ : Semip
 
 end Semiformula
 
-lemma Semisentence.quote_substs {n m : ℕ} (w : Fin n → ClosedSemiterm L m)
-    (σ : Semisentence L n) :
+lemma Semisentence.quote_substs (w : Fin n → ClosedSemiterm L m) (σ : Semisentence L n) :
     (⌜σ ⇜ w⌝ : V) = Bootstrapping.subst L (matrixToVec fun i ↦ (⌜w i⌝ : V)) ⌜σ⌝ := by
   simp [Sentence.quote_def, Rewriting.emb_subst_eq_subst_emb, Semiformula.quote_substs,
     Semiterm.empty_quote_def]
 
-lemma Semisentence.quote_imp {n : ℕ} (σ τ : Semisentence L n) :
+lemma Semisentence.quote_imp (σ τ : Semisentence L n) :
     (⌜σ 🡒 τ⌝ : V) = Bootstrapping.imp L ⌜σ⌝ ⌜τ⌝ := by
   simp [Sentence.quote_def]
 

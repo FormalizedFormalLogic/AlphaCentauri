@@ -9,7 +9,7 @@ public import AlphaCentauri.Schemata.DeltaInduction
 /-!
 # The least number principle in the ring of differences of a model of $\mathsf{I}\mathsf{E}_1$
 
-Supplements `Foundation.FirstOrder.Arithmetic.Schemata`. Over a model $V$ of
+Over a model $V$ of
 $\mathsf{I}\mathsf{E}_1$, the ring of differences of $V$ is discretely ordered and satisfies
 `LeastNumberPrinciple` for bounded existential open predicates.
 

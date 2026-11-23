@@ -5,23 +5,17 @@ public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 /-!
 # Local reflection
 
-Gaps in Foundation's `Reflection.Local`.
+Local reflection for $\Sigma_{s'}$ or $\Pi_{s'}$ prenex sentences yields local reflection for prenex
+sentences of a lower or equal level. A consistent extension of `T` by a single sentence never proves
+the full local reflection schema of `T`.
 -/
 
 @[expose] public section
-
-/-! ## Local reflection over the prenex hierarchy
-
-Local reflection for $\Sigma_{s'}$ or $\Pi_{s'}$ prenex sentences yields local reflection for prenex
-sentences of a lower or equal level, since a prenex sentence is provably equivalent to one of a
-higher level.
--/
 
 namespace FFL.FirstOrder
 namespace Arithmetic
 
 open scoped FFL.FirstOrder.Bounding
-
 open FFL.Entailment ProvabilityAbstraction
 
 variable {T S : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {Γ Γ' : Polarity} {s s' : ℕ}
@@ -57,12 +51,6 @@ lemma provable_localReflectionOn_prenexHierarchy_of_lt (hTS : T ⪯ S) (hs : s <
 
 end Arithmetic
 end FFL.FirstOrder
-
-/-! ## Gaps in Foundation's `Reflection.Local`: full local reflection over a finite extension
-
-A consistent extension of `T` by a single sentence never proves the full local reflection schema
-of `T`.
--/
 
 namespace FFL.ProvabilityLogic
 

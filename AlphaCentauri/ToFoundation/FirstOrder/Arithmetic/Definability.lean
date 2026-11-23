@@ -17,9 +17,7 @@ formulas, and prenex $\Sigma_1$ definability.
 
 @[expose] public section
 
-/-!
-## Casting true $\Sigma_1$/$\Sigma_0$/$\Delta_1$ facts about standard numbers into a model of `𝗣𝗔⁻`
--/
+/-! ## Casting true facts about standard numbers into a model of `𝗣𝗔⁻` -/
 
 namespace FFL.FirstOrder
 namespace Arithmetic

@@ -6,12 +6,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functio
 /-!
 # Functions on codes of terms in models of $\mathsf{EA}$
 
-The part of `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Term/Functions.lean` on
-operations on codes of terms, ported to models of $\mathsf{EA}$: substitution `termSubst`, the
-shifts `termShift` and `termBShift`, the quotation of a list of terms `qVec`, the codes of the
-numerals and the predicate `IsTermFVFree`. The blueprints and formulas are Foundation's; the
-recursions on terms carry a bound on their values, and inductions are on locally $\Delta_0$
-predicates.
+Substitution `termSubst`, the shifts `termShift` and `termBShift`, the quotation of a list of terms
+`qVec`, the codes of the numerals and the predicate `IsTermFVFree`. The recursions on terms carry a
+bound on their values, and inductions are on locally $\Delta_0$ predicates.
 
 - [HP98, §V.3]
 -/

@@ -11,6 +11,10 @@ public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 
 /-!
 # Prime factors and prime powers
+
+In a model of $\mathsf{I}\Sigma_0$, every number above one has a prime divisor, a prime dividing a
+product divides a factor, and `IsPrimePower p q` says that `q` is a positive power of the prime `p`.
+`divisorUpTo y T` is the largest divisor of `y` whose prime-power divisors are all at most `T`.
 -/
 
 @[expose] public section

@@ -6,13 +6,11 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Basi
 /-!
 # Codes of formulas in models of $\mathsf{EA}$
 
-The part of `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Formula/Basic.lean` before the
-recursion on formulas, ported to models of $\mathsf{EA}$: the codes `qqRel`, `qqNRel`, `qqVerum`,
-`qqFalsum`, `qqAnd`, `qqOr`, `qqAll` and `qqExs` of atomic formulas, their negations, the
-constants, conjunctions, disjunctions and quantifications, and the predicate `IsUFormula L` of
-codes of formulas with induction on locally $\Delta_0$ predicates. The formulas are Foundation's
-`qqRelDef`, …, `qqExsDef` and `isUFormula`. The bound variables `bv` of a formula and the predicate
-`IsSemiformula` follow, defined by Foundation's `bvGraph` and `isSemiformula`.
+The codes `qqRel`, `qqNRel`, `qqVerum`, `qqFalsum`, `qqAnd`, `qqOr`, `qqAll` and `qqExs` of atomic
+formulas, their negations, the constants, conjunctions, disjunctions and quantifications, and the
+predicate `IsUFormula L` of codes of formulas with induction on locally $\Delta_0$ predicates,
+defined by `qqRelDef`, …, `qqExsDef` and `isUFormula`. The bound variables `bv` of a formula and the
+predicate `IsSemiformula` follow, defined by `bvGraph` and `isSemiformula`.
 
 - [HP98, §V.3]
 -/

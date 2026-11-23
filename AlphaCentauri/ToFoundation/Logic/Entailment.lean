@@ -5,12 +5,10 @@ public import Foundation.Propositional.Entailment.Cl
 public import Foundation.Meta.ClProver
 
 /-!
-# Gaps in Foundation's `Logic.Entailment`: consistency as a simp lemma, and conjunctions of vectors
+# Consistency and conjunctions of vectors
 
-`simp` cannot close a goal `Consistent 𝓢` on its own, even when an instance is available; this
-records `Consistent 𝓢` as a simp lemma whenever such an instance can be synthesized.
-
-Introduction and elimination of `Matrix.conj` in a minimal entailment system.
+`Consistent 𝓢` is equal to `True` whenever an instance exists, and the conjunction `Matrix.conj` of
+a vector of formulas has introduction and elimination rules in a minimal entailment system.
 -/
 
 @[expose] public section

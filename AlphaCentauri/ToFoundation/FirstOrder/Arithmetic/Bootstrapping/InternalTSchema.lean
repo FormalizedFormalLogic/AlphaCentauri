@@ -8,7 +8,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Bounde
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.General
 
 /-!
-# Gaps in Foundation's `PartialTruth.Bounded`: the internal T-schema
+# The internal T-schema
 
 The internal T-schema for prenex $\Sigma_1$ partial truth.
 
@@ -112,7 +112,7 @@ lemma numeral_vec_four (a b c d : V) :
     (fun i ↦ (𝕹 (![a, b, c, d] i) : Term V ℒₒᵣ)) = ![𝕹 a, 𝕹 b, 𝕹 c, 𝕹 d] := by
   funext i; match i with | 0 => rfl | 1 => rfl | 2 => rfl | 3 => rfl
 
-/-! ### Terms -/
+/-! ## Terms -/
 
 private noncomputable def tvBvarZeroClause : ArithmeticSemisentence 3 :=
   qqBvarDef.val/[#2, ‘0’] 🡒 tvDef.val/[#0, ‘(#0 + #1) * (#0 + #1) + #1 + 1’, #2]
@@ -246,7 +246,7 @@ lemma tprovable_tvF_mul (y₁ y₂ a : Term V ℒₒᵣ) {t u : V} (ht : IsUTerm
       Matrix.vecHead, Matrix.vecTail] using h₁;
   exact h₃ ⨀ h₂
 
-/-! ### Formulas -/
+/-! ## Formulas -/
 
 private noncomputable def verumCond : 𝚺ᴬ₁.Semisentence 1 := .mkSigma “c. !qqVerumDef c”
 
@@ -512,7 +512,7 @@ lemma tprovable_psatF_bex (y a : Term V ℒₒᵣ) {t q : V} (ht : IsUTerm ℒ�
       SemitermVec.q, Matrix.vecHead, Matrix.vecTail] using h₁;
   exact h₃ ⨀ h₂
 
-/-! ### The assignment terms -/
+/-! ## The assignment terms -/
 
 section assignment
 
@@ -597,8 +597,6 @@ lemma val_tvF (y a : Term V ℒₒᵣ) (t : V) :
     (tvF y a t).val = subst ℒₒᵣ ?[y.val, a.val, numeral t] (⌜tvDef.val⌝ : V) := by
   simp [tvF, Sentence.quote_eq]
 
-variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
-
 lemma tprovable_tvF_fvar_assignment (n : V) :
     ∀ i < n, T.internalize V ⊢ tvF (Semiterm.fvar i) (assignment n) (^#i) := by
   suffices ∀ i < n,
@@ -627,7 +625,7 @@ lemma tprovable_tvF_fvar_assignment (n : V) :
 
 end assignment
 
-/-! ### Disquotation for terms -/
+/-! ## Disquotation for terms -/
 
 section termDisquotation
 
@@ -642,8 +640,6 @@ lemma LOR_func_cases {k f v : V} (hf : (ℒₒᵣ).IsFunc k f) (hv : IsUTermVec 
     right; right; left; use a, b; simp [ha, hb, qqAdd]; rfl
   · obtain ⟨a, b, ha, hb, rfl⟩ := IsUTermVec.two_iff.mp hv
     right; right; right; use a, b; simp [ha, hb, qqMul]; rfl
-
-variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 omit [𝗜𝚺₁ ⪯ T] in
 lemma tprovable_tvF_iff (y a : Term V ℒₒᵣ) (t : V) :
@@ -714,7 +710,7 @@ lemma tprovable_tvF_instTerm {n t : V} (ht : IsSemiterm ℒₒᵣ n t) (hs : ter
 
 end termDisquotation
 
-/-! ### Disquotation for $\Delta_0$ formulas -/
+/-! ## Disquotation for $\Delta_0$ formulas -/
 
 section formulaDisquotation
 
@@ -744,8 +740,6 @@ lemma equal_eq_equals (t u : Term V ℒₒᵣ) : Semiformula.equal t u = Semiter
 
 lemma neg_equals (t u : Term V ℒₒᵣ) : ∼Semiterm.equals t u = Semiterm.notEquals t u := by
   ext; simp [Arithmetic.qqNEQ]
-
-variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 lemma tprovable_instTerm_eq_iff {n t u : V} (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
     (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
@@ -1044,9 +1038,7 @@ lemma provable_iff_psat_of_isBounded (N : V) :
 
 end formulaDisquotation
 
-/-! ### The internal T-schema for prenex $\Sigma_1$ partial truth -/
-
-variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T]
+/-! ## The internal T-schema for prenex $\Sigma_1$ partial truth -/
 
 private noncomputable def exsCond : 𝚺ᴬ₁.Semisentence 2 := .mkSigma “z θ. !qqExsDef z θ”
 

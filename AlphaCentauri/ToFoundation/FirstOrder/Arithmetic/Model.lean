@@ -7,16 +7,11 @@ public import Foundation.FirstOrder.Tarski.Elementary
 /-!
 # Models of arithmetic
 
-Counter-models for unprovable sentences, and homomorphisms and embeddings of `ℒₒᵣ`-structures.
+An arithmetic sentence a theory does not prove fails in some model of that theory. A homomorphism
+of `ℒₒᵣ`-structures preserves `0`, `1`, `+` and `*`; an embedding also preserves and reflects `<`.
 -/
 
 @[expose] public section
-
-/-! ## Counter-models for unprovable arithmetic sentences
-
-The converse of `FFL.FirstOrder.Arithmetic.complete`: an arithmetic sentence a theory does not
-prove fails in some model of that theory.
--/
 
 namespace FFL.FirstOrder
 namespace Arithmetic
@@ -29,12 +24,6 @@ lemma exists_countermodel_of_unprovable {T : ArithmeticTheory} [𝗘𝗤 ℒₒ�
   exact h (complete T σ fun M _ _ ↦ hc M ‹_› ‹_›)
 
 end Arithmetic
-
-/-! ## Homomorphisms and embeddings of `ℒₒᵣ`-structures
-
-A homomorphism of `ℒₒᵣ`-structures preserves `0`, `1`, `+` and `*`; an embedding also preserves
-and reflects `<`.
--/
 
 namespace Tarski.Structure
 

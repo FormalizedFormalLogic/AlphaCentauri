@@ -8,18 +8,17 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Typed
 public import Foundation.Meta.ClProver
 
 /-!
-# Gaps in Foundation's `Syntax/Proof`
+# Equality and typed derivability in the internal calculus
 
-Supplements Foundation's formalized proofs: equality and typed derivability.
+The shift of free variables is monotone on coded formula sets, and the weakening and shift rules
+are definable at every level. The typed equality formula of a language with equality has internal
+proofs of reflexivity, symmetry, transitivity and the congruence of function and relation symbols
+from $\mathsf{EQ}$. Typed internal provability `T.internalize V ⊢ φ` is transferred to
+`Derivable T` on sequents given as codes, and specialisation and generalisation of `∀¹^[k]` are
+available in the typed internal proof system.
 -/
 
 @[expose] public section
-
-/-! ## Gaps in Foundation's `Syntax/Proof/Basic`
-
-The shift of free variables is monotone on coded formula sets, and the weakening and shift rules
-are definable at every level.
--/
 
 namespace FFL.FirstOrder.Arithmetic
 namespace Bootstrapping
@@ -28,6 +27,8 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+/-! ## Weakening and shift rules -/
 
 lemma setShift_subset_setShift {s t : V} (h : s ⊆ t) : setShift L s ⊆ setShift L t := by
   intro x hx
@@ -42,15 +43,9 @@ instance shiftRule.definable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) 
     ℌ-Function₂ (shiftRule : V → V → V) :=
   .of_zero shiftRule.defined.to_definable
 
-/-! ## Equality in the internal calculus
-
-The typed equality formula of a language with equality, and the internal proofs of reflexivity,
-symmetry, transitivity and the congruence of function and relation symbols from $\mathsf{EQ}$.
--/
+/-! ## Equality in the internal calculus -/
 
 section
-
-/-! ## Equality -/
 
 variable [L.Eq]
 
@@ -238,16 +233,11 @@ lemma tprovable_rel_congr_imp [𝗘𝗤 L ⪯ S] {k : ℕ} (R : L.Rel k) (s u : 
 
 end
 
-/-! ## The typed internal calculus
-
-Typed internal provability `T.internalize V ⊢ φ` is transferred to `Derivable T` on sequents given
-as codes. Specialisation and generalisation of `∀¹^[k]` are available in the typed internal proof
-system.
--/
+/-! ## The typed internal calculus -/
 
 section
 
-/-! ## From typed proofs to derivability -/
+/-! ### From typed proofs to derivability -/
 
 variable {T : Theory L} [T.Δ₁]
 

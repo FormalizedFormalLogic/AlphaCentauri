@@ -10,7 +10,7 @@ In a model of $\mathsf{EA}$ the $\Delta_0$-definable graph of exponentiation is 
 `Exp.exp`, the binary length and logarithm, and the coding of finite sets by binary expansion
 (`i ∈ a` iff the `i`-th bit of `a` is one) behave as they do in models of $\mathsf{I}\Sigma_1$.
 Comprehension holds for $\Delta_0$ predicates on bounded domains. The instances are scoped to
-`ElementaryArithmetic`, and are read by Foundation's formulas `expDef`, `bitDef`, `insertDef`,
+`ElementaryArithmetic`, and are read by the formulas `expDef`, `bitDef`, `insertDef`,
 `bitSubsetDef` and `underDef`.
 
 - [HP98, §I.1(b)]

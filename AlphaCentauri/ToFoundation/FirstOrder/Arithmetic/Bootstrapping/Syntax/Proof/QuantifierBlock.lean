@@ -10,16 +10,11 @@ public import Foundation.Meta.ClProver
 /-!
 # Provability of formula codes with quantifier blocks
 
-Provable equivalences of formula codes, and blocks of quantifiers.
+Term vectors of bound variables, the typed internal derivations of blocks of universal
+quantifiers, and provable equivalences between formula codes in the typed internal calculus.
 -/
 
 @[expose] public section
-
-/-! ## Blocks of universal quantifiers in the typed internal calculus
-
-Term vectors of bound variables, and the typed internal derivations of blocks of universal
-quantifiers.
--/
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -172,12 +167,6 @@ lemma shift_iterate_subst {m : ℕ} (w : SemitermVec V L n m) (φ : Semiformula 
   | zero => rfl
   | succ k ih => simp [ih, Matrix.vecMap_vecMap_comp]
 
-end Semiformula
-
-end shiftIterate
-
-namespace Semiformula
-
 @[simp]
 lemma free_and (φ ψ : Semiformula V L 1) : (φ ⋏ ψ).free = φ.free ⋏ ψ.free := by
   simp [free]
@@ -194,6 +183,8 @@ lemma free_iff (φ ψ : Semiformula V L 1) : (φ 🡘 ψ).free = φ.free 🡘 ψ
   simp [free]
 
 end Semiformula
+
+end shiftIterate
 
 open _root_.FFL.Entailment
 
@@ -397,10 +388,7 @@ lemma tprovable_exs_iff_exs_of_domain {d : Semiformula V L 1} (hd : T.internaliz
     cl_prover [h₁, h₂]
   cl_prover [hd, h₃, tprovable_all_iff_exs (T := T) A (d ⋏ B)]
 
-/-! ## Provable equivalences of formula codes
-
-Provable equivalences between formula codes in the typed internal calculus.
--/
+/-! ## Provable equivalences of formula codes -/
 
 lemma provable_iff_iff_tprovable {p q : V} (hp : IsFormula L p) (hq : IsFormula L q) :
     Provable T (iff L p q) ↔ T.internalize V ⊢ (⟨p, hp⟩ : Formula V L) 🡘 ⟨q, hq⟩ := by

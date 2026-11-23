@@ -8,10 +8,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 /-!
 # Iterated connectives and quantifiers in models of $\mathsf{EA}$
 
-The part of `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Formula/Iteration.lean` on the
-iterated universal quantifier `qqAlls`, ported to models of $\mathsf{EA}$. The blueprint and the
-formula `qqAllsDef` are Foundation's; the recursion carries a bound on its values, and inductions
-are on locally $\Delta_0$ predicates.
+The iterated universal quantifier `qqAlls`, defined by the formula `qqAllsDef`. The recursion
+carries a bound on its values, and inductions are on locally $\Delta_0$ predicates.
 -/
 
 @[expose] public section
@@ -26,8 +24,6 @@ open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isBounded)
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
-
-/-! ### Iterated universal quantifier -/
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.qqAlls (blueprint)
 

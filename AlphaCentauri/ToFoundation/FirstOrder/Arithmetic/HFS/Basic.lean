@@ -7,16 +7,14 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 /-!
 # Hereditarily finite sets in models of arithmetic
 
-Supplements Foundation's `HFS`.
+Insertions into a coded set commute and are absorbed. `listUnion v` is the union of the coded sets
+listed in the vector `v`. `cardBelow s n` is the number of elements of the coded set `s` below `n`,
+and `card s` is the number of elements of `s`.
 -/
 
 @[expose] public section
 
-/-! ## Elementary facts about coded sets
-
-Supplements `Foundation.FirstOrder.Arithmetic.HFS.Basic`: commuting and absorbing insertions into a
-coded set.
--/
+/-! ## Elementary facts about coded sets -/
 
 namespace FFL.FirstOrder
 namespace Arithmetic
@@ -57,10 +55,7 @@ lemma insert_subset_insert_insert {a p Γ s : V} (h : Γ ⊆ insert p s) :
     · simp
     · simp [hx]
 
-/-! ## The union of a list of coded sets
-
-`listUnion v` is the union of the coded sets listed in the vector `v`.
--/
+/-! ## The union of a list of coded sets -/
 
 namespace ListUnion
 
@@ -127,11 +122,7 @@ lemma listUnion_eq_empty_iff {v : V} : listUnion v = ∅ ↔ ∀ i < len v, v.[i
 
 end
 
-/-! ## The number of elements of a coded set
-
-`cardBelow s n` is the number of elements of the coded set `s` below `n`, and `card s` is the number
-of elements of `s`.
--/
+/-! ## The number of elements of a coded set -/
 
 namespace CardBelow
 

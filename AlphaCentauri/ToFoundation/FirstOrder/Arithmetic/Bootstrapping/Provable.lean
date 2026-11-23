@@ -9,9 +9,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityCondition.EquationalTheory
 
 /-!
-# Gaps in Foundation's `DerivabilityCondition`
+# Internal provability of instances, modus ponens and induction
 
-Generic facts about `Bootstrapping.Provable`: instantiating an internally-provable instance by
+Facts about `Bootstrapping.Provable`: instantiating an internally-provable instance by
 numerals of a universal formula at one more numeral, modus ponens for arbitrary (not necessarily
 quoted) codes, induction on a numeral of a formula whose base case and induction step are
 provable, the internal provability of the numeral instances of a theorem of `𝗜𝚺₁` and of a

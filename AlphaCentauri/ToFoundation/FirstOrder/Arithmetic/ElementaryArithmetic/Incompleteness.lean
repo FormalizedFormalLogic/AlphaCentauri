@@ -11,21 +11,19 @@ public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 /-!
 # Incompleteness in models of $\mathsf{EA}$
 
-`Incompleteness`, ported to models of $\mathsf{EA}$: undefinability of truth and uniform reflection.
+The code `indBodyVal` of the induction instance of a formula, and the predicate `InductionR S` of
+codes of the universal closures of induction instances of formulas satisfying `S`, defined by
+`chInd`. In each model of $\mathsf{EA}$ the axioms of `𝗣𝗔⁻`, of the induction schemata over
+`ℬ[<, ℒₒᵣ].Hierarchy Γ s` and `ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`, and hence of `𝗜𝗡𝗗 Γ s`,
+`𝗜𝗡𝗗⁺ Γ s` and `𝗘𝗔`, form a locally $\Delta_0$ set (`LocallyDelta0Axioms`). A model of
+$\mathsf{EA}$ satisfies the uniform reflection schema of a theory `T` for `φ` iff every instance of
+`φ` by numerals whose code is internally provable in `T` holds in the model, for theories `T` whose
+axioms are locally $\Delta_0$ in the model.
 -/
 
 @[expose] public section
 
-/-! ## The induction schemata recognised on codes in models of $\mathsf{EA}$
-
-The part of `Foundation/FirstOrder/Incompleteness/Definability.lean` on recognising the induction
-schema on codes, ported to models of $\mathsf{EA}$: the code `indBodyVal` of the induction
-instance of a formula, and the predicate `InductionR S` of codes of the universal closures of
-induction instances of formulas satisfying `S`, defined by Foundation's `chInd`. In each model of
-$\mathsf{EA}$ the axioms of `𝗣𝗔⁻`, of the induction schemata over `ℬ[<, ℒₒᵣ].Hierarchy Γ s` and
-`ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`, and hence of `𝗜𝗡𝗗 Γ s`, `𝗜𝗡𝗗⁺ Γ s` and `𝗘𝗔`, form a locally
-$\Delta_0$ set (`LocallyDelta0Axioms`).
--/
+/-! ## The induction schemata recognised on codes -/
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -130,12 +128,7 @@ example (Γ : Polarity) (s : ℕ) : LocallyDelta0Axioms (𝗜𝗡𝗗 Γ s) V :=
 
 example : LocallyDelta0Axioms 𝗘𝗔 V := inferInstance
 
-/-! ## Uniform reflection in models of $\mathsf{EA}$
-
-A model of $\mathsf{EA}$ satisfies the uniform reflection schema of a theory `T` for `φ` iff every
-instance of `φ` by numerals whose code is internally provable in `T` holds in the model, for
-theories `T` whose axioms are locally $\Delta_0$ in the model.
--/
+/-! ## Uniform reflection -/
 
 lemma models_uniformReflectionSchema_iff (T : ArithmeticTheory) [T.Δ₁] [LocallyDelta0Axioms T V]
     {k : ℕ} (φ : ArithmeticSemisentence k) :

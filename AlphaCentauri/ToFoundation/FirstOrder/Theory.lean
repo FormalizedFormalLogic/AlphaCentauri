@@ -5,7 +5,7 @@ public import Foundation.FirstOrder.LK.Basic
 /-!
 # Relative strength of theories on a class of sentences
 
-Companion of Foundation's `Theory`: `T ⪯[Γ] U` says that `U` proves every `Γ`-sentence that `T`
+`T ⪯[Γ] U` says that `U` proves every `Γ`-sentence that `T`
 proves.
 -/
 

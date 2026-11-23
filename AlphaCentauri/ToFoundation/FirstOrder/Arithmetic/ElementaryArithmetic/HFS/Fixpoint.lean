@@ -7,10 +7,9 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 /-!
 # Fixpoint construction in models of $\mathsf{EA}$
 
-The file `Foundation/FirstOrder/Arithmetic/HFS/Fixpoint.lean` on inductively defined sets in
-models of $\mathsf{I}\Sigma_1$, ported to models of $\mathsf{EA}$. The operator is required to be
+Inductively defined sets. The operator is required to be
 locally $\Delta_0$; the stages `limSeq` are then given by bounded primitive recursion, and the
-formulas of Foundation's `Fixpoint.Blueprint` define them. For strongly finite operators the
+formulas of `Fixpoint.Blueprint` define them. For strongly finite operators the
 fixpoint is locally $\Delta_0$, is a fixed point of the operator, and satisfies induction on
 locally $\Delta_0$ predicates. For operators that are only finite, a premise is reached at a
 stage that has to be given explicitly.

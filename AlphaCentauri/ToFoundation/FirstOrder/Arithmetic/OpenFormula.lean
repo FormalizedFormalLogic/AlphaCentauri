@@ -7,19 +7,16 @@ public import Foundation.FirstOrder.Arithmetic.Basic
 /-!
 # Open formulas over an ordered ring
 
-Open `ℒₒᵣ`-formulas, the predicates they define, and their degree.
--/
-
-@[expose] public section
-
-/-! ## Open formulas over an ordered ring
-
 Over a commutative ordered ring `R` regarded as an `ℒₒᵣ`-structure, the open `ℒₒᵣ`-formulas define
 open predicates. Conversely, every open predicate on `R` is defined by an open formula whose
 parameters range over any `M → R` whose differences cover `R`.
+
+`Semiterm.degree` bounds the degree of a term in its bound variables, and `Semiformula.degree` that
+of the terms of a formula. An open `ℒₒᵣ`-formula of degree at most `N` in one bound variable defines
+a predicate determined by the signs of polynomials of degree at most `N`.
 -/
 
-section
+@[expose] public section
 
 open FFL FirstOrder Semiterm Polynomial
 
@@ -121,14 +118,6 @@ lemma exists_open_eval_iff [IsStrictOrderedRing R] {P : (Fin n → R) → Prop} 
     simp [hθ₁, hθ₂, h₁, h₂]
 
 end OpenPredicate
-
-/-! ## The degree of an open formula
-
-`Semiterm.degree` bounds the degree of a term in its bound variables, and `Semiformula.degree` that
-of the terms of a formula. Over a commutative ordered ring, an open `ℒₒᵣ`-formula of degree at most
-`N` in one bound variable defines a predicate determined by the signs of polynomials of degree at
-most `N`.
--/
 
 namespace FFL.FirstOrder
 
@@ -248,5 +237,3 @@ lemma determinedBySigns_eval {φ : ArithmeticSemiformula ξ 1} (hφ : φ.Open) (
 
 
 end OpenPredicate
-
-end

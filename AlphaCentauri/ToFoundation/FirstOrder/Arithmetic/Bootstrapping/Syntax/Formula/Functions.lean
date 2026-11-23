@@ -6,13 +6,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # Functions on formula codes
 
-Supplements Foundation's `Syntax/Formula/Functions`, and iterated quantifiers.
--/
-
-@[expose] public section
-
-/-! ## Gaps in Foundation's `Syntax/Formula/Functions`
-
 Negation has no fixed point on coded formulas, and the shift of free variables does not decrease
 the code of a formula. A substitution instance `subst w p` of a coded formula `p`, and likewise its
 shift `shift p`, has the same outermost connective as `p`. Substituting into a coded formula with
@@ -20,7 +13,14 @@ shift `shift p`, has the same outermost connective as `p`. Substituting into a c
 one-variable formulas instantiates the quantifier case by a free variable. A coded sentence is a
 coded semiformula without free variables, and the class of coded sentences with `n` bound variables
 is closed under the connectives.
+
+The shift of free variables and the substitution of terms without bound variables pass through a
+block `qqAlls p k` of universal quantifiers. `qqExss p k` is a block of `k` existential
+quantifiers; instantiating its outermost quantifier by a closed term instantiates the outermost
+bound variable.
 -/
+
+@[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
 namespace Bootstrapping
@@ -29,6 +29,8 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+/-! ## Connectives, substitution and shift -/
 
 lemma neg_ne_self {p : V} (hp : IsUFormula L p) : neg L p ≠ p := by
   rcases hp.case with (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl |
@@ -483,14 +485,6 @@ lemma shift_neg_substs1_qqFvar {d j : V} (hd : L.IsSentence 1 d) :
     shift L (neg L (substs1 L (^&j) d)) = neg L (substs1 L (^&(j + 1)) d) := by
   rw [shift_neg (IsSemiformula.substs1 (n := 0) (by simp) hd.isSemiformula),
     shift_substs1_qqFvar hd.isSemiformula, hd.shift_eq]
-
-/-! ## Gaps in Foundation's `Syntax/Formula/Iteration`
-
-The shift of free variables and the substitution of terms without bound variables pass through a
-block `qqAlls p k` of universal quantifiers. `qqExss p k` is a block of `k` existential
-quantifiers; instantiating its outermost quantifier by a closed term instantiates the outermost
-bound variable.
--/
 
 /-! ## Blocks of universal quantifiers -/
 

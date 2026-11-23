@@ -9,18 +9,16 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 /-!
 # Provability in models of $\mathsf{EA}$
 
-`Bootstrapping`, ported to models of $\mathsf{EA}$: the fixed point lemma and provability.
+Substitution of numerals for the bound variables of a code of a formula: the list `matrixToVec v`
+of the entries of a tuple, `substNumeral` and `substNumerals`, defined by `ssnum` and `ssnums`. The
+internal provability of the codes of the theorems of a theory, the derivations of an instance of a
+universal formula and of the conclusion of an implication, and the induction on a numeral of a
+formula whose base case and induction step are theorems.
 -/
 
 @[expose] public section
 
-/-! ## Substitution of numerals in models of $\mathsf{EA}$
-
-The part of `Foundation/FirstOrder/Arithmetic/Bootstrapping/FixedPoint.lean` on substituting
-numerals for the bound variables of a code of a formula, ported to models of $\mathsf{EA}$: the list
-`matrixToVec v` of the entries of a tuple, `substNumeral` and `substNumerals`, defined by
-Foundation's `ssnum` and `ssnums`.
--/
+/-! ## Substitution of numerals -/
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
@@ -130,12 +128,7 @@ end Bootstrapping.Arithmetic
 
 end
 
-/-! ## Internal provability in models of $\mathsf{EA}$: instantiation, modus ponens and induction
-
-The internal provability, in a model of $\mathsf{EA}$, of the codes of the theorems of a theory,
-the derivations of an instance of a universal formula and of the conclusion of an implication, and
-the induction on a numeral of a formula whose base case and induction step are theorems.
--/
+/-! ## Internal provability: instantiation, modus ponens and induction -/
 
 namespace Bootstrapping
 

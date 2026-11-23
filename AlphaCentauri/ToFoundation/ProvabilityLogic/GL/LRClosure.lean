@@ -186,7 +186,7 @@ end FiniteUpToEquiv
 
 end Logic.GL
 
-/-! ### Boolean combinations -/
+/-! ## Boolean combinations -/
 
 namespace Formula
 
@@ -325,7 +325,7 @@ lemma image {f : Formula α → Formula α} (hf : ∀ {A B}, 𝐆𝐋 ⊢ A 🡘
 
 end Logic.GL.FiniteUpToEquiv
 
-/-! ### The LR-closure -/
+/-! ## The LR-closure -/
 
 /-- The LR-closure of a finite set `P` of atoms. `LRClosure P true` contains `⊥` and the atoms in
 `P` and is closed under `A ↦ A ⋏ □∼B` for `B` in either part; `LRClosure P false` contains
@@ -598,7 +598,7 @@ theorem finiteUpToEquiv (P : Finset α) (b : Bool) :
     FiniteUpToEquiv {Z | LRClosure P b Z} :=
   (finiteUpToEquiv_base P).of_subset fun _ hZ ↦ .inl ⟨b, hZ⟩
 
-/-! ### The `□`-subformulas of the LR-closure -/
+/-! ## The `□`-subformulas of the LR-closure -/
 
 private lemma box_mem_subfmls_disj₂ {E : Formula α} :
     {l : List (Formula α)} → □E ∈ (⋁l).subfmls → ∃ C ∈ l, □E ∈ C.subfmls

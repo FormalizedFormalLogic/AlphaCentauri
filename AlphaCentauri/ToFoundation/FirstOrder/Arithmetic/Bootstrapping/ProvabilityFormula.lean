@@ -8,7 +8,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Par
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.InternalTSchema
 
 /-!
-# Gaps in Foundation's `DerivabilityCondition`: the provability formula at a numeral
+# The provability formula at a numeral
 
 For an element `x` of a model of `𝗜𝚺₁`, `provabilityFormula T x` is the internal sentence
 obtained by substituting the numeral of `x` into the provability formula of `T`. Its internal

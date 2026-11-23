@@ -8,13 +8,12 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 /-!
 # Lists in models of $\mathsf{EA}$
 
-The file `Foundation/FirstOrder/Arithmetic/HFS/Vec.lean` on lists coded by iterated pairing in
-models of $\mathsf{I}\Sigma_1$, ported to models of $\mathsf{EA}$: `x ∷ v`, the `i`-th element
-`v.[i]`, induction on lists for locally $\Delta_0$ predicates, recursion on lists with a monotone
-bound on its values, and the length, maximum, last elements, concatenation, membership,
-repetition and set of elements of a list. The formulas `adjoinDef`, `mkVec₁Def`, `mkVec₂Def`,
+Lists coded by iterated pairing: `x ∷ v`, the `i`-th element `v.[i]`, induction on lists for
+locally $\Delta_0$ predicates, recursion on lists with a monotone bound on its values, and the
+length, maximum, last elements, concatenation, membership, repetition and set of elements of a
+list. The formulas `adjoinDef`, `mkVec₁Def`, `mkVec₂Def`,
 `nthDef`, `lenDef`, `listMaxDef`, `takeLastDef`, `concatDef`, `memVecDef`, `subsetVecDef`,
-`repeatVecDef` and `vecToSetDef` define the $\mathsf{EA}$ versions. A Skolem function for a
+`repeatVecDef` and `vecToSetDef` define these operations. A Skolem function for a
 locally $\Delta_0$ relation with bounded witnesses is `sigmaZero_skolem_vec`.
 
 - [HP98, §V.3]
@@ -151,7 +150,7 @@ lemma adjoin_le_exp_exp {a b n : V} (hn : 1 ≤ n) (ha : a ≤ Exp.exp (Exp.exp 
 lemma le_exp_exp {a n : V} (h : a ≤ n) : a ≤ Exp.exp (Exp.exp n) :=
   le_trans h (lt_trans (lt_exp n) (exp_monotone.mpr (lt_exp n))).le
 
-/-! ### The `i`-th element of a list -/
+/-! ## The `i`-th element of a list -/
 
 namespace Nth
 
@@ -353,7 +352,7 @@ instance nth_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (nth : V → V → V)
 lemma nth_zero_idx (i : V) : (0 : V).[i] = 0 :=
   nonpos_iff_eq_zero.mp (nth_le 0 i)
 
-/-! ### Recursion on lists -/
+/-! ## Recursion on lists -/
 
 namespace VecRec
 
@@ -632,7 +631,7 @@ end Construction
 
 end VecRec
 
-/-! ### Length of a list -/
+/-! ## Length of a list -/
 
 namespace Len
 
@@ -853,7 +852,7 @@ lemma eq_doubleton_of_len_eq_two {v : V} : len v = 2 ↔ ∃ x y, v = ?[x, y] :=
         (by simp [lt_two_iff_le_one, le_one_iff_eq_zero_or_one, h])⟩
   · rintro ⟨x, y, rfl⟩; simp [one_add_one_eq_two]
 
-/-! ### Maximum of a list -/
+/-! ## Maximum of a list -/
 
 lemma LocallyDelta0Function.max : LocallyDelta0Function₂ (Max.max : V → V → V) :=
   LocallyDelta0Function.of_definableBoundedFunction ⟨inferInstance, by definability⟩
@@ -941,7 +940,7 @@ lemma listMaxss_le_iff {v z : V} : listMax v ≤ z ↔ ∀ i < len v, v.[i] ≤ 
   · intro h i hi; exact le_trans (nth_le_listMax hi) h
   · exact listMaxss_le
 
-/-! ### The last `k` elements of a list -/
+/-! ## The last `k` elements of a list -/
 
 namespace TakeLast
 
@@ -1014,7 +1013,7 @@ lemma takeLast_zero (v : V) : takeLast v 0 = 0 := by
   · intro x v ih
     simp [takeLast_adjoin, ih]
 
-/-! ### Concatenation -/
+/-! ## Concatenation -/
 
 namespace Concat
 
@@ -1129,7 +1128,7 @@ lemma concat_nth_len (v z : V) : (concat v z).[len v] = z := by
 lemma concat_nth_len' (v z : V) {i} (hi : len v = i) : (concat v z).[i] = z := by
   rcases hi; simp
 
-/-! ### Membership -/
+/-! ## Membership -/
 
 /-- `x ∈ᵥ v` states that `x` is an element of the list `v`. -/
 def MemVec (x v : V) : Prop := ∃ i < len v, x = v.[i]
@@ -1167,7 +1166,7 @@ instance memVec_definable : 𝚫ᴬ₁-Relation (MemVec : V → V → Prop) := m
 instance memVec_definable' (Γ m) : Γᴬ_[m + 1]-Relation (MemVec : V → V → Prop) :=
   memVec_definable.of_deltaOne
 
-/-! ### Subset -/
+/-! ## Subset -/
 
 /-- `v ⊆ᵥ w` states that every element of the list `v` is an element of the list `w`. -/
 def SubsetVec (v w : V) : Prop := ∀ x, x ∈ᵥ v → x ∈ᵥ w
@@ -1197,7 +1196,7 @@ instance subsetVec_definable : 𝚫ᴬ₁-Relation (SubsetVec : V → V → Prop
 instance subsetVec_definable' (Γ m) : Γᴬ_[m + 1]-Relation (SubsetVec : V → V → Prop) :=
   subsetVec_definable.of_deltaOne
 
-/-! ### Repetition -/
+/-! ## Repetition -/
 
 lemma repeatVec.bound_locallyDelta0 : LocallyDelta0Function fun v : Fin (1 + 1) → V ↦
     Exp.exp (Exp.exp (v 0 + v 0 + v 1 + 3)) + 1 :=
@@ -1298,7 +1297,7 @@ lemma len_repeatVec_of_nth_le {v m : V} (H : ∀ i < len v, v.[i] ≤ m) :
     v ≤ repeatVec m (len v) :=
   le_of_nth_le_nth (by simp) (fun i hi ↦ by simp [nth_repeatVec m (len v) hi, H i hi])
 
-/-! ### Conversion to a set -/
+/-! ## Conversion to a set -/
 
 namespace VecToSet
 
@@ -1374,7 +1373,7 @@ lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i]
 lemma nth_mem_vecToSet {v i : V} (h : i < len v) : v.[i] ∈ vecToSet v :=
   mem_vecToSet_iff.mpr ⟨i, h, rfl⟩
 
-/-! ### Mapping a function over a list -/
+/-! ## Mapping a function over a list -/
 
 /-- A list of length `l` whose elements are at most `B` lies below
 `Exp.exp (Exp.exp (l + l + B + 3))`. -/

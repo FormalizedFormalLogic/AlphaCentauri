@@ -3,7 +3,11 @@ module
 public import Foundation.FirstOrder.Incompleteness.ProvabilityAbstraction.Basic
 
 /-!
-# Gaps in Foundation's `ProvabilityAbstraction.Basic`: formalized consistency statements
+# Formalized consistency statements
+
+For a provability predicate $\mathfrak{B}$ satisfying the Hilbert--Bernays--Löb conditions, the base
+theory proves that $\mathrm{Con}_{\mathfrak{B}}$ is not provable in $\mathfrak{B}$ and that
+$\neg\mathrm{Con}_{\mathfrak{B}}$ is not refutable in $\mathfrak{B}$.
 -/
 
 @[expose] public section

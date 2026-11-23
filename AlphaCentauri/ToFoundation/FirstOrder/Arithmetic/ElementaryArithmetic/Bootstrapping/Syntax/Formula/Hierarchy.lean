@@ -7,14 +7,10 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hier
 /-!
 # Internal arithmetical hierarchy in models of $\mathsf{EA}$
 
-The part of `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Formula/Hierarchy.lean` in the
-namespace `Bootstrapping`, ported to models of $\mathsf{EA}$: the unbounded quantifier `qqQuant` of
-a given polarity, the iterated quantifier prefix `qqToPrenex`, and the predicates `IsHierarchy Γ n`
-and `IsPrenexHierarchy Γ n` on codes of formulas, closed under negation. The formulas are
-Foundation's `qqQuantDef`, `qqToPrenexDef`, `IsHierarchyF.blueprint`, `isHierarchy` and
-`isPrenexHierarchy`.
-
-## References
+The unbounded quantifier `qqQuant` of a given polarity, the iterated quantifier prefix
+`qqToPrenex`, and the predicates `IsHierarchy Γ n` and `IsPrenexHierarchy Γ n` on codes of
+formulas, closed under negation, defined by `qqQuantDef`, `qqToPrenexDef`,
+`IsHierarchyF.blueprint`, `isHierarchy` and `isPrenexHierarchy`.
 
 - [HP98, Lemma I.1.69]
 -/

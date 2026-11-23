@@ -8,19 +8,16 @@ public import Foundation.FirstOrder.Syntax.Classical.BoundingHierarchy
 /-!
 # Bounded formulas and the hierarchy of formulas
 
-Supplements Foundation's `Bounding`: bounded formulas, the hierarchy, Boolean combinations and
-prenex normal forms.
+The class $\Delta_0$ of formulas all of whose quantifiers are bounded by `<` is
+`ℬ[<, L].Closure`; `Bounding.Hierarchy.zero_iff_bounded` identifies it with
+`ℬ[<, L].Hierarchy Γ 0`, and `bounded_induction` is a recursor for it on arithmetical formulas.
+The hierarchy of a universal closure, Boolean combinations of a class of formulas, and prenex normal
+forms are treated as well.
 -/
 
 @[expose] public section
 
-/-! ## $\Delta_0$ formulas
-
-In Foundation the class $\Delta_0$ of formulas all of whose quantifiers are bounded by `<` is
-`ℬ[<, L].Closure`; `Bounding.Hierarchy.zero_iff_bounded` identifies it with
-`ℬ[<, L].Hierarchy Γ 0`. `bounded_induction` is a recursor for it on arithmetical formulas that
-Foundation does not provide.
--/
+/-! ## $\Delta_0$ formulas -/
 
 namespace FFL.FirstOrder
 
@@ -307,9 +304,6 @@ theorem prenexBlock : ∀ φ ∈ 𝗣𝗔⁻, ℬ[<, ℒₒᵣ].PrenexBlock 𝚷
 
 end Arithmetic.PeanoMinus
 
-end FFL.FirstOrder
-
-namespace FFL.FirstOrder
 namespace Bounding.HierarchySymbol.Semiformula
 
 variable {L : Language} {ℬ : Bounding L} {ξ : Type*} {n s : ℕ}

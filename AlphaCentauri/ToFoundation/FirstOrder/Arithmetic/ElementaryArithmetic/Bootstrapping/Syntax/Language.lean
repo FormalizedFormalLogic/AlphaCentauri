@@ -6,10 +6,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
 /-!
 # The language of arithmetic in models of $\mathsf{EA}$
 
-The file `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Language.lean` on the internalized
-language $\mathcal{L}_{\mathrm{OR}}$, ported to models of $\mathsf{EA}$: the codes of the function
-and relation symbols of $\mathcal{L}_{\mathrm{OR}}$ are the ones given by `zeroIndex`, ...,
-`ltIndex`, and `isFunc_iff_LOR` and `isRel_iff_LOR` describe the codes of symbols.
+The codes of the function and relation symbols of $\mathcal{L}_{\mathrm{OR}}$ are the ones given
+by `zeroIndex`, ..., `ltIndex`, and `isFunc_iff_LOR` and `isRel_iff_LOR` describe the codes of
+symbols.
 
 - [HP98, §V.3]
 -/

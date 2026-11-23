@@ -8,14 +8,12 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 /-!
 # Derivations in models of $\mathsf{EA}$
 
-The file `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Proof/Basic.lean` on codes of
-derivations, ported to models of $\mathsf{EA}$: sets of formulas `IsFormulaSet`, the shift
-`setShift` of a set of formulas, the codes `axL`, …, `axm` of the inference rules, and the
-predicates `Derivation T`, `DerivationOf T`, `Derivable T`, `Proof T` and `Provable T` for a
-theory `T` whose axioms are locally $\Delta_0$ in the model. The formulas are Foundation's
-`isFormulaSet`, `setShiftGraph`, `axLGraph`, …, `axmGraph`, `Derivation.blueprint`, `derivation`,
-`derivationOf`, `derivable`, `proof` and `provable`; derivations form a strongly finite fixpoint,
-with induction on locally $\Delta_0$ predicates.
+Sets of formulas `IsFormulaSet`, the shift `setShift` of a set of formulas, the codes `axL`, …,
+`axm` of the inference rules, and the predicates `Derivation T`, `DerivationOf T`, `Derivable T`,
+`Proof T` and `Provable T` for a theory `T` whose axioms are locally $\Delta_0$ in the model,
+defined by `isFormulaSet`, `setShiftGraph`, `axLGraph`, …, `axmGraph`, `Derivation.blueprint`,
+`derivation`, `derivationOf`, `derivable`, `proof` and `provable`. Derivations form a strongly
+finite fixpoint, with induction on locally $\Delta_0$ predicates.
 
 - [HP98, §V.3]
 -/

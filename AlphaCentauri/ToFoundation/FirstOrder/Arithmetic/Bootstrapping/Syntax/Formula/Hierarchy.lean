@@ -4,7 +4,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hierarchy
 
 /-!
-# Gaps in Foundation's `Syntax/Formula/Hierarchy`
+# Substitution and prenex decompositions of formula codes
 
 Substitution preserves $\Delta_0$ formulas and prenex formulas of a class, and a substitution
 instance of a formula is $\Delta_0$, or prenex of a class, only if the formula itself is. Prenex
@@ -243,8 +243,6 @@ lemma qqToPrenex_eq_or {p q : V} (h : qqToPrenex Γ s θ = p ^⋎ q) : s = 0 := 
   · cases Γ <;> simp [qqExs, qqAll, qqOr] at h
 
 end qqToPrenex
-
-/-! ## Recovering a formula from a substitution instance -/
 
 /-! ## The $\Delta_0$ and prenex classes -/
 

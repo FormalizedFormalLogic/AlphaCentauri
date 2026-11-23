@@ -5,17 +5,17 @@ public import Foundation.FirstOrder.Tarski.Basic
 public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
 
 /-!
-# Gaps in Foundation's syntax of first-order logic
+# Syntax of first-order logic
 
-Supplements Foundation's `Semiformula`, `Rew` and binder notation.
+Quantifier-rank invariance, distinctness lemmas and constructor equations for `Semiformula`,
+commutation and congruence lemmas for substitutions and rewritings, the conversion of a formula
+with `ℕ`-indexed free variables into a semisentence, and the notation `t ^' n` for a power by a
+variable exponent.
 -/
 
 @[expose] public section
 
-/-! ## Two gaps in Foundation's `Semiformula` API
-
-Quantifier-rank invariance, distinctness lemmas, and constructor equations for `Semiformula`.
--/
+/-! ## Quantifier rank, distinctness and constructor equations -/
 
 namespace FFL.FirstOrder
 
@@ -72,10 +72,7 @@ attribute [grind =] Multiset.mem_atom_iff
 
 end Semiformula
 
-/-! ## Substitution against a rewriting
-
-Commutation and congruence lemmas for substitutions and rewritings.
--/
+/-! ## Substitution against a rewriting -/
 
 namespace Rew
 

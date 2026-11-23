@@ -6,21 +6,17 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 /-!
 # Hereditarily finite sets and sequences in models of $\mathsf{EA}$
 
-`HFS`, ported to models of $\mathsf{EA}$: sets, mappings and sequences.
+Union, intersection, product, domain, range, mappings and restriction of bit-coded sets, and
+sequences coded as mappings with domain an initial segment. Comprehension is available for
+$\Delta_0$ predicates only, so the Skolem and replacement principles carry an explicit bound on the
+values; likewise induction on sequences is available for $\Delta_0$ predicates only, and the Skolem
+principle for sequences carries an explicit bound on the values.
+
+- [HP98, §I.1(b)]
 -/
 
 @[expose] public section
 
-/-! ## Hereditary finite sets in models of $\mathsf{EA}$
-
-The file `Foundation/FirstOrder/Arithmetic/HFS/Basic.lean` on hereditary finite set theory in
-models of $\mathsf{I}\Sigma_1$, ported to models of $\mathsf{EA}$: union, intersection, product,
-domain, range, mappings and restriction of bit-coded sets. Comprehension is available for
-$\Delta_0$ predicates only, so the Skolem and replacement principles carry an explicit bound on
-the values.
-
-- [HP98, §I.1(b)]
--/
 
 namespace FFL.FirstOrder.Arithmetic
 namespace ElementaryArithmetic
@@ -28,6 +24,8 @@ namespace ElementaryArithmetic
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+
+/-! ## Union, intersection, product and domain -/
 
 @[simp]
 lemma susbset_insert (x a : V) : a ⊆ insert x a := by intro z hz; simp [hz]
@@ -353,7 +351,7 @@ lemma domain_eq_empty_iff_eq_empty {s : V} : domain s = ∅ ↔ s = ∅ :=
       intro h x hx
       exact h (π₁ x) (π₂ x) (by simpa using hx), by rintro rfl; simp⟩
 
-/-! ### Range -/
+/-! ## Range -/
 
 lemma range_exists_unique (s : V) :
     ∃! r : V, ∀ y, y ∈ r ↔ ∃ x, ⟪x, y⟫ ∈ s := by
@@ -411,7 +409,7 @@ lemma range_bound (s : V) : range s ≤ 2 * s := le_iff_lt_succ.mpr
 
 instance : Bounded₁ (range : V → V) := ⟨‘x. 2 * x’, fun _ ↦ by simp⟩
 
-/-! ### Disjoint -/
+/-! ## Disjoint -/
 
 def Disjoint (s t : V) : Prop := s ∩ t = ∅
 
@@ -428,7 +426,7 @@ lemma Disjoint.symm {s t : V} (h : Disjoint s t) : Disjoint t s := by
 lemma Disjoint.singleton_iff {a s : V} : Disjoint ({a} : V) s ↔ a ∉ s := by
   simp [Disjoint, isempty_iff]
 
-/-! ### Mapping -/
+/-! ## Mapping -/
 
 def IsMapping (m : V) : Prop := ∀ x ∈ domain m, ∃! y, ⟪x, y⟫ ∈ m
 
@@ -507,7 +505,7 @@ lemma IsMapping.uniq {m x y₁ y₂ : V} (h : IsMapping m) :
     ⟪x, y₁⟫ ∈ m → ⟪x, y₂⟫ ∈ m → y₁ = y₂ := fun h₁ h₂ ↦
   h x (mem_domain_iff.mpr ⟨y₁, h₁⟩) |>.unique h₁ h₂
 
-/-! #### Properties of mappings -/
+/-! ### Properties of mappings -/
 
 def IsMapping.Injective (m : V) : Prop := ∀ x x' y, ⟪x, y⟫ ∈ m → ⟪x', y⟫ ∈ m → x = x'
 
@@ -568,7 +566,7 @@ instance IsMapping.surjective_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, 
 @[simp]
 lemma IsMapping.surjective_empty : IsMapping.Surjective (∅ : V) := by intro y; simp
 
-/-! ### Restriction of mapping -/
+/-! ## Restriction of mapping -/
 
 lemma restr_exists_unique (f s : V) :
     ∃! g : V, ∀ x, (x ∈ g ↔ x ∈ f ∧ π₁ x ∈ s) := by
@@ -676,15 +674,7 @@ instance sndIdx_definable : 𝚺ᴬ₀-Function₁[V] sndIdx := sndIdx_defined.t
 instance sndIdx_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     Γ-Function₁[V] sndIdx := sndIdx_definable.of_zero
 
-/-! ## Sequences in models of $\mathsf{EA}$
-
-The file `Foundation/FirstOrder/Arithmetic/HFS/Seq.lean` on sequences coded as mappings with
-domain an initial segment, ported to models of $\mathsf{EA}$. Induction on sequences is available
-for $\Delta_0$ predicates only, and the Skolem principle for sequences carries an explicit bound
-on the values.
-
-- [HP98, §I.1(b)]
--/
+/-! ## Sequences -/
 
 def Seq (s : V) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 

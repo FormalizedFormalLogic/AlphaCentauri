@@ -3,7 +3,7 @@ module
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
-# Gaps in Foundation's `Syntax/Term/Functions`
+# Substitution and bound variables of term codes
 
 Substituting the bound variables of a closed semiterm, or shifting them, is the identity;
 substituting into a semiterm with `m` bound variables depends only on the first `m` entries of the

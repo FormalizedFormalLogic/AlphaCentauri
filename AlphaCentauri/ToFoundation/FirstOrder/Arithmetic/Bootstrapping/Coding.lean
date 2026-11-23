@@ -5,8 +5,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 /-!
 # Codes of sentences and of closed arithmetic terms
 
-Companion of Foundation's `Bootstrapping/Syntax/{Term,Formula}/Coding.lean`.
-
 The code of a semisentence is fixed by the shift of free variables, the code of its negation is the
 negation of its code, and the code of its universal closure is a block of universal quantifiers
 over its code. The code of the negation of a semisentence that is not universal is not existential.
@@ -21,9 +19,13 @@ from the code of the formula by the corresponding function on codes.
 @[expose] public section
 
 namespace FFL.FirstOrder
-namespace Language
 
 open Arithmetic Bootstrapping
+
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {L : Language} [L.Encodable]
+  [L.LORDefinable]
+
+namespace Language
 
 /-- Every relation and function symbol of `L` in `V` is a standard one. -/
 def SymbolsStandard (L : Language) [L.Encodable] [L.LORDefinable] (V : Type*) [ORingStructure V]
@@ -53,15 +55,8 @@ lemma SymbolsStandard.oRing {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧*
       simp
 
 end Language
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder
 namespace Semisentence
-
-open Arithmetic Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {L : Language} [L.Encodable]
-  [L.LORDefinable]
 
 @[simp]
 lemma shift_quote {n : ℕ} (σ : Semisentence L n) : shift L (⌜σ⌝ : V) = ⌜σ⌝ := by
@@ -91,14 +86,10 @@ lemma quote_conj {n k : ℕ} (φ : Fin k → Semisentence L n) :
       ih (Matrix.vecTail φ)
 
 end Semisentence
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder
 namespace Semiterm
 
-open Arithmetic Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {n : ℕ}
+variable {n : ℕ}
 
 section
 
@@ -137,12 +128,8 @@ lemma empty_quote_numeral (k : ℕ) :
   simp [empty_quote_eq]
 
 end Semiterm
-end FFL.FirstOrder
 
-namespace FFL.FirstOrder.Arithmetic
-namespace Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+namespace Arithmetic.Bootstrapping
 
 lemma quote_neg_sentence {n : ℕ} (σ : ArithmeticSemisentence n) :
     (⌜∼σ⌝ : V) = neg ℒₒᵣ (⌜σ⌝ : V) := by
@@ -174,16 +161,7 @@ lemma satisfies_ofList_ch (l : List ArithmeticSentence) (p : V) :
       Theory.Δ₁.singleton_toTDef_ch_val, ih]
     simp [Sentence.quote_eq_encode, numeral_eq_natCast]
 
-end Bootstrapping
-end FFL.FirstOrder.Arithmetic
-
-namespace FFL.FirstOrder
-
-open Arithmetic Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-
-lemma Arithmetic.Bootstrapping.eq_matrixToVec_iff {k : ℕ} {w : V} {u : Fin k → V} :
+lemma eq_matrixToVec_iff {k : ℕ} {w : V} {u : Fin k → V} :
     w = matrixToVec u ↔ (k : V) = len w ∧ ∀ i : Fin k, w.[((i : ℕ) : V)] = u i := by
   constructor
   · rintro rfl
@@ -194,9 +172,18 @@ lemma Arithmetic.Bootstrapping.eq_matrixToVec_iff {k : ℕ} {w : V} {u : Fin k �
     obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi
     simp [h₂]
 
-namespace Semiformula
+lemma exists_termVec {k : ℕ} {v : V} (hv : IsSemitermVec L (k : V) 0 v) :
+    ∃ u : Fin k → Term V L, SemitermVec.val u = v := by
+  have hu : ∀ i : Fin k, IsSemiterm L 0 v.[((i : ℕ) : V)] := fun i ↦ hv.nth (by simp)
+  exact ⟨fun i ↦ ⟨v.[((i : ℕ) : V)], hu i⟩, by
+    change matrixToVec (fun i : Fin k ↦ v.[((i : ℕ) : V)]) = v
+    symm
+    rw [eq_matrixToVec_iff]
+    exact ⟨hv.lh.symm, fun i ↦ rfl⟩⟩
 
-variable {L : Language} [L.Encodable] [L.LORDefinable]
+end Arithmetic.Bootstrapping
+
+namespace Semiformula
 
 @[simp]
 lemma quote_neg {n : ℕ} (φ : Semiproposition L n) : (⌜∼φ⌝ : V) = Bootstrapping.neg L ⌜φ⌝ := by
@@ -226,9 +213,8 @@ lemma quote_substs {n m : ℕ} (w : Fin n → SyntacticSemiterm L m) (φ : Semip
   simp [quote_def, Semiterm.quote_def]
   rfl
 
-end Semiformula
 
-variable {L : Language} [L.Encodable] [L.LORDefinable]
+end Semiformula
 
 lemma Semisentence.quote_substs {n m : ℕ} (w : Fin n → ClosedSemiterm L m)
     (σ : Semisentence L n) :
@@ -241,21 +227,3 @@ lemma Semisentence.quote_imp {n : ℕ} (σ τ : Semisentence L n) :
   simp [Sentence.quote_def]
 
 end FFL.FirstOrder
-
-namespace FFL.FirstOrder.Arithmetic
-namespace Bootstrapping
-
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {L : Language} [L.Encodable]
-  [L.LORDefinable]
-
-lemma exists_termVec {k : ℕ} {v : V} (hv : IsSemitermVec L (k : V) 0 v) :
-    ∃ u : Fin k → Term V L, SemitermVec.val u = v := by
-  have hu : ∀ i : Fin k, IsSemiterm L 0 v.[((i : ℕ) : V)] := fun i ↦ hv.nth (by simp)
-  exact ⟨fun i ↦ ⟨v.[((i : ℕ) : V)], hu i⟩, by
-    change matrixToVec (fun i : Fin k ↦ v.[((i : ℕ) : V)]) = v
-    symm
-    rw [eq_matrixToVec_iff]
-    exact ⟨hv.lh.symm, fun i ↦ rfl⟩⟩
-
-end Bootstrapping
-end FFL.FirstOrder.Arithmetic

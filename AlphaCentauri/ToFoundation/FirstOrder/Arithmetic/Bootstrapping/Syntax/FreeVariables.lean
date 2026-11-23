@@ -23,7 +23,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {Γ : Polarity} {m : ℕ}
 
-/-! ### Terms -/
+/-! ## Terms -/
 
 namespace TermFreeVariables
 
@@ -147,7 +147,7 @@ lemma termShiftVec_eq_self_iff {k v : V} (hv : IsUTermVec L k v) :
 
 end termFreeVariables
 
-/-! ### Formulas -/
+/-! ## Formulas -/
 
 namespace FreeVariables
 

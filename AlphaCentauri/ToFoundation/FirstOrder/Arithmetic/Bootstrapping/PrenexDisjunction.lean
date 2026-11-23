@@ -261,5 +261,3 @@ theorem exists_isPrenexHierarchy_tprovable_or_iff {Γ : Polarity} {n : ℕ}
 
 end Bootstrapping
 end FFL.FirstOrder.Arithmetic
-
-end

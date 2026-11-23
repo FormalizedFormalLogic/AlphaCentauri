@@ -7,19 +7,17 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 /-!
 # Extending a language by constants
 
-Extension of a language by constants, and the language of ordered rings with finitely many extra
-constants.
--/
-
-@[expose] public section
-
-/-! ## Extending a language by constants
-
 `L.add (Language.constant ι)` is `L` together with a new constant symbol for each `i : ι`. A
 formula becomes a formula of the extended language by replacing its bound or its free variables by
 the new constants, and an `L`-structure becomes a structure of the extended language by choosing an
 element for each constant.
+
+`Language.oringConst k` is `ℒₒᵣ` together with `k` new constant symbols. Closed terms of `ℒₒᵣ` in
+`k` variables are dominated by a single one below any code, and a model of a theory of that language
+is a model of `ℒₒᵣ` with a `k`-tuple named by the constants.
 -/
+
+@[expose] public section
 
 namespace FFL.FirstOrder
 
@@ -128,13 +126,7 @@ end
 
 end
 
-/-! ## The language of ordered rings with finitely many extra constants
-
-Extension of Foundation's `ℒₒᵣ` (`Arithmetic/Basic.lean`). `Language.oringConst k` is `ℒₒᵣ`
-together with `k` new constant symbols. Closed terms of `ℒₒᵣ` in `k` variables are dominated by a
-single one below any code, and a model of a theory of that language is a model of `ℒₒᵣ` with a
-`k`-tuple named by the constants.
--/
+/-! ## The language of ordered rings with finitely many extra constants -/
 
 /-- `ℒₒᵣ` extended by `k` new constant symbols. -/
 abbrev Language.oringConst (k : ℕ) : Language := Language.add ℒₒᵣ (Language.constant (Fin k))

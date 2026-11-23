@@ -7,9 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 `AxiomatizableBy C T U` says that `U` axiomatizes `T` through sentences satisfying `C`, and
 `FiniteAxiomatizableBy T U` that a finite `U` axiomatizes `T`; `Axiomatizable` and
-`FiniteAxiomatizable` are the statements that such a `U` exists. Both are AlphaCentauri's own:
-Foundation states finite axiomatizability over an arbitrary entailment structure, where the
-witness stays implicit.
+`FiniteAxiomatizable` are the statements that such a `U` exists.
 
 This module also collects the equivalent forms of finite axiomatizability — a finite **subset**,
 a finset, a single sentence — `conj`, the conjunction of that finite theory — the

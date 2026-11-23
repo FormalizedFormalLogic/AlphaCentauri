@@ -7,12 +7,10 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Func
 /-!
 # Functions on codes of formulas in models of $\mathsf{EA}$
 
-The part of `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Formula/Functions.lean` on
-operations on codes of formulas, ported to models of $\mathsf{EA}$: negation `neg`, implication
-`imp`, equivalence `iff`, the shift `shift` of free variables, substitution `subst` for the bound
-variables, the instantiation `free` of a bound variable by a free one and the complexity
-`formulaComplexity`. The blueprints and formulas are Foundation's; the recursions on formulas
-carry a bound on their values, and inductions are on locally $\Delta_0$ predicates.
+Negation `neg`, implication `imp`, equivalence `iff`, the shift `shift` of free variables,
+substitution `subst` for the bound variables, the instantiation `free` of a bound variable by a
+free one and the complexity `formulaComplexity`. The recursions on formulas carry a bound on their
+values, and inductions are on locally $\Delta_0$ predicates.
 
 - [HP98, §V.3]
 -/
@@ -1431,7 +1429,7 @@ noncomputable def free (p : V) : V := substs1 L ^&0 (shift L p)
 
 variable {L}
 
-/-! ### free function -/
+/-! ## Instantiation of a bound variable by a free one -/
 
 section
 
@@ -1795,7 +1793,7 @@ lemma neg_nlt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : 
 
 end Arithmetic
 
-/-! ### Bounded universal quantifier -/
+/-! ## Bounded universal quantifier -/
 
 /-- `qqBall u q = ^∀ ((^#0 ^≮ u) ^⋎ q)`, the code of `∀¹[“#0 < u”] q`. -/
 noncomputable def qqBall (u q : V) : V := qqAll (qqOr (Arithmetic.qqNLT (qqBvar 0) u) q)

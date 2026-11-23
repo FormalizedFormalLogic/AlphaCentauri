@@ -7,23 +7,17 @@ public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 /-!
 # Prenex sentences of arithmetic
 
-Prenex sentences and their classes, including over $\mathsf{I}\Sigma_1$.
--/
-
-@[expose] public section
-
-/-! ## Prenex normal forms of combinations and of lower levels
-
-Companion of Foundation's `Arithmetic/Prenex.lean`.
-
 In models of `𝗜𝗢𝗽𝗲𝗻`, pairing merges two adjacent quantifiers of the same kind into one. Hence a
 conjunction or a disjunction of two prenex formulas of the same polarity and level, and the
 existential quantification of a prenex $\Sigma_{s + 1}$ formula, are equivalent to a prenex formula
 of that polarity and level. Unlike `Bounding.Prenex.and`, this needs no collection.
 
 Over $\mathsf{B}\Sigma_m$, every $\Gamma'_m$ sentence is equivalent to a prenex sentence of every
-level containing $\Gamma'_m$.
+level containing $\Gamma'_m$. Every prenex class contains a sentence refutable in
+$\mathsf{I}\Sigma_1$.
 -/
+
+@[expose] public section
 
 namespace FFL.FirstOrder
 namespace Semiterm
@@ -204,12 +198,6 @@ lemma exists_prenexHierarchy_provable_iff {σ : ArithmeticSentence}
     have := models_of_provable (M := V) inferInstance hφ;
     simpa [models_iff, hφψ, -Bounding.Prenex.val_sigmaInv] using this
 
-/-! ## Prenex sentences of a given level over $\mathsf{I}\Sigma_1$
-
-Companion of Foundation's `Arithmetic/ISigma1/Prenex.lean`. Every prenex class contains a sentence
-refutable in $\mathsf{I}\Sigma_1$.
--/
-
 namespace ISigma1
 
 lemma exists_prenexHierarchy_refutable (Γ : Polarity) (n : ℕ) :
@@ -225,5 +213,3 @@ end ISigma1
 
 end Arithmetic
 end FFL.FirstOrder
-
-end

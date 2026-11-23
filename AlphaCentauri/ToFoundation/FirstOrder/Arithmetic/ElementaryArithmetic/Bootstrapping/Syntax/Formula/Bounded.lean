@@ -6,13 +6,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Boun
 /-!
 # Internal $\Delta_0$ formulas in models of $\mathsf{EA}$
 
-The part of `Foundation/FirstOrder/Arithmetic/Bootstrapping/Syntax/Formula/Bounded.lean` in the
-namespace `Bootstrapping`, ported to models of $\mathsf{EA}$: the bounded existential quantifier
-`qqBex` on codes and the predicate `IsBounded` on codes of bounded arithmetical formulas, with
-induction on locally $\Delta_0$ predicates, closed under negation and shift. The formulas are
-Foundation's `qqBexDef`, `IsBoundedF.blueprint` and `isBounded`.
-
-## References
+The bounded existential quantifier `qqBex` on codes and the predicate `IsBounded` on codes of
+bounded arithmetical formulas, with induction on locally $\Delta_0$ predicates, closed under
+negation and shift, defined by `qqBexDef`, `IsBoundedF.blueprint` and `isBounded`.
 
 - [HP98, 0.30, Lemma I.1.68]
 -/

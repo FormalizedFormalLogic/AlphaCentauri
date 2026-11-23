@@ -9,7 +9,7 @@ public import Mathlib.Data.Nat.Log
 
 For a base `b ≥ 2`, the hereditary base-`b` representation of `n` writes `n` in base `b`, then
 rewrites every exponent in base `b`, recursively. `bump b n` replaces every occurrence of the
-base `b` in this representation by `b + 1`. The Goodstein sequence seeded at `m` bumps the base
+base `b` in this representation by `b + 1`. The Goodstein sequence starting at `m` bumps the base
 by one at each step and subtracts one.
 
 Every Goodstein sequence (`Goodstein.goodsteinSeq`) reaches `0`: each term
@@ -58,7 +58,7 @@ lemma bump_pos (b : ℕ) {n : ℕ} (h : n ≠ 0) :
       n / b ^ Nat.log b n * (b + 1) ^ bump b (Nat.log b n) + bump b (n % b ^ Nat.log b n) := by
   rw [bump]; simp [h]
 
-/-- The **Goodstein sequence** seeded at `m`: `goodsteinSeq m 0 = m`, and step `k + 1` reads
+/-- The **Goodstein sequence** starting at `m`: `goodsteinSeq m 0 = m`, and step `k + 1` reads
 `goodsteinSeq m k` in hereditary base `k + 2`, bumps the base to `k + 3`, and subtracts one. -/
 def goodsteinSeq (m : ℕ) : ℕ → ℕ
   | 0 => m
@@ -379,8 +379,8 @@ theorem goodstein_terminates (m : ℕ) : ∃ N, goodsteinSeq m N = 0 := by
     Ordinal.lt_wf.has_min (Set.range (seqOrd m)) ⟨seqOrd m 0, 0, rfl⟩
   exact hmin (seqOrd m (N + 1)) ⟨N + 1, rfl⟩ (hNa ▸ seqOrd_step m N (hcon N))
 
-/-- The **Goodstein length** of `m`: the least step at which the Goodstein sequence seeded at
-`m` reaches `0`. Total by `goodstein_terminates`. -/
+/-- The **Goodstein length** of `m`: the least step at which the Goodstein sequence starting
+at `m` reaches `0`. Total by `goodstein_terminates`. -/
 def goodsteinLength (m : ℕ) : ℕ := Nat.find (goodstein_terminates m)
 
 lemma goodsteinSeq_goodsteinLength (m : ℕ) : goodsteinSeq m (goodsteinLength m) = 0 :=

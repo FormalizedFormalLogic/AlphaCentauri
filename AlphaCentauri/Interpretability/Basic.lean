@@ -36,22 +36,27 @@ section ofWeakerThan
 
 variable {T' : Theory L₁} [𝗘𝗤 _ ⪯ T'] [T ⪯ T'] (π : DirectTranslation T L₂)
 
-@[simp] lemma ofWeakerThan_domain : (π.ofWeakerThan (T' := T')).domain = π.domain := rfl
+@[simp]
+lemma ofWeakerThan_domain : (π.ofWeakerThan (T' := T')).domain = π.domain := rfl
 
-@[simp] lemma ofWeakerThan_rel {k} (R : L₂.Rel k) :
+@[simp]
+lemma ofWeakerThan_rel {k} (R : L₂.Rel k) :
     (π.ofWeakerThan (T' := T')).rel R = π.rel R := rfl
 
-@[simp] lemma ofWeakerThan_func {k} (f : L₂.Func k) :
+@[simp]
+lemma ofWeakerThan_func {k} (f : L₂.Func k) :
     (π.ofWeakerThan (T' := T')).func f = π.func f := rfl
 
-@[simp] lemma ofWeakerThan_varEqual {ξ n} (t : Semiterm L₂ ξ n) :
+@[simp]
+lemma ofWeakerThan_varEqual {ξ n} (t : Semiterm L₂ ξ n) :
     (π.ofWeakerThan (T' := T')).varEqual t = π.varEqual t := by
   induction t with
   | bvar x => rfl
   | fvar x => rfl
   | func f v ih => simp [DirectTranslation.varEqual, ih]
 
-@[simp] lemma ofWeakerThan_translate {ξ n} (φ : Semiformula L₂ ξ n) :
+@[simp]
+lemma ofWeakerThan_translate {ξ n} (φ : Semiformula L₂ ξ n) :
     (π.ofWeakerThan (T' := T')).translate φ = π.translate φ := by
   induction φ using Semiformula.rec' with
   | hverum => rfl

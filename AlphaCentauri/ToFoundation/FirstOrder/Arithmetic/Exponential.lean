@@ -492,7 +492,8 @@ lemma length_bpow_le (hB : 0 < B) (hx : 0 < x) (hk : k * ‖x‖ < ‖B‖) :
   obtain ⟨S, hS, H, hlen⟩ := exists_isSeq hB hx hk
   rwa [Power.IsPow.bpow_eq (⟨S, hS, H, rfl⟩ : IsPow B x k (S{B}[k]))]
 
-@[simp] lemma bpow_zero (hB : 0 < B) (x : V) : bpow B x 0 = 1 := by
+@[simp]
+lemma bpow_zero (hB : 0 < B) (x : V) : bpow B x 0 = 1 := by
   apply Power.IsPow.bpow_eq
   use 1
   and_intros

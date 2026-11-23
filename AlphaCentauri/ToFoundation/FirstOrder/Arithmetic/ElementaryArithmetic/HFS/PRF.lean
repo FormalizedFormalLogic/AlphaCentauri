@@ -267,11 +267,13 @@ noncomputable def result (u : V) : V := Classical.choose! (c.cSeq_result_existsU
 lemma result_spec (u : V) : ∃ s, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, c.result v u⟫ ∈ s :=
   Classical.choose!_spec (c.cSeq_result_existsUnique v u)
 
-@[simp] theorem result_zero : c.result v 0 = c.zero v := by
+@[simp]
+theorem result_zero : c.result v 0 = c.zero v := by
   obtain ⟨s, Hs, _, h0⟩ := c.result_spec v 0
   exact Hs.seq.isMapping.uniq h0 Hs.zero
 
-@[simp] theorem result_succ (u : V) : c.result v (u + 1) = c.succ v u (c.result v u) := by
+@[simp]
+theorem result_succ (u : V) : c.result v (u + 1) = c.succ v u (c.result v u) := by
   obtain ⟨s, Hs, hk, h⟩ := c.result_spec v u
   have : CSeq c v (s ⁀' c.succ v u (result c v u)) := Hs.successor hk h
   exact Eq.symm <| Classical.choose_uniq (c.cSeq_result_existsUnique v (u + 1))
@@ -357,7 +359,8 @@ lemma cseq_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (F
     p.cseqDef := .mk fun v ↦ by
   simp [Arithmetic.PR.Blueprint.cseqDef, cseq_iff, c.zero_defined.iff, c.succ_defined.iff]
 
-@[simp] lemma cseq_defined_iff (v : Fin (k + 1) → V) :
+@[simp]
+lemma cseq_defined_iff (v : Fin (k + 1) → V) :
     p.cseqDef.val.Evalb v ↔ c.CSeq (v ·.succ) (v 0) := c.cseq_defined.iff
 
 set_option linter.flexible false in
@@ -365,7 +368,8 @@ lemma result_defined : 𝚺ᴬ₁.DefinedFunction
     (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := .mk fun v ↦ by
   simp [Arithmetic.PR.Blueprint.resultDef, Recursion.result_graph, c.cseq_defined_iff]
 
-@[simp] lemma result_defined_iff (v : Fin (k + 2) → V) :
+@[simp]
+lemma result_defined_iff (v : Fin (k + 2) → V) :
     p.resultDef.val.Evalb v ↔ v 0 = c.result (v ·.succ.succ) (v 1) :=
   c.result_defined.iff
 

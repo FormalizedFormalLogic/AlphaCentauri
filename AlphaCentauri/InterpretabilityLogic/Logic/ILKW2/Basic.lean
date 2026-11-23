@@ -38,7 +38,8 @@ open ofILAxioms
 
 variable {A B C : Formula α}
 
-@[simp] lemma ILKW2.axiomKW2 : 𝐈𝐋𝐊𝐖𝟐 ⊢ Axioms.KW2 A B := axm ⟨A, B, rfl⟩
+@[simp]
+lemma ILKW2.axiomKW2 : 𝐈𝐋𝐊𝐖𝟐 ⊢ Axioms.KW2 A B := axm ⟨A, B, rfl⟩
 
 lemma ILKW2.axiomKW1Zero : 𝐈𝐋𝐊𝐖𝟐 ⊢ Axioms.KW1Zero A B := by
   have h : 𝐈𝐋𝐊𝐖𝟐 ⊢ B ▷ (B ⋏ ∼(B ⋏ A)) 🡒 B ▷ (B ⋏ ∼A) := rhd_mono_right (by cl_prover);

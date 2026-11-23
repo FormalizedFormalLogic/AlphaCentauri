@@ -31,7 +31,8 @@ syntax (name := openProblem) declModifiers
   group("open_problem " declId (ppSpace bracketedBinder)* " := " term) : command
 
 /-- Elaborates `open_problem` as a definition of a proposition, and records it. -/
-@[command_elab openProblem] def elabOpenProblem : CommandElab := fun stx => do
+@[command_elab openProblem]
+def elabOpenProblem : CommandElab := fun stx => do
   let mods : TSyntax ``Parser.Command.declModifiers := ⟨stx[0]⟩
   let declId : TSyntax ``Parser.Command.declId := ⟨stx[1][1]⟩
   let binders : TSyntaxArray ``Parser.Term.bracketedBinder := stx[1][2].getArgs.map (⟨·⟩)

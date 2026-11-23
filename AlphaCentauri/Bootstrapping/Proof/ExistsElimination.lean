@@ -105,7 +105,8 @@ noncomputable def negDomSet (d m : V) : V := by
   letI : 𝚺ᴬ₁-Function₁ (fun i : V ↦ neg L (substs1 L (^&i) d)) := by definability
   exact hfsImage (fun i : V ↦ neg L (substs1 L (^&i) d)) (under m)
 
-@[simp] lemma mem_negDomSet_iff {d m x : V} :
+@[simp]
+lemma mem_negDomSet_iff {d m x : V} :
     x ∈ negDomSet L d m ↔ ∃ i < m, x = neg L (substs1 L (^&i) d) := by
   let _ : 𝚺ᴬ₁-Function₁ (fun i : V ↦ neg L (substs1 L (^&i) d)) := by definability
   change x ∈ hfsImage (fun i : V ↦ neg L (substs1 L (^&i) d)) (under m) ↔ _
@@ -142,7 +143,8 @@ instance negDomSet.definable : 𝚺ᴬ₁-Function₂[V] negDomSet L :=
 instance negDomSet.definable' {Γ : SigmaPiDelta} {m : ℕ} : Γᴬ_[m + 1]-Function₂[V] negDomSet L :=
   negDomSet.definable.of_sigmaOne
 
-@[simp] lemma negDomSet_zero (d : V) : negDomSet L d 0 = ∅ := by
+@[simp]
+lemma negDomSet_zero (d : V) : negDomSet L d 0 = ∅ := by
   apply mem_ext
   intro x
   simp

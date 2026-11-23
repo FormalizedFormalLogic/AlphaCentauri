@@ -56,7 +56,8 @@ noncomputable def translateSetGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “t tbl s. (∀ z ∈' t, ∃ p ∈' s, !(translateGraph L₁ L₂) z tbl p) ∧
     (∀ p ∈' s, ∃ z, !(translateGraph L₁ L₂) z tbl p ∧ z ∈ t)”
 
-@[simp] lemma mem_translateSet_iff {tbl s x : V} :
+@[simp]
+lemma mem_translateSet_iff {tbl s x : V} :
     x ∈ translateSet L₁ L₂ tbl s ↔ ∃ p ∈ s, x = translate L₁ L₂ tbl p := by
   let _ : 𝚺ᴬ₁-Function₁ (translate L₁ L₂ tbl) := translate_sigmaOne L₁ L₂ tbl
   exact mem_hfsImage_iff
@@ -89,11 +90,13 @@ instance translateSet.definable' : Γᴬ_[m + 1]-Function₂[V] translateSet L�
 
 end graph
 
-@[simp] lemma translateSet_empty (tbl : V) : translateSet L₁ L₂ tbl ∅ = ∅ := by
+@[simp]
+lemma translateSet_empty (tbl : V) : translateSet L₁ L₂ tbl ∅ = ∅ := by
   let _ := translate_sigmaOne L₁ L₂ tbl
   exact hfsImage_empty
 
-@[simp] lemma translateSet_insert (tbl p s : V) :
+@[simp]
+lemma translateSet_insert (tbl p s : V) :
     translateSet L₁ L₂ tbl (insert p s) =
       insert (translate L₁ L₂ tbl p) (translateSet L₁ L₂ tbl s) := by
   let _ := translate_sigmaOne L₁ L₂ tbl

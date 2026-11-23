@@ -25,15 +25,18 @@ variable {L : Language}
 def WeakerThanOn (Γ : Sentence L → Prop) (T U : Theory L) : Prop :=
   ∀ σ, Γ σ → T ⊢ σ → U ⊢ σ
 
-@[inherit_doc] notation:40 T:41 " ⪯[" Γ "] " U:41 => Theory.WeakerThanOn Γ T U
+@[inherit_doc]
+notation:40 T:41 " ⪯[" Γ "] " U:41 => Theory.WeakerThanOn Γ T U
 
 namespace WeakerThanOn
 
 variable {Γ Γ' : Sentence L → Prop} {T U S : Theory L}
 
-@[simp, refl] lemma refl (T : Theory L) (Γ : Sentence L → Prop) : T ⪯[Γ] T := fun _ _ h ↦ h
+@[simp, refl]
+lemma refl (T : Theory L) (Γ : Sentence L → Prop) : T ⪯[Γ] T := fun _ _ h ↦ h
 
-@[trans] lemma trans (h₁ : T ⪯[Γ] U) (h₂ : U ⪯[Γ] S) : T ⪯[Γ] S :=
+@[trans]
+lemma trans (h₁ : T ⪯[Γ] U) (h₂ : U ⪯[Γ] S) : T ⪯[Γ] S :=
   fun σ hσ h ↦ h₂ σ hσ (h₁ σ hσ h)
 
 lemma mono (h : ∀ σ, Γ' σ → Γ σ) (hTU : T ⪯[Γ] U) : T ⪯[Γ'] U := fun σ hσ ↦ hTU σ (h σ hσ)

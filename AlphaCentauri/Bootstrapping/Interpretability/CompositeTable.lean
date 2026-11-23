@@ -66,15 +66,18 @@ instance translateVec.defined :
 instance translateVec.definable : 𝚺ᴬ₁-Function₃[V] translateVec L₁ L₂ :=
   translateVec.defined.to_definable
 
-@[simp] lemma translateVec_zero (tbl u : V) : translateVec L₁ L₂ tbl u 0 = 0 := by
+@[simp]
+lemma translateVec_zero (tbl u : V) : translateVec L₁ L₂ tbl u 0 = 0 := by
   simp [translateVec, translateVec.construction]
 
-@[simp] lemma translateVec_succ (tbl u k : V) :
+@[simp]
+lemma translateVec_succ (tbl u k : V) :
     translateVec L₁ L₂ tbl u (k + 1) =
       concat (translateVec L₁ L₂ tbl u k) (translate L₁ L₂ tbl u.[k]) := by
   simp [translateVec, translateVec.construction]
 
-@[simp] lemma len_translateVec (tbl u k : V) : len (translateVec L₁ L₂ tbl u k) = k := by
+@[simp]
+lemma len_translateVec (tbl u k : V) : len (translateVec L₁ L₂ tbl u k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp

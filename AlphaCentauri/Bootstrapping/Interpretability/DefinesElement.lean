@@ -260,11 +260,13 @@ noncomputable def definesElement (d A : Semiformula V L 1) : Formula V L :=
 noncomputable def uniqueAt (d A : Semiformula V L 1) (c : V) : Semiformula V L 1 :=
   d 🡒 (A 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar c))
 
-@[simp] lemma shift_uniqueAt (d A : Semiformula V L 1) (c : V) :
+@[simp]
+lemma shift_uniqueAt (d A : Semiformula V L 1) (c : V) :
     (uniqueAt d A c).shift = uniqueAt d.shift A.shift (c + 1) := by
   simp [uniqueAt]
 
-@[simp] lemma shift_definesElementBody (d A : Semiformula V L 1) :
+@[simp]
+lemma shift_definesElementBody (d A : Semiformula V L 1) :
     (definesElementBody d A).shift = definesElementBody d.shift A.shift := by
   simp [definesElementBody]
 
@@ -373,7 +375,8 @@ lemma witnessConj_dA [𝗘𝗤 L ⪯ T] (d : Semiformula V L 1) {k : ℕ} (A : F
   have h₃ := tprovable_equal_refl (S := T) (Semiterm.fvar (c i))
   cl_prover [h₁, h₂, h₃]
 
-@[simp] private lemma cast_zero_add_addCast {k : ℕ} (i : Fin k) :
+@[simp]
+private lemma cast_zero_add_addCast {k : ℕ} (i : Fin k) :
     Fin.cast (Nat.zero_add k) (Fin.addCast 0 i) = i := rfl
 
 lemma funcGraph_specialize_witness [𝗘𝗤 L ⪯ T] {k : ℕ} (d : Semiformula V L 1)
@@ -414,14 +417,16 @@ lemma witness_eq_mem [𝗘𝗤 L ⪯ T] (d : Semiformula V L 1) {k : ℕ} (A : F
   have h₃ := tprovable_equal_symm_imp (S := T) (Semiterm.fvar (w i)) (Semiterm.fvar (c i))
   cl_prover [h₁, h₂, h₃]
 
-@[simp] lemma shift_iterate_equal {n : ℕ} (s t : Semiterm V L n) (k : ℕ) :
+@[simp]
+lemma shift_iterate_equal {n : ℕ} (s t : Semiterm V L n) (k : ℕ) :
     Semiformula.shift^[k] (Semiformula.equal s t) =
       Semiformula.equal (Semiterm.shift^[k] s) (Semiterm.shift^[k] t) := by
   induction k with
   | zero => rfl
   | succ k ih => simp [Function.iterate_succ_apply', ih]
 
-@[simp] lemma shift_witnessConj (d : Semiformula V L 1) {k : ℕ} (A : Fin k → Semiformula V L 1)
+@[simp]
+lemma shift_witnessConj (d : Semiformula V L 1) {k : ℕ} (A : Fin k → Semiformula V L 1)
     (c : Fin k → V) :
     (witnessConj d A c).shift = witnessConj d.shift (fun i ↦ (A i).shift) (fun i ↦ c i + 1) := by
   simp [witnessConj]

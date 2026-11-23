@@ -40,9 +40,11 @@ open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
-@[simp] lemma ILM₀W.axiomM₀ : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.M₀ A B C := axm <| .inl ⟨A, B, C, rfl⟩
+@[simp]
+lemma ILM₀W.axiomM₀ : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.M₀ A B C := axm <| .inl ⟨A, B, C, rfl⟩
 
-@[simp] lemma ILM₀W.axiomW : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.W A B := axm <| .inr ⟨A, B, rfl⟩
+@[simp]
+lemma ILM₀W.axiomW : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.W A B := axm <| .inr ⟨A, B, rfl⟩
 
 lemma ILM₀W.axiomWstar : 𝐈𝐋𝐌₀𝐖 ⊢ Axioms.Wstar A B C := by
   have h₁ : 𝐈𝐋𝐌₀𝐖 ⊢ B ⋏ □C 🡒 B ⋏ □C ⋏ ∼□(∼A) ⋎ B ⋏ □C ⋏ □(∼A) := by cl_prover;

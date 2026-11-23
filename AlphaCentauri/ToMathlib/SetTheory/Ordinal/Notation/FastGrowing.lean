@@ -295,9 +295,11 @@ def norm : ONote → ℕ
   | 0 => 0
   | oadd e n a => max (norm e) (max (n : ℕ) (norm a))
 
-@[simp] theorem norm_zero : norm 0 = 0 := rfl
+@[simp]
+theorem norm_zero : norm 0 = 0 := rfl
 
-@[simp] theorem norm_oadd (e : ONote) (n : ℕ+) (a : ONote) :
+@[simp]
+theorem norm_oadd (e : ONote) (n : ℕ+) (a : ONote) :
     norm (oadd e n a) = max (norm e) (max (n : ℕ) (norm a)) := rfl
 
 private lemma repr_lt_opow_repr (o : ONote) (h : o.NF) : o.repr < ω ^ o.repr :=
@@ -601,7 +603,8 @@ private lemma fastGrowing_lt_succ_index (h : fundamentalSequence o = Sum.inl (so
 - [Bek99, §6] -/
 def omegaTower (c : ℕ) (a : ONote) : ONote := (fun x => oadd x 1 0)^[c] a
 
-@[simp] theorem omegaTower_zero (a : ONote) : omegaTower 0 a = a := rfl
+@[simp]
+theorem omegaTower_zero (a : ONote) : omegaTower 0 a = a := rfl
 
 lemma omegaTower_succ (c : ℕ) (a : ONote) :
     omegaTower (c + 1) a = oadd (omegaTower c a) 1 0 := by
@@ -615,7 +618,8 @@ lemma omegaTower_NF {a : ONote} (ha : a.NF) (c : ℕ) : (omegaTower c a).NF := b
 /-- The **diagonal tower**: `0, 1, ω, ω^ω, …`. -/
 def tower (i : ℕ) : ONote := omegaTower i 0
 
-@[simp] theorem tower_zero : tower 0 = 0 := rfl
+@[simp]
+theorem tower_zero : tower 0 = 0 := rfl
 
 lemma tower_succ (i : ℕ) : tower (i + 1) = oadd (tower i) 1 0 := omegaTower_succ i 0
 

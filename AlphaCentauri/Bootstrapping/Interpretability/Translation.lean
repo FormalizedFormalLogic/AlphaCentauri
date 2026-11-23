@@ -181,10 +181,12 @@ noncomputable def guardVecGraph : 𝚺ᴬ₁.Semisentence 5 :=
 
 variable {L}
 
-@[simp] lemma guardVec_zero (tbl s w : V) : guardVec L tbl s w 0 = 0 := by
+@[simp]
+lemma guardVec_zero (tbl s w : V) : guardVec L tbl s w 0 = 0 := by
   simp [guardVec, guardVec.construction]
 
-@[simp] lemma guardVec_succ (tbl s w k : V) :
+@[simp]
+lemma guardVec_succ (tbl s w k : V) :
     guardVec L tbl s w (k + 1) =
       concat (guardVec L tbl s w k) (domainAt L tbl k ^⋏ relocate L k s w.[k]) := by
   simp [guardVec, guardVec.construction]
@@ -197,7 +199,8 @@ instance guardVec.definable : 𝚺ᴬ₁-Function₄[V] guardVec L := guardVec.d
 instance guardVec.definable' : Γᴬ_[m + 1]-Function₄[V] guardVec L :=
   guardVec.definable.of_sigmaOne
 
-@[simp] lemma len_guardVec (tbl s w k : V) : len (guardVec L tbl s w k) = k := by
+@[simp]
+lemma len_guardVec (tbl s w k : V) : len (guardVec L tbl s w k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -293,30 +296,36 @@ instance varEqualVec.definable : 𝚺ᴬ₁-Function₃[V] varEqualVec L₁ L₂
 instance varEqualVec.definable' : Γᴬ_[m + 1]-Function₃[V] varEqualVec L₁ L₂ :=
   varEqualVec.definable.of_sigmaOne
 
-@[simp] lemma varEqual_bvar (tbl z : V) :
+@[simp]
+lemma varEqual_bvar (tbl z : V) :
     varEqual L₁ L₂ tbl ^#z =
       ^rel 2 (Encodable.encode (Language.Eq.eq : L₁.Rel 2) : V) ?[^#0, ^#(z + 1)] := by
   simp [varEqual, construction]
 
-@[simp] lemma varEqual_fvar (tbl x : V) :
+@[simp]
+lemma varEqual_fvar (tbl x : V) :
     varEqual L₁ L₂ tbl ^&x =
       ^rel 2 (Encodable.encode (Language.Eq.eq : L₁.Rel 2) : V) ?[^#0, ^&x] := by
   simp [varEqual, construction]
 
-@[simp] lemma varEqual_func {tbl k f v : V} (hf : L₂.IsFunc k f) (hv : IsUTermVec L₂ k v) :
+@[simp]
+lemma varEqual_func {tbl k f v : V} (hf : L₂.IsFunc k f) (hv : IsUTermVec L₂ k v) :
     varEqual L₁ L₂ tbl (^func k f v) =
       qqAlls (imp L₁ (^⋀ guardVec L₁ tbl (k + 1) (varEqualVec L₁ L₂ tbl k v) k)
         (funcTail L₁ tbl k f)) k := by
   simp [varEqual, varEqualVec, construction, hf, hv]
 
-@[simp] lemma len_varEqualVec {tbl k v : V} (hv : IsUTermVec L₂ k v) :
+@[simp]
+lemma len_varEqualVec {tbl k v : V} (hv : IsUTermVec L₂ k v) :
     len (varEqualVec L₁ L₂ tbl k v) = k := (construction L₁).resultVec_lh L₂ _ hv
 
-@[simp] lemma nth_varEqualVec {tbl k v i : V} (hv : IsUTermVec L₂ k v) (hi : i < k) :
+@[simp]
+lemma nth_varEqualVec {tbl k v i : V} (hv : IsUTermVec L₂ k v) (hi : i < k) :
     (varEqualVec L₁ L₂ tbl k v).[i] = varEqual L₁ L₂ tbl v.[i] :=
   (construction L₁).nth_resultVec L₂ _ hv hi
 
-@[simp] lemma varEqualVec_nil (tbl : V) : varEqualVec L₁ L₂ tbl 0 0 = 0 :=
+@[simp]
+lemma varEqualVec_nil (tbl : V) : varEqualVec L₁ L₂ tbl 0 0 = 0 :=
   (construction L₁).resultVec_nil L₂ _
 
 end varEqual
@@ -412,33 +421,41 @@ instance translate.definable : 𝚺ᴬ₁-Function₂[V] translate L₁ L₂ := 
 instance translate.definable' : Γᴬ_[m + 1]-Function₂[V] translate L₁ L₂ :=
   translate.definable.of_sigmaOne
 
-@[simp] lemma translate_rel {tbl k R v : V} (hR : L₂.IsRel k R) (hv : IsUTermVec L₂ k v) :
+@[simp]
+lemma translate_rel {tbl k R v : V} (hR : L₂.IsRel k R) (hv : IsUTermVec L₂ k v) :
     translate L₁ L₂ tbl (^rel k R v) = translateRel L₁ L₂ tbl k R v := by
   simp [translate, hR, hv, construction]
 
-@[simp] lemma translate_nrel {tbl k R v : V} (hR : L₂.IsRel k R) (hv : IsUTermVec L₂ k v) :
+@[simp]
+lemma translate_nrel {tbl k R v : V} (hR : L₂.IsRel k R) (hv : IsUTermVec L₂ k v) :
     translate L₁ L₂ tbl (^nrel k R v) = neg L₁ (translateRel L₁ L₂ tbl k R v) := by
   simp [translate, hR, hv, construction]
 
-@[simp] lemma translate_verum (tbl : V) : translate L₁ L₂ tbl ^⊤ = ^⊤ := by
+@[simp]
+lemma translate_verum (tbl : V) : translate L₁ L₂ tbl ^⊤ = ^⊤ := by
   simp [translate, construction]
 
-@[simp] lemma translate_falsum (tbl : V) : translate L₁ L₂ tbl ^⊥ = ^⊥ := by
+@[simp]
+lemma translate_falsum (tbl : V) : translate L₁ L₂ tbl ^⊥ = ^⊥ := by
   simp [translate, construction]
 
-@[simp] lemma translate_and {tbl p q : V} (hp : IsUFormula L₂ p) (hq : IsUFormula L₂ q) :
+@[simp]
+lemma translate_and {tbl p q : V} (hp : IsUFormula L₂ p) (hq : IsUFormula L₂ q) :
     translate L₁ L₂ tbl (p ^⋏ q) = translate L₁ L₂ tbl p ^⋏ translate L₁ L₂ tbl q := by
   simp [translate, hp, hq, construction]
 
-@[simp] lemma translate_or {tbl p q : V} (hp : IsUFormula L₂ p) (hq : IsUFormula L₂ q) :
+@[simp]
+lemma translate_or {tbl p q : V} (hp : IsUFormula L₂ p) (hq : IsUFormula L₂ q) :
     translate L₁ L₂ tbl (p ^⋎ q) = translate L₁ L₂ tbl p ^⋎ translate L₁ L₂ tbl q := by
   simp [translate, hp, hq, construction]
 
-@[simp] lemma translate_all {tbl p : V} (hp : IsUFormula L₂ p) :
+@[simp]
+lemma translate_all {tbl p : V} (hp : IsUFormula L₂ p) :
     translate L₁ L₂ tbl (^∀ p) = ^∀ imp L₁ (domainAt L₁ tbl 0) (translate L₁ L₂ tbl p) := by
   simp [translate, hp, construction]
 
-@[simp] lemma translate_exs {tbl p : V} (hp : IsUFormula L₂ p) :
+@[simp]
+lemma translate_exs {tbl p : V} (hp : IsUFormula L₂ p) :
     translate L₁ L₂ tbl (^∃ p) = ^∃ (domainAt L₁ tbl 0 ^⋏ translate L₁ L₂ tbl p) := by
   simp [translate, hp, construction]
 

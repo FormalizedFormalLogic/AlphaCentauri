@@ -66,7 +66,8 @@ lemma IsPrime.dvd_mul (hp : IsPrime p) (h : p ∣ u * v) : p ∣ u ∨ p ∣ v :
 /-- `q` is a positive power of the prime `p`: its only prime factor is `p`. -/
 def IsPrimePower (p q : V) : Prop := IsPrime p ∧ 1 < q ∧ ∀ r ≤ q, IsPrime r → r ∣ q → r = p
 
-@[definability] lemma definable_isPrimePower : 𝚺ᴬ₀.DefinableRel (IsPrimePower : V → V → Prop) := by
+@[definability]
+lemma definable_isPrimePower : 𝚺ᴬ₀.DefinableRel (IsPrimePower : V → V → Prop) := by
   unfold IsPrimePower
   definability
 
@@ -191,8 +192,8 @@ end IsPrimePower
 def PrimePowerDivisorsLE (T d : V) : Prop :=
   ∀ q ≤ d, (∃ p ≤ q, IsPrimePower p q) → q ∣ d → q ≤ T
 
-@[definability] lemma definable_primePowerDivisorsLE :
-    𝚺ᴬ₀.DefinableRel (PrimePowerDivisorsLE : V → V → Prop) := by
+@[definability]
+lemma definable_primePowerDivisorsLE : 𝚺ᴬ₀.DefinableRel (PrimePowerDivisorsLE : V → V → Prop) := by
   unfold PrimePowerDivisorsLE
   definability
 
@@ -368,7 +369,8 @@ prime-power divisors are at most `T` and at most `T + 1`. -/
 def IsSegment (y x T : V) : Prop :=
   ‖divisorUpTo y T‖ ≤ x + 1 ∧ x + 1 < ‖divisorUpTo y (T + 1)‖
 
-@[definability] lemma definable_isSegment : 𝚺ᴬ₀.DefinableRel₃ (IsSegment : V → V → V → Prop) := by
+@[definability]
+lemma definable_isSegment : 𝚺ᴬ₀.DefinableRel₃ (IsSegment : V → V → V → Prop) := by
   unfold IsSegment
   definability
 

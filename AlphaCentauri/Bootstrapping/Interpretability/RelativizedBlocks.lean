@@ -33,7 +33,8 @@ noncomputable def relAllItr {n : ℕ} (d : Semiformula V L 1) :
   | 0, φ => φ
   | k + 1, φ => relAllItr d k (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ))
 
-@[simp] lemma relAllItr_zero {n : ℕ} (d : Semiformula V L 1) (φ : Semiformula V L (n + 0)) :
+@[simp]
+lemma relAllItr_zero {n : ℕ} (d : Semiformula V L 1) (φ : Semiformula V L (n + 0)) :
     relAllItr d 0 φ = φ := rfl
 
 lemma relAllItr_succ {n k : ℕ} (d : Semiformula V L 1) (φ : Semiformula V L (n + (k + 1))) :

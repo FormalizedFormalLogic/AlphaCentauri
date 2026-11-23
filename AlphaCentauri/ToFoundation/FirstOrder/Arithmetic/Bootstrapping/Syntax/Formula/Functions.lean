@@ -436,12 +436,12 @@ lemma _root_.FFL.FirstOrder.Language.IsSentence.of_shift_eq {n p : V}
     (hp : IsSemiformula L n p) (h : shift L p = p) : L.IsSentence n p :=
   ⟨hp, (shift_eq_self_iff hp.isUFormula).mp h⟩
 
-@[simp] lemma _root_.FFL.FirstOrder.Language.IsSentence.verum (n : V) :
-    L.IsSentence n ^⊤ := by
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.verum (n : V) : L.IsSentence n ^⊤ := by
   simp [Language.IsSentence]
 
-@[simp] lemma _root_.FFL.FirstOrder.Language.IsSentence.falsum (n : V) :
-    L.IsSentence n ^⊥ := by
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.falsum (n : V) : L.IsSentence n ^⊥ := by
   simp [Language.IsSentence]
 
 lemma _root_.FFL.FirstOrder.Language.IsSentence.and {n p q : V}
@@ -466,7 +466,8 @@ lemma _root_.FFL.FirstOrder.Language.IsSentence.exs {n p : V}
   ⟨by simp [hp.isSemiformula],
     by rw [freeVariables_exs hp.isSemiformula.isUFormula, hp.freeVariables_eq]⟩
 
-@[simp] lemma _root_.FFL.FirstOrder.Language.IsSentence.neg_iff {n p : V} :
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.neg_iff {n p : V} :
     L.IsSentence n (neg L p) ↔ L.IsSentence n p := by
   constructor
   · intro h
@@ -558,9 +559,11 @@ noncomputable def qqExss.construction : PR.Construction V qqExss.blueprint where
 /-- `qqExss p k = ^∃ ^∃ ⋯ ^∃ p`, with `k` existential quantifiers. -/
 noncomputable def qqExss (p k : V) : V := qqExss.construction.result ![p] k
 
-@[simp] lemma qqExss_zero (p : V) : qqExss p 0 = p := by simp [qqExss, qqExss.construction]
+@[simp]
+lemma qqExss_zero (p : V) : qqExss p 0 = p := by simp [qqExss, qqExss.construction]
 
-@[simp] lemma qqExss_succ (p k : V) : qqExss p (k + 1) = ^∃ (qqExss p k) := by
+@[simp]
+lemma qqExss_succ (p k : V) : qqExss p (k + 1) = ^∃ (qqExss p k) := by
   simp [qqExss, qqExss.construction]
 
 def _root_.FFL.FirstOrder.Arithmetic.qqExssDef : 𝚺ᴬ₁.Semisentence 3 :=
@@ -583,7 +586,8 @@ lemma qqExss_exs (p k : V) : qqExss (^∃ p) k = ^∃ (qqExss p k) := by
 lemma qqExss_succ' (p k : V) : qqExss p (k + 1) = qqExss (^∃ p) k := by
   rw [qqExss_succ, qqExss_exs]
 
-@[simp] lemma isUFormula_qqExss {p k : V} : IsUFormula L (qqExss p k) ↔ IsUFormula L p := by
+@[simp]
+lemma isUFormula_qqExss {p k : V} : IsUFormula L (qqExss p k) ↔ IsUFormula L p := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp

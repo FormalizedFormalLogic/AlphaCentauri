@@ -24,15 +24,20 @@ variable {φ ψ : ArithmeticFormula ℕ} {φₓ : ArithmeticSemiformula ℕ 1}
 - [Tow20, Section 13] -/
 def LitTrue (φ : ArithmeticFormula ℕ) : Prop := Semiformula.Evalf (M := ℕ) id φ
 
-@[simp, grind =] lemma litTrue_neg : LitTrue (∼φ) ↔ ¬LitTrue φ := by simp [LitTrue]
+@[simp, grind =]
+lemma litTrue_neg : LitTrue (∼φ) ↔ ¬LitTrue φ := by simp [LitTrue]
 
-@[simp] lemma litTrue_verum : LitTrue ⊤ := by simp [LitTrue]
+@[simp]
+lemma litTrue_verum : LitTrue ⊤ := by simp [LitTrue]
 
-@[simp] lemma litTrue_falsum : ¬LitTrue ⊥ := by simp [LitTrue]
+@[simp]
+lemma litTrue_falsum : ¬LitTrue ⊥ := by simp [LitTrue]
 
-@[simp, grind =] lemma litTrue_and : LitTrue (φ ⋏ ψ) ↔ LitTrue φ ∧ LitTrue ψ := by simp [LitTrue]
+@[simp, grind =]
+lemma litTrue_and : LitTrue (φ ⋏ ψ) ↔ LitTrue φ ∧ LitTrue ψ := by simp [LitTrue]
 
-@[simp, grind =] lemma litTrue_or : LitTrue (φ ⋎ ψ) ↔ LitTrue φ ∨ LitTrue ψ := by simp [LitTrue]
+@[simp, grind =]
+lemma litTrue_or : LitTrue (φ ⋎ ψ) ↔ LitTrue φ ∨ LitTrue ψ := by simp [LitTrue]
 
 lemma litTrue_or_neg (φ : ArithmeticFormula ℕ) : LitTrue φ ∨ LitTrue (∼φ) := by simp [LitTrue, em]
 
@@ -59,10 +64,12 @@ def signedLit : Bool → {k : ℕ} → (ℒₒᵣ).Rel k → (Fin k → Arithmet
 
 variable {k : ℕ} {b : Bool} {r : (ℒₒᵣ).Rel k} {v : Fin k → ArithmeticTerm ℕ}
 
-@[simp, grind =] lemma neg_signedLit : ∼(signedLit b r v) = signedLit (!b) r v := by
+@[simp, grind =]
+lemma neg_signedLit : ∼(signedLit b r v) = signedLit (!b) r v := by
   cases b <;> simp [signedLit]
 
-@[simp, grind .] lemma signedLit_ne_verum : signedLit b r v ≠ ⊤ := by cases b <;> simp [signedLit]
+@[simp, grind .]
+lemma signedLit_ne_verum : signedLit b r v ≠ ⊤ := by cases b <;> simp [signedLit]
 
 
 end OmegaLogic

@@ -33,7 +33,8 @@ noncomputable section
 
 variable {V : Type*} [ORingStructure V]
 
-@[simp] lemma models_infinitudeOfPrimes_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] :
+@[simp]
+lemma models_infinitudeOfPrimes_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] :
     V↓[ℒₒᵣ] ⊧ infinitudeOfPrimes ↔ ∀ x : V, ∃ p, x < p ∧ IsPrime p := by
   simp [models_iff, infinitudeOfPrimes]
 

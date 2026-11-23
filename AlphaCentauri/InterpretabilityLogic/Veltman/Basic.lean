@@ -96,25 +96,39 @@ scoped notation:55 x:56 " ⊩ " A:56 => Forces _ x A
 
 scoped notation:55 x:56 " ⊮ " A:56 => ¬Forces _ x A
 
-@[simp, grind =] lemma forces_atom {a : α} : x ⊩ #a ↔ M x a := Iff.rfl
-@[simp, grind .] lemma not_forces_bot : x ⊮ ⊥ := id
-@[simp, grind .] lemma forces_top : x ⊩ ⊤ := id
-@[grind =] lemma forces_imp : x ⊩ A 🡒 B ↔ x ⊮ A ∨ x ⊩ B := imp_iff_not_or
-@[grind =] lemma forces_and : x ⊩ A ⋏ B ↔ x ⊩ A ∧ x ⊩ B := by
+@[simp, grind =]
+lemma forces_atom {a : α} : x ⊩ #a ↔ M x a := Iff.rfl
+@[simp, grind .]
+lemma not_forces_bot : x ⊮ ⊥ := id
+@[simp, grind .]
+lemma forces_top : x ⊩ ⊤ := id
+@[grind =]
+lemma forces_imp : x ⊩ A 🡒 B ↔ x ⊮ A ∨ x ⊩ B := imp_iff_not_or
+@[grind =]
+lemma forces_and : x ⊩ A ⋏ B ↔ x ⊩ A ∧ x ⊩ B := by
   change ((_ → _ → False) → False) ↔ _; tauto;
-@[grind =] lemma forces_or : x ⊩ A ⋎ B ↔ x ⊩ A ∨ x ⊩ B := by
+@[grind =]
+lemma forces_or : x ⊩ A ⋎ B ↔ x ⊩ A ∨ x ⊩ B := by
   change ((_ → False) → _) ↔ _; tauto;
-@[grind =] lemma forces_neg : x ⊩ ∼A ↔ x ⊮ A := Iff.rfl
-@[grind =] lemma forces_iff : x ⊩ A 🡘 B ↔ (x ⊩ A ↔ x ⊩ B) := by
+@[grind =]
+lemma forces_neg : x ⊩ ∼A ↔ x ⊮ A := Iff.rfl
+@[grind =]
+lemma forces_iff : x ⊩ A 🡘 B ↔ (x ⊩ A ↔ x ⊩ B) := by
   simp only [LogicalConnective.iff, forces_and]; grind;
-@[grind =] lemma forces_box : x ⊩ □A ↔ ∀ y, x ≺ y → y ⊩ A := Iff.rfl
-@[grind =] lemma forces_dia : x ⊩ ◇A ↔ ∃ y, x ≺ y ∧ y ⊩ A := by
+@[grind =]
+lemma forces_box : x ⊩ □A ↔ ∀ y, x ≺ y → y ⊩ A := Iff.rfl
+@[grind =]
+lemma forces_dia : x ⊩ ◇A ↔ ∃ y, x ≺ y ∧ y ⊩ A := by
   change ((∀ y, x ≺ y → y ⊩ A → False) → False) ↔ _; grind;
-@[grind =] lemma forces_rhd : x ⊩ A ▷ B ↔ ∀ y, x ≺ y → y ⊩ A → ∃ z, y ≺[x] z ∧ z ⊩ B := Iff.rfl
+@[grind =]
+lemma forces_rhd : x ⊩ A ▷ B ↔ ∀ y, x ≺ y → y ⊩ A → ∃ z, y ≺[x] z ∧ z ⊩ B := Iff.rfl
 
-@[grind =] lemma not_forces_imp : x ⊮ A 🡒 B ↔ x ⊩ A ∧ x ⊮ B := by grind;
-@[grind =] lemma not_forces_box : x ⊮ □A ↔ ∃ y, x ≺ y ∧ y ⊮ A := by grind;
-@[grind =] lemma not_forces_rhd : x ⊮ A ▷ B ↔ ∃ y, x ≺ y ∧ y ⊩ A ∧ ∀ z, y ≺[x] z → z ⊮ B := by
+@[grind =]
+lemma not_forces_imp : x ⊮ A 🡒 B ↔ x ⊩ A ∧ x ⊮ B := by grind;
+@[grind =]
+lemma not_forces_box : x ⊮ □A ↔ ∃ y, x ≺ y ∧ y ⊮ A := by grind;
+@[grind =]
+lemma not_forces_rhd : x ⊮ A ▷ B ↔ ∃ y, x ≺ y ∧ y ⊩ A ∧ ∀ z, y ≺[x] z → z ⊮ B := by
   grind;
 
 lemma forces_axiomL [IsTrans _ M.Rel] [IsConverseWellFounded _ M.Rel] :

@@ -44,7 +44,8 @@ open ofILAxioms Veltman Veltman.Model Veltman.Model.World
 
 variable {A B C : Formula α} {κ : Type*} [Nonempty κ] {M : Model κ α}
 
-@[simp] lemma ILWStar.axiomWstar : 𝐈𝐋𝐖* ⊢ Axioms.Wstar A B C := axm ⟨A, B, C, rfl⟩
+@[simp]
+lemma ILWStar.axiomWstar : 𝐈𝐋𝐖* ⊢ Axioms.Wstar A B C := axm ⟨A, B, C, rfl⟩
 
 lemma ILWStar.axiomW : 𝐈𝐋𝐖* ⊢ Axioms.W A B := by
   have h₁ : (𝐈𝐋𝐖* : Logic α) ⊢ □⊤ := nec verum;

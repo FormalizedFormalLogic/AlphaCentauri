@@ -74,7 +74,8 @@ def oRingEmbedding : Nonneg R ↪ₛ[ℒₒᵣ] R where
   toFun_inj := Subtype.val_injective
   rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
 
-@[simp] lemma coe_oRingEmbedding : ⇑(oRingEmbedding : Nonneg R ↪ₛ[ℒₒᵣ] R) = Subtype.val := rfl
+@[simp]
+lemma coe_oRingEmbedding : ⇑(oRingEmbedding : Nonneg R ↪ₛ[ℒₒᵣ] R) = Subtype.val := rfl
 
 /-- The non-negative part of a discretely ordered ring is a model of $\mathsf{IOpen}$ if and only
 if the ring satisfies open induction.

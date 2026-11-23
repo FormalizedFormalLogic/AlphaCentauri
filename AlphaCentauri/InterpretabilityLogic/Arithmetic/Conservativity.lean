@@ -194,7 +194,8 @@ noncomputable def conservativity :
 
 variable {T Γ n}
 
-@[simp] lemma models_conservativity_iff {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+@[simp]
+lemma models_conservativity_iff {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
     {σ τ : ArithmeticSentence} :
     V↓[ℒₒᵣ] ⊧ (T.conservativity Γ n) σ τ ↔ Bootstrapping.Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝ := by
   simp [conservativity, models_iff, eval_conservativeDef]

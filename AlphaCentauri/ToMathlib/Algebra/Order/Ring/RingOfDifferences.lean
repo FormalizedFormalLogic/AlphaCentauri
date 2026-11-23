@@ -117,7 +117,8 @@ lemma mk_eq_sub (a b : M) : mk a b = of a - of b := by
 lemma of_injective : Function.Injective (of : M →+* RingOfDifferences M) := fun a b h ↦ by
   simpa [of_def, mk_eq_mk] using h
 
-@[simp] lemma of_inj {a b : M} : of a = of b ↔ a = b := of_injective.eq_iff
+@[simp]
+lemma of_inj {a b : M} : of a = of b ↔ a = b := of_injective.eq_iff
 
 lemma exists_eq_sub (x : RingOfDifferences M) : ∃ a b : M, x = of a - of b := by
   induction x using ind with
@@ -158,14 +159,17 @@ lemma nonneg_iff {x : RingOfDifferences M} : 0 ≤ x ↔ ∃ a, of a = x := by
   rw [le_iff, sub_zero]
   exact Iff.rfl
 
-@[simp] lemma of_nonneg (a : M) : 0 ≤ of a := nonneg_iff.2 ⟨a, rfl⟩
+@[simp]
+lemma of_nonneg (a : M) : 0 ≤ of a := nonneg_iff.2 ⟨a, rfl⟩
 
-@[simp] lemma of_le_of {a b : M} : of a ≤ of b ↔ a ≤ b := by
+@[simp]
+lemma of_le_of {a b : M} : of a ≤ of b ↔ a ≤ b := by
   rw [le_iff, ← mk_eq_sub, le_iff_exists_add']
   change (∃ c, mk c 0 = mk b a) ↔ _
   simp [mk_eq_mk, eq_comm]
 
-@[simp] lemma of_lt_of {a b : M} : of a < of b ↔ a < b := by
+@[simp]
+lemma of_lt_of {a b : M} : of a < of b ↔ a < b := by
   rw [lt_iff_le_not_ge, lt_iff_le_not_ge, of_le_of, of_le_of]
 
 instance : IsOrderedRing (RingOfDifferences M) := IsOrderedRing.mkOfCone cone

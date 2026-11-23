@@ -83,9 +83,11 @@ open ListUnion
 /-- The union of the coded sets listed in the vector `v`. -/
 noncomputable def listUnion (v : V) : V := construction.result ![] v
 
-@[simp] lemma listUnion_nil : listUnion (0 : V) = ∅ := by simp [listUnion, construction]
+@[simp]
+lemma listUnion_nil : listUnion (0 : V) = ∅ := by simp [listUnion, construction]
 
-@[simp] lemma listUnion_adjoin (x v : V) : listUnion (x ∷ v) = x ∪ listUnion v := by
+@[simp]
+lemma listUnion_adjoin (x v : V) : listUnion (x ∷ v) = x ∪ listUnion v := by
   simp [listUnion, construction]
 
 section
@@ -103,7 +105,8 @@ instance listUnion_definable' (Γ m) : Γᴬ_[m + 1]-Function₁ (listUnion : V 
 
 end
 
-@[simp] lemma mem_listUnion_iff {x v : V} : x ∈ listUnion v ↔ ∃ i < len v, x ∈ v.[i] := by
+@[simp]
+lemma mem_listUnion_iff {x v : V} : x ∈ listUnion v ↔ ∃ i < len v, x ∈ v.[i] := by
   induction v using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
@@ -150,7 +153,8 @@ open CardBelow
 /-- The number of elements of the coded set `s` below `n`. -/
 noncomputable def cardBelow (s n : V) : V := construction.result ![s] n
 
-@[simp] lemma cardBelow_zero (s : V) : cardBelow s 0 = 0 := by
+@[simp]
+lemma cardBelow_zero (s : V) : cardBelow s 0 = 0 := by
   simp [cardBelow, construction]
 
 open Classical in
@@ -207,7 +211,8 @@ lemma cardBelow_eq_zero_iff {s n : V} : cardBelow s n = 0 ↔ ∀ i < n, i ∉ s
       · intro H i hi
         exact H i (lt_trans hi (by simp))
 
-@[simp] lemma card_eq_zero_iff {s : V} : card s = 0 ↔ s = ∅ := by
+@[simp]
+lemma card_eq_zero_iff {s : V} : card s = 0 ↔ s = ∅ := by
   rw [card, cardBelow_eq_zero_iff]
   constructor
   · intro h
@@ -215,7 +220,8 @@ lemma cardBelow_eq_zero_iff {s n : V} : cardBelow s n = 0 ↔ ∀ i < n, i ∉ s
   · rintro rfl
     simp
 
-@[simp] lemma card_empty : card (∅ : V) = 0 := card_eq_zero_iff.mpr rfl
+@[simp]
+lemma card_empty : card (∅ : V) = 0 := card_eq_zero_iff.mpr rfl
 
 end Arithmetic
 end FFL.FirstOrder

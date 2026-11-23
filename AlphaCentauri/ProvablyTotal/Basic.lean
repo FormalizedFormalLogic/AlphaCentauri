@@ -29,7 +29,8 @@ variable {k l : ℕ} {V : Type*} [ORingStructure V]
 - [HP98, Definition I.1.51] -/
 def totalitySentence (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSentence := ∀¹* ∃¹ φ.val
 
-@[simp] lemma hierarchy_totalitySentence (φ : 𝚺ᴬ₁.Semisentence (k + 1)) :
+@[simp]
+lemma hierarchy_totalitySentence (φ : 𝚺ᴬ₁.Semisentence (k + 1)) :
     ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 (totalitySentence φ) :=
   Bounding.Hierarchy.allClosure_iff.mpr (Bounding.Hierarchy.accum φ.sigma_prop.exs 𝚷)
 
@@ -58,7 +59,8 @@ def compGraph (ψ : 𝚺ᴬ₁.Semisentence (l + 1)) (χ : Fin l → 𝚺ᴬ₁.
       Matrix.conj fun i ↦ Rew.bind (#i :> (&·.succ)) Empty.elim ▹ (χ i).val)))
     (Bounding.Hierarchy.rew _ (Bounding.Hierarchy.exsClosure (by simp)))
 
-@[simp] lemma eval_compGraph (ψ : 𝚺ᴬ₁.Semisentence (l + 1))
+@[simp]
+lemma eval_compGraph (ψ : 𝚺ᴬ₁.Semisentence (l + 1))
     (χ : Fin l → 𝚺ᴬ₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
     (compGraph ψ χ).val.Evalb w ↔
       ∃ z : Fin l → V, ψ.val.Evalb (w 0 :> z) ∧ ∀ i, (χ i).val.Evalb (z i :> (w ·.succ)) := by
@@ -88,7 +90,8 @@ lemma definablePred_evalb (φ : 𝚺ᴬ₁.Semisentence (k + 1)) (v : Fin k → 
 def leastGraph (φ : 𝚺ᴬ₁.Semisentence (k + 1)) : ArithmeticSemisentence (k + 1) :=
   φ.val ⋏ (∀¹[“#0 < #1”] ∼(Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val))
 
-@[simp] lemma eval_leastGraph (φ : 𝚺ᴬ₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
+@[simp]
+lemma eval_leastGraph (φ : 𝚺ᴬ₁.Semisentence (k + 1)) (w : Fin (k + 1) → V) :
     (leastGraph φ).Evalb w ↔ φ.val.Evalb w ∧ ∀ y < w 0, ¬φ.val.Evalb (y :> (w ·.succ)) := by
   simp [leastGraph, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
 
@@ -125,7 +128,8 @@ def pairGraph (θ : 𝚺ᴬ₀.Semisentence (k + 2)) : ArithmeticSemisentence (k
     (Rew.subst (#0 :> #2 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ θ.val)).bexsLTSucc
     (#0 : ArithmeticSemiterm Empty (k + 2))
 
-@[simp] lemma eval_pairGraph [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺ᴬ₀.Semisentence (k + 2)) (w : Fin (k + 2) → V) :
+@[simp]
+lemma eval_pairGraph [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺ᴬ₀.Semisentence (k + 2)) (w : Fin (k + 2) → V) :
     (pairGraph θ).Evalb w ↔
       ∃ z ≤ w 0, z + w 1 = w 0 ∧ θ.val.Evalb (z :> w 1 :> (w ·.succ.succ)) := by
   simp [pairGraph, Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim,
@@ -137,7 +141,8 @@ def existsAtSum (θ : 𝚺ᴬ₀.Semisentence (k + 2)) : ArithmeticSemisentence 
     (Rew.subst (#0 :> #1 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ θ.val)).bexsLTSucc
       (#1 : ArithmeticSemiterm Empty (k + 2))).bexsLTSucc (#0 : ArithmeticSemiterm Empty (k + 1))
 
-@[simp] lemma eval_existsAtSum [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺ᴬ₀.Semisentence (k + 2))
+@[simp]
+lemma eval_existsAtSum [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺ᴬ₀.Semisentence (k + 2))
     (w : Fin (k + 1) → V) :
     (existsAtSum θ).Evalb w ↔
       ∃ y' ≤ w 0, ∃ z' ≤ w 0, z' + y' = w 0 ∧ θ.val.Evalb (z' :> y' :> (w ·.succ)) := by
@@ -152,7 +157,8 @@ def minimalPairGraph (θ : 𝚺ᴬ₀.Semisentence (k + 2)) : ArithmeticSemisent
     (∀¹[“#0 < #1”] ∼(Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ existsAtSum θ)) ⋏
     (∀¹[“#0 < #2”] ∼(Rew.subst (#1 :> #0 :> fun i : Fin k ↦ #i.succ.succ.succ) ▹ pairGraph θ)))
 
-@[simp] lemma eval_minimalPairGraph [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺ᴬ₀.Semisentence (k + 2))
+@[simp]
+lemma eval_minimalPairGraph [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (θ : 𝚺ᴬ₀.Semisentence (k + 2))
     (w : Fin (k + 1) → V) :
     (minimalPairGraph θ).Evalb w ↔
       ∃ n, (∃ z ≤ n, z + w 0 = n ∧ θ.val.Evalb (z :> w 0 :> (w ·.succ))) ∧
@@ -282,7 +288,8 @@ def ProvablyFunctional (T : ArithmeticTheory) (f : (Fin k → ℕ) → ℕ) : Pr
 def provablyTotalFunctions (T : ArithmeticTheory) (k : ℕ) : Set ((Fin k → ℕ) → ℕ) :=
   {f | T.ProvablyTotal f}
 
-@[simp] lemma mem_provablyTotalFunctions :
+@[simp]
+lemma mem_provablyTotalFunctions :
     f ∈ T.provablyTotalFunctions k ↔ T.ProvablyTotal f := .rfl
 
 namespace ProvablyTotalVia

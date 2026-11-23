@@ -53,7 +53,8 @@ open Bootstrapping.Arithmetic
 
 variable {T : ArithmeticTheory} [T.Δ₁]
 
-@[simp] lemma substNumerals_quote_of_isEmpty (σ : ArithmeticSentence) (v : Fin 0 → V) :
+@[simp]
+lemma substNumerals_quote_of_isEmpty (σ : ArithmeticSentence) (v : Fin 0 → V) :
     substNumerals (⌜σ⌝ : V) v = ⌜σ⌝ := by
   simpa [Matrix.empty_eq] using substNumerals_app_quote (V := V) σ ![]
 

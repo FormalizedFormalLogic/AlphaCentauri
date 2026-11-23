@@ -26,36 +26,47 @@ namespace Semiformula
 section
 variable {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ}
 
-@[simp] lemma qr_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : (ω ▹ φ).qr = φ.qr := by
+@[simp]
+lemma qr_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : (ω ▹ φ).qr = φ.qr := by
   induction φ using Semiformula.rec' generalizing n₂ <;> simp [*]
 
 end
 
-@[simp] lemma qr_substs (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) : (φ/[t]).qr = φ.qr :=
+@[simp]
+lemma qr_substs (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) : (φ/[t]).qr = φ.qr :=
   qr_rew _ φ
 
-@[simp, grind .] lemma ne_and_left (φ ψ : Semiformula L ξ n) : φ ≠ φ ⋏ ψ :=
+@[simp, grind .]
+lemma ne_and_left (φ ψ : Semiformula L ξ n) : φ ≠ φ ⋏ ψ :=
   ne_of_ne_complexity (by simp)
 
-@[simp, grind .] lemma ne_and_right (φ ψ : Semiformula L ξ n) : ψ ≠ φ ⋏ ψ :=
+@[simp, grind .]
+lemma ne_and_right (φ ψ : Semiformula L ξ n) : ψ ≠ φ ⋏ ψ :=
   ne_of_ne_complexity (by simp)
 
-@[simp, grind .] lemma all_ne_subst (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) : φ/[t] ≠ ∀¹ φ :=
+@[simp, grind .]
+lemma all_ne_subst (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) : φ/[t] ≠ ∀¹ φ :=
   ne_of_ne_complexity (by simp)
 
 attribute [grind .] ne_or_left ne_or_right ex_ne_subst
 
-@[grind =] lemma verum_eq : (⊤ : Semiformula L ξ n) = Semiformula.verum := rfl
+@[grind =]
+lemma verum_eq : (⊤ : Semiformula L ξ n) = Semiformula.verum := rfl
 
-@[grind =] lemma falsum_eq : (⊥ : Semiformula L ξ n) = Semiformula.falsum := rfl
+@[grind =]
+lemma falsum_eq : (⊥ : Semiformula L ξ n) = Semiformula.falsum := rfl
 
-@[grind =] lemma and_eq (φ ψ : Semiformula L ξ n) : φ ⋏ ψ = Semiformula.and φ ψ := rfl
+@[grind =]
+lemma and_eq (φ ψ : Semiformula L ξ n) : φ ⋏ ψ = Semiformula.and φ ψ := rfl
 
-@[grind =] lemma or_eq (φ ψ : Semiformula L ξ n) : φ ⋎ ψ = Semiformula.or φ ψ := rfl
+@[grind =]
+lemma or_eq (φ ψ : Semiformula L ξ n) : φ ⋎ ψ = Semiformula.or φ ψ := rfl
 
-@[grind =] lemma all_eq (φ : Semiformula L ξ (n + 1)) : ∀¹ φ = Semiformula.all φ := rfl
+@[grind =]
+lemma all_eq (φ : Semiformula L ξ (n + 1)) : ∀¹ φ = Semiformula.all φ := rfl
 
-@[grind =] lemma exs_eq (φ : Semiformula L ξ (n + 1)) : ∃¹ φ = Semiformula.exs φ := rfl
+@[grind =]
+lemma exs_eq (φ : Semiformula L ξ (n + 1)) : ∃¹ φ = Semiformula.exs φ := rfl
 
 attribute [grind =] Multiset.mem_atom_iff
 
@@ -84,7 +95,8 @@ lemma qpow_map {ξ₁ ξ₂ : Type*} {n₁ n₂ : ℕ} (b : Fin n₁ → Fin n�
       by_cases h : (x : ℕ) < k <;> simp [h]
       omega
 
-@[simp] lemma emb_subst_app {m : ℕ} (w : Fin n → Semiterm L Empty m) (φ : Semiformula L Empty n) :
+@[simp]
+lemma emb_subst_app {m : ℕ} (w : Fin n → Semiterm L Empty m) (φ : Semiformula L Empty n) :
     Rewriting.emb (Rew.subst w ▹ φ : Semiformula L Empty m) =
       Rew.subst (fun i ↦ Rew.emb (w i)) ▹ (Rewriting.emb φ : Semiformula L ℕ n) := by
   unfold Rewriting.emb
@@ -146,7 +158,8 @@ lemma subst_subst_eq {m : ℕ} (v : Fin n → Semiterm L ξ m) (φ : Semiformula
       | succ i => exact i.elim0
     · simp [Rew.comp_app]
 
-@[simp] lemma subst_bShift_eq (v : Fin 1 → Semiterm L ξ 1) (t : Semiterm L ξ 0) :
+@[simp]
+lemma subst_bShift_eq (v : Fin 1 → Semiterm L ξ 1) (t : Semiterm L ξ 0) :
     Rew.subst v (Rew.bShift t) = Rew.bShift t := by
   have e : (Rew.subst v).comp (Rew.bShift : Rew L ξ 0 ξ 1) = Rew.bShift := by
     ext x

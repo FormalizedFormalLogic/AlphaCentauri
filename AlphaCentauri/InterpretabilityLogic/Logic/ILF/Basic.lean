@@ -28,7 +28,8 @@ open ofILAxioms
 
 variable {A B C : Formula α}
 
-@[simp] lemma ILF.axiomF : 𝐈𝐋𝐅 ⊢ Axioms.F A := axm ⟨A, rfl⟩
+@[simp]
+lemma ILF.axiomF : 𝐈𝐋𝐅 ⊢ Axioms.F A := axm ⟨A, rfl⟩
 
 section
 

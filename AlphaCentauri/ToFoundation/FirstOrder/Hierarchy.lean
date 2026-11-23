@@ -49,14 +49,17 @@ lemma arithmetic_bexs {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)
     (h : ℬ[<, L].Closure φ) : ℬ[<, L].Closure (∃¹[“x. x < !!t”] φ) :=
   bexs (R := Semiformula.Operator.LT.lt) (by rfl) ht h
 
-@[simp] lemma imp_iff : ℬ[<, L].Closure (φ 🡒 ψ) ↔ ℬ[<, L].Closure φ ∧ ℬ[<, L].Closure ψ := by
+@[simp]
+lemma imp_iff : ℬ[<, L].Closure (φ 🡒 ψ) ↔ ℬ[<, L].Closure φ ∧ ℬ[<, L].Closure ψ := by
   simp [Semiformula.imp_eq]
 
-@[simp] lemma ballLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
+@[simp]
+lemma ballLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
     ℬ[<, L].Closure (φ.ballLT t) ↔ ℬ[<, L].Closure φ := by
   simp [← Bounding.Hierarchy.zero_iff_bounded (Γ := 𝚺)]
 
-@[simp] lemma bexsLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
+@[simp]
+lemma bexsLT_iff {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ n} :
     ℬ[<, L].Closure (φ.bexsLT t) ↔ ℬ[<, L].Closure φ := by
   simp [← Bounding.Hierarchy.zero_iff_bounded (Γ := 𝚺)]
 
@@ -100,20 +103,23 @@ namespace Bounding.Hierarchy
 
 variable {Γ : Polarity} {s n : ℕ}
 
-@[simp] lemma toEmpty_iff [DecidableEq ξ] {φ : Semiformula L ξ n} (h : φ.freeVariables = ∅) :
+@[simp]
+lemma toEmpty_iff [DecidableEq ξ] {φ : Semiformula L ξ n} (h : φ.freeVariables = ∅) :
     ℬ[<, L].Hierarchy Γ s (φ.toEmpty h) ↔ ℬ[<, L].Hierarchy Γ s φ := by
   have : ℬ[<, L].Hierarchy Γ s (Rew.emb ▹ (φ.toEmpty h) : Semiformula L ξ n) ↔
       ℬ[<, L].Hierarchy Γ s (φ.toEmpty h) := rew_iff
   rwa [show (Rew.emb ▹ (φ.toEmpty h) : Semiformula L ξ n) = φ from Semiformula.emb_toEmpty φ h,
     iff_comm] at this
 
-@[simp] lemma allClosure_iff {φ : Semiformula L ξ n} :
+@[simp]
+lemma allClosure_iff {φ : Semiformula L ξ n} :
     ℬ[<, L].Hierarchy 𝚷 (s + 1) (∀¹* φ) ↔ ℬ[<, L].Hierarchy 𝚷 (s + 1) φ := by
   induction n with
   | zero => simp
   | succ n ih => rw [allClosure_succ]; simp [ih]
 
-@[simp] lemma univCl_iff {φ : Proposition L} :
+@[simp]
+lemma univCl_iff {φ : Proposition L} :
     ℬ[<, L].Hierarchy 𝚷 (s + 1) (Semiformula.univCl φ) ↔ ℬ[<, L].Hierarchy 𝚷 (s + 1) φ := by
   simp [Semiformula.univCl, Semiformula.univCl']
 
@@ -190,7 +196,8 @@ lemma neg : ∀ {Γ n} {φ : Semiformula L ξ n}, ℬ[<, L].PrenexBlock Γ φ �
   | _, _, _, exs h => by simpa using (neg h).all
   | _, _, _, all h => by simpa using (neg h).exs
 
-@[simp, grind =] lemma neg_iff : ℬ[<, L].PrenexBlock Γ.alt (∼φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
+@[simp, grind =]
+lemma neg_iff : ℬ[<, L].PrenexBlock Γ.alt (∼φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
   ⟨fun h ↦ by simpa using h.neg, fun h ↦ by simpa using h.neg⟩
 
 lemma rew {Γ : Polarity} {n₁ n₂ : ℕ} {ξ₁ ξ₂ : Type*} {φ : Semiformula L ξ₁ n₁}
@@ -307,7 +314,8 @@ namespace Bounding.HierarchySymbol.Semiformula
 
 variable {L : Language} {ℬ : Bounding L} {ξ : Type*} {n s : ℕ}
 
-@[simp] lemma hierarchy_succ {C : HierarchySymbol ℬ} {Γ : Polarity} (φ : C.Semiformula ξ n)
+@[simp]
+lemma hierarchy_succ {C : HierarchySymbol ℬ} {Γ : Polarity} (φ : C.Semiformula ξ n)
     (h : C.rank ≤ s + 1) : ℬ.Hierarchy Γ (s + 2) φ.val := hierarchy_of_lt φ (by omega)
 
 end Bounding.HierarchySymbol.Semiformula
@@ -336,7 +344,8 @@ namespace BooleanCombination
 
 variable {Γ Γ' : Semiformula L ξ n → Prop} {φ ψ : Semiformula L ξ n}
 
-@[simp, grind =] lemma neg_iff : BooleanCombination Γ (∼φ) ↔ BooleanCombination Γ φ := by
+@[simp, grind =]
+lemma neg_iff : BooleanCombination Γ (∼φ) ↔ BooleanCombination Γ φ := by
   have H : ∀ {φ : Semiformula L ξ n}, BooleanCombination Γ φ → BooleanCombination Γ (∼φ) := by
     intro φ h
     induction h with

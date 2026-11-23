@@ -187,7 +187,8 @@ lemma Factorial.exists_unique (x : V) : ∃! y, Factorial x y := by
 /-- - [HP98, Theorem I.1.58(1)] -/
 def factorial (x : V) : V := Classical.choose! (Factorial.exists_unique x)
 
-@[simp] lemma factorial_factorial (x : V) : Factorial x (factorial x) :=
+@[simp]
+lemma factorial_factorial (x : V) : Factorial x (factorial x) :=
   Classical.choose!_spec (Factorial.exists_unique x)
 
 lemma Factorial.factorial_eq {x y : V} (h : Factorial x y) : factorial x = y :=
@@ -196,12 +197,14 @@ lemma Factorial.factorial_eq {x y : V} (h : Factorial x y) : factorial x = y :=
 lemma Factorial.eq_iff {x y : V} : y = factorial x ↔ Factorial x y :=
   Classical.choose!_eq_iff_right (Factorial.exists_unique x)
 
-@[simp] lemma factorial_zero : factorial (0 : V) = 1 :=
+@[simp]
+lemma factorial_zero : factorial (0 : V) = 1 :=
   Factorial.factorial_eq
     ⟨1, 1, ⟨Nuon.ext_zero_eq_self_of_le (by simp), by simp⟩,
       Nuon.ext_zero_eq_self_of_le (by simp)⟩
 
-@[simp] lemma factorial_succ (x : V) : factorial (x + 1) = factorial x * (x + 1) := by
+@[simp]
+lemma factorial_succ (x : V) : factorial (x + 1) = factorial x * (x + 1) := by
   obtain ⟨L, S, H⟩ := Factorial.exists_isSeq (x + 1)
   rw [Factorial.factorial_eq (⟨L, S, H, rfl⟩ : Factorial (x + 1) _),
     Factorial.factorial_eq (⟨L, S, H.of_le (by simp), rfl⟩ : Factorial x _),
@@ -215,7 +218,8 @@ instance factorial_defined : 𝚺ᴬ₁-Function₁[V] factorial via factorialDe
 
 instance factorial_definable : 𝚺ᴬ₁-Function₁[V] factorial := factorial_defined.to_definable
 
-@[simp] lemma factorial_pos (x : V) : 0 < factorial x := by
+@[simp]
+lemma factorial_pos (x : V) : 0 < factorial x := by
   obtain ⟨L, S, H⟩ := Factorial.exists_isSeq x
   rw [Factorial.factorial_eq (⟨L, S, H, rfl⟩ : Factorial x _)]
   exact H.ext_pos x le_rfl

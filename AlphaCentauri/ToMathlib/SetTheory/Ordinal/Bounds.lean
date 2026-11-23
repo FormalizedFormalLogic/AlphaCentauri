@@ -90,11 +90,14 @@ noncomputable def omegaTower : ℕ → Ordinal → Ordinal
 
 variable {a : Ordinal}
 
-@[simp, grind =] lemma omegaTower_zero : omegaTower 0 a = a := rfl
+@[simp, grind =]
+lemma omegaTower_zero : omegaTower 0 a = a := rfl
 
-@[simp, grind =] lemma omegaTower_one : omegaTower 1 a = ω ^ a := rfl
+@[simp, grind =]
+lemma omegaTower_one : omegaTower 1 a = ω ^ a := rfl
 
-@[grind =] lemma omegaTower_succ (c : ℕ) : omegaTower (c + 1) a = omegaTower c (ω ^ a) := rfl
+@[grind =]
+lemma omegaTower_succ (c : ℕ) : omegaTower (c + 1) a = omegaTower c (ω ^ a) := rfl
 
 
 end Ordinal

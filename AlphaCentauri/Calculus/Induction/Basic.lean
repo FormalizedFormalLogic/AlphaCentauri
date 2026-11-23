@@ -80,7 +80,8 @@ inductive Derivation (C : ArithmeticSemiformula ℕ 1 → Prop) : LK.Sequent ℒ
   | all {Γ φ} : Derivation C (Γ⁺ + ⦃free φ⦄) → Derivation C (Γ + ⦃∀¹ φ⦄)
   | exs {Γ φ t} : Derivation C (Γ + ⦃φ/[t]⦄) → Derivation C (Γ + ⦃∃¹ φ⦄)
 
-@[inherit_doc] notation:45 "⊢ᴸᴷᴵ[" C "]! " Γ:45 => Derivation C Γ
+@[inherit_doc]
+notation:45 "⊢ᴸᴷᴵ[" C "]! " Γ:45 => Derivation C Γ
 
 /-- `⊢ᴸᴷᴵ[C] Γ` says that the sequent `Γ` is derivable in `LKI[C]`.
 
@@ -88,7 +89,8 @@ inductive Derivation (C : ArithmeticSemiformula ℕ 1 → Prop) : LK.Sequent ℒ
 def Derivable (C : ArithmeticSemiformula ℕ 1 → Prop) (Γ : LK.Sequent ℒₒᵣ) : Prop :=
   Nonempty (⊢ᴸᴷᴵ[C]! Γ)
 
-@[inherit_doc] notation:45 "⊢ᴸᴷᴵ[" C "] " Γ:45 => Derivable C Γ
+@[inherit_doc]
+notation:45 "⊢ᴸᴷᴵ[" C "] " Γ:45 => Derivable C Γ
 
 namespace Derivation
 
@@ -245,52 +247,67 @@ def Anchored (D : ArithmeticProposition → Prop) {Γ} : (⊢ᴸᴷᴵ[C]! Γ) �
   | all d => Anchored D d
   | exs d => Anchored D d
 
-@[simp] lemma anchored_axm {σ : ArithmeticSentence} {h : σ ∈ 𝗣𝗔⁻} :
+@[simp]
+lemma anchored_axm {σ : ArithmeticSentence} {h : σ ∈ 𝗣𝗔⁻} :
     Anchored D (axm (C := C) h) := trivial
 
-@[simp] lemma anchored_ind_iff {hξ} {d : ⊢ᴸᴷᴵ[C]! Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄} :
+@[simp]
+lemma anchored_ind_iff {hξ} {d : ⊢ᴸᴷᴵ[C]! Γ⁺ + ⦃∼(free ξ), (shift ξ)/[‘&0 + 1’]⦄} :
     Anchored D (ind ξ hξ t d) ↔ Anchored D d := Iff.rfl
 
-@[simp] lemma anchored_identity {k} {r : (ℒₒᵣ).Rel k} {v} :
+@[simp]
+lemma anchored_identity {k} {r : (ℒₒᵣ).Rel k} {v} :
     Anchored D (identity (C := C) r v) := trivial
 
-@[simp] lemma anchored_cut_iff {dp : ⊢ᴸᴷᴵ[C]! Γ + ⦃χ⦄} {dn : ⊢ᴸᴷᴵ[C]! Δ + ⦃∼χ⦄} :
+@[simp]
+lemma anchored_cut_iff {dp : ⊢ᴸᴷᴵ[C]! Γ + ⦃χ⦄} {dn : ⊢ᴸᴷᴵ[C]! Δ + ⦃∼χ⦄} :
     Anchored D (dp.cut dn) ↔ D χ ∧ Anchored D dp ∧ Anchored D dn := Iff.rfl
 
-@[simp] lemma anchored_contraction_iff {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃φ, φ⦄} :
+@[simp]
+lemma anchored_contraction_iff {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃φ, φ⦄} :
     Anchored D d.contraction ↔ Anchored D d := Iff.rfl
 
-@[simp] lemma anchored_weakening_iff {d : ⊢ᴸᴷᴵ[C]! Γ} :
+@[simp]
+lemma anchored_weakening_iff {d : ⊢ᴸᴷᴵ[C]! Γ} :
     Anchored D (d.weakening (φ := φ)) ↔ Anchored D d := Iff.rfl
 
-@[simp] lemma anchored_verum : Anchored D (verum (C := C)) := trivial
+@[simp]
+lemma anchored_verum : Anchored D (verum (C := C)) := trivial
 
-@[simp] lemma anchored_or_iff {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃φ, ψ⦄} :
+@[simp]
+lemma anchored_or_iff {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃φ, ψ⦄} :
     Anchored D d.or ↔ Anchored D d := Iff.rfl
 
-@[simp] lemma anchored_and_iff {dp : ⊢ᴸᴷᴵ[C]! Γ + ⦃φ⦄} {dq : ⊢ᴸᴷᴵ[C]! Γ + ⦃ψ⦄} :
+@[simp]
+lemma anchored_and_iff {dp : ⊢ᴸᴷᴵ[C]! Γ + ⦃φ⦄} {dq : ⊢ᴸᴷᴵ[C]! Γ + ⦃ψ⦄} :
     Anchored D (dp.and dq) ↔ Anchored D dp ∧ Anchored D dq := Iff.rfl
 
-@[simp] lemma anchored_all_iff {d : ⊢ᴸᴷᴵ[C]! Γ⁺ + ⦃free ξ⦄} :
+@[simp]
+lemma anchored_all_iff {d : ⊢ᴸᴷᴵ[C]! Γ⁺ + ⦃free ξ⦄} :
     Anchored D d.all ↔ Anchored D d := Iff.rfl
 
-@[simp] lemma anchored_exs_iff {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[t]⦄} :
+@[simp]
+lemma anchored_exs_iff {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃ξ/[t]⦄} :
     Anchored D d.exs ↔ Anchored D d := Iff.rfl
 
-@[simp] lemma anchored_cast_iff {d : ⊢ᴸᴷᴵ[C]! Δ} {e : Δ = Γ} :
+@[simp]
+lemma anchored_cast_iff {d : ⊢ᴸᴷᴵ[C]! Δ} {e : Δ = Γ} :
     Anchored D (cast d e) ↔ Anchored D d := by rcases e; rfl
 
-@[simp] lemma anchored_structural_cast_iff {d : ⊢ᴸᴷᴵ[C]! Γ} {e : Γ = Δ} :
+@[simp]
+lemma anchored_structural_cast_iff {d : ⊢ᴸᴷᴵ[C]! Γ} {e : Γ = Δ} :
     Anchored D (Structural.cast (𝔇 := Derivation C) d e) ↔ Anchored D d := by rcases e; rfl
 
-@[simp] lemma anchored_weakeningMany_iff {t : Δ.Traversal} {d : ⊢ᴸᴷᴵ[C]! Γ} :
+@[simp]
+lemma anchored_weakeningMany_iff {t : Δ.Traversal} {d : ⊢ᴸᴷᴵ[C]! Γ} :
     Anchored D (weakeningMany t d) ↔ Anchored D d := by
   induction t with
   | zero => simp [weakeningMany, Structural.weakenMany]
   | succ φ t ih => simpa [weakeningMany, Structural.weakenMany, Structural.weakening] using ih
 
 /-- The excluded middle is derived without a cut, so its derivation is anchored in every class. -/
-@[simp] lemma anchored_lem : ∀ φ : ArithmeticProposition, Anchored D (lem (C := C) φ)
+@[simp]
+lemma anchored_lem : ∀ φ : ArithmeticProposition, Anchored D (lem (C := C) φ)
   | .rel _ _ => by unfold lem; trivial
   | .nrel _ _ => by unfold lem; exact anchored_cast_iff.mpr trivial
   | ⊤ => by unfold lem; simp
@@ -432,7 +449,8 @@ end Derivation
 abbrev AnchoredDerivation (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition → Prop)
     (Γ : LK.Sequent ℒₒᵣ) := {d : ⊢ᴸᴷᴵ[C]! Γ // Derivation.Anchored D d}
 
-@[inherit_doc] notation:45 "⊢ᴸᴷᴵ[" C ", " D "]! " Γ:45 => AnchoredDerivation C D Γ
+@[inherit_doc]
+notation:45 "⊢ᴸᴷᴵ[" C ", " D "]! " Γ:45 => AnchoredDerivation C D Γ
 
 /-- `⊢ᴸᴷᴵ[C, D] Γ` says that `Γ` has a `D`-anchored derivation in `LKI[C]`. -/
 notation:45 "⊢ᴸᴷᴵ[" C ", " D "] " Γ:45 => Nonempty (AnchoredDerivation C D Γ)

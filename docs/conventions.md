@@ -81,6 +81,10 @@ rewrite, so it is written as if it were already there.
   $\mathsf{I}\Delta_0$ prove the infinitude of primes?`), then cites the source; it does not say
   that the problem is open. A result that depends on an open problem takes it as a hypothesis
   `(h : Name)`.
+- **No `axiom` or `open_problem` in a `Basic.lean`.** As a rule, a `Basic.lean` holds only the
+  definitions of its subject and the facts proved about them, which every other module of the
+  subject imports. An `axiom` or an `open_problem` goes in a module of its own, or in the module
+  of the results it is about, never in `Basic.lean`.
 - **Reuse before restating.** Foundation's theories, notations, definability classes, and the
   hierarchy are the vocabulary. A definition that duplicates a Foundation definition under a
   new name is rejected in review. If Foundation's API is missing or awkward, say so in the
@@ -89,6 +93,15 @@ rewrite, so it is written as if it were already there.
   parentheses whenever the argument runs to the end of the term: `exact Or.inr <| Or.inl h`, not
   `exact Or.inr (Or.inl h)`. Foundation's guidelines do not choose between the two spellings;
   Mathlib's `style.dollarSyntax` linter does, and this repository follows it.
+- **Attributes on their own line.** An attribute goes on the line above the declaration it
+  marks, never in front of it on the same line, so that it does not lengthen the header:
+  ```
+  @[simp]
+  lemma card_empty : …
+  ```
+  not `@[simp] lemma card_empty : …`. The same holds for modifiers after the attribute
+  (`@[simp]` above `private lemma …`) and for `@[inherit_doc]` above a `notation`; only
+  `@[expose] public section` stays on one line.
 - **Avoid `?_`.** Prefer `apply f` to `refine f ?_`, and a direct term to a `refine` with holes;
   [`style.md`](style.md)'s preference for direct term construction is the same rule seen from the
   other side. `use` takes data only — a witness of a `Type`, never a proof of a hypothesis: split

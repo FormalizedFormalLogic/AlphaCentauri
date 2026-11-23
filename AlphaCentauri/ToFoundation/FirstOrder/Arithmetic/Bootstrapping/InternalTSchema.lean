@@ -37,12 +37,12 @@ noncomputable def _root_.FFL.FirstOrder.Arithmetic.psatDef : 𝚺ᴬ₁.Semisent
 noncomputable def _root_.FFL.FirstOrder.Arithmetic.tvDef : 𝚺ᴬ₁.Semisentence 3 :=
   .mkSigma “y a t. ∃ s, !decGraph s a ∧ !termValGraph y s t”
 
-@[simp] lemma eval_psatDef (v : Fin 2 → V) :
-    V ⊧/v psatDef.val ↔ BoundedSatisfied (dec (v 0)) (v 1) := by
+@[simp]
+lemma eval_psatDef (v : Fin 2 → V) : V ⊧/v psatDef.val ↔ BoundedSatisfied (dec (v 0)) (v 1) := by
   simp [psatDef]
 
-@[simp] lemma eval_tvDef (v : Fin 3 → V) :
-    V ⊧/v tvDef.val ↔ v 0 = termVal (dec (v 1)) (v 2) := by
+@[simp]
+lemma eval_tvDef (v : Fin 3 → V) : V ⊧/v tvDef.val ↔ v 0 = termVal (dec (v 1)) (v 2) := by
   simp [tvDef]
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
@@ -65,32 +65,35 @@ section
 
 variable {n m : ℕ}
 
-@[simp] lemma subst_pTerm (w : SemitermVec V ℒₒᵣ n m) (t u : Semiterm V ℒₒᵣ n) :
+@[simp]
+lemma subst_pTerm (w : SemitermVec V ℒₒᵣ n m) (t u : Semiterm V ℒₒᵣ n) :
     (pTerm t u).subst w = pTerm (t.subst w) (u.subst w) := by
   simp [pTerm]
 
-@[simp] lemma shift_pTerm (t u : Semiterm V ℒₒᵣ n) :
-    (pTerm t u).shift = pTerm t.shift u.shift := by
+@[simp]
+lemma shift_pTerm (t u : Semiterm V ℒₒᵣ n) : (pTerm t u).shift = pTerm t.shift u.shift := by
   simp [pTerm]
 
-@[simp] lemma bShift_pTerm (t u : Semiterm V ℒₒᵣ n) :
-    (pTerm t u).bShift = pTerm t.bShift u.bShift := by
+@[simp]
+lemma bShift_pTerm (t u : Semiterm V ℒₒᵣ n) : (pTerm t u).bShift = pTerm t.bShift u.bShift := by
   simp [pTerm]
 
-@[simp] lemma subst_psatF (w : SemitermVec V ℒₒᵣ n m) (a : Semiterm V ℒₒᵣ n) (p : V) :
+@[simp]
+lemma subst_psatF (w : SemitermVec V ℒₒᵣ n m) (a : Semiterm V ℒₒᵣ n) (p : V) :
     (psatF a p).subst w = psatF (a.subst w) p := by
   simp [psatF, Semiformula.substs_substs]
 
-@[simp] lemma shift_psatF (a : Semiterm V ℒₒᵣ n) (p : V) :
-    (psatF a p).shift = psatF a.shift p := by
+@[simp]
+lemma shift_psatF (a : Semiterm V ℒₒᵣ n) (p : V) : (psatF a p).shift = psatF a.shift p := by
   simp [psatF, Semiformula.shift_substs, typed_quote_shift]
 
-@[simp] lemma subst_tvF (w : SemitermVec V ℒₒᵣ n m) (y a : Semiterm V ℒₒᵣ n) (t : V) :
+@[simp]
+lemma subst_tvF (w : SemitermVec V ℒₒᵣ n m) (y a : Semiterm V ℒₒᵣ n) (t : V) :
     (tvF y a t).subst w = tvF (y.subst w) (a.subst w) t := by
   simp [tvF, Semiformula.substs_substs]
 
-@[simp] lemma shift_tvF (y a : Semiterm V ℒₒᵣ n) (t : V) :
-    (tvF y a t).shift = tvF y.shift a.shift t := by
+@[simp]
+lemma shift_tvF (y a : Semiterm V ℒₒᵣ n) (t : V) : (tvF y a t).shift = tvF y.shift a.shift t := by
   simp [tvF, Semiformula.shift_substs, typed_quote_shift]
 
 end
@@ -526,8 +529,8 @@ instance pTermCode_defined : 𝚺ᴬ₁-Function₂ (pTermCode : V → V → V) 
 instance pTermCode_definable : 𝚺ᴬ₁-Function₂ (pTermCode : V → V → V) :=
   pTermCode_defined.to_definable
 
-@[simp] lemma val_pTerm {n : ℕ} (t u : Semiterm V ℒₒᵣ n) :
-    (pTerm t u).val = pTermCode t.val u.val := by
+@[simp]
+lemma val_pTerm {n : ℕ} (t u : Semiterm V ℒₒᵣ n) : (pTerm t u).val = pTermCode t.val u.val := by
   simp [pTerm, pTermCode]
 
 namespace AssignmentCode
@@ -548,10 +551,12 @@ end AssignmentCode
 /-- The code of the term assigning `^&i` to the bound variable `^#i` for `i < n`. -/
 noncomputable def assignmentCode (n : V) : V := AssignmentCode.construction.result ![] n
 
-@[simp] lemma assignmentCode_zero : assignmentCode (0 : V) = numeral 0 := by
+@[simp]
+lemma assignmentCode_zero : assignmentCode (0 : V) = numeral 0 := by
   simp [assignmentCode, AssignmentCode.construction]
 
-@[simp] lemma assignmentCode_succ (n : V) :
+@[simp]
+lemma assignmentCode_succ (n : V) :
     assignmentCode (n + 1) = pTermCode (^&0) (termShift ℒₒᵣ (assignmentCode n)) := by
   simp [assignmentCode, AssignmentCode.construction]
 
@@ -579,7 +584,8 @@ lemma isSemiterm_assignmentCode (n : V) : IsSemiterm ℒₒᵣ 0 (assignmentCode
 noncomputable def assignment (n : V) : Term V ℒₒᵣ :=
   ⟨assignmentCode n, isSemiterm_assignmentCode n⟩
 
-@[simp] lemma val_assignment (n : V) : (assignment n).val = assignmentCode n := rfl
+@[simp]
+lemma val_assignment (n : V) : (assignment n).val = assignmentCode n := rfl
 
 lemma assignment_zero : assignment (0 : V) = 𝕹 0 := by ext; simp [assignment]
 

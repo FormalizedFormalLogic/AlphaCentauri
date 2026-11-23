@@ -97,7 +97,8 @@ noncomputable def result (n : V) : V := znth (c.table v (n + 1)) n
 
 variable {v}
 
-@[simp] lemma table_zero : c.table v 0 = ∅ := c.recursion.result_zero v
+@[simp]
+lemma table_zero : c.table v 0 = ∅ := c.recursion.result_zero v
 
 lemma table_succ (n : V) :
     c.table v (n + 1) = insert ⟪n, c.clippedVal v n (c.table v n)⟫ (c.table v n) :=

@@ -60,7 +60,8 @@ section
 
 variable {M : Type u} {N : Type v} [ORingStructure M] [ORingStructure N] (e : M ⊆ₑ N)
 
-@[simp, grind =] lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
+@[simp, grind =]
+lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
   EmbeddingClass.map_lt_map_iff e.emb
 
 lemma mem_range_of_lt {a : M} {b : N} (h : b < e a) : b ∈ Set.range e.emb :=
@@ -355,7 +356,8 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 - [Kay91, Exercise 11.4(a)] -/
 def codedSet (a : V) : Set ℕ := {n | (n : V) ∈ a}
 
-@[simp] lemma mem_codedSet {a : V} {n : ℕ} : n ∈ codedSet a ↔ (n : V) ∈ a := Iff.rfl
+@[simp]
+lemma mem_codedSet {a : V} {n : ℕ} : n ∈ codedSet a ↔ (n : V) ∈ a := Iff.rfl
 
 variable (V) in
 /-- The standard system: the subsets of `ℕ` coded by some element of `V`.
@@ -396,16 +398,19 @@ namespace EndExtension
 variable {M N : Type*} [ORingStructure M] [ORingStructure N] [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
   (e : M ⊆ₑ N)
 
-@[simp] lemma emb_natCast (n : ℕ) : e n = n := by
+@[simp]
+lemma emb_natCast (n : ℕ) : e n = n := by
   induction n with
   | zero => simp
   | succ n ih => simp [Nat.cast_succ, ih]
 
-@[simp] lemma emb_mem_emb_iff {i a : M} : e i ∈ e a ↔ i ∈ a := by
+@[simp]
+lemma emb_mem_emb_iff {i a : M} : e i ∈ e a ↔ i ∈ a := by
   simpa using (Bounding.HierarchySymbol.Defined.sigmaZero_absolute e.emb
     (bit_defined (V := M)) (bit_defined (V := N)) ![i, a]).symm
 
-@[simp] lemma codedSet_emb (a : M) : codedSet (e a) = codedSet a := by
+@[simp]
+lemma codedSet_emb (a : M) : codedSet (e a) = codedSet a := by
   ext n
   simpa using e.emb_mem_emb_iff (i := (n : M)) (a := a)
 

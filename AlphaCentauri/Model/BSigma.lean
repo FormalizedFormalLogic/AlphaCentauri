@@ -255,7 +255,7 @@ theorem sigmaElementary : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j)
     use ⟨x, hx⟩
     exact hφx
 
-variable {a : M} (ha : a ∈ sigmaDefinableElements (j + 1) M) (hns : ∀ m : ℕ, (m : M) < a)
+variable {a : M} (ha : a ∈ sigmaDefinableElements (j + 1) M) (hns : IsNonstandard a)
 include hns
 
 /-- The cut below the definable elements satisfies $\mathsf{B}\Sigma_{j+1}$ once `M` is
@@ -324,7 +324,7 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
     intro m
     change ((m : (definableCut j M).carrier) : M) < a
     rw [hcast]
-    exact hns m
+    exact hns.natCast_lt m
   obtain ⟨c, hc, hbc⟩ := b.2
   exact lt_asymm hbc (hb ⟨c, hI' hc⟩ (hK hc (hI' hc)) : c < b.1)
 

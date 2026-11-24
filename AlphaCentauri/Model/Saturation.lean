@@ -8,7 +8,8 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 /-! # Saturation of nonstandard models of Peano arithmetic
 
 The standard system of a nonstandard model of `𝗣𝗔` contains every subset of `ℕ` cut out by a
-definable predicate of the model, and every recursive subset of `ℕ`. A type over the model
+definable predicate of the model, every recursive subset of `ℕ`, and the set of codes of the prenex
+$\Sigma_n$ formulas, or of the prenex $\Pi_n$ formulas, satisfied by a tuple. A type over the model
 consisting of prenex $\Sigma_n$ formulas, or of prenex $\Pi_n$ formulas, whose set of codes is in
 the standard system is realized, and so the model is $\Sigma_n$-recursively saturated for every
 $n$.
@@ -81,6 +82,28 @@ lemma exists_forall_of_mem_standardSystem {R : M → M → Prop} (hR : 𝚺ᴬ_[
   apply hx e _ he
   by_contra! hde
   exact hd <| E.mem_range_of_lt (a := e + 1) <| lt_of_le_of_lt hde (by simp [E])
+
+/-- The prenex $\Sigma_n$ type, or prenex $\Pi_n$ type, of a tuple is a coded set.
+- [Kay91, Lemma 12.1] -/
+theorem mem_standardSystem_hierarchyType (Γ : Polarity) (n : ℕ) {l : ℕ} (a : Fin l → M) :
+    {e : ℕ | ∃ φ : ArithmeticSemisentence l, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ ∧ M ⊧/a φ ∧
+      Encodable.encode φ = e} ∈ standardSystem M := by
+  have h := setOf_mem_standardSystem hM (m := n + 1) (P := fun e ↦
+    (ℒₒᵣ).IsSemisentence (l : M) e ∧ PrenexFormulaSatisfied Γ n (matrixToVec a) e)
+    (by definability)
+  apply Set.mem_of_eq_of_mem _ h
+  ext e
+  simp only [← Sentence.quote_eq_encode_nat]
+  constructor
+  · rintro ⟨φ, hφ, ha, rfl⟩
+    simp only [Set.mem_ofPred, Sentence.coe_quote_eq_quote]
+    exact ⟨.quote φ, (PrenexFormulaSatisfied.quote_iff hφ a).mpr ha⟩
+  · rintro ⟨he, hs⟩
+    obtain ⟨φ, rfl⟩ := he.sound_natCast
+    rw [Sentence.coe_quote_eq_quote] at hs
+    have hφ := (isPrenexHierarchy_quote_iff φ).mp hs.isPrenexHierarchy
+    use φ
+    exact ⟨hφ, (PrenexFormulaSatisfied.quote_iff hφ a).mp hs, rfl⟩
 
 end Arithmetic
 

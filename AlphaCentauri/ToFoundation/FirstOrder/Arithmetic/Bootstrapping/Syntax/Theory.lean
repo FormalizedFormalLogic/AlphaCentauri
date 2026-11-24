@@ -27,9 +27,17 @@ class Theory.Δ₁.Sentential (T : Theory L) [T.Δ₁] : Prop where
     (h : p ∈ T.Δ₁Class) : L.IsSentence p
 
 lemma Theory.Δ₁.Sentential.forall_isSentence (T : Theory L) [T.Δ₁]
-    [Theory.Δ₁.Sentential T] {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
-    ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p :=
-  fun _ h ↦ isSentence h
+    [Theory.Δ₁.Sentential T] {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
+    ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p := by
+  have h : 𝗜𝚺₁ ⊢ (“∀ p, !T.Δ₁ch.sigma.val p →
+      !(Arithmetic.Bootstrapping.isSentence L).sigma.val p” : ArithmeticSentence) :=
+    Arithmetic.complete.{0} _ _ fun W _ _ ↦ by
+      simpa [models_iff, Bounding.HierarchySymbol.Semiformula.val_sigma] using
+        fun p hp ↦ isSentence (T := T) (V := W) (p := p) hp
+  have h₁ : ∀ p : V, p ∈ T.Δ₁Class → L.IsSentence p := by
+    simpa [models_iff, Bounding.HierarchySymbol.Semiformula.val_sigma] using
+      models_of_provable (M := V) inferInstance h
+  exact h₁
 
 instance Theory.Δ₁.Sentential.union (T U : Theory L) [T.Δ₁] [U.Δ₁] [Theory.Δ₁.Sentential T]
     [Theory.Δ₁.Sentential U] : Theory.Δ₁.Sentential (T ∪ U) where

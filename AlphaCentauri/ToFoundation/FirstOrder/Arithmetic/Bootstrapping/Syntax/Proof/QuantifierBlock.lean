@@ -263,8 +263,8 @@ lemma TProof.exs_imp_of_free {R : Formula V L} (h : T.internalize V ⊢ φ.free 
     simpa using FiniteContext.provable_iff.mp h₁
   cl_prover [h₂, h₃]
 
-lemma tprovable_all_imp_all (d φ : Semiformula V L 1) :
-    T.internalize V ⊢ ∀¹ φ 🡒 ∀¹ (d 🡒 φ) :=
+lemma tprovable_all_imp_all (D φ : Semiformula V L 1) :
+    T.internalize V ⊢ ∀¹ φ 🡒 ∀¹ (D 🡒 φ) :=
   TProof.all_imp_all_of_free <| by simp only [Semiformula.free_imp]; cl_prover
 
 lemma tprovable_all_imp_imp_all (E F : Semiformula V L 1) :
@@ -279,12 +279,12 @@ lemma tprovable_all_imp_imp_all (E F : Semiformula V L 1) :
     cl_prover [h₂, h₃]
   cl_prover [h₁]
 
-lemma all_iff_imp_all_imp_imp_left (d A B : Semiformula V L 1) :
-    T.internalize V ⊢ ∀¹ (d 🡒 (A 🡘 B)) 🡒 ∀¹ (d 🡒 B 🡒 A) :=
+lemma all_iff_imp_all_imp_imp_left (D A B : Semiformula V L 1) :
+    T.internalize V ⊢ ∀¹ (D 🡒 (A 🡘 B)) 🡒 ∀¹ (D 🡒 B 🡒 A) :=
   TProof.all_imp_all_of_free <| by simp only [Semiformula.free_imp, Semiformula.free_iff]; cl_prover
 
-lemma all_iff_imp_all_imp_imp_right (d A B : Semiformula V L 1) :
-    T.internalize V ⊢ ∀¹ (d 🡒 (A 🡘 B)) 🡒 ∀¹ (d 🡒 A 🡒 B) :=
+lemma all_iff_imp_all_imp_imp_right (D A B : Semiformula V L 1) :
+    T.internalize V ⊢ ∀¹ (D 🡒 (A 🡘 B)) 🡒 ∀¹ (D 🡒 A 🡒 B) :=
   TProof.all_imp_all_of_free <| by simp only [Semiformula.free_imp, Semiformula.free_iff]; cl_prover
 
 lemma tprovable_all_iff_all (E F : Semiformula V L 1) :
@@ -298,23 +298,32 @@ lemma tprovable_all_iff_all (E F : Semiformula V L 1) :
   cl_prover [h₁, h₂, tprovable_all_imp_imp_all (T := T) E F,
     tprovable_all_imp_imp_all (T := T) F E]
 
-lemma tprovable_all_iff_all_domain (d A B : Semiformula V L 1) :
-    T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 (∀¹ (d 🡒 A) 🡘 ∀¹ (d 🡒 B)) := by
+lemma tprovable_all_iff_all_domain (D A B : Semiformula V L 1) :
+    T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 (∀¹ (D 🡒 A) 🡘 ∀¹ (D 🡒 B)) := by
   have h₁ : T.internalize V ⊢ ∀¹ (A 🡘 B : Semiformula V L 1) 🡒
-      ∀¹ ((d 🡒 A) 🡘 (d 🡒 B) : Semiformula V L 1) :=
+      ∀¹ ((D 🡒 A) 🡘 (D 🡒 B) : Semiformula V L 1) :=
     TProof.all_imp_all_of_free <| by
       simp only [Semiformula.free_imp, Semiformula.free_iff]; cl_prover
-  cl_prover [h₁, tprovable_all_iff_all (T := T) (d 🡒 A) (d 🡒 B)]
+  cl_prover [h₁, tprovable_all_iff_all (T := T) (D 🡒 A) (D 🡒 B)]
 
-lemma tprovable_all_iff_exs_domain (d A B : Semiformula V L 1) :
-    T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 (∃¹ (d ⋏ A) 🡘 ∃¹ (d ⋏ B)) := by
+lemma tprovable_all_iff_exs_domain (D A B : Semiformula V L 1) :
+    T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 (∃¹ (D ⋏ A) 🡘 ∃¹ (D ⋏ B)) := by
   have h₁ : T.internalize V ⊢ ∀¹ (A 🡘 B : Semiformula V L 1) 🡒
-      ∀¹ (∼(d ⋏ A) 🡘 ∼(d ⋏ B) : Semiformula V L 1) :=
+      ∀¹ (∼(D ⋏ A) 🡘 ∼(D ⋏ B) : Semiformula V L 1) :=
     TProof.all_imp_all_of_free <| by
       simp only [Semiformula.free_iff, Semiformula.free_neg, Semiformula.free_and]; cl_prover
-  have h₂ : T.internalize V ⊢ ∀¹ (∼(d ⋏ A) 🡘 ∼(d ⋏ B)) 🡒 (∼(∃¹ (d ⋏ A)) 🡘 ∼(∃¹ (d ⋏ B))) := by
-    simpa using tprovable_all_iff_all (T := T) (∼(d ⋏ A)) (∼(d ⋏ B))
+  have h₂ : T.internalize V ⊢ ∀¹ (∼(D ⋏ A) 🡘 ∼(D ⋏ B)) 🡒 (∼(∃¹ (D ⋏ A)) 🡘 ∼(∃¹ (D ⋏ B))) := by
+    simpa using tprovable_all_iff_all (T := T) (∼(D ⋏ A)) (∼(D ⋏ B))
   cl_prover [h₁, h₂]
+
+/-- Equivalence on the domain `D` of the matrices of universal quantifiers relativized to `D`. -/
+lemma tprovable_all_imp_iff_all_domain (D A B : Semiformula V L 1) :
+    T.internalize V ⊢ ∀¹ (D 🡒 (A 🡘 B)) 🡒 (∀¹ (D 🡒 A) 🡘 ∀¹ (D 🡒 B)) := by
+  have h₁ : T.internalize V ⊢ ∀¹ (D 🡒 (A 🡘 B)) 🡒
+      ∀¹ ((D 🡒 A) 🡘 (D 🡒 B) : Semiformula V L 1) :=
+    TProof.all_imp_all_of_free <| by
+      simp only [Semiformula.free_imp, Semiformula.free_iff]; cl_prover
+  cl_prover [h₁, tprovable_all_iff_all (T := T) (D 🡒 A) (D 🡒 B)]
 
 lemma tprovable_all_iff_exs (E F : Semiformula V L 1) :
     T.internalize V ⊢ ∀¹ (E 🡘 F) 🡒 (∃¹ E 🡘 ∃¹ F) := by
@@ -324,6 +333,29 @@ lemma tprovable_all_iff_exs (E F : Semiformula V L 1) :
   have h₂ : T.internalize V ⊢ ∀¹ (∼E 🡘 ∼F) 🡒 (∼(∃¹ E) 🡘 ∼(∃¹ F)) := by
     simpa using tprovable_all_iff_all (T := T) (∼E) (∼F)
   cl_prover [h₁, h₂]
+
+/-- Equivalence on the domain `D` of the matrices of existential quantifiers relativized to `D`. -/
+lemma tprovable_all_imp_iff_exs_domain (D A B : Semiformula V L 1) :
+    T.internalize V ⊢ ∀¹ (D 🡒 (A 🡘 B)) 🡒 (∃¹ (D ⋏ A) 🡘 ∃¹ (D ⋏ B)) := by
+  have h₁ : T.internalize V ⊢ ∀¹ (D 🡒 (A 🡘 B)) 🡒
+      ∀¹ ((D ⋏ A) 🡘 (D ⋏ B) : Semiformula V L 1) :=
+    TProof.all_imp_all_of_free <| by
+      simp only [Semiformula.free_imp, Semiformula.free_iff, Semiformula.free_and]; cl_prover
+  cl_prover [h₁, tprovable_all_iff_exs (T := T) (D ⋏ A) (D ⋏ B)]
+
+/-- Transitivity of equivalence under a universal quantifier, the second equivalence holding on the
+domain `D`. -/
+lemma tprovable_all_iff_imp_all_imp_iff {D A B C : Semiformula V L 1}
+    (h : T.internalize V ⊢ ∀¹ (D 🡒 (B 🡘 C))) :
+    T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 ∀¹ (D 🡒 (A 🡘 C)) := by
+  apply TProof.generalize_imp
+  have h₁ := TProof.all_imp_subst (T := T) (A 🡘 B).shift (Semiterm.fvar 0)
+  have h₂ := TProof.all_imp_subst (T := T) (D 🡒 (B 🡘 C)).shift (Semiterm.fvar 0)
+  have h₃ : T.internalize V ⊢ ∀¹ (D 🡒 (B 🡘 C)).shift := by simpa using TProof.shift! h
+  simp only [Semiformula.free, Semiformula.shift_all, Semiformula.shift_imp,
+    Semiformula.shift_and, LogicalConnective.iff, Semiformula.substs_imp, Semiformula.substs_and]
+    at h₁ h₂ h₃ ⊢
+  cl_prover 256 [h₁, h₂, h₃]
 
 lemma tprovable_all_iff_trans {A B C : Semiformula V L 1} (h₁ : T.internalize V ⊢ ∀¹ (A 🡘 B))
     (h₂ : T.internalize V ⊢ ∀¹ (B 🡘 C)) : T.internalize V ⊢ ∀¹ (A 🡘 C) := by
@@ -346,29 +378,29 @@ lemma tprovable_all_iff_symm {A B : Semiformula V L 1} (h : T.internalize V ⊢ 
     cl_prover
   exact tprovable_all_imp_imp_all _ _ ⨀ h₁ ⨀ h
 
-lemma tprovable_all_iff_all_of_domain {d : Semiformula V L 1} (hd : T.internalize V ⊢ ∀¹ d)
-    (A B : Semiformula V L 1) : T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 (∀¹ A 🡘 ∀¹ (d 🡒 B)) := by
+lemma tprovable_all_iff_all_of_domain {D : Semiformula V L 1} (hd : T.internalize V ⊢ ∀¹ D)
+    (A B : Semiformula V L 1) : T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 (∀¹ A 🡘 ∀¹ (D 🡒 B)) := by
   have h₁ := TProof.all_imp_subst (T := T) (A.shift 🡘 B.shift) (Semiterm.fvar 0)
-  have h₂ := TProof.all_imp_subst (T := T) d.shift (Semiterm.fvar 0)
+  have h₂ := TProof.all_imp_subst (T := T) D.shift (Semiterm.fvar 0)
   simp only [Semiformula.substs_imply] at h₁
-  have h₃ : T.internalize V ⊢ ((∀¹ (A 🡘 B)) ⋏ (∀¹ d)) 🡒 ∀¹ (A 🡘 (d 🡒 B)) := by
+  have h₃ : T.internalize V ⊢ ((∀¹ (A 🡘 B)) ⋏ (∀¹ D)) 🡒 ∀¹ (A 🡘 (D 🡒 B)) := by
     apply TProof.generalize_imp
     simp only [Semiformula.shift_and, Semiformula.shift_all, Semiformula.shift_iff,
       Semiformula.shift_imp, Semiformula.free, Semiformula.substs_imply, Semiformula.substs_imp]
     cl_prover [h₁, h₂]
-  cl_prover [hd, h₃, tprovable_all_iff_all (T := T) A (d 🡒 B)]
+  cl_prover [hd, h₃, tprovable_all_iff_all (T := T) A (D 🡒 B)]
 
-lemma tprovable_exs_iff_exs_of_domain {d : Semiformula V L 1} (hd : T.internalize V ⊢ ∀¹ d)
-    (A B : Semiformula V L 1) : T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 (∃¹ A 🡘 ∃¹ (d ⋏ B)) := by
+lemma tprovable_exs_iff_exs_of_domain {D : Semiformula V L 1} (hd : T.internalize V ⊢ ∀¹ D)
+    (A B : Semiformula V L 1) : T.internalize V ⊢ ∀¹ (A 🡘 B) 🡒 (∃¹ A 🡘 ∃¹ (D ⋏ B)) := by
   have h₁ := TProof.all_imp_subst (T := T) (A.shift 🡘 B.shift) (Semiterm.fvar 0)
-  have h₂ := TProof.all_imp_subst (T := T) d.shift (Semiterm.fvar 0)
+  have h₂ := TProof.all_imp_subst (T := T) D.shift (Semiterm.fvar 0)
   simp only [Semiformula.substs_imply] at h₁
-  have h₃ : T.internalize V ⊢ ((∀¹ (A 🡘 B)) ⋏ (∀¹ d)) 🡒 ∀¹ (A 🡘 (d ⋏ B)) := by
+  have h₃ : T.internalize V ⊢ ((∀¹ (A 🡘 B)) ⋏ (∀¹ D)) 🡒 ∀¹ (A 🡘 (D ⋏ B)) := by
     apply TProof.generalize_imp
     simp only [Semiformula.shift_and, Semiformula.shift_all, Semiformula.shift_iff,
       Semiformula.free, Semiformula.substs_imply, Semiformula.substs_and]
     cl_prover [h₁, h₂]
-  cl_prover [hd, h₃, tprovable_all_iff_exs (T := T) A (d ⋏ B)]
+  cl_prover [hd, h₃, tprovable_all_iff_exs (T := T) A (D ⋏ B)]
 
 /-! ## Provable equivalences of formula codes -/
 

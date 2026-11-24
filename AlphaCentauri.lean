@@ -9,6 +9,7 @@ public import AlphaCentauri.Axiomatizability.OpenProblems.FiniteAxiomatizable
 public import AlphaCentauri.Axiomatizability.OpenProblems.Omega1Conservativity
 public import AlphaCentauri.Axiomatizability.Reflexive
 public import AlphaCentauri.Bootstrapping.Henkin
+public import AlphaCentauri.Bootstrapping.HenkinSatisfaction
 public import AlphaCentauri.Bootstrapping.Interpretability.CaseSplit
 public import AlphaCentauri.Bootstrapping.Interpretability.Commutation
 public import AlphaCentauri.Bootstrapping.Interpretability.CompositeTable
@@ -56,6 +57,7 @@ public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Formalized
 public import AlphaCentauri.Interpretability.Henkin
+public import AlphaCentauri.Interpretability.HenkinTruth
 public import AlphaCentauri.Interpretability.InterpretationExistence
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Basic
 public import AlphaCentauri.InterpretabilityLogic.Arithmetic.Conservativity

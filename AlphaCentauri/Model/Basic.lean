@@ -29,10 +29,13 @@ prenex $\Sigma_n$ formulas with parameters.
 
 A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`, and a
 $\Sigma_s$-elementary embedding between models of $\mathsf{B}\Sigma_s$ preserves the truth of
-$\Sigma_s$ and $\Pi_s$ sentences.
+$\Sigma_s$ and $\Pi_s$ sentences. If `S` embeds onto a $\Sigma_n$-elementary initial
+segment of `M`, a $\Pi_n$ formula satisfiable in `S` is satisfiable in `M` below any element outside
+the initial segment, at the image of the parameter.
 
 The standard system of a model of `𝗜𝚺₁` is the family of subsets of `ℕ` coded by its elements
-under Ackermann's membership; it does not shrink along an end extension.
+under Ackermann's membership; it does not shrink along an end extension, nor does it change when
+the base model is nonstandard. An embedding onto an initial segment is such an end extension.
 -/
 
 @[expose] public section
@@ -67,6 +70,25 @@ lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
 
 lemma mem_range_of_lt {a : M} {b : N} (h : b < e a) : b ∈ Set.range e.emb :=
   e.isInitial.initial (R := Semiformula.Operator.LT.lt) (Set.mem_singleton _) a b (by simpa using h)
+
+/-- The end extension given by an embedding whose image is closed downward under `<`.
+- [Kay91, Definition 2.6] -/
+def ofInitial (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Set.range ι) : M ⊆ₑ N where
+  emb := ι
+  isInitial := {
+    operator_iff := by
+      intro R hR a b
+      obtain rfl := Set.mem_singleton_iff.mp hR
+      simp
+    initial := by
+      intro R hR a b hb
+      obtain rfl := Set.mem_singleton_iff.mp hR
+      exact hι a b (by simpa using hb)
+  }
+
+@[simp]
+lemma ofInitial_apply (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Set.range ι) (x : M) :
+    ofInitial ι hι x = ι x := rfl
 
 include e
 
@@ -296,25 +318,17 @@ instance oringStructure : ORingStructure I.carrier where
 
 /-- `M` is an end extension of each of its closed cuts.
 - [HP98, Definition IV.1.3(2)] -/
-def endExtension : I.carrier ⊆ₑ M where
-  emb := {
-    toFun := Subtype.val,
+def endExtension : I.carrier ⊆ₑ M :=
+  .ofInitial {
+    toFun := Subtype.val
     func' f v := by cases f <;> rfl
     rel' r _ := by cases r; exacts [congrArg Subtype.val, id]
     toFun_inj := Subtype.val_injective
     rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
-  }
-  isInitial := {
-    operator_iff := by
-      intro R hR a b
-      obtain rfl := Set.mem_singleton_iff.mp hR
-      rfl
-    initial := by
-      intro R hR a b hb
-      obtain rfl := Set.mem_singleton_iff.mp hR
-      use ⟨b, I.mem_of_lt (show b < a.1 from hb) a.2⟩
-      rfl
-  }
+  } (by
+    intro a b hb
+    use ⟨b, I.mem_of_lt hb a.2⟩
+    rfl)
 
 @[simp]
 lemma endExtension_apply (x : I.carrier) : I.endExtension x = x.val := rfl
@@ -377,7 +391,7 @@ end
 
 section
 
-variable {S M : Type} [ORingStructure S] [ORingStructure M]
+variable {S : Type u} {M : Type v} [ORingStructure S] [ORingStructure M]
 
 /-- A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/
@@ -399,6 +413,31 @@ theorem _root_.FFL.FirstOrder.IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒ�
   have h₁ := models_theory_iff.mp (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻) σ hσ
   simpa [models_iff] using h ((PeanoMinus.prenexBlock σ hσ).rew Rew.emb) rfl ![] (fun _ ↦ 0)
     (by simpa [models_iff] using h₁)
+
+/-- If `S` embeds onto a $\Sigma_n$-elementary initial segment of a model `M` of `𝗣𝗔⁻`, a
+$\Pi_n$ formula satisfiable in `S` with the parameter `c` is satisfiable in `M`, with the image of
+`c` as parameter, below any element outside the image.
+- [Kay91, Theorem 12.3] -/
+theorem exists_lt_of_initialSegmentEmbedding [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ} {ι : S ↪ₛ[ℒₒᵣ] M}
+    (hι : ∀ x y, y < ι x → y ∈ Set.range ι)
+    (hel : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) ι) {b : M}
+    (hb : b ∉ Set.range ι) {c : S} {θ : ArithmeticSemisentence 2}
+    (hθ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 n θ) (h : ∃ x : S, S ⊧/![x, c] θ) : ∃ x < b, M ⊧/![x, ι c] θ := by
+  obtain ⟨x, hx⟩ := h
+  use ι x
+  and_intros
+  · rcases lt_trichotomy (ι x) b with h | rfl | h
+    · exact h
+    · exact (hb (Set.mem_range_self x)).elim
+    · exact (hb (hι x b h)).elim
+  · have h₁ := hel (φ := Rewriting.emb (∼θ)) (hθ.neg.rew Rew.emb) ![x, c] (fun _ ↦ c)
+    simpa [Matrix.comp_vecCons''] using h₁.not.mpr (by simpa using hx)
+
+end
+
+section
+
+variable {S M : Type} [ORingStructure S] [ORingStructure M]
 
 /-- A $\Sigma_s$-elementary embedding preserves the truth of $\Sigma_s$ and $\Pi_s$ sentences
 between models of $\mathsf{B}\Sigma_s$. -/
@@ -496,6 +535,37 @@ lemma standardSystem_subset_of_endExtension : standardSystem M ⊆ standardSyste
   rintro _ ⟨a, rfl⟩
   use e a
   exact e.codedSet_emb a
+
+include e in
+/-- A nonstandard model of `𝗜𝚺₁` and an end extension of it which again models `𝗜𝚺₁` have the same
+standard system.
+- [Kay91, Chapter 12, p. 159] -/
+theorem standardSystem_eq_of_endExtension [Nonempty (NonstandardElement M)] :
+    standardSystem M = standardSystem N := by
+  apply (standardSystem_subset_of_endExtension e).antisymm
+  rintro _ ⟨a, rfl⟩
+  obtain ⟨c, hc⟩ := Classical.arbitrary (NonstandardElement M)
+  have h₁ : ∀ m : ℕ, (m : N) < e c := by
+    intro m
+    simpa using e.emb_lt_emb.mpr (hc.natCast_lt m)
+  have h₂ : 0 < e c := by simpa using h₁ 0
+  obtain ⟨s, hs, h₃⟩ := finset_comprehension₁ (Γ := 𝚺) (P := (· ∈ a)) (by definability) (log (e c))
+  obtain ⟨x, rfl⟩ := e.mem_range_of_lt (hs.trans_le (exp_log_le_self h₂))
+  use x
+  ext n
+  rw [← e.codedSet_emb]
+  apply h₃
+  have h₄ : ((n + 1 : ℕ) : N) ≤ log (e c) :=
+    (exp_le_iff_le_log h₂).mp (nat_cast_exp (V := N) (n + 1) ▸ (h₁ _).le)
+  exact (Nat.cast_lt.mpr n.lt_succ_self).trans_le h₄
+
+/-- A nonstandard model of `𝗜𝚺₁` embedded onto an initial segment of a model of `𝗜𝚺₁` has the same
+standard system as that model.
+- [Kay91, Theorem 12.3] -/
+theorem standardSystem_eq_of_initialSegmentEmbedding [Nonempty (NonstandardElement M)]
+    {ι : M ↪ₛ[ℒₒᵣ] N} (hι : ∀ x y, y < ι x → y ∈ Set.range ι) :
+    standardSystem M = standardSystem N :=
+  standardSystem_eq_of_endExtension (.ofInitial ι hι)
 
 end Arithmetic
 

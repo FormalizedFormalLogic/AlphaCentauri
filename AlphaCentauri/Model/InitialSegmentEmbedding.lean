@@ -380,13 +380,13 @@ theorem exists_initialSegmentEmbedding [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒ
 $\Sigma_n$-elementary initial segment of itself containing a given element.
 - [Kay91, Theorem 12.4] -/
 theorem exists_selfEmbedding_onto_properInitialSegment [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Countable M]
-    (hM : ∃ c : M, ∀ m : ℕ, (m : M) < c) (n : ℕ) (a : M) :
+    [Nonempty (NonstandardElement M)] (n : ℕ) (a : M) :
     ∃ ι : M ↪ₛ[ℒₒᵣ] M, (∀ x y, y < ι x → y ∈ Set.range ι) ∧ ¬Function.Surjective ι ∧
       IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) ι ∧ a ∈ Set.range ι := by
-  have hQ := setOf_prenexHierarchy_mem_standardSystem hM 𝚷 n 2 (m := n + 1)
-    (P := fun e ↦ ∃ z, PrenexFormulaSatisfied 𝚷 n (z ∷ a ∷ matrixToVec ![]) e) (by definability)
+  have hQ := setOf_prenexHierarchy_mem_standardSystem 𝚷 n 2 (m := n + 1)
+    (P := fun e : M ↦ ∃ z, PrenexFormulaSatisfied 𝚷 n (z ∷ a ∷ matrixToVec ![]) e) (by definability)
   simp only [← and_assoc] at hQ
-  obtain ⟨b, hb⟩ := exists_forall_of_setOf_mem_standardSystem hM (m := n + 1) hQ
+  obtain ⟨b, hb⟩ := exists_forall_of_setOf_mem_standardSystem (m := n + 1) hQ
     (R := fun b e ↦ ∃ z < b, PrenexFormulaSatisfied 𝚷 n (z ∷ a ∷ matrixToVec ![]) e)
     (by definability) <| by
       intro s hs
@@ -397,7 +397,7 @@ theorem exists_selfEmbedding_onto_properInitialSegment [M↓[ℒₒᵣ] ⊧* �
       and_intros
       · exact lt_succ_iff_le.mpr (Finset.single_le_sum (by simp) hφ)
       · exact hz φ hφ
-  obtain ⟨ι, hι, hel, hιa, hιb⟩ := exists_initialSegmentEmbedding hM hM n a b a rfl <| by
+  obtain ⟨ι, hι, hel, hιa, hιb⟩ := exists_initialSegmentEmbedding n a b a rfl <| by
     rintro θ hθ ⟨x, hx⟩
     obtain ⟨ψ, hψ, hθψ⟩ := exists_prenexHierarchy_of_hierarchy 𝗣𝗔 hθ
     obtain ⟨z, hz, h⟩ := hb ψ <| by
@@ -423,11 +423,11 @@ theorem exists_selfEmbedding_onto_properInitialSegment [M↓[ℒₒᵣ] ⊧* �
 closed cut of itself which contains a given element and is a $\Sigma_n$-elementary substructure.
 - [Kay91, Theorem 12.4] -/
 theorem exists_proper_closedCut_iso [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Countable M]
-    (hM : ∃ c : M, ∀ m : ℕ, (m : M) < c) (n : ℕ) (a : M) :
+    [Nonempty (NonstandardElement M)] (n : ℕ) (a : M) :
     ∃ I : ClosedCut M, I.Proper ∧ a ∈ I.carrier ∧
       IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) I.endExtension.emb ∧
       Nonempty (M ≃ₛ[ℒₒᵣ] I.carrier) := by
-  obtain ⟨ι, hι, hsurj, hel, ha⟩ := exists_selfEmbedding_onto_properInitialSegment hM n a
+  obtain ⟨ι, hι, hsurj, hel, ha⟩ := exists_selfEmbedding_onto_properInitialSegment n a
   use .ofEmbedding ι hι
   and_intros
   · constructor

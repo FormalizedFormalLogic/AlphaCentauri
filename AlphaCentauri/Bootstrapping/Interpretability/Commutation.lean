@@ -31,9 +31,9 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 bound variables. -/
 structure IsTable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq] [L₂.Encodable]
     [L₂.LORDefinable] (tbl : V) : Prop where
-  domain : L₁.IsSentence 1 (tableDomain tbl)
-  rel {k r : V} : L₂.IsRel k r → L₁.IsSentence k (tableRel tbl k r)
-  func {k f : V} : L₂.IsFunc k f → L₁.IsSentence (k + 1) (tableFunc tbl k f)
+  domain : L₁.IsSemisentence 1 (tableDomain tbl)
+  rel {k r : V} : L₂.IsRel k r → L₁.IsSemisentence k (tableRel tbl k r)
+  func {k f : V} : L₂.IsFunc k f → L₁.IsSemisentence (k + 1) (tableFunc tbl k f)
 
 lemma IsSemiformula.relocate {n m i s p : V} (hp : IsSemiformula L (n + 1) p) (hi : i < m)
     (hs : s + n ≤ m) : IsSemiformula L m (relocate L i s p) := by
@@ -307,16 +307,15 @@ lemma IsTableOf.isTable {T : Theory L₁} [𝗘𝗤 _ ⪯ T] {π : DirectTransla
     (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) : IsTable L₁ L₂ tbl where
   domain := by
     rw [h.domain]
-    exact .of_shift_eq (by simp) (Semisentence.shift_quote _)
+    simpa using Language.IsSemisentence.quote (V := V) π.domain.sentence
   rel hr := by
     obtain ⟨k', R, rfl, rfl⟩ := hL₂.1 _ _ hr
     rw [h.rel R]
-    exact .of_shift_eq (Sentence.quote_isSemiformula _) (Semisentence.shift_quote _)
+    exact .quote _
   func hf := by
     obtain ⟨k', F, rfl, rfl⟩ := hL₂.2 _ _ hf
     rw [h.func F]
-    exact .of_shift_eq (by simpa using Sentence.quote_isSemiformula (π.func F).sentence)
-      (Semisentence.shift_quote _)
+    simpa using Language.IsSemisentence.quote (V := V) (π.func F).sentence
 
 end isTable
 
@@ -525,12 +524,12 @@ variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
 
 lemma IsTable.fvSubst_domainAt {tbl w i m : V} (hT : IsTable L₁ L₂ tbl) (hi : i < m) :
     fvSubst L₁ w (domainAt L₁ tbl i) = domainAt L₁ tbl i :=
-  (Language.IsSentence.of_shift_eq (hT.isSemiformula_domainAt hi)
+  (Language.IsSemisentence.of_shift_eq (hT.isSemiformula_domainAt hi)
     (hT.shift_domainAt i)).fvSubst_eq_self
 
 lemma IsTable.fvSubst_funcTail {tbl w k f m : V} (hT : IsTable L₁ L₂ tbl) (hf : L₂.IsFunc k f)
     (hk : k < m) : fvSubst L₁ w (funcTail L₁ tbl k f) = funcTail L₁ tbl k f :=
-  (Language.IsSentence.of_shift_eq (hT.isSemiformula_funcTail hf hk)
+  (Language.IsSemisentence.of_shift_eq (hT.isSemiformula_funcTail hf hk)
     (hT.shift_funcTail hf)).fvSubst_eq_self
 
 lemma IsTable.fvSubst_qqConj_guardVec {tbl n m k s w u u' : V} (hT : IsTable L₁ L₂ tbl)

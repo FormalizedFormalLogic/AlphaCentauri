@@ -635,13 +635,13 @@ lemma tprovable_tvF_iff (y a : Term V ℒₒᵣ) (t : V) :
 /-- The value of a term without free variables under `assignment n` is the term obtained by
 replacing each bound variable `#i` by `&i`. -/
 lemma provable_tvF_termSubst (n : V) :
-    ∀ t, IsSemiterm ℒₒᵣ n t → termShift ℒₒᵣ t = t →
+    ∀ t, (ℒₒᵣ).IsClosedSemiterm n t →
       Provable T (subst ℒₒᵣ ?[termSubst ℒₒᵣ (fvarVec n) t, assignmentCode n, numeral t]
         (⌜tvDef.val⌝ : V)) := by
   intro t ht;
   apply IsSemiterm.induction 𝚺 (P := fun t ↦ termShift ℒₒᵣ t = t →
     Provable T (subst ℒₒᵣ ?[termSubst ℒₒᵣ (fvarVec n) t, assignmentCode n, numeral t]
-      (⌜tvDef.val⌝ : V))) ?_ ?_ ?_ ?_ t ht;
+      (⌜tvDef.val⌝ : V))) ?_ ?_ ?_ ?_ t ht.isSemiterm ht.termShift_eq;
   · definability
   · intro z hz _;
     rw [termSubst_bvar, nth_fvarVec n z hz];
@@ -686,12 +686,12 @@ lemma provable_tvF_termSubst (n : V) :
           (tprovable_tvF_mul (T := T) a' b' (assignment n) ha hb ⨀ h₁ ⨀ h₂)
 
 /-- The term obtained from `t` by replacing each bound variable `#i` by `&i`. -/
-noncomputable def instTerm (n t : V) (ht : IsSemiterm ℒₒᵣ n t) : Term V ℒₒᵣ :=
-  ⟨termSubst ℒₒᵣ (fvarVec n) t, (isSemitermVec_fvarVec n 0).termSubst ht⟩
+noncomputable def instTerm (n t : V) (ht : (ℒₒᵣ).IsClosedSemiterm n t) : Term V ℒₒᵣ :=
+  ⟨termSubst ℒₒᵣ (fvarVec n) t, (isSemitermVec_fvarVec n 0).termSubst ht.isSemiterm⟩
 
-lemma tprovable_tvF_instTerm (ht : IsSemiterm ℒₒᵣ n t) (hs : termShift ℒₒᵣ t = t) :
+lemma tprovable_tvF_instTerm (ht : (ℒₒᵣ).IsClosedSemiterm n t) :
     T.internalize V ⊢ tvF (instTerm n t ht) (assignment n) t :=
-  (tprovable_tvF_iff _ _ _).mpr <| by simpa [instTerm] using provable_tvF_termSubst n t ht hs
+  (tprovable_tvF_iff _ _ _).mpr <| by simpa [instTerm] using provable_tvF_termSubst n t ht
 
 end termDisquotation
 
@@ -709,11 +709,11 @@ lemma adjoin_termShiftVec_fvarVec (n : V) :
   · have hi' : i < n := by simpa using hi
     rw [nth_fvarVec (n + 1) (i + 1) hi]; simp [nth_termShiftVec hv hi', nth_fvarVec n i hi']
 
-lemma free_subst_qVec_fvarVec (hq : IsSemiformula ℒₒᵣ (n + 1) q) (hs : shift ℒₒᵣ q = q) :
+lemma free_subst_qVec_fvarVec (hq : (ℒₒᵣ).IsSemisentence (n + 1) q) :
     free ℒₒᵣ (subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) q) = subst ℒₒᵣ (fvarVec (n + 1)) q := by
   have hw := isSemitermVec_fvarVec (L := ℒₒᵣ) n 0
-  rw [free, shift_substs hq hw.qVec, hs, termShift_qVec hw,
-    substs1_subst_qVec hw.termShiftVec hq (by simp), adjoin_termShiftVec_fvarVec]
+  rw [free, shift_substs hq.isSemiformula hw.qVec, hq.shift_eq, termShift_qVec hw,
+    substs1_subst_qVec hw.termShiftVec hq.isSemiformula (by simp), adjoin_termShiftVec_fvarVec]
 
 /-- The formula obtained from `p` by replacing each bound variable `#i` by `&i`. -/
 noncomputable def instFormula (n p : V) (hp : IsSemiformula ℒₒᵣ n p) : Formula V ℒₒᵣ :=
@@ -725,46 +725,46 @@ lemma equal_eq_equals (t u : Term V ℒₒᵣ) : Semiformula.equal t u = Semiter
 lemma neg_equals (t u : Term V ℒₒᵣ) : ∼Semiterm.equals t u = Semiterm.notEquals t u := by
   ext; simp [Arithmetic.qqNEQ]
 
-lemma tprovable_instTerm_eq_iff (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
-    (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
+lemma tprovable_instTerm_eq_iff (ht : (ℒₒᵣ).IsClosedSemiterm n t)
+    (hu : (ℒₒᵣ).IsClosedSemiterm n u) :
     T.internalize V ⊢ Semiterm.equals (instTerm n t ht) (instTerm n u hu) 🡘
       psatF (assignment n) (t ^= u) := by
-  have h₁ := tprovable_tvF_instTerm (T := T) ht hts;
-  have h₂ := tprovable_tvF_instTerm (T := T) hu hus;
+  have h₁ := tprovable_tvF_instTerm (T := T) ht;
+  have h₂ := tprovable_tvF_instTerm (T := T) hu;
   have h₃ := tprovable_psatF_eq (T := T) (instTerm n t ht) (instTerm n u hu) (assignment n)
-    ht.isUTerm hu.isUTerm;
+    ht.isSemiterm.isUTerm hu.isSemiterm.isUTerm;
   rw [equal_eq_equals] at h₃;
   exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
 
-lemma tprovable_instTerm_neq_iff (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
-    (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
+lemma tprovable_instTerm_neq_iff (ht : (ℒₒᵣ).IsClosedSemiterm n t)
+    (hu : (ℒₒᵣ).IsClosedSemiterm n u) :
     T.internalize V ⊢ Semiterm.notEquals (instTerm n t ht) (instTerm n u hu) 🡘
       psatF (assignment n) (t ^≠ u) := by
-  have h₁ := tprovable_tvF_instTerm (T := T) ht hts;
-  have h₂ := tprovable_tvF_instTerm (T := T) hu hus;
+  have h₁ := tprovable_tvF_instTerm (T := T) ht;
+  have h₂ := tprovable_tvF_instTerm (T := T) hu;
   have h₃ := tprovable_psatF_neq (T := T) (instTerm n t ht) (instTerm n u hu) (assignment n)
-    ht.isUTerm hu.isUTerm;
+    ht.isSemiterm.isUTerm hu.isSemiterm.isUTerm;
   rw [equal_eq_equals, neg_equals] at h₃;
   exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
 
-lemma tprovable_instTerm_lt_iff (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
-    (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
+lemma tprovable_instTerm_lt_iff (ht : (ℒₒᵣ).IsClosedSemiterm n t)
+    (hu : (ℒₒᵣ).IsClosedSemiterm n u) :
     T.internalize V ⊢ Semiterm.lessThan (instTerm n t ht) (instTerm n u hu) 🡘
       psatF (assignment n) (t ^< u) := by
-  have h₁ := tprovable_tvF_instTerm (T := T) ht hts;
-  have h₂ := tprovable_tvF_instTerm (T := T) hu hus;
+  have h₁ := tprovable_tvF_instTerm (T := T) ht;
+  have h₂ := tprovable_tvF_instTerm (T := T) hu;
   have h₃ := tprovable_psatF_lt (T := T) (instTerm n t ht) (instTerm n u hu) (assignment n)
-    ht.isUTerm hu.isUTerm;
+    ht.isSemiterm.isUTerm hu.isSemiterm.isUTerm;
   exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
 
-lemma tprovable_instTerm_nlt_iff (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u)
-    (hts : termShift ℒₒᵣ t = t) (hus : termShift ℒₒᵣ u = u) :
+lemma tprovable_instTerm_nlt_iff (ht : (ℒₒᵣ).IsClosedSemiterm n t)
+    (hu : (ℒₒᵣ).IsClosedSemiterm n u) :
     T.internalize V ⊢ Semiterm.notLessThan (instTerm n t ht) (instTerm n u hu) 🡘
       psatF (assignment n) (Arithmetic.qqNLT t u) := by
-  have h₁ := tprovable_tvF_instTerm (T := T) ht hts;
-  have h₂ := tprovable_tvF_instTerm (T := T) hu hus;
+  have h₁ := tprovable_tvF_instTerm (T := T) ht;
+  have h₂ := tprovable_tvF_instTerm (T := T) hu;
   have h₃ := tprovable_psatF_nlt (T := T) (instTerm n t ht) (instTerm n u hu) (assignment n)
-    ht.isUTerm hu.isUTerm;
+    ht.isSemiterm.isUTerm hu.isSemiterm.isUTerm;
   exact E_symm (h₃ ⨀ h₁ ⨀ h₂)
 
 omit [𝗜𝚺₁ ⪯ T] in
@@ -808,26 +808,25 @@ lemma tprovable_instFormula_or (hp : IsSemiformula ℒₒᵣ n p)
   generalize psatF (assignment n) (p ^⋎ q) = Z at h₃ ⊢;
   cl_prover [h₁, h₂, h₃]
 
-lemma tprovable_instFormula_ball (ht : IsSemiterm ℒₒᵣ n t)
-    (hts : termShift ℒₒᵣ t = t) (hq : IsSemiformula ℒₒᵣ (n + 1) q) (hqs : shift ℒₒᵣ q = q)
-    (hqb : IsBounded q)
-    (ih : T.internalize V ⊢ instFormula (n + 1) q hq 🡘 psatF (assignment (n + 1)) q)
+lemma tprovable_instFormula_ball (ht : (ℒₒᵣ).IsClosedSemiterm n t)
+    (hq : (ℒₒᵣ).IsSemisentence (n + 1) q) (hqb : IsBounded q)
+    (ih : T.internalize V ⊢ instFormula (n + 1) q hq.isSemiformula 🡘 psatF (assignment (n + 1)) q)
     (hp : IsSemiformula ℒₒᵣ n (qqBall (termBShift ℒₒᵣ t) q)) :
     T.internalize V ⊢ instFormula n (qqBall (termBShift ℒₒᵣ t) q) hp 🡘
       psatF (assignment n) (qqBall (termBShift ℒₒᵣ t) q) := by
   have hw := isSemitermVec_fvarVec (L := ℒₒᵣ) n 0;
   let B : Semiformula V ℒₒᵣ 1 :=
-    ⟨subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) q, by simpa using hq.subst hw.qVec⟩;
+    ⟨subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) q, by simpa using hq.isSemiformula.subst hw.qVec⟩;
   have e₁ : instFormula n (qqBall (termBShift ℒₒᵣ t) q) hp =
       ∀¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift 🡒 B) := by
     have e : instFormula n (qqBall (termBShift ℒₒᵣ t) q) hp = B.ball (instTerm n t ht) := by
       ext;
       simp only [instFormula, instTerm, B, Arithmetic.val_ball];
-      rw [subst_qqBall hw ht hq.isUFormula];
+      rw [subst_qqBall hw ht.isSemiterm hq.isSemiformula.isUFormula];
       rfl;
     rw [e, Semiformula.ball_eqss_imp];
-  have hB : B.free = instFormula (n + 1) q hq := by
-    ext; simp [B, instFormula, free_subst_qVec_fvarVec hq hqs];
+  have hB : B.free = instFormula (n + 1) q hq.isSemiformula := by
+    ext; simp [B, instFormula, free_subst_qVec_fvarVec hq];
   have hF : (psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q).free =
       psatF (assignment (n + 1)) q := by
     rw [assignment_succ]; simp [Semiformula.free, ← Semiterm.bShift_shift_comm];
@@ -836,9 +835,9 @@ lemma tprovable_instFormula_ball (ht : IsSemiterm ℒₒᵣ n t)
   have h₂ := tprovable_all_iff_all_domain (T := T)
     (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift) B
     (psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q);
-  have h₃ := tprovable_psatF_ball (T := T) (instTerm n t ht) (assignment n) ht.isUTerm hqb
-    hq.isUFormula;
-  have h₄ := tprovable_tvF_instTerm (T := T) ht hts;
+  have h₃ := tprovable_psatF_ball (T := T) (instTerm n t ht) (assignment n)
+    ht.isSemiterm.isUTerm hqb hq.isSemiformula.isUFormula;
+  have h₄ := tprovable_tvF_instTerm (T := T) ht;
   rw [e₁];
   generalize ∀¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift 🡒 B) = X at h₂ ⊢;
   generalize ∀¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift 🡒
@@ -848,27 +847,26 @@ lemma tprovable_instFormula_ball (ht : IsSemiterm ℒₒᵣ n t)
   generalize psatF (assignment n) (qqBall (termBShift ℒₒᵣ t) q) = P at h₃ ⊢;
   cl_prover [h₁, h₂, h₃, h₄]
 
-lemma tprovable_instFormula_bex (ht : IsSemiterm ℒₒᵣ n t)
-    (hts : termShift ℒₒᵣ t = t) (hq : IsSemiformula ℒₒᵣ (n + 1) q) (hqs : shift ℒₒᵣ q = q)
-    (hqb : IsBounded q)
-    (ih : T.internalize V ⊢ instFormula (n + 1) q hq 🡘 psatF (assignment (n + 1)) q)
+lemma tprovable_instFormula_bex (ht : (ℒₒᵣ).IsClosedSemiterm n t)
+    (hq : (ℒₒᵣ).IsSemisentence (n + 1) q) (hqb : IsBounded q)
+    (ih : T.internalize V ⊢ instFormula (n + 1) q hq.isSemiformula 🡘 psatF (assignment (n + 1)) q)
     (hp : IsSemiformula ℒₒᵣ n (qqBex (termBShift ℒₒᵣ t) q)) :
     T.internalize V ⊢ instFormula n (qqBex (termBShift ℒₒᵣ t) q) hp 🡘
       psatF (assignment n) (qqBex (termBShift ℒₒᵣ t) q) := by
   have hw := isSemitermVec_fvarVec (L := ℒₒᵣ) n 0;
   let B : Semiformula V ℒₒᵣ 1 :=
-    ⟨subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) q, by simpa using hq.subst hw.qVec⟩;
+    ⟨subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) q, by simpa using hq.isSemiformula.subst hw.qVec⟩;
   have e₁ : instFormula n (qqBex (termBShift ℒₒᵣ t) q) hp =
       ∃¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift ⋏ B) := by
     have e : instFormula n (qqBex (termBShift ℒₒᵣ t) q) hp = B.bexs (instTerm n t ht) := by
       ext;
       simp only [instFormula, instTerm, B, Arithmetic.val_bexs];
-      rw [subst_qqBex hw ht hq.isUFormula];
+      rw [subst_qqBex hw ht.isSemiterm hq.isSemiformula.isUFormula];
       rfl;
     rw [e];
     rfl;
-  have hB : B.free = instFormula (n + 1) q hq := by
-    ext; simp [B, instFormula, free_subst_qVec_fvarVec hq hqs];
+  have hB : B.free = instFormula (n + 1) q hq.isSemiformula := by
+    ext; simp [B, instFormula, free_subst_qVec_fvarVec hq];
   have hF : (psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q).free =
       psatF (assignment (n + 1)) q := by
     rw [assignment_succ]; simp [Semiformula.free, ← Semiterm.bShift_shift_comm];
@@ -877,9 +875,9 @@ lemma tprovable_instFormula_bex (ht : IsSemiterm ℒₒᵣ n t)
   have h₂ := tprovable_all_iff_exs_domain (T := T)
     (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift) B
     (psatF (pTerm (Semiterm.bvar 0) (assignment n).bShift) q);
-  have h₃ := tprovable_psatF_bex (T := T) (instTerm n t ht) (assignment n) ht.isUTerm hqb
-    hq.isUFormula;
-  have h₄ := tprovable_tvF_instTerm (T := T) ht hts;
+  have h₃ := tprovable_psatF_bex (T := T) (instTerm n t ht) (assignment n)
+    ht.isSemiterm.isUTerm hqb hq.isSemiformula.isUFormula;
+  have h₄ := tprovable_tvF_instTerm (T := T) ht;
   rw [e₁];
   generalize ∃¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift ⋏ B) = X at h₂ ⊢;
   generalize ∃¹ (Semiterm.lessThan (Semiterm.bvar 0) (instTerm n t ht).bShift ⋏
@@ -900,124 +898,141 @@ lemma termBShift_inj {t' : V} (ht : IsSemiterm ℒₒᵣ n t) (ht' : IsSemiterm 
     termSubst_eq_self ht' H] at this
 
 lemma provable_iff_psat_of_isBounded (N : V) :
-    ∀ p, IsBounded p → ∀ n ≤ N, n + p ≤ N → IsSemiformula ℒₒᵣ n p → shift ℒₒᵣ p = p →
+    ∀ p, IsBounded p → ∀ n ≤ N, n + p ≤ N → (ℒₒᵣ).IsSemisentence n p →
       Provable T (iff ℒₒᵣ (subst ℒₒᵣ (fvarVec n) p)
         (subst ℒₒᵣ ?[assignmentCode n, numeral p] (⌜psatDef.val⌝ : V))) := by
-  apply IsBounded.induction 𝚺 (P := fun p ↦ ∀ n ≤ N, n + p ≤ N → IsSemiformula ℒₒᵣ n p →
-    shift ℒₒᵣ p = p → Provable T (iff ℒₒᵣ (subst ℒₒᵣ (fvarVec n) p)
+  apply IsBounded.induction 𝚺 (P := fun p ↦ ∀ n ≤ N, n + p ≤ N →
+    (ℒₒᵣ).IsSemisentence n p → Provable T (iff ℒₒᵣ (subst ℒₒᵣ (fvarVec n) p)
       (subst ℒₒᵣ ?[assignmentCode n, numeral p] (⌜psatDef.val⌝ : V))))
   · definability
-  · intro n _ _ hp _
+  · intro n _ _ hp
+    replace hp := hp.isSemiformula
     apply (tprovable_instFormula_iff hp).mp
     have e : instFormula n ^⊤ hp = ⊤ := by ext; simp [instFormula]
     have h := tprovable_psatF_verum (T := T) (assignment n)
     rw [e]
     generalize psatF (assignment n) ^⊤ = X at h ⊢
     cl_prover [h]
-  · intro n _ _ hp _
+  · intro n _ _ hp
+    replace hp := hp.isSemiformula
     apply (tprovable_instFormula_iff hp).mp
     have e : instFormula n ^⊥ hp = ⊥ := by ext; simp [instFormula]
     have h := tprovable_psatF_falsum (T := T) (assignment n)
     rw [e]
     generalize psatF (assignment n) ^⊥ = X at h ⊢
     cl_prover [h]
-  · intro k r v n _ _ hp hs
+  · intro k r v n _ _ hp
+    have hs := hp.shift_eq
+    replace hp := hp.isSemiformula
     rcases IsUFormula.rel_cases hp.isUFormula with ⟨t, u, ht, hu, e⟩ | ⟨t, u, ht, hu, e⟩
     · rw [e] at hp hs ⊢
       have htu : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by simpa [Arithmetic.qqEQ] using hp
       have hs' : termShift ℒₒᵣ t = t ∧ termShift ℒₒᵣ u = u := by
         simpa [Arithmetic.qqEQ, ht, hu] using hs
+      have ht' : (ℒₒᵣ).IsClosedSemiterm n t := .of_termShift_eq htu.1 hs'.1
+      have hu' : (ℒₒᵣ).IsClosedSemiterm n u := .of_termShift_eq htu.2 hs'.2
       apply (tprovable_instFormula_iff hp).mp
       have e' : instFormula n (t ^= u) hp =
-          Semiterm.equals (instTerm n t htu.1) (instTerm n u htu.2) := by
+          Semiterm.equals (instTerm n t ht') (instTerm n u hu') := by
         ext; simp [instFormula, instTerm, Semiterm.equals, subst_qqEQ ht hu]
       rw [e']
-      exact tprovable_instTerm_eq_iff htu.1 htu.2 hs'.1 hs'.2
+      exact tprovable_instTerm_eq_iff ht' hu'
     · rw [e] at hp hs ⊢
       have htu : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by simpa [Arithmetic.qqLT] using hp
       have hs' : termShift ℒₒᵣ t = t ∧ termShift ℒₒᵣ u = u := by
         simpa [Arithmetic.qqLT, ht, hu] using hs
+      have ht' : (ℒₒᵣ).IsClosedSemiterm n t := .of_termShift_eq htu.1 hs'.1
+      have hu' : (ℒₒᵣ).IsClosedSemiterm n u := .of_termShift_eq htu.2 hs'.2
       apply (tprovable_instFormula_iff hp).mp
       have e' : instFormula n (t ^< u) hp =
-          Semiterm.lessThan (instTerm n t htu.1) (instTerm n u htu.2) := by
+          Semiterm.lessThan (instTerm n t ht') (instTerm n u hu') := by
         ext; simp [instFormula, instTerm, Semiterm.lessThan, subst_qqLT ht hu]
       rw [e']
-      exact tprovable_instTerm_lt_iff htu.1 htu.2 hs'.1 hs'.2
-  · intro k r v n _ _ hp hs
+      exact tprovable_instTerm_lt_iff ht' hu'
+  · intro k r v n _ _ hp
+    have hs := hp.shift_eq
+    replace hp := hp.isSemiformula
     rcases IsUFormula.nrel_cases hp.isUFormula with ⟨t, u, ht, hu, e⟩ | ⟨t, u, ht, hu, e⟩
     · rw [e] at hp hs ⊢
       have htu : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by simpa [Arithmetic.qqNEQ] using hp
       have hs' : termShift ℒₒᵣ t = t ∧ termShift ℒₒᵣ u = u := by
         simpa [Arithmetic.qqNEQ, ht, hu] using hs
+      have ht' : (ℒₒᵣ).IsClosedSemiterm n t := .of_termShift_eq htu.1 hs'.1
+      have hu' : (ℒₒᵣ).IsClosedSemiterm n u := .of_termShift_eq htu.2 hs'.2
       apply (tprovable_instFormula_iff hp).mp
       have e' : instFormula n (t ^≠ u) hp =
-          Semiterm.notEquals (instTerm n t htu.1) (instTerm n u htu.2) := by
+          Semiterm.notEquals (instTerm n t ht') (instTerm n u hu') := by
         ext; simp [instFormula, instTerm, Semiterm.notEquals, subst_qqNEQ ht hu]
       rw [e']
-      exact tprovable_instTerm_neq_iff htu.1 htu.2 hs'.1 hs'.2
+      exact tprovable_instTerm_neq_iff ht' hu'
     · rw [e] at hp hs ⊢
       have htu : IsSemiterm ℒₒᵣ n t ∧ IsSemiterm ℒₒᵣ n u := by simpa [Arithmetic.qqNLT] using hp
       have hs' : termShift ℒₒᵣ t = t ∧ termShift ℒₒᵣ u = u := by
         simpa [Arithmetic.qqNLT, ht, hu] using hs
+      have ht' : (ℒₒᵣ).IsClosedSemiterm n t := .of_termShift_eq htu.1 hs'.1
+      have hu' : (ℒₒᵣ).IsClosedSemiterm n u := .of_termShift_eq htu.2 hs'.2
       apply (tprovable_instFormula_iff hp).mp
       have e' : instFormula n (Arithmetic.qqNLT t u) hp =
-          Semiterm.notLessThan (instTerm n t htu.1) (instTerm n u htu.2) := by
+          Semiterm.notLessThan (instTerm n t ht') (instTerm n u hu') := by
         ext; simp [instFormula, instTerm, Semiterm.notLessThan, subst_qqNLT ht hu]
       rw [e']
-      exact tprovable_instTerm_nlt_iff htu.1 htu.2 hs'.1 hs'.2
-  · intro p q hpb hqb ihp ihq n hn hnpq hpq hs
-    have hpq' := IsSemiformula.and.mp hpq
-    have hs' : shift ℒₒᵣ p = p ∧ shift ℒₒᵣ q = q := by
-      simpa [hpq'.1.isUFormula, hpq'.2.isUFormula] using hs
-    have h₁ := (tprovable_instFormula_iff hpq'.1).mpr <| ihp n hn
-      (le_trans (by simpa using (lt_K!_left p q).le) hnpq) hpq'.1 hs'.1
-    have h₂ := (tprovable_instFormula_iff hpq'.2).mpr <| ihq n hn
-      (le_trans (by simpa using (lt_K!_right p q).le) hnpq) hpq'.2 hs'.2
-    exact (tprovable_instFormula_iff hpq).mp <| tprovable_instFormula_and hpq'.1 hpq'.2 h₁ h₂
-  · intro p q hpb hqb ihp ihq n hn hnpq hpq hs
-    have hpq' := IsSemiformula.or.mp hpq
-    have hs' : shift ℒₒᵣ p = p ∧ shift ℒₒᵣ q = q := by
-      simpa [hpq'.1.isUFormula, hpq'.2.isUFormula] using hs
-    have h₁ := (tprovable_instFormula_iff hpq'.1).mpr <| ihp n hn
-      (le_trans (by simpa using (lt_or_left p q).le) hnpq) hpq'.1 hs'.1
-    have h₂ := (tprovable_instFormula_iff hpq'.2).mpr <| ihq n hn
-      (le_trans (by simpa using (lt_or_right p q).le) hnpq) hpq'.2 hs'.2
-    exact (tprovable_instFormula_iff hpq).mp <|
-      tprovable_instFormula_or hpq'.1 hpq'.2 hpb hqb h₁ h₂
-  · intro t q ht hqb ihq n hn hnp hp hs
+      exact tprovable_instTerm_nlt_iff ht' hu'
+  · intro p q hpb hqb ihp ihq n hn hnpq hpq
+    have hpq' := Language.IsSemisentence.and_iff.mp hpq
+    have h₁ := (tprovable_instFormula_iff hpq'.1.isSemiformula).mpr <| ihp n hn
+      (le_trans (by simpa using (lt_K!_left p q).le) hnpq) hpq'.1
+    have h₂ := (tprovable_instFormula_iff hpq'.2.isSemiformula).mpr <| ihq n hn
+      (le_trans (by simpa using (lt_K!_right p q).le) hnpq) hpq'.2
+    exact (tprovable_instFormula_iff hpq.isSemiformula).mp <| tprovable_instFormula_and
+      hpq'.1.isSemiformula hpq'.2.isSemiformula h₁ h₂
+  · intro p q hpb hqb ihp ihq n hn hnpq hpq
+    have hpq' := Language.IsSemisentence.or_iff.mp hpq
+    have h₁ := (tprovable_instFormula_iff hpq'.1.isSemiformula).mpr <| ihp n hn
+      (le_trans (by simpa using (lt_or_left p q).le) hnpq) hpq'.1
+    have h₂ := (tprovable_instFormula_iff hpq'.2.isSemiformula).mpr <| ihq n hn
+      (le_trans (by simpa using (lt_or_right p q).le) hnpq) hpq'.2
+    exact (tprovable_instFormula_iff hpq.isSemiformula).mp <|
+      tprovable_instFormula_or hpq'.1.isSemiformula hpq'.2.isSemiformula hpb hqb h₁ h₂
+  · intro t q ht hqb ihq n hn hnp hp
+    have hs := hp.shift_eq
+    replace hp := hp.isSemiformula
     have hp' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) ∧ IsSemiformula ℒₒᵣ (n + 1) q := by
       simpa [qqBall, Arithmetic.qqNLT] using hp
     have htn : IsSemiterm ℒₒᵣ n t := IsSemiterm.of_termBShift ht hp'.1
     have hs₁ : termShift ℒₒᵣ (termBShift ℒₒᵣ t) = termBShift ℒₒᵣ t ∧ shift ℒₒᵣ q = q := by
       rw [shift_qqBall ht.termBShift hp'.2.isUFormula] at hs
       simpa [qqBall, Arithmetic.qqNLT] using hs
-    have hts : termShift ℒₒᵣ t = t :=
+    have hqs : (ℒₒᵣ).IsSemisentence (n + 1) q := .of_shift_eq hp'.2 hs₁.2
+    have hts : (ℒₒᵣ).IsClosedSemiterm n t := .of_termShift_eq htn <|
       termBShift_inj htn.termShift htn <| by rw [termBShift_termShift htn, hs₁.1]
     have hq : q + 1 ≤ qqBall (termBShift ℒₒᵣ t) q := by
       simpa [qqBall, lt_iff_succ_le] using lt_trans (lt_or_right _ q) (lt_forall _)
     have hb : n + (q + 1) ≤ N := le_trans (by gcongr) hnp
     have ih := (tprovable_instFormula_iff hp'.2).mpr <| ihq (n + 1)
       (le_trans (by gcongr; exact le_add_self) hb)
-      (by rw [add_assoc, add_comm 1 q]; exact hb) hp'.2 hs₁.2
+      (by rw [add_assoc, add_comm 1 q]; exact hb) hqs
     exact (tprovable_instFormula_iff hp).mp <|
-      tprovable_instFormula_ball htn hts hp'.2 hs₁.2 hqb ih hp
-  · intro t q ht hqb ihq n hn hnp hp hs
+      tprovable_instFormula_ball hts hqs hqb ih hp
+  · intro t q ht hqb ihq n hn hnp hp
+    have hs := hp.shift_eq
+    replace hp := hp.isSemiformula
     have hp' : IsSemiterm ℒₒᵣ (n + 1) (termBShift ℒₒᵣ t) ∧ IsSemiformula ℒₒᵣ (n + 1) q := by
       simpa [qqBex, Arithmetic.qqLT] using hp
     have htn : IsSemiterm ℒₒᵣ n t := IsSemiterm.of_termBShift ht hp'.1
     have hs₁ : termShift ℒₒᵣ (termBShift ℒₒᵣ t) = termBShift ℒₒᵣ t ∧ shift ℒₒᵣ q = q := by
       rw [shift_qqBex ht.termBShift hp'.2.isUFormula] at hs
       simpa [qqBex, Arithmetic.qqLT] using hs
-    have hts : termShift ℒₒᵣ t = t :=
+    have hqs : (ℒₒᵣ).IsSemisentence (n + 1) q := .of_shift_eq hp'.2 hs₁.2
+    have hts : (ℒₒᵣ).IsClosedSemiterm n t := .of_termShift_eq htn <|
       termBShift_inj htn.termShift htn <| by rw [termBShift_termShift htn, hs₁.1]
     have hq : q + 1 ≤ qqBex (termBShift ℒₒᵣ t) q := by
       simpa [qqBex, lt_iff_succ_le] using lt_trans (lt_K!_right _ q) (lt_exists _)
     have hb : n + (q + 1) ≤ N := le_trans (by gcongr) hnp
     have ih := (tprovable_instFormula_iff hp'.2).mpr <| ihq (n + 1)
       (le_trans (by gcongr; exact le_add_self) hb)
-      (by rw [add_assoc, add_comm 1 q]; exact hb) hp'.2 hs₁.2
+      (by rw [add_assoc, add_comm 1 q]; exact hb) hqs
     exact (tprovable_instFormula_iff hp).mp <|
-      tprovable_instFormula_bex htn hts hp'.2 hs₁.2 hqb ih hp
+      tprovable_instFormula_bex hts hqs hqb ih hp
 
 end formulaDisquotation
 
@@ -1067,7 +1082,7 @@ theorem tprovable_iff_partialTrue (φ : Formula V ℒₒᵣ) (hφ : IsPrenexHier
   have hθs : shift ℒₒᵣ θ = θ := by simpa [Θ] using congrArg (·.val) hΘs;
   have hdq := (tprovable_instFormula_iff (T := T) (by simpa using hθ)).mpr <|
     provable_iff_psat_of_isBounded (T := T) (θ + 1) θ hθb 1 (by simp) (by rw [add_comm])
-      (by simpa using hθ) hθs;
+      (.of_shift_eq (by simpa using hθ) hθs);
   let F : Semiformula V ℒₒᵣ 1 := psatF (pTerm (Semiterm.bvar 0) (𝕹 0)) θ;
   have hFs : F.shift = F := by simp [F];
   have hfv : fvarVec (1 : V) = ?[^&0] := by

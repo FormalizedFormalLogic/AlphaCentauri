@@ -8,7 +8,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 
 `termFreeVariables L t` and `freeVariables L p` are the coded sets of the free variables of a coded
 term `t` and a coded formula `p`. A coded formula has no free variables exactly when shifting its
-free variables leaves it unchanged.
+free variables leaves it unchanged. A closed coded term is a coded term without free variables.
 -/
 
 @[expose] public section
@@ -143,6 +143,47 @@ lemma termShiftVec_eq_self_iff (hv : IsUTermVec L k v) :
     termShiftVec L k v = v ↔ listUnion (termFreeVariablesVec L k v) = ∅ := by
   rw [termShiftVec_eq_self_iff_forall hv, termFreeVariablesVec_eq_empty_iff hv]
   exact forall₂_congr fun i hi ↦ termShift_eq_self_iff (hv.nth hi)
+
+variable {n : V}
+
+variable (L) in
+/-- `t` codes a closed semiterm: a semiterm with `n` bound variables and no free variables. -/
+def _root_.FFL.FirstOrder.Language.IsClosedSemiterm (n t : V) : Prop :=
+  IsSemiterm L n t ∧ termFreeVariables L t = ∅
+
+variable (L) in
+/-- `t` codes a closed term: a term with neither bound nor free variables. -/
+abbrev _root_.FFL.FirstOrder.Language.IsClosedTerm (t : V) : Prop := L.IsClosedSemiterm 0 t
+
+lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.isSemiterm (h : L.IsClosedSemiterm n t) :
+    IsSemiterm L n t := h.1
+
+lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.termFreeVariables_eq
+    (h : L.IsClosedSemiterm n t) : termFreeVariables L t = ∅ := h.2
+
+lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.termShift_eq (h : L.IsClosedSemiterm n t) :
+    termShift L t = t :=
+  (termShift_eq_self_iff h.isSemiterm.isUTerm).mpr h.termFreeVariables_eq
+
+lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.of_termShift_eq
+    (ht : IsSemiterm L n t) (h : termShift L t = t) : L.IsClosedSemiterm n t :=
+  ⟨ht, (termShift_eq_self_iff ht.isUTerm).mp h⟩
+
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.bvar_iff {z : V} :
+    L.IsClosedSemiterm n ^#z ↔ z < n := by
+  simp [Language.IsClosedSemiterm]
+
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.not_fvar (x : V) :
+    ¬L.IsClosedSemiterm n ^&x := by
+  intro h
+  simpa using h.termShift_eq
+
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.numeral (n x : V) :
+    (ℒₒᵣ).IsClosedSemiterm n (Arithmetic.numeral x) :=
+  .of_termShift_eq (Arithmetic.numeral_semiterm n x) (Arithmetic.numeral_shift x)
 
 end termFreeVariables
 

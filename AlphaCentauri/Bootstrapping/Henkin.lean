@@ -138,8 +138,9 @@ lemma Derivable.of_and {s p q c : V} (hc : c = p ∨ c = q) (h : Derivable S (in
   rw [neg_and hp.isUFormula hq.isUFormula]
   rcases hc with rfl | rfl <;> exact .or (.em (by simp [hp, hq, hs]) c (by simp) (by simp))
 
-private lemma not_derivable_insert_neg_henkinFormula (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
-    {Γ : V} (hΓ : IsFormulaSet L Γ) (n : V) (h : ¬Derivable S Γ) :
+private lemma not_derivable_insert_neg_henkinFormula
+    (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) {Γ : V} (hΓ : IsFormulaSet L Γ) (n : V)
+    (h : ¬Derivable S Γ) :
     ¬Derivable S (insert (neg L (henkinFormula L n (n + Γ))) Γ) := by
   intro hd
   by_cases hn : IsFormula L n ∧ ∃ p < n, n = ^∃ p
@@ -419,7 +420,7 @@ theorem HenkinSet.of_provable {φ : V} (hφ : IsFormula L φ) (h : Provable S φ
     obtain rfl : x = φ := by simpa using hx
     simp [hφ]
 
-variable {S} (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (hcons : S.Consistent V)
+variable {S} (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (hcons : S.Consistent V)
 include hS hcons
 
 /-- No context of the decision sequence is derivable when `S` is consistent. -/
@@ -531,7 +532,7 @@ theorem henkinSet_of_tprovable {φ : Formula V L} (h : S.internalize V ⊢ φ) :
     HenkinSet S φ.val :=
   HenkinSet.of_provable S (Semiformula.isSemiformula_zero φ) (tprovable_iff_provable.mp h)
 
-variable (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (hcons : S.Consistent V)
+variable (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (hcons : S.Consistent V)
 include hS hcons
 
 theorem henkinSet_of_tprovable_imp {φ ψ : Formula V L} (h : S.internalize V ⊢ φ 🡒 ψ)
@@ -622,7 +623,7 @@ theorem henkinSet_equal_refl (t : Semiterm V L 0) : HenkinSet S (Semiformula.equ
 
 theorem HenkinEq.refl (u : V) : HenkinEq S u u := henkinSet_equal_refl S (Semiterm.fvar u)
 
-variable (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (hcons : S.Consistent V)
+variable (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (hcons : S.Consistent V)
 include hS hcons
 
 theorem henkinSet_equal_symm {s t : Semiterm V L 0}

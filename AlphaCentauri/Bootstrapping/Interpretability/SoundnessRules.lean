@@ -183,7 +183,7 @@ section generic
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-lemma free_imp {δ q : V} (hδ : L.IsSentence 1 δ) (hq : IsSemiformula L 1 q) :
+lemma free_imp {δ q : V} (hδ : L.IsSemisentence 1 δ) (hq : IsSemiformula L 1 q) :
     free L (imp L δ q) = neg L (substs1 L (^&0) δ) ^⋎ free L q := by
   have hw : IsSemitermVec L 1 0 (?[^&0] : V) := IsSemitermVec.singleton.mpr (IsSemiterm.fvar _ _)
   rw [free, shift_imp hδ.isSemiformula hq, hδ.shift_eq, substs1,
@@ -222,7 +222,7 @@ lemma translate_free (hT : IsTable L₁ L₂ tbl) {p : V} (hp : IsSemiformula L�
   simp only [free]
   rw [translate_substs1_fvar hT 0 hp.shift, translate_shift hT hp]
 
-lemma elim_translateSet (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+lemma elim_translateSet (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ₁ m M : V}
     (hΓ₁ : IsFormulaSet L₂ Γ₁) (hm : m ≤ M)
     (hfresh : ∀ j, m ≤ j → j < M → ∀ q ∈ Γ₁, fvSubst L₂ (freshVec j) q = shift L₂ q)
@@ -232,7 +232,7 @@ lemma elim_translateSet (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shi
     (IsFormulaSet.translateSet hT hΓ₁) hm
     (fun j hmj hjM ↦ fvSubstImage_freshVec_translateSet_of hT hΓ₁ (hfresh j hmj hjM)) hd
 
-lemma translated_of_le (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+lemma translated_of_le (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ M : V} (hΓ : IsFormulaSet L₂ Γ)
     (hM : Γ ≤ M)
     (hd : Derivable S (translateSet L₁ L₂ tbl Γ ∪ negDomSet L₁ tbl.[0] M)) :
@@ -291,7 +291,7 @@ lemma translated_axm (hT : IsTable L₁ L₂ tbl) {Γ p : V}
   exact Derivable.wk (isFormulaSet_translated_union hT hΓ Γ)
     (by intro x hx; simp at hx ⊢; grind) hax.toDerivable
 
-lemma translated_and (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+lemma translated_and (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ p q : V}
     (hΓ : IsFormulaSet L₂ Γ) (hpq : p ^⋏ q ∈ Γ)
     (h₁ : TranslatedDerivable S L₂ tbl (insert p Γ))
@@ -311,7 +311,7 @@ lemma translated_and (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift 
   rw [translate_and (IsSemiformula.isUFormula hp) (IsSemiformula.isUFormula hq)] at hmem
   exact translated_of_le hS hT hdom hΓ hΓM (Derivable.and_m hmem d₁ d₂)
 
-lemma translated_or (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+lemma translated_or (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ p q : V}
     (hΓ : IsFormulaSet L₂ Γ) (hpq : p ^⋎ q ∈ Γ)
     (hd : TranslatedDerivable S L₂ tbl (insert p (insert q Γ))) :
@@ -330,7 +330,7 @@ lemma translated_or (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L
     simp; grind
   exact translated_of_le hS hT hdom hΓ hΓM (Derivable.or_m hmem hd')
 
-lemma translated_cut (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+lemma translated_cut (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ p : V}
     (hΓ : IsFormulaSet L₂ Γ) (hp : IsFormula L₂ p)
     (h₁ : TranslatedDerivable S L₂ tbl (insert p Γ))
@@ -359,7 +359,7 @@ lemma translated_wk (hT : IsTable L₁ L₂ tbl) {Γ Γ' : V}
       ((mem_cup_iff.mp hx).imp (translateSet_mono hsub ·) (negDomSet_mono (le_of_subset hsub) ·))
   exact Derivable.wk (isFormulaSet_translated_union hT hΓ' Γ') hU hd
 
-lemma translated_shift (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+lemma translated_shift (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ : V}
     (hΓ : IsFormulaSet L₂ Γ) (hd : TranslatedDerivable S L₂ tbl Γ) :
     TranslatedDerivable S L₂ tbl (setShift L₂ Γ) := by
@@ -384,7 +384,7 @@ lemma translated_shift (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shif
     Derivable.wk (isFormulaSet_translated_union hT hΓs _) hU (Derivable.shift hd)
   exact translated_of_le hS hT hdom hΓs hM hd'
 
-lemma translated_all (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+lemma translated_all (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (hT : IsTable L₁ L₂ tbl) (hdom : Provable S (^∃ tbl.[0])) {Γ p : V}
     (hΓ : IsFormulaSet L₂ Γ) (hp : ^∀ p ∈ Γ)
     (hd : TranslatedDerivable S L₂ tbl (insert (free L₂ p) (setShift L₂ Γ))) :

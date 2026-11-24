@@ -173,7 +173,7 @@ lemma substs_rel_val {k : ℕ} (R : L₂.Rel k) {c v : V} (hc : IsSemiterm L₂ 
     simp
   · rw [substs_rel (codeIn_rel_quote R) hv.isUTerm, Semiformula.rel_val, hu]
 
-lemma derivable_iff_translate_rel (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+lemma derivable_iff_translate_rel (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t b : V}
     (ht : IsSemiterm L₂ 0 t)
     {k : ℕ} (R : L₂.Rel k) {v : V} (hv : IsSemitermVec L₂ (k : V) 1 v) :
@@ -205,7 +205,7 @@ lemma isSemiformula_translate_subst (hT : IsTable L₁ L₂ tbl) {t q : V} (ht :
   IsSemiformula.translate hT (hq.subst h)
 
 omit [𝗘𝗤 _ ⪯ S] [L₂.Eq] in
-lemma derivable_all_of_quantFresh (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+lemma derivable_all_of_quantFresh (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (hT : IsTable L₁ L₂ tbl) {t b q x : V} (ht : IsSemiterm L₂ 0 t) (hq : IsSemiformula L₂ 2 q)
     (hx : π₂(x - 1) = q)
     (ih : Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b
@@ -240,7 +240,7 @@ lemma derivable_all_of_quantFresh (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstr
     (by rw [e]; exact ih)
 
 theorem derivable_translateSubstEquiv
-    (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+    (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t b p : V}
     (ht : IsSemiterm L₂ 0 t) (hp : IsSemiformula L₂ 1 p) :
     Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b p) (substHyp L₁ L₂ tbl t b)) := by
@@ -426,7 +426,7 @@ lemma derivable_exs_body (hT : IsTable L₁ L₂ tbl) {p b s : V} (hs : IsFormul
 
 omit [𝗘𝗤 _ ⪯ S] [L₂.Eq] in
 lemma derivable_neg_exs_definesElement
-    (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p) (hT : IsTable L₁ L₂ tbl)
+    (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p) (hT : IsTable L₁ L₂ tbl)
     {t b Θ : V} (ht : IsSemiterm L₂ 0 t) (hΘ : IsFormulaSet L₁ Θ) (hsu : Θ ≤ b)
     (hpu : tbl.[0] ^⋏ varEqual L₁ L₂ tbl t ≤ b)
     (hd : Derivable S (insert (neg L₁ (substs1 L₁ (^&b) tbl.[0]))
@@ -455,7 +455,7 @@ lemma derivable_neg_exs_definesElement
   exact Derivable.neg_exs_of_fresh hS hsu hpu hp h₁
 
 lemma derivable_exs_definesElement
-    (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+    (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t Θ : V}
     (ht : IsSemiterm L₂ 0 t)
     (hΘ : IsFormulaSet L₁ Θ) (hD : negDomSet L₁ tbl.[0] t ⊆ Θ) :
@@ -485,7 +485,7 @@ lemma derivable_exs_definesElement
     have := @hD x
     grind) h₁
 
-lemma translated_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+lemma translated_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {Γ p t : V}
     (hΓ : IsFormulaSet L₂ Γ)
     (hp : ^∃ p ∈ Γ) (ht : IsTerm L₂ t)
@@ -535,7 +535,7 @@ variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] {tbl : V}
 
 theorem TranslatedDerivable.of_derivable
-    (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+    (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
     (hax : ∀ p ∈ S'.Δ₁Class (V := V), IsFormula L₂ p →
       Provable S (Bootstrapping.translate L₁ L₂ tbl p)) {s : V}
@@ -595,15 +595,14 @@ section translation
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] {tbl : V}
 
-/-- A formula code fixed by the shift of free variables and provable in `S'` has its translation
-provable in `S`.
+/-- A sentence code provable in `S'` has its translation provable in `S`.
 - [Lin97, Corollary 6.1]
 - [HP98, Lemma III.2.42] -/
-theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
     (hax : ∀ p ∈ S'.Δ₁Class (V := V), IsFormula L₂ p →
       Provable S (Bootstrapping.translate L₁ L₂ tbl p)) {φ : V}
-    (hφ : Bootstrapping.shift L₂ φ = φ) (hpr : Provable S' φ) :
+    (hφ : L₂.IsSentence φ) (hpr : Provable S' φ) :
     Provable S (Bootstrapping.translate L₁ L₂ tbl φ) := by
   have hΓ : IsFormulaSet L₂ (insert φ ∅ : V) := hpr.toDerivable.isFormulaSet
   have hφF : IsFormula L₂ φ := (IsFormulaSet.insert_iff.mp hΓ).1
@@ -611,7 +610,7 @@ theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.
       fvSubst L₂ (freshVec j) q = shift L₂ q := by
     intro j _ _ q hq
     obtain rfl : q = φ := by simpa using hq
-    exact ((Language.IsSentence.of_shift_eq hφF hφ).fvSubst_eq_self (w := freshVec j)).trans hφ.symm
+    exact hφ.fvSubst_eq_self.trans hφ.shift_eq.symm
   have hd : Derivable S (translateSet L₁ L₂ tbl (insert φ ∅) ∪
       negDomSet L₁ tbl.[0] (insert φ ∅)) :=
     TranslatedDerivable.of_derivable hS h hL₂ hax hpr.toDerivable
@@ -622,7 +621,7 @@ theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.
 /-- If `S` is consistent in `V`, then so is `S'`.
 - [Lin97, Corollary 6.1]
 - [HP98, Lemma III.2.42] -/
-theorem consistent_of_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+theorem consistent_of_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
     (hax : ∀ p ∈ S'.Δ₁Class (V := V), IsFormula L₂ p →
       Provable S (Bootstrapping.translate L₁ L₂ tbl p))
@@ -630,7 +629,7 @@ theorem consistent_of_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrap
   intro hp
   apply hcon
   have h₁ := provable_translate hS h hL₂ hax (φ := (⌜(⊥ : Sentence L₂)⌝ : V))
-    (shift_falsum (L := L₂)) hp
+    (.quote _) hp
   have h₂ : Bootstrapping.translate L₁ L₂ tbl (⌜(⊥ : Sentence L₂)⌝ : V) =
       (⌜(⊥ : Sentence L₁)⌝ : V) :=
     translate_falsum tbl
@@ -644,14 +643,14 @@ section finite
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
 
-/-- For a finite theory `S'` interpreted in `S`, provability of a formula code from `S'` yields
+/-- For a finite theory `S'` interpreted in `S`, provability of a sentence code from `S'` yields
 provability of its translation in `S`, without assuming the hypothesis on the axioms.
 - [Lin97, Corollary 6.1]
 - [HP98, Lemma III.2.42] -/
-theorem provable_translate_of_finite (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+theorem provable_translate_of_finite (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
     (l : List (Sentence L₂)) (π : S ⊳ {φ | φ ∈ l})
     {tbl : V} (h : IsTableOf π.trln tbl) (hL₂ : L₂.SymbolsStandard V) {φ : V}
-    (hφ : Bootstrapping.shift L₂ φ = φ) :
+    (hφ : L₂.IsSentence φ) :
     letI := Theory.Δ₁.ofList l
     Provable ({φ | φ ∈ l} : Theory L₂) φ → Provable S (Bootstrapping.translate L₁ L₂ tbl φ) := by
   let _ := Theory.Δ₁.ofList l

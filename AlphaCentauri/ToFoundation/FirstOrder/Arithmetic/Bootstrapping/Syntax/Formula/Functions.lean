@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.FreeVariables
 
@@ -385,81 +386,133 @@ section sentence
 
 variable (L)
 
-/-- The coded formula `p` is a sentence with `n` bound variables: a semiformula with `n` bound
-variables and no free variables. `IsSentence 0 p` is the usual notion of a sentence. -/
-def _root_.FFL.FirstOrder.Language.IsSentence (n p : V) : Prop :=
+/-- `p` codes a semisentence: a semiformula with `n` bound variables and no free variables. -/
+def _root_.FFL.FirstOrder.Language.IsSemisentence (n p : V) : Prop :=
   IsSemiformula L n p ∧ freeVariables L p = ∅
 
-noncomputable def isSentence : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
+/-- `p` codes a sentence: a formula with neither bound nor free variables left over. -/
+abbrev _root_.FFL.FirstOrder.Language.IsSentence (p : V) : Prop := L.IsSemisentence 0 p
+
+noncomputable def isSemisentence : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “n p. !(isSemiformula L).sigma n p ∧ !(freeVariablesGraph L) 0 p”)
   (.mkPi “n p. !(isSemiformula L).pi n p ∧ ∀ y, !(freeVariablesGraph L) y p → y = 0”)
 
-instance _root_.FFL.FirstOrder.Language.IsSentence.defined :
-    𝚫ᴬ₁-Relation (L.IsSentence (V := V)) via isSentence L := .mk <| by
+instance _root_.FFL.FirstOrder.Language.IsSemisentence.defined :
+    𝚫ᴬ₁-Relation (L.IsSemisentence (V := V)) via isSemisentence L := .mk <| by
   constructor
   · intro v
-    simp [isSentence, Bounding.HierarchySymbol.Semiformula.val_sigma, IsSemiformula.defined.iff,
+    simp [isSemisentence, Bounding.HierarchySymbol.Semiformula.val_sigma, IsSemiformula.defined.iff,
       freeVariables.defined.iff, eq_comm]
   · intro v
-    simp [isSentence, Bounding.HierarchySymbol.Semiformula.val_sigma, IsSemiformula.defined.iff,
-      freeVariables.defined.iff, Language.IsSentence, emptyset_def, eq_comm]
+    simp [isSemisentence, Bounding.HierarchySymbol.Semiformula.val_sigma, IsSemiformula.defined.iff,
+      freeVariables.defined.iff, Language.IsSemisentence, emptyset_def, eq_comm]
 
-instance _root_.FFL.FirstOrder.Language.IsSentence.definable :
-    𝚫ᴬ₁-Relation (L.IsSentence (V := V)) :=
-  (Language.IsSentence.defined (L := L) (V := V)).to_definable
+instance _root_.FFL.FirstOrder.Language.IsSemisentence.definable :
+    𝚫ᴬ₁-Relation (L.IsSemisentence (V := V)) :=
+  (Language.IsSemisentence.defined (L := L) (V := V)).to_definable
 
-instance _root_.FFL.FirstOrder.Language.IsSentence.definable' {m : ℕ} {Γ : SigmaPiDelta} :
-    Γᴬ_[m + 1]-Relation (L.IsSentence (V := V)) :=
-  (Language.IsSentence.definable (L := L) (V := V)).of_deltaOne
+instance _root_.FFL.FirstOrder.Language.IsSemisentence.definable' {m : ℕ} {Γ : SigmaPiDelta} :
+    Γᴬ_[m + 1]-Relation (L.IsSemisentence (V := V)) :=
+  (Language.IsSemisentence.definable (L := L) (V := V)).of_deltaOne
+
+noncomputable def isSentence : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
+  (.mkSigma “p. !(isSemisentence L).sigma 0 p”)
+  (.mkPi “p. !(isSemisentence L).pi 0 p”)
 
 variable {L}
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.isSemiformula
-    (h : L.IsSentence n p) : IsSemiformula L n p := h.1
+instance _root_.FFL.FirstOrder.Language.IsSentence.defined :
+    𝚫ᴬ₁-Predicate (L.IsSentence (V := V)) via isSentence L := .mk <| by
+  constructor
+  · intro v
+    simp [isSentence, Bounding.HierarchySymbol.Semiformula.val_sigma]
+  · intro v
+    simp [isSentence, Bounding.HierarchySymbol.Semiformula.val_sigma]
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.freeVariables_eq
-    (h : L.IsSentence n p) : freeVariables L p = ∅ := h.2
+lemma isSentence_sigma_iff (p : V) : V ⊧/![p] (isSentence L).sigma.val ↔ L.IsSentence p := by
+  simp [isSentence, Bounding.HierarchySymbol.Semiformula.val_sigma]
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.shift_eq (h : L.IsSentence n p) : shift L p = p :=
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.isSemiformula
+    (h : L.IsSemisentence n p) : IsSemiformula L n p := h.1
+
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.freeVariables_eq
+    (h : L.IsSemisentence n p) : freeVariables L p = ∅ := h.2
+
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.shift_eq (h : L.IsSemisentence n p) :
+    shift L p = p :=
   (shift_eq_self_iff h.isSemiformula.isUFormula).mpr h.freeVariables_eq
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.of_shift_eq
-    (hp : IsSemiformula L n p) (h : shift L p = p) : L.IsSentence n p :=
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.of_shift_eq
+    (hp : IsSemiformula L n p) (h : shift L p = p) : L.IsSemisentence n p :=
   ⟨hp, (shift_eq_self_iff hp.isUFormula).mp h⟩
 
 @[simp]
-lemma _root_.FFL.FirstOrder.Language.IsSentence.verum (n : V) : L.IsSentence n ^⊤ := by
-  simp [Language.IsSentence]
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.quote {n : ℕ} (σ : Semisentence L n) :
+    L.IsSemisentence (n : V) ⌜σ⌝ :=
+  .of_shift_eq (Sentence.quote_isSemiformula σ) (Semisentence.shift_quote σ)
 
 @[simp]
-lemma _root_.FFL.FirstOrder.Language.IsSentence.falsum (n : V) : L.IsSentence n ^⊥ := by
-  simp [Language.IsSentence]
-
-lemma _root_.FFL.FirstOrder.Language.IsSentence.and
-    (hp : L.IsSentence n p) (hq : L.IsSentence n q) : L.IsSentence n (p ^⋏ q) := by
-  refine ⟨by simp [hp.isSemiformula, hq.isSemiformula], ?_⟩
-  rw [freeVariables_and hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
-    hp.freeVariables_eq, hq.freeVariables_eq, union_empty_eq_left]
-
-lemma _root_.FFL.FirstOrder.Language.IsSentence.or
-    (hp : L.IsSentence n p) (hq : L.IsSentence n q) : L.IsSentence n (p ^⋎ q) := by
-  refine ⟨by simp [hp.isSemiformula, hq.isSemiformula], ?_⟩
-  rw [freeVariables_or hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
-    hp.freeVariables_eq, hq.freeVariables_eq, union_empty_eq_left]
-
-lemma _root_.FFL.FirstOrder.Language.IsSentence.all
-    (hp : L.IsSentence (n + 1) p) : L.IsSentence n (^∀ p) :=
-  ⟨by simp [hp.isSemiformula],
-    by rw [freeVariables_all hp.isSemiformula.isUFormula, hp.freeVariables_eq]⟩
-
-lemma _root_.FFL.FirstOrder.Language.IsSentence.exs
-    (hp : L.IsSentence (n + 1) p) : L.IsSentence n (^∃ p) :=
-  ⟨by simp [hp.isSemiformula],
-    by rw [freeVariables_exs hp.isSemiformula.isUFormula, hp.freeVariables_eq]⟩
+lemma _root_.FFL.FirstOrder.Language.IsSentence.quote (σ : Sentence L) :
+    L.IsSentence (⌜σ⌝ : V) :=
+  .of_shift_eq (Sentence.quote_isSemiformula₀ σ) (Semisentence.shift_quote σ)
 
 @[simp]
-lemma _root_.FFL.FirstOrder.Language.IsSentence.neg_iff :
-    L.IsSentence n (neg L p) ↔ L.IsSentence n p := by
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.verum (n : V) : L.IsSemisentence n ^⊤ := by
+  simp [Language.IsSemisentence]
+
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.falsum (n : V) : L.IsSemisentence n ^⊥ := by
+  simp [Language.IsSemisentence]
+
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.and_iff :
+    L.IsSemisentence n (p ^⋏ q) ↔ L.IsSemisentence n p ∧ L.IsSemisentence n q := by
+  constructor
+  · intro h
+    obtain ⟨hp, hq⟩ := IsSemiformula.and.mp h.isSemiformula
+    have hs := h.shift_eq
+    rw [shift_and hp.isUFormula hq.isUFormula, qqAnd_inj] at hs
+    exact ⟨.of_shift_eq hp hs.1, .of_shift_eq hq hs.2⟩
+  · rintro ⟨hp, hq⟩
+    apply Language.IsSemisentence.of_shift_eq
+    · simp [hp.isSemiformula, hq.isSemiformula]
+    · rw [shift_and hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
+        hp.shift_eq, hq.shift_eq]
+
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.or_iff :
+    L.IsSemisentence n (p ^⋎ q) ↔ L.IsSemisentence n p ∧ L.IsSemisentence n q := by
+  constructor
+  · intro h
+    obtain ⟨hp, hq⟩ := IsSemiformula.or.mp h.isSemiformula
+    have hs := h.shift_eq
+    rw [shift_or hp.isUFormula hq.isUFormula, qqOr_inj] at hs
+    exact ⟨.of_shift_eq hp hs.1, .of_shift_eq hq hs.2⟩
+  · rintro ⟨hp, hq⟩
+    apply Language.IsSemisentence.of_shift_eq
+    · simp [hp.isSemiformula, hq.isSemiformula]
+    · rw [shift_or hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
+        hp.shift_eq, hq.shift_eq]
+
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.all_iff :
+    L.IsSemisentence n (^∀ p) ↔ L.IsSemisentence (n + 1) p := by
+  simp only [Language.IsSemisentence, IsSemiformula.all]
+  apply and_congr_right
+  intro hp
+  rw [freeVariables_all hp.isUFormula]
+
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.exs_iff :
+    L.IsSemisentence n (^∃ p) ↔ L.IsSemisentence (n + 1) p := by
+  simp only [Language.IsSemisentence, IsSemiformula.exs]
+  apply and_congr_right
+  intro hp
+  rw [freeVariables_exs hp.isUFormula]
+
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.neg_iff :
+    L.IsSemisentence n (neg L p) ↔ L.IsSemisentence n p := by
   constructor
   · intro h
     have hp : IsSemiformula L n p := IsSemiformula.neg_iff.mp h.isSemiformula
@@ -470,7 +523,7 @@ lemma _root_.FFL.FirstOrder.Language.IsSentence.neg_iff :
 
 end sentence
 
-lemma shift_neg_substs1_qqFvar (hd : L.IsSentence 1 d) :
+lemma shift_neg_substs1_qqFvar (hd : L.IsSemisentence 1 d) :
     shift L (neg L (substs1 L (^&j) d)) = neg L (substs1 L (^&(j + 1)) d) := by
   rw [shift_neg (IsSemiformula.substs1 (n := 0) (by simp) hd.isSemiformula),
     shift_substs1_qqFvar hd.isSemiformula, hd.shift_eq]

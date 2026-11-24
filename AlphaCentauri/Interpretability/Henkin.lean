@@ -55,7 +55,7 @@ lemma consistent_of_models_con {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] �
   simpa [models_iff] using h
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔]
-  (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p) (hcons : S.Consistent V)
+  (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (hcons : S.Consistent V)
 
 omit [Theory.Δ₁.Sentential S] in
 include hS hcons in
@@ -88,11 +88,11 @@ and its $\Delta_1$ numeration consists of sentences is provable from $T$ and the
 `S`. -/
 lemma provable_of_models_henkin (σ : ArithmeticSentence)
     (H : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔],
-      (∀ p ∈ S.Δ₁Class (V := V), shift L p = p) → S.Consistent V → V↓[ℒₒᵣ] ⊧ σ) :
+      (∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) → S.Consistent V → V↓[ℒₒᵣ] ⊧ σ) :
     T ∪ S.Con ⊢ σ :=
   Arithmetic.complete.{0} _ _ fun V _ _ ↦
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔 := models_of_subtheory (T := 𝗣𝗔) (U := T ∪ S.Con) inferInstance
-    H V (Theory.Δ₁.Sentential.forall_shift_eq S) (consistent_of_models_con S T)
+    H V (Theory.Δ₁.Sentential.forall_isSentence S) (consistent_of_models_con S T)
 
 /-- The translation of `L` into arithmetic by the Henkin set of `S`.
 
@@ -125,7 +125,7 @@ theorem henkinTranslation_term {n : ℕ} (t : ClosedSemiterm L n)
       (Bootstrapping.Semiterm.fvar
         ((t.val e Empty.elim : (henkinTranslation S T).Model V) : V)) :
         Bootstrapping.Formula V L).val := by
-  have hS := Theory.Δ₁.Sentential.forall_shift_eq (V := V) S
+  have hS := Theory.Δ₁.Sentential.forall_isSentence (V := V) S
   have hcons : S.Consistent V := consistent_of_models_con S T
   induction t with
   | bvar i =>
@@ -158,7 +158,7 @@ private lemma subst_fvar_cons (x : V) (u : Fin n → V) (φ : Bootstrapping.Semi
 end quote
 
 omit [V↓[ℒₒᵣ] ⊧* T ∪ S.Con] in
-private lemma exists_model_henkinEq (hS : ∀ p ∈ S.Δ₁Class (V := V), shift L p = p)
+private lemma exists_model_henkinEq (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p)
     (hcons : S.Consistent V) (x : V) :
     ∃ a : (henkinTranslation S T).Model V, HenkinEq S (a : V) x := by
   obtain ⟨r, hr, hrx⟩ := exists_isRepresentative S hS hcons x
@@ -176,7 +176,7 @@ theorem henkinTranslation_truth {n : ℕ} (β : Semisentence L n)
     ((henkinTranslation S T).Model V) ⊧/e β ↔
       HenkinSet S ((⌜β⌝ : Bootstrapping.Semiformula V L n).subst
         (fun i ↦ Bootstrapping.Semiterm.fvar (u i) : Bootstrapping.SemitermVec V L n 0)).val := by
-  have hS := Theory.Δ₁.Sentential.forall_shift_eq (V := V) S
+  have hS := Theory.Δ₁.Sentential.forall_isSentence (V := V) S
   have hcons : S.Consistent V := consistent_of_models_con S T
   induction β using Semiformula.rec' with
   | hrel R v =>
@@ -247,7 +247,7 @@ noncomputable abbrev henkinInterpretationOfSentential : T ∪ S.Con ⊳ S where
   interpret_theory σ hσ := Arithmetic.complete.{0} _ _ fun V _ _ ↦ by
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔 := models_of_subtheory (T := 𝗣𝗔) (U := T ∪ S.Con) inferInstance
     have hcons := consistent_of_models_con S T (V := V)
-    have hS := Theory.Δ₁.Sentential.forall_shift_eq (V := V) S
+    have hS := Theory.Δ₁.Sentential.forall_isSentence (V := V) S
     have : Nonempty V := ⟨0⟩
     rw [DirectTranslation.Model.translate_iff]
     simp only [models_iff]

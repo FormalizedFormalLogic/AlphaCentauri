@@ -65,7 +65,7 @@ private lemma exists_vec_bvar_fvar (m i : V) :
 /-- Opening the outermost quantifier of `qqAlls (subst L v' r) i`, where `v'` keeps the innermost
 `i + 1` bound variables of `r` and replaces the others by free variables, with the eigenvariable
 `^&0`. -/
-private lemma free_qqAlls_subst {m i v v' r : V} (hr : L.IsSentence m r) (hvl : len v = m)
+private lemma free_qqAlls_subst {m i v v' r : V} (hr : L.IsSemisentence m r) (hvl : len v = m)
     (hv : ∀ x < m, (x < i → v.[x] = ^#x) ∧ (i ≤ x → v.[x] = ^&(x - i))) (hv'l : len v' = m)
     (hv' : ∀ x < m, (x < i + 1 → v'.[x] = ^#x) ∧ (i + 1 ≤ x → v'.[x] = ^&(x - (i + 1)))) :
     free L (qqAlls (subst L v' r) i) = qqAlls (subst L v r) i := by
@@ -94,7 +94,8 @@ private lemma free_qqAlls_subst {m i v v' r : V} (hr : L.IsSentence m r) (hvl : 
 
 /-- If `p` follows from `q` once their `m` bound variables are replaced by the free variables
 `^&0, …, ^&(m - 1)`, then `qqAlls p m` follows from `qqAlls q m`. -/
-theorem Derivable.neg_qqAlls_qqAlls {m p q : V} (hp : L.IsSentence m p) (hq : L.IsSentence m q)
+theorem Derivable.neg_qqAlls_qqAlls {m p q : V} (hp : L.IsSemisentence m p)
+    (hq : L.IsSemisentence m q)
     (h : Derivable T (insert (neg L (subst L (fvarVec m) q)) ({subst L (fvarVec m) p} : V))) :
     Derivable T (insert (neg L (qqAlls q m)) ({qqAlls p m} : V)) := by
   suffices ∀ i ≤ m, ∃ v, (len v = m ∧ ∀ x < m, (x < i → v.[x] = ^#x) ∧ (i ≤ x → v.[x] = ^&(x - i)))

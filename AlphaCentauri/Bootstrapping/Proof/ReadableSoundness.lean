@@ -104,14 +104,16 @@ end partialInstance
 that has no free variables, is not existential, and belongs to `IsReadable k D`, such that every
 instance of `χ` by closed terms is false under `ReadableTruth k D`. -/
 def IsFalseBlock (k D : ℕ) (e : V) : Prop :=
-  ∃ m χ, e = qqExss χ m ∧ Language.IsSentence ℒₒᵣ m χ ∧ (∀ p, χ ≠ ^∃ p) ∧
+  ∃ m χ, e = qqExss χ m ∧ (ℒₒᵣ).IsSemisentence m χ ∧ (∀ p, χ ≠ ^∃ p) ∧
     IsReadable k D χ ∧ ∀ w, IsSemitermVec ℒₒᵣ m 0 w → ¬ReadableTruth k D (subst ℒₒᵣ w χ)
 
 lemma IsFalseBlock.isFormula {k D : ℕ} {e : V} (h : IsFalseBlock k D e) : IsFormula ℒₒᵣ e := by
   obtain ⟨m, χ, rfl, hχ, -⟩ := h
   exact IsSemiformula.qqExss (by simpa using hχ.isSemiformula)
 
-lemma IsFalseBlock.shift_eq {k D : ℕ} {e : V} (h : IsFalseBlock k D e) : shift ℒₒᵣ e = e := by
+lemma IsFalseBlock.isSentence {k D : ℕ} {e : V} (h : IsFalseBlock k D e) :
+    (ℒₒᵣ).IsSentence e := by
+  apply Language.IsSemisentence.of_shift_eq h.isFormula
   obtain ⟨m, χ, rfl, hχ, -⟩ := h
   rw [shift_qqExss hχ.isSemiformula.isUFormula, hχ.shift_eq]
 
@@ -425,7 +427,7 @@ theorem not_cutFreeDerivable_of_isFalseBlock (hE : ∀ e ∈ E, IsFalseBlock k D
     obtain ⟨m, χ, rfl, hχ, hmax, -, -⟩ := hE e he
     exact ⟨by
       rw [fvAssign_qqExss hχ.isSemiformula.isUFormula,
-        fvAssign_eq_self hχ.isSemiformula.isUFormula hχ.shift_eq],
+        fvAssign_eq_self hχ],
       m, .of_mem hχ.isSemiformula hmax he⟩
   obtain ⟨e, he, hN, hT⟩ := h.exists_readableSatisfaction hE (f := 0) (by
     intro e he

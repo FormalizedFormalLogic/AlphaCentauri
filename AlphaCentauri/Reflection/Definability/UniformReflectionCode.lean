@@ -94,18 +94,18 @@ lemma le_uniformReflectionCode (k q : V) :
 semisentence `φ` whose code satisfies `S`. -/
 def UniformReflectionR (S : V → Prop) (p : V) : Prop :=
   ∃ k ≤ p, ∃ b ≤ p, ∃ q, q = subst ℒₒᵣ (numeral 0 ∷ bvarVec 0 k) b ∧
-    IsSemiformula ℒₒᵣ k q ∧ shift ℒₒᵣ q = q ∧ S q ∧ p = uniformReflectionCode T k q
+    (ℒₒᵣ).IsSemisentence k q ∧ S q ∧ p = uniformReflectionCode T k q
 
 noncomputable def chUniformReflection (cond : 𝚫ᴬ₁.Semisentence 1) : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
   (.mkSigma “p.
     ∃ k < p + 1, ∃ b < p + 1, ∃ w, !bvarVecDef w 0 k ∧ ∃ z, !numeralGraph z 0 ∧
       ∃ v, !adjoinDef v z w ∧ ∃ q, !(substsGraph ℒₒᵣ) q v b ∧
-        !(isSemiformula ℒₒᵣ).sigma k q ∧ !(shiftGraph ℒₒᵣ) q q ∧ !cond.sigma q ∧
+        !(isSemisentence ℒₒᵣ).sigma k q ∧ !cond.sigma q ∧
           !(uniformReflectionCodeGraph T) p k q”)
   (.mkPi “p.
     ∃ k < p + 1, ∃ b < p + 1, ∀ w, !bvarVecDef w 0 k → ∀ z, !numeralGraph z 0 →
       ∀ v, !adjoinDef v z w → ∀ q, !(substsGraph ℒₒᵣ) q v b →
-        !(isSemiformula ℒₒᵣ).pi k q ∧ (∀ y, !(shiftGraph ℒₒᵣ) y q → y = q) ∧ !cond.pi q ∧
+        !(isSemisentence ℒₒᵣ).pi k q ∧ !cond.pi q ∧
           ∀ y, !(uniformReflectionCodeGraph T) y k q → p = y”)
 
 instance UniformReflectionR.defined {S : V → Prop} {cond : 𝚫ᴬ₁.Semisentence 1}
@@ -115,16 +115,16 @@ instance UniformReflectionR.defined {S : V → Prop} {cond : 𝚫ᴬ₁.Semisent
   · intro v; simp [chUniformReflection, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm]
   · intro v
     simp [chUniformReflection, Bounding.HierarchySymbol.Semiformula.val_sigma, UniformReflectionR,
-      lt_succ_iff_le, eq_comm]
+      lt_succ_iff_le]
 
 lemma uniformReflectionR_quote_iff {S : ℕ → Prop} {Γ : ∀ {k : ℕ}, ArithmeticSemisentence k → Prop}
     (hS : ∀ k (φ : ArithmeticSemisentence k), S ⌜φ⌝ ↔ Γ φ) (ψ : ArithmeticSemiproposition 0) :
     UniformReflectionR T S (⌜ψ⌝ : ℕ) ↔ ∃ σ ∈ 𝗥𝗙𝗡[Γ] T, ψ = σ := by
   constructor
-  · rintro ⟨k, -, b, -, q, -, hq, hsh, hSq, hp⟩
-    obtain ⟨F, rfl⟩ := IsSemiformula.sound hq
+  · rintro ⟨k, -, b, -, q, -, hq, hSq, hp⟩
+    obtain ⟨F, rfl⟩ := IsSemiformula.sound hq.isSemiformula
     have hfree : F.freeVariables = ∅ := Semiformula.freeVariables_eq_empty_of_shift_eq <|
-      (Semiformula.quote_inj_iff (V := ℕ)).mp <| by rw [Semiformula.quote_shift]; exact hsh
+      (Semiformula.quote_inj_iff (V := ℕ)).mp <| by rw [Semiformula.quote_shift]; exact hq.shift_eq
     set φ := F.toEmpty hfree
     have hφ : (⌜φ⌝ : ℕ) = ⌜F⌝ := by simp [φ, Sentence.quote_def, Semiformula.emb_toEmpty]
     use T.uniformReflectionSchema φ
@@ -149,12 +149,9 @@ lemma uniformReflectionR_quote_iff {S : ℕ → Prop} {Γ : ∀ {k : ℕ}, Arith
       · rw [quote_bShift]
         simpa using le_uniformReflectionCode (V := ℕ) T k ⌜φ⌝
       · use ⌜φ⌝
-        and_intros
+        apply And.intro
         · simpa using (subst_quote_bShift (V := ℕ) φ).symm
-        · simpa using Sentence.quote_isSemiformula (V := ℕ) φ
-        · exact Semisentence.shift_quote φ
-        · exact (hS k φ).mpr hφ
-        · simp
+        · exact ⟨by simpa using Language.IsSemisentence.quote (V := ℕ) φ, (hS k φ).mpr hφ, rfl⟩
 
 noncomputable abbrev _root_.FFL.FirstOrder.Theory.uniformReflectionOn.delta1_of
     {Γ : ∀ {k : ℕ}, ArithmeticSemisentence k → Prop} {cond : 𝚫ᴬ₁.Semisentence 1}

@@ -58,7 +58,7 @@ noncomputable def prenexInductionAxiom (m Z : V) : V :=
 /-- `Z` is a prenex $\Sigma_n$ formula without free variables, whose bound variable `0` is the
 induction variable and whose bound variables `1, …, m` are the parameters. -/
 def IsInductionMatrix (n : ℕ) (m Z : V) : Prop :=
-  Language.IsSentence ℒₒᵣ (m + 1) Z ∧ IsPrenexHierarchy 𝚺 n Z
+  (ℒₒᵣ).IsSemisentence (m + 1) Z ∧ IsPrenexHierarchy 𝚺 n Z
 
 instance prenexInductionAtom.definable :
     𝚺ᴬ₁-Function₃ (prenexInductionAtom : V → V → V → V) := by
@@ -92,17 +92,19 @@ private lemma isSemiformula_prenexInductionAtom (hZ : IsSemiformula ℒₒᵣ (m
     (ht : IsSemiterm ℒₒᵣ (m + 2) t) : IsSemiformula ℒₒᵣ (m + 2) (prenexInductionAtom m Z t) :=
   hZ.subst (isSemitermVec_cons_bvarVec ht)
 
-private lemma shift_prenexInductionAtom (hZ : Language.IsSentence ℒₒᵣ (m + 1) Z) {t : V}
-    (ht : IsSemiterm ℒₒᵣ (m + 2) t) (hst : termShift ℒₒᵣ t = t) :
-    shift ℒₒᵣ (prenexInductionAtom m Z t) = prenexInductionAtom m Z t := by
-  have hw := isSemitermVec_cons_bvarVec ht
+private lemma isSemisentence_prenexInductionAtom (hZ : (ℒₒᵣ).IsSemisentence (m + 1) Z) {t : V}
+    (ht : (ℒₒᵣ).IsClosedSemiterm (m + 2) t) :
+    (ℒₒᵣ).IsSemisentence (m + 2) (prenexInductionAtom m Z t) := by
+  apply Language.IsSemisentence.of_shift_eq
+    (isSemiformula_prenexInductionAtom hZ.isSemiformula ht.isSemiterm)
+  have hw := isSemitermVec_cons_bvarVec ht.isSemiterm
   rw [prenexInductionAtom, shift_substs hZ.isSemiformula hw, hZ.shift_eq]
   congr 1
   apply nth_ext' (m + 1) (by simp [hw.isUTerm]) (by simp)
   intro i hi
   rw [nth_termShiftVec hw.isUTerm hi]
   rcases zero_or_succ i with rfl | ⟨i, rfl⟩
-  · simpa using hst
+  · simpa using ht.termShift_eq
   · simp [nth_bvarVec 2 m i (by simpa using hi)]
 
 private lemma isSemiterm_bvar_zero : IsSemiterm ℒₒᵣ (m + 2) (^#0 : V) := by simp
@@ -121,14 +123,6 @@ lemma IsInductionMatrix.isSemiformula_prenexInductionMatrix (h : IsInductionMatr
   exact ⟨hA (numeral_semiterm _ _), ⟨hA isSemiterm_bvar_zero, hA isSemiterm_succ_bvar_zero⟩,
     hA isSemiterm_bvar_one⟩
 
-private lemma shift_or_and {a₀ a₁ a₂ a₃ : V} (h₀ : IsUFormula ℒₒᵣ a₀) (h₁ : IsUFormula ℒₒᵣ a₁)
-    (h₂ : IsUFormula ℒₒᵣ a₂) (h₃ : IsUFormula ℒₒᵣ a₃) (hs₀ : shift ℒₒᵣ a₀ = a₀)
-    (hs₁ : shift ℒₒᵣ a₁ = a₁) (hs₂ : shift ℒₒᵣ a₂ = a₂) (hs₃ : shift ℒₒᵣ a₃ = a₃) :
-    shift ℒₒᵣ (neg ℒₒᵣ a₀ ^⋎ ((a₁ ^⋏ neg ℒₒᵣ a₂) ^⋎ a₃)) =
-      neg ℒₒᵣ a₀ ^⋎ ((a₁ ^⋏ neg ℒₒᵣ a₂) ^⋎ a₃) := by
-  simp [h₀, h₁, h₂, h₃, hs₁, hs₃, shift_neg h₀.isSemiformula, shift_neg h₂.isSemiformula, hs₀,
-    hs₂]
-
 private lemma termShift_succ_bvar_zero :
     termShift ℒₒᵣ (^#0 ^+ numeral 1 : V) = ^#0 ^+ numeral 1 := by
   have hv : IsSemitermVec ℒₒᵣ 2 1 (?[^#0, numeral 1] : V) :=
@@ -137,17 +131,16 @@ private lemma termShift_succ_bvar_zero :
     termShiftVec_cons₂ (by simp) (Arithmetic.numeral_uterm 1), termShift_bvar,
     Arithmetic.numeral_shift]
 
-lemma IsInductionMatrix.shift_prenexInductionMatrix (h : IsInductionMatrix n m Z) :
-    shift ℒₒᵣ (prenexInductionMatrix m Z) = prenexInductionMatrix m Z :=
-  shift_or_and
-    (isSemiformula_prenexInductionAtom h.isSemiformula (numeral_semiterm _ 0)).isUFormula
-    (isSemiformula_prenexInductionAtom h.isSemiformula isSemiterm_bvar_zero).isUFormula
-    (isSemiformula_prenexInductionAtom h.isSemiformula isSemiterm_succ_bvar_zero).isUFormula
-    (isSemiformula_prenexInductionAtom h.isSemiformula isSemiterm_bvar_one).isUFormula
-    (shift_prenexInductionAtom h.1 (numeral_semiterm _ 0) (Arithmetic.numeral_shift 0))
-    (shift_prenexInductionAtom h.1 isSemiterm_bvar_zero (termShift_bvar 0))
-    (shift_prenexInductionAtom h.1 isSemiterm_succ_bvar_zero termShift_succ_bvar_zero)
-    (shift_prenexInductionAtom h.1 isSemiterm_bvar_one (termShift_bvar 1))
+lemma IsInductionMatrix.isSemisentence_prenexInductionMatrix (h : IsInductionMatrix n m Z) :
+    (ℒₒᵣ).IsSemisentence (m + 2) (prenexInductionMatrix m Z) := by
+  simp only [prenexInductionMatrix, Language.IsSemisentence.or_iff, Language.IsSemisentence.and_iff,
+    Language.IsSemisentence.neg_iff]
+  have hA {t : V} (ht : (ℒₒᵣ).IsClosedSemiterm (m + 2) t) :=
+    isSemisentence_prenexInductionAtom h.1 ht
+  exact ⟨hA (.numeral _ 0),
+    ⟨hA (.of_termShift_eq isSemiterm_bvar_zero (termShift_bvar 0)),
+      hA (.of_termShift_eq isSemiterm_succ_bvar_zero termShift_succ_bvar_zero)⟩,
+    hA (.of_termShift_eq isSemiterm_bvar_one (termShift_bvar 1))⟩
 
 end prenexInductionAxiom
 
@@ -301,22 +294,17 @@ private lemma prenexIndFormula_val {n : ℕ} (h : IsInductionMatrix n m Z)
 end typed
 
 private lemma derivable_neg_prenexInductionAxiom {n : ℕ} {m b K Z : V}
-    (hM : IsInductionMatrix n m Z) (hb : Language.IsSentence ℒₒᵣ m b)
+    (hM : IsInductionMatrix n m Z) (hb : (ℒₒᵣ).IsSemisentence m b)
     (hKs : IsSemiformula ℒₒᵣ 1 K) (hZK : subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec m)) Z = K)
     (hsub : subst ℒₒᵣ (fvarVec m) b = indBodyVal K) :
     Derivable (∅ : Theory ℒₒᵣ)
       (insert (neg ℒₒᵣ (prenexInductionAxiom m Z)) ({qqAlls b m} : V)) := by
-  have hB := hM.isSemiformula_prenexInductionMatrix
-  have hq : IsSemiformula ℒₒᵣ m (^∀ ^∃ prenexInductionMatrix m Z) := by
-    rw [IsSemiformula.all, IsSemiformula.exs, add_assoc, one_add_one_eq_two]
-    exact hB
-  have hsq : shift ℒₒᵣ (^∀ ^∃ prenexInductionMatrix m Z) = ^∀ ^∃ prenexInductionMatrix m Z := by
-    rw [shift_all (by simpa using hB.isUFormula), shift_exs hB.isUFormula,
-      hM.shift_prenexInductionMatrix]
+  have hq : (ℒₒᵣ).IsSemisentence m (^∀ ^∃ prenexInductionMatrix m Z) := by
+    simpa [add_assoc, one_add_one_eq_two] using hM.isSemisentence_prenexInductionMatrix
   let Kt : Semiformula V ℒₒᵣ 1 := ⟨K, by simpa using hKs⟩
   have d := derivable_prenexIndFormula Kt
   rw [prenexIndFormula_val Kt hM hZK.symm, ← indBodyVal_val Kt, ← hsub] at d
-  exact Derivable.neg_qqAlls_qqAlls hb (.of_shift_eq hq hsq) d
+  exact Derivable.neg_qqAlls_qqAlls hb hq d
 
 /-- In pure logic, every induction axiom of `𝗜𝚺 n` follows from the prenex form of the induction
 axiom of a matrix `Z` coded below it.
@@ -326,27 +314,23 @@ theorem exists_derivable_prenexInductionAxiom {n : ℕ} {p : V}
     ∃ m ≤ p, ∃ Z ≤ p, IsInductionMatrix n m Z ∧
       Derivable (∅ : Theory ℒₒᵣ) (insert (neg ℒₒᵣ (prenexInductionAxiom m Z)) ({p} : V)) := by
   obtain ⟨m, hm, b, hb, rfl, hU, hsh, hbv, K, hK, hKs, hKS, hsub⟩ := h
-  have hbs : IsSemiformula ℒₒᵣ m b := hbv ▸ hU.isSemiformula
+  have hbs : (ℒₒᵣ).IsSemisentence m b := .of_shift_eq (hbv ▸ hU.isSemiformula) hsh
   have hfv := isSemitermVec_fvarVec (L := ℒₒᵣ) m 0
   have hsub₀ := hsub
   rw [show indBodyVal K = _ ^⋎ (_ ^⋎ ^∀ K) from rfl] at hsub
   obtain ⟨b₁, b₂, rfl, -, h₂⟩ := exists_eq_or_of_subst_eq hU hsub
   obtain ⟨b₃, b₄, rfl, -, h₄⟩ := exists_eq_or_of_subst_eq (IsUFormula.or.mp hU).2 h₂
   obtain ⟨Z, rfl, hZK⟩ := exists_eq_all_of_subst_eq (IsUFormula.or.mp (IsUFormula.or.mp hU).2).2 h₄
-  obtain ⟨hb₁, hb₂⟩ := IsSemiformula.or.mp hbs
-  obtain ⟨hb₃, hb₄⟩ := IsSemiformula.or.mp hb₂
-  have hZs : IsSemiformula ℒₒᵣ (m + 1) Z := IsSemiformula.all.mp hb₄
-  have hsZ : shift ℒₒᵣ Z = Z := by
-    rw [shift_or hb₁.isUFormula (IsUFormula.or.mpr ⟨hb₃.isUFormula, hb₄.isUFormula⟩),
-      shift_or hb₃.isUFormula hb₄.isUFormula, shift_all hZs.isUFormula] at hsh
-    exact (by simpa [qqOr_inj, qqAll_inj] using hsh : _ ∧ _ ∧ _).2.2
+  have hZs : (ℒₒᵣ).IsSemisentence (m + 1) Z := by
+    simp only [Language.IsSemisentence.or_iff, Language.IsSemisentence.all_iff] at hbs
+    exact hbs.2.2
   have hZp : IsPrenexHierarchy 𝚺 n Z :=
-    IsPrenexHierarchy.of_subst hfv.qVec hZs (hZK ▸ hKS)
-  have hM : IsInductionMatrix n m Z := ⟨.of_shift_eq hZs hsZ, hZp⟩
+    IsPrenexHierarchy.of_subst hfv.qVec hZs.isSemiformula (hZK ▸ hKS)
+  have hM : IsInductionMatrix n m Z := ⟨hZs, hZp⟩
   have hZle : Z ≤ qqAlls (b₁ ^⋎ b₃ ^⋎ ^∀ Z) m :=
     (le_qqAll Z).trans <| (lt_or_right b₃ _).le.trans <| (lt_or_right b₁ _).le.trans hb
   exact ⟨m, hm, Z, hZle, hM,
-    derivable_neg_prenexInductionAxiom hM (.of_shift_eq hbs hsh) hKs hZK hsub₀⟩
+    derivable_neg_prenexInductionAxiom hM hbs hKs hZK hsub₀⟩
 
 end derivation
 
@@ -543,15 +527,11 @@ theorem IsInductionMatrix.isFalseBlock_neg_prenexInductionAxiom [V↓[ℒₒᵣ]
     (h : IsInductionMatrix n m Z) (hn : n ≤ k) :
     IsFalseBlock k 3 (neg ℒₒᵣ (prenexInductionAxiom m Z)) := by
   have hB := h.isSemiformula_prenexInductionMatrix
-  have hnB : IsSemiformula ℒₒᵣ (m + 1 + 1) (neg ℒₒᵣ (prenexInductionMatrix m Z)) := by
-    rw [add_assoc, one_add_one_eq_two]
-    exact hB.neg
   refine ⟨m + 1, ^∀ neg ℒₒᵣ (prenexInductionMatrix m Z), ?_, ?_, ?_,
     h.isReadable_all_neg_prenexInductionMatrix hn, fun w hw ↦ h.not_readableTruth_subst hn hw⟩
   · rw [prenexInductionAxiom, neg_qqAlls (IsUFormula.all.mpr (IsUFormula.ex.mpr hB.isUFormula)),
       neg_all (IsUFormula.ex.mpr hB.isUFormula), neg_ex hB.isUFormula, qqExss_succ']
-  · exact .of_shift_eq (IsSemiformula.all.mpr hnB) (by
-      rw [shift_all hB.neg.isUFormula, shift_neg hB, h.shift_prenexInductionMatrix])
+  · simpa [add_assoc, one_add_one_eq_two] using h.isSemisentence_prenexInductionMatrix
   · intro p
     simp [qqAll, qqExs]
 

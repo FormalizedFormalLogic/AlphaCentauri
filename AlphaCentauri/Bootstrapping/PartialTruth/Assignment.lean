@@ -580,8 +580,9 @@ lemma termFvAssignVec_eq_self {k v : V} (hv : IsUTermVec ℒₒᵣ k v)
   rw [nth_termFvAssignVec hv hi]
   exact termFvAssign_eq_self (hv.nth hi) (by rw [← nth_termShiftVec hv hi, h])
 
-lemma fvAssign_eq_self {p : V} (hp : IsUFormula ℒₒᵣ p) (h : shift ℒₒᵣ p = p) :
-    fvAssign f p = p := by
+lemma fvAssign_eq_self {n p : V} (h : Language.IsSentence ℒₒᵣ n p) : fvAssign f p = p := by
+  have hp := h.isSemiformula.isUFormula
+  replace h := h.shift_eq
   revert h
   apply IsUFormula.induction1 𝚺 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
   · definability
@@ -608,7 +609,7 @@ lemma fvAssign_eq_self {p : V} (hp : IsUFormula ℒₒᵣ p) (h : shift ℒₒ�
 
 @[simp]
 lemma fvAssign_quote {n : ℕ} (σ : ArithmeticSemisentence n) : fvAssign f (⌜σ⌝ : V) = ⌜σ⌝ :=
-  fvAssign_eq_self (by simp) (Semisentence.shift_quote σ)
+  fvAssign_eq_self (.quote σ)
 
 lemma fvAssign_qqExss {f p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
     fvAssign f (qqExss p k) = qqExss (fvAssign f p) k := by

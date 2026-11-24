@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functions
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.FreeVariables
 
@@ -428,6 +429,16 @@ lemma _root_.FFL.FirstOrder.Language.IsSentence.of_shift_eq
   ⟨hp, (shift_eq_self_iff hp.isUFormula).mp h⟩
 
 @[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.quote {n : ℕ} (σ : Semisentence L n) :
+    L.IsSentence (n : V) ⌜σ⌝ :=
+  .of_shift_eq (Sentence.quote_isSemiformula σ) (Semisentence.shift_quote σ)
+
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.quote₀ (σ : Sentence L) :
+    L.IsSentence (0 : V) ⌜σ⌝ :=
+  .of_shift_eq (Sentence.quote_isSemiformula₀ σ) (Semisentence.shift_quote σ)
+
+@[simp]
 lemma _root_.FFL.FirstOrder.Language.IsSentence.verum (n : V) : L.IsSentence n ^⊤ := by
   simp [Language.IsSentence]
 
@@ -435,27 +446,51 @@ lemma _root_.FFL.FirstOrder.Language.IsSentence.verum (n : V) : L.IsSentence n ^
 lemma _root_.FFL.FirstOrder.Language.IsSentence.falsum (n : V) : L.IsSentence n ^⊥ := by
   simp [Language.IsSentence]
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.and
-    (hp : L.IsSentence n p) (hq : L.IsSentence n q) : L.IsSentence n (p ^⋏ q) := by
-  refine ⟨by simp [hp.isSemiformula, hq.isSemiformula], ?_⟩
-  rw [freeVariables_and hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
-    hp.freeVariables_eq, hq.freeVariables_eq, union_empty_eq_left]
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.and_iff :
+    L.IsSentence n (p ^⋏ q) ↔ L.IsSentence n p ∧ L.IsSentence n q := by
+  constructor
+  · intro h
+    obtain ⟨hp, hq⟩ := IsSemiformula.and.mp h.isSemiformula
+    have hs := h.shift_eq
+    rw [shift_and hp.isUFormula hq.isUFormula, qqAnd_inj] at hs
+    exact ⟨.of_shift_eq hp hs.1, .of_shift_eq hq hs.2⟩
+  · rintro ⟨hp, hq⟩
+    apply Language.IsSentence.of_shift_eq
+    · simp [hp.isSemiformula, hq.isSemiformula]
+    · rw [shift_and hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
+        hp.shift_eq, hq.shift_eq]
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.or
-    (hp : L.IsSentence n p) (hq : L.IsSentence n q) : L.IsSentence n (p ^⋎ q) := by
-  refine ⟨by simp [hp.isSemiformula, hq.isSemiformula], ?_⟩
-  rw [freeVariables_or hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
-    hp.freeVariables_eq, hq.freeVariables_eq, union_empty_eq_left]
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.or_iff :
+    L.IsSentence n (p ^⋎ q) ↔ L.IsSentence n p ∧ L.IsSentence n q := by
+  constructor
+  · intro h
+    obtain ⟨hp, hq⟩ := IsSemiformula.or.mp h.isSemiformula
+    have hs := h.shift_eq
+    rw [shift_or hp.isUFormula hq.isUFormula, qqOr_inj] at hs
+    exact ⟨.of_shift_eq hp hs.1, .of_shift_eq hq hs.2⟩
+  · rintro ⟨hp, hq⟩
+    apply Language.IsSentence.of_shift_eq
+    · simp [hp.isSemiformula, hq.isSemiformula]
+    · rw [shift_or hp.isSemiformula.isUFormula hq.isSemiformula.isUFormula,
+        hp.shift_eq, hq.shift_eq]
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.all
-    (hp : L.IsSentence (n + 1) p) : L.IsSentence n (^∀ p) :=
-  ⟨by simp [hp.isSemiformula],
-    by rw [freeVariables_all hp.isSemiformula.isUFormula, hp.freeVariables_eq]⟩
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.all_iff :
+    L.IsSentence n (^∀ p) ↔ L.IsSentence (n + 1) p := by
+  simp only [Language.IsSentence, IsSemiformula.all]
+  apply and_congr_right
+  intro hp
+  rw [freeVariables_all hp.isUFormula]
 
-lemma _root_.FFL.FirstOrder.Language.IsSentence.exs
-    (hp : L.IsSentence (n + 1) p) : L.IsSentence n (^∃ p) :=
-  ⟨by simp [hp.isSemiformula],
-    by rw [freeVariables_exs hp.isSemiformula.isUFormula, hp.freeVariables_eq]⟩
+@[simp]
+lemma _root_.FFL.FirstOrder.Language.IsSentence.exs_iff :
+    L.IsSentence n (^∃ p) ↔ L.IsSentence (n + 1) p := by
+  simp only [Language.IsSentence, IsSemiformula.exs]
+  apply and_congr_right
+  intro hp
+  rw [freeVariables_exs hp.isUFormula]
 
 @[simp]
 lemma _root_.FFL.FirstOrder.Language.IsSentence.neg_iff :

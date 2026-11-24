@@ -1,15 +1,14 @@
 module
 
-public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Coding
+public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Functions
 public import Foundation.FirstOrder.Incompleteness.Consistency
 
 /-!
 # $\Delta_1$ numerations whose elements are sentences
 
 A $\Delta_1$ numeration of a theory in a nonstandard model may contain codes of formulas with free
-variables. Restricting the numeration to the codes fixed by the shift of free variables gives a
-numeration of the same theory whose elements are all sentences, and it has a weaker consistency
-statement.
+variables. Restricting the numeration to the codes of sentences gives a numeration of the same
+theory, and it has a weaker consistency statement.
 -/
 
 @[expose] public section
@@ -25,55 +24,53 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 namespace Arithmetic.Bootstrapping
 
 variable (L) in
-/-- The codes fixed by the shift of free variables. -/
-noncomputable def shiftFixed : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
-  (.mkSigma “x. !(shiftGraph L) x x”)
-  (.mkPi “x. ∀ y, !(shiftGraph L) y x → y = x”)
+/-- The codes of sentences. -/
+noncomputable def isSentence₀ : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
+  (.mkSigma “p. !(isSentence L).sigma 0 p”)
+  (.mkPi “p. !(isSentence L).pi 0 p”)
 
-lemma shiftFixed_sigma_iff (x : V) :
-    V ⊧/![x] (shiftFixed L).sigma.val ↔ shift L x = x := by
-  simp [shiftFixed, eq_comm]
+instance _root_.FFL.FirstOrder.Language.IsSentence.defined₀ :
+    𝚫ᴬ₁-Predicate (L.IsSentence (V := V) 0) via isSentence₀ L := .mk <| by
+  constructor
+  · intro v
+    simp [isSentence₀, Bounding.HierarchySymbol.Semiformula.val_sigma]
+  · intro v
+    simp [isSentence₀, Bounding.HierarchySymbol.Semiformula.val_sigma]
 
-lemma shiftFixed_pi_iff (x : V) :
-    V ⊧/![x] (shiftFixed L).pi.val ↔ shift L x = x := by
-  simp [shiftFixed]
-
-lemma shiftFixed_properOn : (shiftFixed L).ProperOn V := by
-  intro e
-  rw [Matrix.fun_eq_vec_one e]
-  simp [shiftFixed_sigma_iff, shiftFixed_pi_iff]
+lemma isSentence₀_sigma_iff (p : V) : V ⊧/![p] (isSentence₀ L).sigma.val ↔ L.IsSentence 0 p := by
+  simp [isSentence₀, Bounding.HierarchySymbol.Semiformula.val_sigma]
 
 end Arithmetic.Bootstrapping
 
 /-- Every element of the numeration, in every model of $\mathsf{I}\Sigma_1$, is a sentence. -/
 class Theory.Δ₁.Sentential (T : Theory L) [T.Δ₁] : Prop where
-  shift_eq {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {p : V}
-    (h : p ∈ T.Δ₁Class) : Arithmetic.Bootstrapping.shift L p = p
+  isSentence {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {p : V}
+    (h : p ∈ T.Δ₁Class) : L.IsSentence 0 p
 
-lemma Theory.Δ₁.Sentential.forall_shift_eq (T : Theory L) [T.Δ₁] [Theory.Δ₁.Sentential T] {V : Type}
-    [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
-    ∀ p ∈ T.Δ₁Class (V := V), Arithmetic.Bootstrapping.shift L p = p :=
-  fun _ h ↦ shift_eq h
+lemma Theory.Δ₁.Sentential.forall_isSentence (T : Theory L) [T.Δ₁]
+    [Theory.Δ₁.Sentential T] {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
+    ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p :=
+  fun _ h ↦ isSentence h
 
 instance Theory.Δ₁.Sentential.union (T U : Theory L) [T.Δ₁] [U.Δ₁] [Theory.Δ₁.Sentential T]
     [Theory.Δ₁.Sentential U] : Theory.Δ₁.Sentential (T ∪ U) where
-  shift_eq h := by
+  isSentence h := by
     rcases Theory.Δ₁Class.mem_union.mp h with h | h
-    · exact Theory.Δ₁.Sentential.shift_eq h
-    · exact Theory.Δ₁.Sentential.shift_eq h
+    · exact Theory.Δ₁.Sentential.isSentence h
+    · exact Theory.Δ₁.Sentential.isSentence h
 
 instance Theory.Δ₁.Sentential.singleton (σ : Sentence L) : Theory.Δ₁.Sentential {σ} where
-  shift_eq {V} _ _ p h := by
+  isSentence {V} _ _ p h := by
     have hp : p = ⌜σ⌝ := by
       change V ⊧/![p] ({σ} : Theory L).Δ₁ch.val at h
       rw [Theory.Δ₁.singleton_toTDef_ch_val] at h
       simpa [Sentence.quote_eq_encode, Arithmetic.numeral_eq_natCast] using h
     rw [hp]
-    exact Semisentence.shift_quote σ
+    exact .quote₀ σ
 
-/-- The numeration of `T` restricted to the codes fixed by the shift of free variables. -/
+/-- The numeration of `T` restricted to the codes of sentences. -/
 noncomputable abbrev Theory.Δ₁.sentential (T : Theory L) (d : T.Δ₁) : T.Δ₁ where
-  ch := T.Δ₁ch ⋏ Arithmetic.Bootstrapping.shiftFixed L
+  ch := T.Δ₁ch ⋏ Arithmetic.Bootstrapping.isSentence₀ L
   mem_iff φ := by
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd,
       Bounding.HierarchySymbol.Semiformula.val_and, LogicalConnective.HomClass.map_and,
@@ -84,23 +81,23 @@ noncomputable abbrev Theory.Δ₁.sentential (T : Theory L) (d : T.Δ₁) : T.Δ
       exact h.1
     · rintro ⟨σ, hσ, rfl⟩
       apply And.intro ⟨σ, hσ, rfl⟩
-      change ℕ ⊧/![_] (Arithmetic.Bootstrapping.shiftFixed L).sigma.val
-      rw [Arithmetic.Bootstrapping.shiftFixed_sigma_iff]
-      exact Semisentence.shift_quote σ
+      change ℕ ⊧/![_] (Arithmetic.Bootstrapping.isSentence₀ L).sigma.val
+      rw [Arithmetic.Bootstrapping.isSentence₀_sigma_iff]
+      exact .quote₀ σ
   isDelta1 :=
     Bounding.HierarchySymbol.Semiformula.ProvablyProperOn.arithmetic_ofProperOn.{0} _
       (fun V _ _ ↦
         Bounding.HierarchySymbol.Semiformula.ProperOn.and (by simp)
-          Arithmetic.Bootstrapping.shiftFixed_properOn)
+          Language.IsSentence.defined₀.proper)
 
-lemma Theory.Δ₁.sentential_shift_eq (T : Theory L) (d : T.Δ₁) {V : Type*} [ORingStructure V]
+lemma Theory.Δ₁.isSentence_of_sentential (T : Theory L) (d : T.Δ₁) {V : Type*} [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {p : V} (h : V ⊧/![p] (Theory.Δ₁.sentential T d).ch.val) :
-    Arithmetic.Bootstrapping.shift L p = p := by
-  exact (Arithmetic.Bootstrapping.shiftFixed_sigma_iff p).mp h.2
+    L.IsSentence 0 p :=
+  (Arithmetic.Bootstrapping.isSentence₀_sigma_iff p).mp h.2
 
 instance (T : Theory L) (d : T.Δ₁) : @Theory.Δ₁.Sentential L _ _ T (Theory.Δ₁.sentential T d) :=
   @Theory.Δ₁.Sentential.mk L _ _ T (Theory.Δ₁.sentential T d) fun h ↦
-    Theory.Δ₁.sentential_shift_eq T d h
+    Theory.Δ₁.isSentence_of_sentential T d h
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 lemma Theory.Δ₁.sentential_subset (T : Theory L) (d : T.Δ₁) :

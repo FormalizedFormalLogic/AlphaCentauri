@@ -110,24 +110,24 @@ lemma tableFunc_compTable {tbl₁ tbl₂ k f : V} (h : ⟪k, f⟫ < len tbl₂.[
 
 variable {L₃ : Language} [L₂.Eq] [L₃.Encodable] [L₃.LORDefinable] {tbl₁ tbl₂ : V}
 
+omit [L₂.Eq] in
+lemma IsTable.isSentence_translate {n p : V} (hT : IsTable L₁ L₂ tbl₁) (hp : L₂.IsSentence n p) :
+    L₁.IsSentence n (translate L₁ L₂ tbl₁ p) :=
+  .of_shift_eq (IsSemiformula.translate hT hp.isSemiformula)
+    (by rw [← translate_shift hT hp.isSemiformula, hp.shift_eq])
+
 /-- The composite of two tables is a table. -/
 lemma IsTable.compTable (hT₁ : IsTable L₁ L₂ tbl₁) (hT₂ : IsTable L₂ L₃ tbl₂) :
     IsTable L₁ L₃ (compTable L₁ L₂ tbl₁ tbl₂) where
   domain := by
     rw [tableDomain_compTable]
-    have h₁ := hT₁.domain.isSemiformula
-    have h₂ := hT₂.domain.isSemiformula
-    refine .of_shift_eq (by simp [h₁, IsSemiformula.translate hT₁ h₂]) ?_
-    simp [h₁.isUFormula, (IsSemiformula.translate hT₁ h₂).isUFormula, ← translate_shift hT₁ h₂,
-      hT₁.domain.shift_eq, hT₂.domain.shift_eq]
+    simp [hT₁.domain, hT₁.isSentence_translate hT₂.domain]
   rel h := by
     rw [tableRel_compTable (hT₂.lt_len_rel h)]
-    exact .of_shift_eq (IsSemiformula.translate hT₁ (hT₂.rel h).isSemiformula)
-      (by rw [← translate_shift hT₁ (hT₂.rel h).isSemiformula, (hT₂.rel h).shift_eq])
+    exact hT₁.isSentence_translate (hT₂.rel h)
   func h := by
     rw [tableFunc_compTable (hT₂.lt_len_func h)]
-    exact .of_shift_eq (IsSemiformula.translate hT₁ (hT₂.func h).isSemiformula)
-      (by rw [← translate_shift hT₁ (hT₂.func h).isSemiformula, (hT₂.func h).shift_eq])
+    exact hT₁.isSentence_translate (hT₂.func h)
 
 end compTable
 

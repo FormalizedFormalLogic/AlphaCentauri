@@ -258,7 +258,7 @@ lemma exists_func_termVec (hL₂ : L₂.SymbolsStandard V) {k f v : V}
   obtain ⟨u, hu⟩ := exists_termVec hv
   exact ⟨k', F, u, rfl, rfl, hu⟩
 
-lemma derivable_definesElement_func (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+lemma derivable_definesElement_func (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence 0 p)
     (h : IsTranslationTable L₂ S tbl) {k : ℕ} (F : L₂.Func k) (u : Fin k → Term V L₂)
     (ih : ∀ i, Derivable S (insert (definesCode L₁ tbl.[0] (varEqual L₁ L₂ tbl (u i).val))
       (negDomSet L₁ tbl.[0] (u i).val))) :
@@ -303,7 +303,7 @@ lemma derivable_definesElement_func (hS : ∀ p ∈ S.Δ₁Class (V := V), Boots
   rw [hYeq, definesElement_domT_val h] at hfin
   exact hfin
 
-theorem derivable_definesElement (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+theorem derivable_definesElement (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence 0 p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t : V}
     (ht : IsSemiterm L₂ 0 t) :
     Derivable S
@@ -370,7 +370,7 @@ lemma isFormulaSet_substHyp (hT : IsTable L₁ L₂ tbl) {t : V} (ht : IsSemiter
         IsFormulaSet.negDomSet hT.domain.isSemiformula t⟩⟩
 
 lemma derivable_definesElement_substHyp
-    (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+    (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence 0 p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t : V}
     (ht : IsSemiterm L₂ 0 t) (b : V) :
     Derivable S (insert (definesElement h.domT
@@ -418,7 +418,7 @@ lemma termSubst_func_val {k : ℕ} (F : L₂.Func k) {c v : V} (hc : IsSemiterm 
     rw [nth_termSubstVec hv.isUTerm (by simp)]
 
 lemma derivable_termSubstEquiv_bvar
-    (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+    (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence 0 p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t b : V}
     (ht : IsSemiterm L₂ 0 t) :
     Derivable S (insert (termSubstEquiv L₁ L₂ tbl t b (^#0)) (substHyp L₁ L₂ tbl t b)) := by
@@ -504,7 +504,7 @@ lemma derivable_termSubstEquiv_func
     varEqualT_func hT F u']
   exact hg'
 
-theorem derivable_termSubstEquiv (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p)
+theorem derivable_termSubstEquiv (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence 0 p)
     (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t b s : V}
     (ht : IsSemiterm L₂ 0 t)
     (hs : IsSemiterm L₂ 1 s) :

@@ -111,7 +111,9 @@ lemma IsFalseBlock.isFormula {k D : ℕ} {e : V} (h : IsFalseBlock k D e) : IsFo
   obtain ⟨m, χ, rfl, hχ, -⟩ := h
   exact IsSemiformula.qqExss (by simpa using hχ.isSemiformula)
 
-lemma IsFalseBlock.shift_eq {k D : ℕ} {e : V} (h : IsFalseBlock k D e) : shift ℒₒᵣ e = e := by
+lemma IsFalseBlock.isSentence {k D : ℕ} {e : V} (h : IsFalseBlock k D e) :
+    Language.IsSentence ℒₒᵣ 0 e := by
+  apply Language.IsSentence.of_shift_eq h.isFormula
   obtain ⟨m, χ, rfl, hχ, -⟩ := h
   rw [shift_qqExss hχ.isSemiformula.isUFormula, hχ.shift_eq]
 
@@ -425,7 +427,7 @@ theorem not_cutFreeDerivable_of_isFalseBlock (hE : ∀ e ∈ E, IsFalseBlock k D
     obtain ⟨m, χ, rfl, hχ, hmax, -, -⟩ := hE e he
     exact ⟨by
       rw [fvAssign_qqExss hχ.isSemiformula.isUFormula,
-        fvAssign_eq_self hχ.isSemiformula.isUFormula hχ.shift_eq],
+        fvAssign_eq_self hχ],
       m, .of_mem hχ.isSemiformula hmax he⟩
   obtain ⟨e, he, hN, hT⟩ := h.exists_readableSatisfaction hE (f := 0) (by
     intro e he

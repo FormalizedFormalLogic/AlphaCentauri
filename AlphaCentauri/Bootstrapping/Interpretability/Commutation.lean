@@ -307,16 +307,15 @@ lemma IsTableOf.isTable {T : Theory L₁} [𝗘𝗤 _ ⪯ T] {π : DirectTransla
     (h : IsTableOf π tbl) (hL₂ : L₂.SymbolsStandard V) : IsTable L₁ L₂ tbl where
   domain := by
     rw [h.domain]
-    exact .of_shift_eq (by simp) (Semisentence.shift_quote _)
+    simpa using Language.IsSentence.quote (V := V) π.domain.sentence
   rel hr := by
     obtain ⟨k', R, rfl, rfl⟩ := hL₂.1 _ _ hr
     rw [h.rel R]
-    exact .of_shift_eq (Sentence.quote_isSemiformula _) (Semisentence.shift_quote _)
+    exact .quote _
   func hf := by
     obtain ⟨k', F, rfl, rfl⟩ := hL₂.2 _ _ hf
     rw [h.func F]
-    exact .of_shift_eq (by simpa using Sentence.quote_isSemiformula (π.func F).sentence)
-      (Semisentence.shift_quote _)
+    simpa using Language.IsSentence.quote (V := V) (π.func F).sentence
 
 end isTable
 

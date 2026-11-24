@@ -65,8 +65,8 @@ private lemma exists_falseBlock_set (hT : AdmitsFalseBlockReplacement T V k) (d 
   · apply mem_ext
     intro y
     rw [mem_setShift_iff]
-    exact ⟨fun ⟨x, hx, hy⟩ ↦ by rwa [hy, (hmem x hx).shift_eq], fun hy ↦
-      ⟨y, hy, ((hmem y hy).shift_eq).symm⟩⟩
+    exact ⟨fun ⟨x, hx, hy⟩ ↦ by rwa [hy, (hmem x hx).isSentence.shift_eq], fun hy ↦
+      ⟨y, hy, ((hmem y hy).isSentence.shift_eq).symm⟩⟩
   · exact hmem
   · intro p hp hpT
     obtain ⟨y, hy⟩ := mem_domain_iff.mp ((hsP p (lt_succ_iff_le.mpr hp)).mpr hpT)

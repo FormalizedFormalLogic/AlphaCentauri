@@ -77,10 +77,10 @@ lemma consistent_union_singleton_iff {φ : ArithmeticSentence} :
       cl_prover [h]
   rw [Theory.Consistent, Derivation.provable_union_singleton_iff, h]
 
-lemma union_singleton_shift_eq [Theory.Δ₁.Sentential T] {V : Type} [ORingStructure V]
+lemma union_singleton_isSentence [Theory.Δ₁.Sentential T] {V : Type} [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (φ : ArithmeticSentence) :
-    ∀ p ∈ (T ∪ {φ}).Δ₁Class (V := V), Bootstrapping.shift ℒₒᵣ p = p :=
-  Theory.Δ₁.Sentential.forall_shift_eq (T ∪ {φ})
+    ∀ p ∈ (T ∪ {φ}).Δ₁Class (V := V), Language.IsSentence ℒₒᵣ 0 p :=
+  Theory.Δ₁.Sentential.forall_isSentence (T ∪ {φ})
 
 lemma quote_imp_sentence (φ ψ : ArithmeticSentence) :
     (⌜φ 🡒 ψ⌝ : V) = imp ℒₒᵣ (⌜φ⌝ : V) ⌜ψ⌝ := by
@@ -115,7 +115,7 @@ theorem _root_.FFL.FirstOrder.ArithmeticTheory.consistent_of_interpretability
   have hI := models_interpretability_iff.mp hI
   have hφ := consistent_union_singleton_iff.mpr (models_standardProvability_iff_provable.not.mp hφ)
   exact models_standardProvability_iff_provable.not.mpr <| consistent_union_singleton_iff.mp <|
-    hI.consistent (union_singleton_shift_eq φ) Language.SymbolsStandard.oRing hφ
+    hI.consistent (union_singleton_isSentence φ) Language.SymbolsStandard.oRing hφ
 
 /-- The arithmetical form of $\mathbf{J1}$: provable implication yields interpretability.
 - [Vis90, §6.1] -/
@@ -140,8 +140,8 @@ theorem _root_.FFL.FirstOrder.ArithmeticTheory.interpretability_trans [𝗘𝗤 
     LogicalConnective.Prop.arrow_eq, LogicalConnective.Prop.and_eq]
   rintro ⟨h₁, h₂⟩
   exact models_interpretability_iff.mpr <|
-    (models_interpretability_iff.mp h₁).trans (union_singleton_shift_eq φ)
-      (union_singleton_shift_eq χ) (models_interpretability_iff.mp h₂)
+    (models_interpretability_iff.mp h₁).trans (union_singleton_isSentence φ)
+      (union_singleton_isSentence χ) (models_interpretability_iff.mp h₂)
 
 /-- The arithmetical form of $\mathbf{J3}$: interpretability in each disjunct yields
 interpretability in the disjunction.

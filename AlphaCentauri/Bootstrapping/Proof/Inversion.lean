@@ -673,8 +673,9 @@ private lemma all_bounds {d p s : V} (h : fstIdx d = insert (^∀ p) s) : p ≤ 
 
 /-! ### Universal inversion -/
 
-/-- The empty theory has no axioms, so in particular none with free variables. -/
-private lemma shift_eq_of_mem_empty (p : V) (hp : p ∈ (∅ : Theory L).Δ₁Class) : shift L p = p :=
+/-- The empty theory has no axioms, so in particular none that is not a sentence. -/
+private lemma isSentence_of_mem_empty (p : V) (hp : p ∈ (∅ : Theory L).Δ₁Class) :
+    L.IsSentence 0 p :=
   absurd hp (not_mem_empty_Δ₁Class p)
 
 namespace RankedDerivable
@@ -697,7 +698,7 @@ lemma substs1_of_free {t p s : V} (ht : IsTerm L t) (hp : IsSemiformula L 1 p)
     have hx' : x < len ι := by rwa [hιl]
     exact ⟨hx', by simp [hx']⟩
   have h₂ : ∀ x < p + s, x < len ι ∧ ι.[x] = ^&x := fun x hx ↦ ⟨by rwa [hιl], hι x hx⟩
-  have := rewrite shift_eq_of_mem_empty hu h
+  have := rewrite isSentence_of_mem_empty hu h
   rwa [fvSubstImage_insert, free,
     fvSubst_substs1 hu (by simp : IsSemiterm L 0 (^&0 : V)) hp.shift, h₀,
     fvSubst_shift h₁ hp (by simp), fvSubst_eq_self h₂ hp (by simp),
@@ -723,7 +724,7 @@ lemma shift_substs1_of_fvar {M t p s : V} (ht : IsTerm L t) (hp : IsSemiformula 
       simp
     · rw [(hw i (by rwa [hwl] at hi)).2 hiM]
       exact ht⟩
-  have := rewrite shift_eq_of_mem_empty hwc h
+  have := rewrite isSentence_of_mem_empty hwc h
   rwa [fvSubstImage_insert, fvSubst_substs1 hwc (by simp : IsSemiterm L 0 (^&M : V)) hp,
     termFvSubst_fvar, ite_eq_left hM, (hw M (by simp)).2 le_rfl, fvSubst_eq_shift hM hw₁ hp hpM,
     fvSubstImage_eq_setShift hM hw₁ hs hsM] at this

@@ -119,7 +119,7 @@ def Interpretable (S : Theory L₁) [S.Δ₁] (U : Theory L₂) [U.Δ₁] : Prop
 
 /-- If `U` is interpretable in `S` and `S` is consistent in `V`, so is `U`. -/
 theorem Interpretable.consistent {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] {U : Theory L₂} [U.Δ₁]
-    (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift L₁ p = p) (hL₂ : L₂.SymbolsStandard V)
+    (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence 0 p) (hL₂ : L₂.SymbolsStandard V)
     (h : Interpretable V S U) (hcon : S.Consistent V) : U.Consistent V := by
   obtain ⟨tbl, h⟩ := h
   exact consistent_of_translate hS h.toIsTranslationTable hL₂
@@ -231,13 +231,13 @@ open _root_.FFL.Entailment in
 /-- Interpretability is transitive.
 - [Vis90, §6.1] -/
 theorem Interpretable.trans {S U W : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [W.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S]
-    (hS : ∀ p ∈ S.Δ₁Class (V := V), Bootstrapping.shift ℒₒᵣ p = p)
-    (hW : ∀ p ∈ W.Δ₁Class (V := V), Bootstrapping.shift ℒₒᵣ p = p)
+    (hS : ∀ p ∈ S.Δ₁Class (V := V), Language.IsSentence ℒₒᵣ 0 p)
+    (hW : ∀ p ∈ W.Δ₁Class (V := V), Language.IsSentence ℒₒᵣ 0 p)
     (h₁ : Interpretable V S U) (h₂ : Interpretable V U W) : Interpretable V S W := by
   obtain ⟨tbl₁, h₁⟩ := h₁
   obtain ⟨tbl₂, h₂⟩ := h₂
   have hL := Language.SymbolsStandard.oRing (V := V)
-  have hsound : ∀ φ : V, Bootstrapping.shift ℒₒᵣ φ = φ → Provable U φ →
+  have hsound : ∀ φ : V, Language.IsSentence ℒₒᵣ 0 φ → Provable U φ →
       Provable S (translate ℒₒᵣ ℒₒᵣ tbl₁ φ) := fun φ hφ hpr ↦
     provable_translate hS h₁.toIsTranslationTable hL (fun _ hp hf ↦ h₁.translate_axiom hp hf) hφ hpr
   have hc := h₁.toIsTable.compTable h₂.toIsTable
@@ -245,14 +245,13 @@ theorem Interpretable.trans {S U W : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [W.Δ
   exact { toIsTranslationTable := h₁.toIsTranslationTable.compTable h₂.toIsTranslationTable hsound
           translate_axiom := fun {p} hp hp' ↦ by
             have hps := hW p hp
-            have h₃ := hsound _ (by rw [← translate_shift h₂.toIsTable hp', hps])
+            have h₃ := hsound _ (h₂.toIsTable.isSentence_translate hps)
               (h₂.translate_axiom hp hp')
             have ha := IsSemiformula.translate hc hp'
             have hb := IsSemiformula.translate h₁.toIsTable
               (IsSemiformula.translate h₂.toIsTable hp')
             have h₄ := (provable_iff_iff_tprovable ha hb).mp
-              (provable_comp_translate_iff h₁.toIsTranslationTable h₂.toIsTable hc hS hL
-                (.of_shift_eq hp' hps))
+              (provable_comp_translate_iff h₁.toIsTranslationTable h₂.toIsTable hc hS hL hps)
             have h₅ : S.internalize V ⊢ (⟨_, hb⟩ : Formula V ℒₒᵣ) := tprovable_iff_provable.mpr h₃
             exact tprovable_iff_provable.mp (K_right h₄ ⨀ h₅) }
 

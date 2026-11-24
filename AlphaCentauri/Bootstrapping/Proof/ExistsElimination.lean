@@ -37,7 +37,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
 derivable under `s`, then `Y` is derivable under `s`.
 - [HP98, Theorem I.4.9] -/
 theorem Derivable.conj_exs_elim
-    (hT : ∀ p ∈ T.Δ₁Class (V := V), Bootstrapping.shift L p = p) {k : ℕ}
+    (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p) {k : ℕ}
     (ψ : Fin k → Semiformula V L 1) (Y : Formula V L) {s : V} (hs : IsFormulaSet L s)
     (hY : ∀ u : Fin k → V, T.internalize V ⊢
       Matrix.conj (fun i ↦ (ψ i).subst ![Semiterm.fvar (u i)]) 🡒 Y)
@@ -239,7 +239,7 @@ variable {T : Theory L} [T.Δ₁]
 /-- If `Δ` has a fresh eigenvariable at every `j` in `[m, m')`, then the derivability of `Δ`
 together with the negated instances `negDomSet L d m'` yields that together with
 `negDomSet L d m`, provided `d` is provable as an existential formula. -/
-theorem Derivable.elim_negDomSet (hT : ∀ p ∈ T.Δ₁Class (V := V), Bootstrapping.shift L p = p)
+theorem Derivable.elim_negDomSet (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p)
     {d : V} (hd : L.IsSentence 1 d) (hne : Provable T (^∃ d)) {Δ m m' : V}
     (hΔ : IsFormulaSet L Δ) (hm : m ≤ m')
     (hfresh : ∀ j, m ≤ j → j < m' →

@@ -122,19 +122,15 @@ lemma uniformReflectionR_quote_iff {S : ℕ → Prop} {Γ : ∀ {k : ℕ}, Arith
     UniformReflectionR T S (⌜ψ⌝ : ℕ) ↔ ∃ σ ∈ 𝗥𝗙𝗡[Γ] T, ψ = σ := by
   constructor
   · rintro ⟨k, -, b, -, q, -, hq, hSq, hp⟩
-    obtain ⟨F, rfl⟩ := IsSemiformula.sound hq.isSemiformula
-    have hfree : F.freeVariables = ∅ := Semiformula.freeVariables_eq_empty_of_shift_eq <|
-      (Semiformula.quote_inj_iff (V := ℕ)).mp <| by rw [Semiformula.quote_shift]; exact hq.shift_eq
-    set φ := F.toEmpty hfree
-    have hφ : (⌜φ⌝ : ℕ) = ⌜F⌝ := by simp [φ, Sentence.quote_def, Semiformula.emb_toEmpty]
+    obtain ⟨φ, rfl⟩ := hq.sound
     use T.uniformReflectionSchema φ
     and_intros
     · use k, φ
       and_intros
-      · exact (hS k φ).mp <| hφ ▸ hSq
+      · exact (hS k φ).mp hSq
       · rfl
     · apply (Semiformula.quote_inj_iff (V := ℕ)).mp
-      rw [hp, ← hφ, ← Sentence.quote_def]
+      rw [hp, ← Sentence.quote_def]
       simpa using uniformReflectionCode_quote (V := ℕ) T φ
   · rintro ⟨_, ⟨k, φ, hφ, rfl⟩, rfl⟩
     have hp : (⌜(T.uniformReflectionSchema φ : ArithmeticSemiproposition 0)⌝ : ℕ) =

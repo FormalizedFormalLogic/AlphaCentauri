@@ -1,14 +1,15 @@
 module
 
-public import Foundation.FirstOrder.Syntax.Classical.BinderNotation
+public import Foundation.FirstOrder.Syntax.Classical.Coding
 
 /-!
 # Syntax of first-order logic
 
 Quantifier-rank invariance, distinctness lemmas and constructor equations for `Semiformula`,
 commutation and congruence lemmas for substitutions and rewritings, the conversion of a formula
-with `ℕ`-indexed free variables into a semisentence, and the notation `t ^' n` for a power by a
-variable exponent.
+with `ℕ`-indexed or `Fin m`-indexed free variables into a semisentence, the invariance of codes
+under a renaming of free variables which preserves their codes, and the notation `t ^' n` for a
+power by a variable exponent.
 -/
 
 @[expose] public section
@@ -256,6 +257,75 @@ lemma eval_toSemisentence_two (φ : Semiformula L ℕ 2) (x y : M)
     (fun _ ↦ by simp)
 
 end Semiformula
+
+/-! ## Finitely many free variables as bound variables -/
+
+namespace Rew
+
+/-- The rewriting turning the free variables `Fin m` into the last `m` of `k + m` bound
+variables. -/
+def bindParams (L : Language) (k m : ℕ) : Rew L (Fin m) k Empty (k + m) :=
+  Rew.bind (fun i ↦ #(i.castAdd m)) fun j ↦ #(j.natAdd k)
+
+/-- The rewriting turning the last `m` of `k + m` bound variables into free variables. -/
+def unbindParams (L : Language) (k m : ℕ) : Rew L Empty (k + m) (Fin m) k :=
+  Rew.bind (Fin.append (fun i ↦ #i) fun j ↦ &j) Empty.elim
+
+@[simp]
+lemma bindParams_app_unbindParams_app (σ : Semisentence L (k + m)) :
+    bindParams L k m ▹ (unbindParams L k m ▹ σ) = σ := by
+  have : (bindParams L k m).comp (unbindParams L k m) = Rew.id := by
+    apply Rew.ext
+    · intro i
+      cases i using Fin.addCases <;> simp [Rew.comp_app, bindParams, unbindParams]
+    · intro x
+      exact x.elim
+  simp [← TransitiveRewriting.comp_app, this]
+
+@[simp]
+lemma unbindParams_app_bindParams_app (φ : Semiformula L (Fin m) k) :
+    unbindParams L k m ▹ (bindParams L k m ▹ φ) = φ := by
+  have : (unbindParams L k m).comp (bindParams L k m) = Rew.id := by
+    apply Rew.ext <;> intro x <;> simp [Rew.comp_app, bindParams, unbindParams]
+  simp [← TransitiveRewriting.comp_app, this]
+
+end Rew
+
+namespace Semiformula
+
+@[simp]
+lemma eval_bindParams {M : Type*} [Tarski.Structure L M] (φ : Semiformula L (Fin m) k)
+    (a : Fin k → M) (b : Fin m → M) :
+    M ⊧/(Fin.append a b) (Rew.bindParams L k m ▹ φ) ↔ φ.Eval a b := by
+  simp [eval_rew, Function.comp_def, Rew.bindParams]
+
+end Semiformula
+
+/-! ## Codes under renamings of free variables -/
+
+section
+
+open Encodable
+
+variable [(k : ℕ) → Encodable (L.Func k)] {ζ : Type*} [Encodable ξ] [Encodable ζ] {f : ξ → ζ}
+  (hf : ∀ x, encode (f x) = encode x)
+include hf
+
+lemma Semiterm.encode_rewriteMap (t : Semiterm L ξ n) :
+    encode (Rew.rewriteMap f t) = encode t := by
+  simp only [encode_eq_toNat]
+  induction t with
+  | bvar => simp [toNat]
+  | fvar => simp [toNat, hf]
+  | func g v ih => simp [Rew.func, toNat_func, ih]
+
+lemma Semiformula.encode_rewriteMap [(k : ℕ) → Encodable (L.Rel k)] (φ : Semiformula L ξ n) :
+    encode (Rew.rewriteMap f ▹ φ) = encode φ := by
+  induction φ using rec' <;>
+    simp [encode_rel, encode_nrel, encode_verum, encode_falsum, encode_and, encode_or, encode_all,
+      encode_ex, ← encode_eq_toNat, Semiterm.encode_rewriteMap hf, *]
+
+end
 
 /-! ## Notation for a power by a variable exponent
 

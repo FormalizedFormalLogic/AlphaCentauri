@@ -231,7 +231,7 @@ end
 
 section
 
-variable (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] [Nonempty (NonstandardElement M)]
+variable (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] [IsNonstandard M]
 
 /-- The natural numbers as a proper end extension of a nonstandard model. -/
 def natCastProperEndExtension : ℕ ⊂ₑ M where
@@ -240,7 +240,7 @@ def natCastProperEndExtension : ℕ ⊂ₑ M where
   not_surjective := by
     intro h
     obtain ⟨c, hc⟩ := Classical.arbitrary (NonstandardElement M)
-    exact isNonstandard_iff_not_mem_range.mp hc (h c)
+    exact isNonstandardElement_iff_not_mem_range.mp hc (h c)
 
 end
 
@@ -630,7 +630,7 @@ theorem standardSystem_eq_of_endExtension [IsNonstandard M] :
 /-- A nonstandard model of `𝗜𝚺₁` embedded onto an initial segment of a model of `𝗜𝚺₁` has the same
 standard system as that model.
 - [Kay91, Theorem 12.3] -/
-theorem standardSystem_eq_of_initialSegmentEmbedding [Nonempty (NonstandardElement M)]
+theorem standardSystem_eq_of_initialSegmentEmbedding [IsNonstandard M]
     {ι : M ↪ₛ[ℒₒᵣ] N} (hι : ∀ x y, y < ι x → y ∈ Set.range ι) :
     standardSystem M = standardSystem N :=
   standardSystem_eq_of_endExtension (.ofInitial ι hι)

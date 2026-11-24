@@ -23,7 +23,7 @@ open Arithmetic Bootstrapping
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Nonempty (NonstandardElement M)]
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [IsNonstandard M]
   {k m n : ℕ}
 
 namespace Arithmetic
@@ -78,7 +78,7 @@ lemma exists_forall_of_mem_standardSystem {R : M → M → Prop} (hR : 𝚺ᴬ_[
       simpa using ⟨E.emb_lt_emb.mp he, hec⟩
   use x
   intro e he
-  exact hx e (isNonstandard_iff_not_mem_range.mpr hd e) he
+  exact hx e (isNonstandardElement_iff_not_mem_range.mpr hd e) he
 
 /-- `exists_forall_of_mem_standardSystem` for the codes of a set of semisentences. -/
 lemma exists_forall_of_setOf_mem_standardSystem {Q : ArithmeticSemisentence k → Prop}

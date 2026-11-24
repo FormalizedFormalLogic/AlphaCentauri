@@ -76,8 +76,8 @@ lemma models {θ : ArithmeticSemisentence l} (hθ : ℬ[<, ℒₒᵣ].Hierarchy 
     simpa using hu
   simpa using hx
 
-variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Nonempty (NonstandardElement M)]
-  [Nonempty (NonstandardElement N)] (hSSy : standardSystem M = standardSystem N)
+variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒₒᵣ] ⊧* 𝗣𝗔] [IsNonstandard M] [IsNonstandard N]
+  (hSSy : standardSystem M = standardSystem N)
 include hSSy
 
 /-- [Kay91, Theorem 12.3] -/
@@ -228,8 +228,7 @@ end PartialInitialEmbedding
 
 /-- [Kay91, Theorem 12.3] -/
 private lemma exists_piWitnessBelow_comp [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Countable M] [Countable N]
-    [Nonempty (NonstandardElement M)] [Nonempty (NonstandardElement N)]
-    (hSSy : standardSystem M = standardSystem N) {c : M} {a : N}
+    [IsNonstandard M] [IsNonstandard N] (hSSy : standardSystem M = standardSystem N) {c : M} {a : N}
     (h : PiWitnessBelow n b ![c] ![a]) :
     ∃ f : M → N, f c = a ∧ (∀ x y, y < f x → y ∈ Set.range f) ∧
       ∀ {l : ℕ} (u : Fin l → M), PiWitnessBelow n b u (f ∘ u) := by
@@ -310,7 +309,7 @@ $\Pi_n$ formula satisfiable in `M` with the parameter `c` is satisfiable in `N`,
 contain `b`, with `c` sent to `a`.
 - [Kay91, Theorem 12.3] -/
 theorem exists_initialSegmentEmbedding [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Countable M] [Countable N]
-    [Nonempty (NonstandardElement M)] [Nonempty (NonstandardElement N)] (n : ℕ) (a b : N) (c : M)
+    [IsNonstandard M] [IsNonstandard N] (n : ℕ) (a b : N) (c : M)
     (hSSy : standardSystem M = standardSystem N)
     (h : ∀ θ : ArithmeticSemisentence 2, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 n θ →
       (∃ x : M, M ⊧/![x, c] θ) → ∃ x < b, N ⊧/![x, a] θ) :
@@ -380,7 +379,7 @@ theorem exists_initialSegmentEmbedding [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒ
 $\Sigma_n$-elementary initial segment of itself containing a given element.
 - [Kay91, Theorem 12.4] -/
 theorem exists_selfEmbedding_onto_properInitialSegment [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Countable M]
-    [Nonempty (NonstandardElement M)] (n : ℕ) (a : M) :
+    [IsNonstandard M] (n : ℕ) (a : M) :
     ∃ ι : M ↪ₛ[ℒₒᵣ] M, (∀ x y, y < ι x → y ∈ Set.range ι) ∧ ¬Function.Surjective ι ∧
       IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) ι ∧ a ∈ Set.range ι := by
   have hQ := setOf_prenexHierarchy_mem_standardSystem 𝚷 n 2 (m := n + 1)
@@ -422,8 +421,8 @@ theorem exists_selfEmbedding_onto_properInitialSegment [M↓[ℒₒᵣ] ⊧* �
 /-- Friedman's theorem for cuts: every countable nonstandard model of `𝗣𝗔` is isomorphic to a proper
 closed cut of itself which contains a given element and is a $\Sigma_n$-elementary substructure.
 - [Kay91, Theorem 12.4] -/
-theorem exists_proper_closedCut_iso [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Countable M]
-    [Nonempty (NonstandardElement M)] (n : ℕ) (a : M) :
+theorem exists_proper_closedCut_iso [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Countable M] [IsNonstandard M]
+    (n : ℕ) (a : M) :
     ∃ I : ClosedCut M, I.Proper ∧ a ∈ I.carrier ∧
       IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) I.endExtension.emb ∧
       Nonempty (M ≃ₛ[ℒₒᵣ] I.carrier) := by

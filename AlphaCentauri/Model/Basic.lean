@@ -469,14 +469,14 @@ include e in
 /-- A nonstandard model of `𝗜𝚺₁` and an end extension of it which again models `𝗜𝚺₁` have the same
 standard system.
 - [Kay91, Chapter 12, p. 159] -/
-theorem standardSystem_eq_of_endExtension (hM : ∃ c : M, ∀ m : ℕ, (m : M) < c) :
+theorem standardSystem_eq_of_endExtension [Nonempty (NonstandardElement M)] :
     standardSystem M = standardSystem N := by
   apply (standardSystem_subset_of_endExtension e).antisymm
   rintro _ ⟨a, rfl⟩
-  obtain ⟨c, hc⟩ := hM
+  obtain ⟨c, hc⟩ := Classical.arbitrary (NonstandardElement M)
   have h₁ : ∀ m : ℕ, (m : N) < e c := by
     intro m
-    simpa using e.emb_lt_emb.mpr (hc m)
+    simpa using e.emb_lt_emb.mpr (hc.natCast_lt m)
   have h₂ : 0 < e c := by simpa using h₁ 0
   obtain ⟨s, hs, h₃⟩ := finset_comprehension₁ (Γ := 𝚺) (P := (· ∈ a)) (by definability) (log (e c))
   obtain ⟨x, rfl⟩ := e.mem_range_of_lt (hs.trans_le (exp_log_le_self h₂))

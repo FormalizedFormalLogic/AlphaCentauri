@@ -308,10 +308,10 @@ private noncomputable def satRel (R : (ℒₒᵣ).Rel 2) : ArithmeticSemisentenc
     (henkinRelDef S R).val/[#0, #1])) 🡘 (henkinSatisfiesDef S).val/[#2, #3, #4]
 
 @[simp]
-lemma relativizedImp_two (d : Semiformula V ℒₒᵣ 1) (A : Fin 2 → Semiformula V ℒₒᵣ 1)
-    (C : Semiformula V ℒₒᵣ 2) : relativizedImp d A (C.subst fun i ↦ Semiterm.bvar (i.addCast 0)) =
-      ∀¹ ∀¹ ((d.subst ![Semiterm.bvar 0] ⋏ (A 0).subst ![Semiterm.bvar 0]) ⋏
-        (d.subst ![Semiterm.bvar 1] ⋏ (A 1).subst ![Semiterm.bvar 1]) ⋏ ⊤ 🡒
+lemma relativizedImp_two (D : Semiformula V ℒₒᵣ 1) (A : Fin 2 → Semiformula V ℒₒᵣ 1)
+    (C : Semiformula V ℒₒᵣ 2) : relativizedImp D A (C.subst fun i ↦ Semiterm.bvar (i.addCast 0)) =
+      ∀¹ ∀¹ ((D.subst ![Semiterm.bvar 0] ⋏ (A 0).subst ![Semiterm.bvar 0]) ⋏
+        (D.subst ![Semiterm.bvar 1] ⋏ (A 1).subst ![Semiterm.bvar 1]) ⋏ ⊤ 🡒
           C.subst ![Semiterm.bvar 0, Semiterm.bvar 1]) := by
   rfl
 
@@ -370,14 +370,14 @@ lemma tprovable_henkinEquatesF_bvar (x s : Term V ℒₒᵣ) {i : V} (hi : i < n
     Semiformula.substs_substs, SemitermVec.q, Matrix.vecHead, Matrix.vecTail,
     Matrix.constant_eq_singleton] using h
 
-lemma funcGraph_zero (d : Semiformula V ℒₒᵣ 1) (A : Fin 0 → Semiformula V ℒₒᵣ 1)
-    (C : Semiformula V ℒₒᵣ 1) : funcGraph d A C = (⊤ 🡒 C.subst ![Semiterm.bvar 0]) := by
+lemma funcGraph_zero (D : Semiformula V ℒₒᵣ 1) (A : Fin 0 → Semiformula V ℒₒᵣ 1)
+    (C : Semiformula V ℒₒᵣ 1) : funcGraph D A C = (⊤ 🡒 C.subst ![Semiterm.bvar 0]) := by
   rfl
 
-lemma funcGraph_two (d : Semiformula V ℒₒᵣ 1) (A : Fin 2 → Semiformula V ℒₒᵣ 1)
-    (C : Semiformula V ℒₒᵣ 3) : funcGraph d A C =
-      ∀¹ ∀¹ ((d.subst ![Semiterm.bvar 0] ⋏ (A 0).subst ![Semiterm.bvar 0]) ⋏
-        (d.subst ![Semiterm.bvar 1] ⋏ (A 1).subst ![Semiterm.bvar 1]) ⋏ ⊤ 🡒
+lemma funcGraph_two (D : Semiformula V ℒₒᵣ 1) (A : Fin 2 → Semiformula V ℒₒᵣ 1)
+    (C : Semiformula V ℒₒᵣ 3) : funcGraph D A C =
+      ∀¹ ∀¹ ((D.subst ![Semiterm.bvar 0] ⋏ (A 0).subst ![Semiterm.bvar 0]) ⋏
+        (D.subst ![Semiterm.bvar 1] ⋏ (A 1).subst ![Semiterm.bvar 1]) ⋏ ⊤ 🡒
           C.subst ![Semiterm.bvar 2, Semiterm.bvar 0, Semiterm.bvar 1]) := by
   rfl
 

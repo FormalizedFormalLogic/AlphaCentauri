@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
@@ -11,7 +12,8 @@ over its code. The code of the negation of a semisentence that is not universal 
 A number codes a sentence of a finite list exactly when the defining formula of the list holds of
 it. The symbols of a language are standard in a model when every relation and function symbol
 of the model is the code of a symbol of the language. A vector is `matrixToVec u` exactly when it
-has the length of `u` and the entries of `u`. The code of a negation, an implication, a block of
+has the length of `u` and the entries of `u`, and a vector of definable functions is a definable
+function. The code of a negation, an implication, a block of
 universal quantifiers, a finite conjunction or a substitution instance of a formula is obtained
 from the code of the formula by the corresponding function on codes.
 -/
@@ -129,6 +131,15 @@ end Semiterm
 
 namespace Arithmetic.Bootstrapping
 
+/-- The code of the formula obtained by turning the last `m` bound variables of a semisentence into
+free variables is a substitution instance of the code of the semisentence. -/
+lemma encode_unbindParams (σ : Semisentence L (k + m)) :
+    (Encodable.encode (Rew.unbindParams L k m ▹ σ) : V) = subst L (matrixToVec fun i ↦
+      ⌜(Fin.append (fun i ↦ #i) (fun j : Fin m ↦ &j) i : SyntacticSemiterm L k)⌝) ⌜σ⌝ := by
+  rw [← Semiformula.encode_rewriteMap (f := Fin.val) (fun _ ↦ rfl), ← Semiformula.quote_eq_encode,
+    Rew.rewriteMap_val_unbindParams_app, Semiformula.quote_def, Semiformula.typed_quote_substs]
+  rfl
+
 lemma quote_neg_sentence (σ : ArithmeticSemisentence n) : (⌜∼σ⌝ : V) = neg ℒₒᵣ (⌜σ⌝ : V) := by
   simp [Sentence.quote_eq, Sentence.typed_quote_def]
 
@@ -168,6 +179,15 @@ lemma eq_matrixToVec_iff {w : V} {u : Fin k → V} :
     intro i hi
     obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi
     simp [h₂]
+
+lemma matrixToVec_definable {f : Fin k → (Fin n → V) → V}
+    (hf : ∀ i, 𝚺ᴬ_[m + 1].DefinableFunction (f i)) :
+    𝚺ᴬ_[m + 1].DefinableFunction fun v ↦ matrixToVec fun i ↦ f i v := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    simp only [matrixToVec_succ, Matrix.vecHead, Matrix.vecTail, Function.comp_def]
+    exact Bounding.HierarchySymbol.DefinableFunction₂.comp (hf 0) (ih fun i ↦ hf i.succ)
 
 lemma exists_termVec {v : V} (hv : IsSemitermVec L (k : V) 0 v) :
     ∃ u : Fin k → Term V L, SemitermVec.val u = v := by

@@ -18,7 +18,8 @@ An end extension of an `ℒₒᵣ`-structure `M`, written `M ⊆ₑ N`, is an en
 `ℬ[<, ℒₒᵣ]`: an embedding with nothing new below the image of `M`. `𝗣𝗔⁻`, `𝗜𝚺₀` and any
 $\Pi_1$-axiomatizable theory hold in `M` as soon as they hold in an end extension of `M`. In a
 proper end extension satisfying induction for a hierarchy class, a formula of that class which
-holds at every element of the base model holds below some element outside the base model.
+holds at every element of the base model holds below some element outside the base model. A
+nonstandard model of `𝗣𝗔⁻` is a proper end extension of the natural numbers.
 
 A cut of `M` is a subset closed under successor and downward closed under `<`. A closed cut, one
 closed under the operations of the language, is a substructure of `M`, and `M` is an end extension
@@ -167,6 +168,26 @@ namespace Arithmetic
 
 section
 
+variable (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hM : ∃ c : M, ∀ m : ℕ, (m : M) < c)
+
+/-- The natural numbers as a proper end extension of a nonstandard model. -/
+def natCastProperEndExtension : ℕ ⊂ₑ M where
+  emb := natCastEmbedding M
+  isInitial := inferInstance
+  not_surjective := by
+    obtain ⟨c, hc⟩ := hM
+    intro h
+    obtain ⟨m, rfl⟩ := h c
+    exact lt_irrefl _ (hc m)
+
+@[simp]
+lemma natCastProperEndExtension_emb_apply (n : ℕ) :
+    (natCastProperEndExtension M hM).emb n = n := rfl
+
+end
+
+section
+
 variable {M : Type u} {N : Type v} [ORingStructure M] [ORingStructure N] (e : M ⊂ₑ N)
 
 /-- Overspill: a formula of the induction class holding at every element of the base model holds
@@ -192,6 +213,23 @@ theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗�
   apply e.not_surjective
   intro x
   exact h₁ x (h₃ x)
+
+/-- Overspill: a definable predicate of the induction class holding at every element of the base
+model holds at some element outside it.
+- [HP98, Corollary IV.1.16] -/
+lemma overspill_definablePred (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m] {P : N → Prop}
+    (hP : Γᴬ_[m].DefinablePred P) (h : ∀ a : M, P (e a)) : ∃ c : N, c ∉ Set.range e.emb ∧ P c := by
+  have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m)
+  by_contra! hc
+  apply e.not_surjective
+  intro x
+  by_contra hx
+  apply hc x hx
+  apply InductionOnHierarchy.succ_induction Γ m hP
+  · simpa using h 0
+  · intro y hy
+    obtain ⟨a, rfl⟩ : y ∈ Set.range e.emb := by grind
+    simpa using h (a + 1)
 
 end
 

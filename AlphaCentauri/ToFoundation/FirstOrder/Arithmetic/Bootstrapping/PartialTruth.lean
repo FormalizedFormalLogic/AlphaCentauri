@@ -8,7 +8,9 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Genera
 
 `BoundedSatisfied` and `PrenexSatisfied` read a formula with closed-off bound variables by putting
 the values of the substituted terms into the assignment, swap under negation, and give the same
-value to every decomposition `qqToPrenex Γ s θ` of the same code.
+value to every decomposition `qqToPrenex Γ s θ` of the same code. `PrenexFormulaSatisfied` is
+`PrenexSatisfied` read at the code of the whole prenex formula rather than of its matrix, and agrees
+with satisfaction at the code of a prenex formula.
 
 - [HP98, 1.64(5), Theorem I.1.75]
 -/
@@ -290,7 +292,39 @@ lemma iff_of_qqToPrenex_eq (heq : qqToPrenex Γ s θ = qqToPrenex Γ' s' θ') (h
       · exact exists_congr fun x ↦ ih heq hθ' hf'
       · exact forall_congr' fun x ↦ ih heq hθ' hf'
 
+instance definable (Γ : Polarity) (s : ℕ) :
+    𝚺ᴬ_[s + 2]-Relation (PrenexSatisfied Γ s : V → V → Prop) := by
+  match Γ, s with
+  | Γ, 0 => cases Γ <;> exact BoundedSatisfied.definable.of_lt (by simp)
+  | 𝚺, s + 1 => exact (sigma_definable (s + 1)).of_lt (by simp)
+  | 𝚷, s + 1 => exact (pi_definable (s + 1)).of_lt (by simp)
+
 end PrenexSatisfied
+
+instance qqToPrenex.definable (Γ : Polarity) (s : ℕ) (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+    ℌ.DefinableFunction₁ (qqToPrenex Γ s : V → V) := (qqToPrenex_defined Γ s).to_definable₀
+
+/-- `p` codes a prenex formula with a $\Delta_0$ matrix, with `s` alternating quantifiers starting
+with `Γ`, which holds under the assignment `e`.
+- [HP98, Theorem I.1.75] -/
+def PrenexFormulaSatisfied (Γ : Polarity) (s : ℕ) (e p : V) : Prop :=
+  ∃ θ ≤ p, p = qqToPrenex Γ s θ ∧ PrenexSatisfied Γ s e θ
+
+namespace PrenexFormulaSatisfied
+
+instance definable (Γ : Polarity) (s : ℕ) :
+    𝚺ᴬ_[s + 2]-Relation (PrenexFormulaSatisfied Γ s : V → V → Prop) := by
+  unfold PrenexFormulaSatisfied
+  definability
+
+/-- [HP98, Theorem I.1.75] -/
+lemma quote_iff {l : ℕ} {σ : ArithmeticSemisentence l} (hσ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s σ)
+    (v : Fin l → V) : PrenexFormulaSatisfied Γ s (matrixToVec v) ⌜σ⌝ ↔ V ⊧/v σ := by
+  obtain ⟨φ, rfl⟩ := hσ
+  simpa [PrenexFormulaSatisfied, Bounding.Prenex.val, quote_toPrenex] using
+    prenexSatisfied_quote_iff φ v
+
+end PrenexFormulaSatisfied
 
 end Bootstrapping
 end FFL.FirstOrder.Arithmetic

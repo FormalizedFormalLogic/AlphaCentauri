@@ -580,7 +580,7 @@ lemma termFvAssignVec_eq_self {k v : V} (hv : IsUTermVec ℒₒᵣ k v)
   rw [nth_termFvAssignVec hv hi]
   exact termFvAssign_eq_self (hv.nth hi) (by rw [← nth_termShiftVec hv hi, h])
 
-lemma fvAssign_eq_self {n p : V} (h : (ℒₒᵣ).IsSentence n p) : fvAssign f p = p := by
+lemma fvAssign_eq_self {n p : V} (h : (ℒₒᵣ).IsSemisentence n p) : fvAssign f p = p := by
   have hp := h.isSemiformula.isUFormula
   replace h := h.shift_eq
   revert h

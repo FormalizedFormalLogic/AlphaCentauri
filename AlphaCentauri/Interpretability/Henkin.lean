@@ -55,7 +55,7 @@ lemma consistent_of_models_con {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] �
   simpa [models_iff] using h
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔]
-  (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence 0 p) (hcons : S.Consistent V)
+  (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (hcons : S.Consistent V)
 
 omit [Theory.Δ₁.Sentential S] in
 include hS hcons in
@@ -88,7 +88,7 @@ and its $\Delta_1$ numeration consists of sentences is provable from $T$ and the
 `S`. -/
 lemma provable_of_models_henkin (σ : ArithmeticSentence)
     (H : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔],
-      (∀ p ∈ S.Δ₁Class (V := V), L.IsSentence 0 p) → S.Consistent V → V↓[ℒₒᵣ] ⊧ σ) :
+      (∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) → S.Consistent V → V↓[ℒₒᵣ] ⊧ σ) :
     T ∪ S.Con ⊢ σ :=
   Arithmetic.complete.{0} _ _ fun V _ _ ↦
     have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔 := models_of_subtheory (T := 𝗣𝗔) (U := T ∪ S.Con) inferInstance
@@ -158,7 +158,7 @@ private lemma subst_fvar_cons (x : V) (u : Fin n → V) (φ : Bootstrapping.Semi
 end quote
 
 omit [V↓[ℒₒᵣ] ⊧* T ∪ S.Con] in
-private lemma exists_model_henkinEq (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence 0 p)
+private lemma exists_model_henkinEq (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p)
     (hcons : S.Consistent V) (x : V) :
     ∃ a : (henkinTranslation S T).Model V, HenkinEq S (a : V) x := by
   obtain ⟨r, hr, hrx⟩ := exists_isRepresentative S hS hcons x

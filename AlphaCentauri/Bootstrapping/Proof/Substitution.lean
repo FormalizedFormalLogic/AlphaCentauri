@@ -361,8 +361,8 @@ lemma termFvSubst_eq_self_of_termShift {w n t : V} (ht : IsSemiterm L n t)
     simpa [nth_termShiftVec hts.isUTerm hi] using congrArg (·.[i]) h'
 
 /-- A coded sentence is fixed by every free-variable substitution. -/
-lemma _root_.FFL.FirstOrder.Language.IsSentence.fvSubst_eq_self {w n p : V}
-    (hp : L.IsSentence n p) : fvSubst L w p = p := by
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.fvSubst_eq_self {w n p : V}
+    (hp : L.IsSemisentence n p) : fvSubst L w p = p := by
   have h := hp.shift_eq
   revert h
   apply IsSemiformula.pi1_structural_induction (P := fun _ p ↦ shift L p = p → fvSubst L w p = p)
@@ -586,7 +586,7 @@ private lemma rewrite_cut {p d₁ d₂ : V} (ih : RewritesBelow T (cutRule s p d
   rw [h₂.1, fvSubstImage_insert, fvSubst_neg hw hpF] at he₂
   exact .cut (by rw [formulaComplexity_fvSubst hw hpF]; simp) he₁ he₂
 
-private lemma rewrite_axm {p : V} (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p)
+private lemma rewrite_axm {p : V} (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hp : p ∈ s)
     (hpT : p ∈ T.Δ₁Class) :
     RankedDerivable T (cutRank L (axm s p)) (fvSubstImage (L := L) w s) := by
@@ -595,7 +595,7 @@ private lemma rewrite_axm {p : V} (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSen
   refine ⟨axm _ p, by simp, Derivation.axm (formulaSet_fvSubstImage hw hsF)
     (h ▸ fvSubst_mem_fvSubstImage hp) hpT, by simp⟩
 
-private lemma rewrite_aux (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p) :
+private lemma rewrite_aux (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p) :
     ∀ d w : V, Derivation T d → IsSemitermVec L (len w) 0 w →
       RankedDerivable T (cutRank L d) (fvSubstImage (L := L) w (fstIdx d)) := by
   apply bounded_all_sigma1_order_induction (f := rewriteBound (L := L)) inferInstance
@@ -634,7 +634,7 @@ end rewrite
 /-- Derivability of cut rank at most `r` is closed under free-variable substitution by a vector of
 terms without bound variables, provided the axioms of the theory are free of free variables.
 - [HP98, Theorem I.4.9] -/
-theorem RankedDerivable.rewrite (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p)
+theorem RankedDerivable.rewrite (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
     {r w s : V} (hw : IsSemitermVec L (len w) 0 w) (h : RankedDerivable T r s) :
     RankedDerivable T r (fvSubstImage (L := L) w s) := by
   obtain ⟨d, rfl, hd⟩ := h
@@ -643,7 +643,7 @@ theorem RankedDerivable.rewrite (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSente
 /-- Internal derivability is closed under free-variable substitution by a vector of terms
 without bound variables, provided the axioms of the theory are free of free variables.
 - [HP98, Theorem I.4.9] -/
-theorem Derivable.rewrite (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p) {w s : V}
+theorem Derivable.rewrite (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p) {w s : V}
     (hw : IsSemitermVec L (len w) 0 w) (h : Derivable T s) :
     Derivable T (fvSubstImage (L := L) w s) := by
   obtain ⟨d, rfl, hd⟩ := h
@@ -732,7 +732,7 @@ instance freshVecInverse.definable : 𝚺ᴬ₁-Function₁ (freshVecInverse : V
 
 /-- The internal `∀`-introduction rule with an arbitrary free variable as eigenvariable: `w`
 carries the sequent to its shift and sends `^&u` to `^&0`. -/
-lemma Derivable.all_of_free (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p)
+lemma Derivable.all_of_free (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
     {w u p s : V}
     (hw : IsSemitermVec L (len w) 0 w) (hu : u < len w) (hwu : w.[u] = ^&0)
     (hws : fvSubstImage (L := L) w s = setShift L s)
@@ -749,7 +749,7 @@ lemma Derivable.all_of_free (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 
 /-- The internal `∃`-elimination rule with an arbitrary free variable as eigenvariable: `w`
 carries the sequent to its shift and sends `^&u` to `^&0`.
 - [HP98, Theorem I.4.9] -/
-lemma Derivable.neg_exs_of_free (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p)
+lemma Derivable.neg_exs_of_free (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
     {w u p s : V}
     (hw : IsSemitermVec L (len w) 0 w) (hu : u < len w) (hwu : w.[u] = ^&0)
     (hws : fvSubstImage (L := L) w s = setShift L s)
@@ -765,7 +765,7 @@ lemma Derivable.neg_exs_of_free (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSente
 
 /-- The internal `∀`-introduction rule with the free variable `^&u` as eigenvariable, where `u`
 bounds the codes of the sequent and of the quantified formula. -/
-lemma Derivable.all_of_fresh (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p)
+lemma Derivable.all_of_fresh (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
     {u p s : V} (hsu : s ≤ u) (hpu : p ≤ u) (hp : IsSemiformula L 1 p)
     (h : Derivable T (insert (substs1 L ^&u p) s)) : Derivable T (insert (^∀ p) s) :=
   Derivable.all_of_free hT (isSemitermVec_freshVec u) (by simp) (by simp)
@@ -776,7 +776,7 @@ lemma Derivable.all_of_fresh (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence
 /-- The internal `∃`-elimination rule with the free variable `^&u` as eigenvariable, where `u`
 bounds the codes of the sequent and of the quantified formula.
 - [HP98, Theorem I.4.9] -/
-lemma Derivable.neg_exs_of_fresh (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p)
+lemma Derivable.neg_exs_of_fresh (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
     {u p s : V} (hsu : s ≤ u) (hpu : p ≤ u)
     (hp : IsSemiformula L 1 p) (h : Derivable T (insert (neg L (substs1 L ^&u p)) s)) :
     Derivable T (insert (neg L (^∃ p)) s) :=

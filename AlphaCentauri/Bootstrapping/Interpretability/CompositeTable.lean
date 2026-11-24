@@ -111,8 +111,9 @@ lemma tableFunc_compTable {tbl₁ tbl₂ k f : V} (h : ⟪k, f⟫ < len tbl₂.[
 variable {L₃ : Language} [L₂.Eq] [L₃.Encodable] [L₃.LORDefinable] {tbl₁ tbl₂ : V}
 
 omit [L₂.Eq] in
-lemma IsTable.isSentence_translate {n p : V} (hT : IsTable L₁ L₂ tbl₁) (hp : L₂.IsSentence n p) :
-    L₁.IsSentence n (translate L₁ L₂ tbl₁ p) :=
+lemma IsTable.isSemisentence_translate {n p : V} (hT : IsTable L₁ L₂ tbl₁)
+    (hp : L₂.IsSemisentence n p) :
+    L₁.IsSemisentence n (translate L₁ L₂ tbl₁ p) :=
   .of_shift_eq (IsSemiformula.translate hT hp.isSemiformula)
     (by rw [← translate_shift hT hp.isSemiformula, hp.shift_eq])
 
@@ -121,13 +122,13 @@ lemma IsTable.compTable (hT₁ : IsTable L₁ L₂ tbl₁) (hT₂ : IsTable L₂
     IsTable L₁ L₃ (compTable L₁ L₂ tbl₁ tbl₂) where
   domain := by
     rw [tableDomain_compTable]
-    simp [hT₁.domain, hT₁.isSentence_translate hT₂.domain]
+    simp [hT₁.domain, hT₁.isSemisentence_translate hT₂.domain]
   rel h := by
     rw [tableRel_compTable (hT₂.lt_len_rel h)]
-    exact hT₁.isSentence_translate (hT₂.rel h)
+    exact hT₁.isSemisentence_translate (hT₂.rel h)
   func h := by
     rw [tableFunc_compTable (hT₂.lt_len_func h)]
-    exact hT₁.isSentence_translate (hT₂.func h)
+    exact hT₁.isSemisentence_translate (hT₂.func h)
 
 end compTable
 

@@ -52,7 +52,7 @@ variable {X : V}
 
 /-- The shift of an instance of a set of formula codes without free variables is again an
 instance. -/
-lemma shift (hX : ∀ r ∈ X, ∃ n, L.IsSentence n r) {p : V} (h : Instance L X p) :
+lemma shift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {p : V} (h : Instance L X p) :
     Instance L X (shift L p) := by
   obtain ⟨r, hrX, n, w, hr, hw, rfl⟩ := h
   exact ⟨r, hrX, n, termShiftVec L n w, hr, hw.termShiftVec, by
@@ -60,7 +60,7 @@ lemma shift (hX : ∀ r ∈ X, ∃ n, L.IsSentence n r) {p : V} (h : Instance L 
 
 /-- A formula code whose shift is an instance of a set of formula codes without free variables is
 itself an instance. -/
-lemma of_shift (hX : ∀ r ∈ X, ∃ n, L.IsSentence n r) {p : V} (hp : IsUFormula L p)
+lemma of_shift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {p : V} (hp : IsUFormula L p)
     (h : Instance L X (Bootstrapping.shift L p)) : Instance L X p := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
   obtain ⟨ι, hιl, hι⟩ := sigmaOne_skolem_vec (R := fun x y : V ↦ y = ^&x) (by definability)
@@ -119,7 +119,7 @@ lemma of_or_right (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q 
 /-- The free instance of the body of a universal instance of a set closed under subformulas and
 without free variables is an instance. -/
 lemma free_of_all (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
-    (hX : ∀ r ∈ X, ∃ n, L.IsSentence n r) {p : V} (h : Instance L X (^∀ p)) :
+    (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {p : V} (h : Instance L X (^∀ p)) :
     Instance L X (free L p) := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
   obtain ⟨r₁, rfl, h₁⟩ := exists_eq_all_of_subst_eq hr.isUFormula he.symm
@@ -143,7 +143,7 @@ lemma substs1_of_exs (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p
 
 /-- The shift of a coded set of instances of a set without free variables consists of
 instances. -/
-lemma forall_mem_setShift (hX : ∀ r ∈ X, ∃ n, L.IsSentence n r) {s : V}
+lemma forall_mem_setShift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {s : V}
     (h : ∀ p ∈ s, Instance L X p) : ∀ p ∈ setShift L s, Instance L X p := by
   intro p hp
   obtain ⟨q, hq, rfl⟩ := mem_setShift_iff.mp hp
@@ -151,7 +151,7 @@ lemma forall_mem_setShift (hX : ∀ r ∈ X, ∃ n, L.IsSentence n r) {s : V}
 
 /-- A coded formula set whose shift consists of instances of a set without free variables
 consists of instances. -/
-lemma of_forall_mem_setShift (hX : ∀ r ∈ X, ∃ n, L.IsSentence n r) {s : V}
+lemma of_forall_mem_setShift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {s : V}
     (hs : IsFormulaSet L s) (h : ∀ p ∈ setShift L s, Instance L X p) :
     ∀ p ∈ s, Instance L X p := by
   intro p hp
@@ -172,7 +172,7 @@ end Instance
 the end-sequent of each immediate subderivation again consisting of instances of `X`; an axiom of
 the empty theory never occurs. -/
 theorem CutFreeDerivation.case_instance {X d : V} (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
-    (hsent : ∀ r ∈ X, ∃ n, L.IsSentence n r) (hd : CutFreeDerivation (∅ : Theory L) d)
+    (hsent : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) (hd : CutFreeDerivation (∅ : Theory L) d)
     (hX : ∀ p ∈ fstIdx d, Instance L X p) :
     IsFormulaSet L (fstIdx d) ∧
     ( (∃ s p, d = Bootstrapping.axL s p ∧ p ∈ s ∧ neg L p ∈ s) ∨

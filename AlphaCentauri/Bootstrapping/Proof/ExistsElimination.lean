@@ -37,7 +37,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
 derivable under `s`, then `Y` is derivable under `s`.
 - [HP98, Theorem I.4.9] -/
 theorem Derivable.conj_exs_elim
-    (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p) {k : ℕ}
+    (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p) {k : ℕ}
     (ψ : Fin k → Semiformula V L 1) (Y : Formula V L) {s : V} (hs : IsFormulaSet L s)
     (hY : ∀ u : Fin k → V, T.internalize V ⊢
       Matrix.conj (fun i ↦ (ψ i).subst ![Semiterm.fvar (u i)]) 🡒 Y)
@@ -87,7 +87,7 @@ open PeanoMinus ISigma0 ISigma1
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-lemma fvSubst_freshVec_neg_substs1_qqFvar {d i j : V} (hd : L.IsSentence 1 d) (hij : i < j) :
+lemma fvSubst_freshVec_neg_substs1_qqFvar {d i j : V} (hd : L.IsSemisentence 1 d) (hij : i < j) :
     fvSubst L (freshVec j) (neg L (substs1 L (^&i) d)) = neg L (substs1 L (^&(i + 1)) d) := by
   have hw : IsSemitermVec L (len (freshVec j : V)) 0 (freshVec j) := isSemitermVec_freshVec j
   have ht : IsSemiterm L 0 (^&i) := by simp
@@ -167,7 +167,7 @@ lemma IsFormulaSet.negDomSet {d : V} (hd : IsSemiformula L 1 d) (m : V) :
   obtain ⟨i, _, rfl⟩ := mem_negDomSet_iff.mp hp
   exact (IsSemiformula.substs1 (n := 0) (by simp) hd).neg
 
-lemma negDomSet_succ_eq_insert_setShift {d : V} (hd : L.IsSentence 1 d) (m : V) :
+lemma negDomSet_succ_eq_insert_setShift {d : V} (hd : L.IsSemisentence 1 d) (m : V) :
     negDomSet L d (m + 1) = insert (neg L (substs1 L (^&0) d)) (setShift L (negDomSet L d m)) := by
   apply mem_ext
   intro x
@@ -182,7 +182,7 @@ lemma negDomSet_succ_eq_insert_setShift {d : V} (hd : L.IsSentence 1 d) (m : V) 
     · exact ⟨0, by simp, rfl⟩
     · exact ⟨j + 1, by simpa using hj, this j⟩
 
-lemma fvSubstImage_freshVec_negDomSet {d : V} (hd : L.IsSentence 1 d) (j : V) :
+lemma fvSubstImage_freshVec_negDomSet {d : V} (hd : L.IsSemisentence 1 d) (j : V) :
     fvSubstImage (L := L) (freshVec j) (negDomSet L d j) = setShift L (negDomSet L d j) := by
   apply mem_ext
   intro x
@@ -239,8 +239,8 @@ variable {T : Theory L} [T.Δ₁]
 /-- If `Δ` has a fresh eigenvariable at every `j` in `[m, m')`, then the derivability of `Δ`
 together with the negated instances `negDomSet L d m'` yields that together with
 `negDomSet L d m`, provided `d` is provable as an existential formula. -/
-theorem Derivable.elim_negDomSet (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 0 p)
-    {d : V} (hd : L.IsSentence 1 d) (hne : Provable T (^∃ d)) {Δ m m' : V}
+theorem Derivable.elim_negDomSet (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
+    {d : V} (hd : L.IsSemisentence 1 d) (hne : Provable T (^∃ d)) {Δ m m' : V}
     (hΔ : IsFormulaSet L Δ) (hm : m ≤ m')
     (hfresh : ∀ j, m ≤ j → j < m' →
       fvSubstImage (L := L) (freshVec j) Δ = Bootstrapping.setShift L Δ)

@@ -454,14 +454,14 @@ lemma free_subst_bvar_zero {d : Semiformula V L 1} (hd : d.shift = d) :
   simp [Semiformula.free, hd]
 
 omit [𝗘𝗤 L ⪯ S] in
-lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence 0 p)
+lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p)
     (P : Semiformula V L 1) {M : V} (hM : P.val ≤ M)
     (ih : Derivable S (insert (hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free)).val
       (negDomSet L tbl₁.[0] P.free.val))) :
     Derivable S (insert (∼(h₁.domT.subst ![Semiterm.fvar 0]) ⋎
       (hc.transT P 🡘 h₁.transT (hT₂.transT P)).free).val
         (setShift L (negDomSet L tbl₁.[0] M))) := by
-  have hdom : L.IsSentence 1 tbl₁.[0] := h₁.domain
+  have hdom : L.IsSemisentence 1 tbl₁.[0] := h₁.domain
   have hp : IsSemiformula L 1 P.val := by simp
   set Xf : Formula V L := hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free) with hXf
   have hX : IsFormula L Xf.val := by simp
@@ -503,7 +503,7 @@ lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence 0
   exact h₅
 
 omit [𝗘𝗤 L ⪯ S] in
-lemma derivable_comp_all (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence 0 p) (P : Semiformula V L 1)
+lemma derivable_comp_all (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (P : Semiformula V L 1)
     (ih : Derivable S (insert (hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free)).val
       (negDomSet L tbl₁.[0] P.free.val))) :
     Derivable S (insert (hc.transT (∀¹ P) 🡘 h₁.transT (hT₂.transT (∀¹ P))).val
@@ -535,7 +535,7 @@ lemma derivable_comp_all (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence 0 p
   exact h₃
 
 omit [𝗘𝗤 L ⪯ S] in
-lemma derivable_comp_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence 0 p) (P : Semiformula V L 1)
+lemma derivable_comp_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (P : Semiformula V L 1)
     (ih : Derivable S (insert (hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free)).val
       (negDomSet L tbl₁.[0] P.free.val))) :
     Derivable S (insert (hc.transT (∃¹ P) 🡘 h₁.transT (hT₂.transT (∃¹ P))).val
@@ -569,7 +569,7 @@ lemma derivable_comp_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence 0 p
 include h₁ hT₂ hc in
 /-- Along the composite table and along the composite of the translations, every formula code
 has equivalent translations, given the domain of `tbl₁` at its free variables. -/
-theorem derivable_comp_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence 0 p)
+theorem derivable_comp_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p)
     (hL : L.SymbolsStandard V) {p : V} (hp : IsFormula L p) :
     Derivable S (insert (iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) p)
       (translate L L tbl₁ (translate L L tbl₂ p))) (negDomSet L tbl₁.[0] p)) := by
@@ -652,8 +652,8 @@ theorem derivable_comp_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSent
 include h₁ hT₂ hc in
 /-- Along the composite table and along the composite of the translations, every coded
 sentence has provably equivalent translations. -/
-theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence 0 p)
-    (hL : L.SymbolsStandard V) {p : V} (hp : L.IsSentence 0 p) :
+theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p)
+    (hL : L.SymbolsStandard V) {p : V} (hp : L.IsSentence p) :
     Provable S (iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) p)
       (translate L L tbl₁ (translate L L tbl₂ p))) := by
   have hp' := hp.isSemiformula
@@ -673,7 +673,7 @@ theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsS
       fvSubstImage (L := L) (freshVec j) (insert X ∅) = setShift L (insert X ∅) := by
     intro j _ _
     rw [fvSubstImage_insert, fvSubstImage_empty, mem_setShift_insert, setShift_empty,
-      (Language.IsSentence.of_shift_eq hX hXs).fvSubst_eq_self, hXs]
+      (Language.IsSemisentence.of_shift_eq hX hXs).fvSubst_eq_self, hXs]
   have h₃ := Derivable.elim_negDomSet hS h₁.domain h₁.exs_domain (by simp [hX]) zero_le hfresh h₂
   rw [negDomSet_zero] at h₃
   exact internal_provable_iff_internal_derivable.mpr (Derivable.ofSetEq (fun x ↦ by simp) h₃)
@@ -786,7 +786,7 @@ section compConditions
 variable {S U : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] {tbl₁ tbl₂ : V}
   (h₁ : IsTranslationTable ℒₒᵣ S tbl₁) (h₂ : IsTranslationTable ℒₒᵣ U tbl₂)
   (hc : IsTable ℒₒᵣ ℒₒᵣ (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂))
-  (hsound : ∀ φ : V, (ℒₒᵣ).IsSentence 0 φ → Provable U φ →
+  (hsound : ∀ φ : V, (ℒₒᵣ).IsSentence φ → Provable U φ →
     Provable S (translate ℒₒᵣ ℒₒᵣ tbl₁ φ))
 
 omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
@@ -804,8 +804,8 @@ to the domain of `tbl₁`, provable in `S`. -/
 lemma tprovable_relAllItr_of_provable {k : ℕ} (φ : Semiformula V ℒₒᵣ (0 + k)) (hφ : φ.shift = φ)
     (h : Provable U (∀¹^[k] φ).val) :
     S.internalize V ⊢ relAllItr h₁.domT k (h₁.transT φ) := by
-  have hs : (ℒₒᵣ).IsSentence 0 (∀¹^[k] φ).val := by
-    apply Language.IsSentence.of_shift_eq (by simp)
+  have hs : (ℒₒᵣ).IsSentence (∀¹^[k] φ).val := by
+    apply Language.IsSemisentence.of_shift_eq (by simp)
     rw [← Semiformula.val_shift, Semiformula.shift_allItr, hφ]
   have h' := hsound _ hs h
   rw [← IsTable.transT_val h₁.toIsTable, IsTable.transT_allItr] at h'
@@ -867,8 +867,8 @@ omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
 include h₁ hsound in
 lemma tprovable_relAlls_of_provable {n : ℕ} (φ : Semiformula V ℒₒᵣ n) (hφ : φ.shift = φ)
     (h : Provable U (qqAlls φ.val n)) : S.internalize V ⊢ relAlls h₁.domT (h₁.transT φ) := by
-  have hs : (ℒₒᵣ).IsSentence 0 (qqAlls φ.val n) := by
-    apply Language.IsSentence.of_shift_eq (IsSemiformula.qqAlls (by simp))
+  have hs : (ℒₒᵣ).IsSentence (qqAlls φ.val n) := by
+    apply Language.IsSemisentence.of_shift_eq (IsSemiformula.qqAlls (by simp))
     rw [shift_qqAlls φ.isSemiformula.isUFormula, ← Semiformula.val_shift, hφ]
   have h' := hsound _ hs h
   rw [IsTable.translate_qqAlls h₁.toIsTable] at h'

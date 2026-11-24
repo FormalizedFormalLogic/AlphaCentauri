@@ -675,7 +675,7 @@ private lemma all_bounds {d p s : V} (h : fstIdx d = insert (^∀ p) s) : p ≤ 
 
 /-- The empty theory has no axioms, so in particular none that is not a sentence. -/
 private lemma isSentence_of_mem_empty (p : V) (hp : p ∈ (∅ : Theory L).Δ₁Class) :
-    L.IsSentence 0 p :=
+    L.IsSentence p :=
   absurd hp (not_mem_empty_Δ₁Class p)
 
 namespace RankedDerivable

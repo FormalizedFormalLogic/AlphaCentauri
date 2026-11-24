@@ -709,7 +709,7 @@ lemma adjoin_termShiftVec_fvarVec (n : V) :
   · have hi' : i < n := by simpa using hi
     rw [nth_fvarVec (n + 1) (i + 1) hi]; simp [nth_termShiftVec hv hi', nth_fvarVec n i hi']
 
-lemma free_subst_qVec_fvarVec (hq : (ℒₒᵣ).IsSentence (n + 1) q) :
+lemma free_subst_qVec_fvarVec (hq : (ℒₒᵣ).IsSemisentence (n + 1) q) :
     free ℒₒᵣ (subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) q) = subst ℒₒᵣ (fvarVec (n + 1)) q := by
   have hw := isSemitermVec_fvarVec (L := ℒₒᵣ) n 0
   rw [free, shift_substs hq.isSemiformula hw.qVec, hq.shift_eq, termShift_qVec hw,
@@ -809,7 +809,7 @@ lemma tprovable_instFormula_or (hp : IsSemiformula ℒₒᵣ n p)
   cl_prover [h₁, h₂, h₃]
 
 lemma tprovable_instFormula_ball (ht : IsSemiterm ℒₒᵣ n t)
-    (hts : termShift ℒₒᵣ t = t) (hq : (ℒₒᵣ).IsSentence (n + 1) q)
+    (hts : termShift ℒₒᵣ t = t) (hq : (ℒₒᵣ).IsSemisentence (n + 1) q)
     (hqb : IsBounded q)
     (ih : T.internalize V ⊢ instFormula (n + 1) q hq.isSemiformula 🡘 psatF (assignment (n + 1)) q)
     (hp : IsSemiformula ℒₒᵣ n (qqBall (termBShift ℒₒᵣ t) q)) :
@@ -849,7 +849,7 @@ lemma tprovable_instFormula_ball (ht : IsSemiterm ℒₒᵣ n t)
   cl_prover [h₁, h₂, h₃, h₄]
 
 lemma tprovable_instFormula_bex (ht : IsSemiterm ℒₒᵣ n t)
-    (hts : termShift ℒₒᵣ t = t) (hq : (ℒₒᵣ).IsSentence (n + 1) q)
+    (hts : termShift ℒₒᵣ t = t) (hq : (ℒₒᵣ).IsSemisentence (n + 1) q)
     (hqb : IsBounded q)
     (ih : T.internalize V ⊢ instFormula (n + 1) q hq.isSemiformula 🡘 psatF (assignment (n + 1)) q)
     (hp : IsSemiformula ℒₒᵣ n (qqBex (termBShift ℒₒᵣ t) q)) :
@@ -900,11 +900,11 @@ lemma termBShift_inj {t' : V} (ht : IsSemiterm ℒₒᵣ n t) (ht' : IsSemiterm 
     termSubst_eq_self ht' H] at this
 
 lemma provable_iff_psat_of_isBounded (N : V) :
-    ∀ p, IsBounded p → ∀ n ≤ N, n + p ≤ N → (ℒₒᵣ).IsSentence n p →
+    ∀ p, IsBounded p → ∀ n ≤ N, n + p ≤ N → (ℒₒᵣ).IsSemisentence n p →
       Provable T (iff ℒₒᵣ (subst ℒₒᵣ (fvarVec n) p)
         (subst ℒₒᵣ ?[assignmentCode n, numeral p] (⌜psatDef.val⌝ : V))) := by
   apply IsBounded.induction 𝚺 (P := fun p ↦ ∀ n ≤ N, n + p ≤ N →
-    (ℒₒᵣ).IsSentence n p → Provable T (iff ℒₒᵣ (subst ℒₒᵣ (fvarVec n) p)
+    (ℒₒᵣ).IsSemisentence n p → Provable T (iff ℒₒᵣ (subst ℒₒᵣ (fvarVec n) p)
       (subst ℒₒᵣ ?[assignmentCode n, numeral p] (⌜psatDef.val⌝ : V))))
   · definability
   · intro n _ _ hp
@@ -972,7 +972,7 @@ lemma provable_iff_psat_of_isBounded (N : V) :
       rw [e']
       exact tprovable_instTerm_nlt_iff htu.1 htu.2 hs'.1 hs'.2
   · intro p q hpb hqb ihp ihq n hn hnpq hpq
-    have hpq' := Language.IsSentence.and_iff.mp hpq
+    have hpq' := Language.IsSemisentence.and_iff.mp hpq
     have h₁ := (tprovable_instFormula_iff hpq'.1.isSemiformula).mpr <| ihp n hn
       (le_trans (by simpa using (lt_K!_left p q).le) hnpq) hpq'.1
     have h₂ := (tprovable_instFormula_iff hpq'.2.isSemiformula).mpr <| ihq n hn
@@ -980,7 +980,7 @@ lemma provable_iff_psat_of_isBounded (N : V) :
     exact (tprovable_instFormula_iff hpq.isSemiformula).mp <| tprovable_instFormula_and
       hpq'.1.isSemiformula hpq'.2.isSemiformula h₁ h₂
   · intro p q hpb hqb ihp ihq n hn hnpq hpq
-    have hpq' := Language.IsSentence.or_iff.mp hpq
+    have hpq' := Language.IsSemisentence.or_iff.mp hpq
     have h₁ := (tprovable_instFormula_iff hpq'.1.isSemiformula).mpr <| ihp n hn
       (le_trans (by simpa using (lt_or_left p q).le) hnpq) hpq'.1
     have h₂ := (tprovable_instFormula_iff hpq'.2.isSemiformula).mpr <| ihq n hn
@@ -996,7 +996,7 @@ lemma provable_iff_psat_of_isBounded (N : V) :
     have hs₁ : termShift ℒₒᵣ (termBShift ℒₒᵣ t) = termBShift ℒₒᵣ t ∧ shift ℒₒᵣ q = q := by
       rw [shift_qqBall ht.termBShift hp'.2.isUFormula] at hs
       simpa [qqBall, Arithmetic.qqNLT] using hs
-    have hqs : (ℒₒᵣ).IsSentence (n + 1) q := .of_shift_eq hp'.2 hs₁.2
+    have hqs : (ℒₒᵣ).IsSemisentence (n + 1) q := .of_shift_eq hp'.2 hs₁.2
     have hts : termShift ℒₒᵣ t = t :=
       termBShift_inj htn.termShift htn <| by rw [termBShift_termShift htn, hs₁.1]
     have hq : q + 1 ≤ qqBall (termBShift ℒₒᵣ t) q := by
@@ -1016,7 +1016,7 @@ lemma provable_iff_psat_of_isBounded (N : V) :
     have hs₁ : termShift ℒₒᵣ (termBShift ℒₒᵣ t) = termBShift ℒₒᵣ t ∧ shift ℒₒᵣ q = q := by
       rw [shift_qqBex ht.termBShift hp'.2.isUFormula] at hs
       simpa [qqBex, Arithmetic.qqLT] using hs
-    have hqs : (ℒₒᵣ).IsSentence (n + 1) q := .of_shift_eq hp'.2 hs₁.2
+    have hqs : (ℒₒᵣ).IsSemisentence (n + 1) q := .of_shift_eq hp'.2 hs₁.2
     have hts : termShift ℒₒᵣ t = t :=
       termBShift_inj htn.termShift htn <| by rw [termBShift_termShift htn, hs₁.1]
     have hq : q + 1 ≤ qqBex (termBShift ℒₒᵣ t) q := by

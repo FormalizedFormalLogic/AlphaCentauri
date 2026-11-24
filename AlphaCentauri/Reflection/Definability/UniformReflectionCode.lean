@@ -94,18 +94,18 @@ lemma le_uniformReflectionCode (k q : V) :
 semisentence `φ` whose code satisfies `S`. -/
 def UniformReflectionR (S : V → Prop) (p : V) : Prop :=
   ∃ k ≤ p, ∃ b ≤ p, ∃ q, q = subst ℒₒᵣ (numeral 0 ∷ bvarVec 0 k) b ∧
-    (ℒₒᵣ).IsSentence k q ∧ S q ∧ p = uniformReflectionCode T k q
+    (ℒₒᵣ).IsSemisentence k q ∧ S q ∧ p = uniformReflectionCode T k q
 
 noncomputable def chUniformReflection (cond : 𝚫ᴬ₁.Semisentence 1) : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
   (.mkSigma “p.
     ∃ k < p + 1, ∃ b < p + 1, ∃ w, !bvarVecDef w 0 k ∧ ∃ z, !numeralGraph z 0 ∧
       ∃ v, !adjoinDef v z w ∧ ∃ q, !(substsGraph ℒₒᵣ) q v b ∧
-        !(isSentence ℒₒᵣ).sigma k q ∧ !cond.sigma q ∧
+        !(isSemisentence ℒₒᵣ).sigma k q ∧ !cond.sigma q ∧
           !(uniformReflectionCodeGraph T) p k q”)
   (.mkPi “p.
     ∃ k < p + 1, ∃ b < p + 1, ∀ w, !bvarVecDef w 0 k → ∀ z, !numeralGraph z 0 →
       ∀ v, !adjoinDef v z w → ∀ q, !(substsGraph ℒₒᵣ) q v b →
-        !(isSentence ℒₒᵣ).pi k q ∧ !cond.pi q ∧
+        !(isSemisentence ℒₒᵣ).pi k q ∧ !cond.pi q ∧
           ∀ y, !(uniformReflectionCodeGraph T) y k q → p = y”)
 
 instance UniformReflectionR.defined {S : V → Prop} {cond : 𝚫ᴬ₁.Semisentence 1}
@@ -151,7 +151,7 @@ lemma uniformReflectionR_quote_iff {S : ℕ → Prop} {Γ : ∀ {k : ℕ}, Arith
       · use ⌜φ⌝
         apply And.intro
         · simpa using (subst_quote_bShift (V := ℕ) φ).symm
-        · exact ⟨by simpa using Language.IsSentence.quote (V := ℕ) φ, (hS k φ).mpr hφ, rfl⟩
+        · exact ⟨by simpa using Language.IsSemisentence.quote (V := ℕ) φ, (hS k φ).mpr hφ, rfl⟩
 
 noncomputable abbrev _root_.FFL.FirstOrder.Theory.uniformReflectionOn.delta1_of
     {Γ : ∀ {k : ℕ}, ArithmeticSemisentence k → Prop} {cond : 𝚫ᴬ₁.Semisentence 1}

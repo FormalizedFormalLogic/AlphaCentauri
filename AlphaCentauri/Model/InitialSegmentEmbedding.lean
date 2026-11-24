@@ -74,16 +74,16 @@ lemma models {θ : ArithmeticSemisentence l} (hθ : ℬ[<, ℒₒᵣ].Hierarchy 
     simpa using hu
   simpa using hx
 
-variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒₒᵣ] ⊧* 𝗣𝗔] (hM : ∃ d : M, ∀ m : ℕ, (m : M) < d)
-  (hN : ∃ d : N, ∀ m : ℕ, (m : N) < d) (hSSy : standardSystem M = standardSystem N)
-include hM hN hSSy
+variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Nonempty (NonstandardElement M)]
+  [Nonempty (NonstandardElement N)] (hSSy : standardSystem M = standardSystem N)
+include hSSy
 
 /-- [Kay91, Theorem 12.3] -/
 lemma exists_forth (x : M) : ∃ y : N, PiWitnessBelow n b (x :> u) (y :> v) := by
-  have hA := hSSy ▸ setOf_prenexHierarchy_mem_standardSystem hM 𝚷 n (l + 2) (m := n + 1)
+  have hA := hSSy ▸ setOf_prenexHierarchy_mem_standardSystem 𝚷 n (l + 2) (m := n + 1)
     (P := fun e ↦ ∃ z, PrenexFormulaSatisfied 𝚷 n (z ∷ x ∷ matrixToVec u) e) (by definability)
   simp only [← and_assoc] at hA
-  obtain ⟨y, hy⟩ := exists_forall_of_setOf_mem_standardSystem hN (m := n + 1) hA
+  obtain ⟨y, hy⟩ := exists_forall_of_setOf_mem_standardSystem (m := n + 1) hA
     (R := fun y e ↦ ∃ z < b, PrenexFormulaSatisfied 𝚷 n (z ∷ y ∷ matrixToVec v) e)
     (by definability) <| by
       intro s hs
@@ -131,7 +131,7 @@ lemma exists_forth (x : M) : ∃ y : N, PiWitnessBelow n b (x :> u) (y :> v) := 
 /-- [Kay91, Theorem 12.3] -/
 lemma exists_back {y : N} {i : Fin l} (hy : y ≤ v i) :
     ∃ x : M, PiWitnessBelow n b (x :> u) (y :> v) := by
-  have hB := hSSy.symm ▸ setOf_prenexHierarchy_mem_standardSystem hN 𝚺 n (l + 2) (m := n + 1)
+  have hB := hSSy.symm ▸ setOf_prenexHierarchy_mem_standardSystem 𝚺 n (l + 2) (m := n + 1)
     (P := fun e ↦ ∀ z < b, PrenexFormulaSatisfied 𝚺 n (z ∷ y ∷ matrixToVec v) e) (by definability)
   simp only [← and_assoc] at hB
   have hR : 𝚺ᴬ_[n + 4].DefinableRel fun x e : M ↦
@@ -140,7 +140,7 @@ lemma exists_back {y : N} {i : Fin l} (hy : y ≤ v i) :
       (PrenexFormulaSatisfied.definable 𝚺 n).of_lt (by simp)
     apply HierarchySymbol.Definable.of_lt (C := 𝚷ᴬ_[n + 3]) _ (by simp)
     definability
-  obtain ⟨x, hx⟩ := exists_forall_of_setOf_mem_standardSystem hM hB hR <| by
+  obtain ⟨x, hx⟩ := exists_forall_of_setOf_mem_standardSystem hB hR <| by
     intro s hs
     obtain ⟨x, -, hx⟩ : ∃ x ≤ u i, ∀ z, ∀ φ ∈ s, M ⊧/(z :> x :> u) φ := by
       by_contra! hc
@@ -226,7 +226,7 @@ end PartialInitialEmbedding
 
 /-- [Kay91, Theorem 12.3] -/
 private lemma exists_piWitnessBelow_comp [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Countable M] [Countable N]
-    (hM : ∃ d : M, ∀ m : ℕ, (m : M) < d) (hN : ∃ d : N, ∀ m : ℕ, (m : N) < d)
+    [Nonempty (NonstandardElement M)] [Nonempty (NonstandardElement N)]
     (hSSy : standardSystem M = standardSystem N) {c : M} {a : N}
     (h : PiWitnessBelow n b ![c] ![a]) :
     ∃ f : M → N, f c = a ∧ (∀ x y, y < f x → y ∈ Set.range f) ∧
@@ -246,12 +246,12 @@ private lemma exists_piWitnessBelow_comp [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[�
           simp
         · use 0
           simp
-      obtain ⟨y, hy⟩ := p.piWitnessBelow.exists_forth hM hN hSSy e.1
+      obtain ⟨y, hy⟩ := p.piWitnessBelow.exists_forth hSSy e.1
       obtain ⟨q, hpq, hq⟩ := hle p hy
       by_cases hey : e.2 < y
       · obtain ⟨i, hi⟩ := hq
         have hi' : q.target i = y := congrArg Prod.snd hi
-        obtain ⟨x, hx⟩ := q.piWitnessBelow.exists_back hM hN hSSy (hi' ▸ hey.le)
+        obtain ⟨x, hx⟩ := q.piWitnessBelow.exists_back hSSy (hi' ▸ hey.le)
         obtain ⟨r, hqr, hr⟩ := hle q hx
         use r
         and_intros
@@ -308,13 +308,13 @@ $\Pi_n$ formula satisfiable in `M` with the parameter `c` is satisfiable in `N`,
 contain `b`, with `c` sent to `a`.
 - [Kay91, Theorem 12.3] -/
 theorem exists_initialSegmentEmbedding [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Countable M] [Countable N]
-    (hM : ∃ d : M, ∀ m : ℕ, (m : M) < d) (hN : ∃ d : N, ∀ m : ℕ, (m : N) < d) (n : ℕ) (a b : N)
-    (c : M) (hSSy : standardSystem M = standardSystem N)
+    [Nonempty (NonstandardElement M)] [Nonempty (NonstandardElement N)] (n : ℕ) (a b : N) (c : M)
+    (hSSy : standardSystem M = standardSystem N)
     (h : ∀ θ : ArithmeticSemisentence 2, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 n θ →
       (∃ x : M, M ⊧/![x, c] θ) → ∃ x < b, N ⊧/![x, a] θ) :
     ∃ ι : M ↪ₛ[ℒₒᵣ] N, (∀ x y, y < ι x → y ∈ Set.range ι) ∧
       IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) ι ∧ ι c = a ∧ b ∉ Set.range ι := by
-  obtain ⟨f, hfc, hfi, hf⟩ := exists_piWitnessBelow_comp hM hN hSSy h
+  obtain ⟨f, hfc, hfi, hf⟩ := exists_piWitnessBelow_comp hSSy h
   have hΓ {l : ℕ} {θ : ArithmeticSemisentence l} (hθ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n θ)
       (u : Fin l → M) : N ⊧/(f ∘ u) θ ↔ M ⊧/u θ := by
     constructor

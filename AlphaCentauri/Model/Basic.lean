@@ -529,10 +529,10 @@ theorem standardSystem_eq_of_endExtension [Nonempty (NonstandardElement M)] :
 /-- A nonstandard model of `𝗜𝚺₁` embedded onto an initial segment of a model of `𝗜𝚺₁` has the same
 standard system as that model.
 - [Kay91, Theorem 12.3] -/
-theorem standardSystem_eq_of_initialSegmentEmbedding (hM : ∃ d : M, ∀ m : ℕ, (m : M) < d)
+theorem standardSystem_eq_of_initialSegmentEmbedding [Nonempty (NonstandardElement M)]
     {ι : M ↪ₛ[ℒₒᵣ] N} (hι : ∀ x y, y < ι x → y ∈ Set.range ι) :
     standardSystem M = standardSystem N :=
-  standardSystem_eq_of_endExtension (.ofInitial ι hι) hM
+  standardSystem_eq_of_endExtension (.ofInitial ι hι)
 
 end Arithmetic
 

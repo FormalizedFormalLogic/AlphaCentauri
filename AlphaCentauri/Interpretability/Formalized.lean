@@ -79,7 +79,7 @@ lemma consistent_union_singleton_iff {φ : ArithmeticSentence} :
 
 lemma union_singleton_isSentence [Theory.Δ₁.Sentential T] {V : Type} [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (φ : ArithmeticSentence) :
-    ∀ p ∈ (T ∪ {φ}).Δ₁Class (V := V), Language.IsSentence ℒₒᵣ 0 p :=
+    ∀ p ∈ (T ∪ {φ}).Δ₁Class (V := V), (ℒₒᵣ).IsSentence 0 p :=
   Theory.Δ₁.Sentential.forall_isSentence (T ∪ {φ})
 
 lemma quote_imp_sentence (φ ψ : ArithmeticSentence) :

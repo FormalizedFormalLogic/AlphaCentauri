@@ -786,7 +786,7 @@ section compConditions
 variable {S U : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] {tbl₁ tbl₂ : V}
   (h₁ : IsTranslationTable ℒₒᵣ S tbl₁) (h₂ : IsTranslationTable ℒₒᵣ U tbl₂)
   (hc : IsTable ℒₒᵣ ℒₒᵣ (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂))
-  (hsound : ∀ φ : V, Language.IsSentence ℒₒᵣ 0 φ → Provable U φ →
+  (hsound : ∀ φ : V, (ℒₒᵣ).IsSentence 0 φ → Provable U φ →
     Provable S (translate ℒₒᵣ ℒₒᵣ tbl₁ φ))
 
 omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
@@ -804,7 +804,7 @@ to the domain of `tbl₁`, provable in `S`. -/
 lemma tprovable_relAllItr_of_provable {k : ℕ} (φ : Semiformula V ℒₒᵣ (0 + k)) (hφ : φ.shift = φ)
     (h : Provable U (∀¹^[k] φ).val) :
     S.internalize V ⊢ relAllItr h₁.domT k (h₁.transT φ) := by
-  have hs : Language.IsSentence ℒₒᵣ 0 (∀¹^[k] φ).val := by
+  have hs : (ℒₒᵣ).IsSentence 0 (∀¹^[k] φ).val := by
     apply Language.IsSentence.of_shift_eq (by simp)
     rw [← Semiformula.val_shift, Semiformula.shift_allItr, hφ]
   have h' := hsound _ hs h
@@ -867,7 +867,7 @@ omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
 include h₁ hsound in
 lemma tprovable_relAlls_of_provable {n : ℕ} (φ : Semiformula V ℒₒᵣ n) (hφ : φ.shift = φ)
     (h : Provable U (qqAlls φ.val n)) : S.internalize V ⊢ relAlls h₁.domT (h₁.transT φ) := by
-  have hs : Language.IsSentence ℒₒᵣ 0 (qqAlls φ.val n) := by
+  have hs : (ℒₒᵣ).IsSentence 0 (qqAlls φ.val n) := by
     apply Language.IsSentence.of_shift_eq (IsSemiformula.qqAlls (by simp))
     rw [shift_qqAlls φ.isSemiformula.isUFormula, ← Semiformula.val_shift, hφ]
   have h' := hsound _ hs h

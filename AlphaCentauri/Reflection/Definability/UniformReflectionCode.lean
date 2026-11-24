@@ -94,7 +94,7 @@ lemma le_uniformReflectionCode (k q : V) :
 semisentence `φ` whose code satisfies `S`. -/
 def UniformReflectionR (S : V → Prop) (p : V) : Prop :=
   ∃ k ≤ p, ∃ b ≤ p, ∃ q, q = subst ℒₒᵣ (numeral 0 ∷ bvarVec 0 k) b ∧
-    Language.IsSentence ℒₒᵣ k q ∧ S q ∧ p = uniformReflectionCode T k q
+    (ℒₒᵣ).IsSentence k q ∧ S q ∧ p = uniformReflectionCode T k q
 
 noncomputable def chUniformReflection (cond : 𝚫ᴬ₁.Semisentence 1) : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
   (.mkSigma “p.

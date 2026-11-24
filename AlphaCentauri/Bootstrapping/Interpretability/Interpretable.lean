@@ -231,13 +231,13 @@ open _root_.FFL.Entailment in
 /-- Interpretability is transitive.
 - [Vis90, §6.1] -/
 theorem Interpretable.trans {S U W : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [W.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S]
-    (hS : ∀ p ∈ S.Δ₁Class (V := V), Language.IsSentence ℒₒᵣ 0 p)
-    (hW : ∀ p ∈ W.Δ₁Class (V := V), Language.IsSentence ℒₒᵣ 0 p)
+    (hS : ∀ p ∈ S.Δ₁Class (V := V), (ℒₒᵣ).IsSentence 0 p)
+    (hW : ∀ p ∈ W.Δ₁Class (V := V), (ℒₒᵣ).IsSentence 0 p)
     (h₁ : Interpretable V S U) (h₂ : Interpretable V U W) : Interpretable V S W := by
   obtain ⟨tbl₁, h₁⟩ := h₁
   obtain ⟨tbl₂, h₂⟩ := h₂
   have hL := Language.SymbolsStandard.oRing (V := V)
-  have hsound : ∀ φ : V, Language.IsSentence ℒₒᵣ 0 φ → Provable U φ →
+  have hsound : ∀ φ : V, (ℒₒᵣ).IsSentence 0 φ → Provable U φ →
       Provable S (translate ℒₒᵣ ℒₒᵣ tbl₁ φ) := fun φ hφ hpr ↦
     provable_translate hS h₁.toIsTranslationTable hL (fun _ hp hf ↦ h₁.translate_axiom hp hf) hφ hpr
   have hc := h₁.toIsTable.compTable h₂.toIsTable

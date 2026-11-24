@@ -31,8 +31,7 @@ $\Sigma_s$-elementary embedding between models of $\mathsf{B}\Sigma_s$ preserves
 $\Sigma_s$ and $\Pi_s$ sentences.
 
 The standard system of a model of `𝗜𝚺₁` is the family of subsets of `ℕ` coded by its elements
-under Ackermann's membership; it does not shrink along an end extension, and it is preserved when
-the base model is nonstandard.
+under Ackermann's membership; it does not shrink along an end extension.
 -/
 
 @[expose] public section

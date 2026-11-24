@@ -172,25 +172,15 @@ variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 /-- `c` is nonstandard: above every natural number. -/
 def IsNonstandard (c : M) : Prop := ∀ m : ℕ, (m : M) < c
 
-/-- The nonstandard elements of `M`. -/
+/-- The nonstandard elements of `M`. A nonstandard model is one for which this type is nonempty. -/
 def NonstandardElement (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : Type _ :=
   {c : M // IsNonstandard c}
-
-/-- `M` has a nonstandard element. -/
-class HasNonstandard (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : Prop where
-  exists_nonstandard : ∃ c : M, IsNonstandard c
 
 lemma IsNonstandard.natCast_lt {c : M} (h : IsNonstandard c) (m : ℕ) : (m : M) < c := h m
 
 instance : CoeOut (NonstandardElement M) M := ⟨Subtype.val⟩
 
 lemma NonstandardElement.isNonstandard (c : NonstandardElement M) : IsNonstandard (c : M) := c.2
-
-instance [HasNonstandard M] : Nonempty (NonstandardElement M) :=
-  HasNonstandard.exists_nonstandard.elim fun c hc ↦ ⟨⟨c, hc⟩⟩
-
-lemma HasNonstandard.of_nonempty [Nonempty (NonstandardElement M)] : HasNonstandard M :=
-  ⟨let c := Classical.arbitrary (NonstandardElement M); ⟨c.1, c.2⟩⟩
 
 lemma isNonstandard_iff_not_mem_range {c : M} :
     IsNonstandard c ↔ c ∉ Set.range (Nat.cast : ℕ → M) := by

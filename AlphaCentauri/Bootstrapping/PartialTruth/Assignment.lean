@@ -555,8 +555,9 @@ section fixed
 
 variable {f g : V}
 
-lemma termFvAssign_eq_self {t : V} (ht : IsUTerm ℒₒᵣ t) (h : termShift ℒₒᵣ t = t) :
-    termFvAssign f t = t := by
+lemma termFvAssign_eq_self {n t : V} (h : (ℒₒᵣ).IsClosedSemiterm n t) : termFvAssign f t = t := by
+  have ht := h.isSemiterm.isUTerm
+  replace h := h.termShift_eq
   revert h
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -578,7 +579,8 @@ lemma termFvAssignVec_eq_self {k v : V} (hv : IsUTermVec ℒₒᵣ k v)
   apply nth_ext' k (by simp [hv]) hv.lh.symm
   intro i hi
   rw [nth_termFvAssignVec hv hi]
-  exact termFvAssign_eq_self (hv.nth hi) (by rw [← nth_termShiftVec hv hi, h])
+  exact termFvAssign_eq_self <|
+    .of_termShift_eq (hv.nth hi).isSemiterm (by rw [← nth_termShiftVec hv hi, h])
 
 lemma fvAssign_eq_self {n p : V} (h : (ℒₒᵣ).IsSemisentence n p) : fvAssign f p = p := by
   have hp := h.isSemiformula.isUFormula

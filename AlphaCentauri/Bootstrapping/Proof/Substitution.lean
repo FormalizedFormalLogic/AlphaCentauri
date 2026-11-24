@@ -340,13 +340,13 @@ lemma fvSubstImage_fvSubstImage_eq_self (hw : IsSemitermVec L (len w) 0 w)
 
 end shiftComp
 
-/-- A coded term fixed by the shift of free variables is fixed by every free-variable
-substitution. -/
-lemma termFvSubst_eq_self_of_termShift {w n t : V} (ht : IsSemiterm L n t)
-    (h : termShift L t = t) : termFvSubst L w t = t := by
+/-- A coded closed term is fixed by every free-variable substitution. -/
+lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.termFvSubst_eq_self {w n t : V}
+    (ht : L.IsClosedSemiterm n t) : termFvSubst L w t = t := by
+  have h := ht.termShift_eq
   revert h
   apply IsSemiterm.induction 𝚷
-    (P := fun t ↦ termShift L t = t → termFvSubst L w t = t) ?_ ?_ ?_ ?_ t ht
+    (P := fun t ↦ termShift L t = t → termFvSubst L w t = t) ?_ ?_ ?_ ?_ t ht.isSemiterm
   · definability
   · intro z _ _; simp
   · intro x h
@@ -374,7 +374,8 @@ lemma _root_.FFL.FirstOrder.Language.IsSemisentence.fvSubst_eq_self {w n p : V}
     rw [fvSubst_rel hR hts.isUTerm]
     refine congrArg _ (nth_ext' k (by simp [hts.isUTerm]) hts.lh fun i hi ↦ ?_)
     rw [nth_termFvSubstVec hts.isUTerm hi]
-    apply termFvSubst_eq_self_of_termShift (hts.nth hi)
+    apply Language.IsClosedSemiterm.termFvSubst_eq_self
+    apply Language.IsClosedSemiterm.of_termShift_eq (hts.nth hi)
     simpa [nth_termShiftVec hts.isUTerm hi] using congrArg (·.[i]) h'
   · intro n k R ts hR hts h
     rw [shift_nrel hR hts.isUTerm] at h
@@ -382,7 +383,8 @@ lemma _root_.FFL.FirstOrder.Language.IsSemisentence.fvSubst_eq_self {w n p : V}
     rw [fvSubst_nrel hR hts.isUTerm]
     refine congrArg _ (nth_ext' k (by simp [hts.isUTerm]) hts.lh fun i hi ↦ ?_)
     rw [nth_termFvSubstVec hts.isUTerm hi]
-    apply termFvSubst_eq_self_of_termShift (hts.nth hi)
+    apply Language.IsClosedSemiterm.termFvSubst_eq_self
+    apply Language.IsClosedSemiterm.of_termShift_eq (hts.nth hi)
     simpa [nth_termShiftVec hts.isUTerm hi] using congrArg (·.[i]) h'
   · intro n _; simp
   · intro n _; simp

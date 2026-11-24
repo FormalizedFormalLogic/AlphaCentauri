@@ -93,17 +93,18 @@ private lemma isSemiformula_prenexInductionAtom (hZ : IsSemiformula ℒₒᵣ (m
   hZ.subst (isSemitermVec_cons_bvarVec ht)
 
 private lemma isSemisentence_prenexInductionAtom (hZ : (ℒₒᵣ).IsSemisentence (m + 1) Z) {t : V}
-    (ht : IsSemiterm ℒₒᵣ (m + 2) t) (hst : termShift ℒₒᵣ t = t) :
+    (ht : (ℒₒᵣ).IsClosedSemiterm (m + 2) t) :
     (ℒₒᵣ).IsSemisentence (m + 2) (prenexInductionAtom m Z t) := by
-  apply Language.IsSemisentence.of_shift_eq (isSemiformula_prenexInductionAtom hZ.isSemiformula ht)
-  have hw := isSemitermVec_cons_bvarVec ht
+  apply Language.IsSemisentence.of_shift_eq
+    (isSemiformula_prenexInductionAtom hZ.isSemiformula ht.isSemiterm)
+  have hw := isSemitermVec_cons_bvarVec ht.isSemiterm
   rw [prenexInductionAtom, shift_substs hZ.isSemiformula hw, hZ.shift_eq]
   congr 1
   apply nth_ext' (m + 1) (by simp [hw.isUTerm]) (by simp)
   intro i hi
   rw [nth_termShiftVec hw.isUTerm hi]
   rcases zero_or_succ i with rfl | ⟨i, rfl⟩
-  · simpa using hst
+  · simpa using ht.termShift_eq
   · simp [nth_bvarVec 2 m i (by simpa using hi)]
 
 private lemma isSemiterm_bvar_zero : IsSemiterm ℒₒᵣ (m + 2) (^#0 : V) := by simp
@@ -134,12 +135,12 @@ lemma IsInductionMatrix.isSemisentence_prenexInductionMatrix (h : IsInductionMat
     (ℒₒᵣ).IsSemisentence (m + 2) (prenexInductionMatrix m Z) := by
   simp only [prenexInductionMatrix, Language.IsSemisentence.or_iff, Language.IsSemisentence.and_iff,
     Language.IsSemisentence.neg_iff]
-  have hA {t : V} (ht : IsSemiterm ℒₒᵣ (m + 2) t) (hst : termShift ℒₒᵣ t = t) :=
-    isSemisentence_prenexInductionAtom h.1 ht hst
-  exact ⟨hA (numeral_semiterm _ 0) (Arithmetic.numeral_shift 0),
-    ⟨hA isSemiterm_bvar_zero (termShift_bvar 0),
-      hA isSemiterm_succ_bvar_zero termShift_succ_bvar_zero⟩,
-    hA isSemiterm_bvar_one (termShift_bvar 1)⟩
+  have hA {t : V} (ht : (ℒₒᵣ).IsClosedSemiterm (m + 2) t) :=
+    isSemisentence_prenexInductionAtom h.1 ht
+  exact ⟨hA (.numeral _ 0),
+    ⟨hA (.of_termShift_eq isSemiterm_bvar_zero (termShift_bvar 0)),
+      hA (.of_termShift_eq isSemiterm_succ_bvar_zero termShift_succ_bvar_zero)⟩,
+    hA (.of_termShift_eq isSemiterm_bvar_one (termShift_bvar 1))⟩
 
 end prenexInductionAxiom
 

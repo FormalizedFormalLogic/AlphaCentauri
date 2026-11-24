@@ -108,7 +108,7 @@ lemma setOf_prenexHierarchy_mem_standardSystem (Γ : Polarity) (n l : ℕ) {P : 
       ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ ∧ P ⌜φ⌝ ∧ ⌜φ⌝ = e} ∈ standardSystem M := by
   have hΓ : 𝚺ᴬ_[m + 1]-Predicate (IsPrenexHierarchy Γ n : M → Prop) :=
     (IsPrenexHierarchy.definable Γ n).of_deltaOne
-  apply Set.mem_of_eq_of_mem _ <| setOf_mem_standardSystem hM (m := m)
+  apply Set.mem_of_eq_of_mem _ <| setOf_mem_standardSystem (m := m)
     (P := fun e ↦ (ℒₒᵣ).IsSemisentence (l : M) e ∧ IsPrenexHierarchy Γ n e ∧ P e) (by definability)
   ext e
   constructor
@@ -128,7 +128,7 @@ lemma setOf_prenexHierarchy_mem_standardSystem (Γ : Polarity) (n l : ℕ) {P : 
 theorem mem_standardSystem_hierarchyType (Γ : Polarity) (n : ℕ) {l : ℕ} (a : Fin l → M) :
     {e : ℕ | ∃ φ : ArithmeticSemisentence l, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ ∧ M ⊧/a φ ∧
       ⌜φ⌝ = e} ∈ standardSystem M := by
-  apply Set.mem_of_eq_of_mem _ <| setOf_prenexHierarchy_mem_standardSystem hM Γ n l (m := n + 1)
+  apply Set.mem_of_eq_of_mem _ <| setOf_prenexHierarchy_mem_standardSystem Γ n l (m := n + 1)
     (P := PrenexFormulaSatisfied Γ n (matrixToVec a)) (by definability)
   ext e
   apply exists_congr

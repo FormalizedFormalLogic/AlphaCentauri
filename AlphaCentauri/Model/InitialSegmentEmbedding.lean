@@ -392,19 +392,30 @@ theorem exists_selfEmbedding_onto_properInitialSegment [M↓[ℒₒᵣ] ⊧* �
       choose! z hz using fun φ hφ ↦ (hs φ hφ).2
       use ∑ φ ∈ s, z φ + 1
       intro φ hφ
-      use z φ, lt_succ_iff_le.mpr (Finset.single_le_sum (by simp) hφ)
-      exact hz φ hφ
+      use z φ
+      and_intros
+      · exact lt_succ_iff_le.mpr (Finset.single_le_sum (by simp) hφ)
+      · exact hz φ hφ
   obtain ⟨ι, hι, hel, hιa, hιb⟩ := exists_initialSegmentEmbedding hM hM n a b a rfl <| by
     rintro θ hθ ⟨x, hx⟩
     obtain ⟨ψ, hψ, hθψ⟩ := exists_prenexHierarchy_of_hierarchy 𝗣𝗔 hθ
     obtain ⟨z, hz, h⟩ := hb ψ <| by
-      use hψ, x
-      exact (prenexFormulaSatisfied_adjoin_iff hψ _ _ _).mpr <|
-        (models_iff_of_provable_allClosure hθψ _).mp hx
-    use z, hz
-    exact (models_iff_of_provable_allClosure hθψ _).mpr <|
-      (prenexFormulaSatisfied_adjoin_iff hψ _ _ _).mp h
+      and_intros
+      · exact hψ
+      · use x
+        exact (prenexFormulaSatisfied_adjoin_iff hψ _ _ _).mpr <|
+          (models_iff_of_provable_allClosure hθψ _).mp hx
+    use z
+    and_intros
+    · exact hz
+    · exact (models_iff_of_provable_allClosure hθψ _).mpr <|
+        (prenexFormulaSatisfied_adjoin_iff hψ _ _ _).mp h
   use ι
-  exact ⟨hι, fun h ↦ hιb (h b), hel, a, hιa⟩
+  and_intros
+  · exact hι
+  · intro h
+    exact hιb (h b)
+  · exact hel
+  · use a
 
 end FFL.FirstOrder.Arithmetic

@@ -7,12 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 
 /-! # Saturation of nonstandard models of Peano arithmetic
 
-The standard system of a nonstandard model of `𝗣𝗔` contains every subset of `ℕ` cut out by a
-definable predicate of the model, every recursive subset of `ℕ`, and the set of codes of the prenex
-$\Sigma_n$ formulas, or of the prenex $\Pi_n$ formulas, satisfied by a tuple. A type over the model
-consisting of prenex $\Sigma_n$ formulas, or of prenex $\Pi_n$ formulas, whose set of codes is in
-the standard system is realized, and so the model is $\Sigma_n$-recursively saturated for every
-$n$.
+Coded sets, coded types and $\Sigma_n$-recursive saturation of nonstandard models of `𝗣𝗔`.
 -/
 
 @[expose] public section

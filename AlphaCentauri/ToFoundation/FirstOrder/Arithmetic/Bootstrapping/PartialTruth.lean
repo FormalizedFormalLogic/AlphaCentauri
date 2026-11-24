@@ -8,9 +8,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Genera
 
 `BoundedSatisfied` and `PrenexSatisfied` read a formula with closed-off bound variables by putting
 the values of the substituted terms into the assignment, swap under negation, and give the same
-value to every decomposition `qqToPrenex Γ s θ` of the same code. `PrenexFormulaSatisfied` is
-`PrenexSatisfied` read at the code of the whole prenex formula rather than of its matrix, and agrees
-with satisfaction at the code of a prenex formula.
+value to every decomposition `qqToPrenex Γ s θ` of the same code.
 
 - [HP98, 1.64(5), Theorem I.1.75]
 -/

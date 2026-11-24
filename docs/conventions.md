@@ -33,6 +33,10 @@ rewrite, so it is written as if it were already there.
 - **Module system.** Every file opts into the Lean module system exactly as Foundation does:
   it starts with `module`, imports are `public import`, and the module docstring precedes
   `@[expose] public section`.
+- **Module docstrings.** A module docstring is as short as it can be: a title, `/-! # … -/`,
+  with at most a sentence or two saying what the file is about. It does not list or paraphrase
+  the declarations, and it is not extended when a declaration is added: a result is documented
+  by the docstring of its declaration.
 - **Root module.** `AlphaCentauri.lean` imports every module and is regenerated with
   `just mk-all` (`lake exe mk_all --lib AlphaCentauri --module`); CI checks it.
 - **Linters.** The library builds with Mathlib's standard linter set, which `lakefile.toml`

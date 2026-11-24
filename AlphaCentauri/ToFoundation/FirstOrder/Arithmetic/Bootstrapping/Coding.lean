@@ -12,8 +12,7 @@ over its code. The code of the negation of a semisentence that is not universal 
 A number codes a sentence of a finite list exactly when the defining formula of the list holds of
 it. The symbols of a language are standard in a model when every relation and function symbol
 of the model is the code of a symbol of the language. A vector is `matrixToVec u` exactly when it
-has the length of `u` and the entries of `u`, and a vector of definable functions is a definable
-function. The code of a negation, an implication, a block of
+has the length of `u` and the entries of `u`. The code of a negation, an implication, a block of
 universal quantifiers, a finite conjunction or a substitution instance of a formula is obtained
 from the code of the formula by the corresponding function on codes.
 -/

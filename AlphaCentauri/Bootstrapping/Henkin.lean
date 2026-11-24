@@ -9,24 +9,7 @@ public import Foundation.FirstOrder.Incompleteness.Consistency
 /-!
 # Henkin completion inside $\mathsf{PA}$
 
-Henkin's construction carried out in a model `V` of $\mathsf{PA}$: the Henkin formulas, the
-contexts of the decision sequence, and the closure properties of the formulas decided positively.
-The free variables `^&u` of internal formulas play the role of the Henkin constants. The decision
-sequence exists and is unique, and the set of formulas decided positively along it, the Henkin set,
-is $\Delta_2$-definable, by a formula `henkinSetDef S` that does not depend on the model.
-
-The Henkin set of a theory $S$ in a model of $\mathsf{PA}$ in which $S$ is consistent behaves like
-the set of sentences true in a term model: it is a complete theory closed under internal
-provability with the Henkin property. Provable equality of free variables is an equivalence
-relation, every class has a least element, its representative, and every application of a function
-symbol to free variables equals the free variable of a unique representative. Equality of
-arbitrary terms is symmetric and transitive, and function and relation symbols respect it.
-
-The arithmetical operators of the Henkin translation of a language $L$ into arithmetic are read
-off from the Henkin set: the domain consists of the representatives, a relation holds of
-representatives when the atomic formula on the corresponding free variables is in the Henkin set,
-and a function symbol is interpreted by the graph given by the equation of its application with a
-free variable.
+Henkin's construction for the completeness theorem carried out inside a model of $\mathsf{PA}$.
 
 ## References
 

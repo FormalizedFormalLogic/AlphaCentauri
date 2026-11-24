@@ -12,9 +12,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Model
 /-!
 # Parikh's theorem
 
-A $\Pi^0_2$ sentence provable by $\mathsf{I}\Sigma_0$ is provable with its unbounded existential
-quantifier bounded by a closed term. The statement covers formulas with any number of unbounded
-universal quantifiers followed by one unbounded existential quantifier.
+Parikh's theorem for $\mathsf{I}\Sigma_0$.
 
 - [HP98, Theorem V.1.4]
 - [Bus98A, Theorem 1.2.7.1]

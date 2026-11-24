@@ -5,8 +5,7 @@ public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 /-!
 # Local reflection
 
-Local reflection for $\Sigma_{s'}$ or $\Pi_{s'}$ prenex sentences yields local reflection for prenex
-sentences of a lower or equal level.
+Local reflection for prenex sentences.
 -/
 
 @[expose] public section

@@ -8,19 +8,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
 /-!
 # Positions in the factorizations of $1, \dots, m$
 
-Over a model of $\mathsf{I}\Sigma_0 + \Omega_1$, fix `B` and `s` with $s \|2m\| < \|B\|$ and write
-$\lambda(y) := \|y^s\| - 1 \approx s \log_2 y$. The sets
-- $\mathrm{Bits}(m) = \{(k, y) : 1 \le k \le m, y < \lambda(k)\}$,
-- $\mathrm{Level}(m) = \{(k, P, o) : 1 \le k \le m, P \mid k, P \text{ a power of the prime } p,
-  o < \lambda(p)\}$,
-- $\mathrm{Top}(m) = \{(k, i) : 1 \le k \le m, i < \|k\|\}$,
-- $\mathrm{K}(m) = \{(P, o) : P \text{ a power of the prime } p, \lfloor 2m / P \rfloor
-  \text{ odd}, o < \lambda(p)\}$
-
-stand for $\log_2 m!$, its prime-power decomposition, the rounding errors, and
-$\log_2 \binom{2m}{m}$. Between them there are $\Delta_0$-definable injections: cutting the
-positions of $k^s$ at the prime-power divisors of $k$, Legendre's matching of the multiples of $P$
-in $(m, 2m]$ with those in $[1, m]$, and doubling $\lambda(2k) = \lambda(k) + s$.
+Positions in the prime-power factorizations of $1, \dots, m$ and injections between them.
 -/
 
 @[expose] public section

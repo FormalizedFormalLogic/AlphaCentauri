@@ -7,11 +7,7 @@ public import Mathlib.Data.Set.Finite.List
 /-!
 # The model on labelled sets
 
-The construction behind the completeness of $\mathbf{CL}$ with respect to finite Veltman models.
-
-Finite Veltman models whose worlds are maximal consistent subsets of an adequate set labelled by
-antecedents and consequents of `▷`-formulas in it, with `≺[w]` given by a condition on the labelled
-sets, and the truth lemma for every condition with two existence properties.
+The Veltman model on labelled sets, behind the completeness of $\mathbf{CL}$.
 -/
 
 @[expose] public section

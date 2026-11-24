@@ -11,8 +11,7 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 /-!
 # The formalized interpretation existence lemma
 
-The consistency of $T + \varphi$ follows from $T + \neg\mathrm{Pr}_T(\neg\varphi)$, and hence
-$T + \neg\mathrm{Pr}_T(\neg\varphi)$ interprets $T + \varphi$ by the Henkin translation.
+The interpretation existence lemma, formalized in arithmetic.
 
 ## References
 

@@ -7,8 +7,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILM.Basic
 /-!
 # Arithmetical soundness of $\mathbf{ILM}$
 
-The arithmetical interpretation of $\mathbf{ILM}$ is sound for provability in an arithmetical
-theory, and for $\Pi_1$-conservativity over $\mathsf{I}\Sigma_1$.
+Arithmetical soundness of $\mathbf{ILM}$.
 -/
 
 @[expose] public section

@@ -6,9 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Functio
 /-!
 # Functions on codes of terms in models of $\mathsf{EA}$
 
-Substitution `termSubst`, the shifts `termShift` and `termBShift`, the quotation of a list of terms
-`qVec`, the codes of the numerals and the predicate `IsTermFVFree`. The recursions on terms carry a
-bound on their values, and inductions are on locally $\Delta_0$ predicates.
+Operations on codes of terms in models of $\mathsf{EA}$.
 
 - [HP98, §V.3]
 -/

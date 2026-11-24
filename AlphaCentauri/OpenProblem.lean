@@ -6,14 +6,7 @@ public meta import AlphaCentauri.OpenProblem.Attribute
 /-!
 # Open problems
 
-`open_problem Name binders := p` declares an open problem: a proposition `p` whose truth is
-unknown. It elaborates as `def Name binders : Prop := p` and records `Name` in `openProblemAttr`,
-from which the executable `open_problems` collects the open problems of the library, with their
-docstrings, into the list published on the project's pages.
-
-An open problem is stated, never assumed: it is not an `axiom`, since a statement of unknown truth
-may be false, or contradict a known theorem once combined with another open problem. A result
-depending on it takes it as a hypothesis `(h : Name)`.
+The command `open_problem`, which declares a proposition of unknown truth and records it.
 -/
 
 public meta section

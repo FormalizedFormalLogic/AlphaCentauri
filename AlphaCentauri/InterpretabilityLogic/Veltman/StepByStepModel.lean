@@ -8,17 +8,7 @@ public import Mathlib.Data.Nat.Pairing
 /-!
 # The step-by-step models of $\mathbf{ILM}_0$ and $\mathbf{ILW}^*$
 
-A step-by-step construction of a Veltman model satisfying the frame condition of $\mathsf{M}_0$, for
-any extension of $\mathbf{IL}$ by axioms proving $\mathsf{M}_0$. One world is added at each step,
-with no successors; its predecessors are the ancestors of the world it is added for along a parent
-map, so the predecessors of every world form a chain. Every world is labelled by a maximal
-consistent set, and the worlds added to remove deficiencies are assuring successors carrying the
-promises of criticality, the boxed formulas required by $\mathsf{M}_0$, and, for a deficiency of
-`A ▷ B`, a set `ε A` of further promises fixed in advance.
-
-The same construction in which every world added to remove a deficiency of `A ▷ B` also promises
-`□∼A` yields a Veltman model satisfying the frame conditions of $\mathsf{W}$ and $\mathsf{M}_0$,
-whence the completeness of $\mathbf{ILW}^*$.
+Step-by-step Veltman models behind the completeness of $\mathbf{ILM}_0$ and $\mathbf{ILW}^*$.
 -/
 
 @[expose] public section

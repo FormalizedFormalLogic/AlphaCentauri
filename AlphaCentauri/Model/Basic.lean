@@ -14,24 +14,7 @@ public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Absoluteness
 
 /-! # End extensions, cuts and elementary embeddings of models of arithmetic
 
-An end extension of an `ℒₒᵣ`-structure `M`, written `M ⊆ₑ N`, is an end extension for the bounding
-`ℬ[<, ℒₒᵣ]`: an embedding with nothing new below the image of `M`. `𝗣𝗔⁻`, `𝗜𝚺₀` and any
-$\Pi_1$-axiomatizable theory hold in `M` as soon as they hold in an end extension of `M`. In a
-proper end extension satisfying induction for a hierarchy class, a formula of that class which
-holds at every element of the base model holds below some element outside the base model.
-
-A cut of `M` is a subset closed under successor and downward closed under `<`. A closed cut, one
-closed under the operations of the language, is a substructure of `M`, and `M` is an end extension
-of it. No proper cut is definable by a $\Sigma_0$ formula with parameters in a model of `𝗜𝚺₀`, and
-no model of `𝗜𝚫 n` has a proper cut whose membership relation and complement are both definable by
-prenex $\Sigma_n$ formulas with parameters.
-
-A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`, and a
-$\Sigma_s$-elementary embedding between models of $\mathsf{B}\Sigma_s$ preserves the truth of
-$\Sigma_s$ and $\Pi_s$ sentences.
-
-The standard system of a model of `𝗜𝚺₁` is the family of subsets of `ℕ` coded by its elements
-under Ackermann's membership; it does not shrink along an end extension.
+End extensions, cuts and elementary embeddings of models of arithmetic.
 -/
 
 @[expose] public section

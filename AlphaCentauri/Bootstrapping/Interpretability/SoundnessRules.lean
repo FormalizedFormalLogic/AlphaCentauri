@@ -13,10 +13,7 @@ public import Foundation.FirstOrder.Incompleteness.Consistency
 /-!
 # Translated derivability is closed under the rules of derivations
 
-The coded set of the translations of a set of formulas along a table, its definability, and its
-behaviour under shift and under free-variable substitution. For a set `Γ` of $L_2$-formulas,
-`TranslatedDerivable` states that $\Gamma^*$ together with the negated instances of the domain
-formula is derivable in `S`, and this property is preserved by each rule of the derivation calculus.
+Translated derivability is closed under the rules of the derivation calculus.
 -/
 
 @[expose] public section

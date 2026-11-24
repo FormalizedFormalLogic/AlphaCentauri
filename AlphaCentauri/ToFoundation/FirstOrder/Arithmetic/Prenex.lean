@@ -6,14 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 /-!
 # Prenex sentences of arithmetic
 
-In models of `𝗜𝗢𝗽𝗲𝗻`, pairing merges two adjacent quantifiers of the same kind into one. Hence a
-conjunction or a disjunction of two prenex formulas of the same polarity and level, and the
-existential quantification of a prenex $\Sigma_{s + 1}$ formula, are equivalent to a prenex formula
-of that polarity and level. Unlike `Bounding.Prenex.and`, this needs no collection.
-
-Over $\mathsf{B}\Sigma_m$, every $\Gamma'_m$ sentence is equivalent to a prenex sentence of every
-level containing $\Gamma'_m$. Every prenex class contains a sentence refutable in
-$\mathsf{I}\Sigma_1$.
+Prenex normal forms of arithmetic sentences in models of fragments of arithmetic.
 -/
 
 @[expose] public section

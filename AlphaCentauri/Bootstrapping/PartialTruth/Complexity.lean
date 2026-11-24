@@ -5,13 +5,7 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 /-!
 # Truth by complexity
 
-`ComplexitySatisfied N e p` says that the internal formula `p` of complexity at most `N` is
-satisfied when its bound variables take the values listed in `e` and its free variables the
-value `0`. It is $\Delta_{N+1}$, agrees with $\Delta_0$ satisfaction on formulas of complexity
-`0`, does not depend on the bound `N` once `N` is at least the complexity of the formula, and
-satisfies the Tarski conditions for the connectives and quantifiers, for negation and for
-substitution. It is the satisfaction of a standard arithmetic formula of complexity at most `N`
-when applied to the code of that formula.
+Satisfaction of internal formulas of bounded complexity.
 -/
 
 @[expose] public section

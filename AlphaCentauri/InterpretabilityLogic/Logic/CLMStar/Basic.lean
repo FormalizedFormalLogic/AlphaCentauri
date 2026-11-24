@@ -5,9 +5,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
 /-!
 # The logic $\mathbf{CL} + \mathsf{M}^*$ and principles of $\Sigma_1$-conservativity
 
-The extension of $\mathbf{CL}$ by the principle $\mathsf{M}^*$, and the principles of
-$\Sigma_1$-conservativity of [Ign93, Theorem 12.2] in which the $\Sigma_2$-possibility
-$\langle 1 \rangle A$ is replaced by $\theta(A) = \Diamond A \land (A \rhd (A \land \Diamond A))$.
+The logic $\mathbf{CL} + \mathsf{M}^*$ and principles of $\Sigma_1$-conservativity.
 -/
 
 @[expose] public section

@@ -9,9 +9,7 @@ public import Mathlib.Algebra.Ring.Subring.Basic
 /-!
 # Ordering subrings of polynomials by the leading coefficient
 
-For an ordered field `K`, every subring `S` of `K[X]` is ordered by the sign of the leading
-coefficient, so that `X` is greater than every constant. The order is a scoped instance in
-`Polynomial.LeadingCoeffOrder`; it is discrete when every constant polynomial in `S` is an integer.
+The order on subrings of $K[X]$ given by the sign of the leading coefficient.
 -/
 
 @[expose] public noncomputable section

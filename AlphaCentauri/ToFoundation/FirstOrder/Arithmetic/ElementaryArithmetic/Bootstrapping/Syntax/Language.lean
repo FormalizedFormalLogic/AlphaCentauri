@@ -6,9 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Language
 /-!
 # The language of arithmetic in models of $\mathsf{EA}$
 
-The codes of the function and relation symbols of $\mathcal{L}_{\mathrm{OR}}$ are the ones given
-by `zeroIndex`, ..., `ltIndex`, and `isFunc_iff_LOR` and `isRel_iff_LOR` describe the codes of
-symbols.
+Codes of the symbols of the language of arithmetic in models of $\mathsf{EA}$.
 
 - [HP98, §V.3]
 -/

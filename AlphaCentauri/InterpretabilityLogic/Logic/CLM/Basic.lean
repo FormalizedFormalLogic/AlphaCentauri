@@ -7,13 +7,7 @@ public import AlphaCentauri.ToFoundation.ProvabilityLogic.GL.LRClosure
 /-!
 # The logic $\mathbf{CLM}$
 
-The extension of $\mathbf{CL}$ by the principle $\mathsf{M}$, its soundness with respect to the
-$\mathbf{CL}$-models satisfying the frame condition of $\mathsf{M}$, and its completeness with
-respect to the finite ones. $\mathbf{CLM}$ lies strictly between $\mathbf{CL}$ and $\mathbf{ILM}$.
-
-The countermodel lives on maximal consistent subsets of a $\mathbf{CLM}$-adequate set, a finite set
-whose operands are closed up to $\mathbf{GL}$-equivalence under conjunction with `□`-formulas,
-indexed by sequences of operands.
+The logic $\mathbf{CLM}$ and its completeness with respect to finite models.
 
 - [Ign91, §6]
 -/

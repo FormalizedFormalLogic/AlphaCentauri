@@ -8,13 +8,7 @@ public import Mathlib.SetTheory.Ordinal.Veblen
 /-!
 # ε₀-completeness of CNF notations
 
-For a well-founded relation `r`, `WellFounded.orderType r` is its order type: the least ordinal
-above every `WellFounded.rank r a`.
-
-Mathlib's `Mathlib/SetTheory/Ordinal/Notation.lean` proves that `ONote.repr` is an embedding
-`NONote ↪ ε₀` but does not prove surjectivity onto ordinals `< ε₀`. This file supplies that
-surjectivity, and transfers the result to any `ℕ`-order obtained by pulling the `NONote` order
-back along a bijection.
+Surjectivity of the representation of Cantor normal forms onto $\varepsilon_0$.
 -/
 
 @[expose] public section

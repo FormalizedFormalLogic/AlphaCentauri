@@ -10,12 +10,7 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 /-!
 # Formalized relative interpretability
 
-For an arithmetical theory $T$ with $\Delta_1$ axioms and sentences $\varphi, \psi$, the sentence
-`T.interpretability φ ψ` says that $T + \psi$ is interpretable in $T + \varphi$. The theory
-$\mathsf{I}\Sigma_1$ proves the arithmetical forms of the principles $\mathbf{J1}$–$\mathbf{J4}$ of
-interpretability logic for it. For $T \supseteq \mathsf{PA}$, it also proves that
-$T + \neg\mathrm{Pr}_T(\neg\varphi)$ interprets $T + \varphi$, the arithmetical form of the
-principle $\mathbf{J5}$.
+The arithmetized relative interpretability of an arithmetical theory and its basic principles.
 
 ## References
 

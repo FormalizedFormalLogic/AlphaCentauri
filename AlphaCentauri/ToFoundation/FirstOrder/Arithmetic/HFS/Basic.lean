@@ -5,9 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 /-!
 # Hereditarily finite sets in models of arithmetic
 
-Insertions into a coded set commute and are absorbed. `listUnion v` is the union of the coded sets
-listed in the vector `v`. `cardBelow s n` is the number of elements of the coded set `s` below `n`,
-and `card s` is the number of elements of `s`.
+Basic operations on coded hereditarily finite sets: unions and cardinalities.
 -/
 
 @[expose] public section

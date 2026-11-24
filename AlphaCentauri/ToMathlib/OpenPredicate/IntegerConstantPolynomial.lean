@@ -5,10 +5,7 @@ public import AlphaCentauri.ToMathlib.Algebra.Polynomial.LeadingCoeffOrder
 /-!
 # Discretely ordered ring of polynomials with integer constant terms
 
-`IntegerConstantPolynomial K` is the subring of the polynomials over `K` whose constant term is an
-integer. Ordered by the sign of the leading coefficient, it is a discretely ordered ring in which
-`X` is greater than every natural number, and every element can be divided with remainder by every
-positive natural number.
+The discretely ordered ring of polynomials over a field with integer constant term.
 -/
 
 @[expose] public noncomputable section

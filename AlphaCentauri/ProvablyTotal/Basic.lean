@@ -10,8 +10,7 @@ public import AlphaCentauri.Calculus.Induction.Basic
 /-!
 # Provably total functions
 
-Provably total and provably functional functions, their graph formulas, and closure under
-composition.
+Provably total functions and their closure under composition.
 -/
 
 @[expose] public section

@@ -5,8 +5,7 @@ public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.Epsilon0
 /-!
 # A concrete coding of Cantor normal forms by natural numbers
 
-A structural `Encodable ONote` instance, enumerating the normal forms in increasing order of their
-code, gives a bijection `natCode : ℕ ≃ NONote`.
+A coding of Cantor normal forms by natural numbers.
 -/
 
 @[expose] public section

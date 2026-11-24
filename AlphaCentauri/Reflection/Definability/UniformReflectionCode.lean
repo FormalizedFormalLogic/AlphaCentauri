@@ -10,9 +10,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 /-!
 # $\Delta_1$ presentation of the uniform reflection schema
 
-The code of the uniform reflection schema as a function of the arity and the code of the formula,
-the $\Delta_1$ predicate on codes defining the schema, and the resulting $\Delta_1$ presentation of
-`𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n] T`.
+The uniform reflection schema has a $\Delta_1$ presentation.
 -/
 
 @[expose] public section

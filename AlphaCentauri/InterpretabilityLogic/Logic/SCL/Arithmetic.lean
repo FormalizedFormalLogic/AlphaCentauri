@@ -6,10 +6,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.SCL.Basic
 /-!
 # Arithmetical soundness of $\mathbf{SCL}$
 
-The arithmetical interpretation of $\mathbf{SCL}$ is sound for every interpretability abstraction
-satisfying $\mathbf{J1}$–$\mathbf{J4}$, $\mathsf{Sa}$ and $\mathsf{Sb}$, in particular for
-$\Pi_n$- and $\Sigma_n$-conservativity over a theory containing $\mathsf{B}\Sigma_2$ for
-$n \geq 3$.
+Arithmetical soundness of $\mathbf{SCL}$.
 -/
 
 @[expose] public section

@@ -11,8 +11,7 @@ public import Mathlib.Tactic.Positivity
 /-!
 # Eisenstein integers over a ring
 
-`EisensteinInteger R` is `R[ω]` with `ω² = -1 - ω`, with norm `re² - re·im + im²`. Over a
-discretely ordered ring, the elements of norm `1` are the units.
+Eisenstein integers over a ring and their norm.
 -/
 
 @[expose] public section

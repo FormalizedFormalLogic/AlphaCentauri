@@ -6,9 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hier
 /-!
 # Substitution and prenex decompositions of formula codes
 
-Substitution preserves $\Delta_0$ formulas and prenex formulas of a class, and a substitution
-instance of a formula is $\Delta_0$, or prenex of a class, only if the formula itself is. Prenex
-decompositions `qqToPrenex Γ s θ` commute with negation, substitution and shift.
+Substitution and prenex decompositions on codes of formulas in the arithmetical hierarchy.
 -/
 
 @[expose] public section

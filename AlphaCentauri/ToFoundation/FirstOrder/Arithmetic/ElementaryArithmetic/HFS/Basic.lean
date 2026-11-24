@@ -6,11 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 /-!
 # Hereditarily finite sets and sequences in models of $\mathsf{EA}$
 
-Union, intersection, product, domain, range, mappings and restriction of bit-coded sets, and
-sequences coded as mappings with domain an initial segment. Comprehension is available for
-$\Delta_0$ predicates only, so the Skolem and replacement principles carry an explicit bound on the
-values; likewise induction on sequences is available for $\Delta_0$ predicates only, and the Skolem
-principle for sequences carries an explicit bound on the values.
+Bit-coded sets and sequences in models of $\mathsf{EA}$.
 
 - [HP98, §I.1(b)]
 -/

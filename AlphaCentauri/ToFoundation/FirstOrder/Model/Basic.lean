@@ -10,35 +10,7 @@ public import Mathlib.Order.DirectedInverseSystem
 
 /-! # Elementary substructures, end extensions, types and definable elements
 
-For a class $\Gamma$ of formulas of a language `L`, a $\Gamma$-elementary substructure of an
-`L`-structure `N` is a structure `M` together with an embedding into `N` along which every formula
-of $\Gamma$ takes the same truth value at elements of `M` as at their images. An elementary
-substructure is a $\Gamma$-elementary substructure for every formula; a proper one is not
-surjective. Models of a complete theory are elementarily equivalent. The Tarski–Vaught test reduces
-elementarity for bounded formulas, and for the prenex formulas up to a level, to finding witnesses
-in the substructure.
-
-A countable elementary chain is a sequence of `L`-structures `M 0 ≼ₑ[L] M 1 ≼ₑ[L] M 2 ≼ₑ[L] ⋯`,
-each an elementary substructure of the next. Composing the steps gives an elementary substructure
-`M m ≼ₑ[L] M n` for every `m ≤ n`, and these form a directed system. Its union, the direct limit
-of this system, is an elementary extension of every `M n`.
-
-For a bounding `ℬ` of `L`, an end extension of `M` to `N` is an embedding of `M` into `N` whose
-image is an initial segment for every bounding operator of `ℬ`. For `ℬ[<, L]` these are the end
-extensions of models of arithmetic, and for `ℬ[∈, L]` those of models of set theory. Bounded
-formulas are absolute along an end extension, so an end extension is a $\Delta_0$-elementary
-substructure, and a $\Pi_1$-axiomatizable theory holds in `M` as soon as it holds in an end
-extension of `M`.
-
-A type over a structure `M` is a set of formulas in the free variables $\bar x$, with parameters
-from `M`, that is finitely satisfied in `M`. A type over a theory `T` is a set $\Phi(\bar x)$ of
-formulas such that $T + \Phi(\bar c)$ is consistent for new constants $\bar c$; it is one realized
-in some model of the theory. `M` is recursively saturated when it realizes every recursive type
-over it with finitely many parameters.
-
-An element of `M` is definable over a set `A` by a class of formulas when it is the only element
-satisfying some formula of the class with parameters from `A`; the definable closure of `A`
-collects the elements definable over `A` by any formula.
+Elementary substructures, end extensions, types and definable elements of structures.
 -/
 
 @[expose] public section

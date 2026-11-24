@@ -5,13 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 /-!
 # Axiomatizability
 
-`AxiomatizableBy C T U` says that `U` axiomatizes `T` through sentences satisfying `C`, and
-`FiniteAxiomatizableBy T U` that a finite `U` axiomatizes `T`; `Axiomatizable` and
-`FiniteAxiomatizable` are the statements that such a `U` exists.
-
-This module also collects the equivalent forms of finite axiomatizability — a finite **subset**,
-a finset, a single sentence — `conj`, the conjunction of that finite theory — the
-characterization of the negation, and the finite axiomatizability of `𝗣𝗔⁻`.
+Axiomatizability and finite axiomatizability of theories.
 
 - [Lin97, Ch. 4 §1]
 - [HP98, Theorem I.2.52]

@@ -16,16 +16,8 @@ public import Mathlib.RingTheory.HahnSeries.Summable
 /-!
 # Integer parts of Hahn series
 
-`HahnSeries.supportedIn G` is the subring of the Hahn series `Lex ℝ⟦ℚ⟧`, ordered
-lexicographically, whose support lies in the additive subgroup `G` of `ℚ`, and
-`HahnSeries.integerPartSubring G` is the subring of those supported in the non-positive part of `G`
-with an integer constant coefficient. If `G` is closed under division by `1, …, N`, then every root
-of a nonzero polynomial of degree at most `N` with coefficients in `supportedIn G` lies in
-`supportedIn G`, and so has an integer part in `integerPartSubring G`.
-
-For `G` = $\mathbb{Z}[1/N!]$, the ring `factorialIntegerPartSubring N` therefore satisfies induction
-for predicates determined by the signs of polynomials of degree at most `N`, given that `Lex ℝ⟦ℚ⟧`
-is real closed (`HahnSeries.isRealClosed_lex`), but not open induction.
+Integer parts of Hahn series and the induction they provide for predicates determined by signs of
+polynomials.
 -/
 
 @[expose] public section

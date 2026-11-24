@@ -5,8 +5,7 @@ import AlphaCentauri.OpenProblem
 
 /-! # Induction for bounded existential formulas
 
-$\mathsf{I}\mathsf{E}_k$ is induction for $E_k$ formulas over $\mathsf{PA}^-$, where $E_k$ and
-$U_k$ count the alternations of blocks of bounded quantifiers over an open matrix.
+Induction for bounded existential formulas over $\mathsf{PA}^-$.
 
 - [Wil85]
 - [Smi93, Definition 2.1, Definition 2.2]

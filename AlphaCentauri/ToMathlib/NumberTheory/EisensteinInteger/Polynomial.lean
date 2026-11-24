@@ -6,8 +6,7 @@ public import AlphaCentauri.ToMathlib.OpenPredicate
 /-!
 # Eisenstein-valued polynomial functions
 
-`IsEisensteinPolynomial F` says that the real and imaginary parts of an Eisenstein-valued function
-`F` are polynomial functions. The equality of two such functions is an open predicate.
+Eisenstein-valued polynomial functions.
 -/
 
 @[expose] public section

@@ -5,8 +5,7 @@ public import Foundation.FirstOrder.LK.Basic
 /-!
 # Relative strength of theories on a class of sentences
 
-`T ⪯[Γ] U` says that `U` proves every `Γ`-sentence that `T`
-proves.
+Relative strength of theories on a class of sentences.
 -/
 
 @[expose] public section

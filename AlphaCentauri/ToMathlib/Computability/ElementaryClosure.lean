@@ -5,10 +5,7 @@ public import Foundation.Vorspiel.Matrix
 /-!
 # The elementary closure of a family of functions
 
-`Nat.ElementaryClosure K f` holds when `f` is reachable from a family `K` of functions,
-indexed by arity, together with the basic functions `0`, successor, projections, addition,
-truncated subtraction, multiplication, and `2 ^ ·`, by composition and bounded primitive
-recursion. `Nat.elementaryClosure K` is the resulting family of function classes, one per arity.
+The closure of a family of functions under composition and bounded primitive recursion.
 
 - [Bek99, §6]
 -/

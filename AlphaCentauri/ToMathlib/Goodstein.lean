@@ -7,18 +7,7 @@ public import Mathlib.Data.Nat.Log
 /-!
 # Goodstein's theorem
 
-For a base `b ≥ 2`, the hereditary base-`b` representation of `n` writes `n` in base `b`, then
-rewrites every exponent in base `b`, recursively. `bump b n` replaces every occurrence of the
-base `b` in this representation by `b + 1`. The Goodstein sequence starting at `m` bumps the base
-by one at each step and subtracts one.
-
-Every Goodstein sequence (`Goodstein.goodsteinSeq`) reaches `0`: each term
-`Goodstein.goodsteinSeq m k`, read in its base `k + 2`, is mapped to an ordinal (`toOrdinal`) by
-replacing the base with `ω`. Bumping the base from `k + 2` to `k + 3` leaves this ordinal
-unchanged (`toOrdinal_bump`), while subtracting one strictly decreases it
-(`toOrdinal_strictMono`), so the ordinal sequence `seqOrd` strictly decreases as long as the
-Goodstein sequence is nonzero. Ordinals are well-founded, so no such sequence is infinite, which
-forces some term to `0`.
+Goodstein's theorem, proved by mapping Goodstein sequences to a decreasing sequence of ordinals.
 -/
 
 @[expose] public section

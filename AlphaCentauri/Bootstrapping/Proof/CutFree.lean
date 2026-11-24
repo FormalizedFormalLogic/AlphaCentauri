@@ -7,8 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Coding
 /-!
 # Internal cut-free derivations
 
-This module defines the cut-free fragment of Foundation's internal one-sided calculus.  It is a
-separate least fixpoint so that cut-freeness remains a $\Delta_1$ property in every model of `𝗜𝚺₁`.
+The cut-free fragment of the internal calculus.
 -/
 
 @[expose] public section

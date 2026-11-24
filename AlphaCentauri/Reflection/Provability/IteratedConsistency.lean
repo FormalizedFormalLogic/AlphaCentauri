@@ -7,8 +7,7 @@ public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 /-!
 # Iterated consistency
 
-The tower of iterated-consistency extensions `T₀ = T`, `Tₙ₊₁ = Tₙ ∪ Tₙ.Con` of an arithmetic
-theory, and its relation to iterated provability of `⊥`.
+Iterated consistency extensions of an arithmetic theory.
 
 - [Lin97, §4]
 - [AB05, §4.1]

@@ -5,9 +5,7 @@ public import AlphaCentauri.OmegaLogic.CutElimination.Reduction
 /-!
 # Cut elimination for `Z_∞`
 
-One level of cut elimination lowers the cut rank by one and raises the height to `ω ^ α`.
-Consequently a sequent derivable at height `α` and cut rank `c` is derivable cut-free at height
-`ω_c(α)`.
+Cut elimination for `Z_∞`.
 
 - [Tow20, Section 19.7, Section 19.9]
 -/

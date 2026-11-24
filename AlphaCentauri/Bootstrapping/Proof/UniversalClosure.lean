@@ -9,8 +9,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # Derivations under a block of universal quantifiers
 
-If `p` follows from `q` in the internal calculus once the variables bound by a block of universal
-quantifiers are replaced by free variables, then the block over `p` follows from the block over `q`.
+Derivations under a block of universal quantifiers.
 -/
 
 @[expose] public section

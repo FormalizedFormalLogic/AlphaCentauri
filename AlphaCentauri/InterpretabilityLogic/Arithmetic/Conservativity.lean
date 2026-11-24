@@ -13,19 +13,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Pre
 /-!
 # $\Gamma$-conservativity as an interpretability abstraction
 
-Reading `φ ▷ ψ` as "every prenex $\Gamma_n$ sentence provable in $T + \psi$ is provable in
-$T + \varphi$" for $\Gamma \in \{\Sigma, \Pi\}$ and $n \in \mathbb{N}$. Once $T$ contains
-$\mathsf{I}\Sigma_1$, it satisfies the arithmetical forms of $\mathbf{J1}$–$\mathbf{J4}$ over
-$\mathsf{I}\Sigma_1$, and for $\Gamma_n = \Pi_1$ also those of $\mathbf{J5}$ and $\mathbf{M}$.
-If $T$ is moreover $\Sigma_1$-sound, the instance $\Diamond\Box\bot \rhd \Box\bot$ of
-$\mathbf{J5}$ is not in the $\Gamma_n$-conservativity logic of $T$ for $\Sigma_{n + 1}$ and
-$\Pi_{n + 2}$.
-
-Conjoining a sentence $\chi$ to both sides preserves $\Gamma_n$-conservativity whenever
-$\neg\chi$ is equivalent to a prenex $\Gamma_n$ sentence. Hence $T$ satisfies $\mathbf{M}$ for
-$n \geq 2$, and, once it contains $\mathsf{B}\Sigma_2$, $\mathsf{Sa}$ for $\Sigma_n$ with $n \geq 2$
-and $\Pi_n$ with $n \geq 3$, and $\mathsf{Sb}$ for $\Pi_n$ with $n \geq 2$ and $\Sigma_n$ with
-$n \geq 3$.
+$\Gamma$-conservativity as an interpretability abstraction, and the principles of interpretability
+logic it satisfies.
 
 ## References
 

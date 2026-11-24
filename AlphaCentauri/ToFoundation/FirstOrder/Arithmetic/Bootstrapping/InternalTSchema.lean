@@ -8,13 +8,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Par
 # The internal T-schema
 
 The internal T-schema for prenex $\Sigma_1$ partial truth.
-
-`psatDef` and `tvDef` express $\Delta_0$ satisfaction and the values of terms under an assignment
-coded by iterated `ppair`s. Their Tarski conditions are theorems of `𝗜𝚺₁`, so every internal
-theory containing `𝗜𝚺₁` proves their instances at arbitrary internal terms. Under the assignment
-term `assignment n`, which gives each bound variable `#i` the value `&i`, the internal theory proves
-that every internal $\Delta_0$ formula without free variables is equivalent to its satisfaction,
-and hence that every internal prenex $\Sigma_1$ sentence is equivalent to its partial truth.
 -/
 
 @[expose] public section

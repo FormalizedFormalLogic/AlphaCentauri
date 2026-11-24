@@ -11,8 +11,7 @@ import AlphaCentauri.OpenProblem
 /-!
 # Complete extensions of $\mathsf{I}\Delta_0$ by $\Sigma_n$ sentences
 
-It is open whether $\mathsf{I}\Delta_0$ has a consistent complete extension axiomatized by
-$\Sigma_n$ sentences for some $n$.
+An open problem on complete extensions of $\mathsf{I}\Delta_0$.
 
 - [ELV25, Question 1.2]
 -/

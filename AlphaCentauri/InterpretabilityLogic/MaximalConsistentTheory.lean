@@ -7,9 +7,7 @@ public import Mathlib.Order.Zorn
 /-!
 # Maximal consistent sets of all formulas
 
-Maximal consistent sets of formulas relative to a logic, Lindenbaum's lemma, and, for extensions of
-$\mathbf{IL}$, assuring successors, their existence, and the labelling lemmas for $\mathsf{P}_0$ and
-$\mathsf{R}$.
+Maximal consistent sets of all formulas relative to a logic.
 -/
 
 @[expose] public section

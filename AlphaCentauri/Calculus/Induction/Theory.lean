@@ -5,9 +5,8 @@ public import AlphaCentauri.Schemata.DeltaInduction
 
 /-! # What `LKI[C]` proves
 
-The induction rule derives the induction axiom for every formula of `C` — which is what its side
-formulas are for — so the whole `C`-induction scheme is derivable. A theory whose axioms are all
-`LKI[C]`-derivable proves only `LKI[C]`-derivable sentences.
+The derivable instances of the induction scheme of `LKI[C]`, and what a theory whose axioms are
+`LKI[C]`-derivable proves.
 
 - [Bus98A, Section 1.4.2]
 -/

@@ -7,8 +7,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 /-!
 # The logic $\mathbf{ILP}$
 
-The extension of $\mathbf{IL}$ by the principle $\mathsf{P}$, and its soundness and completeness
-with respect to finite Veltman models satisfying the frame condition of $\mathsf{P}$.
+The logic $\mathbf{ILP}$ and its completeness with respect to finite Veltman models.
 -/
 
 @[expose] public section

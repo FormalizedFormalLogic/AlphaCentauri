@@ -4,10 +4,7 @@ public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 
 /-! # The theory $\mathsf{ZR}$ of discretely ordered $\mathbb{Z}$-rings
 
-A discretely ordered $\mathbb{Z}$-ring is a discretely ordered ring in which every element can be
-divided with remainder by every standard positive integer. `ZRing` is the theory of the
-non-negative parts of such rings: $\mathsf{PA}^-$ together with division with remainder by each
-standard $n \ge 1$. $\mathsf{IOpen}$ proves it.
+The theory of non-negative parts of discretely ordered $\mathbb{Z}$-rings.
 
 - [Wil78]
 - [BO96, §1]

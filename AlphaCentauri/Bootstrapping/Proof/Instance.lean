@@ -7,9 +7,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Subformula
 /-!
 # Instances of a coded set of formulas in cut-free derivations
 
-For a coded set `X` closed under subformulas and free of free variables, the premises of every rule
-of a cut-free derivation over the empty theory whose end-sequent consists of instances of `X` again
-consist of instances of `X`.
+Instances of a coded set of formulas in cut-free derivations.
 -/
 
 @[expose] public section

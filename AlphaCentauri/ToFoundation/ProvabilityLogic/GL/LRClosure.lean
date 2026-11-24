@@ -5,9 +5,7 @@ public import Foundation.ProvabilityLogic.GL.Basic
 /-!
 # The LR-closure is finite up to $\mathbf{GL}$-equivalence
 
-Boolean combinations of a set finite up to $\mathbf{GL}$-equivalence are finite up to
-$\mathbf{GL}$-equivalence, and so is the LR-closure of a finite set of atoms, the least sets closed
-under `A ↦ A ⋏ □∼B` and `A ↦ A ⋏ □(B 🡒 ⋁S ⋎ ⋁◇T)`.
+Finiteness of the LR-closure of a finite set of atoms up to $\mathbf{GL}$-equivalence.
 
 - [Ign91, Lemma 6.3]
 -/

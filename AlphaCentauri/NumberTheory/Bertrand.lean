@@ -9,13 +9,7 @@ import AlphaCentauri.OpenProblem
 /-!
 # Bertrand's postulate over $\mathsf{I}\Delta_0 + \Omega_1$
 
-If there is no prime in $(n, 2n]$, the positions of the prime-power decompositions of
-$1, \dots, 2n$ and of the Chebyshev bands $\binom{2M_r}{M_r}$, $M_r \approx n / (3 \cdot 2^r)$,
-assemble into a $\Delta_0$-definable injection of $z + a$ into $z + b$ numbers with
-$a \approx 2ns$ and $b \approx \frac43 ns$: Erdős's estimates $\log_2 \binom{2n}{n} \approx 2n$
-and $\log_2 \binom{2n}{n} \lesssim \frac43 n$ become maps of positions, and the common part `z`,
-of size about $ns\|n\|^2$, is carried along. The weak pigeonhole principle with ratio
-$(K + 1) / K$ for $K \approx 16\|n\|^2$ excludes it.
+Bertrand's postulate over $\mathsf{I}\Delta_0 + \Omega_1$.
 
 - [HP98, §V.5(f)]
 - [PWW88, remark before Theorem 12]

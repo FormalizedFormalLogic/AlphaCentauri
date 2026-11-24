@@ -6,13 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic
 /-!
 # Open formulas over an ordered ring
 
-Over a commutative ordered ring `R` regarded as an `ℒₒᵣ`-structure, the open `ℒₒᵣ`-formulas define
-open predicates. Conversely, every open predicate on `R` is defined by an open formula whose
-parameters range over any `M → R` whose differences cover `R`.
-
-`Semiterm.degree` bounds the degree of a term in its bound variables, and `Semiformula.degree` that
-of the terms of a formula. An open `ℒₒᵣ`-formula of degree at most `N` in one bound variable defines
-a predicate determined by the signs of polynomials of degree at most `N`.
+Open `ℒₒᵣ`-formulas and the open predicates they define over an ordered ring.
 -/
 
 @[expose] public section

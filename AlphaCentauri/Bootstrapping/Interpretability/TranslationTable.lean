@@ -8,11 +8,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # Tables of translations
 
-A table `tbl` is a table of a translation of $L_2$ in a theory $S$ of $L_1$, in a model `V` of
-$\mathsf{I}\Sigma_1$, when its entries are formulas of the right arities and `S` proves in `V`
-that the domain formula of `tbl` is nonempty, and that the graph of each function symbol defines
-a unique value on the domain and respects equality. A table of a direct translation `π` is a table
-of a translation in this sense.
+Tables of translations, defined inside a model of $\mathsf{I}\Sigma_1$.
 -/
 
 @[expose] public section

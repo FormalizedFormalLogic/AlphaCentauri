@@ -6,10 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Hier
 /-!
 # Internal arithmetical hierarchy in models of $\mathsf{EA}$
 
-The unbounded quantifier `qqQuant` of a given polarity, the iterated quantifier prefix
-`qqToPrenex`, and the predicates `IsHierarchy Γ n` and `IsPrenexHierarchy Γ n` on codes of
-formulas, closed under negation, defined by `qqQuantDef`, `qqToPrenexDef`,
-`IsHierarchyF.blueprint`, `isHierarchy` and `isPrenexHierarchy`.
+The arithmetical hierarchy on codes of formulas in models of $\mathsf{EA}$.
 
 - [HP98, Lemma I.1.69]
 -/

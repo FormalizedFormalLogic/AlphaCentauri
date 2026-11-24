@@ -6,15 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 /-!
 # Codes of sentences and of closed arithmetic terms
 
-The code of a semisentence is fixed by the shift of free variables, the code of its negation is the
-negation of its code, and the code of its universal closure is a block of universal quantifiers
-over its code. The code of the negation of a semisentence that is not universal is not existential.
-A number codes a sentence of a finite list exactly when the defining formula of the list holds of
-it. The symbols of a language are standard in a model when every relation and function symbol
-of the model is the code of a symbol of the language. A vector is `matrixToVec u` exactly when it
-has the length of `u` and the entries of `u`. The code of a negation, an implication, a block of
-universal quantifiers, a finite conjunction or a substitution instance of a formula is obtained
-from the code of the formula by the corresponding function on codes.
+Codes of sentences and of closed arithmetic terms.
 -/
 
 @[expose] public section

@@ -9,8 +9,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Deduction
 /-!
 # The case-split table
 
-For a sentence `φ` and two tables, the case-split table has as each entry the formula
-`(φ ∧ e₁) ∨ (¬φ ∧ e₂)` built from the corresponding entries `e₁` and `e₂` of the two tables.
+A table defined by case distinction on a sentence.
 -/
 
 @[expose] public section

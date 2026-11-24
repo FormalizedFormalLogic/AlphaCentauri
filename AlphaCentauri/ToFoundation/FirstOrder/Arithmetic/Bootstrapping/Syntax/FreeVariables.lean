@@ -6,9 +6,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 /-!
 # Free variables of coded terms and formulas
 
-`termFreeVariables L t` and `freeVariables L p` are the coded sets of the free variables of a coded
-term `t` and a coded formula `p`. A coded formula has no free variables exactly when shifting its
-free variables leaves it unchanged. A closed coded term is a coded term without free variables.
+The free variables of coded terms and formulas.
 -/
 
 @[expose] public section

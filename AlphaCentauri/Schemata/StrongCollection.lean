@@ -5,9 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 
 /-! # Pieces and strong collection in `𝗜𝚺 (n + 1)`
 
-In a model of $\mathsf{I}\Sigma_{n + 1}$ every $\Sigma_{n + 1}$ predicate is piecewise coded, and
-the witnesses of a $\Sigma_{n + 1}$ relation are bounded on an interval even at the arguments
-where it has none.
+Piecewise coding and strong collection in models of $\mathsf{I}\Sigma_{n + 1}$.
 
 - [HP98, Definition I.2.6, Lemma I.2.13(a), Lemma I.2.27]
 -/

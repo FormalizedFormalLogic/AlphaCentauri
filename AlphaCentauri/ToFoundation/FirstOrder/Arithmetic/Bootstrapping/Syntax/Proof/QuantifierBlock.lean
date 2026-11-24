@@ -5,8 +5,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # Provability of formula codes with quantifier blocks
 
-Term vectors of bound variables, the typed internal derivations of blocks of universal
-quantifiers, and provable equivalences between formula codes in the typed internal calculus.
+Internal provability of codes of formulas with blocks of quantifiers.
 -/
 
 @[expose] public section

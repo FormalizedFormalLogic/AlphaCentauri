@@ -5,8 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Model
 /-!
 # Models of arithmetic
 
-An arithmetic sentence a theory does not prove fails in some model of that theory. A homomorphism
-of `ℒₒᵣ`-structures preserves `0`, `1`, `+` and `*`; an embedding also preserves and reflects `<`.
+Homomorphisms and embeddings of models of arithmetic, and models refuting unprovable sentences.
 -/
 
 @[expose] public section

@@ -5,8 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Basic
 /-!
 # Truth of arithmetic literals in `ℕ`
 
-Truth of an arithmetic formula in the standard model `ℕ`, of its numeral instances, and of signed
-atomic literals.
+Truth of arithmetic literals in `ℕ`.
 
 - [Tow20, Section 13]
 -/

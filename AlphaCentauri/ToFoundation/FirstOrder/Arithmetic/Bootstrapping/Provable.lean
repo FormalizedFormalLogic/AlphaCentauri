@@ -8,12 +8,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # Internal provability of instances, modus ponens and induction
 
-Facts about `Bootstrapping.Provable`: instantiating an internally-provable instance by
-numerals of a universal formula at one more numeral, modus ponens for arbitrary (not necessarily
-quoted) codes, induction on a numeral of a formula whose base case and induction step are
-provable, the internal provability of the numeral instances of a theorem of `𝗜𝚺₁` and of a
-true $\Sigma_1$ formula, and the internal equivalence of `(∀¹ A) ⋎ (∀¹ B)` with
-`∀¹ (∀u < #0 + 1, A u ⋎ ∀x < #0 + 1, B x)` for formulas without free variables.
+Internal provability of instances, modus ponens and induction.
 -/
 
 @[expose] public section

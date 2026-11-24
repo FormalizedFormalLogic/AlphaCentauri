@@ -6,10 +6,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 /-!
 # The sequent calculus for $\mathbf{IL}$ and its Veltman semantics
 
-A sequent derivable in the sequent calculus for $\mathbf{IL}$ has the implication from the
-conjunction of its antecedent to the disjunction of its succedent derivable in $\mathbf{IL}$. The
-calculus is sound for Veltman models, is complete for finite Veltman models, and agrees with
-$\mathbf{IL}$ on them.
+The sequent calculus for $\mathbf{IL}$ and its agreement with $\mathbf{IL}$.
 -/
 
 @[expose] public section

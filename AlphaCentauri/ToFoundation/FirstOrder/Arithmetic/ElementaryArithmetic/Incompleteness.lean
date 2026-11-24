@@ -8,14 +8,8 @@ public import Foundation.FirstOrder.Incompleteness.Reflection.Uniform
 /-!
 # Incompleteness in models of $\mathsf{EA}$
 
-The code `indBodyVal` of the induction instance of a formula, and the predicate `InductionR S` of
-codes of the universal closures of induction instances of formulas satisfying `S`, defined by
-`chInd`. In each model of $\mathsf{EA}$ the axioms of `𝗣𝗔⁻`, of the induction schemata over
-`ℬ[<, ℒₒᵣ].Hierarchy Γ s` and `ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`, and hence of `𝗜𝗡𝗗 Γ s`,
-`𝗜𝗡𝗗⁺ Γ s` and `𝗘𝗔`, form a locally $\Delta_0$ set (`LocallyDelta0Axioms`). A model of
-$\mathsf{EA}$ satisfies the uniform reflection schema of a theory `T` for `φ` iff every instance of
-`φ` by numerals whose code is internally provable in `T` holds in the model, for theories `T` whose
-axioms are locally $\Delta_0$ in the model.
+Uniform reflection and the locally $\Delta_0$ axioms of arithmetic theories in models of
+$\mathsf{EA}$.
 -/
 
 @[expose] public section

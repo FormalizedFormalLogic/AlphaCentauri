@@ -7,11 +7,7 @@ public import Mathlib.Data.Set.Finite.List
 /-!
 # The model on indexed sets
 
-The construction behind the completeness of $\mathbf{IL}$ with respect to finite Veltman models
-(de Jongh–Veltman).
-
-A finite Veltman model whose worlds are maximal consistent subsets of an adequate set indexed by
-finite sequences of formulas, and its truth lemma.
+The Veltman model on indexed sets, behind the completeness of $\mathbf{IL}$.
 -/
 
 @[expose] public section

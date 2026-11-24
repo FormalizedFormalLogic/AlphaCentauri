@@ -7,9 +7,7 @@ public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 /-!
 # Translations along provably equivalent tables
 
-If the domain formulas, the formulas of the relation symbols and the graphs of the function symbols
-of two tables are provably equivalent in `S`, every formula code has provably equivalent
-translations along the two tables.
+Translations along provably equivalent tables are provably equivalent.
 -/
 
 @[expose] public section

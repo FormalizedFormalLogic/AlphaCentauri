@@ -5,11 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 /-!
 # Substitution and bound variables of term codes
 
-Substituting the bound variables of a closed semiterm, or shifting them, is the identity;
-substituting into a semiterm with `m` bound variables depends only on the first `m` entries of the
-vector. `bvarVec j k` is the vector of the bound variables `^#j, …, ^#(j + k - 1)`. If the
-substitution of a term vector yields a term with its bound variables shifted by one, so does the
-term.
+Substitution and bound variables of codes of terms.
 -/
 
 @[expose] public section

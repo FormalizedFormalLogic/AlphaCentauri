@@ -6,13 +6,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Pai
 /-!
 # Satisfaction in the Henkin set along a list of free variables
 
-For a list `s` coded by `ppair`, a coded formula `a` with `n` bound variables is satisfied in
-the Henkin set when its instance by the free variables `^&s₀, …, ^&s_{n-1}` belongs to the Henkin
-set, and a coded term `t` equates to `z` when the equation of its instance with `^&z` belongs to the
-Henkin set. Both relations are defined by arithmetical formulas that do not depend on the model.
-Satisfaction commutes with the connectives and quantifiers, the quantifiers ranging over the free
-variables put in front of the list, and it reduces atomic formulas and terms to the values of their
-arguments.
+Satisfaction in the Henkin set, defined arithmetically.
 -/
 
 @[expose] public section

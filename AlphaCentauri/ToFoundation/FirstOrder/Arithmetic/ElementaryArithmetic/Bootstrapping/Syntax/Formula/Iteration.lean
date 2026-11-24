@@ -5,8 +5,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 /-!
 # Iterated connectives and quantifiers in models of $\mathsf{EA}$
 
-The iterated universal quantifier `qqAlls`, defined by the formula `qqAllsDef`. The recursion
-carries a bound on its values, and inductions are on locally $\Delta_0$ predicates.
+Iterated quantifiers on codes of formulas in models of $\mathsf{EA}$.
 -/
 
 @[expose] public section

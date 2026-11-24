@@ -7,9 +7,7 @@ public import Mathlib.Tactic.LinearCombination
 /-!
 # The prime `λ = ω - 1` of Eisenstein integers
 
-`λ = ω - 1` has norm `3`, and over a discretely ordered ring with the least number principle,
-`EisensteinInteger R` has a Euclidean division with respect to the norm, is a Bézout domain, and
-`λ` is a prime element with residue classes `0` and `±1`.
+The prime `λ = ω - 1` of the Eisenstein integers over a discretely ordered ring.
 -/
 
 @[expose] public section

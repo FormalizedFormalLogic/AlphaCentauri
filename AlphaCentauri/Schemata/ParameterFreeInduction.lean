@@ -6,9 +6,7 @@ public import AlphaCentauri.Schemata.DeltaInduction
 
 /-! # Parameter-free induction `𝗜ᶠ` over the prenex hierarchy
 
-`𝗜ᶠ Γ s` is `𝗘𝗔` together with successor induction for the
-`ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s` formulas `φ(x)`
-that carry no free variable besides the induction variable `x`.
+Parameter-free induction over the prenex hierarchy.
 
 - [Bek99, §1]
 -/

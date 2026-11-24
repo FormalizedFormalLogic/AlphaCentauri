@@ -9,10 +9,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # Commutation of the internal translation
 
-Along a table satisfying `IsTable`, the internal translation sends negation to negation and shift
-to shift, and it sends a coded $L_2$-formula to a coded $L_1$-formula of the same arity. It
-commutes with the substitution of a vector of variables for the variables of a formula, and with
-the substitution of free variables by a vector of free variables.
+The internal translation commutes with the syntactic operations.
 -/
 
 @[expose] public section

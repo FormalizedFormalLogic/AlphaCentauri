@@ -7,12 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 
 /-! # The weak pigeonhole principle over $\mathsf{I}\Delta_0 + \Omega_1$
 
-In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection of
-$a^2$ into $a$, for $a > 1$. An injection folds a binary tree of depth $\|a\|$ whose leaves can be
-any $2^{\|a\|}$ values below $a$; diagonalizing against the roots gives a contradiction.
-
-Nor is any an injection of $2b$ into $b$, for $b > 0$, nor of $(K + 1)b$ into $Kb$, for $b > 0$ and
-$0 < K \le \|I\|$ for some $I$. The ratio $(n + 1) / n$ for a standard $n$ is the case $K = n$.
+The weak pigeonhole principle for $\Delta_0$ relations over $\mathsf{I}\Delta_0 + \Omega_1$.
 
 - [PWW88, Theorem 1, Corollary 2]
 -/

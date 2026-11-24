@@ -11,10 +11,7 @@ public import AlphaCentauri.Bootstrapping.Proof.ProofByCases
 /-!
 # Interpretability in a model
 
-In a model `V` of $\mathsf{I}\Sigma_1$, a theory `U` of $L_2$ is interpretable in a theory `S` of
-$L_1$ when there is a table of a translation of $L_2$ in `S` along which every axiom of `U` in `V`
-translates to a formula provable in `S`. The sentence `interpretableDef S U` defines this in every
-model of $\mathsf{I}\Sigma_1$. Consistency transfers along interpretability.
+Interpretability of theories, formalized inside a model of $\mathsf{I}\Sigma_1$.
 -/
 
 @[expose] public section

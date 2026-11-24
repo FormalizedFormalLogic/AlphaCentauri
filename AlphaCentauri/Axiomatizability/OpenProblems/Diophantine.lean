@@ -11,9 +11,7 @@ import AlphaCentauri.OpenProblem
 /-!
 # Diophantine equivalents of $\Delta_0$ formulas
 
-Whether every $\Delta_0$ formula is equivalent over $\mathsf{I}\Delta_0$, or over
-$\mathsf{I}\Delta_0 + \Omega_1$, to a Diophantine formula is open. A positive answer would give
-$\mathsf{NP} = \mathsf{coNP}$, as Wilkie observed.
+An open problem on Diophantine equivalents of $\Delta_0$ formulas.
 
 - [DAq05, Question 8.1]
 -/

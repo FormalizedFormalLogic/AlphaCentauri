@@ -8,11 +8,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Int
 /-!
 # The formalized truth lemma of the Henkin translation
 
-For an arithmetical theory $S$ and $T \supseteq \mathsf{PA}$, the theory $T + \mathrm{Con}_S$
-proves the clauses of satisfaction in the Henkin set of $S$ along lists of representatives. In
-every model of $\mathsf{I}\Sigma_1$, along a table of the Henkin translation, $T + \mathrm{Con}_S$
-proves the equivalence of the translation of every formula without free variables with its
-satisfaction in the Henkin set; hence it proves the translation of every axiom of $S$.
+The truth lemma of the Henkin translation, formalized in arithmetic.
 
 ## References
 

@@ -7,8 +7,7 @@ public import Foundation.Vorspiel.Rel.CWF
 /-!
 # Veltman semantics
 
-Veltman models, forcing, the frame conditions of $\mathbf{J1}$, $\mathbf{J2}$, $\mathbf{J4}$ and
-$\mathbf{J5}$, and the soundness of $\mathbf{CL}$ and its extensions with respect to them.
+Veltman semantics for interpretability logic.
 -/
 
 @[expose] public section

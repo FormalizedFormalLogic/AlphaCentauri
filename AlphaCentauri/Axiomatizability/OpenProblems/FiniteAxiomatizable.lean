@@ -11,10 +11,7 @@ import AlphaCentauri.OpenProblem
 /-!
 # Finite axiomatizability of the open cases
 
-Whether $\mathsf{B}\Sigma_1$, $\mathsf{I}\Delta_0$, or $\mathsf{I}\Delta_0 + \Omega_1$ is finitely
-axiomatizable is open. $\mathsf{B}\Sigma_{n + 1}$ is finitely axiomatizable for $n \ge 1$, and
-$\mathsf{I}\Delta_0$ and $\mathsf{I}\Delta_0 + \Omega_1$ are not if the polynomial hierarchy does
-not collapse.
+Open problems on finite axiomatizability of fragments of arithmetic.
 
 - [HP98, Corollary V.4.39]
 - [Kay91, Exercise 10.4]

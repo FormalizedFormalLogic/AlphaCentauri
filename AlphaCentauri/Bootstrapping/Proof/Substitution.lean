@@ -6,11 +6,7 @@ public import AlphaCentauri.Bootstrapping.Proof.RankedDerivation
 /-!
 # Free-variable substitution on internal derivations
 
-Foundation's internal one-sided calculus has no rule renaming free variables, and its
-`allIntro` rule fixes `^&0` as the eigenvariable.  This module closes internal derivability,
-also with a bound on the cut rank, under the free-variable substitutions of
-`AlphaCentauri.Bootstrapping.Proof.FvSubst` and derives from it the internal quantifier rules
-whose eigenvariable is an arbitrary fresh free variable.
+Free-variable substitution on internal derivations.
 -/
 
 @[expose] public section

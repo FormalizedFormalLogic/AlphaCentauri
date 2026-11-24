@@ -7,8 +7,7 @@ public import Mathlib.SetTheory.Ordinal.Family
 /-!
 # Derivations in `Z_∞`
 
-The infinitary Tait calculus `Z_∞` over `ℒₒᵣ`: its sequents, derivations, ordinal height and cut
-rank, and soundness.
+The infinitary Tait calculus `Z_∞` over `ℒₒᵣ`.
 
 - [Tow20, Section 13]
 -/

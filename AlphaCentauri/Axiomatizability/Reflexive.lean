@@ -10,8 +10,7 @@ public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 /-!
 # Reflexive theories
 
-A theory is reflexive if it proves the consistency of each of its finite subtheories. Every
-reflexive extension of `𝗜𝚺₁` fails to be finitely axiomatizable.
+Reflexive theories and their failure of finite axiomatizability.
 -/
 
 @[expose] public section

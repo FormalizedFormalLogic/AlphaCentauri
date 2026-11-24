@@ -7,9 +7,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Measures
 /-!
 # Internal derivations of bounded cut rank
 
-`RankedDerivation T r d` says that `d` codes a derivation of Foundation's internal one-sided
-calculus over `T` whose cut rank is at most `r`, i.e. all of whose cut formulas have complexity
-below `r`. At rank `0` these are the cut-free derivations.
+Internal derivations of bounded cut rank.
 -/
 
 @[expose] public section

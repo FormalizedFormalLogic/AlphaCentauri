@@ -5,10 +5,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 /-!
 # Maximal consistent subsets of adequate sets
 
-Finite adequate sets of formulas, the maximal consistent subsets of such a set relative to an
-extension of $\mathbf{IL}$, and their (critical) successors. For extensions of $\mathbf{CL}$,
-adequate sets in the sense of Kurahashi and Okawa, Ignatiev's successors, and the existence of
-successors containing prescribed formulas.
+Maximal consistent subsets of adequate sets and their successors.
 -/
 
 @[expose] public section

@@ -7,9 +7,7 @@ public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Bounds
 /-!
 # Cut reducibility in `Z_∞`
 
-A cut formula is reducible below `ω ^ θ` at rank `c` when cutting two bounded derivations on it
-yields a derivation of smaller cut rank. Every formula of quantifier rank below `c` is
-cut-reducible at rank `c`.
+Cut reducibility of formulas in `Z_∞`.
 
 - [Tow20, Section 19.5, Section 19.6, Section 19.7]
 -/

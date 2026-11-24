@@ -10,13 +10,7 @@ import AlphaCentauri.OpenProblem
 /-!
 # The infinitude of primes
 
-Euclid's argument needs a bound on the next prime: $x!$ over $\mathsf{E}\mathsf{A} =
-\mathsf{I}\Delta_0 + \mathrm{Exp}$, from which $\mathsf{I}\Sigma_1$ inherits it; over
-$\mathsf{I}\Delta_0$ no term bounds it. With $\Omega_1$ adjoined the sentence is a theorem of
-Paris, Wilkie and Woods: if every prime is at most $a$, the $a$ consecutive numbers
-$a^{20} + i$, $i < a$, have no prime factor above $a$, and their factorizations give a
-$\Delta_0$ injection of $18a\|a\|$ into $16a\|a\|$, against the weak pigeonhole principle
-with ratio $9/8$. Over $\mathsf{I}\Delta_0$ alone it is an open problem.
+The infinitude of primes in fragments of arithmetic.
 
 - [HP98, Theorem I.1.58(2), Remark I.1.59(3)]
 - [PWW88, Problem 1, Theorem 11, Corollary 8]

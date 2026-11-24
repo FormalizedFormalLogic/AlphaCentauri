@@ -5,10 +5,7 @@ public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 /-!
 # The composite table
 
-For a table `tbl₁` of a translation of $L_2$ into $L_1$ and a table `tbl₂` of a translation of
-$L_3$ into $L_2$, the composite table has as domain formula the conjunction of the domain formula
-of `tbl₁` and the translation along `tbl₁` of the domain formula of `tbl₂`, and as the entries of
-the symbols the translations along `tbl₁` of the entries of `tbl₂`.
+The table of the composite of two translations.
 -/
 
 @[expose] public section

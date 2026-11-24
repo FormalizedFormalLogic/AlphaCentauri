@@ -7,10 +7,7 @@ public import Mathlib.Data.Fintype.Powerset
 /-!
 # w-bisimulations between generalised Veltman models
 
-w-bisimulations and their finite approximations, $n$-w-bisimulations, between generalised Veltman
-models. w-bisimilar worlds force the same formulas, $n$-w-bisimilar worlds force the same formulas
-of modal depth at most $n$, and over finitely many propositional variables the converse of the
-latter holds.
+Bisimulations between generalised Veltman models.
 
 ## References
 

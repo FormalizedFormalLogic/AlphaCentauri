@@ -9,15 +9,8 @@ public import Foundation.FirstOrder.Tarski.Basic
 /-!
 # Bounded approximation and witnessing
 
-`EvalBound e ε b φ` says that `φ` holds under `e` and `ε` with every leading existential
-witnessed below `b`, which approximates a $\Sigma_1$-block formula by a $\Delta_0$ one. The
-approximation implies `φ`, it grows with the bound, and a true $\Sigma_1$-block formula has one.
-
-A $\Sigma_1$-block (resp. $\Pi_1$-block) formula is a `ℬ[<, ℒₒᵣ].PrenexBlock 𝚺` (resp. `𝚷`) one.
-From an anchored `LKI[C]` derivation of a sequent of $\Sigma_1$-block and $\Pi_1$-block
-formulas one reads a primitive recursive bound on the witnesses: if every non-$\Sigma_1$ formula
-of the sequent is refuted below `b`, then some $\Sigma_1$ formula of the sequent holds below
-`h l b`. The induction rule contributes the primitive recursion, every other rule a `max`.
+Bounded approximation of $\Sigma_1$-block formulas, and primitive recursive bounds on witnesses read
+off from `LKI[C]` derivations.
 
 - [Bus98A, Section 3.1.2, Section 3.1.3]
 -/

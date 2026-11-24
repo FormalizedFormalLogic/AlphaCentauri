@@ -6,11 +6,8 @@ public import Foundation.FirstOrder.Arithmetic.Induction.Basic
 /-!
 # Induction axioms and least witnesses
 
-The induction axiom of a formula is built from it by substitution and quantification, so a
-rewriting passes through it; the collection axiom of a formula reads in a model of `𝗣𝗔⁻` as the
-statement that witnesses below a bound admit a common bound. In a model of $\mathsf{I}\Sigma_1$,
-choosing for each `x` the least `y` with `R x y`, for a total $\Delta_1$ relation `R`, gives a
-$\Sigma_1$-definable function.
+Induction and collection axioms of a formula, and definable functions obtained by taking least
+witnesses in models of $\mathsf{I}\Sigma_1$.
 -/
 
 @[expose] public section

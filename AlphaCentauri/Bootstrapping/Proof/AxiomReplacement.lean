@@ -12,10 +12,8 @@ public import Foundation.FirstOrder.Incompleteness.Definability
 /-!
 # Replacing the axioms of $\mathsf{I}\Sigma_n$ and $\mathsf{EA}$ by false blocks
 
-Every axiom `p` of the internal $\mathsf{I}\Sigma_n$ or $\mathsf{EA}$ has a replacement `q` such
-that `p` follows in pure logic from the negation of `q`. For $n \le k$, the negation of a
-replacement is a block of existential quantifiers over a closed matrix in `IsReadable k 3` all of
-whose instances are false.
+Replacing the axioms of $\mathsf{I}\Sigma_n$ and $\mathsf{EA}$ by blocks of existential quantifiers
+with false instances.
 -/
 
 @[expose] public section

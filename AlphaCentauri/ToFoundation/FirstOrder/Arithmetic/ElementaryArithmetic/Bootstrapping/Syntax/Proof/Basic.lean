@@ -6,12 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 /-!
 # Derivations in models of $\mathsf{EA}$
 
-Sets of formulas `IsFormulaSet`, the shift `setShift` of a set of formulas, the codes `axL`, …,
-`axm` of the inference rules, and the predicates `Derivation T`, `DerivationOf T`, `Derivable T`,
-`Proof T` and `Provable T` for a theory `T` whose axioms are locally $\Delta_0$ in the model,
-defined by `isFormulaSet`, `setShiftGraph`, `axLGraph`, …, `axmGraph`, `Derivation.blueprint`,
-`derivation`, `derivationOf`, `derivable`, `proof` and `provable`. Derivations form a strongly
-finite fixpoint, with induction on locally $\Delta_0$ predicates.
+Codes of derivations in models of $\mathsf{EA}$.
 
 - [HP98, §V.3]
 -/

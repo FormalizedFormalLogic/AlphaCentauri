@@ -12,9 +12,7 @@ public import Foundation.FirstOrder.Incompleteness.Definability
 /-!
 # Uniform reflection in a model of $\mathsf{I}\Sigma_{k+1}$
 
-In a model of $\mathsf{I}\Sigma_{k+1}$, a prenex $\Pi_{k+3}$ formula holds of any parameters for
-whose numerals the internal $\mathsf{I}\Sigma_n$, for $n \le k$, or the internal $\mathsf{EA}$
-proves it. In particular, the internal $\mathsf{I}\Sigma_n$ is consistent.
+Uniform reflection in a model of $\mathsf{I}\Sigma_{k+1}$.
 
 ## References
 

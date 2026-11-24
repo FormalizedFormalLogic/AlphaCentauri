@@ -5,8 +5,7 @@ public import Foundation.Meta.ClProver
 /-!
 # Consistency and conjunctions of vectors
 
-`Consistent 𝓢` is equal to `True` whenever an instance exists, and the conjunction `Matrix.conj` of
-a vector of formulas has introduction and elimination rules in a minimal entailment system.
+Consistency and conjunctions of vectors of formulas in entailment systems.
 -/
 
 @[expose] public section

@@ -6,11 +6,7 @@ public import Foundation.FirstOrder.LK.Hauptsatz
 /-!
 # Forcing over anchored derivations
 
-Avigad's algebraic proof of cut elimination reads a sequent `p` as a forcing condition and the
-cut-free derivations of `∼p` as the proofs of `⊥` over it. Taking instead the `D`-anchored
-derivations of `LKI[C]` as the base gives a forcing relation over which `LJ` is still sound, so
-that a classical proof from axioms that are forced yields an anchored derivation: free cuts are
-eliminated, and the cuts on the axioms remain.
+Forcing over anchored derivations of the calculus with an induction rule.
 
 - [Avi01]
 - [Bus98A, Section 1.4.2]

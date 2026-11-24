@@ -7,10 +7,7 @@ public import AlphaCentauri.Bootstrapping.Interpretability.TypedTranslation
 /-!
 # Composition of translations
 
-Along the composite of two tables, every formula code has a translation provably equivalent to the
-translation along `tbl₁` of its translation along `tbl₂`. If every theorem of `U` translates to a
-theorem of `S` along `tbl₁`, the composite of a table of a translation in `S` and a table of a
-translation in `U` is a table of a translation in `S`.
+Internal translations compose along composite tables.
 -/
 
 @[expose] public section

@@ -5,8 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 /-!
 # Polynomial pairing and decoding of lists
 
-A polynomial pairing `ppair x b = (x + b)² + b + 1` and the decoding `dec` of iterated `ppair`s
-into lists (`∷`).
+The polynomial pairing `ppair` and the decoding of iterated pairs into lists.
 -/
 
 @[expose] public section

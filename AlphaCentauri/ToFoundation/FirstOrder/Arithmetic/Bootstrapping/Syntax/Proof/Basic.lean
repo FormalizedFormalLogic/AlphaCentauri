@@ -7,12 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 /-!
 # Equality and typed derivability in the internal calculus
 
-The shift of free variables is monotone on coded formula sets, and the weakening and shift rules
-are definable at every level. The typed equality formula of a language with equality has internal
-proofs of reflexivity, symmetry, transitivity and the congruence of function and relation symbols
-from $\mathsf{EQ}$. Typed internal provability `T.internalize V ⊢ φ` is transferred to
-`Derivable T` on sequents given as codes, and specialisation and generalisation of `∀¹^[k]` are
-available in the typed internal proof system.
+Equality and typed derivability in the internal proof calculus.
 -/
 
 @[expose] public section

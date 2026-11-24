@@ -6,8 +6,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 /-!
 # The logic $\mathbf{ILKW1}^0$
 
-The extension of $\mathbf{IL}$ by the principle $\mathsf{KW1}^0$, which is equivalent to
-$\mathbf{ILKW2}$.
+The logic $\mathbf{ILKW1}^0$.
 -/
 
 @[expose] public section

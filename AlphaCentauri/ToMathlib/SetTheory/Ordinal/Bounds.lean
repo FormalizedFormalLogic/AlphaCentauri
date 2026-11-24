@@ -5,8 +5,7 @@ public import Mathlib.SetTheory.Ordinal.Principal
 /-!
 # Ordinal bounds
 
-Bounds on `ω`-exponentiation, `+`, `max` and `⨆` over the ordinals, and the `ω`-tower
-`Ordinal.omegaTower c α`, which iterates `ω ^ ·` on `α` `c` times.
+Bounds on ordinal arithmetic and the $\omega$-tower.
 -/
 
 @[expose] public section

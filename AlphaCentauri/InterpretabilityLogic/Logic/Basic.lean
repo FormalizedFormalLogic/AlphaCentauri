@@ -7,10 +7,7 @@ public import Foundation.Meta.ClProver
 /-!
 # Interpretability logics
 
-A logic is a set of formulas, regarded as an `Entailment` via membership. The framework here is the
-class of logics containing $\mathbf{GL}$, the axiom schemata of interpretability logic, the
-extensions of $\mathbf{IL}$ by sets of axioms, and the theorems common to all of them. The
-individual logics are in `Logic/<logic>/Basic.lean`.
+Logics as sets of formulas, and the interpretability logics defined by axiom schemata.
 -/
 
 @[expose] public section

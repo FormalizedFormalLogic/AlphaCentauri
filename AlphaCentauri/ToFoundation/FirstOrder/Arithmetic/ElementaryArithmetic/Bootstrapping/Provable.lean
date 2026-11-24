@@ -7,11 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 /-!
 # Provability in models of $\mathsf{EA}$
 
-Substitution of numerals for the bound variables of a code of a formula: the list `matrixToVec v`
-of the entries of a tuple, `substNumeral` and `substNumerals`, defined by `ssnum` and `ssnums`. The
-internal provability of the codes of the theorems of a theory, the derivations of an instance of a
-universal formula and of the conclusion of an implication, and the induction on a numeral of a
-formula whose base case and induction step are theorems.
+Internal provability of codes of formulas in models of $\mathsf{EA}$.
 -/
 
 @[expose] public section

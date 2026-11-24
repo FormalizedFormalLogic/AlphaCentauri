@@ -5,7 +5,8 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Model
 /-!
 # Models of arithmetic
 
-An arithmetic sentence a theory does not prove fails in some model of that theory. A homomorphism
+An arithmetic sentence a theory does not prove fails in some model of that theory, and provably
+equivalent formulas are equivalent in its models. A homomorphism
 of `ℒₒᵣ`-structures preserves `0`, `1`, `+` and `*`; an embedding also preserves and reflects `<`.
 -/
 
@@ -20,6 +21,14 @@ lemma exists_countermodel_of_unprovable {T : ArithmeticTheory} [𝗘𝗤 ℒₒ�
     ∃ (M : Type) (_ : ORingStructure M) (_ : M↓[ℒₒᵣ] ⊧* T), ¬M↓[ℒₒᵣ] ⊧ σ := by
   by_contra! hc
   exact h (complete T σ fun M _ _ ↦ hc M ‹_› ‹_›)
+
+/-- Formulas provably equivalent in `T` are equivalent in a model of `T`. -/
+lemma models_iff_of_provable_allClosure {T : ArithmeticTheory} {M : Type*} [ORingStructure M]
+    [M↓[ℒₒᵣ] ⊧* T] {k : ℕ} {φ ψ : ArithmeticSemisentence k} (h : T ⊢ ∀¹* (φ 🡘 ψ)) (v : Fin k → M) :
+    M ⊧/v φ ↔ M ⊧/v ψ := by
+  have h₁ : ∀ v, M ⊧/v φ ↔ M ⊧/v ψ := by
+    simpa [models_iff] using models_of_provable (M := M) inferInstance h
+  exact h₁ v
 
 end Arithmetic
 

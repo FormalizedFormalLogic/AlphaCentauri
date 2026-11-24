@@ -132,6 +132,23 @@ theorem IsElementary.of_tarskiVaught (ι : M ↪ₛ[L] N)
       use ι x
       simpa [Matrix.comp_vecCons''] using (ih (x :> e)).mpr hx
 
+/-- An embedding is elementary as soon as it is elementary for the semisentences obtained from the
+formulas of the class by rewriting. -/
+lemma IsElementary.of_rew {Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop} {ι : M ↪ₛ[L] N}
+    (h : ∀ {n k : ℕ} {φ : Semiformula L ℕ n}, Γ φ → ∀ (ω : Rew L ℕ n Empty k) (u : Fin k → M),
+      N ⊧/(ι ∘ u) (ω ▹ φ) ↔ M ⊧/u (ω ▹ φ)) : IsElementary Γ ι := by
+  intro n φ hφ e f
+  let ω : Rew L ℕ n Empty (n + (φ.fvSup + 1)) :=
+    Rew.bind (fun i ↦ #(i.castAdd _)) fun x ↦ #(Fin.natAdd n ⟨min x φ.fvSup, by omega⟩)
+  have h₁ : Function.funEqOn φ.FVar? (fun x ↦ f (min x φ.fvSup)) f := by
+    intro x hx
+    simp [(lt_fvSup_of_fvar? hx).le]
+  have h₂ : φ.Eval (ι ∘ e) (fun x ↦ ι (f (min x φ.fvSup))) ↔
+      φ.Eval e (fun x ↦ f (min x φ.fvSup)) := by
+    simpa [eval_rew, Function.comp_def, ω, -Fin.natAdd_mk] using
+      h hφ ω (Fin.append e fun x ↦ f x)
+  rwa [eval_iff_of_funEqOn φ h₁, eval_iff_of_funEqOn φ fun x hx ↦ congrArg ι (h₁ x hx)] at h₂
+
 lemma IsElementary.models_iff [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
     (h : IsElementary (fun {_} _ ↦ True) ι) (σ : Sentence L) : N↓[L] ⊧ σ ↔ M↓[L] ⊧ σ := by
   rw [FFL.FirstOrder.models_iff, FFL.FirstOrder.models_iff]
@@ -232,6 +249,19 @@ def Tarski.Structure.Iso.toElementarySubstructure (f : M ≃ₛ[L] N) : M ≼ₑ
     obtain ⟨a, rfl⟩ := f.toFun_bij.2 x
     use a
     exact hx
+
+/-- An embedding which is elementary after composition with an isomorphism is elementary. -/
+lemma IsElementary.of_comp_iso {Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop} {ι : M ↪ₛ[L] N}
+    {κ : K ↪ₛ[L] N} (h : IsElementary Γ ι) (f : M ≃ₛ[L] K) (hf : ∀ x, κ (f x) = ι x) :
+    IsElementary Γ κ := by
+  intro n φ hφ e g
+  obtain ⟨e, rfl⟩ := f.toFun_bij.2.comp_left e
+  obtain ⟨g, rfl⟩ := f.toFun_bij.2.comp_left g
+  have h₁ : κ ∘ f = ι := funext hf
+  have h₂ := f.toElementarySubstructure.isElementary (φ := φ) trivial e g
+  have h₃ := h hφ e g
+  rw [← h₁] at h₃
+  exact h₃.trans h₂.symm
 
 lemma Tarski.Structure.ElementaryEquiv.of_elementarySubstructure [Nonempty M] [Nonempty N]
     (e : M ≼ₑ[L] N) : M ≡ₑ[L] N :=

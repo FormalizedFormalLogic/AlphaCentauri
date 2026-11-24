@@ -18,21 +18,25 @@ An end extension of an `ℒₒᵣ`-structure `M`, written `M ⊆ₑ N`, is an en
 `ℬ[<, ℒₒᵣ]`: an embedding with nothing new below the image of `M`. `𝗣𝗔⁻`, `𝗜𝚺₀` and any
 $\Pi_1$-axiomatizable theory hold in `M` as soon as they hold in an end extension of `M`. In a
 proper end extension satisfying induction for a hierarchy class, a formula of that class which
-holds at every element of the base model holds below some element outside the base model.
+holds at every element of the base model holds below some element outside the base model. A
+nonstandard model of `𝗣𝗔⁻` is a proper end extension of the natural numbers.
 
 A cut of `M` is a subset closed under successor and downward closed under `<`. A closed cut, one
 closed under the operations of the language, is a substructure of `M`, and `M` is an end extension
-of it. No proper cut is definable by a $\Sigma_0$ formula with parameters in a model of `𝗜𝚺₀`, and
-no model of `𝗜𝚫 n` has a proper cut whose membership relation and complement are both definable by
-prenex $\Sigma_n$ formulas with parameters.
+of it. The image of an embedding which is closed downward under `<` is a closed cut, isomorphic to
+the embedded structure. No proper cut is definable by a $\Sigma_0$ formula with parameters in a
+model of `𝗜𝚺₀`, and no model of `𝗜𝚫 n` has a proper cut whose membership relation and complement are
+both definable by prenex $\Sigma_n$ formulas with parameters.
 
 A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`, and a
 $\Sigma_s$-elementary embedding between models of $\mathsf{B}\Sigma_s$ preserves the truth of
-$\Sigma_s$ and $\Pi_s$ sentences.
+$\Sigma_s$ and $\Pi_s$ sentences. If `S` embeds onto a $\Sigma_n$-elementary initial
+segment of `M`, a $\Pi_n$ formula satisfiable in `S` is satisfiable in `M` below any element outside
+the initial segment, at the image of the parameter.
 
 The standard system of a model of `𝗜𝚺₁` is the family of subsets of `ℕ` coded by its elements
-under Ackermann's membership; it does not shrink along an end extension, and it is preserved when
-the base model is nonstandard.
+under Ackermann's membership; it does not shrink along an end extension, nor does it change when
+the base model is nonstandard. An embedding onto an initial segment is such an end extension.
 -/
 
 @[expose] public section
@@ -67,6 +71,25 @@ lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
 
 lemma mem_range_of_lt {a : M} {b : N} (h : b < e a) : b ∈ Set.range e.emb :=
   e.isInitial.initial (R := Semiformula.Operator.LT.lt) (Set.mem_singleton _) a b (by simpa using h)
+
+/-- The end extension given by an embedding whose image is closed downward under `<`.
+- [Kay91, Definition 2.6] -/
+def ofInitial (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Set.range ι) : M ⊆ₑ N where
+  emb := ι
+  isInitial := {
+    operator_iff := by
+      intro R hR a b
+      obtain rfl := Set.mem_singleton_iff.mp hR
+      simp
+    initial := by
+      intro R hR a b hb
+      obtain rfl := Set.mem_singleton_iff.mp hR
+      exact hι a b (by simpa using hb)
+  }
+
+@[simp]
+lemma ofInitial_apply (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Set.range ι) (x : M) :
+    ofInitial ι hι x = ι x := rfl
 
 include e
 
@@ -208,6 +231,21 @@ end
 
 section
 
+variable (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] [Nonempty (NonstandardElement M)]
+
+/-- The natural numbers as a proper end extension of a nonstandard model. -/
+def natCastProperEndExtension : ℕ ⊂ₑ M where
+  emb := natCastEmbedding M
+  isInitial := inferInstance
+  not_surjective := by
+    intro h
+    obtain ⟨c, hc⟩ := Classical.arbitrary (NonstandardElement M)
+    exact isNonstandard_iff_not_mem_range.mp hc (h c)
+
+end
+
+section
+
 variable {M : Type u} {N : Type v} [ORingStructure M] [ORingStructure N] (e : M ⊂ₑ N)
 
 /-- Overspill: a formula of the induction class holding at every element of the base model holds
@@ -233,6 +271,23 @@ theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗�
   apply e.not_surjective
   intro x
   exact h₁ x (h₃ x)
+
+/-- Overspill: a definable predicate of the induction class holding at every element of the base
+model holds at some element outside it.
+- [HP98, Corollary IV.1.16] -/
+lemma overspill_definablePred (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m] {P : N → Prop}
+    (hP : Γᴬ_[m].DefinablePred P) (h : ∀ a : M, P (e a)) : ∃ c : N, c ∉ Set.range e.emb ∧ P c := by
+  have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m)
+  by_contra! hc
+  apply e.not_surjective
+  intro x
+  by_contra hx
+  apply hc x hx
+  apply InductionOnHierarchy.succ_induction Γ m hP
+  · simpa using h 0
+  · intro y hy
+    obtain ⟨a, rfl⟩ : y ∈ Set.range e.emb := by grind
+    simpa using h (a + 1)
 
 end
 
@@ -270,28 +325,81 @@ instance oringStructure : ORingStructure I.carrier where
 
 /-- `M` is an end extension of each of its closed cuts.
 - [HP98, Definition IV.1.3(2)] -/
-def endExtension : I.carrier ⊆ₑ M where
-  emb := {
-    toFun := Subtype.val,
+def endExtension : I.carrier ⊆ₑ M :=
+  .ofInitial {
+    toFun := Subtype.val
     func' f v := by cases f <;> rfl
     rel' r _ := by cases r; exacts [congrArg Subtype.val, id]
     toFun_inj := Subtype.val_injective
     rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
-  }
-  isInitial := {
-    operator_iff := by
-      intro R hR a b
-      obtain rfl := Set.mem_singleton_iff.mp hR
-      rfl
-    initial := by
-      intro R hR a b hb
-      obtain rfl := Set.mem_singleton_iff.mp hR
-      use ⟨b, I.mem_of_lt (show b < a.1 from hb) a.2⟩
-      rfl
-  }
+  } (by
+    intro a b hb
+    use ⟨b, I.mem_of_lt hb a.2⟩
+    rfl)
 
 @[simp]
 lemma endExtension_apply (x : I.carrier) : I.endExtension x = x.val := rfl
+
+section
+
+variable {N : Type v} [ORingStructure N] (ι : M ↪ₛ[ℒₒᵣ] N)
+  (hι : ∀ x y, y < ι x → y ∈ Set.range ι)
+
+/-- The image of an embedding which is closed downward under `<`, as a closed cut. -/
+def ofEmbedding : ClosedCut N where
+  carrier := Set.range ι
+  succ_mem := by
+    rintro _ ⟨x, rfl⟩
+    use x + 1
+    simp
+  mem_of_lt := by
+    rintro y _ hy ⟨x, rfl⟩
+    exact hι x y hy
+  zero_mem := by
+    use 0
+    simp
+  one_mem := by
+    use 1
+    simp
+  add_mem := by
+    rintro _ _ ⟨x, rfl⟩ ⟨y, rfl⟩
+    use x + y
+    simp
+  mul_mem := by
+    rintro _ _ ⟨x, rfl⟩ ⟨y, rfl⟩
+    use x * y
+    simp
+
+@[simp]
+lemma carrier_ofEmbedding : (ofEmbedding ι hι).carrier = Set.range ι := rfl
+
+/-- An embedding whose image is closed downward under `<` is an isomorphism onto its image. -/
+def isoOfEmbedding : M ≃ₛ[ℒₒᵣ] (ofEmbedding ι hι).carrier where
+  toFun x := ⟨ι x, Set.mem_range_self x⟩
+  func' f w := by
+    apply Subtype.ext
+    cases f <;> exact HomClass.func ι _ w
+  rel' r w h := by
+    cases r
+    · exact Subtype.ext <| congrArg ι (show w 0 = w 1 from h)
+    · exact (EmbeddingClass.map_lt_map_iff ι).mpr h
+  toFun_inj x y h := EmbeddingClass.map_inj ι (congrArg Subtype.val h)
+  rel_inv' r w h := by
+    cases r
+    · exact EmbeddingClass.map_inj ι (congrArg Subtype.val h)
+    · exact (EmbeddingClass.map_lt_map_iff ι).mp h
+  toFun_bij := by
+    and_intros
+    · intro x y h
+      exact EmbeddingClass.map_inj ι (congrArg Subtype.val h)
+    · rintro ⟨_, x, rfl⟩
+      use x
+
+@[simp]
+lemma endExtension_isoOfEmbedding (x : M) :
+    (ofEmbedding ι hι).endExtension (isoOfEmbedding ι hι x) = ι x := rfl
+
+end
 
 end ClosedCut
 
@@ -351,7 +459,7 @@ end
 
 section
 
-variable {S M : Type} [ORingStructure S] [ORingStructure M]
+variable {S : Type u} {M : Type v} [ORingStructure S] [ORingStructure M]
 
 /-- A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/
@@ -373,6 +481,31 @@ theorem _root_.FFL.FirstOrder.IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒ�
   have h₁ := models_theory_iff.mp (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻) σ hσ
   simpa [models_iff] using h ((PeanoMinus.prenexBlock σ hσ).rew Rew.emb) rfl ![] (fun _ ↦ 0)
     (by simpa [models_iff] using h₁)
+
+/-- If `S` embeds onto a $\Sigma_n$-elementary initial segment of a model `M` of `𝗣𝗔⁻`, a
+$\Pi_n$ formula satisfiable in `S` with the parameter `c` is satisfiable in `M`, with the image of
+`c` as parameter, below any element outside the image.
+- [Kay91, Theorem 12.3] -/
+theorem exists_lt_of_initialSegmentEmbedding [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ} {ι : S ↪ₛ[ℒₒᵣ] M}
+    (hι : ∀ x y, y < ι x → y ∈ Set.range ι)
+    (hel : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) ι) {b : M}
+    (hb : b ∉ Set.range ι) {c : S} {θ : ArithmeticSemisentence 2}
+    (hθ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 n θ) (h : ∃ x : S, S ⊧/![x, c] θ) : ∃ x < b, M ⊧/![x, ι c] θ := by
+  obtain ⟨x, hx⟩ := h
+  use ι x
+  and_intros
+  · rcases lt_trichotomy (ι x) b with h | rfl | h
+    · exact h
+    · exact (hb (Set.mem_range_self x)).elim
+    · exact (hb (hι x b h)).elim
+  · have h₁ := hel (φ := Rewriting.emb (∼θ)) (hθ.neg.rew Rew.emb) ![x, c] (fun _ ↦ c)
+    simpa [Matrix.comp_vecCons''] using h₁.not.mpr (by simpa using hx)
+
+end
+
+section
+
+variable {S M : Type} [ORingStructure S] [ORingStructure M]
 
 /-- A $\Sigma_s$-elementary embedding preserves the truth of $\Sigma_s$ and $\Pi_s$ sentences
 between models of $\mathsf{B}\Sigma_s$. -/
@@ -493,6 +626,14 @@ theorem standardSystem_eq_of_endExtension [IsNonstandard M] :
   have h₄ : ((n + 1 : ℕ) : N) ≤ log (e c) :=
     (exp_le_iff_le_log h₂).mp (nat_cast_exp (V := N) (n + 1) ▸ (h₁ _).le)
   exact (Nat.cast_lt.mpr n.lt_succ_self).trans_le h₄
+
+/-- A nonstandard model of `𝗜𝚺₁` embedded onto an initial segment of a model of `𝗜𝚺₁` has the same
+standard system as that model.
+- [Kay91, Theorem 12.3] -/
+theorem standardSystem_eq_of_initialSegmentEmbedding [Nonempty (NonstandardElement M)]
+    {ι : M ↪ₛ[ℒₒᵣ] N} (hι : ∀ x y, y < ι x → y ∈ Set.range ι) :
+    standardSystem M = standardSystem N :=
+  standardSystem_eq_of_endExtension (.ofInitial ι hι)
 
 end Arithmetic
 

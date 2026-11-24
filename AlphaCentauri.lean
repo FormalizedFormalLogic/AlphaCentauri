@@ -105,7 +105,9 @@ public import AlphaCentauri.Model.BSigma
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.DefinableElements
 public import AlphaCentauri.Model.EnumerationCut
+public import AlphaCentauri.Model.InitialSegmentEmbedding
 public import AlphaCentauri.Model.OpenInduction
+public import AlphaCentauri.Model.Saturation
 public import AlphaCentauri.NumberTheory.Bertrand
 public import AlphaCentauri.NumberTheory.Bertrand.Embedding
 public import AlphaCentauri.NumberTheory.Bertrand.Positions

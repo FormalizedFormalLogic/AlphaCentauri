@@ -289,19 +289,6 @@ lemma unbindParams_app_bindParams_app (φ : Semiformula L (Fin m) k) :
     apply Rew.ext <;> intro x <;> simp [Rew.comp_app, bindParams, unbindParams]
   simp [← TransitiveRewriting.comp_app, this]
 
-lemma rewriteMap_val_unbindParams_app (σ : Semisentence L (k + m)) :
-    Rew.rewriteMap Fin.val ▹ (unbindParams L k m ▹ σ) =
-      (Rewriting.emb σ : Semiproposition L (k + m)) ⇜
-        (Fin.append (fun i ↦ #i) fun j : Fin m ↦ &j : Fin (k + m) → SyntacticSemiterm L k) := by
-  unfold Rewriting.emb
-  simp only [← TransitiveRewriting.comp_app]
-  apply Rewriting.smul_ext'
-  apply Rew.ext
-  · intro i
-    cases i using Fin.addCases <;> simp [Rew.comp_app, unbindParams]
-  · intro x
-    exact x.elim
-
 end Rew
 
 namespace Semiformula

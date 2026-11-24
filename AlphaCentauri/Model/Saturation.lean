@@ -100,7 +100,9 @@ lemma exists_forall_of_setOf_mem_standardSystem {Q : ArithmeticSemisentence k �
     rwa [← Sentence.coe_quote_eq_quote, hfe e he] at h₁
   use x
   intro φ hφ
-  simpa [Sentence.coe_quote_eq_quote] using hx ⌜φ⌝ ⟨φ, hφ, rfl⟩
+  rw [← Sentence.coe_quote_eq_quote]
+  apply hx
+  use φ
 
 /-- The codes of the prenex $\Sigma_n$ formulas, or prenex $\Pi_n$ formulas, whose code satisfies a
 definable predicate form a coded set. -/
@@ -119,7 +121,10 @@ lemma setOf_prenexHierarchy_mem_standardSystem (Γ : Polarity) (n l : ℕ) {P : 
     obtain ⟨φ, rfl⟩ := he.sound_natCast
     rw [Sentence.coe_quote_eq_quote] at hφ h
     use φ
-    exact ⟨(isPrenexHierarchy_quote_iff φ).mp hφ, h, rfl⟩
+    and_intros
+    · exact (isPrenexHierarchy_quote_iff φ).mp hφ
+    · exact h
+    · rfl
 
 /-- The prenex $\Sigma_n$ type, or prenex $\Pi_n$ type, of a tuple is a coded set.
 - [Kay91, Lemma 12.1] -/
@@ -166,7 +171,9 @@ theorem «Type».realized_of_mem_standardSystem (Γ : Polarity) (n : ℕ)
       obtain ⟨σ, rfl⟩ := he.sound_natCast
       rw [Sentence.coe_quote_eq_quote] at hσ
       use σ
-      exact ⟨(hw σ).mp hσ, rfl⟩
+      and_intros
+      · exact (hw σ).mp hσ
+      · rfl
   let env (x : M) : M := matrixToVec (Fin.append (fun i : Fin k ↦ x.[((i : ℕ) : M)]) b)
   have henv : 𝚺ᴬ_[n + 2].DefinableFunction₁ env := by
     apply matrixToVec_definable

@@ -28,9 +28,7 @@ prenex $\Sigma_n$ formulas with parameters.
 
 A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`, and a
 $\Sigma_s$-elementary embedding between models of $\mathsf{B}\Sigma_s$ preserves the truth of
-$\Sigma_s$ and $\Pi_s$ sentences. If `S` embeds onto a $\Sigma_n$-elementary initial
-segment of `M`, a $\Pi_n$ formula satisfiable in `S` is satisfiable in `M` below any element outside
-the initial segment, at the image of the parameter.
+$\Sigma_s$ and $\Pi_s$ sentences.
 
 The standard system of a model of `𝗜𝚺₁` is the family of subsets of `ℕ` coded by its elements
 under Ackermann's membership; it does not shrink along an end extension, nor does it change when
@@ -69,25 +67,6 @@ lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
 
 lemma mem_range_of_lt {a : M} {b : N} (h : b < e a) : b ∈ Set.range e.emb :=
   e.isInitial.initial (R := Semiformula.Operator.LT.lt) (Set.mem_singleton _) a b (by simpa using h)
-
-/-- The end extension given by an embedding whose image is closed downward under `<`.
-- [Kay91, Definition 2.6] -/
-def ofInitial (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Set.range ι) : M ⊆ₑ N where
-  emb := ι
-  isInitial := {
-    operator_iff := by
-      intro R hR a b
-      obtain rfl := Set.mem_singleton_iff.mp hR
-      simp
-    initial := by
-      intro R hR a b hb
-      obtain rfl := Set.mem_singleton_iff.mp hR
-      exact hι a b (by simpa using hb)
-  }
-
-@[simp]
-lemma ofInitial_apply (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Set.range ι) (x : M) :
-    ofInitial ι hι x = ι x := rfl
 
 include e
 
@@ -358,7 +337,7 @@ end
 
 section
 
-variable {S : Type u} {M : Type v} [ORingStructure S] [ORingStructure M]
+variable {S M : Type} [ORingStructure S] [ORingStructure M]
 
 /-- A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/
@@ -380,31 +359,6 @@ theorem _root_.FFL.FirstOrder.IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒ�
   have h₁ := models_theory_iff.mp (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻) σ hσ
   simpa [models_iff] using h ((PeanoMinus.prenexBlock σ hσ).rew Rew.emb) rfl ![] (fun _ ↦ 0)
     (by simpa [models_iff] using h₁)
-
-/-- If `S` embeds onto a $\Sigma_n$-elementary initial segment of a model `M` of `𝗣𝗔⁻`, a
-$\Pi_n$ formula satisfiable in `S` with the parameter `c` is satisfiable in `M`, with the image of
-`c` as parameter, below any element outside the image.
-- [Kay91, Theorem 12.3] -/
-theorem exists_lt_of_initialSegmentEmbedding [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ} {ι : S ↪ₛ[ℒₒᵣ] M}
-    (hι : ∀ x y, y < ι x → y ∈ Set.range ι)
-    (hel : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) ι) {b : M}
-    (hb : b ∉ Set.range ι) {c : S} {θ : ArithmeticSemisentence 2}
-    (hθ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 n θ) (h : ∃ x : S, S ⊧/![x, c] θ) : ∃ x < b, M ⊧/![x, ι c] θ := by
-  obtain ⟨x, hx⟩ := h
-  use ι x
-  and_intros
-  · rcases lt_trichotomy (ι x) b with h | rfl | h
-    · exact h
-    · exact (hb (Set.mem_range_self x)).elim
-    · exact (hb (hι x b h)).elim
-  · have h₁ := hel (φ := Rewriting.emb (∼θ)) (hθ.neg.rew Rew.emb) ![x, c] (fun _ ↦ c)
-    simpa [Matrix.comp_vecCons''] using h₁.not.mpr (by simpa using hx)
-
-end
-
-section
-
-variable {S M : Type} [ORingStructure S] [ORingStructure M]
 
 /-- A $\Sigma_s$-elementary embedding preserves the truth of $\Sigma_s$ and $\Pi_s$ sentences
 between models of $\mathsf{B}\Sigma_s$. -/

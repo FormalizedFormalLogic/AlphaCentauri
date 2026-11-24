@@ -132,6 +132,23 @@ theorem IsElementary.of_tarskiVaught (ι : M ↪ₛ[L] N)
       use ι x
       simpa [Matrix.comp_vecCons''] using (ih (x :> e)).mpr hx
 
+/-- An embedding is elementary as soon as it is elementary for the semisentences obtained from the
+formulas of the class by rewriting. -/
+lemma IsElementary.of_rew {Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop} {ι : M ↪ₛ[L] N}
+    (h : ∀ {n k : ℕ} {φ : Semiformula L ℕ n}, Γ φ → ∀ (ω : Rew L ℕ n Empty k) (u : Fin k → M),
+      N ⊧/(ι ∘ u) (ω ▹ φ) ↔ M ⊧/u (ω ▹ φ)) : IsElementary Γ ι := by
+  intro n φ hφ e f
+  let ω : Rew L ℕ n Empty (n + (φ.fvSup + 1)) :=
+    Rew.bind (fun i ↦ #(i.castAdd _)) fun x ↦ #(Fin.natAdd n ⟨min x φ.fvSup, by omega⟩)
+  have h₁ : Function.funEqOn φ.FVar? (fun x ↦ f (min x φ.fvSup)) f := by
+    intro x hx
+    simp [(lt_fvSup_of_fvar? hx).le]
+  have h₂ : φ.Eval (ι ∘ e) (fun x ↦ ι (f (min x φ.fvSup))) ↔
+      φ.Eval e (fun x ↦ f (min x φ.fvSup)) := by
+    simpa [eval_rew, Function.comp_def, ω, -Fin.natAdd_mk] using
+      h hφ ω (Fin.append e fun x ↦ f x)
+  rwa [eval_iff_of_funEqOn φ h₁, eval_iff_of_funEqOn φ fun x hx ↦ congrArg ι (h₁ x hx)] at h₂
+
 lemma IsElementary.models_iff [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
     (h : IsElementary (fun {_} _ ↦ True) ι) (σ : Sentence L) : N↓[L] ⊧ σ ↔ M↓[L] ⊧ σ := by
   rw [FFL.FirstOrder.models_iff, FFL.FirstOrder.models_iff]

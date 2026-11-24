@@ -136,8 +136,19 @@ free variables is a substitution instance of the code of the semisentence. -/
 lemma encode_unbindParams (σ : Semisentence L (k + m)) :
     (Encodable.encode (Rew.unbindParams L k m ▹ σ) : V) = subst L (matrixToVec fun i ↦
       ⌜(Fin.append (fun i ↦ #i) (fun j : Fin m ↦ &j) i : SyntacticSemiterm L k)⌝) ⌜σ⌝ := by
+  have h : Rew.rewriteMap Fin.val ▹ (Rew.unbindParams L k m ▹ σ) =
+      (Rewriting.emb σ : Semiproposition L (k + m)) ⇜
+        (Fin.append (fun i ↦ #i) fun j : Fin m ↦ &j : Fin (k + m) → SyntacticSemiterm L k) := by
+    unfold Rewriting.emb
+    simp only [← TransitiveRewriting.comp_app]
+    apply Rewriting.smul_ext'
+    apply Rew.ext
+    · intro i
+      cases i using Fin.addCases <;> simp [Rew.comp_app, Rew.unbindParams]
+    · intro x
+      exact x.elim
   rw [← Semiformula.encode_rewriteMap (f := Fin.val) (fun _ ↦ rfl), ← Semiformula.quote_eq_encode,
-    Rew.rewriteMap_val_unbindParams_app, Semiformula.quote_def, Semiformula.typed_quote_substs]
+    h, Semiformula.quote_def, Semiformula.typed_quote_substs]
   rfl
 
 lemma quote_neg_sentence (σ : ArithmeticSemisentence n) : (⌜∼σ⌝ : V) = neg ℒₒᵣ (⌜σ⌝ : V) := by

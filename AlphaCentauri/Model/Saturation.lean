@@ -83,27 +83,38 @@ lemma exists_forall_of_mem_standardSystem {R : M → M → Prop} (hR : 𝚺ᴬ_[
   by_contra! hde
   exact hd <| E.mem_range_of_lt (a := e + 1) <| lt_of_le_of_lt hde (by simp [E])
 
+/-- The codes of the prenex $\Sigma_n$ formulas, or prenex $\Pi_n$ formulas, whose code satisfies a
+definable predicate form a coded set. -/
+lemma setOf_prenexHierarchy_mem_standardSystem (Γ : Polarity) (n l : ℕ) {P : M → Prop}
+    (hP : 𝚺ᴬ_[m + 1]-Predicate P) : {e : ℕ | ∃ φ : ArithmeticSemisentence l,
+      ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ ∧ P ⌜φ⌝ ∧ ⌜φ⌝ = e} ∈ standardSystem M := by
+  have hΓ : 𝚺ᴬ_[m + 1]-Predicate (IsPrenexHierarchy Γ n : M → Prop) :=
+    (IsPrenexHierarchy.definable Γ n).of_deltaOne
+  apply Set.mem_of_eq_of_mem _ <| setOf_mem_standardSystem hM (m := m)
+    (P := fun e ↦ (ℒₒᵣ).IsSemisentence (l : M) e ∧ IsPrenexHierarchy Γ n e ∧ P e) (by definability)
+  ext e
+  constructor
+  · rintro ⟨φ, hφ, h, rfl⟩
+    simp [Sentence.coe_quote_eq_quote, h, (isPrenexHierarchy_quote_iff φ).mpr hφ]
+  · rintro ⟨he, hφ, h⟩
+    obtain ⟨φ, rfl⟩ := he.sound_natCast
+    rw [Sentence.coe_quote_eq_quote] at hφ h
+    use φ
+    exact ⟨(isPrenexHierarchy_quote_iff φ).mp hφ, h, rfl⟩
+
 /-- The prenex $\Sigma_n$ type, or prenex $\Pi_n$ type, of a tuple is a coded set.
 - [Kay91, Lemma 12.1] -/
 theorem mem_standardSystem_hierarchyType (Γ : Polarity) (n : ℕ) {l : ℕ} (a : Fin l → M) :
     {e : ℕ | ∃ φ : ArithmeticSemisentence l, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ ∧ M ⊧/a φ ∧
-      Encodable.encode φ = e} ∈ standardSystem M := by
-  have h := setOf_mem_standardSystem hM (m := n + 1) (P := fun e ↦
-    (ℒₒᵣ).IsSemisentence (l : M) e ∧ PrenexFormulaSatisfied Γ n (matrixToVec a) e)
-    (by definability)
-  apply Set.mem_of_eq_of_mem _ h
+      ⌜φ⌝ = e} ∈ standardSystem M := by
+  apply Set.mem_of_eq_of_mem _ <| setOf_prenexHierarchy_mem_standardSystem hM Γ n l (m := n + 1)
+    (P := PrenexFormulaSatisfied Γ n (matrixToVec a)) (by definability)
   ext e
-  simp only [← Sentence.quote_eq_encode_nat]
-  constructor
-  · rintro ⟨φ, hφ, ha, rfl⟩
-    simp only [Set.mem_ofPred, Sentence.coe_quote_eq_quote]
-    exact ⟨.quote φ, (PrenexFormulaSatisfied.quote_iff hφ a).mpr ha⟩
-  · rintro ⟨he, hs⟩
-    obtain ⟨φ, rfl⟩ := he.sound_natCast
-    rw [Sentence.coe_quote_eq_quote] at hs
-    have hφ := (isPrenexHierarchy_quote_iff φ).mp hs.isPrenexHierarchy
-    use φ
-    exact ⟨hφ, (PrenexFormulaSatisfied.quote_iff hφ a).mp hs, rfl⟩
+  apply exists_congr
+  intro φ
+  apply and_congr_right
+  intro hφ
+  rw [PrenexFormulaSatisfied.quote_iff hφ]
 
 end Arithmetic
 

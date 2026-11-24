@@ -317,15 +317,6 @@ instance definable (Γ : Polarity) (s : ℕ) :
   unfold PrenexFormulaSatisfied
   definability
 
-lemma isPrenexHierarchy (h : PrenexFormulaSatisfied Γ s e p) : IsPrenexHierarchy Γ s p := by
-  obtain ⟨θ, -, rfl, hθ⟩ := h
-  apply isPrenexHierarchy_iff_exists_qqToPrenex.mpr
-  use θ
-  and_intros
-  · rfl
-  · by_contra hb
-    exact not_prenexSatisfied_of_not_isBounded hb hθ
-
 /-- [HP98, Theorem I.1.75] -/
 lemma quote_iff {l : ℕ} {σ : ArithmeticSemisentence l} (hσ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s σ)
     (v : Fin l → V) : PrenexFormulaSatisfied Γ s (matrixToVec v) ⌜σ⌝ ↔ V ⊧/v σ := by

@@ -374,8 +374,8 @@ theorem exists_model_nonstandard_sigmaDefinableElement :
   obtain ⟨x, hx, h₂, -⟩ := exists_least_mem_sigmaDefinableElements (j := 0)
     (φ := (φ.sigmaInv.rew Rew.emb).val) (e := ![]) (f := fun _ ↦ 0) Bounding.Prenex.val_hierarchy
     (fun i ↦ i.elim0) (fun _ ↦ (0 : sigmaDefinableElements (0 + 1) M).2) (by simpa using h₁)
-  have h₀ : ¬IsNonstandard x := fun hns ↦ h M _ inferInstance ⟨x, hns⟩ hx
-  simp only [IsNonstandard, not_forall, not_lt] at h₀
+  have h₀ : ¬IsNonstandardElement x := fun hns ↦ h M _ inferInstance ⟨x, hns⟩ hx
+  simp only [IsNonstandardElement, not_forall, not_lt] at h₀
   obtain ⟨m, hm⟩ := h₀
   obtain ⟨i, hi⟩ := eq_nat_of_le_nat hm
   rw [hi] at h₂

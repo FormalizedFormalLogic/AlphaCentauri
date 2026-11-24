@@ -10,7 +10,8 @@ Let `M` and `N` be countable nonstandard models of `𝗣𝗔` with the same stan
 $\Pi_n$ formula satisfiable in `M` with the parameter `c` is satisfiable in `N`, with the parameter
 `a`, below `b`, then `M` embeds onto a $\Sigma_n$-elementary initial segment of `N` which does not
 contain `b`, with `c` sent to `a`. Friedman's theorem follows: a countable nonstandard model of `𝗣𝗔`
-embeds onto a proper $\Sigma_n$-elementary initial segment of itself.
+embeds onto a proper $\Sigma_n$-elementary initial segment of itself, hence is isomorphic to a
+proper closed cut of itself.
 -/
 
 @[expose] public section
@@ -417,5 +418,24 @@ theorem exists_selfEmbedding_onto_properInitialSegment [M↓[ℒₒᵣ] ⊧* �
     exact hιb (h b)
   · exact hel
   · use a
+
+/-- Friedman's theorem for cuts: every countable nonstandard model of `𝗣𝗔` is isomorphic to a proper
+closed cut of itself which contains a given element and is a $\Sigma_n$-elementary substructure.
+- [Kay91, Theorem 12.4] -/
+theorem exists_proper_closedCut_iso [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Countable M]
+    (hM : ∃ c : M, ∀ m : ℕ, (m : M) < c) (n : ℕ) (a : M) :
+    ∃ I : ClosedCut M, I.Proper ∧ a ∈ I.carrier ∧
+      IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) I.endExtension.emb ∧
+      Nonempty (M ≃ₛ[ℒₒᵣ] I.carrier) := by
+  obtain ⟨ι, hι, hsurj, hel, ha⟩ := exists_selfEmbedding_onto_properInitialSegment hM n a
+  use .ofEmbedding ι hι
+  and_intros
+  · constructor
+    · exact (ClosedCut.ofEmbedding ι hι).zero_mem
+    · simpa [Function.Surjective] using hsurj
+  · exact ha
+  · exact hel.of_comp_iso (ClosedCut.isoOfEmbedding ι hι) <|
+      ClosedCut.endExtension_isoOfEmbedding ι hι
+  · exact ⟨ClosedCut.isoOfEmbedding ι hι⟩
 
 end FFL.FirstOrder.Arithmetic

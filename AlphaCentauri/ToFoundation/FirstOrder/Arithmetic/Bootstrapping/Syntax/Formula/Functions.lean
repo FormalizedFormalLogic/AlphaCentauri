@@ -451,6 +451,19 @@ lemma _root_.FFL.FirstOrder.Language.IsSemisentence.quote {n : ℕ} (σ : Semise
     L.IsSemisentence (n : V) ⌜σ⌝ :=
   .of_shift_eq (Sentence.quote_isSemiformula σ) (Semisentence.shift_quote σ)
 
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.sound {n p : ℕ} (h : L.IsSemisentence n p) :
+    ∃ σ : Semisentence L n, ⌜σ⌝ = p := by
+  obtain ⟨φ, rfl⟩ := IsSemiformula.sound h.isSemiformula
+  have h₁ : Rewriting.shift φ = φ := by simpa [← Semiformula.quote_shift] using h.shift_eq
+  use φ.toEmpty (Semiformula.freeVariables_eq_empty_of_shift_eq h₁)
+  simp [Sentence.quote_def]
+
+/-- A standard element coding a semisentence is the code of one. -/
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.sound_natCast {n p : ℕ}
+    (h : L.IsSemisentence (n : V) p) : ∃ σ : Semisentence L n, ⌜σ⌝ = p :=
+  Language.IsSemisentence.sound <| (Defined.shigmaOne_absolute V (Language.IsSemisentence.defined L)
+    (Language.IsSemisentence.defined L) ![n, p]).mpr h
+
 @[simp]
 lemma _root_.FFL.FirstOrder.Language.IsSentence.quote (σ : Sentence L) :
     L.IsSentence (⌜σ⌝ : V) :=

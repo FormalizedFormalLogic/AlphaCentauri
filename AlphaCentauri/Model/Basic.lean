@@ -202,21 +202,16 @@ end
 
 section
 
-variable (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hM : ∃ c : M, ∀ m : ℕ, (m : M) < c)
+variable (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] [Nonempty (NonstandardElement M)]
 
 /-- The natural numbers as a proper end extension of a nonstandard model. -/
 def natCastProperEndExtension : ℕ ⊂ₑ M where
   emb := natCastEmbedding M
   isInitial := inferInstance
   not_surjective := by
-    obtain ⟨c, hc⟩ := hM
     intro h
-    obtain ⟨m, rfl⟩ := h c
-    exact lt_irrefl _ (hc m)
-
-@[simp]
-lemma natCastProperEndExtension_emb_apply (n : ℕ) :
-    (natCastProperEndExtension M hM).emb n = n := rfl
+    obtain ⟨c, hc⟩ := Classical.arbitrary (NonstandardElement M)
+    exact isNonstandard_iff_not_mem_range.mp hc (h c)
 
 end
 

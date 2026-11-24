@@ -22,9 +22,8 @@ open Arithmetic Bootstrapping
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] (hM : ∃ c : M, ∀ m : ℕ, (m : M) < c)
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Nonempty (NonstandardElement M)]
   {k m n : ℕ}
-include hM
 
 namespace Arithmetic
 
@@ -34,7 +33,7 @@ variable {S : Set ℕ}
 lemma setOf_mem_standardSystem {P : M → Prop} (hP : 𝚺ᴬ_[m + 1]-Predicate P) :
     {n : ℕ | P n} ∈ standardSystem M := by
   have : Fact (1 ≤ m + 1) := ⟨by omega⟩
-  obtain ⟨d, hd⟩ := hM
+  obtain ⟨d, hd⟩ := Classical.arbitrary (NonstandardElement M)
   obtain ⟨c, _, hc⟩ := finset_comprehension hP d
   use c
   ext n
@@ -55,7 +54,7 @@ lemma mem_standardSystem_of_computablePred (hS : ComputablePred (· ∈ S)) :
         using models_of_provable (M := M) inferInstance
           (codeOfComputablePred_provable (T := 𝗣𝗔⁻) hS hn)
   have h₁ : {n : ℕ | M ⊧/![(n : M)] (codeOfComputablePred (· ∈ S))} ∈ standardSystem M :=
-    setOf_mem_standardSystem hM (m := 0) <|
+    setOf_mem_standardSystem (m := 0) <|
       Bounding.definablePred_of_hierarchy (codeOfComputablePred_sigma1 (· ∈ S)) Empty.elim
   simpa [h] using h₁
 
@@ -66,7 +65,7 @@ lemma exists_forall_of_mem_standardSystem {R : M → M → Prop} (hR : 𝚺ᴬ_[
     ∃ x : M, ∀ e ∈ S, R x e := by
   classical
   obtain ⟨c, rfl⟩ := hS
-  let E := natCastProperEndExtension M hM
+  let E := natCastProperEndExtension M
   obtain ⟨d, hd, x, hx⟩ := overspill_definablePred E 𝚺 (m + 1)
     (P := fun d ↦ ∃ x, ∀ e < d, e ∈ c → R x e) (by definability) <| by
       intro d
@@ -78,9 +77,7 @@ lemma exists_forall_of_mem_standardSystem {R : M → M → Prop} (hR : 𝚺ᴬ_[
       simpa using ⟨E.emb_lt_emb.mp he, hec⟩
   use x
   intro e he
-  apply hx e _ he
-  by_contra! hde
-  exact hd <| E.mem_range_of_lt (a := e + 1) <| lt_of_le_of_lt hde (by simp [E])
+  exact hx e (isNonstandard_iff_not_mem_range.mpr hd e) he
 
 /-- `exists_forall_of_mem_standardSystem` for the codes of a set of semisentences. -/
 lemma exists_forall_of_setOf_mem_standardSystem {Q : ArithmeticSemisentence k → Prop}
@@ -89,7 +86,7 @@ lemma exists_forall_of_setOf_mem_standardSystem {Q : ArithmeticSemisentence k �
     (h : ∀ s : Finset (ArithmeticSemisentence k), (∀ φ ∈ s, Q φ) → ∃ x, ∀ φ ∈ s, R x ⌜φ⌝) :
     ∃ x, ∀ φ, Q φ → R x ⌜φ⌝ := by
   classical
-  obtain ⟨x, hx⟩ := exists_forall_of_mem_standardSystem hM hR hQ <| by
+  obtain ⟨x, hx⟩ := exists_forall_of_mem_standardSystem hR hQ <| by
     intro s hs
     choose! f hf hfe using fun e (he : e ∈ s) ↦ hs he
     obtain ⟨x, hx⟩ := h (s.image f) (by simpa using hf)
@@ -123,7 +120,7 @@ theorem «Type».realized_of_mem_standardSystem (Γ : Polarity) (n : ℕ)
     rw [← encode_unbindParams, ← mem_codedSet, hc]
     simp [U]
   have hS : {e : ℕ | ∃ σ, U σ ∈ Φ ∧ ⌜σ⌝ = e} ∈ standardSystem M := by
-    apply Set.mem_of_eq_of_mem _ <| setOf_mem_standardSystem hM (m := 0)
+    apply Set.mem_of_eq_of_mem _ <| setOf_mem_standardSystem (m := 0)
       (P := fun e ↦ (ℒₒᵣ).IsSemisentence ((k + m : ℕ) : M) e ∧ subst ℒₒᵣ w e ∈ c) (by definability)
     ext e
     constructor
@@ -152,7 +149,7 @@ theorem «Type».realized_of_mem_standardSystem (Γ : Polarity) (n : ℕ)
       simpa [U] using (hΦ _ hσ).rew (Rew.bindParams ℒₒᵣ k m)
     rw [PrenexFormulaSatisfied.quote_iff this, ← Semiformula.eval_bindParams,
       Rew.bindParams_app_unbindParams_app]
-  obtain ⟨x, hx⟩ := exists_forall_of_setOf_mem_standardSystem hM hS
+  obtain ⟨x, hx⟩ := exists_forall_of_setOf_mem_standardSystem hS
     (R := fun x e ↦ PrenexFormulaSatisfied Γ n (env x) e)
     (HierarchySymbol.DefinableRel.comp inferInstance (henv.comp (by simp)) (by simp)) <| by
       intro s hs
@@ -172,7 +169,7 @@ theorem «Type».realized_of_mem_standardSystem (Γ : Polarity) (n : ℕ)
 theorem sigmaRecursivelySaturated_of_nonstandard (n : ℕ) :
     SigmaRecursivelySaturated M ℬ[<, ℒₒᵣ] n := by
   intro k m Φ b hΦ hr hf
-  apply Type.realized_of_mem_standardSystem hM 𝚺 n hΦ _ hf
-  exact mem_standardSystem_of_computablePred hM hr
+  apply Type.realized_of_mem_standardSystem 𝚺 n hΦ _ hf
+  exact mem_standardSystem_of_computablePred hr
 
 end FFL.FirstOrder

@@ -4,14 +4,10 @@ public import AlphaCentauri.Model.Saturation
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Model
 public import Mathlib.Order.Ideal
 
-/-! # Existence of initial segment embeddings
+/-! # Initial segment embeddings
 
-Let `M` and `N` be countable nonstandard models of `𝗣𝗔` with the same standard system. If every
-$\Pi_n$ formula satisfiable in `M` with the parameter `c` is satisfiable in `N`, with the parameter
-`a`, below `b`, then `M` embeds onto a $\Sigma_n$-elementary initial segment of `N` which does not
-contain `b`, with `c` sent to `a`. Friedman's theorem follows: a countable nonstandard model of `𝗣𝗔`
-embeds onto a proper $\Sigma_n$-elementary initial segment of itself, hence is isomorphic to a
-proper closed cut of itself.
+The embedding theorem for countable nonstandard models of `𝗣𝗔`, and Friedman's self-embedding
+theorem.
 -/
 
 @[expose] public section

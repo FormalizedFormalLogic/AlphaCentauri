@@ -7,9 +7,8 @@ public import Foundation.FirstOrder.Syntax.Classical.Coding
 
 Quantifier-rank invariance, distinctness lemmas and constructor equations for `Semiformula`,
 commutation and congruence lemmas for substitutions and rewritings, the conversion of a formula
-with `ℕ`-indexed or `Fin m`-indexed free variables into a semisentence, the invariance of codes
-under a renaming of free variables which preserves their codes, and the notation `t ^' n` for a
-power by a variable exponent.
+with `ℕ`-indexed free variables into a semisentence, and the notation `t ^' n` for a power by a
+variable exponent.
 -/
 
 @[expose] public section

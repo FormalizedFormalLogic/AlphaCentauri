@@ -28,10 +28,13 @@ prenex $\Sigma_n$ formulas with parameters.
 
 A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`, and a
 $\Sigma_s$-elementary embedding between models of $\mathsf{B}\Sigma_s$ preserves the truth of
-$\Sigma_s$ and $\Pi_s$ sentences.
+$\Sigma_s$ and $\Pi_s$ sentences. If `S` embeds onto a $\Sigma_n$-elementary initial
+segment of `M`, a $\Pi_n$ formula satisfiable in `S` is satisfiable in `M` below any element outside
+the initial segment, at the image of the parameter.
 
 The standard system of a model of `𝗜𝚺₁` is the family of subsets of `ℕ` coded by its elements
-under Ackermann's membership; it does not shrink along an end extension.
+under Ackermann's membership; it does not shrink along an end extension, nor does it change when
+the base model is nonstandard. An embedding onto an initial segment is such an end extension.
 -/
 
 @[expose] public section
@@ -321,7 +324,7 @@ end
 
 section
 
-variable {S M : Type} [ORingStructure S] [ORingStructure M]
+variable {S : Type u} {M : Type v} [ORingStructure S] [ORingStructure M]
 
 /-- A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/
@@ -343,6 +346,31 @@ theorem _root_.FFL.FirstOrder.IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒ�
   have h₁ := models_theory_iff.mp (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻) σ hσ
   simpa [models_iff] using h ((PeanoMinus.prenexBlock σ hσ).rew Rew.emb) rfl ![] (fun _ ↦ 0)
     (by simpa [models_iff] using h₁)
+
+/-- If `S` embeds onto a $\Sigma_n$-elementary initial segment of a model `M` of `𝗣𝗔⁻`, a
+$\Pi_n$ formula satisfiable in `S` with the parameter `c` is satisfiable in `M`, with the image of
+`c` as parameter, below any element outside the image.
+- [Kay91, Theorem 12.3] -/
+theorem exists_lt_of_initialSegmentEmbedding [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ} {ι : S ↪ₛ[ℒₒᵣ] M}
+    (hι : ∀ x y, y < ι x → y ∈ Set.range ι)
+    (hel : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) ι) {b : M}
+    (hb : b ∉ Set.range ι) {c : S} {θ : ArithmeticSemisentence 2}
+    (hθ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 n θ) (h : ∃ x : S, S ⊧/![x, c] θ) : ∃ x < b, M ⊧/![x, ι c] θ := by
+  obtain ⟨x, hx⟩ := h
+  use ι x
+  and_intros
+  · rcases lt_trichotomy (ι x) b with h | rfl | h
+    · exact h
+    · exact (hb (Set.mem_range_self x)).elim
+    · exact (hb (hι x b h)).elim
+  · have h₁ := hel (φ := Rewriting.emb (∼θ)) (hθ.neg.rew Rew.emb) ![x, c] (fun _ ↦ c)
+    simpa [Matrix.comp_vecCons''] using h₁.not.mpr (by simpa using hx)
+
+end
+
+section
+
+variable {S M : Type} [ORingStructure S] [ORingStructure M]
 
 /-- A $\Sigma_s$-elementary embedding preserves the truth of $\Sigma_s$ and $\Pi_s$ sentences
 between models of $\mathsf{B}\Sigma_s$. -/
@@ -440,6 +468,37 @@ lemma standardSystem_subset_of_endExtension : standardSystem M ⊆ standardSyste
   rintro _ ⟨a, rfl⟩
   use e a
   exact e.codedSet_emb a
+
+include e in
+/-- A nonstandard model of `𝗜𝚺₁` and an end extension of it which again models `𝗜𝚺₁` have the same
+standard system.
+- [Kay91, Chapter 12, p. 159] -/
+theorem standardSystem_eq_of_endExtension (hM : ∃ c : M, ∀ m : ℕ, (m : M) < c) :
+    standardSystem M = standardSystem N := by
+  apply (standardSystem_subset_of_endExtension e).antisymm
+  rintro _ ⟨a, rfl⟩
+  obtain ⟨c, hc⟩ := hM
+  have h₁ : ∀ m : ℕ, (m : N) < e c := by
+    intro m
+    simpa using e.emb_lt_emb.mpr (hc m)
+  have h₂ : 0 < e c := by simpa using h₁ 0
+  obtain ⟨s, hs, h₃⟩ := finset_comprehension₁ (Γ := 𝚺) (P := (· ∈ a)) (by definability) (log (e c))
+  obtain ⟨x, rfl⟩ := e.mem_range_of_lt (hs.trans_le (exp_log_le_self h₂))
+  use x
+  ext n
+  rw [← e.codedSet_emb]
+  apply h₃
+  have h₄ : ((n + 1 : ℕ) : N) ≤ log (e c) :=
+    (exp_le_iff_le_log h₂).mp (nat_cast_exp (V := N) (n + 1) ▸ (h₁ _).le)
+  exact (Nat.cast_lt.mpr n.lt_succ_self).trans_le h₄
+
+/-- A nonstandard model of `𝗜𝚺₁` embedded onto an initial segment of a model of `𝗜𝚺₁` has the same
+standard system as that model.
+- [Kay91, Theorem 12.3] -/
+theorem standardSystem_eq_of_initialSegmentEmbedding (hM : ∃ d : M, ∀ m : ℕ, (m : M) < d)
+    {ι : M ↪ₛ[ℒₒᵣ] N} (hι : ∀ x y, y < ι x → y ∈ Set.range ι) :
+    standardSystem M = standardSystem N :=
+  standardSystem_eq_of_endExtension (.ofInitial ι hι) hM
 
 end Arithmetic
 

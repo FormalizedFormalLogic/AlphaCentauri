@@ -182,6 +182,9 @@ instance : CoeOut (NonstandardElement M) M := ⟨Subtype.val⟩
 
 lemma NonstandardElement.isNonstandard (c : NonstandardElement M) : IsNonstandard (c : M) := c.2
 
+@[simp]
+lemma NonstandardElement.natCast_lt (a : NonstandardElement M) (m : ℕ) : (m : M) < a := a.2 m
+
 lemma isNonstandard_iff_not_mem_range {c : M} :
     IsNonstandard c ↔ c ∉ Set.range (Nat.cast : ℕ → M) := by
   constructor

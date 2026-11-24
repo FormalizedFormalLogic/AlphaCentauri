@@ -305,27 +305,27 @@ lemma exists_definesElement [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {x : V}
 /-- In a nonstandard model of $\mathsf{I}\Sigma_{j+1}$ the $\Sigma_{j+1}$-definable elements are
 bounded.
 - [HP98, Lemma IV.1.37] -/
-theorem exists_bound_sigmaDefinableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {a : V}
-    (ha : IsNonstandard a) : ∃ b, ∀ x ∈ sigmaDefinableElements (j + 1) V, x < b := by
+theorem exists_bound_sigmaDefinableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] (a : NonstandardElement V) :
+    ∃ b, ∀ x ∈ sigmaDefinableElements (j + 1) V, x < b := by
   have : Fact (1 ≤ j + 1) := ⟨Nat.le_add_left 1 j⟩
   obtain ⟨u, -, hu⟩ := finset_comprehension (m := j + 1) (Γ := 𝚺)
-    (P := fun c ↦ ∃ x, DefinesElement j c x) (by definability) a
+    (P := fun c ↦ ∃ x, DefinesElement j c x) (by definability) (a : V)
   obtain ⟨b, hb⟩ := IBroadSigma.collection (s := j) (R := fun c x ↦ c ∈ u → DefinesElement j c x)
-    (by definability) a <| by
+    (by definability) (a : V) <| by
       intro c hc
       simpa [imp_iff_not_or, exists_or, hu c hc] using em' (∃ x, DefinesElement j c x)
   use b
   intro x hx
   obtain ⟨c, hc⟩ := exists_definesElement hx
-  obtain ⟨y, hy, hcy⟩ := hb c (ha.natCast_lt c)
-  rwa [← (hcy <| (hu c (ha.natCast_lt c)).mpr ⟨x, hc⟩).unique hc]
+  obtain ⟨y, hy, hcy⟩ := hb c (a.natCast_lt c)
+  rwa [← (hcy <| (hu c (a.natCast_lt c)).mpr ⟨x, hc⟩).unique hc]
 
 end code
 
 /-- The definable elements refute $\mathsf{B}\Sigma_{j+1}$ once one of them is nonstandard.
 - [HP98, Lemma IV.1.41] -/
-theorem sigmaDefinableElements.not_models_BSigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {a : M}
-    (ha : a ∈ sigmaDefinableElements (j + 1) M) (hns : IsNonstandard a) :
+theorem sigmaDefinableElements.not_models_BSigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] (a : NonstandardElement M)
+    (ha : (a : M) ∈ sigmaDefinableElements (j + 1) M) :
     ¬(sigmaDefinableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := by
   intro hK
   have : (sigmaDefinableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
@@ -343,17 +343,17 @@ theorem sigmaDefinableElements.not_models_BSigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
     obtain ⟨c, hc⟩ := exists_definesElement x.2
     use c
     and_intros
-    · change ((c : sigmaDefinableElements (j + 1) M) : M) < a
+    · change ((c : sigmaDefinableElements (j + 1) M) : M) < (a : M)
       rw [hcast]
-      exact hns.natCast_lt c
+      exact a.natCast_lt c
     · apply (transfer (definesElementDef j).sigma_prop ![c, x]).mp
       simpa [hcast, Matrix.comp_vecCons''] using hc
-  have h₂ : ∀ x < a + 1, ∃ c < a, DefinesElement j c x := by
+  have h₂ : ∀ x < (a : M) + 1, ∃ c < (a : M), DefinesElement j c x := by
     simpa using (transfer (φ := “s. ∀ x < s + 1, ∃ c < s, !(definesElementDef j).val c x”)
       (by simp) ![⟨a, ha⟩]).mpr (by simpa [-Subtype.forall, -Subtype.exists] using fun x _ ↦ h₁ x)
   have : Fact (1 ≤ j + 1) := ⟨Nat.le_add_left 1 j⟩
   obtain ⟨x, -, x', -, c, -, hne, hx, hx'⟩ :=
-    pigeonhole (m := j + 1) (R := fun x c ↦ DefinesElement j c x) (by definability) a h₂
+    pigeonhole (m := j + 1) (R := fun x c ↦ DefinesElement j c x) (by definability) (a : M) h₂
   exact hne <| hx.unique hx'
 
 
@@ -361,11 +361,10 @@ theorem sigmaDefinableElements.not_models_BSigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
 - [HP98, Observation IV.1.31] -/
 theorem exists_model_nonstandard_sigmaDefinableElement :
     ∃ (M : Type) (_ : ORingStructure M) (_ : M↓[ℒₒᵣ] ⊧* 𝗣𝗔),
-      ∃ a ∈ sigmaDefinableElements 1 M, IsNonstandard a := by
+      ∃ a : NonstandardElement M, (a : M) ∈ sigmaDefinableElements 1 M := by
   obtain ⟨φ, hφ⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ := 𝚺) (s := 1) (Γ' := 𝚺)
     (φ := ∼(𝗣𝗔.consistent.val : ArithmeticSentence)) 𝗣𝗔.consistent.pi_prop.neg
   by_contra! h
-  simp only [IsNonstandard, not_forall, not_lt] at h
   apply consistent_unprovable 𝗣𝗔
   apply Arithmetic.complete.{0}
   intro M _ _
@@ -375,7 +374,9 @@ theorem exists_model_nonstandard_sigmaDefinableElement :
   obtain ⟨x, hx, h₂, -⟩ := exists_least_mem_sigmaDefinableElements (j := 0)
     (φ := (φ.sigmaInv.rew Rew.emb).val) (e := ![]) (f := fun _ ↦ 0) Bounding.Prenex.val_hierarchy
     (fun i ↦ i.elim0) (fun _ ↦ (0 : sigmaDefinableElements (0 + 1) M).2) (by simpa using h₁)
-  obtain ⟨m, hm⟩ := h M _ inferInstance x hx
+  have h₀ : ¬IsNonstandard x := fun hns ↦ h M _ inferInstance ⟨x, hns⟩ hx
+  simp only [IsNonstandard, not_forall, not_lt] at h₀
+  obtain ⟨m, hm⟩ := h₀
   obtain ⟨i, hi⟩ := eq_nat_of_le_nat hm
   rw [hi] at h₂
   have h₃ : φ.sigmaInv.val.Eval ![i] Empty.elim := by

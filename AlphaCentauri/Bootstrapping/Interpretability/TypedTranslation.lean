@@ -108,6 +108,13 @@ lemma translate_qqAlls : ∀ {n : ℕ} (φ : Semiformula V L₂ n),
     rw [show ((n + 1 : ℕ) : V) = (n : V) + 1 by simp, h]
     rfl
 
+lemma transT_rel {k : ℕ} (R : L₂.Rel k) (v : Fin k → Term V L₂) :
+    hT.transT (Semiformula.rel R v) =
+      relativizedImp hT.domT (fun i ↦ varEqualT hT (v i))
+        ((hT.relT R).subst fun i ↦ Semiterm.bvar (i.addCast 0)) := by
+  ext
+  rw [transT_val, translate_rel_typed]
+
 lemma transT_shift {n : ℕ} (φ : Semiformula V L₂ n) :
     hT.transT φ.shift = (hT.transT φ).shift := by
   ext; simp [translate_shift hT φ.isSemiformula]

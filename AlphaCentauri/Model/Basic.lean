@@ -164,25 +164,54 @@ end EndExtension
 
 namespace Arithmetic
 
+/-! ## Nonstandard elements -/
+
+section
+
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+
+/-- `c` is nonstandard: above every natural number. -/
+def IsNonstandard (c : M) : Prop := ∀ m : ℕ, (m : M) < c
+
+/-- The nonstandard elements of `M`. A nonstandard model is one for which this type is nonempty. -/
+def NonstandardElement (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : Type _ :=
+  {c : M // IsNonstandard c}
+
+lemma IsNonstandard.natCast_lt {c : M} (h : IsNonstandard c) (m : ℕ) : (m : M) < c := h m
+
+instance : CoeOut (NonstandardElement M) M := ⟨Subtype.val⟩
+
+lemma NonstandardElement.isNonstandard (c : NonstandardElement M) : IsNonstandard (c : M) := c.2
+
+@[simp]
+lemma NonstandardElement.natCast_lt (a : NonstandardElement M) (m : ℕ) : (m : M) < a := a.2 m
+
+lemma isNonstandard_iff_not_mem_range {c : M} :
+    IsNonstandard c ↔ c ∉ Set.range (Nat.cast : ℕ → M) := by
+  constructor
+  · rintro h ⟨n, rfl⟩
+    exact Arithmetic.lt_irrefl _ (h n)
+  · intro h m
+    by_contra! hc
+    obtain ⟨n, rfl⟩ := eq_nat_of_le_nat hc
+    exact h ⟨n, rfl⟩
+
+end
+
 /-! ## Overspill -/
 
 section
 
-variable (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (hM : ∃ c : M, ∀ m : ℕ, (m : M) < c)
+variable (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] [Nonempty (NonstandardElement M)]
 
 /-- The natural numbers as a proper end extension of a nonstandard model. -/
 def natCastProperEndExtension : ℕ ⊂ₑ M where
   emb := natCastEmbedding M
   isInitial := inferInstance
   not_surjective := by
-    obtain ⟨c, hc⟩ := hM
     intro h
-    obtain ⟨m, rfl⟩ := h c
-    exact lt_irrefl _ (hc m)
-
-@[simp]
-lemma natCastProperEndExtension_emb_apply (n : ℕ) :
-    (natCastProperEndExtension M hM).emb n = n := rfl
+    obtain ⟨c, hc⟩ := Classical.arbitrary (NonstandardElement M)
+    exact isNonstandard_iff_not_mem_range.mp hc (h c)
 
 end
 

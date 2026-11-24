@@ -69,7 +69,9 @@ lemma comp {k : ℕ} (f : Fin k → Fin l) : PiWitnessBelow n b (u ∘ f) (v ∘
 
 lemma models {θ : ArithmeticSemisentence l} (hθ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 n θ) (hu : M ⊧/u θ) :
     N ⊧/v θ := by
-  obtain ⟨x, -, hx⟩ := h (Rew.bShift ▹ θ) (by simpa using hθ) ⟨0, by simpa using hu⟩
+  obtain ⟨x, -, hx⟩ := h (Rew.bShift ▹ θ) (by simpa using hθ) <| by
+    use 0
+    simpa using hu
   simpa using hx
 
 variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒₒᵣ] ⊧* 𝗣𝗔] (hM : ∃ d : M, ∀ m : ℕ, (m : M) < d)
@@ -95,26 +97,36 @@ lemma exists_forth (x : M) : ∃ y : N, PiWitnessBelow n b (x :> u) (y :> v) := 
             suffices ∃ y ≤ x + ∑ φ ∈ s, z φ, ∀ φ ∈ s, ∃ w ≤ x + ∑ φ ∈ s, z φ,
                 M ⊧/(w :> y :> u) φ by
               simpa [θ, Semiformula.eval_bexsLTSucc, lt_succ_iff_le] using this
-            use x, le_self_add
-            intro φ hφ
-            use z φ, le_add_left (Finset.single_le_sum (by simp) hφ)
-            exact (prenexFormulaSatisfied_adjoin_iff (hs φ hφ).1 _ _ _).mp (hz φ hφ)
+            use x
+            and_intros
+            · exact le_self_add
+            · intro φ hφ
+              use z φ
+              and_intros
+              · exact le_add_left (Finset.single_le_sum (by simp) hφ)
+              · exact (prenexFormulaSatisfied_adjoin_iff (hs φ hφ).1 _ _ _).mp (hz φ hφ)
       obtain ⟨y, -, hy⟩ := hθ
       use y
       intro φ hφ
       obtain ⟨z, hz, hφz⟩ := hy φ hφ
-      use z, hz.trans_lt hw
-      exact (prenexFormulaSatisfied_adjoin_iff (hs φ hφ).1 _ _ _).mpr hφz
+      use z
+      and_intros
+      · exact hz.trans_lt hw
+      · exact (prenexFormulaSatisfied_adjoin_iff (hs φ hφ).1 _ _ _).mpr hφz
   use y
   rintro θ hθ ⟨w, hw⟩
   obtain ⟨ψ, hψ, hθψ⟩ := exists_prenexHierarchy_of_hierarchy 𝗣𝗔 hθ
   obtain ⟨z, hz, h₁⟩ := hy ψ <| by
-    use hψ, w
-    rw [prenexFormulaSatisfied_adjoin_iff hψ]
-    exact (models_iff_of_provable_allClosure hθψ _).mp hw
-  use z, hz
-  rw [prenexFormulaSatisfied_adjoin_iff hψ] at h₁
-  exact (models_iff_of_provable_allClosure hθψ _).mpr h₁
+    and_intros
+    · exact hψ
+    · use w
+      exact (prenexFormulaSatisfied_adjoin_iff hψ _ _ _).mpr <|
+        (models_iff_of_provable_allClosure hθψ _).mp hw
+  use z
+  and_intros
+  · exact hz
+  · exact (models_iff_of_provable_allClosure hθψ _).mpr <|
+      (prenexFormulaSatisfied_adjoin_iff hψ _ _ _).mp h₁
 
 /-- [Kay91, Theorem 12.3] -/
 lemma exists_back {y : N} {i : Fin l} (hy : y ≤ v i) :
@@ -167,13 +179,17 @@ lemma exists_back {y : N} {i : Fin l} (hy : y ≤ v i) :
   rintro θ hθ ⟨w, hw⟩
   by_contra! hc
   obtain ⟨ψ, hψ, hθψ⟩ := exists_prenexHierarchy_of_hierarchy (Γ := 𝚺) 𝗣𝗔 hθ.neg
-  have h₁ := hx ψ (by
-    use hψ
-    intro z hz
-    rw [prenexFormulaSatisfied_adjoin_iff hψ]
-    exact (models_iff_of_provable_allClosure hθψ _).mp (by simpa using hc z hz)) w
-  rw [prenexFormulaSatisfied_adjoin_iff hψ] at h₁
-  simpa [hw] using (models_iff_of_provable_allClosure hθψ _).mpr h₁
+  have h₁ : M ⊧/(w :> x :> u) (∼θ) := by
+    apply (models_iff_of_provable_allClosure hθψ _).mpr
+    apply (prenexFormulaSatisfied_adjoin_iff hψ _ _ _).mp
+    apply hx ψ
+    and_intros
+    · exact hψ
+    · intro z hz
+      apply (prenexFormulaSatisfied_adjoin_iff hψ _ _ _).mpr
+      apply (models_iff_of_provable_allClosure hθψ _).mp
+      simpa using hc z hz
+  simp [hw] at h₁
 
 end PiWitnessBelow
 
@@ -237,8 +253,22 @@ private lemma exists_piWitnessBelow_comp [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[�
         have hi' : q.target i = y := congrArg Prod.snd hi
         obtain ⟨x, hx⟩ := q.piWitnessBelow.exists_back hM hN hSSy (hi' ▸ hey.le)
         obtain ⟨r, hqr, hr⟩ := hle q hx
-        exact ⟨r, ⟨y, hqr ⟨i, hi⟩, fun _ ↦ ⟨x, hr⟩⟩, hpq.trans hqr⟩
-      · exact ⟨q, ⟨y, hq, by grind⟩, hpq⟩ }
+        use r
+        and_intros
+        · use y
+          and_intros
+          · exact hqr ⟨i, hi⟩
+          · intro _
+            use x
+        · exact hpq.trans hqr
+      · use q
+        and_intros
+        · use y
+          and_intros
+          · exact hq
+          · intro h
+            exact (hey h).elim
+        · exact hpq }
   let p₀ : PartialInitialEmbedding M n b := ⟨1, ![c], ![a], h⟩
   let G : Set (M × N) := ⋃ p ∈ Order.idealOfCofinals p₀ 𝒟, p.graph
   have hG {l : ℕ} {u : Fin l → M} {v : Fin l → N} (hu : ∀ i, (u i, v i) ∈ G) :
@@ -261,7 +291,9 @@ private lemma exists_piWitnessBelow_comp [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[�
   use f
   and_intros
   · apply huniq (hf c)
-    exact Set.mem_biUnion (Order.mem_idealOfCofinals p₀ 𝒟) ⟨0, by simp [p₀]⟩
+    apply Set.mem_biUnion (Order.mem_idealOfCofinals p₀ 𝒟)
+    use 0
+    simp [p₀]
   · intro x y hy
     obtain ⟨z, hz, h⟩ := hD x y
     obtain ⟨x', hx'⟩ := h (huniq (hf x) hz ▸ hy)
@@ -298,7 +330,9 @@ theorem exists_initialSegmentEmbedding [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒ
         obtain ⟨ψ, hψ₁, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hψ
         obtain ⟨x, -, hx⟩ := hf u ψ (hψ₁.hierarchy.accum 𝚷) <| by
           simpa using (models_iff_of_provable_allClosure hθψ u).mp hu
-        exact (models_iff_of_provable_allClosure hθψ _).mpr <| by simpa using ⟨x, hx⟩
+        apply (models_iff_of_provable_allClosure hθψ _).mpr
+        suffices ∃ x, N ⊧/(x :> f ∘ u) ψ by simpa using this
+        use x
   have heq (x y : M) : f x = f y ↔ x = y := by
     simpa using hΓ (θ := “x y. x = y”) (by simp) ![x, y]
   have hlt (x y : M) : f x < f y ↔ x < y := by

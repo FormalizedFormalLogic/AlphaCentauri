@@ -9,7 +9,8 @@ public import Mathlib.Order.Ideal
 Let `M` and `N` be countable nonstandard models of `𝗣𝗔` with the same standard system. If every
 $\Pi_n$ formula satisfiable in `M` with the parameter `c` is satisfiable in `N`, with the parameter
 `a`, below `b`, then `M` embeds onto a $\Sigma_n$-elementary initial segment of `N` which does not
-contain `b`, with `c` sent to `a`.
+contain `b`, with `c` sent to `a`. Friedman's theorem follows: a countable nonstandard model of `𝗣𝗔`
+embeds onto a proper $\Sigma_n$-elementary initial segment of itself.
 -/
 
 @[expose] public section
@@ -339,5 +340,37 @@ theorem exists_initialSegmentEmbedding [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [N↓[ℒ
     obtain ⟨y, hy, h₁⟩ := hf ![x] “y x. y = x” (by simp) ⟨x, by simp⟩
     obtain rfl : y = f x := by simpa using h₁
     exact lt_irrefl _ hy
+
+/-- Friedman's theorem: every countable nonstandard model of `𝗣𝗔` embeds onto a proper
+$\Sigma_n$-elementary initial segment of itself containing a given element.
+- [Kay91, Theorem 12.4] -/
+theorem exists_selfEmbedding_onto_properInitialSegment [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [Countable M]
+    (hM : ∃ c : M, ∀ m : ℕ, (m : M) < c) (n : ℕ) (a : M) :
+    ∃ ι : M ↪ₛ[ℒₒᵣ] M, (∀ x y, y < ι x → y ∈ Set.range ι) ∧ ¬Function.Surjective ι ∧
+      IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) ι ∧ a ∈ Set.range ι := by
+  have hQ := setOf_prenexHierarchy_mem_standardSystem hM 𝚷 n 2 (m := n + 1)
+    (P := fun e ↦ ∃ z, PrenexFormulaSatisfied 𝚷 n (z ∷ a ∷ matrixToVec ![]) e) (by definability)
+  simp only [← and_assoc] at hQ
+  obtain ⟨b, hb⟩ := exists_forall_of_setOf_mem_standardSystem hM (m := n + 1) hQ
+    (R := fun b e ↦ ∃ z < b, PrenexFormulaSatisfied 𝚷 n (z ∷ a ∷ matrixToVec ![]) e)
+    (by definability) <| by
+      intro s hs
+      choose! z hz using fun φ hφ ↦ (hs φ hφ).2
+      use ∑ φ ∈ s, z φ + 1
+      intro φ hφ
+      use z φ, lt_succ_iff_le.mpr (Finset.single_le_sum (by simp) hφ)
+      exact hz φ hφ
+  obtain ⟨ι, hι, hel, hιa, hιb⟩ := exists_initialSegmentEmbedding hM hM n a b a rfl <| by
+    rintro θ hθ ⟨x, hx⟩
+    obtain ⟨ψ, hψ, hθψ⟩ := exists_prenexHierarchy_of_hierarchy 𝗣𝗔 hθ
+    obtain ⟨z, hz, h⟩ := hb ψ <| by
+      use hψ, x
+      exact (prenexFormulaSatisfied_adjoin_iff hψ _ _ _).mpr <|
+        (models_iff_of_provable_allClosure hθψ _).mp hx
+    use z, hz
+    exact (models_iff_of_provable_allClosure hθψ _).mpr <|
+      (prenexFormulaSatisfied_adjoin_iff hψ _ _ _).mp h
+  use ι
+  exact ⟨hι, fun h ↦ hιb (h b), hel, a, hιa⟩
 
 end FFL.FirstOrder.Arithmetic

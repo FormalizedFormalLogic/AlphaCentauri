@@ -8,7 +8,8 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 /-! # Saturation of nonstandard models of Peano arithmetic
 
 The standard system of a nonstandard model of `𝗣𝗔` contains every subset of `ℕ` cut out by a
-definable predicate of the model, and every recursive subset of `ℕ`. A type over the model
+definable predicate of the model, every recursive subset of `ℕ`, and the set of codes of the prenex
+$\Sigma_n$ formulas, or of the prenex $\Pi_n$ formulas, satisfied by a tuple. A type over the model
 consisting of prenex $\Sigma_n$ formulas, or of prenex $\Pi_n$ formulas, whose set of codes is in
 the standard system is realized, and so the model is $\Sigma_n$-recursively saturated for every
 $n$.
@@ -99,6 +100,42 @@ lemma exists_forall_of_setOf_mem_standardSystem {Q : ArithmeticSemisentence k �
   rw [← Sentence.coe_quote_eq_quote]
   apply hx
   use φ
+
+/-- The codes of the prenex $\Sigma_n$ formulas, or prenex $\Pi_n$ formulas, whose code satisfies a
+definable predicate form a coded set. -/
+lemma setOf_prenexHierarchy_mem_standardSystem (Γ : Polarity) (n l : ℕ) {P : M → Prop}
+    (hP : 𝚺ᴬ_[m + 1]-Predicate P) : {e : ℕ | ∃ φ : ArithmeticSemisentence l,
+      ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ ∧ P ⌜φ⌝ ∧ ⌜φ⌝ = e} ∈ standardSystem M := by
+  have hΓ : 𝚺ᴬ_[m + 1]-Predicate (IsPrenexHierarchy Γ n : M → Prop) :=
+    (IsPrenexHierarchy.definable Γ n).of_deltaOne
+  apply Set.mem_of_eq_of_mem _ <| setOf_mem_standardSystem (m := m)
+    (P := fun e ↦ (ℒₒᵣ).IsSemisentence (l : M) e ∧ IsPrenexHierarchy Γ n e ∧ P e) (by definability)
+  ext e
+  constructor
+  · rintro ⟨φ, hφ, h, rfl⟩
+    simp [Sentence.coe_quote_eq_quote, h, (isPrenexHierarchy_quote_iff φ).mpr hφ]
+  · rintro ⟨he, hφ, h⟩
+    obtain ⟨φ, rfl⟩ := he.sound_natCast
+    rw [Sentence.coe_quote_eq_quote] at hφ h
+    use φ
+    and_intros
+    · exact (isPrenexHierarchy_quote_iff φ).mp hφ
+    · exact h
+    · rfl
+
+/-- The prenex $\Sigma_n$ type, or prenex $\Pi_n$ type, of a tuple is a coded set.
+- [Kay91, Lemma 12.1] -/
+theorem mem_standardSystem_hierarchyType (Γ : Polarity) (n : ℕ) {l : ℕ} (a : Fin l → M) :
+    {e : ℕ | ∃ φ : ArithmeticSemisentence l, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ ∧ M ⊧/a φ ∧
+      ⌜φ⌝ = e} ∈ standardSystem M := by
+  apply Set.mem_of_eq_of_mem _ <| setOf_prenexHierarchy_mem_standardSystem Γ n l (m := n + 1)
+    (P := PrenexFormulaSatisfied Γ n (matrixToVec a)) (by definability)
+  ext e
+  apply exists_congr
+  intro φ
+  apply and_congr_right
+  intro hφ
+  rw [PrenexFormulaSatisfied.quote_iff hφ]
 
 end Arithmetic
 

@@ -271,9 +271,9 @@ def endExtension : I.carrier ⊆ₑ M :=
     rel' r _ := by cases r; exacts [congrArg Subtype.val, id]
     toFun_inj := Subtype.val_injective
     rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
-  } (by
-    intro a b hb
-    use ⟨b, I.mem_of_lt hb a.2⟩
+  } (by rintro _ rfl; simp [Operator.LT.sentence_eq]) (by
+    rintro _ rfl a b hb
+    use ⟨b, I.mem_of_lt (show b < a.1 from hb) a.2⟩
     rfl)
 
 @[simp]
@@ -486,7 +486,8 @@ standard system as that model.
 theorem standardSystem_eq_of_initialSegmentEmbedding [Nonempty (NonstandardElement M)]
     {ι : M ↪ₛ[ℒₒᵣ] N} (hι : ∀ x y, y < ι x → y ∈ Set.range ι) :
     standardSystem M = standardSystem N :=
-  standardSystem_eq_of_endExtension (.ofInitial ι hι)
+  standardSystem_eq_of_endExtension <| .ofInitial ι
+    (by rintro _ rfl; simp [Operator.LT.sentence_eq]) (by rintro _ rfl; simpa using hι)
 
 end Arithmetic
 

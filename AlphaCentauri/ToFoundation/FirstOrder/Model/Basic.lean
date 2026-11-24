@@ -16,8 +16,9 @@ of $\Gamma$ takes the same truth value at elements of `M` as at their images. An
 substructure is a $\Gamma$-elementary substructure for every formula; a proper one is not
 surjective. Models of a complete theory are elementarily equivalent. The Tarski–Vaught test reduces
 elementarity for bounded formulas, and for the prenex formulas up to a level, to finding witnesses
-in the substructure. Along an elementary embedding onto an initial segment, witnesses go below any
-element outside the image.
+in the substructure. An elementary embedding onto an initial segment for a trichotomous operator
+moves witnesses into the part of the model which that operator relates to any element outside the
+image.
 
 A countable elementary chain is a sequence of `L`-structures `M 0 ≼ₑ[L] M 1 ≼ₑ[L] M 2 ≼ₑ[L] ⋯`,
 each an elementary substructure of the next. Composing the steps gives an elementary substructure
@@ -142,14 +143,16 @@ lemma IsElementary.modelsTheory [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
     (h : IsElementary (fun {_} _ ↦ True) ι) [N↓[L] ⊧* T] : M↓[L] ⊧* T :=
   ⟨fun σ hσ ↦ (h.models_iff σ).mp <| Semantics.ModelsSet.models _ hσ⟩
 
-/-- If the image of a $\Gamma$-elementary embedding `ι` is an initial segment of a linear order
-`N`, a formula whose negation is in $\Gamma$ and which is satisfiable in `M` with the parameter `c`
-is satisfiable in `N` with the parameter `ι c` below any element outside the image.
+/-- If the image of a $\Gamma$-elementary embedding `ι` is an initial segment of `N` for a
+trichotomous operator `R`, a formula whose negation is in $\Gamma$ and which is satisfiable in `M`
+with the parameter `c` is satisfiable in `N` with the parameter `ι c` by an element which `R`
+relates to any given element outside the image.
 - [Kay91, Theorem 12.3] -/
-lemma IsElementary.exists_lt_of_initial [LinearOrder N] {Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop}
-    {ι : M ↪ₛ[L] N} (hι : ∀ x y, y < ι x → y ∈ Set.range ι) (hel : IsElementary Γ ι) {b : N}
+lemma IsElementary.exists_of_initial {Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop}
+    {R : Operator L 2} {ι : M ↪ₛ[L] N} (hι : ∀ (a : M) (b : N), R.val ![b, ι a] → b ∈ Set.range ι)
+    (htri : ∀ x y : N, R.val ![x, y] ∨ x = y ∨ R.val ![y, x]) (hel : IsElementary Γ ι) {b : N}
     (hb : b ∉ Set.range ι) {c : M} {θ : Semisentence L 2} (hθ : Γ (Rewriting.emb (∼θ)))
-    (h : ∃ x : M, M ⊧/![x, c] θ) : ∃ x < b, N ⊧/![x, ι c] θ := by
+    (h : ∃ x : M, M ⊧/![x, c] θ) : ∃ x, R.val ![x, b] ∧ N ⊧/![x, ι c] θ := by
   obtain ⟨x, hx⟩ := h
   use ι x
   and_intros
@@ -571,26 +574,24 @@ protected def trans (e₁ : M ⊆ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) : M ⊆ₑ
 lemma trans_apply (e₁ : M ⊆ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) (x : M) : e₁.trans e₂ x = e₂ (e₁ x) :=
   rfl
 
-/-- The end extension given by an embedding whose image is closed downward under `<`.
+/-- The end extension given by an embedding whose image is an initial segment for every operator of
+`ℬ`, when these operators are open formulas.
 - [Kay91, Definition 2.6] -/
-def ofInitial [L.LT] [LT N] [Tarski.Structure.LT L N] (ι : M ↪ₛ[L] N)
-    (hι : ∀ x y, y < ι x → y ∈ Set.range ι) : M ⊆ₑ[ℬ[<, L]] N where
+def ofInitial (ι : M ↪ₛ[L] N) (hopen : ∀ R ∈ ℬ, R.sentence.Open)
+    (hι : ∀ R ∈ ℬ, ∀ (a : M) (b : N), R.val ![b, ι a] → b ∈ Set.range ι) : M ⊆ₑ[ℬ] N where
   emb := ι
   isInitial := {
     operator_iff := by
       intro R hR a b
-      obtain rfl := Set.mem_singleton_iff.mp hR
-      simpa [Operator.val, Operator.LT.sentence_eq, Function.comp_def] using
-        (EmbeddingClass.rel ι Language.LT.lt ![a, b]).symm
-    initial := by
-      intro R hR a b hb
-      obtain rfl := Set.mem_singleton_iff.mp hR
-      exact hι a b (by simpa using hb)
+      simpa [Operator.val, Matrix.comp_vecCons'', Empty.eq_elim] using
+        eval_hom_iff_of_open ι (hopen R hR) (e₁ := ![a, b]) (ε₁ := Empty.elim)
+    initial := hι _
   }
 
 @[simp]
-lemma ofInitial_apply [L.LT] [LT N] [Tarski.Structure.LT L N] (ι : M ↪ₛ[L] N)
-    (hι : ∀ x y, y < ι x → y ∈ Set.range ι) (x : M) : ofInitial ι hι x = ι x := rfl
+lemma ofInitial_apply (ι : M ↪ₛ[L] N) (hopen : ∀ R ∈ ℬ, R.sentence.Open)
+    (hι : ∀ R ∈ ℬ, ∀ (a : M) (b : N), R.val ![b, ι a] → b ∈ Set.range ι) (x : M) :
+    ofInitial ι hopen hι x = ι x := rfl
 
 /-- An end extension is a $\Delta_0$-elementary substructure.
 - [Kay91, Theorem 2.7]

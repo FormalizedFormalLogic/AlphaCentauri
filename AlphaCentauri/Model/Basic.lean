@@ -171,23 +171,29 @@ section
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 /-- `c` is nonstandard: above every natural number. -/
-def IsNonstandard (c : M) : Prop := ∀ m : ℕ, (m : M) < c
+def IsNonstandardElement (c : M) : Prop := ∀ m : ℕ, (m : M) < c
 
-/-- The nonstandard elements of `M`. A nonstandard model is one for which this type is nonempty. -/
+/-- The nonstandard elements of `M`. -/
 def NonstandardElement (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : Type _ :=
-  {c : M // IsNonstandard c}
+  {c : M // IsNonstandardElement c}
 
-lemma IsNonstandard.natCast_lt {c : M} (h : IsNonstandard c) (m : ℕ) : (m : M) < c := h m
+/-- `M` is nonstandard: it has a nonstandard element. -/
+abbrev IsNonstandard (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : Prop :=
+  Nonempty (NonstandardElement M)
+
+lemma IsNonstandardElement.natCast_lt {c : M} (h : IsNonstandardElement c) (m : ℕ) :
+    (m : M) < c := h m
 
 instance : CoeOut (NonstandardElement M) M := ⟨Subtype.val⟩
 
-lemma NonstandardElement.isNonstandard (c : NonstandardElement M) : IsNonstandard (c : M) := c.2
+lemma NonstandardElement.isNonstandardElement (c : NonstandardElement M) :
+    IsNonstandardElement (c : M) := c.2
 
 @[simp]
 lemma NonstandardElement.natCast_lt (a : NonstandardElement M) (m : ℕ) : (m : M) < a := a.2 m
 
-lemma isNonstandard_iff_not_mem_range {c : M} :
-    IsNonstandard c ↔ c ∉ Set.range (Nat.cast : ℕ → M) := by
+lemma isNonstandardElement_iff_not_mem_range {c : M} :
+    IsNonstandardElement c ↔ c ∉ Set.range (Nat.cast : ℕ → M) := by
   constructor
   · rintro h ⟨n, rfl⟩
     exact Arithmetic.lt_irrefl _ (h n)
@@ -469,7 +475,7 @@ include e in
 /-- A nonstandard model of `𝗜𝚺₁` and an end extension of it which again models `𝗜𝚺₁` have the same
 standard system.
 - [Kay91, Chapter 12, p. 159] -/
-theorem standardSystem_eq_of_endExtension [Nonempty (NonstandardElement M)] :
+theorem standardSystem_eq_of_endExtension [IsNonstandard M] :
     standardSystem M = standardSystem N := by
   apply (standardSystem_subset_of_endExtension e).antisymm
   rintro _ ⟨a, rfl⟩

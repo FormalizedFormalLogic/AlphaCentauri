@@ -55,6 +55,15 @@ lemma termBShift_zero (ht : IsSemiterm L 0 t) : termBShift L t = t := by
     rw [nth_termBShiftVec hts.isUTerm hi]
     exact ih i hi
 
+lemma Semiterm.bShift_eq_subst_nil (t : Term V L) : t.bShift = t.subst ![] := by
+  ext
+  simp [termBShift_zero t.isSemiterm, termSubst_zero t.isSemiterm]
+
+lemma Semiterm.bShift_subst_nil {k : ℕ} (t : Term V L) :
+    (t.subst ![] : Semiterm V L k).bShift = t.subst ![] := by
+  ext
+  simp [termBShift_zero t.isSemiterm, termSubst_zero t.isSemiterm]
+
 /-- The shift of free variables does not decrease the code of a term. -/
 lemma le_termShift (ht : IsSemiterm L n t) : t ≤ termShift L t := by
   apply IsSemiterm.induction 𝚷 ?_ ?_ ?_ ?_ t ht

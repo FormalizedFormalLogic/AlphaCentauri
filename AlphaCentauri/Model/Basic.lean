@@ -185,6 +185,40 @@ end EndExtension
 
 namespace Arithmetic
 
+/-! ## Nonstandard elements -/
+
+section
+
+variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+
+/-- `c` is nonstandard: above every natural number. -/
+def IsNonstandard (c : M) : Prop := ∀ m : ℕ, (m : M) < c
+
+/-- The nonstandard elements of `M`. A nonstandard model is one for which this type is nonempty. -/
+def NonstandardElement (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : Type _ :=
+  {c : M // IsNonstandard c}
+
+lemma IsNonstandard.natCast_lt {c : M} (h : IsNonstandard c) (m : ℕ) : (m : M) < c := h m
+
+instance : CoeOut (NonstandardElement M) M := ⟨Subtype.val⟩
+
+lemma NonstandardElement.isNonstandard (c : NonstandardElement M) : IsNonstandard (c : M) := c.2
+
+@[simp]
+lemma NonstandardElement.natCast_lt (a : NonstandardElement M) (m : ℕ) : (m : M) < a := a.2 m
+
+lemma isNonstandard_iff_not_mem_range {c : M} :
+    IsNonstandard c ↔ c ∉ Set.range (Nat.cast : ℕ → M) := by
+  constructor
+  · rintro h ⟨n, rfl⟩
+    exact Arithmetic.lt_irrefl _ (h n)
+  · intro h m
+    by_contra! hc
+    obtain ⟨n, rfl⟩ := eq_nat_of_le_nat hc
+    exact h ⟨n, rfl⟩
+
+end
+
 /-! ## Overspill -/
 
 section
@@ -473,14 +507,14 @@ include e in
 /-- A nonstandard model of `𝗜𝚺₁` and an end extension of it which again models `𝗜𝚺₁` have the same
 standard system.
 - [Kay91, Chapter 12, p. 159] -/
-theorem standardSystem_eq_of_endExtension (hM : ∃ c : M, ∀ m : ℕ, (m : M) < c) :
+theorem standardSystem_eq_of_endExtension [Nonempty (NonstandardElement M)] :
     standardSystem M = standardSystem N := by
   apply (standardSystem_subset_of_endExtension e).antisymm
   rintro _ ⟨a, rfl⟩
-  obtain ⟨c, hc⟩ := hM
+  obtain ⟨c, hc⟩ := Classical.arbitrary (NonstandardElement M)
   have h₁ : ∀ m : ℕ, (m : N) < e c := by
     intro m
-    simpa using e.emb_lt_emb.mpr (hc m)
+    simpa using e.emb_lt_emb.mpr (hc.natCast_lt m)
   have h₂ : 0 < e c := by simpa using h₁ 0
   obtain ⟨s, hs, h₃⟩ := finset_comprehension₁ (Γ := 𝚺) (P := (· ∈ a)) (by definability) (log (e c))
   obtain ⟨x, rfl⟩ := e.mem_range_of_lt (hs.trans_le (exp_log_le_self h₂))

@@ -3,7 +3,7 @@ module
 public import AlphaCentauri.Bootstrapping.Interpretability.Interpretable
 public import AlphaCentauri.Bootstrapping.Proof.CutFree
 public import AlphaCentauri.Bootstrapping.Proof.Deduction
-public import AlphaCentauri.Interpretability.Henkin
+public import AlphaCentauri.Interpretability.HenkinTruth
 public import AlphaCentauri.Interpretability.Formalized
 public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 public import Foundation.FirstOrder.Incompleteness.StandardProvability
@@ -11,9 +11,8 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 /-!
 # The formalized interpretation existence lemma
 
-Along a table of the Henkin translation of a theory $S$, every axiom of $S$ translates to a formula
-provable from $T$ and the consistency of $S$. The consistency of $T + \varphi$ follows from
-$T + \neg\mathrm{Pr}_T(\neg\varphi)$.
+The consistency of $T + \varphi$ follows from $T + \neg\mathrm{Pr}_T(\neg\varphi)$, and hence
+$T + \neg\mathrm{Pr}_T(\neg\varphi)$ interprets $T + \varphi$ by the Henkin translation.
 
 ## References
 
@@ -28,20 +27,6 @@ namespace FFL.FirstOrder.Arithmetic
 
 open Bootstrapping
 
-
-section henkin
-
-variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] (S : Theory L) [S.Δ₁]
-  [Theory.Δ₁.Sentential S] [𝗘𝗤 L ⪯ S] (T : ArithmeticTheory) [T.Δ₁] [𝗣𝗔 ⪯ T]
-
-/-- In every model of $\mathsf{I}\Sigma_1$, along a table of the Henkin translation of `S`, every
-axiom of `S` translates to a formula provable from `T` and the consistency of `S`.
-- [Vis90, §6.2.2.1] -/
-axiom provable_translate_henkinTranslation {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-    {tbl : V} (h : IsTableOf (henkinTranslation S T) tbl) {p : V} (hp : p ∈ S.Δ₁Class)
-    (hf : IsFormula L p) : Provable (T ∪ S.Con) (translate ℒₒᵣ L tbl p)
-
-end henkin
 
 section existence
 

@@ -255,14 +255,14 @@ theorem sigmaElementary : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j)
     use ⟨x, hx⟩
     exact hφx
 
-variable {a : M} (ha : a ∈ sigmaDefinableElements (j + 1) M) (hns : ∀ m : ℕ, (m : M) < a)
-include hns
+variable (a : NonstandardElement M) (ha : (a : M) ∈ sigmaDefinableElements (j + 1) M)
+include a
 
 /-- The cut below the definable elements satisfies $\mathsf{B}\Sigma_{j+1}$ once `M` is
 nonstandard.
 - [HP98, Lemma IV.1.44(1)] -/
 theorem models_BSigma : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := by
-  obtain ⟨b, hb⟩ := exists_bound_sigmaDefinableElements (j := j) hns
+  obtain ⟨b, hb⟩ := exists_bound_sigmaDefinableElements (j := j) a
   have hI : ∃ c, c ∉ (definableCut j M).carrier := by
     use b
     rintro ⟨c, hc, hbc⟩
@@ -280,7 +280,7 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
       ⟨x, hxI⟩ ∈ sigmaDefinableElements (j + 1) (definableCut j M).carrier := by
     obtain ⟨φ, hφ, hφx⟩ := mem_sigmaDefinableElements_iff.mp hx
     obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
-    have := models_BSigma (j := j) hns
+    have := models_BSigma (j := j) a
     have : M↓[ℒₒᵣ] ⊧* 𝗕𝚺 j :=
       haveI : 𝗕𝚺 j ⪯ 𝗣𝗔 := BSigma_weakerThan_Peano
       models_of_subtheory (U := 𝗣𝗔) inferInstance
@@ -320,11 +320,10 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
   have hI' {c : M} (hc : c ∈ sigmaDefinableElements (j + 1) M) : c ∈ (definableCut j M).carrier :=
     ⟨c + 1, ((⟨c, hc⟩ : sigmaDefinableElements (j + 1) M) + 1).2, lt_add_one c⟩
   obtain ⟨b, hb⟩ := exists_bound_sigmaDefinableElements (V := (definableCut j M).carrier) (j := j)
-    (a := ⟨a, hI' ha⟩) <| by
-    intro m
-    change ((m : (definableCut j M).carrier) : M) < a
-    rw [hcast]
-    exact hns m
+    ⟨⟨a, hI' ha⟩, fun m ↦ by
+      change ((m : (definableCut j M).carrier) : M) < a
+      rw [hcast]
+      exact a.natCast_lt m⟩
   obtain ⟨c, hc, hbc⟩ := b.2
   exact lt_asymm hbc (hb ⟨c, hI' hc⟩ (hK hc (hI' hc)) : c < b.1)
 

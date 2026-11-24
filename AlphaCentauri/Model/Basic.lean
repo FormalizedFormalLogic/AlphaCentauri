@@ -67,6 +67,25 @@ lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
 lemma mem_range_of_lt {a : M} {b : N} (h : b < e a) : b ∈ Set.range e.emb :=
   e.isInitial.initial (R := Semiformula.Operator.LT.lt) (Set.mem_singleton _) a b (by simpa using h)
 
+/-- The end extension given by an embedding whose image is closed downward under `<`.
+- [Kay91, Definition 2.6] -/
+def ofInitial (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Set.range ι) : M ⊆ₑ N where
+  emb := ι
+  isInitial := {
+    operator_iff := by
+      intro R hR a b
+      obtain rfl := Set.mem_singleton_iff.mp hR
+      simp
+    initial := by
+      intro R hR a b hb
+      obtain rfl := Set.mem_singleton_iff.mp hR
+      exact hι a b (by simpa using hb)
+  }
+
+@[simp]
+lemma ofInitial_apply (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Set.range ι) (x : M) :
+    ofInitial ι hι x = ι x := rfl
+
 include e
 
 /-- A structure with an end extension modelling `𝗣𝗔⁻` is itself a model of `𝗣𝗔⁻`.
@@ -229,25 +248,17 @@ instance oringStructure : ORingStructure I.carrier where
 
 /-- `M` is an end extension of each of its closed cuts.
 - [HP98, Definition IV.1.3(2)] -/
-def endExtension : I.carrier ⊆ₑ M where
-  emb := {
-    toFun := Subtype.val,
+def endExtension : I.carrier ⊆ₑ M :=
+  .ofInitial {
+    toFun := Subtype.val
     func' f v := by cases f <;> rfl
     rel' r _ := by cases r; exacts [congrArg Subtype.val, id]
     toFun_inj := Subtype.val_injective
     rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
-  }
-  isInitial := {
-    operator_iff := by
-      intro R hR a b
-      obtain rfl := Set.mem_singleton_iff.mp hR
-      rfl
-    initial := by
-      intro R hR a b hb
-      obtain rfl := Set.mem_singleton_iff.mp hR
-      use ⟨b, I.mem_of_lt (show b < a.1 from hb) a.2⟩
-      rfl
-  }
+  } (by
+    intro a b hb
+    use ⟨b, I.mem_of_lt hb a.2⟩
+    rfl)
 
 @[simp]
 lemma endExtension_apply (x : I.carrier) : I.endExtension x = x.val := rfl

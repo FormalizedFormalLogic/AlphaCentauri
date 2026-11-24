@@ -23,9 +23,10 @@ nonstandard model of `𝗣𝗔⁻` is a proper end extension of the natural numb
 
 A cut of `M` is a subset closed under successor and downward closed under `<`. A closed cut, one
 closed under the operations of the language, is a substructure of `M`, and `M` is an end extension
-of it. No proper cut is definable by a $\Sigma_0$ formula with parameters in a model of `𝗜𝚺₀`, and
-no model of `𝗜𝚫 n` has a proper cut whose membership relation and complement are both definable by
-prenex $\Sigma_n$ formulas with parameters.
+of it. The image of an embedding which is closed downward under `<` is a closed cut, isomorphic to
+the embedded structure. No proper cut is definable by a $\Sigma_0$ formula with parameters in a
+model of `𝗜𝚺₀`, and no model of `𝗜𝚫 n` has a proper cut whose membership relation and complement are
+both definable by prenex $\Sigma_n$ formulas with parameters.
 
 A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`, and a
 $\Sigma_s$-elementary embedding between models of $\mathsf{B}\Sigma_s$ preserves the truth of
@@ -332,6 +333,67 @@ def endExtension : I.carrier ⊆ₑ M :=
 
 @[simp]
 lemma endExtension_apply (x : I.carrier) : I.endExtension x = x.val := rfl
+
+section
+
+variable {N : Type v} [ORingStructure N] (ι : M ↪ₛ[ℒₒᵣ] N)
+  (hι : ∀ x y, y < ι x → y ∈ Set.range ι)
+
+/-- The image of an embedding which is closed downward under `<`, as a closed cut. -/
+def ofEmbedding : ClosedCut N where
+  carrier := Set.range ι
+  succ_mem := by
+    rintro _ ⟨x, rfl⟩
+    use x + 1
+    simp
+  mem_of_lt := by
+    rintro y _ hy ⟨x, rfl⟩
+    exact hι x y hy
+  zero_mem := by
+    use 0
+    simp
+  one_mem := by
+    use 1
+    simp
+  add_mem := by
+    rintro _ _ ⟨x, rfl⟩ ⟨y, rfl⟩
+    use x + y
+    simp
+  mul_mem := by
+    rintro _ _ ⟨x, rfl⟩ ⟨y, rfl⟩
+    use x * y
+    simp
+
+@[simp]
+lemma carrier_ofEmbedding : (ofEmbedding ι hι).carrier = Set.range ι := rfl
+
+/-- An embedding whose image is closed downward under `<` is an isomorphism onto its image. -/
+def isoOfEmbedding : M ≃ₛ[ℒₒᵣ] (ofEmbedding ι hι).carrier where
+  toFun x := ⟨ι x, Set.mem_range_self x⟩
+  func' f w := by
+    apply Subtype.ext
+    cases f <;> exact HomClass.func ι _ w
+  rel' r w h := by
+    cases r
+    · exact Subtype.ext <| congrArg ι (show w 0 = w 1 from h)
+    · exact (EmbeddingClass.map_lt_map_iff ι).mpr h
+  toFun_inj x y h := EmbeddingClass.map_inj ι (congrArg Subtype.val h)
+  rel_inv' r w h := by
+    cases r
+    · exact EmbeddingClass.map_inj ι (congrArg Subtype.val h)
+    · exact (EmbeddingClass.map_lt_map_iff ι).mp h
+  toFun_bij := by
+    and_intros
+    · intro x y h
+      exact EmbeddingClass.map_inj ι (congrArg Subtype.val h)
+    · rintro ⟨_, x, rfl⟩
+      use x
+
+@[simp]
+lemma endExtension_isoOfEmbedding (x : M) :
+    (ofEmbedding ι hι).endExtension (isoOfEmbedding ι hι x) = ι x := rfl
+
+end
 
 end ClosedCut
 

@@ -250,6 +250,19 @@ def Tarski.Structure.Iso.toElementarySubstructure (f : M ≃ₛ[L] N) : M ≼ₑ
     use a
     exact hx
 
+/-- An embedding which is elementary after composition with an isomorphism is elementary. -/
+lemma IsElementary.of_comp_iso {Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop} {ι : M ↪ₛ[L] N}
+    {κ : K ↪ₛ[L] N} (h : IsElementary Γ ι) (f : M ≃ₛ[L] K) (hf : ∀ x, κ (f x) = ι x) :
+    IsElementary Γ κ := by
+  intro n φ hφ e g
+  obtain ⟨e, rfl⟩ := f.toFun_bij.2.comp_left e
+  obtain ⟨g, rfl⟩ := f.toFun_bij.2.comp_left g
+  have h₁ : κ ∘ f = ι := funext hf
+  have h₂ := f.toElementarySubstructure.isElementary (φ := φ) trivial e g
+  have h₃ := h hφ e g
+  rw [← h₁] at h₃
+  exact h₃.trans h₂.symm
+
 lemma Tarski.Structure.ElementaryEquiv.of_elementarySubstructure [Nonempty M] [Nonempty N]
     (e : M ≼ₑ[L] N) : M ≡ₑ[L] N :=
   ⟨fun {σ} ↦ (IsElementary.models_iff e.isElementary σ).symm⟩

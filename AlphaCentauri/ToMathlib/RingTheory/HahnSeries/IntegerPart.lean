@@ -20,6 +20,8 @@ Integer parts of Hahn series and the induction they provide for predicates deter
 polynomials.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open Polynomial

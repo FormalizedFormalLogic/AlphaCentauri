@@ -12,6 +12,8 @@ The logic $\mathbf{CLM}$ and its completeness with respect to finite models.
 - [Ign91, §6]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

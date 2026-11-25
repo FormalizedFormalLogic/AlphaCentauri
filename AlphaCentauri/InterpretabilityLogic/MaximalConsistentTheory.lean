@@ -10,6 +10,8 @@ public import Mathlib.Order.Zorn
 Maximal consistent sets of all formulas relative to a logic.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

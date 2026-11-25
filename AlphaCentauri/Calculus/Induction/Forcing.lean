@@ -12,6 +12,8 @@ Forcing over anchored derivations of the calculus with an induction rule.
 - [Bus98A, Section 1.4.2]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

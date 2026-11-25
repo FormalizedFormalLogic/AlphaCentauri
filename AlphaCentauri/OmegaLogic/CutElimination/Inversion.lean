@@ -12,6 +12,8 @@ Bound-preserving inversion for disjunctions, conjunctions, and universal formula
 - [Tow20, Section 19.2, Section 19.3, Section 19.4]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

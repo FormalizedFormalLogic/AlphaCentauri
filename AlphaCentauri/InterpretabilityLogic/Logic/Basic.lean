@@ -10,6 +10,8 @@ public import Foundation.Meta.ClProver
 Logics as sets of formulas, and the interpretability logics defined by axiom schemata.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

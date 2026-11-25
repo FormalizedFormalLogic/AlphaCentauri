@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.ProvabilityLogic.GL.Basic
 
 /-!
@@ -9,6 +10,8 @@ Finiteness of the LR-closure of a finite set of atoms up to $\mathbf{GL}$-equiva
 
 - [Ign91, Lemma 6.3]
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.Basic
 
 /-!
@@ -7,6 +8,8 @@ public import Foundation.FirstOrder.Arithmetic.Basic
 
 - [Tow20, Section 13]
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

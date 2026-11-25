@@ -9,6 +9,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prenex
 Disjunctions of internal prenex sentences are internally equivalent to prenex sentences.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

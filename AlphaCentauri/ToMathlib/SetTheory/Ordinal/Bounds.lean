@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Mathlib.SetTheory.Ordinal.Principal
 
 /-!
@@ -7,6 +8,8 @@ public import Mathlib.SetTheory.Ordinal.Principal
 
 Bounds on ordinal arithmetic and the $\omega$-tower.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

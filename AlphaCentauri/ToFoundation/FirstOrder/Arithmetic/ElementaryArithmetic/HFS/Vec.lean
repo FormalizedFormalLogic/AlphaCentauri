@@ -11,6 +11,8 @@ Lists coded by iterated pairing in models of $\mathsf{EA}$.
 - [HP98, §V.3]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

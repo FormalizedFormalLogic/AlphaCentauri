@@ -12,6 +12,8 @@ Truth for combinations of prenex formulas with a $\Delta_0$ matrix.
 - [HP98, Theorem I.1.75]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

@@ -8,6 +8,8 @@ public import AlphaCentauri.Bootstrapping.Proof.Subformula
 # Instances of a coded set of formulas in cut-free derivations
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

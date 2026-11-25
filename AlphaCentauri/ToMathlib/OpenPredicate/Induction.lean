@@ -11,6 +11,8 @@ public import Mathlib.RingTheory.Algebraic.Defs
 Criteria for open induction in discretely ordered rings.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open Polynomial

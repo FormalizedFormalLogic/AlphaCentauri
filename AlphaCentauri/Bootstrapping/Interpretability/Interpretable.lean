@@ -14,6 +14,8 @@ public import AlphaCentauri.Bootstrapping.Proof.ProofByCases
 Interpretability of theories, formalized inside a model of $\mathsf{I}\Sigma_1$.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

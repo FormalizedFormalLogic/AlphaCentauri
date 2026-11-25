@@ -12,6 +12,8 @@ Cut reducibility of formulas in `Z_∞`.
 - [Tow20, Section 19.5, Section 19.6, Section 19.7]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

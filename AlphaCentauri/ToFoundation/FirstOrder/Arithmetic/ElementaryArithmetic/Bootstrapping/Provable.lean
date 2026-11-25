@@ -10,6 +10,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 Internal provability of codes of formulas in models of $\mathsf{EA}$.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 /-! ## Substitution of numerals -/

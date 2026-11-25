@@ -11,6 +11,8 @@ public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 The internal translation along the identity translation.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

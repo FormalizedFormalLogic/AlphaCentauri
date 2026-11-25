@@ -7,6 +7,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 # Cut elimination for the internal calculus
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

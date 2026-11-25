@@ -12,6 +12,8 @@ Provability relativized to the true $\Pi_n$ sentences.
 - [Bek99, §3]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.Basic.Model
 
 /-!
@@ -7,6 +8,8 @@ public import Foundation.FirstOrder.Arithmetic.Basic.Model
 
 Homomorphisms and embeddings of models of arithmetic, and models refuting unprovable sentences.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

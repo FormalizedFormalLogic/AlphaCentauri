@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 
 /-! # The theory $\mathsf{ZR}$ of discretely ordered $\mathbb{Z}$-rings
@@ -9,6 +10,8 @@ The theory of non-negative parts of discretely ordered $\mathbb{Z}$-rings.
 - [Wil78]
 - [BO96, §1]
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

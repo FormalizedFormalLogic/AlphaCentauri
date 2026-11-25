@@ -17,6 +17,8 @@ Henkin's construction for the completeness theorem carried out inside a model of
 - [HP98, Theorem I.4.25]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

@@ -10,6 +10,8 @@ public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 Translations along provably equivalent tables are provably equivalent.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

@@ -11,6 +11,8 @@ The arithmetical hierarchy on codes of formulas in models of $\mathsf{EA}$.
 - [HP98, Lemma I.1.69]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

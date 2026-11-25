@@ -17,6 +17,8 @@ The arithmetized relative interpretability of an arithmetical theory and its bas
 - [Vis90, §5.5, §6.1, §6.2.2.1]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

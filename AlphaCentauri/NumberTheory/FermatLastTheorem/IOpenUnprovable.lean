@@ -22,6 +22,8 @@ $\mathsf{IOpen}$ does not prove Fermat's Last Theorem or its Case I.
 - [Wil78]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder

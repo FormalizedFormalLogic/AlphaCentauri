@@ -18,6 +18,8 @@ public import Foundation.FirstOrder.Incompleteness.Definability
 - [Bek05, Theorem 7]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

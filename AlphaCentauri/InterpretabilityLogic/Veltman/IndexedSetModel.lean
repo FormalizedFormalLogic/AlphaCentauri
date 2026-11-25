@@ -10,6 +10,8 @@ public import Mathlib.Data.Set.Finite.List
 The Veltman model on indexed sets, behind the completeness of $\mathbf{IL}$.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

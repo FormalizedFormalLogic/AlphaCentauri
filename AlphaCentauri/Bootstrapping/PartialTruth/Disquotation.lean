@@ -15,6 +15,8 @@ The Tarski conditions and disquotation for partial satisfaction over `𝗣𝗔�
 - [HP98, 1.64(5), Theorem I.1.70, Remark I.1.77, Remark I.1.80]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open FFL.FirstOrder.Bounding (HierarchySymbol)

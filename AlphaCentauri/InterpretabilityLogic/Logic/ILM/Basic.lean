@@ -11,6 +11,8 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 The logic $\mathbf{ILM}$ and its completeness with respect to finite Veltman models.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

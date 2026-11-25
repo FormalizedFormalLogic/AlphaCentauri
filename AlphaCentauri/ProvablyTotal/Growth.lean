@@ -21,6 +21,8 @@ Growth rates of provably total functions of fragments of arithmetic.
 - [Bek99, Theorem 8, Theorem 9]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

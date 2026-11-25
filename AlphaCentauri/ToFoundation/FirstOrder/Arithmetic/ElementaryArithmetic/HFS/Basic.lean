@@ -11,6 +11,8 @@ Bit-coded sets and sequences in models of $\mathsf{EA}$.
 - [HP98, §I.1(b)]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 

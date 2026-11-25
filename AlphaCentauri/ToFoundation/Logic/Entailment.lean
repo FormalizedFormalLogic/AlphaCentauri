@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.Meta.ClProver
 
 /-!
@@ -7,6 +8,8 @@ public import Foundation.Meta.ClProver
 
 Consistency and conjunctions of vectors of formulas in entailment systems.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

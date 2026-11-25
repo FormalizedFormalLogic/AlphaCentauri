@@ -12,6 +12,8 @@ $\mathsf{I}\Sigma_n$ as $\mathsf{EA}$ with uniform reflection.
 - [Bek05, Theorem 7]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

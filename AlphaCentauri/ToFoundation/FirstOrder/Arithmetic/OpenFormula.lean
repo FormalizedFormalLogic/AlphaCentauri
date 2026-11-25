@@ -9,6 +9,8 @@ public import Foundation.FirstOrder.Arithmetic.Basic
 Open `ℒₒᵣ`-formulas and the open predicates they define over an ordered ring.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open FFL FirstOrder Semiterm Polynomial

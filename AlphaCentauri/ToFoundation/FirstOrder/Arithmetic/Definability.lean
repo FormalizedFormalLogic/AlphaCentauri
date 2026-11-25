@@ -11,6 +11,8 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 Definability of truth and of standard facts in models of arithmetic.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 /-! ## Casting true facts about standard numbers into a model of `𝗣𝗔⁻` -/

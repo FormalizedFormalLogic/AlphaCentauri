@@ -9,6 +9,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 The free variables of coded terms and formulas.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

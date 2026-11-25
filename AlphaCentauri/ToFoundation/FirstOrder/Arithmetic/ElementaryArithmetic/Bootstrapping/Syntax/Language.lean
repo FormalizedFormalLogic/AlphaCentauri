@@ -11,6 +11,8 @@ Codes of the symbols of the language of arithmetic in models of $\mathsf{EA}$.
 - [HP98, §V.3]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 

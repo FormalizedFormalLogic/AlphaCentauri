@@ -10,6 +10,8 @@ public import Foundation.Vorspiel.Rel.CWF
 Veltman semantics for interpretability logic.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

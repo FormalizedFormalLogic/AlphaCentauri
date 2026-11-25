@@ -9,6 +9,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Basi
 - [HP98, §V.3]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

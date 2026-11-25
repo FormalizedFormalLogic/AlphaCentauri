@@ -13,6 +13,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 - [HP98, Corollary I.4.34(1), Remark I.4.35(1)]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

@@ -8,6 +8,8 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 Maximal consistent subsets of adequate sets and their successors.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

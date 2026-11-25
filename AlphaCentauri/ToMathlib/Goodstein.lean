@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Mathlib.SetTheory.Ordinal.Exponential
 public import Mathlib.Tactic.Ring
 public import Mathlib.Data.Nat.Log
@@ -9,6 +10,8 @@ public import Mathlib.Data.Nat.Log
 
 Goodstein's theorem, proved by mapping Goodstein sequences to a decreasing sequence of ordinals.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

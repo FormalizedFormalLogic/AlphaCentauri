@@ -17,6 +17,8 @@ Embedding of `𝗣𝗔` derivations into `Z_∞`.
 - [Buc03, Section 5.5]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

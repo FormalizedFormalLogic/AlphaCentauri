@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 
@@ -8,6 +9,8 @@ public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 
 Prenex normal forms of arithmetic sentences in models of fragments of arithmetic.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

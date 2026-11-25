@@ -9,6 +9,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 # Soundness of pure logic for the readable truth
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

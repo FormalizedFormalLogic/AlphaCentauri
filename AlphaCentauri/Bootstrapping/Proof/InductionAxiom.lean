@@ -16,6 +16,8 @@ public import Foundation.FirstOrder.Incompleteness.Definability
 Induction axioms of $\mathsf{I}\Sigma_n$ in prenex form.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

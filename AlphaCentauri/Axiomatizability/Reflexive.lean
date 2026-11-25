@@ -13,6 +13,8 @@ public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 Reflexive theories and their failure of finite axiomatizability.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open FFL.Entailment

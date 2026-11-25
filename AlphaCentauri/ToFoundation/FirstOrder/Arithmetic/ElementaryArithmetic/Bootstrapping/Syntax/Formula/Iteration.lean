@@ -8,6 +8,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 Iterated quantifiers on codes of formulas in models of $\mathsf{EA}$.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

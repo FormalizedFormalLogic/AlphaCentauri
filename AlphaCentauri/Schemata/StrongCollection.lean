@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.HFS.Seq
 public import Foundation.FirstOrder.Arithmetic.Induction.Equiv
 

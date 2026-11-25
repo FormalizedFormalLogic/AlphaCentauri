@@ -14,6 +14,8 @@ public import Foundation.FirstOrder.Incompleteness.Definability
 The axioms of $\mathsf{PA}^-$ as blocks of existential quantifiers with false instances.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

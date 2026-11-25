@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 
 /-!
@@ -7,6 +8,8 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 
 The polynomial pairing `ppair` and the decoding of iterated pairs into lists.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

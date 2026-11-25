@@ -8,6 +8,8 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 Satisfaction of internal formulas of bounded complexity.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import AlphaCentauri.Schemata.DeltaInduction
@@ -10,6 +11,8 @@ Parameter-free induction over the prenex hierarchy.
 
 - [Bek99, §1]
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

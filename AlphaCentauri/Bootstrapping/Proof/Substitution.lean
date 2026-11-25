@@ -7,6 +7,8 @@ public import AlphaCentauri.Bootstrapping.Proof.RankedDerivation
 # Free-variable substitution on internal derivations
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

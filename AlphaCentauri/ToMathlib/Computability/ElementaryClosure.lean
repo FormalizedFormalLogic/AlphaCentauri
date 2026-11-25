@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.Vorspiel.Matrix
 
 /-!
@@ -9,6 +10,8 @@ The closure of a family of functions under composition and bounded primitive rec
 
 - [Bek99, §6]
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

@@ -11,6 +11,8 @@ Partial truth of bounded and prenex formulas.
 - [HP98, 1.64(5), Theorem I.1.75]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Syntax.Classical.Coding
 
 /-!
@@ -7,6 +8,8 @@ public import Foundation.FirstOrder.Syntax.Classical.Coding
 
 Auxiliary lemmas and notation for the syntax of first-order logic.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

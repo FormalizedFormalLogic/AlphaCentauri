@@ -12,6 +12,8 @@ Uniform reflection and the locally $\Delta_0$ axioms of arithmetic theories in m
 $\mathsf{EA}$.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 /-! ## The induction schemata recognised on codes -/

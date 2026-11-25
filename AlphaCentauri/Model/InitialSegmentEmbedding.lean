@@ -10,6 +10,8 @@ The embedding theorem for countable nonstandard models of `𝗣𝗔`, and Friedm
 theorem.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

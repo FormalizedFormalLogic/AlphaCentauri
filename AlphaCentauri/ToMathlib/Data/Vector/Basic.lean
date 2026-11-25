@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.Vorspiel.Matrix
 public import Mathlib.Data.Vector.Basic
 
@@ -8,6 +9,8 @@ public import Mathlib.Data.Vector.Basic
 
 Companion of Mathlib's `List.Vector.tail_ofFn`, `List.Vector.head_ofFn` and `Fin.append_right`.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

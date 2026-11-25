@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.Logic.LogicSymbol
 public import Mathlib.Data.Finset.Basic
 
@@ -8,6 +9,8 @@ public import Mathlib.Data.Finset.Basic
 
 Modal formulas extended by the binary interpretability connective `▷`.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

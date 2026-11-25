@@ -13,6 +13,8 @@ Induction for bounded existential formulas over $\mathsf{PA}^-$.
 - [Car16]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

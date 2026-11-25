@@ -16,6 +16,8 @@ bounded existential open predicates.
 - [Smi93, Theorem 2.3]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace RingOfDifferences

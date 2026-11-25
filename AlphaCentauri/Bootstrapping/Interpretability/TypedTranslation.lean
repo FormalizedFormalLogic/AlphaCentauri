@@ -9,6 +9,8 @@ public import AlphaCentauri.Bootstrapping.Interpretability.RelativizedBlocks
 The internal translation respects typed formulas.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

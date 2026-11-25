@@ -17,6 +17,8 @@ Uniform reflection and parameter-free induction.
 - [Bek99, Proposition 2.1, Proposition 2.2, Lemma 5.1]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Bounding

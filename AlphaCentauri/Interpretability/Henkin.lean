@@ -20,6 +20,8 @@ translation.
 - [HP98, Theorem I.4.27], [HP98, 2.43]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

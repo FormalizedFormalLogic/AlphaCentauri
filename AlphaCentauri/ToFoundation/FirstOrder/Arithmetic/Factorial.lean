@@ -8,6 +8,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 The factorial function on a model of $\mathsf{E}\mathsf{A}$.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

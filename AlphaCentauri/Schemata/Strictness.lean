@@ -4,6 +4,8 @@ public import AlphaCentauri.Model.BSigma
 
 /-! # Strictness of the fragment hierarchy -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

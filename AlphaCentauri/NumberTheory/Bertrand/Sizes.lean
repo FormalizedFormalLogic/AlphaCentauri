@@ -10,6 +10,8 @@ The parameters of the injection in the proof of Bertrand's postulate and the ine
 them.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic

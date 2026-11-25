@@ -12,6 +12,8 @@ public import Mathlib.Algebra.Ring.Subring.Basic
 The order on subrings of $K[X]$ given by the sign of the leading coefficient.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public noncomputable section
 
 open Polynomial OpenPredicate

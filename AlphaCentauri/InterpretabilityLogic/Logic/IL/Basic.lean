@@ -12,6 +12,8 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
 The interpretability logic $\mathbf{IL}$ and its completeness with respect to finite Veltman models.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

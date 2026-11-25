@@ -10,6 +10,8 @@ Relations and functions that are $\Delta_0$ below every bound in models of $\mat
 - [HP98, §V.3]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

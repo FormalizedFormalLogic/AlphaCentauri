@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 
 /-!
@@ -7,6 +8,8 @@ public import Foundation.FirstOrder.Arithmetic.EA.Basic
 
 - [HP98, §I.1(b)]
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

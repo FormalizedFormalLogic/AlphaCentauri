@@ -17,6 +17,8 @@ The $\mathsf{I}\Sigma_1$-provably total functions are the primitive recursive fu
 - [HP98, Theorem I.1.54, Lemma I.1.55, Corollary IV.3.7]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

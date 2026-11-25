@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Mathlib.SetTheory.Ordinal.Notation
 
 /-!
@@ -7,6 +8,8 @@ public import Mathlib.SetTheory.Ordinal.Notation
 
 Growth properties of the fast-growing hierarchy over `ONote`.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

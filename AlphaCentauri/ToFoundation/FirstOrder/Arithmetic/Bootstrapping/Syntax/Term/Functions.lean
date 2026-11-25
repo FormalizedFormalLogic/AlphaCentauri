@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
@@ -7,6 +8,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 Substitution and bound variables of codes of terms.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

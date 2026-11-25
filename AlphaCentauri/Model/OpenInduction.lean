@@ -15,6 +15,8 @@ public import Mathlib.Algebra.Order.Nonneg.Ring
 Models of open induction and of $\mathbb{Z}$-rings, and Wilkie's extension theorem.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 /-! ## The non-negative part of a discretely ordered ring -/

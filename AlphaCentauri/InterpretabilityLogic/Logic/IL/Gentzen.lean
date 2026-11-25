@@ -9,6 +9,8 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 The sequent calculus for $\mathbf{IL}$ and its agreement with $\mathbf{IL}$.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

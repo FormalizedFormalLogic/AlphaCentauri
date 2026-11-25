@@ -10,6 +10,8 @@ public import Mathlib.Data.Set.Finite.List
 The sequent calculus for $\mathbf{IL}$ with respect to Veltman semantics.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

@@ -12,6 +12,8 @@ public import AlphaCentauri.Bootstrapping.Proof.Deduction
 A table defined by case distinction on a sentence.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

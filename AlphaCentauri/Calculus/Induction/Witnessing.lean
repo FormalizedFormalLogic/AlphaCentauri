@@ -15,6 +15,8 @@ off from `LKI[C]` derivations.
 - [Bus98A, Section 3.1.2, Section 3.1.3]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

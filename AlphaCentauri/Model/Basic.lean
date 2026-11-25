@@ -16,6 +16,8 @@ public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Absoluteness
 
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder

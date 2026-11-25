@@ -8,6 +8,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 - [HP98, §V.3]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

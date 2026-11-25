@@ -8,6 +8,8 @@ public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 Blocks of universal quantifiers relativized to a domain.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

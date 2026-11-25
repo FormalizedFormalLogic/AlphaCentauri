@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 
@@ -8,6 +9,8 @@ public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 
 Exponentiation, block sequences and powers in models of $\mathsf{EA}$.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

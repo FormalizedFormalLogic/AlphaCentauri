@@ -10,6 +10,8 @@ public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 The generalised Veltman model on maximal consistent theories.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

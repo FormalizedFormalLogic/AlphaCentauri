@@ -8,6 +8,8 @@ public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 The table of the composite of two translations.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

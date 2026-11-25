@@ -16,6 +16,8 @@ Definable elements of models of arithmetic.
 - [Kay91, §8.1]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

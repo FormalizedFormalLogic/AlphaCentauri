@@ -9,6 +9,8 @@ public import Foundation.FirstOrder.Incompleteness.Consistency
 $\Delta_1$ numerations of theories whose elements are sentences.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

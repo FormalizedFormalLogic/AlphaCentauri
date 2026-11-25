@@ -10,6 +10,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 Equality and typed derivability in the internal proof calculus.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

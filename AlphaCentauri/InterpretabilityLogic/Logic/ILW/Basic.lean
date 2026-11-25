@@ -11,6 +11,8 @@ public import Mathlib.Data.Set.Finite.List
 The logic $\mathbf{ILW}$ and its completeness with respect to finite Veltman models.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

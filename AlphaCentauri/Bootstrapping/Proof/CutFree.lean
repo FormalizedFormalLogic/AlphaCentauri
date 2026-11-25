@@ -10,6 +10,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Coding
 The cut-free fragment of the internal calculus.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

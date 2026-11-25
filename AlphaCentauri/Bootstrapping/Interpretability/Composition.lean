@@ -10,6 +10,8 @@ public import AlphaCentauri.Bootstrapping.Interpretability.TypedTranslation
 Internal translations compose along composite tables.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

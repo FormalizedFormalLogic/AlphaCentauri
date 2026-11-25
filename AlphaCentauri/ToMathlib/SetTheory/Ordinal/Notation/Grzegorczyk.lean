@@ -7,6 +7,8 @@ public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.FastGrowing
 # The extended Grzegorczyk hierarchy over `ONote`
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace ONote

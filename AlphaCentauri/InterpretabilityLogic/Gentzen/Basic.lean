@@ -15,6 +15,8 @@ A cut-free sequent calculus for $\mathbf{IL}$.
 - [HSS25a]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

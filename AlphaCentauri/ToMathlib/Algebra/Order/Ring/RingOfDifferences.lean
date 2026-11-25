@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Mathlib.Algebra.Order.Ring.Cone
 public import Mathlib.Algebra.Order.Ring.Abs
 public import Mathlib.Algebra.Order.Monoid.Canonical.Defs
@@ -12,6 +13,8 @@ public import Mathlib.Tactic.Ring
 
 The ring of formal differences of an ordered commutative semiring.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

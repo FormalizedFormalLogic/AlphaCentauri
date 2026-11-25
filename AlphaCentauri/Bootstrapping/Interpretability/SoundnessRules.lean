@@ -16,6 +16,8 @@ public import Foundation.FirstOrder.Incompleteness.Consistency
 Translated derivability is closed under the rules of the derivation calculus.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

@@ -11,6 +11,8 @@ Codes of derivations in models of $\mathsf{EA}$.
 - [HP98, §V.3]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

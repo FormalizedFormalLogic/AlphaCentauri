@@ -13,6 +13,8 @@ public import AlphaCentauri.Calculus.Induction.Basic
 Provably total functions and their closure under composition.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

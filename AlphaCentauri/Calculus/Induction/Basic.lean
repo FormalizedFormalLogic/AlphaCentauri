@@ -14,6 +14,8 @@ public import AlphaCentauri.Schemata.DeltaInduction
 - [Bus98A, Section 1.4.1, Section 1.4.2]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 

@@ -15,6 +15,8 @@ The truth lemma of the Henkin translation, formalized in arithmetic.
 - [Vis90, §6.2.2.1]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

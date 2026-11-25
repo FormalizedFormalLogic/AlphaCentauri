@@ -11,6 +11,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prime
 Positions in the prime-power factorizations of $1, \dots, m$ and injections between them.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

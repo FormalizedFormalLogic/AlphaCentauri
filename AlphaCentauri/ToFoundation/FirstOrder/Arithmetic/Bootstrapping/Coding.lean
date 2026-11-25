@@ -7,6 +7,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 # Codes of sentences and of closed arithmetic terms
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder

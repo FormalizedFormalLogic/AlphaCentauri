@@ -12,6 +12,8 @@ public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.Coding
 Computability of the order on Cantor normal forms.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace ONote

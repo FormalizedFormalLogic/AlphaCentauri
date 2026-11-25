@@ -16,6 +16,8 @@ The infinitude of primes in fragments of arithmetic.
 - [PWW88, Problem 1, Theorem 11, Corollary 8]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

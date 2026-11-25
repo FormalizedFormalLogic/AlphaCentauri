@@ -12,6 +12,8 @@ The weak pigeonhole principle for $\Delta_0$ relations over $\mathsf{I}\Delta_0 
 - [PWW88, Theorem 1, Corollary 2]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

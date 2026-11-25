@@ -13,6 +13,8 @@ Case II of it and Bézout's theorem.
 - [Smi92b]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

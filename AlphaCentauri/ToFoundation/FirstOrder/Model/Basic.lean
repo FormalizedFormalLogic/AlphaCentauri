@@ -13,6 +13,8 @@ public import Mathlib.Order.DirectedInverseSystem
 Elementary substructures, end extensions, types and definable elements of structures.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder

@@ -22,6 +22,8 @@ logic it satisfies.
 - [Ign91, §1, Definition 2.8, Theorem 1, Theorem A.2]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

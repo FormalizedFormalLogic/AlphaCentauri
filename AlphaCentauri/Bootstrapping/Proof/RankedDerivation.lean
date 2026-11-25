@@ -8,6 +8,8 @@ public import AlphaCentauri.Bootstrapping.Proof.Measures
 # Internal derivations of bounded cut rank
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

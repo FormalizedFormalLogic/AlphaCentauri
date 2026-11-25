@@ -14,6 +14,8 @@ public import Mathlib.RingTheory.Trace.Basic
 Basic facts about real closed fields.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open Polynomial Module

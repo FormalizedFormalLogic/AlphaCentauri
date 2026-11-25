@@ -11,6 +11,8 @@ public import Mathlib.Data.Nat.Pairing
 Step-by-step Veltman models behind the completeness of $\mathbf{ILM}_0$ and $\mathbf{ILW}^*$.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

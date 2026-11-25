@@ -18,6 +18,8 @@ public import AlphaCentauri.Calculus.Induction.Basic
 - [HP98, Theorem I.2.52]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 

@@ -13,6 +13,8 @@ Fermat's Last Theorem for exponent $3$ over a discretely ordered ring satisfying
 principle.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open QuadraticAlgebra OpenPredicate

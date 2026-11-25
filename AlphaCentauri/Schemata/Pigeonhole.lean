@@ -13,6 +13,8 @@ The pigeonhole schemata.
 - [PWW88, Problems 1 and 2]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

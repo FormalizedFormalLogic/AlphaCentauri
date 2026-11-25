@@ -8,6 +8,8 @@ public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.FastGrowing
 The Hardy hierarchy and its comparison with the fast-growing hierarchy.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace ONote

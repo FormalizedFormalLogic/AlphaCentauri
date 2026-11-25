@@ -6,6 +6,8 @@ import AlphaCentauri.OpenProblem
 
 /-! # $\Delta$ induction schemes -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

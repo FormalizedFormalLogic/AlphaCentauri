@@ -8,6 +8,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 Injections between coded sets, and the pigeonhole principle for them.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 /-! ## Injections between sets of a model

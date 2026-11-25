@@ -18,6 +18,8 @@ $\mathsf{I}\mathsf{E}_1$ and $\mathsf{I}\Delta_0$.
 - [Jer21]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

@@ -8,6 +8,8 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 Generalised Veltman semantics (Verbrugge semantics) for interpretability logic.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

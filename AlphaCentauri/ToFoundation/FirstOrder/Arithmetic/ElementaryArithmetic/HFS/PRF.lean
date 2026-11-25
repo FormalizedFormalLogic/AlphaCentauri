@@ -10,6 +10,8 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 - [HP98, §V.3]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

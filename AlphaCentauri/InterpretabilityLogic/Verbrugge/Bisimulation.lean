@@ -14,6 +14,8 @@ Bisimulations between generalised Veltman models.
 - [HPV23]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic.Verbrugge.Model

@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 
 /-!
@@ -7,6 +8,8 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 
 Basic operations on coded hereditarily finite sets: unions and cardinalities.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

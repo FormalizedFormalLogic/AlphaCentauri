@@ -10,6 +10,8 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 The logic $\mathbf{ILP}$ and its completeness with respect to finite Veltman models.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

@@ -11,6 +11,8 @@ public import AlphaCentauri.NumberTheory.Bertrand.Sizes
 - [PWW88, remark before Theorem 12]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

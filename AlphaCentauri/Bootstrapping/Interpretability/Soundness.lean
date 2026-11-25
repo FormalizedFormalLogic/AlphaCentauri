@@ -18,6 +18,8 @@ public import Foundation.FirstOrder.Incompleteness.Consistency
 Internal soundness of translations: provability and consistency transfer along them.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

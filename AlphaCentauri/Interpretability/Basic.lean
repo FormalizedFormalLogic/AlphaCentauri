@@ -9,6 +9,8 @@ public import Foundation.FirstOrder.LK.Interpretation
 Additional API for Foundation's `DirectTranslation` and `DirectInterpretation`.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder

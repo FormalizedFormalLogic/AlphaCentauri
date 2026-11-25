@@ -10,6 +10,8 @@ public import Foundation.Meta.ClProver
 # Existential elimination in the internal calculus
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

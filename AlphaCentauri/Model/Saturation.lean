@@ -10,6 +10,8 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 Coded sets, coded types and $\Sigma_n$-recursive saturation of nonstandard models of `𝗣𝗔`.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder

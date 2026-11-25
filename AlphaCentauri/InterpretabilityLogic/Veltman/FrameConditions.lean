@@ -9,6 +9,8 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 Frame conditions for the extensions of $\mathbf{IL}$.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic

@@ -13,6 +13,8 @@ Over a model of $\mathsf{EA}$, $\mathsf{I}\Delta_1$ yields collection for $\Delt
 relations, and hence the collection scheme $\mathsf{B}\Sigma_1$.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

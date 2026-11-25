@@ -13,6 +13,8 @@ Iterated consistency extensions of an arithmetic theory.
 - [AB05, §4.1]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

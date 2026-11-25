@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Mathlib.Algebra.Order.Ring.Abs
 public import Mathlib.Data.Fin.VecNotation
 public import Mathlib.Tactic.Linarith

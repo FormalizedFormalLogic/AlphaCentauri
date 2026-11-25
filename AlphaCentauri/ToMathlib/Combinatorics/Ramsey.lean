@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Mathlib.Combinatorics.Pigeonhole
 
 /-!

@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 
 /-!
@@ -7,6 +8,8 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 
 The class $\Delta_0$ of bounded formulas and the hierarchy of formulas.
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

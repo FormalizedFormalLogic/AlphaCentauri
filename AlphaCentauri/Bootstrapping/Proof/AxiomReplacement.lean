@@ -16,6 +16,8 @@ Replacing the axioms of $\mathsf{I}\Sigma_n$ and $\mathsf{EA}$ by blocks of exis
 with false instances.
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

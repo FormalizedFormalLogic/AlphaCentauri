@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.PeanoMinus.Basic
 
 /-!
@@ -10,6 +11,8 @@ Axiomatizability and finite axiomatizability of theories.
 - [Lin97, Ch. 4 §1]
 - [HP98, Theorem I.2.52]
 -/
+
+set_option linter.style.repeatedBinder false
 
 @[expose] public section
 

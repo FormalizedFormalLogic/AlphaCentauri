@@ -7,6 +7,8 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 # Theories whose axioms are locally $\Delta_0$ in models of $\mathsf{EA}$
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding

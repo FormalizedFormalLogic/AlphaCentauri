@@ -10,6 +10,8 @@ Derivability in `Z_∞` with bounds on ordinal height and cut rank.
 - [Tow20, Section 13, Section 14, Section 18]
 -/
 
+set_option linter.style.repeatedBinder false
+
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic

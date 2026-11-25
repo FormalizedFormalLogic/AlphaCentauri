@@ -314,9 +314,8 @@ instance definable (Γ : Polarity) (s : ℕ) :
   definability
 
 /-- [HP98, Theorem I.1.75] -/
-lemma quote_iff {l : ℕ} {σ : ArithmeticSemisentence l} (hσ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s σ)
-    (v : Fin l → V) : PrenexFormulaSatisfied Γ s (matrixToVec v) ⌜σ⌝ ↔ V ⊧/v σ := by
-  obtain ⟨φ, rfl⟩ := hσ
+lemma quote_iff {l : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty l) (v : Fin l → V) :
+    PrenexFormulaSatisfied Γ s (matrixToVec v) ⌜φ.val⌝ ↔ V ⊧/v φ.val := by
   simpa [PrenexFormulaSatisfied, Bounding.Prenex.val, quote_toPrenex] using
     prenexSatisfied_quote_iff φ v
 

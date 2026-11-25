@@ -76,13 +76,12 @@ instance by the numerals of `v`.
 - [HP98, Corollary I.4.34]
 - [Bek05, Theorem 7] -/
 theorem models_of_provable_substNumerals [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
-    (hT : AdmitsFalseBlockReplacement T V k) {m : ℕ} {φ : ArithmeticSemisentence m}
-    (hφ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (k + 3) φ) (v : Fin m → V)
-    (h : Provable T (substNumerals (⌜φ⌝ : V) v)) : V ⊧/v φ := by
+    (hT : AdmitsFalseBlockReplacement T V k) {m : ℕ}
+    (φ : ℬ[<, ℒₒᵣ].Prenex 𝚷 (k + 3) Empty m) (v : Fin m → V)
+    (h : Provable T (substNumerals (⌜φ.val⌝ : V) v)) : V ⊧/v φ.val := by
   by_contra hV
-  obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.pi_succ_iff.mp hφ
-  obtain ⟨ρ', hρ', rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hψ
-  obtain ⟨ρ, rfl⟩ := hρ'
+  let ρ := φ.piInv.sigmaInv
+  rw [show φ.val = ∀¹ ∃¹ ρ.val by rw [φ.val_piInv, φ.piInv.val_sigmaInv]] at h hV
   rw [Semiformula.eval_all] at hV
   obtain ⟨a, ha⟩ := not_forall.mp hV
   rw [Semiformula.eval_ex, not_exists] at ha
@@ -102,17 +101,17 @@ $n \le k$.
 lemma consistent_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hn : n ≤ k) :
     (𝗜𝚺 n).Consistent V := by
   intro h
-  let π : ArithmeticSentence := (Bounding.Prenex.falsum : ℬ[<, ℒₒᵣ].Prenex 𝚷 (k + 3) Empty 0).val
-  have hπ : Provable 𝗜𝚺n (⌜π⌝ : V) := by
+  let π : ℬ[<, ℒₒᵣ].Prenex 𝚷 (k + 3) Empty 0 := .falsum
+  have hπ : Provable 𝗜𝚺n (⌜π.val⌝ : V) := by
     apply Derivable.toProvable
     apply Derivable.cut (^⊥ : V)
-    · apply Derivable.wk (s' := insert (^⊥ : V) ∅) (by simp)
+    · apply Derivable.wk (s' := insert (^⊥ : V) ∅) (by simp [-Bounding.Prenex.val_piInv])
       · exact insert_subset_insert_of_subset _ (by simp)
       · have := h.toDerivable
         rwa [Sentence.quote_falsum] at this
-    · exact Derivable.verum (by simp) (by simp)
-  have := models_of_provable_substNumerals (admitsFalseBlockReplacement_ISigma hn) (φ := π)
-    ⟨_, rfl⟩ (![] : Fin 0 → V) (by rwa [substNumerals_quote_of_isEmpty])
+    · exact Derivable.verum (by simp [-Bounding.Prenex.val_piInv]) (by simp)
+  have := models_of_provable_substNumerals (admitsFalseBlockReplacement_ISigma hn) π
+    (![] : Fin 0 → V) (by rwa [substNumerals_quote_of_isEmpty])
   simpa using (Bounding.Prenex.models_falsum ![]).mp this
 
 end LocalReflection

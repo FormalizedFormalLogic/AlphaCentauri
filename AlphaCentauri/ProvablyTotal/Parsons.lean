@@ -337,20 +337,21 @@ private lemma models_allClosure_iff_evalb {k : ℕ} {φ ψ : ArithmeticSemisente
 - [HP98, Theorem I.2.5(3), Lemma I.2.9] -/
 theorem exists_prenexHierarchy_provablyTotalVia {k : ℕ} {f : (Fin k → ℕ) → ℕ}
     (h : 𝗜𝚺₁.ProvablyTotal f) :
-    ∃ φ : 𝚺ᴬ₁.Semisentence (k + 1),
-      ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1 φ.val ∧ 𝗜𝚺₁.ProvablyTotalVia f φ := by
+    ∃ φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 1 Empty (k + 1),
+      𝗜𝚺₁.ProvablyTotalVia f (.mkSigma φ.val φ.val_hierarchy) := by
   obtain ⟨φ, hmono⟩ := h
   have : 𝗕𝚺₁ ⪯ 𝗜𝚺₁ := BSigma_weakerThan_ISigma
-  obtain ⟨ψ, hψ, hprov⟩ := exists_prenexHierarchy_of_hierarchy 𝗜𝚺₁ φ.sigma_prop
+  obtain ⟨ψ, hprov⟩ := exists_prenex_of_hierarchy 𝗜𝚺₁ φ.sigma_prop
   have heval : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁],
-      ∀ v : Fin (k + 1) → V, φ.val.Evalb v ↔ ψ.Evalb v := fun V _ _ ↦
+      ∀ v : Fin (k + 1) → V, φ.val.Evalb v ↔ ψ.val.Evalb v := fun V _ _ ↦
     models_allClosure_iff_evalb.mp (consequence_iff'.mp (Theory.Proof.sound hprov) V)
-  refine ⟨.mkSigma ψ hψ.hierarchy, by simpa using hψ, ?_, ?_⟩
+  use ψ
+  constructor
   · exact .mk fun v ↦ (heval ℕ v).symm.trans hmono.graph_iff
   · exact Arithmetic.complete _ _ fun (V : Type) _ _ ↦
       models_totalitySentence_iff.mpr fun v ↦
         have ⟨y, hy⟩ := hmono.models V v
-        ⟨y, by simpa using (heval V (y :> v)).mp hy⟩
+        ⟨y, (heval V (y :> v)).mp hy⟩
 
 end
 
@@ -360,8 +361,9 @@ end
 - [HP98, Corollary IV.3.7] -/
 theorem primrec'_of_provablyTotal {k : ℕ} {f : List.Vector ℕ k → ℕ}
     (hf : 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))) : Nat.Primrec' f :=
-  have ⟨_, hφ, h⟩ := exists_prenexHierarchy_provablyTotalVia hf
-  (primrec'_of_provablyTotalVia hφ.prenexBlock h).of_eq fun v ↦ by simp
+  have ⟨φ, h⟩ := exists_prenexHierarchy_provablyTotalVia hf
+  (primrec'_of_provablyTotalVia (φ := .mkSigma φ.val φ.val_hierarchy)
+    φ.val_prenexHierarchy.prenexBlock h).of_eq fun v ↦ by simp
 
 /-- **Parsons' theorem**: the `𝗜𝚺₁`-provably total functions are exactly the primitive recursive
 functions.

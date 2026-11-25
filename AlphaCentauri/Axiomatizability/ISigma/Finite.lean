@@ -218,9 +218,8 @@ lemma collection_prenex (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2) (f : 
   exact ⟨y, hyb, (hg x y).mp hy⟩;
 
 private lemma models_IBroadSigma_of {s : ℕ}
-    (H : ∀ φ : ArithmeticSemiformula ℕ 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s φ →
-      ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 1, ∀ (e : Fin 1 → M) (f : ℕ → M),
-        φ'.val.Eval e f ↔ φ.Eval e f) :
+    (H : ∀ φ : 𝚺ᴬ_[s].Semiformula ℕ 1, ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 1,
+      ∀ (e : Fin 1 → M) (f : ℕ → M), φ'.val.Eval e f ↔ φ.val.Eval e f) :
     M↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ s := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
@@ -229,13 +228,13 @@ private lemma models_IBroadSigma_of {s : ℕ}
     rintro _ ⟨φ, hφ, rfl⟩;
     apply (models_succInd_iff φ).mpr;
     intro f;
-    obtain ⟨φ', hφ'⟩ := H φ hφ;
-    simpa only [hφ'] using succ_induction_prenex φ' f;
+    obtain ⟨φ', hφ'⟩ := H (.mkSigma φ hφ);
+    simpa only [hφ', Bounding.HierarchySymbol.Semiformula.val_mkSigma] using
+      succ_induction_prenex φ' f;
 
 private lemma models_CollectionOnHierarchy_of [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {Γ : Polarity} {s : ℕ}
-    (H : ∀ φ : ArithmeticSemiformula ℕ 2, ℬ[<, ℒₒᵣ].Hierarchy Γ s φ →
-      ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2, ∀ (e : Fin 2 → M) (f : ℕ → M),
-        φ'.val.Eval e f ↔ φ.Eval e f) :
+    (H : ∀ φ : Γᴬ_[s].Semiformula ℕ 2, ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ 2,
+      ∀ (e : Fin 2 → M) (f : ℕ → M), φ'.val.Eval e f ↔ φ.val.Eval e f) :
     M↓[ℒₒᵣ] ⊧* 𝗕⁺ Γ s := by
   apply Semantics.ModelsSet.union_iff.mpr;
   and_intros;
@@ -244,20 +243,20 @@ private lemma models_CollectionOnHierarchy_of [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
     rintro _ ⟨φ, hφ, rfl⟩;
     apply (models_collectionAxiom_iff φ).mpr;
     intro f;
-    obtain ⟨φ', hφ'⟩ := H φ hφ;
-    simpa only [hφ'] using collection_prenex φ' f;
+    obtain ⟨φ', hφ'⟩ := H (.mkPolarity φ Γ hφ);
+    simpa only [hφ', Bounding.HierarchySymbol.Semiformula.val_mkPolarity] using
+      collection_prenex φ' f;
 
 omit [M↓[ℒₒᵣ] ⊧* finiteAxiomatization n] in
-private lemma exists_prenex_of_zero {k : ℕ} {Γ : Polarity} {φ : ArithmeticSemiformula ℕ k}
-    (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ 0 φ) :
+private lemma exists_prenex_of_zero {k : ℕ} {Γ : Polarity} (φ : Γᴬ_[0].Semiformula ℕ k) :
     ∃ φ' : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) ℕ k, ∀ (e : Fin k → M) (f : ℕ → M),
-      φ'.val.Eval e f ↔ φ.Eval e f :=
-  ⟨.ofΔ₀ ⟨φ, Bounding.Hierarchy.zero_iff_bounded.mp hφ⟩ 𝚺 (n + 1), fun e _ ↦
+      φ'.val.Eval e f ↔ φ.val.Eval e f :=
+  ⟨.ofΔ₀ ⟨φ.val, Bounding.Hierarchy.zero_iff_bounded.mp φ.sigmaZero⟩ 𝚺 (n + 1), fun e _ ↦
     Bounding.Prenex.models_ofΔ₀ _ e⟩
 
 include n in
 private lemma models_ISigmaZero : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ :=
-  have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ 0 := models_IBroadSigma_of (n := n) fun _ hφ ↦ exists_prenex_of_zero hφ
+  have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ 0 := models_IBroadSigma_of (n := n) (exists_prenex_of_zero (Γ := 𝚺))
   inferInstance
 
 private lemma models_BPi : ∀ j ≤ n, M↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := by
@@ -266,14 +265,14 @@ private lemma models_BPi : ∀ j ≤ n, M↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := by
   induction j with
   | zero =>
     exact models_of_ss
-      (models_CollectionOnHierarchy_of (n := n) fun _ hφ ↦ exists_prenex_of_zero hφ)
+      (models_CollectionOnHierarchy_of (n := n) (exists_prenex_of_zero (Γ := 𝚷)))
       CollectionOnPrenexHierarchy_subset_CollectionOnHierarchy;
   | succ j ih =>
     have : M↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := ih (by omega);
     apply models_of_ss _ CollectionOnPrenexHierarchy_subset_CollectionOnHierarchy;
     apply models_CollectionOnHierarchy_of (n := n);
-    intro φ hφ;
-    obtain ⟨φ₁, h₁⟩ := Bounding.Prenex.models_exists_prenex (Γ' := 𝚺) hφ;
+    intro φ;
+    obtain ⟨φ₁, h₁⟩ := Bounding.Prenex.models_exists_prenex (Γ' := 𝚺) φ.polarity_prop;
     obtain ⟨_, ⟨φ₂, rfl⟩, h₂⟩ :=
       φ₁.val_prenexHierarchy.exists_eval_iff_of_lt 𝚺 (s' := n + 1) (by omega);
     exact ⟨φ₂, fun e f ↦ ((h₁ M e f).trans (h₂ M e f)).symm⟩;
@@ -282,8 +281,8 @@ private lemma models_BPi : ∀ j ≤ n, M↓[ℒₒᵣ] ⊧* 𝗕𝚷 j := by
 - [HP98, Theorem I.2.52] -/
 lemma models_ISigma : M↓[ℒₒᵣ] ⊧* 𝗜𝚺 (n + 1) := by
   have : M↓[ℒₒᵣ] ⊧* 𝗕𝚷 n := models_BPi n le_rfl;
-  have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (n + 1) := models_IBroadSigma_of fun φ hφ ↦ by
-    obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex (Γ' := 𝚺) hφ;
+  have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺ (n + 1) := models_IBroadSigma_of fun φ ↦ by
+    obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex (Γ' := 𝚺) φ.sigma_prop;
     exact ⟨φ', fun e f ↦ (hφ' M e f).symm⟩;
   infer_instance;
 

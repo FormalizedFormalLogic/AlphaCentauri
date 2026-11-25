@@ -27,25 +27,24 @@ variable {j : ℕ} [M↓[ℒₒᵣ] ⊧* 𝗜𝚺j] (I : ClosedCut M)
 
 private lemma exists_bound_of_isElementary (hI : ∃ c, c ∉ I.carrier)
     (hj : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j)
-      I.endExtension.emb) {ψ : ArithmeticSemiformula ℕ 3}
-    (hψ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 j ψ) (e : ℕ → I.carrier) (a : I.carrier)
-    (h : ∀ x < a, ∃ y z, ψ.Eval ![z, x, y] e) :
-    ∃ b, ∀ x < a, ∃ y < b, ∃ z, ψ.Eval ![z, x, y] e := by
+      I.endExtension.emb) (ψ : ℬ[<, ℒₒᵣ].Prenex 𝚷 j ℕ 3) (e : ℕ → I.carrier) (a : I.carrier)
+    (h : ∀ x < a, ∃ y z, ψ.val.Eval ![z, x, y] e) :
+    ∃ b, ∀ x < a, ∃ y < b, ∃ z, ψ.val.Eval ![z, x, y] e := by
   have : M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : M↓[ℒₒᵣ] ⊧* 𝗜𝚺j)
   obtain ⟨c₀, hc₀⟩ := hI
   let ι : I.carrier ⊂ₑ M := { I.endExtension with
     not_surjective h := hc₀ <| by obtain ⟨x, rfl⟩ := h c₀; exact x.2 }
   have hψ' (x y z : I.carrier) :
-      ψ.Eval ![z.1, x.1, y.1] (I.endExtension.emb ∘ e) ↔ ψ.Eval ![z, x, y] e := by
-    simpa [Matrix.comp_vecCons''] using hj ⟨j, le_rfl, 𝚷, hψ⟩ ![z, x, y] e
+      ψ.val.Eval ![z.1, x.1, y.1] (I.endExtension.emb ∘ e) ↔ ψ.val.Eval ![z, x, y] e := by
+    simpa [Matrix.comp_vecCons''] using hj ⟨j, le_rfl, 𝚷, ψ.val_prenexHierarchy⟩ ![z, x, y] e
   have hlt {y c : M} (hy : y ∈ I.carrier) (hc : c ∉ I.carrier) : y < c := by
     by_contra! h₁
     exact hc <| h₁.lt_or_eq.elim (I.mem_of_lt · hy) (· ▸ hy)
   let Θ : ArithmeticSemiformula ℕ 1 :=
-    ((((Rew.rewriteMap Nat.succ ▹ ψ) ⇜ ![#0, #2, #1]).bexsLT #2).bexsLT #1).ballLT &0
+    ((((Rew.rewriteMap Nat.succ ▹ ψ.val) ⇜ ![#0, #2, #1]).bexsLT #2).bexsLT #1).ballLT &0
   let g : ℕ → M := a.1 :>ₙ (Subtype.val ∘ e)
   have hΘ (c : M) : Θ.Eval ![c] g ↔
-      ∀ x < a.1, ∃ y < c, ∃ z < c, ψ.Eval ![z, x, y] fun i ↦ (e i).1 := by
+      ∀ x < a.1, ∃ y < c, ∃ z < c, ψ.val.Eval ![z, x, y] fun i ↦ (e i).1 := by
     simp [Θ, g, eval_rewriteMap, Matrix.comp_vecCons'']
   have h₁ {c : M} (hc : c ∉ I.carrier) : Θ.Eval ![c] g := by
     apply (hΘ c).mpr
@@ -60,8 +59,9 @@ private lemma exists_bound_of_isElementary (hI : ∃ c, c ∉ I.carrier)
       · exact (hψ' _ y z).mpr h₂
   obtain ⟨b, hb, h₂⟩ : ∃ b ∈ I.carrier, Θ.Eval ![b] g := by
     by_contra! h₂
-    obtain ⟨c, hc, h₃⟩ := overspill ι 𝚺 j (φ := ∼Θ)
-      (by simp [Θ, hψ.hierarchy]) g <| by intro b; simpa [ι] using h₂ b.1 b.2
+    obtain ⟨c, hc, h₃⟩ := overspill ι 𝚺 j (.mkSigma (∼Θ) (by simp [Θ])) g <| by
+      intro b
+      simpa [ι] using h₂ b.1 b.2
     have hc' : c ∉ I.carrier := by
       intro h
       exact hc ⟨⟨c, h⟩, rfl⟩
@@ -93,8 +93,8 @@ theorem models_BSigma_succ (hI : ∃ c, c ∉ I.carrier)
         ∃ b, ∀ x < a, ∃ y < b, φ.Eval ![x, y] e by
       simpa [models_iff, Semiformula.eval_univCl, collectionAxiom, Semiformula.eval_ballLT,
         Semiformula.eval_bexsLT, Semiformula.eval_substs] using this
-    obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hφ
-    simpa using I.exists_bound_of_isElementary hI hj hψ
+    obtain ⟨φ, rfl⟩ := hφ
+    simpa using I.exists_bound_of_isElementary hI hj φ.sigmaInv
 
 end ClosedCut
 
@@ -150,12 +150,11 @@ lemma mem_iff {a : M} :
 open Bootstrapping in
 /-- A prenex $\Pi_m$ formula, `m < j`, with parameters from the cut and a witness in `M` has a
 witness in the cut. -/
-private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)}
-    (hφ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 m φ) (e : Fin n → (definableCut j M).carrier)
+private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ}
+    (φ : ℬ[<, ℒₒᵣ].Prenex 𝚷 m ℕ (n + 1)) (e : Fin n → (definableCut j M).carrier)
     (f : ℕ → (definableCut j M).carrier)
-    (h : ∃ x : M, φ.Eval (x :> Subtype.val ∘ e) (Subtype.val ∘ f)) :
-    ∃ x ∈ (definableCut j M).carrier, φ.Eval (x :> Subtype.val ∘ e) (Subtype.val ∘ f) := by
-  obtain ⟨φ, rfl⟩ := hφ
+    (h : ∃ x : M, φ.val.Eval (x :> Subtype.val ∘ e) (Subtype.val ∘ f)) :
+    ∃ x ∈ (definableCut j M).carrier, φ.val.Eval (x :> Subtype.val ∘ e) (Subtype.val ∘ f) := by
   let ψ := φ.rew (φ.val.paramSubst fun i ↦ #(Fin.castLE (by omega) i))
   let w : Fin (φ.val.fvSup + n) → (definableCut j M).carrier :=
     fun i ↦ if h : (i : ℕ) < n then e ⟨i, h⟩ else f (i - n)
@@ -182,22 +181,20 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
       unfold pair
       split_ifs <;> apply_rules [ClosedCut.add_mem, ClosedCut.mul_mem]
   obtain ⟨c, hc, hyc⟩ := hcode w
-  obtain ⟨θ, hθ, hθP⟩ : ∃ θ : ArithmeticSemisentence 2, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) θ ∧
-      ∀ e p : M, M ⊧/![e, p] θ ↔ PrenexSatisfied 𝚷 m e p := by
+  obtain ⟨θ, hθP⟩ : ∃ θ : 𝚷ᴬ_[m + 1].Semisentence 2,
+      ∀ e p : M, M ⊧/![e, p] θ.val ↔ PrenexSatisfied 𝚷 m e p := by
     cases m with
     | zero =>
-      use boundedSatisfied.pi.val
+      use boundedSatisfied.pi
       simp
     | succ m =>
-      use (prenexSatisfied' 𝚷 m).val
-      and_intros
-      · exact (prenexSatisfied' 𝚷 m).pi_prop.mono (by omega)
-      · intro e p
-        simp [(PrenexSatisfied.pi_defined' m).df]
+      use .mkPi (prenexSatisfied' 𝚷 m).val ((prenexSatisfied' 𝚷 m).pi_prop.mono (by omega))
+      intro e p
+      simp [(PrenexSatisfied.pi_defined' m).df]
   let σ := (prenexSatisfied' 𝚺 m).val
-  let ρ : ArithmeticSemiformula ℕ 2 := “y x. !σ y ↑q → ∀ p, !adjoinDef p x y → !θ p ↑q”
+  let ρ : ArithmeticSemiformula ℕ 2 := “y x. !σ y ↑q → ∀ p, !adjoinDef p x y → !θ.val p ↑q”
   let C : ArithmeticSemiformula ℕ 2 :=
-    “d c. ∀ y < c, !σ y ↑q → ∃ x < d, ∀ p, !adjoinDef p x y → !θ p ↑q”
+    “d c. ∀ y < c, !σ y ↑q → ∃ x < d, ∀ p, !adjoinDef p x y → !θ.val p ↑q”
   have hρ (y x : M) : ρ.Eval ![y, x] (fun _ ↦ 0) ↔
       (PrenexSatisfied 𝚺 (m + 1) y q → PrenexSatisfied 𝚷 m (x ∷ y) q) := by
     simp [ρ, σ, hθP, (PrenexSatisfied.sigma_defined' m).df, numeral_eq_natCast]
@@ -205,7 +202,7 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
       ∀ y < c, PrenexSatisfied 𝚺 (m + 1) y q → ∃ x < d, PrenexSatisfied 𝚷 m (x ∷ y) q := by
     simp [C, σ, hθP, (PrenexSatisfied.sigma_defined' m).df, numeral_eq_natCast]
   have hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (m + 1) σ := (prenexSatisfied' 𝚺 m).sigma_prop
-  have hρ' : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) ρ := by simp [ρ, hσ, hθ]
+  have hρ' : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) ρ := by simp [ρ, hσ]
   obtain ⟨d₀, hd₀⟩ := IBroadSigma.collection (s := m + 1)
     (Bounding.definableRel_of_hierarchy (hρ'.accum 𝚺) fun _ ↦ 0) c <| by
       intro y _
@@ -215,8 +212,8 @@ private lemma exists_witness {m : ℕ} (hm : m < j) {n : ℕ} {φ : ArithmeticSe
         exact (hρ y x).mpr fun _ ↦ hx
       · use 0
         simp [hρ, hy]
-  obtain ⟨d, hd, hCd, -⟩ := exists_least_mem_sigmaDefinableElements (φ := C)
-    ((by simp [C, hσ, hθ] : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) C).mono hm) (e := ![c])
+  obtain ⟨d, hd, hCd, -⟩ := exists_least_mem_sigmaDefinableElements
+    (.mkPi C ((by simp [C, hσ] : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 (m + 1) C).mono hm)) (e := ![c])
     (f := fun _ ↦ 0) (Fin.forall_fin_one.mpr hc)
     (fun _ ↦ (0 : sigmaDefinableElements (j + 1) M).2) <| by
       use d₀
@@ -242,8 +239,8 @@ theorem sigmaElementary : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE j)
   apply IsElementary.prenexHierarchyLE_of_tarskiVaught
   · intro n φ hφ e f
     exact (Bounding.bounded_absolute (definableCut j M).endExtension.emb hφ e f).symm
-  · intro m hm n φ hφ e f h
-    obtain ⟨x, hx, hφx⟩ := exists_witness hm hφ e f h
+  · intro m hm n φ e f h
+    obtain ⟨x, hx, hφx⟩ := exists_witness hm φ e f h
     use ⟨x, hx⟩
     exact hφx
 
@@ -270,8 +267,8 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
   have hK {x : M} (hx : x ∈ sigmaDefinableElements (j + 1) M)
       (hxI : x ∈ (definableCut j M).carrier) :
       ⟨x, hxI⟩ ∈ sigmaDefinableElements (j + 1) (definableCut j M).carrier := by
-    obtain ⟨φ, hφ, hφx⟩ := mem_sigmaDefinableElements_iff.mp hx
-    obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
+    obtain ⟨φ, hφx⟩ := mem_sigmaDefinableElements_iff.mp hx
+    obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) φ.sigma_prop
     have := models_BSigma (j := j) a
     have : M↓[ℒₒᵣ] ⊧* 𝗕𝚺 j :=
       haveI : 𝗕𝚺 j ⪯ 𝗣𝗔 := BSigma_weakerThan_Peano
@@ -279,31 +276,30 @@ theorem not_models_ISigma : ¬(definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜
     have : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗕𝚺 j := mod_BSigma_of_le (Nat.le_succ j)
     have transfer (v : Fin 2 → (definableCut j M).carrier) :
         M ⊧/(Subtype.val ∘ v) φ'.sigmaInv.val ↔ _ ⊧/v φ'.sigmaInv.val :=
-      IsElementary.models_iff_of_hierarchy sigmaElementary Bounding.Prenex.val_hierarchy v
+      IsElementary.models_iff_of_hierarchy (Γ := 𝚷) sigmaElementary
+        (.mkPi φ'.sigmaInv.val φ'.sigmaInv.val_hierarchy) v
     apply mem_sigmaDefinableElements_iff.mpr
-    use φ'.val
-    and_intros
-    · exact Bounding.Prenex.val_hierarchy
-    · intro z
-      have h₁ (y : M) : M ⊧/![y] φ ↔ ∃ w, M ⊧/![w, y] φ'.sigmaInv.val :=
-        (hφ' M ![y] Empty.elim).trans <| φ'.models_sigmaInv ![y]
-      rw [Bounding.Prenex.models_sigmaInv]
-      constructor
-      · rintro ⟨w, hw⟩
-        apply Subtype.ext
-        apply (hφx z.1).mp
-        apply (h₁ z.1).mpr
-        use w.1
-        simpa [Matrix.comp_vecCons''] using (transfer ![w, z]).mpr hw
-      · rintro rfl
-        obtain ⟨w, hw, hχ, -⟩ := exists_least_mem_sigmaDefinableElements
-          (φ := (φ'.sigmaInv.rew Rew.emb).val) (e := ![x]) (f := fun _ ↦ 0)
-          Bounding.Prenex.val_hierarchy (Fin.forall_fin_one.mpr hx)
-          (fun _ ↦ (0 : sigmaDefinableElements (j + 1) M).2) <| by
-            simpa [eval_emb] using (h₁ x).mp ((hφx x).mpr rfl)
-        use ⟨w, w + 1, ((⟨w, hw⟩ : sigmaDefinableElements (j + 1) M) + 1).2, lt_add_one w⟩
-        apply (transfer _).mp
-        simpa [Matrix.comp_vecCons'', eval_emb] using hχ
+    use .mkSigma φ'.val φ'.val_hierarchy
+    intro z
+    have h₁ (y : M) : M ⊧/![y] φ.val ↔ ∃ w, M ⊧/![w, y] φ'.sigmaInv.val :=
+      (hφ' M ![y] Empty.elim).trans <| φ'.models_sigmaInv ![y]
+    rw [Bounding.HierarchySymbol.Semiformula.val_mkSigma, Bounding.Prenex.models_sigmaInv]
+    constructor
+    · rintro ⟨w, hw⟩
+      apply Subtype.ext
+      apply (hφx z.1).mp
+      apply (h₁ z.1).mpr
+      use w.1
+      simpa [Matrix.comp_vecCons''] using (transfer ![w, z]).mpr hw
+    · rintro rfl
+      obtain ⟨w, hw, hχ, -⟩ := exists_least_mem_sigmaDefinableElements
+        (.mkPi (φ'.sigmaInv.rew Rew.emb).val Bounding.Prenex.val_hierarchy) (e := ![x])
+        (f := fun _ ↦ 0) (Fin.forall_fin_one.mpr hx)
+        (fun _ ↦ (0 : sigmaDefinableElements (j + 1) M).2) <| by
+          simpa [eval_emb] using (h₁ x).mp ((hφx x).mpr rfl)
+      use ⟨w, w + 1, ((⟨w, hw⟩ : sigmaDefinableElements (j + 1) M) + 1).2, lt_add_one w⟩
+      apply (transfer _).mp
+      simpa [Matrix.comp_vecCons'', eval_emb] using hχ
   have : (definableCut j M).carrier↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (Nat.le_add_left 1 j)
   have hcast (c : ℕ) : ((c : (definableCut j M).carrier) : M) = c := by
     induction c with

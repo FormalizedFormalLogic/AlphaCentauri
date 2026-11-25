@@ -64,7 +64,7 @@ lemma tprovable_provabilityFormula_imp [𝗜𝚺₁ ⪯ T] (φ ψ : Formula V �
       simp only [provableImpFormula];
       simpa using fun h ↦ h ▸ provable_of_provable_imp_of_provable)
     ![(φ 🡒 ψ).val, φ.val, ψ.val];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := (impGraph ℒₒᵣ).val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (impGraph ℒₒᵣ)
     (w := ![(φ 🡒 ψ).val, φ.val, ψ.val]) (by simp);
   simp [provableImpFormula, typed_quote_rew_subst, Semiformula.substs_substs] at h₁;
   simpa [provabilityFormula, Matrix.constant_eq_singleton] using h₁ ⨀ h₂
@@ -79,28 +79,28 @@ lemma val_subst_numeral (φ : Semiformula V ℒₒᵣ 1) (z : V) :
 
 /-- A standard $\Sigma_1$ formula with one parameter internally implies its own provability at
 every numeral. -/
-lemma tprovable_imp_provabilityFormula_subst [𝗜𝚺₁ ⪯ T] {ψ : ArithmeticSemisentence 1}
-    (hψ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ) (z : V) :
-    T.internalize V ⊢ (⌜ψ⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] 🡒
-      provabilityFormula T ((⌜ψ⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] : Formula V ℒₒᵣ).val := by
+lemma tprovable_imp_provabilityFormula_subst [𝗜𝚺₁ ⪯ T] (ψ : 𝚺ᴬ₁.Semisentence 1) (z : V) :
+    T.internalize V ⊢ (⌜ψ.val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] 🡒
+      provabilityFormula T ((⌜ψ.val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] : Formula V ℒₒᵣ).val := by
   have h₁ := tprovable_subst_numeral_of_models (T := T)
-    (φ := provableSubstNumeralFormula (T := T) ψ)
+    (φ := provableSubstNumeralFormula (T := T) ψ.val)
     (fun W _ _ e ↦ by
-      have key : W ⊧/![e 0] ψ → Provable T (substNumeral (⌜ψ⌝ : W) (e 0)) := by
+      have key : W ⊧/![e 0] ψ.val → Provable T (substNumeral (⌜ψ.val⌝ : W) (e 0)) := by
         intro hz
         simpa [substNumeral, Matrix.constant_eq_singleton, Sentence.quote_eq] using
-          tprovable_iff_provable.mp (bold_sigma_one_complete (V := W) T hψ (w := ![e 0]) hz);
+          tprovable_iff_provable.mp <|
+            bold_sigma_one_complete (V := W) T ψ.sigma_prop (w := ![e 0]) hz;
       simpa [provableSubstNumeralFormula] using fun hz (he : e 1 = _) ↦ he ▸ key hz)
-    ![z, substNumeral ⌜ψ⌝ z];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := ssnum.val) (by simp)
-    (w := ![substNumeral ⌜ψ⌝ z, ⌜ψ⌝, z]) (by simp);
-  have h₃ : T.internalize V ⊢ (⌜ψ⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] 🡒
-      (⌜ssnum.val⌝ : Semiformula V ℒₒᵣ 3).subst ![𝕹 (substNumeral ⌜ψ⌝ z), 𝕹 ⌜ψ⌝, 𝕹 z] 🡒
-      (⌜(provable T).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 (substNumeral ⌜ψ⌝ z)] := by
+    ![z, substNumeral ⌜ψ.val⌝ z];
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) ssnum
+    (w := ![substNumeral ⌜ψ.val⌝ z, ⌜ψ.val⌝, z]) (by simp);
+  have h₃ : T.internalize V ⊢ (⌜ψ.val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] 🡒
+      (⌜ssnum.val⌝ : Semiformula V ℒₒᵣ 3).subst ![𝕹 (substNumeral ⌜ψ.val⌝ z), 𝕹 ⌜ψ.val⌝, 𝕹 z] 🡒
+      (⌜(provable T).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 (substNumeral ⌜ψ.val⌝ z)] := by
     simpa [provableSubstNumeralFormula, typed_quote_rew_subst, Semiformula.substs_substs,
       Matrix.vecHead, Matrix.vecTail, Matrix.constant_eq_singleton] using h₁;
-  have h₄ : T.internalize V ⊢ (⌜ψ⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] 🡒
-      (⌜(provable T).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 (substNumeral ⌜ψ⌝ z)] := by
+  have h₄ : T.internalize V ⊢ (⌜ψ.val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] 🡒
+      (⌜(provable T).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 (substNumeral ⌜ψ.val⌝ z)] := by
     cl_prover [h₂, h₃];
   simpa [provabilityFormula, val_subst_numeral, substNumeral, Sentence.quote_eq] using h₄
 
@@ -109,8 +109,7 @@ theorem tprovable_imp_provabilityFormula_of_sigma1 [𝗜𝚺₁ ⪯ T] (φ : For
     (hφ : IsPrenexHierarchy 𝚺 1 φ.val) (hs : φ.shift = φ) :
     T.internalize V ⊢ φ 🡒 provabilityFormula T φ.val := by
   have h₁ := tprovable_iff_partialTrue (T := T) φ hφ hs;
-  have h₂ := tprovable_imp_provabilityFormula_subst (T := T) (ψ := (partialTrue 𝚺 1).val)
-    (Bounding.HierarchySymbol.Semiformula.hierarchy_sigma (partialTrue 𝚺 1)) φ.val;
+  have h₂ := tprovable_imp_provabilityFormula_subst (T := T) (partialTrue 𝚺 1) φ.val;
   have h₃ := tprovable_provabilityFormula <| tprovable_iff_provable.mp <| Entailment.K_right h₁;
   have h₄ := tprovable_provabilityFormula_imp (T := T)
     ((⌜(partialTrue 𝚺 1).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 φ.val]) φ;

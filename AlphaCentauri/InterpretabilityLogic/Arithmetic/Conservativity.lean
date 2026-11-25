@@ -83,10 +83,11 @@ lemma Conservative.or (hσ : Conservative T Γ n (⌜σ⌝ : V) ⌜χ⌝)
   simpa using h₃
 
 lemma Conservative.provable_imp (h : Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝)
-    (hχ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ) (hτ : Provable T (⌜τ 🡒 χ⌝ : V)) :
-    Provable T (⌜σ 🡒 χ⌝ : V) := by
-  simpa [Sentence.quote_eq] using h ⌜χ⌝ (.of_shift_eq (by simp) (by simp))
-    ((isPrenexHierarchy_quote_iff χ).mpr hχ) (by simpa [Sentence.quote_eq] using hτ)
+    (χ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0) (hτ : Provable T (⌜τ 🡒 χ.val⌝ : V)) :
+    Provable T (⌜σ 🡒 χ.val⌝ : V) := by
+  simpa [Sentence.quote_eq] using h ⌜χ.val⌝ (.of_shift_eq (by simp) (by simp))
+    ((isPrenexHierarchy_quote_iff χ.val).mpr χ.val_prenexHierarchy) <| by
+      simpa [Sentence.quote_eq] using hτ
 
 lemma conservative_dia_pi1 [𝗜𝚺₁ ⪯ T] :
     Conservative T 𝚷 1 (⌜∼provabilityPred T (∼σ)⌝ : V) ⌜σ⌝ := by
@@ -136,15 +137,15 @@ lemma Conservative.and_provabilityPred_pi1 [𝗜𝚺₁ ⪯ T] (h : Conservative
 
 /-- If $\neg\chi$ is equivalent in `T` to a prenex $\Gamma_n$ sentence, conjoining `χ` to both
 sides preserves $\Gamma_n$-conservativity. -/
-lemma Conservative.and [𝗜𝚺₁ ⪯ T] {ψ : ArithmeticSentence}
-    (hψ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ) (hχψ : T ⊢ ∼χ 🡘 ψ)
+lemma Conservative.and [𝗜𝚺₁ ⪯ T] {ψ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0} (hχψ : T ⊢ ∼χ 🡘 ψ.val)
     (h : Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝) : Conservative T Γ n (⌜σ ⋏ χ⌝ : V) ⌜τ ⋏ χ⌝ := by
   rw [conservative_quote_iff] at h ⊢;
   intro π hs hπ hτ;
   obtain ⟨θ, hθs, hθ, hθe⟩ := exists_isPrenexHierarchy_tprovable_or_iff (T := T)
-    (φ := ⌜ψ⌝) (ψ := π) (by simp [typed_quote_shift]) hs
-    (by simpa [Sentence.quote_eq] using (isPrenexHierarchy_quote_iff (V := V) ψ).mpr hψ) hπ;
-  have hc : T.internalize V ⊢ ∼⌜χ⌝ 🡘 ⌜ψ⌝ := by
+    (φ := ⌜ψ.val⌝) (ψ := π) (by simp [typed_quote_shift]) hs
+    (by simpa [Sentence.quote_eq] using
+      (isPrenexHierarchy_quote_iff (V := V) ψ.val).mpr ψ.val_prenexHierarchy) hπ;
+  have hc : T.internalize V ⊢ ∼⌜χ⌝ 🡘 ⌜ψ.val⌝ := by
     simpa using internal_provable_of_outer_provable (V := V) hχψ;
   have hτ' : T.internalize V ⊢ ⌜τ⌝ ⋏ ⌜χ⌝ 🡒 π := by simpa using hτ;
   have h₁ := h θ hθs hθ (by cl_prover [hτ', hc, hθe]);
@@ -189,12 +190,12 @@ lemma models_conservativity_iff {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] 
     V↓[ℒₒᵣ] ⊧ (T.conservativity Γ n) σ τ ↔ Bootstrapping.Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝ := by
   simp [conservativity, models_iff, eval_conservativeDef]
 
-lemma conservativity_imp_provable_imp {σ τ χ : ArithmeticSentence}
-    (hχ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ) :
-    𝗜𝚺₁ ⊢ (T.conservativity Γ n) σ τ ⋏ T.standardProvability (τ 🡒 χ) 🡒
-      T.standardProvability (σ 🡒 χ) :=
+lemma conservativity_imp_provable_imp {σ τ : ArithmeticSentence}
+    (χ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0) :
+    𝗜𝚺₁ ⊢ (T.conservativity Γ n) σ τ ⋏ T.standardProvability (τ 🡒 χ.val) 🡒
+      T.standardProvability (σ 🡒 χ.val) :=
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
-    simpa [standardProvability_def] using fun h hτ ↦ Bootstrapping.Conservative.provable_imp h hχ hτ
+    simpa [standardProvability_def] using fun h hτ ↦ Bootstrapping.Conservative.provable_imp h χ hτ
 
 open Bootstrapping in
 instance [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ n).CL where
@@ -206,20 +207,20 @@ instance [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ n).CL where
     have h := Conservative.or (T := T) (Γ := Γ) (n := n) (V := V) (σ := σ) (τ := τ) (χ := χ);
     simpa using h
   J4 {σ τ} := by
-    obtain ⟨χ, hχp, hχ⟩ := ISigma1.exists_prenexHierarchy_refutable Γ n;
-    have h₁ := conservativity_imp_provable_imp (T := T) (σ := σ) (τ := τ) hχp;
-    have h₂ : 𝗜𝚺₁ ⊢ T.standardProvability (∼τ) 🡒 T.standardProvability (τ 🡒 χ) :=
+    obtain ⟨χ, hχ⟩ := ISigma1.exists_prenexHierarchy_refutable Γ n;
+    have h₁ := conservativity_imp_provable_imp (T := T) (σ := σ) (τ := τ) χ;
+    have h₂ : 𝗜𝚺₁ ⊢ T.standardProvability (∼τ) 🡒 T.standardProvability (τ 🡒 χ.val) :=
       T.standardProvability.mono <| by cl_prover;
-    have h₃ : 𝗜𝚺₁ ⊢ T.standardProvability (σ 🡒 χ) 🡒 T.standardProvability (∼σ) :=
+    have h₃ : 𝗜𝚺₁ ⊢ T.standardProvability (σ 🡒 χ.val) 🡒 T.standardProvability (∼σ) :=
       T.standardProvability.mono <| by
-        have : T ⊢ ∼χ := Entailment.WeakerThan.pbl hχ;
+        have : T ⊢ ∼χ.val := Entailment.WeakerThan.pbl hχ;
         cl_prover [this];
     simp only [ProvabilityAbstraction.Provability.dia];
     generalize (T.conservativity Γ n) σ τ = R at h₁ ⊢;
     generalize T.standardProvability (∼σ) = A at h₃ ⊢;
     generalize T.standardProvability (∼τ) = B at h₂ ⊢;
-    generalize T.standardProvability (σ 🡒 χ) = C at h₁ h₃;
-    generalize T.standardProvability (τ 🡒 χ) = D at h₁ h₂;
+    generalize T.standardProvability (σ 🡒 χ.val) = C at h₁ h₃;
+    generalize T.standardProvability (τ 🡒 χ.val) = D at h₁ h₂;
     cl_prover [h₁, h₂, h₃]
 
 open Bootstrapping in
@@ -249,9 +250,10 @@ lemma conservativity_and [𝗜𝚺₁ ⪯ T] {Γ' : Polarity} {m : ℕ} [𝗕�
     {σ τ χ : ArithmeticSentence} (hχ : ℬ[<, ℒₒᵣ].Hierarchy Γ' m (∼χ))
     (hn : Γ = Γ' ∧ m ≤ n ∨ m < n) :
     𝗜𝚺₁ ⊢ (T.conservativity Γ n) σ τ 🡒 (T.conservativity Γ n) (σ ⋏ χ) (τ ⋏ χ) := by
-  obtain ⟨ψ, hψ, hχψ⟩ := exists_prenexHierarchy_provable_iff T hχ hn;
+  obtain ⟨ψ, hχψ⟩ := exists_prenexHierarchy_provable_iff T (.mkPolarity (∼χ) Γ' hχ) hn;
+  rw [Bounding.HierarchySymbol.Semiformula.val_mkPolarity] at hχψ;
   exact complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
-    simpa using Conservative.and (V := V) (σ := σ) (τ := τ) hψ hχψ
+    simpa using Conservative.and (V := V) (σ := σ) (τ := τ) hχψ
 
 instance [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ (n + 2)).M where
   axiomM {σ τ χ} := by
@@ -316,24 +318,25 @@ variable {α : Type*} [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 lemma conservativityLogic_unprovable_axiomJ5 (hn : Γ = 𝚺 ∧ 1 ≤ n ∨ 1 < n) :
     T.conservativityLogic Γ n (α := α) ⊬ Axioms.J5 (□⊥) := by
-  obtain ⟨ψ, hψ, hP⟩ := exists_prenexHierarchy_provable_iff 𝗜𝚺₁ (Γ := Γ) (Γ' := 𝚺)
-    (σ := T.standardProvability ⊥) (by simp [standardProvability_def]) hn;
+  have hσ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 (T.standardProvability ⊥) := by simp [standardProvability_def];
+  obtain ⟨ψ, hP⟩ := exists_prenexHierarchy_provable_iff 𝗜𝚺₁ (.mkPolarity _ 𝚺 hσ) hn;
+  rw [Bounding.HierarchySymbol.Semiformula.val_mkPolarity] at hP;
   intro h;
   have h₀ : T ⊢ _ := h ⟨fun _ ↦ ⊥⟩;
   simp only [interpret] at h₀;
   generalize hD : T.standardProvability (T.standardProvability ⊥ 🡒 ⊥) 🡒 ⊥ = D at h₀;
-  have hψP : T ⊢ ψ 🡒 T.standardProvability ⊥ :=
+  have hψP : T ⊢ ψ.val 🡒 T.standardProvability ⊥ :=
     WeakerThan.pbl (𝓢 := 𝗜𝚺₁) <| by cl_prover [hP];
-  have h₁ : T ⊢ T.standardProvability (T.standardProvability ⊥ 🡒 ψ) :=
+  have h₁ : T ⊢ T.standardProvability (T.standardProvability ⊥ 🡒 ψ.val) :=
     WeakerThan.pbl <| T.standardProvability.D1 <|
       WeakerThan.pbl (𝓢 := 𝗜𝚺₁) <| by cl_prover [hP];
   have h₂ : T ⊢ (T.conservativity Γ n) D (T.standardProvability ⊥) ⋏
-      T.standardProvability (T.standardProvability ⊥ 🡒 ψ) 🡒 T.standardProvability (D 🡒 ψ) :=
-    WeakerThan.pbl <| conservativity_imp_provable_imp hψ;
-  have h₃ : T ⊢ T.standardProvability (D 🡒 ψ) 🡒
+      T.standardProvability (T.standardProvability ⊥ 🡒 ψ.val) 🡒 T.standardProvability (D 🡒 ψ.val) :=
+    WeakerThan.pbl <| conservativity_imp_provable_imp ψ;
+  have h₃ : T ⊢ T.standardProvability (D 🡒 ψ.val) 🡒
       T.standardProvability (T.standardProvability (T.standardProvability ⊥ 🡒 ⊥) 🡒
         T.standardProvability ⊥) 🡒 T.standardProvability (T.standardProvability ⊥) := by
-    have : T ⊢ (D 🡒 ψ) 🡒 (T.standardProvability (T.standardProvability ⊥ 🡒 ⊥) 🡒
+    have : T ⊢ (D 🡒 ψ.val) 🡒 (T.standardProvability (T.standardProvability ⊥ 🡒 ⊥) 🡒
         T.standardProvability ⊥) 🡒 T.standardProvability ⊥ := by
       subst hD; cl_prover [hψP];
     exact WeakerThan.pbl <|

@@ -171,11 +171,10 @@ variable {Γ Γ' : Polarity} {m n : ℕ} (T : ArithmeticTheory) [𝗕𝚺m ⪯ T
 
 /-- Over $\mathsf{B}\Sigma_m$, every $\Gamma'_m$ sentence is equivalent to a prenex $\Gamma_n$
 sentence if $\Gamma = \Gamma'$ and $m \leq n$, or if $m < n$. -/
-lemma exists_prenexHierarchy_provable_iff {σ : ArithmeticSentence}
-    (hσ : ℬ[<, ℒₒᵣ].Hierarchy Γ' m σ) (hn : Γ = Γ' ∧ m ≤ n ∨ m < n) :
-    ∃ ψ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ ∧ T ⊢ σ 🡘 ψ := by
-  obtain ⟨φ, hφ⟩ := exists_prenex_of_hierarchy T hσ;
-  obtain ⟨ψ, hψ, hφψ⟩ : ∃ ψ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ ∧
+lemma exists_prenexHierarchy_provable_iff (σ : Γ'ᴬ_[m].Sentence)
+    (hn : Γ = Γ' ∧ m ≤ n ∨ m < n) : ∃ ψ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0, T ⊢ σ.val 🡘 ψ.val := by
+  obtain ⟨φ, hφ⟩ := exists_prenex_of_hierarchy T σ.polarity_prop;
+  obtain ⟨_, ⟨ψ, rfl⟩, hφψ⟩ : ∃ ψ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n ψ ∧
       ∀ (M : Type) [Tarski.Structure ℒₒᵣ M] [Nonempty M] (e : Fin 0 → M) (f : Empty → M),
         Semiformula.Eval e f φ.val ↔ Semiformula.Eval e f ψ := by
     rcases hn with ⟨rfl, hn⟩ | hn;
@@ -183,23 +182,19 @@ lemma exists_prenexHierarchy_provable_iff {σ : ArithmeticSentence}
     · exact φ.val_prenexHierarchy.exists_eval_iff_of_lt Γ hn;
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := eq_weakerThan_of_BSigma (s := m);
   use ψ;
-  and_intros;
-  · exact hψ;
-  · apply complete;
-    intro (V : Type) _ _;
-    have := models_of_provable (M := V) inferInstance hφ;
-    simpa [models_iff, hφψ, -Bounding.Prenex.val_sigmaInv] using this
+  apply complete;
+  intro (V : Type) _ _;
+  have := models_of_provable (M := V) inferInstance hφ;
+  simpa [models_iff, hφψ, -Bounding.Prenex.val_sigmaInv] using this
 
 namespace ISigma1
 
 lemma exists_prenexHierarchy_refutable (Γ : Polarity) (n : ℕ) :
-    ∃ χ : ArithmeticSentence, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n χ ∧ 𝗜𝚺₁ ⊢ ∼χ := by
-  use (Bounding.Prenex.falsum : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0).val;
-  and_intros;
-  · exact Bounding.Prenex.val_prenexHierarchy;
-  · apply complete;
-    intro (V : Type) _ _;
-    simp [models_iff, Bounding.Prenex.models_falsum]
+    ∃ χ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0, 𝗜𝚺₁ ⊢ ∼χ.val := by
+  use .falsum;
+  apply complete;
+  intro (V : Type) _ _;
+  simp [models_iff, Bounding.Prenex.models_falsum]
 
 end ISigma1
 

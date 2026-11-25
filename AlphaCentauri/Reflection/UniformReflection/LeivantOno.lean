@@ -25,11 +25,9 @@ for prenex $\Sigma_n$ formulas.
 - [Bek05, Theorem 7] -/
 lemma models_succInd_of_uniformReflection_ElementaryArithmetic {V : Type} [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] [V↓[ℒₒᵣ] ⊧* 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔]
-    {φ : ArithmeticSemiformula ℕ 1} (hφ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 n φ) :
-    V↓[ℒₒᵣ] ⊧ .univCl (succInd φ) := by
-  obtain ⟨χ, rfl⟩ := hφ
+    (χ : ℬ[<, ℒₒᵣ].Prenex 𝚺 n ℕ 1) : V↓[ℒₒᵣ] ⊧ .univCl (succInd χ.val) := by
   set ψ := χ.rew (χ.val.paramSubst ![#0])
-  obtain ⟨θ, hθ, hθψ⟩ := exists_inductionImplication.{0} ψ
+  obtain ⟨θ, hθψ⟩ := exists_inductionImplication.{0} ψ
   simp only [models_iff, Semiformula.eval_univCl, succInd]
   simp only [LogicalConnective.HomClass.map_imply, Semiformula.eval_substs, Semiformula.eval_all,
     LogicalConnective.Prop.arrow_eq]
@@ -37,16 +35,17 @@ lemma models_succInd_of_uniformReflection_ElementaryArithmetic {V : Type} [ORing
   have hψ (x : V) :
       Semiformula.Eval (x :> fun i ↦ f i) Empty.elim ψ.val ↔ χ.val.Eval ![x] f :=
     (χ.val_rew _).symm ▸ Semiformula.eval_toSemisentence_one χ.val x f
-  have hrfn : V ⊧/![] (𝗘𝗔.uniformReflectionSchema θ) :=
+  have hrfn : V ⊧/![] (𝗘𝗔.uniformReflectionSchema θ.val) :=
     models_iff.mp <| Semantics.ModelsSet.models _
-      (show _ ∈ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔 from ⟨_, θ, hθ, rfl⟩)
+      (show _ ∈ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔 from
+        ⟨_, _, θ.val_prenexHierarchy, rfl⟩)
   intro h₀ hs x
   have hprov :=
     ElementaryArithmetic.Bootstrapping.provable_substNumerals_of_provable_zero_of_provable_succ
-      (T := 𝗘𝗔) θ (provable_inductionImplication_zero hθψ) (provable_inductionImplication_succ hθψ)
-      x (fun i ↦ f i)
+      (T := 𝗘𝗔) θ.val (provable_inductionImplication_zero hθψ)
+      (provable_inductionImplication_succ hθψ) x (fun i ↦ f i)
   have h := (hθψ V Empty.elim x _).mp
-    ((ElementaryArithmetic.models_uniformReflectionSchema_iff 𝗘𝗔 θ).mp hrfn _ hprov)
+    ((ElementaryArithmetic.models_uniformReflectionSchema_iff 𝗘𝗔 θ.val).mp hrfn _ hprov)
   simp only [hψ] at h
   simpa using h (by simpa using h₀) (by simpa using hs)
 
@@ -67,8 +66,8 @@ theorem ISigma_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi (n :
     and_intros
     · infer_instance
     · apply Semantics.ModelsSet.setOf_iff.mpr
-      rintro _ ⟨φ, hφ, rfl⟩
-      exact models_succInd_of_uniformReflection_ElementaryArithmetic hφ
+      rintro _ ⟨_, ⟨φ, rfl⟩, rfl⟩
+      exact models_succInd_of_uniformReflection_ElementaryArithmetic φ
 
 /-- Uniform prenex $\Pi_{n + 2}$ reflection for `𝗘𝗔` over `𝗜𝚺₁` yields `𝗜𝚺 n`.
 - [Bek05, Theorem 7] -/

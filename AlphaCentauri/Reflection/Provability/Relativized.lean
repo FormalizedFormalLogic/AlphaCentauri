@@ -160,7 +160,7 @@ lemma RelativizedProv.succ {σ : ArithmeticSentence} :
     refine relativizedProv_succ_iff.mpr ⟨c, fun p hp ↦ ?_, ?_⟩
     · obtain ⟨k, hk, hp⟩ := hc p hp
       exact ⟨k, by omega, hp⟩
-    have hno := tprovable_subst_numeral_of_sigma1 (T := T) (noTag m).sigma_prop (w := ![c]) (by
+    have hno := tprovable_subst_numeral_of_sigma1 (T := T) (noTag m) (w := ![c]) (by
       suffices ∀ p ∈ c, ∀ θ ≤ p, ∀ e ≤ p, p ≠ ⟪((m + 2 : ℕ) : V), θ, e⟫ by
         simpa [noTag, numeral_eq_natCast] using this
       intro p hp θ _ e _ he
@@ -186,7 +186,7 @@ lemma RelativizedProv.succ {σ : ArithmeticSentence} :
 
 lemma tprovable_hypothesisFormula_of_subset {c d : V} (h : c ⊆ d) :
     T.internalize V ⊢ hypothesisFormula n d 🡒 hypothesisFormula n c := by
-  have hs := tprovable_subst_numeral_of_sigma1 (T := T) (φ := bitSubsetDef.val) (by simp)
+  have hs := tprovable_subst_numeral_of_sigma1 (T := T) (.ofZero bitSubsetDef _)
     (w := ![c, d]) (by simpa using h)
   have hstd := tprovable_subst_numeral_of_models (T := T)
     (φ := “c d. !bitSubsetDef c d → !(relativizedHypothesis n).val d →
@@ -243,7 +243,7 @@ lemma RelativizedProv.internalize {σ : ArithmeticSentence} :
     obtain ⟨c, hc, hσ⟩ := relativizedProv_succ_iff.mp h
     refine relativizedProv_succ_iff.mpr ⟨c, hc, ?_⟩
     have hρ := tprovable_subst_numeral_of_sigma1 (T := T)
-      (provableFromHypothesis (T := T) n σ).sigma_prop (w := ![c])
+      (provableFromHypothesis (T := T) n σ) (w := ![c])
       ((eval_provableFromHypothesis (T := T) σ ![c]).mpr (by
         simpa [tprovable_iff_provable, substNumeral, Sentence.quote_eq] using hσ))
     have hstd := tprovable_subst_numeral_of_models (T := T)
@@ -276,31 +276,30 @@ private lemma eval_memHypothesis {W : Type*} [ORingStructure W] [W↓[ℒₒᵣ]
     W ⊧/v (memHypothesis n θ).val ↔ ⟪((n + 1 : ℕ) : W), (⌜θ⌝ : W), v 1 ∷ 0⟫ ∈ v 0 := by
   simp [memHypothesis, numeral_eq_natCast]
 
-/-- A true $\Sigma_{n + 2}$ sentence `∃¹ ψ`, with `ψ` prenex $\Pi_{n + 1}$, is
+/-- A true $\Sigma_{n + 2}$ sentence `∃¹ φ`, with `φ` prenex $\Pi_{n + 1}$, is
 `Prov^{n + 1}_T`-provable. -/
-lemma RelativizedProv.of_sigma (φ : ℬ[<, ℒₒᵣ].Prenex 𝚷 (n + 1) Empty 1)
-    {ψ : ArithmeticSemisentence 1} (hψ : φ.val = ψ) {y : V} (hy : V ⊧/![y] ψ) :
-    RelativizedProv T (n + 1) (⌜(∃¹ ψ : ArithmeticSentence)⌝ : V) := by
+lemma RelativizedProv.of_sigma (φ : ℬ[<, ℒₒᵣ].Prenex 𝚷 (n + 1) Empty 1) {y : V}
+    (hy : V ⊧/![y] φ.val) : RelativizedProv T (n + 1) (⌜(∃¹ φ.val : ArithmeticSentence)⌝ : V) := by
   let c : V := {⟪((n + 1 : ℕ) : V), (⌜φ.matrix.val⌝ : V), y ∷ 0⟫}
   refine relativizedProv_succ_iff.mpr ⟨c, fun p hp ↦ ?_, ?_⟩
   · obtain rfl : p = ⟪((n + 1 : ℕ) : V), (⌜φ.matrix.val⌝ : V), y ∷ 0⟫ := by simpa [c] using hp
-    exact ⟨n, le_rfl, _, _, rfl, by simpa using (prenexSatisfied_quote_iff φ ![y]).mpr (hψ ▸ hy)⟩
-  have hm := tprovable_subst_numeral_of_sigma1 (T := T) (memHypothesis n φ.matrix.val).sigma_prop
+    exact ⟨n, le_rfl, _, _, rfl, by simpa using (prenexSatisfied_quote_iff φ ![y]).mpr hy⟩
+  have hm := tprovable_subst_numeral_of_sigma1 (T := T) (memHypothesis n φ.matrix.val)
     (w := ![c, y]) (by simp [eval_memHypothesis, c])
   have hstd := tprovable_subst_numeral_of_models (T := T)
     (φ := “c y. !(memHypothesis n φ.matrix.val).val c y → !(relativizedHypothesis n).val c →
-      !ψ y”) (by
+      !φ.val y”) (by
     intro W _ _ e
     suffices ⟪((n + 1 : ℕ) : W), (⌜φ.matrix.val⌝ : W), e 1 ∷ 0⟫ ∈ e 0 →
-        RelativizedHypothesis n (e 0) → W ⊧/![e 1] ψ by
+        RelativizedHypothesis n (e 0) → W ⊧/![e 1] φ.val by
       simpa [eval_memHypothesis, (RelativizedHypothesis.defined (V := W) _).df,
-        Matrix.constant_eq_singleton] using this
+        Matrix.constant_eq_singleton, -Bounding.Prenex.val_piInv] using this
     intro hmem h
     obtain ⟨k, -, hs⟩ := h _ hmem
     obtain ⟨hk, hs⟩ := hs.of_eq rfl
     obtain rfl : k = n := by omega
-    exact hψ ▸ (prenexSatisfied_quote_iff φ ![e 1]).mp (by simpa using hs)) ![c, y]
-  have hex := TProof.subst_imp_exs (T := T) (⌜ψ⌝ : Bootstrapping.Semiformula V ℒₒᵣ 1) (𝕹 y)
+    exact (prenexSatisfied_quote_iff φ ![e 1]).mp (by simpa using hs)) ![c, y]
+  have hex := TProof.subst_imp_exs (T := T) (⌜φ.val⌝ : Bootstrapping.Semiformula V ℒₒᵣ 1) (𝕹 y)
   simp only [Sentence.typed_quote_def, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue,
     LCWQIsoGödelQuote.imply, Rewriting.emb_subst_eq_subst_emb, Semiformula.typed_quote_substs,
     Fin.Fin1.eq_one, Matrix.cons_val_fin_one, Rew.emb_bvar, Matrix.constant_eq_singleton,
@@ -385,19 +384,18 @@ instance : (T.relativizedProvability n).HBL where
 
 /-- Formalized $\Sigma_{n + 1}$-completeness of `Prov^n_T`.
 - [Bek99, Lemma 3.1(1)] -/
-theorem relativizedProvability_formalizedCompleteOn {σ : ArithmeticSentence}
-    (hσ : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 (n + 1) σ) :
-    (T.relativizedProvability n).FormalizedCompleteOn σ := ⟨by
+theorem relativizedProvability_formalizedCompleteOn (σ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (n + 1) Empty 0) :
+    (T.relativizedProvability n).FormalizedCompleteOn σ.val := ⟨by
   match n with
   | 0 =>
     simpa [Theory.relativizedProvability, Provability.pr] using
-      provable_sigma_one_complete (T := T) hσ.hierarchy
+      provable_sigma_one_complete (T := T) σ.val_hierarchy
   | m + 1 =>
-    obtain ⟨ψ, ⟨φ, hφ⟩, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hσ
     exact complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
       simp only [Semantics.Imp.models_imply, models_relativizedProvability_iff]
       intro h
-      obtain ⟨y, hy⟩ : ∃ y : V, V ⊧/![y] ψ := by simpa [models_iff] using h
-      exact RelativizedProv.of_sigma φ hφ.symm hy⟩
+      obtain ⟨y, hy⟩ := (σ.models_sigmaInv ![]).mp (models_iff.mp h)
+      rw [Bounding.Prenex.val_sigmaInv]
+      exact RelativizedProv.of_sigma σ.sigmaInv hy⟩
 
 end FFL.FirstOrder.Arithmetic

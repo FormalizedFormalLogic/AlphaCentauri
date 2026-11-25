@@ -35,15 +35,15 @@ namespace Arithmetic
 formula?
 - [DAq05, Question 8.1] -/
 open_problem exists_diophantine_equiv_ISigma0 :=
-  ∀ φ : ArithmeticFormula ℕ, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ →
-    ∃ ψ : ArithmeticFormula ℕ, Semiformula.Diophantine ψ ∧ 𝗜𝚺₀ ⊢ (φ 🡘 ψ).univCl
+  ∀ φ : 𝚺ᴬ₀.Semiformula ℕ 0,
+    ∃ ψ : ArithmeticFormula ℕ, Semiformula.Diophantine ψ ∧ 𝗜𝚺₀ ⊢ (φ.val 🡘 ψ).univCl
 
 /-- Does $\mathsf{I}\Delta_0 + \Omega_1$ prove that every $\Delta_0$ formula is equivalent to a
 Diophantine formula?
 - [DAq05, §8] -/
 open_problem exists_diophantine_equiv_ISigma0_union_Omega1 :=
-  ∀ φ : ArithmeticFormula ℕ, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 0 φ →
-    ∃ ψ : ArithmeticFormula ℕ, Semiformula.Diophantine ψ ∧ 𝗜𝚺₀ ∪ 𝝮₁ ⊢ (φ 🡘 ψ).univCl
+  ∀ φ : 𝚺ᴬ₀.Semiformula ℕ 0,
+    ∃ ψ : ArithmeticFormula ℕ, Semiformula.Diophantine ψ ∧ 𝗜𝚺₀ ∪ 𝝮₁ ⊢ (φ.val 🡘 ψ).univCl
 
 end Arithmetic
 

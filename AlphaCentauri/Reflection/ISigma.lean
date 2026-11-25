@@ -29,15 +29,15 @@ $\mathsf{I}\Sigma_n$ for prenex $\Pi_{k+3}$ sentences.
 theorem ISigma.provable_localReflectionOn_Pi (hn : n ≤ k) :
     𝗜𝚺 (k + 1) ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (k + 3)] (𝗜𝚺 n) := by
   intro φ hφ
-  obtain ⟨π, hπ, rfl⟩ := (Provability.mem_localReflectionOn_iff _).mp hφ
+  obtain ⟨_, ⟨π, rfl⟩, rfl⟩ := (Provability.mem_localReflectionOn_iff _).mp hφ
   apply Arithmetic.complete.{0}
   intro V _ _
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (s₁ := 1) (s₂ := k + 1) (by omega)
   simp only [Semantics.Imp.models_imply]
   intro hp
   have := Bootstrapping.models_of_provable_substNumerals
-    (Bootstrapping.admitsFalseBlockReplacement_ISigma hn) hπ (![] : Fin 0 → V)
-    (by simpa [models_iff, standardProvability_def] using hp)
+    (Bootstrapping.admitsFalseBlockReplacement_ISigma hn) π (![] : Fin 0 → V)
+    (by simpa [models_iff, standardProvability_def, -Bounding.Prenex.val_piInv] using hp)
   simpa [models_iff] using this
 
 /-- $\mathsf{I}\Sigma_{k+1}$ proves the uniform reflection principle of $\mathsf{EA}$ for prenex
@@ -47,14 +47,14 @@ $\Pi_{k+3}$ formulas.
 theorem ISigma.provable_uniformReflectionOn_Pi_ElementaryArithmetic (k : ℕ) :
     𝗜𝚺 (k + 1) ⊢* 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (k + 3)] 𝗘𝗔 := by
   intro σ hσ
-  obtain ⟨m, φ, hφ, rfl⟩ := mem_uniformReflectionOn_iff.mp hσ
+  obtain ⟨m, _, ⟨φ, rfl⟩, rfl⟩ := mem_uniformReflectionOn_iff.mp hσ
   apply Arithmetic.complete.{0}
   intro V _ _
   have : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := mod_ISigma_of_le (s₁ := 1) (s₂ := k + 1) (by omega)
   rw [models_iff, models_uniformReflectionSchema_iff]
   intro v hv
   exact Bootstrapping.models_of_provable_substNumerals
-    Bootstrapping.admitsFalseBlockReplacement_ElementaryArithmetic hφ v hv
+    Bootstrapping.admitsFalseBlockReplacement_ElementaryArithmetic φ v hv
 
 theorem ISigma.provable_localReflectionOn_Sigma1 (hk : 1 ≤ k) :
     𝗜𝚺 (k + 1) ⊢* 𝗥𝗳𝗻[ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1] (𝗜𝚺 k) := by
@@ -73,12 +73,14 @@ theorem ISigma.provable_localReflectionOn_Sigma1_of_lt (hm : 1 ≤ m) (hmn : m <
 theorem Peano.provable_localReflection_ISigma (n : ℕ) : 𝗣𝗔 ⊢* 𝗥𝗳𝗻[fun _ ↦ True] (𝗜𝚺 n) := by
   rintro _ ⟨σ, -, rfl⟩
   obtain ⟨s, hs⟩ := ℬ[<, ℒₒᵣ].exists_prenexHierarchy_eval_iff σ
-  obtain ⟨σ', hσ', H⟩ := hs 𝚷 (s + n + 1 + 3) (by omega)
+  obtain ⟨ψ, H⟩ := hs 𝚷 (s + n + 1 + 3) (by omega)
+  have hψ := ψ.val_prenexHierarchy
+  generalize ψ.val = σ' at H hψ
   have he : 𝗜𝚺 n ⊢ σ 🡘 σ' := by
     simpa using provable_iff_of_models_iff.{0} (n := 0) fun V _ _ e ↦ by
       simpa [models_iff] using H V e Empty.elim
   have h₁ : 𝗣𝗔 ⊢ (𝗜𝚺 n).standardProvability.refl σ' := WeakerThan.pbl <|
-    ISigma.provable_localReflectionOn_Pi (k := s + n + 1) (by omega) ⟨σ', hσ', rfl⟩
+    ISigma.provable_localReflectionOn_Pi (k := s + n + 1) (by omega) ⟨σ', hψ, rfl⟩
   have h₂ : 𝗣𝗔 ⊢ (𝗜𝚺 n).standardProvability σ 🡘 (𝗜𝚺 n).standardProvability σ' :=
     WeakerThan.pbl <| Provability.ext (𝔅 := (𝗜𝚺 n).standardProvability) he
   have h₃ : 𝗣𝗔 ⊢ σ 🡘 σ' := WeakerThan.pbl he

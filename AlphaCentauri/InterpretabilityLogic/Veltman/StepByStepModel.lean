@@ -156,7 +156,8 @@ lemma Kind.cases_of_anchor {k : Kind α} {u : ℕ} (h : k.anchor = u) :
     (∃ B, k = .problem u B) ∨ ∃ s A, k = .deficiency u s A := by
   cases k <;> simp_all [Kind.anchor, eq_comm]
 
-lemma kind_spec : match (node Γ₀ ε τ n).kind with | .isolated => (node Γ₀ ε τ n).set = Γ₀
+lemma kind_spec : match (node Γ₀ ε τ n).kind with
+    | .isolated => (node Γ₀ ε τ n).set = Γ₀
     | .problem a B => a < n ∧ ∃ A, τ n = .problem a A B ∧ A ▷ B ∉ (node Γ₀ ε τ a).set ∧
         AssuringSuccessor {∼B} (node Γ₀ ε τ a).set (node Γ₀ ε τ n).set ∧
         A ∈ (node Γ₀ ε τ n).set ∧ □(∼A) ∈ (node Γ₀ ε τ n).set
@@ -183,7 +184,9 @@ lemma kind_spec : match (node Γ₀ ε τ n).kind with | .isolated => (node Γ�
         by simpa [hy] using h.2.2.2.2.1, by simpa only [hx] using hc.1, hc.2⟩;
     · simp [mk, isolatedNode];
 
-lemma kind_lt : match (node Γ₀ ε τ n).kind with | .isolated => True | .problem a _ => a < n
+lemma kind_lt : match (node Γ₀ ε τ n).kind with
+    | .isolated => True
+    | .problem a _ => a < n
     | .deficiency a s _ => a < n ∧ s < n ∧ a ∈ (node Γ₀ ε τ s).pre := by
   have := kind_spec (Γ₀ := Γ₀) (ε := ε) (τ := τ) n;
   split at this <;> simp_all

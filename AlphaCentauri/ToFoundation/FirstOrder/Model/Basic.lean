@@ -302,27 +302,26 @@ formula, `m < s`, with parameters from `S` and a witness in `M` has a witness in
 - [HP98, Lemma IV.1.19] -/
 theorem IsElementary.prenexHierarchyLE_of_tarskiVaught (s : ℕ)
     (bounded : IsElementary (fun {_} φ ↦ ℬ.Closure φ) ι)
-    (witness : ∀ m < s, ∀ {n : ℕ} {φ : Semiformula L ℕ (n + 1)}, ℬ.PrenexHierarchy 𝚷 m φ →
-      ∀ (e : Fin n → S) (f : ℕ → S),
-        (∃ x : M, φ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, φ.Eval (ι x :> ι ∘ e) (ι ∘ f)) :
+    (witness : ∀ m < s, ∀ {n : ℕ} (φ : ℬ.Prenex 𝚷 m ℕ (n + 1)) (e : Fin n → S) (f : ℕ → S),
+      (∃ x : M, φ.val.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : S, φ.val.Eval (ι x :> ι ∘ e) (ι ∘ f)) :
     IsElementary (ℬ.PrenexHierarchyLE s) ι := by
-  suffices ∀ {Γ : Polarity} {m n : ℕ} {φ : Semiformula L ℕ n}, m ≤ s →
-      ℬ.PrenexHierarchy Γ m φ → ∀ (e : Fin n → S) (f : ℕ → S),
-        φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f by
-    rintro n φ ⟨m, hm, Γ, hφ⟩
-    exact this hm hφ
-  intro Γ m n φ hm hφ
-  induction m generalizing Γ n φ with
-  | zero => exact bounded (Bounding.PrenexHierarchy.zero_iff_bounded.mp hφ)
+  suffices ∀ {Γ : Polarity} {m n : ℕ} (φ : ℬ.Prenex Γ m ℕ n), m ≤ s →
+      ∀ (e : Fin n → S) (f : ℕ → S), φ.val.Eval (ι ∘ e) (ι ∘ f) ↔ φ.val.Eval e f by
+    rintro n _ ⟨m, hm, Γ, φ, rfl⟩
+    exact this φ hm
+  intro Γ m n φ hm
+  induction m generalizing Γ n with
+  | zero => exact bounded φ.matrix.bounded
   | succ m ih =>
     intro e f
     rcases Γ
-    · obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.sigma_succ_iff.mp hφ
-      exact eval_ex_iff_of_witness ι (witness m (by omega) hψ e f)
-        fun x ↦ ih (by omega) hψ (x :> e) f
-    · obtain ⟨ψ, hψ, rfl⟩ := Bounding.PrenexHierarchy.pi_succ_iff.mp hφ
-      simpa using (eval_ex_iff_of_witness ι (witness m (by omega) hψ.neg e f)
-        fun x ↦ ih (by omega) hψ.neg (x :> e) f).not
+    · rw [Bounding.Prenex.val_sigmaInv]
+      exact eval_ex_iff_of_witness ι (witness m (by omega) φ.sigmaInv e f)
+        fun x ↦ ih φ.sigmaInv (by omega) (x :> e) f
+    · let ψ : ℬ.Prenex 𝚷 m ℕ (n + 1) := φ.piInv.neg
+      have h : ψ.val = ∼φ.piInv.val := φ.piInv.val_neg
+      simpa [h] using (eval_ex_iff_of_witness ι (witness m (by omega) ψ e f)
+        fun x ↦ ih ψ (by omega) (x :> e) f).not
 
 /-- The Tarski–Vaught test for bounded formulas: bounded formulas are absolute along `ι` as soon as
 every bounded formula with parameters from `S` and a witness in `M` has a witness in `S`. -/

@@ -19,7 +19,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {Γ : Polarity} {m : ℕ} {f i k p q t v R : V}
+variable {Γ : Polarity} {m : ℕ} {f i k n p q t v R : V}
 
 /-! ## Terms -/
 
@@ -143,9 +143,7 @@ lemma termShiftVec_eq_self_iff (hv : IsUTermVec L k v) :
   rw [termShiftVec_eq_self_iff_forall hv, termFreeVariablesVec_eq_empty_iff hv]
   exact forall₂_congr fun i hi ↦ termShift_eq_self_iff (hv.nth hi)
 
-variable {n : V}
-
-variable (L) (n t : V) in
+variable (L n t) in
 /-- `t` codes a closed semiterm: a semiterm with `n` bound variables and no free variables. -/
 def _root_.FFL.FirstOrder.Language.IsClosedSemiterm : Prop :=
   IsSemiterm L n t ∧ termFreeVariables L t = ∅

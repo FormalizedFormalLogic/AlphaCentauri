@@ -96,10 +96,10 @@ lemma tprovable_subst_numeral_of_models
     Entailment.WeakerThan.pbl <| complete 𝗜𝚺₁ _ fun W _ _ ↦ by simpa [models_iff] using h W
 
 /-- A $\Sigma_1$ formula true at `w` is internally provable at the numerals of `w`. -/
-lemma tprovable_subst_numeral_of_sigma1
-    (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 φ) {w : Fin k → V} (h : V ⊧/w φ) :
-    T.internalize V ⊢ (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst (fun i ↦ 𝕹 (w i)) :=
-  bold_sigma_one_complete T hφ h
+lemma tprovable_subst_numeral_of_sigma1 (φ : 𝚺ᴬ₁.Semisentence k) {w : Fin k → V}
+    (h : V ⊧/w φ.val) :
+    T.internalize V ⊢ (⌜φ.val⌝ : Semiformula V ℒₒᵣ k).subst (fun i ↦ 𝕹 (w i)) :=
+  bold_sigma_one_complete T φ.sigma_prop h
 
 end specialize
 

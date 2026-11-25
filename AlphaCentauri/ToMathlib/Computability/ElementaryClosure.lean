@@ -62,8 +62,7 @@ lemma ElementaryClosure.mono (h : ∀ k, K k ⊆ K' k) {k : ℕ}
   | comp _ _ ihg ihh => exact .comp ihg ihh
   | boundedRec _ _ _ hbound ihf ihg ihb => exact .boundedRec ihf ihg ihb hbound
 
-
-lemma elementaryClosure_mono (h : ∀ k, K k ⊆ K' k) (k : ℕ) :
-    elementaryClosure K k ⊆ elementaryClosure K' k := fun _ hf ↦ hf.mono h
+lemma elementaryClosure_mono (h : ∀ k, K k ⊆ K' k) :
+    ∀ k : ℕ, elementaryClosure K k ⊆ elementaryClosure K' k := fun _ _ hf ↦ hf.mono h
 
 end Nat

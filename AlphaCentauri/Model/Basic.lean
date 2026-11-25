@@ -41,7 +41,6 @@ namespace EndExtension
 section
 
 variable {M : Type u} {N : Type v} [ORingStructure M] [ORingStructure N] (e : M ⊆ₑ N)
-  (ι : M ↪ₛ[ℒₒᵣ] N)
 
 @[simp, grind =]
 lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
@@ -52,7 +51,7 @@ lemma mem_range_of_lt {a : M} {b : N} (h : b < e a) : b ∈ Set.range e.emb :=
 
 /-- The end extension given by an embedding whose image is closed downward under `<`.
 - [Kay91, Definition 2.6] -/
-def ofInitial (hι : ∀ x y, y < ι x → y ∈ Set.range ι) : M ⊆ₑ N where
+def ofInitial (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Set.range ι) : M ⊆ₑ N where
   emb := ι
   isInitial := {
     operator_iff := by
@@ -64,10 +63,6 @@ def ofInitial (hι : ∀ x y, y < ι x → y ∈ Set.range ι) : M ⊆ₑ N wher
       obtain rfl := Set.mem_singleton_iff.mp hR
       exact hι a b (by simpa using hb)
   }
-
-@[simp]
-lemma ofInitial_apply (hι : ∀ x y, y < ι x → y ∈ Set.range ι) (x : M) :
-    ofInitial ι hι x = ι x := rfl
 
 include e
 
@@ -174,30 +169,20 @@ variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 /-- `c` is nonstandard: above every natural number. -/
 def IsNonstandardElement (c : M) : Prop := ∀ m : ℕ, (m : M) < c
 
-variable (M)
-
+variable (M) in
 /-- The nonstandard elements of `M`. -/
-def NonstandardElement : Type _ :=
-  {c : M // IsNonstandardElement c}
+def NonstandardElement : Type _ := {c : M // IsNonstandardElement c}
 
+variable (M) in
 /-- `M` is nonstandard: it has a nonstandard element. -/
-abbrev IsNonstandard : Prop :=
-  Nonempty (NonstandardElement M)
-
-variable {M} {c : M} (h : IsNonstandardElement c) (a : NonstandardElement M) (m : ℕ)
-
-include h in
-lemma IsNonstandardElement.natCast_lt : (m : M) < c := h m
+abbrev IsNonstandard : Prop := Nonempty (NonstandardElement M)
 
 instance : CoeOut (NonstandardElement M) M := ⟨Subtype.val⟩
 
-lemma NonstandardElement.isNonstandardElement (c : NonstandardElement M) :
-    IsNonstandardElement (c : M) := c.2
-
 @[simp]
-lemma NonstandardElement.natCast_lt : (m : M) < a := a.2 m
+lemma NonstandardElement.natCast_lt (a : NonstandardElement M) (m : ℕ) : (m : M) < a := a.2 m
 
-lemma isNonstandardElement_iff_not_mem_range :
+lemma isNonstandardElement_iff_not_mem_range {c : M} :
     IsNonstandardElement c ↔ c ∉ Set.range (Nat.cast : ℕ → M) := by
   constructor
   · rintro h ⟨n, rfl⟩
@@ -207,16 +192,9 @@ lemma isNonstandardElement_iff_not_mem_range :
     obtain ⟨n, rfl⟩ := eq_nat_of_le_nat hc
     exact h ⟨n, rfl⟩
 
-end
-
-/-! ## Overspill -/
-
-section
-
-variable (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] [IsNonstandard M]
-
+variable (M) in
 /-- The natural numbers as a proper end extension of a nonstandard model. -/
-def natCastProperEndExtension : ℕ ⊂ₑ M where
+def natCastProperEndExtension [IsNonstandard M] : ℕ ⊂ₑ M where
   emb := natCastEmbedding M
   isInitial := inferInstance
   not_surjective := by
@@ -226,39 +204,18 @@ def natCastProperEndExtension : ℕ ⊂ₑ M where
 
 end
 
+/-! ## Overspill -/
+
 section
 
 variable {M : Type u} {N : Type v} [ORingStructure M] [ORingStructure N] (e : M ⊂ₑ N)
   (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m]
 
-/-- Overspill: a formula of the induction class holding at every element of the base model holds
-below some element outside it.
-- [HP98, Corollary IV.1.16]
-- [vO99, Lemma 3.2, Corollary 3.3] -/
-theorem overspill {φ : ArithmeticSemiformula ℕ 1} (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ m φ) (f : ℕ → N)
-    (h : ∀ a : M, φ.Eval ![e a] f) : ∃ c : N, c ∉ Set.range e.emb ∧ ∀ x < c, φ.Eval ![x] f := by
-  have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m)
-  by_contra! hc
-  have h₁ : ∀ x : N, (∀ y < x, φ.Eval ![y] f) → x ∈ Set.range e.emb := by grind;
-  have h₂ : ∀ x : N, (∀ y < x, φ.Eval ![y] f) → ∀ y < x + 1, φ.Eval ![y] f := by
-    intro x ih y hy;
-    obtain ⟨a, rfl⟩ := h₁ x ih;
-    rcases le_iff_lt_or_eq.mp (lt_succ_iff_le.mp hy) with hy' | rfl
-    · exact ih y hy'
-    · exact h a
-  have h₃ : ∀ x : N, ∀ y < x, φ.Eval ![y] f :=
-    InductionScheme.succ_induction (C := ℬ[<, ℒₒᵣ].Hierarchy Γ m)
-      ⟨f, (φ/[#0]).ballLT #0, by simp [hφ], fun x ↦ by simp [eval_ballLT]⟩
-      (by simp) h₂
-  apply e.not_surjective
-  intro x
-  exact h₁ x (h₃ x)
-
 /-- Overspill: a definable predicate of the induction class holding at every element of the base
 model holds at some element outside it.
 - [HP98, Corollary IV.1.16] -/
-lemma overspill_definablePred {P : N → Prop}
-    (hP : Γᴬ_[m].DefinablePred P) (h : ∀ a : M, P (e a)) : ∃ c : N, c ∉ Set.range e.emb ∧ P c := by
+lemma overspill_definablePred {P : N → Prop} (hP : Γᴬ_[m].DefinablePred P)
+    (h : ∀ a : M, P (e a)) : ∃ c : N, c ∉ Set.range e.emb ∧ P c := by
   have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m)
   by_contra! hc
   apply e.not_surjective
@@ -271,14 +228,30 @@ lemma overspill_definablePred {P : N → Prop}
     obtain ⟨a, rfl⟩ : y ∈ Set.range e.emb := by grind
     simpa using h (a + 1)
 
+/-- Overspill: a formula of the induction class holding at every element of the base model holds
+below some element outside it.
+- [HP98, Corollary IV.1.16]
+- [vO99, Lemma 3.2, Corollary 3.3] -/
+theorem overspill (φ : Γᴬ_[m].Semiformula ℕ 1) (f : ℕ → N) (h : ∀ a : M, φ.val.Eval ![e a] f) :
+    ∃ c : N, c ∉ Set.range e.emb ∧ ∀ x < c, φ.val.Eval ![x] f := by
+  obtain ⟨c, hc, h⟩ := overspill_definablePred e Γ m (P := fun c ↦ ∀ x < c, φ.val.Eval ![x] f)
+    ((Bounding.definablePred_of_hierarchy (φ := (φ.val/[#0]).ballLT #0) (by simp) f).of_iff <| by
+      intro x
+      simp [eval_ballLT]) <| by
+      intro a x hx
+      obtain ⟨y, rfl⟩ := e.mem_range_of_lt hx
+      exact h y
+  use c
+
 end
 
 /-! ## Cuts -/
 
 section
 
-variable (M : Type u) [ORingStructure M]
+variable {M : Type u} [ORingStructure M]
 
+variable (M) in
 /-- A cut of `M`: a subset closed under successor and downward closed under `<`.
 - [HP98, Definition IV.1.14] -/
 structure Cut where
@@ -286,6 +259,7 @@ structure Cut where
   succ_mem {a : M} : a ∈ carrier → a + 1 ∈ carrier
   mem_of_lt {a b : M} : a < b → b ∈ carrier → a ∈ carrier
 
+variable (M) in
 /-- A cut closed under the operations of `ℒₒᵣ`, hence a substructure of `M`.
 - [HP98, Definition IV.2.8(2)] -/
 structure ClosedCut extends Cut M where
@@ -293,8 +267,6 @@ structure ClosedCut extends Cut M where
   one_mem : (1 : M) ∈ carrier
   add_mem {a b : M} : a ∈ carrier → b ∈ carrier → a + b ∈ carrier
   mul_mem {a b : M} : a ∈ carrier → b ∈ carrier → a * b ∈ carrier
-
-variable {M}
 
 namespace ClosedCut
 
@@ -387,14 +359,14 @@ end
 
 end ClosedCut
 
-variable (I : Cut M)
-
 /-- A cut is proper when it contains `0` and omits some element.
 - [HP98, Definition IV.1.14]
 - [Sla04, §1.1] -/
-structure Cut.Proper : Prop where
+structure Cut.Proper (I : Cut M) : Prop where
   zero_mem : (0 : M) ∈ I.carrier
   exists_not_mem : ∃ c, c ∉ I.carrier
+
+variable (I : Cut M)
 
 /-- A cut definable by a $\Sigma_0$ formula with parameters is not proper.
 - [HP98, Observation IV.1.15] -/
@@ -421,10 +393,6 @@ lemma not_models_IDelta_of_proper_cut (n : ℕ) (hI : I.Proper)
   have hhalf₁ : ∀ k : ℕ, 2 * k / 2 = k := by intro k; omega
   have hhalf₂ : ∀ k : ℕ, (2 * k + 1) / 2 = k := by intro k; omega
   let e : ℕ → M := fun k ↦ if k % 2 = 0 then e₁ (k / 2) else e₂ (k / 2)
-  have hφ' : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 n (Rew.rewriteMap (fun k : ℕ ↦ 2 * k) ▹ φ) :=
-    hφ.rew _
-  have hψ' : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 n (Rew.rewriteMap (fun k : ℕ ↦ 2 * k + 1) ▹ ψ) :=
-    hψ.rew _
   have h₁ : ∀ x : M, (Rew.rewriteMap (fun k : ℕ ↦ 2 * k) ▹ φ).Eval ![x] e ↔ x ∈ I.carrier := by
     intro x
     simpa [Semiformula.eval_rewriteMap, e, heven, hhalf₁] using (hφe ![x]).symm
@@ -434,7 +402,7 @@ lemma not_models_IDelta_of_proper_cut (n : ℕ) (hI : I.Proper)
   obtain ⟨h0, c, hc⟩ := hI
   have hind := (models_deltaInd_iff _ _).mp
     (Theory.models (T := DeltaInductionScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 n)) M
-      (mem_DeltaInductionScheme_of_mem hφ' hψ')) e
+      (mem_DeltaInductionScheme_of_mem (hφ.rew _) (hψ.rew _))) e
     (by intro x; rw [h₁ x, h₂ x, not_not])
     ((h₁ 0).mpr h0) (fun x hx ↦ (h₁ (x + 1)).mpr (I.succ_mem ((h₁ x).mp hx)))
   exact hc ((h₁ c).mp (hind c))
@@ -445,8 +413,11 @@ end
 
 section
 
-variable {S : Type u} {M : Type v} [ORingStructure S] [ORingStructure M] {ι : S ↪ₛ[ℒₒᵣ] M}
-  [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+variable {S : Type u} {M : Type v} [ORingStructure S] [ORingStructure M] {ι : S ↪ₛ[ℒₒᵣ] M} {n : ℕ}
+
+section
+
+variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 /-- A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/
@@ -473,10 +444,10 @@ theorem _root_.FFL.FirstOrder.IsElementary.models_peanoMinus
 $\Pi_n$ formula satisfiable in `S` with the parameter `c` is satisfiable in `M`, with the image of
 `c` as parameter, below any element outside the image.
 - [Kay91, Theorem 12.3] -/
-theorem exists_lt_of_initialSegmentEmbedding {n : ℕ} (hι : ∀ x y, y < ι x → y ∈ Set.range ι)
+theorem exists_lt_of_initialSegmentEmbedding (hι : ∀ x y, y < ι x → y ∈ Set.range ι)
     (hel : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) ι) {b : M}
-    (hb : b ∉ Set.range ι) {c : S} {θ : ArithmeticSemisentence 2}
-    (hθ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 n θ) (h : ∃ x : S, S ⊧/![x, c] θ) : ∃ x < b, M ⊧/![x, ι c] θ := by
+    (hb : b ∉ Set.range ι) {c : S} {θ : 𝚷ᴬ_[n].Semisentence 2}
+    (h : ∃ x : S, S ⊧/![x, c] θ.val) : ∃ x < b, M ⊧/![x, ι c] θ.val := by
   obtain ⟨x, hx⟩ := h
   use ι x
   and_intros
@@ -484,23 +455,19 @@ theorem exists_lt_of_initialSegmentEmbedding {n : ℕ} (hι : ∀ x y, y < ι x 
     · exact h
     · exact (hb (Set.mem_range_self x)).elim
     · exact (hb (hι x b h)).elim
-  · have h₁ := hel (φ := Rewriting.emb (∼θ)) (hθ.neg.rew Rew.emb) ![x, c] (fun _ ↦ c)
+  · have h₁ := hel (φ := Rewriting.emb (∼θ.val)) (θ.pi_prop.neg.rew Rew.emb) ![x, c] (fun _ ↦ c)
     simpa [Matrix.comp_vecCons''] using h₁.not.mpr (by simpa using hx)
 
 end
 
-section
-
-variable {S M : Type} [ORingStructure S] [ORingStructure M]
-
 /-- A $\Sigma_s$-elementary embedding preserves the truth of $\Sigma_s$ and $\Pi_s$ sentences
 between models of $\mathsf{B}\Sigma_s$. -/
-lemma _root_.FFL.FirstOrder.IsElementary.models_iff_of_hierarchy {ι : S ↪ₛ[ℒₒᵣ] M} {s : ℕ}
-    (hι : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE s) ι)
-    [S↓[ℒₒᵣ] ⊧* 𝗕𝚺s] [M↓[ℒₒᵣ] ⊧* 𝗕𝚺s] {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemisentence n}
-    (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ s φ) (v : Fin n → S) : M ⊧/(ι ∘ v) φ ↔ S ⊧/v φ := by
-  obtain ⟨φ', hφ'⟩ := Bounding.Prenex.models_exists_prenex.{_, 0} (Γ' := 𝚺) hφ
-  rw [hφ' M, hφ' S]
+lemma _root_.FFL.FirstOrder.IsElementary.models_iff_of_hierarchy {s : ℕ}
+    (hι : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE s) ι) [S↓[ℒₒᵣ] ⊧* 𝗕𝚺s] [M↓[ℒₒᵣ] ⊧* 𝗕𝚺s]
+    {Γ : Polarity} (φ : Γᴬ_[s].Semisentence n) (v : Fin n → S) :
+    M ⊧/(ι ∘ v) φ.val ↔ S ⊧/v φ.val := by
+  obtain ⟨φ', hφ'⟩ := exists_prenex_of_hierarchy 𝗕𝚺s φ.polarity_prop
+  rw [models_iff_of_provable_allClosure hφ', models_iff_of_provable_allClosure hφ']
   have := hι ⟨s, le_rfl, Γ, (φ'.rew Rew.emb).val_prenexHierarchy⟩ v (fun _ ↦ 0)
   rwa [Bounding.Prenex.val_rew, eval_emb, eval_emb] at this
 
@@ -579,9 +546,8 @@ end EndExtension
 namespace Arithmetic
 
 variable {M N : Type*} [ORingStructure M] [ORingStructure N] [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-  (e : M ⊆ₑ N) [IsNonstandard M]
+  (e : M ⊆ₑ N)
 
-omit [IsNonstandard M] in
 include e in
 /-- The standard system of a model of `𝗜𝚺₁` is contained in that of an end extension which
 again models `𝗜𝚺₁`.
@@ -591,17 +557,20 @@ lemma standardSystem_subset_of_endExtension : standardSystem M ⊆ standardSyste
   use e a
   exact e.codedSet_emb a
 
+variable [IsNonstandard M]
+
 include e in
 /-- A nonstandard model of `𝗜𝚺₁` and an end extension of it which again models `𝗜𝚺₁` have the same
 standard system.
 - [Kay91, Chapter 12, p. 159] -/
-theorem standardSystem_eq_of_endExtension : standardSystem M = standardSystem N := by
+theorem standardSystem_eq_of_endExtension :
+    standardSystem M = standardSystem N := by
   apply (standardSystem_subset_of_endExtension e).antisymm
   rintro _ ⟨a, rfl⟩
   obtain ⟨c, hc⟩ := Classical.arbitrary (NonstandardElement M)
   have h₁ : ∀ m : ℕ, (m : N) < e c := by
     intro m
-    simpa using e.emb_lt_emb.mpr (hc.natCast_lt m)
+    simpa using e.emb_lt_emb.mpr (hc m)
   have h₂ : 0 < e c := by simpa using h₁ 0
   obtain ⟨s, hs, h₃⟩ := finset_comprehension₁ (Γ := 𝚺) (P := (· ∈ a)) (by definability) (log (e c))
   obtain ⟨x, rfl⟩ := e.mem_range_of_lt (hs.trans_le (exp_log_le_self h₂))

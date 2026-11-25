@@ -287,7 +287,8 @@ noncomputable def negatedAxioms : Finset (Proposition L) :=
 /-- The internal deduction transform replaces every axiom leaf by an excluded-middle leaf and
 adjoins the negations of the finite list of axioms to every sequent.
 - [HP98, Section I.4(a)] -/
-theorem deduction : let _ : Theory.Δ₁ {p | p ∈ l} := Theory.Δ₁.ofList l Derivation {p | p ∈ l} d →
+theorem deduction : let _ : Theory.Δ₁ {p | p ∈ l} := Theory.Δ₁.ofList l
+    Derivation {p | p ∈ l} d →
       ∃ d', Derivation (∅ : Theory L) d' ∧
         fstIdx d' = fstIdx d ∪ (⌜negatedAxioms l⌝ : V) := by
   let _ : Theory.Δ₁ {p | p ∈ l} := Theory.Δ₁.ofList l

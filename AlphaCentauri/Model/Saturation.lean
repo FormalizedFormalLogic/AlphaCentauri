@@ -19,7 +19,7 @@ open FFL.FirstOrder.Bounding (HierarchySymbol)
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [IsNonstandard M]
-  {k m n : ℕ}
+  {k m : ℕ}
 
 namespace Arithmetic
 
@@ -75,20 +75,21 @@ lemma exists_forall_of_mem_standardSystem (hR : 𝚺ᴬ_[m + 1]-Relation R)
   intro e he
   exact hx e (isNonstandardElement_iff_not_mem_range.mpr hd e) he
 
-/-- `exists_forall_of_mem_standardSystem` for the codes of a set of semisentences. -/
-lemma exists_forall_of_setOf_mem_standardSystem {Q : ArithmeticSemisentence k → Prop}
-    (hQ : {e : ℕ | ∃ φ, Q φ ∧ ⌜φ⌝ = e} ∈ standardSystem M) (hR : 𝚺ᴬ_[m + 1]-Relation R)
-    (h : ∀ s : Finset (ArithmeticSemisentence k), (∀ φ ∈ s, Q φ) → ∃ x, ∀ φ ∈ s, R x ⌜φ⌝) :
-    ∃ x, ∀ φ, Q φ → R x ⌜φ⌝ := by
+/-- `exists_forall_of_mem_standardSystem` for the codes of a family of semisentences. -/
+lemma exists_forall_of_setOf_mem_standardSystem {α : Type*} {q : α → ArithmeticSemisentence k}
+    {Q : α → Prop} (hQ : {e : ℕ | ∃ φ, Q φ ∧ ⌜q φ⌝ = e} ∈ standardSystem M)
+    (hR : 𝚺ᴬ_[m + 1]-Relation R)
+    (h : ∀ s : Finset α, (∀ φ ∈ s, Q φ) → ∃ x, ∀ φ ∈ s, R x ⌜q φ⌝) :
+    ∃ x, ∀ φ, Q φ → R x ⌜q φ⌝ := by
   classical
   obtain ⟨x, hx⟩ := exists_forall_of_mem_standardSystem hR hQ <| by
     intro s hs
-    choose! f hf hfe using fun e (he : e ∈ s) ↦ hs he
-    obtain ⟨x, hx⟩ := h (s.image f) (by simpa using hf)
+    choose f hf hfe using fun e : s ↦ hs e.2
+    obtain ⟨x, hx⟩ := h (Finset.univ.image f) (by grind)
     use x
     intro e he
-    have h₁ := hx _ (Finset.mem_image_of_mem f he)
-    rwa [← Sentence.coe_quote_eq_quote, hfe e he] at h₁
+    have h₁ := hx _ (Finset.mem_image_of_mem f (Finset.mem_univ ⟨e, he⟩))
+    rwa [← Sentence.coe_quote_eq_quote, hfe] at h₁
   use x
   intro φ hφ
   rw [← Sentence.coe_quote_eq_quote]
@@ -97,43 +98,36 @@ lemma exists_forall_of_setOf_mem_standardSystem {Q : ArithmeticSemisentence k �
 
 /-- The codes of the prenex $\Sigma_n$ formulas, or prenex $\Pi_n$ formulas, whose code satisfies a
 definable predicate form a coded set. -/
-lemma setOf_prenexHierarchy_mem_standardSystem (l : ℕ)
-    (hP : 𝚺ᴬ_[m + 1]-Predicate P) : {e : ℕ | ∃ φ : ArithmeticSemisentence l,
-      ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ ∧ P ⌜φ⌝ ∧ ⌜φ⌝ = e} ∈ standardSystem M := by
+lemma setOf_prenexHierarchy_mem_standardSystem (l : ℕ) (hP : 𝚺ᴬ_[m + 1]-Predicate P) :
+    {e : ℕ | ∃ φ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty l, P ⌜φ.val⌝ ∧ ⌜φ.val⌝ = e} ∈ standardSystem M := by
   have hΓ : 𝚺ᴬ_[m + 1]-Predicate (IsPrenexHierarchy Γ n : M → Prop) :=
     (IsPrenexHierarchy.definable Γ n).of_deltaOne
   apply Set.mem_of_eq_of_mem _ <| setOf_mem_standardSystem (m := m)
     (P := fun e ↦ (ℒₒᵣ).IsSemisentence (l : M) e ∧ IsPrenexHierarchy Γ n e ∧ P e) (by definability)
   ext e
   constructor
-  · rintro ⟨φ, hφ, h, rfl⟩
-    simp [Sentence.coe_quote_eq_quote, h, (isPrenexHierarchy_quote_iff φ).mpr hφ]
+  · rintro ⟨φ, h, rfl⟩
+    simp [Sentence.coe_quote_eq_quote, h,
+      (isPrenexHierarchy_quote_iff φ.val).mpr φ.val_prenexHierarchy]
   · rintro ⟨he, hφ, h⟩
     obtain ⟨φ, rfl⟩ := he.sound_natCast
     rw [Sentence.coe_quote_eq_quote] at hφ h
+    obtain ⟨φ, rfl⟩ := (isPrenexHierarchy_quote_iff φ).mp hφ
     use φ
-    and_intros
-    · exact (isPrenexHierarchy_quote_iff φ).mp hφ
-    · exact h
-    · rfl
 
 /-- The prenex $\Sigma_n$ type, or prenex $\Pi_n$ type, of a tuple is a coded set.
 - [Kay91, Lemma 12.1] -/
 theorem mem_standardSystem_hierarchyType {l : ℕ} (a : Fin l → M) :
-    {e : ℕ | ∃ φ : ArithmeticSemisentence l, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ ∧ M ⊧/a φ ∧
-      ⌜φ⌝ = e} ∈ standardSystem M := by
+    {e : ℕ | ∃ φ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty l, M ⊧/a φ.val ∧ ⌜φ.val⌝ = e} ∈ standardSystem M := by
   apply Set.mem_of_eq_of_mem _ <| setOf_prenexHierarchy_mem_standardSystem Γ n l (m := n + 1)
     (P := PrenexFormulaSatisfied Γ n (matrixToVec a)) (by definability)
   ext e
   apply exists_congr
   intro φ
-  apply and_congr_right
-  intro hφ
-  rw [PrenexFormulaSatisfied.quote_iff hφ]
+  rw [PrenexFormulaSatisfied.quote_iff φ]
 
 end Arithmetic
 
-section
 variable (Γ : Polarity) (n : ℕ)
 
 /-- A type of prenex $\Sigma_n$ formulas, or of prenex $\Pi_n$ formulas, over a nonstandard model
@@ -178,9 +172,9 @@ theorem «Type».realized_of_mem_standardSystem {Φ : FirstOrder.Type ℒₒᵣ 
     | right j => simp
   have hR (x : M) {σ : ArithmeticSemisentence (k + m)} (hσ : U σ ∈ Φ) :
       PrenexFormulaSatisfied Γ n (env x) ⌜σ⌝ ↔ (U σ).Eval (fun i ↦ x.[((i : ℕ) : M)]) b := by
-    have : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n σ := by
+    obtain ⟨σ, rfl⟩ : ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n σ := by
       simpa [U] using (hΦ _ hσ).rew (Rew.bindParams ℒₒᵣ k m)
-    rw [PrenexFormulaSatisfied.quote_iff this, ← Semiformula.eval_bindParams,
+    rw [PrenexFormulaSatisfied.quote_iff σ, ← Semiformula.eval_bindParams,
       Rew.bindParams_app_unbindParams_app]
   obtain ⟨x, hx⟩ := exists_forall_of_setOf_mem_standardSystem hS
     (R := fun x e ↦ PrenexFormulaSatisfied Γ n (env x) e)
@@ -203,7 +197,5 @@ theorem sigmaRecursivelySaturated_of_nonstandard : SigmaRecursivelySaturated M �
   intro k m Φ b hΦ hr hf
   apply Type.realized_of_mem_standardSystem 𝚺 n hΦ _ hf
   exact mem_standardSystem_of_computablePred hr
-
-end
 
 end FFL.FirstOrder

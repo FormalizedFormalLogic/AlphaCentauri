@@ -128,7 +128,7 @@ lemma tprovable_tvF_bvar_zero : T.internalize V ⊢ tvF x (pTerm x a) (^#0) := b
     intro W _ _ e;
     simpa [tvBvarZeroClause, add_mul_add_eq_ppair] using fun (h : e 2 = ^#0) ↦ by
       simp [h]) ![x, a, 𝕹 (^#0)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := qqBvarDef.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (.ofZero qqBvarDef _)
     (w := ![(^#0 : V), 0]) (by simp);
   rw [numeral_vec_two] at h₂;
   have h₃ : T.internalize V ⊢ (⌜qqBvarDef.val⌝ : Semiformula V ℒₒᵣ 2).subst ![𝕹 (^#0), 𝕹 0] 🡒
@@ -151,7 +151,7 @@ lemma tprovable_tvF_bvar_succ (i : V) :
     simpa [tvBvarSuccClause, bvarSuccCond, add_mul_add_eq_ppair] using
       fun (h₁ : e 3 = ^#(e 5)) (h₂ : e 4 = ^#(e 5 + 1)) ↦ by simp [h₁, h₂])
     ![y, x, a, 𝕹 (^#i), 𝕹 (^#(i + 1)), 𝕹 i];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := bvarSuccCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) bvarSuccCond
     (w := ![(^#i : V), ^#(i + 1), i]) (by simp [bvarSuccCond]);
   rw [numeral_vec_three] at h₂;
   have h₃ : T.internalize V ⊢
@@ -176,7 +176,7 @@ lemma tprovable_tvF_zero : T.internalize V ⊢ tvF (𝕹 0) a 𝟎 := by
     intro W _ _ e;
     simpa [tvZeroClause, zeroCond, numeral_eq_natCast] using fun (h : e 1 = 𝟎) ↦ by simp [h])
     ![a, 𝕹 (𝟎 : V)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := zeroCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) zeroCond
     (w := ![(𝟎 : V)]) (by simp [zeroCond, numeral_eq_natCast]);
   have h₃ : T.internalize V ⊢ (⌜zeroCond.val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 (𝟎 : V)] 🡒
       tvF (𝕹 0) a 𝟎 := by
@@ -189,7 +189,7 @@ lemma tprovable_tvF_one : T.internalize V ⊢ tvF (𝕹 1) a 𝟏 := by
     intro W _ _ e;
     simpa [tvOneClause, oneCond, numeral_eq_natCast] using fun (h : e 1 = 𝟏) ↦ by simp [h])
     ![a, 𝕹 (𝟏 : V)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := oneCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) oneCond
     (w := ![(𝟏 : V)]) (by simp [oneCond, numeral_eq_natCast]);
   have h₃ : T.internalize V ⊢ (⌜oneCond.val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 (𝟏 : V)] 🡒
       tvF (𝕹 1) a 𝟏 := by
@@ -220,7 +220,7 @@ lemma tprovable_tvF_add (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
         (h₁ : e 0 = termVal (dec (e 2)) (e 3)) (h₂ : e 1 = termVal (dec (e 2)) (e 4)) ↦ by
         simp [h, h₁, h₂, termVal_add ht hu])
     ![y₁, y₂, a, 𝕹 t, 𝕹 u, 𝕹 (t ^+ u)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := addCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) addCond
     (w := ![t ^+ u, t, u]) (by simp [addCond, ht, hu]);
   rw [numeral_vec_three] at h₂;
   have h₃ : T.internalize V ⊢
@@ -239,7 +239,7 @@ lemma tprovable_tvF_mul (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
         (h₁ : e 0 = termVal (dec (e 2)) (e 3)) (h₂ : e 1 = termVal (dec (e 2)) (e 4)) ↦ by
         simp [h, h₁, h₂, termVal_mul ht hu])
     ![y₁, y₂, a, 𝕹 t, 𝕹 u, 𝕹 (t ^* u)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := mulCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) mulCond
     (w := ![t ^* u, t, u]) (by simp [mulCond, ht, hu]);
   rw [numeral_vec_three] at h₂;
   have h₃ : T.internalize V ⊢
@@ -265,7 +265,7 @@ lemma tprovable_psatF_verum : T.internalize V ⊢ psatF a ^⊤ := by
   have h₁ := tprovable_subst_of_models (T := T) (φ := psatVerumClause) (by
     intro W _ _ e;
     simpa [psatVerumClause, verumCond] using fun (h : e 1 = ^⊤) ↦ by simp [h]) ![a, 𝕹 ^⊤];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := verumCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) verumCond
     (w := ![(^⊤ : V)]) (by simp [verumCond]);
   have h₃ : T.internalize V ⊢ (⌜verumCond.val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 (^⊤ : V)] 🡒
       psatF a ^⊤ := by
@@ -277,7 +277,7 @@ lemma tprovable_psatF_falsum : T.internalize V ⊢ ∼psatF a ^⊥ := by
   have h₁ := tprovable_subst_of_models (T := T) (φ := psatFalsumClause) (by
     intro W _ _ e;
     simpa [psatFalsumClause, falsumCond] using fun (h : e 1 = ^⊥) ↦ by simp [h]) ![a, 𝕹 ^⊥];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := falsumCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) falsumCond
     (w := ![(^⊥ : V)]) (by simp [falsumCond]);
   have h₃ : T.internalize V ⊢ (⌜falsumCond.val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 (^⊥ : V)] 🡒
       ∼psatF a ^⊥ := by
@@ -297,7 +297,7 @@ lemma tprovable_psatF_and (p q : V) :
     intro W _ _ e;
     simpa [psatAndClause, andCond] using fun (h : e 3 = e 1 ^⋏ e 2) ↦ by
       rw [h, BoundedSatisfied.and_iff]) ![a, 𝕹 p, 𝕹 q, 𝕹 (p ^⋏ q)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := andCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) andCond
     (w := ![p ^⋏ q, p, q]) (by simp [andCond]);
   rw [numeral_vec_three] at h₂;
   have h₃ : T.internalize V ⊢
@@ -324,7 +324,7 @@ lemma tprovable_psatF_or (hp : IsBounded p) (hp' : IsUFormula ℒₒᵣ p)
       fun (h : e 3 = e 1 ^⋎ e 2) (hp : IsBounded (e 1)) (hp' : IsUFormula ℒₒᵣ (e 1))
         (hq : IsBounded (e 2)) (hq' : IsUFormula ℒₒᵣ (e 2)) ↦ by
       rw [h, BoundedSatisfied.or_iff hp hp' hq hq']) ![a, 𝕹 p, 𝕹 q, 𝕹 (p ^⋎ q)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := orCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) orCond
     (w := ![p ^⋎ q, p, q]) (by simp [orCond, hp, hp', hq, hq']);
   rw [numeral_vec_three] at h₂;
   have h₃ : T.internalize V ⊢
@@ -350,7 +350,7 @@ lemma tprovable_psatF_eq (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
         (h₁ : e 0 = termVal (dec (e 2)) (e 3)) (h₂ : e 1 = termVal (dec (e 2)) (e 4)) ↦ by
         simp [h, h₁, h₂, ht, hu])
     ![y, z, a, 𝕹 t, 𝕹 u, 𝕹 (t ^= u)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := eqCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) eqCond
     (w := ![t ^= u, t, u]) (by simp [eqCond, ht, hu]);
   rw [numeral_vec_three] at h₂;
   have h₃ : T.internalize V ⊢
@@ -376,7 +376,7 @@ lemma tprovable_psatF_neq (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) 
         (h₁ : e 0 = termVal (dec (e 2)) (e 3)) (h₂ : e 1 = termVal (dec (e 2)) (e 4)) ↦ by
         simp [h, h₁, h₂, ht, hu])
     ![y, z, a, 𝕹 t, 𝕹 u, 𝕹 (t ^≠ u)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := neqCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) neqCond
     (w := ![t ^≠ u, t, u]) (by simp [neqCond, ht, hu]);
   rw [numeral_vec_three] at h₂;
   have h₃ : T.internalize V ⊢
@@ -402,7 +402,7 @@ lemma tprovable_psatF_lt (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
         (h₁ : e 0 = termVal (dec (e 2)) (e 3)) (h₂ : e 1 = termVal (dec (e 2)) (e 4)) ↦ by
         simp [h, h₁, h₂, ht, hu])
     ![y, z, a, 𝕹 t, 𝕹 u, 𝕹 (t ^< u)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := ltCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) ltCond
     (w := ![t ^< u, t, u]) (by simp [ltCond, ht, hu]);
   rw [numeral_vec_three] at h₂;
   have h₃ : T.internalize V ⊢
@@ -429,7 +429,7 @@ lemma tprovable_psatF_nlt (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) 
         (h₁ : e 0 = termVal (dec (e 2)) (e 3)) (h₂ : e 1 = termVal (dec (e 2)) (e 4)) ↦ by
         simp [h, h₁, h₂, ht, hu])
     ![y, z, a, 𝕹 t, 𝕹 u, 𝕹 (Arithmetic.qqNLT t u)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := nltCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) nltCond
     (w := ![Arithmetic.qqNLT t u, t, u]) (by simp [nltCond, ht, hu]);
   rw [numeral_vec_three] at h₂;
   have h₃ : T.internalize V ⊢
@@ -460,7 +460,7 @@ lemma tprovable_psatF_ball (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) (hq' : 
         (h₁ : e 0 = termVal (dec (e 1)) (e 2)) ↦ by
         simp [h, hu, h₁, ht, hq, hq'])
     ![y, a, 𝕹 t, 𝕹 q, 𝕹 (qqBall (termBShift ℒₒᵣ t) q), 𝕹 (termBShift ℒₒᵣ t)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := ballCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) ballCond
     (w := ![qqBall (termBShift ℒₒᵣ t) q, t, q, termBShift ℒₒᵣ t]) (by simp [ballCond, ht, hq, hq']);
   rw [numeral_vec_four] at h₂;
   have h₃ : T.internalize V ⊢
@@ -495,7 +495,7 @@ lemma tprovable_psatF_bex (ht : IsUTerm ℒₒᵣ t) (hq : IsBounded q) (hq' : I
         (h₁ : e 0 = termVal (dec (e 1)) (e 2)) ↦ by
         simp [h, hu, h₁, ht])
     ![y, a, 𝕹 t, 𝕹 q, 𝕹 (qqBex (termBShift ℒₒᵣ t) q), 𝕹 (termBShift ℒₒᵣ t)];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := bexCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) bexCond
     (w := ![qqBex (termBShift ℒₒᵣ t) q, t, q, termBShift ℒₒᵣ t]) (by simp [bexCond, ht, hq, hq']);
   rw [numeral_vec_four] at h₂;
   have h₃ : T.internalize V ⊢
@@ -1080,7 +1080,7 @@ lemma tprovable_partialTrue_iff_exs_psatF (θ : V) :
         rw [h];
         simp only [hdec];
         exact hpt.trans (by simp [PartialTrue, (lt_exists (e 1)).le])) ![𝕹 (^∃ θ), 𝕹 θ];
-  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) (φ := exsCond.val) (by simp)
+  have h₂ := tprovable_subst_numeral_of_sigma1 (T := T) exsCond
     (w := ![^∃ θ, θ]) (by simp [exsCond]);
   rw [numeral_vec_two] at h₂;
   have h₃ : T.internalize V ⊢ (⌜exsCond.val⌝ : Semiformula V ℒₒᵣ 2).subst ![𝕹 (^∃ θ), 𝕹 θ] 🡒

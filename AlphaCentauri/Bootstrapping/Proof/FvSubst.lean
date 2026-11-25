@@ -7,8 +7,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
 # Internal substitution for free variables
-
-Internal substitution for free variables.
 -/
 
 @[expose] public section

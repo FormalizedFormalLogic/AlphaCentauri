@@ -12,8 +12,6 @@ public import Foundation.FirstOrder.Incompleteness.Definability
 /-!
 # Uniform reflection in a model of $\mathsf{I}\Sigma_{k+1}$
 
-Uniform reflection in a model of $\mathsf{I}\Sigma_{k+1}$.
-
 ## References
 
 - [HP98, Corollary I.4.34]

@@ -5,8 +5,6 @@ public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.FastGrowing
 
 /-!
 # The extended Grzegorczyk hierarchy over `ONote`
-
-The extended Grzegorczyk hierarchy over `ONote`.
 -/
 
 @[expose] public section

@@ -7,8 +7,6 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 /-!
 # Primitive recursion in models of $\mathsf{EA}$
 
-Primitive recursion in models of $\mathsf{EA}$.
-
 - [HP98, §V.3]
 -/
 

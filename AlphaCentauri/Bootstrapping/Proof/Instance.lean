@@ -6,8 +6,6 @@ public import AlphaCentauri.Bootstrapping.Proof.Subformula
 
 /-!
 # Instances of a coded set of formulas in cut-free derivations
-
-Instances of a coded set of formulas in cut-free derivations.
 -/
 
 @[expose] public section

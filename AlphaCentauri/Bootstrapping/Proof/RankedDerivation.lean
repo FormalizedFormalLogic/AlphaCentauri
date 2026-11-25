@@ -6,8 +6,6 @@ public import AlphaCentauri.Bootstrapping.Proof.Measures
 
 /-!
 # Internal derivations of bounded cut rank
-
-Internal derivations of bounded cut rank.
 -/
 
 @[expose] public section

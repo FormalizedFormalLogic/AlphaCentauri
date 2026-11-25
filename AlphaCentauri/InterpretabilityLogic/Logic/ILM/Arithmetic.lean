@@ -6,8 +6,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.ILM.Basic
 
 /-!
 # Arithmetical soundness of $\mathbf{ILM}$
-
-Arithmetical soundness of $\mathbf{ILM}$.
 -/
 
 @[expose] public section

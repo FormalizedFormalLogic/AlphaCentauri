@@ -8,8 +8,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 /-!
 # Soundness of cut-free derivations for satisfaction by complexity
 
-Soundness of cut-free derivations for satisfaction by complexity.
-
 ## References
 
 - [HP98, Theorem I.4.33]

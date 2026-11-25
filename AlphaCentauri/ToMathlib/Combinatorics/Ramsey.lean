@@ -4,8 +4,6 @@ public import Mathlib.Combinatorics.Pigeonhole
 
 /-!
 # Ramsey's theorem for finite sets
-
-Ramsey's theorem for finite sets.
 -/
 
 @[expose] public section

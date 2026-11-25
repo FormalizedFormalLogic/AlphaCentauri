@@ -5,8 +5,6 @@ public import AlphaCentauri.ToMathlib.OpenPredicate
 
 /-!
 # Eisenstein-valued polynomial functions
-
-Eisenstein-valued polynomial functions.
 -/
 
 @[expose] public section

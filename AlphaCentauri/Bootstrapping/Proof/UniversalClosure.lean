@@ -8,8 +8,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 
 /-!
 # Derivations under a block of universal quantifiers
-
-Derivations under a block of universal quantifiers.
 -/
 
 @[expose] public section

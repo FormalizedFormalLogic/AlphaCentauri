@@ -11,8 +11,6 @@ public import AlphaCentauri.Schemata.DeltaInduction
 /-!
 # A one-sided sequent calculus with an induction rule
 
-A one-sided sequent calculus with an induction rule.
-
 - [Bus98A, Section 1.4.1, Section 1.4.2]
 -/
 

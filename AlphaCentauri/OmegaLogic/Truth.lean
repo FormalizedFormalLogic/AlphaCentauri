@@ -5,8 +5,6 @@ public import Foundation.FirstOrder.Arithmetic.Basic
 /-!
 # Truth of arithmetic literals in `ℕ`
 
-Truth of arithmetic literals in `ℕ`.
-
 - [Tow20, Section 13]
 -/
 

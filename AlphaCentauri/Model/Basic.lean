@@ -14,7 +14,6 @@ public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Absoluteness
 
 /-! # End extensions, cuts and elementary embeddings of models of arithmetic
 
-End extensions, cuts and elementary embeddings of models of arithmetic.
 -/
 
 @[expose] public section

@@ -6,8 +6,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Basi
 /-!
 # Codes of formulas in models of $\mathsf{EA}$
 
-Codes of formulas in models of $\mathsf{EA}$.
-
 - [HP98, §V.3]
 -/
 

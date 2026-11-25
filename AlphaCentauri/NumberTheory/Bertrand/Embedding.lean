@@ -7,8 +7,6 @@ public import AlphaCentauri.NumberTheory.Bertrand.Sizes
 /-!
 # The injection that refutes the failure of Bertrand's postulate
 
-The injection that refutes the failure of Bertrand's postulate.
-
 - [HP98, §V.5(f)]
 - [PWW88, remark before Theorem 12]
 -/

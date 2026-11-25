@@ -4,8 +4,6 @@ public import Foundation.FirstOrder.LK.Basic
 
 /-!
 # Relative strength of theories on a class of sentences
-
-Relative strength of theories on a class of sentences.
 -/
 
 @[expose] public section

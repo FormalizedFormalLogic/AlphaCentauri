@@ -5,8 +5,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.SCL.Basic
 
 /-!
 # Arithmetical soundness of $\mathbf{SCL}$
-
-Arithmetical soundness of $\mathbf{SCL}$.
 -/
 
 @[expose] public section

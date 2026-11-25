@@ -7,8 +7,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 
 /-!
 # Internal provability of instances, modus ponens and induction
-
-Internal provability of instances, modus ponens and induction.
 -/
 
 @[expose] public section

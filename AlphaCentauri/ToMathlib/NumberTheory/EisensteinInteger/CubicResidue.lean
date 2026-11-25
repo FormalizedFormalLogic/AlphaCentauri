@@ -6,8 +6,6 @@ public import Mathlib.RingTheory.PrincipalIdealDomain
 
 /-!
 # Cubes of Eisenstein integers modulo `λ`
-
-Cubes of Eisenstein integers modulo `λ`.
 -/
 
 @[expose] public section

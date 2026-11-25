@@ -8,8 +8,6 @@ public import Foundation.Meta.ClProver
 
 /-!
 # Existential elimination in the internal calculus
-
-Existential elimination in the internal calculus.
 -/
 
 @[expose] public section

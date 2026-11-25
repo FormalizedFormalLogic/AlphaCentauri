@@ -5,8 +5,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 
 /-!
 # Cut elimination for the internal calculus
-
-Cut elimination for the internal calculus.
 -/
 
 @[expose] public section

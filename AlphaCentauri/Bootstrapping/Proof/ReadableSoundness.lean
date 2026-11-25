@@ -7,8 +7,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 
 /-!
 # Soundness of pure logic for the readable truth
-
-Soundness of pure logic for the readable truth.
 -/
 
 @[expose] public section

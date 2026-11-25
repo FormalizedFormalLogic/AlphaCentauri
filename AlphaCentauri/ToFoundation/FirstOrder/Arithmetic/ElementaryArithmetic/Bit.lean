@@ -5,8 +5,6 @@ public import Foundation.FirstOrder.Arithmetic.EA.Basic
 /-!
 # Exponentiation and bit-coded finite sets in models of $\mathsf{EA}$
 
-Exponentiation and bit-coded finite sets in models of $\mathsf{EA}$.
-
 - [HP98, §I.1(b)]
 -/
 

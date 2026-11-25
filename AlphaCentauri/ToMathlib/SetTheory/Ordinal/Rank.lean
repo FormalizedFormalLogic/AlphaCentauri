@@ -4,8 +4,6 @@ public import Mathlib.SetTheory.Ordinal.Rank
 
 /-!
 # Bounding the rank of a well-founded relation
-
-Bounding the rank of a well-founded relation.
 -/
 
 @[expose] public section

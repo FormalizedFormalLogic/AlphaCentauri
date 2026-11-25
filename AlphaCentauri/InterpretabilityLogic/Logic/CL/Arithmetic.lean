@@ -6,8 +6,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 
 /-!
 # Arithmetical soundness of $\mathbf{CL}$
-
-Arithmetical soundness of $\mathbf{CL}$.
 -/
 
 @[expose] public section

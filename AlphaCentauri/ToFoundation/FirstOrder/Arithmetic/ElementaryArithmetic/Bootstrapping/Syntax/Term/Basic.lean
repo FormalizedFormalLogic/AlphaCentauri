@@ -6,8 +6,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
 /-!
 # Codes of terms in models of $\mathsf{EA}$
 
-Codes of terms in models of $\mathsf{EA}$.
-
 - [HP98, §V.3]
 -/
 

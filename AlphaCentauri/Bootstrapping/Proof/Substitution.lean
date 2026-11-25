@@ -5,8 +5,6 @@ public import AlphaCentauri.Bootstrapping.Proof.RankedDerivation
 
 /-!
 # Free-variable substitution on internal derivations
-
-Free-variable substitution on internal derivations.
 -/
 
 @[expose] public section

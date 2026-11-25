@@ -4,8 +4,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Int
 
 /-!
 # The provability formula at a numeral
-
-The provability formula at a numeral.
 -/
 
 @[expose] public section

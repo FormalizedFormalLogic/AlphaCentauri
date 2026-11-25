@@ -5,8 +5,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
 # Codes of sentences and of closed arithmetic terms
-
-Codes of sentences and of closed arithmetic terms.
 -/
 
 @[expose] public section

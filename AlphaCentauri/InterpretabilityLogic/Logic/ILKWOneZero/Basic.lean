@@ -5,8 +5,6 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.FrameConditions
 
 /-!
 # The logic $\mathbf{ILKW1}^0$
-
-The logic $\mathbf{ILKW1}^0$.
 -/
 
 @[expose] public section

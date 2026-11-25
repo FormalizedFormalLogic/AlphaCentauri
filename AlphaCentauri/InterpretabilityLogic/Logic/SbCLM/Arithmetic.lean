@@ -5,8 +5,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.SbCLM.Basic
 
 /-!
 # Arithmetical soundness of $\mathbf{SbCLM}$
-
-Arithmetical soundness of $\mathbf{SbCLM}$.
 -/
 
 @[expose] public section

@@ -5,8 +5,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 
 /-!
 # Theories whose axioms are locally $\Delta_0$ in models of $\mathsf{EA}$
-
-Theories whose axioms are locally $\Delta_0$ in models of $\mathsf{EA}$.
 -/
 
 @[expose] public section

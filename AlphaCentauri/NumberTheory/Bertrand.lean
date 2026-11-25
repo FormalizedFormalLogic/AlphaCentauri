@@ -9,8 +9,6 @@ import AlphaCentauri.OpenProblem
 /-!
 # Bertrand's postulate over $\mathsf{I}\Delta_0 + \Omega_1$
 
-Bertrand's postulate over $\mathsf{I}\Delta_0 + \Omega_1$.
-
 - [HP98, §V.5(f)]
 - [PWW88, remark before Theorem 12]
 -/

@@ -5,8 +5,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 /-!
 # Course-of-values recursion in models of $\mathsf{EA}$
 
-Course-of-values recursion in models of $\mathsf{EA}$.
-
 - [HP98, §V.3]
 -/
 

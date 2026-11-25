@@ -5,8 +5,6 @@ public import AlphaCentauri.OmegaLogic.CutElimination.Reduction
 /-!
 # Cut elimination for `Z_∞`
 
-Cut elimination for `Z_∞`.
-
 - [Tow20, Section 19.7, Section 19.9]
 -/
 

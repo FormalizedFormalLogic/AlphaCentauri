@@ -8,9 +8,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStepModel
 /-!
 # The logic $\mathbf{ILW}^*$
 
-The extension of $\mathbf{IL}$ by the principle $\mathsf{W}^*$, which coincides with
-$\mathbf{ILM}_0\mathbf{W}$. It proves exactly the formulas valid in the Veltman models satisfying
-the frame conditions of $\mathsf{W}$ and $\mathsf{M}_0$.
+The logic $\mathbf{ILW}^*$ and its completeness with respect to Veltman models.
 -/
 
 @[expose] public section

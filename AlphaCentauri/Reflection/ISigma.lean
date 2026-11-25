@@ -10,11 +10,7 @@ public import AlphaCentauri.Bootstrapping.Proof.LocalReflection
 /-!
 # Reflection principles proved by the fragments of arithmetic
 
-For $n \le k$, $\mathsf{I}\Sigma_{k+1}$ proves the local reflection principle of
-$\mathsf{I}\Sigma_n$ for prenex $\Pi_{k+3}$ sentences, and hence, for $k \ge 1$, that of
-$\mathsf{I}\Sigma_k$ for all $\Sigma_1$ sentences. It also proves the uniform reflection principle
-of $\mathsf{EA}$ for prenex $\Pi_{k+3}$ formulas. $\mathsf{PA}$ proves the local reflection
-principle of every $\mathsf{I}\Sigma_n$ (the Kreisel–Lévy theorem).
+Reflection principles proved by the fragments $\mathsf{I}\Sigma_n$ of arithmetic.
 -/
 
 @[expose] public section

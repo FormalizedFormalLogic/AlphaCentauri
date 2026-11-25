@@ -9,10 +9,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.CL.Basic
 /-!
 # Interpretability logic $\mathbf{IL}$
 
-$\mathbf{IL}$ is the logic `ofILAxioms ∅`, contained in every extension by axioms.
-It proves exactly the formulas valid in the finite Veltman models, equivalently in the finite
-generalised Veltman models, equivalently in the finite models satisfying the frame conditions of
-$\mathbf{CL}$ and $\mathbf{J5}$.
+The interpretability logic $\mathbf{IL}$ and its completeness with respect to finite Veltman models.
 -/
 
 @[expose] public section

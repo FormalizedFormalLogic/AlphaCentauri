@@ -11,9 +11,7 @@ public import AlphaCentauri.NumberTheory.FermatLastTheorem.Three
 /-!
 # What $\mathsf{IOpen}$ does not prove
 
-Statements about the first-order theory $\mathsf{IOpen}$ of induction for open formulas: it does not
-prove the infinitude of primes, Euclid's lemma, or Bézout's theorem over the existence of greatest
-common divisors, and it has a computable nonstandard model.
+Statements about the theory $\mathsf{IOpen}$ that it does not prove.
 -/
 
 @[expose] public section

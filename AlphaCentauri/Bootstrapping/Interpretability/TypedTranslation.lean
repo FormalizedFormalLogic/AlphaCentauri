@@ -6,8 +6,7 @@ public import AlphaCentauri.Bootstrapping.Interpretability.RelativizedBlocks
 /-!
 # Typed translations along a table
 
-The translation along a table of a typed formula is a typed formula, and the translation of a block
-of quantifiers is a block of quantifiers relativized to the domain.
+The internal translation respects typed formulas.
 -/
 
 @[expose] public section

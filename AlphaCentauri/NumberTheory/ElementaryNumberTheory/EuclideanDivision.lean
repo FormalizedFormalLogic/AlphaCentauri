@@ -7,8 +7,7 @@ public import Mathlib.Tactic.Ring
 /-!
 # Euclidean division in $\mathsf{PA}^-$
 
-Over $\mathsf{PA}^-$, division with remainder for co-prime pairs is equivalent to division with
-remainder for all pairs with a non-zero divisor.
+Euclidean division over $\mathsf{PA}^-$.
 
 - [Kat26b]
 - [Vis26]

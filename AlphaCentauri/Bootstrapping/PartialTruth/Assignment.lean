@@ -11,11 +11,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # Numeral assignments to free variables
 
-`fvAssign f p` replaces every free variable `^&i` of the coded formula `p` by the numeral of
-`f.[i]`, the `i`-th entry of the sequence `f` (which is `0` beyond the length of `f`). It commutes
-with the connectives, negation, substitution for bound variables, the shift of free variables and
-`free`, and preserves the internal $\Delta_0$ and prenex classes; so do `fvSubst` by closed
-terms and `fvUnshift`, which lowers the indices of free variables and undoes `shift`.
+Substituting numerals for the free variables of internal formulas.
 -/
 
 @[expose] public section

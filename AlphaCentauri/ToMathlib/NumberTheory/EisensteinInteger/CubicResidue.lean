@@ -6,9 +6,6 @@ public import Mathlib.RingTheory.PrincipalIdealDomain
 
 /-!
 # Cubes of Eisenstein integers modulo `λ`
-
-Cubes of Eisenstein integers modulo `λ`, and the normalization of a solution of `a³ + b³ = u c³`
-with `λ ∣ c`.
 -/
 
 @[expose] public section

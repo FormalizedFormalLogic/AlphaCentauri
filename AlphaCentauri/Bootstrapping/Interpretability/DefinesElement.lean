@@ -11,8 +11,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Pro
 /-!
 # Defining an element by a formula
 
-The internal formula `definesElement d A` states that a formula `A` defines a unique element of the
-domain `d`, and the graph of a function symbol under equivalent hypotheses is congruent.
+The internal formula stating that a formula defines a unique element of a domain.
 -/
 
 @[expose] public section

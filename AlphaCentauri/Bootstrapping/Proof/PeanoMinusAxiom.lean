@@ -11,8 +11,7 @@ public import Foundation.FirstOrder.Incompleteness.Definability
 /-!
 # The axioms of $\mathsf{PA}^-$ as false blocks
 
-In a model of $\mathsf{I}\Sigma_1$, the negation of the code of each axiom of $\mathsf{PA}^-$ is a
-block of existential quantifiers over a $\Delta_0$ matrix all of whose instances are false.
+The axioms of $\mathsf{PA}^-$ as blocks of existential quantifiers with false instances.
 -/
 
 @[expose] public section

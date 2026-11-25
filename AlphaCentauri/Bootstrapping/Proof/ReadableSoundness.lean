@@ -7,11 +7,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 
 /-!
 # Soundness of pure logic for the readable truth
-
-`IsFalseBlock k D e` says that `e` is a block of existential quantifiers over a closed matrix in
-the class `IsReadable k D` whose instances by closed terms are all false under `ReadableTruth k D`.
-In every model of `𝗜𝚺⁺(k + 1)`, a sequent consisting of such formulas has no cut-free derivation
-in pure logic, nor any derivation in pure logic at all.
 -/
 
 @[expose] public section

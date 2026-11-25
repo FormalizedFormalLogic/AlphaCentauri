@@ -11,11 +11,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Pro
 /-!
 # Values of closed terms along the internal translation
 
-Along a table, the internal translation of a typed term or formula of $L_2$ is the typed formula
-built from the entries of the table. Along a table of a translation, the internal value of a closed
-typed term is defined by a formula, these defining formulas are derivable under the negated domain
-instances of the term, and the defining formula is transported along the substitution of a closed
-term for a variable.
+The values of closed terms along the internal translation.
 -/
 
 @[expose] public section

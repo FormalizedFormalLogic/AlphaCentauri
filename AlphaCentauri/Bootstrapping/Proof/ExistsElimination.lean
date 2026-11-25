@@ -8,12 +8,6 @@ public import Foundation.Meta.ClProver
 
 /-!
 # Existential elimination in the internal calculus
-
-Internal `∃`-elimination with fresh eigenvariables, iterated over a finite conjunction of
-existential hypotheses. For a formula code `d` and a bound `m`, the coded set `negDomSet L d m`
-collects the negations of the instances `substs1 L (^&i) d` with `i < m`. The module records its
-membership, definability, behaviour under successor and shift, and the internal existential
-elimination rule with the free variables of the instances as eigenvariables.
 -/
 
 @[expose] public section

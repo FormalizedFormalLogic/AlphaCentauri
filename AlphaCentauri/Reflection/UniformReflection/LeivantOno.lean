@@ -6,8 +6,7 @@ public import AlphaCentauri.Reflection.ISigma
 /-!
 # Leivant–Ono theorem
 
-For $n \ge 1$, $\mathsf{I}\Sigma_n$ is equivalent to $\mathsf{EA}$ together with the uniform
-reflection principle of $\mathsf{EA}$ for prenex $\Pi_{n + 2}$ formulas.
+$\mathsf{I}\Sigma_n$ as $\mathsf{EA}$ with uniform reflection.
 
 - [AB05, Theorem 154]
 - [Bek05, Theorem 7]

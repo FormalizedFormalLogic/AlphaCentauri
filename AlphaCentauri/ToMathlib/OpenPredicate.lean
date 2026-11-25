@@ -9,12 +9,7 @@ public import Mathlib.Tactic.Ring
 /-!
 # Open predicates, open induction and the least number principle
 
-`IsPolynomial` and `IsOpen` describe the polynomial functions and the open (quantifier-free)
-predicates on a commutative ring `R` with parameters in `R`. `OpenInduction R` is induction over
-the non-negative elements for open predicates. `LeastNumberPrinciple R` is the
-least number principle for the predicates `∃ ys : Fin n → R, (∀ j, |ys j| < B) ∧ Φ (x, ys)`
-with `Φ` open, over the non-negative `x`. In a discretely ordered ring satisfying
-`LeastNumberPrinciple`, division with remainder is available.
+Open predicates on a commutative ring, open induction and the least number principle.
 -/
 
 @[expose] public section

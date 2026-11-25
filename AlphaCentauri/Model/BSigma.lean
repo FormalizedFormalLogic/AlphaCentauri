@@ -6,15 +6,7 @@ import AlphaCentauri.OpenProblem
 
 /-! # Models of $\mathsf{B}\Sigma_n$
 
-A proper cut of a model of $\mathsf{I}\Sigma_j$ which is closed under the operations and
-$\Sigma_j$-elementary satisfies $\mathsf{B}\Sigma_{j+1}$.
-The elements of a model of `𝗣𝗔` below a $\Sigma_{j+1}$-definable element form such a cut, which
-satisfies $\mathsf{B}\Sigma_{j+1}$ and, when some $\Sigma_{j+1}$-definable element is nonstandard,
-refutes $\mathsf{I}\Sigma_{j+1}$.
-
-A model of $\mathsf{I}\Delta_0$ with a proper end extension to a model of $\mathsf{I}\Delta_0$
-satisfies $\mathsf{B}\Sigma_1$, and a countable model of $\mathsf{B}\Sigma_1 + \mathrm{Exp}$ has
-such an extension. Whether the hypothesis $\mathrm{Exp}$ can be dropped is open.
+Models of $\mathsf{B}\Sigma_n$ obtained from cuts and end extensions.
 -/
 
 @[expose] public section

@@ -12,15 +12,7 @@ public import Mathlib.Algebra.Order.Nonneg.Ring
 
 /-! # Models of open induction and of $\mathbb{Z}$-rings
 
-The non-negative elements `Nonneg R` of an ordered commutative ring `R` form an
-`ℒₒᵣ`-structure, which is a model of $\mathsf{PA}^-$ when `R` is discretely ordered, and a model of
-$\mathsf{IOpen}$ exactly when `R` satisfies open induction. For an ordered field `K`, the
-non-negative part of `IntegerConstantPolynomial K` is a model of $\mathsf{ZR}$ in which `X` is a
-nonstandard element.
-
-Wilkie's extension theorem: every discretely ordered $\mathbb{Z}$-ring embeds into a discretely
-ordered ring satisfying open induction. As a consequence, $\mathsf{IOpen}$ and $\mathsf{ZR}$ prove
-the same universal sentences.
+Models of open induction and of $\mathbb{Z}$-rings, and Wilkie's extension theorem.
 -/
 
 @[expose] public section

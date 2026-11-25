@@ -10,9 +10,7 @@ public import Mathlib.Tactic.Ring
 /-!
 # The ring of differences of an ordered commutative semiring
 
-For a linearly ordered commutative semiring `M` with `CanonicallyOrderedAdd`, `RingOfDifferences M`
-is the ring of formal differences `a - b` of elements of `M`. It is a linearly ordered commutative
-ring in which `M` embeds as the non-negative elements.
+The ring of formal differences of an ordered commutative semiring.
 -/
 
 @[expose] public section

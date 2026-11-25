@@ -10,11 +10,7 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 /-!
 # Enumeration cuts and their coded limits
 
-A failure of $\Sigma_0$ collection yields an unbounded injection on an interval $[0, a)$. Over a
-model of $\mathsf{EA}$, an unbounded injection on $[0, a)$ enumerates its range in increasing order
-by a block-coded sequence, whose codes form a cut of $[0, a)$; two codes of initial segments of the
-cut agree on the entries of the shorter one, and under $\mathsf{I}\Delta_1$ a single code agrees
-with every code of the cut on its entries.
+Enumeration cuts of unbounded injections in models of arithmetic.
 -/
 
 @[expose] public section

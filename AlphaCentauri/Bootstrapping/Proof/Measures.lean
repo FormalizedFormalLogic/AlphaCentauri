@@ -6,8 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Proof.Basic
 /-!
 # Internal proof measures
 
-`cutRank` is the primitive-recursive cut rank of an internal proof code; it is total on all
-codes and is zero on codes that are not proof-rule constructors.
+Measures of internal proofs.
 -/
 
 @[expose] public section

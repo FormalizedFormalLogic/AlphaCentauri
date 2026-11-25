@@ -8,14 +8,7 @@ public import Mathlib.RingTheory.Algebraic.Defs
 /-!
 # Criteria for open induction
 
-A discretely ordered ring satisfies open induction if and only if it is an integer part of the
-real closure of its fraction field (Shepherdson's criterion).
-
-A predicate on a commutative ordered ring `R` is `DeterminedBySigns N` if its truth value at `x`
-depends only on the signs of finitely many polynomials of degree at most `N` at `x`. If `R` is
-discretely ordered and embeds into an ordered field `K` with the intermediate value property for
-polynomials, in which every root of a nonzero polynomial over `R` of degree at most `N` has an
-integer part in `R`, then induction holds for such predicates.
+Criteria for open induction in discretely ordered rings.
 -/
 
 @[expose] public section

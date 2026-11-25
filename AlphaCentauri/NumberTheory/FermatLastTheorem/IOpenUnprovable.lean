@@ -14,10 +14,7 @@ public import Mathlib.NumberTheory.Padics.Hensel
 /-!
 # Non-provability of Fermat's Last Theorem in $\mathsf{IOpen}$
 
-$\mathsf{IOpen}$ does not prove Fermat's Last Theorem for any exponent $n \ge 3$, and does not
-prove Case I of it for some exponent. A nonzero solution of $x^n + y^n = z^n$ in a discretely
-ordered ring is a counterexample to Fermat's Last Theorem in its non-negative part, and
-$\mathsf{IOpen}$ proves only the universal sentences true in every model of $\mathsf{ZR}$.
+$\mathsf{IOpen}$ does not prove Fermat's Last Theorem or its Case I.
 
 - [She64]
 - [Smi92b]

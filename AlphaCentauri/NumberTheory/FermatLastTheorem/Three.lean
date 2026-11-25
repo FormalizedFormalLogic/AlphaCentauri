@@ -7,8 +7,7 @@ public import AlphaCentauri.ToMathlib.NumberTheory.FLT.Three
 /-!
 # Fermat's Last Theorem for exponent three in $\mathsf{I}\mathsf{E}_1$
 
-$\mathsf{I}\mathsf{E}_1$ is induction for bounded existential formulas over $\mathsf{PA}^-$. This
-file proves that $\mathsf{I}\mathsf{E}_1$ proves Fermat's Last Theorem for exponent $3$.
+$\mathsf{I}\mathsf{E}_1$ proves Fermat's Last Theorem for exponent $3$.
 
 - [Wil85]
 - [Smi93]

@@ -6,8 +6,7 @@ public import AlphaCentauri.Bootstrapping.Proof.Substitution
 /-!
 # Subformula codes
 
-The coded set of all subformulas of an internal formula code, defined by structural recursion on
-the code.
+The coded set of subformulas of an internal formula.
 -/
 
 @[expose] public section

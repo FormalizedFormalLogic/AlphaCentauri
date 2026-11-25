@@ -5,8 +5,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 /-!
 # Factorial
 
-The factorial function on a model of $\mathsf{E}\mathsf{A}$, read off from the last block of a
-number whose blocks list the partial products $0!, 1!, \dots, x!$.
+The factorial function on a model of $\mathsf{E}\mathsf{A}$.
 -/
 
 @[expose] public section

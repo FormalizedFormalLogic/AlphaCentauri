@@ -6,8 +6,7 @@ import AlphaCentauri.OpenProblem
 /-!
 # Open problems on the completeness of interpretability logics
 
-The completeness of $\mathbf{ILR}$ and $\mathbf{ILRW}$ with respect to Veltman and Verbrugge
-semantics, stated as propositions.
+Open problems on the completeness of $\mathbf{ILR}$ and $\mathbf{ILRW}$.
 
 - [MV20, §2.5]
 - [JMMV20, §6.5]

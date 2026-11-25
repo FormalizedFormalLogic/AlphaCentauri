@@ -11,12 +11,7 @@ public import AlphaCentauri.Schemata.ParameterFreeInduction
 /-!
 # Uniform reflection and induction
 
-The uniform reflection schemas for $\Sigma_n$ and $\Pi_{n + 1}$ formulas are equivalent over `T`.
-
-Each instance of the parameter-free induction schema follows, over a base theory `T₀ ⊇ 𝗜𝚺₁`, from
-uniform reflection for `T₀` together with that instance's induction hypothesis. Conversely, each
-$\Pi_{n + 2}$ sentence has an induction instance proving that implication for every reflection
-instance.
+Uniform reflection and parameter-free induction.
 
 - [AB05, §4.2, Lemma 22]
 - [Bek99, Proposition 2.1, Proposition 2.2, Lemma 5.1]

@@ -8,10 +8,7 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.Basic
 /-!
 # A sequent calculus for $\mathbf{IL}$
 
-Subformulas, sequents of finite sets of formulas, and the extension of a sequent on which a
-predicate fails to a saturated one. A cut-free sequent calculus for $\mathbf{IL}$ in the language
-with a primitive `□`, whose modal rules are those of $\mathbf{GIL}$, with `A ▷ ⊥` written `□∼A`, the
-boxes on the left treated as in the calculus of $\mathbf{GL}$, and a rule for `□` on the right.
+A cut-free sequent calculus for $\mathbf{IL}$.
 
 ## References
 

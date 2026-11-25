@@ -6,9 +6,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 /-!
 # Single $\Pi$-axiomatizations of `𝗜𝚺 n`
 
-The axioms of the finite theory of `𝗜𝚺 n` are $\Pi_{n + 3}$ sentences, so `𝗜𝚺 n` is axiomatized by
-a single $\Pi_{n + 2}$ sentence for `n ≥ 1`, and by `𝗜𝚺 m` together with such a sentence for
-`m ≤ n`.
+`𝗜𝚺 n` is axiomatized by a single $\Pi_{n + 2}$ sentence for `n ≥ 1`.
 
 ## References
 

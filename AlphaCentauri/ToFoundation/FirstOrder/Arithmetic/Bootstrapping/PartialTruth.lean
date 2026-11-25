@@ -6,9 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Genera
 /-!
 # Partial truth
 
-`BoundedSatisfied` and `PrenexSatisfied` read a formula with closed-off bound variables by putting
-the values of the substituted terms into the assignment, swap under negation, and give the same
-value to every decomposition `qqToPrenex Γ s θ` of the same code.
+Partial truth of bounded and prenex formulas.
 
 - [HP98, 1.64(5), Theorem I.1.75]
 -/

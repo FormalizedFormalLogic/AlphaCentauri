@@ -11,12 +11,8 @@ public import AlphaCentauri.ToFoundation.ProvabilityLogic.ProvabilityAbstraction
 /-!
 # Henkin interpretations
 
-The translation of a language $L$ into arithmetic given by the Henkin set of a theory $S$, over
-any arithmetical theory containing $\mathsf{PA}$ and the consistency of $S$. In its model, a
-formula is true of representatives of free variables exactly when the formula with those free
-variables substituted is in the Henkin set. Hence a theory $S$ with a $\Delta_1$ numeration and
-the equality axioms is interpretable in $T + \mathrm{Con}_S$ for every arithmetical theory
-$T \supseteq \mathsf{PA}$.
+The interpretation of a theory in an arithmetical theory plus its consistency by the Henkin
+translation.
 
 ## References
 

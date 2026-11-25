@@ -6,12 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Fixpoint
 /-!
 # Fixpoint construction in models of $\mathsf{EA}$
 
-Inductively defined sets. The operator is required to be
-locally $\Delta_0$; the stages `limSeq` are then given by bounded primitive recursion, and the
-formulas of `Fixpoint.Blueprint` define them. For strongly finite operators the
-fixpoint is locally $\Delta_0$, is a fixed point of the operator, and satisfies induction on
-locally $\Delta_0$ predicates. For operators that are only finite, a premise is reached at a
-stage that has to be given explicitly.
+Inductively defined sets in models of $\mathsf{EA}$.
 
 - [HP98, §V.3]
 -/

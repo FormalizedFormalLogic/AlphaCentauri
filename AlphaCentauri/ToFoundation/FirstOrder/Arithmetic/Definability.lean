@@ -8,8 +8,7 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 /-!
 # Definability in models of arithmetic
 
-Casting true facts about standard numbers into a model, primitive recursion for truth of $\Delta_0$
-formulas, and prenex $\Sigma_1$ definability.
+Definability of truth and of standard facts in models of arithmetic.
 -/
 
 @[expose] public section

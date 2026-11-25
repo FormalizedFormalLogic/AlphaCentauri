@@ -5,13 +5,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 /-!
 # Relations that are $\Delta_0$ below every bound
 
-A relation `R` on a model of $\mathsf{PA}^-$ is *locally* $\Delta_0$ if, for every bound `X`, it
-agrees on the arguments below `X` with a $\Delta_0$ relation with parameters. A function is
-locally $\Delta_0$ if its graph is, and it is bounded on every bounded set of arguments. In models
-of $\mathsf{EA}$ the functions defined by bounded recursion, such as those of the coded syntax,
-have this form although their graphs are not $\Delta_0$, and $\Delta_0$ induction and
-comprehension extend to locally $\Delta_0$ predicates. This replaces, for $\mathsf{EA}$, the use
-of $\Sigma_1$ definability in $\mathsf{I}\Sigma_1$.
+Relations and functions that are $\Delta_0$ below every bound in models of $\mathsf{EA}$.
 
 - [HP98, §V.3]
 -/

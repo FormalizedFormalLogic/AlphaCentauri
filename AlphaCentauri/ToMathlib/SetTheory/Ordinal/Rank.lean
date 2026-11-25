@@ -4,9 +4,6 @@ public import Mathlib.SetTheory.Ordinal.Rank
 
 /-!
 # Bounding the rank of a well-founded relation
-
-For a well-founded relation `r`, `WellFounded.rank r a` is at most `o` as soon as every `b` with
-`r b a` has rank below `o`.
 -/
 
 @[expose] public section

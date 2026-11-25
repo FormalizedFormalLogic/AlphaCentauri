@@ -13,14 +13,7 @@ public import Foundation.FirstOrder.Incompleteness.Definability
 /-!
 # Induction axioms in prenex form
 
-An induction axiom of `𝗜𝚺 n` is coded as `qqAlls b m`, where `b` is the body
-`K(0) → ∀x (K(x) → K(x + 1)) → ∀x K(x)` of a prenex $\Sigma_n$ formula `K` whose parameters are
-the variables bound by the block. If `Z` codes `K` with its parameters as the bound variables
-`1, …, m`, then `prenexInductionAxiom m Z` codes the prenex form
-`∀p⃗ ∀x ∃y (¬K(0) ∨ ((K(y) ∧ ¬K(y + 1)) ∨ K(x)))` of the axiom. The induction axiom follows from
-its prenex form in pure logic. The negation of the prenex form is a block of existential
-quantifiers over `∀y ¬B`, where `B` is the matrix above; for `n ≤ k`, this formula belongs to
-`IsReadable k 3`, and in a model of `𝗜𝚺⁺ (k + 1)` each of its instances by closed terms is false.
+Induction axioms of $\mathsf{I}\Sigma_n$ in prenex form.
 -/
 
 @[expose] public section

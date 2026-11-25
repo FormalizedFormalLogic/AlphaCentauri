@@ -5,9 +5,7 @@ public import Lean.Attributes
 /-!
 # The record of open problems
 
-The extension in which the command `open_problem` records the open problems it declares. It is
-kept apart from the command, outside any `meta` section, so that the executable `open_problems`
-can read it at run time.
+The environment extension recording the declared open problems.
 -/
 
 @[expose] public section

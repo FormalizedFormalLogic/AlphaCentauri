@@ -9,10 +9,7 @@ public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.Coding
 /-!
 # Computability of `ONote` comparison
 
-Mathlib proves that `ONote.cmp` computes the order on Cantor normal forms
-(`NONote.cmp_compares`) but packages it neither as `Primcodable` nor as `Computable`. This module
-supplies a structural `Primcodable ONote` instance, and shows the order pulled back to `ℕ` along
-the structural coding `natCode` to be recursively enumerable.
+Computability of the order on Cantor normal forms.
 -/
 
 @[expose] public section

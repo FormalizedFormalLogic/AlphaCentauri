@@ -6,13 +6,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
 /-!
 # Codes of terms in models of $\mathsf{EA}$
 
-The codes `qqBvar`, `qqFvar` and `qqFunc` of bound variables, free variables and function
-applications, the predicate `IsUTerm L` of codes of terms with induction on locally $\Delta_0$
-predicates, and the predicate `IsUTermVec L` of lists of terms, defined by `qqBvarDef`,
-`qqFvarDef`, `qqFuncDef`, `isUTerm` and `isUTermVec`. The recursion `termBV` computing the least
-bound of the bound variables and the predicates `IsSemiterm` and `IsSemitermVec` follow, with the
-formulas `termBVGraph`, `isSemiterm` and `isSemitermVec`.
-
 - [HP98, §V.3]
 -/
 

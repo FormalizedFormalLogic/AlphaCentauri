@@ -5,12 +5,7 @@ public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.FastGrowing
 /-!
 # The Hardy hierarchy `H_α`
 
-The **Hardy hierarchy** `H_α : ℕ → ℕ` is the companion of the fast-growing hierarchy, sharing
-its well-founded recursion on `ONote.fundamentalSequence`:
-`H₀(n) = n`, `H_{α+1}(n) = H_α(n+1)`, `H_λ(n) = H_{λ[n]}(n)`. This file develops its growth
-theory, `hstep` (the intrinsic step invariant relating `hardy` at consecutive budgets), the
-additive decomposition of `hardy` along Cantor normal form addition and coefficient
-multiplication, and a two-sided comparison against `fastGrowing`.
+The Hardy hierarchy and its comparison with the fast-growing hierarchy.
 -/
 
 @[expose] public section

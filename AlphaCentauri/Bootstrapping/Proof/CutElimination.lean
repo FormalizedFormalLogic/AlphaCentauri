@@ -5,12 +5,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 
 /-!
 # Cut elimination for the internal calculus
-
-In every model of $\mathsf{I}\Sigma_1$, a cut on a formula of complexity at most `r` between two
-derivations of cut rank at most `r` over the empty theory can be replaced by a derivation of cut
-rank at most `r`. Hence the cut rank of a derivation over the empty theory can be lowered step by
-step, and every internal derivation over the empty theory has a cut-free counterpart with the same
-end-sequent.
 -/
 
 @[expose] public section

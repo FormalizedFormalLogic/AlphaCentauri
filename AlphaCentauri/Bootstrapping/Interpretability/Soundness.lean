@@ -15,13 +15,7 @@ public import Foundation.FirstOrder.Incompleteness.Consistency
 /-!
 # Internal soundness of a translation
 
-Along a table of a direct translation, the translations of `φ[t]` and of `φ[&b]` are provably
-equivalent under the hypotheses `substHyp`, for every formula `φ`. Translated derivability is
-closed under the existential rule: for `^∃ p ∈ Γ` and a closed term `t`, the translated
-derivability of `Γ` follows from that of `insert (substs1 t p) Γ`. Every set of $L_2$-formulas
-derivable in a theory `S'` is translated derivable in `S`, provided the $\Delta_1$ axioms of `S'`
-are provable in `S` after translation. Consequently, provability of formula codes is transferred
-along a translation, and so is consistency.
+Internal soundness of translations: provability and consistency transfer along them.
 -/
 
 @[expose] public section

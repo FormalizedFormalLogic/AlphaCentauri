@@ -7,10 +7,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Func
 /-!
 # Functions on codes of formulas in models of $\mathsf{EA}$
 
-Negation `neg`, implication `imp`, equivalence `iff`, the shift `shift` of free variables,
-substitution `subst` for the bound variables, the instantiation `free` of a bound variable by a
-free one and the complexity `formulaComplexity`. The recursions on formulas carry a bound on their
-values, and inductions are on locally $\Delta_0$ predicates.
+Operations on codes of formulas in models of $\mathsf{EA}$.
 
 - [HP98, §V.3]
 -/

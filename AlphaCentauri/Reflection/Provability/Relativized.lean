@@ -7,12 +7,7 @@ public import Foundation.FirstOrder.Incompleteness.Reflection.Local
 /-!
 # Relativized provability
 
-The provability predicate `Prov^n_T(x)` of `T` extended by the true $\Pi_n$ sentences is a
-$\Sigma_{n + 1}$ formula packaged as a `Provability 𝗜𝚺₁ T` satisfying the Hilbert–Bernays–Löb
-derivability conditions and formalized $\Sigma_{n + 1}$-completeness. For `n = 0` it is
-definitionally the standard provability predicate. For `n + 1`, the true $\Pi_{n+1}$ sentences
-enter as a finite set `c` of tagged satisfied prenex formulas `⟪k + 1, θ, e⟫`, `k ≤ n`, and
-`Prov^{n + 1}_T(x)` says that `T` proves `x` from the formula stating this of `c`.
+Provability relativized to the true $\Pi_n$ sentences.
 
 - [Bek99, §3]
 -/

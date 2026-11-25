@@ -9,13 +9,8 @@ import AlphaCentauri.OpenProblem
 /-!
 # Quadratic residues in weak arithmetic
 
-Smith's open questions on quadratic residues and on primes of the form $x^2 + ny^2$ over
-$\mathsf{I}\mathsf{E}_1$ and $\mathsf{I}\Delta_0$, each stated as the provability of a sentence.
-For a prime $q$, the Legendre symbol $(a/q)$ is $1$ exactly when `quadraticResidue` holds of $a$
-and $q$, and $-1$ exactly when $q \nmid a$ and it fails. The questions are open, so their
-affirmative answers are stated as propositions, one for each theory. With the counting principle
-$\mathrm{Count}_2(\Delta_0)$ adjoined, $\mathsf{I}\Delta_0$ proves quadratic reciprocity and its
-supplementary laws.
+Open questions on quadratic residues and on primes of the form $x^2 + ny^2$ over
+$\mathsf{I}\mathsf{E}_1$ and $\mathsf{I}\Delta_0$.
 
 - [Smi93]
 - [BI91]

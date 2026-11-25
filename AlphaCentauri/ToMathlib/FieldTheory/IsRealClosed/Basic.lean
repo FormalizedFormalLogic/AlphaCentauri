@@ -11,8 +11,7 @@ public import Mathlib.RingTheory.Trace.Basic
 /-!
 # Real closed fields
 
-An irreducible polynomial over a real closed field has degree at most two, and a polynomial over a
-real closed ordered field that changes sign on an interval has a root inside it.
+Basic facts about real closed fields.
 -/
 
 @[expose] public section

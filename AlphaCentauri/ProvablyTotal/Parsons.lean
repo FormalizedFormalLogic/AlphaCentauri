@@ -11,16 +11,7 @@ public import Mathlib.Computability.Ackermann
 /-!
 # Parsons' theorem
 
-The `𝗜𝚺₁`-provably total functions are exactly the primitive recursive functions, and the
-Ackermann function is therefore not `𝗜𝚺₁`-provably total.
-
-One direction is a construction inside a model: the graph of a primitive recursive function is
-assembled by composition and primitive recursion, and `𝗜𝚺₁` proves it functional. For the other,
-a function whose graph is a block of existential quantifiers over a bounded formula whose
-totality `𝗜𝚺₁` proves is primitive recursive: the proof of totality becomes an anchored
-derivation of the graph at the arguments as free variables, witnessing reads a primitive
-recursive bound off that derivation, and the value is recovered by a bounded search below the
-bound.
+The $\mathsf{I}\Sigma_1$-provably total functions are the primitive recursive functions.
 
 - [Bus98A, Theorem 3.1.1, Section 3.1.3]
 - [HP98, Theorem I.1.54, Lemma I.1.55, Corollary IV.3.7]

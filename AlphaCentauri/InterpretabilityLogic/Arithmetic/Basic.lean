@@ -10,10 +10,7 @@ public import Foundation.FirstOrder.Incompleteness.StandardProvability
 /-!
 # Arithmetical soundness of interpretability logics
 
-An interpretability abstraction over a provability abstraction `𝔅` is a binary operator on
-sentences. Interpreting `□` by `𝔅` and `▷` by the operator, the theorems of a logic extending
-$\mathbf{CL}$ are provable under every realization once the arithmetical forms of
-$\mathbf{J1}$–$\mathbf{J4}$ and of its axioms are.
+Arithmetical soundness of interpretability logics with respect to interpretability abstractions.
 
 ## References
 

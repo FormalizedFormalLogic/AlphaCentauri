@@ -5,10 +5,7 @@ public import Foundation.FirstOrder.Syntax.Classical.Coding
 /-!
 # Syntax of first-order logic
 
-Quantifier-rank invariance, distinctness lemmas and constructor equations for `Semiformula`,
-commutation and congruence lemmas for substitutions and rewritings, the conversion of a formula
-with `ℕ`-indexed free variables into a semisentence, and the notation `t ^' n` for a power by a
-variable exponent.
+Auxiliary lemmas and notation for the syntax of first-order logic.
 -/
 
 @[expose] public section

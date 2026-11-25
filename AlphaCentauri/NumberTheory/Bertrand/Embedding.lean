@@ -7,11 +7,6 @@ public import AlphaCentauri.NumberTheory.Bertrand.Sizes
 /-!
 # The injection that refutes the failure of Bertrand's postulate
 
-If there is no prime in $(n, 2n]$, the positions of the prime-power decompositions of
-$1, \dots, 2n$ and of the Chebyshev bands $\binom{2M_r}{M_r}$, $M_r \approx n / (3 \cdot 2^r)$,
-embed into each other as `Embeds (Domain B s n) (Codomain B s n)`, with the common part carried
-along.
-
 - [HP98, §V.5(f)]
 - [PWW88, remark before Theorem 12]
 -/

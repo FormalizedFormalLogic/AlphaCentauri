@@ -7,11 +7,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
 # Internal substitution for free variables
-
-Foundation provides internal substitution for bound variables, but not the corresponding
-operation on free variables.  This module supplies finite free-variable substitutions for coded
-terms and formulas.  Entries below the length of the substitution vector are replaced; all other
-free variables are left unchanged.
 -/
 
 @[expose] public section

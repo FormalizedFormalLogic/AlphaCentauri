@@ -6,9 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Typed
 /-!
 # Typed terms in models of $\mathsf{EA}$
 
-The internal free-variable vector `fvarVec`, defined by the formula `fvarVecDef`. The values of the
-recursion are not bounded below a fixed bound, so the recursion carries the invariant that the
-value is the list of the first free variables.
+The internal free-variable vector in models of $\mathsf{EA}$.
 -/
 
 @[expose] public section

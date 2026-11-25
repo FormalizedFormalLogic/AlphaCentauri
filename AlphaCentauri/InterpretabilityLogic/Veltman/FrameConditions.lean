@@ -6,8 +6,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 /-!
 # Frame conditions of the extensions of $\mathbf{IL}$
 
-Frame conditions for the principles beyond $\mathbf{IL}$, the validity of the principles under
-them, and the countermodels separating the extensions.
+Frame conditions for the extensions of $\mathbf{IL}$.
 -/
 
 @[expose] public section

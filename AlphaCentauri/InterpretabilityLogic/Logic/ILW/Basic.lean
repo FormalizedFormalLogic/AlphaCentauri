@@ -8,10 +8,7 @@ public import Mathlib.Data.Set.Finite.List
 /-!
 # The logic $\mathbf{ILW}$
 
-The extension of $\mathbf{IL}$ by the principle $\mathsf{W}$. It proves exactly the formulas
-valid in the finite Veltman models satisfying the frame condition of $\mathsf{W}$. Completeness is
-proved through models on ranked sets, the worlds being maximal consistent subsets of an adequate
-set indexed by finite sequences of ranked labels.
+The logic $\mathbf{ILW}$ and its completeness with respect to finite Veltman models.
 -/
 
 @[expose] public section

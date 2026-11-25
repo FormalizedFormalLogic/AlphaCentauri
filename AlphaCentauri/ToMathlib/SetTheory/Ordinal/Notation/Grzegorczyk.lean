@@ -5,9 +5,6 @@ public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.FastGrowing
 
 /-!
 # The extended Grzegorczyk hierarchy over `ONote`
-
-`extendedGrzegorczyk o k` is the extended Grzegorczyk (fast-growing) hierarchy class `𝓔^o`: the
-elementary closure of `{F_β | β < o}`, where `F_β` is `ONote.fastGrowing β`.
 -/
 
 @[expose] public section

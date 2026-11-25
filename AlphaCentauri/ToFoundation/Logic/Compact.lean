@@ -5,8 +5,7 @@ public import Foundation.Logic.Semantics
 /-!
 # Compactness along a cumulative sequence
 
-The two directions of `FFL.Compact.compact_cumulative`: a cumulative union is satisfiable if and
-only if each member is.
+Compactness for cumulative unions of theories.
 -/
 
 @[expose] public section

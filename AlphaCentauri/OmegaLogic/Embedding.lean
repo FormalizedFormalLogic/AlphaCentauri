@@ -11,8 +11,7 @@ public import Foundation.FirstOrder.LK.Simplified
 /-!
 # Embedding `𝗣𝗔` into `Z_∞`
 
-Every `𝗣𝗔` derivation embeds into `Z_∞` under a numeral assignment of its free variables, first
-with bounded cut rank and then cut-free.
+Embedding of `𝗣𝗔` derivations into `Z_∞`.
 
 - [Tow20, Section 16]
 - [Buc03, Section 5.5]

@@ -7,9 +7,7 @@ public import Mathlib.Data.Set.Finite.List
 /-!
 # Veltman semantics of the sequent calculus for $\mathbf{IL}$
 
-The sequent calculus is sound for Veltman models, and a sequent not derivable in it fails at a
-world of a finite Veltman model; hence $\mathbf{IL}$, the sequent calculus and finite Veltman
-models agree.
+The sequent calculus for $\mathbf{IL}$ with respect to Veltman semantics.
 -/
 
 @[expose] public section

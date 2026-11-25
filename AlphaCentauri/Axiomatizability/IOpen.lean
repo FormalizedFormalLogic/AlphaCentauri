@@ -8,10 +8,8 @@ public import AlphaCentauri.ToMathlib.RingTheory.HahnSeries.IntegerPart
 /-!
 # $\mathsf{IOpen}$ is not finitely axiomatizable
 
-For each `N`, the non-negative part of the ring of Hahn series supported in the non-positive part
-of $\mathbb{Z}[1/N!]$ with an integer constant coefficient satisfies induction for the open
-formulas of degree at most `N`, but not $\mathsf{IOpen}$. Every finite subset of $\mathsf{IOpen}$
-consists of such instances and axioms of $\mathsf{PA}^-$.
+A model of $\mathsf{PA}^-$ built from Hahn series satisfying all but one open induction axiom
+degree.
 -/
 
 @[expose] public section

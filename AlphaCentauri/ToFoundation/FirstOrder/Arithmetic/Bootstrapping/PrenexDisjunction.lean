@@ -6,13 +6,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Prenex
 /-!
 # Disjunctions of internal prenex sentences
 
-`prenexSatDef Γ n` is the standard formula saying that a code `p` of a bounded formula is satisfied
-under the assignment `a` extended by `n` alternating quantifiers starting with polarity `Γ`. Over a
-theory containing $\mathsf{I}\Sigma_1$, every internal prenex $\Gamma_n$ formula is internally
-equivalent to `prenexSatDef Γ n` at the code of its matrix, and `prenexSatDef Γ (n + 1)` is
-equivalent in every model of $\mathsf{I}\Sigma_1$ to a prenex $\Gamma_{n + 1}$ formula. Hence the
-disjunction of two internal prenex $\Gamma_n$ sentences is internally equivalent to an internal
-prenex $\Gamma_n$ sentence.
+Disjunctions of internal prenex sentences are internally equivalent to prenex sentences.
 -/
 
 @[expose] public section

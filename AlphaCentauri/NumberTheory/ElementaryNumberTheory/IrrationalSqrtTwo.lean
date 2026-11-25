@@ -8,10 +8,7 @@ public import Mathlib.Tactic.LinearCombination
 /-!
 # Irrationality of $\sqrt{2}$ over $\mathsf{IOpen}$
 
-$\mathsf{IOpen}$ together with Bézout's theorem proves the irrationality of $\sqrt{2}$, while
-$\mathsf{IOpen}$ alone does not. In the non-negative part of the $\mathbb{Z}$-ring of real
-polynomials with integer constant term, $x = \sqrt{2} X$ and $y = X$ satisfy $x^2 = 2 y^2$ with $y
-\ne 0$. The irrationality of $\sqrt{2}$ is a universal sentence.
+The irrationality of $\sqrt{2}$ over $\mathsf{IOpen}$.
 
 - [She64]
 - [DAq05]

@@ -6,9 +6,7 @@ public import Mathlib.RingTheory.Coprime.Lemmas
 /-!
 # Additive homomorphisms to `ℤ` from a ring with the least number principle
 
-Let `R` be a discretely ordered commutative ring satisfying `LeastNumberPrinciple` with an element
-above every natural number. Every additive homomorphism `R →+ ℤ` is zero, so `ℤ` is not a direct
-summand of the additive group of `R`.
+Additive homomorphisms to `ℤ` from a ring satisfying the least number principle.
 
 - [Car16, Lemma 5]
 -/

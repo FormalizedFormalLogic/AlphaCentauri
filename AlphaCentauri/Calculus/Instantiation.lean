@@ -5,10 +5,7 @@ public import Foundation.FirstOrder.LK.Basic
 
 /-! # Instantiating a block of universal quantifiers
 
-Provability is defined for sentences, so a universally quantified sentence is instantiated at
-terms with free variables at the level of derivations: the existential closure of a formula is
-derivable from any instance of it, and dually the universal closure of a sentence entails every
-instance of it.
+Instantiation of a block of universal quantifiers at terms with free variables in derivations.
 
 - [Bus98A, Section 3.1.3] -/
 

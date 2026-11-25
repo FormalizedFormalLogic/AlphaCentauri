@@ -11,10 +11,7 @@ public import AlphaCentauri.Calculus.Induction.Basic
 /-!
 # Finite axiomatizability of `𝗜𝚺 n`
 
-`𝗣𝗔⁻` together with the finite theory `tarski`, a single instance of the $\Sigma_{n + 1}$
-induction scheme and a single instance of the $\Sigma_{n + 1}$ collection scheme, both stated with
-the partial satisfaction `prenexSatisfied 𝚺 (n + 1)`, is a finite theory equivalent to
-`𝗜𝚺 (n + 1)`; hence `𝗜𝚺 n` is finitely axiomatizable for `n ≥ 1`.
+`𝗜𝚺 n` is finitely axiomatizable for `n ≥ 1`.
 
 ## References
 

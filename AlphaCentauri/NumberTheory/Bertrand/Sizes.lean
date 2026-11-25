@@ -6,13 +6,8 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 /-!
 # The sizes in the proof of Bertrand's postulate
 
-The parameters of the injection that refutes the failure of Bertrand's postulate at `n`, over a
-model of $\mathsf{I}\Sigma_0 + \Omega_1$, and the inequalities between them. With
-$\ell = \|n\|$, the exponent is $s = \ell^2$, positions are counted below
-$\Lambda = s(\ell + 1) + 1$, the Chebyshev bands are the halvings
-$u_r = \lfloor x / 2^r \rfloor$ of $x = \lfloor 2n / 3 \rfloor$, and the injection goes from
-$z + a$ into $z + b$ numbers with $(K + 1) b + K (K + 1) + z \le K a$, so that it is one of
-$(K + 1) c$ into $K c$ for $c = \lfloor (z + b) / K \rfloor + 1$.
+The parameters of the injection in the proof of Bertrand's postulate and the inequalities between
+them.
 -/
 
 @[expose] public section

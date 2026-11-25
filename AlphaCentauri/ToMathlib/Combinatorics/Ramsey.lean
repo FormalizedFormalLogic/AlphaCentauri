@@ -4,10 +4,6 @@ public import Mathlib.Combinatorics.Pigeonhole
 
 /-!
 # Ramsey's theorem for finite sets
-
-For all `k`, `c` and `q` there is `N` such that every colouring with `c` colours of the
-`k`-element subsets of a finite set with at least `N` elements has a homogeneous set of size `q`:
-a subset all of whose `k`-element subsets have the same colour.
 -/
 
 @[expose] public section

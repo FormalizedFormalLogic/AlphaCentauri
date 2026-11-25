@@ -8,9 +8,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 /-!
 # The logic $\mathbf{ILM}$
 
-The extension of $\mathbf{IL}$ by the principle $\mathsf{M}$, with its soundness, consistency, and
-completeness with respect to the finite Veltman models satisfying the frame condition of
-$\mathsf{M}$.
+The logic $\mathbf{ILM}$ and its completeness with respect to finite Veltman models.
 -/
 
 @[expose] public section

@@ -6,11 +6,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 
 /-!
 # Arithmetical soundness of $\mathbf{CL}$
-
-The arithmetical interpretation of $\mathbf{CL}$ is sound for every interpretability abstraction
-satisfying $\mathbf{J1}$–$\mathbf{J4}$, in particular for $\Gamma_n$-conservativity over a theory
-containing $\mathsf{I}\Sigma_1$. If the theory is moreover $\Sigma_1$-sound, the
-$\Sigma_{n + 1}$- and $\Pi_{n + 2}$-conservativity logics do not contain $\mathbf{IL}$.
 -/
 
 @[expose] public section

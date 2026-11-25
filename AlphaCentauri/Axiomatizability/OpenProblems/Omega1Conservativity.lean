@@ -11,7 +11,7 @@ import AlphaCentauri.OpenProblem
 /-!
 # $\Pi_1$-conservativity of $\Omega_1$ over $\mathsf{I}\Delta_0$
 
-Whether adjoining $\Omega_1$ to $\mathsf{I}\Delta_0$ adds any new $\Pi_1$ theorems is open.
+An open problem on conservativity of $\Omega_1$ over $\mathsf{I}\Delta_0$.
 
 - [HP98, §V.1(a), p. 274, §V.5(g), p. 395]
 -/

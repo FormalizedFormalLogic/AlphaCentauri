@@ -5,11 +5,7 @@ public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 /-!
 # Bounded formulas and the hierarchy of formulas
 
-The class $\Delta_0$ of formulas all of whose quantifiers are bounded by `<` is
-`ℬ[<, L].Closure`; `Bounding.Hierarchy.zero_iff_bounded` identifies it with
-`ℬ[<, L].Hierarchy Γ 0`, and `bounded_induction` is a recursor for it on arithmetical formulas.
-The hierarchy of a universal closure, Boolean combinations of a class of formulas, and prenex normal
-forms are treated as well.
+The class $\Delta_0$ of bounded formulas and the hierarchy of formulas.
 -/
 
 @[expose] public section

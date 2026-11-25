@@ -9,13 +9,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # Inversion for the internal calculus of bounded cut rank
 
-This module proves that the rules of the internal calculus for `∧`, `∨` and `∀` are invertible
-for derivations of cut rank at most `r`: a derivation of a sequent containing a conjunction yields
-derivations of the sequent with either conjunct in its place, one containing a disjunction yields
-a derivation with both disjuncts in its place, and one containing a universal formula yields, for
-every term, a derivation with the instance at that term in its place. It also shows that `⊥` can
-be deleted from a derivable sequent, and records the injectivity of the external-variable shift
-on codes, which the shift rule needs.
+Inversion of the rules of the internal calculus for derivations of bounded cut rank.
 -/
 
 @[expose] public section

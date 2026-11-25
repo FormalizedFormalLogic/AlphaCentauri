@@ -11,15 +11,6 @@ public import AlphaCentauri.Schemata.DeltaInduction
 /-!
 # A one-sided sequent calculus with an induction rule
 
-`LKI[C]` is Foundation's one-sided calculus `LK.Derivation` over `ℒₒᵣ` with two further rules: a
-leaf `axm` for the axioms of `𝗣𝗔⁻`, and an induction rule for the formulas of a class `C`,
-carrying the side formulas that make it as strong as the induction axioms for `C`. A derivation
-is `Anchored D` when every cut formula belongs to `D`.
-
-The induction class is a parameter: taking `C` to be the prenex $\Sigma_1$ formulas and `D` the
-blocks of existential and of universal quantifiers over a bounded matrix gives the calculus for
-$\mathsf{I}\Sigma_1$, and the same calculus serves the other induction schemes.
-
 - [Bus98A, Section 1.4.1, Section 1.4.2]
 -/
 

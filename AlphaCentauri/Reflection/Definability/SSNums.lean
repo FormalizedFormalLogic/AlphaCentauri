@@ -9,8 +9,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # $\Delta_1$ definability of `ssnums`
 
-The code of `ssnums` as a function of its arity is $\Sigma_1$-definable, through the code of its
-list of conjuncts.
+The code of `ssnums` is $\Delta_1$-definable.
 -/
 
 @[expose] public section

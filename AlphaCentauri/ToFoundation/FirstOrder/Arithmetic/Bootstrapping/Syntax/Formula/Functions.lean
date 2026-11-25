@@ -7,18 +7,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # Functions on formula codes
 
-Negation has no fixed point on coded formulas, and the shift of free variables does not decrease
-the code of a formula. A substitution instance `subst w p` of a coded formula `p`, and likewise its
-shift `shift p`, has the same outermost connective as `p`. Substituting into a coded formula with
-`m` bound variables depends only on the first `m` entries of the vector. Structural induction on
-one-variable formulas instantiates the quantifier case by a free variable. A coded sentence is a
-coded semiformula without free variables, and the class of coded sentences with `n` bound variables
-is closed under the connectives.
-
-The shift of free variables and the substitution of terms without bound variables pass through a
-block `qqAlls p k` of universal quantifiers. `qqExss p k` is a block of `k` existential
-quantifiers; instantiating its outermost quantifier by a closed term instantiates the outermost
-bound variable.
+Basic operations on codes of formulas and sentences.
 -/
 
 @[expose] public section

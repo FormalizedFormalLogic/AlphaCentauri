@@ -7,11 +7,7 @@ import AlphaCentauri.OpenProblem
 
 /-! # The pigeonhole schemata `𝗣𝗛𝗣`
 
-The pigeonhole axiom for `φ` says that `φ` defines no injection of $a + 1$ into $a$. Whether
-$\mathsf{I}\Delta_0$ proves the pigeonhole principle for $\Delta_0$ formulas is open.
-
-A formula is read here as a multivalued function: the hypothesis asks only that every element of
-the domain has a value, not that it has exactly one.
+The pigeonhole schemata.
 
 - [HP98, §I.2(b)]
 - [PWW88, Problems 1 and 2]

@@ -5,13 +5,7 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 /-!
 # Truth for combinations of prenex formulas
 
-For standard `k` and `D`, `IsReadable k D` is the $\Delta_1$ class of internal formulas consisting
-of the prenex formulas with a $\Delta_0$ matrix and at most `k` quantifiers, their combinations by
-`^⋏` and `^⋎` of depth at most `D`, the universal quantifications of such combinations, and the
-prenex $\Pi_{k+1}$ formulas with a $\Delta_0$ matrix. `ReadableSatisfaction k D p f` says that
-`p` belongs to this class and is true when its free variables take the values `f`; it is
-$\Pi_{k+1}$, satisfies the Tarski conditions, and does not depend on how a formula is read when it
-falls into several of the clauses above.
+Truth for combinations of prenex formulas with a $\Delta_0$ matrix.
 
 ## References
 

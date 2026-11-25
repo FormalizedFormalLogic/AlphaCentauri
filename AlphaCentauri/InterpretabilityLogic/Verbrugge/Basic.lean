@@ -5,14 +5,7 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 /-!
 # Generalised Veltman semantics
 
-Generalised Veltman models (Verbrugge semantics), in which each `≺[w]` relates a world to a set of
-worlds, forcing, the soundness of extensions of $\mathbf{IL}$ with respect to generalised Veltman
-models validating their axioms, and frame conditions for the principles $\mathsf{P}_0$,
-$\mathsf{R}$ and $\mathsf{W}$.
-
-A Veltman model is a generalised Veltman model, and conversely the Veltman model of a generalised
-Veltman model `M` has as worlds the worlds of `M` paired with strategies choosing an element of
-each `≺[x]`-successor set along a play, and forces the same formulas as `M`.
+Generalised Veltman semantics (Verbrugge semantics) for interpretability logic.
 -/
 
 @[expose] public section

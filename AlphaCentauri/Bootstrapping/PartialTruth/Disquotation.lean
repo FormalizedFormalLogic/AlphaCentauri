@@ -8,9 +8,7 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.PartialTruth.Genera
 /-!
 # The Tarski conditions and disquotation over `𝗣𝗔⁻`
 
-The finite theory `tarski` of Tarski conditions for $\Delta_0$ satisfaction, provable in `𝗜𝚺₁`.
-In a model of `𝗣𝗔⁻ ∪ tarski`, the partial satisfaction `Reading.PrenexSatisfied Γ s` holds
-of the code of a prenex formula with a $\Delta_0$ matrix exactly when the formula holds.
+The Tarski conditions and disquotation for partial satisfaction over `𝗣𝗔⁻`.
 
 ## References
 

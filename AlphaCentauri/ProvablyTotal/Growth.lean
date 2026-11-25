@@ -14,10 +14,7 @@ public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.Grzegorczyk
 /-!
 # Growth of provably total functions
 
-An $\mathsf{I}\Sigma_0$-provably total function with a $\Delta_0$ graph is bounded by a closed
-term, hence grows at most as fast as a term. The provably total functions of
-$\mathsf{I}\Pi_{n+1}^-$ and of $\mathsf{I}\Sigma_n + \mathsf{I}\Pi_{n+1}^-$ are described in terms
-of the extended Grzegorczyk hierarchy `ONote.extendedGrzegorczyk`.
+Growth rates of provably total functions of fragments of arithmetic.
 
 - [HP98, Theorem V.1.4]
 - [Bus98A, Theorem 1.2.7.1]

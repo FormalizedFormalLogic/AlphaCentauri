@@ -7,10 +7,8 @@ public import AlphaCentauri.ToMathlib.OpenPredicate.AddMonoidHomToInt
 /-!
 # $\mathbb{Z}$ is not a direct summand of the ring of differences
 
-For a nonstandard model $V$ of $\mathsf{I}\mathsf{E}_1$, every additive homomorphism from the ring
-of differences of $V$ to $\mathbb{Z}$ is zero, so $\mathbb{Z}$ is not a direct summand of its
-additive group. Carl proved this over $\mathsf{I}\mathsf{E}_2$ and asked whether
-$\mathsf{I}\mathsf{E}_1$ suffices.
+$\mathbb{Z}$ is not a direct summand of the ring of differences of a nonstandard model of
+$\mathsf{I}\mathsf{E}_1$.
 
 - [Car16]
 -/

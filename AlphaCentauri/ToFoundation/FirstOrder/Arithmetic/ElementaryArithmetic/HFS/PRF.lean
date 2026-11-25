@@ -7,13 +7,6 @@ public import Foundation.FirstOrder.Arithmetic.HFS.PRF
 /-!
 # Primitive recursion in models of $\mathsf{EA}$
 
-Functions defined by primitive recursion. A recursion
-(`PR.Recursion`) consists of locally $\Delta_0$ functions together with a monotone bound on the
-values, so that every computation sequence is bounded and the recursion is carried out by
-induction on a locally $\Delta_0$ predicate; its result is locally $\Delta_0$. A construction
-(`PR.Construction`) adds the formulas of `PR.Blueprint` defining the functions, and these formulas
-then define the result.
-
 - [HP98, §V.3]
 -/
 

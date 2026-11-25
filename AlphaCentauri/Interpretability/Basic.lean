@@ -6,10 +6,7 @@ public import Foundation.FirstOrder.LK.Interpretation
 /-!
 # API for `DirectInterpretation`
 
-Additional API for Foundation's `DirectTranslation` and `DirectInterpretation` (`T ⊳ U`):
-transport of a translation along a stronger base theory, consistency transfer, monotonicity in
-both arguments, the disjunction lemma, faithful interpretations, and commutation of translation
-with the renaming of variables.
+Additional API for Foundation's `DirectTranslation` and `DirectInterpretation`.
 -/
 
 @[expose] public section

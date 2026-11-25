@@ -5,9 +5,7 @@ public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 /-!
 # Relativized blocks of quantifiers
 
-Blocks of universal quantifiers relativized to a domain `d`: their specialisation, their
-generalisation over fresh free variables under a hypothesis, and the equivalence of a block of
-implications with a block over a conjunction under hypotheses on the domain.
+Blocks of universal quantifiers relativized to a domain.
 -/
 
 @[expose] public section

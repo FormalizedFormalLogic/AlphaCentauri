@@ -5,11 +5,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Theory
 
 /-!
 # Theories whose axioms are locally $\Delta_0$ in models of $\mathsf{EA}$
-
-The class `LocallyDelta0Axioms T V` states that, in the model `V` of $\mathsf{EA}$, the $\Sigma$
-and $\Pi$ parts of the $\Delta_1$ formula `T.Δ₁ch` of the axioms of `T` agree and the codes of
-the axioms form a locally $\Delta_0$ set. The class is closed under the constructions of
-`Theory.Δ₁` instances: the empty theory, single sentences, finite theories, unions and insertion.
 -/
 
 @[expose] public section

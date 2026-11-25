@@ -6,13 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 /-!
 # Lists in models of $\mathsf{EA}$
 
-Lists coded by iterated pairing: `x ∷ v`, the `i`-th element `v.[i]`, induction on lists for
-locally $\Delta_0$ predicates, recursion on lists with a monotone bound on its values, and the
-length, maximum, last elements, concatenation, membership, repetition and set of elements of a
-list. The formulas `adjoinDef`, `mkVec₁Def`, `mkVec₂Def`,
-`nthDef`, `lenDef`, `listMaxDef`, `takeLastDef`, `concatDef`, `memVecDef`, `subsetVecDef`,
-`repeatVecDef` and `vecToSetDef` define these operations. A Skolem function for a
-locally $\Delta_0$ relation with bounded witnesses is `sigmaZero_skolem_vec`.
+Lists coded by iterated pairing in models of $\mathsf{EA}$.
 
 - [HP98, §V.3]
 -/

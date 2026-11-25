@@ -10,8 +10,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # The deduction theorem for finite sets of axioms
 
-The internal deduction theorem for finite sets of axioms, and the equivalence of provability from
-`T` with an added sentence `σ` and provability of `σ → p` from `T`.
+The internal deduction theorem for finite sets of axioms.
 -/
 
 @[expose] public section

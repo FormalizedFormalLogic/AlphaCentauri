@@ -8,11 +8,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.HFS.Basic
 /-!
 # Soundness of cut-free derivations for satisfaction by complexity
 
-In every model of `𝗜𝚺⁺(N + 1)`, a sequent of formulas of complexity at most `N` derivable without
-cuts in pure logic contains a formula satisfied under `ComplexitySatisfied N`. Consequently, a
-sequent of codes of sentences of complexity at most `N` derivable in pure logic contains the code
-of a true sentence.
-
 ## References
 
 - [HP98, Theorem I.4.33]

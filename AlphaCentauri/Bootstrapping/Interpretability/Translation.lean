@@ -9,17 +9,7 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 /-!
 # Internal translation of formulas along a table of operators
 
-A table `tbl` lists the codes of the formulas of a direct translation of a language $L_2$ into a
-language $L_1$: its entry `tbl.[0]` is the domain formula, `(tbl.[1]).[⟪k, r⟫]` is the formula
-interpreting the `k`-ary relation symbol `r`, and `(tbl.[2]).[⟪k, f⟫]` is the formula of the graph
-of the `k`-ary function symbol `f`. Along such a table, `varEqual` sends a coded $L_2$-term to the
-coded $L_1$-formula saying that the variable `^#0` is its value, and `translate` sends a coded
-$L_2$-formula to its relativized translation, a coded $L_1$-formula.
-
-A table of a direct translation `π` lists the codes of the domain formula of `π`, of the formulas
-interpreting the relation symbols and of the formulas of the graphs of the function symbols. Along
-such a table, `varEqual` sends the code of a term to the code of its translation by `π`, and
-`translate` sends the code of a formula or of a sentence to the code of its translation by `π`.
+The internal translation of formulas along a table of operators.
 -/
 
 @[expose] public section

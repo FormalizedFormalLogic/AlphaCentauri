@@ -9,12 +9,8 @@ public import Mathlib.RingTheory.PrincipalIdealDomain
 /-!
 # Fermat's Last Theorem for exponent 3 from the least number principle
 
-A solution of `a³ + b³ = u c³` in the Eisenstein integers over a discretely ordered ring `R` with
-`LeastNumberPrinciple R` (`Solution`) yields one with a smaller `norm c`
-(`EisensteinInteger.descent`), by the descent of Kummer's proof. The existence of a solution is a
-bounded existential open predicate in the coordinates of `a`, `b`, `c`, `u`, so
-`LeastNumberPrinciple R` rules out every solution (`EisensteinInteger.no_solution`), and hence
-every non-trivial solution of `x³ + y³ = z³` in `R` (`FermatThree.flt3_of_leastNumberPrinciple`).
+Fermat's Last Theorem for exponent $3$ over a discretely ordered ring satisfying the least number
+principle.
 -/
 
 @[expose] public section

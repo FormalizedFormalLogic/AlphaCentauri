@@ -10,19 +10,7 @@ public import Foundation.FirstOrder.Incompleteness.Second
 
 /-! # Definable elements
 
-The $\Sigma_k$-definable elements of a model of arithmetic are the elements definable without
-parameters by a $\Sigma_k$ formula.
-
-The $\Sigma_{j+1}$-definable elements of a model `M` of `𝗣𝗔` form a $\Sigma_{j+1}$-elementary
-substructure, which satisfies $\mathsf{I}\Sigma_j$ and, when it contains a nonstandard element,
-refutes $\mathsf{B}\Sigma_{j+1}$.
-
-The elements of a model `M` of `𝗣𝗔` definable over a set `A` of parameters form an elementary
-substructure. The elements of `M` definable without parameters embed elementarily into every model
-`N` elementarily equivalent to `M`, in exactly one way, and the image consists of the elements of
-`N` definable without parameters. For a complete extension `T` of `𝗣𝗔` these elements form the
-prime model $K_T$ of `T`. Consequently the prime model has no proper elementary substructures and no
-non-trivial automorphisms.
+Definable elements of models of arithmetic.
 
 - [HP98, §IV.1(d)]
 - [Kay91, §8.1]

@@ -6,9 +6,7 @@ public import Foundation.FirstOrder.Incompleteness.Consistency
 /-!
 # $\Delta_1$ numerations whose elements are sentences
 
-A $\Delta_1$ numeration of a theory in a nonstandard model may contain codes of formulas with free
-variables. Restricting the numeration to the codes of sentences gives a numeration of the same
-theory, and it has a weaker consistency statement.
+$\Delta_1$ numerations of theories whose elements are sentences.
 -/
 
 @[expose] public section

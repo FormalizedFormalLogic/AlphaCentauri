@@ -6,7 +6,7 @@ public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 /-!
 # Exponentiation, block sequences and powers
 
-The exponential in models of $\mathsf{EA}$, sequences coded in blocks, and powers.
+Exponentiation, block sequences and powers in models of $\mathsf{EA}$.
 -/
 
 @[expose] public section

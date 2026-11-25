@@ -5,12 +5,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.ElementaryArithme
 /-!
 # Course-of-values recursion in models of $\mathsf{EA}$
 
-A function `r` on a model of $\mathsf{EA}$ given by `r n = F n T`, where `T` is the sequence
-`⟪0, r 0⟫, …, ⟪n - 1, r (n - 1)⟫` of the earlier values, for a locally $\Delta_0$ function `F`.
-The construction carries a monotone locally $\Delta_0$ bound, and `r n` is the value clipped by the
-bound at `n`; when `F n T` stays below the bound, `r n = F n T`. The table is built by bounded
-primitive recursion, and `r` is locally $\Delta_0$.
-
 - [HP98, §V.3]
 -/
 

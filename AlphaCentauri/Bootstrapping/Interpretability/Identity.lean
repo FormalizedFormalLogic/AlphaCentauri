@@ -8,9 +8,7 @@ public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 /-!
 # The internal identity translation
 
-Along a table of the identity translation `DirectTranslation.id S`, the coded formula of the value
-of a closed term `t` is provably equivalent to `^#0 = t`, every formula code is provably equivalent
-to its translation, and so the translation of every formula code provable in `S` is provable in `S`.
+The internal translation along the identity translation.
 -/
 
 @[expose] public section

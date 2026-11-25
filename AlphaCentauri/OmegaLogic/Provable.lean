@@ -5,8 +5,7 @@ public import AlphaCentauri.OmegaLogic.Derivation
 /-!
 # Bounded derivability in `Z_∞`
 
-`Z∞ ⊢[α, c] Γ` for ordinal height at most `α` and cut rank at most `c`, with its structural rules,
-logical rules, and soundness.
+Derivability in `Z_∞` with bounds on ordinal height and cut rank.
 
 - [Tow20, Section 13, Section 14, Section 18]
 -/

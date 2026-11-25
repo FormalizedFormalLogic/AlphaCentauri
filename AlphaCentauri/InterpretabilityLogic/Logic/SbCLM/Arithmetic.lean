@@ -5,10 +5,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.SbCLM.Basic
 
 /-!
 # Arithmetical soundness of $\mathbf{SbCLM}$
-
-The arithmetical interpretation of $\mathbf{SbCLM}$ is sound for every interpretability abstraction
-satisfying $\mathbf{J1}$–$\mathbf{J4}$, $\mathbf{M}$ and $\mathsf{Sb}$, in particular for
-$\Pi_n$-conservativity over a theory containing $\mathsf{B}\Sigma_2$ for $n \geq 2$.
 -/
 
 @[expose] public section

@@ -8,10 +8,7 @@ public import Mathlib.NumberTheory.Padics.RingHoms
 /-!
 # Discretely ordered ring of polynomials with $p$-adic integral values
 
-For a field `K`, a prime `p` and a ring homomorphism `χ : K →+* ℚ_[p]`, the polynomials `f` over
-`K` with `f(0) ∈ ℤ[1/p]` and `χ(f(1)) ∈ ℤ_[p]` form a subring `PadicIntegralPolynomial χ` of
-`K[X]`. When `K` is an ordered field, it is discretely ordered by the sign of the leading
-coefficient, and every element can be divided with remainder by every positive natural number.
+The discretely ordered ring of polynomials with $p$-adic integral values.
 -/
 
 @[expose] public noncomputable section

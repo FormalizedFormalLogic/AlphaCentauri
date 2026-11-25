@@ -11,8 +11,6 @@ Operations on codes of terms in models of $\mathsf{EA}$.
 - [HP98, §V.3]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -22,7 +20,7 @@ namespace ElementaryArithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] {a f i k l m n t ts t₁ t₂ u v w : V}
+variable {L : Language} [L.Encodable] [L.LORDefinable] {a f i k l m n t ts t₁ t₂ u w v : V}
 
 namespace TermSubst
 
@@ -60,8 +58,9 @@ open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (termSubstGraph termSubstVec
 
 variable (L)
 
+variable (w) in
 /-- The substitution of the list `w` for the bound variables in the code `t` of a term. -/
-noncomputable def termSubst (w t : V) : V := construction.result L ![w] t
+noncomputable def termSubst (t : V) : V := construction.result L ![w] t
 
 /-- The substitution of the list `w` for the bound variables in the list `v` of `k` terms. -/
 noncomputable def termSubstVec (k w v : V) : V := construction.resultVec L ![w] k v
@@ -113,8 +112,8 @@ lemma termSubstVec_locallyDelta0 :
     (![0, 2, 1] : Fin 3 → Fin 3) using 3
   simp [termSubstVec, Matrix.constant_eq_singleton]
 
-lemma termSubstVec_le_exp_exp (k w v : V) :
-    termSubstVec L k w v ≤ Exp.exp (Exp.exp (8 * v + (w + 4))) :=
+variable (k w v) in
+lemma termSubstVec_le_exp_exp : termSubstVec L k w v ≤ Exp.exp (Exp.exp (8 * v + (w + 4))) :=
   construction.resultVec_le_exp_exp L ![w] (le_trans (by simp) le_add_self) (fun _ ↦ le_rfl) k v
 
 @[simp]
@@ -126,8 +125,9 @@ lemma nth_termSubstVec (hts : IsUTermVec L k ts) (hi : i < k) :
     (termSubstVec L k w ts).[i] = termSubst L w ts.[i] :=
   construction.nth_resultVec L _ hts hi
 
+variable (w) in
 @[simp]
-lemma termSubstVec_nil (w : V) : termSubstVec L 0 w 0 = 0 := construction.resultVec_nil L _
+lemma termSubstVec_nil : termSubstVec L 0 w 0 = 0 := construction.resultVec_nil L _
 
 lemma termSubstVec_cons (ht : IsUTerm L t) (hts : IsUTermVec L k ts) :
     termSubstVec L (k + 1) w (t ∷ ts) = termSubst L w t ∷ termSubstVec L k w ts :=
@@ -320,7 +320,8 @@ lemma termShiftVec_locallyDelta0 : LocallyDelta0Function₂ (termShiftVec L : V 
   convert construction.resultVec_locallyDelta0 (V := V) L using 3
   simp [termShiftVec, Matrix.empty_eq]
 
-lemma termShiftVec_le_exp_exp (k v : V) : termShiftVec L k v ≤ Exp.exp (Exp.exp (8 * v + 2)) :=
+variable (k v) in
+lemma termShiftVec_le_exp_exp : termShiftVec L k v ≤ Exp.exp (Exp.exp (8 * v + 2)) :=
   construction.resultVec_le_exp_exp L ![] one_le_two (fun _ ↦ le_rfl) k v
 
 @[simp]
@@ -782,14 +783,14 @@ variable (L)
 /-- The code `t` is a semiterm with bound variables below `n` and no free variable. -/
 def IsTermFVFree (n t : V) : Prop := IsSemiterm L n t ∧ termShift L t = t
 
-variable {L}
+variable {L} (x : V)
 
 @[simp]
-lemma IsTermFVFree.bvar (x : V) : IsTermFVFree L n ^#x ↔ x < n := by
+lemma IsTermFVFree.bvar : IsTermFVFree L n ^#x ↔ x < n := by
   simp [IsTermFVFree]
 
 @[simp]
-lemma IsTermFVFree.fvar (x : V) : ¬IsTermFVFree L n ^&x := by
+lemma IsTermFVFree.fvar : ¬IsTermFVFree L n ^&x := by
   simp [IsTermFVFree]
 
 end fvfree
@@ -802,11 +803,13 @@ set_option linter.dupNamespace false
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic
   (addIndex mulIndex zeroIndex oneIndex qqAddGraph qqMulGraph)
 
+variable (x y : V)
+
 /-- The code of the sum of the terms `x` and `y`. -/
-noncomputable def qqAdd (x y : V) : V := ^func 2 (addIndex : V) ?[x, y]
+noncomputable def qqAdd : V := ^func 2 (addIndex : V) ?[x, y]
 
 /-- The code of the product of the terms `x` and `y`. -/
-noncomputable def qqMul (x y : V) : V := ^func 2 (mulIndex : V) ?[x, y]
+noncomputable def qqMul : V := ^func 2 (mulIndex : V) ?[x, y]
 
 scoped infixl:80 " ^+ " => qqAdd
 
@@ -823,19 +826,19 @@ instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqAdd : V → V → V) := .of_sigma
 instance (Γ m) : Γᴬ_[m + 1]-Function₂ (qqMul : V → V → V) := .of_sigmaOne qqMul_defined.to_definable
 
 @[simp]
-lemma lt_qqAdd_left (x y : V) : x < x ^+ y := by
+lemma lt_qqAdd_left : x < x ^+ y := by
   simpa using! nth_lt_qqFunc_of_lt (i := 0) (k := 2) (f := (addIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp]
-lemma lt_qqAdd_right (x y : V) : y < x ^+ y := by
+lemma lt_qqAdd_right : y < x ^+ y := by
   simpa using! nth_lt_qqFunc_of_lt (i := 1) (k := 2) (f := (addIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp]
-lemma lt_qqMul_left (x y : V) : x < x ^* y := by
+lemma lt_qqMul_left : x < x ^* y := by
   simpa using! nth_lt_qqFunc_of_lt (i := 0) (k := 2) (f := (mulIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp]
-lemma lt_qqMul_right (x y : V) : y < x ^* y := by
+lemma lt_qqMul_right : y < x ^* y := by
   simpa using! nth_lt_qqFunc_of_lt (i := 1) (k := 2) (f := (mulIndex : V)) (v := ?[x, y]) (by simp)
 
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by
@@ -946,13 +949,13 @@ noncomputable def construction : PR.Construction V blueprint where
     bound_locallyDelta0
 
 /-- The code of the numeral for `x + 1`. -/
-noncomputable def numeralAux (x : V) : V := construction.result ![] x
+noncomputable def numeralAux : V := construction.result ![] x
 
 @[simp]
 lemma numeralAux_zero : numeralAux (0 : V) = 𝟏 := by simp [numeralAux, construction]
 
 @[simp]
-lemma numeralAux_succ (x : V) : numeralAux (x + 1) = numeralAux x ^+ 𝟏 := by
+lemma numeralAux_succ : numeralAux (x + 1) = numeralAux x ^+ 𝟏 := by
   simp [numeralAux, construction]
 
 instance numeralAux.defined : 𝚺ᴬ₁-Function₁ (numeralAux : V → V) via numeralAuxGraph := .mk
@@ -965,8 +968,10 @@ lemma numeralAux_locallyDelta0 : LocallyDelta0Function₁ (numeralAux : V → V)
   convert construction.result_locallyDelta0 (V := V) using 3
   simp [numeralAux, Matrix.empty_eq]
 
+variable (n)
+
 @[simp]
-lemma lt_numeralAux_self (n : V) : n < numeralAux n := by
+lemma lt_numeralAux_self : n < numeralAux n := by
   refine LocallyDelta0Pred.succ_induction (P := fun n ↦ n < numeralAux n) ?_ ?_ ?_ n
   · exact LocallyDelta0.lt (LocallyDelta0Function.var (0 : Fin 1))
       (numeralAux_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
@@ -976,12 +981,14 @@ lemma lt_numeralAux_self (n : V) : n < numeralAux n := by
     exact lt_of_lt_of_le ((add_lt_add_iff_right 1).mpr ih) (by simp [succ_le_iff_lt])
 
 @[simp]
-lemma numeralAux_semiterm (n x : V) : IsSemiterm ℒₒᵣ n (numeralAux x) := by
+lemma numeralAux_semiterm : IsSemiterm ℒₒᵣ n (numeralAux x) := by
   refine LocallyDelta0Pred.succ_induction (P := fun x ↦ IsSemiterm ℒₒᵣ n (numeralAux x)) ?_ ?_ ?_ x
   · exact isSemiterm_locallyDelta0.rel_comp₂ (LocallyDelta0Function.const n)
       (numeralAux_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
   · simp
   · intro x ih; simp [qqAdd, ih]
+
+variable {n}
 
 end Numeral
 
@@ -990,7 +997,7 @@ open Numeral
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic (numeralGraph)
 
 /-- The code of the numeral of `x`. -/
-noncomputable def numeral (x : V) : V := if x = 0 then 𝟎 else numeralAux (x - 1)
+noncomputable def numeral : V := if x = 0 then 𝟎 else numeralAux (x - 1)
 
 @[simp]
 lemma numeral_zero : numeral (0 : V) = 𝟎 := by simp [numeral]
@@ -1007,18 +1014,22 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
   · simp at pos
   simp [numeral]
 
+variable (n)
+
 @[simp]
-lemma numeral_semiterm (n x : V) : IsSemiterm ℒₒᵣ n (numeral x) := by
+lemma numeral_semiterm : IsSemiterm ℒₒᵣ n (numeral x) := by
   by_cases hx : x = 0 <;> simp [hx, numeral]
 
 @[simp]
-lemma numeral_uterm (x : V) : IsUTerm ℒₒᵣ (numeral x) := (numeral_semiterm 0 x).isUTerm
+lemma numeral_uterm : IsUTerm ℒₒᵣ (numeral x) := (numeral_semiterm 0 x).isUTerm
 
 @[simp]
-lemma le_numeral_self (n : V) : n ≤ numeral n := by
+lemma le_numeral_self : n ≤ numeral n := by
   rcases zero_or_succ n with (rfl | ⟨n, rfl⟩)
   · simp
   · simp [numeral, succ_le_iff_lt]
+
+variable {n}
 
 instance numeral_defined : 𝚺ᴬ₁-Function₁ (numeral : V → V) via numeralGraph := .mk fun v ↦ by
   simp [numeralGraph, numeral_eq_natCast]
@@ -1053,7 +1064,7 @@ lemma numeral_substs (_ : IsSemitermVec ℒₒᵣ n m w) (x : V) :
       simp [ih, qqOne_eq_qqFunc]
 
 @[simp]
-lemma numeral_shift (x : V) : termShift ℒₒᵣ (numeral x) = numeral x := by
+lemma numeral_shift : termShift ℒₒᵣ (numeral x) = numeral x := by
   refine LocallyDelta0Pred.succ_induction (P := fun x ↦ termShift ℒₒᵣ (numeral x) = numeral x)
     ?_ ?_ ?_ x
   · exact LocallyDelta0.eq (termShift_locallyDelta0.comp₁
@@ -1068,7 +1079,7 @@ lemma numeral_shift (x : V) : termShift ℒₒᵣ (numeral x) = numeral x := by
       simp [ih, qqOne_eq_qqFunc]
 
 @[simp]
-lemma numeral_bShift (x : V) : termBShift ℒₒᵣ (numeral x) = numeral x := by
+lemma numeral_bShift : termBShift ℒₒᵣ (numeral x) = numeral x := by
   refine LocallyDelta0Pred.succ_induction (P := fun x ↦ termBShift ℒₒᵣ (numeral x) = numeral x)
     ?_ ?_ ?_ x
   · exact LocallyDelta0.eq (termBShift_locallyDelta0.comp₁

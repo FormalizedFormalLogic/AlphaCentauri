@@ -12,8 +12,6 @@ public import Mathlib.Algebra.Ring.Subring.Basic
 The order on subrings of $K[X]$ given by the sign of the leading coefficient.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public noncomputable section
 
 open Polynomial OpenPredicate
@@ -33,24 +31,30 @@ lemma leadingCoeff_add_nonneg {p q : K[X]} (hp : 0 ≤ p.leadingCoeff)
       exact add_nonneg hp hq
   · rwa [leadingCoeff_add_of_degree_lt' h]
 
+section
+
+variable (S : Subring K[X])
+
 /-- The polynomials in `S` with non-negative leading coefficient. -/
-def leadingCoeffCone (S : Subring K[X]) : Subsemiring S where
+def leadingCoeffCone : Subsemiring S where
   carrier := {p | 0 ≤ (p : K[X]).leadingCoeff}
   zero_mem' := by simp
   one_mem' := by simp
   add_mem' := leadingCoeff_add_nonneg
   mul_mem' hp hq := by simpa [leadingCoeff_mul] using mul_nonneg hp hq
 
-lemma leadingCoeffCone_isPointed (S : Subring K[X]) : (leadingCoeffCone S).IsPointed := by
+lemma leadingCoeffCone_isPointed : (leadingCoeffCone S).IsPointed := by
   intro p hp hnp
   have : (p : K[X]).leadingCoeff = 0 := le_antisymm (by simpa [leadingCoeffCone] using hnp) hp
   exact Subtype.ext (leadingCoeff_eq_zero.mp this)
 
-lemma leadingCoeffCone_isSpanning (S : Subring K[X]) : (leadingCoeffCone S).IsSpanning := by
+lemma leadingCoeffCone_isSpanning : (leadingCoeffCone S).IsSpanning := by
   intro p
   rcases le_total 0 (p : K[X]).leadingCoeff with h | h
   · exact Or.inl h
   · exact Or.inr (by simpa [leadingCoeffCone] using h)
+
+end
 
 namespace LeadingCoeffOrder
 

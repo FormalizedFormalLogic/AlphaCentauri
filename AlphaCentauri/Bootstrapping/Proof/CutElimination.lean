@@ -7,8 +7,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Induction
 # Cut elimination for the internal calculus
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -20,12 +18,13 @@ open PeanoMinus ISigma0 ISigma1 InternalMeasures
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {r : V} {ρ : V → V} {a b d d₀ p q s e x Γ : V}
 
-variable (L) in
+variable (L p) in
 /-- `p` has complexity zero or is existential. -/
-private def IsZeroOrExs (p : V) : Prop := formulaComplexity L p = 0 ∨ ∃ a < p, p = ^∃ a
+private def IsZeroOrExs : Prop := formulaComplexity L p = 0 ∨ ∃ a < p, p = ^∃ a
 
-private lemma isZeroOrExs_shift_iff {p : V} (hp : IsUFormula L p) :
+private lemma isZeroOrExs_shift_iff (hp : IsUFormula L p) :
     IsZeroOrExs L (shift L p) ↔ IsZeroOrExs L p := by
   unfold IsZeroOrExs
   rw [formulaComplexity_shift hp]
@@ -40,54 +39,55 @@ private lemma isZeroOrExs_shift_iff {p : V} (hp : IsUFormula L p) :
 
 /-! ### Bounds on the premises of the cut reduction -/
 
+variable (d s) in
 /-- `s` together with every code up to `d`. -/
-private noncomputable def widen (d s : V) : V := s ∪ under (d + 1)
+private noncomputable def widen : V := s ∪ under (d + 1)
 
 private instance : 𝚺ᴬ₁-Function₂ (widen : V → V → V) := by
   unfold widen
   definability
 
-private lemma subset_widen (d s : V) : s ⊆ widen d s := fun _ hx ↦ mem_cup_iff.mpr (.inl hx)
+variable (d s) in
+private lemma subset_widen : s ⊆ widen d s := fun _ hx ↦ mem_cup_iff.mpr (.inl hx)
 
-private lemma insert_subset_widen {a d s : V} (ha : a ≤ d) : insert a s ⊆ widen d s := by
+private lemma insert_subset_widen (ha : a ≤ d) : insert a s ⊆ widen d s := by
   intro x hx
   rcases mem_bitInsert_iff.mp hx with rfl | hx
   · exact mem_cup_iff.mpr (.inr (mem_under_iff.mpr (lt_succ_iff_le.mpr ha)))
   · exact subset_widen d s hx
 
-private lemma insert_insert_subset_widen {a b d s : V} (ha : a ≤ d) (hb : b ≤ d) :
+private lemma insert_insert_subset_widen (ha : a ≤ d) (hb : b ≤ d) :
     insert a (insert b s) ⊆ widen d s := by
   intro x hx
   rcases mem_bitInsert_iff.mp hx with rfl | hx
   · exact mem_cup_iff.mpr (.inr (mem_under_iff.mpr (lt_succ_iff_le.mpr ha)))
   · exact insert_subset_widen hb hx
 
-private lemma wkRule_le_wkRule {S S' e : V} (h : S ⊆ S') : wkRule S e ≤ wkRule S' e := by
+private lemma wkRule_le_wkRule {S S' : V} (h : S ⊆ S') : wkRule S e ≤ wkRule S' e := by
   unfold wkRule
   exact add_le_add_left (pair_le_pair (le_of_subset h) le_rfl) 1
 
-variable (L) in
+variable (L d p) in
 /-- The cut formulas at the premises: the cut formula itself, its shift, and every code up to
 `d`. -/
-private noncomputable def formulaBound (d p : V) : V := p + shift L p + d
+private noncomputable def formulaBound : V := p + shift L p + d
 
-variable (L) in
+variable (L d s) in
 /-- The contexts at the premises: contexts enlarged by codes up to `d`, their shifts so enlarged,
 and the image of the context under the inverse of `freshVec (s + d)`. -/
-private noncomputable def contextBound (d s : V) : V :=
+private noncomputable def contextBound : V :=
   widen d s + widen d (setShift L s) + fvSubstImage (L := L) (freshVecInverse (s + d)) s
 
-variable (L) in
+variable (L ρ d p s e) in
 /-- The partner derivations at the premises: weakenings of the partner and of its shift, and the
 image `ρ ⟪w, e⟫` of the partner under the inverse `w` of `freshVec (s + d)`. -/
-private noncomputable def partnerBound (ρ : V → V) (d p s e : V) : V :=
+private noncomputable def partnerBound : V :=
   wkRule (insert (neg L p) (widen d s)) e +
     wkRule (insert (neg L (shift L p)) (widen d (setShift L s)))
       (shiftRule (setShift L (fstIdx e)) e) +
     ρ ⟪freshVecInverse (s + d), e⟫
 
-private lemma partnerBound_definable {ρ : V → V} (hρ : 𝚺ᴬ₁-Function₁ ρ) :
-    𝚺ᴬ₁-Function₄ (partnerBound L ρ) := by
+private lemma partnerBound_definable (hρ : 𝚺ᴬ₁-Function₁ ρ) : 𝚺ᴬ₁-Function₄ (partnerBound L ρ) := by
   have h₁ : 𝚺ᴬ₁-Function₄ fun d p s e : V ↦ wkRule (insert (neg L p) (widen d s)) e := by
     definability
   have h₂ : 𝚺ᴬ₁-Function₄ fun d p s e : V ↦ wkRule (insert (neg L (shift L p))
@@ -98,15 +98,15 @@ private lemma partnerBound_definable {ρ : V → V} (hρ : 𝚺ᴬ₁-Function�
   unfold partnerBound
   definability
 
-variable (L) in
+variable (L r) in
 /-- `y` codes a derivation of cut rank at most `r` of the image under `π₁ x` of the end-sequent of
 `π₂ x`, whenever `π₂ x` codes a derivation of cut rank at most `r` and `π₁ x` a vector of terms. -/
-private def IsRewriting (r x y : V) : Prop :=
+private def IsRewriting (x y : V) : Prop :=
   RankedDerivation (∅ : Theory L) r (π₂ x) → IsSemitermVec L (len (π₁ x)) 0 (π₁ x) →
     RankedDerivationOf (∅ : Theory L) r y (fvSubstImage (L := L) (π₁ x) (fstIdx (π₂ x)))
 
-private lemma exists_rewriting (r : V) :
-    ∃ ρ : V → V, (𝚺ᴬ₁-Function₁ ρ) ∧ ∀ x, IsRewriting L r x (ρ x) := by
+variable (r) in
+private lemma exists_rewriting : ∃ ρ : V → V, (𝚺ᴬ₁-Function₁ ρ) ∧ ∀ x, IsRewriting L r x (ρ x) := by
   apply ISigma1.exists_sigma1Function_of_forall_exists (by unfold IsRewriting; definability)
   intro x
   by_cases h : RankedDerivation (∅ : Theory L) r (π₂ x) ∧ IsSemitermVec L (len (π₁ x)) 0 (π₁ x)
@@ -119,15 +119,13 @@ private lemma exists_rewriting (r : V) :
 
 section cutAux
 
-variable {r : V}
-
-private lemma RankedDerivationOf.weaken {e S s : V} (hS : IsFormulaSet L S) (hsub : s ⊆ S)
+private lemma RankedDerivationOf.weaken {S : V} (hS : IsFormulaSet L S) (hsub : s ⊆ S)
     (he : RankedDerivationOf (∅ : Theory L) r e s) :
     RankedDerivationOf (∅ : Theory L) r (wkRule S e) S :=
   ⟨by simp, Derivation.wkRule hS hsub ⟨he.1, he.2.1⟩, by simp [he.2.2]⟩
 
 /-- Weakening the end-sequent `insert x s` of a derivation by `a` beside `x`. -/
-private lemma RankedDerivationOf.wk_insert {e x a s : V} (ha : IsFormula L a)
+private lemma RankedDerivationOf.wk_insert (ha : IsFormula L a)
     (he : RankedDerivationOf (∅ : Theory L) r e (insert x s)) :
     RankedDerivationOf (∅ : Theory L) r (wkRule (insert x (insert a s)) e)
       (insert x (insert a s)) := by
@@ -136,7 +134,7 @@ private lemma RankedDerivationOf.wk_insert {e x a s : V} (ha : IsFormula L a)
     (insert_subset_insert_of_subset x (susbset_insert a s))
 
 /-- Weakening the end-sequent `insert x s` of a derivation by `a` and `b` beside `x`. -/
-private lemma RankedDerivationOf.wk_insert_insert {e x a b s : V} (ha : IsFormula L a)
+private lemma RankedDerivationOf.wk_insert_insert (ha : IsFormula L a)
     (hb : IsFormula L b) (he : RankedDerivationOf (∅ : Theory L) r e (insert x s)) :
     RankedDerivationOf (∅ : Theory L) r (wkRule (insert x (insert a (insert b s))) e)
       (insert x (insert a (insert b s))) := by
@@ -144,52 +142,51 @@ private lemma RankedDerivationOf.wk_insert_insert {e x a b s : V} (ha : IsFormul
   exact he.weaken (by simp [hs.1, hs.2, ha, hb]) (insert_subset_insert_of_subset x
     fun y hy ↦ susbset_insert a _ (susbset_insert b s hy))
 
-variable (L) in
+variable (L r d) in
 /-- The cut reduction holds for every derivation coded below `d`, with cut formula, context and
 partner derivation bounded by `bp`, `bs` and `be`. -/
-private def CutBelow (r d bp bs be : V) : Prop :=
+private def CutBelow (bp bs be : V) : Prop :=
   ∀ d₀ < d, ∀ q ≤ bp, ∀ s₀ ≤ bs, ∀ e₀ ≤ be, formulaComplexity L q ≤ r → IsZeroOrExs L q →
     RankedDerivation (∅ : Theory L) r d₀ → fstIdx d₀ ⊆ insert q s₀ →
     RankedDerivationOf (∅ : Theory L) r e₀ (insert (neg L q) s₀) →
     RankedDerivable (∅ : Theory L) r s₀
 
-variable {ρ : V → V} {p s e : V}
-
-private lemma le_formulaBound (d p : V) : p ≤ formulaBound L d p :=
+variable (d p) in
+private lemma le_formulaBound : p ≤ formulaBound L d p :=
   le_trans le_self_add le_self_add
 
-private lemma le_contextBound_insert {a d : V} (ha : a ≤ d) : insert a s ≤ contextBound L d s :=
+private lemma le_contextBound_insert (ha : a ≤ d) : insert a s ≤ contextBound L d s :=
   le_trans (le_of_subset (insert_subset_widen ha)) (le_trans le_self_add le_self_add)
 
-private lemma le_contextBound_insert_insert {a b d : V} (ha : a ≤ d) (hb : b ≤ d) :
+private lemma le_contextBound_insert_insert (ha : a ≤ d) (hb : b ≤ d) :
     insert a (insert b s) ≤ contextBound L d s :=
   le_trans (le_of_subset (insert_insert_subset_widen ha hb)) (le_trans le_self_add le_self_add)
 
-private lemma le_partnerBound_insert {a d : V} (ha : a ≤ d) :
+private lemma le_partnerBound_insert (ha : a ≤ d) :
     wkRule (insert (neg L p) (insert a s)) e ≤ partnerBound L ρ d p s e :=
   le_trans (wkRule_le_wkRule (insert_subset_insert_of_subset _ (insert_subset_widen ha)))
     (le_trans le_self_add le_self_add)
 
-private lemma le_contextBound_insert_setShift {a d : V} (ha : a ≤ d) :
+private lemma le_contextBound_insert_setShift (ha : a ≤ d) :
     insert a (setShift L s) ≤ contextBound L d s :=
   le_trans (le_of_subset (insert_subset_widen ha)) (le_trans le_add_self le_self_add)
 
-private lemma le_partnerBound_shift {a d : V} (ha : a ≤ d) :
+private lemma le_partnerBound_shift (ha : a ≤ d) :
     wkRule (insert (neg L (shift L p)) (insert a (setShift L s)))
       (shiftRule (setShift L (fstIdx e)) e) ≤ partnerBound L ρ d p s e :=
   le_trans (wkRule_le_wkRule (insert_subset_insert_of_subset _ (insert_subset_widen ha)))
     (le_trans le_add_self le_self_add)
 
-private lemma le_partnerBound_insert_insert {a b d : V} (ha : a ≤ d) (hb : b ≤ d) :
+private lemma le_partnerBound_insert_insert (ha : a ≤ d) (hb : b ≤ d) :
     wkRule (insert (neg L p) (insert a (insert b s))) e ≤ partnerBound L ρ d p s e :=
   le_trans (wkRule_le_wkRule
     (insert_subset_insert_of_subset _ (insert_insert_subset_widen ha hb)))
     (le_trans le_self_add le_self_add)
 
-private lemma le_of_mem_fstIdx {x d₀ d : V} (hx : x ∈ fstIdx d₀) (hd₀ : d₀ < d) : x ≤ d :=
+private lemma le_of_mem_fstIdx (hx : x ∈ fstIdx d₀) (hd₀ : d₀ < d) : x ≤ d :=
   le_of_lt (lt_of_lt_of_le (lt_of_mem hx) (le_trans (fstIdx_le_self d₀) (le_of_lt hd₀)))
 
-private lemma mem_of_mem_insert_of_isZeroOrExs {x : V} (hpg : IsZeroOrExs L p)
+private lemma mem_of_mem_insert_of_isZeroOrExs (hpg : IsZeroOrExs L p)
     (hx : x ∈ insert p s) (h₀ : formulaComplexity L x ≠ 0) (h₁ : ∀ a, x ≠ ^∃ a) : x ∈ s := by
   apply mem_of_mem_insert_of_ne hx
   rintro rfl
@@ -197,7 +194,7 @@ private lemma mem_of_mem_insert_of_isZeroOrExs {x : V} (hpg : IsZeroOrExs L p)
   · exact h₀ h
   · exact h₁ a rfl
 
-private lemma cut_aux_axL {Γ q : V} (hΓF : IsFormulaSet L Γ) (hsF : IsFormulaSet L s)
+private lemma cut_aux_axL (hΓF : IsFormulaSet L Γ) (hsF : IsFormulaSet L s)
     (hpF : IsFormula L p) (hq : q ∈ Γ) (hnq : neg L q ∈ Γ) (hsub : Γ ⊆ insert p s)
     (he : RankedDerivationOf (∅ : Theory L) r e (insert (neg L p) s)) :
     RankedDerivable (∅ : Theory L) r s := by
@@ -213,7 +210,7 @@ private lemma cut_aux_axL {Γ q : V} (hΓF : IsFormulaSet L Γ) (hsF : IsFormula
       exact hn (hqp ▸ mem_of_mem_insert_of_ne (hsub hq) (hqp ▸ neg_ne_self hpF.isUFormula))
     exact .em hsF _ (mem_of_mem_insert_of_ne (hsub hq) h₁) (mem_of_mem_insert_of_ne (hsub hnq) h₂)
 
-private lemma cut_aux_verum {Γ : V} (hsF : IsFormulaSet L s) (hv : ^⊤ ∈ Γ)
+private lemma cut_aux_verum (hsF : IsFormulaSet L s) (hv : ^⊤ ∈ Γ)
     (hsub : Γ ⊆ insert p s) (he : RankedDerivationOf (∅ : Theory L) r e (insert (neg L p) s)) :
     RankedDerivable (∅ : Theory L) r s := by
   by_cases hv' : (^⊤ : V) ∈ s
@@ -222,7 +219,7 @@ private lemma cut_aux_verum {Γ : V} (hsF : IsFormulaSet L s) (hv : ^⊤ ∈ Γ)
     rw [neg_verum] at he
     exact RankedDerivable.of_insert_falsum ⟨e, he⟩
 
-private lemma cut_aux_and {Γ a b da db : V}
+private lemma cut_aux_and {da db : V}
     (ih : CutBelow L r (andIntro Γ a b da db) (formulaBound L (andIntro Γ a b da db) p)
       (contextBound L (andIntro Γ a b da db) s) (partnerBound L ρ (andIntro Γ a b da db) p s e))
     (hpc : formulaComplexity L p ≤ r) (hpg : IsZeroOrExs L p) (hΓF : IsFormulaSet L Γ)
@@ -248,8 +245,7 @@ private lemma cut_aux_and {Γ a b da db : V}
       (RankedDerivationOf.wk_insert habF.2 he))
 
 
-private lemma cut_aux_or {Γ a b d₀ : V}
-    (ih : CutBelow L r (orIntro Γ a b d₀) (formulaBound L (orIntro Γ a b d₀) p)
+private lemma cut_aux_or (ih : CutBelow L r (orIntro Γ a b d₀) (formulaBound L (orIntro Γ a b d₀) p)
       (contextBound L (orIntro Γ a b d₀) s) (partnerBound L ρ (orIntro Γ a b d₀) p s e))
     (hpc : formulaComplexity L p ≤ r) (hpg : IsZeroOrExs L p) (hΓF : IsFormulaSet L Γ)
     (hab : a ^⋎ b ∈ Γ) (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert a (insert b Γ)))
@@ -265,8 +261,7 @@ private lemma cut_aux_or {Γ a b d₀ : V}
     (by rw [hd₀.1]; exact insert_subset_insert_insert (insert_subset_insert_insert hsub))
     (RankedDerivationOf.wk_insert_insert habF.1 habF.2 he)
 
-private lemma cut_aux_all {Γ a d₀ : V}
-    (ih : CutBelow L r (allIntro Γ a d₀) (formulaBound L (allIntro Γ a d₀) p)
+private lemma cut_aux_all (ih : CutBelow L r (allIntro Γ a d₀) (formulaBound L (allIntro Γ a d₀) p)
       (contextBound L (allIntro Γ a d₀) s) (partnerBound L ρ (allIntro Γ a d₀) p s e))
     (hpc : formulaComplexity L p ≤ r) (hpg : IsZeroOrExs L p) (hpF : IsFormula L p)
     (hΓF : IsFormulaSet L Γ) (ha : ^∀ a ∈ Γ)
@@ -294,7 +289,7 @@ private lemma cut_aux_all {Γ a d₀ : V}
       exact setShift_subset_setShift hsub)
     (RankedDerivationOf.wk_insert hfree hsh)
 
-private lemma cut_aux_exs {Γ a t d₀ : V}
+private lemma cut_aux_exs {t : V}
     (ih : CutBelow L r (exsIntro Γ a t d₀) (formulaBound L (exsIntro Γ a t d₀) p)
       (contextBound L (exsIntro Γ a t d₀) s) (partnerBound L ρ (exsIntro Γ a t d₀) p s e))
     (hpc : formulaComplexity L p ≤ r) (hpg : IsZeroOrExs L p) (hΓF : IsFormulaSet L Γ)
@@ -319,7 +314,7 @@ private lemma cut_aux_exs {Γ a t d₀ : V}
     exact .cut (by rw [fomulaComplexity_substs1 haF ht]; exact lt_of_lt_of_le (by simp) hpc) h₁ h₂
   · exact .ex_m (mem_of_mem_insert_of_ne (hsub ha) hap) ht h₁
 
-private lemma cut_aux_shift {d₀ : V} (hρ : ∀ x, IsRewriting L r x (ρ x))
+private lemma cut_aux_shift (hρ : ∀ x, IsRewriting L r x (ρ x))
     (ih : CutBelow L r (shiftRule (setShift L (fstIdx d₀)) d₀)
       (formulaBound L (shiftRule (setShift L (fstIdx d₀)) d₀) p)
       (contextBound L (shiftRule (setShift L (fstIdx d₀)) d₀) s)
@@ -364,7 +359,7 @@ private lemma cut_aux_shift {d₀ : V} (hρ : ∀ x, IsRewriting L r x (ρ x))
   · exact .wk hsF (fun x hx ↦ mem_of_mem_insert_of_ne (hsub hx) (by rintro rfl; exact hp' hx))
       (.shift_m ⟨d₀, rfl, hd₀⟩)
 
-private lemma cut_aux_cut {Γ q d₁ d₂ : V}
+private lemma cut_aux_cut {d₁ d₂ : V}
     (ih : CutBelow L r (cutRule Γ q d₁ d₂) (formulaBound L (cutRule Γ q d₁ d₂) p)
       (contextBound L (cutRule Γ q d₁ d₂) s) (partnerBound L ρ (cutRule Γ q d₁ d₂) p s e))
     (hpc : formulaComplexity L p ≤ r) (hpg : IsZeroOrExs L p) (hq : formulaComplexity L q < r)
@@ -388,11 +383,11 @@ private lemma cut_aux_cut {Γ q d₁ d₂ : V}
 
 end cutAux
 
+variable (r) in
 /-- A cut on a formula `p` of complexity at most `r` that has complexity zero or is existential,
 where the end-sequent of a derivation of cut rank at most `r` is covered by `p` beside the context,
 is replaced by a derivation of cut rank at most `r`. -/
-private lemma cut_aux (r : V) :
-    ∀ d p s e : V, formulaComplexity L p ≤ r → IsZeroOrExs L p →
+private lemma cut_aux : ∀ d p s e : V, formulaComplexity L p ≤ r → IsZeroOrExs L p →
       RankedDerivation (∅ : Theory L) r d → fstIdx d ⊆ insert p s →
       RankedDerivationOf (∅ : Theory L) r e (insert (neg L p) s) →
       RankedDerivable (∅ : Theory L) r s := by
@@ -444,11 +439,9 @@ private lemma cut_aux (r : V) :
 
 /-! ### Lowering the cut rank -/
 
-variable {r : V}
-
 /-- A cut on a conjunction of complexity at most `r` between derivations of cut rank at most `r`
 becomes two cuts on its conjuncts. -/
-private lemma cut_and {q q' s : V} (hc : formulaComplexity L (q ^⋏ q') ≤ r)
+private lemma cut_and {q' : V} (hc : formulaComplexity L (q ^⋏ q') ≤ r)
     (h₁ : RankedDerivable (∅ : Theory L) r (insert (q ^⋏ q') s))
     (h₂ : RankedDerivable (∅ : Theory L) r (insert (neg L (q ^⋏ q')) s)) :
     RankedDerivable (∅ : Theory L) r s := by
@@ -465,7 +458,7 @@ private lemma cut_and {q q' s : V} (hc : formulaComplexity L (q ^⋏ q') ≤ r)
   exact .cut (lt_of_lt_of_le (lt_max_succ_left _ _) hc)
     (RankedDerivation.inversion_and (Or.inl rfl) hd₁) h₃
 
-private lemma cut_of_isZeroOrExs {p s : V} (hp : formulaComplexity L p ≤ r) (hpg : IsZeroOrExs L p)
+private lemma cut_of_isZeroOrExs (hp : formulaComplexity L p ≤ r) (hpg : IsZeroOrExs L p)
     (h₁ : RankedDerivable (∅ : Theory L) r (insert p s))
     (h₂ : RankedDerivable (∅ : Theory L) r (insert (neg L p) s)) :
     RankedDerivable (∅ : Theory L) r s := by
@@ -476,7 +469,7 @@ private lemma cut_of_isZeroOrExs {p s : V} (hp : formulaComplexity L p ≤ r) (h
 /-- A cut on a formula of complexity at most `r` between derivations of cut rank at most `r` over
 the empty theory is replaced by a derivation of cut rank at most `r`.
 - [Bus98, Lemma 2.4.2.1] -/
-theorem RankedDerivable.cut_of_le {p s : V} (hp : formulaComplexity L p ≤ r)
+theorem RankedDerivable.cut_of_le (hp : formulaComplexity L p ≤ r)
     (h₁ : RankedDerivable (∅ : Theory L) r (insert p s))
     (h₂ : RankedDerivable (∅ : Theory L) r (insert (neg L p) s)) :
     RankedDerivable (∅ : Theory L) r s := by
@@ -500,7 +493,7 @@ theorem RankedDerivable.cut_of_le {p s : V} (hp : formulaComplexity L p ≤ r)
 /-- A derivation of cut rank at most `r + 1` over the empty theory has a counterpart of cut rank
 at most `r` with the same end-sequent.
 - [Bus98, Lemma 2.4.2.2] -/
-theorem RankedDerivable.of_succ {s : V} (h : RankedDerivable (∅ : Theory L) (r + 1) s) :
+theorem RankedDerivable.of_succ (h : RankedDerivable (∅ : Theory L) (r + 1) s) :
     RankedDerivable (∅ : Theory L) r s := by
   obtain ⟨d, rfl, hd, hr⟩ := h
   revert hr
@@ -534,8 +527,7 @@ theorem RankedDerivable.of_succ {s : V} (h : RankedDerivable (∅ : Theory L) (r
 /-- Cut elimination: every sequent derivable over the empty theory is cut-free derivable.
 - [Bus98, Theorem 2.4.2]
 - [AB05, Theorem 152] -/
-theorem Derivable.cutFree {s : V} (h : Derivable (∅ : Theory L) s) :
-    CutFreeDerivable (∅ : Theory L) s := by
+theorem Derivable.cutFree (h : Derivable (∅ : Theory L) s) : CutFreeDerivable (∅ : Theory L) s := by
   obtain ⟨d, rfl, hd⟩ := h
   have key : ∀ j ≤ cutRank L d, RankedDerivable (∅ : Theory L) (cutRank L d - j) (fstIdx d) := by
     intro j
@@ -551,7 +543,7 @@ theorem Derivable.cutFree {s : V} (h : Derivable (∅ : Theory L) s) :
 
 /-- The cut rule is admissible in the cut-free calculus over the empty theory.
 - [Bus98, Lemma 2.4.2.1] -/
-theorem CutFreeDerivable.cut {p s : V} (h₁ : CutFreeDerivable (∅ : Theory L) (insert p s))
+theorem CutFreeDerivable.cut (h₁ : CutFreeDerivable (∅ : Theory L) (insert p s))
     (h₂ : CutFreeDerivable (∅ : Theory L) (insert (neg L p) s)) :
     CutFreeDerivable (∅ : Theory L) s :=
   Derivable.cutFree (.cut p h₁.toDerivable h₂.toDerivable)

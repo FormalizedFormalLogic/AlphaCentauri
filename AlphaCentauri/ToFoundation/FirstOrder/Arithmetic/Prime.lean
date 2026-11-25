@@ -9,8 +9,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 Prime divisors and prime powers in models of $\mathsf{I}\Sigma_0$.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder
@@ -185,8 +183,12 @@ lemma dvd_of_dvd_mul (h : IsPrimePower p q) (hq : q ∣ u * v) (hv : ¬p ∣ v) 
 
 end IsPrimePower
 
+section
+
+variable (y T : V)
+
 /-- Every prime-power divisor of `d` is at most `T`. -/
-def PrimePowerDivisorsLE (T d : V) : Prop :=
+def PrimePowerDivisorsLE (d : V) : Prop :=
   ∀ q ≤ d, (∃ p ≤ q, IsPrimePower p q) → q ∣ d → q ≤ T
 
 @[definability]
@@ -194,12 +196,11 @@ lemma definable_primePowerDivisorsLE : 𝚺ᴬ₀.DefinableRel (PrimePowerDiviso
   unfold PrimePowerDivisorsLE
   definability
 
-lemma primePowerDivisorsLE_one (T : V) : PrimePowerDivisorsLE T 1 := by
+lemma primePowerDivisorsLE_one : PrimePowerDivisorsLE T 1 := by
   intro q hq ⟨p, _, hp⟩
   exact absurd (hp.2.1.trans_le hq) (lt_irrefl _)
 
-lemma exists_greatest_primePowerDivisorsLE (y T : V) :
-    ∃ d, d ≤ y ∧ d ∣ y ∧ PrimePowerDivisorsLE T d ∧
+lemma exists_greatest_primePowerDivisorsLE : ∃ d, d ≤ y ∧ d ∣ y ∧ PrimePowerDivisorsLE T d ∧
       ∀ d' ≤ y, d' ∣ y → PrimePowerDivisorsLE T d' → d' ≤ d := by
   obtain ⟨e, ⟨d, hdy, hde, hdvd, hd⟩, hmin⟩ := ISigma0.least_number
     (P := fun e ↦ ∃ d ≤ y, d + e = y ∧ d ∣ y ∧ PrimePowerDivisorsLE T d)
@@ -227,17 +228,19 @@ lemma exists_greatest_primePowerDivisorsLE (y T : V) :
     simp [hde, hd'y] at this
 
 /-- The largest divisor of `y` whose prime-power divisors are all at most `T`. -/
-noncomputable def divisorUpTo (y T : V) : V :=
+noncomputable def divisorUpTo : V :=
   Classical.choose (exists_greatest_primePowerDivisorsLE y T)
 
-lemma divisorUpTo_le (y T : V) : divisorUpTo y T ≤ y :=
+lemma divisorUpTo_le : divisorUpTo y T ≤ y :=
   (Classical.choose_spec (exists_greatest_primePowerDivisorsLE y T)).1
 
-lemma divisorUpTo_dvd (y T : V) : divisorUpTo y T ∣ y :=
+lemma divisorUpTo_dvd : divisorUpTo y T ∣ y :=
   (Classical.choose_spec (exists_greatest_primePowerDivisorsLE y T)).2.1
 
-lemma primePowerDivisorsLE_divisorUpTo (y T : V) : PrimePowerDivisorsLE T (divisorUpTo y T) :=
+lemma primePowerDivisorsLE_divisorUpTo : PrimePowerDivisorsLE T (divisorUpTo y T) :=
   (Classical.choose_spec (exists_greatest_primePowerDivisorsLE y T)).2.2.1
+
+end
 
 lemma le_divisorUpTo_of_le (hdy : d ≤ y) (hd : d ∣ y) (h : PrimePowerDivisorsLE T d) :
     d ≤ divisorUpTo y T :=

@@ -15,8 +15,6 @@ public import Mathlib.Algebra.Order.Nonneg.Ring
 Models of open induction and of $\mathbb{Z}$-rings, and Wilkie's extension theorem.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 /-! ## The non-negative part of a discretely ordered ring -/
@@ -27,7 +25,7 @@ open FFL FirstOrder OpenPredicate
 
 variable {R : Type*} [CommRing R] [LinearOrder R] [IsStrictOrderedRing R]
 
-private lemma Nonneg.models_addEqOfLt [DiscretelyOrdered R] :
+private lemma Nonneg.models_addEqOfLt :
     (Nonneg R)↓[ℒₒᵣ] ⊧ Arithmetic.PeanoMinus.Axiom.addEqOfLt := by
   suffices ∀ x y : Nonneg R, x < y → ∃ z < y + 1, x + z = y by
     simpa [models_iff, Semiformula.eval_bexsLTSucc] using this
@@ -45,9 +43,12 @@ private lemma Nonneg.models_mulLtMul : (Nonneg R)↓[ℒₒᵣ] ⊧ Arithmetic.P
 private lemma Nonneg.models_distr : (Nonneg R)↓[ℒₒᵣ] ⊧ Arithmetic.PeanoMinus.Axiom.distr := by
   simpa [models_iff] using fun x y z : Nonneg R ↦ mul_add x y z
 
+variable [DiscretelyOrdered R]
+
 /-- The non-negative part of a discretely ordered ring is a model of $\mathsf{PA}^-$.
 - [Kay91, §2.1] -/
-instance [DiscretelyOrdered R] : (Nonneg R)↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_theory_iff.mpr fun {σ} h ↦ by
+instance instModelsSetStrucORingSentenceStrNonnegPeanoMinusOfDiscretelyOrdered :
+    (Nonneg R)↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_theory_iff.mpr fun {σ} h ↦ by
   rcases (h : Arithmetic.IsPeanoMinusAxiom σ)
   case equal h => exact models_theory_iff.mp inferInstance _ h
   case addEqOfLt => exact Nonneg.models_addEqOfLt
@@ -76,6 +77,7 @@ def oRingEmbedding : Nonneg R ↪ₛ[ℒₒᵣ] R where
   toFun_inj := Subtype.val_injective
   rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
 
+omit [DiscretelyOrdered R] in
 @[simp]
 lemma coe_oRingEmbedding : ⇑(oRingEmbedding : Nonneg R ↪ₛ[ℒₒᵣ] R) = Subtype.val := rfl
 
@@ -83,7 +85,7 @@ lemma coe_oRingEmbedding : ⇑(oRingEmbedding : Nonneg R ↪ₛ[ℒₒᵣ] R) = 
 if the ring satisfies open induction.
 - [BO96, §1]
 - [GG17, §2.3] -/
-theorem models_IOpen_iff [DiscretelyOrdered R] : (Nonneg R)↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 ↔ OpenInduction R := by
+theorem models_IOpen_iff : (Nonneg R)↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻 ↔ OpenInduction R := by
   constructor
   · intro _ P hP h0 hs x hx
     obtain ⟨θ, hθ, h⟩ := exists_open_eval_iff (M := Nonneg R) (ι := Subtype.val)
@@ -112,7 +114,7 @@ theorem models_IOpen_iff [DiscretelyOrdered R] : (Nonneg R)↓[ℒₒᵣ] ⊧* �
 
 /-- The natural number cast of the semiring structure that the $\mathsf{PA}^-$ model structure on
 `Nonneg R` induces agrees with the cast of `Nonneg R` itself. -/
-lemma natCast_foundation [DiscretelyOrdered R] (m : ℕ) :
+lemma natCast_foundation (m : ℕ) :
     @Nat.cast (Nonneg R) Arithmetic.instCommSemiring_foundation.toNatCast m = (m : Nonneg R) := by
   induction m with
   | zero => rw [@Nat.cast_zero _ Arithmetic.instCommSemiring_foundation.toAddMonoidWithOne,
@@ -121,7 +123,7 @@ lemma natCast_foundation [DiscretelyOrdered R] (m : ℕ) :
       Nat.cast_succ, ih]
 
 /-- The numerals of the $\mathsf{PA}^-$ model structure on `Nonneg R` are those of `R`. -/
-lemma coe_ofNat_foundation [DiscretelyOrdered R] (n : ℕ) [n.AtLeastTwo] :
+lemma coe_ofNat_foundation (n : ℕ) [n.AtLeastTwo] :
     ((@OfNat.ofNat (Nonneg R) n (@instOfNatAtLeastTwo _ n
       Arithmetic.instCommSemiring_foundation.toNatCast _) : Nonneg R) : R) = OfNat.ofNat n := by
   rw [← @Nat.cast_ofNat (Nonneg R) n Arithmetic.instCommSemiring_foundation.toNatCast _,
@@ -132,8 +134,7 @@ lemma coe_ofNat_foundation [DiscretelyOrdered R] (n : ℕ) [n.AtLeastTwo] :
 remainder by every positive natural number is a model of $\mathsf{ZR}$.
 - [Wil78, §2]
 - [BO96, §1] -/
-theorem models_ZRing [DiscretelyOrdered R]
-    (h : ∀ (a : R) {n : ℕ}, 0 < n → ∃ q r : R, 0 ≤ r ∧ r < n ∧ a = n * q + r) :
+theorem models_ZRing (h : ∀ (a : R) {n : ℕ}, 0 < n → ∃ q r : R, 0 ≤ r ∧ r < n ∧ a = n * q + r) :
     (Nonneg R)↓[ℒₒᵣ] ⊧* Arithmetic.ZRing := by
   apply models_theory_iff.mpr
   rintro σ (hσ | ⟨n, rfl⟩)

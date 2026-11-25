@@ -11,8 +11,6 @@ public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 The internal translation along the identity translation.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -36,6 +34,8 @@ namespace IsTableOf
 
 include h hL
 
+variable {k : ℕ} (R : L.Rel k) (F : L.Func k) (u : Fin k → Term V L) (t : Term V L) {p : V}
+
 omit [S.Δ₁] in
 lemma id_domT : (h.isTable hL).domT = ⊤ := by
   rw [show (h.isTable hL).domT = ⌜(DirectTranslation.id S).domain.sentence⌝ from
@@ -43,25 +43,23 @@ lemma id_domT : (h.isTable hL).domT = ⊤ := by
   simp [DirectTranslation.id]
 
 omit [S.Δ₁] in
-lemma id_relT {k : ℕ} (R : L.Rel k) : (h.isTable hL).relT R = Semiformula.rel R Semiterm.bvar := by
+lemma id_relT : (h.isTable hL).relT R = Semiformula.rel R Semiterm.bvar := by
   rw [show (h.isTable hL).relT R = ⌜((DirectTranslation.id S).rel R).sentence⌝ from
     Semiformula.ext (h.rel R)]
   simp [DirectTranslation.id_rel_def]
 
 omit [S.Δ₁] in
-lemma id_funcT {k : ℕ} (F : L.Func k) : (h.isTable hL).funcT F =
+lemma id_funcT : (h.isTable hL).funcT F =
     Semiformula.equal (Semiterm.bvar 0) (Semiterm.func F fun i ↦ Semiterm.bvar i.succ) := by
   rw [show (h.isTable hL).funcT F = ⌜((DirectTranslation.id S).func F).sentence⌝ from
     Semiformula.ext (h.func F)]
   simp [DirectTranslation.id_func_def]
 
-lemma id_tprovable_domT_subst (t : Term V L) :
-    S.internalize V ⊢ (h.isTable hL).domT.subst ![t] := by
+lemma id_tprovable_domT_subst : S.internalize V ⊢ (h.isTable hL).domT.subst ![t] := by
   rw [h.id_domT hL, Semiformula.substs_verum]
   cl_prover
 
-lemma id_tprovable_varEqualT_func {k : ℕ} (F : L.Func k) (u : Fin k → Term V L)
-    (ih : ∀ i, S.internalize V ⊢ ∀¹ (varEqualT (h.isTable hL) (u i) 🡘
+lemma id_tprovable_varEqualT_func (ih : ∀ i, S.internalize V ⊢ ∀¹ (varEqualT (h.isTable hL) (u i) 🡘
       Semiformula.equal (Semiterm.bvar 0) (u i).bShift)) :
     S.internalize V ⊢ ∀¹ (varEqualT (h.isTable hL) (Semiterm.func F u) 🡘
       Semiformula.equal (Semiterm.bvar 0) (Semiterm.func F u).bShift) := by
@@ -115,8 +113,7 @@ lemma id_tprovable_varEqualT_func {k : ℕ} (F : L.Func k) (u : Fin k → Term V
   rw [varEqualT_func]
   exact tprovable_all_iff_trans (h₁ ⨀ h₂) h₅
 
-lemma id_tprovable_varEqualT (t : Term V L) :
-    S.internalize V ⊢ ∀¹ (varEqualT (h.isTable hL) t 🡘
+lemma id_tprovable_varEqualT : S.internalize V ⊢ ∀¹ (varEqualT (h.isTable hL) t 🡘
       Semiformula.equal (Semiterm.bvar 0) t.bShift) := by
   have hE (t : Term V L) : (∀¹ (varEqualT (h.isTable hL) t 🡘
       Semiformula.equal (Semiterm.bvar 0) t.bShift)).val = ^∀ iff L (varEqual L L tbl t.val)
@@ -149,7 +146,7 @@ lemma id_tprovable_varEqualT (t : Term V L) :
     rw [tprovable_iff_provable, hE, Semiterm.func_val] at h₁
     exact h₁
 
-lemma id_tprovable_rel_iff {k : ℕ} (R : L.Rel k) (u : Fin k → Term V L) :
+lemma id_tprovable_rel_iff :
     S.internalize V ⊢ Semiformula.rel R u 🡘 relativizedImp (h.isTable hL).domT
       (fun i ↦ varEqualT (h.isTable hL) (u i))
       (((h.isTable hL).relT R).subst fun i ↦ Semiterm.bvar (i.addCast 0)) := by
@@ -195,7 +192,7 @@ lemma id_provable_iff_translate_rel {k r v : V} (hR : L.IsRel k r) (hv : IsTermV
 
 /-- Along a table of the identity translation, every formula code is provably equivalent to its
 translation. -/
-theorem id_provable_iff_translate {p : V} (hp : IsFormula L p) :
+theorem id_provable_iff_translate (hp : IsFormula L p) :
     Provable S (iff L p (translate L L tbl p)) := by
   have hT := h.isTable hL
   have hd : Provable S (^∀ tbl.[0]) := by
@@ -238,7 +235,7 @@ theorem id_provable_iff_translate {p : V} (hp : IsFormula L p) :
 
 /-- Along a table of the identity translation, the translation of a provable formula code is
 provable. -/
-theorem id_provable_translate {p : V} (hpr : Provable S p) : Provable S (translate L L tbl p) := by
+theorem id_provable_translate (hpr : Provable S p) : Provable S (translate L L tbl p) := by
   have hp : IsFormula L p := (IsFormulaSet.insert_iff.mp hpr.toDerivable.isFormulaSet).1
   have hq : IsFormula L (translate L L tbl p) := IsSemiformula.translate (h.isTable hL) hp
   have h₁ := (provable_iff_iff_tprovable hp hq).mp (h.id_provable_iff_translate hL hp)

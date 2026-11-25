@@ -14,8 +14,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Pro
 The internal formula stating that a formula defines a unique element of a domain.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -37,16 +35,15 @@ section relativizedImp
 
 open _root_.FFL.Entailment
 
-variable {T : Theory L} [T.Δ₁]
+variable {T : Theory L} [T.Δ₁] {k : ℕ} (d d' : Semiformula V L 1) (A B : Fin k → Semiformula V L 1)
+  (C C' : Semiformula V L (0 + k))
 
 /-- `∀ w⃗ (⋀ᵢ (d(wᵢ) ∧ Aᵢ(wᵢ)) → C(w⃗))`, the shape of a translated atomic formula. -/
-noncomputable def relativizedImp {k : ℕ} (d : Semiformula V L 1) (A : Fin k → Semiformula V L 1)
-    (C : Semiformula V L (0 + k)) : Formula V L :=
+noncomputable def relativizedImp : Formula V L :=
   ∀¹^[k] (Matrix.conj (fun i : Fin k ↦
       d.subst ![Semiterm.bvar (i.addCast 0)] ⋏ (A i).subst ![Semiterm.bvar (i.addCast 0)]) 🡒 C)
 
-lemma relativizedImp_imp_relativizedImp {k : ℕ} {H : Formula V L} (d : Semiformula V L 1)
-    (A B : Fin k → Semiformula V L 1) (C : Semiformula V L (0 + k))
+lemma relativizedImp_imp_relativizedImp {H : Formula V L}
     (hH : ∀ i, T.internalize V ⊢ H 🡒 ∀¹ (d 🡒 B i 🡒 A i)) :
     T.internalize V ⊢ H 🡒 relativizedImp d A C 🡒 relativizedImp d B C := by
   have h₁ : ∀ i : Fin k, T.internalize V ⊢ Semiformula.shift^[k] H 🡒
@@ -77,9 +74,7 @@ lemma relativizedImp_imp_relativizedImp {k : ℕ} {H : Formula V L} (d : Semifor
     cl_prover [this]
   cl_prover [h₂]
 
-lemma relativizedImp_imp_relativizedImp_of_imp {k : ℕ} (d d' : Semiformula V L 1)
-    (A B : Fin k → Semiformula V L 1) (C C' : Semiformula V L (0 + k))
-    (hA : ∀ i, T.internalize V ⊢ ∀¹ (d' ⋏ B i 🡒 d ⋏ A i))
+lemma relativizedImp_imp_relativizedImp_of_imp (hA : ∀ i, T.internalize V ⊢ ∀¹ (d' ⋏ B i 🡒 d ⋏ A i))
     (hC : T.internalize V ⊢ (Semiformula.shift^[k] C).subst (fun i ↦ Semiterm.fvar (i : V)) 🡒
       (Semiformula.shift^[k] C').subst fun i ↦ Semiterm.fvar (i : V)) :
     T.internalize V ⊢ relativizedImp d A C 🡒 relativizedImp d' B C' := by
@@ -112,9 +107,7 @@ lemma relativizedImp_imp_relativizedImp_of_imp {k : ℕ} (d d' : Semiformula V L
   cl_prover [h₂, hC]
 
 /-- Replacement of domain-equivalent hypotheses in `relativizedImp`. -/
-theorem relativizedImp_congr {k : ℕ} (d : Semiformula V L 1) (A B : Fin k → Semiformula V L 1)
-    (C : Semiformula V L (0 + k)) :
-    T.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (d 🡒 (A i 🡘 B i))) 🡒
+theorem relativizedImp_congr : T.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (d 🡒 (A i 🡘 B i))) 🡒
       (relativizedImp d A C 🡘 relativizedImp d B C) := by
   have h₁ := relativizedImp_imp_relativizedImp (T := T) d A B C fun i ↦
     C_trans (matrixConj_elim (fun i ↦ ∀¹ (d 🡒 (A i 🡘 B i))) i)
@@ -128,7 +121,7 @@ variable [L.Eq] [𝗘𝗤 L ⪯ T]
 
 /-- If every instance of the domain `d` is provable and `X` is preserved by equal arguments, then
 `∀ w⃗ (⋀ᵢ (d(wᵢ) ∧ wᵢ = uᵢ) → X(w⃗))` is provably equivalent to `X(u⃗)`. -/
-lemma tprovable_relativizedImp_equal_iff {k : ℕ} (d : Semiformula V L 1)
+lemma tprovable_relativizedImp_equal_iff
     (hd : ∀ t : Term V L, T.internalize V ⊢ d.subst ![t]) (u : Fin k → Term V L)
     (X : Semiformula V L k)
     (hX : ∀ (j : ℕ) (s w : Fin k → Term V L), T.internalize V ⊢
@@ -183,21 +176,21 @@ section funcGraph
 
 open _root_.FFL.Entailment
 
+variable {k : ℕ} (c : V) (d : Semiformula V L 1) (A B : Fin k → Semiformula V L 1)
+  (γ : Semiformula V L (k + 1))
+
 /-- `∀ w⃗ (⋀ᵢ (d(wᵢ) ∧ Aᵢ(wᵢ)) → γ(z, w⃗))` with `z` the outer variable. -/
-noncomputable def funcGraph {k : ℕ} (d : Semiformula V L 1) (A : Fin k → Semiformula V L 1)
-    (γ : Semiformula V L (k + 1)) : Semiformula V L 1 :=
+noncomputable def funcGraph : Semiformula V L 1 :=
   ∀¹^[k] (Matrix.conj (fun i : Fin k ↦
       d.subst ![Semiterm.bvar (i.addCast 1)] ⋏ (A i).subst ![Semiterm.bvar (i.addCast 1)]) 🡒
     γ.subst (Semiterm.bvar (Fin.cast (Nat.add_comm k 1) (Fin.last k)) :>
       fun i ↦ Semiterm.bvar (i.addCast 1)))
 
-lemma shift_funcGraph {k : ℕ} (d : Semiformula V L 1) (A : Fin k → Semiformula V L 1)
-    (γ : Semiformula V L (k + 1)) :
+lemma shift_funcGraph :
     (funcGraph d A γ).shift = funcGraph d.shift (fun i ↦ (A i).shift) γ.shift := by
   simp [funcGraph]
 
-lemma allItr_subst_fvar {k : ℕ} (c : V) (B : Semiformula V L (1 + k)) :
-    (∀¹^[k] B).subst ![Semiterm.fvar c] =
+lemma allItr_subst_fvar (B : Semiformula V L (1 + k)) : (∀¹^[k] B).subst ![Semiterm.fvar c] =
       ∀¹^[k] (B.subst fun j : Fin (1 + k) ↦
         if h : (j : ℕ) < k then Semiterm.bvar ((⟨j, h⟩ : Fin k).addCast 0)
           else Semiterm.fvar c) := by
@@ -219,9 +212,7 @@ lemma allItr_subst_fvar {k : ℕ} (c : V) (B : Semiformula V L (1 + k)) :
       · simp [hi, Semiterm.bShift_bvar, Fin.ext_iff]
       · simp [hi]
 
-lemma funcGraph_subst_fvar {k : ℕ} (c : V) (d : Semiformula V L 1)
-    (A : Fin k → Semiformula V L 1) (γ : Semiformula V L (k + 1)) :
-    (funcGraph d A γ).subst ![Semiterm.fvar c] =
+lemma funcGraph_subst_fvar : (funcGraph d A γ).subst ![Semiterm.fvar c] =
       relativizedImp d A (γ.subst (Semiterm.fvar c :> fun i : Fin k ↦
         Semiterm.bvar (i.addCast 0))) := by
   unfold funcGraph relativizedImp
@@ -230,9 +221,7 @@ lemma funcGraph_subst_fvar {k : ℕ} (c : V) (d : Semiformula V L 1)
   simp
 
 /-- Replacement of domain-equivalent hypotheses in `funcGraph`. -/
-theorem funcGraph_congr {k : ℕ} (d : Semiformula V L 1) (A B : Fin k → Semiformula V L 1)
-    (γ : Semiformula V L (k + 1)) :
-    T.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (d 🡒 (A i 🡘 B i))) 🡒
+theorem funcGraph_congr : T.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (d 🡒 (A i 🡘 B i))) 🡒
       ∀¹ (funcGraph d A γ 🡘 funcGraph d B γ) := by
   apply TProof.generalize_imp
   simp only [Semiformula.free, Semiformula.shift_conj, Semiformula.shift_all,
@@ -246,53 +235,52 @@ section definesElement
 
 open _root_.FFL.Entailment
 
-variable [L.Eq]
+variable [L.Eq] (d A : Semiformula V L 1) (c : V)
 
 /-- The matrix `d(y) ∧ ∀ z (d(z) → (A(z) ↔ z = y))` of `definesElement`. -/
-noncomputable def definesElementBody (d A : Semiformula V L 1) : Semiformula V L 1 :=
+noncomputable def definesElementBody : Semiformula V L 1 :=
   d ⋏ (∀¹ (d.subst ![Semiterm.bvar 0] 🡒
     (A.subst ![Semiterm.bvar 0] 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.bvar 1))))
 
 /-- `∃ y (d(y) ∧ ∀ z (d(z) → (A(z) ↔ z = y)))`: `A` defines a unique element of `d`. -/
-noncomputable def definesElement (d A : Semiformula V L 1) : Formula V L :=
+noncomputable def definesElement : Formula V L :=
   ∃¹ definesElementBody d A
 
 /-- The matrix `d(z) → (A(z) ↔ z = c)` of the uniqueness clause of `definesElement`. -/
-noncomputable def uniqueAt (d A : Semiformula V L 1) (c : V) : Semiformula V L 1 :=
+noncomputable def uniqueAt : Semiformula V L 1 :=
   d 🡒 (A 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar c))
 
 @[simp]
-lemma shift_uniqueAt (d A : Semiformula V L 1) (c : V) :
-    (uniqueAt d A c).shift = uniqueAt d.shift A.shift (c + 1) := by
+lemma shift_uniqueAt : (uniqueAt d A c).shift = uniqueAt d.shift A.shift (c + 1) := by
   simp [uniqueAt]
 
 @[simp]
-lemma shift_definesElementBody (d A : Semiformula V L 1) :
+lemma shift_definesElementBody :
     (definesElementBody d A).shift = definesElementBody d.shift A.shift := by
   simp [definesElementBody]
 
-lemma shift_iterate_definesElementBody (d A : Semiformula V L 1) (k : ℕ) :
-    Semiformula.shift^[k] (definesElementBody d A) =
+variable (k : ℕ) in
+lemma shift_iterate_definesElementBody : Semiformula.shift^[k] (definesElementBody d A) =
       definesElementBody (Semiformula.shift^[k] d) (Semiformula.shift^[k] A) :=
   Function.Semiconj₂.iterate (op := definesElementBody) shift_definesElementBody k d A
 
-lemma definesElementBody_subst_fvar (d A : Semiformula V L 1) (c : V) :
+lemma definesElementBody_subst_fvar :
     ((definesElementBody d A).subst ![Semiterm.fvar c] : Formula V L) =
       d.subst ![Semiterm.fvar c] ⋏ (∀¹ (uniqueAt d A c)) := by
   simp [definesElementBody, uniqueAt]
 
-lemma definesElementBody_free (d A : Semiformula V L 1) :
+lemma definesElementBody_free :
     (definesElementBody d A).free = d.free ⋏ (∀¹ (uniqueAt d.shift A.shift 0)) := by
   simp [Semiformula.free, definesElementBody_subst_fvar]
 
-lemma tprovable_unique_specialize (d A : Semiformula V L 1) (c y : V) :
-    T.internalize V ⊢ ∀¹ (uniqueAt d A c) 🡒
+lemma tprovable_unique_specialize (y : V) : T.internalize V ⊢ ∀¹ (uniqueAt d A c) 🡒
       d.subst ![Semiterm.fvar y] 🡒
         (A.subst ![Semiterm.fvar y] 🡘 Semiformula.equal (Semiterm.fvar y) (Semiterm.fvar c)) := by
   simpa [uniqueAt] using TProof.all_imp_subst (T := T) (uniqueAt d A c) (Semiterm.fvar y)
 
-theorem definesElement_exists (d A : Semiformula V L 1) [𝗘𝗤 L ⪯ T] :
-    T.internalize V ⊢ definesElement d A 🡒 ∃¹ (d ⋏ A) := by
+variable [𝗘𝗤 L ⪯ T]
+
+theorem definesElement_exists : T.internalize V ⊢ definesElement d A 🡒 ∃¹ (d ⋏ A) := by
   unfold definesElement
   refine FiniteContext.emptyPrf <| TProof.exs_imp_exs! (Γ := []) <| FiniteContext.of ?_
   have h₁ : T.internalize V ⊢ ∀¹ (uniqueAt d.shift A.shift 0) 🡒
@@ -319,17 +307,19 @@ private lemma uniq_combine {Hq Dx Ax Dz Az Exc Ecx Ezc Ezx : Formula V L}
     cl_prover 128 [k₁, k₃, h₅]
   cl_prover 128 [g₁, g₂]
 
+variable {P Q R S : Formula V L}
+
 omit [L.Eq] in
-private lemma conj_of_curry {P Q R S : Formula V L} (h : T.internalize V ⊢ P 🡒 Q 🡒 R 🡒 S) :
+private lemma conj_of_curry (h : T.internalize V ⊢ P 🡒 Q 🡒 R 🡒 S) :
     T.internalize V ⊢ (P ⋏ Q ⋏ R) 🡒 S := by
   cl_prover [h]
 
 omit [L.Eq] in
-private lemma conj_of_curry_swap {P Q R S : Formula V L}
-    (h : T.internalize V ⊢ P 🡒 Q 🡒 R 🡒 S) : T.internalize V ⊢ (Q ⋏ R) 🡒 (P 🡒 S) := by
+private lemma conj_of_curry_swap (h : T.internalize V ⊢ P 🡒 Q 🡒 R 🡒 S) :
+    T.internalize V ⊢ (Q ⋏ R) 🡒 (P 🡒 S) := by
   cl_prover [h]
 
-lemma definesElement_imp_theta (d A : Semiformula V L 1) [𝗘𝗤 L ⪯ T] (c x : V) :
+lemma definesElement_imp_theta (x : V) :
     T.internalize V ⊢ ∀¹ (uniqueAt d A c) 🡒 d.subst ![Semiterm.fvar x] 🡒
       A.subst ![Semiterm.fvar x] 🡒 ∀¹ (uniqueAt d A x) := by
   have key : T.internalize V ⊢ ((∀¹ (uniqueAt d A c)) ⋏ d.subst ![Semiterm.fvar x] ⋏
@@ -345,7 +335,7 @@ lemma definesElement_imp_theta (d A : Semiformula V L 1) [𝗘𝗤 L ⪯ T] (c x
     simpa [Semiformula.free, uniqueAt] using conj_of_curry h
   cl_prover [key]
 
-theorem definesElement_iff_equal (d A : Semiformula V L 1) (b : V) [𝗘𝗤 L ⪯ T] :
+theorem definesElement_iff_equal (b : V) :
     T.internalize V ⊢ definesElement d A 🡒 d.subst ![Semiterm.fvar b] 🡒
       A.subst ![Semiterm.fvar b] 🡒 ∀¹ (uniqueAt d A b) := by
   have hi := definesElement_imp_theta (T := T) d.shift A.shift 0 (b + 1)
@@ -357,14 +347,16 @@ theorem definesElement_iff_equal (d A : Semiformula V L 1) (b : V) [𝗘𝗤 L �
     cl_prover [hi]
   simpa using this
 
+section
+
+variable {k : ℕ} (γ : Semiformula V L (k + 1)) (A : Fin k → Semiformula V L 1) (z : V)
+  (c w : Fin k → V) (i : Fin k)
+
 /-- The conjunction of the witnessed definitions `definesElementBody d (A i)` at `c i`. -/
-noncomputable def witnessConj (d : Semiformula V L 1) {k : ℕ} (A : Fin k → Semiformula V L 1)
-    (c : Fin k → V) : Formula V L :=
+noncomputable def witnessConj : Formula V L :=
   Matrix.conj (fun i ↦ (definesElementBody d (A i)).subst ![Semiterm.fvar (c i)])
 
-lemma witnessConj_dA [𝗘𝗤 L ⪯ T] (d : Semiformula V L 1) {k : ℕ} (A : Fin k → Semiformula V L 1)
-    (c : Fin k → V) :
-    T.internalize V ⊢ witnessConj d A c 🡒
+lemma witnessConj_dA : T.internalize V ⊢ witnessConj d A c 🡒
       Matrix.conj (fun i ↦
         d.subst ![Semiterm.fvar (c i)] ⋏ (A i).subst ![Semiterm.fvar (c i)]) := by
   apply matrixConj_intro
@@ -377,11 +369,10 @@ lemma witnessConj_dA [𝗘𝗤 L ⪯ T] (d : Semiformula V L 1) {k : ℕ} (A : F
   cl_prover [h₁, h₂, h₃]
 
 @[simp]
-private lemma cast_zero_add_addCast {k : ℕ} (i : Fin k) :
-    Fin.cast (Nat.zero_add k) (Fin.addCast 0 i) = i := rfl
+private lemma cast_zero_add_addCast : Fin.cast (Nat.zero_add k) (Fin.addCast 0 i) = i := rfl
 
-lemma funcGraph_specialize_witness [𝗘𝗤 L ⪯ T] {k : ℕ} (d : Semiformula V L 1)
-    (γ : Semiformula V L (k + 1)) (A : Fin k → Semiformula V L 1) (z : V) (c : Fin k → V) :
+omit [𝗘𝗤 L ⪯ T] in
+lemma funcGraph_specialize_witness [𝗘𝗤 L ⪯ T] :
     T.internalize V ⊢ (funcGraph d A γ).subst ![Semiterm.fvar z] 🡒
       (Matrix.conj (fun i ↦ d.subst ![Semiterm.fvar (c i)] ⋏ (A i).subst ![Semiterm.fvar (c i)]) 🡒
         γ.subst (Semiterm.fvar z :> fun i ↦ Semiterm.fvar (c i))) := by
@@ -395,9 +386,7 @@ lemma funcGraph_specialize_witness [𝗘𝗤 L ⪯ T] {k : ℕ} (d : Semiformula
   simpa using h₁
 
 omit [L.Eq] in
-lemma witnessConj_dom (d : Semiformula V L 1) {k : ℕ} (A : Fin k → Semiformula V L 1)
-    (c : Fin k → V) :
-    T.internalize V ⊢
+lemma witnessConj_dom : T.internalize V ⊢
       Matrix.conj (fun i ↦ d.subst ![Semiterm.fvar (c i)] ⋏ (A i).subst ![Semiterm.fvar (c i)]) 🡒
         Matrix.conj (fun i ↦ d.subst ![Semiterm.fvar (c i)]) := by
   apply matrixConj_intro
@@ -406,9 +395,7 @@ lemma witnessConj_dom (d : Semiformula V L 1) {k : ℕ} (A : Fin k → Semiformu
     (fun i ↦ d.subst ![Semiterm.fvar (c i)] ⋏ (A i).subst ![Semiterm.fvar (c i)]) i
   cl_prover [h₁]
 
-lemma witness_eq_mem [𝗘𝗤 L ⪯ T] (d : Semiformula V L 1) {k : ℕ} (A : Fin k → Semiformula V L 1)
-    (c w : Fin k → V) (i : Fin k) :
-    T.internalize V ⊢ witnessConj d A c 🡒
+lemma witness_eq_mem : T.internalize V ⊢ witnessConj d A c 🡒
       (d.subst ![Semiterm.fvar (w i)] ⋏ (A i).subst ![Semiterm.fvar (w i)]) 🡒
         Semiformula.equal (Semiterm.fvar (c i)) (Semiterm.fvar (w i)) := by
   have h₁ := matrixConj_elim (𝓢 := T.internalize V)
@@ -427,21 +414,20 @@ lemma shift_iterate_equal {n : ℕ} (s t : Semiterm V L n) (k : ℕ) :
   | succ k ih => simp [Function.iterate_succ_apply', ih]
 
 @[simp]
-lemma shift_witnessConj (d : Semiformula V L 1) {k : ℕ} (A : Fin k → Semiformula V L 1)
-    (c : Fin k → V) :
+lemma shift_witnessConj :
     (witnessConj d A c).shift = witnessConj d.shift (fun i ↦ (A i).shift) (fun i ↦ c i + 1) := by
   simp [witnessConj]
 
-lemma shift_iterate_witnessConj (d : Semiformula V L 1) {k : ℕ} (A : Fin k → Semiformula V L 1)
-    (c : Fin k → V) (n : ℕ) :
-    Semiformula.shift^[n] (witnessConj d A c) =
+lemma shift_iterate_witnessConj (n : ℕ) : Semiformula.shift^[n] (witnessConj d A c) =
       witnessConj (Semiformula.shift^[n] d) (fun i ↦ Semiformula.shift^[n] (A i))
         (fun i ↦ c i + (n : V)) := by
   simp [witnessConj, shift_iterate_definesElementBody, Semiformula.shift_iterate_subst]
 
+end
+
 section funcGraphWitness
 
-variable [𝗘𝗤 L ⪯ T] {k : ℕ} (d : Semiformula V L 1) (γ : Semiformula V L (k + 1))
+variable {k : ℕ} (γ : Semiformula V L (k + 1))
   (hd : d.shift = d) (hγ : γ.shift = γ) (A : Fin k → Semiformula V L 1)
   (huniq : ∀ (y z : Term V L) (w : Fin k → Term V L), T.internalize V ⊢
     Matrix.conj (fun i ↦ d.subst ![w i]) ⋏ d.subst ![y] ⋏ d.subst ![z] ⋏
@@ -449,9 +435,13 @@ variable [𝗘𝗤 L ⪯ T] {k : ℕ} (d : Semiformula V L 1) (γ : Semiformula 
   (hcongr : ∀ (y z : Term V L) (w w' : Fin k → Term V L), T.internalize V ⊢
     Semiformula.equal y z ⋏ Matrix.conj (fun i ↦ Semiformula.equal (w i) (w' i)) 🡒
       γ.subst (y :> w) 🡒 γ.subst (z :> w'))
+  (hex : ∀ w : Fin k → Term V L, T.internalize V ⊢
+    Matrix.conj (fun i ↦ d.subst ![w i]) 🡒
+      ∃¹ (d ⋏ γ.subst (Semiterm.bvar 0 :> fun i ↦ (w i).bShift)))
+  (c w : Fin k → V) (e z : V)
 
 include hcongr in
-lemma back_core (c w : Fin k → V) (e z : V) :
+lemma back_core :
     T.internalize V ⊢ witnessConj d A c 🡒 γ.subst (Semiterm.fvar e :> fun i ↦ Semiterm.fvar (c i)) 🡒
       Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar e) 🡒
         Matrix.conj (fun i ↦ d.subst ![Semiterm.fvar (w i)] ⋏ (A i).subst ![Semiterm.fvar (w i)]) 🡒
@@ -472,7 +462,7 @@ lemma back_core (c w : Fin k → V) (e z : V) :
   cl_prover [hcon, hsymm, hc]
 
 include hd hγ hcongr in
-lemma back_funcGraph (c : Fin k → V) (e z : V) :
+lemma back_funcGraph :
     T.internalize V ⊢ witnessConj d A c 🡒 γ.subst (Semiterm.fvar e :> fun i ↦ Semiterm.fvar (c i)) 🡒
       Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar e) 🡒
         (funcGraph d A γ).subst ![Semiterm.fvar z] := by
@@ -493,7 +483,8 @@ lemma back_funcGraph (c : Fin k → V) (e z : V) :
   cl_prover [key]
 
 include huniq in
-lemma front_core (c : Fin k → V) (z e : V) :
+variable (z e : V) in
+lemma front_core :
     T.internalize V ⊢ witnessConj d A c 🡒 (funcGraph d A γ).subst ![Semiterm.fvar z] 🡒
       d.subst ![Semiterm.fvar z] 🡒 d.subst ![Semiterm.fvar e] 🡒
         γ.subst (Semiterm.fvar e :> fun i ↦ Semiterm.fvar (c i)) 🡒
@@ -505,8 +496,7 @@ lemma front_core (c : Fin k → V) (z e : V) :
   cl_prover [hu, hsp, hdA, hD]
 
 include hd hγ huniq hcongr in
-lemma funcGraph_iff_equal (c : Fin k → V) (e z : V) :
-    T.internalize V ⊢ witnessConj d A c 🡒 d.subst ![Semiterm.fvar e] 🡒
+lemma funcGraph_iff_equal : T.internalize V ⊢ witnessConj d A c 🡒 d.subst ![Semiterm.fvar e] 🡒
       γ.subst (Semiterm.fvar e :> fun i ↦ Semiterm.fvar (c i)) 🡒 d.subst ![Semiterm.fvar z] 🡒
         ((funcGraph d A γ).subst ![Semiterm.fvar z] 🡘
           Semiformula.equal (Semiterm.fvar z) (Semiterm.fvar e)) := by
@@ -525,8 +515,7 @@ lemma funcGraph_iff_equal (c : Fin k → V) (e z : V) :
   cl_prover 128 [fwd, bwd]
 
 include hd hγ huniq hcongr in
-lemma witness_body_imp (c : Fin k → V) (e : V) :
-    T.internalize V ⊢ (witnessConj d A c ⋏ d.subst ![Semiterm.fvar e] ⋏
+lemma witness_body_imp : T.internalize V ⊢ (witnessConj d A c ⋏ d.subst ![Semiterm.fvar e] ⋏
       γ.subst (Semiterm.fvar e :> fun i ↦ Semiterm.fvar (c i))) 🡒
         (∀¹ (d 🡒 (funcGraph d A γ 🡘 Semiformula.equal (Semiterm.bvar 0) (Semiterm.fvar e)))) := by
   apply TProof.generalize_imp
@@ -537,8 +526,7 @@ lemma witness_body_imp (c : Fin k → V) (e : V) :
   simpa [Semiformula.free, hd, hγ, hΦ] using conj_of_curry hz
 
 include hd hγ huniq hcongr in
-lemma exists_body (c : Fin k → V) (e : V) :
-    T.internalize V ⊢ witnessConj d A c 🡒 d.subst ![Semiterm.fvar e] 🡒
+lemma exists_body : T.internalize V ⊢ witnessConj d A c 🡒 d.subst ![Semiterm.fvar e] 🡒
       γ.subst (Semiterm.fvar e :> fun i ↦ Semiterm.fvar (c i)) 🡒
         ∃¹ definesElementBody d (funcGraph d A γ) := by
   have s₂ := witness_body_imp (T := T) d γ hd hγ A huniq hcongr c e
@@ -548,21 +536,15 @@ lemma exists_body (c : Fin k → V) (e : V) :
   cl_prover 128 [s₂, intro]
 
 include hd hγ huniq hcongr in
-lemma free_premise (c : Fin k → V) :
-    T.internalize V ⊢
+lemma free_premise : T.internalize V ⊢
       (d ⋏ γ.subst (Semiterm.bvar 0 :> fun i ↦ (Semiterm.fvar (c i) : Semiterm V L 1))).free 🡒
         (witnessConj d A c 🡒 ∃¹ definesElementBody d (funcGraph d A γ)).shift := by
   have ex := exists_body (T := T) d γ hd hγ (fun i ↦ (A i).shift) huniq hcongr
     (fun i ↦ c i + 1) 0
   simpa [Semiformula.free, hd, hγ, shift_funcGraph] using conj_of_curry_swap ex
 
-include hd hγ huniq hcongr in
-theorem definesElement_funcGraph
-    (hex : ∀ w : Fin k → Term V L, T.internalize V ⊢
-      Matrix.conj (fun i ↦ d.subst ![w i]) 🡒
-        ∃¹ (d ⋏ γ.subst (Semiterm.bvar 0 :> fun i ↦ (w i).bShift)))
-    (c : Fin k → V) :
-    T.internalize V ⊢
+include hd hγ huniq hcongr hex in
+theorem definesElement_funcGraph : T.internalize V ⊢
       Matrix.conj (fun i ↦ (definesElementBody d (A i)).subst ![Semiterm.fvar (c i)]) 🡒
         definesElement d (funcGraph d A γ) := by
   have h1 : T.internalize V ⊢ Matrix.conj (fun i ↦ d.subst ![Semiterm.fvar (c i)]) 🡒

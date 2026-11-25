@@ -16,8 +16,6 @@ public import Foundation.FirstOrder.Tarski.HierarchicalDefinability.Absoluteness
 
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder
@@ -43,6 +41,7 @@ namespace EndExtension
 section
 
 variable {M : Type u} {N : Type v} [ORingStructure M] [ORingStructure N] (e : M ⊆ₑ N)
+  (ι : M ↪ₛ[ℒₒᵣ] N)
 
 @[simp, grind =]
 lemma emb_lt_emb {x y : M} : e x < e y ↔ x < y :=
@@ -53,7 +52,7 @@ lemma mem_range_of_lt {a : M} {b : N} (h : b < e a) : b ∈ Set.range e.emb :=
 
 /-- The end extension given by an embedding whose image is closed downward under `<`.
 - [Kay91, Definition 2.6] -/
-def ofInitial (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Set.range ι) : M ⊆ₑ N where
+def ofInitial (hι : ∀ x y, y < ι x → y ∈ Set.range ι) : M ⊆ₑ N where
   emb := ι
   isInitial := {
     operator_iff := by
@@ -67,7 +66,7 @@ def ofInitial (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Se
   }
 
 @[simp]
-lemma ofInitial_apply (ι : M ↪ₛ[ℒₒᵣ] N) (hι : ∀ x y, y < ι x → y ∈ Set.range ι) (x : M) :
+lemma ofInitial_apply (hι : ∀ x y, y < ι x → y ∈ Set.range ι) (x : M) :
     ofInitial ι hι x = ι x := rfl
 
 include e
@@ -175,16 +174,20 @@ variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 /-- `c` is nonstandard: above every natural number. -/
 def IsNonstandardElement (c : M) : Prop := ∀ m : ℕ, (m : M) < c
 
+variable (M)
+
 /-- The nonstandard elements of `M`. -/
-def NonstandardElement (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : Type _ :=
+def NonstandardElement : Type _ :=
   {c : M // IsNonstandardElement c}
 
 /-- `M` is nonstandard: it has a nonstandard element. -/
-abbrev IsNonstandard (M : Type*) [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : Prop :=
+abbrev IsNonstandard : Prop :=
   Nonempty (NonstandardElement M)
 
-lemma IsNonstandardElement.natCast_lt {c : M} (h : IsNonstandardElement c) (m : ℕ) :
-    (m : M) < c := h m
+variable {M} {c : M} (h : IsNonstandardElement c) (a : NonstandardElement M) (m : ℕ)
+
+include h in
+lemma IsNonstandardElement.natCast_lt : (m : M) < c := h m
 
 instance : CoeOut (NonstandardElement M) M := ⟨Subtype.val⟩
 
@@ -192,9 +195,9 @@ lemma NonstandardElement.isNonstandardElement (c : NonstandardElement M) :
     IsNonstandardElement (c : M) := c.2
 
 @[simp]
-lemma NonstandardElement.natCast_lt (a : NonstandardElement M) (m : ℕ) : (m : M) < a := a.2 m
+lemma NonstandardElement.natCast_lt : (m : M) < a := a.2 m
 
-lemma isNonstandardElement_iff_not_mem_range {c : M} :
+lemma isNonstandardElement_iff_not_mem_range :
     IsNonstandardElement c ↔ c ∉ Set.range (Nat.cast : ℕ → M) := by
   constructor
   · rintro h ⟨n, rfl⟩
@@ -226,13 +229,13 @@ end
 section
 
 variable {M : Type u} {N : Type v} [ORingStructure M] [ORingStructure N] (e : M ⊂ₑ N)
+  (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m]
 
 /-- Overspill: a formula of the induction class holding at every element of the base model holds
 below some element outside it.
 - [HP98, Corollary IV.1.16]
 - [vO99, Lemma 3.2, Corollary 3.3] -/
-theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m]
-    {φ : ArithmeticSemiformula ℕ 1} (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ m φ) (f : ℕ → N)
+theorem overspill {φ : ArithmeticSemiformula ℕ 1} (hφ : ℬ[<, ℒₒᵣ].Hierarchy Γ m φ) (f : ℕ → N)
     (h : ∀ a : M, φ.Eval ![e a] f) : ∃ c : N, c ∉ Set.range e.emb ∧ ∀ x < c, φ.Eval ![x] f := by
   have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m)
   by_contra! hc
@@ -254,7 +257,7 @@ theorem overspill (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗�
 /-- Overspill: a definable predicate of the induction class holding at every element of the base
 model holds at some element outside it.
 - [HP98, Corollary IV.1.16] -/
-lemma overspill_definablePred (Γ : Polarity) (m : ℕ) [N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m] {P : N → Prop}
+lemma overspill_definablePred {P : N → Prop}
     (hP : Γᴬ_[m].DefinablePred P) (h : ∀ a : M, P (e a)) : ∃ c : N, c ∉ Set.range e.emb ∧ P c := by
   have : N↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : N↓[ℒₒᵣ] ⊧* 𝗜𝗡𝗗⁺ Γ m)
   by_contra! hc
@@ -274,22 +277,24 @@ end
 
 section
 
-variable {M : Type u} [ORingStructure M]
+variable (M : Type u) [ORingStructure M]
 
 /-- A cut of `M`: a subset closed under successor and downward closed under `<`.
 - [HP98, Definition IV.1.14] -/
-structure Cut (M : Type u) [ORingStructure M] where
+structure Cut where
   carrier : Set M
   succ_mem {a : M} : a ∈ carrier → a + 1 ∈ carrier
   mem_of_lt {a b : M} : a < b → b ∈ carrier → a ∈ carrier
 
 /-- A cut closed under the operations of `ℒₒᵣ`, hence a substructure of `M`.
 - [HP98, Definition IV.2.8(2)] -/
-structure ClosedCut (M : Type u) [ORingStructure M] extends Cut M where
+structure ClosedCut extends Cut M where
   zero_mem : (0 : M) ∈ carrier
   one_mem : (1 : M) ∈ carrier
   add_mem {a b : M} : a ∈ carrier → b ∈ carrier → a + b ∈ carrier
   mul_mem {a b : M} : a ∈ carrier → b ∈ carrier → a * b ∈ carrier
+
+variable {M}
 
 namespace ClosedCut
 
@@ -382,16 +387,18 @@ end
 
 end ClosedCut
 
+variable (I : Cut M)
+
 /-- A cut is proper when it contains `0` and omits some element.
 - [HP98, Definition IV.1.14]
 - [Sla04, §1.1] -/
-structure Cut.Proper (I : Cut M) : Prop where
+structure Cut.Proper : Prop where
   zero_mem : (0 : M) ∈ I.carrier
   exists_not_mem : ∃ c, c ∉ I.carrier
 
 /-- A cut definable by a $\Sigma_0$ formula with parameters is not proper.
 - [HP98, Observation IV.1.15] -/
-lemma Cut.not_proper_of_definable [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] (I : Cut M)
+lemma Cut.not_proper_of_definable [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
     (hI : 𝚺ᴬ₀.DefinablePred (· ∈ I.carrier)) : ¬I.Proper := by
   rintro ⟨h0, c, hc⟩
   exact hc <| ISigma0.succ_induction (P := (· ∈ I.carrier)) hI h0 (fun _ hx ↦ I.succ_mem hx) c
@@ -399,7 +406,7 @@ lemma Cut.not_proper_of_definable [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] (I : Cut M)
 /-- A proper cut whose membership relation and complement are both definable by prenex $\Sigma_n$
 formulas with parameters refutes $\Delta_s$ induction.
 - [Sla04, §1.1] -/
-lemma not_models_IDelta_of_proper_cut (I : Cut M) (n : ℕ) (hI : I.Proper)
+lemma not_models_IDelta_of_proper_cut (n : ℕ) (hI : I.Proper)
     (hσ : PrenexDefinablePred 𝚺 n (· ∈ I.carrier))
     (hπ : PrenexDefinablePred 𝚺 n (· ∉ I.carrier)) : ¬M↓[ℒₒᵣ] ⊧* 𝗜𝚫 n := by
   intro hM
@@ -438,12 +445,13 @@ end
 
 section
 
-variable {S : Type u} {M : Type v} [ORingStructure S] [ORingStructure M]
+variable {S : Type u} {M : Type v} [ORingStructure S] [ORingStructure M] {ι : S ↪ₛ[ℒₒᵣ] M}
+  [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 /-- A $\Delta_0$-elementary substructure of a model of `𝗣𝗔⁻` is a model of `𝗣𝗔⁻`.
 - [HP98, Remark IV.1.21(2)] -/
-theorem _root_.FFL.FirstOrder.IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒₒᵣ] M}
-    (hι : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ) ι) [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] : S↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := by
+theorem _root_.FFL.FirstOrder.IsElementary.models_peanoMinus
+    (hι : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Closure φ) ι) : S↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := by
   have h {Γ : Polarity} {n : ℕ} {φ : ArithmeticSemiformula ℕ n}
       (hφ : ℬ[<, ℒₒᵣ].PrenexBlock Γ φ) (hΓ : Γ = 𝚷) (e : Fin n → S) (f : ℕ → S) :
       φ.Eval (ι ∘ e) (ι ∘ f) → φ.Eval e f := by
@@ -465,8 +473,7 @@ theorem _root_.FFL.FirstOrder.IsElementary.models_peanoMinus {ι : S ↪ₛ[ℒ�
 $\Pi_n$ formula satisfiable in `S` with the parameter `c` is satisfiable in `M`, with the image of
 `c` as parameter, below any element outside the image.
 - [Kay91, Theorem 12.3] -/
-theorem exists_lt_of_initialSegmentEmbedding [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {n : ℕ} {ι : S ↪ₛ[ℒₒᵣ] M}
-    (hι : ∀ x y, y < ι x → y ∈ Set.range ι)
+theorem exists_lt_of_initialSegmentEmbedding {n : ℕ} (hι : ∀ x y, y < ι x → y ∈ Set.range ι)
     (hel : IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) ι) {b : M}
     (hb : b ∉ Set.range ι) {c : S} {θ : ArithmeticSemisentence 2}
     (hθ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 n θ) (h : ∃ x : S, S ⊧/![x, c] θ) : ∃ x < b, M ⊧/![x, ι c] θ := by
@@ -572,8 +579,9 @@ end EndExtension
 namespace Arithmetic
 
 variable {M N : Type*} [ORingStructure M] [ORingStructure N] [M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] [N↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-  (e : M ⊆ₑ N)
+  (e : M ⊆ₑ N) [IsNonstandard M]
 
+omit [IsNonstandard M] in
 include e in
 /-- The standard system of a model of `𝗜𝚺₁` is contained in that of an end extension which
 again models `𝗜𝚺₁`.
@@ -587,8 +595,7 @@ include e in
 /-- A nonstandard model of `𝗜𝚺₁` and an end extension of it which again models `𝗜𝚺₁` have the same
 standard system.
 - [Kay91, Chapter 12, p. 159] -/
-theorem standardSystem_eq_of_endExtension [IsNonstandard M] :
-    standardSystem M = standardSystem N := by
+theorem standardSystem_eq_of_endExtension : standardSystem M = standardSystem N := by
   apply (standardSystem_subset_of_endExtension e).antisymm
   rintro _ ⟨a, rfl⟩
   obtain ⟨c, hc⟩ := Classical.arbitrary (NonstandardElement M)
@@ -609,7 +616,7 @@ theorem standardSystem_eq_of_endExtension [IsNonstandard M] :
 /-- A nonstandard model of `𝗜𝚺₁` embedded onto an initial segment of a model of `𝗜𝚺₁` has the same
 standard system as that model.
 - [Kay91, Theorem 12.3] -/
-theorem standardSystem_eq_of_initialSegmentEmbedding [IsNonstandard M]
+theorem standardSystem_eq_of_initialSegmentEmbedding
     {ι : M ↪ₛ[ℒₒᵣ] N} (hι : ∀ x y, y < ι x → y ∈ Set.range ι) :
     standardSystem M = standardSystem N :=
   standardSystem_eq_of_endExtension (.ofInitial ι hι)

@@ -9,8 +9,6 @@ public import Foundation.FirstOrder.Incompleteness.Consistency
 $\Delta_1$ numerations of theories whose elements are sentences.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -21,14 +19,18 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
+section
+
+variable (T : Theory L) [T.Δ₁]
+
 /-- Every element of the numeration, in every model of $\mathsf{I}\Sigma_1$, is a sentence. -/
-class Theory.Δ₁.Sentential (T : Theory L) [T.Δ₁] : Prop where
+class Theory.Δ₁.Sentential : Prop where
   isSentence {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {p : V}
     (h : p ∈ T.Δ₁Class) : L.IsSentence p
 
-lemma Theory.Δ₁.Sentential.forall_isSentence (T : Theory L) [T.Δ₁]
-    [Theory.Δ₁.Sentential T] {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
-    ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p := by
+variable [Theory.Δ₁.Sentential T]
+
+lemma Theory.Δ₁.Sentential.forall_isSentence : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p := by
   have h : 𝗜𝚺₁ ⊢ (“∀ p, !T.Δ₁ch.sigma.val p →
       !(Arithmetic.Bootstrapping.isSentence L).sigma.val p” : ArithmeticSentence) :=
     Arithmetic.complete.{0} _ _ fun W _ _ ↦ by
@@ -39,8 +41,8 @@ lemma Theory.Δ₁.Sentential.forall_isSentence (T : Theory L) [T.Δ₁]
       models_of_provable (M := V) inferInstance h
   exact h₁
 
-instance Theory.Δ₁.Sentential.union (T U : Theory L) [T.Δ₁] [U.Δ₁] [Theory.Δ₁.Sentential T]
-    [Theory.Δ₁.Sentential U] : Theory.Δ₁.Sentential (T ∪ U) where
+instance Theory.Δ₁.Sentential.union (U : Theory L) [U.Δ₁] [Theory.Δ₁.Sentential U] :
+    Theory.Δ₁.Sentential (T ∪ U) where
   isSentence h := by
     rcases Theory.Δ₁Class.mem_union.mp h with h | h
     · exact Theory.Δ₁.Sentential.isSentence h
@@ -55,8 +57,14 @@ instance Theory.Δ₁.Sentential.singleton (σ : Sentence L) : Theory.Δ₁.Sent
     rw [hp]
     exact .quote σ
 
+end
+
+section
+
+variable (T : Theory L) (d : T.Δ₁)
+
 /-- The numeration of `T` restricted to the codes of sentences. -/
-noncomputable abbrev Theory.Δ₁.sentential (T : Theory L) (d : T.Δ₁) : T.Δ₁ where
+noncomputable abbrev Theory.Δ₁.sentential : T.Δ₁ where
   ch := T.Δ₁ch ⋏ Arithmetic.Bootstrapping.isSentence L
   mem_iff φ := by
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd,
@@ -77,23 +85,24 @@ noncomputable abbrev Theory.Δ₁.sentential (T : Theory L) (d : T.Δ₁) : T.Δ
         Bounding.HierarchySymbol.Semiformula.ProperOn.and (by simp)
           Language.IsSentence.defined.proper)
 
-lemma Theory.Δ₁.isSentence_of_sentential (T : Theory L) (d : T.Δ₁) {V : Type*} [ORingStructure V]
-    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {p : V} (h : V ⊧/![p] (Theory.Δ₁.sentential T d).ch.val) :
+lemma Theory.Δ₁.isSentence_of_sentential {p : V} (h : V ⊧/![p] (Theory.Δ₁.sentential T d).ch.val) :
     L.IsSentence p :=
   (Arithmetic.Bootstrapping.isSentence_sigma_iff p).mp h.2
 
-instance (T : Theory L) (d : T.Δ₁) : @Theory.Δ₁.Sentential L _ _ T (Theory.Δ₁.sentential T d) :=
+instance : @Theory.Δ₁.Sentential L _ _ T (Theory.Δ₁.sentential T d) :=
   @Theory.Δ₁.Sentential.mk L _ _ T (Theory.Δ₁.sentential T d) fun h ↦
     Theory.Δ₁.isSentence_of_sentential T d h
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
-lemma Theory.Δ₁.sentential_subset (T : Theory L) (d : T.Δ₁) :
+lemma Theory.Δ₁.sentential_subset :
     @Theory.Δ₁Class V _ L _ _ T (Theory.Δ₁.sentential T d) ⊆ T.Δ₁Class := by
   intro p h
   change V ⊧/![p] T.Δ₁ch.val
   have h₁ := h.1
   rw [Bounding.HierarchySymbol.Semiformula.val_sigma] at h₁
   exact h₁
+
+end
 
 lemma Theory.Δ₁.sentential_consistent (T : Theory L) [d : T.Δ₁] (h : T.Consistent V) :
     letI := Theory.Δ₁.sentential T d

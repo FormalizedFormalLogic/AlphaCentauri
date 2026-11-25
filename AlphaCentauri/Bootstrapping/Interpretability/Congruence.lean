@@ -10,8 +10,6 @@ public import AlphaCentauri.Bootstrapping.Interpretability.ValueLemma
 Translations along provably equivalent tables are provably equivalent.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -56,8 +54,10 @@ lemma tprovable_all_and_imp_and {A B : Semiformula V L₁ 1}
     cl_prover
   exact tprovable_all_of_all_imp_imp h₁ (tprovable_all_domT_iff hd) h
 
+variable {k : ℕ} (F : L₂.Func k)
+
 include hd hf in
-lemma tprovable_funcGraph_iff {k : ℕ} (F : L₂.Func k) (A B : Fin k → Semiformula V L₁ 1)
+lemma tprovable_funcGraph_iff (A B : Fin k → Semiformula V L₁ 1)
     (h : ∀ i, S.internalize V ⊢ ∀¹ (A i 🡘 B i)) :
     S.internalize V ⊢ ∀¹ (funcGraph hT.domT A (hT.funcT F) 🡘
       funcGraph hT'.domT B (hT'.funcT F)) := by
@@ -131,7 +131,7 @@ lemma tprovable_varEqualT_iff (hL : L₂.SymbolsStandard V) (t : Term V L₂) :
     exact h₁
 
 include hd hr hf in
-lemma tprovable_translate_rel_iff (hL : L₂.SymbolsStandard V) {k : ℕ} (R : L₂.Rel k)
+lemma tprovable_translate_rel_iff (hL : L₂.SymbolsStandard V) (R : L₂.Rel k)
     (u : Fin k → Term V L₂) :
     S.internalize V ⊢ relativizedImp hT.domT (fun i ↦ varEqualT hT (u i))
         ((hT.relT R).subst fun i ↦ Semiterm.bvar (i.addCast 0)) 🡘
@@ -231,7 +231,7 @@ lemma tprovable_conj_domT_imp {m : ℕ} (u : Fin m → Term V L₁) :
   cl_prover [h₁]
 
 include hd hf in
-lemma tprovable_funcUniqueBody_imp {k : ℕ} (F : L₂.Func k) (w : Fin (k + 2) → Term V L₁) :
+lemma tprovable_funcUniqueBody_imp (w : Fin (k + 2) → Term V L₁) :
     S.internalize V ⊢ (funcUniqueBody hT.domT (hT.funcT F)).subst w 🡒
       (funcUniqueBody hT'.domT (hT'.funcT F)).subst w := by
   simp only [funcUniqueBody, Semiformula.substs_imp, Semiformula.substs_and,
@@ -248,8 +248,7 @@ lemma tprovable_funcUniqueBody_imp {k : ℕ} (F : L₂.Func k) (w : Fin (k + 2) 
   exact key (tprovable_conj_domT_imp hd _) (hd _) (hd _) (hf F _) (hf F _)
 
 include hf in
-lemma tprovable_funcCongrBody_imp {k : ℕ} (F : L₂.Func k)
-    (w : Fin (k + 1 + (k + 1)) → Term V L₁) :
+lemma tprovable_funcCongrBody_imp (w : Fin (k + 1 + (k + 1)) → Term V L₁) :
     S.internalize V ⊢ (funcCongrBody (hT.funcT F)).subst w 🡒
       (funcCongrBody (hT'.funcT F)).subst w := by
   simp only [funcCongrBody, Semiformula.substs_imp, Semiformula.substs_substs]
@@ -260,7 +259,7 @@ lemma tprovable_funcCongrBody_imp {k : ℕ} (F : L₂.Func k)
   exact key (hf F _) (hf F _)
 
 include hd hf in
-lemma tprovable_funcExistsBody_imp {k : ℕ} (F : L₂.Func k) (w : Fin k → Term V L₁) :
+lemma tprovable_funcExistsBody_imp (w : Fin k → Term V L₁) :
     S.internalize V ⊢ (funcExistsBody hT.domT (hT.funcT F)).subst w 🡒
       (funcExistsBody hT'.domT (hT'.funcT F)).subst w := by
   have key {C C' : Formula V L₁} {X X' : Semiformula V L₁ 1} (h₁ : S.internalize V ⊢ C' 🡒 C)
@@ -282,8 +281,12 @@ lemma tprovable_funcExistsBody_imp {k : ℕ} (F : L₂.Func k) (w : Fin k → Te
     Matrix.vecMap_cons', Matrix.head_cons, Matrix.vecMap_nil]
   exact key₂ (hd _) (hf F _)
 
+section
+
+variable [L₂.Eq]
+
 include hd hr in
-lemma tprovable_preserveEqBody_imp [L₂.Eq] (w : Fin 2 → Term V L₁) :
+lemma tprovable_preserveEqBody_imp (w : Fin 2 → Term V L₁) :
     S.internalize V ⊢ (preserveEqBody hT.domT (hT.relT (Language.Eq.eq : L₂.Rel 2))).subst w 🡒
       (preserveEqBody hT'.domT (hT'.relT (Language.Eq.eq : L₂.Rel 2))).subst w := by
   simp only [preserveEqBody, LogicalConnective.iff, Semiformula.substs_imp, Semiformula.substs_and,
@@ -298,7 +301,7 @@ lemma tprovable_preserveEqBody_imp [L₂.Eq] (w : Fin 2 → Term V L₁) :
 include hd hr hf in
 /-- A table whose domain formula and the entries of whose symbols are provably equivalent in `S`
 to those of a table of a translation in `S` is itself a table of a translation in `S`. -/
-theorem IsTranslationTable.of_provable_iff [L₂.Eq] (h : IsTranslationTable L₂ S tbl)
+theorem IsTranslationTable.of_provable_iff (h : IsTranslationTable L₂ S tbl)
     (hL : L₂.SymbolsStandard V) : IsTranslationTable L₂ S tbl' where
   toIsTable := hT'
   exs_domain := by
@@ -340,6 +343,8 @@ theorem IsTranslationTable.of_provable_iff [L₂.Eq] (h : IsTranslationTable L�
           simpa using h.preserve_eq)
     rw [preserveEqBody_val _ rfl (hT'.relT (Language.Eq.eq : L₂.Rel 2)) rfl] at h₁
     simpa using h₁
+
+end
 
 end congruence
 

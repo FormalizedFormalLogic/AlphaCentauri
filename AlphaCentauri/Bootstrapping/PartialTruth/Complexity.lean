@@ -8,8 +8,6 @@ public import AlphaCentauri.Bootstrapping.PartialTruth.Assignment
 Satisfaction of internal formulas of bounded complexity.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -237,12 +235,14 @@ lemma neg_iff (hp : IsUFormula ℒₒᵣ p) (h : formulaComplexity ℒₒᵣ p �
     · rw [neg_ex hq, succ_all hq.neg, succ_exs hq, not_exists]
       exact forall_congr' fun x ↦ ih hq (by simpa [hq] using h)
 
-private lemma quote_formulaComplexity_le {n : ℕ} {φ : ArithmeticSemisentence n}
+variable {n : ℕ}
+
+private lemma quote_formulaComplexity_le {φ : ArithmeticSemisentence n}
     (h : φ.complexity ≤ N) : formulaComplexity ℒₒᵣ (⌜φ⌝ : V) ≤ N := by
   rw [Semisentence.formulaComplexity_quote]
   exact_mod_cast h
 
-lemma quote_iff {n : ℕ} (φ : ArithmeticSemisentence n) (h : φ.complexity ≤ N)
+lemma quote_iff (φ : ArithmeticSemisentence n) (h : φ.complexity ≤ N)
     (v : Fin n → V) : ComplexitySatisfied N (matrixToVec v) ⌜φ⌝ ↔ V ⊧/v φ := by
   induction φ using Semiformula.rec' generalizing N with
   | hrel R w | hnrel R w | hverum | hfalsum =>

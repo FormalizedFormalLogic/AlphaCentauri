@@ -10,8 +10,6 @@ public import Foundation.FirstOrder.Arithmetic.ISigma1.Prenex
 Prenex normal forms of arithmetic sentences in models of fragments of arithmetic.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder
@@ -75,8 +73,11 @@ def pairExs {s n : ℕ} (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n + 1)) 
 variable {Γ : Polarity} {s n : ℕ} {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻]
   {f : ξ → V}
 
-lemma eval_contract (φ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ (n + 2)) (z : V) (e : Fin n → V) :
-    Semiformula.Eval (z :> e) f (contract φ).val ↔
+section
+
+variable (φ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ (n + 2)) (z : V) (e : Fin n → V)
+
+lemma eval_contract : Semiformula.Eval (z :> e) f (contract φ).val ↔
       Semiformula.Eval (π₁ z :> π₂ z :> e) f φ.val := by
   induction s generalizing Γ n with
   | zero =>
@@ -114,8 +115,13 @@ lemma eval_contract (φ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ (n + 2)) (z : V) (e :
         Semiterm.val_comp_vecCons,
         Semiterm.val_bvar, Matrix.cons_val, Matrix.cons_val_succ, ih, ← models_piInv]
 
-lemma eval_pairAnd (φ ψ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n) (e : Fin n → V) :
-    Semiformula.Eval e f (pairAnd φ ψ).val ↔
+end
+
+section
+
+variable (φ ψ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n) (e : Fin n → V)
+
+lemma eval_pairAnd : Semiformula.Eval e f (pairAnd φ ψ).val ↔
       Semiformula.Eval e f φ.val ∧ Semiformula.Eval e f ψ.val := by
   induction s generalizing Γ n with
   | zero => simp [pairAnd, Prenex.val]
@@ -133,8 +139,7 @@ lemma eval_pairAnd (φ ψ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n) (e : Fin n → V
         and_intros <;> simpa
     · simp only [pairAnd, models_pi, ih, models_piInv φ, models_piInv ψ, forall_and]
 
-lemma eval_pairOr (φ ψ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n) (e : Fin n → V) :
-    Semiformula.Eval e f (pairOr φ ψ).val ↔
+lemma eval_pairOr : Semiformula.Eval e f (pairOr φ ψ).val ↔
       Semiformula.Eval e f φ.val ∨ Semiformula.Eval e f ψ.val := by
   induction s generalizing Γ n with
   | zero => simp [pairOr, Prenex.val]
@@ -156,7 +161,13 @@ lemma eval_pairOr (φ ψ : ℬ[<, ℒₒᵣ].Prenex Γ s ξ n) (e : Fin n → V)
         · exact Or.inl <| h _
         · exact Or.inr <| h _
 
-lemma eval_pairExs (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n + 1)) (e : Fin n → V) :
+end
+
+section
+
+variable (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n + 1)) (e : Fin n → V)
+
+lemma eval_pairExs :
     Semiformula.Eval e f (pairExs φ).val ↔ ∃ x, Semiformula.Eval (x :> e) f φ.val := by
   simp only [pairExs, models_sigma, eval_contract, models_sigmaInv φ]
   constructor
@@ -165,6 +176,8 @@ lemma eval_pairExs (φ : ℬ[<, ℒₒᵣ].Prenex 𝚺 (s + 1) ξ (n + 1)) (e : 
   · rintro ⟨x, y, h⟩
     use ⟪y, x⟫
     simpa using h
+
+end
 
 end Bounding.Prenex
 

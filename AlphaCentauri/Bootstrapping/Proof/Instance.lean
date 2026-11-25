@@ -8,8 +8,6 @@ public import AlphaCentauri.Bootstrapping.Proof.Subformula
 # Instances of a coded set of formulas in cut-free derivations
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -46,11 +44,11 @@ lemma fvSubst_fvar_zero_cons_shift {N ι p : V} (hι : ∀ x < N, x < len ι ∧
 
 namespace Instance
 
-variable {X : V}
+variable {X p q s : V}
 
 /-- The shift of an instance of a set of formula codes without free variables is again an
 instance. -/
-lemma shift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {p : V} (h : Instance L X p) :
+lemma shift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) (h : Instance L X p) :
     Instance L X (shift L p) := by
   obtain ⟨r, hrX, n, w, hr, hw, rfl⟩ := h
   exact ⟨r, hrX, n, termShiftVec L n w, hr, hw.termShiftVec, by
@@ -58,7 +56,7 @@ lemma shift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {p : V} (h : Instanc
 
 /-- A formula code whose shift is an instance of a set of formula codes without free variables is
 itself an instance. -/
-lemma of_shift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {p : V} (hp : IsUFormula L p)
+lemma of_shift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) (hp : IsUFormula L p)
     (h : Instance L X (Bootstrapping.shift L p)) : Instance L X p := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
   obtain ⟨ι, hιl, hι⟩ := sigmaOne_skolem_vec (R := fun x y : V ↦ y = ^&x) (by definability)
@@ -75,7 +73,7 @@ lemma of_shift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {p : V} (hp : IsU
     rw [← fvSubst_fvar_zero_cons_shift hι' hp (by simp), he, fvSubst_subst hu hw hr, h₁]⟩
 
 /-- The left conjunct of an instance of a set closed under subformulas is an instance. -/
-lemma of_and_left (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q : V}
+lemma of_and_left (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
     (h : Instance L X (p ^⋏ q)) : Instance L X p := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
   obtain ⟨r₁, r₂, rfl, h₁, h₂⟩ := exists_eq_and_of_subst_eq hr.isUFormula he.symm
@@ -85,7 +83,7 @@ lemma of_and_left (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q 
     h₃.1, hw, h₁.symm⟩
 
 /-- The right conjunct of an instance of a set closed under subformulas is an instance. -/
-lemma of_and_right (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q : V}
+lemma of_and_right (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
     (h : Instance L X (p ^⋏ q)) : Instance L X q := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
   obtain ⟨r₁, r₂, rfl, h₁, h₂⟩ := exists_eq_and_of_subst_eq hr.isUFormula he.symm
@@ -95,7 +93,7 @@ lemma of_and_right (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q
     h₃.2, hw, h₂.symm⟩
 
 /-- The left disjunct of an instance of a set closed under subformulas is an instance. -/
-lemma of_or_left (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q : V}
+lemma of_or_left (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
     (h : Instance L X (p ^⋎ q)) : Instance L X p := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
   obtain ⟨r₁, r₂, rfl, h₁, h₂⟩ := exists_eq_or_of_subst_eq hr.isUFormula he.symm
@@ -105,7 +103,7 @@ lemma of_or_left (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q :
     h₃.1, hw, h₁.symm⟩
 
 /-- The right disjunct of an instance of a set closed under subformulas is an instance. -/
-lemma of_or_right (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q : V}
+lemma of_or_right (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
     (h : Instance L X (p ^⋎ q)) : Instance L X q := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
   obtain ⟨r₁, r₂, rfl, h₁, h₂⟩ := exists_eq_or_of_subst_eq hr.isUFormula he.symm
@@ -117,7 +115,7 @@ lemma of_or_right (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p q 
 /-- The free instance of the body of a universal instance of a set closed under subformulas and
 without free variables is an instance. -/
 lemma free_of_all (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
-    (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {p : V} (h : Instance L X (^∀ p)) :
+    (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) (h : Instance L X (^∀ p)) :
     Instance L X (free L p) := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
   obtain ⟨r₁, rfl, h₁⟩ := exists_eq_all_of_subst_eq hr.isUFormula he.symm
@@ -130,7 +128,7 @@ lemma free_of_all (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X)
 
 /-- The instance at a term of the body of an existential instance of a set closed under
 subformulas is an instance. -/
-lemma substs1_of_exs (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p t : V}
+lemma substs1_of_exs (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {t : V}
     (h : Instance L X (^∃ p)) (ht : IsTerm L t) : Instance L X (substs1 L t p) := by
   obtain ⟨r, hrX, n, w, hr, hw, he⟩ := h
   obtain ⟨r₁, rfl, h₁⟩ := exists_eq_exs_of_subst_eq hr.isUFormula he.symm
@@ -141,7 +139,7 @@ lemma substs1_of_exs (hsub : ∀ r ∈ X, ∀ q ∈ subformulas L r, q ∈ X) {p
 
 /-- The shift of a coded set of instances of a set without free variables consists of
 instances. -/
-lemma forall_mem_setShift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {s : V}
+lemma forall_mem_setShift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r)
     (h : ∀ p ∈ s, Instance L X p) : ∀ p ∈ setShift L s, Instance L X p := by
   intro p hp
   obtain ⟨q, hq, rfl⟩ := mem_setShift_iff.mp hp
@@ -149,14 +147,14 @@ lemma forall_mem_setShift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {s : V
 
 /-- A coded formula set whose shift consists of instances of a set without free variables
 consists of instances. -/
-lemma of_forall_mem_setShift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r) {s : V}
+lemma of_forall_mem_setShift (hX : ∀ r ∈ X, ∃ n, L.IsSemisentence n r)
     (hs : IsFormulaSet L s) (h : ∀ p ∈ setShift L s, Instance L X p) :
     ∀ p ∈ s, Instance L X p := by
   intro p hp
   exact of_shift hX (hs p hp).isUFormula (h _ (shift_mem_setShift hp))
 
 /-- Adding an instance to a coded set of instances yields a set of instances. -/
-lemma insert {x s : V} (hx : Instance L X x) (hs : ∀ y ∈ s, Instance L X y) :
+lemma insert {x : V} (hx : Instance L X x) (hs : ∀ y ∈ s, Instance L X y) :
     ∀ y ∈ insert x s, Instance L X y := by
   intro y hy
   rcases mem_bitInsert_iff.mp hy with rfl | hy

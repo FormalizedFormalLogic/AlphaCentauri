@@ -20,8 +20,6 @@ translation.
 - [HP98, Theorem I.4.27], [HP98, 2.43]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -113,10 +111,9 @@ noncomputable def henkinTranslation : DirectTranslation (T ∪ S.Con) L where
 section truth
 
 variable {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] [V↓[ℒₒᵣ] ⊧* T ∪ S.Con]
+variable {n : ℕ} {e : Fin n → (henkinTranslation S T).Model V} {u : Fin n → V}
 
-theorem henkinTranslation_term {n : ℕ} (t : ClosedSemiterm L n)
-    {e : Fin n → (henkinTranslation S T).Model V} {u : Fin n → V}
-    (h : ∀ i, HenkinEq S (e i : V) (u i)) :
+theorem henkinTranslation_term (t : ClosedSemiterm L n) (h : ∀ i, HenkinEq S (e i : V) (u i)) :
     HenkinSet S (Bootstrapping.Semiformula.equal
       ((⌜t⌝ : Bootstrapping.Semiterm V L n).subst
         (fun i ↦ Bootstrapping.Semiterm.fvar (u i) : Bootstrapping.SemitermVec V L n 0))
@@ -163,14 +160,12 @@ private lemma exists_model_henkinEq (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsS
   exact ⟨⟨r, (henkinDomain_val S r).mpr hr⟩, hrx⟩
 
 omit [V↓[ℒₒᵣ] ⊧* T ∪ S.Con] in
-private lemma henkinEq_cons {n : ℕ} {e : Fin n → (henkinTranslation S T).Model V} {u : Fin n → V}
-    {a : (henkinTranslation S T).Model V} {x : V} (ha : HenkinEq S (a : V) x)
-    (h : ∀ i, HenkinEq S (e i : V) (u i)) : ∀ i, HenkinEq S ((a :> e) i : V) ((x :> u) i) :=
+private lemma henkinEq_cons {a : (henkinTranslation S T).Model V} {x : V}
+    (ha : HenkinEq S (a : V) x) (h : ∀ i, HenkinEq S (e i : V) (u i)) :
+    ∀ i, HenkinEq S ((a :> e) i : V) ((x :> u) i) :=
   Fin.cases ha h
 
-theorem henkinTranslation_truth {n : ℕ} (β : Semisentence L n)
-    {e : Fin n → (henkinTranslation S T).Model V} {u : Fin n → V}
-    (h : ∀ i, HenkinEq S (e i : V) (u i)) :
+theorem henkinTranslation_truth (β : Semisentence L n) (h : ∀ i, HenkinEq S (e i : V) (u i)) :
     ((henkinTranslation S T).Model V) ⊧/e β ↔
       HenkinSet S ((⌜β⌝ : Bootstrapping.Semiformula V L n).subst
         (fun i ↦ Bootstrapping.Semiterm.fvar (u i) : Bootstrapping.SemitermVec V L n 0)).val := by

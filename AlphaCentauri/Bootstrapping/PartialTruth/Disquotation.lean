@@ -15,8 +15,6 @@ The Tarski conditions and disquotation for partial satisfaction over `𝗣𝗔�
 - [HP98, 1.64(5), Theorem I.1.70, Remark I.1.77, Remark I.1.80]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open FFL.FirstOrder.Bounding (HierarchySymbol)
@@ -315,27 +313,27 @@ theorem _root_.FFL.FirstOrder.Arithmetic.ISigma1.provable_tarski : 𝗜𝚺₁ �
 
 namespace Reading
 
-variable {V : Type*} [ORingStructure V]
+variable {V : Type*} [ORingStructure V] (e' x l y e z i t : V)
 
-def BoundedSatisfied (e z : V) : Prop := V ⊧/![e, z] boundedSatisfied.val
+def BoundedSatisfied : Prop := V ⊧/![e, z] boundedSatisfied.val
 
 def PrenexSatisfied : Polarity → ℕ → V → V → Prop
   | _, 0 => BoundedSatisfied
   | Γ, s + 1 => fun e z ↦ V ⊧/![e, z] (prenexSatisfied' Γ s).val
 
-def Bounded (z : V) : Prop := V ⊧/![z] isBounded.val
+def Bounded : Prop := V ⊧/![z] isBounded.val
 
-def UFormula (z : V) : Prop := V ⊧/![z] (isUFormula ℒₒᵣ).val
+def UFormula : Prop := V ⊧/![z] (isUFormula ℒₒᵣ).val
 
-def UTerm (t : V) : Prop := V ⊧/![t] (isUTerm ℒₒᵣ).val
+def UTerm : Prop := V ⊧/![t] (isUTerm ℒₒᵣ).val
 
-def Adjoin (e' x e : V) : Prop := V ⊧/![e', x, e] adjoinDef.val
+def Adjoin : Prop := V ⊧/![e', x, e] adjoinDef.val
 
-def Nth (y e i : V) : Prop := V ⊧/![y, e, i] nthDef.val
+def Nth : Prop := V ⊧/![y, e, i] nthDef.val
 
-def Len (l e : V) : Prop := V ⊧/![l, e] lenDef.val
+def Len : Prop := V ⊧/![l, e] lenDef.val
 
-def TermVal (y e t : V) : Prop := V ⊧/![y, e, t] termValGraph.val
+def TermVal : Prop := V ⊧/![y, e, t] termValGraph.val
 
 end Reading
 
@@ -466,9 +464,9 @@ section disquotation
 open Reading
 
 variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
-  (hM : ∀ σ ∈ tarski, M↓[ℒₒᵣ] ⊧ σ)
+  (hM : ∀ σ ∈ tarski, M↓[ℒₒᵣ] ⊧ σ) {m k : ℕ} {ev : M} {φ : ArithmeticSemisentence k}
 
-def Reading.Codes {m : ℕ} (v : Fin m → M) (ev : M) : Prop :=
+def Reading.Codes (v : Fin m → M) (ev : M) : Prop :=
   Len (m : M) ev ∧ ∀ i : Fin m, Nth (v i) ev (i.val : M)
 
 include hM in
@@ -476,7 +474,7 @@ lemma codes_nil (v : Fin 0 → M) : Codes v 0 :=
   ⟨by simpa using (read_lenNil hM 0).mpr rfl, fun i ↦ i.elim0⟩
 
 include hM in
-lemma codes_cons {m : ℕ} {v : Fin m → M} {ev ev' x : M} (h : Codes v ev)
+lemma codes_cons {v : Fin m → M} {ev' x : M} (h : Codes v ev)
     (hadj : Adjoin ev' x ev) : Codes (x :> v) ev' :=
   ⟨by simpa using (read_lenAdjoin hM x ev ev' (m : M) hadj).mpr h.1,
     fun i ↦ Fin.cases (by simpa using (read_nthAdjoinZero hM x ev ev' x hadj).mpr rfl)
@@ -494,21 +492,20 @@ lemma exists_codes : ∀ {m : ℕ} (v : Fin m → M), ∃ ev, Codes v ev := by
     obtain ⟨ev', hadj⟩ := read_adjoinTotal hM (v 0) ev;
     exact ⟨ev', Matrix.cons_head_tail v ▸ codes_cons hM hev hadj⟩;
 
-private lemma uTerm_quote_cast {k : ℕ} (t : ClosedSemiterm ℒₒᵣ k) :
-    UTerm ((⌜t⌝ : ℕ) : M) :=
+private lemma uTerm_quote_cast (t : ClosedSemiterm ℒₒᵣ k) : UTerm ((⌜t⌝ : ℕ) : M) :=
   Delta1_cast₁ (isUTerm ℒₒᵣ) (by simp)
 
-private lemma uFormula_quote_cast {k : ℕ} (φ : ArithmeticSemisentence k) :
-    UFormula ((⌜φ⌝ : ℕ) : M) :=
+variable (φ) in
+private lemma uFormula_quote_cast : UFormula ((⌜φ⌝ : ℕ) : M) :=
   Delta1_cast₁ (isUFormula ℒₒᵣ) (by simp)
 
-private lemma bounded_quote_cast {k : ℕ} {φ : ArithmeticSemisentence k}
-    (h : ℬ[<, ℒₒᵣ].Closure φ) : Reading.Bounded ((⌜φ⌝ : ℕ) : M) :=
+private lemma bounded_quote_cast (h : ℬ[<, ℒₒᵣ].Closure φ) : Reading.Bounded ((⌜φ⌝ : ℕ) : M) :=
   Delta1_cast₁ isBounded (by simpa using (isBounded_quote_iff (V := ℕ) φ).mpr h)
 
 include hM in
-private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Codes v ev)
-    (t : ClosedSemiterm ℒₒᵣ k) : TermVal (t.valb v) ev ((⌜t⌝ : ℕ) : M) := by
+private lemma termVal_quote_cast {v : Fin k → M} (hev : Codes v ev) :
+    ∀ t : ClosedSemiterm ℒₒᵣ k, TermVal (t.valb v) ev ((⌜t⌝ : ℕ) : M) := by
+  intro t
   induction t with
   | bvar i =>
     have hb : M ⊧/![((⌜(#i : ClosedSemiterm ℒₒᵣ k)⌝ : ℕ) : M), ((i.val : ℕ) : M)] qqBvarDef.val :=
@@ -539,8 +536,7 @@ private lemma termVal_quote_cast {k : ℕ} {v : Fin k → M} {ev : M} (hev : Cod
         (ih 0) (ih 1)).mpr rfl;
 
 include hM in
-private lemma boundedSatisfied_quote_reading {k : ℕ} {φ : ArithmeticSemisentence k}
-    (hφ : ℬ[<, ℒₒᵣ].Closure φ) :
+private lemma boundedSatisfied_quote_reading (hφ : ℬ[<, ℒₒᵣ].Closure φ) :
     ∀ (v : Fin k → M) (ev : M), Codes v ev →
       (Reading.BoundedSatisfied ev ((⌜φ⌝ : ℕ) : M) ↔ M ⊧/v φ) := by
   revert hφ;

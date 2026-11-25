@@ -9,8 +9,6 @@ public import Foundation.FirstOrder.LK.Interpretation
 Additional API for Foundation's `DirectTranslation` and `DirectInterpretation`.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder
@@ -74,19 +72,18 @@ end ofWeakerThan
 section models
 
 variable {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] [Tarski.Structure.Eq L₁ M]
+  (D : Semiformula.Operator L₁ 1)
 
 omit [L₁.Eq] [Tarski.Structure.Eq L₁ M] in
-lemma models_domainNonempty_iff (D : Semiformula.Operator L₁ 1) :
-    M↓[L₁] ⊧ “∃ x, %D x” ↔ ∃ x : M, D.val ![x] := by
+lemma models_domainNonempty_iff : M↓[L₁] ⊧ “∃ x, %D x” ↔ ∃ x : M, D.val ![x] := by
   simp [models_iff]
 
-lemma models_funcDefined_iff {k} (D : Semiformula.Operator L₁ 1)
-    (F : Semiformula.Operator L₁ (k + 1)) :
+lemma models_funcDefined_iff {k} (F : Semiformula.Operator L₁ (k + 1)) :
     M↓[L₁] ⊧ ∀¹* “(⋀ i, %D #(i : Fin k)) → ∃! y, %D y ∧ %F y ⋯” ↔
       ∀ e : Fin k → M, (∀ i, D.val ![e i]) → ∃! y : M, D.val ![y] ∧ F.val (y :> e) := by
   simp [models_iff, Function.comp_def, Matrix.constant_eq_singleton]
 
-lemma models_preserveEq_iff (D : Semiformula.Operator L₁ 1) (E : Semiformula.Operator L₁ 2) :
+lemma models_preserveEq_iff (E : Semiformula.Operator L₁ 2) :
     M↓[L₁] ⊧ “∀ x y, %D x → %D y → (%E x y ↔ x = y)” ↔
       ∀ x y : M, D.val ![x] → D.val ![y] → (E.val ![x, y] ↔ x = y) := by
   simp [models_iff]
@@ -137,10 +134,10 @@ section ite
 
 variable (φ : Sentence L₁) [𝗘𝗤 _ ⪯ insert φ T] [𝗘𝗤 _ ⪯ insert (∼φ) T]
   (π₀ : DirectTranslation (insert φ T) L₂) (π₁ : DirectTranslation (insert (∼φ) T) L₂)
+  {M : Type*} [Nonempty M] [Tarski.Structure L₁ M]
 
 omit [L₁.Eq] in
-private lemma eval_rew_empty_iff {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] {n}
-    {e : Fin n → M} (σ : Sentence L₁) :
+private lemma eval_rew_empty_iff {n} {e : Fin n → M} (σ : Sentence L₁) :
     (⟨Rew.empty ▹ σ⟩ : Semiformula.Operator L₁ n).val e ↔ M↓[L₁] ⊧ σ := by
   simp only [Semiformula.Operator.val]
   rw [Semiformula.eval_empty]
@@ -148,8 +145,7 @@ private lemma eval_rew_empty_iff {M : Type*} [Nonempty M] [Tarski.Structure L₁
     fun h ↦ Semiformula.Eval.of_eq h rfl (funext fun a ↦ a.elim)⟩
 
 omit [L₁.Eq] in
-private lemma models_insert_cases {M : Type*} [Nonempty M] [Tarski.Structure L₁ M]
-    (hT : M↓[L₁] ⊧* T) : (M↓[L₁] ⊧ φ ∧ M↓[L₁] ⊧* insert φ T) ∨
+private lemma models_insert_cases (hT : M↓[L₁] ⊧* T) : (M↓[L₁] ⊧ φ ∧ M↓[L₁] ⊧* insert φ T) ∨
       (M↓[L₁] ⊧ ∼φ ∧ M↓[L₁] ⊧* insert (∼φ) T) := by
   rcases Classical.em (M↓[L₁] ⊧ φ) with hφ | hφ
   · exact Or.inl ⟨hφ, Semantics.ModelsSet.insert_iff.mpr ⟨hφ, hT⟩⟩
@@ -157,8 +153,7 @@ private lemma models_insert_cases {M : Type*} [Nonempty M] [Tarski.Structure L�
     exact Or.inr ⟨hφ', Semantics.ModelsSet.insert_iff.mpr ⟨hφ', hT⟩⟩
 
 omit [L₁.Eq] in
-private lemma ite_gate_iff {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] (hφ : M↓[L₁] ⊧ φ) {k}
-    {e : Fin k → M} {X Y : Semiformula.Operator L₁ k} :
+private lemma ite_gate_iff (hφ : M↓[L₁] ⊧ φ) {k} {e : Fin k → M} {X Y : Semiformula.Operator L₁ k} :
     (((⟨Rew.empty ▹ φ⟩ : Semiformula.Operator L₁ k).and X).or
       ((⟨Rew.empty ▹ ∼φ⟩ : Semiformula.Operator L₁ k).and Y)).val e ↔ X.val e := by
   have hφ' : ¬ M↓[L₁] ⊧ ∼φ := by simpa using hφ
@@ -166,7 +161,7 @@ private lemma ite_gate_iff {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] (h
   tauto
 
 omit [L₁.Eq] in
-private lemma ite_gate_iff' {M : Type*} [Nonempty M] [Tarski.Structure L₁ M] (hφ' : M↓[L₁] ⊧ ∼φ)
+private lemma ite_gate_iff' (hφ' : M↓[L₁] ⊧ ∼φ)
     {k} {e : Fin k → M} {X Y : Semiformula.Operator L₁ k} :
     (((⟨Rew.empty ▹ φ⟩ : Semiformula.Operator L₁ k).and X).or
       ((⟨Rew.empty ▹ ∼φ⟩ : Semiformula.Operator L₁ k).and Y)).val e ↔ Y.val e := by
@@ -212,8 +207,6 @@ def ite : DirectTranslation T L₂ where
       simpa only [ite_gate_iff φ hφ] using H
     · have H := (models_preserveEq_iff _ _).mp (models_of_provable hT' π₁.preserve_eq)
       simpa only [ite_gate_iff' φ hφ'] using H
-
-variable {M : Type*} [Nonempty M] [Tarski.Structure L₁ M]
 
 private lemma ite_translate_iff (hφ : M↓[L₁] ⊧ φ) {ξ n} (σ : Semiformula L₂ ξ n) {e : Fin n → M}
     {ε : ξ → M} :
@@ -302,26 +295,27 @@ end DirectTranslation
 
 namespace DirectInterpretation
 
-variable {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] {T : Theory L₁} [𝗘𝗤 _ ⪯ T] {U : Theory L₂}
+variable {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] {T : Theory L₁} [𝗘𝗤 _ ⪯ T] {U : Theory L₂} (π : T ⊳ U)
 
+include π in
 /-- Consistency transfers along interpretation: if `T` interprets `U` and `T` is consistent, so
 is `U`.
 - [HP98, Corollary III.1.6]
 - [Lin97, p. 76] -/
-theorem consistent (π : T ⊳ U) [Entailment.Consistent T] : Entailment.Consistent U :=
+theorem consistent [Entailment.Consistent T] : Entailment.Consistent U :=
   Entailment.Consistent.of_unprovable (φ := ⊥) fun h ↦
     Entailment.Consistent.not_bot (𝓢 := T) (by simpa using π.sound h)
 
 /-- If `T` interprets `U` and `U'` is (provably) weaker than `U`, then `T` interprets `U'`,
 via the same translation.
 - [Lin97, Ch. 6 §1] -/
-abbrev ofWeakerThanRight (π : T ⊳ U) {U' : Theory L₂} [U' ⪯ U] : T ⊳ U' where
+abbrev ofWeakerThanRight {U' : Theory L₂} [U' ⪯ U] : T ⊳ U' where
   trln := π.trln
   interpret_theory _φ hφ := π.sound (Entailment.WeakerThan.pbl (Entailment.by_axm hφ))
 
 /-- If `T` interprets `U` and `T'` is (provably) stronger than `T`, then `T'` interprets `U`.
 - [Lin97, Ch. 6 §1] -/
-abbrev ofWeakerThanLeft (π : T ⊳ U) {T' : Theory L₁} [𝗘𝗤 _ ⪯ T'] [T ⪯ T'] : T' ⊳ U where
+abbrev ofWeakerThanLeft {T' : Theory L₁} [𝗘𝗤 _ ⪯ T'] [T ⪯ T'] : T' ⊳ U where
   trln := π.trln.ofWeakerThan
   interpret_theory φ hφ := by
     have h : T' ⊢ π.trln.translate φ := Entailment.WeakerThan.pbl (π.interpret_theory φ hφ)

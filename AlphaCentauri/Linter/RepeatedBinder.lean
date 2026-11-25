@@ -221,12 +221,15 @@ def dataPositions (binders : Array Syntax) : CommandElabM (Std.HashSet String.Po
 def check (declaration : Declaration) (seen : Std.HashMap String Occurrence) :
     CommandElabM (Std.HashMap String Occurrence) := do
   let mut ctx := readVariables {} ((← getScope).varDecls.map (·.raw))
-  ctx := readVariables ctx declaration.localVariables
+  -- a binder without a type only changes the kind of a variable
+  let localVariables := declaration.localVariables.filter fun b ↦
+    (BinderParts.ofSyntax? b).any (·.type?.isSome)
   let mut seen := seen
   let mut own : Std.HashSet String := {}
   let fileMap ← getFileMap
-  let positions ← dataPositions declaration.binders
-  for binder in declaration.binders do
+  let binders := localVariables ++ declaration.binders
+  let positions ← dataPositions binders
+  for binder in binders do
     let (ctx', arguments) := readBinder ctx binder fun n ↦ n.getPos?.any positions.contains
     ctx := ctx'
     for argument in arguments do

@@ -9,8 +9,6 @@ public import AlphaCentauri.Bootstrapping.Interpretability.RelativizedBlocks
 The internal translation respects typed formulas.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -28,73 +26,74 @@ open _root_.FFL.Entailment
 section typed
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable] {tbl : V} (hT : IsTable L₁ L₂ tbl)
+  [L₂.Encodable] [L₂.LORDefinable] {tbl : V} (hT : IsTable L₁ L₂ tbl) {n : ℕ}
 
 /-- The translation along a table of a typed formula, as a typed formula. -/
-noncomputable def IsTable.transT {n : ℕ} (φ : Semiformula V L₂ n) : Semiformula V L₁ n :=
+noncomputable def IsTable.transT (φ : Semiformula V L₂ n) : Semiformula V L₁ n :=
   ⟨translate L₁ L₂ tbl φ.val, IsSemiformula.translate hT φ.isSemiformula⟩
 
 namespace IsTable
 
-@[simp]
-lemma transT_val {n : ℕ} (φ : Semiformula V L₂ n) :
-    (hT.transT φ).val = translate L₁ L₂ tbl φ.val := rfl
+variable (φ ψ : Semiformula V L₂ n)
 
 @[simp]
-lemma transT_verum {n : ℕ} : hT.transT (⊤ : Semiformula V L₂ n) = ⊤ := by
+lemma transT_val : (hT.transT φ).val = translate L₁ L₂ tbl φ.val := rfl
+
+@[simp]
+lemma transT_verum : hT.transT (⊤ : Semiformula V L₂ n) = ⊤ := by
   ext; simp
 
 @[simp]
-lemma transT_falsum {n : ℕ} : hT.transT (⊥ : Semiformula V L₂ n) = ⊥ := by
+lemma transT_falsum : hT.transT (⊥ : Semiformula V L₂ n) = ⊥ := by
   ext; simp
 
 @[simp]
-lemma transT_and {n : ℕ} (φ ψ : Semiformula V L₂ n) :
-    hT.transT (φ ⋏ ψ) = hT.transT φ ⋏ hT.transT ψ := by
+lemma transT_and : hT.transT (φ ⋏ ψ) = hT.transT φ ⋏ hT.transT ψ := by
   ext; simp [φ.isSemiformula.isUFormula, ψ.isSemiformula.isUFormula]
 
 @[simp]
-lemma transT_or {n : ℕ} (φ ψ : Semiformula V L₂ n) :
-    hT.transT (φ ⋎ ψ) = hT.transT φ ⋎ hT.transT ψ := by
+lemma transT_or : hT.transT (φ ⋎ ψ) = hT.transT φ ⋎ hT.transT ψ := by
   ext; simp [φ.isSemiformula.isUFormula, ψ.isSemiformula.isUFormula]
 
 @[simp]
-lemma transT_neg {n : ℕ} (φ : Semiformula V L₂ n) : hT.transT (∼φ) = ∼hT.transT φ := by
+lemma transT_neg : hT.transT (∼φ) = ∼hT.transT φ := by
   ext; simp [translate_neg hT φ.isSemiformula]
 
 @[simp]
-lemma transT_imp {n : ℕ} (φ ψ : Semiformula V L₂ n) :
-    hT.transT (φ 🡒 ψ) = hT.transT φ 🡒 hT.transT ψ := by
+lemma transT_imp : hT.transT (φ 🡒 ψ) = hT.transT φ 🡒 hT.transT ψ := by
   simp [Semiformula.imp_def]
 
 @[simp]
-lemma transT_iff {n : ℕ} (φ ψ : Semiformula V L₂ n) :
-    hT.transT (φ 🡘 ψ) = hT.transT φ 🡘 hT.transT ψ := by
+lemma transT_iff : hT.transT (φ 🡘 ψ) = hT.transT φ 🡘 hT.transT ψ := by
   simp [LogicalConnective.iff]
 
 @[simp]
-lemma transT_conj {n m : ℕ} (v : Fin m → Semiformula V L₂ n) :
+lemma transT_conj {m : ℕ} (v : Fin m → Semiformula V L₂ n) :
     hT.transT (Matrix.conj v) = Matrix.conj fun i ↦ hT.transT (v i) :=
   Matrix.conj_map hT.transT (transT_verum hT) (transT_and hT) v
 
-lemma domainAt_zero_typed {n : ℕ} :
+lemma domainAt_zero_typed :
     domainAt L₁ tbl 0 = (hT.domT.subst ![Semiterm.bvar 0] : Semiformula V L₁ (n + 1)).val := by
   rw [Semiformula.val_substs, domT_val, domainAt]
   simp
 
+section
+
+variable (φ : Semiformula V L₂ (n + 1))
+
 @[simp]
-lemma transT_all {n : ℕ} (φ : Semiformula V L₂ (n + 1)) :
-    hT.transT (∀¹ φ) = ∀¹ (hT.domT.subst ![Semiterm.bvar 0] 🡒 hT.transT φ) := by
+lemma transT_all : hT.transT (∀¹ φ) = ∀¹ (hT.domT.subst ![Semiterm.bvar 0] 🡒 hT.transT φ) := by
   ext
   simp [φ.isSemiformula.isUFormula, domainAt_zero_typed hT (n := n)]
 
 @[simp]
-lemma transT_exs {n : ℕ} (φ : Semiformula V L₂ (n + 1)) :
-    hT.transT (∃¹ φ) = ∃¹ (hT.domT.subst ![Semiterm.bvar 0] ⋏ hT.transT φ) := by
+lemma transT_exs : hT.transT (∃¹ φ) = ∃¹ (hT.domT.subst ![Semiterm.bvar 0] ⋏ hT.transT φ) := by
   ext
   simp [φ.isSemiformula.isUFormula, domainAt_zero_typed hT (n := n)]
 
-lemma transT_allItr {n : ℕ} : ∀ (k : ℕ) (φ : Semiformula V L₂ (n + k)),
+end
+
+lemma transT_allItr : ∀ (k : ℕ) (φ : Semiformula V L₂ (n + k)),
     hT.transT (∀¹^[k] φ) = relAllItr hT.domT k (hT.transT φ)
   | 0, φ => rfl
   | k + 1, φ => by
@@ -116,8 +115,7 @@ lemma transT_rel {k : ℕ} (R : L₂.Rel k) (v : Fin k → Term V L₂) :
   ext
   rw [transT_val, translate_rel_typed]
 
-lemma transT_shift {n : ℕ} (φ : Semiformula V L₂ n) :
-    hT.transT φ.shift = (hT.transT φ).shift := by
+lemma transT_shift : hT.transT φ.shift = (hT.transT φ).shift := by
   ext; simp [translate_shift hT φ.isSemiformula]
 
 lemma transT_free (φ : Semiformula V L₂ 1) : hT.transT φ.free = (hT.transT φ).free := by
@@ -126,14 +124,18 @@ lemma transT_free (φ : Semiformula V L₂ 1) : hT.transT φ.free = (hT.transT �
 
 end IsTable
 
+section
+
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {tbl : V} (hT : IsTable L L tbl)
+  {m : ℕ} (w : SemitermVec V L n m)
+
+omit [L.Eq] in
 /-- A vector of terms each of which is a variable. -/
-def IsVarVec {L : Language} [L.Encodable] [L.LORDefinable] {n m : ℕ}
-    (w : SemitermVec V L n m) : Prop :=
+def IsVarVec : Prop :=
   ∀ i, (∃ z, w i = Semiterm.bvar z) ∨ (∃ x, w i = Semiterm.fvar x)
 
-lemma IsTable.transT_subst {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {tbl : V}
-    (hT : IsTable L L tbl) {n m : ℕ} (w : SemitermVec V L n m) (hw : IsVarVec w)
-    (φ : Semiformula V L n) : hT.transT (φ.subst w) = (hT.transT φ).subst w := by
+lemma IsTable.transT_subst (hw : IsVarVec w) (φ : Semiformula V L n) :
+    hT.transT (φ.subst w) = (hT.transT φ).subst w := by
   ext
   simp only [IsTable.transT_val, Semiformula.val_substs]
   apply translate_subst hT w.isSemitermVec ?_ φ.isSemiformula
@@ -143,6 +145,8 @@ lemma IsTable.transT_subst {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] 
   rcases hw i with ⟨z, hz⟩ | ⟨x, hx⟩
   · exact Or.inl ⟨z, by simp [hz]⟩
   · exact Or.inr ⟨x, by simp [hx]⟩
+
+end
 
 end typed
 

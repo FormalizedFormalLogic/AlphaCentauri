@@ -12,8 +12,6 @@ Uniform reflection and the locally $\Delta_0$ axioms of arithmetic theories in m
 $\mathsf{EA}$.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 /-! ## The induction schemata recognised on codes -/
@@ -55,7 +53,10 @@ def InductionR (S : V → Prop) (p : V) : Prop :=
     ∧ ∃ K ≤ subst ℒₒᵣ (fvarVec m) b,
         IsSemiformula ℒₒᵣ 1 K ∧ S K ∧ subst ℒₒᵣ (fvarVec m) b = indBodyVal K
 
-instance InductionR.defined {cond : 𝚫ᴬ₁.Semisentence 1} [hcond : 𝚫ᴬ₁-Predicate[V] S via cond] :
+section
+variable {cond : 𝚫ᴬ₁.Semisentence 1}
+
+instance InductionR.defined [hcond : 𝚫ᴬ₁-Predicate[V] S via cond] :
     𝚫ᴬ₁-Predicate[V] (InductionR S : V → Prop) via chInd cond := .mk <| by
   constructor
   · intro v; simp [chInd, HierarchySymbol.Semiformula.val_sigma, eq_comm]
@@ -97,20 +98,27 @@ lemma inductionR_locallyDelta0 (hS : LocallyDelta0Pred S) : LocallyDelta0Pred (I
 
 /-- A theory whose $\Delta_1$ formula is `chInd cond`, for a formula `cond` defining a locally
 $\Delta_0$ predicate `S`, has locally $\Delta_0$ axioms. -/
-lemma locallyDelta0Axioms_of_chInd {T : ArithmeticTheory} [T.Δ₁] {cond : 𝚫ᴬ₁.Semisentence 1}
+lemma locallyDelta0Axioms_of_chInd {T : ArithmeticTheory} [T.Δ₁]
     (hch : T.Δ₁ch = chInd cond) [𝚫ᴬ₁-Predicate[V] S via cond] (hS : LocallyDelta0Pred S) :
     LocallyDelta0Axioms T V where
   properOn := hch ▸ (InductionR.defined (S := S)).proper
   locallyDelta0 := (inductionR_locallyDelta0 hS).of_iff fun v ↦ by
     simp [Theory.Δ₁Class, hch]
 
-instance InductionScheme.locallyDelta0Axioms_hierarchy (Γ : Polarity) (s : ℕ) :
+end
+
+section
+variable (Γ : Polarity) (s : ℕ)
+
+instance InductionScheme.locallyDelta0Axioms_hierarchy :
     LocallyDelta0Axioms (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].Hierarchy Γ s)) V :=
   locallyDelta0Axioms_of_chInd rfl (isHierarchy_locallyDelta0 Γ s)
 
-instance InductionScheme.locallyDelta0Axioms_prenexHierarchy (Γ : Polarity) (s : ℕ) :
+instance InductionScheme.locallyDelta0Axioms_prenexHierarchy :
     LocallyDelta0Axioms (InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s)) V :=
   locallyDelta0Axioms_of_chInd rfl (isPrenexHierarchy_locallyDelta0 Γ s)
+
+end
 
 instance : LocallyDelta0Axioms 𝗣𝗔⁻ V := LocallyDelta0Axioms.ofFinite _ _
 

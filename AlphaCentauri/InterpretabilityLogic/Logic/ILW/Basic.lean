@@ -11,8 +11,6 @@ public import Mathlib.Data.Set.Finite.List
 The logic $\mathbf{ILW}$ and its completeness with respect to finite Veltman models.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
@@ -91,9 +89,9 @@ variable {L : Logic α} {Φ : Finset (Formula α)} {Γ Δ : MaximalConsistentSet
   {Y Z₁ Z₂ Z₁' Z₂' : Finset (Formula α × Formula α)} {p : Formula α × Formula α}
   {C D E F : Formula α}
 
+variable (Γ E) in
 /-- The pairs `(B, C)` of formulas in `Φ` with `B ▷ C ∈ Γ` and `B ▷ E ∉ Γ`. -/
-noncomputable def rhdPairs (Γ : MaximalConsistentSet L Φ) (E : Formula α) :
-    Finset (Formula α × Formula α) :=
+noncomputable def rhdPairs : Finset (Formula α × Formula α) :=
   (Φ ×ˢ Φ).filter fun p ↦ p.1 ▷ p.2 ∈ Γ ∧ p.1 ▷ E ∉ Γ
 
 lemma rhd_mem_of_mem_rhdPairs (hp : p ∈ Γ.rhdPairs E) : p.1 ▷ p.2 ∈ Γ :=
@@ -118,21 +116,25 @@ lemma CriticalSolution.mono (h : CriticalSolution E C Z₁ Z₂ Γ Δ) (h₁ : Z
   ⟨h.toCriticalSuccessor, h.mem, fun p hp ↦ h.box_neg_mem_of_mem p (h₁ hp),
     fun p hp ↦ h.not_mem_of_mem p (h₂ hp)⟩
 
+section
+
+variable (Γ E)
+
 /-- `r` assigns to each pair `(B, C)` in `Y` a number below `|Y|` such that `C` has an `E`-critical
 solution with `□∼B'` for the pairs `(B', C')` in `Y` of rank at least that of `(B, C)` and blocking
 the antecedents of the pairs of greater rank.
 
 - [dJV99, Theorem 13]
 -/
-def IsRank (Γ : MaximalConsistentSet L Φ) (E : Formula α) (Y : Finset (Formula α × Formula α))
-    (r : Formula α × Formula α → ℕ) : Prop :=
+def IsRank (Y : Finset (Formula α × Formula α)) (r : Formula α × Formula α → ℕ) : Prop :=
   ∀ p ∈ Y, r p < Y.card ∧
     ∃ Δ, CriticalSolution E p.2 (Y.filter (r p ≤ r ·)) (Y.filter (r p < r ·)) Γ Δ
 
 /-- A rank on `Γ.rhdPairs E`, if there is one. -/
-noncomputable def rank (Γ : MaximalConsistentSet L Φ) (E : Formula α) :
-    Formula α × Formula α → ℕ :=
+noncomputable def rank : Formula α × Formula α → ℕ :=
   Classical.epsilon (Γ.IsRank E (Γ.rhdPairs E))
+
+end
 
 section
 
@@ -341,7 +343,7 @@ namespace Veltman
 
 open MaximalConsistentSet
 
-variable {L : Logic α} {Φ : Finset (Formula α)}
+variable (L : Logic α) (𝔸 : FormulaSet α) (Φ : Finset (Formula α))
 
 /-- A maximal consistent subset of `Φ` together with a finite sequence of pairs of an antecedent or
 consequent of a `▷`-formula in `Φ` and a number at most `|Φ × Φ|`, no longer than the number of
@@ -349,7 +351,7 @@ consequent of a `▷`-formula in `Φ` and a number at most `|Φ × Φ|`, no long
 
 - [dJV99, Theorem 13]
 -/
-structure RankedSet (L : Logic α) (Φ : Finset (Formula α)) where
+structure RankedSet where
   set : MaximalConsistentSet L Φ
   seq : List (Formula α × ℕ)
   isRhdOperand_of_mem_seq : ∀ p ∈ seq, IsRhdOperand Φ p.1
@@ -358,7 +360,7 @@ structure RankedSet (L : Logic α) (Φ : Finset (Formula α)) where
 
 namespace RankedSet
 
-variable {x y z w : RankedSet L Φ} {E F : Formula α} {i j k : ℕ}
+variable {L Φ} {x y z w : RankedSet L Φ} {E F : Formula α} {i j k : ℕ}
 
 lemma ext {x y : RankedSet L Φ} (h₁ : x.set = y.set) (h₂ : x.seq = y.seq) : x = y := by
   cases x; cases y; simp_all;
@@ -386,6 +388,10 @@ lemma eq_of_append_singleton_prefix {s l : List (Formula α × ℕ)} {a b : Form
   have h := (List.prefix_of_prefix_length_le ha hb (by simp)).eq_of_length (by simp);
   simpa using h;
 
+section
+
+variable (x y E k)
+
 /-- `y` extends `x` by the label `(E, k)`: the set of `y` is an `E`-critical successor of the set
 of `x` containing `□∼B` for every pair `(B, C)` in `x.set.rhdPairs E` of rank at least `k`, and
 not containing `B` if the rank is greater than `k`, or at least `k` and `y` extends `x` by more
@@ -393,7 +399,7 @@ than one label.
 
 - [dJV99, Theorem 13]
 -/
-structure RelWith (x y : RankedSet L Φ) (E : Formula α) (k : ℕ) : Prop where
+structure RelWith : Prop where
   append_prefix : x.seq ++ [(E, k)] <+: y.seq
   criticalSuccessor : CriticalSuccessor E x.set y.set
   box_neg_mem : ∀ p ∈ x.set.rhdPairs E, k ≤ x.set.rank E p → □(∼p.1) ∈ y.set
@@ -402,9 +408,8 @@ structure RelWith (x y : RankedSet L Φ) (E : Formula α) (k : ℕ) : Prop where
     ∀ p ∈ x.set.rhdPairs E, k ≤ x.set.rank E p → p.1 ∉ y.set
 
 /-- The set `Δ` indexed by the sequence of `x` followed by `(E, k)`. -/
-def extend (x : RankedSet L Φ) (E : Formula α) (k : ℕ) (hE : IsRhdOperand Φ E)
-    (hk : k ≤ (Φ ×ˢ Φ).card) (Δ : MaximalConsistentSet L Φ) (h : Successor x.set Δ) :
-    RankedSet L Φ :=
+def extend (hE : IsRhdOperand Φ E) (hk : k ≤ (Φ ×ˢ Φ).card) (Δ : MaximalConsistentSet L Φ)
+    (h : Successor x.set Δ) : RankedSet L Φ :=
   ⟨Δ, x.seq ++ [(E, k)], fun p hp ↦ by
       rcases List.mem_append.mp hp with hp | hp;
       · exact x.isRhdOperand_of_mem_seq p hp;
@@ -418,6 +423,8 @@ def extend (x : RankedSet L Φ) (E : Formula α) (k : ℕ) (hE : IsRhdOperand Φ
     by simpa using Nat.succ_le_of_lt <| x.length_seq_le.trans_lt <|
       Finset.card_lt_card h.prebox_ssubset⟩
 
+end
+
 end RankedSet
 
 open RankedSet
@@ -428,8 +435,7 @@ open RankedSet
 
 - [dJV99, Theorem 13]
 -/
-def rankedCountermodel (𝔸 : FormulaSet α) (Φ : Finset (Formula α))
-    [Nonempty (RankedSet (Logic.ofILAxioms 𝔸) Φ)] :
+def rankedCountermodel [Nonempty (RankedSet (Logic.ofILAxioms 𝔸) Φ)] :
     Model (RankedSet (Logic.ofILAxioms 𝔸) Φ) α where
   Rel' x y := ∃ E k, x.RelWith y E k
   S' w x y := (∃ E k, w.RelWith x E k) ∧ (∃ E k, w.RelWith y E k) ∧
@@ -441,7 +447,7 @@ namespace rankedCountermodel
 
 open Model Model.World
 
-variable {𝔸 : FormulaSet α} [Nonempty (RankedSet (Logic.ofILAxioms 𝔸) Φ)]
+variable {𝔸 Φ} [Nonempty (RankedSet (Logic.ofILAxioms 𝔸) Φ)]
 
 variable {x y z : RankedSet (Logic.ofILAxioms 𝔸) Φ} {E : Formula α} {k : ℕ}
 
@@ -487,7 +493,9 @@ instance : IsTrans _ (rankedCountermodel 𝔸 Φ).Rel := ⟨fun _ _ _ ↦ rel_tr
 
 instance : Std.Irrefl (rankedCountermodel 𝔸 Φ).Rel := ⟨fun _ ↦ rel_irrefl⟩
 
-instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).IsIL where
+variable [Adequate Φ]
+
+instance : (rankedCountermodel 𝔸 Φ).IsIL where
   rel_of_s_left h := h.1
   rel_of_s_right h := h.2.1
   s_refl h := ⟨h, h, .inl rfl⟩
@@ -515,7 +523,7 @@ instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).IsIL where
         exact ⟨E, i, k, hx, hz, by omega⟩
   s_of_rel h₁ h₂ := ⟨h₁, rel_trans h₁ h₂, .inr <| .inl h₂⟩
 
-instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).HasW := HasW.of_finite <| by
+instance : (rankedCountermodel 𝔸 Φ).HasW := HasW.of_finite <| by
   intro w x y hxy hyx;
   obtain ⟨-, hwx, h⟩ := hyx;
   rcases h with rfl | hyx | ⟨E, i, j, hy, hx, hij⟩;
@@ -528,13 +536,14 @@ instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).HasW := HasW.of_finite <| 
     simp only [List.length_append, List.length_singleton] at h₁;
     omega;
 
-instance [Adequate Φ] : (rankedCountermodel 𝔸 Φ).IsILW := {}
+instance : (rankedCountermodel 𝔸 Φ).IsILW := {}
 
-variable [Adequate Φ] (hW : ∀ {A B : Formula α}, Logic.ofILAxioms 𝔸 ⊢ Axioms.W A B)
+variable {x : (rankedCountermodel 𝔸 Φ).World}
+  (hW : ∀ {A B : Formula α}, Logic.ofILAxioms 𝔸 ⊢ Axioms.W A B)
 include hW
 
-lemma exists_rel_of_mem_rhdPairs {x : (rankedCountermodel 𝔸 Φ).World} {E : Formula α}
-    {p : Formula α × Formula α} (hE : IsRhdOperand Φ E) (hp : p ∈ x.set.rhdPairs E) :
+lemma exists_rel_of_mem_rhdPairs {p : Formula α × Formula α}
+    (hE : IsRhdOperand Φ E) (hp : p ∈ x.set.rhdPairs E) :
     ∃ y, (rankedCountermodel 𝔸 Φ).Rel x y ∧ y.seq = x.seq ++ [(E, x.set.rank E p)] ∧
       p.2 ∈ y.set := by
   obtain ⟨-, Δ, hΔ⟩ := isRank_rank hW hE p hp;
@@ -544,8 +553,7 @@ lemma exists_rel_of_mem_rhdPairs {x : (rankedCountermodel 𝔸 Φ).World} {E : F
     (fun q hq hk ↦ hΔ.not_mem_of_mem q (Finset.mem_filter.mpr ⟨hq, hk⟩))
 
 /-- - [dJV99, Theorem 13] -/
-lemma truthlemma {x : (rankedCountermodel 𝔸 Φ).World} {A : Formula α} (hA : A ∈ Φ) :
-    x ⊩ A ↔ A ∈ x.set := by
+lemma truthlemma {A : Formula α} (hA : A ∈ Φ) : x ⊩ A ↔ A ∈ x.set := by
   induction A generalizing x with
   | atom a => rfl;
   | falsum => exact ⟨False.elim, fun h ↦ bot_not_mem h⟩;
@@ -621,8 +629,9 @@ namespace Logic.ofILAxioms
 open Veltman Veltman.Model.World MaximalConsistentSet
 
 variable {𝔸 : FormulaSet α} {Φ : Finset (Formula α)} {A : Formula α}
+  [Entailment.Consistent (ofILAxioms 𝔸)]
 
-instance [Entailment.Consistent (ofILAxioms 𝔸)] : Nonempty (RankedSet (ofILAxioms 𝔸) Φ) := by
+instance : Nonempty (RankedSet (ofILAxioms 𝔸) Φ) := by
   obtain ⟨Γ, -⟩ := exists_consistent_union (Φ := Φ) (L := ofILAxioms 𝔸) (X := ∅) <| by
     intro h;
     exact Entailment.Consistent.not_inconsistent (𝓢 := ofILAxioms 𝔸) fun _ ↦
@@ -634,8 +643,8 @@ instance [Entailment.Consistent (ofILAxioms 𝔸)] : Nonempty (RankedSet (ofILAx
 
 - [dJV99, Theorem 13]
 -/
-lemma not_models_rankedCountermodel [Entailment.Consistent (ofILAxioms 𝔸)]
-    (hW : ∀ {A B : Formula α}, ofILAxioms 𝔸 ⊢ Axioms.W A B) (h : ofILAxioms 𝔸 ⊬ A) :
+lemma not_models_rankedCountermodel (hW : ∀ {A B : Formula α}, ofILAxioms 𝔸 ⊢ Axioms.W A B)
+    (h : ofILAxioms 𝔸 ⊬ A) :
     ¬rankedCountermodel 𝔸 (adequateClosure {A}) ⊧ A := by
   intro hM;
   have hX : ({∼A} : FormulaSet α) *⊬[ofILAxioms 𝔸] ⊥ := by

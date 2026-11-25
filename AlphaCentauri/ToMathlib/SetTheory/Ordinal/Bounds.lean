@@ -9,8 +9,6 @@ public import Mathlib.SetTheory.Ordinal.Principal
 Bounds on ordinal arithmetic and the $\omega$-tower.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace Ordinal
@@ -38,10 +36,10 @@ variable (a b : Ordinal) (f : ℕ → Ordinal)
 
 lemma zero_lt_add_one : 0 < a + 1 := one_pos.trans_le le_add_self
 
-private lemma lt_opow_succ_max_left (a b : Ordinal) : ω ^ a < ω ^ (max a b + 1) :=
+private lemma lt_opow_succ_max_left : ω ^ a < ω ^ (max a b + 1) :=
   (opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_left a b).trans_lt (lt_add_one _))
 
-private lemma lt_opow_succ_max_right (a b : Ordinal) : ω ^ b < ω ^ (max a b + 1) :=
+private lemma lt_opow_succ_max_right : ω ^ b < ω ^ (max a b + 1) :=
   (opow_lt_opow_iff_right one_lt_omega0).mpr ((le_max_right a b).trans_lt (lt_add_one _))
 
 private lemma lt_opow_succ_max_of_le_max {a b x : Ordinal} (hx : x ≤ max (ω ^ a) (ω ^ b)) :
@@ -61,16 +59,15 @@ lemma iSup_opow_add_one_le : (⨆ n, ω ^ f n) + 1 ≤ ω ^ ((⨆ n, f n) + 1) :
   refine (add_one_lt_omega0_opow (zero_lt_add_one _) (hsup.trans_lt ?_)).le
   exact (opow_lt_opow_iff_right one_lt_omega0).mpr (lt_add_one _)
 
-lemma max_add_add_one_add_one_le (a b c : Ordinal) :
+lemma max_add_add_one_add_one_le (c : Ordinal) :
     max (a + b + 1) (a + c + 1) + 1 ≤ a + (max b c + 1) + 1 := by
   gcongr
   refine max_le ?_ ?_ <;> rw [add_assoc] <;> gcongr <;> simp
 
-lemma add_add_one_add_one_le (a b : Ordinal) : a + b + 1 + 1 ≤ a + (b + 1) + 1 :=
+lemma add_add_one_add_one_le : a + b + 1 + 1 ≤ a + (b + 1) + 1 :=
   le_of_eq (by rw [add_assoc a b 1])
 
-lemma iSup_add_add_one_add_one_le (a : Ordinal) (f : ℕ → Ordinal) :
-    (⨆ n, a + f n + 1) + 1 ≤ a + ((⨆ n, f n) + 1) + 1 := by
+lemma iSup_add_add_one_add_one_le : (⨆ n, a + f n + 1) + 1 ≤ a + ((⨆ n, f n) + 1) + 1 := by
   gcongr
   apply Ordinal.iSup_le
   intro n

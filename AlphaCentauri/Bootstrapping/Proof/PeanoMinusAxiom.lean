@@ -14,8 +14,6 @@ public import Foundation.FirstOrder.Incompleteness.Definability
 The axioms of $\mathsf{PA}^-$ as blocks of existential quantifiers with false instances.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -54,7 +52,10 @@ private lemma isFalseBlock_neg_quote_allClosure {k D m : ℕ} {θ : ArithmeticSe
     simp only [models_iff, Semiformula.eval_allClosure] at hσ
     simpa using hσ _
 
-private lemma exists_allClosure_closure_of_peanoMinus {σ : ArithmeticSentence} (h : σ ∈ 𝗣𝗔⁻) :
+section
+variable {σ : ArithmeticSentence}
+
+private lemma exists_allClosure_closure_of_peanoMinus (h : σ ∈ 𝗣𝗔⁻) :
     ∃ m, ∃ θ : ArithmeticSemisentence m, σ = ∀¹* θ ∧ ℬ[<, ℒₒᵣ].Closure θ ∧ ∀ ψ, θ ≠ ∀¹ ψ := by
   rcases h with ⟨φ, hφ⟩ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _
   · rcases hφ with _ | _ | _ | @⟨k, f⟩ | @⟨k, r⟩
@@ -80,18 +81,22 @@ private lemma exists_allClosure_closure_of_peanoMinus {σ : ArithmeticSentence} 
          Semiformula.Operator.LT.lt, Semiformula.Operator.LE.sentence_eq])
     | (intro ψ h; cases h)
 
-private lemma isFalseBlock_neg_quote_of_mem_peanoMinus {σ : ArithmeticSentence}
+private lemma isFalseBlock_neg_quote_of_mem_peanoMinus
     (h : σ ∈ 𝗣𝗔⁻) (k D : ℕ) : IsFalseBlock k D (neg ℒₒᵣ (⌜σ⌝ : V)) := by
   obtain ⟨m, θ, rfl, hθ, hn⟩ := exists_allClosure_closure_of_peanoMinus h
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := mod_paMinus_of_ISigma (s := 1)
   exact isFalseBlock_neg_quote_allClosure hθ hn (Semantics.ModelsSet.models _ h)
 
-lemma isFalseBlock_neg_of_mem_peanoMinus_Δ₁Class {p : V}
+end
+
+variable {p : V}
+
+lemma isFalseBlock_neg_of_mem_peanoMinus_Δ₁Class
     (hp : p ∈ (𝗣𝗔⁻ : ArithmeticTheory).Δ₁Class) (k D : ℕ) : IsFalseBlock k D (neg ℒₒᵣ p) := by
   obtain ⟨σ, hσ, rfl⟩ := (mem_peanoMinus_Δ₁Class_iff p).mp hp
   exact isFalseBlock_neg_quote_of_mem_peanoMinus hσ k D
 
-lemma derivable_of_mem_peanoMinus_Δ₁Class {p : V} (hp : p ∈ (𝗣𝗔⁻ : ArithmeticTheory).Δ₁Class) :
+lemma derivable_of_mem_peanoMinus_Δ₁Class (hp : p ∈ (𝗣𝗔⁻ : ArithmeticTheory).Δ₁Class) :
     Derivable (∅ : Theory ℒₒᵣ) (insert (neg ℒₒᵣ p) ({p} : V)) := by
   obtain ⟨σ, -, rfl⟩ := (mem_peanoMinus_Δ₁Class_iff p).mp hp
   have hf : IsFormula ℒₒᵣ (⌜σ⌝ : V) := Sentence.quote_isSemiformula₀ σ

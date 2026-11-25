@@ -16,8 +16,6 @@ Replacing the axioms of $\mathsf{I}\Sigma_n$ and $\mathsf{EA}$ by blocks of exis
 with false instances.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -81,6 +79,9 @@ lemma isFalseBlock_substNumerals_exs {s m : ℕ} (hs : s ≤ k)
     | zero => simp
     | succ i => simp [w]
 
+section
+variable (n : ℕ)
+
 /-- `q` is the replacement of the axiom `p` of `𝗜𝚺 n`: an axiom of $\mathsf{PA}^-$ is its own
 replacement, and an induction axiom is replaced by the prenex form of the induction axiom of the
 matrix it is built from. -/
@@ -89,10 +90,11 @@ def IsAxiomReplacement (n : ℕ) (p q : V) : Prop :=
     ((p ∈ (𝗣𝗔⁻ : ArithmeticTheory).Δ₁Class ∧ q = p) ∨
       ∃ m ≤ p, ∃ Z ≤ p, IsInductionMatrix n m Z ∧ q = prenexInductionAxiom m Z)
 
-instance IsAxiomReplacement.definable (n : ℕ) :
-    𝚺ᴬ₁-Relation (IsAxiomReplacement n : V → V → Prop) := by
+instance IsAxiomReplacement.definable : 𝚺ᴬ₁-Relation (IsAxiomReplacement n : V → V → Prop) := by
   unfold IsAxiomReplacement
   definability
+
+end
 
 theorem exists_isAxiomReplacement {n : ℕ} {p : V} (hp : p ∈ (𝗜𝚺n).Δ₁Class) :
     ∃ q, IsAxiomReplacement n p q := by
@@ -101,11 +103,16 @@ theorem exists_isAxiomReplacement {n : ℕ} {p : V} (hp : p ∈ (𝗜𝚺n).Δ�
   · obtain ⟨m, hm, Z, hZ, hM, hd⟩ := exists_derivable_prenexInductionAxiom h
     exact ⟨_, hd, Or.inr ⟨m, hm, Z, hZ, hM, rfl⟩⟩
 
-theorem IsAxiomReplacement.isFalseBlock {n k : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hn : n ≤ k)
-    {p q : V} (h : IsAxiomReplacement n p q) : IsFalseBlock k 3 (neg ℒₒᵣ q) := by
+section
+variable {n : ℕ} {p q : V} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
+
+theorem IsAxiomReplacement.isFalseBlock (hn : n ≤ k) (h : IsAxiomReplacement n p q) :
+    IsFalseBlock k 3 (neg ℒₒᵣ q) := by
   rcases h.2 with ⟨hp, rfl⟩ | ⟨m, -, Z, -, hM, rfl⟩
   · exact isFalseBlock_neg_of_mem_peanoMinus_Δ₁Class hp k 3
   · exact hM.isFalseBlock_neg_prenexInductionAxiom hn
+
+end
 
 private lemma isFalseBlock_neg_quote_expAxiom : IsFalseBlock k D (neg ℒₒᵣ (⌜expAxiom⌝ : V)) := by
   let E : ArithmeticSemisentence 2 :=
@@ -133,8 +140,10 @@ def AdmitsFalseBlockReplacement (T : ArithmeticTheory) [T.Δ₁] (V : Type*) [OR
     ∀ p q, R p q →
       Derivable (∅ : Theory ℒₒᵣ) (insert (neg ℒₒᵣ q) ({p} : V)) ∧ IsFalseBlock k 3 (neg ℒₒᵣ q)
 
-lemma admitsFalseBlockReplacement_ISigma {n : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hn : n ≤ k) :
-    AdmitsFalseBlockReplacement (𝗜𝚺 n) V k := by
+section
+variable {n : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
+
+lemma admitsFalseBlockReplacement_ISigma (hn : n ≤ k) : AdmitsFalseBlockReplacement (𝗜𝚺 n) V k := by
   use IsAxiomReplacement n
   and_intros
   · infer_instance
@@ -143,8 +152,7 @@ lemma admitsFalseBlockReplacement_ISigma {n : ℕ} [V↓[ℒₒᵣ] ⊧* 𝗜�
   · intro p q h
     exact ⟨h.1, h.isFalseBlock hn⟩
 
-lemma admitsFalseBlockReplacement_ElementaryArithmetic [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] :
-    AdmitsFalseBlockReplacement 𝗘𝗔 V k := by
+lemma admitsFalseBlockReplacement_ElementaryArithmetic : AdmitsFalseBlockReplacement 𝗘𝗔 V k := by
   use fun p q ↦ IsAxiomReplacement 0 p q ∨ (p = ⌜expAxiom⌝ ∧ q = p)
   and_intros
   · definability
@@ -161,6 +169,8 @@ lemma admitsFalseBlockReplacement_ElementaryArithmetic [V↓[ℒₒᵣ] ⊧* �
     · have hf : IsFormula ℒₒᵣ (⌜expAxiom⌝ : V) := Sentence.quote_isSemiformula₀ expAxiom
       exact ⟨Derivable.em (by simp [hf]) (⌜expAxiom⌝ : V) (by simp) (by simp),
         isFalseBlock_neg_quote_expAxiom⟩
+
+end
 
 end AxiomReplacement
 

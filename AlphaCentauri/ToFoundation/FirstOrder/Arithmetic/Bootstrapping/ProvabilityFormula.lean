@@ -6,8 +6,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Int
 # The provability formula at a numeral
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -32,9 +30,12 @@ lemma isPrenexHierarchy_allBallOrBall {A B : Semiformula V ℒₒᵣ 1} (hA : Is
   simpa [IsPrenexHierarchy, qqBall] using And.intro (IsBounded.ball ht hA') (IsBounded.ball ht hB')
 
 
+section
+
+variable (σ : ArithmeticSentence)
+
 @[simp]
-lemma models_provabilityPred_iff (σ : ArithmeticSentence) :
-    V↓[ℒₒᵣ] ⊧ provabilityPred T σ ↔ Provable T (⌜σ⌝ : V) := by
+lemma models_provabilityPred_iff : V↓[ℒₒᵣ] ⊧ provabilityPred T σ ↔ Provable T (⌜σ⌝ : V) := by
   simp [models_iff]
 
 variable (T) in
@@ -42,9 +43,11 @@ noncomputable def provabilityFormula (x : V) : Formula V ℒₒᵣ :=
   (⌜(provable T).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 x]
 
 @[simp]
-lemma typed_quote_provabilityPred (σ : ArithmeticSentence) :
+lemma typed_quote_provabilityPred :
     (⌜provabilityPred T σ⌝ : Formula V ℒₒᵣ) = provabilityFormula T ⌜σ⌝ := by
   simp [provabilityPred, typed_quote_rew_subst, provabilityFormula, Matrix.constant_eq_singleton]
+
+end
 
 lemma tprovable_provabilityFormula [𝗣𝗔⁻ ⪯ T] {x : V} (h : Provable T x) :
     T.internalize V ⊢ provabilityFormula T x := by
@@ -57,8 +60,11 @@ private noncomputable def provableImpFormula : ArithmeticSemisentence 3 :=
   (impGraph ℒₒᵣ).val 🡒 (Rew.subst ![#0] ▹ (provable T).val) 🡒
     (Rew.subst ![#1] ▹ (provable T).val) 🡒 (Rew.subst ![#2] ▹ (provable T).val)
 
-lemma tprovable_provabilityFormula_imp [𝗜𝚺₁ ⪯ T] (φ ψ : Formula V ℒₒᵣ) :
-    T.internalize V ⊢
+section
+
+variable [𝗜𝚺₁ ⪯ T] (φ ψ : Formula V ℒₒᵣ)
+
+lemma tprovable_provabilityFormula_imp : T.internalize V ⊢
       provabilityFormula T (φ 🡒 ψ).val 🡒 provabilityFormula T φ.val 🡒
         provabilityFormula T ψ.val := by
   have h₁ := tprovable_subst_numeral_of_models (T := T) (φ := provableImpFormula T)
@@ -71,6 +77,7 @@ lemma tprovable_provabilityFormula_imp [𝗜𝚺₁ ⪯ T] (φ ψ : Formula V �
   simp [provableImpFormula, typed_quote_rew_subst, Semiformula.substs_substs] at h₁;
   simpa [provabilityFormula, Matrix.constant_eq_singleton] using h₁ ⨀ h₂
 
+omit [𝗜𝚺₁ ⪯ T] in
 private noncomputable def provableSubstNumeralFormula (ψ : ArithmeticSemisentence 1) :
     ArithmeticSemisentence 2 :=
   (Rew.subst ![#0] ▹ ψ) 🡒 ssnum.val/[#1, ⌜ψ⌝, #0] 🡒 (Rew.subst ![#1] ▹ (provable T).val)
@@ -81,10 +88,11 @@ lemma val_subst_numeral (φ : Semiformula V ℒₒᵣ 1) (z : V) :
 
 /-- A standard $\Sigma_1$ formula with one parameter internally implies its own provability at
 every numeral. -/
-lemma tprovable_imp_provabilityFormula_subst [𝗜𝚺₁ ⪯ T] {ψ : ArithmeticSemisentence 1}
-    (hψ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ) (z : V) :
+lemma tprovable_imp_provabilityFormula_subst {ψ : ArithmeticSemisentence 1}
+    (hψ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 1 ψ) : ∀ z : V,
     T.internalize V ⊢ (⌜ψ⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] 🡒
       provabilityFormula T ((⌜ψ⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 z] : Formula V ℒₒᵣ).val := by
+  intro z
   have h₁ := tprovable_subst_numeral_of_models (T := T)
     (φ := provableSubstNumeralFormula (T := T) ψ)
     (fun W _ _ e ↦ by
@@ -107,7 +115,7 @@ lemma tprovable_imp_provabilityFormula_subst [𝗜𝚺₁ ⪯ T] {ψ : Arithmeti
   simpa [provabilityFormula, val_subst_numeral, substNumeral, Sentence.quote_eq] using h₄
 
 /-- Every internal prenex $\Sigma_1$ sentence internally implies its own provability. -/
-theorem tprovable_imp_provabilityFormula_of_sigma1 [𝗜𝚺₁ ⪯ T] (φ : Formula V ℒₒᵣ)
+theorem tprovable_imp_provabilityFormula_of_sigma1
     (hφ : IsPrenexHierarchy 𝚺 1 φ.val) (hs : φ.shift = φ) :
     T.internalize V ⊢ φ 🡒 provabilityFormula T φ.val := by
   have h₁ := tprovable_iff_partialTrue (T := T) φ hφ hs;
@@ -117,6 +125,8 @@ theorem tprovable_imp_provabilityFormula_of_sigma1 [𝗜𝚺₁ ⪯ T] (φ : For
   have h₄ := tprovable_provabilityFormula_imp (T := T)
     ((⌜(partialTrue 𝚺 1).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 φ.val]) φ;
   cl_prover [h₁, h₂, h₃, h₄]
+
+end
 
 end Bootstrapping
 end FFL.FirstOrder.Arithmetic

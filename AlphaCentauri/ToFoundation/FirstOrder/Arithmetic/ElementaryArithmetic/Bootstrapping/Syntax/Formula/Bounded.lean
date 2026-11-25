@@ -11,8 +11,6 @@ Codes of bounded formulas in models of $\mathsf{EA}$.
 - [HP98, 0.30, Lemma I.1.68]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -28,15 +26,20 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {k p q r
 
 section qqBex
 
+section
+variable (u q : V)
+
 /-- The code of the bounded existential quantifier `∃¹[“#0 < u”] q`. -/
-noncomputable def qqBex (u q : V) : V := ^∃ ((^#0 ^< u) ^⋏ q)
+noncomputable def qqBex : V := ^∃ ((^#0 ^< u) ^⋏ q)
 
 @[simp]
-lemma lt_q_qqBex (u q : V) : q < qqBex u q := lt_trans (lt_K!_right _ _) (lt_exists _)
+lemma lt_q_qqBex : q < qqBex u q := lt_trans (lt_K!_right _ _) (lt_exists _)
 
 @[simp]
-lemma lt_u_qqBex (u q : V) : u < qqBex u q :=
+lemma lt_u_qqBex : u < qqBex u q :=
   lt_trans (Arithmetic.lt_qqLT_right _ _) (lt_trans (lt_K!_left _ _) (lt_exists _))
+
+end
 
 instance qqBex_defined : 𝚺ᴬ₁-Function₂ (qqBex : V → V → V) via qqBexDef := .mk fun v ↦ by
   simp [qqBexDef, qqBex, Arithmetic.qqLT_defined.df]
@@ -89,8 +92,11 @@ end qqBex
 
 namespace IsBoundedF
 
+section
+variable (C : Set V) (p : V)
+
 /-- The operator generating the codes of bounded formulas. -/
-def Phi (C : Set V) (p : V) : Prop :=
+def Phi : Prop :=
   (p = ^⊤) ∨
   (p = ^⊥) ∨
   (∃ k r v, p = ^rel k r v) ∨
@@ -99,6 +105,8 @@ def Phi (C : Set V) (p : V) : Prop :=
   (∃ p₁ p₂, p₁ ∈ C ∧ p₂ ∈ C ∧ p = p₁ ^⋎ p₂) ∨
   (∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ q ∈ C ∧ p = qqBall u q) ∨
   (∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ q ∈ C ∧ p = qqBex u q)
+
+end
 
 private lemma phi_iff (C p : V) :
     Phi {x | x ∈ C} p ↔
@@ -136,8 +144,9 @@ private lemma phi_iff (C p : V) :
 lemma locallyDelta0_mem (i j : Fin 4) : LocallyDelta0 fun y : Fin 4 → V ↦ y i ∈ y j :=
   LocallyDelta0.mem (LocallyDelta0Function.var i) (LocallyDelta0Function.var j)
 
-lemma locallyDelta0_binary {f : V → V → V} (hf : LocallyDelta0Function₂ f) :
-    LocallyDelta0 fun w : Fin 2 → V ↦
+variable {f : V → V → V}
+
+lemma locallyDelta0_binary (hf : LocallyDelta0Function₂ f) : LocallyDelta0 fun w : Fin 2 → V ↦
       ∃ p₁ < w 0, ∃ p₂ < w 0, p₁ ∈ w 1 ∧ p₂ ∈ w 1 ∧ w 0 = f p₁ p₂ :=
   LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var (0 : Fin 2)) <|
     LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
@@ -145,8 +154,7 @@ lemma locallyDelta0_binary {f : V → V → V} (hf : LocallyDelta0Function₂ f)
         LocallyDelta0.eq (LocallyDelta0Function.var 2) <|
           hf.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
 
-lemma locallyDelta0_bounded {f : V → V → V} (hf : LocallyDelta0Function₂ f) :
-    LocallyDelta0 fun w : Fin 2 → V ↦
+lemma locallyDelta0_bounded (hf : LocallyDelta0Function₂ f) : LocallyDelta0 fun w : Fin 2 → V ↦
       ∃ u < w 0, ∃ q < w 0,
         (∃ t < w 0, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ q ∈ w 1 ∧ w 0 = f u q := by
   have hterm : LocallyDelta0 fun y : Fin 5 → V ↦ IsUTerm ℒₒᵣ (y 0) ∧ y 2 = termBShift ℒₒᵣ (y 0) :=

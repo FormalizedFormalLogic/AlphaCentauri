@@ -10,8 +10,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 Equality and typed derivability in the internal proof calculus.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -29,12 +27,12 @@ lemma setShift_subset_setShift {s t : V} (h : s ⊆ t) : setShift L s ⊆ setShi
   obtain ⟨y, hy, rfl⟩ := mem_setShift_iff.mp hx
   exact shift_mem_setShift (h hy)
 
-instance wkRule.definable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₂ (wkRule : V → V → V) :=
+variable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ])
+
+instance wkRule.definable : ℌ-Function₂ (wkRule : V → V → V) :=
   .of_zero wkRule.defined.to_definable
 
-instance shiftRule.definable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₂ (shiftRule : V → V → V) :=
+instance shiftRule.definable : ℌ-Function₂ (shiftRule : V → V → V) :=
   .of_zero shiftRule.defined.to_definable
 
 /-! ## Equality in the internal calculus -/
@@ -42,10 +40,10 @@ instance shiftRule.definable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) 
 section
 
 variable [L.Eq]
-variable {n m k : ℕ}
+variable {n m k : ℕ} (w : SemitermVec V L n m) (s t : Semiterm V L n)
 
 /-- The formula saying that two terms are equal. -/
-noncomputable def Semiformula.equal (s t : Semiterm V L n) : Semiformula V L n :=
+noncomputable def Semiformula.equal : Semiformula V L n :=
   Semiformula.rel Language.Eq.eq ![s, t]
 
 @[simp]
@@ -63,24 +61,30 @@ lemma quote_eqop (t u : ClosedSemiterm L n) :
   | 0 => rfl
   | 1 => rfl
 
-omit [L.Eq] in
+section
+
+omit [L.Eq]
+
+variable (R : L.Rel k) (v : Fin k → ClosedSemiterm L n)
+
 @[simp]
-lemma quote_rel_sentence (R : L.Rel k) (v : Fin k → ClosedSemiterm L n) :
+lemma quote_rel_sentence :
     (⌜(FirstOrder.Semiformula.rel R v : Semisentence L n)⌝ : Semiformula V L n) =
       Semiformula.rel R fun i ↦ ⌜v i⌝ := by
   rw [Sentence.typed_quote_def]
   simp
   rfl
 
-omit [L.Eq] in
 @[simp]
-lemma quote_nrel_sentence (R : L.Rel k) (v : Fin k → ClosedSemiterm L n) :
+lemma quote_nrel_sentence :
     (⌜(FirstOrder.Semiformula.nrel R v : Semisentence L n)⌝ : Semiformula V L n) =
       Semiformula.nrel R fun i ↦ ⌜v i⌝ :=
   rfl
 
+end
+
 @[simp]
-lemma Semiformula.substs_equal (w : SemitermVec V L n m) (s t : Semiterm V L n) :
+lemma Semiformula.substs_equal :
     (Semiformula.equal s t).subst w = Semiformula.equal (s.subst w) (t.subst w) := by
   simp only [Semiformula.equal, Semiformula.substs_rel]
   congr 1
@@ -90,7 +94,7 @@ lemma Semiformula.substs_equal (w : SemitermVec V L n m) (s t : Semiterm V L n) 
   | 1 => rfl
 
 @[simp]
-lemma Semiformula.shift_equal (s t : Semiterm V L n) :
+lemma Semiformula.shift_equal :
     (Semiformula.equal s t).shift = Semiformula.equal s.shift t.shift := by
   simp only [Semiformula.equal, Semiformula.shift_rel]
   congr 1
@@ -100,8 +104,7 @@ lemma Semiformula.shift_equal (s t : Semiterm V L n) :
   | 1 => rfl
 
 @[simp]
-lemma Semiformula.shift_iterate_equal (s t : Semiterm V L n) (j : ℕ) :
-    Semiformula.shift^[j] (Semiformula.equal s t) =
+lemma Semiformula.shift_iterate_equal (j : ℕ) : Semiformula.shift^[j] (Semiformula.equal s t) =
       Semiformula.equal (Semiterm.shift^[j] s) (Semiterm.shift^[j] t) := by
   induction j generalizing s t with
   | zero => rfl
@@ -127,8 +130,7 @@ lemma Semiformula.substs_q_substs_single (φ : Semiformula V L (n + 1))
 
 omit [L.Eq] in
 @[simp]
-lemma Semiformula.substs_conj (w : SemitermVec V L n m)
-    (v : Fin k → Semiformula V L n) :
+lemma Semiformula.substs_conj (v : Fin k → Semiformula V L n) :
     (Matrix.conj v).subst w = Matrix.conj fun i ↦ (v i).subst w :=
   Matrix.conj_map (·.subst w) (Semiformula.substs_verum w) (Semiformula.substs_and w) v
 
@@ -138,17 +140,23 @@ lemma quote_conj (v : Fin k → Semisentence L n) :
     (⌜Matrix.conj v⌝ : Semiformula V L n) = Matrix.conj fun i ↦ ⌜v i⌝ :=
   Matrix.conj_map (fun φ : Semisentence L n ↦ (⌜φ⌝ : Semiformula V L n)) (by simp) (by simp) v
 
-omit [L.Eq] in
-private lemma subst_append_addCast (s u : SemitermVec V L k 0) :
+section
+
+omit [L.Eq]
+
+variable (s u : SemitermVec V L k 0)
+
+private lemma subst_append_addCast :
     (Semiterm.subst (Fin.append s u))⨟ (fun i ↦ Semiterm.bvar (Fin.addCast k i)) = s := by
   funext i
   simp [Fin.append_addCast]
 
-omit [L.Eq] in
-private lemma subst_append_addNat (s u : SemitermVec V L k 0) :
+private lemma subst_append_addNat :
     (Semiterm.subst (Fin.append s u))⨟ (fun i ↦ Semiterm.bvar (i.addNat k)) = u := by
   funext i
   simp [Fin.append_addNat]
+
+end
 
 variable (S : Theory L) [S.Δ₁]
 
@@ -172,26 +180,29 @@ lemma tprovable_subst_of_allClosure :
     rwa [Semiformula.substs_q_substs_single,
       show (w 0 :> Matrix.vecTail w) = w from Matrix.cons_head_tail w] at h₂
 
-lemma tprovable_quote_eqAxiom [𝗘𝗤 L ⪯ S] {σ : Sentence L} (h : σ ∈ 𝗘𝗤 L) :
+variable [𝗘𝗤 L ⪯ S]
+
+lemma tprovable_quote_eqAxiom {σ : Sentence L} (h : σ ∈ 𝗘𝗤 L) :
     S.internalize V ⊢ (⌜σ⌝ : Formula V L) := by
   have h₁ : S ⊢ σ :=
     _root_.FFL.Entailment.WeakerThan.pbl (𝓢 := 𝗘𝗤 L) (_root_.FFL.Entailment.by_axm h)
   exact tprovable_tquote_iff_provable_quote_sentence.mpr (internalize_provability h₁)
 
-lemma tprovable_equal_refl [𝗘𝗤 L ⪯ S] (t : Semiterm V L 0) :
-    S.internalize V ⊢ Semiformula.equal t t := by
+variable (s t : Semiterm V L 0)
+
+lemma tprovable_equal_refl : S.internalize V ⊢ Semiformula.equal t t := by
   have h₁ := tprovable_subst_of_allClosure S (σ := (op(=).operator ![#0, #0] : Semisentence L 1))
     ![t] (tprovable_quote_eqAxiom S Theory.IsEqAxiom.refl)
   simpa using h₁
 
-lemma tprovable_equal_symm_imp [𝗘𝗤 L ⪯ S] (s t : Semiterm V L 0) :
+lemma tprovable_equal_symm_imp :
     S.internalize V ⊢ Semiformula.equal s t 🡒 Semiformula.equal t s := by
   have h₁ := tprovable_subst_of_allClosure S
     (σ := (op(=).operator ![#1, #0] 🡒 op(=).operator ![#0, #1] : Semisentence L 2))
     ![t, s] (tprovable_quote_eqAxiom S Theory.IsEqAxiom.symm)
   simpa using h₁
 
-lemma tprovable_equal_trans_imp [𝗘𝗤 L ⪯ S] (s t u : Semiterm V L 0) :
+lemma tprovable_equal_trans_imp (u : Semiterm V L 0) :
     S.internalize V ⊢ Semiformula.equal s t ⋏ Semiformula.equal t u 🡒 Semiformula.equal s u := by
   have h₁ := tprovable_subst_of_allClosure S
     (σ := (op(=).operator ![#2, #1] 🡒 op(=).operator ![#1, #0] 🡒 op(=).operator ![#2, #0] :
@@ -201,7 +212,9 @@ lemma tprovable_equal_trans_imp [𝗘𝗤 L ⪯ S] (s t u : Semiterm V L 0) :
     Semiformula.substs_equal] at h₁
   simpa using _root_.FFL.Entailment.CK_of_CC h₁
 
-lemma tprovable_equal_func_imp [𝗘𝗤 L ⪯ S] (f : L.Func k) (s u : SemitermVec V L k 0) :
+variable (f : L.Func k) (R : L.Rel k) (s u : SemitermVec V L k 0)
+
+lemma tprovable_equal_func_imp :
     S.internalize V ⊢ Matrix.conj (fun i ↦ Semiformula.equal (s i) (u i)) 🡒
       Semiformula.equal (Semiterm.func f s) (Semiterm.func f u) := by
   have h₁ := tprovable_subst_of_allClosure S (n := k + k) (w := Fin.append s u)
@@ -213,7 +226,7 @@ lemma tprovable_equal_func_imp [𝗘𝗤 L ⪯ S] (f : L.Func k) (s u : Semiterm
   rw [subst_append_addCast, subst_append_addNat] at h₁
   exact h₁
 
-lemma tprovable_rel_congr_imp [𝗘𝗤 L ⪯ S] (R : L.Rel k) (s u : SemitermVec V L k 0) :
+lemma tprovable_rel_congr_imp :
     S.internalize V ⊢ Matrix.conj (fun i ↦ Semiformula.equal (s i) (u i)) 🡒
       (Semiformula.rel R s 🡒 Semiformula.rel R u) := by
   have h₁ := tprovable_subst_of_allClosure S (n := k + k) (w := Fin.append s u)

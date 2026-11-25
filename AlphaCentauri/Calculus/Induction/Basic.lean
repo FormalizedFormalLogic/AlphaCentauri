@@ -14,8 +14,6 @@ public import AlphaCentauri.Schemata.DeltaInduction
 - [Bus98A, Section 1.4.1, Section 1.4.2]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 
@@ -42,11 +40,12 @@ instance prenexBlock : RewriteClosed (n := n) (ℬ[<, ℒₒᵣ].PrenexBlock b) 
 instance hierarchy : RewriteClosed (n := n) (ℬ[<, ℒₒᵣ].Hierarchy b s) where
   rewrite f := Bounding.Hierarchy.rew (Rew.rewrite f)
 
-instance or [RewriteClosed C] [RewriteClosed D] : RewriteClosed fun φ ↦ C φ ∨ D φ where
+variable [RewriteClosed C]
+
+instance or [RewriteClosed D] : RewriteClosed fun φ ↦ C φ ∨ D φ where
   rewrite f := fun h ↦ h.imp (rewrite f) (rewrite f)
 
-lemma shift [RewriteClosed C] {φ : ArithmeticSemiformula ℕ n} (h : C φ) :
-    C (Rewriting.shift φ) := by
+lemma shift {φ : ArithmeticSemiformula ℕ n} (h : C φ) : C (Rewriting.shift φ) := by
   have e : (Rew.shift : SyntacticRew ℒₒᵣ n n) = Rew.rewrite fun x ↦ &(x + 1) := by ext x <;> simp
   simpa [Rewriting.shift, e] using rewrite (C := C) (fun x ↦ &(x + 1)) h
 
@@ -76,10 +75,13 @@ inductive Derivation (C : ArithmeticSemiformula ℕ 1 → Prop) : LK.Sequent ℒ
 @[inherit_doc]
 notation:45 "⊢ᴸᴷᴵ[" C "]! " Γ:45 => Derivation C Γ
 
+variable (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition → Prop)
+  (Γ : LK.Sequent ℒₒᵣ)
+
 /-- `⊢ᴸᴷᴵ[C] Γ` says that the sequent `Γ` is derivable in `LKI[C]`.
 
 - [Bus98A, Section 1.4.1] -/
-def Derivable (C : ArithmeticSemiformula ℕ 1 → Prop) (Γ : LK.Sequent ℒₒᵣ) : Prop :=
+def Derivable : Prop :=
   Nonempty (⊢ᴸᴷᴵ[C]! Γ)
 
 @[inherit_doc]
@@ -87,10 +89,8 @@ notation:45 "⊢ᴸᴷᴵ[" C "] " Γ:45 => Derivable C Γ
 
 namespace Derivation
 
-variable {C : ArithmeticSemiformula ℕ 1 → Prop}
-  {D D' : ArithmeticProposition → Prop}
-  {Γ Δ : LK.Sequent ℒₒᵣ} {φ ψ χ : ArithmeticProposition}
-  {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
+variable {C D Γ} {D' : ArithmeticProposition → Prop} {Δ : LK.Sequent ℒₒᵣ}
+  {φ ψ χ : ArithmeticProposition} {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
 
 abbrev cast (d : ⊢ᴸᴷᴵ[C]! Δ) (e : Δ = Γ := by abel) : ⊢ᴸᴷᴵ[C]! Γ := e ▸ d
 
@@ -224,6 +224,10 @@ abbrev weakeningMany (t : Δ.Traversal) (d : ⊢ᴸᴷᴵ[C]! Γ) : ⊢ᴸᴷᴵ
 
 /-! ## Anchored derivations -/
 
+section Anchored
+
+variable {d : ⊢ᴸᴷᴵ[C]! Γ}
+
 /-- A derivation is `Anchored D` when every one of its cut formulas belongs to `D`.
 
 - [Bus98A, Section 1.4.2] -/
@@ -261,8 +265,7 @@ lemma anchored_contraction_iff {d : ⊢ᴸᴷᴵ[C]! Γ + ⦃φ, φ⦄} :
     Anchored D d.contraction ↔ Anchored D d := Iff.rfl
 
 @[simp]
-lemma anchored_weakening_iff {d : ⊢ᴸᴷᴵ[C]! Γ} :
-    Anchored D (d.weakening (φ := φ)) ↔ Anchored D d := Iff.rfl
+lemma anchored_weakening_iff : Anchored D (d.weakening (φ := φ)) ↔ Anchored D d := Iff.rfl
 
 @[simp]
 lemma anchored_verum : Anchored D (verum (C := C)) := trivial
@@ -288,11 +291,11 @@ lemma anchored_cast_iff {d : ⊢ᴸᴷᴵ[C]! Δ} {e : Δ = Γ} :
     Anchored D (cast d e) ↔ Anchored D d := by rcases e; rfl
 
 @[simp]
-lemma anchored_structural_cast_iff {d : ⊢ᴸᴷᴵ[C]! Γ} {e : Γ = Δ} :
+lemma anchored_structural_cast_iff {e : Γ = Δ} :
     Anchored D (Structural.cast (𝔇 := Derivation C) d e) ↔ Anchored D d := by rcases e; rfl
 
 @[simp]
-lemma anchored_weakeningMany_iff {t : Δ.Traversal} {d : ⊢ᴸᴷᴵ[C]! Γ} :
+lemma anchored_weakeningMany_iff {t : Δ.Traversal} :
     Anchored D (weakeningMany t d) ↔ Anchored D d := by
   induction t with
   | zero => simp [weakeningMany, Structural.weakenMany]
@@ -329,6 +332,8 @@ lemma Anchored.mono (h : ∀ φ, D φ → D' φ) {Γ} : {d : ⊢ᴸᴷᴵ[C]! Γ
   | and _ _, hd => ⟨Anchored.mono h hd.1, .mono h hd.2⟩
   | all d, hd => .mono h (d := d) hd
   | exs d, hd => .mono h (d := d) hd
+
+end Anchored
 
 /-! ## Rewriting -/
 
@@ -384,10 +389,12 @@ def rewrite {Γ} (f : ℕ → ArithmeticTerm ℕ) : (⊢ᴸᴷᴵ[C]! Γ) → �
     (exs (Γ := Γ.map (Rew.rewrite f ▹ ·)) (φ := Rew.rewrite (Rew.bShift ∘ f) ▹ φ)
       (t := Rew.rewrite f t) (cast h (by simp [rewrite_subst_eq]))).cast (by simp [Rew.q_rewrite])
 
-protected def map (d : ⊢ᴸᴷᴵ[C]! Γ) (f : ℕ → ℕ) : ⊢ᴸᴷᴵ[C]! Γ.map (Rew.rewriteMap f ▹ ·) :=
+variable (d : ⊢ᴸᴷᴵ[C]! Γ)
+
+protected def map (f : ℕ → ℕ) : ⊢ᴸᴷᴵ[C]! Γ.map (Rew.rewriteMap f ▹ ·) :=
   d.rewrite fun x ↦ &(f x)
 
-protected def shift (d : ⊢ᴸᴷᴵ[C]! Γ) : ⊢ᴸᴷᴵ[C]! Γ⁺ := cast (Derivation.map d Nat.succ) (by rfl)
+protected def shift : ⊢ᴸᴷᴵ[C]! Γ⁺ := cast (Derivation.map d Nat.succ) (by rfl)
 
 /-- The induction rule with the step case taken at a variable that occurs in no formula of the
 conclusion, in place of the shifted sequent the rule itself asks for. -/
@@ -404,7 +411,7 @@ def generalizeByNewVar {m} (hξ : ¬ξ.FVar? m) (hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar?
   all <| cast (Derivation.map d fun x ↦ if x = m then 0 else x + 1)
     (by simp [Semiformula.rewriteMap_subst_eq_free ξ hξ, Semiformula.map_rewriteMap_eq_shifts Γ hΓ])
 
-variable [RewriteClosed D] {Γ : LK.Sequent ℒₒᵣ}
+variable [RewriteClosed D]
 
 lemma anchored_rewrite {Γ} : ∀ (d : ⊢ᴸᴷᴵ[C]! Γ) (f), Anchored D d → Anchored D (d.rewrite f)
   | axm _, _, _ => by simp [rewrite]
@@ -422,7 +429,7 @@ lemma anchored_rewrite {Γ} : ∀ (d : ⊢ᴸᴷᴵ[C]! Γ) (f), Anchored D d �
   | all d, _, h => by simpa [rewrite] using anchored_rewrite d _ h
   | exs d, f, h => by simpa [rewrite] using anchored_rewrite d f h
 
-lemma anchored_map (d : ⊢ᴸᴷᴵ[C]! Γ) (f) (h : Anchored D d) : Anchored D (Derivation.map d f) :=
+lemma anchored_map (f) (h : Anchored D d) : Anchored D (Derivation.map d f) :=
   anchored_rewrite d _ h
 
 lemma anchored_indByNewVar {m} {hξ : C ξ} {hξm : ¬ξ.FVar? m} {hΓ : ∀ ψ ∈ Γ, ¬ψ.FVar? m}
@@ -439,8 +446,7 @@ lemma anchored_generalizeByNewVar {m} {hξ : ¬ξ.FVar? m} {hΓ : ∀ ψ ∈ Γ,
 end Derivation
 
 /-- The `D`-anchored derivations of `Γ` in `LKI[C]`. -/
-abbrev AnchoredDerivation (C : ArithmeticSemiformula ℕ 1 → Prop) (D : ArithmeticProposition → Prop)
-    (Γ : LK.Sequent ℒₒᵣ) := {d : ⊢ᴸᴷᴵ[C]! Γ // Derivation.Anchored D d}
+abbrev AnchoredDerivation := {d : ⊢ᴸᴷᴵ[C]! Γ // Derivation.Anchored D d}
 
 @[inherit_doc]
 notation:45 "⊢ᴸᴷᴵ[" C ", " D "]! " Γ:45 => AnchoredDerivation C D Γ
@@ -450,8 +456,7 @@ notation:45 "⊢ᴸᴷᴵ[" C ", " D "] " Γ:45 => Nonempty (AnchoredDerivation 
 
 namespace AnchoredDerivation
 
-variable {C : ArithmeticSemiformula ℕ 1 → Prop} {D : ArithmeticProposition → Prop}
-  {Γ Δ : LK.Sequent ℒₒᵣ}
+variable {C D Γ} {Δ : LK.Sequent ℒₒᵣ}
 
 def cast (d : ⊢ᴸᴷᴵ[C, D]! Γ) (e : Γ = Δ := by abel) : ⊢ᴸᴷᴵ[C, D]! Δ :=
   ⟨d.val.cast e, by simpa using d.prop⟩
@@ -460,7 +465,7 @@ end AnchoredDerivation
 
 namespace Derivable
 
-variable {C : ArithmeticSemiformula ℕ 1 → Prop} {Γ Δ : LK.Sequent ℒₒᵣ}
+variable {C Γ} {Δ : LK.Sequent ℒₒᵣ}
   {φ ψ : ArithmeticProposition} {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
 
 /-! ### The rules, read as closure properties of derivability -/

@@ -13,14 +13,16 @@ Case II of it and Bézout's theorem.
 - [Smi92b]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
 
+section
+
+variable (n : ℕ)
+
 /-- Fermat's Last Theorem for exponent `n`. -/
-def fermatLastTheorem (n : ℕ) : ArithmeticSentence :=
+def fermatLastTheorem : ArithmeticSentence :=
   “∀ x y z, x ^' n + y ^' n = z ^' n → x = 0 ∨ y = 0 ∨ z = 0”
 
 /-- Bézout's theorem: any `x` and nonzero `y` have a common divisor `z` with `s y = t x + z`.
@@ -31,19 +33,21 @@ def bezout : ArithmeticSentence := “∀ x y, y ≠ 0 → ∃ z s t, s * y = t 
 /-- Case I of Fermat's Last Theorem for exponent `n`: every solution of `xⁿ + yⁿ = zⁿ` has
 `n ∣ x y z`.
 - [Smi92b, §2] -/
-def fermatLastTheoremCaseOne (n : ℕ) : ArithmeticSentence :=
+def fermatLastTheoremCaseOne : ArithmeticSentence :=
   “∀ x y z, x ^' n + y ^' n = z ^' n → ↑n ∣ x * y * z”
 
 /-- Case II of Fermat's Last Theorem for exponent `n`: every solution of `xⁿ + yⁿ = zⁿ` with
 `n ∣ x y z` is trivial.
 - [Smi92b, §2] -/
-def fermatLastTheoremCaseTwo (n : ℕ) : ArithmeticSentence :=
+def fermatLastTheoremCaseTwo : ArithmeticSentence :=
   “∀ x y z, x ^' n + y ^' n = z ^' n → ↑n ∣ x * y * z → x = 0 ∨ y = 0 ∨ z = 0”
 
 /-- `xⁿ ± yⁿ = z²` has only trivial solutions.
 - [Smi92b, Question 5.6] -/
-def powerAddPowerNeSquare (n : ℕ) : ArithmeticSentence :=
+def powerAddPowerNeSquare : ArithmeticSentence :=
   “∀ x y z, x ^' n + y ^' n = z * z ∨ x ^' n = y ^' n + z * z →
     x = 0 ∨ y = 0 ∨ z = 0”
+
+end
 
 end FFL.FirstOrder.Arithmetic

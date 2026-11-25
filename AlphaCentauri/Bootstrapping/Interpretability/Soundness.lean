@@ -18,8 +18,6 @@ public import Foundation.FirstOrder.Incompleteness.Consistency
 Internal soundness of translations: provability and consistency transfer along them.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -37,10 +35,10 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 section defs
 
 variable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable]
+  [L₂.Encodable] [L₂.LORDefinable] (tbl t b : V)
 
 /-- The code of the equivalence between the translations of `φ[t]` and `φ[&b]`. -/
-noncomputable def translateSubstEquiv (tbl t b p : V) : V :=
+noncomputable def translateSubstEquiv (p : V) : V :=
   iff L₁ (translate L₁ L₂ tbl (substs1 L₂ t p)) (translate L₁ L₂ tbl (substs1 L₂ (^&b) p))
 
 instance translateSubstEquiv.definable : 𝚺ᴬ₁-Function₄[V] translateSubstEquiv L₁ L₂ := by
@@ -48,7 +46,7 @@ instance translateSubstEquiv.definable : 𝚺ᴬ₁-Function₄[V] translateSubs
 
 /-- The fresh free variable of the quantifier case, bounding the codes of `substHyp` and of the
 equivalence of the translated matrices. It has no counterpart in the literature. -/
-noncomputable def quantFresh (tbl t b x : V) : V :=
+noncomputable def quantFresh (x : V) : V :=
   max (substHyp L₁ L₂ tbl t b) (iff L₁ (translate L₁ L₂ tbl (subst L₂ ?[^#0, t] (π₂ (x - 1))))
     (translate L₁ L₂ tbl (subst L₂ ?[^#0, ^&b] (π₂ (x - 1)))))
 
@@ -61,10 +59,10 @@ section value
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] {tbl : V}
+  {t b q v s δ θ₁ θ₂ X X' Y Y' : V}
 
 omit [L₂.Eq] in
-lemma translate_substs1_all {t q : V} (ht : IsSemiterm L₂ 0 t)
-    (hq : IsSemiformula L₂ 2 q) :
+lemma translate_substs1_all (ht : IsSemiterm L₂ 0 t) (hq : IsSemiformula L₂ 2 q) :
     translate L₁ L₂ tbl (substs1 L₂ t (^∀ q)) =
       ^∀ imp L₁ (domainAt L₁ tbl 0) (translate L₁ L₂ tbl (subst L₂ ?[^#(0 : V), t] q)) := by
   have h₁ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [IsSemiterm.of_zero ht]
@@ -72,8 +70,7 @@ lemma translate_substs1_all {t q : V} (ht : IsSemiterm L₂ 0 t)
   rw [substs_all hq.isUFormula, qVec_closed ht, translate_all (hq.subst h₁).isUFormula]
 
 omit [L₂.Eq] in
-lemma translate_substs1_exs {t q : V} (ht : IsSemiterm L₂ 0 t)
-    (hq : IsSemiformula L₂ 2 q) :
+lemma translate_substs1_exs (ht : IsSemiterm L₂ 0 t) (hq : IsSemiformula L₂ 2 q) :
     translate L₁ L₂ tbl (substs1 L₂ t (^∃ q)) =
       ^∃ (domainAt L₁ tbl 0 ^⋏ translate L₁ L₂ tbl (subst L₂ ?[^#(0 : V), t] q)) := by
   have h₁ : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [IsSemiterm.of_zero ht]
@@ -81,7 +78,7 @@ lemma translate_substs1_exs {t q : V} (ht : IsSemiterm L₂ 0 t)
   rw [substs_ex hq.isUFormula, qVec_closed ht, translate_exs (hq.subst h₁).isUFormula]
 
 omit [L₁.Eq] [𝗘𝗤 L₁ ⪯ S] in
-lemma derivable_all_iff_V {δ θ₁ θ₂ s : V} (hδ : IsSemiformula L₁ 1 δ)
+lemma derivable_all_iff_V (hδ : IsSemiformula L₁ 1 δ)
     (hθ₁ : IsSemiformula L₁ 1 θ₁) (hθ₂ : IsSemiformula L₁ 1 θ₂)
     (h : Derivable S (insert (^∀ (iff L₁ θ₁ θ₂)) s)) :
     Derivable S (insert (iff L₁ (^∀ imp L₁ δ θ₁) (^∀ imp L₁ δ θ₂)) s) := by
@@ -94,7 +91,7 @@ lemma derivable_all_iff_V {δ θ₁ θ₂ s : V} (hδ : IsSemiformula L₁ 1 δ)
   simpa only [Semiformula.val_all, Semiformula.val_iff, Semiformula.val_imp] using h₂
 
 omit [L₁.Eq] [𝗘𝗤 L₁ ⪯ S] in
-lemma derivable_exs_iff_V {δ θ₁ θ₂ s : V} (hδ : IsSemiformula L₁ 1 δ)
+lemma derivable_exs_iff_V (hδ : IsSemiformula L₁ 1 δ)
     (hθ₁ : IsSemiformula L₁ 1 θ₁) (hθ₂ : IsSemiformula L₁ 1 θ₂)
     (h : Derivable S (insert (^∀ (iff L₁ θ₁ θ₂)) s)) :
     Derivable S (insert (iff L₁ (^∃ (δ ^⋏ θ₁)) (^∃ (δ ^⋏ θ₂))) s) := by
@@ -107,7 +104,7 @@ lemma derivable_exs_iff_V {δ θ₁ θ₂ s : V} (hδ : IsSemiformula L₁ 1 δ)
   simpa only [Semiformula.val_exs, Semiformula.val_iff, Semiformula.val_and] using h₂
 
 omit [L₁.Eq] [𝗘𝗤 L₁ ⪯ S] in
-lemma derivable_iff_and_V {X X' Y Y' s : V} (hX : IsSemiformula L₁ 0 X)
+lemma derivable_iff_and_V (hX : IsSemiformula L₁ 0 X)
     (hX' : IsSemiformula L₁ 0 X') (hY : IsSemiformula L₁ 0 Y) (hY' : IsSemiformula L₁ 0 Y')
     (h₁ : Derivable S (insert (iff L₁ X X') s))
     (h₂ : Derivable S (insert (iff L₁ Y Y') s)) :
@@ -122,7 +119,7 @@ lemma derivable_iff_and_V {X X' Y Y' s : V} (hX : IsSemiformula L₁ 0 X)
   simpa only [Semiformula.val_and, Semiformula.val_iff] using h₅
 
 omit [L₁.Eq] [𝗘𝗤 L₁ ⪯ S] in
-lemma derivable_iff_or_V {X X' Y Y' s : V} (hX : IsSemiformula L₁ 0 X)
+lemma derivable_iff_or_V (hX : IsSemiformula L₁ 0 X)
     (hX' : IsSemiformula L₁ 0 X') (hY : IsSemiformula L₁ 0 Y) (hY' : IsSemiformula L₁ 0 Y')
     (h₁ : Derivable S (insert (iff L₁ X X') s))
     (h₂ : Derivable S (insert (iff L₁ Y Y') s)) :
@@ -137,7 +134,7 @@ lemma derivable_iff_or_V {X X' Y Y' s : V} (hX : IsSemiformula L₁ 0 X)
   simpa only [Semiformula.val_or, Semiformula.val_iff] using h₅
 
 omit [L₁.Eq] [𝗘𝗤 L₁ ⪯ S] in
-lemma derivable_iff_neg_V {X X' s : V} (hX : IsSemiformula L₁ 0 X)
+lemma derivable_iff_neg_V (hX : IsSemiformula L₁ 0 X)
     (hX' : IsSemiformula L₁ 0 X') (h : Derivable S (insert (iff L₁ X X') s)) :
     Derivable S (insert (iff L₁ (neg L₁ X) (neg L₁ X')) s) := by
   have h₁ : Derivable S (insert ((⟨X, hX⟩ : Formula V L₁) 🡘 ⟨X', hX'⟩).val s) := by
@@ -148,7 +145,7 @@ lemma derivable_iff_neg_V {X X' s : V} (hX : IsSemiformula L₁ 0 X)
   simpa only [Semiformula.val_neg, Semiformula.val_iff] using h₂
 
 omit [L₂.Eq] in
-lemma translate_substs1_nrel {t k R v : V} (ht : IsSemiterm L₂ 0 t)
+lemma translate_substs1_nrel {k R : V} (ht : IsSemiterm L₂ 0 t)
     (hR : L₂.IsRel k R) (hv : IsSemitermVec L₂ k 1 v) :
     translate L₁ L₂ tbl (substs1 L₂ t (^nrel k R v)) =
       neg L₁ (translate L₁ L₂ tbl (substs1 L₂ t (^rel k R v))) := by
@@ -157,9 +154,11 @@ lemma translate_substs1_nrel {t k R v : V} (ht : IsSemiterm L₂ 0 t)
   rw [substs_nrel hR hv.isUTerm, substs_rel hR hv.isUTerm,
     translate_nrel hR (hw.termSubstVec hv).isUTerm, translate_rel hR (hw.termSubstVec hv).isUTerm]
 
+variable (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p) (h : IsTranslationTable L₂ S tbl)
+  (hL₂ : L₂.SymbolsStandard V) (ht : IsSemiterm L₂ 0 t) {k : ℕ} (R : L₂.Rel k)
+
 omit [L₂.Eq] in
-lemma substs_rel_val {k : ℕ} (R : L₂.Rel k) {c v : V} (hc : IsSemiterm L₂ 0 c)
-    (hv : IsSemitermVec L₂ (k : V) 1 v) :
+lemma substs_rel_val {c : V} (hc : IsSemiterm L₂ 0 c) (hv : IsSemitermVec L₂ (k : V) 1 v) :
     ∃ u : Fin k → Term V L₂, (∀ i : Fin k, (u i).val = termSubst L₂ ?[c] v.[(i : ℕ)]) ∧
       subst L₂ ?[c] (^rel (k : V) ⌜R⌝ v) = (Semiformula.rel R u).val := by
   have hw : IsSemitermVec L₂ (1 : V) 0 ?[c] := by simp [hc]
@@ -169,10 +168,8 @@ lemma substs_rel_val {k : ℕ} (R : L₂.Rel k) {c v : V} (hc : IsSemiterm L₂ 
     simp
   · rw [substs_rel (codeIn_rel_quote R) hv.isUTerm, Semiformula.rel_val, hu]
 
-lemma derivable_iff_translate_rel (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
-    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t b : V}
-    (ht : IsSemiterm L₂ 0 t)
-    {k : ℕ} (R : L₂.Rel k) {v : V} (hv : IsSemitermVec L₂ (k : V) 1 v) :
+include hS h hL₂ ht in
+lemma derivable_iff_translate_rel (hv : IsSemitermVec L₂ (k : V) 1 v) :
     Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b (^rel (k : V) ⌜R⌝ v))
       (substHyp L₁ L₂ tbl t b)) := by
   have hT := h.toIsTable
@@ -194,7 +191,7 @@ lemma derivable_iff_translate_rel (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.Is
   simpa only [Semiformula.val_iff] using hg
 
 omit [L₂.Eq] in
-lemma isSemiformula_translate_subst (hT : IsTable L₁ L₂ tbl) {t q : V} (ht : IsSemiterm L₂ 0 t)
+lemma isSemiformula_translate_subst (hT : IsTable L₁ L₂ tbl) (ht : IsSemiterm L₂ 0 t)
     (hq : IsSemiformula L₂ 2 q) :
     IsSemiformula L₁ 1 (translate L₁ L₂ tbl (subst L₂ ?[^#(0 : V), t] q)) :=
   have h : IsSemitermVec L₂ 2 1 (?[^#(0 : V), t] : V) := by simp [IsSemiterm.of_zero ht]
@@ -202,7 +199,7 @@ lemma isSemiformula_translate_subst (hT : IsTable L₁ L₂ tbl) {t q : V} (ht :
 
 omit [𝗘𝗤 _ ⪯ S] [L₂.Eq] in
 lemma derivable_all_of_quantFresh (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
-    (hT : IsTable L₁ L₂ tbl) {t b q x : V} (ht : IsSemiterm L₂ 0 t) (hq : IsSemiformula L₂ 2 q)
+    (hT : IsTable L₁ L₂ tbl) {x : V} (ht : IsSemiterm L₂ 0 t) (hq : IsSemiformula L₂ 2 q)
     (hx : π₂(x - 1) = q)
     (ih : Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b
       (subst L₂ ?[^&(quantFresh L₁ L₂ tbl t b x), ^#(0 : V)] q)) (substHyp L₁ L₂ tbl t b))) :
@@ -237,7 +234,7 @@ lemma derivable_all_of_quantFresh (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.Is
 
 theorem derivable_translateSubstEquiv
     (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
-    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t b p : V}
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {p : V}
     (ht : IsSemiterm L₂ 0 t) (hp : IsSemiformula L₂ 1 p) :
     Derivable S (insert (translateSubstEquiv L₁ L₂ tbl t b p) (substHyp L₁ L₂ tbl t b)) := by
   have hT := h.toIsTable
@@ -349,9 +346,10 @@ section rules
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] {tbl : V}
+  {t b p Θ : V}
 
 omit [𝗘𝗤 _ ⪯ S] [L₂.Eq] in
-lemma derivable_insert_translate_substs (hT : IsTable L₁ L₂ tbl) {t b p Θ : V}
+lemma derivable_insert_translate_substs (hT : IsTable L₁ L₂ tbl)
     (ht : IsSemiterm L₂ 0 t) (hp : IsSemiformula L₂ 1 p) (hΘ : IsFormulaSet L₁ Θ)
     (hD : negDomSet L₁ tbl.[0] t ⊆ Θ)
     (hX : Derivable S (insert (translate L₁ L₂ tbl (substs1 L₂ t p)) Θ))
@@ -387,7 +385,7 @@ lemma derivable_insert_translate_substs (hT : IsTable L₁ L₂ tbl) {t b p Θ :
   exact derivable_of_iff_mp (⟨_, hX'⟩ : Formula V L₁) ⟨_, hY'⟩ hIs hXs
 
 omit [𝗘𝗤 _ ⪯ S] [L₂.Eq] in
-lemma derivable_exs_body (hT : IsTable L₁ L₂ tbl) {p b s : V} (hs : IsFormulaSet L₁ s)
+lemma derivable_exs_body (hT : IsTable L₁ L₂ tbl) {s : V} (hs : IsFormulaSet L₁ s)
     (hp : IsSemiformula L₂ 1 p) (hm : ^∃ (tbl.[0] ^⋏ translate L₁ L₂ tbl p) ∈ s)
     (hn : neg L₁ (substs1 L₁ (^&b) tbl.[0]) ∈ s)
     (hd : Derivable S (insert (translate L₁ L₂ tbl (substs1 L₂ (^&b) p)) s)) :
@@ -423,7 +421,7 @@ lemma derivable_exs_body (hT : IsTable L₁ L₂ tbl) {p b s : V} (hs : IsFormul
 omit [𝗘𝗤 _ ⪯ S] [L₂.Eq] in
 lemma derivable_neg_exs_definesElement
     (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p) (hT : IsTable L₁ L₂ tbl)
-    {t b Θ : V} (ht : IsSemiterm L₂ 0 t) (hΘ : IsFormulaSet L₁ Θ) (hsu : Θ ≤ b)
+    (ht : IsSemiterm L₂ 0 t) (hΘ : IsFormulaSet L₁ Θ) (hsu : Θ ≤ b)
     (hpu : tbl.[0] ^⋏ varEqual L₁ L₂ tbl t ≤ b)
     (hd : Derivable S (insert (neg L₁ (substs1 L₁ (^&b) tbl.[0]))
       (insert (neg L₁ (substs1 L₁ (^&b) (varEqual L₁ L₂ tbl t))) Θ))) :
@@ -452,7 +450,7 @@ lemma derivable_neg_exs_definesElement
 
 lemma derivable_exs_definesElement
     (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
-    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t Θ : V}
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V)
     (ht : IsSemiterm L₂ 0 t)
     (hΘ : IsFormulaSet L₁ Θ) (hD : negDomSet L₁ tbl.[0] t ⊆ Θ) :
     Derivable S (insert (^∃ (tbl.[0] ^⋏ varEqual L₁ L₂ tbl t)) Θ) := by
@@ -482,7 +480,7 @@ lemma derivable_exs_definesElement
     grind) h₁
 
 lemma translated_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
-    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {Γ p t : V}
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {Γ : V}
     (hΓ : IsFormulaSet L₂ Γ)
     (hp : ^∃ p ∈ Γ) (ht : IsTerm L₂ t)
     (hd : TranslatedDerivable S L₂ tbl (insert (substs1 L₂ t p) Γ)) :
@@ -590,12 +588,13 @@ section translation
 
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] {tbl : V}
+  {S' : Theory L₂} [S'.Δ₁]
 
 /-- A sentence code provable in `S'` has its translation provable in `S`.
 - [Lin97, Corollary 6.1]
 - [HP98, Lemma III.2.42] -/
 theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
-    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V)
     (hax : ∀ p ∈ S'.Δ₁Class (V := V), IsFormula L₂ p →
       Provable S (Bootstrapping.translate L₁ L₂ tbl p)) {φ : V}
     (hφ : L₂.IsSentence φ) (hpr : Provable S' φ) :
@@ -618,7 +617,7 @@ theorem provable_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentenc
 - [Lin97, Corollary 6.1]
 - [HP98, Lemma III.2.42] -/
 theorem consistent_of_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
-    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {S' : Theory L₂} [S'.Δ₁]
+    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V)
     (hax : ∀ p ∈ S'.Δ₁Class (V := V), IsFormula L₂ p →
       Provable S (Bootstrapping.translate L₁ L₂ tbl p))
     (hcon : S.Consistent V) : S'.Consistent V := by

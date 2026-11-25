@@ -11,8 +11,6 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.IndexedSetModel
 The logic $\mathbf{ILM}$ and its completeness with respect to finite Veltman models.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
@@ -71,7 +69,9 @@ variable [DecidableEq α]
 
 /-! ### Subformulas of conjunctions -/
 
-lemma Formula.exists_mem_subformulas_of_mem_conj₂ {A : Formula α} :
+variable {A : Formula α}
+
+lemma Formula.exists_mem_subformulas_of_mem_conj₂ :
     {l : List (Formula α)} → A ∈ (⋀l).subformulas → (∀ B C, A ≠ B 🡒 C) → A ≠ ⊥ →
       ∃ B ∈ l, A ∈ B.subformulas
   | [], h, himp, hbot => by
@@ -181,7 +181,7 @@ end Logic
 
 /-! ### Adequate sets for $\mathbf{ILM}$ -/
 
-lemma Adequate.subformulas_subset {Φ : Finset (Formula α)} [Adequate Φ] {A : Formula α}
+lemma Adequate.subformulas_subset {Φ : Finset (Formula α)} [Adequate Φ]
     (h : A ∈ Φ) : A.subformulas ⊆ Φ := by
   induction A with
   | atom a => simpa [subformulas] using h;
@@ -196,13 +196,14 @@ lemma Adequate.subformulas_subset {Φ : Finset (Formula α)} [Adequate Φ] {A : 
     simp only [subformulas, Finset.insert_subset_iff, Finset.union_subset_iff];
     exact ⟨h, ihA (Adequate.rhd_left h), ihB (Adequate.rhd_right h)⟩
 
+variable (Φ : Finset (Formula α)) in
 /-- `Φ` is adequate, and for every antecedent or consequent `B` of a `▷`-formula in `Φ` and every
 finite set `X` of `□`-formulas in `Φ`, some antecedent or consequent `B'` of a `▷`-formula in `Φ`
 satisfies `B ⋏ X.conj 🡒 B' ⋎ ◇B'` and `B' 🡒 (B ⋏ X.conj) ⋎ ◇(B ⋏ X.conj)` in $\mathbf{IL}$.
 
 - [dJV90, Definition 6.1]
 -/
-class MAdequate (Φ : Finset (Formula α)) : Prop extends Adequate Φ where
+class MAdequate : Prop extends Adequate Φ where
   exists_isRhdOperand {B : Formula α} {X : Finset (Formula α)} : IsRhdOperand Φ B →
     (∀ C ∈ X, C ∈ Φ ∧ ∃ D, C = □D) → ∃ B', IsRhdOperand Φ B' ∧
       𝐈𝐋 ⊢ B ⋏ X.conj 🡒 B' ⋎ ◇B' ∧ 𝐈𝐋 ⊢ B' 🡒 (B ⋏ X.conj) ⋎ ◇(B ⋏ X.conj)
@@ -253,7 +254,9 @@ lemma tree_mono (h : O ⊆ O') : tree Φ O ⊆ tree Φ O' := by
       Finset.image_subset_image <|
         ih _ (hn ▸ Finset.card_erase_lt_of_mem hB) (Finset.erase_subset_erase B h) rfl, rfl⟩
 
-private lemma imp_or_iff_of_subset {X : Finset (Formula α)}
+variable {X : Finset (Formula α)}
+
+private lemma imp_or_iff_of_subset
     (hO : ∀ D ∈ tree Φ O, 𝐈𝐋 ⊢ D 🡒 B ∨ ∃ A' ∈ tree Φ (O.erase B), 𝐈𝐋 ⊢ □(∼B) 🡒 (D 🡘 A'))
     (hX : X ⊆ boxes Φ ∪ (tree Φ O).image fun C ↦ □(∼C)) :
     ∀ C ∈ X, 𝐈𝐋 ⊢ □(∼B) 🡒 C ∨ ∃ C' ∈ boxes Φ ∪ (tree Φ (O.erase B)).image (fun C ↦ □(∼C)),
@@ -289,8 +292,7 @@ private lemma exists_box_of_subset {Y : Finset (Formula α)}
   · obtain ⟨D, -, rfl⟩ := Finset.mem_image.mp hC;
     exact ⟨∼D, rfl⟩
 
-lemma exists_tree_of_conj {X : Finset (Formula α)} (hB : B ∈ O)
-    (hX : X ⊆ boxes Φ ∪ (tree Φ O).image fun C ↦ □(∼C)) :
+lemma exists_tree_of_conj (hB : B ∈ O) (hX : X ⊆ boxes Φ ∪ (tree Φ O).image fun C ↦ □(∼C)) :
     ∃ A ∈ tree Φ O, 𝐈𝐋 ⊢ B ⋏ X.conj 🡒 A ⋎ ◇A ∧ 𝐈𝐋 ⊢ A 🡒 (B ⋏ X.conj) ⋎ ◇(B ⋏ X.conj) := by
   obtain ⟨X', hX', h⟩ := Logic.exists_conj_iff <|
     imp_or_iff_of_subset (B := B) (fun _ hD ↦ exists_tree_erase hD) hX;
@@ -329,17 +331,23 @@ lemma mem_of_mem_tree (hO : O ⊆ rhdOperands Φ) (hA : A ∈ tree Φ O) (hB : B
 
 end mAdequateClosure
 
+section
+
+variable (Φ : Finset (Formula α))
+
 open mAdequateClosure in
 /-- The antecedents and consequents of `▷`-formulas in `Φ` together with the trees over them. -/
-noncomputable def mAdequateClosure.operands (Φ : Finset (Formula α)) : Finset (Formula α) :=
+noncomputable def mAdequateClosure.operands : Finset (Formula α) :=
   rhdOperands Φ ∪ tree Φ (rhdOperands Φ)
 
 open mAdequateClosure in
 /-- The subformulas of the formulas in `Φ`, of `□∼A` for the trees `A` over `Φ`, and of `A ▷ B` for
 `A` and `B` in `operands Φ`. -/
-noncomputable def mAdequateClosure (Φ : Finset (Formula α)) : Finset (Formula α) :=
+noncomputable def mAdequateClosure : Finset (Formula α) :=
   (Φ ∪ (tree Φ (rhdOperands Φ)).image (fun A ↦ □(∼A)) ∪
     (operands Φ ×ˢ operands Φ).image (fun p ↦ p.1 ▷ p.2)).biUnion subformulas
+
+end
 
 namespace mAdequateClosure
 
@@ -616,20 +624,27 @@ instance : IsTrans _ (countermodelM Φ).Rel :=
 
 instance : Std.Irrefl (countermodelM Φ).Rel := ⟨fun _ h ↦ h.1.irrefl⟩
 
-instance [Adequate Φ] : (countermodelM Φ).IsIL where
+section
+
+variable [Adequate Φ]
+
+instance instIsILIndexedSetILMOfAdequate : (countermodelM Φ).IsIL where
   rel_of_s_left h := h.1.1.1
   rel_of_s_right h := h.1.1.2
   s_refl h := ⟨countermodel.s_refl Logic.ofILAxioms.rhd_refl h, List.prefix_refl _, fun h ↦ h⟩
   s_trans h₁ h₂ := ⟨countermodel.s_trans h₁.1 h₂.1, h₁.2.1.trans h₂.2.1, fun h ↦ h₂.2.2 (h₁.2.2 h)⟩
   s_of_rel h₁ h₂ := ⟨countermodel.s_of_rel h₁ h₂, h₂.2, fun h ↦ h₂.1.box_mem_of_box_mem h⟩
 
+omit [Adequate Φ] in
 instance : (countermodelM Φ).HasM where
   rel_of_s_rel h₁ h₂ := by
     obtain ⟨A, hA, hA'⟩ := h₂.1.exists_box;
     exact ⟨⟨fun h ↦ h₂.1.mem_of_box_mem (h₁.2.2 h), fun h ↦ h₂.1.box_mem_of_box_mem (h₁.2.2 h),
       A, hA, fun h ↦ hA' (h₁.2.2 h)⟩, h₁.2.1.trans h₂.2⟩
 
-instance [Adequate Φ] : (countermodelM Φ).IsILM := {}
+instance instIsILMIndexedSetILMOfAdequate : (countermodelM Φ).IsILM := {}
+
+end
 
 variable [MAdequate Φ]
 

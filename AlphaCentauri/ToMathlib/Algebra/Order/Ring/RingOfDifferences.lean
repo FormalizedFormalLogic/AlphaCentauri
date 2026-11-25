@@ -14,8 +14,6 @@ public import Mathlib.Tactic.Ring
 The ring of formal differences of an ordered commutative semiring.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 universe u
@@ -29,12 +27,13 @@ def RingOfDifferences (M : Type u) [CommSemiring M] [LinearOrder M] [IsStrictOrd
 namespace RingOfDifferences
 
 variable {M : Type u} [CommSemiring M] [LinearOrder M] [IsStrictOrderedRing M]
-  [CanonicallyOrderedAdd M]
+  [CanonicallyOrderedAdd M] (a b c d : M) {x : RingOfDifferences M}
 
 /-- The class of `(a, b)`, that is, `a - b`. -/
-def mk (a b : M) : RingOfDifferences M := Quotient.mk _ (a, b)
+def mk : RingOfDifferences M := Quotient.mk _ (a, b)
 
-lemma mk_eq_mk {a b c d : M} : mk a b = mk c d ↔ a + d = c + b := Quotient.eq
+variable {a b c d} in
+lemma mk_eq_mk : mk a b = mk c d ↔ a + d = c + b := Quotient.eq
 
 @[elab_as_elim]
 lemma ind {motive : RingOfDifferences M → Prop} (h : ∀ a b, motive (mk a b))
@@ -61,11 +60,11 @@ instance : Mul (RingOfDifferences M) :=
       change _ + _ = _ + _ at hx hy ⊢
       linear_combination y.1 * hx - y.2 * hx + x'.1 * hy - x'.2 * hy⟩
 
-lemma mk_add (a b c d : M) : mk a b + mk c d = mk (a + c) (b + d) := rfl
+lemma mk_add : mk a b + mk c d = mk (a + c) (b + d) := rfl
 
-lemma mk_mul (a b c d : M) : mk a b * mk c d = mk (a * c + b * d) (a * d + b * c) := rfl
+lemma mk_mul : mk a b * mk c d = mk (a * c + b * d) (a * d + b * c) := rfl
 
-lemma mk_neg (a b : M) : -mk a b = mk b a := rfl
+lemma mk_neg : -mk a b = mk b a := rfl
 
 lemma zero_def : (0 : RingOfDifferences M) = mk 0 0 := rfl
 
@@ -110,18 +109,20 @@ def of : M →+* RingOfDifferences M where
   map_add' a b := by change mk (a + b) 0 = mk a 0 + mk b 0; diff_ring
   map_mul' a b := by change mk (a * b) 0 = mk a 0 * mk b 0; diff_ring
 
-lemma of_def (a : M) : of a = mk a 0 := rfl
+lemma of_def : of a = mk a 0 := rfl
 
-lemma mk_eq_sub (a b : M) : mk a b = of a - of b := by
+lemma mk_eq_sub : mk a b = of a - of b := by
   simp only [of_def, sub_eq_add_neg]; diff_ring
 
 lemma of_injective : Function.Injective (of : M →+* RingOfDifferences M) := fun a b h ↦ by
   simpa [of_def, mk_eq_mk] using h
 
+variable {a b} in
 @[simp]
-lemma of_inj {a b : M} : of a = of b ↔ a = b := of_injective.eq_iff
+lemma of_inj : of a = of b ↔ a = b := of_injective.eq_iff
 
-lemma exists_eq_sub (x : RingOfDifferences M) : ∃ a b : M, x = of a - of b := by
+variable (x) in
+lemma exists_eq_sub : ∃ a b : M, x = of a - of b := by
   induction x using ind with
   | h a b =>
     use a, b
@@ -155,23 +156,25 @@ noncomputable instance : LinearOrder (RingOfDifferences M) :=
   letI := Classical.decPred (· ∈ cone (M := M))
   LinearOrder.ofAddSubmonoid cone_isPointed cone_isSpanning
 
-lemma le_iff {x y : RingOfDifferences M} : x ≤ y ↔ y - x ∈ cone := Iff.rfl
+lemma le_iff {y : RingOfDifferences M} : x ≤ y ↔ y - x ∈ cone := Iff.rfl
 
-lemma nonneg_iff {x : RingOfDifferences M} : 0 ≤ x ↔ ∃ a, of a = x := by
+lemma nonneg_iff : 0 ≤ x ↔ ∃ a, of a = x := by
   rw [le_iff, sub_zero]
   exact Iff.rfl
 
 @[simp]
-lemma of_nonneg (a : M) : 0 ≤ of a := nonneg_iff.2 ⟨a, rfl⟩
+lemma of_nonneg : 0 ≤ of a := nonneg_iff.2 ⟨a, rfl⟩
 
+variable {a b} in
 @[simp]
-lemma of_le_of {a b : M} : of a ≤ of b ↔ a ≤ b := by
+lemma of_le_of : of a ≤ of b ↔ a ≤ b := by
   rw [le_iff, ← mk_eq_sub, le_iff_exists_add']
   change (∃ c, mk c 0 = mk b a) ↔ _
   simp [mk_eq_mk, eq_comm]
 
+variable {a b} in
 @[simp]
-lemma of_lt_of {a b : M} : of a < of b ↔ a < b := by
+lemma of_lt_of : of a < of b ↔ a < b := by
   rw [lt_iff_le_not_ge, lt_iff_le_not_ge, of_le_of, of_le_of]
 
 instance : IsOrderedRing (RingOfDifferences M) :=
@@ -189,21 +192,26 @@ instance : IsStrictOrderedRing (RingOfDifferences M) :=
     rw [← map_mul, ← map_zero of, of_lt_of]
     exact mul_pos hx hy
 
-lemma one_le_of_pos (h : ∀ x : M, 0 < x → 1 ≤ x) {x : RingOfDifferences M} (hx : 0 < x) :
-    1 ≤ x := by
+lemma one_le_of_pos (h : ∀ x : M, 0 < x → 1 ≤ x) (hx : 0 < x) : 1 ≤ x := by
   obtain ⟨a, rfl⟩ := nonneg_iff.1 hx.le
   rw [← map_zero of, of_lt_of] at hx
   rw [← map_one of, of_le_of]
   exact h a hx
 
+section
+
+variable (x)
+
 /-- A positive part of a difference. -/
-noncomputable def posPart (x : RingOfDifferences M) : M := (exists_eq_sub x).choose
+noncomputable def posPart : M := (exists_eq_sub x).choose
 
 /-- A negative part of a difference. -/
-noncomputable def negPart (x : RingOfDifferences M) : M := (exists_eq_sub x).choose_spec.choose
+noncomputable def negPart : M := (exists_eq_sub x).choose_spec.choose
 
-lemma posPart_sub_negPart (x : RingOfDifferences M) : of (posPart x) - of (negPart x) = x :=
+lemma posPart_sub_negPart : of (posPart x) - of (negPart x) = x :=
   (exists_eq_sub x).choose_spec.choose_spec.symm
+
+end
 
 /-- Every difference of absolute value below `B` is a difference of two elements below a fixed
 `b : M`. -/

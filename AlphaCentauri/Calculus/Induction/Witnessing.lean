@@ -15,8 +15,6 @@ off from `LKI[C]` derivations.
 - [Bus98A, Section 3.1.2, Section 3.1.3]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -24,7 +22,8 @@ namespace FFL.FirstOrder.Arithmetic
 /-! ## Bounded approximation of $\Sigma_1$-block formulas -/
 
 section
-variable {ξ : Type*} {n : ℕ}
+
+variable {ξ : Type*}
 
 /-- `bound u φ` replaces the leading existential quantifiers of `φ` by quantifiers bounded
 by `u`.
@@ -35,20 +34,28 @@ private def bound {n : ℕ} (u : ArithmeticSemiterm ξ n) :
   | ∃¹ φ => ∃¹[“#0 < !!(Rew.bShift u)”] bound (Rew.bShift u) φ
   | φ => φ
 
+variable {n : ℕ} {φ : ArithmeticSemiformula ξ n} (h : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ)
+  (u : ArithmeticSemiterm ξ n)
+
 @[simp, grind =]
-private lemma bound_exs (u : ArithmeticSemiterm ξ n)
-    (φ : ArithmeticSemiformula ξ (n + 1)) :
+private lemma bound_exs (φ : ArithmeticSemiformula ξ (n + 1)) :
     bound u (∃¹ φ) = ∃¹[“#0 < !!(Rew.bShift u)”] bound (Rew.bShift u) φ := rfl
 
+include h in
 /-- The approximation of a $\Sigma_1$-block formula is $\Delta_0$. -/
-private lemma bounded_bound {n : ℕ} {φ : ArithmeticSemiformula ξ n} (h : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ)
-    (u : ArithmeticSemiterm ξ n) : ℬ[<, ℒₒᵣ].Closure (bound u φ) := by
+private lemma bounded_bound : ℬ[<, ℒₒᵣ].Closure (bound u φ) := by
   induction φ using Semiformula.rec' with
   | hexs φ ih =>
     exact .arithmetic_bexs (Rew.positive_iff.mpr ⟨u, rfl⟩) (ih (Bounding.PrenexBlock.of_exs h) _)
   | _ => cases h with | bounded h => exact h
 
+end
+
 /-! ## The approximation, read semantically -/
+
+section
+
+variable {ξ : Type*} {n : ℕ}
 
 /-- `EvalBound e ε b φ` says that `φ` is true under `e` and `ε` with every leading existential
 witnessed below `b`.
@@ -59,14 +66,15 @@ def EvalBound {n : ℕ} (e : Fin n → ℕ) (ε : ξ → ℕ) (b : ℕ) :
   | ∃¹ φ => ∃ x < b, EvalBound (x :> e) ε b φ
   | φ => Semiformula.Eval e ε φ
 
+variable {e : Fin n → ℕ} {ε : ξ → ℕ} {b : ℕ} {φ : ArithmeticSemiformula ξ n}
+
 @[simp, grind =]
-lemma evalBound_exs {e : Fin n → ℕ} {ε : ξ → ℕ} {b}
-    {φ : ArithmeticSemiformula ξ (n + 1)} :
+lemma evalBound_exs {φ : ArithmeticSemiformula ξ (n + 1)} :
     EvalBound e ε b (∃¹ φ) ↔ ∃ x < b, EvalBound (x :> e) ε b φ := Iff.rfl
 
 section
 
-variable {e : Fin n → ℕ} {ε : ξ → ℕ} {b : ℕ} {k} {r : (ℒₒᵣ).Rel k}
+variable {ψ : ArithmeticSemiformula ξ n} {k} {r : (ℒₒᵣ).Rel k}
 
 @[simp, grind =]
 lemma evalBound_rel {v} :
@@ -83,12 +91,10 @@ lemma evalBound_verum : EvalBound e ε b ⊤ := by tauto
 lemma evalBound_falsum : ¬EvalBound e ε b ⊥ := by tauto
 
 @[simp, grind =]
-lemma evalBound_and {φ ψ : ArithmeticSemiformula ξ n} :
-    EvalBound e ε b (φ ⋏ ψ) ↔ Semiformula.Eval e ε (φ ⋏ ψ) := Iff.rfl
+lemma evalBound_and : EvalBound e ε b (φ ⋏ ψ) ↔ Semiformula.Eval e ε (φ ⋏ ψ) := Iff.rfl
 
 @[simp, grind =]
-lemma evalBound_or {φ ψ : ArithmeticSemiformula ξ n} :
-    EvalBound e ε b (φ ⋎ ψ) ↔ Semiformula.Eval e ε (φ ⋎ ψ) := Iff.rfl
+lemma evalBound_or : EvalBound e ε b (φ ⋎ ψ) ↔ Semiformula.Eval e ε (φ ⋎ ψ) := Iff.rfl
 
 @[simp, grind =]
 lemma evalBound_all {φ : ArithmeticSemiformula ξ (n + 1)} :
@@ -96,12 +102,10 @@ lemma evalBound_all {φ : ArithmeticSemiformula ξ (n + 1)} :
 
 end
 
-variable {n n₁ n₂ : ℕ}
+variable {n₁ n₂ : ℕ}
 
 /-- The approximation is what the bounded formula says. -/
-private lemma evalBound_iff_eval_bound {φ : ArithmeticSemiformula ξ n}
-    {u : ArithmeticSemiterm ξ n}
-    {e : Fin n → ℕ} {ε : ξ → ℕ} :
+private lemma evalBound_iff_eval_bound {u : ArithmeticSemiterm ξ n} :
     EvalBound e ε (Semiterm.val e ε u) φ ↔ Semiformula.Eval e ε (bound u φ) := by
   induction φ using Semiformula.rec' with
   | hexs φ ih =>
@@ -114,8 +118,7 @@ private lemma evalBound_iff_eval_bound {φ : ArithmeticSemiformula ξ n}
   | _ => exact Iff.rfl
 
 /-- The approximation implies the formula. -/
-lemma eval_of_evalBound {n : ℕ} {φ : ArithmeticSemiformula ξ n} {b : ℕ} {e : Fin n → ℕ}
-    {ε : ξ → ℕ} (h : EvalBound e ε b φ) : Semiformula.Eval e ε φ := by
+lemma eval_of_evalBound (h : EvalBound e ε b φ) : Semiformula.Eval e ε φ := by
   induction φ using Semiformula.rec' with
   | hexs φ ih =>
     obtain ⟨x, _, hx⟩ := h
@@ -123,15 +126,14 @@ lemma eval_of_evalBound {n : ℕ} {φ : ArithmeticSemiformula ξ n} {b : ℕ} {e
   | _ => exact h
 
 /-- The approximation grows with the bound. -/
-lemma evalBound_mono {n : ℕ} {φ : ArithmeticSemiformula ξ n} {b b' : ℕ} (hb : b ≤ b')
-    {e : Fin n → ℕ} {ε : ξ → ℕ} (h : EvalBound e ε b φ) : EvalBound e ε b' φ := by
+lemma evalBound_mono {b' : ℕ} (hb : b ≤ b') (h : EvalBound e ε b φ) : EvalBound e ε b' φ := by
   induction φ using Semiformula.rec' with
   | hexs φ ih => grind
   | _ => exact h
 
 /-- A true $\Sigma_1$-block formula has an approximation. -/
-lemma exists_evalBound {φ : ArithmeticSemiformula ξ n} (hφ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ)
-    {e : Fin n → ℕ} {ε : ξ → ℕ} (h : Semiformula.Eval e ε φ) : ∃ b, EvalBound e ε b φ := by
+lemma exists_evalBound (hφ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ) (h : Semiformula.Eval e ε φ) :
+    ∃ b, EvalBound e ε b φ := by
   induction φ using Semiformula.rec' with
   | hexs φ ih =>
     obtain ⟨x, hx⟩ : ∃ x, Semiformula.Eval (x :> e) ε φ := by simpa using h
@@ -142,7 +144,7 @@ lemma exists_evalBound {φ : ArithmeticSemiformula ξ n} (hφ : ℬ[<, ℒₒᵣ
 
 /-- The approximation commutes with rewriting. -/
 lemma evalBound_rew {ξ₁ ξ₂ : Type*} (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂)
-    (φ : ArithmeticSemiformula ξ₁ n₁) {e : Fin n₂ → ℕ} {ε : ξ₂ → ℕ} {b : ℕ} :
+    (φ : ArithmeticSemiformula ξ₁ n₁) {e : Fin n₂ → ℕ} {ε : ξ₂ → ℕ} :
     EvalBound e ε b (ω ▹ φ) ↔
       EvalBound (Semiterm.val e ε ∘ ω ∘ Semiterm.bvar)
         (Semiterm.val e ε ∘ ω ∘ Semiterm.fvar) b φ := by
@@ -163,8 +165,7 @@ lemma evalBound_rew {ξ₁ ξ₂ : Type*} (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n
   | _ => exact Semiformula.eval_rew ω _
 
 /-- The approximation only looks at the free variables of the formula. -/
-lemma evalBound_congr_fvar [DecidableEq ξ] {n : ℕ} {φ : ArithmeticSemiformula ξ n} {b : ℕ}
-    {e : Fin n → ℕ} {ε ε' : ξ → ℕ} (h : Function.funEqOn φ.FVar? ε ε') :
+lemma evalBound_congr_fvar [DecidableEq ξ] {ε' : ξ → ℕ} (h : Function.funEqOn φ.FVar? ε ε') :
     EvalBound e ε b φ ↔ EvalBound e ε' b φ := by
   induction φ using Semiformula.rec' with
   | hexs φ ih =>
@@ -175,8 +176,7 @@ lemma evalBound_congr_fvar [DecidableEq ξ] {n : ℕ} {φ : ArithmeticSemiformul
 
 /-- A true $\Delta_0$ formula has an approximation bounded by a term of the formula: only its
 leading bounded existential has to be witnessed. -/
-lemma exists_term_evalBound_of_bounded {n : ℕ} {φ : ArithmeticSemiformula ξ n}
-    (hφ : ℬ[<, ℒₒᵣ].Closure φ) :
+lemma exists_term_evalBound_of_bounded (hφ : ℬ[<, ℒₒᵣ].Closure φ) :
     ∃ s : ArithmeticSemiterm ξ n, ∀ (e : Fin n → ℕ) (ε : ξ → ℕ),
       Semiformula.Eval e ε φ → EvalBound e ε (Semiterm.val e ε s + 1) φ := by
   cases φ using Semiformula.cases' with
@@ -256,12 +256,13 @@ variable {Γ Δ : LK.Sequent ℒₒᵣ} {φ ψ : ArithmeticProposition} {f g : L
 
 /-! ## Witnessing -/
 
+variable (Γ f) in
 /-- `Witnesses Γ f` says that `f` bounds the witnesses of the $\Sigma_1$ formulas of `Γ`: if every
 non-$\Sigma_1$ formula of `Γ` is refuted below `b` under `l`, then some $\Sigma_1$ formula of `Γ`
 holds below `f l b`.
 
 - [Bus98A, Section 3.1.3] -/
-def Witnesses (Γ : LK.Sequent ℒₒᵣ) (f : List ℕ → ℕ → ℕ) : Prop :=
+def Witnesses : Prop :=
   ∀ (l : List ℕ) (b : ℕ),
       (∀ ψ ∈ Γ, ¬ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 ψ → EvalBound ![] (l.getD · 0) b (∼ψ)) →
     ∃ φ ∈ Γ, ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 φ ∧ EvalBound ![] (l.getD · 0) (f l b) φ
@@ -365,8 +366,9 @@ lemma witnesses_and (hd : ℬ[<, ℒₒᵣ].Closure (φ ⋏ ψ)) (H₁ : Witness
 
 /-! ## The existential rule -/
 
-lemma witnesses_exs {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
-    (hσ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (∃¹ ξ)) (H : Witnesses (Γ + ⦃ξ/[t]⦄) f) :
+variable {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
+
+lemma witnesses_exs (hσ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (∃¹ ξ)) (H : Witnesses (Γ + ⦃ξ/[t]⦄) f) :
     Witnesses (Γ + ⦃∃¹ ξ⦄) fun l b ↦ max (f l b) (Semiterm.val ![] (l.getD · 0) t + 1) := by
   have hsub : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (ξ/[t]) := (Bounding.PrenexBlock.of_exs hσ).rew _
   intro l b hb
@@ -396,7 +398,11 @@ lemma witnesses_exs {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
 
 /-! ## The cut rule -/
 
-private lemma witnesses_cut_sigma {χ : ArithmeticProposition} (hσ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 χ)
+section
+
+variable {χ : ArithmeticProposition}
+
+private lemma witnesses_cut_sigma (hσ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 χ)
     (H₁ : Witnesses (Γ + ⦃χ⦄) f) (H₂ : Witnesses (Δ + ⦃∼χ⦄) g) :
     Witnesses (Γ + Δ) fun l b ↦ max (f l b) (g l (max b (f l b))) := by
   intro l b hb
@@ -418,8 +424,7 @@ private lemma witnesses_cut_sigma {χ : ArithmeticProposition} (hσ : ℬ[<, ℒ
   rcases show χ₂ = ∼χ by simpa using hm₂
   exact absurd (eval_of_evalBound hbnd₁) (by simpa using eval_of_evalBound hbnd₂)
 
-lemma witnesses_cut {χ : ArithmeticProposition}
-    (hχ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 χ ∨ ℬ[<, ℒₒᵣ].PrenexBlock 𝚷 χ)
+lemma witnesses_cut (hχ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 χ ∨ ℬ[<, ℒₒᵣ].PrenexBlock 𝚷 χ)
     (H₁ : Witnesses (Γ + ⦃χ⦄) f) (H₂ : Witnesses (Δ + ⦃∼χ⦄) g) :
     Witnesses (Γ + Δ) fun l b ↦
       max (max (f l b) (g l (max b (f l b)))) (max (g l b) (f l (max b (g l b)))) := by
@@ -429,40 +434,45 @@ lemma witnesses_cut {χ : ArithmeticProposition}
     exact ((witnesses_cut_sigma (Bounding.PrenexBlock.neg hπ) H₂ H₁').cast (by abel)).mono
       fun _ _ ↦ le_max_right _ _
 
+end
+
 /-! ## The universal rule -/
 
-/-- The maximum of `f` below `n`. -/
-def maxBelow (f : ℕ → ℕ) : ℕ → ℕ
-  | 0 => 0
-  | n + 1 => max (f n) (maxBelow f n)
+section
 
-lemma maxBelow_eq_rec (f : ℕ → ℕ) : ∀ n : ℕ,
+variable (f : ℕ → ℕ) {n c x : ℕ} {l : List ℕ}
+
+/-- The maximum of `f` below `n`. -/
+def maxBelow : ℕ → ℕ
+  | 0 => 0
+  | n + 1 => max (f n) (maxBelow n)
+
+lemma maxBelow_eq_rec : ∀ n : ℕ,
     maxBelow f n = n.rec (motive := fun _ ↦ ℕ) 0 fun x ih ↦ max (f x) ih
   | 0 => rfl
-  | n + 1 => by simp [maxBelow, maxBelow_eq_rec f n]
+  | n + 1 => by simp [maxBelow, maxBelow_eq_rec n]
 
-lemma le_maxBelow (f : ℕ → ℕ) {x : ℕ} : {n : ℕ} → x < n → f x ≤ maxBelow f n
+lemma le_maxBelow : {n : ℕ} → x < n → f x ≤ maxBelow f n
   | 0, h => absurd h (by simp)
   | n + 1, h => by
     rcases (Nat.lt_succ_iff.mp h).lt_or_eq with h' | rfl
-    · exact le_trans (le_maxBelow f h') (le_max_right _ _)
+    · exact le_trans (le_maxBelow h') (le_max_right _ _)
     · exact le_max_left _ _
 
-lemma maxBelow_le (f : ℕ → ℕ) {c : ℕ} : {n : ℕ} → (∀ x < n, f x ≤ c) → maxBelow f n ≤ c
+lemma maxBelow_le : {n : ℕ} → (∀ x < n, f x ≤ c) → maxBelow f n ≤ c
   | 0, _ => by simp [maxBelow]
   | n + 1, h => by
     simp only [maxBelow, max_le_iff]
-    exact ⟨h n (by simp), maxBelow_le f fun x hx ↦ h x (by omega)⟩
+    exact ⟨h n (by simp), maxBelow_le fun x hx ↦ h x (by omega)⟩
 
 /-- A bounded search: the maximum below `n` of the partial identity on `p` is the unique element
 of `p`, provided it lies below `n`. -/
-lemma maxBelow_ite_eq {p : ℕ → Prop} [DecidablePred p] {c n : ℕ} (hc : p c) (hcn : c < n)
+lemma maxBelow_ite_eq {p : ℕ → Prop} [DecidablePred p] (hc : p c) (hcn : c < n)
     (huniq : ∀ y, p y → y = c) : maxBelow (fun y ↦ if p y then y else 0) n = c :=
   le_antisymm (maxBelow_le _ fun x _ ↦ by grind)
     (by simpa [hc] using le_maxBelow (fun y ↦ if p y then y else 0) hcn)
 
-private lemma evalBound_shift {n : ℕ} {χ : ArithmeticSemiformula ℕ n} {e : Fin n → ℕ} {c x : ℕ}
-    {l : List ℕ} :
+private lemma evalBound_shift {χ : ArithmeticSemiformula ℕ n} {e : Fin n → ℕ} :
     EvalBound e ((x :: l).getD · 0) c (Rewriting.shift χ) ↔ EvalBound e (l.getD · 0) c χ := by
   have e₁ : ((Semiterm.val e fun y ↦ (x :: l).getD y 0) ∘
       ⇑(Rew.shift : SyntacticRew ℒₒᵣ n n) ∘ Semiterm.bvar) = e := by funext i; simp
@@ -472,9 +482,7 @@ private lemma evalBound_shift {n : ℕ} {χ : ArithmeticSemiformula ℕ n} {e : 
   simp only [Rewriting.shift]
   rw [evalBound_rew, e₁, e₂]
 
-private lemma evalBound_subst {ξ : ArithmeticSemiformula ℕ 1} {s : ArithmeticTerm ℕ} {c : ℕ}
-    {l : List ℕ} :
-    EvalBound ![] (l.getD · 0) c (ξ/[s]) ↔
+private lemma evalBound_subst {s : ArithmeticTerm ℕ} : EvalBound ![] (l.getD · 0) c (ξ/[s]) ↔
       EvalBound ![Semiterm.val ![] (l.getD · 0) s] (l.getD · 0) c ξ := by
   have e₁ : ((Semiterm.val ![] fun y ↦ l.getD y 0) ∘ ⇑(Rew.subst ![s]) ∘ Semiterm.bvar)
       = ![Semiterm.val ![] (fun y ↦ l.getD y 0) s] := by
@@ -487,7 +495,7 @@ private lemma evalBound_subst {ξ : ArithmeticSemiformula ℕ 1} {s : Arithmetic
   simp only [Rewriting.subst]
   rw [evalBound_rew, e₁, e₂]
 
-private lemma evalBound_free {χ : ArithmeticSemiformula ℕ 1} {c x : ℕ} {l : List ℕ} :
+private lemma evalBound_free {χ : ArithmeticSemiformula ℕ 1} :
     EvalBound ![] ((x :: l).getD · 0) c (Rewriting.free χ) ↔ EvalBound ![x] (l.getD · 0) c χ := by
   have e₁ : ((Semiterm.val ![] fun y ↦ (x :: l).getD y 0) ∘
       ⇑(Rew.free : SyntacticRew ℒₒᵣ 1 0) ∘ Semiterm.bvar) = ![x] := by
@@ -501,9 +509,11 @@ private lemma evalBound_free {χ : ArithmeticSemiformula ℕ 1} {c x : ℕ} {l :
   simp only [Rewriting.free]
   rw [evalBound_rew, e₁, e₂]
 
+end
+
 /-- The universal rule when the principal formula is not $\Sigma_1$: the hypothesis refutes it
 below `b`, which bounds the counterexample. -/
-lemma witnesses_all_pi {ξ : ArithmeticSemiformula ℕ 1} (hnσ : ¬ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (∀¹ ξ))
+lemma witnesses_all_pi (hnσ : ¬ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 (∀¹ ξ))
     (H : Witnesses (Γ⁺ + ⦃Rewriting.free ξ⦄) f) :
     Witnesses (Γ + ⦃∀¹ ξ⦄) fun l b ↦ maxBelow (fun x ↦ f (x :: l) b) b := by
   intro l b hb
@@ -526,8 +536,7 @@ lemma witnesses_all_pi {ξ : ArithmeticSemiformula ℕ 1} (hnσ : ¬ℬ[<, ℒ�
 
 /-- The universal rule when the principal formula is a bounded universal: the term bounds the
 counterexample. -/
-lemma witnesses_all_bounded {ψ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ}
-    (hψ : ℬ[<, ℒₒᵣ].Closure ψ)
+lemma witnesses_all_bounded {ψ : ArithmeticSemiformula ℕ 1} (hψ : ℬ[<, ℒₒᵣ].Closure ψ)
     (H : Witnesses (Γ⁺ + ⦃Rewriting.free (“#0 < !!(Rew.bShift t)” 🡒 ψ)⦄) f) :
     Witnesses (Γ + ⦃∀¹[“#0 < !!(Rew.bShift t)”] ψ⦄)
       fun l b ↦ maxBelow (fun x ↦ f (x :: l) b) (Semiterm.val ![] (l.getD · 0) t) := by
@@ -563,25 +572,30 @@ lemma witnesses_all_bounded {ψ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTe
 
 /-! ## The induction rule -/
 
+section
+
+variable (f) (l : List ℕ) (b : ℕ)
+
 /-- The bounds the induction rule iterates: `b` at `0`, and at each step the larger of the
 current bound and what the premise gives. -/
-def indBound (f : List ℕ → ℕ → ℕ) (l : List ℕ) (b : ℕ) : ℕ → ℕ
+def indBound : ℕ → ℕ
   | 0 => b
-  | n + 1 => max (indBound f l b n) (f (n :: l) (indBound f l b n))
+  | n + 1 => max (indBound n) (f (n :: l) (indBound n))
 
-lemma indBound_eq_rec (f : List ℕ → ℕ → ℕ) (l : List ℕ) (b : ℕ) : ∀ n : ℕ,
+lemma indBound_eq_rec : ∀ n : ℕ,
     indBound f l b n = n.rec (motive := fun _ ↦ ℕ) b fun x ih ↦ max ih (f (x :: l) ih)
   | 0 => rfl
-  | n + 1 => by simp [indBound, indBound_eq_rec f l b n]
+  | n + 1 => by simp [indBound, indBound_eq_rec n]
 
-lemma le_indBound (f : List ℕ → ℕ → ℕ) (l : List ℕ) (b : ℕ) : ∀ n, b ≤ indBound f l b n
+lemma le_indBound : ∀ n, b ≤ indBound f l b n
   | 0 => le_rfl
-  | n + 1 => le_trans (le_indBound f l b n) (le_max_left _ _)
+  | n + 1 => le_trans (le_indBound n) (le_max_left _ _)
+
+end
 
 /-- The induction rule: the bound is iterated along the term. `B` supplies the standard bound of
 the induction formula, which is called for only when that formula is $\Delta_0$. -/
-lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} {B : List ℕ → ℕ}
-    (hξ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 ξ)
+lemma witnesses_ind {B : List ℕ → ℕ} (hξ : ℬ[<, ℒₒᵣ].PrenexBlock 𝚺 ξ)
     (hB : ℬ[<, ℒₒᵣ].Closure ξ → ∀ l : List ℕ,
       (Semiformula.Eval ![0] (l.getD · 0) ξ → EvalBound ![0] (l.getD · 0) (B l) ξ) ∧
         (Semiformula.Eval ![0] (l.getD · 0) (∼ξ) → EvalBound ![0] (l.getD · 0) (B l) (∼ξ)))
@@ -645,9 +659,13 @@ lemma witnesses_ind {ξ : ArithmeticSemiformula ℕ 1} {t : ArithmeticTerm ℕ} 
 
 /-! ## Primitive recursion of the bounds -/
 
+section
+
+variable {α : Type*} [Primcodable α] {B : α → ℕ}
+
 @[primrec]
-lemma primrec_maxBelow {α : Type*} [Primcodable α] {f : α → ℕ → ℕ} (hf : Primrec₂ f)
-    {B : α → ℕ} (hB : Primrec B) : Primrec fun a ↦ maxBelow (f a) (B a) := by
+lemma primrec_maxBelow {f : α → ℕ → ℕ} (hf : Primrec₂ f) (hB : Primrec B) :
+    Primrec fun a ↦ maxBelow (f a) (B a) := by
   have hstep : Primrec₂ fun (a : α) (q : ℕ × ℕ) ↦ max (f a q.1) q.2 := by primrec
   have h : Primrec fun a : α ↦
       (B a).rec (motive := fun _ ↦ ℕ) 0 fun x ih ↦ max (f a x) ih :=
@@ -655,14 +673,16 @@ lemma primrec_maxBelow {α : Type*} [Primcodable α] {f : α → ℕ → ℕ} (h
   exact h.of_eq fun a ↦ (maxBelow_eq_rec _ _).symm
 
 @[primrec]
-lemma primrec_indBound {α : Type*} [Primcodable α] {f : List ℕ → ℕ → ℕ} (hf : Primrec₂ f)
-    {l : α → List ℕ} (hl : Primrec l) {b B : α → ℕ} (hb : Primrec b) (hB : Primrec B) :
+lemma primrec_indBound {f : List ℕ → ℕ → ℕ} (hf : Primrec₂ f)
+    {l : α → List ℕ} (hl : Primrec l) {b : α → ℕ} (hb : Primrec b) (hB : Primrec B) :
     Primrec fun a ↦ indBound f (l a) (b a) (B a) := by
   have hstep : Primrec₂ fun (a : α) (q : ℕ × ℕ) ↦ max q.2 (f (q.1 :: l a) q.2) := by primrec
   have h' : Primrec fun a ↦
       (B a).rec (motive := fun _ ↦ ℕ) (b a) fun x ih ↦ max ih (f (x :: l a) ih) :=
     Primrec.nat_rec' hB hb hstep
   exact h'.of_eq fun a ↦ (indBound_eq_rec _ _ _ _).symm
+
+end
 
 /-! ## The witnessing lemma -/
 

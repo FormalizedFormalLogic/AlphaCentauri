@@ -10,8 +10,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.DerivabilityConditi
 Internal provability of codes of formulas in models of $\mathsf{EA}$.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 /-! ## Substitution of numerals -/
@@ -28,8 +26,10 @@ section
 
 open _root_.FFL.FirstOrder.Arithmetic.ElementaryArithmetic.Bootstrapping Bounding
 
+variable (v : Fin k → V)
+
 /-- The list of the entries of the tuple `v`. -/
-noncomputable def matrixToVec {k : ℕ} (v : Fin k → V) : V := Matrix.foldr (fun t w ↦ t ∷ w) 0 v
+noncomputable def matrixToVec : V := Matrix.foldr (fun t w ↦ t ∷ w) 0 v
 
 @[simp]
 lemma matrixToVec_nil (v : Fin 0 → V) : matrixToVec v = 0 := rfl
@@ -39,11 +39,11 @@ lemma matrixToVec_succ (v : Fin (k + 1) → V) :
     matrixToVec v = Matrix.vecHead v ∷ matrixToVec (Matrix.vecTail v) := rfl
 
 @[simp]
-lemma matrixToVec_len (v : Fin k → V) : len (matrixToVec v) = k := by
+lemma matrixToVec_len : len (matrixToVec v) = k := by
   induction k <;> simp [*]
 
 @[simp]
-lemma matrixToVec_nth (v : Fin k → V) (i : Fin k) : (matrixToVec v).[↑i] = v i := by
+lemma matrixToVec_nth (i : Fin k) : (matrixToVec v).[↑i] = v i := by
   induction k
   · exact i.elim0
   · cases i using Fin.cases
@@ -84,13 +84,15 @@ set_option linter.dupNamespace false
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic (ssnum ssnums)
 
+variable (φ : V)
+
 /-- The code of the formula obtained from the code `φ` by substituting the numeral of `x` for its
 bound variable. -/
-noncomputable def substNumeral (φ x : V) : V := subst ℒₒᵣ ?[numeral x] φ
+noncomputable def substNumeral (x : V) : V := subst ℒₒᵣ ?[numeral x] φ
 
 /-- The code of the formula obtained from the code `φ` by substituting the numerals of the entries
 of `v` for its bound variables. -/
-noncomputable def substNumerals (φ : V) (v : Fin k → V) : V :=
+noncomputable def substNumerals (v : Fin k → V) : V :=
   subst ℒₒᵣ (matrixToVec (fun i ↦ numeral (v i))) φ
 
 instance substNumeral.defined : 𝚺ᴬ₁-Function₂ (substNumeral : V → V → V) via ssnum :=
@@ -161,40 +163,40 @@ lemma of_natCast_of_defined {F : 𝚺ᴬ₁.Semisentence k} {P : (Fin k → V) �
   rw [e, numeral_comp_elim] at hV
   simpa [hP.iff] using hV
 
-lemma natCast_qqAll (a : ℕ) : ((Arithmetic.Bootstrapping.qqAll a : ℕ) : V) = ^∀ (a : V) :=
+variable (a b : ℕ)
+
+lemma natCast_qqAll : ((Arithmetic.Bootstrapping.qqAll a : ℕ) : V) = ^∀ (a : V) :=
   (natCast_apply_of_defined (f := fun v ↦ ^∀ (v 0))
     (g := fun v ↦ Arithmetic.Bootstrapping.qqAll (v 0))
     (qqForall_defined.of_zero (ℌ := 𝚺ᴬ₁))
     (Arithmetic.Bootstrapping.qqForall_defined.of_zero (ℌ := 𝚺ᴬ₁)) ![a]).symm
 
-lemma natCast_qqBvar (a : ℕ) : ((Arithmetic.Bootstrapping.qqBvar a : ℕ) : V) = ^#(a : V) :=
+lemma natCast_qqBvar : ((Arithmetic.Bootstrapping.qqBvar a : ℕ) : V) = ^#(a : V) :=
   (natCast_apply_of_defined (f := fun v ↦ ^#(v 0))
     (g := fun v ↦ Arithmetic.Bootstrapping.qqBvar (v 0))
     (qqBvar_defined.of_zero (ℌ := 𝚺ᴬ₁))
     (Arithmetic.Bootstrapping.qqBvar_defined.of_zero (ℌ := 𝚺ᴬ₁)) ![a]).symm
 
-lemma natCast_adjoin (a b : ℕ) : (((a ∷ b : ℕ) : ℕ) : V) = (a : V) ∷ (b : V) :=
+lemma natCast_adjoin : (((a ∷ b : ℕ) : ℕ) : V) = (a : V) ∷ (b : V) :=
   (natCast_apply_of_defined (f := fun v ↦ v 0 ∷ v 1) (g := fun v ↦ v 0 ∷ v 1)
     (adjoin_defined.of_zero (ℌ := 𝚺ᴬ₁))
     (FFL.FirstOrder.Arithmetic.adjoin_defined.of_zero (ℌ := 𝚺ᴬ₁)) ![a, b]).symm
 
-lemma natCast_imp (a b : ℕ) :
-    ((Arithmetic.Bootstrapping.imp ℒₒᵣ a b : ℕ) : V) = imp ℒₒᵣ (a : V) (b : V) := by
+lemma natCast_imp : ((Arithmetic.Bootstrapping.imp ℒₒᵣ a b : ℕ) : V) = imp ℒₒᵣ (a : V) (b : V) := by
   simpa using (natCast_apply_of_defined (imp.defined (L := ℒₒᵣ))
     (Arithmetic.Bootstrapping.imp.defined (L := ℒₒᵣ)) ![a, b]).symm
 
-lemma natCast_subst (a b : ℕ) :
+lemma natCast_subst :
     ((Arithmetic.Bootstrapping.subst ℒₒᵣ a b : ℕ) : V) = subst ℒₒᵣ (a : V) (b : V) := by
   simpa using (natCast_apply_of_defined (subst.defined (L := ℒₒᵣ))
     (Arithmetic.Bootstrapping.subst.defined (L := ℒₒᵣ)) ![a, b]).symm
 
-lemma natCast_numeral (a : ℕ) :
+lemma natCast_numeral :
     ((Arithmetic.Bootstrapping.Arithmetic.numeral a : ℕ) : V) = Arithmetic.numeral (a : V) := by
   simpa using (natCast_apply_of_defined Arithmetic.numeral_defined
     Arithmetic.Bootstrapping.Arithmetic.numeral_defined ![a]).symm
 
-lemma natCast_qqAdd (a b : ℕ) :
-    ((Arithmetic.Bootstrapping.Arithmetic.qqAdd a b : ℕ) : V) =
+lemma natCast_qqAdd : ((Arithmetic.Bootstrapping.Arithmetic.qqAdd a b : ℕ) : V) =
       Arithmetic.qqAdd (a : V) (b : V) := by
   simpa using (natCast_apply_of_defined Arithmetic.qqAdd_defined
     Arithmetic.Bootstrapping.Arithmetic.qqAdd_defined ![a, b]).symm
@@ -223,19 +225,17 @@ section quote
 
 open FFL.FirstOrder
 
-variable {n : ℕ}
+variable {n : ℕ} (φ ψ : ArithmeticSemisentence n)
 
 lemma natCast_quote_all (φ : ArithmeticSemisentence (n + 1)) :
     ((⌜∀¹ φ⌝ : ℕ) : V) = ^∀ ((⌜φ⌝ : ℕ) : V) := by
   rw [Sentence.quote_all, natCast_qqAll]
 
-lemma natCast_quote_imply (φ ψ : ArithmeticSemisentence n) :
-    ((⌜φ 🡒 ψ⌝ : ℕ) : V) = imp ℒₒᵣ ((⌜φ⌝ : ℕ) : V) ((⌜ψ⌝ : ℕ) : V) := by
+lemma natCast_quote_imply : ((⌜φ 🡒 ψ⌝ : ℕ) : V) = imp ℒₒᵣ ((⌜φ⌝ : ℕ) : V) ((⌜ψ⌝ : ℕ) : V) := by
   rw [← natCast_imp, Sentence.quote_eq, LCWQIsoGödelQuote.imply]
   rfl
 
-lemma isSemiformula_natCast_quote (φ : ArithmeticSemisentence n) :
-    IsSemiformula ℒₒᵣ (n : V) ((⌜φ⌝ : ℕ) : V) := by
+lemma isSemiformula_natCast_quote : IsSemiformula ℒₒᵣ (n : V) ((⌜φ⌝ : ℕ) : V) := by
   simpa using isSemiformula_natCast (V := V) (Sentence.quote_isSemiformula (V := ℕ) φ)
 
 lemma natCast_quote_rew_subst (φ : ArithmeticSemisentence k)
@@ -283,7 +283,7 @@ end quote
 
 section
 
-variable {T : Theory L} [T.Δ₁] [LocallyDelta0Axioms T V]
+variable {T : Theory L} [T.Δ₁] [LocallyDelta0Axioms T V] {m : V}
 
 /-- A theorem of `T` is internally provable. -/
 theorem provable_natCast_quote_of_provable {σ : Sentence L} (h : T ⊢ σ) :
@@ -384,13 +384,13 @@ lemma set_le_exp_exp (h : ∀ x ∈ s, x ≤ n) : s ≤ Exp.exp (Exp.exp n) :=
   le_trans (lt_exp_iff.mpr fun x hx ↦ lt_succ_iff_le.mpr (h x hx)).le
     (exp_monotone_le.mpr (succ_le_iff_lt.mpr (lt_exp n)))
 
-private lemma adjoin_le_of {m : V} (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
+private lemma adjoin_le_of (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
     (hb : b ≤ Exp.exp (Exp.exp m)) (hnm : n ≤ m := by simp [add_assoc]) :
     a ∷ b ≤ Exp.exp (Exp.exp (m + 2)) :=
   adjoin_le_exp_exp (le_trans (le_trans one_le_two hn) hnm)
     (le_trans ha (exp_exp_le_of_le hnm)) hb
 
-private lemma pair_le_of {m : V} (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
+private lemma pair_le_of (hn : 2 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
     (hb : b ≤ Exp.exp (Exp.exp m)) (hnm : n ≤ m := by simp [add_assoc]) :
     ⟪a, b⟫ ≤ Exp.exp (Exp.exp (m + 2)) :=
   le_trans (by rw [adjoin_def]; exact le_self_add) (adjoin_le_of hn ha hb hnm)
@@ -496,17 +496,25 @@ end
 
 open FFL.FirstOrder Arithmetic
 
-variable {T : ArithmeticTheory} [T.Δ₁] [LocallyDelta0Axioms T V] {m : ℕ}
+variable {T : ArithmeticTheory} [T.Δ₁] [LocallyDelta0Axioms T V] {m : ℕ} {A : V → V}
 
-lemma substNumerals_cons (φ x : V) (v : Fin m → V) :
+section
+
+variable (φ x : V) (v : Fin m → V)
+
+lemma substNumerals_cons :
     substNumerals φ (x :> v) = subst ℒₒᵣ (numeral x ∷ matrixToVec fun i ↦ numeral (v i)) φ :=
   rfl
 
-lemma isSemitermVec_numerals (v : Fin m → V) (n : V) :
+lemma isSemitermVec_numerals (n : V) :
     IsSemitermVec ℒₒᵣ (m : V) n (matrixToVec fun i ↦ numeral (v i)) :=
   isSemitermVec_matrixToVec.mpr fun i ↦ numeral_semiterm n (v i)
 
-lemma subst_natCast_quote_rew_subst {j : ℕ} (φ : ArithmeticSemisentence k)
+end
+
+variable (φ : ArithmeticSemisentence k)
+
+lemma subst_natCast_quote_rew_subst {j : ℕ}
     (u : Fin k → ArithmeticSemiterm Empty j) {u' : Fin k → V}
     (hu : ∀ i, ((⌜(Rew.emb (u i) : SyntacticSemiterm ℒₒᵣ j)⌝ : ℕ) : V) = u' i)
     (hu' : ∀ i, IsSemiterm ℒₒᵣ (j : V) (u' i)) {W : V} (hW : IsSemitermVec ℒₒᵣ (j : V) n W) :
@@ -516,22 +524,25 @@ lemma subst_natCast_quote_rew_subst {j : ℕ} (φ : ArithmeticSemisentence k)
     substs_substs (isSemiformula_natCast_quote φ) hW (isSemitermVec_matrixToVec.mpr hu'),
     termSubstVec_matrixToVec fun i ↦ (hu' i).isUTerm]
 
-lemma substNumerals_natCast_quote_all (φ : ArithmeticSemisentence (m + 1)) (v : Fin m → V) :
-    substNumerals ((⌜∀¹ φ⌝ : ℕ) : V) v =
+section
+
+variable (φ : ArithmeticSemisentence (m + 1)) (v : Fin m → V)
+
+lemma substNumerals_natCast_quote_all : substNumerals ((⌜∀¹ φ⌝ : ℕ) : V) v =
       ^∀ subst ℒₒᵣ (qVec ℒₒᵣ (matrixToVec fun i ↦ numeral (v i))) ((⌜φ⌝ : ℕ) : V) := by
   rw [substNumerals, natCast_quote_all, substs_all (isSemiformula_natCast_quote φ).isUFormula]
 
-lemma isSemiformula_subst_qVec_numerals (φ : ArithmeticSemisentence (m + 1)) (v : Fin m → V) :
-    IsSemiformula ℒₒᵣ 1
+lemma isSemiformula_subst_qVec_numerals : IsSemiformula ℒₒᵣ 1
       (subst ℒₒᵣ (qVec ℒₒᵣ (matrixToVec fun i ↦ numeral (v i))) ((⌜φ⌝ : ℕ) : V)) := by
   simpa using (isSemiformula_natCast_quote (V := V) φ).subst (isSemitermVec_numerals v 0).qVec
 
-lemma substs1_subst_qVec_numerals (φ : ArithmeticSemisentence (m + 1)) (v : Fin m → V) (x : V) :
-    substs1 ℒₒᵣ (numeral x)
+lemma substs1_subst_qVec_numerals (x : V) : substs1 ℒₒᵣ (numeral x)
         (subst ℒₒᵣ (qVec ℒₒᵣ (matrixToVec fun i ↦ numeral (v i))) ((⌜φ⌝ : ℕ) : V)) =
       substNumerals ((⌜φ⌝ : ℕ) : V) (x :> v) := by
   rw [substNumerals_cons, substs1_subst_qVec (isSemitermVec_numerals v 0)
     (by simpa using isSemiformula_natCast_quote (V := V) φ) (numeral_semiterm 0 x)]
+
+end
 
 /-- Instantiating an internally provable instance by numerals of `∀¹ φ` at one more numeral. -/
 lemma provable_substNumerals_of_provable_substNumerals_all (φ : ArithmeticSemisentence (m + 1))
@@ -544,7 +555,7 @@ lemma provable_substNumerals_of_provable_substNumerals_all (φ : ArithmeticSemis
     (numeral_semiterm 0 x) hd⟩
 
 /-- Instantiating an internally provable universal closure at numerals. -/
-lemma provable_substNumerals_of_provable_allClosure (φ : ArithmeticSemisentence k)
+lemma provable_substNumerals_of_provable_allClosure
     (h : Provable T ((⌜∀¹* φ⌝ : ℕ) : V)) (v : Fin k → V) :
     Provable T (substNumerals ((⌜φ⌝ : ℕ) : V) v) := by
   induction k with
@@ -555,8 +566,7 @@ lemma provable_substNumerals_of_provable_allClosure (φ : ArithmeticSemisentence
     rw [← Matrix.cons_head_tail v]
     exact provable_substNumerals_of_provable_substNumerals_all φ (ih (∀¹ φ) h _) _
 
-private lemma max_specializeSize_modusPonensSize_locallyDelta0 {A : V → V}
-    (hA : LocallyDelta0Function₁ A) :
+private lemma max_specializeSize_modusPonensSize_locallyDelta0 (hA : LocallyDelta0Function₁ A) :
     LocallyDelta0Function₁ fun y ↦
       max (specializeSize ℒₒᵣ S (numeral y)) (modusPonensSize ℒₒᵣ (A y) (A (y + 1))) := by
   have hn := numeral_locallyDelta0.comp₁ (LocallyDelta0Function.var (V := V) (0 : Fin 1))
@@ -584,7 +594,7 @@ lemma modusPonensCode_specializeCode_le_exp_exp (hn : 2 ≤ n)
 
 /-- If `{∀ S}` and `{A 1}` are derivable and the instance of `S` at the numeral of each `y > 0` is
 `A y → A (y + 1)`, then every `A (y + 1)` is internally provable. -/
-lemma provable_succ_of_derivationOf_all {A : V → V} (hA : LocallyDelta0Function₁ A)
+lemma provable_succ_of_derivationOf_all (hA : LocallyDelta0Function₁ A)
     (hS : IsSemiformula ℒₒᵣ 1 S) (hAf : ∀ y, IsFormula ℒₒᵣ (A y)) (he : DerivationOf T e {^∀ S})
     (hd : DerivationOf T d {A 1})
     (hstep : ∀ y, 0 < y → substs1 ℒₒᵣ (numeral y) S = imp ℒₒᵣ (A y) (A (y + 1))) (y : V) :
@@ -631,10 +641,15 @@ lemma provable_succ_of_derivationOf_all {A : V → V} (hA : LocallyDelta0Functio
   obtain ⟨d', -, hd'⟩ := key y
   exact ⟨d', hd'⟩
 
+section
+
+variable [𝗣𝗔⁻ ⪯ T] (φ : ArithmeticSemisentence (m + 1))
+  (h₀ : T ⊢ ∀¹* (Rew.subst (‘0’ :> fun i ↦ #i) ▹ φ))
+  (hs : T ⊢ ∀¹* (φ 🡒 Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ) ▹ φ)) (x : V) (p : Fin m → V)
+
+include h₀ hs in
 omit [T.Δ₁] in
-private lemma provable_one_of_provable_zero_of_provable_succ [𝗣𝗔⁻ ⪯ T]
-    (φ : ArithmeticSemisentence (m + 1)) (h₀ : T ⊢ ∀¹* (Rew.subst (‘0’ :> fun i ↦ #i) ▹ φ))
-    (hs : T ⊢ ∀¹* (φ 🡒 Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ) ▹ φ)) :
+private lemma provable_one_of_provable_zero_of_provable_succ :
     T ⊢ ∀¹* (Rew.subst (‘1’ :> fun i ↦ #i) ▹ φ) := by
   have : 𝗘𝗤 ℒₒᵣ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
   apply Arithmetic.complete.{0} T _
@@ -661,8 +676,8 @@ private lemma provable_one_of_provable_zero_of_provable_succ [𝗣𝗔⁻ ⪯ T]
   rw [e₁]
   exact h₁ h₂
 
-private lemma provable_substNumerals_cons_of_provable (φ : ArithmeticSemisentence (m + 1))
-    (t : ArithmeticSemiterm Empty m)
+omit [𝗣𝗔⁻ ⪯ T] in
+private lemma provable_substNumerals_cons_of_provable (t : ArithmeticSemiterm Empty m)
     (ht : ((⌜(Rew.emb t : SyntacticSemiterm ℒₒᵣ m)⌝ : ℕ) : V) = numeral a)
     (h : T ⊢ ∀¹* (Rew.subst (t :> fun i ↦ #i) ▹ φ)) (p : Fin m → V) :
     Provable T (substNumerals ((⌜φ⌝ : ℕ) : V) (a :> p)) := by
@@ -679,8 +694,7 @@ private lemma provable_substNumerals_cons_of_provable (φ : ArithmeticSemisenten
   · intro i
     cases i using Fin.cases <;> simp
 
-private lemma substs1_subst_qVec_numerals_imp (φ : ArithmeticSemisentence (m + 1))
-    (p : Fin m → V) {y : V} (hy : 0 < y) :
+private lemma substs1_subst_qVec_numerals_imp {y : V} (hy : 0 < y) :
     substs1 ℒₒᵣ (numeral y) (subst ℒₒᵣ (qVec ℒₒᵣ (matrixToVec fun i ↦ numeral (p i)))
       ((⌜φ 🡒 Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ) ▹ φ⌝ : ℕ) : V)) =
     imp ℒₒᵣ (substNumerals ((⌜φ⌝ : ℕ) : V) (y :> p))
@@ -706,11 +720,10 @@ private lemma substs1_subst_qVec_numerals_imp (φ : ArithmeticSemisentence (m + 
     · simp [qqAdd, qqOne_eq_qqFunc]
     · simp
 
+include h₀ hs in
 /-- If `T` proves the base case `∀ p⃗, φ(0, p⃗)` and the induction step
 `∀ x p⃗, φ(x, p⃗) 🡒 φ(x + 1, p⃗)`, then every instance of `φ` by numerals is internally provable. -/
-theorem provable_substNumerals_of_provable_zero_of_provable_succ [𝗣𝗔⁻ ⪯ T]
-    (φ : ArithmeticSemisentence (m + 1)) (h₀ : T ⊢ ∀¹* (Rew.subst (‘0’ :> fun i ↦ #i) ▹ φ))
-    (hs : T ⊢ ∀¹* (φ 🡒 Rew.subst (‘#0 + 1’ :> fun i ↦ #i.succ) ▹ φ)) (x : V) (p : Fin m → V) :
+theorem provable_substNumerals_of_provable_zero_of_provable_succ :
     Provable T (Arithmetic.substNumerals (((⌜φ⌝ : ℕ) : ℕ) : V) (x :> p)) := by
   set w : V := matrixToVec fun i ↦ numeral (p i)
   have hW (y : V) : IsSemitermVec ℒₒᵣ ((m + 1 : ℕ) : V) 0 (numeral y ∷ w) := by
@@ -732,6 +745,8 @@ theorem provable_substNumerals_of_provable_zero_of_provable_succ [𝗣𝗔⁻ �
   exact provable_succ_of_derivationOf_all hA (isSemiformula_subst_qVec_numerals _ p)
     (fun y ↦ (isSemiformula_natCast_quote φ).subst (hW y)) he hd₁
     (fun _ hy ↦ substs1_subst_qVec_numerals_imp φ p hy) y
+
+end
 
 end Bootstrapping
 

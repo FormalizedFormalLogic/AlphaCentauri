@@ -11,8 +11,6 @@ The arithmetical hierarchy on codes of formulas in models of $\mathsf{EA}$.
 - [HP98, Lemma I.1.69]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -32,26 +30,29 @@ noncomputable def qqQuant : Polarity → V → V
   | 𝚺, p => ^∃ p
   | 𝚷, p => ^∀ p
 
-@[simp]
-lemma qqQuant_sigma (p : V) : qqQuant 𝚺 p = ^∃ p := rfl
+variable (Γ p)
 
 @[simp]
-lemma qqQuant_pi (p : V) : qqQuant 𝚷 p = ^∀ p := rfl
+lemma qqQuant_sigma : qqQuant 𝚺 p = ^∃ p := rfl
 
-instance qqQuant_defined (Γ : Polarity) :
-    𝚺ᴬ₀-Function₁ (qqQuant Γ : V → V) via qqQuantDef Γ := by
+@[simp]
+lemma qqQuant_pi : qqQuant 𝚷 p = ^∀ p := rfl
+
+instance qqQuant_defined : 𝚺ᴬ₀-Function₁ (qqQuant Γ : V → V) via qqQuantDef Γ := by
   cases Γ
   · exact qqExsists_defined
   · exact qqForall_defined
 
-lemma qqQuant_locallyDelta0 (Γ : Polarity) : LocallyDelta0Function₁ (qqQuant Γ : V → V) := by
+lemma qqQuant_locallyDelta0 : LocallyDelta0Function₁ (qqQuant Γ : V → V) := by
   cases Γ
   · exact qqExs_locallyDelta0
   · exact qqAll_locallyDelta0
 
 @[simp]
-lemma lt_qqQuant (Γ : Polarity) (p : V) : p < qqQuant Γ p := by
+lemma lt_qqQuant : p < qqQuant Γ p := by
   cases Γ <;> simp [lt_exists, lt_forall]
+
+variable {Γ p}
 
 @[simp]
 lemma qqQuant_inj : qqQuant Γ p = qqQuant Γ' q ↔ Γ = Γ' ∧ p = q := by
@@ -102,9 +103,11 @@ namespace IsHierarchyF
 
 open IsBoundedF (locallyDelta0_binary locallyDelta0_bounded)
 
+variable (Γ) (P : V → Prop)
+
 /-- The operator generating the codes of formulas of a level of the hierarchy from the formulas
 of the lower level `P`. -/
-def Phi (Γ : Polarity) (P : V → Prop) (C : Set V) (p : V) : Prop :=
+def Phi (C : Set V) (p : V) : Prop :=
   P p ∨
   (∃ p₁ p₂, p₁ ∈ C ∧ p₂ ∈ C ∧ p = p₁ ^⋏ p₂) ∨
   (∃ p₁ p₂, p₁ ∈ C ∧ p₂ ∈ C ∧ p = p₁ ^⋎ p₂) ∨
@@ -112,9 +115,9 @@ def Phi (Γ : Polarity) (P : V → Prop) (C : Set V) (p : V) : Prop :=
   (∃ u q, (∃ t, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ q ∈ C ∧ p = qqBex u q) ∨
   (∃ q, q ∈ C ∧ p = qqQuant Γ q)
 
-private lemma phi_iff (Γ : Polarity) (P : V → Prop) (C p : V) :
-    Phi Γ P {x | x ∈ C} p ↔
-    P p ∨
+variable (p)
+
+private lemma phi_iff (C : V) : Phi Γ P {x | x ∈ C} p ↔ P p ∨
     (∃ p₁ < p, ∃ p₂ < p, p₁ ∈ C ∧ p₂ ∈ C ∧ p = p₁ ^⋏ p₂) ∨
     (∃ p₁ < p, ∃ p₂ < p, p₁ ∈ C ∧ p₂ ∈ C ∧ p = p₁ ^⋎ p₂) ∨
     (∃ u < p, ∃ q < p, (∃ t < p, IsUTerm ℒₒᵣ t ∧ u = termBShift ℒₒᵣ t) ∧ q ∈ C
@@ -140,7 +143,9 @@ private lemma phi_iff (Γ : Polarity) (P : V → Prop) (C p : V) :
       | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩ | ⟨u, _, q, _, ⟨t, _, ht, rfl⟩, hq, rfl⟩
       | ⟨q, _, hq, rfl⟩) <;> grind
 
-lemma phi_locallyDelta0 (Γ : Polarity) {P : V → Prop} (hP : LocallyDelta0Pred P) :
+variable {P} {p} {θ : 𝚫ᴬ₁.Semisentence 1}
+
+lemma phi_locallyDelta0 (hP : LocallyDelta0Pred P) :
     LocallyDelta0 fun w : Fin 2 → V ↦ Phi Γ P {x | x ∈ w 1} (w 0) := by
   have hquant : LocallyDelta0 fun y : Fin 3 → V ↦ y 0 ∈ y 2 ∧ y 1 = qqQuant Γ (y 0) :=
     (LocallyDelta0.mem (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 2)).and <|
@@ -152,13 +157,12 @@ lemma phi_locallyDelta0 (Γ : Polarity) {P : V → Prop} (hP : LocallyDelta0Pred
     (locallyDelta0_binary qqOr_locallyDelta0).or <|
     (locallyDelta0_bounded qqBall_locallyDelta0).or <|
     (locallyDelta0_bounded qqBex_locallyDelta0).or hex).of_iff
-    fun w ↦ by simpa using phi_iff Γ P (w 1) (w 0)
+    fun w ↦ by simpa using phi_iff Γ (w 0) P (w 1)
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.IsHierarchyF (blueprint) in
 /-- The construction of the codes of formulas of a level of the hierarchy from the formulas of
 the lower level `P`. -/
-def construction (Γ : Polarity) {P : V → Prop} {θ : 𝚫ᴬ₁.Semisentence 1}
-    (hP : 𝚫ᴬ₁-Predicate P via θ) (hP' : LocallyDelta0Pred P) :
+def construction (hP : 𝚫ᴬ₁-Predicate P via θ) (hP' : LocallyDelta0Pred P) :
     Fixpoint.Construction V (blueprint Γ θ) where
   Φ := fun _ ↦ Phi Γ P
   defined := .mk <| by
@@ -171,15 +175,14 @@ def construction (Γ : Polarity) {P : V → Prop} {θ : 𝚫ᴬ₁.Semisentence 
     · intro v
       simpa [blueprint, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm,
         (termBShift.defined (L := ℒₒᵣ)).df, qqBall_defined.df, qqBex_defined.df,
-        (qqQuant_defined Γ).df] using (phi_iff Γ P _ _).symm
+        (qqQuant_defined Γ).df] using (phi_iff Γ _ P _).symm
   monotone := by
     unfold Phi
     intro C C' hC _ x
     grind
   Φ_locallyDelta0 := phi_locallyDelta0 Γ hP'
 
-instance (Γ : Polarity) {P : V → Prop} {θ : 𝚫ᴬ₁.Semisentence 1}
-    (hP : 𝚫ᴬ₁-Predicate P via θ) (hP' : LocallyDelta0Pred P) :
+instance (hP : 𝚫ᴬ₁-Predicate P via θ) (hP' : LocallyDelta0Pred P) :
     (construction Γ hP hP').StrongFinite V where
   strong_finite := by
     unfold construction Phi
@@ -202,25 +205,26 @@ noncomputable def pred :
 
 end IsHierarchyF
 
+variable (Γ n p)
+
 /-- The predicate that `p` is the code of a formula of the level `n` of the hierarchy of
 polarity `Γ`. -/
-def IsHierarchy (Γ : Polarity) (n : ℕ) (p : V) : Prop := (IsHierarchyF.pred Γ n).1 p
+def IsHierarchy : Prop := (IsHierarchyF.pred Γ n).1 p
 
-abbrev IsSigma (n : ℕ) (p : V) : Prop := IsHierarchy 𝚺 n p
+abbrev IsSigma : Prop := IsHierarchy 𝚺 n p
 
-abbrev IsPi (n : ℕ) (p : V) : Prop := IsHierarchy 𝚷 n p
+abbrev IsPi : Prop := IsHierarchy 𝚷 n p
 
-instance IsHierarchy.defined (Γ : Polarity) (n : ℕ) :
-    𝚫ᴬ₁-Predicate (IsHierarchy (V := V) Γ n) via isHierarchy Γ n :=
+instance IsHierarchy.defined : 𝚫ᴬ₁-Predicate (IsHierarchy (V := V) Γ n) via isHierarchy Γ n :=
   (IsHierarchyF.pred Γ n).2.1
 
-instance IsHierarchy.definable (Γ : Polarity) (n : ℕ) :
-    𝚫ᴬ₁-Predicate (IsHierarchy (V := V) Γ n) :=
+instance IsHierarchy.definable : 𝚫ᴬ₁-Predicate (IsHierarchy (V := V) Γ n) :=
   (IsHierarchy.defined Γ n).to_definable
 
-lemma isHierarchy_locallyDelta0 (Γ : Polarity) (n : ℕ) :
-    LocallyDelta0Pred (IsHierarchy (V := V) Γ n) :=
+lemma isHierarchy_locallyDelta0 : LocallyDelta0Pred (IsHierarchy (V := V) Γ n) :=
   (IsHierarchyF.pred Γ n).2.2
+
+variable {Γ n p}
 
 lemma IsHierarchy.zero_iff : IsHierarchy Γ 0 p ↔ IsBounded p := by rfl
 
@@ -454,12 +458,12 @@ instance IsPrenexHierarchy.defined : (Γ : Polarity) → (n : ℕ) →
         simp [isPrenexHierarchy, IsPrenexHierarchy, (qqQuant_defined Γ).df]
         grind [lt_qqQuant]⟩
 
-instance IsPrenexHierarchy.definable (Γ : Polarity) (n : ℕ) :
-    𝚫ᴬ₁-Predicate (IsPrenexHierarchy (V := V) Γ n) :=
+variable (Γ n)
+
+instance IsPrenexHierarchy.definable : 𝚫ᴬ₁-Predicate (IsPrenexHierarchy (V := V) Γ n) :=
   (IsPrenexHierarchy.defined Γ n).to_definable
 
-lemma isPrenexHierarchy_locallyDelta0 (Γ : Polarity) (n : ℕ) :
-    LocallyDelta0Pred (IsPrenexHierarchy (V := V) Γ n) := by
+lemma isPrenexHierarchy_locallyDelta0 : LocallyDelta0Pred (IsPrenexHierarchy (V := V) Γ n) := by
   induction n generalizing Γ with
   | zero => exact isBounded_locallyDelta0
   | succ n ih =>
@@ -473,6 +477,8 @@ lemma isPrenexHierarchy_locallyDelta0 (Γ : Polarity) (n : ℕ) :
       exact ⟨q, hp ▸ lt_qqQuant Γ q, hp, h⟩
     · rintro ⟨q, -, hp, h⟩
       exact ⟨q, hp, h⟩
+
+variable {Γ n}
 
 @[simp]
 lemma IsPrenexHierarchy.quant_iff :

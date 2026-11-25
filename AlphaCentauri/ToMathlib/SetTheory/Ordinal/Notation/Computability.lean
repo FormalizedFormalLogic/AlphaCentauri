@@ -12,15 +12,15 @@ public import AlphaCentauri.ToMathlib.SetTheory.Ordinal.Notation.Coding
 Computability of the order on Cantor normal forms.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace ONote
 
+variable (n m a b c cx cy : ℕ)
+
 /-! ### Structural `Primcodable ONote` and computability of `ONote.cmp` -/
 
-private lemma encodeONote_decodeONote (n : ℕ) : encodeONote (decodeONote n) = n := by
+private lemma encodeONote_decodeONote : encodeONote (decodeONote n) = n := by
   induction n using Nat.strongRecOn with
   | ind n ih =>
   rcases n with (_ | m)
@@ -30,15 +30,14 @@ private lemma encodeONote_decodeONote (n : ℕ) : encodeONote (decodeONote n) = 
       ih _ (Nat.lt_succ_of_le (Nat.unpair_right_le _ |> le_trans <| Nat.unpair_right_le _))]
 
 @[simp]
-private lemma decode_eq (n : ℕ) : (Encodable.decode n : Option ONote) = some (decodeONote n) := by
+private lemma decode_eq : (Encodable.decode n : Option ONote) = some (decodeONote n) := by
   rfl
 
 @[simp]
 private lemma encode_eq (x : ONote) : Encodable.encode x = encodeONote x := by
   rfl
 
-private lemma encode_decode_eq (n : ℕ) :
-    Encodable.encode (Encodable.decode n : Option ONote) = n + 1 := by
+private lemma encode_decode_eq : Encodable.encode (Encodable.decode n : Option ONote) = n + 1 := by
   rw [decode_eq]
   simp +decide [Encodable.encode, encodeONote_decodeONote]
 
@@ -68,32 +67,32 @@ private def ordCode : Ordering → ℕ
 
 /-- `ℕ`-level version of `Ordering.then`. -/
 @[grind =]
-private def thenNat (a b : ℕ) : ℕ := if a = 1 then b else a
+private def thenNat : ℕ := if a = 1 then b else a
 
 /-- `ℕ`-level version of `_root_.cmp` on `ℕ`, returning an `ordCode`. -/
 @[grind =]
-private def cmpNat (a b : ℕ) : ℕ := if a < b then 0 else if a = b then 1 else 2
+private def cmpNat : ℕ := if a < b then 0 else if a = b then 1 else 2
 
 private lemma ordCode_then (o p : Ordering) :
     ordCode (o.then p) = thenNat (ordCode o) (ordCode p) := by
   cases o <;> cases p <;> rfl
 
-private lemma ordCode_cmp (a b : ℕ) : ordCode (_root_.cmp a b) = cmpNat a b := by
+private lemma ordCode_cmp : ordCode (_root_.cmp a b) = cmpNat a b := by
   unfold _root_.cmp cmpUsing ordCode cmpNat
   split_ifs <;> simp_all
   omega
 
 /-- Index (paired code) of the `e`-subterms, given the paired code `m = pair cx cy`. -/
-private def cmpIdxE (m : ℕ) : ℕ :=
+private def cmpIdxE : ℕ :=
   Nat.pair (Nat.unpair ((Nat.unpair m).1 - 1)).1 (Nat.unpair ((Nat.unpair m).2 - 1)).1
 
 /-- Index (paired code) of the `a`-subterms, given the paired code `m = pair cx cy`. -/
-private def cmpIdxA (m : ℕ) : ℕ :=
+private def cmpIdxA : ℕ :=
   Nat.pair (Nat.unpair (Nat.unpair ((Nat.unpair m).1 - 1)).2).2
            (Nat.unpair (Nat.unpair ((Nat.unpair m).2 - 1)).2).2
 
 /-- The `ordCode` of the comparison of the leading coefficients, given `m = pair cx cy`. -/
-private def cmpNV (m : ℕ) : ℕ :=
+private def cmpNV : ℕ :=
   cmpNat ((Nat.unpair (Nat.unpair ((Nat.unpair m).1 - 1)).2).1 + 1)
          ((Nat.unpair (Nat.unpair ((Nat.unpair m).2 - 1)).2).1 + 1)
 
@@ -123,10 +122,10 @@ private def cmpStep (L : List ℕ) : Option ℕ :=
         thenNat re (thenNat (cmpNV m) ra)
 
 /-- The function computed by the strong recursion: `ordCode` of the comparison. -/
-private def Cnat (m : ℕ) : ℕ :=
+private def Cnat : ℕ :=
   ordCode (ONote.cmp (decodeONote (Nat.unpair m).1) (decodeONote (Nat.unpair m).2))
 
-private lemma Cnat_pair (cx cy : ℕ) :
+private lemma Cnat_pair :
     Cnat (Nat.pair cx cy) = ordCode (ONote.cmp (decodeONote cx) (decodeONote cy)) := by
   simp [Cnat, Nat.unpair_pair]
 
@@ -139,7 +138,7 @@ private lemma computable_cmpStep : Computable cmpStep := by
   unfold cmpStep
   primrec
 
-private lemma cmpStep_spec (m : ℕ) : cmpStep ((List.range m).map Cnat) = some (Cnat m) := by
+private lemma cmpStep_spec : cmpStep ((List.range m).map Cnat) = some (Cnat m) := by
   unfold cmpStep
   simp +decide only [cmpIdxE, cmpIdxA, cmpNV, List.length_map, List.length_range]
   rcases n : Nat.unpair m with ⟨x, y⟩; rcases x with (_ | x) <;> rcases y with (_ | y) <;>
@@ -177,20 +176,20 @@ private theorem computable_Cnat : Computable Cnat := by
 private lemma ordCode_eq_zero {o : Ordering} : ordCode o = 0 ↔ o = Ordering.lt := by
   cases o <;> simp [ordCode]
 
-private lemma Cnat_pair_eq_zero (cx cy : ℕ) :
+private lemma Cnat_pair_eq_zero :
     Cnat (Nat.pair cx cy) = 0 ↔ ONote.cmp (decodeONote cx) (decodeONote cy) = Ordering.lt := by
   rw [Cnat_pair, ordCode_eq_zero]
 
-private def Nfb (n : ℕ) : Bool := decide (decodeONote n).NF
+private def Nfb : Bool := decide (decodeONote n).NF
 
 /-- Index of the leading exponent code, given a notation code `c`. -/
-private def nfIdxE (c : ℕ) : ℕ := (Nat.unpair (c - 1)).1
+private def nfIdxE : ℕ := (Nat.unpair (c - 1)).1
 
 /-- Index of the tail code, given a notation code `c`. -/
-private def nfIdxA (c : ℕ) : ℕ := (Nat.unpair (Nat.unpair (c - 1)).2).2
+private def nfIdxA : ℕ := (Nat.unpair (Nat.unpair (c - 1)).2).2
 
 /-- Check `TopBelow` at code `c`. -/
-private def nfTB (c : ℕ) : Bool :=
+private def nfTB : Bool :=
   if nfIdxA c = 0 then true
   else decide (Cnat (Nat.pair (Nat.unpair (nfIdxA c - 1)).1 (nfIdxE c)) = 0)
 
@@ -257,7 +256,7 @@ private lemma NF_oadd_iff {e : ONote} {n : ℕ+} {a : ONote} :
     tauto
   · exact ⟨fun h' => absurd h'.fst h, fun h' => absurd h'.1 h⟩
 
-private lemma nfStep_spec (n : ℕ) : nfStep ((List.range n).map Nfb) = some (Nfb n) := by
+private lemma nfStep_spec : nfStep ((List.range n).map Nfb) = some (Nfb n) := by
   unfold nfStep Nfb
   by_cases hn : n = 0
   · rw [hn]; simp +decide [decodeONote]
@@ -290,10 +289,8 @@ private theorem computable_Nfb : Computable Nfb :=
 
 /-! ### Enumeration of normal-form codes -/
 
-variable (a : ℕ)
-
 /-- The structural NF-code of the `a`-th notation. -/
-private noncomputable def enc (a : ℕ) : ℕ := encodeONote (natCode a).1
+private noncomputable def enc : ℕ := encodeONote (natCode a).1
 
 private lemma decodeONote_enc : decodeONote (enc a) = (natCode a).1 := by
   rw [enc, decodeONote_encodeONote]
@@ -338,7 +335,7 @@ private lemma enc_strictMono : StrictMono enc := by
   exact Subtype.coe_lt_coe.mpr (Nat.Subtype.lt_succ_self _)
 
 /-- Count of NF-codes strictly below `n`. -/
-private def countNF (n : ℕ) : ℕ := ((List.range n).filter (fun k => Nfb k)).length
+private def countNF : ℕ := ((List.range n).filter (fun k => Nfb k)).length
 
 private lemma computable_countNF : Computable countNF := by
   have h_countNF_eq :
@@ -372,7 +369,7 @@ private lemma computable_countNF : Computable countNF := by
 private lemma Nfb_enc : Nfb (enc a) = true := by
   simp [Nfb, nf_decode_enc]
 
-private lemma countNF_eq (n : ℕ) :
+private lemma countNF_eq :
     countNF n = ((Finset.range n).filter (fun k => (decodeONote k).NF)).card := by
   congr
 
@@ -391,7 +388,7 @@ private lemma countNF_enc : countNF (enc a) = a := by
   aesop
 
 @[grind =]
-private lemma countNF_succ (n : ℕ) : countNF (n + 1) = countNF n + (if Nfb n then 1 else 0) := by
+private lemma countNF_succ : countNF (n + 1) = countNF n + (if Nfb n then 1 else 0) := by
   have h_filter : List.filter (fun k => Nfb k) (List.range (n + 1)) =
       List.filter (fun k => Nfb k) (List.range n) ++ if Nfb n then [n] else [] := by
     simp +decide [List.range_succ]
@@ -409,14 +406,14 @@ private lemma lt_countNF_succ_enc : a < countNF (enc a + 1) := by
 private lemma exists_count : ∃ n, a < countNF (n + 1) := ⟨enc a, lt_countNF_succ_enc a⟩
 
 /-- The `a`-th NF-code. -/
-private noncomputable def nthNF (a : ℕ) : ℕ := Nat.find (exists_count a)
+private noncomputable def nthNF : ℕ := Nat.find (exists_count a)
 
 private lemma enc_eq_nthNF : enc a = nthNF a :=
   Eq.symm <| (Nat.find_eq_iff _).2
     ⟨lt_countNF_succ_enc a, fun n hn => not_lt_of_ge <| by
       linarith [countNF_mono <| Nat.succ_le_of_lt hn, countNF_enc a]⟩
 
-private lemma rfind_nthNF (a : ℕ) :
+private lemma rfind_nthNF :
     Nat.rfind (fun n => (Part.some (decide (a < countNF (n + 1))) : Part Bool)) =
       Part.some (nthNF a) :=
   Part.eq_some_iff.mpr <| Nat.mem_rfind.mpr
@@ -440,8 +437,7 @@ private lemma cmp_eq_lt_iff_lt (x y : NONote) : x.cmp y = Ordering.lt ↔ x < y 
   rcases h : x.cmp y with (_ | _ | _) <;>
     simp_all +decide only [Ordering.Compares, lt_irrefl, gt_iff_lt, lt_asymm]
 
-private lemma lt_iff_Cnat (a b : ℕ) :
-    natCode a < natCode b ↔ Cnat (Nat.pair (enc a) (enc b)) = 0 := by
+private lemma lt_iff_Cnat : natCode a < natCode b ↔ Cnat (Nat.pair (enc a) (enc b)) = 0 := by
   rw [Cnat_pair_eq_zero, decodeONote_enc, decodeONote_enc]
   exact (cmp_eq_lt_iff_lt (natCode a) (natCode b)).symm
 

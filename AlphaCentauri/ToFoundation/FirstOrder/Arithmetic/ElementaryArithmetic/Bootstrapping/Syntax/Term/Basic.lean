@@ -9,8 +9,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Basic
 - [HP98, §V.3]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -21,21 +19,31 @@ namespace ElementaryArithmetic.Bootstrapping
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isUTerm isUTermVec)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {Γ : Polarity} {m : ℕ}
-  {f i k n t t₁ t₂ v w x y z : V}
-  {L : Language} [L.Encodable] [L.LORDefinable]
+  {L : Language} [L.Encodable] [L.LORDefinable] {f i k n t t₁ t₂ v w x y z : V}
 
 section term
 
+variable (z x k f v : V)
+
 /-- The code of the bound variable `z`. -/
-noncomputable def qqBvar (z : V) : V := ⟪0, z⟫ + 1
+noncomputable def qqBvar : V := ⟪0, z⟫ + 1
 
 /-- The code of the free variable `x`. -/
-noncomputable def qqFvar (x : V) : V := ⟪1, x⟫ + 1
+noncomputable def qqFvar : V := ⟪1, x⟫ + 1
 
 /-- The code of the application of the function symbol `f` of arity `k` to the list `v`. -/
-noncomputable def qqFunc (k f v : V) : V := ⟪2, k, f, v⟫ + 1
+noncomputable def qqFunc : V := ⟪2, k, f, v⟫ + 1
 
-def qqFuncN (k f v : ℕ) : ℕ := (Nat.pair 2 <| Nat.pair k <| Nat.pair f v) + 1
+section
+
+variable (k f v : ℕ)
+
+def qqFuncN : ℕ := (Nat.pair 2 <| Nat.pair k <| Nat.pair f v) + 1
+
+lemma qqFuncN_eq_qqFunc : qqFuncN k f v = qqFunc k f v := by
+  simp [qqFunc, qqFuncN, nat_pair_eq]
+
+end
 
 scoped prefix:max "^#" => qqBvar
 
@@ -43,26 +51,25 @@ scoped prefix:max "^&" => qqFvar
 
 scoped prefix:max "^func " => qqFunc
 
-lemma qqFuncN_eq_qqFunc (k f v : ℕ) : qqFuncN k f v = qqFunc k f v := by
-  simp [qqFunc, qqFuncN, nat_pair_eq]
+@[simp]
+lemma var_lt_qqBvar : z < ^#z := by simp [qqBvar, lt_succ_iff_le]
 
 @[simp]
-lemma var_lt_qqBvar (z : V) : z < ^#z := by simp [qqBvar, lt_succ_iff_le]
+lemma var_lt_qqFvar : x < ^&x := by simp [qqFvar, lt_succ_iff_le]
 
 @[simp]
-lemma var_lt_qqFvar (x : V) : x < ^&x := by simp [qqFvar, lt_succ_iff_le]
-
-@[simp]
-lemma arity_lt_qqFunc (k f v : V) : k < ^func k f v := by
+lemma arity_lt_qqFunc : k < ^func k f v := by
   grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma func_lt_qqFunc (k f v : V) : f < ^func k f v := by
+lemma func_lt_qqFunc : f < ^func k f v := by
   grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma terms_lt_qqFunc (k f v : V) : v < ^func k f v := by
+lemma terms_lt_qqFunc : v < ^func k f v := by
   grind [qqFunc, lt_succ_iff_le, le_pair_left, le_pair_right]
+
+variable {z x k f v}
 
 lemma nth_lt_qqFunc_of_lt (hi : i < len v) : v.[i] < ^func k f v :=
   lt_trans (nth_lt_self hi) (terms_lt_qqFunc _ _ _)
@@ -140,10 +147,8 @@ def Phi (C : Set V) (t : V) : Prop :=
   (∃ z, t = ^#z) ∨ (∃ x, t = ^&x) ∨
   (∃ k f v : V, L.IsFunc k f ∧ k = len v ∧ (∀ i < k, v.[i] ∈ C) ∧ t = ^func k f v)
 
-private lemma phi_iff (C : V) (t : V) :
-    Phi L {x | x ∈ C} t ↔
-    (∃ z < t, t = ^#z) ∨
-    (∃ x < t, t = ^&x) ∨
+variable (t) in
+private lemma phi_iff (C : V) : Phi L {x | x ∈ C} t ↔ (∃ z < t, t = ^#z) ∨ (∃ x < t, t = ^&x) ∨
     (∃ k < t, ∃ f < t, ∃ v < t,
       L.IsFunc k f ∧ k = len v ∧ (∀ i < k, v.[i] ∈ C) ∧ t = ^func k f v) where
   mp := by
@@ -188,7 +193,7 @@ lemma phi_locallyDelta0 :
     LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
       LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 2) <|
         hisFunc.and <| hlen.and <| hall.and hfunc
-  exact (hex₁.or <| hex₂.or hex₃).of_iff fun w ↦ by simpa using phi_iff L (w 1) (w 0)
+  exact (hex₁.or <| hex₂.or hex₃).of_iff fun w ↦ by simpa using phi_iff L (w 0) (w 1)
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.FormalizedTerm (blueprint) in
 /-- The construction of the codes of terms. -/
@@ -503,17 +508,21 @@ variable {V} (L)
 namespace Construction
 
 variable {arity : ℕ} {β : Blueprint arity} (c : Construction V β)
+  (param : Fin arity → V)
 
 /-- The rules generating the graph `⟪t, y⟫` of the recursion. -/
-def Phi (param : Fin arity → V) (C : Set V) (pr : V) : Prop :=
+def Phi (C : Set V) (pr : V) : Prop :=
   IsUTerm L (π₁ pr) ∧
   ( (∃ z, pr = ⟪^#z, c.bvar param z⟫) ∨
     (∃ x, pr = ⟪^&x, c.fvar param x⟫) ∨
     (∃ k f v w : V,
       (k = len w ∧ ∀ i < k, ⟪v.[i], w.[i]⟫ ∈ C) ∧ pr = ⟪^func k f v, c.func param k f v w⟫) )
 
-private lemma phi_iff (param : Fin arity → V) (C pr : V) :
-    c.Phi L param {x | x ∈ C} pr ↔
+section
+
+variable (C pr : V)
+
+private lemma phi_iff : c.Phi L param {x | x ∈ C} pr ↔
     ∃ t ≤ pr, ∃ y ≤ pr, pr = ⟪t, y⟫ ∧ IsUTerm L t ∧
     ( (∃ z < t, t = ^#z ∧ y = c.bvar param z) ∨
       (∃ x < t, t = ^&x ∧ y = c.fvar param x) ∨
@@ -539,8 +548,7 @@ private lemma phi_iff (param : Fin arity → V) (C pr : V) :
     · disj 3; exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hw i hi⟩, rfl⟩
 
 /-- The rules in a form that reads the term off its code by projections. -/
-private lemma phi_iff_decode (param : Fin arity → V) (C pr : V) :
-    c.Phi L param {x | x ∈ C} pr ↔ IsUTerm L (π₁ pr) ∧
+private lemma phi_iff_decode : c.Phi L param {x | x ∈ C} pr ↔ IsUTerm L (π₁ pr) ∧
     ( (π₁ (π₁ pr - 1) = 0 ∧ π₂ pr = c.bvar param (π₂ (π₁ pr - 1))) ∨
       (π₁ (π₁ pr - 1) = 1 ∧ π₂ pr = c.fvar param (π₂ (π₁ pr - 1))) ∨
       (π₁ (π₁ pr - 1) = 2 ∧ ∃ w ≤ repeatVec C (π₁ (π₂ (π₁ pr - 1))),
@@ -581,15 +589,23 @@ private lemma phi_iff_decode (param : Fin arity → V) (C pr : V) :
         disj 3
         exact ⟨k, f, v, w, ⟨hk, hw⟩, by rw [hpr, hkfv, hy]⟩
 
-private lemma pi₁_comp {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
+end
+
+section Comp
+
+variable {n : ℕ} {g : (Fin n → V) → V}
+
+private lemma pi₁_comp (hg : LocallyDelta0Function g) :
     LocallyDelta0Function fun u ↦ π₁ (g u) := LocallyDelta0Function.pi₁.comp₁ hg
 
-private lemma pi₂_comp {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
+private lemma pi₂_comp (hg : LocallyDelta0Function g) :
     LocallyDelta0Function fun u ↦ π₂ (g u) := LocallyDelta0Function.pi₂.comp₁ hg
 
-private lemma pred_sub_comp {n : ℕ} {g : (Fin n → V) → V} (hg : LocallyDelta0Function g) :
+private lemma pred_sub_comp (hg : LocallyDelta0Function g) :
     LocallyDelta0Function fun u ↦ g u - 1 :=
   LocallyDelta0Function.sub.comp₂ hg (LocallyDelta0Function.const 1)
+
+end Comp
 
 lemma phi_locallyDelta0 :
     LocallyDelta0 fun w : Fin (arity + 2) → V ↦ c.Phi L (w ·.succ.succ) {x | x ∈ w 1} (w 0) := by
@@ -696,8 +712,11 @@ def construction : Fixpoint.Construction V (β.blueprint L) where
     · disj 3; exact ⟨k, f, v, w, ⟨hk, fun i hi ↦ hC (hw i hi)⟩, rfl⟩
   Φ_locallyDelta0 := c.phi_locallyDelta0 L
 
+variable (x y : V) in
 /-- `c.Graph L param t y` states that the recursion takes the value `y` at the term `t`. -/
-def Graph (param : Fin arity → V) (x y : V) : Prop := (c.construction L).Fixpoint param ⟪x, y⟫
+def Graph : Prop := (c.construction L).Fixpoint param ⟪x, y⟫
+
+section CourseOfValues
 
 /-- The lookup of the values of the elements of `v` in the table `q 0`. -/
 noncomputable def tableLookup (q : Fin 1 → V) (x : V) : V := znth (q 0) x
@@ -762,14 +781,15 @@ noncomputable def courseOfValues : CourseOfValues.Construction V arity where
   bound_monotone := c.bound_monotone
   bound_locallyDelta0 := c.bound_locallyDelta0
 
-variable (param : Fin arity → V)
+variable (t : V)
 
 /-- The value of the course-of-values recursion at `t`. -/
-noncomputable def courseOfValuesResult (t : V) : V := c.courseOfValues.result param t
+noncomputable def courseOfValuesResult : V := c.courseOfValues.result param t
 
-lemma courseOfValuesResult_le_bound (t : V) :
-    c.courseOfValuesResult param t ≤ c.bound param t :=
+lemma courseOfValuesResult_le_bound : c.courseOfValuesResult param t ≤ c.bound param t :=
   c.courseOfValues.result_le_bound (v := param) t
+
+variable {t}
 
 lemma courseOfValuesResult_locallyDelta0 :
     LocallyDelta0Function fun w : Fin (arity + 1) → V ↦ c.courseOfValuesResult (w ·.succ) (w 0) :=
@@ -782,7 +802,8 @@ lemma courseOfValuesResult_bvar (z : V) : c.courseOfValuesResult param (^#z) = c
   rw [← e] at hle
   rw [courseOfValuesResult, c.courseOfValues.result_eq_val hle, e]
 
-lemma courseOfValuesResult_fvar (x : V) : c.courseOfValuesResult param (^&x) = c.fvar param x := by
+lemma courseOfValuesResult_fvar : ∀ x : V, c.courseOfValuesResult param (^&x) = c.fvar param x := by
+  intro x
   have e : c.courseOfValues.val param (^&x) (c.courseOfValues.table param (^&x)) =
       c.fvar param x := by simp [courseOfValues, qqFvar]
   have hle := c.fvar_le_bound param x
@@ -806,16 +827,23 @@ lemma courseOfValuesResult_func (hk : k = len v) :
   rw [← e] at hle
   exact ⟨w, hw, hwv, by rw [courseOfValuesResult, c.courseOfValues.result_eq_val hle, e]⟩
 
-private lemma limSeq_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
+end CourseOfValues
+
+section CompResult
+
+variable {n : ℕ} {f : (Fin n → V) → V}
+
+private lemma limSeq_comp (hf : LocallyDelta0Function f) :
     LocallyDelta0Function fun w : Fin n → V ↦ (c.construction L).limSeq param (f w) := by
   simpa using (c.construction L).limSeq_locallyDelta0.comp_cons hf fun j ↦
     LocallyDelta0Function.const (param j)
 
-private lemma courseOfValuesResult_comp {n : ℕ} {f : (Fin n → V) → V}
-    (hf : LocallyDelta0Function f) :
+private lemma courseOfValuesResult_comp (hf : LocallyDelta0Function f) :
     LocallyDelta0Function fun w : Fin n → V ↦ c.courseOfValuesResult param (f w) := by
   simpa using c.courseOfValuesResult_locallyDelta0.comp_cons hf fun j ↦
     LocallyDelta0Function.const (param j)
+
+end CompResult
 
 lemma isUTerm_and_eq_of_mem_limSeq {s : V} (h : z ∈ (c.construction L).limSeq param s) :
     IsUTerm L (π₁ z) ∧ π₂ z = c.courseOfValuesResult param (π₁ z) := by
@@ -998,11 +1026,15 @@ lemma graph_existsUnique (ht : IsUTerm L t) : ∃! y, c.Graph L param t y := by
   rcases graph_exists param ht with ⟨y, hy⟩
   exact ExistsUnique.intro y hy (fun y' h' ↦ graph_unique param h' hy)
 
-lemma graph_existsUnique_total (t : V) : ∃! y,
+variable (t : V)
+
+lemma graph_existsUnique_total : ∃! y,
     (IsUTerm L t → c.Graph L param t y) ∧ (¬IsUTerm L t → y = 0) := by
   by_cases ht : IsUTerm L t <;> simp [ht, c.graph_existsUnique L param]
 
-noncomputable def result (t : V) : V := Classical.choose! (c.graph_existsUnique_total L param t)
+noncomputable def result : V := Classical.choose! (c.graph_existsUnique_total L param t)
+
+variable {t}
 
 theorem result_prop (ht : IsUTerm L t) : c.Graph L param t (c.result L param t) :=
   Classical.choose!_spec (c.graph_existsUnique_total L param t) |>.1 ht
@@ -1030,19 +1062,23 @@ lemma result_func {k f v w} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v)
   c.result_eq_of_graph (by simp [hkf, hv]) (c.graph_func hkf hv hkw (fun i hi ↦ by
     simpa [hw i hi] using c.result_prop L param (hv.nth hi)))
 
+variable (t : V)
+
 open Classical in
-lemma result_eq_ite (t : V) :
+lemma result_eq_ite :
     c.result L param t = if IsUTerm L t then c.courseOfValuesResult param t else 0 := by
   by_cases ht : IsUTerm L t
   · simp [ht, ((c.graph_iff L).mp (c.result_prop L param ht)).2]
   · simp [ht, c.result_prop_not L param ht]
 
 variable (L c param) in
-lemma result_le_bound (t : V) : c.result L param t ≤ c.bound param t := by
+lemma result_le_bound : c.result L param t ≤ c.bound param t := by
   rw [c.result_eq_ite]
   split_ifs
   · exact c.courseOfValuesResult_le_bound param t
   · exact zero_le
+
+variable {t}
 
 open Classical in
 variable (L c) in
@@ -1073,13 +1109,17 @@ lemma graph_existsUnique_vec (hw : IsUTermVec L k w) :
 
 variable (L c param)
 
-lemma graph_existsUnique_vec_total (k w : V) : ∃! w',
+variable (k w : V)
+
+lemma graph_existsUnique_vec_total : ∃! w',
     (IsUTermVec L k w → k = len w' ∧ ∀ i < k, c.Graph L param w.[i] w'.[i]) ∧
     (¬IsUTermVec L k w → w' = 0) := by
   by_cases h : IsUTermVec L k w <;> simp [h, c.graph_existsUnique_vec]
 
-noncomputable def resultVec (k w : V) : V :=
+noncomputable def resultVec : V :=
   Classical.choose! (c.graph_existsUnique_vec_total L param k w)
+
+variable {k w}
 
 @[simp]
 lemma resultVec_lh (hw : IsUTermVec L k w) : len (c.resultVec L param k w) = k :=
@@ -1111,8 +1151,9 @@ lemma resultVec_cons (hw : IsUTermVec L k w) (ht : IsUTerm L t) :
     · simp
     · simp [c.nth_resultVec L param hw (by simpa using hi)])
 
+variable (k w) in
 open Classical in
-lemma resultVec_eq_ite (k w : V) : c.resultVec L param k w =
+lemma resultVec_eq_ite : c.resultVec L param k w =
     if IsUTermVec L k w then listMap (fun p x ↦ c.result L p x) param w else 0 := by
   have hres := c.result_locallyDelta0 (L := L)
   by_cases hw : IsUTermVec L k w
@@ -1162,8 +1203,10 @@ lemma result_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ c.result L (v ·.su
     c.eval_graphDef, result, Classical.choose!_eq_iff_right]
 
 @[simp]
-lemma result_graphDef (v : Fin (arity + 2) → V) :
-    (β.result L).val.Evalb v ↔ v 0 = c.result L (v ·.succ.succ) (v 1) := (result_defined c).iff
+lemma result_graphDef : ∀ v : Fin (arity + 2) → V,
+    (β.result L).val.Evalb v ↔ v 0 = c.result L (v ·.succ.succ) (v 1) := by
+  intro v
+  exact (result_defined c).iff
 
 private lemma resultVec_graph {w' k w} :
     w' = c.resultVec L param k w ↔
@@ -1283,23 +1326,23 @@ end bv
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isSemiterm isSemitermVec)
 
-variable (L)
+variable (L) (k n t v : V)
 
 /-- The code `t` is a term of the language `L` whose bound variables are all below `n`. -/
-class IsSemiterm (n t : V) : Prop where
+class IsSemiterm : Prop where
   isUTerm : IsUTerm L t
   bv : termBV L t ≤ n
 
 /-- The list `v` of `k` semiterms with bound variables below `n`. -/
-class IsSemitermVec (k n v : V) : Prop where
+class IsSemitermVec : Prop where
   isUTermVec : IsUTermVec L k v
   bv : ∀  {i}, i < k → termBV L v.[i] ≤ n
 
-abbrev IsTerm (t : V) : Prop := IsSemiterm L 0 t
+abbrev IsTerm : Prop := IsSemiterm L 0 t
 
-abbrev IsTermVec (k v : V) : Prop := IsSemitermVec L k 0 v
+abbrev IsTermVec : Prop := IsSemitermVec L k 0 v
 
-variable {L}
+variable {L k n t v}
 
 lemma IsSemiterm.def {n} : IsSemiterm L n t ↔ IsUTerm L t ∧ termBV L t ≤ n :=
   ⟨by rintro ⟨h, bv⟩; exact ⟨h, bv⟩, by rintro ⟨h, bv⟩; exact ⟨h, bv⟩⟩
@@ -1369,8 +1412,9 @@ lemma IsSemiterm.func : IsSemiterm L n (^func k f v) ↔ L.IsFunc k f ∧ IsSemi
       have hi : i < k := by simpa [hf, h.isUTerm] using hi
       simpa [hf, h.isUTerm, hi] using (h.nth hi).bv⟩
 
+variable (n) in
 @[simp]
-lemma IsSemitermVec.empty (n : V) : IsSemitermVec L 0 n 0 := ⟨by simp, by simp⟩
+lemma IsSemitermVec.empty : IsSemitermVec L 0 n 0 := ⟨by simp, by simp⟩
 
 @[simp]
 lemma IsSemitermVec.empty_iff : IsSemitermVec L 0 n v ↔ v = 0 := by
@@ -1416,7 +1460,9 @@ instance IsSemiterm.defined : 𝚫ᴬ₁-Relation (IsSemiterm (V := V) L) via (i
 instance IsSemiterm.definable : 𝚫ᴬ₁-Relation (IsSemiterm (V := V) L) :=
   IsSemiterm.defined.to_definable
 
-instance IsSemiterm.definable' (Γ : Polarity) (m : ℕ) :
+variable (Γ m)
+
+instance IsSemiterm.definable' :
     Γᴬ_[m + 1]-Relation (IsSemiterm (V := V) L) := IsSemiterm.definable.of_deltaOne
 
 instance IsSemitermVec.defined : 𝚫ᴬ₁-Relation₃ (IsSemitermVec (V := V) L) via (isSemitermVec L) :=
@@ -1430,8 +1476,10 @@ instance IsSemitermVec.defined : 𝚫ᴬ₁-Relation₃ (IsSemitermVec (V := V) 
 instance IsSemitermVec.definable : 𝚫ᴬ₁-Relation₃ (IsSemitermVec (V := V) L) :=
   IsSemitermVec.defined.to_definable
 
-instance IsSemitermVec.definable' (Γ : Polarity) (m : ℕ) :
+instance IsSemitermVec.definable' :
     Γᴬ_[m + 1]-Relation₃ (IsSemitermVec (V := V) L) := IsSemitermVec.definable.of_deltaOne
+
+variable {Γ m}
 
 lemma IsSemiterm.case_iff :
     IsSemiterm L n t ↔

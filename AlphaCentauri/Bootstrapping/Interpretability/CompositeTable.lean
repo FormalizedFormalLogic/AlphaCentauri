@@ -8,8 +8,6 @@ public import AlphaCentauri.Bootstrapping.Interpretability.Soundness
 The table of the composite of two translations.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -29,6 +27,8 @@ section compTable
 variable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable]
 
+variable (tbl u k : V)
+
 noncomputable def translateVec.blueprint : PR.Blueprint 2 where
   zero := .mkSigma “y tbl u. y = 0”
   succ := .mkSigma
@@ -42,12 +42,14 @@ noncomputable def translateVec.construction : PR.Construction V (translateVec.bl
 
 /-- `translateVec L₁ L₂ tbl u k` is the vector of length `k` whose `j`-th entry is the translation
 of `u.[j]` along `tbl`. -/
-noncomputable def translateVec (tbl u k : V) : V :=
+noncomputable def translateVec : V :=
   (translateVec.construction L₁ L₂).result ![tbl, u] k
+
+variable (tbl₁ tbl₂ : V)
 
 /-- The composite of the tables `tbl₁` and `tbl₂`: its domain formula is `δ₁ ∧ τ₁(δ₂)` and its
 entries for the symbols are the translations along `tbl₁` of those of `tbl₂`. -/
-noncomputable def compTable (tbl₁ tbl₂ : V) : V :=
+noncomputable def compTable : V :=
   ?[tbl₁.[0] ^⋏ translate L₁ L₂ tbl₁ tbl₂.[0],
     translateVec L₁ L₂ tbl₁ tbl₂.[1] (len tbl₂.[1]),
     translateVec L₁ L₂ tbl₁ tbl₂.[2] (len tbl₂.[2])]
@@ -66,24 +68,22 @@ instance translateVec.definable : 𝚺ᴬ₁-Function₃[V] translateVec L₁ L�
   translateVec.defined.to_definable
 
 @[simp]
-lemma translateVec_zero (tbl u : V) : translateVec L₁ L₂ tbl u 0 = 0 := by
+lemma translateVec_zero : translateVec L₁ L₂ tbl u 0 = 0 := by
   simp [translateVec, translateVec.construction]
 
 @[simp]
-lemma translateVec_succ (tbl u k : V) :
-    translateVec L₁ L₂ tbl u (k + 1) =
+lemma translateVec_succ : translateVec L₁ L₂ tbl u (k + 1) =
       concat (translateVec L₁ L₂ tbl u k) (translate L₁ L₂ tbl u.[k]) := by
   simp [translateVec, translateVec.construction]
 
 @[simp]
-lemma len_translateVec (tbl u k : V) : len (translateVec L₁ L₂ tbl u k) = k := by
+lemma len_translateVec : len (translateVec L₁ L₂ tbl u k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih => simp [ih]
 
-lemma nth_translateVec (tbl u k : V) :
-    ∀ j < k, (translateVec L₁ L₂ tbl u k).[j] = translate L₁ L₂ tbl u.[j] := by
+lemma nth_translateVec : ∀ j < k, (translateVec L₁ L₂ tbl u k).[j] = translate L₁ L₂ tbl u.[j] := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -94,20 +94,21 @@ lemma nth_translateVec (tbl u k : V) :
       exact ih j hlt
     · rw [translateVec_succ, concat_nth_len' _ _ (by simp)]
 
-lemma tableDomain_compTable (tbl₁ tbl₂ : V) :
-    tableDomain (compTable L₁ L₂ tbl₁ tbl₂) =
+lemma tableDomain_compTable : tableDomain (compTable L₁ L₂ tbl₁ tbl₂) =
       tableDomain tbl₁ ^⋏ translate L₁ L₂ tbl₁ (tableDomain tbl₂) := by
   simp [compTable, tableDomain]
 
-lemma tableRel_compTable {tbl₁ tbl₂ k r : V} (h : ⟪k, r⟫ < len tbl₂.[1]) :
+variable {tbl₁ tbl₂ k}
+
+lemma tableRel_compTable {r : V} (h : ⟪k, r⟫ < len tbl₂.[1]) :
     tableRel (compTable L₁ L₂ tbl₁ tbl₂) k r = translate L₁ L₂ tbl₁ (tableRel tbl₂ k r) := by
   simp [compTable, tableRel, nth_translateVec _ _ _ _ h]
 
-lemma tableFunc_compTable {tbl₁ tbl₂ k f : V} (h : ⟪k, f⟫ < len tbl₂.[2]) :
+lemma tableFunc_compTable {f : V} (h : ⟪k, f⟫ < len tbl₂.[2]) :
     tableFunc (compTable L₁ L₂ tbl₁ tbl₂) k f = translate L₁ L₂ tbl₁ (tableFunc tbl₂ k f) := by
   simp [compTable, tableFunc, nth_translateVec _ _ _ _ h]
 
-variable {L₃ : Language} [L₂.Eq] [L₃.Encodable] [L₃.LORDefinable] {tbl₁ tbl₂ : V}
+variable {L₃ : Language} [L₂.Eq] [L₃.Encodable] [L₃.LORDefinable]
 
 omit [L₂.Eq] in
 lemma IsTable.isSemisentence_translate {n p : V} (hT : IsTable L₁ L₂ tbl₁)

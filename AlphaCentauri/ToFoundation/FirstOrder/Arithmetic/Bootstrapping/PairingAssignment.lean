@@ -9,8 +9,6 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 The polynomial pairing `ppair` and the decoding of iterated pairs into lists.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -18,9 +16,11 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 namespace FFL.FirstOrder.Arithmetic
 namespace Bootstrapping
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {a b b' s s₁ s₂ x x' pr : V}
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {x b a b' s s₁ s₂ x' pr : V}
+  (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ])
 
-def ppair (x b : V) : V := (x + b) * (x + b) + b + 1
+variable (x b) in
+def ppair : V := (x + b) * (x + b) + b + 1
 
 lemma ppair_lt_ppair (h : x + b < x' + b') : ppair x b < ppair x' b' := by
   have h1 : x + b + 1 ≤ x' + b' := lt_iff_succ_le.mp h
@@ -53,13 +53,17 @@ lemma ppair_inj : ppair x b = ppair x' b' ↔ x = x' ∧ b = b' := by
   · exact ppair_eq_imp
   · rintro ⟨rfl, rfl⟩; rfl
 
+section
+
+variable (x b)
+
 @[simp]
-lemma lt_ppair_right (x b : V) : b < ppair x b := by
+lemma lt_ppair_right : b < ppair x b := by
   unfold ppair
   exact lt_succ_iff_le.mpr le_add_self
 
 @[simp]
-lemma lt_ppair_left (x b : V) : x < ppair x b := by
+lemma lt_ppair_left : x < ppair x b := by
   unfold ppair
   rcases eq_zero_or_pos (x + b) with (h | h)
   · have : x = 0 := (add_eq_zero_iff_of_nonneg zero_le zero_le |>.mp h).1
@@ -69,7 +73,9 @@ lemma lt_ppair_left (x b : V) : x < ppair x b := by
     exact lt_succ_iff_le.mpr (le_add_right (h2.trans h1))
 
 @[simp]
-lemma ppair_ne_zero (x b : V) : ppair x b ≠ 0 := by simp [ppair]
+lemma ppair_ne_zero : ppair x b ≠ 0 := by simp [ppair]
+
+end
 
 def _root_.FFL.FirstOrder.Arithmetic.ppairDef : 𝚺ᴬ₀.Semisentence 3 :=
   .mkSigma “y x b. y = (x + b) * (x + b) + b + 1”
@@ -79,12 +85,13 @@ instance ppair_defined : 𝚺ᴬ₀-Function₂ (ppair : V → V → V) via ppai
 
 instance ppair_definable : 𝚺ᴬ₀-Function₂ (ppair : V → V → V) := ppair_defined.to_definable
 
-instance ppair_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₂ (ppair : V → V → V) := ppair_definable.of_zero
+instance ppair_definable' : ℌ-Function₂ (ppair : V → V → V) := ppair_definable.of_zero
 
-def IsPPair (a : V) : Prop := ∃ x ≤ a, ∃ b ≤ a, a = ppair x b
+variable (a) in
+def IsPPair : Prop := ∃ x ≤ a, ∃ b ≤ a, a = ppair x b
 
-lemma isPPair_ppair (x b : V) : IsPPair (ppair x b) :=
+variable (x b) in
+lemma isPPair_ppair : IsPPair (ppair x b) :=
   ⟨x, (lt_ppair_left x b).le, b, (lt_ppair_right x b).le, rfl⟩
 
 lemma isPPair_iff : IsPPair a ↔ ∃ x b, a = ppair x b :=
@@ -98,19 +105,19 @@ instance isPPair_defined : 𝚺ᴬ₀-Predicate (IsPPair : V → Prop) via isPPa
 
 instance isPPair_definable : 𝚺ᴬ₀-Predicate (IsPPair : V → Prop) := isPPair_defined.to_definable
 
-instance isPPair_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Predicate (IsPPair : V → Prop) := isPPair_definable.of_zero
+instance isPPair_definable' : ℌ-Predicate (IsPPair : V → Prop) := isPPair_definable.of_zero
 
 namespace Dec
 
-def Phi (C : Set V) (pr : V) : Prop :=
+variable (C : Set V) (pr : V) in
+def Phi : Prop :=
   (∃ a, pr = ⟪a, 0⟫ ∧ ¬IsPPair a) ∨ (∃ x b s, pr = ⟪ppair x b, x ∷ s⟫ ∧ ⟪b, s⟫ ∈ C)
 
-private lemma phi_iff (C pr : V) :
-    Phi {x | x ∈ C} pr ↔
+private lemma phi_iff (C : V) : ∀ pr : V, Phi {x | x ∈ C} pr ↔
     (∃ a ≤ pr, pr = ⟪a, 0⟫ ∧ ¬IsPPair a) ∨
     (∃ x ≤ pr, ∃ b ≤ pr, ∃ s ≤ pr, ∃ pb ≤ pr, pb = ppair x b ∧ ∃ xs ≤ pr, xs = x ∷ s ∧
       pr = ⟪pb, xs⟫ ∧ ∃ bs < C, bs = ⟪b, s⟫ ∧ bs ∈ C) := by
+  intro pr
   constructor
   · rintro (⟨a, rfl, h⟩ | ⟨x, b, s, rfl, hC⟩)
     · left; exact ⟨a, by simp, rfl, h⟩
@@ -180,7 +187,8 @@ lemma graph_ppair : Graph ⟪ppair x b, s⟫ ↔ ∃ s', s = x ∷ s' ∧ Graph 
   · rintro ⟨s', rfl, hs⟩
     exact graph_case.mpr <| Or.inr ⟨x, b, s', rfl, hs⟩
 
-lemma graph_exists (a : V) : ∃ s, Graph ⟪a, s⟫ := by
+variable (a) in
+lemma graph_exists : ∃ s, Graph ⟪a, s⟫ := by
   induction a using ISigma1.sigma1_order_induction
   · definability
   case ind a ih =>
@@ -202,7 +210,8 @@ lemma graph_unique : Graph ⟪a, s₁⟫ → Graph ⟪a, s₂⟫ → s₁ = s₂
       rw [ih b (lt_ppair_right x b) ht₁ ht₂]
     · rw [(graph_of_not_isPPair ha).mp h₁, (graph_of_not_isPPair ha).mp h₂]
 
-lemma graph_existsUnique (a : V) : ∃! s, Graph ⟪a, s⟫ := by
+variable (a) in
+lemma graph_existsUnique : ∃! s, Graph ⟪a, s⟫ := by
   rcases graph_exists a with ⟨s, hs⟩
   exact ExistsUnique.intro s hs (fun t ht ↦ graph_unique ht hs)
 
@@ -210,15 +219,18 @@ end Dec
 
 open Dec
 
-noncomputable def dec (a : V) : V := Classical.choose! (graph_existsUnique a)
+variable (a) in
+noncomputable def dec : V := Classical.choose! (graph_existsUnique a)
 
-lemma dec_graph (a : V) : Graph ⟪a, dec a⟫ := Classical.choose!_spec (graph_existsUnique a)
+variable (a) in
+lemma dec_graph : Graph ⟪a, dec a⟫ := Classical.choose!_spec (graph_existsUnique a)
 
 lemma dec_eq_of_graph (h : Graph ⟪a, s⟫) : dec a = s :=
   graph_unique (dec_graph a) h
 
+variable (x b) in
 @[simp]
-lemma dec_ppair (x b : V) : dec (ppair x b) = x ∷ dec b :=
+lemma dec_ppair : dec (ppair x b) = x ∷ dec b :=
   dec_eq_of_graph (graph_ppair.mpr ⟨dec b, rfl, dec_graph b⟩)
 
 lemma dec_of_not_isPPair (h : ¬IsPPair a) : dec a = 0 :=

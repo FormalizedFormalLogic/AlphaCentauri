@@ -14,15 +14,14 @@ public import Mathlib.RingTheory.Trace.Basic
 Basic facts about real closed fields.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open Polynomial Module
 
 namespace IsRealClosed
 
-variable {R : Type*} [Field R] [IsRealClosed R]
+variable {R : Type*} [Field R] [IsRealClosed R] {L : Type*} [Field L] [Algebra R L]
+  [FiniteDimensional R L] [IsGalois R L]
 
 lemma finrank_eq_one_of_odd {F : Type*} [Field F] [Algebra R F] [FiniteDimensional R F]
     (h : Odd (finrank R F)) : finrank R F = 1 := by
@@ -35,8 +34,7 @@ lemma finrank_eq_one_of_odd {F : Type*} [Field F] [Algebra R F] [FiniteDimension
   exact natDegree_eq_of_degree_eq_some <| degree_eq_one_of_irreducible_of_root
     (minpoly.irreducible hx) hr
 
-lemma exists_finrank_eq_two_pow {L : Type*} [Field L] [Algebra R L] [FiniteDimensional R L]
-    [IsGalois R L] : ∃ k, finrank R L = 2 ^ k := by
+lemma exists_finrank_eq_two_pow : ∃ k, finrank R L = 2 ^ k := by
   obtain ⟨P⟩ : Nonempty (Sylow 2 Gal(L/R)) := inferInstance
   obtain ⟨k, hk⟩ := IsPGroup.iff_card.mp P.isPGroup
   use k
@@ -50,7 +48,7 @@ lemma exists_finrank_eq_two_pow {L : Type*} [Field L] [Algebra R L] [FiniteDimen
     exact P.not_dvd_index
   rw [← h₁, finrank_eq_one_of_odd h₄, one_mul]
 
-variable [LinearOrder R] [IsStrictOrderedRing R]
+variable [LinearOrder R] [IsStrictOrderedRing R] {f : R[X]} {a b : R}
 
 lemma isSquare_of_finrank_eq_two {E : Type*} [Field E] [Algebra R E] (h : finrank R E = 2)
     (z : E) : IsSquare z := by
@@ -99,8 +97,7 @@ lemma isSquare_of_finrank_eq_two {E : Type*} [Field E] [Algebra R E] (h : finran
     rw [map_mul]
     linear_combination (-(algebraMap R E β) ^ 2) * h₁ + (algebraMap R E β) ^ 2 * h₂ - z * h₃
 
-lemma finrank_le_two_of_isGalois {L : Type*} [Field L] [Algebra R L] [FiniteDimensional R L]
-    [IsGalois R L] : finrank R L ≤ 2 := by
+lemma finrank_le_two_of_isGalois : finrank R L ≤ 2 := by
   obtain ⟨k, hk⟩ := exists_finrank_eq_two_pow (R := R) (L := L)
   match k, hk with
   | 0, hk => simp [hk]
@@ -111,12 +108,12 @@ lemma finrank_le_two_of_isGalois {L : Type*} [Field L] [Algebra R L] [FiniteDime
     exact absurd hM <| finrank_ne_two_of_forall_isSquare <| isSquare_of_finrank_eq_two hE
 
 /-- An irreducible polynomial over a real closed field has degree at most two. -/
-theorem natDegree_le_two_of_irreducible {f : R[X]} (hf : Irreducible f) : f.natDegree ≤ 2 := by
+theorem natDegree_le_two_of_irreducible (hf : Irreducible f) : f.natDegree ≤ 2 := by
   have : IsGalois R f.SplittingField := {}
   exact (Nat.le_of_dvd finrank_pos (hf.natDegree_dvd_finrank (SplittingField.splits f))).trans
     finrank_le_two_of_isGalois
 
-lemma eval_mul_eval_pos_of_irreducible {f : R[X]} (hf : Irreducible f) {a b : R} (hab : a ≤ b)
+lemma eval_mul_eval_pos_of_irreducible (hf : Irreducible f) (hab : a ≤ b)
     (hroot : ∀ x ∈ Set.Icc a b, ¬ f.IsRoot x) : 0 < f.eval a * f.eval b := by
   have heval (x : R) : f.eval x = f.coeff 2 * (x * x) + f.coeff 1 * x + f.coeff 0 := by
     rw [eval_eq_sum_range' (n := 3) (by have := natDegree_le_two_of_irreducible hf; omega)]
@@ -154,7 +151,7 @@ lemma eval_mul_eval_pos_of_irreducible {f : R[X]} (hf : Irreducible f) {a b : R}
     have := mul_pos (hpos a) (hpos b)
     nlinarith [sq_nonneg (f.coeff 2)]
 
-lemma eval_mul_eval_pos {f : R[X]} {a b : R} (hab : a ≤ b)
+lemma eval_mul_eval_pos (hab : a ≤ b)
     (hroot : ∀ x ∈ Set.Icc a b, ¬ f.IsRoot x) : 0 < f.eval a * f.eval b := by
   induction f using WfDvdMonoid.induction_on_irreducible with
   | zero => exact absurd eval_zero (hroot a ⟨le_rfl, hab⟩)
@@ -172,7 +169,7 @@ lemma eval_mul_eval_pos {f : R[X]} {a b : R} (hab : a ≤ b)
 /-- A polynomial over a real closed ordered field that changes sign on an interval has a root
 inside it.
 - [BCR98, §1.2] -/
-theorem exists_mem_Ioo_isRoot {f : R[X]} {a b : R} (hab : a < b) (ha : f.eval a < 0)
+theorem exists_mem_Ioo_isRoot (hab : a < b) (ha : f.eval a < 0)
     (hb : 0 < f.eval b) : ∃ c ∈ Set.Ioo a b, f.IsRoot c := by
   by_contra! h
   refine (mul_neg_of_neg_of_pos ha hb).not_gt (eval_mul_eval_pos hab.le ?_)

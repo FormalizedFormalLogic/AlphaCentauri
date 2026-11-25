@@ -9,8 +9,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 # Internal provability of instances, modus ponens and induction
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -109,10 +107,9 @@ section induction
 
 open Bootstrapping.Arithmetic
 
-variable [𝗣𝗔⁻ ⪯ T]
+variable [𝗣𝗔⁻ ⪯ T] (φ : ArithmeticSemisentence k)
 
-lemma substNumerals_eq_subst (φ : ArithmeticSemisentence k) (v : Fin k → V) :
-    substNumerals (⌜φ⌝ : V) v =
+lemma substNumerals_eq_subst (v : Fin k → V) : substNumerals (⌜φ⌝ : V) v =
       ((⌜φ⌝ : Semiformula V ℒₒᵣ k).subst fun i ↦ (𝕹 (v i) : Term V ℒₒᵣ)).val := by
   simp [substNumerals, Sentence.quote_eq]
   rfl
@@ -124,8 +121,7 @@ lemma typed_quote_shift (σ : ArithmeticSemisentence n) :
   rw [Sentence.quote_def, ← Semiformula.quote_shift];
   simp [Rewriting.shift, Rewriting.emb, ← TransitiveRewriting.comp_app]
 
-lemma typed_quote_rew_subst {j : ℕ} (φ : ArithmeticSemisentence k)
-    (w : Fin k → ArithmeticSemiterm Empty j) :
+lemma typed_quote_rew_subst {j : ℕ} (w : Fin k → ArithmeticSemiterm Empty j) :
     (⌜Rew.subst w ▹ φ⌝ : Semiformula V ℒₒᵣ j) =
       (⌜φ⌝ : Semiformula V ℒₒᵣ k).subst fun i ↦ ⌜(Rew.emb (w i) : SyntacticSemiterm ℒₒᵣ j)⌝ := by
   simp [Sentence.typed_quote_def, Rewriting.emb_subst_eq_subst_emb]
@@ -182,29 +178,34 @@ end induction
 
 open FFL.Entailment Bootstrapping.Arithmetic
 
+variable {A B : Semiformula V ℒₒᵣ 1} (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ)
+
+variable (A B) in
 /-- `∀¹ (∀u < #0 + 1, A u ⋎ ∀x < #0 + 1, B x)`. -/
-noncomputable abbrev allBallOrBall (A B : Semiformula V ℒₒᵣ 1) : Formula V ℒₒᵣ :=
+noncomputable abbrev allBallOrBall : Formula V ℒₒᵣ :=
   ∀¹ ((A.subst ![Semiterm.bvar 0]).ball (Semiterm.bvar 0 + 𝕹 1) ⋎
     (B.subst ![Semiterm.bvar 0]).ball (Semiterm.bvar 0 + 𝕹 1))
 
-lemma shift_allBallOrBall {A B : Semiformula V ℒₒᵣ 1} (hA : A.shift = A) (hB : B.shift = B) :
+lemma shift_allBallOrBall (hA : A.shift = A) (hB : B.shift = B) :
     (allBallOrBall A B).shift = allBallOrBall A B := by
   simp [Semiformula.shift_substs, hA, hB]
 
-lemma tprovable_ball_imp (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ) :
+lemma tprovable_ball_imp :
     T.internalize V ⊢ φ.ball t 🡒 Semiterm.notLessThan u t ⋎ φ.subst ![u] := by
   have := TProof.all_imp_subst (T := T)
     (Semiterm.notLessThan (Semiterm.bvar 0) t.bShift ⋎ φ) u;
   simpa [Semiformula.ball] using this
 
-lemma tprovable_allBallOrBall_imp_subst (A B : Semiformula V ℒₒᵣ 1) (w : Term V ℒₒᵣ) :
+variable (A B) in
+lemma tprovable_allBallOrBall_imp_subst (w : Term V ℒₒᵣ) :
     T.internalize V ⊢ allBallOrBall A B 🡒 A.ball (w + 𝕹 1) ⋎ B.ball (w + 𝕹 1) := by
   have := TProof.all_imp_subst (T := T)
     ((A.subst ![Semiterm.bvar 0]).ball (Semiterm.bvar 0 + 𝕹 1) ⋎
       (B.subst ![Semiterm.bvar 0]).ball (Semiterm.bvar 0 + 𝕹 1)) w;
   simpa [Semiformula.substs_substs, SemitermVec.q] using this
 
-lemma tprovable_all_or_all_imp_allBallOrBall (A B : Semiformula V ℒₒᵣ 1) :
+variable (A B) in
+lemma tprovable_all_or_all_imp_allBallOrBall :
     T.internalize V ⊢ (∀¹ A) ⋎ (∀¹ B) 🡒 allBallOrBall A B := by
   have e (φ : Semiformula V ℒₒᵣ 1) :
       (((Semiterm.bvar 0 : Semiterm V ℒₒᵣ 1) <' Semiterm.fvar 0 + 𝕹 1) 🡒 φ) =
@@ -226,7 +227,7 @@ lemma tprovable_all_or_all_imp_allBallOrBall (A B : Semiformula V ℒₒᵣ 1) :
 
 variable [𝗜𝚺₁ ⪯ T]
 
-lemma tprovable_lt_add_add_one (t u : Term V ℒₒᵣ) : T.internalize V ⊢ t <' t + u + 𝕹 1 := by
+lemma tprovable_lt_add_add_one : T.internalize V ⊢ t <' t + u + 𝕹 1 := by
   have h : T ⊢ (“∀ x y, x < x + y + 1” : ArithmeticSentence) :=
     complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
       have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory hM;
@@ -236,7 +237,7 @@ lemma tprovable_lt_add_add_one (t u : Term V ℒₒᵣ) : T.internalize V ⊢ t 
     simpa using internal_provable_of_outer_provable (V := V) h;
   simpa using TProof.specialize₂! h' u t
 
-lemma tprovable_lt_add_add_one' (t u : Term V ℒₒᵣ) : T.internalize V ⊢ u <' t + u + 𝕹 1 := by
+lemma tprovable_lt_add_add_one' : T.internalize V ⊢ u <' t + u + 𝕹 1 := by
   have h : T ⊢ (“∀ x y, y < x + y + 1” : ArithmeticSentence) :=
     complete.{0} T _ fun (M : Type) _ (hM : M↓[ℒₒᵣ] ⊧* T) ↦ by
       have : M↓[ℒₒᵣ] ⊧* 𝗜𝚺₁ := models_of_subtheory hM;
@@ -246,8 +247,8 @@ lemma tprovable_lt_add_add_one' (t u : Term V ℒₒᵣ) : T.internalize V ⊢ u
     simpa using internal_provable_of_outer_provable (V := V) h;
   simpa using TProof.specialize₂! h' u t
 
-lemma tprovable_allBallOrBall_imp {A B : Semiformula V ℒₒᵣ 1} (hA : A.shift = A)
-    (hB : B.shift = B) : T.internalize V ⊢ allBallOrBall A B 🡒 (∀¹ A) ⋎ (∀¹ B) := by
+lemma tprovable_allBallOrBall_imp (hA : A.shift = A) (hB : B.shift = B) :
+    T.internalize V ⊢ allBallOrBall A B 🡒 (∀¹ A) ⋎ (∀¹ B) := by
   have hHs := shift_allBallOrBall hA hB;
   have key : T.internalize V ⊢ ∃¹ (∼A) 🡒 allBallOrBall A B 🡒 ∀¹ B := by
     apply TProof.exs_imp_of_free;

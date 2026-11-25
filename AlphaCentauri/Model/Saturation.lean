@@ -10,8 +10,6 @@ public import Foundation.FirstOrder.Arithmetic.R0.Representation
 Coded sets, coded types and $\Sigma_n$-recursive saturation of nonstandard models of `𝗣𝗔`.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder
@@ -25,10 +23,10 @@ variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] [IsNonst
 
 namespace Arithmetic
 
-variable {S : Set ℕ}
+variable {S : Set ℕ} {P : M → Prop} {R : M → M → Prop} (Γ : Polarity) (n : ℕ)
 
 /-- The standard numbers satisfying a definable predicate form a coded set. -/
-lemma setOf_mem_standardSystem {P : M → Prop} (hP : 𝚺ᴬ_[m + 1]-Predicate P) :
+lemma setOf_mem_standardSystem (hP : 𝚺ᴬ_[m + 1]-Predicate P) :
     {n : ℕ | P n} ∈ standardSystem M := by
   have : Fact (1 ≤ m + 1) := ⟨by omega⟩
   obtain ⟨d, hd⟩ := Classical.arbitrary (NonstandardElement M)
@@ -58,7 +56,7 @@ lemma mem_standardSystem_of_computablePred (hS : ComputablePred (· ∈ S)) :
 
 /-- If for every finite subset of a coded set `S` some element is related to all its members by a
 definable relation, then some element is related to all members of `S`. -/
-lemma exists_forall_of_mem_standardSystem {R : M → M → Prop} (hR : 𝚺ᴬ_[m + 1]-Relation R)
+lemma exists_forall_of_mem_standardSystem (hR : 𝚺ᴬ_[m + 1]-Relation R)
     (hS : S ∈ standardSystem M) (h : ∀ s : Finset ℕ, ↑s ⊆ S → ∃ x : M, ∀ e ∈ s, R x e) :
     ∃ x : M, ∀ e ∈ S, R x e := by
   classical
@@ -79,8 +77,7 @@ lemma exists_forall_of_mem_standardSystem {R : M → M → Prop} (hR : 𝚺ᴬ_[
 
 /-- `exists_forall_of_mem_standardSystem` for the codes of a set of semisentences. -/
 lemma exists_forall_of_setOf_mem_standardSystem {Q : ArithmeticSemisentence k → Prop}
-    (hQ : {e : ℕ | ∃ φ, Q φ ∧ ⌜φ⌝ = e} ∈ standardSystem M) {R : M → M → Prop}
-    (hR : 𝚺ᴬ_[m + 1]-Relation R)
+    (hQ : {e : ℕ | ∃ φ, Q φ ∧ ⌜φ⌝ = e} ∈ standardSystem M) (hR : 𝚺ᴬ_[m + 1]-Relation R)
     (h : ∀ s : Finset (ArithmeticSemisentence k), (∀ φ ∈ s, Q φ) → ∃ x, ∀ φ ∈ s, R x ⌜φ⌝) :
     ∃ x, ∀ φ, Q φ → R x ⌜φ⌝ := by
   classical
@@ -100,7 +97,7 @@ lemma exists_forall_of_setOf_mem_standardSystem {Q : ArithmeticSemisentence k �
 
 /-- The codes of the prenex $\Sigma_n$ formulas, or prenex $\Pi_n$ formulas, whose code satisfies a
 definable predicate form a coded set. -/
-lemma setOf_prenexHierarchy_mem_standardSystem (Γ : Polarity) (n l : ℕ) {P : M → Prop}
+lemma setOf_prenexHierarchy_mem_standardSystem (l : ℕ)
     (hP : 𝚺ᴬ_[m + 1]-Predicate P) : {e : ℕ | ∃ φ : ArithmeticSemisentence l,
       ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ ∧ P ⌜φ⌝ ∧ ⌜φ⌝ = e} ∈ standardSystem M := by
   have hΓ : 𝚺ᴬ_[m + 1]-Predicate (IsPrenexHierarchy Γ n : M → Prop) :=
@@ -122,7 +119,7 @@ lemma setOf_prenexHierarchy_mem_standardSystem (Γ : Polarity) (n l : ℕ) {P : 
 
 /-- The prenex $\Sigma_n$ type, or prenex $\Pi_n$ type, of a tuple is a coded set.
 - [Kay91, Lemma 12.1] -/
-theorem mem_standardSystem_hierarchyType (Γ : Polarity) (n : ℕ) {l : ℕ} (a : Fin l → M) :
+theorem mem_standardSystem_hierarchyType {l : ℕ} (a : Fin l → M) :
     {e : ℕ | ∃ φ : ArithmeticSemisentence l, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ ∧ M ⊧/a φ ∧
       ⌜φ⌝ = e} ∈ standardSystem M := by
   apply Set.mem_of_eq_of_mem _ <| setOf_prenexHierarchy_mem_standardSystem Γ n l (m := n + 1)
@@ -136,11 +133,13 @@ theorem mem_standardSystem_hierarchyType (Γ : Polarity) (n : ℕ) {l : ℕ} (a 
 
 end Arithmetic
 
+section
+variable (Γ : Polarity) (n : ℕ)
+
 /-- A type of prenex $\Sigma_n$ formulas, or of prenex $\Pi_n$ formulas, over a nonstandard model
 of `𝗣𝗔` is realized when its set of codes is in the standard system.
 - [Kay91, Lemma 12.2] -/
-theorem «Type».realized_of_mem_standardSystem (Γ : Polarity) (n : ℕ)
-    {Φ : FirstOrder.Type ℒₒᵣ (Fin m) k} {b : Fin m → M}
+theorem «Type».realized_of_mem_standardSystem {Φ : FirstOrder.Type ℒₒᵣ (Fin m) k} {b : Fin m → M}
     (hΦ : ∀ φ ∈ Φ, ℬ[<, ℒₒᵣ].PrenexHierarchy Γ n φ)
     (hs : Encodable.encode '' Φ ∈ standardSystem M) (hf : Φ.FinitelySatisfied M b) :
     Φ.Realized M b := by
@@ -200,10 +199,11 @@ theorem «Type».realized_of_mem_standardSystem (Γ : Polarity) (n : ℕ)
 
 /-- A nonstandard model of `𝗣𝗔` is $\Sigma_n$-recursively saturated.
 - [Kay91, Theorem 11.5] -/
-theorem sigmaRecursivelySaturated_of_nonstandard (n : ℕ) :
-    SigmaRecursivelySaturated M ℬ[<, ℒₒᵣ] n := by
+theorem sigmaRecursivelySaturated_of_nonstandard : SigmaRecursivelySaturated M ℬ[<, ℒₒᵣ] n := by
   intro k m Φ b hΦ hr hf
   apply Type.realized_of_mem_standardSystem 𝚺 n hΦ _ hf
   exact mem_standardSystem_of_computablePred hr
+
+end
 
 end FFL.FirstOrder

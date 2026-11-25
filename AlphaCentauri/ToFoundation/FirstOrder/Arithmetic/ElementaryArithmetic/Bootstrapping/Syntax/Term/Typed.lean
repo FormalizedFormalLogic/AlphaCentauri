@@ -9,8 +9,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Term.Typed
 The internal free-variable vector in models of $\mathsf{EA}$.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -22,21 +20,24 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.fvarVec (blueprint)
 
+variable {i : V} (k : V)
+
 /-- `^&` is monotone. -/
-lemma qqFvar_le_qqFvar {i j : V} (h : i ≤ j) : ^&i ≤ ^&j := by
+lemma qqFvar_le_qqFvar {j : V} (h : i ≤ j) : ^&i ≤ ^&j := by
   simpa [qqFvar] using pair_le_pair_right 1 h
 
 /-- The list `⟨^&0, …, ^&(k-1)⟩` as a mapping over `[0, …, k - 1]`. -/
-noncomputable def fvarVecClosed (k : V) : V := listMap (fun _ i ↦ ^&i) ![] (rangeList k)
+noncomputable def fvarVecClosed : V := listMap (fun _ i ↦ ^&i) ![] (rangeList k)
 
 lemma fvarVecFun_locallyDelta0 : LocallyDelta0Function fun w : Fin (0 + 1) → V ↦
     (fun (_ : Fin 0 → V) i ↦ ^&i) (w ·.succ) (w 0) :=
   qqFvar_locallyDelta0.comp₁ (LocallyDelta0Function.var 0)
 
-lemma len_fvarVecClosed (k : V) : len (fvarVecClosed k) = k := by
+lemma len_fvarVecClosed : len (fvarVecClosed k) = k := by
   rw [fvarVecClosed, len_listMap fvarVecFun_locallyDelta0, len_rangeList]
 
-lemma nth_fvarVecClosed {k i : V} (hi : i < k) : (fvarVecClosed k).[i] = ^&i := by
+variable {k} in
+lemma nth_fvarVecClosed (hi : i < k) : (fvarVecClosed k).[i] = ^&i := by
   rw [fvarVecClosed, nth_listMap fvarVecFun_locallyDelta0 _ _ (by simpa using hi),
     nth_rangeList hi]
 
@@ -54,8 +55,7 @@ lemma fvarVecClosed_zero : fvarVecClosed (0 : V) = 0 := by
   intro i hi
   simp [len_fvarVecClosed] at hi
 
-lemma concat_fvarVecClosed (k : V) :
-    concat (fvarVecClosed k) (^&k) = fvarVecClosed (k + 1) := by
+lemma concat_fvarVecClosed : concat (fvarVecClosed k) (^&k) = fvarVecClosed (k + 1) := by
   apply nth_ext (by simp [len_fvarVecClosed])
   intro i hi
   rw [len_concat, len_fvarVecClosed] at hi
@@ -64,8 +64,7 @@ lemma concat_fvarVecClosed (k : V) :
       nth_fvarVecClosed hi]
   · rw [concat_nth_len' _ _ (len_fvarVecClosed _), nth_fvarVecClosed hi]
 
-lemma fvarVecClosed_le (k : V) :
-    fvarVecClosed k ≤ Exp.exp (Exp.exp (k + k + ^&k + 3)) := by
+lemma fvarVecClosed_le : fvarVecClosed k ≤ Exp.exp (Exp.exp (k + k + ^&k + 3)) := by
   have := le_exp_exp_of_nth_le (B := ^&k) (fvarVecClosed k) fun i hi ↦ by
     rw [len_fvarVecClosed] at hi
     rw [nth_fvarVecClosed hi]
@@ -105,13 +104,13 @@ noncomputable def fvarVec.construction : PR.Construction V blueprint where
     rw [h, concat_fvarVecClosed]
 
 /-- `fvarVec k = ⟨^&0, …, ^&(k-1)⟩`. -/
-noncomputable def fvarVec (k : V) : V := fvarVec.construction.result ![] k
+noncomputable def fvarVec : V := fvarVec.construction.result ![] k
 
 @[simp]
 lemma fvarVec_zero : fvarVec (0 : V) = 0 := by simp [fvarVec, fvarVec.construction]
 
 @[simp]
-lemma fvarVec_succ (k : V) : fvarVec (k + 1) = concat (fvarVec k) (^&k) := by
+lemma fvarVec_succ : fvarVec (k + 1) = concat (fvarVec k) (^&k) := by
   simp [fvarVec, fvarVec.construction]
 
 instance fvarVec_defined : 𝚺ᴬ₁-Function₁ (fvarVec : V → V) via fvarVecDef := .mk
@@ -128,7 +127,7 @@ lemma fvarVec_locallyDelta0 : LocallyDelta0Function₁ (fvarVec : V → V) := by
   simp [fvarVec, Matrix.empty_eq]
 
 @[simp]
-lemma len_fvarVec (k : V) : len (fvarVec k) = k := by
+lemma len_fvarVec : len (fvarVec k) = k := by
   have hP : LocallyDelta0Pred fun k : V ↦ len (fvarVec k) = k :=
     LocallyDelta0.eq (len_locallyDelta0.comp₁ (fvarVec_locallyDelta0.comp₁
       (LocallyDelta0Function.var (0 : Fin 1)))) (LocallyDelta0Function.var 0)
@@ -137,7 +136,7 @@ lemma len_fvarVec (k : V) : len (fvarVec k) = k := by
   · intro k ih
     simp [ih]
 
-lemma nth_fvarVec (k : V) : ∀ i < k, (fvarVec k).[i] = ^&i := by
+lemma nth_fvarVec : ∀ i < k, (fvarVec k).[i] = ^&i := by
   have hR : LocallyDelta0 fun w : Fin 2 → V ↦ w 0 < w 1 → (fvarVec (w 1)).[w 0] = ^&(w 0) :=
     (LocallyDelta0.lt (LocallyDelta0Function.var 0) (LocallyDelta0Function.var 1)).imp
       (LocallyDelta0.eq (nth_locallyDelta0.comp₂ (fvarVec_locallyDelta0.comp₁

@@ -13,8 +13,6 @@ Over a model of $\mathsf{EA}$, $\mathsf{I}\Delta_1$ yields collection for $\Delt
 relations, and hence the collection scheme $\mathsf{B}\Sigma_1$.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -25,11 +23,11 @@ open _root_.FFL.Entailment
 
 noncomputable section CollectionFromDeltaInduction
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {a I c : V} {G : V → V → Prop} {p : V}
 
 attribute [local instance] ElementaryArithmetic.models_ISigma0_union_Omega1
 
-lemma enumCode.anti {a B i z t t' : V} {G : V → V → Prop}
+lemma enumCode.anti {B i z t t' : V}
     (hfun : ∀ x y y', G x y → G x y' → y = y') (h : enumCode a B G i z t)
     (ht : ∀ j ≤ i, ∀ y, G (entry a z j) y → y ≤ t') : enumCode a B G i z t' := by
   obtain ⟨h1, h2, h3, h4, h5, h6⟩ := h
@@ -56,9 +54,12 @@ lemma enumCode.anti {a B i z t t' : V} {G : V → V → Prop}
     · exact hmin x hx w hwt hGw hyw
     · exact hw₂.trans (not_le.mp hwt).le
 
-lemma exists_enumCode_of_not_definable {a I : V} {G : V → V → Prop}
-    (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y')
-    (K : Cut V) (hK : ∀ i, i ∈ K.carrier ↔ ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) G i z t)
+variable (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y')
+  (htot : ∀ x < a, ∃ y, G x y) (K : Cut V)
+
+include hG hfun in
+lemma exists_enumCode_of_not_definable
+    (hK : ∀ i, i ∈ K.carrier ↔ ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) G i z t)
     (hzero : (0 : V) ∈ K.carrier) (hlt : ∀ i ∈ K.carrier, i < a) (T : V) :
     ∃ i z t, enumCode a (I ⨳ a) G i z t ∧ ∃ j ≤ i, ∃ y, G (entry a z j) y ∧ T < y := by
   by_contra hcon
@@ -79,12 +80,13 @@ lemma exists_enumCode_of_not_definable {a I : V} {G : V → V → Prop}
     exact hP.of_iff fun i ↦ hmem i
   exact Cut.not_proper_of_definable K hdef ⟨hzero, a, fun ha ↦ lt_irrefl a (hlt a ha)⟩
 
-private def LimitFails (a c : V) (G : V → V → Prop) (p y'' y' : V) : Prop :=
+variable (a c G p) in
+private def LimitFails (y'' y' : V) : Prop :=
   a < p ∨ a ≤ entry a c p ∨
     ∃ i'' < p, G (entry a c i'') y'' ∧ G (entry a c p) y' ∧ y' ≤ y''
 
-private lemma exists_limitFails_of_not_mem {a I c p : V} {G : V → V → Prop}
-    (htot : ∀ x < a, ∃ y, G x y) (K : Cut V)
+include htot in
+private lemma exists_limitFails_of_not_mem
     (hK : ∀ i, i ∈ K.carrier ↔ ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) G i z t)
     (hD : ∀ T, ∃ i z t, enumCode a (I ⨳ a) G i z t ∧ ∃ j ≤ i, ∃ y, G (entry a z j) y ∧ T < y)
     (hc : ∀ i ∈ K.carrier, ∀ z t, enumCode a (I ⨳ a) G i z t → ∀ j ≤ i, entry a c j = entry a z j)
@@ -105,8 +107,8 @@ private lemma exists_limitFails_of_not_mem {a I c p : V} {G : V → V → Prop}
   rw [hc i' hi'K z t hcode j hji]
   exact hGy
 
-private lemma not_mem_of_limitFails {a I c p y'' y' : V} {G : V → V → Prop}
-    (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y') (K : Cut V)
+include hG hfun in
+private lemma not_mem_of_limitFails {y'' y' : V}
     (hK : ∀ i, i ∈ K.carrier ↔ ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) G i z t)
     (hlt : ∀ i ∈ K.carrier, i < a)
     (hc : ∀ i ∈ K.carrier, ∀ z t, enumCode a (I ⨳ a) G i z t → ∀ j ≤ i, entry a c j = entry a z j)
@@ -122,10 +124,9 @@ private lemma not_mem_of_limitFails {a I c p y'' y' : V} {G : V → V → Prop}
     rw [hz' p le_rfl] at hG'
     exact not_le.mpr (enumCode.strictMono hG hfun hcode hi'' le_rfl hG'' hG') hle
 
-lemma prenexDefinable_compl_of_enumCode {a I c : V} {G : V → V → Prop}
-    (hG : 𝚺ᴬ₀.DefinableRel G)
-    (hfun : ∀ x y y', G x y → G x y' → y = y') (htot : ∀ x < a, ∃ y, G x y)
-    (K : Cut V) (hK : ∀ i, i ∈ K.carrier ↔ ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) G i z t)
+include hG hfun htot in
+lemma prenexDefinable_compl_of_enumCode
+    (hK : ∀ i, i ∈ K.carrier ↔ ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) G i z t)
     (hlt : ∀ i ∈ K.carrier, i < a)
     (hD : ∀ T, ∃ i z t, enumCode a (I ⨳ a) G i z t ∧ ∃ j ≤ i, ∃ y, G (entry a z j) y ∧ T < y)
     (hc : ∀ i ∈ K.carrier, ∀ z t, enumCode a (I ⨳ a) G i z t → ∀ j ≤ i, entry a c j = entry a z j) :
@@ -138,8 +139,8 @@ lemma prenexDefinable_compl_of_enumCode {a I c : V} {G : V → V → Prop}
   exact ⟨exists_limitFails_of_not_mem htot K hK hD hc, fun ⟨_, _, h⟩ ↦
     not_mem_of_limitFails hG hfun K hK hlt hc h⟩
 
-lemma prenexDefinable_mem_of_enumCode {a I : V} {G : V → V → Prop}
-    (hG : 𝚺ᴬ₀.DefinableRel G) (K : Cut V)
+include hG in
+lemma prenexDefinable_mem_of_enumCode
     (hK : ∀ i, i ∈ K.carrier ↔ ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) G i z t) :
     PrenexDefinablePred 𝚺 1 (· ∈ K.carrier) := by
   have hd := definable_enumCode hG a (I ⨳ a)
@@ -154,11 +155,13 @@ lemma prenexDefinable_mem_of_enumCode {a I : V} {G : V → V → Prop}
     rw [hK]
     exact ⟨fun ⟨z, hz, t, h⟩ ↦ ⟨z, t, h⟩, fun ⟨z, t, h⟩ ↦ ⟨z, h.2.1, t, h⟩⟩
 
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1]
+
 /-- If a $\Delta_0$-definable relation `Q` has a witness `u` for every `x < a`, then the witnesses
 can be bounded uniformly by some `w`.
 - [Sla04, Theorem 2.1]
 - [Tha05, Theorem 2] -/
-theorem collection_of_models_IDelta_one [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1]
+theorem collection_of_models_IDelta_one
     {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q) (a : V) (hex : ∀ x < a, ∃ u, Q u x) :
     ∃ w, ∀ x < a, ∃ u < w, Q u x := by
   by_contra hne
@@ -187,16 +190,20 @@ theorem collection_of_models_IDelta_one [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1]
   exact not_models_IDelta_of_proper_cut _ 1 ⟨hzero, a, fun ha ↦ lt_irrefl a (hlt a ha)⟩ hσ hπ
     inferInstance
 
+variable {Q : V → V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel₃ Q) (a : V)
+
+omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] in
+include hQ in
 /-- The pairing of a witness `u` with a value `y`, relating a bound on a single code to the
 pair of its components. -/
-lemma definableRel_exists_pair {Q : V → V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel₃ Q) :
+lemma definableRel_exists_pair :
     𝚺ᴬ₀.DefinableRel fun p x : V ↦ ∃ y ≤ p, ∃ u ≤ p, p = ⟪y, u⟫ ∧ Q u x y := by
   have hpair : 𝚺ᴬ₀.DefinableRel₃ fun y u p : V ↦ p = ⟪y, u⟫ := by definability
   definability
 
+include hQ in
 /-- Collection for a $\Delta_0$-definable three-place relation whose witnesses are pairs. -/
-theorem collection_of_exists_pair [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] {Q : V → V → V → Prop}
-    (hQ : 𝚺ᴬ₀.DefinableRel₃ Q) (a : V) (h : ∀ x < a, ∃ y u, Q u x y) :
+theorem collection_of_exists_pair (h : ∀ x < a, ∃ y u, Q u x y) :
     ∃ b, ∀ x < a, ∃ y < b, ∃ u, Q u x y := by
   obtain ⟨w, hw⟩ := collection_of_models_IDelta_one (definableRel_exists_pair hQ) a
     (fun x hx ↦ by
@@ -207,7 +214,7 @@ theorem collection_of_exists_pair [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] {Q : V → V
   exact ⟨y, lt_of_le_of_lt hy hp, u, hq⟩
 
 /-- Collection for the prenex $\Sigma_1$ formulas, as a scheme over `V`. -/
-lemma models_collection_prenex_sigmaOne [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] :
+lemma models_collection_prenex_sigmaOne :
     V↓[ℒₒᵣ] ⊧* CollectionScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1) := by
   apply Semantics.ModelsSet.setOf_iff.mpr
   rintro _ ⟨φ, hφ, rfl⟩
@@ -234,7 +241,7 @@ lemma models_collection_prenex_sigmaOne [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] :
     exact ⟨y, hy, (hEq x y).mpr ⟨u, hu⟩⟩⟩
 
 /-- The collection scheme `𝗕𝚺 1`, over a model of `𝗘𝗔` and `𝗜𝚫 1`. -/
-lemma models_BSigma_one [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 1 :=
+lemma models_BSigma_one : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 1 :=
   Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, models_collection_prenex_sigmaOne⟩
 
 /-- Over `𝗘𝗔`, `𝗜𝚫 1` proves the collection scheme `𝗕𝚺 1`.

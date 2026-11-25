@@ -10,8 +10,6 @@ public import AlphaCentauri.Bootstrapping.Interpretability.TypedTranslation
 Internal translations compose along composite tables.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -28,9 +26,11 @@ open _root_.FFL.Entailment
 section equalBlock
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {T : Theory L} [T.Δ₁] [𝗘𝗤 L ⪯ T]
+  {k : ℕ} {d : Semiformula V L 1} (hd : d.shift = d) (u : Fin k → Term V L)
+  (X : Semiformula V L k)
 
-lemma relativizedImp_equal_specialize {k : ℕ} (d : Semiformula V L 1) (u : Fin k → Term V L)
-    (X : Semiformula V L k) :
+variable (d) in
+lemma relativizedImp_equal_specialize :
     T.internalize V ⊢ relativizedImp d (fun i ↦ Semiformula.equal (Semiterm.bvar 0) (u i).bShift)
       (X.subst fun i ↦ Semiterm.bvar (i.addCast 0)) 🡒
         Matrix.conj (fun i ↦ d.subst ![u i]) 🡒 X.subst u := by
@@ -54,9 +54,8 @@ lemma relativizedImp_equal_specialize {k : ℕ} (d : Semiformula V L 1) (u : Fin
   cl_prover [h₁, hc]
 
 omit [𝗘𝗤 L ⪯ T] in
-lemma relativizedImp_equal_generalize {k : ℕ} {d : Semiformula V L 1} (hd : d.shift = d)
-    (u : Fin k → Term V L) (X : Semiformula V L k)
-    (hX : ∀ (j : ℕ) (s w : Fin k → Term V L), T.internalize V ⊢
+include hd in
+lemma relativizedImp_equal_generalize (hX : ∀ (j : ℕ) (s w : Fin k → Term V L), T.internalize V ⊢
       Matrix.conj (fun i ↦ d.subst ![s i]) 🡒 Matrix.conj (fun i ↦ d.subst ![w i]) 🡒
         Matrix.conj (fun i ↦ Semiformula.equal (s i) (w i)) 🡒
           (Semiformula.shift^[j] X).subst w 🡒 (Semiformula.shift^[j] X).subst s) :
@@ -188,7 +187,7 @@ end equation
 
 section compShapes
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {tbl₁ tbl₂ : V}
+variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {tbl₁ tbl₂ : V} {k : ℕ}
   (hT₁ : IsTable L L tbl₁) (hT₂ : IsTable L L tbl₂)
   (hc : IsTable L L (Bootstrapping.compTable L L tbl₁ tbl₂))
 
@@ -197,15 +196,17 @@ lemma IsTable.compTable_domT : hc.domT = hT₁.domT ⋏ hT₁.transT hT₂.domT 
   ext; simp [tableDomain_compTable]
 
 include hT₁ in
-lemma IsTable.compTable_relT {k : ℕ} (R : L.Rel k) : hc.relT R = hT₁.transT (hT₂.relT R) := by
+lemma IsTable.compTable_relT (R : L.Rel k) : hc.relT R = hT₁.transT (hT₂.relT R) := by
   ext; simp [tableRel_compTable (hT₂.lt_len_rel (codeIn_rel_quote R))]
 
 include hT₁ in
-lemma IsTable.compTable_funcT {k : ℕ} (F : L.Func k) : hc.funcT F = hT₁.transT (hT₂.funcT F) := by
+lemma IsTable.compTable_funcT (F : L.Func k) : hc.funcT F = hT₁.transT (hT₂.funcT F) := by
   ext; simp [tableFunc_compTable (hT₂.lt_len_func (codeIn_func_quote F))]
 
+variable {m : ℕ} (a : Fin m)
+
 omit [L.Eq] in
-lemma IsVarVec.two_bvar {m : ℕ} (a b : Fin m) :
+lemma IsVarVec.two_bvar (b : Fin m) :
     IsVarVec (![Semiterm.bvar a, Semiterm.bvar b] : SemitermVec V L 2 m) := fun j ↦ by
   match j with
   | 0 => exact Or.inl ⟨a, rfl⟩
@@ -216,12 +217,12 @@ lemma IsVarVec.fvar {n : ℕ} (f : Fin n → V) :
     IsVarVec (fun i ↦ (Semiterm.fvar (f i) : Term V L)) := fun _ ↦ Or.inr ⟨_, rfl⟩
 
 omit [L.Eq] in
-lemma IsVarVec.single_bvar {m : ℕ} (a : Fin m) :
+lemma IsVarVec.single_bvar :
     IsVarVec (![Semiterm.bvar a] : SemitermVec V L 1 m) := fun j ↦ Or.inl ⟨a, by
   match j with
   | 0 => rfl⟩
 
-lemma IsTable.transT_relativizedImp {k : ℕ} (d : Semiformula V L 1) (A : Fin k → Semiformula V L 1)
+lemma IsTable.transT_relativizedImp (d : Semiformula V L 1) (A : Fin k → Semiformula V L 1)
     (G : Semiformula V L (0 + k)) :
     hT₁.transT (relativizedImp d A G) = relAllItr hT₁.domT k (Matrix.conj (fun i : Fin k ↦
       (hT₁.transT d).subst ![Semiterm.bvar (i.addCast 0)] ⋏
@@ -248,10 +249,9 @@ section compValue
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {S : Theory L} [S.Δ₁] [𝗘𝗤 L ⪯ S]
   {tbl₁ tbl₂ : V} (h₁ : IsTranslationTable L S tbl₁) (hT₂ : IsTable L L tbl₂)
-  (hc : IsTable L L (Bootstrapping.compTable L L tbl₁ tbl₂))
+  (hc : IsTable L L (Bootstrapping.compTable L L tbl₁ tbl₂)) {k : ℕ} (x : V)
 
-lemma tprovable_comp_varEqualT_fvar (x : V) :
-    S.internalize V ⊢ h₁.domT.subst ![Semiterm.fvar x] 🡒
+lemma tprovable_comp_varEqualT_fvar : S.internalize V ⊢ h₁.domT.subst ![Semiterm.fvar x] 🡒
       ∀¹ (h₁.domT 🡒 (varEqualT hc (Semiterm.fvar x) 🡘
         h₁.transT (varEqualT hT₂ (Semiterm.fvar x)))) := by
   rw [varEqualT_fvar, varEqualT_fvar]
@@ -271,8 +271,7 @@ lemma tprovable_comp_varEqualT_fvar (x : V) :
   exact key hp
 
 omit [L.Eq] [S.Δ₁] [𝗘𝗤 L ⪯ S] in
-lemma IsVarVec.fvar_cons_bvar {k : ℕ} (x : V) :
-    IsVarVec (Semiterm.fvar x :>
+lemma IsVarVec.fvar_cons_bvar : IsVarVec (Semiterm.fvar x :>
       fun i : Fin k ↦ (Semiterm.bvar (i.addCast 0) : Semiterm V L (0 + k))) := by
   intro j
   cases j using Fin.cases with
@@ -280,7 +279,7 @@ lemma IsVarVec.fvar_cons_bvar {k : ℕ} (x : V) :
   | succ j => exact Or.inl ⟨_, rfl⟩
 
 omit [𝗘𝗤 L ⪯ S] in
-lemma tprovable_comp_varEqualT_func {k : ℕ} (F : L.Func k) (u : Fin k → Term V L) :
+lemma tprovable_comp_varEqualT_func (F : L.Func k) (u : Fin k → Term V L) :
     S.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (h₁.domT 🡒 (varEqualT hc (u i) 🡘
         h₁.transT (varEqualT hT₂ (u i))))) 🡒
       ∀¹ (h₁.domT 🡒 (varEqualT hc (Semiterm.func F u) 🡘
@@ -378,13 +377,17 @@ variable {L : Language} [L.Encodable] [L.LORDefinable] [L.Eq] {S : Theory L} [S.
   {tbl₁ tbl₂ : V} (h₁ : IsTranslationTable L S tbl₁) (hT₂ : IsTable L L tbl₂)
   (hc : IsTable L L (Bootstrapping.compTable L L tbl₁ tbl₂))
 
+section
+
+variable {k : ℕ} {M : V} (hL : L.SymbolsStandard V) (R : L.Rel k) (u : Fin k → Term V L)
+
 omit [L.Eq] [S.Δ₁] [𝗘𝗤 L ⪯ S] in
-lemma IsVarVec.addCast_bvar {k : ℕ} :
+lemma IsVarVec.addCast_bvar :
     IsVarVec (fun i : Fin k ↦ (Semiterm.bvar (i.addCast 0) : Semiterm V L (0 + k))) :=
   fun _ ↦ Or.inl ⟨_, rfl⟩
 
 omit [𝗘𝗤 L ⪯ S] in
-lemma tprovable_comp_rel {k : ℕ} (R : L.Rel k) (u : Fin k → Term V L) :
+lemma tprovable_comp_rel :
     S.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (h₁.domT 🡒 (varEqualT hc (u i) 🡘
         h₁.transT (varEqualT hT₂ (u i))))) 🡒
       (hc.transT (Semiformula.rel R u) 🡘 h₁.transT (hT₂.transT (Semiformula.rel R u))) := by
@@ -406,8 +409,8 @@ lemma IsTable.comp_iff_val (φ : Formula V L) :
         (translate L L tbl₁ (translate L L tbl₂ φ.val)) := by
   simp only [Semiformula.val_iff, IsTable.transT_val]
 
-lemma derivable_comp_rel (hL : L.SymbolsStandard V) {k : ℕ} (R : L.Rel k) (u : Fin k → Term V L)
-    {M : V} (hM : ∀ i, (u i).val < M) :
+include hL in
+lemma derivable_comp_rel (hM : ∀ i, (u i).val < M) :
     Derivable S (insert (hc.transT (Semiformula.rel R u) 🡘
       h₁.transT (hT₂.transT (Semiformula.rel R u))).val (negDomSet L tbl₁.[0] M)) := by
   have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain.isSemiformula
@@ -416,8 +419,12 @@ lemma derivable_comp_rel (hL : L.SymbolsStandard V) {k : ℕ} (R : L.Rel k) (u :
   exact Derivable.of_tprovable_imp (tprovable_comp_rel h₁ hT₂ hc R u)
     (Derivable.conj_typed (IsFormulaSet.negDomSet hdom M) ih')
 
+end
+
+variable {tbl p q u j : V} (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (P : Semiformula V L 1)
+
 omit [S.Δ₁] [𝗘𝗤 L ⪯ S] in
-lemma fvSubst_freshVec_translate_free {tbl p u j : V} (hT : IsTable L L tbl)
+lemma fvSubst_freshVec_translate_free (hT : IsTable L L tbl)
     (hp : IsSemiformula L 1 p) (hpu : p ≤ u) (hj : u < j) :
     fvSubst L (freshVec j) (translate L L tbl (free L p)) =
       shift L (translate L L tbl (free L p)) := by
@@ -425,7 +432,7 @@ lemma fvSubst_freshVec_translate_free {tbl p u j : V} (hT : IsTable L L tbl)
     fvSubst_freshVec_free hp hpu hj, translate_shift hT (IsSemiformula.free hp)]
 
 omit [S.Δ₁] [𝗘𝗤 L ⪯ S] in
-lemma fvSubst_freshVec_translate_translate_free {tbl tbl' p u j : V} (hT : IsTable L L tbl)
+lemma fvSubst_freshVec_translate_translate_free {tbl' : V} (hT : IsTable L L tbl)
     (hT' : IsTable L L tbl') (hp : IsSemiformula L 1 p) (hpu : p ≤ u) (hj : u < j) :
     fvSubst L (freshVec j) (translate L L tbl (translate L L tbl' (free L p))) =
       shift L (translate L L tbl (translate L L tbl' (free L p))) := by
@@ -434,14 +441,14 @@ lemma fvSubst_freshVec_translate_translate_free {tbl tbl' p u j : V} (hT : IsTab
     translate_shift hT h₁]
 
 omit [L.Eq] [S.Δ₁] [𝗘𝗤 L ⪯ S] in
-lemma fvSubst_iff_code {w p q : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsFormula L p)
+lemma fvSubst_iff_code {w : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsFormula L p)
     (hq : IsFormula L q) : fvSubst L w (iff L p q) = iff L (fvSubst L w p) (fvSubst L w q) := by
   rw [Bootstrapping.iff, fvSubst_and (by simp [hp.isUFormula, hq.isUFormula])
     (by simp [hp.isUFormula, hq.isUFormula]), fvSubst_imp hw hp hq, fvSubst_imp hw hq hp]
   rfl
 
 omit [L.Eq] [S.Δ₁] [𝗘𝗤 L ⪯ S] in
-lemma shift_iff_code {p q : V} (hp : IsFormula L p) (hq : IsFormula L q) :
+lemma shift_iff_code (hp : IsFormula L p) (hq : IsFormula L q) :
     shift L (iff L p q) = iff L (shift L p) (shift L q) := by
   rw [Bootstrapping.iff, shift_and (by simp [hp.isUFormula, hq.isUFormula])
     (by simp [hp.isUFormula, hq.isUFormula]), shift_imp hp hq, shift_imp hq hp]
@@ -453,8 +460,8 @@ lemma free_subst_bvar_zero {d : Semiformula V L 1} (hd : d.shift = d) :
   simp [Semiformula.free, hd]
 
 omit [𝗘𝗤 L ⪯ S] in
-lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p)
-    (P : Semiformula V L 1) {M : V} (hM : P.val ≤ M)
+include hS in
+lemma derivable_comp_quant {M : V} (hM : P.val ≤ M)
     (ih : Derivable S (insert (hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free)).val
       (negDomSet L tbl₁.[0] P.free.val))) :
     Derivable S (insert (∼(h₁.domT.subst ![Semiterm.fvar 0]) ⋎
@@ -502,7 +509,8 @@ lemma derivable_comp_quant (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p
   exact h₅
 
 omit [𝗘𝗤 L ⪯ S] in
-lemma derivable_comp_all (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (P : Semiformula V L 1)
+include hS in
+lemma derivable_comp_all
     (ih : Derivable S (insert (hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free)).val
       (negDomSet L tbl₁.[0] P.free.val))) :
     Derivable S (insert (hc.transT (∀¹ P) 🡘 h₁.transT (hT₂.transT (∀¹ P))).val
@@ -534,7 +542,8 @@ lemma derivable_comp_all (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) 
   exact h₃
 
 omit [𝗘𝗤 L ⪯ S] in
-lemma derivable_comp_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (P : Semiformula V L 1)
+include hS in
+lemma derivable_comp_exs
     (ih : Derivable S (insert (hc.transT P.free 🡘 h₁.transT (hT₂.transT P.free)).val
       (negDomSet L tbl₁.[0] P.free.val))) :
     Derivable S (insert (hc.transT (∃¹ P) 🡘 h₁.transT (hT₂.transT (∃¹ P))).val
@@ -565,11 +574,10 @@ lemma derivable_comp_exs (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) 
     h₁.toIsTable.transT_subst _ (IsVarVec.single_bvar _)]
   exact h₃
 
-include h₁ hT₂ hc in
+include h₁ hT₂ hc hS in
 /-- Along the composite table and along the composite of the translations, every formula code
 has equivalent translations, given the domain of `tbl₁` at its free variables. -/
-theorem derivable_comp_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p)
-    (hL : L.SymbolsStandard V) {p : V} (hp : IsFormula L p) :
+theorem derivable_comp_translate (hL : L.SymbolsStandard V) (hp : IsFormula L p) :
     Derivable S (insert (iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) p)
       (translate L L tbl₁ (translate L L tbl₂ p))) (negDomSet L tbl₁.[0] p)) := by
   have hdom : IsSemiformula L 1 tbl₁.[0] := h₁.domain.isSemiformula
@@ -648,11 +656,10 @@ theorem derivable_comp_translate (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSent
     rw [hv] at h
     exact h
 
-include h₁ hT₂ hc in
+include h₁ hT₂ hc hS in
 /-- Along the composite table and along the composite of the translations, every coded
 sentence has provably equivalent translations. -/
-theorem provable_comp_translate_iff (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p)
-    (hL : L.SymbolsStandard V) {p : V} (hp : L.IsSentence p) :
+theorem provable_comp_translate_iff (hL : L.SymbolsStandard V) (hp : L.IsSentence p) :
     Provable S (iff L (translate L L (Bootstrapping.compTable L L tbl₁ tbl₂) p)
       (translate L L tbl₁ (translate L L tbl₂ p))) := by
   have hp' := hp.isSemiformula
@@ -683,7 +690,7 @@ end compFormula
 
 section generalizeFvar
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] {S : Theory L} [S.Δ₁]
+variable {L : Language} [L.Encodable] [L.LORDefinable] {S : Theory L} [S.Δ₁] {k : ℕ}
 
 lemma provable_qqAlls_of_tprovable_fvar : ∀ {n : ℕ} (φ : Semiformula V L n), φ.shift = φ →
     S.internalize V ⊢ φ.subst (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) → Provable S (qqAlls φ.val n)
@@ -698,7 +705,7 @@ lemma provable_qqAlls_of_tprovable_fvar : ∀ {n : ℕ} (φ : Semiformula V L n)
       exact h)
     simpa [qqAlls_all] using h₁
 
-lemma tprovable_conj_and_split {k : ℕ} (a b : Fin k → Formula V L) :
+lemma tprovable_conj_and_split (a b : Fin k → Formula V L) :
     S.internalize V ⊢ Matrix.conj (fun i ↦ a i ⋏ b i) 🡒 Matrix.conj a ⋏ Matrix.conj b := by
   have h₁ := matrixConj_imp_matrixConj (𝓢 := S.internalize V) (φ := ⊤)
     (v := fun i ↦ a i ⋏ b i) (u := a) fun i ↦ by cl_prover
@@ -715,7 +722,7 @@ lemma tprovable_exs_and_assoc (A B G : Semiformula V L 1) :
     cl_prover
   exact K_left (tprovable_all_iff_exs _ _ ⨀ h)
 
-lemma tprovable_conj_succ_succ {k : ℕ} (f : Fin (k + 2) → Formula V L) :
+lemma tprovable_conj_succ_succ (f : Fin (k + 2) → Formula V L) :
     S.internalize V ⊢ Matrix.conj (fun i : Fin k ↦ f i.succ.succ) ⋏ f 0 ⋏ f 1 🡒 Matrix.conj f := by
   apply matrixConj_intro
   intro i
@@ -786,7 +793,8 @@ variable {S U : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S]
   (h₁ : IsTranslationTable ℒₒᵣ S tbl₁) (h₂ : IsTranslationTable ℒₒᵣ U tbl₂)
   (hc : IsTable ℒₒᵣ ℒₒᵣ (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂))
   (hsound : ∀ φ : V, (ℒₒᵣ).IsSentence φ → Provable U φ →
-    Provable S (translate ℒₒᵣ ℒₒᵣ tbl₁ φ))
+    Provable S (translate ℒₒᵣ ℒₒᵣ tbl₁ φ)) {k : ℕ} (d : Semiformula V ℒₒᵣ 1)
+  (F : (ℒₒᵣ).Func k)
 
 omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
 include h₁ h₂ hsound in
@@ -800,7 +808,7 @@ omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
 include h₁ hsound in
 /-- `τ₁` applied to a block of universal quantifiers provable in `U` yields the block relativized
 to the domain of `tbl₁`, provable in `S`. -/
-lemma tprovable_relAllItr_of_provable {k : ℕ} (φ : Semiformula V ℒₒᵣ (0 + k)) (hφ : φ.shift = φ)
+lemma tprovable_relAllItr_of_provable (φ : Semiformula V ℒₒᵣ (0 + k)) (hφ : φ.shift = φ)
     (h : Provable U (∀¹^[k] φ).val) :
     S.internalize V ⊢ relAllItr h₁.domT k (h₁.transT φ) := by
   have hs : (ℒₒᵣ).IsSentence (∀¹^[k] φ).val := by
@@ -811,8 +819,7 @@ lemma tprovable_relAllItr_of_provable {k : ℕ} (φ : Semiformula V ℒₒᵣ (0
   exact tprovable_iff_provable.mpr h'
 
 omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
-lemma conj_two_fvar (d : Semiformula V ℒₒᵣ 1) :
-    S.internalize V ⊢ d.subst ![Semiterm.fvar 0] ⋏ d.subst ![Semiterm.fvar 1] 🡒
+lemma conj_two_fvar : S.internalize V ⊢ d.subst ![Semiterm.fvar 0] ⋏ d.subst ![Semiterm.fvar 1] 🡒
       Matrix.conj (fun i : Fin (0 + 2) ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)]) := by
   apply matrixConj_intro
   intro i
@@ -822,7 +829,7 @@ lemma conj_two_fvar (d : Semiformula V ℒₒᵣ 1) :
 
 omit [U.Δ₁] in
 include h₁ in
-lemma tprovable_comp_preserveEqBody (d : Semiformula V ℒₒᵣ 1) (E : Semiformula V ℒₒᵣ 2)
+lemma tprovable_comp_preserveEqBody (E : Semiformula V ℒₒᵣ 2)
     (hb : S.internalize V ⊢ relAllItr h₁.domT 2 (h₁.transT (preserveEqBody d E))) :
     S.internalize V ⊢ (preserveEqBody (h₁.domT ⋏ h₁.transT d) (h₁.transT E)).subst
       (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) := by
@@ -874,8 +881,7 @@ lemma tprovable_relAlls_of_provable {n : ℕ} (φ : Semiformula V ℒₒᵣ n) (
   exact tprovable_iff_provable.mpr h'
 
 omit [S.Δ₁] [U.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] in
-lemma IsVarVec.bvar_cons_succ {k : ℕ} :
-    IsVarVec (Semiterm.bvar 0 :>
+lemma IsVarVec.bvar_cons_succ : IsVarVec (Semiterm.bvar 0 :>
       fun i : Fin k ↦ (Semiterm.bvar i.succ : Semiterm V ℒₒᵣ (k + 1))) := by
   intro j
   cases j using Fin.cases with
@@ -884,7 +890,7 @@ lemma IsVarVec.bvar_cons_succ {k : ℕ} :
 
 omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
 include h₁ h₂ hc hsound in
-lemma comp_func_exists {k : ℕ} (F : (ℒₒᵣ).Func k) :
+lemma comp_func_exists :
     Provable S (qqAlls (funcExistsCode ℒₒᵣ (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂) k ⌜F⌝)
       k) := by
   have hb := tprovable_relAlls_of_provable h₁ hsound (funcExistsBody h₂.domT (h₂.funcT F))
@@ -911,7 +917,7 @@ lemma comp_func_exists {k : ℕ} (F : (ℒₒᵣ).Func k) :
 
 omit [U.Δ₁] in
 include hc in
-lemma comp_func_congr {k : ℕ} (F : (ℒₒᵣ).Func k) :
+lemma comp_func_congr :
     Provable S (qqAlls (funcCongrCode ℒₒᵣ (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂) k ⌜F⌝)
       (k + 1 + (k + 1))) := by
   have h := provable_qqAlls_of_forall_tprovable (S := S) (funcCongrBody (hc.funcT F))
@@ -925,8 +931,7 @@ lemma comp_func_congr {k : ℕ} (F : (ℒₒᵣ).Func k) :
   simpa using h
 
 omit [S.Δ₁] [U.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S] in
-lemma IsVarVec.bvar_cons_succ_succ {k : ℕ} (a : Fin (k + 2)) :
-    IsVarVec (Semiterm.bvar a :>
+lemma IsVarVec.bvar_cons_succ_succ (a : Fin (k + 2)) : IsVarVec (Semiterm.bvar a :>
       fun i : Fin k ↦ (Semiterm.bvar i.succ.succ : Semiterm V ℒₒᵣ (k + 2))) := by
   intro j
   cases j using Fin.cases with
@@ -935,8 +940,7 @@ lemma IsVarVec.bvar_cons_succ_succ {k : ℕ} (a : Fin (k + 2)) :
 
 omit [U.Δ₁] in
 include h₁ in
-lemma tprovable_comp_funcUniqueBody {k : ℕ} (d : Semiformula V ℒₒᵣ 1)
-    (γ : Semiformula V ℒₒᵣ (k + 1))
+lemma tprovable_comp_funcUniqueBody (γ : Semiformula V ℒₒᵣ (k + 1))
     (hb : S.internalize V ⊢ relAlls h₁.domT (h₁.transT (funcUniqueBody d γ))) :
     S.internalize V ⊢ (funcUniqueBody (h₁.domT ⋏ h₁.transT d) (h₁.transT γ)).subst
       (fun i ↦ Semiterm.fvar ((i : ℕ) : V)) := by
@@ -964,7 +968,7 @@ lemma tprovable_comp_funcUniqueBody {k : ℕ} (d : Semiformula V ℒₒᵣ 1)
 
 
 include h₁ h₂ hc hsound in
-lemma comp_func_unique {k : ℕ} (F : (ℒₒᵣ).Func k) :
+lemma comp_func_unique :
     Provable S (qqAlls (funcUniqueCode ℒₒᵣ (Bootstrapping.compTable ℒₒᵣ ℒₒᵣ tbl₁ tbl₂) k ⌜F⌝)
       (k + 2)) := by
   have hb := tprovable_relAlls_of_provable h₁ hsound (funcUniqueBody h₂.domT (h₂.funcT F))

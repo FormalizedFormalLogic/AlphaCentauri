@@ -11,8 +11,6 @@ Finiteness of the LR-closure of a finite set of atoms up to $\mathbf{GL}$-equiva
 - [Ign91, Lemma 6.3]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.ProvabilityLogic
@@ -336,8 +334,9 @@ open Logic.GL Formula.BooleanCombination
 
 variable [DecidableEq α] {P : Finset α} {b : Bool} {Z : Formula α} {S : Finset (Formula α)}
 
+variable (P) in
 /-- The members of the LR-closure and the formulas `□∼A` for `A` in its first part. -/
-def base (P : Finset α) : Set (Formula α) :=
+def base : Set (Formula α) :=
   {A | ∃ b, LRClosure P b A} ∪ (fun A ↦ □(∼A)) '' {A | LRClosure P true A}
 
 /-- Every member of the LR-closure is equivalent to `⊥` or to `#a ⋏ □D` for an atom `a ∈ P` and a
@@ -375,9 +374,13 @@ private lemma forces_subst_disj {x : M.World} {s : Substitution α α} :
   rw [← Model.forces_subst, forces_disj]
   simp only [Model.forces_subst]
 
+section
+
+variable (a : α)
+
 /-- Substituting `⊥` for an atom maps the LR-closure of `P` into that of `P.erase a`, up to
 equivalence. -/
-lemma exists_subst_bot (a : α) (h : LRClosure P b Z) :
+lemma exists_subst_bot (h : LRClosure P b Z) :
     ∃ Z', LRClosure (P.erase a) b Z' ∧ 𝐆𝐋 ⊢ Z⟦a ↦ ⊥⟧ 🡘 Z' := by
   induction h with
   | falsum => exact ⟨⊥, falsum, iff_refl'⟩
@@ -427,7 +430,7 @@ lemma exists_subst_bot (a : α) (h : LRClosure P b Z) :
       · rintro ⟨⟨C, hC⟩, -, z, Ryz, hz⟩
         exact ⟨C, hC, z, Ryz, (forces_iff_of (hg' C hC) z).mpr hz⟩
 
-lemma exists_subst_bot_of_mem_base (a : α) (h : A ∈ base P) :
+lemma exists_subst_bot_of_mem_base (h : A ∈ base P) :
     ∃ A' ∈ base (P.erase a), 𝐆𝐋 ⊢ A⟦a ↦ ⊥⟧ 🡘 A' := by
   rcases h with ⟨b, h⟩ | ⟨A, h, rfl⟩
   · obtain ⟨A', hA', h⟩ := exists_subst_bot a h
@@ -435,7 +438,7 @@ lemma exists_subst_bot_of_mem_base (a : α) (h : A ∈ base P) :
   · obtain ⟨A', hA', h⟩ := exists_subst_bot a h
     exact ⟨□(∼A'), .inr ⟨A', hA', rfl⟩, box_congr' (imp_congr' h iff_refl')⟩
 
-lemma exists_subst_bot_of_booleanCombination (a : α) (h : BooleanCombination (base P) D) :
+lemma exists_subst_bot_of_booleanCombination (h : BooleanCombination (base P) D) :
     ∃ D', BooleanCombination (base (P.erase a)) D' ∧ 𝐆𝐋 ⊢ D⟦a ↦ ⊥⟧ 🡘 D' := by
   induction h with
   | mem hA =>
@@ -446,6 +449,8 @@ lemma exists_subst_bot_of_booleanCombination (a : α) (h : BooleanCombination (b
     obtain ⟨A', hA', h₁⟩ := ihA
     obtain ⟨B', hB', h₂⟩ := ihB
     exact ⟨A' 🡒 B', imp hA' hB', imp_congr' h₁ h₂⟩
+
+end
 
 /-- The formulas `□∼A` for `A` in the LR-closure are finitely many up to equivalence, provided the
 bases over `P.erase a` are. -/
@@ -476,8 +481,9 @@ private lemma finiteUpToEquiv_box_neg
       exact and_congr_right fun _ ↦ forall_congr' fun y ↦ imp_congr_right fun _ ↦
         forces_iff_of h' y
 
+variable (P) in
 /-- - [Ign91, Lemma 6.3] -/
-theorem finiteUpToEquiv_base (P : Finset α) : FiniteUpToEquiv (base P) := by
+theorem finiteUpToEquiv_base : FiniteUpToEquiv (base P) := by
   classical
   induction P using Finset.strongInduction with
   | H P ih =>
@@ -577,9 +583,9 @@ theorem finiteUpToEquiv_base (P : Finset α) : FiniteUpToEquiv (base P) := by
   · obtain ⟨E, hE, h⟩ := hF _ ⟨A, ⟨true, hA⟩, rfl⟩
     exact ⟨E, Finset.mem_union_right _ hE, h⟩
 
+variable (P) in
 /-- - [Ign91, Lemma 6.3] -/
-theorem finiteUpToEquiv (P : Finset α) (b : Bool) :
-    FiniteUpToEquiv {Z | LRClosure P b Z} :=
+theorem finiteUpToEquiv (b : Bool) : FiniteUpToEquiv {Z | LRClosure P b Z} :=
   (finiteUpToEquiv_base P).of_subset fun _ hZ ↦ .inl ⟨b, hZ⟩
 
 /-! ## The `□`-subformulas of the LR-closure -/
@@ -601,9 +607,10 @@ lemma box_mem_subfmls_disj (h : □E ∈ S.disj.subfmls) : ∃ C ∈ S, □E ∈
   obtain ⟨C, hC, h⟩ := box_mem_subfmls_disj₂ h
   exact ⟨C, Finset.mem_toList.mp hC, h⟩
 
+variable (P) in
 /-- The bodies of the `□`-formulas occurring in the LR-closure: `∼B` for `B` in the closure, and
 `B 🡒 ⋁S ⋎ ⋁◇T` for `B` and the members of `S` and `T` in its first part. -/
-def IsBoxBody (P : Finset α) (E : Formula α) : Prop :=
+def IsBoxBody (E : Formula α) : Prop :=
   (∃ B b, LRClosure P b B ∧ E = ∼B) ∨
     ∃ B, ∃ S T : Finset (Formula α), LRClosure P true B ∧ (∀ C ∈ S, LRClosure P true C) ∧
       (∀ C ∈ T, LRClosure P true C) ∧ E = B 🡒 S.disj ⋎ (T.image (◇·)).disj

@@ -13,8 +13,6 @@ Iterated consistency extensions of an arithmetic theory.
 - [AB05, §4.1]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -34,14 +32,18 @@ noncomputable def _root_.FFL.FirstOrder.Theory.iterConSigma
     match T.iterConSigma n with
     | ⟨S, hS⟩ => letI := hS; ⟨S ∪ S.Con, inferInstance⟩
 
+section
+variable (T : ArithmeticTheory) [T.Δ₁] (n : ℕ)
+
 /-- The `n`-times iterated-consistency extension of `T`: `T₀ = T`, `Tₙ₊₁ = Tₙ ∪ Tₙ.Con`.
 - [Lin97, §4, p. 55]
 - [AB05, §4.1] -/
-noncomputable def _root_.FFL.FirstOrder.Theory.iterCon (T : ArithmeticTheory) [T.Δ₁] (n : ℕ) :
-    ArithmeticTheory := (T.iterConSigma n).1
+noncomputable def _root_.FFL.FirstOrder.Theory.iterCon : ArithmeticTheory := (T.iterConSigma n).1
 
-noncomputable instance (T : ArithmeticTheory) [T.Δ₁] (n : ℕ) : (T.iterCon n).Δ₁ :=
+noncomputable instance : (T.iterCon n).Δ₁ :=
   (T.iterConSigma n).2
+
+end
 
 /-- Iterated consistency reduces to iterated provability of `⊥`: over `𝗜𝚺₁`, the formalized
 consistency statement of the `n`-times iterated-consistency extension of `T` is equivalent to

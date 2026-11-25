@@ -11,8 +11,6 @@ public import Mathlib.Data.Nat.Log
 Goodstein's theorem, proved by mapping Goodstein sequences to a decreasing sequence of ordinals.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace Goodstein
@@ -21,6 +19,9 @@ open Ordinal
 
 /-! ### Definitions -/
 
+section Definitions
+
+variable (b m : ℕ)
 
 /-- The base read at step `k` of a Goodstein sequence. -/
 def base (k : ℕ) : ℕ := k + 2
@@ -28,10 +29,10 @@ def base (k : ℕ) : ℕ := k + 2
 /-- Reads `n` in hereditary base `b` and replaces every occurrence of `b` by `b + 1`. Peeling the
 top power, with `e = Nat.log b n`, `c = n / b ^ e`, `r = n % b ^ e`:
 `bump b n = c * (b + 1) ^ bump b e + bump b r`, and `bump b 0 = 0`. -/
-def bump (b n : ℕ) : ℕ :=
+def bump (n : ℕ) : ℕ :=
   if h : n = 0 then 0
   else
-    n / b ^ Nat.log b n * (b + 1) ^ bump b (Nat.log b n) + bump b (n % b ^ Nat.log b n)
+    n / b ^ Nat.log b n * (b + 1) ^ bump (Nat.log b n) + bump (n % b ^ Nat.log b n)
 termination_by n
 decreasing_by
   · exact Nat.log_lt_self b h
@@ -42,34 +43,35 @@ decreasing_by
     exact lt_of_lt_of_le (Nat.mod_lt _ hb) (Nat.pow_log_le_self b h)
 
 @[simp]
-lemma bump_zero (b : ℕ) : bump b 0 = 0 := by rw [bump]; simp
+lemma bump_zero : bump b 0 = 0 := by rw [bump]; simp
 
 /-- Unfolds `bump` at a nonzero argument by peeling its top power. -/
-lemma bump_pos (b : ℕ) {n : ℕ} (h : n ≠ 0) :
-    bump b n =
+lemma bump_pos {n : ℕ} (h : n ≠ 0) : bump b n =
       n / b ^ Nat.log b n * (b + 1) ^ bump b (Nat.log b n) + bump b (n % b ^ Nat.log b n) := by
   rw [bump]; simp [h]
 
 /-- The **Goodstein sequence** starting at `m`: `goodsteinSeq m 0 = m`, and step `k + 1` reads
 `goodsteinSeq m k` in hereditary base `k + 2`, bumps the base to `k + 3`, and subtracts one. -/
-def goodsteinSeq (m : ℕ) : ℕ → ℕ
+def goodsteinSeq : ℕ → ℕ
   | 0 => m
-  | k + 1 => bump (base k) (goodsteinSeq m k) - 1
+  | k + 1 => bump (base k) (goodsteinSeq k) - 1
 
+end Definitions
 
 /-! ### Termination -/
 
+section Termination
 
 variable (b m k : ℕ)
 
 /-- Reads `n` in hereditary base `b` as an ordinal, replacing `b` by `ω`. Peeling the top power,
 with `e = Nat.log b n`, `c = n / b ^ e`, `r = n % b ^ e`: `toOrdinal b n = ω ^ toOrdinal b e * c +
 toOrdinal b r`. -/
-noncomputable def toOrdinal (b n : ℕ) : Ordinal.{0} :=
+noncomputable def toOrdinal (n : ℕ) : Ordinal.{0} :=
   if _h : n = 0 then 0
   else
-    ω ^ toOrdinal b (Nat.log b n) * (n / b ^ Nat.log b n : ℕ)
-      + toOrdinal b (n % b ^ Nat.log b n)
+    ω ^ toOrdinal (Nat.log b n) * (n / b ^ Nat.log b n : ℕ)
+      + toOrdinal (n % b ^ Nat.log b n)
 termination_by n
 decreasing_by
   · exact Nat.log_lt_self b _h
@@ -89,10 +91,15 @@ lemma toOrdinal_pos {n : ℕ} (h : n ≠ 0) :
         + toOrdinal b (n % b ^ Nat.log b n) := by
   rw [toOrdinal]; simp [h]
 
+section Bounds
+
+variable (hb : 2 ≤ b) (n : ℕ)
+
+include hb
+
 /-- For `b ≥ 2`, `toOrdinal b` is strictly monotone, and every value is bounded by
 `ω ^ (toOrdinal b (Nat.log b n) + 1)`. -/
-private theorem toOrdinal_strictMono_and_bound (hb : 2 ≤ b) (n : ℕ) :
-    (∀ m, m < n → toOrdinal b m < toOrdinal b n) ∧
+private theorem toOrdinal_strictMono_and_bound : (∀ m, m < n → toOrdinal b m < toOrdinal b n) ∧
       (n ≠ 0 → toOrdinal b n < ω ^ (toOrdinal b (Nat.log b n) + 1)) := by
   have hb1 : 1 < b := by omega
   induction n using Nat.strong_induction_on with
@@ -189,14 +196,13 @@ private theorem toOrdinal_strictMono_and_bound (hb : 2 ≤ b) (n : ℕ) :
               mul_le_mul_right (by rw [← Nat.cast_add_one]; exact (natCast_lt_omega0 _).le) _
         _ = ω ^ (toOrdinal b (Nat.log b n) + 1) := by rw [← opow_add_one]
 
-theorem toOrdinal_strictMono (hb : 2 ≤ b) : StrictMono (toOrdinal b) :=
+theorem toOrdinal_strictMono : StrictMono (toOrdinal b) :=
   fun m n hmn => (toOrdinal_strictMono_and_bound b hb n).1 m hmn
 
 /-- The analogue of `toOrdinal_strictMono_and_bound` for `bump`, over `ℕ` with base `b + 1` in
 place of `ω`: `bump b` is strictly monotone, with leading bound
 `(b + 1) ^ (bump b (Nat.log b n) + 1)`. -/
-private theorem bump_strictMono_and_bound (hb : 2 ≤ b) (n : ℕ) :
-    (∀ m, m < n → bump b m < bump b n) ∧
+private theorem bump_strictMono_and_bound : (∀ m, m < n → bump b m < bump b n) ∧
       (n ≠ 0 → bump b n < (b + 1) ^ (bump b (Nat.log b n) + 1)) := by
   have hb1 : 1 < b := by omega
   have hb1' : 1 ≤ b + 1 := by omega
@@ -283,8 +289,7 @@ private theorem bump_strictMono_and_bound (hb : 2 ≤ b) (n : ℕ) :
         _ ≤ (b + 1) * (b + 1) ^ bump b (Nat.log b n) := Nat.mul_le_mul_right _ (by omega)
         _ = (b + 1) ^ (bump b (Nat.log b n) + 1) := by rw [pow_succ]; ring
 
-private lemma bump_lt_pow (hb : 2 ≤ b) {r e : ℕ} (h : r < b ^ e) :
-    bump b r < (b + 1) ^ bump b e := by
+private lemma bump_lt_pow {r e : ℕ} (h : r < b ^ e) : bump b r < (b + 1) ^ bump b e := by
   rcases eq_or_ne r 0 with rfl | hr0
   · simp
   · have hb1 : 1 < b := by omega
@@ -294,7 +299,7 @@ private lemma bump_lt_pow (hb : 2 ≤ b) {r e : ℕ} (h : r < b ^ e) :
       (Nat.pow_le_pow_right (by omega) hmono)
 
 /-- For `b ≥ 2`, bumping the base does not change the ordinal reading. -/
-theorem toOrdinal_bump (hb : 2 ≤ b) (n : ℕ) : toOrdinal (b + 1) (bump b n) = toOrdinal b n := by
+theorem toOrdinal_bump : toOrdinal (b + 1) (bump b n) = toOrdinal b n := by
   induction n using Nat.strong_induction_on with
   | _ n ih =>
     rcases eq_or_ne n 0 with rfl | hn0
@@ -342,6 +347,8 @@ theorem toOrdinal_bump (hb : 2 ≤ b) (n : ℕ) : toOrdinal (b + 1) (bump b n) =
       rw [key, ih e he_lt_n, ih (n % b ^ e) hr_lt_n]
       exact (toOrdinal_pos b hn0).symm
 
+end Bounds
+
 /-- The ordinal value of the `k`-th Goodstein term, read in its base `k + 2`. -/
 noncomputable def seqOrd : Ordinal.{0} := toOrdinal (k + 2) (goodsteinSeq m k)
 
@@ -364,7 +371,7 @@ theorem seqOrd_step (h : goodsteinSeq m k ≠ 0) : seqOrd m (k + 1) < seqOrd m k
   exact hmono.trans_le hinv.le
 
 /-- **Goodstein's theorem.** Every Goodstein sequence reaches `0`. -/
-theorem goodstein_terminates (m : ℕ) : ∃ N, goodsteinSeq m N = 0 := by
+theorem goodstein_terminates : ∃ N, goodsteinSeq m N = 0 := by
   by_contra hcon
   rw [not_exists] at hcon
   obtain ⟨a, ⟨N, hNa⟩, hmin⟩ :=
@@ -373,16 +380,18 @@ theorem goodstein_terminates (m : ℕ) : ∃ N, goodsteinSeq m N = 0 := by
 
 /-- The **Goodstein length** of `m`: the least step at which the Goodstein sequence starting
 at `m` reaches `0`. Total by `goodstein_terminates`. -/
-def goodsteinLength (m : ℕ) : ℕ := Nat.find (goodstein_terminates m)
+def goodsteinLength : ℕ := Nat.find (goodstein_terminates m)
 
-lemma goodsteinSeq_goodsteinLength (m : ℕ) : goodsteinSeq m (goodsteinLength m) = 0 :=
+lemma goodsteinSeq_goodsteinLength : goodsteinSeq m (goodsteinLength m) = 0 :=
   Nat.find_spec (goodstein_terminates m)
 
-lemma goodsteinLength_le {m N : ℕ} (h : goodsteinSeq m N = 0) : goodsteinLength m ≤ N :=
+variable {m} {N : ℕ}
+
+lemma goodsteinLength_le (h : goodsteinSeq m N = 0) : goodsteinLength m ≤ N :=
   Nat.find_le h
 
-lemma goodsteinSeq_ne_zero_of_lt {m N : ℕ} (h : N < goodsteinLength m) : goodsteinSeq m N ≠ 0 :=
+lemma goodsteinSeq_ne_zero_of_lt (h : N < goodsteinLength m) : goodsteinSeq m N ≠ 0 :=
   Nat.find_min (goodstein_terminates m) h
-
+end Termination
 
 end Goodstein

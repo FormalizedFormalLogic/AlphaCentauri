@@ -10,8 +10,6 @@ public import Mathlib.Data.Vector.Basic
 Companion of Mathlib's `List.Vector.tail_ofFn`, `List.Vector.head_ofFn` and `Fin.append_right`.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace List.Vector
@@ -25,12 +23,12 @@ end List.Vector
 
 namespace Fin
 
-lemma append_addCast {α : Type*} {k : ℕ} (s u : Fin k → α) (i : Fin k) :
-    Fin.append s u (Fin.addCast k i) = s i := by
+variable {α : Type*} {k : ℕ} (s u : Fin k → α) (i : Fin k)
+
+lemma append_addCast : Fin.append s u (Fin.addCast k i) = s i := by
   simp [Fin.addCast]
 
-lemma append_addNat {α : Type*} {k : ℕ} (s u : Fin k → α) (i : Fin k) :
-    Fin.append s u (i.addNat k) = u i := by
+lemma append_addNat : Fin.append s u (i.addNat k) = u i := by
   have : i.addNat k = Fin.natAdd k i := Fin.ext (Nat.add_comm _ _)
   rw [this, Fin.append_right]
 

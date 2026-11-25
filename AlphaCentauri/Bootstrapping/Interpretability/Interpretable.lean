@@ -14,8 +14,6 @@ public import AlphaCentauri.Bootstrapping.Proof.ProofByCases
 Interpretability of theories, formalized inside a model of $\mathsf{I}\Sigma_1$.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -102,10 +100,13 @@ section interpretable
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq]
 
+section
+variable (S : Theory L₁) [S.Δ₁] (U : Theory L₂) [U.Δ₁]
+
 /-- `tbl` is a table of a translation of `L₂` in `S` along which every axiom of `U` in `V`
 translates to a formula provable in `S`.
 - [Vis90, §5.5] -/
-structure IsInterpretationTable (S : Theory L₁) [S.Δ₁] (U : Theory L₂) [U.Δ₁] (tbl : V) : Prop
+structure IsInterpretationTable (tbl : V) : Prop
     extends IsTranslationTable L₂ S tbl where
   translate_axiom {p : V} :
     p ∈ U.Δ₁Class → IsFormula L₂ p → Provable S (translate L₁ L₂ tbl p)
@@ -113,8 +114,10 @@ structure IsInterpretationTable (S : Theory L₁) [S.Δ₁] (U : Theory L₂) [U
 variable (V) in
 /-- `U` is interpretable in `S` in the model `V`: some table interprets `U` in `S`.
 - [Vis90, §5.5] -/
-def Interpretable (S : Theory L₁) [S.Δ₁] (U : Theory L₂) [U.Δ₁] : Prop :=
+def Interpretable : Prop :=
   ∃ tbl : V, IsInterpretationTable S U tbl
+
+end
 
 /-- If `U` is interpretable in `S` and `S` is consistent in `V`, so is `U`. -/
 theorem Interpretable.consistent {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S] {U : Theory L₂} [U.Δ₁]
@@ -226,10 +229,13 @@ theorem exists_isTranslationTable_provable_translate (V : Type*) [ORingStructure
   · intro p hp
     exact h.id_provable_translate Language.SymbolsStandard.oRing hp
 
+section
+variable {W : ArithmeticTheory} [W.Δ₁]
+
 open _root_.FFL.Entailment in
 /-- Interpretability is transitive.
 - [Vis90, §6.1] -/
-theorem Interpretable.trans {S U W : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [W.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S]
+theorem Interpretable.trans {S U : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S]
     (hS : ∀ p ∈ S.Δ₁Class (V := V), (ℒₒᵣ).IsSentence p)
     (hW : ∀ p ∈ W.Δ₁Class (V := V), (ℒₒᵣ).IsSentence p)
     (h₁ : Interpretable V S U) (h₂ : Interpretable V U W) : Interpretable V S W := by
@@ -257,7 +263,7 @@ theorem Interpretable.trans {S U W : ArithmeticTheory} [S.Δ₁] [U.Δ₁] [W.Δ
 /-- If `W` is interpretable both in `T + φ` and in `T + ψ`, it is interpretable in
 `T + (φ ∨ ψ)`.
 - [Vis90, §6.1] -/
-theorem Interpretable.union_or {T W : ArithmeticTheory} [T.Δ₁] [W.Δ₁] {φ ψ : ArithmeticSentence}
+theorem Interpretable.union_or {T : ArithmeticTheory} [T.Δ₁] {φ ψ : ArithmeticSentence}
     (h₁ : Interpretable V (T ∪ {φ}) W) (h₂ : Interpretable V (T ∪ {ψ}) W) :
     Interpretable V (T ∪ {φ ⋎ ψ}) W := by
   obtain ⟨tbl₁, h₁⟩ := h₁
@@ -280,6 +286,7 @@ theorem Interpretable.union_or {T W : ArithmeticTheory} [T.Δ₁] [W.Δ₁] {φ 
           translate_axiom hp hp' :=
             provable_union_or (c₁.translate_axiom hp hp') (c₂.translate_axiom hp hp') }
 
+end
 
 /-! ## The sentence of interpretability -/
 

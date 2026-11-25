@@ -14,8 +14,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Pro
 The values of closed terms along the internal translation.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -39,29 +37,31 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] {tbl : V}
 
+variable (hT : IsTable L₁ L₂ tbl) (t : Term V L₂) {n k : ℕ} (F : L₂.Func k) (R : L₂.Rel k)
+  (v : Fin k → Term V L₂) (s : V) (d : Semiformula V L₁ 1) (hd : d.val = tableDomain tbl)
+  (A : Semiformula V L₁ 1) (i : Fin k)
+
 /-- The coded translation of a closed typed term, as a typed formula in one variable. -/
-noncomputable def varEqualT (hT : IsTable L₁ L₂ tbl) (t : Term V L₂) : Semiformula V L₁ 1 :=
+noncomputable def varEqualT : Semiformula V L₁ 1 :=
   ⟨varEqual L₁ L₂ tbl t.val, by simpa using IsSemiformula.varEqual hT t.isSemiterm⟩
 
 @[simp]
-lemma varEqualT_val (hT : IsTable L₁ L₂ tbl) (t : Term V L₂) :
-    (varEqualT hT t).val = varEqual L₁ L₂ tbl t.val := rfl
+lemma varEqualT_val : (varEqualT hT t).val = varEqual L₁ L₂ tbl t.val := rfl
 
-lemma varEqualT_fvar (hT : IsTable L₁ L₂ tbl) (x : V) :
-    varEqualT hT (Semiterm.fvar x) =
+lemma varEqualT_fvar (x : V) : varEqualT hT (Semiterm.fvar x) =
       Semiformula.rel (Language.Eq.eq : L₁.Rel 2) ![Semiterm.bvar 0, Semiterm.fvar x] := by
   ext
   simp [varEqual_fvar]
   rfl
 
 omit [L₁.Eq] in
-lemma val_bvar_addCast_vec {k l : ℕ} :
+lemma val_bvar_addCast_vec {l : ℕ} :
     SemitermVec.val (fun i : Fin k ↦ (Semiterm.bvar (i.addCast l) : Semiterm V L₁ (l + k))) =
       bvarVec 0 (k : V) := by
   rw [bvarVec_zero_eq_matrixToVec (L := L₁) l k]
   rfl
 
-lemma varEqualVec_typed (hT : IsTable L₁ L₂ tbl) {k : ℕ} (v : Fin k → Term V L₂) :
+lemma varEqualVec_typed :
     varEqualVec L₁ L₂ tbl k (SemitermVec.val v) = matrixToVec fun i ↦ (varEqualT hT (v i)).val := by
   change varEqualVec L₁ L₂ tbl k (matrixToVec fun i ↦ (v i).val) = _
   have hv : IsUTermVec L₂ (k : V) (matrixToVec fun i ↦ (v i).val) :=
@@ -73,22 +73,22 @@ lemma varEqualVec_typed (hT : IsTable L₁ L₂ tbl) {k : ℕ} (v : Fin k → Te
     rw [nth_varEqualVec (i := (i : V)) hv (by simp)]
     simp
 
+include hd in
 omit [L₁.Eq] in
-lemma domainAt_typed {n k : ℕ} (d : Semiformula V L₁ 1) (hd : d.val = tableDomain tbl)
-    (i : Fin k) : domainAt L₁ tbl (i : V) = (d.subst ![Semiterm.bvar (i.addCast n)]).val := by
+lemma domainAt_typed : domainAt L₁ tbl (i : V) = (d.subst ![Semiterm.bvar (i.addCast n)]).val := by
   rw [Semiformula.val_substs, hd, domainAt]
   simp
 
 omit [L₁.Eq] in
-lemma relocate_typed {n k : ℕ} (s : V) (A : Semiformula V L₁ 1) (i : Fin k) :
+lemma relocate_typed :
     relocate L₁ (i : V) s A.val = (A.subst ![Semiterm.bvar (i.addCast n)]).val := by
   rw [relocate_eq_subst (L := L₁) (n := 0) (by simp),
     Semiformula.val_substs]
   simp
 
+include hd in
 omit [L₁.Eq] in
-lemma guardVec_typed {n k : ℕ} (s : V) (d : Semiformula V L₁ 1) (hd : d.val = tableDomain tbl)
-    (A : Fin k → Semiformula V L₁ 1) :
+lemma guardVec_typed (A : Fin k → Semiformula V L₁ 1) :
     guardVec L₁ tbl s (matrixToVec fun i ↦ (A i).val) k =
       matrixToVec fun i ↦ (d.subst ![Semiterm.bvar (i.addCast n)] ⋏
         (A i).subst ![Semiterm.bvar (i.addCast n)]).val := by
@@ -99,12 +99,7 @@ lemma guardVec_typed {n k : ℕ} (s : V) (d : Semiformula V L₁ 1) (hd : d.val 
     rw [nth_guardVec _ _ _ _ _ (by simp), matrixToVec_nth, Semiformula.val_and,
       domainAt_typed d hd, relocate_typed]
 
-section table
-
-variable (hT : IsTable L₁ L₂ tbl)
-
-lemma funcTail_typed {k : ℕ} (F : L₂.Func k) :
-    funcTail L₁ tbl (k : V) (⌜F⌝ : V) =
+lemma funcTail_typed : funcTail L₁ tbl (k : V) (⌜F⌝ : V) =
       ((hT.funcT F).subst (Semiterm.bvar (Fin.cast (Nat.add_comm k 1) (Fin.last k)) :>
         fun i : Fin k ↦ Semiterm.bvar (i.addCast 1))).val := by
   have hw : SemitermVec.val (Semiterm.bvar (Fin.cast (Nat.add_comm k 1) (Fin.last k)) :>
@@ -115,16 +110,14 @@ lemma funcTail_typed {k : ℕ} (F : L₂.Func k) :
   rw [funcTail, Semiformula.val_substs, hw]
   rfl
 
-lemma tableRel_typed {k : ℕ} (R : L₂.Rel k) :
-    tableRel tbl (k : V) (⌜R⌝ : V) =
+lemma tableRel_typed : tableRel tbl (k : V) (⌜R⌝ : V) =
       ((hT.relT R).subst (fun i : Fin k ↦ Semiterm.bvar (i.addCast 0))).val := by
   rw [Semiformula.val_substs, val_bvar_addCast_vec]
   symm
   exact subst_eq_self (hT.relT R).isSemiformula (IsSemitermVec.bvarVec (by simp))
     (fun i hi ↦ by simp [nth_bvarVec _ _ _ hi])
 
-lemma varEqualT_func {k : ℕ} (F : L₂.Func k) (v : Fin k → Term V L₂) :
-    varEqualT hT (Semiterm.func F v) =
+lemma varEqualT_func : varEqualT hT (Semiterm.func F v) =
       funcGraph hT.domT (fun i ↦ varEqualT hT (v i)) (hT.funcT F) := by
   ext
   rw [varEqualT_val, Semiterm.func_val, varEqual_func (f := (⌜F⌝ : V)) (by simp)
@@ -132,16 +125,13 @@ lemma varEqualT_func {k : ℕ} (F : L₂.Func k) (v : Fin k → Term V L₂) :
     guardVec_typed (A := fun i ↦ varEqualT hT (v i)) (d := hT.domT) (n := 1) (k + 1 : V) rfl,
     funcGraph, val_allItr_imp_conj, funcTail_typed hT F]
 
-lemma translate_rel_typed {k : ℕ} (R : L₂.Rel k) (v : Fin k → Term V L₂) :
-    translate L₁ L₂ tbl (Semiformula.rel R v : Formula V L₂).val =
+lemma translate_rel_typed : translate L₁ L₂ tbl (Semiformula.rel R v : Formula V L₂).val =
       (relativizedImp hT.domT (fun i ↦ varEqualT hT (v i))
         ((hT.relT R).subst (fun i ↦ Semiterm.bvar (i.addCast 0)))).val := by
   rw [Semiformula.rel_val, translate_rel (by simp) (SemitermVec.isUTermVec v), translateRel,
     varEqualVec_typed hT v, guardVec_typed (A := fun i ↦ varEqualT hT (v i))
       (d := hT.domT) (n := 0) (k : V) rfl,
     tableRel_typed hT R, relativizedImp, val_allItr_imp_conj]
-
-end table
 
 end typedShapes
 
@@ -330,11 +320,11 @@ end value
 section defs
 
 variable (L₁ L₂ : Language) [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
-  [L₂.Encodable] [L₂.LORDefinable]
+  [L₂.Encodable] [L₂.LORDefinable] (tbl t b : V)
 
 /-- The coded set of `¬δ(&b)`, `¬E_t(&b)` and `¬δ(&i)` for `i < t`, where `δ` is the domain formula
 of the table and `E_t` is the coded formula of the value of `t`. -/
-noncomputable def substHyp (tbl t b : V) : V :=
+noncomputable def substHyp : V :=
   insert (neg L₁ (substs1 L₁ (^&b) tbl.[0]))
     (insert (neg L₁ (substs1 L₁ (^&b) (varEqual L₁ L₂ tbl t))) (negDomSet L₁ tbl.[0] t))
 
@@ -342,7 +332,7 @@ instance substHyp.definable : 𝚺ᴬ₁-Function₃[V] substHyp L₁ L₂ := by
   definability
 
 /-- The code of `∀ z (δ z → (E_{s[t]}(z) ↔ E_{s[&b]}(z)))`. -/
-noncomputable def termSubstEquiv (tbl t b s : V) : V :=
+noncomputable def termSubstEquiv (s : V) : V :=
   ^∀ (imp L₁ tbl.[0] (iff L₁ (varEqual L₁ L₂ tbl (termSubst L₂ ?[t] s))
     (varEqual L₁ L₂ tbl (termSubst L₂ ?[^&b] s))))
 
@@ -357,9 +347,15 @@ variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable] [L₂.Eq] {S : Theory L₁} [S.Δ₁] [𝗘𝗤 _ ⪯ S]
   {tbl : V}
 
+section
+
+variable (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p) (h : IsTranslationTable L₂ S tbl)
+  (hL₂ : L₂.SymbolsStandard V)
+  (hT : IsTable L₁ L₂ tbl) {t : V} (ht : IsSemiterm L₂ 0 t) (b : V)
+
 omit [L₂.Eq] in
-lemma isFormulaSet_substHyp (hT : IsTable L₁ L₂ tbl) {t : V} (ht : IsSemiterm L₂ 0 t) (b : V) :
-    IsFormulaSet L₁ (substHyp L₁ L₂ tbl t b) := by
+include hT ht in
+lemma isFormulaSet_substHyp : IsFormulaSet L₁ (substHyp L₁ L₂ tbl t b) := by
   have h₁ : IsSemiformula L₁ 1 (varEqual L₁ L₂ tbl t) := by
     simpa using IsSemiformula.varEqual hT ht
   exact IsFormulaSet.insert_iff.mpr
@@ -367,11 +363,8 @@ lemma isFormulaSet_substHyp (hT : IsTable L₁ L₂ tbl) {t : V} (ht : IsSemiter
       IsFormulaSet.insert_iff.mpr ⟨(IsSemiformula.substs1 (n := 0) (by simp) h₁).neg,
         IsFormulaSet.negDomSet hT.domain.isSemiformula t⟩⟩
 
-lemma derivable_definesElement_substHyp
-    (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
-    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t : V}
-    (ht : IsSemiterm L₂ 0 t) (b : V) :
-    Derivable S (insert (definesElement h.domT
+include hS hL₂ in
+lemma derivable_definesElement_substHyp : Derivable S (insert (definesElement h.domT
       (varEqualT h.toIsTable (⟨t, ht⟩ : Term V L₂))).val (substHyp L₁ L₂ tbl t b)) := by
   have hT := h.toIsTable
   have hd : tbl.[0] = h.domT.val := rfl
@@ -388,9 +381,15 @@ lemma derivable_definesElement_substHyp
     · exact mem_bitInsert_iff.mpr (Or.inr (by simp [substHyp, hx]))
   exact Derivable.wk hF hsub (derivable_definesElement hS h hL₂ ht)
 
+end
+
+variable (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p) (h : IsTranslationTable L₂ S tbl)
+  (hL₂ : L₂.SymbolsStandard V) {t b s : V}
+  (ht : IsSemiterm L₂ 0 t) {k : ℕ} (F : L₂.Func k) {v : V}
+
 omit [𝗘𝗤 L₁ ⪯ S] in
-lemma termSubstEquiv_eq_typed (h : IsTranslationTable L₂ S tbl) {t b s : V}
-    {u u' : Term V L₂} (hu : u.val = termSubst L₂ ?[t] s) (hu' : u'.val = termSubst L₂ ?[^&b] s) :
+lemma termSubstEquiv_eq_typed {u u' : Term V L₂} (hu : u.val = termSubst L₂ ?[t] s)
+    (hu' : u'.val = termSubst L₂ ?[^&b] s) :
     termSubstEquiv L₁ L₂ tbl t b s =
       (∀¹ (h.domT 🡒 (varEqualT h.toIsTable u 🡘 varEqualT h.toIsTable u'))).val := by
   have hd : tbl.[0] = h.domT.val := rfl
@@ -398,8 +397,7 @@ lemma termSubstEquiv_eq_typed (h : IsTranslationTable L₂ S tbl) {t b s : V}
     varEqualT_val, hu, hu', hd]
 
 omit [L₂.Eq] in
-lemma termSubst_func_val {k : ℕ} (F : L₂.Func k) {c v : V} (hc : IsSemiterm L₂ 0 c)
-    (hv : IsSemitermVec L₂ (k : V) 1 v) :
+lemma termSubst_func_val {c : V} (hc : IsSemiterm L₂ 0 c) (hv : IsSemitermVec L₂ (k : V) 1 v) :
     ∃ u : Fin k → Term V L₂, (∀ i : Fin k, (u i).val = termSubst L₂ ?[c] v.[(i : ℕ)]) ∧
       termSubst L₂ ?[c] (^func (k : V) ⌜F⌝ v) = (Semiterm.func F u).val := by
   have hw : IsSemitermVec L₂ (1 : V) 0 ?[c] := by simp [hc]
@@ -415,10 +413,8 @@ lemma termSubst_func_val {k : ℕ} (F : L₂.Func k) {c v : V} (hc : IsSemiterm 
   · intro i
     rw [nth_termSubstVec hv.isUTerm (by simp)]
 
-lemma derivable_termSubstEquiv_bvar
-    (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
-    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t b : V}
-    (ht : IsSemiterm L₂ 0 t) :
+include hS h hL₂ ht in
+lemma derivable_termSubstEquiv_bvar :
     Derivable S (insert (termSubstEquiv L₁ L₂ tbl t b (^#0)) (substHyp L₁ L₂ tbl t b)) := by
   have hT := h.toIsTable
   have hd : tbl.[0] = h.domT.val := rfl
@@ -460,8 +456,8 @@ lemma derivable_termSubstEquiv_bvar
   exact h₃
 
 omit [𝗘𝗤 L₁ ⪯ S] in
-lemma derivable_termSubstEquiv_fvar (h : IsTranslationTable L₂ S tbl)
-    {t b : V} (ht : IsSemiterm L₂ 0 t) (x : V) :
+include h ht in
+lemma derivable_termSubstEquiv_fvar (x : V) :
     Derivable S (insert (termSubstEquiv L₁ L₂ tbl t b (^&x)) (substHyp L₁ L₂ tbl t b)) := by
   have hT := h.toIsTable
   have hH := isFormulaSet_substHyp hT ht b
@@ -477,9 +473,8 @@ lemma derivable_termSubstEquiv_fvar (h : IsTranslationTable L₂ S tbl)
   exact Derivable.of_tprovable hH hA
 
 omit [𝗘𝗤 L₁ ⪯ S] in
-lemma derivable_termSubstEquiv_func
-    (h : IsTranslationTable L₂ S tbl) {t b : V} (ht : IsSemiterm L₂ 0 t)
-    {k : ℕ} (F : L₂.Func k) {v : V} (hv : IsSemitermVec L₂ (k : V) 1 v)
+include h ht in
+lemma derivable_termSubstEquiv_func (hv : IsSemitermVec L₂ (k : V) 1 v)
     (ih : ∀ i < (k : V), Derivable S (insert (termSubstEquiv L₁ L₂ tbl t b v.[i])
       (substHyp L₁ L₂ tbl t b))) :
     Derivable S (insert (termSubstEquiv L₁ L₂ tbl t b (^func (k : V) ⌜F⌝ v))
@@ -502,10 +497,8 @@ lemma derivable_termSubstEquiv_func
     varEqualT_func hT F u']
   exact hg'
 
-theorem derivable_termSubstEquiv (hS : ∀ p ∈ S.Δ₁Class (V := V), L₁.IsSentence p)
-    (h : IsTranslationTable L₂ S tbl) (hL₂ : L₂.SymbolsStandard V) {t b s : V}
-    (ht : IsSemiterm L₂ 0 t)
-    (hs : IsSemiterm L₂ 1 s) :
+include hS h hL₂ ht in
+theorem derivable_termSubstEquiv (hs : IsSemiterm L₂ 1 s) :
     Derivable S (insert (termSubstEquiv L₁ L₂ tbl t b s) (substHyp L₁ L₂ tbl t b)) := by
   have hP : 𝚺ᴬ₁-Predicate fun s : V ↦
       Derivable S (insert (termSubstEquiv L₁ L₂ tbl t b s) (substHyp L₁ L₂ tbl t b)) := by

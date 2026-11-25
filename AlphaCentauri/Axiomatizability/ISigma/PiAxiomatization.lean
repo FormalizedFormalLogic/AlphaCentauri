@@ -13,8 +13,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Hierarchy
 - [HP98, Corollary I.4.34(1), Remark I.4.35(1)]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -69,9 +67,13 @@ lemma hierarchy_of_mem_finiteAxiomatization {σ : ArithmeticSentence}
 
 end Hierarchy
 
+section
+
+variable (n : ℕ)
+
 /-- For `n ≥ 1`, `𝗜𝚺 n` is axiomatized by a single $\Pi_{n + 2}$ sentence.
 - [HP98, Corollary I.4.34(1), Remark I.4.35(1)] -/
-theorem exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :
+theorem exists_pi_axiomatization (hn : 1 ≤ n) :
     ∃ σ : 𝚷ᴬ_[n + 2].Sentence, ({σ.val} : ArithmeticTheory) ≊ 𝗜𝚺 n := by
   obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
   have h := finiteAxiomatizableBy m
@@ -83,7 +85,7 @@ theorem exists_pi_axiomatization (n : ℕ) (hn : 1 ≤ n) :
 /-- For `n ≥ 1` and `m ≤ n`, `𝗜𝚺 n` is axiomatized by `𝗜𝚺 m` together with a single
 $\Pi_{n + 2}$ sentence.
 - [HP98, Corollary I.4.34(1), Remark I.4.35(1)] -/
-theorem exists_pi_axiomatization_insert (n : ℕ) (hn : 1 ≤ n) (m : ℕ) (hmn : m ≤ n) :
+theorem exists_pi_axiomatization_insert (hn : 1 ≤ n) (m : ℕ) (hmn : m ≤ n) :
     ∃ π : 𝚷ᴬ_[n + 2].Sentence, 𝗜𝚺 n ≊ insert π.val (𝗜𝚺 m) := by
   obtain ⟨π, hπ⟩ := exists_pi_axiomatization n hn
   refine ⟨π, Equiv.antisymm_iff.mpr ⟨?_, ?_⟩⟩
@@ -93,6 +95,8 @@ theorem exists_pi_axiomatization_insert (n : ℕ) (hn : 1 ≤ n) (m : ℕ) (hmn 
     rintro φ (rfl | hφ)
     · exact hπ.le.pbl <| by_axm rfl
     · exact (ISigma_weakerThan_of_le hmn).pbl <| by_axm hφ
+
+end
 
 end ISigma
 

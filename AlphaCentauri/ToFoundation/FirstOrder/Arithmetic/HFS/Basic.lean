@@ -9,8 +9,6 @@ public import Foundation.FirstOrder.Arithmetic.HFS.Vec
 Basic operations on coded hereditarily finite sets: unions and cardinalities.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 /-! ## Elementary facts about coded sets -/
@@ -20,27 +18,31 @@ namespace Arithmetic
 
 open scoped FFL.FirstOrder.Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {a n p s v x y Γ : V}
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {x y a b s n v p Γ : V}
 
 attribute [local grind =] mem_bitInsert_iff mem_bitRemove_iff
 
-lemma insert_comm (x y s : V) : insert x (insert y s) = insert y (insert x s) :=
+section
+
+variable (x y a b s)
+
+lemma insert_comm : insert x (insert y s) = insert y (insert x s) :=
   mem_ext fun _ ↦ by grind
 
-lemma insert_insert_self (x s : V) : insert x (insert x s) = insert x s :=
+lemma insert_insert_self : insert x (insert x s) = insert x s :=
   mem_ext fun _ ↦ by grind
 
-lemma insert_pair_absorb (x y s : V) :
-    insert x (insert y (insert x (insert y s))) = insert x (insert y s) :=
+lemma insert_pair_absorb : insert x (insert y (insert x (insert y s))) = insert x (insert y s) :=
   mem_ext fun _ ↦ by grind
 
-lemma insert_pair_comm (x y a s : V) :
-    insert x (insert y (insert a s)) = insert a (insert x (insert y s)) :=
+lemma insert_pair_comm : insert x (insert y (insert a s)) = insert a (insert x (insert y s)) :=
   mem_ext fun _ ↦ by grind
 
-lemma insert_pair_comm₂ (x y a b s : V) :
+lemma insert_pair_comm₂ :
     insert x (insert y (insert a (insert b s))) = insert a (insert b (insert x (insert y s))) :=
   mem_ext fun _ ↦ by grind
+
+end
 
 lemma mem_of_mem_insert_of_ne (h : x ∈ insert y s) (hne : x ≠ y) : x ∈ s :=
   (mem_bitInsert_iff.mp h).resolve_left hne
@@ -73,15 +75,21 @@ section
 
 open ListUnion
 
+section
+
+variable (x v)
+
 /-- The union of the coded sets listed in the vector `v`. -/
-noncomputable def listUnion (v : V) : V := construction.result ![] v
+noncomputable def listUnion : V := construction.result ![] v
 
 @[simp]
 lemma listUnion_nil : listUnion (0 : V) = ∅ := by simp [listUnion, construction]
 
 @[simp]
-lemma listUnion_adjoin (x v : V) : listUnion (x ∷ v) = x ∪ listUnion v := by
+lemma listUnion_adjoin : listUnion (x ∷ v) = x ∪ listUnion v := by
   simp [listUnion, construction]
+
+end
 
 section
 
@@ -139,20 +147,26 @@ end CardBelow
 
 open CardBelow
 
+section
+
+variable (s n)
+
 /-- The number of elements of the coded set `s` below `n`. -/
-noncomputable def cardBelow (s n : V) : V := construction.result ![s] n
+noncomputable def cardBelow : V := construction.result ![s] n
 
 @[simp]
-lemma cardBelow_zero (s : V) : cardBelow s 0 = 0 := by
+lemma cardBelow_zero : cardBelow s 0 = 0 := by
   simp [cardBelow, construction]
 
 open Classical in
-lemma cardBelow_succ (s n : V) :
+lemma cardBelow_succ :
     cardBelow s (n + 1) = if n ∈ s then cardBelow s n + 1 else cardBelow s n := by
   simp [cardBelow, construction]
 
 /-- The number of elements of the coded set `s`. -/
-noncomputable def card (s : V) : V := cardBelow s s
+noncomputable def card : V := cardBelow s s
+
+end
 
 section
 

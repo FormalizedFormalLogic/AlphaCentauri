@@ -9,8 +9,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Pai
 Satisfaction in the Henkin set, defined arithmetically.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -38,9 +36,11 @@ noncomputable def construction : PR.Construction V blueprint where
 
 end HenkinFvarVec
 
+variable (L : Language) [L.Encodable] [L.LORDefinable] (n s : V)
+
 /-- The vector `^&s₀, …, ^&s_{n-1}` of the free variables listed by the first `n` entries of the
 list decoded from `s`. -/
-noncomputable def henkinFvarVec (n s : V) : V := HenkinFvarVec.construction.result ![s] n
+noncomputable def henkinFvarVec : V := HenkinFvarVec.construction.result ![s] n
 
 def henkinFvarVecGraph : 𝚺ᴬ₁.Semisentence 3 := HenkinFvarVec.blueprint.resultDef
 
@@ -52,21 +52,21 @@ instance henkinFvarVec.definable : 𝚺ᴬ₁-Function₂ (henkinFvarVec : V →
   henkinFvarVec.defined.to_definable
 
 @[simp]
-lemma henkinFvarVec_zero (s : V) : henkinFvarVec 0 s = 0 := by
+lemma henkinFvarVec_zero : henkinFvarVec 0 s = 0 := by
   simp [henkinFvarVec, HenkinFvarVec.construction]
 
-lemma henkinFvarVec_succ (n s : V) :
+lemma henkinFvarVec_succ :
     henkinFvarVec (n + 1) s = concat (henkinFvarVec n s) (^&((dec s).[n])) := by
   simp [henkinFvarVec, HenkinFvarVec.construction]
 
 @[simp]
-lemma len_henkinFvarVec (n s : V) : len (henkinFvarVec n s) = n := by
+lemma len_henkinFvarVec : len (henkinFvarVec n s) = n := by
   induction n using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ n ih => simp [henkinFvarVec_succ, ih]
 
-lemma nth_henkinFvarVec (n s : V) : ∀ i < n, (henkinFvarVec n s).[i] = ^&((dec s).[i]) := by
+lemma nth_henkinFvarVec : ∀ i < n, (henkinFvarVec n s).[i] = ^&((dec s).[i]) := by
   induction n using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -86,8 +86,7 @@ lemma henkinFvarVec_ppair (n a s : V) :
   · rw [nth_henkinFvarVec _ _ _ hi, nth_adjoin_succ,
       nth_henkinFvarVec _ _ _ (by simpa using hi), dec_ppair, nth_adjoin_succ]
 
-lemma isSemitermVec_henkinFvarVec (L : Language) [L.Encodable] [L.LORDefinable] (n s : V) :
-    IsSemitermVec L n 0 (henkinFvarVec n s) :=
+lemma isSemitermVec_henkinFvarVec : IsSemitermVec L n 0 (henkinFvarVec n s) :=
   IsSemitermVec.iff.mpr ⟨by simp, fun i hi ↦ by simp [nth_henkinFvarVec _ _ _ hi]⟩
 
 end fvarVec
@@ -143,43 +142,47 @@ end equality
 
 section closure
 
-variable {S}
+variable {S} {n p q : V}
 
-private lemma henkinSet_subst_iff {n p : V} (hp : IsSemiformula L n p) (s : V) :
-    HenkinSatisfies S p n s ↔ HenkinSet S
+private lemma henkinSet_subst_iff (hp : IsSemiformula L n p) :
+    ∀ s : V, HenkinSatisfies S p n s ↔ HenkinSet S
       (⟨subst L (henkinFvarVec n s) p, hp.subst (isSemitermVec_henkinFvarVec L n s)⟩ :
-        Formula V L).val := Iff.rfl
+        Formula V L).val := fun _ ↦ Iff.rfl
 
 variable (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (hcons : S.Consistent V)
 include hS hcons
 
+variable (n) (s : V) in
 omit hS hcons in
-lemma henkinSatisfies_verum (n s : V) : HenkinSatisfies S ^⊤ n s := by
+lemma henkinSatisfies_verum : HenkinSatisfies S ^⊤ n s := by
   simpa [HenkinSatisfies] using henkinSet_of_tprovable S (φ := (⊤ : Formula V L)) (by simp)
 
-lemma not_henkinSatisfies_falsum (n s : V) : ¬HenkinSatisfies S ^⊥ n s := by
+lemma not_henkinSatisfies_falsum (n : V) : ∀ s : V, ¬HenkinSatisfies S ^⊥ n s := by
+  intro s
   simpa [HenkinSatisfies] using henkinSet_not_falsum S hS hcons
 
-lemma henkinSatisfies_and_iff {n p q : V} (hp : IsSemiformula L n p) (hq : IsSemiformula L n q)
-    (s : V) :
-    HenkinSatisfies S (p ^⋏ q) n s ↔ HenkinSatisfies S p n s ∧ HenkinSatisfies S q n s := by
+lemma henkinSatisfies_and_iff (hp : IsSemiformula L n p) (hq : IsSemiformula L n q) : ∀ s : V,
+      HenkinSatisfies S (p ^⋏ q) n s ↔ HenkinSatisfies S p n s ∧ HenkinSatisfies S q n s := by
+  intro s
   rw [henkinSet_subst_iff hp, henkinSet_subst_iff hq, ← henkinSet_and_iff S hS hcons]
   simp [HenkinSatisfies, hp.isUFormula, hq.isUFormula]
 
-lemma henkinSatisfies_or_iff {n p q : V} (hp : IsSemiformula L n p) (hq : IsSemiformula L n q)
-    (s : V) :
-    HenkinSatisfies S (p ^⋎ q) n s ↔ HenkinSatisfies S p n s ∨ HenkinSatisfies S q n s := by
+lemma henkinSatisfies_or_iff (hp : IsSemiformula L n p) (hq : IsSemiformula L n q) : ∀ s : V,
+      HenkinSatisfies S (p ^⋎ q) n s ↔ HenkinSatisfies S p n s ∨ HenkinSatisfies S q n s := by
+  intro s
   rw [henkinSet_subst_iff hp, henkinSet_subst_iff hq, ← henkinSet_or_iff S hS hcons]
   simp [HenkinSatisfies, hp.isUFormula, hq.isUFormula]
 
-lemma henkinSatisfies_neg_iff {n p : V} (hp : IsSemiformula L n p) (s : V) :
-    HenkinSatisfies S (neg L p) n s ↔ ¬HenkinSatisfies S p n s := by
+lemma henkinSatisfies_neg_iff (hp : IsSemiformula L n p) :
+    ∀ s : V, HenkinSatisfies S (neg L p) n s ↔ ¬HenkinSatisfies S p n s := by
+  intro s
   rw [henkinSet_subst_iff hp, ← henkinSet_neg_iff S hS hcons, HenkinSatisfies,
     substs_neg hp (isSemitermVec_henkinFvarVec L n s)]
   rfl
 
-lemma henkinSatisfies_all_iff {n p : V} (hp : IsSemiformula L (n + 1) p) (s : V) :
-    HenkinSatisfies S (^∀ p) n s ↔ ∀ u, HenkinSatisfies S p (n + 1) (ppair u s) := by
+lemma henkinSatisfies_all_iff (hp : IsSemiformula L (n + 1) p) :
+    ∀ s : V, HenkinSatisfies S (^∀ p) n s ↔ ∀ u, HenkinSatisfies S p (n + 1) (ppair u s) := by
+  intro s
   have hw := isSemitermVec_henkinFvarVec L n s
   let φ : Semiformula V L 1 := ⟨subst L (qVec L (henkinFvarVec n s)) p, by
     simpa using hp.subst hw.qVec⟩
@@ -192,8 +195,9 @@ lemma henkinSatisfies_all_iff {n p : V} (hp : IsSemiformula L (n + 1) p) (s : V)
   simp only [φ]
   rw [substs1_subst_qVec hw hp (by simp)]
 
-lemma henkinSatisfies_exs_iff {n p : V} (hp : IsSemiformula L (n + 1) p) (s : V) :
-    HenkinSatisfies S (^∃ p) n s ↔ ∃ u, HenkinSatisfies S p (n + 1) (ppair u s) := by
+lemma henkinSatisfies_exs_iff (hp : IsSemiformula L (n + 1) p) :
+    ∀ s : V, HenkinSatisfies S (^∃ p) n s ↔ ∃ u, HenkinSatisfies S p (n + 1) (ppair u s) := by
+  intro s
   have hw := isSemitermVec_henkinFvarVec L n s
   let φ : Semiformula V L 1 := ⟨subst L (qVec L (henkinFvarVec n s)) p, by
     simpa using hp.subst hw.qVec⟩
@@ -207,8 +211,9 @@ lemma henkinSatisfies_exs_iff {n p : V} (hp : IsSemiformula L (n + 1) p) (s : V)
   rw [substs1_subst_qVec hw hp (by simp)]
 
 omit hS hcons in
-lemma henkinSatisfies_zero_iff {p : V} (hp : IsFormula L p) (s : V) :
-    HenkinSatisfies S p 0 s ↔ HenkinSet S p := by
+lemma henkinSatisfies_zero_iff (hp : IsFormula L p) :
+    ∀ s : V, HenkinSatisfies S p 0 s ↔ HenkinSet S p := by
+  intro s
   rw [HenkinSatisfies, henkinFvarVec_zero,
     subst_eq_self hp (by simp) (fun i hi ↦ absurd hi (by simp))]
 
@@ -216,22 +221,25 @@ end closure
 
 section atomic
 
-variable [L.Eq] {S}
+variable [L.Eq] {S} {n t : V}
 
 omit [L.Eq] in
-private lemma isSemiterm_termSubst {n t : V} (ht : IsSemiterm L n t) (s : V) :
+private lemma isSemiterm_termSubst (ht : IsSemiterm L n t) (s : V) :
     IsSemiterm L 0 (termSubst L (henkinFvarVec n s) t) :=
   (isSemitermVec_henkinFvarVec L n s).termSubst ht
 
-private lemma henkinEquates_iff {n t : V} (ht : IsSemiterm L n t) (s z : V) :
-    HenkinEquates S t n s z ↔ HenkinSet S (Semiformula.equal
+private lemma henkinEquates_iff (ht : IsSemiterm L n t) :
+    ∀ s z : V, HenkinEquates S t n s z ↔ HenkinSet S (Semiformula.equal
       (⟨termSubst L (henkinFvarVec n s) t, isSemiterm_termSubst ht s⟩ : Term V L)
       (Semiterm.fvar z)).val := by
+  intro s z
   simp [HenkinEquates, Semiformula.equal, quote_rel_def]
 
+variable {k : ℕ} {t z : Fin k → V}
+
 omit [L.Eq] in
-lemma isSemitermVec_matrixToVec {n : V} {k : ℕ} {t : Fin k → V}
-    (ht : ∀ j, IsSemiterm L n (t j)) : IsSemitermVec L (k : V) n (matrixToVec t) := by
+lemma isSemitermVec_matrixToVec (ht : ∀ j, IsSemiterm L n (t j)) :
+    IsSemitermVec L (k : V) n (matrixToVec t) := by
   apply IsSemitermVec.iff.mpr
   apply And.intro (by simp)
   intro i hi
@@ -243,11 +251,11 @@ lemma isSemitermVec_matrixToVec {n : V} {k : ℕ} {t : Fin k → V}
   exact ht _
 
 omit [L.Eq] in
-private lemma termSubstVec_matrixToVec {n : V} {k : ℕ} {t : Fin k → V}
-    (ht : ∀ j, IsSemiterm L n (t j)) (s : V) :
-    termSubstVec L (k : V) (henkinFvarVec n s) (matrixToVec t) =
+private lemma termSubstVec_matrixToVec (ht : ∀ j, IsSemiterm L n (t j)) :
+    ∀ s : V, termSubstVec L (k : V) (henkinFvarVec n s) (matrixToVec t) =
       SemitermVec.val (fun j ↦ (⟨termSubst L (henkinFvarVec n s) (t j),
         isSemiterm_termSubst (ht j) s⟩ : Term V L)) := by
+  intro s
   have hv := (isSemitermVec_matrixToVec ht).isUTerm
   apply nth_ext' (k : V) (by simp [hv]) (by simp)
   intro i hi
@@ -268,8 +276,26 @@ include hS hcons
 
 variable [𝗘𝗤 L ⪯ S]
 
-lemma henkinSatisfies_rel_iff {k : ℕ} (R : L.Rel k) {n : V} {t z : Fin k → V}
-    (ht : ∀ j, IsSemiterm L n (t j)) (s : V) (h : ∀ j, HenkinEquates S (t j) n s (z j)) :
+lemma exists_henkinEquates {t : V} (ht : IsSemiterm L n t) :
+    ∀ s : V, ∃ z, IsRepresentative S z ∧ HenkinEquates S t n s z := by
+  intro s
+  let u : Term V L := ⟨termSubst L (henkinFvarVec n s) t, isSemiterm_termSubst ht s⟩
+  have h₁ : S.internalize V ⊢ ∃¹ (Semiformula.equal u.bShift (Semiterm.bvar 0)) :=
+    TProof.ex_intro! _ u <| by simpa [Semiformula.equal] using tprovable_equal_refl S u
+  obtain ⟨w, hw⟩ := (henkinSet_exs_iff S hS hcons).mp (henkinSet_of_tprovable S h₁)
+  obtain ⟨z, hz, hzw⟩ := exists_isRepresentative S hS hcons w
+  have h₂ : HenkinSet S (Semiformula.equal u (Semiterm.fvar w) : Formula V L).val := by
+    simpa [Semiformula.equal] using hw
+  exact ⟨z, hz, (henkinEquates_iff ht s z).mpr
+    (henkinSet_equal_trans S hS hcons h₂ (HenkinEq.symm S hS hcons hzw))⟩
+
+section rel
+
+variable (R : L.Rel k) (ht : ∀ j, IsSemiterm L n (t j)) (s : V)
+
+include ht
+
+lemma henkinSatisfies_rel_iff (h : ∀ j, HenkinEquates S (t j) n s (z j)) :
     HenkinSatisfies S (^rel (k : V) ⌜R⌝ (matrixToVec t)) n s ↔
       HenkinSet S (Semiformula.rel R (fun j ↦ Semiterm.fvar (z j)) : Formula V L).val := by
   have hv := (isSemitermVec_matrixToVec ht).isUTerm
@@ -277,8 +303,26 @@ lemma henkinSatisfies_rel_iff {k : ℕ} (R : L.Rel k) {n : V} {t z : Fin k → V
     ← Semiformula.rel_val]
   exact henkinSet_rel_iff S hS hcons R fun j ↦ (henkinEquates_iff (ht j) s (z j)).mp (h j)
 
-lemma henkinEquates_func_iff {k : ℕ} (f : L.Func k) {n : V} {t z : Fin k → V}
-    (ht : ∀ j, IsSemiterm L n (t j)) (s y : V) (h : ∀ j, HenkinEquates S (t j) n s (z j)) :
+lemma henkinSatisfies_rel_iff_forall :
+    (∀ z : Fin k → V, (∀ j, IsRepresentative S (z j) ∧ HenkinEquates S (t j) n s (z j)) →
+      HenkinSet S (Semiformula.rel R (fun j ↦ Semiterm.fvar (z j)) : Formula V L).val) ↔
+      HenkinSatisfies S (^rel (k : V) ⌜R⌝ (matrixToVec t)) n s := by
+  constructor
+  · intro h
+    choose z hz using fun j ↦ exists_henkinEquates hS hcons (ht j) s
+    exact (henkinSatisfies_rel_iff hS hcons R ht s fun j ↦ (hz j).2).mpr (h z hz)
+  · intro h z hz
+    exact (henkinSatisfies_rel_iff hS hcons R ht s fun j ↦ (hz j).2).mp h
+
+end rel
+
+section func
+
+variable (f : L.Func k) (ht : ∀ j, IsSemiterm L n (t j)) (s y : V)
+
+include ht
+
+lemma henkinEquates_func_iff (h : ∀ j, HenkinEquates S (t j) n s (z j)) :
     HenkinEquates S (^func (k : V) ⌜f⌝ (matrixToVec t)) n s y ↔
       HenkinSet S (Semiformula.equal (Semiterm.func f fun j ↦ Semiterm.fvar (z j))
         (Semiterm.fvar y) : Formula V L).val := by
@@ -301,32 +345,7 @@ lemma henkinEquates_func_iff {k : ℕ} (f : L.Func k) {n : V} {t z : Fin k → V
   · intro hf
     exact henkinSet_equal_trans S hS hcons hfz hf
 
-lemma exists_henkinEquates {n t : V} (ht : IsSemiterm L n t) (s : V) :
-    ∃ z, IsRepresentative S z ∧ HenkinEquates S t n s z := by
-  let u : Term V L := ⟨termSubst L (henkinFvarVec n s) t, isSemiterm_termSubst ht s⟩
-  have h₁ : S.internalize V ⊢ ∃¹ (Semiformula.equal u.bShift (Semiterm.bvar 0)) :=
-    TProof.ex_intro! _ u <| by simpa [Semiformula.equal] using tprovable_equal_refl S u
-  obtain ⟨w, hw⟩ := (henkinSet_exs_iff S hS hcons).mp (henkinSet_of_tprovable S h₁)
-  obtain ⟨z, hz, hzw⟩ := exists_isRepresentative S hS hcons w
-  have h₂ : HenkinSet S (Semiformula.equal u (Semiterm.fvar w) : Formula V L).val := by
-    simpa [Semiformula.equal] using hw
-  exact ⟨z, hz, (henkinEquates_iff ht s z).mpr
-    (henkinSet_equal_trans S hS hcons h₂ (HenkinEq.symm S hS hcons hzw))⟩
-
-lemma henkinSatisfies_rel_iff_forall {k : ℕ} (R : L.Rel k) {n : V} {t : Fin k → V}
-    (ht : ∀ j, IsSemiterm L n (t j)) (s : V) :
-    (∀ z : Fin k → V, (∀ j, IsRepresentative S (z j) ∧ HenkinEquates S (t j) n s (z j)) →
-      HenkinSet S (Semiformula.rel R (fun j ↦ Semiterm.fvar (z j)) : Formula V L).val) ↔
-      HenkinSatisfies S (^rel (k : V) ⌜R⌝ (matrixToVec t)) n s := by
-  constructor
-  · intro h
-    choose z hz using fun j ↦ exists_henkinEquates hS hcons (ht j) s
-    exact (henkinSatisfies_rel_iff hS hcons R ht s fun j ↦ (hz j).2).mpr (h z hz)
-  · intro h z hz
-    exact (henkinSatisfies_rel_iff hS hcons R ht s fun j ↦ (hz j).2).mp h
-
-lemma henkinEquates_func_iff_forall {k : ℕ} (f : L.Func k) {n : V} {t : Fin k → V}
-    (ht : ∀ j, IsSemiterm L n (t j)) (s y : V) :
+lemma henkinEquates_func_iff_forall :
     (∀ z : Fin k → V, (∀ j, IsRepresentative S (z j) ∧ HenkinEquates S (t j) n s (z j)) →
       HenkinSet S (Semiformula.equal (Semiterm.func f fun j ↦ Semiterm.fvar (z j))
         (Semiterm.fvar y) : Formula V L).val) ↔
@@ -338,9 +357,12 @@ lemma henkinEquates_func_iff_forall {k : ℕ} (f : L.Func k) {n : V} {t : Fin k 
   · intro h z hz
     exact (henkinEquates_func_iff hS hcons f ht s y fun j ↦ (hz j).2).mp h
 
+end func
+
 omit hS hcons [𝗘𝗤 L ⪯ S] in
-lemma henkinEquates_bvar_iff {n i : V} (hi : i < n) (s z : V) :
-    HenkinEquates S (^#i) n s z ↔ HenkinEq S ((dec s).[i]) z := by
+lemma henkinEquates_bvar_iff {i : V} (hi : i < n) :
+    ∀ s z : V, HenkinEquates S (^#i) n s z ↔ HenkinEq S ((dec s).[i]) z := by
+  intro s z
   simp [HenkinEquates, HenkinEq, Semiformula.equal, quote_rel_def,
     nth_henkinFvarVec _ _ _ hi]
 
@@ -353,12 +375,15 @@ section arithmetic
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] {S : ArithmeticTheory} [S.Δ₁] [𝗘𝗤 ℒₒᵣ ⪯ S]
   (hS : ∀ p ∈ S.Δ₁Class (V := V), (ℒₒᵣ).IsSentence p) (hcons : S.Consistent V)
 
+variable {n p : V}
+
 omit [𝗘𝗤 ℒₒᵣ ⪯ S] in
-private lemma henkinSatisfies_ppair_iff {n p : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (s u : V) :
-    HenkinSatisfies S p (n + 1) (ppair u s) ↔
+private lemma henkinSatisfies_ppair_iff (hp : IsSemiformula ℒₒᵣ (n + 1) p) :
+    ∀ s u : V, HenkinSatisfies S p (n + 1) (ppair u s) ↔
       HenkinSet S ((⟨subst ℒₒᵣ (qVec ℒₒᵣ (henkinFvarVec n s)) p, by
         simpa using hp.subst (isSemitermVec_henkinFvarVec ℒₒᵣ n s).qVec⟩ :
           Semiformula V ℒₒᵣ 1).subst ![(Semiterm.fvar u : Term V ℒₒᵣ)]).val := by
+  intro s u
   rw [Semiformula.val_subst_fvar, HenkinSatisfies, henkinFvarVec_ppair,
     substs1_subst_qVec (isSemitermVec_henkinFvarVec ℒₒᵣ n s) hp (by simp)]
 
@@ -366,7 +391,7 @@ include hS hcons
 
 /-- Satisfaction in the Henkin set of an arithmetical theory respects provable equality of the
 first entry of the list. -/
-lemma henkinSatisfies_ppair_of_henkinEq {n p : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p) (s : V)
+lemma henkinSatisfies_ppair_of_henkinEq (hp : IsSemiformula ℒₒᵣ (n + 1) p) (s : V)
     {u v : V} (huv : HenkinEq S u v) (h : HenkinSatisfies S p (n + 1) (ppair u s)) :
     HenkinSatisfies S p (n + 1) (ppair v s) := by
   rw [henkinSatisfies_ppair_iff hp] at h ⊢
@@ -378,10 +403,10 @@ lemma henkinSatisfies_ppair_of_henkinEq {n p : V} (hp : IsSemiformula ℒₒᵣ 
   exact HenkinSet.modus_ponens hS hcons h
     (henkinSet_of_tprovable_imp S hS hcons (Arithmetic.replace S _ _ _) huv')
 
-lemma henkinSatisfies_all_iff_isRepresentative {n p : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p)
-    (s : V) :
-    HenkinSatisfies S (^∀ p) n s ↔
+lemma henkinSatisfies_all_iff_isRepresentative (hp : IsSemiformula ℒₒᵣ (n + 1) p) :
+    ∀ s : V, HenkinSatisfies S (^∀ p) n s ↔
       ∀ y, IsRepresentative S y → HenkinSatisfies S p (n + 1) (ppair y s) := by
+  intro s
   rw [henkinSatisfies_all_iff hS hcons hp]
   constructor
   · intro h y _
@@ -390,10 +415,10 @@ lemma henkinSatisfies_all_iff_isRepresentative {n p : V} (hp : IsSemiformula ℒ
     obtain ⟨y, hy, hyu⟩ := exists_isRepresentative S hS hcons u
     exact henkinSatisfies_ppair_of_henkinEq hS hcons hp s hyu (h y hy)
 
-lemma henkinSatisfies_exs_iff_isRepresentative {n p : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p)
-    (s : V) :
-    HenkinSatisfies S (^∃ p) n s ↔
+lemma henkinSatisfies_exs_iff_isRepresentative (hp : IsSemiformula ℒₒᵣ (n + 1) p) :
+    ∀ s : V, HenkinSatisfies S (^∃ p) n s ↔
       ∃ y, IsRepresentative S y ∧ HenkinSatisfies S p (n + 1) (ppair y s) := by
+  intro s
   rw [henkinSatisfies_exs_iff hS hcons hp]
   constructor
   · rintro ⟨u, hu⟩

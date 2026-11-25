@@ -16,8 +16,6 @@ Definable elements of models of arithmetic.
 - [Kay91, §8.1]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -31,16 +29,16 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 abbrev sigmaDefinableElements (k : ℕ) (M : Type*) [ORingStructure M] : Set M :=
   definableElementsOver (∅ : Set M) (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k)
 
-variable {j : ℕ} {M : Type} [ORingStructure M]
+variable {j k : ℕ} {M : Type} [ORingStructure M] {a : M}
 
-lemma mem_sigmaDefinableElements_iff {k : ℕ} {a : M} : a ∈ sigmaDefinableElements k M ↔
+lemma mem_sigmaDefinableElements_iff : a ∈ sigmaDefinableElements k M ↔
     ∃ φ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k φ ∧ ∀ x, M ⊧/![x] φ ↔ x = a :=
   mem_definableElementsOver_empty_iff (C := fun φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k φ) fun _ _ h ↦ h.rew _
 
 /-- An element defined uniquely from definable elements by a $\Sigma_k$ formula is definable. -/
-lemma mem_sigmaDefinableElements_of_unique {k m : ℕ} (hk : 1 ≤ k)
+lemma mem_sigmaDefinableElements_of_unique {m : ℕ} (hk : 1 ≤ k)
     {ψ : ArithmeticSemisentence (m + 1)} (hψ : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 k ψ) {v : Fin m → M}
-    (hv : ∀ i, v i ∈ sigmaDefinableElements k M) {a : M} (ha : ∀ x, M ⊧/(x :> v) ψ ↔ x = a) :
+    (hv : ∀ i, v i ∈ sigmaDefinableElements k M) (ha : ∀ x, M ⊧/(x :> v) ψ ↔ x = a) :
     a ∈ sigmaDefinableElements k M := by
   induction m with
   | zero => exact mem_sigmaDefinableElements_iff.mpr ⟨ψ, hψ, by simpa [Matrix.empty_eq] using ha⟩
@@ -61,10 +59,14 @@ lemma mem_sigmaDefinableElements_of_unique {k m : ℕ} (hk : 1 ≤ k)
         | succ i => cases i using Fin.cases <;> simp [Fin.tail]
       simp [← ha x, hv₀, hw]
 
+section
+
+variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)} {e : Fin n → M}
+  {f : ℕ → M}
+
 /-- The least witness of a formula with parameters is defined by a formula whose parameters are
 among those of the formula, and which is $\Sigma_{j+1}$ if the formula is $\Pi_j$. -/
-lemma exists_defining_formula_of_least [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)}
-    {e : Fin n → M} {f : ℕ → M} {x : M} (hx : φ.Eval (x :> e) f)
+lemma exists_defining_formula_of_least {x : M} (hx : φ.Eval (x :> e) f)
     (hmin : ∀ y < x, ¬φ.Eval (y :> e) f) :
     ∃ (m : ℕ) (ψ : ArithmeticSemisentence (m + 1)) (w : Fin m → M),
       (∀ j, ℬ[<, ℒₒᵣ].Hierarchy 𝚷 j φ → ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (j + 1) ψ) ∧
@@ -105,9 +107,8 @@ lemma exists_defining_formula_of_least [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ}
 
 /-- A $\Pi_j$ formula with parameters among the $\Sigma_{j+1}$-definable elements and a witness
 has a least witness, and it is $\Sigma_{j+1}$-definable. -/
-lemma exists_least_mem_sigmaDefinableElements [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ}
-    {φ : ArithmeticSemiformula ℕ (n + 1)} (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 j φ) {e : Fin n → M}
-    {f : ℕ → M} (he : ∀ i, e i ∈ sigmaDefinableElements (j + 1) M)
+lemma exists_least_mem_sigmaDefinableElements
+    (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 j φ) (he : ∀ i, e i ∈ sigmaDefinableElements (j + 1) M)
     (hf : ∀ i, f i ∈ sigmaDefinableElements (j + 1) M) (h : ∃ x, φ.Eval (x :> e) f) :
     ∃ x ∈ sigmaDefinableElements (j + 1) M, φ.Eval (x :> e) f ∧ ∀ y < x, ¬φ.Eval (y :> e) f := by
   obtain ⟨x₀, hx₀⟩ := h
@@ -128,6 +129,8 @@ lemma exists_least_mem_sigmaDefinableElements [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n
     · exact hdef
   · exact hx
   · exact hmin
+
+end
 
 namespace sigmaDefinableElements
 
@@ -155,10 +158,10 @@ def emb : sigmaDefinableElements (j + 1) M ↪ₛ[ℒₒᵣ] M where
 @[simp]
 lemma emb_apply (x : sigmaDefinableElements (j + 1) M) : emb j M x = x.val := rfl
 
-variable (j) in
+variable (j) [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
+
 /-- [HP98, Lemma IV.1.39] -/
-theorem sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] :
-    IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE (j + 1)) (emb j M) := by
+theorem sigmaElementary : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE (j + 1)) (emb j M) := by
   have witness {n : ℕ} {φ : ArithmeticSemiformula ℕ (n + 1)} (hφ : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 j φ)
       (e : Fin n → sigmaDefinableElements (j + 1) M) (f : ℕ → sigmaDefinableElements (j + 1) M)
       (h : ∃ x : M, φ.Eval (x :> emb j M ∘ e) (emb j M ∘ f)) :
@@ -174,9 +177,8 @@ theorem sigmaElementary [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] :
   · intro m hm n φ hφ
     exact witness (hφ.hierarchy.mono (by omega))
 
-variable (j) in
 /-- [HP98, Corollary IV.1.40] -/
-theorem models_ISigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] : (sigmaDefinableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗜𝚺 j := by
+theorem models_ISigma : (sigmaDefinableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗜𝚺 j := by
   have hK : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE (j + 1))
       (emb j M) := sigmaElementary j
   have : (sigmaDefinableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ :=
@@ -218,9 +220,11 @@ open Bootstrapping
 
 variable {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
+variable (j)
+
 /-- `x` is the element defined by the code `c`: `c` codes the matrix of a prenex $\Pi_j$ formula
 in one variable, and `x` is the first component of the least element satisfying it. -/
-def DefinesElement (j : ℕ) (c x : V) : Prop :=
+def DefinesElement (c x : V) : Prop :=
   ∃ p, π₁ p = x ∧ PrenexSatisfied 𝚷 j (p ∷ 0) c ∧ ∀ q < p, ¬PrenexSatisfied 𝚷 j (q ∷ 0) c
 
 /-- The $\Sigma_{j+1}$ definition of `DefinesElement j`. -/
@@ -239,10 +243,12 @@ instance DefinesElement.defined : (j : ℕ) →
     simp [definesElementDef, DefinesElement, (PrenexSatisfied.pi_defined' j).df,
       eq_comm]
 
-instance DefinesElement.definable (j : ℕ) : 𝚺ᴬ_[j + 1]-Relation (DefinesElement j : V → V → Prop) :=
+instance DefinesElement.definable : 𝚺ᴬ_[j + 1]-Relation (DefinesElement j : V → V → Prop) :=
   (DefinesElement.defined j).to_definable
 
-lemma DefinesElement.unique {c x x' : V} (h : DefinesElement j c x)
+variable {j} {x : V}
+
+lemma DefinesElement.unique {c x' : V} (h : DefinesElement j c x)
     (h' : DefinesElement j c x') : x = x' := by
   obtain ⟨p, rfl, hp, hmin⟩ := h
   obtain ⟨p', rfl, hp', hmin'⟩ := h'
@@ -254,10 +260,12 @@ lemma DefinesElement.unique {c x x' : V} (h : DefinesElement j c x)
       exact hmin' p h hp
   rfl
 
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)]
+
 /-- Every $\Sigma_{j+1}$-definable element of a model of $\mathsf{I}\Sigma_{j+1}$ is defined by a
 standard code. -/
-lemma exists_definesElement [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {x : V}
-    (hx : x ∈ sigmaDefinableElements (j + 1) V) : ∃ c : ℕ, DefinesElement j (c : V) x := by
+lemma exists_definesElement (hx : x ∈ sigmaDefinableElements (j + 1) V) :
+    ∃ c : ℕ, DefinesElement j (c : V) x := by
   obtain ⟨φ, hφ, hφx⟩ := mem_sigmaDefinableElements_iff.mp hx
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1))
   have : V↓[ℒₒᵣ] ⊧* 𝗕𝚺 j := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1))
@@ -295,7 +303,7 @@ lemma exists_definesElement [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] {x : V}
 /-- In a nonstandard model of $\mathsf{I}\Sigma_{j+1}$ the $\Sigma_{j+1}$-definable elements are
 bounded.
 - [HP98, Lemma IV.1.37] -/
-theorem exists_bound_sigmaDefinableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1)] (a : NonstandardElement V) :
+theorem exists_bound_sigmaDefinableElements (a : NonstandardElement V) :
     ∃ b, ∀ x ∈ sigmaDefinableElements (j + 1) V, x < b := by
   have : Fact (1 ≤ j + 1) := ⟨Nat.le_add_left 1 j⟩
   obtain ⟨u, -, hu⟩ := finset_comprehension (m := j + 1) (Γ := 𝚺)
@@ -312,9 +320,10 @@ theorem exists_bound_sigmaDefinableElements [V↓[ℒₒᵣ] ⊧* 𝗜𝚺(j + 1
 
 end code
 
+variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] in
 /-- The definable elements refute $\mathsf{B}\Sigma_{j+1}$ once one of them is nonstandard.
 - [HP98, Lemma IV.1.41] -/
-theorem sigmaDefinableElements.not_models_BSigma [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] (a : NonstandardElement M)
+theorem sigmaDefinableElements.not_models_BSigma (a : NonstandardElement M)
     (ha : (a : M) ∈ sigmaDefinableElements (j + 1) M) :
     ¬(sigmaDefinableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗕𝚺 (j + 1) := by
   intro hK
@@ -500,7 +509,9 @@ namespace definableElements
 
 open definableClosure
 
-lemma existsUnique_realize (a : definableElements ℒₒᵣ M) :
+variable (a : definableElements ℒₒᵣ M)
+
+lemma existsUnique_realize :
     ∃! y : N, ∀ θ : ArithmeticSemisentence 1, M ⊧/![a.1] θ → N ⊧/![y] θ := by
   obtain ⟨θa, ha⟩ := mem_definableElements_iff.mp a.2
   obtain ⟨y, hy, huniq⟩ := (ElementaryEquiv.existsUnique_iff (N := N) θa).mp
@@ -518,14 +529,15 @@ lemma existsUnique_realize (a : definableElements ℒₒᵣ M) :
     exact huniq y' (hy' θa ((ha _).mpr rfl))
 
 /-- The element of `N` realizing the type of an element of `M` definable without parameters. -/
-noncomputable def primeModelMap (a : definableElements ℒₒᵣ M) : N :=
+noncomputable def primeModelMap : N :=
   (existsUnique_realize a).exists.choose
 
-lemma realize_primeModelMap (a : definableElements ℒₒᵣ M)
-    {θ : ArithmeticSemisentence 1} (h : M ⊧/![a.1] θ) : N ⊧/![primeModelMap a] θ :=
+lemma realize_primeModelMap {θ : ArithmeticSemisentence 1} (h : M ⊧/![a.1] θ) :
+    N ⊧/![primeModelMap a] θ :=
   (existsUnique_realize a).exists.choose_spec θ h
 
-lemma eq_primeModelMap {a : definableElements ℒₒᵣ M} {y : N}
+variable {a} in
+lemma eq_primeModelMap {y : N}
     (h : ∀ θ : ArithmeticSemisentence 1, M ⊧/![a.1] θ → N ⊧/![y] θ) : y = primeModelMap a :=
   (existsUnique_realize a).unique h fun _ ↦ realize_primeModelMap a
 
@@ -563,8 +575,7 @@ lemma evalb_primeModelMap {n : ℕ} (φ : ArithmeticSemisentence n)
     ext i
     cases i using Fin.cases <;> simp [Fin.tail]
 
-lemma primeModelMap_mem (a : definableElements ℒₒᵣ M) :
-    (primeModelMap a : N) ∈ definableElements ℒₒᵣ N := by
+lemma primeModelMap_mem : (primeModelMap a : N) ∈ definableElements ℒₒᵣ N := by
   obtain ⟨θ, hθ⟩ := mem_definableElements_iff.mp a.2
   obtain ⟨y, -, huniq⟩ := (ElementaryEquiv.existsUnique_iff (N := N) θ).mp
     ⟨a.1, (hθ _).mpr rfl, fun x ↦ (hθ x).mp⟩

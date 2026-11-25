@@ -10,8 +10,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Bootstrapping.Syn
 # Derivations under a block of universal quantifiers
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -26,8 +24,10 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable {T : Theory L} [T.Δ₁]
 
+variable {p q : V}
+
 /-- If the free instance of `p` follows from that of `q`, then `^∀ p` follows from `^∀ q`. -/
-private lemma Derivable.neg_all_all {p q : V} (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
+private lemma Derivable.neg_all_all (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q)
     (h : Derivable T (insert (neg L (free L q)) ({free L p} : V))) :
     Derivable T (insert (neg L (^∀ q)) ({^∀ p} : V)) := by
   have he : substs1 L ^&0 (neg L (Bootstrapping.shift L q)) = neg L (free L q) :=
@@ -43,7 +43,9 @@ private lemma Derivable.neg_all_all {p q : V} (hp : IsSemiformula L 1 p) (hq : I
       tauto
   · simp [shift_neg hq, shift_exs hq.neg.isUFormula]
 
-private lemma isSemitermVec_of_bvar_fvar {m i v : V} (hvl : len v = m)
+variable {m i v : V}
+
+private lemma isSemitermVec_of_bvar_fvar (hvl : len v = m)
     (hv : ∀ x < m, (x < i → v.[x] = ^#x) ∧ (i ≤ x → v.[x] = ^&(x - i))) :
     IsSemitermVec L m i v :=
   IsSemitermVec.iff.mpr ⟨hvl, fun x hx ↦ by
@@ -64,7 +66,7 @@ private lemma exists_vec_bvar_fvar (m i : V) :
 /-- Opening the outermost quantifier of `qqAlls (subst L v' r) i`, where `v'` keeps the innermost
 `i + 1` bound variables of `r` and replaces the others by free variables, with the eigenvariable
 `^&0`. -/
-private lemma free_qqAlls_subst {m i v v' r : V} (hr : L.IsSemisentence m r) (hvl : len v = m)
+private lemma free_qqAlls_subst {v' r : V} (hr : L.IsSemisentence m r) (hvl : len v = m)
     (hv : ∀ x < m, (x < i → v.[x] = ^#x) ∧ (i ≤ x → v.[x] = ^&(x - i))) (hv'l : len v' = m)
     (hv' : ∀ x < m, (x < i + 1 → v'.[x] = ^#x) ∧ (i + 1 ≤ x → v'.[x] = ^&(x - (i + 1)))) :
     free L (qqAlls (subst L v' r) i) = qqAlls (subst L v r) i := by
@@ -93,8 +95,7 @@ private lemma free_qqAlls_subst {m i v v' r : V} (hr : L.IsSemisentence m r) (hv
 
 /-- If `p` follows from `q` once their `m` bound variables are replaced by the free variables
 `^&0, …, ^&(m - 1)`, then `qqAlls p m` follows from `qqAlls q m`. -/
-theorem Derivable.neg_qqAlls_qqAlls {m p q : V} (hp : L.IsSemisentence m p)
-    (hq : L.IsSemisentence m q)
+theorem Derivable.neg_qqAlls_qqAlls (hp : L.IsSemisentence m p) (hq : L.IsSemisentence m q)
     (h : Derivable T (insert (neg L (subst L (fvarVec m) q)) ({subst L (fvarVec m) p} : V))) :
     Derivable T (insert (neg L (qqAlls q m)) ({qqAlls p m} : V)) := by
   suffices ∀ i ≤ m, ∃ v, (len v = m ∧ ∀ x < m, (x < i → v.[x] = ^#x) ∧ (i ≤ x → v.[x] = ^&(x - i)))

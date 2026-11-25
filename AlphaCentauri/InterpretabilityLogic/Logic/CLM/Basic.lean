@@ -12,8 +12,6 @@ The logic $\mathbf{CLM}$ and its completeness with respect to finite models.
 - [Ign91, §6]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
@@ -69,14 +67,16 @@ def ofModal : ProvabilityLogic.Formula (Formula α) → Formula α
 
 @[simp]
 lemma ofModal_atom {A : Formula α} : ofModal (.atom A) = A := rfl
+
+variable {A : ProvabilityLogic.Formula (Formula α)}
+
 @[simp]
 lemma ofModal_falsum : ofModal (⊥ : ProvabilityLogic.Formula (Formula α)) = ⊥ := rfl
 @[simp]
-lemma ofModal_imp {A B : ProvabilityLogic.Formula (Formula α)} :
+lemma ofModal_imp {B : ProvabilityLogic.Formula (Formula α)} :
     ofModal (A 🡒 B) = ofModal A 🡒 ofModal B := rfl
 @[simp]
-lemma ofModal_box {A : ProvabilityLogic.Formula (Formula α)} :
-    ofModal (□A) = □(ofModal A) := rfl
+lemma ofModal_box : ofModal (□A) = □(ofModal A) := rfl
 
 end Formula
 
@@ -378,6 +378,8 @@ instance : CLAdequate (clmAdequateClosure X) where
 open Entailment
 
 variable {L : Logic α} [L.ExtendsGL] [Entailment.Cl L]
+variable {U : Finset (ProvabilityLogic.Formula (Formula α))}
+  {Z W₀ : ProvabilityLogic.Formula (Formula α)} {Y : Finset (Formula α)} {E : Formula α}
 
 omit [DecidableEq α] [Adequate X] in
 lemma ofModal_disj₂ : (l : List (ProvabilityLogic.Formula (Formula α))) →
@@ -390,7 +392,7 @@ lemma ofModal_disj₂ : (l : List (ProvabilityLogic.Formula (Formula α))) →
     rfl
 
 omit [Adequate X] [L.ExtendsGL] in
-lemma ofModal_disj_imp {U : Finset (ProvabilityLogic.Formula (Formula α))} {D : Formula α}
+lemma ofModal_disj_imp {D : Formula α}
     (h : ∀ Z ∈ U, L ⊢ Formula.ofModal Z 🡒 D) : L ⊢ Formula.ofModal U.disj 🡒 D := by
   change L ⊢ Formula.ofModal (⋁U.toList) 🡒 D
   rw [ofModal_disj₂]
@@ -400,16 +402,14 @@ lemma ofModal_disj_imp {U : Finset (ProvabilityLogic.Formula (Formula α))} {D :
   exact h Z (Finset.mem_toList.mp hZ)
 
 omit [Adequate X] [L.ExtendsGL] in
-lemma imp_ofModal_disj {U : Finset (ProvabilityLogic.Formula (Formula α))}
-    {Z : ProvabilityLogic.Formula (Formula α)} (h : Z ∈ U) :
-    L ⊢ Formula.ofModal Z 🡒 Formula.ofModal U.disj := by
+lemma imp_ofModal_disj (h : Z ∈ U) : L ⊢ Formula.ofModal Z 🡒 Formula.ofModal U.disj := by
   change L ⊢ Formula.ofModal Z 🡒 Formula.ofModal (⋁U.toList)
   rw [ofModal_disj₂]
   exact right_Disj₂_intro _ (List.mem_map_of_mem (Finset.mem_toList.mpr h))
 
 /-- Every `□`-formula in `clmAdequateClosure X` is equivalent to the translation of a `□`-formula
 of the LR-closure of `atoms X`. -/
-lemma exists_isBoxBody_of_box_mem {E : Formula α} (h : □E ∈ clmAdequateClosure X) :
+lemma exists_isBoxBody_of_box_mem (h : □E ∈ clmAdequateClosure X) :
     ∃ E', IsBoxBody (atoms X) E' ∧ L ⊢ □E 🡘 □(Formula.ofModal E') := by
   classical
   rcases tame_or_of_mem h with h | ⟨_, _, _, _, h⟩ | ⟨B, hB, S, hS, h⟩
@@ -486,13 +486,12 @@ lemma exists_isBoxBody_of_box_mem {E : Formula α} (h : □E ∈ clmAdequateClos
   cl_prover [h₄, h₅]
 
 omit [DecidableEq α] [Adequate X] in
-lemma provable_ofModal_iff {Z Z' : ProvabilityLogic.Formula (Formula α)} (h : 𝐆𝐋 ⊢ Z 🡘 Z') :
+lemma provable_ofModal_iff {Z' : ProvabilityLogic.Formula (Formula α)} (h : 𝐆𝐋 ⊢ Z 🡘 Z') :
     L ⊢ Formula.ofModal Z 🡘 Formula.ofModal Z' :=
   Logic.provable_ofModal h
 
 omit [Adequate X] [L.ExtendsGL] in
-private lemma exists_and_box_neg {W₀ : ProvabilityLogic.Formula (Formula α)}
-    (hW₀ : LRClosure (atoms X) true W₀) {Y : Finset (Formula α)}
+private lemma exists_and_box_neg (hW₀ : LRClosure (atoms X) true W₀)
     (hY : ∀ E ∈ Y, ∃ b Z, LRClosure (atoms X) b Z ∧ L ⊢ E 🡘 □(∼Formula.ofModal Z)) :
     ∃ W, LRClosure (atoms X) true W ∧ L ⊢ Formula.ofModal W 🡘 Formula.ofModal W₀ ⋏ Y.conj := by
   induction Y using Finset.induction_on with
@@ -507,8 +506,7 @@ private lemma exists_and_box_neg {W₀ : ProvabilityLogic.Formula (Formula α)}
     cl_prover [h, hE, c₁, c₂]
 
 omit [Adequate X] [L.ExtendsGL] in
-private lemma exists_and_box_imp {b₀ : Bool} {W₀ : ProvabilityLogic.Formula (Formula α)}
-    (hW₀ : LRClosure (atoms X) b₀ W₀) {Y : Finset (Formula α)}
+private lemma exists_and_box_imp {b₀ : Bool} (hW₀ : LRClosure (atoms X) b₀ W₀)
     (hY : ∀ E ∈ Y, ∃ G, ∃ S T : Finset (ProvabilityLogic.Formula (Formula α)),
       LRClosure (atoms X) true G ∧ (∀ C ∈ S, LRClosure (atoms X) true C) ∧
         (∀ C ∈ T, LRClosure (atoms X) true C) ∧
@@ -526,7 +524,7 @@ private lemma exists_and_box_imp {b₀ : Bool} {W₀ : ProvabilityLogic.Formula 
     change L ⊢ Formula.ofModal W ⋏ □(Formula.ofModal (G 🡒 S.disj ⋎ (T.image (◇·)).disj)) 🡘 _
     cl_prover [h, hE, c₁, c₂]
 
-lemma exists_box_neg_of_mem_boxes {E : Formula α} (h : E ∈ boxes X) :
+lemma exists_box_neg_of_mem_boxes (h : E ∈ boxes X) :
     ∃ b Z, LRClosure (atoms X) b Z ∧ L ⊢ E 🡘 □(∼Formula.ofModal Z) := by
   classical
   rcases Finset.mem_union.mp h with h | h
@@ -545,8 +543,8 @@ lemma exists_box_neg_of_mem_boxes {E : Formula α} (h : E ∈ boxes X) :
 
 - [Ign91, Definition 6.1]
 -/
-lemma exists_mem_operands_iff_and_conj (hB : B ∈ operands X) {Y : Finset (Formula α)}
-    (hY : Y ⊆ boxes X) : ∃ B' ∈ operands X, L ⊢ B' 🡘 B ⋏ Y.conj := by
+lemma exists_mem_operands_iff_and_conj (hB : B ∈ operands X) (hY : Y ⊆ boxes X) :
+    ∃ B' ∈ operands X, L ⊢ B' 🡘 B ⋏ Y.conj := by
   classical
   obtain ⟨W₀, hW₀, rfl⟩ := exists_of_mem_operands hB
   obtain ⟨W, hW, h⟩ := exists_and_box_neg (L := L) hW₀ fun E hE ↦
@@ -560,7 +558,7 @@ formula `B'` with `□∼B'` in `boxes X`.
 
 - [Ign91, Definition 6.1]
 -/
-lemma exists_box_neg_mem_boxes_iff_and_conj (hB : B ∈ operands X) {Y : Finset (Formula α)}
+lemma exists_box_neg_mem_boxes_iff_and_conj (hB : B ∈ operands X)
     (hY : ∀ E ∈ Y, E ∈ clmAdequateClosure X ∧ ∃ D, E = □D) :
     ∃ B', □(∼B') ∈ boxes X ∧ L ⊢ B' 🡘 B ⋏ Y.conj := by
   classical
@@ -616,18 +614,20 @@ private lemma literals_provable_conj {L : Logic α} [Entailment.Cl L] {Φ : Fins
 
 namespace Veltman
 
+variable (X)
+
 /-- `y` contains the `□`-formulas of `boxes X` in `x` together with their bodies, and the sequence
 of `x` is a proper initial segment of that of `y`.
 
 - [Ign91, Definition 6.8]
 -/
-def CLMRel (X : Finset (Formula α)) (x y : IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X)) : Prop :=
+def CLMRel (x y : IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X)) : Prop :=
   (∀ {A}, □A ∈ boxes X → □A ∈ x.set → A ∈ y.set ∧ □A ∈ y.set) ∧ x.seq <+: y.seq ∧
     x.seq.length < y.seq.length
 
 namespace CLMRel
 
-variable {x y z : IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X)}
+variable {X} {x y z : IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X)}
 
 lemma trans (h₁ : CLMRel X x y) (h₂ : CLMRel X y z) : CLMRel X x z :=
   ⟨fun hA hx ↦ h₂.1 hA (h₁.1 hA hx).2, h₁.2.1.trans h₂.2.1, h₁.2.2.trans h₂.2.2⟩
@@ -645,8 +645,7 @@ of `w` followed by `C`.
 
 - [Ign91, Definition 6.8]
 -/
-def countermodelCLM (X : Finset (Formula α))
-    [Nonempty (IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X))] :
+def countermodelCLM [Nonempty (IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X))] :
     Model (IndexedSet 𝐂𝐋𝐌 (clmAdequateClosure X)) α where
   Rel' := CLMRel X
   S' w x y := CLMRel X w x ∧ CLMRel X w y ∧ x.seq = y.seq ∧
@@ -656,6 +655,8 @@ def countermodelCLM (X : Finset (Formula α))
   Val' x a := Formula.atom a ∈ x.set
 
 namespace countermodelCLM
+
+variable {X}
 
 open Model Model.World
 

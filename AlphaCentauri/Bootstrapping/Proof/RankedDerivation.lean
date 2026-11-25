@@ -8,8 +8,6 @@ public import AlphaCentauri.Bootstrapping.Proof.Measures
 # Internal derivations of bounded cut rank
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -42,20 +40,22 @@ lemma CutFreeDerivation.cutRank_eq_zero {d : V} (h : CutFreeDerivation T d) :
   · intro s _ p _ _; simp
   · definability
 
+variable (r d s : V)
+
 variable (T) in
 /-- `RankedDerivation T r d`: `d` codes a derivation of `T` whose cut formulas all have complexity
 below `r`.
 - [Bus98, Ch. I §2.4] -/
-def RankedDerivation (r d : V) : Prop := Derivation T d ∧ cutRank L d ≤ r
+def RankedDerivation : Prop := Derivation T d ∧ cutRank L d ≤ r
 
 variable (T) in
 /-- `RankedDerivationOf T r d s`: `d` codes a derivation of `T` of cut rank at most `r` whose
 end-sequent is `s`. -/
-def RankedDerivationOf (r d s : V) : Prop := fstIdx d = s ∧ RankedDerivation T r d
+def RankedDerivationOf : Prop := fstIdx d = s ∧ RankedDerivation T r d
 
 variable (T) in
 /-- `RankedDerivable T r s`: the sequent `s` has a derivation over `T` of cut rank at most `r`. -/
-def RankedDerivable (r s : V) : Prop := ∃ d, RankedDerivationOf T r d s
+def RankedDerivable : Prop := ∃ d, RankedDerivationOf T r d s
 
 section definability
 
@@ -86,7 +86,7 @@ instance RankedDerivable.definable' : 𝚺ᴬ_[0 + 1]-Relation (RankedDerivable 
 
 end definability
 
-variable {r r' d s : V}
+variable {r d s} {r' : V}
 
 namespace RankedDerivation
 
@@ -184,6 +184,8 @@ lemma RankedDerivationOf.isFormulaSet (h : RankedDerivationOf T r d s) : IsFormu
 
 namespace RankedDerivable
 
+variable {p q : V}
+
 lemma isFormulaSet (h : RankedDerivable T r s) : IsFormulaSet L s := by
   obtain ⟨d, hd⟩ := h
   exact hd.isFormulaSet
@@ -202,24 +204,24 @@ lemma em (hs : IsFormulaSet L s) (p : V) (h : p ∈ s) (hn : neg L p ∈ s) : Ra
 lemma verum (hs : IsFormulaSet L s) (h : ^⊤ ∈ s) : RankedDerivable T r s :=
   ⟨_, by simp, Derivation.verumIntro hs h, by simp⟩
 
-lemma and_m {p q : V} (h : p ^⋏ q ∈ s) (hp : RankedDerivable T r (insert p s))
+lemma and_m (h : p ^⋏ q ∈ s) (hp : RankedDerivable T r (insert p s))
     (hq : RankedDerivable T r (insert q s)) : RankedDerivable T r s := by
   obtain ⟨dp, hdp, hdp'⟩ := hp
   obtain ⟨dq, hdq, hdq'⟩ := hq
   exact ⟨_, by simp, Derivation.andIntro h ⟨hdp, hdp'.1⟩ ⟨hdq, hdq'.1⟩,
     by simp [hdp'.2, hdq'.2]⟩
 
-lemma or_m {p q : V} (h : p ^⋎ q ∈ s) (hpq : RankedDerivable T r (insert p (insert q s))) :
+lemma or_m (h : p ^⋎ q ∈ s) (hpq : RankedDerivable T r (insert p (insert q s))) :
     RankedDerivable T r s := by
   obtain ⟨d, hd, hd'⟩ := hpq
   exact ⟨_, by simp, Derivation.orIntro h ⟨hd, hd'.1⟩, by simp [hd'.2]⟩
 
-lemma all_m {p : V} (h : ^∀ p ∈ s) (hp : RankedDerivable T r (insert (free L p) (setShift L s))) :
+lemma all_m (h : ^∀ p ∈ s) (hp : RankedDerivable T r (insert (free L p) (setShift L s))) :
     RankedDerivable T r s := by
   obtain ⟨d, hd, hd'⟩ := hp
   exact ⟨_, by simp, Derivation.allIntro h ⟨hd, hd'.1⟩, by simp [hd'.2]⟩
 
-lemma ex_m {p t : V} (h : ^∃ p ∈ s) (ht : IsTerm L t)
+lemma ex_m {t : V} (h : ^∃ p ∈ s) (ht : IsTerm L t)
     (hp : RankedDerivable T r (insert (substs1 L t p) s)) : RankedDerivable T r s := by
   obtain ⟨d, hd, hd'⟩ := hp
   exact ⟨_, by simp, Derivation.exsIntro h ht ⟨hd, hd'.1⟩, by simp [hd'.2]⟩
@@ -234,7 +236,7 @@ lemma shift_m (hd : RankedDerivable T r s) : RankedDerivable T r (setShift L s) 
   exact ⟨_, by simp, Derivation.shiftRule ⟨rfl, hd'.1⟩, by simp [hd'.2]⟩
 
 /-- A cut on a formula of complexity below `r` keeps the cut rank at most `r`. -/
-lemma cut {p : V} (hp : formulaComplexity L p < r) (hd₁ : RankedDerivable T r (insert p s))
+lemma cut (hp : formulaComplexity L p < r) (hd₁ : RankedDerivable T r (insert p s))
     (hd₂ : RankedDerivable T r (insert (neg L p) s)) : RankedDerivable T r s := by
   obtain ⟨d₁, hd₁, hd₁'⟩ := hd₁
   obtain ⟨d₂, hd₂, hd₂'⟩ := hd₂

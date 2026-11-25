@@ -16,8 +16,6 @@ public import Foundation.FirstOrder.Incompleteness.Definability
 Induction axioms of $\mathsf{I}\Sigma_n$ in prenex form.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -34,12 +32,14 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 section prenexInductionAxiom
 
+variable (n : ℕ) (m Z : V)
+
 /-- `K(t)` inside the two quantifiers `∀x ∃y`: the instance of `Z` by `t` for the induction
 variable, with the parameters of `Z` moved past `x` and `y`. -/
-noncomputable def prenexInductionAtom (m Z t : V) : V := subst ℒₒᵣ (t ∷ bvarVec 2 m) Z
+noncomputable def prenexInductionAtom (t : V) : V := subst ℒₒᵣ (t ∷ bvarVec 2 m) Z
 
 /-- `¬K(0) ∨ ((K(y) ∧ ¬K(y + 1)) ∨ K(x))`, where `y` and `x` are the bound variables `0` and `1`. -/
-noncomputable def prenexInductionMatrix (m Z : V) : V :=
+noncomputable def prenexInductionMatrix : V :=
   neg ℒₒᵣ (prenexInductionAtom m Z (numeral 0)) ^⋎
     ((prenexInductionAtom m Z ^#0 ^⋏ neg ℒₒᵣ (prenexInductionAtom m Z (^#0 ^+ numeral 1))) ^⋎
       prenexInductionAtom m Z ^#1)
@@ -47,12 +47,12 @@ noncomputable def prenexInductionMatrix (m Z : V) : V :=
 /-- The prenex form `∀p⃗ ∀x ∃y (¬K(0) ∨ ((K(y) ∧ ¬K(y + 1)) ∨ K(x)))` of the induction axiom of `Z`,
 with a block of `m` universal quantifiers over the parameters.
 - [HP98, Lemma I.2.4] -/
-noncomputable def prenexInductionAxiom (m Z : V) : V :=
+noncomputable def prenexInductionAxiom : V :=
   qqAlls (^∀ ^∃ prenexInductionMatrix m Z) m
 
 /-- `Z` is a prenex $\Sigma_n$ formula without free variables, whose bound variable `0` is the
 induction variable and whose bound variables `1, …, m` are the parameters. -/
-def IsInductionMatrix (n : ℕ) (m Z : V) : Prop :=
+def IsInductionMatrix : Prop :=
   (ℒₒᵣ).IsSemisentence (m + 1) Z ∧ IsPrenexHierarchy 𝚺 n Z
 
 instance prenexInductionAtom.definable :
@@ -69,25 +69,24 @@ instance prenexInductionAxiom.definable : 𝚺ᴬ₁-Function₂ (prenexInductio
   unfold prenexInductionAxiom
   definability
 
-instance IsInductionMatrix.definable (n : ℕ) :
-    𝚫ᴬ₁-Relation (IsInductionMatrix n : V → V → Prop) := by
+instance IsInductionMatrix.definable : 𝚫ᴬ₁-Relation (IsInductionMatrix n : V → V → Prop) := by
   unfold IsInductionMatrix
   definability
 
-variable {n : ℕ} {m Z : V}
+variable {n m Z} {t : V}
 
 lemma IsInductionMatrix.isSemiformula (h : IsInductionMatrix n m Z) :
     IsSemiformula ℒₒᵣ (m + 1) Z := h.1.isSemiformula
 
-private lemma isSemitermVec_cons_bvarVec {t : V} (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
+private lemma isSemitermVec_cons_bvarVec (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
     IsSemitermVec ℒₒᵣ (m + 1) (m + 2) (t ∷ bvarVec 2 m) :=
   IsSemitermVec.cons_iff.mpr ⟨ht, IsSemitermVec.bvarVec (by rw [add_comm])⟩
 
-private lemma isSemiformula_prenexInductionAtom (hZ : IsSemiformula ℒₒᵣ (m + 1) Z) {t : V}
+private lemma isSemiformula_prenexInductionAtom (hZ : IsSemiformula ℒₒᵣ (m + 1) Z)
     (ht : IsSemiterm ℒₒᵣ (m + 2) t) : IsSemiformula ℒₒᵣ (m + 2) (prenexInductionAtom m Z t) :=
   hZ.subst (isSemitermVec_cons_bvarVec ht)
 
-private lemma isSemisentence_prenexInductionAtom (hZ : (ℒₒᵣ).IsSemisentence (m + 1) Z) {t : V}
+private lemma isSemisentence_prenexInductionAtom (hZ : (ℒₒᵣ).IsSemisentence (m + 1) Z)
     (ht : (ℒₒᵣ).IsClosedSemiterm (m + 2) t) :
     (ℒₒᵣ).IsSemisentence (m + 2) (prenexInductionAtom m Z t) := by
   apply Language.IsSemisentence.of_shift_eq
@@ -143,7 +142,7 @@ end prenexInductionAxiom
 
 section derivation
 
-variable {m Z : V}
+variable {n : ℕ} {m Z : V}
 
 private lemma coe_substCode_zero :
     ((substCode (‘0’ : ArithmeticSemiterm ℕ 0) : ℕ) : V) =
@@ -288,10 +287,9 @@ private lemma prenexIndFormula_val {n : ℕ} (h : IsInductionMatrix n m Z)
 
 end typed
 
-private lemma derivable_neg_prenexInductionAxiom {n : ℕ} {m b K Z : V}
-    (hM : IsInductionMatrix n m Z) (hb : (ℒₒᵣ).IsSemisentence m b)
-    (hKs : IsSemiformula ℒₒᵣ 1 K) (hZK : subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec m)) Z = K)
-    (hsub : subst ℒₒᵣ (fvarVec m) b = indBodyVal K) :
+private lemma derivable_neg_prenexInductionAxiom {b K : V} (hM : IsInductionMatrix n m Z)
+    (hb : (ℒₒᵣ).IsSemisentence m b) (hKs : IsSemiformula ℒₒᵣ 1 K)
+    (hZK : subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec m)) Z = K) (hsub : subst ℒₒᵣ (fvarVec m) b = indBodyVal K) :
     Derivable (∅ : Theory ℒₒᵣ)
       (insert (neg ℒₒᵣ (prenexInductionAxiom m Z)) ({qqAlls b m} : V)) := by
   have hq : (ℒₒᵣ).IsSemisentence m (^∀ ^∃ prenexInductionMatrix m Z) := by
@@ -304,8 +302,7 @@ private lemma derivable_neg_prenexInductionAxiom {n : ℕ} {m b K Z : V}
 /-- In pure logic, every induction axiom of `𝗜𝚺 n` follows from the prenex form of the induction
 axiom of a matrix `Z` coded below it.
 - [HP98, Lemma I.2.4] -/
-theorem exists_derivable_prenexInductionAxiom {n : ℕ} {p : V}
-    (h : InductionR (IsPrenexHierarchy 𝚺 n) p) :
+theorem exists_derivable_prenexInductionAxiom {p : V} (h : InductionR (IsPrenexHierarchy 𝚺 n) p) :
     ∃ m ≤ p, ∃ Z ≤ p, IsInductionMatrix n m Z ∧
       Derivable (∅ : Theory ℒₒᵣ) (insert (neg ℒₒᵣ (prenexInductionAxiom m Z)) ({p} : V)) := by
   obtain ⟨m, hm, b, hb, rfl, hU, hsh, hbv, K, hK, hKs, hKS, hsub⟩ := h
@@ -333,10 +330,10 @@ end derivation
 
 section counterexample
 
-variable {k : ℕ} {n : ℕ} {m Z : V}
+variable {k : ℕ} {n : ℕ} {m Z : V} {t a b w' θ : V} {D : ℕ}
 
 lemma IsInductionMatrix.isPrenexHierarchy_prenexInductionAtom (h : IsInductionMatrix n m Z)
-    {t : V} (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
+    (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
     IsPrenexHierarchy 𝚺 n (prenexInductionAtom m Z t) :=
   h.2.subst (isSemitermVec_cons_bvarVec ht) h.isSemiformula
 
@@ -356,12 +353,12 @@ lemma IsInductionMatrix.neg_prenexInductionMatrix (h : IsInductionMatrix n m Z) 
     neg_or h₄ h₃, neg_and h₁ h₂.neg, h₂.neg_neg]
 
 private lemma IsInductionMatrix.isCombination_prenexInductionAtom (h : IsInductionMatrix n m Z)
-    (hn : n ≤ k) {t : V} (ht : IsSemiterm ℒₒᵣ (m + 2) t) {D : ℕ} :
+    (hn : n ≤ k) (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
     IsCombination k D (prenexInductionAtom m Z t) :=
   .of_isPrenexAtMost ⟨𝚺, n, hn, h.isPrenexHierarchy_prenexInductionAtom ht⟩
 
-private lemma IsInductionMatrix.isCombination_neg_prenexInductionAtom
-    (h : IsInductionMatrix n m Z) (hn : n ≤ k) {t : V} (ht : IsSemiterm ℒₒᵣ (m + 2) t) {D : ℕ} :
+private lemma IsInductionMatrix.isCombination_neg_prenexInductionAtom (h : IsInductionMatrix n m Z)
+    (hn : n ≤ k) (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
     IsCombination k D (neg ℒₒᵣ (prenexInductionAtom m Z t)) :=
   (h.isCombination_prenexInductionAtom hn ht).neg
     (isSemiformula_prenexInductionAtom h.isSemiformula ht).isUFormula
@@ -378,8 +375,8 @@ lemma IsInductionMatrix.isReadable_all_neg_prenexInductionMatrix (h : IsInductio
     (hn : n ≤ k) : IsReadable k 3 (^∀ neg ℒₒᵣ (prenexInductionMatrix m Z)) :=
   .all (h.isCombination_neg_prenexInductionMatrix hn)
 
-private lemma subst_prenexInductionAtom {a b w' t : V} (ha : IsSemiterm ℒₒᵣ 0 a)
-    (hb : IsSemiterm ℒₒᵣ 0 b) (hw' : IsSemitermVec ℒₒᵣ m 0 w') (hZ : IsSemiformula ℒₒᵣ (m + 1) Z)
+private lemma subst_prenexInductionAtom (ha : IsSemiterm ℒₒᵣ 0 a) (hb : IsSemiterm ℒₒᵣ 0 b)
+    (hw' : IsSemitermVec ℒₒᵣ m 0 w') (hZ : IsSemiformula ℒₒᵣ (m + 1) Z)
     (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
     subst ℒₒᵣ (a ∷ b ∷ w') (prenexInductionAtom m Z t) =
       subst ℒₒᵣ (termSubst ℒₒᵣ (a ∷ b ∷ w') t ∷ w') Z := by
@@ -394,10 +391,9 @@ private lemma subst_prenexInductionAtom {a b w' t : V} (ha : IsSemiterm ℒₒ�
     show (2 + i : V) = i + 1 + 1 by rw [add_comm, add_assoc, one_add_one_eq_two]]
   simp
 
-private lemma readableTruth_subst_prenexInductionAtom_iff {D : ℕ} {θ a b w' t : V}
-    (hθ : Z = qqToPrenex 𝚺 n θ) (hθb : IsBounded θ) (hZ : IsSemiformula ℒₒᵣ (m + 1) Z)
-    (hn : n ≤ k) (ha : IsSemiterm ℒₒᵣ 0 a) (hb : IsSemiterm ℒₒᵣ 0 b)
-    (hw' : IsSemitermVec ℒₒᵣ m 0 w') (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
+private lemma readableTruth_subst_prenexInductionAtom_iff (hθ : Z = qqToPrenex 𝚺 n θ)
+    (hθb : IsBounded θ) (hZ : IsSemiformula ℒₒᵣ (m + 1) Z) (hn : n ≤ k) (ha : IsSemiterm ℒₒᵣ 0 a)
+    (hb : IsSemiterm ℒₒᵣ 0 b) (hw' : IsSemitermVec ℒₒᵣ m 0 w') (ht : IsSemiterm ℒₒᵣ (m + 2) t) :
     ReadableTruth k D (subst ℒₒᵣ (a ∷ b ∷ w') (prenexInductionAtom m Z t)) ↔
       PrenexSatisfied 𝚺 n (termVal 0 (termSubst ℒₒᵣ (a ∷ b ∷ w') t) ∷ termValVec 0 m w') θ := by
   have hu := isSemitermVec_cons_cons ha hb hw'
@@ -409,7 +405,7 @@ private lemma readableTruth_subst_prenexInductionAtom_iff {D : ℕ} {θ a b w' t
     ReadableTruth.subst_qqToPrenex_iff (.of_le hn) hθs hθb hcons,
     termValVec_cons hc.isUTerm hw'.isUTerm]
 
-private lemma subst_neg_prenexInductionMatrix {a b w' : V} (h : IsInductionMatrix n m Z)
+private lemma subst_neg_prenexInductionMatrix (h : IsInductionMatrix n m Z)
     (hu : IsSemitermVec ℒₒᵣ (m + 2) 0 (a ∷ b ∷ w')) :
     subst ℒₒᵣ (a ∷ b ∷ w') (neg ℒₒᵣ (prenexInductionMatrix m Z)) =
       subst ℒₒᵣ (a ∷ b ∷ w') (prenexInductionAtom m Z (numeral 0)) ^⋏
@@ -425,8 +421,7 @@ private lemma subst_neg_prenexInductionMatrix {a b w' : V} (h : IsInductionMatri
     (IsUFormula.and.mpr ⟨hY, h₃.isUFormula.neg⟩), substs_and hY h₃.isUFormula.neg,
     substs_or h₁.isUFormula.neg h₂.isUFormula, substs_neg h₁ hu, substs_neg h₃ hu]
 
-private lemma termVal_prenexInductionTerms {a b w' : V}
-    (hu : IsSemitermVec ℒₒᵣ (m + 2) 0 (a ∷ b ∷ w')) :
+private lemma termVal_prenexInductionTerms (hu : IsSemitermVec ℒₒᵣ (m + 2) 0 (a ∷ b ∷ w')) :
     termVal (termValVec 0 (m + 2) (a ∷ b ∷ w')) (^#0 : V) = termVal 0 a ∧
       termVal (termValVec 0 (m + 2) (a ∷ b ∷ w')) (^#1 : V) = termVal 0 b ∧
       termVal (termValVec 0 (m + 2) (a ∷ b ∷ w')) (^#0 ^+ numeral 1 : V) = termVal 0 a + 1 := by
@@ -438,9 +433,9 @@ private lemma termVal_prenexInductionTerms {a b w' : V}
     simp
   · rw [termVal_add (by simp) (Arithmetic.numeral_uterm 1), e₀, termVal_numeral]
 
-private lemma readableTruth_subst_neg_prenexInductionMatrix_iff {θ a b w' : V}
-    (h : IsInductionMatrix n m Z) (hn : n ≤ k) (hθ : Z = qqToPrenex 𝚺 n θ) (hθb : IsBounded θ)
-    (ha : IsSemiterm ℒₒᵣ 0 a) (hb : IsSemiterm ℒₒᵣ 0 b) (hw' : IsSemitermVec ℒₒᵣ m 0 w') :
+private lemma readableTruth_subst_neg_prenexInductionMatrix_iff (h : IsInductionMatrix n m Z)
+    (hn : n ≤ k) (hθ : Z = qqToPrenex 𝚺 n θ) (hθb : IsBounded θ) (ha : IsSemiterm ℒₒᵣ 0 a)
+    (hb : IsSemiterm ℒₒᵣ 0 b) (hw' : IsSemitermVec ℒₒᵣ m 0 w') :
     ReadableTruth k 3 (subst ℒₒᵣ (a ∷ b ∷ w') (neg ℒₒᵣ (prenexInductionMatrix m Z))) ↔
       PrenexSatisfied 𝚺 n (0 ∷ termValVec 0 m w') θ ∧
         (¬PrenexSatisfied 𝚺 n (termVal 0 a ∷ termValVec 0 m w') θ ∨
@@ -472,7 +467,7 @@ private lemma readableTruth_subst_neg_prenexInductionMatrix_iff {θ a b w' : V}
     hT isSemiterm_bvar_one, hV (numeral_semiterm _ 0), hV isSemiterm_bvar_zero,
     hV isSemiterm_succ_bvar_zero, hV isSemiterm_bvar_one, termVal_numeral, e₀, e₁, e₂]
 
-private lemma readableTruth_subst_all_neg_prenexInductionMatrix_iff {θ w₀ w' : V}
+private lemma readableTruth_subst_all_neg_prenexInductionMatrix_iff {w₀ : V}
     (h : IsInductionMatrix n m Z) (hn : n ≤ k) (hθ : Z = qqToPrenex 𝚺 n θ) (hθb : IsBounded θ)
     (hw₀ : IsSemiterm ℒₒᵣ 0 w₀) (hw' : IsSemitermVec ℒₒᵣ m 0 w') :
     ReadableTruth k 3 (subst ℒₒᵣ (w₀ ∷ w') (^∀ neg ℒₒᵣ (prenexInductionMatrix m Z))) ↔
@@ -497,11 +492,13 @@ private lemma readableTruth_subst_all_neg_prenexInductionMatrix_iff {θ w₀ w' 
     readableTruth_subst_neg_prenexInductionMatrix_iff h hn hθ hθb (numeral_semiterm 0 x) hw₀ hw',
     termVal_numeral]
 
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
+
 /-- In a model of `𝗜𝚺⁺ (k + 1)` with `n ≤ k`, no instance of `∀y ¬B(p⃗, x, y)` by closed terms is
 true.
 - [HP98, Lemma I.2.4] -/
-theorem IsInductionMatrix.not_readableTruth_subst [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
-    (h : IsInductionMatrix n m Z) (hn : n ≤ k) {w : V} (hw : IsSemitermVec ℒₒᵣ (m + 1) 0 w) :
+theorem IsInductionMatrix.not_readableTruth_subst (h : IsInductionMatrix n m Z) (hn : n ≤ k) {w : V}
+    (hw : IsSemitermVec ℒₒᵣ (m + 1) 0 w) :
     ¬ReadableTruth k 3 (subst ℒₒᵣ w (^∀ neg ℒₒᵣ (prenexInductionMatrix m Z))) := by
   obtain ⟨w₀, w', rfl, hw₀, hw'⟩ := hw.exists_cons
   obtain ⟨θ, hθ, hθb⟩ := isPrenexHierarchy_iff_exists_qqToPrenex.mp h.2
@@ -518,8 +515,8 @@ theorem IsInductionMatrix.not_readableTruth_subst [V↓[ℒₒᵣ] ⊧* 𝗜𝚺
 /-- The negation of the prenex form of an induction axiom of `𝗜𝚺 n`, with `n ≤ k`, is a block of
 existential quantifiers over a closed matrix in `IsReadable k 3` all of whose instances are false.
 - [HP98, Lemma I.2.4] -/
-theorem IsInductionMatrix.isFalseBlock_neg_prenexInductionAxiom [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
-    (h : IsInductionMatrix n m Z) (hn : n ≤ k) :
+theorem IsInductionMatrix.isFalseBlock_neg_prenexInductionAxiom (h : IsInductionMatrix n m Z)
+    (hn : n ≤ k) :
     IsFalseBlock k 3 (neg ℒₒᵣ (prenexInductionAxiom m Z)) := by
   have hB := h.isSemiformula_prenexInductionMatrix
   refine ⟨m + 1, ^∀ neg ℒₒᵣ (prenexInductionMatrix m Z), ?_, ?_, ?_,

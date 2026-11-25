@@ -8,8 +8,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Arithmetic.Exponential
 Injections between coded sets, and the pigeonhole principle for them.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 /-! ## Injections between sets of a model
@@ -28,23 +26,30 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 attribute [-simp] Semantics.ModelsSet.setOf_iff Semantics.ModelsSet.union_iff
 
-variable {V : Type*} {R S : V → V → Prop} {X X' Y Y' W : V → Prop} {t t' c N : V}
+variable {V : Type*} {c N t t' : V} {R S : V → V → Prop} {X X' Y Y' W : V → Prop}
+
+section
+
+variable (R X Y) (x y : V)
 
 /-- `R` is an injection of `X` into `Y`. -/
-def IsInj (R : V → V → Prop) (X Y : V → Prop) : Prop :=
+def IsInj : Prop :=
   (∀ x, X x → ∃ y, R x y) ∧ (∀ x y, X x → R x y → Y y) ∧
     ∀ x x' y, X x → X x' → R x y → R x' y → x = x'
 
+variable (X : V → Prop) (R : V → V → Prop) (X' : V → Prop) (S : V → V → Prop) (x y : V) in
 /-- `R` on `X` and `S` on `X'`. -/
-def UnionMap (X : V → Prop) (R : V → V → Prop) (X' : V → Prop) (S : V → V → Prop) (x y : V) :
-    Prop :=
+def UnionMap : Prop :=
   (X x ∧ R x y) ∨ (X' x ∧ S x y)
 
 /-- The identity relation. -/
-def IdMap (x y : V) : Prop := y = x
+def IdMap : Prop := y = x
 
+end
+
+variable (c R S) [LT V] (x z : V) in
 /-- `R` followed by `S`, through values below `c`. -/
-def CompMap [LT V] (c : V) (R S : V → V → Prop) (x z : V) : Prop := ∃ y < c, R x y ∧ S y z
+def CompMap : Prop := ∃ y < c, R x y ∧ S y z
 
 namespace IsInj
 
@@ -97,23 +102,35 @@ section
 
 variable [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝗢𝗽𝗲𝗻]
 
+section
+
+variable (t t' R X) (u v : V)
+
 /-- `R` on the tag-`t` copy, forgetting the tag. -/
-def UntagMap (t : V) (R : V → V → Prop) (u v : V) : Prop := π₁ u = t ∧ R (π₂ u) v
+def UntagMap : Prop := π₁ u = t ∧ R (π₂ u) v
 
 /-- `R`, landing in the tag-`t` copy. -/
-def TagOutMap (t : V) (R : V → V → Prop) (u v : V) : Prop := π₁ v = t ∧ R u (π₂ v)
+def TagOutMap : Prop := π₁ v = t ∧ R u (π₂ v)
 
 /-- The copy $\{\langle t, x \rangle : x \in X\}$ of `X` with the tag `t`. -/
-def Tagged (t : V) (X : V → Prop) (u : V) : Prop := π₁ u = t ∧ X (π₂ u)
+def Tagged : Prop := π₁ u = t ∧ X (π₂ u)
 
 /-- `R` acting on the tag-`t` copy and landing in the tag-`t'` copy. -/
-def TagMap (t t' : V) (R : V → V → Prop) (u v : V) : Prop := π₁ u = t ∧ π₁ v = t' ∧ R (π₂ u) (π₂ v)
+def TagMap : Prop := π₁ u = t ∧ π₁ v = t' ∧ R (π₂ u) (π₂ v)
+
+end
+
+section
+
+variable (N : V) (X : V → V → Prop) (F : V → V → V → Prop) (u v : V)
 
 /-- The indexed family $\{\langle r, x \rangle : r < N, x \in X_r\}$. -/
-def Family (N : V) (X : V → V → Prop) (u : V) : Prop := π₁ u < N ∧ X (π₁ u) (π₂ u)
+def Family : Prop := π₁ u < N ∧ X (π₁ u) (π₂ u)
 
 /-- `F r` acting on the `r`-th member of a family. -/
-def FamilyMap (F : V → V → V → Prop) (u v : V) : Prop := π₁ v = π₁ u ∧ F (π₁ u) (π₂ u) (π₂ v)
+def FamilyMap : Prop := π₁ v = π₁ u ∧ F (π₁ u) (π₂ u) (π₂ v)
+
+end
 
 lemma Tagged.disjoint {u : V} (htt : t ≠ t') (h : Tagged t X u) (h' : Tagged t' Y u) : False :=
   htt (h.1.symm.trans h'.1)
@@ -285,10 +302,10 @@ variable {m : ℕ} [Fact (1 ≤ m)] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺m]
 
 section
 
-variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (hR : 𝚺ᴬ_[m].DefinableRel R) (a b w : V)
 
-lemma exists_set_of_definableRel (hR : 𝚺ᴬ_[m].DefinableRel R) (a b : V) :
-    ∃ w : V, ∀ x < a, ∀ y < b, ⟪x, y⟫ ∈ w ↔ R x y := by
+include hR in
+lemma exists_set_of_definableRel : ∃ w : V, ∀ x < a, ∀ y < b, ⟪x, y⟫ ∈ w ↔ R x y := by
   have hp : 𝚺ᴬ_[m].DefinableRel₃ fun z x y : V ↦ z = ⟪x, y⟫ :=
     (show 𝚺ᴬ₀.DefinableRel₃ fun z x y : V ↦ z = ⟪x, y⟫ by definability).of_zero
   have : 𝚺ᴬ_[m]-Predicate fun z : V ↦ ∃ x < a, ∃ y < b, z = ⟪x, y⟫ ∧ R x y := by
@@ -307,12 +324,12 @@ lemma exists_set_of_definableRel (hR : 𝚺ᴬ_[m].DefinableRel R) (a b : V) :
   simp [pair_ext_iff]
   grind
 
-private def IsInjection (a w : V) : Prop :=
+private def IsInjection : Prop :=
   (∀ x < a + 1, ∃ y < a, ⟪x, y⟫ ∈ w) ∧
   ∀ x < a + 1, ∀ x' < a + 1, ∀ y < a, ⟪x, y⟫ ∈ w → ⟪x', y⟫ ∈ w → x = x'
 
-private lemma exists_isInjection_of_succ {a w : V} (h : IsInjection (a + 1) w) :
-    ∃ w', IsInjection a w' := by
+variable {a w} in
+private lemma exists_isInjection_of_succ (h : IsInjection (a + 1) w) : ∃ w', IsInjection a w' := by
   have : Fact (1 ≤ 1) := ⟨le_rfl⟩
   obtain ⟨w', hw'⟩ := exists_set_of_definableRel (m := 1)
     (R := fun x y ↦ ⟪x, y⟫ ∈ w ∨ (⟪x, a⟫ ∈ w ∧ ⟪a + 1, y⟫ ∈ w)) (by definability) (a + 1) a
@@ -352,7 +369,7 @@ private lemma exists_isInjection_of_succ {a w : V} (h : IsInjection (a + 1) w) :
     · exact absurd (hI x' hx₁' (a + 1) ha₂ y hy₁ h' h₂) hx'.ne
     · exact hI x hx₁ x' hx₁' a ha₁ h₁ h₁'
 
-private lemma not_isInjection (a w : V) : ¬IsInjection a w := by
+private lemma not_isInjection : ¬IsInjection a w := by
   suffices ∀ a : V, ∀ w, ¬IsInjection a w from this a w
   intro a
   induction a using ISigma1.pi1_succ_induction

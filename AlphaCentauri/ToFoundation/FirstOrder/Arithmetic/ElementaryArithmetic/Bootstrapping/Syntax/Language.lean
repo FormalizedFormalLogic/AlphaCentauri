@@ -11,8 +11,6 @@ Codes of the symbols of the language of arithmetic in models of $\mathsf{EA}$.
 - [HP98, §V.3]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 
@@ -65,8 +63,10 @@ instance gödelQuoteFuncLOR (k) : GödelQuote ((ℒₒᵣ).Func k) V := gödelQu
 @[reducible]
 instance gödelQuoteRelLOR (k) : GödelQuote ((ℒₒᵣ).Rel k) V := gödelQuoteRel k
 
-lemma isFunc_iff_LOR {k f : V} :
-    (ℒₒᵣ).IsFunc k f ↔
+section
+variable {k : V}
+
+lemma isFunc_iff_LOR {f : V} : (ℒₒᵣ).IsFunc k f ↔
     (k = 0 ∧ f = ⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝) ∨
     (k = 0 ∧ f = ⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝) ∨
     (k = 2 ∧ f = ⌜(Language.Add.add : (ℒₒᵣ).Func 2)⌝) ∨
@@ -83,9 +83,7 @@ lemma isFunc_iff_LOR {k f : V} :
       (1 : V) = (1 : ℕ) := by simp
       _       = ⌜(Language.Mul.mul : (ℒₒᵣ).Func 2)⌝ := by rfl
 
-lemma isRel_iff_LOR {k R : V} :
-    (ℒₒᵣ).IsRel k R ↔
-    (k = 2 ∧ R = ⌜(Language.Eq.eq : (ℒₒᵣ).Rel 2)⌝) ∨
+lemma isRel_iff_LOR {R : V} : (ℒₒᵣ).IsRel k R ↔ (k = 2 ∧ R = ⌜(Language.Eq.eq : (ℒₒᵣ).Rel 2)⌝) ∨
     (k = 2 ∧ R = ⌜(Language.LT.lt : (ℒₒᵣ).Rel 2)⌝) := by
   rw [isRel_def (L := ℒₒᵣ), rel_def_LOR]
   suffices
@@ -93,6 +91,8 @@ lemma isRel_iff_LOR {k R : V} :
   apply iff_of_eq
   congr
   · calc (1 : V) = (1 : ℕ) := by simp
+
+end
 
 end ElementaryArithmetic.Bootstrapping.Arithmetic
 end FFL.FirstOrder.Arithmetic

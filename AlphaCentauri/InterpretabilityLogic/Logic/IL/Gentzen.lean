@@ -9,8 +9,6 @@ public import AlphaCentauri.InterpretabilityLogic.Logic.IL.Basic
 The sequent calculus for $\mathbf{IL}$ and its agreement with $\mathbf{IL}$.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
@@ -61,8 +59,8 @@ private lemma box_conj_box : ofILAxioms 𝔸 ⊢ Γ.box.conj 🡒 □Γ.box.conj
   have h₂ : ofILAxioms 𝔸 ⊢ Γ.box.box.conj 🡒 □Γ.box.conj := box_conj;
   cl_prover [h₁, h₂];
 
-private lemma rhd_of_box_imp (N : FormulaFinset α) (X Y : Formula α) :
-    ofILAxioms 𝔸 ⊢
+variable (N : FormulaFinset α) (X Y : Formula α) in
+private lemma rhd_of_box_imp : ofILAxioms 𝔸 ⊢
       (N.image (· ▷ Y)).conj 🡒 □(X ⋏ (FormulaFinset.boxNeg N).conj 🡒 N.disj) 🡒 X ▷ Y := by
   induction N using Finset.induction_on generalizing X with
   | empty =>
@@ -132,7 +130,9 @@ private lemma conj_neg_imp_neg_disj : ofILAxioms 𝔸 ⊢ (N.image Formula.neg).
     cl_prover [this];
   cl_prover [this];
 
-private lemma conj_witness_ant {D : Formula α} :
+variable {D : Formula α}
+
+private lemma conj_witness_ant :
     ofILAxioms 𝔸 ⊢ D ⋏ □(∼D) ⋏ (Γ.conj ⋏ Γ.box.conj) ⋏ (FormulaFinset.boxNeg N).conj 🡒
       (witness Γ N D).ant.conj := by
   apply right_Fconj_intro;
@@ -148,9 +148,10 @@ private lemma conj_witness_ant {D : Formula α} :
   · have : ofILAxioms 𝔸 ⊢ (FormulaFinset.boxNeg N).conj 🡒 B := left_Fconj_intro hB;
     cl_prover [this];
 
-private lemma rhd_of_witness {D : Formula α}
-    (h : ofILAxioms 𝔸 ⊢ (witness Γ N D).ant.conj 🡒 (witness Γ N D).suc.disj) (Y : Formula α) :
-    ofILAxioms 𝔸 ⊢ Γ.box.conj ⋏ (N.image (· ▷ Y)).conj 🡒 D ▷ Y := by
+private lemma rhd_of_witness
+    (h : ofILAxioms 𝔸 ⊢ (witness Γ N D).ant.conj 🡒 (witness Γ N D).suc.disj) :
+    ∀ Y : Formula α, ofILAxioms 𝔸 ⊢ Γ.box.conj ⋏ (N.image (· ▷ Y)).conj 🡒 D ▷ Y := by
+  intro Y
   have h₁ : ofILAxioms 𝔸 ⊢ D ⋏ □(∼D) ⋏ (Γ.conj ⋏ Γ.box.conj) ⋏ (FormulaFinset.boxNeg N).conj 🡒
       N.disj := C_trans conj_witness_ant h;
   have h₂' : ofILAxioms 𝔸 ⊢ (Γ.conj ⋏ Γ.box.conj) 🡒

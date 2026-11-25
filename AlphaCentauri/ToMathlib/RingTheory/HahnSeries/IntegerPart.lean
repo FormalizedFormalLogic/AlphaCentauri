@@ -20,8 +20,6 @@ Integer parts of Hahn series and the induction they provide for predicates deter
 polynomials.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open Polynomial
@@ -49,7 +47,11 @@ def supportedIn : Subring (Lex ℝ⟦ℚ⟧) where
   zero_mem' g hg := by simp at hg
   neg_mem' {x} hx g hg := hx g (by simpa using hg)
 
-lemma coeff_mul_zero_of_support_nonpos {x y : ℝ⟦ℚ⟧} (hx : ∀ g ∈ x.support, g ≤ 0)
+section
+
+variable {x y : ℝ⟦ℚ⟧}
+
+lemma coeff_mul_zero_of_support_nonpos (hx : ∀ g ∈ x.support, g ≤ 0)
     (hy : ∀ g ∈ y.support, g ≤ 0) : (x * y).coeff 0 = x.coeff 0 * y.coeff 0 := by
   rw [coeff_mul, Finset.sum_eq_single ((0 : ℚ), (0 : ℚ))]
   · rintro ⟨i, j⟩ hij hne
@@ -61,6 +63,11 @@ lemma coeff_mul_zero_of_support_nonpos {x y : ℝ⟦ℚ⟧} (hx : ∀ g ∈ x.su
     simp only [Finset.mem_antidiagonal, mem_support, add_zero, and_true, not_and_or,
       not_not] at h
     rcases h with h | h <;> simp [h]
+
+lemma coeff_order_ne_zero (h : x ≠ 0) : x.coeff x.order ≠ 0 :=
+  mt coeff_order_eq_zero.mp h
+
+end
 
 /-- The Hahn series supported in the non-positive part of `G` whose constant coefficient is an
 integer. -/
@@ -100,17 +107,13 @@ def integerPartSubring : Subring (Lex ℝ⟦ℚ⟧) where
     obtain ⟨hx, n, hn⟩ := hx
     exact ⟨fun g hg ↦ hx g (by simpa using hg), -n, by simp [hn]⟩
 
-variable {G}
+variable {G} {x y α : Lex ℝ⟦ℚ⟧} {N : ℕ} {f : (Lex ℝ⟦ℚ⟧)[X]}
 
-lemma coeff_order_ne_zero {x : ℝ⟦ℚ⟧} (h : x ≠ 0) : x.coeff x.order ≠ 0 :=
-  mt coeff_order_eq_zero.mp h
-
-lemma pos_of_coeff {x : Lex ℝ⟦ℚ⟧} {i : ℚ} (h : ∀ j < i, (ofLex x).coeff j = 0)
+lemma pos_of_coeff {i : ℚ} (h : ∀ j < i, (ofLex x).coeff j = 0)
     (hi : 0 < (ofLex x).coeff i) : 0 < x :=
   (lt_iff 0 x).mpr ⟨i, fun j hj ↦ by simp [h j hj], by simpa using hi⟩
 
-lemma lt_of_order_lt {x y : Lex ℝ⟦ℚ⟧} (hx : 0 < x) (hy : 0 < y)
-    (h : (ofLex x).order < (ofLex y).order) : y < x := by
+lemma lt_of_order_lt (hx : 0 < x) (hy : 0 < y) (h : (ofLex x).order < (ofLex y).order) : y < x := by
   have hx' : ofLex x ≠ 0 := hx.ne'
   have hy' : ofLex y ≠ 0 := hy.ne'
   have := abs_lt_abs_of_orderTop_ofLex (x := y) (y := x) (by
@@ -118,8 +121,7 @@ lemma lt_of_order_lt {x y : Lex ℝ⟦ℚ⟧} (hx : 0 < x) (hy : 0 < y)
     exact WithTop.coe_lt_coe.mpr h)
   rwa [abs_of_pos hx, abs_of_pos hy] at this
 
-lemma order_mem_of_mem_supportedIn {x : Lex ℝ⟦ℚ⟧} (hx : x ∈ supportedIn G) (h : x ≠ 0) :
-    (ofLex x).order ∈ G :=
+lemma order_mem_of_mem_supportedIn (hx : x ∈ supportedIn G) (h : x ≠ 0) : (ofLex x).order ∈ G :=
   hx _ (coeff_order_ne_zero (x := ofLex x) h)
 
 /-- A Hahn series supported in the non-negative rationals lies between consecutive integers. -/
@@ -161,7 +163,7 @@ lemma exists_intCast_le_lt_of_support_nonneg {β : Lex ℝ⟦ℚ⟧}
   omega
 
 /-- Every Hahn series supported in `G` has an integer part in `integerPartSubring G`. -/
-lemma exists_mem_integerPartSubring_le_lt {α : Lex ℝ⟦ℚ⟧} (hα : α ∈ supportedIn G) :
+lemma exists_mem_integerPartSubring_le_lt (hα : α ∈ supportedIn G) :
     ∃ r ∈ integerPartSubring G, r ≤ α ∧ α < r + 1 := by
   set τ : Lex ℝ⟦ℚ⟧ := toLex (truncLT 0 (ofLex α))
   obtain ⟨n, hn₁, hn₂⟩ := exists_intCast_le_lt_of_support_nonneg (β := α - τ) (by
@@ -183,9 +185,8 @@ lemma exists_mem_integerPartSubring_le_lt {α : Lex ℝ⟦ℚ⟧} (hα : α ∈ 
 
 /-- A polynomial over `supportedIn G` of degree at most `N` does not vanish at a nonzero series
 whose order lies outside `G`, if `G` is closed under division by `1, …, N`. -/
-lemma eval_ne_zero_of_order_notMem {N : ℕ}
-    (hG : ∀ d : ℕ, 0 < d → d ≤ N → ∀ q : ℚ, (d : ℚ) * q ∈ G → q ∈ G)
-    {f : (Lex ℝ⟦ℚ⟧)[X]} (hf : f ≠ 0) (hN : f.natDegree ≤ N) (hc : ∀ i, f.coeff i ∈ supportedIn G)
+lemma eval_ne_zero_of_order_notMem (hG : ∀ d : ℕ, 0 < d → d ≤ N → ∀ q : ℚ, (d : ℚ) * q ∈ G → q ∈ G)
+    (hf : f ≠ 0) (hN : f.natDegree ≤ N) (hc : ∀ i, f.coeff i ∈ supportedIn G)
     {s : Lex ℝ⟦ℚ⟧} (hs : s ≠ 0) (hsG : (ofLex s).order ∉ G) : f.eval s ≠ 0 := by
   set γ := (ofLex s).order
   set T := (Finset.range (f.natDegree + 1)).filter fun i ↦ f.coeff i ≠ 0
@@ -229,10 +230,9 @@ lemma eval_ne_zero_of_order_notMem {N : ℕ}
 /-- A root of a nonzero polynomial over `supportedIn G` of degree at most `N` lies in
 `supportedIn G`, if `G` is closed under division by `1, …, N`.
 - [Kov24, Lemma 2.3] -/
-lemma mem_supportedIn_of_isRoot {N : ℕ}
-    (hG : ∀ d : ℕ, 0 < d → d ≤ N → ∀ q : ℚ, (d : ℚ) * q ∈ G → q ∈ G)
-    {f : (Lex ℝ⟦ℚ⟧)[X]} (hf : f ≠ 0) (hN : f.natDegree ≤ N) (hc : ∀ i, f.coeff i ∈ supportedIn G)
-    {α : Lex ℝ⟦ℚ⟧} (hα : f.IsRoot α) : α ∈ supportedIn G := by
+lemma mem_supportedIn_of_isRoot (hG : ∀ d : ℕ, 0 < d → d ≤ N → ∀ q : ℚ, (d : ℚ) * q ∈ G → q ∈ G)
+    (hf : f ≠ 0) (hN : f.natDegree ≤ N) (hc : ∀ i, f.coeff i ∈ supportedIn G)
+    (hα : f.IsRoot α) : α ∈ supportedIn G := by
   by_contra hαG
   set B := {g ∈ (ofLex α).support | g ∉ G}
   have hB : B.Nonempty := by
@@ -275,8 +275,7 @@ lemma mem_supportedIn_of_isRoot {N : ℕ}
     (hsγ ▸ hγ.2)
   simpa [g, map_comp, eval_comp] using hα
 
-lemma one_le_of_mem_integerPartSubring {x : Lex ℝ⟦ℚ⟧} (hx : x ∈ integerPartSubring G)
-    (hpos : 0 < x) : 1 ≤ x := by
+lemma one_le_of_mem_integerPartSubring (hx : x ∈ integerPartSubring G) (hpos : 0 < x) : 1 ≤ x := by
   obtain ⟨hsupp, n, hn⟩ := hx
   have hx0 : ofLex x ≠ 0 := hpos.ne'
   have hord := hsupp _ (coeff_order_ne_zero hx0)
@@ -302,7 +301,7 @@ lemma one_le_of_mem_integerPartSubring {x : Lex ℝ⟦ℚ⟧} (hx : x ∈ intege
 /-- The infinite series `t⁻¹ = single (-1) 1` has no integer `p`-th root in `integerPartSubring G`
 if `p * q = -1` has no solution `q` in `G`. -/
 lemma not_pow_le_lt_add_one_pow {p : ℕ} (hpG : ∀ q ∈ G, (p : ℚ) * q ≠ -1)
-    {y : Lex ℝ⟦ℚ⟧} (hy : y ∈ integerPartSubring G) (hy0 : 0 ≤ y) :
+    (hy : y ∈ integerPartSubring G) (hy0 : 0 ≤ y) :
     ¬(y ^ p ≤ toLex (single (-1 : ℚ) (1 : ℝ)) ∧ toLex (single (-1 : ℚ) (1 : ℝ)) < (y + 1) ^ p) := by
   set a : Lex ℝ⟦ℚ⟧ := toLex (single (-1 : ℚ) (1 : ℝ))
   have ha : 0 < a := pos_of_coeff (i := -1) (fun j hj ↦ by simp [a, hj.ne])
@@ -351,9 +350,9 @@ def powDenominators (n : ℕ) : AddSubgroup ℚ where
     rw [← hz]
     ring
 
-variable {n : ℕ}
+variable {n : ℕ} {q : ℚ}
 
-lemma mem_powDenominators_of_mul_mem {d : ℕ} (hdn : d ∣ n) {q : ℚ}
+lemma mem_powDenominators_of_mul_mem {d : ℕ} (hdn : d ∣ n)
     (hq : (d : ℚ) * q ∈ powDenominators n) : q ∈ powDenominators n := by
   obtain ⟨k, z, hz⟩ := hq
   obtain ⟨e, rfl⟩ := hdn
@@ -362,7 +361,7 @@ lemma mem_powDenominators_of_mul_mem {d : ℕ} (hdn : d ∣ n) {q : ℚ}
   rw [← hz]
   ring
 
-lemma mul_ne_neg_one_of_mem_powDenominators {p : ℕ} (hp : p.Prime) (hpn : ¬p ∣ n) {q : ℚ}
+lemma mul_ne_neg_one_of_mem_powDenominators {p : ℕ} (hp : p.Prime) (hpn : ¬p ∣ n)
     (hq : q ∈ powDenominators n) : (p : ℚ) * q ≠ -1 := by
   obtain ⟨k, z, hz⟩ := hq
   intro h

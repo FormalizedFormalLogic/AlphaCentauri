@@ -13,8 +13,6 @@ public import Mathlib.Order.DirectedInverseSystem
 Elementary substructures, end extensions, types and definable elements of structures.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder
@@ -30,6 +28,8 @@ variable {L : Language} {ℬ : Bounding L} {M : Type u} {N : Type v} {K : Type w
 
 namespace Tarski.Structure.Embedding
 
+variable (ι : M ↪ₛ[L] N) (κ : N ↪ₛ[L] K) (x : M)
+
 variable (L M) in
 /-- The identity embedding. -/
 @[refl]
@@ -41,11 +41,11 @@ protected def refl : M ↪ₛ[L] M where
   rel_inv' _ _ h := h
 
 @[simp]
-lemma refl_apply (x : M) : Embedding.refl L M x = x := rfl
+lemma refl_apply : Embedding.refl L M x = x := rfl
 
 /-- The composition of embeddings. -/
 @[trans]
-protected def trans (ι : M ↪ₛ[L] N) (κ : N ↪ₛ[L] K) : M ↪ₛ[L] K where
+protected def trans : M ↪ₛ[L] K where
   toFun := κ ∘ ι
   func' f v := by simp [HomClass.func ι, HomClass.func κ, Function.comp_def]
   rel' r v h := HomClass.rel κ r _ (HomClass.rel ι r v h)
@@ -53,7 +53,7 @@ protected def trans (ι : M ↪ₛ[L] N) (κ : N ↪ₛ[L] K) : M ↪ₛ[L] K wh
   rel_inv' r v h := EmbeddingClass.map_rel_inv ι r v (EmbeddingClass.map_rel_inv κ r _ h)
 
 @[simp]
-lemma trans_apply (ι : M ↪ₛ[L] N) (κ : N ↪ₛ[L] K) (x : M) : ι.trans κ x = κ (ι x) := rfl
+lemma trans_apply : ι.trans κ x = κ (ι x) := rfl
 
 end Tarski.Structure.Embedding
 
@@ -61,18 +61,20 @@ end Tarski.Structure.Embedding
 
 section
 
+variable (Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop) (ι : M ↪ₛ[L] N)
+
 /-- `ι` is $\Gamma$-elementary: every formula of $\Gamma$ takes the same truth value at elements of
 `M` as at their images.
 - [Kay91, §2.2]
 - [HP98, Definition IV.1.17] -/
-def IsElementary (Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop) (ι : M ↪ₛ[L] N) : Prop :=
+def IsElementary : Prop :=
   ∀ {n : ℕ} {φ : Semiformula L ℕ n}, Γ φ → ∀ (e : Fin n → M) (f : ℕ → M),
     φ.Eval (ι ∘ e) (ι ∘ f) ↔ φ.Eval e f
 
 /-- The Tarski–Vaught test: an embedding is elementary as soon as every formula with parameters
 from `M` and a witness in `N` has a witness in `M`.
 - [Kay91, Theorem 0.5] -/
-theorem IsElementary.of_tarskiVaught (ι : M ↪ₛ[L] N)
+theorem IsElementary.of_tarskiVaught
     (witness : ∀ {n : ℕ} (φ : Semiformula L ℕ (n + 1)) (e : Fin n → M) (f : ℕ → M),
       (∃ x : N, φ.Eval (x :> ι ∘ e) (ι ∘ f)) → ∃ x : M, φ.Eval (ι x :> ι ∘ e) (ι ∘ f)) :
     IsElementary (fun {_} _ ↦ True) ι := by
@@ -106,9 +108,11 @@ theorem IsElementary.of_tarskiVaught (ι : M ↪ₛ[L] N)
       use ι x
       simpa [Matrix.comp_vecCons''] using (ih (x :> e)).mpr hx
 
+variable {Γ ι}
+
 /-- An embedding is elementary as soon as it is elementary for the semisentences obtained from the
 formulas of the class by rewriting. -/
-lemma IsElementary.of_rew {Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop} {ι : M ↪ₛ[L] N}
+lemma IsElementary.of_rew
     (h : ∀ {n k : ℕ} {φ : Semiformula L ℕ n}, Γ φ → ∀ (ω : Rew L ℕ n Empty k) (u : Fin k → M),
       N ⊧/(ι ∘ u) (ω ▹ φ) ↔ M ⊧/u (ω ▹ φ)) : IsElementary Γ ι := by
   intro n φ hφ e f
@@ -123,41 +127,47 @@ lemma IsElementary.of_rew {Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop} {ι
       h hφ ω (Fin.append e fun x ↦ f x)
   rwa [eval_iff_of_funEqOn φ h₁, eval_iff_of_funEqOn φ fun x hx ↦ congrArg ι (h₁ x hx)] at h₂
 
-lemma IsElementary.models_iff [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
+section
+
+variable [Nonempty M] [Nonempty N]
+
+lemma IsElementary.models_iff
     (h : IsElementary (fun {_} _ ↦ True) ι) (σ : Sentence L) : N↓[L] ⊧ σ ↔ M↓[L] ⊧ σ := by
   rw [FFL.FirstOrder.models_iff, FFL.FirstOrder.models_iff]
   simpa [Matrix.empty_eq] using h (φ := Rewriting.emb σ) trivial ![] fun _ ↦ Classical.ofNonempty
 
-lemma IsElementary.modelsTheory [Nonempty M] [Nonempty N] {ι : M ↪ₛ[L] N}
-    (h : IsElementary (fun {_} _ ↦ True) ι) [N↓[L] ⊧* T] : M↓[L] ⊧* T :=
+lemma IsElementary.modelsTheory (h : IsElementary (fun {_} _ ↦ True) ι) [N↓[L] ⊧* T] : M↓[L] ⊧* T :=
   ⟨fun σ hσ ↦ (h.models_iff σ).mp <| Semantics.ModelsSet.models _ hσ⟩
+
+end
+
+section
+
+variable (Γ) (M : Type u) (N : Type v) [Tarski.Structure L M] [Tarski.Structure L N]
 
 /-- A $\Gamma$-elementary substructure: an embedding of `M` into `N` which is $\Gamma$-elementary.
 - [Kay91, §2.2] -/
-structure ElementarySubstructureOn (Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop)
-    (M : Type u) (N : Type v) [Tarski.Structure L M] [Tarski.Structure L N] where
+structure ElementarySubstructureOn where
   emb : M ↪ₛ[L] N
   isElementary : IsElementary Γ emb
 
 variable (L) in
 /-- An elementary substructure.
 - [Kay91, §0.1] -/
-abbrev ElementarySubstructure (M : Type u) (N : Type v) [Tarski.Structure L M]
-    [Tarski.Structure L N] :=
+abbrev ElementarySubstructure :=
   ElementarySubstructureOn (L := L) (fun {_} _ ↦ True) M N
 
 /-- A proper $\Gamma$-elementary substructure: a $\Gamma$-elementary substructure which is not
 surjective. -/
-structure ProperElementarySubstructureOn (Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop)
-    (M : Type u) (N : Type v) [Tarski.Structure L M] [Tarski.Structure L N]
-    extends ElementarySubstructureOn Γ M N where
+structure ProperElementarySubstructureOn extends ElementarySubstructureOn Γ M N where
   not_surjective : ¬Function.Surjective emb
 
 variable (L) in
 /-- A proper elementary substructure. -/
-abbrev ProperElementarySubstructure (M : Type u) (N : Type v) [Tarski.Structure L M]
-    [Tarski.Structure L N] :=
+abbrev ProperElementarySubstructure :=
   ProperElementarySubstructureOn (L := L) (fun {_} _ ↦ True) M N
+
+end
 
 @[inherit_doc ElementarySubstructureOn]
 notation:50 M " ≼ₑ[" L "; " Γ "] " N => @ElementarySubstructureOn L Γ M N _ _
@@ -171,13 +181,15 @@ notation:50 M " ≼ₑ[" L "] " N => ElementarySubstructure L M N
 @[inherit_doc]
 notation:50 M " ≺ₑ[" L "] " N => ProperElementarySubstructure L M N
 
-variable {Γ Γ' : ∀ {n : ℕ}, Semiformula L ℕ n → Prop}
+variable {Γ' : ∀ {n : ℕ}, Semiformula L ℕ n → Prop}
 
 instance : CoeFun (M ≼ₑ[L; Γ] N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
 
 instance : CoeFun (M ≺ₑ[L; Γ] N) (fun _ ↦ M → N) := ⟨fun e ↦ e.emb⟩
 
 namespace ElementarySubstructureOn
+
+variable (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) (x : M)
 
 variable (M Γ) in
 /-- The identity $\Gamma$-elementary substructure. -/
@@ -187,17 +199,16 @@ protected def refl : M ≼ₑ[L; Γ] M where
   isElementary _ _ _ := Iff.rfl
 
 @[simp]
-lemma refl_apply (x : M) : ElementarySubstructureOn.refl M Γ x = x := rfl
+lemma refl_apply : ElementarySubstructureOn.refl M Γ x = x := rfl
 
 /-- The composition of $\Gamma$-elementary substructures. -/
 @[trans]
-protected def trans (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) : M ≼ₑ[L; Γ] K where
+protected def trans : M ≼ₑ[L; Γ] K where
   emb := e₁.emb.trans e₂.emb
   isElementary hφ e f := (e₂.isElementary hφ (e₁ ∘ e) (e₁ ∘ f)).trans (e₁.isElementary hφ e f)
 
 @[simp]
-lemma trans_apply (e₁ : M ≼ₑ[L; Γ] N) (e₂ : N ≼ₑ[L; Γ] K) (x : M) :
-    e₁.trans e₂ x = e₂ (e₁ x) := rfl
+lemma trans_apply : e₁.trans e₂ x = e₂ (e₁ x) := rfl
 
 /-- A $\Gamma$-elementary substructure is $\Gamma'$-elementary for every $\Gamma'$ contained in
 $\Gamma$. -/
@@ -225,9 +236,8 @@ def Tarski.Structure.Iso.toElementarySubstructure (f : M ≃ₛ[L] N) : M ≼ₑ
     exact hx
 
 /-- An embedding which is elementary after composition with an isomorphism is elementary. -/
-lemma IsElementary.of_comp_iso {Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop} {ι : M ↪ₛ[L] N}
-    {κ : K ↪ₛ[L] N} (h : IsElementary Γ ι) (f : M ≃ₛ[L] K) (hf : ∀ x, κ (f x) = ι x) :
-    IsElementary Γ κ := by
+lemma IsElementary.of_comp_iso {κ : K ↪ₛ[L] N} (h : IsElementary Γ ι) (f : M ≃ₛ[L] K)
+    (hf : ∀ x, κ (f x) = ι x) : IsElementary Γ κ := by
   intro n φ hφ e g
   obtain ⟨e, rfl⟩ := f.toFun_bij.2.comp_left e
   obtain ⟨g, rfl⟩ := f.toFun_bij.2.comp_left g
@@ -237,8 +247,11 @@ lemma IsElementary.of_comp_iso {Γ : ∀ {n : ℕ}, Semiformula L ℕ n → Prop
   rw [← h₁] at h₃
   exact h₃.trans h₂.symm
 
-lemma Tarski.Structure.ElementaryEquiv.of_elementarySubstructure [Nonempty M] [Nonempty N]
-    (e : M ≼ₑ[L] N) : M ≡ₑ[L] N :=
+section
+
+variable [Nonempty M] [Nonempty N]
+
+lemma Tarski.Structure.ElementaryEquiv.of_elementarySubstructure (e : M ≼ₑ[L] N) : M ≡ₑ[L] N :=
   ⟨fun {σ} ↦ (IsElementary.models_iff e.isElementary σ).symm⟩
 
 lemma Tarski.Structure.ElementaryEquiv.of_complete (T : Theory L) [Entailment.Complete T]
@@ -253,11 +266,13 @@ lemma Tarski.Structure.ElementaryEquiv.of_complete (T : Theory L) [Entailment.Co
     simp only [models_iff, LogicalConnective.HomClass.map_neg] at hM hN ⊢
     exact iff_of_false hM hN
 
-lemma Tarski.Structure.ElementaryEquiv.existsUnique_iff [Nonempty M] [Nonempty N] [L.Eq]
+lemma Tarski.Structure.ElementaryEquiv.existsUnique_iff [L.Eq]
     [Tarski.Structure.Eq L M] [Tarski.Structure.Eq L N] [M ≡ₑ[L] N] (θ : Semisentence L 1) :
     (∃! x : M, M ⊧/![x] θ) ↔ ∃! y : N, N ⊧/![y] θ := by
   simpa [existsUnique, models_iff, ExistsUnique, Matrix.constant_eq_singleton] using
     ElementaryEquiv.models (L := L) (M₁ := M) (M₂ := N) (φ := ∃¹! θ)
+
+end
 
 end
 
@@ -348,16 +363,16 @@ structure ElementaryChain (M : ℕ → Type u) [∀ n, Tarski.Structure L (M n)]
 namespace ElementaryChain
 
 variable {M : ℕ → Type u} [∀ n, Tarski.Structure L (M n)]
-  (c : ElementaryChain L M) {k l m n : ℕ}
+  (c : ElementaryChain L M) {k l m n : ℕ} (h : m ≤ n) (x : M m)
 
 /-- The elementary substructure `M m ≼ₑ[L] M n` composed of the steps from `m` to `n`. -/
-def map (h : m ≤ n) : M m ≼ₑ[L] M n := Nat.leRecOn h (fun e ↦ e.trans (c.step _)) (.refl _ _)
+def map : M m ≼ₑ[L] M n := Nat.leRecOn h (fun e ↦ e.trans (c.step _)) (.refl _ _)
 
 @[simp]
-lemma map_self (x : M m) : c.map le_rfl x = x := by
+lemma map_self : c.map le_rfl x = x := by
   simp [map, Nat.leRecOn_self]
 
-lemma map_succ (h : m ≤ n) (x : M m) : c.map (h.trans n.le_succ) x = c.step n (c.map h x) := by
+lemma map_succ : c.map (h.trans n.le_succ) x = c.step n (c.map h x) := by
   simp [map, Nat.leRecOn_succ h]
 
 @[simp]
@@ -388,22 +403,23 @@ lemma mk_eq_mk_iff {x : M m} {y : M n} (hm : m ≤ k) (hn : n ≤ k) :
     rw [← DirectLimit.mk_apply m k x hm, ← DirectLimit.mk_apply n k y hn]
     exact congrArg (fun z : M k ↦ (⟦⟨k, z⟩⟧ : c.Union)) h
 
+variable (v : Fin k → c.Union) (i : Fin k) (f : L.Func k) (r : L.Rel k) (w : Fin k → M n)
+
 /-- A stage of the chain at which finitely many elements of its union all appear. -/
-noncomputable def stage (v : Fin k → c.Union) : ℕ := Finset.univ.sup fun i ↦ (v i).out.1
+noncomputable def stage : ℕ := Finset.univ.sup fun i ↦ (v i).out.1
 
 /-- Finitely many elements of the union, as elements of a common stage. -/
-noncomputable def lift (v : Fin k → c.Union) (i : Fin k) : M (c.stage v) :=
+noncomputable def lift : M (c.stage v) :=
   c.map (Finset.le_sup (f := fun i ↦ (v i).out.1) (Finset.mem_univ i)) (v i).out.2
 
-lemma mk_lift (v : Fin k → c.Union) (i : Fin k) : (⟦⟨c.stage v, c.lift v i⟩⟧ : c.Union) = v i :=
+lemma mk_lift : (⟦⟨c.stage v, c.lift v i⟩⟧ : c.Union) = v i :=
   (DirectLimit.mk_apply _ _ _ _).trans (Quotient.out_eq (v i))
 
 noncomputable instance : Tarski.Structure L c.Union where
   func _ f v := ⟦⟨c.stage v, func f (c.lift v)⟩⟧
   rel _ r v := rel r (c.lift v)
 
-lemma func_mk (f : L.Func k) (w : Fin k → M n) :
-    func f (fun i ↦ (⟦⟨n, w i⟩⟧ : c.Union)) = ⟦⟨n, func f w⟩⟧ := by
+lemma func_mk : func f (fun i ↦ (⟦⟨n, w i⟩⟧ : c.Union)) = ⟦⟨n, func f w⟩⟧ := by
   let v : Fin k → c.Union := fun i ↦ ⟦⟨n, w i⟩⟧
   have hs := le_max_left (c.stage v) n
   have hn := le_max_right (c.stage v) n
@@ -413,8 +429,7 @@ lemma func_mk (f : L.Func k) (w : Fin k → M n) :
   funext i
   exact (c.mk_eq_mk_iff hs hn).mp (c.mk_lift v i)
 
-lemma rel_mk (r : L.Rel k) (w : Fin k → M n) :
-    rel r (fun i ↦ (⟦⟨n, w i⟩⟧ : c.Union)) ↔ rel r w := by
+lemma rel_mk : rel r (fun i ↦ (⟦⟨n, w i⟩⟧ : c.Union)) ↔ rel r w := by
   let v : Fin k → c.Union := fun i ↦ ⟦⟨n, w i⟩⟧
   have hs := le_max_left (c.stage v) n
   have hn := le_max_right (c.stage v) n
@@ -424,8 +439,9 @@ lemma rel_mk (r : L.Rel k) (w : Fin k → M n) :
   funext i
   exact (c.mk_eq_mk_iff hs hn).mp (c.mk_lift v i)
 
+variable (n) in
 /-- The embedding of `M n` into the union of the chain. -/
-noncomputable def of (n : ℕ) : M n ↪ₛ[L] c.Union where
+noncomputable def of : M n ↪ₛ[L] c.Union where
   toFun x := ⟦⟨n, x⟩⟧
   func' f v := (c.func_mk f v).symm
   rel' r v h := (c.rel_mk r v).mpr h
@@ -433,13 +449,15 @@ noncomputable def of (n : ℕ) : M n ↪ₛ[L] c.Union where
   rel_inv' r v h := (c.rel_mk r v).mp h
 
 @[simp]
-lemma of_map (h : m ≤ n) (x : M m) : c.of n (c.map h x) = c.of m x :=
+lemma of_map : c.of n (c.map h x) = c.of m x :=
   DirectLimit.mk_apply ..
 
 @[simp]
-lemma of_comp_map (h : m ≤ n) : c.of n ∘ c.map h = c.of m := funext (c.of_map h)
+lemma of_comp_map : c.of n ∘ c.map h = c.of m := funext (c.of_map h)
 
-lemma exists_eq_of_le (n : ℕ) (y : c.Union) : ∃ m, ∃ _ : n ≤ m, ∃ x, y = c.of m x := by
+variable (n)
+
+lemma exists_eq_of_le (y : c.Union) : ∃ m, ∃ _ : n ≤ m, ∃ x, y = c.of m x := by
   obtain ⟨m, x, rfl⟩ := DirectLimit.exists_eq_mk _ y
   use max n m, le_max_left n m, c.map (le_max_right n m) x
   exact (c.of_map _ x).symm
@@ -447,7 +465,7 @@ lemma exists_eq_of_le (n : ℕ) (y : c.Union) : ∃ m, ∃ _ : n ≤ m, ∃ x, y
 /-- The elementary chain theorem: the union of an elementary chain is an elementary extension of
 each structure in the chain.
 - [Kay91, Lemma 0.6] -/
-theorem isElementary_of (n : ℕ) : IsElementary (fun {_} _ ↦ True) (c.of n) := by
+theorem isElementary_of : IsElementary (fun {_} _ ↦ True) (c.of n) := by
   suffices ∀ {k} (φ : Semiformula L ℕ k) (n : ℕ) (e : Fin k → M n) (f : ℕ → M n),
       φ.Eval (c.of n ∘ e) (c.of n ∘ f) ↔ φ.Eval e f from fun {_ φ} _ ↦ this φ n
   intro k φ
@@ -480,7 +498,7 @@ theorem isElementary_of (n : ℕ) : IsElementary (fun {_} _ ↦ True) (c.of n) :
       simpa [Matrix.comp_vecCons''] using (ih n (x :> e) f).mpr h
 
 /-- Each structure in an elementary chain is an elementary substructure of its union. -/
-noncomputable def toUnion (n : ℕ) : M n ≼ₑ[L] c.Union where
+noncomputable def toUnion : M n ≼ₑ[L] c.Union where
   emb := c.of n
   isElementary := c.isElementary_of n
 
@@ -492,20 +510,22 @@ end
 
 section
 
+variable (ℬ M N)
+
 /-- An end extension of `M` to `N` for `ℬ`: an embedding of `M` into `N` whose image is an initial
 segment for every bounding operator of `ℬ`.
 - [Kay91, Definition 2.6]
 - [HP98, Definition IV.1.3(2)] -/
-structure EndExtension (ℬ : Bounding L) (M : Type u) (N : Type v) [Tarski.Structure L M]
-    [Tarski.Structure L N] where
+structure EndExtension where
   emb : M ↪ₛ[L] N
   isInitial : ℬ.IsInitial emb
 
 /-- A proper end extension: an end extension which is not surjective.
 - [HP98, Definition IV.1.14] -/
-structure ProperEndExtension (ℬ : Bounding L) (M : Type u) (N : Type v) [Tarski.Structure L M]
-    [Tarski.Structure L N] extends EndExtension ℬ M N where
+structure ProperEndExtension extends EndExtension ℬ M N where
   not_surjective : ¬Function.Surjective emb
+
+variable {ℬ M N}
 
 @[inherit_doc]
 notation:50 M " ⊆ₑ[" ℬ "] " N => EndExtension ℬ M N
@@ -528,6 +548,8 @@ lemma emb_injective : Function.Injective e.emb := EmbeddingClass.map_inj e.emb
 @[grind =]
 lemma emb_eq_emb {x y : M} : e x = e y ↔ x = y := e.emb_injective.eq_iff
 
+variable (e₁ : M ⊆ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) (x : M)
+
 variable (ℬ M) in
 /-- The identity end extension. -/
 @[refl]
@@ -539,11 +561,11 @@ protected def refl : M ⊆ₑ[ℬ] M where
   }
 
 @[simp]
-lemma refl_apply (x : M) : EndExtension.refl ℬ M x = x := rfl
+lemma refl_apply : EndExtension.refl ℬ M x = x := rfl
 
 /-- The composition of end extensions. -/
 @[trans]
-protected def trans (e₁ : M ⊆ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) : M ⊆ₑ[ℬ] K where
+protected def trans : M ⊆ₑ[ℬ] K where
   emb := e₁.emb.trans e₂.emb
   isInitial := {
     operator_iff hR a b :=
@@ -556,7 +578,7 @@ protected def trans (e₁ : M ⊆ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) : M ⊆ₑ
   }
 
 @[simp]
-lemma trans_apply (e₁ : M ⊆ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) (x : M) : e₁.trans e₂ x = e₂ (e₁ x) :=
+lemma trans_apply : e₁.trans e₂ x = e₂ (e₁ x) :=
   rfl
 
 /-- An end extension is a $\Delta_0$-elementary substructure.
@@ -566,12 +588,13 @@ def toElementarySubstructureOn : M ≼ₑ[L; fun {_} φ ↦ ℬ.Closure φ] N wh
   emb := e.emb
   isElementary hφ v f := (Bounding.bounded_absolute e.emb hφ v f).symm
 
+variable [Nonempty M] [Nonempty N] [N↓[L] ⊧* T]
+
 include e in
 /-- A theory all of whose members are $\Pi_1$ sentences holds in `M` as soon as it holds in an end
 extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
-theorem models_of_Pi1 [Nonempty M] [Nonempty N] (hT : ∀ σ ∈ T, ℬ.Hierarchy 𝚷 1 σ)
-    [N↓[L] ⊧* T] : M↓[L] ⊧* T := by
+theorem models_of_Pi1 (hT : ∀ σ ∈ T, ℬ.Hierarchy 𝚷 1 σ) : M↓[L] ⊧* T := by
   apply models_theory_iff.mpr
   intro σ hσ
   have h := models_theory_iff.mp (inferInstance : N↓[L] ⊧* T) σ hσ
@@ -582,8 +605,7 @@ theorem models_of_Pi1 [Nonempty M] [Nonempty N] (hT : ∀ σ ∈ T, ℬ.Hierarch
 include e in
 /-- A $\Pi_1$-axiomatizable theory holds in `M` as soon as it holds in an end extension of `M`.
 - [HP98, Remark IV.1.18, Remark IV.1.21(2)] -/
-theorem models_of_Pi1Axiomatizable [Nonempty M] [Nonempty N]
-    (hT : Axiomatizable (ℬ.Hierarchy 𝚷 1) T) [N↓[L] ⊧* T] : M↓[L] ⊧* T := by
+theorem models_of_Pi1Axiomatizable (hT : Axiomatizable (ℬ.Hierarchy 𝚷 1) T) : M↓[L] ⊧* T := by
   obtain ⟨U, hU, hTU⟩ := hT
   have : U ⪯ T := hTU.symm.le
   have : T ⪯ U := hTU.le
@@ -594,8 +616,10 @@ end EndExtension
 
 namespace ProperEndExtension
 
+variable (e₁ : M ⊂ₑ[ℬ] N)
+
 /-- A proper end extension followed by an end extension is proper. -/
-protected def transLeft (e₁ : M ⊂ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) : M ⊂ₑ[ℬ] K where
+protected def transLeft (e₂ : N ⊆ₑ[ℬ] K) : M ⊂ₑ[ℬ] K where
   toEndExtension := e₁.toEndExtension.trans e₂
   not_surjective h := e₁.not_surjective <| by
     intro y
@@ -605,7 +629,7 @@ protected def transLeft (e₁ : M ⊂ₑ[ℬ] N) (e₂ : N ⊆ₑ[ℬ] K) : M �
 
 /-- The composition of proper end extensions. -/
 @[trans]
-protected def trans (e₁ : M ⊂ₑ[ℬ] N) (e₂ : N ⊂ₑ[ℬ] K) : M ⊂ₑ[ℬ] K :=
+protected def trans (e₂ : N ⊂ₑ[ℬ] K) : M ⊂ₑ[ℬ] K :=
   e₁.transLeft e₂.toEndExtension
 
 end ProperEndExtension
@@ -623,37 +647,44 @@ namespace «Type»
 
 open Semiformula
 
-variable {ξ : Type*} {k : ℕ} {M : Type*} [Tarski.Structure L M]
-  {Φ Ψ : FirstOrder.Type L ξ k} {b : ξ → M}
+variable {ξ : Type*} {k : ℕ} {M : Type*} [Tarski.Structure L M] {Ψ : FirstOrder.Type L ξ k}
+  (Φ : FirstOrder.Type L ξ k) (b : ξ → M)
 
 /-- The tuple `a` realizes `Φ` with the parameters read as `b`.
 - [Kay91, §8.1] -/
-def RealizedBy (Φ : FirstOrder.Type L ξ k) (b : ξ → M) (a : Fin k → M) : Prop :=
+def RealizedBy (a : Fin k → M) : Prop :=
   ∀ φ ∈ Φ, φ.Eval a b
+
+section
+
+variable (M : Type*) [Tarski.Structure L M] (b : ξ → M)
 
 /-- `Φ` is realized in `M` with the parameters read as `b`.
 - [Kay91, §8.1] -/
-def Realized (Φ : FirstOrder.Type L ξ k) (M : Type*) [Tarski.Structure L M] (b : ξ → M) : Prop :=
+def Realized : Prop :=
   ∃ a : Fin k → M, Φ.RealizedBy b a
 
 /-- `M` omits `Φ` with the parameters read as `b`: no tuple of `M` realizes `Φ`.
 - [Kay91, §8.1] -/
-def Omitted (Φ : FirstOrder.Type L ξ k) (M : Type*) [Tarski.Structure L M] (b : ξ → M) : Prop :=
+def Omitted : Prop :=
   ∀ a : Fin k → M, ¬Φ.RealizedBy b a
 
 /-- Every finite subset of `Φ` is realized in `M` with the parameters read as `b`.
 - [Kay91, §11.2] -/
-def FinitelySatisfied (Φ : FirstOrder.Type L ξ k) (M : Type*) [Tarski.Structure L M]
-    (b : ξ → M) : Prop :=
+def FinitelySatisfied : Prop :=
   ∀ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ → Realized (s : Set (Semiformula L ξ k)) M b
+
+end
 
 /-- `Φ` decides every formula in `M` with the parameters read as `b`: some finite subset of `Φ`
 implies the formula or its negation.
 - [Kay91, §11.2] -/
-def IsComplete (Φ : FirstOrder.Type L ξ k) (b : ξ → M) : Prop :=
+def IsComplete : Prop :=
   ∀ φ : Semiformula L ξ k, ∃ s : Finset (Semiformula L ξ k), ↑s ⊆ Φ ∧
     ((∀ a, RealizedBy (s : Set (Semiformula L ξ k)) b a → φ.Eval a b) ∨
       ∀ a, RealizedBy (s : Set (Semiformula L ξ k)) b a → ¬φ.Eval a b)
+
+variable {Φ b}
 
 lemma RealizedBy.mono {a : Fin k → M} (h : Φ.RealizedBy b a) (hΨΦ : Ψ ⊆ Φ) : Ψ.RealizedBy b a :=
   fun φ hφ ↦ h φ (hΨΦ hφ)
@@ -672,7 +703,7 @@ section theory
 open _root_.FFL.Entailment
 
 
-variable {L : Language.{u}} {k : ℕ}
+variable {L : Language.{u}} {k : ℕ} (Φ : FirstOrder.Type L Empty k) (T : Theory L)
 
 /-- `T + Φ(c̄)`: `T` together with the formulas of `Φ`, their variables filled by new constants.
 - [Kay91, §8.1] -/
@@ -682,18 +713,18 @@ def _root_.FFL.FirstOrder.Theory.addType (T : Theory L) (Φ : FirstOrder.Type L 
 
 /-- `Φ` is a type over `T`: `T + Φ(c̄)` is consistent.
 - [Kay91, §8.1] -/
-def IsTypeOver (Φ : FirstOrder.Type L Empty k) (T : Theory L) : Prop :=
+def IsTypeOver : Prop :=
   Consistent (T.addType Φ)
 
 /-- `Φ` is a complete type over `T`: `T + Φ(c̄)` is consistent and complete.
 - [Kay91, §8.1] -/
-def IsCompleteOver (Φ : FirstOrder.Type L Empty k) (T : Theory L) : Prop :=
+def IsCompleteOver : Prop :=
   Φ.IsTypeOver T ∧ Entailment.Complete (T.addType Φ)
 
 /-- `Φ` is a principal type over `T`: some `ψ` with `T + Φ(c̄) ⊢ ψ(c̄)` implies every formula of `Φ`
 over `T`.
 - [Kay91, §8.1] -/
-def IsPrincipalOver (Φ : FirstOrder.Type L Empty k) (T : Theory L) : Prop :=
+def IsPrincipalOver : Prop :=
   ∃ ψ : Semisentence L k, T.addType Φ ⊢ lift ψ ∧ ∀ φ ∈ Φ, T ⊢ ∀¹* (ψ 🡒 φ)
 
 /-- A type over `T` is realized in some model of `T`, and a set of formulas realized in a model of
@@ -817,31 +848,33 @@ end
 
 section
 
-variable {M : Type*} [Tarski.Structure L M]
+variable {M : Type*} [Tarski.Structure L M] (A : Set M) (C : Semiformula L A 1 → Prop)
 
 /-- A formula satisfying `C`, with parameters from `A`, which defines `a` in `M`: `a` is the only
 element of `M` satisfying it. -/
-structure DefiningFormula (A : Set M) (C : Semiformula L A 1 → Prop) (a : M) where
+structure DefiningFormula (a : M) where
   formula : Semiformula L A 1
   formula_mem : C formula
   eval_iff : ∀ x : M, formula.Eval ![x] Subtype.val ↔ x = a
 
 /-- The elements of `M` definable over `A` by a formula satisfying `C`.
 - [Kay91, §8.1] -/
-def definableElementsOver (A : Set M) (C : Semiformula L A 1 → Prop) : Set M :=
+def definableElementsOver : Set M :=
   {a | Nonempty (DefiningFormula A C a)}
 
 variable (L) in
 /-- The definable closure of `A`: the elements of `M` definable over `A`.
 - [Kay91, §8.1] -/
-abbrev definableClosure (A : Set M) : Set M :=
+abbrev definableClosure : Set M :=
   definableElementsOver A (⊤ : Semiformula L A 1 → Prop)
 
 variable (L M) in
 /-- The elements of `M` definable without parameters. -/
 abbrev definableElements : Set M := definableClosure L (∅ : Set M)
 
-lemma definableElementsOver_mono {A : Set M} {C D : Semiformula L A 1 → Prop}
+variable {A C}
+
+lemma definableElementsOver_mono {D : Semiformula L A 1 → Prop}
     (h : ∀ φ, C φ → D φ) : definableElementsOver A C ⊆ definableElementsOver A D := by
   rintro a ⟨φ, hφ, ha⟩
   exact ⟨φ, h φ hφ, ha⟩
@@ -850,13 +883,13 @@ end
 
 section
 
-variable {M : Type} [Tarski.Structure L M]
+variable {M : Type} [Tarski.Structure L M] {a : M}
 
 /-- Over no parameters, a class of formulas closed under renaming the free variables defines the
 same elements by formulas as by sentences. -/
 lemma mem_definableElementsOver_empty_iff {C : ∀ {ξ : Type}, Semiformula L ξ 1 → Prop}
-    (hC : ∀ {ξ ζ : Type} (f : ξ → ζ) {φ : Semiformula L ξ 1}, C φ → C (Rew.rewriteMap f ▹ φ))
-    {a : M} : a ∈ definableElementsOver (∅ : Set M) C ↔
+    (hC : ∀ {ξ ζ : Type} (f : ξ → ζ) {φ : Semiformula L ξ 1}, C φ → C (Rew.rewriteMap f ▹ φ)) :
+    a ∈ definableElementsOver (∅ : Set M) C ↔
       ∃ φ : Semisentence L 1, C φ ∧ ∀ x, M ⊧/![x] φ ↔ x = a := by
   constructor
   · rintro ⟨θ, hθ, h⟩
@@ -873,7 +906,7 @@ lemma mem_definableElementsOver_empty_iff {C : ∀ {ξ : Type}, Semiformula L ξ
       rw [← h x, eval_rewriteMap]
       exact iff_of_eq (congrArg (fun f ↦ Eval ![x] f φ) (Subsingleton.elim _ _))
 
-lemma mem_definableElements_iff {a : M} :
+lemma mem_definableElements_iff :
     a ∈ definableElements L M ↔ ∃ φ : Semisentence L 1, ∀ x, M ⊧/![x] φ ↔ x = a :=
   (mem_definableElementsOver_empty_iff (C := fun _ ↦ True) fun _ _ h ↦ h).trans (by simp)
 

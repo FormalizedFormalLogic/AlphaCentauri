@@ -6,8 +6,6 @@ import AlphaCentauri.OpenProblem
 
 /-! # $\Delta$ induction schemes -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -24,19 +22,23 @@ hierarchy `ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s` instead of the prenex one.
 - [Sla04, §1.2]
 -/
 
+section
+
+variable (s : ℕ)
+
 /-- The `Δ` induction scheme for the broad hierarchy `ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s`. -/
-abbrev IDeltaOnBroadHierarchy (s : ℕ) : ArithmeticTheory :=
+abbrev IDeltaOnBroadHierarchy : ArithmeticTheory :=
   𝗜𝚺₀ ∪ DeltaInductionScheme (ℬ[<, ℒₒᵣ].Hierarchy 𝚺 s)
 
 prefix:max "𝗜𝚫⁺ " => IDeltaOnBroadHierarchy
 
-lemma IDelta_subset_IDeltaOnBroadHierarchy (s : ℕ) : 𝗜𝚫 s ⊆ 𝗜𝚫⁺ s :=
+lemma IDelta_subset_IDeltaOnBroadHierarchy : 𝗜𝚫 s ⊆ 𝗜𝚫⁺ s :=
   Set.union_subset_union_right _ (DeltaInductionScheme_subset (·.hierarchy))
 
-instance IDelta_weakerThan_IDeltaOnBroadHierarchy (s : ℕ) : 𝗜𝚫 s ⪯ 𝗜𝚫⁺ s :=
+instance IDelta_weakerThan_IDeltaOnBroadHierarchy : 𝗜𝚫 s ⪯ 𝗜𝚫⁺ s :=
   WeakerThan.ofSubset (IDelta_subset_IDeltaOnBroadHierarchy s)
 
-instance models_IDeltaOnBroadHierarchy (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚫⁺ s := by
+instance models_IDeltaOnBroadHierarchy : ℕ↓[ℒₒᵣ] ⊧* 𝗜𝚫⁺ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
   rintro _ ⟨φ, ψ, -, -, rfl⟩
   apply models_deltaInd_iff _ _ |>.mpr
@@ -45,7 +47,7 @@ instance models_IDeltaOnBroadHierarchy (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜�
   | zero => exact hzero
   | succ x ih => exact hsucc x ih
 
-
+end
 
 /-! ## The `Δ` induction schemes between `𝗜𝚺 n` and `𝗕𝚺(n + 1)`
 
@@ -55,9 +57,13 @@ defined by formulas of the broad hierarchy; whether `𝗜𝚫(n + 1)` proves `�
 - [Sla04, §2.1]
 -/
 
+section
+
+variable (n : ℕ)
+
 /-- Every model of `𝗕𝚺(n + 1)` satisfies `𝗜𝚫⁺(n + 1)`.
 - [Sla04, §2.1] -/
-lemma models_IDeltaOnBroadHierarchy_of_models_BSigma_succ (n : ℕ) (V : Type*) [ORingStructure V]
+lemma models_IDeltaOnBroadHierarchy_of_models_BSigma_succ (V : Type*) [ORingStructure V]
     [V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1)] : V↓[ℒₒᵣ] ⊧* 𝗜𝚫⁺(n + 1) := by
   have : V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
   have h₀ : V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ := models_of_subtheory (inferInstance : V↓[ℒₒᵣ] ⊧* 𝗕𝚺(n + 1))
@@ -75,9 +81,11 @@ lemma models_IDeltaOnBroadHierarchy_of_models_BSigma_succ (n : ℕ) (V : Type*) 
 
 /-- `𝗜𝚫⁺(n + 1)` is at most as strong as `𝗕𝚺(n + 1)`.
 - [Sla04, §2.1] -/
-theorem IDeltaOnBroadHierarchy_weakerThan_BSigma (n : ℕ) : 𝗜𝚫⁺(n + 1) ⪯ 𝗕𝚺(n + 1) :=
+theorem IDeltaOnBroadHierarchy_weakerThan_BSigma : 𝗜𝚫⁺(n + 1) ⪯ 𝗕𝚺(n + 1) :=
   weakerThan_of_models.{0} _ _ fun V _ _ ↦
     models_IDeltaOnBroadHierarchy_of_models_BSigma_succ n V
+
+end
 
 /-- Does $\mathsf{I}\Delta_{n + 1}$ prove $\mathsf{B}\Sigma_{n + 1}$ for every $n$? It holds once
 exponentiation is adjoined to $\mathsf{I}\Delta_0$.

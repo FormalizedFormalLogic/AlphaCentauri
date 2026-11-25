@@ -8,8 +8,6 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.Basic
 Generalised Veltman semantics (Verbrugge semantics) for interpretability logic.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic
@@ -29,13 +27,13 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
 
 abbrev World (_ : Model κ α) := κ
 
-abbrev Rel {M : Model κ α} : M.World → M.World → Prop := M.Rel'
+abbrev Rel : M.World → M.World → Prop := M.Rel'
 scoped infix:60 " ≺ " => Rel
 
-abbrev S {M : Model κ α} (w : M.World) : M.World → Set M.World → Prop := M.S' w
+abbrev S (w : M.World) : M.World → Set M.World → Prop := M.S' w
 scoped notation:60 x:61 " ≺[" w "] " V:61 => S w x V
 
-abbrev Val {M : Model κ α} : M.World → α → Prop := M.Val'
+abbrev Val : M.World → α → Prop := M.Val'
 
 instance : CoeFun (Model κ α) (fun M ↦ M.World → α → Prop) := ⟨fun M ↦ M.Val⟩
 
@@ -229,7 +227,9 @@ def toVerbrugge (M : Model κ α) : Verbrugge.Model κ α where
   S' w u V := (∀ v ∈ V, M.Rel' w v) ∧ ∃ v ∈ V, M.S' w u v
   Val' := M.Val'
 
-instance [M.IsIL] : M.toVerbrugge.IsIL where
+variable [M.IsIL]
+
+instance : M.toVerbrugge.IsIL where
   trans := IsTrans.trans (r := M.Rel)
   cwf := IsConverseWellFounded.cwf (rel := M.Rel)
   rel_of_s := by
@@ -278,8 +278,7 @@ open Veltman.Model.World Verbrugge.Model.World in
 - [JMMV20, Theorem 3.2]
 - [Mas20, §9]
 -/
-lemma forces_toVerbrugge [M.IsIL] {x : M.World} {A : Formula α} :
-    x ⊩[M.toVerbrugge] A ↔ x ⊩[M] A := by
+lemma forces_toVerbrugge {x : M.World} {A : Formula α} : x ⊩[M.toVerbrugge] A ↔ x ⊩[M] A := by
   induction A generalizing x with
   | atom a => rfl;
   | falsum => rfl;
@@ -381,19 +380,23 @@ noncomputable def choose (u : M.World) (G : Set M.World) : M.Strategy
 
 end Strategy
 
-variable (M) in
+section
+
+variable (M) (x u : M.World) (σ : M.Strategy)
+
 /-- A history `H` is a play of `σ` for `x` when each set in `H` is a `≺[x]`-successor of the world
 `σ` chooses before it. -/
-def IsPlay (x : M.World) (σ : M.Strategy) : List (Set M.World) → Prop
+def IsPlay : List (Set M.World) → Prop
   | [] => True
-  | Z :: H => IsPlay x σ H ∧ σ H ≺[x] Z
+  | Z :: H => IsPlay H ∧ σ H ≺[x] Z
 
-variable (M) in
 /-- `σ` is a strategy for `x` from `u`: it chooses `u` first and, on a play, an element of every
 `≺[x]`-successor set of the world it chose last. -/
-structure IsStrategy (x u : M.World) (σ : M.Strategy) : Prop where
+structure IsStrategy : Prop where
   nil : σ [] = u
   mem_cons {H : List (Set M.World)} {Z : Set M.World} : M.IsPlay x σ H → σ H ≺[x] Z → σ (Z :: H) ∈ Z
+
+end
 
 section Strategy
 
@@ -453,29 +456,36 @@ namespace VeltmanWorld
 instance [M.IsIL] : Nonempty M.VeltmanWorld :=
   ⟨⟨Classical.arbitrary κ, fun _ ↦ Strategy.choose M _ ∅, fun _ ↦ isStrategy_choose⟩⟩
 
+section
+
+variable (a b : M.VeltmanWorld)
+
 /-- `b` lies over a `≺`-successor of the world of `a`, and the strategy of `b` for each
 `≺`-predecessor `x` of the world of `a` continues that of `a` after a play. -/
-def Rel (a b : M.VeltmanWorld) : Prop :=
+def Rel : Prop :=
   a.world ≺ b.world ∧
     ∀ x, x ≺ a.world → ∃ H, M.IsPlay x (a.strategy x) H ∧ b.strategy x = (a.strategy x).shift H
 
 /-- `b` and `c` are `Rel`-successors of `a`, and the strategy of `c` for the world of `a`
 continues that of `b` after a play. -/
-def S (a b c : M.VeltmanWorld) : Prop :=
+def S (c : M.VeltmanWorld) : Prop :=
   Rel a b ∧ Rel a c ∧
     ∃ H, M.IsPlay a.world (b.strategy a.world) H ∧
       c.strategy a.world = (b.strategy a.world).shift H
 
-variable [M.IsIL] {u : M.World} {τ : M.Strategy}
+end
 
-lemma isPlay_singleton {a : M.VeltmanWorld} {x : M.World} (hx : x ≺ a.world) (hu : a.world ≺ u) :
+variable [M.IsIL] {u : M.World} {τ : M.Strategy} {a : M.VeltmanWorld}
+
+lemma isPlay_singleton {x : M.World} (hx : x ≺ a.world) (hu : a.world ≺ u) :
     M.IsPlay x (a.strategy x) [{u}] := by
   simpa [(a.isStrategy hx).nil] using s_of_rel hx hu;
 
+variable (a) in
 open Classical in
 /-- The world over `u` whose strategy for the world of `a` is `τ` and whose strategy for each
 `≺`-predecessor `x` of the world of `a` continues that of `a` after $\{u\}$. -/
-noncomputable def successor (a : M.VeltmanWorld) (hu : a.world ≺ u)
+noncomputable def successor (hu : a.world ≺ u)
     (hτ : M.IsStrategy a.world u τ) : M.VeltmanWorld where
   world := u
   strategy x :=
@@ -490,7 +500,7 @@ noncomputable def successor (a : M.VeltmanWorld) (hu : a.world ≺ u)
     · exact hx' ▸ hτ;
     · exact isStrategy_choose;
 
-variable {a : M.VeltmanWorld} {hu : a.world ≺ u} {hτ : M.IsStrategy a.world u τ}
+variable {hu : a.world ≺ u} {hτ : M.IsStrategy a.world u τ}
 
 @[simp]
 lemma successor_world : (a.successor hu hτ).world = u := rfl

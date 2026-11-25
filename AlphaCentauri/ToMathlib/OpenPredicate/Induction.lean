@@ -11,8 +11,6 @@ public import Mathlib.RingTheory.Algebraic.Defs
 Criteria for open induction in discretely ordered rings.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open Polynomial
@@ -48,10 +46,12 @@ lemma of_iff (hP : DeterminedBySigns N P) (h : ∀ x, P x ↔ Q x) : DeterminedB
   obtain ⟨s, hs, hd⟩ := hP
   exact ⟨s, hs, fun x y hxy ↦ (h x).symm.trans ((hd x y hxy).trans (h y))⟩
 
-lemma eq_zero {p : R[X]} (hp : p.natDegree ≤ N) : DeterminedBySigns N fun x ↦ p.eval x = 0 :=
+variable {p q : R[X]}
+
+lemma eq_zero (hp : p.natDegree ≤ N) : DeterminedBySigns N fun x ↦ p.eval x = 0 :=
   ⟨{p}, by simpa using hp, fun x y h ↦ (h p (by simp)).1⟩
 
-lemma pos {p : R[X]} (hp : p.natDegree ≤ N) : DeterminedBySigns N fun x ↦ 0 < p.eval x :=
+lemma pos (hp : p.natDegree ≤ N) : DeterminedBySigns N fun x ↦ 0 < p.eval x :=
   ⟨{p}, by simpa using hp, fun x y h ↦ (h p (by simp)).2⟩
 
 lemma not (hP : DeterminedBySigns N P) : DeterminedBySigns N fun x ↦ ¬P x := by
@@ -78,11 +78,11 @@ lemma or (hP : DeterminedBySigns N P) (hQ : DeterminedBySigns N Q) :
 variable [IsStrictOrderedRing R]
 
 omit [IsStrictOrderedRing R] in
-lemma eq {p q : R[X]} (hp : p.natDegree ≤ N) (hq : q.natDegree ≤ N) :
+lemma eq (hp : p.natDegree ≤ N) (hq : q.natDegree ≤ N) :
     DeterminedBySigns N fun x ↦ p.eval x = q.eval x :=
   (eq_zero ((natDegree_sub_le p q).trans (max_le hp hq))).of_iff fun _ ↦ by simp [sub_eq_zero]
 
-lemma lt {p q : R[X]} (hp : p.natDegree ≤ N) (hq : q.natDegree ≤ N) :
+lemma lt (hp : p.natDegree ≤ N) (hq : q.natDegree ≤ N) :
     DeterminedBySigns N fun x ↦ p.eval x < q.eval x :=
   (pos ((natDegree_sub_le q p).trans (max_le hq hp))).of_iff fun _ ↦ by simp
 

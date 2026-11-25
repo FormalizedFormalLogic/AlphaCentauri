@@ -13,8 +13,6 @@ public import AlphaCentauri.ToFoundation.FirstOrder.Syntax
 The uniform reflection schema has a $\Delta_1$ presentation.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -25,15 +23,16 @@ open FFL.FirstOrder.Theory Bootstrapping Bootstrapping.Arithmetic
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
+section
 
-lemma quote_bShift {k : ℕ} (φ : ArithmeticSemisentence k) :
-    (⌜(Rew.bShift ▹ φ : ArithmeticSemisentence (k + 1))⌝ : V) =
+variable {k : ℕ} (φ : ArithmeticSemisentence k)
+
+lemma quote_bShift : (⌜(Rew.bShift ▹ φ : ArithmeticSemisentence (k + 1))⌝ : V) =
       subst ℒₒᵣ (bvarVec 1 (k : V)) ⌜φ⌝ := by
   erw [Rew.bShift_eq_subst, Semisentence.quote_substs]
   simp [bvarVec_eq_matrixToVec]
 
-lemma subst_quote_bShift {k : ℕ} (φ : ArithmeticSemisentence k) :
-    subst ℒₒᵣ (numeral 0 ∷ bvarVec 0 (k : V))
+lemma subst_quote_bShift : subst ℒₒᵣ (numeral 0 ∷ bvarVec 0 (k : V))
       (⌜(Rew.bShift ▹ φ : ArithmeticSemisentence (k + 1))⌝ : V) = ⌜φ⌝ := by
   have h : (Rew.bShift ▹ φ : ArithmeticSemisentence (k + 1)) ⇜
       ((↑(0 : ℕ) : ClosedSemiterm ℒₒᵣ k) :> fun i ↦ #i) = φ := by
@@ -51,11 +50,17 @@ lemma subst_quote_bShift {k : ℕ} (φ : ArithmeticSemisentence k) :
   rw [e]
   simp [bvarVec_eq_matrixToVec, Matrix.vecHead, Matrix.vecTail, Function.comp_def]
 
+end
+
 variable (T : ArithmeticTheory) [T.Δ₁]
+
+section
+
+variable (k q : V)
 
 /-- The code of `T.uniformReflectionSchema φ` as a function of the arity `k` and the code `q` of
 `φ`. -/
-noncomputable def uniformReflectionCode (k q : V) : V :=
+noncomputable def uniformReflectionCode : V :=
   qqAlls (^∀ (imp ℒₒᵣ (subst ℒₒᵣ (^#0 ∷ numeral q ∷ bvarVec 1 k) (ssnumsCode k))
     (imp ℒₒᵣ (subst ℒₒᵣ ?[^#0] ⌜T.standardProvability.prov⌝) (subst ℒₒᵣ (bvarVec 1 k) q)))) k
 
@@ -86,9 +91,10 @@ instance uniformReflectionCode.defined :
     simp [uniformReflectionCodeGraph, uniformReflectionCode, Sentence.quote_eq_encode,
       numeral_eq_natCast]
 
-lemma le_uniformReflectionCode (k q : V) :
-    subst ℒₒᵣ (bvarVec 1 k) q ≤ uniformReflectionCode T k q :=
+lemma le_uniformReflectionCode : subst ℒₒᵣ (bvarVec 1 k) q ≤ uniformReflectionCode T k q :=
   (lt_or_right _ _).le.trans <| (lt_or_right _ _).le.trans <| (le_qqAll _).trans <| le_qqAlls _ _
+
+end
 
 /-- `UniformReflectionR T S p` holds when `p` codes `T.uniformReflectionSchema φ` for a
 semisentence `φ` whose code satisfies `S`. -/
@@ -108,8 +114,9 @@ noncomputable def chUniformReflection (cond : 𝚫ᴬ₁.Semisentence 1) : 𝚫�
         !(isSemisentence ℒₒᵣ).pi k q ∧ !cond.pi q ∧
           ∀ y, !(uniformReflectionCodeGraph T) y k q → p = y”)
 
-instance UniformReflectionR.defined {S : V → Prop} {cond : 𝚫ᴬ₁.Semisentence 1}
-    [hcond : 𝚫ᴬ₁-Predicate[V] S via cond] :
+variable {cond : 𝚫ᴬ₁.Semisentence 1} {Γ : ∀ {k : ℕ}, ArithmeticSemisentence k → Prop}
+
+instance UniformReflectionR.defined {S : V → Prop} [hcond : 𝚫ᴬ₁-Predicate[V] S via cond] :
     𝚫ᴬ₁-Predicate[V] (UniformReflectionR T S : V → Prop) via chUniformReflection T cond := .mk <| by
   constructor
   · intro v; simp [chUniformReflection, Bounding.HierarchySymbol.Semiformula.val_sigma, eq_comm]
@@ -117,7 +124,7 @@ instance UniformReflectionR.defined {S : V → Prop} {cond : 𝚫ᴬ₁.Semisent
     simp [chUniformReflection, Bounding.HierarchySymbol.Semiformula.val_sigma, UniformReflectionR,
       lt_succ_iff_le]
 
-lemma uniformReflectionR_quote_iff {S : ℕ → Prop} {Γ : ∀ {k : ℕ}, ArithmeticSemisentence k → Prop}
+lemma uniformReflectionR_quote_iff {S : ℕ → Prop}
     (hS : ∀ k (φ : ArithmeticSemisentence k), S ⌜φ⌝ ↔ Γ φ) (ψ : ArithmeticSemiproposition 0) :
     UniformReflectionR T S (⌜ψ⌝ : ℕ) ↔ ∃ σ ∈ 𝗥𝗙𝗡[Γ] T, ψ = σ := by
   constructor
@@ -150,7 +157,6 @@ lemma uniformReflectionR_quote_iff {S : ℕ → Prop} {Γ : ∀ {k : ℕ}, Arith
         · exact ⟨by simpa using Language.IsSemisentence.quote (V := ℕ) φ, (hS k φ).mpr hφ, rfl⟩
 
 noncomputable abbrev _root_.FFL.FirstOrder.Theory.uniformReflectionOn.delta1_of
-    {Γ : ∀ {k : ℕ}, ArithmeticSemisentence k → Prop} {cond : 𝚫ᴬ₁.Semisentence 1}
     {S : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁], V → Prop}
     (hS : ∀ (V : Type) [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁], 𝚫ᴬ₁-Predicate[V] S V via cond)
     (hC : ∀ k (φ : ArithmeticSemisentence k), S ℕ ⌜φ⌝ ↔ Γ φ) :

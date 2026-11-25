@@ -11,8 +11,6 @@ Lists coded by iterated pairing in models of $\mathsf{EA}$.
 - [HP98, §V.3]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -22,7 +20,8 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 open Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {i v v₁ v₂ x xs y z : V}
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {x v i v₁ v₂ xs y z B : V}
+  (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ])
 
 lemma LocallyDelta0.mem {k : ℕ} {f f' : (Fin k → V) → V} (hf : LocallyDelta0Function f)
     (hf' : LocallyDelta0Function f') : LocallyDelta0 fun v ↦ f v ∈ f' v :=
@@ -31,32 +30,39 @@ lemma LocallyDelta0.mem {k : ℕ} {f f' : (Fin k → V) → V} (hf : LocallyDelt
 
 noncomputable scoped instance : Adjoin V V := ⟨(⟪·, ·⟫ + 1)⟩
 
-lemma adjoin_def (x v : V) : x ∷ v = ⟪x, v⟫ + 1 := rfl
+section
+
+variable (x v : V)
+
+lemma adjoin_def : x ∷ v = ⟪x, v⟫ + 1 := rfl
 
 @[simp]
-lemma fstIdx_adjoin (x v : V) : fstIdx (x ∷ v) = x := by simp [adjoin_def, fstIdx]
+lemma fstIdx_adjoin : fstIdx (x ∷ v) = x := by simp [adjoin_def, fstIdx]
 
 @[simp]
-lemma sndIdx_adjoin (x v : V) : sndIdx (x ∷ v) = v := by simp [adjoin_def, sndIdx]
+lemma sndIdx_adjoin : sndIdx (x ∷ v) = v := by simp [adjoin_def, sndIdx]
 
-lemma succ_eq_adjoin (x : V) : x + 1 = π₁ x ∷ π₂ x := by simp [adjoin_def]
-
-@[simp]
-lemma lt_adjoin (x v : V) : x < x ∷ v := by simp [adjoin_def, lt_succ_iff_le]
+lemma succ_eq_adjoin : x + 1 = π₁ x ∷ π₂ x := by simp [adjoin_def]
 
 @[simp]
-lemma lt_adjoin' (x v : V) : v < x ∷ v := by simp [adjoin_def, lt_succ_iff_le]
+lemma lt_adjoin : x < x ∷ v := by simp [adjoin_def, lt_succ_iff_le]
 
 @[simp]
-lemma zero_lt_adjoin (x v : V) : 0 < x ∷ v := by simp [adjoin_def]
+lemma lt_adjoin' : v < x ∷ v := by simp [adjoin_def, lt_succ_iff_le]
 
 @[simp]
-lemma adjoin_ne_zero (x v : V) : x ∷ v ≠ 0 := by simp [adjoin_def]
+lemma zero_lt_adjoin : 0 < x ∷ v := by simp [adjoin_def]
 
 @[simp]
-lemma zero_ne_adjoin (x v : V) : 0 ≠ x ∷ v := by symm; simp [adjoin_def]
+lemma adjoin_ne_zero : x ∷ v ≠ 0 := by simp [adjoin_def]
 
-lemma nil_or_adjoin (z : V) : z = 0 ∨ ∃ x v, z = x ∷ v := by
+@[simp]
+lemma zero_ne_adjoin : 0 ≠ x ∷ v := by symm; simp [adjoin_def]
+
+end
+
+variable (z) in
+lemma nil_or_adjoin : z = 0 ∨ ∃ x v, z = x ∷ v := by
   rcases zero_or_succ z with (rfl | ⟨z, rfl⟩)
   · left; rfl
   · right; exact ⟨π₁ z, π₂ z, by simp [succ_eq_adjoin]⟩
@@ -82,16 +88,14 @@ instance adjoin_defined : 𝚺ᴬ₀-Function₂ (adjoin : V → V → V) via ad
 
 instance adjoin_definable : 𝚺ᴬ₀-Function₂ (adjoin : V → V → V) := adjoin_defined.to_definable
 
-instance adjoin_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₂ (adjoin : V → V → V) := adjoin_definable.of_zero
+instance adjoin_definable' : ℌ-Function₂ (adjoin : V → V → V) := adjoin_definable.of_zero
 
 instance mkVec₁_defined : 𝚺ᴬ₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁Def := .mk fun v ↦ by
   simp [mkVec₁Def]
 
 instance mkVec₁_definable : 𝚺ᴬ₀-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_defined.to_definable
 
-instance mkVec₁_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_definable.of_zero
+instance mkVec₁_definable' : ℌ-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_definable.of_zero
 
 instance mkVec₂_defined : 𝚺ᴬ₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec₂Def := .mk fun v ↦ by
   simp [mkVec₂Def]
@@ -121,8 +125,12 @@ lemma exp_exp_add_two (n : V) :
     rw [← one_add_one_eq_two, ← add_assoc, exp_succ, exp_succ, one_add_one_eq_two]
   rw [this, exp_even, exp_even, sq, mul_pow]
 
+section
+
+variable {a n : V}
+
 /-- A pair of elements below `Exp.exp (Exp.exp n)` lies below `Exp.exp (Exp.exp (n + 2))`. -/
-lemma adjoin_le_exp_exp {a b n : V} (hn : 1 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
+lemma adjoin_le_exp_exp {b : V} (hn : 1 ≤ n) (ha : a ≤ Exp.exp (Exp.exp n))
     (hb : b ≤ Exp.exp (Exp.exp n)) : a ∷ b ≤ Exp.exp (Exp.exp (n + 2)) := by
   set E := Exp.exp (Exp.exp n)
   have hE : 2 * 2 ≤ E := by
@@ -141,22 +149,25 @@ lemma adjoin_le_exp_exp {a b n : V} (hn : 1 ≤ n) (ha : a ≤ Exp.exp (Exp.exp 
   rw [exp_exp_add_two, adjoin_def]
   exact lt_iff_succ_le.mp this
 
-lemma le_exp_exp {a n : V} (h : a ≤ n) : a ≤ Exp.exp (Exp.exp n) :=
+lemma le_exp_exp (h : a ≤ n) : a ≤ Exp.exp (Exp.exp n) :=
   le_trans h (lt_trans (lt_exp n) (exp_monotone.mpr (lt_exp n))).le
+
+end
 
 /-! ## The `i`-th element of a list -/
 
 namespace Nth
 
+variable (C : Set V) (pr : V) in
 /-- The rules generating the graph `⟪v, i, x⟫` of `v.[i] = x`. -/
-def Phi (C : Set V) (pr : V) : Prop :=
+def Phi : Prop :=
   (∃ v, pr = ⟪v, 0, fstIdx v⟫) ∨ (∃ v i x, pr = ⟪v, i + 1, x⟫ ∧ ⟪sndIdx v, i, x⟫ ∈ C)
 
-private lemma phi_iff (C pr : V) :
-    Phi {x | x ∈ C} pr ↔
+private lemma phi_iff (C : V) : ∀ pr : V, Phi {x | x ∈ C} pr ↔
     (∃ v ≤ pr, ∃ fst ≤ v, fst = fstIdx v ∧ pr = ⟪v, 0, fst⟫) ∨
     (∃ v ≤ pr, ∃ i ≤ pr, ∃ x ≤ pr, pr = ⟪v, i + 1, x⟫ ∧
       ∃ snd ≤ v, snd = sndIdx v ∧ ∃ six < C, six = ⟪snd, i, x⟫ ∧ six ∈ C) := by
+  intro pr
   constructor
   · rintro (⟨v, rfl⟩ | ⟨v, i, x, rfl, hC⟩)
     · left; exact ⟨v, by simp, _, by simp, rfl, rfl⟩
@@ -221,7 +232,8 @@ lemma graph_succ : Graph ⟪v, i + 1, x⟫ ↔ Graph ⟪sndIdx v, i, x⟫ := by
     · rcases show v = w ∧ i = j ∧ x = y by simpa using h with ⟨rfl, rfl, rfl⟩; exact hw
   · intro h; exact graph_case.mpr <| Or.inr ⟨v, i, x, rfl, h⟩
 
-lemma exists_le_graph (v i : V) : ∃ x ≤ v, Graph ⟪v, i, x⟫ := by
+variable (v i) in
+lemma exists_le_graph : ∃ x ≤ v, Graph ⟪v, i, x⟫ := by
   have hP : LocallyDelta0Pred fun i' ↦ ∀ v' ≤ v, ∃ x ≤ v', Graph ⟪v', i', x⟫ := by
     have hR : LocallyDelta0 fun y : Fin 3 → V ↦ Graph ⟪y 1, y 2, y 0⟫ := by
       simpa using graph_locallyDelta0.comp₃ (LocallyDelta0Function.var 1)
@@ -265,48 +277,63 @@ lemma graph_unique {x₁ x₂ : V} : Graph ⟪v, i, x₁⟫ → Graph ⟪v, i, x
       exact ih (sndIdx v) (le_trans (by simp) hv) x₁ hx₁ x₂ hx₂
   exact this i v (by simp [A, add_assoc]) x₁ (by simp [A]) x₂ (by simp [A])
 
-lemma graph_existsUnique (v i : V) : ∃! x, Graph ⟪v, i, x⟫ := by
+variable (v i) in
+lemma graph_existsUnique : ∃! x, Graph ⟪v, i, x⟫ := by
   obtain ⟨x, -, hx⟩ := exists_le_graph v i
   exact ExistsUnique.intro x hx fun y hy ↦ graph_unique hy hx
 
 end Nth
 
+variable (v i) in
 /-- The `i`-th element of the list `v`. -/
-noncomputable def nth (v i : V) : V := Classical.choose! (Nth.graph_existsUnique v i)
+noncomputable def nth : V := Classical.choose! (Nth.graph_existsUnique v i)
 
 scoped notation:max v:max ".[" i "]" => nth v i
 
-lemma nth_graph (v i : V) : Nth.Graph ⟪v, i, v.[i]⟫ :=
+variable (v i) in
+lemma nth_graph : Nth.Graph ⟪v, i, v.[i]⟫ :=
   Classical.choose!_spec (Nth.graph_existsUnique v i)
 
 lemma nth_eq_of_graph (h : Nth.Graph ⟪v, i, x⟫) : nth v i = x :=
   Nth.graph_unique (nth_graph v i) h
 
-lemma nth_zero (v : V) : v.[0] = fstIdx v := nth_eq_of_graph (Nth.graph_zero.mpr rfl)
+section
 
-lemma nth_succ (v i : V) : v.[i + 1] = (sndIdx v).[i] :=
+variable (v i : V)
+
+lemma nth_zero : v.[0] = fstIdx v := nth_eq_of_graph (Nth.graph_zero.mpr rfl)
+
+lemma nth_succ : v.[i + 1] = (sndIdx v).[i] :=
   nth_eq_of_graph (Nth.graph_succ.mpr <| nth_graph _ _)
 
+end
+
+section
+
+variable (x v i : V)
+
 @[simp]
-lemma nth_adjoin_zero (x v : V) : (x ∷ v).[0] = x := by
+lemma nth_adjoin_zero : (x ∷ v).[0] = x := by
   simp [nth_zero]
 
 @[simp]
-lemma nth_adjoin_succ (x v i : V) : (x ∷ v).[i + 1] = v.[i] := by
+lemma nth_adjoin_succ : (x ∷ v).[i + 1] = v.[i] := by
   simp [nth_succ]
 
 @[simp]
-lemma nth_adjoin_one (x v : V) : (x ∷ v).[1] = v.[0] := by
+lemma nth_adjoin_one : (x ∷ v).[1] = v.[0] := by
   simpa using nth_adjoin_succ x v 0
 
 @[simp]
-lemma nth_adjoin_two (x v : V) : (x ∷ v).[2] = v.[1] := by
+lemma nth_adjoin_two : (x ∷ v).[2] = v.[1] := by
   simpa [-nth_adjoin_succ, one_add_one_eq_two] using nth_adjoin_succ x v 1
 
 @[simp]
-lemma nth_le (v i : V) : v.[i] ≤ v := by
+lemma nth_le : v.[i] ≤ v := by
   obtain ⟨x, hx, h⟩ := Nth.exists_le_graph v i
   simpa [nth_eq_of_graph h] using hx
+
+end
 
 lemma nth_locallyDelta0 : LocallyDelta0Function₂ (nth : V → V → V) where
   graph := by
@@ -320,7 +347,8 @@ lemma nth_locallyDelta0 : LocallyDelta0Function₂ (nth : V → V → V) where
     intro w hw
     exact le_trans (nth_le _ _) (hw 0)
 
-lemma adjoin_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := nil_or_adjoin x
+variable (x) in
+lemma adjoin_cases : x = 0 ∨ ∃ y v, x = y ∷ v := nil_or_adjoin x
 
 lemma adjoin_induction {P : V → Prop} (hP : LocallyDelta0Pred P)
     (nil : P 0) (adjoin : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
@@ -342,8 +370,9 @@ instance nth_definable : 𝚺ᴬ₁-Function₂ (nth : V → V → V) := nth_def
 instance nth_definable' (Γ m) : Γᴬ_[m + 1]-Function₂ (nth : V → V → V) :=
   nth_definable.of_sigmaOne
 
+variable (i) in
 @[simp]
-lemma nth_zero_idx (i : V) : (0 : V).[i] = 0 :=
+lemma nth_zero_idx : (0 : V).[i] = 0 :=
   nonpos_iff_eq_zero.mp (nth_le 0 i)
 
 /-! ## Recursion on lists -/
@@ -377,14 +406,16 @@ namespace Construction
 
 variable {arity : ℕ} {β : Arithmetic.VecRec.Blueprint arity} (c : Construction V β)
 
+variable (param : Fin arity → V)
+
+variable (C : Set V) (pr : V) in
 /-- The rules generating the graph `⟪xs, y⟫` of the recursion. -/
-def Phi (param : Fin arity → V) (C : Set V) (pr : V) : Prop :=
+def Phi : Prop :=
   pr = ⟪0, c.nil param⟫ ∨ (∃ x xs ih, pr = ⟪x ∷ xs, c.adjoin param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C)
 
-private lemma phi_iff (param : Fin arity → V) (C pr : V) :
-    c.Phi param {x | x ∈ C} pr ↔
-    pr = ⟪0, c.nil param⟫ ∨
+private lemma phi_iff (C : V) : ∀ pr : V, c.Phi param {x | x ∈ C} pr ↔ pr = ⟪0, c.nil param⟫ ∨
     (∃ x < pr, ∃ xs < pr, ∃ ih < C, pr = ⟪x ∷ xs, c.adjoin param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C) := by
+  intro pr
   constructor
   · rintro (h | ⟨x, xs, ih, rfl, hC⟩)
     · left; exact h
@@ -433,8 +464,6 @@ def construction : Fixpoint.Construction V β.blueprint where
     · right; exact ⟨v, i, hv, rfl, hC h⟩
   Φ_locallyDelta0 := c.phi_locallyDelta0
 
-variable (param : Fin arity → V)
-
 /-- `c.Graph param ⟪xs, y⟫` states that the recursion takes the value `y` at `xs`. -/
 def Graph : V → Prop := c.construction.Fixpoint param
 
@@ -470,11 +499,17 @@ noncomputable def courseOfValues : CourseOfValues.Construction V arity where
 
 variable (param)
 
-/-- The value of the recursion at `xs`. -/
-noncomputable def result (xs : V) : V := c.courseOfValues.result param xs
+section
 
-lemma result_le_bound (xs : V) : c.result param xs ≤ c.bound param xs :=
+variable (xs : V)
+
+/-- The value of the recursion at `xs`. -/
+noncomputable def result : V := c.courseOfValues.result param xs
+
+lemma result_le_bound : c.result param xs ≤ c.bound param xs :=
   c.courseOfValues.result_le_bound (v := param) xs
+
+end
 
 @[simp]
 lemma result_nil : c.result param (0 : V) = c.nil param := by
@@ -483,8 +518,9 @@ lemma result_nil : c.result param (0 : V) = c.nil param := by
   rw [result, c.courseOfValues.result_eq_val (by rw [this]; exact c.nil_le_bound param), this]
 
 @[simp]
-lemma result_adjoin (x xs : V) :
-    c.result param (x ∷ xs) = c.adjoin param x xs (c.result param xs) := by
+lemma result_adjoin :
+    ∀ x xs : V, c.result param (x ∷ xs) = c.adjoin param x xs (c.result param xs) := by
+  intro x xs
   have hz : znth (c.courseOfValues.table param (x ∷ xs)) xs = c.result param xs :=
     c.courseOfValues.znth_table (show xs < x ∷ xs by simp)
   have e : x ∷ xs - 1 = ⟪x, xs⟫ := by simp [adjoin_def]
@@ -501,14 +537,20 @@ lemma result_locallyDelta0 :
     LocallyDelta0Function fun w : Fin (arity + 1) → V ↦ c.result (w ·.succ) (w 0) :=
   c.courseOfValues.result_locallyDelta0
 
-private lemma limSeq_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
+section
+
+variable {n : ℕ} {f : (Fin n → V) → V}
+
+private lemma limSeq_comp (hf : LocallyDelta0Function f) :
     LocallyDelta0Function fun w : Fin n → V ↦ c.construction.limSeq param (f w) := by
   simpa using c.construction.limSeq_locallyDelta0.comp_cons hf fun j ↦
     LocallyDelta0Function.const (param j)
 
-private lemma result_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
+private lemma result_comp (hf : LocallyDelta0Function f) :
     LocallyDelta0Function fun w : Fin n → V ↦ c.result param (f w) := by
   simpa using c.result_locallyDelta0.comp_cons hf fun j ↦ LocallyDelta0Function.const (param j)
+
+end
 
 lemma eq_of_mem_limSeq {s : V} (h : z ∈ c.construction.limSeq param s) :
     z = ⟪π₁ z, c.result param (π₁ z)⟫ := by
@@ -541,9 +583,9 @@ lemma eq_of_mem_limSeq {s : V} (h : z ∈ c.construction.limSeq param s) :
         simp [hy]
   exact this s z (lt_of_mem h) h
 
-lemma mem_limSeq_result (xs : V) :
-    ⟪xs, c.result param xs⟫ ∈
+lemma mem_limSeq_result : ∀ xs : V, ⟪xs, c.result param xs⟫ ∈
       c.construction.limSeq param (⟪xs, c.bound param xs⟫ + xs + 1) := by
+  intro xs
   set K := ⟪xs, c.bound param xs⟫
   have hP : LocallyDelta0Pred fun ys ↦
       ys ≤ xs → ⟪ys, c.result param ys⟫ ∈ c.construction.limSeq param (K + ys + 1) := by
@@ -586,9 +628,15 @@ lemma graph_iff : c.Graph param ⟪xs, y⟫ ↔ y = c.result param xs := by
 
 variable (param)
 
-lemma result_graph (xs : V) : c.Graph param ⟪xs, c.result param xs⟫ := c.graph_iff.mpr rfl
+section
 
-lemma graph_exists (xs : V) : ∃ y, c.Graph param ⟪xs, y⟫ := ⟨_, c.result_graph param xs⟩
+variable (xs : V)
+
+lemma result_graph : c.Graph param ⟪xs, c.result param xs⟫ := c.graph_iff.mpr rfl
+
+lemma graph_exists : ∃ y, c.Graph param ⟪xs, y⟫ := ⟨_, c.result_graph param xs⟩
+
+end
 
 variable {param}
 
@@ -598,8 +646,9 @@ lemma graph_unique {y₁ y₂ : V} : c.Graph param ⟪xs, y₁⟫ → c.Graph pa
 
 variable (param)
 
-lemma graph_existsUnique (xs : V) : ∃! y, c.Graph param ⟪xs, y⟫ :=
-  ExistsUnique.intro _ (c.result_graph param xs) fun _ h ↦
+lemma graph_existsUnique : ∀ xs : V, ∃! y, c.Graph param ⟪xs, y⟫ := by
+  intro xs
+  exact ExistsUnique.intro _ (c.result_graph param xs) fun _ h ↦
     c.graph_unique h (c.result_graph param xs)
 
 lemma result_eq_of_graph (h : c.Graph param ⟪xs, y⟫) : c.result param xs = y :=
@@ -643,14 +692,16 @@ noncomputable def construction : VecRec.Construction V Arithmetic.Len.blueprint 
 
 end Len
 
+variable (v) in
 /-- The length of the list `v`. -/
-noncomputable def len (v : V) : V := Len.construction.result ![] v
+noncomputable def len : V := Len.construction.result ![] v
 
 @[simp]
 lemma len_nil : len (0 : V) = 0 := by simp [len, Len.construction]
 
+variable (x v) in
 @[simp]
-lemma len_adjoin (x v : V) : len (x ∷ v) = len v + 1 := by simp [len, Len.construction]
+lemma len_adjoin : len (x ∷ v) = len v + 1 := by simp [len, Len.construction]
 
 instance len_defined : 𝚺ᴬ₁-Function₁ (len : V → V) via lenDef :=
   Len.construction.result_defined
@@ -667,8 +718,9 @@ lemma len_locallyDelta0 : LocallyDelta0Function₁ (len : V → V) := by
 lemma len_zero_iff_eq_nil : len v = 0 ↔ v = 0 := by
   rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩) <;> simp
 
+variable (v) in
 @[simp]
-lemma len_le (v : V) : len v ≤ v := by
+lemma len_le : len v ≤ v := by
   have hP : LocallyDelta0Pred fun v : V ↦ len v ≤ v :=
     LocallyDelta0.le (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
       (LocallyDelta0Function.var (0 : Fin 1))
@@ -782,7 +834,7 @@ lemma nth_lt_self (hi : i < len v) : v.[i] < v := by
       · simpa using lt_trans (ih j (le_trans le_self_add hj) (by simpa using hl)) (by simp)
   exact this i le_rfl hi
 
-theorem sigmaZero_skolem_vec {R : V → V → Prop} (hR : LocallyDelta0Rel R) {l B : V}
+theorem sigmaZero_skolem_vec {R : V → V → Prop} (hR : LocallyDelta0Rel R) {l : V}
     (H : ∀ x < l, ∃ y < B, R x y) : ∃ v, len v = l ∧ ∀ i < l, R i v.[i] := by
   have hE : LocallyDelta0Function fun w : Fin 1 → V ↦ Exp.exp (Exp.exp (w 0 + w 0 + B + 3)) :=
     LocallyDelta0Function.exp.comp₁ <| LocallyDelta0Function.exp.comp₁ <|
@@ -866,14 +918,16 @@ noncomputable def construction : VecRec.Construction V Arithmetic.ListMax.bluepr
 
 end ListMax
 
+variable (v) in
 /-- The maximum of the elements of the list `v`. -/
-noncomputable def listMax (v : V) : V := ListMax.construction.result ![] v
+noncomputable def listMax : V := ListMax.construction.result ![] v
 
 @[simp]
 lemma listMax_nil : listMax (0 : V) = 0 := by simp [listMax, ListMax.construction]
 
+variable (x v) in
 @[simp]
-lemma listMax_adjoin (x v : V) : listMax (x ∷ v) = max x (listMax v) := by
+lemma listMax_adjoin : listMax (x ∷ v) = max x (listMax v) := by
   simp [listMax, ListMax.construction]
 
 instance listMax_defined : 𝚺ᴬ₁-Function₁ (listMax : V → V) via listMaxDef :=
@@ -965,17 +1019,22 @@ noncomputable def construction : VecRec.Construction V Arithmetic.TakeLast.bluep
 
 end TakeLast
 
+section
+
+variable (x v k : V)
+
 /-- The last `k` elements of the list `v`. -/
-noncomputable def takeLast (v k : V) : V := TakeLast.construction.result ![k] v
+noncomputable def takeLast : V := TakeLast.construction.result ![k] v
 
 @[simp]
-lemma takeLast_nil (k : V) : takeLast (0 : V) k = 0 := by
+lemma takeLast_nil : takeLast (0 : V) k = 0 := by
   simp [takeLast, TakeLast.construction]
 
 open Classical in
-lemma takeLast_adjoin (x v k : V) :
-    takeLast (x ∷ v) k = if len v < k then x ∷ v else takeLast v k := by
+lemma takeLast_adjoin : takeLast (x ∷ v) k = if len v < k then x ∷ v else takeLast v k := by
   simp [takeLast, TakeLast.construction]
+
+end
 
 instance takeLast_defined : 𝚺ᴬ₁-Function₂ (takeLast : V → V → V) via takeLastDef :=
   TakeLast.construction.result_defined
@@ -990,12 +1049,16 @@ lemma takeLast_locallyDelta0 : LocallyDelta0Function₂ (takeLast : V → V → 
   simp [takeLast]
   rfl
 
+section
+
+variable (v : V)
+
 @[simp]
-lemma takeLast_len_self (v : V) : takeLast v (len v) = v := by
+lemma takeLast_len_self : takeLast v (len v) = v := by
   rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩) <;> simp [takeLast_adjoin]
 
 @[simp]
-lemma takeLast_zero (v : V) : takeLast v 0 = 0 := by
+lemma takeLast_zero : takeLast v 0 = 0 := by
   have hP : LocallyDelta0Pred fun u : V ↦ takeLast u 0 = 0 :=
     LocallyDelta0.eq (takeLast_locallyDelta0.comp₂ (LocallyDelta0Function.var (0 : Fin 1))
       (LocallyDelta0Function.const 0)) (LocallyDelta0Function.const 0)
@@ -1003,6 +1066,8 @@ lemma takeLast_zero (v : V) : takeLast v 0 = 0 := by
   · simp
   · intro x v ih
     simp [takeLast_adjoin, ih]
+
+end
 
 /-! ## Concatenation -/
 
@@ -1047,16 +1112,22 @@ noncomputable def construction : VecRec.Construction V Arithmetic.Concat.bluepri
 
 end Concat
 
+section
+
+variable (x v z : V)
+
 /-- The list `v` followed by `z`. -/
-noncomputable def concat (v z : V) : V := Concat.construction.result ![z] v
+noncomputable def concat : V := Concat.construction.result ![z] v
 
 @[simp]
-lemma concat_nil (z : V) : concat 0 z = ?[z] := by
+lemma concat_nil : concat 0 z = ?[z] := by
   simp [concat, Concat.construction]
 
 @[simp]
-lemma concat_adjoin (x v z : V) : concat (x ∷ v) z = x ∷ concat v z := by
+lemma concat_adjoin : concat (x ∷ v) z = x ∷ concat v z := by
   simp [concat, Concat.construction]
+
+end
 
 instance concat_defined : 𝚺ᴬ₁-Function₂ (concat : V → V → V) via concatDef :=
   Concat.construction.result_defined
@@ -1071,8 +1142,12 @@ lemma concat_locallyDelta0 : LocallyDelta0Function₂ (concat : V → V → V) :
   simp [concat]
   rfl
 
+section
+
+variable (v z : V)
+
 @[simp]
-lemma len_concat (v z : V) : len (concat v z) = len v + 1 := by
+lemma len_concat : len (concat v z) = len v + 1 := by
   have hP : LocallyDelta0Pred fun u : V ↦ len (concat u z) = len u + 1 :=
     LocallyDelta0.eq (len_locallyDelta0.comp₁ (concat_locallyDelta0.comp₂
       (LocallyDelta0Function.var (0 : Fin 1)) (LocallyDelta0Function.const z)))
@@ -1083,7 +1158,7 @@ lemma len_concat (v z : V) : len (concat v z) = len v + 1 := by
   · intro x v ih
     simp [ih]
 
-lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] := by
+lemma concat_nth_lt {i} (hi : i < len v) : (concat v z).[i] = v.[i] := by
   have hR : LocallyDelta0 fun w : Fin 2 → V ↦
       w 0 < len (w 1) → (concat (w 1) z).[w 0] = (w 1).[w 0] :=
     (LocallyDelta0.lt (LocallyDelta0Function.var (0 : Fin 2))
@@ -1105,7 +1180,7 @@ lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] :=
   exact this i le_rfl hi
 
 @[simp]
-lemma concat_nth_len (v z : V) : (concat v z).[len v] = z := by
+lemma concat_nth_len : (concat v z).[len v] = z := by
   have hP : LocallyDelta0Pred fun u : V ↦ (concat u z).[len u] = z :=
     LocallyDelta0.eq (nth_locallyDelta0.comp₂ (concat_locallyDelta0.comp₂
       (LocallyDelta0Function.var (0 : Fin 1)) (LocallyDelta0Function.const z))
@@ -1116,18 +1191,22 @@ lemma concat_nth_len (v z : V) : (concat v z).[len v] = z := by
   · intro x v ih
     simp [ih]
 
-lemma concat_nth_len' (v z : V) {i} (hi : len v = i) : (concat v z).[i] = z := by
+lemma concat_nth_len' {i} (hi : len v = i) : (concat v z).[i] = z := by
   rcases hi; simp
+
+end
 
 /-! ## Membership -/
 
+variable (x v) in
 /-- `x ∈ᵥ v` states that `x` is an element of the list `v`. -/
-def MemVec (x v : V) : Prop := ∃ i < len v, x = v.[i]
+def MemVec : Prop := ∃ i < len v, x = v.[i]
 
 scoped infix:40 " ∈ᵥ " => MemVec
 
+variable (x) in
 @[simp]
-lemma not_memVec_empty (x : V) : ¬x ∈ᵥ 0 := by rintro ⟨i, h, _⟩; simp at h
+lemma not_memVec_empty : ¬x ∈ᵥ 0 := by rintro ⟨i, h, _⟩; simp at h
 
 lemma nth_mem_memVec (h : i < len v) : v.[i] ∈ᵥ v := ⟨i, by simp [h]⟩
 
@@ -1159,16 +1238,23 @@ instance memVec_definable' (Γ m) : Γᴬ_[m + 1]-Relation (MemVec : V → V →
 
 /-! ## Subset -/
 
+variable (v) (w : V) in
 /-- `v ⊆ᵥ w` states that every element of the list `v` is an element of the list `w`. -/
-def SubsetVec (v w : V) : Prop := ∀ x, x ∈ᵥ v → x ∈ᵥ w
+def SubsetVec : Prop := ∀ x, x ∈ᵥ v → x ∈ᵥ w
 
 scoped infix:30 " ⊆ᵥ " => SubsetVec
 
+section
+
+variable (x v : V)
+
 @[simp, refl]
-lemma SubsetVec.refl (v : V) : v ⊆ᵥ v := fun _ hx ↦ hx
+lemma SubsetVec.refl : v ⊆ᵥ v := fun _ hx ↦ hx
 
 @[simp]
-lemma subsetVec_insert_tail (x v : V) : v ⊆ᵥ x ∷ v := by intro y hy; simp [hy]
+lemma subsetVec_insert_tail : v ⊆ᵥ x ∷ v := by intro y hy; simp [hy]
+
+end
 
 set_option linter.flexible false in
 instance subsetVec_defined : 𝚫ᴬ₁-Relation (SubsetVec : V → V → Prop) via subsetVecDef :=
@@ -1224,16 +1310,22 @@ noncomputable def repeatVec.construction :
     (bound := fun (p : Fin 1 → V) i ↦ Exp.exp (Exp.exp (i + i + p 0 + 3)) + 1)
     repeatVec.bound_locallyDelta0
 
+section
+
+variable (x k : V)
+
 /-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0` -/
-noncomputable def repeatVec (x k : V) : V := repeatVec.construction.result ![x] k
+noncomputable def repeatVec : V := repeatVec.construction.result ![x] k
 
 @[simp]
-lemma repeatVec_zero (x : V) : repeatVec x 0 = 0 := by
+lemma repeatVec_zero : repeatVec x 0 = 0 := by
   simp [repeatVec, repeatVec.construction]
 
 @[simp]
-lemma repeatVec_succ (x k : V) : repeatVec x (k + 1) = x ∷ repeatVec x k := by
+lemma repeatVec_succ : repeatVec x (k + 1) = x ∷ repeatVec x k := by
   simp [repeatVec, repeatVec.construction]
+
+end
 
 instance repeatVec_defined : 𝚺ᴬ₁-Function₂ (repeatVec : V → V → V) via repeatVecDef := .mk
   fun v ↦ by simp [repeatVec.construction.result_defined_iff, repeatVecDef]; rfl
@@ -1251,8 +1343,12 @@ lemma repeatVec_locallyDelta0 : LocallyDelta0Function₂ (repeatVec : V → V �
   simp [repeatVec]
   rfl
 
+section
+
+variable (x k : V)
+
 @[simp]
-lemma len_repeatVec (x k : V) : len (repeatVec x k) = k := by
+lemma len_repeatVec : len (repeatVec x k) = k := by
   have hP : LocallyDelta0Pred fun k : V ↦ len (repeatVec x k) = k :=
     LocallyDelta0.eq (len_locallyDelta0.comp₁ (repeatVec_locallyDelta0.comp₂
       (LocallyDelta0Function.const x) (LocallyDelta0Function.var (0 : Fin 1))))
@@ -1263,10 +1359,10 @@ lemma len_repeatVec (x k : V) : len (repeatVec x k) = k := by
     simp [ih]
 
 @[simp]
-lemma le_repaetVec (x k : V) : k ≤ repeatVec x k := by
+lemma le_repaetVec : k ≤ repeatVec x k := by
   simpa using len_le (repeatVec x k)
 
-lemma nth_repeatVec (x k : V) {i} (h : i < k) : (repeatVec x k).[i] = x := by
+lemma nth_repeatVec {i} (h : i < k) : (repeatVec x k).[i] = x := by
   have hR : LocallyDelta0 fun w : Fin 2 → V ↦ w 0 < w 1 → (repeatVec x (w 1)).[w 0] = x :=
     (LocallyDelta0.lt (LocallyDelta0Function.var (0 : Fin 2)) (LocallyDelta0Function.var 1)).imp
       (LocallyDelta0.eq (nth_locallyDelta0.comp₂ (repeatVec_locallyDelta0.comp₂
@@ -1283,6 +1379,8 @@ lemma nth_repeatVec (x k : V) {i} (h : i < k) : (repeatVec x k).[i] = x := by
       · simp
       · simpa using ih j (le_trans le_self_add hj) (by simpa using hl)
   exact this i le_rfl h
+
+end
 
 lemma len_repeatVec_of_nth_le {m : V} (H : ∀ i < len v, v.[i] ≤ m) : v ≤ repeatVec m (len v) :=
   le_of_nth_le_nth (by simp) (fun i hi ↦ by simp [nth_repeatVec m (len v) hi, H i hi])
@@ -1314,14 +1412,16 @@ noncomputable def construction : VecRec.Construction V Arithmetic.VecToSet.bluep
 
 end VecToSet
 
+variable (v) in
 /-- The set of the elements of the list `v`. -/
-noncomputable def vecToSet (v : V) : V := VecToSet.construction.result ![] v
+noncomputable def vecToSet : V := VecToSet.construction.result ![] v
 
 @[simp]
 lemma vecToSet_nil : vecToSet (0 : V) = ∅ := by simp [vecToSet, VecToSet.construction]
 
+variable (x v) in
 @[simp]
-lemma vecToSet_adjoin (x v : V) :
+lemma vecToSet_adjoin :
     vecToSet (x ∷ v) = insert x (vecToSet v) := by simp [vecToSet, VecToSet.construction]
 
 instance vecToSet_defined : 𝚺ᴬ₁-Function₁ (vecToSet : V → V) via vecToSetDef :=
@@ -1367,7 +1467,7 @@ lemma nth_mem_vecToSet (h : i < len v) : v.[i] ∈ vecToSet v :=
 
 /-- A list of length `l` whose elements are at most `B` lies below
 `Exp.exp (Exp.exp (l + l + B + 3))`. -/
-lemma le_exp_exp_of_nth_le {B : V} :
+lemma le_exp_exp_of_nth_le :
     ∀ w : V, (∀ i < len w, w.[i] ≤ B) → w ≤ Exp.exp (Exp.exp (len w + len w + B + 3)) := by
   have hF : LocallyDelta0Function fun u : Fin 1 → V ↦
       Exp.exp (Exp.exp (len (u 0) + len (u 0) + B + 3)) :=
@@ -1411,8 +1511,9 @@ noncomputable def listMap (g : (Fin k → V) → V → V) (p : Fin k → V) (v :
 variable (hg : LocallyDelta0Function fun w : Fin (k + 1) → V ↦ g (w ·.succ) (w 0))
 include hg
 
-lemma listMap_existsUnique (p : Fin k → V) (v : V) :
-    ∃! w : V, len w = len v ∧ ∀ i < len v, w.[i] = g p v.[i] := by
+variable (p : Fin k → V) (v : V)
+
+lemma listMap_existsUnique : ∃! w : V, len w = len v ∧ ∀ i < len v, w.[i] = g p v.[i] := by
   obtain ⟨Y, hY⟩ := hg.bounded (v + ∑ j, p j)
   have hR : LocallyDelta0Rel fun i y ↦ y = g p v.[i] := by
     have := LocallyDelta0.eq (LocallyDelta0Function.var (V := V) (1 : Fin 2))
@@ -1438,18 +1539,19 @@ lemma listMap_existsUnique (p : Fin k → V) (v : V) :
   intro i hi
   rw [hw'v i (by simpa [hw'] using hi), hwv i (by simpa [hw'] using hi)]
 
-lemma len_listMap (p : Fin k → V) (v : V) : len (listMap g p v) = len v := by
+lemma len_listMap : len (listMap g p v) = len v := by
   have h := listMap_existsUnique hg p v
   simp only [listMap, h, ↓reduceDIte]
   exact (Classical.choose!_spec h).1
 
-lemma nth_listMap (p : Fin k → V) (v : V) (hi : i < len v) : (listMap g p v).[i] = g p v.[i] := by
+lemma nth_listMap (hi : i < len v) : (listMap g p v).[i] = g p v.[i] := by
   have h := listMap_existsUnique hg p v
   simp only [listMap, h, ↓reduceDIte]
   exact (Classical.choose!_spec h).2 i hi
 
-lemma listMap_eq_iff (p : Fin k → V) (v w : V) :
+lemma listMap_eq_iff : ∀ w : V,
     w = listMap g p v ↔ len w = len v ∧ ∀ i < len v, w.[i] = g p v.[i] := by
+  intro w
   constructor
   · rintro rfl; exact ⟨len_listMap hg p v, fun i hi ↦ nth_listMap hg p v hi⟩
   · rintro ⟨hw, hwv⟩

@@ -13,8 +13,6 @@ import AlphaCentauri.OpenProblem
 - [PWW88, remark before Theorem 12]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -31,20 +29,28 @@ variable {B s : V}
 
 variable (n : V)
 
+section
+
+variable (u v : V)
+
 /-- The positions $(k, y)$ of a copy `c` of $\mathrm{Bits}(n)$ or of $\mathrm{Bits}(M_r)$ are
 numbered in blocks of $n \Lambda$. -/
-def CarryEncode (u v : V) : Prop :=
+def CarryEncode : Prop :=
   (∃ c ≤ u, ∃ k ≤ u, ∃ y ≤ u, c ≤ 1 ∧ u = ⟪0, c, k, y⟫ ∧
       v = c * (n * blockWidth n) + (k - 1) * blockWidth n + y) ∨
     (∃ r ≤ u, ∃ c ≤ u, ∃ k ≤ u, ∃ y ≤ u, c ≤ 1 ∧ u = ⟪1, r, c, k, y⟫ ∧
       v = (2 + 2 * r + c) * (n * blockWidth n) + (k - 1) * blockWidth n + y)
 
 /-- The encoding of the domain in $[0, z + a)$. -/
-def DomainEncode (u v : V) : Prop :=
+def DomainEncode : Prop :=
   CarryEncode n u v ∨ ∃ y ≤ u, u = ⟪0, 2, y⟫ ∧ v = lowerSize n + y
 
+end
+
+variable (r x q u v : V)
+
 /-- The index of an element of the $r$-th band in $[0, 2 M_r w)$. -/
-def BandIndex (r x q : V) : Prop :=
+def BandIndex : Prop :=
   (∃ y ≤ x, x = ⟪3, y⟫ ∧ q = y) ∨
     (∃ c ≤ x, ∃ k ≤ x, ∃ i ≤ x, 4 ≤ c ∧ c ≤ 5 ∧ x = ⟪c, k, i⟫ ∧
       q = 2 * bandBound n r * exponent n + (c - 4) * (bandBound n r * (‖n‖ + 1)) +
@@ -52,7 +58,7 @@ def BandIndex (r x q : V) : Prop :=
 
 /-- The position of the `q`-th element of the $r$-th band: the first $2 u_{r + 1} w$ elements
 go to $[w(2x - 2u_r), w(2x - u_r))$, and the remaining $2w$ to the end. -/
-def BandPosition (r q v : V) : Prop :=
+def BandPosition : Prop :=
   (q < 2 * bandSize n (r + 1) * bandUnit n ∧
       v = bandUnit n * (2 * cutoff n - 2 * bandSize n r) + q) ∨
     (2 * bandSize n (r + 1) * bandUnit n ≤ q ∧
@@ -63,7 +69,7 @@ def bandOffset : V :=
   lowerSize n + blockWidth n + 2 * n * (‖n‖ + 1) + ((√(2 * n) : V) + 1) * blockWidth n
 
 /-- The encoding of the codomain in $[0, z + b)$. -/
-def CodomainEncode (u v : V) : Prop :=
+def CodomainEncode : Prop :=
   CarryEncode n u v ∨
     (∃ y ≤ u, u = ⟪0, 4, y⟫ ∧ v = lowerSize n + y) ∨
     (∃ k ≤ u, ∃ i ≤ u, u = ⟪0, 3, k, i⟫ ∧
@@ -89,7 +95,7 @@ lemma definable_domain (B s : V) : 𝚺ᴬ₀.DefinablePred (Domain B s n) := by
 
 attribute [local simp] le_pair_of_le_right
 
-variable {n} {r r' c c' k k' x x' y y' q q' w : V}
+variable {n} {r r' c c' k k' x x' y y' q q' w j m u t v : V}
 
 lemma two_le_of_length_ge (hℓ : (1024 : V) ≤ ‖n‖) : 2 ≤ n := by
   by_contra h
@@ -97,7 +103,7 @@ lemma two_le_of_length_ge (hℓ : (1024 : V) ≤ ‖n‖) : 2 ≤ n := by
   have h₂ : ‖n‖ ≤ 1 := by simpa using length_monotone (lt_succ_iff_le.mp h₁)
   exact absurd (by exact_mod_cast hℓ.trans h₂ : (1024 : ℕ) ≤ 1) (by decide)
 
-lemma eq_of_mul_add_eq {a a' m : V} (hx : x < m) (hx' : x' < m)
+lemma eq_of_mul_add_eq {a a' : V} (hx : x < m) (hx' : x' < m)
     (h : a * m + x = a' * m + x') : a = a' ∧ x = x' := by
   have h₁ : a = a' := calc
     a = (a * m + x) / m := (div_mul_add a m hx).symm
@@ -111,8 +117,7 @@ lemma eq_of_sub_one_eq (hk : 0 < k) (hk' : 0 < k') (h : k - 1 = k' - 1) : k = k'
     _ = k' - 1 + 1 := by rw [h]
     _ = k' := tsub_add_cancel_of_le (pos_iff_one_le.mp hk')
 
-lemma mul_add_lt_mul {j m b : V} (hj : 0 < j) (hjb : j ≤ b) (hy : y < m) :
-    (j - 1) * m + y < b * m :=
+lemma mul_add_lt_mul {b : V} (hj : 0 < j) (hjb : j ≤ b) (hy : y < m) : (j - 1) * m + y < b * m :=
   calc (j - 1) * m + y < (j - 1) * m + m := (add_lt_add_iff_left _).mpr hy
     _ = (j - 1 + 1) * m := by rw [add_mul, one_mul]
     _ = j * m := by rw [tsub_add_cancel_of_le (pos_iff_one_le.mp hj)]
@@ -330,7 +335,7 @@ lemma bits_of_codomain_one (h : Codomain B s n ⟪1, r, c, k, y⟫) (hc : c ≤ 
   rcases h with (⟨-, hb⟩ | ⟨-, hb⟩ | ⟨rfl, -⟩) | ⟨rfl, -⟩ | ⟨rfl, -⟩ <;>
     first | assumption | exact absurd hc (by norm_num)
 
-lemma code_lt_lowerSize {j rem : V} (hrem : rem < n * blockWidth n)
+lemma code_lt_lowerSize {rem : V} (hrem : rem < n * blockWidth n)
     (hj : j + 1 ≤ 2 * bandCount n + 2) : j * (n * blockWidth n) + rem < lowerSize n :=
   calc j * (n * blockWidth n) + rem < j * (n * blockWidth n) + n * blockWidth n :=
         (add_lt_add_iff_left _).mpr hrem
@@ -343,14 +348,13 @@ lemma targetExcess_eq : lowerSize n + targetExcess n =
   unfold targetExcess bandOffset
   grind
 
-lemma Domain.lt {B s u : V} (hn2 : 2 ≤ n) (h : Domain B s n u) :
-    u < ⟪1, n, 10, payloadBound B s n⟫ + 1 := by
+lemma Domain.lt (hn2 : 2 ≤ n) (h : Domain B s n u) : u < ⟪1, n, 10, payloadBound B s n⟫ + 1 := by
   rcases h with h | h
   · exact Tagged.lt_of_tagged_zero h fun _ ↦ LowerDomain.le_bound
   · exact Tagged.lt_of_family h bandCount_le fun r hr x hx ↦
       BandCarry.le_bound (bandBound_le hr hn2) hx
 
-lemma Codomain.lt {B s u : V} (hn2 : 2 ≤ n) (h : Codomain B s n u) :
+lemma Codomain.lt (hn2 : 2 ≤ n) (h : Codomain B s n u) :
     u < ⟪1, n, 10, payloadBound B s n⟫ + 1 := by
   rcases h with h | h
   · exact Tagged.lt_of_tagged_zero h fun _ ↦ LowerResidue.le_bound
@@ -361,8 +365,7 @@ variable (hn2 : 2 ≤ n) (hℓ : (1024 : V) ≤ ‖n‖)
 
 include hn2
 
-lemma carryEncode_cases {t v : V} (ht : Codomain (powerBound n) (exponent n) n t)
-    (h : CarryEncode n t v) :
+lemma carryEncode_cases (ht : Codomain (powerBound n) (exponent n) n t) (h : CarryEncode n t v) :
     (∃ c k y, c ≤ 1 ∧ 0 < k ∧ k ≤ n ∧ y < blockWidth n ∧ t = ⟪0, c, k, y⟫ ∧
       v = c * (n * blockWidth n) + (k - 1) * blockWidth n + y) ∨
     (∃ r c k y, c ≤ 1 ∧ r < bandCount n ∧ 0 < k ∧ k ≤ n ∧ y < blockWidth n ∧
@@ -383,7 +386,7 @@ lemma carryEncode_cases {t v : V} (ht : Codomain (powerBound n) (exponent n) n t
     exact ⟨hc, hr, hk0, hkn, hy.trans (scaledLength_lt_blockWidth hn0 hk0 (hkn.trans (by simp))),
       rfl, rfl⟩
 
-lemma carryEncode_inj {t t' v : V} (ht : Codomain (powerBound n) (exponent n) n t)
+lemma carryEncode_inj {t' : V} (ht : Codomain (powerBound n) (exponent n) n t)
     (ht' : Codomain (powerBound n) (exponent n) n t') (h : CarryEncode n t v)
     (h' : CarryEncode n t' v) : t = t' := by
   have core : ∀ {j j' k k' y y' : V}, 0 < k → 0 < k' → k ≤ n → k' ≤ n → y < blockWidth n →
@@ -410,7 +413,7 @@ lemma carryEncode_inj {t t' v : V} (ht : Codomain (powerBound n) (exponent n) n 
     obtain ⟨rfl, rfl⟩ := eq_of_mul_add_eq (lt_two_iff_le_one.mpr hc) (lt_two_iff_le_one.mpr hc') h₂
     rfl
 
-lemma codomainEncode_cases {t v : V} (ht : Codomain (powerBound n) (exponent n) n t)
+lemma codomainEncode_cases (ht : Codomain (powerBound n) (exponent n) n t)
     (h : CodomainEncode n t v) :
     (CarryEncode n t v ∧ v < lowerSize n) ∨
     (∃ y, t = ⟪0, 4, y⟫ ∧ y < blockWidth n ∧ v = lowerSize n + y ∧
@@ -512,7 +515,7 @@ lemma codomainEncode_band_total (hr : r < bandCount n)
   right; right; right; right
   use r, by simp, x, by simp, q, hqw.trans le_add_self, w, le_add_self
 
-lemma codomainEncode_total {t : V} (ht : Codomain (powerBound n) (exponent n) n t) :
+lemma codomainEncode_total (ht : Codomain (powerBound n) (exponent n) n t) :
     ∃ v, CodomainEncode n t v := by
   obtain ⟨a, b, rfl⟩ := exists_pair₂ t
   have ha : a = 0 ∨ a = 1 := by

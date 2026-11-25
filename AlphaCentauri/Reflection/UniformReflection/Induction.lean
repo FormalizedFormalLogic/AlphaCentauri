@@ -17,8 +17,6 @@ Uniform reflection and parameter-free induction.
 - [Bek99, Proposition 2.1, Proposition 2.2, Lemma 5.1]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Bounding
@@ -39,15 +37,17 @@ end
 
 open FFL.Entailment Bootstrapping Bootstrapping.Arithmetic
 
+variable {T₀ : ArithmeticTheory} [T₀.Δ₁] (φ : ArithmeticSemisentence 1)
+
 /-- The induction hypothesis of `φ`: `φ(0) ⋏ ∀ x, φ(x) 🡒 φ(x + 1)`. -/
-def inductionHypothesis (φ : ArithmeticSemisentence 1) : ArithmeticSentence :=
+def inductionHypothesis : ArithmeticSentence :=
   “!φ 0 ∧ ∀ x, !φ x → !φ(x + 1)”
 
 /-- `∀ x, φ(x)` follows over `T₀` from `φ`'s induction hypothesis together with uniform reflection
 for `T₀` and that induction hypothesis, provided `Γ` places `φ` in the reflection schema.
 - [Bek99, Proposition 2.1] -/
-theorem provable_all_of_uniformReflection {T₀ : ArithmeticTheory} [T₀.Δ₁] [𝗜𝚺₁ ⪯ T₀]
-    {Γ : ∀ {k : ℕ}, ArithmeticSemisentence k → Prop} (φ : ArithmeticSemisentence 1) (hφ : Γ φ) :
+theorem provable_all_of_uniformReflection [𝗜𝚺₁ ⪯ T₀]
+    {Γ : ∀ {k : ℕ}, ArithmeticSemisentence k → Prop} (hφ : Γ φ) :
     (T₀ ∪ {inductionHypothesis φ}) ∪ 𝗥𝗙𝗡[Γ] (T₀ ∪ {inductionHypothesis φ}) ⊢ ∀¹ φ := by
   set U : ArithmeticTheory := T₀ ∪ {inductionHypothesis φ}
   have hU : 𝗜𝚺₁ ⪯ U := Entailment.WeakerThan.trans ‹𝗜𝚺₁ ⪯ T₀› inferInstance
@@ -77,7 +77,7 @@ theorem provable_all_of_uniformReflection {T₀ : ArithmeticTheory} [T₀.Δ₁]
 without proof: every $\Pi_{n + 2}$ sentence `P` has a $\Pi_{n + 1}$ induction instance over `T₀`
 proving `P 🡒 σ`, for every uniform $\Pi_{n + 1}$ reflection instance `σ` for `T₀ ∪ {P}`.
 - [Bek99, Proposition 2.1, Lemma 5.1] -/
-axiom uniformReflection_of_parameterFreeInduction {n : ℕ} {T₀ : ArithmeticTheory} [T₀.Δ₁]
+axiom uniformReflection_of_parameterFreeInduction {n : ℕ}
     (hT₀ : 𝗜𝚺₁ ⪯ T₀) (P : ArithmeticSentence) (hP : ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2) P) :
     ∃ φ : ArithmeticSemisentence 1, ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1) φ ∧
       ∀ σ ∈ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 1)] (T₀ ∪ {P}),

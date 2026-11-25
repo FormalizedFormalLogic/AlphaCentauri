@@ -17,8 +17,6 @@ Henkin's construction for the completeness theorem carried out inside a model of
 - [HP98, Theorem I.4.25]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -32,16 +30,16 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔]
 
 section formula
 
-variable (L : Language) [L.Encodable] [L.LORDefinable]
+variable (L : Language) [L.Encodable] [L.LORDefinable] (n u : V)
 
 open Classical in
 /-- The formula with code `n`, and `⊤` if `n` is not the code of a formula. -/
-noncomputable def formulaOfCode (n : V) : V := if IsFormula L n then n else ^⊤
+noncomputable def formulaOfCode : V := if IsFormula L n then n else ^⊤
 
 open Classical in
 /-- The Henkin formula `∃x α → α(^&u)` of the code `n = ⌜∃x α⌝` with the free variable `^&u` as
 its witness, and `⊤` if `n` is not the code of an existential formula. -/
-noncomputable def henkinFormula (n u : V) : V :=
+noncomputable def henkinFormula : V :=
   if IsFormula L n ∧ ∃ p < n, n = ^∃ p then imp L n (substs1 L ^&u (π₂ (n - 1))) else ^⊤
 
 /-- The graph of `formulaOfCode L`. -/
@@ -78,7 +76,7 @@ instance henkinFormula.definable : 𝚺ᴬ₁-Function₂ (henkinFormula (V := V
   henkinFormula.defined.to_definable
 
 @[simp]
-lemma isFormula_formulaOfCode (n : V) : IsFormula L (formulaOfCode L n) := by
+lemma isFormula_formulaOfCode : IsFormula L (formulaOfCode L n) := by
   unfold formulaOfCode
   split_ifs with h <;> simp [h]
 
@@ -93,7 +91,7 @@ lemma henkinFormula_exs {α : V} (hα : IsSemiformula L 1 α) (u : V) :
   simp [qqExs]
 
 @[simp]
-lemma isFormula_henkinFormula (n u : V) : IsFormula L (henkinFormula L n u) := by
+lemma isFormula_henkinFormula : IsFormula L (henkinFormula L n u) := by
   unfold henkinFormula
   split_ifs with h
   · obtain ⟨hn, α, -, rfl⟩ := h
@@ -147,13 +145,14 @@ end derivable
 section
 
 variable {L : Language} [L.Encodable] [L.LORDefinable] (S : Theory L) [S.Δ₁]
+  {m y y' c : V} (n : V)
 
 open Classical in
 /-- The context after the `n`-th decision, given the context `s` before it. It extends `s` by the
 negation of the Henkin formula of `n` with the witness `^&(n + s)`, and by the negation of the
 formula with code `n` if the sequent of `s`, that negated Henkin formula and the formula is
 derivable, and by the formula itself otherwise. -/
-noncomputable def henkinStep (n s : V) : V :=
+noncomputable def henkinStep (s : V) : V :=
   insert (neg L (henkinFormula L n (n + s)))
     (insert (if Derivable S (insert (neg L (henkinFormula L n (n + s)))
         (insert (formulaOfCode L n) s)) then neg L (formulaOfCode L n) else formulaOfCode L n) s)
@@ -180,7 +179,7 @@ instance henkinStep.definable : 𝚫ᴬ_[2]-Function₂ (henkinStep (V := V) S) 
 
 /-- `y` is the sequence of the first `n + 1` contexts of the decision sequence of the Henkin
 completion of `S`. -/
-def IsHenkinSeq (n y : V) : Prop :=
+def IsHenkinSeq (y : V) : Prop :=
   Seq y ∧ lh y = n + 1 ∧ znth y 0 = ∅ ∧ ∀ i < n, znth y (i + 1) = henkinStep S i (znth y i)
 
 /-- The $\Delta_2$ formula saying that `y` is a decision sequence of length `n + 1`. -/
@@ -200,7 +199,7 @@ instance IsHenkinSeq.defined : 𝚫ᴬ_[2]-Relation[V] IsHenkinSeq S via isHenki
 instance IsHenkinSeq.definable : 𝚫ᴬ_[2]-Relation (IsHenkinSeq (V := V) S) :=
   (IsHenkinSeq.defined S).to_definable
 
-lemma exists_isHenkinSeq (n : V) : ∃ y, IsHenkinSeq S n y := by
+lemma exists_isHenkinSeq : ∃ y, IsHenkinSeq S n y := by
   apply InductionOnHierarchy.succ_induction_sigma 𝚺 2 (P := fun n : V ↦ ∃ y, IsHenkinSeq S n y)
     (by definability)
   · exact ⟨∅ ⁀' ∅, seq_empty.seqCons ∅, by simp,
@@ -222,8 +221,8 @@ lemma exists_isHenkinSeq (n : V) : ∃ y, IsHenkinSeq S n y := by
     exact ⟨y ⁀' henkinStep S n (znth y n), hcons, by simp [hy, hlh], by rw [hlt zero_le, h0],
       hstep'⟩
 
-variable {S} in
-private lemma IsHenkinSeq.znth_eq {n m y y' : V} (hy : IsHenkinSeq S n y) (hy' : IsHenkinSeq S m y')
+variable {S} {n} in
+private lemma IsHenkinSeq.znth_eq (hy : IsHenkinSeq S n y) (hy' : IsHenkinSeq S m y')
     {i : V} (hn : i ≤ n) (hm : i ≤ m) : znth y i = znth y' i := by
   revert hn hm
   induction i using ISigma1.sigma1_succ_induction
@@ -236,10 +235,10 @@ private lemma IsHenkinSeq.znth_eq {n m y y' : V} (hy : IsHenkinSeq S n y) (hy' :
     rw [hy.2.2.2 i hn', hy'.2.2.2 i hm', ih hn'.le hm'.le]
 
 /-- The contexts of the decision sequence of the Henkin completion of `S`. -/
-noncomputable def henkinContext (n : V) : V := znth (Classical.choose (exists_isHenkinSeq S n)) n
+noncomputable def henkinContext : V := znth (Classical.choose (exists_isHenkinSeq S n)) n
 
-variable {S} in
-private lemma IsHenkinSeq.znth_eq_henkinContext {n y : V} (hy : IsHenkinSeq S n y) :
+variable {S} {n} in
+private lemma IsHenkinSeq.znth_eq_henkinContext (hy : IsHenkinSeq S n y) :
     znth y n = henkinContext S n :=
   hy.znth_eq (Classical.choose_spec (exists_isHenkinSeq S n)) le_rfl le_rfl
 
@@ -248,8 +247,7 @@ lemma henkinContext_zero : henkinContext S (0 : V) = ∅ := by
   obtain ⟨y, hy⟩ := exists_isHenkinSeq S (0 : V)
   rw [← hy.znth_eq_henkinContext, hy.2.2.1]
 
-lemma henkinContext_succ (n : V) :
-    henkinContext S (n + 1) = henkinStep S n (henkinContext S n) := by
+lemma henkinContext_succ : henkinContext S (n + 1) = henkinStep S n (henkinContext S n) := by
   obtain ⟨y, hy⟩ := exists_isHenkinSeq S (n + 1)
   rw [← hy.znth_eq_henkinContext, hy.2.2.2 n (lt_add_one n)]
   exact congrArg (henkinStep S n) <| hy.znth_eq (Classical.choose_spec (exists_isHenkinSeq S n))
@@ -260,14 +258,14 @@ noncomputable def henkinContextGraph : 𝚫ᴬ_[2].Semisentence 2 := .mkDelta
   (.mkSigma “c n. ∃ y, !(isHenkinSeq S).sigma.val n y ∧ !znthDef c y n”)
   (.mkPi “c n. ∀ y, !(isHenkinSeq S).sigma.val n y → !znthDef c y n”)
 
-variable {S} in
-private lemma eq_henkinContext_iff_exists {c n : V} :
+variable {S} {n} in
+private lemma eq_henkinContext_iff_exists :
     c = henkinContext S n ↔ ∃ y, IsHenkinSeq S n y ∧ c = znth y n :=
   ⟨fun h ↦ let ⟨y, hy⟩ := exists_isHenkinSeq S n; ⟨y, hy, h.trans hy.znth_eq_henkinContext.symm⟩,
     by rintro ⟨y, hy, rfl⟩; exact hy.znth_eq_henkinContext⟩
 
-variable {S} in
-private lemma eq_henkinContext_iff_forall {c n : V} :
+variable {S} {n} in
+private lemma eq_henkinContext_iff_forall :
     c = henkinContext S n ↔ ∀ y, IsHenkinSeq S n y → c = znth y n :=
   ⟨by rintro rfl y hy; exact hy.znth_eq_henkinContext.symm,
     fun h ↦ let ⟨y, hy⟩ := exists_isHenkinSeq S n; (h y hy).trans hy.znth_eq_henkinContext⟩
@@ -317,35 +315,38 @@ theorem henkinSet_definable : 𝚫ᴬ_[2]-Predicate[V] (HenkinSet S) :=
 
 section context
 
-variable {S}
+variable {S} {x : V}
 
-lemma HenkinSet.isFormula {x : V} (h : HenkinSet S x) : IsFormula L x := h.1
+lemma HenkinSet.isFormula (h : HenkinSet S x) : IsFormula L x := h.1
 
-private lemma mem_henkinContext_decision (n : V) :
-    (open Classical in
+private lemma mem_henkinContext_decision : (open Classical in
       if Derivable S (insert (neg L (henkinFormula L n (n + henkinContext S n)))
         (insert (formulaOfCode L n) (henkinContext S n))) then neg L (formulaOfCode L n)
       else formulaOfCode L n) ∈ henkinContext S (n + 1) := by
   simp [henkinContext_succ, henkinStep]
 
-private lemma henkinSet_iff {n : V} (hn : IsFormula L n) :
+variable {n}
+
+private lemma henkinSet_iff (hn : IsFormula L n) :
     HenkinSet S n ↔ Derivable S (insert (neg L (henkinFormula L n (n + henkinContext S n)))
       (insert (formulaOfCode L n) (henkinContext S n))) := by
   simp [HenkinSet, hn]
 
-private lemma neg_mem_henkinContext_of_henkinSet {n : V} (h : HenkinSet S n) :
+private lemma neg_mem_henkinContext_of_henkinSet (h : HenkinSet S n) :
     neg L n ∈ henkinContext S (n + 1) := by
   have := mem_henkinContext_decision (S := S) n
   rwa [ite_eq_left ((henkinSet_iff h.isFormula).mp h), formulaOfCode_of_isFormula h.isFormula]
     at this
 
-private lemma mem_henkinContext_of_not_henkinSet {n : V} (hn : IsFormula L n) (h : ¬HenkinSet S n) :
+private lemma mem_henkinContext_of_not_henkinSet (hn : IsFormula L n) (h : ¬HenkinSet S n) :
     n ∈ henkinContext S (n + 1) := by
   have := mem_henkinContext_decision (S := S) n
   rwa [ite_eq_right (mt (henkinSet_iff hn).mpr h), formulaOfCode_of_isFormula hn] at this
 
+variable (n)
+
 @[simp]
-private lemma isFormulaSet_henkinContext (n : V) : IsFormulaSet L (henkinContext S n) := by
+private lemma isFormulaSet_henkinContext : IsFormulaSet L (henkinContext S n) := by
   have : 𝚫ᴬ_[2]-Predicate[V] IsFormulaSet L :=
     Bounding.HierarchySymbol.Definable.of_lt IsFormulaSet.definable (by simp)
   apply InductionOnHierarchy.succ_induction_sigma 𝚫 2
@@ -355,7 +356,9 @@ private lemma isFormulaSet_henkinContext (n : V) : IsFormulaSet L (henkinContext
     rw [henkinContext_succ, henkinStep]
     split_ifs <;> simp [ih]
 
-private lemma mem_henkinContext_of_le {n m x : V} (hnm : n ≤ m) (h : x ∈ henkinContext S n) :
+variable {n}
+
+private lemma mem_henkinContext_of_le (hnm : n ≤ m) (h : x ∈ henkinContext S n) :
     x ∈ henkinContext S m := by
   obtain ⟨k, rfl⟩ := exists_add_of_le hnm
   clear hnm
@@ -396,8 +399,10 @@ end context
 
 section theorems
 
+variable {s ψ φ α β : V}
+
 /-- Provable formulas are in the Henkin set. -/
-theorem HenkinSet.of_provable {φ : V} (hφ : IsFormula L φ) (h : Provable S φ) : HenkinSet S φ := by
+theorem HenkinSet.of_provable (hφ : IsFormula L φ) (h : Provable S φ) : HenkinSet S φ := by
   apply (henkinSet_iff hφ).mpr
   apply h.toDerivable.wk
   · simp
@@ -408,8 +413,10 @@ theorem HenkinSet.of_provable {φ : V} (hφ : IsFormula L φ) (h : Provable S φ
 variable {S} (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (hcons : S.Consistent V)
 include hS hcons
 
+variable (n : V)
+
 /-- No context of the decision sequence is derivable when `S` is consistent. -/
-theorem not_derivable_henkinContext (n : V) : ¬Derivable S (henkinContext S n) := by
+theorem not_derivable_henkinContext : ¬Derivable S (henkinContext S n) := by
   have : 𝚫ᴬ_[2]-Predicate[V] Derivable S :=
     Bounding.HierarchySymbol.Definable.of_lt (Derivable.definable (T := S)) (by simp)
   apply InductionOnHierarchy.succ_induction_sigma 𝚫 2
@@ -430,7 +437,7 @@ theorem not_derivable_henkinContext (n : V) : ¬Derivable S (henkinContext S n) 
     · rw [ite_eq_right hD] at h
       exact hD h
 
-private lemma henkinSet_of_forall_mem {s ψ : V} (hψ : IsFormula L ψ)
+private lemma henkinSet_of_forall_mem (hψ : IsFormula L ψ)
     (hs : ∃ m : V, ∀ p ∈ s, p ∈ henkinContext S m) (h : Derivable S (insert ψ s)) :
     HenkinSet S ψ := by
   by_contra hM
@@ -445,8 +452,8 @@ private lemma henkinSet_of_forall_mem {s ψ : V} (hψ : IsFormula L ψ)
 
 /-- If `ψ` is derivable from the negations of formulas in the Henkin set, then `ψ` is in the
 Henkin set. -/
-theorem HenkinSet.of_derivable {s ψ : V} (hψ : IsFormula L ψ)
-    (hs : ∀ p ∈ s, HenkinSet S (neg L p)) (h : Derivable S (insert ψ s)) : HenkinSet S ψ := by
+theorem HenkinSet.of_derivable (hψ : IsFormula L ψ) (hs : ∀ p ∈ s, HenkinSet S (neg L p))
+    (h : Derivable S (insert ψ s)) : HenkinSet S ψ := by
   have h₁ : ∀ p ∈ s, ∃ m : V, p ∈ henkinContext S m := by
     intro p hp
     have hM := hs p hp
@@ -459,8 +466,7 @@ theorem HenkinSet.of_derivable {s ψ : V} (hψ : IsFormula L ψ)
 
 - [Lin97, Theorem 6.4]
 - [HP98, Theorem I.4.25] -/
-theorem HenkinSet.neg_iff {φ : V} (hφ : IsFormula L φ) :
-    HenkinSet S (neg L φ) ↔ ¬HenkinSet S φ := by
+theorem HenkinSet.neg_iff (hφ : IsFormula L φ) : HenkinSet S (neg L φ) ↔ ¬HenkinSet S φ := by
   constructor
   · intro h₁ h₂
     have e₁ := neg_mem_henkinContext_of_henkinSet h₂
@@ -475,7 +481,7 @@ theorem HenkinSet.neg_iff {φ : V} (hφ : IsFormula L φ) :
       (.em (by simp [hφ]) φ (by simp) (by simp))
 
 /-- Every Henkin formula with witness `^&(n + henkinContext S n)` is in the Henkin set. -/
-theorem HenkinSet.henkinFormula_henkinContext (n : V) :
+theorem HenkinSet.henkinFormula_henkinContext :
     HenkinSet S (henkinFormula L n (n + henkinContext S n)) := by
   have hH := isFormula_henkinFormula (L := L) n (n + henkinContext S n)
   exact henkinSet_of_forall_mem hS hcons (s := {neg L (henkinFormula L n (n + henkinContext S n))})
@@ -483,7 +489,7 @@ theorem HenkinSet.henkinFormula_henkinContext (n : V) :
     (.em (by simp [hH]) (henkinFormula L n (n + henkinContext S n)) (by simp) (by simp))
 
 /-- The Henkin set is closed under modus ponens. -/
-theorem HenkinSet.modus_ponens {α β : V} (hα : HenkinSet S α) (hαβ : HenkinSet S (imp L α β)) :
+theorem HenkinSet.modus_ponens (hα : HenkinSet S α) (hαβ : HenkinSet S (imp L α β)) :
     HenkinSet S β := by
   have hF : IsFormula L α ∧ IsFormula L β := by simpa using hαβ.isFormula
   have e : neg L (imp L α β) = α ^⋏ neg L β := by
@@ -503,7 +509,7 @@ variable.
 
 - [Lin97, Theorem 6.4]
 - [HP98, Theorem I.4.25] -/
-theorem HenkinSet.exists_substs1 {α : V} (hα : IsSemiformula L 1 α) (h : HenkinSet S (^∃ α)) :
+theorem HenkinSet.exists_substs1 (hα : IsSemiformula L 1 α) (h : HenkinSet S (^∃ α)) :
     ∃ u, HenkinSet S (substs1 L ^&u α) := by
   have h₁ := HenkinSet.henkinFormula_henkinContext hS hcons (^∃ α)
   rw [henkinFormula_exs hα] at h₁
@@ -513,18 +519,19 @@ end theorems
 
 section closure
 
-theorem henkinSet_of_tprovable {φ : Formula V L} (h : S.internalize V ⊢ φ) :
-    HenkinSet S φ.val :=
+variable {φ ψ : Formula V L}
+
+theorem henkinSet_of_tprovable (h : S.internalize V ⊢ φ) : HenkinSet S φ.val :=
   HenkinSet.of_provable S (Semiformula.isSemiformula_zero φ) (tprovable_iff_provable.mp h)
 
 variable (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (hcons : S.Consistent V)
 include hS hcons
 
-theorem henkinSet_of_tprovable_imp {φ ψ : Formula V L} (h : S.internalize V ⊢ φ 🡒 ψ)
-    (hφ : HenkinSet S φ.val) : HenkinSet S ψ.val :=
+theorem henkinSet_of_tprovable_imp (h : S.internalize V ⊢ φ 🡒 ψ) (hφ : HenkinSet S φ.val) :
+    HenkinSet S ψ.val :=
   HenkinSet.modus_ponens hS hcons hφ (henkinSet_of_tprovable S h)
 
-theorem henkinSet_neg_iff {φ : Formula V L} : HenkinSet S (∼φ).val ↔ ¬HenkinSet S φ.val :=
+theorem henkinSet_neg_iff : HenkinSet S (∼φ).val ↔ ¬HenkinSet S φ.val :=
   HenkinSet.neg_iff hS hcons (Semiformula.isSemiformula_zero φ)
 
 theorem henkinSet_not_falsum : ¬HenkinSet S (⊥ : Formula V L).val := by
@@ -532,8 +539,7 @@ theorem henkinSet_not_falsum : ¬HenkinSet S (⊥ : Formula V L).val := by
     henkinSet_of_tprovable S <| by simp [Entailment.verum]
   exact (henkinSet_neg_iff S hS hcons).mp h
 
-theorem henkinSet_and_iff {φ ψ : Formula V L} :
-    HenkinSet S (φ ⋏ ψ).val ↔ HenkinSet S φ.val ∧ HenkinSet S ψ.val := by
+theorem henkinSet_and_iff : HenkinSet S (φ ⋏ ψ).val ↔ HenkinSet S φ.val ∧ HenkinSet S ψ.val := by
   constructor
   · intro h
     exact ⟨henkinSet_of_tprovable_imp S hS hcons Entailment.and₁ h,
@@ -542,14 +548,14 @@ theorem henkinSet_and_iff {φ ψ : Formula V L} :
     exact HenkinSet.modus_ponens hS hcons h₂
       (henkinSet_of_tprovable_imp S hS hcons Entailment.and₃ h₁)
 
-theorem henkinSet_or_iff {φ ψ : Formula V L} :
-    HenkinSet S (φ ⋎ ψ).val ↔ HenkinSet S φ.val ∨ HenkinSet S ψ.val := by
+theorem henkinSet_or_iff : HenkinSet S (φ ⋎ ψ).val ↔ HenkinSet S φ.val ∨ HenkinSet S ψ.val := by
   have e : φ ⋎ ψ = ∼(∼φ ⋏ ∼ψ) := by simp
   simp only [e, henkinSet_neg_iff S hS hcons, henkinSet_and_iff S hS hcons]
   tauto
 
-theorem henkinSet_exs_iff {φ : Semiformula V L 1} :
-    HenkinSet S (∃¹ φ).val ↔
+variable {φ : Semiformula V L 1}
+
+theorem henkinSet_exs_iff : HenkinSet S (∃¹ φ).val ↔
       ∃ u : V, HenkinSet S (φ.subst ![(Semiterm.fvar u : Semiterm V L 0)]).val := by
   constructor
   · intro h
@@ -558,8 +564,7 @@ theorem henkinSet_exs_iff {φ : Semiformula V L 1} :
   · rintro ⟨u, hu⟩
     exact henkinSet_of_tprovable_imp S hS hcons (TProof.subst_imp_exs (T := S) φ _) hu
 
-theorem henkinSet_all_iff {φ : Semiformula V L 1} :
-    HenkinSet S (∀¹ φ).val ↔
+theorem henkinSet_all_iff : HenkinSet S (∀¹ φ).val ↔
       ∀ u : V, HenkinSet S (φ.subst ![(Semiterm.fvar u : Semiterm V L 0)]).val := by
   constructor
   · intro h u
@@ -585,17 +590,17 @@ end closure
 
 section equality
 
-variable [L.Eq] [𝗘𝗤 L ⪯ S]
+variable [L.Eq] [𝗘𝗤 L ⪯ S] (u : V) {a b : V}
 
 /-- The free variables `^&u` and `^&v` are provably equal in the Henkin set. -/
-def HenkinEq (u v : V) : Prop :=
+def HenkinEq (v : V) : Prop :=
   HenkinSet S (Semiformula.equal (Semiterm.fvar u) (Semiterm.fvar v) : Formula V L).val
 
 /-- The free variable `^&a` is the least of the free variables provably equal to it. -/
 def IsRepresentative (a : V) : Prop := ∀ y < a, ¬HenkinEq S y a
 
 omit [𝗘𝗤 L ⪯ S] in
-private lemma henkinEq_definable (u : V) : 𝚫ᴬ_[2]-Predicate[V] fun a ↦ HenkinEq S a u := by
+private lemma henkinEq_definable : 𝚫ᴬ_[2]-Predicate[V] fun a ↦ HenkinEq S a u := by
   have hf : 𝚺ᴬ₁-Function₁[V] fun a ↦
       (Semiformula.equal (Semiterm.fvar a) (Semiterm.fvar u) : Formula V L).val := by
     simp only [Semiformula.equal, Semiformula.rel_val, Nat.cast_ofNat, SemitermVec.val_succ,
@@ -606,61 +611,77 @@ private lemma henkinEq_definable (u : V) : 𝚫ᴬ_[2]-Predicate[V] fun a ↦ He
 theorem henkinSet_equal_refl (t : Semiterm V L 0) : HenkinSet S (Semiformula.equal t t).val :=
   henkinSet_of_tprovable S <| tprovable_equal_refl S t
 
-theorem HenkinEq.refl (u : V) : HenkinEq S u u := henkinSet_equal_refl S (Semiterm.fvar u)
+theorem HenkinEq.refl : HenkinEq S u u := henkinSet_equal_refl S (Semiterm.fvar u)
 
 variable (hS : ∀ p ∈ S.Δ₁Class (V := V), L.IsSentence p) (hcons : S.Consistent V)
 include hS hcons
 
-theorem henkinSet_equal_symm {s t : Semiterm V L 0}
-    (h : HenkinSet S (Semiformula.equal s t).val) : HenkinSet S (Semiformula.equal t s).val :=
+section
+
+variable {s t u : Semiterm V L 0}
+
+theorem henkinSet_equal_symm (h : HenkinSet S (Semiformula.equal s t).val) :
+    HenkinSet S (Semiformula.equal t s).val :=
   henkinSet_of_tprovable_imp S hS hcons (tprovable_equal_symm_imp S s t) h
 
-theorem henkinSet_equal_trans {s t u : Semiterm V L 0}
-    (h₁ : HenkinSet S (Semiformula.equal s t).val)
+theorem henkinSet_equal_trans (h₁ : HenkinSet S (Semiformula.equal s t).val)
     (h₂ : HenkinSet S (Semiformula.equal t u).val) : HenkinSet S (Semiformula.equal s u).val :=
   henkinSet_of_tprovable_imp S hS hcons (tprovable_equal_trans_imp S s t u)
     ((henkinSet_and_iff S hS hcons).mpr ⟨h₁, h₂⟩)
 
-theorem henkinSet_equal_func {k : ℕ} (f : L.Func k) {s u : SemitermVec V L k 0}
-    (h : ∀ i, HenkinSet S (Semiformula.equal (s i) (u i)).val) :
+end
+
+section
+
+variable {k : ℕ} (f : L.Func k) (R : L.Rel k) {s u : SemitermVec V L k 0}
+
+theorem henkinSet_equal_func (h : ∀ i, HenkinSet S (Semiformula.equal (s i) (u i)).val) :
     HenkinSet S (Semiformula.equal (Semiterm.func f s) (Semiterm.func f u)).val :=
   henkinSet_of_tprovable_imp S hS hcons (tprovable_equal_func_imp S f s u)
     ((henkinSet_conj_iff S hS hcons _).mpr h)
 
-private theorem henkinSet_rel_imp {k : ℕ} (R : L.Rel k) {s u : SemitermVec V L k 0}
-    (h : ∀ i, HenkinSet S (Semiformula.equal (s i) (u i)).val)
+private theorem henkinSet_rel_imp (h : ∀ i, HenkinSet S (Semiformula.equal (s i) (u i)).val)
     (hs : HenkinSet S (Semiformula.rel R s).val) : HenkinSet S (Semiformula.rel R u).val :=
   HenkinSet.modus_ponens hS hcons hs <|
     henkinSet_of_tprovable_imp S hS hcons (tprovable_rel_congr_imp S R s u)
       ((henkinSet_conj_iff S hS hcons _).mpr h)
 
-theorem henkinSet_rel_iff {k : ℕ} (R : L.Rel k) {s u : SemitermVec V L k 0}
-    (h : ∀ i, HenkinSet S (Semiformula.equal (s i) (u i)).val) :
+theorem henkinSet_rel_iff (h : ∀ i, HenkinSet S (Semiformula.equal (s i) (u i)).val) :
     HenkinSet S (Semiformula.rel R s).val ↔ HenkinSet S (Semiformula.rel R u).val :=
   ⟨henkinSet_rel_imp S hS hcons R h,
     henkinSet_rel_imp S hS hcons R fun i ↦ henkinSet_equal_symm S hS hcons (h i)⟩
 
-theorem HenkinEq.symm {u v : V} (h : HenkinEq S u v) : HenkinEq S v u :=
+end
+
+section
+
+variable {u v w : V}
+
+theorem HenkinEq.symm (h : HenkinEq S u v) : HenkinEq S v u :=
   henkinSet_equal_symm S hS hcons h
 
-theorem HenkinEq.trans {u v w : V} (h₁ : HenkinEq S u v) (h₂ : HenkinEq S v w) :
-    HenkinEq S u w :=
+theorem HenkinEq.trans (h₁ : HenkinEq S u v) (h₂ : HenkinEq S v w) : HenkinEq S u w :=
   henkinSet_equal_trans S hS hcons h₁ h₂
+
+end
 
 theorem exists_isRepresentative (u : V) : ∃ a, IsRepresentative S a ∧ HenkinEq S a u := by
   obtain ⟨a, ha, hmin⟩ := InductionOnHierarchy.least_number_sigma 𝚫 2
     (P := fun a ↦ HenkinEq S a u) (henkinEq_definable S u) (x := u) (HenkinEq.refl S u)
   exact ⟨a, fun y hy hya ↦ hmin y hy (HenkinEq.trans S hS hcons hya ha), ha⟩
 
-theorem IsRepresentative.eq_of_henkinEq {a b : V} (ha : IsRepresentative S a)
-    (hb : IsRepresentative S b) (h : HenkinEq S a b) : a = b := by
+theorem IsRepresentative.eq_of_henkinEq (ha : IsRepresentative S a) (hb : IsRepresentative S b)
+    (h : HenkinEq S a b) : a = b := by
   rcases lt_trichotomy a b with hab | hab | hab
   · exact (hb a hab h).elim
   · exact hab
   · exact (ha b hab (HenkinEq.symm S hS hcons h)).elim
 
-theorem exists_isRepresentative_henkinFunc {k : ℕ} (f : L.Func k) (v : Fin k → V) :
-    ∃ y, IsRepresentative S y ∧
+section
+
+variable {k : ℕ} (f : L.Func k) (v : Fin k → V)
+
+theorem exists_isRepresentative_henkinFunc : ∃ y, IsRepresentative S y ∧
       HenkinSet S (Semiformula.equal (Semiterm.func f (fun i ↦ Semiterm.fvar (v i)))
         (Semiterm.fvar y) : Formula V L).val := by
   set t : Semiterm V L 0 := Semiterm.func f (fun i ↦ Semiterm.fvar (v i))
@@ -672,7 +693,7 @@ theorem exists_isRepresentative_henkinFunc {k : ℕ} (f : L.Func k) (v : Fin k �
     simpa [Semiformula.equal] using hu
   exact ⟨a, ha, henkinSet_equal_trans S hS hcons h₂ (HenkinEq.symm S hS hcons hau)⟩
 
-theorem IsRepresentative.eq_of_henkinFunc {k : ℕ} (f : L.Func k) (v : Fin k → V) {y y' : V}
+theorem IsRepresentative.eq_of_henkinFunc {y y' : V}
     (hy : IsRepresentative S y) (hy' : IsRepresentative S y')
     (h : HenkinSet S (Semiformula.equal (Semiterm.func f (fun i ↦ Semiterm.fvar (v i)))
       (Semiterm.fvar y) : Formula V L).val)
@@ -681,7 +702,9 @@ theorem IsRepresentative.eq_of_henkinFunc {k : ℕ} (f : L.Func k) (v : Fin k �
   hy.eq_of_henkinEq S hS hcons hy'
     (henkinSet_equal_trans S hS hcons (henkinSet_equal_symm S hS hcons h) h')
 
-theorem henkinSet_equal_fvar_iff {a b : V} (ha : IsRepresentative S a) (hb : IsRepresentative S b) :
+end
+
+theorem henkinSet_equal_fvar_iff (ha : IsRepresentative S a) (hb : IsRepresentative S b) :
     HenkinSet S (Semiformula.equal (Semiterm.fvar a) (Semiterm.fvar b) : Formula V L).val ↔
       a = b :=
   ⟨fun h ↦ ha.eq_of_henkinEq S hS hcons hb h, by rintro rfl; exact HenkinEq.refl S a⟩
@@ -690,7 +713,7 @@ end equality
 
 section operators
 
-variable [L.Eq]
+variable [L.Eq] {k : ℕ} (R : L.Rel k) (f : L.Func k) (z : V) (v : Fin k → V)
 
 /-- The $\Pi_2$ formula of `henkinDomain S`. -/
 noncomputable def henkinDomainDef : 𝚷ᴬ_[2].Semisentence 1 := .mkPi
@@ -700,13 +723,13 @@ noncomputable def henkinDomainDef : 𝚷ᴬ_[2].Semisentence 1 := .mkPi
   (by simp [HierarchySymbol.Semiformula.hierarchy_of_lt])
 
 /-- The $\Sigma_2$ formula of `henkinRel S R`. -/
-noncomputable def henkinRelDef {k : ℕ} (R : L.Rel k) : 𝚺ᴬ_[2].Semisentence k := .mkSigma
+noncomputable def henkinRelDef : 𝚺ᴬ_[2].Semisentence k := .mkSigma
   “∃ w, !lenDef ↑k w ∧ (⋀ i, ∃ z, !nthDef z w ↑(i : Fin k).val ∧ !qqFvarDef z #i.succ.succ) ∧
     ∃ c, !qqRelDef c ↑k ↑(Encodable.encode R) w ∧ !(henkinSetDef S).sigma.val c”
   (by simp [HierarchySymbol.Semiformula.hierarchy_of_lt])
 
 /-- The $\Sigma_2$ formula of `henkinFunc S f`. -/
-noncomputable def henkinFuncDef {k : ℕ} (f : L.Func k) : 𝚺ᴬ_[2].Semisentence (k + 1) := .mkSigma
+noncomputable def henkinFuncDef : 𝚺ᴬ_[2].Semisentence (k + 1) := .mkSigma
   “z. ∃ w, !lenDef ↑k w ∧
     (⋀ i, ∃ t, !nthDef t w ↑(i : Fin k).val ∧ !qqFvarDef t #i.succ.succ.succ) ∧
     ∃ t, !qqFuncDef t ↑k ↑(Encodable.encode f) w ∧ ∃ s, !qqFvarDef s z ∧ ∃ e, !mkVec₂Def e t s ∧
@@ -719,12 +742,12 @@ noncomputable def henkinDomain : Semiformula.Operator ℒₒᵣ 1 := ⟨(henkinD
 
 /-- The relation symbol `R` holds of the free variables `y₀, …, y_{k-1}` when `R(^&y₀, …)` is in
 the Henkin set. -/
-noncomputable def henkinRel {k : ℕ} (R : L.Rel k) : Semiformula.Operator ℒₒᵣ k :=
+noncomputable def henkinRel : Semiformula.Operator ℒₒᵣ k :=
   ⟨(henkinRelDef S R).val⟩
 
 /-- The function symbol `f` maps the free variables `y₀, …, y_{k-1}` to `z` when
 `f(^&y₀, …) = ^&z` is in the Henkin set. -/
-noncomputable def henkinFunc {k : ℕ} (f : L.Func k) : Semiformula.Operator ℒₒᵣ (k + 1) :=
+noncomputable def henkinFunc : Semiformula.Operator ℒₒᵣ (k + 1) :=
   ⟨(henkinFuncDef S f).val⟩
 
 @[simp]
@@ -734,16 +757,14 @@ theorem henkinDomain_val (a : V) : (henkinDomain S).val ![a] ↔ IsRepresentativ
 
 omit [L.Eq] in
 @[simp]
-theorem henkinRel_val {k : ℕ} (R : L.Rel k) (v : Fin k → V) :
-    (henkinRel S R).val v ↔
+theorem henkinRel_val : (henkinRel S R).val v ↔
       HenkinSet S (Semiformula.rel R (fun i ↦ Semiterm.fvar (v i)) : Formula V L).val := by
   simp [henkinRel, henkinRelDef, Semiformula.Operator.val]
   simp only [numeral_eq_natCast, ← and_assoc, ← eq_matrixToVec_iff, exists_eq_left]
   rfl
 
 @[simp]
-theorem henkinFunc_val {k : ℕ} (f : L.Func k) (z : V) (v : Fin k → V) :
-    (henkinFunc S f).val (z :> v) ↔
+theorem henkinFunc_val : (henkinFunc S f).val (z :> v) ↔
       HenkinSet S (Semiformula.equal (Semiterm.func f (fun i ↦ Semiterm.fvar (v i)))
         (Semiterm.fvar z) : Formula V L).val := by
   simp [henkinFunc, henkinFuncDef, Semiformula.Operator.val]

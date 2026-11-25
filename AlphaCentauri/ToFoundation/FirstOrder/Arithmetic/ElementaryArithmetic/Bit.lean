@@ -9,8 +9,6 @@ public import Foundation.FirstOrder.Arithmetic.EA.Basic
 - [HP98, §I.1(b)]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -18,11 +16,12 @@ namespace ElementaryArithmetic
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {a b c i j r s x y z : V}
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {i j a b c r s x y z : V}
 
 noncomputable scoped instance : Exp V := ⟨fun a ↦ Classical.choose! (exponential_exists_unique a)⟩
 
-lemma exponential_exp (a : V) : Exponential a (Exp.exp a) :=
+variable (a) in
+lemma exponential_exp : Exponential a (Exp.exp a) :=
   Classical.choose!_spec (exponential_exists_unique a)
 
 lemma exponential_graph : a = Exp.exp b ↔ Exponential b a :=
@@ -46,23 +45,29 @@ lemma exp_zero : Exp.exp (0 : V) = 1 := exp_of_exponential (by simp)
 @[simp]
 lemma exp_one : Exp.exp (1 : V) = 2 := exp_of_exponential (by simp)
 
-lemma exp_succ (a : V) : Exp.exp (a + 1) = 2 * Exp.exp a :=
+section
+
+variable (a)
+
+lemma exp_succ : Exp.exp (a + 1) = 2 * Exp.exp a :=
   exp_of_exponential <| Exponential.exponential_succ_mul_two.mpr <| exponential_exp a
 
-lemma exp_even (a : V) : Exp.exp (2 * a) = (Exp.exp a) ^ 2 :=
+lemma exp_even : Exp.exp (2 * a) = (Exp.exp a) ^ 2 :=
   exp_of_exponential <| Exponential.exponential_even_sq.mpr <| exponential_exp a
 
 @[simp]
-lemma lt_exp (a : V) : a < Exp.exp a := (exponential_exp a).lt
+lemma lt_exp : a < Exp.exp a := (exponential_exp a).lt
 
 @[simp]
-lemma exp_pos (a : V) : 0 < Exp.exp a := (exponential_exp a).range_pos
+lemma exp_pos : 0 < Exp.exp a := (exponential_exp a).range_pos
 
 @[simp]
-lemma one_le_exp (a : V) : 1 ≤ Exp.exp a := pos_iff_one_le.mp (by simp)
+lemma one_le_exp : 1 ≤ Exp.exp a := pos_iff_one_le.mp (by simp)
 
 @[simp]
-lemma exp_pow2 (a : V) : Pow2 (Exp.exp a) := (exponential_exp a).range_pow2
+lemma exp_pow2 : Pow2 (Exp.exp a) := (exponential_exp a).range_pow2
+
+end
 
 @[simp]
 lemma exp_monotone : Exp.exp a < Exp.exp b ↔ a < b :=
@@ -72,12 +77,18 @@ lemma exp_monotone : Exp.exp a < Exp.exp b ↔ a < b :=
 lemma exp_monotone_le : Exp.exp a ≤ Exp.exp b ↔ a ≤ b :=
   Iff.symm <| Exponential.monotone_le_iff (exponential_exp a) (exponential_exp b)
 
-lemma exp_add (a b : V) : Exp.exp (a + b) = Exp.exp a * Exp.exp b :=
+section
+
+variable (a b)
+
+lemma exp_add : Exp.exp (a + b) = Exp.exp a * Exp.exp b :=
   exp_of_exponential (Exponential.add_mul (exponential_exp a) (exponential_exp b))
 
 @[simp]
-lemma log_exponential (a : V) : log (Exp.exp a) = a :=
+lemma log_exponential : log (Exp.exp a) = a :=
   (exponential_exp a).log_eq_of_exp
+
+end
 
 lemma exp_log_le_self (pos : 0 < a) : Exp.exp (log a) ≤ a := by
   obtain ⟨_, _, H, _⟩ := log_pos pos
@@ -89,16 +100,18 @@ lemma lt_two_mul_exponential_log (pos : 0 < a) : a < 2 * Exp.exp (log a) := by
   rcases H.uniq (exponential_exp (log a))
   assumption
 
+variable (a) in
 @[simp]
-lemma length_exponential (a : V) : ‖Exp.exp a‖ = a + 1 := by
+lemma length_exponential : ‖Exp.exp a‖ = a + 1 := by
   simp [length_of_pos (exp_pos a)]
 
 lemma exp_le_iff_le_log (pos : 0 < a) : Exp.exp i ≤ a ↔ i ≤ log a :=
   ⟨by intro h; simpa using log_monotone h,
     fun h ↦ le_trans (exp_monotone_le.mpr h) (exp_log_le_self pos)⟩
 
+variable (i a) in
 /-- `i ∈ a` states that the `i`-th bit of `a` is one. -/
-def Bit (i a : V) : Prop := LenBit (Exp.exp i) a
+def Bit : Prop := LenBit (Exp.exp i) a
 
 scoped instance : Membership V V := ⟨fun a i ↦ Bit i a⟩
 
@@ -109,12 +122,16 @@ instance bit_defined : 𝚺ᴬ₀-Relation[V] (· ∈ ·) via bitDef := .mk fun 
 
 instance mem_definable : 𝚺ᴬ₀-Relation[V] (· ∈ ·) := bit_defined.to_definable
 
-instance mem_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Relation[V] (· ∈ ·) := mem_definable.of_zero
+section
 
-instance mem_definable'' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Relation[V] Membership.mem := by
+variable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ])
+
+instance mem_definable' : ℌ-Relation[V] (· ∈ ·) := mem_definable.of_zero
+
+instance mem_definable'' : ℌ-Relation[V] Membership.mem := by
   simpa using (mem_definable' ℌ).retraction ![1, 0]
+
+end
 
 lemma mem_iff_bit : i ∈ a ↔ Bit i a := iff_of_eq rfl
 
@@ -122,9 +139,12 @@ lemma exp_le_of_mem (h : i ∈ a) : Exp.exp i ≤ a := LenBit.le h
 
 lemma lt_of_mem (h : i ∈ a) : i < a := lt_of_lt_of_le (lt_exp i) (exp_le_of_mem h)
 
+section
+
+variable {k : ℕ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+
 @[definability]
-lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_ball_mem_zero
-    {Γ} {k : ℕ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_ball_mem_zero {Γ}
     (hf : DefinableBoundedFunction f) (h : Γᴬ_[0].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γᴬ_[0].Definable (fun v ↦ ∀ x ∈ f v, P v x) := by
   have : Γᴬ_[0].Definable (fun v ↦ ∀ x < f v, x ∈ f v → P v x) := by
@@ -137,8 +157,7 @@ lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_ball_m
     intro v; exact ⟨fun h x _ hxv ↦ h x hxv, fun h x hx ↦ h x (lt_of_mem hx) hx⟩
 
 @[definability]
-lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_bexs_mem_zero
-    {Γ} {k : ℕ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_bexs_mem_zero {Γ}
     (hf : DefinableBoundedFunction f) (h : Γᴬ_[0].Definable (fun w ↦ P (w ·.succ) (w 0))) :
     Γᴬ_[0].Definable (fun v ↦ ∃ x ∈ f v, P v x) := by
   have : Γᴬ_[0].Definable (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) := by
@@ -151,13 +170,18 @@ lemma _root_.FFL.FirstOrder.Bounding.HierarchySymbol.Definable.arithmetic_bexs_m
     intro v; exact ⟨by rintro ⟨x, hx, hxv⟩; exact ⟨x, lt_of_mem hx, hx, hxv⟩,
       by rintro ⟨x, _, hx, hxv⟩; exact ⟨x, hx, hxv⟩⟩
 
+end
+
 scoped instance : Tarski.Structure.Mem ℒₒᵣ V :=
   ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def, bit_defined.iff]⟩
 
+section
+
+variable {ξ : Type*} {n : ℕ} {t : ArithmeticSemiterm ξ n} {φ : ArithmeticSemiformula ξ (n + 1)}
+  {bv : Fin n → V} {fv : ξ → V}
+
 @[simp]
-lemma eval_ballIn {ξ : Type*} {n : ℕ} {t : ArithmeticSemiterm ξ n}
-    {φ : ArithmeticSemiformula ξ (n + 1)} {bv : Fin n → V} {fv : ξ → V} :
-    (ballIn t φ).Eval (M := V) bv fv ↔ ∀ x ∈ t.val bv fv, φ.Eval (x :> bv) fv := by
+lemma eval_ballIn : (ballIn t φ).Eval (M := V) bv fv ↔ ∀ x ∈ t.val bv fv, φ.Eval (x :> bv) fv := by
   suffices
     (∀ x < t.val bv fv, x ∈ t.val bv fv → φ.Eval (x :> bv) fv) ↔
     ∀ x ∈ t.val bv fv, φ.Eval (x :> bv) fv by simpa [ballIn]
@@ -166,15 +190,15 @@ lemma eval_ballIn {ξ : Type*} {n : ℕ} {t : ArithmeticSemiterm ξ n}
   · intro h x _ hx; exact h x hx
 
 @[simp]
-lemma eval_bexsIn {ξ : Type*} {n : ℕ} {t : ArithmeticSemiterm ξ n}
-    {φ : ArithmeticSemiformula ξ (n + 1)} {bv : Fin n → V} {fv : ξ → V} :
-    (bexsIn t φ).Eval (M := V) bv fv ↔ ∃ x ∈ t.val bv fv, φ.Eval (x :> bv) fv := by
+lemma eval_bexsIn : (bexsIn t φ).Eval (M := V) bv fv ↔ ∃ x ∈ t.val bv fv, φ.Eval (x :> bv) fv := by
   suffices
     (∃ x < t.val bv fv, x ∈ t.val bv fv ∧ φ.Eval (x :> bv) fv) ↔
     ∃ x ∈ t.val bv fv, φ.Eval (x :> bv) fv by simpa [bexsIn]
   constructor
   · rintro ⟨x, _, hx, h⟩; exact ⟨x, hx, h⟩
   · rintro ⟨x, hx, h⟩; exact ⟨x, lt_of_mem hx, hx, h⟩
+
+end
 
 instance memRel_defined : 𝚺ᴬ₀-Relation₃ (fun r x y : V ↦ ⟪x, y⟫ ∈ r) via memRel :=
   .mk fun v ↦ by simp [memRel]
@@ -203,33 +227,52 @@ scoped instance : EmptyCollection V := ⟨0⟩
 omit [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] in
 lemma emptyset_def : (∅ : V) = 0 := rfl
 
-@[simp]
-lemma not_mem_empty (i : V) : i ∉ (∅ : V) := by simp [emptyset_def, mem_iff_bit, Bit]
+section
+
+variable (i)
 
 @[simp]
-lemma not_mem_zero (i : V) : i ∉ (0 : V) := by simp [mem_iff_bit, Bit]
+lemma not_mem_empty : i ∉ (∅ : V) := by simp [emptyset_def, mem_iff_bit, Bit]
+
+@[simp]
+lemma not_mem_zero : i ∉ (0 : V) := by simp [mem_iff_bit, Bit]
+
+end
 
 noncomputable scoped instance : Singleton V V := ⟨fun a ↦ Exp.exp a⟩
 
-lemma singleton_def (a : V) : {a} = Exp.exp a := rfl
+section
+
+variable (a b)
+
+lemma singleton_def : {a} = Exp.exp a := rfl
 
 @[simp]
-lemma singleton_injective (a b : V) : ({a} : V) = {b} ↔ a = b :=
+lemma singleton_injective : ({a} : V) = {b} ↔ a = b :=
   ⟨fun h ↦ by simpa [singleton_def] using congr_arg log h, by rintro rfl; rfl⟩
+
+end
+
+section
+
+variable (i a)
 
 open Classical in
 /-- `bitInsert i a` adds `i` to the set `a`. -/
-noncomputable def bitInsert (i a : V) : V := if i ∈ a then a else a + Exp.exp i
+noncomputable def bitInsert : V := if i ∈ a then a else a + Exp.exp i
 
 open Classical in
 /-- `bitRemove i a` removes `i` from the set `a`. -/
-noncomputable def bitRemove (i a : V) : V := if i ∈ a then a - Exp.exp i else a
+noncomputable def bitRemove : V := if i ∈ a then a - Exp.exp i else a
+
+end
 
 noncomputable scoped instance : Insert V V := ⟨bitInsert⟩
 
 lemma insert_eq : insert i a = bitInsert i a := rfl
 
-lemma singleton_eq_insert (i : V) : ({i} : V) = insert i ∅ := by
+variable (i) in
+lemma singleton_eq_insert : ({i} : V) = insert i ∅ := by
   simp [singleton_def, insert, bitInsert, emptyset_def]
 
 scoped instance : LawfulSingleton V V where
@@ -250,7 +293,8 @@ lemma mem_bitRemove_iff : i ∈ bitRemove j a ↔ i ≠ j ∧ i ∈ a := by
   · simp only [bitRemove, h, ↓reduceIte, ne_eq, iff_and_self]
     rintro _ rfl; contradiction
 
-lemma insert_graph (b i a : V) :
+variable (b i a : V) in
+lemma insert_graph :
     b = insert i a ↔ (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e ≤ b, e = Exp.exp i ∧ b = a + e) :=
   ⟨by rintro rfl; by_cases hi : i ∈ a <;> simp [hi, insert, bitInsert],
    by by_cases hi : i ∈ a <;> simp only [hi, true_and, not_true_eq_false, false_and,
@@ -263,8 +307,9 @@ instance insert_defined : 𝚺ᴬ₀-Function₂[V] insert via insertDef :=
 
 instance insert_definable : 𝚺ᴬ₀-Function₂[V] insert := insert_defined.to_definable
 
-instance insert_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    Γ-Function₂[V] insert := insert_definable.of_zero
+variable (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ])
+
+instance insert_definable' : Γ-Function₂[V] insert := insert_definable.of_zero
 
 open Classical in
 lemma insert_le_of_le_of_le (hij : i ≤ j) (hab : a ≤ b) : insert i a ≤ b + Exp.exp j := by
@@ -285,8 +330,9 @@ lemma pos_of_nonempty (h : i ∈ a) : 0 < a := by
   rcases show a = 0 by simpa using A
   simp_all
 
+variable (i a) in
 @[simp]
-lemma mem_insert (i a : V) : i ∈ insert i a := by simp
+lemma mem_insert : i ∈ insert i a := by simp
 
 lemma insert_eq_self_of_mem (h : i ∈ a) : insert i a = a := by
   simp [insert_eq, bitInsert, h]
@@ -324,14 +370,16 @@ instance bitSubset_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ])
 
 lemma subset_iff : a ⊆ b ↔ (∀ x ∈ a, x ∈ b) := by simp [HasSubset.Subset]
 
+variable (a) in
 @[refl, simp]
-lemma subset_refl (a : V) : a ⊆ a := by intro x; simp
+lemma subset_refl : a ⊆ a := by intro x; simp
 
 @[trans]
 lemma subset_trans (hab : a ⊆ b) (hbc : b ⊆ c) : a ⊆ c := by
   intro x hx; exact hbc (hab hx)
 
-lemma mem_exp_add_succ_sub_one (i j : V) : i ∈ Exp.exp (i + j + 1) - 1 := by
+variable (i j) in
+lemma mem_exp_add_succ_sub_one : i ∈ Exp.exp (i + j + 1) - 1 := by
   have : Exp.exp (i + j + 1) - 1 =
       (Exp.exp j - 1) * Exp.exp (i + 1) + Exp.exp i + (Exp.exp i - 1) := calc
     Exp.exp (i + j + 1) - 1 = Exp.exp j * Exp.exp (i + 1) - 1 := by
@@ -348,13 +396,19 @@ lemma mem_exp_add_succ_sub_one (i j : V) : i ∈ Exp.exp (i + j + 1) - 1 := by
   exact mem_iff_mul_exp_add_exp_add.mpr
     ⟨Exp.exp j - 1, Exp.exp i - 1, (tsub_lt_iff_left (by simp)).mpr <| by simp, this⟩
 
+section
+
+variable (a)
+
 /-- `under a` is the set `{0, 1, …, a - 1}`. -/
-noncomputable def under (a : V) : V := Exp.exp a - 1
+noncomputable def under : V := Exp.exp a - 1
 
 @[simp]
-lemma le_under (a : V) : a ≤ under a :=
+lemma le_under : a ≤ under a :=
   le_iff_lt_succ.mpr (by
     simp [under, show Exp.exp a - 1 + 1 = Exp.exp a from sub_add_self_of_le (by simp)])
+
+end
 
 @[simp]
 lemma mem_under_iff : i ∈ under j ↔ i < j := by
@@ -384,8 +438,7 @@ instance under_defined : 𝚺ᴬ₀-Function₁[V] under via underDef :=
 
 instance under_definable : 𝚺ᴬ₀-Function₁[V] under := under_defined.to_definable
 
-instance under_definable' (Γ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    Γ-Function₁[V] under := under_definable.of_zero
+instance under_definable' : Γ-Function₁[V] under := under_definable.of_zero
 
 lemma eq_zero_of_subset_zero : a ⊆ 0 → a = 0 := by
   intro h; by_contra A
@@ -398,12 +451,18 @@ lemma subset_div_two : a ⊆ b → a / 2 ⊆ b / 2 := by
 
 lemma zero_mem_iff : 0 ∉ a ↔ 2 ∣ a := by simp [mem_iff_bit, Bit, LenBit]
 
-@[simp]
-lemma zero_not_mem (a : V) : 0 ∉ 2 * a := by simp [mem_iff_bit, Bit, LenBit]
+section
+
+variable (a)
 
 @[simp]
-lemma zero_mem_double_add_one (a : V) : 0 ∈ 2 * a + 1 := by
+lemma zero_not_mem : 0 ∉ 2 * a := by simp [mem_iff_bit, Bit, LenBit]
+
+@[simp]
+lemma zero_mem_double_add_one : 0 ∈ 2 * a + 1 := by
   simp [mem_iff_bit, Bit, LenBit, ← mod_eq_zero_iff_dvd]
+
+end
 
 @[simp]
 lemma succ_mem_two_mul_iff : i + 1 ∈ 2 * a ↔ i ∈ a := by
@@ -438,7 +497,8 @@ lemma le_of_subset (h : a ⊆ b) : a ≤ b := le_of_subset_of_le (c := a) b a le
 lemma mem_ext (h : ∀ i, i ∈ a ↔ i ∈ b) : a = b :=
   le_antisymm (le_of_subset fun i hi ↦ (h i).mp hi) (le_of_subset fun i hi ↦ (h i).mpr hi)
 
-lemma eq_empty_or_nonempty (a : V) : a = ∅ ∨ ∃ i, i ∈ a := by
+variable (a) in
+lemma eq_empty_or_nonempty : a = ∅ ∨ ∃ i, i ∈ a := by
   rcases Arithmetic.zero_le a with (rfl | pos)
   · simp [emptyset_def]
   · exact Or.inr ⟨log a, log_mem_of_pos pos⟩
@@ -472,8 +532,9 @@ lemma under_inj : under i = under j ↔ i = j := ⟨fun h ↦ by
 @[simp]
 lemma under_zero : under (0 : V) = ∅ := mem_ext (by simp [mem_under_iff])
 
+variable (i) in
 @[simp]
-lemma under_succ (i : V) : under (i + 1) = insert i (under i) :=
+lemma under_succ : under (i + 1) = insert i (under i) :=
   mem_ext (by simp [mem_under_iff, lt_succ_iff_le, le_iff_eq_or_lt])
 
 lemma insert_remove (h : i ∈ a) : insert i (bitRemove i a) = a := mem_ext <| by
@@ -489,8 +550,9 @@ variable {P : V → Prop}
 
 /-- Comprehension for a $\Delta_0$ predicate on `{0, …, a - 1}`.
 - [HP98, Theorem I.1.36] -/
-theorem finset_comprehension (hP : 𝚺ᴬ₀.DefinablePred P) (a : V) :
-    ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i := by
+theorem finset_comprehension (hP : 𝚺ᴬ₀.DefinablePred P) :
+    ∀ a : V, ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i := by
+  intro a
   have hs : ∀ i < a, P i → i ∈ under a := by
     intro i hi _
     simpa [mem_under_iff] using hi

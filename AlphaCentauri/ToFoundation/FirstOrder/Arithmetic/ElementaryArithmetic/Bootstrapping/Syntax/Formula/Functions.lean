@@ -12,8 +12,6 @@ Operations on codes of formulas in models of $\mathsf{EA}$.
 - [HP98, §V.3]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -22,7 +20,7 @@ namespace FFL.FirstOrder.Arithmetic
 namespace ElementaryArithmetic.Bootstrapping
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
-  {L : Language} [L.Encodable] [L.LORDefinable] {a a' d i k m n p q R t u v w x : V}
+  {L : Language} [L.Encodable] [L.LORDefinable] {w x y a a' b n d i k m p t u q R v : V}
 
 section structuralBound
 
@@ -319,13 +317,13 @@ lemma neg_inj_iff (hp : IsUFormula L p) (hq : IsUFormula L q) : neg L p = neg L 
 
 end negation
 
-variable (L)
+variable (L) (p q)
 
-noncomputable def imp (p q : V) : V := neg L p ^⋎ q
+noncomputable def imp : V := neg L p ^⋎ q
 
-noncomputable def iff (p q : V) : V := (imp L p q) ^⋏ (imp L q p)
+noncomputable def iff : V := (imp L p q) ^⋏ (imp L q p)
 
-variable {L}
+variable {L} {p q}
 
 @[simp]
 lemma IsUFormula.imp : IsUFormula L (imp L p q) ↔ IsUFormula L p ∧ IsUFormula L q := by
@@ -366,11 +364,17 @@ lemma IsSemiformula.iff :
   simp only [Bootstrapping.iff, and, imp, and_iff_left_iff_imp, and_imp]
   intros; simp_all
 
-@[simp]
-lemma lt_iff_left (p q : V) : p < iff L p q := lt_trans (lt_or_right _ _) (lt_K!_right _ _)
+section
+
+variable (p q)
 
 @[simp]
-lemma lt_iff_right (p q : V) : q < iff L p q := lt_trans (lt_or_right _ _) (lt_K!_left _ _)
+lemma lt_iff_left : p < iff L p q := lt_trans (lt_or_right _ _) (lt_K!_right _ _)
+
+@[simp]
+lemma lt_iff_right : q < iff L p q := lt_trans (lt_or_right _ _) (lt_K!_left _ _)
+
+end
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (iffGraph)
 
@@ -599,12 +603,18 @@ private lemma bvarAt_locallyDelta0 :
       (LocallyDelta0Function.var 0))
   simpa using this
 
+section
+
+variable (a n)
+
 /-- The list `^#a, ^#(a + 1), …, ^#(a + n - 1)`. -/
-noncomputable def bvarRange (a n : V) : V := listMap (fun r i ↦ ^#(r 0 + i)) ![a] (rangeList n)
+noncomputable def bvarRange : V := listMap (fun r i ↦ ^#(r 0 + i)) ![a] (rangeList n)
 
 @[simp]
-lemma len_bvarRange (a n : V) : len (bvarRange a n) = n := by
+lemma len_bvarRange : len (bvarRange a n) = n := by
   rw [bvarRange, len_listMap bvarAt_locallyDelta0, len_rangeList]
+
+end
 
 @[simp]
 lemma nth_bvarRange (hi : i < n) : (bvarRange a n).[i] = ^#(a + i) := by
@@ -623,13 +633,16 @@ lemma bvarRange_locallyDelta0 : LocallyDelta0Function₂ (bvarRange : V → V �
   rw [Fin.fin_one_eq_zero j]
   rfl
 
-lemma IsSemitermVec.bvarRange (a n : V) : IsSemitermVec L n (a + n) (bvarRange a n) :=
+section
+
+variable (a n)
+
+lemma IsSemitermVec.bvarRange : IsSemitermVec L n (a + n) (bvarRange a n) :=
   IsSemitermVec.iff.mpr ⟨by simp, fun i hi ↦ by
     rw [nth_bvarRange hi]
     exact ⟨by simp, by simpa [add_assoc] using add_le_add_right (succ_le_iff_lt.mpr hi) a⟩⟩
 
-lemma termBShiftVec_bvarRange (a n : V) :
-    termBShiftVec L n (bvarRange a n) = bvarRange (a + 1) n := by
+lemma termBShiftVec_bvarRange : termBShiftVec L n (bvarRange a n) = bvarRange (a + 1) n := by
   have h := (IsSemitermVec.bvarRange (L := L) a n).isUTerm
   apply nth_ext (by simp [h])
   intro i hi
@@ -637,12 +650,14 @@ lemma termBShiftVec_bvarRange (a n : V) :
   rw [nth_termBShiftVec h hi, nth_bvarRange hi, nth_bvarRange hi]
   simp [add_right_comm]
 
-variable (L)
+end
+
+variable (L) (d t)
 
 /-- The code of the term `t` with the indices of its bound variables raised by `d`. -/
-noncomputable def termBShiftIter (d t : V) : V := termSubst L (bvarRange d (termBV L t)) t
+noncomputable def termBShiftIter : V := termSubst L (bvarRange d (termBV L t)) t
 
-variable {L}
+variable {L} {d t}
 
 lemma termBShiftIter_locallyDelta0 : LocallyDelta0Function₂ (termBShiftIter L : V → V → V) :=
   termSubst_locallyDelta0.comp₂ (bvarRange_locallyDelta0.comp₂ (LocallyDelta0Function.var 0)
@@ -651,14 +666,22 @@ lemma termBShiftIter_locallyDelta0 : LocallyDelta0Function₂ (termBShiftIter L 
 lemma termBShiftIter_zero (ht : IsUTerm L t) : termBShiftIter L 0 t = t :=
   termSubst_eq_self ht.isSemiterm fun i hi ↦ by simp [hi]
 
-lemma IsUTerm.termBShiftIter (ht : IsUTerm L t) (d : V) : IsUTerm L (termBShiftIter L d t) :=
+section
+
+variable (ht : IsUTerm L t) (d : V)
+
+include ht
+
+lemma IsUTerm.termBShiftIter : IsUTerm L (termBShiftIter L d t) :=
   ((IsSemitermVec.bvarRange d (termBV L t)).termSubst ht.isSemiterm).isUTerm
 
-lemma termBShift_termBShiftIter (ht : IsUTerm L t) (d : V) :
+lemma termBShift_termBShiftIter :
     termBShift L (termBShiftIter L d t) = termBShiftIter L (d + 1) t := by
   rw [termBShiftIter, bShift_substs ht.isSemiterm (IsSemitermVec.bvarRange d (termBV L t)),
     termBShiftVec_bvarRange]
   rfl
+
+end
 
 open Classical in
 private lemma qVecIterAt_locallyDelta0 :
@@ -672,20 +695,21 @@ private lemma qVecIterAt_locallyDelta0 :
       (LocallyDelta0Function.sub.comp₂ (v3 0) (v3 2))))
   simpa using this
 
-variable (L)
+variable (L) (w d)
 
 open Classical in
 /-- The list obtained from `w` by `d` applications of `qVec`, given in closed form: the codes
 `^#0, …, ^#(d - 1)` followed by the terms of `w` with their bound variables raised by `d`. -/
-noncomputable def qVecIter (w d : V) : V :=
+noncomputable def qVecIter : V :=
   if d = 0 then w else
     listMap (fun r i ↦ if i < r 1 then ^#i else termBShiftIter L (r 1) (r 0).[i - r 1]) ![w, d]
       (rangeList (d + if IsUTermVec L (len w) w then len w else 0))
 
-variable {L}
+variable {L} {w d}
 
+variable (w) in
 @[simp]
-lemma qVecIter_zero (w : V) : qVecIter L w 0 = w := by simp [qVecIter]
+lemma qVecIter_zero : qVecIter L w 0 = w := by simp [qVecIter]
 
 open Classical in
 lemma len_qVecIter (hd : d ≠ 0) :
@@ -715,8 +739,9 @@ lemma isUTermVec_qVecIter (hd : d ≠ 0) :
     · simp only [hw, ↓reduceIte, add_zero] at hi
       exact absurd hi h
 
+variable (w d) in
 open Classical in
-lemma qVec_qVecIter (w d : V) : qVec L (qVecIter L w d) = qVecIter L w (d + 1) := by
+lemma qVec_qVecIter : qVec L (qVecIter L w d) = qVecIter L w (d + 1) := by
   have hlenR := len_qVecIter (L := L) (w := w) (d := d + 1) (by simp)
   by_cases hd : d = 0
   · subst hd
@@ -800,26 +825,31 @@ lemma qVecIter_locallyDelta0 :
       | zero => rfl
       | succ j => exact j.elim0
 
-private lemma qVecIter_var_locallyDelta0 {n : ℕ} (w : V) (i : Fin n) :
+section
+
+variable {n : ℕ} (w m) (i : Fin n)
+
+private lemma qVecIter_var_locallyDelta0 :
     LocallyDelta0Function fun u : Fin n → V ↦ qVecIter L w (u i) :=
   qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const w) (LocallyDelta0Function.var i)
 
-private lemma add_var_locallyDelta0 {n : ℕ} (m : V) (i : Fin n) :
-    LocallyDelta0Function fun u : Fin n → V ↦ m + u i :=
+private lemma add_var_locallyDelta0 : LocallyDelta0Function fun u : Fin n → V ↦ m + u i :=
   LocallyDelta0Function.add.comp₂ (LocallyDelta0Function.const m) (LocallyDelta0Function.var i)
+
+end
 
 private lemma qVecIterAt'_locallyDelta0 :
     LocallyDelta0Function fun u : Fin 2 → V ↦
       (fun (r : Fin 1 → V) d ↦ qVecIter L (r 0) d) (u ·.succ) (u 0) := by
   simpa using (qVecIter_locallyDelta0 (L := L)).retraction ![1, 0]
 
-variable (L)
+variable (L) (w p)
 
 /-- The largest of the lists `qVecIter L w d` over the depths `d ≤ p`. -/
-noncomputable def qVecIterMax (w p : V) : V :=
+noncomputable def qVecIterMax : V :=
   listMax (listMap (fun r d ↦ qVecIter L (r 0) d) ![w] (rangeList (p + 1)))
 
-variable {L}
+variable {L} {w p}
 
 lemma le_qVecIterMax (hd : d ≤ p) : qVecIter L w d ≤ qVecIterMax L w p := by
   have hd' : d < len (rangeList (p + 1)) := by simpa [lt_succ_iff_le] using hd
@@ -828,7 +858,8 @@ lemma le_qVecIterMax (hd : d ≤ p) : qVecIter L w d ≤ qVecIterMax L w p := by
   rw [nth_listMap qVecIterAt'_locallyDelta0 _ _ hd', nth_rangeList (by simpa using hd')] at this
   exact this
 
-lemma le_qVecIterMax_self (w p : V) : w ≤ qVecIterMax L w p := by
+variable (w p) in
+lemma le_qVecIterMax_self : w ≤ qVecIterMax L w p := by
   simpa using le_qVecIterMax (L := L) (w := w) (zero_le (a := p))
 
 lemma qVecIterMax_le {B : V} (h : ∀ d ≤ p, qVecIter L w d ≤ B) : qVecIterMax L w p ≤ B := by
@@ -841,7 +872,8 @@ lemma qVecIterMax_le {B : V} (h : ∀ d ≤ p, qVecIter L w d ≤ B) : qVecIterM
 lemma qVecIterMax_monotone (h : p ≤ q) : qVecIterMax L w p ≤ qVecIterMax L w q :=
   qVecIterMax_le fun _ hd ↦ le_qVecIterMax (le_trans hd h)
 
-lemma qVecIter_qVec (w d : V) : qVecIter L (qVec L w) d = qVecIter L w (d + 1) := by
+variable (w d) in
+lemma qVecIter_qVec : qVecIter L (qVec L w) d = qVecIter L w (d + 1) := by
   have hP : LocallyDelta0Pred fun d ↦ qVecIter L (qVec L w) d = qVecIter L w (d + 1) :=
     LocallyDelta0.eq (qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const _)
         (LocallyDelta0Function.var 0))
@@ -853,7 +885,8 @@ lemma qVecIter_qVec (w d : V) : qVecIter L (qVec L w) d = qVecIter L w (d + 1) :
   · intro d ih
     rw [← qVec_qVecIter, ih, qVec_qVecIter]
 
-lemma qVecIterMax_qVec_le (w p : V) : qVecIterMax L (qVec L w) p ≤ qVecIterMax L w (p + 1) :=
+variable (w p) in
+lemma qVecIterMax_qVec_le : qVecIterMax L (qVec L w) p ≤ qVecIterMax L w (p + 1) :=
   qVecIterMax_le fun d hd ↦ by
     rw [qVecIter_qVec]; exact le_qVecIterMax (by gcongr)
 
@@ -976,12 +1009,12 @@ end Substs
 
 open Substs
 
-variable (L)
+variable (L) (w p)
 
 /-- The substitution of the list `w` for the bound variables in the code `p` of a formula. -/
-noncomputable def subst (w p : V) : V := (construction L).result L w p
+noncomputable def subst : V := (construction L).result L w p
 
-variable {L}
+variable {L} {w p}
 
 section
 
@@ -1010,11 +1043,17 @@ lemma substs_nrel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     subst L w (^nrel k R v) = ^nrel k R (termSubstVec L k w v) := by
   simp [subst, hR, hv, construction]
 
-@[simp]
-lemma substs_verum (w : V) : subst L w ^⊤ = ^⊤ := by simp [subst, construction]
+section
+
+variable (w)
 
 @[simp]
-lemma substs_falsum (w : V) : subst L w ^⊥ = ^⊥ := by simp [subst, construction]
+lemma substs_verum : subst L w ^⊤ = ^⊤ := by simp [subst, construction]
+
+@[simp]
+lemma substs_falsum : subst L w ^⊥ = ^⊥ := by simp [subst, construction]
+
+end
 
 @[simp]
 lemma substs_and (hp : IsUFormula L p) (hq : IsUFormula L q) :
@@ -1357,11 +1396,11 @@ lemma subst_eq_self (hp : IsSemiformula L n p) (hw : IsSemitermVec L n n w)
 
 end subst
 
-variable (L)
+variable (L) (t u)
 
-noncomputable def substs1 (t u : V) : V := subst L ?[t] u
+noncomputable def substs1 : V := subst L ?[t] u
 
-variable {L}
+variable {L} {t u}
 
 section
 
@@ -1408,11 +1447,11 @@ lemma substs1_subst_qVec {j : V} (hw : IsSemitermVec L j 0 w) (hq : IsSemiformul
       substs_cons_bShift (hw.nth hi), substs_nil (hw.nth hi)]
     simp
 
-variable (L)
+variable (L) (p)
 
-noncomputable def free (p : V) : V := substs1 L ^&0 (shift L p)
+noncomputable def free : V := substs1 L ^&0 (shift L p)
 
-variable {L}
+variable {L} {p}
 
 /-! ## Instantiation of a bound variable by a free one -/
 
@@ -1677,11 +1716,17 @@ lemma fomulaComplexity_free (hp : IsSemiformula L 1 p) :
 
 end complexity
 
-@[simp]
-lemma lt_max_succ_left (a b : V) : a < max a b + 1 := lt_succ_iff_le.mpr <| by simp
+section
+
+variable (a b)
 
 @[simp]
-lemma lt_max_succ_right (a b : V) : b < max a b + 1 := lt_succ_iff_le.mpr <| by simp
+lemma lt_max_succ_left : a < max a b + 1 := lt_succ_iff_le.mpr <| by simp
+
+@[simp]
+lemma lt_max_succ_right : b < max a b + 1 := lt_succ_iff_le.mpr <| by simp
+
+end
 
 namespace Arithmetic
 
@@ -1691,13 +1736,15 @@ set_option linter.dupNamespace false
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Arithmetic (eqIndex ltIndex)
 
-noncomputable def qqEQ (x y : V) : V := ^rel 2 (eqIndex : V) ?[x, y]
+variable (x y)
 
-noncomputable def qqNEQ (x y : V) : V := ^nrel 2 (eqIndex : V) ?[x, y]
+noncomputable def qqEQ : V := ^rel 2 (eqIndex : V) ?[x, y]
 
-noncomputable def qqLT (x y : V) : V := ^rel 2 (ltIndex : V) ?[x, y]
+noncomputable def qqNEQ : V := ^nrel 2 (eqIndex : V) ?[x, y]
 
-noncomputable def qqNLT (x y : V) : V := ^nrel 2 (ltIndex : V) ?[x, y]
+noncomputable def qqLT : V := ^rel 2 (ltIndex : V) ?[x, y]
+
+noncomputable def qqNLT : V := ^nrel 2 (ltIndex : V) ?[x, y]
 
 notation:75 x:75 " ^= " y:76 => qqEQ x y
 
@@ -1708,35 +1755,35 @@ notation:78 x:78 " ^< " y:79 => qqLT x y
 notation:78 x:78 " ^≮ " y:79 => qqNLT x y
 
 @[simp]
-lemma lt_qqEQ_left (x y : V) : x < x ^= y := by
+lemma lt_qqEQ_left : x < x ^= y := by
   simpa using! nth_lt_qqRel_of_lt (i := 0) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp]
-lemma lt_qqEQ_right (x y : V) : y < x ^= y := by
+lemma lt_qqEQ_right : y < x ^= y := by
   simpa using! nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp]
-lemma lt_qqLT_left (x y : V) : x < x ^< y := by
+lemma lt_qqLT_left : x < x ^< y := by
   simpa using! nth_lt_qqRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp]
-lemma lt_qqLT_right (x y : V) : y < x ^< y := by
+lemma lt_qqLT_right : y < x ^< y := by
   simpa using! nth_lt_qqRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp]
-lemma lt_qqNEQ_left (x y : V) : x < x ^≠ y := by
+lemma lt_qqNEQ_left : x < x ^≠ y := by
   simpa using! nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp]
-lemma lt_qqNEQ_right (x y : V) : y < x ^≠ y := by
+lemma lt_qqNEQ_right : y < x ^≠ y := by
   simpa using! nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (eqIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp]
-lemma lt_qqNLT_left (x y : V) : x < x ^≮ y := by
+lemma lt_qqNLT_left : x < x ^≮ y := by
   simpa using! nth_lt_qqNRel_of_lt (i := 0) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 @[simp]
-lemma lt_qqNLT_right (x y : V) : y < x ^≮ y := by
+lemma lt_qqNLT_right : y < x ^≮ y := by
   simpa using! nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 instance qqEQ_defined : 𝚺ᴬ₁-Function₂ (qqEQ : V → V → V) via qqEQDef :=
@@ -1779,16 +1826,22 @@ end Arithmetic
 
 /-! ## Bounded universal quantifier -/
 
+section
+
+variable (u q)
+
 /-- `qqBall u q = ^∀ ((^#0 ^≮ u) ^⋎ q)`, the code of `∀¹[“#0 < u”] q`. -/
-noncomputable def qqBall (u q : V) : V := qqAll (qqOr (Arithmetic.qqNLT (qqBvar 0) u) q)
+noncomputable def qqBall : V := qqAll (qqOr (Arithmetic.qqNLT (qqBvar 0) u) q)
 
 @[simp]
-lemma lt_q_qqBall (u q : V) : q < qqBall u q :=
+lemma lt_q_qqBall : q < qqBall u q :=
   lt_trans (lt_or_right _ _) (lt_forall _)
 
 @[simp]
-lemma lt_u_qqBall (u q : V) : u < qqBall u q :=
+lemma lt_u_qqBall : u < qqBall u q :=
   lt_trans (Arithmetic.lt_qqNLT_right _ _) (lt_trans (lt_or_left _ _) (lt_forall _))
+
+end
 
 instance qqBall_defined :
     𝚺ᴬ₁-Function₂ (qqBall : V → V → V) via qqBallDef := .mk fun v ↦ by

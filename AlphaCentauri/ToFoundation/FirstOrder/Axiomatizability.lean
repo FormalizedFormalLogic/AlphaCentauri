@@ -12,8 +12,6 @@ Axiomatizability and finite axiomatizability of theories.
 - [HP98, Theorem I.2.52]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder
@@ -22,28 +20,34 @@ open _root_.FFL.Entailment
 
 variable {L : Language} {T U : Theory L}
 
+section
+
+variable (C : Sentence L → Prop) (T U : Theory L)
+
 /-- `T` is axiomatized by `U` through sentences satisfying `C`: every member of `U` satisfies `C`,
 and `T` proves exactly the theorems of `U`.
 - [HP98, Discussion III.2.28] -/
-structure AxiomatizableBy (C : Sentence L → Prop) (T U : Theory L) : Prop where
+structure AxiomatizableBy : Prop where
   forall_mem : ∀ σ ∈ U, C σ
   equiv : T ≊ U
 
 /-- `T` is axiomatized by the sentences satisfying `C`: some theory of such sentences proves
 exactly the theorems of `T`. The axioms of `T` itself need not satisfy `C`.
 - [HP98, Discussion III.2.28] -/
-def Axiomatizable (C : Sentence L → Prop) (T : Theory L) : Prop :=
+def Axiomatizable : Prop :=
   ∃ U : Theory L, AxiomatizableBy C T U
 
 /-- `T` is finitely axiomatized by `U`: `U` is finite and proves exactly the theorems of `T`.
 - [Lin97, Ch. 4 §1] -/
-structure FiniteAxiomatizableBy (T U : Theory L) : Prop where
+structure FiniteAxiomatizableBy : Prop where
   finite : U.Finite
   equiv : T ≊ U
 
 /-- `T` is finitely axiomatizable: some finite theory proves exactly the theorems of `T`.
 - [Lin97, Ch. 4 §1] -/
-def FiniteAxiomatizable (T : Theory L) : Prop := ∃ U : Theory L, FiniteAxiomatizableBy T U
+def FiniteAxiomatizable : Prop := ∃ U : Theory L, FiniteAxiomatizableBy T U
+
+end
 
 /-- Every finite theory is finitely axiomatizable.
 - [Lin97, Ch. 4 §1] -/

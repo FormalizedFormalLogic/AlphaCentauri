@@ -14,8 +14,6 @@ Bisimulations between generalised Veltman models.
 - [HPV23]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.InterpretabilityLogic.Verbrugge.Model
@@ -156,24 +154,30 @@ theorem forces_iff (hi : i ≤ n) (h : Z.toRel i x y) (hA : A.depth ≤ i) :
 
 end NWBisimulation
 
-variable (M N) in
+section
+
+variable (M N) (n : ℕ) (x : M.World) (y : N.World)
+
 /-- `x` and `y` are $n$-w-bisimilar: some $n$-w-bisimulation relates them by $Z_n$.
 
 - [HPV23, Definition 3.1]
 -/
-def NWBisimilar (n : ℕ) (x : M.World) (y : N.World) : Prop :=
+def NWBisimilar : Prop :=
   ∃ Z : NWBisimulation M N n, Z.toRel n x y
 
-variable (M N) in
 /-- `x` and `y` are $n$-modally equivalent: they force the same formulas of modal depth at most
 $n$.
 
 - [HPV23, §2]
 -/
-def ModalEquivalent (n : ℕ) (x : M.World) (y : N.World) : Prop :=
+def ModalEquivalent : Prop :=
   ∀ A : Formula α, A.depth ≤ n → (x ⊩[M] A ↔ y ⊩[N] A)
 
-lemma flip_modalEquivalent {n : ℕ} : flip (ModalEquivalent M N n) = ModalEquivalent N M n := by
+end
+
+variable {n : ℕ}
+
+lemma flip_modalEquivalent : flip (ModalEquivalent M N n) = ModalEquivalent N M n := by
   ext y x;
   exact forall_congr' fun _ ↦ imp_congr_right fun _ ↦ Iff.comm;
 
@@ -186,7 +190,7 @@ private def SumForces : M.World ⊕ N.World → Formula α → Prop
   | .inl x, A => x ⊩[M] A
   | .inr y, A => y ⊩[N] A
 
-variable {z : M.World ⊕ N.World}
+variable {z : M.World ⊕ N.World} {A' : Formula α}
 
 private lemma sumForces_bot : ¬SumForces M N z ⊥ := by cases z <;> exact id;
 
@@ -204,14 +208,13 @@ private lemma sumForces_or :
     SumForces M N z (A ⋎ B) ↔ SumForces M N z A ∨ SumForces M N z B := by
   cases z <;> exact forces_or;
 
-private lemma sumForces_box_congr {A' : Formula α}
-    (hA : ∀ w, SumForces M N w A ↔ SumForces M N w A') :
+private lemma sumForces_box_congr (hA : ∀ w, SumForces M N w A ↔ SumForces M N w A') :
     SumForces M N z (□A) ↔ SumForces M N z (□A') := by
   cases z with
   | inl x => exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ hA (.inl y);
   | inr x => exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ hA (.inr y);
 
-private lemma sumForces_rhd_congr {A' B' : Formula α}
+private lemma sumForces_rhd_congr {B' : Formula α}
     (hA : ∀ w, SumForces M N w A ↔ SumForces M N w A')
     (hB : ∀ w, SumForces M N w B ↔ SumForces M N w B') :
     SumForces M N z (A ▷ B) ↔ SumForces M N z (A' ▷ B') := by
@@ -225,11 +228,11 @@ private lemma sumForces_rhd_congr {A' B' : Formula α}
     have hB' (y : N.World) : y ⊩[N] B ↔ y ⊩[N] B' := hB (.inr y);
     simp only [SumForces, forces_rhd, hA', hB'];
 
-variable (M N) in
-private def Definable (n : ℕ) (S : Set (M.World ⊕ N.World)) : Prop :=
+variable (M N n) in
+private def Definable (S : Set (M.World ⊕ N.World)) : Prop :=
   ∃ A : Formula α, A.depth ≤ n ∧ ∀ z, z ∈ S ↔ SumForces M N z A
 
-variable {n : ℕ} {𝒮 : Set (Set (M.World ⊕ N.World))}
+variable {𝒮 : Set (Set (M.World ⊕ N.World))}
 
 private lemma definable_forces (hA : A.depth ≤ n) : Definable M N n {z | SumForces M N z A} := by
   use A;
@@ -288,9 +291,11 @@ private lemma finite_definable_of_invariant {β : Type*} [Finite β] (σ : M.Wor
   intro S hS T hT hST;
   exact Set.Subset.antisymm (sub hT hST.le) (sub hS hST.ge);
 
+variable [Finite α] (n)
+
 /-- Over finitely many propositional variables, finitely many sets of worlds are definable by
 formulas of modal depth at most `n`. -/
-private lemma finite_definable [Finite α] (n : ℕ) : {S | Definable M N n S}.Finite := by
+private lemma finite_definable : {S | Definable M N n S}.Finite := by
   induction n with
   | zero =>
     apply finite_definable_of_invariant fun z ↦ {a : α | SumForces M N z (#a)};
@@ -333,11 +338,12 @@ private lemma finite_definable [Finite α] (n : ℕ) : {S | Definable M N n S}.F
       rw [sumForces_rhd_congr hS hT, sumForces_rhd_congr hS hT];
       exact Set.ext_iff.mp hrhd (_, _);
 
+omit [Finite α] in
 variable (M N) in
-private def SumModalEquivalent (n : ℕ) (z w : M.World ⊕ N.World) : Prop :=
+private def SumModalEquivalent (z w : M.World ⊕ N.World) : Prop :=
   ∀ A : Formula α, A.depth ≤ n → (SumForces M N z A ↔ SumForces M N w A)
 
-private lemma definable_modalEquivalent_class [Finite α] (n : ℕ) (u : M.World ⊕ N.World) :
+private lemma definable_modalEquivalent_class (u : M.World ⊕ N.World) :
     Definable M N n {z | SumModalEquivalent M N n z u} := by
   have : {z | SumModalEquivalent M N n z u} = ⋂₀ {S | Definable M N n S ∧ u ∈ S} := by
     ext z;
@@ -353,7 +359,7 @@ private lemma definable_modalEquivalent_class [Finite α] (n : ℕ) (u : M.World
   rw [this];
   exact Definable.sInter ((finite_definable n).subset fun _ h ↦ h.1) fun _ h ↦ h.1;
 
-private lemma definable_modalEquivalent_union [Finite α] (n : ℕ) (C : Set (M.World ⊕ N.World)) :
+private lemma definable_modalEquivalent_union (C : Set (M.World ⊕ N.World)) :
     Definable M N n {z | ∃ c ∈ C, SumModalEquivalent M N n z c} := by
   have : {z | ∃ c ∈ C, SumModalEquivalent M N n z c} =
       ⋃₀ ((fun c ↦ {z | SumModalEquivalent M N n z c}) '' C) := by
@@ -370,7 +376,7 @@ condition with respect to $n$-modal equivalence.
 
 - [HPV23, Theorem 4.3, Remark 3.3]
 -/
-lemma wForth_modalEquivalent [Finite α] (n : ℕ) :
+lemma wForth_modalEquivalent :
     WForth M N (ModalEquivalent M N (n + 1)) (ModalEquivalent M N n) := by
   intro x y u h Rxu;
   obtain ⟨χ, hχ, hχu⟩ := definable_modalEquivalent_class (M := M) (N := N) n (.inl u);
@@ -414,7 +420,7 @@ $n$-modally equivalent.
 
 - [HPV23, Proposition 3.2, Theorem 4.3]
 -/
-theorem nWBisimilar_iff_modalEquivalent [Finite α] {n : ℕ} :
+theorem nWBisimilar_iff_modalEquivalent [Finite α] :
     NWBisimilar M N n x y ↔ ModalEquivalent M N n x y := by
   constructor;
   · rintro ⟨Z, h⟩ A hA;

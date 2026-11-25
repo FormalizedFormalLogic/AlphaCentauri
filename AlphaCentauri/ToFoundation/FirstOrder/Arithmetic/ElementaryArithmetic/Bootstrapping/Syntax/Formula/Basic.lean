@@ -9,8 +9,6 @@ public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax.Formula.Basi
 - [HP98, §V.3]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -26,13 +24,17 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
 
 section formula
 
+section
+
+variable (k r v p q : V)
+
 /-- The code of the atomic formula given by the relation symbol `r` of arity `k` and the list `v`
 of terms. -/
-noncomputable def qqRel (k r v : V) : V := ⟪0, k, r, v⟫ + 1
+noncomputable def qqRel : V := ⟪0, k, r, v⟫ + 1
 
 /-- The code of the negated atomic formula given by the relation symbol `r` of arity `k` and the
 list `v` of terms. -/
-noncomputable def qqNRel (k r v : V) : V := ⟪1, k, r, v⟫ + 1
+noncomputable def qqNRel : V := ⟪1, k, r, v⟫ + 1
 
 /-- The code of the verum. -/
 noncomputable def qqVerum : V := ⟪2, 0⟫ + 1
@@ -41,16 +43,18 @@ noncomputable def qqVerum : V := ⟪2, 0⟫ + 1
 noncomputable def qqFalsum : V := ⟪3, 0⟫ + 1
 
 /-- The code of the conjunction of `p` and `q`. -/
-noncomputable def qqAnd (p q : V) : V := ⟪4, p, q⟫ + 1
+noncomputable def qqAnd : V := ⟪4, p, q⟫ + 1
 
 /-- The code of the disjunction of `p` and `q`. -/
-noncomputable def qqOr (p q : V) : V := ⟪5, p, q⟫ + 1
+noncomputable def qqOr : V := ⟪5, p, q⟫ + 1
 
 /-- The code of the universal quantification of `p`. -/
-noncomputable def qqAll (p : V) : V := ⟪6, p⟫ + 1
+noncomputable def qqAll : V := ⟪6, p⟫ + 1
 
 /-- The code of the existential quantification of `p`. -/
-noncomputable def qqExs (p : V) : V := ⟪7, p⟫ + 1
+noncomputable def qqExs : V := ⟪7, p⟫ + 1
+
+end
 
 scoped prefix:max "^rel " => qqRel
 
@@ -104,55 +108,63 @@ instance qqAll_definable : 𝚺ᴬ₀-Function₁ (qqAll : V → V) := qqForall_
 
 instance qqExs_definable : 𝚺ᴬ₀-Function₁ (qqExs : V → V) := qqExsists_defined.to_definable
 
-@[simp]
-lemma qqRel_inj (k₁ r₁ v₁ k₂ r₂ v₂ : V) :
-    ^rel k₁ r₁ v₁ = ^rel k₂ r₂ v₂ ↔ k₁ = k₂ ∧ r₁ = r₂ ∧ v₁ = v₂ := by simp [qqRel]
+section
+
+variable (k₁ r₁ v₁ k₂ r₂ v₂ p₁ q₁ p₂ q₂ : V)
 
 @[simp]
-lemma qqNRel_inj (k₁ r₁ v₁ k₂ r₂ v₂ : V) :
-    ^nrel k₁ r₁ v₁ = ^nrel k₂ r₂ v₂ ↔ k₁ = k₂ ∧ r₁ = r₂ ∧ v₁ = v₂ := by simp [qqNRel]
+lemma qqRel_inj : ^rel k₁ r₁ v₁ = ^rel k₂ r₂ v₂ ↔ k₁ = k₂ ∧ r₁ = r₂ ∧ v₁ = v₂ := by simp [qqRel]
 
 @[simp]
-lemma qqAnd_inj (p₁ q₁ p₂ q₂ : V) :
-    p₁ ^⋏ q₁ = p₂ ^⋏ q₂ ↔ p₁ = p₂ ∧ q₁ = q₂ := by simp [qqAnd]
+lemma qqNRel_inj : ^nrel k₁ r₁ v₁ = ^nrel k₂ r₂ v₂ ↔ k₁ = k₂ ∧ r₁ = r₂ ∧ v₁ = v₂ := by simp [qqNRel]
 
 @[simp]
-lemma qqOr_inj (p₁ q₁ p₂ q₂ : V) :
-    p₁ ^⋎ q₁ = p₂ ^⋎ q₂ ↔ p₁ = p₂ ∧ q₁ = q₂ := by simp [qqOr]
+lemma qqAnd_inj : p₁ ^⋏ q₁ = p₂ ^⋏ q₂ ↔ p₁ = p₂ ∧ q₁ = q₂ := by simp [qqAnd]
 
 @[simp]
-lemma qqAll_inj (p₁ p₂ : V) : ^∀ p₁ = ^∀ p₂ ↔ p₁ = p₂ := by simp [qqAll]
+lemma qqOr_inj : p₁ ^⋎ q₁ = p₂ ^⋎ q₂ ↔ p₁ = p₂ ∧ q₁ = q₂ := by simp [qqOr]
 
 @[simp]
-lemma qqExs_inj (p₁ p₂ : V) : ^∃ p₁ = ^∃ p₂ ↔ p₁ = p₂ := by simp [qqExs]
+lemma qqAll_inj : ^∀ p₁ = ^∀ p₂ ↔ p₁ = p₂ := by simp [qqAll]
 
 @[simp]
-lemma arity_lt_rel (k r v : V) : k < ^rel k r v :=
+lemma qqExs_inj : ^∃ p₁ = ^∃ p₂ ↔ p₁ = p₂ := by simp [qqExs]
+
+end
+
+section
+
+variable (k r v : V)
+
+@[simp]
+lemma arity_lt_rel : k < ^rel k r v :=
   le_iff_lt_succ.mp <| le_trans (le_pair_left k ⟪r, v⟫) <| le_pair_right _ _
 
 @[simp]
-lemma r_lt_rel (k r v : V) : r < ^rel k r v :=
+lemma r_lt_rel : r < ^rel k r v :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <|
     le_pair_right _ _
 
 @[simp]
-lemma v_lt_rel (k r v : V) : v < ^rel k r v :=
+lemma v_lt_rel : v < ^rel k r v :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <|
     le_pair_right _ _
 
 @[simp]
-lemma arity_lt_nrel (k r v : V) : k < ^nrel k r v :=
+lemma arity_lt_nrel : k < ^nrel k r v :=
   le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
 
 @[simp]
-lemma r_lt_nrel (k r v : V) : r < ^nrel k r v :=
+lemma r_lt_nrel : r < ^nrel k r v :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <|
     le_pair_right _ _
 
 @[simp]
-lemma v_lt_nrel (k r v : V) : v < ^nrel k r v :=
+lemma v_lt_nrel : v < ^nrel k r v :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <|
     le_pair_right _ _
+
+end
 
 lemma nth_lt_qqRel_of_lt (hi : i < len v) : v.[i] < ^rel k r v :=
   lt_trans (nth_lt_self hi) (v_lt_rel _ _ _)
@@ -160,27 +172,33 @@ lemma nth_lt_qqRel_of_lt (hi : i < len v) : v.[i] < ^rel k r v :=
 lemma nth_lt_qqNRel_of_lt (hi : i < len v) : v.[i] < ^nrel k r v :=
   lt_trans (nth_lt_self hi) (v_lt_nrel _ _ _)
 
+section
+
+variable (p q : V)
+
 @[simp]
-lemma lt_K!_left (p q : V) : p < p ^⋏ q :=
+lemma lt_K!_left : p < p ^⋏ q :=
   le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
 
 @[simp]
-lemma lt_K!_right (p q : V) : q < p ^⋏ q :=
+lemma lt_K!_right : q < p ^⋏ q :=
   le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
 
 @[simp]
-lemma lt_or_left (p q : V) : p < p ^⋎ q :=
+lemma lt_or_left : p < p ^⋎ q :=
   le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
 
 @[simp]
-lemma lt_or_right (p q : V) : q < p ^⋎ q :=
+lemma lt_or_right : q < p ^⋎ q :=
   le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
 
 @[simp]
-lemma lt_forall (p : V) : p < ^∀ p := le_iff_lt_succ.mp <| le_pair_right _ _
+lemma lt_forall : p < ^∀ p := le_iff_lt_succ.mp <| le_pair_right _ _
 
 @[simp]
-lemma lt_exists (p : V) : p < ^∃ p := le_iff_lt_succ.mp <| le_pair_right _ _
+lemma lt_exists : p < ^∃ p := le_iff_lt_succ.mp <| le_pair_right _ _
+
+end
 
 private lemma pair_le_square (a b : V) : ⟪a, b⟫ ≤ (a + b + 1) * (a + b + 1) := by
   simpa [sq] using pair_polybound a b
@@ -256,8 +274,7 @@ def Phi (C : Set V) (p : V) : Prop :=
   (∃ p₁, p₁ ∈ C ∧ p = ^∀ p₁) ∨
   (∃ p₁, p₁ ∈ C ∧ p = ^∃ p₁)
 
-private lemma phi_iff (C p : V) :
-    Phi L {x | x ∈ C} p ↔
+private lemma phi_iff (C : V) : ∀ p : V, Phi L {x | x ∈ C} p ↔
     (∃ k < p, ∃ r < p, ∃ v < p, L.IsRel k r ∧ IsUTermVec L k v ∧ p = ^rel k r v) ∨
     (∃ k < p, ∃ r < p, ∃ v < p, L.IsRel k r ∧ IsUTermVec L k v ∧ p = ^nrel k r v) ∨
     (p = ^⊤) ∨
@@ -265,9 +282,10 @@ private lemma phi_iff (C p : V) :
     (∃ p₁ < p, ∃ p₂ < p, p₁ ∈ C ∧ p₂ ∈ C ∧ p = p₁ ^⋏ p₂) ∨
     (∃ p₁ < p, ∃ p₂ < p, p₁ ∈ C ∧ p₂ ∈ C ∧ p = p₁ ^⋎ p₂) ∨
     (∃ p₁ < p, p₁ ∈ C ∧ p = ^∀ p₁) ∨
-    (∃ p₁ < p, p₁ ∈ C ∧ p = ^∃ p₁) where
-  mp := by
-    rintro (⟨k, r, v, hkr, hv, rfl⟩ | ⟨k, r, v, hkr, hv, rfl⟩ | rfl | rfl |
+    (∃ p₁ < p, p₁ ∈ C ∧ p = ^∃ p₁) := by
+  intro p
+  constructor
+  · rintro (⟨k, r, v, hkr, hv, rfl⟩ | ⟨k, r, v, hkr, hv, rfl⟩ | rfl | rfl |
       ⟨q, r, hp, hq, rfl⟩ | ⟨q, r, hp, hq, rfl⟩ | ⟨q, h, rfl⟩ | ⟨q, h, rfl⟩)
     · disj 1; exact ⟨k, by simp, r, by simp, v, by simp, hkr, hv, rfl⟩
     · disj 2; exact ⟨k, by simp, r, by simp, v, by simp, hkr, hv, rfl⟩
@@ -277,8 +295,7 @@ private lemma phi_iff (C p : V) :
     · disj 6; exact ⟨q, by simp, r, by simp, hp, hq, rfl⟩
     · disj 7; exact ⟨q, by simp, h, rfl⟩
     · disj 8; exact ⟨q, by simp, h, rfl⟩
-  mpr := by
-    unfold Phi
+  · unfold Phi
     rintro (⟨k, _, r, _, v, _, hkr, hv, rfl⟩ | ⟨k, _, r, _, v, _, hkr, hv, rfl⟩ | rfl | rfl |
       ⟨q, _, r, _, hq, hr, rfl⟩ | ⟨q, _, r, _, hq, hr, rfl⟩ | ⟨q, _, hq, rfl⟩ | ⟨q, _, hq, rfl⟩)
     · disj 1; exact ⟨k, r, v, hkr, hv, rfl⟩
@@ -545,17 +562,23 @@ end IsUFormula
 
 end formula
 
-lemma rangeList_exists (n : V) : ∃ w, len w = n ∧ ∀ i < n, w.[i] = i :=
+section
+
+variable (n)
+
+lemma rangeList_exists : ∃ w, len w = n ∧ ∀ i < n, w.[i] = i :=
   sigmaZero_skolem_vec (R := fun i y ↦ y = i) (B := n)
     (LocallyDelta0.eq (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0))
     fun i hi ↦ ⟨i, hi, rfl⟩
 
 /-- The list `[0, 1, …, n - 1]`. -/
-noncomputable def rangeList (n : V) : V := Classical.choose (rangeList_exists n)
+noncomputable def rangeList : V := Classical.choose (rangeList_exists n)
 
 @[simp]
-lemma len_rangeList (n : V) : len (rangeList n) = n :=
+lemma len_rangeList : len (rangeList n) = n :=
   (Classical.choose_spec (rangeList_exists n)).1
+
+end
 
 @[simp]
 lemma nth_rangeList (hi : i < n) : (rangeList n).[i] = i :=
@@ -747,8 +770,11 @@ def Phi (C : Set V) (pr : V) : Prop :=
       ∀ i < c.exsSize param p₁, ⟪c.exsChanges param i, p₁, ys.[i]⟫ ∈ C) ∧
     p = ^∃ p₁ ∧ y = c.exs param p₁ ys) )
 
-private lemma phi_iff (C pr : V) :
-    c.Phi L {x | x ∈ C} pr ↔
+section
+
+variable (C pr : V)
+
+private lemma phi_iff : c.Phi L {x | x ∈ C} pr ↔
     ∃ param ≤ pr, ∃ p ≤ pr, ∃ y ≤ pr, pr = ⟪param, p, y⟫ ∧ IsUFormula L p ∧
     ((∃ k < p, ∃ R < p, ∃ v < p, p = ^rel k R v ∧ y = c.rel param k R v) ∨
     (∃ k < p, ∃ R < p, ∃ v < p, p = ^nrel k R v ∧ y = c.nrel param k R v) ∨
@@ -810,8 +836,7 @@ private lemma phi_iff (C pr : V) :
 private lemma le_pair_pair_right (a b d : V) : d ≤ ⟪a, b, d⟫ :=
   le_trans (le_pair_right _ _) (le_pair_right _ _)
 
-private lemma phi_iff_decode (C pr : V) :
-    c.Phi L {x | x ∈ C} pr ↔ IsUFormula L (π₁ (π₂ pr)) ∧
+private lemma phi_iff_decode : c.Phi L {x | x ∈ C} pr ↔ IsUFormula L (π₁ (π₂ pr)) ∧
     ( (π₁ (π₁ (π₂ pr) - 1) = 0 ∧ π₂ (π₂ pr) = c.rel (π₁ pr) (π₁ (π₂ (π₁ (π₂ pr) - 1)))
         (π₁ (π₂ (π₂ (π₁ (π₂ pr) - 1)))) (π₂ (π₂ (π₂ (π₁ (π₂ pr) - 1))))) ∨
       (π₁ (π₁ (π₂ pr) - 1) = 1 ∧ π₂ (π₂ pr) = c.nrel (π₁ pr) (π₁ (π₂ (π₁ (π₂ pr) - 1)))
@@ -939,7 +964,10 @@ private lemma phi_iff_decode (C pr : V) :
         rcases lt_one_iff_eq_zero.mp hi
         simpa [c.exsChanges_eq_change] using h₁
 
-lemma change_eq_iter (param : V) : c.change param = c.iter param 1 := by
+end
+
+lemma change_eq_iter : ∀ param : V, c.change param = c.iter param 1 := by
+  intro param
   simpa [c.iter_zero] using (c.iter_succ param 0).symm
 
 lemma change_locallyDelta0 : LocallyDelta0Function fun w : Fin 1 → V ↦ c.change (w 0) := by
@@ -947,7 +975,11 @@ lemma change_locallyDelta0 : LocallyDelta0Function fun w : Fin 1 → V ↦ c.cha
     (LocallyDelta0Function.var 0) (LocallyDelta0Function.const 1)
   simpa [c.change_eq_iter] using this
 
-private lemma fun4 {n : ℕ} {g : V → V → V → V → V} {f₀ f₁ f₂ f₃ : (Fin n → V) → V}
+section
+
+variable {n : ℕ} {f₀ f₁ f₂ f₃ : (Fin n → V) → V}
+
+private lemma fun4 {g : V → V → V → V → V}
     (hg : LocallyDelta0Function fun w : Fin 4 → V ↦ g (w 0) (w 1) (w 2) (w 3))
     (h₀ : LocallyDelta0Function f₀) (h₁ : LocallyDelta0Function f₁)
     (h₂ : LocallyDelta0Function f₂) (h₃ : LocallyDelta0Function f₃) :
@@ -957,7 +989,7 @@ private lemma fun4 {n : ℕ} {g : V → V → V → V → V} {f₀ f₁ f₂ f�
       Fin.forall_fin_succ.mpr ⟨h₃, finZeroElim⟩⟩⟩⟩
   simpa using this
 
-private lemma fun5 {n : ℕ} {g : V → V → V → V → V → V} {f₀ f₁ f₂ f₃ f₄ : (Fin n → V) → V}
+private lemma fun5 {g : V → V → V → V → V → V} {f₄ : (Fin n → V) → V}
     (hg : LocallyDelta0Function fun w : Fin 5 → V ↦ g (w 0) (w 1) (w 2) (w 3) (w 4))
     (h₀ : LocallyDelta0Function f₀) (h₁ : LocallyDelta0Function f₁)
     (h₂ : LocallyDelta0Function f₂) (h₃ : LocallyDelta0Function f₃)
@@ -967,6 +999,8 @@ private lemma fun5 {n : ℕ} {g : V → V → V → V → V → V} {f₀ f₁ f�
     Fin.forall_fin_succ.mpr ⟨h₁, Fin.forall_fin_succ.mpr ⟨h₂,
       Fin.forall_fin_succ.mpr ⟨h₃, Fin.forall_fin_succ.mpr ⟨h₄, finZeroElim⟩⟩⟩⟩⟩
   simpa using this
+
+end
 
 lemma phi_locallyDelta0 :
     LocallyDelta0 fun w : Fin 2 → V ↦ c.Phi L {x | x ∈ w 1} (w 0) := by
@@ -1101,13 +1135,18 @@ def construction : Fixpoint.Construction V (β.blueprint L) where
     · disj 8; exact ⟨p₁, ys, ⟨hl, fun i hi ↦ hC (hys i hi)⟩, rfl, rfl⟩
   Φ_locallyDelta0 := c.phi_locallyDelta0 L
 
+variable (param : V) in
 /-- `c.Graph L param p y` states that the recursion takes the value `y` at `p` with `param`. -/
-def Graph (param : V) (x y : V) : Prop := (c.construction L).Fixpoint ![] ⟪param, x, y⟫
+def Graph (x y : V) : Prop := (c.construction L).Fixpoint ![] ⟪param, x, y⟫
+
+section
+
+variable (P M a J J' n q k R v p₁ p₂ T d : V)
 
 open Classical in
 /-- The value at depth `d` of the code `n`, read off the table `T` of the lists of values of the
 smaller codes; the parameter at depth `d` is `c.iter P d`. -/
-noncomputable def depthValue (P n T d : V) : V :=
+noncomputable def depthValue : V :=
   if n = 0 then 0
   else if π₁ (n - 1) = 0 then c.rel (c.iter P d) (π₁ (π₂ (n - 1))) (π₁ (π₂ (π₂ (n - 1))))
     (π₂ (π₂ (π₂ (n - 1))))
@@ -1173,9 +1212,10 @@ private lemma boundAt_locallyDelta0 :
     (LocallyDelta0Function.var 0)) (LocallyDelta0Function.var 2)
 
 /-- The largest of the bounds at `n` over the depths `d ≤ J`. -/
-noncomputable def boundMax (P J n : V) : V :=
+noncomputable def boundMax : V :=
   listMax (listMap (fun r d ↦ c.bound (c.iter (r 0) d) (r 1)) ![P, n] (rangeList (J + 1)))
 
+variable {d J P n} in
 lemma le_boundMax (hd : d ≤ J) : c.bound (c.iter P d) n ≤ c.boundMax P J n := by
   have hd' : d < len (rangeList (J + 1)) := by simpa [lt_succ_iff_le] using hd
   have := nth_le_listMax (v := listMap (fun r d ↦ c.bound (c.iter (r 0) d) (r 1)) ![P, n]
@@ -1183,6 +1223,7 @@ lemma le_boundMax (hd : d ≤ J) : c.bound (c.iter P d) n ≤ c.boundMax P J n :
   rw [nth_listMap c.boundAt_locallyDelta0 _ _ hd', nth_rangeList (by simpa using hd')] at this
   exact this
 
+variable {n P J} in
 lemma boundMax_monotone {m : V} (h : n ≤ m) : c.boundMax P J n ≤ c.boundMax P J m := by
   apply listMaxss_le
   intro i hi
@@ -1196,9 +1237,10 @@ private lemma iterAt_locallyDelta0 :
   c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 0)
 
 /-- The largest of the parameters over the depths `d ≤ J`. -/
-noncomputable def iterMax (P J : V) : V :=
+noncomputable def iterMax : V :=
   listMax (listMap (fun r d ↦ c.iter (r 0) d) ![P] (rangeList (J + 1)))
 
+variable {d J P} in
 lemma le_iterMax (hd : d ≤ J) : c.iter P d ≤ c.iterMax P J := by
   have hd' : d < len (rangeList (J + 1)) := by simpa [lt_succ_iff_le] using hd
   have := nth_le_listMax (v := listMap (fun r d ↦ c.iter (r 0) d) ![P] (rangeList (J + 1)))
@@ -1262,12 +1304,14 @@ noncomputable def courseOfValues : CourseOfValues.Construction V 2 where
         (LocallyDelta0Function.const 3)
 
 /-- The list of the values of the code `q` at the depths `d ≤ J`. -/
-noncomputable def depthList (P J q : V) : V := c.courseOfValues.result ![P, J] q
+noncomputable def depthList : V := c.courseOfValues.result ![P, J] q
 
+variable {q} in
 private lemma qqDecode (hq : q ≠ 0) : q = ⟪π₁ (q - 1), π₂ (q - 1)⟫ + 1 := by
   rw [pair_unpair]
   exact (tsub_add_cancel_of_le (pos_iff_one_le.mp (pos_iff_ne_zero.mpr hq))).symm
 
+variable {q T P d} in
 lemma depthValue_le (hT : ∀ q' < q, ∀ e, (znth T q').[e] ≤ c.bound (c.iter P e) q') :
     c.depthValue P q T d ≤ c.bound (c.iter P d) q := by
   by_cases h0 : q = 0
@@ -1312,8 +1356,7 @@ lemma depthValue_le (hT : ∀ q' < q, ∀ e, (znth T q').[e] ≤ c.bound (c.iter
     rwa [e] at h
   · exact zero_le
 
-private lemma depthValueList_locallyDelta0 (P J : V) :
-    LocallyDelta0Function fun w : Fin 1 → V ↦
+private lemma depthValueList_locallyDelta0 : LocallyDelta0Function fun w : Fin 1 → V ↦
       listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d)
         ![P, w 0, c.courseOfValues.table ![P, J] (w 0)] (rangeList (J + 1)) := by
   have htable : LocallyDelta0Function fun w : Fin 1 → V ↦ c.courseOfValues.table ![P, J] (w 0) := by
@@ -1360,8 +1403,7 @@ lemma depthList_locallyDelta0 :
     | zero => rfl
     | succ j => exact j.elim0
 
-lemma depthList_spec (P J q : V) :
-    c.depthList P J q = listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d)
+lemma depthList_spec : c.depthList P J q = listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d)
         ![P, q, c.courseOfValues.table ![P, J] q] (rangeList (J + 1)) ∧
       ∀ e < len (c.depthList P J q), (c.depthList P J q).[e] ≤ c.bound (c.iter P e) q := by
   have hdl : LocallyDelta0Function fun w : Fin 1 → V ↦ c.depthList P J (w 0) :=
@@ -1413,7 +1455,7 @@ lemma depthList_spec (P J q : V) :
   rw [nth_listMap hg _ _ he, nth_rangeList (by simpa using he)]
   exact c.depthValue_le hT
 
-lemma iter_add (P a d : V) : c.iter (c.iter P a) d = c.iter P (a + d) := by
+lemma iter_add : c.iter (c.iter P a) d = c.iter P (a + d) := by
   have hP : LocallyDelta0Pred fun d ↦ c.iter (c.iter P a) d = c.iter P (a + d) :=
     LocallyDelta0.eq (c.iter_locallyDelta0.comp₂ (LocallyDelta0Function.const _)
         (LocallyDelta0Function.var 0))
@@ -1426,6 +1468,7 @@ lemma iter_add (P a d : V) : c.iter (c.iter P a) d = c.iter P (a + d) := by
   · intro d ih
     rw [c.iter_succ, ih, ← add_assoc, c.iter_succ]
 
+variable {d J P q} in
 lemma nth_depthList (hd : d ≤ J) :
     (c.depthList P J q).[d] = c.depthValue P q (c.courseOfValues.table ![P, J] q) d := by
   have hg : LocallyDelta0Function fun w : Fin 4 → V ↦
@@ -1435,6 +1478,7 @@ lemma nth_depthList (hd : d ≤ J) :
   rw [(c.depthList_spec P J q).1, nth_listMap hg _ _ hd', nth_rangeList (by simpa using hd')]
   simp
 
+variable {P d q T} in
 lemma depthValue_congr {P' T' : V} (hP : c.iter P d = c.iter P' e)
     (hT : ∀ q' < q, (znth T q').[d] = (znth T' q').[e] ∧
       (znth T q').[d + 1] = (znth T' q').[e + 1]) :
@@ -1452,7 +1496,7 @@ lemma depthValue_congr {P' T' : V} (hP : c.iter P d = c.iter P' e)
 
 /-- The entries of the lists of values do not depend on the depth bound, and an entry at a
 depth depends only on the parameter at that depth. -/
-lemma nth_depthList_eq (P M J J' : V) (hJ : J ≤ M) (hJ' : J' ≤ M) :
+lemma nth_depthList_eq (hJ : J ≤ M) (hJ' : J' ≤ M) :
     ∀ q, ∀ a ≤ M, ∀ d ≤ M, ∀ b ≤ M, ∀ e ≤ M, a + d = b + e → d + q ≤ J → e + q ≤ J' →
       (c.depthList (c.iter P a) J q).[d] = (c.depthList (c.iter P b) J' q).[e] := by
   have hP : LocallyDelta0Pred fun q ↦ ∀ a ≤ M, ∀ d ≤ M, ∀ b ≤ M, ∀ e ≤ M,
@@ -1494,24 +1538,25 @@ lemma nth_depthList_eq (P M J J' : V) (hJ : J ≤ M) (hJ' : J' ≤ M) :
     ih q' hq' a ha (d + 1) (le_trans (le_trans le_self_add hd1) hJ) b hb (e + 1)
       (le_trans (le_trans le_self_add he1) hJ') (by rw [← add_assoc, ← add_assoc, hsum]) hd1 he1⟩
 
-lemma len_depthList (P J q : V) : len (c.depthList P J q) = J + 1 := by
+lemma len_depthList : len (c.depthList P J q) = J + 1 := by
   have hg : LocallyDelta0Function fun w : Fin 4 → V ↦
       (fun (r : Fin 3 → V) d ↦ c.depthValue (r 0) (r 1) (r 2) d) (w ·.succ) (w 0) :=
     c.depthValueAt_locallyDelta0
   rw [(c.depthList_spec P J q).1, len_listMap hg, len_rangeList]
 
 /-- The value of the recursion at the code `q` with the parameter `P`. -/
-noncomputable def courseOfValuesResult (P q : V) : V := (c.depthList P q q).[0]
+noncomputable def courseOfValuesResult : V := (c.depthList P q q).[0]
 
 lemma courseOfValuesResult_locallyDelta0 :
     LocallyDelta0Function fun w : Fin 2 → V ↦ c.courseOfValuesResult (w 0) (w 1) :=
   nth_locallyDelta0.comp₂ (c.depthList_locallyDelta0.comp₃ (LocallyDelta0Function.var 0)
     (LocallyDelta0Function.var 1) (LocallyDelta0Function.var 1)) (LocallyDelta0Function.const 0)
 
-lemma courseOfValuesResult_le_bound (P q : V) : c.courseOfValuesResult P q ≤ c.bound P q := by
+lemma courseOfValuesResult_le_bound : c.courseOfValuesResult P q ≤ c.bound P q := by
   simpa [c.iter_zero, courseOfValuesResult] using
     (c.depthList_spec P q q).2 0 (by simp [c.len_depthList])
 
+variable {d J P} in
 lemma nth_depthList_eq_courseOfValuesResult (h : d + p ≤ J) :
     (c.depthList P J p).[d] = c.courseOfValuesResult (c.iter P d) p := by
   have hd : d ≤ J := le_trans le_self_add h
@@ -1519,10 +1564,11 @@ lemma nth_depthList_eq_courseOfValuesResult (h : d + p ≤ J) :
     zero_le (by simp) h (by simp)
   simpa [c.iter_zero, courseOfValuesResult] using this
 
-private lemma courseOfValuesResult_eq_depthValue (P q : V) :
+private lemma courseOfValuesResult_eq_depthValue :
     c.courseOfValuesResult P q = c.depthValue P q (c.courseOfValues.table ![P, q] q) 0 :=
   c.nth_depthList zero_le
 
+variable {q P d} in
 private lemma znth_table_eq (hp : p < q) (hd : d ≤ 1) :
     (znth (c.courseOfValues.table ![P, q] q) p).[d] = c.courseOfValuesResult (c.iter P d) p := by
   rw [c.courseOfValues.znth_table hp]
@@ -1531,62 +1577,57 @@ private lemma znth_table_eq (hp : p < q) (hd : d ≤ 1) :
     _ = p + 1 := add_comm _ _
     _ ≤ q := lt_iff_succ_le.mp hp
 
-lemma courseOfValuesResult_rel (P k R v : V) :
-    c.courseOfValuesResult P (^rel k R v) = c.rel P k R v := by
+lemma courseOfValuesResult_rel : c.courseOfValuesResult P (^rel k R v) = c.rel P k R v := by
   simp [courseOfValuesResult_eq_depthValue, depthValue, qqRel, c.iter_zero]
 
-lemma courseOfValuesResult_nrel (P k R v : V) :
-    c.courseOfValuesResult P (^nrel k R v) = c.nrel P k R v := by
+lemma courseOfValuesResult_nrel : c.courseOfValuesResult P (^nrel k R v) = c.nrel P k R v := by
   simp [courseOfValuesResult_eq_depthValue, depthValue, qqNRel, c.iter_zero]
 
-lemma courseOfValuesResult_verum (P : V) : c.courseOfValuesResult P ^⊤ = c.verum P := by
+lemma courseOfValuesResult_verum : c.courseOfValuesResult P ^⊤ = c.verum P := by
   simp [courseOfValuesResult_eq_depthValue, depthValue, qqVerum, c.iter_zero]
 
-lemma courseOfValuesResult_falsum (P : V) : c.courseOfValuesResult P ^⊥ = c.falsum P := by
+lemma courseOfValuesResult_falsum : c.courseOfValuesResult P ^⊥ = c.falsum P := by
   simp [courseOfValuesResult_eq_depthValue, depthValue, qqFalsum, c.iter_zero]
 
-private lemma depthValue_and (P p₁ p₂ T d : V) :
-    c.depthValue P (p₁ ^⋏ p₂) T d =
+private lemma depthValue_and : c.depthValue P (p₁ ^⋏ p₂) T d =
       c.and (c.iter P d) p₁ p₂ (znth T p₁).[d] (znth T p₂).[d] := by
   simp [depthValue, qqAnd]
 
-private lemma depthValue_or (P p₁ p₂ T d : V) :
-    c.depthValue P (p₁ ^⋎ p₂) T d =
+private lemma depthValue_or : c.depthValue P (p₁ ^⋎ p₂) T d =
       c.or (c.iter P d) p₁ p₂ (znth T p₁).[d] (znth T p₂).[d] := by
   simp [depthValue, qqOr]
 
-private lemma depthValue_all (P p₁ T d : V) :
+private lemma depthValue_all :
     c.depthValue P (^∀ p₁) T d = c.all (c.iter P d) p₁ ?[(znth T p₁).[d + 1]] := by
   simp [depthValue, qqAll]
 
-private lemma depthValue_exs (P p₁ T d : V) :
+private lemma depthValue_exs :
     c.depthValue P (^∃ p₁) T d = c.exs (c.iter P d) p₁ ?[(znth T p₁).[d + 1]] := by
   simp [depthValue, qqExs]
 
-lemma courseOfValuesResult_and (P p₁ p₂ : V) :
-    c.courseOfValuesResult P (p₁ ^⋏ p₂) =
+lemma courseOfValuesResult_and : c.courseOfValuesResult P (p₁ ^⋏ p₂) =
       c.and P p₁ p₂ (c.courseOfValuesResult P p₁) (c.courseOfValuesResult P p₂) := by
   rw [courseOfValuesResult_eq_depthValue, depthValue_and, c.znth_table_eq (by simp) zero_le,
     c.znth_table_eq (by simp) zero_le]
   simp only [c.iter_zero]
 
-lemma courseOfValuesResult_or (P p₁ p₂ : V) :
-    c.courseOfValuesResult P (p₁ ^⋎ p₂) =
+lemma courseOfValuesResult_or : c.courseOfValuesResult P (p₁ ^⋎ p₂) =
       c.or P p₁ p₂ (c.courseOfValuesResult P p₁) (c.courseOfValuesResult P p₂) := by
   rw [courseOfValuesResult_eq_depthValue, depthValue_or, c.znth_table_eq (by simp) zero_le,
     c.znth_table_eq (by simp) zero_le]
   simp only [c.iter_zero]
 
-lemma courseOfValuesResult_all (P p₁ : V) :
+lemma courseOfValuesResult_all :
     c.courseOfValuesResult P (^∀ p₁) = c.all P p₁ ?[c.courseOfValuesResult (c.change P) p₁] := by
   rw [courseOfValuesResult_eq_depthValue, depthValue_all, zero_add,
     c.znth_table_eq (by simp) le_rfl, ← c.change_eq_iter, c.iter_zero]
 
-lemma courseOfValuesResult_exs (P p₁ : V) :
+lemma courseOfValuesResult_exs :
     c.courseOfValuesResult P (^∃ p₁) = c.exs P p₁ ?[c.courseOfValuesResult (c.change P) p₁] := by
   rw [courseOfValuesResult_eq_depthValue, depthValue_exs, zero_add,
     c.znth_table_eq (by simp) le_rfl, ← c.change_eq_iter, c.iter_zero]
 
+variable {P p₁} in
 lemma all_eq_courseOfValuesResult (hl : len ys = c.allSize P p₁)
     (h₀ : ys.[0] = c.courseOfValuesResult (c.change P) p₁) :
     c.all P p₁ ys = c.courseOfValuesResult P (^∀ p₁) := by
@@ -1594,6 +1635,7 @@ lemma all_eq_courseOfValuesResult (hl : len ys = c.allSize P p₁)
   rw [c.courseOfValuesResult_all, ← h₀]
   simp
 
+variable {P p₁} in
 lemma exs_eq_courseOfValuesResult (hl : len ys = c.exsSize P p₁)
     (h₀ : ys.[0] = c.courseOfValuesResult (c.change P) p₁) :
     c.exs P p₁ ys = c.courseOfValuesResult P (^∃ p₁) := by
@@ -1601,7 +1643,8 @@ lemma exs_eq_courseOfValuesResult (hl : len ys = c.exsSize P p₁)
   rw [c.courseOfValuesResult_exs, ← h₀]
   simp
 
-private lemma limSeq_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
+variable {n : ℕ} in
+private lemma limSeq_comp {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
     LocallyDelta0Function fun w : Fin n → V ↦ (c.construction L).limSeq ![] (f w) := by
   have := (c.construction L).limSeq_locallyDelta0.comp_cons hf (u := fun j ↦ j.elim0)
     fun j ↦ j.elim0
@@ -1657,6 +1700,7 @@ lemma isUFormula_and_eq_of_mem_limSeq {s z : V} (h : z ∈ (c.construction L).li
         exact c.exs_eq_courseOfValuesResult hl (ih' h₀)
   exact this s z (lt_of_mem h) h
 
+variable {P} in
 lemma mem_limSeq_of_isUFormula (hp : IsUFormula L p) :
     ⟪P, p, c.courseOfValuesResult P p⟫ ∈
       (c.construction L).limSeq ![] (⟪c.iterMax P p, p, c.boundMax P p p⟫ + p + 1) := by
@@ -1731,6 +1775,8 @@ lemma mem_limSeq_of_isUFormula (hp : IsUFormula L p) :
       simpa [c.exsChanges_eq_change] using this
   have := this p 0 zero_le (by simp) hp
   rwa [c.iter_zero] at this
+
+end
 
 lemma graph_iff {param : V} :
     c.Graph L param p y ↔ IsUFormula L p ∧ y = c.courseOfValuesResult param p := by
@@ -1875,11 +1921,17 @@ lemma exists_unique (hp : IsUFormula L p) : ∃! r, c.Graph L param p r := by
 
 variable (L)
 
-lemma exists_unique_all (p : V) : ∃! r, (IsUFormula L p → c.Graph L param p r) ∧ (¬IsUFormula L p →
+section
+
+variable (p : V)
+
+lemma exists_unique_all : ∃! r, (IsUFormula L p → c.Graph L param p r) ∧ (¬IsUFormula L p →
   r = 0) := by
   by_cases hp : IsUFormula L p <;> simp [hp, exists_unique]
 
-noncomputable def result (p : V) : V := Classical.choose! (c.exists_unique_all L param p)
+noncomputable def result : V := Classical.choose! (c.exists_unique_all L param p)
+
+end
 
 variable {L}
 
@@ -1936,8 +1988,9 @@ lemma result_exs {p} (hp : IsUFormula L p) (hs : c.exsSize param p = 1) :
   c.result_eq_of_graph (c.graph_ex hp (by simp [hs]) fun i hi ↦ by
     rcases lt_one_iff_eq_zero.mp (hs ▸ hi); simpa using c.result_prop _ hp)
 
+variable (param) (p : V) in
 open Classical in
-lemma result_eq_ite (param p : V) :
+lemma result_eq_ite :
     c.result L param p = if IsUFormula L p then c.courseOfValuesResult param p else 0 := by
   by_cases hp : IsUFormula L p
   · simp [hp, ((c.graph_iff L).mp (c.result_prop param hp)).2]
@@ -2095,17 +2148,19 @@ section isSemiformula
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (isSemiformula)
 
-variable (L)
+section
+
+variable (L) (n p : V)
 
 /-- The code `p` is a formula of the language `L` whose bound variables are all below `n`. -/
-structure IsSemiformula (n p : V) : Prop where
+structure IsSemiformula : Prop where
   isUFormula : IsUFormula L p
   bv_le : bv L p ≤ n
 
 /-- The code `p` is a formula of the language `L` without free bound variables. -/
-abbrev IsFormula (p : V) : Prop := IsSemiformula L 0 p
+abbrev IsFormula : Prop := IsSemiformula L 0 p
 
-variable {L}
+end
 
 lemma isSemiformula_iff : IsSemiformula L n p ↔ IsUFormula L p ∧ bv L p ≤ n :=
   ⟨fun h ↦ ⟨h.isUFormula, h.bv_le⟩, by rintro ⟨hp, h⟩; exact ⟨hp, h⟩⟩
@@ -2248,7 +2303,9 @@ lemma IsSemiformula.case_iff :
   · rintro (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩ | rfl | rfl | ⟨p₁, p₂, h₁, h₂, rfl⟩ |
     ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩) <;> simp [*]
 
-lemma IsSemiformula.case {P : V → V → Prop} {n p} (hp : IsSemiformula L n p)
+variable {P : V → V → Prop}
+
+lemma IsSemiformula.case {n p} (hp : IsSemiformula L n p)
     (hrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^rel k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^nrel k r v))
     (hverum : ∀ n, P n ^⊤)
@@ -2270,7 +2327,7 @@ lemma IsSemiformula.case {P : V → V → Prop} {n p} (hp : IsSemiformula L n p)
   · exact hexs _ _ h₁
 
 /-- Structural induction on semiformulas for locally $\Delta_0$ predicates. -/
-lemma IsSemiformula.induction {P : V → V → Prop} (hP : LocallyDelta0Rel P)
+lemma IsSemiformula.induction (hP : LocallyDelta0Rel P)
     (hrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^rel k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^nrel k r v))
     (hverum : ∀ n, P n ^⊤)

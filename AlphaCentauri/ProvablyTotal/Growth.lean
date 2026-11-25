@@ -21,8 +21,6 @@ Growth rates of provably total functions of fragments of arithmetic.
 - [Bek99, Theorem 8, Theorem 9]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -47,17 +45,22 @@ theorem exists_term_bound_of_provablyTotal {f φ}
   obtain ⟨y, hy, hy'⟩ := h₁ v;
   exact le_of_lt (h.graph_iff.mp hy' ▸ hy)
 
+section
+variable (n k : ℕ)
+
 /-- The provably total functions of $\mathsf{I}\Pi_{n+1}^-$, for `n ≥ 1`, are the extended
 Grzegorczyk class at `ω_n := ω_n(1)`.
 - [Bek99, Theorem 8] -/
-axiom provablyTotalFunctions_IParameterFree_Pi (n k : ℕ) (hn : 1 ≤ n) :
+axiom provablyTotalFunctions_IParameterFree_Pi (hn : 1 ≤ n) :
     (𝗜ᶠ 𝚷 (n + 1)).provablyTotalFunctions k = ONote.extendedGrzegorczyk (ONote.omegaTower n 1) k
 
 /-- The provably total functions of $\mathsf{I}\Sigma_n + \mathsf{I}\Pi_{n+1}^-$, for `n ≥ 1`, are
 the extended Grzegorczyk class at `ω_{n+1}(2)`.
 - [Bek99, Theorem 9] -/
-axiom provablyTotalFunctions_ISigma_union_IParameterFree_Pi (n k : ℕ) (hn : 1 ≤ n) :
+axiom provablyTotalFunctions_ISigma_union_IParameterFree_Pi (hn : 1 ≤ n) :
     (𝗜𝚺 n ∪ 𝗜ᶠ 𝚷 (n + 1)).provablyTotalFunctions k =
       ONote.extendedGrzegorczyk (ONote.omegaTower (n + 1) 2) k
+
+end
 
 end FFL.FirstOrder.Arithmetic

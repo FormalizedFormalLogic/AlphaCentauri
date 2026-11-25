@@ -17,8 +17,6 @@ The $\mathsf{I}\Sigma_1$-provably total functions are the primitive recursive fu
 - [HP98, Theorem I.1.54, Lemma I.1.55, Corollary IV.3.7]
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
@@ -146,11 +144,13 @@ namespace Arithmetic
 
 open ArithmeticTheory
 
+variable {f : List.Vector ℕ k → ℕ}
+
 open ProvablyFunctionalVia in
 /-- Every primitive recursive function, in Mathlib's `List.Vector` form `Nat.Primrec'`, is
 `𝗜𝚺₁`-provably functional.
 - [HP98, Theorem I.1.54, Lemma I.1.55] -/
-theorem provablyFunctional_of_primrec' {f : List.Vector ℕ k → ℕ} (hf : Nat.Primrec' f) :
+theorem provablyFunctional_of_primrec' (hf : Nat.Primrec' f) :
     𝗜𝚺₁.ProvablyFunctional (fun v ↦ f (.ofFn v)) := by
   induction hf with
   | zero => exact ⟨_, zero.of_eq (by simp)⟩
@@ -168,22 +168,20 @@ theorem provablyFunctional_of_primrec' {f : List.Vector ℕ k → ℕ} (hf : Nat
 /-- Every primitive recursive function, in Mathlib's curried form `Primrec`, is `𝗜𝚺₁`-provably
 functional.
 - [HP98, Theorem I.1.54, Lemma I.1.55] -/
-theorem provablyFunctional_of_primrec {f : List.Vector ℕ k → ℕ} (hf : Primrec f) :
+theorem provablyFunctional_of_primrec (hf : Primrec f) :
     𝗜𝚺₁.ProvablyFunctional (fun v ↦ f (.ofFn v)) :=
   provablyFunctional_of_primrec' (Nat.Primrec'.prim_iff.mpr hf)
 
 /-- Every primitive recursive function, in Mathlib's `List.Vector` form `Nat.Primrec'`, is
 `𝗜𝚺₁`-provably total.
 - [HP98, Theorem I.1.54, Lemma I.1.55] -/
-lemma provablyTotal_of_primrec' {f : List.Vector ℕ k → ℕ} (hf : Nat.Primrec' f) :
-    𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
+lemma provablyTotal_of_primrec' (hf : Nat.Primrec' f) : 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
   (provablyFunctional_of_primrec' hf).toProvablyTotal
 
 /-- Every primitive recursive function, in Mathlib's curried form `Primrec`, is `𝗜𝚺₁`-provably
 total.
 - [HP98, Theorem I.1.54, Lemma I.1.55] -/
-lemma provablyTotal_of_primrec {f : List.Vector ℕ k → ℕ} (hf : Primrec f) :
-    𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
+lemma provablyTotal_of_primrec (hf : Primrec f) : 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
   (provablyFunctional_of_primrec hf).toProvablyTotal
 
 /-! ## From a proof of totality to an anchored derivation -/
@@ -229,12 +227,12 @@ section
 
 open Rewriting LKI LKI.Canonical
 
-variable {k : ℕ} {f : (Fin k → ℕ) → ℕ} {φ : 𝚺ᴬ₁.Semisentence (k + 1)}
+variable {k : ℕ} {f : (Fin k → ℕ) → ℕ} {φ : 𝚺ᴬ₁.Semisentence (k + 1)} {v : Fin k → ℕ} {b : ℕ}
 
 /-- Substituting terms with free variables into a sentence reads the values of those terms as the
 assignment to the bound variables. -/
 private lemma evalBound_embSubsts {n : ℕ} {χ : ArithmeticSemisentence n}
-    {w : Fin n → ArithmeticTerm ℕ} {ε : ℕ → ℕ} {b : ℕ} :
+    {w : Fin n → ArithmeticTerm ℕ} {ε : ℕ → ℕ} :
     EvalBound ![] ε b (Rew.embSubsts w ▹ χ) ↔
       EvalBound (fun i ↦ Semiterm.val ![] ε (w i)) Empty.elim b χ := by
   rw [evalBound_rew]
@@ -242,8 +240,7 @@ private lemma evalBound_embSubsts {n : ℕ} {χ : ArithmeticSemisentence n}
 
 /-- The graph of `φ` at the free variables `&0 … &(k-1)` is approximated by the graph at the
 arguments themselves. -/
-private lemma evalBound_instance {v : Fin k → ℕ} {b : ℕ} :
-    EvalBound ![] ((List.ofFn v).getD · 0) b
+private lemma evalBound_instance : EvalBound ![] ((List.ofFn v).getD · 0) b
         (Rew.embSubsts (fun i : Fin k ↦ (&i : ArithmeticTerm ℕ)) ▹ (∃¹ φ.val)) ↔
       ∃ y < b, EvalBound (y :> v) Empty.elim b φ.val := by
   rw [evalBound_embSubsts]
@@ -251,8 +248,7 @@ private lemma evalBound_instance {v : Fin k → ℕ} {b : ℕ} :
 
 /-- The graph of `φ` with the value at `&0` and the arguments at `&1 … &k` is approximated by the
 graph at the value and the arguments themselves. -/
-private lemma evalBound_graph {v : Fin k → ℕ} {y b : ℕ} :
-    EvalBound ![] ((y :: List.ofFn v).getD · 0) b
+private lemma evalBound_graph {y : ℕ} : EvalBound ![] ((y :: List.ofFn v).getD · 0) b
         (Rew.embSubsts (&0 :> fun i : Fin k ↦ (&i.succ : ArithmeticTerm ℕ)) ▹ φ.val) ↔
       EvalBound (y :> v) Empty.elim b φ.val := by
   rw [evalBound_embSubsts]
@@ -329,7 +325,7 @@ section
 open _root_.FFL.Entailment
 
 /-- The reading of a provable equivalence of graph formulas in a model. -/
-private lemma models_allClosure_iff_evalb {k : ℕ} {φ ψ : ArithmeticSemisentence (k + 1)}
+private lemma models_allClosure_iff_evalb {φ ψ : ArithmeticSemisentence (k + 1)}
     {V : Type*} [ORingStructure V] :
     V↓[ℒₒᵣ] ⊧ (∀¹* (φ 🡘 ψ) : ArithmeticSentence) ↔
       ∀ v : Fin (k + 1) → V, φ.Evalb v ↔ ψ.Evalb v := by
@@ -337,8 +333,7 @@ private lemma models_allClosure_iff_evalb {k : ℕ} {φ ψ : ArithmeticSemisente
 
 /-- An `𝗜𝚺₁`-provably total function has a strict $\Sigma_1$ graph whose totality `𝗜𝚺₁` proves.
 - [HP98, Theorem I.2.5(3), Lemma I.2.9] -/
-theorem exists_prenexHierarchy_provablyTotalVia {k : ℕ} {f : (Fin k → ℕ) → ℕ}
-    (h : 𝗜𝚺₁.ProvablyTotal f) :
+theorem exists_prenexHierarchy_provablyTotalVia {f : (Fin k → ℕ) → ℕ} (h : 𝗜𝚺₁.ProvablyTotal f) :
     ∃ φ : 𝚺ᴬ₁.Semisentence (k + 1),
       ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚺 1 φ.val ∧ 𝗜𝚺₁.ProvablyTotalVia f φ := by
   obtain ⟨φ, hmono⟩ := h
@@ -360,36 +355,36 @@ end
 
 /-- Every `𝗜𝚺₁`-provably total function is primitive recursive.
 - [HP98, Corollary IV.3.7] -/
-theorem primrec'_of_provablyTotal {k : ℕ} {f : List.Vector ℕ k → ℕ}
-    (hf : 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))) : Nat.Primrec' f :=
+theorem primrec'_of_provablyTotal (hf : 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v))) : Nat.Primrec' f :=
   have ⟨_, hφ, h⟩ := exists_prenexHierarchy_provablyTotalVia hf
   (primrec'_of_provablyTotalVia hφ.prenexBlock h).of_eq fun v ↦ by simp
 
+variable (f) in
 /-- **Parsons' theorem**: the `𝗜𝚺₁`-provably total functions are exactly the primitive recursive
 functions.
 - [HP98, Corollary IV.3.7] -/
-theorem primrec'_iff_provablyTotal {k : ℕ} (f : List.Vector ℕ k → ℕ) :
-    Nat.Primrec' f ↔ 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
+theorem primrec'_iff_provablyTotal : Nat.Primrec' f ↔ 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
   ⟨provablyTotal_of_primrec', primrec'_of_provablyTotal⟩
 
 /-- **Parsons' theorem**, under its usual name. -/
 alias parsons := primrec'_iff_provablyTotal
 
+variable (k) in
 /-- **Parsons' theorem** in class form: the class of `𝗜𝚺₁`-provably total functions of arity `k`
 is the class of primitive recursive functions of arity `k`.
 - [HP98, Corollary IV.3.7] -/
-theorem provablyTotalFunctions_ISigma1 (k : ℕ) :
+theorem provablyTotalFunctions_ISigma1 :
     𝗜𝚺₁.provablyTotalFunctions k = {f | Nat.Primrec' fun v : List.Vector ℕ k ↦ f v.get} := by
   ext f
   have e : (fun v : Fin k → ℕ ↦ f (List.Vector.ofFn v).get) = f :=
     funext fun v ↦ congrArg f (funext (List.Vector.get_ofFn v))
   simpa [e] using (primrec'_iff_provablyTotal fun v : List.Vector ℕ k ↦ f v.get).symm
 
+variable (f) in
 /-- In Mathlib's `Primrec` form, the `𝗜𝚺₁`-provably total functions are exactly the primitive
 recursive functions.
 - [HP98, Corollary IV.3.7] -/
-theorem primrec_iff_provablyTotal {k : ℕ} (f : List.Vector ℕ k → ℕ) :
-    Primrec f ↔ 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
+theorem primrec_iff_provablyTotal : Primrec f ↔ 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (.ofFn v)) :=
   Nat.Primrec'.prim_iff.symm.trans (primrec'_iff_provablyTotal f)
 
 /-- **Parsons' theorem** in Mathlib's `Primrec` form, under its usual name. -/

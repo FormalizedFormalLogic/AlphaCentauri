@@ -9,8 +9,6 @@ public import Mathlib.SetTheory.Ordinal.Notation
 Growth properties of the fast-growing hierarchy over `ONote`.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace ONote
@@ -21,7 +19,7 @@ open ONote Ordinal
 
 section Basic
 
-variable {o a b : ONote} {f g : ℕ → ONote} {m n x : ℕ}
+variable {o a b : ONote} {f g : ℕ → ONote} {m : ℕ+} {n x : ℕ}
 
 lemma lt_of_fundamentalSequence_succ (h : fundamentalSequence o = Sum.inl (some a)) : a < o := by
   have hp := fundamentalSequence_has_prop o
@@ -34,7 +32,8 @@ lemma fundamentalSequence_lt_of_limit (h : fundamentalSequence o = Sum.inr g) (n
   rw [h] at hp
   exact (hp.2.1 n).2.1
 
-theorem le_fastGrowing (o : ONote) (n : ℕ) : n ≤ fastGrowing o n := by
+theorem le_fastGrowing : ∀ (o : ONote) (n : ℕ), n ≤ fastGrowing o n := by
+  intro o n
   rcases e : fundamentalSequence o with (_ | a) | f
   · -- `o = 0`: `fastGrowing o = Nat.succ`
     rw [fastGrowing_zero' o e]
@@ -47,10 +46,11 @@ theorem le_fastGrowing (o : ONote) (n : ℕ) : n ≤ fastGrowing o n := by
     have hlt : f n < o := fundamentalSequence_lt_of_limit e n
     rw [fastGrowing_limit o e]
     exact le_fastGrowing (f n) n
-termination_by o
+termination_by o _ => o
 decreasing_by all_goals exact hlt
 
-private lemma id_le_fastGrowing (o : ONote) : (id : ℕ → ℕ) ≤ fastGrowing o :=
+variable (o) in
+private lemma id_le_fastGrowing : (id : ℕ → ℕ) ≤ fastGrowing o :=
   fun m => le_fastGrowing o m
 
 theorem lt_fastGrowing (o : ONote) (hn : 1 ≤ n) : n < fastGrowing o n := by
@@ -91,7 +91,9 @@ lemma Reaches.trans {c : ONote} (h1 : Reaches x a b) (h2 : Reaches x b c) : Reac
   | succ h _ ih => exact Reaches.succ h (ih h2)
   | limit h _ ih => exact Reaches.limit h (ih h2)
 
-theorem fastGrowing_le_of_reaches {p r : ONote} (hx : 1 ≤ x) (h : Reaches x p r) :
+variable {p r : ONote}
+
+theorem fastGrowing_le_of_reaches (hx : 1 ≤ x) (h : Reaches x p r) :
     fastGrowing r x ≤ fastGrowing p x := by
   induction h with
   | refl a => exact le_rfl
@@ -99,7 +101,7 @@ theorem fastGrowing_le_of_reaches {p r : ONote} (hx : 1 ≤ x) (h : Reaches x p 
   | limit hb _ ih => rw [fastGrowing_limit _ hb]; exact ih
 
 @[grind →]
-lemma reaches_le {p r : ONote} (h : Reaches x p r) : r ≤ p := by
+lemma reaches_le (h : Reaches x p r) : r ≤ p := by
   induction h with
   | refl a => exact le_rfl
   | @succ p q r hb _ ih =>
@@ -113,26 +115,25 @@ lemma reaches_le {p r : ONote} (h : Reaches x p r) : r ≤ p := by
 of the fast-growing hierarchy. -/
 
 @[grind =>]
-lemma fundamentalSequence_oadd_succ {m : ℕ+} {b' : ONote}
-    (h : fundamentalSequence b = Sum.inl (some b')) :
+lemma fundamentalSequence_oadd_succ {b' : ONote} (h : fundamentalSequence b = Sum.inl (some b')) :
     fundamentalSequence (oadd a m b) = Sum.inl (some (oadd a m b')) := by
   conv_lhs => rw [fundamentalSequence]; rw [h]
 
 @[grind =>]
-lemma fundamentalSequence_oadd_limit {m : ℕ+} {h : ℕ → ONote}
-    (hb : fundamentalSequence b = Sum.inr h) :
+lemma fundamentalSequence_oadd_limit {h : ℕ → ONote} (hb : fundamentalSequence b = Sum.inr h) :
     fundamentalSequence (oadd a m b) = Sum.inr (fun i => oadd a m (h i)) := by
   conv_lhs => rw [fundamentalSequence]; rw [hb]
 
 @[grind =>]
-lemma Reaches.oadd_tail {m : ℕ+} {d' d : ONote} (h : Reaches x d' d) :
+lemma Reaches.oadd_tail {d' d : ONote} (h : Reaches x d' d) :
     Reaches x (oadd a m d') (oadd a m d) := by
   induction h with
   | refl c => exact Reaches.refl _
   | succ hb _ ih => exact Reaches.succ (fundamentalSequence_oadd_succ hb) ih
   | limit hb _ ih => exact Reaches.limit (fundamentalSequence_oadd_limit hb) ih
 
-private lemma reaches_zero (o : ONote) (x : ℕ) : Reaches x o 0 := by
+private lemma reaches_zero : ∀ (o : ONote) (x : ℕ), Reaches x o 0 := by
+  intro o x
   rcases e : fundamentalSequence o with (_ | a) | g
   · have ho : o = 0 := by have hp := fundamentalSequence_has_prop o; rw [e] at hp; exact hp
     rw [ho]; exact Reaches.refl 0
@@ -140,12 +141,15 @@ private lemma reaches_zero (o : ONote) (x : ℕ) : Reaches x o 0 := by
     exact Reaches.succ e (reaches_zero a x)
   · have hlt : g x < o := fundamentalSequence_lt_of_limit e x
     exact Reaches.limit e (reaches_zero (g x) x)
-termination_by o
+termination_by o _ => o
 decreasing_by all_goals exact hlt
 
+section CoeffChain
+
+variable (e : ONote) (j x : ℕ)
+
 /-- `ω^e·(j+2)` descends to `ω^e·(j+1)` with any budget. -/
-private lemma reaches_coeff_step (e : ONote) (j x : ℕ) :
-    Reaches x (oadd e (j + 1).succPNat 0) (oadd e j.succPNat 0) := by
+private lemma reaches_coeff_step : Reaches x (oadd e (j + 1).succPNat 0) (oadd e j.succPNat 0) := by
   rcases he : fundamentalSequence e with (_ | e') | p
   · have h0 : e = 0 := by have hp := fundamentalSequence_has_prop e; rw [he] at hp; exact hp
     subst h0
@@ -164,11 +168,13 @@ private lemma reaches_coeff_step (e : ONote) (j x : ℕ) :
     exact Reaches.limit hlim (Reaches.oadd_tail (reaches_zero (oadd (p x) 1 0) x))
 
 /-- `ω^e·(j+1)` descends to `ω^e·1`. -/
-private lemma reaches_coeff_chain (e : ONote) (j x : ℕ) :
+private lemma reaches_coeff_chain :
     Reaches x (oadd e j.succPNat 0) (oadd e (0 : ℕ).succPNat 0) := by
   induction j with
   | zero => exact Reaches.refl _
   | succ j ih => exact (reaches_coeff_step e j x).trans ih
+
+end CoeffChain
 
 /-- Fundamental sequence of `ω^{successor exponent}`. -/
 @[grind =>]
@@ -186,8 +192,7 @@ lemma fundamentalSequence_omega_pow_limit {q : ℕ → ONote}
   rw [he]; rfl
 
 /-- A structural reach on exponents lifts through `ω^·`. -/
-private lemma reaches_omega_pow_lift {p r : ONote} (h : Reaches x p r) :
-    Reaches x (oadd p 1 0) (oadd r 1 0) := by
+private lemma reaches_omega_pow_lift (h : Reaches x p r) : Reaches x (oadd p 1 0) (oadd r 1 0) := by
   induction h with
   | refl c => exact Reaches.refl _
   | @succ p q r hb _ ih =>
@@ -206,8 +211,8 @@ lemma fundamentalSequence_ofNat_succ (k : ℕ) :
 /-- **Bachmann reachability**: for a limit `o` with fundamental sequence `f`, `f (n + 1)`
 reaches `f n` with budget `n + 1`. -/
 theorem fastGrowing_bachmann_reach {o : ONote} {f : ℕ → ONote}
-    (h : fundamentalSequence o = Sum.inr f) (n : ℕ) :
-    Reaches (n + 1) (f (n + 1)) (f n) := by
+    (h : fundamentalSequence o = Sum.inr f) : ∀ n : ℕ, Reaches (n + 1) (f (n + 1)) (f n) := by
+  intro n
   cases o with
   | zero => exact (Sum.inl_ne_inr h).elim
   | oadd a m b =>
@@ -242,13 +247,14 @@ theorem fastGrowing_bachmann_reach {o : ONote} {f : ℕ → ONote}
         rw [fundamentalSequence_oadd_limit hb] at h; exact (Sum.inr.inj h).symm
       rw [hf]; exact Reaches.oadd_tail (fastGrowing_bachmann_reach hb n)
 
-private lemma fastGrowing_fundSeq_step
-    (h : fundamentalSequence o = Sum.inr f) (n : ℕ) :
-    fastGrowing (f n) (n + 1) ≤ fastGrowing (f (n + 1)) (n + 1) :=
-  fastGrowing_le_of_reaches (Nat.succ_le_succ (Nat.zero_le n)) (fastGrowing_bachmann_reach h n)
+private lemma fastGrowing_fundSeq_step (h : fundamentalSequence o = Sum.inr f) :
+    ∀ n : ℕ, fastGrowing (f n) (n + 1) ≤ fastGrowing (f (n + 1)) (n + 1) :=
+  fun n ↦ fastGrowing_le_of_reaches (Nat.succ_le_succ (Nat.zero_le n))
+    (fastGrowing_bachmann_reach h n)
 
-private lemma fastGrowing_le_succ (o : ONote) (n : ℕ) :
-    fastGrowing o n ≤ fastGrowing o (n + 1) := by
+private lemma fastGrowing_le_succ :
+    ∀ (o : ONote) (n : ℕ), fastGrowing o n ≤ fastGrowing o (n + 1) := by
+  intro o n
   rcases e : fundamentalSequence o with (_ | a) | g
   · rw [fastGrowing_zero' o e]
     exact Nat.le_succ _
@@ -270,10 +276,11 @@ private lemma fastGrowing_le_succ (o : ONote) (n : ℕ) :
     calc fastGrowing (g n) n
         ≤ fastGrowing (g n) (n + 1) := hmono_gn (Nat.le_succ n)
       _ ≤ fastGrowing (g (n + 1)) (n + 1) := fastGrowing_fundSeq_step e n
-termination_by o
+termination_by o _ => o
 decreasing_by all_goals exact hlt
 
-theorem fastGrowing_monotone (o : ONote) : Monotone (fastGrowing o) :=
+variable (o) in
+theorem fastGrowing_monotone : Monotone (fastGrowing o) :=
   monotone_nat_of_le_succ (fastGrowing_le_succ o)
 
 end Basic
@@ -301,8 +308,7 @@ theorem norm_zero : norm 0 = 0 := rfl
 theorem norm_oadd (e : ONote) (n : ℕ+) (a : ONote) :
     norm (oadd e n a) = max (norm e) (max (n : ℕ) (norm a)) := rfl
 
-private lemma repr_lt_opow_repr (o : ONote) (h : o.NF) : o.repr < ω ^ o.repr :=
-  match o, h with
+private lemma repr_lt_opow_repr : ∀ o : ONote, o.NF → o.repr < ω ^ o.repr
   | 0, _ => by simp
   | oadd e n a, h => by
       have hIH : e.repr < ω ^ e.repr := repr_lt_opow_repr e h.fst
@@ -354,9 +360,11 @@ private lemma lt_oadd_of_lead_le (hc : c.NF) {d : ONote} (hd : d.NF)
       refine oadd_lt_oadd_2 hd ?_
       simpa [Nat.succPNat] using Nat.lt_succ_of_le hnd
 
-private theorem lt_fundamentalSequence_of_norm_le (o : ONote) (ho : o.NF) (g : ℕ → ONote)
-    (hg : fundamentalSequence o = Sum.inr g) (d : ONote) (hd : d.NF) (hdo : d < o)
-    (hnorm : norm d ≤ x) : d < g x := by
+variable (o) in
+private theorem lt_fundamentalSequence_of_norm_le (ho : o.NF) (g : ℕ → ONote)
+    (hg : fundamentalSequence o = Sum.inr g) :
+    ∀ d : ONote, d.NF → d < o → norm d ≤ x → d < g x := by
+  intro d hd hdo hnorm
   induction o generalizing g d with
   | zero => exact (Sum.inl_ne_inr hg).elim
   | oadd a m b iha ihb =>
@@ -513,7 +521,7 @@ decreasing_by all_goals assumption
 Structural fundamental-sequence descent, used to reach `osucc o` from a tower level with
 budget `n` (for strict index domination). -/
 
-private lemma tail_eq_zero_of_zero_exponent {n : ℕ+} {a : ONote} (h : (oadd 0 n a).NF) : a = 0 := by
+private lemma tail_eq_zero_of_zero_exponent {n : ℕ+} (h : (oadd 0 n a).NF) : a = 0 := by
   have hlt : a.repr < ω ^ (0 : ONote).repr := h.snd'.repr_lt
   rw [repr_zero, opow_zero] at hlt
   exact (@repr_inj a 0 h.snd NF.zero).1 (by rw [repr_zero]; exact Order.lt_one_iff.1 hlt)
@@ -541,12 +549,14 @@ lemma repr_osucc {o : ONote} (h : o.NF) : (osucc o).repr = o.repr + 1 :=
       rw [repr_osucc h.snd, ← add_assoc]
 
 @[grind →]
-lemma osucc_NF {o : ONote} (h : o.NF) : (osucc o).NF :=
-  match o, h with
-  | 0, _ => NF.oadd_zero 0 1
-  | oadd 0 n _, _ => NF.oadd_zero 0 (n + 1)
-  | oadd (oadd e' n' a') m b, h => by
-      refine NF.oadd h.fst m (NF.below_of_lt' ?_ (osucc_NF h.snd))
+lemma osucc_NF (h : o.NF) : (osucc o).NF := by
+  induction o with
+  | zero => exact NF.oadd_zero 0 1
+  | oadd e m b _ ihb =>
+    cases e with
+    | zero => exact NF.oadd_zero 0 (m + 1)
+    | oadd e' n' a' =>
+      refine NF.oadd h.fst m (NF.below_of_lt' ?_ (ihb h.snd))
       rw [repr_osucc h.snd, ← Order.succ_eq_add_one]
       have hElim : Order.IsSuccLimit (ω ^ (oadd e' n' a').repr) := by
         refine isSuccLimit_opow_left isSuccLimit_omega0 ?_
@@ -556,20 +566,20 @@ lemma osucc_NF {o : ONote} (h : o.NF) : (osucc o).NF :=
       exact hElim.succ_lt h.snd'.repr_lt
 
 @[grind =]
-lemma fundamentalSequence_osucc {o : ONote} (h : o.NF) :
-    fundamentalSequence (osucc o) = Sum.inl (some o) :=
-  match o, h with
-  | 0, _ => rfl
-  | oadd 0 n a, h => by
+lemma fundamentalSequence_osucc (h : o.NF) : fundamentalSequence (osucc o) = Sum.inl (some o) := by
+  induction o with
+  | zero => rfl
+  | oadd e n a _ iha =>
+    cases e with
+    | zero =>
       have ha0 := tail_eq_zero_of_zero_exponent h
       subst ha0
       obtain ⟨k, rfl⟩ : ∃ k : ℕ, n = k.succPNat := ⟨n.natPred, (PNat.succPNat_natPred n).symm⟩
       rfl
-  | oadd (oadd e' n' a') m b, h =>
-      fundamentalSequence_oadd_succ (fundamentalSequence_osucc h.snd)
+    | oadd e' n' a' =>
+      exact fundamentalSequence_oadd_succ (iha h.snd)
 
-lemma norm_osucc_le {o : ONote} : norm (osucc o) ≤ norm o + 1 :=
-  match o with
+lemma norm_osucc_le : ∀ {o : ONote}, norm (osucc o) ≤ norm o + 1
   | 0 => by simp [osucc, norm]
   | oadd 0 n _ => by
       simp only [osucc, norm_oadd, norm_zero, PNat.add_coe, PNat.one_coe]; omega
@@ -598,33 +608,43 @@ private lemma fastGrowing_lt_succ_index (h : fundamentalSequence o = Sum.inl (so
 `omegaTower c a` iterates `ω ^ ·` `c` times over `a`, and `tower` is its diagonal
 `omegaTower · 0`: `tower 0 = 0` and `tower (i + 1) = ω ^ tower i`, cofinal in `ε₀`. -/
 
+section OmegaTower
+
+variable (c : ℕ) (a : ONote)
+
 /-- The **`ω`-tower** `ω_c(a)`: `ω ^ ·` iterated `c` times over `a`, so `tower i = omegaTower i 0`.
 - [Bek99, §6] -/
-def omegaTower (c : ℕ) (a : ONote) : ONote := (fun x => oadd x 1 0)^[c] a
+def omegaTower : ONote := (fun x => oadd x 1 0)^[c] a
 
 @[simp]
-theorem omegaTower_zero (a : ONote) : omegaTower 0 a = a := rfl
+theorem omegaTower_zero : omegaTower 0 a = a := rfl
 
-lemma omegaTower_succ (c : ℕ) (a : ONote) :
-    omegaTower (c + 1) a = oadd (omegaTower c a) 1 0 := by
+lemma omegaTower_succ : omegaTower (c + 1) a = oadd (omegaTower c a) 1 0 := by
   rw [omegaTower, omegaTower, Function.iterate_succ_apply']
 
-lemma omegaTower_NF {a : ONote} (ha : a.NF) (c : ℕ) : (omegaTower c a).NF := by
+end OmegaTower
+
+lemma omegaTower_NF (ha : a.NF) : ∀ c : ℕ, (omegaTower c a).NF := by
+  intro c
   induction c with
   | zero => simpa using ha
   | succ c ih => rw [omegaTower_succ]; exact @NF.oadd_zero _ _ ih
 
+section Tower
+
+variable (i : ℕ)
+
 /-- The **diagonal tower**: `0, 1, ω, ω^ω, …`. -/
-def tower (i : ℕ) : ONote := omegaTower i 0
+def tower : ONote := omegaTower i 0
 
 @[simp]
 theorem tower_zero : tower 0 = 0 := rfl
 
-lemma tower_succ (i : ℕ) : tower (i + 1) = oadd (tower i) 1 0 := omegaTower_succ i 0
+lemma tower_succ : tower (i + 1) = oadd (tower i) 1 0 := omegaTower_succ i 0
 
-lemma tower_NF (i : ℕ) : (tower i).NF := omegaTower_NF NF.zero i
+lemma tower_NF : (tower i).NF := omegaTower_NF NF.zero i
 
-private lemma tower_lt_succ (i : ℕ) : tower i < tower (i + 1) := by
+private lemma tower_lt_succ : tower i < tower (i + 1) := by
   rw [tower_succ, lt_def]
   have hrepr : ((tower i).oadd 1 0).repr = ω ^ (tower i).repr := by
     simp only [ONote.repr, PNat.one_coe, Nat.cast_one, mul_one, add_zero]
@@ -634,7 +654,7 @@ private lemma tower_lt_succ (i : ℕ) : tower i < tower (i + 1) := by
 lemma tower_strictMono : StrictMono tower :=
   strictMono_nat_of_lt_succ tower_lt_succ
 
-lemma repr_tower_succ (i : ℕ) : (tower (i + 1)).repr = ω ^ (tower i).repr := by
+lemma repr_tower_succ : (tower (i + 1)).repr = ω ^ (tower i).repr := by
   rw [tower_succ]
   simp only [ONote.repr, PNat.one_coe, Nat.cast_one, mul_one, add_zero]
 
@@ -652,6 +672,8 @@ theorem tower_cofinal (o : ONote) (h : o.NF) : ∃ k, o < tower k :=
       have h2 : ω ^ (e.repr + 1) ≤ ω ^ (tower j).repr :=
         opow_le_opow_right omega0_pos (Order.succ_le_of_lt hej)
       exact lt_of_lt_of_le h1 h2
+
+end Tower
 
 end Norm
 

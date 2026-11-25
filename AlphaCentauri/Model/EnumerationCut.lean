@@ -13,8 +13,6 @@ public import Foundation.FirstOrder.Arithmetic.Schemata
 Enumeration cuts of unbounded injections in models of arithmetic.
 -/
 
-set_option linter.style.repeatedBinder false
-
 @[expose] public section
 
 namespace FFL.FirstOrder.Arithmetic
@@ -27,10 +25,11 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 open FFL.FirstOrder.Bounding (HierarchySymbol)
 open _root_.FFL.Entailment
 
-variable {V : Type*} [ORingStructure V]
+variable {V : Type*} [ORingStructure V] {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q)
 
-lemma definable_exists_lt {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q) :
-    𝚺ᴬ₀.DefinableRel fun s x : V ↦ ∃ u < s, Q u x := by
+include hQ
+
+lemma definable_exists_lt : 𝚺ᴬ₀.DefinableRel fun s x : V ↦ ∃ u < s, Q u x := by
   have h : 𝚺ᴬ₀.Definable (k := 3) fun w : Fin 3 → V ↦ Q (w 0) (w 2) :=
     (HierarchySymbol.Definable.retraction hQ ![0, 2]).of_iff
       (by intro w; simp)
@@ -40,14 +39,14 @@ lemma definable_exists_lt {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q
     (h.of_iff (by intro w; simp)) (#0 : ArithmeticSemiterm V 2)
   exact hB.of_iff (by intro v; simp)
 
-lemma definablePred_exists_lt {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q) (x : V) :
-    𝚺ᴬ₀.DefinablePred fun s : V ↦ ∃ u < s, Q u x := by
+lemma definablePred_exists_lt (x : V) : 𝚺ᴬ₀.DefinablePred fun s : V ↦ ∃ u < s, Q u x := by
   have := HierarchySymbol.Definable.retractiont
     (definable_exists_lt hQ) (![#0, &x] : Fin 2 → ArithmeticSemiterm V 1)
   exact this.of_iff fun v ↦ by simp
 
-lemma definableRel_graph [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q) (a : V) :
-    𝚺ᴬ₀.DefinableRel fun x y : V ↦ x < a ∧
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] (a : V)
+
+lemma definableRel_graph : 𝚺ᴬ₀.DefinableRel fun x y : V ↦ x < a ∧
       ∃ z, z < y + 1 ∧ y = ⟪x, z⟫ ∧ (∃ u < z, Q u x) ∧ ∀ z' < z, ¬∃ u < z', Q u x := by
   have hσ := definable_exists_lt hQ
   have hpair : 𝚺ᴬ₀.DefinableRel₃ fun x z y : V ↦ y = ⟪x, z⟫ := by definability
@@ -77,8 +76,7 @@ lemma definableRel_graph [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {Q : V → V → Pro
 bounds the witnesses of all `x < a`, then there is an injective unbounded map `f` on `a` whose
 graph restricted to `a` is $\Delta_0$-definable.
 - [Sla04, Lemma 2.2] -/
-theorem exists_injective_unbounded_of_not_collection [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
-    {Q : V → V → Prop} (hQ : 𝚺ᴬ₀.DefinableRel Q) (a : V)
+theorem exists_injective_unbounded_of_not_collection
     (hex : ∀ x < a, ∃ u, Q u x) (hnb : ∀ w, ∃ x < a, ∀ u ≤ w, ¬Q u x) :
     ∃ f : V → V, (∀ x < a, ∀ y < a, f x = f y → x = y) ∧ (∀ s, ∃ x < a, s < f x) ∧
       𝚺ᴬ₀-Relation fun x y ↦ x < a ∧ f x = y := by
@@ -136,18 +134,21 @@ noncomputable section EnumerationCut
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {a B : V} {G : V → V → Prop}
+  {I i i' z z' t t' j k v : V}
 
 attribute [local instance] ElementaryArithmetic.models_ISigma0_union_Omega1
 
+variable (a z j) in
 /-- The `j`-th entry of a code `z` of blocks of width `‖a‖`, counted from the top block.
 - [Tha05, Lemmas 4–7] -/
-def entry (a z j : V) : V := Nuon.ext a z (a - j)
+def entry : V := Nuon.ext a z (a - j)
 
+variable (a B G i z t) in
 /-- The bounded form of the code condition for the enumeration of the graph `G` of a function
 on `[0, a)`: `i` is the length of the code `z`, and `t` bounds the values of the entries.
 - [Tha05, Lemmas 4–7] -/
-def enumCode (a B : V) (G : V → V → Prop) (i z t : V) : Prop :=
+def enumCode : Prop :=
   i ≤ a ∧ z < B ∧
   (∀ j ≤ a, i < j → entry a z j = 0) ∧
   (∀ j ≤ i, entry a z j < a ∧ ∃ y ≤ t, G (entry a z j) y) ∧
@@ -155,38 +156,43 @@ def enumCode (a B : V) (G : V → V → Prop) (i z t : V) : Prop :=
   (∀ j < i, ∀ y ≤ t, ∀ y' ≤ t, G (entry a z j) y → G (entry a z (j + 1)) y' →
     y < y' ∧ ∀ x < a, ∀ w ≤ t, G x w → y < w → y' ≤ w)
 
-private lemma definable_enumCode_entries {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G) (a B : V) :
-    𝚺ᴬ₀.DefinableRel₃ fun i z t : V ↦ i ≤ a ∧ z < B ∧
+section
+
+variable (hG : 𝚺ᴬ₀.DefinableRel G) (a B : V)
+
+include hG
+
+private lemma definable_enumCode_entries : 𝚺ᴬ₀.DefinableRel₃ fun i z t : V ↦ i ≤ a ∧ z < B ∧
       (∀ j ≤ a, i < j → entry a z j = 0) ∧
       (∀ j ≤ i, entry a z j < a ∧ ∃ y ≤ t, G (entry a z j) y) ∧
       (∀ x < a, ∀ y ≤ t, G x y → ∀ y₀ ≤ t, G (entry a z 0) y₀ → y₀ ≤ y) := by
   unfold entry
   definability
 
-private lemma definable_enumCode_step {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G) (a : V) :
-    𝚺ᴬ₀.DefinableRel₃ fun i z t : V ↦
+private lemma definable_enumCode_step : 𝚺ᴬ₀.DefinableRel₃ fun i z t : V ↦
       ∀ j < i, ∀ y ≤ t, ∀ y' ≤ t, G (entry a z j) y → G (entry a z (j + 1)) y' →
         y < y' ∧ ∀ x < a, ∀ w ≤ t, G x w → y < w → y' ≤ w := by
   unfold entry
   definability
 
-lemma definable_enumCode {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G) (a B : V) :
-    𝚺ᴬ₀.DefinableRel₃ (enumCode a B G) :=
+lemma definable_enumCode : 𝚺ᴬ₀.DefinableRel₃ (enumCode a B G) :=
   ((definable_enumCode_entries hG a B).and (definable_enumCode_step hG a)).of_iff fun v ↦ by
     simp only [enumCode, and_assoc]
 
-lemma entry_zero_left (a j : V) : entry a 0 j = 0 := by
+end
+
+variable (a j) in
+lemma entry_zero_left : entry a 0 j = 0 := by
   simp [entry]
 
-lemma ext_eq_entry {a z j : V} (hj : j ≤ a) : Nuon.ext a z j = entry a z (a - j) := by
+lemma ext_eq_entry (hj : j ≤ a) : Nuon.ext a z j = entry a z (a - j) := by
   unfold entry
   rw [tsub_tsub_cancel_of_le hj]
 
-lemma sub_inj_of_le {a j k : V} (hj : j ≤ a) (hk : k ≤ a) (h : a - j = a - k) : j = k := by
+lemma sub_inj_of_le (hj : j ≤ a) (hk : k ≤ a) (h : a - j = a - k) : j = k := by
   rw [← tsub_tsub_cancel_of_le hj, h, tsub_tsub_cancel_of_le hk]
 
-lemma exists_update_entry {a I z k v : V} (hz : z < I ⨳ a) (hI : ‖I‖ = a + 1) (hk : k ≤ a)
-    (hv : v < a) :
+lemma exists_update_entry (hz : z < I ⨳ a) (hI : ‖I‖ = a + 1) (hk : k ≤ a) (hv : v < a) :
     ∃ z' < I ⨳ a, entry a z' k = v ∧ ∀ j ≤ a, j ≠ k → entry a z' j = entry a z j := by
   have hkI : a - k < ‖I‖ := by
     rw [hI]
@@ -205,7 +211,7 @@ lemma exists_update_entry {a I z k v : V} (hz : z < I ⨳ a) (hI : ‖I‖ = a +
   · intro hne
     exact hjk (sub_inj_of_le hj hk hne)
 
-lemma enumCode.mono {a B i z t t' : V} {G : V → V → Prop}
+lemma enumCode.mono
     (hfun : ∀ x y y', G x y → G x y' → y = y') (h : enumCode a B G i z t) (ht : t ≤ t') :
     enumCode a B G i z t' := by
   obtain ⟨h1, h2, h3, h4, h5, h6⟩ := h
@@ -236,7 +242,7 @@ lemma enumCode.mono {a B i z t t' : V} {G : V → V → Prop}
       · exact hmin x hx w hwt hGw hyw
       · exact hy't.trans (not_le.mp hwt).le
 
-lemma enumCode.exists_common_value {a I i i' z z' t t' : V} {G : V → V → Prop}
+lemma enumCode.exists_common_value
     (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y') (hii' : i ≤ i')
     (h : enumCode a (I ⨳ a) G i z t) (h' : enumCode a (I ⨳ a) G i' z' t') :
     ∀ j ≤ i, ∃ y ≤ t + t', G (entry a z j) y ∧ G (entry a z' j) y := by
@@ -269,8 +275,7 @@ lemma enumCode.exists_common_value {a I i i' z z' t t' : V} {G : V → V → Pro
     use v
     exact ⟨hv, hGv, (le_antisymm hvv' hv'v) ▸ hGv'⟩
 
-lemma enumCode.unique {a I i z z' t t' : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G)
-    (hfun : ∀ x y y', G x y → G x y' → y = y')
+lemma enumCode.unique (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y')
     (hinj : ∀ x x' y, G x y → G x' y → x = x') (hI : ‖I‖ = a + 1)
     (hz : z < I ⨳ a) (hz' : z' < I ⨳ a)
     (h : enumCode a (I ⨳ a) G i z t) (h' : enumCode a (I ⨳ a) G i z' t') : z = z' := by
@@ -290,9 +295,9 @@ lemma enumCode.unique {a I i z z' t t' : V} {G : V → V → Prop} (hG : 𝚺ᴬ
   have hja : j ≤ a := lt_succ_iff_le.mp hj
   rw [ext_eq_entry hja, ext_eq_entry hja, hentry (a - j) (sub_le_self a j)]
 
-lemma enumCode.strictMono {a B i z t : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G)
+lemma enumCode.strictMono (hG : 𝚺ᴬ₀.DefinableRel G)
     (hfun : ∀ x y y', G x y → G x y' → y = y') (h : enumCode a B G i z t)
-    {j k : V} (hjk : j < k) (hki : k ≤ i) {y y' : V} (hy : G (entry a z j) y)
+    (hjk : j < k) (hki : k ≤ i) {y y' : V} (hy : G (entry a z j) y)
     (hy' : G (entry a z k) y') : y < y' := by
   obtain ⟨-, -, -, h4, -, h6⟩ := h
   have hbd : ∀ j ≤ i, ∀ y, G (entry a z j) y → y ≤ t := by
@@ -318,7 +323,7 @@ lemma enumCode.strictMono {a B i z t : V} {G : V → V → Prop} (hG : 𝚺ᴬ�
       · exact (h6 j hki y hyt y' hy't hGj hGk).1
   exact key k hki j hjk y (hbd j (hjk.le.trans hki) y hy) y' (hbd k hki y' hy') hy hy'
 
-lemma enumCode.entry_ne {a B i z t j k : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G)
+lemma enumCode.entry_ne (hG : 𝚺ᴬ₀.DefinableRel G)
     (hfun : ∀ x y y', G x y → G x y' → y = y') (h : enumCode a B G i z t) (hjk : j < k)
     (hki : k ≤ i) : entry a z j ≠ entry a z k := by
   intro heq
@@ -326,7 +331,7 @@ lemma enumCode.entry_ne {a B i z t j k : V} {G : V → V → Prop} (hG : 𝚺ᴬ
   obtain ⟨-, y', -, hy'⟩ := h.2.2.2.1 k hki
   exact (enumCode.strictMono hG hfun h hjk hki hy hy').ne (hfun _ _ _ (heq ▸ hy) hy')
 
-lemma enumCode.lt_of_enumCode {a I i z t : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G)
+lemma enumCode.lt_of_enumCode (hG : 𝚺ᴬ₀.DefinableRel G)
     (hfun : ∀ x y y', G x y → G x y' → y = y') (h : enumCode a (I ⨳ a) G i z t) : i < a := by
   by_contra! hlt
   have hia : i = a := le_antisymm h.1 hlt
@@ -346,7 +351,7 @@ lemma enumCode.lt_of_enumCode {a I i z t : V} {G : V → V → Prop} (hG : 𝚺�
     exact sub_inj_of_le hj hj' (hinj _ (sub_le_self a j) _ (sub_le_self a j') heq)
   exact no_coded_injection a a z le_rfl hlt_ext hinj_ext
 
-lemma enumCode.exists_zero {a I : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G)
+lemma enumCode.exists_zero (hG : 𝚺ᴬ₀.DefinableRel G)
     (hdom : ∀ x y, G x y → x < a) (hfun : ∀ x y y', G x y → G x y' → y = y')
     (hunb : ∀ s, ∃ x y, G x y ∧ s < y) (hI : ‖I‖ = a + 1) :
     ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) G 0 z t := by
@@ -379,8 +384,7 @@ lemma enumCode.exists_zero {a I : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.Def
   · intro j hj
     simp at hj
 
-lemma enumCode.exists_pred {a I i z t : V} {G : V → V → Prop}
-    (hI : ‖I‖ = a + 1) (h : enumCode a (I ⨳ a) G (i + 1) z t) :
+lemma enumCode.exists_pred (hI : ‖I‖ = a + 1) (h : enumCode a (I ⨳ a) G (i + 1) z t) :
     ∃ z' < I ⨳ a, enumCode a (I ⨳ a) G i z' t := by
   obtain ⟨h1, h2, h3, h4, h5, h6⟩ := h
   have hi1 : i + 1 ≤ a := h1
@@ -409,7 +413,7 @@ lemma enumCode.exists_pred {a I i z t : V} {G : V → V → Prop}
     rw [hij j (le_of_lt hj), hij (j + 1) (succ_le_iff_lt.mpr hj)]
     exact h6 j (hj.trans (lt_add_one i))
 
-lemma enumCode.exists_succ {a I i z t : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G)
+lemma enumCode.exists_succ (hG : 𝚺ᴬ₀.DefinableRel G)
     (hdom : ∀ x y, G x y → x < a) (hfun : ∀ x y y', G x y → G x y' → y = y')
     (hunb : ∀ s, ∃ x y, G x y ∧ s < y) (hI : ‖I‖ = a + 1) (h : enumCode a (I ⨳ a) G i z t) :
     ∃ z' < I ⨳ a, ∃ t', enumCode a (I ⨳ a) G (i + 1) z' t' := by
@@ -460,7 +464,7 @@ lemma enumCode.exists_succ {a I i z t : V} {G : V → V → Prop} (hG : 𝚺ᴬ�
       rw [hyc, hys]
       exact ⟨hcs, fun x hx w _ hGw hcw => not_lt.mp fun hlt => hmin w hlt ⟨x, hx, hGw, hcw⟩⟩
 
-lemma enumCode.exists_le {a I b z t B : V} {G : V → V → Prop}
+lemma enumCode.exists_le {b : V}
     (hG : 𝚺ᴬ₀.DefinableRel G) (hI : ‖I‖ = a + 1) (hB : B = I ⨳ a) (h : enumCode a B G b z t) :
     ∀ c ≤ b, ∃ z' < B, enumCode a B G c z' t := by
   have key : ∀ d, d ≤ b → ∃ z' < B, enumCode a B G (b - d) z' t := by
@@ -482,7 +486,7 @@ lemma enumCode.exists_le {a I b z t B : V} {G : V → V → Prop}
   rw [tsub_tsub_cancel_of_le hc] at h'
   use z'
 
-variable (a I : V)
+variable (a I)
 
 omit [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] in
 lemma exists_graph_unbounded {f : V → V} (hunb : ∀ s, ∃ x < a, s < f x) :
@@ -491,10 +495,12 @@ lemma exists_graph_unbounded {f : V → V} (hunb : ∀ s, ∃ x < a, s < f x) :
   obtain ⟨x, hx, hs⟩ := hunb s
   use x, f x
 
+variable (f : V → V)
+
 /-- The `Σ₁` cut of `[0, a)` given by the enumeration of the range of a function `f` with unbounded
 values below `a` whose graph on `[0, a)` is `Δ₀`-definable.
 - [Tha05, Lemmas 4–7] -/
-def enumerationCut (f : V → V) (hI : ‖I‖ = a + 1) (hunb : ∀ s, ∃ x < a, s < f x)
+def enumerationCut (hI : ‖I‖ = a + 1) (hunb : ∀ s, ∃ x < a, s < f x)
     (hgraph : 𝚺ᴬ₀.DefinableRel fun x y ↦ x < a ∧ f x = y) : Cut V where
   carrier := {i | ∃ z < I ⨳ a, ∃ t, enumCode a (I ⨳ a) (fun x y ↦ x < a ∧ f x = y) i z t}
   succ_mem := by
@@ -507,14 +513,14 @@ def enumerationCut (f : V → V) (hI : ‖I‖ = a + 1) (hunb : ∀ s, ∃ x < a
     obtain ⟨z', hz', h'⟩ := enumCode.exists_le hgraph hI rfl h c hcb.le
     exact ⟨z', hz', t, h'⟩
 
-lemma zero_mem_enumerationCut (f : V → V) (hI : ‖I‖ = a + 1) (hunb : ∀ s, ∃ x < a, s < f x)
+lemma zero_mem_enumerationCut (hI : ‖I‖ = a + 1) (hunb : ∀ s, ∃ x < a, s < f x)
     (hgraph : 𝚺ᴬ₀.DefinableRel fun x y ↦ x < a ∧ f x = y) :
     (0 : V) ∈ (enumerationCut a I f hI hunb hgraph).carrier := by
   exact enumCode.exists_zero hgraph (fun x y h ↦ h.1)
     (fun x y y' h h' ↦ h.2.symm.trans h'.2) (exists_graph_unbounded a hunb) hI
 
-lemma lt_of_mem_enumerationCut (f : V → V) (hI : ‖I‖ = a + 1) (hunb : ∀ s, ∃ x < a, s < f x)
-    (hgraph : 𝚺ᴬ₀.DefinableRel fun x y ↦ x < a ∧ f x = y) {i : V}
+lemma lt_of_mem_enumerationCut (hI : ‖I‖ = a + 1) (hunb : ∀ s, ∃ x < a, s < f x)
+    (hgraph : 𝚺ᴬ₀.DefinableRel fun x y ↦ x < a ∧ f x = y)
     (hi : i ∈ (enumerationCut a I f hI hunb hgraph).carrier) : i < a := by
   obtain ⟨z, hz, t, h⟩ := hi
   exact enumCode.lt_of_enumCode hgraph (fun x y y' h h' ↦ h.2.symm.trans h'.2) h
@@ -532,12 +538,12 @@ noncomputable section
 
 open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {a I : V} {G : V → V → Prop}
+  {i i' z z' t t' q x e : V}
 
 attribute [local instance] ElementaryArithmetic.models_ISigma0_union_Omega1
 
-lemma enumCode.ext_eq_of_le {a I i i' z z' t t' : V} {G : V → V → Prop}
-    (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y')
+lemma enumCode.ext_eq_of_le (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y')
     (hinj : ∀ x x' y, G x y → G x' y → x = x') (hii' : i ≤ i')
     (h : enumCode a (I ⨳ a) G i z t) (h' : enumCode a (I ⨳ a) G i' z' t') :
     ∀ M, a - i ≤ M → M ≤ a → Nuon.ext a z M = Nuon.ext a z' M := by
@@ -548,7 +554,7 @@ lemma enumCode.ext_eq_of_le {a I i i' z z' t t' : V} {G : V → V → Prop}
   rw [ext_eq_entry hMa, ext_eq_entry hMa]
   exact hinj _ _ y hG₁ hG₂
 
-lemma enumCode.mod_eq_zero {a I i z t q : V} {G : V → V → Prop} (hI : ‖I‖ = a + 1)
+lemma enumCode.mod_eq_zero (hI : ‖I‖ = a + 1)
     (h : enumCode a (I ⨳ a) G i z t) (hq : Exponential ((a - i) * ‖a‖) q) : z % q = 0 := by
   have hk : a - i ≤ ‖I‖ := by
     rw [hI]
@@ -560,13 +566,12 @@ lemma enumCode.mod_eq_zero {a I i z t q : V} {G : V → V → Prop} (hI : ‖I�
   rw [Nuon.ext_zero, ext_mod_pow2 hk hm hq, ext_eq_entry hma]
   exact h.2.2.1 (a - m) (sub_le_self a m) hia
 
-lemma enumCode.mul_div_eq {a I i z t q : V} {G : V → V → Prop} (hI : ‖I‖ = a + 1)
+lemma enumCode.mul_div_eq (hI : ‖I‖ = a + 1)
     (h : enumCode a (I ⨳ a) G i z t) (hq : Exponential ((a - i) * ‖a‖) q) : q * (z / q) = z := by
   have h₁ := div_add_mod z q
   rwa [enumCode.mod_eq_zero hI h hq, add_zero] at h₁
 
-lemma enumCode.le_lt_add {a I i i' z z' t t' q : V} {G : V → V → Prop}
-    (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y')
+lemma enumCode.le_lt_add (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y')
     (hinj : ∀ x x' y, G x y → G x' y → x = x') (hI : ‖I‖ = a + 1) (hii' : i ≤ i')
     (h : enumCode a (I ⨳ a) G i z t) (h' : enumCode a (I ⨳ a) G i' z' t')
     (hq : Exponential ((a - i) * ‖a‖) q) : z ≤ z' ∧ z' < z + q := by
@@ -605,7 +610,7 @@ lemma enumCode.le_lt_add {a I i i' z z' t t' q : V} {G : V → V → Prop}
       _ < q * (z' / q) + q := add_lt_add_right (mod_lt z' hq.range_pos) _
       _ = z + q := by rw [← hdz, hzq]
 
-lemma enumCode.ext_eq_of_le_lt {a I i z e t q : V} {G : V → V → Prop} (hI : ‖I‖ = a + 1)
+lemma enumCode.ext_eq_of_le_lt (hI : ‖I‖ = a + 1)
     (h : enumCode a (I ⨳ a) G i z t) (hq : Exponential ((a - i) * ‖a‖) q)
     (h₁ : z ≤ e) (h₂ : e < z + q) : ∀ M, a - i ≤ M → M ≤ a → Nuon.ext a e M = Nuon.ext a z M := by
   have hzq := enumCode.mul_div_eq hI h hq
@@ -616,33 +621,36 @@ lemma enumCode.ext_eq_of_le_lt {a I i z e t q : V} {G : V → V → Prop} (hI : 
   have hkI : a - i + m ≤ ‖I‖ := by rw [hI]; exact hMa.trans le_self_add
   rw [← ext_div_pow2 hkI hq, hed, ext_div_pow2 hkI hq]
 
-private def codeBelow (a I : V) (G : V → V → Prop) (x : V) : Prop :=
+variable (a I G x) in
+private def codeBelow : Prop :=
   ∃ i z t, enumCode a (I ⨳ a) G i z t ∧ x < z
 
-private def codeAbove (a I : V) (G : V → V → Prop) (x : V) : Prop :=
+variable (a I G x) in
+private def codeAbove : Prop :=
   ∃ i z t, I ⨳ a ≤ x ∨
     (enumCode a (I ⨳ a) G i z t ∧ ∃ p ≤ x, Exponential ((a - i) * ‖a‖) p ∧ z + p ≤ x)
 
-private def NoMaximalCode (a I : V) (G : V → V → Prop) : Prop :=
+variable (a I G) in
+private def NoMaximalCode : Prop :=
   ∀ i z t, enumCode a (I ⨳ a) G i z t →
     ∃ i' z' t', enumCode a (I ⨳ a) G i' z' t' ∧ z < z'
 
-private lemma prenexDefinablePred_codeBelow {a I : V} {G : V → V → Prop}
-    (hG : 𝚺ᴬ₀.DefinableRel G) : PrenexDefinablePred 𝚺 1 (codeBelow a I G) := by
+private lemma prenexDefinablePred_codeBelow (hG : 𝚺ᴬ₀.DefinableRel G) :
+    PrenexDefinablePred 𝚺 1 (codeBelow a I G) := by
   have := definable_enumCode hG a (I ⨳ a)
   exact (PrenexDefinable.exists_exists_exists_of_sigmaZero (k := 1)
     (R := fun v i z t ↦ enumCode a (I ⨳ a) G i z t ∧ v 0 < z) (by definability)).of_iff
     fun v ↦ Iff.rfl
 
-private lemma prenexDefinablePred_codeAbove {a I : V} {G : V → V → Prop}
-    (hG : 𝚺ᴬ₀.DefinableRel G) : PrenexDefinablePred 𝚺 1 (codeAbove a I G) := by
+private lemma prenexDefinablePred_codeAbove (hG : 𝚺ᴬ₀.DefinableRel G) :
+    PrenexDefinablePred 𝚺 1 (codeAbove a I G) := by
   have := definable_enumCode hG a (I ⨳ a)
   exact (PrenexDefinable.exists_exists_exists_of_sigmaZero (k := 1)
     (R := fun v i z t ↦ I ⨳ a ≤ v 0 ∨
       (enumCode a (I ⨳ a) G i z t ∧ ∃ p ≤ v 0, Exponential ((a - i) * ‖a‖) p ∧ z + p ≤ v 0))
     (by definability)).of_iff fun v ↦ Iff.rfl
 
-private lemma not_codeAbove_of_codeBelow {a I x : V} {G : V → V → Prop}
+private lemma not_codeAbove_of_codeBelow
     (hG : 𝚺ᴬ₀.DefinableRel G) (hfun : ∀ x y y', G x y → G x y' → y = y')
     (hinj : ∀ x x' y, G x y → G x' y → x = x') (hI : ‖I‖ = a + 1)
     (hx : codeBelow a I G x) : ¬codeAbove a I G x := by
@@ -657,7 +665,7 @@ private lemma not_codeAbove_of_codeBelow {a I x : V} {G : V → V → Prop}
     · have hlt := (enumCode.le_lt_add hG hfun hinj hI hii hc' hc hpq).2
       exact lt_asymm (hlt.trans_le hle) hxz
 
-private def codeCut {a I : V} {G : V → V → Prop} (hnomax : NoMaximalCode a I G) : Cut V where
+private def codeCut (hnomax : NoMaximalCode a I G) : Cut V where
   carrier := {x | codeBelow a I G x}
   succ_mem := by
     rintro x ⟨i, z, t, hc, hxz⟩
@@ -667,7 +675,7 @@ private def codeCut {a I : V} {G : V → V → Prop} (hnomax : NoMaximalCode a I
     rintro x y hxy ⟨i, z, t, hc, hyz⟩
     exact ⟨i, z, t, hc, hxy.trans hyz⟩
 
-private lemma codeCut_proper {a I : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G)
+private lemma codeCut_proper (hG : 𝚺ᴬ₀.DefinableRel G)
     (hdom : ∀ x y, G x y → x < a) (hfun : ∀ x y y', G x y → G x y' → y = y')
     (hunb : ∀ s, ∃ x y, G x y ∧ s < y) (hI : ‖I‖ = a + 1) (hnomax : NoMaximalCode a I G) :
     (codeCut hnomax).Proper := by
@@ -679,7 +687,9 @@ private lemma codeCut_proper {a I : V} {G : V → V → Prop} (hG : 𝚺ᴬ₀.D
     rintro ⟨i, z, t, hc, hBz⟩
     exact lt_irrefl z (hc.2.1.trans hBz)
 
-lemma exists_gap {a I : V} [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] {G : V → V → Prop} (hG : 𝚺ᴬ₀.DefinableRel G)
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1]
+
+lemma exists_gap (hG : 𝚺ᴬ₀.DefinableRel G)
     (hdom : ∀ x y, G x y → x < a) (hfun : ∀ x y y', G x y → G x y' → y = y')
     (hinj : ∀ x x' y, G x y → G x' y → x = x') (hunb : ∀ s, ∃ x y, G x y ∧ s < y) (hI : ‖I‖ = a + 1)
     (hnomax : ∀ i z t, enumCode a (I ⨳ a) G i z t →
@@ -710,7 +720,7 @@ lemma exists_gap {a I : V} [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] {G : V → V → Pr
 
 /-- The codes of the initial segments of an enumeration cut converge to a single code.
 - [Tha05, Lemma 1] -/
-theorem exists_coded_limit [V↓[ℒₒᵣ] ⊧* 𝗜𝚫 1] {a I : V} {f : V → V}
+theorem exists_coded_limit {f : V → V}
     (hI : ‖I‖ = a + 1) (hinj : ∀ x < a, ∀ y < a, f x = f y → x = y)
     (hunb : ∀ s, ∃ x < a, s < f x) (hgraph : 𝚺ᴬ₀.DefinableRel fun x y ↦ x < a ∧ f x = y) :
     ∃ e < I ⨳ a, ∀ i ∈ (enumerationCut a I f hI hunb hgraph).carrier, ∀ z t,

@@ -26,15 +26,19 @@ section hypothesis
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
+variable (k : ℕ)
+
 /-- `p = ⟪k, θ, e⟫` with the prenex $\Pi_k$ formula of matrix `θ` satisfied under `e`. -/
-def TaggedPrenexSatisfied (k : ℕ) (p : V) : Prop :=
+def TaggedPrenexSatisfied (p : V) : Prop :=
   ∃ θ e, p = ⟪(k : V), θ, e⟫ ∧ PrenexSatisfied 𝚷 k e θ
 
-noncomputable def taggedPrenexSatisfied (k : ℕ) [NeZero k] : 𝚷ᴬ_[k].Semisentence 1 := .mkPi
+variable [NeZero k]
+
+noncomputable def taggedPrenexSatisfied : 𝚷ᴬ_[k].Semisentence 1 := .mkPi
   “p. ∃ θ <⁺ p, ∃ e <⁺ p, !pair₃Def p ↑k θ e ∧ !(prenexSatisfied 𝚷 k).val e θ”
   (by simp [(prenexSatisfied 𝚷 k).pi_prop])
 
-instance TaggedPrenexSatisfied.defined (k : ℕ) [NeZero k] :
+instance TaggedPrenexSatisfied.defined :
     𝚷ᴬ_[k]-Predicate (TaggedPrenexSatisfied k : V → Prop) via taggedPrenexSatisfied k :=
   .mk fun v ↦ by
     suffices (∃ θ ≤ v 0, ∃ e ≤ v 0, v 0 = ⟪(k : V), θ, e⟫ ∧ PrenexSatisfied 𝚷 k e θ) ↔
@@ -54,8 +58,10 @@ lemma TaggedPrenexSatisfied.of_eq {k j : ℕ} {p θ e : V} (h : TaggedPrenexSati
   obtain ⟨hk, rfl, rfl⟩ : (k : V) = j ∧ θ' = θ ∧ e' = e := by simpa using hp
   exact ⟨by exact_mod_cast hk, hs⟩
 
+variable (n : ℕ)
+
 /-- `c` is a set of tagged satisfied prenex $\Pi_{k + 1}$ formulas with `k ≤ n`. -/
-def RelativizedHypothesis (n : ℕ) (c : V) : Prop :=
+def RelativizedHypothesis (c : V) : Prop :=
   ∀ p ∈ c, ∃ k ≤ n, TaggedPrenexSatisfied (k + 1) p
 
 noncomputable def relativizedHypothesisMember : (n : ℕ) → 𝚷ᴬ_[n + 1].Semisentence 1
@@ -68,7 +74,7 @@ noncomputable def relativizedHypothesisMember : (n : ℕ) → 𝚷ᴬ_[n + 1].Se
         simp [h])
 
 /-- The $\Pi_{n + 1}$ formula defining `RelativizedHypothesis n`. -/
-noncomputable def relativizedHypothesis (n : ℕ) : 𝚷ᴬ_[n + 1].Semisentence 1 := .mkPi
+noncomputable def relativizedHypothesis : 𝚷ᴬ_[n + 1].Semisentence 1 := .mkPi
   “c. ∀ p ∈' c, !(relativizedHypothesisMember n).val p”
 
 lemma eval_relativizedHypothesisMember : (n : ℕ) → (p : V) →
@@ -78,7 +84,7 @@ lemma eval_relativizedHypothesisMember : (n : ℕ) → (p : V) →
     simp [relativizedHypothesisMember, eval_relativizedHypothesisMember n,
       (TaggedPrenexSatisfied.defined (V := V) (n + 2)).df, Nat.le_succ_iff]
 
-instance RelativizedHypothesis.defined (n : ℕ) :
+instance RelativizedHypothesis.defined :
     𝚷ᴬ_[n + 1]-Predicate (RelativizedHypothesis n : V → Prop) via relativizedHypothesis n :=
   .mk fun v ↦ by
     simp [relativizedHypothesis, RelativizedHypothesis, eval_relativizedHypothesisMember]
@@ -129,18 +135,45 @@ instance RelativizedProv.defined : (n : ℕ) →
       (RelativizedHypothesis.defined (V := V) n).df, (imp.defined (V := V) (L := ℒₒᵣ)).df,
       (Provable.defined (T := T) (V := V)).df, (substNumeral.defined (V := V)).df]
 
+variable {T} (n) (σ : ArithmeticSentence)
+
 /-- The internal formula `H(c̄)`: `relativizedHypothesis n` at the numeral of `c`. -/
-noncomputable abbrev hypothesisFormula (n : ℕ) (c : V) : Bootstrapping.Formula V ℒₒᵣ :=
+noncomputable abbrev hypothesisFormula (c : V) : Bootstrapping.Formula V ℒₒᵣ :=
   (⌜(relativizedHypothesis n).val⌝ : Bootstrapping.Semiformula V ℒₒᵣ 1).subst ![𝕹 c]
 
-variable {T}
+/-- The $\Sigma_1$ part of `Prov^{n + 1}_T(σ)` for the hypothesis set `c`. -/
+private noncomputable def provableFromHypothesis : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
+  “c. ∃ h, !ssnum h !!(⌜(relativizedHypothesis n).val⌝) c ∧
+    ∃ i, !(impGraph ℒₒᵣ).val i h !!(⌜σ⌝) ∧ !(provable T).val i”
 
-lemma relativizedProv_succ_iff {σ : ArithmeticSentence} :
+variable {k : ℕ} (θ : ArithmeticSemisentence k)
+
+/-- `c` contains `⟪n + 1, ⌜θ⌝, y ∷ 0⟫`. -/
+private noncomputable def memHypothesis : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
+  “c y. ∃ e, !adjoinDef e y 0 ∧ ∃ p, !pair₃Def p ↑(n + 1) !!(⌜θ⌝) e ∧ p ∈ c”
+
+variable {n}
+
+variable {W : Type*} [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+
+private lemma eval_provableFromHypothesis (v : Fin 1 → W) :
+    W ⊧/v (provableFromHypothesis (T := T) n σ).val ↔
+      Provable T (imp ℒₒᵣ (substNumeral ⌜(relativizedHypothesis n).val⌝ (v 0)) ⌜σ⌝) := by
+  simp [provableFromHypothesis, (imp.defined (V := W) (L := ℒₒᵣ)).df,
+    (Provable.defined (T := T) (V := W)).df, (substNumeral.defined (V := W)).df]
+
+private lemma eval_memHypothesis (v : Fin 2 → W) :
+    W ⊧/v (memHypothesis n θ).val ↔ ⟪((n + 1 : ℕ) : W), (⌜θ⌝ : W), v 1 ∷ 0⟫ ∈ v 0 := by
+  simp [memHypothesis, numeral_eq_natCast]
+
+variable {σ}
+
+lemma relativizedProv_succ_iff :
     RelativizedProv T (n + 1) (⌜σ⌝ : V) ↔
       ∃ c : V, RelativizedHypothesis n c ∧ T.internalize V ⊢ hypothesisFormula n c 🡒 ⌜σ⌝ := by
   simp [RelativizedProv, tprovable_iff_provable, substNumeral, Sentence.quote_eq]
 
-lemma RelativizedProv.of_provable {σ : ArithmeticSentence} (h : Provable T (⌜σ⌝ : V)) :
+lemma RelativizedProv.of_provable (h : Provable T (⌜σ⌝ : V)) :
     ∀ n, RelativizedProv T n (⌜σ⌝ : V)
   | 0 => h
   | _ + 1 => relativizedProv_succ_iff.mpr ⟨0, fun p hp ↦ by simp [← emptyset_def] at hp,
@@ -152,7 +185,7 @@ variable [𝗜𝚺₁ ⪯ T]
 private noncomputable def noTag (m : ℕ) : 𝚺ᴬ₁.Semisentence 1 := .mkSigma
   “c. ∀ p ∈' c, ∀ θ <⁺ p, ∀ e <⁺ p, ¬!pair₃Def p ↑(m + 2) θ e”
 
-lemma RelativizedProv.succ {σ : ArithmeticSentence} :
+lemma RelativizedProv.succ :
     ∀ {n}, RelativizedProv T n (⌜σ⌝ : V) → RelativizedProv T (n + 1) (⌜σ⌝ : V)
   | 0, h => RelativizedProv.of_provable h 1
   | m + 1, h => by
@@ -204,7 +237,7 @@ lemma tprovable_hypothesisFormula_of_subset {c d : V} (h : c ⊆ d) :
     Fin.succ_zero_eq_one, Matrix.cons_val_one, Matrix.vecMap_nil, hypothesisFormula] at hs hstd ⊢
   exact hstd ⨀ hs
 
-lemma RelativizedProv.modusPonens {σ τ : ArithmeticSentence} :
+lemma RelativizedProv.modusPonens {τ : ArithmeticSentence} :
     ∀ {n}, RelativizedProv T n (⌜σ 🡒 τ⌝ : V) → RelativizedProv T n (⌜σ⌝ : V) →
       RelativizedProv T n (⌜τ⌝ : V)
   | 0, h₁, h₂ => modus_ponens_sentence T h₁ h₂
@@ -221,21 +254,7 @@ lemma RelativizedProv.modusPonens {σ τ : ArithmeticSentence} :
     have hστ' : T.internalize V ⊢ hypothesisFormula n c₁ 🡒 (⌜σ⌝ 🡒 ⌜τ⌝) := by simpa using hστ
     exact Entailment.mdp₁ (Entailment.C_trans e₁ hστ') (Entailment.C_trans e₂ hσ)
 
-/-- The $\Sigma_1$ part of `Prov^{n + 1}_T(σ)` for the hypothesis set `c`. -/
-private noncomputable def provableFromHypothesis (n : ℕ) (σ : ArithmeticSentence) :
-    𝚺ᴬ₁.Semisentence 1 := .mkSigma
-  “c. ∃ h, !ssnum h !!(⌜(relativizedHypothesis n).val⌝) c ∧
-    ∃ i, !(impGraph ℒₒᵣ).val i h !!(⌜σ⌝) ∧ !(provable T).val i”
-
-omit [𝗜𝚺₁ ⪯ T] in
-private lemma eval_provableFromHypothesis {W : Type*} [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-    (σ : ArithmeticSentence) (v : Fin 1 → W) :
-    W ⊧/v (provableFromHypothesis (T := T) n σ).val ↔
-      Provable T (imp ℒₒᵣ (substNumeral ⌜(relativizedHypothesis n).val⌝ (v 0)) ⌜σ⌝) := by
-  simp [provableFromHypothesis, (imp.defined (V := W) (L := ℒₒᵣ)).df,
-    (Provable.defined (T := T) (V := W)).df, (substNumeral.defined (V := W)).df]
-
-lemma RelativizedProv.internalize {σ : ArithmeticSentence} :
+lemma RelativizedProv.internalize :
     ∀ {n}, RelativizedProv T n (⌜σ⌝ : V) →
       RelativizedProv T n (⌜((T.relativizedProvabilityPred n).val/[⌜σ⌝] : ArithmeticSentence)⌝ : V)
   | 0, h => provable_internalize T h
@@ -264,17 +283,6 @@ lemma RelativizedProv.internalize {σ : ArithmeticSentence} :
       Semiformula.substs_substs, Matrix.vecMap_cons', Matrix.head_cons, subst_numeral,
       Matrix.tail_cons, Matrix.vecMap_nil, hypothesisFormula] at hρ hstd ⊢
     exact Entailment.mdp₁ hstd (Entailment.C_of_conseq hρ)
-
-/-- `c` contains `⟪n + 1, ⌜θ⌝, y ∷ 0⟫`. -/
-private noncomputable def memHypothesis {k : ℕ} (n : ℕ) (θ : ArithmeticSemisentence k) :
-    𝚺ᴬ₁.Semisentence 2 := .mkSigma
-  “c y. ∃ e, !adjoinDef e y 0 ∧ ∃ p, !pair₃Def p ↑(n + 1) !!(⌜θ⌝) e ∧ p ∈ c”
-
-omit [𝗜𝚺₁ ⪯ T] in
-private lemma eval_memHypothesis {W : Type*} [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {k : ℕ}
-    (θ : ArithmeticSemisentence k) (v : Fin 2 → W) :
-    W ⊧/v (memHypothesis n θ).val ↔ ⟪((n + 1 : ℕ) : W), (⌜θ⌝ : W), v 1 ∷ 0⟫ ∈ v 0 := by
-  simp [memHypothesis, numeral_eq_natCast]
 
 /-- A true $\Sigma_{n + 2}$ sentence `∃¹ φ`, with `φ` prenex $\Pi_{n + 1}$, is
 `Prov^{n + 1}_T`-provable. -/
@@ -311,8 +319,12 @@ lemma RelativizedProv.of_sigma (φ : ℬ[<, ℒₒᵣ].Prenex 𝚷 (n + 1) Empty
 
 end
 
+variable {σ : ArithmeticSentence}
+
+variable (n)
+
 /-- The derivability condition D1 for `Prov^n_T`. -/
-theorem _root_.FFL.FirstOrder.Theory.relativizedProvability_D1 (n : ℕ) {σ : ArithmeticSentence}
+theorem _root_.FFL.FirstOrder.Theory.relativizedProvability_D1
     (h : T ⊢ σ) : 𝗜𝚺₁ ⊢ (T.relativizedProvabilityPred n).val/[⌜σ⌝] :=
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff, (RelativizedProv.defined T n).df] using
@@ -320,13 +332,13 @@ theorem _root_.FFL.FirstOrder.Theory.relativizedProvability_D1 (n : ℕ) {σ : A
 
 /-- Provability relativized to true $\Pi_n$ sentences, as a `Provability 𝗜𝚺₁ T` instance.
 - [Bek99, §3] -/
-noncomputable def _root_.FFL.FirstOrder.Theory.relativizedProvability (n : ℕ) :
-    Provability 𝗜𝚺₁ T where
+noncomputable def _root_.FFL.FirstOrder.Theory.relativizedProvability : Provability 𝗜𝚺₁ T where
   prov := (T.relativizedProvabilityPred n).val
   bew_def h := T.relativizedProvability_D1 n h
 
-private lemma models_relativizedProvability_iff {V : Type} [ORingStructure V]
-    [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {σ : ArithmeticSentence} :
+variable {n}
+
+private lemma models_relativizedProvability_iff {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
     V↓[ℒₒᵣ] ⊧ T.relativizedProvability n σ ↔ RelativizedProv T n (⌜σ⌝ : V) := by
   simp [Theory.relativizedProvability, Provability.pr, models_iff,
     (RelativizedProv.defined T n).df]
@@ -334,26 +346,25 @@ private lemma models_relativizedProvability_iff {V : Type} [ORingStructure V]
 /-- The standard provability predicate implies provability relativized to true $\Pi_n$
 sentences, over the standard model.
 - [Bek99, §3] -/
-lemma models_relativizedProvability_of_standardProvability {σ : ArithmeticSentence}
-    (h : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ) :
+lemma models_relativizedProvability_of_standardProvability (h : ℕ↓[ℒₒᵣ] ⊧ T.standardProvability σ) :
     ℕ↓[ℒₒᵣ] ⊧ T.relativizedProvability n σ :=
   models_of_provable inferInstance
     (T.relativizedProvability_D1 n (T.standardProvability.sound_on h))
 
 variable [𝗜𝚺₁ ⪯ T]
 
+variable (n) in
 /-- Raising the level of the relativization is provable: `𝗜𝚺₁` proves that what `Prov^n_T`
 proves, `Prov^(n + 1)_T` proves.
 - [Bek99, Lemma 3.1(2)] -/
-theorem provable_relativizedProvability_succ_of_relativizedProvability (n : ℕ)
-    {σ : ArithmeticSentence} :
+theorem provable_relativizedProvability_succ_of_relativizedProvability :
     𝗜𝚺₁ ⊢ T.relativizedProvability n σ 🡒 T.relativizedProvability (n + 1) σ :=
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [models_relativizedProvability_iff] using RelativizedProv.succ (T := T) (V := V)
 
 /-- Raising the level of the relativization to any higher one is provable.
 - [Bek99, Lemma 3.1(2)] -/
-theorem provable_relativizedProvability_of_le {n m : ℕ} (hnm : n ≤ m) {σ : ArithmeticSentence} :
+theorem provable_relativizedProvability_of_le {n m : ℕ} (hnm : n ≤ m) :
     𝗜𝚺₁ ⊢ T.relativizedProvability n σ 🡒 T.relativizedProvability m σ := by
   induction m, hnm using Nat.le_induction with
   | base => cl_prover
@@ -365,7 +376,7 @@ theorem provable_relativizedProvability_of_le {n m : ℕ} (hnm : n ≤ m) {σ : 
 model.
 - [Bek99, §3] -/
 theorem models_relativizedProvability_succ_of_models_relativizedProvability
-    {σ : ArithmeticSentence} (h : ℕ↓[ℒₒᵣ] ⊧ T.relativizedProvability n σ) :
+    (h : ℕ↓[ℒₒᵣ] ⊧ T.relativizedProvability n σ) :
     ℕ↓[ℒₒᵣ] ⊧ T.relativizedProvability (n + 1) σ :=
   Semantics.Imp.models_imply.mp
     (models_of_provable inferInstance

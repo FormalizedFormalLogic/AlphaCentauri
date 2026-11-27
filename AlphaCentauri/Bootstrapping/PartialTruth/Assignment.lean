@@ -24,7 +24,7 @@ variable {Γ : SigmaPiDelta} {m : ℕ}
 
 open Arithmetic (numeral numeralGraph numeral_uterm numeral_semiterm numeral_substs qqNLT qqLT)
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (k f v t p x : V)
 
 /-! ## Terms -/
 
@@ -49,10 +49,10 @@ open TermFvAssign
 
 /-- `termFvAssign f t` is the coded term `t` with each free variable `^&i` replaced by the
 numeral of `f.[i]`. -/
-noncomputable def termFvAssign (f t : V) : V := construction.result ℒₒᵣ ![f] t
+noncomputable def termFvAssign : V := construction.result ℒₒᵣ ![f] t
 
 /-- `termFvAssignVec k f v` applies `termFvAssign f` to each entry of the coded `k`-vector `v`. -/
-noncomputable def termFvAssignVec (k f v : V) : V := construction.resultVec ℒₒᵣ ![f] k v
+noncomputable def termFvAssignVec : V := construction.resultVec ℒₒᵣ ![f] k v
 
 noncomputable def termFvAssignGraph : 𝚺ᴬ₁.Semisentence 3 :=
   (blueprint.result ℒₒᵣ).rew <| Rew.subst ![#0, #2, #1]
@@ -84,28 +84,28 @@ instance termFvAssignVec.definable' : Γᴬ_[m + 1]-Function₃ (termFvAssignVec
 
 section
 
-variable {f : V}
+variable {f : V} {k v t n m w b : V}
 
 @[simp]
 lemma termFvAssign_bvar (z : V) : termFvAssign f ^#z = ^#z := by
   simp [termFvAssign, construction]
 
 @[simp]
-lemma termFvAssign_fvar (x : V) : termFvAssign f ^&x = numeral f.[x] := by
+lemma termFvAssign_fvar : termFvAssign f ^&x = numeral f.[x] := by
   simp [termFvAssign, construction]
 
 @[simp]
-lemma termFvAssign_func {k g v : V} (hg : (ℒₒᵣ).IsFunc k g) (hv : IsUTermVec ℒₒᵣ k v) :
+lemma termFvAssign_func {g : V} (hg : (ℒₒᵣ).IsFunc k g) (hv : IsUTermVec ℒₒᵣ k v) :
     termFvAssign f (^func k g v) = ^func k g (termFvAssignVec k f v) := by
   simp [termFvAssign, construction, hg, hv]
   rfl
 
 @[simp]
-lemma len_termFvAssignVec {k v : V} (hv : IsUTermVec ℒₒᵣ k v) : len (termFvAssignVec k f v) = k :=
+lemma len_termFvAssignVec (hv : IsUTermVec ℒₒᵣ k v) : len (termFvAssignVec k f v) = k :=
   construction.resultVec_lh ℒₒᵣ _ hv
 
 @[simp]
-lemma nth_termFvAssignVec {k v i : V} (hv : IsUTermVec ℒₒᵣ k v) (hi : i < k) :
+lemma nth_termFvAssignVec {i : V} (hv : IsUTermVec ℒₒᵣ k v) (hi : i < k) :
     (termFvAssignVec k f v).[i] = termFvAssign f v.[i] :=
   construction.nth_resultVec ℒₒᵣ _ hv hi
 
@@ -113,12 +113,12 @@ lemma nth_termFvAssignVec {k v i : V} (hv : IsUTermVec ℒₒᵣ k v) (hi : i < 
 lemma termFvAssignVec_nil : termFvAssignVec 0 f (0 : V) = 0 :=
   construction.resultVec_nil ℒₒᵣ _
 
-lemma termFvAssignVec_cons {k t v : V} (ht : IsUTerm ℒₒᵣ t) (hv : IsUTermVec ℒₒᵣ k v) :
+lemma termFvAssignVec_cons (ht : IsUTerm ℒₒᵣ t) (hv : IsUTermVec ℒₒᵣ k v) :
     termFvAssignVec (k + 1) f (t ∷ v) = termFvAssign f t ∷ termFvAssignVec k f v :=
   construction.resultVec_cons ℒₒᵣ ![f] hv ht
 
 @[simp]
-lemma termFvAssignVec_cons₁ {t : V} (ht : IsUTerm ℒₒᵣ t) :
+lemma termFvAssignVec_cons₁ (ht : IsUTerm ℒₒᵣ t) :
     termFvAssignVec 1 f ?[t] = ?[termFvAssign f t] := by
   simpa using termFvAssignVec_cons (f := f) ht IsUTermVec.empty
 
@@ -129,8 +129,7 @@ lemma termFvAssignVec_cons₂ {t₁ t₂ : V} (ht₁ : IsUTerm ℒₒᵣ t₁) (
     simp [*]
 
 @[simp]
-lemma IsSemiterm.termFvAssign {n t : V} (ht : IsSemiterm ℒₒᵣ n t) :
-    IsSemiterm ℒₒᵣ n (termFvAssign f t) := by
+lemma IsSemiterm.termFvAssign (ht : IsSemiterm ℒₒᵣ n t) : IsSemiterm ℒₒᵣ n (termFvAssign f t) := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz
@@ -147,7 +146,7 @@ lemma IsSemiterm.termFvAssign {n t : V} (ht : IsSemiterm ℒₒᵣ n t) :
       exact ih i hi
 
 @[simp]
-lemma IsSemitermVec.termFvAssignVec {k n v : V} (hv : IsSemitermVec ℒₒᵣ k n v) :
+lemma IsSemitermVec.termFvAssignVec (hv : IsSemitermVec ℒₒᵣ k n v) :
     IsSemitermVec ℒₒᵣ k n (termFvAssignVec k f v) := by
   apply IsSemitermVec.iff.mpr
   constructor
@@ -156,12 +155,12 @@ lemma IsSemitermVec.termFvAssignVec {k n v : V} (hv : IsSemitermVec ℒₒᵣ k 
     rw [nth_termFvAssignVec hv.isUTerm hi]
     exact (hv.nth hi).termFvAssign
 
-lemma IsUTermVec.termFvAssignVec {k v : V} (hv : IsUTermVec ℒₒᵣ k v) :
+lemma IsUTermVec.termFvAssignVec (hv : IsUTermVec ℒₒᵣ k v) :
     IsUTermVec ℒₒᵣ k (termFvAssignVec k f v) :=
   hv.isSemitermVec.termFvAssignVec.isUTerm
 
 @[simp]
-lemma termFvAssign_numeral (x : V) : termFvAssign f (numeral x) = numeral x := by
+lemma termFvAssign_numeral : termFvAssign f (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp [Arithmetic.zero, Arithmetic.qqFunc_absolute, qqFuncN_eq_qqFunc]
@@ -173,7 +172,7 @@ lemma termFvAssign_numeral (x : V) : termFvAssign f (numeral x) = numeral x := b
         (by simp [Arithmetic.one, Arithmetic.qqFunc_absolute, qqFuncN_eq_qqFunc])]
       simp [ih, Arithmetic.one, Arithmetic.qqFunc_absolute, qqFuncN_eq_qqFunc]
 
-lemma termFvAssign_termShift {b t : V} (ht : IsUTerm ℒₒᵣ t) :
+lemma termFvAssign_termShift (ht : IsUTerm ℒₒᵣ t) :
     termFvAssign (b ∷ f) (termShift ℒₒᵣ t) = termFvAssign f t := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -189,7 +188,7 @@ lemma termFvAssign_termShift {b t : V} (ht : IsUTerm ℒₒᵣ t) :
     rw [nth_termFvAssignVec hv.termShiftVec hi, nth_termShiftVec hv hi,
       nth_termFvAssignVec hv hi, ih i hi]
 
-lemma termFvAssign_termBShift {t : V} (ht : IsUTerm ℒₒᵣ t) :
+lemma termFvAssign_termBShift (ht : IsUTerm ℒₒᵣ t) :
     termFvAssign f (termBShift ℒₒᵣ t) = termBShift ℒₒᵣ (termFvAssign f t) := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -206,8 +205,7 @@ lemma termFvAssign_termBShift {t : V} (ht : IsUTerm ℒₒᵣ t) :
     rw [nth_termFvAssignVec hv.termBShiftVec hi, nth_termBShiftVec hv hi,
       nth_termBShiftVec hv.termFvAssignVec hi, nth_termFvAssignVec hv hi, ih i hi]
 
-lemma termFvAssign_termSubst {n m w t : V} (hw : IsSemitermVec ℒₒᵣ n m w)
-    (ht : IsSemiterm ℒₒᵣ n t) :
+lemma termFvAssign_termSubst (hw : IsSemitermVec ℒₒᵣ n m w) (ht : IsSemiterm ℒₒᵣ n t) :
     termFvAssign f (termSubst ℒₒᵣ w t) =
       termSubst ℒₒᵣ (termFvAssignVec n f w) (termFvAssign f t) := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
@@ -226,7 +224,7 @@ lemma termFvAssign_termSubst {n m w t : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     rw [nth_termFvAssignVec (hw.termSubstVec hv).isUTerm hi, nth_termSubstVec hv.isUTerm hi,
       nth_termSubstVec hv.termFvAssignVec.isUTerm hi, nth_termFvAssignVec hv.isUTerm hi, ih i hi]
 
-lemma termFvAssignVec_qVec {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
+lemma termFvAssignVec_qVec (hw : IsSemitermVec ℒₒᵣ n m w) :
     termFvAssignVec (n + 1) f (qVec ℒₒᵣ w) = qVec ℒₒᵣ (termFvAssignVec n f w) := by
   apply nth_ext' (n + 1) (len_termFvAssignVec hw.qVec.isUTerm)
     (len_qVec hw.termFvAssignVec.isUTerm)
@@ -244,15 +242,14 @@ lemma termFvAssignVec_qVec {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w) :
       simp [nth_termBShiftVec hw.termFvAssignVec.isUTerm hj, hw.isUTerm, hj]
     rw [h₁, h₂, termFvAssign_termBShift (hw.isUTerm.nth hj)]
 
-lemma termFvAssignVec_termShiftVec {k b v : V} (hv : IsUTermVec ℒₒᵣ k v) :
+lemma termFvAssignVec_termShiftVec (hv : IsUTermVec ℒₒᵣ k v) :
     termFvAssignVec k (b ∷ f) (termShiftVec ℒₒᵣ k v) = termFvAssignVec k f v := by
   apply nth_ext' k (by simp [hv.termShiftVec]) (by simp [hv])
   intro i hi
   rw [nth_termFvAssignVec hv.termShiftVec hi, nth_termShiftVec hv hi, nth_termFvAssignVec hv hi,
     termFvAssign_termShift (hv.nth hi)]
 
-lemma termFvAssignVec_termSubstVec {k n m w v : V} (hw : IsSemitermVec ℒₒᵣ n m w)
-    (hv : IsSemitermVec ℒₒᵣ k n v) :
+lemma termFvAssignVec_termSubstVec (hw : IsSemitermVec ℒₒᵣ n m w) (hv : IsSemitermVec ℒₒᵣ k n v) :
     termFvAssignVec k f (termSubstVec ℒₒᵣ k w v) =
       termSubstVec ℒₒᵣ k (termFvAssignVec n f w) (termFvAssignVec k f v) := by
   apply nth_ext' k (by simp [(hw.termSubstVec hv).isUTerm])
@@ -300,7 +297,7 @@ end FvAssign
 
 /-- `fvAssign f p` is the coded formula `p` with each free variable `^&i` replaced by the numeral
 of `f.[i]`. -/
-noncomputable def fvAssign (f p : V) : V := FvAssign.construction.result ℒₒᵣ f p
+noncomputable def fvAssign : V := FvAssign.construction.result ℒₒᵣ f p
 
 noncomputable def fvAssignGraph : 𝚺ᴬ₁.Semisentence 3 := FvAssign.blueprint.result ℒₒᵣ
 
@@ -315,15 +312,15 @@ instance fvAssign.definable' : Γᴬ_[m + 1]-Function₂ (fvAssign : V → V →
 
 section
 
-variable {f : V}
+variable {f : V} {k R v p q n m b t : V} {Γ : Polarity} {s : ℕ}
 
 @[simp]
-lemma fvAssign_rel {k R v : V} (hR : (ℒₒᵣ).IsRel k R) (hv : IsUTermVec ℒₒᵣ k v) :
+lemma fvAssign_rel (hR : (ℒₒᵣ).IsRel k R) (hv : IsUTermVec ℒₒᵣ k v) :
     fvAssign f (^rel k R v) = ^rel k R (termFvAssignVec k f v) := by
   simp [fvAssign, hR, hv, FvAssign.construction]
 
 @[simp]
-lemma fvAssign_nrel {k R v : V} (hR : (ℒₒᵣ).IsRel k R) (hv : IsUTermVec ℒₒᵣ k v) :
+lemma fvAssign_nrel (hR : (ℒₒᵣ).IsRel k R) (hv : IsUTermVec ℒₒᵣ k v) :
     fvAssign f (^nrel k R v) = ^nrel k R (termFvAssignVec k f v) := by
   simp [fvAssign, hR, hv, FvAssign.construction]
 
@@ -336,29 +333,28 @@ lemma fvAssign_falsum : fvAssign f (^⊥ : V) = ^⊥ := by
   simp [fvAssign, FvAssign.construction]
 
 @[simp]
-lemma fvAssign_and {p q : V} (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q) :
+lemma fvAssign_and (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q) :
     fvAssign f (p ^⋏ q) = fvAssign f p ^⋏ fvAssign f q := by
   simp [fvAssign, hp, hq, FvAssign.construction]
 
 @[simp]
-lemma fvAssign_or {p q : V} (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q) :
+lemma fvAssign_or (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q) :
     fvAssign f (p ^⋎ q) = fvAssign f p ^⋎ fvAssign f q := by
   simp [fvAssign, hp, hq, FvAssign.construction]
 
 @[simp]
-lemma fvAssign_all {p : V} (hp : IsUFormula ℒₒᵣ p) : fvAssign f (^∀ p) = ^∀ (fvAssign f p) := by
+lemma fvAssign_all (hp : IsUFormula ℒₒᵣ p) : fvAssign f (^∀ p) = ^∀ (fvAssign f p) := by
   simp [fvAssign, hp, FvAssign.construction]
 
 @[simp]
-lemma fvAssign_exs {p : V} (hp : IsUFormula ℒₒᵣ p) : fvAssign f (^∃ p) = ^∃ (fvAssign f p) := by
+lemma fvAssign_exs (hp : IsUFormula ℒₒᵣ p) : fvAssign f (^∃ p) = ^∃ (fvAssign f p) := by
   simp [fvAssign, hp, FvAssign.construction]
 
-lemma fvAssign_not_uformula {p : V} (hp : ¬IsUFormula ℒₒᵣ p) : fvAssign f p = 0 :=
+lemma fvAssign_not_uformula (hp : ¬IsUFormula ℒₒᵣ p) : fvAssign f p = 0 :=
   FvAssign.construction.result_prop_not _ hp
 
 @[simp]
-lemma IsSemiformula.fvAssign {n p : V} (hp : IsSemiformula ℒₒᵣ n p) :
-    IsSemiformula ℒₒᵣ n (fvAssign f p) := by
+lemma IsSemiformula.fvAssign (hp : IsSemiformula ℒₒᵣ n p) : IsSemiformula ℒₒᵣ n (fvAssign f p) := by
   apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intro n k R v hR hv
@@ -376,11 +372,10 @@ lemma IsSemiformula.fvAssign {n p : V} (hp : IsSemiformula ℒₒᵣ n p) :
   · intro n p hp ihp
     simp [hp.isUFormula, ihp]
 
-lemma IsUFormula.fvAssign {p : V} (hp : IsUFormula ℒₒᵣ p) : IsUFormula ℒₒᵣ (fvAssign f p) :=
+lemma IsUFormula.fvAssign (hp : IsUFormula ℒₒᵣ p) : IsUFormula ℒₒᵣ (fvAssign f p) :=
   hp.isSemiformula.fvAssign.isUFormula
 
-lemma fvAssign_neg {p : V} (hp : IsUFormula ℒₒᵣ p) :
-    fvAssign f (neg ℒₒᵣ p) = neg ℒₒᵣ (fvAssign f p) := by
+lemma fvAssign_neg (hp : IsUFormula ℒₒᵣ p) : fvAssign f (neg ℒₒᵣ p) = neg ℒₒᵣ (fvAssign f p) := by
   apply IsUFormula.induction1 𝚺 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
   · definability
   · intro k R v hR hv
@@ -401,7 +396,7 @@ lemma fvAssign_neg {p : V} (hp : IsUFormula ℒₒᵣ p) :
     rw [neg_ex hp, fvAssign_all hp.neg, fvAssign_exs hp, neg_ex hp.fvAssign, ih]
 
 @[simp]
-lemma formulaComplexity_fvAssign {p : V} :
+lemma formulaComplexity_fvAssign :
     IsUFormula ℒₒᵣ p → formulaComplexity ℒₒᵣ (fvAssign f p) = formulaComplexity ℒₒᵣ p := by
   apply IsUFormula.ISigma1.sigma1_succ_induction
   · definability
@@ -414,8 +409,7 @@ lemma formulaComplexity_fvAssign {p : V} :
   · intro p hp ihp; simp [hp, hp.fvAssign, ihp]
   · intro p hp ihp; simp [hp, hp.fvAssign, ihp]
 
-lemma fvAssign_shift {b p : V} (hp : IsUFormula ℒₒᵣ p) :
-    fvAssign (b ∷ f) (shift ℒₒᵣ p) = fvAssign f p := by
+lemma fvAssign_shift (hp : IsUFormula ℒₒᵣ p) : fvAssign (b ∷ f) (shift ℒₒᵣ p) = fvAssign f p := by
   apply IsUFormula.induction1 𝚺 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
   · definability
   · intro k R v hR hv
@@ -435,7 +429,7 @@ lemma fvAssign_shift {b p : V} (hp : IsUFormula ℒₒᵣ p) :
   · intro p hp ih
     rw [shift_exs hp, fvAssign_exs hp.shift, fvAssign_exs hp, ih]
 
-lemma fvAssign_subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ n p) :
+lemma fvAssign_subst {w : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : IsSemiformula ℒₒᵣ n p) :
     fvAssign f (subst ℒₒᵣ w p) = subst ℒₒᵣ (termFvAssignVec n f w) (fvAssign f p) := by
   revert m w
   apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
@@ -471,17 +465,17 @@ lemma fvAssign_subst {n m w p : V} (hw : IsSemitermVec ℒₒᵣ n m w) (hp : Is
       fvAssign_exs hp.isUFormula, substs_ex hp.fvAssign.isUFormula, ih hw.qVec,
       termFvAssignVec_qVec hw]
 
-lemma fvAssign_substs1 {m t p : V} (ht : IsSemiterm ℒₒᵣ m t) (hp : IsSemiformula ℒₒᵣ 1 p) :
+lemma fvAssign_substs1 (ht : IsSemiterm ℒₒᵣ m t) (hp : IsSemiformula ℒₒᵣ 1 p) :
     fvAssign f (substs1 ℒₒᵣ t p) = substs1 ℒₒᵣ (termFvAssign f t) (fvAssign f p) := by
   have hw : IsSemitermVec ℒₒᵣ 1 m (?[t] : V) := by simp [ht]
   rw [substs1, fvAssign_subst hw hp, substs1, termFvAssignVec_cons₁ ht.isUTerm]
 
-lemma fvAssign_free {b p : V} (hp : IsSemiformula ℒₒᵣ 1 p) :
+lemma fvAssign_free (hp : IsSemiformula ℒₒᵣ 1 p) :
     fvAssign (b ∷ f) (free ℒₒᵣ p) = substs1 ℒₒᵣ (numeral b) (fvAssign f p) := by
   rw [free, fvAssign_substs1 (m := 0) (by simp) hp.shift, fvAssign_shift hp.isUFormula]
   simp
 
-lemma fvAssign_qqBall {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsUFormula ℒₒᵣ q) :
+lemma fvAssign_qqBall (ht : IsUTerm ℒₒᵣ t) (hq : IsUFormula ℒₒᵣ q) :
     fvAssign f (qqBall (termBShift ℒₒᵣ t) q) =
       qqBall (termBShift ℒₒᵣ (termFvAssign f t)) (fvAssign f q) := by
   have hv : IsUTermVec ℒₒᵣ 2 (?[^#0, termBShift ℒₒᵣ t] : V) := by simp [ht.termBShift]
@@ -491,7 +485,7 @@ lemma fvAssign_qqBall {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsUFormula ℒ�
     fvAssign_nrel (by simp) hv]
   simp [qqBall, qqNLT, ht.termBShift, termFvAssign_termBShift ht]
 
-lemma fvAssign_qqBex {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsUFormula ℒₒᵣ q) :
+lemma fvAssign_qqBex (ht : IsUTerm ℒₒᵣ t) (hq : IsUFormula ℒₒᵣ q) :
     fvAssign f (qqBex (termBShift ℒₒᵣ t) q) =
       qqBex (termBShift ℒₒᵣ (termFvAssign f t)) (fvAssign f q) := by
   have hv : IsUTermVec ℒₒᵣ 2 (?[^#0, termBShift ℒₒᵣ t] : V) := by simp [ht.termBShift]
@@ -501,14 +495,13 @@ lemma fvAssign_qqBex {t q : V} (ht : IsUTerm ℒₒᵣ t) (hq : IsUFormula ℒ�
     fvAssign_rel (by simp) hv]
   simp [qqBex, qqLT, ht.termBShift, termFvAssign_termBShift ht]
 
-lemma fvAssign_qqToPrenex {Γ : Polarity} {s : ℕ} {θ : V} (hθ : IsUFormula ℒₒᵣ θ) :
+lemma fvAssign_qqToPrenex {θ : V} (hθ : IsUFormula ℒₒᵣ θ) :
     fvAssign f (qqToPrenex Γ s θ) = qqToPrenex Γ s (fvAssign f θ) := by
   induction s generalizing Γ with
   | zero => simp
   | succ s ih => cases Γ <;> simp [isUFormula_qqToPrenex.mpr hθ, ih]
 
-lemma IsBounded.fvAssign {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
-    IsBounded (fvAssign f p) := by
+lemma IsBounded.fvAssign (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) : IsBounded (fvAssign f p) := by
   suffices ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.fvAssign f p) from
     this p h hp
   apply IsBounded.induction 𝚷
@@ -536,7 +529,7 @@ lemma IsBounded.fvAssign {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p)
     rw [fvAssign_qqBex ht hq]
     exact IsBounded.bex ht.isSemiterm.termFvAssign.isUTerm (ih hq)
 
-lemma IsPrenexHierarchy.fvAssign {Γ : Polarity} {s : ℕ} {p : V} (hp : IsUFormula ℒₒᵣ p)
+lemma IsPrenexHierarchy.fvAssign (hp : IsUFormula ℒₒᵣ p)
     (h : IsPrenexHierarchy Γ s p) : IsPrenexHierarchy Γ s (fvAssign f p) := by
   obtain ⟨θ, rfl, hθ⟩ := isPrenexHierarchy_iff_exists_qqToPrenex.mp h
   have hθ' : IsUFormula ℒₒᵣ θ := isUFormula_qqToPrenex.mp hp
@@ -549,9 +542,9 @@ end
 
 section fixed
 
-variable {f g : V}
+variable {f g : V} {k n p t v : V}
 
-lemma termFvAssign_eq_self {n t : V} (h : (ℒₒᵣ).IsClosedSemiterm n t) : termFvAssign f t = t := by
+lemma termFvAssign_eq_self (h : (ℒₒᵣ).IsClosedSemiterm n t) : termFvAssign f t = t := by
   have ht := h.isSemiterm.isUTerm
   replace h := h.termShift_eq
   revert h
@@ -570,7 +563,7 @@ lemma termFvAssign_eq_self {n t : V} (h : (ℒₒᵣ).IsClosedSemiterm n t) : te
     rw [nth_termFvAssignVec hv hi]
     exact ih i hi (by rw [← nth_termShiftVec hv hi, h.2.2])
 
-lemma termFvAssignVec_eq_self {k v : V} (hv : IsUTermVec ℒₒᵣ k v)
+lemma termFvAssignVec_eq_self (hv : IsUTermVec ℒₒᵣ k v)
     (h : termShiftVec ℒₒᵣ k v = v) : termFvAssignVec k f v = v := by
   apply nth_ext' k (by simp [hv]) hv.lh.symm
   intro i hi
@@ -578,7 +571,7 @@ lemma termFvAssignVec_eq_self {k v : V} (hv : IsUTermVec ℒₒᵣ k v)
   exact termFvAssign_eq_self <|
     .of_termShift_eq (hv.nth hi).isSemiterm (by rw [← nth_termShiftVec hv hi, h])
 
-lemma fvAssign_eq_self {n p : V} (h : (ℒₒᵣ).IsSemisentence n p) : fvAssign f p = p := by
+lemma fvAssign_eq_self (h : (ℒₒᵣ).IsSemisentence n p) : fvAssign f p = p := by
   have hp := h.isSemiformula.isUFormula
   replace h := h.shift_eq
   revert h
@@ -609,7 +602,7 @@ lemma fvAssign_eq_self {n p : V} (h : (ℒₒᵣ).IsSemisentence n p) : fvAssign
 lemma fvAssign_quote {n : ℕ} (σ : ArithmeticSemisentence n) : fvAssign f (⌜σ⌝ : V) = ⌜σ⌝ :=
   fvAssign_eq_self (.quote σ)
 
-lemma fvAssign_qqExss {f p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
+lemma fvAssign_qqExss (hp : IsUFormula ℒₒᵣ p) (k : V) :
     fvAssign f (qqExss p k) = qqExss (fvAssign f p) k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
@@ -617,7 +610,7 @@ lemma fvAssign_qqExss {f p : V} (hp : IsUFormula ℒₒᵣ p) (k : V) :
   case succ k ih => rw [qqExss_succ, fvAssign_exs (by simpa using hp), ih, qqExss_succ]
 
 
-lemma termFvAssign_congr (h : ∀ i, f.[i] = g.[i]) {t : V} (ht : IsUTerm ℒₒᵣ t) :
+lemma termFvAssign_congr (h : ∀ i, f.[i] = g.[i]) (ht : IsUTerm ℒₒᵣ t) :
     termFvAssign f t = termFvAssign g t := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -632,7 +625,7 @@ lemma termFvAssign_congr (h : ∀ i, f.[i] = g.[i]) {t : V} (ht : IsUTerm ℒₒ
     intro i hi
     rw [nth_termFvAssignVec hv hi, nth_termFvAssignVec hv hi, ih i hi]
 
-lemma termFvAssignVec_congr (h : ∀ i, f.[i] = g.[i]) {k v : V} (hv : IsUTermVec ℒₒᵣ k v) :
+lemma termFvAssignVec_congr (h : ∀ i, f.[i] = g.[i]) (hv : IsUTermVec ℒₒᵣ k v) :
     termFvAssignVec k f v = termFvAssignVec k g v := by
   apply nth_ext' k (by simp [hv]) (by simp [hv])
   intro i hi
@@ -664,9 +657,9 @@ end fixed
 
 section fvSubst
 
-variable {w : V}
+variable {w : V} {Γ : Polarity} {s : ℕ} {p : V}
 
-lemma fvSubst_qqToPrenex {Γ : Polarity} {s : ℕ} {θ : V} (hθ : IsUFormula ℒₒᵣ θ) :
+lemma fvSubst_qqToPrenex {θ : V} (hθ : IsUFormula ℒₒᵣ θ) :
     fvSubst ℒₒᵣ w (qqToPrenex Γ s θ) = qqToPrenex Γ s (fvSubst ℒₒᵣ w θ) := by
   induction s generalizing Γ with
   | zero => simp
@@ -709,7 +702,7 @@ lemma fvSubst_qqBex :
 
 end
 
-lemma IsBounded.fvSubst (hw : IsSemitermVec ℒₒᵣ (len w) 0 w) {p : V} (hp : IsUFormula ℒₒᵣ p)
+lemma IsBounded.fvSubst (hw : IsSemitermVec ℒₒᵣ (len w) 0 w) (hp : IsUFormula ℒₒᵣ p)
     (h : IsBounded p) : IsBounded (fvSubst ℒₒᵣ w p) := by
   suffices ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p →
       IsBounded (Bootstrapping.fvSubst ℒₒᵣ w p) from this p h hp
@@ -741,8 +734,8 @@ lemma IsBounded.fvSubst (hw : IsSemitermVec ℒₒᵣ (len w) 0 w) {p : V} (hp :
     rw [fvSubst_qqBex hw ht hq]
     exact IsBounded.bex (hts.termFvSubst (hw.weaken (by simp))).isUTerm (ih hq)
 
-lemma IsPrenexHierarchy.fvSubst {Γ : Polarity} {s : ℕ} (hw : IsSemitermVec ℒₒᵣ (len w) 0 w)
-    {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsPrenexHierarchy Γ s p) :
+lemma IsPrenexHierarchy.fvSubst (hw : IsSemitermVec ℒₒᵣ (len w) 0 w)
+    (hp : IsUFormula ℒₒᵣ p) (h : IsPrenexHierarchy Γ s p) :
     IsPrenexHierarchy Γ s (fvSubst ℒₒᵣ w p) := by
   obtain ⟨θ, rfl, hθ⟩ := isPrenexHierarchy_iff_exists_qqToPrenex.mp h
   have hθ' : IsUFormula ℒₒᵣ θ := isUFormula_qqToPrenex.mp hp
@@ -772,9 +765,9 @@ end TermFvUnshift
 
 /-- `termFvUnshift t` is the coded term `t` with each free variable `^&x` replaced by
 `^&(x - 1)`. -/
-noncomputable def termFvUnshift (t : V) : V := TermFvUnshift.construction.result ℒₒᵣ ![] t
+noncomputable def termFvUnshift : V := TermFvUnshift.construction.result ℒₒᵣ ![] t
 
-noncomputable def termFvUnshiftVec (k v : V) : V :=
+noncomputable def termFvUnshiftVec : V :=
   TermFvUnshift.construction.resultVec ℒₒᵣ ![] k v
 
 noncomputable def termFvUnshiftGraph : 𝚺ᴬ₁.Semisentence 2 :=
@@ -799,30 +792,34 @@ instance termFvUnshift.definable : 𝚺ᴬ₁-Function₁ (termFvUnshift : V →
 instance termFvUnshiftVec.definable : 𝚺ᴬ₁-Function₂ (termFvUnshiftVec : V → V → V) :=
   termFvUnshiftVec.defined.to_definable
 
+section
+
+variable {k v t : V}
+
 @[simp]
 lemma termFvUnshift_bvar (z : V) : termFvUnshift ^#z = ^#z := by
   simp [termFvUnshift, TermFvUnshift.construction]
 
 @[simp]
-lemma termFvUnshift_fvar (x : V) : termFvUnshift ^&x = ^&(x - 1) := by
+lemma termFvUnshift_fvar : termFvUnshift ^&x = ^&(x - 1) := by
   simp [termFvUnshift, TermFvUnshift.construction]
 
 @[simp]
-lemma termFvUnshift_func {k g v : V} (hg : (ℒₒᵣ).IsFunc k g) (hv : IsUTermVec ℒₒᵣ k v) :
+lemma termFvUnshift_func {g : V} (hg : (ℒₒᵣ).IsFunc k g) (hv : IsUTermVec ℒₒᵣ k v) :
     termFvUnshift (^func k g v) = ^func k g (termFvUnshiftVec k v) := by
   simp [termFvUnshift, TermFvUnshift.construction, hg, hv]
   rfl
 
 @[simp]
-lemma len_termFvUnshiftVec {k v : V} (hv : IsUTermVec ℒₒᵣ k v) : len (termFvUnshiftVec k v) = k :=
+lemma len_termFvUnshiftVec (hv : IsUTermVec ℒₒᵣ k v) : len (termFvUnshiftVec k v) = k :=
   TermFvUnshift.construction.resultVec_lh ℒₒᵣ _ hv
 
 @[simp]
-lemma nth_termFvUnshiftVec {k v i : V} (hv : IsUTermVec ℒₒᵣ k v) (hi : i < k) :
+lemma nth_termFvUnshiftVec {i : V} (hv : IsUTermVec ℒₒᵣ k v) (hi : i < k) :
     (termFvUnshiftVec k v).[i] = termFvUnshift v.[i] :=
   TermFvUnshift.construction.nth_resultVec ℒₒᵣ _ hv hi
 
-lemma termFvUnshiftVec_cons {k t v : V} (ht : IsUTerm ℒₒᵣ t) (hv : IsUTermVec ℒₒᵣ k v) :
+lemma termFvUnshiftVec_cons (ht : IsUTerm ℒₒᵣ t) (hv : IsUTermVec ℒₒᵣ k v) :
     termFvUnshiftVec (k + 1) (t ∷ v) = termFvUnshift t ∷ termFvUnshiftVec k v :=
   TermFvUnshift.construction.resultVec_cons ℒₒᵣ ![] hv ht
 
@@ -831,7 +828,7 @@ lemma termFvUnshiftVec_nil : termFvUnshiftVec 0 (0 : V) = 0 :=
   TermFvUnshift.construction.resultVec_nil ℒₒᵣ _
 
 @[simp]
-lemma termFvUnshiftVec_cons₁ {t : V} (ht : IsUTerm ℒₒᵣ t) :
+lemma termFvUnshiftVec_cons₁ (ht : IsUTerm ℒₒᵣ t) :
     termFvUnshiftVec 1 (?[t] : V) = ?[termFvUnshift t] := by
   simpa using termFvUnshiftVec_cons ht IsUTermVec.empty
 
@@ -840,7 +837,7 @@ lemma termFvUnshiftVec_cons₂ {t₁ t₂ : V} (ht₁ : IsUTerm ℒₒᵣ t₁) 
     termFvUnshiftVec 2 (?[t₁, t₂] : V) = ?[termFvUnshift t₁, termFvUnshift t₂] := by
   rw [show (2 : V) = 0 + 1 + 1 by simp [one_add_one_eq_two], termFvUnshiftVec_cons] <;> simp [*]
 
-lemma IsUTerm.termFvUnshift {t : V} (ht : IsUTerm ℒₒᵣ t) : IsUTerm ℒₒᵣ (termFvUnshift t) := by
+lemma IsUTerm.termFvUnshift (ht : IsUTerm ℒₒᵣ t) : IsUTerm ℒₒᵣ (termFvUnshift t) := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z
@@ -856,7 +853,7 @@ lemma IsUTerm.termFvUnshift {t : V} (ht : IsUTerm ℒₒᵣ t) : IsUTerm ℒₒ�
       rw [nth_termFvUnshiftVec hv hi]
       exact ih i hi
 
-lemma IsUTermVec.termFvUnshiftVec {k v : V} (hv : IsUTermVec ℒₒᵣ k v) :
+lemma IsUTermVec.termFvUnshiftVec (hv : IsUTermVec ℒₒᵣ k v) :
     IsUTermVec ℒₒᵣ k (termFvUnshiftVec k v) := by
   constructor
   · simp [hv]
@@ -864,8 +861,7 @@ lemma IsUTermVec.termFvUnshiftVec {k v : V} (hv : IsUTermVec ℒₒᵣ k v) :
     rw [nth_termFvUnshiftVec hv hi]
     exact (hv.nth hi).termFvUnshift
 
-lemma termFvUnshift_termShift {t : V} (ht : IsUTerm ℒₒᵣ t) :
-    termFvUnshift (termShift ℒₒᵣ t) = t := by
+lemma termFvUnshift_termShift (ht : IsUTerm ℒₒᵣ t) : termFvUnshift (termShift ℒₒᵣ t) = t := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z
@@ -879,7 +875,7 @@ lemma termFvUnshift_termShift {t : V} (ht : IsUTerm ℒₒᵣ t) :
     intro i hi
     rw [nth_termFvUnshiftVec hv.termShiftVec hi, nth_termShiftVec hv hi, ih i hi]
 
-lemma termFvUnshift_termBShift {t : V} (ht : IsUTerm ℒₒᵣ t) :
+lemma termFvUnshift_termBShift (ht : IsUTerm ℒₒᵣ t) :
     termFvUnshift (termBShift ℒₒᵣ t) = termBShift ℒₒᵣ (termFvUnshift t) := by
   apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -896,7 +892,7 @@ lemma termFvUnshift_termBShift {t : V} (ht : IsUTerm ℒₒᵣ t) :
     rw [nth_termFvUnshiftVec hv.termBShiftVec hi, nth_termBShiftVec hv hi,
       nth_termBShiftVec hv.termFvUnshiftVec hi, nth_termFvUnshiftVec hv hi, ih i hi]
 
-lemma termFvUnshiftVec_termShiftVec {k v : V} (hv : IsUTermVec ℒₒᵣ k v) :
+lemma termFvUnshiftVec_termShiftVec (hv : IsUTermVec ℒₒᵣ k v) :
     termFvUnshiftVec k (termShiftVec ℒₒᵣ k v) = v := by
   apply nth_ext' k (by simp [hv.termShiftVec]) hv.lh.symm
   intro i hi
@@ -937,15 +933,17 @@ end FvUnshift
 
 /-- `fvUnshift p` is the coded formula `p` with each free variable `^&x` replaced by `^&(x - 1)`;
 it undoes `shift`. -/
-noncomputable def fvUnshift (p : V) : V := FvUnshift.construction.result ℒₒᵣ 0 p
+noncomputable def fvUnshift : V := FvUnshift.construction.result ℒₒᵣ 0 p
+
+variable {p q R : V}
 
 @[simp]
-lemma fvUnshift_rel {k R v : V} (hR : (ℒₒᵣ).IsRel k R) (hv : IsUTermVec ℒₒᵣ k v) :
+lemma fvUnshift_rel (hR : (ℒₒᵣ).IsRel k R) (hv : IsUTermVec ℒₒᵣ k v) :
     fvUnshift (^rel k R v) = ^rel k R (termFvUnshiftVec k v) := by
   simp [fvUnshift, hR, hv, FvUnshift.construction]
 
 @[simp]
-lemma fvUnshift_nrel {k R v : V} (hR : (ℒₒᵣ).IsRel k R) (hv : IsUTermVec ℒₒᵣ k v) :
+lemma fvUnshift_nrel (hR : (ℒₒᵣ).IsRel k R) (hv : IsUTermVec ℒₒᵣ k v) :
     fvUnshift (^nrel k R v) = ^nrel k R (termFvUnshiftVec k v) := by
   simp [fvUnshift, hR, hv, FvUnshift.construction]
 
@@ -958,24 +956,24 @@ lemma fvUnshift_falsum : fvUnshift (^⊥ : V) = ^⊥ := by
   simp [fvUnshift, FvUnshift.construction]
 
 @[simp]
-lemma fvUnshift_and {p q : V} (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q) :
+lemma fvUnshift_and (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q) :
     fvUnshift (p ^⋏ q) = fvUnshift p ^⋏ fvUnshift q := by
   simp [fvUnshift, hp, hq, FvUnshift.construction]
 
 @[simp]
-lemma fvUnshift_or {p q : V} (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q) :
+lemma fvUnshift_or (hp : IsUFormula ℒₒᵣ p) (hq : IsUFormula ℒₒᵣ q) :
     fvUnshift (p ^⋎ q) = fvUnshift p ^⋎ fvUnshift q := by
   simp [fvUnshift, hp, hq, FvUnshift.construction]
 
 @[simp]
-lemma fvUnshift_all {p : V} (hp : IsUFormula ℒₒᵣ p) : fvUnshift (^∀ p) = ^∀ (fvUnshift p) := by
+lemma fvUnshift_all (hp : IsUFormula ℒₒᵣ p) : fvUnshift (^∀ p) = ^∀ (fvUnshift p) := by
   simp [fvUnshift, hp, FvUnshift.construction]
 
 @[simp]
-lemma fvUnshift_exs {p : V} (hp : IsUFormula ℒₒᵣ p) : fvUnshift (^∃ p) = ^∃ (fvUnshift p) := by
+lemma fvUnshift_exs (hp : IsUFormula ℒₒᵣ p) : fvUnshift (^∃ p) = ^∃ (fvUnshift p) := by
   simp [fvUnshift, hp, FvUnshift.construction]
 
-lemma fvUnshift_shift {p : V} (hp : IsUFormula ℒₒᵣ p) : fvUnshift (shift ℒₒᵣ p) = p := by
+lemma fvUnshift_shift (hp : IsUFormula ℒₒᵣ p) : fvUnshift (shift ℒₒᵣ p) = p := by
   apply IsUFormula.induction1 𝚺 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
   · definability
   · intro k R v hR hv
@@ -993,7 +991,7 @@ lemma fvUnshift_shift {p : V} (hp : IsUFormula ℒₒᵣ p) : fvUnshift (shift �
   · intro p hp ih
     rw [shift_exs hp, fvUnshift_exs hp.shift, ih]
 
-lemma IsUFormula.fvUnshift {p : V} (hp : IsUFormula ℒₒᵣ p) : IsUFormula ℒₒᵣ (fvUnshift p) := by
+lemma IsUFormula.fvUnshift (hp : IsUFormula ℒₒᵣ p) : IsUFormula ℒₒᵣ (fvUnshift p) := by
   apply IsUFormula.induction1 𝚺 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ p hp
   · definability
   · intro k R v hR hv
@@ -1011,7 +1009,9 @@ lemma IsUFormula.fvUnshift {p : V} (hp : IsUFormula ℒₒᵣ p) : IsUFormula �
   · intro p hp ih
     simp [hp, ih]
 
-lemma fvUnshift_qqToPrenex {Γ : Polarity} {s : ℕ} {θ : V} (hθ : IsUFormula ℒₒᵣ θ) :
+variable {Γ : Polarity} {s : ℕ}
+
+lemma fvUnshift_qqToPrenex {θ : V} (hθ : IsUFormula ℒₒᵣ θ) :
     fvUnshift (qqToPrenex Γ s θ) = qqToPrenex Γ s (fvUnshift θ) := by
   induction s generalizing Γ with
   | zero => simp
@@ -1044,8 +1044,7 @@ lemma fvUnshift_qqBex :
 
 end
 
-lemma IsBounded.fvUnshift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) :
-    IsBounded (fvUnshift p) := by
+lemma IsBounded.fvUnshift (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p) : IsBounded (fvUnshift p) := by
   suffices ∀ p : V, IsBounded p → IsUFormula ℒₒᵣ p → IsBounded (Bootstrapping.fvUnshift p) from
     this p h hp
   apply IsBounded.induction 𝚷
@@ -1073,12 +1072,14 @@ lemma IsBounded.fvUnshift {p : V} (hp : IsUFormula ℒₒᵣ p) (h : IsBounded p
     rw [fvUnshift_qqBex ht hq]
     exact IsBounded.bex ht.termFvUnshift (ih hq)
 
-lemma IsPrenexHierarchy.fvUnshift {Γ : Polarity} {s : ℕ} {p : V} (hp : IsUFormula ℒₒᵣ p)
+lemma IsPrenexHierarchy.fvUnshift (hp : IsUFormula ℒₒᵣ p)
     (h : IsPrenexHierarchy Γ s p) : IsPrenexHierarchy Γ s (fvUnshift p) := by
   obtain ⟨θ, rfl, hθ⟩ := isPrenexHierarchy_iff_exists_qqToPrenex.mp h
   have hθ' : IsUFormula ℒₒᵣ θ := isUFormula_qqToPrenex.mp hp
   exact isPrenexHierarchy_iff_exists_qqToPrenex.mpr
     ⟨_, fvUnshift_qqToPrenex hθ', hθ.fvUnshift hθ'⟩
+
+end
 
 end Bootstrapping
 end FFL.FirstOrder.Arithmetic

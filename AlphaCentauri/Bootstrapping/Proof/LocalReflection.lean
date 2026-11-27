@@ -70,13 +70,14 @@ private lemma exists_falseBlock_set (hT : AdmitsFalseBlockReplacement T V k) (d 
     use q
     exact ⟨mem_range_iff.mpr ⟨p, hy⟩, (hR p q hq).1⟩
 
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
+
 /-- In a model of $\mathsf{I}\Sigma^+_{k+1}$, a prenex $\Pi_{k+3}$ formula holds of
 `v` if the internal `T`, each of whose axioms has a replacement by a false block, proves its
 instance by the numerals of `v`.
 - [HP98, Corollary I.4.34]
 - [Bek05, Theorem 7] -/
-theorem models_of_provable_substNumerals [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
-    (hT : AdmitsFalseBlockReplacement T V k) {m : ℕ}
+theorem models_of_provable_substNumerals (hT : AdmitsFalseBlockReplacement T V k) {m : ℕ}
     (φ : ℬ[<, ℒₒᵣ].Prenex 𝚷 (k + 3) Empty m) (v : Fin m → V)
     (h : Provable T (substNumerals (⌜φ.val⌝ : V) v)) : V ⊧/v φ.val := by
   by_contra hV
@@ -98,7 +99,7 @@ theorem models_of_provable_substNumerals [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1
 /-- In a model of $\mathsf{I}\Sigma^+_{k+1}$, the internal $\mathsf{I}\Sigma_n$ is consistent for
 $n \le k$.
 - [HP98, Corollary I.4.34] -/
-lemma consistent_ISigma [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)] (hn : n ≤ k) :
+lemma consistent_ISigma (hn : n ≤ k) :
     (𝗜𝚺 n).Consistent V := by
   intro h
   let π : ℬ[<, ℒₒᵣ].Prenex 𝚷 (k + 3) Empty 0 := .falsum

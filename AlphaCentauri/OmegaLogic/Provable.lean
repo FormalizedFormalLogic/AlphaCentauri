@@ -57,18 +57,18 @@ end
 lemma insert_absorb (h : Z∞ ⊢[α, c] insert φ Γ) (hmem : φ ∈ Γ) : Z∞ ⊢[α, c] Γ := by
   rwa [Finset.insert_eq_self.mpr hmem] at h
 
+variable (b : Bool) (r : (ℒₒᵣ).Rel k)
+
 /-- The identity axiom.
 
 - [Tow20, Section 13] -/
-lemma axL (r : (ℒₒᵣ).Rel k) (v) (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v ∈ Γ) :
-    Z∞ ⊢[0, 0] Γ :=
+lemma axL (v) (hp : Semiformula.rel r v ∈ Γ) (hn : Semiformula.nrel r v ∈ Γ) : Z∞ ⊢[0, 0] Γ :=
   ⟨Derivation.axL r v hp hn, by simp [Derivation.ordinalBound], by simp [Derivation.cutRank]⟩
 
 /-- The ω-logic leaf: a true literal closes its sequent.
 
 - [Tow20, Section 13] -/
-lemma axTrue (b : Bool) (r : (ℒₒᵣ).Rel k) (v) (ht : LitTrue (signedLit b r v))
-    (hmem : signedLit b r v ∈ Γ) : Z∞ ⊢[0, 0] Γ :=
+lemma axTrue (v) (ht : LitTrue (signedLit b r v)) (hmem : signedLit b r v ∈ Γ) : Z∞ ⊢[0, 0] Γ :=
   ⟨Derivation.axTrue b r v ht hmem, by simp [Derivation.ordinalBound], by simp [Derivation.cutRank]⟩
 
 /-- `⊤` closes a sequent.

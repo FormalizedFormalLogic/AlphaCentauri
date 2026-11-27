@@ -113,6 +113,7 @@ end Axioms
 
 /-! ### Extensions of $\mathbf{IL}$ -/
 
+section
 /-- The derivability predicate of `Logic.ofILAxioms`. -/
 inductive Logic.OfILAxioms (𝔸 : FormulaSet α) : Formula α → Prop
   | axm {A}          : A ∈ 𝔸 → OfILAxioms 𝔸 A
@@ -136,12 +137,16 @@ inductive Logic.OfILAxioms (𝔸 : FormulaSet α) : Formula α → Prop
   | axiomJ4 {A B}    : OfILAxioms 𝔸 (Axioms.J4 A B)
   | axiomJ5 {A}      : OfILAxioms 𝔸 (Axioms.J5 A)
 
+variable (𝔸 : FormulaSet α)
+
 /-- The smallest logic containing `𝔸` and the axioms of $\mathbf{IL}$, closed under modus ponens
 and necessitation.
 
 - [Vis90, §6.1]
 -/
-def Logic.ofILAxioms (𝔸 : FormulaSet α) : Logic α := Set.ofPred (Logic.OfILAxioms 𝔸)
+def Logic.ofILAxioms : Logic α := Set.ofPred (Logic.OfILAxioms 𝔸)
+
+end
 
 namespace Logic.ofILAxioms
 
@@ -402,6 +407,7 @@ end Axioms
 
 /-! ### Extensions of $\mathbf{CL}$ -/
 
+section
 /-- The derivability predicate of `Logic.ofCLAxioms`. -/
 inductive Logic.OfCLAxioms (𝔸 : FormulaSet α) : Formula α → Prop
   | axm {A}          : A ∈ 𝔸 → OfCLAxioms 𝔸 A
@@ -424,13 +430,17 @@ inductive Logic.OfCLAxioms (𝔸 : FormulaSet α) : Formula α → Prop
   | axiomJ3 {A B C}  : OfCLAxioms 𝔸 (Axioms.J3 A B C)
   | axiomJ4 {A B}    : OfCLAxioms 𝔸 (Axioms.J4 A B)
 
+variable (𝔸 : FormulaSet α)
+
 /-- The smallest logic containing `𝔸` and the axioms of $\mathbf{CL}$, closed under modus ponens
 and necessitation.
 
 - [Ign91, Definition 2.2]
 - [KO21, §3.5]
 -/
-def Logic.ofCLAxioms (𝔸 : FormulaSet α) : Logic α := Set.ofPred (Logic.OfCLAxioms 𝔸)
+def Logic.ofCLAxioms : Logic α := Set.ofPred (Logic.OfCLAxioms 𝔸)
+
+end
 
 namespace Logic.ofCLAxioms
 
@@ -585,10 +595,15 @@ end Logic.ofCLAxioms
 
 /-! ### Logics proving $\mathbf{J5}$ -/
 
-class Logic.HasAxiomJ5 (L : Logic α) : Prop where
+section
+variable (L : Logic α)
+
+class Logic.HasAxiomJ5 : Prop where
   J5 (A : Formula α) : L ⊢ Axioms.J5 A
 
 instance : Logic.HasAxiomJ5 (Logic.ofCLAxioms {Axioms.J5 A | A} : Logic α) :=
   ⟨fun _ ↦ Logic.ofCLAxioms.axm ⟨_, rfl⟩⟩
+
+end
 
 end FFL.InterpretabilityLogic

@@ -89,7 +89,9 @@ lemma Conservative.provable_imp (h : Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝
     ((isPrenexHierarchy_quote_iff χ.val).mpr χ.val_prenexHierarchy) <| by
       simpa [Sentence.quote_eq] using hτ
 
-lemma conservative_dia_pi1 [𝗜𝚺₁ ⪯ T] :
+variable [𝗜𝚺₁ ⪯ T]
+
+lemma conservative_dia_pi1 :
     Conservative T 𝚷 1 (⌜∼provabilityPred T (∼σ)⌝ : V) ⌜σ⌝ := by
   apply conservative_quote_iff.mpr;
   intro π hs hπ h;
@@ -103,7 +105,7 @@ lemma conservative_dia_pi1 [𝗜𝚺₁ ⪯ T] :
     cl_prover [h₂, h₃, h₄];
   simpa [Sentence.quote_eq] using h₅
 
-lemma Conservative.and_provabilityPred_pi1 [𝗜𝚺₁ ⪯ T] (h : Conservative T 𝚷 1 (⌜σ⌝ : V) ⌜τ⌝) :
+lemma Conservative.and_provabilityPred_pi1 (h : Conservative T 𝚷 1 (⌜σ⌝ : V) ⌜τ⌝) :
     Conservative T 𝚷 1 (⌜σ ⋏ provabilityPred T χ⌝ : V) ⌜τ ⋏ provabilityPred T χ⌝ := by
   rw [conservative_quote_iff] at h ⊢;
   intro π hs hπ hτ;
@@ -137,7 +139,7 @@ lemma Conservative.and_provabilityPred_pi1 [𝗜𝚺₁ ⪯ T] (h : Conservative
 
 /-- If $\neg\chi$ is equivalent in `T` to a prenex $\Gamma_n$ sentence, conjoining `χ` to both
 sides preserves $\Gamma_n$-conservativity. -/
-lemma Conservative.and [𝗜𝚺₁ ⪯ T] {ψ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0} (hχψ : T ⊢ ∼χ 🡘 ψ.val)
+lemma Conservative.and {ψ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0} (hχψ : T ⊢ ∼χ 🡘 ψ.val)
     (h : Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝) : Conservative T Γ n (⌜σ ⋏ χ⌝ : V) ⌜τ ⋏ χ⌝ := by
   rw [conservative_quote_iff] at h ⊢;
   intro π hs hπ hτ;
@@ -182,23 +184,26 @@ noncomputable def conservativity :
     InterpretabilityLogic.Interpretability T.standardProvability where
   rhd σ τ := (conservativeDef T Γ n)/[⌜σ⌝, ⌜τ⌝]
 
-variable {T Γ n}
+variable {T Γ n} {σ τ : ArithmeticSentence}
 
 @[simp]
-lemma models_conservativity_iff {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-    {σ τ : ArithmeticSentence} :
+lemma models_conservativity_iff {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] :
     V↓[ℒₒᵣ] ⊧ (T.conservativity Γ n) σ τ ↔ Bootstrapping.Conservative T Γ n (⌜σ⌝ : V) ⌜τ⌝ := by
   simp [conservativity, models_iff, eval_conservativeDef]
 
-lemma conservativity_imp_provable_imp {σ τ : ArithmeticSentence}
-    (χ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0) :
+lemma conservativity_imp_provable_imp (χ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty 0) :
     𝗜𝚺₁ ⊢ (T.conservativity Γ n) σ τ ⋏ T.standardProvability (τ 🡒 χ.val) 🡒
       T.standardProvability (σ 🡒 χ.val) :=
   complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [standardProvability_def] using fun h hτ ↦ Bootstrapping.Conservative.provable_imp h χ hτ
 
+section
+
+variable [𝗜𝚺₁ ⪯ T]
+
 open Bootstrapping in
-instance [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ n).CL where
+instance instCLConservativityOfWeakerThanSentenceORingISigmaOfNatNat :
+    (T.conservativity Γ n).CL where
   J1 := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa [standardProvability_def] using conservative_of_provable
   J2 := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
@@ -224,19 +229,22 @@ instance [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ n).CL where
     cl_prover [h₁, h₂, h₃]
 
 open Bootstrapping in
-instance [𝗜𝚺₁ ⪯ T] : (T.conservativity 𝚷 1).IL where
+instance instILConservativityPiPolarityOfNatNatOfWeakerThanSentenceORingISigma :
+    (T.conservativity 𝚷 1).IL where
   toCL := inferInstance
   J5 {σ} := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     have h := conservative_dia_pi1 (T := T) (V := V) (σ := σ);
     simpa [ProvabilityAbstraction.Provability.dia, standardProvability_def] using h
 
 open Bootstrapping in
-instance [𝗜𝚺₁ ⪯ T] : (T.conservativity 𝚷 1).M where
+instance instMConservativityPiPolarityOfNatNatOfWeakerThanSentenceORingISigma :
+    (T.conservativity 𝚷 1).M where
   axiomM {σ τ χ} := complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     have h := Conservative.and_provabilityPred_pi1 (T := T) (V := V) (σ := σ) (τ := τ) (χ := χ);
     simpa [standardProvability_def] using h
 
-lemma hierarchy_conservativity {σ τ : ArithmeticSentence} :
+omit [𝗜𝚺₁ ⪯ T] in
+lemma hierarchy_conservativity :
     ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 ((T.conservativity Γ n) σ τ) := by
   have h {k : ℕ} (φ : 𝚺-[ℬ[<, ℒₒᵣ], 1].Semisentence k) (Γ' : Polarity) :
       ℬ[<, ℒₒᵣ].Hierarchy Γ' 2 φ.val :=
@@ -246,8 +254,8 @@ lemma hierarchy_conservativity {σ τ : ArithmeticSentence} :
 open Bootstrapping in
 /-- If $\neg\chi$ is a $\Gamma'_m$ sentence with $\Gamma'_m \subseteq \Gamma_n$, conjoining `χ` to
 both sides preserves $\Gamma_n$-conservativity. -/
-lemma conservativity_and [𝗜𝚺₁ ⪯ T] {Γ' : Polarity} {m : ℕ} [𝗕𝚺m ⪯ T]
-    {σ τ χ : ArithmeticSentence} (hχ : ℬ[<, ℒₒᵣ].Hierarchy Γ' m (∼χ))
+lemma conservativity_and {Γ' : Polarity} {m : ℕ} [𝗕𝚺m ⪯ T]
+    {χ : ArithmeticSentence} (hχ : ℬ[<, ℒₒᵣ].Hierarchy Γ' m (∼χ))
     (hn : Γ = Γ' ∧ m ≤ n ∨ m < n) :
     𝗜𝚺₁ ⊢ (T.conservativity Γ n) σ τ 🡒 (T.conservativity Γ n) (σ ⋏ χ) (τ ⋏ χ) := by
   obtain ⟨ψ, hχψ⟩ := exists_prenexHierarchy_provable_iff T (.mkPolarity (∼χ) Γ' hχ) hn;
@@ -255,11 +263,13 @@ lemma conservativity_and [𝗜𝚺₁ ⪯ T] {Γ' : Polarity} {m : ℕ} [𝗕�
   exact complete 𝗜𝚺₁ _ fun (V : Type) _ _ ↦ by
     simpa using Conservative.and (V := V) (σ := σ) (τ := τ) hχψ
 
-instance [𝗜𝚺₁ ⪯ T] : (T.conservativity Γ (n + 2)).M where
+instance : (T.conservativity Γ (n + 2)).M where
   axiomM {σ τ χ} := by
     have : 𝗕𝚺 1 ⪯ T := BSigma_weakerThan_ISigma.trans inferInstance;
     exact conservativity_and (Γ' := 𝚷) (m := 1) (by simp [standardProvability_def])
       (.inr (by omega))
+
+end
 
 section
 

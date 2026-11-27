@@ -154,7 +154,10 @@ open Model Model.World
 abbrev countermodelJ5 (α : Type*) : Model (Fin 3) α :=
   ⟨(· < ·), fun w x y ↦ w < x ∧ x = y, fun _ _ ↦ False⟩
 
-instance {α : Type*} : (countermodelJ5 α).IsCL where
+section
+variable {α : Type*}
+
+instance : (countermodelJ5 α).IsCL where
   trans := by omega
   cwf := by
     have : Std.Irrefl (countermodelJ5 α).Rel := ⟨fun _ ↦ lt_irrefl _⟩
@@ -164,12 +167,14 @@ instance {α : Type*} : (countermodelJ5 α).IsCL where
   rel_of_s_right := by omega
   s_trans := by omega
 
-lemma countermodelJ5.not_models_axiomJ5 {α : Type*} : ¬countermodelJ5 α ⊧ Axioms.J5 (□⊥) := by
+lemma countermodelJ5.not_models_axiomJ5 : ¬countermodelJ5 α ⊧ Axioms.J5 (□⊥) := by
   intro h
   have h₁ : (1 : Fin 3) ⊩[countermodelJ5 α] ◇□⊥ :=
     forces_dia.mpr ⟨2, by omega, fun y hy ↦ by omega⟩
   obtain ⟨z, ⟨-, rfl⟩, hz⟩ := h 0 1 (by omega) h₁
   exact hz 2 (by omega)
+
+end
 
 end Veltman
 

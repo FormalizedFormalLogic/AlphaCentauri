@@ -28,27 +28,25 @@ section
 
 open Bootstrapping
 
-variable {W : Type} [ORingStructure W]
+variable {W : Type} [ORingStructure W] [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (Γ : Polarity) (n : ℕ) (e : Fin 2 → W)
 
 @[simp]
-lemma eval_prenexSatDef_zero [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (Γ : Polarity) (e : Fin 2 → W) :
-    W ⊧/e (prenexSatDef Γ 0) ↔ BoundedSatisfied (dec (e 0)) (e 1) := by
+lemma eval_prenexSatDef_zero : W ⊧/e (prenexSatDef Γ 0) ↔ BoundedSatisfied (dec (e 0)) (e 1) := by
   simp [prenexSatDef]
 
+omit [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 @[simp]
-lemma eval_prenexSatDef_sigma (n : ℕ) (e : Fin 2 → W) :
-    W ⊧/e (prenexSatDef .sigma (n + 1)) ↔
+lemma eval_prenexSatDef_sigma : W ⊧/e (prenexSatDef .sigma (n + 1)) ↔
       ∃ x, W ⊧/![(x + e 0) * (x + e 0) + e 0 + 1, e 1] (prenexSatDef .pi n) := by
   simp [prenexSatDef]
 
+omit [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 @[simp]
-lemma eval_prenexSatDef_pi (n : ℕ) (e : Fin 2 → W) :
-    W ⊧/e (prenexSatDef .pi (n + 1)) ↔
+lemma eval_prenexSatDef_pi : W ⊧/e (prenexSatDef .pi (n + 1)) ↔
       ∀ x, W ⊧/![(x + e 0) * (x + e 0) + e 0 + 1, e 1] (prenexSatDef .sigma n) := by
   simp [prenexSatDef]
 
-lemma eval_prenexSatPiOneDef [W↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (e : Fin 2 → W) :
-    W ⊧/e prenexSatPiOneDef ↔ W ⊧/e (prenexSatDef .pi 1) := by
+lemma eval_prenexSatPiOneDef : W ⊧/e prenexSatPiOneDef ↔ W ⊧/e (prenexSatDef .pi 1) := by
   rw [show (1 : ℕ) = 0 + 1 from rfl, eval_prenexSatDef_pi]
   simp [prenexSatPiOneDef]
 
@@ -124,24 +122,24 @@ namespace Bootstrapping
 
 open FirstOrder FFL.Entailment Bootstrapping.Arithmetic
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] (Γ : Polarity) (n : ℕ)
+  (a : Term V ℒₒᵣ) {θ : V} (hθ : IsBounded θ) (k p : V)
 
-lemma quote_prenexSatDef_sigma_subst (n : ℕ) (a : Term V ℒₒᵣ) (p : V) :
+lemma quote_prenexSatDef_sigma_subst :
     (⌜prenexSatDef .sigma (n + 1)⌝ : Semiformula V ℒₒᵣ 2).subst ![a, 𝕹 p] =
       ∃¹ (⌜prenexSatDef .pi n⌝ : Semiformula V ℒₒᵣ 2).subst
         ![pTerm (Semiterm.bvar 0) a.bShift, 𝕹 p] := by
   simp [prenexSatDef, pTerm, typed_quote_rew_subst, Semiformula.substs_substs, SemitermVec.q,
     Matrix.vecHead, Matrix.vecTail]
 
-lemma quote_prenexSatDef_pi_subst (n : ℕ) (a : Term V ℒₒᵣ) (p : V) :
+lemma quote_prenexSatDef_pi_subst :
     (⌜prenexSatDef .pi (n + 1)⌝ : Semiformula V ℒₒᵣ 2).subst ![a, 𝕹 p] =
       ∀¹ (⌜prenexSatDef .sigma n⌝ : Semiformula V ℒₒᵣ 2).subst
         ![pTerm (Semiterm.bvar 0) a.bShift, 𝕹 p] := by
   simp [prenexSatDef, pTerm, typed_quote_rew_subst, Semiformula.substs_substs, SemitermVec.q,
     Matrix.vecHead, Matrix.vecTail]
 
-lemma free_quote_prenexSatDef_subst (Γ : Polarity) (n : ℕ) (k p : V) :
-    ((⌜prenexSatDef Γ n⌝ : Semiformula V ℒₒᵣ 2).subst
+lemma free_quote_prenexSatDef_subst : ((⌜prenexSatDef Γ n⌝ : Semiformula V ℒₒᵣ 2).subst
         ![pTerm (Semiterm.bvar 0) (assignment k).bShift, 𝕹 p]).free =
       (⌜prenexSatDef Γ n⌝ : Semiformula V ℒₒᵣ 2).subst ![assignment (k + 1), 𝕹 p] := by
   simp [Semiformula.free, Semiformula.shift_substs, Semiformula.substs_substs, assignment_succ,
@@ -160,8 +158,8 @@ lemma TProof.exs_imp_exs_of_free {φ ψ : Semiformula V ℒₒᵣ 1}
 
 variable [𝗜𝚺₁ ⪯ T]
 
-lemma tprovable_instFormula_qqToPrenex_iff (Γ : Polarity) (n : ℕ) {θ : V} (hθ : IsBounded θ)
-    (k : V) (hk : (ℒₒᵣ).IsSemisentence (k + n) θ) :
+include hθ in
+lemma tprovable_instFormula_qqToPrenex_iff (hk : (ℒₒᵣ).IsSemisentence (k + n) θ) :
     T.internalize V ⊢ instFormula k (qqToPrenex Γ n θ)
         (isSemiformula_qqToPrenex.mpr hk.isSemiformula) 🡘
       (⌜prenexSatDef Γ n⌝ : Semiformula V ℒₒᵣ 2).subst ![assignment k, 𝕹 θ] := by
@@ -199,8 +197,10 @@ lemma tprovable_instFormula_qqToPrenex_iff (Γ : Polarity) (n : ℕ) {θ : V} (h
       have h₂ := TProof.all_imp_all_of_free (T := T) (K_right ih');
       cl_prover [h₁, h₂]
 
-lemma tprovable_iff_prenexSatDef {Γ : Polarity} {n : ℕ} {φ : Formula V ℒₒᵣ} {θ : V}
-    (hφs : φ.shift = φ) (hθ : φ.val = qqToPrenex Γ n θ) (hθb : IsBounded θ) :
+variable {Γ n} {φ ψ : Formula V ℒₒᵣ}
+
+lemma tprovable_iff_prenexSatDef (hφs : φ.shift = φ) (hθ : φ.val = qqToPrenex Γ n θ)
+    (hθb : IsBounded θ) :
     T.internalize V ⊢ φ 🡘 (⌜prenexSatDef Γ n⌝ : Semiformula V ℒₒᵣ 2).subst ![𝕹 0, 𝕹 θ] := by
   have hk : IsSemiformula ℒₒᵣ ((0 : V) + n) θ := by
     simpa [hθ] using φ.isSemiformula;
@@ -218,8 +218,7 @@ lemma tprovable_iff_prenexSatDef {Γ : Polarity} {n : ℕ} {φ : Formula V ℒ�
 
 /-- The disjunction of two internal prenex $\Gamma_n$ sentences is internally equivalent to an
 internal prenex $\Gamma_n$ sentence. -/
-theorem exists_isPrenexHierarchy_tprovable_or_iff {Γ : Polarity} {n : ℕ}
-    {φ ψ : Formula V ℒₒᵣ} (hφs : φ.shift = φ) (hψs : ψ.shift = ψ)
+theorem exists_isPrenexHierarchy_tprovable_or_iff (hφs : φ.shift = φ) (hψs : ψ.shift = ψ)
     (hφ : IsPrenexHierarchy Γ n φ.val) (hψ : IsPrenexHierarchy Γ n ψ.val) :
     ∃ χ : Formula V ℒₒᵣ, χ.shift = χ ∧ IsPrenexHierarchy Γ n χ.val ∧
       T.internalize V ⊢ φ ⋎ ψ 🡘 χ := by

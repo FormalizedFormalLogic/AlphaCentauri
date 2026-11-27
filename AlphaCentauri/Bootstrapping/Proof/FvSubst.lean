@@ -15,10 +15,11 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 namespace FFL.FirstOrder.Arithmetic
 namespace Bootstrapping
-variable {Γ : SigmaPiDelta} {m : ℕ}
+variable {Γ : SigmaPiDelta}
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* ISigma 1]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {k n m w v t p q R s i f : V}
 
 namespace TermFvSubst
 
@@ -50,15 +51,15 @@ end TermFvSubst
 
 open TermFvSubst
 
-variable (L)
+variable (L k w v t)
 
 /-- `termFvSubst L w t`: the coded `L`-term obtained from `t` by substituting the free variables
 below the length of `w` with the corresponding entries of `w`, leaving bound variables and
 out-of-range free variables unchanged. -/
-noncomputable def termFvSubst (w t : V) : V := construction.result L ![w] t
+noncomputable def termFvSubst : V := construction.result L ![w] t
 
 /-- `termFvSubstVec L k w v`: `termFvSubst L w` applied entrywise to the coded `k`-vector `v`. -/
-noncomputable def termFvSubstVec (k w v : V) : V := construction.resultVec L ![w] k v
+noncomputable def termFvSubstVec : V := construction.resultVec L ![w] k v
 
 /-- The $\Sigma_1$ graph of `termFvSubst`; argument order `(y, w, t)`, `y = termFvSubst L w t`. -/
 noncomputable def termFvSubstGraph : 𝚺ᴬ₁.Semisentence 3 :=
@@ -68,27 +69,37 @@ noncomputable def termFvSubstGraph : 𝚺ᴬ₁.Semisentence 3 :=
 noncomputable def termFvSubstVecGraph : 𝚺ᴬ₁.Semisentence 4 :=
   (blueprint.resultVec L).rew <| Rew.subst ![#0, #1, #3, #2]
 
-variable {L}
+variable {L k v t}
 
 /-- Substitution of free variables leaves a coded bound variable unchanged. -/
 @[simp]
-lemma termFvSubst_bvar (w z : V) : termFvSubst L w ^#z = ^#z := by
+lemma termFvSubst_bvar (z : V) : termFvSubst L w ^#z = ^#z := by
   simp [termFvSubst, construction]
 
 /-- Substitution of free variables reads off the entry of `w` at index `x` when `x` is within
 `w`'s length, and leaves `x` unchanged otherwise. -/
 @[simp]
-lemma termFvSubst_fvar (w x : V) : termFvSubst L w ^&x = if x < len w then w.[x] else ^&x := by
+lemma termFvSubst_fvar (x : V) : termFvSubst L w ^&x = if x < len w then w.[x] else ^&x := by
   simp [termFvSubst, construction]
+
+/-- Free-variable substitution on the empty coded vector is the empty vector. -/
+@[simp]
+lemma termFvSubstVec_nil : termFvSubstVec L 0 w 0 = 0 :=
+  construction.resultVec_nil L _
+
+variable {w}
 
 /-- Substitution of free variables commutes with a coded function application, keeping its
 function symbol and recursing into the argument vector. -/
 @[simp]
-lemma termFvSubst_func {w k f v : V} (hf : L.IsFunc k f)
-    (hv : IsUTermVec L k v) :
+lemma termFvSubst_func (hf : L.IsFunc k f) (hv : IsUTermVec L k v) :
     termFvSubst L w (^func k f v) = ^func k f (termFvSubstVec L k w v) := by
   simp [termFvSubst, construction, hf, hv]
   rfl
+
+section
+
+variable {m : ℕ}
 
 instance termFvSubst.defined : 𝚺ᴬ₁-Function₂ termFvSubst (V := V) L via termFvSubstGraph L :=
   .mk fun v ↦ by
@@ -112,25 +123,22 @@ instance termFvSubstVec.definable : 𝚺ᴬ₁-Function₃ termFvSubstVec (V := 
 instance termFvSubstVec.definable' : Γᴬ_[m + 1]-Function₃ termFvSubstVec (V := V) L :=
   termFvSubstVec.definable.of_sigmaOne
 
+end
+
 /-- Free-variable substitution on a coded term vector preserves its coded length. -/
 @[simp]
-lemma len_termFvSubstVec {k w v : V} (hv : IsUTermVec L k v) :
+lemma len_termFvSubstVec (hv : IsUTermVec L k v) :
     len (termFvSubstVec L k w v) = k := construction.resultVec_lh L _ hv
 
 /-- The `i`-th entry of a free-variable-substituted term vector is the substitution applied to
 the `i`-th entry of the original. -/
 @[simp]
-lemma nth_termFvSubstVec {k w v i : V} (hv : IsUTermVec L k v) (hi : i < k) :
+lemma nth_termFvSubstVec (hv : IsUTermVec L k v) (hi : i < k) :
     (termFvSubstVec L k w v).[i] = termFvSubst L w v.[i] :=
   construction.nth_resultVec L _ hv hi
 
-/-- Free-variable substitution on the empty coded vector is the empty vector. -/
-@[simp]
-lemma termFvSubstVec_nil (w : V) : termFvSubstVec L 0 w 0 = 0 :=
-  construction.resultVec_nil L _
-
 /-- Free-variable substitution on a coded vector distributes over prepending an entry. -/
-lemma termFvSubstVec_cons {k w t v : V} (ht : IsUTerm L t) (hv : IsUTermVec L k v) :
+lemma termFvSubstVec_cons (ht : IsUTerm L t) (hv : IsUTermVec L k v) :
     termFvSubstVec L (k + 1) w (t ∷ v) =
       termFvSubst L w t ∷ termFvSubstVec L k w v :=
   construction.resultVec_cons L ![w] hv ht
@@ -138,7 +146,7 @@ lemma termFvSubstVec_cons {k w t v : V} (ht : IsUTerm L t) (hv : IsUTermVec L k 
 /-- Free-variable substitution by a vector of `n`-ary semiterms preserves being an `n`-ary
 semiterm. -/
 @[simp]
-lemma IsSemiterm.termFvSubst {n w t : V} (hw : IsSemitermVec L (len w) n w)
+lemma IsSemiterm.termFvSubst (hw : IsSemitermVec L (len w) n w)
     (ht : IsSemiterm L n t) : IsSemiterm L n (termFvSubst L w t) := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -156,40 +164,40 @@ lemma IsSemiterm.termFvSubst {n w t : V} (hw : IsSemitermVec L (len w) n w)
 /-- Free-variable substitution by a vector of `n`-ary semiterms preserves being an `n`-ary
 semiterm vector. -/
 @[simp]
-lemma IsSemitermVec.termFvSubstVec {k n w v : V} (hw : IsSemitermVec L (len w) n w)
+lemma IsSemitermVec.termFvSubstVec (hw : IsSemitermVec L (len w) n w)
     (hv : IsSemitermVec L k n v) : IsSemitermVec L k n (termFvSubstVec L k w v) :=
   IsSemitermVec.iff.mpr ⟨by simp [hv.isUTerm], fun i hi ↦ by
     rw [nth_termFvSubstVec hv.isUTerm hi]
     exact (hv.nth hi).termFvSubst hw⟩
 
 /-- A semiterm vector bounded by `n` free variables is also bounded by any larger `m`. -/
-lemma IsSemitermVec.weaken {k n m v : V} (hv : IsSemitermVec L k n v) (hnm : n ≤ m) :
-    IsSemitermVec L k m v :=
+lemma IsSemitermVec.weaken (hv : IsSemitermVec L k n v) (hnm : n ≤ m) : IsSemitermVec L k m v :=
   ⟨hv.isUTerm, fun {_i} hi ↦ le_trans (hv.bv hi) hnm⟩
 
 /-- A semiterm vector bounded by `n` free variables is also bounded by `n + 1`. -/
-lemma IsSemitermVec.succ {k n v : V} (hv : IsSemitermVec L k n v) :
+lemma IsSemitermVec.succ (hv : IsSemitermVec L k n v) :
     IsSemitermVec L k (n + 1) v := hv.weaken (by simp)
 
 /-- Free-variable substitution by a well-formed term vector preserves being a well-formed term
 vector. -/
-lemma IsUTermVec.termFvSubstVec {k w v : V} (hw : IsUTermVec L (len w) w)
+lemma IsUTermVec.termFvSubstVec (hw : IsUTermVec L (len w) w)
     (hv : IsUTermVec L k v) : IsUTermVec L k (termFvSubstVec L k w v) := by
   exact (hw.isSemitermVec.weaken (le_max_left _ _)).termFvSubstVec
     (hv.isSemitermVec.weaken (le_max_right _ _)) |>.isUTerm
 
 /-- A semiformula bounded by `n` free variables is also bounded by any larger `m`. -/
-lemma IsSemiformula.weaken {n m p : V} (hp : IsSemiformula L n p) (hnm : n ≤ m) :
+lemma IsSemiformula.weaken (hp : IsSemiformula L n p) (hnm : n ≤ m) :
     IsSemiformula L m p := ⟨hp.isUFormula, le_trans hp.bv_le hnm⟩
 
 namespace FvSubst
+
+variable (L)
 
 /-- Recursion blueprint for `fvSubst`: atomic (non-)relations substitute their argument vector via
 `termFvSubstVec` and keep their relation symbol, the propositional connectives and quantifiers
 pass through unchanged, and the substitution vector `w` is left untouched when crossing a
 quantifier. -/
-noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] :
-    UformulaRec1.Blueprint where
+noncomputable def blueprint : UformulaRec1.Blueprint where
   rel := .mkSigma
     “y w k R v. ∃ v', !(termFvSubstVecGraph L) v' k w v ∧ !qqRelDef y k R v'”
   nrel := .mkSigma
@@ -203,8 +211,7 @@ noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] :
 
 /-- The realization of `FvSubst.blueprint` as a `UformulaRec1.Construction`, together with the
 $\Sigma_1$-definability witness for each clause. -/
-noncomputable def construction (L : Language) [L.Encodable] [L.LORDefinable] :
-    UformulaRec1.Construction V (blueprint L) where
+noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   rel w := fun k R v ↦ ^rel k R (termFvSubstVec L k w v)
   nrel w := fun k R v ↦ ^nrel k R (termFvSubstVec L k w v)
   verum _ := ^⊤
@@ -226,17 +233,21 @@ end FvSubst
 
 open FvSubst
 
-variable (L)
+variable (L w p)
 
 /-- `fvSubst L w p`: the coded `L`-formula obtained from `p` by substituting the free variables
 below the length of `w` with the corresponding entries of `w` throughout, leaving bound variables
 and out-of-range free variables unchanged. -/
-noncomputable def fvSubst (w p : V) : V := (FvSubst.construction L).result L w p
+noncomputable def fvSubst : V := (FvSubst.construction L).result L w p
 
 /-- The $\Sigma_1$ graph of `fvSubst`; argument order `(y, w, p)`, `y = fvSubst L w p`. -/
 noncomputable def fvSubstGraph : 𝚺ᴬ₁.Semisentence 3 := (blueprint L).result L
 
-variable {L}
+variable {L w p}
+
+section
+
+variable {m : ℕ}
 
 instance fvSubst.defined : 𝚺ᴬ₁-Function₂[V] fvSubst L via fvSubstGraph L :=
   (FvSubst.construction L).result_defined
@@ -246,56 +257,62 @@ instance fvSubst.definable : 𝚺ᴬ₁-Function₂[V] fvSubst L := fvSubst.defi
 instance fvSubst.definable' : Γᴬ_[m + 1]-Function₂[V] fvSubst L :=
   fvSubst.definable.of_sigmaOne
 
+end
+
 /-- Substitution of free variables commutes with a coded relation atom, substituting its argument
 vector and keeping the relation symbol. -/
 @[simp]
-lemma fvSubst_rel {w k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma fvSubst_rel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     fvSubst L w (^relk R v) = ^relk R (termFvSubstVec L k w v) := by
   simp [fvSubst, hR, hv, FvSubst.construction]
 
 /-- Substitution of free variables commutes with a coded negated relation atom, substituting its
 argument vector and keeping the relation symbol. -/
 @[simp]
-lemma fvSubst_nrel {w k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+lemma fvSubst_nrel (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     fvSubst L w (^nrelk R v) = ^nrelk R (termFvSubstVec L k w v) := by
   simp [fvSubst, hR, hv, FvSubst.construction]
 
+variable (w)
+
 /-- Substitution of free variables leaves the coded `⊤` unchanged. -/
 @[simp]
-lemma fvSubst_verum (w : V) : fvSubst L w ^⊤ = ^⊤ := by
+lemma fvSubst_verum : fvSubst L w ^⊤ = ^⊤ := by
   simp [fvSubst, FvSubst.construction]
 
 /-- Substitution of free variables leaves the coded `⊥` unchanged. -/
 @[simp]
-lemma fvSubst_falsum (w : V) : fvSubst L w ^⊥ = ^⊥ := by
+lemma fvSubst_falsum : fvSubst L w ^⊥ = ^⊥ := by
   simp [fvSubst, FvSubst.construction]
+
+variable {w}
 
 /-- Substitution of free variables commutes with coded conjunction. -/
 @[simp]
-lemma fvSubst_and {w p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma fvSubst_and (hp : IsUFormula L p) (hq : IsUFormula L q) :
     fvSubst L w (p ^⋏ q) = fvSubst L w p ^⋏ fvSubst L w q := by
   simp [fvSubst, hp, hq, FvSubst.construction]
 
 /-- Substitution of free variables commutes with coded disjunction. -/
 @[simp]
-lemma fvSubst_or {w p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+lemma fvSubst_or (hp : IsUFormula L p) (hq : IsUFormula L q) :
     fvSubst L w (p ^⋎ q) = fvSubst L w p ^⋎ fvSubst L w q := by
   simp [fvSubst, hp, hq, FvSubst.construction]
 
 /-- Substitution of free variables commutes with the coded universal quantifier. -/
 @[simp]
-lemma fvSubst_all {w p : V} (hp : IsUFormula L p) : fvSubst L w (^∀ p) = ^∀ (fvSubst L w p) := by
+lemma fvSubst_all (hp : IsUFormula L p) : fvSubst L w (^∀ p) = ^∀ (fvSubst L w p) := by
   simp [fvSubst, hp, FvSubst.construction]
 
 /-- Substitution of free variables commutes with the coded existential quantifier. -/
 @[simp]
-lemma fvSubst_exs {w p : V} (hp : IsUFormula L p) : fvSubst L w (^∃ p) = ^∃ (fvSubst L w p) := by
+lemma fvSubst_exs (hp : IsUFormula L p) : fvSubst L w (^∃ p) = ^∃ (fvSubst L w p) := by
   simp [fvSubst, hp, FvSubst.construction]
 
 /-- Free-variable substitution by a vector of `n`-ary semiterms preserves being an `n`-ary
 semiformula. -/
 @[simp]
-lemma IsSemiformula.fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)
+lemma IsSemiformula.fvSubst (hw : IsSemitermVec L (len w) n w)
     (hp : IsSemiformula L n p) : IsSemiformula L n (fvSubst L w p) := by
   apply IsSemiformula.pi1_structural_induction
     (P := fun n p ↦ ∀ w, IsSemitermVec L (len w) n w →
@@ -318,7 +335,7 @@ lemma IsSemiformula.fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)
     simp [hp.isUFormula, ihp (w := w) hw.succ]
 
 /-- Substitution of free variables commutes with coded negation. -/
-lemma fvSubst_neg {n w p : V} (hw : IsSemitermVec L (len w) n w)
+lemma fvSubst_neg (hw : IsSemitermVec L (len w) n w)
     (hp : IsSemiformula L n p) : fvSubst L w (neg L p) = neg L (fvSubst L w p) := by
   revert w
   apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
@@ -361,7 +378,7 @@ lemma fvSubst_neg {n w p : V} (hw : IsSemitermVec L (len w) n w)
       neg_ex (hp.fvSubst hw.succ).isUFormula]
 
 @[simp]
-lemma formulaComplexity_fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)
+lemma formulaComplexity_fvSubst (hw : IsSemitermVec L (len w) n w)
     (hp : IsSemiformula L n p) : formulaComplexity L (fvSubst L w p) = formulaComplexity L p := by
   revert w
   apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
@@ -385,8 +402,7 @@ lemma formulaComplexity_fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)
 
 /-- The external-variable shift after free-variable substitution equals free-variable substitution
 by the shifted substitution vector with a fresh variable `&0` prepended, applied after the shift. -/
-lemma termShift_termFvSubst {n w t : V}
-    (hw : IsSemitermVec L (len w) n w) (ht : IsSemiterm L n t) :
+lemma termShift_termFvSubst (hw : IsSemitermVec L (len w) n w) (ht : IsSemiterm L n t) :
     termShift L (termFvSubst L w t) =
       termFvSubst L (^&0 ∷ termShiftVec L (len w) w) (termShift L t) := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
@@ -415,8 +431,7 @@ lemma termShift_termFvSubst {n w t : V}
 
 /-- The external-variable shift after free-variable substitution equals free-variable substitution,
 by the shifted substitution vector with a fresh variable `&0` prepended, applied after the shift. -/
-lemma shift_fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)
-    (hp : IsSemiformula L n p) :
+lemma shift_fvSubst (hw : IsSemitermVec L (len w) n w) (hp : IsSemiformula L n p) :
     shift L (fvSubst L w p) =
       fvSubst L (^&0 ∷ termShiftVec L (len w) w) (shift L p) := by
   revert w
@@ -481,8 +496,7 @@ lemma shift_fvSubst {n w p : V} (hw : IsSemitermVec L (len w) n w)
 
 /-- For a substitution vector of closed terms, free-variable substitution commutes with the
 bound-variable shift. -/
-lemma termFvSubst_termBShift_closed {n w t : V}
-    (hw : IsSemitermVec L (len w) 0 w) (ht : IsSemiterm L n t) :
+lemma termFvSubst_termBShift_closed (hw : IsSemitermVec L (len w) 0 w) (ht : IsSemiterm L n t) :
     termFvSubst L w (termBShift L t) = termBShift L (termFvSubst L w t) := by
   have hw' : IsSemitermVec L (len w) n w := hw.weaken (by simp)
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
@@ -513,9 +527,8 @@ lemma termFvSubst_termBShift_closed {n w t : V}
 /-- For a substitution vector of closed terms, free-variable substitution commutes with
 bound-variable substitution, substituting the entries of the bound-variable substitution vector as
 well. -/
-lemma termFvSubst_termSubst {n m w v t : V}
-    (hw : IsSemitermVec L (len w) 0 w) (hv : IsSemitermVec L n m v)
-    (ht : IsSemiterm L n t) :
+lemma termFvSubst_termSubst (hw : IsSemitermVec L (len w) 0 w)
+    (hv : IsSemitermVec L n m v) (ht : IsSemiterm L n t) :
     termFvSubst L w (termSubst L v t) =
       termSubst L (termFvSubstVec L n w v) (termFvSubst L w t) := by
   have hw' : IsSemitermVec L (len w) n w := hw.weaken (by simp)
@@ -547,8 +560,7 @@ lemma termFvSubst_termSubst {n m w v t : V}
 
 /-- For a substitution vector of closed terms, free-variable substitution commutes with prefixing
 the bound variable `#0` used to enter a quantifier (`qVec`). -/
-lemma termFvSubstVec_qVec_closed {n m w v : V}
-    (hw : IsSemitermVec L (len w) 0 w) (hv : IsSemitermVec L n m v) :
+lemma termFvSubstVec_qVec_closed (hw : IsSemitermVec L (len w) 0 w) (hv : IsSemitermVec L n m v) :
     termFvSubstVec L (n + 1) w (qVec L v) =
       qVec L (termFvSubstVec L n w v) := by
   apply nth_ext' (len v + 1)
@@ -570,44 +582,48 @@ lemma termFvSubstVec_qVec_closed {n m w v : V}
       nth_termFvSubstVec hv.isUTerm hi'']
     exact termFvSubst_termBShift_closed hw (hv.nth hi'')
 
-lemma fvSubst_sigmaOne (w : V) : 𝚺ᴬ₁-Function₁ (fvSubst L w) := by definability
+variable (w s)
+
+lemma fvSubst_sigmaOne : 𝚺ᴬ₁-Function₁ (fvSubst L w) := by definability
 
 /-- `fvSubstImage w s`: the coded set obtained by applying `fvSubst L w` to every formula code in
 the coded set `s`. -/
-noncomputable def fvSubstImage (w s : V) : V := by
+noncomputable def fvSubstImage : V := by
   letI := fvSubst_sigmaOne (L := L) w
   exact hfsImage (fvSubst L w) s
+
+variable {w s}
 
 /-- A formula code belongs to `fvSubstImage w s` iff it is `fvSubst L w q` for some formula code
 `q ∈ s`. -/
 @[simp]
-lemma mem_fvSubstImage_iff {w s p : V} :
-    p ∈ fvSubstImage (L := L) w s ↔ ∃ q ∈ s, p = fvSubst L w q := by
+lemma mem_fvSubstImage_iff : p ∈ fvSubstImage (L := L) w s ↔ ∃ q ∈ s, p = fvSubst L w q := by
   let _ := fvSubst_sigmaOne (L := L) w
   exact mem_hfsImage_iff
 
-lemma fvSubst_mem_fvSubstImage {w q s : V} (h : q ∈ s) :
-    fvSubst L w q ∈ fvSubstImage (L := L) w s :=
+lemma fvSubst_mem_fvSubstImage (h : q ∈ s) : fvSubst L w q ∈ fvSubstImage (L := L) w s :=
   mem_fvSubstImage_iff.mpr ⟨q, h, rfl⟩
 
+variable (w p s)
+
 @[simp]
-lemma fvSubstImage_empty (w : V) : fvSubstImage (L := L) w ∅ = ∅ := by
+lemma fvSubstImage_empty : fvSubstImage (L := L) w ∅ = ∅ := by
   let _ := fvSubst_sigmaOne (L := L) w
   exact hfsImage_empty
 
 @[simp]
-lemma fvSubstImage_insert (w p s : V) :
-    fvSubstImage (L := L) w (insert p s) =
+lemma fvSubstImage_insert : fvSubstImage (L := L) w (insert p s) =
       insert (fvSubst L w p) (fvSubstImage (L := L) w s) := by
   let _ := fvSubst_sigmaOne (L := L) w
   exact mem_hfsImage_insert
 
 @[simp]
-lemma fvSubstImage_union (w s₁ s₂ : V) :
-    fvSubstImage (L := L) w (s₁ ∪ s₂) =
+lemma fvSubstImage_union (s₁ s₂ : V) : fvSubstImage (L := L) w (s₁ ∪ s₂) =
       fvSubstImage (L := L) w s₁ ∪ fvSubstImage (L := L) w s₂ := by
   let _ := fvSubst_sigmaOne (L := L) w
   exact mem_hfsImage_union
+
+variable {w p s}
 
 variable (L) in
 /-- The $\Sigma_1$ graph of `fvSubstImage`; argument order `(t, w, s)`, `t = fvSubstImage w s`. -/
@@ -615,9 +631,9 @@ noncomputable def fvSubstImageGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “t w s. (∀ y ∈' t, ∃ x ∈' s, !(fvSubstGraph L) y w x) ∧
     (∀ x ∈' s, ∃ y, !(fvSubstGraph L) y w x ∧ y ∈ t)”
 
-private lemma fvSubstImage_graph (t w s : V) :
-    t = fvSubstImage (L := L) w s ↔
+private lemma fvSubstImage_graph : ∀ t w s : V, t = fvSubstImage (L := L) w s ↔
       (∀ y ∈ t, ∃ x ∈ s, y = fvSubst L w x) ∧ (∀ x ∈ s, fvSubst L w x ∈ t) := by
+  intro t w s
   constructor
   · rintro rfl
     simp only [mem_fvSubstImage_iff, forall_exists_index, and_imp]
@@ -627,6 +643,10 @@ private lemma fvSubstImage_graph (t w s : V) :
     intro y
     simp only [mem_fvSubstImage_iff]
     grind
+
+section
+
+variable {m : ℕ}
 
 instance fvSubstImage.defined :
     𝚺ᴬ₁-Function₂[V] fvSubstImage (L := L) via fvSubstImageGraph L :=
@@ -638,9 +658,11 @@ instance fvSubstImage.definable : 𝚺ᴬ₁-Function₂[V] fvSubstImage (L := L
 instance fvSubstImage.definable' : Γᴬ_[m + 1]-Function₂[V] fvSubstImage (L := L) :=
   fvSubstImage.definable.of_sigmaOne
 
+end
+
 /-- Free-variable substitution by a vector of closed terms carries a coded formula set to a coded
 formula set. -/
-lemma formulaSet_fvSubstImage {w s : V} (hw : IsSemitermVec L (len w) 0 w)
+lemma formulaSet_fvSubstImage (hw : IsSemitermVec L (len w) 0 w)
     (hs : IsFormulaSet L s) : IsFormulaSet L (fvSubstImage (L := L) w s) := by
   intro p hp
   rcases mem_fvSubstImage_iff.mp hp with ⟨q, hq, rfl⟩
@@ -649,8 +671,7 @@ lemma formulaSet_fvSubstImage {w s : V} (hw : IsSemitermVec L (len w) 0 w)
 /-- For a substitution vector of closed terms, free-variable substitution commutes with
 bound-variable substitution at the formula level, substituting the entries of the bound-variable
 substitution vector as well. -/
-lemma fvSubst_subst {n m w v p : V}
-    (hw : IsSemitermVec L (len w) 0 w) (hv : IsSemitermVec L n m v)
+lemma fvSubst_subst (hw : IsSemitermVec L (len w) 0 w) (hv : IsSemitermVec L n m v)
     (hp : IsSemiformula L n p) :
     fvSubst L w (subst L v p) =
       subst L (termFvSubstVec L n w v) (fvSubst L w p) := by
@@ -724,8 +745,7 @@ lemma fvSubst_subst {n m w v p : V}
 
 /-- For a substitution vector of closed terms, free-variable substitution commutes with
 single-variable substitution, substituting the term being substituted as well. -/
-lemma fvSubst_substs1 {n w t p : V}
-    (hw : IsSemitermVec L (len w) 0 w) (ht : IsSemiterm L n t)
+lemma fvSubst_substs1 (hw : IsSemitermVec L (len w) 0 w) (ht : IsSemiterm L n t)
     (hp : IsSemiformula L 1 p) :
     fvSubst L w (substs1 L t p) =
       substs1 L (termFvSubst L w t) (fvSubst L w p) := by
@@ -739,7 +759,7 @@ lemma fvSubst_substs1 {n w t p : V}
   rw [hvec]
 
 /-- The shift of a vector of closed terms with `&0` prepended is a vector of closed terms. -/
-lemma IsSemitermVec.fvar_cons_termShiftVec {w : V} (hw : IsSemitermVec L (len w) 0 w) :
+lemma IsSemitermVec.fvar_cons_termShiftVec (hw : IsSemitermVec L (len w) 0 w) :
     IsSemitermVec L (len (^&0 ∷ Bootstrapping.termShiftVec L (len w) w)) 0
       (^&0 ∷ Bootstrapping.termShiftVec L (len w) w) := by
   simp [hw.isUTerm, hw.termShiftVec]
@@ -747,7 +767,7 @@ lemma IsSemitermVec.fvar_cons_termShiftVec {w : V} (hw : IsSemitermVec L (len w)
 /-- For a substitution vector of closed terms, the free instance after free-variable substitution
 equals free-variable substitution, by the shifted substitution vector with `&0` prepended, applied
 to the free instance. -/
-lemma free_fvSubst {w p : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsSemiformula L 1 p) :
+lemma free_fvSubst (hw : IsSemitermVec L (len w) 0 w) (hp : IsSemiformula L 1 p) :
     free L (fvSubst L w p) = fvSubst L (^&0 ∷ termShiftVec L (len w) w) (free L p) := by
   rw [free, free, fvSubst_substs1 hw.fvar_cons_termShiftVec (by simp : IsSemiterm L 0 (^&0 : V))
       hp.shift,
@@ -757,8 +777,7 @@ lemma free_fvSubst {w p : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsSemiform
 /-- For a substitution vector of closed terms, the external-variable shift of a substituted coded
 formula set equals the image of the shifted set under the shifted substitution vector with `&0`
 prepended. -/
-lemma setShift_fvSubstImage {w s : V} (hw : IsSemitermVec L (len w) 0 w)
-    (hs : IsFormulaSet L s) :
+lemma setShift_fvSubstImage (hw : IsSemitermVec L (len w) 0 w) (hs : IsFormulaSet L s) :
     setShift L (fvSubstImage (L := L) w s) =
       fvSubstImage (L := L) (^&0 ∷ termShiftVec L (len w) w) (setShift L s) := by
   refine mem_ext fun x ↦ ?_
@@ -769,35 +788,38 @@ lemma setShift_fvSubstImage {w s : V} (hw : IsSemitermVec L (len w) 0 w)
   · rintro ⟨_, ⟨q, hq, rfl⟩, rfl⟩
     exact ⟨_, ⟨q, hq, rfl⟩, (shift_fvSubst hw (hs q hq)).symm⟩
 
-lemma termFvSubstVec_bvarVec (w s n : V) : termFvSubstVec L n w (bvarVec s n) = bvarVec s n := by
+lemma termFvSubstVec_bvarVec : ∀ w s n : V, termFvSubstVec L n w (bvarVec s n) = bvarVec s n := by
+  intro w s n
   have h₁ : IsUTermVec L n (bvarVec s n) :=
     (IsSemitermVec.bvarVec (L := L) (n := s + n) le_rfl).isUTerm
   apply nth_ext' n (by rw [len_termFvSubstVec h₁]) (by simp)
   intro i hi
   rw [nth_termFvSubstVec h₁ hi, nth_bvarVec _ _ _ hi, termFvSubst_bvar]
 
-lemma termFvSubstVec_bvar_cons (w i s n : V) :
-    termFvSubstVec L (n + 1) w (^#i ∷ bvarVec s n) = ^#i ∷ bvarVec s n := by
+lemma termFvSubstVec_bvar_cons :
+    ∀ w i s n : V, termFvSubstVec L (n + 1) w (^#i ∷ bvarVec s n) = ^#i ∷ bvarVec s n := by
+  intro w i s n
   have h₁ : IsUTermVec L n (bvarVec s n) :=
     (IsSemitermVec.bvarVec (L := L) (n := s + n) le_rfl).isUTerm
   rw [termFvSubstVec_cons (show IsUTerm L ^#i by simp) h₁, termFvSubst_bvar,
     termFvSubstVec_bvarVec]
 
-lemma termFvSubstVec_pair {w s t : V} (hs : IsUTerm L s) (ht : IsUTerm L t) :
+lemma termFvSubstVec_pair (hs : IsUTerm L s) (ht : IsUTerm L t) :
     termFvSubstVec L 2 w (?[s, t] : V) = ?[termFvSubst L w s, termFvSubst L w t] := by
   have h₁ : IsUTermVec L (0 + 1) (?[t] : V) := (IsUTermVec.empty (V := V) (L := L)).adjoin ht
   rw [show (2 : V) = 0 + 1 + 1 by simp [one_add_one_eq_two], termFvSubstVec_cons hs h₁,
     termFvSubstVec_cons ht (IsUTermVec.empty (V := V) (L := L)),
     termFvSubstVec_nil]
 
-lemma fvSubst_imp {w n p q : V} (hw : IsSemitermVec L (len w) n w) (hp : IsSemiformula L n p)
+lemma fvSubst_imp (hw : IsSemitermVec L (len w) n w) (hp : IsSemiformula L n p)
     (hq : IsSemiformula L n q) :
     fvSubst L w (imp L p q) = imp L (fvSubst L w p) (fvSubst L w q) := by
   unfold imp
   rw [fvSubst_or hp.isUFormula.neg hq.isUFormula, fvSubst_neg hw hp]
 
-lemma fvSubst_qqAlls {w p : V} (hp : IsUFormula L p) (k : V) :
-    fvSubst L w (qqAlls p k) = qqAlls (fvSubst L w p) k := by
+lemma fvSubst_qqAlls (hp : IsUFormula L p) :
+    ∀ k : V, fvSubst L w (qqAlls p k) = qqAlls (fvSubst L w p) k := by
+  intro k
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp

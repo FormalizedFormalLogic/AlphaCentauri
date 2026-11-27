@@ -27,17 +27,17 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 section isReadable
 
-variable (k : ℕ)
+variable (k D : ℕ) (p : V)
 
 /-- The prenex classes read directly: at most `k` quantifiers of either polarity, or `k + 1`
 quantifiers beginning with a universal one. -/
 def IsAtomLevel (Γ : Polarity) (s : ℕ) : Prop := s ≤ k ∨ Γ = 𝚷 ∧ s = k + 1
 
 /-- `p` is a prenex formula with a $\Delta_0$ matrix and at most `k` quantifiers. -/
-def IsPrenexAtMost (p : V) : Prop := ∃ Γ, ∃ s ≤ k, IsPrenexHierarchy Γ s p
+def IsPrenexAtMost : Prop := ∃ Γ, ∃ s ≤ k, IsPrenexHierarchy Γ s p
 
 /-- `p` is a prenex formula with a $\Delta_0$ matrix whose class is read directly. -/
-def IsPrenexAtom (p : V) : Prop := ∃ Γ s, IsAtomLevel k Γ s ∧ IsPrenexHierarchy Γ s p
+def IsPrenexAtom : Prop := ∃ Γ s, IsAtomLevel k Γ s ∧ IsPrenexHierarchy Γ s p
 
 /-- `p` is built from formulas of `IsPrenexAtMost k` by `^⋏` and `^⋎`, nested at most `D` deep. -/
 def IsCombination : ℕ → V → Prop
@@ -47,7 +47,7 @@ def IsCombination : ℕ → V → Prop
       (∃ p₁ < p, ∃ p₂ < p, p = p₁ ^⋎ p₂ ∧ IsCombination D p₁ ∧ IsCombination D p₂)
 
 /-- The class of formulas read by `ReadableSatisfaction k D`. -/
-def IsReadable (D : ℕ) (p : V) : Prop :=
+def IsReadable : Prop :=
   IsCombination k D p ∨ (∃ q < p, p = ^∀ q ∧ IsCombination k D q) ∨
     IsPrenexHierarchy 𝚷 (k + 1) p
 
@@ -295,11 +295,11 @@ end structure_
 
 section closure
 
-variable {k D : ℕ} {p : V}
+variable {k D : ℕ} {p : V} {F : V → V} {n m w t : V}
 
 /-- `IsReadable k D` is closed under an operation that preserves the prenex classes and commutes
 with `^⋏`, `^⋎` and `^∀`. -/
-lemma IsReadable.map {P : V → Prop} {F : V → V}
+lemma IsReadable.map {P : V → Prop}
     (hprenex : ∀ Γ s p, P p → IsPrenexHierarchy Γ s p → IsPrenexHierarchy Γ s (F p))
     (hand : ∀ p q, P (p ^⋏ q) → P p ∧ P q ∧ F (p ^⋏ q) = F p ^⋏ F q)
     (hor : ∀ p q, P (p ^⋎ q) → P p ∧ P q ∧ F (p ^⋎ q) = F p ^⋎ F q)
@@ -337,7 +337,7 @@ lemma IsCombination.neg (hp : IsUFormula ℒₒᵣ p) (h : IsCombination k D p) 
     obtain ⟨hp, hq⟩ := IsUFormula.or.mp h
     exact ⟨hp, hq, Or.inl (neg_or hp hq)⟩
 
-lemma IsCombination.subst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+lemma IsCombination.subst (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (h : IsCombination k D p) :
     IsCombination k D (subst ℒₒᵣ w p) := by
   apply IsCombination.map (P := IsSemiformula ℒₒᵣ n) (hp := hp) (h := h)
@@ -352,7 +352,7 @@ lemma IsCombination.subst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w)
 
 /-- `IsReadable k D` is closed under an operation on formulas that preserves the prenex classes
 and commutes with the connectives and quantifiers. -/
-lemma IsReadable.map_uformula {F : V → V}
+lemma IsReadable.map_uformula
     (hprenex : ∀ Γ s p, IsUFormula ℒₒᵣ p → IsPrenexHierarchy Γ s p → IsPrenexHierarchy Γ s (F p))
     (hand : ∀ p q, IsUFormula ℒₒᵣ p → IsUFormula ℒₒᵣ q → F (p ^⋏ q) = F p ^⋏ F q)
     (hor : ∀ p q, IsUFormula ℒₒᵣ p → IsUFormula ℒₒᵣ q → F (p ^⋎ q) = F p ^⋎ F q)
@@ -392,12 +392,12 @@ lemma IsReadable.fvAssign {f : V} (hp : IsUFormula ℒₒᵣ p) (h : IsReadable 
   IsReadable.map_uformula (fun _ _ _ hp h ↦ h.fvAssign hp) (fun _ _ ↦ fvAssign_and)
     (fun _ _ ↦ fvAssign_or) (fun _ ↦ fvAssign_all) hp h
 
-lemma IsReadable.fvSubst {w : V} (hw : IsSemitermVec ℒₒᵣ (len w) 0 w)
+lemma IsReadable.fvSubst (hw : IsSemitermVec ℒₒᵣ (len w) 0 w)
     (hp : IsUFormula ℒₒᵣ p) (h : IsReadable k D p) : IsReadable k D (fvSubst ℒₒᵣ w p) :=
   IsReadable.map_uformula (fun _ _ _ hp h ↦ h.fvSubst hw hp) (fun _ _ ↦ fvSubst_and)
     (fun _ _ ↦ fvSubst_or) (fun _ ↦ fvSubst_all) hp h
 
-lemma IsReadable.subst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w)
+lemma IsReadable.subst (hw : IsSemitermVec ℒₒᵣ n m w)
     (hp : IsSemiformula ℒₒᵣ n p) (h : IsReadable k D p) : IsReadable k D (subst ℒₒᵣ w p) := by
   rcases h with h | ⟨q, -, rfl, hq⟩ | h
   · exact .of_isCombination (h.subst hw hp)
@@ -406,12 +406,12 @@ lemma IsReadable.subst {n m w : V} (hw : IsSemitermVec ℒₒᵣ n m w)
     exact .all (hq.subst hw.qVec hq')
   · exact Or.inr <| Or.inr <| h.subst hw hp
 
-lemma IsReadable.substs1_of_all {m t : V} (ht : IsSemiterm ℒₒᵣ m t)
+lemma IsReadable.substs1_of_all (ht : IsSemiterm ℒₒᵣ m t)
     (hp : IsSemiformula ℒₒᵣ 1 p) (h : IsReadable k D (^∀ p)) :
     IsReadable k D (substs1 ℒₒᵣ t p) :=
   .of_isCombination <| h.isCombination_of_all.subst (m := m) (by simp [ht]) hp
 
-lemma IsReadable.substs1_of_exs {m t : V} (ht : IsSemiterm ℒₒᵣ m t)
+lemma IsReadable.substs1_of_exs (ht : IsSemiterm ℒₒᵣ m t)
     (hp : IsSemiformula ℒₒᵣ 1 p) (h : IsReadable k D (^∃ p)) :
     IsReadable k D (substs1 ℒₒᵣ t p) :=
   .of_isCombination <| (IsCombination.of_isPrenexAtMost (.of_exs h.isPrenexAtom_of_exs)).subst
@@ -431,7 +431,7 @@ section definability
 
 open FFL.FirstOrder.Bounding.HierarchySymbol
 
-variable {k : ℕ}
+variable {k : ℕ} (D : ℕ) (Γ : SigmaPiDelta) (m : ℕ)
 
 private lemma exists_polarity_iff {P : Polarity → Prop} : (∃ Γ, P Γ) ↔ P 𝚺 ∨ P 𝚷 := by
   constructor
@@ -456,16 +456,14 @@ instance IsPrenexAtMost.definable : 𝚫ᴬ₁-Predicate (IsPrenexAtMost k : V �
   intro v
   simp only [IsPrenexAtMost, exists_polarity_iff, e]
 
-instance IsPrenexAtMost.definable' (Γ : SigmaPiDelta) (m : ℕ) :
-    Γᴬ_[m + 1]-Predicate (IsPrenexAtMost k : V → Prop) :=
+instance IsPrenexAtMost.definable' : Γᴬ_[m + 1]-Predicate (IsPrenexAtMost k : V → Prop) :=
   IsPrenexAtMost.definable.of_deltaOne
 
 instance IsPrenexAtom.definable : 𝚫ᴬ₁-Predicate (IsPrenexAtom k : V → Prop) :=
   (IsPrenexAtMost.definable.or (IsPrenexHierarchy.definable 𝚷 (k + 1))).of_iff
     fun _ ↦ isPrenexAtom_iff
 
-instance IsPrenexAtom.definable' (Γ : SigmaPiDelta) (m : ℕ) :
-    Γᴬ_[m + 1]-Predicate (IsPrenexAtom k : V → Prop) :=
+instance IsPrenexAtom.definable' : Γᴬ_[m + 1]-Predicate (IsPrenexAtom k : V → Prop) :=
   IsPrenexAtom.definable.of_deltaOne
 
 instance IsCombination.definable : (D : ℕ) → 𝚫ᴬ₁-Predicate (IsCombination k D : V → Prop)
@@ -478,18 +476,16 @@ instance IsCombination.definable : (D : ℕ) → 𝚫ᴬ₁-Predicate (IsCombina
       definability
     exact this.of_iff fun _ ↦ Iff.rfl
 
-instance IsCombination.definable' (D : ℕ) (Γ : SigmaPiDelta) (m : ℕ) :
-    Γᴬ_[m + 1]-Predicate (IsCombination k D : V → Prop) :=
+instance IsCombination.definable' : Γᴬ_[m + 1]-Predicate (IsCombination k D : V → Prop) :=
   (IsCombination.definable D).of_deltaOne
 
-instance IsReadable.definable (D : ℕ) : 𝚫ᴬ₁-Predicate (IsReadable k D : V → Prop) := by
+instance IsReadable.definable : 𝚫ᴬ₁-Predicate (IsReadable k D : V → Prop) := by
   have : 𝚫ᴬ₁-Predicate fun p : V ↦ IsCombination k D p ∨
       (∃ q < p, p = ^∀ q ∧ IsCombination k D q) ∨ IsPrenexHierarchy 𝚷 (k + 1) p := by
     definability
   exact this.of_iff fun _ ↦ Iff.rfl
 
-instance IsReadable.definable' (D : ℕ) (Γ : SigmaPiDelta) (m : ℕ) :
-    Γᴬ_[m + 1]-Predicate (IsReadable k D : V → Prop) :=
+instance IsReadable.definable' : Γᴬ_[m + 1]-Predicate (IsReadable k D : V → Prop) :=
   (IsReadable.definable D).of_deltaOne
 
 end definability
@@ -498,14 +494,14 @@ end definability
 
 section truth
 
-variable (k : ℕ)
+variable (k : ℕ) (Γ : Polarity) (s D : ℕ) (q : V)
 
 /-- `q` is true when read as `qqToPrenex Γ s θ` with a $\Delta_0$ matrix `θ`. -/
-def PrenexReading (Γ : Polarity) (s : ℕ) (q : V) : Prop :=
+def PrenexReading : Prop :=
   ∀ θ ≤ q, q = qqToPrenex Γ s θ → IsBounded θ → PrenexSatisfied Γ s 0 θ
 
 /-- `q` is true when read as a prenex formula of any class read directly. -/
-def AtomReading (q : V) : Prop := ∀ Γ s, IsAtomLevel k Γ s → PrenexReading Γ s q
+def AtomReading : Prop := ∀ Γ s, IsAtomLevel k Γ s → PrenexReading Γ s q
 
 /-- The truth of a combination of depth at most `D`, computed by its truth table from the
 prenex formulas it is built from. -/
@@ -518,20 +514,20 @@ def CombinationReading : ℕ → V → Prop
         CombinationReading D q₁ ∨ CombinationReading D q₂)
 
 /-- `q` belongs to `IsReadable k D` and is true, its free variables being read as `0`. -/
-def ReadableTruth (D : ℕ) (q : V) : Prop :=
+def ReadableTruth : Prop :=
   IsReadable k D q ∧ CombinationReading k D q ∧
     (¬IsPrenexAtom k q → ∀ χ < q, q = ^∀ χ →
       ∀ x, CombinationReading k D (substs1 ℒₒᵣ (numeral x) χ))
 
 /-- `p`, with its free variables `^&i` valued by `f.[i]`, belongs to `IsReadable k D` and is
 true. -/
-def ReadableSatisfaction (D : ℕ) (p f : V) : Prop := ReadableTruth k D (fvAssign f p)
+def ReadableSatisfaction (p f : V) : Prop := ReadableTruth k D (fvAssign f p)
 
 end truth
 
 section reading
 
-variable {k D : ℕ} {Γ : Polarity} {s : ℕ} {q θ : V}
+variable {k D : ℕ} {Γ : Polarity} {s : ℕ} {q θ q₁ q₂ : V}
 
 lemma PrenexReading.iff (heq : q = qqToPrenex Γ s θ) (hθ : IsBounded θ) :
     PrenexReading Γ s q ↔ PrenexSatisfied Γ s 0 θ := by
@@ -602,7 +598,7 @@ lemma CombinationReading.of_not_isPrenexAtom_all {χ : V} (ha : ¬IsPrenexAtom k
       intro _ q₁ _ q₂ _ he
       simp [qqAll, qqAnd, qqOr] at he
 
-lemma CombinationReading.and_iff {q₁ q₂ : V} (hq₁ : IsUFormula ℒₒᵣ q₁) (hq₂ : IsUFormula ℒₒᵣ q₂) :
+lemma CombinationReading.and_iff (hq₁ : IsUFormula ℒₒᵣ q₁) (hq₂ : IsUFormula ℒₒᵣ q₂) :
     CombinationReading k (D + 1) (q₁ ^⋏ q₂) ↔
       CombinationReading k D q₁ ∧ CombinationReading k D q₂ := by
   by_cases ha : IsPrenexAtom k (q₁ ^⋏ q₂)
@@ -629,7 +625,7 @@ lemma CombinationReading.and_iff {q₁ q₂ : V} (hq₁ : IsUFormula ℒₒᵣ q
       · rintro q₁' - q₂' - he
         simp [qqAnd, qqOr] at he
 
-lemma CombinationReading.or_iff {q₁ q₂ : V} (hq₁ : IsUFormula ℒₒᵣ q₁) (hq₂ : IsUFormula ℒₒᵣ q₂) :
+lemma CombinationReading.or_iff (hq₁ : IsUFormula ℒₒᵣ q₁) (hq₂ : IsUFormula ℒₒᵣ q₂) :
     CombinationReading k (D + 1) (q₁ ^⋎ q₂) ↔
       CombinationReading k D q₁ ∨ CombinationReading k D q₂ := by
   by_cases ha : IsPrenexAtom k (q₁ ^⋎ q₂)
@@ -705,7 +701,7 @@ end reading
 
 section readableTruth
 
-variable {k D : ℕ} {q χ : V}
+variable {k D : ℕ} {q χ q₁ q₂ t : V}
 
 lemma ReadableTruth.iff_atomReading (ha : IsPrenexAtom k q) :
     ReadableTruth k D q ↔ AtomReading k q := by
@@ -727,7 +723,7 @@ lemma ReadableTruth.verum : ReadableTruth k D (^⊤ : V) := by
   rw [iff_atomReading ha, AtomReading.iff (Γ := 𝚺) (s := 0) (θ := ^⊤) ha rfl (by simp) (by simp)]
   simp
 
-lemma ReadableTruth.and_iff {q₁ q₂ : V} (h : IsReadable k D (q₁ ^⋏ q₂))
+lemma ReadableTruth.and_iff (h : IsReadable k D (q₁ ^⋏ q₂))
     (hq₁ : IsUFormula ℒₒᵣ q₁) (hq₂ : IsUFormula ℒₒᵣ q₂) :
     ReadableTruth k D (q₁ ^⋏ q₂) ↔ ReadableTruth k D q₁ ∧ ReadableTruth k D q₂ := by
   have hc := h.isCombination_of_and
@@ -744,7 +740,7 @@ lemma ReadableTruth.and_iff {q₁ q₂ : V} (h : IsReadable k D (q₁ ^⋏ q₂)
       CombinationReading.succ_iff h₂ hq₂]
   · simp [qqAnd, qqOr] at he
 
-lemma ReadableTruth.or_iff {q₁ q₂ : V} (h : IsReadable k D (q₁ ^⋎ q₂))
+lemma ReadableTruth.or_iff (h : IsReadable k D (q₁ ^⋎ q₂))
     (hq₁ : IsUFormula ℒₒᵣ q₁) (hq₂ : IsUFormula ℒₒᵣ q₂) :
     ReadableTruth k D (q₁ ^⋎ q₂) ↔ ReadableTruth k D q₁ ∨ ReadableTruth k D q₂ := by
   have hc := h.isCombination_of_or
@@ -800,7 +796,7 @@ lemma ReadableTruth.exs_iff (h : IsReadable k D (^∃ χ)) (hχ : IsSemiformula 
   obtain ⟨ha', hr⟩ := AtomReading.substs1_iff hs hθ hχ (Arithmetic.numeral_semiterm 0 x)
   rw [iff_atomReading ha', hr, termVal_numeral]
 
-lemma ReadableTruth.substs1_iff {t : V} (h : IsReadable k D (^∃ χ)) (hχ : IsSemiformula ℒₒᵣ 1 χ)
+lemma ReadableTruth.substs1_iff (h : IsReadable k D (^∃ χ)) (hχ : IsSemiformula ℒₒᵣ 1 χ)
     (ht : IsSemiterm ℒₒᵣ 0 t) :
     ReadableTruth k D (substs1 ℒₒᵣ t χ) ↔
       ReadableTruth k D (substs1 ℒₒᵣ (numeral (termVal 0 t)) χ) := by
@@ -810,7 +806,7 @@ lemma ReadableTruth.substs1_iff {t : V} (h : IsReadable k D (^∃ χ)) (hχ : Is
     AtomReading.substs1_iff hs hθ hχ (Arithmetic.numeral_semiterm 0 (termVal 0 t))
   rw [iff_atomReading ha, iff_atomReading ha', hr, hr', termVal_numeral]
 
-lemma ReadableTruth.exs_of_substs1 {t : V} (h : IsReadable k D (^∃ χ))
+lemma ReadableTruth.exs_of_substs1 (h : IsReadable k D (^∃ χ))
     (hχ : IsSemiformula ℒₒᵣ 1 χ) (ht : IsSemiterm ℒₒᵣ 0 t)
     (ht' : ReadableTruth k D (substs1 ℒₒᵣ t χ)) : ReadableTruth k D (^∃ χ) :=
   (exs_iff h hχ).mpr ⟨termVal 0 t, (substs1_iff h hχ ht).mp ht'⟩
@@ -866,7 +862,7 @@ section truthDefinability
 
 open FFL.FirstOrder.Bounding.HierarchySymbol
 
-variable {k : ℕ} {Γ : Polarity} {s : ℕ}
+variable {k : ℕ} {Γ : Polarity} {s : ℕ} (D : ℕ)
 
 lemma PrenexSatisfied.definable_of_isAtomLevel (hs : IsAtomLevel k Γ s) :
     𝚷ᴬ_[k + 1]-Relation (PrenexSatisfied Γ s : V → V → Prop) := by
@@ -930,15 +926,14 @@ instance CombinationReading.definable :
       definability
     exact this.of_iff fun _ ↦ Iff.rfl
 
-instance ReadableTruth.definable (D : ℕ) :
-    𝚷ᴬ_[k + 1]-Predicate (ReadableTruth k D : V → Prop) := by
+instance ReadableTruth.definable : 𝚷ᴬ_[k + 1]-Predicate (ReadableTruth k D : V → Prop) := by
   have : 𝚷ᴬ_[k + 1]-Predicate fun q : V ↦ IsReadable k D q ∧ CombinationReading k D q ∧
       (¬IsPrenexAtom k q → ∀ χ < q, q = ^∀ χ →
         ∀ x, CombinationReading k D (substs1 ℒₒᵣ (numeral x) χ)) := by
     definability
   exact this.of_iff fun _ ↦ Iff.rfl
 
-instance ReadableSatisfaction.definable (D : ℕ) :
+instance ReadableSatisfaction.definable :
     𝚷ᴬ_[k + 1]-Relation (ReadableSatisfaction k D : V → V → Prop) := by
   have : 𝚷ᴬ_[k + 1]-Relation fun p f : V ↦ ReadableTruth k D (fvAssign f p) := by
     definability
@@ -1044,11 +1039,14 @@ theorem ReadableTruth.subst_qqToPrenex_iff {n θ u : V} (hs : IsAtomLevel k Γ s
   rw [iff_atomReading ha, AtomReading.iff ha he hb' (hφ.subst hu).isUFormula,
     PrenexSatisfied.subst hu hθ hb]
 
+variable (hs : IsAtomLevel k Γ s) (φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty n) {w : V}
+
+include hs
+
 /-- An instance of a standard prenex formula by closed terms is true exactly when the formula
 holds of the values of the terms.
 - [HP98, Theorem I.1.75] -/
-theorem ReadableTruth.subst_quote_iff (hs : IsAtomLevel k Γ s)
-    (φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty n) {w : V} (hw : IsSemitermVec ℒₒᵣ (n : V) 0 w) :
+theorem ReadableTruth.subst_quote_iff (hw : IsSemitermVec ℒₒᵣ (n : V) 0 w) :
     ReadableTruth k D (subst ℒₒᵣ w ⌜φ.val⌝) ↔ V ⊧/(fun i ↦ termVal 0 w.[i]) φ.val := by
   have hb : IsBounded (⌜φ.matrix.val⌝ : V) := (isBounded_quote_iff _).mpr φ.matrix.bounded
   have hf : IsSemiformula ℒₒᵣ (n + s : V) ⌜φ.matrix.val⌝ := by
@@ -1074,8 +1072,7 @@ theorem ReadableTruth.subst_quote_iff (hs : IsAtomLevel k Γ s)
 /-- An instance of a standard prenex formula by terms is true under an assignment exactly when the
 formula holds of the values of the terms.
 - [HP98, Theorem I.1.75] -/
-theorem ReadableSatisfaction.subst_quote_iff (hs : IsAtomLevel k Γ s)
-    (φ : ℬ[<, ℒₒᵣ].Prenex Γ s Empty n) {w : V} (hw : IsSemitermVec ℒₒᵣ (n : V) 0 w) (f : V) :
+theorem ReadableSatisfaction.subst_quote_iff (hw : IsSemitermVec ℒₒᵣ (n : V) 0 w) (f : V) :
     ReadableSatisfaction k D (subst ℒₒᵣ w ⌜φ.val⌝) f ↔
       V ⊧/(fun i ↦ termVal 0 (termFvAssign f w.[i])) φ.val := by
   have hf : IsSemiformula ℒₒᵣ (n : V) ⌜φ.val⌝ := by simp

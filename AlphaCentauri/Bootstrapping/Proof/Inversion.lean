@@ -22,10 +22,10 @@ namespace Bootstrapping
 open PeanoMinus ISigma0 ISigma1 InternalMeasures
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
-variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {L : Language} [L.Encodable] [L.LORDefinable] {p q s r d x t : V}
 
 /-- The external-variable shift is injective on term codes. -/
-lemma termShift_inj {t u : V} (ht : IsUTerm L t) (hu : IsUTerm L u)
+lemma termShift_inj {u : V} (ht : IsUTerm L t) (hu : IsUTerm L u)
     (h : termShift L t = termShift L u) : t = u := by
   have H : ∀ t : V, IsUTerm L t → ∀ u, IsUTerm L u → termShift L t = termShift L u → t = u := by
     apply IsUTerm.induction 𝚷
@@ -57,7 +57,7 @@ lemma termShiftVec_inj {k v v' : V} (hv : IsUTermVec L k v) (hv' : IsUTermVec L 
   rw [← nth_termShiftVec hv hi, ← nth_termShiftVec hv' hi, h]
 
 /-- The external-variable shift is injective on formula codes. -/
-lemma shift_inj {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q)
+lemma shift_inj (hp : IsUFormula L p) (hq : IsUFormula L q)
     (h : shift L p = shift L q) : p = q := by
   have H : ∀ p : V, IsUFormula L p → ∀ q, IsUFormula L q → shift L p = shift L q → p = q := by
     apply IsUFormula.ISigma1.pi1_succ_induction
@@ -115,7 +115,7 @@ lemma shift_inj {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q)
   exact H p hp q hq h
 
 /-- Removing a formula from a coded set commutes with the external-variable shift. -/
-lemma setShift_bitRemove {p s : V} (hs : IsFormulaSet L s) (hp : IsUFormula L p) :
+lemma setShift_bitRemove (hs : IsFormulaSet L s) (hp : IsUFormula L p) :
     setShift L (bitRemove p s) = bitRemove (shift L p) (setShift L s) := by
   apply mem_ext
   intro y
@@ -130,23 +130,31 @@ lemma setShift_bitRemove {p s : V} (hs : IsFormulaSet L s) (hp : IsUFormula L p)
     rcases mem_setShift_iff.mp hy'.2 with ⟨x, hx, rfl⟩
     exact mem_setShift_iff.mpr ⟨x, mem_bitRemove_iff.mpr ⟨fun e ↦ hy'.1 (by rw [e]), hx⟩, rfl⟩
 
+variable (p)
+
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 /-- No code is an axiom of the empty theory. -/
-lemma not_mem_empty_Δ₁Class (p : V) : p ∉ (∅ : Theory L).Δ₁Class := by
+lemma not_mem_empty_Δ₁Class : p ∉ (∅ : Theory L).Δ₁Class := by
   intro h
   have : V ⊧/![p] (⊥ : 𝚫ᴬ₁.Semisentence 1).val := h
   simp at this
 
+/-- The empty theory has no axioms, so in particular none that is not a sentence. -/
+private lemma isSentence_of_mem_empty (hp : p ∈ (∅ : Theory L).Δ₁Class) : L.IsSentence p :=
+  absurd hp (not_mem_empty_Δ₁Class p)
+
+variable {p}
+
 /-- The rest of an end-sequent split off by `insert` is bounded by the proof code. -/
-lemma le_of_fstIdx_eq_insert {d x s : V} (h : fstIdx d = insert x s) : s ≤ d :=
+lemma le_of_fstIdx_eq_insert (h : fstIdx d = insert x s) : s ≤ d :=
   le_trans (le_of_subset (by rw [h]; exact susbset_insert x s)) (fstIdx_le_self d)
 
 /-- A code in the end-sequent of a proof code is bounded by the proof code. -/
-private lemma le_of_mem_fstIdx {x d : V} (h : x ∈ fstIdx d) : x ≤ d :=
+private lemma le_of_mem_fstIdx (h : x ∈ fstIdx d) : x ≤ d :=
   le_trans (le_of_lt (lt_of_mem h)) (fstIdx_le_self d)
 
 /-- The formulas and the context of a conjunction inversion are bounded by the derivation. -/
-private lemma and_bounds {p q c s d : V} (hc : c = p ∨ c = q)
+private lemma and_bounds {c : V} (hc : c = p ∨ c = q)
     (h : fstIdx d = insert (p ^⋏ q) s) : p ≤ d ∧ q ≤ d ∧ c ≤ d ∧ s ≤ d := by
   have hb : p ^⋏ q ≤ d := le_of_mem_fstIdx (by rw [h]; simp)
   have hp : p ≤ d := le_trans (le_of_lt (by simp)) hb
@@ -155,22 +163,20 @@ private lemma and_bounds {p q c s d : V} (hc : c = p ∨ c = q)
   rcases hc with rfl | rfl <;> assumption
 
 /-- The formulas and the context of a disjunction inversion are bounded by the derivation. -/
-private lemma or_bounds {p q s d : V} (h : fstIdx d = insert (p ^⋎ q) s) :
-    p ≤ d ∧ q ≤ d ∧ s ≤ d := by
+private lemma or_bounds (h : fstIdx d = insert (p ^⋎ q) s) : p ≤ d ∧ q ≤ d ∧ s ≤ d := by
   have hb : p ^⋎ q ≤ d := le_of_mem_fstIdx (by rw [h]; simp)
   exact ⟨le_trans (le_of_lt (by simp)) hb, le_trans (le_of_lt (by simp)) hb,
     le_of_fstIdx_eq_insert h⟩
 
 /-- Removing a formula from a set contained in `insert x s` leaves a subset of `s`. -/
-private lemma bitRemove_subset_of_subset_insert {x s t : V} (h : t ⊆ insert x s) :
-    bitRemove x t ⊆ s := by
+private lemma bitRemove_subset_of_subset_insert (h : t ⊆ insert x s) : bitRemove x t ⊆ s := by
   intro y hy
   have hy' := mem_bitRemove_iff.mp hy
   exact mem_of_mem_insert_of_ne (h hy'.2) hy'.1
 
 /-- An axiom-pair `x`, `neg L x` in `insert A s` either puts the negation of `A` in `s` or is
 already a pair in `s`. -/
-private lemma axL_cases {A x s : V} (hx : IsUFormula L x) (hne : neg L A ≠ A)
+private lemma axL_cases {A : V} (hx : IsUFormula L x) (hne : neg L A ≠ A)
     (hxs : x ∈ insert A s) (hnx : neg L x ∈ insert A s) :
     neg L A ∈ s ∨ x ∈ s ∧ neg L x ∈ s := by
   by_cases hxA : x = A
@@ -181,11 +187,9 @@ private lemma axL_cases {A x s : V} (hx : IsUFormula L x) (hne : neg L A ≠ A)
     exact .inl (this ▸ mem_of_mem_insert_of_ne hxs hxA)
   exact .inr ⟨mem_of_mem_insert_of_ne hxs hxA, mem_of_mem_insert_of_ne hnx hnxA⟩
 
-variable {r : V}
-
 /-- Weakening step of an inversion: `Φ` is the monotone context in which the inverted sequent
 sits. -/
-private lemma wk_invert {x s d₀ : V} {Φ : V → V} (hΦ : ∀ a b : V, a ⊆ b → Φ a ⊆ Φ b)
+private lemma wk_invert {d₀ : V} {Φ : V → V} (hΦ : ∀ a b : V, a ⊆ b → Φ a ⊆ Φ b)
     (hs : s ⊆ Φ s) (hF : IsFormulaSet L (Φ s)) (hsub : fstIdx d₀ ⊆ insert x s)
     (hd₀ : RankedDerivation (∅ : Theory L) r d₀)
     (ih : x ∈ fstIdx d₀ → RankedDerivable (∅ : Theory L) r (Φ (bitRemove x (fstIdx d₀)))) :
@@ -197,18 +201,26 @@ private lemma wk_invert {x s d₀ : V} {Φ : V → V} (hΦ : ∀ a b : V, a ⊆ 
 
 namespace RankedDerivation
 
-variable (L) in
+variable (L r d)
+
 /-- Conjunction inversion holds for every derivation of cut rank at most `r` coded below `d`. -/
-private def InvertsAndBelow (r d : V) : Prop :=
+private def InvertsAndBelow : Prop :=
   ∀ d₀ < d, ∀ p q c s : V, (c = p ∨ c = q) →
     RankedDerivationOf (∅ : Theory L) r d₀ (insert (p ^⋏ q) s) →
     RankedDerivable (∅ : Theory L) r (insert c s)
 
+/-- Disjunction inversion holds for every derivation of cut rank at most `r` coded below `d`. -/
+private def InvertsOrBelow : Prop :=
+  ∀ d₀ < d, ∀ p q s : V, RankedDerivationOf (∅ : Theory L) r d₀ (insert (p ^⋎ q) s) →
+    RankedDerivable (∅ : Theory L) r (insert p (insert q s))
+
+variable {L r d}
+
 section invertAnd
 
-variable {p q c s : V}
+variable {c a b d₀ : V}
 
-private lemma inversion_and_axL {x : V} (hc : c = p ∨ c = q) (hpF : IsFormula L p)
+private lemma inversion_and_axL (hc : c = p ∨ c = q) (hpF : IsFormula L p)
     (hqF : IsFormula L q) (hfs : IsFormulaSet L (insert (p ^⋏ q) s))
     (hcsF : IsFormulaSet L (insert c s)) (hx : x ∈ insert (p ^⋏ q) s)
     (hnx : neg L x ∈ insert (p ^⋏ q) s) : RankedDerivable (∅ : Theory L) r (insert c s) := by
@@ -220,7 +232,7 @@ private lemma inversion_and_axL {x : V} (hc : c = p ∨ c = q) (hpF : IsFormula 
       (.em (by simp [hcsF, hpF.neg, hqF.neg]) c (by simp) (by rcases hc with rfl | rfl <;> simp))
   · exact .em hcsF x (by simp [h₁]) (by simp [h₂])
 
-private lemma inversion_and_and {a b dp dq : V} (hc : c = p ∨ c = q)
+private lemma inversion_and_and {dp dq : V} (hc : c = p ∨ c = q)
     (ih : InvertsAndBelow L r (andIntro (insert (p ^⋏ q) s) a b dp dq))
     (hab : a ^⋏ b ∈ insert (p ^⋏ q) s)
     (hdp : RankedDerivationOf (∅ : Theory L) r dp (insert a (insert (p ^⋏ q) s)))
@@ -237,7 +249,7 @@ private lemma inversion_and_and {a b dp dq : V} (hc : c = p ∨ c = q)
   · rw [insert_comm] at hp hq
     exact .and_m (by simp [mem_of_mem_insert_of_ne hab hab']) hp hq
 
-private lemma inversion_and_or {a b d₀ : V} (hc : c = p ∨ c = q)
+private lemma inversion_and_or (hc : c = p ∨ c = q)
     (ih : InvertsAndBelow L r (orIntro (insert (p ^⋏ q) s) a b d₀))
     (hab : a ^⋎ b ∈ insert (p ^⋏ q) s)
     (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert a (insert b (insert (p ^⋏ q) s)))) :
@@ -247,8 +259,7 @@ private lemma inversion_and_or {a b d₀ : V} (hc : c = p ∨ c = q)
   rw [insert_comm c a, insert_comm c b] at h
   exact .or_m (by simp [mem_of_mem_insert_of_ne hab (by simp [qqOr, qqAnd])]) h
 
-private lemma inversion_and_all {a d₀ : V} (hc : c = p ∨ c = q) (hpF : IsFormula L p)
-    (hqF : IsFormula L q)
+private lemma inversion_and_all (hc : c = p ∨ c = q) (hpF : IsFormula L p) (hqF : IsFormula L q)
     (ih : InvertsAndBelow L r (allIntro (insert (p ^⋏ q) s) a d₀))
     (ha : ^∀ a ∈ insert (p ^⋏ q) s)
     (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀
@@ -261,7 +272,7 @@ private lemma inversion_and_all {a d₀ : V} (hc : c = p ∨ c = q) (hpF : IsFor
   exact .all_m (p := a) (by simp [mem_of_mem_insert_of_ne ha (by simp [qqAll, qqAnd])])
     (by simpa using h)
 
-private lemma inversion_and_exs {a t d₀ : V} (hc : c = p ∨ c = q)
+private lemma inversion_and_exs (hc : c = p ∨ c = q)
     (ih : InvertsAndBelow L r (exsIntro (insert (p ^⋏ q) s) a t d₀))
     (ha : ^∃ a ∈ insert (p ^⋏ q) s) (ht : IsTerm L t)
     (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert (substs1 L t a) (insert (p ^⋏ q) s))) :
@@ -271,7 +282,7 @@ private lemma inversion_and_exs {a t d₀ : V} (hc : c = p ∨ c = q)
   rw [insert_comm] at h
   exact .ex_m (by simp [mem_of_mem_insert_of_ne ha (by simp [qqExs, qqAnd])]) ht h
 
-private lemma inversion_and_wk {d₀ : V} (hc : c = p ∨ c = q)
+private lemma inversion_and_wk (hc : c = p ∨ c = q)
     (ih : InvertsAndBelow L r (wkRule (insert (p ^⋏ q) s) d₀))
     (hcsF : IsFormulaSet L (insert c s)) (hsub : fstIdx d₀ ⊆ insert (p ^⋏ q) s)
     (hd₀ : RankedDerivation (∅ : Theory L) r d₀) :
@@ -281,7 +292,7 @@ private lemma inversion_and_wk {d₀ : V} (hc : c = p ∨ c = q)
   intro hmem
   exact ih d₀ (d_lt_wkRule _ _) p q c _ hc ⟨(insert_remove hmem).symm, hd₀⟩
 
-private lemma inversion_and_shift {d₀ : V} (hc : c = p ∨ c = q)
+private lemma inversion_and_shift (hc : c = p ∨ c = q)
     (ih : InvertsAndBelow L r (shiftRule (insert (p ^⋏ q) s) d₀))
     (hcsF : IsFormulaSet L (insert c s)) (hsh : insert (p ^⋏ q) s = setShift L (fstIdx d₀))
     (hd₀ : RankedDerivation (∅ : Theory L) r d₀) :
@@ -314,10 +325,113 @@ private lemma inversion_and_cut {e d₁ d₂ : V} (hc : c = p ∨ c = q)
 
 end invertAnd
 
+section invertOr
+
+variable {a b d₀ : V}
+
+private lemma inversion_or_axL (hpF : IsFormula L p) (hqF : IsFormula L q)
+    (hfs : IsFormulaSet L (insert (p ^⋎ q) s)) (htF : IsFormulaSet L (insert p (insert q s)))
+    (hx : x ∈ insert (p ^⋎ q) s) (hnx : neg L x ∈ insert (p ^⋎ q) s) :
+    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
+  have hneg := neg_or hpF.isUFormula hqF.isUFormula
+  rcases axL_cases (hfs x hx).isUFormula (by rw [hneg]; simp [qqAnd, qqOr]) hx hnx with
+    h | ⟨h₁, h₂⟩
+  · rw [hneg] at h
+    exact .and_m (p := neg L p) (q := neg L q) (by simp [h])
+      (.em (by simp [htF, hpF.neg]) p (by simp) (by simp))
+      (.em (by simp [htF, hqF.neg]) q (by simp) (by simp))
+  · exact .em htF x (by simp [h₁]) (by simp [h₂])
+
+private lemma inversion_or_and {dp dq : V}
+    (ih : InvertsOrBelow L r (andIntro (insert (p ^⋎ q) s) a b dp dq))
+    (hab : a ^⋏ b ∈ insert (p ^⋎ q) s)
+    (hdp : RankedDerivationOf (∅ : Theory L) r dp (insert a (insert (p ^⋎ q) s)))
+    (hdq : RankedDerivationOf (∅ : Theory L) r dq (insert b (insert (p ^⋎ q) s))) :
+    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
+  rw [insert_comm] at hdp hdq
+  have hp := ih dp (dp_lt_andIntro _ _ _ _ _) p q _ hdp
+  have hq := ih dq (dq_lt_andIntro _ _ _ _ _) p q _ hdq
+  rw [insert_pair_comm] at hp hq
+  exact .and_m (by simp [mem_of_mem_insert_of_ne hab (by simp [qqAnd, qqOr])]) hp hq
+
+private lemma inversion_or_or (ih : InvertsOrBelow L r (orIntro (insert (p ^⋎ q) s) a b d₀))
+    (hab : a ^⋎ b ∈ insert (p ^⋎ q) s)
+    (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert a (insert b (insert (p ^⋎ q) s)))) :
+    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
+  rw [insert_comm b, insert_comm a] at hd₀
+  have h := ih d₀ (d_lt_orIntro _ _ _ _) p q _ hd₀
+  by_cases hab' : a ^⋎ b = p ^⋎ q
+  · obtain ⟨rfl, rfl⟩ : a = p ∧ b = q := by simpa using hab'
+    simpa [insert_pair_absorb] using h
+  · rw [insert_pair_comm₂] at h
+    exact .or_m (by simp [mem_of_mem_insert_of_ne hab hab']) h
+
+private lemma inversion_or_all (hpF : IsFormula L p) (hqF : IsFormula L q)
+    (ih : InvertsOrBelow L r (allIntro (insert (p ^⋎ q) s) a d₀))
+    (ha : ^∀ a ∈ insert (p ^⋎ q) s)
+    (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀
+      (insert (free L a) (setShift L (insert (p ^⋎ q) s)))) :
+    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
+  rw [mem_setShift_insert, shift_or hpF.isUFormula hqF.isUFormula, insert_comm] at hd₀
+  have h := ih d₀ (s_lt_allIntro _ _ _) (shift L p) (shift L q) _ hd₀
+  rw [insert_pair_comm] at h
+  exact .all_m (p := a) (by simp [mem_of_mem_insert_of_ne ha (by simp [qqAll, qqOr])])
+    (by simpa using h)
+
+private lemma inversion_or_exs (ih : InvertsOrBelow L r (exsIntro (insert (p ^⋎ q) s) a t d₀))
+    (ha : ^∃ a ∈ insert (p ^⋎ q) s) (ht : IsTerm L t)
+    (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert (substs1 L t a) (insert (p ^⋎ q) s))) :
+    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
+  rw [insert_comm] at hd₀
+  have h := ih d₀ (d_lt_exsIntro _ _ _ _) p q _ hd₀
+  rw [insert_pair_comm] at h
+  exact .ex_m (by simp [mem_of_mem_insert_of_ne ha (by simp [qqExs, qqOr])]) ht h
+
+private lemma inversion_or_wk (ih : InvertsOrBelow L r (wkRule (insert (p ^⋎ q) s) d₀))
+    (htF : IsFormulaSet L (insert p (insert q s))) (hsub : fstIdx d₀ ⊆ insert (p ^⋎ q) s)
+    (hd₀ : RankedDerivation (∅ : Theory L) r d₀) :
+    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
+  apply wk_invert (Φ := fun s ↦ insert p (insert q s))
+    (fun _ _ h ↦ insert_subset_insert_of_subset p (insert_subset_insert_of_subset q h))
+    (subset_trans (susbset_insert q s) (susbset_insert p _)) htF hsub hd₀
+  intro hmem
+  exact ih d₀ (d_lt_wkRule _ _) p q _ ⟨(insert_remove hmem).symm, hd₀⟩
+
+private lemma inversion_or_shift (ih : InvertsOrBelow L r (shiftRule (insert (p ^⋎ q) s) d₀))
+    (htF : IsFormulaSet L (insert p (insert q s)))
+    (hsh : insert (p ^⋎ q) s = setShift L (fstIdx d₀))
+    (hd₀ : RankedDerivation (∅ : Theory L) r d₀) :
+    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
+  have hΔ := hd₀.isFormulaSet
+  obtain ⟨x, hx, hxe⟩ :=
+    mem_setShift_iff.mp (show p ^⋎ q ∈ setShift L (fstIdx d₀) by rw [← hsh]; simp)
+  have hxF := (hΔ x hx).isUFormula
+  obtain ⟨r₁, r₂, rfl, hs₁, hs₂⟩ := exists_eq_or_of_shift_eq hxF hxe.symm
+  have h := (ih d₀ (d_lt_shiftRule _ _) r₁ r₂ _ ⟨(insert_remove hx).symm, hd₀⟩).shift_m
+  rw [mem_setShift_insert, mem_setShift_insert, hs₁, hs₂, setShift_bitRemove hΔ hxF, ← hxe,
+    ← hsh] at h
+  exact .wk htF (insert_subset_insert_of_subset p (insert_subset_insert_of_subset q
+    (bitRemove_subset_of_subset_insert (subset_refl _)))) h
+
+private lemma inversion_or_cut {e d₁ d₂ : V}
+    (ih : InvertsOrBelow L r (cutRule (insert (p ^⋎ q) s) e d₁ d₂))
+    (he : formulaComplexity L e < r)
+    (hd₁ : RankedDerivationOf (∅ : Theory L) r d₁ (insert e (insert (p ^⋎ q) s)))
+    (hd₂ : RankedDerivationOf (∅ : Theory L) r d₂ (insert (neg L e) (insert (p ^⋎ q) s))) :
+    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
+  rw [insert_comm] at hd₁ hd₂
+  have h₁ := ih d₁ (d₁_lt_cutRule _ _ _ _) p q _ hd₁
+  have h₂ := ih d₂ (d₂_lt_cutRule _ _ _ _) p q _ hd₂
+  rw [insert_pair_comm] at h₁ h₂
+  exact .cut he h₁ h₂
+
+end invertOr
+
+variable (r)
+
 /-- The $\Sigma_1$ form of the conjunction inversion: every piece of data is bounded by the
 derivation it is read off. -/
-private lemma inversion_and_aux (r : V) :
-    ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
+private lemma inversion_and_aux : ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
       RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋏ q) s) →
       RankedDerivable (∅ : Theory L) r (insert c s) := by
   have hP : 𝚺ᴬ₁-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
@@ -355,131 +469,9 @@ private lemma inversion_and_aux (r : V) :
   · exact inversion_and_cut hc ih' he hd₁ hd₂
   · exact absurd hT (not_mem_empty_Δ₁Class x)
 
-/-- Inversion for the conjunction rule: a derivation of cut rank at most `r` of a sequent
-containing `p ^⋏ q` yields, for either conjunct `c`, a derivation of cut rank at most `r` of the
-sequent with `c` in place of `p ^⋏ q`.
-- [Bus98, Ch. I §2.4] -/
-theorem inversion_and {p q c s d : V} (hc : c = p ∨ c = q)
-    (hd : RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋏ q) s)) :
-    RankedDerivable (∅ : Theory L) r (insert c s) := by
-  obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc hd.1
-  exact inversion_and_aux r d _ b₁ _ b₂ _ b₃ _ b₄ hc hd
-
-variable (L) in
-/-- Disjunction inversion holds for every derivation of cut rank at most `r` coded below `d`. -/
-private def InvertsOrBelow (r d : V) : Prop :=
-  ∀ d₀ < d, ∀ p q s : V, RankedDerivationOf (∅ : Theory L) r d₀ (insert (p ^⋎ q) s) →
-    RankedDerivable (∅ : Theory L) r (insert p (insert q s))
-
-section invertOr
-
-variable {p q s : V}
-
-private lemma inversion_or_axL {x : V} (hpF : IsFormula L p) (hqF : IsFormula L q)
-    (hfs : IsFormulaSet L (insert (p ^⋎ q) s)) (htF : IsFormulaSet L (insert p (insert q s)))
-    (hx : x ∈ insert (p ^⋎ q) s) (hnx : neg L x ∈ insert (p ^⋎ q) s) :
-    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
-  have hneg := neg_or hpF.isUFormula hqF.isUFormula
-  rcases axL_cases (hfs x hx).isUFormula (by rw [hneg]; simp [qqAnd, qqOr]) hx hnx with
-    h | ⟨h₁, h₂⟩
-  · rw [hneg] at h
-    exact .and_m (p := neg L p) (q := neg L q) (by simp [h])
-      (.em (by simp [htF, hpF.neg]) p (by simp) (by simp))
-      (.em (by simp [htF, hqF.neg]) q (by simp) (by simp))
-  · exact .em htF x (by simp [h₁]) (by simp [h₂])
-
-private lemma inversion_or_and {a b dp dq : V}
-    (ih : InvertsOrBelow L r (andIntro (insert (p ^⋎ q) s) a b dp dq))
-    (hab : a ^⋏ b ∈ insert (p ^⋎ q) s)
-    (hdp : RankedDerivationOf (∅ : Theory L) r dp (insert a (insert (p ^⋎ q) s)))
-    (hdq : RankedDerivationOf (∅ : Theory L) r dq (insert b (insert (p ^⋎ q) s))) :
-    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
-  rw [insert_comm] at hdp hdq
-  have hp := ih dp (dp_lt_andIntro _ _ _ _ _) p q _ hdp
-  have hq := ih dq (dq_lt_andIntro _ _ _ _ _) p q _ hdq
-  rw [insert_pair_comm] at hp hq
-  exact .and_m (by simp [mem_of_mem_insert_of_ne hab (by simp [qqAnd, qqOr])]) hp hq
-
-private lemma inversion_or_or {a b d₀ : V}
-    (ih : InvertsOrBelow L r (orIntro (insert (p ^⋎ q) s) a b d₀))
-    (hab : a ^⋎ b ∈ insert (p ^⋎ q) s)
-    (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert a (insert b (insert (p ^⋎ q) s)))) :
-    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
-  rw [insert_comm b, insert_comm a] at hd₀
-  have h := ih d₀ (d_lt_orIntro _ _ _ _) p q _ hd₀
-  by_cases hab' : a ^⋎ b = p ^⋎ q
-  · obtain ⟨rfl, rfl⟩ : a = p ∧ b = q := by simpa using hab'
-    simpa [insert_pair_absorb] using h
-  · rw [insert_pair_comm₂] at h
-    exact .or_m (by simp [mem_of_mem_insert_of_ne hab hab']) h
-
-private lemma inversion_or_all {a d₀ : V} (hpF : IsFormula L p) (hqF : IsFormula L q)
-    (ih : InvertsOrBelow L r (allIntro (insert (p ^⋎ q) s) a d₀))
-    (ha : ^∀ a ∈ insert (p ^⋎ q) s)
-    (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀
-      (insert (free L a) (setShift L (insert (p ^⋎ q) s)))) :
-    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
-  rw [mem_setShift_insert, shift_or hpF.isUFormula hqF.isUFormula, insert_comm] at hd₀
-  have h := ih d₀ (s_lt_allIntro _ _ _) (shift L p) (shift L q) _ hd₀
-  rw [insert_pair_comm] at h
-  exact .all_m (p := a) (by simp [mem_of_mem_insert_of_ne ha (by simp [qqAll, qqOr])])
-    (by simpa using h)
-
-private lemma inversion_or_exs {a t d₀ : V}
-    (ih : InvertsOrBelow L r (exsIntro (insert (p ^⋎ q) s) a t d₀))
-    (ha : ^∃ a ∈ insert (p ^⋎ q) s) (ht : IsTerm L t)
-    (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert (substs1 L t a) (insert (p ^⋎ q) s))) :
-    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
-  rw [insert_comm] at hd₀
-  have h := ih d₀ (d_lt_exsIntro _ _ _ _) p q _ hd₀
-  rw [insert_pair_comm] at h
-  exact .ex_m (by simp [mem_of_mem_insert_of_ne ha (by simp [qqExs, qqOr])]) ht h
-
-private lemma inversion_or_wk {d₀ : V} (ih : InvertsOrBelow L r (wkRule (insert (p ^⋎ q) s) d₀))
-    (htF : IsFormulaSet L (insert p (insert q s))) (hsub : fstIdx d₀ ⊆ insert (p ^⋎ q) s)
-    (hd₀ : RankedDerivation (∅ : Theory L) r d₀) :
-    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
-  apply wk_invert (Φ := fun s ↦ insert p (insert q s))
-    (fun _ _ h ↦ insert_subset_insert_of_subset p (insert_subset_insert_of_subset q h))
-    (subset_trans (susbset_insert q s) (susbset_insert p _)) htF hsub hd₀
-  intro hmem
-  exact ih d₀ (d_lt_wkRule _ _) p q _ ⟨(insert_remove hmem).symm, hd₀⟩
-
-private lemma inversion_or_shift {d₀ : V}
-    (ih : InvertsOrBelow L r (shiftRule (insert (p ^⋎ q) s) d₀))
-    (htF : IsFormulaSet L (insert p (insert q s)))
-    (hsh : insert (p ^⋎ q) s = setShift L (fstIdx d₀))
-    (hd₀ : RankedDerivation (∅ : Theory L) r d₀) :
-    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
-  have hΔ := hd₀.isFormulaSet
-  obtain ⟨x, hx, hxe⟩ :=
-    mem_setShift_iff.mp (show p ^⋎ q ∈ setShift L (fstIdx d₀) by rw [← hsh]; simp)
-  have hxF := (hΔ x hx).isUFormula
-  obtain ⟨r₁, r₂, rfl, hs₁, hs₂⟩ := exists_eq_or_of_shift_eq hxF hxe.symm
-  have h := (ih d₀ (d_lt_shiftRule _ _) r₁ r₂ _ ⟨(insert_remove hx).symm, hd₀⟩).shift_m
-  rw [mem_setShift_insert, mem_setShift_insert, hs₁, hs₂, setShift_bitRemove hΔ hxF, ← hxe,
-    ← hsh] at h
-  exact .wk htF (insert_subset_insert_of_subset p (insert_subset_insert_of_subset q
-    (bitRemove_subset_of_subset_insert (subset_refl _)))) h
-
-private lemma inversion_or_cut {e d₁ d₂ : V}
-    (ih : InvertsOrBelow L r (cutRule (insert (p ^⋎ q) s) e d₁ d₂))
-    (he : formulaComplexity L e < r)
-    (hd₁ : RankedDerivationOf (∅ : Theory L) r d₁ (insert e (insert (p ^⋎ q) s)))
-    (hd₂ : RankedDerivationOf (∅ : Theory L) r d₂ (insert (neg L e) (insert (p ^⋎ q) s))) :
-    RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
-  rw [insert_comm] at hd₁ hd₂
-  have h₁ := ih d₁ (d₁_lt_cutRule _ _ _ _) p q _ hd₁
-  have h₂ := ih d₂ (d₂_lt_cutRule _ _ _ _) p q _ hd₂
-  rw [insert_pair_comm] at h₁ h₂
-  exact .cut he h₁ h₂
-
-end invertOr
-
 /-- The $\Sigma_1$ form of the disjunction inversion: every piece of data is bounded by the
 derivation it is read off. -/
-private lemma inversion_or_aux (r : V) :
-    ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,
+private lemma inversion_or_aux : ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,
       RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋎ q) s) →
       RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
   have hP : 𝚺ᴬ₁-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,
@@ -516,12 +508,23 @@ private lemma inversion_or_aux (r : V) :
   · exact inversion_or_cut ih' he hd₁ hd₂
   · exact absurd hT (not_mem_empty_Δ₁Class x)
 
+variable {r}
+
+/-- Inversion for the conjunction rule: a derivation of cut rank at most `r` of a sequent
+containing `p ^⋏ q` yields, for either conjunct `c`, a derivation of cut rank at most `r` of the
+sequent with `c` in place of `p ^⋏ q`.
+- [Bus98, Ch. I §2.4] -/
+theorem inversion_and {c : V} (hc : c = p ∨ c = q)
+    (hd : RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋏ q) s)) :
+    RankedDerivable (∅ : Theory L) r (insert c s) := by
+  obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc hd.1
+  exact inversion_and_aux r d _ b₁ _ b₂ _ b₃ _ b₄ hc hd
+
 /-- Inversion for the disjunction rule: a derivation of cut rank at most `r` of a sequent
 containing `p ^⋎ q` yields a derivation of cut rank at most `r` of the sequent with both
 disjuncts in place of `p ^⋎ q`.
 - [Bus98, Ch. I §2.4] -/
-theorem inversion_or {p q s d : V}
-    (hd : RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋎ q) s)) :
+theorem inversion_or (hd : RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋎ q) s)) :
     RankedDerivable (∅ : Theory L) r (insert p (insert q s)) := by
   obtain ⟨b₁, b₂, b₃⟩ := or_bounds hd.1
   exact inversion_or_aux r d _ b₁ _ b₂ _ b₃ hd
@@ -530,18 +533,21 @@ end RankedDerivation
 
 namespace RankedDerivable
 
-variable (L) in
+variable (L r d)
+
 /-- `⊥` can be deleted from the end-sequent of every derivation of cut rank at most `r` coded
 below `d`. -/
-private def DeletesFalsumBelow (r d : V) : Prop :=
+private def DeletesFalsumBelow : Prop :=
   ∀ d₀ < d, ∀ s₀ : V, RankedDerivationOf (∅ : Theory L) r d₀ (insert ^⊥ s₀) →
     RankedDerivable (∅ : Theory L) r s₀
 
+variable {L r d}
+
 section deleteFalsum
 
-variable {s : V}
+variable {a b d₀ : V}
 
-private lemma falsum_axL {x : V} (hfs : IsFormulaSet L (insert ^⊥ s)) (hx : x ∈ insert ^⊥ s)
+private lemma falsum_axL (hfs : IsFormulaSet L (insert ^⊥ s)) (hx : x ∈ insert ^⊥ s)
     (hnx : neg L x ∈ insert ^⊥ s) : RankedDerivable (∅ : Theory L) r s := by
   have hsF : IsFormulaSet L s := fun y hy ↦ hfs y (by simp [hy])
   rcases axL_cases (hfs x hx).isUFormula (by rw [neg_falsum]; simp [qqVerum, qqFalsum]) hx
@@ -550,7 +556,7 @@ private lemma falsum_axL {x : V} (hfs : IsFormulaSet L (insert ^⊥ s)) (hx : x 
     exact .verum hsF h
   · exact .em hsF x h₁ h₂
 
-private lemma falsum_and {a b dp dq : V}
+private lemma falsum_and {dp dq : V}
     (ih : DeletesFalsumBelow L r (andIntro (insert ^⊥ s) a b dp dq)) (hab : a ^⋏ b ∈ insert ^⊥ s)
     (hdp : RankedDerivationOf (∅ : Theory L) r dp (insert a (insert ^⊥ s)))
     (hdq : RankedDerivationOf (∅ : Theory L) r dq (insert b (insert ^⊥ s))) :
@@ -559,7 +565,7 @@ private lemma falsum_and {a b dp dq : V}
   exact .and_m (mem_of_mem_insert_of_ne hab (by simp [qqAnd, qqFalsum]))
     (ih dp (dp_lt_andIntro _ _ _ _ _) _ hdp) (ih dq (dq_lt_andIntro _ _ _ _ _) _ hdq)
 
-private lemma falsum_or {a b d₀ : V}
+private lemma falsum_or
     (ih : DeletesFalsumBelow L r (orIntro (insert ^⊥ s) a b d₀)) (hab : a ^⋎ b ∈ insert ^⊥ s)
     (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert a (insert b (insert ^⊥ s)))) :
     RankedDerivable (∅ : Theory L) r s := by
@@ -567,7 +573,7 @@ private lemma falsum_or {a b d₀ : V}
   exact .or_m (mem_of_mem_insert_of_ne hab (by simp [qqOr, qqFalsum]))
     (ih d₀ (d_lt_orIntro _ _ _ _) _ hd₀)
 
-private lemma falsum_all {a d₀ : V} (ih : DeletesFalsumBelow L r (allIntro (insert ^⊥ s) a d₀))
+private lemma falsum_all (ih : DeletesFalsumBelow L r (allIntro (insert ^⊥ s) a d₀))
     (ha : ^∀ a ∈ insert ^⊥ s)
     (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert (free L a) (setShift L (insert ^⊥ s)))) :
     RankedDerivable (∅ : Theory L) r s := by
@@ -575,7 +581,7 @@ private lemma falsum_all {a d₀ : V} (ih : DeletesFalsumBelow L r (allIntro (in
   exact .all_m (mem_of_mem_insert_of_ne ha (by simp [qqAll, qqFalsum]))
     (ih d₀ (s_lt_allIntro _ _ _) _ hd₀)
 
-private lemma falsum_exs {a t d₀ : V}
+private lemma falsum_exs
     (ih : DeletesFalsumBelow L r (exsIntro (insert ^⊥ s) a t d₀)) (ha : ^∃ a ∈ insert ^⊥ s)
     (ht : IsTerm L t)
     (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert (substs1 L t a) (insert ^⊥ s))) :
@@ -584,14 +590,14 @@ private lemma falsum_exs {a t d₀ : V}
   exact .ex_m (mem_of_mem_insert_of_ne ha (by simp [qqExs, qqFalsum])) ht
     (ih d₀ (d_lt_exsIntro _ _ _ _) _ hd₀)
 
-private lemma falsum_wk {d₀ : V} (ih : DeletesFalsumBelow L r (wkRule (insert ^⊥ s) d₀))
+private lemma falsum_wk (ih : DeletesFalsumBelow L r (wkRule (insert ^⊥ s) d₀))
     (hsF : IsFormulaSet L s) (hsub : fstIdx d₀ ⊆ insert ^⊥ s)
     (hd₀ : RankedDerivation (∅ : Theory L) r d₀) : RankedDerivable (∅ : Theory L) r s := by
   apply wk_invert (Φ := id) (fun _ _ h ↦ h) (subset_refl s) hsF hsub hd₀
   intro hf
   exact ih d₀ (d_lt_wkRule _ _) _ ⟨(insert_remove hf).symm, hd₀⟩
 
-private lemma falsum_shift {d₀ : V} (ih : DeletesFalsumBelow L r (shiftRule (insert ^⊥ s) d₀))
+private lemma falsum_shift (ih : DeletesFalsumBelow L r (shiftRule (insert ^⊥ s) d₀))
     (hsF : IsFormulaSet L s) (hsh : insert ^⊥ s = setShift L (fstIdx d₀))
     (hd₀ : RankedDerivation (∅ : Theory L) r d₀) : RankedDerivable (∅ : Theory L) r s := by
   have hΔ := hd₀.isFormulaSet
@@ -613,8 +619,9 @@ private lemma falsum_cut {e d₁ d₂ : V} (ih : DeletesFalsumBelow L r (cutRule
 
 end deleteFalsum
 
+variable (r) in
 /-- Deleting `⊥` from the end-sequent of a derivation code bounding the rest of it. -/
-private lemma of_insert_falsum_aux (r : V) :
+private lemma of_insert_falsum_aux :
     ∀ d : V, ∀ s ≤ d, RankedDerivationOf (∅ : Theory L) r d (insert ^⊥ s) →
       RankedDerivable (∅ : Theory L) r s := by
   have hP : 𝚺ᴬ₁-Predicate fun d : V ↦ ∀ s ≤ d,
@@ -651,7 +658,7 @@ private lemma of_insert_falsum_aux (r : V) :
 
 /-- Deleting `⊥` from a sequent derivable with cut rank at most `r` over the empty theory leaves
 it derivable with cut rank at most `r`. -/
-theorem of_insert_falsum {s : V} (h : RankedDerivable (∅ : Theory L) r (insert ^⊥ s)) :
+theorem of_insert_falsum (h : RankedDerivable (∅ : Theory L) r (insert ^⊥ s)) :
     RankedDerivable (∅ : Theory L) r s := by
   obtain ⟨d, hd⟩ := h
   exact of_insert_falsum_aux r d s (le_of_fstIdx_eq_insert hd.1) hd
@@ -660,24 +667,18 @@ end RankedDerivable
 
 /-- The body and the rest of an end-sequent containing a universal formula are bounded by the
 proof code. -/
-private lemma all_bounds {d p s : V} (h : fstIdx d = insert (^∀ p) s) : p ≤ d ∧ s ≤ d := by
+private lemma all_bounds (h : fstIdx d = insert (^∀ p) s) : p ≤ d ∧ s ≤ d := by
   have hp : ^∀ p ∈ fstIdx d := by rw [h]; simp
   exact ⟨le_of_lt <| lt_of_lt_of_le (lt_trans (by simp) (lt_of_mem hp)) (fstIdx_le_self d),
     le_of_fstIdx_eq_insert h⟩
 
 /-! ### Universal inversion -/
 
-/-- The empty theory has no axioms, so in particular none that is not a sentence. -/
-private lemma isSentence_of_mem_empty (p : V) (hp : p ∈ (∅ : Theory L).Δ₁Class) :
-    L.IsSentence p :=
-  absurd hp (not_mem_empty_Δ₁Class p)
-
 namespace RankedDerivable
 
 /-- From the free instance of `p` beside the shifted sequent, the instance of `p` at a term beside
 the sequent itself. -/
-lemma substs1_of_free {t p s : V} (ht : IsTerm L t) (hp : IsSemiformula L 1 p)
-    (hs : IsFormulaSet L s)
+lemma substs1_of_free (ht : IsTerm L t) (hp : IsSemiformula L 1 p) (hs : IsFormulaSet L s)
     (h : RankedDerivable (∅ : Theory L) r (insert (free L p) (setShift L s))) :
     RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
   obtain ⟨ι, hιl, hι⟩ := sigmaOne_skolem_vec (R := fun x y : V ↦ y = ^&x) (by definability)
@@ -700,7 +701,7 @@ lemma substs1_of_free {t p s : V} (ht : IsTerm L t) (hp : IsSemiformula L 1 p)
 
 /-- From the instance of `p` at a free variable `^&M` above the codes of `p` and of the sequent,
 the instance of the shift of `p` at a term beside the shifted sequent. -/
-lemma shift_substs1_of_fvar {M t p s : V} (ht : IsTerm L t) (hp : IsSemiformula L 1 p)
+lemma shift_substs1_of_fvar {M : V} (ht : IsTerm L t) (hp : IsSemiformula L 1 p)
     (hpM : p ≤ M) (hs : IsFormulaSet L s) (hsM : s ≤ M)
     (h : RankedDerivable (∅ : Theory L) r (insert (substs1 L ^&M p) s)) :
     RankedDerivable (∅ : Theory L) r (insert (substs1 L t (shift L p)) (setShift L s)) := by
@@ -735,19 +736,22 @@ private instance : 𝚺ᴬ₁-Function₂ (allInversionBound (L := L) : V → V 
   unfold allInversionBound
   definability
 
-variable (L) in
+variable (L r d) (B : V)
+
 /-- Universal inversion at every term below `B` holds for every derivation of cut rank at most `r`
 coded below `d`. -/
-private def InvertsAllBelow (r d B : V) : Prop :=
+private def InvertsAllBelow : Prop :=
   ∀ d₀ < d, ∀ t₀ ≤ B, ∀ p₀ s₀ : V, IsTerm L t₀ →
     RankedDerivationOf (∅ : Theory L) r d₀ (insert (^∀ p₀) s₀) →
     RankedDerivable (∅ : Theory L) r (insert (substs1 L t₀ p₀) s₀)
 
+variable {L r d B}
+
 section invertAll
 
-variable {d t p s : V}
+variable {a b d₀ e : V}
 
-private lemma inversion_all_axL {e : V} (ht : IsTerm L t) (hpF : IsSemiformula L 1 p)
+private lemma inversion_all_axL (ht : IsTerm L t) (hpF : IsSemiformula L 1 p)
     (hfs : IsFormulaSet L (insert (^∀ p) s)) (hes : e ∈ insert (^∀ p) s)
     (hnes : neg L e ∈ insert (^∀ p) s) :
     RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) := by
@@ -769,7 +773,7 @@ private lemma inversion_all_verum (ht : IsTerm L t) (hpF : IsSemiformula L 1 p)
   .verum (by simp [hsF, hpF.substs1 ht])
     (by simp [mem_of_mem_insert_of_ne hv (by simp [qqVerum, qqAll])])
 
-private lemma inversion_all_and {a b dp dq B : V}
+private lemma inversion_all_and {dp dq : V}
     (ih : InvertsAllBelow L r (andIntro (insert (^∀ p) s) a b dp dq) B) (htB : t ≤ B)
     (ht : IsTerm L t) (hab : a ^⋏ b ∈ insert (^∀ p) s)
     (hdp : RankedDerivationOf (∅ : Theory L) r dp (insert a (insert (^∀ p) s)))
@@ -782,7 +786,7 @@ private lemma inversion_all_and {a b dp dq B : V}
   rw [insert_comm] at hep heq
   exact .and_m (by simp [mem_of_mem_insert_of_ne hab (by simp [qqAnd, qqAll])]) hep heq
 
-private lemma inversion_all_or {a b d₀ B : V}
+private lemma inversion_all_or
     (ih : InvertsAllBelow L r (orIntro (insert (^∀ p) s) a b d₀) B) (htB : t ≤ B)
     (ht : IsTerm L t) (hab : a ^⋎ b ∈ insert (^∀ p) s)
     (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert a (insert b (insert (^∀ p) s)))) :
@@ -792,7 +796,7 @@ private lemma inversion_all_or {a b d₀ B : V}
   rw [insert_comm _ a, insert_comm _ b] at he
   exact .or_m (by simp [mem_of_mem_insert_of_ne hab (by simp [qqOr, qqAll])]) he
 
-private lemma inversion_all_exs {a u d₀ B : V}
+private lemma inversion_all_exs {u : V}
     (ih : InvertsAllBelow L r (exsIntro (insert (^∀ p) s) a u d₀) B) (htB : t ≤ B)
     (ht : IsTerm L t) (ha : ^∃ a ∈ insert (^∀ p) s) (hu : IsTerm L u)
     (hd₀ : RankedDerivationOf (∅ : Theory L) r d₀ (insert (substs1 L u a) (insert (^∀ p) s))) :
@@ -802,7 +806,7 @@ private lemma inversion_all_exs {a u d₀ B : V}
   rw [insert_comm] at he
   exact .ex_m (by simp [mem_of_mem_insert_of_ne ha (by simp [qqAll, qqExs])]) hu he
 
-private lemma inversion_all_wk {d₀ B : V}
+private lemma inversion_all_wk
     (ih : InvertsAllBelow L r (wkRule (insert (^∀ p) s) d₀) B) (htB : t ≤ B) (ht : IsTerm L t)
     (hpF : IsSemiformula L 1 p) (hsF : IsFormulaSet L s)
     (hsub : fstIdx d₀ ⊆ insert (^∀ p) s) (hd₀ : RankedDerivation (∅ : Theory L) r d₀) :
@@ -813,8 +817,7 @@ private lemma inversion_all_wk {d₀ B : V}
   intro hA
   exact ih d₀ (d_lt_wkRule _ _) t htB p _ ht ⟨(insert_remove hA).symm, hd₀⟩
 
-private lemma inversion_all_all {a d₀ : V}
-    (ih : InvertsAllBelow L r (allIntro (insert (^∀ p) s) a d₀)
+private lemma inversion_all_all (ih : InvertsAllBelow L r (allIntro (insert (^∀ p) s) a d₀)
       (allInversionBound (L := L) (allIntro (insert (^∀ p) s) a d₀) t))
     (ht : IsTerm L t) (hpF : IsSemiformula L 1 p) (hsF : IsFormulaSet L s)
     (ha : ^∀ a ∈ insert (^∀ p) s)
@@ -837,8 +840,7 @@ private lemma inversion_all_all {a d₀ : V}
     rw [e₁, insert_comm, ← mem_setShift_insert] at he
     exact .all_m (by simp [mem_of_mem_insert_of_ne ha (by simpa using hap)]) he
 
-private lemma inversion_all_shift {d₀ : V}
-    (ih : InvertsAllBelow L r (shiftRule (insert (^∀ p) s) d₀)
+private lemma inversion_all_shift (ih : InvertsAllBelow L r (shiftRule (insert (^∀ p) s) d₀)
       (allInversionBound (L := L) (shiftRule (insert (^∀ p) s) d₀) t))
     (ht : IsTerm L t) (hpF : IsSemiformula L 1 p) (hsF : IsFormulaSet L s)
     (hsh : insert (^∀ p) s = setShift L (fstIdx d₀))
@@ -862,7 +864,7 @@ private lemma inversion_all_shift {d₀ : V}
   exact .wk hT (insert_subset_insert_of_subset _
     (bitRemove_subset_of_subset_insert (subset_refl _))) h
 
-private lemma inversion_all_cut {e d₁ d₂ B : V}
+private lemma inversion_all_cut {d₁ d₂ : V}
     (ih : InvertsAllBelow L r (cutRule (insert (^∀ p) s) e d₁ d₂) B) (htB : t ≤ B)
     (ht : IsTerm L t) (he : formulaComplexity L e < r)
     (hd₁ : RankedDerivationOf (∅ : Theory L) r d₁ (insert e (insert (^∀ p) s)))
@@ -920,7 +922,7 @@ private lemma inversion_all_aux :
 `^∀ p` yields, for every term `t`, one of the sequent with the instance of `p` at `t` in place of
 `^∀ p`.
 - [Bus98, Ch. I §2.4] -/
-theorem inversion_all {p s t d : V} (ht : IsTerm L t)
+theorem inversion_all (ht : IsTerm L t)
     (hd : RankedDerivationOf (∅ : Theory L) r d (insert (^∀ p) s)) :
     RankedDerivable (∅ : Theory L) r (insert (substs1 L t p) s) :=
   inversion_all_aux d t p (all_bounds hd.1).1 s (all_bounds hd.1).2 ht hd

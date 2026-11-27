@@ -19,7 +19,7 @@ open QuadraticAlgebra OpenPredicate
 
 namespace EisensteinInteger
 
-variable {R : Type*} [CommRing R] {a b c d e f g p q r s u v z ε : EisensteinInteger R} {K : R}
+variable {R : Type*} [CommRing R] {a b c d e f g p q r s u v z ε : EisensteinInteger R}
 
 lemma isCoprime_of_lin (h : IsCoprime a b) (p q r s : EisensteinInteger R) (ha : a = p * f + q * g)
     (hb : b = r * f + s * g) : IsCoprime f g := by
@@ -36,14 +36,22 @@ lemma isCoprime_of_cube_eq (hpq : IsCoprime p q) (h : p ^ 3 + q ^ 3 = r ^ 3) : I
     exact hpq.pow_right.add_mul_left_right _
   exact (IsCoprime.pow_right_iff (by norm_num)).mp this
 
+section
+variable (w : Fin 15 → R)
+
 /-- Coordinates `i + 1` and `j + 1` of `w` as an Eisenstein integer. -/
-abbrev coordinate (w : Fin 15 → R) (i j : Fin 14) : EisensteinInteger R := ⟨w i.succ, w j.succ⟩
+abbrev coordinate (i j : Fin 14) : EisensteinInteger R := ⟨w i.succ, w j.succ⟩
+
+end
 
 variable [LinearOrder R]
 
+section
+variable (K : R) (w : Fin 15 → R)
+
 /-- A solution of `a³ + b³ = u c³` with `λ ∤ a`, `λ ∤ b`, `λ ∣ c ≠ 0`, `u` a unit, and the norms
 of `a` and `b` bounded by `K`. -/
-structure Solution (K : R) (a b c u : EisensteinInteger R) : Prop where
+structure Solution (a b c u : EisensteinInteger R) : Prop where
   norm_a_le : norm a ≤ K
   norm_b_le : norm b ≤ K
   isUnit_u : IsUnit u
@@ -56,7 +64,7 @@ structure Solution (K : R) (a b c u : EisensteinInteger R) : Prop where
 /-- The open matrix of the descent predicate: the variable `0` is `norm c`, the others are the
 coordinates of `a, b, c, u` and of the witnesses `sa, sb, sc` of `a ∓ 1 = λ sa`, `b ∓ 1 = λ sb`,
 `c = λ sc`. -/
-def descentPredicate (K : R) (w : Fin 15 → R) : Prop :=
+def descentPredicate : Prop :=
   let x (i j) := coordinate w i j
   norm (x 0 1) ≤ K ∧ norm (x 2 3) ≤ K ∧ norm (x 6 7) = 1 ∧
     x 0 1 ^ 3 + x 2 3 ^ 3 = x 6 7 * x 4 5 ^ 3 ∧
@@ -64,18 +72,24 @@ def descentPredicate (K : R) (w : Fin 15 → R) : Prop :=
     (x 2 3 - 1 = lambda * x 10 11 ∨ x 2 3 + 1 = lambda * x 10 11) ∧
     x 4 5 = lambda * x 12 13 ∧ x 4 5 ≠ 0 ∧ w 0 = norm (x 4 5)
 
-lemma isOpen_descentPredicate (K : R) : IsOpen (descentPredicate K) := by
+lemma isOpen_descentPredicate : IsOpen (descentPredicate K) := by
   is_open
+
+end
+
+variable {K : R}
 
 variable [IsStrictOrderedRing R]
 
-lemma dvd_of_pow_three_dvd [IsBezout (EisensteinInteger R)] (h : d ^ 3 ∣ c ^ 3) : d ∣ c := by
+section
+variable [IsBezout (EisensteinInteger R)]
+
+lemma dvd_of_pow_three_dvd (h : d ^ 3 ∣ c ^ 3) : d ∣ c := by
   classical
   let := IsBezout.toGCDDomain (EisensteinInteger R)
   exact (IsIntegrallyClosed.pow_dvd_pow_iff (by norm_num)).mp h
 
-lemma exists_unit_mul_cube [IsBezout (EisensteinInteger R)] (hu : IsUnit u) (hpq : IsCoprime p q)
-    (h : p * q = u * c ^ 3) :
+lemma exists_unit_mul_cube (hu : IsUnit u) (hpq : IsCoprime p q) (h : p * q = u * c ^ 3) :
     ∃ (P : EisensteinInteger R) (v : (EisensteinInteger R)ˣ), p = v * P ^ 3 := by
   obtain ⟨P, v, hv⟩ := exists_associated_pow_of_associated_pow_mul hpq (c := c) (k := 3)
     ⟨hu.unit, by rw [h, IsUnit.unit_spec]; ring⟩
@@ -83,7 +97,7 @@ lemma exists_unit_mul_cube [IsBezout (EisensteinInteger R)] (hu : IsUnit u) (hpq
   rw [← hv]; ring
 
 /-- Dividing a solution of `a³ + b³ = u c³` by the gcd of `a` and `b`. -/
-lemma exists_gcd_reduce [IsBezout (EisensteinInteger R)] (ha : a ≠ 0) (hu : IsUnit u)
+lemma exists_gcd_reduce (ha : a ≠ 0) (hu : IsUnit u)
     (h : a ^ 3 + b ^ 3 = u * c ^ 3) : ∃ d a₀ b₀ c₀ : EisensteinInteger R,
       a = d * a₀ ∧ b = d * b₀ ∧ c = d * c₀ ∧ d ≠ 0 ∧ IsCoprime a₀ b₀ ∧
       a₀ ^ 3 + b₀ ^ 3 = u * c₀ ^ 3 ∧ (IsUnit d → IsCoprime a b) := by
@@ -108,6 +122,8 @@ lemma exists_gcd_reduce [IsBezout (EisensteinInteger R)] (ha : a ≠ 0) (hu : Is
   obtain ⟨e, he⟩ := hdu.exists_right_inv
   use s * e, t * e
   linear_combination e * hst + he
+
+end
 
 lemma norm_witness_le (h : z - 1 = lambda * s ∨ z + 1 = lambda * s) : norm s ≤ norm z + 1 := by
   have key (e : EisensteinInteger R) (he : norm e = 1) (h : z + e = lambda * s) :
@@ -137,7 +153,7 @@ lemma eq_neg_of_lambda_sq_dvd (hv : IsUnit v) (he : e = 1 ∨ e = -1) (h : lambd
   rw [isUnit_iff_norm_eq_one.mp hv, show norm e = 1 by rcases he with rfl | rfl <;> simp] at h₂
   linarith
 
-lemma le_of_three_mul_cube_le {n K : R} (hK : 1 ≤ K) (hn : 0 ≤ n) (h : 3 * n ^ 3 ≤ 4 * K) :
+lemma le_of_three_mul_cube_le {n : R} (hK : 1 ≤ K) (hn : 0 ≤ n) (h : 3 * n ^ 3 ≤ 4 * K) :
     n ≤ K := by
   by_cases h1 : n ≤ 1
   · linarith
@@ -341,7 +357,7 @@ lemma not_dvd_iff : ¬lambda ∣ z ↔ ∃ s, z - 1 = lambda * s ∨ z + 1 = lam
     · exact not_lambda_dvd_one ⟨t - s, by linear_combination ht - hs⟩
     · exact not_lambda_dvd_one ⟨s - t, by linear_combination hs - ht⟩
 
-lemma solution_iff_boundedExists {K m₀ m : R} (hm : m ≤ m₀) :
+lemma solution_iff_boundedExists {m₀ m : R} (hm : m ≤ m₀) :
     (∃ a b c u : EisensteinInteger R, Solution K a b c u ∧ norm c = m) ↔
       BoundedExists (4 * (K + m₀) + 8) (descentPredicate K) m := by
   constructor

@@ -63,9 +63,9 @@ lemma isFormulaSet_locallyDelta0 : LocallyDelta0Pred (IsFormulaSet (V := V) L) :
         (LocallyDelta0Function.var 0)).of_iff fun _ ↦
     ⟨fun h x _ hx ↦ h x hx, fun h x hx ↦ h x (lt_of_mem hx) hx⟩
 
-variable (L) in
-lemma setShift_existsUnique (s : V) :
-    ∃! t : V, ∀ y, y ∈ t ↔ ∃ x ∈ s, y = shift L x := by
+variable (L) (s)
+
+lemma setShift_existsUnique : ∃! t : V, ∀ y, y ∈ t ↔ ∃ x ∈ s, y = shift L x := by
   obtain ⟨Y, hY⟩ := (shift_locallyDelta0 (V := V) (L := L)).bounded s
   have : LocallyDelta0Pred fun y ↦ ∃ x ∈ s, y = shift L x :=
     (LocallyDelta0.bexs_lt_function (LocallyDelta0Function.const s) <|
@@ -81,9 +81,10 @@ lemma setShift_existsUnique (s : V) :
     simpa using (lt_of_mem hx).le
   exact lt_succ_iff_le.mpr <| hY ![x] this
 
-variable (L) in
 /-- The set of the shifts of the elements of `s`. -/
-noncomputable def setShift (s : V) : V := Classical.choose! (setShift_existsUnique L s)
+noncomputable def setShift : V := Classical.choose! (setShift_existsUnique L s)
+
+variable {L} {s}
 
 lemma mem_setShift_iff {y : V} : y ∈ setShift L s ↔ ∃ x ∈ s, y = shift L x :=
   Classical.choose!_spec (setShift_existsUnique L s) y
@@ -111,8 +112,10 @@ lemma mem_setShift_insert {x : V} :
 @[simp]
 lemma setShift_empty : setShift L (∅ : V) = ∅ := mem_ext <| by simp [mem_setShift_iff]
 
-private lemma setShift_graph (t s : V) :
-    t = setShift L s ↔ (∀ y ∈ t, ∃ x ∈ s, y = shift L x) ∧ (∀ x ∈ s, shift L x ∈ t) := by
+variable (t) in
+private lemma setShift_graph :
+    ∀ s : V, t = setShift L s ↔ (∀ y ∈ t, ∃ x ∈ s, y = shift L x) ∧ (∀ x ∈ s, shift L x ∈ t) := by
+  intro s
   constructor
   · rintro rfl
     grind [mem_setShift_iff]
@@ -160,35 +163,37 @@ lemma setShift_locallyDelta0 : LocallyDelta0Function₁ (setShift (V := V) L) wh
 
 section code
 
+variable (s p q t dp dq d d₁ d₂ : V) (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ])
+
 /-- The code of the derivation of `s` by the axiom `p, ¬p`. -/
-noncomputable def axL (s p : V) : V := ⟪s, 0, p⟫ + 1
+noncomputable def axL : V := ⟪s, 0, p⟫ + 1
 
 /-- The code of the derivation of `s` by the axiom `⊤`. -/
-noncomputable def verumIntro (s : V) : V := ⟪s, 1, 0⟫ + 1
+noncomputable def verumIntro : V := ⟪s, 1, 0⟫ + 1
 
 /-- The code of the derivation of `s` by the rule for `p ⋏ q` from `dp` and `dq`. -/
-noncomputable def andIntro (s p q dp dq : V) : V := ⟪s, 2, p, q, dp, dq⟫ + 1
+noncomputable def andIntro : V := ⟪s, 2, p, q, dp, dq⟫ + 1
 
 /-- The code of the derivation of `s` by the rule for `p ⋎ q` from `d`. -/
-noncomputable def orIntro (s p q d : V) : V := ⟪s, 3, p, q, d⟫ + 1
+noncomputable def orIntro : V := ⟪s, 3, p, q, d⟫ + 1
 
 /-- The code of the derivation of `s` by the rule for `∀ p` from `d`. -/
-noncomputable def allIntro (s p d : V) : V := ⟪s, 4, p, d⟫ + 1
+noncomputable def allIntro : V := ⟪s, 4, p, d⟫ + 1
 
 /-- The code of the derivation of `s` by the rule for `∃ p` with the witness `t` from `d`. -/
-noncomputable def exsIntro (s p t d : V) : V := ⟪s, 5, p, t, d⟫ + 1
+noncomputable def exsIntro : V := ⟪s, 5, p, t, d⟫ + 1
 
 /-- The code of the derivation of `s` by weakening from `d`. -/
-noncomputable def wkRule (s d : V) : V := ⟪s, 6, d⟫ + 1
+noncomputable def wkRule : V := ⟪s, 6, d⟫ + 1
 
 /-- The code of the derivation of `s` by shifting the free variables of `d`. -/
-noncomputable def shiftRule (s d : V) : V := ⟪s, 7, d⟫ + 1
+noncomputable def shiftRule : V := ⟪s, 7, d⟫ + 1
 
 /-- The code of the derivation of `s` by the cut on `p` from `d₁` and `d₂`. -/
-noncomputable def cutRule (s p d₁ d₂ : V) : V := ⟪s, 8, p, d₁, d₂⟫ + 1
+noncomputable def cutRule : V := ⟪s, 8, p, d₁, d₂⟫ + 1
 
 /-- The code of the derivation of `s` by the nonlogical axiom `p`. -/
-noncomputable def axm (s p : V) : V := ⟪s, 9, p⟫ + 1
+noncomputable def axm : V := ⟪s, 9, p⟫ + 1
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (axLGraph verumIntroGraph andIntroGraph
   orIntroGraph allIntroGraph exsIntroGraph wkRuleGraph shiftRuleGraph cutRuleGraph axmGraph)
@@ -223,136 +228,134 @@ instance cutRule_defined : 𝚺ᴬ₀-Function₄ (cutRule : V → V → V → V
 instance axm_defined : 𝚺ᴬ₀-Function₂ (axm : V → V → V) via axmGraph :=
   .mk fun v ↦ by simp_all [axmGraph, numeral_eq_natCast, axm]
 
-instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₄ (orIntro : V → V → V → V → V) :=
+instance : ℌ-Function₄ (orIntro : V → V → V → V → V) :=
   .of_zero orIntro.defined.to_definable
 
-instance (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
-    ℌ-Function₂ (axm : V → V → V) :=
+instance : ℌ-Function₂ (axm : V → V → V) :=
   .of_zero axm_defined.to_definable
 
 @[simp]
-lemma seq_lt_axL (s p : V) : s < axL s p := by
+lemma seq_lt_axL : s < axL s p := by
   grind [axL, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma arity_lt_axL (s p : V) : p < axL s p := by
+lemma arity_lt_axL : p < axL s p := by
   grind [axL, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma seq_lt_verumIntro (s : V) : s < verumIntro s := by
+lemma seq_lt_verumIntro : s < verumIntro s := by
   grind [verumIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma seq_lt_andIntro (s p q dp dq : V) : s < andIntro s p q dp dq := by
+lemma seq_lt_andIntro : s < andIntro s p q dp dq := by
   grind [andIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma p_lt_andIntro (s p q dp dq : V) : p < andIntro s p q dp dq := by
+lemma p_lt_andIntro : p < andIntro s p q dp dq := by
   grind [andIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma q_lt_andIntro (s p q dp dq : V) : q < andIntro s p q dp dq := by
+lemma q_lt_andIntro : q < andIntro s p q dp dq := by
   grind [andIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma dp_lt_andIntro (s p q dp dq : V) : dp < andIntro s p q dp dq := by
+lemma dp_lt_andIntro : dp < andIntro s p q dp dq := by
   grind [andIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma dq_lt_andIntro (s p q dp dq : V) : dq < andIntro s p q dp dq := by
+lemma dq_lt_andIntro : dq < andIntro s p q dp dq := by
   grind [andIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma seq_lt_orIntro (s p q d : V) : s < orIntro s p q d := by
+lemma seq_lt_orIntro : s < orIntro s p q d := by
   grind [orIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma p_lt_orIntro (s p q d : V) : p < orIntro s p q d := by
+lemma p_lt_orIntro : p < orIntro s p q d := by
   grind [orIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma q_lt_orIntro (s p q d : V) : q < orIntro s p q d := by
+lemma q_lt_orIntro : q < orIntro s p q d := by
   grind [orIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma d_lt_orIntro (s p q d : V) : d < orIntro s p q d := by
+lemma d_lt_orIntro : d < orIntro s p q d := by
   grind [orIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma seq_lt_allIntro (s p d : V) : s < allIntro s p d := by
+lemma seq_lt_allIntro : s < allIntro s p d := by
   grind [allIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma p_lt_allIntro (s p d : V) : p < allIntro s p d := by
+lemma p_lt_allIntro : p < allIntro s p d := by
   grind [allIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma s_lt_allIntro (s p d : V) : d < allIntro s p d := by
+lemma s_lt_allIntro : d < allIntro s p d := by
   grind [allIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma seq_lt_exsIntro (s p t d : V) : s < exsIntro s p t d := by
+lemma seq_lt_exsIntro : s < exsIntro s p t d := by
   grind [exsIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma p_lt_exsIntro (s p t d : V) : p < exsIntro s p t d := by
+lemma p_lt_exsIntro : p < exsIntro s p t d := by
   grind [exsIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma t_lt_exsIntro (s p t d : V) : t < exsIntro s p t d := by
+lemma t_lt_exsIntro : t < exsIntro s p t d := by
   grind [exsIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma d_lt_exsIntro (s p t d : V) : d < exsIntro s p t d := by
+lemma d_lt_exsIntro : d < exsIntro s p t d := by
   grind [exsIntro, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma seq_lt_wkRule (s d : V) : s < wkRule s d := by
+lemma seq_lt_wkRule : s < wkRule s d := by
   grind [wkRule, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma d_lt_wkRule (s d : V) : d < wkRule s d := by
+lemma d_lt_wkRule : d < wkRule s d := by
   grind [wkRule, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma seq_lt_shiftRule (s d : V) : s < shiftRule s d := by
+lemma seq_lt_shiftRule : s < shiftRule s d := by
   grind [shiftRule, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma d_lt_shiftRule (s d : V) : d < shiftRule s d := by
+lemma d_lt_shiftRule : d < shiftRule s d := by
   grind [shiftRule, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma seq_lt_cutRule (s p d₁ d₂ : V) : s < cutRule s p d₁ d₂ := by
+lemma seq_lt_cutRule : s < cutRule s p d₁ d₂ := by
   grind [cutRule, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma p_lt_cutRule (s p d₁ d₂ : V) : p < cutRule s p d₁ d₂ := by
+lemma p_lt_cutRule : p < cutRule s p d₁ d₂ := by
   grind [cutRule, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma d₁_lt_cutRule (s p d₁ d₂ : V) : d₁ < cutRule s p d₁ d₂ := by
+lemma d₁_lt_cutRule : d₁ < cutRule s p d₁ d₂ := by
   grind [cutRule, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma d₂_lt_cutRule (s p d₁ d₂ : V) : d₂ < cutRule s p d₁ d₂ := by
+lemma d₂_lt_cutRule : d₂ < cutRule s p d₁ d₂ := by
   grind [cutRule, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma seq_lt_axm (s p : V) : s < axm s p := by
+lemma seq_lt_axm : s < axm s p := by
   grind [axm, lt_succ_iff_le, le_pair_left, le_pair_right]
 @[simp]
-lemma p_lt_axm (s p : V) : p < axm s p := by
+lemma p_lt_axm : p < axm s p := by
   grind [axm, lt_succ_iff_le, le_pair_left, le_pair_right]
 
 @[simp]
-lemma fstIdx_axL (s p : V) : fstIdx (axL s p) = s := by simp [fstIdx, axL]
+lemma fstIdx_axL : fstIdx (axL s p) = s := by simp [fstIdx, axL]
 @[simp]
-lemma fstIdx_verumIntro (s : V) : fstIdx (verumIntro s) = s := by simp [fstIdx, verumIntro]
+lemma fstIdx_verumIntro : fstIdx (verumIntro s) = s := by simp [fstIdx, verumIntro]
 @[simp]
-lemma fstIdx_andIntro (s p q dp dq : V) : fstIdx (andIntro s p q dp dq) = s := by
+lemma fstIdx_andIntro : fstIdx (andIntro s p q dp dq) = s := by
   simp [fstIdx, andIntro]
 @[simp]
-lemma fstIdx_orIntro (s p q dpq : V) : fstIdx (orIntro s p q dpq) = s := by
+lemma fstIdx_orIntro (dpq : V) : fstIdx (orIntro s p q dpq) = s := by
   simp [fstIdx, orIntro]
 @[simp]
-lemma fstIdx_allIntro (s p d : V) : fstIdx (allIntro s p d) = s := by
+lemma fstIdx_allIntro : fstIdx (allIntro s p d) = s := by
   simp [fstIdx, allIntro]
 @[simp]
-lemma fstIdx_exsIntro (s p t d : V) : fstIdx (exsIntro s p t d) = s := by
+lemma fstIdx_exsIntro : fstIdx (exsIntro s p t d) = s := by
   simp [fstIdx, exsIntro]
 @[simp]
-lemma fstIdx_wkRule (s d : V) : fstIdx (wkRule s d) = s := by simp [fstIdx, wkRule]
+lemma fstIdx_wkRule : fstIdx (wkRule s d) = s := by simp [fstIdx, wkRule]
 @[simp]
-lemma fstIdx_shiftRule (s d : V) : fstIdx (shiftRule s d) = s := by simp [fstIdx, shiftRule]
+lemma fstIdx_shiftRule : fstIdx (shiftRule s d) = s := by simp [fstIdx, shiftRule]
 @[simp]
-lemma fstIdx_cutRule (s p d₁ d₂ : V) : fstIdx (cutRule s p d₁ d₂) = s := by
+lemma fstIdx_cutRule : fstIdx (cutRule s p d₁ d₂) = s := by
   simp [fstIdx, cutRule]
 @[simp]
-lemma fstIdx_axm (s p : V) : fstIdx (axm s p) = s := by simp [fstIdx, axm]
+lemma fstIdx_axm : fstIdx (axm s p) = s := by simp [fstIdx, axm]
 
 end code
 
@@ -362,7 +365,8 @@ namespace Derivation
 
 noncomputable abbrev conseq (x : V) : V := π₁ x
 
-variable (T) in
+variable (T)
+
 /-- The operator generating the codes of derivations from the axioms of `T`. -/
 def Phi (C : Set V) (d : V) : Prop :=
   IsFormulaSet L (fstIdx d) ∧
@@ -382,10 +386,7 @@ def Phi (C : Set V) (d : V) : Prop :=
       (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (neg L p) s ∧ d₂ ∈ C)) ∨
     (∃ s p, d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) )
 
-variable (T) in
-private lemma phi_iff (C d : V) :
-    Phi T {x | x ∈ C} d ↔
-    IsFormulaSet L (fstIdx d) ∧
+private lemma phi_iff (C : V) : ∀ d : V, Phi T {x | x ∈ C} d ↔ IsFormulaSet L (fstIdx d) ∧
     ( (∃ s < d, ∃ p < d, d = axL s p ∧ p ∈ s ∧ neg L p ∈ s) ∨
       (∃ s < d, d = verumIntro s ∧ ^⊤ ∈ s) ∨
       (∃ s < d, ∃ p < d, ∃ q < d, ∃ dp < d, ∃ dq < d,
@@ -407,6 +408,7 @@ private lemma phi_iff (C d : V) :
           (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (neg L p) s ∧ d₂ ∈ C)) ∨
       (∃ s < d, ∃ p < d,
         d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) ) := by
+  intro d
   constructor
   · rintro ⟨hs, H⟩
     apply And.intro hs
@@ -441,6 +443,8 @@ private lemma phi_iff (C d : V) :
     · disj 8; exact ⟨s, d', rfl, h⟩
     · disj 9; exact ⟨s, p, d₁, d₂, rfl, h⟩
     · disj 10; exact ⟨s, p, h⟩
+
+variable {T}
 
 open LocallyDelta0 LocallyDelta0Function in
 lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
@@ -543,7 +547,8 @@ lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
 
 variable [LocallyDelta0Axioms T V]
 
-variable (T) in
+variable (T)
+
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Derivation (blueprint) in
 /-- The construction of the codes of derivations from the axioms of `T`. -/
 def construction : Fixpoint.Construction V (blueprint T) where
@@ -575,6 +580,8 @@ def construction : Fixpoint.Construction V (blueprint T) where
     · disj 10; exact ⟨s, p, h⟩
   Φ_locallyDelta0 := phi_locallyDelta0
 
+variable {T}
+
 instance : (construction T).StrongFinite V where
   strong_finite := by
     rintro C _ d ⟨hs, H⟩
@@ -599,25 +606,26 @@ end Derivation
 
 variable [LocallyDelta0Axioms T V]
 
-variable (T) in
+section
+
+variable (T) (d s φ : V)
+
 /-- The predicate that `d` is the code of a derivation from the axioms of `T`. -/
 def Derivation : V → Prop := (Derivation.construction T).Fixpoint ![]
 
-variable (T) in
 /-- The predicate that `d` is the code of a derivation of the set `s` from the axioms of `T`. -/
-def DerivationOf (d s : V) : Prop := fstIdx d = s ∧ Derivation T d
+def DerivationOf : Prop := fstIdx d = s ∧ Derivation T d
 
-variable (T) in
 /-- The predicate that the set `s` has a derivation from the axioms of `T`. -/
-def Derivable (s : V) : Prop := ∃ d, DerivationOf T d s
+def Derivable : Prop := ∃ d, DerivationOf T d s
 
-variable (T) in
 /-- The predicate that `d` is the code of a proof of `φ` from the axioms of `T`. -/
-def Proof (d φ : V) : Prop := DerivationOf T d {φ}
+def Proof : Prop := DerivationOf T d {φ}
 
-variable (T) in
 /-- The predicate that `φ` has a proof from the axioms of `T`. -/
-def Provable (φ : V) : Prop := ∃ d, Proof T d φ
+def Provable : Prop := ∃ d, Proof T d φ
+
+end
 
 section
 

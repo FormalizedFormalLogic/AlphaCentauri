@@ -36,42 +36,47 @@ private lemma forall_vec_two_iff {α : Type*} {P : (Fin 2 → α) → Prop} {D :
 
 section formulas
 
-variable (S : ArithmeticTheory) [S.Δ₁]
+variable (S : ArithmeticTheory) [S.Δ₁] {V : Type*} [ORingStructure V]
 
 /-- The first `n` entries of the list coded by `s` are representatives of the Henkin set of `S`. -/
 noncomputable def henkinListDef : ArithmeticSemisentence 2 :=
   “n s. ∃ l, !decGraph.val l s ∧ ∀ i < n, ∃ x, !nthDef.val x l i ∧ !(henkinDomainDef S).val x”
 
+section
+
+variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] {k : ℕ} (R : (ℒₒᵣ).Rel k) (F : (ℒₒᵣ).Func k) (y : V) (v : Fin k → V)
+
 @[simp]
-lemma eval_henkinListDef {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] (v : Fin 2 → V) :
+lemma eval_henkinListDef (v : Fin 2 → V) :
     V ⊧/v (henkinListDef S) ↔ ∀ i < v 0, IsRepresentative S (dec (v 1)).[i] := by
   simp [henkinListDef]
 
-lemma eval_henkinRelDef {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] {k : ℕ} (R : (ℒₒᵣ).Rel k)
-    (v : Fin k → V) : V ⊧/v (henkinRelDef S R).val ↔
+lemma eval_henkinRelDef : V ⊧/v (henkinRelDef S R).val ↔
       HenkinSet S (Semiformula.rel R (fun i ↦ Semiterm.fvar (v i)) : Formula V ℒₒᵣ).val :=
   henkinRel_val S R v
 
-lemma eval_henkinFuncDef {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔] {k : ℕ}
-    (F : (ℒₒᵣ).Func k) (y : V) (v : Fin k → V) : V ⊧/(y :> v) (henkinFuncDef S F).val ↔
+lemma eval_henkinFuncDef : V ⊧/(y :> v) (henkinFuncDef S F).val ↔
       HenkinSet S (Semiformula.equal (Semiterm.func F (fun i ↦ Semiterm.fvar (v i)))
         (Semiterm.fvar y) : Formula V ℒₒᵣ).val :=
   henkinFunc_val S F y v
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {m : ℕ}
+end
+
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] {m m' : ℕ} (w : SemitermVec V ℒₒᵣ m m')
+  (s z : Semiterm V ℒₒᵣ m) (p t n : V)
 
 /-- The internal formula that the code `p` with `n` bound variables is satisfied in the Henkin set
 of `S` along the list `s`. -/
-noncomputable def henkinSatisfiesF (s : Semiterm V ℒₒᵣ m) (p n : V) : Semiformula V ℒₒᵣ m :=
+noncomputable def henkinSatisfiesF : Semiformula V ℒₒᵣ m :=
   (⌜(henkinSatisfiesDef S).val⌝ : Semiformula V ℒₒᵣ 3).subst ![𝕹 p, 𝕹 n, s]
 
 /-- The internal formula that the code `t` of a term with `n` bound variables equates to `z` in the
 Henkin set of `S` along the list `s`. -/
-noncomputable def henkinEquatesF (s z : Semiterm V ℒₒᵣ m) (t n : V) : Semiformula V ℒₒᵣ m :=
+noncomputable def henkinEquatesF : Semiformula V ℒₒᵣ m :=
   (⌜(henkinEquatesDef S).val⌝ : Semiformula V ℒₒᵣ 4).subst ![𝕹 t, 𝕹 n, s, z]
 
 /-- The internal formula that the first `n` entries of `s` are representatives. -/
-noncomputable def henkinListF (s : Semiterm V ℒₒᵣ m) (n : V) : Semiformula V ℒₒᵣ m :=
+noncomputable def henkinListF : Semiformula V ℒₒᵣ m :=
   (⌜henkinListDef S⌝ : Semiformula V ℒₒᵣ 2).subst ![𝕹 n, s]
 
 /-- The internal domain formula of the Henkin translation. -/
@@ -80,12 +85,12 @@ noncomputable def henkinDomainF : Semiformula V ℒₒᵣ 1 := ⌜(henkinDomainD
 variable {S}
 
 @[simp]
-lemma subst_henkinSatisfiesF {m' : ℕ} (w : SemitermVec V ℒₒᵣ m m') (s : Semiterm V ℒₒᵣ m)
-    (p n : V) : (henkinSatisfiesF S s p n).subst w = henkinSatisfiesF S (s.subst w) p n := by
+lemma subst_henkinSatisfiesF :
+    (henkinSatisfiesF S s p n).subst w = henkinSatisfiesF S (s.subst w) p n := by
   simp [henkinSatisfiesF, Semiformula.substs_substs]
 
 @[simp]
-lemma shift_henkinSatisfiesF (s : Semiterm V ℒₒᵣ m) (p n : V) :
+lemma shift_henkinSatisfiesF :
     (henkinSatisfiesF S s p n).shift = henkinSatisfiesF S s.shift p n := by
   simp [henkinSatisfiesF, Semiformula.shift_substs, typed_quote_shift]
 
@@ -126,12 +131,12 @@ lemma tprovable_subst_of_models_henkin {k m : ℕ} (c : 𝚺ᴬ₁.Semisentence 
   exact h₁ ⨀ bold_sigma_one_complete _ c.sigma_prop hw
 
 
-variable {n p q t u : V}
+variable {p q t u : V} (x : Term V ℒₒᵣ) (R : (ℒₒᵣ).Rel 2) (D : Semiformula V ℒₒᵣ 1)
+  (A : Fin 2 → Semiformula V ℒₒᵣ 1) (s : Term V ℒₒᵣ) {n : V}
 
 /-! ### Lists of representatives -/
 
-lemma tprovable_henkinListF_zero (s : Term V ℒₒᵣ) :
-    (T ∪ S.Con).internalize V ⊢ henkinListF S s 0 := by
+lemma tprovable_henkinListF_zero : (T ∪ S.Con).internalize V ⊢ henkinListF S s 0 := by
   have h := tprovable_subst_of_models_henkin S T (k := 1) (m := 1) (.mkSigma “n. n = 0”)
     (henkinListDef S) (by
       intro W _ _ _ _ e he
@@ -144,8 +149,11 @@ private noncomputable def listSucc : ArithmeticSemisentence 4 :=
   (henkinListDef S)/[#1, ‘(#2 + #3) * (#2 + #3) + #3 + 1’] 🡘
     (henkinDomainDef S).val/[#2] ⋏ (henkinListDef S)/[#0, #3]
 
-lemma tprovable_henkinListF_succ (x s : Term V ℒₒᵣ) (n : V) :
-    (T ∪ S.Con).internalize V ⊢ henkinListF S (pTerm x s) (n + 1) 🡘
+section
+
+variable (n)
+
+lemma tprovable_henkinListF_succ : (T ∪ S.Con).internalize V ⊢ henkinListF S (pTerm x s) (n + 1) 🡘
       (henkinDomainF S).subst ![x] ⋏ henkinListF S s n := by
   have h := tprovable_subst_of_models_henkin S T (k := 2) (m := 2) (.mkSigma “n m. m = n + 1”)
     (listSucc S) (by
@@ -171,8 +179,7 @@ lemma tprovable_henkinListF_succ (x s : Term V ℒₒᵣ) (n : V) :
 
 /-! ### Formulas -/
 
-lemma tprovable_henkinSatisfiesF_verum (s : Term V ℒₒᵣ) (n : V) :
-    (T ∪ S.Con).internalize V ⊢ henkinSatisfiesF S s ^⊤ n :=
+lemma tprovable_henkinSatisfiesF_verum : (T ∪ S.Con).internalize V ⊢ henkinSatisfiesF S s ^⊤ n :=
   tprovable_subst_of_models_henkin S T (k := 2) (m := 1) (.mkSigma “c n. !qqVerumDef c”)
     (henkinSatisfiesDef S).val (by
       intro W _ _ _ _ e he
@@ -180,7 +187,7 @@ lemma tprovable_henkinSatisfiesF_verum (s : Term V ℒₒᵣ) (n : V) :
       simp [h, henkinSatisfies_verum])
     (w := ![(^⊤ : V), n]) (by simp) ![𝕹 ^⊤, 𝕹 n, s] (by simp [Fin.forall_fin_succ])
 
-lemma tprovable_henkinSatisfiesF_falsum (s : Term V ℒₒᵣ) (n : V) :
+lemma tprovable_henkinSatisfiesF_falsum :
     (T ∪ S.Con).internalize V ⊢ ∼henkinSatisfiesF S s ^⊥ n := by
   have h := tprovable_subst_of_models_henkin S T (k := 2) (m := 1) (.mkSigma “c n. !qqFalsumDef c”)
     (∼(henkinSatisfiesDef S).val) (by
@@ -190,12 +197,13 @@ lemma tprovable_henkinSatisfiesF_falsum (s : Term V ℒₒᵣ) (n : V) :
     (w := ![(^⊥ : V), n]) (by simp) ![𝕹 ^⊥, 𝕹 n, s] (by simp [Fin.forall_fin_succ])
   simpa [henkinSatisfiesF] using h
 
+end
+
 private noncomputable def satAnd : ArithmeticSemisentence 5 :=
   (henkinSatisfiesDef S).val/[#2, #3, #4] 🡘
     (henkinSatisfiesDef S).val/[#0, #3, #4] ⋏ (henkinSatisfiesDef S).val/[#1, #3, #4]
 
-lemma tprovable_henkinSatisfiesF_and (s : Term V ℒₒᵣ) (hp : IsSemiformula ℒₒᵣ n p)
-    (hq : IsSemiformula ℒₒᵣ n q) :
+lemma tprovable_henkinSatisfiesF_and (hp : IsSemiformula ℒₒᵣ n p) (hq : IsSemiformula ℒₒᵣ n q) :
     (T ∪ S.Con).internalize V ⊢ henkinSatisfiesF S s (p ^⋏ q) n 🡘
       henkinSatisfiesF S s p n ⋏ henkinSatisfiesF S s q n := by
   have h := tprovable_subst_of_models_henkin S T (k := 4) (m := 1)
@@ -214,8 +222,7 @@ private noncomputable def satOr : ArithmeticSemisentence 5 :=
   (henkinSatisfiesDef S).val/[#2, #3, #4] 🡘
     (henkinSatisfiesDef S).val/[#0, #3, #4] ⋎ (henkinSatisfiesDef S).val/[#1, #3, #4]
 
-lemma tprovable_henkinSatisfiesF_or (s : Term V ℒₒᵣ) (hp : IsSemiformula ℒₒᵣ n p)
-    (hq : IsSemiformula ℒₒᵣ n q) :
+lemma tprovable_henkinSatisfiesF_or (hp : IsSemiformula ℒₒᵣ n p) (hq : IsSemiformula ℒₒᵣ n q) :
     (T ∪ S.Con).internalize V ⊢ henkinSatisfiesF S s (p ^⋎ q) n 🡘
       henkinSatisfiesF S s p n ⋎ henkinSatisfiesF S s q n := by
   have h := tprovable_subst_of_models_henkin S T (k := 4) (m := 1)
@@ -233,7 +240,7 @@ lemma tprovable_henkinSatisfiesF_or (s : Term V ℒₒᵣ) (hp : IsSemiformula �
 private noncomputable def satNeg : ArithmeticSemisentence 4 :=
   (henkinSatisfiesDef S).val/[#1, #2, #3] 🡘 ∼(henkinSatisfiesDef S).val/[#0, #2, #3]
 
-lemma tprovable_henkinSatisfiesF_neg (s : Term V ℒₒᵣ) (hp : IsSemiformula ℒₒᵣ n p) :
+lemma tprovable_henkinSatisfiesF_neg (hp : IsSemiformula ℒₒᵣ n p) :
     (T ∪ S.Con).internalize V ⊢ henkinSatisfiesF S s (neg ℒₒᵣ p) n 🡘
       ∼henkinSatisfiesF S s p n := by
   have h := tprovable_subst_of_models_henkin S T (k := 3) (m := 1)
@@ -246,7 +253,7 @@ lemma tprovable_henkinSatisfiesF_neg (s : Term V ℒₒᵣ) (hp : IsSemiformula 
   simpa [satNeg, henkinSatisfiesF, typed_quote_rew_subst, Semiformula.substs_substs,
     Matrix.vecHead, Matrix.vecTail] using h
 
-lemma tprovable_henkinSatisfiesF_axiom (s : Term V ℒₒᵣ) (hp : p ∈ S.Δ₁Class)
+lemma tprovable_henkinSatisfiesF_axiom (hp : p ∈ S.Δ₁Class)
     (hf : IsFormula ℒₒᵣ p) : (T ∪ S.Con).internalize V ⊢ henkinSatisfiesF S s p 0 :=
   tprovable_subst_of_models_henkin S T (k := 2) (m := 1)
     (.mkSigma “a n. !(S.Δ₁ch).sigma a ∧ !(isSemiformula ℒₒᵣ).sigma 0 a ∧ n = 0”)
@@ -264,7 +271,7 @@ private noncomputable def satAll : ArithmeticSemisentence 5 :=
   (henkinSatisfiesDef S).val/[#1, #2, #4] 🡘 ∀¹ ((henkinDomainDef S).val/[#0] 🡒
     (henkinSatisfiesDef S).val/[#1, #4, ‘(#0 + #5) * (#0 + #5) + #5 + 1’])
 
-lemma tprovable_henkinSatisfiesF_all (s : Term V ℒₒᵣ) (hp : IsSemiformula ℒₒᵣ (n + 1) p) :
+lemma tprovable_henkinSatisfiesF_all (hp : IsSemiformula ℒₒᵣ (n + 1) p) :
     (T ∪ S.Con).internalize V ⊢ henkinSatisfiesF S s (^∀ p) n 🡘
       ∀¹ (henkinDomainF S 🡒 henkinSatisfiesF S (pTerm (Semiterm.bvar 0) s.bShift) p (n + 1)) := by
   have h := tprovable_subst_of_models_henkin S T (k := 4) (m := 1)
@@ -283,7 +290,7 @@ private noncomputable def satExs : ArithmeticSemisentence 5 :=
   (henkinSatisfiesDef S).val/[#1, #2, #4] 🡘 ∃¹ ((henkinDomainDef S).val/[#0] ⋏
     (henkinSatisfiesDef S).val/[#1, #4, ‘(#0 + #5) * (#0 + #5) + #5 + 1’])
 
-lemma tprovable_henkinSatisfiesF_exs (s : Term V ℒₒᵣ) (hp : IsSemiformula ℒₒᵣ (n + 1) p) :
+lemma tprovable_henkinSatisfiesF_exs (hp : IsSemiformula ℒₒᵣ (n + 1) p) :
     (T ∪ S.Con).internalize V ⊢ henkinSatisfiesF S s (^∃ p) n 🡘
       ∃¹ (henkinDomainF S ⋏ henkinSatisfiesF S (pTerm (Semiterm.bvar 0) s.bShift) p (n + 1)) := by
   have h := tprovable_subst_of_models_henkin S T (k := 4) (m := 1)
@@ -298,21 +305,20 @@ lemma tprovable_henkinSatisfiesF_exs (s : Term V ℒₒᵣ) (hp : IsSemiformula 
     Semiformula.substs_substs, SemitermVec.q, Matrix.vecHead, Matrix.vecTail,
     Matrix.constant_eq_singleton] using h
 
-private noncomputable def satRel (R : (ℒₒᵣ).Rel 2) : ArithmeticSemisentence 5 :=
+private noncomputable def satRel : ArithmeticSemisentence 5 :=
   (∀¹ ∀¹ (((henkinDomainDef S).val/[#0] ⋏ (henkinEquatesDef S).val/[#2, #5, #6, #0]) ⋏
       ((henkinDomainDef S).val/[#1] ⋏ (henkinEquatesDef S).val/[#3, #5, #6, #1]) ⋏ ⊤ 🡒
     (henkinRelDef S R).val/[#0, #1])) 🡘 (henkinSatisfiesDef S).val/[#2, #3, #4]
 
 @[simp]
-lemma relativizedImp_two (D : Semiformula V ℒₒᵣ 1) (A : Fin 2 → Semiformula V ℒₒᵣ 1)
-    (C : Semiformula V ℒₒᵣ 2) : relativizedImp D A (C.subst fun i ↦ Semiterm.bvar (i.addCast 0)) =
+lemma relativizedImp_two (C : Semiformula V ℒₒᵣ 2) :
+    relativizedImp D A (C.subst fun i ↦ Semiterm.bvar (i.addCast 0)) =
       ∀¹ ∀¹ ((D.subst ![Semiterm.bvar 0] ⋏ (A 0).subst ![Semiterm.bvar 0]) ⋏
         (D.subst ![Semiterm.bvar 1] ⋏ (A 1).subst ![Semiterm.bvar 1]) ⋏ ⊤ 🡒
           C.subst ![Semiterm.bvar 0, Semiterm.bvar 1]) := by
   rfl
 
-lemma tprovable_henkinSatisfiesF_rel (R : (ℒₒᵣ).Rel 2) (s : Term V ℒₒᵣ)
-    (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u) :
+lemma tprovable_henkinSatisfiesF_rel (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u) :
     (T ∪ S.Con).internalize V ⊢
       relativizedImp (henkinDomainF S)
         (fun i ↦ henkinEquatesF S s.bShift (Semiterm.bvar 0) (![t, u] i) n)
@@ -347,7 +353,7 @@ private noncomputable def equatesBvar : ArithmeticSemisentence 5 :=
   tvDef.val/[#3, #4, #0] 🡒 (henkinListDef S)/[#2, #4] 🡒
     ∀¹ ((henkinDomainDef S).val/[#0] 🡒 (“#0 = #4” 🡘 (henkinEquatesDef S).val/[#1, #3, #5, #0]))
 
-lemma tprovable_henkinEquatesF_bvar (x s : Term V ℒₒᵣ) {i : V} (hi : i < n) :
+lemma tprovable_henkinEquatesF_bvar {i : V} (hi : i < n) :
     (T ∪ S.Con).internalize V ⊢ tvF x s (^#i) 🡒 henkinListF S s n 🡒
       ∀¹ (henkinDomainF S 🡒 (Semiformula.equal (Semiterm.bvar 0) x.bShift 🡘
         henkinEquatesF S s.bShift (Semiterm.bvar 0) (^#i) n)) := by
@@ -366,24 +372,25 @@ lemma tprovable_henkinEquatesF_bvar (x s : Term V ℒₒᵣ) {i : V} (hi : i < n
     Semiformula.substs_substs, SemitermVec.q, Matrix.vecHead, Matrix.vecTail,
     Matrix.constant_eq_singleton] using h
 
-lemma funcGraph_zero (D : Semiformula V ℒₒᵣ 1) (A : Fin 0 → Semiformula V ℒₒᵣ 1)
-    (C : Semiformula V ℒₒᵣ 1) : funcGraph D A C = (⊤ 🡒 C.subst ![Semiterm.bvar 0]) := by
+lemma funcGraph_zero (A : Fin 0 → Semiformula V ℒₒᵣ 1) (C : Semiformula V ℒₒᵣ 1) :
+    funcGraph D A C = (⊤ 🡒 C.subst ![Semiterm.bvar 0]) := by
   rfl
 
-lemma funcGraph_two (D : Semiformula V ℒₒᵣ 1) (A : Fin 2 → Semiformula V ℒₒᵣ 1)
-    (C : Semiformula V ℒₒᵣ 3) : funcGraph D A C =
+lemma funcGraph_two (C : Semiformula V ℒₒᵣ 3) : funcGraph D A C =
       ∀¹ ∀¹ ((D.subst ![Semiterm.bvar 0] ⋏ (A 0).subst ![Semiterm.bvar 0]) ⋏
         (D.subst ![Semiterm.bvar 1] ⋏ (A 1).subst ![Semiterm.bvar 1]) ⋏ ⊤ 🡒
           C.subst ![Semiterm.bvar 2, Semiterm.bvar 0, Semiterm.bvar 1]) := by
   rfl
 
-private noncomputable def equatesConst (F : (ℒₒᵣ).Func 0) : ArithmeticSemisentence 3 :=
+section
+
+variable (F : (ℒₒᵣ).Func 0) (s : Term V ℒₒᵣ) (n : V) (A : Fin 0 → Semiformula V ℒₒᵣ 1)
+
+private noncomputable def equatesConst : ArithmeticSemisentence 3 :=
   ∀¹ ((henkinDomainDef S).val/[#0] 🡒
     ((⊤ 🡒 (henkinFuncDef S F).val/[#0]) 🡘 (henkinEquatesDef S).val/[#1, #2, #3, #0]))
 
-lemma tprovable_henkinEquatesF_const (F : (ℒₒᵣ).Func 0) (s : Term V ℒₒᵣ) (n : V)
-    (A : Fin 0 → Semiformula V ℒₒᵣ 1) :
-    (T ∪ S.Con).internalize V ⊢ ∀¹ (henkinDomainF S 🡒
+lemma tprovable_henkinEquatesF_const : (T ∪ S.Con).internalize V ⊢ ∀¹ (henkinDomainF S 🡒
       (funcGraph (henkinDomainF S) A ⌜(henkinFuncDef S F).val⌝ 🡘
         henkinEquatesF S s.bShift (Semiterm.bvar 0) (^func 0 ⌜F⌝ 0) n)) := by
   have h := tprovable_subst_of_models_henkin S T (k := 2) (m := 1)
@@ -407,14 +414,19 @@ lemma tprovable_henkinEquatesF_const (F : (ℒₒᵣ).Func 0) (s : Term V ℒₒ
     Semiformula.substs_substs, SemitermVec.q, Matrix.vecHead, Matrix.vecTail,
     Matrix.constant_eq_singleton] using h
 
-private noncomputable def equatesFunc (F : (ℒₒᵣ).Func 2) : ArithmeticSemisentence 5 :=
+end
+
+section
+
+variable (F : (ℒₒᵣ).Func 2) (s : Term V ℒₒᵣ)
+
+private noncomputable def equatesFunc : ArithmeticSemisentence 5 :=
   ∀¹ ((henkinDomainDef S).val/[#0] 🡒
     ((∀¹ ∀¹ (((henkinDomainDef S).val/[#0] ⋏ (henkinEquatesDef S).val/[#3, #6, #7, #0]) ⋏
         ((henkinDomainDef S).val/[#1] ⋏ (henkinEquatesDef S).val/[#4, #6, #7, #1]) ⋏ ⊤ 🡒
       (henkinFuncDef S F).val/[#2, #0, #1])) 🡘 (henkinEquatesDef S).val/[#3, #4, #5, #0]))
 
-lemma tprovable_henkinEquatesF_func (F : (ℒₒᵣ).Func 2) (s : Term V ℒₒᵣ)
-    (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u) :
+lemma tprovable_henkinEquatesF_func (ht : IsSemiterm ℒₒᵣ n t) (hu : IsSemiterm ℒₒᵣ n u) :
     (T ∪ S.Con).internalize V ⊢ ∀¹ (henkinDomainF S 🡒
       (funcGraph (henkinDomainF S)
           (fun i ↦ henkinEquatesF S s.bShift (Semiterm.bvar 0) (![t, u] i) n)
@@ -442,6 +454,8 @@ lemma tprovable_henkinEquatesF_func (F : (ℒₒᵣ).Func 2) (s : Term V ℒₒ�
     Matrix.constant_eq_singleton, Semiterm.bShift_eq_subst_nil, Semiterm.bShift_subst_nil,
     Semiterm.subst_nil_subst] using h
 
+end
+
 end clauses
 
 /-! ## The truth lemma -/
@@ -459,13 +473,28 @@ noncomputable def henkinTermEquiv (ht : (ℒₒᵣ).IsClosedSemiterm n t) : Form
   henkinListF S (assignment n) n 🡒 ∀¹ (henkinDomainF S 🡒 (varEqualT hT (instTerm n t ht) 🡘
     henkinEquatesF S (assignment n).bShift (Semiterm.bvar 0) t n))
 
+variable (tbl n p t)
+
 /-- The code of `henkinTermEquiv`. -/
-noncomputable def henkinTermEquivCode (tbl n t : V) : V :=
+noncomputable def henkinTermEquivCode : V :=
   imp ℒₒᵣ (subst ℒₒᵣ ?[numeral n, assignmentCode n] ⌜henkinListDef S⌝)
     (^∀ (imp ℒₒᵣ ⌜(henkinDomainDef S).val⌝
       (iff ℒₒᵣ (varEqual ℒₒᵣ ℒₒᵣ tbl (termSubst ℒₒᵣ (fvarVec n) t))
         (subst ℒₒᵣ ?[numeral t, numeral n, termBShift ℒₒᵣ (assignmentCode n), ^#0]
           ⌜(henkinEquatesDef S).val⌝))))
+
+/-- The code of `henkinEquiv`. -/
+noncomputable def henkinEquivCode : V :=
+  imp ℒₒᵣ (subst ℒₒᵣ ?[numeral n, assignmentCode n] ⌜henkinListDef S⌝)
+    (iff ℒₒᵣ (translate ℒₒᵣ ℒₒᵣ tbl (subst ℒₒᵣ (fvarVec n) p))
+      (subst ℒₒᵣ ?[numeral p, numeral n, assignmentCode n] ⌜(henkinSatisfiesDef S).val⌝))
+
+/-- The matrix of a quantified formula with the bound variables `#(i + 1)` replaced by `&i`. -/
+noncomputable def instMatrix (hp : IsSemiformula ℒₒᵣ (n + 1) p) : Semiformula V ℒₒᵣ 1 :=
+  ⟨subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) p, by
+    simpa using hp.subst (isSemitermVec_fvarVec n 0).qVec⟩
+
+variable {tbl n p t}
 
 lemma val_henkinTermEquiv (ht : (ℒₒᵣ).IsClosedSemiterm n t) :
     (henkinTermEquiv S hT ht).val = henkinTermEquivCode S tbl n t := by
@@ -477,12 +506,6 @@ set agree at the free variables `&i`. -/
 noncomputable def henkinEquiv (hp : IsSemiformula ℒₒᵣ n p) : Formula V ℒₒᵣ :=
   henkinListF S (assignment n) n 🡒
     (hT.transT (instFormula n p hp) 🡘 henkinSatisfiesF S (assignment n) p n)
-
-/-- The code of `henkinEquiv`. -/
-noncomputable def henkinEquivCode (tbl n p : V) : V :=
-  imp ℒₒᵣ (subst ℒₒᵣ ?[numeral n, assignmentCode n] ⌜henkinListDef S⌝)
-    (iff ℒₒᵣ (translate ℒₒᵣ ℒₒᵣ tbl (subst ℒₒᵣ (fvarVec n) p))
-      (subst ℒₒᵣ ?[numeral p, numeral n, assignmentCode n] ⌜(henkinSatisfiesDef S).val⌝))
 
 lemma val_henkinEquiv (hp : IsSemiformula ℒₒᵣ n p) :
     (henkinEquiv S hT hp).val = henkinEquivCode S tbl n p := by
@@ -523,11 +546,6 @@ lemma tprovable_henkinEquiv_or (hp : IsSemiformula ℒₒᵣ n p) (hq : IsSemifo
   rw [henkinEquiv] at h₁ h₂ ⊢
   rw [e, IsTable.transT_or]
   cl_prover [h₁, h₂, h₃]
-
-/-- The matrix of a quantified formula with the bound variables `#(i + 1)` replaced by `&i`. -/
-noncomputable def instMatrix (n p : V) (hp : IsSemiformula ℒₒᵣ (n + 1) p) : Semiformula V ℒₒᵣ 1 :=
-  ⟨subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) p, by
-    simpa using hp.subst (isSemitermVec_fvarVec n 0).qVec⟩
 
 lemma tprovable_list_imp_all_iff (hp : (ℒₒᵣ).IsSemisentence (n + 1) p)
     (h : (T ∪ S.Con).internalize V ⊢ henkinEquiv S hT hp.isSemiformula) :

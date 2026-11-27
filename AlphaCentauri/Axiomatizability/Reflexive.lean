@@ -19,18 +19,23 @@ open FFL.Entailment
 
 namespace FFL.FirstOrder
 
+section
+variable (T : ArithmeticTheory)
+
 /-- `T` is reflexive if it proves the consistency of every finite subtheory.
 - [Lin97, Ch. 1 p. 18]
 - [HP98, Definition III.2.32] -/
-def ArithmeticTheory.Reflexive (T : ArithmeticTheory) : Prop :=
+def ArithmeticTheory.Reflexive : Prop :=
   ∀ U, U ⊆ T → (U_fin : U.Finite) →
     let _ : U.Δ₁ := Theory.Δ₁.ofFinite _ U_fin
     T ⊢ U.consistent.val
 
 /-- `T` is essentially reflexive if every theory extending `T` is reflexive.
 - [Lin97, Ch. 1 p. 18] -/
-def ArithmeticTheory.EssentiallyReflexive (T : ArithmeticTheory) : Prop :=
+def ArithmeticTheory.EssentiallyReflexive : Prop :=
   ∀ U : ArithmeticTheory, T ⊆ U → U.Reflexive
+
+end
 
 lemma ArithmeticTheory.EssentiallyReflexive.reflexive {T : ArithmeticTheory}
     (h : T.EssentiallyReflexive) : T.Reflexive :=
@@ -41,10 +46,13 @@ namespace Arithmetic
 
 variable {T : ArithmeticTheory}
 
+section
+variable [Consistent T]
+
 /-- A reflexive extension of `𝗜𝚺₁` is not finitely axiomatizable.
 - [Lin97, Corollary 2.1]
 - [HP98, Corollary III.2.24] -/
-theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] [Consistent T] (h : T.Reflexive) :
+theorem not_finiteAxiomatizable_of_reflexive [𝗜𝚺₁ ⪯ T] (h : T.Reflexive) :
     ¬FiniteAxiomatizable T := by
   by_contra hfa
   obtain ⟨F, hFT, hfin, hequiv⟩ := finiteAxiomatizable_iff_exists_finite_subset.mp hfa
@@ -121,7 +129,7 @@ theorem Peano.not_finiteAxiomatizable : ¬FiniteAxiomatizable 𝗣𝗔 :=
 
 /-- Every consistent extension of `𝗣𝗔` is not finitely axiomatizable.
 - [Lin97, Corollary 2.1] -/
-theorem not_finiteAxiomatizable_of_Peano_le [𝗣𝗔 ⪯ T] [Consistent T] : ¬FiniteAxiomatizable T := by
+theorem not_finiteAxiomatizable_of_Peano_le [𝗣𝗔 ⪯ T] : ¬FiniteAxiomatizable T := by
   have hR : (𝗣𝗔 ∪ T).Reflexive := Peano.essentiallyReflexive _ Set.subset_union_left
   have hUT : 𝗣𝗔 ∪ T ⪯ T := WeakerThan.ofAxm! <| by
     intro σ hσ
@@ -132,6 +140,8 @@ theorem not_finiteAxiomatizable_of_Peano_le [𝗣𝗔 ⪯ T] [Consistent T] : ¬
   have : 𝗜𝚺₁ ⪯ 𝗣𝗔 ∪ T := WeakerThan.trans (inferInstance : 𝗜𝚺₁ ⪯ 𝗣𝗔) inferInstance
   have : Consistent (𝗣𝗔 ∪ T) := Consistent.of_le ‹Consistent T› hUT
   exact mt (FiniteAxiomatizable.of_equiv hequiv) <| not_finiteAxiomatizable_of_reflexive hR
+
+end
 
 end Arithmetic
 end FFL.FirstOrder

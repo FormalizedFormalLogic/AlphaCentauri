@@ -32,13 +32,13 @@ def hardy : ONote → ℕ → ℕ
       hardy (f n) n
   termination_by o => o
 
-private lemma eq_zero_of_fundamentalSequence_none
-    {o : ONote} (e : fundamentalSequence o = Sum.inl none) :
+variable {o a b : ONote} {k x n : ℕ}
+
+private lemma eq_zero_of_fundamentalSequence_none (e : fundamentalSequence o = Sum.inl none) :
     o = 0 := by
   have hp := fundamentalSequence_has_prop o; rw [e] at hp; exact hp
 
-private lemma hardy_def {o : ONote} {x} (e : fundamentalSequence o = x) :
-    hardy o =
+private lemma hardy_def {x} (e : fundamentalSequence o = x) : hardy o =
       match
         (motive := (x : Option ONote ⊕ (ℕ → ONote)) → FundamentalSequenceProp o x → ℕ → ℕ)
         x, e ▸ fundamentalSequence_has_prop o with
@@ -48,16 +48,22 @@ private lemma hardy_def {o : ONote} {x} (e : fundamentalSequence o = x) :
   subst x
   rw [hardy]
 
-lemma hardy_zero' (o : ONote) (h : fundamentalSequence o = Sum.inl none) : hardy o = id := by
+section
+
+variable (o)
+
+lemma hardy_zero' (h : fundamentalSequence o = Sum.inl none) : hardy o = id := by
   rw [hardy_def h]
 
-lemma hardy_succ (o) {a} (h : fundamentalSequence o = Sum.inl (some a)) :
+lemma hardy_succ (h : fundamentalSequence o = Sum.inl (some a)) :
     hardy o = fun n => hardy a (n + 1) := by
   rw [hardy_def h]
 
-lemma hardy_limit (o) {f} (h : fundamentalSequence o = Sum.inr f) :
+lemma hardy_limit {f} (h : fundamentalSequence o = Sum.inr f) :
     hardy o = fun n => hardy (f n) n := by
   rw [hardy_def h]
+
+end
 
 @[simp]
 lemma hardy_zero : hardy 0 = id :=
@@ -69,7 +75,8 @@ lemma hardy_one : hardy 1 = fun n => n + 1 := by
 
 /-! ### Growth -/
 
-theorem le_hardy (o : ONote) (n : ℕ) : n ≤ hardy o n := by
+theorem le_hardy : ∀ (o : ONote) (n : ℕ), n ≤ hardy o n := by
+  intro o n
   rcases e : fundamentalSequence o with (_ | a) | f
   · rw [hardy_zero' o e]; exact le_rfl
   · have hlt : a < o := lt_of_fundamentalSequence_succ e
@@ -78,10 +85,10 @@ theorem le_hardy (o : ONote) (n : ℕ) : n ≤ hardy o n := by
   · have hlt : f n < o := fundamentalSequence_lt_of_limit e n
     rw [hardy_limit o e]
     exact le_hardy (f n) n
-termination_by o
+termination_by o => o
 decreasing_by all_goals exact hlt
 
-theorem hardy_le_of_reaches {x : ℕ} {b a : ONote} (h : Reaches x b a) :
+theorem hardy_le_of_reaches (h : Reaches x b a) :
     (∀ γ, Reaches x b γ → Monotone (hardy γ)) → hardy a x ≤ hardy b x := by
   induction h with
   | refl a => intro _; exact le_rfl
@@ -97,7 +104,8 @@ theorem hardy_le_of_reaches {x : ℕ} {b a : ONote} (h : Reaches x b a) :
       have heq : hardy b x = hardy (g x) x := by rw [hardy_limit _ hb]
       rw [heq]; exact ihg
 
-theorem hardy_monotone (o : ONote) : Monotone (hardy o) := by
+theorem hardy_monotone : ∀ o : ONote, Monotone (hardy o) := by
+  intro o
   refine monotone_nat_of_le_succ (fun n => ?_)
   rcases e : fundamentalSequence o with (_ | a) | f
   · rw [hardy_zero' o e]; exact Nat.le_succ n
@@ -114,14 +122,14 @@ theorem hardy_monotone (o : ONote) : Monotone (hardy o) := by
       have hγo : γ < o := lt_of_le_of_lt (reaches_le hγ) hltn1
       exact hardy_monotone γ
     exact le_trans (mono_fn (Nat.le_succ n)) step
-termination_by o
+termination_by o => o
 decreasing_by
   · exact hlt
   · exact hlt
   · exact hγo
 
-theorem hardy_le_of_lt {x : ℕ} {a b : ONote} (ha : a.NF) (hb : b.NF)
-    (hab : a < b) (hnorm : norm a ≤ x) : hardy a x ≤ hardy b x :=
+theorem hardy_le_of_lt (ha : a.NF) (hb : b.NF) (hab : a < b) (hnorm : norm a ≤ x) :
+    hardy a x ≤ hardy b x :=
   hardy_le_of_reaches (reaches_of_lt b hb a ha hab hnorm) (fun γ _ => hardy_monotone γ)
 
 /-! ### Closed forms -/
@@ -134,20 +142,22 @@ lemma hardy_ofNat (k x : ℕ) : hardy (ofNat k) x = x + k := by
     simp only [hardy_succ _ (fundamentalSequence_ofNat_succ k)]
     rw [ih (x + 1)]; omega
 
+variable (n) in
 /-- `oadd 1 1 0` represents `ω`. -/
-lemma hardy_omega (n : ℕ) : hardy (oadd 1 1 0) n = 2 * n + 1 := by
+lemma hardy_omega : hardy (oadd 1 1 0) n = 2 * n + 1 := by
   have hfs : fundamentalSequence (oadd 1 1 0) = Sum.inr (fun i => ofNat (i + 1)) := rfl
   have h1 : hardy (oadd 1 1 0) n = hardy (ofNat (n + 1)) n := by
     simp only [hardy_limit _ hfs]
   rw [h1, hardy_ofNat (n + 1) n]
   omega
 
-
 /-! ### The Hardy step -/
+
+section
 
 
 /-- The fundamental sequence of a limit notation is everywhere nonzero. -/
-private lemma fundamentalSequence_ne_zero_of_limit {o : ONote} {f : ℕ → ONote}
+private lemma fundamentalSequence_ne_zero_of_limit {f : ℕ → ONote}
     (h : fundamentalSequence o = Sum.inr f) (i : ℕ) : f i ≠ 0 := by
   induction o with
   | zero => simp [fundamentalSequence] at h
@@ -173,8 +183,7 @@ def hstep : ONote → ℕ → ONote
       hstep (f n) n
   termination_by o => o
 
-private lemma hstep_def {o : ONote} {x} (e : fundamentalSequence o = x) :
-    hstep o =
+private lemma hstep_def {x} (e : fundamentalSequence o = x) : hstep o =
       match
         (motive := (x : Option ONote ⊕ (ℕ → ONote)) → FundamentalSequenceProp o x → ℕ → ONote)
         x, e ▸ fundamentalSequence_has_prop o with
@@ -183,10 +192,12 @@ private lemma hstep_def {o : ONote} {x} (e : fundamentalSequence o = x) :
       | Sum.inr f, _ => fun n => hstep (f n) n := by
   subst x; rw [hstep]
 
-lemma hstep_succ (o) {a} (h : fundamentalSequence o = Sum.inl (some a)) : hstep o = fun _ => a := by
+variable (o)
+
+lemma hstep_succ (h : fundamentalSequence o = Sum.inl (some a)) : hstep o = fun _ => a := by
   rw [hstep_def h]
 
-lemma hstep_limit (o) {f} (h : fundamentalSequence o = Sum.inr f) :
+lemma hstep_limit {f} (h : fundamentalSequence o = Sum.inr f) :
     hstep o = fun n => hstep (f n) n := by
   rw [hstep_def h]
 
@@ -200,7 +211,11 @@ theorem hardy_hstep (o : ONote) (n : ℕ) (h : o ≠ 0) : hardy o n = hardy (hst
 termination_by o
 decreasing_by exact hlt
 
+end
+
 /-! ### Peeling the tail -/
+
+section
 
 theorem hardy_oadd_tail (a : ONote) (m : ℕ+) (b : ONote) (n : ℕ) :
     hardy (oadd a m b) n = hardy (oadd a m 0) (hardy b n) := by
@@ -222,8 +237,11 @@ decreasing_by all_goals exact hlt
 
 /-! ### Coefficient composition -/
 
-theorem hardy_oadd_coeff_step (b : ONote) (hb : b ≠ 0) (k x : ℕ) :
-    hardy (oadd b (k + 1).succPNat 0) x
+variable (b) (hb : b ≠ 0) (k x : ℕ)
+
+include hb
+
+theorem hardy_oadd_coeff_step : hardy (oadd b (k + 1).succPNat 0) x
       = hardy (oadd b k.succPNat 0) (hardy (oadd b 1 0) x) := by
   rcases e : fundamentalSequence b with (_ | b') | f
   · exact absurd (eq_zero_of_fundamentalSequence_none e) hb
@@ -247,18 +265,21 @@ theorem hardy_oadd_coeff_step (b : ONote) (hb : b ≠ 0) (k x : ℕ) :
         hardy_limit (oadd b 1 0) (fundamentalSequence_omega_pow_limit e)]
 
 /-- `oadd b k.succPNat 0` represents `ω^b · (k + 1)`. -/
-theorem hardy_oadd_coeff (b : ONote) (hb : b ≠ 0) (k x : ℕ) :
-    hardy (oadd b k.succPNat 0) x = (hardy (oadd b 1 0))^[k + 1] x := by
+theorem hardy_oadd_coeff : hardy (oadd b k.succPNat 0) x = (hardy (oadd b 1 0))^[k + 1] x := by
   induction k generalizing x with
   | zero => rfl
   | succ k ih =>
     rw [hardy_oadd_coeff_step b hb k x, ih (hardy (oadd b 1 0) x), ← Function.iterate_succ_apply]
+
+end
 
 /-! ### The additive composition law
 
 `H_{c+d}(x) = H_c(H_d(x))` when `d` lies strictly below `c`'s least exponent (non-absorbing CNF
 concatenation).
 -/
+
+section
 
 /-- The least (trailing) exponent of a notation's Cantor normal form (`0` for `0`). -/
 def lastExp : ONote → ONote
@@ -272,16 +293,17 @@ theorem lastExp_zero : lastExp 0 = 0 := rfl
 @[simp]
 theorem lastExp_oadd_zero (e n) : lastExp (oadd e n 0) = e := rfl
 
+variable {e : ONote} {n : ℕ+}
+
 @[grind =]
-lemma lastExp_oadd_ne {e : ONote} {n : ℕ+} {a : ONote} (h : a ≠ 0) :
-    lastExp (oadd e n a) = lastExp a := by
+lemma lastExp_oadd_ne (h : a ≠ 0) : lastExp (oadd e n a) = lastExp a := by
   cases a with
   | zero => exact absurd rfl h
   | oadd e' n' a' => rfl
 
 /-- `addAux` concatenates (no merge or absorption) when the right operand's leading exponent
 is strictly below `e`. -/
-private lemma addAux_concat {e : ONote} (he : e.NF) {n : ℕ+} {o : ONote} (ho : o.NF)
+private lemma addAux_concat (he : e.NF) (ho : o.NF)
     (h : o = 0 ∨ ∀ e' n' a', o = oadd e' n' a' → e'.repr < e.repr) :
     addAux e n o = oadd e n o := by
   match o, ho, h with
@@ -295,9 +317,10 @@ private lemma addAux_concat {e : ONote} (he : e.NF) {n : ℕ+} {o : ONote} (ho :
       (@ONote.cmp_compares e e' he ho'.fst).eq_gt.2 hlt
     simp only [addAux, hee']
 
+variable {b : Ordinal}
+
 /-- The least exponent of a nonzero notation lies below any bound it is `NFBelow`. -/
-private lemma lastExp_repr_lt {o : ONote} {b : Ordinal} (hb : NFBelow o b) (h : o ≠ 0) :
-    (lastExp o).repr < b := by
+private lemma lastExp_repr_lt (hb : NFBelow o b) (h : o ≠ 0) : (lastExp o).repr < b := by
   induction o generalizing b with
   | zero => exact absurd rfl h
   | oadd e n a _ iha =>
@@ -307,7 +330,7 @@ private lemma lastExp_repr_lt {o : ONote} {b : Ordinal} (hb : NFBelow o b) (h : 
       exact lt_trans (iha hb.snd ha) hb.lt
 
 /-- Convert an `NFBelow` fact into the leading-exponent bound `addAux_concat` consumes. -/
-private lemma nfBelow_concat {o : ONote} {b : Ordinal} (h : NFBelow o b) :
+private lemma nfBelow_concat (h : NFBelow o b) :
     o = 0 ∨ ∀ e' n' a', o = oadd e' n' a' → e'.repr < b := by
   cases o with
   | zero => left; rfl
@@ -352,16 +375,17 @@ theorem hardy_add_comp (c : ONote) (hc : c.NF) (d : ONote) (hd : d.NF)
         · rwa [lastExp_oadd_ne ha0] at hlt
       rw [iha ha d hd ihcond x, hardy_oadd_tail e n a (hardy d x)]
 
+end
 
 /-! ### Comparison with the fast-growing hierarchy
 
 Two-sided comparison of `hardy` at `ω`-powers against `fastGrowing`, up to the `ε₀`-tower
 diagonal. Throughout, `oadd a 1 0` is the notation for `ω ^ a`. -/
 
-
 instance : WellFoundedLT ONote := InvImage.wf repr Ordinal.lt_wf
 
-theorem hardy_le_fastGrowing (o : ONote) (n : ℕ) (hn : 2 ≤ n) : hardy o n ≤ fastGrowing o n := by
+theorem hardy_le_fastGrowing : ∀ (o : ONote) (n : ℕ), 2 ≤ n → hardy o n ≤ fastGrowing o n := by
+  intro o n hn
   rcases e : fundamentalSequence o with (_ | a) | f
   · rw [hardy_zero' o e, fastGrowing_zero' o e]; simp
   · have hlt : a < o := lt_of_fundamentalSequence_succ e
@@ -382,7 +406,7 @@ theorem hardy_le_fastGrowing (o : ONote) (n : ℕ) (hn : 2 ≤ n) : hardy o n �
   · have hlt : f n < o := fundamentalSequence_lt_of_limit e n
     rw [hardy_limit o e, fastGrowing_limit o e]
     exact hardy_le_fastGrowing (f n) n hn
-termination_by o
+termination_by o => o
 decreasing_by all_goals exact hlt
 
 /-! ### An arbitrary exponent
@@ -391,9 +415,10 @@ At arbitrary `a : ONote`, `H_{ω^a}(n) + 1 ≤ f_a(n+1)` unconditionally, tighte
 bracket once the coefficient composition law is in place.
 -/
 
-private lemma hardy_omega_pow_coeff_comp (b : ONote) (k n : ℕ) :
+private lemma hardy_omega_pow_coeff_comp : ∀ (b : ONote) (k n : ℕ),
     hardy (oadd b (Nat.succPNat (k + 1)) 0) n
       = hardy (oadd b (Nat.succPNat k) 0) (hardy (oadd b 1 0) n) := by
+  intro b k n
   rcases eq_or_ne b 0 with hb | hb
   · subst hb
     have e1 : oadd (0 : ONote) (Nat.succPNat (k + 1)) 0 = ofNat (k + 2) := (ofNat_succ (k + 1)).symm
@@ -404,9 +429,10 @@ private lemma hardy_omega_pow_coeff_comp (b : ONote) (k n : ℕ) :
     omega
   · exact hardy_oadd_coeff_step b hb k n
 
-private lemma hardy_omega_pow_coeff_le {b : ONote}
-    (hbase : ∀ n, hardy (oadd b 1 0) n + 1 ≤ fastGrowing b (n + 1)) (m n : ℕ) :
-    hardy (oadd b (Nat.succPNat m) 0) n + 1 ≤ (fastGrowing b)^[m + 1] (n + 1) := by
+private lemma hardy_omega_pow_coeff_le
+    (hbase : ∀ n, hardy (oadd b 1 0) n + 1 ≤ fastGrowing b (n + 1)) (m : ℕ) :
+    ∀ n : ℕ, hardy (oadd b (Nat.succPNat m) 0) n + 1 ≤ (fastGrowing b)^[m + 1] (n + 1) := by
+  intro n
   induction m generalizing n with
   | zero =>
       change hardy (oadd b 1 0) n + 1 ≤ fastGrowing b (n + 1)
@@ -499,11 +525,18 @@ theorem hardy_omega_pow_bracket :
 
 end
 
-theorem fastGrowing_iterate_le_hardy_coeff (a : ONote) (ha : a ≠ 0) (k n : ℕ) :
+section
+
+variable (a) (ha : a ≠ 0) (k n : ℕ)
+
+include ha
+
+theorem fastGrowing_iterate_le_hardy_coeff :
     (fastGrowing a)^[k + 1] n ≤ hardy (oadd a k.succPNat 0) n := by
   rw [hardy_oadd_coeff a ha k n]
   exact iterate_le_iterate_of_le (fastGrowing_le_hardy_omega_pow a) (hardy_monotone _) (k + 1) n
 
+omit ha in
 private lemma iterate_offset_le {g F : ℕ → ℕ} (hF : Monotone F) (h : ∀ y, g y + 1 ≤ F (y + 1))
     (m y : ℕ) : g^[m] y + 1 ≤ F^[m] (y + 1) := by
   induction m generalizing y with
@@ -512,16 +545,17 @@ private lemma iterate_offset_le {g F : ℕ → ℕ} (hF : Monotone F) (h : ∀ y
       rw [Function.iterate_succ_apply, Function.iterate_succ_apply]
       exact le_trans (ih (g y)) (hF.iterate m (h y))
 
-theorem hardy_coeff_add_one_le (a : ONote) (ha : a ≠ 0) (k n : ℕ) :
+theorem hardy_coeff_add_one_le :
     hardy (oadd a k.succPNat 0) n + 1 ≤ (fastGrowing a)^[k + 1] (n + 1) := by
   rw [hardy_oadd_coeff a ha k n]
   exact iterate_offset_le (fastGrowing_monotone a) (hardy_omega_pow_add_one_le a) (k + 1) n
 
-theorem hardy_omega_pow_coeff_bracket (a : ONote) (ha : a ≠ 0) (k n : ℕ) :
-    (fastGrowing a)^[k + 1] n ≤ hardy (oadd a k.succPNat 0) n
+theorem hardy_omega_pow_coeff_bracket : (fastGrowing a)^[k + 1] n ≤ hardy (oadd a k.succPNat 0) n
       ∧ hardy (oadd a k.succPNat 0) n < (fastGrowing a)^[k + 1] (n + 1) :=
   ⟨fastGrowing_iterate_le_hardy_coeff a ha k n,
     Nat.lt_of_succ_le (hardy_coeff_add_one_le a ha k n)⟩
+
+end
 
 /-! ### The `ε₀`-diagonal capstone
 
@@ -529,17 +563,22 @@ theorem hardy_omega_pow_coeff_bracket (a : ONote) (ha : a ≠ 0) (k n : ℕ) :
 `a = tower i`, argument `i`, pins the `ε₀`-diagonal against the Hardy function at the next
 tower level. -/
 
-theorem fastGrowingε₀_le_hardy_tower_succ (i : ℕ) : fastGrowingε₀ i ≤ hardy (tower (i + 1)) i := by
+section
+
+variable (i : ℕ)
+
+theorem fastGrowingε₀_le_hardy_tower_succ : fastGrowingε₀ i ≤ hardy (tower (i + 1)) i := by
   have h : fastGrowing (tower i) i ≤ hardy (oadd (tower i) 1 0) i :=
     (hardy_omega_pow_bracket (tower i) i).1
   rw [← tower_succ] at h
   exact h
 
-theorem hardy_tower_succ_lt_fastGrowing (i : ℕ) :
+theorem hardy_tower_succ_lt_fastGrowing :
     hardy (tower (i + 1)) i < fastGrowing (tower i) (i + 1) := by
   have h := (hardy_omega_pow_bracket (tower i) i).2
   rw [← tower_succ] at h
   exact h
 
+end
 
 end ONote

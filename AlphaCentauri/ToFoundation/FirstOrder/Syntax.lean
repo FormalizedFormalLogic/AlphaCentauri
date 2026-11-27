@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Syntax.Classical.Coding
 
 /-!
@@ -22,20 +23,30 @@ namespace Semiformula
 lemma qr_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : (ω ▹ φ).qr = φ.qr := by
   induction φ using Semiformula.rec' generalizing n₂ <;> simp [*]
 
+section
+
+variable (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0)
+
 @[simp]
-lemma qr_substs (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) : (φ/[t]).qr = φ.qr :=
+lemma qr_substs : (φ/[t]).qr = φ.qr :=
   qr_rew _ φ
 
 @[simp, grind .]
-lemma ne_and_left (φ ψ : Semiformula L ξ n) : φ ≠ φ ⋏ ψ :=
+lemma all_ne_subst : φ/[t] ≠ ∀¹ φ :=
+  ne_of_ne_complexity (by simp)
+
+end
+
+section
+
+variable (φ ψ : Semiformula L ξ n)
+
+@[simp, grind .]
+lemma ne_and_left : φ ≠ φ ⋏ ψ :=
   ne_of_ne_complexity (by simp)
 
 @[simp, grind .]
-lemma ne_and_right (φ ψ : Semiformula L ξ n) : ψ ≠ φ ⋏ ψ :=
-  ne_of_ne_complexity (by simp)
-
-@[simp, grind .]
-lemma all_ne_subst (φ : Semiformula L ξ 1) (t : Semiterm L ξ 0) : φ/[t] ≠ ∀¹ φ :=
+lemma ne_and_right : ψ ≠ φ ⋏ ψ :=
   ne_of_ne_complexity (by simp)
 
 attribute [grind .] ne_or_left ne_or_right ex_ne_subst
@@ -47,16 +58,24 @@ lemma verum_eq : (⊤ : Semiformula L ξ n) = Semiformula.verum := rfl
 lemma falsum_eq : (⊥ : Semiformula L ξ n) = Semiformula.falsum := rfl
 
 @[grind =]
-lemma and_eq (φ ψ : Semiformula L ξ n) : φ ⋏ ψ = Semiformula.and φ ψ := rfl
+lemma and_eq : φ ⋏ ψ = Semiformula.and φ ψ := rfl
 
 @[grind =]
-lemma or_eq (φ ψ : Semiformula L ξ n) : φ ⋎ ψ = Semiformula.or φ ψ := rfl
+lemma or_eq : φ ⋎ ψ = Semiformula.or φ ψ := rfl
+
+end
+
+section
+
+variable (φ : Semiformula L ξ (n + 1))
 
 @[grind =]
-lemma all_eq (φ : Semiformula L ξ (n + 1)) : ∀¹ φ = Semiformula.all φ := rfl
+lemma all_eq : ∀¹ φ = Semiformula.all φ := rfl
 
 @[grind =]
-lemma exs_eq (φ : Semiformula L ξ (n + 1)) : ∃¹ φ = Semiformula.exs φ := rfl
+lemma exs_eq : ∃¹ φ = Semiformula.exs φ := rfl
+
+end
 
 attribute [grind =] Multiset.mem_atom_iff
 
@@ -104,18 +123,23 @@ lemma app_substs (ω : Rew L ξ 0 ξ 0) (φ : Semiformula L ξ 1) (t : Semiterm 
     · simp [Rew.comp_app]
   rw [← TransitiveRewriting.comp_app, ← TransitiveRewriting.comp_app, h]
 
-lemma subst_comp_subst_q (w : Fin n → Semiterm L ξ 0) (s : Semiterm L ξ 0) :
-    (Rew.subst ![s]).comp (Rew.subst w).q = Rew.subst (s :> w) := by
+section
+
+variable (w : Fin n → Semiterm L ξ 0) (s : Semiterm L ξ 0)
+
+lemma subst_comp_subst_q : (Rew.subst ![s]).comp (Rew.subst w).q = Rew.subst (s :> w) := by
   ext x
   · cases x using Fin.cases with
     | zero => simp [Rew.comp_app]
     | succ i => simp [Rew.comp_app]
   · simp [Rew.comp_app]
 
-lemma subst_q_app (w : Fin n → Semiterm L ξ 0) (s : Semiterm L ξ 0)
-    (φ : Semiformula L ξ (n + 1)) : ((Rew.subst w).q ▹ φ)/[s] = Rew.subst (s :> w) ▹ φ := by
+lemma subst_q_app (φ : Semiformula L ξ (n + 1)) :
+    ((Rew.subst w).q ▹ φ)/[s] = Rew.subst (s :> w) ▹ φ := by
   change Rew.subst ![s] ▹ ((Rew.subst w).q ▹ φ) = Rew.subst (s :> w) ▹ φ
   rw [← TransitiveRewriting.comp_app, subst_comp_subst_q]
+
+end
 
 lemma val_subst_congr {M : Type*} [Tarski.Structure L M] {ε : ξ → M} {w w' : Fin n → Semiterm L ξ 0}
     (h : ∀ i, Semiterm.val ![] ε (w i) = Semiterm.val ![] ε (w' i)) (t : Semiterm L ξ n) :
@@ -136,8 +160,9 @@ lemma rewrite_subst_shift_eq (f : ℕ → SyntacticTerm L) (t : SyntacticTerm L)
         simpa using Rew.q_comp_bShift_app (ω := (Rew.shift : SyntacticRew L 0 0)) (f x)
       simp [Rew.comp_app, e]
 
-lemma subst_subst_eq (v : Fin n → Semiterm L ξ m) (φ : Semiformula L ξ 1)
-    (t : Semiterm L ξ n) : Rew.subst v ▹ (φ/[t]) = φ/[Rew.subst v t] := by
+lemma subst_subst_eq (v : Fin n → Semiterm L ξ m) :
+    ∀ (φ : Semiformula L ξ 1) (t : Semiterm L ξ n), Rew.subst v ▹ (φ/[t]) = φ/[Rew.subst v t] := by
+  intro φ t
   simpa [← TransitiveRewriting.comp_app] using Rewriting.smul_ext' <| by
     ext x
     · cases x using Fin.cases with
@@ -146,16 +171,18 @@ lemma subst_subst_eq (v : Fin n → Semiterm L ξ m) (φ : Semiformula L ξ 1)
     · simp [Rew.comp_app]
 
 @[simp]
-lemma subst_bShift_eq (v : Fin 1 → Semiterm L ξ 1) (t : Semiterm L ξ 0) :
-    Rew.subst v (Rew.bShift t) = Rew.bShift t := by
+lemma subst_bShift_eq (v : Fin 1 → Semiterm L ξ 1) :
+    ∀ t : Semiterm L ξ 0, Rew.subst v (Rew.bShift t) = Rew.bShift t := by
+  intro t
   have e : (Rew.subst v).comp (Rew.bShift : Rew L ξ 0 ξ 1) = Rew.bShift := by
     ext x
     · exact x.elim0
     · simp [Rew.comp_app]
   simpa [Rew.comp_app] using Rew.ext' e t
 
-lemma shift_subst_eq (φ : Semiformula L ℕ 1) (t : SyntacticSemiterm L n) :
-    Rew.shift ▹ (φ/[t]) = (Rew.shift ▹ φ)/[Rew.shift t] := by
+lemma shift_subst_eq : ∀ (φ : Semiformula L ℕ 1) (t : SyntacticSemiterm L n),
+      Rew.shift ▹ (φ/[t]) = (Rew.shift ▹ φ)/[Rew.shift t] := by
+  intro φ t
   simpa [← TransitiveRewriting.comp_app] using Rewriting.smul_ext' <| by
     ext x
     · cases x using Fin.cases with
@@ -202,23 +229,25 @@ whose extra bound variables are those free variables, with the original bound va
 a caller-supplied substitution `b`.
 -/
 
+variable {M : Type*} [Tarski.Structure L M]
+
+section
+
+variable [NeZero k] (φ : Semiformula L ℕ k) (b : Fin k → Semiterm L Empty (φ.fvSup + k))
+
 /-- The substitution sending the bound variables of `φ` to `b` and the free variables below
 `φ.fvSup` to the remaining bound variables. -/
-noncomputable def paramSubst [NeZero k] (φ : Semiformula L ℕ k)
-    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Rew L ℕ k Empty (φ.fvSup + k) :=
+noncomputable def paramSubst : Rew L ℕ k Empty (φ.fvSup + k) :=
   haveI : NeZero (φ.fvSup + k) := ⟨by have := Nat.pos_of_ne_zero (NeZero.ne k); omega⟩
   Rew.bind b fun x ↦ if h : x < φ.fvSup then #⟨x + k, by omega⟩ else #0
 
 /-- `φ`, viewed as a semisentence whose extra bound variables are its free variables, with its
 own bound variables placed by `b`. -/
-noncomputable def toSemisentence [NeZero k] (φ : Semiformula L ℕ k)
-    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) : Semisentence L (φ.fvSup + k) :=
+noncomputable def toSemisentence : Semisentence L (φ.fvSup + k) :=
   paramSubst φ b ▹ φ
 
-variable {M : Type*} [Tarski.Structure L M]
-
-lemma eval_toSemisentence [NeZero k] {φ : Semiformula L ℕ k}
-    (b : Fin k → Semiterm L Empty (φ.fvSup + k)) {v : Fin (φ.fvSup + k) → M} {w : Fin k → M}
+variable {φ} in
+lemma eval_toSemisentence {v : Fin (φ.fvSup + k) → M} {w : Fin k → M}
     {f : ℕ → M} (hb : ∀ i, Semiterm.val v Empty.elim (b i) = w i)
     (hv : ∀ y : Fin φ.fvSup, v ⟨y + k, by omega⟩ = f y) :
     M ⊧/v (φ.toSemisentence b) ↔ φ.Eval w f := by
@@ -237,6 +266,8 @@ lemma eval_toSemisentence_one (φ : Semiformula L ℕ 1) (x : M)
   eval_toSemisentence ![#0]
     (fun i ↦ by induction i using Fin.cases with | zero => simp | succ i => exact i.elim0)
     (fun _ ↦ by simp)
+
+end
 
 /-- `eval_toSemisentence` at `k = 2`, with `b` placing the two bound variables at `#1`, `#0` (the
 witness-then-bound order). -/
@@ -258,14 +289,20 @@ end Semiformula
 
 namespace Rew
 
+section
+
+variable (L : Language) (k m : ℕ)
+
 /-- The rewriting turning the free variables `Fin m` into the last `m` of `k + m` bound
 variables. -/
-def bindParams (L : Language) (k m : ℕ) : Rew L (Fin m) k Empty (k + m) :=
+def bindParams : Rew L (Fin m) k Empty (k + m) :=
   Rew.bind (fun i ↦ #(i.castAdd m)) fun j ↦ #(j.natAdd k)
 
 /-- The rewriting turning the last `m` of `k + m` bound variables into free variables. -/
-def unbindParams (L : Language) (k m : ℕ) : Rew L Empty (k + m) (Fin m) k :=
+def unbindParams : Rew L Empty (k + m) (Fin m) k :=
   Rew.bind (Fin.append (fun i ↦ #i) fun j ↦ &j) Empty.elim
+
+end
 
 @[simp]
 lemma bindParams_app_unbindParams_app (σ : Semisentence L (k + m)) :

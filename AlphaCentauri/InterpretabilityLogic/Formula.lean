@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.Logic.LogicSymbol
 public import Mathlib.Data.Finset.Basic
 
@@ -21,23 +22,27 @@ inductive Formula (α : Type*) where
   | rhd    : Formula α → Formula α → Formula α
   deriving DecidableEq
 
-abbrev FormulaSet (α : Type*) := Set (Formula α)
+variable (α : Type*)
+
+abbrev FormulaSet := Set (Formula α)
 
 namespace Formula
 
-variable {α : Type*} {A B : Formula α}
+variable {α}
 
 scoped[FFL.InterpretabilityLogic] prefix:max "#" => Formula.atom
 
-abbrev neg (A : Formula α) : Formula α := imp A falsum
+variable (A B : Formula α)
+
+abbrev neg : Formula α := imp A falsum
 
 abbrev verum : Formula α := imp falsum falsum
 
-abbrev or (A B : Formula α) : Formula α := imp (neg A) B
+abbrev or : Formula α := imp (neg A) B
 
-abbrev and (A B : Formula α) : Formula α := neg (imp A (neg B))
+abbrev and : Formula α := neg (imp A (neg B))
 
-abbrev dia (A : Formula α) : Formula α := neg (box (neg A))
+abbrev dia : Formula α := neg (box (neg A))
 
 instance : LogicalConnective (Formula α) where
   tilde := neg
@@ -61,44 +66,43 @@ instance : ŁukasiewiczAbbrev (Formula α) where
   or := rfl
   and := rfl
 
+variable {A B} {A₁ A₂ B₁ B₂ : Formula α}
+
 @[simp, grind =]
-lemma imp_inj {A₁ A₂ B₁ B₂ : Formula α} : A₁ 🡒 A₂ = B₁ 🡒 B₂ ↔ A₁ = B₁ ∧ A₂ = B₂ :=
+lemma imp_inj : A₁ 🡒 A₂ = B₁ 🡒 B₂ ↔ A₁ = B₁ ∧ A₂ = B₂ :=
   Iff.of_eq <| imp.injEq _ _ _ _
 
 @[simp, grind =]
 lemma box_inj : □A = □B ↔ A = B := Iff.of_eq <| box.injEq _ _
 
 @[simp, grind =]
-lemma rhd_inj {A₁ A₂ B₁ B₂ : Formula α} : A₁ ▷ A₂ = B₁ ▷ B₂ ↔ A₁ = B₁ ∧ A₂ = B₂ :=
+lemma rhd_inj : A₁ ▷ A₂ = B₁ ▷ B₂ ↔ A₁ = B₁ ∧ A₂ = B₂ :=
   Iff.of_eq <| rhd.injEq _ _ _ _
 
+section Eliminators
+
+variable {C : Formula α → Sort*} (atom : ∀ a, C (#a)) (falsum : C ⊥)
+
 @[elab_as_elim, induction_eliminator]
-def rec' {C : Formula α → Sort*}
-    (atom : ∀ a, C (#a))
-    (falsum : C ⊥)
-    (imp : ∀ A B, C A → C B → C (A 🡒 B))
-    (box : ∀ A, C A → C (□A))
+def rec' (imp : ∀ A B, C A → C B → C (A 🡒 B)) (box : ∀ A, C A → C (□A))
     (rhd : ∀ A B, C A → C B → C (A ▷ B)) :
     (A : Formula α) → C A
   | #a => atom a
   | .falsum => falsum
-  | .imp A B => imp A B (rec' atom falsum imp box rhd A) (rec' atom falsum imp box rhd B)
-  | .box A => box A (rec' atom falsum imp box rhd A)
-  | .rhd A B => rhd A B (rec' atom falsum imp box rhd A) (rec' atom falsum imp box rhd B)
+  | .imp A B => imp A B (rec' imp box rhd A) (rec' imp box rhd B)
+  | .box A => box A (rec' imp box rhd A)
+  | .rhd A B => rhd A B (rec' imp box rhd A) (rec' imp box rhd B)
 
 @[elab_as_elim, cases_eliminator]
-def cases' {C : Formula α → Sort*}
-    (atom : ∀ a, C (#a))
-    (falsum : C ⊥)
-    (imp : ∀ A B, C (A 🡒 B))
-    (box : ∀ A, C (□A))
-    (rhd : ∀ A B, C (A ▷ B)) :
+def cases' (imp : ∀ A B, C (A 🡒 B)) (box : ∀ A, C (□A)) (rhd : ∀ A B, C (A ▷ B)) :
     (A : Formula α) → C A
   | #a => atom a
   | .falsum => falsum
   | .imp A B => imp A B
   | .box A => box A
   | .rhd A B => rhd A B
+
+end Eliminators
 
 /-- The modal depth: the maximal number of nested occurrences of `□` and `▷`.
 

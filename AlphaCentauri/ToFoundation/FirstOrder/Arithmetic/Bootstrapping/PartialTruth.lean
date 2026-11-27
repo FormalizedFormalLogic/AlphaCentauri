@@ -297,14 +297,19 @@ instance definable (Γ : Polarity) (s : ℕ) :
 
 end PrenexSatisfied
 
-instance qqToPrenex.definable (Γ : Polarity) (s : ℕ) (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
+section
+variable (Γ : Polarity) (s : ℕ) (e : V)
+
+instance qqToPrenex.definable (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ]) :
     ℌ.DefinableFunction₁ (qqToPrenex Γ s : V → V) := (qqToPrenex_defined Γ s).to_definable₀
 
 /-- `p` codes a prenex formula with a $\Delta_0$ matrix, with `s` alternating quantifiers starting
 with `Γ`, which holds under the assignment `e`.
 - [HP98, Theorem I.1.75] -/
-def PrenexFormulaSatisfied (Γ : Polarity) (s : ℕ) (e p : V) : Prop :=
+def PrenexFormulaSatisfied (p : V) : Prop :=
   ∃ θ ≤ p, p = qqToPrenex Γ s θ ∧ PrenexSatisfied Γ s e θ
+
+end
 
 namespace PrenexFormulaSatisfied
 

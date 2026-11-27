@@ -18,15 +18,15 @@ namespace FFL.InterpretabilityLogic
 
 namespace Veltman
 
-variable {κ α : Type*} [Nonempty κ]
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α) (x : M.World) (S : Sequent α)
 
 /-- Some formula of the succedent of `S` is forced at `x` if every formula of its antecedent is. -/
-def Model.World.ForcesSequent (M : Model κ α) (x : M.World) (S : Sequent α) : Prop :=
+def Model.World.ForcesSequent : Prop :=
   (∀ A ∈ S.ant, Model.World.Forces M x A) → ∃ B ∈ S.suc, Model.World.Forces M x B
 
 namespace Model.World
 
-variable {M : Model κ α} {x : M.World}
+variable {M} {x} {Γ : FormulaFinset α}
 
 lemma forces_conj₂ : {l : List (Formula α)} → (x ⊩ ⋀l ↔ ∀ B ∈ l, x ⊩ B)
   | [] => by simp
@@ -34,7 +34,7 @@ lemma forces_conj₂ : {l : List (Formula α)} → (x ⊩ ⋀l ↔ ∀ B ∈ l, 
   | B :: C :: l => by simp [forces_and, forces_conj₂ (l := C :: l)]
 
 @[simp]
-lemma forces_conj {Γ : FormulaFinset α} : x ⊩ Γ.conj ↔ ∀ B ∈ Γ, x ⊩ B := by
+lemma forces_conj : x ⊩ Γ.conj ↔ ∀ B ∈ Γ, x ⊩ B := by
   simp [Finset.conj, forces_conj₂];
 
 lemma forces_disj₂ : {l : List (Formula α)} → (x ⊩ ⋁l ↔ ∃ B ∈ l, x ⊩ B)
@@ -43,13 +43,13 @@ lemma forces_disj₂ : {l : List (Formula α)} → (x ⊩ ⋁l ↔ ∃ B ∈ l, 
   | B :: C :: l => by simp [forces_or, forces_disj₂ (l := C :: l)]
 
 @[simp]
-lemma forces_disj {Γ : FormulaFinset α} : x ⊩ Γ.disj ↔ ∃ B ∈ Γ, x ⊩ B := by
+lemma forces_disj : x ⊩ Γ.disj ↔ ∃ B ∈ Γ, x ⊩ B := by
   simp [Finset.disj, forces_disj₂];
 
 end Model.World
 
 /-- Every world of `M` forces `S`. -/
-def Model.ValidatesSequent (M : Model κ α) (S : Sequent α) : Prop :=
+def Model.ValidatesSequent : Prop :=
   ∀ x : M.World, Model.World.ForcesSequent M x S
 
 end Veltman
@@ -89,7 +89,8 @@ namespace IL
 
 open Veltman Veltman.Model Veltman.Model.World
 
-variable {α : Type*} [DecidableEq α]
+variable {α : Type*} [DecidableEq α] (Γ : FormulaFinset α) (x : Sequent α) (R : Formula α)
+  (N : FormulaFinset α)
 
 /-! ### The modal rules -/
 
@@ -99,7 +100,7 @@ def avoid : Formula α → FormulaFinset α
   | _ => ∅
 
 /-- The premise of the modal rule for `R` on the right. -/
-def principal (Γ N : FormulaFinset α) : Formula α → Sequent α
+def principal : Formula α → Sequent α
   | A ▷ _ => witness Γ N A
   | □B => insert (□B) (Γ ∪ Γ.box ∪ N.boxNeg) ⟹ insert B N
   | _ => ∅ ⟹ ∅
@@ -112,7 +113,7 @@ def IsModal : Formula α → Prop
 
 namespace Gentzen
 
-variable {Γ : FormulaFinset α} {l : List (Formula α × Formula α)} {R : Formula α}
+variable {Γ} {l : List (Formula α × Formula α)} {R}
 
 lemma modal (hR : IsModal R)
     (hl : ∀ l₁ p l₂, l = l₁ ++ p :: l₂ → ⊢ᴳ[𝐈𝐋] witness Γ (avoid R ∪ antecedents l₂) p.2)
@@ -136,13 +137,13 @@ end Gentzen
 /-- `N` consists of `avoid R` and antecedents of formulas `C ▷ D` on the left of `x`, the premise
 `principal x.ant.prebox N R` is not derivable, and neither is `witness x.ant.prebox N D` for any
 `C ▷ D` on the left of `x` with `C ∉ N`. -/
-structure IsAvoiding (x : Sequent α) (R : Formula α) (N : FormulaFinset α) : Prop where
+structure IsAvoiding : Prop where
   avoid_subset : avoid R ⊆ N
   mem : ∀ C ∈ N, C ∈ avoid R ∨ ∃ D, C ▷ D ∈ x.ant
   principal : ⊬ᴳ[𝐈𝐋] principal x.ant.prebox N R
   witness : ∀ {C D}, C ▷ D ∈ x.ant → C ∉ N → ⊬ᴳ[𝐈𝐋] witness x.ant.prebox N D
 
-variable {x : Sequent α} {R : Formula α}
+variable {x} {R}
 
 lemma exists_isAvoiding (hx : ⊬ᴳ[𝐈𝐋] x) (hR : R ∈ x.suc) (hRm : IsModal R) :
     ∃ N, IsAvoiding x R N := by
@@ -215,10 +216,22 @@ lemma exists_isAvoiding (hx : ⊬ᴳ[𝐈𝐋] x) (hR : R ∈ x.suc) (hRm : IsMo
   have := Finset.card_le_card this;
   omega;
 
+variable (x R)
+
 open Classical in
 /-- A chosen avoiding set. -/
-noncomputable def avoidance (x : Sequent α) (R : Formula α) : FormulaFinset α :=
+noncomputable def avoidance : FormulaFinset α :=
   if h : ∃ N, IsAvoiding x R N then h.choose else ∅
+
+/-- `y` is a child of `x` for the formula `R` on the right of `x`. -/
+structure IsChild (y : Sequent α) : Prop where
+  modal : IsModal R
+  mem_suc : R ∈ x.suc
+  box : ∀ {C}, □C ∈ x.ant → C ∈ y.ant ∧ □C ∈ y.ant
+  avoid : ∀ {C}, C ∈ avoidance x R → C ∈ y.suc ∧ □(∼C) ∈ y.ant
+  new_box : ∃ C, □C ∈ y.ant ∧ □C ∉ x.ant
+
+variable {x R}
 
 lemma isAvoiding_avoidance (hx : ⊬ᴳ[𝐈𝐋] x) (hR : R ∈ x.suc) (hRm : IsModal R) :
     IsAvoiding x R (avoidance x R) := by
@@ -337,16 +350,6 @@ lemma prebox_subset : x.ant.prebox ⊆ closure BS := by
   exact mem_closure_box (x.ant_subset (FormulaFinset.mem_prebox.mp hC));
 
 end SaturatedSequent
-
-/-! ### Children -/
-
-/-- `y` is a child of `x` for the formula `R` on the right of `x`. -/
-structure IsChild (x : Sequent α) (R : Formula α) (y : Sequent α) : Prop where
-  modal : IsModal R
-  mem_suc : R ∈ x.suc
-  box : ∀ {C}, □C ∈ x.ant → C ∈ y.ant ∧ □C ∈ y.ant
-  avoid : ∀ {C}, C ∈ avoidance x R → C ∈ y.suc ∧ □(∼C) ∈ y.ant
-  new_box : ∃ C, □C ∈ y.ant ∧ □C ∉ x.ant
 
 /-! ### The countermodel -/
 

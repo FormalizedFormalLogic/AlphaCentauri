@@ -30,10 +30,10 @@ open _root_.FFL.Entailment
 
 section caseCode
 
-variable (L : Language) [L.Encodable] [L.LORDefinable]
+variable (L : Language) [L.Encodable] [L.LORDefinable] (s u v k tbl₁ tbl₂ : V)
 
 /-- The code of `(σ ∧ p) ∨ (¬σ ∧ q)`. -/
-noncomputable def caseCode (s p q : V) : V := (s ^⋏ p) ^⋎ (neg L s ^⋏ q)
+noncomputable def caseCode (p q : V) : V := (s ^⋏ p) ^⋎ (neg L s ^⋏ q)
 
 /-- The $\Sigma_1$ graph of `caseCode`, with argument order `(y, s, p, q)`. -/
 noncomputable def caseCodeGraph : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
@@ -61,11 +61,11 @@ noncomputable def caseVec.construction : PR.Construction V (caseVec.blueprint L)
 
 /-- `caseVec L s u v k` is the vector of length `k` whose `j`-th entry is
 `caseCode L s u.[j] v.[j]`. -/
-noncomputable def caseVec (s u v k : V) : V := (caseVec.construction L).result ![s, u, v] k
+noncomputable def caseVec : V := (caseVec.construction L).result ![s, u, v] k
 
 /-- The table whose entries are `(σ ∧ e₁) ∨ (¬σ ∧ e₂)` for the entries `e₁` of `tbl₁` and `e₂` of
 `tbl₂`. -/
-noncomputable def caseTable (s tbl₁ tbl₂ : V) : V :=
+noncomputable def caseTable : V :=
   ?[caseCode L s tbl₁.[0] tbl₂.[0], caseVec L s tbl₁.[1] tbl₂.[1] (len tbl₁.[1]),
     caseVec L s tbl₁.[2] tbl₂.[2] (len tbl₁.[2])]
 
@@ -83,23 +83,22 @@ instance caseVec.defined : 𝚺ᴬ₁-Function₄[V] caseVec L via caseVecGraph 
 instance caseVec.definable : 𝚺ᴬ₁-Function₄[V] caseVec L := caseVec.defined.to_definable
 
 @[simp]
-lemma caseVec_zero (s u v : V) : caseVec L s u v 0 = 0 := by
+lemma caseVec_zero : caseVec L s u v 0 = 0 := by
   simp [caseVec, caseVec.construction]
 
 @[simp]
-lemma caseVec_succ (s u v k : V) :
+lemma caseVec_succ :
     caseVec L s u v (k + 1) = concat (caseVec L s u v k) (caseCode L s u.[k] v.[k]) := by
   simp [caseVec, caseVec.construction]
 
 @[simp]
-lemma len_caseVec (s u v k : V) : len (caseVec L s u v k) = k := by
+lemma len_caseVec : len (caseVec L s u v k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih => simp [ih]
 
-lemma nth_caseVec (s u v k : V) :
-    ∀ j < k, (caseVec L s u v k).[j] = caseCode L s u.[j] v.[j] := by
+lemma nth_caseVec : ∀ j < k, (caseVec L s u v k).[j] = caseCode L s u.[j] v.[j] := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -110,16 +109,18 @@ lemma nth_caseVec (s u v k : V) :
       exact ih j hlt
     · rw [caseVec_succ, concat_nth_len' _ _ (by simp)]
 
-lemma tableDomain_caseTable (s tbl₁ tbl₂ : V) :
+lemma tableDomain_caseTable :
     tableDomain (caseTable L s tbl₁ tbl₂) = caseCode L s (tableDomain tbl₁) (tableDomain tbl₂) := by
   simp [caseTable, tableDomain]
 
-lemma tableRel_caseTable {s tbl₁ tbl₂ k r : V} (h : ⟪k, r⟫ < len tbl₁.[1]) :
+variable {s tbl₁ tbl₂ k}
+
+lemma tableRel_caseTable {r : V} (h : ⟪k, r⟫ < len tbl₁.[1]) :
     tableRel (caseTable L s tbl₁ tbl₂) k r =
       caseCode L s (tableRel tbl₁ k r) (tableRel tbl₂ k r) := by
   simp [caseTable, tableRel, nth_caseVec _ _ _ _ _ h]
 
-lemma tableFunc_caseTable {s tbl₁ tbl₂ k f : V} (h : ⟪k, f⟫ < len tbl₁.[2]) :
+lemma tableFunc_caseTable {f : V} (h : ⟪k, f⟫ < len tbl₁.[2]) :
     tableFunc (caseTable L s tbl₁ tbl₂) k f =
       caseCode L s (tableFunc tbl₁ k f) (tableFunc tbl₂ k f) := by
   simp [caseTable, tableFunc, nth_caseVec _ _ _ _ _ h]
@@ -155,18 +156,17 @@ lemma IsTable.caseTable (hT₁ : IsTable ℒₒᵣ L₂ tbl₁) (hT₂ : IsTable
 
 section
 
-variable (hT₁ : IsTable ℒₒᵣ L₂ tbl₁) (hT₂ : IsTable ℒₒᵣ L₂ tbl₂)
+variable {k : ℕ} (hT₁ : IsTable ℒₒᵣ L₂ tbl₁) (hT₂ : IsTable ℒₒᵣ L₂ tbl₂)
 
 lemma IsTable.caseTable_domT_val :
     (hT₁.caseTable φ hT₂).domT.val = caseCode ℒₒᵣ ⌜φ⌝ hT₁.domT.val hT₂.domT.val := by
   simp only [IsTable.domT_val, tableDomain_caseTable]
 
-lemma IsTable.caseTable_relT_val {k : ℕ} (R : L₂.Rel k) :
+lemma IsTable.caseTable_relT_val (R : L₂.Rel k) :
     ((hT₁.caseTable φ hT₂).relT R).val = caseCode ℒₒᵣ ⌜φ⌝ (hT₁.relT R).val (hT₂.relT R).val := by
   simp only [IsTable.relT_val, tableRel_caseTable (hT₁.lt_len_rel (codeIn_rel_quote R))]
 
-lemma IsTable.caseTable_funcT_val {k : ℕ} (F : L₂.Func k) :
-    ((hT₁.caseTable φ hT₂).funcT F).val =
+lemma IsTable.caseTable_funcT_val (F : L₂.Func k) : ((hT₁.caseTable φ hT₂).funcT F).val =
       caseCode ℒₒᵣ ⌜φ⌝ (hT₁.funcT F).val (hT₂.funcT F).val := by
   simp only [IsTable.funcT_val, tableFunc_caseTable (hT₁.lt_len_func (codeIn_func_quote F))]
 

@@ -23,24 +23,24 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ �
 
 namespace Bertrand
 
-variable (B s : V)
+variable (B s t m n u : V)
 
 /-- The bound $\langle 2m, \langle 2m, B \mathbin{\#} 1 + 2ms \rangle \rangle$ of the elements of
 the sets of positions occurring in the band of `m`. -/
-def payloadBound (m : V) : V := ⟪2 * m, 2 * m, B ⨳ 1 + 2 * m * s⟫
+def payloadBound : V := ⟪2 * m, 2 * m, B ⨳ 1 + 2 * m * s⟫
 
 /-- The domain of a band: $\mathrm{K}(m)$ and two copies of $\mathrm{Bits}(m)$. -/
-def BandDomain (m u : V) : Prop :=
+def BandDomain : Prop :=
   Tagged 2 (Kummer B s m) u ∨ Tagged 0 (Bits B s m) u ∨ Tagged 1 (Bits B s m) u
 
 /-- The codomain of a band: two copies of $\mathrm{Bits}(m)$, the $2ms$ numbers of the Chebyshev
 estimate, and two copies of $\mathrm{Top}(m)$. -/
-def BandCodomain (m u : V) : Prop :=
+def BandCodomain : Prop :=
   (Tagged 0 (Bits B s m) u ∨ Tagged 1 (Bits B s m) u ∨ Tagged 3 (Below (2 * m * s)) u) ∨
     (Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u)
 
 /-- Cut the two copies of $\mathrm{Bits}(m)$ into levels. -/
-def bandLevelMap (m : V) : V → V → Prop :=
+def bandLevelMap : V → V → Prop :=
   UnionMap (Tagged 2 (Kummer B s m)) IdMap
     (fun u ↦ Tagged 0 (Bits B s m) u ∨ Tagged 1 (Bits B s m) u)
     (UnionMap (Tagged 0 (Bits B s m)) (UntagMap 0 (BitsToLevel B s 6 4))
@@ -48,23 +48,23 @@ def bandLevelMap (m : V) : V → V → Prop :=
 
 /-- Legendre's matching backwards: two copies of $\mathrm{Level}(m)$ and $\mathrm{K}(m)$ into
 $\mathrm{Level}(2m)$. -/
-def bandLegendreMap (m : V) : V → V → Prop :=
+def bandLegendreMap : V → V → Prop :=
   UnionMap (fun u ↦ Tagged 6 (Level B s m) u ∨ Tagged 7 (Level B s m) u ∨ Tagged 2 (Kummer B s m) u)
     (TagOutMap 8 (LegendreUp m 6 7 2)) (fun u ↦ Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u) IdMap
 
 /-- Levels of $1, \dots, 2m$ into positions. -/
-def bandBitsMap (m : V) : V → V → Prop :=
+def bandBitsMap : V → V → Prop :=
   UnionMap (Tagged 8 (Level B s (2 * m))) (TagMap 8 9 (LevelToBits B s))
     (fun u ↦ Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u) IdMap
 
 /-- Halve the positions of $1, \dots, 2m$. -/
-def bandDoubleMap (m : V) : V → V → Prop :=
+def bandDoubleMap : V → V → Prop :=
   UnionMap (Tagged 9 (Bits B s (2 * m))) (UntagMap 9 (DoubleUp B s m 0 1 3))
     (fun u ↦ Tagged 4 (Top m) u ∨ Tagged 5 (Top m) u) IdMap
 
 /-- The injection of a band: $\mathrm{K}(m) + 2\,\mathrm{Bits}(m) \le 2\,\mathrm{Bits}(m) + 2ms +
 2\,\mathrm{Top}(m)$, i.e. $\log_2 \binom{2m}{m} \lesssim 2m$. -/
-def BandStep (m : V) : V → V → Prop :=
+def BandStep : V → V → Prop :=
   CompMap (⟪10, payloadBound B s m⟫ + 1)
     (CompMap (⟪10, payloadBound B s m⟫ + 1)
       (CompMap (⟪10, payloadBound B s m⟫ + 1) (bandLevelMap B s m) (bandLegendreMap B s m))
@@ -72,48 +72,48 @@ def BandStep (m : V) : V → V → Prop :=
     (bandDoubleMap B s m)
 
 /-- The domain of the lower part: two copies of $\mathrm{Bits}(n)$ and $(2n - 1)s$ numbers. -/
-def LowerDomain (n u : V) : Prop :=
+def LowerDomain : Prop :=
   Tagged 0 (Bits B s n) u ∨ Tagged 1 (Bits B s n) u ∨ Tagged 2 (Below ((2 * n - 1) * s)) u
 
 /-- The codomain of the lower part: two copies of $\mathrm{Bits}(n)$, $\mathrm{K}(n)$, and the
 errors $\mathrm{Top}(2n)$ and $\lambda(n)$. -/
-def LowerCodomain (n u : V) : Prop :=
+def LowerCodomain : Prop :=
   (Tagged 0 (Bits B s n) u ∨ Tagged 1 (Bits B s n) u) ∨
     (Tagged 6 (Kummer B s n) u ∨ Tagged 3 (Top (2 * n)) u ∨
       Tagged 4 (Below (scaledLength B s n)) u)
 
 /-- $M_r = u_{r + 1} + 1$: the band $(M_r, 2M_r]$ of the Chebyshev estimate. -/
-def bandBound (n r : V) : V := bandSize n (r + 1) + 1
+def bandBound (r : V) : V := bandSize n (r + 1) + 1
 
 /-- $\{(p, o) : p \text{ prime}, p^2 \le 2n, o < \lambda(p)\}$: the proper prime powers in
 $(n, 2n]$, recorded by their primes. -/
-def Small (n w : V) : Prop :=
+def Small (w : V) : Prop :=
   ∃ p ≤ w, ∃ o ≤ w, w = ⟪p, o⟫ ∧ IsPrime p ∧ p * p ≤ 2 * n ∧ o < scaledLength B s p
 
 /-- A position $(P, o)$ of $\binom{2n}{n}$ goes to the Chebyshev band of `P` if $P \le$
 `cutoff n`, and to `Small` otherwise. -/
-def ChebyshevMap (n u v : V) : Prop :=
+def ChebyshevMap (v : V) : Prop :=
   ∃ P ≤ u, ∃ o ≤ u, π₂ u = ⟪6, P, o⟫ ∧
     ((P ≤ cutoff n ∧ ∃ r < bandCount n, (∀ r' < r, P ≤ bandBound n r') ∧ bandBound n r < P ∧
         v = ⟪1, r, 2, P, o⟫) ∨
       (cutoff n < P ∧ ∃ p ≤ P, IsPrimePower p P ∧ v = ⟪0, 5, p, o⟫))
 
 /-- The two copies of $\mathrm{Bits}(m)$ that a band carries along. -/
-def BandCarry (m u : V) : Prop := Tagged 0 (Bits B s m) u ∨ Tagged 1 (Bits B s m) u
+def BandCarry : Prop := Tagged 0 (Bits B s m) u ∨ Tagged 1 (Bits B s m) u
 
 /-- The domain of the whole injection. -/
-def Domain (n u : V) : Prop :=
+def Domain : Prop :=
   Tagged 0 (LowerDomain B s n) u ∨
     Tagged 1 (Family (bandCount n) fun r ↦ BandCarry B s (bandBound n r)) u
 
 /-- What remains of the lower part after the Chebyshev map. -/
-def LowerResidue (n u : V) : Prop :=
+def LowerResidue : Prop :=
   (Tagged 0 (Bits B s n) u ∨ Tagged 1 (Bits B s n) u) ∨
     (Tagged 3 (Top (2 * n)) u ∨ Tagged 4 (Below (scaledLength B s n)) u ∨
       Tagged 5 (Small B s n) u)
 
 /-- The codomain of the whole injection. -/
-def Codomain (n u : V) : Prop :=
+def Codomain : Prop :=
   Tagged 0 (LowerResidue B s n) u ∨
     Tagged 1 (Family (bandCount n) fun r ↦ BandCodomain B s (bandBound n r)) u
 
@@ -121,7 +121,7 @@ variable {B s}
 
 section bounds
 
-variable {n m m' w u : V}
+variable {t m n u} {t' m' w β : V} {X : V → Prop}
 
 lemma Bits.le_payloadBound (h : Bits B s m' w) (hm : m' ≤ 2 * m) : w ≤ payloadBound B s m := by
   obtain ⟨k, -, y, -, rfl, -, hk, hy⟩ := h
@@ -158,20 +158,19 @@ lemma Below.le_payloadBound_of_scaledLength {y : V} (h : Below (scaledLength B s
   ((h.trans (scaledLength_lt B s y)).le.trans le_self_add).trans
     ((le_pair_right _ _).trans (le_pair_right _ _))
 
-lemma Tagged.lt_of_le {t t' β : V} {X : V → Prop} (h : Tagged t X u) (ht : t ≤ t')
+lemma Tagged.lt_of_le (h : Tagged t X u) (ht : t ≤ t')
     (hX : ∀ x, X x → x ≤ β) : u < ⟪t', β⟫ + 1 := by
   rw [← pair_unpair u, h.1]
   exact lt_succ_iff_le.mpr (pair_le_pair ht (hX _ h.2))
 
-lemma Tagged.le_pair_of_le {t t' β : V} {X : V → Prop} (h : Tagged t X u) (ht : t ≤ t')
-    (hX : ∀ x, X x → x ≤ β) : u ≤ ⟪t', β⟫ :=
+lemma Tagged.le_pair_of_le (h : Tagged t X u) (ht : t ≤ t') (hX : ∀ x, X x → x ≤ β) : u ≤ ⟪t', β⟫ :=
   lt_succ_iff_le.mp (Tagged.lt_of_le h ht hX)
 
-lemma Tagged.lt_of_tagged_zero {Y : V → Prop} {β : V} (h : Tagged 0 Y u)
+lemma Tagged.lt_of_tagged_zero {Y : V → Prop} (h : Tagged 0 Y u)
     (hY : ∀ w, Y w → w ≤ ⟪10, β⟫) : u < ⟪1, n, 10, β⟫ + 1 :=
   Tagged.lt_of_le h zero_le_one fun w hw ↦ (hY w hw).trans (le_pair_right _ _)
 
-lemma Tagged.lt_of_family {N : V} {Z : V → V → Prop} {β : V} (h : Tagged 1 (Family N Z) u)
+lemma Tagged.lt_of_family {N : V} {Z : V → V → Prop} (h : Tagged 1 (Family N Z) u)
     (hN : N ≤ n) (hZ : ∀ r < N, ∀ x, Z r x → x ≤ ⟪10, β⟫) : u < ⟪1, n, 10, β⟫ + 1 := by
   apply Tagged.lt_of_le h le_rfl
   rintro w ⟨hr, hw⟩
@@ -244,32 +243,32 @@ macro "tagged_disjoint" : tactic =>
   `(tactic| (intro y hy hy'; simp only [Tagged, Family] at hy hy'; aesop))
 
 
-lemma definable_tagged_bits (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Bits B s m)) := by
+lemma definable_tagged_bits : 𝚺ᴬ₀.DefinablePred (Tagged t (Bits B s m)) := by
   have := definable_bits B s
   apply definable_tagged
   definability
 
-lemma definable_tagged_level (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Level B s m)) := by
+lemma definable_tagged_level : 𝚺ᴬ₀.DefinablePred (Tagged t (Level B s m)) := by
   have := definable_level B s
   apply definable_tagged
   definability
 
-lemma definable_tagged_top (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Top m)) := by
+lemma definable_tagged_top : 𝚺ᴬ₀.DefinablePred (Tagged t (Top m)) := by
   have := definable_top (V := V)
   apply definable_tagged
   definability
 
-lemma definable_tagged_kummer (t m : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Kummer B s m)) := by
+lemma definable_tagged_kummer : 𝚺ᴬ₀.DefinablePred (Tagged t (Kummer B s m)) := by
   have := definable_kummer B s
   apply definable_tagged
   definability
 
-lemma definable_tagged_below (t c : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Below c)) := by
+lemma definable_tagged_below (c : V) : 𝚺ᴬ₀.DefinablePred (Tagged t (Below c)) := by
   apply definable_tagged
   unfold Below
   definability
 
-lemma definable_tagged_carry (n : V) : 𝚺ᴬ₀.DefinablePred
+lemma definable_tagged_carry : 𝚺ᴬ₀.DefinablePred
     (Tagged 1 (Family (bandCount n) fun r ↦ BandCarry B s (bandBound n r))) := by
   have := definable_bits B s
   apply definable_tagged
@@ -310,7 +309,7 @@ lemma definable_bandDoubleMap : 𝚺ᴬ₀.DefinableRel₃ (bandDoubleMap B s) :
   unfold bandDoubleMap UnionMap IdMap UntagMap Tagged
   definability
 
-lemma definable_bandStep_bandBound (n : V) :
+lemma definable_bandStep_bandBound :
     𝚺ᴬ₀.DefinableRel₃ fun r u v ↦ BandStep B s (bandBound n r) u v := by
   obtain ⟨h₁, h₃⟩ := definable_bandLevelMap_bandBitsMap (B := B) (s := s)
   have h₂ := definable_bandLegendreMap (B := B) (s := s)
@@ -321,7 +320,7 @@ lemma definable_bandStep_bandBound (n : V) :
   unfold bandBound bandSize cutoff
   definability
 
-lemma definable_tagged_family_bandDomain (n : V) : 𝚺ᴬ₀.DefinablePred
+lemma definable_tagged_family_bandDomain : 𝚺ᴬ₀.DefinablePred
     (Tagged 1 (Family (bandCount n) fun r ↦ BandDomain B s (bandBound n r))) := by
   have := definable_bits B s
   have := definable_kummer B s
@@ -329,12 +328,11 @@ lemma definable_tagged_family_bandDomain (n : V) : 𝚺ᴬ₀.DefinablePred
   unfold Family BandDomain Tagged bandBound bandSize bandCount cutoff
   definability
 
-lemma definable_chebyshevMap (n : V) : 𝚺ᴬ₀.DefinableRel (ChebyshevMap n : V → V → Prop) := by
+lemma definable_chebyshevMap : 𝚺ᴬ₀.DefinableRel (ChebyshevMap n : V → V → Prop) := by
   unfold ChebyshevMap bandBound bandSize bandCount
   definability
 
-lemma definable_pieces (n : V) :
-    𝚺ᴬ₀.DefinablePred (Tagged 0 (LowerDomain B s n)) ∧
+lemma definable_pieces : 𝚺ᴬ₀.DefinablePred (Tagged 0 (LowerDomain B s n)) ∧
     𝚺ᴬ₀.DefinablePred (Tagged 0 (Tagged 6 (Kummer B s n))) ∧
     𝚺ᴬ₀.DefinablePred (fun u ↦
       Tagged 0 (fun w ↦ (Tagged 0 (Bits B s n) w ∨ Tagged 1 (Bits B s n) w) ∨
@@ -377,7 +375,7 @@ lemma definable_pieces (n : V) :
 
 section chebyshev
 
-variable {n : V}
+variable {t n u} {a b P o : V}
 
 lemma bandBound_le {r : V} (hr : r < bandCount n) (hn2 : 2 ≤ n) : bandBound n r ≤ n := by
   have h₀ : 0 < bandCount n := pos_of_gt hr
@@ -402,8 +400,7 @@ lemma bandBound_le {r : V} (hr : r < bandCount n) (hn2 : 2 ≤ n) : bandBound n 
       _ = 3 * bandSize n (r + 1) := by grind
       _ ≤ n := h₄
 
-lemma Kummer.gt_of_cutoff_lt {P o : V} (h : Kummer B s n ⟪P, o⟫) (hP : cutoff n < P) :
-    n < P ∧ P ≤ 2 * n := by
+lemma Kummer.gt_of_cutoff_lt (h : Kummer B s n ⟪P, o⟫) (hP : cutoff n < P) : n < P ∧ P ≤ 2 * n := by
   have hodd := (kummer_pair_iff.mp h).1
   have hP0 : 0 < P := pos_of_gt hP
   have hle : P ≤ 2 * n := by
@@ -436,13 +433,13 @@ lemma bandCount_le : bandCount n ≤ n :=
       calc 3 * cutoff n ≤ 2 * n := mul_div_le _ _
         _ ≤ 3 * n := mul_le_mul_right (by norm_cast)
 
-lemma tagged_pair_iff {t a b : V} {X : V → Prop} : Tagged t X ⟪a, b⟫ ↔ a = t ∧ X b := by
+lemma tagged_pair_iff {X : V → Prop} : Tagged t X ⟪a, b⟫ ↔ a = t ∧ X b := by
   simp [Tagged]
 
-lemma family_pair_iff {N a b : V} {X : V → V → Prop} : Family N X ⟪a, b⟫ ↔ a < N ∧ X a b := by
+lemma family_pair_iff {N : V} {X : V → V → Prop} : Family N X ⟪a, b⟫ ↔ a < N ∧ X a b := by
   simp [Family]
 
-lemma exists_tagged_tagged_kummer {u : V} (h : Tagged 0 (Tagged 6 (Kummer B s n)) u) :
+lemma exists_tagged_tagged_kummer (h : Tagged 0 (Tagged 6 (Kummer B s n)) u) :
     ∃ P o, u = ⟪0, 6, P, o⟫ ∧ Kummer B s n ⟪P, o⟫ := by
   obtain ⟨a, b, rfl⟩ := exists_pair₂ u
   obtain ⟨c, w, rfl⟩ := exists_pair₂ b
@@ -451,8 +448,7 @@ lemma exists_tagged_tagged_kummer {u : V} (h : Tagged 0 (Tagged 6 (Kummer B s n)
   obtain ⟨rfl, rfl, hk⟩ := h
   use P, o
 
-lemma chebyshevMap_pair {P o v : V} :
-    ChebyshevMap n ⟪0, 6, P, o⟫ v ↔
+lemma chebyshevMap_pair {v : V} : ChebyshevMap n ⟪0, 6, P, o⟫ v ↔
       (P ≤ cutoff n ∧ ∃ r < bandCount n, (∀ r' < r, P ≤ bandBound n r') ∧ bandBound n r < P ∧
         v = ⟪1, r, 2, P, o⟫) ∨
       (cutoff n < P ∧ ∃ p ≤ P, IsPrimePower p P ∧ v = ⟪0, 5, p, o⟫) := by
@@ -471,7 +467,7 @@ lemma chebyshevMap_pair {P o v : V} :
       · simp
       · exact hh
 
-lemma not_lt_of_isPrimePower {p P P' : V} (hp : IsPrimePower p P) (hp' : IsPrimePower p P')
+lemma not_lt_of_isPrimePower {p P' : V} (hp : IsPrimePower p P) (hp' : IsPrimePower p P')
     (hn : n < P) (hn' : P' ≤ 2 * n) : ¬P < P' := by
   intro hlt
   have h₁ : 2 ≤ p := by simpa [one_add_one_eq_two] using succ_le_iff_lt.mpr hp.1.1
@@ -487,7 +483,7 @@ end chebyshev
 
 section assembly
 
-variable {n m : V} (hB : 0 < B) (hs : 0 < s) (hm₄ : s * ‖2 * (2 * m)‖ < ‖B‖)
+variable {n m} (hB : 0 < B) (hs : 0 < s) (hm₄ : s * ‖2 * (2 * m)‖ < ‖B‖)
   (hn₄ : s * ‖2 * (2 * n)‖ < ‖B‖) (H : ∀ p, n < p → p ≤ 2 * n → ¬IsPrime p)
 
 include hB hm₄ in

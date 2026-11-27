@@ -65,8 +65,10 @@ private lemma map_pow_of_map_mul {M S : Type*} [CommSemiring M] [CommSemiring S]
     f (a ^ k) = f a ^ k :=
   map_pow ({ toFun := f, map_one' := hone, map_mul' := hmul } : M →* S) a k
 
+variable {n : ℕ}
+
 private lemma not_evalb_fermatLastTheorem_of_pow_add_pow {R : Type*} [CommRing R]
-    [LinearOrder R] [IsStrictOrderedRing R] [OpenPredicate.DiscretelyOrdered R] {n : ℕ}
+    [LinearOrder R] [IsStrictOrderedRing R] [OpenPredicate.DiscretelyOrdered R]
     {a b c : R} (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) (ha₀ : a ≠ 0) (hb₀ : b ≠ 0)
     (hc₀ : c ≠ 0) (h : a ^ n + b ^ n = c ^ n) :
     ¬ Evalb (M := Nonneg R) ![⟨c, hc⟩, ⟨b, hb⟩, ⟨a, ha⟩]
@@ -90,7 +92,7 @@ private lemma not_evalb_fermatLastTheorem_of_pow_add_pow {R : Type*} [CommRing R
 - [She64]
 - [Smi92b, Introduction]
 - [DAq05, §2] -/
-theorem not_provable_fermatLastTheorem_IOpen {n : ℕ} (hn : 3 ≤ n) :
+theorem not_provable_fermatLastTheorem_IOpen (hn : 3 ≤ n) :
     𝗜𝗢𝗽𝗲𝗻 ⊬ Arithmetic.fermatLastTheorem n := by
   have hF : Arithmetic.fermatLastTheorem n = ∀¹*
       (“#2 ^' n + #1 ^' n = #0 ^' n → #2 = 0 ∨ #1 = 0 ∨ #0 = 0” : ArithmeticSemisentence 3) :=

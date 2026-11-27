@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Mathlib.Algebra.Order.Ring.Abs
 public import Mathlib.Data.Fin.VecNotation
 public import Mathlib.Tactic.Linarith
@@ -61,19 +62,18 @@ variable [LinearOrder R]
 def BoundedExists {n : ℕ} (B : R) (Φ : (Fin (n + 1) → R) → Prop) (x : R) : Prop :=
   ∃ ys : Fin n → R, (∀ j, |ys j| < B) ∧ Φ (Fin.cons x ys)
 
-variable (R) in
+variable (R)
+
 /-- The least number principle for bounded existential open predicates, over the non-negative
 elements. -/
 def LeastNumberPrinciple : Prop :=
   ∀ (n : ℕ) (Φ : (Fin (n + 1) → R) → Prop), IsOpen Φ → ∀ (B x₀ : R), 0 ≤ x₀ → BoundedExists B Φ x₀ →
     ∃ x, 0 ≤ x ∧ BoundedExists B Φ x ∧ ∀ y, 0 ≤ y → y < x → ¬BoundedExists B Φ y
 
-variable (R) in
 /-- A discretely ordered ring: there is nothing strictly between `0` and `1`. -/
 class DiscretelyOrdered : Prop where
   one_le_of_pos : ∀ x : R, 0 < x → 1 ≤ x
 
-variable (R) in
 /-- Open induction: induction over the non-negative elements for open predicates with parameters
 in `R`.
 - [BO96, §1]
@@ -81,6 +81,8 @@ in `R`.
 def OpenInduction : Prop :=
   ∀ P : (Fin 1 → R) → Prop, IsOpen P → P ![0] → (∀ x, 0 ≤ x → P ![x] → P ![x + 1]) →
     ∀ x, 0 ≤ x → P ![x]
+
+variable {R}
 
 namespace IsOpen
 

@@ -28,15 +28,17 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
 
 abbrev World (_ : Model κ α) := κ
 
-abbrev Rel {M : Model κ α} : M.World → M.World → Prop := M.Rel'
+abbrev Rel : M.World → M.World → Prop := M.Rel'
 scoped infix:60 " ≺ " => Rel
 
-abbrev S {M : Model κ α} (w : M.World) : M.World → M.World → Prop := M.S' w
+abbrev S (w : M.World) : M.World → M.World → Prop := M.S' w
 scoped notation:60 x:61 " ≺[" w "] " y:61 => S w x y
 
-abbrev Val {M : Model κ α} : M.World → α → Prop := M.Val'
+abbrev Val : M.World → α → Prop := M.Val'
 
 instance : CoeFun (Model κ α) (fun M ↦ M.World → α → Prop) := ⟨fun M ↦ M.Val⟩
+
+variable (M)
 
 /-- `≺` is transitive and conversely well-founded, and each `≺[w]` is a reflexive and transitive
 relation on the `≺`-successors of `w` containing `≺` between them.
@@ -52,17 +54,19 @@ class IsIL (M : Model κ α) extends IsTrans _ M.Rel, IsConverseWellFounded _ M.
 
 export IsIL (rel_of_s_left rel_of_s_right s_refl s_trans s_of_rel)
 
-noncomputable def terminalOf (M : Model κ α) [IsConverseWellFounded _ M.Rel] (X : Set M.World)
+noncomputable def terminalOf [IsConverseWellFounded _ M.Rel] (X : Set M.World)
     (hX : X.Nonempty) : { t // t ∈ X ∧ ∀ x ∈ X, ¬t ≺ x } :=
   have h := ConverseWellFounded.iff_has_max.mp IsConverseWellFounded.cwf X hX;
   ⟨h.choose, h.choose_spec⟩
 
-abbrev pointModel (v : α → Prop) : Model (Fin 1) α where
+variable (v : α → Prop)
+
+abbrev pointModel : Model (Fin 1) α where
   Rel' _ _ := False
   S' _ _ _ := False
   Val' _ := v
 
-instance (v : α → Prop) : (pointModel v).IsIL where
+instance : (pointModel v).IsIL where
   trans := by tauto;
   cwf := ⟨fun x ↦ ⟨x, fun _ h ↦ h.elim⟩⟩
   rel_of_s_left := by tauto;
@@ -146,47 +150,52 @@ end Model.World
 
 namespace Model
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
 
 instance : Semantics (Model κ α) (Formula α) := ⟨fun M A ↦ ∀ x : M.World, World.Forces M x A⟩
 
 
 /-- - [KO21, Proposition 3.2] -/
-class IsJ1 (M : Model κ α) : Prop where
+class IsJ1 : Prop where
   s_refl {w x : M.World} : w ≺ x → x ≺[w] x
 
 /-- - [KO21, Proposition 3.8] -/
-class IsJ4 (M : Model κ α) : Prop where
+class IsJ4 : Prop where
   rel_of_s_right {w x y : M.World} : x ≺[w] y → w ≺ y
 
 /-- - [KO21, Proposition 3.15] -/
-class IsJ2 (M : Model κ α) : Prop extends M.IsJ4 where
+class IsJ2 : Prop extends M.IsJ4 where
   s_trans {w x y z : M.World} : x ≺[w] y → y ≺[w] z → x ≺[w] z
 
 /-- - [KO21, Proposition 3.18] -/
-class IsJ5 (M : Model κ α) : Prop where
+class IsJ5 : Prop where
   s_of_rel {w x y : M.World} : w ≺ x → x ≺ y → x ≺[w] y
 
-instance [M.IsIL] : M.IsJ1 := ⟨s_refl⟩
+variable {M} [M.IsIL]
 
-instance [M.IsIL] : M.IsJ2 where
+instance instIsJ1OfIsIL : M.IsJ1 := ⟨s_refl⟩
+
+instance instIsJ2OfIsIL : M.IsJ2 where
   rel_of_s_right := rel_of_s_right
   s_trans := s_trans
 
-instance [M.IsIL] : M.IsJ5 := ⟨s_of_rel⟩
+instance instIsJ5OfIsIL : M.IsJ5 := ⟨s_of_rel⟩
 
+omit [M.IsIL] in
+variable (M) in
 /-- `≺` is transitive and conversely well-founded, `x ≺[w] y` implies `w ≺ x`, and the conditions of
 $\mathbf{J1}$ and $\mathbf{J2}$ hold.
 
 - [KO21, Definition 2.2]
 -/
-class IsCL (M : Model κ α) : Prop extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel,
+class IsCL : Prop extends IsTrans _ M.Rel, IsConverseWellFounded _ M.Rel,
     M.IsJ1, M.IsJ2 where
   rel_of_s_left {w x y : M.World} : x ≺[w] y → w ≺ x
 
-instance [M.IsIL] : M.IsCL where
+instance instIsCLOfIsIL : M.IsCL where
   rel_of_s_left := rel_of_s_left
 
+omit [M.IsIL] in
 lemma IsIL.of_isCL [M.IsCL] [M.IsJ5] : M.IsIL where
   rel_of_s_left := IsCL.rel_of_s_left
   rel_of_s_right := IsJ4.rel_of_s_right

@@ -24,22 +24,23 @@ open Arithmetic (numeral numeral_semiterm)
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
+variable (k D : ℕ) (E r φ e s f : V)
+
 /-! ### Partial instances of blocks -/
 
 /-- `IsPartialInstance E r φ`: `φ` is obtained from a member `qqExss χ m` of `E`, whose matrix `χ`
 is not existential, by instantiating the outermost `m - r` existential quantifiers with closed
 terms. -/
-def IsPartialInstance (E r φ : V) : Prop :=
+def IsPartialInstance : Prop :=
   ∃ m χ, qqExss χ m ∈ E ∧ IsSemiformula ℒₒᵣ m χ ∧ (∀ p < χ, χ ≠ ^∃ p) ∧ r ≤ m ∧
     ∃ w, IsSemitermVec ℒₒᵣ m r w ∧ (∀ i < r, w.[i] = ^#i) ∧
       (∀ i < m, r ≤ i → IsSemiterm ℒₒᵣ 0 w.[i]) ∧ φ = qqExss (subst ℒₒᵣ w χ) r
 
 section partialInstance
 
-variable {E : V}
+variable {E r φ}
 
-instance IsPartialInstance.definable :
-    𝚺ᴬ₁-Relation₃ (IsPartialInstance : V → V → V → Prop) := by
+instance IsPartialInstance.definable : 𝚺ᴬ₁-Relation₃ (IsPartialInstance : V → V → V → Prop) := by
   unfold IsPartialInstance
   definability
 
@@ -58,12 +59,11 @@ lemma IsPartialInstance.of_mem {m χ : V} (hχ : IsSemiformula ℒₒᵣ m χ) (
   exact ⟨m, χ, h, hχ, fun p _ ↦ hmax p, le_rfl, w, hwv, hw,
     fun i hi hmi ↦ absurd hi (not_lt.mpr hmi), by rw [subst_eq_self hχ hwv hw]⟩
 
-lemma IsPartialInstance.isFormula {r φ : V} (h : IsPartialInstance E r φ) :
-    IsFormula ℒₒᵣ φ := by
+lemma IsPartialInstance.isFormula (h : IsPartialInstance E r φ) : IsFormula ℒₒᵣ φ := by
   obtain ⟨m, χ, -, hχ, -, -, w, hw, -, -, rfl⟩ := h
   exact IsSemiformula.qqExss (by simpa using hχ.subst hw)
 
-lemma IsPartialInstance.succ {r φ : V} (h : IsPartialInstance E (r + 1) φ) :
+lemma IsPartialInstance.succ (h : IsPartialInstance E (r + 1) φ) :
     ∃ p, φ = ^∃ p ∧ IsSemiformula ℒₒᵣ 1 p ∧
       ∀ t, IsSemiterm ℒₒᵣ 0 t → IsPartialInstance E r (substs1 ℒₒᵣ t p) := by
   obtain ⟨m, χ, hmem, hχ, hmax, hrm, w, hw, hwb, hwc, rfl⟩ := h
@@ -98,47 +98,52 @@ end partialInstance
 /-- `IsFalseBlock k D e`: `e` is a block `qqExss χ m` of existential quantifiers over a matrix `χ`
 that has no free variables, is not existential, and belongs to `IsReadable k D`, such that every
 instance of `χ` by closed terms is false under `ReadableTruth k D`. -/
-def IsFalseBlock (k D : ℕ) (e : V) : Prop :=
+def IsFalseBlock : Prop :=
   ∃ m χ, e = qqExss χ m ∧ (ℒₒᵣ).IsSemisentence m χ ∧ (∀ p, χ ≠ ^∃ p) ∧
     IsReadable k D χ ∧ ∀ w, IsSemitermVec ℒₒᵣ m 0 w → ¬ReadableTruth k D (subst ℒₒᵣ w χ)
 
-lemma IsFalseBlock.isFormula {k D : ℕ} {e : V} (h : IsFalseBlock k D e) : IsFormula ℒₒᵣ e := by
+section
+
+variable {k D e}
+
+lemma IsFalseBlock.isFormula (h : IsFalseBlock k D e) : IsFormula ℒₒᵣ e := by
   obtain ⟨m, χ, rfl, hχ, -⟩ := h
   exact IsSemiformula.qqExss (by simpa using hχ.isSemiformula)
 
-lemma IsFalseBlock.isSentence {k D : ℕ} {e : V} (h : IsFalseBlock k D e) :
-    (ℒₒᵣ).IsSentence e := by
+lemma IsFalseBlock.isSentence (h : IsFalseBlock k D e) : (ℒₒᵣ).IsSentence e := by
   apply Language.IsSemisentence.of_shift_eq h.isFormula
   obtain ⟨m, χ, rfl, hχ, -⟩ := h
   rw [shift_qqExss hχ.isSemiformula.isUFormula, hχ.shift_eq]
 
+end
+
 /-- `φ` is readable or a partial instance of a block of `E`. -/
-private def Admissible (k D : ℕ) (E φ : V) : Prop :=
+private def Admissible : Prop :=
   IsReadable k D φ ∨ ∃ r, IsPartialInstance E r φ
 
 /-- Some formula of `s` is true under `f`, and its value under `f` is not a partial instance of a
 block of `E` with a quantifier left. -/
-private def HasWitness (k D : ℕ) (E s f : V) : Prop :=
+private def HasWitness : Prop :=
   ∃ ψ ∈ s, (∀ r, ¬IsPartialInstance E (r + 1) (fvAssign f ψ)) ∧ ReadableSatisfaction k D ψ f
 
 section falseBlock
 
-variable {k D : ℕ} {E : V}
+variable {k D E r φ s f} {p q t : V}
 
-lemma IsPartialInstance.zero (hE : ∀ e ∈ E, IsFalseBlock k D e) {φ : V}
+lemma IsPartialInstance.zero (hE : ∀ e ∈ E, IsFalseBlock k D e)
     (h : IsPartialInstance E 0 φ) : IsReadable k D φ ∧ ¬ReadableTruth k D φ := by
   obtain ⟨m, χ, hmem, hχ, hmax, -, w, hw, -, -, rfl⟩ := h
   obtain ⟨m', χ', he, -, hmax', hr, hf⟩ := hE _ hmem
   obtain ⟨rfl, rfl⟩ := qqExss_inj (fun a ha ↦ hmax a (by simp [ha]) ha) hmax' he
   exact ⟨by simpa using hr.subst hw hχ, by simpa using hf w hw⟩
 
-private lemma not_isPartialInstance_succ {φ : V} (h : ∀ p, φ ≠ ^∃ p) (r : V) :
+private lemma not_isPartialInstance_succ (h : ∀ p, φ ≠ ^∃ p) (r : V) :
     ¬IsPartialInstance E (r + 1) φ := by
   intro hr
   obtain ⟨p, rfl, -⟩ := hr.succ
   exact h p rfl
 
-private lemma isReadable_of_admissible (hE : ∀ e ∈ E, IsFalseBlock k D e) {φ : V}
+private lemma isReadable_of_admissible (hE : ∀ e ∈ E, IsFalseBlock k D e)
     (h : Admissible k D E φ) (hN : ∀ r, ¬IsPartialInstance E (r + 1) φ) : IsReadable k D φ := by
   rcases h with h | ⟨r, hr⟩
   · exact h
@@ -146,7 +151,7 @@ private lemma isReadable_of_admissible (hE : ∀ e ∈ E, IsFalseBlock k D e) {�
     · exact (hr.zero hE).1
     · exact absurd hr (hN r)
 
-private lemma admissible_insert {p s f : V} (hp : Admissible k D E (fvAssign f p))
+private lemma admissible_insert (hp : Admissible k D E (fvAssign f p))
     (hs : ∀ ψ ∈ s, Admissible k D E (fvAssign f ψ)) :
     ∀ ψ ∈ insert p s, Admissible k D E (fvAssign f ψ) := by
   intro ψ hψ
@@ -154,14 +159,14 @@ private lemma admissible_insert {p s f : V} (hp : Admissible k D E (fvAssign f p
   · exact hp
   · exact hs ψ hψ
 
-private lemma hasWitness_of_insert {p s f : V} (h : HasWitness k D E (insert p s) f)
+private lemma hasWitness_of_insert (h : HasWitness k D E (insert p s) f)
     (hp : ¬ReadableSatisfaction k D p f) : HasWitness k D E s f := by
   obtain ⟨ψ, hψ, hψN, hψT⟩ := h
   rcases mem_bitInsert_iff.mp hψ with rfl | hψ
   · exact absurd hψT hp
   · exact ⟨ψ, hψ, hψN, hψT⟩
 
-private lemma hasWitness_of_and (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p q f : V}
+private lemma hasWitness_of_and (hE : ∀ e ∈ E, IsFalseBlock k D e)
     (hs : IsFormulaSet ℒₒᵣ s) (hpq : p ^⋏ q ∈ s) (hadm : ∀ ψ ∈ s, Admissible k D E (fvAssign f ψ))
     (ihp : (∀ ψ ∈ insert p s, Admissible k D E (fvAssign f ψ)) → HasWitness k D E (insert p s) f)
     (ihq : (∀ ψ ∈ insert q s, Admissible k D E (fvAssign f ψ)) → HasWitness k D E (insert q s) f) :
@@ -181,7 +186,7 @@ private lemma hasWitness_of_and (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p q f 
   · exact hasWitness_of_insert (ihp (admissible_insert (.inl hR.of_and.1) hadm)) ht
   · exact hasWitness_of_insert (ihq (admissible_insert (.inl hR.of_and.2) hadm)) ht
 
-private lemma hasWitness_of_or (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p q f : V}
+private lemma hasWitness_of_or (hE : ∀ e ∈ E, IsFalseBlock k D e)
     (hs : IsFormulaSet ℒₒᵣ s) (hpq : p ^⋎ q ∈ s) (hadm : ∀ ψ ∈ s, Admissible k D E (fvAssign f ψ))
     (ih : (∀ ψ ∈ insert p (insert q s), Admissible k D E (fvAssign f ψ)) →
       HasWitness k D E (insert p (insert q s)) f) :
@@ -200,7 +205,7 @@ private lemma hasWitness_of_or (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p q f :
   exact hasWitness_of_insert (hasWitness_of_insert
     (ih (admissible_insert (.inl hR.of_or.1) (admissible_insert (.inl hR.of_or.2) hadm))) ht.1) ht.2
 
-private lemma hasWitness_of_all (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p f : V}
+private lemma hasWitness_of_all (hE : ∀ e ∈ E, IsFalseBlock k D e)
     (hs : IsFormulaSet ℒₒᵣ s) (hp : ^∀ p ∈ s) (hadm : ∀ ψ ∈ s, Admissible k D E (fvAssign f ψ))
     (ih : ∀ g, (∀ ψ ∈ insert (free ℒₒᵣ p) (setShift ℒₒᵣ s), Admissible k D E (fvAssign g ψ)) →
       HasWitness k D E (insert (free ℒₒᵣ p) (setShift ℒₒᵣ s)) g) :
@@ -236,7 +241,7 @@ private lemma hasWitness_of_all (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p f : 
   exact ⟨q, hq, hψN, ReadableSatisfaction.shift_iff.mp hψT⟩
 
 private lemma hasWitness_of_exs_of_isPartialInstance (hE : ∀ e ∈ E, IsFalseBlock k D e)
-    {s p t f q r : V} (hpq : fvAssign f p = q) (ht : IsSemiterm ℒₒᵣ 0 t)
+    (hpq : fvAssign f p = q) (ht : IsSemiterm ℒₒᵣ 0 t)
     (hinst : ∀ u, IsSemiterm ℒₒᵣ 0 u → IsPartialInstance E r (substs1 ℒₒᵣ u q))
     (et : fvAssign f (substs1 ℒₒᵣ t p) = substs1 ℒₒᵣ (termFvAssign f t) (fvAssign f p))
     (hadm : ∀ ψ ∈ s, Admissible k D E (fvAssign f ψ))
@@ -253,7 +258,7 @@ private lemma hasWitness_of_exs_of_isPartialInstance (hE : ∀ e ∈ E, IsFalseB
     · exact absurd hnew (hψN r)
   · exact ⟨ψ, hψ, hψN, hψT⟩
 
-private lemma hasWitness_of_exs (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p t f : V}
+private lemma hasWitness_of_exs (hE : ∀ e ∈ E, IsFalseBlock k D e)
     (hs : IsFormulaSet ℒₒᵣ s) (hp : ^∃ p ∈ s) (ht : IsTerm ℒₒᵣ t)
     (hadm : ∀ ψ ∈ s, Admissible k D E (fvAssign f ψ))
     (ih : (∀ ψ ∈ insert (substs1 ℒₒᵣ t p) s, Admissible k D E (fvAssign f ψ)) →
@@ -282,7 +287,7 @@ private lemma hasWitness_of_exs (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p t f 
     exact ReadableTruth.exs_of_substs1 hR hpF.fvAssign ht.termFvAssign hψT
   · exact ⟨ψ, hψ, hψN, hψT⟩
 
-private lemma hasWitness_of_shift {Γ f : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
+private lemma hasWitness_of_shift {Γ : V} (hΓ : IsFormulaSet ℒₒᵣ Γ)
     (hadm : ∀ ψ ∈ setShift ℒₒᵣ Γ, Admissible k D E (fvAssign f ψ))
     (ih : ∀ g, (∀ ψ ∈ Γ, Admissible k D E (fvAssign g ψ)) → HasWitness k D E Γ g) :
     HasWitness k D E (setShift ℒₒᵣ Γ) f := by
@@ -311,7 +316,7 @@ private lemma hasWitness_definable :
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺⁺(k + 1)]
 
-private lemma IsPartialInstance.readableTruth_neg (hE : ∀ e ∈ E, IsFalseBlock k D e) {r φ : V}
+private lemma IsPartialInstance.readableTruth_neg (hE : ∀ e ∈ E, IsFalseBlock k D e)
     (h : IsPartialInstance E r φ) (hn : IsReadable k D (neg ℒₒᵣ φ)) :
     ReadableTruth k D (neg ℒₒᵣ φ) := by
   have hP : 𝚷ᴬ_[k + 1].DefinablePred fun r : V ↦ ∀ φ, IsPartialInstance E r φ →
@@ -332,7 +337,7 @@ private lemma IsPartialInstance.readableTruth_neg (hE : ∀ e ∈ E, IsFalseBloc
     rw [e] at hx ⊢
     exact ih _ (hinst _ (numeral_semiterm 0 x)) hx
 
-private lemma hasWitness_of_axL (hE : ∀ e ∈ E, IsFalseBlock k D e) {s p f : V}
+private lemma hasWitness_of_axL (hE : ∀ e ∈ E, IsFalseBlock k D e)
     (hs : IsFormulaSet ℒₒᵣ s) (hp : p ∈ s) (hnp : neg ℒₒᵣ p ∈ s)
     (hadm : ∀ ψ ∈ s, Admissible k D E (fvAssign f ψ)) :
     HasWitness k D E s f := by

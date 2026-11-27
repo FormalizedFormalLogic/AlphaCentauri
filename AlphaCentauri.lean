@@ -53,6 +53,7 @@ public import AlphaCentauri.Calculus.Induction.Forcing
 public import AlphaCentauri.Calculus.Induction.Theory
 public import AlphaCentauri.Calculus.Induction.Witnessing
 public import AlphaCentauri.Calculus.Instantiation
+public import AlphaCentauri.Init
 public import AlphaCentauri.Interpretability.Basic
 public import AlphaCentauri.Interpretability.Feferman
 public import AlphaCentauri.Interpretability.Formalized
@@ -101,6 +102,8 @@ public import AlphaCentauri.InterpretabilityLogic.Veltman.StepByStepModel
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Basic
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.Bisimulation
 public import AlphaCentauri.InterpretabilityLogic.Verbrugge.MaximalConsistentTheoryModel
+public import AlphaCentauri.Linter.InitImport
+public import AlphaCentauri.Linter.RepeatedBinder
 public import AlphaCentauri.Model.BSigma
 public import AlphaCentauri.Model.Basic
 public import AlphaCentauri.Model.DefinableElements

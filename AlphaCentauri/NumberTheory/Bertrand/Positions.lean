@@ -25,26 +25,26 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ �
 
 namespace Bertrand
 
-variable (B s : V)
+variable (B s y : V)
 
 /-- $\|y^s\| - 1$, which approximates $s \log_2 y$. -/
-def scaledLength (y : V) : V := ‖bpow B y s‖ - 1
+def scaledLength : V := ‖bpow B y s‖ - 1
 
 instance : 𝚺ᴬ₀.DefinableFunction₁ (scaledLength B s) := by
   unfold scaledLength
   definability
 
-lemma scaledLength_lt (y : V) : scaledLength B s y < B ⨳ 1 :=
+lemma scaledLength_lt : scaledLength B s y < B ⨳ 1 :=
   lt_of_le_of_lt ((sub_le_self _ _).trans (length_le _)) (bpow_lt B y s)
 
 instance : Bounded₁ (scaledLength B s) :=
   ⟨&(B ⨳ 1), fun _ ↦ by simpa using (scaledLength_lt B s _).le⟩
 
-variable {B s}
+variable {B s y}
 
 section scaledLength
 
-variable {u v y y' : V} (hB : 0 < B)
+variable {u v y' : V} (hB : 0 < B)
 include hB
 
 lemma one_le_length_bpow (hy : 0 < y) (h : s * ‖y‖ < ‖B‖) : 1 ≤ ‖bpow B y s‖ :=
@@ -105,28 +105,28 @@ lemma scaledLength_mul_le (hu : 0 < u) (hv : 0 < v) (h : s * ‖u * v‖ < ‖B�
 
 end scaledLength
 
-variable (B s)
+variable (B s) (m t₀ t₁ t₂ t₃ t₄ c w u v : V)
 
 /-- $\{(k, y) : 1 \le k \le m, y < \lambda(k)\}$. -/
-def Bits (m w : V) : Prop :=
+def Bits : Prop :=
   ∃ k ≤ w, ∃ y ≤ w, w = ⟪k, y⟫ ∧ 0 < k ∧ k ≤ m ∧ y < scaledLength B s k
 
 /-- $\{(k, P, o) : 1 \le k \le m, P \mid k, P \text{ a power of the prime } p, o < \lambda(p)\}$. -/
-def Level (m w : V) : Prop :=
+def Level : Prop :=
   ∃ k ≤ w, ∃ P ≤ w, ∃ o ≤ w, w = ⟪k, P, o⟫ ∧ 0 < k ∧ k ≤ m ∧ P ∣ k ∧
     ∃ p ≤ P, IsPrimePower p P ∧ o < scaledLength B s p
 
 /-- $\{(k, i) : 1 \le k \le m, i < \|k\|\}$. -/
-def Top (m w : V) : Prop := ∃ k ≤ w, ∃ i ≤ w, w = ⟪k, i⟫ ∧ 0 < k ∧ k ≤ m ∧ i < ‖k‖
+def Top : Prop := ∃ k ≤ w, ∃ i ≤ w, w = ⟪k, i⟫ ∧ 0 < k ∧ k ≤ m ∧ i < ‖k‖
 
 /-- $\{(P, o) : P \text{ a power of the prime } p, \lfloor 2m / P \rfloor \text{ odd},
 o < \lambda(p)\}$. -/
-def Kummer (m w : V) : Prop :=
+def Kummer : Prop :=
   ∃ P ≤ w, ∃ o ≤ w, w = ⟪P, o⟫ ∧ 2 * m / P % 2 = 1 ∧
     ∃ p ≤ P, IsPrimePower p P ∧ o < scaledLength B s p
 
 /-- The numbers below `c`. -/
-def Below (c w : V) : Prop := w < c
+def Below : Prop := w < c
 
 lemma definable_bits : 𝚺ᴬ₀.DefinableRel (Bits B s) := by
   unfold Bits
@@ -146,13 +146,13 @@ lemma definable_kummer : 𝚺ᴬ₀.DefinableRel (Kummer B s) := by
 
 /-- $(k, P, o) \mapsto (k, \lambda(k^{(P - 1)}) + o)$: the level `P` of `k` occupies the
 positions of $k^s$ from $\lambda(k^{(P - 1)})$ on. -/
-def LevelToBits (w v : V) : Prop :=
+def LevelToBits : Prop :=
   ∃ k ≤ w, ∃ P ≤ w, ∃ o ≤ w, w = ⟪k, P, o⟫ ∧
     v = ⟪k, scaledLength B s (divisorUpTo k (P - 1)) + o⟫
 
 /-- The position `y` of $k^s$ lies in the level `T + 1` of `k`; it goes to that level if its
 offset is below $\lambda(p)$, and to `Top` otherwise. -/
-def BitsToLevel (t₀ t₁ w v : V) : Prop :=
+def BitsToLevel : Prop :=
   ∃ k ≤ w, ∃ y ≤ w, w = ⟪k, y⟫ ∧ ∃ T < k,
     scaledLength B s (divisorUpTo k T) ≤ y ∧ y < scaledLength B s (divisorUpTo k (T + 1)) ∧
     ((∃ p ≤ T + 1, IsPrimePower p (T + 1) ∧
@@ -165,14 +165,14 @@ def BitsToLevel (t₀ t₁ w v : V) : Prop :=
 /-- Legendre's matching: the multiples $qP \le m$ stay, the multiples $qP \in (m, 2m]$ with
 $q \le 2 \lfloor m / P \rfloor$ go to $(q - \lfloor m / P \rfloor) P$, and the last one, if
 $\lfloor 2m / P \rfloor$ is odd, goes to `Kummer`. -/
-def LegendreDown (m t₀ t₁ t₂ w v : V) : Prop :=
+def LegendreDown : Prop :=
   ∃ k ≤ w, ∃ P ≤ w, ∃ o ≤ w, w = ⟪k, P, o⟫ ∧
     ((k ≤ m ∧ v = ⟪t₀, w⟫) ∨
       (m < k ∧ k / P ≤ 2 * (m / P) ∧ v = ⟪t₁, ⟪k - m / P * P, P, o⟫⟫) ∨
       (m < k ∧ 2 * (m / P) < k / P ∧ v = ⟪t₂, ⟪P, o⟫⟫))
 
 /-- The inverse of Legendre's matching. -/
-def LegendreUp (m t₀ t₁ t₂ u v : V) : Prop :=
+def LegendreUp : Prop :=
   (π₁ u = t₀ ∧ v = π₂ u) ∨
     (π₁ u = t₁ ∧ ∃ k ≤ u, ∃ P ≤ u, ∃ o ≤ u, π₂ u = ⟪k, P, o⟫ ∧ v = ⟪k + m / P * P, P, o⟫) ∨
     (π₁ u = t₂ ∧ ∃ P ≤ u, ∃ o ≤ u, π₂ u = ⟪P, o⟫ ∧ v = ⟪2 * m / P * P, P, o⟫)
@@ -180,7 +180,7 @@ def LegendreUp (m t₀ t₁ t₂ u v : V) : Prop :=
 /-- $\lambda(2j) = \lambda(j) + s$ and $\lambda(2j - 1) \le \lambda(j) + s$: the positions of
 $2j$ and $2j - 1$ below $\lambda(j)$ go to two copies of $(j, y)$, the others to numbers below
 $2ms$. -/
-def DoubleUp (m t₀ t₁ t₂ w v : V) : Prop :=
+def DoubleUp : Prop :=
   ∃ k ≤ w, ∃ y ≤ w, w = ⟪k, y⟫ ∧
     ((k % 2 = 0 ∧ y < scaledLength B s (k / 2) ∧ v = ⟪t₀, ⟪k / 2, y⟫⟫) ∨
       (k % 2 = 0 ∧ scaledLength B s (k / 2) ≤ y ∧
@@ -191,7 +191,7 @@ def DoubleUp (m t₀ t₁ t₂ w v : V) : Prop :=
 
 /-- The two copies of $(j, y)$ go to $(2j, y)$ and $(2j + 1, y)$ (the last one to a number below
 $\lambda(m)$), and $qs + t$ goes to the position $\lambda(j) + t$ of $2j$ or of $2j + 1$. -/
-def DoubleDown (m t₀ t₁ t₂ t₃ t₄ u v : V) : Prop :=
+def DoubleDown : Prop :=
   (π₁ u = t₀ ∧ ∃ k ≤ u, ∃ y ≤ u, π₂ u = ⟪k, y⟫ ∧ v = ⟪t₃, ⟪2 * k, y⟫⟫) ∨
     (π₁ u = t₁ ∧ ∃ k ≤ u, ∃ y ≤ u, π₂ u = ⟪k, y⟫ ∧
       ((k < m ∧ v = ⟪t₃, ⟪2 * k + 1, y⟫⟫) ∨ (m ≤ k ∧ v = ⟪t₄, y⟫))) ∨
@@ -206,28 +206,27 @@ lemma definable_levelToBits : 𝚺ᴬ₀.DefinableRel (LevelToBits B s) := by
   unfold LevelToBits
   definability
 
-lemma definable_bitsToLevel (t₀ t₁ : V) : 𝚺ᴬ₀.DefinableRel (BitsToLevel B s t₀ t₁) := by
+lemma definable_bitsToLevel : 𝚺ᴬ₀.DefinableRel (BitsToLevel B s t₀ t₁) := by
   unfold BitsToLevel
   definability
 
-lemma definable_legendreDown (m t₀ t₁ t₂ : V) :
-    𝚺ᴬ₀.DefinableRel (LegendreDown m t₀ t₁ t₂ : V → V → Prop) := by
+lemma definable_legendreDown : 𝚺ᴬ₀.DefinableRel (LegendreDown m t₀ t₁ t₂ : V → V → Prop) := by
   unfold LegendreDown
   definability
 
-lemma definable_doubleDown (m t₀ t₁ t₂ t₃ t₄ : V) :
-    𝚺ᴬ₀.DefinableRel (DoubleDown B s m t₀ t₁ t₂ t₃ t₄) := by
+lemma definable_doubleDown : 𝚺ᴬ₀.DefinableRel (DoubleDown B s m t₀ t₁ t₂ t₃ t₄) := by
   unfold DoubleDown
   definability
 
 variable {B s}
 
-lemma exists_pair₂ (w : V) : ∃ a b, w = ⟪a, b⟫ := ⟨π₁ w, π₂ w, by simp⟩
+lemma exists_pair₂ : ∃ a b, w = ⟪a, b⟫ := ⟨π₁ w, π₂ w, by simp⟩
 
-lemma exists_pair₃ (w : V) : ∃ a b c, w = ⟪a, b, c⟫ := ⟨π₁ w, π₁ (π₂ w), π₂ (π₂ w), by simp⟩
+lemma exists_pair₃ : ∃ a b c, w = ⟪a, b, c⟫ := ⟨π₁ w, π₁ (π₂ w), π₂ (π₂ w), by simp⟩
 
-lemma bits_pair_iff {m k y : V} :
-    Bits B s m ⟪k, y⟫ ↔ 0 < k ∧ k ≤ m ∧ y < scaledLength B s k := by
+variable {m t₀ t₁ t₂ t₃ t₄ u v} {k P o x : V}
+
+lemma bits_pair_iff : Bits B s m ⟪k, y⟫ ↔ 0 < k ∧ k ≤ m ∧ y < scaledLength B s k := by
   constructor
   · rintro ⟨k', -, y', -, h, hk⟩
     obtain ⟨rfl, rfl⟩ := pair_ext_iff.mp h
@@ -235,7 +234,7 @@ lemma bits_pair_iff {m k y : V} :
   · intro h
     exact ⟨k, by simp, y, by simp, rfl, h⟩
 
-lemma top_pair_iff {m k i : V} : Top m ⟪k, i⟫ ↔ 0 < k ∧ k ≤ m ∧ i < ‖k‖ := by
+lemma top_pair_iff {i : V} : Top m ⟪k, i⟫ ↔ 0 < k ∧ k ≤ m ∧ i < ‖k‖ := by
   constructor
   · rintro ⟨k', -, i', -, h, hk⟩
     obtain ⟨rfl, rfl⟩ := pair_ext_iff.mp h
@@ -243,8 +242,7 @@ lemma top_pair_iff {m k i : V} : Top m ⟪k, i⟫ ↔ 0 < k ∧ k ≤ m ∧ i < 
   · intro h
     exact ⟨k, by simp, i, by simp, rfl, h⟩
 
-lemma level_pair_iff {m k P o : V} :
-    Level B s m ⟪k, P, o⟫ ↔
+lemma level_pair_iff : Level B s m ⟪k, P, o⟫ ↔
       0 < k ∧ k ≤ m ∧ P ∣ k ∧ ∃ p ≤ P, IsPrimePower p P ∧ o < scaledLength B s p := by
   constructor
   · rintro ⟨k', -, P', -, o', -, h, hk⟩
@@ -255,8 +253,7 @@ lemma level_pair_iff {m k P o : V} :
     exact ⟨k, by simp, P, le_trans (by simp) (le_pair_right _ _), o,
       le_trans (by simp) (le_pair_right _ _), rfl, h⟩
 
-lemma kummer_pair_iff {m P o : V} :
-    Kummer B s m ⟪P, o⟫ ↔
+lemma kummer_pair_iff : Kummer B s m ⟪P, o⟫ ↔
       2 * m / P % 2 = 1 ∧ ∃ p ≤ P, IsPrimePower p P ∧ o < scaledLength B s p := by
   constructor
   · rintro ⟨P', -, o', -, h, hk⟩
@@ -265,7 +262,7 @@ lemma kummer_pair_iff {m P o : V} :
   · intro h
     exact ⟨P, by simp, o, by simp, rfl, h⟩
 
-lemma levelToBits_pair {k P o v : V} :
+lemma levelToBits_pair :
     LevelToBits B s ⟪k, P, o⟫ v ↔ v = ⟪k, scaledLength B s (divisorUpTo k (P - 1)) + o⟫ := by
   constructor
   · rintro ⟨k', -, P', -, o', -, h, rfl⟩
@@ -276,13 +273,12 @@ lemma levelToBits_pair {k P o v : V} :
     exact ⟨k, by simp, P, le_trans (by simp) (le_pair_right _ _), o,
       le_trans (by simp) (le_pair_right _ _), rfl, rfl⟩
 
-lemma le_pair_of_le_right {a b : V} (c : V) (h : a ≤ b) : a ≤ ⟪c, b⟫ :=
+lemma le_pair_of_le_right {a b : V} (h : a ≤ b) : a ≤ ⟪c, b⟫ :=
   h.trans (le_pair_right _ _)
 
 attribute [local simp] le_pair_of_le_right
 
-lemma legendreDown_pair {m t₀ t₁ t₂ k P o v : V} :
-    LegendreDown m t₀ t₁ t₂ ⟪k, P, o⟫ v ↔
+lemma legendreDown_pair : LegendreDown m t₀ t₁ t₂ ⟪k, P, o⟫ v ↔
       (k ≤ m ∧ v = ⟪t₀, ⟪k, P, o⟫⟫) ∨
         (m < k ∧ k / P ≤ 2 * (m / P) ∧ v = ⟪t₁, ⟪k - m / P * P, P, o⟫⟫) ∨
         (m < k ∧ 2 * (m / P) < k / P ∧ v = ⟪t₂, ⟪P, o⟫⟫) := by
@@ -294,13 +290,12 @@ lemma legendreDown_pair {m t₀ t₁ t₂ k P o v : V} :
   · intro H
     exact ⟨k, by simp, P, by simp, o, by simp, rfl, H⟩
 
-lemma legendreUp_tag_zero {m t₀ t₁ t₂ x v : V} (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) :
+lemma legendreUp_tag_zero (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) :
     LegendreUp m t₀ t₁ t₂ ⟪t₀, x⟫ v ↔ v = x := by
   unfold LegendreUp
   simp [h₀₁, h₀₂]
 
-lemma legendreUp_tag_one {m t₀ t₁ t₂ x v : V} (h₀₁ : t₀ ≠ t₁) (h₁₂ : t₁ ≠ t₂) :
-    LegendreUp m t₀ t₁ t₂ ⟪t₁, x⟫ v ↔
+lemma legendreUp_tag_one (h₀₁ : t₀ ≠ t₁) (h₁₂ : t₁ ≠ t₂) : LegendreUp m t₀ t₁ t₂ ⟪t₁, x⟫ v ↔
       ∃ k P o, x = ⟪k, P, o⟫ ∧ v = ⟪k + m / P * P, P, o⟫ := by
   constructor
   · rintro (⟨h, -⟩ | ⟨-, k, -, P, -, o, -, h, hv⟩ | ⟨h, -⟩)
@@ -312,7 +307,7 @@ lemma legendreUp_tag_one {m t₀ t₁ t₂ x v : V} (h₀₁ : t₀ ≠ t₁) (h
     left
     exact ⟨by simp, k, by simp, P, by simp, o, by simp, by simp, rfl⟩
 
-lemma legendreUp_tag_two {m t₀ t₁ t₂ x v : V} (h₀₂ : t₀ ≠ t₂) (h₁₂ : t₁ ≠ t₂) :
+lemma legendreUp_tag_two (h₀₂ : t₀ ≠ t₂) (h₁₂ : t₁ ≠ t₂) :
     LegendreUp m t₀ t₁ t₂ ⟪t₂, x⟫ v ↔ ∃ P o, x = ⟪P, o⟫ ∧ v = ⟪2 * m / P * P, P, o⟫ := by
   constructor
   · rintro (⟨h, -⟩ | ⟨h, -⟩ | ⟨-, P, -, o, -, h, hv⟩)
@@ -324,8 +319,7 @@ lemma legendreUp_tag_two {m t₀ t₁ t₂ x v : V} (h₀₂ : t₀ ≠ t₂) (h
     right
     exact ⟨by simp, P, by simp, o, by simp, by simp, rfl⟩
 
-lemma doubleUp_pair {m t₀ t₁ t₂ k y v : V} :
-    DoubleUp B s m t₀ t₁ t₂ ⟪k, y⟫ v ↔
+lemma doubleUp_pair : DoubleUp B s m t₀ t₁ t₂ ⟪k, y⟫ v ↔
       ((k % 2 = 0 ∧ y < scaledLength B s (k / 2) ∧ v = ⟪t₀, ⟪k / 2, y⟫⟫) ∨
         (k % 2 = 0 ∧ scaledLength B s (k / 2) ≤ y ∧
           v = ⟪t₂, (k / 2 - 1) * s + (y - scaledLength B s (k / 2))⟫) ∨
@@ -340,7 +334,7 @@ lemma doubleUp_pair {m t₀ t₁ t₂ k y v : V} :
   · intro H
     exact ⟨k, by simp, y, by simp, rfl, H⟩
 
-lemma doubleDown_tag_zero {m t₀ t₁ t₂ t₃ t₄ x v : V} (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) :
+lemma doubleDown_tag_zero (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) :
     DoubleDown B s m t₀ t₁ t₂ t₃ t₄ ⟪t₀, x⟫ v ↔ ∃ k y, x = ⟪k, y⟫ ∧ v = ⟪t₃, ⟪2 * k, y⟫⟫ := by
   constructor
   · rintro (⟨-, k, -, y, -, h, hv⟩ | ⟨h, -⟩ | ⟨h, -⟩)
@@ -351,7 +345,7 @@ lemma doubleDown_tag_zero {m t₀ t₁ t₂ t₃ t₄ x v : V} (h₀₁ : t₀ �
     left
     exact ⟨by simp, k, by simp, y, by simp, by simp, rfl⟩
 
-lemma doubleDown_tag_one {m t₀ t₁ t₂ t₃ t₄ x v : V} (h₀₁ : t₀ ≠ t₁) (h₁₂ : t₁ ≠ t₂) :
+lemma doubleDown_tag_one (h₀₁ : t₀ ≠ t₁) (h₁₂ : t₁ ≠ t₂) :
     DoubleDown B s m t₀ t₁ t₂ t₃ t₄ ⟪t₁, x⟫ v ↔ ∃ k y, x = ⟪k, y⟫ ∧
       ((k < m ∧ v = ⟪t₃, ⟪2 * k + 1, y⟫⟫) ∨ (m ≤ k ∧ v = ⟪t₄, y⟫)) := by
   constructor
@@ -364,7 +358,7 @@ lemma doubleDown_tag_one {m t₀ t₁ t₂ t₃ t₄ x v : V} (h₀₁ : t₀ �
     left
     exact ⟨by simp, k, by simp, y, by simp, by simp, H⟩
 
-lemma doubleDown_tag_two {m t₀ t₁ t₂ t₃ t₄ x v : V} (h₀₂ : t₀ ≠ t₂) (h₁₂ : t₁ ≠ t₂) :
+lemma doubleDown_tag_two (h₀₂ : t₀ ≠ t₂) (h₁₂ : t₁ ≠ t₂) :
     DoubleDown B s m t₀ t₁ t₂ t₃ t₄ ⟪t₂, x⟫ v ↔
       ((x / s < m ∧
           v = ⟪t₃, ⟪2 * (x / s + 1), scaledLength B s (x / s + 1) + x % s⟫⟫) ∨
@@ -374,8 +368,6 @@ lemma doubleDown_tag_two {m t₀ t₁ t₂ t₃ t₄ x v : V} (h₀₂ : t₀ �
   simp [h₀₂.symm, h₁₂.symm]
 
 section division
-
-variable {k m P : V}
 
 lemma two_mul_div_bounds (hP : 0 < P) :
     2 * (m / P) ≤ 2 * m / P ∧ 2 * m / P ≤ 2 * (m / P) + 1 := by
@@ -469,10 +461,10 @@ end division
 
 section levels
 
-variable {k m p T T' : V} (hB : 0 < B) (hBm : s * ‖2 * m‖ < ‖B‖)
+variable {p T T' : V} (hB : 0 < B) (hBm : s * ‖2 * m‖ < ‖B‖)
 
 include hBm in
-lemma mul_length_lt_of_le {y : V} (h : y ≤ 2 * m) : s * ‖y‖ < ‖B‖ :=
+lemma mul_length_lt_of_le (h : y ≤ 2 * m) : s * ‖y‖ < ‖B‖ :=
   lt_of_le_of_lt (mul_le_mul_left (length_monotone h)) hBm
 
 lemma divisorUpTo_succ_eq (hk : 0 < k) (hP : IsPrimePower p (T + 1)) (hd : T + 1 ∣ k) :
@@ -532,7 +524,7 @@ lemma add_lt_scaledLength_divisorUpTo_succ {o : V} (hk : 0 < k) (hkm : k ≤ 2 *
   lt_of_lt_of_le ((add_lt_add_iff_left _).mpr ho)
     (scaledLength_divisorUpTo_succ hB hBm hk hkm hP hd).1
 
-lemma exists_segment {y : V} (hk : 0 < k) (hkm : k ≤ 2 * m) (hy : y < scaledLength B s k) :
+lemma exists_segment (hk : 0 < k) (hkm : k ≤ 2 * m) (hy : y < scaledLength B s k) :
     ∃ T < k, scaledLength B s (divisorUpTo k T) ≤ y ∧
       y < scaledLength B s (divisorUpTo k (T + 1)) := by
   obtain ⟨T', hT', hmin⟩ := ISigma0.least_number
@@ -548,7 +540,7 @@ lemma exists_segment {y : V} (hk : 0 < k) (hkm : k ≤ 2 * m) (hy : y < scaledLe
   by_contra! hle
   exact hmin k (lt_succ_iff_le.mpr hle) (by simpa [divisorUpTo_self hk] using hy)
 
-lemma exists_level_of_segment {y : V} (hk : 0 < k) (hkm : k ≤ 2 * m)
+lemma exists_level_of_segment (hk : 0 < k) (hkm : k ≤ 2 * m)
     (h : scaledLength B s (divisorUpTo k T) ≤ y)
     (h' : y < scaledLength B s (divisorUpTo k (T + 1))) :
     ∃ p, IsPrimePower p (T + 1) ∧ T + 1 ∣ k := by
@@ -559,7 +551,7 @@ lemma exists_level_of_segment {y : V} (hk : 0 < k) (hkm : k ≤ 2 * m)
   obtain ⟨p, hp, hd, -⟩ := exists_isPrimePower_of_divisorUpTo_lt hk hlt
   exact ⟨p, hp, hd⟩
 
-lemma eq_add_scaledLength_of_le {y : V} (hk : 0 < k) (hkm : k ≤ 2 * m)
+lemma eq_add_scaledLength_of_le (hk : 0 < k) (hkm : k ≤ 2 * m)
     (hP : IsPrimePower p (T + 1)) (hd : T + 1 ∣ k)
     (h₂ : y < scaledLength B s (divisorUpTo k (T + 1)))
     (h₁ : scaledLength B s (divisorUpTo k T) ≤ y)
@@ -600,8 +592,6 @@ end levels
 
 section legendre
 
-variable {m t₀ t₁ t₂ u v : V}
-
 lemma legendreUp_shape (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) (h₁₂ : t₁ ≠ t₂)
     (hu : Tagged t₀ (Level B s m) u ∨ Tagged t₁ (Level B s m) u ∨ Tagged t₂ (Kummer B s m) u)
     (hv : LegendreUp m t₀ t₁ t₂ u v) :
@@ -637,7 +627,7 @@ lemma legendreUp_shape (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) (h₁
 end legendre
 
 
-variable {m t₀ t₁ t₂ t₃ t₄ : V} (hB : 0 < B) (hs : 0 < s) (hBm : s * ‖2 * m‖ < ‖B‖)
+variable (hB : 0 < B) (hs : 0 < s) (hBm : s * ‖2 * m‖ < ‖B‖)
 include hB hs hBm
 
 omit hs in
@@ -826,8 +816,7 @@ lemma isInj_legendreUp (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) (h₁
     · exact eC.trans eC'.symm
 
 omit hs in
-lemma doubleUp_decode {w v : V} (hw : Bits B s (2 * m) w)
-    (hv : DoubleUp B s m t₀ t₁ t₂ w v) :
+lemma doubleUp_decode {w : V} (hw : Bits B s (2 * m) w) (hv : DoubleUp B s m t₀ t₁ t₂ w v) :
     (Tagged t₀ (Bits B s m) v ∨ Tagged t₁ (Bits B s m) v ∨ Tagged t₂ (Below (2 * m * s)) v) ∧
       ((∃ j y, v = ⟪t₀, ⟪j, y⟫⟫ ∧ w = ⟪2 * j, y⟫) ∨
         (∃ i y, v = ⟪t₁, ⟪i + 1, y⟫⟫ ∧ w = ⟪2 * i + 1, y⟫) ∨
@@ -937,7 +926,7 @@ lemma isInj_doubleUp (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) (h₁�
       · exact absurd (hz'.trans_le hz) (lt_irrefl _)
       · exact e.trans e'.symm
 
-lemma doubleDown_decode {u v : V} (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) (h₁₂ : t₁ ≠ t₂)
+lemma doubleDown_decode (h₀₁ : t₀ ≠ t₁) (h₀₂ : t₀ ≠ t₂) (h₁₂ : t₁ ≠ t₂)
     (hu : Tagged t₀ (Bits B s m) u ∨ Tagged t₁ (Bits B s m) u ∨
       Tagged t₂ (Below ((2 * m - 1) * s)) u)
     (hv : DoubleDown B s m t₀ t₁ t₂ t₃ t₄ u v) :

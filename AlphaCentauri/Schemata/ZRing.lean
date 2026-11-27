@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.IOpen.Basic
 
 /-! # The theory $\mathsf{ZR}$ of discretely ordered $\mathbb{Z}$-rings
@@ -14,9 +15,10 @@ The theory of non-negative parts of discretely ordered $\mathbb{Z}$-rings.
 
 namespace FFL.FirstOrder.Arithmetic
 
+variable (n : ℕ)
 
 /-- Division with remainder by the numeral `n`. -/
-def standardEuclideanDivisionBy (n : ℕ) : ArithmeticSentence :=
+def standardEuclideanDivisionBy : ArithmeticSentence :=
   “∀ b, ∃ q r, r < ↑n ∧ b = ↑n * q + r”
 
 /-- $\mathsf{ZR}$: $\mathsf{PA}^-$ together with division with remainder by every standard
@@ -33,7 +35,7 @@ instance : 𝗘𝗤 ℒₒᵣ ⪯ ZRing :=
 
 variable {M : Type*} [ORingStructure M]
 
-lemma models_standardEuclideanDivisionBy_iff [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (n : ℕ) :
+lemma models_standardEuclideanDivisionBy_iff [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] :
     M↓[ℒₒᵣ] ⊧ standardEuclideanDivisionBy n ↔ ∀ b : M, ∃ q r : M, r < n ∧ b = n * q + r := by
   simp [models_iff, standardEuclideanDivisionBy, numeral_eq_natCast]
 

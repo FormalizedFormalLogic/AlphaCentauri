@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Schemata
 public import AlphaCentauri.Schemata.DeltaInduction
@@ -21,57 +22,60 @@ open _root_.FFL.Entailment
 
 section axioms
 
-variable {L : Language} [L.ORing] {C C' : Semisentence L 1 → Prop}
+variable {L : Language} [L.ORing] {C C' : Semisentence L 1 → Prop} (Γ : Polarity) (s : ℕ)
 
-variable (L) in
+variable (L)
+
 /-- The parameter-free induction instance for a formula `φ` of one free variable:
 `φ(0) → (∀ x, φ(x) → φ(x + 1)) → ∀ x, φ(x)`.
 - [Bek99, §1] -/
 def parameterFreeSuccInd (φ : Semisentence L 1) : Sentence L := .univCl (succInd (Rew.emb ▹ φ))
 
-variable (L) in
 /-- The parameter-free induction schema restricted to the formulas satisfying `C`:
 `{ φ(0) → (∀ x, φ(x) → φ(x + 1)) → ∀ x, φ(x) | C φ }`.
 - [Bek99, §1] -/
 def parameterFreeInductionOn (C : Semisentence L 1 → Prop) : Set (Sentence L) :=
   parameterFreeSuccInd L '' {φ | C φ}
 
+variable {L}
+
 /-- `𝗜ᶠ Γ s` is `𝗘𝗔` together with the parameter-free induction schema for
 `ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`.
 - [Bek99, §1] -/
-abbrev IParameterFree (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+abbrev IParameterFree : ArithmeticTheory :=
   𝗘𝗔 ∪ parameterFreeInductionOn ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s)
 
 prefix:max "𝗜ᶠ " => IParameterFree
 
-lemma parameterFreeInductionOn_subset_InductionScheme (Γ : Polarity) (s : ℕ) :
+lemma parameterFreeInductionOn_subset_InductionScheme :
     parameterFreeInductionOn ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) ⊆
       InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) := by
   rintro _ ⟨φ, hφ, rfl⟩
   exact ⟨Rew.emb ▹ φ, Bounding.PrenexHierarchy.rew_iff.mpr hφ, rfl⟩
 
-instance IParameterFree_weakerThan_EA_union_InductionScheme (Γ : Polarity) (s : ℕ) :
+instance IParameterFree_weakerThan_EA_union_InductionScheme :
     𝗜ᶠ Γ s ⪯ 𝗘𝗔 ∪ InductionScheme ℒₒᵣ (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s) :=
   WeakerThan.ofSubset
     (Set.union_subset_union_right _ (parameterFreeInductionOn_subset_InductionScheme Γ s))
 
-instance (Γ : Polarity) (s : ℕ) : 𝗘𝗔 ⪯ 𝗜ᶠ Γ s := WeakerThan.ofSubset Set.subset_union_left
+instance : 𝗘𝗔 ⪯ 𝗜ᶠ Γ s := WeakerThan.ofSubset Set.subset_union_left
 
-instance (Γ : Polarity) (s : ℕ) : 𝗣𝗔⁻ ⪯ 𝗜ᶠ Γ s :=
+instance : 𝗣𝗔⁻ ⪯ 𝗜ᶠ Γ s :=
   WeakerThan.trans (inferInstance : 𝗣𝗔⁻ ⪯ 𝗘𝗔) inferInstance
 
-instance (Γ : Polarity) (s : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜ᶠ Γ s :=
+instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜ᶠ Γ s :=
   WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗘𝗔) inferInstance
 
 end axioms
 
+variable (Γ : Polarity) (s : ℕ)
 
-instance models_IParameterFree (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗜ᶠ Γ s := by
+instance models_IParameterFree : ℕ↓[ℒₒᵣ] ⊧* 𝗜ᶠ Γ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
   rintro _ ⟨φ, -, rfl⟩
   exact models_succInd _
 
-instance (Γ : Polarity) (s : ℕ) : Consistent (𝗜ᶠ Γ s) := (𝗜ᶠ Γ s).consistent_of_sound (Eq ⊥) rfl
+instance : Consistent (𝗜ᶠ Γ s) := (𝗜ᶠ Γ s).consistent_of_sound (Eq ⊥) rfl
 
 
 

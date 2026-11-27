@@ -78,7 +78,9 @@ variable {κ α : Type*} [Nonempty κ] {M : Model κ α} {x : M.World} {A B C : 
 
 lemma forces_axiomM [M.HasM] : x ⊩ Axioms.M A B C := by grind [rel_of_s_rel]
 
-lemma forces_axiomM₀ [M.IsIL] [M.HasM₀] : x ⊩ Axioms.M₀ A B C := by
+variable [M.IsIL]
+
+lemma forces_axiomM₀ [M.HasM₀] : x ⊩ Axioms.M₀ A B C := by
   intro h y Rxy hy
   obtain ⟨hA, hC⟩ := forces_and.mp hy
   obtain ⟨z, Ryz, hz⟩ := forces_dia.mp hA
@@ -86,24 +88,35 @@ lemma forces_axiomM₀ [M.IsIL] [M.HasM₀] : x ⊩ Axioms.M₀ A B C := by
   exact ⟨u, s_trans (s_of_rel Rxy Ryz) Sxzu,
     forces_and.mpr ⟨hu, fun v Ruv ↦ hC v (rel_of_rel_rel_s_rel Rxy Ryz Sxzu Ruv)⟩⟩
 
-lemma forces_axiomP₀ [M.IsIL] [M.HasR] : x ⊩ Axioms.P₀ A B := by
+section
+
+variable [M.HasR]
+
+lemma forces_axiomP₀ : x ⊩ Axioms.P₀ A B := by
   intro h y Rxy z Ryz hz
   obtain ⟨v, Sxzv, hv⟩ := h z (IsTrans.trans _ _ _ Rxy Ryz) hz
   obtain ⟨u, Rvu, hu⟩ := forces_dia.mp hv
   exact ⟨u, s_of_rel_rel_s_rel Rxy Ryz Sxzv Rvu, hu⟩
 
-lemma forces_axiomP [M.IsIL] [M.HasP] : x ⊩ Axioms.P A B := by
+omit [M.HasR] in
+lemma forces_axiomP [M.HasP] : x ⊩ Axioms.P A B := by
   have := IsTrans.trans (r := M.Rel)
   grind [s_of_rel_rel_s]
 
-lemma forces_axiomR [M.IsIL] [M.HasR] : x ⊩ Axioms.R A B C := by
+lemma forces_axiomR : x ⊩ Axioms.R A B C := by
   intro h y Rxy hy
   obtain ⟨z, Ryz, hz, hC⟩ := not_forces_rhd.mp hy
   obtain ⟨u, Sxzu, hu⟩ := h z (IsTrans.trans _ _ _ Rxy Ryz) hz
   exact ⟨u, s_trans (s_of_rel Rxy Ryz) Sxzu,
     forces_and.mpr ⟨hu, fun v Ruv ↦ not_not.mp <| hC v (s_of_rel_rel_s_rel Rxy Ryz Sxzu Ruv)⟩⟩
 
-lemma forces_axiomW [M.IsIL] [M.HasW] : x ⊩ Axioms.W A B := by
+end
+
+section
+
+variable [M.HasW]
+
+lemma forces_axiomW : x ⊩ Axioms.W A B := by
   intro h y Rxy hy
   obtain ⟨z, Sxyz, hz⟩ := h y Rxy hy
   obtain ⟨t, ⟨Sxyt, ht⟩, tmax⟩ := ConverseWellFounded.iff_has_max.mp (cwf_rel_comp_s x)
@@ -114,7 +127,7 @@ lemma forces_axiomW [M.IsIL] [M.HasW] : x ⊩ Axioms.W A B := by
   obtain ⟨v, Sxuv, hv⟩ := h u (IsTrans.trans _ _ _ Rxt Rtu) hu
   exact tmax v ⟨s_trans Sxyt <| s_trans (s_of_rel Rxt Rtu) Sxuv, hv⟩ ⟨u, Rtu, Sxuv⟩
 
-lemma forces_axiomKW2 [M.IsIL] [M.HasW] : x ⊩ Axioms.KW2 A B := by
+lemma forces_axiomKW2 : x ⊩ Axioms.KW2 A B := by
   intro h y Rxy hy
   by_contra! hn
   have hA : ∀ z, y ≺[x] z → z ⊩ B → z ⊩ A := fun z Syz hz ↦ by
@@ -126,7 +139,7 @@ lemma forces_axiomKW2 [M.IsIL] [M.HasW] : x ⊩ Axioms.KW2 A B := by
   exact hn u (s_trans Sys (s_of_rel (rel_of_s_right Sys) Rsu))
     (forces_and.mpr ⟨hu, hsA u Rsu⟩)
 
-lemma forces_axiomF [M.IsIL] [M.HasW] : x ⊩ Axioms.F A := by
+lemma forces_axiomF : x ⊩ Axioms.F A := by
   intro h y Rxy hy
   obtain ⟨z, Syz, hz⟩ := h y Rxy hy
   obtain ⟨t, ⟨Rxt, ht⟩, tmax⟩ := ConverseWellFounded.iff_has_max.mp (cwf_rel_comp_s x)
@@ -134,6 +147,8 @@ lemma forces_axiomF [M.IsIL] [M.HasW] : x ⊩ Axioms.F A := by
   obtain ⟨u, Rtu, hu⟩ := forces_dia.mp ht
   obtain ⟨v, Suv, hv⟩ := h u (IsTrans.trans _ _ _ Rxt Rtu) hu
   exact tmax v ⟨rel_of_s_right Suv, hv⟩ ⟨u, Rtu, Suv⟩
+
+end
 
 end Model.World
 

@@ -22,29 +22,28 @@ variable {α : Ordinal.{0}} {c : ℕ} {φ ψ : ArithmeticFormula ℕ}
 
 section Frame
 
-variable (b : ArithmeticFormula ℕ)
+variable (b a e : ArithmeticFormula ℕ) (s : Sequent)
 
-private lemma inv_push (a e : ArithmeticFormula ℕ) (s : Sequent) :
-    insert b ((insert a s).erase e) ⊆ insert a (insert b (s.erase e)) := by
+private lemma inv_push : insert b ((insert a s).erase e) ⊆ insert a (insert b (s.erase e)) := by
   intro x hx
   simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
   tauto
 
-private lemma inv_pull {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s : Sequent) :
+private lemma inv_push₂ : insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ)))
+      ⊆ insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ)))) :=
+  (Finset.insert_subset_insert φ (inv_push ψ a (φ ⋎ ψ) s)).trans (Finset.insert_comm φ a _).subset
+
+variable {a e}
+
+private lemma inv_pull (h : a ≠ e) :
     insert a (insert b (s.erase e)) ⊆ insert b ((insert a s).erase e) := by
   intro x hx
   simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
   rcases hx with rfl | hx <;> tauto
 
-private lemma inv_push₂ (a : ArithmeticFormula ℕ) (s : Sequent) :
-    insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ)))
-      ⊆ insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ)))) :=
-  (Finset.insert_subset_insert φ (inv_push ψ a (φ ⋎ ψ) s)).trans (Finset.insert_comm φ a _).subset
-
-private lemma inv_pull₂ {a : ArithmeticFormula ℕ} (h : a ≠ (φ ⋎ ψ)) (s : Sequent) :
-    insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ))))
+private lemma inv_pull₂ (h : a ≠ (φ ⋎ ψ)) : insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ))))
       ⊆ insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ))) :=
-  (Finset.insert_comm a φ _).subset.trans (Finset.insert_subset_insert φ (inv_pull ψ h s))
+  (Finset.insert_comm a φ _).subset.trans (Finset.insert_subset_insert φ (inv_pull ψ s h))
 
 end Frame
 
@@ -53,11 +52,13 @@ lemma qr_lt_of_succ_le {χ : ArithmeticFormula ℕ} (h : ((χ.qr : ℕ∞) + 1) 
 
 namespace Provable
 
+variable (D : Derivation Γ) (n : ℕ)
+
 
 /-- Replaces a disjunction in a derivation by its two disjuncts while preserving both bounds.
 
 - [Tow20, Section 19.2] -/
-private lemma orInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (hmem : (φ ⋎ ψ) ∈ Γ) :
+private lemma orInvAux (hcr : D.cutRank ≤ (c : ℕ∞)) (hmem : (φ ⋎ ψ) ∈ Γ) :
     Z∞ ⊢[D.ordinalBound, c] insert φ (insert ψ (Γ.erase (φ ⋎ ψ))) := by
   induction D with
   | @axL Γ k r v hp hn => exact (axL r v (by grind) (by grind)).mono_cutRank (Nat.zero_le c)
@@ -72,7 +73,7 @@ private lemma orInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (h
     · refine (show Z∞ ⊢[D'.ordinalBound, c] Δ from ⟨D', le_rfl, hcr⟩).weakening ?_
       intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
   | @andI Γ₀ φ' ψ' D₁ D₂ ih₁ ih₂ =>
-    refine (andI ?_ ?_).weakening (inv_pull₂ (by grind) Γ₀)
+    refine (andI ?_ ?_).weakening (inv_pull₂ Γ₀ (by grind))
     · exact (ih₁ ((le_max_left _ _).trans hcr) (by grind)).weakening (inv_push₂ φ' Γ₀)
     · exact (ih₂ ((le_max_right _ _).trans hcr) (by grind)).weakening (inv_push₂ ψ' Γ₀)
   | @orI Γ₀ φ' ψ' D' ih =>
@@ -84,16 +85,16 @@ private lemma orInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (h
       · refine ((show Z∞ ⊢[D'.ordinalBound, c] insert φ (insert ψ Γ₀) from
           ⟨D', le_rfl, hcr⟩).weakening ?_).mono_ordinalBound (lt_add_one _).le
         intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
-    · refine (orI ?_).weakening (inv_pull₂ hhd Γ₀)
+    · refine (orI ?_).weakening (inv_pull₂ Γ₀ hhd)
       apply (ih hcr (by grind)).weakening
       intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
   | @allω Γ₀ χ Dₓ ih =>
-    refine (allω ?_).weakening (inv_pull₂ (by grind) Γ₀)
+    refine (allω ?_).weakening (inv_pull₂ Γ₀ (by grind))
     intro n
     exact (ih n ((le_iSup (fun m => (Dₓ m).cutRank) n).trans hcr) (by grind)).weakening
       (inv_push₂ _ Γ₀)
   | @exI Γ₀ χ n D' ih =>
-    refine (exI n ?_).weakening (inv_pull₂ (by grind) Γ₀)
+    refine (exI n ?_).weakening (inv_pull₂ Γ₀ (by grind))
     exact (ih hcr (by grind)).weakening (inv_push₂ _ Γ₀)
   | @cut Γ₀ χ D₁ D₂ ih₁ ih₂ =>
     refine cut χ (qr_lt_of_succ_le ((le_max_left _ _).trans hcr)) ?_ ?_
@@ -116,8 +117,7 @@ lemma or_inv (hmem : (φ ⋎ ψ) ∈ Γ) (h : Z∞ ⊢[α, c] Γ) :
 /-- Replaces a universal formula by a numeral instance while preserving both derivation bounds.
 
 - [Tow20, Section 19.4] -/
-private lemma allInvAux (n : ℕ) (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞))
-    (hmem : (∀¹ φₓ) ∈ Γ) :
+private lemma allInvAux (hcr : D.cutRank ≤ (c : ℕ∞)) (hmem : (∀¹ φₓ) ∈ Γ) :
     Z∞ ⊢[D.ordinalBound, c] insert (φₓ/[(↑n : ArithmeticTerm ℕ)]) (Γ.erase (∀¹ φₓ)) := by
   induction D with
   | @axL Γ k r v hp hn => exact (axL r v (by grind) (by grind)).mono_cutRank (Nat.zero_le c)
@@ -132,11 +132,11 @@ private lemma allInvAux (n : ℕ) (D : Derivation Γ) (hcr : D.cutRank ≤ (c : 
     · refine (show Z∞ ⊢[D'.ordinalBound, c] Δ from ⟨D', le_rfl, hcr⟩).weakening ?_
       intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
   | @andI Γ₀ φ' ψ' D₁ D₂ ih₁ ih₂ =>
-    refine (andI ?_ ?_).weakening (inv_pull _ (by grind) Γ₀)
+    refine (andI ?_ ?_).weakening (inv_pull _ Γ₀ (by grind))
     · exact (ih₁ ((le_max_left _ _).trans hcr) (by grind)).weakening (inv_push _ φ' _ Γ₀)
     · exact (ih₂ ((le_max_right _ _).trans hcr) (by grind)).weakening (inv_push _ ψ' _ Γ₀)
   | @orI Γ₀ φ' ψ' D' ih =>
-    refine (orI ?_).weakening (inv_pull _ (by grind) Γ₀)
+    refine (orI ?_).weakening (inv_pull _ Γ₀ (by grind))
     apply (ih hcr (by grind)).weakening
     intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
   | @allω Γ₀ χ Dₓ ih =>
@@ -151,12 +151,12 @@ private lemma allInvAux (n : ℕ) (D : Derivation Γ) (hcr : D.cutRank ≤ (c : 
       · refine ((show Z∞ ⊢[(Dₓ n).ordinalBound, c] insert (χ/[(↑n : ArithmeticTerm ℕ)]) Γ₀ from
           ⟨Dₓ n, le_rfl, hcrn⟩).weakening ?_).mono_ordinalBound hb
         intro x; simp only [Finset.mem_insert, Finset.mem_erase]; grind
-    · refine (allω ?_).weakening (inv_pull _ hhd Γ₀)
+    · refine (allω ?_).weakening (inv_pull _ Γ₀ hhd)
       intro m
       exact (ih m ((le_iSup (fun j => (Dₓ j).cutRank) m).trans hcr) (by grind)).weakening
         (inv_push _ _ _ Γ₀)
   | @exI Γ₀ χ m D' ih =>
-    refine (exI m ?_).weakening (inv_pull _ (by grind) Γ₀)
+    refine (exI m ?_).weakening (inv_pull _ Γ₀ (by grind))
     exact (ih hcr (by grind)).weakening (inv_push _ _ _ Γ₀)
   | @cut Γ₀ χ D₁ D₂ ih₁ ih₂ =>
     refine cut χ (qr_lt_of_succ_le ((le_max_left _ _).trans hcr)) ?_ ?_
@@ -171,14 +171,14 @@ private lemma allInvAux (n : ℕ) (D : Derivation Γ) (hcr : D.cutRank ≤ (c : 
 lemma all_inv (hmem : (∀¹ φₓ) ∈ Γ) (n : ℕ) (h : Z∞ ⊢[α, c] Γ) :
     Z∞ ⊢[α, c] insert (φₓ/[(↑n : ArithmeticTerm ℕ)]) (Γ.erase (∀¹ φₓ)) := by
   obtain ⟨D, ho, hcr⟩ := h
-  exact (allInvAux n D hcr hmem).mono_ordinalBound ho
+  exact (allInvAux D n hcr hmem).mono_ordinalBound ho
 
 
 
 /-- Replaces a conjunction by either conjunct while preserving both derivation bounds.
 
 - [Tow20, Section 19.3] -/
-private lemma andInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (hmem : (φ ⋏ ψ) ∈ Γ) :
+private lemma andInvAux (hcr : D.cutRank ≤ (c : ℕ∞)) (hmem : (φ ⋏ ψ) ∈ Γ) :
     (Z∞ ⊢[D.ordinalBound, c] insert φ (Γ.erase (φ ⋏ ψ))) ∧
       (Z∞ ⊢[D.ordinalBound, c] insert ψ (Γ.erase (φ ⋏ ψ))) := by
   induction D with
@@ -227,35 +227,35 @@ private lemma andInvAux (D : Derivation Γ) (hcr : D.cutRank ≤ (c : ℕ∞)) (
             ⟨D₂, le_rfl, hcr₂⟩).weakening ?_).mono_ordinalBound hb
           intro x; simp only [Finset.mem_insert, Finset.mem_erase]; grind
     · constructor
-      · refine (andI ?_ ?_).weakening (inv_pull _ hhd Γ₀)
+      · refine (andI ?_ ?_).weakening (inv_pull _ Γ₀ hhd)
         · exact (ih₁ hcr₁ (by grind)).1.weakening (inv_push _ φ' _ Γ₀)
         · exact (ih₂ hcr₂ (by grind)).1.weakening (inv_push _ ψ' _ Γ₀)
-      · refine (andI ?_ ?_).weakening (inv_pull _ hhd Γ₀)
+      · refine (andI ?_ ?_).weakening (inv_pull _ Γ₀ hhd)
         · exact (ih₁ hcr₁ (by grind)).2.weakening (inv_push _ φ' _ Γ₀)
         · exact (ih₂ hcr₂ (by grind)).2.weakening (inv_push _ ψ' _ Γ₀)
   | @orI Γ₀ φ' ψ' D' ih =>
     constructor
-    · refine (orI ?_).weakening (inv_pull _ (by grind) Γ₀)
+    · refine (orI ?_).weakening (inv_pull _ Γ₀ (by grind))
       apply (ih hcr (by grind)).1.weakening
       intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
-    · refine (orI ?_).weakening (inv_pull _ (by grind) Γ₀)
+    · refine (orI ?_).weakening (inv_pull _ Γ₀ (by grind))
       apply (ih hcr (by grind)).2.weakening
       intro χ; simp only [Finset.mem_insert, Finset.mem_erase]; grind
   | @allω Γ₀ χ Dₓ ih =>
     constructor
-    · refine (allω ?_).weakening (inv_pull _ (by grind) Γ₀)
+    · refine (allω ?_).weakening (inv_pull _ Γ₀ (by grind))
       intro m
       exact (ih m ((le_iSup (fun j => (Dₓ j).cutRank) m).trans hcr) (by grind)).1.weakening
         (inv_push _ _ _ Γ₀)
-    · refine (allω ?_).weakening (inv_pull _ (by grind) Γ₀)
+    · refine (allω ?_).weakening (inv_pull _ Γ₀ (by grind))
       intro m
       exact (ih m ((le_iSup (fun j => (Dₓ j).cutRank) m).trans hcr) (by grind)).2.weakening
         (inv_push _ _ _ Γ₀)
   | @exI Γ₀ χ m D' ih =>
     constructor
-    · refine (exI m ?_).weakening (inv_pull _ (by grind) Γ₀)
+    · refine (exI m ?_).weakening (inv_pull _ Γ₀ (by grind))
       exact (ih hcr (by grind)).1.weakening (inv_push _ _ _ Γ₀)
-    · refine (exI m ?_).weakening (inv_pull _ (by grind) Γ₀)
+    · refine (exI m ?_).weakening (inv_pull _ Γ₀ (by grind))
       exact (ih hcr (by grind)).2.weakening (inv_push _ _ _ Γ₀)
   | @cut Γ₀ χ D₁ D₂ ih₁ ih₂ =>
     have hc : χ.qr < c := qr_lt_of_succ_le ((le_max_left _ _).trans hcr)

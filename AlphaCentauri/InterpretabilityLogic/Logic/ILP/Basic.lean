@@ -106,15 +106,20 @@ variable {α : Type*} [DecidableEq α]
 
 /-! ### $\mathbf{ILP}$-adequate sets -/
 
+section
+variable (Φ : Finset (Formula α))
+
 /-- `Φ` is adequate and contains `□(A ▷ B)` for each `A ▷ B ∈ Φ`.
 
 - [dJV90, Definition 5.1]
 -/
-class ILPAdequate (Φ : Finset (Formula α)) : Prop extends Adequate Φ where
+class ILPAdequate : Prop extends Adequate Φ where
   box_rhd_mem {A B : Formula α} : A ▷ B ∈ Φ → □(A ▷ B) ∈ Φ
 
 /-- `Φ` together with `□A` for every `A ∈ Φ`. -/
-def boxClosure (Φ : Finset (Formula α)) : Finset (Formula α) := Φ ∪ Φ.image (□·)
+def boxClosure : Finset (Formula α) := Φ ∪ Φ.image (□·)
+
+end
 
 namespace boxClosure
 
@@ -196,11 +201,14 @@ variable {w u v : IndexedBranch L Φ}
 lemma ext (h₁ : w.head = u.head) (h₂ : w.tail = u.tail) : w = u := by
   cases w; cases u; simp_all;
 
+section
+variable (w : IndexedBranch L Φ)
+
 /-- The branch `w` extended by `x`. -/
-def cons (w : IndexedBranch L Φ) (x : IndexedSet L Φ) (h : w.head.Step x) : IndexedBranch L Φ :=
+def cons (x : IndexedSet L Φ) (h : w.head.Step x) : IndexedBranch L Φ :=
   ⟨x, w.head :: w.tail, .cons_cons h w.isChain⟩
 
-lemma length_tail_le (w : IndexedBranch L Φ) : w.tail.length ≤ w.head.set.prebox.card := by
+lemma length_tail_le : w.tail.length ≤ w.head.set.prebox.card := by
   obtain ⟨a, l, hc⟩ := w;
   induction l generalizing a with
   | nil => simp;
@@ -208,6 +216,8 @@ lemma length_tail_le (w : IndexedBranch L Φ) : w.tail.length ≤ w.head.set.pre
     obtain ⟨hs, hc⟩ := List.isChain_cons_cons.mp hc;
     exact Nat.succ_le_of_lt <| (ih y hc).trans_lt <|
       Finset.card_lt_card hs.rel.1.prebox_ssubset;
+
+end
 
 instance [Adequate Φ] : Finite (IndexedBranch L Φ) := by
   have : Finite {l : List (IndexedSet L Φ) // l.length ≤ Φ.card} :=
@@ -254,17 +264,21 @@ end IndexedBranch
 
 open IndexedBranch
 
+section
+variable (L : Logic α) (Φ : Finset (Formula α))
+
 /-- The model on branches of indexed sets in which `w` is related to `u` if `w` is a proper initial
 segment of `u`, and `S w u v` holds if moreover the branch `u` without its last element is a proper
 initial segment of `v` and the sequence of `u` is an initial segment of the sequence of `v`.
 
 - [dJV90, Theorem 5.2]
 -/
-def treeCountermodel (L : Logic α) (Φ : Finset (Formula α)) [Nonempty (IndexedSet L Φ)] :
-    Model (IndexedBranch L Φ) α where
+def treeCountermodel [Nonempty (IndexedSet L Φ)] : Model (IndexedBranch L Φ) α where
   Rel' w u := w.head :: w.tail <:+ u.tail
   S' w u v := w.head :: w.tail <:+ u.tail ∧ u.tail <:+ v.tail ∧ u.head.seq <+: v.head.seq
   Val' w a := #a ∈ w.head.set
+
+end
 
 namespace treeCountermodel
 
@@ -292,16 +306,22 @@ instance : IsTrans _ (treeCountermodel L Φ).Rel :=
 
 instance : Std.Irrefl (treeCountermodel L Φ).Rel := ⟨fun _ h ↦ by simpa using h.length_le⟩
 
-instance [Adequate Φ] : (treeCountermodel L Φ).IsIL where
+section
+variable [Adequate Φ]
+
+instance instIsILIndexedBranchOfAdequate : (treeCountermodel L Φ).IsIL where
   rel_of_s_left h := h.1
   rel_of_s_right h := h.1.trans h.2.1
   s_refl h := ⟨h, List.suffix_refl _, List.prefix_refl _⟩
   s_trans h₁ h₂ := ⟨h₁.1, h₁.2.1.trans h₂.2.1, h₁.2.2.trans h₂.2.2⟩
   s_of_rel h₁ h₂ := ⟨h₁, (List.suffix_cons _ _).trans h₂, (rel_rel h₂).2⟩
 
+omit [Adequate Φ] in
 instance : (treeCountermodel L Φ).HasP := ⟨fun _ h₁ h₂ ↦ ⟨h₁, h₂.2⟩⟩
 
-instance [Adequate Φ] : (treeCountermodel L Φ).IsILP := {}
+instance instIsILPIndexedBranchOfAdequate : (treeCountermodel L Φ).IsILP := {}
+
+end
 
 variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (Logic.ofILAxioms 𝔸) Φ)] [ILPAdequate Φ]
 

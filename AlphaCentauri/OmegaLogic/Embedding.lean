@@ -30,6 +30,9 @@ variable {n : ℕ} {Γ : Sequent}
 noncomputable def asg (e : ℕ → ℕ) : Rew ℒₒᵣ ℕ 0 ℕ 0 :=
   Rew.rewrite fun x => (↑(e x) : ArithmeticTerm ℕ)
 
+section
+variable (m : ℕ) (e : ℕ → ℕ)
+
 /-- Closing after a shift re-indexes the assignment.
 
 - [Tow20, Section 16] -/
@@ -38,8 +41,7 @@ lemma asg_comp_shift (e : ℕ → ℕ) : (asg e).comp Rew.shift = asg (e ∘ Nat
   · exact x.elim0
   · simp [asg, Rew.comp_app]
 
-lemma asg_image_shift (e : ℕ → ℕ) (Γ : Sequent) :
-    (Γ.image Rewriting.shift).image (fun ψ => asg e ▹ ψ)
+lemma asg_image_shift (Γ : Sequent) : (Γ.image Rewriting.shift).image (fun ψ => asg e ▹ ψ)
       = Γ.image (fun ψ => asg (e ∘ Nat.succ) ▹ ψ) := by
   rw [Finset.image_image]
   apply Finset.image_congr
@@ -50,7 +52,7 @@ lemma asg_image_shift (e : ℕ → ℕ) (Γ : Sequent) :
 /-- Closing a freed variable with `m :>ₙ e` equals closing with `e` and substituting `m`.
 
 - [Tow20, Section 16] -/
-lemma asg_cons_free (m : ℕ) (e : ℕ → ℕ) (φ : ArithmeticSemiformula ℕ 1) :
+lemma asg_cons_free (φ : ArithmeticSemiformula ℕ 1) :
     asg (m :>ₙ e) ▹ (Rewriting.free φ) = ((asg e).q ▹ φ)/[(↑m : ArithmeticTerm ℕ)] := by
   have h : (asg (m :>ₙ e)).comp Rew.free
       = (Rew.subst ![(↑m : ArithmeticTerm ℕ)]).comp (asg e).q := by
@@ -61,6 +63,8 @@ lemma asg_cons_free (m : ℕ) (e : ℕ → ℕ) (φ : ArithmeticSemiformula ℕ 
   change asg (m :>ₙ e) ▹ (Rew.free ▹ φ) = Rew.subst ![(↑m : ArithmeticTerm ℕ)] ▹ ((asg e).q ▹ φ)
   rw [← TransitiveRewriting.comp_app, ← TransitiveRewriting.comp_app, h]
 
+
+end
 
 namespace Provable
 
@@ -89,12 +93,15 @@ lemma exI_closed (ψ : ArithmeticSemiformula ℕ 1) (s : ArithmeticTerm ℕ)
 end ClosedWitness
 
 
+section
+variable (d : 𝗣𝗔 ⟹₂ Γ)
+
+include d in
 /-- Every `𝗣𝗔` derivation embeds into `Z_∞` under every numeral assignment of its free variables.
 
 - [Tow20, Section 16]
 - [Buc03, Section 5.5] -/
-theorem of_derivation2 (d : 𝗣𝗔 ⟹₂ Γ) :
-    ∃ c, ∀ e : ℕ → ℕ, ∃ α, Z∞ ⊢[α, c] (Γ.image fun φ => asg e ▹ φ) := by
+theorem of_derivation2 : ∃ c, ∀ e : ℕ → ℕ, ∃ α, Z∞ ⊢[α, c] (Γ.image fun φ => asg e ▹ φ) := by
   induction d with
   | closed Γ φ hp hn =>
     have h : ∀ e : ℕ → ℕ, ∼(asg e ▹ φ) ∈ Γ.image fun ψ => asg e ▹ ψ := fun e => by
@@ -171,15 +178,16 @@ theorem of_derivation2 (d : 𝗣𝗔 ⟹₂ Γ) :
     exact ⟨_, cut (asg e ▹ φ) (by simp only [Semiformula.qr_rew]; omega)
       (h₁.mono_cutRank (by omega)) (h₂.mono_cutRank (by omega))⟩
 
+include d in
 /-- Every `𝗣𝗔` derivation embeds cut-free into `Z_∞` under a numeral assignment.
 
 - [Tow20, Section 16] -/
-theorem of_derivation2_cutFree (d : 𝗣𝗔 ⟹₂ Γ) (e : ℕ → ℕ) :
-    ∃ α, Z∞ ⊢[α, 0] (Γ.image fun φ => asg e ▹ φ) := by
+theorem of_derivation2_cutFree (e : ℕ → ℕ) : ∃ α, Z∞ ⊢[α, 0] (Γ.image fun φ => asg e ▹ φ) := by
   obtain ⟨c, h⟩ := of_derivation2 d
   obtain ⟨α, hα⟩ := h e
   exact ⟨_, cut_elimination hα⟩
 
+end
 
 end Provable
 

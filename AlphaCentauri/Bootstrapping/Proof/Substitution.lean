@@ -22,12 +22,12 @@ variable {T : Theory L} [T.Δ₁]
 
 section eqShift
 
-variable {u w : V}
+variable {u w n : V}
 
 /-- A substitution vector reaching past `u` and sending `^&x` to `^&(x + 1)` below `u` acts on
 the terms coded by a number at most `u` as the shift of free variables. -/
 lemma termFvSubst_eq_termShift (hu : u < len w) (hw : ∀ x < u, w.[x] = ^&(x + 1))
-    {n t : V} (ht : IsSemiterm L n t) (h : t ≤ u) : termFvSubst L w t = termShift L t := by
+    {t : V} (ht : IsSemiterm L n t) (h : t ≤ u) : termFvSubst L w t = termShift L t := by
   revert h
   apply IsSemiterm.induction 𝚷
     (P := fun t ↦ t ≤ u → termFvSubst L w t = termShift L t) ?_ ?_ ?_ ?_ t ht
@@ -46,7 +46,7 @@ lemma termFvSubst_eq_termShift (hu : u < len w) (hw : ∀ x < u, w.[x] = ^&(x + 
 /-- A substitution vector reaching past `u` and sending `^&x` to `^&(x + 1)` below `u` acts on
 the formulas coded by a number at most `u` as the shift of free variables. -/
 lemma fvSubst_eq_shift (hu : u < len w) (hw : ∀ x < u, w.[x] = ^&(x + 1))
-    {n p : V} (hp : IsSemiformula L n p) (h : p ≤ u) : fvSubst L w p = shift L p := by
+    {p : V} (hp : IsSemiformula L n p) (h : p ≤ u) : fvSubst L w p = shift L p := by
   revert h
   apply IsSemiformula.pi1_structural_induction
     (P := fun _ p ↦ p ≤ u → fvSubst L w p = shift L p) ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
@@ -99,13 +99,13 @@ end eqShift
 
 section shiftComp
 
-variable {u w v : V}
+variable {u w v n t p s : V}
 
 /-- If `v` sends `^&x` to the image of `^&(x + 1)` under `w` for every `x < u`, then substituting
 by `w` after the shift of free variables is substituting by `v`, on the terms coded by a number
 at most `u`. -/
 lemma termFvSubst_termShift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L w ^&(x + 1))
-    {n t : V} (ht : IsSemiterm L n t) (h : t ≤ u) :
+    (ht : IsSemiterm L n t) (h : t ≤ u) :
     termFvSubst L w (termShift L t) = termFvSubst L v t := by
   revert h
   apply IsSemiterm.induction 𝚷
@@ -128,7 +128,7 @@ lemma termFvSubst_termShift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L
 by `w` after the shift of free variables is substituting by `v`, on the formulas coded by a number
 at most `u`. -/
 lemma fvSubst_shift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L w ^&(x + 1))
-    {n p : V} (hp : IsSemiformula L n p) (h : p ≤ u) :
+    (hp : IsSemiformula L n p) (h : p ≤ u) :
     fvSubst L w (shift L p) = fvSubst L v p := by
   revert h
   apply IsSemiformula.pi1_structural_induction
@@ -173,7 +173,7 @@ lemma fvSubst_shift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L w ^&(x 
 /-- If `v` sends `^&x` to the image of `^&(x + 1)` under `w` for every `x < u`, then the image
 under `w` of the shift of a coded formula set bounded by `u` is its image under `v`. -/
 lemma fvSubstImage_setShift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L w ^&(x + 1))
-    {s : V} (hs : IsFormulaSet L s) (h : s ≤ u) :
+    (hs : IsFormulaSet L s) (h : s ≤ u) :
     fvSubstImage (L := L) w (setShift L s) = fvSubstImage (L := L) v s := by
   apply mem_ext
   intro x
@@ -188,7 +188,7 @@ lemma fvSubstImage_setShift (hv : ∀ x < u, x < len v ∧ v.[x] = termFvSubst L
 /-- A substitution vector sending `^&x` to itself for every `x < u` fixes the terms coded by a
 number at most `u`. -/
 lemma termFvSubst_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
-    {n t : V} (ht : IsSemiterm L n t) (h : t ≤ u) : termFvSubst L v t = t := by
+    (ht : IsSemiterm L n t) (h : t ≤ u) : termFvSubst L v t = t := by
   revert h
   apply IsSemiterm.induction 𝚷 (P := fun t ↦ t ≤ u → termFvSubst L v t = t) ?_ ?_ ?_ ?_ t ht
   · definability
@@ -206,7 +206,7 @@ lemma termFvSubst_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
 /-- A substitution vector sending `^&x` to itself for every `x < u` fixes the formulas coded by a
 number at most `u`. -/
 lemma fvSubst_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
-    {n p : V} (hp : IsSemiformula L n p) (h : p ≤ u) : fvSubst L v p = p := by
+    (hp : IsSemiformula L n p) (h : p ≤ u) : fvSubst L v p = p := by
   revert h
   apply IsSemiformula.pi1_structural_induction (P := fun _ p ↦ p ≤ u → fvSubst L v p = p)
     ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
@@ -241,7 +241,7 @@ lemma fvSubst_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
 /-- A substitution vector sending `^&x` to itself for every `x < u` fixes a coded formula set
 bounded by `u`. -/
 lemma fvSubstImage_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
-    {s : V} (hs : IsFormulaSet L s) (h : s ≤ u) : fvSubstImage (L := L) v s = s := by
+    (hs : IsFormulaSet L s) (h : s ≤ u) : fvSubstImage (L := L) v s = s := by
   apply mem_ext
   intro x
   have key : ∀ q ∈ s, fvSubst L v q = q := fun q hq ↦
@@ -253,7 +253,7 @@ lemma fvSubstImage_eq_self (hv : ∀ x < u, x < len v ∧ v.[x] = ^&x)
 and then by `v` fixes the terms coded by a number at most `u`. -/
 lemma termFvSubst_termFvSubst_eq_self (hw : IsSemitermVec L (len w) 0 w)
     (h : ∀ x < u, x < len w ∧ termFvSubst L v w.[x] = ^&x)
-    {n t : V} (ht : IsSemiterm L n t) (htu : t ≤ u) :
+    (ht : IsSemiterm L n t) (htu : t ≤ u) :
     termFvSubst L v (termFvSubst L w t) = t := by
   revert htu
   apply IsSemiterm.induction 𝚷
@@ -276,7 +276,7 @@ lemma termFvSubst_termFvSubst_eq_self (hw : IsSemitermVec L (len w) 0 w)
 and then by `v` fixes the formulas coded by a number at most `u`. -/
 lemma fvSubst_fvSubst_eq_self (hw : IsSemitermVec L (len w) 0 w)
     (h : ∀ x < u, x < len w ∧ termFvSubst L v w.[x] = ^&x)
-    {n p : V} (hp : IsSemiformula L n p) (hpu : p ≤ u) :
+    (hp : IsSemiformula L n p) (hpu : p ≤ u) :
     fvSubst L v (fvSubst L w p) = p := by
   revert hpu
   apply IsSemiformula.pi1_structural_induction
@@ -323,7 +323,7 @@ lemma fvSubst_fvSubst_eq_self (hw : IsSemitermVec L (len w) 0 w)
 of the image under `w` of a coded formula set bounded by `u` is the set itself. -/
 lemma fvSubstImage_fvSubstImage_eq_self (hw : IsSemitermVec L (len w) 0 w)
     (h : ∀ x < u, x < len w ∧ termFvSubst L v w.[x] = ^&x)
-    {s : V} (hs : IsFormulaSet L s) (hsu : s ≤ u) :
+    (hs : IsFormulaSet L s) (hsu : s ≤ u) :
     fvSubstImage (L := L) v (fvSubstImage (L := L) w s) = s := by
   apply mem_ext
   intro x
@@ -334,8 +334,10 @@ lemma fvSubstImage_fvSubstImage_eq_self (hw : IsSemitermVec L (len w) 0 w)
 
 end shiftComp
 
+variable {n d d₀ p q r s u w : V}
+
 /-- A coded closed term is fixed by every free-variable substitution. -/
-lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.termFvSubst_eq_self {w n t : V}
+lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.termFvSubst_eq_self {t : V}
     (ht : L.IsClosedSemiterm n t) : termFvSubst L w t = t := by
   have h := ht.termShift_eq
   revert h
@@ -355,8 +357,8 @@ lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.termFvSubst_eq_self {w n t
     simpa [nth_termShiftVec hts.isUTerm hi] using congrArg (·.[i]) h'
 
 /-- A coded sentence is fixed by every free-variable substitution. -/
-lemma _root_.FFL.FirstOrder.Language.IsSemisentence.fvSubst_eq_self {w n p : V}
-    (hp : L.IsSemisentence n p) : fvSubst L w p = p := by
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.fvSubst_eq_self (hp : L.IsSemisentence n p) :
+    fvSubst L w p = p := by
   have h := hp.shift_eq
   revert h
   apply IsSemiformula.pi1_structural_induction (P := fun _ p ↦ shift L p = p → fvSubst L w p = p)
@@ -414,17 +416,17 @@ lemma Derivable.sequentRules : SequentRules L (Derivable (V := V) T) :=
   ⟨Derivable.em, Derivable.verum, Derivable.and_m, Derivable.or_m, Derivable.all_m,
     Derivable.ex_m, Derivable.wk⟩
 
-lemma RankedDerivable.sequentRules {r : V} : SequentRules L (RankedDerivable (V := V) T r) :=
+lemma RankedDerivable.sequentRules : SequentRules L (RankedDerivable (V := V) T r) :=
   ⟨RankedDerivable.em, RankedDerivable.verum, RankedDerivable.and_m, RankedDerivable.or_m,
     RankedDerivable.all_m, RankedDerivable.ex_m, RankedDerivable.wk⟩
 
 namespace SequentRules
 
-variable {D : V → Prop} (R : SequentRules L D) {w s : V}
+variable {D : V → Prop} (R : SequentRules L D)
 
 include R
 
-lemma image_axL {p : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
+lemma image_axL (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
     (hp : p ∈ s) (hnp : neg L p ∈ s) : D (fvSubstImage (L := L) w s) :=
   R.em (formulaSet_fvSubstImage hw hsF) _ (fvSubst_mem_fvSubstImage hp)
     (by rw [← fvSubst_neg hw (hsF p hp)]; exact fvSubst_mem_fvSubstImage hnp)
@@ -433,7 +435,7 @@ lemma image_verum (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (h
     D (fvSubstImage (L := L) w s) :=
   R.verum (formulaSet_fvSubstImage hw hsF) (by simpa using fvSubst_mem_fvSubstImage (L := L) hv)
 
-lemma image_and {p q : V} (hsF : IsFormulaSet L s) (hpq : p ^⋏ q ∈ s)
+lemma image_and (hsF : IsFormulaSet L s) (hpq : p ^⋏ q ∈ s)
     (hp : D (fvSubstImage (L := L) w (insert p s)))
     (hq : D (fvSubstImage (L := L) w (insert q s))) : D (fvSubstImage (L := L) w s) := by
   have hpqF : IsFormula L p ∧ IsFormula L q := by simpa using hsF _ hpq
@@ -442,7 +444,7 @@ lemma image_and {p q : V} (hsF : IsFormulaSet L s) (hpq : p ^⋏ q ∈ s)
   rw [fvSubst_and hpqF.1.isUFormula hpqF.2.isUFormula] at h
   exact R.and_m h hp hq
 
-lemma image_or {p q : V} (hsF : IsFormulaSet L s) (hpq : p ^⋎ q ∈ s)
+lemma image_or (hsF : IsFormulaSet L s) (hpq : p ^⋎ q ∈ s)
     (h : D (fvSubstImage (L := L) w (insert p (insert q s)))) : D (fvSubstImage (L := L) w s) := by
   have hpqF : IsFormula L p ∧ IsFormula L q := by simpa using hsF _ hpq
   rw [fvSubstImage_insert, fvSubstImage_insert] at h
@@ -450,8 +452,7 @@ lemma image_or {p q : V} (hsF : IsFormulaSet L s) (hpq : p ^⋎ q ∈ s)
   rw [fvSubst_or hpqF.1.isUFormula hpqF.2.isUFormula] at h'
   exact R.or_m h' h
 
-lemma image_all {p : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
-    (hp : ^∀ p ∈ s)
+lemma image_all (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hp : ^∀ p ∈ s)
     (h : D (fvSubstImage (L := L) (^&0 ∷ termShiftVec L (len w) w)
       (insert (free L p) (setShift L s)))) : D (fvSubstImage (L := L) w s) := by
   have hpF : IsSemiformula L 1 p := by simpa using hsF _ hp
@@ -460,7 +461,7 @@ lemma image_all {p : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L
   rw [fvSubst_all hpF.isUFormula] at h'
   exact R.all_m h' h
 
-lemma image_exs {p t : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
+lemma image_exs {t : V} (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s)
     (hp : ^∃ p ∈ s) (ht : IsTerm L t) (h : D (fvSubstImage (L := L) w (insert (substs1 L t p) s))) :
     D (fvSubstImage (L := L) w s) := by
   have hpF : IsSemiformula L 1 p := by simpa using hsF _ hp
@@ -479,12 +480,12 @@ end SequentRules
 
 section rewrite
 
-variable {w s : V}
+variable (d w)
 
 /-- The bound on the substitution vectors needed for the premises of a derivation code: the vector
 itself, its shift with `&0` prepended, and the vector `x ↦ termFvSubst w ^&(x + 1)` of length
 `d`. -/
-private noncomputable def rewriteBound (d w : V) : V :=
+private noncomputable def rewriteBound : V :=
   w + (^&0 ∷ termShiftVec L (len w) w) +
     termFvSubstVec L d w (termShiftVec L d (fvarVec d))
 
@@ -492,22 +493,24 @@ private instance : 𝚺ᴬ₁-Function₂ (rewriteBound (L := L) : V → V → V
   unfold rewriteBound
   definability
 
-private lemma le_rewriteBound_self (d w : V) : w ≤ rewriteBound (L := L) d w :=
+private lemma le_rewriteBound_self : w ≤ rewriteBound (L := L) d w :=
   le_trans le_self_add le_self_add
 
 variable (T) in
-private def RewritesBelow (d w : V) : Prop :=
+private def RewritesBelow : Prop :=
   ∀ d₀ < d, ∀ w' ≤ rewriteBound (L := L) d w, Derivation T d₀ → IsSemitermVec L (len w') 0 w' →
     RankedDerivable T (cutRank L d₀) (fvSubstImage (L := L) w' (fstIdx d₀))
 
+variable {d w}
+
 /-- The rewritten premise of a node, of the cut rank of the node. -/
-private lemma RewritesBelow.premise {d d₀ w' : V} (ih : RewritesBelow T d w) (hd₀ : d₀ < d)
+private lemma RewritesBelow.premise {w' : V} (ih : RewritesBelow T d w) (hd₀ : d₀ < d)
     (hw' : w' ≤ rewriteBound (L := L) d w) (h : Derivation T d₀)
     (hw : IsSemitermVec L (len w') 0 w') (hr : cutRank L d₀ ≤ cutRank L d := by simp) :
     RankedDerivable T (cutRank L d) (fvSubstImage (L := L) w' (fstIdx d₀)) :=
   (ih d₀ hd₀ w' hw' h hw).of_le hr
 
-private lemma rewrite_and {p q dp dq : V} (ih : RewritesBelow T (andIntro s p q dp dq) w)
+private lemma rewrite_and {dp dq : V} (ih : RewritesBelow T (andIntro s p q dp dq) w)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hpq : p ^⋏ q ∈ s)
     (hdp : DerivationOf T dp (insert p s)) (hdq : DerivationOf T dq (insert q s)) :
     RankedDerivable T (cutRank L (andIntro s p q dp dq)) (fvSubstImage (L := L) w s) := by
@@ -517,7 +520,7 @@ private lemma rewrite_and {p q dp dq : V} (ih : RewritesBelow T (andIntro s p q 
   rw [hdq.1] at heq
   exact RankedDerivable.sequentRules.image_and hsF hpq hep heq
 
-private lemma rewrite_or {p q d₀ : V} (ih : RewritesBelow T (orIntro s p q d₀) w)
+private lemma rewrite_or (ih : RewritesBelow T (orIntro s p q d₀) w)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hpq : p ^⋎ q ∈ s)
     (hd₀ : DerivationOf T d₀ (insert p (insert q s))) :
     RankedDerivable T (cutRank L (orIntro s p q d₀)) (fvSubstImage (L := L) w s) := by
@@ -525,7 +528,7 @@ private lemma rewrite_or {p q d₀ : V} (ih : RewritesBelow T (orIntro s p q d�
   rw [hd₀.1] at he
   exact RankedDerivable.sequentRules.image_or hsF hpq he
 
-private lemma rewrite_all {p d₀ : V} (ih : RewritesBelow T (allIntro s p d₀) w)
+private lemma rewrite_all (ih : RewritesBelow T (allIntro s p d₀) w)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hp : ^∀ p ∈ s)
     (hd₀ : DerivationOf T d₀ (insert (free L p) (setShift L s))) :
     RankedDerivable T (cutRank L (allIntro s p d₀)) (fvSubstImage (L := L) w s) := by
@@ -534,7 +537,7 @@ private lemma rewrite_all {p d₀ : V} (ih : RewritesBelow T (allIntro s p d₀)
   rw [hd₀.1] at he
   exact RankedDerivable.sequentRules.image_all hw hsF hp he
 
-private lemma rewrite_exs {p t d₀ : V} (ih : RewritesBelow T (exsIntro s p t d₀) w)
+private lemma rewrite_exs {t : V} (ih : RewritesBelow T (exsIntro s p t d₀) w)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hp : ^∃ p ∈ s) (ht : IsTerm L t)
     (hd₀ : DerivationOf T d₀ (insert (substs1 L t p) s)) :
     RankedDerivable T (cutRank L (exsIntro s p t d₀)) (fvSubstImage (L := L) w s) := by
@@ -542,15 +545,14 @@ private lemma rewrite_exs {p t d₀ : V} (ih : RewritesBelow T (exsIntro s p t d
   rw [hd₀.1] at he
   exact RankedDerivable.sequentRules.image_exs hw hsF hp ht he
 
-private lemma rewrite_wk {d₀ : V} (ih : RewritesBelow T (wkRule s d₀) w)
+private lemma rewrite_wk (ih : RewritesBelow T (wkRule s d₀) w)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hsub : fstIdx d₀ ⊆ s)
     (hd₀ : Derivation T d₀) :
     RankedDerivable T (cutRank L (wkRule s d₀)) (fvSubstImage (L := L) w s) :=
   RankedDerivable.sequentRules.image_wk hw hsF hsub
     (ih.premise (d_lt_wkRule _ _) (le_rewriteBound_self _ w) hd₀ hw)
 
-private lemma rewrite_shift {d₀ : V}
-    (ih : RewritesBelow T (shiftRule (setShift L (fstIdx d₀)) d₀) w)
+private lemma rewrite_shift (ih : RewritesBelow T (shiftRule (setShift L (fstIdx d₀)) d₀) w)
     (hw : IsSemitermVec L (len w) 0 w) (hd₀ : Derivation T d₀) :
     RankedDerivable T (cutRank L (shiftRule (setShift L (fstIdx d₀)) d₀))
       (fvSubstImage (L := L) w (setShift L (fstIdx d₀))) := by
@@ -571,7 +573,7 @@ private lemma rewrite_shift {d₀ : V}
   rw [nth_termFvSubstVec hfv.isUTerm hxd, nth_termShiftVec (isSemitermVec_fvarVec d 0).isUTerm hxd,
     nth_fvarVec d x hxd, termShift_fvar, termFvSubst_fvar]
 
-private lemma rewrite_cut {p d₁ d₂ : V} (ih : RewritesBelow T (cutRule s p d₁ d₂) w)
+private lemma rewrite_cut {d₁ d₂ : V} (ih : RewritesBelow T (cutRule s p d₁ d₂) w)
     (hw : IsSemitermVec L (len w) 0 w) (h₁ : DerivationOf T d₁ (insert p s))
     (h₂ : DerivationOf T d₂ (insert (neg L p) s)) :
     RankedDerivable T (cutRank L (cutRule s p d₁ d₂)) (fvSubstImage (L := L) w s) := by
@@ -582,7 +584,7 @@ private lemma rewrite_cut {p d₁ d₂ : V} (ih : RewritesBelow T (cutRule s p d
   rw [h₂.1, fvSubstImage_insert, fvSubst_neg hw hpF] at he₂
   exact .cut (by rw [formulaComplexity_fvSubst hw hpF]; simp) he₁ he₂
 
-private lemma rewrite_axm {p : V} (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
+private lemma rewrite_axm (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
     (hw : IsSemitermVec L (len w) 0 w) (hsF : IsFormulaSet L s) (hp : p ∈ s)
     (hpT : p ∈ T.Δ₁Class) :
     RankedDerivable T (cutRank L (axm s p)) (fvSubstImage (L := L) w s) := by
@@ -631,7 +633,7 @@ end rewrite
 terms without bound variables, provided the axioms of the theory are free of free variables.
 - [HP98, Theorem I.4.9] -/
 theorem RankedDerivable.rewrite (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
-    {r w s : V} (hw : IsSemitermVec L (len w) 0 w) (h : RankedDerivable T r s) :
+    (hw : IsSemitermVec L (len w) 0 w) (h : RankedDerivable T r s) :
     RankedDerivable T r (fvSubstImage (L := L) w s) := by
   obtain ⟨d, rfl, hd⟩ := h
   exact (rewrite_aux hT d w hd.1 hw).of_le hd.2
@@ -639,14 +641,16 @@ theorem RankedDerivable.rewrite (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSente
 /-- Internal derivability is closed under free-variable substitution by a vector of terms
 without bound variables, provided the axioms of the theory are free of free variables.
 - [HP98, Theorem I.4.9] -/
-theorem Derivable.rewrite (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p) {w s : V}
+theorem Derivable.rewrite (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
     (hw : IsSemitermVec L (len w) 0 w) (h : Derivable T s) :
     Derivable T (fvSubstImage (L := L) w s) := by
   obtain ⟨d, rfl, hd⟩ := h
   exact (rewrite_aux hT d w hd hw).toDerivable
 
 
-lemma freshVec_exists_aux (u : V) : ∀ j, ∀ m ≤ u, j + m = u →
+variable (u)
+
+lemma freshVec_exists_aux : ∀ j, ∀ m ≤ u, j + m = u →
     ∃ w : V, len w = j + 1 ∧ (∀ x < j, w.[x] = ^&(m + x + 1)) ∧ w.[j] = ^&0 := by
   intro j
   induction j using ISigma1.sigma1_succ_induction
@@ -666,7 +670,7 @@ lemma freshVec_exists_aux (u : V) : ∀ j, ∀ m ≤ u, j + m = u →
       congr 2
       rw [add_assoc, add_comm (1 : V) x]
 
-lemma freshVec_existsUnique (u : V) :
+lemma freshVec_existsUnique :
     ∃! w : V, len w = u + 1 ∧ (∀ x < u, w.[x] = ^&(x + 1)) ∧ w.[u] = ^&0 := by
   obtain ⟨w, hlen, hlt, hlast⟩ := freshVec_exists_aux u u 0 (by simp) (by simp)
   refine ⟨w, ⟨hlen, by simpa using hlt, hlast⟩, ?_⟩
@@ -680,33 +684,32 @@ lemma freshVec_existsUnique (u : V) :
 
 /-- `freshVec u` is the term vector of length `u + 1` whose entry at `x < u` is `^&(x + 1)` and
 whose entry at `u` is `^&0`. -/
-noncomputable def freshVec (u : V) : V := Classical.choose! (freshVec_existsUnique u)
+noncomputable def freshVec : V := Classical.choose! (freshVec_existsUnique u)
 
 @[simp]
-lemma len_freshVec (u : V) : len (freshVec u : V) = u + 1 :=
+lemma len_freshVec : len (freshVec u : V) = u + 1 :=
   (Classical.choose!_spec (freshVec_existsUnique u)).1
 
-lemma nth_freshVec_of_lt {u x : V} (h : x < u) : (freshVec u : V).[x] = ^&(x + 1) :=
+variable {u} in
+lemma nth_freshVec_of_lt {x : V} (h : x < u) : (freshVec u : V).[x] = ^&(x + 1) :=
   (Classical.choose!_spec (freshVec_existsUnique u)).2.1 x h
 
 @[simp]
-lemma nth_freshVec_self (u : V) : (freshVec u : V).[u] = ^&0 :=
+lemma nth_freshVec_self : (freshVec u : V).[u] = ^&0 :=
   (Classical.choose!_spec (freshVec_existsUnique u)).2.2
 
-lemma isSemitermVec_freshVec (u : V) :
-    IsSemitermVec L (len (freshVec u : V)) 0 (freshVec u) :=
+lemma isSemitermVec_freshVec : IsSemitermVec L (len (freshVec u : V)) 0 (freshVec u) :=
   IsSemitermVec.iff.mpr ⟨rfl, fun i hi ↦ by
     rcases lt_or_eq_of_le (lt_succ_iff_le.mp (by simpa using hi)) with (h | rfl)
     · simp [nth_freshVec_of_lt h]
     · simp⟩
 
 /-- `freshVecInverse u` is the term vector `^&u, ^&0, …, ^&(u - 1)`. -/
-noncomputable def freshVecInverse (u : V) : V := ^&u ∷ fvarVec u
+noncomputable def freshVecInverse : V := ^&u ∷ fvarVec u
 
 /-- `freshVecInverse u` is a vector of closed terms, and it and `freshVec u` undo each other on the
 free variables below `u`. -/
-lemma freshVecInverse_spec (u : V) :
-    IsSemitermVec L (len (freshVecInverse u)) 0 (freshVecInverse u) ∧
+lemma freshVecInverse_spec : IsSemitermVec L (len (freshVecInverse u)) 0 (freshVecInverse u) ∧
     (∀ x < u, x < len (freshVec u : V) ∧
       termFvSubst L (freshVecInverse u) (freshVec u : V).[x] = ^&x) ∧
     (∀ x < u, x < len (freshVecInverse u) ∧
@@ -722,6 +725,8 @@ lemma freshVecInverse_spec (u : V) :
       have hx₁ : x < u + 1 := lt_trans hx' (by simp)
       exact ⟨by simp [hx'], by simp [nth_fvarVec u x hx', hx₁, nth_freshVec_of_lt hx']⟩
 
+variable {u}
+
 instance freshVecInverse.definable : 𝚺ᴬ₁-Function₁ (freshVecInverse : V → V) := by
   unfold freshVecInverse
   definability
@@ -729,7 +734,6 @@ instance freshVecInverse.definable : 𝚺ᴬ₁-Function₁ (freshVecInverse : V
 /-- The internal `∀`-introduction rule with an arbitrary free variable as eigenvariable: `w`
 carries the sequent to its shift and sends `^&u` to `^&0`. -/
 lemma Derivable.all_of_free (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
-    {w u p s : V}
     (hw : IsSemitermVec L (len w) 0 w) (hu : u < len w) (hwu : w.[u] = ^&0)
     (hws : fvSubstImage (L := L) w s = setShift L s)
     (hwp : fvSubst L w p = Bootstrapping.shift L p)
@@ -746,7 +750,6 @@ lemma Derivable.all_of_free (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence 
 carries the sequent to its shift and sends `^&u` to `^&0`.
 - [HP98, Theorem I.4.9] -/
 lemma Derivable.neg_exs_of_free (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
-    {w u p s : V}
     (hw : IsSemitermVec L (len w) 0 w) (hu : u < len w) (hwu : w.[u] = ^&0)
     (hws : fvSubstImage (L := L) w s = setShift L s)
     (hwp : fvSubst L w p = Bootstrapping.shift L p)
@@ -762,7 +765,7 @@ lemma Derivable.neg_exs_of_free (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSente
 /-- The internal `∀`-introduction rule with the free variable `^&u` as eigenvariable, where `u`
 bounds the codes of the sequent and of the quantified formula. -/
 lemma Derivable.all_of_fresh (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
-    {u p s : V} (hsu : s ≤ u) (hpu : p ≤ u) (hp : IsSemiformula L 1 p)
+    (hsu : s ≤ u) (hpu : p ≤ u) (hp : IsSemiformula L 1 p)
     (h : Derivable T (insert (substs1 L ^&u p) s)) : Derivable T (insert (^∀ p) s) :=
   Derivable.all_of_free hT (isSemitermVec_freshVec u) (by simp) (by simp)
     (fvSubstImage_eq_setShift (by simp) (fun _ hx ↦ nth_freshVec_of_lt hx)
@@ -773,7 +776,7 @@ lemma Derivable.all_of_fresh (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence
 bounds the codes of the sequent and of the quantified formula.
 - [HP98, Theorem I.4.9] -/
 lemma Derivable.neg_exs_of_fresh (hT : ∀ p ∈ T.Δ₁Class (V := V), L.IsSentence p)
-    {u p s : V} (hsu : s ≤ u) (hpu : p ≤ u)
+    (hsu : s ≤ u) (hpu : p ≤ u)
     (hp : IsSemiformula L 1 p) (h : Derivable T (insert (neg L (substs1 L ^&u p)) s)) :
     Derivable T (insert (neg L (^∃ p)) s) :=
   Derivable.neg_exs_of_free hT (isSemitermVec_freshVec u) (by simp) (by simp)

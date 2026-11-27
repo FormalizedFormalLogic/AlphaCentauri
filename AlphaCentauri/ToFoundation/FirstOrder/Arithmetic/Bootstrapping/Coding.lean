@@ -49,15 +49,17 @@ end Language
 
 namespace Semisentence
 
+section
+variable (σ : Semisentence L n)
+
 @[simp]
-lemma shift_quote (σ : Semisentence L n) : shift L (⌜σ⌝ : V) = ⌜σ⌝ := by
+lemma shift_quote : shift L (⌜σ⌝ : V) = ⌜σ⌝ := by
   have h : Rewriting.shift (Rewriting.emb σ : Semiproposition L n) = Rewriting.emb σ := by
     simpa [Rewriting.shifts] using Rewriting.shifts_emb ({σ} : Multiset (Semisentence L n))
   rw [Sentence.quote_def, ← Semiformula.quote_shift, h]
 
 @[simp]
-lemma formulaComplexity_quote (σ : Semisentence L n) :
-    formulaComplexity L (⌜σ⌝ : V) = σ.complexity := by
+lemma formulaComplexity_quote : formulaComplexity L (⌜σ⌝ : V) = σ.complexity := by
   induction σ using Semiformula.rec' with
   | hrel R v => simp [Sentence.quote_def]
   | hnrel R v => simp [Sentence.quote_def]
@@ -67,6 +69,8 @@ lemma formulaComplexity_quote (σ : Semisentence L n) :
   | hor φ ψ ihφ ihψ => simp [ihφ, ihψ, max_def]
   | hall φ ih => simp [ih]
   | hexs φ ih => simp [ih]
+
+end
 
 lemma quote_conj (φ : Fin k → Semisentence L n) :
     (⌜Matrix.conj φ⌝ : V) = ^⋀ matrixToVec fun i ↦ (⌜φ i⌝ : V) := by
@@ -157,8 +161,10 @@ lemma quote_neg_ne_exs {θ : ArithmeticSemisentence m} (h : ∀ ψ, θ ≠ ∀¹
     | exact absurd rfl (h _)
     | simp [Sentence.quote_def, qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqExs]
 
-lemma satisfies_ofList_ch (l : List ArithmeticSentence) (p : V) :
-    V ⊧/![p] (Theory.Δ₁.ofList l).ch.val ↔ ∃ σ ∈ l, p = (⌜σ⌝ : V) := by
+section
+variable (l : List ArithmeticSentence) (p : V)
+
+lemma satisfies_ofList_ch : V ⊧/![p] (Theory.Δ₁.ofList l).ch.val ↔ ∃ σ ∈ l, p = (⌜σ⌝ : V) := by
   induction l with
   | nil =>
     change V ⊧/![p] (⊥ : 𝚫ᴬ₁.Semisentence 1).val ↔ _
@@ -168,6 +174,8 @@ lemma satisfies_ofList_ch (l : List ArithmeticSentence) (p : V) :
     simp only [Bounding.HierarchySymbol.Semiformula.val_or, LogicalConnective.HomClass.map_or,
       Theory.Δ₁.singleton_toTDef_ch_val, ih]
     simp [Sentence.quote_eq_encode, numeral_eq_natCast]
+
+end
 
 lemma eq_matrixToVec_iff {w : V} {u : Fin k → V} :
     w = matrixToVec u ↔ (k : V) = len w ∧ ∀ i : Fin k, w.[((i : ℕ) : V)] = u i := by
@@ -202,13 +210,18 @@ end Arithmetic.Bootstrapping
 
 namespace Semiformula
 
+section
+variable (φ : Semiproposition L n)
+
 @[simp]
-lemma quote_neg (φ : Semiproposition L n) : (⌜∼φ⌝ : V) = Bootstrapping.neg L ⌜φ⌝ := by
+lemma quote_neg : (⌜∼φ⌝ : V) = Bootstrapping.neg L ⌜φ⌝ := by
   simp [quote_def]
 
 @[simp]
-lemma quote_imp (φ ψ : Semiproposition L n) : (⌜φ 🡒 ψ⌝ : V) = Bootstrapping.imp L ⌜φ⌝ ⌜ψ⌝ := by
+lemma quote_imp (ψ : Semiproposition L n) : (⌜φ 🡒 ψ⌝ : V) = Bootstrapping.imp L ⌜φ⌝ ⌜ψ⌝ := by
   simp [quote_def, Bootstrapping.imp]
+
+end
 
 lemma quote_allItr (φ : Semiproposition L (n + k)) :
     (⌜∀¹^[k] φ⌝ : V) = qqAlls (⌜φ⌝ : V) (k : V) := by
@@ -224,21 +237,31 @@ lemma quote_conj (φ : Fin k → Semiproposition L n) :
     simpa [Matrix.conj, Matrix.vecHead, Matrix.vecTail, Function.comp_def] using
       ih (Matrix.vecTail φ)
 
-lemma quote_substs (w : Fin n → SyntacticSemiterm L m) (φ : Semiproposition L n) :
+section
+variable (w : Fin n → SyntacticSemiterm L m) (φ : Semiproposition L n)
+
+lemma quote_substs :
     (⌜φ ⇜ w⌝ : V) = Bootstrapping.subst L (matrixToVec fun i ↦ (⌜w i⌝ : V)) ⌜φ⌝ := by
   simp [quote_def, Semiterm.quote_def]
   rfl
 
+end
+
 
 end Semiformula
 
-lemma Semisentence.quote_substs (w : Fin n → ClosedSemiterm L m) (σ : Semisentence L n) :
+section
+variable (w : Fin n → ClosedSemiterm L m) (σ : Semisentence L n)
+
+lemma Semisentence.quote_substs :
     (⌜σ ⇜ w⌝ : V) = Bootstrapping.subst L (matrixToVec fun i ↦ (⌜w i⌝ : V)) ⌜σ⌝ := by
   simp [Sentence.quote_def, Rewriting.emb_subst_eq_subst_emb, Semiformula.quote_substs,
     Semiterm.empty_quote_def]
 
-lemma Semisentence.quote_imp (σ τ : Semisentence L n) :
+lemma Semisentence.quote_imp (τ : Semisentence L n) :
     (⌜σ 🡒 τ⌝ : V) = Bootstrapping.imp L ⌜σ⌝ ⌜τ⌝ := by
   simp [Sentence.quote_def]
+
+end
 
 end FFL.FirstOrder

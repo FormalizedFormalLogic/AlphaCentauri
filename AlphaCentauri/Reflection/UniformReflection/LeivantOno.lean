@@ -49,11 +49,14 @@ lemma models_succInd_of_uniformReflection_ElementaryArithmetic {V : Type} [ORing
   simp only [hψ] at h
   simpa using h (by simpa using h₀) (by simpa using hs)
 
+section
+variable (n : ℕ)
+
 /-- $\mathsf{EA}$ together with the uniform reflection principle of $\mathsf{EA}$ for prenex
 $\Pi_{n + 2}$ formulas proves $\mathsf{I}\Sigma_n$.
 - [AB05, Theorem 154]
 - [Bek05, Theorem 7] -/
-theorem ISigma_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi (n : ℕ) :
+theorem ISigma_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi :
     𝗜𝚺 n ⪯ 𝗘𝗔 ∪ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔 :=
   have : 𝗘𝗤 ℒₒᵣ ⪯ 𝗘𝗔 ∪ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔 :=
     WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗘𝗔) inferInstance
@@ -71,7 +74,7 @@ theorem ISigma_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi (n :
 
 /-- Uniform prenex $\Pi_{n + 2}$ reflection for `𝗘𝗔` over `𝗜𝚺₁` yields `𝗜𝚺 n`.
 - [Bek05, Theorem 7] -/
-theorem ISigma_weakerThan_ISigma1_union_uniformReflectionOn_Pi (n : ℕ) :
+theorem ISigma_weakerThan_ISigma1_union_uniformReflectionOn_Pi :
     𝗜𝚺 n ⪯ 𝗜𝚺₁ ∪ 𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔 :=
   (ISigma_weakerThan_ElementaryArithmetic_union_uniformReflectionOn_Pi n).trans <|
     weakerThan_of_models.{0} _ _ fun V _ hV ↦ by
@@ -80,6 +83,8 @@ theorem ISigma_weakerThan_ISigma1_union_uniformReflectionOn_Pi (n : ℕ) :
       exact Semantics.ModelsSet.union_iff.mpr
         ⟨ModelsTheory.of_provably_subtheory V 𝗘𝗔 𝗜𝚺₁ inferInstance,
           ModelsTheory.of_add_right V 𝗜𝚺₁ (𝗥𝗙𝗡[ℬ[<, ℒₒᵣ].PrenexHierarchy 𝚷 (n + 2)] 𝗘𝗔)⟩
+
+end
 
 /-- For $n \ge 1$, $\mathsf{EA}$ together with the uniform reflection principle of $\mathsf{EA}$ for
 prenex $\Pi_{n + 2}$ formulas proves $\mathsf{I}\Sigma_1$.

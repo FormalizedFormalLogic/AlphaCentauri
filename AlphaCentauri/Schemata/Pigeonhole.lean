@@ -41,19 +41,29 @@ def pigeonholeAxiom {ξ} (φ : Semiformula L ξ 2) : Formula L ξ :=
 def weakPigeonholeAxiom {ξ} (φ : Semiformula L ξ 2) : Formula L ξ :=
   “∀ a, 1 < a → ¬!(definesInjection φ) (a * a) a”
 
+section schemes
+
+variable (Γ : ArithmeticSemiformula ℕ 2 → Prop)
+
 /-- The pigeonhole scheme for the class `Γ` of `ArithmeticSemiformula ℕ 2`.
 - [HP98, I.2.22] -/
-def PigeonholeScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : Set ArithmeticSentence :=
+def PigeonholeScheme : Set ArithmeticSentence :=
   { ψ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ ψ = .univCl (pigeonholeAxiom φ) }
 
 /-- The weak pigeonhole scheme for the class `Γ` of `ArithmeticSemiformula ℕ 2`.
 - [PWW88, Theorem 1] -/
-def WeakPigeonholeScheme (Γ : ArithmeticSemiformula ℕ 2 → Prop) : Set ArithmeticSentence :=
+def WeakPigeonholeScheme : Set ArithmeticSentence :=
   { ψ | ∃ φ : ArithmeticSemiformula ℕ 2, Γ φ ∧ ψ = .univCl (weakPigeonholeAxiom φ) }
+
+end schemes
+
+section hierarchy
+
+variable (Γ : Polarity) (s : ℕ)
 
 /-- `𝗣𝗛𝗣 Γ s` is `𝗜𝚺₀` together with the pigeonhole scheme for `ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`.
 - [HP98, I.2.22] -/
-abbrev PigeonholeOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+abbrev PigeonholeOnPrenexHierarchy : ArithmeticTheory :=
   𝗜𝚺₀ ∪ PigeonholeScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s)
 
 prefix:max "𝗣𝗛𝗣 " => PigeonholeOnPrenexHierarchy
@@ -61,31 +71,32 @@ prefix:max "𝗣𝗛𝗣 " => PigeonholeOnPrenexHierarchy
 /-- `𝗪𝗣𝗛𝗣 Γ s` is `𝗜𝚺₀` together with the weak pigeonhole scheme for
 `ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`.
 - [PWW88, Theorem 1] -/
-abbrev WeakPigeonholeOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ArithmeticTheory :=
+abbrev WeakPigeonholeOnPrenexHierarchy : ArithmeticTheory :=
   𝗜𝚺₀ ∪ WeakPigeonholeScheme (ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s)
 
 prefix:max "𝗪𝗣𝗛𝗣 " => WeakPigeonholeOnPrenexHierarchy
 
-instance (Γ : Polarity) (s : ℕ) : 𝗜𝚺₀ ⪯ 𝗣𝗛𝗣 Γ s := WeakerThan.ofSubset Set.subset_union_left
+instance : 𝗜𝚺₀ ⪯ 𝗣𝗛𝗣 Γ s := WeakerThan.ofSubset Set.subset_union_left
 
-instance (Γ : Polarity) (s : ℕ) : 𝗜𝚺₀ ⪯ 𝗪𝗣𝗛𝗣 Γ s := WeakerThan.ofSubset Set.subset_union_left
+instance : 𝗜𝚺₀ ⪯ 𝗪𝗣𝗛𝗣 Γ s := WeakerThan.ofSubset Set.subset_union_left
 
-instance (Γ : Polarity) (s : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗛𝗣 Γ s :=
+instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗣𝗛𝗣 Γ s :=
   WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) inferInstance
 
-instance (Γ : Polarity) (s : ℕ) : 𝗘𝗤 ℒₒᵣ ⪯ 𝗪𝗣𝗛𝗣 Γ s :=
+instance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗪𝗣𝗛𝗣 Γ s :=
   WeakerThan.trans (inferInstance : 𝗘𝗤 ℒₒᵣ ⪯ 𝗜𝚺₀) inferInstance
+
+end hierarchy
 
 end axioms
 
 section models
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] (φ : ArithmeticSemiformula ℕ 2)
 
 /-- The reading of the pigeonhole axiom in a model of `𝗣𝗔⁻`.
 - [PWW88, Problem 2] -/
-lemma models_pigeonholeAxiom_iff (φ : ArithmeticSemiformula ℕ 2) :
-    V↓[ℒₒᵣ] ⊧ (.univCl (pigeonholeAxiom φ) : ArithmeticSentence) ↔
+lemma models_pigeonholeAxiom_iff : V↓[ℒₒᵣ] ⊧ (.univCl (pigeonholeAxiom φ) : ArithmeticSentence) ↔
       ∀ f : ℕ → V, ∀ a : V, (∀ x < a + 1, ∃ y < a, φ.Eval ![x, y] f) →
         ∃ x < a + 1, ∃ x' < a + 1, ∃ y < a,
           x ≠ x' ∧ φ.Eval ![x, y] f ∧ φ.Eval ![x', y] f := by
@@ -95,7 +106,7 @@ lemma models_pigeonholeAxiom_iff (φ : ArithmeticSemiformula ℕ 2) :
 
 /-- The reading of the weak pigeonhole axiom in a model of `𝗣𝗔⁻`.
 - [PWW88, Theorem 1] -/
-lemma models_weakPigeonholeAxiom_iff (φ : ArithmeticSemiformula ℕ 2) :
+lemma models_weakPigeonholeAxiom_iff :
     V↓[ℒₒᵣ] ⊧ (.univCl (weakPigeonholeAxiom φ) : ArithmeticSentence) ↔
       ∀ f : ℕ → V, ∀ a : V, 1 < a → (∀ x < a * a, ∃ y < a, φ.Eval ![x, y] f) →
         ∃ x < a * a, ∃ x' < a * a, ∃ y < a,
@@ -106,8 +117,11 @@ lemma models_weakPigeonholeAxiom_iff (φ : ArithmeticSemiformula ℕ 2) :
 
 end models
 
+section instances
 
-instance models_PigeonholeOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗛𝗣 Γ s := by
+variable (Γ : Polarity) (s : ℕ)
+
+instance models_PigeonholeOnPrenexHierarchy : ℕ↓[ℒₒᵣ] ⊧* 𝗣𝗛𝗣 Γ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
   rintro _ ⟨φ, -, rfl⟩
   apply models_pigeonholeAxiom_iff _ |>.mpr
@@ -119,7 +133,7 @@ instance models_PigeonholeOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[�
   rw [Finset.mem_range] at hx hx'
   exact ⟨x, hx, x', hx', g x, hlt x hx, hne, hφ x hx, heq ▸ hφ x' hx'⟩
 
-instance models_WeakPigeonholeOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ℕ↓[ℒₒᵣ] ⊧* 𝗪𝗣𝗛𝗣 Γ s := by
+instance models_WeakPigeonholeOnPrenexHierarchy : ℕ↓[ℒₒᵣ] ⊧* 𝗪𝗣𝗛𝗣 Γ s := by
   refine Semantics.ModelsSet.union_iff.mpr ⟨inferInstance, Semantics.ModelsSet.setOf_iff.mpr ?_⟩
   rintro _ ⟨φ, -, rfl⟩
   apply models_weakPigeonholeAxiom_iff _ |>.mpr
@@ -132,12 +146,12 @@ instance models_WeakPigeonholeOnPrenexHierarchy (Γ : Polarity) (s : ℕ) : ℕ�
   rw [Finset.mem_range] at hx hx'
   exact ⟨x, hx, x', hx', g x, hlt x hx, hne, hφ x hx, heq ▸ hφ x' hx'⟩
 
-instance (Γ : Polarity) (s : ℕ) : Consistent (𝗣𝗛𝗣 Γ s) := (𝗣𝗛𝗣 Γ s).consistent_of_sound (Eq ⊥) rfl
+instance : Consistent (𝗣𝗛𝗣 Γ s) := (𝗣𝗛𝗣 Γ s).consistent_of_sound (Eq ⊥) rfl
 
-instance (Γ : Polarity) (s : ℕ) : Consistent (𝗪𝗣𝗛𝗣 Γ s) :=
+instance : Consistent (𝗪𝗣𝗛𝗣 Γ s) :=
   (𝗪𝗣𝗛𝗣 Γ s).consistent_of_sound (Eq ⊥) rfl
 
-
+end instances
 
 /-- Does $\mathsf{I}\Delta_0$ prove the pigeonhole principle for $\Delta_0$ formulas?
 - [PWW88, Problem 2]

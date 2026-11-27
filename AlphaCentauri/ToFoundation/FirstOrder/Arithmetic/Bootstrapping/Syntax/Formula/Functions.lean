@@ -19,7 +19,7 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
-variable {d j k m n p q q₁ q₂ r t u v w R Z : V}
+variable {d j k m n p q q₁ q₂ r t u v w w' R Z : V}
 
 /-! ## Connectives, substitution and shift -/
 
@@ -99,7 +99,7 @@ lemma substs1_subst_qVec (hw : IsSemitermVec L j 0 w)
       termBShift_zero (hw.nth hi), termSubst_eq_self (hw.nth hi) (by simp)]
     simp
 
-lemma subst_congr (hp : IsSemiformula L m p) {k' w' : V}
+lemma subst_congr (hp : IsSemiformula L m p) {k' : V}
     (hw : IsUTermVec L k w) (hw' : IsUTermVec L k' w') (hk : m ≤ k) (hk' : m ≤ k')
     (H : ∀ i < m, w.[i] = w'.[i]) : subst L w p = subst L w' p := by
   revert k k' w w'
@@ -355,11 +355,15 @@ lemma substs1_or (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q) :
   unfold substs1
   exact substs_or hp.isUFormula hq.isUFormula
 
-lemma pi2_qqAll_sub_one (q : V) : π₂ ((^∀ q) - 1) = q := by
+variable (q)
+
+lemma pi2_qqAll_sub_one : π₂ ((^∀ q) - 1) = q := by
   simp [qqAll]
 
-lemma pi2_qqExs_sub_one (q : V) : π₂ ((^∃ q) - 1) = q := by
+lemma pi2_qqExs_sub_one : π₂ ((^∃ q) - 1) = q := by
   simp [qqExs]
+
+variable {q}
 
 lemma shift_substs1_qqFvar (hp : IsSemiformula L 1 p) :
     shift L (substs1 L (^&j) p) = substs1 L (^&(j + 1)) (shift L p) := by
@@ -373,14 +377,14 @@ lemma shift_substs1_qqFvar (hp : IsSemiformula L 1 p) :
 
 section sentence
 
-variable (L)
+variable (L) (n p : V)
 
 /-- `p` codes a semisentence: a semiformula with `n` bound variables and no free variables. -/
-def _root_.FFL.FirstOrder.Language.IsSemisentence (n p : V) : Prop :=
+def _root_.FFL.FirstOrder.Language.IsSemisentence : Prop :=
   IsSemiformula L n p ∧ freeVariables L p = ∅
 
 /-- `p` codes a sentence: a formula with neither bound nor free variables left over. -/
-abbrev _root_.FFL.FirstOrder.Language.IsSentence (p : V) : Prop := L.IsSemisentence 0 p
+abbrev _root_.FFL.FirstOrder.Language.IsSentence : Prop := L.IsSemisentence 0 p
 
 noncomputable def isSemisentence : 𝚫ᴬ₁.Semisentence 2 := .mkDelta
   (.mkSigma “n p. !(isSemiformula L).sigma n p ∧ !(freeVariablesGraph L) 0 p”)
@@ -408,7 +412,7 @@ noncomputable def isSentence : 𝚫ᴬ₁.Semisentence 1 := .mkDelta
   (.mkSigma “p. !(isSemisentence L).sigma 0 p”)
   (.mkPi “p. !(isSemisentence L).pi 0 p”)
 
-variable {L}
+variable {L} {n}
 
 instance _root_.FFL.FirstOrder.Language.IsSentence.defined :
     𝚫ᴬ₁-Predicate (L.IsSentence (V := V)) via isSentence L := .mk <| by
@@ -418,8 +422,10 @@ instance _root_.FFL.FirstOrder.Language.IsSentence.defined :
   · intro v
     simp [isSentence, Bounding.HierarchySymbol.Semiformula.val_sigma]
 
-lemma isSentence_sigma_iff (p : V) : V ⊧/![p] (isSentence L).sigma.val ↔ L.IsSentence p := by
+lemma isSentence_sigma_iff : V ⊧/![p] (isSentence L).sigma.val ↔ L.IsSentence p := by
   simp [isSentence, Bounding.HierarchySymbol.Semiformula.val_sigma]
+
+variable {p}
 
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.isSemiformula
     (h : L.IsSemisentence n p) : IsSemiformula L n p := h.1
@@ -435,12 +441,16 @@ lemma _root_.FFL.FirstOrder.Language.IsSemisentence.of_shift_eq
     (hp : IsSemiformula L n p) (h : shift L p = p) : L.IsSemisentence n p :=
   ⟨hp, (shift_eq_self_iff hp.isUFormula).mp h⟩
 
+section
+
+variable {n p : ℕ}
+
 @[simp]
-lemma _root_.FFL.FirstOrder.Language.IsSemisentence.quote {n : ℕ} (σ : Semisentence L n) :
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.quote (σ : Semisentence L n) :
     L.IsSemisentence (n : V) ⌜σ⌝ :=
   .of_shift_eq (Sentence.quote_isSemiformula σ) (Semisentence.shift_quote σ)
 
-lemma _root_.FFL.FirstOrder.Language.IsSemisentence.sound {n p : ℕ} (h : L.IsSemisentence n p) :
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.sound (h : L.IsSemisentence n p) :
     ∃ σ : Semisentence L n, ⌜σ⌝ = p := by
   obtain ⟨φ, rfl⟩ := IsSemiformula.sound h.isSemiformula
   have h₁ : Rewriting.shift φ = φ := by simpa [← Semiformula.quote_shift] using h.shift_eq
@@ -448,23 +458,29 @@ lemma _root_.FFL.FirstOrder.Language.IsSemisentence.sound {n p : ℕ} (h : L.IsS
   simp [Sentence.quote_def]
 
 /-- A standard element coding a semisentence is the code of one. -/
-lemma _root_.FFL.FirstOrder.Language.IsSemisentence.sound_natCast {n p : ℕ}
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.sound_natCast
     (h : L.IsSemisentence (n : V) p) : ∃ σ : Semisentence L n, ⌜σ⌝ = p :=
   Language.IsSemisentence.sound <| (Defined.shigmaOne_absolute V (Language.IsSemisentence.defined L)
     (Language.IsSemisentence.defined L) ![n, p]).mpr h
+
+end
 
 @[simp]
 lemma _root_.FFL.FirstOrder.Language.IsSentence.quote (σ : Sentence L) :
     L.IsSentence (⌜σ⌝ : V) :=
   .of_shift_eq (Sentence.quote_isSemiformula₀ σ) (Semisentence.shift_quote σ)
 
+variable (n)
+
 @[simp]
-lemma _root_.FFL.FirstOrder.Language.IsSemisentence.verum (n : V) : L.IsSemisentence n ^⊤ := by
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.verum : L.IsSemisentence n ^⊤ := by
   simp [Language.IsSemisentence]
 
 @[simp]
-lemma _root_.FFL.FirstOrder.Language.IsSemisentence.falsum (n : V) : L.IsSemisentence n ^⊥ := by
+lemma _root_.FFL.FirstOrder.Language.IsSemisentence.falsum : L.IsSemisentence n ^⊥ := by
   simp [Language.IsSemisentence]
+
+variable {n}
 
 @[simp]
 lemma _root_.FFL.FirstOrder.Language.IsSemisentence.and_iff :
@@ -541,7 +557,7 @@ lemma shift_qqAlls (hp : IsUFormula L p) (k : V) : shift L (qqAlls p k) = qqAlls
 /-- Substituting terms `w` without bound variables for the outermost bound variables of a block of
 `k` universal quantifiers: inside the block they become `w'`, which keeps the `k` variables bound
 by the block and continues with `w`. -/
-lemma subst_qqAlls {w' : V} (hw : IsSemitermVec L (len w) 0 w) (hp : IsUFormula L p)
+lemma subst_qqAlls (hw : IsSemitermVec L (len w) 0 w) (hp : IsUFormula L p)
     (hl : len w' = k + len w) (h₁ : ∀ i < k, w'.[i] = ^#i) (h₂ : ∀ i < len w, w'.[k + i] = w.[i]) :
     subst L w (qqAlls p k) = qqAlls (subst L w' p) k := by
   induction k using ISigma1.pi1_succ_induction generalizing p w'
@@ -593,14 +609,18 @@ noncomputable def qqExss.construction : PR.Construction V qqExss.blueprint where
   zero_defined := .mk fun v ↦ by simp [blueprint]
   succ_defined := .mk fun v ↦ by simp [blueprint, qqExs]
 
+section
+
+variable (p k : V)
+
 /-- `qqExss p k = ^∃ ^∃ ⋯ ^∃ p`, with `k` existential quantifiers. -/
-noncomputable def qqExss (p k : V) : V := qqExss.construction.result ![p] k
+noncomputable def qqExss : V := qqExss.construction.result ![p] k
 
 @[simp]
-lemma qqExss_zero (p : V) : qqExss p 0 = p := by simp [qqExss, qqExss.construction]
+lemma qqExss_zero : qqExss p 0 = p := by simp [qqExss, qqExss.construction]
 
 @[simp]
-lemma qqExss_succ (p k : V) : qqExss p (k + 1) = ^∃ (qqExss p k) := by
+lemma qqExss_succ : qqExss p (k + 1) = ^∃ (qqExss p k) := by
   simp [qqExss, qqExss.construction]
 
 def _root_.FFL.FirstOrder.Arithmetic.qqExssDef : 𝚺ᴬ₁.Semisentence 3 :=
@@ -614,14 +634,16 @@ instance qqExss.definable : 𝚺ᴬ₁-Function₂ (qqExss : V → V → V) := q
 instance qqExss.definable' {Γ : Polarity} {m : ℕ} :
     Γᴬ_[m + 1]-Function₂ (qqExss : V → V → V) := qqExss.definable.of_sigmaOne
 
-lemma qqExss_exs (p k : V) : qqExss (^∃ p) k = ^∃ (qqExss p k) := by
+lemma qqExss_exs : qqExss (^∃ p) k = ^∃ (qqExss p k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih => rw [qqExss_succ, ih, qqExss_succ]
 
-lemma qqExss_succ' (p k : V) : qqExss p (k + 1) = qqExss (^∃ p) k := by
+lemma qqExss_succ' : qqExss p (k + 1) = qqExss (^∃ p) k := by
   rw [qqExss_succ, qqExss_exs]
+
+end
 
 @[simp]
 lemma isUFormula_qqExss : IsUFormula L (qqExss p k) ↔ IsUFormula L p := by
@@ -630,18 +652,26 @@ lemma isUFormula_qqExss : IsUFormula L (qqExss p k) ↔ IsUFormula L p := by
   case zero => simp
   case succ k ih => rw [qqExss_succ, IsUFormula.ex, ih]
 
-lemma shift_qqExss (hp : IsUFormula L p) (k : V) : shift L (qqExss p k) = qqExss (shift L p) k := by
+section
+
+variable (hp : IsUFormula L p) (k : V)
+
+include hp
+
+lemma shift_qqExss : shift L (qqExss p k) = qqExss (shift L p) k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih => rw [qqExss_succ, shift_exs (isUFormula_qqExss.mpr hp), ih, qqExss_succ]
 
-lemma neg_qqAlls (hp : IsUFormula L p) (k : V) : neg L (qqAlls p k) = qqExss (neg L p) k := by
+lemma neg_qqAlls : neg L (qqAlls p k) = qqExss (neg L p) k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih =>
     rw [qqAlls_succ, neg_all (isUFormula_qqAlls.mpr hp), ih, qqExss_succ]
+
+end
 
 lemma IsSemiformula.qqExss (h : IsSemiformula L (n + k) p) : IsSemiformula L n (qqExss p k) := by
   induction k using ISigma1.pi1_succ_induction generalizing n

@@ -1,6 +1,7 @@
 module
 
 public meta import Lean.Elab.Command
+public import AlphaCentauri.Init
 public meta import AlphaCentauri.OpenProblem.Attribute
 
 /-!

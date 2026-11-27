@@ -25,16 +25,16 @@ section
 
 variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {a b c m : ℕ}
 
+variable {u : Fin m → ℕ}
+
 /-- A $\Sigma_1$ fact about standard numbers is inherited by every model of `𝗣𝗔⁻`.
 - [HP98, Theorem I.1.6] -/
-lemma Sigma1_cast (σ : 𝚺ᴬ₁.Semisentence m) {u : Fin m → ℕ}
-    (h : ℕ ⊧/u σ.val) : V ⊧/(fun i ↦ (u i : V)) σ.val := by
+lemma Sigma1_cast (σ : 𝚺ᴬ₁.Semisentence m) (h : ℕ ⊧/u σ.val) : V ⊧/(fun i ↦ (u i : V)) σ.val := by
   simpa [Function.comp_def] using sigmaOne_upward_absolute V σ u h
 
 /-- The $\Delta_1$ form of `Sigma1_cast`, reading the $\Sigma_1$ half of the definition.
 - [HP98, Theorem I.1.6] -/
-lemma Delta1_cast (σ : 𝚫ᴬ₁.Semisentence m) {u : Fin m → ℕ}
-    (h : ℕ ⊧/u σ.val) : V ⊧/(fun i ↦ (u i : V)) σ.val := by
+lemma Delta1_cast (σ : 𝚫ᴬ₁.Semisentence m) (h : ℕ ⊧/u σ.val) : V ⊧/(fun i ↦ (u i : V)) σ.val := by
   have h' : ℕ ⊧/u σ.sigma.val := by rwa [HierarchySymbol.Semiformula.val_sigma]
   have := Sigma1_cast (V := V) σ.sigma h'
   rwa [HierarchySymbol.Semiformula.val_sigma] at this
@@ -164,7 +164,10 @@ lemma PrenexDefinable.exists_of_sigmaZero {R : (Fin k → V) → V → Prop}
     Bounding.PrenexHierarchy.zero_iff.mpr φ.sigma_prop
   exact ⟨∃¹ φ.val, Bounding.PrenexHierarchy.exs h₁, by intro v; simp [hφ.iff]⟩
 
-private lemma definable_exists_pair [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {R : (Fin k → V) → V → V → Prop}
+section
+variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {R : (Fin k → V) → V → V → Prop}
+
+private lemma definable_exists_pair
     (hR : 𝚺ᴬ₀.Definable fun v : Fin (k + 2) → V ↦ R (fun i ↦ v i.succ.succ) (v 0) (v 1)) :
     𝚺ᴬ₀.Definable (k := k + 1) fun w ↦
       ∃ y ≤ w 0, ∃ x ≤ w 0, w 0 = ⟪x, y⟫ ∧ R (fun i ↦ w i.succ) x y := by
@@ -185,13 +188,15 @@ private lemma definable_exists_pair [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {R : (Fin
         R (fun i ↦ (y :> w) i.succ.succ) x ((y :> w) 0))
     (hI.of_iff (by intro w; simp)) #0).of_iff (by intro w; simp)
 
-lemma PrenexDefinable.exists_exists_of_sigmaZero [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀] {R : (Fin k → V) → V → V → Prop}
+lemma PrenexDefinable.exists_exists_of_sigmaZero
     (hR : 𝚺ᴬ₀.Definable fun v : Fin (k + 2) → V ↦ R (fun i ↦ v i.succ.succ) (v 0) (v 1)) :
     PrenexDefinable 𝚺 1 fun v ↦ ∃ x y, R v x y := by
   exact (PrenexDefinable.exists_of_sigmaZero
     (R := fun v p ↦ ∃ y ≤ p, ∃ x ≤ p, p = ⟪x, y⟫ ∧ R v x y) (definable_exists_pair hR)).of_iff
     fun v ↦ ⟨fun ⟨x, y, h⟩ ↦ ⟨⟪x, y⟫, y, le_pair_right x y, x, le_pair_left x y, rfl, h⟩,
       fun ⟨_, y, _, x, _, _, h⟩ ↦ ⟨x, y, h⟩⟩
+
+end
 
 lemma PrenexDefinable.exists_exists_exists_of_sigmaZero [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀]
     {R : (Fin k → V) → V → V → V → Prop} (hR : 𝚺ᴬ₀.Definable fun v : Fin (k + 3) → V ↦

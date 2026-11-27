@@ -19,7 +19,7 @@ namespace FFL.FirstOrder
 
 /-- An upper bound on the degree of a term in its bound variables: a bound variable counts `1`, a
 free variable `0`, and a function application the sum over its arguments. -/
-def Semiterm.degree {n : ℕ} : Semiterm L ξ n → ℕ
+def Semiterm.degree : Semiterm L ξ n → ℕ
   | #_ => 1
   | &_ => 0
   | func _ v => ∑ i, (v i).degree
@@ -41,8 +41,10 @@ namespace OpenPredicate
 
 variable {R : Type*} [CommRing R] [LinearOrder R]
 
-lemma isPolynomial_val (ε : ξ → R) (t : ArithmeticSemiterm ξ n) :
-    IsPolynomial fun w : Fin n → R ↦ t.val w ε := by
+section
+variable (ε : ξ → R) (t : ArithmeticSemiterm ξ n)
+
+lemma isPolynomial_val : IsPolynomial fun w : Fin n → R ↦ t.val w ε := by
   induction t with
   | bvar x => exact .var x
   | fvar x => exact .const (ε x)
@@ -53,7 +55,7 @@ lemma isPolynomial_val (ε : ξ → R) (t : ArithmeticSemiterm ξ n) :
     · exact ((ih 0).add (ih 1)).of_eq fun _ ↦ rfl
     · exact ((ih 0).mul (ih 1)).of_eq fun _ ↦ rfl
 
-lemma isOpen_eval (ε : ξ → R) {φ : ArithmeticSemiformula ξ n} (hφ : φ.Open) :
+lemma isOpen_eval {φ : ArithmeticSemiformula ξ n} (hφ : φ.Open) :
     IsOpen fun w : Fin n → R ↦ φ.Eval w ε := by
   induction φ using Semiformula.rec' with
   | hverum => exact (IsOpen.eq (.const 0) (.const 0)).of_iff fun _ ↦ by simp
@@ -69,6 +71,8 @@ lemma isOpen_eval (ε : ξ → R) {φ : ArithmeticSemiformula ξ n} (hφ : φ.Op
   | hor φ ψ ihφ ihψ => simp at hφ; simpa using (ihφ hφ.1).or (ihψ hφ.2)
   | hall => simp at hφ
   | hexs => simp at hφ
+
+end
 
 section
 

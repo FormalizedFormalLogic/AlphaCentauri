@@ -84,7 +84,10 @@ lemma imp (h : LocallyDelta0 R) (h' : LocallyDelta0 R') : LocallyDelta0 fun v �
 lemma iff (h : LocallyDelta0 R) (h' : LocallyDelta0 R') : LocallyDelta0 fun v ↦ R v ↔ R' v :=
   ((h.imp h').and (h'.imp h)).of_iff fun _ ↦ iff_iff_implies_and_implies
 
-lemma retraction {R : (Fin l → V) → Prop} (h : LocallyDelta0 R) (σ : Fin l → Fin k) :
+section
+variable {R : (Fin l → V) → Prop}
+
+lemma retraction (h : LocallyDelta0 R) (σ : Fin l → Fin k) :
     LocallyDelta0 fun v : Fin k → V ↦ R fun i ↦ v (σ i) := by
   intro X
   obtain ⟨Q, hQ, hRQ⟩ := h X
@@ -94,7 +97,7 @@ lemma retraction {R : (Fin l → V) → Prop} (h : LocallyDelta0 R) (σ : Fin l 
 variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 /-- Substitution of locally $\Delta_0$ functions into a locally $\Delta_0$ relation. -/
-lemma comp {R : (Fin l → V) → Prop} {f : Fin l → (Fin k → V) → V} (h : LocallyDelta0 R)
+lemma comp {f : Fin l → (Fin k → V) → V} (h : LocallyDelta0 R)
     (hf : ∀ i, LocallyDelta0Function (f i)) :
     LocallyDelta0 fun v ↦ R fun i ↦ f i v := by
   intro X
@@ -131,6 +134,10 @@ lemma comp {R : (Fin l → V) → Prop} {f : Fin l → (Fin k → V) → V} (h :
       have : w = fun i ↦ f i v := funext fun i ↦ (hgraph i (w i) (hw i)).mpr (hwG i)
       subst this
       exact (hRQ _ hw).mpr hwQ
+
+end
+
+variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 
 /-- Bounded universal quantification below a variable. -/
 lemma ball_le (h : LocallyDelta0 P) :

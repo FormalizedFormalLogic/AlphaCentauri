@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.Meta.ClProver
 
 /-!
@@ -19,20 +20,20 @@ lemma consistent_eq_true (𝓢 : S) [h : Consistent 𝓢] : Consistent 𝓢 = Tr
   eq_true h
 
 variable [LogicalConnective F] [LogicalNeutral F] {𝓢 : S}
+variable [Entailment.Minimal 𝓢] {φ : F}
 
-lemma matrixConj_elim [Entailment.Minimal 𝓢] :
-    ∀ {k : ℕ} (v : Fin k → F) (i : Fin k), 𝓢 ⊢ Matrix.conj v 🡒 v i
+lemma matrixConj_elim : ∀ {k : ℕ} (v : Fin k → F) (i : Fin k), 𝓢 ⊢ Matrix.conj v 🡒 v i
   | _ + 1, v, i => by
     cases i using Fin.cases with
     | zero => exact and₁
     | succ i => exact C_trans and₂ <| matrixConj_elim (Matrix.vecTail v) i
 
-lemma matrixConj_intro [Entailment.Minimal 𝓢] {φ : F} :
-    ∀ {k : ℕ} {v : Fin k → F}, (∀ i, 𝓢 ⊢ φ 🡒 v i) → 𝓢 ⊢ φ 🡒 Matrix.conj v
+lemma matrixConj_intro : ∀ {k : ℕ} {v : Fin k → F}, (∀ i, 𝓢 ⊢ φ 🡒 v i) → 𝓢 ⊢ φ 🡒 Matrix.conj v
   | 0, _, _ => C_of_conseq verum
   | _ + 1, v, h => right_K_intro (h 0) <| matrixConj_intro (v := Matrix.vecTail v) fun i ↦ h i.succ
 
-lemma matrixConj_imp_matrixConj [Entailment.Cl 𝓢] {φ : F} {k : ℕ} {v u : Fin k → F}
+omit [Entailment.Minimal 𝓢] in
+lemma matrixConj_imp_matrixConj [Entailment.Cl 𝓢] {k : ℕ} {v u : Fin k → F}
     (h : ∀ i, 𝓢 ⊢ φ 🡒 v i 🡒 u i) : 𝓢 ⊢ φ 🡒 Matrix.conj v 🡒 Matrix.conj u := by
   have : 𝓢 ⊢ φ ⋏ Matrix.conj v 🡒 Matrix.conj u := matrixConj_intro fun i ↦ by
     have := matrixConj_elim (𝓢 := 𝓢) v i

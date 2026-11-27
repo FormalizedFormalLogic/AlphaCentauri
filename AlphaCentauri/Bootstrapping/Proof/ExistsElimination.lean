@@ -79,9 +79,9 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 open PeanoMinus ISigma0 ISigma1
 
-variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {L : Language} [L.Encodable] [L.LORDefinable] {d m j u : V}
 
-lemma fvSubst_freshVec_neg_substs1_qqFvar {d i j : V} (hd : L.IsSemisentence 1 d) (hij : i < j) :
+lemma fvSubst_freshVec_neg_substs1_qqFvar {i : V} (hd : L.IsSemisentence 1 d) (hij : i < j) :
     fvSubst L (freshVec j) (neg L (substs1 L (^&i) d)) = neg L (substs1 L (^&(i + 1)) d) := by
   have hw : IsSemitermVec L (len (freshVec j : V)) 0 (freshVec j) := isSemitermVec_freshVec j
   have ht : IsSemiterm L 0 (^&i) := by simp
@@ -92,22 +92,16 @@ lemma fvSubst_freshVec_neg_substs1_qqFvar {d i j : V} (hd : L.IsSemisentence 1 d
     fvSubst_substs1 hw ht hd.isSemiformula, termFvSubst_fvar, ite_eq_left hil,
     nth_freshVec_of_lt hij, hd.fvSubst_eq_self]
 
-variable (L) in
+section
+
+variable (L d m)
+
 /-- `negDomSet L d m` is the coded set of the negations of the instances `substs1 L (^&i) d`
 for `i < m`. -/
-noncomputable def negDomSet (d m : V) : V := by
+noncomputable def negDomSet : V := by
   letI : 𝚺ᴬ₁-Function₁ (fun i : V ↦ neg L (substs1 L (^&i) d)) := by definability
   exact hfsImage (fun i : V ↦ neg L (substs1 L (^&i) d)) (under m)
 
-@[simp]
-lemma mem_negDomSet_iff {d m x : V} :
-    x ∈ negDomSet L d m ↔ ∃ i < m, x = neg L (substs1 L (^&i) d) := by
-  let _ : 𝚺ᴬ₁-Function₁ (fun i : V ↦ neg L (substs1 L (^&i) d)) := by definability
-  change x ∈ hfsImage (fun i : V ↦ neg L (substs1 L (^&i) d)) (under m) ↔ _
-  rw [mem_hfsImage_iff]
-  simp only [mem_under_iff]
-
-variable (L) in
 /-- The $\Sigma_1$ graph of `negDomSet`; argument order `(t, d, m)`, `t = negDomSet d m`. -/
 noncomputable def negDomSetGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
   “y d m. (∀ z ∈' y, ∃ i < m, ∃ fi, !qqFvarDef fi i ∧ ∃ s, !(substs1Graph L) s fi d ∧
@@ -115,7 +109,20 @@ noncomputable def negDomSetGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
     (∀ i < m, ∃ fi, !qqFvarDef fi i ∧ ∃ s, !(substs1Graph L) s fi d ∧ ∃ z, !(negGraph L) z s ∧
       z ∈ y)”
 
-private lemma negDomSet_graph (t d m : V) :
+end
+
+@[simp]
+lemma mem_negDomSet_iff {x : V} : x ∈ negDomSet L d m ↔ ∃ i < m, x = neg L (substs1 L (^&i) d) := by
+  let _ : 𝚺ᴬ₁-Function₁ (fun i : V ↦ neg L (substs1 L (^&i) d)) := by definability
+  change x ∈ hfsImage (fun i : V ↦ neg L (substs1 L (^&i) d)) (under m) ↔ _
+  rw [mem_hfsImage_iff]
+  simp only [mem_under_iff]
+
+section
+
+variable (t d m : V)
+
+private lemma negDomSet_graph :
     t = negDomSet L d m ↔ (∀ z ∈ t, ∃ i < m, z = neg L (substs1 L (^&i) d)) ∧
       (∀ i < m, neg L (substs1 L (^&i) d) ∈ t) := by
   constructor
@@ -138,30 +145,38 @@ instance negDomSet.definable' {Γ : SigmaPiDelta} {m : ℕ} : Γᴬ_[m + 1]-Func
   negDomSet.definable.of_sigmaOne
 
 @[simp]
-lemma negDomSet_zero (d : V) : negDomSet L d 0 = ∅ := by
+lemma negDomSet_zero : negDomSet L d 0 = ∅ := by
   apply mem_ext
   intro x
   simp
 
-lemma negDomSet_succ (d m : V) :
+lemma negDomSet_succ :
     negDomSet L d (m + 1) = insert (neg L (substs1 L (^&m) d)) (negDomSet L d m) := by
   apply mem_ext
   intro x
   simp only [mem_negDomSet_iff, mem_bitInsert_iff, lt_succ_iff_le, le_iff_lt_or_eq]
   grind
 
-lemma negDomSet_mono {d m m' : V} (h : m ≤ m') : negDomSet L d m ⊆ negDomSet L d m' := by
+end
+
+lemma negDomSet_mono {m' : V} (h : m ≤ m') : negDomSet L d m ⊆ negDomSet L d m' := by
   intro x
   simp only [mem_negDomSet_iff]
   grind
 
-lemma IsFormulaSet.negDomSet {d : V} (hd : IsSemiformula L 1 d) (m : V) :
+lemma IsFormulaSet.negDomSet (hd : IsSemiformula L 1 d) : ∀ m : V,
     IsFormulaSet L (negDomSet L d m) := by
-  intro p hp
+  intro m p hp
   obtain ⟨i, _, rfl⟩ := mem_negDomSet_iff.mp hp
   exact (IsSemiformula.substs1 (n := 0) (by simp) hd).neg
 
-lemma negDomSet_succ_eq_insert_setShift {d : V} (hd : L.IsSemisentence 1 d) (m : V) :
+section
+
+variable (hd : L.IsSemisentence 1 d) (m j : V)
+
+include hd
+
+lemma negDomSet_succ_eq_insert_setShift :
     negDomSet L d (m + 1) = insert (neg L (substs1 L (^&0) d)) (setShift L (negDomSet L d m)) := by
   apply mem_ext
   intro x
@@ -176,7 +191,7 @@ lemma negDomSet_succ_eq_insert_setShift {d : V} (hd : L.IsSemisentence 1 d) (m :
     · exact ⟨0, by simp, rfl⟩
     · exact ⟨j + 1, by simpa using hj, this j⟩
 
-lemma fvSubstImage_freshVec_negDomSet {d : V} (hd : L.IsSemisentence 1 d) (j : V) :
+lemma fvSubstImage_freshVec_negDomSet :
     fvSubstImage (L := L) (freshVec j) (negDomSet L d j) = setShift L (negDomSet L d j) := by
   apply mem_ext
   intro x
@@ -188,8 +203,9 @@ lemma fvSubstImage_freshVec_negDomSet {d : V} (hd : L.IsSemisentence 1 d) (j : V
   · rintro ⟨_, ⟨i, hi, rfl⟩, rfl⟩
     exact ⟨_, ⟨i, hi, rfl⟩, by rw [fvSubst_freshVec_neg_substs1_qqFvar hd hi, this]⟩
 
-lemma fvSubst_freshVec_shift {n q u j : V} (hq : IsSemiformula L n q) (hqu : q ≤ u)
-    (huj : u < j) :
+end
+
+lemma fvSubst_freshVec_shift {n q : V} (hq : IsSemiformula L n q) (hqu : q ≤ u) (huj : u < j) :
     fvSubst L (freshVec j) (shift L q) = shift L (shift L q) := by
   have hfu : IsSemitermVec L (len (freshVec u : V)) 0 (freshVec u) := isSemitermVec_freshVec u
   have hfu' : IsSemitermVec L (u + 1) 0 (freshVec u) := by simpa using hfu
@@ -215,7 +231,7 @@ lemma fvSubst_freshVec_shift {n q u j : V} (hq : IsSemiformula L n q) (hqu : q �
   rw [hvx x hx, termFvSubst_fvar, ite_eq_left hxl',
     nth_adjoin_succ, nth_termShiftVec hfu.isUTerm hxl, nth_freshVec_of_lt hx, termShift_fvar]
 
-lemma fvSubst_freshVec_free {p u j : V} (hp : IsSemiformula L 1 p) (hpu : p ≤ u) (huj : u < j) :
+lemma fvSubst_freshVec_free {p : V} (hp : IsSemiformula L 1 p) (hpu : p ≤ u) (huj : u < j) :
     fvSubst L (freshVec j) (free L p) = shift L (free L p) := by
   have hj : (0 : V) < j := lt_of_le_of_lt zero_le huj
   rw [free, substs1, fvSubst_subst (n := 1) (m := 0) (isSemitermVec_freshVec j) (by simp) hp.shift,

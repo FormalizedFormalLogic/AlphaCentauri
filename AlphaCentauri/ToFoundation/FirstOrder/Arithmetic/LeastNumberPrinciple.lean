@@ -77,29 +77,30 @@ open RingOfDifferences OpenPredicate
 
 section
 
-variable {V W : Type}
+variable {V W : Type} {ξ : Type} {m : ℕ}
 
 /-- `∃ x₁ < &k, ⋯, ∃ xₙ < &k, φ`. -/
-private def bexsBlock {ξ : Type} (k : ξ) {m : ℕ} :
+private def bexsBlock (k : ξ) :
     (n : ℕ) → ArithmeticSemiformula ξ (m + n) → ArithmeticSemiformula ξ m
   | 0, φ => φ
   | n + 1, φ => bexsBlock k n (φ.bexsLT &k)
 
-private lemma bexsBlock_boundedExistential {ξ : Type} (k : ξ) {m : ℕ} :
-    ∀ (n : ℕ) {φ : ArithmeticSemiformula ξ (m + n)},
+variable (k : ξ)
+
+private lemma bexsBlock_boundedExistential : ∀ (n : ℕ) {φ : ArithmeticSemiformula ξ (m + n)},
       IsBoundedExistential 1 φ → IsBoundedExistential 1 (bexsBlock k n φ)
   | 0, _, h => h
-  | n + 1, _, h => bexsBlock_boundedExistential k n (.bexsLT _ h)
+  | n + 1, _, h => bexsBlock_boundedExistential n (.bexsLT _ h)
 
 variable [ORingStructure V]
 
-private lemma eval_bexsBlock {ξ : Type} (k : ξ) (ε : ξ → V) {m : ℕ} :
+private lemma eval_bexsBlock (ε : ξ → V) :
     ∀ (n : ℕ) (φ : ArithmeticSemiformula ξ (m + n)) (e : Fin m → V),
       (bexsBlock k n φ).Eval e ε ↔
         ∃ xs : Fin n → V, (∀ i, xs i < ε k) ∧ φ.Eval (Matrix.appendr xs e) ε
   | 0, φ, e => by simp [bexsBlock, Matrix.empty_eq]
   | n + 1, φ, e => by
-    simp [bexsBlock, eval_bexsBlock k ε n, Matrix.vecExists_iff, Fin.forall_fin_succ]
+    simp [bexsBlock, eval_bexsBlock ε n, Matrix.vecExists_iff, Fin.forall_fin_succ]
     aesop
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] {N : ℕ} (pv nv : W → ArithmeticSemiterm V N)

@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.Basic
 
 /-!
@@ -36,7 +37,12 @@ lemma litTrue_and : LitTrue (φ ⋏ ψ) ↔ LitTrue φ ∧ LitTrue ψ := by simp
 @[simp, grind =]
 lemma litTrue_or : LitTrue (φ ⋎ ψ) ↔ LitTrue φ ∨ LitTrue ψ := by simp [LitTrue]
 
-lemma litTrue_or_neg (φ : ArithmeticFormula ℕ) : LitTrue φ ∨ LitTrue (∼φ) := by simp [LitTrue, em]
+section
+variable (φ : ArithmeticFormula ℕ)
+
+lemma litTrue_or_neg : LitTrue φ ∨ LitTrue (∼φ) := by simp [LitTrue, em]
+
+end
 
 /-- A universal formula is true exactly when all its numeral instances are true.
 

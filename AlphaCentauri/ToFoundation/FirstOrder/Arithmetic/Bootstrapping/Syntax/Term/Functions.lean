@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.Bootstrapping.Syntax
 
 /-!
@@ -51,14 +52,19 @@ lemma termBShift_zero (ht : IsSemiterm L 0 t) : termBShift L t = t := by
     rw [nth_termBShiftVec hts.isUTerm hi]
     exact ih i hi
 
-lemma Semiterm.bShift_eq_subst_nil (t : Term V L) : t.bShift = t.subst ![] := by
+section BShiftNil
+
+variable (t : Term V L)
+
+lemma Semiterm.bShift_eq_subst_nil : t.bShift = t.subst ![] := by
   ext
   simp [termBShift_zero t.isSemiterm, termSubst_zero t.isSemiterm]
 
-lemma Semiterm.bShift_subst_nil {k : ℕ} (t : Term V L) :
-    (t.subst ![] : Semiterm V L k).bShift = t.subst ![] := by
+lemma Semiterm.bShift_subst_nil {k : ℕ} : (t.subst ![] : Semiterm V L k).bShift = t.subst ![] := by
   ext
   simp [termBShift_zero t.isSemiterm, termSubst_zero t.isSemiterm]
+
+end BShiftNil
 
 /-- The shift of free variables does not decrease the code of a term. -/
 lemma le_termShift (ht : IsSemiterm L n t) : t ≤ termShift L t := by
@@ -83,8 +89,15 @@ lemma le_termShiftVec (hv : IsSemitermVec L k n v) : v ≤ termShiftVec L k v :=
     rw [nth_termShiftVec hv.isUTerm (by simpa [hv.lh] using hi)]
     exact le_termShift (hv.nth (by simpa [hv.lh] using hi))
 
-lemma isSemitermVec_fvarVec (m n : V) : IsSemitermVec L m n (fvarVec m) :=
+variable (k m n)
+
+lemma add_arity_comm : k + 1 + n = n + 1 + k := by
+  simp only [add_comm, add_left_comm]
+
+lemma isSemitermVec_fvarVec : IsSemitermVec L m n (fvarVec m) :=
   IsSemitermVec.iff.mpr ⟨len_fvarVec m, fun i hi ↦ by simp [nth_fvarVec m i hi]⟩
+
+variable {k m n}
 
 lemma nth_qVec_succ (hw : IsUTermVec L k w) (hj : j < k) :
     (qVec L w).[j + 1] = termBShift L w.[j] := by
@@ -155,15 +168,19 @@ noncomputable def bvarVec.construction : PR.Construction V bvarVec.blueprint whe
   zero_defined := .mk fun v ↦ by simp [blueprint]
   succ_defined := .mk fun v ↦ by simp [blueprint]
 
+section BVarVec
+
+variable (j k : V)
+
 /-- `bvarVec j k = ⟨^#j, …, ^#(j + k - 1)⟩`. -/
-noncomputable def bvarVec (j k : V) : V := bvarVec.construction.result ![j] k
+noncomputable def bvarVec : V := bvarVec.construction.result ![j] k
 
 @[simp]
-lemma bvarVec_zero (j : V) : bvarVec j 0 = 0 := by
+lemma bvarVec_zero : bvarVec j 0 = 0 := by
   simp [bvarVec, bvarVec.construction]
 
 @[simp]
-lemma bvarVec_succ (j k : V) : bvarVec j (k + 1) = concat (bvarVec j k) (^#(j + k)) := by
+lemma bvarVec_succ : bvarVec j (k + 1) = concat (bvarVec j k) (^#(j + k)) := by
   simp [bvarVec, bvarVec.construction]
 
 /-- The $\Sigma_1$ graph of `bvarVec`, with argument order `(y, j, k)`. -/
@@ -180,13 +197,13 @@ instance bvarVec_definable' {Γ : Polarity} {m : ℕ} :
     Γᴬ_[m + 1]-Function₂ (bvarVec : V → V → V) := bvarVec_definable.of_sigmaOne
 
 @[simp]
-lemma len_bvarVec (j k : V) : len (bvarVec j k) = k := by
+lemma len_bvarVec : len (bvarVec j k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih => simp [ih]
 
-lemma nth_bvarVec (j k : V) : ∀ i < k, (bvarVec j k).[i] = ^#(j + i) := by
+lemma nth_bvarVec : ∀ i < k, (bvarVec j k).[i] = ^#(j + i) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -197,20 +214,26 @@ lemma nth_bvarVec (j k : V) : ∀ i < k, (bvarVec j k).[i] = ^#(j + i) := by
       exact ih i hlt
     · rw [bvarVec_succ, concat_nth_len' _ _ (by simp)]
 
+variable {j k} in
 lemma IsSemitermVec.bvarVec (h : j + k ≤ n) : IsSemitermVec L k n (bvarVec j k) :=
   IsSemitermVec.iff.mpr ⟨by simp, fun i hi ↦ by
     rw [nth_bvarVec j k i hi, IsSemiterm.bvar]
     exact lt_of_lt_of_le (by simpa using hi) h⟩
 
-lemma bvarVec_eq_matrixToVec (j : V) (k : ℕ) :
+lemma bvarVec_eq_matrixToVec (k : ℕ) :
     bvarVec j (k : V) = matrixToVec fun i : Fin k ↦ ^#(((i : ℕ) : V) + j) := by
   apply nth_ext' (k : V) (by simp) (by simp)
   intro i hi
   obtain ⟨i, rfl⟩ := eq_fin_of_lt_nat hi
   simp [nth_bvarVec _ _ _ hi, add_comm]
 
-lemma exists_vec_bvar_append (w k : V) :
-    ∃ v : V, len v = k + len w ∧ (∀ i < k, v.[i] = ^#i) ∧ ∀ j < len w, v.[k + j] = w.[j] := by
+end BVarVec
+
+variable (w)
+
+lemma exists_vec_bvar_append : ∀ k : V, ∃ v : V, len v = k + len w ∧ (∀ i < k, v.[i] = ^#i) ∧
+      ∀ j < len w, v.[k + j] = w.[j] := by
+  intro k
   obtain ⟨v, hvl, hv⟩ := sigmaOne_skolem_vec
     (R := fun i y : V ↦ (i < k → y = ^#i) ∧ (k ≤ i → y = w.[i - k])) (by definability)
     (l := k + len w) (fun i _ ↦ by
@@ -219,6 +242,8 @@ lemma exists_vec_bvar_append (w k : V) :
       · exact ⟨w.[i - k], fun h ↦ absurd h hi, fun _ ↦ rfl⟩)
   exact ⟨v, hvl, fun i hi ↦ (hv i (by simp [lt_of_lt_of_le hi])).1 hi,
     fun j hj ↦ by simpa using (hv (k + j) (by simpa using hj)).2 (by simp)⟩
+
+variable {w}
 
 /-- The vector `^#0, …, ^#(r - 1), t`. -/
 lemma exists_vec_bvar_term (r t : V) :
@@ -229,24 +254,29 @@ lemma exists_vec_bvar_term (r t : V) :
 lemma isSemitermVec_fvar_bvar (u : V) : IsSemitermVec L 2 1 (?[^&u, ^#(0 : V)] : V) :=
   IsSemitermVec.adjoin (IsSemitermVec.adjoin (IsSemitermVec.nil _) (by simp)) (by simp)
 
-lemma add_arity_comm (k n : V) : k + 1 + n = n + 1 + k := by
-  simp only [add_comm, add_left_comm]
+section ShiftVec
 
-lemma termShiftVec_bvarVec (s n : V) : termShiftVec L n (bvarVec s n) = bvarVec s n := by
+variable (i s n : V)
+
+lemma termShiftVec_bvarVec : termShiftVec L n (bvarVec s n) = bvarVec s n := by
   have h₁ : IsUTermVec L n (bvarVec s n) :=
     (IsSemitermVec.bvarVec (L := L) (n := s + n) le_rfl).isUTerm
   apply nth_ext' n (by rw [len_termShiftVec h₁]) (by simp)
   intro i hi
   rw [nth_termShiftVec h₁ hi, nth_bvarVec _ _ _ hi, termShift_bvar]
 
-lemma termShiftVec_bvarVec_cons (i s n : V) :
+lemma termShiftVec_bvarVec_cons :
     termShiftVec L (n + 1) (^#i ∷ bvarVec s n) = ^#i ∷ bvarVec s n := by
   have h₁ : IsUTermVec L n (bvarVec s n) :=
     (IsSemitermVec.bvarVec (L := L) (n := s + n) le_rfl).isUTerm
   rw [termShiftVec_cons (show IsUTerm L ^#i by simp) h₁, termShift_bvar, termShiftVec_bvarVec]
 
-lemma IsSemitermVec.of_var {L' : Language} [L'.Encodable] [L'.LORDefinable]
-    (hw : IsSemitermVec L n m w) (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) :
+end ShiftVec
+
+variable {L' : Language} [L'.Encodable] [L'.LORDefinable]
+
+lemma IsSemitermVec.of_var (hw : IsSemitermVec L n m w)
+    (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) :
     IsSemitermVec L' n m w := by
   refine IsSemitermVec.iff.mpr ⟨hw.lh, fun i hi ↦ ?_⟩
   have h := hw.nth hi
@@ -257,7 +287,11 @@ lemma IsSemitermVec.of_var {L' : Language} [L'.Encodable] [L'.LORDefinable]
   · rw [hx]
     exact IsSemiterm.fvar _ _
 
-lemma termSubst_bvarVec_termBShift (k : V) (ht : IsSemiterm L m t) :
+section BVarVecShift
+
+variable (k : V)
+
+lemma termSubst_bvarVec_termBShift (ht : IsSemiterm L m t) :
     termSubst L (bvarVec k (m + 1)) (termBShift L t) = termSubst L (bvarVec (k + 1) m) t := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -276,7 +310,7 @@ lemma termSubst_bvarVec_termBShift (k : V) (ht : IsSemiterm L m t) :
     rw [nth_termSubstVec hv.termBShiftVec.isUTerm hi, nth_termSubstVec hv.isUTerm hi,
       nth_termBShiftVec hv.isUTerm hi, ih i hi]
 
-lemma termBShift_termSubst_bvarVec (k : V) (ht : IsSemiterm L m t) :
+lemma termBShift_termSubst_bvarVec (ht : IsSemiterm L m t) :
     termBShift L (termSubst L (bvarVec k m) t) = termSubst L (bvarVec (k + 1) m) t := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
@@ -296,14 +330,17 @@ lemma termBShift_termSubst_bvarVec (k : V) (ht : IsSemiterm L m t) :
     simp only [nth_termBShiftVec hs.isUTerm hi, nth_termSubstVec hv.isUTerm hi]
     exact ih i hi
 
+end BVarVecShift
+
 lemma termSubst_bvarVec_zero (ht : IsSemiterm L m t) : termSubst L (bvarVec 0 m) t = t :=
   termSubst_eq_self ht fun i hi ↦ by rw [nth_bvarVec _ _ _ hi, zero_add]
 
+variable (w) in
 @[simp]
-lemma nth_qVec_zero (w : V) : (qVec L w).[0] = ^#0 := by simp [qVec]
+lemma nth_qVec_zero : (qVec L w).[0] = ^#0 := by simp [qVec]
 
-lemma qVec_eq_of_var {L' : Language} [L'.Encodable] [L'.LORDefinable]
-    (hw : IsSemitermVec L n m w) (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) :
+lemma qVec_eq_of_var (hw : IsSemitermVec L n m w)
+    (hvar : ∀ i < n, (∃ z, w.[i] = ^#z) ∨ (∃ x, w.[i] = ^&x)) :
     qVec L w = qVec L' w := by
   have h₁ : IsUTermVec L (len w) w := by rw [hw.lh]; exact hw.isUTerm
   have h₂ : IsUTermVec L' (len w) w := by rw [hw.lh]; exact (hw.of_var (L' := L') hvar).isUTerm
@@ -328,9 +365,10 @@ lemma hvar_qVec (hw : IsSemitermVec L n m w)
     · exact Or.inl ⟨z + 1, by rw [nth_qVec_succ hw.isUTerm hi', hz, termBShift_bvar]⟩
     · exact Or.inr ⟨x, by rw [nth_qVec_succ hw.isUTerm hi', hx, termBShift_fvar]⟩
 
-lemma exists_vec_shift (hw : IsSemitermVec L n m w) (k : V) :
-    ∃ v, IsSemitermVec L (n + k) (m + k) v ∧ (∀ i < k, v.[i] = ^#i) ∧
+lemma exists_vec_shift (hw : IsSemitermVec L n m w) :
+    ∀ k : V, ∃ v, IsSemitermVec L (n + k) (m + k) v ∧ (∀ i < k, v.[i] = ^#i) ∧
       ∀ j < n, v.[k + j] = termSubst L (bvarVec k m) w.[j] := by
+  intro k
   have hsub : IsSemitermVec L m (m + k) (bvarVec k m) :=
     IsSemitermVec.bvarVec (j := k) (k := m) (n := m + k) (add_comm k m).le
   have hrest : IsSemitermVec L n (m + k) (termSubstVec L n (bvarVec k m) w) :=
@@ -349,8 +387,8 @@ lemma exists_vec_shift (hw : IsSemitermVec L n m w) (k : V) :
       exact hsub.termSubst (hw.nth hj')
   · rw [hv₂ j (by rw [hl]; exact hj), nth_termSubstVec hw.isUTerm hj]
 
-lemma isSemitermVec_of_fvar (n : V) (hw : ∀ i < len w, ∃ x, w.[i] = ^&x) :
-    IsSemitermVec L (len w) n w :=
+variable (n) in
+lemma isSemitermVec_of_fvar (hw : ∀ i < len w, ∃ x, w.[i] = ^&x) : IsSemitermVec L (len w) n w :=
   IsSemitermVec.iff.mpr ⟨rfl, fun i hi ↦ by obtain ⟨x, hx⟩ := hw i hi; simp [hx]⟩
 
 lemma IsSemiterm.of_zero (ht : IsSemiterm L 0 t) : IsSemiterm L n t :=

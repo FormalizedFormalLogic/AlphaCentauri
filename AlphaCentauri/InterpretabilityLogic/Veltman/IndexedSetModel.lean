@@ -20,14 +20,14 @@ open Entailment Formula MaximalConsistentSet Logic
 
 namespace Veltman
 
-variable {α : Type*} [DecidableEq α] {L : Logic α} {Φ : Finset (Formula α)}
+variable {α : Type*} [DecidableEq α] (L : Logic α) (Φ : Finset (Formula α))
 
 /-- A maximal consistent subset of `Φ` together with a finite sequence of antecedents and
 consequents of `▷`-formulas in `Φ`, no longer than the number of `□`-formulas in the set.
 
 - [dJV90, Theorem 4.1]
 -/
-structure IndexedSet (L : Logic α) (Φ : Finset (Formula α)) where
+structure IndexedSet where
   set : MaximalConsistentSet L Φ
   seq : List (Formula α)
   isRhdOperand_of_mem_seq : ∀ A ∈ seq, IsRhdOperand Φ A
@@ -35,7 +35,7 @@ structure IndexedSet (L : Logic α) (Φ : Finset (Formula α)) where
 
 namespace IndexedSet
 
-variable {x y z w : IndexedSet L Φ}
+variable {L Φ}
 
 lemma ext {x y : IndexedSet L Φ} (h₁ : x.set = y.set) (h₂ : x.seq = y.seq) : x = y := by
   cases x; cases y; simp_all;
@@ -59,19 +59,21 @@ instance [Entailment.Cl L] [Entailment.Consistent L] : Nonempty (IndexedSet L Φ
     exact Entailment.Consistent.not_inconsistent (𝓢 := L) fun _ ↦ efq ⨀ Context.emptyPrf h;
   exact ⟨⟨Γ, [], by simp, by simp⟩⟩
 
+variable (x y : IndexedSet L Φ)
+
 /-- `y` extends `x`: the set of `y` is a successor of the set of `x`, and the sequence of `x` is an
 initial segment of the sequence of `y`. -/
-def Rel (x y : IndexedSet L Φ) : Prop := Successor x.set y.set ∧ x.seq <+: y.seq
+def Rel : Prop := Successor x.set y.set ∧ x.seq <+: y.seq
+
+variable (F : Formula α) (hF : IsRhdOperand Φ F) (Δ : MaximalConsistentSet L Φ)
 
 /-- The set `Δ` indexed by the sequence of `x`. -/
-def successor (x : IndexedSet L Φ) (Δ : MaximalConsistentSet L Φ) (h : Successor x.set Δ) :
-    IndexedSet L Φ :=
+def successor (h : Successor x.set Δ) : IndexedSet L Φ :=
   ⟨Δ, x.seq, x.isRhdOperand_of_mem_seq,
     x.length_seq_le.trans (Finset.card_le_card h.prebox_ssubset.subset)⟩
 
 /-- The set `Δ` indexed by the sequence of `x` followed by `F`. -/
-def criticalSuccessor (x : IndexedSet L Φ) (F : Formula α) (hF : IsRhdOperand Φ F)
-    (Δ : MaximalConsistentSet L Φ) (h : Successor x.set Δ) : IndexedSet L Φ :=
+def criticalSuccessor (h : Successor x.set Δ) : IndexedSet L Φ :=
   ⟨Δ, x.seq ++ [F], fun A hA ↦ by
       rcases List.mem_append.mp hA with hA | hA;
       · exact x.isRhdOperand_of_mem_seq A hA;
@@ -91,13 +93,14 @@ so is `y`, which moreover does not contain `C`.
 - [dJV90, Theorem 4.1]
 - [KO21, Theorem 5.4]
 -/
-def countermodel (L : Logic α) (Φ : Finset (Formula α)) [Nonempty (IndexedSet L Φ)] :
-    Model (IndexedSet L Φ) α where
+def countermodel [Nonempty (IndexedSet L Φ)] : Model (IndexedSet L Φ) α where
   Rel' := IndexedSet.Rel
   S' w x y := (w.Rel x ∧ w.Rel y) ∧ ∀ C, w.seq ++ [C] <+: x.seq → CriticalSuccessor C w.set x.set →
     □(∼C) ∈ x.set → w.seq ++ [C] <+: y.seq ∧ CriticalSuccessor C w.set y.set ∧ C ∉ y.set ∧
       □(∼C) ∈ y.set
   Val' x a := #a ∈ x.set
+
+variable {L Φ}
 
 namespace countermodel
 
@@ -133,9 +136,13 @@ lemma s_of_rel (h₁ : w.Rel x) (h₂ : x.Rel y) : (countermodel L Φ).S w x y :
     exact ⟨h₃.trans h₂.2, h₄.trans_successor h₂.1, h₂.1.not_mem_of_box_neg_mem h₅,
       h₂.1.box_mem_of_box_mem h₅⟩;
 
+section
+
+variable [Adequate Φ]
+
 /-- If `L` proves `C ▷ C` for every `C`, then `S w x y` holds as soon as `x` and `y` extend `w` and
 `y` is a `C`-critical successor of `w` indexed by `C` after the sequence of `w` whenever `x` is. -/
-lemma s_of_rhd_refl [Adequate Φ] (hL : ∀ {A}, L ⊢ A ▷ A) (hx : w.Rel x) (hy : w.Rel y)
+lemma s_of_rhd_refl (hL : ∀ {A}, L ⊢ A ▷ A) (hx : w.Rel x) (hy : w.Rel y)
     (h : ∀ C, w.seq ++ [C] <+: x.seq → CriticalSuccessor C w.set x.set →
       w.seq ++ [C] <+: y.seq ∧ CriticalSuccessor C w.set y.set) : (countermodel L Φ).S w x y := by
   constructor;
@@ -147,18 +154,21 @@ lemma s_of_rhd_refl [Adequate Φ] (hL : ∀ {A}, L ⊢ A ▷ A) (hx : w.Rel x) (
     obtain ⟨h₃, h₄⟩ := h C h₁ h₂;
     exact ⟨h₃, h₄, h₄.not_mem hCC, h₄.box_neg_mem hCC⟩;
 
-lemma s_refl [Adequate Φ] (hL : ∀ {A}, L ⊢ A ▷ A) (h : w.Rel x) : (countermodel L Φ).S w x x :=
+lemma s_refl (hL : ∀ {A}, L ⊢ A ▷ A) (h : w.Rel x) : (countermodel L Φ).S w x x :=
   s_of_rhd_refl hL h h fun _ h₁ h₂ ↦ ⟨h₁, h₂⟩
 
+omit [Adequate Φ] in
 instance : (countermodel L Φ).IsJ5 := ⟨s_of_rel⟩
 
-instance {𝔸 : FormulaSet α} [Adequate Φ] [Nonempty (IndexedSet (ofCLAxioms 𝔸) Φ)] :
-    (countermodel (ofCLAxioms 𝔸) Φ).IsJ1 :=
+variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (ofCLAxioms 𝔸) Φ)]
+
+instance instIsJ1IndexedSetOfCLAxiomsOfAdequate : (countermodel (ofCLAxioms 𝔸) Φ).IsJ1 :=
   ⟨s_refl ofCLAxioms.rhd_refl⟩
 
-instance {𝔸 : FormulaSet α} [Adequate Φ] [Nonempty (IndexedSet (ofCLAxioms 𝔸) Φ)] :
-    (countermodel (ofCLAxioms 𝔸) Φ).IsCL where
+instance instIsCLIndexedSetOfCLAxiomsOfAdequate : (countermodel (ofCLAxioms 𝔸) Φ).IsCL where
   rel_of_s_left h := h.1.1
+
+end
 
 variable {𝔸 : FormulaSet α} [Nonempty (IndexedSet (ofCLAxioms 𝔸) Φ)] [CLAdequate Φ]
   [(ofCLAxioms 𝔸).HasAxiomJ5]

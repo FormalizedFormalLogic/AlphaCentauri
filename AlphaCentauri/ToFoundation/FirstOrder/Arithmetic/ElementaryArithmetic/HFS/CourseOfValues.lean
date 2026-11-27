@@ -39,10 +39,10 @@ variable {V}
 
 namespace Construction
 
-variable {k : ℕ} (c : Construction V k) (v : Fin k → V)
+variable {k : ℕ} (c : Construction V k) (v : Fin k → V) (n : V)
 
 /-- The value at `n` clipped by the bound. -/
-noncomputable def clippedVal (n T : V) : V := min (c.val v n T) (c.bound v n)
+noncomputable def clippedVal (T : V) : V := min (c.val v n T) (c.bound v n)
 
 lemma bound_succ_locallyDelta0 :
     LocallyDelta0Function fun w : Fin (k + 1) → V ↦
@@ -81,18 +81,17 @@ noncomputable def recursion : PR.Recursion V k where
     (bound := fun v n ↦ Exp.exp ⟪n, c.bound v n + 1⟫) c.bound_succ_locallyDelta0
 
 /-- The table `⟪0, r 0⟫, …, ⟪n - 1, r (n - 1)⟫` of the values below `n`. -/
-noncomputable def table (n : V) : V := c.recursion.result v n
+noncomputable def table : V := c.recursion.result v n
 
 /-- The value of the recursion at `n`. -/
-noncomputable def result (n : V) : V := znth (c.table v (n + 1)) n
+noncomputable def result : V := znth (c.table v (n + 1)) n
 
 variable {v}
 
 @[simp]
 lemma table_zero : c.table v 0 = ∅ := c.recursion.result_zero v
 
-lemma table_succ (n : V) :
-    c.table v (n + 1) = insert ⟪n, c.clippedVal v n (c.table v n)⟫ (c.table v n) :=
+lemma table_succ : c.table v (n + 1) = insert ⟪n, c.clippedVal v n (c.table v n)⟫ (c.table v n) :=
   c.recursion.result_succ v n
 
 lemma table_locallyDelta0 :
@@ -103,7 +102,7 @@ private lemma table_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0
     LocallyDelta0Function fun w : Fin n → V ↦ c.table v (f w) := by
   simpa using c.table_locallyDelta0.comp_cons hf fun j ↦ LocallyDelta0Function.const (v j)
 
-lemma table_seq (n : V) : Seq (c.table v n) ∧ lh (c.table v n) = n := by
+lemma table_seq : Seq (c.table v n) ∧ lh (c.table v n) = n := by
   have hP : LocallyDelta0Pred fun n ↦ Seq (c.table v n) ∧ lh (c.table v n) = n := by
     have := (LocallyDelta0.of_definable (R := fun y : Fin 2 → V ↦ Seq (y 0) ∧ lh (y 0) = y 1)
       (by definability)).comp₂
@@ -119,23 +118,25 @@ lemma table_seq (n : V) : Seq (c.table v n) ∧ lh (c.table v n) = n := by
     rw [this]
     exact ⟨hs.seqCons _, by simp [hs, hl]⟩
 
-lemma table_succ_eq_seqCons (n : V) :
+lemma table_succ_eq_seqCons :
     c.table v (n + 1) = c.table v n ⁀' c.clippedVal v n (c.table v n) := by
   simp [table_succ, seqCons, (c.table_seq (v := v) n).2]
 
-lemma result_eq (n : V) : c.result v n = c.clippedVal v n (c.table v n) := by
+lemma result_eq : c.result v n = c.clippedVal v n (c.table v n) := by
   have := (c.table_seq (v := v) n).1.znth_seqCons_lh (x := c.clippedVal v n (c.table v n))
   rw [(c.table_seq (v := v) n).2] at this
   simpa [result, c.table_succ_eq_seqCons] using this
 
-lemma result_le_bound (n : V) : c.result v n ≤ c.bound v n := by
+lemma result_le_bound : c.result v n ≤ c.bound v n := by
   simp [c.result_eq, clippedVal]
 
-lemma result_eq_val {n : V} (h : c.val v n (c.table v n) ≤ c.bound v n) :
+variable {n}
+
+lemma result_eq_val (h : c.val v n (c.table v n) ≤ c.bound v n) :
     c.result v n = c.val v n (c.table v n) := by
   simpa [c.result_eq, clippedVal] using h
 
-lemma znth_table {m n : V} (hm : m < n) : znth (c.table v n) m = c.result v m := by
+lemma znth_table {m : V} (hm : m < n) : znth (c.table v n) m = c.result v m := by
   have hP : LocallyDelta0Pred fun n ↦ ∀ m < n, znth (c.table v n) m = c.result v m := by
     have hR : LocallyDelta0 fun y : Fin 2 → V ↦ znth (c.table v (y 1)) (y 0) =
         znth (c.table v (y 0 + 1)) (y 0) := by

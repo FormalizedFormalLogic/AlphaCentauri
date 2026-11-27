@@ -32,13 +32,18 @@ lemma models_infinitudeOfPrimes_iff [V↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻] :
     V↓[ℒₒᵣ] ⊧ infinitudeOfPrimes ↔ ∀ x : V, ∃ p, x < p ∧ IsPrime p := by
   simp [models_iff, infinitudeOfPrimes]
 
+section
+variable [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] (x : V)
+
 /-- - [HP98, Theorem I.1.58(2)] -/
-lemma ElementaryArithmetic.exists_prime_gt [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] (x : V) : ∃ p, x < p ∧ IsPrime p := by
+lemma ElementaryArithmetic.exists_prime_gt : ∃ p, x < p ∧ IsPrime p := by
   obtain ⟨p, hp, hpn⟩ := exists_isPrime_dvd (n := factorial x + 1) (by simp)
   refine ⟨p, ?_, hp⟩
   by_contra! hle
   exact absurd (le_of_dvd one_pos (dvd_of_dvd_add (dvd_factorial (zero_lt_one.trans hp.1) hle) hpn))
     (not_le.mpr hp.1)
+
+end
 
 /-- - [HP98, Remark I.1.59(3)] -/
 theorem provable_infinitudeOfPrimes_ElementaryArithmetic : 𝗘𝗔 ⊢ infinitudeOfPrimes :=
@@ -71,9 +76,14 @@ def Image (i x z : V) : Prop :=
       (t = i ∧ (∀ s < a, i < s → ¬T + 1 ∣ A + s) ∧
         ∃ p ≤ T + 1, IsPrimePower p (T + 1) ∧ z = x + l * ((p - 1) / 2) + 4 * a * ‖a‖))
 
+section
+variable (X z : V)
+
 /-- The relation sending `x + l * i`, for `x < l` and `i < a`, to the images of `x` in the block
 of `A + i`. -/
-def Code (X z : V) : Prop := ∃ i < a, ∃ x < l, X = x + l * i ∧ Image a A l i x z
+def Code : Prop := ∃ i < a, ∃ x < l, X = x + l * i ∧ Image a A l i x z
+
+end
 
 variable {a A l}
 

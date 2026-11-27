@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 
 /-!
@@ -75,13 +76,18 @@ and of every large enough level.
 
 namespace Bounding
 
-variable (ℬ) in
+variable {φ : Semiformula L ξ n}
+
+variable (ℬ φ)
+
 /-- `φ` is equivalent, in every nonempty structure, to a `ℬ`-prenex formula of either polarity and
 of every large enough level. -/
-private def HasPrenexNormalForm (φ : Semiformula L ξ n) : Prop :=
+private def HasPrenexNormalForm : Prop :=
   ∃ s, ∀ Γ s', s ≤ s' → ∃ ψ : ℬ.Prenex Γ s' ξ n,
     ∀ (M : Type u) [Tarski.Structure L M] [Nonempty M] (e : Fin n → M) (f : ξ → M),
       Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ.val
+
+variable {ℬ φ}
 
 namespace HasPrenexNormalForm
 
@@ -110,17 +116,21 @@ private lemma neg (h : HasPrenexNormalForm.{u} ℬ φ) : HasPrenexNormalForm.{u}
   intro M _ _ e f
   simp [H M e f]
 
-private lemma all {φ : Semiformula L ξ (n + 1)} (h : HasPrenexNormalForm.{u} ℬ φ) :
-    HasPrenexNormalForm.{u} ℬ (∀¹ φ) := by
+section
+
+variable {φ : Semiformula L ξ (n + 1)}
+
+private lemma all (h : HasPrenexNormalForm.{u} ℬ φ) : HasPrenexNormalForm.{u} ℬ (∀¹ φ) := by
   obtain ⟨s, hs⟩ := h
   obtain ⟨ψ, H⟩ := hs 𝚺 s le_rfl
   exact (of_prenex ψ.pi).of_iff fun M _ _ e f ↦ by simp [H M, -Prenex.val_piInv]
 
-private lemma exs {φ : Semiformula L ξ (n + 1)} (h : HasPrenexNormalForm.{u} ℬ φ) :
-    HasPrenexNormalForm.{u} ℬ (∃¹ φ) := by
+private lemma exs (h : HasPrenexNormalForm.{u} ℬ φ) : HasPrenexNormalForm.{u} ℬ (∃¹ φ) := by
   obtain ⟨s, hs⟩ := h
   obtain ⟨ψ, H⟩ := hs 𝚷 s le_rfl
   exact (of_prenex ψ.sigma).of_iff fun M _ _ e f ↦ by simp [H M, -Prenex.val_sigmaInv]
+
+end
 
 private lemma and_of_prenex : {Γ₁ Γ₂ : Polarity} → {s₁ s₂ n : ℕ} → (ψ₁ : ℬ.Prenex Γ₁ s₁ ξ n) →
     (ψ₂ : ℬ.Prenex Γ₂ s₂ ξ n) → HasPrenexNormalForm.{u} ℬ (ψ₁.val ⋏ ψ₂.val)
@@ -148,7 +158,9 @@ private lemma and {φ₁ φ₂ : Semiformula L ξ n} (h₁ : HasPrenexNormalForm
 
 end HasPrenexNormalForm
 
-private lemma hasPrenexNormalForm (φ : Semiformula L ξ n) : HasPrenexNormalForm.{u} ℬ φ := by
+variable (φ)
+
+private lemma hasPrenexNormalForm : HasPrenexNormalForm.{u} ℬ φ := by
   induction φ using Semiformula.rec' with
   | hverum => exact .of_closure (.verum _)
   | hfalsum => exact .of_closure (.falsum _)
@@ -159,11 +171,12 @@ private lemma hasPrenexNormalForm (φ : Semiformula L ξ n) : HasPrenexNormalFor
   | hall _ ih => exact ih.all
   | hexs _ ih => exact ih.exs
 
-variable (ℬ) in
+variable (ℬ)
+
 /-- Every formula is equivalent, in every nonempty structure, to a `ℬ`-prenex formula of either
 polarity and of every large enough level.
 - [HP98, p. 8] -/
-theorem exists_prenexHierarchy_eval_iff (φ : Semiformula L ξ n) :
+theorem exists_prenexHierarchy_eval_iff :
     ∃ s, ∀ Γ s', s ≤ s' → ∃ ψ : ℬ.Prenex Γ s' ξ n,
       ∀ (M : Type u) [Tarski.Structure L M] [Nonempty M] (e : Fin n → M) (f : ξ → M),
         Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ.val :=
@@ -213,22 +226,24 @@ lemma induction_open {P : (n : ℕ) → Semiformula L ξ n → Prop}
     obtain rfl := Set.mem_singleton_iff.mp hR
     simpa [Semiformula.Operator.lt_def] using hBex _ t _ hp ih
 
-variable {φ : Semiformula L ξ (n + 1)}
+variable {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)}
 
-lemma arithmetic_ball {t : Semiterm L ξ (n + 1)} (ht : t.Positive) (h : ℬ[<, L].Closure φ) :
+lemma arithmetic_ball (ht : t.Positive) (h : ℬ[<, L].Closure φ) :
     ℬ[<, L].Closure (∀¹[“x. x < !!t”] φ) :=
   ball (R := Semiformula.Operator.LT.lt) (by rfl) ht h
 
-lemma arithmetic_bexs {t : Semiterm L ξ (n + 1)} (ht : t.Positive) (h : ℬ[<, L].Closure φ) :
+lemma arithmetic_bexs (ht : t.Positive) (h : ℬ[<, L].Closure φ) :
     ℬ[<, L].Closure (∃¹[“x. x < !!t”] φ) :=
   bexs (R := Semiformula.Operator.LT.lt) (by rfl) ht h
 
+variable {t : Semiterm L ξ n}
+
 @[simp]
-lemma ballLT_iff {t : Semiterm L ξ n} : ℬ[<, L].Closure (φ.ballLT t) ↔ ℬ[<, L].Closure φ := by
+lemma ballLT_iff : ℬ[<, L].Closure (φ.ballLT t) ↔ ℬ[<, L].Closure φ := by
   simp [← Bounding.Hierarchy.zero_iff_bounded (Γ := 𝚺)]
 
 @[simp]
-lemma bexsLT_iff {t : Semiterm L ξ n} : ℬ[<, L].Closure (φ.bexsLT t) ↔ ℬ[<, L].Closure φ := by
+lemma bexsLT_iff : ℬ[<, L].Closure (φ.bexsLT t) ↔ ℬ[<, L].Closure φ := by
   simp [← Bounding.Hierarchy.zero_iff_bounded (Γ := 𝚺)]
 
 @[grind →]
@@ -288,13 +303,15 @@ lemma univCl_iff {φ : Proposition L} :
     ℬ[<, L].Hierarchy 𝚷 (s + 1) (Semiformula.univCl φ) ↔ ℬ[<, L].Hierarchy 𝚷 (s + 1) φ := by
   simp [Semiformula.univCl, Semiformula.univCl']
 
-lemma of_mem_eqAxiom {σ : ArithmeticSentence} (hσ : σ ∈ 𝗘𝗤 ℒₒᵣ) : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ := by
+variable {σ : ArithmeticSentence}
+
+lemma of_mem_eqAxiom (hσ : σ ∈ 𝗘𝗤 ℒₒᵣ) : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ := by
   cases hσ with
   | funcExt f => simp [Theory.Eq.funcExt]
   | relExt r => simp [Theory.Eq.relExt]
   | _ => simp
 
-lemma of_mem_peanoMinus {σ : ArithmeticSentence} (hσ : σ ∈ 𝗣𝗔⁻) : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ := by
+lemma of_mem_peanoMinus (hσ : σ ∈ 𝗣𝗔⁻) : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 σ := by
   cases hσ with
   | equal φ hφ => exact of_mem_eqAxiom hφ
   | addEqOfLt =>
@@ -331,15 +348,20 @@ lemma neg : ∀ {Γ n} {φ : Semiformula L ξ n}, ℬ[<, L].PrenexBlock Γ φ �
 lemma neg_iff : ℬ[<, L].PrenexBlock Γ.alt (∼φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
   ⟨fun h ↦ by simpa using h.neg, fun h ↦ by simpa using h.neg⟩
 
-lemma rew {φ : Semiformula L ξ₁ n₁} (ω : Rew L ξ₁ n₁ ξ₂ n₂)
+section
+
+variable {φ : Semiformula L ξ₁ n₁}
+
+lemma rew (ω : Rew L ξ₁ n₁ ξ₂ n₂)
     (h : ℬ[<, L].PrenexBlock Γ φ) : ℬ[<, L].PrenexBlock Γ (ω ▹ φ) := by
   induction h generalizing n₂ with
   | bounded h => exact bounded (h.rew ω)
   | exs h ih => simpa using (ih ω.q).exs
   | all h ih => simpa using (ih ω.q).all
 
-lemma of_rew {ψ : Semiformula L ξ₂ n₂} (h : ℬ[<, L].PrenexBlock Γ ψ)
-    {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} (e : ω ▹ φ = ψ) :
+variable {ω : Rew L ξ₁ n₁ ξ₂ n₂}
+
+lemma of_rew {ψ : Semiformula L ξ₂ n₂} (h : ℬ[<, L].PrenexBlock Γ ψ) (e : ω ▹ φ = ψ) :
     ℬ[<, L].PrenexBlock Γ φ := by
   induction h generalizing n₁ with
   | bounded h => exact bounded (by rw [← e] at h; simpa using h)
@@ -351,9 +373,10 @@ lemma of_rew {ψ : Semiformula L ξ₂ n₂} (h : ℬ[<, L].PrenexBlock Γ ψ)
     exact all (ih hφ')
 
 @[simp, grind =]
-lemma rew_iff {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
-    ℬ[<, L].PrenexBlock Γ (ω ▹ φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
+lemma rew_iff : ℬ[<, L].PrenexBlock Γ (ω ▹ φ) ↔ ℬ[<, L].PrenexBlock Γ φ :=
   ⟨fun h ↦ h.of_rew rfl, rew ω⟩
+
+end
 
 lemma of_deltaZero (h : ℬ[<, L].Hierarchy 𝚺 0 φ) :
     ℬ[<, L].PrenexBlock Γ φ := bounded (Hierarchy.zero_iff_bounded.mp h)
@@ -397,8 +420,10 @@ lemma PrenexHierarchy.prenexBlock (h : ℬ[<, L].PrenexHierarchy Γ 1 φ) :
   · obtain ⟨ψ, hψ, rfl⟩ := PrenexHierarchy.pi_succ_iff.mp h
     exact .all (.bounded (PrenexHierarchy.zero_iff_bounded.mp hψ))
 
+variable (ℬ)
+
 /-- `φ` is a prenex $\Sigma_m$ or $\Pi_m$ formula for some `m ≤ s`. -/
-abbrev PrenexHierarchyLE (ℬ : Bounding L) (s : ℕ) (φ : Semiformula L ξ n) : Prop :=
+abbrev PrenexHierarchyLE (s : ℕ) (φ : Semiformula L ξ n) : Prop :=
   ∃ m ≤ s, ∃ Γ, ℬ.PrenexHierarchy Γ m φ
 
 end Bounding

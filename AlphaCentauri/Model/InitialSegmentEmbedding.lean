@@ -22,25 +22,34 @@ variable {M N : Type*} [ORingStructure M] [ORingStructure N] {n l : ℕ} {b : N}
 
 /-! ## Tuples with the same $\Pi_n$ properties -/
 
+variable (n b)
+
 /-- Every $\Pi_n$ formula with a witness in `M` for the parameters `u` has a witness in `N` below
 `b` for the parameters `v`.
 - [Kay91, Theorem 12.3] -/
-def PiWitnessBelow (n : ℕ) (b : N) (u : Fin l → M) (v : Fin l → N) : Prop :=
+def PiWitnessBelow (u : Fin l → M) (v : Fin l → N) : Prop :=
   ∀ θ : 𝚷ᴬ_[n].Semisentence (l + 1),
     (∃ x : M, M ⊧/(x :> u) θ.val) → ∃ x < b, N ⊧/(x :> v) θ.val
 
+variable {n b}
+
+variable {Γ : Polarity} (φ : ArithmeticSemisentence (l + 2))
+
 /-- `φ` with a dummy variable inserted after the first two. -/
-private def insertThird (φ : ArithmeticSemisentence (l + 2)) : ArithmeticSemisentence (l + 3) :=
+private def insertThird : ArithmeticSemisentence (l + 3) :=
   φ ⇜ (#0 :> #1 :> fun i ↦ #i.succ.succ.succ)
 
+variable {φ} in
 @[simp]
-private lemma hierarchy_insertThird_iff {Γ : Polarity} {φ : ArithmeticSemisentence (l + 2)} :
+private lemma hierarchy_insertThird_iff :
     ℬ[<, ℒₒᵣ].Hierarchy Γ n (insertThird φ) ↔ ℬ[<, ℒₒᵣ].Hierarchy Γ n φ := by
   simp [insertThird]
 
 @[simp]
-private lemma eval_insertThird (φ : ArithmeticSemisentence (l + 2)) (z x y : M) (u : Fin l → M) :
-    M ⊧/(z :> x :> y :> u) (insertThird φ) ↔ M ⊧/(z :> x :> u) φ := by
+private lemma eval_insertThird :
+    ∀ (z x y : M) (u : Fin l → M),
+      M ⊧/(z :> x :> y :> u) (insertThird φ) ↔ M ⊧/(z :> x :> u) φ := by
+  intro z x y u
   have h : Semiterm.val (z :> x :> y :> u) Empty.elim ∘ (#0 :> #1 :> fun i ↦ #i.succ.succ.succ :
       Fin (l + 2) → ClosedSemiterm ℒₒᵣ (l + 3)) = z :> x :> u := by
     funext j
@@ -49,9 +58,12 @@ private lemma eval_insertThird (φ : ArithmeticSemisentence (l + 2)) (z x y : M)
     | succ j => cases j using Fin.cases <;> simp
   rw [insertThird, Semiformula.eval_substs, h]
 
-private lemma prenexFormulaSatisfied_adjoin_iff [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {Γ : Polarity}
-    (ψ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty (l + 2)) (z x : M) (u : Fin l → M) :
-    PrenexFormulaSatisfied Γ n (z ∷ x ∷ matrixToVec u) ⌜ψ.val⌝ ↔ M ⊧/(z :> x :> u) ψ.val := by
+private lemma prenexFormulaSatisfied_adjoin_iff [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
+    (ψ : ℬ[<, ℒₒᵣ].Prenex Γ n Empty (l + 2)) :
+    ∀ (z x : M) (u : Fin l → M),
+      PrenexFormulaSatisfied Γ n (z ∷ x ∷ matrixToVec u) ⌜ψ.val⌝ ↔
+        M ⊧/(z :> x :> u) ψ.val := by
+  intro z x u
   simpa using PrenexFormulaSatisfied.quote_iff ψ (z :> x :> u)
 
 namespace PiWitnessBelow
@@ -179,7 +191,8 @@ end PiWitnessBelow
 
 /-! ## The embedding -/
 
-variable (M n b) in
+variable (M n b)
+
 /-- A tuple of `M` and a tuple of `N` such that every $\Pi_n$ formula with a witness in `M` for the
 former has a witness in `N` below `b` for the latter. -/
 structure PartialInitialEmbedding where
@@ -187,6 +200,8 @@ structure PartialInitialEmbedding where
   source : Fin length → M
   target : Fin length → N
   piWitnessBelow : PiWitnessBelow n b source target
+
+variable {M n b}
 
 namespace PartialInitialEmbedding
 
@@ -287,12 +302,14 @@ private lemma exists_piWitnessBelow_comp (hSSy : standardSystem M = standardSyst
   · intro l u
     exact hG fun i ↦ hf (u i)
 
+variable (n)
+
 /-- Let `M` and `N` be countable nonstandard models of `𝗣𝗔` with the same standard system. If every
 $\Pi_n$ formula satisfiable in `M` with the parameter `c` is satisfiable in `N`, with the parameter
 `a`, below `b`, then `M` embeds onto a $\Sigma_n$-elementary initial segment of `N` which does not
 contain `b`, with `c` sent to `a`.
 - [Kay91, Theorem 12.3] -/
-theorem exists_initialSegmentEmbedding (n : ℕ) (a b : N) (c : M)
+theorem exists_initialSegmentEmbedding (a b : N) (c : M)
     (hSSy : standardSystem M = standardSystem N) (h : ∀ θ : 𝚷ᴬ_[n].Semisentence 2,
       (∃ x : M, M ⊧/![x, c] θ.val) → ∃ x < b, N ⊧/![x, a] θ.val) :
     ∃ ι : M ↪ₛ[ℒₒᵣ] N, (∀ x y, y < ι x → y ∈ Set.range ι) ∧
@@ -357,10 +374,12 @@ theorem exists_initialSegmentEmbedding (n : ℕ) (a b : N) (c : M)
     obtain rfl : y = f x := by simpa using h₁
     exact lt_irrefl _ hy
 
+variable (a : M)
+
 /-- Friedman's theorem: every countable nonstandard model of `𝗣𝗔` embeds onto a proper
 $\Sigma_n$-elementary initial segment of itself containing a given element.
 - [Kay91, Theorem 12.4] -/
-theorem exists_selfEmbedding_onto_properInitialSegment (n : ℕ) (a : M) :
+theorem exists_selfEmbedding_onto_properInitialSegment :
     ∃ ι : M ↪ₛ[ℒₒᵣ] M, (∀ x y, y < ι x → y ∈ Set.range ι) ∧ ¬Function.Surjective ι ∧
       IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) ι ∧ a ∈ Set.range ι := by
   have hQ := setOf_prenexHierarchy_mem_standardSystem 𝚷 n 2 (m := n + 1)
@@ -399,7 +418,7 @@ theorem exists_selfEmbedding_onto_properInitialSegment (n : ℕ) (a : M) :
 /-- Friedman's theorem for cuts: every countable nonstandard model of `𝗣𝗔` is isomorphic to a proper
 closed cut of itself which contains a given element and is a $\Sigma_n$-elementary substructure.
 - [Kay91, Theorem 12.4] -/
-theorem exists_proper_closedCut_iso (n : ℕ) (a : M) : ∃ I : ClosedCut M, I.Proper ∧ a ∈ I.carrier ∧
+theorem exists_proper_closedCut_iso : ∃ I : ClosedCut M, I.Proper ∧ a ∈ I.carrier ∧
     IsElementary (fun {_} φ ↦ ℬ[<, ℒₒᵣ].Hierarchy 𝚺 n φ) I.endExtension.emb ∧
     Nonempty (M ≃ₛ[ℒₒᵣ] I.carrier) := by
   obtain ⟨ι, hι, hsurj, hel, ha⟩ := exists_selfEmbedding_onto_properInitialSegment n a

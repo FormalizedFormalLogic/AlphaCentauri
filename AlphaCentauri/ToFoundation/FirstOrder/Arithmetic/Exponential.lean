@@ -1,5 +1,6 @@
 module
 
+public import AlphaCentauri.Init
 public import Foundation.FirstOrder.Arithmetic.EA.Basic
 public import Foundation.FirstOrder.Arithmetic.Omega1.Nuon
 
@@ -51,15 +52,21 @@ lemma add_mul_eq_add_mul_iff (hu : u < a) (hu' : u' < a) :
 lemma bexp_succ (h : x + 1 < ‖b‖) : bexp b (x + 1) = 2 * bexp b x :=
   bexp_eq_of_exp h (exp_bexp_of_lt (lt_of_le_of_lt le_self_add h)).succ
 
-lemma fbit_zero_eq_mod_two (x : V) : fbit x 0 = x % 2 := by
+section
+
+variable (x : V)
+
+lemma fbit_zero_eq_mod_two : fbit x 0 = x % 2 := by
   rcases (Arithmetic.zero_le x).eq_or_lt with rfl | hx
   · simp
   · simp [fbit, bexp_pos_zero hx]
 
-lemma fbit_succ_eq_fbit_div_two (x i : V) : fbit x (i + 1) = fbit (x / 2) i := by
+lemma fbit_succ_eq_fbit_div_two (i : V) : fbit x (i + 1) = fbit (x / 2) i := by
   rcases mod_two x with h | h <;>
   · conv_lhs => rw [← div_add_mod x 2, h]
     simp
+
+end
 
 lemma fbit_ext (h : ∀ i, fbit x i = fbit y i) : x = y := by
   have key : ∀ z, z ≤ x + y → ∀ u ≤ z, ∀ w ≤ z, (∀ i ≤ x + y, fbit u i = fbit w i) → u = w := by
@@ -162,7 +169,11 @@ section
 
 variable [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₀ ∪ 𝝮₁]
 
-private lemma mod_mul_eq_mod_add (S : V) (hp : 0 < p) (hβ : 0 < β) :
+section
+
+variable (S : V)
+
+private lemma mod_mul_eq_mod_add (hp : 0 < p) (hβ : 0 < β) :
     S % (p * β) = S % p + (S / p % β) * p := by
   have e₁ : p * (S / p) + S % p = S := div_add_mod S p
   have e₂ : β * (S / p / β) + S / p % β = S / p := div_add_mod (S / p) β
@@ -182,9 +193,11 @@ private lemma mod_mul_eq_mod_add (S : V) (hp : 0 < p) (hβ : 0 < β) :
     _           = (S / p % β) * p + S % p := mod_mul_add_of_lt _ _ h₂
     _           = S % p + (S / p % β) * p := add_comm _ _
 
-private lemma mod_add_div_mul_eq (S q : V) : S % q + S / q * q = S := by
+private lemma mod_add_div_mul_eq (q : V) : S % q + S / q * q = S := by
   rw [mul_comm (S / q) q, add_comm]
   exact div_add_mod S q
+
+end
 
 private lemma bexp_succ_mul_length (h : (k + 1) * ‖a‖ < ‖b‖) :
     bexp b ((k + 1) * ‖a‖) = bexp b (k * ‖a‖) * (a ⨳ 1) := by
@@ -325,6 +338,8 @@ local notation S "{" L "}[" i "]" => Nuon.ext L S i
 
 namespace Power
 
+variable {B L S x k y : V}
+
 lemma one_lt_sq_smash (hB : 0 < B) : (1 : V) < (B ⨳ B) ^ 2 := by
   have hB1 : (1 : V) ≤ ‖B‖ := pos_iff_one_le.mp (length_pos_iff.mpr hB)
   have h₁ : (1 : V) < B ⨳ B := lt_smash_iff.mpr (by simpa using one_le_mul hB1 hB1)
@@ -335,8 +350,12 @@ lemma one_lt_sq_smash (hB : 0 < B) : (1 : V) < (B ⨳ B) ^ 2 := by
 lemma ext_one_zero (hB : 0 < B) : (1 : V){B}[0] = 1 :=
   Nuon.ext_zero_eq_self_of_le (by simpa using pos_iff_one_le.mp (length_pos_iff.mpr hB))
 
+variable (L S x k)
+
 /-- The blocks of `S` of width `‖L‖` list the powers $x^0, \dots, x^k$. -/
-def IsSeq (L S x k : V) : Prop := S{L}[0] = 1 ∧ ∀ i < k, S{L}[i + 1] = S{L}[i] * x
+def IsSeq : Prop := S{L}[0] = 1 ∧ ∀ i < k, S{L}[i + 1] = S{L}[i] * x
+
+variable {L S x k}
 
 def isSeqDef : 𝚺ᴬ₀.Semisentence 4 := .mkSigma
   “L S x k.
@@ -404,18 +423,22 @@ lemma exists_isSeq (hB : 0 < B) (hx : 0 < x) (hk : k * ‖x‖ < ‖B‖) :
       · rwa [hlast]
   exact key k le_rfl
 
+variable (B x k y)
+
 /-- `y` is $x^k$, as listed by a sequence with blocks of width `‖B‖`. -/
-def IsPow (B x k y : V) : Prop := ∃ S < (B ⨳ B) ^ 2, IsSeq B S x k ∧ S{B}[k] = y
+def IsPow : Prop := ∃ S < (B ⨳ B) ^ 2, IsSeq B S x k ∧ S{B}[k] = y
+
+lemma definable_isPow : 𝚺ᴬ₀.DefinableRel₃ (IsPow B) := by
+  have := definable_isSeq (V := V)
+  unfold IsPow
+  definability
+
+variable {B x k y}
 
 lemma IsPow.unique {y' : V} (h : IsPow B x k y) (h' : IsPow B x k y') : y = y' := by
   obtain ⟨S, -, H, rfl⟩ := h
   obtain ⟨S', -, H', rfl⟩ := h'
   exact H.ext_eq H' k le_rfl
-
-lemma definable_isPow (B : V) : 𝚺ᴬ₀.DefinableRel₃ (IsPow B) := by
-  have := definable_isSeq (V := V)
-  unfold IsPow
-  definability
 
 lemma IsPow.lt (h : IsPow B x k y) : y < B ⨳ 1 := by
   obtain ⟨S, -, -, rfl⟩ := h
@@ -425,9 +448,21 @@ end Power
 
 open Power
 
+variable {B x k y : V}
+
+variable (B x k)
+
 open Classical in
 /-- $x^k$, computed with blocks of width `‖B‖`; it is $0$ if no such sequence exists. -/
-def bpow (B x k : V) : V := if h : ∃ y, IsPow B x k y then h.choose else 0
+def bpow : V := if h : ∃ y, IsPow B x k y then h.choose else 0
+
+lemma bpow_lt : bpow B x k < B ⨳ 1 := by
+  unfold bpow
+  split_ifs with h
+  · exact h.choose_spec.lt
+  · exact smash_pos B 1
+
+variable {B x k}
 
 lemma Power.IsPow.bpow_eq (h : IsPow B x k y) : bpow B x k = y := by
   unfold bpow
@@ -460,19 +495,17 @@ lemma bpow_eq_iff : y = bpow B x k ↔ IsPow B x k y ∨ ((¬∃ y' < B ⨳ 1, I
         exact absurd ⟨y, hy.lt, hy⟩ h
       · rfl
 
-instance (B : V) : 𝚺ᴬ₀.DefinableFunction₂ (bpow B) := by
+variable (B)
+
+instance : 𝚺ᴬ₀.DefinableFunction₂ (bpow B) := by
   have := definable_isPow B
   simp only [Bounding.HierarchySymbol.DefinableFunction₂,
     Bounding.HierarchySymbol.DefinableFunction, bpow_eq_iff]
   definability
 
-lemma bpow_lt (B x k : V) : bpow B x k < B ⨳ 1 := by
-  unfold bpow
-  split_ifs with h
-  · exact h.choose_spec.lt
-  · exact smash_pos B 1
+instance : Bounded₂ (bpow B) := ⟨&(B ⨳ 1), fun _ ↦ by simpa using (bpow_lt B _ _).le⟩
 
-instance (B : V) : Bounded₂ (bpow B) := ⟨&(B ⨳ 1), fun _ ↦ by simpa using (bpow_lt B _ _).le⟩
+variable {B}
 
 lemma length_bpow_le (hB : 0 < B) (hx : 0 < x) (hk : k * ‖x‖ < ‖B‖) :
     ‖bpow B x k‖ ≤ k * ‖x‖ + 1 := by
@@ -480,7 +513,8 @@ lemma length_bpow_le (hB : 0 < B) (hx : 0 < x) (hk : k * ‖x‖ < ‖B‖) :
   rwa [Power.IsPow.bpow_eq (⟨S, hS, H, rfl⟩ : IsPow B x k (S{B}[k]))]
 
 @[simp]
-lemma bpow_zero (hB : 0 < B) (x : V) : bpow B x 0 = 1 := by
+lemma bpow_zero (hB : 0 < B) : ∀ x : V, bpow B x 0 = 1 := by
+  intro x
   apply Power.IsPow.bpow_eq
   use 1
   and_intros

@@ -33,34 +33,34 @@ namespace WeakPigeonhole
 
 section tree
 
-variable (C : V → V → V → Prop) (a : V)
+variable (C : V → V → V → Prop) (a d s c τ e : V)
 
 /-- The blocks of `s` of width `‖a‖` trace a path of length `d` from `c` along the bits of `τ`,
 lowest bit first, each step going from a node `e` to a node `x` with `C β e x` for the current bit
 `β`.
 - [PWW88, proof of Theorem 1] -/
-def IsPath (d s c τ : V) : Prop :=
+def IsPath : Prop :=
   Nuon.ext a s 0 = c ∧
     ∀ i < d, Nuon.ext a s (i + 1) < a ∧ C (fbit τ i) (Nuon.ext a s i) (Nuon.ext a s (i + 1))
 
 /-- The path of length `d` from `c` along `τ` ends at `e`: $H^d_c(\tau) = e$.
 - [PWW88, proof of Theorem 1] -/
-def IsLeaf (d c τ e : V) : Prop :=
+def IsLeaf : Prop :=
   ∃ s < (2 * a) ⨳ a, IsPath C a d s c τ ∧ Nuon.ext a s d = e
 
-variable {C a}
+variable {C a d s c τ e}
 
 lemma definable_isLeaf (hC : 𝚺ᴬ₀.DefinableRel₃ C) : 𝚺ᴬ₀.DefinableRel₄ (IsLeaf C a) := by
   unfold IsLeaf IsPath
   definability
 
-lemma IsPath.ext_lt {d s c τ i : V} (hc : c < a) (h : IsPath C a d s c τ) (hi : i ≤ d) :
+lemma IsPath.ext_lt {i : V} (hc : c < a) (h : IsPath C a d s c τ) (hi : i ≤ d) :
     Nuon.ext a s i < a := by
   rcases zero_or_succ i with rfl | ⟨j, rfl⟩
   · rwa [h.1]
   · exact (h.2 j (succ_le_iff_lt.mp hi)).1
 
-lemma IsPath.ext_eq {d s s' c τ τ' : V} (hc : c < a)
+lemma IsPath.ext_eq {s' τ' : V} (hc : c < a)
     (hC : ∀ i < d, ∀ e < a, ∀ x < a, ∀ x' < a, C (fbit τ i) e x → C (fbit τ' i) e x' → x = x')
     (h : IsPath C a d s c τ) (h' : IsPath C a d s' c τ') :
     ∀ i ≤ d, Nuon.ext a s i = Nuon.ext a s' i := by
@@ -76,7 +76,8 @@ lemma IsPath.ext_eq {d s s' c τ τ' : V} (hc : c < a)
     rw [← IH hid.le] at hch'
     exact hC i hid _ (h.ext_lt hc hid.le) _ hlt _ hlt' hch hch'
 
-lemma isLeaf_zero {e : V} (he : e < a) (τ : V) : IsLeaf C a 0 e τ e := by
+lemma isLeaf_zero (he : e < a) : ∀ τ : V, IsLeaf C a 0 e τ e := by
+  intro τ
   have hext : Nuon.ext a e 0 = e := Nuon.ext_zero_eq_self_of_le (length_monotone he.le)
   use e
   and_intros
@@ -88,7 +89,7 @@ lemma isLeaf_zero {e : V} (he : e < a) (τ : V) : IsLeaf C a 0 e τ e := by
     simp at hi
   · exact hext
 
-lemma IsLeaf.cons {d c c' τ β e : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c < a) (hc' : c' < a)
+lemma IsLeaf.cons {c' β : V} (ha : 0 < a) (hd : d < ‖a‖) (hc : c < a) (hc' : c' < a)
     (hβ : β < 2) (hch : C β c c') (h : IsLeaf C a d c' τ e) :
     IsLeaf C a (d + 1) c (2 * τ + β) e := by
   obtain ⟨s', -, hs', rfl⟩ := h
@@ -151,10 +152,12 @@ lemma definable_isChild (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableR
 
 section injective
 
+variable {e : V}
+
 variable (hinj : ∀ x < a * a, ∀ x' < a * a, ∀ y < a, R x y → R x' y → x = x')
 include hinj
 
-lemma IsChild.unique {β e x x' : V} (he : e < a) (hx : x < a) (hx' : x' < a)
+lemma IsChild.unique {β x x' : V} (he : e < a) (hx : x < a) (hx' : x' < a)
     (h : IsChild R a β e x) (h' : IsChild R a β e x') : x = x' := by
   rcases h with ⟨rfl, w, hw, hR⟩ | ⟨rfl, w, hw, hR⟩ <;>
     rcases h' with ⟨h0, w', hw', hR'⟩ | ⟨h1, w', hw', hR'⟩
@@ -165,7 +168,7 @@ lemma IsChild.unique {β e x x' : V} (he : e < a) (hx : x < a) (hx' : x' < a)
   · exact ((add_mul_eq_add_mul_iff hw hw').mp <|
       hinj _ (add_mul_lt_mul_of_lt hw hx) _ (add_mul_lt_mul_of_lt hw' hx') e he hR hR').2
 
-lemma IsLeaf.unique {d c τ e e' : V} (hc : c < a) (h : IsLeaf (IsChild R a) a d c τ e)
+lemma IsLeaf.unique {d c τ e' : V} (hc : c < a) (h : IsLeaf (IsChild R a) a d c τ e)
     (h' : IsLeaf (IsChild R a) a d c τ e') : e = e' := by
   obtain ⟨s, -, hs, rfl⟩ := h
   obtain ⟨s', -, hs', rfl⟩ := h'
@@ -248,11 +251,13 @@ lemma definable_diagonal (hR : 𝚺ᴬ₀.DefinableRel R) :
 
 end WeakPigeonhole
 
+variable {R : V → V → Prop} {a : V}
+
 open WeakPigeonhole in
 /-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
 of $a^2$ into $a$, for $a > 1$.
 - [PWW88, Theorem 1] -/
-theorem weakPigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {a : V} (ha : 1 < a)
+theorem weakPigeonhole (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 1 < a)
     (total : ∀ x < a * a, ∃ y < a, R x y) :
     ∃ x < a * a, ∃ x' < a * a, ∃ y < a, x ≠ x' ∧ R x y ∧ R x' y := by
   by_contra! hne
@@ -286,8 +291,6 @@ theorem weakPigeonhole {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {
   · exact h hl
 
 namespace WeakPigeonhole
-
-variable {R : V → V → Prop} {a : V}
 
 /-- `R` sends `x + a * β` to `e`: in the tree of an injection of `2 * a` into `a`, `x` is the child
 of `e` along the bit `β`. -/
@@ -338,7 +341,7 @@ open WeakPigeonhole in
 /-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
 of $2a$ into $a$, for $a > 0$.
 - [PWW88, Corollary 2] -/
-theorem weakPigeonhole_two_mul {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {a : V} (ha : 0 < a)
+theorem weakPigeonhole_two_mul (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a)
     (total : ∀ x < 2 * a, ∃ y < a, R x y) :
     ∃ x < 2 * a, ∃ x' < 2 * a, ∃ y < a, x ≠ x' ∧ R x y ∧ R x' y := by
   by_contra! hne
@@ -395,33 +398,41 @@ theorem weakPigeonhole_two_mul {R : V → V → Prop} (hR : 𝚺ᴬ₀.Definable
 namespace WeakPigeonhole
 
 
-variable (R : V → V → Prop) (K b : V)
+variable (R : V → V → Prop) (K b : V) (hR : 𝚺ᴬ₀.DefinableRel R) (e I x z : V)
 
 /-- `R` on the first `(K + 1) * b` numbers and the shift down by `b` above them: an injection of
 `(k + 1) * b` into `k * b` for every `k ≥ K` if `R` is one of `(K + 1) * b` into `K * b`. -/
-def ShiftStep (e z : V) : Prop :=
+def ShiftStep : Prop :=
   (e < (K + 1) * b ∧ z < K * b ∧ R e z) ∨ ((K + 1) * b ≤ e ∧ z + b = e)
 
 /-- `z` is reached from `x` by `K` steps of `ShiftStep`, recorded in a sequence with blocks of
 width `‖2 * K * b‖`. -/
-def ShiftReach (I x z : V) : Prop :=
+def ShiftReach : Prop :=
   ∃ s < (I ⨳ (2 * K * b)) ^ 2, IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) K s x 0 ∧
     Nuon.ext (2 * K * b) s K = z
 
-variable {R K b}
+/-- Every `x < 2 * K * b` starts a path of `j` steps of `ShiftStep` ending below
+`2 * K * b - j * b`. -/
+def ShiftPaths (j : V) : Prop :=
+  ∀ x < 2 * K * b, ∃ s < (I ⨳ (2 * K * b)) ^ 2,
+    IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) j s x 0 ∧
+      Nuon.ext (2 * K * b) s j + j * b < 2 * K * b
 
-lemma definable_shiftStep (hR : 𝚺ᴬ₀.DefinableRel R) : 𝚺ᴬ₀.DefinableRel (ShiftStep R K b) := by
+variable {R K b e x z}
+
+include hR in
+lemma definable_shiftStep : 𝚺ᴬ₀.DefinableRel (ShiftStep R K b) := by
   unfold ShiftStep
   definability
 
-lemma definable_shiftReach (hR : 𝚺ᴬ₀.DefinableRel R) (I : V) :
-    𝚺ᴬ₀.DefinableRel (ShiftReach R K b I) := by
+include hR in
+lemma definable_shiftReach : 𝚺ᴬ₀.DefinableRel (ShiftReach R K b I) := by
   have := definable_shiftStep (K := K) (b := b) hR
   unfold ShiftReach IsPath
   definability
 
 lemma ShiftStep.unique (hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, ∀ y < K * b,
-      R x y → R x' y → x = x') {e e' z : V} (h : ShiftStep R K b e z)
+      R x y → R x' y → x = x') {e' : V} (h : ShiftStep R K b e z)
     (h' : ShiftStep R K b e' z) : e = e' := by
   have hKb : (K + 1) * b = K * b + b := by rw [add_mul, one_mul]
   have hge : ∀ {e z : V}, (K + 1) * b ≤ e → z + b = e → K * b ≤ z := fun he hz ↦
@@ -432,20 +443,15 @@ lemma ShiftStep.unique (hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, ∀ y 
   · exact absurd hz' (not_lt.mpr (hge he hz))
   · rw [← hz, ← hz']
 
-/-- Every `x < 2 * K * b` starts a path of `j` steps of `ShiftStep` ending below
-`2 * K * b - j * b`. -/
-def ShiftPaths (R : V → V → Prop) (K b I j : V) : Prop :=
-  ∀ x < 2 * K * b, ∃ s < (I ⨳ (2 * K * b)) ^ 2,
-    IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) j s x 0 ∧
-      Nuon.ext (2 * K * b) s j + j * b < 2 * K * b
-
-lemma definable_shiftPaths (hR : 𝚺ᴬ₀.DefinableRel R) (I : V) :
-    𝚺ᴬ₀.DefinablePred (ShiftPaths R K b I) := by
+include hR in
+lemma definable_shiftPaths : 𝚺ᴬ₀.DefinablePred (ShiftPaths R K b I) := by
   have := definable_shiftStep (K := K) (b := b) hR
   unfold ShiftPaths IsPath
   definability
 
-lemma exists_shiftStep {j e : V} (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y)
+variable {I}
+
+lemma exists_shiftStep {j : V} (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y)
     (hj : j + 1 ≤ K) (he : e + j * b < 2 * K * b) :
     ∃ z < 2 * K * b, ShiftStep R K b e z ∧ z + (j + 1) * b < 2 * K * b := by
   have hjb : (j + 1) * b ≤ K * b := mul_le_mul_right hj
@@ -470,7 +476,8 @@ lemma exists_shiftStep {j e : V} (total : ∀ x < (K + 1) * b, ∃ y < K * b, R 
     · exact Or.inr ⟨heK, hzv⟩
     · exact this
 
-lemma shiftPaths (hR : 𝚺ᴬ₀.DefinableRel R) {I : V} (hb : 0 < b) (hK : 0 < K) (hKI : K ≤ ‖I‖)
+include hR in
+lemma shiftPaths (hb : 0 < b) (hK : 0 < K) (hKI : K ≤ ‖I‖)
     (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y) : ∀ j ≤ K, ShiftPaths R K b I j := by
   have ha : 0 < 2 * K * b := mul_pos (mul_pos two_pos hK) hb
   have hIpos : 0 < I := length_pos_iff.mp (lt_of_lt_of_le hK hKI)
@@ -563,7 +570,7 @@ end WeakPigeonhole
 open WeakPigeonhole in
 /-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
 of $(K + 1)b$ into $Kb$, for $b > 0$ and $0 < K \le \|I\|$. -/
-theorem weakPigeonhole_succ_mul_of_le_length {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R)
+theorem weakPigeonhole_succ_mul_of_le_length (hR : 𝚺ᴬ₀.DefinableRel R)
     {K b I : V} (hb : 0 < b) (hK : 0 < K) (hKI : K ≤ ‖I‖)
     (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y) :
     ∃ x < (K + 1) * b, ∃ x' < (K + 1) * b, ∃ y < K * b, x ≠ x' ∧ R x y ∧ R x' y := by
@@ -590,8 +597,8 @@ open WeakPigeonhole in
 /-- In a model of $\mathsf{I}\Delta_0 + \Omega_1$, no $\Delta_0$-definable relation is an injection
 of $(n + 1)a$ into $na$, for a standard $n$ and $a > 0$.
 - [PWW88, Corollary 2] -/
-theorem weakPigeonhole_succ_mul (n : ℕ) {R : V → V → Prop} (hR : 𝚺ᴬ₀.DefinableRel R) {a : V}
-    (ha : 0 < a) (total : ∀ x < (n + 1) * a, ∃ y < n * a, R x y) :
+theorem weakPigeonhole_succ_mul (n : ℕ) (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a)
+    (total : ∀ x < (n + 1) * a, ∃ y < n * a, R x y) :
     ∃ x < (n + 1) * a, ∃ x' < (n + 1) * a, ∃ y < n * a, x ≠ x' ∧ R x y ∧ R x' y := by
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · obtain ⟨y, hy, -⟩ := total 0 (by simpa using ha)

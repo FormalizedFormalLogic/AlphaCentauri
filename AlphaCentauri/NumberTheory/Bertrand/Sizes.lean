@@ -302,7 +302,9 @@ lemma size_inequality (hn : (1024 : V) ≤ ‖n‖) :
 lemma bandSize_zero : bandSize n 0 = cutoff n := by
   simp [bandSize]
 
-lemma bandSize_succ {r : V} (hr : r < bandCount n) :
+variable {r : V}
+
+lemma bandSize_succ (hr : r < bandCount n) :
     2 * bandSize n (r + 1) ≤ bandSize n r ∧ bandSize n r ≤ 2 * bandSize n (r + 1) + 1 := by
   have h : r + 1 < ‖2 * cutoff n + 1‖ := by
     rw [length_two_mul_add_one]
@@ -319,7 +321,7 @@ lemma bandSize_bandCount : bandSize n (bandCount n) = 0 := by
   apply div_eq_zero_of_lt
   exact lt_bexp_len (by simp [length_two_mul_add_one])
 
-lemma bandSize_antitone {r r' : V} (h : r ≤ r') (hr' : r' ≤ bandCount n) :
+lemma bandSize_antitone {r' : V} (h : r ≤ r') (hr' : r' ≤ bandCount n) :
     bandSize n r' ≤ bandSize n r := by
   obtain ⟨k, rfl⟩ := le_iff_exists_add.mp h
   clear h

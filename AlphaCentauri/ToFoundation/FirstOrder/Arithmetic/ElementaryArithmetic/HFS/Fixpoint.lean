@@ -24,10 +24,10 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {ih m s 
 
 namespace Fixpoint
 
-variable (V)
+variable (V) {k : ℕ}
 
 /-- A monotone, locally $\Delta_0$ operator defined by the core of a blueprint. -/
-structure Construction {k : ℕ} (φ : Arithmetic.Fixpoint.Blueprint k) where
+structure Construction (φ : Arithmetic.Fixpoint.Blueprint k) where
   /-- `c.Φ v Y x` states that `x ∈ Φ(Y)`. -/
   Φ : (Fin k → V) → Set V → V → Prop
   defined : 𝚫ᴬ₁.Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
@@ -35,47 +35,52 @@ structure Construction {k : ℕ} (φ : Arithmetic.Fixpoint.Blueprint k) where
   Φ_locallyDelta0 :
     LocallyDelta0 fun v : Fin (k + 2) → V ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)
 
-class Construction.Finite {k : ℕ} {φ : Arithmetic.Fixpoint.Blueprint k} (c : Construction V φ) where
+variable {φ : Arithmetic.Fixpoint.Blueprint k} (c : Construction V φ)
+
+include c in
+class Construction.Finite where
   finite {C : Set V} {v x} : c.Φ v C x → ∃ m, c.Φ v {y ∈ C | y < m} x
 
-class Construction.StrongFinite {k : ℕ} {φ : Arithmetic.Fixpoint.Blueprint k}
-    (c : Construction V φ) where
+include c in
+class Construction.StrongFinite where
   strong_finite {C : Set V} {v x} : c.Φ v C x → c.Φ v {y ∈ C | y < x} x
 
-instance {k : ℕ} {φ : Arithmetic.Fixpoint.Blueprint k} (c : Construction V φ) [c.StrongFinite] :
-    c.Finite where
+instance [c.StrongFinite] : c.Finite where
   finite {_ _ x} := fun h ↦ ⟨x, Construction.StrongFinite.strong_finite h⟩
 
 variable {V}
 
 namespace Construction
 
-variable {k : ℕ} {φ : Arithmetic.Fixpoint.Blueprint k} (c : Construction V φ) (v : Fin k → V)
+variable (v : Fin k → V)
 
 lemma eval_formula (v : Fin k.succ.succ → V) :
     φ.core.val.Evalb v ↔ c.Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0) := c.defined.iff
 
-private lemma phi_comp {n : ℕ} {f g : (Fin n → V) → V} (hf : LocallyDelta0Function f)
-    (hg : LocallyDelta0Function g) :
+variable {n : ℕ} {f g : (Fin n → V) → V}
+
+private lemma phi_comp (hf : LocallyDelta0Function f) (hg : LocallyDelta0Function g) :
     LocallyDelta0 fun w : Fin n → V ↦ c.Φ v {z | z ∈ g w} (f w) := by
   simpa using c.Φ_locallyDelta0.comp_cons₂ hf hg fun j ↦ LocallyDelta0Function.const (v j)
 
-lemma succ_existsUnique (s ih : V) :
-    ∃! u : V, ∀ x, (x ∈ u ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x) := by
+variable (s ih : V)
+
+lemma succ_existsUnique : ∃! u : V, ∀ x, (x ∈ u ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x) := by
   have : LocallyDelta0Pred fun x ↦ x ≤ s ∧ c.Φ v {z | z ∈ ih} x :=
     (LocallyDelta0.of_definable (R := fun w : Fin 1 → V ↦ w 0 ≤ s) (by definability)).and
       (c.phi_comp v (LocallyDelta0Function.var 0) (LocallyDelta0Function.const ih))
   exact this.finite_comprehension! ⟨s + 1, fun i ⟨hi, _⟩ ↦ lt_succ_iff_le.mpr hi⟩
 
 /-- The next stage `{x ≤ s | x ∈ Φ(ih)}`. -/
-noncomputable def succ (s ih : V) : V := Classical.choose! (c.succ_existsUnique v s ih)
+noncomputable def succ : V := Classical.choose! (c.succ_existsUnique v s ih)
 
-variable {v}
+variable {v} {s ih}
 
 lemma mem_succ_iff : x ∈ c.succ v s ih ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x :=
   Classical.choose!_spec (c.succ_existsUnique v s ih) x
 
-lemma succ_lt_exp (s ih : V) : c.succ v s ih < Exp.exp (s + 1) :=
+variable (s ih) in
+lemma succ_lt_exp : c.succ v s ih < Exp.exp (s + 1) :=
   lt_exp_iff.mpr fun _ hj ↦ lt_succ_iff_le.mpr (c.mem_succ_iff.mp hj).1
 
 private lemma succ_graph :
@@ -141,18 +146,20 @@ noncomputable def prConstruction : PR.Construction V φ.prBlueprint where
   inv_locallyDelta0 :=
     PR.lt_bound_locallyDelta0 (bound := fun _ i ↦ Exp.exp i) stageBound_locallyDelta0
 
-variable (v)
+variable (v s)
 
 /-- The `s`-th stage of the construction. -/
-noncomputable def limSeq (s : V) : V := c.prConstruction.result v s
+noncomputable def limSeq : V := c.prConstruction.result v s
 
 variable {v}
 
 @[simp]
 lemma limSeq_zero : c.limSeq v 0 = ∅ := by simp [limSeq, prConstruction]
 
-lemma limSeq_succ (s : V) : c.limSeq v (s + 1) = c.succ v s (c.limSeq v s) := by
+lemma limSeq_succ : c.limSeq v (s + 1) = c.succ v s (c.limSeq v s) := by
   simp [limSeq, prConstruction]
+
+variable {s}
 
 lemma termSet_defined :
     𝚺ᴬ₁.DefinedFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) φ.limSeqDef := .mk fun v ↦ by
@@ -166,7 +173,7 @@ lemma limSeq_locallyDelta0 :
     LocallyDelta0Function fun w : Fin (k + 1) → V ↦ c.limSeq (w ·.succ) (w 0) :=
   c.prConstruction.result_locallyDelta0
 
-private lemma limSeq_comp {n : ℕ} {f : (Fin n → V) → V} (hf : LocallyDelta0Function f) :
+private lemma limSeq_comp (hf : LocallyDelta0Function f) :
     LocallyDelta0Function fun w : Fin n → V ↦ c.limSeq v (f w) := by
   simpa using c.limSeq_locallyDelta0.comp_cons hf fun j ↦ LocallyDelta0Function.const (v j)
 
@@ -192,7 +199,52 @@ lemma limSeq_cumulative {s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' :
       exact c.mem_limSeq_succ_iff.mpr ⟨le_trans hu hs, c.monotone (fun z hz ↦ ih s hs hz) Hu⟩
   exact this s' s
 
-lemma mem_limSeq_self [c.StrongFinite] : u ∈ c.limSeq v s → u ∈ c.limSeq v (u + 1) := by
+variable (v)
+
+set_option linter.dupNamespace false in
+/-- `c.Fixpoint v x` states that `x` belongs to the least fixed point of the operator. -/
+def Fixpoint (x : V) : Prop := ∃ s, x ∈ c.limSeq v s
+
+variable {v}
+
+lemma fixpoint_iff_succ : c.Fixpoint v x ↔ ∃ u, x ∈ c.limSeq v (u + 1) :=
+  ⟨by
+    rintro ⟨u, h⟩
+    rcases zero_or_succ u with (rfl | ⟨u, rfl⟩)
+    · simp at h
+    · exact ⟨u, h⟩, by rintro ⟨u, h⟩; exact ⟨u + 1, h⟩⟩
+
+lemma case_mp : c.Fixpoint v x → c.Φ v {z | c.Fixpoint v z} x := by
+  intro h
+  obtain ⟨u, hu⟩ := c.fixpoint_iff_succ.mp h
+  have : c.Φ v {z | z ∈ c.limSeq v u} x := (c.mem_limSeq_succ_iff.mp hu).2
+  exact c.monotone (C' := {z | c.Fixpoint v z}) (fun _ hx ↦ ⟨u, hx⟩) this
+
+/-- A point whose premises below `m` all appear by the stage `S` belongs to the fixpoint. -/
+lemma case_mpr_of_stage (hΦ : c.Φ v {z | c.Fixpoint v z ∧ z < m} x)
+    (hS : ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v S) : c.Fixpoint v x := by
+  have : c.Φ v {z | z ∈ c.limSeq v S} x :=
+    c.monotone (C := {z | c.Fixpoint v z ∧ z < m}) (C' := {z | z ∈ c.limSeq v S})
+      (fun z hz ↦ hS z hz.2 hz.1) hΦ
+  use max S x + 1
+  exact c.mem_limSeq_succ_iff.mpr
+    ⟨by simp, c.monotone (C' := {z | z ∈ c.limSeq v (max S x)})
+      (fun _ hz ↦ c.limSeq_cumulative (by simp) hz) this⟩
+
+lemma fixpoint_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDef :=
+  .mk fun v ↦ by
+  simp [Arithmetic.Fixpoint.Blueprint.fixpointDef, c.eval_limSeqDef]; rfl
+
+variable (v : Fin (k + 1) → V) in
+@[simp]
+lemma eval_fixpointDef :
+    φ.fixpointDef.val.Evalb v ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_defined.iff
+
+section
+
+variable [c.StrongFinite]
+
+lemma mem_limSeq_self : u ∈ c.limSeq v s → u ∈ c.limSeq v (u + 1) := by
   have hR : LocallyDelta0 fun y : Fin 2 → V ↦
       y 1 ∈ c.limSeq v (y 0) → y 1 ∈ c.limSeq v (y 1 + 1) := by
     exact ((LocallyDelta0.of_definable (R := fun y : Fin 3 → V ↦ y 0 ∈ y 1 → y 0 ∈ y 2)
@@ -220,42 +272,10 @@ lemma mem_limSeq_self [c.StrongFinite] : u ∈ c.limSeq v s → u ∈ c.limSeq v
     exact c.mem_limSeq_succ_iff.mpr ⟨by rfl, this⟩
   exact this u s le_rfl
 
-variable (v)
-
-set_option linter.dupNamespace false in
-/-- `c.Fixpoint v x` states that `x` belongs to the least fixed point of the operator. -/
-def Fixpoint (x : V) : Prop := ∃ s, x ∈ c.limSeq v s
-
-variable {v}
-
-lemma fixpoint_iff [c.StrongFinite] : c.Fixpoint v x ↔ x ∈ c.limSeq v (x + 1) :=
+lemma fixpoint_iff : c.Fixpoint v x ↔ x ∈ c.limSeq v (x + 1) :=
   ⟨by rintro ⟨s, hs⟩; exact c.mem_limSeq_self hs, fun h ↦ ⟨x + 1, h⟩⟩
 
-lemma fixpoint_iff_succ : c.Fixpoint v x ↔ ∃ u, x ∈ c.limSeq v (u + 1) :=
-  ⟨by
-    rintro ⟨u, h⟩
-    rcases zero_or_succ u with (rfl | ⟨u, rfl⟩)
-    · simp at h
-    · exact ⟨u, h⟩, by rintro ⟨u, h⟩; exact ⟨u + 1, h⟩⟩
-
-lemma case_mp : c.Fixpoint v x → c.Φ v {z | c.Fixpoint v z} x := by
-  intro h
-  obtain ⟨u, hu⟩ := c.fixpoint_iff_succ.mp h
-  have : c.Φ v {z | z ∈ c.limSeq v u} x := (c.mem_limSeq_succ_iff.mp hu).2
-  exact c.monotone (C' := {z | c.Fixpoint v z}) (fun _ hx ↦ ⟨u, hx⟩) this
-
-/-- A point whose premises below `m` all appear by the stage `S` belongs to the fixpoint. -/
-lemma case_mpr_of_stage (hΦ : c.Φ v {z | c.Fixpoint v z ∧ z < m} x)
-    (hS : ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v S) : c.Fixpoint v x := by
-  have : c.Φ v {z | z ∈ c.limSeq v S} x :=
-    c.monotone (C := {z | c.Fixpoint v z ∧ z < m}) (C' := {z | z ∈ c.limSeq v S})
-      (fun z hz ↦ hS z hz.2 hz.1) hΦ
-  use max S x + 1
-  exact c.mem_limSeq_succ_iff.mpr
-    ⟨by simp, c.monotone (C' := {z | z ∈ c.limSeq v (max S x)})
-      (fun _ hz ↦ c.limSeq_cumulative (by simp) hz) this⟩
-
-theorem case [c.StrongFinite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x := by
+theorem case : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x := by
   constructor
   · exact c.case_mp
   · intro hx
@@ -263,24 +283,16 @@ theorem case [c.StrongFinite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x
     intro z hz hfix
     exact c.limSeq_cumulative (succ_le_iff_lt.mpr hz) (c.fixpoint_iff.mp hfix)
 
-lemma fixpoint_defined : 𝚺ᴬ₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDef :=
-  .mk fun v ↦ by
-  simp [Arithmetic.Fixpoint.Blueprint.fixpointDef, c.eval_limSeqDef]; rfl
-
-@[simp]
-lemma eval_fixpointDef (v : Fin (k + 1) → V) :
-    φ.fixpointDef.val.Evalb v ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_defined.iff
-
-lemma fixpoint_definedΔ₁ [c.StrongFinite] :
-    𝚫ᴬ₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDefΔ₁ :=
+lemma fixpoint_definedΔ₁ : 𝚫ᴬ₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDefΔ₁ :=
   ⟨by intro v; simp [Arithmetic.Fixpoint.Blueprint.fixpointDefΔ₁, c.eval_limSeqDef],
    by intro v; simp [Arithmetic.Fixpoint.Blueprint.fixpointDefΔ₁, c.eval_limSeqDef, fixpoint_iff]⟩
 
+variable (v : Fin (k + 1) → V) in
 @[simp]
-lemma eval_fixpointDefΔ₁ [c.StrongFinite] (v : Fin (k + 1) → V) :
+lemma eval_fixpointDefΔ₁ :
     φ.fixpointDefΔ₁.val.Evalb v ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_definedΔ₁.iff
 
-lemma fixpoint_locallyDelta0 [c.StrongFinite] :
+lemma fixpoint_locallyDelta0 :
     LocallyDelta0 fun w : Fin (k + 1) → V ↦ c.Fixpoint (w ·.succ) (w 0) := by
   have hlim : LocallyDelta0Function fun w : Fin (k + 1) → V ↦ c.limSeq (w ·.succ) (w 0 + 1) := by
     simpa using c.limSeq_locallyDelta0.comp_cons
@@ -289,7 +301,7 @@ lemma fixpoint_locallyDelta0 [c.StrongFinite] :
     (by definability)).comp₂ (LocallyDelta0Function.var 0) hlim).of_iff
       fun w ↦ by simpa using c.fixpoint_iff
 
-theorem induction [c.StrongFinite] {P : V → Prop} (hP : LocallyDelta0Pred P)
+theorem induction {P : V → Prop} (hP : LocallyDelta0Pred P)
     (H : ∀ C : Set V, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
   have hfix : LocallyDelta0Pred fun x ↦ c.Fixpoint v x := by
@@ -299,6 +311,8 @@ theorem induction [c.StrongFinite] {P : V → Prop} (hP : LocallyDelta0Pred P)
   intro x ih hx
   have : c.Φ v {y | c.Fixpoint v y ∧ y < x} x := StrongFinite.strong_finite (c.case.mp hx)
   exact H {y | c.Fixpoint v y ∧ y < x} (by intro y ⟨hy, hyx⟩; exact ⟨hy, ih y hyx hy⟩) x this
+
+end
 
 end Construction
 

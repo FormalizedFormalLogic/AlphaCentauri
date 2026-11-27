@@ -104,16 +104,21 @@ end
 
 variable [DecidableEq α]
 
+section
+variable (Γ : MaximalConsistentTheory L) (S : FormulaSet α)
+
 /-- The formulas `A` with $A ▷ \bigvee_{G ∈ S'} ¬G ∈ Γ$ for some finite $S' \subseteq S$. -/
-def antecedents (Γ : MaximalConsistentTheory L) (S : FormulaSet α) : FormulaSet α :=
+def antecedents : FormulaSet α :=
   {A | ∃ T : Finset (Formula α), ↑T ⊆ S ∧ A ▷ (T.image (∼·)).disj ∈ Γ}
 
 /-- The formulas `□∼A` with `A ∈ Γ.antecedents S`.
 
 - [MV20, Definition 5]
 -/
-def boxLabel (Γ : MaximalConsistentTheory L) (S : FormulaSet α) : FormulaSet α :=
+def boxLabel : FormulaSet α :=
   (fun A ↦ □(∼A)) '' Γ.antecedents S
+
+end
 
 /-- `Δ` is an `S`-assuring successor of `Γ`: `∼A` and `□∼A` belong to `Δ` whenever
 $A ▷ \bigvee_{G ∈ S'} ¬G ∈ Γ$ for some finite $S' \subseteq S$.

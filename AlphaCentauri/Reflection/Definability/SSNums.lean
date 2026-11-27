@@ -51,15 +51,17 @@ noncomputable def ssnumsConjuncts.construction : PR.Construction V ssnumsConjunc
   zero_defined := .mk fun v ↦ by simp [ssnumsConjuncts.blueprint]
   succ_defined := .mk fun v ↦ by simp [ssnumsConjuncts.blueprint]
 
+variable (k : V)
+
 /-- `ssnumsConjuncts k = ⟨ssnumsConjunct 0, …, ssnumsConjunct (k - 1)⟩`. -/
-noncomputable def ssnumsConjuncts (k : V) : V := ssnumsConjuncts.construction.result ![] k
+noncomputable def ssnumsConjuncts : V := ssnumsConjuncts.construction.result ![] k
 
 @[simp]
 lemma ssnumsConjuncts_zero : ssnumsConjuncts (0 : V) = 0 := by
   simp [ssnumsConjuncts, ssnumsConjuncts.construction]
 
 @[simp]
-lemma ssnumsConjuncts_succ (k : V) :
+lemma ssnumsConjuncts_succ :
     ssnumsConjuncts (k + 1) = concat (ssnumsConjuncts k) (ssnumsConjunct k) := by
   simp [ssnumsConjuncts, ssnumsConjuncts.construction]
 
@@ -73,13 +75,13 @@ instance ssnumsConjuncts.definable : 𝚺ᴬ₁-Function₁ (ssnumsConjuncts : V
   ssnumsConjuncts.defined.to_definable
 
 @[simp]
-lemma len_ssnumsConjuncts (k : V) : len (ssnumsConjuncts k) = k := by
+lemma len_ssnumsConjuncts : len (ssnumsConjuncts k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih => simp [ih]
 
-lemma nth_ssnumsConjuncts (k : V) : ∀ i < k, (ssnumsConjuncts k).[i] = ssnumsConjunct i := by
+lemma nth_ssnumsConjuncts : ∀ i < k, (ssnumsConjuncts k).[i] = ssnumsConjunct i := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -90,7 +92,7 @@ lemma nth_ssnumsConjuncts (k : V) : ∀ i < k, (ssnumsConjuncts k).[i] = ssnumsC
     · rw [ssnumsConjuncts_succ, concat_nth_len' _ _ (by simp)]
 
 /-- `ssnumsCode k` is the code of `ssnums` with `k` parameters. -/
-noncomputable def ssnumsCode (k : V) : V :=
+noncomputable def ssnumsCode : V :=
   ^∃ (subst ℒₒᵣ ?[numeral k, ^#0] ⌜lenDef.val⌝ ^⋏
     ((^⋀ ssnumsConjuncts k) ^⋏ subst ℒₒᵣ ?[^#1, ^#0, ^#2] ⌜(substsGraph ℒₒᵣ).val⌝))
 

@@ -24,14 +24,18 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
 /-! ## Tables of operators -/
 
+section tables
+
+variable (tbl k : V)
+
 /-- The code of the domain formula listed in the table `tbl`. -/
-noncomputable def tableDomain (tbl : V) : V := tbl.[0]
+noncomputable def tableDomain : V := tbl.[0]
 
 /-- The code of the formula interpreting the `k`-ary relation symbol `r`, listed in `tbl`. -/
-noncomputable def tableRel (tbl k r : V) : V := (tbl.[1]).[⟪k, r⟫]
+noncomputable def tableRel (r : V) : V := (tbl.[1]).[⟪k, r⟫]
 
 /-- The code of the formula of the graph of the `k`-ary function symbol `f`, listed in `tbl`. -/
-noncomputable def tableFunc (tbl k f : V) : V := (tbl.[2]).[⟪k, f⟫]
+noncomputable def tableFunc (f : V) : V := (tbl.[2]).[⟪k, f⟫]
 
 def tableDomainGraph : 𝚺ᴬ₁.Semisentence 2 := .mkSigma “y tbl. !nthDef y tbl 0”
 
@@ -68,22 +72,24 @@ instance tableFunc.definable : 𝚺ᴬ₁-Function₃ (tableFunc : V → V → V
 instance tableFunc.definable' : Γᴬ_[m + 1]-Function₃ (tableFunc : V → V → V → V) :=
   tableFunc.definable.of_sigmaOne
 
+end tables
+
 /-! ## Relocated formulas -/
 
 section relocate
 
-variable (L : Language) [L.Encodable] [L.LORDefinable]
+variable (L : Language) [L.Encodable] [L.LORDefinable] (tbl i : V)
 
 /-- `relocate L i s p` substitutes `^#i` for the bound variable `^#0` of `p` and `^#(s + j)` for
 `^#(j + 1)`, for every `j < bv L p`. -/
-noncomputable def relocate (i s p : V) : V := subst L (^#i ∷ bvarVec s (bv L p)) p
+noncomputable def relocate (s p : V) : V := subst L (^#i ∷ bvarVec s (bv L p)) p
 
 /-- `domainAt L tbl i` is the domain formula of `tbl` applied to the bound variable `^#i`. -/
-noncomputable def domainAt (tbl i : V) : V := subst L ?[^#i] (tableDomain tbl)
+noncomputable def domainAt : V := subst L ?[^#i] (tableDomain tbl)
 
 /-- `funcTail L tbl k f` is the formula of the graph of the `k`-ary function symbol `f` applied to
 `^#k, ^#0, …, ^#(k - 1)`. -/
-noncomputable def funcTail (tbl k f : V) : V := subst L (^#k ∷ bvarVec 0 k) (tableFunc tbl k f)
+noncomputable def funcTail (k f : V) : V := subst L (^#k ∷ bvarVec 0 k) (tableFunc tbl k f)
 
 noncomputable def relocateGraph : 𝚺ᴬ₁.Semisentence 4 := .mkSigma
   “y i s p. ∃ b, !qqBvarDef b i ∧ ∃ m, !(bvGraph L) m p ∧ ∃ bs, !bvarVecDef bs s m ∧
@@ -147,7 +153,7 @@ end relocate
 
 section guardVec
 
-variable (L : Language) [L.Encodable] [L.LORDefinable]
+variable (L : Language) [L.Encodable] [L.LORDefinable] (tbl s w k : V)
 
 noncomputable def guardVec.blueprint : PR.Blueprint 3 where
   zero := .mkSigma “y tbl s w. y = 0”
@@ -163,7 +169,7 @@ noncomputable def guardVec.construction : PR.Construction V (guardVec.blueprint 
 
 /-- `guardVec L tbl s w k` is the vector whose `j`-th entry, for `j < k`, is the conjunction of
 the domain formula of `tbl` at `^#j` and `relocate L j s w.[j]`. -/
-noncomputable def guardVec (tbl s w k : V) : V := (guardVec.construction L).result ![tbl, s, w] k
+noncomputable def guardVec : V := (guardVec.construction L).result ![tbl, s, w] k
 
 /-- The $\Sigma_1$ graph of `guardVec`, with argument order `(y, tbl, s, w, k)`. -/
 noncomputable def guardVecGraph : 𝚺ᴬ₁.Semisentence 5 :=
@@ -172,12 +178,11 @@ noncomputable def guardVecGraph : 𝚺ᴬ₁.Semisentence 5 :=
 variable {L}
 
 @[simp]
-lemma guardVec_zero (tbl s w : V) : guardVec L tbl s w 0 = 0 := by
+lemma guardVec_zero : guardVec L tbl s w 0 = 0 := by
   simp [guardVec, guardVec.construction]
 
 @[simp]
-lemma guardVec_succ (tbl s w k : V) :
-    guardVec L tbl s w (k + 1) =
+lemma guardVec_succ : guardVec L tbl s w (k + 1) =
       concat (guardVec L tbl s w k) (domainAt L tbl k ^⋏ relocate L k s w.[k]) := by
   simp [guardVec, guardVec.construction]
 
@@ -190,13 +195,13 @@ instance guardVec.definable' : Γᴬ_[m + 1]-Function₄[V] guardVec L :=
   guardVec.definable.of_sigmaOne
 
 @[simp]
-lemma len_guardVec (tbl s w k : V) : len (guardVec L tbl s w k) = k := by
+lemma len_guardVec : len (guardVec L tbl s w k) = k := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih => simp [ih]
 
-lemma nth_guardVec (tbl s w k : V) :
+lemma nth_guardVec :
     ∀ j < k, (guardVec L tbl s w k).[j] = domainAt L tbl j ^⋏ relocate L j s w.[j] := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
@@ -245,15 +250,15 @@ end VarEqual
 
 open VarEqual
 
-variable (L₁ L₂)
+variable (L₁ L₂) (tbl : V)
 
 /-- `varEqual L₁ L₂ tbl t` is the coded $L_1$-formula saying, along the table `tbl`, that the
 bound variable `^#0` is the value of the coded $L_2$-term `t`, whose bound variable `^#x` becomes
 `^#(x + 1)`. -/
-noncomputable def varEqual (tbl t : V) : V := (construction L₁).result L₂ ![tbl] t
+noncomputable def varEqual (t : V) : V := (construction L₁).result L₂ ![tbl] t
 
 /-- `varEqual L₁ L₂ tbl` applied entrywise to the coded `k`-vector `v`. -/
-noncomputable def varEqualVec (tbl k v : V) : V := (construction L₁).resultVec L₂ ![tbl] k v
+noncomputable def varEqualVec (k v : V) : V := (construction L₁).resultVec L₂ ![tbl] k v
 
 /-- The $\Sigma_1$ graph of `varEqual`, with argument order `(y, tbl, t)`. -/
 noncomputable def varEqualGraph : 𝚺ᴬ₁.Semisentence 3 :=
@@ -287,35 +292,36 @@ instance varEqualVec.definable' : Γᴬ_[m + 1]-Function₃[V] varEqualVec L₁ 
   varEqualVec.definable.of_sigmaOne
 
 @[simp]
-lemma varEqual_bvar (tbl z : V) :
-    varEqual L₁ L₂ tbl ^#z =
+lemma varEqual_bvar (z : V) : varEqual L₁ L₂ tbl ^#z =
       ^rel 2 (Encodable.encode (Language.Eq.eq : L₁.Rel 2) : V) ?[^#0, ^#(z + 1)] := by
   simp [varEqual, construction]
 
 @[simp]
-lemma varEqual_fvar (tbl x : V) :
-    varEqual L₁ L₂ tbl ^&x =
+lemma varEqual_fvar (x : V) : varEqual L₁ L₂ tbl ^&x =
       ^rel 2 (Encodable.encode (Language.Eq.eq : L₁.Rel 2) : V) ?[^#0, ^&x] := by
   simp [varEqual, construction]
 
+variable {tbl} {k v : V}
+
 @[simp]
-lemma varEqual_func {tbl k f v : V} (hf : L₂.IsFunc k f) (hv : IsUTermVec L₂ k v) :
+lemma varEqual_func {f : V} (hf : L₂.IsFunc k f) (hv : IsUTermVec L₂ k v) :
     varEqual L₁ L₂ tbl (^func k f v) =
       qqAlls (imp L₁ (^⋀ guardVec L₁ tbl (k + 1) (varEqualVec L₁ L₂ tbl k v) k)
         (funcTail L₁ tbl k f)) k := by
   simp [varEqual, varEqualVec, construction, hf, hv]
 
 @[simp]
-lemma len_varEqualVec {tbl k v : V} (hv : IsUTermVec L₂ k v) :
+lemma len_varEqualVec (hv : IsUTermVec L₂ k v) :
     len (varEqualVec L₁ L₂ tbl k v) = k := (construction L₁).resultVec_lh L₂ _ hv
 
 @[simp]
-lemma nth_varEqualVec {tbl k v i : V} (hv : IsUTermVec L₂ k v) (hi : i < k) :
+lemma nth_varEqualVec {i : V} (hv : IsUTermVec L₂ k v) (hi : i < k) :
     (varEqualVec L₁ L₂ tbl k v).[i] = varEqual L₁ L₂ tbl v.[i] :=
   (construction L₁).nth_resultVec L₂ _ hv hi
 
+variable (tbl) in
 @[simp]
-lemma varEqualVec_nil (tbl : V) : varEqualVec L₁ L₂ tbl 0 0 = 0 :=
+lemma varEqualVec_nil : varEqualVec L₁ L₂ tbl 0 0 = 0 :=
   (construction L₁).resultVec_nil L₂ _
 
 end varEqual
@@ -327,11 +333,11 @@ section translate
 variable {L₁ L₂ : Language} [L₁.Encodable] [L₁.LORDefinable] [L₁.Eq]
   [L₂.Encodable] [L₂.LORDefinable]
 
-variable (L₁ L₂)
+variable (L₁ L₂) (tbl : V)
 
 /-- `translateRel L₁ L₂ tbl k R v` is the translation along `tbl` of the coded atomic formula
 `^rel k R v`. -/
-noncomputable def translateRel (tbl k R v : V) : V :=
+noncomputable def translateRel (k R v : V) : V :=
   qqAlls (imp L₁ (^⋀ guardVec L₁ tbl k (varEqualVec L₁ L₂ tbl k v) k) (tableRel tbl k R)) k
 
 /-- The $\Sigma_1$ graph of `translateRel`, with argument order `(y, tbl, k, R, v)`. -/
@@ -396,7 +402,7 @@ variable (L₁ L₂)
 
 /-- `translate L₁ L₂ tbl p` is the translation along `tbl` of the coded $L_2$-formula `p` into a
 coded $L_1$-formula, with quantifiers relativized to the domain formula of `tbl`. -/
-noncomputable def translate (tbl p : V) : V := (construction L₁ L₂).result L₂ tbl p
+noncomputable def translate (p : V) : V := (construction L₁ L₂).result L₂ tbl p
 
 /-- The $\Sigma_1$ graph of `translate`, with argument order `(y, tbl, p)`. -/
 noncomputable def translateGraph : 𝚺ᴬ₁.Semisentence 3 := (blueprint L₁ L₂).result L₂
@@ -411,41 +417,47 @@ instance translate.definable : 𝚺ᴬ₁-Function₂[V] translate L₁ L₂ := 
 instance translate.definable' : Γᴬ_[m + 1]-Function₂[V] translate L₁ L₂ :=
   translate.definable.of_sigmaOne
 
+variable {tbl} {k R v : V}
+
 @[simp]
-lemma translate_rel {tbl k R v : V} (hR : L₂.IsRel k R) (hv : IsUTermVec L₂ k v) :
+lemma translate_rel (hR : L₂.IsRel k R) (hv : IsUTermVec L₂ k v) :
     translate L₁ L₂ tbl (^rel k R v) = translateRel L₁ L₂ tbl k R v := by
   simp [translate, hR, hv, construction]
 
 @[simp]
-lemma translate_nrel {tbl k R v : V} (hR : L₂.IsRel k R) (hv : IsUTermVec L₂ k v) :
+lemma translate_nrel (hR : L₂.IsRel k R) (hv : IsUTermVec L₂ k v) :
     translate L₁ L₂ tbl (^nrel k R v) = neg L₁ (translateRel L₁ L₂ tbl k R v) := by
   simp [translate, hR, hv, construction]
 
+variable (tbl)
+
 @[simp]
-lemma translate_verum (tbl : V) : translate L₁ L₂ tbl ^⊤ = ^⊤ := by
+lemma translate_verum : translate L₁ L₂ tbl ^⊤ = ^⊤ := by
   simp [translate, construction]
 
 @[simp]
-lemma translate_falsum (tbl : V) : translate L₁ L₂ tbl ^⊥ = ^⊥ := by
+lemma translate_falsum : translate L₁ L₂ tbl ^⊥ = ^⊥ := by
   simp [translate, construction]
 
+variable {tbl} {p q : V}
+
 @[simp]
-lemma translate_and {tbl p q : V} (hp : IsUFormula L₂ p) (hq : IsUFormula L₂ q) :
+lemma translate_and (hp : IsUFormula L₂ p) (hq : IsUFormula L₂ q) :
     translate L₁ L₂ tbl (p ^⋏ q) = translate L₁ L₂ tbl p ^⋏ translate L₁ L₂ tbl q := by
   simp [translate, hp, hq, construction]
 
 @[simp]
-lemma translate_or {tbl p q : V} (hp : IsUFormula L₂ p) (hq : IsUFormula L₂ q) :
+lemma translate_or (hp : IsUFormula L₂ p) (hq : IsUFormula L₂ q) :
     translate L₁ L₂ tbl (p ^⋎ q) = translate L₁ L₂ tbl p ^⋎ translate L₁ L₂ tbl q := by
   simp [translate, hp, hq, construction]
 
 @[simp]
-lemma translate_all {tbl p : V} (hp : IsUFormula L₂ p) :
+lemma translate_all (hp : IsUFormula L₂ p) :
     translate L₁ L₂ tbl (^∀ p) = ^∀ imp L₁ (domainAt L₁ tbl 0) (translate L₁ L₂ tbl p) := by
   simp [translate, hp, construction]
 
 @[simp]
-lemma translate_exs {tbl p : V} (hp : IsUFormula L₂ p) :
+lemma translate_exs (hp : IsUFormula L₂ p) :
     translate L₁ L₂ tbl (^∃ p) = ^∃ (domainAt L₁ tbl 0 ^⋏ translate L₁ L₂ tbl p) := by
   simp [translate, hp, construction]
 
@@ -495,19 +507,21 @@ structure IsTableOf (π : DirectTranslation T L₂) (tbl : V) : Prop where
 
 namespace IsTableOf
 
-variable {π : DirectTranslation T L₂} {tbl : V}
+variable {π : DirectTranslation T L₂} {tbl : V} {n k : ℕ}
 
 section
 
 omit [L₂.LORDefinable]
 
-lemma domainAt_quote (h : IsTableOf π tbl) {l : ℕ} (x : Fin l) :
+variable {l : ℕ}
+
+lemma domainAt_quote (h : IsTableOf π tbl) (x : Fin l) :
     domainAt L₁ tbl (x : V) = ⌜(π.domain.operator ![#x] : Semiproposition L₁ l)⌝ := by
   rw [domainAt, h.domain, Semiformula.Operator.operator, Semiformula.quote_substs,
     Sentence.quote_def]
   simp [Matrix.vecHead, Matrix.vecTail]
 
-lemma guardVec_quote (h : IsTableOf π tbl) {m l k : ℕ} (ψ : Fin k → Semiproposition L₁ (m + 1))
+lemma guardVec_quote (h : IsTableOf π tbl) {m : ℕ} (ψ : Fin k → Semiproposition L₁ (m + 1))
     (s : ℕ) (y : Fin m → Fin (l + k)) (hy : ∀ j, (y j : ℕ) = s + j) :
     guardVec L₁ tbl (s : V) (matrixToVec fun i ↦ (⌜ψ i⌝ : V)) (k : V) =
       matrixToVec fun i ↦ (⌜π.domain.operator ![#(i.addCast l)] ⋏
@@ -521,15 +535,14 @@ lemma guardVec_quote (h : IsTableOf π tbl) {m l k : ℕ} (ψ : Fin k → Semipr
     simp only [Fin.addCast_val] at hd hr
     rw [nth_guardVec _ _ _ _ _ (by simp), matrixToVec_nth, Semiformula.quote_and, hd, hr]
 
-lemma tableRel_eq_quote (h : IsTableOf π tbl) {n k : ℕ} (R : L₂.Rel k) :
-    tableRel tbl (k : V) ⌜R⌝ =
+lemma tableRel_eq_quote (h : IsTableOf π tbl) (R : L₂.Rel k) : tableRel tbl (k : V) ⌜R⌝ =
       ⌜((π.rel R).operator fun i ↦ #(i.addCast n) : Semiproposition L₁ (n + k))⌝ := by
   rw [h.rel, Semiformula.Operator.operator, Semiformula.quote_substs,
     ← bvarVec_zero_eq_matrixToVec, Sentence.quote_def,
     subst_eq_self (Semiformula.quote_isSemiformula _) (IsSemitermVec.bvarVec (by simp))
       (fun i hi ↦ by simp [nth_bvarVec _ _ _ hi])]
 
-lemma funcTail_eq_quote (h : IsTableOf π tbl) {n k : ℕ} (f : L₂.Func k) :
+lemma funcTail_eq_quote (h : IsTableOf π tbl) (f : L₂.Func k) :
     funcTail L₁ tbl (k : V) ⌜f⌝ = ⌜((π.func f).operator
       (#((0 : Fin (n + 1)).addNat k) :> fun i ↦ #(i.addCast (n + 1))) :
         Semiproposition L₁ (n + 1 + k))⌝ := by
@@ -539,7 +552,7 @@ lemma funcTail_eq_quote (h : IsTableOf π tbl) {n k : ℕ} (f : L₂.Func k) :
 
 end
 
-private lemma varEqualVec_quote_of {n k : ℕ} {v : Fin k → SyntacticSemiterm L₂ n}
+private lemma varEqualVec_quote_of {v : Fin k → SyntacticSemiterm L₂ n}
     (H : ∀ i, varEqual L₁ L₂ tbl (⌜v i⌝ : V) = ⌜π.varEqual (v i)⌝) :
     varEqualVec L₁ L₂ tbl (k : V) (matrixToVec fun i ↦ (⌜v i⌝ : V)) =
       matrixToVec fun i ↦ (⌜π.varEqual (v i)⌝ : V) := by
@@ -550,7 +563,7 @@ private lemma varEqualVec_quote_of {n k : ℕ} {v : Fin k → SyntacticSemiterm 
   · intro i
     rw [nth_varEqualVec hv (by simp), matrixToVec_nth, H]
 
-lemma varEqual_quote (h : IsTableOf π tbl) {n : ℕ} (t : SyntacticSemiterm L₂ n) :
+lemma varEqual_quote (h : IsTableOf π tbl) (t : SyntacticSemiterm L₂ n) :
     varEqual L₁ L₂ tbl (⌜t⌝ : V) = ⌜π.varEqual t⌝ := by
   induction t with
   | bvar x =>
@@ -569,8 +582,7 @@ lemma varEqual_quote (h : IsTableOf π tbl) {n : ℕ} (t : SyntacticSemiterm L�
       h.funcTail_eq_quote, DirectTranslation.varEqual, Semiformula.quote_allItr,
       Semiformula.quote_imp, Semiformula.quote_conj]
 
-lemma translateRel_quote (h : IsTableOf π tbl) {n k : ℕ} (R : L₂.Rel k)
-    (v : Fin k → SyntacticSemiterm L₂ n) :
+lemma translateRel_quote (h : IsTableOf π tbl) (R : L₂.Rel k) (v : Fin k → SyntacticSemiterm L₂ n) :
     translateRel L₁ L₂ tbl (k : V) ⌜R⌝ (matrixToVec fun i ↦ (⌜v i⌝ : V)) =
       ⌜π.translateRel R v⌝ := by
   rw [translateRel, varEqualVec_quote_of fun i ↦ h.varEqual_quote (v i),
@@ -579,7 +591,7 @@ lemma translateRel_quote (h : IsTableOf π tbl) {n k : ℕ} (R : L₂.Rel k)
     h.tableRel_eq_quote (n := n) R, DirectTranslation.translateRel, Semiformula.quote_allItr,
     Semiformula.quote_imp, Semiformula.quote_conj]
 
-lemma translate_quote (h : IsTableOf π tbl) {n : ℕ} (φ : Semiproposition L₂ n) :
+lemma translate_quote (h : IsTableOf π tbl) (φ : Semiproposition L₂ n) :
     translate L₁ L₂ tbl (⌜φ⌝ : V) = ⌜π.translate φ⌝ := by
   induction φ using Semiformula.rec' with
   | hrel R v =>
@@ -609,7 +621,7 @@ lemma translate_quote (h : IsTableOf π tbl) {n : ℕ} (φ : Semiproposition L�
     simp [DirectTranslation.translate_ex, DirectTranslation.exs, bexs,
       ← h.domainAt_quote (0 : Fin (_ + 1))]
 
-lemma translate_quote_sentence (h : IsTableOf π tbl) {n : ℕ} (σ : Semisentence L₂ n) :
+lemma translate_quote_sentence (h : IsTableOf π tbl) (σ : Semisentence L₂ n) :
     translate L₁ L₂ tbl (⌜σ⌝ : V) = ⌜π.translate σ⌝ := by
   rw [Sentence.quote_def, h.translate_quote, DirectTranslation.translate_emb, Sentence.quote_def]
 
@@ -624,14 +636,18 @@ end IsTableOf
 
 /-! ## Tables of translations of arithmetic -/
 
+section arithmetic
+
+variable (π : DirectTranslation T ℒₒᵣ)
+
 /-- The entries of `arithmeticTable π` for relation symbols, indexed by the codes `⟪k, r⟫`. -/
-noncomputable def arithmeticRelationTable (π : DirectTranslation T ℒₒᵣ) : Fin 8 → V
+noncomputable def arithmeticRelationTable : Fin 8 → V
   | 6 => ⌜(π.rel Language.ORing.Rel.eq).sentence⌝
   | 7 => ⌜(π.rel Language.ORing.Rel.lt).sentence⌝
   | _ => 0
 
 /-- The entries of `arithmeticTable π` for function symbols, indexed by the codes `⟪k, f⟫`. -/
-noncomputable def arithmeticFunctionTable (π : DirectTranslation T ℒₒᵣ) : Fin 8 → V
+noncomputable def arithmeticFunctionTable : Fin 8 → V
   | 0 => ⌜(π.func Language.ORing.Func.zero).sentence⌝
   | 1 => ⌜(π.func Language.ORing.Func.one).sentence⌝
   | 6 => ⌜(π.func Language.ORing.Func.add).sentence⌝
@@ -639,7 +655,7 @@ noncomputable def arithmeticFunctionTable (π : DirectTranslation T ℒₒᵣ) :
   | _ => 0
 
 /-- A table of the direct translation `π` of the language of arithmetic. -/
-noncomputable def arithmeticTable (π : DirectTranslation T ℒₒᵣ) : V :=
+noncomputable def arithmeticTable : V :=
   ?[⌜π.domain.sentence⌝, matrixToVec (arithmeticRelationTable π),
     matrixToVec (arithmeticFunctionTable π)]
 
@@ -648,8 +664,7 @@ private lemma nth_matrixToVec_pair {N : ℕ} (v : Fin N → V) (k r : ℕ) (h : 
   rw [← coe_pair_eq_pair_coe]
   exact matrixToVec_nth v ⟨Nat.pair k r, h⟩
 
-theorem isTableOf_arithmeticTable (π : DirectTranslation T ℒₒᵣ) :
-    IsTableOf π (arithmeticTable (V := V) π) where
+theorem isTableOf_arithmeticTable : IsTableOf π (arithmeticTable (V := V) π) where
   domain := by simp [tableDomain, arithmeticTable]
   rel R := by
     have h : (arithmeticTable (V := V) π).[1] = matrixToVec (arithmeticRelationTable π) := by
@@ -667,6 +682,8 @@ theorem isTableOf_arithmeticTable (π : DirectTranslation T ℒₒᵣ) :
     · exact nth_matrixToVec_pair (V := V) (arithmeticFunctionTable π) 0 1 (by decide)
     · exact nth_matrixToVec_pair (V := V) (arithmeticFunctionTable π) 2 0 (by decide)
     · exact nth_matrixToVec_pair (V := V) (arithmeticFunctionTable π) 2 1 (by decide)
+
+end arithmetic
 
 end Bootstrapping
 end FFL.FirstOrder.Arithmetic

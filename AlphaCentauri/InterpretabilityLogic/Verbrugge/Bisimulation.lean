@@ -23,7 +23,8 @@ open World
 variable {κ κ' α : Type*} [Nonempty κ] [Nonempty κ'] {M : Model κ α} {N : Model κ' α}
   {Z₁ Z₀ : M.World → N.World → Prop} {x : M.World} {y : N.World} {A B : Formula α}
 
-variable (M N) in
+variable (M N)
+
 /-- The w-forth condition from `Z₁` to `Z₀`: for every `≺`-successor `u` of `x` and every
 `Z₁`-related `y`, there is a nonempty set `U` of `≺`-successors of `y`, each `Z₀`-related to `u`,
 such that whenever every `u' ∈ U` is given some $u' \mathrel{≺[y]} V'(u')$, some
@@ -36,6 +37,32 @@ def WForth (Z₁ Z₀ : M.World → N.World → Prop) : Prop :=
     ∃ U : Set N.World, U.Nonempty ∧ (∀ u' ∈ U, y ≺ u' ∧ Z₀ u u') ∧
       ∀ V' : N.World → Set N.World, (∀ u' ∈ U, u' ≺[y] V' u') →
         ∃ V, u ≺[x] V ∧ ∀ v ∈ V, ∃ u' ∈ U, ∃ v' ∈ V' u', Z₀ v v'
+
+/-- A w-bisimulation: a relation between worlds that preserves atoms and satisfies the w-forth
+and the w-back conditions.
+
+- [HPV23, Definition 2.7]
+-/
+structure WBisimulation where
+  toRel : M.World → N.World → Prop
+  atomic {x : M.World} {y : N.World} {a : α} : toRel x y → (M x a ↔ N y a)
+  forth : WForth M N toRel toRel
+  back : WForth N M (flip toRel) (flip toRel)
+
+/-- An $n$-w-bisimulation: a sequence $Z_n ⊆ ⋯ ⊆ Z_0$ of relations between worlds such that
+$Z_0$ preserves atoms and each $Z_{i + 1}$ satisfies the w-forth and the w-back conditions with
+respect to $Z_i$.
+
+- [HPV23, Definition 3.1]
+-/
+structure NWBisimulation (n : ℕ) where
+  toRel : ℕ → M.World → N.World → Prop
+  antitone {i : ℕ} {x : M.World} {y : N.World} : i < n → toRel (i + 1) x y → toRel i x y
+  atomic {x : M.World} {y : N.World} {a : α} : toRel 0 x y → (M x a ↔ N y a)
+  forth {i : ℕ} : i < n → WForth M N (toRel (i + 1)) (toRel i)
+  back {i : ℕ} : i < n → WForth N M (flip (toRel (i + 1))) (flip (toRel i))
+
+variable {M N}
 
 namespace WForth
 
@@ -63,18 +90,6 @@ lemma forces_rhd (hA : ∀ u u', Z₀ u u' → (u ⊩[M] A ↔ u' ⊩[N] A))
 
 end WForth
 
-variable (M N) in
-/-- A w-bisimulation: a relation between worlds that preserves atoms and satisfies the w-forth
-and the w-back conditions.
-
-- [HPV23, Definition 2.7]
--/
-structure WBisimulation where
-  toRel : M.World → N.World → Prop
-  atomic {x : M.World} {y : N.World} {a : α} : toRel x y → (M x a ↔ N y a)
-  forth : WForth M N toRel toRel
-  back : WForth N M (flip toRel) (flip toRel)
-
 instance : CoeFun (WBisimulation M N) fun _ ↦ M.World → N.World → Prop :=
   ⟨WBisimulation.toRel⟩
 
@@ -95,20 +110,6 @@ theorem WBisimulation.forces_iff (Z : WBisimulation M N) (h : Z x y) : x ⊩[M] 
     constructor;
     · exact WForth.forces_rhd Z.back h (fun _ _ h ↦ (ihA h).symm) fun _ _ h ↦ (ihB h).symm;
     · exact WForth.forces_rhd Z.forth h (fun _ _ h ↦ ihA h) fun _ _ h ↦ ihB h;
-
-variable (M N) in
-/-- An $n$-w-bisimulation: a sequence $Z_n ⊆ ⋯ ⊆ Z_0$ of relations between worlds such that
-$Z_0$ preserves atoms and each $Z_{i + 1}$ satisfies the w-forth and the w-back conditions with
-respect to $Z_i$.
-
-- [HPV23, Definition 3.1]
--/
-structure NWBisimulation (n : ℕ) where
-  toRel : ℕ → M.World → N.World → Prop
-  antitone {i : ℕ} {x : M.World} {y : N.World} : i < n → toRel (i + 1) x y → toRel i x y
-  atomic {x : M.World} {y : N.World} {a : α} : toRel 0 x y → (M x a ↔ N y a)
-  forth {i : ℕ} : i < n → WForth M N (toRel (i + 1)) (toRel i)
-  back {i : ℕ} : i < n → WForth N M (flip (toRel (i + 1))) (flip (toRel i))
 
 namespace NWBisimulation
 
@@ -154,24 +155,30 @@ theorem forces_iff (hi : i ≤ n) (h : Z.toRel i x y) (hA : A.depth ≤ i) :
 
 end NWBisimulation
 
-variable (M N) in
+section
+
+variable (M N) (n : ℕ) (x : M.World) (y : N.World)
+
 /-- `x` and `y` are $n$-w-bisimilar: some $n$-w-bisimulation relates them by $Z_n$.
 
 - [HPV23, Definition 3.1]
 -/
-def NWBisimilar (n : ℕ) (x : M.World) (y : N.World) : Prop :=
+def NWBisimilar : Prop :=
   ∃ Z : NWBisimulation M N n, Z.toRel n x y
 
-variable (M N) in
 /-- `x` and `y` are $n$-modally equivalent: they force the same formulas of modal depth at most
 $n$.
 
 - [HPV23, §2]
 -/
-def ModalEquivalent (n : ℕ) (x : M.World) (y : N.World) : Prop :=
+def ModalEquivalent : Prop :=
   ∀ A : Formula α, A.depth ≤ n → (x ⊩[M] A ↔ y ⊩[N] A)
 
-lemma flip_modalEquivalent {n : ℕ} : flip (ModalEquivalent M N n) = ModalEquivalent N M n := by
+end
+
+variable {n : ℕ}
+
+lemma flip_modalEquivalent : flip (ModalEquivalent M N n) = ModalEquivalent N M n := by
   ext y x;
   exact forall_congr' fun _ ↦ imp_congr_right fun _ ↦ Iff.comm;
 
@@ -179,12 +186,21 @@ lemma flip_modalEquivalent {n : ℕ} : flip (ModalEquivalent M N n) = ModalEquiv
 
 section Definable
 
-variable (M N) in
+variable (M N n)
+
 private def SumForces : M.World ⊕ N.World → Formula α → Prop
   | .inl x, A => x ⊩[M] A
   | .inr y, A => y ⊩[N] A
 
-variable {z : M.World ⊕ N.World}
+private def Definable (S : Set (M.World ⊕ N.World)) : Prop :=
+  ∃ A : Formula α, A.depth ≤ n ∧ ∀ z, z ∈ S ↔ SumForces M N z A
+
+private def SumModalEquivalent (z w : M.World ⊕ N.World) : Prop :=
+  ∀ A : Formula α, A.depth ≤ n → (SumForces M N z A ↔ SumForces M N w A)
+
+variable {M N n}
+
+variable {z : M.World ⊕ N.World} {A' : Formula α}
 
 private lemma sumForces_bot : ¬SumForces M N z ⊥ := by cases z <;> exact id;
 
@@ -202,14 +218,13 @@ private lemma sumForces_or :
     SumForces M N z (A ⋎ B) ↔ SumForces M N z A ∨ SumForces M N z B := by
   cases z <;> exact forces_or;
 
-private lemma sumForces_box_congr {A' : Formula α}
-    (hA : ∀ w, SumForces M N w A ↔ SumForces M N w A') :
+private lemma sumForces_box_congr (hA : ∀ w, SumForces M N w A ↔ SumForces M N w A') :
     SumForces M N z (□A) ↔ SumForces M N z (□A') := by
   cases z with
   | inl x => exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ hA (.inl y);
   | inr x => exact forall_congr' fun y ↦ imp_congr_right fun _ ↦ hA (.inr y);
 
-private lemma sumForces_rhd_congr {A' B' : Formula α}
+private lemma sumForces_rhd_congr {B' : Formula α}
     (hA : ∀ w, SumForces M N w A ↔ SumForces M N w A')
     (hB : ∀ w, SumForces M N w B ↔ SumForces M N w B') :
     SumForces M N z (A ▷ B) ↔ SumForces M N z (A' ▷ B') := by
@@ -223,11 +238,7 @@ private lemma sumForces_rhd_congr {A' B' : Formula α}
     have hB' (y : N.World) : y ⊩[N] B ↔ y ⊩[N] B' := hB (.inr y);
     simp only [SumForces, forces_rhd, hA', hB'];
 
-variable (M N) in
-private def Definable (n : ℕ) (S : Set (M.World ⊕ N.World)) : Prop :=
-  ∃ A : Formula α, A.depth ≤ n ∧ ∀ z, z ∈ S ↔ SumForces M N z A
-
-variable {n : ℕ} {𝒮 : Set (Set (M.World ⊕ N.World))}
+variable {𝒮 : Set (Set (M.World ⊕ N.World))}
 
 private lemma definable_forces (hA : A.depth ≤ n) : Definable M N n {z | SumForces M N z A} := by
   use A;
@@ -286,9 +297,11 @@ private lemma finite_definable_of_invariant {β : Type*} [Finite β] (σ : M.Wor
   intro S hS T hT hST;
   exact Set.Subset.antisymm (sub hT hST.le) (sub hS hST.ge);
 
+variable [Finite α] (n)
+
 /-- Over finitely many propositional variables, finitely many sets of worlds are definable by
 formulas of modal depth at most `n`. -/
-private lemma finite_definable [Finite α] (n : ℕ) : {S | Definable M N n S}.Finite := by
+private lemma finite_definable : {S | Definable M N n S}.Finite := by
   induction n with
   | zero =>
     apply finite_definable_of_invariant fun z ↦ {a : α | SumForces M N z (#a)};
@@ -331,11 +344,7 @@ private lemma finite_definable [Finite α] (n : ℕ) : {S | Definable M N n S}.F
       rw [sumForces_rhd_congr hS hT, sumForces_rhd_congr hS hT];
       exact Set.ext_iff.mp hrhd (_, _);
 
-variable (M N) in
-private def SumModalEquivalent (n : ℕ) (z w : M.World ⊕ N.World) : Prop :=
-  ∀ A : Formula α, A.depth ≤ n → (SumForces M N z A ↔ SumForces M N w A)
-
-private lemma definable_modalEquivalent_class [Finite α] (n : ℕ) (u : M.World ⊕ N.World) :
+private lemma definable_modalEquivalent_class (u : M.World ⊕ N.World) :
     Definable M N n {z | SumModalEquivalent M N n z u} := by
   have : {z | SumModalEquivalent M N n z u} = ⋂₀ {S | Definable M N n S ∧ u ∈ S} := by
     ext z;
@@ -351,7 +360,7 @@ private lemma definable_modalEquivalent_class [Finite α] (n : ℕ) (u : M.World
   rw [this];
   exact Definable.sInter ((finite_definable n).subset fun _ h ↦ h.1) fun _ h ↦ h.1;
 
-private lemma definable_modalEquivalent_union [Finite α] (n : ℕ) (C : Set (M.World ⊕ N.World)) :
+private lemma definable_modalEquivalent_union (C : Set (M.World ⊕ N.World)) :
     Definable M N n {z | ∃ c ∈ C, SumModalEquivalent M N n z c} := by
   have : {z | ∃ c ∈ C, SumModalEquivalent M N n z c} =
       ⋃₀ ((fun c ↦ {z | SumModalEquivalent M N n z c}) '' C) := by
@@ -368,7 +377,7 @@ condition with respect to $n$-modal equivalence.
 
 - [HPV23, Theorem 4.3, Remark 3.3]
 -/
-lemma wForth_modalEquivalent [Finite α] (n : ℕ) :
+lemma wForth_modalEquivalent :
     WForth M N (ModalEquivalent M N (n + 1)) (ModalEquivalent M N n) := by
   intro x y u h Rxu;
   obtain ⟨χ, hχ, hχu⟩ := definable_modalEquivalent_class (M := M) (N := N) n (.inl u);
@@ -412,7 +421,7 @@ $n$-modally equivalent.
 
 - [HPV23, Proposition 3.2, Theorem 4.3]
 -/
-theorem nWBisimilar_iff_modalEquivalent [Finite α] {n : ℕ} :
+theorem nWBisimilar_iff_modalEquivalent [Finite α] :
     NWBisimilar M N n x y ↔ ModalEquivalent M N n x y := by
   constructor;
   · rintro ⟨Z, h⟩ A hA;

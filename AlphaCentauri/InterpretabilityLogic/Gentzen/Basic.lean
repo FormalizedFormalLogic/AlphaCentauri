@@ -19,33 +19,41 @@ A cut-free sequent calculus for $\mathbf{IL}$.
 
 namespace FFL.InterpretabilityLogic
 
-abbrev FormulaFinset (α : Type*) := Finset (Formula α)
+variable (α : Type*)
+
+abbrev FormulaFinset := Finset (Formula α)
 
 namespace FormulaFinset
 
 variable {α : Type*} {Γ : FormulaFinset α} {A B : Formula α}
 
+variable (Γ)
+
 /-- The formulas `A` with `□A ∈ Γ`. -/
-noncomputable def prebox (Γ : FormulaFinset α) : FormulaFinset α :=
+noncomputable def prebox : FormulaFinset α :=
   Γ.preimage (□·) fun _ _ _ _ h ↦ Formula.box_inj.mp h
+
+variable {Γ}
 
 @[simp, grind =]
 lemma mem_prebox : A ∈ Γ.prebox ↔ □A ∈ Γ := Finset.mem_preimage
 
-variable [DecidableEq α]
+variable (Γ) [DecidableEq α]
 
-abbrev box (Γ : FormulaFinset α) : FormulaFinset α := Γ.image (□·)
+abbrev box : FormulaFinset α := Γ.image (□·)
 
 /-- The formulas `□∼A` for `A ∈ Γ`. -/
-abbrev boxNeg (Γ : FormulaFinset α) : FormulaFinset α := Γ.image fun A ↦ □(∼A)
+abbrev boxNeg : FormulaFinset α := Γ.image fun A ↦ □(∼A)
+
+def subformulas : FormulaFinset α := Γ.biUnion Formula.subformulas
+
+variable {Γ}
 
 @[grind .]
 lemma box_prebox_subset : Γ.prebox.box ⊆ Γ := by
   intro A hA;
   obtain ⟨B, hB, rfl⟩ := Finset.mem_image.mp hA;
   exact mem_prebox.mp hB;
-
-def subformulas (Γ : FormulaFinset α) : FormulaFinset α := Γ.biUnion Formula.subformulas
 
 @[grind .]
 lemma subset_subformulas : Γ ⊆ Γ.subformulas :=
@@ -59,7 +67,7 @@ lemma mem_subformulas_subformulas {C : Formula α} (hB : B ∈ Γ.subformulas)
 
 end FormulaFinset
 
-structure Sequent (α : Type*) where
+structure Sequent where
   ant : FormulaFinset α
   suc : FormulaFinset α
 
@@ -69,36 +77,46 @@ namespace Sequent
 
 variable {α : Type*} {S T : Sequent α}
 
-structure Subset (S T : Sequent α) : Prop where
+variable (S T)
+
+structure Subset : Prop where
   ant : S.ant ⊆ T.ant
   suc : S.suc ⊆ T.suc
 
 instance : HasSubset (Sequent α) := ⟨Subset⟩
 
-@[simp]
-lemma subset_iff : S ⊆ T ↔ S.ant ⊆ T.ant ∧ S.suc ⊆ T.suc :=
-  ⟨fun h ↦ ⟨h.1, h.2⟩, fun h ↦ ⟨h.1, h.2⟩⟩
-
-structure Saturated (S : Sequent α) : Prop where
+structure Saturated : Prop where
   impL : ∀ {A B}, A 🡒 B ∈ S.ant → A ∈ S.suc ∨ B ∈ S.ant
   impR : ∀ {A B}, A 🡒 B ∈ S.suc → A ∈ S.ant ∧ B ∈ S.suc
 
 variable [DecidableEq α]
 
-def subformulas (S : Sequent α) : FormulaFinset α := (S.ant ∪ S.suc).subformulas
+def subformulas : FormulaFinset α := (S.ant ∪ S.suc).subformulas
+
+variable {S T}
+
+omit [DecidableEq α] in
+@[simp]
+lemma subset_iff : S ⊆ T ↔ S.ant ⊆ T.ant ∧ S.suc ⊆ T.suc :=
+  ⟨fun h ↦ ⟨h.1, h.2⟩, fun h ↦ ⟨h.1, h.2⟩⟩
 
 end Sequent
 
 namespace IL
 
-variable {α : Type*} [DecidableEq α]
+variable {α : Type*} [DecidableEq α] {p : Formula α × Formula α}
+  {l : List (Formula α × Formula α)}
+
+variable (l)
 
 /-- The first components of a list of pairs of formulas. -/
-def antecedents (l : List (Formula α × Formula α)) : FormulaFinset α := (l.map Prod.fst).toFinset
+def antecedents : FormulaFinset α := (l.map Prod.fst).toFinset
 
 /-- The formulas `A ▷ B` for the pairs `(A, B)` of a list. -/
-def rhdFormulas (l : List (Formula α × Formula α)) : FormulaFinset α :=
+def rhdFormulas : FormulaFinset α :=
   (l.map fun p ↦ p.1 ▷ p.2).toFinset
+
+variable {l}
 
 /-- The sequent `D, □∼D, Γ, □Γ, □∼N ⟹ N`. -/
 def witness (Γ N : FormulaFinset α) (D : Formula α) : Sequent α :=
@@ -108,23 +126,20 @@ def witness (Γ N : FormulaFinset α) (D : Formula α) : Sequent α :=
 lemma antecedents_nil : antecedents ([] : List (Formula α × Formula α)) = ∅ := rfl
 
 @[simp, grind =]
-lemma antecedents_cons {p : Formula α × Formula α} {l} :
-    antecedents (p :: l) = insert p.1 (antecedents l) := by simp [antecedents]
+lemma antecedents_cons : antecedents (p :: l) = insert p.1 (antecedents l) := by simp [antecedents]
 
 @[simp, grind =]
-lemma mem_antecedents {l : List (Formula α × Formula α)} {A : Formula α} :
-    A ∈ antecedents l ↔ ∃ B, (A, B) ∈ l := by simp [antecedents]
+lemma mem_antecedents {A : Formula α} : A ∈ antecedents l ↔ ∃ B, (A, B) ∈ l := by simp [antecedents]
 
 @[simp, grind =]
 lemma rhdFormulas_nil : rhdFormulas ([] : List (Formula α × Formula α)) = ∅ := rfl
 
 @[simp, grind =]
-lemma rhdFormulas_cons {p : Formula α × Formula α} {l} :
+lemma rhdFormulas_cons :
     rhdFormulas (p :: l) = insert (p.1 ▷ p.2) (rhdFormulas l) := by simp [rhdFormulas]
 
 @[simp, grind =]
-lemma mem_rhdFormulas {l : List (Formula α × Formula α)} {C : Formula α} :
-    C ∈ rhdFormulas l ↔ ∃ A B, (A, B) ∈ l ∧ C = A ▷ B := by
+lemma mem_rhdFormulas {C : Formula α} : C ∈ rhdFormulas l ↔ ∃ A B, (A, B) ∈ l ∧ C = A ▷ B := by
   simp [rhdFormulas, eq_comm]
 
 /-- The cut-free sequent calculus for $\mathbf{IL}$: the rules `rhd` and `box` take, for a list

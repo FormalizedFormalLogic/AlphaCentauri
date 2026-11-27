@@ -57,14 +57,16 @@ noncomputable def qqAlls.construction : PR.Construction V blueprint where
     rw [show p 0 + (i + 1) + (i + 1) + 2 = p 0 + i + i + 2 + 2 by grind]
     exact lt_succ_iff_le.mpr this
 
+variable (p k : V)
+
 /-- `qqAlls p k = ^∀ ^∀ ... ^∀ p` (`k` universal quantifiers). -/
-noncomputable def qqAlls (p k : V) : V := qqAlls.construction.result ![p] k
+noncomputable def qqAlls : V := qqAlls.construction.result ![p] k
 
 @[simp]
-lemma qqAlls_zero (p : V) : qqAlls p 0 = p := by simp [qqAlls, qqAlls.construction]
+lemma qqAlls_zero : qqAlls p 0 = p := by simp [qqAlls, qqAlls.construction]
 
 @[simp]
-lemma qqAlls_succ (p k : V) : qqAlls p (k + 1) = ^∀ (qqAlls p k) := by
+lemma qqAlls_succ : qqAlls p (k + 1) = ^∀ (qqAlls p k) := by
   simp [qqAlls, qqAlls.construction]
 
 set_option linter.flexible false in
@@ -87,10 +89,10 @@ lemma qqAlls_locallyDelta0 : LocallyDelta0Function₂ (qqAlls : V → V → V) :
   congr 1
   exact funext fun j ↦ by rw [Fin.fin_one_eq_zero j]; rfl
 
-lemma le_qqAll (p : V) : p ≤ ^∀ p := by
+lemma le_qqAll : p ≤ ^∀ p := by
   simp only [qqAll]; exact le_trans (le_pair_right _ _) le_self_add
 
-lemma qqAlls_all (p k : V) : qqAlls (^∀ p) k = ^∀ (qqAlls p k) := by
+lemma qqAlls_all : qqAlls (^∀ p) k = ^∀ (qqAlls p k) := by
   have hP : LocallyDelta0Pred fun k : V ↦ qqAlls (^∀ p) k = ^∀ (qqAlls p k) :=
     LocallyDelta0.eq (qqAlls_locallyDelta0.comp₂
       (qqAll_locallyDelta0.comp₁ (LocallyDelta0Function.const p)) (LocallyDelta0Function.var 0))
@@ -101,11 +103,11 @@ lemma qqAlls_all (p k : V) : qqAlls (^∀ p) k = ^∀ (qqAlls p k) := by
   · intro k ih
     rw [qqAlls_succ, ih, qqAlls_succ]
 
-lemma qqAlls_succ' (p k : V) : qqAlls p (k + 1) = qqAlls (^∀ p) k := by
+lemma qqAlls_succ' : qqAlls p (k + 1) = qqAlls (^∀ p) k := by
   rw [qqAlls_succ, qqAlls_all]
 
 @[simp]
-lemma le_qqAlls (p k : V) : p ≤ qqAlls p k := by
+lemma le_qqAlls : p ≤ qqAlls p k := by
   have hP : LocallyDelta0Pred fun k : V ↦ p ≤ qqAlls p k :=
     LocallyDelta0.le (LocallyDelta0Function.const p) (qqAlls_locallyDelta0.comp₂
       (LocallyDelta0Function.const p) (LocallyDelta0Function.var 0))
@@ -115,11 +117,11 @@ lemma le_qqAlls (p k : V) : p ≤ qqAlls p k := by
     rw [qqAlls_succ]
     exact ih.trans (le_qqAll _)
 
-lemma succ_le_qqAll (p : V) : p + 1 ≤ ^∀ p := by
+lemma succ_le_qqAll : p + 1 ≤ ^∀ p := by
   simp only [qqAll]; exact add_le_add (le_pair_right _ _) (le_refl 1)
 
 @[simp]
-lemma index_le_qqAlls (p k : V) : k ≤ qqAlls p k := by
+lemma index_le_qqAlls : k ≤ qqAlls p k := by
   have hP : LocallyDelta0Pred fun k : V ↦ k ≤ qqAlls p k :=
     LocallyDelta0.le (LocallyDelta0Function.var 0) (qqAlls_locallyDelta0.comp₂
       (LocallyDelta0Function.const p) (LocallyDelta0Function.var 0))
@@ -128,6 +130,8 @@ lemma index_le_qqAlls (p k : V) : k ≤ qqAlls p k := by
   · intro k ih
     rw [qqAlls_succ]
     exact le_trans (add_le_add ih (le_refl 1)) (succ_le_qqAll _)
+
+variable {p k : V}
 
 @[simp]
 lemma isUFormula_qqAlls : IsUFormula L (qqAlls p k) ↔ IsUFormula L p := by

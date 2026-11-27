@@ -19,12 +19,14 @@ open scoped FFL.FirstOrder.Arithmetic FFL.FirstOrder.Bounding
 
 open Bounding
 
-variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {i s z : V}
+variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {i s x z : V}
 
 namespace PR
 
+variable {k : ℕ}
+
 /-- The default invariant `z < bound v i` is locally $\Delta_0$. -/
-lemma lt_bound_locallyDelta0 {k : ℕ} {bound : (Fin k → V) → V → V}
+lemma lt_bound_locallyDelta0 {bound : (Fin k → V) → V → V}
     (h : LocallyDelta0Function fun v : Fin (k + 1) → V ↦ bound (v ·.succ) (v 0)) :
     LocallyDelta0 fun w : Fin (k + 2) → V ↦ w 0 < bound (w ·.succ.succ) (w 1) :=
   LocallyDelta0.lt (LocallyDelta0Function.var 0) (h.retraction Fin.succ)
@@ -53,7 +55,7 @@ structure Recursion (k : ℕ) where
   succ_lt_bound : ∀ v i z, inv v i z → inv v (i + 1) (succ v i z)
 
 /-- A primitive recursion whose functions are defined by the formulas of a blueprint. -/
-structure Construction {k : ℕ} (p : Arithmetic.PR.Blueprint k) extends Recursion V k where
+structure Construction (p : Arithmetic.PR.Blueprint k) extends Recursion V k where
   zero_defined : 𝚺ᴬ₁.DefinedFunction zero p.zero
   succ_defined : 𝚺ᴬ₁.DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
 
@@ -61,14 +63,17 @@ variable {V}
 
 namespace Recursion
 
-variable {k : ℕ} (c : Recursion V k) (v : Fin k → V)
+variable (c : Recursion V k) (v : Fin k → V)
+
+section
+
+variable (s : V)
 
 /-- `s` is a computation sequence of the recursion. -/
-def CSeq (s : V) : Prop :=
+def CSeq : Prop :=
   Seq s ∧ ⟪0, c.zero v⟫ ∈ s ∧ ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s
 
-private lemma cseq_iff_bounded (s : V) : c.CSeq v s ↔
-    Seq s ∧ ⟪0, c.zero v⟫ ∈ s ∧
+private lemma cseq_iff_bounded : c.CSeq v s ↔ Seq s ∧ ⟪0, c.zero v⟫ ∈ s ∧
       ∀ i < s, i + 1 < lh s → ∀ z < s, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s := by
   constructor
   · rintro ⟨Hs, hz, hs⟩
@@ -76,6 +81,8 @@ private lemma cseq_iff_bounded (s : V) : c.CSeq v s ↔
   · rintro ⟨Hs, hz, hs⟩
     exact ⟨Hs, hz, fun i hi z hiz ↦ hs i (lt_of_mem_dom hiz)
       (by simpa [lt_tsub_iff_right] using hi) z (lt_of_mem_rng hiz) hiz⟩
+
+end
 
 lemma cseq_locallyDelta0 :
     LocallyDelta0 (k := k + 1) fun w ↦ c.CSeq (w ·.succ) (w 0) := by
@@ -112,6 +119,8 @@ lemma cseq_locallyDelta0 :
 variable {c v}
 
 namespace CSeq
+
+variable {l : V}
 
 lemma seq (h : c.CSeq v s) : Seq s := h.1
 
@@ -151,7 +160,7 @@ lemma unique {s₁ s₂ : V} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁
 lemma initial : c.CSeq v !⟦c.zero v⟧ :=
   ⟨by simp, by simp [seqCons], by simp⟩
 
-lemma successor {l : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
+lemma successor (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
     c.CSeq v (s ⁀' c.succ v l z) :=
   ⟨ Hs.seq.seqCons _, by simp [seqCons, Hs.zero], by
     simp only [Hs.seq.lh_seqCons, add_tsub_cancel_right]
@@ -199,8 +208,7 @@ lemma lt_bound (H : c.CSeq v s) (h : ⟪i, z⟫ ∈ s) : z < c.bound v i :=
   c.lt_bound_of_inv v i z (H.inv_of_mem h)
 
 /-- A computation sequence of length at most `l + 1` lies below `Exp.exp ⟪l + 1, c.bound v l⟫`. -/
-lemma lt_exp_of_lh_le (H : c.CSeq v s) {l : V} (hl : lh s ≤ l + 1) :
-    s < Exp.exp ⟪l + 1, c.bound v l⟫ := by
+lemma lt_exp_of_lh_le (H : c.CSeq v s) (hl : lh s ≤ l + 1) : s < Exp.exp ⟪l + 1, c.bound v l⟫ := by
   apply lt_exp_iff.mpr
   intro q hq
   have hq' : ⟪π₁ q, π₂ q⟫ ∈ s := by simpa using hq
@@ -213,7 +221,7 @@ end CSeq
 
 /-! ## Result of primitive recursion -/
 
-variable (c v)
+variable (c v) (l z u : V)
 
 private lemma cseq_lh_locallyDelta0 :
     LocallyDelta0 fun x : Fin 2 → V ↦ c.CSeq v (x 0) ∧ x 1 + 1 = lh (x 0) := by
@@ -222,7 +230,7 @@ private lemma cseq_lh_locallyDelta0 :
       fun j ↦ LocallyDelta0Function.const (v j)
   exact hcseq.and <| LocallyDelta0.of_definable (by definability)
 
-lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
+lemma CSeq.exists : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
   set E := Exp.exp ⟪l + 1, c.bound v l⟫
   have hP : LocallyDelta0Pred fun m ↦ m ≤ l → ∃ s < E, c.CSeq v s ∧ m + 1 = lh s := by
     have := LocallyDelta0.bexs_lt_function (LocallyDelta0Function.const (k := 1) E)
@@ -244,7 +252,7 @@ lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
   obtain ⟨s, -, H⟩ := this l le_rfl
   exact ⟨s, H⟩
 
-lemma cSeq_result_existsUnique (l : V) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = lh s ∧ ⟪l, z⟫ ∈ s := by
+lemma cSeq_result_existsUnique : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = lh s ∧ ⟪l, z⟫ ∈ s := by
   obtain ⟨s, Hs, h⟩ := CSeq.exists c v l
   obtain ⟨z, hz⟩ := Hs.seq.exists (show l < lh s by simp [← h])
   apply ExistsUnique.intro z ⟨s, Hs, h, hz⟩
@@ -252,9 +260,9 @@ lemma cSeq_result_existsUnique (l : V) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = l
   exact Eq.symm <| Hs.unique Hs' (by simp [← h, ← h']) (show l < lh s by simp [← h]) hz hz'
 
 /-- The value of the recursion at `u`. -/
-noncomputable def result (u : V) : V := Classical.choose! (c.cSeq_result_existsUnique v u)
+noncomputable def result : V := Classical.choose! (c.cSeq_result_existsUnique v u)
 
-lemma result_spec (u : V) : ∃ s, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, c.result v u⟫ ∈ s :=
+lemma result_spec : ∃ s, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, c.result v u⟫ ∈ s :=
   Classical.choose!_spec (c.cSeq_result_existsUnique v u)
 
 @[simp]
@@ -263,13 +271,13 @@ theorem result_zero : c.result v 0 = c.zero v := by
   exact Hs.seq.isMapping.uniq h0 Hs.zero
 
 @[simp]
-theorem result_succ (u : V) : c.result v (u + 1) = c.succ v u (c.result v u) := by
+theorem result_succ : c.result v (u + 1) = c.succ v u (c.result v u) := by
   obtain ⟨s, Hs, hk, h⟩ := c.result_spec v u
   have : CSeq c v (s ⁀' c.succ v u (result c v u)) := Hs.successor hk h
   exact Eq.symm <| Classical.choose_uniq (c.cSeq_result_existsUnique v (u + 1))
     ⟨_, this, by simp [Hs.seq, hk], by simp [hk]⟩
 
-lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, z⟫ ∈ s :=
+lemma result_graph : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, z⟫ ∈ s :=
   ⟨by rintro rfl
       obtain ⟨s, Hs, _, h⟩ := c.result_spec v u
       exact ⟨s, Hs, h⟩,
@@ -279,11 +287,11 @@ lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
         (by simpa [← hu, succ_le_iff_lt] using Hs.seq.lt_lh_iff.mpr (mem_domain_of_pair_mem h))
         (by simp [← hu]) h' h⟩
 
-lemma result_lt_bound (u : V) : c.result v u < c.bound v u := by
+lemma result_lt_bound : c.result v u < c.bound v u := by
   obtain ⟨s, Hs, _, h⟩ := c.result_spec v u
   exact Hs.lt_bound h
 
-private lemma result_graph_bounded (z u : V) : z = c.result v u ↔
+private lemma result_graph_bounded : z = c.result v u ↔
     ∃ s < Exp.exp ⟪u + 1, c.bound v u⟫, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, z⟫ ∈ s := by
   constructor
   · rintro rfl
@@ -324,7 +332,7 @@ end Recursion
 
 namespace Construction
 
-variable {k : ℕ} {p : Arithmetic.PR.Blueprint k} (c : Construction V p) (v : Fin k → V)
+variable {p : Arithmetic.PR.Blueprint k} (c : Construction V p) (v : Fin k → V)
 
 private lemma cseq_iff (s : V) : c.CSeq v s ↔
     Seq s
@@ -403,10 +411,10 @@ lemma Seq.znth_of_lt (h : Seq s) (hi : i < lh s) : ⟪i, znth s i⟫ ∈ s := by
   obtain ⟨y, hy⟩ := h.exists hi
   rwa [h.znth_eq_of_mem hy]
 
-lemma Seq.znth_seqCons_of_lt {x : V} (h : Seq s) (hi : i < lh s) : znth (s ⁀' x) i = znth s i :=
+lemma Seq.znth_seqCons_of_lt (h : Seq s) (hi : i < lh s) : znth (s ⁀' x) i = znth s i :=
   (h.seqCons x).znth_eq_of_mem <| (Seq.mem_seqCons_iff_of_lt hi).mpr (h.znth_of_lt hi)
 
-lemma Seq.znth_seqCons_lh {x : V} (h : Seq s) : znth (s ⁀' x) (lh s) = x :=
+lemma Seq.znth_seqCons_lh (h : Seq s) : znth (s ⁀' x) (lh s) = x :=
   (h.seqCons x).znth_eq_of_mem (Seq.mem_seqCons s x)
 
 end ElementaryArithmetic

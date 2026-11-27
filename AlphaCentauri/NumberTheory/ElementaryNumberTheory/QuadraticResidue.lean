@@ -33,9 +33,12 @@ def quadraticResidue : ArithmeticSemisentence 2 :=
 def negOneHasRoot (k : ℕ) : ArithmeticSemisentence 1 :=
   “m. ∃ x, m ∣ x ^' k + 1”
 
+section
+variable (n : ℕ)
+
 /-- `q` is of the form `x² + n y²`.
 - [Smi93, §4] -/
-def squareAddMulSquare (n : ℕ) : ArithmeticSemisentence 1 := “q. ∃ x y, q = x * x + ↑n * y * y”
+def squareAddMulSquare : ArithmeticSemisentence 1 := “q. ∃ x y, q = x * x + ↑n * y * y”
 
 /-- $(-1/q) = 1$ for every prime $q \equiv 1 \pmod 4$.
 - [Smi93, Question 5.1] -/
@@ -121,9 +124,11 @@ open_problem provable_noRootNegOne_ISigma0 := ∀ r : ℕ, 2 ≤ r → 𝗜𝚺�
 
 /-- A prime $q \nmid 4n$ is of the form $x^2 + ny^2$ if and only if $q \bmod 4n$ lies in `S`.
 - [Smi93, Question 5.4] -/
-noncomputable def squareAddMulSquareIff (n : ℕ) (S : Finset ℕ) : ArithmeticSentence :=
+noncomputable def squareAddMulSquareIff (S : Finset ℕ) : ArithmeticSentence :=
   let residue : ArithmeticSemisentence 1 := ⩖ r ∈ S, “q. ∃ k, q = ↑(4 * n) * k + ↑r”
   “∀ q, !isPrime q → ¬q ∣ ↑(4 * n) → (!(squareAddMulSquare n) q ↔ !residue q)”
+
+end
 
 /-- For $n > 4$, $\mathsf{I}\mathsf{E}_1$ proves each characterization of the primes of the form
 $x^2 + ny^2$ by a congruence modulo $4n$ that holds in $\mathbb{N}$. Smith asks what can be said

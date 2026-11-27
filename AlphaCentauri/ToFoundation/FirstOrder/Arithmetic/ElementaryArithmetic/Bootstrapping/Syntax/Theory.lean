@@ -41,24 +41,23 @@ instance singleton (φ : Sentence L) : LocallyDelta0Axioms ({φ} : Theory L) V w
     (R := fun v : Fin 1 → V ↦ v 0 = (Encodable.encode φ : V)) (by definability)).of_iff
       fun v ↦ by simp [Theory.Δ₁Class, numeral_eq_natCast]
 
+section
+variable (dT : T.Δ₁) [hT : @LocallyDelta0Axioms L _ _ T dT V _ _]
+
 /-- The class is preserved by the union of the $\Delta_1$ formulas. -/
-lemma add (dT : T.Δ₁) (dU : U.Δ₁) [hT : @LocallyDelta0Axioms L _ _ T dT V _ _]
-    [hU : @LocallyDelta0Axioms L _ _ U dU V _ _] :
+lemma add (dU : U.Δ₁) [hU : @LocallyDelta0Axioms L _ _ U dU V _ _] :
     @LocallyDelta0Axioms L _ _ (T ∪ U) (dT.add dU) V _ _ := by
   let := dT
   let := dU
   exact ⟨hT.properOn.or hU.properOn,
     (hT.locallyDelta0.or hU.locallyDelta0).of_iff fun _ ↦ Theory.Δ₁Class.mem_union⟩
 
-instance union [T.Δ₁] [U.Δ₁] [LocallyDelta0Axioms T V] [LocallyDelta0Axioms U V] :
-    LocallyDelta0Axioms (T ∪ U) V :=
-  add inferInstance inferInstance
-
 /-- The class is preserved by rewriting the theory along an equality. -/
-lemma ofEq (dT : T.Δ₁) (h : T = U) [hT : @LocallyDelta0Axioms L _ _ T dT V _ _] :
-    @LocallyDelta0Axioms L _ _ U (dT.ofEq h) V _ _ := by
+lemma ofEq (h : T = U) : @LocallyDelta0Axioms L _ _ U (dT.ofEq h) V _ _ := by
   subst h
   exact hT
+
+end
 
 lemma ofList (l : List (Sentence L)) :
     @LocallyDelta0Axioms L _ _ {φ | φ ∈ l} (Theory.Δ₁.ofList l) V _ _ := by
@@ -73,10 +72,17 @@ instance ofFinite (T : Theory L) (h : Set.Finite T) :
   haveI := ofList (V := V) h.toFinset.toList
   ofEq (V := V) _ _
 
-instance insert {φ : Sentence L} [T.Δ₁] [LocallyDelta0Axioms T V] :
-    LocallyDelta0Axioms (insert φ T) V :=
+section
+variable [T.Δ₁] [LocallyDelta0Axioms T V]
+
+instance union [U.Δ₁] [LocallyDelta0Axioms U V] : LocallyDelta0Axioms (T ∪ U) V :=
+  add inferInstance inferInstance
+
+instance insert {φ : Sentence L} : LocallyDelta0Axioms (insert φ T) V :=
   haveI := add (V := V) (T := T) inferInstance (Theory.Δ₁.singleton φ)
   ofEq (V := V) _ (by ext; simp)
+
+end
 
 end LocallyDelta0Axioms
 

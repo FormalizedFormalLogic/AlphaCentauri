@@ -27,25 +27,35 @@ variable {θ α β : Ordinal.{0}} {c k : ℕ} {φ ψ : ArithmeticFormula ℕ}
 
 Subset relations for moving insertion across erasure and union. -/
 
-private lemma eraseIn (a e : ArithmeticFormula ℕ) (s : Sequent) :
-    (insert a s).erase e ⊆ insert a (s.erase e) := by
+section
+
+variable (a e : ArithmeticFormula ℕ) (s t : Sequent)
+
+private lemma eraseIn : (insert a s).erase e ⊆ insert a (s.erase e) := by
   intro x hx
   simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
   tauto
 
-private lemma eraseOut {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s : Sequent) :
-    insert a (s.erase e) ⊆ (insert a s).erase e := by
+private lemma frameIn : (insert a s).erase e ∪ t ⊆ insert a (s.erase e ∪ t) := by
+  grind
+
+end
+
+section
+
+variable {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s t : Sequent)
+
+include h
+
+private lemma eraseOut : insert a (s.erase e) ⊆ (insert a s).erase e := by
   intro x hx
   simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
   rcases hx with rfl | hx <;> tauto
 
-private lemma frameIn (a e : ArithmeticFormula ℕ) (s t : Sequent) :
-    (insert a s).erase e ∪ t ⊆ insert a (s.erase e ∪ t) := by
+private lemma frameOut : insert a (s.erase e ∪ t) ⊆ (insert a s).erase e ∪ t := by
   grind
 
-private lemma frameOut {a e : ArithmeticFormula ℕ} (h : a ≠ e) (s t : Sequent) :
-    insert a (s.erase e ∪ t) ⊆ (insert a s).erase e ∪ t := by
-  grind
+end
 
 
 /-- A cut formula is reducible below `ω ^ θ` at rank `c` when cutting two bounded derivations on it
@@ -204,12 +214,12 @@ lemma remove_false_lit (hL : ¬LitTrue (signedLit b₀ r₀ v₀))
   simp only [Finset.mem_erase, Finset.mem_insert] at hx
   exact hx.2.resolve_left hx.1
 
-variable {Δ : Sequent}
+variable {Δ : Sequent} (hθ : 0 < θ) (r : (ℒₒᵣ).Rel k)
 
 /-- Eliminates an atomic cut against a cut-free derivation with an explicit height bound.
 
 - [Tow20, Section 19.2] -/
-private lemma atom_cutAux (r : (ℒₒᵣ).Rel k) (v) (hNC : Z∞ ⊢[β, 0] insert (Semiformula.nrel r v) Γ)
+private lemma atom_cutAux (v) (hNC : Z∞ ⊢[β, 0] insert (Semiformula.nrel r v) Γ)
     (D : Derivation Δ) (hcr : D.cutRank ≤ (0 : ℕ∞)) (hmem : (Semiformula.rel r v) ∈ Δ) :
     Z∞ ⊢[β + D.ordinalBound + 1, 0] (Δ.erase (Semiformula.rel r v) ∪ Γ) := by
   induction D with
@@ -274,26 +284,26 @@ private lemma atom_cutAux (r : (ℒₒᵣ).Rel k) (v) (hNC : Z∞ ⊢[β, 0] ins
 /-- Eliminates a cut on an atomic formula between cut-free derivations.
 
 - [Tow20, Section 19.2] -/
-lemma atom_cut (r : (ℒₒᵣ).Rel k) (v) (hC : Z∞ ⊢[α, 0] insert (Semiformula.rel r v) Γ)
+lemma atom_cut (v) (hC : Z∞ ⊢[α, 0] insert (Semiformula.rel r v) Γ)
     (hNC : Z∞ ⊢[β, 0] insert (Semiformula.nrel r v) Γ) : Z∞ ⊢[β + α + 1, 0] Γ := by
   obtain ⟨D, ho, hcr⟩ := hC
   refine ((atom_cutAux r v hNC D hcr (Finset.mem_insert_self _ _)).weakening ?_).mono_ordinalBound
     (by gcongr)
   grind
 
+include hθ in
 /-- An atomic formula reduces at rank `0`.
 
 - [Tow20, Section 19.2] -/
-lemma cutReducible_rel (hθ : 0 < θ) (r : (ℒₒᵣ).Rel k) (v) :
-    CutReducible θ 0 (Semiformula.rel r v) := fun hγ hδ h₁ h₂ =>
+lemma cutReducible_rel (v) : CutReducible θ 0 (Semiformula.rel r v) := fun hγ hδ h₁ h₂ =>
   ⟨_, Ordinal.add_one_lt_omega0_opow hθ (Ordinal.add_lt_omega0_opow hδ hγ),
     atom_cut r v h₁ (by simpa using h₂)⟩
 
+include hθ in
 /-- A negated atomic formula reduces at rank `0`.
 
 - [Tow20, Section 19.2] -/
-lemma cutReducible_nrel (hθ : 0 < θ) (r : (ℒₒᵣ).Rel k) (v) :
-    CutReducible θ 0 (Semiformula.nrel r v) := fun hγ hδ h₁ h₂ =>
+lemma cutReducible_nrel (v) : CutReducible θ 0 (Semiformula.nrel r v) := fun hγ hδ h₁ h₂ =>
   ⟨_, Ordinal.add_one_lt_omega0_opow hθ (Ordinal.add_lt_omega0_opow hγ hδ),
     atom_cut r v (by simpa using h₂) h₁⟩
 

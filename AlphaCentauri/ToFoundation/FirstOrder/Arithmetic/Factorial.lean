@@ -169,21 +169,25 @@ instance isSeq_defined :
 
 end Factorial
 
-/-- `y` is the factorial of `x`. -/
-def Factorial (x y : V) : Prop := ∃ L S, Factorial.IsSeq L S x ∧ S{L}[x] = y
+variable (x)
 
-lemma Factorial.exists_unique (x : V) : ∃! y, Factorial x y := by
+/-- `y` is the factorial of `x`. -/
+def Factorial (y : V) : Prop := ∃ L S, Factorial.IsSeq L S x ∧ S{L}[x] = y
+
+lemma Factorial.exists_unique : ∃! y, Factorial x y := by
   obtain ⟨L, S, H⟩ := Factorial.exists_isSeq x
   apply ExistsUnique.intro (S{L}[x]) ⟨L, S, H, rfl⟩
   rintro y ⟨L', S', H', rfl⟩
   exact H'.ext_eq H x le_rfl
 
 /-- - [HP98, Theorem I.1.58(1)] -/
-def factorial (x : V) : V := Classical.choose! (Factorial.exists_unique x)
+def factorial : V := Classical.choose! (Factorial.exists_unique x)
 
 @[simp]
-lemma factorial_factorial (x : V) : Factorial x (factorial x) :=
+lemma factorial_factorial : Factorial x (factorial x) :=
   Classical.choose!_spec (Factorial.exists_unique x)
+
+variable {x}
 
 lemma Factorial.factorial_eq (h : Factorial x y) : factorial x = y :=
   (Factorial.exists_unique x).unique (factorial_factorial x) h
@@ -197,12 +201,22 @@ lemma factorial_zero : factorial (0 : V) = 1 :=
     ⟨1, 1, ⟨Nuon.ext_zero_eq_self_of_le (by simp), by simp⟩,
       Nuon.ext_zero_eq_self_of_le (by simp)⟩
 
+variable (x)
+
 @[simp]
-lemma factorial_succ (x : V) : factorial (x + 1) = factorial x * (x + 1) := by
+lemma factorial_succ : factorial (x + 1) = factorial x * (x + 1) := by
   obtain ⟨L, S, H⟩ := Factorial.exists_isSeq (x + 1)
   rw [Factorial.factorial_eq (⟨L, S, H, rfl⟩ : Factorial (x + 1) _),
     Factorial.factorial_eq (⟨L, S, H.of_le (by simp), rfl⟩ : Factorial x _),
     H.2 x (by simp)]
+
+@[simp]
+lemma factorial_pos : 0 < factorial x := by
+  obtain ⟨L, S, H⟩ := Factorial.exists_isSeq x
+  rw [Factorial.factorial_eq (⟨L, S, H, rfl⟩ : Factorial x _)]
+  exact H.ext_pos x le_rfl
+
+variable {x}
 
 def factorialDef : 𝚺ᴬ₁.Semisentence 2 := .mkSigma
   “y x. ∃ L, ∃ S, !Factorial.isSeqDef L S x ∧ !Nuon.extDef y L S x”
@@ -211,12 +225,6 @@ instance factorial_defined : 𝚺ᴬ₁-Function₁[V] factorial via factorialDe
   simp [factorialDef, Factorial.eq_iff, Factorial, Eq.comm]
 
 instance factorial_definable : 𝚺ᴬ₁-Function₁[V] factorial := factorial_defined.to_definable
-
-@[simp]
-lemma factorial_pos (x : V) : 0 < factorial x := by
-  obtain ⟨L, S, H⟩ := Factorial.exists_isSeq x
-  rw [Factorial.factorial_eq (⟨L, S, H, rfl⟩ : Factorial x _)]
-  exact H.ext_pos x le_rfl
 
 lemma dvd_factorial (pos : 0 < d) (h : d ≤ x) : d ∣ factorial x := by
   obtain ⟨L, S, H⟩ := Factorial.exists_isSeq x

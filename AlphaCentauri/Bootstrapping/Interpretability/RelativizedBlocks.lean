@@ -22,27 +22,25 @@ open _root_.FFL.Entailment
 
 section relAllItr
 
-variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {L : Language} [L.Encodable] [L.LORDefinable] {n : ℕ} (d : Semiformula V L 1)
 
 /-- `∀ x₁ (d(x₁) → ∀ x₂ (d(x₂) → … φ))`, the block of `k` universal quantifiers relativized to
 `d`. -/
-noncomputable def relAllItr {n : ℕ} (d : Semiformula V L 1) :
-    (k : ℕ) → Semiformula V L (n + k) → Semiformula V L n
+noncomputable def relAllItr : (k : ℕ) → Semiformula V L (n + k) → Semiformula V L n
   | 0, φ => φ
-  | k + 1, φ => relAllItr d k (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ))
+  | k + 1, φ => relAllItr k (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ))
 
 @[simp]
-lemma relAllItr_zero {n : ℕ} (d : Semiformula V L 1) (φ : Semiformula V L (n + 0)) :
-    relAllItr d 0 φ = φ := rfl
+lemma relAllItr_zero (φ : Semiformula V L (n + 0)) : relAllItr d 0 φ = φ := rfl
 
-lemma relAllItr_succ {n k : ℕ} (d : Semiformula V L 1) (φ : Semiformula V L (n + (k + 1))) :
+lemma relAllItr_succ {k : ℕ} (φ : Semiformula V L (n + (k + 1))) :
     relAllItr d (k + 1) φ = relAllItr d k (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ)) := rfl
 
 /-- `∀ x₁ (d(x₁) → ∀ x₂ (d(x₂) → … φ))`, the block of universal quantifiers relativized to `d`
 closing all the bound variables of `φ`. -/
-noncomputable def relAlls (d : Semiformula V L 1) : {n : ℕ} → Semiformula V L n → Formula V L
+noncomputable def relAlls : {n : ℕ} → Semiformula V L n → Formula V L
   | 0, φ => φ
-  | _ + 1, φ => relAlls d (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ))
+  | _ + 1, φ => relAlls (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ))
 
 end relAllItr
 
@@ -50,9 +48,10 @@ end relAllItr
 
 section relAllItrProof
 
-variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
+variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁] {k : ℕ}
+  {d : Semiformula V L 1}
 
-lemma shift_iterate_relAllItr {n : ℕ} {d : Semiformula V L 1} (hd : d.shift = d) (j : ℕ) :
+lemma shift_iterate_relAllItr {n : ℕ} (hd : d.shift = d) (j : ℕ) :
     ∀ (k : ℕ) (φ : Semiformula V L (n + k)),
       Semiformula.shift^[j] (relAllItr d k φ) = relAllItr d k (Semiformula.shift^[j] φ)
   | 0, φ => rfl
@@ -61,8 +60,10 @@ lemma shift_iterate_relAllItr {n : ℕ} {d : Semiformula V L 1} (hd : d.shift = 
     rw [relAllItr_succ, relAllItr_succ, shift_iterate_relAllItr hd j k]
     simp [Semiformula.shift_iterate_subst, hd']
 
+variable (d)
+
 /-- Specialisation of a relativized block of `k` universal quantifiers. -/
-lemma relAllItr_specialize (d : Semiformula V L 1) :
+lemma relAllItr_specialize :
     ∀ {k : ℕ} (φ : Semiformula V L (0 + k)) (w : SemitermVec V L (0 + k) 0),
       T.internalize V ⊢ relAllItr d k φ 🡒 Matrix.conj (fun i ↦ d.subst ![w i]) 🡒 φ.subst w
   | 0, φ, w => by
@@ -70,7 +71,7 @@ lemma relAllItr_specialize (d : Semiformula V L 1) :
     simp only [relAllItr_zero]
     cl_prover
   | k + 1, φ, w => by
-    have h₁ := relAllItr_specialize d (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ)) (Matrix.vecTail w)
+    have h₁ := relAllItr_specialize (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ)) (Matrix.vecTail w)
     rw [Semiformula.substs_all] at h₁
     have h₂ := TProof.all_imp_subst (T := T)
       ((d.subst ![Semiterm.bvar 0] 🡒 φ).subst (SemitermVec.q (Matrix.vecTail w))) (w 0)
@@ -83,15 +84,14 @@ lemma relAllItr_specialize (d : Semiformula V L 1) :
     cl_prover [h₁, h₂]
 
 /-- Specialisation of a relativized block of universal quantifiers. -/
-lemma relAlls_specialize (d : Semiformula V L 1) :
-    ∀ {n : ℕ} (φ : Semiformula V L n) (w : SemitermVec V L n 0),
+lemma relAlls_specialize : ∀ {n : ℕ} (φ : Semiformula V L n) (w : SemitermVec V L n 0),
       T.internalize V ⊢ relAlls d φ 🡒 Matrix.conj (fun i ↦ d.subst ![w i]) 🡒 φ.subst w
   | 0, φ, w => by
     rw [Semiformula.subst_nil_eq_self]
     simp only [relAlls]
     cl_prover
   | n + 1, φ, w => by
-    have h₁ := relAlls_specialize d (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ)) (Matrix.vecTail w)
+    have h₁ := relAlls_specialize (∀¹ (d.subst ![Semiterm.bvar 0] 🡒 φ)) (Matrix.vecTail w)
     rw [Semiformula.substs_all] at h₁
     have h₂ := TProof.all_imp_subst (T := T)
       ((d.subst ![Semiterm.bvar 0] 🡒 φ).subst (SemitermVec.q (Matrix.vecTail w))) (w 0)
@@ -102,8 +102,10 @@ lemma relAlls_specialize (d : Semiformula V L 1) :
     simp only [relAlls, Matrix.conj]
     cl_prover [h₁, h₂]
 
+variable {d}
+
 omit [T.Δ₁] in
-lemma free_subst_q_fvar' {k : ℕ} (ψ : Semiformula V L (k + 1)) :
+lemma free_subst_q_fvar' (ψ : Semiformula V L (k + 1)) :
     (ψ.subst (SemitermVec.q fun i : Fin k ↦ Semiterm.fvar (i : V))).free =
       ψ.shift.subst fun i ↦ Semiterm.fvar (i : V) := by
   rw [Semiformula.free, Semiformula.shift_substs, Semiformula.substs_substs]
@@ -115,7 +117,7 @@ lemma free_subst_q_fvar' {k : ℕ} (ψ : Semiformula V L (k + 1)) :
 
 /-- Generalisation of a relativized block of `k` universal quantifiers over `k` fresh free
 variables under a hypothesis. -/
-lemma relAllItr_generalize_imp {d : Semiformula V L 1} (hd : d.shift = d) :
+lemma relAllItr_generalize_imp (hd : d.shift = d) :
     ∀ {k : ℕ} {C : Formula V L} {φ : Semiformula V L (0 + k)},
       T.internalize V ⊢ Semiformula.shift^[k] C 🡒
         Matrix.conj (fun i : Fin (0 + k) ↦ d.subst ![Semiterm.fvar ((i : ℕ) : V)]) 🡒
@@ -152,7 +154,7 @@ lemma conj_fin_zero_add {α : Type*} [Top α] [Wedge α] (k : ℕ) (f : ℕ → 
 
 /-- Under hypotheses that `B i` and `C i` agree on `d`, the block `relativizedImp (d ⋏ e) B G` is
 equivalent to the block of quantifiers relativized to `d` over `⋀ᵢ (e(wᵢ) ∧ Cᵢ(wᵢ)) → G`. -/
-lemma relativizedImp_iff_relAllItr {k : ℕ} {d : Semiformula V L 1} (hd : d.shift = d)
+lemma relativizedImp_iff_relAllItr (hd : d.shift = d)
     (e : Semiformula V L 1) (B C : Fin k → Semiformula V L 1) (G : Semiformula V L (0 + k)) :
     T.internalize V ⊢ Matrix.conj (fun i ↦ ∀¹ (d 🡒 (B i 🡘 C i))) 🡒
       (relativizedImp (d ⋏ e) B G 🡘 relAllItr d k (Matrix.conj (fun i : Fin k ↦

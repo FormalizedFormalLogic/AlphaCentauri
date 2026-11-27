@@ -702,6 +702,16 @@ Ros84:
     title: Oxford Logic Guides
     volume: 9
 
+Sch22:
+  type: Misc
+  title: Which sentences are "irreducibly" self-referential over PA?
+  author: "Schweber, Noah"
+  date: 2022-03-05
+  url: https://mathoverflow.net/q/417499
+  parent:
+    type: Web
+    title: MathOverflow
+
 She64:
   type: Article
   title: A non-standard model for a free variable fragment of number theory

@@ -20,9 +20,66 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 variable {r : V} {ρ : V → V} {a b d d₀ p q s e x Γ : V}
 
-variable (L p) in
+section
+
+/-! ### Bounds on the premises of the cut reduction -/
+
+variable (L r ρ d p s e)
+
 /-- `p` has complexity zero or is existential. -/
 private def IsZeroOrExs : Prop := formulaComplexity L p = 0 ∨ ∃ a < p, p = ^∃ a
+
+/-- `s` together with every code up to `d`. -/
+private noncomputable def widen : V := s ∪ under (d + 1)
+
+private lemma subset_widen : s ⊆ widen d s := fun _ hx ↦ mem_cup_iff.mpr (.inl hx)
+
+/-- The cut formulas at the premises: the cut formula itself, its shift, and every code up to
+`d`. -/
+private noncomputable def formulaBound : V := p + shift L p + d
+
+/-- The contexts at the premises: contexts enlarged by codes up to `d`, their shifts so enlarged,
+and the image of the context under the inverse of `freshVec (s + d)`. -/
+private noncomputable def contextBound : V :=
+  widen d s + widen d (setShift L s) + fvSubstImage (L := L) (freshVecInverse (s + d)) s
+
+/-- The partner derivations at the premises: weakenings of the partner and of its shift, and the
+image `ρ ⟪w, e⟫` of the partner under the inverse `w` of `freshVec (s + d)`. -/
+private noncomputable def partnerBound : V :=
+  wkRule (insert (neg L p) (widen d s)) e +
+    wkRule (insert (neg L (shift L p)) (widen d (setShift L s)))
+      (shiftRule (setShift L (fstIdx e)) e) +
+    ρ ⟪freshVecInverse (s + d), e⟫
+
+/-- `y` codes a derivation of cut rank at most `r` of the image under `π₁ x` of the end-sequent of
+`π₂ x`, whenever `π₂ x` codes a derivation of cut rank at most `r` and `π₁ x` a vector of terms. -/
+private def IsRewriting (x y : V) : Prop :=
+  RankedDerivation (∅ : Theory L) r (π₂ x) → IsSemitermVec L (len (π₁ x)) 0 (π₁ x) →
+    RankedDerivationOf (∅ : Theory L) r y (fvSubstImage (L := L) (π₁ x) (fstIdx (π₂ x)))
+
+/-- The cut reduction holds for every derivation coded below `d`, with cut formula, context and
+partner derivation bounded by `bp`, `bs` and `be`. -/
+private def CutBelow (bp bs be : V) : Prop :=
+  ∀ d₀ < d, ∀ q ≤ bp, ∀ s₀ ≤ bs, ∀ e₀ ≤ be, formulaComplexity L q ≤ r → IsZeroOrExs L q →
+    RankedDerivation (∅ : Theory L) r d₀ → fstIdx d₀ ⊆ insert q s₀ →
+    RankedDerivationOf (∅ : Theory L) r e₀ (insert (neg L q) s₀) →
+    RankedDerivable (∅ : Theory L) r s₀
+
+variable {L}
+
+private lemma exists_rewriting : ∃ ρ : V → V, (𝚺ᴬ₁-Function₁ ρ) ∧ ∀ x, IsRewriting L r x (ρ x) := by
+  apply ISigma1.exists_sigma1Function_of_forall_exists (by unfold IsRewriting; definability)
+  intro x
+  by_cases h : RankedDerivation (∅ : Theory L) r (π₂ x) ∧ IsSemitermVec L (len (π₁ x)) 0 (π₁ x)
+  · obtain ⟨y, hy⟩ := RankedDerivable.rewrite (fun p hp ↦ absurd hp (not_mem_empty_Δ₁Class p))
+      h.2 ⟨π₂ x, rfl, h.1⟩
+    exact ⟨y, fun _ _ ↦ hy⟩
+  · exact ⟨0, fun h₁ h₂ ↦ absurd ⟨h₁, h₂⟩ h⟩
+
+private lemma le_formulaBound : p ≤ formulaBound L d p :=
+  le_trans le_self_add le_self_add
+
+end
 
 private lemma isZeroOrExs_shift_iff (hp : IsUFormula L p) :
     IsZeroOrExs L (shift L p) ↔ IsZeroOrExs L p := by
@@ -37,18 +94,9 @@ private lemma isZeroOrExs_shift_iff (hp : IsUFormula L p) :
     have ha : IsUFormula L a := by simpa using hp
     exact ⟨shift L a, by simp [shift_exs ha], shift_exs ha⟩
 
-/-! ### Bounds on the premises of the cut reduction -/
-
-variable (d s) in
-/-- `s` together with every code up to `d`. -/
-private noncomputable def widen : V := s ∪ under (d + 1)
-
 private instance : 𝚺ᴬ₁-Function₂ (widen : V → V → V) := by
   unfold widen
   definability
-
-variable (d s) in
-private lemma subset_widen : s ⊆ widen d s := fun _ hx ↦ mem_cup_iff.mpr (.inl hx)
 
 private lemma insert_subset_widen (ha : a ≤ d) : insert a s ⊆ widen d s := by
   intro x hx
@@ -67,26 +115,6 @@ private lemma wkRule_le_wkRule {S S' : V} (h : S ⊆ S') : wkRule S e ≤ wkRule
   unfold wkRule
   exact add_le_add_left (pair_le_pair (le_of_subset h) le_rfl) 1
 
-variable (L d p) in
-/-- The cut formulas at the premises: the cut formula itself, its shift, and every code up to
-`d`. -/
-private noncomputable def formulaBound : V := p + shift L p + d
-
-variable (L d s) in
-/-- The contexts at the premises: contexts enlarged by codes up to `d`, their shifts so enlarged,
-and the image of the context under the inverse of `freshVec (s + d)`. -/
-private noncomputable def contextBound : V :=
-  widen d s + widen d (setShift L s) + fvSubstImage (L := L) (freshVecInverse (s + d)) s
-
-variable (L ρ d p s e) in
-/-- The partner derivations at the premises: weakenings of the partner and of its shift, and the
-image `ρ ⟪w, e⟫` of the partner under the inverse `w` of `freshVec (s + d)`. -/
-private noncomputable def partnerBound : V :=
-  wkRule (insert (neg L p) (widen d s)) e +
-    wkRule (insert (neg L (shift L p)) (widen d (setShift L s)))
-      (shiftRule (setShift L (fstIdx e)) e) +
-    ρ ⟪freshVecInverse (s + d), e⟫
-
 private lemma partnerBound_definable (hρ : 𝚺ᴬ₁-Function₁ ρ) : 𝚺ᴬ₁-Function₄ (partnerBound L ρ) := by
   have h₁ : 𝚺ᴬ₁-Function₄ fun d p s e : V ↦ wkRule (insert (neg L p) (widen d s)) e := by
     definability
@@ -97,23 +125,6 @@ private lemma partnerBound_definable (hρ : 𝚺ᴬ₁-Function₁ ρ) : 𝚺ᴬ
     definability
   unfold partnerBound
   definability
-
-variable (L r) in
-/-- `y` codes a derivation of cut rank at most `r` of the image under `π₁ x` of the end-sequent of
-`π₂ x`, whenever `π₂ x` codes a derivation of cut rank at most `r` and `π₁ x` a vector of terms. -/
-private def IsRewriting (x y : V) : Prop :=
-  RankedDerivation (∅ : Theory L) r (π₂ x) → IsSemitermVec L (len (π₁ x)) 0 (π₁ x) →
-    RankedDerivationOf (∅ : Theory L) r y (fvSubstImage (L := L) (π₁ x) (fstIdx (π₂ x)))
-
-variable (r) in
-private lemma exists_rewriting : ∃ ρ : V → V, (𝚺ᴬ₁-Function₁ ρ) ∧ ∀ x, IsRewriting L r x (ρ x) := by
-  apply ISigma1.exists_sigma1Function_of_forall_exists (by unfold IsRewriting; definability)
-  intro x
-  by_cases h : RankedDerivation (∅ : Theory L) r (π₂ x) ∧ IsSemitermVec L (len (π₁ x)) 0 (π₁ x)
-  · obtain ⟨y, hy⟩ := RankedDerivable.rewrite (fun p hp ↦ absurd hp (not_mem_empty_Δ₁Class p))
-      h.2 ⟨π₂ x, rfl, h.1⟩
-    exact ⟨y, fun _ _ ↦ hy⟩
-  · exact ⟨0, fun h₁ h₂ ↦ absurd ⟨h₁, h₂⟩ h⟩
 
 /-! ### The cut reduction -/
 
@@ -141,19 +152,6 @@ private lemma RankedDerivationOf.wk_insert_insert (ha : IsFormula L a)
   have hs := IsFormulaSet.insert_iff.mp he.isFormulaSet
   exact he.weaken (by simp [hs.1, hs.2, ha, hb]) (insert_subset_insert_of_subset x
     fun y hy ↦ susbset_insert a _ (susbset_insert b s hy))
-
-variable (L r d) in
-/-- The cut reduction holds for every derivation coded below `d`, with cut formula, context and
-partner derivation bounded by `bp`, `bs` and `be`. -/
-private def CutBelow (bp bs be : V) : Prop :=
-  ∀ d₀ < d, ∀ q ≤ bp, ∀ s₀ ≤ bs, ∀ e₀ ≤ be, formulaComplexity L q ≤ r → IsZeroOrExs L q →
-    RankedDerivation (∅ : Theory L) r d₀ → fstIdx d₀ ⊆ insert q s₀ →
-    RankedDerivationOf (∅ : Theory L) r e₀ (insert (neg L q) s₀) →
-    RankedDerivable (∅ : Theory L) r s₀
-
-variable (d p) in
-private lemma le_formulaBound : p ≤ formulaBound L d p :=
-  le_trans le_self_add le_self_add
 
 private lemma le_contextBound_insert (ha : a ≤ d) : insert a s ≤ contextBound L d s :=
   le_trans (le_of_subset (insert_subset_widen ha)) (le_trans le_self_add le_self_add)
@@ -383,14 +381,14 @@ private lemma cut_aux_cut {d₁ d₂ : V}
 
 end cutAux
 
-variable (r) in
 /-- A cut on a formula `p` of complexity at most `r` that has complexity zero or is existential,
 where the end-sequent of a derivation of cut rank at most `r` is covered by `p` beside the context,
 is replaced by a derivation of cut rank at most `r`. -/
-private lemma cut_aux : ∀ d p s e : V, formulaComplexity L p ≤ r → IsZeroOrExs L p →
+private lemma cut_aux : ∀ r d p s e : V, formulaComplexity L p ≤ r → IsZeroOrExs L p →
       RankedDerivation (∅ : Theory L) r d → fstIdx d ⊆ insert p s →
       RankedDerivationOf (∅ : Theory L) r e (insert (neg L p) s) →
       RankedDerivable (∅ : Theory L) r s := by
+  intro r
   obtain ⟨ρ, hρ, hρR⟩ := exists_rewriting (L := L) r
   have hfy : 𝚺ᴬ₁-Function₄ fun d p (_ _ : V) ↦ formulaBound L d p := by
     unfold formulaBound

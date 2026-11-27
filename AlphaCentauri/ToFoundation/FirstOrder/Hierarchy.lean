@@ -78,13 +78,16 @@ namespace Bounding
 
 variable {φ : Semiformula L ξ n}
 
-variable (ℬ φ) in
+variable (ℬ φ)
+
 /-- `φ` is equivalent, in every nonempty structure, to a `ℬ`-prenex formula of either polarity and
 of every large enough level. -/
 private def HasPrenexNormalForm : Prop :=
   ∃ s, ∀ Γ s', s ≤ s' → ∃ ψ : ℬ.Prenex Γ s' ξ n,
     ∀ (M : Type u) [Tarski.Structure L M] [Nonempty M] (e : Fin n → M) (f : ξ → M),
       Semiformula.Eval e f φ ↔ Semiformula.Eval e f ψ.val
+
+variable {ℬ φ}
 
 namespace HasPrenexNormalForm
 
@@ -155,7 +158,8 @@ private lemma and {φ₁ φ₂ : Semiformula L ξ n} (h₁ : HasPrenexNormalForm
 
 end HasPrenexNormalForm
 
-variable (φ) in
+variable (φ)
+
 private lemma hasPrenexNormalForm : HasPrenexNormalForm.{u} ℬ φ := by
   induction φ using Semiformula.rec' with
   | hverum => exact .of_closure (.verum _)
@@ -167,7 +171,8 @@ private lemma hasPrenexNormalForm : HasPrenexNormalForm.{u} ℬ φ := by
   | hall _ ih => exact ih.all
   | hexs _ ih => exact ih.exs
 
-variable (ℬ φ) in
+variable (ℬ)
+
 /-- Every formula is equivalent, in every nonempty structure, to a `ℬ`-prenex formula of either
 polarity and of every large enough level.
 - [HP98, p. 8] -/
@@ -415,7 +420,8 @@ lemma PrenexHierarchy.prenexBlock (h : ℬ[<, L].PrenexHierarchy Γ 1 φ) :
   · obtain ⟨ψ, hψ, rfl⟩ := PrenexHierarchy.pi_succ_iff.mp h
     exact .all (.bounded (PrenexHierarchy.zero_iff_bounded.mp hψ))
 
-variable (ℬ) in
+variable (ℬ)
+
 /-- `φ` is a prenex $\Sigma_m$ or $\Pi_m$ formula for some `m ≤ s`. -/
 abbrev PrenexHierarchyLE (s : ℕ) (φ : Semiformula L ξ n) : Prop :=
   ∃ m ≤ s, ∃ Γ, ℬ.PrenexHierarchy Γ m φ

@@ -355,13 +355,15 @@ lemma substs1_or (hp : IsSemiformula L 1 p) (hq : IsSemiformula L 1 q) :
   unfold substs1
   exact substs_or hp.isUFormula hq.isUFormula
 
-variable (q) in
+variable (q)
+
 lemma pi2_qqAll_sub_one : π₂ ((^∀ q) - 1) = q := by
   simp [qqAll]
 
-variable (q) in
 lemma pi2_qqExs_sub_one : π₂ ((^∃ q) - 1) = q := by
   simp [qqExs]
+
+variable {q}
 
 lemma shift_substs1_qqFvar (hp : IsSemiformula L 1 p) :
     shift L (substs1 L (^&j) p) = substs1 L (^&(j + 1)) (shift L p) := by

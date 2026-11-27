@@ -221,7 +221,11 @@ lemma exists_isHenkinSeq : ∃ y, IsHenkinSeq S n y := by
     exact ⟨y ⁀' henkinStep S n (znth y n), hcons, by simp [hy, hlh], by rw [hlt zero_le, h0],
       hstep'⟩
 
-variable {S} {n} in
+/-- The contexts of the decision sequence of the Henkin completion of `S`. -/
+noncomputable def henkinContext : V := znth (Classical.choose (exists_isHenkinSeq S n)) n
+
+variable {S n}
+
 private lemma IsHenkinSeq.znth_eq (hy : IsHenkinSeq S n y) (hy' : IsHenkinSeq S m y')
     {i : V} (hn : i ≤ n) (hm : i ≤ m) : znth y i = znth y' i := by
   revert hn hm
@@ -234,13 +238,21 @@ private lemma IsHenkinSeq.znth_eq (hy : IsHenkinSeq S n y) (hy' : IsHenkinSeq S 
     have hm' : i < m := succ_le_iff_lt.mp hm
     rw [hy.2.2.2 i hn', hy'.2.2.2 i hm', ih hn'.le hm'.le]
 
-/-- The contexts of the decision sequence of the Henkin completion of `S`. -/
-noncomputable def henkinContext : V := znth (Classical.choose (exists_isHenkinSeq S n)) n
-
-variable {S} {n} in
 private lemma IsHenkinSeq.znth_eq_henkinContext (hy : IsHenkinSeq S n y) :
     znth y n = henkinContext S n :=
   hy.znth_eq (Classical.choose_spec (exists_isHenkinSeq S n)) le_rfl le_rfl
+
+private lemma eq_henkinContext_iff_exists :
+    c = henkinContext S n ↔ ∃ y, IsHenkinSeq S n y ∧ c = znth y n :=
+  ⟨fun h ↦ let ⟨y, hy⟩ := exists_isHenkinSeq S n; ⟨y, hy, h.trans hy.znth_eq_henkinContext.symm⟩,
+    by rintro ⟨y, hy, rfl⟩; exact hy.znth_eq_henkinContext⟩
+
+private lemma eq_henkinContext_iff_forall :
+    c = henkinContext S n ↔ ∀ y, IsHenkinSeq S n y → c = znth y n :=
+  ⟨by rintro rfl y hy; exact hy.znth_eq_henkinContext.symm,
+    fun h ↦ let ⟨y, hy⟩ := exists_isHenkinSeq S n; (h y hy).trans hy.znth_eq_henkinContext⟩
+
+variable (S n)
 
 @[simp]
 lemma henkinContext_zero : henkinContext S (0 : V) = ∅ := by
@@ -257,18 +269,6 @@ lemma henkinContext_succ : henkinContext S (n + 1) = henkinStep S n (henkinConte
 noncomputable def henkinContextGraph : 𝚫ᴬ_[2].Semisentence 2 := .mkDelta
   (.mkSigma “c n. ∃ y, !(isHenkinSeq S).sigma.val n y ∧ !znthDef c y n”)
   (.mkPi “c n. ∀ y, !(isHenkinSeq S).sigma.val n y → !znthDef c y n”)
-
-variable {S} {n} in
-private lemma eq_henkinContext_iff_exists :
-    c = henkinContext S n ↔ ∃ y, IsHenkinSeq S n y ∧ c = znth y n :=
-  ⟨fun h ↦ let ⟨y, hy⟩ := exists_isHenkinSeq S n; ⟨y, hy, h.trans hy.znth_eq_henkinContext.symm⟩,
-    by rintro ⟨y, hy, rfl⟩; exact hy.znth_eq_henkinContext⟩
-
-variable {S} {n} in
-private lemma eq_henkinContext_iff_forall :
-    c = henkinContext S n ↔ ∀ y, IsHenkinSeq S n y → c = znth y n :=
-  ⟨by rintro rfl y hy; exact hy.znth_eq_henkinContext.symm,
-    fun h ↦ let ⟨y, hy⟩ := exists_isHenkinSeq S n; (h y hy).trans hy.znth_eq_henkinContext⟩
 
 instance henkinContext.defined :
     𝚫ᴬ_[2]-Function₁[V] henkinContext S via henkinContextGraph S := .mk

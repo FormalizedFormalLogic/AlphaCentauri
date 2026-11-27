@@ -169,19 +169,6 @@ variable {M : Type*} [ORingStructure M] [M↓[ℒₒᵣ] ⊧* 𝗣𝗔⁻]
 /-- `c` is nonstandard: above every natural number. -/
 def IsNonstandardElement (c : M) : Prop := ∀ m : ℕ, (m : M) < c
 
-variable (M) in
-/-- The nonstandard elements of `M`. -/
-def NonstandardElement : Type _ := {c : M // IsNonstandardElement c}
-
-variable (M) in
-/-- `M` is nonstandard: it has a nonstandard element. -/
-abbrev IsNonstandard : Prop := Nonempty (NonstandardElement M)
-
-instance : CoeOut (NonstandardElement M) M := ⟨Subtype.val⟩
-
-@[simp]
-lemma NonstandardElement.natCast_lt (a : NonstandardElement M) (m : ℕ) : (m : M) < a := a.2 m
-
 lemma isNonstandardElement_iff_not_mem_range {c : M} :
     IsNonstandardElement c ↔ c ∉ Set.range (Nat.cast : ℕ → M) := by
   constructor
@@ -192,7 +179,14 @@ lemma isNonstandardElement_iff_not_mem_range {c : M} :
     obtain ⟨n, rfl⟩ := eq_nat_of_le_nat hc
     exact h ⟨n, rfl⟩
 
-variable (M) in
+variable (M)
+
+/-- The nonstandard elements of `M`. -/
+def NonstandardElement : Type _ := {c : M // IsNonstandardElement c}
+
+/-- `M` is nonstandard: it has a nonstandard element. -/
+abbrev IsNonstandard : Prop := Nonempty (NonstandardElement M)
+
 /-- The natural numbers as a proper end extension of a nonstandard model. -/
 def natCastProperEndExtension [IsNonstandard M] : ℕ ⊂ₑ M where
   emb := natCastEmbedding M
@@ -201,6 +195,13 @@ def natCastProperEndExtension [IsNonstandard M] : ℕ ⊂ₑ M where
     intro h
     obtain ⟨c, hc⟩ := Classical.arbitrary (NonstandardElement M)
     exact isNonstandardElement_iff_not_mem_range.mp hc (h c)
+
+variable {M}
+
+instance : CoeOut (NonstandardElement M) M := ⟨Subtype.val⟩
+
+@[simp]
+lemma NonstandardElement.natCast_lt (a : NonstandardElement M) (m : ℕ) : (m : M) < a := a.2 m
 
 end
 
@@ -251,7 +252,8 @@ section
 
 variable {M : Type u} [ORingStructure M]
 
-variable (M) in
+variable (M)
+
 /-- A cut of `M`: a subset closed under successor and downward closed under `<`.
 - [HP98, Definition IV.1.14] -/
 structure Cut where
@@ -259,7 +261,6 @@ structure Cut where
   succ_mem {a : M} : a ∈ carrier → a + 1 ∈ carrier
   mem_of_lt {a b : M} : a < b → b ∈ carrier → a ∈ carrier
 
-variable (M) in
 /-- A cut closed under the operations of `ℒₒᵣ`, hence a substructure of `M`.
 - [HP98, Definition IV.2.8(2)] -/
 structure ClosedCut extends Cut M where
@@ -267,6 +268,8 @@ structure ClosedCut extends Cut M where
   one_mem : (1 : M) ∈ carrier
   add_mem {a b : M} : a ∈ carrier → b ∈ carrier → a + b ∈ carrier
   mul_mem {a b : M} : a ∈ carrier → b ∈ carrier → a * b ∈ carrier
+
+variable {M}
 
 namespace ClosedCut
 

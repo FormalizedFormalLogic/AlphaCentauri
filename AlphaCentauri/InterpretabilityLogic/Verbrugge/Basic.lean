@@ -344,15 +344,14 @@ end Verbrugge.Model
 
 namespace Verbrugge.Model
 
-variable {κ α : Type*} [Nonempty κ] {M : Model κ α}
+variable {κ α : Type*} [Nonempty κ] (M : Model κ α)
 
-variable (M) in
 /-- A choice of a world after each finite sequence of sets of worlds, the latest set first. -/
 abbrev Strategy := List (Set M.World) → M.World
 
 namespace Strategy
 
-variable {σ : M.Strategy} {H H₁ H₂ : List (Set M.World)}
+variable {M} {σ : M.Strategy} {H H₁ H₂ : List (Set M.World)}
 
 /-- The strategy `σ` continued after the history `H`. -/
 def shift (σ : M.Strategy) (H : List (Set M.World)) : M.Strategy := fun Y ↦ σ (Y ++ H)
@@ -382,7 +381,7 @@ end Strategy
 
 section
 
-variable (M) (x u : M.World) (σ : M.Strategy)
+variable (x u : M.World) (σ : M.Strategy)
 
 /-- A history `H` is a play of `σ` for `x` when each set in `H` is a `≺[x]`-successor of the world
 `σ` chooses before it. -/
@@ -400,7 +399,7 @@ end
 
 section Strategy
 
-variable {x u w : M.World} {σ : M.Strategy} {H H₁ H₂ : List (Set M.World)} {G : Set M.World}
+variable {M} {x u w : M.World} {σ : M.Strategy} {H H₁ H₂ : List (Set M.World)} {G : Set M.World}
 
 @[simp]
 lemma isPlay_nil : M.IsPlay x σ [] := trivial
@@ -441,7 +440,6 @@ lemma choose_mem_of_isPlay (hG : ∀ v ∈ G, ∀ Z, v ≺[w] Z → (Z ∩ G).No
 
 end Strategy
 
-variable (M) in
 /-- A world of `M` together with, for each `≺`-predecessor `x` of it, a strategy for `x` from it.
 
 - [Per25, Definition 5]
@@ -452,6 +450,8 @@ structure VeltmanWorld where
   isStrategy {x : M.World} : x ≺ world → M.IsStrategy x world (strategy x)
 
 namespace VeltmanWorld
+
+variable {M}
 
 instance [M.IsIL] : Nonempty M.VeltmanWorld :=
   ⟨⟨Classical.arbitrary κ, fun _ ↦ Strategy.choose M _ ∅, fun _ ↦ isStrategy_choose⟩⟩
@@ -538,12 +538,12 @@ and the valuation of `M` on the underlying worlds.
 
 - [Per25, Definition 5]
 -/
-noncomputable def toVeltman (M : Model κ α) [M.IsIL] : Veltman.Model M.VeltmanWorld α where
+noncomputable def toVeltman [M.IsIL] : Veltman.Model M.VeltmanWorld α where
   Rel' := VeltmanWorld.Rel
   S' := VeltmanWorld.S
   Val' a := M.Val' a.world
 
-variable [M.IsIL]
+variable {M} [M.IsIL]
 
 /-- - [Per25, Proposition 6] -/
 instance : M.toVeltman.IsIL where

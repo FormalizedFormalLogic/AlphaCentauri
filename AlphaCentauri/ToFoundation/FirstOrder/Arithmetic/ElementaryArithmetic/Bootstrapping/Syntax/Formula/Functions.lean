@@ -705,11 +705,12 @@ noncomputable def qVecIter : V :=
     listMap (fun r i ↦ if i < r 1 then ^#i else termBShiftIter L (r 1) (r 0).[i - r 1]) ![w, d]
       (rangeList (d + if IsUTermVec L (len w) w then len w else 0))
 
-variable {L} {w d}
+variable {L} {d}
 
-variable (w) in
 @[simp]
 lemma qVecIter_zero : qVecIter L w 0 = w := by simp [qVecIter]
+
+variable {w}
 
 open Classical in
 lemma len_qVecIter (hd : d ≠ 0) :
@@ -739,7 +740,8 @@ lemma isUTermVec_qVecIter (hd : d ≠ 0) :
     · simp only [hw, ↓reduceIte, add_zero] at hi
       exact absurd hi h
 
-variable (w d) in
+variable (w d)
+
 open Classical in
 lemma qVec_qVecIter : qVec L (qVecIter L w d) = qVecIter L w (d + 1) := by
   have hlenR := len_qVecIter (L := L) (w := w) (d := d + 1) (by simp)
@@ -793,6 +795,8 @@ lemma qVec_qVecIter : qVec L (qVecIter L w d) = qVecIter L w (d + 1) := by
           exact (tsub_lt_iff_left (not_lt.mp hjd)).mpr hj
         simp only [hjd, ↓reduceIte, add_lt_add_iff_right, add_tsub_add_eq_tsub_right]
         exact termBShift_termBShiftIter (hw.2 _ hjw) d
+
+variable {w d}
 
 open Classical in
 lemma qVecIter_locallyDelta0 :
@@ -858,10 +862,6 @@ lemma le_qVecIterMax (hd : d ≤ p) : qVecIter L w d ≤ qVecIterMax L w p := by
   rw [nth_listMap qVecIterAt'_locallyDelta0 _ _ hd', nth_rangeList (by simpa using hd')] at this
   exact this
 
-variable (w p) in
-lemma le_qVecIterMax_self : w ≤ qVecIterMax L w p := by
-  simpa using le_qVecIterMax (L := L) (w := w) (zero_le (a := p))
-
 lemma qVecIterMax_le {B : V} (h : ∀ d ≤ p, qVecIter L w d ≤ B) : qVecIterMax L w p ≤ B := by
   apply listMaxss_le
   intro i hi
@@ -872,7 +872,11 @@ lemma qVecIterMax_le {B : V} (h : ∀ d ≤ p, qVecIter L w d ≤ B) : qVecIterM
 lemma qVecIterMax_monotone (h : p ≤ q) : qVecIterMax L w p ≤ qVecIterMax L w q :=
   qVecIterMax_le fun _ hd ↦ le_qVecIterMax (le_trans hd h)
 
-variable (w d) in
+variable (w p d)
+
+lemma le_qVecIterMax_self : w ≤ qVecIterMax L w p := by
+  simpa using le_qVecIterMax (L := L) (w := w) (zero_le (a := p))
+
 lemma qVecIter_qVec : qVecIter L (qVec L w) d = qVecIter L w (d + 1) := by
   have hP : LocallyDelta0Pred fun d ↦ qVecIter L (qVec L w) d = qVecIter L w (d + 1) :=
     LocallyDelta0.eq (qVecIter_locallyDelta0.comp₂ (LocallyDelta0Function.const _)
@@ -885,10 +889,11 @@ lemma qVecIter_qVec : qVecIter L (qVec L w) d = qVecIter L w (d + 1) := by
   · intro d ih
     rw [← qVec_qVecIter, ih, qVec_qVecIter]
 
-variable (w p) in
 lemma qVecIterMax_qVec_le : qVecIterMax L (qVec L w) p ≤ qVecIterMax L w (p + 1) :=
   qVecIterMax_le fun d hd ↦ by
     rw [qVecIter_qVec]; exact le_qVecIterMax (by gcongr)
+
+variable {w p d}
 
 lemma qVecIterMax_locallyDelta0 :
     LocallyDelta0Function fun u : Fin 2 → V ↦ qVecIterMax L (u 0) (u 1) := by

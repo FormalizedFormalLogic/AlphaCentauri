@@ -22,13 +22,16 @@ variable {M N : Type*} [ORingStructure M] [ORingStructure N] {n l : ℕ} {b : N}
 
 /-! ## Tuples with the same $\Pi_n$ properties -/
 
-variable (n b) in
+variable (n b)
+
 /-- Every $\Pi_n$ formula with a witness in `M` for the parameters `u` has a witness in `N` below
 `b` for the parameters `v`.
 - [Kay91, Theorem 12.3] -/
 def PiWitnessBelow (u : Fin l → M) (v : Fin l → N) : Prop :=
   ∀ θ : 𝚷ᴬ_[n].Semisentence (l + 1),
     (∃ x : M, M ⊧/(x :> u) θ.val) → ∃ x < b, N ⊧/(x :> v) θ.val
+
+variable {n b}
 
 variable {Γ : Polarity} (φ : ArithmeticSemisentence (l + 2))
 
@@ -188,7 +191,8 @@ end PiWitnessBelow
 
 /-! ## The embedding -/
 
-variable (M n b) in
+variable (M n b)
+
 /-- A tuple of `M` and a tuple of `N` such that every $\Pi_n$ formula with a witness in `M` for the
 former has a witness in `N` below `b` for the latter. -/
 structure PartialInitialEmbedding where
@@ -196,6 +200,8 @@ structure PartialInitialEmbedding where
   source : Fin length → M
   target : Fin length → N
   piWitnessBelow : PiWitnessBelow n b source target
+
+variable {M n b}
 
 namespace PartialInitialEmbedding
 

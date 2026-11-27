@@ -137,7 +137,8 @@ end
 
 namespace sigmaDefinableElements
 
-variable (j M) in
+variable (j M)
+
 instance oringStructure : ORingStructure (sigmaDefinableElements (j + 1) M) where
   zero := ⟨0, mem_sigmaDefinableElements_iff.mpr ⟨.mkSigma “#0 = 0”, by simp⟩⟩
   one := ⟨1, mem_sigmaDefinableElements_iff.mpr ⟨.mkSigma “#0 = 1”, by simp⟩⟩
@@ -149,7 +150,6 @@ instance oringStructure : ORingStructure (sigmaDefinableElements (j + 1) M) wher
     fun x ↦ by simp⟩
   lt a b := a.1 < b.1
 
-variable (j M) in
 /-- The inclusion of the definable elements into `M`. -/
 def emb : sigmaDefinableElements (j + 1) M ↪ₛ[ℒₒᵣ] M where
   toFun := Subtype.val
@@ -158,12 +158,13 @@ def emb : sigmaDefinableElements (j + 1) M ↪ₛ[ℒₒᵣ] M where
   toFun_inj := Subtype.val_injective
   rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
 
+variable {j M}
+
 @[simp]
 lemma emb_apply (x : sigmaDefinableElements (j + 1) M) : emb j M x = x.val := rfl
 
-variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
+variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] (j)
 
-variable (j) in
 /-- [HP98, Lemma IV.1.39] -/
 theorem sigmaElementary :
     IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE (j + 1)) (emb j M) := by
@@ -182,7 +183,6 @@ theorem sigmaElementary :
   · intro m hm n φ
     exact witness (.mkPi φ.val (φ.val_hierarchy.mono (by omega)))
 
-variable (j) in
 /-- [HP98, Corollary IV.1.40] -/
 theorem models_ISigma : (sigmaDefinableElements (j + 1) M)↓[ℒₒᵣ] ⊧* 𝗜𝚺 j := by
   have hK : IsElementary (ℬ[<, ℒₒᵣ].PrenexHierarchyLE (j + 1))
@@ -226,7 +226,8 @@ open Bootstrapping
 
 variable {V : Type} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁]
 
-variable (j) in
+variable (j)
+
 /-- `x` is the element defined by the code `c`: `c` codes the matrix of a prenex $\Pi_j$ formula
 in one variable, and `x` is the first component of the least element satisfying it. -/
 def DefinesElement (c x : V) : Prop :=
@@ -248,11 +249,10 @@ instance DefinesElement.defined : (j : ℕ) →
     simp [definesElementDef, DefinesElement, (PrenexSatisfied.pi_defined' j).df,
       eq_comm]
 
-variable (j) in
 instance DefinesElement.definable : 𝚺ᴬ_[j + 1]-Relation (DefinesElement j : V → V → Prop) :=
   (DefinesElement.defined j).to_definable
 
-variable {x : V}
+variable {j} {x : V}
 
 lemma DefinesElement.unique {c x' : V} (h : DefinesElement j c x)
     (h' : DefinesElement j c x') : x = x' := by
@@ -421,7 +421,8 @@ lemma mem_definableClosure_of_unique {n : ℕ} {ψ : ArithmeticSemiformula A (n 
 
 namespace definableClosure
 
-variable (A) in
+variable (A)
+
 instance oringStructure : ORingStructure (definableClosure ℒₒᵣ A) where
   zero := ⟨0, mem_definableClosure_of_unique (ψ := “#0 = 0”) (v := ![])
     (fun i ↦ i.elim0) fun x ↦ by simp⟩
@@ -433,7 +434,6 @@ instance oringStructure : ORingStructure (definableClosure ℒₒᵣ A) where
     (v := ![a.1, b.1]) (Fin.forall_fin_two.mpr ⟨a.2, b.2⟩) fun x ↦ by simp⟩
   lt a b := a.1 < b.1
 
-variable (A) in
 /-- The inclusion of the elements definable over `A` into `M`. -/
 def emb : definableClosure ℒₒᵣ A ↪ₛ[ℒₒᵣ] M where
   toFun := Subtype.val
@@ -441,6 +441,8 @@ def emb : definableClosure ℒₒᵣ A ↪ₛ[ℒₒᵣ] M where
   rel' r _ := by cases r; exacts [congrArg Subtype.val, id]
   toFun_inj := Subtype.val_injective
   rel_inv' r _ := by cases r; exacts [Subtype.ext, id]
+
+variable {A}
 
 @[simp]
 lemma emb_apply (x : definableClosure ℒₒᵣ A) : emb A x = x.val := rfl
@@ -473,9 +475,8 @@ lemma exists_mem_of_exists [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] {n : ℕ} (φ : Arith
     · simpa using hdef
   · exact hx
 
-variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔]
+variable [M↓[ℒₒᵣ] ⊧* 𝗣𝗔] (A)
 
-variable (A) in
 /-- The elements definable over `A` form an elementary substructure of a model of `𝗣𝗔`.
 - [Kay91, Theorem 8.1] -/
 theorem isElementary : IsElementary (fun {_} _ ↦ True) (emb A) := by
@@ -485,14 +486,12 @@ theorem isElementary : IsElementary (fun {_} _ ↦ True) (emb A) := by
   use ⟨x, hx⟩
   exact hφ
 
-variable (A) in
 /-- The elements definable over `A` as an elementary substructure of a model of `𝗣𝗔`.
 - [Kay91, Theorem 8.1] -/
 def elementarySubstructure : definableClosure ℒₒᵣ A ≼ₑ[ℒₒᵣ] M where
   emb := emb A
   isElementary := isElementary A
 
-variable (A) in
 /-- The elements definable over `A` in a model of `𝗣𝗔` form a model of `𝗣𝗔`.
 - [Kay91, Theorem 8.1] -/
 theorem models_PA : (definableClosure ℒₒᵣ A)↓[ℒₒᵣ] ⊧* 𝗣𝗔 :=

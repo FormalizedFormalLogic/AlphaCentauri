@@ -89,17 +89,6 @@ variable {L : Logic α} {Φ : Finset (Formula α)} {Γ Δ : MaximalConsistentSet
   {Y Z₁ Z₂ Z₁' Z₂' : Finset (Formula α × Formula α)} {p : Formula α × Formula α}
   {C D E F : Formula α}
 
-variable (Γ E) in
-/-- The pairs `(B, C)` of formulas in `Φ` with `B ▷ C ∈ Γ` and `B ▷ E ∉ Γ`. -/
-noncomputable def rhdPairs : Finset (Formula α × Formula α) :=
-  (Φ ×ˢ Φ).filter fun p ↦ p.1 ▷ p.2 ∈ Γ ∧ p.1 ▷ E ∉ Γ
-
-lemma rhd_mem_of_mem_rhdPairs (hp : p ∈ Γ.rhdPairs E) : p.1 ▷ p.2 ∈ Γ :=
-  (Finset.mem_filter.mp hp).2.1
-
-lemma rhd_not_mem_of_mem_rhdPairs (hp : p ∈ Γ.rhdPairs E) : p.1 ▷ E ∉ Γ :=
-  (Finset.mem_filter.mp hp).2.2
-
 /-- `Δ` is an `E`-critical successor of `Γ` containing `C`, with `□∼B ∈ Δ` for `(B, _) ∈ Z₁` and
 `B ∉ Δ` for `(B, _) ∈ Z₂`.
 
@@ -120,6 +109,10 @@ section
 
 variable (Γ E)
 
+/-- The pairs `(B, C)` of formulas in `Φ` with `B ▷ C ∈ Γ` and `B ▷ E ∉ Γ`. -/
+noncomputable def rhdPairs : Finset (Formula α × Formula α) :=
+  (Φ ×ˢ Φ).filter fun p ↦ p.1 ▷ p.2 ∈ Γ ∧ p.1 ▷ E ∉ Γ
+
 /-- `r` assigns to each pair `(B, C)` in `Y` a number below `|Y|` such that `C` has an `E`-critical
 solution with `□∼B'` for the pairs `(B', C')` in `Y` of rank at least that of `(B, C)` and blocking
 the antecedents of the pairs of greater rank.
@@ -135,6 +128,12 @@ noncomputable def rank : Formula α × Formula α → ℕ :=
   Classical.epsilon (Γ.IsRank E (Γ.rhdPairs E))
 
 end
+
+lemma rhd_mem_of_mem_rhdPairs (hp : p ∈ Γ.rhdPairs E) : p.1 ▷ p.2 ∈ Γ :=
+  (Finset.mem_filter.mp hp).2.1
+
+lemma rhd_not_mem_of_mem_rhdPairs (hp : p ∈ Γ.rhdPairs E) : p.1 ▷ E ∉ Γ :=
+  (Finset.mem_filter.mp hp).2.2
 
 section
 

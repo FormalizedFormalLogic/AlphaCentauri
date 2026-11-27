@@ -80,10 +80,13 @@ lemma exists_enumCode_of_not_definable
     exact hP.of_iff fun i ↦ hmem i
   exact Cut.not_proper_of_definable K hdef ⟨hzero, a, fun ha ↦ lt_irrefl a (hlt a ha)⟩
 
-variable (a c G p) in
+variable (a c G p)
+
 private def LimitFails (y'' y' : V) : Prop :=
   a < p ∨ a ≤ entry a c p ∨
     ∃ i'' < p, G (entry a c i'') y'' ∧ G (entry a c p) y' ∧ y' ≤ y''
+
+variable {a c G p}
 
 include htot in
 private lemma exists_limitFails_of_not_mem

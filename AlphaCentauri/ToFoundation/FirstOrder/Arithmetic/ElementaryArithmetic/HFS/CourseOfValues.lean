@@ -130,12 +130,12 @@ lemma result_eq : c.result v n = c.clippedVal v n (c.table v n) := by
 lemma result_le_bound : c.result v n ≤ c.bound v n := by
   simp [c.result_eq, clippedVal]
 
-variable {n} in
+variable {n}
+
 lemma result_eq_val (h : c.val v n (c.table v n) ≤ c.bound v n) :
     c.result v n = c.val v n (c.table v n) := by
   simpa [c.result_eq, clippedVal] using h
 
-variable {n} in
 lemma znth_table {m : V} (hm : m < n) : znth (c.table v n) m = c.result v m := by
   have hP : LocallyDelta0Pred fun n ↦ ∀ m < n, znth (c.table v n) m = c.result v m := by
     have hR : LocallyDelta0 fun y : Fin 2 → V ↦ znth (c.table v (y 1)) (y 0) =

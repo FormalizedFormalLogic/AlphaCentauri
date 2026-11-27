@@ -232,24 +232,6 @@ lemma graph_succ : Graph ⟪v, i + 1, x⟫ ↔ Graph ⟪sndIdx v, i, x⟫ := by
     · rcases show v = w ∧ i = j ∧ x = y by simpa using h with ⟨rfl, rfl, rfl⟩; exact hw
   · intro h; exact graph_case.mpr <| Or.inr ⟨v, i, x, rfl, h⟩
 
-variable (v i) in
-lemma exists_le_graph : ∃ x ≤ v, Graph ⟪v, i, x⟫ := by
-  have hP : LocallyDelta0Pred fun i' ↦ ∀ v' ≤ v, ∃ x ≤ v', Graph ⟪v', i', x⟫ := by
-    have hR : LocallyDelta0 fun y : Fin 3 → V ↦ Graph ⟪y 1, y 2, y 0⟫ := by
-      simpa using graph_locallyDelta0.comp₃ (LocallyDelta0Function.var 1)
-        (LocallyDelta0Function.var 2) (LocallyDelta0Function.var 0)
-    have := LocallyDelta0.ball_le_function (LocallyDelta0Function.const v) <|
-      LocallyDelta0.bexs_le_function (LocallyDelta0Function.var 0) hR
-    exact this.of_iff fun w ↦ by simp
-  have : ∀ i', ∀ v' ≤ v, ∃ x ≤ v', Graph ⟪v', i', x⟫ := by
-    apply LocallyDelta0Pred.succ_induction hP
-    · intro v' _
-      exact ⟨fstIdx v', by simp, graph_case.mpr <| Or.inl ⟨v', rfl⟩⟩
-    · intro i' ih v' hv'
-      obtain ⟨x, hx, hg⟩ := ih (sndIdx v') (le_trans (by simp) hv')
-      exact ⟨x, le_trans hx (by simp), graph_succ.mpr hg⟩
-  exact this i v le_rfl
-
 lemma graph_unique {x₁ x₂ : V} : Graph ⟪v, i, x₁⟫ → Graph ⟪v, i, x₂⟫ → x₁ = x₂ := by
   set A := v + x₁ + x₂
   have hP : LocallyDelta0Pred fun i ↦
@@ -277,22 +259,44 @@ lemma graph_unique {x₁ x₂ : V} : Graph ⟪v, i, x₁⟫ → Graph ⟪v, i, x
       exact ih (sndIdx v) (le_trans (by simp) hv) x₁ hx₁ x₂ hx₂
   exact this i v (by simp [A, add_assoc]) x₁ (by simp [A]) x₂ (by simp [A])
 
-variable (v i) in
+variable (v i)
+
+lemma exists_le_graph : ∃ x ≤ v, Graph ⟪v, i, x⟫ := by
+  have hP : LocallyDelta0Pred fun i' ↦ ∀ v' ≤ v, ∃ x ≤ v', Graph ⟪v', i', x⟫ := by
+    have hR : LocallyDelta0 fun y : Fin 3 → V ↦ Graph ⟪y 1, y 2, y 0⟫ := by
+      simpa using graph_locallyDelta0.comp₃ (LocallyDelta0Function.var 1)
+        (LocallyDelta0Function.var 2) (LocallyDelta0Function.var 0)
+    have := LocallyDelta0.ball_le_function (LocallyDelta0Function.const v) <|
+      LocallyDelta0.bexs_le_function (LocallyDelta0Function.var 0) hR
+    exact this.of_iff fun w ↦ by simp
+  have : ∀ i', ∀ v' ≤ v, ∃ x ≤ v', Graph ⟪v', i', x⟫ := by
+    apply LocallyDelta0Pred.succ_induction hP
+    · intro v' _
+      exact ⟨fstIdx v', by simp, graph_case.mpr <| Or.inl ⟨v', rfl⟩⟩
+    · intro i' ih v' hv'
+      obtain ⟨x, hx, hg⟩ := ih (sndIdx v') (le_trans (by simp) hv')
+      exact ⟨x, le_trans hx (by simp), graph_succ.mpr hg⟩
+  exact this i v le_rfl
+
 lemma graph_existsUnique : ∃! x, Graph ⟪v, i, x⟫ := by
   obtain ⟨x, -, hx⟩ := exists_le_graph v i
   exact ExistsUnique.intro x hx fun y hy ↦ graph_unique hy hx
 
 end Nth
 
-variable (v i) in
+section
+
+variable (v i)
+
 /-- The `i`-th element of the list `v`. -/
 noncomputable def nth : V := Classical.choose! (Nth.graph_existsUnique v i)
 
 scoped notation:max v:max ".[" i "]" => nth v i
 
-variable (v i) in
 lemma nth_graph : Nth.Graph ⟪v, i, v.[i]⟫ :=
   Classical.choose!_spec (Nth.graph_existsUnique v i)
+
+end
 
 lemma nth_eq_of_graph (h : Nth.Graph ⟪v, i, x⟫) : nth v i = x :=
   Nth.graph_unique (nth_graph v i) h
@@ -692,14 +696,16 @@ noncomputable def construction : VecRec.Construction V Arithmetic.Len.blueprint 
 
 end Len
 
-variable (v) in
+section
+
+variable (x v : V)
+
 /-- The length of the list `v`. -/
 noncomputable def len : V := Len.construction.result ![] v
 
 @[simp]
 lemma len_nil : len (0 : V) = 0 := by simp [len, Len.construction]
 
-variable (x v) in
 @[simp]
 lemma len_adjoin : len (x ∷ v) = len v + 1 := by simp [len, Len.construction]
 
@@ -715,11 +721,6 @@ lemma len_locallyDelta0 : LocallyDelta0Function₁ (len : V → V) := by
   simp [len, Matrix.empty_eq]
 
 @[simp]
-lemma len_zero_iff_eq_nil : len v = 0 ↔ v = 0 := by
-  rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩) <;> simp
-
-variable (v) in
-@[simp]
 lemma len_le : len v ≤ v := by
   have hP : LocallyDelta0Pred fun v : V ↦ len v ≤ v :=
     LocallyDelta0.le (len_locallyDelta0.comp₁ (LocallyDelta0Function.var (0 : Fin 1)))
@@ -729,6 +730,12 @@ lemma len_le : len v ≤ v := by
   · intro x v ih
     rw [len_adjoin]
     exact succ_le_iff_lt.mpr (lt_of_le_of_lt ih (lt_adjoin' x v))
+
+end
+
+@[simp]
+lemma len_zero_iff_eq_nil : len v = 0 ↔ v = 0 := by
+  rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩) <;> simp
 
 lemma nth_lt_len (hl : len v ≤ i) : v.[i] = 0 := by
   have hR : LocallyDelta0 fun w : Fin 2 → V ↦ len (w 1) ≤ w 0 → (w 1).[w 0] = 0 :=
@@ -918,17 +925,21 @@ noncomputable def construction : VecRec.Construction V Arithmetic.ListMax.bluepr
 
 end ListMax
 
-variable (v) in
+section
+
+variable (x v : V)
+
 /-- The maximum of the elements of the list `v`. -/
 noncomputable def listMax : V := ListMax.construction.result ![] v
 
 @[simp]
 lemma listMax_nil : listMax (0 : V) = 0 := by simp [listMax, ListMax.construction]
 
-variable (x v) in
 @[simp]
 lemma listMax_adjoin : listMax (x ∷ v) = max x (listMax v) := by
   simp [listMax, ListMax.construction]
+
+end
 
 instance listMax_defined : 𝚺ᴬ₁-Function₁ (listMax : V → V) via listMaxDef :=
   ListMax.construction.result_defined
@@ -1198,15 +1209,19 @@ end
 
 /-! ## Membership -/
 
-variable (x v) in
+section
+
+variable (x v : V)
+
 /-- `x ∈ᵥ v` states that `x` is an element of the list `v`. -/
 def MemVec : Prop := ∃ i < len v, x = v.[i]
 
 scoped infix:40 " ∈ᵥ " => MemVec
 
-variable (x) in
 @[simp]
 lemma not_memVec_empty : ¬x ∈ᵥ 0 := by rintro ⟨i, h, _⟩; simp at h
+
+end
 
 lemma nth_mem_memVec (h : i < len v) : v.[i] ∈ᵥ v := ⟨i, by simp [h]⟩
 
@@ -1238,15 +1253,14 @@ instance memVec_definable' (Γ m) : Γᴬ_[m + 1]-Relation (MemVec : V → V →
 
 /-! ## Subset -/
 
-variable (v) (w : V) in
+section
+
+variable (x v w : V)
+
 /-- `v ⊆ᵥ w` states that every element of the list `v` is an element of the list `w`. -/
 def SubsetVec : Prop := ∀ x, x ∈ᵥ v → x ∈ᵥ w
 
 scoped infix:30 " ⊆ᵥ " => SubsetVec
-
-section
-
-variable (x v : V)
 
 @[simp, refl]
 lemma SubsetVec.refl : v ⊆ᵥ v := fun _ hx ↦ hx
@@ -1412,17 +1426,21 @@ noncomputable def construction : VecRec.Construction V Arithmetic.VecToSet.bluep
 
 end VecToSet
 
-variable (v) in
+section
+
+variable (x v : V)
+
 /-- The set of the elements of the list `v`. -/
 noncomputable def vecToSet : V := VecToSet.construction.result ![] v
 
 @[simp]
 lemma vecToSet_nil : vecToSet (0 : V) = ∅ := by simp [vecToSet, VecToSet.construction]
 
-variable (x v) in
 @[simp]
 lemma vecToSet_adjoin :
     vecToSet (x ∷ v) = insert x (vecToSet v) := by simp [vecToSet, VecToSet.construction]
+
+end
 
 instance vecToSet_defined : 𝚺ᴬ₁-Function₁ (vecToSet : V → V) via vecToSetDef :=
   VecToSet.construction.result_defined

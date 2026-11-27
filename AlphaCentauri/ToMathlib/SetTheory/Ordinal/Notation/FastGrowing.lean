@@ -49,9 +49,9 @@ theorem le_fastGrowing : ∀ (o : ONote) (n : ℕ), n ≤ fastGrowing o n := by
 termination_by o _ => o
 decreasing_by all_goals exact hlt
 
-variable (o) in
-private lemma id_le_fastGrowing : (id : ℕ → ℕ) ≤ fastGrowing o :=
-  fun m => le_fastGrowing o m
+private lemma id_le_fastGrowing : ∀ o : ONote, (id : ℕ → ℕ) ≤ fastGrowing o := by
+  intro o m
+  exact le_fastGrowing o m
 
 theorem lt_fastGrowing (o : ONote) (hn : 1 ≤ n) : n < fastGrowing o n := by
   rcases e : fundamentalSequence o with (_ | a) | f
@@ -279,9 +279,9 @@ private lemma fastGrowing_le_succ :
 termination_by o _ => o
 decreasing_by all_goals exact hlt
 
-variable (o) in
-theorem fastGrowing_monotone : Monotone (fastGrowing o) :=
-  monotone_nat_of_le_succ (fastGrowing_le_succ o)
+theorem fastGrowing_monotone : ∀ o : ONote, Monotone (fastGrowing o) := by
+  intro o
+  exact monotone_nat_of_le_succ (fastGrowing_le_succ o)
 
 end Basic
 
@@ -360,11 +360,9 @@ private lemma lt_oadd_of_lead_le (hc : c.NF) {d : ONote} (hd : d.NF)
       refine oadd_lt_oadd_2 hd ?_
       simpa [Nat.succPNat] using Nat.lt_succ_of_le hnd
 
-variable (o) in
-private theorem lt_fundamentalSequence_of_norm_le (ho : o.NF) (g : ℕ → ONote)
-    (hg : fundamentalSequence o = Sum.inr g) :
-    ∀ d : ONote, d.NF → d < o → norm d ≤ x → d < g x := by
-  intro d hd hdo hnorm
+private theorem lt_fundamentalSequence_of_norm_le : ∀ o : ONote, o.NF → ∀ g : ℕ → ONote,
+    fundamentalSequence o = Sum.inr g → ∀ d : ONote, d.NF → d < o → norm d ≤ x → d < g x := by
+  intro o ho g hg d hd hdo hnorm
   induction o generalizing g d with
   | zero => exact (Sum.inl_ne_inr hg).elim
   | oadd a m b iha ihb =>

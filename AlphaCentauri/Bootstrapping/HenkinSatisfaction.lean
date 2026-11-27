@@ -157,8 +157,8 @@ omit hS hcons in
 lemma henkinSatisfies_verum : HenkinSatisfies S ^⊤ n s := by
   simpa [HenkinSatisfies] using henkinSet_of_tprovable S (φ := (⊤ : Formula V L)) (by simp)
 
-lemma not_henkinSatisfies_falsum (n : V) : ∀ s : V, ¬HenkinSatisfies S ^⊥ n s := by
-  intro s
+lemma not_henkinSatisfies_falsum : ∀ n s : V, ¬HenkinSatisfies S ^⊥ n s := by
+  intro n s
   simpa [HenkinSatisfies] using henkinSet_not_falsum S hS hcons
 
 lemma henkinSatisfies_and_iff (hp : IsSemiformula L n p) (hq : IsSemiformula L n q) : ∀ s : V,

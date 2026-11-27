@@ -130,12 +130,20 @@ lemma setShift_bitRemove (hs : IsFormulaSet L s) (hp : IsUFormula L p) :
     rcases mem_setShift_iff.mp hy'.2 with ⟨x, hx, rfl⟩
     exact mem_setShift_iff.mpr ⟨x, mem_bitRemove_iff.mpr ⟨fun e ↦ hy'.1 (by rw [e]), hx⟩, rfl⟩
 
+variable (p)
+
 omit [V↓[ℒₒᵣ] ⊧* 𝗜𝚺₁] in
 /-- No code is an axiom of the empty theory. -/
-lemma not_mem_empty_Δ₁Class (p : V) : p ∉ (∅ : Theory L).Δ₁Class := by
+lemma not_mem_empty_Δ₁Class : p ∉ (∅ : Theory L).Δ₁Class := by
   intro h
   have : V ⊧/![p] (⊥ : 𝚫ᴬ₁.Semisentence 1).val := h
   simp at this
+
+/-- The empty theory has no axioms, so in particular none that is not a sentence. -/
+private lemma isSentence_of_mem_empty (hp : p ∈ (∅ : Theory L).Δ₁Class) : L.IsSentence p :=
+  absurd hp (not_mem_empty_Δ₁Class p)
+
+variable {p}
 
 /-- The rest of an end-sequent split off by `insert` is bounded by the proof code. -/
 lemma le_of_fstIdx_eq_insert (h : fstIdx d = insert x s) : s ≤ d :=
@@ -193,12 +201,20 @@ private lemma wk_invert {d₀ : V} {Φ : V → V} (hΦ : ∀ a b : V, a ⊆ b �
 
 namespace RankedDerivation
 
-variable (L) in
+variable (L r d)
+
 /-- Conjunction inversion holds for every derivation of cut rank at most `r` coded below `d`. -/
-private def InvertsAndBelow (r d : V) : Prop :=
+private def InvertsAndBelow : Prop :=
   ∀ d₀ < d, ∀ p q c s : V, (c = p ∨ c = q) →
     RankedDerivationOf (∅ : Theory L) r d₀ (insert (p ^⋏ q) s) →
     RankedDerivable (∅ : Theory L) r (insert c s)
+
+/-- Disjunction inversion holds for every derivation of cut rank at most `r` coded below `d`. -/
+private def InvertsOrBelow : Prop :=
+  ∀ d₀ < d, ∀ p q s : V, RankedDerivationOf (∅ : Theory L) r d₀ (insert (p ^⋎ q) s) →
+    RankedDerivable (∅ : Theory L) r (insert p (insert q s))
+
+variable {L r d}
 
 section invertAnd
 
@@ -309,63 +325,6 @@ private lemma inversion_and_cut {e d₁ d₂ : V} (hc : c = p ∨ c = q)
 
 end invertAnd
 
-variable (r) in
-/-- The $\Sigma_1$ form of the conjunction inversion: every piece of data is bounded by the
-derivation it is read off. -/
-private lemma inversion_and_aux : ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
-      RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋏ q) s) →
-      RankedDerivable (∅ : Theory L) r (insert c s) := by
-  have hP : 𝚺ᴬ₁-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
-      RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋏ q) s) →
-      RankedDerivable (∅ : Theory L) r (insert c s) := by
-    definability
-  intro d
-  refine ISigma1.order_induction 𝚺 hP ?_ d
-  intro d ih
-  have ih' : InvertsAndBelow L r d := by
-    intro d₀ hd₀ p q c s hc h
-    obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc h.1
-    exact ih d₀ hd₀ p b₁ q b₂ c b₃ s b₄ hc h
-  rintro p - q - c - s - hc ⟨hd1, hd2⟩
-  have hfs : IsFormulaSet L (insert (p ^⋏ q) s) := hd1 ▸ hd2.isFormulaSet
-  have hF : (IsFormula L p ∧ IsFormula L q) ∧ IsFormulaSet L s := by simpa using hfs
-  have hcsF : IsFormulaSet L (insert c s) :=
-    IsFormulaSet.insert_iff.mpr ⟨by rcases hc with rfl | rfl <;> simp [hF], hF.2⟩
-  rcases hd2.case.2 with (⟨Γ, x, rfl, hx, hnx⟩ | ⟨Γ, rfl, hv⟩ |
-    ⟨Γ, a, b, dp, dq, rfl, hab, hdp, hdq⟩ | ⟨Γ, a, b, d₀, rfl, hab, hd₀⟩ |
-    ⟨Γ, a, d₀, rfl, ha, hd₀⟩ | ⟨Γ, a, t, d₀, rfl, ha, ht, hd₀⟩ |
-    ⟨Γ, d₀, rfl, hsub, hd₀⟩ | ⟨Γ, d₀, rfl, hsh, hd₀⟩ |
-    ⟨Γ, e, d₁, d₂, rfl, he, hd₁, hd₂⟩ | ⟨Γ, x, rfl, -, hT⟩)
-  <;> simp only [fstIdx_axL, fstIdx_verumIntro, fstIdx_andIntro, fstIdx_orIntro,
-    fstIdx_allIntro, fstIdx_exsIntro, fstIdx_wkRule, fstIdx_shiftRule, fstIdx_cutRule,
-    fstIdx_axm] at hd1 <;> subst hd1
-  · exact inversion_and_axL hc hF.1.1 hF.1.2 hfs hcsF hx hnx
-  · exact .verum hcsF (by simp [mem_of_mem_insert_of_ne hv (by simp [qqVerum, qqAnd])])
-  · exact inversion_and_and hc ih' hab hdp hdq
-  · exact inversion_and_or hc ih' hab hd₀
-  · exact inversion_and_all hc hF.1.1 hF.1.2 ih' ha hd₀
-  · exact inversion_and_exs hc ih' ha ht hd₀
-  · exact inversion_and_wk hc ih' hcsF hsub hd₀
-  · exact inversion_and_shift hc ih' hcsF hsh hd₀
-  · exact inversion_and_cut hc ih' he hd₁ hd₂
-  · exact absurd hT (not_mem_empty_Δ₁Class x)
-
-/-- Inversion for the conjunction rule: a derivation of cut rank at most `r` of a sequent
-containing `p ^⋏ q` yields, for either conjunct `c`, a derivation of cut rank at most `r` of the
-sequent with `c` in place of `p ^⋏ q`.
-- [Bus98, Ch. I §2.4] -/
-theorem inversion_and {c : V} (hc : c = p ∨ c = q)
-    (hd : RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋏ q) s)) :
-    RankedDerivable (∅ : Theory L) r (insert c s) := by
-  obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc hd.1
-  exact inversion_and_aux r d _ b₁ _ b₂ _ b₃ _ b₄ hc hd
-
-variable (L) (r d) in
-/-- Disjunction inversion holds for every derivation of cut rank at most `r` coded below `d`. -/
-private def InvertsOrBelow : Prop :=
-  ∀ d₀ < d, ∀ p q s : V, RankedDerivationOf (∅ : Theory L) r d₀ (insert (p ^⋎ q) s) →
-    RankedDerivable (∅ : Theory L) r (insert p (insert q s))
-
 section invertOr
 
 variable {a b d₀ : V}
@@ -468,7 +427,48 @@ private lemma inversion_or_cut {e d₁ d₂ : V}
 
 end invertOr
 
-variable (r) in
+variable (r)
+
+/-- The $\Sigma_1$ form of the conjunction inversion: every piece of data is bounded by the
+derivation it is read off. -/
+private lemma inversion_and_aux : ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
+      RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋏ q) s) →
+      RankedDerivable (∅ : Theory L) r (insert c s) := by
+  have hP : 𝚺ᴬ₁-Predicate fun d : V ↦ ∀ p ≤ d, ∀ q ≤ d, ∀ c ≤ d, ∀ s ≤ d, (c = p ∨ c = q) →
+      RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋏ q) s) →
+      RankedDerivable (∅ : Theory L) r (insert c s) := by
+    definability
+  intro d
+  refine ISigma1.order_induction 𝚺 hP ?_ d
+  intro d ih
+  have ih' : InvertsAndBelow L r d := by
+    intro d₀ hd₀ p q c s hc h
+    obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc h.1
+    exact ih d₀ hd₀ p b₁ q b₂ c b₃ s b₄ hc h
+  rintro p - q - c - s - hc ⟨hd1, hd2⟩
+  have hfs : IsFormulaSet L (insert (p ^⋏ q) s) := hd1 ▸ hd2.isFormulaSet
+  have hF : (IsFormula L p ∧ IsFormula L q) ∧ IsFormulaSet L s := by simpa using hfs
+  have hcsF : IsFormulaSet L (insert c s) :=
+    IsFormulaSet.insert_iff.mpr ⟨by rcases hc with rfl | rfl <;> simp [hF], hF.2⟩
+  rcases hd2.case.2 with (⟨Γ, x, rfl, hx, hnx⟩ | ⟨Γ, rfl, hv⟩ |
+    ⟨Γ, a, b, dp, dq, rfl, hab, hdp, hdq⟩ | ⟨Γ, a, b, d₀, rfl, hab, hd₀⟩ |
+    ⟨Γ, a, d₀, rfl, ha, hd₀⟩ | ⟨Γ, a, t, d₀, rfl, ha, ht, hd₀⟩ |
+    ⟨Γ, d₀, rfl, hsub, hd₀⟩ | ⟨Γ, d₀, rfl, hsh, hd₀⟩ |
+    ⟨Γ, e, d₁, d₂, rfl, he, hd₁, hd₂⟩ | ⟨Γ, x, rfl, -, hT⟩)
+  <;> simp only [fstIdx_axL, fstIdx_verumIntro, fstIdx_andIntro, fstIdx_orIntro,
+    fstIdx_allIntro, fstIdx_exsIntro, fstIdx_wkRule, fstIdx_shiftRule, fstIdx_cutRule,
+    fstIdx_axm] at hd1 <;> subst hd1
+  · exact inversion_and_axL hc hF.1.1 hF.1.2 hfs hcsF hx hnx
+  · exact .verum hcsF (by simp [mem_of_mem_insert_of_ne hv (by simp [qqVerum, qqAnd])])
+  · exact inversion_and_and hc ih' hab hdp hdq
+  · exact inversion_and_or hc ih' hab hd₀
+  · exact inversion_and_all hc hF.1.1 hF.1.2 ih' ha hd₀
+  · exact inversion_and_exs hc ih' ha ht hd₀
+  · exact inversion_and_wk hc ih' hcsF hsub hd₀
+  · exact inversion_and_shift hc ih' hcsF hsh hd₀
+  · exact inversion_and_cut hc ih' he hd₁ hd₂
+  · exact absurd hT (not_mem_empty_Δ₁Class x)
+
 /-- The $\Sigma_1$ form of the disjunction inversion: every piece of data is bounded by the
 derivation it is read off. -/
 private lemma inversion_or_aux : ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ d,
@@ -508,6 +508,18 @@ private lemma inversion_or_aux : ∀ d : V, ∀ p ≤ d, ∀ q ≤ d, ∀ s ≤ 
   · exact inversion_or_cut ih' he hd₁ hd₂
   · exact absurd hT (not_mem_empty_Δ₁Class x)
 
+variable {r}
+
+/-- Inversion for the conjunction rule: a derivation of cut rank at most `r` of a sequent
+containing `p ^⋏ q` yields, for either conjunct `c`, a derivation of cut rank at most `r` of the
+sequent with `c` in place of `p ^⋏ q`.
+- [Bus98, Ch. I §2.4] -/
+theorem inversion_and {c : V} (hc : c = p ∨ c = q)
+    (hd : RankedDerivationOf (∅ : Theory L) r d (insert (p ^⋏ q) s)) :
+    RankedDerivable (∅ : Theory L) r (insert c s) := by
+  obtain ⟨b₁, b₂, b₃, b₄⟩ := and_bounds hc hd.1
+  exact inversion_and_aux r d _ b₁ _ b₂ _ b₃ _ b₄ hc hd
+
 /-- Inversion for the disjunction rule: a derivation of cut rank at most `r` of a sequent
 containing `p ^⋎ q` yields a derivation of cut rank at most `r` of the sequent with both
 disjuncts in place of `p ^⋎ q`.
@@ -521,12 +533,15 @@ end RankedDerivation
 
 namespace RankedDerivable
 
-variable (L) in
+variable (L r d)
+
 /-- `⊥` can be deleted from the end-sequent of every derivation of cut rank at most `r` coded
 below `d`. -/
-private def DeletesFalsumBelow (r d : V) : Prop :=
+private def DeletesFalsumBelow : Prop :=
   ∀ d₀ < d, ∀ s₀ : V, RankedDerivationOf (∅ : Theory L) r d₀ (insert ^⊥ s₀) →
     RankedDerivable (∅ : Theory L) r s₀
+
+variable {L r d}
 
 section deleteFalsum
 
@@ -659,11 +674,6 @@ private lemma all_bounds (h : fstIdx d = insert (^∀ p) s) : p ≤ d ∧ s ≤ 
 
 /-! ### Universal inversion -/
 
-variable (p) in
-/-- The empty theory has no axioms, so in particular none that is not a sentence. -/
-private lemma isSentence_of_mem_empty (hp : p ∈ (∅ : Theory L).Δ₁Class) : L.IsSentence p :=
-  absurd hp (not_mem_empty_Δ₁Class p)
-
 namespace RankedDerivable
 
 /-- From the free instance of `p` beside the shifted sequent, the instance of `p` at a term beside
@@ -726,7 +736,8 @@ private instance : 𝚺ᴬ₁-Function₂ (allInversionBound (L := L) : V → V 
   unfold allInversionBound
   definability
 
-variable (L) (r d) (B : V) in
+variable (L r d) (B : V)
+
 /-- Universal inversion at every term below `B` holds for every derivation of cut rank at most `r`
 coded below `d`. -/
 private def InvertsAllBelow : Prop :=
@@ -734,9 +745,11 @@ private def InvertsAllBelow : Prop :=
     RankedDerivationOf (∅ : Theory L) r d₀ (insert (^∀ p₀) s₀) →
     RankedDerivable (∅ : Theory L) r (insert (substs1 L t₀ p₀) s₀)
 
+variable {L r d B}
+
 section invertAll
 
-variable {a b d₀ B e : V}
+variable {a b d₀ e : V}
 
 private lemma inversion_all_axL (ht : IsTerm L t) (hpF : IsSemiformula L 1 p)
     (hfs : IsFormulaSet L (insert (^∀ p) s)) (hes : e ∈ insert (^∀ p) s)

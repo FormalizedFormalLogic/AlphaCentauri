@@ -415,9 +415,10 @@ At arbitrary `a : ONote`, `H_{ω^a}(n) + 1 ≤ f_a(n+1)` unconditionally, tighte
 bracket once the coefficient composition law is in place.
 -/
 
-variable (b k n) in
-private lemma hardy_omega_pow_coeff_comp : hardy (oadd b (Nat.succPNat (k + 1)) 0) n
+private lemma hardy_omega_pow_coeff_comp : ∀ (b : ONote) (k n : ℕ),
+    hardy (oadd b (Nat.succPNat (k + 1)) 0) n
       = hardy (oadd b (Nat.succPNat k) 0) (hardy (oadd b 1 0) n) := by
+  intro b k n
   rcases eq_or_ne b 0 with hb | hb
   · subst hb
     have e1 : oadd (0 : ONote) (Nat.succPNat (k + 1)) 0 = ofNat (k + 2) := (ofNat_succ (k + 1)).symm

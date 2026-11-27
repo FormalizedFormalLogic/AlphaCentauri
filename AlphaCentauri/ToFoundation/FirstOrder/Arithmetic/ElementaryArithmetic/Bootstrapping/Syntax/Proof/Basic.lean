@@ -365,7 +365,8 @@ namespace Derivation
 
 noncomputable abbrev conseq (x : V) : V := π₁ x
 
-variable (T) in
+variable (T)
+
 /-- The operator generating the codes of derivations from the axioms of `T`. -/
 def Phi (C : Set V) (d : V) : Prop :=
   IsFormulaSet L (fstIdx d) ∧
@@ -385,7 +386,6 @@ def Phi (C : Set V) (d : V) : Prop :=
       (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (neg L p) s ∧ d₂ ∈ C)) ∨
     (∃ s p, d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) )
 
-variable (T) in
 private lemma phi_iff (C : V) : ∀ d : V, Phi T {x | x ∈ C} d ↔ IsFormulaSet L (fstIdx d) ∧
     ( (∃ s < d, ∃ p < d, d = axL s p ∧ p ∈ s ∧ neg L p ∈ s) ∨
       (∃ s < d, d = verumIntro s ∧ ^⊤ ∈ s) ∨
@@ -443,6 +443,8 @@ private lemma phi_iff (C : V) : ∀ d : V, Phi T {x | x ∈ C} d ↔ IsFormulaSe
     · disj 8; exact ⟨s, d', rfl, h⟩
     · disj 9; exact ⟨s, p, d₁, d₂, rfl, h⟩
     · disj 10; exact ⟨s, p, h⟩
+
+variable {T}
 
 open LocallyDelta0 LocallyDelta0Function in
 lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
@@ -545,7 +547,8 @@ lemma phi_locallyDelta0 [LocallyDelta0Axioms T V] :
 
 variable [LocallyDelta0Axioms T V]
 
-variable (T) in
+variable (T)
+
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.Derivation (blueprint) in
 /-- The construction of the codes of derivations from the axioms of `T`. -/
 def construction : Fixpoint.Construction V (blueprint T) where
@@ -576,6 +579,8 @@ def construction : Fixpoint.Construction V (blueprint T) where
     · disj 9; exact ⟨s, p, d₁, d₂, rfl, ⟨h₁, hC hd₁C⟩, ⟨h₂, hC hd₂C⟩⟩
     · disj 10; exact ⟨s, p, h⟩
   Φ_locallyDelta0 := phi_locallyDelta0
+
+variable {T}
 
 instance : (construction T).StrongFinite V where
   strong_finite := by

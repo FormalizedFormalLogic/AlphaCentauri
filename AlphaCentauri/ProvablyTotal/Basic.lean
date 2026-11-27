@@ -35,23 +35,44 @@ def totalitySentence : ArithmeticSentence := ∀¹* ∃¹ φ.val
 lemma hierarchy_totalitySentence : ℬ[<, ℒₒᵣ].Hierarchy 𝚷 2 (totalitySentence φ) :=
   Bounding.Hierarchy.allClosure_iff.mpr (Bounding.Hierarchy.accum φ.sigma_prop.exs 𝚷)
 
-variable {φ} in
-lemma models_totalitySentence_iff :
-    V↓[ℒₒᵣ] ⊧ totalitySentence φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) := by
-  simp [totalitySentence, models_iff]
-
 /-- The functionality sentence `∀ x⃗, ∀ y y', φ(y, x⃗) ∧ φ(y', x⃗) → y = y'` of a graph formula `φ`.
 - [HP98, Definition I.1.51(2)] -/
 def functionalitySentence : ArithmeticSentence :=
   ∀¹* ∀¹ ∀¹ (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val) ⋏
     (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val)) 🡒 “#1 = #0”)
 
-variable {φ} in
+/-- `φ` refined so that the value is the least witness: `φ(y, x⃗) ∧ ∀ y' < y, ¬φ(y', x⃗)`.
+- [HP98, Lemma IV.3.4] -/
+def leastGraph : ArithmeticSemisentence (k + 1) :=
+  φ.val ⋏ (∀¹[“#0 < #1”] ∼(Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val))
+
+/-- The unique-existence form of totality, `∀ x⃗, ∃! y, φ*(y, x⃗)`, where `φ*` is the least-witness
+refinement `leastGraph φ`.
+- [HP98, Definition I.1.51, Lemma IV.3.4] -/
+def uniqueTotalitySentence : ArithmeticSentence :=
+  ∀¹* ((∃¹ leastGraph φ) ⋏ (∀¹ ∀¹
+    (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ) ⋏
+      (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ)) 🡒 “#1 = #0”)))
+
+variable {φ}
+
+lemma models_totalitySentence_iff :
+    V↓[ℒₒᵣ] ⊧ totalitySentence φ ↔ ∀ v : Fin k → V, ∃ y, φ.val.Evalb (y :> v) := by
+  simp [totalitySentence, models_iff]
+
 lemma models_functionalitySentence_iff :
     V↓[ℒₒᵣ] ⊧ functionalitySentence φ ↔ ∀ (v : Fin k → V) (y y'),
       φ.val.Evalb (y :> v) → φ.val.Evalb (y' :> v) → y = y' := by
   simp [functionalitySentence, models_iff, Semiformula.eval_rew, Function.comp_def,
     Matrix.comp_vecCons', Empty.eq_elim]
+
+lemma models_uniqueTotalitySentence_iff : V↓[ℒₒᵣ] ⊧ uniqueTotalitySentence φ ↔ ∀ v : Fin k → V,
+      (∃ y, (leastGraph φ).Evalb (y :> v)) ∧
+        ∀ y y', (leastGraph φ).Evalb (y :> v) → (leastGraph φ).Evalb (y' :> v) → y = y' := by
+  simp [uniqueTotalitySentence, models_iff, Semiformula.eval_rew, Function.comp_def,
+    Matrix.comp_vecCons', Empty.eq_elim]
+
+variable (φ)
 
 /-- A graph formula for the composite `fun x⃗ ↦ f (fun i ↦ g i x⃗)`.
 - [HP98, Lemma I.1.53] -/
@@ -83,11 +104,6 @@ lemma definablePred_evalb : 𝚺ᴬ₁-Predicate fun y ↦ φ.val.Evalb (y :> v)
     (Rew.bind (#0 :> fun i ↦ &(v i)) Empty.elim ▹ φ.val)
     (Bounding.Hierarchy.rew _ (by simp)) fun w ↦ by
       simp [Semiformula.eval_rew, Function.comp_def, Matrix.comp_vecCons', Empty.eq_elim]
-
-/-- `φ` refined so that the value is the least witness: `φ(y, x⃗) ∧ ∀ y' < y, ¬φ(y', x⃗)`.
-- [HP98, Lemma IV.3.4] -/
-def leastGraph : ArithmeticSemisentence (k + 1) :=
-  φ.val ⋏ (∀¹[“#0 < #1”] ∼(Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ φ.val))
 
 @[simp]
 lemma eval_leastGraph :
@@ -230,22 +246,6 @@ private lemma models_existsUnique_minimalPairGraph [V↓[ℒₒᵣ] ⊧* 𝗜�
     · exact absurd hyA (hy'C y hlt)
     · rfl
     · exact absurd hy'A (hyC y' hlt)
-
-/-- The unique-existence form of totality, `∀ x⃗, ∃! y, φ*(y, x⃗)`, where `φ*` is the least-witness
-refinement `leastGraph φ`.
-- [HP98, Definition I.1.51, Lemma IV.3.4] -/
-def uniqueTotalitySentence : ArithmeticSentence :=
-  ∀¹* ((∃¹ leastGraph φ) ⋏ (∀¹ ∀¹
-    (((Rew.subst (#1 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ) ⋏
-      (Rew.subst (#0 :> fun i : Fin k ↦ #i.succ.succ) ▹ leastGraph φ)) 🡒 “#1 = #0”)))
-
-variable {φ} in
-lemma models_uniqueTotalitySentence_iff : V↓[ℒₒᵣ] ⊧ uniqueTotalitySentence φ ↔ ∀ v : Fin k → V,
-      (∃ y, (leastGraph φ).Evalb (y :> v)) ∧
-        ∀ y y', (leastGraph φ).Evalb (y :> v) → (leastGraph φ).Evalb (y' :> v) → y = y' := by
-  simp [uniqueTotalitySentence, models_iff, Semiformula.eval_rew, Function.comp_def,
-    Matrix.comp_vecCons', Empty.eq_elim]
-
 
 end Arithmetic
 

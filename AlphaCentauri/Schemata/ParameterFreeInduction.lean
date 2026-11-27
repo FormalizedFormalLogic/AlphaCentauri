@@ -24,18 +24,20 @@ section axioms
 
 variable {L : Language} [L.ORing] {C C' : Semisentence L 1 → Prop} (Γ : Polarity) (s : ℕ)
 
-variable (L) in
+variable (L)
+
 /-- The parameter-free induction instance for a formula `φ` of one free variable:
 `φ(0) → (∀ x, φ(x) → φ(x + 1)) → ∀ x, φ(x)`.
 - [Bek99, §1] -/
 def parameterFreeSuccInd (φ : Semisentence L 1) : Sentence L := .univCl (succInd (Rew.emb ▹ φ))
 
-variable (L) in
 /-- The parameter-free induction schema restricted to the formulas satisfying `C`:
 `{ φ(0) → (∀ x, φ(x) → φ(x + 1)) → ∀ x, φ(x) | C φ }`.
 - [Bek99, §1] -/
 def parameterFreeInductionOn (C : Semisentence L 1 → Prop) : Set (Sentence L) :=
   parameterFreeSuccInd L '' {φ | C φ}
+
+variable {L}
 
 /-- `𝗜ᶠ Γ s` is `𝗘𝗔` together with the parameter-free induction schema for
 `ℬ[<, ℒₒᵣ].PrenexHierarchy Γ s`.

@@ -715,7 +715,8 @@ end termDisquotation
 
 section formulaDisquotation
 
-variable (n) in
+variable (n p)
+
 lemma adjoin_termShiftVec_fvarVec : ^&0 ∷ termShiftVec ℒₒᵣ n (fvarVec n) = fvarVec (n + 1) := by
   have hv := (isSemitermVec_fvarVec (L := ℒₒᵣ) n 0).isUTerm
   apply nth_ext' (n + 1) (by simp [hv]) (by simp)
@@ -725,16 +726,17 @@ lemma adjoin_termShiftVec_fvarVec : ^&0 ∷ termShiftVec ℒₒᵣ n (fvarVec n)
   · have hi' : i < n := by simpa using hi
     rw [nth_fvarVec (n + 1) (i + 1) hi]; simp [nth_termShiftVec hv hi', nth_fvarVec n i hi']
 
+/-- The formula obtained from `p` by replacing each bound variable `#i` by `&i`. -/
+noncomputable def instFormula (hp : IsSemiformula ℒₒᵣ n p) : Formula V ℒₒᵣ :=
+  ⟨subst ℒₒᵣ (fvarVec n) p, hp.subst (isSemitermVec_fvarVec n 0)⟩
+
+variable {n p}
+
 lemma free_subst_qVec_fvarVec (hq : (ℒₒᵣ).IsSemisentence (n + 1) q) :
     free ℒₒᵣ (subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) q) = subst ℒₒᵣ (fvarVec (n + 1)) q := by
   have hw := isSemitermVec_fvarVec (L := ℒₒᵣ) n 0
   rw [free, shift_substs hq.isSemiformula hw.qVec, hq.shift_eq, termShift_qVec hw,
     substs1_subst_qVec hw.termShiftVec hq.isSemiformula (by simp), adjoin_termShiftVec_fvarVec]
-
-variable (n p) in
-/-- The formula obtained from `p` by replacing each bound variable `#i` by `&i`. -/
-noncomputable def instFormula (hp : IsSemiformula ℒₒᵣ n p) : Formula V ℒₒᵣ :=
-  ⟨subst ℒₒᵣ (fvarVec n) p, hp.subst (isSemitermVec_fvarVec n 0)⟩
 
 section
 

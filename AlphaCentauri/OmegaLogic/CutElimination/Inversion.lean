@@ -29,18 +29,18 @@ private lemma inv_push : insert b ((insert a s).erase e) ⊆ insert a (insert b 
   simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
   tauto
 
-variable {a e} in
+private lemma inv_push₂ : insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ)))
+      ⊆ insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ)))) :=
+  (Finset.insert_subset_insert φ (inv_push ψ a (φ ⋎ ψ) s)).trans (Finset.insert_comm φ a _).subset
+
+variable {a e}
+
 private lemma inv_pull (h : a ≠ e) :
     insert a (insert b (s.erase e)) ⊆ insert b ((insert a s).erase e) := by
   intro x hx
   simp only [Finset.mem_insert, Finset.mem_erase] at hx ⊢
   rcases hx with rfl | hx <;> tauto
 
-private lemma inv_push₂ : insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ)))
-      ⊆ insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ)))) :=
-  (Finset.insert_subset_insert φ (inv_push ψ a (φ ⋎ ψ) s)).trans (Finset.insert_comm φ a _).subset
-
-variable {a} in
 private lemma inv_pull₂ (h : a ≠ (φ ⋎ ψ)) : insert a (insert φ (insert ψ (s.erase (φ ⋎ ψ))))
       ⊆ insert φ (insert ψ ((insert a s).erase (φ ⋎ ψ))) :=
   (Finset.insert_comm a φ _).subset.trans (Finset.insert_subset_insert φ (inv_pull ψ s h))

@@ -20,10 +20,6 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {i j a b
 
 noncomputable scoped instance : Exp V := ⟨fun a ↦ Classical.choose! (exponential_exists_unique a)⟩
 
-variable (a) in
-lemma exponential_exp : Exponential a (Exp.exp a) :=
-  Classical.choose!_spec (exponential_exists_unique a)
-
 lemma exponential_graph : a = Exp.exp b ↔ Exponential b a :=
   Classical.choose!_eq_iff_right _
 
@@ -36,6 +32,13 @@ instance exp_definable_deltaZero : 𝚺ᴬ₀-Function₁ (Exp.exp : V → V) :=
 lemma exp_of_exponential (h : Exponential a b) : Exp.exp a = b :=
   Eq.symm <| exponential_graph.mpr h
 
+section
+
+variable (a)
+
+lemma exponential_exp : Exponential a (Exp.exp a) :=
+  Classical.choose!_spec (exponential_exists_unique a)
+
 lemma exp_inj : Function.Injective (Exp.exp : V → V) := fun a _ H ↦
   (exponential_exp a).inj (exponential_graph.mp H)
 
@@ -44,10 +47,6 @@ lemma exp_zero : Exp.exp (0 : V) = 1 := exp_of_exponential (by simp)
 
 @[simp]
 lemma exp_one : Exp.exp (1 : V) = 2 := exp_of_exponential (by simp)
-
-section
-
-variable (a)
 
 lemma exp_succ : Exp.exp (a + 1) = 2 * Exp.exp a :=
   exp_of_exponential <| Exponential.exponential_succ_mul_two.mpr <| exponential_exp a
@@ -88,6 +87,10 @@ lemma exp_add : Exp.exp (a + b) = Exp.exp a * Exp.exp b :=
 lemma log_exponential : log (Exp.exp a) = a :=
   (exponential_exp a).log_eq_of_exp
 
+@[simp]
+lemma length_exponential : ‖Exp.exp a‖ = a + 1 := by
+  simp [length_of_pos (exp_pos a)]
+
 end
 
 lemma exp_log_le_self (pos : 0 < a) : Exp.exp (log a) ≤ a := by
@@ -99,11 +102,6 @@ lemma lt_two_mul_exponential_log (pos : 0 < a) : a < 2 * Exp.exp (log a) := by
   obtain ⟨_, _, H, _⟩ := log_pos pos
   rcases H.uniq (exponential_exp (log a))
   assumption
-
-variable (a) in
-@[simp]
-lemma length_exponential : ‖Exp.exp a‖ = a + 1 := by
-  simp [length_of_pos (exp_pos a)]
 
 lemma exp_le_iff_le_log (pos : 0 < a) : Exp.exp i ≤ a ↔ i ≤ log a :=
   ⟨by intro h; simpa using log_monotone h,
@@ -271,13 +269,6 @@ noncomputable scoped instance : Insert V V := ⟨bitInsert⟩
 
 lemma insert_eq : insert i a = bitInsert i a := rfl
 
-variable (i) in
-lemma singleton_eq_insert : ({i} : V) = insert i ∅ := by
-  simp [singleton_def, insert, bitInsert, emptyset_def]
-
-scoped instance : LawfulSingleton V V where
-  insert_empty_eq := fun x ↦ Eq.symm <| singleton_eq_insert x
-
 @[simp]
 lemma mem_bitInsert_iff : i ∈ insert j a ↔ i = j ∨ i ∈ a := by
   by_cases h : j ∈ a <;> simp [h, insert_eq, bitInsert]
@@ -293,7 +284,13 @@ lemma mem_bitRemove_iff : i ∈ bitRemove j a ↔ i ≠ j ∧ i ∈ a := by
   · simp only [bitRemove, h, ↓reduceIte, ne_eq, iff_and_self]
     rintro _ rfl; contradiction
 
-variable (b i a : V) in
+section
+
+variable (b i a : V)
+
+lemma singleton_eq_insert : ({i} : V) = insert i ∅ := by
+  simp [singleton_def, insert, bitInsert, emptyset_def]
+
 lemma insert_graph :
     b = insert i a ↔ (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e ≤ b, e = Exp.exp i ∧ b = a + e) :=
   ⟨by rintro rfl; by_cases hi : i ∈ a <;> simp [hi, insert, bitInsert],
@@ -301,6 +298,14 @@ lemma insert_graph :
         or_false, insert, bitInsert, ↓reduceIte, imp_self,
         not_false_eq_true, true_and, false_or, forall_exists_index, and_imp]
       rintro x _ rfl rfl; rfl⟩
+
+@[simp]
+lemma mem_insert : i ∈ insert i a := by simp
+
+end
+
+scoped instance : LawfulSingleton V V where
+  insert_empty_eq := fun x ↦ Eq.symm <| singleton_eq_insert x
 
 instance insert_defined : 𝚺ᴬ₀-Function₂[V] insert via insertDef :=
   .mk fun v ↦ by simp [insertDef, insert_graph, exp_defined_deltaZero.iff]
@@ -329,10 +334,6 @@ lemma pos_of_nonempty (h : i ∈ a) : 0 < a := by
   by_contra A
   rcases show a = 0 by simpa using A
   simp_all
-
-variable (i a) in
-@[simp]
-lemma mem_insert : i ∈ insert i a := by simp
 
 lemma insert_eq_self_of_mem (h : i ∈ a) : insert i a = a := by
   simp [insert_eq, bitInsert, h]
@@ -370,9 +371,19 @@ instance bitSubset_definable' (ℌ : Bounding.HierarchySymbol ℬ[<, ℒₒᵣ])
 
 lemma subset_iff : a ⊆ b ↔ (∀ x ∈ a, x ∈ b) := by simp [HasSubset.Subset]
 
-variable (a) in
+section
+
+variable (a)
+
 @[refl, simp]
 lemma subset_refl : a ⊆ a := by intro x; simp
+
+lemma eq_empty_or_nonempty : a = ∅ ∨ ∃ i, i ∈ a := by
+  rcases Arithmetic.zero_le a with (rfl | pos)
+  · simp [emptyset_def]
+  · exact Or.inr ⟨log a, log_mem_of_pos pos⟩
+
+end
 
 @[trans]
 lemma subset_trans (hab : a ⊆ b) (hbc : b ⊆ c) : a ⊆ c := by
@@ -497,12 +508,6 @@ lemma le_of_subset (h : a ⊆ b) : a ≤ b := le_of_subset_of_le (c := a) b a le
 lemma mem_ext (h : ∀ i, i ∈ a ↔ i ∈ b) : a = b :=
   le_antisymm (le_of_subset fun i hi ↦ (h i).mp hi) (le_of_subset fun i hi ↦ (h i).mpr hi)
 
-variable (a) in
-lemma eq_empty_or_nonempty : a = ∅ ∨ ∃ i, i ∈ a := by
-  rcases Arithmetic.zero_le a with (rfl | pos)
-  · simp [emptyset_def]
-  · exact Or.inr ⟨log a, log_mem_of_pos pos⟩
-
 lemma nonempty_iff : s ≠ ∅ ↔ ∃ x, x ∈ s := by
   rcases eq_empty_or_nonempty s with (rfl | hy)
   · simp
@@ -532,10 +537,10 @@ lemma under_inj : under i = under j ↔ i = j := ⟨fun h ↦ by
 @[simp]
 lemma under_zero : under (0 : V) = ∅ := mem_ext (by simp [mem_under_iff])
 
-variable (i) in
 @[simp]
-lemma under_succ : under (i + 1) = insert i (under i) :=
-  mem_ext (by simp [mem_under_iff, lt_succ_iff_le, le_iff_eq_or_lt])
+lemma under_succ : ∀ i : V, under (i + 1) = insert i (under i) := by
+  intro i
+  exact mem_ext (by simp [mem_under_iff, lt_succ_iff_le, le_iff_eq_or_lt])
 
 lemma insert_remove (h : i ∈ a) : insert i (bitRemove i a) = a := mem_ext <| by
   suffices ∀ j, j = i ∨ j ≠ i ∧ j ∈ a ↔ j ∈ a by simpa

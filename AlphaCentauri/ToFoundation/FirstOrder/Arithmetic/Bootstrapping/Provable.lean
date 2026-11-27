@@ -180,23 +180,13 @@ open FFL.Entailment Bootstrapping.Arithmetic
 
 variable {A B : Semiformula V ℒₒᵣ 1} (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ)
 
-variable (A B) in
+variable (A B)
+
 /-- `∀¹ (∀u < #0 + 1, A u ⋎ ∀x < #0 + 1, B x)`. -/
 noncomputable abbrev allBallOrBall : Formula V ℒₒᵣ :=
   ∀¹ ((A.subst ![Semiterm.bvar 0]).ball (Semiterm.bvar 0 + 𝕹 1) ⋎
     (B.subst ![Semiterm.bvar 0]).ball (Semiterm.bvar 0 + 𝕹 1))
 
-lemma shift_allBallOrBall (hA : A.shift = A) (hB : B.shift = B) :
-    (allBallOrBall A B).shift = allBallOrBall A B := by
-  simp [Semiformula.shift_substs, hA, hB]
-
-lemma tprovable_ball_imp :
-    T.internalize V ⊢ φ.ball t 🡒 Semiterm.notLessThan u t ⋎ φ.subst ![u] := by
-  have := TProof.all_imp_subst (T := T)
-    (Semiterm.notLessThan (Semiterm.bvar 0) t.bShift ⋎ φ) u;
-  simpa [Semiformula.ball] using this
-
-variable (A B) in
 lemma tprovable_allBallOrBall_imp_subst (w : Term V ℒₒᵣ) :
     T.internalize V ⊢ allBallOrBall A B 🡒 A.ball (w + 𝕹 1) ⋎ B.ball (w + 𝕹 1) := by
   have := TProof.all_imp_subst (T := T)
@@ -204,7 +194,6 @@ lemma tprovable_allBallOrBall_imp_subst (w : Term V ℒₒᵣ) :
       (B.subst ![Semiterm.bvar 0]).ball (Semiterm.bvar 0 + 𝕹 1)) w;
   simpa [Semiformula.substs_substs, SemitermVec.q] using this
 
-variable (A B) in
 lemma tprovable_all_or_all_imp_allBallOrBall :
     T.internalize V ⊢ (∀¹ A) ⋎ (∀¹ B) 🡒 allBallOrBall A B := by
   have e (φ : Semiformula V ℒₒᵣ 1) :
@@ -224,6 +213,18 @@ lemma tprovable_all_or_all_imp_allBallOrBall :
     simpa [Semiformula.free, Semiformula.ball, Semiformula.shift_substs,
       Semiformula.substs_substs, SemitermVec.q] using this;
   cl_prover [hA, hB]
+
+variable {A B}
+
+lemma shift_allBallOrBall (hA : A.shift = A) (hB : B.shift = B) :
+    (allBallOrBall A B).shift = allBallOrBall A B := by
+  simp [Semiformula.shift_substs, hA, hB]
+
+lemma tprovable_ball_imp :
+    T.internalize V ⊢ φ.ball t 🡒 Semiterm.notLessThan u t ⋎ φ.subst ![u] := by
+  have := TProof.all_imp_subst (T := T)
+    (Semiterm.notLessThan (Semiterm.bvar 0) t.bShift ⋎ φ) u;
+  simpa [Semiformula.ball] using this
 
 variable [𝗜𝚺₁ ⪯ T]
 

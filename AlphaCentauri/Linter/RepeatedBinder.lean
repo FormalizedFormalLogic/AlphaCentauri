@@ -26,8 +26,10 @@ end
 ```
 Such an argument is to be declared once, by `variable {a : Nat}`.
 
-Types are compared as syntax, up to whitespace and comments. If a type mentions other arguments, or
-section variables, these are to have the same signature as well. Arguments without a type or with a
+A variable that `variable (a) in` turns into an argument of another kind counts as an argument of that
+kind, and so do the binders of `variable … in` with a type. Types are compared as syntax, up to
+whitespace and comments. If a type mentions other arguments, or section variables, these are to have
+the same signature as well. Arguments without a type or with a
 default value, `_`, hypotheses, and arguments depending on any of them, are ignored. A hypothesis is
 an argument whose type is a proposition; instance arguments are compared even if their class is a
 proposition.
@@ -129,6 +131,24 @@ def readBinder (ctx : Context) (stx : Syntax) (isData : Syntax → Bool := fun _
       ctx := ctx.insert (name n) none
   return (ctx, arguments)
 
+/-- Reads a binder without a type, which changes the kind of the variables it names, and returns
+them as arguments of the new kind. -/
+def readKindChange (ctx : Context) (stx : Syntax) : Context × Array Argument := Id.run do
+  let some parts := BinderParts.ofSyntax? stx | return (ctx, #[])
+  let mut ctx := ctx
+  let mut arguments := #[]
+  for n in parts.names do
+    let name := n.getId.eraseMacroScopes
+    let some (some signature) := ctx.find? name | continue
+    let inner := String.ofList (signature.toList.drop 1).dropLast
+    let argument : Argument :=
+      { signature := s!"{parts.opening}{inner}{parts.closing}"
+        display := s!"{parts.opening}{name}{parts.closing}"
+        ref := stx }
+    ctx := ctx.insert name (some argument.signature)
+    arguments := arguments.push argument
+  return (ctx, arguments)
+
 /-- Reads the binders of a `variable` command after `ctx`. A binder without a type only changes the
 kind of a variable, and is skipped when there is such a variable. -/
 def readVariables (ctx : Context) (binders : Array Syntax) : Context :=
@@ -221,16 +241,17 @@ def dataPositions (binders : Array Syntax) : CommandElabM (Std.HashSet String.Po
 def check (declaration : Declaration) (seen : Std.HashMap String Occurrence) :
     CommandElabM (Std.HashMap String Occurrence) := do
   let mut ctx := readVariables {} ((← getScope).varDecls.map (·.raw))
-  -- a binder without a type only changes the kind of a variable
-  let localVariables := declaration.localVariables.filter fun b ↦
-    (BinderParts.ofSyntax? b).any (·.type?.isSome)
+  let isKindChange (b : Syntax) := (BinderParts.ofSyntax? b).any (·.type?.isNone)
   let mut seen := seen
   let mut own : Std.HashSet String := {}
   let fileMap ← getFileMap
-  let binders := localVariables ++ declaration.binders
+  let binders := declaration.localVariables ++ declaration.binders
   let positions ← dataPositions binders
   for binder in binders do
-    let (ctx', arguments) := readBinder ctx binder fun n ↦ n.getPos?.any positions.contains
+    let (ctx', arguments) :=
+      if declaration.localVariables.contains binder && isKindChange binder then
+        readKindChange ctx binder
+      else readBinder ctx binder fun n ↦ n.getPos?.any positions.contains
     ctx := ctx'
     for argument in arguments do
       if own.contains argument.signature then continue

@@ -31,9 +31,8 @@ variable {T : Theory L} [T.Δ₁]
 
 namespace Derivation
 
-variable (l : List (Sentence L)) {σ : Sentence L} {p a d : V}
+variable (l : List (Sentence L)) (σ : Sentence L) (p : V) {a d : V}
 
-variable (p) in
 /-- A formula code belongs to the $\Delta_1$-class of a finite list of sentences, presented as a
 theory, iff it is the quote of one of the listed sentences. -/
 lemma mem_deltaClass_ofList_iff : p ∈ @Theory.Δ₁Class V _ L _ _ {p | p ∈ l} (Theory.Δ₁.ofList l) ↔
@@ -57,7 +56,13 @@ lemma mem_deltaClass_ofList_iff : p ∈ @Theory.Δ₁Class V _ L _ _ {p | p ∈ 
     rw [ih']
     simp [Sentence.quote_eq_encode, numeral_eq_natCast]
 
-variable {U : Theory L} [U.Δ₁]
+/-- The $\Delta_1$-class of the singleton theory `{σ}` consists of the code of `σ` alone. -/
+lemma mem_deltaClass_singleton_iff : p ∈ ({σ} : Theory L).Δ₁Class ↔ p = ⌜σ⌝ := by
+  change V ⊧/![p] ({σ} : Theory L).Δ₁ch.val ↔ p = ⌜σ⌝
+  rw [Theory.Δ₁.singleton_toTDef_ch_val]
+  simp [Sentence.quote_eq_encode, numeral_eq_natCast]
+
+variable {σ p} {U : Theory L} [U.Δ₁]
 
 /-- Given a coded formula set `a` closed under the external-variable shift such that every axiom
 of `T` is an axiom of `U` or has its negation in `a`, every derivation from `T` yields a derivation
@@ -194,13 +199,6 @@ theorem derivable_union_of_replacement (ha : IsFormulaSet L a) (hsa : setShift L
     rcases mem_bitInsert_iff.mp hx with rfl | hx
     · exact mem_cup_iff.mpr <| Or.inr hq
     · exact mem_cup_iff.mpr <| Or.inl <| (mem_singleton_iff.mp hx) ▸ hp
-
-variable (σ p) in
-/-- The $\Delta_1$-class of the singleton theory `{σ}` consists of the code of `σ` alone. -/
-lemma mem_deltaClass_singleton_iff : p ∈ ({σ} : Theory L).Δ₁Class ↔ p = ⌜σ⌝ := by
-  change V ⊧/![p] ({σ} : Theory L).Δ₁ch.val ↔ p = ⌜σ⌝
-  rw [Theory.Δ₁.singleton_toTDef_ch_val]
-  simp [Sentence.quote_eq_encode, numeral_eq_natCast]
 
 /-- If every axiom of `U` is an axiom of `T` or the sentence `σ`, every derivation from `U` yields
 a derivation from `T` of the same end-sequent with `¬σ` adjoined.

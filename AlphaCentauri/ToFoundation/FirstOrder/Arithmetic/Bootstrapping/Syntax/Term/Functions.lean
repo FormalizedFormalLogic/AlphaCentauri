@@ -89,9 +89,15 @@ lemma le_termShiftVec (hv : IsSemitermVec L k n v) : v ≤ termShiftVec L k v :=
     rw [nth_termShiftVec hv.isUTerm (by simpa [hv.lh] using hi)]
     exact le_termShift (hv.nth (by simpa [hv.lh] using hi))
 
-variable (m n) in
+variable (k m n)
+
+lemma add_arity_comm : k + 1 + n = n + 1 + k := by
+  simp only [add_comm, add_left_comm]
+
 lemma isSemitermVec_fvarVec : IsSemitermVec L m n (fvarVec m) :=
   IsSemitermVec.iff.mpr ⟨len_fvarVec m, fun i hi ↦ by simp [nth_fvarVec m i hi]⟩
+
+variable {k m n}
 
 lemma nth_qVec_succ (hw : IsUTermVec L k w) (hj : j < k) :
     (qVec L w).[j + 1] = termBShift L w.[j] := by
@@ -223,7 +229,8 @@ lemma bvarVec_eq_matrixToVec (k : ℕ) :
 
 end BVarVec
 
-variable (w) in
+variable (w)
+
 lemma exists_vec_bvar_append : ∀ k : V, ∃ v : V, len v = k + len w ∧ (∀ i < k, v.[i] = ^#i) ∧
       ∀ j < len w, v.[k + j] = w.[j] := by
   intro k
@@ -236,6 +243,8 @@ lemma exists_vec_bvar_append : ∀ k : V, ∃ v : V, len v = k + len w ∧ (∀ 
   exact ⟨v, hvl, fun i hi ↦ (hv i (by simp [lt_of_lt_of_le hi])).1 hi,
     fun j hj ↦ by simpa using (hv (k + j) (by simpa using hj)).2 (by simp)⟩
 
+variable {w}
+
 /-- The vector `^#0, …, ^#(r - 1), t`. -/
 lemma exists_vec_bvar_term (r t : V) :
     ∃ v, len v = r + 1 ∧ (∀ i < r, v.[i] = ^#i) ∧ v.[r] = t := by
@@ -244,10 +253,6 @@ lemma exists_vec_bvar_term (r t : V) :
 
 lemma isSemitermVec_fvar_bvar (u : V) : IsSemitermVec L 2 1 (?[^&u, ^#(0 : V)] : V) :=
   IsSemitermVec.adjoin (IsSemitermVec.adjoin (IsSemitermVec.nil _) (by simp)) (by simp)
-
-variable (k n) in
-lemma add_arity_comm : k + 1 + n = n + 1 + k := by
-  simp only [add_comm, add_left_comm]
 
 section ShiftVec
 

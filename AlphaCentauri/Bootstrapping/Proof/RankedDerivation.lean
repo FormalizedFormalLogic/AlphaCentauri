@@ -40,22 +40,21 @@ lemma CutFreeDerivation.cutRank_eq_zero {d : V} (h : CutFreeDerivation T d) :
   · intro s _ p _ _; simp
   · definability
 
-variable (r d s : V)
+variable (T) (r d s : V)
 
-variable (T) in
 /-- `RankedDerivation T r d`: `d` codes a derivation of `T` whose cut formulas all have complexity
 below `r`.
 - [Bus98, Ch. I §2.4] -/
 def RankedDerivation : Prop := Derivation T d ∧ cutRank L d ≤ r
 
-variable (T) in
 /-- `RankedDerivationOf T r d s`: `d` codes a derivation of `T` of cut rank at most `r` whose
 end-sequent is `s`. -/
 def RankedDerivationOf : Prop := fstIdx d = s ∧ RankedDerivation T r d
 
-variable (T) in
 /-- `RankedDerivable T r s`: the sequent `s` has a derivation over `T` of cut rank at most `r`. -/
 def RankedDerivable : Prop := ∃ d, RankedDerivationOf T r d s
+
+variable {T}
 
 section definability
 

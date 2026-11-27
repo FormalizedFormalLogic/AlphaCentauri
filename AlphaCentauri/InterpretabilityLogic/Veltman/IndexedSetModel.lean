@@ -20,9 +20,8 @@ open Entailment Formula MaximalConsistentSet Logic
 
 namespace Veltman
 
-variable {α : Type*} [DecidableEq α] {L : Logic α} {Φ : Finset (Formula α)}
+variable {α : Type*} [DecidableEq α] (L : Logic α) (Φ : Finset (Formula α))
 
-variable (L Φ) in
 /-- A maximal consistent subset of `Φ` together with a finite sequence of antecedents and
 consequents of `▷`-formulas in `Φ`, no longer than the number of `□`-formulas in the set.
 
@@ -35,6 +34,8 @@ structure IndexedSet where
   length_seq_le : seq.length ≤ set.prebox.card
 
 namespace IndexedSet
+
+variable {L Φ}
 
 lemma ext {x y : IndexedSet L Φ} (h₁ : x.set = y.set) (h₂ : x.seq = y.seq) : x = y := by
   cases x; cases y; simp_all;
@@ -85,7 +86,6 @@ end IndexedSet
 
 open IndexedSet
 
-variable (L Φ) in
 /-- The model on indexed sets in which `S w x y` holds if `x` and `y` extend `w`, and whenever `x`
 is a `C`-critical successor of `w` containing `□∼C` and indexed by `C` after the sequence of `w`,
 so is `y`, which moreover does not contain `C`.
@@ -99,6 +99,8 @@ def countermodel [Nonempty (IndexedSet L Φ)] : Model (IndexedSet L Φ) α where
     □(∼C) ∈ x.set → w.seq ++ [C] <+: y.seq ∧ CriticalSuccessor C w.set y.set ∧ C ∉ y.set ∧
       □(∼C) ∈ y.set
   Val' x a := #a ∈ x.set
+
+variable {L Φ}
 
 namespace countermodel
 

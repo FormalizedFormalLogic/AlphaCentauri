@@ -51,14 +51,13 @@ end TermFvSubst
 
 open TermFvSubst
 
-variable (L)
+variable (L k w v t)
 
 /-- `termFvSubst L w t`: the coded `L`-term obtained from `t` by substituting the free variables
 below the length of `w` with the corresponding entries of `w`, leaving bound variables and
 out-of-range free variables unchanged. -/
-noncomputable def termFvSubst (w t : V) : V := construction.result L ![w] t
+noncomputable def termFvSubst : V := construction.result L ![w] t
 
-variable (k w v) in
 /-- `termFvSubstVec L k w v`: `termFvSubst L w` applied entrywise to the coded `k`-vector `v`. -/
 noncomputable def termFvSubstVec : V := construction.resultVec L ![w] k v
 
@@ -70,9 +69,7 @@ noncomputable def termFvSubstGraph : 𝚺ᴬ₁.Semisentence 3 :=
 noncomputable def termFvSubstVecGraph : 𝚺ᴬ₁.Semisentence 4 :=
   (blueprint.resultVec L).rew <| Rew.subst ![#0, #1, #3, #2]
 
-variable {L}
-
-variable (w)
+variable {L k v t}
 
 /-- Substitution of free variables leaves a coded bound variable unchanged. -/
 @[simp]
@@ -84,6 +81,11 @@ lemma termFvSubst_bvar (z : V) : termFvSubst L w ^#z = ^#z := by
 @[simp]
 lemma termFvSubst_fvar (x : V) : termFvSubst L w ^&x = if x < len w then w.[x] else ^&x := by
   simp [termFvSubst, construction]
+
+/-- Free-variable substitution on the empty coded vector is the empty vector. -/
+@[simp]
+lemma termFvSubstVec_nil : termFvSubstVec L 0 w 0 = 0 :=
+  construction.resultVec_nil L _
 
 variable {w}
 
@@ -134,12 +136,6 @@ the `i`-th entry of the original. -/
 lemma nth_termFvSubstVec (hv : IsUTermVec L k v) (hi : i < k) :
     (termFvSubstVec L k w v).[i] = termFvSubst L w v.[i] :=
   construction.nth_resultVec L _ hv hi
-
-variable (w) in
-/-- Free-variable substitution on the empty coded vector is the empty vector. -/
-@[simp]
-lemma termFvSubstVec_nil : termFvSubstVec L 0 w 0 = 0 :=
-  construction.resultVec_nil L _
 
 /-- Free-variable substitution on a coded vector distributes over prepending an entry. -/
 lemma termFvSubstVec_cons (ht : IsUTerm L t) (hv : IsUTermVec L k v) :
@@ -237,9 +233,8 @@ end FvSubst
 
 open FvSubst
 
-variable (L)
+variable (L w p)
 
-variable (w p) in
 /-- `fvSubst L w p`: the coded `L`-formula obtained from `p` by substituting the free variables
 below the length of `w` with the corresponding entries of `w` throughout, leaving bound variables
 and out-of-range free variables unchanged. -/
@@ -248,7 +243,7 @@ noncomputable def fvSubst : V := (FvSubst.construction L).result L w p
 /-- The $\Sigma_1$ graph of `fvSubst`; argument order `(y, w, p)`, `y = fvSubst L w p`. -/
 noncomputable def fvSubstGraph : 𝚺ᴬ₁.Semisentence 3 := (blueprint L).result L
 
-variable {L}
+variable {L w p}
 
 section
 
@@ -822,8 +817,9 @@ lemma fvSubst_imp (hw : IsSemitermVec L (len w) n w) (hp : IsSemiformula L n p)
   unfold imp
   rw [fvSubst_or hp.isUFormula.neg hq.isUFormula, fvSubst_neg hw hp]
 
-lemma fvSubst_qqAlls (hp : IsUFormula L p) (k : V) :
-    fvSubst L w (qqAlls p k) = qqAlls (fvSubst L w p) k := by
+lemma fvSubst_qqAlls (hp : IsUFormula L p) :
+    ∀ k : V, fvSubst L w (qqAlls p k) = qqAlls (fvSubst L w p) k := by
+  intro k
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp

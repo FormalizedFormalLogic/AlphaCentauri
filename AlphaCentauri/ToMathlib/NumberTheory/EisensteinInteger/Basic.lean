@@ -64,7 +64,8 @@ variable [LinearOrder R] [IsStrictOrderedRing R]
 lemma norm_nonneg : 0 ≤ norm z := by
   nlinarith [four_mul_norm z, sq_nonneg (2 * z.re - z.im), sq_nonneg z.im]
 
-variable {z} in
+variable {z}
+
 lemma norm_eq_zero_iff : norm z = 0 ↔ z = 0 := by
   constructor
   · intro h
@@ -75,7 +76,6 @@ lemma norm_eq_zero_iff : norm z = 0 ↔ z = 0 := by
   · rintro rfl
     simp [norm]
 
-variable {z} in
 lemma norm_pos (hz : z ≠ 0) : 0 < norm z :=
   (norm_nonneg z).lt_of_ne (Ne.symm (mt norm_eq_zero_iff.mp hz))
 
@@ -85,6 +85,8 @@ instance : NoZeroDivisors (EisensteinInteger R) where
       congrArg norm h
 
 instance : IsDomain (EisensteinInteger R) := NoZeroDivisors.to_isDomain _
+
+variable (z)
 
 lemma norm_add_le : norm (z + w) ≤ 2 * norm z + 2 * norm w := by
   have : norm (z + w) + norm (z - w) = 2 * norm z + 2 * norm w := by

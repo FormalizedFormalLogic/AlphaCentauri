@@ -143,14 +143,18 @@ lemma termShiftVec_eq_self_iff (hv : IsUTermVec L k v) :
   rw [termShiftVec_eq_self_iff_forall hv, termFreeVariablesVec_eq_empty_iff hv]
   exact forall₂_congr fun i hi ↦ termShift_eq_self_iff (hv.nth hi)
 
-variable (L n t) in
+section
+
+variable (L n t)
+
 /-- `t` codes a closed semiterm: a semiterm with `n` bound variables and no free variables. -/
 def _root_.FFL.FirstOrder.Language.IsClosedSemiterm : Prop :=
   IsSemiterm L n t ∧ termFreeVariables L t = ∅
 
-variable (L) (t) in
 /-- `t` codes a closed term: a term with neither bound nor free variables. -/
 abbrev _root_.FFL.FirstOrder.Language.IsClosedTerm : Prop := L.IsClosedSemiterm 0 t
+
+end
 
 lemma _root_.FFL.FirstOrder.Language.IsClosedSemiterm.isSemiterm (h : L.IsClosedSemiterm n t) :
     IsSemiterm L n t := h.1

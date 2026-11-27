@@ -151,18 +151,18 @@ structure ElementarySubstructureOn where
   emb : M ↪ₛ[L] N
   isElementary : IsElementary Γ emb
 
-variable (L) in
-/-- An elementary substructure.
-- [Kay91, §0.1] -/
-abbrev ElementarySubstructure :=
-  ElementarySubstructureOn (L := L) (fun {_} _ ↦ True) M N
-
 /-- A proper $\Gamma$-elementary substructure: a $\Gamma$-elementary substructure which is not
 surjective. -/
 structure ProperElementarySubstructureOn extends ElementarySubstructureOn Γ M N where
   not_surjective : ¬Function.Surjective emb
 
-variable (L) in
+variable (L)
+
+/-- An elementary substructure.
+- [Kay91, §0.1] -/
+abbrev ElementarySubstructure :=
+  ElementarySubstructureOn (L := L) (fun {_} _ ↦ True) M N
+
 /-- A proper elementary substructure. -/
 abbrev ProperElementarySubstructure :=
   ProperElementarySubstructureOn (L := L) (fun {_} _ ↦ True) M N
@@ -861,17 +861,18 @@ structure DefiningFormula (a : M) where
 def definableElementsOver : Set M :=
   {a | Nonempty (DefiningFormula A C a)}
 
-variable (L) in
+variable (L)
+
 /-- The definable closure of `A`: the elements of `M` definable over `A`.
 - [Kay91, §8.1] -/
 abbrev definableClosure : Set M :=
   definableElementsOver A (⊤ : Semiformula L A 1 → Prop)
 
-variable (L M) in
+variable (M) in
 /-- The elements of `M` definable without parameters. -/
 abbrev definableElements : Set M := definableClosure L (∅ : Set M)
 
-variable {A C}
+variable {L A C}
 
 lemma definableElementsOver_mono {D : Semiformula L A 1 → Prop}
     (h : ∀ φ, C φ → D φ) : definableElementsOver A C ⊆ definableElementsOver A D := by

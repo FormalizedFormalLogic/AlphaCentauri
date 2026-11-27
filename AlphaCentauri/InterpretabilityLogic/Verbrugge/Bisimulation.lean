@@ -23,7 +23,8 @@ open World
 variable {κ κ' α : Type*} [Nonempty κ] [Nonempty κ'] {M : Model κ α} {N : Model κ' α}
   {Z₁ Z₀ : M.World → N.World → Prop} {x : M.World} {y : N.World} {A B : Formula α}
 
-variable (M N) in
+variable (M N)
+
 /-- The w-forth condition from `Z₁` to `Z₀`: for every `≺`-successor `u` of `x` and every
 `Z₁`-related `y`, there is a nonempty set `U` of `≺`-successors of `y`, each `Z₀`-related to `u`,
 such that whenever every `u' ∈ U` is given some $u' \mathrel{≺[y]} V'(u')$, some
@@ -36,6 +37,32 @@ def WForth (Z₁ Z₀ : M.World → N.World → Prop) : Prop :=
     ∃ U : Set N.World, U.Nonempty ∧ (∀ u' ∈ U, y ≺ u' ∧ Z₀ u u') ∧
       ∀ V' : N.World → Set N.World, (∀ u' ∈ U, u' ≺[y] V' u') →
         ∃ V, u ≺[x] V ∧ ∀ v ∈ V, ∃ u' ∈ U, ∃ v' ∈ V' u', Z₀ v v'
+
+/-- A w-bisimulation: a relation between worlds that preserves atoms and satisfies the w-forth
+and the w-back conditions.
+
+- [HPV23, Definition 2.7]
+-/
+structure WBisimulation where
+  toRel : M.World → N.World → Prop
+  atomic {x : M.World} {y : N.World} {a : α} : toRel x y → (M x a ↔ N y a)
+  forth : WForth M N toRel toRel
+  back : WForth N M (flip toRel) (flip toRel)
+
+/-- An $n$-w-bisimulation: a sequence $Z_n ⊆ ⋯ ⊆ Z_0$ of relations between worlds such that
+$Z_0$ preserves atoms and each $Z_{i + 1}$ satisfies the w-forth and the w-back conditions with
+respect to $Z_i$.
+
+- [HPV23, Definition 3.1]
+-/
+structure NWBisimulation (n : ℕ) where
+  toRel : ℕ → M.World → N.World → Prop
+  antitone {i : ℕ} {x : M.World} {y : N.World} : i < n → toRel (i + 1) x y → toRel i x y
+  atomic {x : M.World} {y : N.World} {a : α} : toRel 0 x y → (M x a ↔ N y a)
+  forth {i : ℕ} : i < n → WForth M N (toRel (i + 1)) (toRel i)
+  back {i : ℕ} : i < n → WForth N M (flip (toRel (i + 1))) (flip (toRel i))
+
+variable {M N}
 
 namespace WForth
 
@@ -63,18 +90,6 @@ lemma forces_rhd (hA : ∀ u u', Z₀ u u' → (u ⊩[M] A ↔ u' ⊩[N] A))
 
 end WForth
 
-variable (M N) in
-/-- A w-bisimulation: a relation between worlds that preserves atoms and satisfies the w-forth
-and the w-back conditions.
-
-- [HPV23, Definition 2.7]
--/
-structure WBisimulation where
-  toRel : M.World → N.World → Prop
-  atomic {x : M.World} {y : N.World} {a : α} : toRel x y → (M x a ↔ N y a)
-  forth : WForth M N toRel toRel
-  back : WForth N M (flip toRel) (flip toRel)
-
 instance : CoeFun (WBisimulation M N) fun _ ↦ M.World → N.World → Prop :=
   ⟨WBisimulation.toRel⟩
 
@@ -95,20 +110,6 @@ theorem WBisimulation.forces_iff (Z : WBisimulation M N) (h : Z x y) : x ⊩[M] 
     constructor;
     · exact WForth.forces_rhd Z.back h (fun _ _ h ↦ (ihA h).symm) fun _ _ h ↦ (ihB h).symm;
     · exact WForth.forces_rhd Z.forth h (fun _ _ h ↦ ihA h) fun _ _ h ↦ ihB h;
-
-variable (M N) in
-/-- An $n$-w-bisimulation: a sequence $Z_n ⊆ ⋯ ⊆ Z_0$ of relations between worlds such that
-$Z_0$ preserves atoms and each $Z_{i + 1}$ satisfies the w-forth and the w-back conditions with
-respect to $Z_i$.
-
-- [HPV23, Definition 3.1]
--/
-structure NWBisimulation (n : ℕ) where
-  toRel : ℕ → M.World → N.World → Prop
-  antitone {i : ℕ} {x : M.World} {y : N.World} : i < n → toRel (i + 1) x y → toRel i x y
-  atomic {x : M.World} {y : N.World} {a : α} : toRel 0 x y → (M x a ↔ N y a)
-  forth {i : ℕ} : i < n → WForth M N (toRel (i + 1)) (toRel i)
-  back {i : ℕ} : i < n → WForth N M (flip (toRel (i + 1))) (flip (toRel i))
 
 namespace NWBisimulation
 
@@ -185,10 +186,19 @@ lemma flip_modalEquivalent : flip (ModalEquivalent M N n) = ModalEquivalent N M 
 
 section Definable
 
-variable (M N) in
+variable (M N n)
+
 private def SumForces : M.World ⊕ N.World → Formula α → Prop
   | .inl x, A => x ⊩[M] A
   | .inr y, A => y ⊩[N] A
+
+private def Definable (S : Set (M.World ⊕ N.World)) : Prop :=
+  ∃ A : Formula α, A.depth ≤ n ∧ ∀ z, z ∈ S ↔ SumForces M N z A
+
+private def SumModalEquivalent (z w : M.World ⊕ N.World) : Prop :=
+  ∀ A : Formula α, A.depth ≤ n → (SumForces M N z A ↔ SumForces M N w A)
+
+variable {M N n}
 
 variable {z : M.World ⊕ N.World} {A' : Formula α}
 
@@ -227,10 +237,6 @@ private lemma sumForces_rhd_congr {B' : Formula α}
     have hA' (y : N.World) : y ⊩[N] A ↔ y ⊩[N] A' := hA (.inr y);
     have hB' (y : N.World) : y ⊩[N] B ↔ y ⊩[N] B' := hB (.inr y);
     simp only [SumForces, forces_rhd, hA', hB'];
-
-variable (M N n) in
-private def Definable (S : Set (M.World ⊕ N.World)) : Prop :=
-  ∃ A : Formula α, A.depth ≤ n ∧ ∀ z, z ∈ S ↔ SumForces M N z A
 
 variable {𝒮 : Set (Set (M.World ⊕ N.World))}
 
@@ -337,11 +343,6 @@ private lemma finite_definable : {S | Definable M N n S}.Finite := by
       have hT := hrep ⟨_, definable_forces hA.2⟩;
       rw [sumForces_rhd_congr hS hT, sumForces_rhd_congr hS hT];
       exact Set.ext_iff.mp hrhd (_, _);
-
-omit [Finite α] in
-variable (M N) in
-private def SumModalEquivalent (z w : M.World ⊕ N.World) : Prop :=
-  ∀ A : Formula α, A.depth ≤ n → (SumForces M N z A ↔ SumForces M N w A)
 
 private lemma definable_modalEquivalent_class (u : M.World ⊕ N.World) :
     Definable M N n {z | SumModalEquivalent M N n z u} := by

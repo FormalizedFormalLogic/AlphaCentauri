@@ -56,16 +56,23 @@ open TermSubst
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (termSubstGraph termSubstVecGraph)
 
-variable (L)
+variable (L k w v)
 
-variable (w) in
 /-- The substitution of the list `w` for the bound variables in the code `t` of a term. -/
 noncomputable def termSubst (t : V) : V := construction.result L ![w] t
 
 /-- The substitution of the list `w` for the bound variables in the list `v` of `k` terms. -/
-noncomputable def termSubstVec (k w v : V) : V := construction.resultVec L ![w] k v
+noncomputable def termSubstVec : V := construction.resultVec L ![w] k v
 
 variable {L}
+
+lemma termSubstVec_le_exp_exp : termSubstVec L k w v ≤ Exp.exp (Exp.exp (8 * v + (w + 4))) :=
+  construction.resultVec_le_exp_exp L ![w] (le_trans (by simp) le_add_self) (fun _ ↦ le_rfl) k v
+
+@[simp]
+lemma termSubstVec_nil : termSubstVec L 0 w 0 = 0 := construction.resultVec_nil L _
+
+variable {k w v}
 
 @[simp]
 lemma termSubst_bvar (z) :
@@ -112,10 +119,6 @@ lemma termSubstVec_locallyDelta0 :
     (![0, 2, 1] : Fin 3 → Fin 3) using 3
   simp [termSubstVec, Matrix.constant_eq_singleton]
 
-variable (k w v) in
-lemma termSubstVec_le_exp_exp : termSubstVec L k w v ≤ Exp.exp (Exp.exp (8 * v + (w + 4))) :=
-  construction.resultVec_le_exp_exp L ![w] (le_trans (by simp) le_add_self) (fun _ ↦ le_rfl) k v
-
 @[simp]
 lemma len_termSubstVec (hts : IsUTermVec L k ts) :
     len (termSubstVec L k w ts) = k := construction.resultVec_lh L _ hts
@@ -124,10 +127,6 @@ lemma len_termSubstVec (hts : IsUTermVec L k ts) :
 lemma nth_termSubstVec (hts : IsUTermVec L k ts) (hi : i < k) :
     (termSubstVec L k w ts).[i] = termSubst L w ts.[i] :=
   construction.nth_resultVec L _ hts hi
-
-variable (w) in
-@[simp]
-lemma termSubstVec_nil : termSubstVec L 0 w 0 = 0 := construction.resultVec_nil L _
 
 lemma termSubstVec_cons (ht : IsUTerm L t) (hts : IsUTermVec L k ts) :
     termSubstVec L (k + 1) w (t ∷ ts) = termSubst L w t ∷ termSubstVec L k w ts :=
@@ -271,15 +270,20 @@ open TermShift
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping (termShiftGraph termShiftVecGraph)
 
-variable (L)
+variable (L k v)
 
 /-- The code of the term obtained by raising the indices of the free variables of `t` by one. -/
 noncomputable def termShift (t : V) : V := construction.result L ![] t
 
 /-- The list obtained by shifting each of the `k` terms in `v`. -/
-noncomputable def termShiftVec (k v : V) : V := construction.resultVec L ![] k v
+noncomputable def termShiftVec : V := construction.resultVec L ![] k v
 
 variable {L}
+
+lemma termShiftVec_le_exp_exp : termShiftVec L k v ≤ Exp.exp (Exp.exp (8 * v + 2)) :=
+  construction.resultVec_le_exp_exp L ![] one_le_two (fun _ ↦ le_rfl) k v
+
+variable {k v}
 
 @[simp]
 lemma termShift_bvar (z : V) :
@@ -319,10 +323,6 @@ lemma termShift_locallyDelta0 : LocallyDelta0Function₁ (termShift L : V → V)
 lemma termShiftVec_locallyDelta0 : LocallyDelta0Function₂ (termShiftVec L : V → V → V) := by
   convert construction.resultVec_locallyDelta0 (V := V) L using 3
   simp [termShiftVec, Matrix.empty_eq]
-
-variable (k v) in
-lemma termShiftVec_le_exp_exp : termShiftVec L k v ≤ Exp.exp (Exp.exp (8 * v + 2)) :=
-  construction.resultVec_le_exp_exp L ![] one_le_two (fun _ ↦ le_rfl) k v
 
 @[simp]
 lemma len_termShiftVec (hts : IsUTermVec L k ts) :

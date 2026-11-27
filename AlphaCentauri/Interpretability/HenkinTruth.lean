@@ -473,7 +473,8 @@ noncomputable def henkinTermEquiv (ht : (ℒₒᵣ).IsClosedSemiterm n t) : Form
   henkinListF S (assignment n) n 🡒 ∀¹ (henkinDomainF S 🡒 (varEqualT hT (instTerm n t ht) 🡘
     henkinEquatesF S (assignment n).bShift (Semiterm.bvar 0) t n))
 
-variable (tbl n t) in
+variable (tbl n p t)
+
 /-- The code of `henkinTermEquiv`. -/
 noncomputable def henkinTermEquivCode : V :=
   imp ℒₒᵣ (subst ℒₒᵣ ?[numeral n, assignmentCode n] ⌜henkinListDef S⌝)
@@ -481,6 +482,19 @@ noncomputable def henkinTermEquivCode : V :=
       (iff ℒₒᵣ (varEqual ℒₒᵣ ℒₒᵣ tbl (termSubst ℒₒᵣ (fvarVec n) t))
         (subst ℒₒᵣ ?[numeral t, numeral n, termBShift ℒₒᵣ (assignmentCode n), ^#0]
           ⌜(henkinEquatesDef S).val⌝))))
+
+/-- The code of `henkinEquiv`. -/
+noncomputable def henkinEquivCode : V :=
+  imp ℒₒᵣ (subst ℒₒᵣ ?[numeral n, assignmentCode n] ⌜henkinListDef S⌝)
+    (iff ℒₒᵣ (translate ℒₒᵣ ℒₒᵣ tbl (subst ℒₒᵣ (fvarVec n) p))
+      (subst ℒₒᵣ ?[numeral p, numeral n, assignmentCode n] ⌜(henkinSatisfiesDef S).val⌝))
+
+/-- The matrix of a quantified formula with the bound variables `#(i + 1)` replaced by `&i`. -/
+noncomputable def instMatrix (hp : IsSemiformula ℒₒᵣ (n + 1) p) : Semiformula V ℒₒᵣ 1 :=
+  ⟨subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) p, by
+    simpa using hp.subst (isSemitermVec_fvarVec n 0).qVec⟩
+
+variable {tbl n p t}
 
 lemma val_henkinTermEquiv (ht : (ℒₒᵣ).IsClosedSemiterm n t) :
     (henkinTermEquiv S hT ht).val = henkinTermEquivCode S tbl n t := by
@@ -492,13 +506,6 @@ set agree at the free variables `&i`. -/
 noncomputable def henkinEquiv (hp : IsSemiformula ℒₒᵣ n p) : Formula V ℒₒᵣ :=
   henkinListF S (assignment n) n 🡒
     (hT.transT (instFormula n p hp) 🡘 henkinSatisfiesF S (assignment n) p n)
-
-variable (tbl n p) in
-/-- The code of `henkinEquiv`. -/
-noncomputable def henkinEquivCode : V :=
-  imp ℒₒᵣ (subst ℒₒᵣ ?[numeral n, assignmentCode n] ⌜henkinListDef S⌝)
-    (iff ℒₒᵣ (translate ℒₒᵣ ℒₒᵣ tbl (subst ℒₒᵣ (fvarVec n) p))
-      (subst ℒₒᵣ ?[numeral p, numeral n, assignmentCode n] ⌜(henkinSatisfiesDef S).val⌝))
 
 lemma val_henkinEquiv (hp : IsSemiformula ℒₒᵣ n p) :
     (henkinEquiv S hT hp).val = henkinEquivCode S tbl n p := by
@@ -539,12 +546,6 @@ lemma tprovable_henkinEquiv_or (hp : IsSemiformula ℒₒᵣ n p) (hq : IsSemifo
   rw [henkinEquiv] at h₁ h₂ ⊢
   rw [e, IsTable.transT_or]
   cl_prover [h₁, h₂, h₃]
-
-variable (n p) in
-/-- The matrix of a quantified formula with the bound variables `#(i + 1)` replaced by `&i`. -/
-noncomputable def instMatrix (hp : IsSemiformula ℒₒᵣ (n + 1) p) : Semiformula V ℒₒᵣ 1 :=
-  ⟨subst ℒₒᵣ (qVec ℒₒᵣ (fvarVec n)) p, by
-    simpa using hp.subst (isSemitermVec_fvarVec n 0).qVec⟩
 
 lemma tprovable_list_imp_all_iff (hp : (ℒₒᵣ).IsSemisentence (n + 1) p)
     (h : (T ∪ S.Con).internalize V ⊢ henkinEquiv S hT hp.isSemiformula) :

@@ -350,9 +350,12 @@ lemma one_lt_sq_smash (hB : 0 < B) : (1 : V) < (B ⨳ B) ^ 2 := by
 lemma ext_one_zero (hB : 0 < B) : (1 : V){B}[0] = 1 :=
   Nuon.ext_zero_eq_self_of_le (by simpa using pos_iff_one_le.mp (length_pos_iff.mpr hB))
 
-variable (L S x k) in
+variable (L S x k)
+
 /-- The blocks of `S` of width `‖L‖` list the powers $x^0, \dots, x^k$. -/
 def IsSeq : Prop := S{L}[0] = 1 ∧ ∀ i < k, S{L}[i + 1] = S{L}[i] * x
+
+variable {L S x k}
 
 def isSeqDef : 𝚺ᴬ₀.Semisentence 4 := .mkSigma
   “L S x k.
@@ -420,20 +423,22 @@ lemma exists_isSeq (hB : 0 < B) (hx : 0 < x) (hk : k * ‖x‖ < ‖B‖) :
       · rwa [hlast]
   exact key k le_rfl
 
-variable (B x k y) in
+variable (B x k y)
+
 /-- `y` is $x^k$, as listed by a sequence with blocks of width `‖B‖`. -/
 def IsPow : Prop := ∃ S < (B ⨳ B) ^ 2, IsSeq B S x k ∧ S{B}[k] = y
+
+lemma definable_isPow : 𝚺ᴬ₀.DefinableRel₃ (IsPow B) := by
+  have := definable_isSeq (V := V)
+  unfold IsPow
+  definability
+
+variable {B x k y}
 
 lemma IsPow.unique {y' : V} (h : IsPow B x k y) (h' : IsPow B x k y') : y = y' := by
   obtain ⟨S, -, H, rfl⟩ := h
   obtain ⟨S', -, H', rfl⟩ := h'
   exact H.ext_eq H' k le_rfl
-
-variable (B) in
-lemma definable_isPow : 𝚺ᴬ₀.DefinableRel₃ (IsPow B) := by
-  have := definable_isSeq (V := V)
-  unfold IsPow
-  definability
 
 lemma IsPow.lt (h : IsPow B x k y) : y < B ⨳ 1 := by
   obtain ⟨S, -, -, rfl⟩ := h
@@ -445,10 +450,19 @@ open Power
 
 variable {B x k y : V}
 
-variable (B x k) in
+variable (B x k)
+
 open Classical in
 /-- $x^k$, computed with blocks of width `‖B‖`; it is $0$ if no such sequence exists. -/
 def bpow : V := if h : ∃ y, IsPow B x k y then h.choose else 0
+
+lemma bpow_lt : bpow B x k < B ⨳ 1 := by
+  unfold bpow
+  split_ifs with h
+  · exact h.choose_spec.lt
+  · exact smash_pos B 1
+
+variable {B x k}
 
 lemma Power.IsPow.bpow_eq (h : IsPow B x k y) : bpow B x k = y := by
   unfold bpow
@@ -481,22 +495,17 @@ lemma bpow_eq_iff : y = bpow B x k ↔ IsPow B x k y ∨ ((¬∃ y' < B ⨳ 1, I
         exact absurd ⟨y, hy.lt, hy⟩ h
       · rfl
 
-variable (B) in
+variable (B)
+
 instance : 𝚺ᴬ₀.DefinableFunction₂ (bpow B) := by
   have := definable_isPow B
   simp only [Bounding.HierarchySymbol.DefinableFunction₂,
     Bounding.HierarchySymbol.DefinableFunction, bpow_eq_iff]
   definability
 
-variable (B x k) in
-lemma bpow_lt : bpow B x k < B ⨳ 1 := by
-  unfold bpow
-  split_ifs with h
-  · exact h.choose_spec.lt
-  · exact smash_pos B 1
-
-variable (B) in
 instance : Bounded₂ (bpow B) := ⟨&(B ⨳ 1), fun _ ↦ by simpa using (bpow_lt B _ _).le⟩
+
+variable {B}
 
 lemma length_bpow_le (hB : 0 < B) (hx : 0 < x) (hk : k * ‖x‖ < ‖B‖) :
     ‖bpow B x k‖ ≤ k * ‖x‖ + 1 := by

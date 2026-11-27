@@ -33,9 +33,8 @@ namespace WeakPigeonhole
 
 section tree
 
-variable (C : V → V → V → Prop) (a : V) {d s c τ e : V}
+variable (C : V → V → V → Prop) (a d s c τ e : V)
 
-variable (d s c τ) in
 /-- The blocks of `s` of width `‖a‖` trace a path of length `d` from `c` along the bits of `τ`,
 lowest bit first, each step going from a node `e` to a node `x` with `C β e x` for the current bit
 `β`.
@@ -44,13 +43,12 @@ def IsPath : Prop :=
   Nuon.ext a s 0 = c ∧
     ∀ i < d, Nuon.ext a s (i + 1) < a ∧ C (fbit τ i) (Nuon.ext a s i) (Nuon.ext a s (i + 1))
 
-variable (d c τ e) in
 /-- The path of length `d` from `c` along `τ` ends at `e`: $H^d_c(\tau) = e$.
 - [PWW88, proof of Theorem 1] -/
 def IsLeaf : Prop :=
   ∃ s < (2 * a) ⨳ a, IsPath C a d s c τ ∧ Nuon.ext a s d = e
 
-variable {C a}
+variable {C a d s c τ e}
 
 lemma definable_isLeaf (hC : 𝚺ᴬ₀.DefinableRel₃ C) : 𝚺ᴬ₀.DefinableRel₄ (IsLeaf C a) := by
   unfold IsLeaf IsPath
@@ -78,7 +76,8 @@ lemma IsPath.ext_eq {s' τ' : V} (hc : c < a)
     rw [← IH hid.le] at hch'
     exact hC i hid _ (h.ext_lt hc hid.le) _ hlt _ hlt' hch hch'
 
-lemma isLeaf_zero (he : e < a) (τ : V) : IsLeaf C a 0 e τ e := by
+lemma isLeaf_zero (he : e < a) : ∀ τ : V, IsLeaf C a 0 e τ e := by
+  intro τ
   have hext : Nuon.ext a e 0 = e := Nuon.ext_zero_eq_self_of_le (length_monotone he.le)
   use e
   and_intros
@@ -399,29 +398,33 @@ theorem weakPigeonhole_two_mul (hR : 𝚺ᴬ₀.DefinableRel R) (ha : 0 < a)
 namespace WeakPigeonhole
 
 
-variable (R : V → V → Prop) (K b : V) (hR : 𝚺ᴬ₀.DefinableRel R) {e I x z : V}
+variable (R : V → V → Prop) (K b : V) (hR : 𝚺ᴬ₀.DefinableRel R) (e I x z : V)
 
-variable (e z) in
 /-- `R` on the first `(K + 1) * b` numbers and the shift down by `b` above them: an injection of
 `(k + 1) * b` into `k * b` for every `k ≥ K` if `R` is one of `(K + 1) * b` into `K * b`. -/
 def ShiftStep : Prop :=
   (e < (K + 1) * b ∧ z < K * b ∧ R e z) ∨ ((K + 1) * b ≤ e ∧ z + b = e)
 
-variable (I x z) in
 /-- `z` is reached from `x` by `K` steps of `ShiftStep`, recorded in a sequence with blocks of
 width `‖2 * K * b‖`. -/
 def ShiftReach : Prop :=
   ∃ s < (I ⨳ (2 * K * b)) ^ 2, IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) K s x 0 ∧
     Nuon.ext (2 * K * b) s K = z
 
-variable {R K b}
+/-- Every `x < 2 * K * b` starts a path of `j` steps of `ShiftStep` ending below
+`2 * K * b - j * b`. -/
+def ShiftPaths (j : V) : Prop :=
+  ∀ x < 2 * K * b, ∃ s < (I ⨳ (2 * K * b)) ^ 2,
+    IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) j s x 0 ∧
+      Nuon.ext (2 * K * b) s j + j * b < 2 * K * b
+
+variable {R K b e x z}
 
 include hR in
 lemma definable_shiftStep : 𝚺ᴬ₀.DefinableRel (ShiftStep R K b) := by
   unfold ShiftStep
   definability
 
-variable (I) in
 include hR in
 lemma definable_shiftReach : 𝚺ᴬ₀.DefinableRel (ShiftReach R K b I) := by
   have := definable_shiftStep (K := K) (b := b) hR
@@ -440,20 +443,13 @@ lemma ShiftStep.unique (hinj : ∀ x < (K + 1) * b, ∀ x' < (K + 1) * b, ∀ y 
   · exact absurd hz' (not_lt.mpr (hge he hz))
   · rw [← hz, ← hz']
 
-variable (R K b I) in
-/-- Every `x < 2 * K * b` starts a path of `j` steps of `ShiftStep` ending below
-`2 * K * b - j * b`. -/
-def ShiftPaths (j : V) : Prop :=
-  ∀ x < 2 * K * b, ∃ s < (I ⨳ (2 * K * b)) ^ 2,
-    IsPath (fun _ ↦ ShiftStep R K b) (2 * K * b) j s x 0 ∧
-      Nuon.ext (2 * K * b) s j + j * b < 2 * K * b
-
-variable (I) in
 include hR in
 lemma definable_shiftPaths : 𝚺ᴬ₀.DefinablePred (ShiftPaths R K b I) := by
   have := definable_shiftStep (K := K) (b := b) hR
   unfold ShiftPaths IsPath
   definability
+
+variable {I}
 
 lemma exists_shiftStep {j : V} (total : ∀ x < (K + 1) * b, ∃ y < K * b, R x y)
     (hj : j + 1 ≤ K) (he : e + j * b < 2 * K * b) :

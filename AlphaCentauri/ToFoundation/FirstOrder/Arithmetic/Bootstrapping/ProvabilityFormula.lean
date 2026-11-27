@@ -37,9 +37,16 @@ lemma models_provabilityPred_iff :
     V↓[ℒₒᵣ] ⊧ provabilityPred T σ ↔ Provable T (⌜σ⌝ : V) := by
   simp [models_iff]
 
-variable (T) in
+variable (T)
+
 noncomputable def provabilityFormula (x : V) : Formula V ℒₒᵣ :=
   (⌜(provable T).val⌝ : Semiformula V ℒₒᵣ 1).subst ![𝕹 x]
+
+private noncomputable def provableImpFormula : ArithmeticSemisentence 3 :=
+  (impGraph ℒₒᵣ).val 🡒 (Rew.subst ![#0] ▹ (provable T).val) 🡒
+    (Rew.subst ![#1] ▹ (provable T).val) 🡒 (Rew.subst ![#2] ▹ (provable T).val)
+
+variable {T}
 
 @[simp]
 lemma typed_quote_provabilityPred :
@@ -51,11 +58,6 @@ lemma tprovable_provabilityFormula [𝗣𝗔⁻ ⪯ T] {x : V} (h : Provable T x
   simpa [provabilityFormula, Matrix.constant_eq_singleton] using
     bold_sigma_one_complete (V := V) T (φ := (provable T).val) (by simp) (w := ![x])
       (by simpa using h)
-
-variable (T) in
-private noncomputable def provableImpFormula : ArithmeticSemisentence 3 :=
-  (impGraph ℒₒᵣ).val 🡒 (Rew.subst ![#0] ▹ (provable T).val) 🡒
-    (Rew.subst ![#1] ▹ (provable T).val) 🡒 (Rew.subst ![#2] ▹ (provable T).val)
 
 variable [𝗜𝚺₁ ⪯ T] (φ : Formula V ℒₒᵣ)
 

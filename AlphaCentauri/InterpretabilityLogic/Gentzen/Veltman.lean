@@ -216,11 +216,22 @@ lemma exists_isAvoiding (hx : ⊬ᴳ[𝐈𝐋] x) (hR : R ∈ x.suc) (hRm : IsMo
   have := Finset.card_le_card this;
   omega;
 
-variable (x R) in
+variable (x R)
+
 open Classical in
 /-- A chosen avoiding set. -/
 noncomputable def avoidance : FormulaFinset α :=
   if h : ∃ N, IsAvoiding x R N then h.choose else ∅
+
+/-- `y` is a child of `x` for the formula `R` on the right of `x`. -/
+structure IsChild (y : Sequent α) : Prop where
+  modal : IsModal R
+  mem_suc : R ∈ x.suc
+  box : ∀ {C}, □C ∈ x.ant → C ∈ y.ant ∧ □C ∈ y.ant
+  avoid : ∀ {C}, C ∈ avoidance x R → C ∈ y.suc ∧ □(∼C) ∈ y.ant
+  new_box : ∃ C, □C ∈ y.ant ∧ □C ∉ x.ant
+
+variable {x R}
 
 lemma isAvoiding_avoidance (hx : ⊬ᴳ[𝐈𝐋] x) (hR : R ∈ x.suc) (hRm : IsModal R) :
     IsAvoiding x R (avoidance x R) := by
@@ -339,17 +350,6 @@ lemma prebox_subset : x.ant.prebox ⊆ closure BS := by
   exact mem_closure_box (x.ant_subset (FormulaFinset.mem_prebox.mp hC));
 
 end SaturatedSequent
-
-/-! ### Children -/
-
-variable (x R) in
-/-- `y` is a child of `x` for the formula `R` on the right of `x`. -/
-structure IsChild (y : Sequent α) : Prop where
-  modal : IsModal R
-  mem_suc : R ∈ x.suc
-  box : ∀ {C}, □C ∈ x.ant → C ∈ y.ant ∧ □C ∈ y.ant
-  avoid : ∀ {C}, C ∈ avoidance x R → C ∈ y.suc ∧ □(∼C) ∈ y.ant
-  new_box : ∃ C, □C ∈ y.ant ∧ □C ∉ x.ant
 
 /-! ### The countermodel -/
 

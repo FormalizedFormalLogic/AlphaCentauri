@@ -365,7 +365,8 @@ theorem primrec'_of_provablyTotal (hf : 𝗜𝚺₁.ProvablyTotal (fun v ↦ f (
   (primrec'_of_provablyTotalVia (φ := .mkSigma φ.val φ.val_hierarchy)
     φ.val_prenexHierarchy.prenexBlock h).of_eq fun v ↦ by simp
 
-variable (f) in
+variable (f)
+
 /-- **Parsons' theorem**: the `𝗜𝚺₁`-provably total functions are exactly the primitive recursive
 functions.
 - [HP98, Corollary IV.3.7] -/
@@ -376,17 +377,6 @@ theorem primrec'_iff_provablyTotal :
 /-- **Parsons' theorem**, under its usual name. -/
 alias parsons := primrec'_iff_provablyTotal
 
-/-- **Parsons' theorem** in class form: the class of `𝗜𝚺₁`-provably total functions of arity `k`
-is the class of primitive recursive functions of arity `k`.
-- [HP98, Corollary IV.3.7] -/
-theorem provablyTotalFunctions_ISigma1 (k : ℕ) :
-    𝗜𝚺₁.provablyTotalFunctions k = {f | Nat.Primrec' fun v : List.Vector ℕ k ↦ f v.get} := by
-  ext f
-  have e : (fun v : Fin k → ℕ ↦ f (List.Vector.ofFn v).get) = f :=
-    funext fun v ↦ congrArg f (funext (List.Vector.get_ofFn v))
-  simpa [e] using (primrec'_iff_provablyTotal fun v : List.Vector ℕ k ↦ f v.get).symm
-
-variable (f) in
 /-- In Mathlib's `Primrec` form, the `𝗜𝚺₁`-provably total functions are exactly the primitive
 recursive functions.
 - [HP98, Corollary IV.3.7] -/
@@ -396,6 +386,18 @@ theorem primrec_iff_provablyTotal :
 
 /-- **Parsons' theorem** in Mathlib's `Primrec` form, under its usual name. -/
 alias parsons_primrec := primrec_iff_provablyTotal
+
+variable {f}
+
+/-- **Parsons' theorem** in class form: the class of `𝗜𝚺₁`-provably total functions of arity `k`
+is the class of primitive recursive functions of arity `k`.
+- [HP98, Corollary IV.3.7] -/
+theorem provablyTotalFunctions_ISigma1 (k : ℕ) :
+    𝗜𝚺₁.provablyTotalFunctions k = {f | Nat.Primrec' fun v : List.Vector ℕ k ↦ f v.get} := by
+  ext f
+  have e : (fun v : Fin k → ℕ ↦ f (List.Vector.ofFn v).get) = f :=
+    funext fun v ↦ congrArg f (funext (List.Vector.get_ofFn v))
+  simpa [e] using (primrec'_iff_provablyTotal fun v : List.Vector ℕ k ↦ f v.get).symm
 
 /-- The Ackermann function is not `𝗜𝚺₁`-provably total.
 - [HP98, Corollary IV.3.7] -/

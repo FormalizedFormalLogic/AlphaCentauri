@@ -60,7 +60,8 @@ lemma shift_iterate_relAllItr {n : ℕ} (hd : d.shift = d) (j : ℕ) :
     rw [relAllItr_succ, relAllItr_succ, shift_iterate_relAllItr hd j k]
     simp [Semiformula.shift_iterate_subst, hd']
 
-variable (d) in
+variable (d)
+
 /-- Specialisation of a relativized block of `k` universal quantifiers. -/
 lemma relAllItr_specialize :
     ∀ {k : ℕ} (φ : Semiformula V L (0 + k)) (w : SemitermVec V L (0 + k) 0),
@@ -82,7 +83,6 @@ lemma relAllItr_specialize :
     simp only [Matrix.conj]
     cl_prover [h₁, h₂]
 
-variable (d) in
 /-- Specialisation of a relativized block of universal quantifiers. -/
 lemma relAlls_specialize : ∀ {n : ℕ} (φ : Semiformula V L n) (w : SemitermVec V L n 0),
       T.internalize V ⊢ relAlls d φ 🡒 Matrix.conj (fun i ↦ d.subst ![w i]) 🡒 φ.subst w
@@ -101,6 +101,8 @@ lemma relAlls_specialize : ∀ {n : ℕ} (φ : Semiformula V L n) (w : SemitermV
       Matrix.head_cons, Matrix.vecMap_nil, Semiterm.substs_bvar] at h₁ h₂
     simp only [relAlls, Matrix.conj]
     cl_prover [h₁, h₂]
+
+variable {d}
 
 omit [T.Δ₁] in
 lemma free_subst_q_fvar' (ψ : Semiformula V L (k + 1)) :

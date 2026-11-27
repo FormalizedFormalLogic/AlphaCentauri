@@ -147,7 +147,6 @@ def Phi (C : Set V) (t : V) : Prop :=
   (∃ z, t = ^#z) ∨ (∃ x, t = ^&x) ∨
   (∃ k f v : V, L.IsFunc k f ∧ k = len v ∧ (∀ i < k, v.[i] ∈ C) ∧ t = ^func k f v)
 
-variable (t) in
 private lemma phi_iff (C : V) : Phi L {x | x ∈ C} t ↔ (∃ z < t, t = ^#z) ∨ (∃ x < t, t = ^&x) ∨
     (∃ k < t, ∃ f < t, ∃ v < t,
       L.IsFunc k f ∧ k = len v ∧ (∀ i < k, v.[i] ∈ C) ∧ t = ^func k f v) where
@@ -193,7 +192,7 @@ lemma phi_locallyDelta0 :
     LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 1) <|
       LocallyDelta0.bexs_lt_function (LocallyDelta0Function.var 2) <|
         hisFunc.and <| hlen.and <| hall.and hfunc
-  exact (hex₁.or <| hex₂.or hex₃).of_iff fun w ↦ by simpa using phi_iff L (w 0) (w 1)
+  exact (hex₁.or <| hex₂.or hex₃).of_iff fun w ↦ by simpa using phi_iff L (t := w 0) (w 1)
 
 open _root_.FFL.FirstOrder.Arithmetic.Bootstrapping.FormalizedTerm (blueprint) in
 /-- The construction of the codes of terms. -/
@@ -1071,17 +1070,18 @@ lemma result_eq_ite :
   · simp [ht, ((c.graph_iff L).mp (c.result_prop L param ht)).2]
   · simp [ht, c.result_prop_not L param ht]
 
-variable (L c param) in
-lemma result_le_bound : c.result L param t ≤ c.bound param t := by
+variable {t}
+
+variable (L c param)
+
+lemma result_le_bound : ∀ t : V, c.result L param t ≤ c.bound param t := by
+  intro t
   rw [c.result_eq_ite]
   split_ifs
   · exact c.courseOfValuesResult_le_bound param t
   · exact zero_le
 
-variable {t}
-
 open Classical in
-variable (L c) in
 lemma result_locallyDelta0 :
     LocallyDelta0Function fun w : Fin (arity + 1) → V ↦ c.result L (w ·.succ) (w 0) := by
   have : (fun w : Fin (arity + 1) → V ↦ c.result L (w ·.succ) (w 0)) = fun w ↦
@@ -1090,6 +1090,8 @@ lemma result_locallyDelta0 :
   rw [this]
   exact LocallyDelta0Function.ite (isUTerm_locallyDelta0.pred_comp (LocallyDelta0Function.var 0))
     c.courseOfValuesResult_locallyDelta0 (LocallyDelta0Function.const 0)
+
+variable {L c param}
 
 section vec
 
@@ -1178,8 +1180,9 @@ lemma resultVec_locallyDelta0 :
   simp
 
 lemma resultVec_le_exp_exp {C : V} (hC : 1 ≤ C)
-    (hb : ∀ t, c.bound param t ≤ Exp.exp (Exp.exp (8 * t + C))) (k w : V) :
-    c.resultVec L param k w ≤ Exp.exp (Exp.exp (8 * w + C)) := by
+    (hb : ∀ t, c.bound param t ≤ Exp.exp (Exp.exp (8 * t + C))) :
+    ∀ k w : V, c.resultVec L param k w ≤ Exp.exp (Exp.exp (8 * w + C)) := by
+  intro k w
   by_cases hw : IsUTermVec L k w
   · refine le_exp_exp_of_nth_le_exp_exp hC (by rw [c.resultVec_lh L param hw, hw.lh]) ?_
     intro i hi
@@ -1391,9 +1394,17 @@ lemma IsSemitermVec.iff : IsSemitermVec L k n v ↔ (len v = k ∧ ∀ i < k, Is
 @[simp]
 lemma IsSemiterm.bvar : IsSemiterm L n ^#z ↔ z < n := by simp [IsSemiterm.def, succ_le_iff_lt]
 
+variable (n)
+
 @[simp]
-lemma IsSemiterm.fvar (n x : V) :
-    IsSemiterm L n ^&x := by simp [IsSemiterm.def]
+lemma IsSemiterm.fvar : ∀ x : V, IsSemiterm L n ^&x := by
+  intro x
+  simp [IsSemiterm.def]
+
+@[simp]
+lemma IsSemitermVec.empty : IsSemitermVec L 0 n 0 := ⟨by simp, by simp⟩
+
+variable {n}
 
 @[simp]
 lemma IsSemiterm.func : IsSemiterm L n (^func k f v) ↔ L.IsFunc k f ∧ IsSemitermVec L k n v := by
@@ -1411,10 +1422,6 @@ lemma IsSemiterm.func : IsSemiterm L n (^func k f v) ↔ L.IsFunc k f ∧ IsSemi
       intro i hi
       have hi : i < k := by simpa [hf, h.isUTerm] using hi
       simpa [hf, h.isUTerm, hi] using (h.nth hi).bv⟩
-
-variable (n) in
-@[simp]
-lemma IsSemitermVec.empty : IsSemitermVec L 0 n 0 := ⟨by simp, by simp⟩
 
 @[simp]
 lemma IsSemitermVec.empty_iff : IsSemitermVec L 0 n v ↔ v = 0 := by

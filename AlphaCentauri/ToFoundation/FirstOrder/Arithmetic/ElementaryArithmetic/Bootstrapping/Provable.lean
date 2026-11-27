@@ -447,11 +447,18 @@ lemma cutRule_le_exp_exp (hs : s ≤ Exp.exp (Exp.exp n)) (hp : p ≤ Exp.exp (E
 
 end rules
 
-variable (L) in
+variable (L)
+
 /-- The largest code of a formula or term occurring in `specializeCode L d p t`. -/
 noncomputable def specializeSize (p t : V) : V :=
   max (substs1 L t p) (max (^∀ p) (max (^∃ neg L p) (max (neg L p)
     (max (neg L (substs1 L t p)) t))))
+
+/-- The largest code of a formula occurring in `modusPonensCode L d₁ d₂ a b`. -/
+noncomputable def modusPonensSize (a b : V) : V :=
+  max (imp L a b) (max a (max b (max (a ^⋏ neg L b) (neg L b))))
+
+variable {L}
 
 lemma specializeCode_le_exp_exp (hn : 2 ≤ n) (hN : specializeSize L p t ≤ n)
     (hd : d ≤ Exp.exp (Exp.exp n)) :
@@ -468,11 +475,6 @@ lemma specializeCode_le_exp_exp (hn : 2 ≤ n) (hN : specializeSize L p t ≤ n)
     (le_trans (le_exp_exp hall) (exp_exp_le_of_le (by simp [add_assoc])))
     (le_trans hD0 (exp_exp_le_of_le (by simp [add_assoc]))) hD2
   exact le_trans this (exp_exp_le_of_le (le_of_eq (by norm_num [add_assoc])))
-
-variable (L) in
-/-- The largest code of a formula occurring in `modusPonensCode L d₁ d₂ a b`. -/
-noncomputable def modusPonensSize (a b : V) : V :=
-  max (imp L a b) (max a (max b (max (a ^⋏ neg L b) (neg L b))))
 
 lemma modusPonensCode_le_exp_exp (hn : 2 ≤ n) (hN : modusPonensSize L a b ≤ n)
     (hd₁ : d₁ ≤ Exp.exp (Exp.exp n)) (hd₂ : d₂ ≤ Exp.exp (Exp.exp n)) :

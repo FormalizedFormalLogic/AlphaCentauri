@@ -334,10 +334,13 @@ open Logic.GL Formula.BooleanCombination
 
 variable [DecidableEq α] {P : Finset α} {b : Bool} {Z : Formula α} {S : Finset (Formula α)}
 
-variable (P) in
+variable (P)
+
 /-- The members of the LR-closure and the formulas `□∼A` for `A` in its first part. -/
 def base : Set (Formula α) :=
   {A | ∃ b, LRClosure P b A} ∪ (fun A ↦ □(∼A)) '' {A | LRClosure P true A}
+
+variable {P}
 
 /-- Every member of the LR-closure is equivalent to `⊥` or to `#a ⋏ □D` for an atom `a ∈ P` and a
 Boolean combination `D` of `base P`. -/
@@ -481,7 +484,8 @@ private lemma finiteUpToEquiv_box_neg
       exact and_congr_right fun _ ↦ forall_congr' fun y ↦ imp_congr_right fun _ ↦
         forces_iff_of h' y
 
-variable (P) in
+variable (P)
+
 /-- - [Ign91, Lemma 6.3] -/
 theorem finiteUpToEquiv_base : FiniteUpToEquiv (base P) := by
   classical
@@ -583,12 +587,20 @@ theorem finiteUpToEquiv_base : FiniteUpToEquiv (base P) := by
   · obtain ⟨E, hE, h⟩ := hF _ ⟨A, ⟨true, hA⟩, rfl⟩
     exact ⟨E, Finset.mem_union_right _ hE, h⟩
 
-variable (P) in
 /-- - [Ign91, Lemma 6.3] -/
 theorem finiteUpToEquiv (b : Bool) : FiniteUpToEquiv {Z | LRClosure P b Z} :=
   (finiteUpToEquiv_base P).of_subset fun _ hZ ↦ .inl ⟨b, hZ⟩
 
 /-! ## The `□`-subformulas of the LR-closure -/
+
+/-- The bodies of the `□`-formulas occurring in the LR-closure: `∼B` for `B` in the closure, and
+`B 🡒 ⋁S ⋎ ⋁◇T` for `B` and the members of `S` and `T` in its first part. -/
+def IsBoxBody (E : Formula α) : Prop :=
+  (∃ B b, LRClosure P b B ∧ E = ∼B) ∨
+    ∃ B, ∃ S T : Finset (Formula α), LRClosure P true B ∧ (∀ C ∈ S, LRClosure P true C) ∧
+      (∀ C ∈ T, LRClosure P true C) ∧ E = B 🡒 S.disj ⋎ (T.image (◇·)).disj
+
+variable {P}
 
 private lemma box_mem_subfmls_disj₂ :
     {l : List (Formula α)} → □E ∈ (⋁l).subfmls → ∃ C ∈ l, □E ∈ C.subfmls
@@ -606,14 +618,6 @@ private lemma box_mem_subfmls_disj₂ :
 lemma box_mem_subfmls_disj (h : □E ∈ S.disj.subfmls) : ∃ C ∈ S, □E ∈ C.subfmls := by
   obtain ⟨C, hC, h⟩ := box_mem_subfmls_disj₂ h
   exact ⟨C, Finset.mem_toList.mp hC, h⟩
-
-variable (P) in
-/-- The bodies of the `□`-formulas occurring in the LR-closure: `∼B` for `B` in the closure, and
-`B 🡒 ⋁S ⋎ ⋁◇T` for `B` and the members of `S` and `T` in its first part. -/
-def IsBoxBody (E : Formula α) : Prop :=
-  (∃ B b, LRClosure P b B ∧ E = ∼B) ∨
-    ∃ B, ∃ S T : Finset (Formula α), LRClosure P true B ∧ (∀ C ∈ S, LRClosure P true C) ∧
-      (∀ C ∈ T, LRClosure P true C) ∧ E = B 🡒 S.disj ⋎ (T.image (◇·)).disj
 
 lemma isBoxBody_of_box_mem_subfmls (h : LRClosure P b Z) (hE : □E ∈ Z.subfmls) : IsBoxBody P E := by
   induction h with

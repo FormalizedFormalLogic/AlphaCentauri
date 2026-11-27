@@ -18,22 +18,12 @@ open Entailment Formula MaximalConsistentTheory
 
 namespace Verbrugge
 
-variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α} {A₀ : Formula α}
+variable {α : Type*} [DecidableEq α] (𝔸 : FormulaSet α) (A₀ : Formula α)
 
-variable (A₀) in
 /-- The subformulas of `A₀` and their negations. -/
 def markers : Finset (Formula α) :=
   A₀.subformulas ∪ A₀.subformulas.image (∼·)
 
-variable {G : Formula α}
-
-lemma mem_markers_of_mem (h : G ∈ A₀.subformulas) : G ∈ markers A₀ :=
-  Finset.mem_union_left _ h
-
-lemma neg_mem_markers_of_mem (h : G ∈ A₀.subformulas) : ∼G ∈ markers A₀ :=
-  Finset.mem_union_right _ <| Finset.mem_image_of_mem _ h
-
-variable (𝔸 A₀) in
 /-- The maximal consistent sets containing `G` and `□∼G` for some subformula `G` of `A₀` or
 negation of one.
 
@@ -42,7 +32,6 @@ negation of one.
 def CountermodelWorld : Type _ :=
   {Γ : MaximalConsistentTheory (Logic.ofILAxioms 𝔸) // ∃ G ∈ markers A₀, G ∈ Γ ∧ □(∼G) ∈ Γ}
 
-variable (𝔸 A₀) in
 /-- The generalised Veltman model on `CountermodelWorld 𝔸 A₀` in which `u ≺[w] V` holds when `u`
 and the elements of `V` are successors of `w` and every `S`-assuring successor `u` of `w` has an
 `S`-assuring successor of `w` in `V`.
@@ -54,6 +43,16 @@ def countermodel [Nonempty (CountermodelWorld 𝔸 A₀)] : Model (CountermodelW
   S' w u V := AssuringSuccessor ∅ w.1 u.1 ∧ (∀ v ∈ V, AssuringSuccessor ∅ w.1 v.1) ∧
     ∀ S, AssuringSuccessor S w.1 u.1 → ∃ v ∈ V, AssuringSuccessor S w.1 v.1
   Val' w a := #a ∈ w.1
+
+variable {𝔸 A₀}
+
+variable {G : Formula α}
+
+lemma mem_markers_of_mem (h : G ∈ A₀.subformulas) : G ∈ markers A₀ :=
+  Finset.mem_union_left _ h
+
+lemma neg_mem_markers_of_mem (h : G ∈ A₀.subformulas) : ∼G ∈ markers A₀ :=
+  Finset.mem_union_right _ <| Finset.mem_image_of_mem _ h
 
 namespace countermodel
 

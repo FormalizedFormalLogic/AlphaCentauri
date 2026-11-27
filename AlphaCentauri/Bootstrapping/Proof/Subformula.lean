@@ -45,7 +45,8 @@ noncomputable def blueprint (L : Language) [L.Encodable] [L.LORDefinable] :
   exs := .mkSigma
     “y param p₁ ys. ∃ y₁, !nthDef y₁ ys 0 ∧ ∃ z, !qqExsDef z p₁ ∧ !insertDef y z y₁”
 
-variable (L) in
+variable (L)
+
 /-- Construction realizing `blueprint`: the immediate subformulas of a compound code are
 inserted into the union of the subformula sets already computed for its parts; the parameter
 is unused. -/
@@ -71,9 +72,8 @@ end Subformula
 
 open Subformula
 
-variable (L)
+variable (L p)
 
-variable (p) in
 /-- The coded set of all subformula codes of the formula code `p`, including `p` itself:
 codes of relation and negated-relation atoms are singletons, and the codes of a compound
 formula's immediate parts are inserted into the union of their own subformula sets.
@@ -86,7 +86,7 @@ noncomputable def subformulas : V := (Subformula.construction L).result L 0 p
 noncomputable def subformulasGraph : 𝚺ᴬ₁.Semisentence 2 :=
   ((Subformula.blueprint L).result L).rew (Rew.subst ![#0, ‘0’, #1])
 
-variable {L}
+variable {L p}
 
 section
 

@@ -52,7 +52,8 @@ namespace Canonical
 
 variable {p q : LK.Sequent ℒₒᵣ} {φ ψ : Propositionᵢ ℒₒᵣ} {χ : ArithmeticProposition}
 
-variable (C D) in
+variable (C D)
+
 /-- Forcing over the `D`-anchored derivations of `LKI[C]`: a condition is a sequent `p`, and the
 proofs of `⊥` over it are the anchored derivations of `∼p`.
 
@@ -66,6 +67,8 @@ def Forces (p : LK.Sequent ℒₒᵣ) : Propositionᵢ ℒₒᵣ → Type
   |     ∀¹ φ => (t : ArithmeticTerm ℕ) → Forces p (φ/[t])
   |     ∃¹ φ => (t : ArithmeticTerm ℕ) × Forces p (φ/[t])
   termination_by φ => φ.complexity
+
+variable {C D}
 
 @[inherit_doc]
 notation:45 p:45 " ⊩[" C ", " D "] " φ:45 => Forces C D p φ
@@ -137,9 +140,17 @@ def modusPonens (f : p ⊩[C, D] φ 🡒 ψ) (g : p ⊩[C, D] φ) : p ⊩[C, D] 
 
 end Forces
 
-variable (C D p) in
+variable (C D p)
+
 /-- A condition forcing every formula of an `LJ` context. -/
 abbrev ContextForces (Γ : LJ.Sequent ℒₒᵣ) := (φ : Propositionᵢ ℒₒᵣ) → φ ∈ Γ → p ⊩[C, D] φ
+
+/-- A condition forcing the succedent of an `LJ` sequent. -/
+def HeadForces : LJ.Head ℒₒᵣ → Type
+  | none => p ⊩[C, D] ⊥
+  | some φ => p ⊩[C, D] φ
+
+variable {C D p}
 
 namespace ContextForces
 
@@ -158,12 +169,6 @@ def cons (hφ : p ⊩[C, D] φ) : ContextForces C D p (Γ + ⦃φ⦄) :=
   fun ψ hψ ↦ if h : φ = ψ then hφ.cast h else b ψ (by simp_all [eq_comm])
 
 end ContextForces
-
-variable (C D p) in
-/-- A condition forcing the succedent of an `LJ` sequent. -/
-def HeadForces : LJ.Head ℒₒᵣ → Type
-  | none => p ⊩[C, D] ⊥
-  | some φ => p ⊩[C, D] φ
 
 namespace Forces
 

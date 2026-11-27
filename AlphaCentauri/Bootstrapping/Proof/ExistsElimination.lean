@@ -92,12 +92,24 @@ lemma fvSubst_freshVec_neg_substs1_qqFvar {i : V} (hd : L.IsSemisentence 1 d) (h
     fvSubst_substs1 hw ht hd.isSemiformula, termFvSubst_fvar, ite_eq_left hil,
     nth_freshVec_of_lt hij, hd.fvSubst_eq_self]
 
-variable (L) (d m) in
+section
+
+variable (L d m)
+
 /-- `negDomSet L d m` is the coded set of the negations of the instances `substs1 L (^&i) d`
 for `i < m`. -/
 noncomputable def negDomSet : V := by
   letI : 𝚺ᴬ₁-Function₁ (fun i : V ↦ neg L (substs1 L (^&i) d)) := by definability
   exact hfsImage (fun i : V ↦ neg L (substs1 L (^&i) d)) (under m)
+
+/-- The $\Sigma_1$ graph of `negDomSet`; argument order `(t, d, m)`, `t = negDomSet d m`. -/
+noncomputable def negDomSetGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
+  “y d m. (∀ z ∈' y, ∃ i < m, ∃ fi, !qqFvarDef fi i ∧ ∃ s, !(substs1Graph L) s fi d ∧
+      !(negGraph L) z s) ∧
+    (∀ i < m, ∃ fi, !qqFvarDef fi i ∧ ∃ s, !(substs1Graph L) s fi d ∧ ∃ z, !(negGraph L) z s ∧
+      z ∈ y)”
+
+end
 
 @[simp]
 lemma mem_negDomSet_iff {x : V} : x ∈ negDomSet L d m ↔ ∃ i < m, x = neg L (substs1 L (^&i) d) := by
@@ -106,15 +118,10 @@ lemma mem_negDomSet_iff {x : V} : x ∈ negDomSet L d m ↔ ∃ i < m, x = neg L
   rw [mem_hfsImage_iff]
   simp only [mem_under_iff]
 
-variable (L) in
-/-- The $\Sigma_1$ graph of `negDomSet`; argument order `(t, d, m)`, `t = negDomSet d m`. -/
-noncomputable def negDomSetGraph : 𝚺ᴬ₁.Semisentence 3 := .mkSigma
-  “y d m. (∀ z ∈' y, ∃ i < m, ∃ fi, !qqFvarDef fi i ∧ ∃ s, !(substs1Graph L) s fi d ∧
-      !(negGraph L) z s) ∧
-    (∀ i < m, ∃ fi, !qqFvarDef fi i ∧ ∃ s, !(substs1Graph L) s fi d ∧ ∃ z, !(negGraph L) z s ∧
-      z ∈ y)”
+section
 
-variable (t d m : V) in
+variable (t d m : V)
+
 private lemma negDomSet_graph :
     t = negDomSet L d m ↔ (∀ z ∈ t, ∃ i < m, z = neg L (substs1 L (^&i) d)) ∧
       (∀ i < m, neg L (substs1 L (^&i) d) ∈ t) := by
@@ -137,20 +144,20 @@ instance negDomSet.definable : 𝚺ᴬ₁-Function₂[V] negDomSet L :=
 instance negDomSet.definable' {Γ : SigmaPiDelta} {m : ℕ} : Γᴬ_[m + 1]-Function₂[V] negDomSet L :=
   negDomSet.definable.of_sigmaOne
 
-variable (d) in
 @[simp]
 lemma negDomSet_zero : negDomSet L d 0 = ∅ := by
   apply mem_ext
   intro x
   simp
 
-variable (d m) in
 lemma negDomSet_succ :
     negDomSet L d (m + 1) = insert (neg L (substs1 L (^&m) d)) (negDomSet L d m) := by
   apply mem_ext
   intro x
   simp only [mem_negDomSet_iff, mem_bitInsert_iff, lt_succ_iff_le, le_iff_lt_or_eq]
   grind
+
+end
 
 lemma negDomSet_mono {m' : V} (h : m ≤ m') : negDomSet L d m ⊆ negDomSet L d m' := by
   intro x

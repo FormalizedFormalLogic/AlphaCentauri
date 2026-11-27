@@ -23,13 +23,21 @@ namespace Veltman.StepByStep
 
 variable {α : Type*} [DecidableEq α] {𝔸 : FormulaSet α} {A B C : Formula α}
 
-variable (α) in
+variable (α)
+
 /-- A world is isolated, or added for a world `a` to witness `¬(A ▷ B)`, or added for `a` as a
 `≺[a]`-successor of `s` to remove a deficiency of `A ▷ B`. -/
 inductive Kind
   | isolated
   | problem (a : ℕ) (B : Formula α)
   | deficiency (a s : ℕ) (A : Formula α)
+
+/-- A step either witnesses `¬(A ▷ B)` at `x` or removes the deficiency of `A ▷ B` at `x` on `y`. -/
+inductive Job
+  | problem (x : ℕ) (A B : Formula α)
+  | deficiency (x y : ℕ) (A B : Formula α)
+
+variable {α}
 
 /-- A world: its kind and maximal consistent set, its predecessors, its ancestors along the parent
 map, and, for each `u`, the world supplying the boxed formulas, the criticality promises, and the
@@ -42,12 +50,6 @@ structure Node (𝔸 : FormulaSet α) where
   mu : ℕ → WithBot ℕ
   cr : ℕ → FormulaSet α
   extra : ℕ → FormulaSet α
-
-variable (α) in
-/-- A step either witnesses `¬(A ▷ B)` at `x` or removes the deficiency of `A ▷ B` at `x` on `y`. -/
-inductive Job
-  | problem (x : ℕ) (A B : Formula α)
-  | deficiency (x y : ℕ) (A B : Formula α)
 
 section
 
@@ -854,17 +856,19 @@ omit hM₀
 
 /-! ### Depth -/
 
-variable (Ω) in
+variable (Γ₀ ε τ Ω n)
+
 /-- The formulas of a task belong to `Ω`. -/
 def Job.Mem : Job α → Prop
   | .problem _ A B => A ∈ Ω ∧ B ∈ Ω
   | .deficiency _ _ A B => A ∈ Ω ∧ B ∈ Ω
 
-variable (Γ₀ ε τ Ω n) in
 open Classical in
 /-- The formulas `C` of `Ω` with `□∼C` at `n`. -/
 noncomputable def boxedNeg : Finset (Formula α) :=
   Ω.filter (fun C ↦ □(∼C) ∈ (𝒩 n).set)
+
+variable {Γ₀ ε τ Ω n}
 
 lemma boxedNeg_subset (h : p ∈ (𝒩 q).anc) : boxedNeg Γ₀ ε τ Ω p ⊆ boxedNeg Γ₀ ε τ Ω q := by
   classical
@@ -996,8 +1000,9 @@ private lemma exists_deficiency_child (hfair : ∀ t : Job α, t.Mem Ω → ∀ 
 
 include hM₀ hε in
 lemma truthlemma (hfair : ∀ t : Job α, t.Mem Ω → ∀ N, ∃ n, N < n ∧ τ n = t) (hbot : ⊥ ∈ Ω)
-    (hC : ∀ D ∈ C.subformulas, D ∈ Ω ∧ ∼D ∈ Ω) (x : ℕ) :
-    Model.World.Forces (model Γ₀ ε τ) x C ↔ C ∈ (𝒩 x).set := by
+    (hC : ∀ D ∈ C.subformulas, D ∈ Ω ∧ ∼D ∈ Ω) :
+    ∀ x : ℕ, Model.World.Forces (model Γ₀ ε τ) x C ↔ C ∈ (𝒩 x).set := by
+  intro x
   induction C generalizing x with
   | atom a => rfl;
   | falsum => exact ⟨False.elim, fun h ↦ (bot_not_mem h).elim⟩;

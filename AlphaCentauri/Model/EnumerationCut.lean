@@ -139,12 +139,17 @@ variable {V : Type*} [ORingStructure V] [V↓[ℒₒᵣ] ⊧* 𝗘𝗔] {a B : V
 
 attribute [local instance] ElementaryArithmetic.models_ISigma0_union_Omega1
 
-variable (a z j) in
+variable (a z j)
+
 /-- The `j`-th entry of a code `z` of blocks of width `‖a‖`, counted from the top block.
 - [Tha05, Lemmas 4–7] -/
 def entry : V := Nuon.ext a z (a - j)
 
-variable (a B G i z t) in
+lemma entry_zero_left : entry a 0 j = 0 := by
+  simp [entry]
+
+variable {j} (B G i t)
+
 /-- The bounded form of the code condition for the enumeration of the graph `G` of a function
 on `[0, a)`: `i` is the length of the code `z`, and `t` bounds the values of the entries.
 - [Tha05, Lemmas 4–7] -/
@@ -155,6 +160,8 @@ def enumCode : Prop :=
   (∀ x < a, ∀ y ≤ t, G x y → ∀ y₀ ≤ t, G (entry a z 0) y₀ → y₀ ≤ y) ∧
   (∀ j < i, ∀ y ≤ t, ∀ y' ≤ t, G (entry a z j) y → G (entry a z (j + 1)) y' →
     y < y' ∧ ∀ x < a, ∀ w ≤ t, G x w → y < w → y' ≤ w)
+
+variable {a B G i z t}
 
 section
 
@@ -180,10 +187,6 @@ lemma definable_enumCode : 𝚺ᴬ₀.DefinableRel₃ (enumCode a B G) :=
     simp only [enumCode, and_assoc]
 
 end
-
-variable (a j) in
-lemma entry_zero_left : entry a 0 j = 0 := by
-  simp [entry]
 
 lemma ext_eq_entry (hj : j ≤ a) : Nuon.ext a z j = entry a z (a - j) := by
   unfold entry
@@ -621,19 +624,22 @@ lemma enumCode.ext_eq_of_le_lt (hI : ‖I‖ = a + 1)
   have hkI : a - i + m ≤ ‖I‖ := by rw [hI]; exact hMa.trans le_self_add
   rw [← ext_div_pow2 hkI hq, hed, ext_div_pow2 hkI hq]
 
-variable (a I G x) in
+section CodeBelow
+
+variable (a I G) (x : V)
+
 private def codeBelow : Prop :=
   ∃ i z t, enumCode a (I ⨳ a) G i z t ∧ x < z
 
-variable (a I G x) in
 private def codeAbove : Prop :=
   ∃ i z t, I ⨳ a ≤ x ∨
     (enumCode a (I ⨳ a) G i z t ∧ ∃ p ≤ x, Exponential ((a - i) * ‖a‖) p ∧ z + p ≤ x)
 
-variable (a I G) in
 private def NoMaximalCode : Prop :=
   ∀ i z t, enumCode a (I ⨳ a) G i z t →
     ∃ i' z' t', enumCode a (I ⨳ a) G i' z' t' ∧ z < z'
+
+end CodeBelow
 
 private lemma prenexDefinablePred_codeBelow (hG : 𝚺ᴬ₀.DefinableRel G) :
     PrenexDefinablePred 𝚺 1 (codeBelow a I G) := by

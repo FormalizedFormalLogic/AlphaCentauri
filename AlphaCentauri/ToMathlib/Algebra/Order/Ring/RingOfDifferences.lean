@@ -117,17 +117,6 @@ lemma mk_eq_sub : mk a b = of a - of b := by
 lemma of_injective : Function.Injective (of : M →+* RingOfDifferences M) := fun a b h ↦ by
   simpa [of_def, mk_eq_mk] using h
 
-variable {a b} in
-@[simp]
-lemma of_inj : of a = of b ↔ a = b := of_injective.eq_iff
-
-variable (x) in
-lemma exists_eq_sub : ∃ a b : M, x = of a - of b := by
-  induction x using ind with
-  | h a b =>
-    use a, b
-    exact mk_eq_sub a b
-
 /-- The cone of non-negative elements: the image of `M`. -/
 def cone : Subsemiring (RingOfDifferences M) where
   carrier := Set.range of
@@ -165,14 +154,17 @@ lemma nonneg_iff : 0 ≤ x ↔ ∃ a, of a = x := by
 @[simp]
 lemma of_nonneg : 0 ≤ of a := nonneg_iff.2 ⟨a, rfl⟩
 
-variable {a b} in
+variable {a b}
+
+@[simp]
+lemma of_inj : of a = of b ↔ a = b := of_injective.eq_iff
+
 @[simp]
 lemma of_le_of : of a ≤ of b ↔ a ≤ b := by
   rw [le_iff, ← mk_eq_sub, le_iff_exists_add']
   change (∃ c, mk c 0 = mk b a) ↔ _
   simp [mk_eq_mk, eq_comm]
 
-variable {a b} in
 @[simp]
 lemma of_lt_of : of a < of b ↔ a < b := by
   rw [lt_iff_le_not_ge, lt_iff_le_not_ge, of_le_of, of_le_of]
@@ -201,6 +193,12 @@ lemma one_le_of_pos (h : ∀ x : M, 0 < x → 1 ≤ x) (hx : 0 < x) : 1 ≤ x :=
 section
 
 variable (x)
+
+lemma exists_eq_sub : ∃ a b : M, x = of a - of b := by
+  induction x using ind with
+  | h a b =>
+    use a, b
+    exact mk_eq_sub a b
 
 /-- A positive part of a difference. -/
 noncomputable def posPart : M := (exists_eq_sub x).choose

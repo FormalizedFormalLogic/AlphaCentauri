@@ -1215,22 +1215,6 @@ private lemma boundAt_locallyDelta0 :
 noncomputable def boundMax : V :=
   listMax (listMap (fun r d ↦ c.bound (c.iter (r 0) d) (r 1)) ![P, n] (rangeList (J + 1)))
 
-variable {d J P n} in
-lemma le_boundMax (hd : d ≤ J) : c.bound (c.iter P d) n ≤ c.boundMax P J n := by
-  have hd' : d < len (rangeList (J + 1)) := by simpa [lt_succ_iff_le] using hd
-  have := nth_le_listMax (v := listMap (fun r d ↦ c.bound (c.iter (r 0) d) (r 1)) ![P, n]
-    (rangeList (J + 1))) (i := d) (by rwa [len_listMap c.boundAt_locallyDelta0])
-  rw [nth_listMap c.boundAt_locallyDelta0 _ _ hd', nth_rangeList (by simpa using hd')] at this
-  exact this
-
-variable {n P J} in
-lemma boundMax_monotone {m : V} (h : n ≤ m) : c.boundMax P J n ≤ c.boundMax P J m := by
-  apply listMaxss_le
-  intro i hi
-  rw [len_listMap c.boundAt_locallyDelta0] at hi
-  rw [nth_listMap c.boundAt_locallyDelta0 _ _ hi, nth_rangeList (by simpa using hi)]
-  exact le_trans (c.bound_monotone _ h) (c.le_boundMax (lt_succ_iff_le.mp (by simpa using hi)))
-
 private lemma iterAt_locallyDelta0 :
     LocallyDelta0Function fun w : Fin 2 → V ↦
       (fun (r : Fin 1 → V) d ↦ c.iter (r 0) d) (w ·.succ) (w 0) :=
@@ -1240,13 +1224,30 @@ private lemma iterAt_locallyDelta0 :
 noncomputable def iterMax : V :=
   listMax (listMap (fun r d ↦ c.iter (r 0) d) ![P] (rangeList (J + 1)))
 
-variable {d J P} in
+variable {d J P n}
+
+lemma le_boundMax (hd : d ≤ J) : c.bound (c.iter P d) n ≤ c.boundMax P J n := by
+  have hd' : d < len (rangeList (J + 1)) := by simpa [lt_succ_iff_le] using hd
+  have := nth_le_listMax (v := listMap (fun r d ↦ c.bound (c.iter (r 0) d) (r 1)) ![P, n]
+    (rangeList (J + 1))) (i := d) (by rwa [len_listMap c.boundAt_locallyDelta0])
+  rw [nth_listMap c.boundAt_locallyDelta0 _ _ hd', nth_rangeList (by simpa using hd')] at this
+  exact this
+
+lemma boundMax_monotone {m : V} (h : n ≤ m) : c.boundMax P J n ≤ c.boundMax P J m := by
+  apply listMaxss_le
+  intro i hi
+  rw [len_listMap c.boundAt_locallyDelta0] at hi
+  rw [nth_listMap c.boundAt_locallyDelta0 _ _ hi, nth_rangeList (by simpa using hi)]
+  exact le_trans (c.bound_monotone _ h) (c.le_boundMax (lt_succ_iff_le.mp (by simpa using hi)))
+
 lemma le_iterMax (hd : d ≤ J) : c.iter P d ≤ c.iterMax P J := by
   have hd' : d < len (rangeList (J + 1)) := by simpa [lt_succ_iff_le] using hd
   have := nth_le_listMax (v := listMap (fun r d ↦ c.iter (r 0) d) ![P] (rangeList (J + 1)))
     (i := d) (by rwa [len_listMap c.iterAt_locallyDelta0])
   rw [nth_listMap c.iterAt_locallyDelta0 _ _ hd', nth_rangeList (by simpa using hd')] at this
   exact this
+
+variable (d J P n)
 
 lemma boundMax_locallyDelta0 :
     LocallyDelta0Function fun w : Fin 3 → V ↦ c.boundMax (w 0) (w 1) (w 2) := by
@@ -1306,12 +1307,12 @@ noncomputable def courseOfValues : CourseOfValues.Construction V 2 where
 /-- The list of the values of the code `q` at the depths `d ≤ J`. -/
 noncomputable def depthList : V := c.courseOfValues.result ![P, J] q
 
-variable {q} in
+variable {q T P d}
+
 private lemma qqDecode (hq : q ≠ 0) : q = ⟪π₁ (q - 1), π₂ (q - 1)⟫ + 1 := by
   rw [pair_unpair]
   exact (tsub_add_cancel_of_le (pos_iff_one_le.mp (pos_iff_ne_zero.mpr hq))).symm
 
-variable {q T P d} in
 lemma depthValue_le (hT : ∀ q' < q, ∀ e, (znth T q').[e] ≤ c.bound (c.iter P e) q') :
     c.depthValue P q T d ≤ c.bound (c.iter P d) q := by
   by_cases h0 : q = 0
@@ -1355,6 +1356,8 @@ lemma depthValue_le (hT : ∀ q' < q, ∀ e, (znth T q').[e] ≤ c.bound (c.iter
       (by rw [← c.iter_succ]; exact hT _ hb _)
     rwa [e] at h
   · exact zero_le
+
+variable (q T P d)
 
 private lemma depthValueList_locallyDelta0 : LocallyDelta0Function fun w : Fin 1 → V ↦
       listMap (fun r d ↦ c.depthValue (r 0) (r 1) (r 2) d)
@@ -1468,7 +1471,8 @@ lemma iter_add : c.iter (c.iter P a) d = c.iter P (a + d) := by
   · intro d ih
     rw [c.iter_succ, ih, ← add_assoc, c.iter_succ]
 
-variable {d J P q} in
+variable {d J P q T}
+
 lemma nth_depthList (hd : d ≤ J) :
     (c.depthList P J q).[d] = c.depthValue P q (c.courseOfValues.table ![P, J] q) d := by
   have hg : LocallyDelta0Function fun w : Fin 4 → V ↦
@@ -1478,7 +1482,6 @@ lemma nth_depthList (hd : d ≤ J) :
   rw [(c.depthList_spec P J q).1, nth_listMap hg _ _ hd', nth_rangeList (by simpa using hd')]
   simp
 
-variable {P d q T} in
 lemma depthValue_congr {P' T' : V} (hP : c.iter P d = c.iter P' e)
     (hT : ∀ q' < q, (znth T q').[d] = (znth T' q').[e] ∧
       (znth T q').[d + 1] = (znth T' q').[e + 1]) :
@@ -1493,6 +1496,8 @@ lemma depthValue_congr {P' T' : V} (hP : c.iter P d = c.iter P' e)
   unfold depthValue
   simp only [h0, ↓reduceIte]
   split_ifs <;> simp only [hP, (hT _ hb₁).1, (hT _ hb₂).1, (hT _ hb).2]
+
+variable (d J P q T)
 
 /-- The entries of the lists of values do not depend on the depth bound, and an entry at a
 depth depends only on the parameter at that depth. -/
@@ -1556,7 +1561,12 @@ lemma courseOfValuesResult_le_bound : c.courseOfValuesResult P q ≤ c.bound P q
   simpa [c.iter_zero, courseOfValuesResult] using
     (c.depthList_spec P q q).2 0 (by simp [c.len_depthList])
 
-variable {d J P} in
+private lemma courseOfValuesResult_eq_depthValue :
+    c.courseOfValuesResult P q = c.depthValue P q (c.courseOfValues.table ![P, q] q) 0 :=
+  c.nth_depthList zero_le
+
+variable {d J P q}
+
 lemma nth_depthList_eq_courseOfValuesResult (h : d + p ≤ J) :
     (c.depthList P J p).[d] = c.courseOfValuesResult (c.iter P d) p := by
   have hd : d ≤ J := le_trans le_self_add h
@@ -1564,11 +1574,6 @@ lemma nth_depthList_eq_courseOfValuesResult (h : d + p ≤ J) :
     zero_le (by simp) h (by simp)
   simpa [c.iter_zero, courseOfValuesResult] using this
 
-private lemma courseOfValuesResult_eq_depthValue :
-    c.courseOfValuesResult P q = c.depthValue P q (c.courseOfValues.table ![P, q] q) 0 :=
-  c.nth_depthList zero_le
-
-variable {q P d} in
 private lemma znth_table_eq (hp : p < q) (hd : d ≤ 1) :
     (znth (c.courseOfValues.table ![P, q] q) p).[d] = c.courseOfValuesResult (c.iter P d) p := by
   rw [c.courseOfValues.znth_table hp]
@@ -1576,6 +1581,8 @@ private lemma znth_table_eq (hp : p < q) (hd : d ≤ 1) :
   calc d + p ≤ 1 + p := by gcongr
     _ = p + 1 := add_comm _ _
     _ ≤ q := lt_iff_succ_le.mp hp
+
+variable (d J P q)
 
 lemma courseOfValuesResult_rel : c.courseOfValuesResult P (^rel k R v) = c.rel P k R v := by
   simp [courseOfValuesResult_eq_depthValue, depthValue, qqRel, c.iter_zero]
@@ -1627,7 +1634,8 @@ lemma courseOfValuesResult_exs :
   rw [courseOfValuesResult_eq_depthValue, depthValue_exs, zero_add,
     c.znth_table_eq (by simp) le_rfl, ← c.change_eq_iter, c.iter_zero]
 
-variable {P p₁} in
+variable {P p₁}
+
 lemma all_eq_courseOfValuesResult (hl : len ys = c.allSize P p₁)
     (h₀ : ys.[0] = c.courseOfValuesResult (c.change P) p₁) :
     c.all P p₁ ys = c.courseOfValuesResult P (^∀ p₁) := by
@@ -1635,7 +1643,6 @@ lemma all_eq_courseOfValuesResult (hl : len ys = c.allSize P p₁)
   rw [c.courseOfValuesResult_all, ← h₀]
   simp
 
-variable {P p₁} in
 lemma exs_eq_courseOfValuesResult (hl : len ys = c.exsSize P p₁)
     (h₀ : ys.[0] = c.courseOfValuesResult (c.change P) p₁) :
     c.exs P p₁ ys = c.courseOfValuesResult P (^∃ p₁) := by
@@ -1700,7 +1707,6 @@ lemma isUFormula_and_eq_of_mem_limSeq {s z : V} (h : z ∈ (c.construction L).li
         exact c.exs_eq_courseOfValuesResult hl (ih' h₀)
   exact this s z (lt_of_mem h) h
 
-variable {P} in
 lemma mem_limSeq_of_isUFormula (hp : IsUFormula L p) :
     ⟪P, p, c.courseOfValuesResult P p⟫ ∈
       (c.construction L).limSeq ![] (⟪c.iterMax P p, p, c.boundMax P p p⟫ + p + 1) := by
@@ -1941,6 +1947,14 @@ lemma result_prop (hp : IsUFormula L p) : c.Graph L param p (c.result L param p)
 lemma result_prop_not (hp : ¬IsUFormula L p) : c.result L param p = 0 :=
   Classical.choose!_spec (c.exists_unique_all L param p) |>.2 hp
 
+open Classical in
+lemma result_eq_ite :
+    ∀ p : V, c.result L param p = if IsUFormula L p then c.courseOfValuesResult param p else 0 := by
+  intro p
+  by_cases hp : IsUFormula L p
+  · simp [hp, ((c.graph_iff L).mp (c.result_prop param hp)).2]
+  · simp [hp, c.result_prop_not param hp]
+
 variable {param}
 
 lemma result_eq_of_graph {p r} (h : c.Graph L param p r) : c.result L param p = r := Eq.symm <|
@@ -1987,14 +2001,6 @@ lemma result_exs {p} (hp : IsUFormula L p) (hs : c.exsSize param p = 1) :
     c.result L param (^∃ p) = c.exs param p ?[c.result L (c.exsChanges param 0) p] :=
   c.result_eq_of_graph (c.graph_ex hp (by simp [hs]) fun i hi ↦ by
     rcases lt_one_iff_eq_zero.mp (hs ▸ hi); simpa using c.result_prop _ hp)
-
-variable (param) (p : V) in
-open Classical in
-lemma result_eq_ite :
-    c.result L param p = if IsUFormula L p then c.courseOfValuesResult param p else 0 := by
-  by_cases hp : IsUFormula L p
-  · simp [hp, ((c.graph_iff L).mp (c.result_prop param hp)).2]
-  · simp [hp, c.result_prop_not param hp]
 
 open Classical in
 variable (L) in

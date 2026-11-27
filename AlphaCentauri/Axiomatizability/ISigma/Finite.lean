@@ -30,27 +30,18 @@ open _root_.FFL.Entailment
 
 namespace ISigma
 
-variable {n : ℕ}
+variable (n : ℕ)
 
-variable (n) in
 /-- The formula saying that some `ev` codes the assignment obtained by putting `x` in front of the
 assignment coded by `&1`, and `prenexSatisfied 𝚺 (n + 1)` holds of the code `&0` and `ev`.
 - [HP98, Theorem I.2.52] -/
 noncomputable def indFormula : ArithmeticSemiformula ℕ 1 :=
   “x. ∃ ev, !adjoinDef.val ev x &1 ∧ !(prenexSatisfied' 𝚺 n).val ev &0”
 
-/-- The induction formula is $\Sigma_{n + 1}$.
-- [HP98, Theorem I.2.52] -/
-@[simp]
-lemma hierarchy_indFormula : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (indFormula n) := by
-  simp [indFormula, (prenexSatisfied' 𝚺 n).sigma_prop]
-
-variable (n) in
 /-- The single induction axiom of the finite theory.
 - [HP98, Theorem I.2.52] -/
 noncomputable def indSentence : ArithmeticSentence := .univCl (succInd (indFormula n))
 
-variable (n) in
 /-- The formula saying that some `ev` codes the assignment obtained by putting `y` and then `x` in
 front of the assignment coded by `&1`, and `prenexSatisfied 𝚺 (n + 1)` holds of the code
 `&0` and `ev`.
@@ -59,22 +50,28 @@ noncomputable def collFormula : ArithmeticSemiformula ℕ 2 :=
   “x y. ∃ ev₀, !adjoinDef.val ev₀ x &1 ∧
     ∃ ev, !adjoinDef.val ev y ev₀ ∧ !(prenexSatisfied' 𝚺 n).val ev &0”
 
+/-- The single collection axiom of the finite theory.
+- [HP98, Theorem I.2.52] -/
+noncomputable def collSentence : ArithmeticSentence := .univCl (collectionAxiom (collFormula n))
+
+/-- The finite theory equivalent to `𝗜𝚺 (n + 1)`.
+- [HP98, Theorem I.2.52] -/
+noncomputable def finiteAxiomatization : ArithmeticTheory :=
+  𝗣𝗔⁻ ∪ tarski ∪ {indSentence n, collSentence n}
+
+variable {n}
+
+/-- The induction formula is $\Sigma_{n + 1}$.
+- [HP98, Theorem I.2.52] -/
+@[simp]
+lemma hierarchy_indFormula : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (indFormula n) := by
+  simp [indFormula, (prenexSatisfied' 𝚺 n).sigma_prop]
+
 /-- The collection formula is $\Sigma_{n + 1}$.
 - [HP98, Theorem I.2.52] -/
 @[simp]
 lemma hierarchy_collFormula : ℬ[<, ℒₒᵣ].Hierarchy 𝚺 (n + 1) (collFormula n) := by
   simp [collFormula, (prenexSatisfied' 𝚺 n).sigma_prop]
-
-variable (n) in
-/-- The single collection axiom of the finite theory.
-- [HP98, Theorem I.2.52] -/
-noncomputable def collSentence : ArithmeticSentence := .univCl (collectionAxiom (collFormula n))
-
-variable (n) in
-/-- The finite theory equivalent to `𝗜𝚺 (n + 1)`.
-- [HP98, Theorem I.2.52] -/
-noncomputable def finiteAxiomatization : ArithmeticTheory :=
-  𝗣𝗔⁻ ∪ tarski ∪ {indSentence n, collSentence n}
 
 /-- The theory `finiteAxiomatization n` is finite.
 - [HP98, Theorem I.2.52] -/
@@ -124,19 +121,6 @@ private lemma models_succInd_iff (φ : ArithmeticSemiformula ℕ 1) :
   simp [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs]
 
 end eval
-
-variable (n) in
-/-- `𝗜𝚺 (n + 1)` proves the finite theory.
-- [HP98, Theorem I.2.52] -/
-theorem provable_finiteAxiomatization : 𝗜𝚺 (n + 1) ⊢* finiteAxiomatization n := by
-  rintro σ ((hσ | hσ) | rfl | rfl);
-  · exact by_axm (Set.mem_union_left _ hσ);
-  · exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega)) (ISigma1.provable_tarski hσ);
-  · exact WeakerThan.pbl (h := InductionOnHierarchy_weakerThan_InductionOnPrenexHierarchy 𝚺 (n + 1))
-      (by_axm (Set.mem_union_right _ (mem_InductionScheme_of_mem hierarchy_indFormula)));
-  · have h : 𝗕⁺ 𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance;
-    exact WeakerThan.pbl (h := h)
-      (by_axm (Set.mem_union_right _ (mem_CollectionScheme_of_mem hierarchy_collFormula)));
 
 section models
 
@@ -306,6 +290,18 @@ lemma models_ISigma : M↓[ℒₒᵣ] ⊧* 𝗜𝚺 (n + 1) := by
 end models
 
 variable (n)
+
+/-- `𝗜𝚺 (n + 1)` proves the finite theory.
+- [HP98, Theorem I.2.52] -/
+theorem provable_finiteAxiomatization : 𝗜𝚺 (n + 1) ⊢* finiteAxiomatization n := by
+  rintro σ ((hσ | hσ) | rfl | rfl);
+  · exact by_axm (Set.mem_union_left _ hσ);
+  · exact WeakerThan.pbl (h := ISigma_weakerThan_of_le (by omega)) (ISigma1.provable_tarski hσ);
+  · exact WeakerThan.pbl (h := InductionOnHierarchy_weakerThan_InductionOnPrenexHierarchy 𝚺 (n + 1))
+      (by_axm (Set.mem_union_right _ (mem_InductionScheme_of_mem hierarchy_indFormula)));
+  · have h : 𝗕⁺ 𝚺 (n + 1) ⪯ 𝗜𝚺 (n + 1) := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance;
+    exact WeakerThan.pbl (h := h)
+      (by_axm (Set.mem_union_right _ (mem_CollectionScheme_of_mem hierarchy_collFormula)));
 
 /-- The finite theory is equivalent to `𝗜𝚺 (n + 1)`.
 - [HP98, Theorem I.2.52] -/
